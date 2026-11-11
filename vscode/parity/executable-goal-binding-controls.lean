@@ -1,5 +1,6 @@
 import Solidity.Tools.ExecutableGoalBindingV2
 import Solidity.Frontend.ExecutableAst.Shared.ObligationCaptureV2
+import Solidity.Tools.DirectRuntime
 
 /-! Structural V2 controls only. These are not the four original source imports,
 not source adequacy and not ordinary runtime evidence. Guard wrong target,
@@ -92,4 +93,52 @@ run_cmd do
 #print axioms ExecutableBindingControls.trueTargetRefused
 #print axioms ExecutableBindingControls.wrongValuesRefused
 #print axioms ExecutableBindingControls.changedArgumentsRefused
+
+/- Injected compact AST exercises actual request dispatch and capture order.
+It is not compiler output, source certification or a retained proof candidate. -/
+run_cmd do
+  let .ok request := Json.parse r#"{"contract":{"nodeType":"ContractDefinition","contractKind":"contract","nodes":[{"nodeType":"FunctionDefinition","id":1,"name":"first","kind":"function","visibility":"public","stateMutability":"pure","modifiers":[],"parameters":{"parameters":[]},"returnParameters":{"parameters":[]},"body":{"nodeType":"Block","statements":[]},"documentation":""},{"nodeType":"FunctionDefinition","id":2,"name":"second","kind":"function","visibility":"public","stateMutability":"pure","modifiers":[],"parameters":{"parameters":[]},"returnParameters":{"parameters":[]},"body":{"nodeType":"Block","statements":[]},"documentation":""}]},"listing":true}"# | throwError "capture fixture JSON"
+  let .ok (_, listed) := DirectRuntime.checkWithGoalsV2 request
+    | throwError "listing capture refused"
+  unless listed.size == 2 do throwError "listing lost ordered goals"
+  for i in [:listed.size] do
+    let some goal := listed[i]? | throwError "missing ordered listing goal"
+    unless goal.sourceId == Int.ofNat (i + 1) &&
+        goal.functionName == (if i == 0 then "first" else "second") do
+      throwError "capture identity/order mismatch"
+    unless goal.request.compress == request.compress &&
+        goal.source.compress == ((request.getObjVal? "contract").toOption.getD .null).compress do
+      throwError "capture request/source mismatch"
+    unless !goal.retry && goal.result.isNone && goal.priorResult.isNone do
+      throwError "listing fabricated an evaluation or retry"
+  let ordinary := request.setObjVal! "listing" (toJson false)
+  let .ok (report, evaluated) := DirectRuntime.checkWithGoalsV2 ordinary
+    | throwError "ordinary capture refused"
+  let .ok rows := report.getArr? | throwError "ordinary report shape"
+  unless rows.size == 2 && evaluated.size == 2 do throwError "ordinary capture count"
+  for i in [:evaluated.size] do
+    let some goal := evaluated[i]? | throwError "missing ordered evaluation goal"
+    let some result := goal.result | throwError "missing actual evaluation"
+    unless !goal.retry && goal.priorResult.isNone && goal.sourceId == Int.ofNat (i + 1) &&
+        goal.request.compress == ordinary.compress do throwError "wrong evaluation ownership"
+    let .ok status := result.getObjValAs? String "status" | throwError "missing evaluation status"
+    let .ok rowStatus := rows[i]!.getObjValAs? String "status" | throwError "missing report status"
+    unless status == "proved" && rowStatus == "proved" do throwError "unexpected fixture status"
+    let expectedName := if i == 0 then "first" else "second"
+    let .ok rowId := rows[i]!.getObjValAs? Int "sourceId" | throwError "missing report identity"
+    let .ok rowName := rows[i]!.getObjValAs? String "function" | throwError "missing report name"
+    let .ok memberId := goal.member.getObjValAs? Int "id" | throwError "missing member identity"
+    let .ok memberName := goal.member.getObjValAs? String "name" | throwError "missing member name"
+    unless rowId == goal.sourceId && memberId == goal.sourceId &&
+        rowName == expectedName && memberName == expectedName && goal.functionName == expectedName do
+      throwError "capture/report/member identity mismatch"
+  let foreign := request.setObjVal! "sourceId" (toJson (99 : Int))
+  if (DirectRuntime.checkWithGoalsV2 foreign).isOk then
+    throwError "foreign selection admitted"
+  let malformed := request.setObjVal! "sourceId" (toJson "1")
+  if (DirectRuntime.checkWithGoalsV2 malformed).isOk then
+    throwError "malformed selector admitted"
+  logInfo "EXECUTABLE_V2 injected actual-dispatch listing/evaluation/order/ownership/refusal controls passed"
+
+#print axioms DirectRuntime.checkWithGoalsV2_forget
 end ExecutableBindingControls

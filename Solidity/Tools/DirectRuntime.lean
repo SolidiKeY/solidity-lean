@@ -104,9 +104,85 @@ private partial def unrollLoops (ss : List RawStmt) : List RawStmt :=
     | .loop _ c b => .loop {} c b
     | s => s
 
-/-- No parser, elaborator environment, proof term or module file is loaded.
-The same intrinsic obligation builder and executable verifier are called. -/
-def check (request : Json) : Except String Json := do
+/-- Data retained by the opt-in actual invocation. Constructor privacy is
+only ingress discipline, not source/event authentication. A later metadata
+consumer must authenticate the retained declaration and its provenance. -/
+structure RequestGoalCaptureV2 where
+  private mk ::
+  request : Json
+  source : Json
+  member : Json
+  sourceId : Int
+  functionName : String
+  specified : Bool
+  box : Bool
+  retry : Bool
+  contract : Contract
+  formula : Fml contract []
+  /-- Original evaluation that caused the existing annotated-loop retry. -/
+  priorResult : Option Json := none
+  /-- Actual result of this evaluation; `none` denotes listing-only capture. -/
+  result : Option Json := none
+
+/-- A lazy request plan shares the old computation between report-only and
+opt-in capture interpreters. Ordinary execution does not accumulate goals. -/
+private inductive RequestPlanV2 where
+  | done (result : Except String Json)
+  | listing (goal : RequestGoalCaptureV2) (next : Unit → RequestPlanV2)
+  | verify (goal : RequestGoalCaptureV2) (next : Json → RequestPlanV2)
+
+private def RequestPlanV2.report : RequestPlanV2 → Except String Json
+  | .done result => result
+  | .listing _ next => (next ()).report
+  | .verify goal next =>
+    let result := compiledResult goal.contract goal.formula
+    (next result).report
+
+/-- Keep partial captures even when a later global error refuses the request.
+Successful public projection still has the frozen Except/report interface. -/
+private def RequestPlanV2.trace : RequestPlanV2 → Except String Json × Array RequestGoalCaptureV2
+  | .done result => (result, #[])
+  | .listing goal next =>
+    let rest := (next ()).trace
+    (rest.1, #[goal] ++ rest.2)
+  | .verify goal next =>
+    let result := compiledResult goal.contract goal.formula
+    let rest := (next result).trace
+    (rest.1, #[{ goal with result := some result }] ++ rest.2)
+
+private theorem RequestPlanV2.trace_report (plan : RequestPlanV2) :
+    plan.trace.1 = plan.report := by
+  induction plan with
+  | done result => rfl
+  | listing goal next ih => exact ih ()
+  | verify goal next ih => exact ih (compiledResult goal.contract goal.formula)
+
+private def finishRowV2 (n : Json) (name : String) (specified : Bool)
+    (result : Json) : Except String Json := do
+  let result := match result.getObjVal? "counterexample" with
+    | .error _ => result
+    | .ok witness => match witness.getObjValAs? (Array Json) "arguments" with
+      | .error _ => result
+      | .ok args =>
+        let args := args.map fun (arg : Json) =>
+          match arg.getObjValAs? String "modelName" with
+          | .error _ => arg
+          | .ok name => match ((J.arrD (J.opt n "parameters" |>.getD .null) "parameters").toList).findIdx?
+              (fun p => J.str? p "name" == some name) with
+            | none => arg
+            | some i => arg.setObjVal! "paramIndex" (toJson i)
+        result.setObjVal! "counterexample" (witness.setObjVal! "arguments" (toJson args))
+  let result := result.setObjVal! "function" (toJson name)
+    |>.setObjVal! "sourceId" (← field n "id")
+    |>.setObjVal! "verification" (toJson "direct")
+    |>.setObjVal! "reading" (toJson "solc")
+    |>.setObjVal! "tag" (toJson (if specified then "specified" else
+      if ((keyClauses (docText n)).toOption.getD []).any (·.kind == "box") then "box" else "diamond"))
+  return result
+
+/-- Only verification result handling is delayed: all original validation,
+selection, error priority, callbacks and ordinary result construction remain. -/
+private def requestPlanV2 (request : Json) : Except String RequestPlanV2 := do
   let source ← field request "contract"
   let base ← contract executableReader source
   if (request.getObjVal? "function").isOk && !(request.getObjValAs? String "function").isOk then
@@ -126,54 +202,85 @@ def check (request : Json) : Except String Json := do
   let selected := (request.getObjValAs? String "function").toOption
   let selectedId := (request.getObjValAs? Int "sourceId").toOption
   let listing := (request.getObjValAs? Bool "listing").toOption.getD false
-  let mut rows := #[]
-  for n in ← arr source "nodes" do
-    unless (← node n) == "FunctionDefinition" do continue
-    let name ← str n "name"
-    if selected.isSome && selected != some name then continue
-    if selectedId.isSome && selectedId != (n.getObjValAs? Int "id").toOption then continue
-    let visibility ← str n "visibility"
-    unless visibility == "public" || visibility == "external" do continue
-    let clauses ← keyClauses (docText n)
-    let specified := clauses.any (fun c => c.kind == "requires" || c.kind == "ensures")
-    let result : Json := if clauses.any (·.kind == "skip") then
-        Json.mkObj [("status", toJson "skipped"), ("reason", toJson "tagged `@custom:key skip`")]
-      else match (do
+  let finish (rows : Array Json) : RequestPlanV2 :=
+    .done (if rows.isEmpty then .error "no selected functions" else .ok (Json.arr rows))
+  let step (n : Json) (next : Array Json → RequestPlanV2) (rows : Array Json) : RequestPlanV2 := Id.run do
+    let selection : Except String (Option (String × List KeyClause)) := do
+      unless (← node n) == "FunctionDefinition" do return none
+      let name ← str n "name"
+      if selected.isSome && selected != some name then return none
+      if selectedId.isSome && selectedId != (n.getObjValAs? Int "id").toOption then return none
+      let visibility ← str n "visibility"
+      unless visibility == "public" || visibility == "external" do return none
+      let clauses ← keyClauses (docText n)
+      return some (name, clauses)
+    match selection with
+    | .error reason => return .done (.error reason)
+    | .ok none => return next rows
+    | .ok (some (name, clauses)) =>
+      let specified := clauses.any (fun c => c.kind == "requires" || c.kind == "ensures")
+      let push (result : Json) : RequestPlanV2 :=
+        match finishRowV2 n name specified result with
+        | .error reason => .done (.error reason)
+        | .ok result => next (rows.push result)
+      let unsupported (reason : String) := push (Json.mkObj [
+        ("status", toJson "unsupported"), ("reason", toJson reason)])
+      if clauses.any (·.kind == "skip") then
+        return push (Json.mkObj [("status", toJson "skipped"),
+          ("reason", toJson "tagged `@custom:key skip`")])
+      let initial : Except String (FunDecl × RequestGoalCaptureV2) := do
         let (_, d) ← function executableReader n avoid
         let C := { base with funs := [(name, d)] }
         let φ ← buildObligation C name specified (clauses.any (·.kind == "box"))
-        if listing then return Json.mkObj [("status", toJson "ready"), ("reason", toJson "")]
-        let result := compiledResult C φ
-        if (result.getObjValAs? String "status").toOption == some "pending" && hasAnnotatedLoop d.body then
-          let d := { d with body := unrollLoops d.body }
-          let C := { base with funs := [(name, d)] }
-          let φ ← buildObligation C name specified (clauses.any (·.kind == "box"))
-          return compiledResult C φ
-        return result) with
-      | .ok result => result
-      | .error reason => Json.mkObj [("status", toJson "unsupported"), ("reason", toJson reason)]
-    let result := match result.getObjVal? "counterexample" with
-      | .error _ => result
-      | .ok witness => match witness.getObjValAs? (Array Json) "arguments" with
-        | .error _ => result
-        | .ok args =>
-          let args := args.map fun (arg : Json) =>
-            match arg.getObjValAs? String "modelName" with
-            | .error _ => arg
-            | .ok name => match ((J.arrD (J.opt n "parameters" |>.getD .null) "parameters").toList).findIdx?
-                (fun p => J.str? p "name" == some name) with
-              | none => arg
-              | some i => arg.setObjVal! "paramIndex" (toJson i)
-          result.setObjVal! "counterexample" (witness.setObjVal! "arguments" (toJson args))
-    let result := result.setObjVal! "function" (toJson name)
-      |>.setObjVal! "sourceId" (← field n "id")
-      |>.setObjVal! "verification" (toJson "direct")
-      |>.setObjVal! "reading" (toJson "solc")
-      |>.setObjVal! "tag" (toJson (if specified then "specified" else
-        if ((keyClauses (docText n)).toOption.getD []).any (·.kind == "box") then "box" else "diamond"))
-    rows := rows.push result
-  if rows.isEmpty then throw "no selected functions"
-  return Json.arr rows
+        pure (d, (⟨request, source, n, (J.id? n).getD 0, name, specified,
+          clauses.any (·.kind == "box"), false, C, φ, none, none⟩ : RequestGoalCaptureV2))
+      match initial with
+      | .error reason => return unsupported reason
+      | .ok (d, goal) =>
+        if listing then
+          return .listing goal (fun _ => push (Json.mkObj [("status", toJson "ready"), ("reason", toJson "")]))
+        return .verify goal fun result =>
+          if (result.getObjValAs? String "status").toOption == some "pending" && hasAnnotatedLoop d.body then
+            let retried : Except String RequestGoalCaptureV2 := do
+              let d := { d with body := unrollLoops d.body }
+              let C := { base with funs := [(name, d)] }
+              let φ ← buildObligation C name specified (clauses.any (·.kind == "box"))
+              pure (⟨request, source, n, (J.id? n).getD 0, name, specified,
+                clauses.any (·.kind == "box"), true, C, φ, some result, none⟩ : RequestGoalCaptureV2)
+            match retried with
+            | .error reason => unsupported reason
+            | .ok retried => .verify retried push
+          else push result
+  let plan : Array Json → RequestPlanV2 := Array.foldr step finish (← arr source "nodes")
+  return plan #[]
+
+private def successfulTraceV2 (trace : Except String Json × Array RequestGoalCaptureV2) :
+    Except String (Json × Array RequestGoalCaptureV2) :=
+  trace.1.map (fun result => (result, trace.2))
+
+private theorem successfulTraceV2_forget (trace : Except String Json × Array RequestGoalCaptureV2) :
+    (successfulTraceV2 trace).map Prod.fst = trace.1 := by
+  rcases trace with ⟨result, goals⟩
+  cases result <;> rfl
+
+/-- Execute one real request and retain its actual initial/retry goals. This
+CAN perform the ordinary verifier/model search. Metadata intake must consume
+an already retained capture, never call this again merely to discover a goal. -/
+def checkWithGoalsV2 (request : Json) : Except String (Json × Array RequestGoalCaptureV2) :=
+  (requestPlanV2 request).bind (fun plan => successfulTraceV2 plan.trace)
+
+/-- Ordinary report-only evaluation discards each goal before advancing. No
+proof term, capture registry or elaborator environment is loaded here. -/
+def check (request : Json) : Except String Json :=
+  (requestPlanV2 request).bind RequestPlanV2.report
+
+theorem checkWithGoalsV2_forget (request : Json) :
+    (checkWithGoalsV2 request).map Prod.fst = check request := by
+  cases h : requestPlanV2 request with
+  | error reason => simp only [checkWithGoalsV2, check, h, Except.bind, Except.map]
+  | ok plan =>
+    simp only [checkWithGoalsV2, check, h, Except.bind]
+    exact (successfulTraceV2_forget plan.trace).trans (RequestPlanV2.trace_report plan)
 
 @[export solidity_direct_check]
 def checkString (input : String) : String :=
