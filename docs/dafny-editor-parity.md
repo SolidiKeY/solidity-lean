@@ -2349,3 +2349,18 @@ and current diagnostic-publication fences remain separate from the observed
 active editor URI. Problems row IDs are opaque: an independent Problems resource
 URI, full range-end/raster/occlusion correspondence, paired Dafny/macOS and both
 row judgments remain unavailable. Matching labels do not close those gaps.
+
+
+The separate `--diagnostic-rendered problems-scroll-v2` collection records
+primary and related-information viewports independently. A native wheel is
+allowed only at an observed owned Problems scrollport with the same source and
+renderer lifetime. Both preparations share one absolute three-second deadline;
+that budget is not restarted after the first snapshot. Each viewport retains
+its own before/after AX/DOM/PNG bracket under the original operation deadline.
+The failed same-viewport v1 case and its predicate remain unchanged. Separate
+viewport observations do not establish simultaneous visibility, complete text,
+resource URI attestation, raster equivalence or either original row judgment.
+The scroll companion's DOM probe additionally handles translation-only virtual
+list transforms using observed post-transform rectangles, while rejecting scale,
+rotation and perspective on every ancestor. The v1 transform predicate is
+unchanged. This is collection geometry, not a new parity acceptance rule.
