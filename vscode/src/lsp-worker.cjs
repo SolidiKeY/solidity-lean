@@ -6,6 +6,7 @@ const {createHash}=require('node:crypto');
 const {LeanSession}=require('./lean-session.cjs');
 const projects=require('./project.cjs');
 const {checkDirect,disposeDirect}=require('./direct-runtime.cjs');
+const {unknownResult}=require('./direct-model.cjs');
 
 let session,compiler,locations;
 function checkpointRows(path,contract,contracts=[]){
@@ -79,8 +80,19 @@ async function execute(task){
     // It must finish before the pool's request deadline (worker-pool.cjs),
     // which would otherwise retire this worker and discard those answers, so
     // it stops a reply margin (20% of the time left, at most 1 s) earlier.
-    try{diagnostics=await session.check(wrapper,recheck?recheckBudget(options.timeoutMs??60000,task.requestDeadline):options.timeoutMs??60000);}
-    catch(error){if(!recheck||!/timed out/i.test(error?.message||''))throw error;errors.push({source,contract:contract.name,stage:'lean',reason:'Certified recheck did not finish; compiled-verifier answers kept: '+error.message});diagnostics=null;}
+    // Every Lean run ends before the pool's request deadline. A run that times
+    // out while answers are already held (a recheck, a fallback after a gap,
+    // or earlier contracts of this file) keeps them: this contract's open rows
+    // are reported unknown and the timeout as a lean-stage error.
+    let fallbackRows=null;
+    try{diagnostics=await session.check(wrapper,recheckBudget(options.timeoutMs??60000,task.requestDeadline));}
+    catch(error){
+      const holding=recheck||(directMode&&!decided)||results.length>0;
+      if(!holding||!/timed out/i.test(error?.message||''))throw error;
+      errors.push({source,contract:contract.name,stage:'lean',reason:'Certified Lean check did not finish before the request deadline; answers already computed are kept: '+error.message});diagnostics=null;
+      if(!recheck)fallbackRows=unknownResult(contract,options,'The certified Lean check did not finish before the request deadline.',allContracts).results;
+    }
+    if(fallbackRows)for(const row of fallbackRows){const range=locate(contract.name,row);results.push({...row,source,contract:contract.name,sourceHash:compiled.sourceHash??compiled.fixture.header.sourceSha256,...(range?{range}:{})});}
     if(diagnostics&&options.benchmark){await new Promise(setImmediate);benchmarkLog.push(session.stderr,...diagnostics.map(d=>d.message||''));}
     for(const diagnostic of diagnostics||[])if(importDiagnostic(diagnostic))
       errors.push({source,contract:contract.name,stage:'lean',reason:diagnostic.message});
