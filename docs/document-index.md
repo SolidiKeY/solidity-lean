@@ -198,6 +198,7 @@ and open obligations. Test proposals remain proposals until applied.
 - [docs/feature-work/transient-storage.md](feature-work/transient-storage.md)
 - [docs/feature-work/trust-usability.md](feature-work/trust-usability.md)
 - [docs/feature-work/v13-public-compiler-total.md](feature-work/v13-public-compiler-total.md)
+- [docs/feature-work/va3-differential.md](feature-work/va3-differential.md)
 - [docs/feature-work/vy5-composition.md](feature-work/vy5-composition.md)
 - [docs/feature-work/vy5-natural-account.md](feature-work/vy5-natural-account.md)
 - [docs/feature-work/vy5-source-release.md](feature-work/vy5-source-release.md)

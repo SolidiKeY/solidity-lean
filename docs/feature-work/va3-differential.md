@@ -105,6 +105,10 @@ persistence before shrinking; added both. Each observation is appended before
 shrinking, and shrink errors preserve the original mismatch as incomplete triage.
 No milestone is complete before its required gate and review.
 
+Pre-gate navigation repair: regenerated the catalog and removed its stale
+proposal. Independent read-only finder/skeptic checks found no issue; the
+navigation checker remains unchanged.
+
 ## Handoff
 
 H568 retires this lane and replans unfinished work. Inventory, source harness,
@@ -178,9 +182,8 @@ new file mode 100644
 +          if-no-files-found: error
 ```
 
-The new guidance needs this exact inbound-link owner edit. Its additional
-`docs/document-index.md` generated catalog change must be produced by the owner
-with `python3 scripts/check-doc-navigation.py --write`, then checked.
+The catalog is regenerated for the pre-gate navigation repair. The following
+topic-guide inbound link remains an owner proposal.
 
 ```diff
 diff --git a/docs/feature-work/trust-usability.md b/docs/feature-work/trust-usability.md
@@ -197,18 +200,3 @@ recorded seeds, a larger explicit outer process-group timeout (for example
 8 hours), and the same exact compiler lock and four-mode denominator. Preserve
 all failures/refusals and shrink candidates; retain raw observations outside
 the code branch. No nightly result is asserted until the VM run completes.
-
-Exact generated catalog owner diff (computed without modifying the catalog):
-
-```diff
---- a/docs/document-index.md
-+++ b/docs/document-index.md
-@@ -198,6 +198,7 @@
- - [docs/feature-work/transient-storage.md](feature-work/transient-storage.md)
- - [docs/feature-work/trust-usability.md](feature-work/trust-usability.md)
- - [docs/feature-work/v13-public-compiler-total.md](feature-work/v13-public-compiler-total.md)
-+- [docs/feature-work/va3-differential.md](feature-work/va3-differential.md)
- - [docs/feature-work/vy5-composition.md](feature-work/vy5-composition.md)
- - [docs/feature-work/vy5-natural-account.md](feature-work/vy5-natural-account.md)
- - [docs/feature-work/vy5-source-release.md](feature-work/vy5-source-release.md)
-```
