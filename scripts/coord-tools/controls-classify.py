@@ -80,6 +80,15 @@ def main():
             for i in mods.get(st.pop(), []):
                 if i in mods and i not in seen: seen.add(i); st.append(i)
         for m in sorted(seen & un): print(f"controls-classify: {m} is library-reachable"); bad = 1
+        # roots: every *Controls module in exactly one of Solidity.lean and
+        # SolidityControls.lean; SolidityControls.lean holds exactly the unreachable ones
+        def imports(f):
+            p = pathlib.Path(f)
+            return {l.split()[1] for l in p.read_text().splitlines() if l.startswith("import ")} if p.is_file() else set()
+        lib, ctl = imports("Solidity.lean"), imports("SolidityControls.lean")
+        for m in controls:
+            if (m in lib) == (m in ctl): print(f"controls-classify: {m} in {'both roots' if m in lib else 'neither root'}"); bad = 1
+        if ctl != un: print(f"controls-classify: SolidityControls.lean differs from the unreachable set ({len(ctl ^ un)} modules)"); bad = 1
         return bad
     if a: raise ValueError("usage: controls-classify.py [--list reachable|unreachable|edges] [--check]")
     print(f"controls={len(controls)} reachable={len(reachable)} unreachable={len(unreachable)} "
