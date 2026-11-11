@@ -14,7 +14,12 @@ Run recorded generators/reproducers only in disposable committed-byte copies;
 their commands can write fixed paths. Normal write/check never executes them.
 
 The use graph is deliberately an under-approximation: explicit reviewed routes,
-Lean imports/solc_imports and validated Python reads of measured bytes.
+Lean imports/solc_imports and observed Python reads of measured bytes.
+Separately audited nonpassing unittest routes retain failure status and grant
+no passing-reproducer credit; actual test/setup method identity is required.
+Unreviewed unittest data reads remain unresolved even when the test passes.
+Unchanged demonstrated committed runners may be source-only roots with
+unavailable current validation, without fixture/child or passing-reproducer credit.
 Text matches are search candidates, never invocation edges. Shell expansion,
 Python eval/importlib, computed Node reads and producer environments need review;
 no static absence is sufficient to prune a candidate. Unresolved paths have a
@@ -195,7 +200,7 @@ class Graph:
             queue = collections.deque([(first, True)])
             while queue:
                 source, executing = queue.popleft()
-                if not executing: continue
+                if not executing or entry.get('source_only'): continue
                 for edge in sorted(self.edges[source], key=lambda e: (e['target'], e['line'], e['operation'])):
                     if edge.get('validated_for', root_id) != root_id: continue
                     if entry.get('lake_package') and edge.get('repository_lean'): continue
@@ -431,7 +436,9 @@ def entrypoint_lines(source):
 def validated_routes(graph, catalog):
     """Reviewed validation definitions; raw run receipts live outside the branch.
 
-    A definition is bound to an exact input revision, command and source blob.
+    A passing-validation definition is bound to an exact input revision, command and source blob.
+    Identical demonstrated committed runner sources may remain source-only roots
+    at another revision, with explicit unavailable validation and no edge credit.
     Check/write do not execute it. Changes to the measured revision invalidate
     it until deliberate validation updates the definition. Definitions are part
     of the classifier, not evidence supplied by the inventory under test.
@@ -439,21 +446,67 @@ def validated_routes(graph, catalog):
     repo = graph.repo
     if not isinstance(catalog, dict) or set(catalog) != {'schema_version', 'standalone', 'generators', 'reads', 'orphans'} or catalog['schema_version'] != 1:
         raise ValueError('invalid validation definition schema')
+    current_runner_paths = {e.get('path') for e in catalog['standalone'] if e.get('input_revision') == repo.ref}
+    # Historical source-only eligibility needs a real commit and the exact
+    # recorded source object, not merely a matching current filename/blob.
+    historical_specs = {}
+    historical_revisions = set()
+    for entry in catalog['standalone']:
+        p = entry.get('path')
+        if (entry.get('input_revision') == repo.ref or entry.get('kind') not in ('unittest', 'node-test', 'runnable-entrypoint')
+                or p in current_runner_paths or p not in repo.tree or repo.tree[p][2] != entry.get('source_blob')): continue
+        revision = entry.get('input_revision')
+        if not hex_pin(revision, 40): raise ValueError('historical runner demonstration requires full commit revision')
+        historical_revisions.add(revision)
+        historical_specs[revision + ':' + p] = entry['source_blob']
+    requests = sorted(historical_revisions) + sorted(historical_specs)
+    if requests:
+        raw = git(repo.root, 'cat-file', '--batch-check', '-Z', data=b''.join(v.encode('utf-8', 'surrogateescape') + b'\0' for v in requests))
+        lines = raw.rstrip(b'\0').split(b'\0')
+        if len(lines) != len(requests): raise ValueError('historical runner object batch mismatch')
+        for request, line in zip(requests, lines):
+            fields = line.split()
+            expected_oid = request if request in historical_revisions else historical_specs[request]
+            expected_type = b'commit' if request in historical_revisions else b'blob'
+            if len(fields) != 3 or fields[0].decode() != expected_oid or fields[1] != expected_type:
+                raise ValueError('unverifiable historical runner demonstration: ' + request)
     for entry in catalog['standalone']:
         required = {'path', 'input_revision', 'source_blob', 'command', 'kind'}
         if entry.get('kind') == 'manual-reproducer': required.add('documentation')
         if entry.get('kind') == 'runnable-entrypoint': required.update(('entry_line', 'purpose', 'input_scope', 'other_reads'))
-        if set(entry) != required:
+        if entry.get('kind') == 'nonpassing-unittest': required.update(('purpose', 'input_scope'))
+        allowed = (required, required | {'purpose', 'input_scope', 'other_reads'}) if entry.get('kind') in ('unittest', 'node-test') else (required,)
+        if set(entry) not in allowed:
             raise ValueError('invalid standalone definition')
         p = entry['path']
-        if entry['input_revision'] != repo.ref: continue
+        historical_runner = entry['input_revision'] != repo.ref
+        if historical_runner and (entry['kind'] not in ('unittest', 'node-test', 'runnable-entrypoint')
+                or p in current_runner_paths or p not in repo.tree or repo.tree[p][2] != entry['source_blob']):
+            continue
         if p not in repo.tree or repo.tree[p][2] != entry['source_blob']:
             raise ValueError('standalone definition source mismatch: ' + p)
         command = entry['command']
         if entry['kind'] != 'manual-reproducer' and command not in (['python3', '-B', p], ['node', '--test', p]):
             raise ValueError('unsupported standalone invocation: ' + p)
-        if entry['kind'] not in ('unittest', 'node-test', 'manual-reproducer', 'runnable-entrypoint'):
+        if entry['kind'] not in ('unittest', 'node-test', 'manual-reproducer', 'runnable-entrypoint', 'nonpassing-unittest'):
             raise ValueError('unsupported standalone kind')
+        if entry['kind'] == 'nonpassing-unittest':
+            declaration = declared_unittest(repo, p)
+            if declaration is None or command != ['python3', '-B', p]:
+                raise ValueError('nonpassing source is not a declared unittest runner')
+            scopes = entry['input_scope']
+            if (not isinstance(entry['purpose'], str) or not entry['purpose'].strip()
+                    or not isinstance(scopes, list) or not all(isinstance(v, str) and v not in SCOPE
+                        and (v in repo.tree or v.endswith('/') and any(q.startswith(v) for q in repo.tree)) for v in scopes)):
+                raise ValueError('nonpassing test lacks reviewed fixture scope')
+            identity = 'nonpassing:' + p
+            graph.root(p, 'nonpassing committed unittest runner', shlex.join(command), p,
+                       declaration['main_line'], root_id=identity)
+            graph.roots[identity].update({'source_only': True, 'source_blob': entry['source_blob'],
+                'role_provenance': declaration, 'purpose': entry['purpose'], 'data_use_scope': scopes,
+                'other_reads': 'unresolved', 'validation_at_measured_revision': {'status': 'failed',
+                    'command': command, 'reason': 'Normal run failed; only separately observed test-context reads qualify. No passing-reproducer credit.'}})
+            continue
         if entry['kind'] == 'unittest':
             tree = ast.parse(repo.texts[p])
             if command[0] != 'python3' or not any(isinstance(n, ast.Call) and ast.unparse(n.func) == 'unittest.main' for n in ast.walk(tree)):
@@ -468,7 +521,7 @@ def validated_routes(graph, catalog):
             if entry['other_reads'] not in ('unresolved', 'secondary'): raise ValueError('invalid other-read eligibility')
             scopes = entry['input_scope']
             if not isinstance(scopes, list) or not all(isinstance(scope, str) and scope not in SCOPE and
-                    (scope in repo.tree or scope.endswith('/') and any(path.startswith(scope) for path in repo.tree)) for scope in scopes):
+                    (historical_runner or scope in repo.tree or scope.endswith('/') and any(path.startswith(scope) for path in repo.tree)) for scope in scopes):
                 raise ValueError('invalid fixture-specific data scope')
         else:
             if not isinstance(command, list) or not command or not all(isinstance(a, str) for a in command):
@@ -494,33 +547,66 @@ def validated_routes(graph, catalog):
                            and p.endswith(('.mjs', '.js', '.cjs')))
             else: matched = False
             if not matched: raise ValueError('manual reproducer arguments differ from documentation')
+        if historical_runner:
+            # H490 / X1-RUNNER-ROOT: the demonstrated committed runner source
+            # is a root independently of current passing-validation credit.
+            # It cannot propagate any fixture/child edge, even a shared edge.
+            identity = 'committed:' + p
+            graph.root(p, 'committed standalone runner', shlex.join(command), p,
+                       entry.get('entry_line', 1), root_id=identity)
+            graph.roots[identity].update({'runner_kind': entry['kind'], 'source_blob': entry['source_blob'],
+                'source_only': True, 'source_demonstration_revision': entry['input_revision'],
+                'validation_at_measured_revision': {'status': 'unavailable', 'command': command,
+                    'reason': 'Not executed at measured revision; source role and command established independently.'}})
+            continue
         graph.root(p, 'validated standalone runner', shlex.join(command), p, entry.get('entry_line', 1), root_id='validated:' + p)
         graph.roots['validated:' + p].update({'runner_kind': entry['kind'], 'source_blob': entry['source_blob']})
         if entry['kind'] == 'runnable-entrypoint':
             graph.roots['validated:' + p].update({'purpose': entry['purpose'], 'data_use_scope': entry['input_scope'], 'other_reads': entry['other_reads']})
+        if entry['kind'] in ('unittest', 'node-test'):
+            if 'input_scope' in entry:
+                scopes = entry['input_scope']
+                if (not isinstance(entry['purpose'], str) or not entry['purpose'].strip()
+                        or entry['other_reads'] not in ('unresolved', 'secondary')
+                        or not isinstance(scopes, list) or not all(isinstance(v, str) and v not in SCOPE
+                            and (v in repo.tree or v.endswith('/') and any(q.startswith(v) for q in repo.tree)) for v in scopes)):
+                    raise ValueError('invalid reviewed unittest fixture scope')
+                purpose = entry['purpose']; other = entry['other_reads']
+            else:
+                scopes = []; other = 'unresolved'
+                purpose = 'Fixture roles not reviewed; passing test status and IO alone do not establish data eligibility.'
+            graph.roots['validated:' + p].update({'purpose': purpose, 'data_use_scope': scopes, 'other_reads': other})
         if entry['kind'] == 'manual-reproducer': graph.roots['validated:' + p]['documentation'] = entry['documentation']
     for route in catalog['reads']:
         if set(route) != {'runner', 'input_revision', 'frames', 'target', 'target_blob', 'operation'}:
             raise ValueError('invalid validated read route')
         if route['input_revision'] != repo.ref: continue
         original = route['runner']
-        if original not in graph.roots or graph.roots[original]['kind'] != 'validated standalone runner':
+        if original not in graph.roots or graph.roots[original]['kind'] not in ('validated standalone runner', 'nonpassing committed unittest runner'):
             raise ValueError('validated read has no validated runner')
         target = route['target']
         if target not in repo.tree or repo.tree[target][2] != route['target_blob']:
             raise ValueError('validated read target mismatch')
-        if route['operation'] != 'validated Python read of measured bytes':
+        nonpassing = graph.roots[original]['kind'] == 'nonpassing committed unittest runner'
+        operation = 'Observed fixture read during nonpassing unittest' if nonpassing else 'validated Python read of measured bytes'
+        if route['operation'] != operation:
             raise ValueError('unsupported validated read operation')
         frames = route['frames']
         if not isinstance(frames, list) or not frames or frames[0].get('path') != graph.roots[original]['path']:
             raise ValueError('validated read route does not start at its runner')
         for frame in frames:
-            if set(frame) != {'path', 'blob', 'line'}: raise ValueError('invalid read stack frame')
+            required_frame = {'path', 'blob', 'line'} | ({'code_qualname', 'code_firstlineno'} if nonpassing else set())
+            if set(frame) != required_frame: raise ValueError('invalid read stack frame')
+            if nonpassing and (not isinstance(frame['code_qualname'], str) or type(frame['code_firstlineno']) is not int or frame['code_firstlineno'] < 1):
+                raise ValueError('invalid nonpassing frame code identity')
             source = frame['path']
             if source not in repo.tree or repo.tree[source][2] != frame['blob']:
                 raise ValueError('validated read source mismatch')
             if not isinstance(frame['line'], int) or not 1 <= frame['line'] <= len(repo.texts.get(source, '').splitlines()):
                 raise ValueError('validated read location mismatch')
+        if nonpassing and not any(frame['path'] == graph.roots[original]['path'] and
+                any(c['first'] <= frame['line'] <= c['last'] and c['qualname'] == frame['code_qualname'] and c['code_firstlineno'] == frame['code_firstlineno'] for c in graph.roots[original]['role_provenance']['test_contexts']) for frame in frames):
+            raise ValueError('nonpassing read lacks an entered test or setup context')
         if any(excluded(f['path']) for f in frames) or excluded(target): continue
         scopes = graph.roots[original].get('data_use_scope')
         eligible = scopes is None or any(target == scope or scope.endswith('/') and target.startswith(scope) for scope in scopes)
@@ -535,7 +621,7 @@ def validated_routes(graph, catalog):
         for caller, callee in zip(frames, frames[1:]):
             chain = {**chain, 'edges': chain['edges'] + [{
                 'source': caller['path'], 'target': callee['path'],
-                'line': caller['line'], 'operation': 'validated Python call stack',
+                'line': caller['line'], 'operation': ('Observed nonpassing unittest call stack' if nonpassing else 'validated Python call stack'),
                 'kind': 'executes', 'validated_for': identity}]}
             graph.observed.append((callee['path'], chain))
         reader = frames[-1]
@@ -641,6 +727,55 @@ def historical_json_role(value):
     return None
 
 
+def reviewed_receipt_rows(value):
+    """Measured rows from three reviewed historical envelope schemas.
+
+    Not arbitrary recursive keys: native/probe resource envelopes contain
+    commands[]; pinned continuation reports contain checks[]. A commands dict
+    is a recipe table, never measured output. Missing commands get no credit.
+    No success, active-consumer or external-artifact claim follows from a row.
+    """
+    if not isinstance(value, dict): return []
+    recorded = value.get('recordedAt')
+    if not isinstance(recorded, str) or not re.fullmatch(r'\d{4}-\d{2}-\d{2}T[0-9:.+\-]+Z?', recorded): return []
+    def argv(v): return isinstance(v, list) and bool(v) and all(isinstance(x, str) for x in v)
+    def measured(row, resource, command_type):
+        return (isinstance(row, dict) and command_type(row.get('command'))
+                and type(row.get('exitCode')) is int and nonnegative_number(row.get('elapsedSeconds'))
+                and type(row.get(resource)) is int and row[resource] >= 0
+                and isinstance(row.get('log'), str) and bool(row['log']))
+    rows = value.get('commands')
+    native = (isinstance(value.get('historicalFiles'), list) and bool(value['historicalFiles'])
+              and all(isinstance(r, dict) and isinstance(r.get('path'), str) and r['path']
+                      and hex_pin(r.get('sha256')) and type(r.get('byteIdenticalToStartingCommit')) is bool
+                      for r in value['historicalFiles']) and type(value.get('nativeValidationComplete')) is bool
+              and all(isinstance(value.get(k), str) for k in ('remainingNativeCapability', 'historicalGeneratorNote')))
+    probes = all(isinstance(value.get(k), str) for k in ('nativeValidation', 'originalCoreAndCorpus', 'newTheoremAxiomAudit'))
+    if (isinstance(rows, list) and rows and (native or probes)
+            and nonnegative_number(value.get('elapsedSeconds')) and type(value.get('maxWait4JobRssKiB')) is int
+            and value['maxWait4JobRssKiB'] >= 0 and isinstance(value.get('resourceInterpretation'), str)
+            and all(measured(r, 'wait4MaxRssKiB', argv) and hex_pin(r.get('uncompressedLogSha256')) for r in rows)):
+        return [(f'/commands/{i}', r) for i, r in enumerate(rows)]
+    if (type(value.get('version')) is not int or value['version'] != 1
+            or not isinstance(value.get('runtime'), dict) or not isinstance(value.get('branch'), str)
+            or not hex_pin(value.get('implementationCommit'), 40)):
+        return []
+    rows = value.get('checks')
+    if not isinstance(rows, list) or not rows: return []
+    continuation = hex_pin(value.get('evidenceBaseCommit'), 40) and isinstance(value.get('historicalIntegrity'), dict)
+    validation = hex_pin(value.get('startingCommit'), 40) and isinstance(value.get('scope'), str)
+    if continuation:
+        if not all(measured(r, 'peakCgroupBytes', lambda v: isinstance(v, str) and bool(v))
+                and isinstance(r.get('runner'), str) and isinstance(r.get('status'), str)
+                and hex_pin(r.get('sha256')) for r in rows): return []
+        return [(f'/checks/{i}', r) for i, r in enumerate(rows)]
+    if validation:
+        return [(f'/checks/{i}', r) for i, r in enumerate(rows)
+                if measured(r, 'prototypePeakGroupRssBytes', argv)
+                and isinstance(r.get('status'), str) and hex_pin(r.get('sha256'))]
+    return []
+
+
 def evidence_role(data):
     """Content signatures, never extension or directory alone. Keep wins first."""
     if data.startswith(b'\x1f\x8b'):
@@ -656,6 +791,8 @@ def evidence_role(data):
         return 'Historical sequential command receipts: argv, exit codes and elapsed measurements.'
     if isinstance(value, dict):
         keys = set(value)
+        if reviewed_receipt_rows(value):
+            return 'Historical resource/validation command receipts: reviewed dated envelope, explicit commands, exit/timing/resource observations and output digests; no current validation credit.'
         reviewed = historical_json_role(value)
         if reviewed: return reviewed
         gate = value.get('combinedGate')
@@ -732,15 +869,19 @@ def historical_outputs(repo):
         try: value = json.loads(repo.texts[source])
         except (ValueError, RecursionError): continue
         if not evidence_role(repo.bytes(source)): continue
-        rows = command_receipt_rows(value)
-        for i, row in enumerate(rows):
+        standard = command_receipt_rows(value)
+        rows = [(f'/{i}' if isinstance(value, list) else f'/commands/{i}', row) for i, row in enumerate(standard)]
+        rows += reviewed_receipt_rows(value)
+        for pointer, row in rows:
             if not {'log'} <= set(row) or not isinstance(row['log'], str): continue
             digest = row.get('uncompressedLogSha256', row.get('sha256'))
             if not isinstance(digest, str) or not re.fullmatch('[0-9a-f]{64}', digest): continue
+            # A basename is never a substitute for an external absolute path.
+            if row['log'].startswith('/') or '\0' in row['log'] or '..' in row['log'].split('/'): continue
             # Historical receipts use both repository-relative and sibling names.
             direct = clean(row['log'])
             sibling = clean(posixpath.join(posixpath.dirname(source), row['log']))
-            possibilities = {path for path in (direct, sibling) if path in repo.tree and repo.tree[path][1] == 'blob'}
+            possibilities = {path for path in (direct, sibling) if path in repo.tree and repo.tree[path][1] == 'blob' and repo.tree[path][0] in ('100644', '100755')}
             if len(possibilities) != 1: continue  # ambiguous cwd is not provenance
             target = possibilities.pop()
             data = repo.bytes(target)
@@ -749,10 +890,107 @@ def historical_outputs(repo):
                     with gzip.GzipFile(fileobj=io.BytesIO(data)) as stream: data = stream.read(8_000_001)
                 except (OSError, EOFError, zlib.error): continue
             if len(data) > 8_000_000 or hashlib.sha256(data).hexdigest() != digest: continue
-            pointer = f'/{i}' if isinstance(value, list) else f'/commands/{i}'
             encoding = 'uncompressed' if 'uncompressedLogSha256' in row else 'stored-byte'
             roles[target] = f'Historical command output: {source} {pointer} names this log; recorded {encoding} SHA256 matches measured bytes.'
     return roles
+
+
+def declared_unittest(repo, path):
+    """Recognize a committed runner role without executing it or granting reads."""
+    if path not in repo.texts or not path.endswith('.py') or repo.tree[path][0] not in ('100644', '100755'): return None
+    text = repo.texts[path]
+    try: tree = ast.parse(text)
+    except (SyntaxError, ValueError, RecursionError): return None
+    modules = set(); cases = set(); mains = set()
+    for node in tree.body:
+        if isinstance(node, ast.Import):
+            modules.update(a.asname or 'unittest' for a in node.names
+                           if a.name == 'unittest' or a.name.startswith('unittest.') and a.asname is None)
+        elif isinstance(node, ast.ImportFrom) and node.module == 'unittest' and not node.level:
+            cases.update(a.asname or a.name for a in node.names if a.name == 'TestCase')
+            mains.update(a.asname or a.name for a in node.names if a.name == 'main')
+    if not modules and not (cases and mains): return None
+    bindings = modules | cases | mains | {'__name__'}
+    shadowed = any(isinstance(n, ast.Name) and isinstance(n.ctx, (ast.Store, ast.Del)) and n.id in bindings
+                   or isinstance(n, (ast.FunctionDef, ast.AsyncFunctionDef, ast.ClassDef)) and n.name in bindings
+                   or isinstance(n, ast.Attribute) and isinstance(n.ctx, (ast.Store, ast.Del))
+                      and isinstance(n.value, ast.Name) and n.value.id in modules and n.attr in ('main', 'TestCase')
+                   for n in ast.walk(tree))
+    for node in ast.walk(tree):
+        if isinstance(node, ast.Import):
+            for alias in node.names:
+                bound = alias.asname or alias.name.split('.')[0]
+                if bound == '__name__': shadowed = True
+                if bound in bindings and not (bound in modules and
+                        (alias.name == 'unittest' or alias.name.startswith('unittest.') and alias.asname is None)):
+                    shadowed = True
+        elif isinstance(node, ast.ImportFrom):
+            for alias in node.names:
+                bound = alias.asname or alias.name
+                if bound == '__name__': shadowed = True
+                if alias.name == '*': shadowed = True
+                if bound in bindings and not (node.module == 'unittest' and not node.level
+                        and (alias.name == 'TestCase' and bound in cases or alias.name == 'main' and bound in mains)):
+                    shadowed = True
+    if modules & cases or modules & mains or cases & mains: shadowed = True
+    if shadowed: return None
+    def terminal(statement):
+        if isinstance(statement, ast.Raise): return True
+        if isinstance(statement, ast.Expr) and isinstance(statement.value, ast.Call):
+            func = statement.value.func
+            return (isinstance(func, ast.Name) and func.id in ('exit', 'quit')
+                    or isinstance(func, ast.Attribute) and func.attr in ('exit', '_exit'))
+        return False
+    def testcase(base):
+        return (isinstance(base, ast.Name) and base.id in cases
+                or isinstance(base, ast.Attribute) and base.attr == 'TestCase'
+                and isinstance(base.value, ast.Name) and base.value.id in modules)
+    classes = [n for n in tree.body if isinstance(n, ast.ClassDef) and any(testcase(b) for b in n.bases)
+               and any(isinstance(m, (ast.FunctionDef, ast.AsyncFunctionDef)) and m.name.startswith('test_') for m in n.body)]
+    if not classes: return None
+    calls = []
+    for index, node in enumerate(tree.body):
+        if not isinstance(node, ast.If) or not isinstance(node.test, ast.Compare): continue
+        test = node.test
+        if len(test.ops) != 1 or not isinstance(test.ops[0], ast.Eq) or len(test.comparators) != 1: continue
+        pair = (test.left, test.comparators[0])
+        if not (any(isinstance(n, ast.Name) and n.id == '__name__' for n in pair)
+                and any(isinstance(n, ast.Constant) and n.value == '__main__' for n in pair)): continue
+        if any(terminal(n) for n in tree.body[:index]): continue
+        for position, statement in enumerate(node.body):
+            if not isinstance(statement, ast.Expr) or not isinstance(statement.value, ast.Call): continue
+            call = statement.value; func = call.func
+            if not (isinstance(func, ast.Name) and func.id in mains or isinstance(func, ast.Attribute)
+                    and func.attr == 'main' and isinstance(func.value, ast.Name) and func.value.id in modules): continue
+            if any(terminal(n) for n in node.body[:position]): continue
+            calls.append(call)
+    if not calls: return None
+    try: compile(text, path, 'exec', dont_inherit=True)
+    except (SyntaxError, ValueError, RecursionError, OverflowError): return None
+    methods = [m for c in classes for m in c.body if isinstance(m, (ast.FunctionDef, ast.AsyncFunctionDef))
+               and (m.name.startswith('test_') or m.name in ('setUp', 'tearDown', 'setUpClass', 'tearDownClass'))]
+    return {'kind': 'unittest declaration and explicit main entry', 'revision': repo.ref,
+            'class_lines': [c.lineno for c in classes], 'main_line': calls[0].lineno,
+            'test_contexts': [{'name': m.name, 'qualname': c.name + '.' + m.name,
+                'code_firstlineno': min([m.lineno] + [d.lineno for d in m.decorator_list]),
+                'first': m.body[0].lineno, 'last': m.end_lineno} for c in classes for m in c.body if m in methods]}
+
+
+def add_declared_test_runners(graph):
+    """H490 source-only roots; no fixture, child or passing-reproducer credit."""
+    repo = graph.repo
+    existing = {v['path'] for v in graph.roots.values()}
+    for path in sorted(repo.texts):
+        if path in existing: continue
+        declaration = declared_unittest(repo, path)
+        if declaration is None: continue
+        identity = 'committed:' + path
+        graph.root(path, 'committed standalone test runner', shlex.join(['python3', '-B', path]), path,
+                   declaration['main_line'], root_id=identity)
+        graph.roots[identity].update({'source_only': True, 'source_blob': repo.tree[path][2],
+            'role_provenance': declaration,
+            'validation_at_measured_revision': {'status': 'unavailable', 'command': ['python3', '-B', path],
+                'reason': 'Committed runner role audited from syntax; command not executed by inventory.'}})
 
 
 def reviewed_generated_consumption(entry, graph, candidate_sources):
@@ -794,6 +1032,7 @@ def inventory(repo, catalog=None):
         catalog = json.loads(definitions.read_bytes()) if definitions.exists() else {'schema_version': 1, 'standalone': [], 'generators': [], 'reads': [], 'orphans': []}
     add_roots(graph); reviewed_routes(graph); add_lean(graph)
     generated = validated_routes(graph, catalog)
+    add_declared_test_runners(graph)
     ci_spec = importlib.util.spec_from_file_location('tests_used_ci', Path(__file__).with_name('check-tests-used-ci.py'))
     ci_rules = importlib.util.module_from_spec(ci_spec); ci_spec.loader.exec_module(ci_rules)
     ci_rules.add(graph)
@@ -817,7 +1056,15 @@ def inventory(repo, catalog=None):
     # Search coverage is explicitly broader than the certified use graph. A
     # textual hit is negative-evidence context, not a consumer certification.
     names = collections.defaultdict(list)
-    for p in repo.paths: names[posixpath.basename(p)].append(p)
+    for p in repo.paths:
+        base = posixpath.basename(p)
+        names[base].append(p)
+        stem, suffix = posixpath.splitext(base)
+        if suffix in ('.py', '.lean', '.mjs', '.js', '.cjs'):
+            # Module imports omit source extensions. This broadens SEARCH only;
+            # it never certifies invocation, consumption or orphan eligibility.
+            for spelling in {stem, p[:-len(suffix)].replace('/', '.')}:
+                if spelling != base: names[spelling].append(p)
     candidates = collections.defaultdict(list)
     candidate_sources = collections.defaultdict(set)  # eligibility is never display-capped
     # Single indexed scan rather than one repository scan per inventoried file.
@@ -881,7 +1128,7 @@ def inventory(repo, catalog=None):
             if p in orphan_reviews and candidates[p]: unresolved.append('UNSUPPORTED_ORPHAN_REVIEW: candidate matches remain unresolved')
         if p in graph.uncertain_reads and classification != 'keep':
             classification = None
-            reason = 'A passing entry point read this object; fixture-specific versus secondary-scan eligibility needs review. Independent historical/generated properties are retained.'
+            reason = 'An observed entry point read this object; fixture-specific versus secondary-scan eligibility needs review. Independent historical/generated properties are retained.'
             unresolved.append('UNRESOLVED_READ_ROLE: observed read eligibility is unreviewed; this is not established non-use')
         if recovery is None:
             unresolved.append(repo.pin_limitations.get(p, 'UNVERIFIABLE: ' + ('shallow history boundary prevents establishing last-touch provenance' if repo.shallow else 'no historical change introducing the measured object was recovered')))
@@ -898,7 +1145,7 @@ def inventory(repo, catalog=None):
             'universe': list(SCOPE), 'policy_scans': graph.policy_scans, 'analysis_gaps': sorted(set(graph.notes)), 'totals': {**counts, 'paths': len(records),
                                               'unresolved': sum(bool(r['unresolved']) for r in records)},
             'search_coverage': {'inputs': 'All committed non-NUL blobs, excluding classifier and inventory outputs.',
-                                'candidates': 'Basename token search plus exact unusual-name and escaped-literal search, with source line locations; capped at eight samples per path.',
+                                'candidates': 'Basename/module-stem/module-name token search plus exact unusual-name and escaped-literal search, with source line locations; capped at eight samples per path.',
                                 'limitations': ['Under-approximate use graph; no automatic script execution.',
                                                 'Unresolved dynamic shell/Python/Node dispatch prevents a complete classification.',
                                                 'No orphan or regenerable classification inferred from an absent static edge.',
@@ -930,6 +1177,95 @@ def verify(actual, expected, require_complete=True):
         if require_complete: raise ValueError('four-class totals do not equal universe')
 
 
+
+def nonpassing_boundary_controls():
+    import copy
+    with tempfile.TemporaryDirectory(prefix='tests-used-failed-controls-') as directory:
+        root = Path(directory)
+        sources = {'tests/data.txt': 'actual', 'tests/other.txt': 'unreviewed',
+            'tests/helper.py': 'from pathlib import Path\ndef read(): return Path("tests/data.txt").read_text()\n',
+            'tests/failure.py': 'import unittest\nfrom helper import read\nclass T(unittest.TestCase):\n def test_input(self):\n  self.assertEqual(read(), "expected")\nif __name__ == "__main__": unittest.main()\n',
+            'tests/bootstrap.py': 'import unittest\nfrom pathlib import Path\nPath("tests/data.txt").read_text()\nassert False, "bootstrap"\nclass T(unittest.TestCase):\n def test_input(self): pass\nif __name__ == "__main__": unittest.main()\n',
+            'tests/plain.py': 'from pathlib import Path\nPath("tests/data.txt").read_text()\nassert False\n'}
+        for path, text in sources.items():
+            target = root / path; target.parent.mkdir(exist_ok=True, parents=True); target.write_text(text)
+        git(root, 'init', '-q'); git(root, 'add', '.')
+        git(root, '-c', 'user.name=Control', '-c', 'user.email=control@example.invalid', 'commit', '-qm', 'failed controls')
+        repo = Repository(root, 'HEAD'); runner = 'tests/failure.py'
+        assert subprocess.run(['python3', '-B', runner], cwd=root, capture_output=True).returncode == 1
+        entry = {'path': runner, 'source_blob': repo.tree[runner][2], 'input_revision': repo.ref,
+                 'command': ['python3', '-B', runner], 'kind': 'nonpassing-unittest',
+                 'purpose': 'A real test reads this specific fixture and then fails its assertion.', 'input_scope': ['tests/data.txt']}
+        route = {'runner': 'nonpassing:' + runner, 'input_revision': repo.ref,
+                 'frames': [{'path': path, 'blob': repo.tree[path][2], 'line': line, 'code_qualname': name, 'code_firstlineno': first}
+                            for path, line, name, first in [(runner, 6, '<module>', 1), (runner, 5, 'T.test_input', 4), ('tests/helper.py', 2, 'read', 2)]],
+                 'target': 'tests/data.txt', 'target_blob': repo.tree['tests/data.txt'][2],
+                 'operation': 'Observed fixture read during nonpassing unittest'}
+        catalog = {'schema_version': 1, 'standalone': [entry], 'reads': [route], 'generators': [], 'orphans': []}
+        result = inventory(repo, catalog); rows = {r['path']: r for r in result['records']}
+        assert rows['tests/data.txt']['class'] == rows['tests/helper.py']['class'] == 'keep'
+        chain = rows['tests/data.txt']['runner_chain']; assert chain['entry']['source_only']
+        assert chain['entry']['validation_at_measured_revision']['status'] == 'failed'
+        assert chain['entry']['kind'] == 'nonpassing committed unittest runner'
+        graph = Graph(repo); validated_routes(graph, catalog)
+        graph.edge(runner, 'tests/other.txt', 1, 'Unsupported inferred fixture edge', validated_for='nonpassing:' + runner)
+        assert 'tests/other.txt' not in graph.chains()
+        execution_only = copy.deepcopy(catalog); execution_only['standalone'][0]['input_scope'] = []
+        execution_rows = {r['path']: r for r in inventory(repo, execution_only)['records']}
+        assert execution_rows['tests/helper.py']['class'] == 'keep' and execution_rows['tests/data.txt']['class'] is None
+        outside = copy.deepcopy(catalog); outside['reads'][0].update(target='tests/other.txt', target_blob=repo.tree['tests/other.txt'][2])
+        outside_rows = {r['path']: r for r in inventory(repo, outside)['records']}
+        assert outside_rows['tests/other.txt']['class'] is None and outside_rows['tests/other.txt']['secondary']['unreviewed_readers']
+        assert outside_rows['tests/helper.py']['class'] == 'keep'
+        root_only = copy.deepcopy(outside); root_only['reads'][0]['frames'] = root_only['reads'][0]['frames'][:2]
+        root_rows = {r['path']: r for r in inventory(repo, root_only)['records']}
+        assert root_rows['tests/other.txt']['class'] is None and root_rows['tests/helper.py']['class'] is None
+        data_only = copy.deepcopy(root_only); data_only['reads'][0].update(target='tests/helper.py', target_blob=repo.tree['tests/helper.py'][2])
+        assert next(r for r in inventory(repo, data_only)['records'] if r['path'] == 'tests/helper.py')['class'] is None
+        for scenario in ('bootstrap', 'plain', 'operation', 'command', 'no-test-context', 'nested-code'):
+            bad = copy.deepcopy(catalog)
+            if scenario in ('bootstrap', 'plain'):
+                source = 'tests/' + scenario + '.py'; bad['standalone'][0].update(path=source, source_blob=repo.tree[source][2], command=['python3', '-B', source])
+                bad['reads'][0]['runner'] = 'nonpassing:' + source
+                bad['reads'][0]['frames'] = [{'path': source, 'blob': repo.tree[source][2], 'line': 3 if scenario == 'bootstrap' else 2, 'code_qualname': '<module>', 'code_firstlineno': 1}]
+            elif scenario == 'operation': bad['reads'][0]['operation'] = 'validated Python read of measured bytes'
+            elif scenario == 'command': bad['standalone'][0]['command'].append('--help')
+            elif scenario == 'nested-code': bad['reads'][0]['frames'][1]['code_qualname'] = 'T.test_input.<locals>.escaped'
+            else: bad['reads'][0]['frames'] = [bad['reads'][0]['frames'][0]]
+            try: inventory(repo, bad)
+            except ValueError: pass
+            else: raise AssertionError('unsupported nonpassing route accepted: ' + scenario)
+
+
+
+def passing_scan_boundary_controls():
+    import copy
+    with tempfile.TemporaryDirectory(prefix='tests-used-scan-controls-') as directory:
+        root = Path(directory)
+        text = 'import unittest\nfrom pathlib import Path\nclass T(unittest.TestCase):\n def test_scan(self):\n  values=[p.read_text() for p in Path("tests/scanned").rglob("*") if p.is_file()]\n  self.assertTrue(values)\nif __name__ == "__main__": unittest.main()\n'
+        sources = {'tests/scan.py': text, 'tests/scanned/receipt.json': json.dumps({
+            'command': ['old-run'], 'exit': 7, 'elapsed_seconds': 1, 'resource_stop': False, 'peak_group_rss_bytes': 1})}
+        for path, value in sources.items():
+            target = root/path; target.parent.mkdir(parents=True, exist_ok=True); target.write_text(value)
+        git(root, 'init', '-q'); git(root, 'add', '.')
+        git(root, '-c', 'user.name=Control', '-c', 'user.email=control@example.invalid', 'commit', '-qm', 'scan control')
+        repo = Repository(root, 'HEAD'); runner = 'tests/scan.py'; target = 'tests/scanned/receipt.json'
+        assert subprocess.run(['python3', '-B', runner], cwd=root, capture_output=True).returncode == 0
+        catalog = {'schema_version': 1, 'generators': [], 'orphans': [], 'standalone': [{
+            'path': runner, 'input_revision': repo.ref, 'source_blob': repo.tree[runner][2],
+            'command': ['python3', '-B', runner], 'kind': 'unittest'}], 'reads': [{
+            'runner': 'validated:' + runner, 'input_revision': repo.ref,
+            'frames': [{'path': runner, 'blob': repo.tree[runner][2], 'line': 5}],
+            'target': target, 'target_blob': repo.tree[target][2], 'operation': 'validated Python read of measured bytes'}]}
+        rows = {r['path']: r for r in inventory(repo, catalog)['records']}
+        assert rows[runner]['class'] == 'keep' and rows[target]['class'] is None
+        assert rows[target]['secondary']['unreviewed_readers'] and rows[target]['secondary']['historical_role']
+        secondary = copy.deepcopy(catalog); secondary['standalone'][0].update(input_scope=[],
+            purpose='Reviewed blanket count-policy scan; no fixture-specific consumer is claimed.', other_reads='secondary')
+        rows = {r['path']: r for r in inventory(repo, secondary)['records']}
+        assert rows[target]['class'] == 'evidence' and not rows[target]['runner_chain']
+
+
 def self_test():
     if not __debug__: raise ValueError("self-test requires Python assertions; omit -O")
     import copy
@@ -959,6 +1295,23 @@ def self_test():
     assert evidence_role(json.dumps(dict(summary, commit='unrun')).encode()) is None
     assert evidence_role(json.dumps(dict(summary, suites={'suite': {'proved': 1}})).encode()) is None
     assert evidence_role(json.dumps(dict(summary, suites={'suite': {'proved': 2, 'error': 1, 'extra': 1}})).encode()) is None
+    measured_row = {'command': ['old-runner'], 'exitCode': 7, 'elapsedSeconds': 0.25,
+                    'wait4MaxRssKiB': 1024, 'log': 'bound.log.gz', 'uncompressedLogSha256': 'a' * 64}
+    resource_envelope = {'recordedAt': '2026-01-01T00:00:00+00:00', 'elapsedSeconds': 0.5,
+        'maxWait4JobRssKiB': 1024, 'resourceInterpretation': 'Recorded child resources',
+        'nativeValidation': 'partial', 'originalCoreAndCorpus': 'recorded', 'newTheoremAxiomAudit': 'recorded',
+        'commands': [measured_row]}
+    assert reviewed_receipt_rows(resource_envelope) == [('/commands/0', measured_row)]
+    assert evidence_role(json.dumps(resource_envelope).encode())
+    for field, bad in (('elapsedSeconds', float('nan')), ('maxWait4JobRssKiB', True), ('commands', {})):
+        assert not reviewed_receipt_rows(dict(resource_envelope, **{field: bad}))
+    check_row = {'command': 'archived command', 'runner': 'old-wrapper', 'exitCode': 9, 'elapsedSeconds': 1,
+                 'peakCgroupBytes': 100, 'status': 'failed', 'log': 'tests/old.log', 'sha256': 'b' * 64}
+    continuation = {'version': 1, 'recordedAt': '2026-01-01T00:00:00Z', 'evidenceBaseCommit': 'a' * 40,
+                    'implementationCommit': 'b' * 40, 'branch': 'old', 'runtime': {},
+                    'historicalIntegrity': {}, 'checks': [check_row]}
+    assert reviewed_receipt_rows(continuation) == [('/checks/0', check_row)]
+    assert not reviewed_receipt_rows(dict(continuation, checks=[dict(check_row, command=None)]))
     with tempfile.TemporaryDirectory(prefix='tests-used-controls-') as directory:
         root = Path(directory)
         git(root, 'init', '-q')
@@ -969,6 +1322,10 @@ def self_test():
             'tests/main-only.txt': 'main only\n',
             'tests/pass.py': 'import unittest\nclass T(unittest.TestCase):\n def test_value(self): import live; self.assertEqual(2 + 2, 4)\nif __name__ == "__main__": unittest.main()\n',
             'tests/fail.py': 'raise SystemExit(1)\n',
+            'tests/failing-unit.py': 'import unittest\nclass Failed(unittest.TestCase):\n def test_failure(self): self.fail("intentional control")\nif __name__ == "__main__": unittest.main()\n',
+            'tests/dead-unit.py': 'import unittest\nclass Dead(unittest.TestCase):\n def test_value(self): pass\nif False: unittest.main()\n',
+            'tests/quoted-unit.py': '"""import unittest\nclass Fake(unittest.TestCase):\n def test_value(self): pass\nif __name__ == "__main__": unittest.main()\n"""\n',
+            'tests/shadowed-unit.py': 'import unittest\nunittest = object()\nclass Fake(unittest.TestCase):\n def test_value(self): pass\nif __name__ == "__main__": unittest.main()\n',
             'tests/plain.py': 'from pathlib import Path\ndef main(): assert Path("tests/generated.txt").read_bytes() == b"generated\\n"; Path("tests/" + "mention" + ".txt").read_text()\nif __name__ == "__main__": main()\n',
             'tests/callback.py': 'import callback_helper as helper\ndef callback(): return helper.read()\nassert helper.invoke(callback) == "callback\\n"\n',
             'tests/callback_helper.py': 'from pathlib import Path\ndef invoke(f): return f()\ndef read(): return Path("tests/callback.txt").read_text()\n',
@@ -1005,6 +1362,15 @@ def self_test():
             'scripts/h55/other': 'h55\n',
             'scripts/h62/other': 'h62\n',
         }
+        bound_envelope = dict(resource_envelope, commands=[dict(measured_row, log='tests/bound-history.log', uncompressedLogSha256=hashlib.sha256(b'archived failure\n').hexdigest())])
+        sources['tests/bound-history.json'] = json.dumps(bound_envelope)
+        sources['tests/bound-history.log'] = 'archived failure\n'
+        sources['tests/unsafe-history.json'] = json.dumps(dict(resource_envelope, commands=[dict(measured_row, log='/tests/not-an-input.log', uncompressedLogSha256=hashlib.sha256(b'unused\n').hexdigest())]))
+        sources['tests/not-an-input.log'] = 'unused\n'
+        sources['tests/magic-name-unit.py'] = 'import unittest as u\nimport unittest as __name__\nclass T(u.TestCase):\n def test_value(self): pass\nif __name__ == "__main__": u.main()\n'
+        sources['tests/import-shadow-unit.py'] = 'import unittest\nimport json as unittest\nclass T(unittest.TestCase):\n def test_value(self): pass\nif __name__ == "__main__": unittest.main()\n'
+        sources['tests/from-shadow-unit.py'] = 'from unittest import TestCase, main\nfrom json import loads as main\nclass T(TestCase):\n def test_value(self): pass\nif __name__ == "__main__": main()\n'
+        sources['tests/exit-before-unit.py'] = 'import unittest,sys\nclass T(unittest.TestCase):\n def test_value(self): pass\nsys.exit(0)\nif __name__ == "__main__": unittest.main()\n'
         for i in range(9): sources[f'tests/reference-{i}.txt'] = 'Historical mention of tests/spare.txt only.\n'
         for p, content in sources.items():
             target = root / p; target.parent.mkdir(parents=True, exist_ok=True)
@@ -1023,7 +1389,9 @@ def self_test():
         catalog = {'schema_version': 1, 'standalone': [{
             'path': 'tests/pass.py', 'input_revision': repo.ref,
             'source_blob': repo.tree['tests/pass.py'][2],
-            'command': ['python3', '-B', 'tests/pass.py'], 'kind': 'unittest'}],
+            'command': ['python3', '-B', 'tests/pass.py'], 'kind': 'unittest',
+            'purpose': 'Read explicit generated and source fixtures under the passing regression test.',
+            'input_scope': ['tests/generated.txt', 'tests/helper.py', 'tests/dead.lean'], 'other_reads': 'unresolved'}],
             'orphans': [{'path': 'tests/unknown.bin', 'input_revision': repo.ref,
                 'blob': repo.tree['tests/unknown.bin'][2],
                 'reason': 'No references or runner use after complete source/root search of the closed control repository.',
@@ -1064,11 +1432,22 @@ def self_test():
         spare = copy.deepcopy(catalog['generators'][0]); spare.update(path='tests/spare.txt', output_blob=repo.tree['tests/spare.txt'][2])
         catalog['generators'].append(spare)
         assert (root / 'tests/spare.txt').read_bytes() == b'spare\n'
+        unreviewed = copy.deepcopy(catalog)
+        for key in ('purpose', 'input_scope', 'other_reads'): del unreviewed['standalone'][0][key]
+        unreviewed_rows = {r['path']: r for r in inventory(repo, unreviewed)['records']}
+        assert unreviewed_rows['tests/generated.txt']['class'] is None
+        assert unreviewed_rows['tests/generated.txt']['secondary']['unreviewed_readers']
+        assert unreviewed_rows['tests/live.py']['class'] == 'keep'  # actually observed helper frame
         expected = inventory(repo, catalog)
         rows = {r['path']: r for r in expected['records']}
         for p in ('tests/live.py', 'tests/helper.py', 'tests/pass.py', 'tests/generated.txt'):
             assert rows[p]['class'] == 'keep', p
         assert rows['tests/generated.txt']['generator']
+        assert subprocess.run(['python3', '-B', 'tests/failing-unit.py'], cwd=root, capture_output=True).returncode == 1
+        assert rows['tests/failing-unit.py']['class'] == 'keep'
+        assert rows['tests/failing-unit.py']['runner_chain']['entry']['source_only']
+        assert rows['tests/failing-unit.py']['runner_chain']['entry']['validation_at_measured_revision']['status'] == 'unavailable'
+        for name in ('dead-unit.py', 'quoted-unit.py', 'shadowed-unit.py', 'import-shadow-unit.py', 'from-shadow-unit.py', 'exit-before-unit.py', 'magic-name-unit.py'): assert rows['tests/' + name]['class'] is None
         assert rows['tests/plain.py']['class'] == 'keep'
         assert rows['tests/mention.txt']['class'] is None and rows['tests/mention.txt']['secondary']['unreviewed_readers']
         for path in ('tests/package/lakefile.toml', 'tests/package/src/Package.lean', 'tests/package/src/Package/Leaf.lean'): assert rows[path]['class'] == 'keep', path
@@ -1131,6 +1510,9 @@ def self_test():
             assert rows[p]['class'] is None, p
         assert rows['tests/evidence.json']['class'] == 'evidence'
         assert rows['tests/history-empty.log']['class'] == 'evidence'
+        assert rows['tests/bound-history.log']['class'] == 'evidence'
+        assert '/commands/0' in rows['tests/bound-history.log']['reason']
+        assert rows['tests/not-an-input.log']['class'] is None
         assert rows['tests/history-receipts.json']['class'] == 'evidence'
         assert all(r['recovery'] for r in rows.values())
         for path in ('tests/space name.txt', 'tests/α.txt', 'tests/line\nname.txt'):
@@ -1184,9 +1566,33 @@ def self_test():
         assert Repository(merge_root, 'HEAD').pins()['tests/restored.txt']['last_touch_commit'] == merged_ref
         git(root, '-c', 'user.name=Control', '-c', 'user.email=control@example.invalid', 'commit', '--allow-empty', '-qm', 'advance without touching inputs')
         newer = inventory(Repository(root, 'HEAD'), catalog)
+        later_rows = {r['path']: r for r in newer['records']}
+        entry = later_rows['tests/pass.py']['runner_chain']['entry']
+        assert later_rows['tests/pass.py']['class'] == 'keep' and entry['source_only']
+        assert entry['validation_at_measured_revision']['status'] == 'unavailable'
+        assert entry['command'] == 'python3 -B tests/pass.py'
+        assert later_rows['tests/callback.txt']['class'] is None  # old passing reproducer/read receives no current credit
+        source_graph = Graph(Repository(root, 'HEAD'))
+        source_graph.root('tests/pass.py', 'committed standalone runner', 'python3 -B tests/pass.py', 'tests/pass.py', 1)
+        source_graph.roots['tests/pass.py']['source_only'] = True
+        source_graph.edge('tests/pass.py', 'tests/cycle.py', 1, 'unrelated shared invocation', kind='executes')
+        source_graph.edge('tests/cycle.py', 'tests/callback.txt', 1, 'unrelated shared read')
+        assert 'tests/cycle.py' not in source_graph.chains() and 'tests/callback.txt' not in source_graph.chains()
         try: verify(expected, newer)
         except ValueError as error: assert 'revision' in str(error)
         else: raise AssertionError('genuine stale revision accepted')
+        git(root, 'rm', '-q', '--', 'tests/generated.txt')
+        git(root, '-c', 'user.name=Control', '-c', 'user.email=control@example.invalid', 'commit', '-qm', 'remove old fixture only')
+        removed_repo = Repository(root, 'HEAD')
+        removed = {r['path']: r for r in inventory(removed_repo, catalog)['records']}
+        assert removed['tests/plain.py']['class'] == 'keep'
+        assert removed['tests/plain.py']['runner_chain']['entry']['source_only']
+        assert 'tests/generated.txt' not in removed
+        fabricated_demonstration = copy.deepcopy(catalog)
+        fabricated_demonstration['standalone'][0]['input_revision'] = '0' * 40
+        try: inventory(removed_repo, fabricated_demonstration)
+        except ValueError as error: assert 'historical runner' in str(error)
+        else: raise AssertionError('fabricated historical demonstration revision accepted')
         shallow = root / 'shallow-clone'
         git(root, 'clone', '-q', '--depth=1', root.as_uri(), str(shallow))
         shallow_repo = Repository(shallow, 'HEAD')
@@ -1194,6 +1600,8 @@ def self_test():
         assert not shell_operands('echo python3 tests/mention.py')
         assert not shell_operands('echo "node --test tests/mention.py"')
         assert shell_operands('lake env python3 -B tests/live.py') == ['tests/live.py']
+    nonpassing_boundary_controls()
+    passing_scan_boundary_controls()
     print('self-test: enumeration, recovery, shallow history, shell, standalone pass/fail, exact generation, consumed-generated data and tamper and reviewed-orphan controls PASS')
 
 

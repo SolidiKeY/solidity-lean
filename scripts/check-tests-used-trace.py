@@ -175,7 +175,7 @@ def install_hook():
                         cached = (code, code_fingerprint(code)); fingerprints[id(code)] = cached
                     if source in untrusted_sources or cached[1] not in manifest[source].get('code_hashes', ()):
                         return
-                    frames.append({'path': source, 'line': frame.f_lineno})
+                    frames.append({'path': source, 'line': frame.f_lineno, 'code_qualname': code.co_qualname, 'code_firstlineno': code.co_firstlineno})
                 elif frame.f_code.co_filename in ('<string>', '<stdin>'):
                     return
                 elif frame.f_code.co_filename.startswith(root + os.sep):
@@ -246,13 +246,13 @@ def run(command, scratch, manifest, output, timeout=30):
         return receipt
 
 
-def observed_routes(receipt, scratch, manifest, runner):
+def _observed_routes(receipt, scratch, manifest, runner, nonpassing=False):
     """Match each actual read to its audited open by native thread and fd.
 
     Every mutated path and directory descendant is excluded, even if restored.
     Unknown descriptor inheritance and incomplete syscall records get no credit.
     """
-    if receipt['exit'] or receipt['timeout']: return []
+    if receipt['timeout'] or (receipt['exit'] and not nonpassing): return []
     if receipt['input_revision'] != manifest['measured_revision'] or receipt['command'] != ['python3', '-B', runner]:
         raise ValueError('trace invocation differs from validated runner')
     scratch_path = Path(scratch).resolve(); scratch = str(scratch_path)
@@ -395,12 +395,67 @@ def observed_routes(receipt, scratch, manifest, runner):
             if any(hashlib.sha256((scratch_path / p).read_bytes()).hexdigest() != files[p]['sha256'] for p in relevant): continue
         except OSError:
             continue
-        route = {'runner': 'validated:' + runner, 'input_revision': manifest['measured_revision'],
-                 'frames': [{'path': f['path'], 'blob': files[f['path']]['blob'], 'line': f['line']} for f in frames],
+        route = {'runner': ('nonpassing:' if nonpassing else 'validated:') + runner, 'input_revision': manifest['measured_revision'],
+                 'frames': [{'path': f['path'], 'blob': files[f['path']]['blob'], 'line': f['line'],
+                             **({'code_qualname': f.get('code_qualname'), 'code_firstlineno': f.get('code_firstlineno')} if nonpassing else {})} for f in frames],
                  'target': target, 'target_blob': files[target]['blob'],
-                 'operation': 'validated Python read of measured bytes'}
+                 'operation': ('Observed fixture read during nonpassing unittest' if nonpassing else 'validated Python read of measured bytes')}
         routes[json.dumps(route, sort_keys=True, separators=(',', ':'))] = route
     return [routes[k] for k in sorted(routes)]
+
+
+
+def observed_routes(receipt, scratch, manifest, runner):
+    """Passing traces only; failures never receive passing-runner credit."""
+    return _observed_routes(receipt, scratch, manifest, runner)
+
+
+def observed_test_failure_routes(receipt, normal, scratch, manifest, runner, instrumentation_source=None):
+    """Separate observations from an ordinary failed unittest, never a pass.
+
+    The normal run and trace must exhibit the same unittest failure diagnostics.
+    Bootstrap-only failures and unentered methods do not establish fixture use.
+    Callers must separately review fixture roles; this only establishes reads.
+    Raw receipts and immutable instrumentation source stay in private evidence.
+    """
+    if (receipt.get('timeout') is not False or normal.get('timeout') is not False
+            or type(receipt.get('exit')) is not int or receipt['exit'] not in range(1, 124)
+            or type(normal.get('exit')) is not int or normal.get('exit') != receipt['exit'] or normal.get('revision') != manifest['measured_revision']
+            or normal.get('command') != receipt.get('command')):
+        return []
+    import ast
+    import importlib.util
+    import types
+    source = Path(instrumentation_source) if instrumentation_source else Path(__file__)
+    raw = source.read_bytes()
+    if hashlib.sha256(raw).hexdigest() != receipt.get('instrumentation_source_sha256'):
+        raise ValueError('nonpassing trace instrumentation source mismatch')
+    if raw != Path(__file__).read_bytes():
+        raise ValueError('nonpassing trace requires the complete reviewed instrumentation source')
+    spec = importlib.util.spec_from_file_location('tests_used_failure_roles', Path(__file__).with_name('check-tests-used.py'))
+    rules = importlib.util.module_from_spec(spec); spec.loader.exec_module(rules)
+    source_bytes = (Path(scratch) / runner).read_bytes()
+    if hashlib.sha256(source_bytes).hexdigest() != manifest['files'][runner]['sha256']: return []
+    repo = types.SimpleNamespace(texts={runner: source_bytes.decode()},
+        tree={runner: ('100644', 'blob', manifest['files'][runner]['blob'])}, ref=manifest['measured_revision'])
+    declaration = rules.declared_unittest(repo, runner)
+    if declaration is None: return []
+    def diagnostic(path):
+        text = Path(path).read_text(errors='replace')
+        if not re.search(r'^Ran [0-9]+ tests? in [0-9.]+s$', text, re.M): return None
+        start = re.search(r'^(?:FAIL|ERROR): [^\n]+$', text, re.M)
+        if start is None or not re.search(r'^FAILED \([^\n]+\)$', text, re.M): return None
+        # Preserve test IDs, source/line traceback locations and full assertions.
+        # Only framework elapsed time and freshly allocated temporary names vary.
+        section = text[start.start():]
+        section = re.sub(r'^(Ran [0-9]+ tests? in )[0-9.]+s$', r'\1<elapsed>s', section, flags=re.M)
+        return re.sub(r'/tmp/(?:tmp|x1-audit-)[^/\s\']+', '<temporary>', section)
+    ordinary = diagnostic(normal['log']); traced = diagnostic(receipt['stdout'])
+    if ordinary is None or ordinary != traced: return []
+    routes = _observed_routes(receipt, scratch, manifest, runner, nonpassing=True)
+    return [r for r in routes if any(frame['path'] == runner and any(
+        context['first'] <= frame['line'] <= context['last'] and context['qualname'] == frame.get('code_qualname')
+        and context['code_firstlineno'] == frame.get('code_firstlineno') for context in declaration['test_contexts']) for frame in r['frames'])]
 
 
 def self_test():
@@ -414,6 +469,13 @@ def self_test():
             'tests/native.py': 'import helper, subprocess\nhelper.open_without_read()\nsubprocess.run(["cat", "tests/input/data.txt"], check=True)\n',
             'tests/replace.py': 'import os, shutil\nfrom pathlib import Path\nos.rename("tests/input", "tests/saved")\nPath("tests/input").mkdir()\nPath("tests/input/data.txt").write_text("changed\\n")\nPath("tests/input/data.txt").read_text()\nshutil.rmtree("tests/input")\nos.rename("tests/saved", "tests/input")\n',
         }
+        sources['tests/failed_unit.py'] = 'import unittest\nfrom pathlib import Path\nclass T(unittest.TestCase):\n def test_input(self):\n  self.assertEqual(Path("tests/input/data.txt").read_text(), "expected")\nif __name__ == "__main__": unittest.main()\n'
+        sources['tests/bootstrap_unit.py'] = 'import unittest\nfrom pathlib import Path\nPath("tests/input/data.txt").read_text()\nassert False, "bootstrap"\nclass T(unittest.TestCase):\n def test_input(self): pass\nif __name__ == "__main__": unittest.main()\n'
+        sources['tests/failed_plain.py'] = 'from pathlib import Path\nPath("tests/input/data.txt").read_text()\nassert False\n'
+        sources['tests/failed_mutation.py'] = 'import unittest\nfrom pathlib import Path\nclass T(unittest.TestCase):\n def test_input(self):\n  p=Path("tests/input/data.txt"); value=p.read_bytes(); p.write_bytes(b"changed"); p.write_bytes(value)\n  self.assertFalse(True)\nif __name__ == "__main__": unittest.main()\n'
+        sources['tests/escaped_unit.py'] = 'import unittest\nfrom pathlib import Path\nclass T(unittest.TestCase):\n def test_factory(self):\n  def escaped():\n   return Path("tests/input/data.txt").read_text()\n  return escaped\n def test_failure(self): self.assertFalse(True)\nT("test_factory").test_factory()()\nif __name__ == "__main__": unittest.main()\n'
+        sources['tests/failure_helper.py'] = 'from pathlib import Path\ndef read(): return Path("tests/input/data.txt").read_text()\n'
+        sources['tests/mutated_helper_unit.py'] = 'import unittest\nfrom pathlib import Path\nclass T(unittest.TestCase):\n def test_input(self):\n  p=Path(__file__).with_name("failure_helper.py"); original=p.read_text(); p.write_text(original + "# changed\\n")\n  import failure_helper\n  value=failure_helper.read(); p.write_text(original)\n  self.assertFalse(True)\nif __name__ == "__main__": unittest.main()\n'
         sources['tests/input/twin.txt'] = 'measured\n'
         sources['tests/input/empty.txt'] = ''
         sources['tests/input/empty-unread.txt'] = ''
@@ -440,6 +502,42 @@ def self_test():
             'blob': git('rev-parse', revision + ':' + p).decode().strip(),
             'sha256': hashlib.sha256((root / p).read_bytes()).hexdigest()} for p in sources}}
         manifest_path = base / 'manifest.json'; manifest_path.write_text(json.dumps(manifest))
+        for scenario in ('failed_unit', 'bootstrap_unit', 'failed_plain', 'failed_mutation', 'escaped_unit', 'mutated_helper_unit'):
+            runner = 'tests/' + scenario + '.py'; command = ['python3', '-B', runner]
+            normal_path = base / (scenario + '.normal.log')
+            with normal_path.open('wb') as stream:
+                process = subprocess.run(command, cwd=root, stdout=stream, stderr=subprocess.STDOUT, timeout=15,
+                                         env=dict(os.environ, PYTHONDONTWRITEBYTECODE='1'))
+            normal = {'command': command, 'revision': revision, 'exit': process.returncode, 'timeout': False, 'log': str(normal_path)}
+            assert normal['exit'] == 1
+            receipt = run(command, root, manifest_path, base / (scenario + '-trace'), 15)
+            assert receipt['exit'] == 1 and not receipt['timeout']
+            assert not observed_routes(receipt, root, manifest, runner)
+            routes = observed_test_failure_routes(receipt, normal, root, manifest, runner)
+            targets = {r['target'] for r in routes}
+            assert ('tests/input/data.txt' in targets) == (scenario == 'failed_unit'), (scenario, targets)
+            if scenario == 'mutated_helper_unit': assert not routes
+            if scenario == 'failed_unit':
+                assert all(r['operation'] == 'Observed fixture read during nonpassing unittest' and r['runner'] == 'nonpassing:' + runner for r in routes)
+                for invalid in (dict(receipt, timeout=True), dict(receipt, exit=143), dict(receipt, exit=0)):
+                    assert not observed_test_failure_routes(invalid, normal, root, manifest, runner)
+                assert not observed_test_failure_routes(receipt, dict(normal, exit=True), root, manifest, runner)
+                changed_log = base / 'instrumentation-only.log'
+                changed_log.write_text(normal_path.read_text().replace('AssertionError:', 'RuntimeError: instrumentation-only '))
+                assert not observed_test_failure_routes(dict(receipt, stdout=str(changed_log)), normal, root, manifest, runner)
+                try: observed_test_failure_routes(dict(receipt, instrumentation_source_sha256='0'*64), normal, root, manifest, runner)
+                except ValueError: pass
+                else: raise AssertionError('fabricated instrumentation binding accepted')
+                altered = base / 'altered-instrumentation.py'; altered.write_bytes(Path(__file__).read_bytes() + b'\nsubprocess = None\n')
+                forged = dict(receipt, instrumentation_source_sha256=hashlib.sha256(altered.read_bytes()).hexdigest())
+                try: observed_test_failure_routes(forged, normal, root, manifest, runner, altered)
+                except ValueError: pass
+                else: raise AssertionError('self-consistent altered instrumentation accepted')
+                for old, replacement in [('test_input (__main__.T.test_input)', 'test_other (__main__.T.test_other)'), ('line 5, in test_input', 'line 4, in test_input')]:
+                    changed_log.write_text(normal_path.read_text().replace(old, replacement))
+                    assert changed_log.read_text() != normal_path.read_text()
+                    assert not observed_test_failure_routes(dict(receipt, stdout=str(changed_log)), normal, root, manifest, runner)
+
         for scenario in ('direct', 'link', 'fake', 'native', 'replace', 'historical', 'historical_read', 'empty', 'empty_zero', 'empty_native'):
             runner = 'tests/' + scenario + '.py'
             receipt = run(['python3', '-B', runner], root, manifest_path, base / scenario, 15)
