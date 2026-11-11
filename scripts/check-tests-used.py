@@ -14,7 +14,10 @@ Run recorded generators/reproducers only in disposable committed-byte copies;
 their commands can write fixed paths. Normal write/check never executes them.
 
 The use graph is deliberately an under-approximation: explicit reviewed routes,
-Lean imports/solc_imports and validated Python reads of measured bytes.
+Lean imports/solc_imports and observed Python reads of measured bytes.
+Separately audited nonpassing unittest routes retain failure status and grant
+no passing-reproducer credit; actual test/setup method identity is required.
+Unreviewed unittest data reads remain unresolved even when the test passes.
 Unchanged demonstrated committed runners may be source-only roots with
 unavailable current validation, without fixture/child or passing-reproducer credit.
 Text matches are search candidates, never invocation edges. Shell expansion,
@@ -471,7 +474,9 @@ def validated_routes(graph, catalog):
         required = {'path', 'input_revision', 'source_blob', 'command', 'kind'}
         if entry.get('kind') == 'manual-reproducer': required.add('documentation')
         if entry.get('kind') == 'runnable-entrypoint': required.update(('entry_line', 'purpose', 'input_scope', 'other_reads'))
-        if set(entry) != required:
+        if entry.get('kind') == 'nonpassing-unittest': required.update(('purpose', 'input_scope'))
+        allowed = (required, required | {'purpose', 'input_scope', 'other_reads'}) if entry.get('kind') in ('unittest', 'node-test') else (required,)
+        if set(entry) not in allowed:
             raise ValueError('invalid standalone definition')
         p = entry['path']
         historical_runner = entry['input_revision'] != repo.ref
@@ -483,8 +488,25 @@ def validated_routes(graph, catalog):
         command = entry['command']
         if entry['kind'] != 'manual-reproducer' and command not in (['python3', '-B', p], ['node', '--test', p]):
             raise ValueError('unsupported standalone invocation: ' + p)
-        if entry['kind'] not in ('unittest', 'node-test', 'manual-reproducer', 'runnable-entrypoint'):
+        if entry['kind'] not in ('unittest', 'node-test', 'manual-reproducer', 'runnable-entrypoint', 'nonpassing-unittest'):
             raise ValueError('unsupported standalone kind')
+        if entry['kind'] == 'nonpassing-unittest':
+            declaration = declared_unittest(repo, p)
+            if declaration is None or command != ['python3', '-B', p]:
+                raise ValueError('nonpassing source is not a declared unittest runner')
+            scopes = entry['input_scope']
+            if (not isinstance(entry['purpose'], str) or not entry['purpose'].strip()
+                    or not isinstance(scopes, list) or not all(isinstance(v, str) and v not in SCOPE
+                        and (v in repo.tree or v.endswith('/') and any(q.startswith(v) for q in repo.tree)) for v in scopes)):
+                raise ValueError('nonpassing test lacks reviewed fixture scope')
+            identity = 'nonpassing:' + p
+            graph.root(p, 'nonpassing committed unittest runner', shlex.join(command), p,
+                       declaration['main_line'], root_id=identity)
+            graph.roots[identity].update({'source_only': True, 'source_blob': entry['source_blob'],
+                'role_provenance': declaration, 'purpose': entry['purpose'], 'data_use_scope': scopes,
+                'other_reads': 'unresolved', 'validation_at_measured_revision': {'status': 'failed',
+                    'command': command, 'reason': 'Normal run failed; only separately observed test-context reads qualify. No passing-reproducer credit.'}})
+            continue
         if entry['kind'] == 'unittest':
             tree = ast.parse(repo.texts[p])
             if command[0] != 'python3' or not any(isinstance(n, ast.Call) and ast.unparse(n.func) == 'unittest.main' for n in ast.walk(tree)):
@@ -541,29 +563,50 @@ def validated_routes(graph, catalog):
         graph.roots['validated:' + p].update({'runner_kind': entry['kind'], 'source_blob': entry['source_blob']})
         if entry['kind'] == 'runnable-entrypoint':
             graph.roots['validated:' + p].update({'purpose': entry['purpose'], 'data_use_scope': entry['input_scope'], 'other_reads': entry['other_reads']})
+        if entry['kind'] in ('unittest', 'node-test'):
+            if 'input_scope' in entry:
+                scopes = entry['input_scope']
+                if (not isinstance(entry['purpose'], str) or not entry['purpose'].strip()
+                        or entry['other_reads'] not in ('unresolved', 'secondary')
+                        or not isinstance(scopes, list) or not all(isinstance(v, str) and v not in SCOPE
+                            and (v in repo.tree or v.endswith('/') and any(q.startswith(v) for q in repo.tree)) for v in scopes)):
+                    raise ValueError('invalid reviewed unittest fixture scope')
+                purpose = entry['purpose']; other = entry['other_reads']
+            else:
+                scopes = []; other = 'unresolved'
+                purpose = 'Fixture roles not reviewed; passing test status and IO alone do not establish data eligibility.'
+            graph.roots['validated:' + p].update({'purpose': purpose, 'data_use_scope': scopes, 'other_reads': other})
         if entry['kind'] == 'manual-reproducer': graph.roots['validated:' + p]['documentation'] = entry['documentation']
     for route in catalog['reads']:
         if set(route) != {'runner', 'input_revision', 'frames', 'target', 'target_blob', 'operation'}:
             raise ValueError('invalid validated read route')
         if route['input_revision'] != repo.ref: continue
         original = route['runner']
-        if original not in graph.roots or graph.roots[original]['kind'] != 'validated standalone runner':
+        if original not in graph.roots or graph.roots[original]['kind'] not in ('validated standalone runner', 'nonpassing committed unittest runner'):
             raise ValueError('validated read has no validated runner')
         target = route['target']
         if target not in repo.tree or repo.tree[target][2] != route['target_blob']:
             raise ValueError('validated read target mismatch')
-        if route['operation'] != 'validated Python read of measured bytes':
+        nonpassing = graph.roots[original]['kind'] == 'nonpassing committed unittest runner'
+        operation = 'Observed fixture read during nonpassing unittest' if nonpassing else 'validated Python read of measured bytes'
+        if route['operation'] != operation:
             raise ValueError('unsupported validated read operation')
         frames = route['frames']
         if not isinstance(frames, list) or not frames or frames[0].get('path') != graph.roots[original]['path']:
             raise ValueError('validated read route does not start at its runner')
         for frame in frames:
-            if set(frame) != {'path', 'blob', 'line'}: raise ValueError('invalid read stack frame')
+            required_frame = {'path', 'blob', 'line'} | ({'code_qualname', 'code_firstlineno'} if nonpassing else set())
+            if set(frame) != required_frame: raise ValueError('invalid read stack frame')
+            if nonpassing and (not isinstance(frame['code_qualname'], str) or type(frame['code_firstlineno']) is not int or frame['code_firstlineno'] < 1):
+                raise ValueError('invalid nonpassing frame code identity')
             source = frame['path']
             if source not in repo.tree or repo.tree[source][2] != frame['blob']:
                 raise ValueError('validated read source mismatch')
             if not isinstance(frame['line'], int) or not 1 <= frame['line'] <= len(repo.texts.get(source, '').splitlines()):
                 raise ValueError('validated read location mismatch')
+        if nonpassing and not any(frame['path'] == graph.roots[original]['path'] and
+                any(c['first'] <= frame['line'] <= c['last'] and c['qualname'] == frame['code_qualname'] and c['code_firstlineno'] == frame['code_firstlineno'] for c in graph.roots[original]['role_provenance']['test_contexts']) for frame in frames):
+            raise ValueError('nonpassing read lacks an entered test or setup context')
         if any(excluded(f['path']) for f in frames) or excluded(target): continue
         scopes = graph.roots[original].get('data_use_scope')
         eligible = scopes is None or any(target == scope or scope.endswith('/') and target.startswith(scope) for scope in scopes)
@@ -578,7 +621,7 @@ def validated_routes(graph, catalog):
         for caller, callee in zip(frames, frames[1:]):
             chain = {**chain, 'edges': chain['edges'] + [{
                 'source': caller['path'], 'target': callee['path'],
-                'line': caller['line'], 'operation': 'validated Python call stack',
+                'line': caller['line'], 'operation': ('Observed nonpassing unittest call stack' if nonpassing else 'validated Python call stack'),
                 'kind': 'executes', 'validated_for': identity}]}
             graph.observed.append((callee['path'], chain))
         reader = frames[-1]
@@ -852,93 +895,100 @@ def historical_outputs(repo):
     return roles
 
 
-def add_declared_test_runners(graph):
-    """H490 source-only roots from explicit unittest declarations.
+def declared_unittest(repo, path):
+    """Recognize a committed runner role without executing it or granting reads."""
+    if path not in repo.texts or not path.endswith('.py') or repo.tree[path][0] not in ('100644', '100755'): return None
+    text = repo.texts[path]
+    try: tree = ast.parse(text)
+    except (SyntaxError, ValueError, RecursionError): return None
+    modules = set(); cases = set(); mains = set()
+    for node in tree.body:
+        if isinstance(node, ast.Import):
+            modules.update(a.asname or 'unittest' for a in node.names
+                           if a.name == 'unittest' or a.name.startswith('unittest.') and a.asname is None)
+        elif isinstance(node, ast.ImportFrom) and node.module == 'unittest' and not node.level:
+            cases.update(a.asname or a.name for a in node.names if a.name == 'TestCase')
+            mains.update(a.asname or a.name for a in node.names if a.name == 'main')
+    if not modules and not (cases and mains): return None
+    bindings = modules | cases | mains | {'__name__'}
+    shadowed = any(isinstance(n, ast.Name) and isinstance(n.ctx, (ast.Store, ast.Del)) and n.id in bindings
+                   or isinstance(n, (ast.FunctionDef, ast.AsyncFunctionDef, ast.ClassDef)) and n.name in bindings
+                   or isinstance(n, ast.Attribute) and isinstance(n.ctx, (ast.Store, ast.Del))
+                      and isinstance(n.value, ast.Name) and n.value.id in modules and n.attr in ('main', 'TestCase')
+                   for n in ast.walk(tree))
+    for node in ast.walk(tree):
+        if isinstance(node, ast.Import):
+            for alias in node.names:
+                bound = alias.asname or alias.name.split('.')[0]
+                if bound == '__name__': shadowed = True
+                if bound in bindings and not (bound in modules and
+                        (alias.name == 'unittest' or alias.name.startswith('unittest.') and alias.asname is None)):
+                    shadowed = True
+        elif isinstance(node, ast.ImportFrom):
+            for alias in node.names:
+                bound = alias.asname or alias.name
+                if bound == '__name__': shadowed = True
+                if alias.name == '*': shadowed = True
+                if bound in bindings and not (node.module == 'unittest' and not node.level
+                        and (alias.name == 'TestCase' and bound in cases or alias.name == 'main' and bound in mains)):
+                    shadowed = True
+    if modules & cases or modules & mains or cases & mains: shadowed = True
+    if shadowed: return None
+    def terminal(statement):
+        if isinstance(statement, ast.Raise): return True
+        if isinstance(statement, ast.Expr) and isinstance(statement.value, ast.Call):
+            func = statement.value.func
+            return (isinstance(func, ast.Name) and func.id in ('exit', 'quit')
+                    or isinstance(func, ast.Attribute) and func.attr in ('exit', '_exit'))
+        return False
+    def testcase(base):
+        return (isinstance(base, ast.Name) and base.id in cases
+                or isinstance(base, ast.Attribute) and base.attr == 'TestCase'
+                and isinstance(base.value, ast.Name) and base.value.id in modules)
+    classes = [n for n in tree.body if isinstance(n, ast.ClassDef) and any(testcase(b) for b in n.bases)
+               and any(isinstance(m, (ast.FunctionDef, ast.AsyncFunctionDef)) and m.name.startswith('test_') for m in n.body)]
+    if not classes: return None
+    calls = []
+    for index, node in enumerate(tree.body):
+        if not isinstance(node, ast.If) or not isinstance(node.test, ast.Compare): continue
+        test = node.test
+        if len(test.ops) != 1 or not isinstance(test.ops[0], ast.Eq) or len(test.comparators) != 1: continue
+        pair = (test.left, test.comparators[0])
+        if not (any(isinstance(n, ast.Name) and n.id == '__name__' for n in pair)
+                and any(isinstance(n, ast.Constant) and n.value == '__main__' for n in pair)): continue
+        if any(terminal(n) for n in tree.body[:index]): continue
+        for position, statement in enumerate(node.body):
+            if not isinstance(statement, ast.Expr) or not isinstance(statement.value, ast.Call): continue
+            call = statement.value; func = call.func
+            if not (isinstance(func, ast.Name) and func.id in mains or isinstance(func, ast.Attribute)
+                    and func.attr == 'main' and isinstance(func.value, ast.Name) and func.value.id in modules): continue
+            if any(terminal(n) for n in node.body[:position]): continue
+            calls.append(call)
+    if not calls: return None
+    try: compile(text, path, 'exec', dont_inherit=True)
+    except (SyntaxError, ValueError, RecursionError, OverflowError): return None
+    methods = [m for c in classes for m in c.body if isinstance(m, (ast.FunctionDef, ast.AsyncFunctionDef))
+               and (m.name.startswith('test_') or m.name in ('setUp', 'tearDown', 'setUpClass', 'tearDownClass'))]
+    return {'kind': 'unittest declaration and explicit main entry', 'revision': repo.ref,
+            'class_lines': [c.lineno for c in classes], 'main_line': calls[0].lineno,
+            'test_contexts': [{'name': m.name, 'qualname': c.name + '.' + m.name,
+                'code_firstlineno': min([m.lineno] + [d.lineno for d in m.decorator_list]),
+                'first': m.body[0].lineno, 'last': m.end_lineno} for c in classes for m in c.body if m in methods]}
 
-    Require an unshadowed unittest import, a real module-level TestCase with
-    test methods, and a direct unittest.main call under the literal __main__
-    guard. Text examples, dead guards, plain failing scripts and helpers are
-    not roots. This demonstrates the committed runner ROLE, never a current
-    pass or any fixture/child use. No code is executed.
-    """
+
+def add_declared_test_runners(graph):
+    """H490 source-only roots; no fixture, child or passing-reproducer credit."""
     repo = graph.repo
     existing = {v['path'] for v in graph.roots.values()}
-    for path, text in sorted(repo.texts.items()):
-        if not path.endswith('.py') or path in existing or repo.tree[path][0] not in ('100644', '100755'): continue
-        try: tree = ast.parse(text)
-        except (SyntaxError, ValueError, RecursionError): continue
-        modules = set(); cases = set(); mains = set()
-        for node in tree.body:
-            if isinstance(node, ast.Import):
-                modules.update(a.asname or 'unittest' for a in node.names
-                               if a.name == 'unittest' or a.name.startswith('unittest.') and a.asname is None)
-            elif isinstance(node, ast.ImportFrom) and node.module == 'unittest' and not node.level:
-                cases.update(a.asname or a.name for a in node.names if a.name == 'TestCase')
-                mains.update(a.asname or a.name for a in node.names if a.name == 'main')
-        if not modules and not (cases and mains): continue
-        bindings = modules | cases | mains | {'__name__'}
-        shadowed = any(isinstance(n, ast.Name) and isinstance(n.ctx, (ast.Store, ast.Del)) and n.id in bindings
-                       or isinstance(n, (ast.FunctionDef, ast.AsyncFunctionDef, ast.ClassDef)) and n.name in bindings
-                       or isinstance(n, ast.Attribute) and isinstance(n.ctx, (ast.Store, ast.Del))
-                          and isinstance(n.value, ast.Name) and n.value.id in modules and n.attr in ('main', 'TestCase')
-                       for n in ast.walk(tree))
-        for node in ast.walk(tree):
-            if isinstance(node, ast.Import):
-                for alias in node.names:
-                    bound = alias.asname or alias.name.split('.')[0]
-                    if bound == '__name__': shadowed = True
-                    if bound in bindings and not (bound in modules and
-                            (alias.name == 'unittest' or alias.name.startswith('unittest.') and alias.asname is None)):
-                        shadowed = True
-            elif isinstance(node, ast.ImportFrom):
-                for alias in node.names:
-                    bound = alias.asname or alias.name
-                    if bound == '__name__': shadowed = True
-                    if alias.name == '*': shadowed = True
-                    if bound in bindings and not (node.module == 'unittest' and not node.level
-                            and (alias.name == 'TestCase' and bound in cases or alias.name == 'main' and bound in mains)):
-                        shadowed = True
-        if modules & cases or modules & mains or cases & mains: shadowed = True
-        if shadowed: continue
-        def terminal(statement):
-            if isinstance(statement, ast.Raise): return True
-            if isinstance(statement, ast.Expr) and isinstance(statement.value, ast.Call):
-                func = statement.value.func
-                return (isinstance(func, ast.Name) and func.id in ('exit', 'quit')
-                        or isinstance(func, ast.Attribute) and func.attr in ('exit', '_exit'))
-            return False
-        def testcase(base):
-            return (isinstance(base, ast.Name) and base.id in cases
-                    or isinstance(base, ast.Attribute) and base.attr == 'TestCase'
-                    and isinstance(base.value, ast.Name) and base.value.id in modules)
-        classes = [n for n in tree.body if isinstance(n, ast.ClassDef) and any(testcase(b) for b in n.bases)
-                   and any(isinstance(m, (ast.FunctionDef, ast.AsyncFunctionDef)) and m.name.startswith('test_') for m in n.body)]
-        if not classes: continue
-        calls = []
-        for index, node in enumerate(tree.body):
-            if not isinstance(node, ast.If) or not isinstance(node.test, ast.Compare): continue
-            test = node.test
-            if len(test.ops) != 1 or not isinstance(test.ops[0], ast.Eq) or len(test.comparators) != 1: continue
-            pair = (test.left, test.comparators[0])
-            if not (any(isinstance(n, ast.Name) and n.id == '__name__' for n in pair)
-                    and any(isinstance(n, ast.Constant) and n.value == '__main__' for n in pair)): continue
-            if any(terminal(n) for n in tree.body[:index]): continue
-            for position, statement in enumerate(node.body):
-                if not isinstance(statement, ast.Expr) or not isinstance(statement.value, ast.Call): continue
-                call = statement.value; func = call.func
-                if not (isinstance(func, ast.Name) and func.id in mains or isinstance(func, ast.Attribute)
-                        and func.attr == 'main' and isinstance(func.value, ast.Name) and func.value.id in modules): continue
-                if any(terminal(n) for n in node.body[:position]): continue
-                calls.append(call)
-        if not calls: continue
-        try: compile(text, path, 'exec', dont_inherit=True)
-        except (SyntaxError, ValueError, RecursionError, OverflowError): continue
+    for path in sorted(repo.texts):
+        if path in existing: continue
+        declaration = declared_unittest(repo, path)
+        if declaration is None: continue
         identity = 'committed:' + path
         graph.root(path, 'committed standalone test runner', shlex.join(['python3', '-B', path]), path,
-                   calls[0].lineno, root_id=identity)
+                   declaration['main_line'], root_id=identity)
         graph.roots[identity].update({'source_only': True, 'source_blob': repo.tree[path][2],
-            'role_provenance': {'kind': 'unittest declaration and explicit main entry', 'revision': repo.ref,
-                'class_lines': [c.lineno for c in classes], 'main_line': calls[0].lineno},
+            'role_provenance': declaration,
             'validation_at_measured_revision': {'status': 'unavailable', 'command': ['python3', '-B', path],
                 'reason': 'Committed runner role audited from syntax; command not executed by inventory.'}})
 
@@ -1006,7 +1056,15 @@ def inventory(repo, catalog=None):
     # Search coverage is explicitly broader than the certified use graph. A
     # textual hit is negative-evidence context, not a consumer certification.
     names = collections.defaultdict(list)
-    for p in repo.paths: names[posixpath.basename(p)].append(p)
+    for p in repo.paths:
+        base = posixpath.basename(p)
+        names[base].append(p)
+        stem, suffix = posixpath.splitext(base)
+        if suffix in ('.py', '.lean', '.mjs', '.js', '.cjs'):
+            # Module imports omit source extensions. This broadens SEARCH only;
+            # it never certifies invocation, consumption or orphan eligibility.
+            for spelling in {stem, p[:-len(suffix)].replace('/', '.')}:
+                if spelling != base: names[spelling].append(p)
     candidates = collections.defaultdict(list)
     candidate_sources = collections.defaultdict(set)  # eligibility is never display-capped
     # Single indexed scan rather than one repository scan per inventoried file.
@@ -1070,7 +1128,7 @@ def inventory(repo, catalog=None):
             if p in orphan_reviews and candidates[p]: unresolved.append('UNSUPPORTED_ORPHAN_REVIEW: candidate matches remain unresolved')
         if p in graph.uncertain_reads and classification != 'keep':
             classification = None
-            reason = 'A passing entry point read this object; fixture-specific versus secondary-scan eligibility needs review. Independent historical/generated properties are retained.'
+            reason = 'An observed entry point read this object; fixture-specific versus secondary-scan eligibility needs review. Independent historical/generated properties are retained.'
             unresolved.append('UNRESOLVED_READ_ROLE: observed read eligibility is unreviewed; this is not established non-use')
         if recovery is None:
             unresolved.append(repo.pin_limitations.get(p, 'UNVERIFIABLE: ' + ('shallow history boundary prevents establishing last-touch provenance' if repo.shallow else 'no historical change introducing the measured object was recovered')))
@@ -1087,7 +1145,7 @@ def inventory(repo, catalog=None):
             'universe': list(SCOPE), 'policy_scans': graph.policy_scans, 'analysis_gaps': sorted(set(graph.notes)), 'totals': {**counts, 'paths': len(records),
                                               'unresolved': sum(bool(r['unresolved']) for r in records)},
             'search_coverage': {'inputs': 'All committed non-NUL blobs, excluding classifier and inventory outputs.',
-                                'candidates': 'Basename token search plus exact unusual-name and escaped-literal search, with source line locations; capped at eight samples per path.',
+                                'candidates': 'Basename/module-stem/module-name token search plus exact unusual-name and escaped-literal search, with source line locations; capped at eight samples per path.',
                                 'limitations': ['Under-approximate use graph; no automatic script execution.',
                                                 'Unresolved dynamic shell/Python/Node dispatch prevents a complete classification.',
                                                 'No orphan or regenerable classification inferred from an absent static edge.',
@@ -1117,6 +1175,95 @@ def verify(actual, expected, require_complete=True):
         raise ValueError(f"incomplete classification: {expected['totals']['unresolved']} unresolved paths")
     if sum(expected['totals'][c] for c in CLASSES) != len(wanted):
         if require_complete: raise ValueError('four-class totals do not equal universe')
+
+
+
+def nonpassing_boundary_controls():
+    import copy
+    with tempfile.TemporaryDirectory(prefix='tests-used-failed-controls-') as directory:
+        root = Path(directory)
+        sources = {'tests/data.txt': 'actual', 'tests/other.txt': 'unreviewed',
+            'tests/helper.py': 'from pathlib import Path\ndef read(): return Path("tests/data.txt").read_text()\n',
+            'tests/failure.py': 'import unittest\nfrom helper import read\nclass T(unittest.TestCase):\n def test_input(self):\n  self.assertEqual(read(), "expected")\nif __name__ == "__main__": unittest.main()\n',
+            'tests/bootstrap.py': 'import unittest\nfrom pathlib import Path\nPath("tests/data.txt").read_text()\nassert False, "bootstrap"\nclass T(unittest.TestCase):\n def test_input(self): pass\nif __name__ == "__main__": unittest.main()\n',
+            'tests/plain.py': 'from pathlib import Path\nPath("tests/data.txt").read_text()\nassert False\n'}
+        for path, text in sources.items():
+            target = root / path; target.parent.mkdir(exist_ok=True, parents=True); target.write_text(text)
+        git(root, 'init', '-q'); git(root, 'add', '.')
+        git(root, '-c', 'user.name=Control', '-c', 'user.email=control@example.invalid', 'commit', '-qm', 'failed controls')
+        repo = Repository(root, 'HEAD'); runner = 'tests/failure.py'
+        assert subprocess.run(['python3', '-B', runner], cwd=root, capture_output=True).returncode == 1
+        entry = {'path': runner, 'source_blob': repo.tree[runner][2], 'input_revision': repo.ref,
+                 'command': ['python3', '-B', runner], 'kind': 'nonpassing-unittest',
+                 'purpose': 'A real test reads this specific fixture and then fails its assertion.', 'input_scope': ['tests/data.txt']}
+        route = {'runner': 'nonpassing:' + runner, 'input_revision': repo.ref,
+                 'frames': [{'path': path, 'blob': repo.tree[path][2], 'line': line, 'code_qualname': name, 'code_firstlineno': first}
+                            for path, line, name, first in [(runner, 6, '<module>', 1), (runner, 5, 'T.test_input', 4), ('tests/helper.py', 2, 'read', 2)]],
+                 'target': 'tests/data.txt', 'target_blob': repo.tree['tests/data.txt'][2],
+                 'operation': 'Observed fixture read during nonpassing unittest'}
+        catalog = {'schema_version': 1, 'standalone': [entry], 'reads': [route], 'generators': [], 'orphans': []}
+        result = inventory(repo, catalog); rows = {r['path']: r for r in result['records']}
+        assert rows['tests/data.txt']['class'] == rows['tests/helper.py']['class'] == 'keep'
+        chain = rows['tests/data.txt']['runner_chain']; assert chain['entry']['source_only']
+        assert chain['entry']['validation_at_measured_revision']['status'] == 'failed'
+        assert chain['entry']['kind'] == 'nonpassing committed unittest runner'
+        graph = Graph(repo); validated_routes(graph, catalog)
+        graph.edge(runner, 'tests/other.txt', 1, 'Unsupported inferred fixture edge', validated_for='nonpassing:' + runner)
+        assert 'tests/other.txt' not in graph.chains()
+        execution_only = copy.deepcopy(catalog); execution_only['standalone'][0]['input_scope'] = []
+        execution_rows = {r['path']: r for r in inventory(repo, execution_only)['records']}
+        assert execution_rows['tests/helper.py']['class'] == 'keep' and execution_rows['tests/data.txt']['class'] is None
+        outside = copy.deepcopy(catalog); outside['reads'][0].update(target='tests/other.txt', target_blob=repo.tree['tests/other.txt'][2])
+        outside_rows = {r['path']: r for r in inventory(repo, outside)['records']}
+        assert outside_rows['tests/other.txt']['class'] is None and outside_rows['tests/other.txt']['secondary']['unreviewed_readers']
+        assert outside_rows['tests/helper.py']['class'] == 'keep'
+        root_only = copy.deepcopy(outside); root_only['reads'][0]['frames'] = root_only['reads'][0]['frames'][:2]
+        root_rows = {r['path']: r for r in inventory(repo, root_only)['records']}
+        assert root_rows['tests/other.txt']['class'] is None and root_rows['tests/helper.py']['class'] is None
+        data_only = copy.deepcopy(root_only); data_only['reads'][0].update(target='tests/helper.py', target_blob=repo.tree['tests/helper.py'][2])
+        assert next(r for r in inventory(repo, data_only)['records'] if r['path'] == 'tests/helper.py')['class'] is None
+        for scenario in ('bootstrap', 'plain', 'operation', 'command', 'no-test-context', 'nested-code'):
+            bad = copy.deepcopy(catalog)
+            if scenario in ('bootstrap', 'plain'):
+                source = 'tests/' + scenario + '.py'; bad['standalone'][0].update(path=source, source_blob=repo.tree[source][2], command=['python3', '-B', source])
+                bad['reads'][0]['runner'] = 'nonpassing:' + source
+                bad['reads'][0]['frames'] = [{'path': source, 'blob': repo.tree[source][2], 'line': 3 if scenario == 'bootstrap' else 2, 'code_qualname': '<module>', 'code_firstlineno': 1}]
+            elif scenario == 'operation': bad['reads'][0]['operation'] = 'validated Python read of measured bytes'
+            elif scenario == 'command': bad['standalone'][0]['command'].append('--help')
+            elif scenario == 'nested-code': bad['reads'][0]['frames'][1]['code_qualname'] = 'T.test_input.<locals>.escaped'
+            else: bad['reads'][0]['frames'] = [bad['reads'][0]['frames'][0]]
+            try: inventory(repo, bad)
+            except ValueError: pass
+            else: raise AssertionError('unsupported nonpassing route accepted: ' + scenario)
+
+
+
+def passing_scan_boundary_controls():
+    import copy
+    with tempfile.TemporaryDirectory(prefix='tests-used-scan-controls-') as directory:
+        root = Path(directory)
+        text = 'import unittest\nfrom pathlib import Path\nclass T(unittest.TestCase):\n def test_scan(self):\n  values=[p.read_text() for p in Path("tests/scanned").rglob("*") if p.is_file()]\n  self.assertTrue(values)\nif __name__ == "__main__": unittest.main()\n'
+        sources = {'tests/scan.py': text, 'tests/scanned/receipt.json': json.dumps({
+            'command': ['old-run'], 'exit': 7, 'elapsed_seconds': 1, 'resource_stop': False, 'peak_group_rss_bytes': 1})}
+        for path, value in sources.items():
+            target = root/path; target.parent.mkdir(parents=True, exist_ok=True); target.write_text(value)
+        git(root, 'init', '-q'); git(root, 'add', '.')
+        git(root, '-c', 'user.name=Control', '-c', 'user.email=control@example.invalid', 'commit', '-qm', 'scan control')
+        repo = Repository(root, 'HEAD'); runner = 'tests/scan.py'; target = 'tests/scanned/receipt.json'
+        assert subprocess.run(['python3', '-B', runner], cwd=root, capture_output=True).returncode == 0
+        catalog = {'schema_version': 1, 'generators': [], 'orphans': [], 'standalone': [{
+            'path': runner, 'input_revision': repo.ref, 'source_blob': repo.tree[runner][2],
+            'command': ['python3', '-B', runner], 'kind': 'unittest'}], 'reads': [{
+            'runner': 'validated:' + runner, 'input_revision': repo.ref,
+            'frames': [{'path': runner, 'blob': repo.tree[runner][2], 'line': 5}],
+            'target': target, 'target_blob': repo.tree[target][2], 'operation': 'validated Python read of measured bytes'}]}
+        rows = {r['path']: r for r in inventory(repo, catalog)['records']}
+        assert rows[runner]['class'] == 'keep' and rows[target]['class'] is None
+        assert rows[target]['secondary']['unreviewed_readers'] and rows[target]['secondary']['historical_role']
+        secondary = copy.deepcopy(catalog); secondary['standalone'][0].update(input_scope=[],
+            purpose='Reviewed blanket count-policy scan; no fixture-specific consumer is claimed.', other_reads='secondary')
+        rows = {r['path']: r for r in inventory(repo, secondary)['records']}
+        assert rows[target]['class'] == 'evidence' and not rows[target]['runner_chain']
 
 
 def self_test():
@@ -1242,7 +1389,9 @@ def self_test():
         catalog = {'schema_version': 1, 'standalone': [{
             'path': 'tests/pass.py', 'input_revision': repo.ref,
             'source_blob': repo.tree['tests/pass.py'][2],
-            'command': ['python3', '-B', 'tests/pass.py'], 'kind': 'unittest'}],
+            'command': ['python3', '-B', 'tests/pass.py'], 'kind': 'unittest',
+            'purpose': 'Read explicit generated and source fixtures under the passing regression test.',
+            'input_scope': ['tests/generated.txt', 'tests/helper.py', 'tests/dead.lean'], 'other_reads': 'unresolved'}],
             'orphans': [{'path': 'tests/unknown.bin', 'input_revision': repo.ref,
                 'blob': repo.tree['tests/unknown.bin'][2],
                 'reason': 'No references or runner use after complete source/root search of the closed control repository.',
@@ -1283,6 +1432,12 @@ def self_test():
         spare = copy.deepcopy(catalog['generators'][0]); spare.update(path='tests/spare.txt', output_blob=repo.tree['tests/spare.txt'][2])
         catalog['generators'].append(spare)
         assert (root / 'tests/spare.txt').read_bytes() == b'spare\n'
+        unreviewed = copy.deepcopy(catalog)
+        for key in ('purpose', 'input_scope', 'other_reads'): del unreviewed['standalone'][0][key]
+        unreviewed_rows = {r['path']: r for r in inventory(repo, unreviewed)['records']}
+        assert unreviewed_rows['tests/generated.txt']['class'] is None
+        assert unreviewed_rows['tests/generated.txt']['secondary']['unreviewed_readers']
+        assert unreviewed_rows['tests/live.py']['class'] == 'keep'  # actually observed helper frame
         expected = inventory(repo, catalog)
         rows = {r['path']: r for r in expected['records']}
         for p in ('tests/live.py', 'tests/helper.py', 'tests/pass.py', 'tests/generated.txt'):
@@ -1445,6 +1600,8 @@ def self_test():
         assert not shell_operands('echo python3 tests/mention.py')
         assert not shell_operands('echo "node --test tests/mention.py"')
         assert shell_operands('lake env python3 -B tests/live.py') == ['tests/live.py']
+    nonpassing_boundary_controls()
+    passing_scan_boundary_controls()
     print('self-test: enumeration, recovery, shallow history, shell, standalone pass/fail, exact generation, consumed-generated data and tamper and reviewed-orphan controls PASS')
 
 
