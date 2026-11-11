@@ -16,12 +16,14 @@ structure Row where
   args : List Nat
   out : Nat
 
-/-- Operand list as the evaluator's argument function; operands are below 2^256. -/
+/-- Operand list as the evaluator's argument function. -/
 def operands {a : Nat} (args : List Nat) : Fin a → Word := fun i => word (args.getD i.val 0)
 
-/-- A row holds when it supplies exactly `arity` operands and evaluates to `out`. -/
+/-- A row holds when it supplies exactly `arity` operands, each already a word
+(below 2^256, so no operand is silently reduced), and evaluates to `out`. -/
 def Row.check (r : Row) : Bool :=
-  r.args.length == r.arity && (Pure.eval r.op (operands r.args)).val == r.out
+  r.args.length == r.arity && r.args.all (· < 2 ^ 256) &&
+    (Pure.eval r.op (operands r.args)).val == r.out
 
 /-- Generic projection: every row of a checked list evaluates to its expected word. -/
 theorem Row.holds {rows : List Row} (h : rows.all Row.check = true) :
