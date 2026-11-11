@@ -13,6 +13,11 @@ body) never panics (`Prog.run_noPanic`), on every typed state, inside the
 EVM fragment or not; master's statement over the untyped run, restated
 over the typed one.
 
+`PanicV2` and its `PanicV2Assert` companion retain this V1 theorem and
+provide exact erasure of explicit V2 assertion origins. A raw V1 panic
+remains unclassified; source-assert 0x01 and generated-guard 0x11/0x21
+codes are not reconstructed by this no-panic predicate.
+
 An evaluator only reverts (`TRes.RevertOnly`, `Semantics/Ends.lean`), so
 its lemma here is that one's; each step's follows its definition.
 -/

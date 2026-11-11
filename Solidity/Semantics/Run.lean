@@ -25,6 +25,11 @@ The heap only grows, and a call sets its caller's locals aside while the body
 runs, so each step returns its state with the extension of the heap typing
 (`Out`): the caller's locals are weakened along it when the call returns.
 
+The additive code-carrying companion is `Semantics/PanicV2.lean`, with
+structural expression projection in `PanicV2Eval` and explicit assertion
+origins (0x01/0x11/0x21) in `PanicV2Assert`. V1 remains code-less; the
+companion does not infer source provenance from an arbitrary V1 panic.
+
 Each statement's step is one function
 (`TRun.*`) given its sub-programs' runs, `Stmt.run`/`Prog.run` are the
 recursor over them (`Stmt.runR`, Gate G0 conditions 1 and 2) with a
@@ -584,10 +589,19 @@ def iterN (body : α → TRes α) (c : α → TRes Bool) : Nat → α → α ⊕
     | .inl τ => iterN body c n τ
     | .inr r => .inr r
 
-partial def runImpl [Inhabited α] (body : α → TRes α) (c : α → TRes Bool) (σ : α) : TRes α :=
-  match step body c σ with
-  | .inl τ => runImpl body c τ
-  | .inr r => r
+/-- Logical completion: `none` is the least fixed point for a loop that
+never finishes. The compiler still generates a partial `runComplete._unsafe_rec`;
+logical equalities below do not certify that generated implementation edge. -/
+def runComplete (body : α → TRes α) (c : α → TRes Bool) (σ : α) : Option (TRes α) :=
+  match TLoop.step body c σ with
+  | .inl τ => runComplete body c τ
+  | .inr r => some r
+partial_fixpoint
+
+/-- The existing implementation entry, now with a logical completion model.
+The generated recursive implementation remains a separate trust obligation. -/
+def runImpl [Inhabited α] (body : α → TRes α) (c : α → TRes Bool) (σ : α) : TRes α :=
+  (runComplete body c σ).getD (.error .diverge)
 
 /-- The compiled loop, for a state type with no `Inhabited` instance. -/
 def runImpl' (body : α → TRes α) (c : α → TRes Bool) (σ : α) : TRes α :=
@@ -659,6 +673,53 @@ theorem run_induct {body : α → TRes α} {c : α → TRes Bool} {P : α → Pr
     obtain ⟨n, hn⟩ := Classical.choose_spec hex
     exact key n σ _ h0 hn
   · exact hdiv
+
+/-- The gap guarded is logical loop completion: every finite outcome is
+retained, including a finite outcome that itself is `diverge`. -/
+theorem runComplete_of_iterN {body : α → TRes α} {c : α → TRes Bool}
+    {n : Nat} {σ : α} {r : TRes α} (h : TLoop.iterN body c n σ = .inr r) :
+    runComplete body c σ = some r := by
+  induction n generalizing σ with
+  | zero => cases h
+  | succ n ih =>
+    rw [runComplete.eq_1]
+    simp only [TLoop.iterN] at h
+    cases hs : TLoop.step body c σ with
+    | inl τ => rw [hs] at h; exact ih h
+    | inr other => rw [hs] at h; cases h; rfl
+
+theorem iterN_of_runComplete (body : α → TRes α) (c : α → TRes Bool) :
+    ∀ σ r, runComplete body c σ = some r → ∃ n, TLoop.iterN body c n σ = .inr r := by
+  apply runComplete.partial_correctness body c
+  intro rec ih σ r h
+  cases hs : TLoop.step body c σ with
+  | inl τ =>
+    rw [hs] at h
+    obtain ⟨n, hn⟩ := ih τ r h
+    exact ⟨n + 1, by simp only [TLoop.iterN, hs]; exact hn⟩
+  | inr other =>
+    rw [hs] at h
+    cases h
+    exact ⟨1, by simp only [TLoop.iterN, hs]⟩
+
+/-- Exact universal logical-name equality for the implemented_by entry.
+This guards the A03 name-level link; the generated partial helper's actual-code
+edge remains unresolved, so this is not an A03-complete runtime certificate. -/
+theorem run_eq_runImpl' (body : α → TRes α) (c : α → TRes Bool) (σ : α) :
+    TLoop.run body c σ = runImpl' body c σ := by
+  unfold runImpl' runImpl
+  cases ho : runComplete body c σ with
+  | none =>
+    have hn : ¬ ∃ r n, TLoop.iterN body c n σ = .inr r := by
+      rintro ⟨r, n, h⟩
+      have hh := runComplete_of_iterN h
+      rw [ho] at hh
+      cases hh
+    simp only [TLoop.run, hn, ↓reduceDIte, Option.getD_none]
+  | some r =>
+    obtain ⟨n, hn⟩ := iterN_of_runComplete body c σ r ho
+    exact TLoop.run_of_iterN hn
+
 
 end TLoop
 

@@ -425,11 +425,18 @@ def loopIterN (rc rb : Machine → Out) : Nat → Machine → Machine ⊕ Out
     | .inl m' => loopIterN rc rb n m'
     | .inr r => .inr r
 
-/-- `loopRun`'s compiled twin. -/
-partial def loopImpl (rc rb : Machine → Out) (m : Machine) : Out :=
-  match loopTurn rc rb m with
-  | .inl m' => loopImpl rc rb m'
-  | .inr r => r
+/-- Logical completion, with `none` for no finite outcome. The compiler's
+partial `loopComplete._unsafe_rec` remains an unresolved actual-code edge. -/
+def loopComplete (rc rb : Machine → Out) (σ : Machine) : Option (Out) :=
+  match loopTurn rc rb σ with
+  | .inl τ => loopComplete rc rb τ
+  | .inr r => some r
+partial_fixpoint
+
+/-- `loopRun`'s logical implementation twin. Generated-code adequacy is
+separate from the exact name-level equality proved below. -/
+def loopImpl (rc rb : Machine → Out) (m : Machine) : Out :=
+  (loopComplete rc rb m).getD .fault
 
 open Classical in
 /-- **A loop's outcome**: what the turns end with, a fault where no number
@@ -469,6 +476,52 @@ theorem loopRun_of_forall {rc rb : Machine → Out} {m : Machine}
     rw [hm'] at hn
     cases hn
   simp only [loopRun, hex, dif_neg, not_false_eq_true]
+
+/-- The completion gap guarded here includes all finite outcomes, including
+finite faults; they are not confused with absence of a finite outcome. -/
+theorem loopComplete_of_iterN {rc rb : Machine → Out}
+    {n : Nat} {σ : Machine} {r : Out} (h : loopIterN rc rb n σ = .inr r) :
+    loopComplete rc rb σ = some r := by
+  induction n generalizing σ with
+  | zero => cases h
+  | succ n ih =>
+    rw [loopComplete.eq_1]
+    simp only [loopIterN] at h
+    cases hs : loopTurn rc rb σ with
+    | inl τ => rw [hs] at h; exact ih h
+    | inr other => rw [hs] at h; cases h; rfl
+
+theorem loopIterN_of_loopComplete (rc rb : Machine → Out) :
+    ∀ σ r, loopComplete rc rb σ = some r → ∃ n, loopIterN rc rb n σ = .inr r := by
+  apply loopComplete.partial_correctness rc rb
+  intro rec ih σ r h
+  cases hs : loopTurn rc rb σ with
+  | inl τ =>
+    rw [hs] at h
+    obtain ⟨n, hn⟩ := ih τ r h
+    exact ⟨n + 1, by simp only [loopIterN, hs]; exact hn⟩
+  | inr other =>
+    rw [hs] at h
+    cases h
+    exact ⟨1, by simp only [loopIterN, hs]⟩
+
+/-- Exact universal logical-name equality. The A03 actual-code finding for
+the generated partial helper remains open; this theorem does not certify it. -/
+theorem loopRun_eq_loopImpl (rc rb : Machine → Out) (σ : Machine) :
+    loopRun rc rb σ = loopImpl rc rb σ := by
+  unfold loopImpl
+  cases ho : loopComplete rc rb σ with
+  | none =>
+    have hn : ¬ ∃ r n, loopIterN rc rb n σ = .inr r := by
+      rintro ⟨r, n, h⟩
+      have hh := loopComplete_of_iterN h
+      rw [ho] at hh
+      cases hh
+    simp only [loopRun, hn, ↓reduceDIte, Option.getD_none]
+  | some r =>
+    obtain ⟨n, hn⟩ := loopIterN_of_loopComplete rc rb σ r ho
+    exact loopRun_of_iterN hn
+
 
 /-- `SAR`'s result: the signed reading of `a` divided by `2^n` rounding
 toward `-∞`, and the sign's fill (`-1` or `0`) for counts of `256` or more. -/
