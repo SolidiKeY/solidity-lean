@@ -251,6 +251,17 @@ run_cmd do
     | throwError "first invocation failed"
   let .ok rows := report.getArr? | throwError "missing invocation rows"
   unless rows.size == 2 do throwError "invocation lost rows"
+  for (id, functionName, index) in [(1, "first", 0), (2, "second", 1)] do
+    let some selected ← Solidity.Frontend.ExecutableMetadataV2.Internal.selectedInvocationGoalV2?
+      root request id functionName | throwError "actual retained terminal goal missing"
+    unless selected.captureIndex == index && selected.goal.sourceId == id &&
+        selected.goal.functionName == functionName && selected.goal.retryRequiredV2? == some false do
+      throwError "actual retained terminal goal changed identity"
+  for (id, functionName) in [(1, "second"), (2, "first"), (99, "first")] do
+    if (← Solidity.Frontend.ExecutableMetadataV2.Internal.selectedInvocationGoalV2?
+        root request id functionName).isSome then throwError "foreign terminal goal selected"
+  if (← Solidity.Frontend.ExecutableMetadataV2.Internal.selectedInvocationGoalV2?
+      root fixture 1 "first").isSome then throwError "changed request selected"
   let receipt? ← Solidity.Frontend.ExecutableMetadataV2.Internal.invocationReceiptV2? root
   logInfo m!"EXECUTABLE_V2 first invocation outcome: {(receipt?.map Json.compress).getD "missing receipt"}"
   let some retained ← Solidity.Frontend.ExecutableMetadataV2.Internal.retainedInvocationV2? root request
@@ -318,5 +329,34 @@ run_cmd do
     throwError "retention failure detail was lost"
   logInfo m!"EXECUTABLE_V2 actual injected invocation receipt: {receiptBefore.compress}"
   logInfo "EXECUTABLE_V2 no-search lookup, rollback replay, coherent forgery, synchronous rejection and atomic-failure controls passed"
+
+/- Injected protocol negatives, not actual annotated-loop or source evidence. -/
+run_cmd do
+  let outcome (status : String) (reason : String := "") :=
+    Json.mkObj [("status", toJson status), ("reason", toJson reason)]
+  let initial : Solidity.Frontend.ExecutableMetadataV2.Internal.EvaluationBranchV2 :=
+    ⟨false, none, some (outcome "pending")⟩
+  let retried : Solidity.Frontend.ExecutableMetadataV2.Internal.EvaluationBranchV2 :=
+    ⟨true, initial.result, some (outcome "pending")⟩
+  let select := Solidity.Frontend.ExecutableMetadataV2.Internal.terminalBranchOffsetV2?
+  unless select true "pending" [initial, retried] == some 1 &&
+      select false "pending" [initial] == some 0 do throwError "complete branch protocol refused"
+  let negatives := [
+    select true "pending" [initial],
+    select false "pending" [initial, retried],
+    select true "pending" [retried, initial],
+    select true "pending" [initial, retried, retried],
+    select true "pending" [initial, { retried with priorResult := some (outcome "pending" "foreign") }],
+    select true "proved" [initial, retried],
+    select true "pending" [initial, { retried with result := none }],
+    select true "pending" [initial, { retried with priorResult := none }],
+    select true "ready" [initial, { retried with result := some (outcome "ready") }],
+    select false "ready" [{ initial with result := some (outcome "ready") }],
+    select false "pending" [{ initial with result := some Json.null }],
+    select false "pending" [{ initial with priorResult := initial.result }],
+    select false "pending" [retried],
+    select false "pending" []]
+  unless negatives.all Option.isNone do throwError "incomplete or foreign branch protocol accepted"
+  logInfo "EXECUTABLE_V2 injected complete-branch controls: 2 positive, 14 negative"
 
 end ExecutableBindingControls

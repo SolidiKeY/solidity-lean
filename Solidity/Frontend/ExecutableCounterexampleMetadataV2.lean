@@ -198,6 +198,76 @@ def retainedInvocationV2? (name : Lean.Name) (request : Json) :
         declaration.type == type && declaration.value == value do return none
   return some retained
 
+/-- Protocol facts only: callers cannot use this record as invocation,
+source or certificate authority. Real intake must obtain its retry requirement
+from the private retained invocation and `retryRequiredV2?`. -/
+structure EvaluationBranchV2 where
+  retry : Bool
+  priorResult : Option Json
+  result : Option Json
+
+private def runtimeStatusV2? (result : Option Json) : Option String := do
+  let result ← result
+  let status ← (result.getObjValAs? String "status").toOption
+  if status == "proved" || status == "refuted" || status == "pending" then some status else none
+
+/-- Select an offset only for a complete, ordered initial/retry protocol.
+Full prior-result bytes must match, even when both outcomes are pending.
+This is a protocol validator, not the actual-invocation intake or a certificate. -/
+def terminalBranchOffsetV2? (needsRetry : Bool) (reportStatus : String)
+    (branches : List EvaluationBranchV2) : Option Nat := do
+  match needsRetry, branches with
+  | false, [initial] =>
+    if initial.retry || initial.priorResult.isSome then none else do
+      let status ← runtimeStatusV2? initial.result
+      if status == reportStatus then some 0 else none
+  | true, [initial, retry] =>
+    if initial.retry || initial.priorResult.isSome || !retry.retry then none else do
+      let initialStatus ← runtimeStatusV2? initial.result
+      let prior ← retry.priorResult
+      let original ← initial.result
+      let finalStatus ← runtimeStatusV2? retry.result
+      if initialStatus == "pending" && prior.compress == original.compress &&
+          finalStatus == reportStatus then some 1 else none
+  | _, _ => none
+
+/-- An internal selection of the actual execution target. No source bytes,
+candidate, failure certificate or span is admitted by this record. -/
+structure SelectedInvocationGoalV2 where
+  private mk ::
+  invocation : RetainedInvocationV2
+  row : Json
+  goal : Tools.DirectRuntime.RequestGoalCaptureV2
+  captureIndex : Nat
+
+/-- Read only the private retained first execution, preserving global capture
+index and exact report/member identities. A missing retry is refused even when
+initial and terminal statuses would both be pending. No search is performed. -/
+def selectedInvocationGoalV2? (name : Lean.Name) (request : Json)
+    (sourceId : Int) (functionName : String) : CommandElabM (Option SelectedInvocationGoalV2) := do
+  let some invocation ← retainedInvocationV2? name request | return none
+  let some rows := invocation.report.getArr?.toOption | return none
+  let rows := rows.filter fun row =>
+    (row.getObjValAs? Int "sourceId").toOption == some sourceId
+  unless rows.size == 1 do return none
+  let some row := rows[0]? | return none
+  unless (row.getObjValAs? String "function").toOption == some functionName do return none
+  let some status := (row.getObjValAs? String "status").toOption | return none
+  let captures := invocation.goals.toList.zipIdx |>.filter fun item => item.1.sourceId == sourceId
+  let (initial, _) :: _ := captures | return none
+  let some needsRetry := initial.retryRequiredV2? | return none
+  for (goal, _) in captures do
+    unless goal.functionName == functionName && goal.request.compress == request.compress &&
+        goal.source.compress == initial.source.compress && goal.member.compress == initial.member.compress &&
+        (goal.member.getObjValAs? Int "id").toOption == some sourceId &&
+        (goal.member.getObjValAs? String "name").toOption == some functionName &&
+        goal.specified == initial.specified && goal.box == initial.box do return none
+  let facts := captures.map fun (goal, _) =>
+    ({ retry := goal.retry, priorResult := goal.priorResult, result := goal.result } : EvaluationBranchV2)
+  let some offset := terminalBranchOffsetV2? needsRetry status facts | return none
+  let some (goal, index) := captures[offset]? | return none
+  return some ⟨invocation, row, goal, index⟩
+
 /-- Diagnostic receipt only, never certificate admission. -/
 def invocationReceiptV2? (name : Lean.Name) : CommandElabM (Option Json) := do
   let some attempt := (invocationAttemptsV2.getState (← getEnv)).find? name | return none

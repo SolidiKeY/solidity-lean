@@ -124,6 +124,20 @@ structure RequestGoalCaptureV2 where
   /-- Actual result of this evaluation; `none` denotes listing-only capture. -/
   result : Option Json := none
 
+/-- Inspect the initial retained result using the very predicate that selected
+its retry. This performs no request execution or search. `none` refuses listing,
+retry captures and malformed/unsupported results. It is not source admission. -/
+def RequestGoalCaptureV2.retryRequiredV2? (goal : RequestGoalCaptureV2) : Option Bool := do
+  if goal.retry || goal.priorResult.isSome then none else do
+    let result ← goal.result
+    let status ← (result.getObjValAs? String "status").toOption
+    let [(name, declaration)] := goal.contract.funs | none
+    if name != goal.functionName then none else
+      match status with
+      | "proved" | "refuted" => some false
+      | "pending" => some (hasAnnotatedLoop declaration.body)
+      | _ => none
+
 /-- A lazy request plan shares the old computation between report-only and
 opt-in capture interpreters. Ordinary execution does not accumulate goals. -/
 private inductive RequestPlanV2 where
