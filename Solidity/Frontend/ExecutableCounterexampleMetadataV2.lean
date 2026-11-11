@@ -351,7 +351,7 @@ def prepareRetainedCandidateV2 (captureDeclaration : Lean.Name) (request : Json)
     | return .error "retained theorem goal shape refused"
   let axioms ← liftTermElabM <| collectAxioms certificateDeclaration
   unless axioms.all ([``propext, ``Classical.choice, ``Quot.sound].contains ·) do
-    return .error "retained theorem axiom audit refused"
+    return .error "retained theorem dependency audit refused"
   liftTermElabM do
     let options ← kernelOptionsV2
     withOptions (fun _ => options) do
