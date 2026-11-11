@@ -399,6 +399,7 @@ and open obligations. Test proposals remain proposals until applied.
 - [scripts/h62/item2/audit-theories/handoff/TUPLE-ROLES-20261108.md](../scripts/h62/item2/audit-theories/handoff/TUPLE-ROLES-20261108.md)
 - [scripts/h62/item2/audit-theories/handoff/TUPLE-VERIFICATION-20261108.md](../scripts/h62/item2/audit-theories/handoff/TUPLE-VERIFICATION-20261108.md)
 - [scripts/h62/item2/audit-theories/handoff/original-work-and-backfill-queue.md](../scripts/h62/item2/audit-theories/handoff/original-work-and-backfill-queue.md)
+- [scripts/prose-backtest/README.md](../scripts/prose-backtest/README.md)
 - [vscode/README.md](../vscode/README.md)
 - [web/README.md](../web/README.md)
 
