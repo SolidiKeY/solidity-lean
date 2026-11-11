@@ -78,7 +78,8 @@ def main():
     # t2-controls-off-path: the *Controls modules no library module reaches
     # (`controls-classify.py`) leave `Solidity.lean` for the default-target
     # `SolidityControls` root; reachable ones stay (Lake builds them anyway).
-    if any(r == "Solidity.lean" for r,_,_ in gen):
+    # (fixture trees without the classifier keep every module in `Solidity.lean`)
+    if any(r == "Solidity.lean" for r,_,_ in gen) and pathlib.Path("scripts/coord-tools/controls-classify.py").is_file():
         cc = runpy.run_path("scripts/coord-tools/controls-classify.py", run_name="controls")
         moved = set(cc["classify"](cc["tree"]())[2])
         gen = [(r, [m for m in mods if m not in moved] if r == "Solidity.lean" else mods, h)

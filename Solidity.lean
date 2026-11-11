@@ -531,6 +531,7 @@ import Solidity.Backend.LabelExec.Boundaries
 import Solidity.Backend.LabelExec.Checks
 import Solidity.Backend.LabelExec.Fetch
 import Solidity.Backend.LabelExec.Fragment
+import Solidity.Backend.LabelExec.FragmentControls
 import Solidity.Backend.LabelExec.FragmentSound
 import Solidity.Backend.LabelExec.LiteralChecks
 import Solidity.Backend.LabelExec.LiteralLoops

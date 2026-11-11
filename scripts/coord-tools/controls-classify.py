@@ -5,10 +5,9 @@ Classifies every `*Controls` module of the `Solidity` library (the modules
 `register.sh` puts in `Solidity.lean` or `SolidityControls`) as
 LIBRARY-REACHABLE or UNREACHABLE (t2-controls-off-path, step 1).
 
-A Controls module is reachable when a library module that is neither a
-Controls module nor check-like imports it, directly or transitively (through
-any chain of modules). Check-like means the module name's last component ends
-in `Controls`, `Checks`, `Check`, `Tests` or `Test`. Only unreachable Controls
+A Controls module is reachable when a library module that is not itself a
+Controls module imports it, directly or transitively (through any chain of
+modules). Every such module is in the `Solidity` root, so Lake builds it. Only unreachable Controls
 may leave the `Solidity` root: Lake builds a reachable one anyway.
 
 The default output is the counts. `--list` prints one class, or the direct
@@ -22,12 +21,10 @@ import pathlib, re, subprocess, sys
 
 EXCLUDED = ["Solidity.Scratch", "Solidity.Corpus", "Solidity.TestSuite",
             "Solidity.Solkey.TestSuite", "Solidity.Examples"]
-CHECKLIKE = re.compile(r"(Controls|Checks|Check|Tests|Test)$")
-IMPORT = re.compile(r"^\s*(?:public\s+)?(?:meta\s+)?import\s+(?:all\s+)?([\w.']+)", re.M)
+IMPORT = re.compile(r"^\s*(?:public\s+)?(?:meta\s+)?import\s+(?:all\s+)?([\w.' \t]+)", re.M)
 
 def under(m, p): return m == p or m.startswith(p + ".")
 def is_controls(m): return m.rsplit(".", 1)[-1].endswith("Controls")
-def checklike(m): return bool(CHECKLIKE.search(m.rsplit(".", 1)[-1]))
 
 def tree():
     files = subprocess.run(["git", "ls-files", "-co", "--exclude-standard", "--", "Solidity"],
@@ -39,14 +36,15 @@ def tree():
         if any(under(m, x) for x in EXCLUDED): continue
         src = pathlib.Path(f).read_text(errors="replace")
         # imports precede the first non-header command; stop at the first declaration keyword
-        head = re.split(r"^(?:namespace|section|open|def|theorem|set_option|variable|noncomputable|@\[)", src, maxsplit=1, flags=re.M)[0]
-        head = re.sub(r"/-.*?-/", "", head, flags=re.S)
-        mods[m] = [i for i in IMPORT.findall(head) if i.startswith("Solidity")]
+        # strip comments first, then cut at the first command after the imports
+        body = re.sub(r"--[^\n]*", "", re.sub(r"/-.*?-/", "", src, flags=re.S))
+        head = re.split(r"^(?:namespace|section|open|def|theorem|set_option|variable|noncomputable|@\[)", body, maxsplit=1, flags=re.M)[0]
+        mods[m] = [i for line in IMPORT.findall(head) for i in line.split() if i.startswith("Solidity")]
     return mods
 
 def classify(mods):
     controls = sorted(m for m in mods if is_controls(m))
-    seeds = [m for m in mods if not checklike(m)]
+    seeds = [m for m in mods if not is_controls(m)]
     reach, stack = set(), list(seeds)
     while stack:
         m = stack.pop()
@@ -75,7 +73,7 @@ def main():
             print("controls-classify: classes not a partition"); bad = 1
         un = set(unreachable)
         # independent pass: one closure from all non-check-like modules
-        seen, st = set(), [m for m in mods if not checklike(m)]
+        seen, st = set(), [m for m in mods if not is_controls(m)]
         while st:
             for i in mods.get(st.pop(), []):
                 if i in mods and i not in seen: seen.add(i); st.append(i)

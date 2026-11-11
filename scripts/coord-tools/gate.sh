@@ -105,7 +105,8 @@ else
   # tree that passes the gate cannot turn `checks` red.
   run_gate checks-fast bash scripts/ci/checks-fast.sh
   # t2-controls-off-path: every *Controls module in exactly one root, moved ones unreachable.
-  run_gate controls-roots python3 scripts/coord-tools/controls-classify.py --check
+  # (fixture trees without the controls root skip it; register.sh --check keeps the real one present)
+  [ ! -f SolidityControls.lean ] || run_gate controls-roots python3 -B scripts/coord-tools/controls-classify.py --check
   [ "$failed" -eq 0 ] || exit "$failed"
   run_gate build-touched build_touched
   if [ "$mode" != touched ]; then

@@ -136,7 +136,6 @@ import Solidity.Backend.InternalFlow.RuntimeFrameV3ScalarReturnControls
 import Solidity.Backend.InternalFlow.RuntimeFrameV3ScopedScalarControls
 import Solidity.Backend.InternalFlow.RuntimeFrameV3TypedHeapExtensionalityControls
 import Solidity.Backend.InternalFlow.RuntimeFrameV4MigrationControls
-import Solidity.Backend.LabelExec.FragmentControls
 import Solidity.Backend.LabelExec.LoopExitControls
 import Solidity.Backend.MemoryCopies.AliasBindingControls
 import Solidity.Backend.MemoryCopies.BudgetedDefaultControls
