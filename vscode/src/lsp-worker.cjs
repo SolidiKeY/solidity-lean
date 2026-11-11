@@ -48,7 +48,7 @@ async function execute(task){
     // obligations stay pending without `counterexamples`) instead of being
     // reported `unsupported`.
     const decided=await checkDirect(root,contract,options);
-    const directMode=options.certify!==true&&!options.auditPreconditions&&process.env.SOLIDITY_LEAN_DIRECT!=='0';
+    const directMode=options.certify!==true&&!options.auditPreconditions&&!options.counterexamples&&process.env.SOLIDITY_LEAN_DIRECT!=='0';
     const recheck=decided?new Set(decided.results.filter(r=>r.status==='unsupported').map(r=>r.sourceId)):null;
     if(decided){
       directChecks.push({contract:contract.name,backend:'unavailable',environmentImports:0,...decided.timings});wasmBuild=decided.build;
@@ -62,8 +62,9 @@ async function execute(task){
     // Multi-file units always took the certified path; direct mode reaches
     // here only to recheck rows the compiled verifier could not decide; the
     // entry-certificate audit runs only on the certified path
-    // (Frontend/Testing.lean reports `unknown` in direct mode).
-    const certified=options.certify===true||!!options.auditPreconditions||allAsts.length>1||directMode;
+    // (Frontend/Testing.lean reports `unknown` in direct mode), and requested
+    // counterexamples are certified model prestates.
+    const certified=options.certify===true||!!options.auditPreconditions||!!options.counterexamples||allAsts.length>1||directMode;
     if(task.deferLegacyBuild)return {needsLegacyBuild:true};
     usedLegacy=true;session??=new LeanSession(root,directory);
     const output=join(directory,`result-${task.id}-${contract.id}.json`);
