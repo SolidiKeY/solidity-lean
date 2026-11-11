@@ -1,14 +1,11 @@
 import Solidity.Yul.Checks.Powers
+import Solidity.Yul.OpcodeSpec
 
 /-! # BYTE, SIGNEXTEND, CLZ: universal meaning and literal vectors
 
 The universal statements cover every input word. `universal` assembles them with
-EXP's `Powers.exp_val` into the statement of `Goals.opcodeBytesPowers` (the
-Bytes/Powers conjunct of `Goals.opcodeEvalUniversal`), with `OpcodeSpec.modulus`
-written as `2 ^ 256` and `OpcodeSpec.clz` unfolded: the two are definitionally
-equal, so a module importing `Goals.Plan` closes the conjunct by
-`exact Bytes.universal`. The core may not import `Goals.Plan`
-(`scripts/check-layers.mjs`, core import closure).
+EXP's `Powers.exp_val` into `OpcodeSpec.bytesPowers`, of which
+`Goals.opcodeBytesPowers` is a definitional wrapper.
 
 `rows` keeps the integer-oracle vectors as literal data, checked by one kernel
 decision (`rows_fast`). They are finite tests, independent of the universal proofs; `rows[n]`
@@ -51,22 +48,8 @@ theorem clz_val (xs : Fin 1 → Word) :
     (Pure.eval .«clz» xs).val =
       (if (xs 0).val = 0 then 256 else 255 - (xs 0).val.log2) % (2 ^ 256) := rfl
 
-/-- `Goals.opcodeBytesPowers`, unfolded: the Bytes/Powers conjunct of
-`Goals.opcodeEvalUniversal`, for every input. -/
-theorem universal :
-    (∀ xs : Fin 2 → Word, (Pure.eval .«byte» xs).val =
-      (if (xs 0).val ≥ 32 then 0 else
-        ((xs 1).val / 2 ^ (8 * (31 - (xs 0).val))) % 256) % (2 ^ 256)) ∧
-    (∀ xs : Fin 2 → Word, (Pure.eval .«signextend» xs).val =
-      (if (xs 0).val ≥ 31 then (xs 1).val else
-        let bits := 8 * ((xs 0).val + 1)
-        let low := (xs 1).val % (2 ^ bits)
-        if low < 2 ^ (bits - 1) then low
-        else low + (2 ^ 256) - 2 ^ bits) % (2 ^ 256)) ∧
-    (∀ xs : Fin 1 → Word, (Pure.eval .«clz» xs).val =
-      (if (xs 0).val = 0 then 256 else 255 - (xs 0).val.log2) % (2 ^ 256)) ∧
-    (∀ xs : Fin 2 → Word, (Pure.eval .«exp» xs).val =
-      (xs 0).val ^ (xs 1).val % (2 ^ 256)) :=
+/-- BYTE, SIGNEXTEND, CLZ and EXP for every input. -/
+theorem universal : OpcodeSpec.bytesPowers :=
   ⟨byte_val, signextend_val, clz_val, Powers.exp_val⟩
 
 /-- One literal vector: opcode, operands in source order, expected result. -/

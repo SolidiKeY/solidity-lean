@@ -1,13 +1,14 @@
 import Solidity.Yul.Checks.Arithmetic.Part00
 import Solidity.Yul.Checks.Arithmetic.Part01
 import Solidity.Yul.Checks.Arithmetic.Part02
+import Solidity.Yul.Checks.Shifts
+import Solidity.Yul.Checks.Bytes
 
 /-! # Arithmetic opcodes: universal contract and vector table
 
 The 20 clause theorems state each opcode's exact meaning over arbitrary
-operands, in the vocabulary of `Solidity.Goals.opcodeArithmetic` (with
-`OpcodeSpec.modulus` and `OpcodeSpec.residue` unfolded to `2 ^ 256` and
-`(z % 2 ^ 256).toNat`). The 2,008 literal vectors of `Part00`–`Part02` form one
+operands; `universal` is `OpcodeSpec.arithmetic`, and
+`Solidity.Yul.opcode_eval_universal` joins it with the Shifts and Bytes proofs. The 2,008 literal vectors of `Part00`–`Part02` form one
 table checked by one aggregate kernel decision. -/
 
 namespace Solidity.Yul.Checks.Arithmetic
@@ -26,8 +27,8 @@ theorem table_holds : ∀ r ∈ table, (Pure.eval r.op (operands r.args)).val = 
 
 /-! ## Universal clauses
 
-One theorem per clause of `Solidity.Goals.opcodeArithmetic`, in its order;
-each is definitionally that clause, and `universal` is their conjunction. -/
+One theorem per clause of `OpcodeSpec.arithmetic`, in its order (`OpcodeSpec.modulus`
+and `OpcodeSpec.residue` unfolded); each is definitionally that clause, and `universal` is their conjunction. -/
 
 theorem word_val (n : Nat) : (word n).val = n % 2 ^ 256 := rfl
 
@@ -132,46 +133,17 @@ theorem clz_spec (xs : Fin 1 → Word) :
     (Pure.eval .«clz» xs).val =
       (if (xs 0).val = 0 then 256 else 255 - (xs 0).val.log2) % 2 ^ 256 := rfl
 
-/-- The whole arithmetic contract, written out: definitionally
-`Solidity.Goals.opcodeArithmetic` (with `OpcodeSpec.modulus` and
-`OpcodeSpec.residue` unfolded), stated without importing the goal module. -/
-theorem universal :
-    (∀ xs : Fin 2 → Word, (Pure.eval .«add» xs).val = ((xs 0).val + (xs 1).val) % 2 ^ 256) ∧
-    (∀ xs : Fin 2 → Word, (Pure.eval .«sub» xs).val =
-      ((xs 0).val + 2 ^ 256 - (xs 1).val) % 2 ^ 256) ∧
-    (∀ xs : Fin 2 → Word, (Pure.eval .«mul» xs).val = ((xs 0).val * (xs 1).val) % 2 ^ 256) ∧
-    (∀ xs : Fin 2 → Word, (Pure.eval .«div» xs).val =
-      (if (xs 1).val = 0 then 0 else (xs 0).val / (xs 1).val) % 2 ^ 256) ∧
-    (∀ xs : Fin 2 → Word, (Pure.eval .«mod» xs).val =
-      (if (xs 1).val = 0 then 0 else (xs 0).val % (xs 1).val) % 2 ^ 256) ∧
-    (∀ xs : Fin 2 → Word, (Pure.eval .«sdiv» xs).val =
-      ((if (xs 1).val = 0 then 0 else (signed (xs 0)).tdiv (signed (xs 1))) % 2 ^ 256).toNat) ∧
-    (∀ xs : Fin 2 → Word, (Pure.eval .«smod» xs).val =
-      ((if (xs 1).val = 0 then 0 else (signed (xs 0)).tmod (signed (xs 1))) % 2 ^ 256).toNat) ∧
-    (∀ xs : Fin 3 → Word, (Pure.eval .«addmod» xs).val =
-      (if (xs 2).val = 0 then 0 else ((xs 0).val + (xs 1).val) % (xs 2).val) % 2 ^ 256) ∧
-    (∀ xs : Fin 3 → Word, (Pure.eval .«mulmod» xs).val =
-      (if (xs 2).val = 0 then 0 else ((xs 0).val * (xs 1).val) % (xs 2).val) % 2 ^ 256) ∧
-    (∀ xs : Fin 2 → Word, (Pure.eval .«lt» xs).val =
-      (if (xs 0).val < (xs 1).val then 1 else 0) % 2 ^ 256) ∧
-    (∀ xs : Fin 2 → Word, (Pure.eval .«gt» xs).val =
-      (if (xs 1).val < (xs 0).val then 1 else 0) % 2 ^ 256) ∧
-    (∀ xs : Fin 2 → Word, (Pure.eval .«slt» xs).val =
-      (if signed (xs 0) < signed (xs 1) then 1 else 0) % 2 ^ 256) ∧
-    (∀ xs : Fin 2 → Word, (Pure.eval .«sgt» xs).val =
-      (if signed (xs 1) < signed (xs 0) then 1 else 0) % 2 ^ 256) ∧
-    (∀ xs : Fin 2 → Word, (Pure.eval .«eq» xs).val =
-      (if (xs 0).val = (xs 1).val then 1 else 0) % 2 ^ 256) ∧
-    (∀ xs : Fin 1 → Word, (Pure.eval .«iszero» xs).val =
-      (if (xs 0).val = 0 then 1 else 0) % 2 ^ 256) ∧
-    (∀ xs : Fin 1 → Word, (Pure.eval .«not» xs).val = (2 ^ 256 - 1 - (xs 0).val) % 2 ^ 256) ∧
-    (∀ xs : Fin 2 → Word, (Pure.eval .«and» xs).val = ((xs 0).val &&& (xs 1).val) % 2 ^ 256) ∧
-    (∀ xs : Fin 2 → Word, (Pure.eval .«or» xs).val = ((xs 0).val ||| (xs 1).val) % 2 ^ 256) ∧
-    (∀ xs : Fin 2 → Word, (Pure.eval .«xor» xs).val = ((xs 0).val ^^^ (xs 1).val) % 2 ^ 256) ∧
-    (∀ xs : Fin 1 → Word, (Pure.eval .«clz» xs).val =
-      (if (xs 0).val = 0 then 256 else 255 - (xs 0).val.log2) % 2 ^ 256) :=
+/-- The whole arithmetic contract, for every input
+(`Solidity.Goals.opcodeArithmetic` is a definitional wrapper of it). -/
+theorem universal : OpcodeSpec.arithmetic :=
   ⟨add_spec, sub_spec, mul_spec, div_spec, mod_spec, sdiv_spec, smod_spec, addmod_spec,
     mulmod_spec, lt_spec, gt_spec, slt_spec, sgt_spec, eq_spec, iszero_spec, not_spec,
     and_spec, or_spec, xor_spec, clz_spec⟩
 
 end Solidity.Yul.Checks.Arithmetic
+
+/-- Every opcode of the Shifts, Arithmetic and Bytes/Powers families agrees with
+its arithmetic specification on every input: `Solidity.Goals.opcodeEvalUniversal`
+up to its definitional wrappers. -/
+theorem Solidity.Yul.opcode_eval_universal : Solidity.Yul.OpcodeSpec.evalUniversal :=
+  ⟨Checks.Shifts.universal, Checks.Arithmetic.universal, Checks.Bytes.universal⟩
