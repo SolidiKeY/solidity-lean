@@ -1,4 +1,9 @@
 {
+ "Solidity/Lowering/G16/ComparisonControls.lean:Solidity.Lowering.G16.BooleanComparisonControls.wrong_capture_rejected": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
  "Solidity/Lowering/G16/ComparisonControls.lean:Solidity.Lowering.G16.ComparisonControls.wrong_assignment_comparison_rejected": [
   "Classical.choice",
   "Quot.sound",

@@ -192,3 +192,88 @@ theorem wrong_assignment_bitwise_rejected (checked : Bool) (fuel : Nat) :
 #guard_msgs (whitespace := lax) in
 #print axioms wrong_assignment_bitwise_rejected
 end UnsignedBitwiseControls
+
+end Solidity.Lowering.G16
+
+namespace Solidity.Lowering.G16.UnsignedShiftControls
+open Solidity.Lowering.V07
+open Solidity.Lowering.G16.UnsignedShifts
+
+private theorem amount_range (n : Nat) (bound : n < 2^256) :
+    Source.IntTy.u256.lo ≤ (n : Int) ∧ (n : Int) ≤ Source.IntTy.u256.hi := by
+  change 0 ≤ (n : Int) ∧ (n : Int) ≤ ((2^256-1 : Nat) : Int)
+  have positive := Source.two_pow_pos 256
+  omega
+
+private def source (n : Nat) (bound : n < 2^256) :
+    Source.EMState MixedAssignmentControls.E [.int .u8,.int .u256,.bytes .memory,.bytes .storage] :=
+  (.cons (.int 129 (by decide)) (.cons (.int (n : Int) (amount_range n bound))
+    (.cons (.memRef rfl 0) (.cons (.storRef rfl MixedAssignmentControls.path) .nil))),
+    {Source.SemanticsExamples.s0 with heap := MixedAssignmentControls.heap})
+private def target (n : Nat) (bound : n < 2^256) :
+    State MixedAssignmentControls.C [.val .uint,.val .uint,.mem bytesR,.alias bytesR] :=
+  (MixedAssignmentControls.memory.push (integerValue .u256 (n : Int) (amount_range n bound))).push
+    (integerValue .u8 129 (by decide))
+private def sourceObserved (op : Op) (n : Nat) (bound : n < 2^256)
+    (checked : Bool) (p : Roadmap.Pipeline) (fuel : Nat) : Option Int :=
+  match (Source.evalE (MixedAssignmentControls.globals p) {Source.SemanticsExamples.F0 with checked := checked}
+      (fuel+3) (.shiftLike op.source (.local (.here : Source.Idx _ (.int .u8)))
+        (.local (.there .here)) rfl)).run (source n bound) with
+  | (.ok (.val (.int z _)),_) => some z
+  | _ => none
+private def nativeObserved (op : Op) (n : Nat) (bound : n < 2^256) : Option Int :=
+  ((value op 8 (by decide) (.simple (.local .here)) (.simple (.local (.there .here)))).evalT
+    (target n bound)).toOption.map (·.val)
+
+private theorem observed (op : Op) (n : Nat) (bound : n < 2^256)
+    (checked : Bool) (p : Roadmap.Pipeline) (fuel : Nat) :
+    sourceObserved op n bound checked p fuel = some ((UnsignedNarrowing.ty 8 (by decide)).wrap
+      (op.calculate 8 129 (n : Int))) ∧
+    nativeObserved op n bound = some ((UnsignedNarrowing.ty 8 (by decide)).wrap
+      (op.calculate 8 129 (n : Int))) := by
+  have runs := transport (MixedAssignmentControls.globals p)
+    {Source.SemanticsExamples.F0 with checked := checked} fuel (source n bound) (target n bound)
+    op 8 (by decide) 256 (by decide) .here (.there .here) .here (.there .here) 129 (n : Int)
+    (by decide) (amount_range n bound) rfl rfl rfl rfl
+  constructor
+  · unfold sourceObserved
+    rw [runs.1]
+    rfl
+  · unfold nativeObserved
+    rw [runs.2.1]
+    rfl
+
+/-- Actual Source/native runs reject a missing uint8 mask, reversed shift direction, and narrowing the uint256 amount modulo 256. Both modes/pipelines include the left-width and word-width boundaries. -/
+theorem regressions_rejected (checked : Bool) (p : Roadmap.Pipeline) (fuel : Nat) :
+    sourceObserved .left 1 (by decide) checked p fuel = some 2 ∧
+    nativeObserved .left 1 (by decide) = some 2 ∧
+    nativeObserved .left 1 (by decide) ≠ some 258 ∧
+    sourceObserved .right 1 (by decide) checked p fuel = some 64 ∧
+    nativeObserved .right 1 (by decide) = some 64 ∧
+    nativeObserved .right 1 (by decide) ≠ nativeObserved .left 1 (by decide) ∧
+    ∀ op, sourceObserved op 8 (by decide) checked p fuel = some 0 ∧
+      nativeObserved op 8 (by decide) = some 0 ∧
+      sourceObserved op 256 (by decide) checked p fuel = some 0 ∧
+      nativeObserved op 256 (by decide) = some 0 ∧
+      nativeObserved op 256 (by decide) ≠ some 129 := by
+  have left := observed .left 1 (by decide) checked p fuel
+  have right := observed .right 1 (by decide) checked p fuel
+  change sourceObserved .left 1 _ checked p fuel = some 2 ∧
+    nativeObserved .left 1 _ = some 2 at left
+  change sourceObserved .right 1 _ checked p fuel = some 64 ∧
+    nativeObserved .right 1 _ = some 64 at right
+  refine ⟨left.1,left.2,?_,right.1,right.2,?_,?_⟩
+  · rw [left.2]; decide
+  · rw [left.2,right.2]; decide
+  · intro op
+    have width := observed op 8 (by decide) checked p fuel
+    have word := observed op 256 (by decide) checked p fuel
+    change sourceObserved op 8 _ checked p fuel = some 0 ∧ nativeObserved op 8 _ = some 0 at width
+    change sourceObserved op 256 _ checked p fuel = some 0 ∧ nativeObserved op 256 _ = some 0 at word
+    exact ⟨width.1,width.2,word.1,word.2,by rw [word.2]; decide⟩
+
+end Solidity.Lowering.G16.UnsignedShiftControls
+
+/-- info: 'Solidity.Lowering.G16.UnsignedShiftControls.regressions_rejected' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in
+#print axioms Solidity.Lowering.G16.UnsignedShiftControls.regressions_rejected
