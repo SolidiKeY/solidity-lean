@@ -13,7 +13,7 @@ lean.yml	testsuite	Seed Lake cache from master	setup: downloads master's Lake ar
 lean.yml	testsuite	Build the TestSuite	TestSuite build; gate.sh checkpoint builds it when the core is touched, full always
 lean.yml	testsuite	Restore fetched artifacts	setup: places fetched oleans in .lake/build
 lean.yml	testsuite	Check fresh replay timing	fresh replay of the memory-loop groups (~7 min, 600 s budget); needs the TestSuite built
-lean.yml	testsuite	Automation gate	reads the TestSuite build log and replay results; gate.sh full runs check-automatic.mjs --strict
+lean.yml	testsuite	Automation gate	reads the TestSuite build log and the CI replay results; gate.sh full runs check-automatic.mjs --strict without them (weaker: no build log, no replay groups)
 lean.yml	tools	Seed Lake cache from master	setup: downloads master's Lake artifacts
 lean.yml	tools	Build library and executables	full library and executable build (~10 min)
 lean.yml	tools	Restore fetched artifacts	setup: places fetched oleans in .lake/build
