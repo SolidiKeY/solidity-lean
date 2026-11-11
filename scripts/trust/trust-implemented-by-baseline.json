@@ -1,0 +1,3527 @@
+{
+  "schema": 1,
+  "source": [
+    {
+      "file": "Solidity/Calculus/CallFunctionSearch.lean",
+      "module": "Solidity.Calculus.CallFunctionSearch",
+      "line": 33,
+      "kind": "implemented_by"
+    },
+    {
+      "file": "Solidity/Calculus/CallFunctionTransform.lean",
+      "module": "Solidity.Calculus.CallFunctionTransform",
+      "line": 106,
+      "kind": "implemented_by"
+    },
+    {
+      "file": "Solidity/Calculus/CallSummary.lean",
+      "module": "Solidity.Calculus.CallSummary",
+      "line": 157,
+      "kind": "implemented_by"
+    },
+    {
+      "file": "Solidity/Calculus/CallSummary.lean",
+      "module": "Solidity.Calculus.CallSummary",
+      "line": 207,
+      "kind": "implemented_by"
+    },
+    {
+      "file": "Solidity/Calculus/CallSummary.lean",
+      "module": "Solidity.Calculus.CallSummary",
+      "line": 311,
+      "kind": "implemented_by"
+    },
+    {
+      "file": "Solidity/Calculus/CallSummary.lean",
+      "module": "Solidity.Calculus.CallSummary",
+      "line": 424,
+      "kind": "implemented_by"
+    },
+    {
+      "file": "Solidity/Calculus/CallSummary.lean",
+      "module": "Solidity.Calculus.CallSummary",
+      "line": 456,
+      "kind": "implemented_by"
+    },
+    {
+      "file": "Solidity/Calculus/CallSummary.lean",
+      "module": "Solidity.Calculus.CallSummary",
+      "line": 537,
+      "kind": "implemented_by"
+    },
+    {
+      "file": "Solidity/Calculus/CallSummary.lean",
+      "module": "Solidity.Calculus.CallSummary",
+      "line": 569,
+      "kind": "implemented_by"
+    },
+    {
+      "file": "Solidity/Calculus/Closer/Bytes.lean",
+      "module": "Solidity.Calculus.Closer.Bytes",
+      "line": 1102,
+      "kind": "implemented_by"
+    },
+    {
+      "file": "Solidity/Calculus/Closer/Facts.lean",
+      "module": "Solidity.Calculus.Closer.Facts",
+      "line": 246,
+      "kind": "implemented_by"
+    },
+    {
+      "file": "Solidity/Calculus/Closer/Facts.lean",
+      "module": "Solidity.Calculus.Closer.Facts",
+      "line": 695,
+      "kind": "implemented_by"
+    },
+    {
+      "file": "Solidity/Calculus/Closer/Leaf.lean",
+      "module": "Solidity.Calculus.Closer.Leaf",
+      "line": 43,
+      "kind": "implemented_by"
+    },
+    {
+      "file": "Solidity/Calculus/Closer/Leaf.lean",
+      "module": "Solidity.Calculus.Closer.Leaf",
+      "line": 200,
+      "kind": "implemented_by"
+    },
+    {
+      "file": "Solidity/Calculus/Closer/Leaf.lean",
+      "module": "Solidity.Calculus.Closer.Leaf",
+      "line": 1018,
+      "kind": "implemented_by"
+    },
+    {
+      "file": "Solidity/Calculus/Closer/Leaf.lean",
+      "module": "Solidity.Calculus.Closer.Leaf",
+      "line": 1314,
+      "kind": "implemented_by"
+    },
+    {
+      "file": "Solidity/Calculus/CondLift.lean",
+      "module": "Solidity.Calculus.CondLift",
+      "line": 133,
+      "kind": "implemented_by"
+    },
+    {
+      "file": "Solidity/Calculus/CondLift.lean",
+      "module": "Solidity.Calculus.CondLift",
+      "line": 519,
+      "kind": "implemented_by"
+    },
+    {
+      "file": "Solidity/Calculus/Decide.lean",
+      "module": "Solidity.Calculus.Decide",
+      "line": 98,
+      "kind": "implemented_by"
+    },
+    {
+      "file": "Solidity/Calculus/Decide.lean",
+      "module": "Solidity.Calculus.Decide",
+      "line": 397,
+      "kind": "implemented_by"
+    },
+    {
+      "file": "Solidity/Calculus/Decide.lean",
+      "module": "Solidity.Calculus.Decide",
+      "line": 422,
+      "kind": "implemented_by"
+    },
+    {
+      "file": "Solidity/Calculus/Decide.lean",
+      "module": "Solidity.Calculus.Decide",
+      "line": 559,
+      "kind": "implemented_by"
+    },
+    {
+      "file": "Solidity/Calculus/Decide.lean",
+      "module": "Solidity.Calculus.Decide",
+      "line": 713,
+      "kind": "implemented_by"
+    },
+    {
+      "file": "Solidity/Calculus/Decide.lean",
+      "module": "Solidity.Calculus.Decide",
+      "line": 740,
+      "kind": "implemented_by"
+    },
+    {
+      "file": "Solidity/Calculus/Decide.lean",
+      "module": "Solidity.Calculus.Decide",
+      "line": 774,
+      "kind": "implemented_by"
+    },
+    {
+      "file": "Solidity/Calculus/Decide.lean",
+      "module": "Solidity.Calculus.Decide",
+      "line": 806,
+      "kind": "implemented_by"
+    },
+    {
+      "file": "Solidity/Calculus/Decide.lean",
+      "module": "Solidity.Calculus.Decide",
+      "line": 844,
+      "kind": "implemented_by"
+    },
+    {
+      "file": "Solidity/Calculus/Decide.lean",
+      "module": "Solidity.Calculus.Decide",
+      "line": 914,
+      "kind": "implemented_by"
+    },
+    {
+      "file": "Solidity/Calculus/Decide.lean",
+      "module": "Solidity.Calculus.Decide",
+      "line": 970,
+      "kind": "implemented_by"
+    },
+    {
+      "file": "Solidity/Calculus/Decide.lean",
+      "module": "Solidity.Calculus.Decide",
+      "line": 1078,
+      "kind": "implemented_by"
+    },
+    {
+      "file": "Solidity/Calculus/Decide.lean",
+      "module": "Solidity.Calculus.Decide",
+      "line": 1130,
+      "kind": "implemented_by"
+    },
+    {
+      "file": "Solidity/Calculus/Decide.lean",
+      "module": "Solidity.Calculus.Decide",
+      "line": 1167,
+      "kind": "implemented_by"
+    },
+    {
+      "file": "Solidity/Calculus/Decide.lean",
+      "module": "Solidity.Calculus.Decide",
+      "line": 1455,
+      "kind": "implemented_by"
+    },
+    {
+      "file": "Solidity/Calculus/DecideCleanTail.lean",
+      "module": "Solidity.Calculus.DecideCleanTail",
+      "line": 62,
+      "kind": "implemented_by"
+    },
+    {
+      "file": "Solidity/Calculus/DecideCleanTail.lean",
+      "module": "Solidity.Calculus.DecideCleanTail",
+      "line": 92,
+      "kind": "implemented_by"
+    },
+    {
+      "file": "Solidity/Calculus/DecideCleanTail.lean",
+      "module": "Solidity.Calculus.DecideCleanTail",
+      "line": 174,
+      "kind": "implemented_by"
+    },
+    {
+      "file": "Solidity/Calculus/DecideCleanTail.lean",
+      "module": "Solidity.Calculus.DecideCleanTail",
+      "line": 245,
+      "kind": "implemented_by"
+    },
+    {
+      "file": "Solidity/Calculus/DecideCleanTail.lean",
+      "module": "Solidity.Calculus.DecideCleanTail",
+      "line": 317,
+      "kind": "implemented_by"
+    },
+    {
+      "file": "Solidity/Calculus/DecideCleanTail.lean",
+      "module": "Solidity.Calculus.DecideCleanTail",
+      "line": 361,
+      "kind": "implemented_by"
+    },
+    {
+      "file": "Solidity/Calculus/DecideLang.lean",
+      "module": "Solidity.Calculus.DecideLang",
+      "line": 316,
+      "kind": "implemented_by"
+    },
+    {
+      "file": "Solidity/Calculus/DecideScoped.lean",
+      "module": "Solidity.Calculus.DecideScoped",
+      "line": 107,
+      "kind": "implemented_by"
+    },
+    {
+      "file": "Solidity/Calculus/DecideScoped.lean",
+      "module": "Solidity.Calculus.DecideScoped",
+      "line": 352,
+      "kind": "implemented_by"
+    },
+    {
+      "file": "Solidity/Calculus/DecideScoped.lean",
+      "module": "Solidity.Calculus.DecideScoped",
+      "line": 438,
+      "kind": "implemented_by"
+    },
+    {
+      "file": "Solidity/Calculus/DecideScoped.lean",
+      "module": "Solidity.Calculus.DecideScoped",
+      "line": 569,
+      "kind": "implemented_by"
+    },
+    {
+      "file": "Solidity/Calculus/ElimFacts.lean",
+      "module": "Solidity.Calculus.ElimFacts",
+      "line": 41,
+      "kind": "implemented_by"
+    },
+    {
+      "file": "Solidity/Calculus/ElimFacts.lean",
+      "module": "Solidity.Calculus.ElimFacts",
+      "line": 75,
+      "kind": "implemented_by"
+    },
+    {
+      "file": "Solidity/Calculus/ElimFacts.lean",
+      "module": "Solidity.Calculus.ElimFacts",
+      "line": 184,
+      "kind": "implemented_by"
+    },
+    {
+      "file": "Solidity/Calculus/ElimFacts.lean",
+      "module": "Solidity.Calculus.ElimFacts",
+      "line": 290,
+      "kind": "implemented_by"
+    },
+    {
+      "file": "Solidity/Calculus/FirstOrder.lean",
+      "module": "Solidity.Calculus.FirstOrder",
+      "line": 30,
+      "kind": "implemented_by"
+    },
+    {
+      "file": "Solidity/Calculus/FirstOrder.lean",
+      "module": "Solidity.Calculus.FirstOrder",
+      "line": 45,
+      "kind": "implemented_by"
+    },
+    {
+      "file": "Solidity/Calculus/Lands.lean",
+      "module": "Solidity.Calculus.Lands",
+      "line": 140,
+      "kind": "implemented_by"
+    },
+    {
+      "file": "Solidity/Calculus/Lands.lean",
+      "module": "Solidity.Calculus.Lands",
+      "line": 193,
+      "kind": "implemented_by"
+    },
+    {
+      "file": "Solidity/Calculus/Lands.lean",
+      "module": "Solidity.Calculus.Lands",
+      "line": 273,
+      "kind": "implemented_by"
+    },
+    {
+      "file": "Solidity/Calculus/Lands.lean",
+      "module": "Solidity.Calculus.Lands",
+      "line": 306,
+      "kind": "implemented_by"
+    },
+    {
+      "file": "Solidity/Calculus/Lands.lean",
+      "module": "Solidity.Calculus.Lands",
+      "line": 951,
+      "kind": "implemented_by"
+    },
+    {
+      "file": "Solidity/Calculus/Lands.lean",
+      "module": "Solidity.Calculus.Lands",
+      "line": 980,
+      "kind": "implemented_by"
+    },
+    {
+      "file": "Solidity/Calculus/LeafDerive.lean",
+      "module": "Solidity.Calculus.LeafDerive",
+      "line": 54,
+      "kind": "implemented_by"
+    },
+    {
+      "file": "Solidity/Calculus/LeafDerive.lean",
+      "module": "Solidity.Calculus.LeafDerive",
+      "line": 71,
+      "kind": "implemented_by"
+    },
+    {
+      "file": "Solidity/Calculus/LeafDerive.lean",
+      "module": "Solidity.Calculus.LeafDerive",
+      "line": 107,
+      "kind": "implemented_by"
+    },
+    {
+      "file": "Solidity/Calculus/LeafDerive.lean",
+      "module": "Solidity.Calculus.LeafDerive",
+      "line": 155,
+      "kind": "implemented_by"
+    },
+    {
+      "file": "Solidity/Calculus/LeafDerive.lean",
+      "module": "Solidity.Calculus.LeafDerive",
+      "line": 208,
+      "kind": "implemented_by"
+    },
+    {
+      "file": "Solidity/Calculus/LeafDerive.lean",
+      "module": "Solidity.Calculus.LeafDerive",
+      "line": 317,
+      "kind": "implemented_by"
+    },
+    {
+      "file": "Solidity/Calculus/LeafDerive.lean",
+      "module": "Solidity.Calculus.LeafDerive",
+      "line": 353,
+      "kind": "implemented_by"
+    },
+    {
+      "file": "Solidity/Calculus/LeafDerive.lean",
+      "module": "Solidity.Calculus.LeafDerive",
+      "line": 374,
+      "kind": "implemented_by"
+    },
+    {
+      "file": "Solidity/Calculus/LeafDerive.lean",
+      "module": "Solidity.Calculus.LeafDerive",
+      "line": 417,
+      "kind": "implemented_by"
+    },
+    {
+      "file": "Solidity/Calculus/MemoryWitness.lean",
+      "module": "Solidity.Calculus.MemoryWitness",
+      "line": 229,
+      "kind": "implemented_by"
+    },
+    {
+      "file": "Solidity/Calculus/MemRead/Pass.lean",
+      "module": "Solidity.Calculus.MemRead.Pass",
+      "line": 691,
+      "kind": "implemented_by"
+    },
+    {
+      "file": "Solidity/Calculus/MemRead/Pass.lean",
+      "module": "Solidity.Calculus.MemRead.Pass",
+      "line": 769,
+      "kind": "implemented_by"
+    },
+    {
+      "file": "Solidity/Calculus/MemRead/Pass.lean",
+      "module": "Solidity.Calculus.MemRead.Pass",
+      "line": 838,
+      "kind": "implemented_by"
+    },
+    {
+      "file": "Solidity/Calculus/MemRead/Pass.lean",
+      "module": "Solidity.Calculus.MemRead.Pass",
+      "line": 890,
+      "kind": "implemented_by"
+    },
+    {
+      "file": "Solidity/Calculus/MemRead/Pass.lean",
+      "module": "Solidity.Calculus.MemRead.Pass",
+      "line": 924,
+      "kind": "implemented_by"
+    },
+    {
+      "file": "Solidity/Calculus/MemRead/Pass.lean",
+      "module": "Solidity.Calculus.MemRead.Pass",
+      "line": 982,
+      "kind": "implemented_by"
+    },
+    {
+      "file": "Solidity/Calculus/MemRead/Spine.lean",
+      "module": "Solidity.Calculus.MemRead.Spine",
+      "line": 112,
+      "kind": "implemented_by"
+    },
+    {
+      "file": "Solidity/Calculus/MemRead/Spine.lean",
+      "module": "Solidity.Calculus.MemRead.Spine",
+      "line": 163,
+      "kind": "implemented_by"
+    },
+    {
+      "file": "Solidity/Calculus/MemRead/Spine.lean",
+      "module": "Solidity.Calculus.MemRead.Spine",
+      "line": 385,
+      "kind": "implemented_by"
+    },
+    {
+      "file": "Solidity/Calculus/MemRead/Spine.lean",
+      "module": "Solidity.Calculus.MemRead.Spine",
+      "line": 530,
+      "kind": "implemented_by"
+    },
+    {
+      "file": "Solidity/Calculus/MemRead/Spine.lean",
+      "module": "Solidity.Calculus.MemRead.Spine",
+      "line": 851,
+      "kind": "implemented_by"
+    },
+    {
+      "file": "Solidity/Calculus/Proves.lean",
+      "module": "Solidity.Calculus.Proves",
+      "line": 304,
+      "kind": "implemented_by"
+    },
+    {
+      "file": "Solidity/Calculus/ReadBounds.lean",
+      "module": "Solidity.Calculus.ReadBounds",
+      "line": 35,
+      "kind": "implemented_by"
+    },
+    {
+      "file": "Solidity/Calculus/ReadBounds.lean",
+      "module": "Solidity.Calculus.ReadBounds",
+      "line": 47,
+      "kind": "implemented_by"
+    },
+    {
+      "file": "Solidity/Calculus/ReadBounds.lean",
+      "module": "Solidity.Calculus.ReadBounds",
+      "line": 77,
+      "kind": "implemented_by"
+    },
+    {
+      "file": "Solidity/Calculus/ReadBounds.lean",
+      "module": "Solidity.Calculus.ReadBounds",
+      "line": 87,
+      "kind": "implemented_by"
+    },
+    {
+      "file": "Solidity/Calculus/ReadBounds.lean",
+      "module": "Solidity.Calculus.ReadBounds",
+      "line": 124,
+      "kind": "implemented_by"
+    },
+    {
+      "file": "Solidity/Calculus/ReadBounds.lean",
+      "module": "Solidity.Calculus.ReadBounds",
+      "line": 158,
+      "kind": "implemented_by"
+    },
+    {
+      "file": "Solidity/Calculus/ReadBounds.lean",
+      "module": "Solidity.Calculus.ReadBounds",
+      "line": 244,
+      "kind": "implemented_by"
+    },
+    {
+      "file": "Solidity/Calculus/ReadBounds.lean",
+      "module": "Solidity.Calculus.ReadBounds",
+      "line": 271,
+      "kind": "implemented_by"
+    },
+    {
+      "file": "Solidity/Calculus/ReadBounds.lean",
+      "module": "Solidity.Calculus.ReadBounds",
+      "line": 359,
+      "kind": "implemented_by"
+    },
+    {
+      "file": "Solidity/Calculus/ReadBounds.lean",
+      "module": "Solidity.Calculus.ReadBounds",
+      "line": 409,
+      "kind": "implemented_by"
+    },
+    {
+      "file": "Solidity/Calculus/ReadBounds.lean",
+      "module": "Solidity.Calculus.ReadBounds",
+      "line": 435,
+      "kind": "implemented_by"
+    },
+    {
+      "file": "Solidity/Calculus/ReadBounds.lean",
+      "module": "Solidity.Calculus.ReadBounds",
+      "line": 471,
+      "kind": "implemented_by"
+    },
+    {
+      "file": "Solidity/Calculus/RewritePast/Merge.lean",
+      "module": "Solidity.Calculus.RewritePast.Merge",
+      "line": 33,
+      "kind": "implemented_by"
+    },
+    {
+      "file": "Solidity/Calculus/RewriteSyntax.lean",
+      "module": "Solidity.Calculus.RewriteSyntax",
+      "line": 81,
+      "kind": "implemented_by"
+    },
+    {
+      "file": "Solidity/Calculus/Rigid.lean",
+      "module": "Solidity.Calculus.Rigid",
+      "line": 37,
+      "kind": "implemented_by"
+    },
+    {
+      "file": "Solidity/Calculus/RuleShapes.lean",
+      "module": "Solidity.Calculus.RuleShapes",
+      "line": 45,
+      "kind": "implemented_by"
+    },
+    {
+      "file": "Solidity/Calculus/SeqRewrite.lean",
+      "module": "Solidity.Calculus.SeqRewrite",
+      "line": 717,
+      "kind": "implemented_by"
+    },
+    {
+      "file": "Solidity/Calculus/StatePartsScoped.lean",
+      "module": "Solidity.Calculus.StatePartsScoped",
+      "line": 250,
+      "kind": "implemented_by"
+    },
+    {
+      "file": "Solidity/Calculus/Step.lean",
+      "module": "Solidity.Calculus.Step",
+      "line": 258,
+      "kind": "implemented_by"
+    },
+    {
+      "file": "Solidity/Calculus/Symex.lean",
+      "module": "Solidity.Calculus.Symex",
+      "line": 160,
+      "kind": "implemented_by"
+    },
+    {
+      "file": "Solidity/Calculus/TermEq.lean",
+      "module": "Solidity.Calculus.TermEq",
+      "line": 252,
+      "kind": "implemented_by"
+    },
+    {
+      "file": "Solidity/Calculus/TermEq.lean",
+      "module": "Solidity.Calculus.TermEq",
+      "line": 339,
+      "kind": "implemented_by"
+    },
+    {
+      "file": "Solidity/Calculus/TermEval.lean",
+      "module": "Solidity.Calculus.TermEval",
+      "line": 46,
+      "kind": "implemented_by"
+    },
+    {
+      "file": "Solidity/Calculus/UpdRuleScoped.lean",
+      "module": "Solidity.Calculus.UpdRuleScoped",
+      "line": 145,
+      "kind": "implemented_by"
+    },
+    {
+      "file": "Solidity/Calculus/UpdRuleScoped.lean",
+      "module": "Solidity.Calculus.UpdRuleScoped",
+      "line": 245,
+      "kind": "implemented_by"
+    },
+    {
+      "file": "Solidity/Calculus/UpdRuleScoped.lean",
+      "module": "Solidity.Calculus.UpdRuleScoped",
+      "line": 328,
+      "kind": "implemented_by"
+    },
+    {
+      "file": "Solidity/Calculus/UpdRuleScoped.lean",
+      "module": "Solidity.Calculus.UpdRuleScoped",
+      "line": 350,
+      "kind": "implemented_by"
+    },
+    {
+      "file": "Solidity/Calculus/UpdRuleScoped.lean",
+      "module": "Solidity.Calculus.UpdRuleScoped",
+      "line": 381,
+      "kind": "implemented_by"
+    },
+    {
+      "file": "Solidity/Calculus/UpdRuleScoped.lean",
+      "module": "Solidity.Calculus.UpdRuleScoped",
+      "line": 896,
+      "kind": "implemented_by"
+    },
+    {
+      "file": "Solidity/Calculus/UpdRuleScoped.lean",
+      "module": "Solidity.Calculus.UpdRuleScoped",
+      "line": 1097,
+      "kind": "implemented_by"
+    },
+    {
+      "file": "Solidity/Calculus/UpdRuleScoped.lean",
+      "module": "Solidity.Calculus.UpdRuleScoped",
+      "line": 1207,
+      "kind": "implemented_by"
+    },
+    {
+      "file": "Solidity/Calculus/UpdRuleScoped.lean",
+      "module": "Solidity.Calculus.UpdRuleScoped",
+      "line": 1246,
+      "kind": "implemented_by"
+    },
+    {
+      "file": "Solidity/Evm/Machine.lean",
+      "module": "Solidity.Evm.Machine",
+      "line": 437,
+      "kind": "implemented_by"
+    },
+    {
+      "file": "Solidity/Evm/MemoryLoopScopeCompile.lean",
+      "module": "Solidity.Evm.MemoryLoopScopeCompile",
+      "line": 46,
+      "kind": "implemented_by"
+    },
+    {
+      "file": "Solidity/Evm/MemoryLoopScopeCompile.lean",
+      "module": "Solidity.Evm.MemoryLoopScopeCompile",
+      "line": 75,
+      "kind": "implemented_by"
+    },
+    {
+      "file": "Solidity/Evm/MemoryLoopScopeMeta.lean",
+      "module": "Solidity.Evm.MemoryLoopScopeMeta",
+      "line": 28,
+      "kind": "implemented_by"
+    },
+    {
+      "file": "Solidity/Evm/MemoryLoopScopeMeta.lean",
+      "module": "Solidity.Evm.MemoryLoopScopeMeta",
+      "line": 40,
+      "kind": "implemented_by"
+    },
+    {
+      "file": "Solidity/Evm/MemoryRecursiveCert.lean",
+      "module": "Solidity.Evm.MemoryRecursiveCert",
+      "line": 127,
+      "kind": "implemented_by"
+    },
+    {
+      "file": "Solidity/Evm/MemoryRecursiveCert.lean",
+      "module": "Solidity.Evm.MemoryRecursiveCert",
+      "line": 137,
+      "kind": "implemented_by"
+    },
+    {
+      "file": "Solidity/Evm/MemoryRecursiveCompile.lean",
+      "module": "Solidity.Evm.MemoryRecursiveCompile",
+      "line": 52,
+      "kind": "implemented_by"
+    },
+    {
+      "file": "Solidity/Evm/MemoryRecursiveCompile.lean",
+      "module": "Solidity.Evm.MemoryRecursiveCompile",
+      "line": 89,
+      "kind": "implemented_by"
+    },
+    {
+      "file": "Solidity/Evm/MemoryRecursiveRoom.lean",
+      "module": "Solidity.Evm.MemoryRecursiveRoom",
+      "line": 19,
+      "kind": "implemented_by"
+    },
+    {
+      "file": "Solidity/Evm/MemoryRecursiveRoom.lean",
+      "module": "Solidity.Evm.MemoryRecursiveRoom",
+      "line": 29,
+      "kind": "implemented_by"
+    },
+    {
+      "file": "Solidity/Frontend/QualifiedUnits/References.lean",
+      "module": "Solidity.Frontend.QualifiedUnits.References",
+      "line": 124,
+      "kind": "implemented_by"
+    },
+    {
+      "file": "Solidity/Frontend/QualifiedUnits/References.lean",
+      "module": "Solidity.Frontend.QualifiedUnits.References",
+      "line": 478,
+      "kind": "implemented_by"
+    },
+    {
+      "file": "Solidity/Semantics/Run.lean",
+      "module": "Solidity.Semantics.Run",
+      "line": 598,
+      "kind": "implemented_by"
+    },
+    {
+      "file": "Solidity/Semantics/Run.lean",
+      "module": "Solidity.Semantics.Run",
+      "line": 1120,
+      "kind": "implemented_by"
+    },
+    {
+      "file": "Solidity/Semantics/Run.lean",
+      "module": "Solidity.Semantics.Run",
+      "line": 1151,
+      "kind": "implemented_by"
+    },
+    {
+      "file": "Solidity/Semantics/RunAccel.lean",
+      "module": "Solidity.Semantics.RunAccel",
+      "line": 889,
+      "kind": "implemented_by"
+    },
+    {
+      "file": "Solidity/Semantics/RunAccel.lean",
+      "module": "Solidity.Semantics.RunAccel",
+      "line": 920,
+      "kind": "implemented_by"
+    },
+    {
+      "file": "Solidity/Semantics/RunFuel.lean",
+      "module": "Solidity.Semantics.RunFuel",
+      "line": 287,
+      "kind": "implemented_by"
+    },
+    {
+      "file": "Solidity/Semantics/RunFuel.lean",
+      "module": "Solidity.Semantics.RunFuel",
+      "line": 318,
+      "kind": "implemented_by"
+    },
+    {
+      "file": "Solidity/Semantics/Storage/Ops.lean",
+      "module": "Solidity.Semantics.Storage.Ops",
+      "line": 98,
+      "kind": "implemented_by"
+    },
+    {
+      "file": "Solidity/Semantics/Storage/Ops.lean",
+      "module": "Solidity.Semantics.Storage.Ops",
+      "line": 121,
+      "kind": "implemented_by"
+    },
+    {
+      "file": "Solidity/Semantics/Storage/Ops.lean",
+      "module": "Solidity.Semantics.Storage.Ops",
+      "line": 143,
+      "kind": "implemented_by"
+    },
+    {
+      "file": "Solidity/Semantics/Storage/Ops.lean",
+      "module": "Solidity.Semantics.Storage.Ops",
+      "line": 232,
+      "kind": "implemented_by"
+    },
+    {
+      "file": "Solidity/Semantics/Storage/Ops.lean",
+      "module": "Solidity.Semantics.Storage.Ops",
+      "line": 234,
+      "kind": "implemented_by"
+    },
+    {
+      "file": "Solidity/Semantics/Storage/Ops.lean",
+      "module": "Solidity.Semantics.Storage.Ops",
+      "line": 236,
+      "kind": "implemented_by"
+    },
+    {
+      "file": "Solidity/Semantics/Storage/Ops.lean",
+      "module": "Solidity.Semantics.Storage.Ops",
+      "line": 238,
+      "kind": "implemented_by"
+    },
+    {
+      "file": "Solidity/Semantics/Storage/Ops.lean",
+      "module": "Solidity.Semantics.Storage.Ops",
+      "line": 346,
+      "kind": "implemented_by"
+    },
+    {
+      "file": "Solidity/Semantics/Storage/Ops.lean",
+      "module": "Solidity.Semantics.Storage.Ops",
+      "line": 348,
+      "kind": "implemented_by"
+    },
+    {
+      "file": "Solidity/Semantics/Storage/Ops.lean",
+      "module": "Solidity.Semantics.Storage.Ops",
+      "line": 350,
+      "kind": "implemented_by"
+    },
+    {
+      "file": "Solidity/Semantics/Storage/Ops.lean",
+      "module": "Solidity.Semantics.Storage.Ops",
+      "line": 352,
+      "kind": "implemented_by"
+    },
+    {
+      "file": "Solidity/Semantics/Storage/Ops.lean",
+      "module": "Solidity.Semantics.Storage.Ops",
+      "line": 497,
+      "kind": "implemented_by"
+    },
+    {
+      "file": "Solidity/Semantics/Storage/Ops.lean",
+      "module": "Solidity.Semantics.Storage.Ops",
+      "line": 499,
+      "kind": "implemented_by"
+    },
+    {
+      "file": "Solidity/Semantics/Storage/Ops.lean",
+      "module": "Solidity.Semantics.Storage.Ops",
+      "line": 503,
+      "kind": "implemented_by"
+    },
+    {
+      "file": "Solidity/Semantics/Storage/Values.lean",
+      "module": "Solidity.Semantics.Storage.Values",
+      "line": 119,
+      "kind": "implemented_by"
+    },
+    {
+      "file": "Solidity/Semantics/Storage/Values.lean",
+      "module": "Solidity.Semantics.Storage.Values",
+      "line": 125,
+      "kind": "implemented_by"
+    },
+    {
+      "file": "Solidity/Semantics/Storage/Values.lean",
+      "module": "Solidity.Semantics.Storage.Values",
+      "line": 131,
+      "kind": "implemented_by"
+    },
+    {
+      "file": "Solidity/Semantics/Storage/Values.lean",
+      "module": "Solidity.Semantics.Storage.Values",
+      "line": 137,
+      "kind": "implemented_by"
+    },
+    {
+      "file": "Solidity/Semantics/Storage/Values.lean",
+      "module": "Solidity.Semantics.Storage.Values",
+      "line": 143,
+      "kind": "implemented_by"
+    },
+    {
+      "file": "Solidity/Semantics/Storage/Values.lean",
+      "module": "Solidity.Semantics.Storage.Values",
+      "line": 279,
+      "kind": "implemented_by"
+    },
+    {
+      "file": "Solidity/Semantics/Storage/Values.lean",
+      "module": "Solidity.Semantics.Storage.Values",
+      "line": 318,
+      "kind": "implemented_by"
+    },
+    {
+      "file": "Solidity/Semantics/Storage/Values.lean",
+      "module": "Solidity.Semantics.Storage.Values",
+      "line": 378,
+      "kind": "implemented_by"
+    },
+    {
+      "file": "Solidity/Semantics/Storage/Values.lean",
+      "module": "Solidity.Semantics.Storage.Values",
+      "line": 428,
+      "kind": "implemented_by"
+    },
+    {
+      "file": "Solidity/Semantics/Storage/Values.lean",
+      "module": "Solidity.Semantics.Storage.Values",
+      "line": 527,
+      "kind": "implemented_by"
+    },
+    {
+      "file": "Solidity/Semantics/Storage/Values.lean",
+      "module": "Solidity.Semantics.Storage.Values",
+      "line": 542,
+      "kind": "implemented_by"
+    },
+    {
+      "file": "Solidity/Semantics/Storage/Values.lean",
+      "module": "Solidity.Semantics.Storage.Values",
+      "line": 702,
+      "kind": "implemented_by"
+    },
+    {
+      "file": "Solidity/Semantics/Storage/Values.lean",
+      "module": "Solidity.Semantics.Storage.Values",
+      "line": 724,
+      "kind": "implemented_by"
+    },
+    {
+      "file": "Solidity/Semantics/Storage/Values.lean",
+      "module": "Solidity.Semantics.Storage.Values",
+      "line": 765,
+      "kind": "implemented_by"
+    },
+    {
+      "file": "Solidity/Signature.lean",
+      "module": "Solidity.Signature",
+      "line": 121,
+      "kind": "implemented_by"
+    },
+    {
+      "file": "Solidity/Signature.lean",
+      "module": "Solidity.Signature",
+      "line": 320,
+      "kind": "implemented_by"
+    },
+    {
+      "file": "Solidity/Signature.lean",
+      "module": "Solidity.Signature",
+      "line": 355,
+      "kind": "implemented_by"
+    },
+    {
+      "file": "Solidity/Signature.lean",
+      "module": "Solidity.Signature",
+      "line": 452,
+      "kind": "implemented_by"
+    },
+    {
+      "file": "Solidity/Signature.lean",
+      "module": "Solidity.Signature",
+      "line": 513,
+      "kind": "implemented_by"
+    },
+    {
+      "file": "Solidity/Syntax/Elab/Context.lean",
+      "module": "Solidity.Syntax.Elab.Context",
+      "line": 1352,
+      "kind": "implemented_by"
+    },
+    {
+      "file": "Solidity/Syntax/Elab/Values.lean",
+      "module": "Solidity.Syntax.Elab.Values",
+      "line": 694,
+      "kind": "implemented_by"
+    },
+    {
+      "file": "Solidity/Syntax/Elab/Values.lean",
+      "module": "Solidity.Syntax.Elab.Values",
+      "line": 705,
+      "kind": "implemented_by"
+    },
+    {
+      "file": "Solidity/Syntax/Quote.lean",
+      "module": "Solidity.Syntax.Quote",
+      "line": 309,
+      "kind": "implemented_by"
+    },
+    {
+      "file": "Solidity/Syntax/Quote.lean",
+      "module": "Solidity.Syntax.Quote",
+      "line": 322,
+      "kind": "implemented_by"
+    },
+    {
+      "file": "Solidity/Tools/Counterexample.lean",
+      "module": "Solidity.Tools.Counterexample",
+      "line": 396,
+      "kind": "implemented_by"
+    },
+    {
+      "file": "Solidity/Tools/Counterexample.lean",
+      "module": "Solidity.Tools.Counterexample",
+      "line": 726,
+      "kind": "implemented_by"
+    },
+    {
+      "file": "Solidity/Yul/Views/RetainedEntryPaths.lean",
+      "module": "Solidity.Yul.Views.RetainedEntryPaths",
+      "line": 15,
+      "kind": "implemented_by"
+    },
+    {
+      "file": "Solidity/Yul/Views/RetainedEntryPaths.lean",
+      "module": "Solidity.Yul.Views.RetainedEntryPaths",
+      "line": 34,
+      "kind": "implemented_by"
+    },
+    {
+      "file": "Solidity/Yul/Views/RetainedEntryPaths.lean",
+      "module": "Solidity.Yul.Views.RetainedEntryPaths",
+      "line": 52,
+      "kind": "implemented_by"
+    },
+    {
+      "file": "Solidity/Yul/Views/RetainedLocationRun.lean",
+      "module": "Solidity.Yul.Views.RetainedLocationRun",
+      "line": 22,
+      "kind": "implemented_by"
+    },
+    {
+      "file": "Solidity/Yul/Views/RetainedRuntimePaths.lean",
+      "module": "Solidity.Yul.Views.RetainedRuntimePaths",
+      "line": 23,
+      "kind": "implemented_by"
+    },
+    {
+      "file": "Solidity/Yul/Views/RetainedRuntimePaths.lean",
+      "module": "Solidity.Yul.Views.RetainedRuntimePaths",
+      "line": 29,
+      "kind": "implemented_by"
+    }
+  ],
+  "rows": [
+    {
+      "declaration": "_private.Solidity.Calculus.RuleShapes.0.Solidity.evalNames",
+      "extern": false,
+      "implementation": "_private.Solidity.Calculus.RuleShapes.0.Solidity.evalNamesImpl",
+      "implementationUnsafe": true,
+      "links": [],
+      "module": "Solidity.Calculus.RuleShapes",
+      "opaque": true,
+      "unsafe": false,
+      "compilerGenerated": false
+    },
+    {
+      "declaration": "_private.Solidity.Evm.MemoryLoopScopeMeta.0.Solidity.Evm.Memory.LoopScopes.progMeta",
+      "extern": false,
+      "implementation": "_private.Solidity.Evm.MemoryLoopScopeMeta.0.Solidity.Evm.Memory.LoopScopes.progMetaM",
+      "implementationUnsafe": false,
+      "links": [
+        "_private.Solidity.Evm.MemoryLoopScopeMeta.0.Solidity.Evm.Memory.LoopScopes.progMeta_eq"
+      ],
+      "module": "Solidity.Evm.MemoryLoopScopeMeta",
+      "opaque": false,
+      "unsafe": false,
+      "compilerGenerated": false
+    },
+    {
+      "declaration": "_private.Solidity.Evm.MemoryLoopScopeMeta.0.Solidity.Evm.Memory.LoopScopes.stmtMeta",
+      "extern": false,
+      "implementation": "_private.Solidity.Evm.MemoryLoopScopeMeta.0.Solidity.Evm.Memory.LoopScopes.stmtMetaM",
+      "implementationUnsafe": false,
+      "links": [
+        "_private.Solidity.Evm.MemoryLoopScopeMeta.0.Solidity.Evm.Memory.LoopScopes.stmtMeta_eq"
+      ],
+      "module": "Solidity.Evm.MemoryLoopScopeMeta",
+      "opaque": false,
+      "unsafe": false,
+      "compilerGenerated": false
+    },
+    {
+      "declaration": "Solidity.CallFunctionSearch.subterms",
+      "extern": false,
+      "implementation": "Solidity.CallFunctionSearch.subtermsM",
+      "implementationUnsafe": false,
+      "links": [
+        "Solidity.CallFunctionSearch.subterms_eq"
+      ],
+      "module": "Solidity.Calculus.CallFunctionSearch",
+      "opaque": false,
+      "unsafe": false,
+      "compilerGenerated": false
+    },
+    {
+      "declaration": "Solidity.CallFunctionTransform.transform",
+      "extern": false,
+      "implementation": "Solidity.CallFunctionTransform.transformM",
+      "implementationUnsafe": false,
+      "links": [
+        "Solidity.CallFunctionTransform.transform_eq"
+      ],
+      "module": "Solidity.Calculus.CallFunctionTransform",
+      "opaque": false,
+      "unsafe": false,
+      "compilerGenerated": false
+    },
+    {
+      "declaration": "Solidity.CallMemo.body?",
+      "extern": false,
+      "implementation": "Solidity.CallMemo.bodyImpl?",
+      "implementationUnsafe": true,
+      "links": [],
+      "module": "Solidity.Syntax.Elab.Values",
+      "opaque": false,
+      "unsafe": false,
+      "compilerGenerated": false
+    },
+    {
+      "declaration": "Solidity.CallMemo.setBody",
+      "extern": false,
+      "implementation": "Solidity.CallMemo.setBodyImpl",
+      "implementationUnsafe": true,
+      "links": [],
+      "module": "Solidity.Syntax.Elab.Values",
+      "opaque": false,
+      "unsafe": false,
+      "compilerGenerated": false
+    },
+    {
+      "declaration": "Solidity.Decide.arrRd",
+      "extern": false,
+      "implementation": "Solidity.Decide.arrRdM",
+      "implementationUnsafe": false,
+      "links": [
+        "Solidity.Decide.arrRd_eq_arrRdM"
+      ],
+      "module": "Solidity.Calculus.Decide",
+      "opaque": false,
+      "unsafe": false,
+      "compilerGenerated": false
+    },
+    {
+      "declaration": "Solidity.Decide.BEnv.thin",
+      "extern": false,
+      "implementation": "Solidity.Decide.BEnv.thinM",
+      "implementationUnsafe": false,
+      "links": [
+        "Solidity.Decide.BEnv.thin_eq_thinM"
+      ],
+      "module": "Solidity.Calculus.DecideScoped",
+      "opaque": false,
+      "unsafe": false,
+      "compilerGenerated": false
+    },
+    {
+      "declaration": "Solidity.Decide.delRS",
+      "extern": false,
+      "implementation": "Solidity.Decide.delRSM",
+      "implementationUnsafe": false,
+      "links": [],
+      "module": "Solidity.Calculus.Decide",
+      "opaque": false,
+      "unsafe": false,
+      "compilerGenerated": false
+    },
+    {
+      "declaration": "Solidity.Decide.dfltHas",
+      "extern": false,
+      "implementation": "Solidity.Decide.dfltHasM",
+      "implementationUnsafe": false,
+      "links": [
+        "Solidity.Decide.dfltHas_eq_dfltHasM"
+      ],
+      "module": "Solidity.Calculus.Decide",
+      "opaque": false,
+      "unsafe": false,
+      "compilerGenerated": false
+    },
+    {
+      "declaration": "Solidity.Decide.ElimM.rwF",
+      "extern": false,
+      "implementation": "Solidity.Decide.ElimM.rwFM",
+      "implementationUnsafe": false,
+      "links": [
+        "Solidity.Decide.ElimM.rwF_eq_rwFM"
+      ],
+      "module": "Solidity.Calculus.ElimFacts",
+      "opaque": false,
+      "unsafe": false,
+      "compilerGenerated": false
+    },
+    {
+      "declaration": "Solidity.Decide.evalCore.unsafe_impl_3",
+      "extern": false,
+      "implementation": "Solidity.Decide.evalCore.unsafe_1",
+      "implementationUnsafe": true,
+      "links": [],
+      "module": "Solidity.Calculus.DecideComplete",
+      "opaque": true,
+      "unsafe": false,
+      "compilerGenerated": true
+    },
+    {
+      "declaration": "Solidity.Decide.Facts.nf",
+      "extern": false,
+      "implementation": "Solidity.Decide.Facts.nfM",
+      "implementationUnsafe": false,
+      "links": [
+        "Solidity.Decide.Facts.nf_eq_nfM"
+      ],
+      "module": "Solidity.Calculus.Closer.Bytes",
+      "opaque": false,
+      "unsafe": false,
+      "compilerGenerated": false
+    },
+    {
+      "declaration": "Solidity.Decide.Facts.returns",
+      "extern": false,
+      "implementation": "Solidity.Decide.Facts.returnsM",
+      "implementationUnsafe": false,
+      "links": [
+        "Solidity.Decide.Facts.returns_eq_returnsM"
+      ],
+      "module": "Solidity.Calculus.Closer.Facts",
+      "opaque": false,
+      "unsafe": false,
+      "compilerGenerated": false
+    },
+    {
+      "declaration": "Solidity.Decide.Facts.rwWith",
+      "extern": false,
+      "implementation": "Solidity.Decide.Facts.rwWithM",
+      "implementationUnsafe": false,
+      "links": [
+        "Solidity.Decide.Facts.rwWith_eq_rwWithM"
+      ],
+      "module": "Solidity.Calculus.Closer.Facts",
+      "opaque": false,
+      "unsafe": false,
+      "compilerGenerated": false
+    },
+    {
+      "declaration": "Solidity.Decide.LFml.close",
+      "extern": false,
+      "implementation": "Solidity.Decide.LFml.closeM",
+      "implementationUnsafe": false,
+      "links": [
+        "Solidity.Decide.LFml.close_eq_closeM"
+      ],
+      "module": "Solidity.Calculus.Closer.Leaf",
+      "opaque": false,
+      "unsafe": false,
+      "compilerGenerated": false
+    },
+    {
+      "declaration": "Solidity.Decide.LFml.ctFold",
+      "extern": false,
+      "implementation": "Solidity.Decide.LFml.ctFoldM",
+      "implementationUnsafe": false,
+      "links": [
+        "Solidity.Decide.LFml.ctFold_eq_ctFoldM"
+      ],
+      "module": "Solidity.Calculus.DecideCleanTail",
+      "opaque": false,
+      "unsafe": false,
+      "compilerGenerated": false
+    },
+    {
+      "declaration": "Solidity.Decide.LFml.dropPrem",
+      "extern": false,
+      "implementation": "Solidity.Decide.LFml.dropPremM",
+      "implementationUnsafe": false,
+      "links": [
+        "Solidity.Decide.LFml.dropPrem_eq_dropPremM"
+      ],
+      "module": "Solidity.Calculus.LeafDerive",
+      "opaque": false,
+      "unsafe": false,
+      "compilerGenerated": false
+    },
+    {
+      "declaration": "Solidity.Decide.LFml.elimF",
+      "extern": false,
+      "implementation": "Solidity.Decide.LFml.elimFM",
+      "implementationUnsafe": false,
+      "links": [
+        "Solidity.Decide.LFml.elimF_eq_elimFM"
+      ],
+      "module": "Solidity.Calculus.ElimFacts",
+      "opaque": false,
+      "unsafe": false,
+      "compilerGenerated": false
+    },
+    {
+      "declaration": "Solidity.Decide.LFml.exposeDepth",
+      "extern": false,
+      "implementation": "Solidity.Decide.LFml.exposeDepthM",
+      "implementationUnsafe": false,
+      "links": [
+        "Solidity.Decide.LFml.exposeDepth_eq_exposeDepthM"
+      ],
+      "module": "Solidity.Calculus.ReadBounds",
+      "opaque": false,
+      "unsafe": false,
+      "compilerGenerated": false
+    },
+    {
+      "declaration": "Solidity.Decide.LFml.factsOf",
+      "extern": false,
+      "implementation": "Solidity.Decide.LFml.factsOfM",
+      "implementationUnsafe": false,
+      "links": [
+        "Solidity.Decide.LFml.factsOf_eq_factsOfM"
+      ],
+      "module": "Solidity.Calculus.ElimFacts",
+      "opaque": false,
+      "unsafe": false,
+      "compilerGenerated": false
+    },
+    {
+      "declaration": "Solidity.Decide.LFml.fits",
+      "extern": false,
+      "implementation": "Solidity.Decide.LFml.fitsM",
+      "implementationUnsafe": false,
+      "links": [
+        "Solidity.Decide.LFml.fits_eq_fitsM"
+      ],
+      "module": "Solidity.Calculus.ReadBounds",
+      "opaque": false,
+      "unsafe": false,
+      "compilerGenerated": false
+    },
+    {
+      "declaration": "Solidity.Decide.LFml.fitsM",
+      "extern": false,
+      "implementation": "Solidity.Decide.LFml.fitsStack",
+      "implementationUnsafe": false,
+      "links": [],
+      "module": "Solidity.Calculus.ReadBounds",
+      "opaque": false,
+      "unsafe": false,
+      "compilerGenerated": false
+    },
+    {
+      "declaration": "Solidity.Decide.LFml.hasStRd",
+      "extern": false,
+      "implementation": "Solidity.Decide.LFml.hasStRdM",
+      "implementationUnsafe": false,
+      "links": [
+        "Solidity.Decide.LFml.hasStRd_eq_hasStRdM"
+      ],
+      "module": "Solidity.Calculus.MemRead.Pass",
+      "opaque": false,
+      "unsafe": false,
+      "compilerGenerated": false
+    },
+    {
+      "declaration": "Solidity.Decide.LFml.known",
+      "extern": false,
+      "implementation": "Solidity.Decide.LFml.knownM",
+      "implementationUnsafe": false,
+      "links": [
+        "Solidity.Decide.LFml.known_eq_knownM"
+      ],
+      "module": "Solidity.Calculus.ReadBounds",
+      "opaque": false,
+      "unsafe": false,
+      "compilerGenerated": false
+    },
+    {
+      "declaration": "Solidity.Decide.LFml.memRes",
+      "extern": false,
+      "implementation": "Solidity.Decide.LFml.memResM",
+      "implementationUnsafe": false,
+      "links": [
+        "Solidity.Decide.LFml.memRes_eq_memResM"
+      ],
+      "module": "Solidity.Calculus.MemRead.Pass",
+      "opaque": false,
+      "unsafe": false,
+      "compilerGenerated": false
+    },
+    {
+      "declaration": "Solidity.Decide.LFml.nfE",
+      "extern": false,
+      "implementation": "Solidity.Decide.LFml.nfEM",
+      "implementationUnsafe": false,
+      "links": [
+        "Solidity.Decide.LFml.nfE_eq_nfEM"
+      ],
+      "module": "Solidity.Calculus.MemRead.Pass",
+      "opaque": false,
+      "unsafe": false,
+      "compilerGenerated": false
+    },
+    {
+      "declaration": "Solidity.Decide.LFml.reads",
+      "extern": false,
+      "implementation": "Solidity.Decide.LFml.readsM",
+      "implementationUnsafe": false,
+      "links": [
+        "Solidity.Decide.LFml.reads_eq_readsM"
+      ],
+      "module": "Solidity.Calculus.LeafDerive",
+      "opaque": false,
+      "unsafe": false,
+      "compilerGenerated": false
+    },
+    {
+      "declaration": "Solidity.Decide.LFml.spine",
+      "extern": false,
+      "implementation": "Solidity.Decide.LFml.spineM",
+      "implementationUnsafe": false,
+      "links": [
+        "Solidity.Decide.LFml.spine_eq_spineM"
+      ],
+      "module": "Solidity.Calculus.LeafDerive",
+      "opaque": false,
+      "unsafe": false,
+      "compilerGenerated": false
+    },
+    {
+      "declaration": "Solidity.Decide.LFml.stDepth",
+      "extern": false,
+      "implementation": "Solidity.Decide.LFml.stDepthM",
+      "implementationUnsafe": false,
+      "links": [
+        "Solidity.Decide.LFml.stDepth_eq_stDepthM"
+      ],
+      "module": "Solidity.Calculus.ReadBounds",
+      "opaque": false,
+      "unsafe": false,
+      "compilerGenerated": false
+    },
+    {
+      "declaration": "Solidity.Decide.LTm.beqR",
+      "extern": false,
+      "implementation": "Solidity.Decide.LTm.beqM",
+      "implementationUnsafe": false,
+      "links": [
+        "Solidity.Decide.LTm.beqR_eq_beqM"
+      ],
+      "module": "Solidity.Calculus.Decide",
+      "opaque": false,
+      "unsafe": false,
+      "compilerGenerated": false
+    },
+    {
+      "declaration": "Solidity.Decide.LTm.boundedIn",
+      "extern": false,
+      "implementation": "Solidity.Decide.LTm.boundedInM",
+      "implementationUnsafe": false,
+      "links": [
+        "Solidity.Decide.LTm.boundedIn_eq_boundedInM"
+      ],
+      "module": "Solidity.Calculus.MemRead.Spine",
+      "opaque": false,
+      "unsafe": false,
+      "compilerGenerated": false
+    },
+    {
+      "declaration": "Solidity.Decide.LTm.condSimp",
+      "extern": false,
+      "implementation": "Solidity.Decide.LTm.condSimpM",
+      "implementationUnsafe": false,
+      "links": [
+        "Solidity.Decide.LTm.condSimp_eq_condSimpM"
+      ],
+      "module": "Solidity.Calculus.CondLift",
+      "opaque": false,
+      "unsafe": false,
+      "compilerGenerated": false
+    },
+    {
+      "declaration": "Solidity.Decide.LTm.condSplit",
+      "extern": false,
+      "implementation": "Solidity.Decide.LTm.condSplitM",
+      "implementationUnsafe": false,
+      "links": [
+        "Solidity.Decide.LTm.condSplit_eq_condSplitM"
+      ],
+      "module": "Solidity.Calculus.CondLift",
+      "opaque": false,
+      "unsafe": false,
+      "compilerGenerated": false
+    },
+    {
+      "declaration": "Solidity.Decide.LTm.ctFoldK",
+      "extern": false,
+      "implementation": "Solidity.Decide.LTm.ctFoldKM",
+      "implementationUnsafe": false,
+      "links": [
+        "Solidity.Decide.LTm.ctFoldK_eq_ctFoldKM"
+      ],
+      "module": "Solidity.Calculus.DecideCleanTail",
+      "opaque": false,
+      "unsafe": false,
+      "compilerGenerated": false
+    },
+    {
+      "declaration": "Solidity.Decide.LTm.ctGuards",
+      "extern": false,
+      "implementation": "Solidity.Decide.LTm.ctGuardsM",
+      "implementationUnsafe": false,
+      "links": [
+        "Solidity.Decide.LTm.ctGuards_eq_ctGuardsM"
+      ],
+      "module": "Solidity.Calculus.DecideCleanTail",
+      "opaque": false,
+      "unsafe": false,
+      "compilerGenerated": false
+    },
+    {
+      "declaration": "Solidity.Decide.LTm.dropSeq",
+      "extern": false,
+      "implementation": "Solidity.Decide.LTm.dropSeqM",
+      "implementationUnsafe": false,
+      "links": [
+        "Solidity.Decide.LTm.dropSeq_eq_dropSeqM"
+      ],
+      "module": "Solidity.Calculus.DecideCleanTail",
+      "opaque": false,
+      "unsafe": false,
+      "compilerGenerated": false
+    },
+    {
+      "declaration": "Solidity.Decide.LTm.elim",
+      "extern": false,
+      "implementation": "Solidity.Decide.LTm.elimM",
+      "implementationUnsafe": false,
+      "links": [
+        "Solidity.Decide.LTm.elim_eq_elimM"
+      ],
+      "module": "Solidity.Calculus.Decide",
+      "opaque": false,
+      "unsafe": false,
+      "compilerGenerated": false
+    },
+    {
+      "declaration": "Solidity.Decide.LTm.elimF",
+      "extern": false,
+      "implementation": "Solidity.Decide.LTm.elimFM",
+      "implementationUnsafe": false,
+      "links": [
+        "Solidity.Decide.LTm.elimF_eq_elimFM"
+      ],
+      "module": "Solidity.Calculus.ElimFacts",
+      "opaque": false,
+      "unsafe": false,
+      "compilerGenerated": false
+    },
+    {
+      "declaration": "Solidity.Decide.LTm.exposeDepth",
+      "extern": false,
+      "implementation": "Solidity.Decide.LTm.exposeDepthM",
+      "implementationUnsafe": false,
+      "links": [
+        "Solidity.Decide.LTm.exposeDepth_eq_exposeDepthM"
+      ],
+      "module": "Solidity.Calculus.ReadBounds",
+      "opaque": false,
+      "unsafe": false,
+      "compilerGenerated": false
+    },
+    {
+      "declaration": "Solidity.Decide.LTm.fits",
+      "extern": false,
+      "implementation": "Solidity.Decide.LTm.fitsM",
+      "implementationUnsafe": false,
+      "links": [
+        "Solidity.Decide.LTm.fits_eq_fitsM"
+      ],
+      "module": "Solidity.Calculus.ReadBounds",
+      "opaque": false,
+      "unsafe": false,
+      "compilerGenerated": false
+    },
+    {
+      "declaration": "Solidity.Decide.LTm.fitsM",
+      "extern": false,
+      "implementation": "Solidity.Decide.LTm.fitsStack",
+      "implementationUnsafe": false,
+      "links": [],
+      "module": "Solidity.Calculus.ReadBounds",
+      "opaque": false,
+      "unsafe": false,
+      "compilerGenerated": false
+    },
+    {
+      "declaration": "Solidity.Decide.LTm.freshPath?",
+      "extern": false,
+      "implementation": "Solidity.Decide.LTm.freshPathM",
+      "implementationUnsafe": false,
+      "links": [
+        "Solidity.Decide.LTm.freshPath?_eq_freshPathM"
+      ],
+      "module": "Solidity.Calculus.MemRead.Spine",
+      "opaque": false,
+      "unsafe": false,
+      "compilerGenerated": false
+    },
+    {
+      "declaration": "Solidity.Decide.LTm.hasStRd",
+      "extern": false,
+      "implementation": "Solidity.Decide.LTm.hasStRdM",
+      "implementationUnsafe": false,
+      "links": [
+        "Solidity.Decide.LTm.hasStRd_eq_hasStRdM"
+      ],
+      "module": "Solidity.Calculus.MemRead.Pass",
+      "opaque": false,
+      "unsafe": false,
+      "compilerGenerated": false
+    },
+    {
+      "declaration": "Solidity.Decide.LTm.known?",
+      "extern": false,
+      "implementation": "Solidity.Decide.LTm.knownM",
+      "implementationUnsafe": false,
+      "links": [
+        "Solidity.Decide.LTm.known?_eq_knownM"
+      ],
+      "module": "Solidity.Calculus.ReadBounds",
+      "opaque": false,
+      "unsafe": false,
+      "compilerGenerated": false
+    },
+    {
+      "declaration": "Solidity.Decide.LTm.litRoot?",
+      "extern": false,
+      "implementation": "Solidity.Decide.LTm.litRootM",
+      "implementationUnsafe": false,
+      "links": [
+        "Solidity.Decide.LTm.litRoot?_eq_litRootM"
+      ],
+      "module": "Solidity.Calculus.ReadBounds",
+      "opaque": false,
+      "unsafe": false,
+      "compilerGenerated": false
+    },
+    {
+      "declaration": "Solidity.Decide.LTm.memRes",
+      "extern": false,
+      "implementation": "Solidity.Decide.LTm.memResM",
+      "implementationUnsafe": false,
+      "links": [
+        "Solidity.Decide.LTm.memRes_eq_memResM"
+      ],
+      "module": "Solidity.Calculus.MemRead.Pass",
+      "opaque": false,
+      "unsafe": false,
+      "compilerGenerated": false
+    },
+    {
+      "declaration": "Solidity.Decide.LTm.mentions",
+      "extern": false,
+      "implementation": "Solidity.Decide.LTm.mentionsM",
+      "implementationUnsafe": false,
+      "links": [
+        "Solidity.Decide.LTm.mentions_eq_mentionsM"
+      ],
+      "module": "Solidity.Calculus.Closer.Leaf",
+      "opaque": false,
+      "unsafe": false,
+      "compilerGenerated": false
+    },
+    {
+      "declaration": "Solidity.Decide.LTm.onSpineAny",
+      "extern": false,
+      "implementation": "Solidity.Decide.LTm.onSpineAnyM",
+      "implementationUnsafe": false,
+      "links": [
+        "Solidity.Decide.LTm.onSpineAny_eq_onSpineAnyM"
+      ],
+      "module": "Solidity.Calculus.MemRead.Spine",
+      "opaque": false,
+      "unsafe": false,
+      "compilerGenerated": false
+    },
+    {
+      "declaration": "Solidity.Decide.LTm.peel",
+      "extern": false,
+      "implementation": "Solidity.Decide.LTm.peelM",
+      "implementationUnsafe": false,
+      "links": [
+        "Solidity.Decide.LTm.peel_eq_peelM"
+      ],
+      "module": "Solidity.Calculus.MemRead.Spine",
+      "opaque": false,
+      "unsafe": false,
+      "compilerGenerated": false
+    },
+    {
+      "declaration": "Solidity.Decide.LTm.pick",
+      "extern": false,
+      "implementation": "Solidity.Decide.LTm.pickM",
+      "implementationUnsafe": false,
+      "links": [
+        "Solidity.Decide.LTm.pick_eq_pickM"
+      ],
+      "module": "Solidity.Calculus.Closer.Leaf",
+      "opaque": false,
+      "unsafe": false,
+      "compilerGenerated": false
+    },
+    {
+      "declaration": "Solidity.Decide.LTm.reads",
+      "extern": false,
+      "implementation": "Solidity.Decide.LTm.readsM",
+      "implementationUnsafe": false,
+      "links": [
+        "Solidity.Decide.LTm.reads_eq_readsM"
+      ],
+      "module": "Solidity.Calculus.LeafDerive",
+      "opaque": false,
+      "unsafe": false,
+      "compilerGenerated": false
+    },
+    {
+      "declaration": "Solidity.Decide.LTm.retsS",
+      "extern": false,
+      "implementation": "Solidity.Decide.LTm.retsSM",
+      "implementationUnsafe": false,
+      "links": [
+        "Solidity.Decide.LTm.retsS_eq_retsSM"
+      ],
+      "module": "Solidity.Calculus.DecideLang",
+      "opaque": false,
+      "unsafe": false,
+      "compilerGenerated": false
+    },
+    {
+      "declaration": "Solidity.Decide.LTm.rootAny?",
+      "extern": false,
+      "implementation": "Solidity.Decide.LTm.rootAnyM",
+      "implementationUnsafe": false,
+      "links": [
+        "Solidity.Decide.LTm.rootAny?_eq_rootAnyM"
+      ],
+      "module": "Solidity.Calculus.ReadBounds",
+      "opaque": false,
+      "unsafe": false,
+      "compilerGenerated": false
+    },
+    {
+      "declaration": "Solidity.Decide.LTm.seqMem",
+      "extern": false,
+      "implementation": "Solidity.Decide.LTm.seqMemM",
+      "implementationUnsafe": false,
+      "links": [
+        "Solidity.Decide.LTm.seqMem_eq_seqMemM"
+      ],
+      "module": "Solidity.Calculus.MemRead.Pass",
+      "opaque": false,
+      "unsafe": false,
+      "compilerGenerated": false
+    },
+    {
+      "declaration": "Solidity.Decide.LTm.stDepth",
+      "extern": false,
+      "implementation": "Solidity.Decide.LTm.stDepthM",
+      "implementationUnsafe": false,
+      "links": [
+        "Solidity.Decide.LTm.stDepth_eq_stDepthM"
+      ],
+      "module": "Solidity.Calculus.ReadBounds",
+      "opaque": false,
+      "unsafe": false,
+      "compilerGenerated": false
+    },
+    {
+      "declaration": "Solidity.Decide.LTm.strict",
+      "extern": false,
+      "implementation": "Solidity.Decide.LTm.strictM",
+      "implementationUnsafe": false,
+      "links": [
+        "Solidity.Decide.LTm.strict_eq_strictM"
+      ],
+      "module": "Solidity.Calculus.Closer.Leaf",
+      "opaque": false,
+      "unsafe": false,
+      "compilerGenerated": false
+    },
+    {
+      "declaration": "Solidity.Decide.LTm.stripW",
+      "extern": false,
+      "implementation": "Solidity.Decide.LTm.stripWM",
+      "implementationUnsafe": false,
+      "links": [
+        "Solidity.Decide.LTm.stripW_eq_stripWM"
+      ],
+      "module": "Solidity.Calculus.MemRead.Spine",
+      "opaque": false,
+      "unsafe": false,
+      "compilerGenerated": false
+    },
+    {
+      "declaration": "Solidity.Decide.memRd",
+      "extern": false,
+      "implementation": "Solidity.Decide.memRdM",
+      "implementationUnsafe": false,
+      "links": [
+        "Solidity.Decide.memRd_eq_memRdM"
+      ],
+      "module": "Solidity.Calculus.Decide",
+      "opaque": false,
+      "unsafe": false,
+      "compilerGenerated": false
+    },
+    {
+      "declaration": "Solidity.Decide.ovRS",
+      "extern": false,
+      "implementation": "Solidity.Decide.ovRSM",
+      "implementationUnsafe": false,
+      "links": [],
+      "module": "Solidity.Calculus.Decide",
+      "opaque": false,
+      "unsafe": false,
+      "compilerGenerated": false
+    },
+    {
+      "declaration": "Solidity.Decide.reduceExpr.unsafe_impl_3",
+      "extern": false,
+      "implementation": "Solidity.Decide.reduceExpr.unsafe_1",
+      "implementationUnsafe": true,
+      "links": [],
+      "module": "Solidity.Calculus.DecideComplete",
+      "opaque": true,
+      "unsafe": false,
+      "compilerGenerated": true
+    },
+    {
+      "declaration": "Solidity.Decide.relSegs",
+      "extern": false,
+      "implementation": "Solidity.Decide.relSegsM",
+      "implementationUnsafe": false,
+      "links": [
+        "Solidity.Decide.relSegs_eq_relSegsM"
+      ],
+      "module": "Solidity.Calculus.Decide",
+      "opaque": false,
+      "unsafe": false,
+      "compilerGenerated": false
+    },
+    {
+      "declaration": "Solidity.Decide.stripRS",
+      "extern": false,
+      "implementation": "Solidity.Decide.stripRSM",
+      "implementationUnsafe": false,
+      "links": [],
+      "module": "Solidity.Calculus.Decide",
+      "opaque": false,
+      "unsafe": false,
+      "compilerGenerated": false
+    },
+    {
+      "declaration": "Solidity.Decide.svalRd",
+      "extern": false,
+      "implementation": "Solidity.Decide.svalRdM",
+      "implementationUnsafe": false,
+      "links": [
+        "Solidity.Decide.svalRd_eq_svalRdM"
+      ],
+      "module": "Solidity.Calculus.Decide",
+      "opaque": false,
+      "unsafe": false,
+      "compilerGenerated": false
+    },
+    {
+      "declaration": "Solidity.Decide.TSegs.append",
+      "extern": false,
+      "implementation": "Solidity.Decide.TSegs.appendM",
+      "implementationUnsafe": false,
+      "links": [
+        "Solidity.Decide.TSegs.append_eq_appendM"
+      ],
+      "module": "Solidity.Calculus.Decide",
+      "opaque": false,
+      "unsafe": false,
+      "compilerGenerated": false
+    },
+    {
+      "declaration": "Solidity.Decide.TSegs.hasFrom",
+      "extern": false,
+      "implementation": "Solidity.Decide.TSegs.hasFromM",
+      "implementationUnsafe": false,
+      "links": [
+        "Solidity.Decide.TSegs.hasFrom_eq_hasFromM"
+      ],
+      "module": "Solidity.Calculus.Decide",
+      "opaque": false,
+      "unsafe": false,
+      "compilerGenerated": false
+    },
+    {
+      "declaration": "Solidity.Decide.TSegs.mtHas",
+      "extern": false,
+      "implementation": "Solidity.Decide.TSegs.mtHasM",
+      "implementationUnsafe": false,
+      "links": [
+        "Solidity.Decide.TSegs.mtHas_eq_mtHasM"
+      ],
+      "module": "Solidity.Calculus.Decide",
+      "opaque": false,
+      "unsafe": false,
+      "compilerGenerated": false
+    },
+    {
+      "declaration": "Solidity.Decide.TSegs.toLTm",
+      "extern": false,
+      "implementation": "Solidity.Decide.TSegs.toLTmM",
+      "implementationUnsafe": false,
+      "links": [
+        "Solidity.Decide.TSegs.toLTm_eq_toLTmM"
+      ],
+      "module": "Solidity.Calculus.Decide",
+      "opaque": false,
+      "unsafe": false,
+      "compilerGenerated": false
+    },
+    {
+      "declaration": "Solidity.Decide.writeAt",
+      "extern": false,
+      "implementation": "Solidity.Decide.writeAtM",
+      "implementationUnsafe": false,
+      "links": [],
+      "module": "Solidity.Calculus.Decide",
+      "opaque": false,
+      "unsafe": false,
+      "compilerGenerated": false
+    },
+    {
+      "declaration": "Solidity.DeclarationFacts.elabDeclarationFacts.unsafe_impl_3",
+      "extern": false,
+      "implementation": "Solidity.DeclarationFacts.elabDeclarationFacts.unsafe_1",
+      "implementationUnsafe": true,
+      "links": [],
+      "module": "Solidity.Calculus.DeclarationFacts",
+      "opaque": true,
+      "unsafe": false,
+      "compilerGenerated": true
+    },
+    {
+      "declaration": "Solidity.elabAgainstWith.unsafe_impl_3",
+      "extern": false,
+      "implementation": "Solidity.elabAgainstWith.unsafe_1",
+      "implementationUnsafe": true,
+      "links": [],
+      "module": "Solidity.Syntax.Splice",
+      "opaque": true,
+      "unsafe": false,
+      "compilerGenerated": true
+    },
+    {
+      "declaration": "Solidity.Evm.loopRun",
+      "extern": false,
+      "implementation": "Solidity.Evm.loopImpl",
+      "implementationUnsafe": false,
+      "links": [],
+      "module": "Solidity.Evm.Machine",
+      "opaque": false,
+      "unsafe": false,
+      "compilerGenerated": false
+    },
+    {
+      "declaration": "Solidity.Evm.Memory.LoopScopes.compileProg",
+      "extern": false,
+      "implementation": "_private.Solidity.Evm.MemoryLoopScopeCompile.0.Solidity.Evm.Memory.LoopScopes.compileProgM",
+      "implementationUnsafe": false,
+      "links": [
+        "_private.Solidity.Evm.MemoryLoopScopeCompile.0.Solidity.Evm.Memory.LoopScopes.compileProg_eq"
+      ],
+      "module": "Solidity.Evm.MemoryLoopScopeCompile",
+      "opaque": false,
+      "unsafe": false,
+      "compilerGenerated": false
+    },
+    {
+      "declaration": "Solidity.Evm.Memory.LoopScopes.compileStmt",
+      "extern": false,
+      "implementation": "_private.Solidity.Evm.MemoryLoopScopeCompile.0.Solidity.Evm.Memory.LoopScopes.compileStmtM",
+      "implementationUnsafe": false,
+      "links": [
+        "_private.Solidity.Evm.MemoryLoopScopeCompile.0.Solidity.Evm.Memory.LoopScopes.compileStmt_eq"
+      ],
+      "module": "Solidity.Evm.MemoryLoopScopeCompile",
+      "opaque": false,
+      "unsafe": false,
+      "compilerGenerated": false
+    },
+    {
+      "declaration": "Solidity.Evm.Memory.Recursive.compileProg",
+      "extern": false,
+      "implementation": "_private.Solidity.Evm.MemoryRecursiveCompile.0.Solidity.Evm.Memory.Recursive.compileProgM",
+      "implementationUnsafe": false,
+      "links": [
+        "_private.Solidity.Evm.MemoryRecursiveCompile.0.Solidity.Evm.Memory.Recursive.compileProg_eq"
+      ],
+      "module": "Solidity.Evm.MemoryRecursiveCompile",
+      "opaque": false,
+      "unsafe": false,
+      "compilerGenerated": false
+    },
+    {
+      "declaration": "Solidity.Evm.Memory.Recursive.compileStmt",
+      "extern": false,
+      "implementation": "_private.Solidity.Evm.MemoryRecursiveCompile.0.Solidity.Evm.Memory.Recursive.compileStmtM",
+      "implementationUnsafe": false,
+      "links": [
+        "_private.Solidity.Evm.MemoryRecursiveCompile.0.Solidity.Evm.Memory.Recursive.compileStmt_eq"
+      ],
+      "module": "Solidity.Evm.MemoryRecursiveCompile",
+      "opaque": false,
+      "unsafe": false,
+      "compilerGenerated": false
+    },
+    {
+      "declaration": "Solidity.Evm.Memory.Recursive.ProgCert.allocates",
+      "extern": false,
+      "implementation": "_private.Solidity.Evm.MemoryRecursiveRoom.0.Solidity.Evm.Memory.Recursive.progallocatesM",
+      "implementationUnsafe": false,
+      "links": [
+        "_private.Solidity.Evm.MemoryRecursiveRoom.0.Solidity.Evm.Memory.Recursive.progallocates_eq"
+      ],
+      "module": "Solidity.Evm.MemoryRecursiveRoom",
+      "opaque": false,
+      "unsafe": false,
+      "compilerGenerated": false
+    },
+    {
+      "declaration": "Solidity.Evm.Memory.Recursive.ProgCert.need",
+      "extern": false,
+      "implementation": "_private.Solidity.Evm.MemoryRecursiveCert.0.Solidity.Evm.Memory.Recursive.progneedM",
+      "implementationUnsafe": false,
+      "links": [
+        "_private.Solidity.Evm.MemoryRecursiveCert.0.Solidity.Evm.Memory.Recursive.progneed_eq"
+      ],
+      "module": "Solidity.Evm.MemoryRecursiveCert",
+      "opaque": false,
+      "unsafe": false,
+      "compilerGenerated": false
+    },
+    {
+      "declaration": "Solidity.Evm.Memory.Recursive.StmtCert.allocates",
+      "extern": false,
+      "implementation": "_private.Solidity.Evm.MemoryRecursiveRoom.0.Solidity.Evm.Memory.Recursive.stmtallocatesM",
+      "implementationUnsafe": false,
+      "links": [
+        "_private.Solidity.Evm.MemoryRecursiveRoom.0.Solidity.Evm.Memory.Recursive.stmtallocates_eq"
+      ],
+      "module": "Solidity.Evm.MemoryRecursiveRoom",
+      "opaque": false,
+      "unsafe": false,
+      "compilerGenerated": false
+    },
+    {
+      "declaration": "Solidity.Evm.Memory.Recursive.StmtCert.need",
+      "extern": false,
+      "implementation": "_private.Solidity.Evm.MemoryRecursiveCert.0.Solidity.Evm.Memory.Recursive.stmtneedM",
+      "implementationUnsafe": false,
+      "links": [
+        "_private.Solidity.Evm.MemoryRecursiveCert.0.Solidity.Evm.Memory.Recursive.stmtneed_eq"
+      ],
+      "module": "Solidity.Evm.MemoryRecursiveCert",
+      "opaque": false,
+      "unsafe": false,
+      "compilerGenerated": false
+    },
+    {
+      "declaration": "Solidity.Fml.assumesCT",
+      "extern": false,
+      "implementation": "Solidity.Fml.assumesCTM",
+      "implementationUnsafe": false,
+      "links": [
+        "Solidity.Fml.assumesCT_eq_assumesCTM"
+      ],
+      "module": "Solidity.Calculus.DecideCleanTail",
+      "opaque": false,
+      "unsafe": false,
+      "compilerGenerated": false
+    },
+    {
+      "declaration": "Solidity.Fml.checkMemoryAt",
+      "extern": false,
+      "implementation": "Solidity.Fml.checkMemoryAtM",
+      "implementationUnsafe": false,
+      "links": [
+        "Solidity.Fml.checkMemoryAt_eq_checkMemoryAtM"
+      ],
+      "module": "Solidity.Calculus.MemoryWitness",
+      "opaque": false,
+      "unsafe": false,
+      "compilerGenerated": false
+    },
+    {
+      "declaration": "Solidity.Fml.cleanB",
+      "extern": false,
+      "implementation": "Solidity.Fml.cleanBM",
+      "implementationUnsafe": false,
+      "links": [
+        "Solidity.Fml.cleanB_eq_cleanBM"
+      ],
+      "module": "Solidity.Calculus.UpdRuleScoped",
+      "opaque": false,
+      "unsafe": false,
+      "compilerGenerated": false
+    },
+    {
+      "declaration": "Solidity.Fml.eval3",
+      "extern": false,
+      "implementation": "Solidity.Fml.eval3C",
+      "implementationUnsafe": false,
+      "links": [
+        "Solidity.Fml.eval3_eq"
+      ],
+      "module": "Solidity.Tools.Counterexample",
+      "opaque": false,
+      "unsafe": false,
+      "compilerGenerated": false
+    },
+    {
+      "declaration": "Solidity.Fml.isCTPrem",
+      "extern": false,
+      "implementation": "Solidity.Fml.isCTPremM",
+      "implementationUnsafe": false,
+      "links": [
+        "Solidity.Fml.isCTPrem_eq_isCTPremM"
+      ],
+      "module": "Solidity.Calculus.DecideCleanTail",
+      "opaque": false,
+      "unsafe": false,
+      "compilerGenerated": false
+    },
+    {
+      "declaration": "Solidity.Fml.litPos",
+      "extern": false,
+      "implementation": "Solidity.Fml.litPosM",
+      "implementationUnsafe": false,
+      "links": [
+        "Solidity.Fml.litPos_eq_litPosM"
+      ],
+      "module": "Solidity.Calculus.LeafDerive",
+      "opaque": false,
+      "unsafe": false,
+      "compilerGenerated": false
+    },
+    {
+      "declaration": "Solidity.Fml.mergeB",
+      "extern": false,
+      "implementation": "Solidity.Fml.mergeBM",
+      "implementationUnsafe": false,
+      "links": [
+        "Solidity.Fml.mergeB_eq_mergeBM"
+      ],
+      "module": "Solidity.Calculus.UpdRuleScoped",
+      "opaque": false,
+      "unsafe": false,
+      "compilerGenerated": false
+    },
+    {
+      "declaration": "Solidity.Fml.peel",
+      "extern": false,
+      "implementation": "Solidity.Fml.peelC",
+      "implementationUnsafe": false,
+      "links": [
+        "Solidity.Fml.peel_eq"
+      ],
+      "module": "Solidity.Tools.Counterexample",
+      "opaque": false,
+      "unsafe": false,
+      "compilerGenerated": false
+    },
+    {
+      "declaration": "Solidity.Fml.rwAtS",
+      "extern": false,
+      "implementation": "Solidity.Fml.rwAtSM",
+      "implementationUnsafe": false,
+      "links": [],
+      "module": "Solidity.Calculus.UpdRuleScoped",
+      "opaque": false,
+      "unsafe": false,
+      "compilerGenerated": false
+    },
+    {
+      "declaration": "Solidity.Fml.rwEqC",
+      "extern": false,
+      "implementation": "Solidity.Fml.rwEqCM",
+      "implementationUnsafe": false,
+      "links": [
+        "Solidity.Fml.rwEqC_eq_rwEqCM",
+        "Solidity.Hyps.rwEqC_eq_rwEqCM._simp_1_11"
+      ],
+      "module": "Solidity.Calculus.SeqRewrite",
+      "opaque": false,
+      "unsafe": false,
+      "compilerGenerated": false
+    },
+    {
+      "declaration": "Solidity.Fml.simpUpdsS",
+      "extern": false,
+      "implementation": "Solidity.Fml.simpUpdsSM",
+      "implementationUnsafe": false,
+      "links": [
+        "Solidity.Fml.simpUpdsS_eq_simpUpdsSM"
+      ],
+      "module": "Solidity.Calculus.UpdRuleScoped",
+      "opaque": false,
+      "unsafe": false,
+      "compilerGenerated": false
+    },
+    {
+      "declaration": "Solidity.Fml.stepR",
+      "extern": false,
+      "implementation": "Solidity.Fml.stepAt",
+      "implementationUnsafe": false,
+      "links": [
+        "Solidity.Fml.stepR_eq"
+      ],
+      "module": "Solidity.Calculus.Step",
+      "opaque": false,
+      "unsafe": false,
+      "compilerGenerated": false
+    },
+    {
+      "declaration": "Solidity.Fml.stepRS",
+      "extern": false,
+      "implementation": "Solidity.Fml.stepAtS",
+      "implementationUnsafe": false,
+      "links": [
+        "Solidity.Fml.stepRS_eq"
+      ],
+      "module": "Solidity.Calculus.Symex",
+      "opaque": false,
+      "unsafe": false,
+      "compilerGenerated": false
+    },
+    {
+      "declaration": "Solidity.Fml.toLS",
+      "extern": false,
+      "implementation": "Solidity.Fml.toLSM",
+      "implementationUnsafe": false,
+      "links": [
+        "Solidity.Fml.toLS_eq_toLSM"
+      ],
+      "module": "Solidity.Calculus.DecideScoped",
+      "opaque": false,
+      "unsafe": false,
+      "compilerGenerated": false
+    },
+    {
+      "declaration": "Solidity.freshName.unsafe_impl_3",
+      "extern": false,
+      "implementation": "Solidity.freshName.unsafe_1",
+      "implementationUnsafe": true,
+      "links": [],
+      "module": "Solidity.Calculus.RuleSyntax.Print",
+      "opaque": true,
+      "unsafe": false,
+      "compilerGenerated": true
+    },
+    {
+      "declaration": "Solidity.Frontend.QualifiedUnits.expressionPathAny",
+      "extern": false,
+      "implementation": "Solidity.Frontend.QualifiedUnits.expressionPathAnyM",
+      "implementationUnsafe": false,
+      "links": [
+        "Solidity.Frontend.QualifiedUnits.expressionPathAny_eq_M"
+      ],
+      "module": "Solidity.Frontend.QualifiedUnits.References",
+      "opaque": false,
+      "unsafe": false,
+      "compilerGenerated": false
+    },
+    {
+      "declaration": "Solidity.Frontend.QualifiedUnits.references",
+      "extern": false,
+      "implementation": "Solidity.Frontend.QualifiedUnits.referencesM",
+      "implementationUnsafe": false,
+      "links": [
+        "Solidity.Frontend.QualifiedUnits.references_eq_M"
+      ],
+      "module": "Solidity.Frontend.QualifiedUnits.References",
+      "opaque": false,
+      "unsafe": false,
+      "compilerGenerated": false
+    },
+    {
+      "declaration": "Solidity.Hyps.groundInS",
+      "extern": false,
+      "implementation": "Solidity.Hyps.groundInSM",
+      "implementationUnsafe": false,
+      "links": [
+        "Solidity.Hyps.groundInS_eq_groundInSM"
+      ],
+      "module": "Solidity.Calculus.LeafDerive",
+      "opaque": false,
+      "unsafe": false,
+      "compilerGenerated": false
+    },
+    {
+      "declaration": "Solidity.Hyps.rigid",
+      "extern": false,
+      "implementation": "Solidity.Hyps.rigidM",
+      "implementationUnsafe": false,
+      "links": [
+        "Solidity.Hyps.rigid_eq_rigidM"
+      ],
+      "module": "Solidity.Calculus.Rigid",
+      "opaque": false,
+      "unsafe": false,
+      "compilerGenerated": false
+    },
+    {
+      "declaration": "Solidity.Hyps.rwEqC",
+      "extern": false,
+      "implementation": "Solidity.Hyps.rwEqCM",
+      "implementationUnsafe": false,
+      "links": [
+        "Solidity.Hyps.rwEqC_eq_rwEqCM"
+      ],
+      "module": "Solidity.Calculus.Proves",
+      "opaque": false,
+      "unsafe": false,
+      "compilerGenerated": false
+    },
+    {
+      "declaration": "Solidity.Idx.nameR",
+      "extern": false,
+      "implementation": "Solidity.Idx.name",
+      "implementationUnsafe": false,
+      "links": [
+        "Solidity.Idx.nameR_eq"
+      ],
+      "module": "Solidity.Calculus.FirstOrder",
+      "opaque": false,
+      "unsafe": false,
+      "compilerGenerated": false
+    },
+    {
+      "declaration": "Solidity.Idx.toNatR",
+      "extern": false,
+      "implementation": "Solidity.Idx.toNat",
+      "implementationUnsafe": false,
+      "links": [
+        "Solidity.Idx.toNatR_eq"
+      ],
+      "module": "Solidity.Calculus.LeafDerive",
+      "opaque": false,
+      "unsafe": false,
+      "compilerGenerated": false
+    },
+    {
+      "declaration": "Solidity.intOf?.unsafe_impl_3",
+      "extern": false,
+      "implementation": "Solidity.intOf?.unsafe_1",
+      "implementationUnsafe": true,
+      "links": [],
+      "module": "Solidity.Calculus.RuleSyntax.Print",
+      "opaque": true,
+      "unsafe": false,
+      "compilerGenerated": true
+    },
+    {
+      "declaration": "Solidity.MAddrT.resolve",
+      "extern": false,
+      "implementation": "Solidity.MAddrT.resolveM",
+      "implementationUnsafe": false,
+      "links": [
+        "Solidity.MAddrT.resolve_eq_resolveM"
+      ],
+      "module": "Solidity.Signature",
+      "opaque": false,
+      "unsafe": false,
+      "compilerGenerated": false
+    },
+    {
+      "declaration": "Solidity.natOf?.unsafe_impl_5",
+      "extern": false,
+      "implementation": "Solidity.natOf?.unsafe_3",
+      "implementationUnsafe": true,
+      "links": [],
+      "module": "Solidity.Calculus.RuleSyntax.Print",
+      "opaque": true,
+      "unsafe": false,
+      "compilerGenerated": true
+    },
+    {
+      "declaration": "Solidity.Op0.eval",
+      "extern": false,
+      "implementation": "Solidity.Op0.evalM",
+      "implementationUnsafe": false,
+      "links": [
+        "Solidity.Op0.eval_eq_evalM"
+      ],
+      "module": "Solidity.Signature",
+      "opaque": false,
+      "unsafe": false,
+      "compilerGenerated": false
+    },
+    {
+      "declaration": "Solidity.Op1.eval",
+      "extern": false,
+      "implementation": "Solidity.Op1.evalM",
+      "implementationUnsafe": false,
+      "links": [
+        "Solidity.Op1.eval_eq_evalM"
+      ],
+      "module": "Solidity.Signature",
+      "opaque": false,
+      "unsafe": false,
+      "compilerGenerated": false
+    },
+    {
+      "declaration": "Solidity.Op2.eval",
+      "extern": false,
+      "implementation": "Solidity.Op2.evalM",
+      "implementationUnsafe": false,
+      "links": [
+        "Solidity.Op2.eval_eq_evalM"
+      ],
+      "module": "Solidity.Signature",
+      "opaque": false,
+      "unsafe": false,
+      "compilerGenerated": false
+    },
+    {
+      "declaration": "Solidity.Op3.eval",
+      "extern": false,
+      "implementation": "Solidity.Op3.evalM",
+      "implementationUnsafe": false,
+      "links": [
+        "Solidity.Op3.eval_eq_evalM"
+      ],
+      "module": "Solidity.Signature",
+      "opaque": false,
+      "unsafe": false,
+      "compilerGenerated": false
+    },
+    {
+      "declaration": "Solidity.Path.append",
+      "extern": false,
+      "implementation": "Solidity.Path.appendM",
+      "implementationUnsafe": false,
+      "links": [
+        "Solidity.Path.append_eq_appendM"
+      ],
+      "module": "Solidity.Semantics.Storage.Values",
+      "opaque": false,
+      "unsafe": false,
+      "compilerGenerated": false
+    },
+    {
+      "declaration": "Solidity.Path.segments",
+      "extern": false,
+      "implementation": "Solidity.Path.segmentsM",
+      "implementationUnsafe": false,
+      "links": [
+        "Solidity.Path.segments_eq_segmentsM"
+      ],
+      "module": "Solidity.Semantics.Storage.Values",
+      "opaque": false,
+      "unsafe": false,
+      "compilerGenerated": false
+    },
+    {
+      "declaration": "Solidity.Prog.hasCall",
+      "extern": false,
+      "implementation": "Solidity.Prog.hasCallM",
+      "implementationUnsafe": false,
+      "links": [],
+      "module": "Solidity.Calculus.CallSummary",
+      "opaque": false,
+      "unsafe": false,
+      "compilerGenerated": false
+    },
+    {
+      "declaration": "Solidity.Prog.runA",
+      "extern": false,
+      "implementation": "Solidity.Prog.runAC",
+      "implementationUnsafe": false,
+      "links": [
+        "Solidity.Prog.runA_eq"
+      ],
+      "module": "Solidity.Semantics.RunAccel",
+      "opaque": false,
+      "unsafe": false,
+      "compilerGenerated": false
+    },
+    {
+      "declaration": "Solidity.Prog.runF",
+      "extern": false,
+      "implementation": "Solidity.Prog.runFC",
+      "implementationUnsafe": false,
+      "links": [
+        "Solidity.Prog.runF_eq"
+      ],
+      "module": "Solidity.Semantics.RunFuel",
+      "opaque": false,
+      "unsafe": false,
+      "compilerGenerated": false
+    },
+    {
+      "declaration": "Solidity.Prog.runR",
+      "extern": false,
+      "implementation": "Solidity.Prog.runC",
+      "implementationUnsafe": false,
+      "links": [
+        "Solidity.Prog.runR_eq"
+      ],
+      "module": "Solidity.Semantics.Run",
+      "opaque": false,
+      "unsafe": false,
+      "compilerGenerated": false
+    },
+    {
+      "declaration": "Solidity.Prog.sym",
+      "extern": false,
+      "implementation": "Solidity.Prog.symM",
+      "implementationUnsafe": false,
+      "links": [
+        "Solidity.Prog.sym_eq_symM"
+      ],
+      "module": "Solidity.Calculus.CallSummary",
+      "opaque": false,
+      "unsafe": false,
+      "compilerGenerated": false
+    },
+    {
+      "declaration": "Solidity.QMemo.add",
+      "extern": false,
+      "implementation": "Solidity.QMemo.addImpl",
+      "implementationUnsafe": true,
+      "links": [],
+      "module": "Solidity.Syntax.Quote",
+      "opaque": false,
+      "unsafe": false,
+      "compilerGenerated": false
+    },
+    {
+      "declaration": "Solidity.QMemo.find",
+      "extern": false,
+      "implementation": "Solidity.QMemo.findImpl",
+      "implementationUnsafe": true,
+      "links": [],
+      "module": "Solidity.Syntax.Quote",
+      "opaque": false,
+      "unsafe": false,
+      "compilerGenerated": false
+    },
+    {
+      "declaration": "Solidity.RecThunk.get",
+      "extern": false,
+      "implementation": "_private.Solidity.Syntax.Elab.Context.0.Solidity.RecThunk.getImpl",
+      "implementationUnsafe": true,
+      "links": [],
+      "module": "Solidity.Syntax.Elab.Context",
+      "opaque": true,
+      "unsafe": false,
+      "compilerGenerated": false
+    },
+    {
+      "declaration": "Solidity.Rhs.eval",
+      "extern": false,
+      "implementation": "Solidity.Rhs.evalM",
+      "implementationUnsafe": false,
+      "links": [
+        "Solidity.Rhs.eval_eq_evalM"
+      ],
+      "module": "Solidity.Calculus.Lands",
+      "opaque": false,
+      "unsafe": false,
+      "compilerGenerated": false
+    },
+    {
+      "declaration": "Solidity.Semantics.Segs.labels",
+      "extern": false,
+      "implementation": "Solidity.Semantics.Segs.labelsM",
+      "implementationUnsafe": false,
+      "links": [
+        "Solidity.Semantics.Segs.labels_eq_labelsM"
+      ],
+      "module": "Solidity.Semantics.Storage.Values",
+      "opaque": false,
+      "unsafe": false,
+      "compilerGenerated": false
+    },
+    {
+      "declaration": "Solidity.Seq.goalFits.unsafe_impl_3",
+      "extern": false,
+      "implementation": "Solidity.Seq.goalFits.unsafe_1",
+      "implementationUnsafe": true,
+      "links": [],
+      "module": "Solidity.Calculus.ProvesDerive",
+      "opaque": true,
+      "unsafe": false,
+      "compilerGenerated": true
+    },
+    {
+      "declaration": "Solidity.Seq.prove.unsafe_impl_23",
+      "extern": false,
+      "implementation": "Solidity.Seq.prove.unsafe_21",
+      "implementationUnsafe": true,
+      "links": [],
+      "module": "Solidity.Calculus.ProvesDerive",
+      "opaque": true,
+      "unsafe": false,
+      "compilerGenerated": true
+    },
+    {
+      "declaration": "Solidity.SFields.defaultOf",
+      "extern": false,
+      "implementation": "Solidity.SFields.defaultOfM",
+      "implementationUnsafe": false,
+      "links": [
+        "Solidity.SFields.defaultOf_eq_defaultOfM"
+      ],
+      "module": "Solidity.Semantics.Storage.Ops",
+      "opaque": false,
+      "unsafe": false,
+      "compilerGenerated": false
+    },
+    {
+      "declaration": "Solidity.SFields.fold",
+      "extern": false,
+      "implementation": "Solidity.SFields.foldM",
+      "implementationUnsafe": false,
+      "links": [
+        "Solidity.SFields.fold_eq_foldM"
+      ],
+      "module": "Solidity.Semantics.Storage.Values",
+      "opaque": false,
+      "unsafe": false,
+      "compilerGenerated": false
+    },
+    {
+      "declaration": "Solidity.SFields.get",
+      "extern": false,
+      "implementation": "Solidity.SFields.getM",
+      "implementationUnsafe": false,
+      "links": [
+        "Solidity.SFields.get_eq_getM"
+      ],
+      "module": "Solidity.Semantics.Storage.Values",
+      "opaque": false,
+      "unsafe": false,
+      "compilerGenerated": false
+    },
+    {
+      "declaration": "Solidity.SFields.overlay",
+      "extern": false,
+      "implementation": "Solidity.SFields.overlayM",
+      "implementationUnsafe": false,
+      "links": [
+        "Solidity.SFields.overlay_eq_overlayM"
+      ],
+      "module": "Solidity.Semantics.Storage.Ops",
+      "opaque": false,
+      "unsafe": false,
+      "compilerGenerated": false
+    },
+    {
+      "declaration": "Solidity.SFields.set",
+      "extern": false,
+      "implementation": "Solidity.SFields.setM",
+      "implementationUnsafe": false,
+      "links": [
+        "Solidity.SFields.set_eq_setM"
+      ],
+      "module": "Solidity.Semantics.Storage.Values",
+      "opaque": false,
+      "unsafe": false,
+      "compilerGenerated": false
+    },
+    {
+      "declaration": "Solidity.SFields.strip",
+      "extern": false,
+      "implementation": "Solidity.SFields.stripM",
+      "implementationUnsafe": false,
+      "links": [
+        "Solidity.SFields.strip_eq_stripM"
+      ],
+      "module": "Solidity.Semantics.Storage.Ops",
+      "opaque": false,
+      "unsafe": false,
+      "compilerGenerated": false
+    },
+    {
+      "declaration": "Solidity.SList.defaultOf",
+      "extern": false,
+      "implementation": "Solidity.SList.defaultOfM",
+      "implementationUnsafe": false,
+      "links": [
+        "Solidity.SList.defaultOf_eq_defaultOfM"
+      ],
+      "module": "Solidity.Semantics.Storage.Ops",
+      "opaque": false,
+      "unsafe": false,
+      "compilerGenerated": false
+    },
+    {
+      "declaration": "Solidity.SList.fold",
+      "extern": false,
+      "implementation": "Solidity.SList.foldM",
+      "implementationUnsafe": false,
+      "links": [
+        "Solidity.SList.fold_eq_foldM"
+      ],
+      "module": "Solidity.Semantics.Storage.Values",
+      "opaque": false,
+      "unsafe": false,
+      "compilerGenerated": false
+    },
+    {
+      "declaration": "Solidity.SList.strip",
+      "extern": false,
+      "implementation": "Solidity.SList.stripM",
+      "implementationUnsafe": false,
+      "links": [
+        "Solidity.SList.strip_eq_stripM"
+      ],
+      "module": "Solidity.Semantics.Storage.Ops",
+      "opaque": false,
+      "unsafe": false,
+      "compilerGenerated": false
+    },
+    {
+      "declaration": "Solidity.SList.toList",
+      "extern": false,
+      "implementation": "Solidity.SList.toListM",
+      "implementationUnsafe": false,
+      "links": [
+        "Solidity.SList.toList_eq_toListM"
+      ],
+      "module": "Solidity.Semantics.Storage.Values",
+      "opaque": false,
+      "unsafe": false,
+      "compilerGenerated": false
+    },
+    {
+      "declaration": "Solidity.SMap.fold",
+      "extern": false,
+      "implementation": "Solidity.SMap.foldM",
+      "implementationUnsafe": false,
+      "links": [
+        "Solidity.SMap.fold_eq_foldM"
+      ],
+      "module": "Solidity.Semantics.Storage.Values",
+      "opaque": false,
+      "unsafe": false,
+      "compilerGenerated": false
+    },
+    {
+      "declaration": "Solidity.SMap.toList",
+      "extern": false,
+      "implementation": "Solidity.SMap.toListM",
+      "implementationUnsafe": false,
+      "links": [
+        "Solidity.SMap.toList_eq_toListM"
+      ],
+      "module": "Solidity.Semantics.Storage.Values",
+      "opaque": false,
+      "unsafe": false,
+      "compilerGenerated": false
+    },
+    {
+      "declaration": "Solidity.Stmt.runA",
+      "extern": false,
+      "implementation": "Solidity.Stmt.runAC",
+      "implementationUnsafe": false,
+      "links": [
+        "Solidity.Stmt.runA_eq"
+      ],
+      "module": "Solidity.Semantics.RunAccel",
+      "opaque": false,
+      "unsafe": false,
+      "compilerGenerated": false
+    },
+    {
+      "declaration": "Solidity.Stmt.runF",
+      "extern": false,
+      "implementation": "Solidity.Stmt.runFC",
+      "implementationUnsafe": false,
+      "links": [
+        "Solidity.Stmt.runF_eq"
+      ],
+      "module": "Solidity.Semantics.RunFuel",
+      "opaque": false,
+      "unsafe": false,
+      "compilerGenerated": false
+    },
+    {
+      "declaration": "Solidity.Stmt.runR",
+      "extern": false,
+      "implementation": "Solidity.Stmt.runC",
+      "implementationUnsafe": false,
+      "links": [
+        "Solidity.Stmt.runR_eq"
+      ],
+      "module": "Solidity.Semantics.Run",
+      "opaque": false,
+      "unsafe": false,
+      "compilerGenerated": false
+    },
+    {
+      "declaration": "Solidity.Stmt.sym",
+      "extern": false,
+      "implementation": "Solidity.Stmt.symM",
+      "implementationUnsafe": false,
+      "links": [
+        "Solidity.Stmt.sym_eq_symM"
+      ],
+      "module": "Solidity.Calculus.CallSummary",
+      "opaque": false,
+      "unsafe": false,
+      "compilerGenerated": false
+    },
+    {
+      "declaration": "Solidity.SVal.defaultOf",
+      "extern": false,
+      "implementation": "Solidity.SVal.defaultOfM",
+      "implementationUnsafe": false,
+      "links": [
+        "Solidity.SVal.defaultOf_eq_defaultOfM"
+      ],
+      "module": "Solidity.Semantics.Storage.Ops",
+      "opaque": false,
+      "unsafe": false,
+      "compilerGenerated": false
+    },
+    {
+      "declaration": "Solidity.SVal.find",
+      "extern": false,
+      "implementation": "Solidity.SVal.findM",
+      "implementationUnsafe": false,
+      "links": [
+        "Solidity.SVal.find_eq_findM"
+      ],
+      "module": "Solidity.Semantics.Storage.Ops",
+      "opaque": false,
+      "unsafe": false,
+      "compilerGenerated": false
+    },
+    {
+      "declaration": "Solidity.SVal.findLive",
+      "extern": false,
+      "implementation": "Solidity.SVal.findLiveM",
+      "implementationUnsafe": false,
+      "links": [
+        "Solidity.SVal.findLive_eq_findLiveM"
+      ],
+      "module": "Solidity.Semantics.Storage.Ops",
+      "opaque": false,
+      "unsafe": false,
+      "compilerGenerated": false
+    },
+    {
+      "declaration": "Solidity.SVal.fold",
+      "extern": false,
+      "implementation": "Solidity.SVal.foldM",
+      "implementationUnsafe": false,
+      "links": [
+        "Solidity.SVal.fold_eq_foldM"
+      ],
+      "module": "Solidity.Semantics.Storage.Values",
+      "opaque": false,
+      "unsafe": false,
+      "compilerGenerated": false
+    },
+    {
+      "declaration": "Solidity.SVal.overlay",
+      "extern": false,
+      "implementation": "Solidity.SVal.overlayM",
+      "implementationUnsafe": false,
+      "links": [
+        "Solidity.SVal.overlay_eq_overlayM"
+      ],
+      "module": "Solidity.Semantics.Storage.Ops",
+      "opaque": false,
+      "unsafe": false,
+      "compilerGenerated": false
+    },
+    {
+      "declaration": "Solidity.SVal.save",
+      "extern": false,
+      "implementation": "Solidity.SVal.saveM",
+      "implementationUnsafe": false,
+      "links": [
+        "Solidity.SVal.save_eq_saveM"
+      ],
+      "module": "Solidity.Semantics.Storage.Ops",
+      "opaque": false,
+      "unsafe": false,
+      "compilerGenerated": false
+    },
+    {
+      "declaration": "Solidity.SVal.strip",
+      "extern": false,
+      "implementation": "Solidity.SVal.stripM",
+      "implementationUnsafe": false,
+      "links": [
+        "Solidity.SVal.strip_eq_stripM"
+      ],
+      "module": "Solidity.Semantics.Storage.Ops",
+      "opaque": false,
+      "unsafe": false,
+      "compilerGenerated": false
+    },
+    {
+      "declaration": "Solidity.SVec.defaultOf",
+      "extern": false,
+      "implementation": "Solidity.SVec.defaultOfM",
+      "implementationUnsafe": false,
+      "links": [
+        "Solidity.SVec.defaultOf_eq_defaultOfM"
+      ],
+      "module": "Solidity.Semantics.Storage.Ops",
+      "opaque": false,
+      "unsafe": false,
+      "compilerGenerated": false
+    },
+    {
+      "declaration": "Solidity.SVec.fold",
+      "extern": false,
+      "implementation": "Solidity.SVec.foldM",
+      "implementationUnsafe": false,
+      "links": [
+        "Solidity.SVec.fold_eq_foldM"
+      ],
+      "module": "Solidity.Semantics.Storage.Values",
+      "opaque": false,
+      "unsafe": false,
+      "compilerGenerated": false
+    },
+    {
+      "declaration": "Solidity.SVec.overlayOn",
+      "extern": false,
+      "implementation": "Solidity.SVec.overlayOnM",
+      "implementationUnsafe": false,
+      "links": [
+        "Solidity.SVec.overlayOn_eq_overlayOnM"
+      ],
+      "module": "Solidity.Semantics.Storage.Ops",
+      "opaque": false,
+      "unsafe": false,
+      "compilerGenerated": false
+    },
+    {
+      "declaration": "Solidity.SVec.set",
+      "extern": false,
+      "implementation": "Solidity.SVec.setM",
+      "implementationUnsafe": false,
+      "links": [
+        "Solidity.SVec.set_eq_setM"
+      ],
+      "module": "Solidity.Semantics.Storage.Values",
+      "opaque": false,
+      "unsafe": false,
+      "compilerGenerated": false
+    },
+    {
+      "declaration": "Solidity.SVec.strip",
+      "extern": false,
+      "implementation": "Solidity.SVec.stripM",
+      "implementationUnsafe": false,
+      "links": [
+        "Solidity.SVec.strip_eq_stripM"
+      ],
+      "module": "Solidity.Semantics.Storage.Ops",
+      "opaque": false,
+      "unsafe": false,
+      "compilerGenerated": false
+    },
+    {
+      "declaration": "Solidity.SVec.toList",
+      "extern": false,
+      "implementation": "Solidity.SVec.toListM",
+      "implementationUnsafe": false,
+      "links": [
+        "Solidity.SVec.toList_eq_toListM"
+      ],
+      "module": "Solidity.Semantics.Storage.Values",
+      "opaque": false,
+      "unsafe": false,
+      "compilerGenerated": false
+    },
+    {
+      "declaration": "Solidity.Symex.normValid.unsafe_impl_3",
+      "extern": false,
+      "implementation": "Solidity.Symex.normValid.unsafe_1",
+      "implementationUnsafe": true,
+      "links": [],
+      "module": "Solidity.Calculus.Symex",
+      "opaque": true,
+      "unsafe": false,
+      "compilerGenerated": true
+    },
+    {
+      "declaration": "Solidity.Symex.normValid.unsafe_impl_6",
+      "extern": false,
+      "implementation": "Solidity.Symex.normValid.unsafe_4",
+      "implementationUnsafe": true,
+      "links": [],
+      "module": "Solidity.Calculus.Symex",
+      "opaque": true,
+      "unsafe": false,
+      "compilerGenerated": true
+    },
+    {
+      "declaration": "Solidity.Thin.namesR",
+      "extern": false,
+      "implementation": "Solidity.Thin.names",
+      "implementationUnsafe": false,
+      "links": [
+        "Solidity.Thin.namesR_eq"
+      ],
+      "module": "Solidity.Calculus.FirstOrder",
+      "opaque": false,
+      "unsafe": false,
+      "compilerGenerated": false
+    },
+    {
+      "declaration": "Solidity.Thin.posWk",
+      "extern": false,
+      "implementation": "Solidity.Thin.posWkM",
+      "implementationUnsafe": false,
+      "links": [
+        "Solidity.Thin.posWk_eq_posWkM"
+      ],
+      "module": "Solidity.Calculus.LeafDerive",
+      "opaque": false,
+      "unsafe": false,
+      "compilerGenerated": false
+    },
+    {
+      "declaration": "Solidity.TLoop.run",
+      "extern": false,
+      "implementation": "Solidity.TLoop.runImpl'",
+      "implementationUnsafe": false,
+      "links": [],
+      "module": "Solidity.Semantics.Run",
+      "opaque": false,
+      "unsafe": false,
+      "compilerGenerated": false
+    },
+    {
+      "declaration": "Solidity.Tm.beqR",
+      "extern": false,
+      "implementation": "Solidity.Tm.beqM",
+      "implementationUnsafe": false,
+      "links": [
+        "Solidity.Tm.beqR_eq_beqM"
+      ],
+      "module": "Solidity.Calculus.TermEq",
+      "opaque": false,
+      "unsafe": false,
+      "compilerGenerated": false
+    },
+    {
+      "declaration": "Solidity.Tm.eval",
+      "extern": false,
+      "implementation": "Solidity.Tm.evalM",
+      "implementationUnsafe": false,
+      "links": [
+        "Solidity.Tm.eval_eq_evalM"
+      ],
+      "module": "Solidity.Calculus.TermEval",
+      "opaque": false,
+      "unsafe": false,
+      "compilerGenerated": false
+    },
+    {
+      "declaration": "Solidity.Tm.litVarsS",
+      "extern": false,
+      "implementation": "Solidity.Tm.litVarsSM",
+      "implementationUnsafe": false,
+      "links": [
+        "Solidity.Tm.litVarsS_eq_litVarsSM"
+      ],
+      "module": "Solidity.Calculus.TermEq",
+      "opaque": false,
+      "unsafe": false,
+      "compilerGenerated": false
+    },
+    {
+      "declaration": "Solidity.Tm.norm",
+      "extern": false,
+      "implementation": "Solidity.Tm.normM",
+      "implementationUnsafe": false,
+      "links": [
+        "Solidity.Tm.norm_eq_normM"
+      ],
+      "module": "Solidity.Calculus.CallSummary",
+      "opaque": false,
+      "unsafe": false,
+      "compilerGenerated": false
+    },
+    {
+      "declaration": "Solidity.Tm.spineHas",
+      "extern": false,
+      "implementation": "Solidity.Tm.spineHasM",
+      "implementationUnsafe": false,
+      "links": [
+        "Solidity.Tm.spineHas_eq_spineHasM"
+      ],
+      "module": "Solidity.Calculus.RewritePast.Merge",
+      "opaque": false,
+      "unsafe": false,
+      "compilerGenerated": false
+    },
+    {
+      "declaration": "Solidity.Tm.strictReads",
+      "extern": false,
+      "implementation": "Solidity.Tm.strictReadsM",
+      "implementationUnsafe": false,
+      "links": [
+        "Solidity.Tm.strictReads_eq_strictReadsM"
+      ],
+      "module": "Solidity.Calculus.CallSummary",
+      "opaque": false,
+      "unsafe": false,
+      "compilerGenerated": false
+    },
+    {
+      "declaration": "Solidity.Tm.substE",
+      "extern": false,
+      "implementation": "Solidity.Tm.substEM",
+      "implementationUnsafe": false,
+      "links": [
+        "Solidity.Tm.substE_eq_substEM"
+      ],
+      "module": "Solidity.Calculus.CallSummary",
+      "opaque": false,
+      "unsafe": false,
+      "compilerGenerated": false
+    },
+    {
+      "declaration": "Solidity.Tm.toL",
+      "extern": false,
+      "implementation": "Solidity.Tm.toLM",
+      "implementationUnsafe": false,
+      "links": [
+        "Solidity.Tm.toL_eq_toLM"
+      ],
+      "module": "Solidity.Calculus.DecideScoped",
+      "opaque": false,
+      "unsafe": false,
+      "compilerGenerated": false
+    },
+    {
+      "declaration": "Solidity.Tm.valOnly",
+      "extern": false,
+      "implementation": "Solidity.Tm.valOnlyM",
+      "implementationUnsafe": false,
+      "links": [
+        "Solidity.Tm.valOnly_eq_valOnlyM"
+      ],
+      "module": "Solidity.Calculus.CallSummary",
+      "opaque": false,
+      "unsafe": false,
+      "compilerGenerated": false
+    },
+    {
+      "declaration": "Solidity.Tools.certifyLong.unsafe_impl_3",
+      "extern": false,
+      "implementation": "Solidity.Tools.certifyLong.unsafe_1",
+      "implementationUnsafe": true,
+      "links": [],
+      "module": "Solidity.Tools.Counterexample",
+      "opaque": true,
+      "unsafe": false,
+      "compilerGenerated": true
+    },
+    {
+      "declaration": "Solidity.Tools.elabCounterexample.unsafe_impl_10",
+      "extern": false,
+      "implementation": "Solidity.Tools.elabCounterexample.unsafe_8",
+      "implementationUnsafe": true,
+      "links": [],
+      "module": "Solidity.Tools.Counterexample",
+      "opaque": true,
+      "unsafe": false,
+      "compilerGenerated": true
+    },
+    {
+      "declaration": "Solidity.Tools.elabCounterexample.unsafe_impl_7",
+      "extern": false,
+      "implementation": "Solidity.Tools.elabCounterexample.unsafe_5",
+      "implementationUnsafe": true,
+      "links": [],
+      "module": "Solidity.Tools.Counterexample",
+      "opaque": true,
+      "unsafe": false,
+      "compilerGenerated": true
+    },
+    {
+      "declaration": "Solidity.Tools.evalLines.unsafe_impl_3",
+      "extern": false,
+      "implementation": "Solidity.Tools.evalLines.unsafe_1",
+      "implementationUnsafe": true,
+      "links": [],
+      "module": "Solidity.Tools.Common",
+      "opaque": true,
+      "unsafe": false,
+      "compilerGenerated": true
+    },
+    {
+      "declaration": "Solidity.Tools.evalSolRefute.unsafe_impl_5",
+      "extern": false,
+      "implementation": "Solidity.Tools.evalSolRefute.unsafe_3",
+      "implementationUnsafe": true,
+      "links": [],
+      "module": "Solidity.Tools.Counterexample",
+      "opaque": true,
+      "unsafe": false,
+      "compilerGenerated": true
+    },
+    {
+      "declaration": "Solidity.Tools.evalSolRefute.unsafe_impl_8",
+      "extern": false,
+      "implementation": "Solidity.Tools.evalSolRefute.unsafe_6",
+      "implementationUnsafe": true,
+      "links": [],
+      "module": "Solidity.Tools.Counterexample",
+      "opaque": true,
+      "unsafe": false,
+      "compilerGenerated": true
+    },
+    {
+      "declaration": "Solidity.Tools.resolveTarget?.unsafe_impl_3",
+      "extern": false,
+      "implementation": "Solidity.Tools.resolveTarget?.unsafe_1",
+      "implementationUnsafe": true,
+      "links": [],
+      "module": "Solidity.Tools.Common",
+      "opaque": true,
+      "unsafe": false,
+      "compilerGenerated": true
+    },
+    {
+      "declaration": "Solidity.Tools.resolveTarget?.unsafe_impl_6",
+      "extern": false,
+      "implementation": "Solidity.Tools.resolveTarget?.unsafe_4",
+      "implementationUnsafe": true,
+      "links": [],
+      "module": "Solidity.Tools.Common",
+      "opaque": true,
+      "unsafe": false,
+      "compilerGenerated": true
+    },
+    {
+      "declaration": "Solidity.Upd.applyV",
+      "extern": false,
+      "implementation": "Solidity.Upd.applyVM",
+      "implementationUnsafe": false,
+      "links": [
+        "Solidity.Upd.applyV_eq_applyVM"
+      ],
+      "module": "Solidity.Calculus.Lands",
+      "opaque": false,
+      "unsafe": false,
+      "compilerGenerated": false
+    },
+    {
+      "declaration": "Solidity.Upd.globT",
+      "extern": false,
+      "implementation": "Solidity.Upd.globTM",
+      "implementationUnsafe": false,
+      "links": [
+        "Solidity.Upd.globT_eq_globTM"
+      ],
+      "module": "Solidity.Calculus.Lands",
+      "opaque": false,
+      "unsafe": false,
+      "compilerGenerated": false
+    },
+    {
+      "declaration": "Solidity.Upd.graftF",
+      "extern": false,
+      "implementation": "Solidity.Upd.graftFM",
+      "implementationUnsafe": false,
+      "links": [],
+      "module": "Solidity.Calculus.StatePartsScoped",
+      "opaque": false,
+      "unsafe": false,
+      "compilerGenerated": false
+    },
+    {
+      "declaration": "Solidity.Upd.held",
+      "extern": false,
+      "implementation": "Solidity.Upd.heldM",
+      "implementationUnsafe": false,
+      "links": [
+        "Solidity.Upd.held_eq_heldM"
+      ],
+      "module": "Solidity.Calculus.Lands",
+      "opaque": false,
+      "unsafe": false,
+      "compilerGenerated": false
+    },
+    {
+      "declaration": "Solidity.Upd.redecl",
+      "extern": false,
+      "implementation": "Solidity.Upd.redeclM",
+      "implementationUnsafe": false,
+      "links": [
+        "Solidity.Upd.redecl_eq_redeclM",
+        "Solidity.Upd.shadow_eq_shadowM._simp_1_9"
+      ],
+      "module": "Solidity.Calculus.UpdRuleScoped",
+      "opaque": false,
+      "unsafe": false,
+      "compilerGenerated": false
+    },
+    {
+      "declaration": "Solidity.Upd.resolveS",
+      "extern": false,
+      "implementation": "Solidity.Upd.resolveSM",
+      "implementationUnsafe": false,
+      "links": [
+        "Solidity.Upd.resolveS_eq_resolveSM"
+      ],
+      "module": "Solidity.Calculus.LeafDerive",
+      "opaque": false,
+      "unsafe": false,
+      "compilerGenerated": false
+    },
+    {
+      "declaration": "Solidity.Upd.shadow",
+      "extern": false,
+      "implementation": "Solidity.Upd.shadowM",
+      "implementationUnsafe": false,
+      "links": [
+        "Solidity.Upd.shadow_eq_shadowM"
+      ],
+      "module": "Solidity.Calculus.UpdRuleScoped",
+      "opaque": false,
+      "unsafe": false,
+      "compilerGenerated": false
+    },
+    {
+      "declaration": "Solidity.Upd.size",
+      "extern": false,
+      "implementation": "Solidity.Upd.sizeM",
+      "implementationUnsafe": false,
+      "links": [
+        "Solidity.Upd.size_eq_sizeM"
+      ],
+      "module": "Solidity.Calculus.UpdRuleScoped",
+      "opaque": false,
+      "unsafe": false,
+      "compilerGenerated": false
+    },
+    {
+      "declaration": "Solidity.Upd.toLS",
+      "extern": false,
+      "implementation": "Solidity.Upd.toLSM",
+      "implementationUnsafe": false,
+      "links": [
+        "Solidity.Upd.toLS_eq_toLSM"
+      ],
+      "module": "Solidity.Calculus.DecideScoped",
+      "opaque": false,
+      "unsafe": false,
+      "compilerGenerated": false
+    },
+    {
+      "declaration": "Solidity.Upd.totalB",
+      "extern": false,
+      "implementation": "Solidity.Upd.totalBM",
+      "implementationUnsafe": false,
+      "links": [
+        "Solidity.Upd.totalB_eq_totalBM"
+      ],
+      "module": "Solidity.Calculus.UpdRuleScoped",
+      "opaque": false,
+      "unsafe": false,
+      "compilerGenerated": false
+    },
+    {
+      "declaration": "Solidity.Upd.unsetAt",
+      "extern": false,
+      "implementation": "Solidity.Upd.unsetAtM",
+      "implementationUnsafe": false,
+      "links": [
+        "Solidity.Upd.shadow_eq_shadowM._simp_1_8",
+        "Solidity.Upd.unsetAt_eq_unsetAtM"
+      ],
+      "module": "Solidity.Calculus.UpdRuleScoped",
+      "opaque": false,
+      "unsafe": false,
+      "compilerGenerated": false
+    },
+    {
+      "declaration": "Solidity.UpdElem.applyV",
+      "extern": false,
+      "implementation": "Solidity.UpdElem.applyVM",
+      "implementationUnsafe": false,
+      "links": [
+        "Solidity.UpdElem.applyV_eq_applyVM"
+      ],
+      "module": "Solidity.Calculus.Lands",
+      "opaque": false,
+      "unsafe": false,
+      "compilerGenerated": false
+    },
+    {
+      "declaration": "Solidity.UpdElem.globT",
+      "extern": false,
+      "implementation": "Solidity.UpdElem.globTM",
+      "implementationUnsafe": false,
+      "links": [
+        "Solidity.UpdElem.globT_eq_globTM"
+      ],
+      "module": "Solidity.Calculus.Lands",
+      "opaque": false,
+      "unsafe": false,
+      "compilerGenerated": false
+    },
+    {
+      "declaration": "Solidity.Walk.evalQuoteOpt",
+      "extern": false,
+      "implementation": "Solidity.Walk.evalQuoteOptImpl",
+      "implementationUnsafe": true,
+      "links": [],
+      "module": "Solidity.Calculus.RewriteSyntax",
+      "opaque": true,
+      "unsafe": false,
+      "compilerGenerated": false
+    },
+    {
+      "declaration": "Solidity.Yul.Views.localStoragePaths",
+      "extern": false,
+      "implementation": "Solidity.Yul.Views.localStoragePathsM",
+      "implementationUnsafe": false,
+      "links": [
+        "Solidity.Yul.Views.localStoragePaths_eq_M"
+      ],
+      "module": "Solidity.Yul.Views.RetainedEntryPaths",
+      "opaque": false,
+      "unsafe": false,
+      "compilerGenerated": false
+    },
+    {
+      "declaration": "Solidity.Yul.Views.locationStoragePaths",
+      "extern": false,
+      "implementation": "Solidity.Yul.Views.locationStoragePathsM",
+      "implementationUnsafe": false,
+      "links": [
+        "Solidity.Yul.Views.locationStoragePaths_eq_M"
+      ],
+      "module": "Solidity.Yul.Views.RetainedLocationRun",
+      "opaque": false,
+      "unsafe": false,
+      "compilerGenerated": false
+    },
+    {
+      "declaration": "Solidity.Yul.Views.returnStoragePaths",
+      "extern": false,
+      "implementation": "Solidity.Yul.Views.returnStoragePathsM",
+      "implementationUnsafe": false,
+      "links": [
+        "Solidity.Yul.Views.returnStoragePaths_eq_M"
+      ],
+      "module": "Solidity.Yul.Views.RetainedEntryPaths",
+      "opaque": false,
+      "unsafe": false,
+      "compilerGenerated": false
+    },
+    {
+      "declaration": "Solidity.Yul.Views.runtimeStoragePaths",
+      "extern": false,
+      "implementation": "Solidity.Yul.Views.runtimeStoragePathsM",
+      "implementationUnsafe": false,
+      "links": [
+        "Solidity.Yul.Views.runtimeStoragePaths_eq_M"
+      ],
+      "module": "Solidity.Yul.Views.RetainedRuntimePaths",
+      "opaque": false,
+      "unsafe": false,
+      "compilerGenerated": false
+    },
+    {
+      "declaration": "Solidity.Yul.Views.runtimeValuesPaths",
+      "extern": false,
+      "implementation": "Solidity.Yul.Views.runtimeValuesPathsM",
+      "implementationUnsafe": false,
+      "links": [
+        "Solidity.Yul.Views.runtimeValuesPaths_eq_M"
+      ],
+      "module": "Solidity.Yul.Views.RetainedRuntimePaths",
+      "opaque": false,
+      "unsafe": false,
+      "compilerGenerated": false
+    },
+    {
+      "declaration": "Solidity.Yul.Views.valueStoragePaths",
+      "extern": false,
+      "implementation": "Solidity.Yul.Views.valueStoragePathsM",
+      "implementationUnsafe": false,
+      "links": [
+        "Solidity.Yul.Views.valueStoragePaths_eq_M"
+      ],
+      "module": "Solidity.Yul.Views.RetainedEntryPaths",
+      "opaque": false,
+      "unsafe": false,
+      "compilerGenerated": false
+    }
+  ]
+}

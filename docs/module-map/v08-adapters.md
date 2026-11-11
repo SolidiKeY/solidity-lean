@@ -824,6 +824,7 @@ See [P8 admission](../feature-work/p8-admission.md).
 | `Backend/InternalFlow/RuntimeFrameP1BridgeV2.lean` | `p1_frame_bridge` (V2) for the guarded revert-with-data family: actual source/target runs, full `PassCorrect`, per-input `Local`. |
 | `Backend/InternalFlow/RuntimeFrameP1BridgeV2Controls.lean` | Admitted witnesses of both classes, observed payload, refused mismatch, other-payload disagreement, call events, satisfiability. |
 | `Backend/InternalFlow/RuntimeFrameP1LangV2Migration.lean` | V2 → V12 `P1Lang` migration: `coarse` (forget events/data), `source_coarse`, `target_coarse`, `lift_coarse`, input conversions. |
+| `Frontend/Admission/CanonicalReaderContract.lean` | CR/H68 control: one fixture through the existing `solc_import` route (all six rows elaborated) and `Shared.executableReader` (two `uint8` shapes refused with exact diagnostics); observation, no migration or fallback. |
 | `Backend/PrimitivePackets/SignedCheckedMul/Source.lean` | Checked int256 `*` Source evaluation on arbitrary locals: exact value or `Panic(0x11)`. |
 | `Backend/PrimitivePackets/SignedCheckedMul/Selected.lean` | The public compiler selects `binaryCode .int .mul`, with the literal `sTail .mul` guard. |
 | `Backend/PrimitivePackets/SignedCheckedMul/Target.lean` | Selected checked int256 `*` execution on any represented machine and saved stack: product or coarse revert. |
