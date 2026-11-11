@@ -1501,3 +1501,22 @@ theorem obs_len_lt (st : Storage C) {E : Ty} (r : SRef C (.ref (.array E))) :
 end Decide
 
 end Solidity
+
+namespace Solidity.Decide
+/-- Universal implementation equality for `delete a[i]`. -/
+theorem delRS_eq_delRSM_universal : @delRS = @delRSM := by
+  funext C U V x r c
+  exact delRS_eq_delRSM x r c
+/-- Universal implementation equality for `a = b` at fresh array slots. -/
+theorem stripRS_eq_stripRSM_universal : @stripRS = @stripRSM := by
+  funext C U V x r c
+  exact stripRS_eq_stripRSM x r c
+/-- Universal implementation equality for copying `a = b` over old storage. -/
+theorem ovRS_eq_ovRSM_universal : @ovRS = @ovRSM := by
+  funext C U V o n r c
+  exact ovRS_eq_ovRSM o n r c
+/-- Universal implementation equality for the reader after `a[i] = x`. -/
+theorem writeAt_eq_writeAtM_universal : @writeAt = @writeAtM := by
+  funext C T S P newR V c Q
+  exact writeAt_eq_writeAtM S P newR c Q
+end Solidity.Decide

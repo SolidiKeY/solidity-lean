@@ -1,3 +1,4 @@
+import Solidity.Lowering.V07.BooleanComparisonControls
 import Solidity.Lowering.G16.Comparisons
 import Solidity.Lowering.V07.WordCastControls
 import Solidity.Lowering.V07.AddressConversions
@@ -139,3 +140,76 @@ end Solidity.Lowering.G16.ComparisonControls
 /-- info: 'Solidity.Lowering.G16.ComparisonControls.wrong_assignment_comparison_rejected' depends on axioms: [propext, Classical.choice, Quot.sound] -/
 #guard_msgs (whitespace := lax) in
 #print axioms Solidity.Lowering.G16.ComparisonControls.wrong_assignment_comparison_rejected
+
+namespace Solidity.Lowering.G16.BooleanComparisonControls
+open Solidity.Lowering.V07
+
+private def sampleSource := BooleanComparisonControls.source false true
+private def sampleTarget := BooleanComparisonControls.target false true
+
+private def sourceRun (ne checked : Bool) (pipeline : Roadmap.Pipeline) (fuel : Nat) :=
+  (Source.evalE (MixedAssignmentControls.globals pipeline)
+    {Source.SemanticsExamples.F0 with checked := checked} (fuel+4)
+    (.compare (BooleanComparisons.sourceOp ne)
+      (.assign (.local .here) (.local (.there .here))) (.local .here))).run sampleSource
+
+private def sourceObserved (ne checked : Bool) (pipeline : Roadmap.Pipeline) (fuel : Nat) : Option Bool :=
+  match (sourceRun ne checked pipeline fuel).1 with
+  | .ok (.val (.bool b)) => some b
+  | _ => none
+
+private def sourceWritten (ne checked : Bool) (pipeline : Roadmap.Pipeline) (fuel : Nat) : Option Bool :=
+  match (sourceRun ne checked pipeline fuel).2.1.get .here with
+  | .bool b => some b
+
+private def nativeObserved (ne : Bool) (pipeline : Roadmap.Pipeline) : Option Bool :=
+  match (BooleanComparisons.operand ne pipeline .here (.there .here)).run sampleTarget with
+  | .ok (_, .prim b) => some b
+  | .error _ => none
+
+private def nativeWritten (ne : Bool) (pipeline : Roadmap.Pipeline) : Option Bool :=
+  match (BooleanComparisons.operand ne pipeline .here (.there .here)).run sampleTarget with
+  | .ok (out,_) => some (TEnv.get .here out.st.env)
+  | .error _ => none
+
+private theorem sample_run (ne checked : Bool) (pipeline : Roadmap.Pipeline) (fuel : Nat) :
+    sourceObserved ne checked pipeline fuel =
+      some (BooleanComparisons.answer ne true (if pipeline = .legacy then false else true)) ∧
+    nativeObserved ne pipeline =
+      some (BooleanComparisons.answer ne true (if pipeline = .legacy then false else true)) ∧
+    sourceWritten ne checked pipeline fuel = some true ∧ nativeWritten ne pipeline = some true := by
+  have runs := BooleanComparison.transport (MixedAssignmentControls.globals pipeline)
+    {Source.SemanticsExamples.F0 with checked := checked} fuel sampleSource sampleTarget ne
+    .here (.there .here) .here (.there .here) true false rfl rfl rfl rfl
+  have native := runs.2
+  dsimp only [MixedAssignmentControls.globals] at native
+  refine ⟨?_,?_,?_,?_⟩
+  · unfold sourceObserved sourceRun
+    rw [runs.1]
+    rfl
+  · unfold nativeObserved
+    rw [native]
+  · unfold sourceWritten sourceRun
+    rw [runs.1]
+    rfl
+  · unfold nativeWritten
+    rw [native]
+    rfl
+
+/-- Guards both Boolean comparison operators against losing the pre-assignment capture; actual Source/native observations agree and both callers record the write in either mode. -/
+theorem wrong_capture_rejected (ne checked : Bool) (fuel : Nat) :
+    sourceObserved ne checked .legacy fuel ≠ sourceObserved ne checked .viaIR fuel ∧
+    ∀ pipeline, sourceObserved ne checked pipeline fuel = nativeObserved ne pipeline ∧
+      sourceWritten ne checked pipeline fuel = some true ∧ nativeWritten ne pipeline = some true := by
+  refine ⟨?_,?_⟩
+  · rw [(sample_run ne checked .legacy fuel).1,(sample_run ne checked .viaIR fuel).1]
+    cases ne <;> intro impossible <;> cases impossible
+  · intro pipeline
+    obtain ⟨source,native,written,target⟩ := sample_run ne checked pipeline fuel
+    exact ⟨source.trans native.symm,written,target⟩
+
+end Solidity.Lowering.G16.BooleanComparisonControls
+
+/-- info: 'Solidity.Lowering.G16.BooleanComparisonControls.wrong_capture_rejected' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in
+#print axioms Solidity.Lowering.G16.BooleanComparisonControls.wrong_capture_rejected
