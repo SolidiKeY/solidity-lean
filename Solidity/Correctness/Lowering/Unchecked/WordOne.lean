@@ -194,6 +194,132 @@ theorem pairedIncrementV2_run {E : Source.Env} {C : Contract}
       sourceResult modelResult
       (primitiveUInt_of_integerRelationV2 sourceResult modelResult valueRelated) initial
 
+/-- One syntax-only family for compound-one and increment statements.
+V2 stays unchanged; V3 reuses SourceOneShape and the paired V2 execution law. -/
+structure PairedUpdateV3 {E : Source.Env} {C : Contract}
+    {R : List Source.STy} {M loop : Bool} {Δ : Source.RCtx} (pre tail : List PrimTy)
+    (source : Source.RStmt E R M ⟨loop, true⟩
+      (sourceContext (pre ++ .uint :: tail)) Δ)
+    (program : Prog C (modelContext (pre ++ .uint :: tail))
+      (modelContext (pre ++ .uint :: tail))) where
+  inc : Bool
+  sourceShape : SourceOneShape inc (sourcePrimitiveSlot .uint tail pre) source
+  model : WordOneAssociation inc program
+  modelSlot : model.target.slot = modelPrimitiveSlot .uint tail pre
+
+private def pairedUpdateAtV3 {E : Source.Env} {C : Contract}
+    {R : List Source.STy} {M loop : Bool} {Δ : Source.RCtx} (pre tail : List PrimTy)
+    (source : Source.RStmt E R M ⟨loop, true⟩
+      (sourceContext (pre ++ .uint :: tail)) Δ)
+    (program : Prog C (modelContext (pre ++ .uint :: tail))
+      (modelContext (pre ++ .uint :: tail)))
+    (inc : Bool) (slot : Source.Idx (sourceContext (pre ++ .uint :: tail)) (.int Source.IntTy.u256))
+    (shape : SourceOneShape inc slot source) : Option (PairedUpdateV3 pre tail source program) := do
+  if position : slot.toNat = (sourcePrimitiveSlot .uint tail pre).toNat then
+    let model ← checkWordOne inc program
+    if same : model.target.slot = modelPrimitiveSlot .uint tail pre then
+      some ⟨inc, by rw [source_idx_injective _ _ position] at shape; exact shape, model, same⟩
+    else none
+  else none
+
+private def checkPairedUpdateExpressionV3 {E : Source.Env} {C : Contract}
+    {R : List Source.STy} {M loop : Bool} (pre tail : List PrimTy) {τ : Source.STy}
+    (expression : Source.RExpr E (sourceContext (pre ++ .uint :: tail)) τ)
+    (program : Prog C (modelContext (pre ++ .uint :: tail))
+      (modelContext (pre ++ .uint :: tail))) :
+    Option (PairedUpdateV3 (R := R) (M := M) (loop := loop) pre tail (.expr expression) program) :=
+  match expression with
+  | .incDec inc prefixResult location =>
+    match location with
+    | .local slot =>
+      match τ with
+      | .int ⟨false, 256, _⟩ =>
+        pairedUpdateAtV3 pre tail _ program inc slot (.increment prefixResult)
+      | _ => none
+    | _ => none
+  | .compound (σ := σ) op location rhs fits =>
+    match location with
+    | .local slot =>
+      match τ with
+      | .int ⟨false, 256, _⟩ =>
+        match σ, rhs with
+        | _, .const q =>
+          if literal : q = Source.Q.ofInt 1 then
+            match op with
+            | .add => pairedUpdateAtV3 pre tail _ program true slot
+                (by cases literal; exact .compound fits)
+            | .sub => pairedUpdateAtV3 pre tail _ program false slot
+                (by cases literal; exact .compound fits)
+            | _ => none
+          else none
+        | _, _ => none
+      | _ => none
+    | _ => none
+  | _ => none
+
+/-- Total supplied-pair recognizer for the shared compound-one/increment
+family. The actual Source operator, RHS, type and position and the actual
+model program are inspected. Unrecognized syntax remains a coverage gap. -/
+def checkPairedUpdateV3 {E : Source.Env} {C : Contract}
+    {R : List Source.STy} {M loop : Bool} {Δ : Source.RCtx} (pre tail : List PrimTy)
+    (source : Source.RStmt E R M ⟨loop, true⟩ (sourceContext (pre ++ .uint :: tail)) Δ)
+    (program : Prog C (modelContext (pre ++ .uint :: tail))
+      (modelContext (pre ++ .uint :: tail))) : Option (PairedUpdateV3 pre tail source program) :=
+  match source with
+  | .expr expression => checkPairedUpdateExpressionV3 pre tail expression program
+  | _ => none
+
+/-- Lift one paired execution through the existing Source normalization.
+No per-operator model execution proof or semantic-correctness premise is added.
+The unchecked runtime frame and sufficient horizon are explicit; raw producer,
+entry, resources and whole-state encoding still require the full endpoint. -/
+theorem pairedUpdateV3_run {E : Source.Env} {C : Contract}
+    {R : List Source.STy} {M loop : Bool} (pre tail : List PrimTy)
+    (source : Source.RStmt E R M ⟨loop, true⟩
+      (sourceContext (pre ++ .uint :: tail)) (sourceContext (pre ++ .uint :: tail)))
+    (program : Prog C (modelContext (pre ++ .uint :: tail))
+      (modelContext (pre ++ .uint :: tail)))
+    (association : PairedUpdateV3 pre tail source program)
+    (G : Source.Glob E) (F : Source.Fr) (fuel nps : Nat) (ph : Option (Source.Ph E))
+    (plan : Source.FailureExecution.RuntimePlan) (known : Bool)
+    (ls : Source.Locals E.layout (sourceContext (pre ++ .uint :: tail))) (st : Source.St E)
+    (model : Solidity.State C (modelContext (pre ++ .uint :: tail)))
+    (initial : LocalsRel E.layout C model.H (pre ++ .uint :: tail) ls model.env) :
+    ∃ (sourceResult : Source.Val E.layout (.int Source.IntTy.u256))
+      (modelResult : PrimTy.uint.Denote),
+      (Source.execS G { F with checked := false } (fuel + 3) nps ph source ls
+        (plan := plan) (calldataKnown := known)).run (.nil, st) =
+          (.ok (.normal (ls.set (sourcePrimitiveSlot .uint tail pre) sourceResult)), (.nil, st)) ∧
+      program.run model = .ok (⟨model.setLocal (modelPrimitiveSlot .uint tail pre) modelResult,
+        List.prefix_refl _⟩ : Out C model.H (modelContext (pre ++ .uint :: tail))) ∧
+      StateLocalsRel E C (pre ++ .uint :: tail)
+        (ls.set (sourcePrimitiveSlot .uint tail pre) sourceResult)
+        (model.setLocal (modelPrimitiveSlot .uint tail pre) modelResult) ∧
+      (model.setLocal (modelPrimitiveSlot .uint tail pre) modelResult).glob = model.glob := by
+  rcases association with ⟨inc, shape, certificate, same⟩
+  have normalize :
+      (Source.execS G { F with checked := false } (fuel + 3) nps ph source ls
+        (plan := plan) (calldataKnown := known)).run (.nil, st) =
+      (Source.execS G { F with checked := false } (fuel + 3) nps ph
+        (.expr (.incDec inc true (.local (sourcePrimitiveSlot .uint tail pre))) :
+          Source.RStmt E R M ⟨loop, true⟩ (sourceContext (pre ++ .uint :: tail))
+            (sourceContext (pre ++ .uint :: tail))) ls
+        (plan := plan) (calldataKnown := known)).run (.nil, st) := by
+    cases shape with
+    | increment prefixResult =>
+      exact incDec_statement G _ (fuel + 3) nps ph plan known ls st inc prefixResult _
+    | compound fits =>
+      exact compoundOne_statement G _ (fuel + 3) nps ph plan known ls st
+        Source.IntTy.u256 inc true _ fits
+  obtain ⟨sourceResult, modelResult, sourceRun, rest⟩ :=
+    pairedIncrementV2_run pre tail
+      (.expr (.incDec inc true (.local (sourcePrimitiveSlot .uint tail pre))))
+      program ⟨inc, true, .matched, certificate, same⟩
+      G F fuel nps ph plan known ls st model initial
+  exact ⟨sourceResult, modelResult, normalize.trans sourceRun, rest⟩
+
+#print axioms pairedUpdateV3_run
+
 #print axioms pairedIncrementV2_run
 
 #print axioms wordOne_run

@@ -85,6 +85,53 @@ theorem paired_source_slot_rejected (E : Source.Env) :
 #print axioms paired_nonupdate_rejected
 #print axioms paired_source_slot_rejected
 
+private def decrement := sol[Example]{ uint x = 0; unchecked { x -= 1; }; }
+
+private def sourceCompound (E : Source.Env) (inc : Bool) :
+    Source.RStmt E [] false ⟨false, true⟩
+      (Source.Agreement.sourceContext [.uint]) (Source.Agreement.sourceContext [.uint]) :=
+  .expr (.compound (if inc then .add else .sub) (.local .here)
+    (.const (Source.Q.ofInt 1)) (by cases inc <;> rfl))
+
+/-- Guards V3 losing either compound direction: both actual target quotations
+are accepted through the same static association and execution theorem. -/
+theorem paired_compound_v3_accepted (E : Source.Env) (inc : Bool) :
+    (checkPairedUpdateV3 [] [] (sourceCompound E inc)
+      (if inc then body compound else body decrement)).isSome = true := by
+  cases inc <;> rfl
+
+/-- Guards retaining only the new compound spelling while dropping V2's
+increment/decrement and either discarded token-result convention. -/
+theorem paired_increment_v3_accepted (E : Source.Env) (inc prefixResult : Bool) :
+    (checkPairedUpdateV3 [] [] (sourceIncrement E inc prefixResult)
+      (if inc then body increment else body decrement)).isSome = true := by
+  cases inc <;> rfl
+
+/-- Guards taking the direction only from the model, ignoring Source compound syntax. -/
+theorem paired_compound_v3_direction_rejected (E : Source.Env) :
+    (checkPairedUpdateV3 [] [] (sourceCompound E false) (body compound)).isNone = true := by
+  rfl
+
+/-- Guards ignoring the actual Source RHS while the target is increment-by-one. -/
+theorem paired_compound_v3_amount_rejected (E : Source.Env) :
+    (checkPairedUpdateV3 [] []
+      (.expr (.compound .add (.local .here) (.const (Source.Q.ofInt 2)) (by rfl)) :
+        Source.RStmt E [] false ⟨false, true⟩
+          (Source.Agreement.sourceContext [.uint]) (Source.Agreement.sourceContext [.uint]))
+      (body compound)).isNone = true := by
+  rfl
+
+/-- Guards V3 accepting a checked target after recognizing the Source compound. -/
+theorem paired_compound_v3_checked_rejected (E : Source.Env) :
+    (checkPairedUpdateV3 [] [] (sourceCompound E true) (body checking)).isNone = true := by
+  rfl
+
+#print axioms paired_compound_v3_accepted
+#print axioms paired_increment_v3_accepted
+#print axioms paired_compound_v3_direction_rejected
+#print axioms paired_compound_v3_amount_rejected
+#print axioms paired_compound_v3_checked_rejected
+
 /-- Both actual producer spellings reach one emitted typed program. -/
 theorem compound_increment_same : compound = increment := by
   rfl
