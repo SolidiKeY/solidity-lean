@@ -51,12 +51,30 @@ class DevTools {
  close(){this.abort(Error('CDP closed'),'connection.owned-close');if(this.diagnosticFailure)throw this.diagnosticFailure;}
 }
 async function connect(port,options={}){
- const start=performance.now();options.diagnostic?.({event:'target.lookup.start',wallTime:Date.now(),monotonicMs:start});
- try{const response=await fetch(`http://127.0.0.1:${port}/json/list`,{signal:AbortSignal.timeout(1500)}),pages=await response.json();
-  const page=pages.find(p=>p.type==='page'&&p.url.startsWith('vscode-file:'));if(!page)throw Error('VS Code renderer not ready');
-  options.diagnostic?.({event:'target.lookup.finish',wallTime:Date.now(),monotonicMs:performance.now(),elapsedMs:performance.now()-start,targetId:page.id,targetUrl:page.url,targetTitle:page.title});
-  return new DevTools(page.webSocketDebuggerUrl,{...options,identity:{...options.identity,targetId:page.id,targetUrl:page.url,targetTitle:page.title}});
- }catch(error){options.diagnostic?.({event:'target.lookup.failed',wallTime:Date.now(),monotonicMs:performance.now(),elapsedMs:performance.now()-start,error:error.message});throw error;}
+ const {fetchImpl=fetch,now=()=>performance.now(),...clientOptions}=options;
+ const start=now(),lookupUrl=`http://127.0.0.1:${port}/json/list`,note=(event,data={})=>clientOptions.diagnostic?.({event,wallTime:Date.now(),monotonicMs:now(),elapsedMs:now()-start,lookupUrl,deadlineMs:1500,...data});
+ const onTime=()=>{if(now()-start>=1500)throw Error('CDP target lookup timeout');};
+ note('target.lookup.start');
+ try{
+  const response=await fetchImpl(lookupUrl,{signal:AbortSignal.timeout(1500)});note('target.lookup.headers',{status:response.status});onTime();
+  if(!response.ok)throw Error('CDP target lookup HTTP '+response.status);
+  const pages=await response.json();note('target.lookup.body');onTime();
+  if(!Array.isArray(pages))throw Error('Malformed CDP target list');
+  const page=pages.find(p=>p?.type==='page'&&typeof p.url==='string'&&p.url.startsWith('vscode-file:'));if(!page)throw Error('VS Code renderer not ready');
+  note('target.lookup.finish',{targetId:page.id,targetUrl:page.url,targetTitle:page.title});onTime();
+  return new DevTools(page.webSocketDebuggerUrl,{...clientOptions,now,identity:{...clientOptions.identity,targetId:page.id,targetUrl:page.url,targetTitle:page.title}});
+ }catch(error){try{note('target.lookup.failed',{error:error.message});}catch(reporting){(error.reportingErrors??=[]).push(reporting.message);}throw error;}
+}
+async function withPhaseRenderer(port,directory,request,config,capturePhase,{connectRenderer=connect}={}){
+ const tracked=request.phase.startsWith('menus-')||request.phase.startsWith('diagnostics-problems-');
+ const diagnostic=tracked?phaseDiagnostic(join(directory,'cdp-timing.jsonl'),{runId:config.runId,target:config.target,sourceHead:config.sourceHead,phase:request.phase,phaseRequestId:request.requestId,metadataHash:createHash('sha256').update(JSON.stringify(request.metadata??null)).digest('hex'),source:request.metadata?.binding}):undefined;
+ const note=(event,data={})=>diagnostic?.({event,wallTime:Date.now(),monotonicMs:performance.now(),...data});
+ let client,result,primary;
+ try{note('phase.start');client=await connectRenderer(port,{diagnostic});result=await capturePhase(client);}
+ catch(error){primary=error;}
+ finally{try{if(client){if(request.phase.startsWith('menus-'))client.finish();else client.close();}}catch(error){if(primary)(primary.cleanupErrors??=[]).push(error.message);else primary=error;}}
+ if(primary){try{note('phase.failed',{error:primary.message,cleanupErrors:primary.cleanupErrors??[]});}catch(reporting){(primary.reportingErrors??=[]).push(reporting.message);}throw primary;}
+ note('phase.complete');return result;
 }
 async function capture(client,directory,screenshot=false,surface='editor') {
   const start=performance.now();
@@ -283,4 +301,4 @@ async function captureCompilerConfiguration(client,directory,metadata){
  const deadline=Date.now()+15000;let before;do{before=await read();if(valid(before))break;await new Promise(resolve=>setTimeout(resolve,50));}while(Date.now()<deadline);writeFileSync(join(directory,'configuration-before.json'),JSON.stringify(before,null,2));const rendered=await capture(client,directory,true),after=await read();writeFileSync(join(directory,'configuration-after.json'),JSON.stringify(after,null,2));
  if(!valid(before)||!valid(after)||JSON.stringify(before)!==JSON.stringify(after))throw Error('Rendered output directory configuration/source changed or missing');return{...rendered,configuration:{before,after,metadata,scope:'Actual Settings UI default or resource JSON DOM/AX/PNG; not full glyph/raster equivalence.'}};
 }
-module.exports={phaseDiagnostic,captureTrustControl,captureContributionMenu,testingLabel,captureProblems,captureProblemsScroll:require('./diagnostic-problems-scroll.cjs').capture,captureTesting,availablePort,DevTools,connect,capture,inputProbe,buildKeybinding,contextSubmenu,captureTrace,captureProofHelp,captureProofHover,captureOutput,captureCompilerConfiguration};
+module.exports={withPhaseRenderer,phaseDiagnostic,captureTrustControl,captureContributionMenu,testingLabel,captureProblems,captureProblemsScroll:require('./diagnostic-problems-scroll.cjs').capture,captureTesting,availablePort,DevTools,connect,capture,inputProbe,buildKeybinding,contextSubmenu,captureTrace,captureProofHelp,captureProofHover,captureOutput,captureCompilerConfiguration};
