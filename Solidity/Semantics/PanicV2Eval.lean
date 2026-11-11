@@ -1,7 +1,7 @@
 import Solidity.Semantics.PanicV2
 
 /-!
-# Expression, path and pop evaluation through the exact V2 result interface
+# Expression, path and selected statement evaluation through the exact V2 interface
 
 This structural evaluator uses the same typed state and the same operand
 order/short circuit as V1. Each path/value constructor has an unconditional
@@ -9,7 +9,8 @@ projection theorem. Site classifiers are refined by family; unclassified
 failed options remain unknown rather than receiving guessed panic codes.
 Arithmetic options now retain 0x11/0x12 at their actual failure branches;
 Storage/memory read bounds tests retain 0x32 after receiver resolution;
-statement-level compound assignments, increments and writes are not yet migrated.
+Ordinary compound-assignment and pop steps are refined below; push-compound,
+increment, plain-write and whole-program dispatch are not yet migrated.
 -/
 
 namespace Solidity.PanicV2.Eval
@@ -395,6 +396,120 @@ theorem pop_empty {E : Ty} (b : SPath C Γ (.array E)) (σ : State C Γ)
 theorem emptyPop_code : (Halt.operation .emptyPop).panicCode? = some 0x31 ∧
     (Halt.operation .emptyPop).erase = .revert := by constructor <;> rfl
 
+/-- Compound arithmetic uses the same operand values and range check as
+V1. Only numeric operator failures may receive an arithmetic cause. -/
+def compound (op : BinOp) (p : PrimTy) (x y : p.Denote) : Result p.Denote :=
+  if p.isNumeric then
+    match binaryFailure op p y with
+    | some failure => checked failure (compoundT op p (PrimTy.key x) (PrimTy.key y))
+    | none => ofOpt (compoundT op p (PrimTy.key x) (PrimTy.key y))
+  else ofOpt (compoundT op p (PrimTy.key x) (PrimTy.key y))
+
+theorem compound_erase (op : BinOp) (p : PrimTy) (x y : p.Denote) :
+    erase (compound op p x y) = TRes.ofOpt (compoundT op p (PrimTy.key x) (PrimTy.key y)) := by
+  unfold compound
+  split
+  · split <;> first | exact erase_checked _ _ | exact erase_ofOpt _
+  · exact erase_ofOpt _
+
+/-- Gap control for compound0x11/0x12: only the actual failed numeric
+operator option receives the independently selected arithmetic cause. -/
+theorem compound_failed (op : BinOp) (p : PrimTy) (x y : p.Denote)
+    (numeric : p.isNumeric = true) {failure : OperationFailure}
+    (site : binaryFailure op p y = some failure)
+    (failed : compoundT op p (PrimTy.key x) (PrimTy.key y) = none) :
+    compound op p x y = .error (.operation failure) := by
+  simp only [compound, numeric, ↓reduceIte, site, failed, checked]
+
+/-- Compound assignment at a resolved storage target. Lookup and write-back
+failures remain distinct from the classified arithmetic operation. -/
+def opStore (σ : State C Γ) (op : BinOp) {p : PrimTy} (r : SRef C (.prim p)) (v : p.Denote) :
+    Result (Out C σ.H Γ) := do
+  let old ← ofOpt (σ.storage.find r)
+  let new ← compound op p (SVal.view old) v
+  let st ← ofOpt (σ.storage.save r (.prim new))
+  pure ⟨σ.withStorage st, List.prefix_refl _⟩
+
+theorem opStore_erase (σ : State C Γ) (op : BinOp) {p : PrimTy}
+    (r : SRef C (.prim p)) (v : p.Denote) : erase (opStore σ op r v) = opStoreT σ op r v :=
+  erase_bind_congr (erase_ofOpt _) fun old =>
+    erase_bind_congr (compound_erase op p (SVal.view old) v) fun _ =>
+      erase_bind_congr (erase_ofOpt _) fun _ => rfl
+
+/-- Compound assignment at a resolved memory target; the old-value read
+may carry0x32 before the arithmetic option is evaluated. -/
+def opMem (σ : State C Γ) (op : BinOp) {p : PrimTy} (addr : MAddr σ.H (.prim p)) (v : p.Denote) :
+    Result (Out C σ.H Γ) := do
+  let old ← memoryRead σ.heap addr
+  let new ← compound op p old v
+  let hp ← ofOpt (σ.heap.writeAddr addr new)
+  pure ⟨σ.withHeap hp, List.prefix_refl _⟩
+
+theorem opMem_erase (σ : State C Γ) (op : BinOp) {p : PrimTy}
+    (addr : MAddr σ.H (.prim p)) (v : p.Denote) : erase (opMem σ op addr v) = opMemT σ op addr v :=
+  erase_bind_congr (memoryRead_erase _ _) fun old =>
+    erase_bind_congr (compound_erase op p old v) fun _ =>
+      erase_bind_congr (erase_ofOpt _) fun _ => rfl
+
+/-- All V1 compound target forms, with the same reference/address resolution. -/
+def opLocStore (σ : State C Γ) (op : BinOp) : {p : PrimTy} → OpLoc C Γ p → p.Denote →
+    Result (Out C σ.H Γ)
+  | p, .local i, v => do
+    let new ← compound op p (TEnv.get i σ.env) v
+    pure ⟨σ.setLocal i new, List.prefix_refl _⟩
+  | _, .root r h, v => opStore σ op (SRef.ofRoot r h) v
+  | _, .field b f h, v => do opStore σ op (← loc σ (Loc.field b f h)) v
+  | _, .index it b i, v => do opStore σ op (← loc σ (Loc.index it b (.simple i))) v
+  | _, .mfield b f h, v => do opMem σ op (← mloc σ (MLoc.field b f h)) v
+  | _, .mindex a b i, v => do opMem σ op (← mloc σ (MLoc.index a b (.simple i))) v
+
+theorem opLocStore_erase (σ : State C Γ) (op : BinOp) : {p : PrimTy} → (l : OpLoc C Γ p) →
+    (v : p.Denote) → erase (opLocStore σ op l v) = l.storeT σ op v
+  | p, .local i, v => erase_bind_congr (compound_erase op p (TEnv.get i σ.env) v) fun _ => rfl
+  | _, .root _ _, v => opStore_erase σ op _ v
+  | _, .field b f h, v => erase_bind_congr (loc_erase σ (Loc.field b f h)) fun _ =>
+      opStore_erase σ op _ v
+  | _, .index it b i, v => erase_bind_congr (loc_erase σ (Loc.index it b (.simple i))) fun _ =>
+      opStore_erase σ op _ v
+  | _, .mfield b f h, v => erase_bind_congr (mloc_erase σ (MLoc.field b f h)) fun _ =>
+      opMem_erase σ op _ v
+  | _, .mindex a b i, v => erase_bind_congr (mloc_erase σ (MLoc.index a b (.simple i))) fun _ =>
+      opMem_erase σ op _ v
+
+/-- Compound assignment evaluates its RHS before resolving the target,
+exactly as V1 does, and forwards the first intrinsic cause. -/
+def opAssign {p : PrimTy} (op : BinOp) (l : OpLoc C Γ p) (rhs : Val C Γ p)
+    (σ : State C Γ) : Result (Out C σ.H Γ) := do
+  let v ← value σ rhs
+  opLocStore σ op l v
+
+theorem opAssign_erase {p : PrimTy} (op : BinOp) (l : OpLoc C Γ p) (rhs : Val C Γ p)
+    (σ : State C Γ) : erase (opAssign op l rhs σ) = TRun.opAssign op l rhs σ :=
+  erase_bind_congr (value_erase σ rhs) fun v => opLocStore_erase σ op l v
+
+/-- Gap control: an earlier RHS failure wins over target/bounds/arithmetic
+failure; the target is not evaluated to choose a different code. -/
+theorem opAssign_rhs_failure {p : PrimTy} (op : BinOp) (l : OpLoc C Γ p) (rhs : Val C Γ p)
+    (σ : State C Γ) (halt : Halt) (failed : value σ rhs = .error halt) :
+    opAssign op l rhs σ = .error halt := by
+  unfold opAssign
+  rw [failed]
+  rfl
+
+/-- Gap control at a local compound-assignment step: after the RHS
+returns, the actual failed arithmetic option carries its selected0x11/0x12 cause. -/
+theorem opAssign_local_failure {p : PrimTy} (op : BinOp) (i : Idx Γ (.val p))
+    (rhs : Val C Γ p) (σ : State C Γ) (v : p.Denote)
+    (right : value σ rhs = .ok v) (numeric : p.isNumeric = true)
+    {failure : OperationFailure} (site : binaryFailure op p v = some failure)
+    (failed : compoundT op p (PrimTy.key (TEnv.get i σ.env)) (PrimTy.key v) = none) :
+    opAssign op (.local i) rhs σ = .error (.operation failure) := by
+  unfold opAssign
+  rw [right]
+  change (compound op p (TEnv.get i σ.env) v >>= _) = _
+  rw [compound_failed op p (TEnv.get i σ.env) v numeric site failed]
+  rfl
+
 /-- info: 'Solidity.PanicV2.Eval.path_erase' depends on axioms: [propext, Classical.choice, Quot.sound] -/
 #guard_msgs (whitespace := lax) in #print axioms path_erase
 /-- info: 'Solidity.PanicV2.Eval.loc_erase' depends on axioms: [propext, Classical.choice, Quot.sound] -/
@@ -454,5 +569,22 @@ theorem emptyPop_code : (Halt.operation .emptyPop).panicCode? = some 0x31 ∧
 #guard_msgs (whitespace := lax) in #print axioms pop_empty
 /-- info: 'Solidity.PanicV2.Eval.emptyPop_code' depends on axioms: [propext] -/
 #guard_msgs (whitespace := lax) in #print axioms emptyPop_code
+
+/-- info: 'Solidity.PanicV2.Eval.compound_erase' depends on axioms: [propext] -/
+#guard_msgs (whitespace := lax) in #print axioms compound_erase
+/-- info: 'Solidity.PanicV2.Eval.compound_failed' depends on axioms: [propext] -/
+#guard_msgs (whitespace := lax) in #print axioms compound_failed
+/-- info: 'Solidity.PanicV2.Eval.opStore_erase' depends on axioms: [propext, Quot.sound] -/
+#guard_msgs (whitespace := lax) in #print axioms opStore_erase
+/-- info: 'Solidity.PanicV2.Eval.opMem_erase' depends on axioms: [propext, Quot.sound] -/
+#guard_msgs (whitespace := lax) in #print axioms opMem_erase
+/-- info: 'Solidity.PanicV2.Eval.opLocStore_erase' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in #print axioms opLocStore_erase
+/-- info: 'Solidity.PanicV2.Eval.opAssign_erase' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in #print axioms opAssign_erase
+/-- info: 'Solidity.PanicV2.Eval.opAssign_rhs_failure' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in #print axioms opAssign_rhs_failure
+/-- info: 'Solidity.PanicV2.Eval.opAssign_local_failure' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in #print axioms opAssign_local_failure
 
 end Solidity.PanicV2.Eval
