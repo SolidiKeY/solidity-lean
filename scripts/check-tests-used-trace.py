@@ -9,13 +9,15 @@ external evidence output stem. No fixture in the original checkout is changed.
     --manifest EXTERNAL_MANIFEST --output EXTERNAL_STEM -- python3 -B tests/test.py
 
 The manifest has measured_revision and files[path] = {blob, sha256}. An audit
-hook captures read-only Python open stacks; strace confirms actual reads and
-excludes every file mutated during validation. The scratch inputs must match
+hook captures read-only Python open stacks; strace confirms actual reads or
+supported kernel copies. Observed mutations and ambiguous writes exclude inputs. The scratch inputs must match
 the committed manifest before execution. It records the actual Python call stack and tracks inherited Python
 children that honor sitecustomize. Native/Node reads and isolated Python
 children are NOT observed. Missing observations never establish non-use.
-Instrumentation must pass as well as the ordinary command before any route is
-promoted. Raw stdout, event traces and receipts are external lane evidence.
+Passing routes require successful ordinary and instrumented commands. Separate
+nonpassing unittest observations retain failure status and require an entered
+test/setup method identity. Reinterpreting older traces requires an exact
+reviewed full collector SHA. Raw traces and receipts stay outside the code branch.
 """
 import argparse
 import hashlib
@@ -355,6 +357,32 @@ def _observed_routes(receipt, scratch, manifest, runner, nonpassing=False):
                 if actual in files: all_read_paths.add(actual)
                 event_id = descriptors.get((tid, int(match[1])))
                 if event_id and actual == events[event_id]['target']: reads.add(event_id)
+        kernel_copy = re.match(r'(sendfile|copy_file_range)\(', line)
+        if kernel_copy:
+            args = arguments(line)
+            name = kernel_copy[1]
+            source_index, destination_index, count_index, arity = ((1, 0, 3, 4) if name == 'sendfile' else (0, 2, 4, 6))
+            def descriptor(argument):
+                return re.fullmatch(r'([0-9]+)<([^>]+)>', argument)
+            destination = descriptor(args[destination_index]) if len(args) > destination_index else None
+            # A malformed/unknown output descriptor cannot establish immutability.
+            if destination is None: dirty.update(files)
+            else:
+                taint(destination[2])
+            source = descriptor(args[source_index]) if len(args) > source_index else None
+            result = re.search(r'\)\s+=\s+([0-9]+)\s*$', line)
+            supported = (len(args) == arity and source is not None and destination is not None
+                         and re.fullmatch(r'[0-9]+', args[count_index])
+                         and (name == 'sendfile' or args[5] == '0'))
+            if supported and result:
+                requested, transferred = int(args[count_index]), int(result[1])
+                actual = relative(source[2])
+                consumed = (requested > 0 and transferred <= requested and
+                            (transferred > 0 or actual in files and files[actual]['sha256'] == hashlib.sha256(b'').hexdigest()))
+                if consumed:
+                    if actual in files: all_read_paths.add(actual)
+                    event_id = descriptors.get((tid, int(source[1])))
+                    if event_id and actual == events[event_id]['target']: reads.add(event_id)
         closed = re.match(r'close\((\d+).*\)\s+=\s+0\s*$', line)
         if closed: descriptors.pop((tid, int(closed[1])), None)
         path_change = bool(re.match(r'(?:creat|truncate|ftruncate|unlink|unlinkat|rmdir|rename|renameat|renameat2|link|linkat|symlink|symlinkat)\(', line))
@@ -366,6 +394,10 @@ def _observed_routes(receipt, scratch, manifest, runner, nonpassing=False):
             target_fd = re.search(r'= \d+<([^>]+)>\s*$', line)
             if target_fd: taint(target_fd[1])
             else: dirty.update(files)
+        elif kernel_copy:
+            # The input fd is read-only evidence, not a mutation. Destination
+            # taint was handled above, including conservative unknown forms.
+            pass
         elif not path_change or line.startswith('ftruncate('):
             for value in re.findall(r'\b\d+<([^>]+)>', line): taint(value)
         if path_change:
@@ -430,8 +462,15 @@ def observed_test_failure_routes(receipt, normal, scratch, manifest, runner, ins
     raw = source.read_bytes()
     if hashlib.sha256(raw).hexdigest() != receipt.get('instrumentation_source_sha256'):
         raise ValueError('nonpassing trace instrumentation source mismatch')
-    if raw != Path(__file__).read_bytes():
-        raise ValueError('nonpassing trace requires the complete reviewed instrumentation source')
+    reviewed_collectors = {
+        # scripts/check-tests-used-trace.py at 1e3896861de530ec76897f73de3c97efff7b2069.
+        # Includes measured-code fingerprints and actual test-method identities.
+        '70c5a9e41492bc3f21b4350e4e26f5656e89be41dae8549984cb6e5680ecf316',
+        # Reviewed kernel-copy collector frozen with current-master census receipts.
+        'bbc4200a194d2ac636f66db5ff5b32fc62efd3fb1af951849072dfd822834c64',
+    }
+    if raw != Path(__file__).read_bytes() and hashlib.sha256(raw).hexdigest() not in reviewed_collectors:
+        raise ValueError('nonpassing trace requires a complete reviewed instrumentation source')
     spec = importlib.util.spec_from_file_location('tests_used_failure_roles', Path(__file__).with_name('check-tests-used.py'))
     rules = importlib.util.module_from_spec(spec); spec.loader.exec_module(rules)
     source_bytes = (Path(scratch) / runner).read_bytes()
@@ -456,6 +495,71 @@ def observed_test_failure_routes(receipt, normal, scratch, manifest, runner, ins
     return [r for r in routes if any(frame['path'] == runner and any(
         context['first'] <= frame['line'] <= context['last'] and context['qualname'] == frame.get('code_qualname')
         and context['code_firstlineno'] == frame.get('code_firstlineno') for context in declaration['test_contexts']) for frame in r['frames'])]
+
+
+
+def kernel_copy_boundary_controls():
+    with tempfile.TemporaryDirectory(prefix='tests-used-copy-controls-') as directory:
+        base=Path(directory);root=base/'repo';root.mkdir()
+        sources={'tests/input/data.txt':'measured\n','tests/input/twin.txt':'measured\n','tests/input/empty.txt':''}
+        def program(operation, mode):
+            call=("os.sendfile(dst.fileno(),src.fileno(),None,COUNT)" if operation=='sendfile'
+                  else "os.copy_file_range(src.fileno(),dst.fileno(),COUNT)")
+            count='0' if mode=='zero' else '1024'
+            body='import os,tempfile,threading,ctypes\nfrom pathlib import Path\n'
+            name='tests/input/empty.txt' if mode=='empty' else 'tests/input/data.txt'
+            if mode=='mutated':body+='p=Path("tests/input/data.txt");original=p.read_bytes();p.write_bytes(b"changed!\\n")\n'
+            if mode=='alias':body+='alias=Path("tests/input/alias.txt");os.link("tests/input/data.txt",alias)\n'
+            if mode=='reuse':
+                body+='libc=ctypes.CDLL(None);src=open("tests/input/data.txt","rb");old=src.fileno();src.close();fd=libc.open(b"tests/input/data.txt",0);assert fd==old\n'
+                body+='with tempfile.NamedTemporaryFile() as dst: '+call.replace('src.fileno()','fd').replace('COUNT',count)+'\nos.close(fd)\n'
+                return body
+            body+='with open('+repr(name)+',"rb") as src:\n'
+            if mode=='eof':body+=' src.seek(9999)\n'
+            if mode=='thread':
+                body+=' def copy():\n  with tempfile.NamedTemporaryFile() as dst: '+call.replace('COUNT',count)+'\n worker=threading.Thread(target=copy);worker.start();worker.join()\n'
+            else:
+                destination='open("tests/input/twin.txt","wb")' if mode=='destination' else 'tempfile.NamedTemporaryFile()'
+                body+=' with '+destination+' as dst:\n'
+                if mode=='error':
+                    native = ('ctypes.CDLL(None).sendfile(-1,src.fileno(),None,1024)' if operation=='sendfile' else 'ctypes.CDLL(None).copy_file_range(src.fileno(),None,-1,None,1024,0)')
+                    body+='  assert '+native+'==-1\n'
+                else:body+='  result='+call.replace('COUNT',count)+'\n  assert result=='+('0' if mode in ('zero','eof','empty') else '9')+'\n'
+            if mode=='destination':body+='assert Path("tests/input/twin.txt").read_text()=="measured\\n"\n'
+            if mode=='mutated':body+='p.write_bytes(original)\n'
+            if mode=='alias':body+='alias.unlink()\n'
+            return body
+        scenarios=[]
+        for operation in ('sendfile','copy_file_range'):
+            for mode in ('out','destination','mutated','alias','reuse','thread','zero','eof','empty','error'):
+                path='tests/'+operation+'_'+mode+'.py';sources[path]=program(operation,mode);scenarios.append((operation,mode,path))
+        for path,text in sources.items():
+            target=root/path;target.parent.mkdir(parents=True,exist_ok=True);target.write_text(text)
+        def git(*args):return subprocess.check_output(['git','-C',str(root),'-c','core.hooksPath=/dev/null',*args])
+        git('init','-q');git('add','.');git('-c','user.name=Control','-c','user.email=control@example.invalid','commit','-qm','copy controls')
+        revision=git('rev-parse','HEAD').decode().strip()
+        manifest={'measured_revision':revision,'files':{path:{'blob':git('rev-parse',revision+':'+path).decode().strip(),'sha256':hashlib.sha256((root/path).read_bytes()).hexdigest()} for path in sources}}
+        mp=base/'manifest.json';mp.write_text(json.dumps(manifest))
+        for operation,mode,runner in scenarios:
+            receipt=run(['python3','-B',runner],root,mp,base/(operation+'-'+mode),15)
+            assert receipt['exit']==0,(operation,mode,Path(receipt['stdout']).read_text())
+            routes=observed_routes(receipt,root,manifest,runner);targets={r['target'] for r in routes}
+            expected='tests/input/empty.txt' if mode=='empty' else 'tests/input/data.txt'
+            assert (expected in targets)==(mode in ('out','destination','empty')),(operation,mode,targets)
+            assert 'tests/input/twin.txt' not in targets,(operation,mode,'destination received source credit')
+            if mode=='out':
+                path=Path(receipt['events']).with_name(Path(receipt['events']).name.replace('.events.jsonl','.syscalls'));original=path.read_text()
+                lines=original.splitlines(True);index=next(i for i,line in enumerate(lines) if re.match(r'\d+ '+operation+r'\(',line) and re.search(r'= 9\s*$',line))
+                line=lines[index].rstrip('\n');tid,body=line.split(' ',1);split=body.rfind(') =')
+                assert split>0
+                altered=lines[:index]+[tid+' '+body[:split]+' <unfinished ...>\n',tid+' <... '+operation+' resumed>'+body[split:]+'\n']+lines[index+1:]
+                path.write_text(''.join(altered));assert expected in {r['target'] for r in observed_routes(receipt,root,manifest,runner)}
+                path.write_text(''.join(lines[:index]+[tid+' '+body[:split]+' <unfinished ...>\n']+lines[index+1:]));assert expected not in {r['target'] for r in observed_routes(receipt,root,manifest,runner)}
+                if operation=='copy_file_range':
+                    malformed=re.sub(r', 0\) = 9$',', 1) = 9',line);assert malformed!=line
+                    path.write_text(''.join(lines[:index]+[malformed+'\n']+lines[index+1:]));assert expected not in {r['target'] for r in observed_routes(receipt,root,manifest,runner)}
+                path.write_text(original)
+        print('kernel-copy self-test: '+str(len(scenarios))+' actual syscall scenarios plus resumed/unfinished/flag controls PASS')
 
 
 def self_test():
@@ -600,6 +704,7 @@ def self_test():
         try: verify_inputs(root, manifest)
         except ValueError: pass
         else: raise AssertionError('untracked bytecode accepted')
+    kernel_copy_boundary_controls()
     print('trace self-test: measured inputs, forged manifest, index flags, bytecode, actual read/fd correlation, historical/synthetic code, link aliases, directory replacement and command binding PASS')
 
 
