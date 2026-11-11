@@ -194,6 +194,11 @@ class Lines(Base):
     def test_lean_excluded(self):
         self.r.commit({"Solidity/Gen.lean": lines(30000)}); self.ok()
 
+    def test_exact_binary_rename_adds_nothing(self):
+        self.r.commit({"keep/old.bin": b"\0\n" * 20001}); self.established()
+        self.r.git("mv", "keep/old.bin", "keep/moved.bin"); self.r.commit()
+        self.ok()
+
     def test_exact_rename_adds_nothing(self):
         self.r.commit({"keep/old.txt": lines(15000)}); self.established()
         self.r.git("mv", "keep/old.txt", "keep/moved.txt"); self.r.commit({"gen/a.txt": lines(10000)})

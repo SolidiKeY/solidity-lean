@@ -202,8 +202,8 @@ def line_additions(base, head):
     i = 0
     while i < len(out) - 1:
         a, _, path = out[i].split(b"\t", 2)
-        if path == b"":  # rename: old and new paths follow
-            path = out[i + 2]; i += 3
+        if path == b"":  # exact (100%) rename: old and new paths follow; it adds no content
+            i += 3; continue
         else:
             i += 1
         p = path.decode("utf-8", "surrogateescape")
