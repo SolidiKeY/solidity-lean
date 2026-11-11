@@ -1,0 +1,22 @@
+{
+  "_doc": "Lean size budget (scripts/lean-budget/check.py). cap: per-merge net Lean lines outside exempt globs (measured p75 rounded up to 500). frozen: shrink-only globs (minus except). steps: plan step id -> globs a `Lean-Budget: <id>` commit trailer lets grow.",
+  "cap": 500,
+  "frozen": [
+    {"name": "Backend", "globs": ["Solidity/Backend/**"], "except": ["Solidity/Backend/Passes/**", "Solidity/Backend/Compiler*.lean"]},
+    {"name": "Yul", "globs": ["Solidity/Yul/**"], "except": ["Solidity/Yul/Compilation/**"]},
+    {"name": "Lowering", "globs": ["Solidity/Lowering/**"], "except": []},
+    {"name": "Bridge", "globs": ["Bridge/**"], "except": []},
+    {"name": "Controls", "globs": ["**/*Controls*.lean"], "except": []},
+    {"name": "tests", "globs": ["tests/**"], "except": []}
+  ],
+  "steps": {
+    "b1-backend-endpoint": ["Solidity/Backend/Passes/**", "Solidity/Backend/Compiler*.lean"],
+    "e1-loops": ["Solidity/Correctness/Lowering/Loops/**"],
+    "va2-honest-theorems": ["Solidity/Theorems.lean", "Solidity/Backend/Payments/Headlines.lean", "tests/h28-sol/non-vacuity/lean/**"],
+    "w3-panic-codes": ["Solidity/Semantics/**"],
+    "e4-hash-bridge": ["Solidity/Hash/Bridge*.lean", "Solidity/Hash/CollisionBridge*.lean"],
+    "t0-endpoint-total": ["Solidity/Backend/CompilerTotal.lean", "Solidity/Goals/Total.lean"],
+    "e2a-lower-total": ["Solidity/Syntax/Elab/Lower.lean"],
+    "e2b-loops-producer": ["Solidity/Correctness/Lowering/Total/**"]
+  }
+}
