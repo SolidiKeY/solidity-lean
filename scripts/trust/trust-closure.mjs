@@ -197,20 +197,47 @@ export function validateRevision(next, previousText) {
       !next.change?.reason?.trim()||next.change.reason===previous.change?.reason))
     throw Error('baseline growth requires a fresh reason and exact predecessor checksum');
 }
-function checkHistory(baseline) {
-  const git=(...args)=>execFileSync('git',args,{encoding:'utf8',stdio:['ignore','pipe','pipe']}).trim();
-  const ref=process.env.TRUST_BASE_REF||'origin/master';
-  const base=git('merge-base','HEAD',ref);
-  if(git('ls-tree',base,'--',baselinePath)) {
-    const previous=execFileSync('git',['show',`${base}:${baselinePath}`],{encoding:'utf8'});
-    validateRevision(baseline,previous);
-  } else if(baseline.change?.previousSha256!==null) {
-    // Initial lane baseline can be updated before merging: validate against HEAD.
-    if(git('ls-tree','HEAD','--',baselinePath)) {
-      const previous=execFileSync('git',['show',`HEAD:${baselinePath}`],{encoding:'utf8'});
-      if(sha(previous)!==sha(JSON.stringify(baseline,null,2)+'\n'))validateRevision(baseline,previous);
-    } else throw Error('initial baseline must have a null predecessor');
+// CI must supply the event's actual predecessor, not the updated remote tip.
+// Locally retain branch merge-base selection, but never compare HEAD to itself.
+export function historyBase({env=process.env,git=(...args)=>execFileSync('git',args,
+    {encoding:'utf8',stdio:['ignore','pipe','pipe']}).trim()}={}) {
+  const explicit=env.TRUST_BASE_REF;
+  if(['push','pull_request','pull_request_target'].includes(env.GITHUB_EVENT_NAME)&&!explicit)
+    throw Error('CI closure history needs TRUST_BASE_REF from push.before or pull_request.base.sha');
+  if(explicit && /^0+$/u.test(explicit))throw Error('closure predecessor is unavailable (zero event SHA)');
+  const head=git('rev-parse','HEAD');
+  let base=explicit?git('rev-parse','--verify',`${explicit}^{commit}`):git('merge-base','HEAD','origin/master');
+  if(base===head) {
+    if(explicit)throw Error('closure history cannot compare HEAD with itself');
+    const parents=git('rev-list','--first-parent','--max-count=2','HEAD').split('\n');
+    base=parents.length>1?parents[1]:null;
   }
+  if(base)git('merge-base','--is-ancestor',base,'HEAD');
+  return base;
+}
+export function checkHistory(baseline,{env=process.env,git=(...args)=>execFileSync('git',args,
+    {encoding:'utf8',stdio:['ignore','pipe','pipe']}).trim()}={}) {
+  const base=historyBase({env,git});
+  // Validate every changed snapshot after the event anchor, including initial
+  // adoption and multi-commit PRs. A final HEAD snapshot is never its own anchor.
+  let previous=base && git('ls-tree',base,'--',baselinePath)?
+    execFileSync('git',['show',`${base}:${baselinePath}`],{encoding:'utf8'}):null;
+  const range=base?`${base}..HEAD`:'HEAD';
+  const revisions=git('rev-list','--reverse','--topo-order',range,'--',baselinePath).split('\n').filter(Boolean);
+  for(const revision of revisions) {
+    if(!git('ls-tree',revision,'--',baselinePath))throw Error('baseline history deleted its source');
+    const text=execFileSync('git',['show',`${revision}:${baselinePath}`],{encoding:'utf8'});
+    if(text===previous)continue;
+    const next=JSON.parse(text);
+    if(previous===null) {
+      if(next.change?.previousSha256!==null || !next.change?.reason?.trim())
+        throw Error('initial baseline must have a reason and null predecessor');
+    } else validateRevision(next,previous);
+    previous=text;
+  }
+  if(previous!==null)validateRevision(baseline,previous);
+  else if(baseline.change?.previousSha256!==null)
+    throw Error('initial baseline must have a null predecessor');
 }
 // The selected OLean graph and its cache mapping identify the source index.
 // Neither a physical .ilean nor its physical .trace is a freshness witness.
@@ -231,8 +258,8 @@ export function sourceIndex(toolchain,m,{indexPaths=new Map()}={}) {
 }
 export function committedBaseline() {
  const git=(...args)=>execFileSync('git',args,{encoding:'utf8',stdio:['ignore','pipe','pipe']}).trim();
- const base=git('merge-base','HEAD',process.env.TRUST_BASE_REF||'origin/master');
- for(const rev of [base,'HEAD'])if(git('ls-tree',rev,'--',baselinePath))
+ const base=process.env.TRUST_BASE_REF?git('rev-parse','--verify',`${process.env.TRUST_BASE_REF}^{commit}`):git('merge-base','HEAD','origin/master');
+ for(const rev of ['HEAD',base])if(git('ls-tree',rev,'--',baselinePath))
    return execFileSync('git',['show',`${rev}:${baselinePath}`],{encoding:'utf8'});
  return null;
 }
@@ -241,6 +268,11 @@ function main() {
   const args=allArgs.filter(a=>a!=='--source-ceilings'), writing=args[0]==='--write';
   if(args.length && (!writing||args.length!==3||args[1]!=='--reason'||!args[2].trim()))
     throw Error('usage: trust-closure.mjs [--source-ceilings] [--write --reason REASON]');
+  const baseline=writing?null:JSON.parse(readFileSync(baselinePath,'utf8'));
+  if(baseline) {
+    if(!baseline.change?.reason?.trim())throw Error('baseline needs a recorded reason');
+    checkHistory(baseline);
+  }
   const toolchain=execFileSync('lean',['--print-prefix'],{encoding:'utf8'}).trim();
   const sourceCache=new Map();
   const metadata=extract('scripts/trust/trust-closure.lean','TRUST_CLOSURE_JSON=');
@@ -261,9 +293,6 @@ function main() {
     if(old)for(const n of JSON.parse(old).roots)if(!current.roots.includes(n))throw Error(`cannot delete root: ${n}`);
     writeFileSync(baselinePath,JSON.stringify({...current,declarations:current.declarations.map(d=>d.name),change:{reason:args[2],previousSha256:old?sha(old):null}},null,2)+'\n');
   } else {
-    const baseline=JSON.parse(readFileSync(baselinePath,'utf8'));
-    if(!baseline.change?.reason?.trim())throw Error('baseline needs a recorded reason');
-    checkHistory(baseline);
     compare(current,baseline);
   }
   console.log(JSON.stringify({roots:current.roots.length,declarations:current.totalDeclarations,lines:current.totalLines,modules:current.modules,sourceLineMetric:current.sourceLineMetric,fallbacks:current.fallbacks,ceilings:current.ceilings.map(c=>({module:c.module,physicalLines:c.physicalLines,excludedProofLines:c.excludedProofLines,generatedProofs:c.generatedProofsWithoutIndependentSource.length}))}));

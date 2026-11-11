@@ -43,6 +43,10 @@ jobs:
       - name: Guard native proof reduction
         run: bash scripts/check-trust.sh
       - name: Measure and ratchet statement-type closure
+        env:
+          # origin/master already names the pushed commit on push events.
+          # Compare the actual event predecessor/PR target, never that same tip.
+          TRUST_BASE_REF: ${{ github.event_name == 'push' && github.event.before || github.event_name == 'pull_request' && github.event.pull_request.base.sha || '' }}
         run: node scripts/trust/trust-closure.mjs --source-ceilings
       - name: Require every compiled twin's logical equality link
         run: node scripts/trust/trust-implemented-by.mjs

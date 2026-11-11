@@ -5,7 +5,8 @@ import assert from 'node:assert/strict';
 import {mkdtempSync,mkdirSync,writeFileSync,rmSync} from 'node:fs';
 import {tmpdir} from 'node:os';
 import {join} from 'node:path';
-import {statementEnd,summarize,compare,validateRevision,sha,sourceIndex} from './trust-closure.mjs';
+import {execFileSync} from 'node:child_process';
+import {statementEnd,summarize,compare,validateRevision,sha,sourceIndex,historyBase,checkHistory} from './trust-closure.mjs';
 const source='theorem headline (n : Nat := 0) : n = n := by\n  rfl\n';
 const raw={schema:1,roots:['headline'],declarations:[{name:'headline',module:'Control',theorem:true,start:1,end:2}]};
 test('proof bodies do not enter statement lines',()=>{
@@ -128,4 +129,88 @@ test('dropping an executable auxiliary range cannot erase its proof-owner source
   ceilingProofs:[{name:'outer',module:'Control',start:1,end:4}]};
  assert.throws(()=>summarize(input,()=>source,{sourceCeilings:true}),/inside a proof needs precise/);
  assert.throws(()=>summarize({...input,declarations:[{...input.declarations[0],ownerStart:null}]},()=>source,{sourceCeilings:true}),/owner provenance/);
+});
+
+// Guards master-push self-comparison accepting growth, lost roots or stale pins.
+// Real Git fixtures put origin/master at the changed HEAD, as actions/checkout does.
+function historyFixture(action) {
+ const root=mkdtempSync(join(tmpdir(),'trust-history-')),cwd=process.cwd();
+ const git=(...args)=>execFileSync('git',args,{cwd:root,encoding:'utf8',stdio:['ignore','pipe','pipe']}).trim();
+ try {
+  git('init','-q');git('config','user.name','control');git('config','user.email','control@example.invalid');
+  mkdirSync(join(root,'scripts/trust'),{recursive:true});
+  const baseline=join(root,'scripts/trust/trust-closure-baseline.json');
+  const previous={...summarize(raw,()=>source),change:{reason:'initial',previousSha256:null}};
+  const previousText=JSON.stringify(previous,null,2)+'\n';
+  writeFileSync(baseline,previousText);git('add','.');git('commit','-qm','initial baseline');
+  const before=git('rev-parse','HEAD');git('update-ref','refs/remotes/origin/master',before);
+  const commit=next=>{writeFileSync(baseline,JSON.stringify(next,null,2)+'\n');git('add','.');git('commit','-qm','changed baseline');git('update-ref','refs/remotes/origin/master',git('rev-parse','HEAD'));};
+  process.chdir(root);
+  action({git,before,previous,previousText,commit,baseline});
+ } finally {process.chdir(cwd);rmSync(root,{recursive:true,force:true});}
+}
+test('push history rejects baseline growth even when origin/master equals HEAD',()=>historyFixture(({git,before,previous,previousText,commit})=>{
+ const grown={...previous,modules:[{module:'Control',lines:2}]};commit(grown);
+ assert.equal(git('rev-parse','origin/master'),git('rev-parse','HEAD'));
+ const push={GITHUB_EVENT_NAME:'push',TRUST_BASE_REF:before};
+ assert.equal(historyBase({env:push}),before);
+ assert.throws(()=>checkHistory(grown,{env:push}),/fresh reason/);
+ assert.throws(()=>checkHistory({...grown,change:{reason:'fresh',previousSha256:'0'.repeat(64)}},{env:push}),/checksum/);
+ assert.throws(()=>checkHistory(grown,{env:{}}),/fresh reason/);
+ const valid={...grown,change:{reason:'new definition',previousSha256:sha(previousText)}};
+ writeFileSync('scripts/trust/trust-closure-baseline.json',JSON.stringify(valid,null,2)+'\n');git('add','.');git('commit','--amend','-qm','valid growth');git('update-ref','refs/remotes/origin/master',git('rev-parse','HEAD'));
+ checkHistory(valid,{env:push});
+}));
+test('PR target and push predecessor both preserve lost-root refusal',()=>historyFixture(({before,previous,commit})=>{
+ const lost={...previous,roots:[]};commit(lost);
+ for(const event of ['push','pull_request'])
+  assert.throws(()=>checkHistory(lost,{env:{GITHUB_EVENT_NAME:event,TRUST_BASE_REF:before}}),/lost public root/);
+}));
+test('event history refuses missing, zero, self, unavailable and unrelated anchors',()=>historyFixture(({git,before,previous,commit})=>{
+ commit({...previous,change:{reason:'unchanged allowance',previousSha256:sha(JSON.stringify(previous,null,2)+'\n')}});
+ for(const event of ['push','pull_request']) {
+  assert.throws(()=>historyBase({env:{GITHUB_EVENT_NAME:event}}),/needs TRUST_BASE_REF/);
+  assert.throws(()=>historyBase({env:{GITHUB_EVENT_NAME:event,TRUST_BASE_REF:'0'.repeat(40)}}),/zero event SHA/);
+  assert.throws(()=>historyBase({env:{GITHUB_EVENT_NAME:event,TRUST_BASE_REF:'HEAD'}}),/itself/);
+ }
+ assert.throws(()=>historyBase({env:{TRUST_BASE_REF:'not-a-ref'}}));
+ const unrelated=git('commit-tree','HEAD^{tree}','-m','unrelated root');
+ assert.throws(()=>historyBase({env:{TRUST_BASE_REF:unrelated}}));
+ assert.equal(historyBase({env:{GITHUB_EVENT_NAME:'schedule'}}),before);
+ assert.equal(historyBase({env:{GITHUB_EVENT_NAME:'workflow_dispatch'}}),before);
+}));
+test('initial root commit needs null predecessor without a self-comparison escape',()=>historyFixture(({previous,git,baseline})=>{
+ assert.equal(historyBase({env:{}}),null);
+ checkHistory(previous,{env:{}});
+ const bad={...previous,change:{reason:'initial',previousSha256:'a'.repeat(64)}};
+ writeFileSync(baseline,JSON.stringify(bad,null,2)+'\n');git('add','.');git('commit','--amend','-qm','bad initial');git('update-ref','refs/remotes/origin/master',git('rev-parse','HEAD'));
+ assert.throws(()=>checkHistory(bad,{env:{}}),/null predecessor/);
+}));
+
+// Guards initial adoption and multi-commit PRs hiding bad intermediate history.
+test('initial adoption checks each actual predecessor instead of final HEAD',()=>{
+ const root=mkdtempSync(join(tmpdir(),'trust-initial-history-')),cwd=process.cwd();
+ const git=(...args)=>execFileSync('git',args,{cwd:root,encoding:'utf8',stdio:['ignore','pipe','pipe']}).trim();
+ try {
+  git('init','-q');git('config','user.name','control');git('config','user.email','control@example.invalid');
+  git('commit','--allow-empty','-qm','before baseline');const before=git('rev-parse','HEAD');
+  mkdirSync(join(root,'scripts/trust'),{recursive:true});
+  const path=join(root,'scripts/trust/trust-closure-baseline.json');
+  const put=next=>{const text=JSON.stringify(next,null,2)+'\n';writeFileSync(path,text);git('add','.');git('commit','-qm','baseline revision');git('update-ref','refs/remotes/origin/master',git('rev-parse','HEAD'));return text;};
+  const initial={...summarize(raw,()=>source),change:{reason:'initial',previousSha256:null}};
+  const first=put(initial),firstCommit=git('rev-parse','HEAD');
+  const grown={...initial,modules:[{module:'Control',lines:2}],change:{reason:'first growth',previousSha256:sha(first)}};
+  const second=put(grown);
+  process.chdir(root);
+  const env={GITHUB_EVENT_NAME:'push',TRUST_BASE_REF:before};
+  checkHistory(grown,{env});
+  checkHistory(grown,{env:{GITHUB_EVENT_NAME:'pull_request',TRUST_BASE_REF:firstCommit}});
+  const bad={...grown,modules:[{module:'Control',lines:3}],change:{reason:'second growth',previousSha256:sha(first)}};
+  put(bad);assert.throws(()=>checkHistory(bad,{env}),/checksum/);
+  assert.throws(()=>checkHistory(bad,{env:{GITHUB_EVENT_NAME:'pull_request',TRUST_BASE_REF:firstCommit}}),/checksum/);
+  const fixed={...bad,change:{reason:'second growth',previousSha256:sha(second)}};
+  writeFileSync(path,JSON.stringify(fixed,null,2)+'\n');git('add','.');git('commit','--amend','-qm','valid second growth');git('update-ref','refs/remotes/origin/master',git('rev-parse','HEAD'));
+  checkHistory(fixed,{env});
+  const lost={...fixed,roots:[]};put(lost);assert.throws(()=>checkHistory(lost,{env}),/lost public root/);
+ } finally {process.chdir(cwd);rmSync(root,{recursive:true,force:true});}
 });
