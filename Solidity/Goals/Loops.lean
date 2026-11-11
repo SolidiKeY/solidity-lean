@@ -48,7 +48,10 @@ with its own copies of these definitions, definitionally equal to
 `loweringKernelTotal` (the roadmap checks the binding by `isDefEq`).  Once the
 family is total, `LoweringKernelFix` is its unfolding equations, the measures
 count the syntax with extra weight on a `while` loop whose condition has an
-effect, and `LoweringKernelHelpers` holds by `rfl`. -/
+effect, and `LoweringKernelHelpers` holds by `rfl`.  The totalized family
+carries no `implemented_by` or `extern`, which the axiom check cannot see, so
+that the code that runs is the code proved; and the restated type is checked
+first by `rfl` against `loweringKernelTotal`. -/
 
 section Kernel
 
