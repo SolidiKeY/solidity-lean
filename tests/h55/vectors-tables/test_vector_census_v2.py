@@ -1,14 +1,15 @@
 import importlib.util
 import json
-import sys
+import shutil
+import tempfile
 import unittest
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[3]
-sys.path.insert(0, str(ROOT / "scripts/h55/vectors-tables"))
 spec = importlib.util.spec_from_file_location("vector_census_v2", ROOT / "scripts/h55/vectors-tables/vector_census_v2.py")
 c = importlib.util.module_from_spec(spec)
 spec.loader.exec_module(c)
+ASSEMBLY, ASSEMBLY_LINE, TABLE = c.TABLES["shifts"]
 
 class CensusV2Tests(unittest.TestCase):
     def test_full_inventory(self):
@@ -20,36 +21,53 @@ class CensusV2Tests(unittest.TestCase):
 
     def test_layouts_agree(self):
         theorem = "theorem v0007 : (Pure.eval .«shl» (fun i => if i.val = 0 then word 1 else word 57)).val = 114 := by decide +kernel"
-        row = "  ⟨.«shl», 1, 57, 114⟩,"
-        self.assertEqual(c.tuples("t", theorem), c.tuples("t", row))
+        table = "noncomputable def t : List Row := [\n  ⟨.«shl», 1, 57, 114⟩\n]"
+        self.assertEqual(c.tuples("t", theorem), c.tuples("t", table, "t"))
         unary = "theorem v0001 : (Pure.eval .«not» (fun _ => word 0)).val = 5 := by decide +kernel"
         self.assertEqual(c.tuples("t", unary), [("not", ["0"], "5")])
 
     def test_negative_controls(self):
-        paths = c.FAMILIES["shifts"]
+        paths = [*c.FAMILIES["shifts"], ASSEMBLY]
         texts = {p: (ROOT / p).read_text(encoding="utf-8") for p in paths}
         expected = c.census(ROOT)["shifts"]
-        def family(changed):
-            rows = [r for p in paths for r in c.tuples(p, changed.get(p, texts[p]))]
-            return {"count": len(rows), "sha256": c.digest(rows)}
-        path = next(p for p in paths if "  ⟨" in texts[p])
+        path = next(iter(TABLE))
         lines = texts[path].splitlines(keepends=True)
         pos = [i for i, line in enumerate(lines) if line.startswith("  ⟨")]
-        def rejected(new_lines):
-            try:
-                return family({path: "".join(new_lines)}) != expected
-            except ValueError:
-                return True
+        opening = next(i for i, line in enumerate(lines) if c.OPEN.fullmatch(line.rstrip("\n")))
+        closing = next(i for i, line in enumerate(lines) if line == "]\n")
+        def edit(i, old, new):
+            changed = lines.copy(); changed[i] = changed[i].replace(old, new, 1)
+            return {path: "".join(changed)}
+        def rows(changed): return {path: "".join(changed)}
         missing = lines.copy(); missing.pop(pos[5])
         extra = lines.copy(); extra.insert(pos[5], lines[pos[5]])
         order = lines.copy(); order[pos[5]], order[pos[6]] = order[pos[6]], order[pos[5]]
-        schema = lines.copy(); schema[pos[5]] = schema[pos[5]].replace("⟩", ", 0⟩")
-        output = lines.copy(); output[pos[0]] = output[pos[0]].replace(", 0⟩", ", 1⟩")
-        operand = lines.copy(); operand[pos[1]] = operand[pos[1]].replace(", 1, ", ", 2, ", 1)
-        for label, mutation in [("missing", missing), ("extra", extra), ("order", order),
-                                ("schema", schema), ("output", output), ("operand", operand)]:
-            with self.subTest(label=label):
-                self.assertNotEqual(mutation, lines)
-                self.assertTrue(rejected(mutation))
+        commented = lines[:pos[-2]] + ["/-\n"] + lines[pos[-2]:pos[-1] + 1] + ["-/\n"] + lines[pos[-1] + 1:]
+        indented = lines.copy(); indented.insert(pos[3], "   " + lines[pos[3]].lstrip())
+        second = lines[:closing + 1] + ["noncomputable def unused : List Row := [\n", lines[pos[-1]], "]\n"] + lines[closing + 1:]
+        line_comment = lines.copy(); line_comment.insert(pos[2], "  -- ⟨.«shl», 9, 9, 9⟩,\n")
+        mutations = {
+            "missing": rows(missing), "extra": rows(extra), "order": rows(order),
+            "schema": edit(pos[5], "⟩", ", 0⟩"), "output": edit(pos[0], ", 0⟩", ", 1⟩"),
+            "operand": edit(pos[1], ", 1, ", ", 2, "),
+            "block comment": rows(commented), "indented row": rows(indented),
+            "second list": rows(second), "line comment": rows(line_comment),
+            "list wrapper": edit(opening, ":= [", ":= List.drop 3 ["),
+            "list suffix": edit(closing, "]", "].take 5"),
+            "assembly": {ASSEMBLY: texts[ASSEMBLY].replace(ASSEMBLY_LINE, ASSEMBLY_LINE.replace("shlRows ++ shrRows", "shrRows ++ shlRows"))},
+            "renamed list": edit(opening, TABLE[path], TABLE[path] + "X"),
+        }
+        for label, changed in mutations.items():
+            with self.subTest(label=label), tempfile.TemporaryDirectory() as tmp:
+                for p in [q for qs in c.FAMILIES.values() for q in qs] + [ASSEMBLY]:
+                    (Path(tmp) / p).parent.mkdir(parents=True, exist_ok=True)
+                    shutil.copyfile(ROOT / p, Path(tmp) / p)
+                for p, text in changed.items():
+                    self.assertNotEqual(text, texts[p])
+                    (Path(tmp) / p).write_text(text, encoding="utf-8")
+                try:
+                    self.assertNotEqual(c.census(Path(tmp))["shifts"], expected)
+                except ValueError:
+                    pass
 
 if __name__ == "__main__": unittest.main()

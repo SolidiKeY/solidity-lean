@@ -6,8 +6,11 @@ source bytes of the per-theorem vector files. A family converted to a literal
 row table (H379/H400) keeps every tuple but not those bytes. v2 extracts, per
 family and in file order, each `(opcode, operands, expected)` tuple from either
 layout and compares the ordered tuples with a digest frozen from the
-v1-authenticated sources. Like v1 it is a census, not an EVM oracle; the Lean
-kernel checks remain the evidence that each tuple holds.
+v1-authenticated sources (`--create-manifest` re-checks that link; a normal run
+trusts the committed manifest). For a converted family it also requires the
+registered list assembly and one well-formed list per row file, and rejects
+vector-like lines it would otherwise skip. Like v1 it is a census, not an EVM
+oracle; the Lean kernel checks remain the evidence that each tuple holds.
 """
 import argparse
 import hashlib
@@ -30,8 +33,19 @@ NAT = r"(?:0|[1-9][0-9]*)"
 THEOREM = re.compile(rf"theorem v[0-9]{{4}} : \(Pure\.eval \.«([a-z]+)» \(fun (?:i|_) => (.+)\)\)\.val = ({NAT}) := by decide \+kernel")
 ARG = re.compile(rf"if i\.val = ({NAT}) then word ({NAT}) else ")
 TAIL = re.compile(rf"word ({NAT})")
-# Row-table layout (binary rows, as in Solidity/Yul/Checks/Shifts/Part01-03).
+# Row-table layout (binary rows, as in Solidity/Yul/Checks/Shifts/Part01-03):
+# exactly one list per row file, opened by OPEN and closed by a line `]`, with
+# one row per line and nothing else inside.
+OPEN = re.compile(r"noncomputable def ([A-Za-z]+) : List Row := \[")
 ROW = re.compile(rf"  ⟨\.«([a-z]+)», ({NAT}), ({NAT}), ({NAT})⟩,?")
+# A converted family's list must be assembled exactly as below, in FAMILIES order.
+TABLES = {
+    "shifts": ("Solidity/Yul/Checks/Shifts.lean",
+               "noncomputable def rows : List Row := shlRows ++ shrRows ++ sarRows",
+               {"Solidity/Yul/Checks/Shifts/Part01.lean": "shlRows",
+                "Solidity/Yul/Checks/Shifts/Part02.lean": "shrRows",
+                "Solidity/Yul/Checks/Shifts/Part03.lean": "sarRows"}),
+}
 
 def operands(expr):
     args = []
@@ -42,27 +56,58 @@ def operands(expr):
     if not tail: raise ValueError("argument tail")
     return [*args, tail.group(1)]
 
-def tuples(path, text):
-    """Ordered tuples of one file; any vector-like line outside the schemas fails."""
-    rows = []
+def tuples(path, text, table=None):
+    """Ordered `(opcode, operands, expected)` tuples of one file.
+
+    Fails on a vector-like line (`theorem vNNNN` anywhere, or `⟨.«`) that is
+    not a schema row in its place: inside a block comment, indented, outside
+    the single row list, or in a file mixing both layouts. `table` names the
+    one list a row file must hold."""
+    rows, lists, depth, inside, kinds = [], [], 0, None, set()
     for line in text.splitlines():
-        if line.startswith("theorem v"):
+        vectorish = re.search(r"theorem v[0-9]{4}", line) or "⟨.«" in line
+        if vectorish and depth: raise ValueError(f"{path}: vector inside a comment")
+        if inside is not None:
+            if line == "]":
+                inside = None
+            else:
+                m = ROW.fullmatch(line)
+                if not m: raise ValueError(f"{path}: unsupported row schema")
+                rows.append((m.group(1), [m.group(2), m.group(3)], m.group(4))); kinds.add("row")
+            continue
+        if m := OPEN.fullmatch(line):
+            if lists: raise ValueError(f"{path}: more than one row list")
+            lists.append(m.group(1)); inside = m.group(1)
+        elif vectorish:
             m = THEOREM.fullmatch(line)
             if not m: raise ValueError(f"{path}: unsupported theorem schema")
-            rows.append((m.group(1), operands(m.group(2)), m.group(3)))
-        elif line.startswith("  ⟨"):
-            m = ROW.fullmatch(line)
-            if not m: raise ValueError(f"{path}: unsupported row schema")
-            rows.append((m.group(1), [m.group(2), m.group(3)], m.group(4)))
+            rows.append((m.group(1), operands(m.group(2)), m.group(3))); kinds.add("theorem")
+        depth += line.count("/-") - line.count("-/")
+    if inside is not None: raise ValueError(f"{path}: unterminated row list")
+    if len(kinds) > 1: raise ValueError(f"{path}: mixed layouts")
+    if table is not None and lists != [table]: raise ValueError(f"{path}: expected row list {table}")
+    if table is None and lists: raise ValueError(f"{path}: unexpected row list")
     return rows
 
 def digest(rows):
     return hashlib.sha256(json.dumps(rows, separators=(",", ":")).encode()).hexdigest()
 
+def family_rows(root, family):
+    paths = FAMILIES[family]
+    texts = {p: (root / p).read_text(encoding="utf-8") for p in paths}
+    converted = any(OPEN.search(t) for t in texts.values())
+    tables = {}
+    if converted:
+        if family not in TABLES: raise ValueError(f"{family}: unregistered row-table layout")
+        assembly, line, tables = TABLES[family]
+        if (root / assembly).read_text(encoding="utf-8").splitlines().count(line) != 1:
+            raise ValueError(f"{assembly}: family list is not assembled as registered")
+    return [r for p in paths for r in tuples(p, texts[p], tables.get(p))]
+
 def census(root):
     out = {}
-    for family, paths in FAMILIES.items():
-        rows = [r for p in paths for r in tuples(p, (root / p).read_text(encoding="utf-8"))]
+    for family in FAMILIES:
+        rows = family_rows(root, family)
         out[family] = {"count": len(rows), "sha256": digest(rows)}
     return out
 
