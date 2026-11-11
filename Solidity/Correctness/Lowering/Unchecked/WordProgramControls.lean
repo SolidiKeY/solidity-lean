@@ -32,6 +32,59 @@ private def body (program : Prog Example [] [.val .uint]) :
   | .cons (.declLocal .uint _ _) rest => rest
   | _ => .nil
 
+/-- The actual Source increment AST, with both token-result conventions retained. -/
+private def sourceIncrement (E : Source.Env) (inc prefixResult : Bool) :
+    Source.RStmt E [] false ⟨false, true⟩
+      (Source.Agreement.sourceContext [.uint]) (Source.Agreement.sourceContext [.uint]) :=
+  .expr (.incDec inc prefixResult (.local .here))
+
+/-- Guards a vacuous paired checker: both Source token-result conventions
+associate with the actual quotation's emitted update. -/
+theorem paired_actual_output_accepted (E : Source.Env) (prefixResult : Bool) :
+    (checkPairedIncrementV2 [] [] (sourceIncrement E true prefixResult)
+      (body increment)).isSome = true := by
+  rfl
+
+/-- Guards mismatching Source decrement with an otherwise accepted target increment. -/
+theorem paired_direction_rejected (E : Source.Env) :
+    (checkPairedIncrementV2 [] [] (sourceIncrement E false false)
+      (body increment)).isNone = true := by
+  rfl
+
+/-- Guards loss of the target's actual checkedness in paired association. -/
+theorem paired_checked_target_rejected (E : Source.Env) :
+    (checkPairedIncrementV2 [] [] (sourceIncrement E true false)
+      (body checking)).isNone = true := by
+  rfl
+
+/-- Guards accepting a different Source expression merely because the target
+is a valid increment. -/
+theorem paired_nonupdate_rejected (E : Source.Env) :
+    (checkPairedIncrementV2 [] []
+      (.expr (.local .here) : Source.RStmt E [] false ⟨false, true⟩
+        (Source.Agreement.sourceContext [.uint]) (Source.Agreement.sourceContext [.uint]))
+      (body increment)).isNone = true := by
+  rfl
+
+/-- Guards silently redirecting the Source slot while retaining an otherwise
+valid target update at the selected second slot. -/
+theorem paired_source_slot_rejected (E : Source.Env) :
+    (checkPairedIncrementV2 [.uint] []
+      (.expr (.incDec true false (.local .here)) : Source.RStmt E [] false ⟨false, true⟩
+        (Source.Agreement.sourceContext [.uint, .uint])
+        (Source.Agreement.sourceContext [.uint, .uint]))
+      (.cons (.assignLocal (.there .here)
+        (.binop .addW rfl rfl (.simple (.local (.there .here)))
+          (.simple (.lit 1 (by decide))))) .nil :
+        Prog Example [.val .uint, .val .uint] [.val .uint, .val .uint])).isNone = true := by
+  rfl
+
+#print axioms paired_actual_output_accepted
+#print axioms paired_direction_rejected
+#print axioms paired_checked_target_rejected
+#print axioms paired_nonupdate_rejected
+#print axioms paired_source_slot_rejected
+
 /-- Both actual producer spellings reach one emitted typed program. -/
 theorem compound_increment_same : compound = increment := by
   rfl
