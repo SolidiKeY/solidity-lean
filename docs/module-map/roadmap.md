@@ -29,8 +29,8 @@
 | `Bridge/SolidityBridge/RoadmapV15/P10/InvocationEnvironmentControls.lean` | Bounded v15-evm-agreement checkpoint; typed scope and retained obligations are stated in the module. |
 | `Bridge/SolidityBridge/RoadmapV15/P10/PublishedShifts.lean` | Bounded v15-evm-agreement checkpoint; typed scope and retained obligations are stated in the module. |
 | `Bridge/SolidityBridge/RoadmapV15/P10/PublishedShiftsControls.lean` | Bounded v15-evm-agreement checkpoint; typed scope and retained obligations are stated in the module. |
-| `Goals/{Headline,Endpoint,Loops,Hash,Panic,Taclets}.lean` | One finish-line component goal per module, each owned by the lane that states or proves it. |
-| `Goals/Plan.lean`, `Goals/Finish.lean` | The plan goals outside the finish line, and `projectFinished`, the conjunction of the six components. |
+| `Goals/{Headline,Endpoint,Loops,Hash,Panic,Taclets,Total}.lean` | One finish-line component goal per module, each owned by the lane that states or proves it. |
+| `Goals/Plan.lean`, `Goals/Finish.lean` | The plan goals outside the finish line, and `projectFinished`, the conjunction of the seven components. |
 | `Examples/Goals/*` | One pinned `#roadmap_goal` status check per goal module; `Finish.lean` checks the finish line's structure instead of its shrinking `blocked by` list. |
 | `Roadmap/G49Final/PassCorrect.lean` | H64 pass template: one `Behaviour` type, one constructive refinement `PassCorrect` (explicit `need`, forward A/F/G and backward A/G transport, environment soundness/surjectivity), `PassCorrect.trans`, the intrinsic `PassList`, its `fold` and `public_end_to_end` ([h55-g49-final-theorem.md](../feature-work/h55-g49-final-theorem.md)). |
 | `Roadmap/G49Final/PassCorrectAdapters.lean` | `Behaviour.ofLang`; the one full-`Cert` adapter (`cert_adapter`) and its Lowering/Compilation/Execution/P8b carriers; the single source-end boundary (`source_from_admitted`, `source_ready`) and `PassCorrect.refines`. |
