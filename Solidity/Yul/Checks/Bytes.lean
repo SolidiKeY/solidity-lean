@@ -85,7 +85,7 @@ def Row.check : Row → Bool
   | .clz v r => (Pure.eval .«clz» (fun _ => word v)).val == r
 
 /-- The 947 vectors (315 BYTE, 376 SIGNEXTEND, 256 CLZ), in their original order. -/
-def rows : List Row := [
+noncomputable def rows : List Row := [
   .byte 0 0 0,
   .byte 0 1 0,
   .byte 0 2 0,
