@@ -1,6 +1,7 @@
 import Std.Sync.Mutex
 import Solidity.Frontend.SpecOriginsV1
 import Solidity.Tools.DirectRuntime
+import Solidity.Tools.ExecutableGoalBindingV2
 
 /-! # Internal executable invocation retention and reification for V2 intake
 
@@ -323,6 +324,63 @@ def admittedInvocationSourceV2? (captureDeclaration namespaceName : Lean.Name)
     J.kind node == "ContractDefinition" && node.compress == selected.goal.source.compress
   unless contracts.length == 1 do return none
   return some ⟨namespaceName, fixtureBytes, fixture, selected, origins⟩
+
+/-- Kernel-checked candidate DATA preparation only. The named theorem is
+not authenticated as an imported source row here, and the executable target
+need not fail. No source metadata, certificate or span is returned. -/
+structure PreparedRetainedCandidateV2 where
+  private mk ::
+  selection : SelectedInvocationGoalV2
+  certificateDeclaration : Lean.Name
+  imported : Tools.SourceCounterexampleCandidateV1
+  goalPair : Expr
+  relation : Expr
+
+/-- Read the candidate from a real named theorem, never from a caller's JSON
+or a second search. Prepare the typed relation to the actual retained target.
+Independent source-row admission and exact executable failure remain mandatory.
+Temporary kernel/audit declarations are removed on both success and refusal. -/
+def prepareRetainedCandidateV2 (captureDeclaration : Lean.Name) (request : Json)
+    (sourceId : Int) (functionName : String) (certificateDeclaration : Lean.Name)
+    (report : Json) : CommandElabM (Except String PreparedRetainedCandidateV2) := do
+  let some selection ← selectedInvocationGoalV2? captureDeclaration request sourceId functionName
+    | return .error "actual invocation unavailable"
+  let some (.thmInfo certificate) := (← getEnv).find? certificateDeclaration
+    | return .error "retained theorem unavailable"
+  let (``Not, #[goalType]) := certificate.type.consumeMData.getAppFnArgs
+    | return .error "retained theorem goal shape refused"
+  let axioms ← liftTermElabM <| collectAxioms certificateDeclaration
+  unless axioms.all ([``propext, ``Classical.choice, ``Quot.sound].contains ·) do
+    return .error "retained theorem axiom audit refused"
+  liftTermElabM do
+    let options ← kernelOptionsV2
+    withOptions (fun _ => options) do
+      let some imported ← Tools.sourceCounterexampleCandidateV1? goalType ⟨certificate.value, report⟩
+        | return .error "retained candidate shape or kernel validation refused"
+      let contractName := Lean.Name.str (Lean.Name.num captureDeclaration selection.captureIndex) "contract"
+      let formulaName := Lean.Name.str (Lean.Name.num captureDeclaration selection.captureIndex) "formula"
+      let executableContract := mkConst contractName
+      let importedVars := mkApp (mkConst ``Contract.vars) imported.contract
+      let executableVars := mkApp (mkConst ``Contract.vars) executableContract
+      unless ← withTransparency .all (isDefEq importedVars executableVars) do
+        return .error "storage layout mismatch"
+      let pair := mkAppN (mkConst ``Tools.GoalPairV2.mk)
+        #[imported.contract, executableContract, imported.formula, mkConst formulaName]
+      let layout ← mkEqRefl importedVars
+      let relation := mkAppN (mkConst ``Tools.SameCandidateV2.ofLayout) #[pair, imported.candidate, layout]
+      let pairType := mkConst ``Tools.GoalPairV2
+      let relationType := mkApp (mkConst ``Tools.SameCandidateV2) pair
+      let equationType ← inferType imported.valuesEquation
+      let base ← getEnv
+      let pairName ← mkFreshUserName `_executable_v2_prepared_pair
+      let relationName ← mkFreshUserName `_executable_v2_prepared_relation
+      let equationName ← mkFreshUserName `_executable_v2_prepared_values
+      let checked ← installDeclarationsV2 #[(pairName, pairType, pair),
+        (relationName, relationType, relation), (equationName, equationType, imported.valuesEquation)]
+      setEnv base
+      match checked with
+      | .error reason => return .error ("candidate relation kernel/audit refused: " ++ reason)
+      | .ok () => return .ok ⟨selection, certificateDeclaration, imported, pair, relation⟩
 
 /-- Diagnostic receipt only, never certificate admission. -/
 def invocationReceiptV2? (name : Lean.Name) : CommandElabM (Option Json) := do

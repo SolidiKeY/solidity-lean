@@ -241,6 +241,20 @@ run_cmd do
     | .error _ => throwError m!"changed {label} failed for an unrelated reason"
 
 
+/- Synthetic NAMED retained proof, not one of the four source certificates. -/
+theorem preparationCertificate : ¬ Fml.Valid (.ff : Fml C []) :=
+  Fml.not_valid_of_eval3Peel candidate.sourceValuesV1 (candidate.tstate C)
+    (show Fml.eval3Peel (poolDom candidate.argInts) candidate.sourceValuesV1
+      (candidate.tstate C) (.ff : Fml C []) = .ff from rfl)
+
+def otherLayoutCandidate : Cand quotationContract :=
+  { st := SFields.dflt quotationContract.vars, args := [] }
+theorem preparationOtherLayout : ¬ Fml.Valid (.ff : Fml quotationContract []) :=
+  Fml.not_valid_of_eval3Peel otherLayoutCandidate.sourceValuesV1 (otherLayoutCandidate.tstate quotationContract)
+    (show Fml.eval3Peel (poolDom otherLayoutCandidate.argInts) otherLayoutCandidate.sourceValuesV1
+      (otherLayoutCandidate.tstate quotationContract) (.ff : Fml quotationContract []) = .ff from rfl)
+theorem preparationWrongShape : True := True.intro
+
 /- A distinct injected first invocation; lookups must never rerun it. -/
 run_cmd do
   let .ok fixture := Json.parse r#"{"contract":{"nodeType":"ContractDefinition","contractKind":"contract","nodes":[{"nodeType":"FunctionDefinition","id":1,"name":"first","kind":"function","visibility":"public","stateMutability":"pure","modifiers":[],"parameters":{"parameters":[]},"returnParameters":{"parameters":[]},"body":{"nodeType":"Block","statements":[]},"documentation":""},{"nodeType":"FunctionDefinition","id":2,"name":"second","kind":"function","visibility":"public","stateMutability":"pure","modifiers":[],"parameters":{"parameters":[]},"returnParameters":{"parameters":[]},"body":{"nodeType":"Block","statements":[]},"documentation":""}]},"listing":true}"# | throwError "invocation fixture JSON"
@@ -262,6 +276,26 @@ run_cmd do
         root request id functionName).isSome then throwError "foreign terminal goal selected"
   if (← Solidity.Frontend.ExecutableMetadataV2.Internal.selectedInvocationGoalV2?
       root fixture 1 "first").isSome then throwError "changed request selected"
+  let preparationEnv ← getEnv
+  let .ok prepared ← Solidity.Frontend.ExecutableMetadataV2.Internal.prepareRetainedCandidateV2
+    root request 1 "first" ``preparationCertificate Json.null
+    | throwError "named candidate preparation failed"
+  unless prepared.selection.captureIndex == 0 && prepared.certificateDeclaration == ``preparationCertificate &&
+      prepared.imported.original.report == Json.null do throwError "preparation changed retained identity"
+  unless ((← getEnv).constants.toList.map Prod.fst) == (preparationEnv.constants.toList.map Prod.fst) do
+    throwError "temporary candidate preparation declarations leaked"
+  for (name, reason) in [(``preparationOtherLayout, "storage layout mismatch"),
+      (``preparationWrongShape, "retained theorem goal shape refused"),
+      (``C, "retained theorem unavailable"), (`MissingPreparationCertificate, "retained theorem unavailable")] do
+    let result ← Solidity.Frontend.ExecutableMetadataV2.Internal.prepareRetainedCandidateV2
+      root request 1 "first" name (Json.mkObj [("certified", toJson true)])
+    match result with
+    | .error actual => unless actual == reason do throwError "unrelated preparation refusal: {actual}"
+    | .ok _ => throwError "invalid retained candidate preparation accepted"
+  let .error wrongRequestReason ← Solidity.Frontend.ExecutableMetadataV2.Internal.prepareRetainedCandidateV2
+    root fixture 1 "first" ``preparationCertificate Json.null
+    | throwError "changed request admitted to candidate preparation"
+  unless wrongRequestReason == "actual invocation unavailable" do throwError "wrong preparation refusal stage"
   let receipt? ← Solidity.Frontend.ExecutableMetadataV2.Internal.invocationReceiptV2? root
   logInfo m!"EXECUTABLE_V2 first invocation outcome: {(receipt?.map Json.compress).getD "missing receipt"}"
   let some retained ← Solidity.Frontend.ExecutableMetadataV2.Internal.retainedInvocationV2? root request
