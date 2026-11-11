@@ -35,6 +35,13 @@ Neither replaces the historical `genericYulViewsPreserve` of `Goals/Plan.lean`.
   `Roadmap.Lowering S I` and a `G49Final.PassCorrect` per program whose
   data fields (environment map, resource transport) are the diagram's.
 
+Open scope point (not hidden): no intrinsic session semantics over emitted
+programs exists at the base, so `Binding.targetSession` is an explicit
+reference parameter, as P8a's `OperationalReference`. Universally quantified
+and unconstrained, it admits intrinsic specs no lowering refines; the
+session-level conjunct is to be restated against an actual intrinsic session
+semantics once one is chosen.
+
 ## Views inventory (per-shape view definitions, read at the launch base)
 
 | Shape | Declaration | Pinned by |
@@ -111,7 +118,7 @@ inductive Tree where
 
 /-- One physical byte: a byte of a slot (least significant first) or of memory. -/
 inductive Cell where
-  | slot (region : Region) (word : Nat) (byte : Nat)
+  | slot (region : Region) (word : Roadmap.Word) (byte : Nat)
   | mem (address : Nat)
 
 /-- A word of `2 ^ 256`, from a natural number. -/
@@ -119,8 +126,8 @@ def toWord (n : Nat) : Roadmap.Word := ⟨n % 2 ^ 256, Nat.mod_lt _ (by decide)�
 
 /-- The byte a cell holds. -/
 def Phys.byte (m : Phys) : Cell → Nat
-  | .slot .storage w b => (m.storage (toWord w)).val / 256 ^ b % 256
-  | .slot .transient w b => (m.transient (toWord w)).val / 256 ^ b % 256
+  | .slot .storage w b => (m.storage w).val / 256 ^ b % 256
+  | .slot .transient w b => (m.transient w).val / 256 ^ b % 256
   | .slot .memory _ _ => 0
   | .mem a => (m.memory a).toNat
 
@@ -280,8 +287,8 @@ mutual
 /-- The trees a layout admits (the typing the laws preserve); lengths are
 bounded as the existing views bound them (`< 2 ^ 256`). -/
 def Layout.Fits : Layout → Tree → Prop
-  | .scalar w, .leaf v => v < 256 ^ w
-  | .fixedArray e n, .node xs => xs.length = n ∧ Layout.FitsAll e xs
+  | .scalar w, .leaf v => 0 < w ∧ w ≤ 32 ∧ v < 256 ^ w
+  | .fixedArray e n, .node xs => xs.length = n ∧ n < 2 ^ 256 ∧ Layout.FitsAll e xs
   | .dynArray e, .node xs => xs.length < 2 ^ 256 ∧ Layout.FitsAll e xs
   | .bytes, .blob bs => bs.length < 2 ^ 256
   | .struct fs, .node xs => Layout.FitsFields fs xs
@@ -359,11 +366,33 @@ def objectCells (base size : Nat) : Cell → Prop
   | .mem x => base ≤ x ∧ x < base + size
   | .slot _ _ _ => False
 
-/-- The byte starts of packed scalar members of the given widths from
-`cursor`, by the existing packing rule (`packedStart`, PackedAggregates.lean:54). -/
-def packedStarts : List Nat → Nat → List Nat
-  | [], _ => []
-  | w :: ws, cursor => packedStart cursor w :: packedStarts ws (packedStart cursor w + w)
+mutual
+/-- The static storage slots a layout occupies (solc's storage layout):
+narrow scalars of an array pack `32 / w` per slot, struct members pack by
+`packedStart` and an aggregate member starts a fresh slot; a dynamic array,
+bytes or mapping takes its one head slot. -/
+def Layout.slots : Layout → Nat
+  | .scalar _ => 1
+  | .fixedArray (.scalar w) n => (n + 32 / w - 1) / (32 / w)
+  | .fixedArray e n => n * e.slots
+  | .dynArray _ => 1
+  | .bytes => 1
+  | .struct fs => (Layout.memberEnd fs 0 + 31) / 32
+  | .mapping _ => 1
+/-- The byte cursor after struct members from `cursor`. -/
+def Layout.memberEnd : List Layout → Nat → Nat
+  | [], cursor => cursor
+  | .scalar w :: fs, cursor => Layout.memberEnd fs (packedStart cursor w + w)
+  | f :: fs, cursor => Layout.memberEnd fs ((cursor + 31) / 32 * 32 + 32 * f.slots)
+end
+
+/-- The byte start of struct member `i` from `cursor`. -/
+def Layout.memberStart : List Layout → Nat → Nat → Nat
+  | [], _, _ => 0
+  | .scalar w :: _, cursor, 0 => packedStart cursor w
+  | _ :: _, cursor, 0 => (cursor + 31) / 32 * 32
+  | .scalar w :: fs, cursor, i + 1 => Layout.memberStart fs (packedStart cursor w + w) i
+  | f :: fs, cursor, i + 1 => Layout.memberStart fs ((cursor + 31) / 32 * 32 + 32 * f.slots) i
 
 /-- A slot region. -/
 def Region.slotted : Region → Prop
@@ -380,7 +409,7 @@ structure LayoutView.Geometric (V : LayoutView) : Prop where
     (∀ v : f.Value, V.geometry.writeScalar P f.width ⟨r, slot.val, f.offset⟩ v.val m =
       some (m.withSlots r (patchScalarSlot (m.slots r) slot f v))) ∧
     (∀ c, V.geometry.scalarCells P f.width ⟨r, slot.val, f.offset⟩ c ↔
-      ∃ b, c = .slot r slot.val b ∧ f.offset ≤ b ∧ b < f.offset + f.width)
+      ∃ b, c = .slot r slot b ∧ f.offset ≤ b ∧ b < f.offset + f.width)
   /-- A memory word reads and writes as `mload`/`mstore`; a narrower memory
   value is cleaned of its dirty high bits exactly when `cleanDirty`. -/
   memoryScalar : ∀ (P : Params) (w a : Nat) (m : Phys), 0 < w → w ≤ 32 →
@@ -396,7 +425,7 @@ structure LayoutView.Geometric (V : LayoutView) : Prop where
       some (if r = .memory then m.withMemory (mstore m.memory w (toWord n))
         else m.withSlots r (saveSlot (m.slots r) (toWord w) (toWord n))) ∧
     (∀ c, V.geometry.lengthCells P ⟨r, w, 0⟩ c ↔
-      if r = .memory then objectCells w 32 c else ∃ b, c = .slot r w b ∧ b < 32)
+      if r = .memory then objectCells w 32 c else ∃ b, c = .slot r (toWord w) b ∧ b < 32)
   /-- Dynamic data starts at `keccak(slot)` in storage (`Storage.Loc.data`)
   and after the header word in memory. -/
   data : ∀ (P : Params) (r : Region) (w : Nat) (m : Phys),
@@ -404,18 +433,23 @@ structure LayoutView.Geometric (V : LayoutView) : Prop where
       if r = .memory then ⟨.memory, w + 32, 0⟩
       else ⟨r, (physicalSlot P.hash (.data (.root w) 0)).val, 0⟩
   /-- A mapping value lives at `keccak(key . slot)` (`Storage.Loc.hash`). -/
-  key : ∀ (P : Params) (r : Region) (w : Nat) (k : Roadmap.Word),
+  key : ∀ (P : Params) (r : Region) (w : Nat) (k : Roadmap.Word), r.slotted →
     V.geometry.key P ⟨r, w, 0⟩ k = ⟨r, (physicalSlot P.hash (.hash k.val (.root w) 0)).val, 0⟩
   /-- Elements of narrow scalars pack `32 / w` per slot; memory elements are words. -/
   elem : ∀ (P : Params) (r : Region) (w base i : Nat), 0 < w → w ≤ 32 →
     V.geometry.elem P (.scalar w) ⟨r, base, 0⟩ i =
       if r = .memory then ⟨.memory, base + 32 * i, 0⟩
-      else ⟨r, base + i / (32 / w), i % (32 / w) * w⟩
-  /-- Struct members of scalars pack by `packedStart`; memory members are words. -/
-  field : ∀ (P : Params) (r : Region) (ws : List Nat) (base i : Nat), i < ws.length →
-    V.geometry.field P (ws.map Layout.scalar) ⟨r, base, 0⟩ i =
-      if r = .memory then ⟨.memory, base + 32 * i, 0⟩
-      else ⟨r, base + (packedStarts ws 0).getD i 0 / 32, (packedStarts ws 0).getD i 0 % 32⟩
+      else ⟨r, (toWord (base + i / (32 / w))).val, i % (32 / w) * w⟩
+  /-- Storage elements of an aggregate start every `e.slots` slots. -/
+  elemAggregate : ∀ (P : Params) (r : Region) (e : Layout) (base i : Nat), r.slotted →
+    (∀ w, e ≠ .scalar w) → V.geometry.elem P e ⟨r, base, 0⟩ i = ⟨r, (toWord (base + i * e.slots)).val, 0⟩
+  /-- Struct members pack by `packedStart`, aggregates from a fresh slot;
+  memory scalar members are words. -/
+  field : ∀ (P : Params) (r : Region) (fs : List Layout) (base i : Nat), i < fs.length →
+    (r.slotted → V.geometry.field P fs ⟨r, base, 0⟩ i =
+      ⟨r, (toWord (base + Layout.memberStart fs 0 i / 32)).val, Layout.memberStart fs 0 i % 32⟩) ∧
+    (r = .memory → (∀ f ∈ fs, ∃ w, f = .scalar w) →
+      V.geometry.field P fs ⟨.memory, base, 0⟩ i = ⟨.memory, base + 32 * i, 0⟩)
 
 /-- **The instance relation**: each existing per-shape view definition is the
 recursive view at a concrete layout, location and tree. -/
@@ -552,6 +586,11 @@ inductive Site where
   | loop
   | callee (d : FunDecl) (ρ : List (String × String)) (ctor selfFrame : Bool) (Γf : ECtx)
       (funs : List (Name × FunDecl)) (k₀ : Nat)
+  /-- A recursive callee's frame body (Arms.lean:1063-1075): `calleeBody`, then
+  `(elabStmtsP body).runFrom sc'` from `(Γf, k₁)` with an empty memo, `sc'` the
+  callee scope over the scope `outer` read then, with the frame `rf` pushed. -/
+  | recursive (d : FunDecl) (ρ : List (String × String)) (ctor selfFrame : Bool) (Γf : ECtx)
+      (funs : List (Name × FunDecl)) (k₀ : Nat) (outer : ElabScope) (rf : RecFrame)
 
 /-- A source body with its production input and its site. -/
 structure Body where
@@ -579,7 +618,7 @@ def Lowered (b : Body) (u : Emitted) : Prop :=
     b.input.returnSlots = none ∧
     (((lowerAt none b.input.raw).run b.input.scope).run b.input.before.locals).run
       b.input.before.memo = .ok ((u.output.raw, u.output.afterLower.locals), u.output.afterLower.memo)
-  | .callee d ρ ctor selfFrame Γf _ _ =>
+  | .callee d ρ ctor selfFrame Γf _ _ | .recursive d ρ ctor selfFrame Γf _ _ _ _ =>
     b.input.raw = d.body ∧ b.input.returnSlots = some (returnSlots d ρ) ∧
     (((calleeBody u.C d ρ ctor selfFrame Γf).run b.input.scope).run b.input.before.locals).run
       b.input.before.memo = .ok ((u.output.raw, u.output.afterLower.locals), u.output.afterLower.memo)
@@ -594,10 +633,16 @@ def calleeScope (sc : ElabScope) (funs : List (Name × FunDecl)) (selfFrame : Bo
 a standalone loop; for a callee, the locals reset to `Γf` with the counter
 kept, and the scope `inlinedBody` sets. -/
 def Threaded (b : Body) (u : Emitted) : Prop :=
-  u.output.beforeElab.memo = u.output.afterLower.memo ∧
   match b.site with
-  | .loop => u.output.elabScope = b.input.scope ∧ u.output.beforeElab.locals = u.output.afterLower.locals
+  | .loop => u.output.beforeElab.memo = u.output.afterLower.memo ∧
+    u.output.elabScope = b.input.scope ∧ u.output.beforeElab.locals = u.output.afterLower.locals
+  | .recursive _ _ _ selfFrame Γf funs k₀ outer rf =>
+    u.output.beforeElab.memo = {} ∧
+    u.output.beforeElab.locals = (Γf, u.output.afterLower.locals.2) ∧
+    u.output.elabScope = { calleeScope outer funs selfFrame k₀ u.output.afterLower.locals.2 with
+      recs := rf :: outer.recs }
   | .callee _ _ _ selfFrame Γf funs k₀ =>
+    u.output.beforeElab.memo = u.output.afterLower.memo ∧
     u.output.beforeElab.locals = (Γf, u.output.afterLower.locals.2) ∧
     u.output.elabScope = calleeScope b.input.scope funs selfFrame k₀ u.output.afterLower.locals.2
 
@@ -625,8 +670,10 @@ def sourceRun (b : Body) (G : Source.Glob b.E) (F : Source.Fr) (n nps : Nat)
 /-- Halts correspond: a revert keeps its data; a panic's data is the target's
 `panic` (the intrinsic halt records no code: this observation is lossy and
 the session-level `Cert` compares the exact data); a stuck or timed-out
-source matches nothing. (`exhausted` is a storage push past its bound,
-outside t0's fragment, which has no `push`.) -/
+source matches nothing. A target `exhausted` (`storage.full`, `assumeFalse`,
+payments: Run.lean, RunAccel.lean, PaymentWorld.lean) matches nothing either,
+so the backward clause obliges the prover to show associated fragment
+programs never reach one; it is not assumed. -/
 def HaltMatch : Source.Halt → THalt → Prop
   | .revert d, h => h = THalt.ofData d ∨ (h = .panic ∧ ∃ c, d = Source.panicData c)
   | .stuck _, _ => False
@@ -695,15 +742,19 @@ def Diagram.Simulates (D : Diagram) : Prop :=
       (∀ n, u.output.program.2.runF n tgt ≠ .error .diverge →
         ∃ j, D.Final m emb (sourceRun b G F j nps ph src) (u.output.program.2.runF n tgt))
 
+/-- Two bodies with the same production input (site, raw input, slots,
+scope and state); only their resolved source may differ. -/
+def Body.SameInput (b' b : Body) : Prop :=
+  b'.site = b.site ∧ b'.input.raw = b.input.raw ∧ b'.input.returnSlots = b.input.returnSlots ∧
+    b'.input.scope = b.input.scope ∧ b'.input.before = b.input.before
+
 /-- **Coverage of t0's fragment**: every actual production run whose emitted
 program is in the fragment has a resolved source, at the same site and with
 the same raw input, slots, scope and state, that the diagram associates with
 it. (No raw-to-resolved function exists at the base; see the limitations.) -/
 def Diagram.Total (D : Diagram) : Prop :=
   ∀ (b : Body) (u : Emitted), Production b u → Accepted u →
-    ∃ b' : Body, b'.site = b.site ∧ b'.input.raw = b.input.raw ∧
-      b'.input.returnSlots = b.input.returnSlots ∧ b'.input.scope = b.input.scope ∧
-      b'.input.before = b.input.before ∧ ∃ m, D.Assoc b' u m
+    ∃ b' : Body, b'.SameInput b ∧ ∃ m, D.Assoc b' u m
 
 /-- The binding of a source/intrinsic pair to the actual programs: a
 resolution's Source program (the frozen P8a origins) whose failure-free
@@ -740,7 +791,7 @@ def Diagram.Lifts (D : Diagram) {S : SourceSpec} {I : IntrinsicSpec} (B : Bindin
     (∀ e, L.pass.envAbs e = S.ofSession (I.session e)) ∧
     (∀ r w p art, (B.units (L.lower r w p art)).length = (B.bodies r).length ∧
       ∀ bu ∈ (B.bodies r).zip (B.units (L.lower r w p art)),
-        Production bu.1 bu.2 ∧ ∃ m, D.Assoc bu.1 bu.2 m) ∧
+        Production bu.1 bu.2 ∧ ∃ b' : Body, b'.SameInput bu.1 ∧ ∃ m, D.Assoc b' bu.2 m) ∧
     ∃ pc : (r : S.Resolved) → (w : S.WellFormed r) → (p : S.InProfile r) → (art : Artifact) →
         Solidity.Roadmap.G49Final.PassCorrect
           (Solidity.Roadmap.G49Final.Behaviour.ofLang S.lang (S.meaning r w p art))
