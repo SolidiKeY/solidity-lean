@@ -201,6 +201,7 @@ and open obligations. Test proposals remain proposals until applied.
 - [docs/feature-work/transient-storage.md](feature-work/transient-storage.md)
 - [docs/feature-work/trust-usability.md](feature-work/trust-usability.md)
 - [docs/feature-work/v13-public-compiler-total.md](feature-work/v13-public-compiler-total.md)
+- [docs/feature-work/va3-differential.md](feature-work/va3-differential.md)
 - [docs/feature-work/vu1-bench.md](feature-work/vu1-bench.md)
 - [docs/feature-work/vy5-composition.md](feature-work/vy5-composition.md)
 - [docs/feature-work/vy5-natural-account.md](feature-work/vy5-natural-account.md)
@@ -329,6 +330,7 @@ and open obligations. Test proposals remain proposals until applied.
 - [tests/editor-parity/compiler-project-baseline.md](../tests/editor-parity/compiler-project-baseline.md)
 - [tests/editor-parity/lsp-baseline.md](../tests/editor-parity/lsp-baseline.md)
 - [tests/failure-emission/README.md](../tests/failure-emission/README.md)
+- [tests/fullscope-20261104/vo1/unused-functions-registration.md](../tests/fullscope-20261104/vo1/unused-functions-registration.md)
 - [tests/h28-sol/automation-benchmark/README.md](../tests/h28-sol/automation-benchmark/README.md)
 - [tests/h28-sol/mutation-testing/tools/README.md](../tests/h28-sol/mutation-testing/tools/README.md)
 - [tests/h28-sol/type-grammar/README.md](../tests/h28-sol/type-grammar/README.md)
@@ -398,6 +400,7 @@ and open obligations. Test proposals remain proposals until applied.
 - [scripts/h62/item2/audit-theories/handoff/TUPLE-ROLES-20261108.md](../scripts/h62/item2/audit-theories/handoff/TUPLE-ROLES-20261108.md)
 - [scripts/h62/item2/audit-theories/handoff/TUPLE-VERIFICATION-20261108.md](../scripts/h62/item2/audit-theories/handoff/TUPLE-VERIFICATION-20261108.md)
 - [scripts/h62/item2/audit-theories/handoff/original-work-and-backfill-queue.md](../scripts/h62/item2/audit-theories/handoff/original-work-and-backfill-queue.md)
+- [scripts/prose-backtest/README.md](../scripts/prose-backtest/README.md)
 - [vscode/README.md](../vscode/README.md)
 - [web/README.md](../web/README.md)
 

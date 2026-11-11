@@ -60091,6 +60091,21 @@
   "Quot.sound",
   "propext"
  ],
+ "Solidity/SolcValidation/IrHex.lean:Solidity.SolcValidation.IrSyntax.eval_hex": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/SolcValidation/IrHex.lean:Solidity.SolcValidation.IrSyntax.hex_decode": [
+  "propext"
+ ],
+ "Solidity/SolcValidation/IrHex.lean:Solidity.SolcValidation.IrSyntax.hex_recognized": [],
+ "Solidity/SolcValidation/IrHex.lean:Solidity.SolcValidation.IrSyntax.hex_string_decode": [
+  "propext"
+ ],
+ "Solidity/SolcValidation/IrHex.lean:Solidity.SolcValidation.IrSyntax.hex_tokens": [],
+ "Solidity/SolcValidation/IrHex.lean:Solidity.SolcValidation.IrSyntax.hex_too_long": [
+  "propext"
+ ],
  "Solidity/Source/Calldata.lean:Solidity.Source.cdStaticToMem_ok": [
   "Classical.choice",
   "Quot.sound",
