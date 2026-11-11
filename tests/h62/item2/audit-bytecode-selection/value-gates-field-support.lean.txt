@@ -1,0 +1,111 @@
+/-! Guards mistaking value-gate success for body execution, assuming the body
+result, or borrowing numeric-memory premises absent from value-gate contracts.
+Reuses the route fixture and actual label-writing body with unchanged classifier
+and compiler. Model value/body observations only, not Source admission, ABI bytes,
+native realization, gas/fork or G01 operational correspondence. -/
+
+def valueGateCompilation (payable : Bool) :=
+  ValueGate.compiled (C := payableContract) 3 (Frag.init RouteCtx) payable
+
+def valueGateBody : Prog payableContract RouteCtx RouteCtx := SelectorRoutes.writeLabel payableContract (wmod 13)
+def valueGateBack := ValueGateBody.selectedBody 3 (Frag.init RouteCtx) valueGateBody (Frag.init RouteCtx) rfl
+def valueGateWhole (payable : Bool) :=
+  ValueGateBody.selectedWhole 3 (Frag.init RouteCtx) valueGateBody payable (Frag.init RouteCtx) rfl
+
+theorem value_gate_found (payable : Bool) : Compiler.compile 3 (Frag.init RouteCtx)
+    (ValueGate.program (C := payableContract) payable)=some (valueGateCompilation payable) :=
+  ValueGate.selected 3 (Frag.init RouteCtx) payable
+
+theorem value_gate_code (payable : Bool) : (valueGateCompilation payable).code=
+    if payable then [] else [.callvalue,.push (.val (wmod 0)),.eq,.jumpi 1,.revert] :=
+  ValueGate.code 3 (Frag.init RouteCtx) payable
+
+theorem value_body_found : Compiler.compile 3 (Frag.init RouteCtx) valueGateBody=some valueGateBack :=
+  ValueGateBody.body_selected 3 (Frag.init RouteCtx) valueGateBody (Frag.init RouteCtx) rfl
+
+theorem value_whole_found (payable : Bool) : Compiler.compile 3 (Frag.init RouteCtx)
+    (ValueGateBody.guard payable valueGateBody)=some (valueGateWhole payable) :=
+  ValueGateBody.whole_selected 3 (Frag.init RouteCtx) valueGateBody payable (Frag.init RouteCtx) rfl
+
+theorem value_whole_code (payable : Bool) : (valueGateWhole payable).code=
+    (if payable then [] else [.callvalue,.push (.val (wmod 0)),.eq,.jumpi 1,.revert])++valueGateBack.code :=
+  ValueGateBody.code 3 (Frag.init RouteCtx) valueGateBody payable (Frag.init RouteCtx) rfl
+
+theorem value_gate_actual (payable : Bool) (machine : Machine) :
+    run (valueGateCompilation payable).code machine=
+      if payable || decide (machine.callvalue.val=0) then .ok machine 0 else .revert :=
+  ValueGate.executed 3 (Frag.init RouteCtx) payable (valueGateCompilation payable) (value_gate_found payable) machine
+
+theorem value_whole_actual (payable : Bool) (machine : Machine) :
+    run (valueGateWhole payable).code machine=
+      if payable || decide (machine.callvalue.val=0) then run valueGateBack.code machine else .revert :=
+  ValueGateBody.executed 3 (Frag.init RouteCtx) valueGateBody payable (Frag.init RouteCtx) rfl
+    (valueGateWhole payable) valueGateBack (value_whole_found payable) value_body_found machine
+
+theorem value_payable_unchanged (machine : Machine) :
+    run (valueGateCompilation true).code machine=.ok machine 0 := by
+  rw [value_gate_actual]
+  rfl
+
+theorem value_zero_unchanged (word : Fin W) :
+    run (valueGateCompilation false).code (payableMachine word (wmod 0))=
+      .ok (payableMachine word (wmod 0)) 0 := by
+  rw [value_gate_actual]
+  rfl
+
+theorem value_paid_refused (machine : Machine) (nonzero : machine.callvalue.val≠0) :
+    run (valueGateCompilation false).code machine=.revert := by
+  rw [value_gate_actual]
+  simp only [Bool.false_or,decide_eq_false nonzero,Bool.false_eq_true,if_false]
+
+theorem value_body_payable_writes (word value : Fin W) :
+    run (valueGateWhole true).code (payableMachine word value)=
+      .ok (payableWritten word value (wmod 13)) 0 := by
+  rw [value_whole_actual]
+  rfl
+
+theorem value_body_zero_writes (word : Fin W) :
+    run (valueGateWhole false).code (payableMachine word (wmod 0))=
+      .ok (payableWritten word (wmod 0) (wmod 13)) 0 := by
+  rw [value_whole_actual]
+  rfl
+
+theorem value_body_paid_refused (machine : Machine) (nonzero : machine.callvalue.val≠0) :
+    run (valueGateWhole false).code machine=.revert := by
+  rw [value_whole_actual]
+  simp only [Bool.false_or,decide_eq_false nonzero,Bool.false_eq_true,if_false]
+
+def valueMalformed (value : Fin W) : Machine :=
+  {Machine.init with callvalue := value, mem := fun _ => .slot (.root 0)}
+
+theorem value_malformed_zero_success :
+    run (valueGateCompilation false).code (valueMalformed (wmod 0))=.ok (valueMalformed (wmod 0)) 0 := by
+  rw [value_gate_actual]
+  rfl
+
+theorem value_body_malformed_paid_refused :
+    run (valueGateWhole false).code (valueMalformed (wmod 1))=.revert :=
+  value_body_paid_refused (valueMalformed (wmod 1)) (by decide)
+
+theorem value_body_revert_all_refused :
+    run (valueGateWhole false).code (payableMachine (wmod 5) (wmod 0))≠.revert := by
+  rw [value_body_zero_writes]
+  intro impossible
+  cases impossible
+
+#print axioms value_gate_found
+#print axioms value_gate_code
+#print axioms value_body_found
+#print axioms value_whole_found
+#print axioms value_whole_code
+#print axioms value_gate_actual
+#print axioms value_whole_actual
+#print axioms value_payable_unchanged
+#print axioms value_zero_unchanged
+#print axioms value_paid_refused
+#print axioms value_body_payable_writes
+#print axioms value_body_zero_writes
+#print axioms value_body_paid_refused
+#print axioms value_malformed_zero_success
+#print axioms value_body_malformed_paid_refused
+#print axioms value_body_revert_all_refused

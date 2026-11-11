@@ -1,0 +1,62 @@
+{
+  "base": "d6fd95f0886775d7c286813fa9b993a40ba7a777",
+  "base_graph_sha256": "8f0934d9bd78964146422cef24d84fceaeb498751cd19b66d5441bb11532f05b",
+  "boundaries": [
+    "Each global main is resolved in its own cached legacy import context; incompatible CLIs are not imported together.",
+    "Only Lean module artifacts are compiled; native executable linking and CLI execution are not tested.",
+    "Counts are native type/value/structural expression closure, not runtime or whole-program liveness.",
+    "SolidityLean main launches scripts/solidity-lean.mjs via Node; cross-language/generated-check dependencies are outside this graph.",
+    "Compiler attributes/IR, reflective names, external files and arbitrary inputs require separate treatment.",
+    "Outside this expression closure does not mean unused or deletable; missing joint-visible collision relations remain explicit boundaries.",
+    "File provenance flags and missing native ranges are retained; missing ranges are not automatically classified as generated code."
+  ],
+  "build_status": {
+    "SolidityLean": "pass",
+    "SolkeyCheck": "pass"
+  },
+  "deletable_now_verified_lines": 0,
+  "local_graph_sha256": "1f8e444d3fb1037cd487102c70d6b4e17d0840d89ae6120f073871137f4510da",
+  "provenance": [
+    {
+      "context": "SolidityLean",
+      "group": "untraced",
+      "native_range_lines": 27,
+      "source_constants": 6,
+      "without_native_source_range": 4
+    },
+    {
+      "context": "SolkeyCheck",
+      "group": "untraced",
+      "native_range_lines": 638,
+      "source_constants": 269,
+      "without_native_source_range": 120
+    }
+  ],
+  "roots": [
+    {
+      "all_loaded_used_bindings": 1792,
+      "boundary": {},
+      "context": "SolidityLean",
+      "own_outside_expression_closure_constants": 0,
+      "own_serialized_constants": 6,
+      "own_used_constants": 6,
+      "seed": "main",
+      "selected_source_used_bindings": 6,
+      "source_native_range_lines": 27,
+      "status": "expression_closure_measured"
+    },
+    {
+      "all_loaded_used_bindings": 1857,
+      "boundary": {},
+      "context": "SolkeyCheck",
+      "own_outside_expression_closure_constants": 18,
+      "own_serialized_constants": 31,
+      "own_used_constants": 13,
+      "seed": "main",
+      "selected_source_used_bindings": 269,
+      "source_native_range_lines": 638,
+      "status": "expression_closure_measured"
+    }
+  ],
+  "status": "partial"
+}

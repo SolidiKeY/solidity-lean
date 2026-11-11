@@ -1,0 +1,230 @@
+{
+  "files_created_and_deleted": 5039,
+  "files_edited_more_than_5_times": 536,
+  "monthly": {
+    "2026-09": {
+      "categories": {
+        "ci": {
+          "added": 42,
+          "binary_changes": 0,
+          "deleted": 0,
+          "file_changes": 1
+        },
+        "docs": {
+          "added": 11891,
+          "binary_changes": 0,
+          "deleted": 9176,
+          "file_changes": 285
+        },
+        "generated_corpus": {
+          "added": 4305,
+          "binary_changes": 0,
+          "deleted": 12,
+          "file_changes": 10
+        },
+        "generated_docs": {
+          "added": 846,
+          "binary_changes": 0,
+          "deleted": 571,
+          "file_changes": 91
+        },
+        "generated_other": {
+          "added": 1492,
+          "binary_changes": 0,
+          "deleted": 138,
+          "file_changes": 5
+        },
+        "generated_roots": {
+          "added": 313,
+          "binary_changes": 0,
+          "deleted": 185,
+          "file_changes": 71
+        },
+        "other": {
+          "added": 9128,
+          "binary_changes": 0,
+          "deleted": 8422,
+          "file_changes": 109
+        },
+        "other_lean": {
+          "added": 288,
+          "binary_changes": 0,
+          "deleted": 194,
+          "file_changes": 10
+        },
+        "scripts_other": {
+          "added": 3122,
+          "binary_changes": 0,
+          "deleted": 1446,
+          "file_changes": 57
+        },
+        "solidity_header_unmarked_proofs_and_definitions": {
+          "added": 230487,
+          "binary_changes": 0,
+          "deleted": 161801,
+          "file_changes": 1525
+        }
+      },
+      "commits": 155,
+      "revert_subjects": 0
+    },
+    "2026-10": {
+      "categories": {
+        "ci": {
+          "added": 326,
+          "binary_changes": 0,
+          "deleted": 6,
+          "file_changes": 13
+        },
+        "docs": {
+          "added": 180911,
+          "binary_changes": 0,
+          "deleted": 43098,
+          "file_changes": 1522
+        },
+        "generated_corpus": {
+          "added": 5424,
+          "binary_changes": 0,
+          "deleted": 5513,
+          "file_changes": 86
+        },
+        "generated_docs": {
+          "added": 3535,
+          "binary_changes": 0,
+          "deleted": 2012,
+          "file_changes": 422
+        },
+        "generated_other": {
+          "added": 2111,
+          "binary_changes": 0,
+          "deleted": 102,
+          "file_changes": 10
+        },
+        "generated_registry": {
+          "added": 3724,
+          "binary_changes": 0,
+          "deleted": 0,
+          "file_changes": 6
+        },
+        "generated_roots": {
+          "added": 1127,
+          "binary_changes": 0,
+          "deleted": 253,
+          "file_changes": 213
+        },
+        "other": {
+          "added": 2456218,
+          "binary_changes": 259,
+          "deleted": 16396,
+          "file_changes": 1557
+        },
+        "other_lean": {
+          "added": 43731,
+          "binary_changes": 0,
+          "deleted": 515,
+          "file_changes": 303
+        },
+        "scripts_other": {
+          "added": 22900,
+          "binary_changes": 3,
+          "deleted": 1817,
+          "file_changes": 376
+        },
+        "solidity_header_unmarked_proofs_and_definitions": {
+          "added": 648920,
+          "binary_changes": 0,
+          "deleted": 351510,
+          "file_changes": 7713
+        }
+      },
+      "commits": 892,
+      "revert_subjects": 0
+    },
+    "2026-11": {
+      "categories": {
+        "axiom_pins_files": {
+          "added": 4054,
+          "binary_changes": 0,
+          "deleted": 0,
+          "file_changes": 2
+        },
+        "ci": {
+          "added": 465,
+          "binary_changes": 0,
+          "deleted": 70,
+          "file_changes": 28
+        },
+        "coordination": {
+          "added": 1869,
+          "binary_changes": 2,
+          "deleted": 209,
+          "file_changes": 68
+        },
+        "docs": {
+          "added": 280167,
+          "binary_changes": 0,
+          "deleted": 167180,
+          "file_changes": 3452
+        },
+        "generated_docs": {
+          "added": 6903,
+          "binary_changes": 0,
+          "deleted": 3382,
+          "file_changes": 599
+        },
+        "generated_other": {
+          "added": 1668,
+          "binary_changes": 0,
+          "deleted": 0,
+          "file_changes": 19
+        },
+        "generated_registry": {
+          "added": 104408,
+          "binary_changes": 0,
+          "deleted": 29546,
+          "file_changes": 119
+        },
+        "generated_roots": {
+          "added": 9005,
+          "binary_changes": 0,
+          "deleted": 2796,
+          "file_changes": 436
+        },
+        "other": {
+          "added": 1053310,
+          "binary_changes": 9,
+          "deleted": 492799,
+          "file_changes": 9522
+        },
+        "other_lean": {
+          "added": 136543,
+          "binary_changes": 0,
+          "deleted": 415,
+          "file_changes": 1384
+        },
+        "scripts_other": {
+          "added": 216973,
+          "binary_changes": 1,
+          "deleted": 1687,
+          "file_changes": 3592
+        },
+        "solidity_header_unmarked_proofs_and_definitions": {
+          "added": 776272,
+          "binary_changes": 0,
+          "deleted": 34394,
+          "file_changes": 7165
+        }
+      },
+      "commits": 833,
+      "revert_subjects": 1
+    }
+  },
+  "path_lifecycle_note": "reachable DAG, path-based; moves and branch deletion/recreation count, not necessarily abandoned work",
+  "revert_subjects": [
+    {
+      "month": "2026-11",
+      "sha": "48db8306421812236202a812a44451c98aeb30a2",
+      "subject": "Revert \"Import: pass calldata parameters as slice origins to obligation bodies\""
+    }
+  ]
+}

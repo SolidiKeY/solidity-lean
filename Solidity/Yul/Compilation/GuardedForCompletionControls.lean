@@ -1,3 +1,4 @@
+import Solidity.Yul.Compilation.Artifact
 import Solidity.Yul.Compilation.GuardedForCompletion
 import Solidity.Yul.Compilation.GuardedForControls
 /-! Source recovery from actual guard/loop model witnesses. Inactive-body
@@ -10,9 +11,16 @@ open SourceLoop.Controls (dirty)
 theorem recovered_skipped (locals : Vector Scalar.Word 2) (m : Evm.Machine) (caller : List Evm.Word) :
  ∃ fuel, evalStmt fuel .nil True.intro (.if_ zeroExpr ForCompilation.Controls.constantGuard)
    ⟨zeroGuard.profile,endless.compiled.profile⟩ (sourceLocals locals) =
- some ⟨sourceLocals locals,.normal⟩ :=
- (completion_iff zeroGuard endless skippedCode (Option.some_get (by rfl)).symm
-   locals locals #v[] m caller).mpr (skipped locals m caller)
+ some ⟨sourceLocals locals,.normal⟩ := by
+ let represented : Solidity.Yul.Compilation.Artifact 0
+     (.if_ zeroExpr ForCompilation.Controls.constantGuard) :=
+   { profile := ⟨zeroGuard.profile,endless.compiled.profile⟩
+     code := skippedCode
+     source_to_model :=
+       GuardedFor.source_to_model zeroGuard endless skippedCode (Option.some_get (by rfl)).symm
+     model_to_source :=
+       GuardedForCompletion.model_to_source zeroGuard endless skippedCode (Option.some_get (by rfl)).symm }
+ exact (represented.completion_iff locals locals #v[] m caller).mpr (skipped locals m caller)
 
 theorem recovered_taken (a b : Scalar.Word) (m : Evm.Machine) (caller : List Evm.Word) :
  ∃ fuel, evalStmt fuel .nil True.intro (.if_ oneExpr SourceLoopInitializer.Controls.source)

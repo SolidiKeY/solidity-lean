@@ -1,0 +1,14 @@
+{
+  "word_carrier_entry_selected_joint_domain": {
+    "target": "Solidity.Backend.AbiEntry.Interface.WordCarrierEntryBodyCertificate.selected",
+    "proof": "\u27e8WordCarrierEntryBody.program,WordCarrierEntryBody.certificate,bodyContract,UIntBoundCtx,7,Solidity.AbiEntry.Kind.enumBelow 3,false,bodyLabel,carrierEntryBody,Frag.init UIntBoundCtx,rfl,True.intro\u27e9"
+  },
+  "word_carrier_entry_executed_joint_domain": {
+    "target": "Solidity.Backend.AbiEntry.Interface.WordCarrierEntryBodyCertificate.executed",
+    "proof": "\u27e8WordCarrierEntryBody.program,WordCarrierEntryBody.certificate,bodyContract,UIntBoundCtx,7,Solidity.AbiEntry.Kind.enumBelow 3,false,bodyLabel,carrierEntryBody,Frag.init UIntBoundCtx,rfl,carrierEntryWhole (.enumBelow 3) false,carrierEntryBack,carrier_entry_whole_found (.enumBelow 3) false,carrier_entry_back_found,carrierEntryMachine (wmod 2) (wmod 36) (wmod 0),wmod 2,wmod 36,rfl,rfl,True.intro\u27e9"
+  },
+  "word_carrier_entry_early_rejection_joint_domain": {
+    "target": "Solidity.Backend.AbiEntry.Interface.WordCarrierEntryBodyCertificate.early_rejection",
+    "proof": "\u27e8WordCarrierEntryBody.program,WordCarrierEntryBody.certificate,bodyContract,UIntBoundCtx,7,Solidity.AbiEntry.Kind.enumBelow 3,false,bodyLabel,carrierEntryBody,Frag.init UIntBoundCtx,rfl,carrierEntryWhole (.enumBelow 3) false,carrier_entry_whole_found (.enumBelow 3) false,carrierEntryBlocked,rfl,True.intro\u27e9"
+  }
+}

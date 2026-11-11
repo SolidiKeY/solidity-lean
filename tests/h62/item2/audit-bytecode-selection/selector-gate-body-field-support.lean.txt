@@ -1,0 +1,51 @@
+/-! Guards incompatible selector-gate compiler witnesses, reject-all guards,
+and executing a body after selector mismatch. Reuse the existing typed body,
+actual compiler and represented input. No desired body result is a premise;
+short routing, Source authenticity, native loading and gas remain separate. -/
+def gateBodyBack := SelectorGateBody.selectedBody 0 (Frag.init dispatchCtx)
+  dispatchHit.program dispatchHit.outFrag dispatchHit.admitted
+def gateBodyWhole (tag : Fin W) := SelectorGateBody.selectedWhole 0 (Frag.init dispatchCtx) .here tag
+  dispatchHit.program dispatchHit.outFrag dispatchHit.admitted
+
+theorem gate_body_found : Compiler.compile 0 (Frag.init dispatchCtx) dispatchHit.program=some gateBodyBack :=
+  SelectorGateBody.body_selected 0 (Frag.init dispatchCtx) dispatchHit.program dispatchHit.outFrag dispatchHit.admitted
+
+theorem gate_whole_found (tag : Fin W) : Compiler.compile 0 (Frag.init dispatchCtx)
+    (SelectorGateBody.program (.here : Idx dispatchCtx (.val .uint)) tag dispatchHit.program)=some (gateBodyWhole tag) :=
+  SelectorGateBody.whole_selected 0 (Frag.init dispatchCtx) .here tag dispatchHit.program dispatchHit.outFrag dispatchHit.admitted
+
+theorem gate_body_outcome (tag : Fin W) : run (gateBodyWhole tag).code dispatchMachine=
+    if tag.val=(wmod 5).val then run gateBodyBack.code dispatchMachine else .revert :=
+  SelectorGateBody.executed 0 (Frag.init dispatchCtx) .here tag dispatchHit.program dispatchHit.outFrag dispatchHit.admitted
+    (gateBodyWhole tag) gateBodyBack (gate_whole_found tag) gate_body_found dispatchMachine (wmod 5) rfl
+
+theorem gate_match_executes_body : run (gateBodyWhole (wmod 5)).code dispatchMachine=.ok dispatchHitOut 0 := by
+  rw [gate_body_outcome,if_pos (rfl : (wmod 5).val=(wmod 5).val)]
+  rfl
+
+theorem gate_mismatch_refused : run (gateBodyWhole (wmod 6)).code dispatchMachine=.revert := by
+  rw [gate_body_outcome,if_neg (by decide : (wmod 6).val≠(wmod 5).val)]
+
+theorem gate_miss_before_any_core_body {Δ : Ctx} (body : Prog dispatchContract dispatchCtx Δ)
+    (outFrag : Frag Δ) (core : inFragP (Frag.init dispatchCtx) body=some outFrag) :
+    run (SelectorGateBody.selectedWhole 0 (Frag.init dispatchCtx) .here (wmod 6) body outFrag core).code dispatchMachine=.revert :=
+  SelectorGateBody.miss_before_body 0 (Frag.init dispatchCtx) .here (wmod 6) body outFrag core
+    dispatchMachine (wmod 5) rfl (by decide)
+
+theorem gate_prefix_preserves_caller :
+    run [.mload 0,.push (.val (wmod 5)),.eq,.jumpi 1,.revert] dispatchMachine=.ok dispatchMachine 0 := by
+  rw [SelectorGateBody.run_code 0 (wmod 5) (wmod 5) dispatchMachine rfl,if_pos rfl]
+
+theorem gate_revert_all_refused : run (gateBodyWhole (wmod 5)).code dispatchMachine≠.revert := by
+  rw [gate_match_executes_body]
+  intro impossible
+  cases impossible
+
+#print axioms gate_body_found
+#print axioms gate_whole_found
+#print axioms gate_body_outcome
+#print axioms gate_match_executes_body
+#print axioms gate_mismatch_refused
+#print axioms gate_miss_before_any_core_body
+#print axioms gate_prefix_preserves_caller
+#print axioms gate_revert_all_refused

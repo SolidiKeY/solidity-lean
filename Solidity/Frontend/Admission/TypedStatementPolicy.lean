@@ -1,9 +1,6 @@
 import Solidity.Frontend.Admission.TypedExpressionPolicy
 
-/-! Actual structural statement and Program observation-policy closure.
-Conditional builder interfaces are retained, then instantiated with checked
-container proofs. This does not establish full feature/profile or SourceSpec
-adequacy. -/
+/-! Actual structural statement and Program observation-policy closure. Conditional builder interfaces are retained, then instantiated with checked container proofs. This does not establish full feature/profile or SourceSpec adequacy. -/
 namespace Solidity.Frontend.Admission.TypedObservationPolicy
 open Source
 
@@ -22,8 +19,7 @@ theorem statement_from_containers : StatementBuilder := by
     Solidity.Frontend.Admission.TypedObservationPolicy.expression_allowed, ho.1, ho.2]
   all_goals simp only [Solidity.Frontend.Admission.ObservationSite.allowed, Solidity.Frontend.Admission.ObservationSite.status] <;> decide
 
-/-- Builder shape: complete output closure from both routine proof inputs
-(discharged by `closed_policies`). -/
+/-- Builder shape: complete output closure from both routine proof inputs (discharged by `closed_policies`). -/
 abbrev ProgramBuilder : Prop := ConversionsPolicy → OptionalPolicy → WholeProgramPolicy
 
 theorem program_from_containers : ProgramBuilder := by

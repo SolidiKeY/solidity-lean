@@ -1,0 +1,10 @@
+{
+  "selector_gate_selected_joint_domain": {
+    "target": "Solidity.Backend.AbiEntry.Interface.SelectorGateBodyCertificate.selected",
+    "proof": "\u27e8SelectorGateBody.program,SelectorGateBody.certificate,dispatchContract,dispatchCtx,dispatchCtx,0,Frag.init dispatchCtx,(Idx.here),wmod 5,dispatchHit.program,dispatchHit.outFrag,dispatchHit.admitted,True.intro\u27e9"
+  },
+  "selector_gate_executed_joint_domain": {
+    "target": "Solidity.Backend.AbiEntry.Interface.SelectorGateBodyCertificate.executed",
+    "proof": "\u27e8SelectorGateBody.program,SelectorGateBody.certificate,dispatchContract,dispatchCtx,dispatchCtx,0,Frag.init dispatchCtx,(Idx.here),wmod 5,dispatchHit.program,dispatchHit.outFrag,dispatchHit.admitted,gateBodyWhole (wmod 5),gateBodyBack,gate_whole_found (wmod 5),gate_body_found,dispatchMachine,wmod 5,rfl,True.intro\u27e9"
+  }
+}

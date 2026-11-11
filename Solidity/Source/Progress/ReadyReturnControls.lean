@@ -211,7 +211,7 @@ theorem expression_run (p : Roadmap.Pipeline) (fixed : Roadmap.Fixed) :
   rw [evalE,Hoare.run_bind,argument_run]
   dsimp only
   rw [Hoare.run_bind]
-  have inner : callInternal (plan := none) (glob p fixed) frame 20 d arguments [Aty] (.nil,initial) =
+  have inner : callInternal (plan := none) (calldataKnown := true) (glob p fixed) frame 20 d arguments [Aty] (.nil,initial) =
       (.ok (.val (.memRef rfl 2)),(.nil,after)) := success_run p fixed
   simp only [EM.sub,ExceptT.run,ExceptT.mk,inner]
   rfl

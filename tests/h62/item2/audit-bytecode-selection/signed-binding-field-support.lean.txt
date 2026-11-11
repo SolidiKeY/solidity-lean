@@ -1,0 +1,93 @@
+/-! Guards incompatible signed-binding compiler/memory witnesses, accepting a
+noncanonical signed word, or reading a short head before refusing it. Reuses the
+actual signed-parameter compiler and its certificate with unchanged fuel+2 and
+raw-word/size premises. These are model fixtures, not native loading, Source-body,
+physical memory, gas, or G01 operational correspondence. -/
+open Solidity Solidity.Evm Solidity.Backend.AbiEntry
+open Solidity.Backend.AbiEntry.Interface
+
+def signedContract : Contract := {vars := []}
+def signedLabel : Fin W := wmod 13
+def signedCompilation := SignedBinding.compiled signedContract 7 8 signedLabel
+
+theorem signed_found : Compiler.compile 7 (Frag.init RouteCtx)
+    (SignedBinding.program signedContract 8 signedLabel)=some signedCompilation :=
+  SignedBinding.selected signedContract 7 8 signedLabel
+
+def signedMachine (word size : Fin W) : Machine :=
+  {Machine.init with
+    mem := fun address => if address=7 then .val word
+      else if address=8 then .val size else .val (wmod 71)
+    stack := [.val (wmod 11),.val (wmod 99)]}
+
+theorem signed_actual (word size : Fin W) :
+    run signedCompilation.code (signedMachine word size)=
+      signedBindingOutcome 7 8 signedLabel word size (signedMachine word size) :=
+  SignedBinding.executed signedContract 7 8 signedLabel signedCompilation signed_found
+    (signedMachine word size) word size rfl rfl
+
+theorem signed_positive_boundary :
+    run signedCompilation.code (signedMachine (wmod 127) (wmod 36))=
+      .ok (signedBoundMachine 7 signedLabel (wmod 127) (signedMachine (wmod 127) (wmod 36))) 0 := by
+  rw [signed_actual]
+  rfl
+
+theorem signed_negative_one :
+    run signedCompilation.code (signedMachine (wmod (W-1)) (wmod 36))=
+      .ok (signedBoundMachine 7 signedLabel (wmod (W-1)) (signedMachine (wmod (W-1)) (wmod 36))) 0 := by
+  rw [signed_actual]
+  rfl
+
+theorem signed_positive_overflow_refused :
+    run signedCompilation.code (signedMachine (wmod 128) (wmod 36))=.revert := by
+  rw [signed_actual]
+  rfl
+
+theorem signed_negative_boundary :
+    run signedCompilation.code (signedMachine (wmod (W-128)) (wmod 36))=
+      .ok (signedBoundMachine 7 signedLabel (wmod (W-128)) (signedMachine (wmod (W-128)) (wmod 36))) 0 := by
+  rw [signed_actual]
+  rfl
+
+theorem signed_negative_overflow_refused :
+    run signedCompilation.code (signedMachine (wmod (W-129)) (wmod 36))=.revert := by
+  rw [signed_actual]
+  rfl
+
+theorem signed_binds_and_preserves (word size : Fin W) :
+    (signedBoundMachine 7 signedLabel word (signedMachine word size)).mem 9=.val word ∧
+    (signedBoundMachine 7 signedLabel word (signedMachine word size)).stack=
+      [.val (wmod 11),.val (wmod 99)] := ⟨rfl,rfl⟩
+
+theorem signed_revert_all_refused :
+    run signedCompilation.code (signedMachine (wmod 127) (wmod 36))≠.revert := by
+  rw [signed_positive_boundary]
+  intro impossible
+  cases impossible
+
+def signedShortMachine : Machine :=
+  {Machine.init with mem := fun address => if address=8 then .val (wmod 35) else .slot (.root 0)}
+
+theorem signed_short_skips_word : run signedCompilation.code signedShortMachine=.revert :=
+  SignedBinding.short_before_word signedContract 7 8 signedLabel signedShortMachine (wmod 35) rfl (by decide)
+
+def signedEmptyInput : Solidity.AbiEntry.Input := {data := [],free := 0}
+
+theorem signed_entry_refusal (input : Solidity.AbiEntry.Input) (fuel : Nat) (size : Fin W)
+    (represented : size.val=input.size) :
+    (run signedCompilation.code (signedMachine (rawArgumentWord input) size)=.revert ↔
+      Solidity.AbiEntry.entry input (fuel+2) (singleWordParams (.int 8))=.error .revert) :=
+  SignedBinding.entry_rejection signedContract 7 8 signedLabel signedCompilation signed_found
+    input fuel (signedMachine (rawArgumentWord input) size) size rfl rfl represented
+
+#print axioms signed_found
+#print axioms signed_actual
+#print axioms signed_positive_boundary
+#print axioms signed_negative_one
+#print axioms signed_positive_overflow_refused
+#print axioms signed_negative_boundary
+#print axioms signed_negative_overflow_refused
+#print axioms signed_binds_and_preserves
+#print axioms signed_revert_all_refused
+#print axioms signed_short_skips_word
+#print axioms signed_entry_refusal

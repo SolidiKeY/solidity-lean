@@ -1,0 +1,14 @@
+info SliceCopies.ast.json/SliceCopies: 12 rows, 0 changed
+info SourceAdmission.ast.json/SourceAdmission: 20 rows, 0 changed
+info SourceAdmission.ast.json/PaymentFallback: 2 rows, 0 changed
+info SourceAdmission.ast.json/ConstructorArguments: 2 rows, 0 changed
+info SourceAdmission.ast.json/InvariantOwner: 1 rows, 0 changed
+info SourceAdmission.ast.json/InheritedPayment: 1 rows, 0 changed
+info SourceAdmission.ast.json/VirtualOwner: 2 rows, 0 changed
+info SourceAdmission.ast.json/LoopOwner: 2 rows, 0 changed
+info SourceAdmission.ast.json/InvariantParameter: 1 rows, 0 changed
+info SourceAdmission.ast.json/ConstructorLoopOwner: 1 rows, 0 changed
+info SourceCoder.ast.json/SourceCoder: 1 rows, 0 changed
+info SourceCoderIR.ast.json/SourceCoder: 1 rows, 0 changed
+info SourceIdentifiers.ast.json/SourceIdentifiers: 6 rows, 0 changed
+info SourceLiterals.ast.json/SourceLiterals: 9 rows, 0 changed

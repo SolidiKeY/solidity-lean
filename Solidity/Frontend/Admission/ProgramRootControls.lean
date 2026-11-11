@@ -1,8 +1,7 @@
 import Solidity.Frontend.Admission.ProgramRoots
 import Solidity.Frontend.Admission.ProgramObservationControls
 
-/-! Actual carried-field inventory controls. The underlying Program fixture
-is synthetic, not an Elaborated or execution witness. -/
+/-! Actual carried-field inventory controls. The underlying Program fixture is synthetic, not an Elaborated or execution witness. -/
 namespace Solidity.Frontend.Admission.RootControls
 open Solidity.Source ProgramControls
 
@@ -13,8 +12,7 @@ def expected : List (ProgramRoot program) :=
 
 theorem exact_inventory : programRoots program = expected := rfl
 
-/-- Removing a contract from the roster refuses its root even when its body
-lookup still returns a value. -/
+/-- Removing a contract from the roster refuses its root even when its body lookup still returns a value. -/
 theorem omitted_constructor_refused :
     (ProgramRoot.constructor "C" body : ProgramRoot omitted) ∉ programRoots omitted := by
   intro h

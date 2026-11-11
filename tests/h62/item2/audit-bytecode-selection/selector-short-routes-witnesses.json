@@ -1,0 +1,18 @@
+{
+  "plain_selector_routes_selected_joint_domain": {
+    "target": "Solidity.Backend.AbiEntry.Interface.SelectorRoutesCertificate.selected",
+    "proof": "\u27e8SelectorRoutes.route,SelectorRoutes.certificate,payableContract,3,plainRouteTable,payableFallback,True.intro\u27e9"
+  },
+  "plain_selector_routes_executed_joint_domain": {
+    "target": "Solidity.Backend.AbiEntry.Interface.SelectorRoutesCertificate.executed",
+    "proof": "\u27e8SelectorRoutes.route,SelectorRoutes.certificate,payableContract,3,plainRouteTable,payableFallback,plainRouteCompilation,plain_route_found,entryMachine (wmod 5) (wmod 4) (wmod 0),wmod 5,rfl,True.intro\u27e9"
+  },
+  "short_routes_selected_joint_domain": {
+    "target": "Solidity.Backend.AbiEntry.Interface.ShortRoutesCertificate.selected",
+    "proof": "\u27e8ShortRoutes.route,ShortRoutes.certificate,payableContract,3,payableTable,payableFallback,shortRouteLabel,True.intro\u27e9"
+  },
+  "short_routes_executed_joint_domain": {
+    "target": "Solidity.Backend.AbiEntry.Interface.ShortRoutesCertificate.executed",
+    "proof": "\u27e8ShortRoutes.route,ShortRoutes.certificate,payableContract,3,payableTable,payableFallback,shortRouteLabel,shortRouteCompilation,short_route_found,entryMachine (wmod 5) (wmod 3) (wmod 1),wmod 5,wmod 3,rfl,rfl,True.intro\u27e9"
+  }
+}

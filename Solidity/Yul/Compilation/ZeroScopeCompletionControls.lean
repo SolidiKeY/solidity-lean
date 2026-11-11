@@ -47,8 +47,12 @@ def retiringCode := (ZeroLoopScope.lower 1 (n := 1) retiringArtifact).get (by rf
 theorem dirty_body (b : Scalar.Word) :
  evalStmt 14 .nil True.intro retiringBody retiringArtifact.compiled.profile (sourceLocals #v[0,b]) =
  some ⟨sourceLocals #v[dirty,(~~~(~~~b+3)+3)+3],.normal⟩ := by
- have last := evalStmt_stable (show 2 ≤ 13 by omega) .nil True.intro stamp stampCompiled.profile
-   (sourceLocals #v[0,(~~~(~~~b+3)+3)+3]) (stampCompiled.source #v[0,(~~~(~~~b+3)+3)+3])
+ have last := CompletionControls.completed_horizon
+   (fun fuel => evalStmt fuel .nil True.intro stamp stampCompiled.profile
+     (sourceLocals #v[0,(~~~(~~~b+3)+3)+3]))
+   (fun fuel extra => evalStmt_refines_add fuel extra .nil True.intro stamp stampCompiled.profile
+     (sourceLocals #v[0,(~~~(~~~b+3)+3)+3]))
+   (show 2 ≤ 13 by omega) (stampCompiled.source #v[0,(~~~(~~~b+3)+3)+3])
  exact LoopControlCompilation.sequence_source mutatingBody stamp mutatingArtifact.compiled.profile stampCompiled.profile
    13 (sourceLocals #v[0,b]) (sourceLocals #v[0,(~~~(~~~b+3)+3)+3])
    (sourceLocals #v[dirty,(~~~(~~~b+3)+3)+3]) (mutating_body_source 0 b) last

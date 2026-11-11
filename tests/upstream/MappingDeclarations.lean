@@ -1,6 +1,6 @@
 import Solidity.Tools.Upstream
-solc_import "../solc/MappingAliases.ast.json" hash 0x0ac73744dfdbf75b as Imported.MappingAliases testing
-solc_import "../solc/MappingAliasesIR.ast.json" hash 0x9763b92c2484ec50 as Imported.IR.MappingAliases testing
+solc_import "../solc/MappingAliases.ast.json" hash 0xaf21c8524bead2e4 as Imported.MappingAliases testing
+solc_import "../solc/MappingAliasesIR.ast.json" hash 0x928996789b1a7829 as Imported.IR.MappingAliases testing
 open Solidity
 namespace Solidity.Upstream.MappingDeclarations
 

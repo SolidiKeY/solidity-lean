@@ -1,0 +1,10 @@
+{
+  "bool_body_selected_joint_domain": {
+    "target": "Solidity.Backend.AbiEntry.Interface.BoolBindingBodyCertificate.selected",
+    "proof": "\u27e8BoolBindingBody.program,BoolBindingBody.certificate,bodyContract,BoolBoundCtx,7,bodyLabel,bodyNil,Frag.init BoolBoundCtx,rfl,True.intro\u27e9"
+  },
+  "bool_body_executed_joint_domain": {
+    "target": "Solidity.Backend.AbiEntry.Interface.BoolBindingBodyCertificate.executed",
+    "proof": "\u27e8BoolBindingBody.program,BoolBindingBody.certificate,bodyContract,BoolBoundCtx,7,bodyLabel,bodyNil,Frag.init BoolBoundCtx,rfl,bodyWhole,bodyBack,bodyWholeFound,bodyBackFound,bodyMachine (wmod 1) (wmod 36),wmod 1,wmod 36,rfl,rfl,True.intro\u27e9"
+  }
+}

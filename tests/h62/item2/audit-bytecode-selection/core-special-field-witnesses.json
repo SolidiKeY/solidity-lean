@@ -1,0 +1,14 @@
+{
+  "core_special_endpoint_joint_domain": {
+    "target": "Solidity.Backend.AbiEntry.Interface.CoreSpecialCertificate.endpoint_code",
+    "proof": "\u27e8CoreSpecial.endpoint,CoreSpecial.route,CoreSpecial.certificate,dispatchContract,dispatchCtx,0,Frag.init dispatchCtx,some specialReceive,True.intro\u27e9"
+  },
+  "core_special_selected_joint_domain": {
+    "target": "Solidity.Backend.AbiEntry.Interface.CoreSpecialCertificate.selected",
+    "proof": "\u27e8CoreSpecial.endpoint,CoreSpecial.route,CoreSpecial.certificate,dispatchContract,dispatchCtx,0,Frag.init dispatchCtx,(Idx.here),some specialReceive,some specialFallback,True.intro\u27e9"
+  },
+  "core_special_executed_joint_domain": {
+    "target": "Solidity.Backend.AbiEntry.Interface.CoreSpecialCertificate.executed",
+    "proof": "\u27e8CoreSpecial.endpoint,CoreSpecial.route,CoreSpecial.certificate,dispatchContract,dispatchCtx,1,0,Frag.init dispatchCtx,(Idx.here),some specialReceive,some specialFallback,specialBuilt (some specialReceive) (some specialFallback),special_found (some specialReceive) (some specialFallback),dispatchState,dispatchMachine,dispatch_represented,special_room,wmod 5,rfl,True.intro\u27e9"
+  }
+}

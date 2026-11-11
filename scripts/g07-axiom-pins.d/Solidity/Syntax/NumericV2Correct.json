@@ -1,0 +1,71 @@
+{
+ "Solidity/Syntax/NumericV2Correct.lean:Solidity.Val.NumericV2.checkedSignedPower_run": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Syntax/NumericV2Correct.lean:Solidity.Val.NumericV2.checkedSignedPower_source_run": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Syntax/NumericV2Correct.lean:Solidity.Val.NumericV2.fitsResult_correct": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Syntax/NumericV2Correct.lean:Solidity.Val.NumericV2.guard_run": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Syntax/NumericV2Correct.lean:Solidity.Val.NumericV2.lookupResult_correct": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Syntax/NumericV2Correct.lean:Solidity.Val.NumericV2.lookupResult_large": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Syntax/NumericV2Correct.lean:Solidity.Val.NumericV2.lookup_eval": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Syntax/NumericV2Correct.lean:Solidity.Val.NumericV2.overflow_payload_length": [],
+ "Solidity/Syntax/NumericV2Correct.lean:Solidity.Val.NumericV2.overflow_payload_source": [],
+ "Solidity/Syntax/NumericV2Correct.lean:Solidity.Val.NumericV2.powerFits_eval": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Syntax/NumericV2Correct.lean:Solidity.Val.NumericV2.powerFits_eval_model": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Syntax/NumericV2Correct.lean:Solidity.Val.NumericV2.powerValue_eval": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Syntax/NumericV2Correct.lean:Solidity.Val.NumericV2.root_iff": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Syntax/NumericV2Correct.lean:Solidity.Val.NumericV2.signed_range_iff": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Syntax/NumericV2Correct.lean:Solidity.Val.NumericV2.threshold_present": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Syntax/NumericV2Correct.lean:Solidity.Val.NumericV2.thresholds_indices": [
+  "propext"
+ ],
+ "Solidity/Syntax/NumericV2Correct.lean:Solidity.Val.NumericV2.thresholds_valid": [
+  "propext"
+ ]
+}

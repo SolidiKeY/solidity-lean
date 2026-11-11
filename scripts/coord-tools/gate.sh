@@ -97,10 +97,17 @@ else
   run_gate layers node scripts/check-layers.mjs
   run_gate private-paths bash scripts/check-private-paths.sh
   run_gate evidence-files bash scripts/check-evidence-files.sh
+  # CI's `checks` job runs this same script (.github/workflows/lean.yml), so a
+  # tree that passes the gate cannot turn `checks` red.
+  run_gate checks-fast bash scripts/ci/checks-fast.sh
   [ "$failed" -eq 0 ] || exit "$failed"
   run_gate build-touched build_touched
   if [ "$mode" != touched ]; then
     if [ "$mode" = full ]; then
+      # H134: each slow example under its own 600 s one-core budget, as in CI
+      # (after the libraries it imports); run-lean.sh then finds them built.
+      run_gate library lake build Solidity SolidityExamples
+      run_gate slow-examples bash scripts/ci/build-slow-examples.sh
       run_gate run-lean bash run-lean.sh
     else
       # A checkpoint builds the library alone; a lane touching the core also
@@ -110,12 +117,9 @@ else
         run_gate examples lake build SolidityExamples SolkeyTestSuite
       fi
     fi
-    run_gate trust bash scripts/check-trust.sh
+    # trust, roots, fragments, doc-paths and axiom-pins ran in checks-fast.
     run_gate orphans node scripts/check-orphans.mjs
-    run_gate roots bash scripts/coord-tools/register.sh --check
-    run_gate fragments bash scripts/coord-tools/fragments.sh --check
-    run_gate doc-paths bash scripts/check-doc-paths.sh
-    run_gate axiom-pins node scripts/check-axiom-pins.mjs
+    run_gate p16-generated python3 -B scripts/h62/item1/p16-generator/check.py
   fi
   if [ "$mode" = full ]; then
     run_gate testsuite bash scripts/check-testsuite.sh

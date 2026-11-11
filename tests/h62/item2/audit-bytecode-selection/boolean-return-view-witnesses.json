@@ -1,0 +1,10 @@
+{
+  "boolean_return_contexts_joint_domain": {
+    "target": "Solidity.Backend.FailurePaths.BooleanReturn.View.contexts",
+    "proof": "\u27e8boolReturnEnv,[Solidity.Source.STy.bool],[Solidity.Source.STy.bool],boolReturnStmt true,boolReturnView true,True.intro\u27e9"
+  },
+  "boolean_return_same_joint_domain": {
+    "target": "Solidity.Backend.FailurePaths.BooleanReturn.View.same",
+    "proof": "\u27e8boolReturnEnv,[Solidity.Source.STy.bool],[Solidity.Source.STy.bool],boolReturnStmt true,boolReturnView true,True.intro\u27e9"
+  }
+}

@@ -37,9 +37,12 @@ theorem mixed_high_source :
  evalStmt 17 .nil True.intro mixedSource mixedArtifact.compiled.profile (sourceLocals #v[highOnly]) =
  some ⟨sourceLocals #v[scopeUpdate highOnly],.normal⟩ := by
  have first := source_false condition artifact.compiled.profile #v[highOnly] (by decide)
- have last := evalStmt_stable (show 15 ≤ 16 by omega) .nil True.intro LetScopeCompilation.Controls.source
-   LetScopeCompilation.Controls.artifact.compiled.profile (sourceLocals #v[highOnly])
-   (LetScopeCompilation.Controls.source_done highOnly)
+ have last := CompletionControls.completed_horizon
+   (fun fuel => evalStmt fuel .nil True.intro LetScopeCompilation.Controls.source
+     LetScopeCompilation.Controls.artifact.compiled.profile (sourceLocals #v[highOnly]))
+   (fun fuel extra => evalStmt_refines_add fuel extra .nil True.intro LetScopeCompilation.Controls.source
+     LetScopeCompilation.Controls.artifact.compiled.profile (sourceLocals #v[highOnly]))
+   (show 15 ≤ 16 by omega) (LetScopeCompilation.Controls.source_done highOnly)
  exact LoopControlCompilation.sequence_source mixedIfSource LetScopeCompilation.Controls.source
    ⟨condition.profile,artifact.compiled.profile⟩ LetScopeCompilation.Controls.artifact.compiled.profile 16
    (sourceLocals #v[highOnly]) (sourceLocals #v[highOnly]) (sourceLocals #v[scopeUpdate highOnly]) first last
@@ -54,9 +57,12 @@ theorem mixed_zero_source :
  some ⟨sourceLocals #v[scopeUpdate (update 0)],.normal⟩ := by
  have first := source_true condition artifact.compiled.profile 20 #v[0] #v[update 0] (by decide)
    (LetControlCompilation.Controls.source_done 0)
- have last := evalStmt_stable (show 15 ≤ 21 by omega) .nil True.intro LetScopeCompilation.Controls.source
-   LetScopeCompilation.Controls.artifact.compiled.profile (sourceLocals #v[update 0])
-   (LetScopeCompilation.Controls.source_done (update 0))
+ have last := CompletionControls.completed_horizon
+   (fun fuel => evalStmt fuel .nil True.intro LetScopeCompilation.Controls.source
+     LetScopeCompilation.Controls.artifact.compiled.profile (sourceLocals #v[update 0]))
+   (fun fuel extra => evalStmt_refines_add fuel extra .nil True.intro LetScopeCompilation.Controls.source
+     LetScopeCompilation.Controls.artifact.compiled.profile (sourceLocals #v[update 0]))
+   (show 15 ≤ 21 by omega) (LetScopeCompilation.Controls.source_done (update 0))
  exact LoopControlCompilation.sequence_source mixedIfSource LetScopeCompilation.Controls.source
    ⟨condition.profile,artifact.compiled.profile⟩ LetScopeCompilation.Controls.artifact.compiled.profile 21
    (sourceLocals #v[0]) (sourceLocals #v[update 0]) (sourceLocals #v[scopeUpdate (update 0)]) first last

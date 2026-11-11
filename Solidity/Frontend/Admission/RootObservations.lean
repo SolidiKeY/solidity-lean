@@ -4,12 +4,7 @@ import Solidity.Language.Features
 /-!
 # Observation sites of resolved expression roots (G15 checkpoint 1)
 
-Walk the actual intrinsic resolved syntax, including expressions inside lvalues
-and both converted/unconverted argument lists. Declaration identities are
-retained at call sites; this module does not follow function bodies yet. This
-is a structural extraction interface, not an operational adequacy theorem or
-complete feature extraction for types, specification terms or the
-solc-JSON importer. No syntax representation is replaced.
+Walk the actual intrinsic resolved syntax, including expressions inside lvalues and both converted/unconverted argument lists. Declaration identities are retained at call sites; this module does not follow function bodies yet. This is a structural extraction interface, not an operational adequacy theorem or complete feature extraction for types, specification terms or the solc-JSON importer. No syntax representation is replaced. Library-call sites record typed delegated syntax under the existing abstract external-library feature, not ABI or linkage adequacy.
 -/
 namespace Solidity.Frontend.Admission
 open Solidity.Source
@@ -21,6 +16,7 @@ inductive ObservationSite where
   | magic (name : Builtin) (member : String)
   | internalCall (declaration : Decl)
   | externalCall (declaration : Decl)
+  | libraryCall (declaration : Decl)
   | balance
   | payment
   | abiEncode (kind : AbiKind)
@@ -29,13 +25,13 @@ inductive ObservationSite where
   | customError (declaration : Decl)
   | rethrow
 
-/-- Missing namespace members fail closed. Calls carry their declarations for
-subsequent closure extraction; their local status does not certify callees. -/
+/-- Missing namespace members fail closed. Calls carry their declarations for subsequent closure extraction; their local status does not certify callees. -/
 def ObservationSite.status : ObservationSite → Option Status
   | .builtin b => some b.status
   | .magic b m => b.memberStatus m
   | .internalCall _ => some (.admitted "internalCalls")
   | .externalCall _ => some (.admitted Feature.externalTypedCalls.id)
+  | .libraryCall _ => some (.admitted Feature.externalLibraryCalls.id)
   | .balance => some (.admitted "addressBalance")
   | .payment => some (.admitted "sendTransfer")
   | .abiEncode .encode => some (.admitted "abiEncode")
@@ -55,8 +51,7 @@ def ObservationSite.allowed (site : ObservationSite) : Bool :=
       decide (f.scope = .model ∨ f.scope = .abstract)
   | _ => false
 
-/-- A local acceptance must name a real feature in the frozen profile, with
-exactly the S01 status identifier and an allowed scope. Unknown IDs fail closed. -/
+/-- A local acceptance must name a real feature in the frozen profile, with exactly the S01 status identifier and an allowed scope. Unknown IDs fail closed. -/
 theorem ObservationSite.allowed_iff (site : ObservationSite) :
     site.allowed = true ↔ ∃ name f, site.status = some (.admitted name) ∧
       Feature.all.find? (fun f => f.id == name) = some f ∧ f.inProfile := by
@@ -80,8 +75,7 @@ theorem ObservationSite.allowed_iff (site : ObservationSite) :
         exact ⟨f, hf, hp⟩
 
 mutual
-/-- All local observation sites, in structural order; no fuel or truncation.
-The cases motives generalize every result index (intrinsic Gate G0). -/
+/-- All local observation sites, in structural order; no fuel or truncation. The cases motives generalize every result index (intrinsic Gate G0). -/
 def observations {E : Env} {Γ : RCtx} {τ : STy} (e : RExpr E Γ τ) : List ObservationSite :=
   RExpr.casesOn (motive_1 := fun _ _ => List ObservationSite) e
     (fun _ => []) -- const
@@ -158,8 +152,7 @@ def optExprObservations {E : Env} {Γ : RCtx} : ROptExpr E Γ → List Observati
   | .some e => observations e
 
 mutual
-/-- Every expression-bearing statement position, including loop postconditions,
-all branches and try success/catch bodies. No execution-fuel bound is used. -/
+/-- Every expression-bearing statement position, including loop postconditions, all branches and try success/catch bodies. No execution-fuel bound is used. -/
 def stmtObservations {E : Env} {R : List STy} {M : Bool} {k : SCtx} {Γ Γ' : RCtx}
     (s : RStmt E R M k Γ Γ') : List ObservationSite :=
   RStmt.casesOn (motive_1 := fun _ _ _ _ => List ObservationSite) s
@@ -184,6 +177,8 @@ def stmtObservations {E : Env} {R : List STy} {M : Bool} {k : SCtx} {Γ Γ' : RC
     (fun _ e _ => observations e) -- tuple declaration
     (fun target d _ args ok _ cat => .externalCall d ::
       (observations target ++ convObservations args ++ itemsObservations ok ++ itemsObservations cat))
+    (fun d _ _ args ok cat => .libraryCall d ::
+      (convObservations args ++ itemsObservations ok ++ itemsObservations cat))
 termination_by structural s
 
 def itemsObservations {E : Env} {R : List STy} {M : Bool} {k : SCtx} {Γ Γ' : RCtx}
@@ -205,8 +200,7 @@ theorem root_observation_iff {E : Env} (roots : List (ExprRoot E)) (site : Obser
     site ∈ rootObservations roots ↔ ∃ root ∈ roots, site ∈ observations root.2.2 := by
   exact List.mem_flatMap
 
-/-- Admission of the collected local observations covers every supplied root,
-not just the first root. Callee bodies and statement roots remain a next step. -/
+/-- Admission of the collected local observations covers every supplied root, not just the first root. Callee bodies and statement roots remain a next step. -/
 theorem accepted_roots {E : Env} (roots : List (ExprRoot E))
     (h : (rootObservations roots).all ObservationSite.allowed = true)
     {root : ExprRoot E} (hr : root ∈ roots) {site : ObservationSite}

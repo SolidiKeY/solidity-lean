@@ -1,0 +1,14 @@
+{
+  "signed_entry_selected_joint_domain": {
+    "target": "Solidity.Backend.AbiEntry.Interface.SignedEntryBodyCertificate.selected",
+    "proof": "\u27e8SignedEntryBody.program,SignedEntryBody.certificate,signedContract,SignedBoundCtx,7,8,false,signedLabel,signedEntryBody,Frag.init SignedBoundCtx,rfl,True.intro\u27e9"
+  },
+  "signed_entry_executed_joint_domain": {
+    "target": "Solidity.Backend.AbiEntry.Interface.SignedEntryBodyCertificate.executed",
+    "proof": "\u27e8SignedEntryBody.program,SignedEntryBody.certificate,signedContract,SignedBoundCtx,7,8,false,signedLabel,signedEntryBody,Frag.init SignedBoundCtx,rfl,signedEntryWhole false,signedEntryBack,signed_entry_whole_found false,signed_entry_back_found,signedEntryMachine (wmod 127) (wmod 36) (wmod 0),wmod 127,wmod 36,rfl,rfl,True.intro\u27e9"
+  },
+  "signed_entry_early_rejection_joint_domain": {
+    "target": "Solidity.Backend.AbiEntry.Interface.SignedEntryBodyCertificate.early_rejection",
+    "proof": "\u27e8SignedEntryBody.program,SignedEntryBody.certificate,signedContract,SignedBoundCtx,7,8,false,signedLabel,signedEntryBody,Frag.init SignedBoundCtx,rfl,signedEntryWhole false,signed_entry_whole_found false,signedEntryBlocked,rfl,True.intro\u27e9"
+  }
+}
