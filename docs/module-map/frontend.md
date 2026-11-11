@@ -332,4 +332,4 @@ diffs it).  `docs/testsuite-proofs.md` has the counts and timings.
 | `SolcValidation/IrExpEvm.lean` | `checked_exp`'s model and imported IR body against this compiler's checked `**` code (`Evm/Exp.lean`'s `exp_tail`) and the EVM `EXP` value. |
 | `SolcValidation/IrErase.lean`, `SolcValidation/IrCensusParse.lean` | An injective, decidable erasure of the intrinsic IR tree; the parser's own result for the LinkedMath fixture pinned by kernel evaluation. |
 | `Frontend/ExecutableAst/Shared/ObligationCaptureV2.lean` | Additive exact-output capture of the actual obligation callbacks and arguments, with unchanged error and forget equality; no source adequacy. |
-| `Frontend/ExecutableCounterexampleMetadataV2.lean` | Internal literal reification of actual executable captures; preserves every contract field and keeps derived quote instances local. No authenticated metadata or certificate publication. |
+| `Frontend/ExecutableCounterexampleMetadataV2.lean` | Internal first-invocation retention, literal reification and no-search lookup with durable tokens and synchronous kernel checks. No source/session/candidate certification. |

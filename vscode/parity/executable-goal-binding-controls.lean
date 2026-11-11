@@ -240,4 +240,83 @@ run_cmd do
     | .error (.declTypeMismatch ..) => logInfo m!"EXECUTABLE_V2 quotation mismatch refused: {label}"
     | .error _ => throwError m!"changed {label} failed for an unrelated reason"
 
+
+/- A distinct injected first invocation; lookups must never rerun it. -/
+run_cmd do
+  let .ok fixture := Json.parse r#"{"contract":{"nodeType":"ContractDefinition","contractKind":"contract","nodes":[{"nodeType":"FunctionDefinition","id":1,"name":"first","kind":"function","visibility":"public","stateMutability":"pure","modifiers":[],"parameters":{"parameters":[]},"returnParameters":{"parameters":[]},"body":{"nodeType":"Block","statements":[]},"documentation":""},{"nodeType":"FunctionDefinition","id":2,"name":"second","kind":"function","visibility":"public","stateMutability":"pure","modifiers":[],"parameters":{"parameters":[]},"returnParameters":{"parameters":[]},"body":{"nodeType":"Block","statements":[]},"documentation":""}]},"listing":true}"# | throwError "invocation fixture JSON"
+  let request := fixture.setObjVal! "listing" (toJson false)
+  let base ← getEnv
+  let root := `ExecutableBindingControls.invocationPrimary
+  let .ok report ← Solidity.Frontend.ExecutableMetadataV2.Internal.retainInvocationV2 root request
+    | throwError "first invocation failed"
+  let .ok rows := report.getArr? | throwError "missing invocation rows"
+  unless rows.size == 2 do throwError "invocation lost rows"
+  let receipt? ← Solidity.Frontend.ExecutableMetadataV2.Internal.invocationReceiptV2? root
+  logInfo m!"EXECUTABLE_V2 first invocation outcome: {(receipt?.map Json.compress).getD "missing receipt"}"
+  let some retained ← Solidity.Frontend.ExecutableMetadataV2.Internal.retainedInvocationV2? root request
+    | throwError "actual invocation not retained"
+  unless retained.goals.size == 2 && retained.report.compress == report.compress do
+    throwError "wrong retained actual report"
+  let some receiptBefore ← Solidity.Frontend.ExecutableMetadataV2.Internal.invocationReceiptV2? root
+    | throwError "missing ordered invocation receipt"
+  let some _ ← Solidity.Frontend.ExecutableMetadataV2.Internal.retainedInvocationV2? root request
+    | throwError "read-only lookup lost capture"
+  let some receiptAfter ← Solidity.Frontend.ExecutableMetadataV2.Internal.invocationReceiptV2? root
+    | throwError "read-only lookup lost receipt"
+  unless receiptBefore.compress == receiptAfter.compress do throwError "lookup changed invocation"
+  let wrong := request.setObjVal! "sourceId" (toJson (99 : Int))
+  if (← Solidity.Frontend.ExecutableMetadataV2.Internal.retainedInvocationV2? root wrong).isSome then
+    throwError "foreign request matched actual invocation"
+  match ← Solidity.Frontend.ExecutableMetadataV2.Internal.retainInvocationV2 root wrong with
+  | .error "capture name unavailable" => pure ()
+  | _ => throwError "duplicate invocation admitted"
+  setEnv base
+  match ← Solidity.Frontend.ExecutableMetadataV2.Internal.retainInvocationV2 root request with
+  | .error "capture name unavailable" => pure ()
+  | _ => throwError "environment rollback permitted execution replay"
+  if (← getEnv).contains root then throwError "rollback replay created a declaration"
+  let some goal := retained.goals[0]? | throwError "missing actual retained goal"
+  let (contract, formula) := Solidity.Frontend.ExecutableMetadataV2.Internal.quoteGoal goal
+  let forged := `ExecutableBindingControls.forgedInvocation
+  let forgedContract := forged ++ `contract
+  let forgedFormula := forged ++ `formula
+  let fake := #[(forged, mkConst ``String, toExpr request.compress),
+    (forgedContract, mkConst ``Contract, contract),
+    (forgedFormula, mkApp2 (mkConst ``Fml) (mkConst forgedContract) (toExpr ([] : Ctx)), formula)]
+  let .ok () ← liftTermElabM (Solidity.Frontend.ExecutableMetadataV2.Internal.installDeclarationsV2 fake)
+    | throwError "coherent forged declaration control did not install"
+  if (← Solidity.Frontend.ExecutableMetadataV2.Internal.retainedInvocationV2? forged request).isSome then
+    throwError "public declarations alone authenticated an invocation"
+  let goodName := `ExecutableBindingControls.invalidPrefix
+  let badName := `ExecutableBindingControls.invalidClosedValue
+  let invalid := #[(goodName, mkConst ``Nat, toExpr (1 : Nat)),
+    (badName, mkConst ``Nat, mkConst ``Bool.true)]
+  let validation ← liftTermElabM do
+    let checked ← Solidity.Frontend.ExecutableMetadataV2.Internal.validateDeclarationsV2 invalid
+    pure checked
+  match validation with
+  | .error (.declTypeMismatch ..) => pure ()
+  | .error _ => throwError "invalid closed value failed for unrelated reason"
+  | .ok () => throwError "invalid closed value accepted synchronously"
+  let failed ← liftTermElabM <| Solidity.Frontend.ExecutableMetadataV2.Internal.installDeclarationsV2 invalid
+  if failed.isOk || (← getEnv).contains goodName || (← getEnv).contains badName then
+    throwError "failed validation published a declaration prefix"
+  let collision := `ExecutableBindingControls.collidingInvocation
+  let child := Lean.Name.str (Lean.Name.num collision 0) "contract"
+  let .ok () ← liftTermElabM <| Solidity.Frontend.ExecutableMetadataV2.Internal.installDeclarationsV2
+    #[(child, mkConst ``Nat, toExpr (17 : Nat))]
+    | throwError "collision control setup failed"
+  let .ok unchanged ← Solidity.Frontend.ExecutableMetadataV2.Internal.retainInvocationV2 collision request
+    | throwError "retention failure changed ordinary runtime success"
+  unless unchanged.compress == report.compress do throwError "retention failure replaced report"
+  if (← Solidity.Frontend.ExecutableMetadataV2.Internal.retainedInvocationV2? collision request).isSome ||
+      (← getEnv).contains collision then throwError "failed capture published a retained root"
+  let some failureReceipt ← Solidity.Frontend.ExecutableMetadataV2.Internal.invocationReceiptV2? collision
+    | throwError "retention failure dropped receipt"
+  unless (failureReceipt.getObjValAs? Bool "retained").toOption == some false &&
+      (failureReceipt.getObjValAs? String "reason").toOption == some "capture declaration collision" do
+    throwError "retention failure detail was lost"
+  logInfo m!"EXECUTABLE_V2 actual injected invocation receipt: {receiptBefore.compress}"
+  logInfo "EXECUTABLE_V2 no-search lookup, rollback replay, coherent forgery, synchronous rejection and atomic-failure controls passed"
+
 end ExecutableBindingControls
