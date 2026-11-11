@@ -2337,3 +2337,15 @@ compiler wire publications. This is observation-time correlation, not proof of
 which notification caused the callback. The pinned upstream test's failing
 postcondition fixture remains a distinct verification obligation; compiler
 errors cannot substitute for that test, rendered Problems or either row judge.
+
+
+The separate `--diagnostic-rendered problems-v1` companion additionally requires
+`--diagnostic-events public-v1` and captures duplicate/shifted/fixed Problems
+states through the existing phase transport. It opens the registered Problems
+view without executing product proof/build commands. The renderer keeps the
+three-second readiness and five-second CDP guards, expands only hit-owned view
+rows, and brackets AX/DOM/PNG with equal visible-state samples. Host API/source
+and current diagnostic-publication fences remain separate from the observed
+active editor URI. Problems row IDs are opaque: an independent Problems resource
+URI, full range-end/raster/occlusion correspondence, paired Dafny/macOS and both
+row judgments remain unavailable. Matching labels do not close those gaps.
