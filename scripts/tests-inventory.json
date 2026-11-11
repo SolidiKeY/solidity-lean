@@ -1284,7 +1284,7 @@
           "--evidence",
           "--lean"
         ],
-        "revision": "f976bc1b87d0321f052f59e4b5b4ddcf9b86745c"
+        "revision": "07aa767db1a6ca05f4bff05acbabe6637d451e13"
       },
       "source_blob": "422b13e5bc7bc987e87c86cbd709078eefd0cfb3",
       "source_demonstration_revision": "9990777843ea8e47fe455c8815bfbac159504abb",
@@ -1320,7 +1320,7 @@
           "--evidence",
           "--lean"
         ],
-        "revision": "f976bc1b87d0321f052f59e4b5b4ddcf9b86745c"
+        "revision": "07aa767db1a6ca05f4bff05acbabe6637d451e13"
       },
       "source_blob": "682be2da2571b069f46bb3f0ae29e1f1fe03caae",
       "source_demonstration_revision": "9990777843ea8e47fe455c8815bfbac159504abb",
@@ -1356,7 +1356,7 @@
           "--archive",
           "--commit"
         ],
-        "revision": "f976bc1b87d0321f052f59e4b5b4ddcf9b86745c"
+        "revision": "07aa767db1a6ca05f4bff05acbabe6637d451e13"
       },
       "source_blob": "223e96d3fa285f4e838393e9e9afad342bc1d1fc",
       "source_demonstration_revision": "9990777843ea8e47fe455c8815bfbac159504abb",
@@ -1390,7 +1390,7 @@
         "required_options": [
           "--lean"
         ],
-        "revision": "f976bc1b87d0321f052f59e4b5b4ddcf9b86745c"
+        "revision": "07aa767db1a6ca05f4bff05acbabe6637d451e13"
       },
       "source_blob": "ca23eb7d445d4c99f560c70a6c5cb8b6748985c5",
       "source_demonstration_revision": "9990777843ea8e47fe455c8815bfbac159504abb",
@@ -1432,7 +1432,7 @@
           "--repo",
           "--source-census"
         ],
-        "revision": "f976bc1b87d0321f052f59e4b5b4ddcf9b86745c"
+        "revision": "07aa767db1a6ca05f4bff05acbabe6637d451e13"
       },
       "source_blob": "7745ef63eb65f01e5dfe9835ac84bf84f1841c9d",
       "source_demonstration_revision": "9990777843ea8e47fe455c8815bfbac159504abb",
@@ -1470,7 +1470,7 @@
           "--lean",
           "--repo"
         ],
-        "revision": "f976bc1b87d0321f052f59e4b5b4ddcf9b86745c"
+        "revision": "07aa767db1a6ca05f4bff05acbabe6637d451e13"
       },
       "source_blob": "26a9ed6ed79d6252dbb1299b3336d8e9ad8d8fb0",
       "source_demonstration_revision": "9990777843ea8e47fe455c8815bfbac159504abb",
@@ -1504,7 +1504,7 @@
         "required_options": [
           "--evidence"
         ],
-        "revision": "f976bc1b87d0321f052f59e4b5b4ddcf9b86745c"
+        "revision": "07aa767db1a6ca05f4bff05acbabe6637d451e13"
       },
       "source_blob": "675133d51e0202e01e5cf4532a26996debb4371e",
       "source_demonstration_revision": "9990777843ea8e47fe455c8815bfbac159504abb",
@@ -1540,7 +1540,7 @@
           "--evidence",
           "--lean"
         ],
-        "revision": "f976bc1b87d0321f052f59e4b5b4ddcf9b86745c"
+        "revision": "07aa767db1a6ca05f4bff05acbabe6637d451e13"
       },
       "source_blob": "35b0e13c4ed30a28724f454e3d110ea33217b0ed",
       "source_demonstration_revision": "9990777843ea8e47fe455c8815bfbac159504abb",
@@ -1562,7 +1562,7 @@
       "kind": "committed CLI runner source",
       "location": "scripts/h62/item2/audit-theories/check_disposition_controls.py:41",
       "path": "scripts/h62/item2/audit-theories/check_disposition_controls.py",
-      "purpose": "Seven rejection controls for H69 role changes, operational-refusal claims, decision hash, role counts, historical-equivalence substitution and remaining-owner mutation. Historical acceptance assertions are checked data, not current authorization. Configured validation unavailable: required external audit evidence not supplied; ordinary and instrumented bare invocations exit2 for missing options. Committed runner source only; no helper, fixture, passing-reproducer, witness or proof credit.",
+      "purpose": "Seven rejection controls for H69 role changes, operational-refusal claims, decision hash, role counts, historical-equivalence substitution and remaining-owner mutation. Historical acceptance assertions are checked data, not current authorization. Configured validation unavailable: required external audit evidence not supplied; required options are absent from the command prefix. Committed runner source only; no helper, fixture, passing-reproducer, witness or proof credit.",
       "required_options": [
         "--evidence",
         "--historical-evidence",
@@ -1580,7 +1580,7 @@
           "--out",
           "--roles"
         ],
-        "revision": "f976bc1b87d0321f052f59e4b5b4ddcf9b86745c"
+        "revision": "07aa767db1a6ca05f4bff05acbabe6637d451e13"
       },
       "source_blob": "6e807347d481dd7768f2fc9d9da3976d23e1a5d1",
       "source_demonstration_revision": "f976bc1b87d0321f052f59e4b5b4ddcf9b86745c",
@@ -1602,7 +1602,7 @@
       "kind": "committed CLI runner source",
       "location": "scripts/h62/item2/audit-theories/check_evidence_controls.py:50",
       "path": "scripts/h62/item2/audit-theories/check_evidence_controls.py",
-      "purpose": "Positive receipt and corrupt hash, wrong producer, false independent-replay and explicit-module rejection controls. Configured validation unavailable: required external audit evidence not supplied; ordinary and instrumented bare invocations exit2 for missing options. Committed runner source only; no helper, fixture, passing-reproducer, witness or proof credit.",
+      "purpose": "Positive receipt and corrupt hash, wrong producer, false independent-replay and explicit-module rejection controls. Configured validation unavailable: required external audit evidence not supplied; required options are absent from the command prefix. Committed runner source only; no helper, fixture, passing-reproducer, witness or proof credit.",
       "required_options": [
         "--evidence"
       ],
@@ -1614,7 +1614,7 @@
         "required_options": [
           "--evidence"
         ],
-        "revision": "f976bc1b87d0321f052f59e4b5b4ddcf9b86745c"
+        "revision": "07aa767db1a6ca05f4bff05acbabe6637d451e13"
       },
       "source_blob": "a50f657e2df51efe2d0049a0c944d47cebce4bb3",
       "source_demonstration_revision": "f976bc1b87d0321f052f59e4b5b4ddcf9b86745c",
@@ -1636,7 +1636,7 @@
       "kind": "committed CLI runner source",
       "location": "scripts/h62/item2/audit-theories/check_leaf_role_controls.py:49",
       "path": "scripts/h62/item2/audit-theories/check_leaf_role_controls.py",
-      "purpose": "Six rehashed corruption controls for frozen leaf-extension binders, global/horizon laws, type expression and producing-route metadata. Configured validation unavailable: required external audit evidence not supplied; ordinary and instrumented bare invocations exit2 for missing options. Committed runner source only; no helper, fixture, passing-reproducer, witness or proof credit.",
+      "purpose": "Six rehashed corruption controls for frozen leaf-extension binders, global/horizon laws, type expression and producing-route metadata. Configured validation unavailable: required external audit evidence not supplied; required options are absent from the command prefix. Committed runner source only; no helper, fixture, passing-reproducer, witness or proof credit.",
       "required_options": [
         "--historical-evidence",
         "--out",
@@ -1652,7 +1652,7 @@
           "--out",
           "--proof-evidence"
         ],
-        "revision": "f976bc1b87d0321f052f59e4b5b4ddcf9b86745c"
+        "revision": "07aa767db1a6ca05f4bff05acbabe6637d451e13"
       },
       "source_blob": "5c40025618acc07c253fa061c2c801542a7bfe2e",
       "source_demonstration_revision": "f976bc1b87d0321f052f59e4b5b4ddcf9b86745c",
@@ -1674,7 +1674,7 @@
       "kind": "committed CLI runner source",
       "location": "scripts/h62/item2/audit-theories/check_mirror_role_controls.py:47",
       "path": "scripts/h62/item2/audit-theories/check_mirror_role_controls.py",
-      "purpose": "Six rehashed corruption controls for mirror late index, prefix/keeps laws, type expression and source/producer provenance. Configured validation unavailable: required external audit evidence not supplied; ordinary and instrumented bare invocations exit2 for missing options. Committed runner source only; no helper, fixture, passing-reproducer, witness or proof credit.",
+      "purpose": "Six rehashed corruption controls for mirror late index, prefix/keeps laws, type expression and source/producer provenance. Configured validation unavailable: required external audit evidence not supplied; required options are absent from the command prefix. Committed runner source only; no helper, fixture, passing-reproducer, witness or proof credit.",
       "required_options": [
         "--historical-evidence",
         "--out",
@@ -1690,7 +1690,7 @@
           "--out",
           "--proof-evidence"
         ],
-        "revision": "f976bc1b87d0321f052f59e4b5b4ddcf9b86745c"
+        "revision": "07aa767db1a6ca05f4bff05acbabe6637d451e13"
       },
       "source_blob": "69e71ae67b03f9cc903309c1e613b0f81dd3b1a3",
       "source_demonstration_revision": "f976bc1b87d0321f052f59e4b5b4ddcf9b86745c",
@@ -1726,7 +1726,7 @@
           "--archive",
           "--out"
         ],
-        "revision": "f976bc1b87d0321f052f59e4b5b4ddcf9b86745c"
+        "revision": "07aa767db1a6ca05f4bff05acbabe6637d451e13"
       },
       "source_blob": "b4d93269d25d1effa9e943a6cba3f63c88ffd4a6",
       "source_demonstration_revision": "9990777843ea8e47fe455c8815bfbac159504abb",
@@ -1748,7 +1748,7 @@
       "kind": "committed CLI runner source",
       "location": "scripts/h62/item2/audit-theories/check_path_role_controls.py:45",
       "path": "scripts/h62/item2/audit-theories/check_path_role_controls.py",
-      "purpose": "Five rehashed corruption controls for path late replacement, universal frame law, type expression and source/producer provenance. Configured validation unavailable: required external audit evidence not supplied; ordinary and instrumented bare invocations exit2 for missing options. Committed runner source only; no helper, fixture, passing-reproducer, witness or proof credit.",
+      "purpose": "Five rehashed corruption controls for path late replacement, universal frame law, type expression and source/producer provenance. Configured validation unavailable: required external audit evidence not supplied; required options are absent from the command prefix. Committed runner source only; no helper, fixture, passing-reproducer, witness or proof credit.",
       "required_options": [
         "--historical-evidence",
         "--out",
@@ -1764,7 +1764,7 @@
           "--out",
           "--proof-evidence"
         ],
-        "revision": "f976bc1b87d0321f052f59e4b5b4ddcf9b86745c"
+        "revision": "07aa767db1a6ca05f4bff05acbabe6637d451e13"
       },
       "source_blob": "1141a1f46577583ed140e1c4c454d781885b52c1",
       "source_demonstration_revision": "f976bc1b87d0321f052f59e4b5b4ddcf9b86745c",
@@ -1798,7 +1798,7 @@
         "required_options": [
           "--evidence"
         ],
-        "revision": "f976bc1b87d0321f052f59e4b5b4ddcf9b86745c"
+        "revision": "07aa767db1a6ca05f4bff05acbabe6637d451e13"
       },
       "source_blob": "a264dd0c7435a8b5f6e2a1c4bb37a34abafbe980",
       "source_demonstration_revision": "9990777843ea8e47fe455c8815bfbac159504abb",
@@ -1808,6 +1808,158 @@
           "python3",
           "-B",
           "scripts/h62/item2/audit-theories/check_subset_controls.py"
+        ],
+        "reason": "Configured checker invocation not validated; required options are absent. Source role only, no helper/fixture or passing-reproducer credit.",
+        "status": "unavailable"
+      }
+    },
+    "committed-cli:scripts/h62/item2/audit-theories/coverage_ledger.py": {
+      "command": "python3 -B scripts/h62/item2/audit-theories/coverage_ledger.py",
+      "command_form": "entry prefix; required configuration is not supplied",
+      "cwd": ".",
+      "kind": "committed CLI runner source",
+      "location": "scripts/h62/item2/audit-theories/coverage_ledger.py:80",
+      "path": "scripts/h62/item2/audit-theories/coverage_ledger.py",
+      "purpose": "Authenticates the external frozen census and reconciles original/generated obligations and certificate receipts, preserving pending records and version-fidelity separation. Bare and configured invocations unrun; configured validation unavailable without original historical/evidence prerequisites. Committed checker source only; no helper, fixture, execution, proof, witness or current-authority credit.",
+      "required_options": [
+        "--historical-evidence",
+        "--out",
+        "--proof-evidence"
+      ],
+      "role_provenance": {
+        "function_line": 17,
+        "kind": "curated local argparse entry",
+        "main_line": 80,
+        "parse_args_line": 22,
+        "required_options": [
+          "--historical-evidence",
+          "--out",
+          "--proof-evidence"
+        ],
+        "revision": "07aa767db1a6ca05f4bff05acbabe6637d451e13"
+      },
+      "source_blob": "c459994e09c06ade984aabd8af6483287f5f215a",
+      "source_demonstration_revision": "07aa767db1a6ca05f4bff05acbabe6637d451e13",
+      "source_only": true,
+      "validation_at_measured_revision": {
+        "command_prefix": [
+          "python3",
+          "-B",
+          "scripts/h62/item2/audit-theories/coverage_ledger.py"
+        ],
+        "reason": "Configured checker invocation not validated; required options are absent. Source role only, no helper/fixture or passing-reproducer credit.",
+        "status": "unavailable"
+      }
+    },
+    "committed-cli:scripts/h62/item2/audit-theories/leaf_progress_input_roles.py": {
+      "command": "python3 -B scripts/h62/item2/audit-theories/leaf_progress_input_roles.py",
+      "command_form": "entry prefix; required configuration is not supplied",
+      "cwd": ".",
+      "kind": "committed CLI runner source",
+      "location": "scripts/h62/item2/audit-theories/leaf_progress_input_roles.py:117",
+      "path": "scripts/h62/item2/audit-theories/leaf_progress_input_roles.py",
+      "purpose": "Checks exact frozen leaf-extension source/type/binder pins and designated external receipts, retaining all-horizon law and prior-family disjointness boundaries. Bare and configured invocations unrun; configured validation unavailable without original historical/evidence prerequisites. Committed checker source only; no helper, fixture, execution, proof, witness or current-authority credit.",
+      "required_options": [
+        "--historical-evidence",
+        "--out",
+        "--proof-evidence"
+      ],
+      "role_provenance": {
+        "function_line": 90,
+        "kind": "curated local argparse entry",
+        "main_line": 117,
+        "parse_args_line": 93,
+        "required_options": [
+          "--historical-evidence",
+          "--out",
+          "--proof-evidence"
+        ],
+        "revision": "07aa767db1a6ca05f4bff05acbabe6637d451e13"
+      },
+      "source_blob": "8ebef1f839575345b96af5a093ae053a69456229",
+      "source_demonstration_revision": "07aa767db1a6ca05f4bff05acbabe6637d451e13",
+      "source_only": true,
+      "validation_at_measured_revision": {
+        "command_prefix": [
+          "python3",
+          "-B",
+          "scripts/h62/item2/audit-theories/leaf_progress_input_roles.py"
+        ],
+        "reason": "Configured checker invocation not validated; required options are absent. Source role only, no helper/fixture or passing-reproducer credit.",
+        "status": "unavailable"
+      }
+    },
+    "committed-cli:scripts/h62/item2/audit-theories/mirror_input_roles.py": {
+      "command": "python3 -B scripts/h62/item2/audit-theories/mirror_input_roles.py",
+      "command_form": "entry prefix; required configuration is not supplied",
+      "cwd": ".",
+      "kind": "committed CLI runner source",
+      "location": "scripts/h62/item2/audit-theories/mirror_input_roles.py:76",
+      "path": "scripts/h62/item2/audit-theories/mirror_input_roles.py",
+      "purpose": "Checks exact frozen memory-mirror telescope/source pins and designated external receipts, separating selected-heap feasibility from global laws. Bare and configured invocations unrun; configured validation unavailable without original historical/evidence prerequisites. Committed checker source only; no helper, fixture, execution, proof, witness or current-authority credit.",
+      "required_options": [
+        "--historical-evidence",
+        "--out",
+        "--proof-evidence"
+      ],
+      "role_provenance": {
+        "function_line": 43,
+        "kind": "curated local argparse entry",
+        "main_line": 76,
+        "parse_args_line": 46,
+        "required_options": [
+          "--historical-evidence",
+          "--out",
+          "--proof-evidence"
+        ],
+        "revision": "07aa767db1a6ca05f4bff05acbabe6637d451e13"
+      },
+      "source_blob": "d50e9a8d0c8ee4258bbff1668d9015012bc7830c",
+      "source_demonstration_revision": "07aa767db1a6ca05f4bff05acbabe6637d451e13",
+      "source_only": true,
+      "validation_at_measured_revision": {
+        "command_prefix": [
+          "python3",
+          "-B",
+          "scripts/h62/item2/audit-theories/mirror_input_roles.py"
+        ],
+        "reason": "Configured checker invocation not validated; required options are absent. Source role only, no helper/fixture or passing-reproducer credit.",
+        "status": "unavailable"
+      }
+    },
+    "committed-cli:scripts/h62/item2/audit-theories/path_input_roles.py": {
+      "command": "python3 -B scripts/h62/item2/audit-theories/path_input_roles.py",
+      "command_form": "entry prefix; required configuration is not supplied",
+      "cwd": ".",
+      "kind": "committed CLI runner source",
+      "location": "scripts/h62/item2/audit-theories/path_input_roles.py:105",
+      "path": "scripts/h62/item2/audit-theories/path_input_roles.py",
+      "purpose": "Checks exact frozen Path/Obs source/type/binder identities and designated external receipts; correlated inputs and universal frame conditions remain explicit. Bare and configured invocations unrun; configured validation unavailable without original historical/evidence prerequisites. Committed checker source only; no helper, fixture, execution, proof, witness or current-authority credit.",
+      "required_options": [
+        "--historical-evidence",
+        "--out",
+        "--proof-evidence"
+      ],
+      "role_provenance": {
+        "function_line": 72,
+        "kind": "curated local argparse entry",
+        "main_line": 105,
+        "parse_args_line": 75,
+        "required_options": [
+          "--historical-evidence",
+          "--out",
+          "--proof-evidence"
+        ],
+        "revision": "07aa767db1a6ca05f4bff05acbabe6637d451e13"
+      },
+      "source_blob": "6854beb912fed9853621da7dfaa47acc943eb181",
+      "source_demonstration_revision": "07aa767db1a6ca05f4bff05acbabe6637d451e13",
+      "source_only": true,
+      "validation_at_measured_revision": {
+        "command_prefix": [
+          "python3",
+          "-B",
+          "scripts/h62/item2/audit-theories/path_input_roles.py"
         ],
         "reason": "Configured checker invocation not validated; required options are absent. Source role only, no helper/fixture or passing-reproducer credit.",
         "status": "unavailable"
@@ -1834,7 +1986,7 @@
           "--lean",
           "--out"
         ],
-        "revision": "f976bc1b87d0321f052f59e4b5b4ddcf9b86745c"
+        "revision": "07aa767db1a6ca05f4bff05acbabe6637d451e13"
       },
       "source_blob": "766c1e39caab15fa028423e025bf4c7e0661fdd9",
       "source_demonstration_revision": "9990777843ea8e47fe455c8815bfbac159504abb",
@@ -1844,6 +1996,46 @@
           "python3",
           "-B",
           "scripts/h62/item2/audit-theories/serial_check.py"
+        ],
+        "reason": "Configured checker invocation not validated; required options are absent. Source role only, no helper/fixture or passing-reproducer credit.",
+        "status": "unavailable"
+      }
+    },
+    "committed-cli:scripts/h62/item2/audit-theories/verify_acceptance_snapshot.py": {
+      "command": "python3 -B scripts/h62/item2/audit-theories/verify_acceptance_snapshot.py",
+      "command_form": "entry prefix; required configuration is not supplied",
+      "cwd": ".",
+      "kind": "committed CLI runner source",
+      "location": "scripts/h62/item2/audit-theories/verify_acceptance_snapshot.py:145",
+      "path": "scripts/h62/item2/audit-theories/verify_acceptance_snapshot.py",
+      "purpose": "Cross-checks external original ledger, helper receipts, role union, remaining gaps and mapped source provenance; full-assignment acceptance remains false. Bare and configured invocations unrun; configured validation unavailable without original historical/evidence prerequisites. Committed checker source only; no helper, fixture, execution, proof, witness or current-authority credit.",
+      "required_options": [
+        "--evidence",
+        "--historical-evidence",
+        "--out",
+        "--roles"
+      ],
+      "role_provenance": {
+        "function_line": 19,
+        "kind": "curated local argparse entry",
+        "main_line": 145,
+        "parse_args_line": 22,
+        "required_options": [
+          "--evidence",
+          "--historical-evidence",
+          "--out",
+          "--roles"
+        ],
+        "revision": "07aa767db1a6ca05f4bff05acbabe6637d451e13"
+      },
+      "source_blob": "c805842b75bc519260d857f9730671c78421cbe1",
+      "source_demonstration_revision": "07aa767db1a6ca05f4bff05acbabe6637d451e13",
+      "source_only": true,
+      "validation_at_measured_revision": {
+        "command_prefix": [
+          "python3",
+          "-B",
+          "scripts/h62/item2/audit-theories/verify_acceptance_snapshot.py"
         ],
         "reason": "Configured checker invocation not validated; required options are absent. Source role only, no helper/fixture or passing-reproducer credit.",
         "status": "unavailable"
@@ -1868,7 +2060,7 @@
         "required_options": [
           "--evidence"
         ],
-        "revision": "f976bc1b87d0321f052f59e4b5b4ddcf9b86745c"
+        "revision": "07aa767db1a6ca05f4bff05acbabe6637d451e13"
       },
       "source_blob": "a725519cebe318902b7caf85768063fb0b8c191a",
       "source_demonstration_revision": "9990777843ea8e47fe455c8815bfbac159504abb",
@@ -1902,7 +2094,7 @@
         "required_options": [
           "--evidence"
         ],
-        "revision": "f976bc1b87d0321f052f59e4b5b4ddcf9b86745c"
+        "revision": "07aa767db1a6ca05f4bff05acbabe6637d451e13"
       },
       "source_blob": "73b309b26c3d796f34be8f9476421d7f1dfcac62",
       "source_demonstration_revision": "9990777843ea8e47fe455c8815bfbac159504abb",
@@ -1938,7 +2130,7 @@
           "--evidence",
           "--module"
         ],
-        "revision": "f976bc1b87d0321f052f59e4b5b4ddcf9b86745c"
+        "revision": "07aa767db1a6ca05f4bff05acbabe6637d451e13"
       },
       "source_blob": "90e9500177b9bbd54633f0fef42e3caf165a429d",
       "source_demonstration_revision": "9990777843ea8e47fe455c8815bfbac159504abb",
@@ -1972,7 +2164,7 @@
         "required_options": [
           "--evidence"
         ],
-        "revision": "f976bc1b87d0321f052f59e4b5b4ddcf9b86745c"
+        "revision": "07aa767db1a6ca05f4bff05acbabe6637d451e13"
       },
       "source_blob": "d377f90debd83512fd4fc3f0a94400fffdf67f12",
       "source_demonstration_revision": "9990777843ea8e47fe455c8815bfbac159504abb",
@@ -2008,7 +2200,7 @@
           "--output",
           "--toolchain"
         ],
-        "revision": "f976bc1b87d0321f052f59e4b5b4ddcf9b86745c"
+        "revision": "07aa767db1a6ca05f4bff05acbabe6637d451e13"
       },
       "source_blob": "40b7b173d0f683039f55497c1d36b20dcfd70116",
       "source_demonstration_revision": "9990777843ea8e47fe455c8815bfbac159504abb",
@@ -2046,7 +2238,7 @@
           "--frozen",
           "--output"
         ],
-        "revision": "f976bc1b87d0321f052f59e4b5b4ddcf9b86745c"
+        "revision": "07aa767db1a6ca05f4bff05acbabe6637d451e13"
       },
       "source_blob": "2d795e6b300c40e1fe4924f04ad7a9e4b2ba4df8",
       "source_demonstration_revision": "9990777843ea8e47fe455c8815bfbac159504abb",
@@ -2082,7 +2274,7 @@
           "--evidence",
           "--toolchain"
         ],
-        "revision": "f976bc1b87d0321f052f59e4b5b4ddcf9b86745c"
+        "revision": "07aa767db1a6ca05f4bff05acbabe6637d451e13"
       },
       "source_blob": "51652ca513e21150f4c49c49505dc64a5bb8c12d",
       "source_demonstration_revision": "9990777843ea8e47fe455c8815bfbac159504abb",
@@ -2116,7 +2308,7 @@
         "required_options": [
           "--inventory"
         ],
-        "revision": "f976bc1b87d0321f052f59e4b5b4ddcf9b86745c"
+        "revision": "07aa767db1a6ca05f4bff05acbabe6637d451e13"
       },
       "source_blob": "b0d1b50765bf744a5a53cd026695999fb3e6f1c3",
       "source_demonstration_revision": "9990777843ea8e47fe455c8815bfbac159504abb",
@@ -2150,7 +2342,7 @@
         "required_options": [
           "--evidence"
         ],
-        "revision": "f976bc1b87d0321f052f59e4b5b4ddcf9b86745c"
+        "revision": "07aa767db1a6ca05f4bff05acbabe6637d451e13"
       },
       "source_blob": "f08074788981d2635375dcd531c34621ab29faa8",
       "source_demonstration_revision": "9990777843ea8e47fe455c8815bfbac159504abb",
@@ -2186,7 +2378,7 @@
           "--inventory",
           "--output"
         ],
-        "revision": "f976bc1b87d0321f052f59e4b5b4ddcf9b86745c"
+        "revision": "07aa767db1a6ca05f4bff05acbabe6637d451e13"
       },
       "source_blob": "5524cbec706ee5732ddcb15feb808a66cfd13421",
       "source_demonstration_revision": "9990777843ea8e47fe455c8815bfbac159504abb",
@@ -2222,7 +2414,7 @@
           "--inventory",
           "--output"
         ],
-        "revision": "f976bc1b87d0321f052f59e4b5b4ddcf9b86745c"
+        "revision": "07aa767db1a6ca05f4bff05acbabe6637d451e13"
       },
       "source_blob": "35a5868915fc8b3b1818e2e042a5748df899b9f3",
       "source_demonstration_revision": "9990777843ea8e47fe455c8815bfbac159504abb",
@@ -2256,7 +2448,7 @@
         "required_options": [
           "--output"
         ],
-        "revision": "f976bc1b87d0321f052f59e4b5b4ddcf9b86745c"
+        "revision": "07aa767db1a6ca05f4bff05acbabe6637d451e13"
       },
       "source_blob": "fc0b06fef2af5c7db8bf451b5b61ae7314ff3343",
       "source_demonstration_revision": "9990777843ea8e47fe455c8815bfbac159504abb",
@@ -2290,7 +2482,7 @@
         "required_options": [
           "--output"
         ],
-        "revision": "f976bc1b87d0321f052f59e4b5b4ddcf9b86745c"
+        "revision": "07aa767db1a6ca05f4bff05acbabe6637d451e13"
       },
       "source_blob": "5416c212d266a6105db8ac41b4f8d3af26de26ee",
       "source_demonstration_revision": "9990777843ea8e47fe455c8815bfbac159504abb",
@@ -2330,7 +2522,7 @@
           "--lean-bin",
           "--pin"
         ],
-        "revision": "f976bc1b87d0321f052f59e4b5b4ddcf9b86745c"
+        "revision": "07aa767db1a6ca05f4bff05acbabe6637d451e13"
       },
       "source_blob": "15143c90ceead4c5d8f57c1cfa95bed521650358",
       "source_demonstration_revision": "9990777843ea8e47fe455c8815bfbac159504abb",
@@ -2370,7 +2562,7 @@
           "--lean-bin",
           "--pin"
         ],
-        "revision": "f976bc1b87d0321f052f59e4b5b4ddcf9b86745c"
+        "revision": "07aa767db1a6ca05f4bff05acbabe6637d451e13"
       },
       "source_blob": "5568f8e28a28f5daf777efa0c5c7976f2b413a54",
       "source_demonstration_revision": "9990777843ea8e47fe455c8815bfbac159504abb",
@@ -2398,7 +2590,7 @@
         ],
         "kind": "unittest declaration and explicit main entry",
         "main_line": 179,
-        "revision": "f976bc1b87d0321f052f59e4b5b4ddcf9b86745c",
+        "revision": "07aa767db1a6ca05f4bff05acbabe6637d451e13",
         "test_contexts": [
           {
             "code_firstlineno": 15,
@@ -2726,7 +2918,7 @@
         ],
         "kind": "unittest declaration and explicit main entry",
         "main_line": 138,
-        "revision": "f976bc1b87d0321f052f59e4b5b4ddcf9b86745c",
+        "revision": "07aa767db1a6ca05f4bff05acbabe6637d451e13",
         "test_contexts": [
           {
             "code_firstlineno": 20,
@@ -3085,7 +3277,7 @@
         ],
         "kind": "unittest declaration and explicit main entry",
         "main_line": 107,
-        "revision": "f976bc1b87d0321f052f59e4b5b4ddcf9b86745c",
+        "revision": "07aa767db1a6ca05f4bff05acbabe6637d451e13",
         "test_contexts": [
           {
             "code_firstlineno": 35,
@@ -3831,7 +4023,7 @@
         ],
         "kind": "unittest declaration and explicit main entry",
         "main_line": 61,
-        "revision": "f976bc1b87d0321f052f59e4b5b4ddcf9b86745c",
+        "revision": "07aa767db1a6ca05f4bff05acbabe6637d451e13",
         "test_contexts": [
           {
             "code_firstlineno": 15,
@@ -4026,7 +4218,7 @@
         ],
         "kind": "unittest declaration and explicit main entry",
         "main_line": 75,
-        "revision": "f976bc1b87d0321f052f59e4b5b4ddcf9b86745c",
+        "revision": "07aa767db1a6ca05f4bff05acbabe6637d451e13",
         "test_contexts": [
           {
             "code_firstlineno": 37,
@@ -4108,7 +4300,7 @@
         ],
         "kind": "unittest declaration and explicit main entry",
         "main_line": 48,
-        "revision": "f976bc1b87d0321f052f59e4b5b4ddcf9b86745c",
+        "revision": "07aa767db1a6ca05f4bff05acbabe6637d451e13",
         "test_contexts": [
           {
             "code_firstlineno": 13,
@@ -4623,7 +4815,7 @@
         ],
         "kind": "unittest declaration and explicit main entry",
         "main_line": 34,
-        "revision": "f976bc1b87d0321f052f59e4b5b4ddcf9b86745c",
+        "revision": "07aa767db1a6ca05f4bff05acbabe6637d451e13",
         "test_contexts": [
           {
             "code_firstlineno": 14,
@@ -4872,7 +5064,7 @@
         ],
         "kind": "unittest declaration and explicit main entry",
         "main_line": 45,
-        "revision": "f976bc1b87d0321f052f59e4b5b4ddcf9b86745c",
+        "revision": "07aa767db1a6ca05f4bff05acbabe6637d451e13",
         "test_contexts": [
           {
             "code_firstlineno": 7,
@@ -4956,7 +5148,7 @@
         ],
         "kind": "unittest declaration and explicit main entry",
         "main_line": 31,
-        "revision": "f976bc1b87d0321f052f59e4b5b4ddcf9b86745c",
+        "revision": "07aa767db1a6ca05f4bff05acbabe6637d451e13",
         "test_contexts": [
           {
             "code_firstlineno": 7,
@@ -5040,7 +5232,7 @@
         ],
         "kind": "unittest declaration and explicit main entry",
         "main_line": 94,
-        "revision": "f976bc1b87d0321f052f59e4b5b4ddcf9b86745c",
+        "revision": "07aa767db1a6ca05f4bff05acbabe6637d451e13",
         "test_contexts": [
           {
             "code_firstlineno": 8,
@@ -5194,7 +5386,7 @@
         ],
         "kind": "unittest declaration and explicit main entry",
         "main_line": 78,
-        "revision": "f976bc1b87d0321f052f59e4b5b4ddcf9b86745c",
+        "revision": "07aa767db1a6ca05f4bff05acbabe6637d451e13",
         "test_contexts": [
           {
             "code_firstlineno": 7,
@@ -5658,7 +5850,7 @@
         ],
         "kind": "unittest declaration and explicit main entry",
         "main_line": 101,
-        "revision": "f976bc1b87d0321f052f59e4b5b4ddcf9b86745c",
+        "revision": "07aa767db1a6ca05f4bff05acbabe6637d451e13",
         "test_contexts": [
           {
             "code_firstlineno": 17,
@@ -5817,7 +6009,7 @@
         ],
         "kind": "unittest declaration and explicit main entry",
         "main_line": 49,
-        "revision": "f976bc1b87d0321f052f59e4b5b4ddcf9b86745c",
+        "revision": "07aa767db1a6ca05f4bff05acbabe6637d451e13",
         "test_contexts": [
           {
             "code_firstlineno": 13,
@@ -5880,7 +6072,7 @@
         ],
         "kind": "unittest declaration and explicit main entry",
         "main_line": 38,
-        "revision": "f976bc1b87d0321f052f59e4b5b4ddcf9b86745c",
+        "revision": "07aa767db1a6ca05f4bff05acbabe6637d451e13",
         "test_contexts": [
           {
             "code_firstlineno": 11,
@@ -6036,7 +6228,7 @@
         ],
         "kind": "unittest declaration and explicit main entry",
         "main_line": 49,
-        "revision": "f976bc1b87d0321f052f59e4b5b4ddcf9b86745c",
+        "revision": "07aa767db1a6ca05f4bff05acbabe6637d451e13",
         "test_contexts": [
           {
             "code_firstlineno": 13,
@@ -6100,7 +6292,7 @@
         ],
         "kind": "unittest declaration and explicit main entry",
         "main_line": 89,
-        "revision": "f976bc1b87d0321f052f59e4b5b4ddcf9b86745c",
+        "revision": "07aa767db1a6ca05f4bff05acbabe6637d451e13",
         "test_contexts": [
           {
             "code_firstlineno": 16,
@@ -6278,7 +6470,7 @@
         ],
         "kind": "unittest declaration and explicit main entry",
         "main_line": 27,
-        "revision": "f976bc1b87d0321f052f59e4b5b4ddcf9b86745c",
+        "revision": "07aa767db1a6ca05f4bff05acbabe6637d451e13",
         "test_contexts": [
           {
             "code_firstlineno": 9,
@@ -6367,7 +6559,7 @@
         ],
         "kind": "unittest declaration and explicit main entry",
         "main_line": 77,
-        "revision": "f976bc1b87d0321f052f59e4b5b4ddcf9b86745c",
+        "revision": "07aa767db1a6ca05f4bff05acbabe6637d451e13",
         "test_contexts": [
           {
             "code_firstlineno": 18,
@@ -6811,7 +7003,7 @@
         ],
         "kind": "unittest declaration and explicit main entry",
         "main_line": 77,
-        "revision": "f976bc1b87d0321f052f59e4b5b4ddcf9b86745c",
+        "revision": "07aa767db1a6ca05f4bff05acbabe6637d451e13",
         "test_contexts": [
           {
             "code_firstlineno": 14,
@@ -6980,7 +7172,7 @@
         ],
         "kind": "unittest declaration and explicit main entry",
         "main_line": 21,
-        "revision": "f976bc1b87d0321f052f59e4b5b4ddcf9b86745c",
+        "revision": "07aa767db1a6ca05f4bff05acbabe6637d451e13",
         "test_contexts": [
           {
             "code_firstlineno": 6,
@@ -7189,7 +7381,7 @@
         ],
         "kind": "unittest declaration and explicit main entry",
         "main_line": 87,
-        "revision": "f976bc1b87d0321f052f59e4b5b4ddcf9b86745c",
+        "revision": "07aa767db1a6ca05f4bff05acbabe6637d451e13",
         "test_contexts": [
           {
             "code_firstlineno": 13,
@@ -7660,7 +7852,7 @@
         ],
         "kind": "unittest declaration and explicit main entry",
         "main_line": 364,
-        "revision": "f976bc1b87d0321f052f59e4b5b4ddcf9b86745c",
+        "revision": "07aa767db1a6ca05f4bff05acbabe6637d451e13",
         "test_contexts": [
           {
             "code_firstlineno": 70,
@@ -7723,7 +7915,7 @@
         ],
         "kind": "unittest declaration and explicit main entry",
         "main_line": 181,
-        "revision": "f976bc1b87d0321f052f59e4b5b4ddcf9b86745c",
+        "revision": "07aa767db1a6ca05f4bff05acbabe6637d451e13",
         "test_contexts": [
           {
             "code_firstlineno": 108,
@@ -7877,7 +8069,7 @@
         ],
         "kind": "unittest declaration and explicit main entry",
         "main_line": 274,
-        "revision": "f976bc1b87d0321f052f59e4b5b4ddcf9b86745c",
+        "revision": "07aa767db1a6ca05f4bff05acbabe6637d451e13",
         "test_contexts": [
           {
             "code_firstlineno": 197,
@@ -8038,7 +8230,7 @@
         ],
         "kind": "unittest declaration and explicit main entry",
         "main_line": 126,
-        "revision": "f976bc1b87d0321f052f59e4b5b4ddcf9b86745c",
+        "revision": "07aa767db1a6ca05f4bff05acbabe6637d451e13",
         "test_contexts": [
           {
             "code_firstlineno": 58,
@@ -8171,7 +8363,7 @@
         ],
         "kind": "unittest declaration and explicit main entry",
         "main_line": 191,
-        "revision": "f976bc1b87d0321f052f59e4b5b4ddcf9b86745c",
+        "revision": "07aa767db1a6ca05f4bff05acbabe6637d451e13",
         "test_contexts": [
           {
             "code_firstlineno": 119,
@@ -8346,7 +8538,7 @@
         ],
         "kind": "unittest declaration and explicit main entry",
         "main_line": 283,
-        "revision": "f976bc1b87d0321f052f59e4b5b4ddcf9b86745c",
+        "revision": "07aa767db1a6ca05f4bff05acbabe6637d451e13",
         "test_contexts": [
           {
             "code_firstlineno": 206,
@@ -8801,7 +8993,7 @@
         ],
         "kind": "unittest declaration and explicit main entry",
         "main_line": 249,
-        "revision": "f976bc1b87d0321f052f59e4b5b4ddcf9b86745c",
+        "revision": "07aa767db1a6ca05f4bff05acbabe6637d451e13",
         "test_contexts": [
           {
             "code_firstlineno": 62,
@@ -9035,7 +9227,7 @@
         ],
         "kind": "unittest declaration and explicit main entry",
         "main_line": 195,
-        "revision": "f976bc1b87d0321f052f59e4b5b4ddcf9b86745c",
+        "revision": "07aa767db1a6ca05f4bff05acbabe6637d451e13",
         "test_contexts": [
           {
             "code_firstlineno": 27,
@@ -9119,7 +9311,7 @@
         ],
         "kind": "unittest declaration and explicit main entry",
         "main_line": 137,
-        "revision": "f976bc1b87d0321f052f59e4b5b4ddcf9b86745c",
+        "revision": "07aa767db1a6ca05f4bff05acbabe6637d451e13",
         "test_contexts": [
           {
             "code_firstlineno": 32,
@@ -9224,7 +9416,7 @@
         ],
         "kind": "unittest declaration and explicit main entry",
         "main_line": 20,
-        "revision": "f976bc1b87d0321f052f59e4b5b4ddcf9b86745c",
+        "revision": "07aa767db1a6ca05f4bff05acbabe6637d451e13",
         "test_contexts": [
           {
             "code_firstlineno": 6,
@@ -9826,7 +10018,7 @@
         ],
         "kind": "unittest declaration and explicit main entry",
         "main_line": 44,
-        "revision": "f976bc1b87d0321f052f59e4b5b4ddcf9b86745c",
+        "revision": "07aa767db1a6ca05f4bff05acbabe6637d451e13",
         "test_contexts": [
           {
             "code_firstlineno": 14,
@@ -9902,7 +10094,7 @@
         ],
         "kind": "unittest declaration and explicit main entry",
         "main_line": 60,
-        "revision": "f976bc1b87d0321f052f59e4b5b4ddcf9b86745c",
+        "revision": "07aa767db1a6ca05f4bff05acbabe6637d451e13",
         "test_contexts": [
           {
             "code_firstlineno": 16,
@@ -9958,7 +10150,7 @@
         ],
         "kind": "unittest declaration and explicit main entry",
         "main_line": 39,
-        "revision": "f976bc1b87d0321f052f59e4b5b4ddcf9b86745c",
+        "revision": "07aa767db1a6ca05f4bff05acbabe6637d451e13",
         "test_contexts": [
           {
             "code_firstlineno": 11,
@@ -10062,7 +10254,7 @@
         ],
         "kind": "unittest declaration and explicit main entry",
         "main_line": 19,
-        "revision": "f976bc1b87d0321f052f59e4b5b4ddcf9b86745c",
+        "revision": "07aa767db1a6ca05f4bff05acbabe6637d451e13",
         "test_contexts": [
           {
             "code_firstlineno": 10,
@@ -10111,7 +10303,7 @@
         ],
         "kind": "unittest declaration and explicit main entry",
         "main_line": 71,
-        "revision": "f976bc1b87d0321f052f59e4b5b4ddcf9b86745c",
+        "revision": "07aa767db1a6ca05f4bff05acbabe6637d451e13",
         "test_contexts": [
           {
             "code_firstlineno": 21,
@@ -10201,7 +10393,7 @@
         ],
         "kind": "unittest declaration and explicit main entry",
         "main_line": 51,
-        "revision": "f976bc1b87d0321f052f59e4b5b4ddcf9b86745c",
+        "revision": "07aa767db1a6ca05f4bff05acbabe6637d451e13",
         "test_contexts": [
           {
             "code_firstlineno": 35,
@@ -10310,7 +10502,7 @@
         ],
         "kind": "unittest declaration and explicit main entry",
         "main_line": 233,
-        "revision": "f976bc1b87d0321f052f59e4b5b4ddcf9b86745c",
+        "revision": "07aa767db1a6ca05f4bff05acbabe6637d451e13",
         "test_contexts": [
           {
             "code_firstlineno": 11,
@@ -10773,7 +10965,7 @@
         ],
         "kind": "unittest declaration and explicit main entry",
         "main_line": 92,
-        "revision": "f976bc1b87d0321f052f59e4b5b4ddcf9b86745c",
+        "revision": "07aa767db1a6ca05f4bff05acbabe6637d451e13",
         "test_contexts": [
           {
             "code_firstlineno": 18,
@@ -10836,7 +11028,7 @@
         ],
         "kind": "unittest declaration and explicit main entry",
         "main_line": 118,
-        "revision": "f976bc1b87d0321f052f59e4b5b4ddcf9b86745c",
+        "revision": "07aa767db1a6ca05f4bff05acbabe6637d451e13",
         "test_contexts": [
           {
             "code_firstlineno": 16,
@@ -12340,7 +12532,7 @@
         ],
         "kind": "unittest declaration and explicit main entry",
         "main_line": 47,
-        "revision": "f976bc1b87d0321f052f59e4b5b4ddcf9b86745c",
+        "revision": "07aa767db1a6ca05f4bff05acbabe6637d451e13",
         "test_contexts": [
           {
             "code_firstlineno": 25,
@@ -12429,7 +12621,7 @@
         ],
         "kind": "unittest declaration and explicit main entry",
         "main_line": 41,
-        "revision": "f976bc1b87d0321f052f59e4b5b4ddcf9b86745c",
+        "revision": "07aa767db1a6ca05f4bff05acbabe6637d451e13",
         "test_contexts": [
           {
             "code_firstlineno": 14,
@@ -12491,7 +12683,7 @@
         ],
         "kind": "unittest declaration and explicit main entry",
         "main_line": 42,
-        "revision": "f976bc1b87d0321f052f59e4b5b4ddcf9b86745c",
+        "revision": "07aa767db1a6ca05f4bff05acbabe6637d451e13",
         "test_contexts": [
           {
             "code_firstlineno": 14,
@@ -12593,7 +12785,7 @@
         ],
         "kind": "unittest declaration and explicit main entry",
         "main_line": 33,
-        "revision": "f976bc1b87d0321f052f59e4b5b4ddcf9b86745c",
+        "revision": "07aa767db1a6ca05f4bff05acbabe6637d451e13",
         "test_contexts": [
           {
             "code_firstlineno": 10,
@@ -12628,7 +12820,7 @@
         ],
         "kind": "unittest declaration and explicit main entry",
         "main_line": 28,
-        "revision": "f976bc1b87d0321f052f59e4b5b4ddcf9b86745c",
+        "revision": "07aa767db1a6ca05f4bff05acbabe6637d451e13",
         "test_contexts": [
           {
             "code_firstlineno": 10,
@@ -12677,7 +12869,7 @@
         ],
         "kind": "unittest declaration and explicit main entry",
         "main_line": 28,
-        "revision": "f976bc1b87d0321f052f59e4b5b4ddcf9b86745c",
+        "revision": "07aa767db1a6ca05f4bff05acbabe6637d451e13",
         "test_contexts": [
           {
             "code_firstlineno": 9,
@@ -13279,7 +13471,7 @@
         ],
         "kind": "unittest declaration and explicit main entry",
         "main_line": 551,
-        "revision": "f976bc1b87d0321f052f59e4b5b4ddcf9b86745c",
+        "revision": "07aa767db1a6ca05f4bff05acbabe6637d451e13",
         "test_contexts": [
           {
             "code_firstlineno": 26,
@@ -13461,7 +13653,7 @@
         ],
         "kind": "unittest declaration and explicit main entry",
         "main_line": 119,
-        "revision": "f976bc1b87d0321f052f59e4b5b4ddcf9b86745c",
+        "revision": "07aa767db1a6ca05f4bff05acbabe6637d451e13",
         "test_contexts": [
           {
             "code_firstlineno": 21,
@@ -13503,7 +13695,7 @@
         ],
         "kind": "unittest declaration and explicit main entry",
         "main_line": 195,
-        "revision": "f976bc1b87d0321f052f59e4b5b4ddcf9b86745c",
+        "revision": "07aa767db1a6ca05f4bff05acbabe6637d451e13",
         "test_contexts": [
           {
             "code_firstlineno": 35,
@@ -13755,7 +13947,7 @@
         ],
         "kind": "unittest declaration and explicit main entry",
         "main_line": 444,
-        "revision": "f976bc1b87d0321f052f59e4b5b4ddcf9b86745c",
+        "revision": "07aa767db1a6ca05f4bff05acbabe6637d451e13",
         "test_contexts": [
           {
             "code_firstlineno": 41,
@@ -14197,7 +14389,7 @@
         ],
         "kind": "unittest declaration and explicit main entry",
         "main_line": 59,
-        "revision": "f976bc1b87d0321f052f59e4b5b4ddcf9b86745c",
+        "revision": "07aa767db1a6ca05f4bff05acbabe6637d451e13",
         "test_contexts": [
           {
             "code_firstlineno": 34,
@@ -14280,7 +14472,7 @@
         ],
         "kind": "unittest declaration and explicit main entry",
         "main_line": 55,
-        "revision": "f976bc1b87d0321f052f59e4b5b4ddcf9b86745c",
+        "revision": "07aa767db1a6ca05f4bff05acbabe6637d451e13",
         "test_contexts": [
           {
             "code_firstlineno": 31,
@@ -14347,7 +14539,7 @@
         ],
         "kind": "unittest declaration and explicit main entry",
         "main_line": 231,
-        "revision": "f976bc1b87d0321f052f59e4b5b4ddcf9b86745c",
+        "revision": "07aa767db1a6ca05f4bff05acbabe6637d451e13",
         "test_contexts": [
           {
             "code_firstlineno": 17,
@@ -14771,7 +14963,7 @@
         ],
         "kind": "unittest declaration and explicit main entry",
         "main_line": 183,
-        "revision": "f976bc1b87d0321f052f59e4b5b4ddcf9b86745c",
+        "revision": "07aa767db1a6ca05f4bff05acbabe6637d451e13",
         "test_contexts": [
           {
             "code_firstlineno": 23,
@@ -14889,7 +15081,7 @@
         ],
         "kind": "unittest declaration and explicit main entry",
         "main_line": 70,
-        "revision": "f976bc1b87d0321f052f59e4b5b4ddcf9b86745c",
+        "revision": "07aa767db1a6ca05f4bff05acbabe6637d451e13",
         "test_contexts": [
           {
             "code_firstlineno": 14,
@@ -14952,7 +15144,7 @@
         ],
         "kind": "unittest declaration and explicit main entry",
         "main_line": 47,
-        "revision": "f976bc1b87d0321f052f59e4b5b4ddcf9b86745c",
+        "revision": "07aa767db1a6ca05f4bff05acbabe6637d451e13",
         "test_contexts": [
           {
             "code_firstlineno": 12,
@@ -15008,7 +15200,7 @@
         ],
         "kind": "unittest declaration and explicit main entry",
         "main_line": 119,
-        "revision": "f976bc1b87d0321f052f59e4b5b4ddcf9b86745c",
+        "revision": "07aa767db1a6ca05f4bff05acbabe6637d451e13",
         "test_contexts": [
           {
             "code_firstlineno": 16,
@@ -15366,7 +15558,7 @@
         ],
         "kind": "unittest declaration and explicit main entry",
         "main_line": 287,
-        "revision": "f976bc1b87d0321f052f59e4b5b4ddcf9b86745c",
+        "revision": "07aa767db1a6ca05f4bff05acbabe6637d451e13",
         "test_contexts": [
           {
             "code_firstlineno": 25,
@@ -15637,7 +15829,7 @@
         ],
         "kind": "unittest declaration and explicit main entry",
         "main_line": 107,
-        "revision": "f976bc1b87d0321f052f59e4b5b4ddcf9b86745c",
+        "revision": "07aa767db1a6ca05f4bff05acbabe6637d451e13",
         "test_contexts": [
           {
             "code_firstlineno": 14,
@@ -15728,7 +15920,7 @@
         ],
         "kind": "unittest declaration and explicit main entry",
         "main_line": 59,
-        "revision": "f976bc1b87d0321f052f59e4b5b4ddcf9b86745c",
+        "revision": "07aa767db1a6ca05f4bff05acbabe6637d451e13",
         "test_contexts": [
           {
             "code_firstlineno": 17,
@@ -15811,7 +16003,7 @@
         ],
         "kind": "unittest declaration and explicit main entry",
         "main_line": 38,
-        "revision": "f976bc1b87d0321f052f59e4b5b4ddcf9b86745c",
+        "revision": "07aa767db1a6ca05f4bff05acbabe6637d451e13",
         "test_contexts": [
           {
             "code_firstlineno": 13,
@@ -15874,7 +16066,7 @@
         ],
         "kind": "unittest declaration and explicit main entry",
         "main_line": 40,
-        "revision": "f976bc1b87d0321f052f59e4b5b4ddcf9b86745c",
+        "revision": "07aa767db1a6ca05f4bff05acbabe6637d451e13",
         "test_contexts": [
           {
             "code_firstlineno": 14,
@@ -16169,7 +16361,7 @@
         ],
         "kind": "unittest declaration and explicit main entry",
         "main_line": 483,
-        "revision": "f976bc1b87d0321f052f59e4b5b4ddcf9b86745c",
+        "revision": "07aa767db1a6ca05f4bff05acbabe6637d451e13",
         "test_contexts": [
           {
             "code_firstlineno": 46,
@@ -16826,7 +17018,7 @@
         ],
         "kind": "unittest declaration and explicit main entry",
         "main_line": 41,
-        "revision": "f976bc1b87d0321f052f59e4b5b4ddcf9b86745c",
+        "revision": "07aa767db1a6ca05f4bff05acbabe6637d451e13",
         "test_contexts": [
           {
             "code_firstlineno": 9,
@@ -17129,7 +17321,7 @@
         ],
         "kind": "unittest declaration and explicit main entry",
         "main_line": 37,
-        "revision": "f976bc1b87d0321f052f59e4b5b4ddcf9b86745c",
+        "revision": "07aa767db1a6ca05f4bff05acbabe6637d451e13",
         "test_contexts": [
           {
             "code_firstlineno": 20,
@@ -17245,7 +17437,7 @@
         ],
         "kind": "unittest declaration and explicit main entry",
         "main_line": 28,
-        "revision": "f976bc1b87d0321f052f59e4b5b4ddcf9b86745c",
+        "revision": "07aa767db1a6ca05f4bff05acbabe6637d451e13",
         "test_contexts": [
           {
             "code_firstlineno": 10,
@@ -17308,7 +17500,7 @@
         ],
         "kind": "unittest declaration and explicit main entry",
         "main_line": 31,
-        "revision": "f976bc1b87d0321f052f59e4b5b4ddcf9b86745c",
+        "revision": "07aa767db1a6ca05f4bff05acbabe6637d451e13",
         "test_contexts": [
           {
             "code_firstlineno": 9,
@@ -17432,7 +17624,7 @@
         ],
         "kind": "unittest declaration and explicit main entry",
         "main_line": 87,
-        "revision": "f976bc1b87d0321f052f59e4b5b4ddcf9b86745c",
+        "revision": "07aa767db1a6ca05f4bff05acbabe6637d451e13",
         "test_contexts": [
           {
             "code_firstlineno": 17,
@@ -17795,7 +17987,7 @@
         ],
         "kind": "unittest declaration and explicit main entry",
         "main_line": 32,
-        "revision": "f976bc1b87d0321f052f59e4b5b4ddcf9b86745c",
+        "revision": "07aa767db1a6ca05f4bff05acbabe6637d451e13",
         "test_contexts": [
           {
             "code_firstlineno": 8,
@@ -17905,7 +18097,7 @@
         ],
         "kind": "unittest declaration and explicit main entry",
         "main_line": 71,
-        "revision": "f976bc1b87d0321f052f59e4b5b4ddcf9b86745c",
+        "revision": "07aa767db1a6ca05f4bff05acbabe6637d451e13",
         "test_contexts": [
           {
             "code_firstlineno": 15,
@@ -18015,7 +18207,7 @@
         ],
         "kind": "unittest declaration and explicit main entry",
         "main_line": 32,
-        "revision": "f976bc1b87d0321f052f59e4b5b4ddcf9b86745c",
+        "revision": "07aa767db1a6ca05f4bff05acbabe6637d451e13",
         "test_contexts": [
           {
             "code_firstlineno": 5,
@@ -18372,7 +18564,7 @@
         ],
         "kind": "unittest declaration and explicit main entry",
         "main_line": 104,
-        "revision": "f976bc1b87d0321f052f59e4b5b4ddcf9b86745c",
+        "revision": "07aa767db1a6ca05f4bff05acbabe6637d451e13",
         "test_contexts": [
           {
             "code_firstlineno": 16,
@@ -18611,7 +18803,7 @@
         ],
         "kind": "unittest declaration and explicit main entry",
         "main_line": 93,
-        "revision": "f976bc1b87d0321f052f59e4b5b4ddcf9b86745c",
+        "revision": "07aa767db1a6ca05f4bff05acbabe6637d451e13",
         "test_contexts": [
           {
             "code_firstlineno": 16,
@@ -18855,7 +19047,7 @@
         ],
         "kind": "unittest declaration and explicit main entry",
         "main_line": 41,
-        "revision": "f976bc1b87d0321f052f59e4b5b4ddcf9b86745c",
+        "revision": "07aa767db1a6ca05f4bff05acbabe6637d451e13",
         "test_contexts": [
           {
             "code_firstlineno": 12,
@@ -18978,7 +19170,7 @@
         ],
         "kind": "unittest declaration and explicit main entry",
         "main_line": 46,
-        "revision": "f976bc1b87d0321f052f59e4b5b4ddcf9b86745c",
+        "revision": "07aa767db1a6ca05f4bff05acbabe6637d451e13",
         "test_contexts": [
           {
             "code_firstlineno": 10,
@@ -19069,7 +19261,7 @@
         ],
         "kind": "unittest declaration and explicit main entry",
         "main_line": 101,
-        "revision": "f976bc1b87d0321f052f59e4b5b4ddcf9b86745c",
+        "revision": "07aa767db1a6ca05f4bff05acbabe6637d451e13",
         "test_contexts": [
           {
             "code_firstlineno": 11,
@@ -19293,7 +19485,7 @@
         ],
         "kind": "unittest declaration and explicit main entry",
         "main_line": 131,
-        "revision": "f976bc1b87d0321f052f59e4b5b4ddcf9b86745c",
+        "revision": "07aa767db1a6ca05f4bff05acbabe6637d451e13",
         "test_contexts": [
           {
             "code_firstlineno": 10,
@@ -19601,7 +19793,7 @@
         ],
         "kind": "unittest declaration and explicit main entry",
         "main_line": 41,
-        "revision": "f976bc1b87d0321f052f59e4b5b4ddcf9b86745c",
+        "revision": "07aa767db1a6ca05f4bff05acbabe6637d451e13",
         "test_contexts": [
           {
             "code_firstlineno": 10,
@@ -19798,7 +19990,7 @@
         ],
         "kind": "unittest declaration and explicit main entry",
         "main_line": 232,
-        "revision": "f976bc1b87d0321f052f59e4b5b4ddcf9b86745c",
+        "revision": "07aa767db1a6ca05f4bff05acbabe6637d451e13",
         "test_contexts": [
           {
             "code_firstlineno": 16,
@@ -20111,7 +20303,7 @@
         ],
         "kind": "unittest declaration and explicit main entry",
         "main_line": 149,
-        "revision": "f976bc1b87d0321f052f59e4b5b4ddcf9b86745c",
+        "revision": "07aa767db1a6ca05f4bff05acbabe6637d451e13",
         "test_contexts": [
           {
             "code_firstlineno": 32,
@@ -20250,7 +20442,7 @@
         ],
         "kind": "unittest declaration and explicit main entry",
         "main_line": 261,
-        "revision": "f976bc1b87d0321f052f59e4b5b4ddcf9b86745c",
+        "revision": "07aa767db1a6ca05f4bff05acbabe6637d451e13",
         "test_contexts": [
           {
             "code_firstlineno": 19,
@@ -20557,7 +20749,7 @@
         ],
         "kind": "unittest declaration and explicit main entry",
         "main_line": 119,
-        "revision": "f976bc1b87d0321f052f59e4b5b4ddcf9b86745c",
+        "revision": "07aa767db1a6ca05f4bff05acbabe6637d451e13",
         "test_contexts": [
           {
             "code_firstlineno": 13,
@@ -20703,7 +20895,7 @@
         ],
         "kind": "unittest declaration and explicit main entry",
         "main_line": 169,
-        "revision": "f976bc1b87d0321f052f59e4b5b4ddcf9b86745c",
+        "revision": "07aa767db1a6ca05f4bff05acbabe6637d451e13",
         "test_contexts": [
           {
             "code_firstlineno": 14,
@@ -20944,7 +21136,7 @@
         ],
         "kind": "unittest declaration and explicit main entry",
         "main_line": 116,
-        "revision": "f976bc1b87d0321f052f59e4b5b4ddcf9b86745c",
+        "revision": "07aa767db1a6ca05f4bff05acbabe6637d451e13",
         "test_contexts": [
           {
             "code_firstlineno": 35,
@@ -21186,7 +21378,7 @@
         ],
         "kind": "unittest declaration and explicit main entry",
         "main_line": 230,
-        "revision": "f976bc1b87d0321f052f59e4b5b4ddcf9b86745c",
+        "revision": "07aa767db1a6ca05f4bff05acbabe6637d451e13",
         "test_contexts": [
           {
             "code_firstlineno": 23,
@@ -21368,7 +21560,7 @@
         ],
         "kind": "unittest declaration and explicit main entry",
         "main_line": 63,
-        "revision": "f976bc1b87d0321f052f59e4b5b4ddcf9b86745c",
+        "revision": "07aa767db1a6ca05f4bff05acbabe6637d451e13",
         "test_contexts": [
           {
             "code_firstlineno": 25,
@@ -21444,7 +21636,7 @@
         ],
         "kind": "unittest declaration and explicit main entry",
         "main_line": 46,
-        "revision": "f976bc1b87d0321f052f59e4b5b4ddcf9b86745c",
+        "revision": "07aa767db1a6ca05f4bff05acbabe6637d451e13",
         "test_contexts": [
           {
             "code_firstlineno": 7,
@@ -21591,7 +21783,7 @@
         ],
         "kind": "unittest declaration and explicit main entry",
         "main_line": 136,
-        "revision": "f976bc1b87d0321f052f59e4b5b4ddcf9b86745c",
+        "revision": "07aa767db1a6ca05f4bff05acbabe6637d451e13",
         "test_contexts": [
           {
             "code_firstlineno": 14,
@@ -21682,7 +21874,7 @@
         ],
         "kind": "unittest declaration and explicit main entry",
         "main_line": 61,
-        "revision": "f976bc1b87d0321f052f59e4b5b4ddcf9b86745c",
+        "revision": "07aa767db1a6ca05f4bff05acbabe6637d451e13",
         "test_contexts": [
           {
             "code_firstlineno": 15,
@@ -22032,6 +22224,13 @@
       "kind": "gate",
       "location": "scripts/coord-tools/gate.sh:1",
       "path": "scripts/coord-tools/gate.sh"
+    },
+    "scripts/lean-budget/test_check.py": {
+      "command": "python3 -B scripts/lean-budget/test_check.py",
+      "cwd": ".",
+      "kind": "CI",
+      "location": ".github/workflows/lean-budget.yml:16",
+      "path": "scripts/lean-budget/test_check.py"
     },
     "scripts/site/export.mjs": {
       "command": "node scripts/site/export.mjs --project Solidity --out _site",
@@ -22391,7 +22590,7 @@
     }
   },
   "goal_decl": null,
-  "measured_revision": "f976bc1b87d0321f052f59e4b5b4ddcf9b86745c",
+  "measured_revision": "07aa767db1a6ca05f4bff05acbabe6637d451e13",
   "policy_scans": {
     "private-paths": {
       "eligibility": "Secondary coverage only; test, runnable entry point, Lean root or fixture-specific use is required for keep",
@@ -22481,7 +22680,7 @@
               "--evidence",
               "--lean"
             ],
-            "revision": "f976bc1b87d0321f052f59e4b5b4ddcf9b86745c"
+            "revision": "07aa767db1a6ca05f4bff05acbabe6637d451e13"
           },
           "source_blob": "422b13e5bc7bc987e87c86cbd709078eefd0cfb3",
           "source_demonstration_revision": "9990777843ea8e47fe455c8815bfbac159504abb",
@@ -22552,7 +22751,7 @@
               "--evidence",
               "--lean"
             ],
-            "revision": "f976bc1b87d0321f052f59e4b5b4ddcf9b86745c"
+            "revision": "07aa767db1a6ca05f4bff05acbabe6637d451e13"
           },
           "source_blob": "682be2da2571b069f46bb3f0ae29e1f1fe03caae",
           "source_demonstration_revision": "9990777843ea8e47fe455c8815bfbac159504abb",
@@ -33951,8 +34150,8 @@
           "token": "check"
         },
         {
-          "location": ".github/workflows/lean.yml:34",
-          "token": "check"
+          "location": ".github/workflows/lean-budget.yml:2",
+          "token": "scripts/lean-budget/check.py"
         }
       ],
       "secondary": {
@@ -38319,7 +38518,7 @@
             ],
             "kind": "unittest declaration and explicit main entry",
             "main_line": 61,
-            "revision": "f976bc1b87d0321f052f59e4b5b4ddcf9b86745c",
+            "revision": "07aa767db1a6ca05f4bff05acbabe6637d451e13",
             "test_contexts": [
               {
                 "code_firstlineno": 15,
@@ -38769,7 +38968,7 @@
             ],
             "kind": "unittest declaration and explicit main entry",
             "main_line": 75,
-            "revision": "f976bc1b87d0321f052f59e4b5b4ddcf9b86745c",
+            "revision": "07aa767db1a6ca05f4bff05acbabe6637d451e13",
             "test_contexts": [
               {
                 "code_firstlineno": 37,
@@ -38934,7 +39133,7 @@
             ],
             "kind": "unittest declaration and explicit main entry",
             "main_line": 48,
-            "revision": "f976bc1b87d0321f052f59e4b5b4ddcf9b86745c",
+            "revision": "07aa767db1a6ca05f4bff05acbabe6637d451e13",
             "test_contexts": [
               {
                 "code_firstlineno": 13,
@@ -40014,7 +40213,7 @@
               "--archive",
               "--commit"
             ],
-            "revision": "f976bc1b87d0321f052f59e4b5b4ddcf9b86745c"
+            "revision": "07aa767db1a6ca05f4bff05acbabe6637d451e13"
           },
           "source_blob": "223e96d3fa285f4e838393e9e9afad342bc1d1fc",
           "source_demonstration_revision": "9990777843ea8e47fe455c8815bfbac159504abb",
@@ -40946,7 +41145,7 @@
             "required_options": [
               "--lean"
             ],
-            "revision": "f976bc1b87d0321f052f59e4b5b4ddcf9b86745c"
+            "revision": "07aa767db1a6ca05f4bff05acbabe6637d451e13"
           },
           "source_blob": "ca23eb7d445d4c99f560c70a6c5cb8b6748985c5",
           "source_demonstration_revision": "9990777843ea8e47fe455c8815bfbac159504abb",
@@ -42533,7 +42732,7 @@
             ],
             "kind": "unittest declaration and explicit main entry",
             "main_line": 34,
-            "revision": "f976bc1b87d0321f052f59e4b5b4ddcf9b86745c",
+            "revision": "07aa767db1a6ca05f4bff05acbabe6637d451e13",
             "test_contexts": [
               {
                 "code_firstlineno": 14,
@@ -42986,7 +43185,7 @@
               "--repo",
               "--source-census"
             ],
-            "revision": "f976bc1b87d0321f052f59e4b5b4ddcf9b86745c"
+            "revision": "07aa767db1a6ca05f4bff05acbabe6637d451e13"
           },
           "source_blob": "7745ef63eb65f01e5dfe9835ac84bf84f1841c9d",
           "source_demonstration_revision": "9990777843ea8e47fe455c8815bfbac159504abb",
@@ -43159,7 +43358,7 @@
               "--lean",
               "--repo"
             ],
-            "revision": "f976bc1b87d0321f052f59e4b5b4ddcf9b86745c"
+            "revision": "07aa767db1a6ca05f4bff05acbabe6637d451e13"
           },
           "source_blob": "26a9ed6ed79d6252dbb1299b3336d8e9ad8d8fb0",
           "source_demonstration_revision": "9990777843ea8e47fe455c8815bfbac159504abb",
@@ -43290,7 +43489,7 @@
             "required_options": [
               "--evidence"
             ],
-            "revision": "f976bc1b87d0321f052f59e4b5b4ddcf9b86745c"
+            "revision": "07aa767db1a6ca05f4bff05acbabe6637d451e13"
           },
           "source_blob": "675133d51e0202e01e5cf4532a26996debb4371e",
           "source_demonstration_revision": "9990777843ea8e47fe455c8815bfbac159504abb",
@@ -43385,7 +43584,7 @@
               "--evidence",
               "--lean"
             ],
-            "revision": "f976bc1b87d0321f052f59e4b5b4ddcf9b86745c"
+            "revision": "07aa767db1a6ca05f4bff05acbabe6637d451e13"
           },
           "source_blob": "35b0e13c4ed30a28724f454e3d110ea33217b0ed",
           "source_demonstration_revision": "9990777843ea8e47fe455c8815bfbac159504abb",
@@ -43465,7 +43664,7 @@
             "operation": "entered measured Python module; no fixture consumption credit",
             "source": "tests/h62/item2/audit-calculus/test_bulk_inputs.py",
             "target": "scripts/h62/item2/audit-calculus/bulk_inputs.py",
-            "validated_for": "validated:tests/h62/item2/audit-calculus/test_bulk_inputs.py:module:55670bee904810229d12f25b358f129a9e044f62d0c331985bfcf90bccaa3853"
+            "validated_for": "validated:tests/h62/item2/audit-calculus/test_bulk_inputs.py:module:cf1c683d32368f97702d08e56b4df095b2da4c9f9f5436d224169d8d7c0b0ad5"
           }
         ],
         "entry": {
@@ -43492,7 +43691,7 @@
           "runner_kind": "unittest",
           "source_blob": "e966c7b99f53e997430aa99ca965db3b33940447"
         },
-        "root": "validated:tests/h62/item2/audit-calculus/test_bulk_inputs.py:module:55670bee904810229d12f25b358f129a9e044f62d0c331985bfcf90bccaa3853"
+        "root": "validated:tests/h62/item2/audit-calculus/test_bulk_inputs.py:module:cf1c683d32368f97702d08e56b4df095b2da4c9f9f5436d224169d8d7c0b0ad5"
       },
       "search_candidates": [
         {
@@ -43557,7 +43756,7 @@
             "operation": "entered measured Python module; no fixture consumption credit",
             "source": "tests/h62/item2/audit-calculus/test_census.py",
             "target": "scripts/h62/item2/audit-calculus/census.py",
-            "validated_for": "validated:tests/h62/item2/audit-calculus/test_census.py:module:3758b5486f2167ed7ff58e2a3819406a02afd24205f489b7eec6f41fe7022989"
+            "validated_for": "validated:tests/h62/item2/audit-calculus/test_census.py:module:c46b7d00a122f353e5242dffde7e7f6eebadf3a3fc9ea67ccb4ab2e02577ae57"
           }
         ],
         "entry": {
@@ -43584,7 +43783,7 @@
           "runner_kind": "unittest",
           "source_blob": "049292b3e1f72cd6f5ba59bb01ac4933bb5c1dd7"
         },
-        "root": "validated:tests/h62/item2/audit-calculus/test_census.py:module:3758b5486f2167ed7ff58e2a3819406a02afd24205f489b7eec6f41fe7022989"
+        "root": "validated:tests/h62/item2/audit-calculus/test_census.py:module:c46b7d00a122f353e5242dffde7e7f6eebadf3a3fc9ea67ccb4ab2e02577ae57"
       },
       "search_candidates": [
         {
@@ -43649,7 +43848,7 @@
             "operation": "entered measured Python module; no fixture consumption credit",
             "source": "tests/h62/item2/audit-calculus/test_semantic_classification.py",
             "target": "scripts/h62/item2/audit-calculus/classify_frozen_signatures.py",
-            "validated_for": "validated:tests/h62/item2/audit-calculus/test_semantic_classification.py:module:12e2a711678a0216a1db866fd79111a06389124afd0734506fd979f53f6f5dc5"
+            "validated_for": "validated:tests/h62/item2/audit-calculus/test_semantic_classification.py:module:d153fc255ec80b6a3c9694ebe93de658d330afd7c76a0968d0bf2ba9e01c0e58"
           }
         ],
         "entry": {
@@ -43676,7 +43875,7 @@
           "runner_kind": "unittest",
           "source_blob": "767d10cb27be5c6f5504627a07ac8ded1a3b0806"
         },
-        "root": "validated:tests/h62/item2/audit-calculus/test_semantic_classification.py:module:12e2a711678a0216a1db866fd79111a06389124afd0734506fd979f53f6f5dc5"
+        "root": "validated:tests/h62/item2/audit-calculus/test_semantic_classification.py:module:d153fc255ec80b6a3c9694ebe93de658d330afd7c76a0968d0bf2ba9e01c0e58"
       },
       "search_candidates": [
         {
@@ -43721,7 +43920,7 @@
             "operation": "entered measured Python module; no fixture consumption credit",
             "source": "tests/h62/item2/audit-calculus/test_guarded_acceptance.py",
             "target": "scripts/h62/item2/audit-calculus/guarded_acceptance.py",
-            "validated_for": "validated:tests/h62/item2/audit-calculus/test_guarded_acceptance.py:module:c9c8180a36090e5d2dd4b4b70bc19cfc12553d129dc8555ba72549509d19d646"
+            "validated_for": "validated:tests/h62/item2/audit-calculus/test_guarded_acceptance.py:module:bd9d2993bf51628b632f52fe98dd8e99e0914dfa5b97e67ed6dcd11af23168c2"
           }
         ],
         "entry": {
@@ -43748,7 +43947,7 @@
           "runner_kind": "unittest",
           "source_blob": "212536e7cdcc6a043cd61a43978dea06d78d9065"
         },
-        "root": "validated:tests/h62/item2/audit-calculus/test_guarded_acceptance.py:module:c9c8180a36090e5d2dd4b4b70bc19cfc12553d129dc8555ba72549509d19d646"
+        "root": "validated:tests/h62/item2/audit-calculus/test_guarded_acceptance.py:module:bd9d2993bf51628b632f52fe98dd8e99e0914dfa5b97e67ed6dcd11af23168c2"
       },
       "search_candidates": [
         {
@@ -44050,7 +44249,7 @@
             "operation": "entered measured Python module; no fixture consumption credit",
             "source": "tests/h62/item2/audit-calculus/test_handoff_index.py",
             "target": "scripts/h62/item2/audit-calculus/handoff_index.py",
-            "validated_for": "validated:tests/h62/item2/audit-calculus/test_handoff_index.py:module:5f035265561d959cfb640f4bac6223ea21cd3b931519918c2172a19b4d8496a5"
+            "validated_for": "validated:tests/h62/item2/audit-calculus/test_handoff_index.py:module:f8864532494a5820e2bc72aa08aae86a78dd7a255907a57d34d2a6d6ce3f092c"
           }
         ],
         "entry": {
@@ -44077,7 +44276,7 @@
           "runner_kind": "unittest",
           "source_blob": "873df01e20af8815478c9bd3ffd5550f69624ad2"
         },
-        "root": "validated:tests/h62/item2/audit-calculus/test_handoff_index.py:module:5f035265561d959cfb640f4bac6223ea21cd3b931519918c2172a19b4d8496a5"
+        "root": "validated:tests/h62/item2/audit-calculus/test_handoff_index.py:module:f8864532494a5820e2bc72aa08aae86a78dd7a255907a57d34d2a6d6ce3f092c"
       },
       "search_candidates": [
         {
@@ -44180,7 +44379,7 @@
             "operation": "entered measured Python module; no fixture consumption credit",
             "source": "tests/h62/item2/audit-calculus/test_receipts.py",
             "target": "scripts/h62/item2/audit-calculus/receipts.py",
-            "validated_for": "validated:tests/h62/item2/audit-calculus/test_receipts.py:module:a3c06915fc69afd4ed34b0d8aec1eed5570c603763b34334a508ae928edca80c"
+            "validated_for": "validated:tests/h62/item2/audit-calculus/test_receipts.py:module:08d00aeab7c6d65adbb4176099e9479db5352b53da0edf6637ef2aa88f89cd61"
           }
         ],
         "entry": {
@@ -44207,7 +44406,7 @@
           "runner_kind": "unittest",
           "source_blob": "68da1e61d3c0abb61e12398ef9bb0240da55df58"
         },
-        "root": "validated:tests/h62/item2/audit-calculus/test_receipts.py:module:a3c06915fc69afd4ed34b0d8aec1eed5570c603763b34334a508ae928edca80c"
+        "root": "validated:tests/h62/item2/audit-calculus/test_receipts.py:module:08d00aeab7c6d65adbb4176099e9479db5352b53da0edf6637ef2aa88f89cd61"
       },
       "search_candidates": [
         {
@@ -44272,7 +44471,7 @@
             "operation": "entered measured Python module; no fixture consumption credit",
             "source": "tests/h62/item2/audit-calculus/test_reconcile.py",
             "target": "scripts/h62/item2/audit-calculus/reconcile.py",
-            "validated_for": "validated:tests/h62/item2/audit-calculus/test_reconcile.py:module:ee0bc89945b5f108d41b43e14590ff0dfbd36a1e75cd2591f0d1755f641fd208"
+            "validated_for": "validated:tests/h62/item2/audit-calculus/test_reconcile.py:module:2601a04c0e7b31e1deda7560641a6ab707298bb31966c6aa5c7bc94ed48530c7"
           }
         ],
         "entry": {
@@ -44299,7 +44498,7 @@
           "runner_kind": "unittest",
           "source_blob": "a10452c60df5311a27fef8722bb5e06e3f40f488"
         },
-        "root": "validated:tests/h62/item2/audit-calculus/test_reconcile.py:module:ee0bc89945b5f108d41b43e14590ff0dfbd36a1e75cd2591f0d1755f641fd208"
+        "root": "validated:tests/h62/item2/audit-calculus/test_reconcile.py:module:2601a04c0e7b31e1deda7560641a6ab707298bb31966c6aa5c7bc94ed48530c7"
       },
       "search_candidates": [
         {
@@ -44364,7 +44563,7 @@
             "operation": "entered measured Python module; no fixture consumption credit",
             "source": "tests/h62/item2/audit-calculus/test_frozen_recovery.py",
             "target": "scripts/h62/item2/audit-calculus/recover_frozen_census.py",
-            "validated_for": "validated:tests/h62/item2/audit-calculus/test_frozen_recovery.py:module:d588513a467c2b310fa44fd7b11f9d1dad43e877f0910649b6eb9c744ad4608e"
+            "validated_for": "validated:tests/h62/item2/audit-calculus/test_frozen_recovery.py:module:a109a1507544621722ad728222413db4543d8cbcd3e27b96b292ebeb8bbe9155"
           }
         ],
         "entry": {
@@ -44391,7 +44590,7 @@
           "runner_kind": "unittest",
           "source_blob": "41f94bcaabe51e9b6afb9d2e043aff2a370c208b"
         },
-        "root": "validated:tests/h62/item2/audit-calculus/test_frozen_recovery.py:module:d588513a467c2b310fa44fd7b11f9d1dad43e877f0910649b6eb9c744ad4608e"
+        "root": "validated:tests/h62/item2/audit-calculus/test_frozen_recovery.py:module:a109a1507544621722ad728222413db4543d8cbcd3e27b96b292ebeb8bbe9155"
       },
       "search_candidates": [
         {
@@ -44428,7 +44627,7 @@
             "operation": "entered measured Python module; no fixture consumption credit",
             "source": "tests/h62/item2/audit-calculus/test_standing_owners.py",
             "target": "scripts/h62/item2/audit-calculus/standing_owners.py",
-            "validated_for": "validated:tests/h62/item2/audit-calculus/test_standing_owners.py:module:64b8371eaac48913df45be52462af8156b4c6da547411f6cbf0c5047bf5e25ea"
+            "validated_for": "validated:tests/h62/item2/audit-calculus/test_standing_owners.py:module:283e42bac6ea693f43aa2715be46c0592cff2187b128d7a0bf59619160cf07e5"
           }
         ],
         "entry": {
@@ -44455,7 +44654,7 @@
           "runner_kind": "unittest",
           "source_blob": "55e3837cbb78a61206ba4b4b0416a0c95b4f5b58"
         },
-        "root": "validated:tests/h62/item2/audit-calculus/test_standing_owners.py:module:64b8371eaac48913df45be52462af8156b4c6da547411f6cbf0c5047bf5e25ea"
+        "root": "validated:tests/h62/item2/audit-calculus/test_standing_owners.py:module:283e42bac6ea693f43aa2715be46c0592cff2187b128d7a0bf59619160cf07e5"
       },
       "search_candidates": [
         {
@@ -44492,7 +44691,7 @@
             "operation": "entered measured Python module; no fixture consumption credit",
             "source": "tests/h62/item2/audit-calculus/test_packet_transition.py",
             "target": "scripts/h62/item2/audit-calculus/verify_packet_transition.py",
-            "validated_for": "validated:tests/h62/item2/audit-calculus/test_packet_transition.py:module:8cd6ccd09a2ead3957440b184d2cd06641bb38aa2ef2bab4b57504576965d6d8"
+            "validated_for": "validated:tests/h62/item2/audit-calculus/test_packet_transition.py:module:3f1fa89488a50effd35b0f84c6f85866052cc115687b792ebf4a3aa9689df778"
           }
         ],
         "entry": {
@@ -44519,7 +44718,7 @@
           "runner_kind": "unittest",
           "source_blob": "135dcd08d9b6489268377602011de0dcebd83838"
         },
-        "root": "validated:tests/h62/item2/audit-calculus/test_packet_transition.py:module:8cd6ccd09a2ead3957440b184d2cd06641bb38aa2ef2bab4b57504576965d6d8"
+        "root": "validated:tests/h62/item2/audit-calculus/test_packet_transition.py:module:3f1fa89488a50effd35b0f84c6f85866052cc115687b792ebf4a3aa9689df778"
       },
       "search_candidates": [
         {
@@ -47246,7 +47445,7 @@
             "operation": "entered measured Python module; no fixture consumption credit",
             "source": "scripts/h62/item2/audit-language/test_source_roles.py",
             "target": "scripts/h62/item2/audit-language/census.py",
-            "validated_for": "validated:scripts/h62/item2/audit-language/test_source_roles.py:module:b20f0cf3c6c74ce9e179f7364963e2adaf34eeaf52055e00e0c50f59fba9803d"
+            "validated_for": "validated:scripts/h62/item2/audit-language/test_source_roles.py:module:69c91d1caa6e164f31a4b0127c4391bd467327b9f1ba8b318466bc629750c801"
           }
         ],
         "entry": {
@@ -47273,7 +47472,7 @@
           "runner_kind": "unittest",
           "source_blob": "8425d6d046fac59ffacc1c2ba2a67c0c7b4aa926"
         },
-        "root": "validated:scripts/h62/item2/audit-language/test_source_roles.py:module:b20f0cf3c6c74ce9e179f7364963e2adaf34eeaf52055e00e0c50f59fba9803d"
+        "root": "validated:scripts/h62/item2/audit-language/test_source_roles.py:module:69c91d1caa6e164f31a4b0127c4391bd467327b9f1ba8b318466bc629750c801"
       },
       "search_candidates": [
         {
@@ -47361,8 +47560,8 @@
           "token": "check"
         },
         {
-          "location": ".github/workflows/lean.yml:34",
-          "token": "check"
+          "location": ".github/workflows/lean-budget.yml:2",
+          "token": "scripts/lean-budget/check.py"
         }
       ],
       "secondary": {
@@ -47421,7 +47620,7 @@
             "operation": "entered measured Python module; no fixture consumption credit",
             "source": "scripts/h62/item2/audit-language/test_source_roles.py",
             "target": "scripts/h62/item2/audit-language/source_roles.py",
-            "validated_for": "validated:scripts/h62/item2/audit-language/test_source_roles.py:module:8a023ffd1c62955895d9a7199827050e8d8e7abd3eb39319425866f8d675da12"
+            "validated_for": "validated:scripts/h62/item2/audit-language/test_source_roles.py:module:54a0b8ebe5638626edd1f8635b9d9c2efda54ca4bfcd475790f612be8f895eef"
           },
           {
             "kind": "executes",
@@ -47429,7 +47628,7 @@
             "operation": "entered measured Python module; no fixture consumption credit",
             "source": "scripts/h62/item2/audit-language/source_roles.py",
             "target": "scripts/h62/item2/audit-language/classify.py",
-            "validated_for": "validated:scripts/h62/item2/audit-language/test_source_roles.py:module:8a023ffd1c62955895d9a7199827050e8d8e7abd3eb39319425866f8d675da12"
+            "validated_for": "validated:scripts/h62/item2/audit-language/test_source_roles.py:module:54a0b8ebe5638626edd1f8635b9d9c2efda54ca4bfcd475790f612be8f895eef"
           }
         ],
         "entry": {
@@ -47456,7 +47655,7 @@
           "runner_kind": "unittest",
           "source_blob": "8425d6d046fac59ffacc1c2ba2a67c0c7b4aa926"
         },
-        "root": "validated:scripts/h62/item2/audit-language/test_source_roles.py:module:8a023ffd1c62955895d9a7199827050e8d8e7abd3eb39319425866f8d675da12"
+        "root": "validated:scripts/h62/item2/audit-language/test_source_roles.py:module:54a0b8ebe5638626edd1f8635b9d9c2efda54ca4bfcd475790f612be8f895eef"
       },
       "search_candidates": [
         {
@@ -47746,7 +47945,7 @@
             "operation": "entered measured Python module; no fixture consumption credit",
             "source": "scripts/h62/item2/audit-language/test_source_roles.py",
             "target": "scripts/h62/item2/audit-language/test_source_roles.py",
-            "validated_for": "validated:scripts/h62/item2/audit-language/test_source_roles.py:module:1899df0a573084768eaebb27a6dee6ee7a9501a53fb357b1a273f9c5b933c8fe"
+            "validated_for": "validated:scripts/h62/item2/audit-language/test_source_roles.py:module:e570301f9a0e1de8f6d9882fbcbf96c0187f5048eb426ba893b225413a9c988e"
           },
           {
             "kind": "executes",
@@ -47754,7 +47953,7 @@
             "operation": "entered measured Python module; no fixture consumption credit",
             "source": "scripts/h62/item2/audit-language/test_source_roles.py",
             "target": "scripts/h62/item2/audit-language/test_source_roles.py",
-            "validated_for": "validated:scripts/h62/item2/audit-language/test_source_roles.py:module:1899df0a573084768eaebb27a6dee6ee7a9501a53fb357b1a273f9c5b933c8fe"
+            "validated_for": "validated:scripts/h62/item2/audit-language/test_source_roles.py:module:e570301f9a0e1de8f6d9882fbcbf96c0187f5048eb426ba893b225413a9c988e"
           },
           {
             "kind": "executes",
@@ -47762,7 +47961,7 @@
             "operation": "entered measured Python module; no fixture consumption credit",
             "source": "scripts/h62/item2/audit-language/test_source_roles.py",
             "target": "scripts/h62/item2/audit-language/refine_remaining.py",
-            "validated_for": "validated:scripts/h62/item2/audit-language/test_source_roles.py:module:1899df0a573084768eaebb27a6dee6ee7a9501a53fb357b1a273f9c5b933c8fe"
+            "validated_for": "validated:scripts/h62/item2/audit-language/test_source_roles.py:module:e570301f9a0e1de8f6d9882fbcbf96c0187f5048eb426ba893b225413a9c988e"
           }
         ],
         "entry": {
@@ -47789,7 +47988,7 @@
           "runner_kind": "unittest",
           "source_blob": "8425d6d046fac59ffacc1c2ba2a67c0c7b4aa926"
         },
-        "root": "validated:scripts/h62/item2/audit-language/test_source_roles.py:module:1899df0a573084768eaebb27a6dee6ee7a9501a53fb357b1a273f9c5b933c8fe"
+        "root": "validated:scripts/h62/item2/audit-language/test_source_roles.py:module:e570301f9a0e1de8f6d9882fbcbf96c0187f5048eb426ba893b225413a9c988e"
       },
       "search_candidates": [
         {
@@ -47982,7 +48181,7 @@
             "operation": "entered measured Python module; no fixture consumption credit",
             "source": "scripts/h62/item2/audit-language/test_source_roles.py",
             "target": "scripts/h62/item2/audit-language/source_roles.py",
-            "validated_for": "validated:scripts/h62/item2/audit-language/test_source_roles.py:module:18a5e237894428d95ab93483f59f34adf649ec31d207fe21248b7bf11c2a0a29"
+            "validated_for": "validated:scripts/h62/item2/audit-language/test_source_roles.py:module:b2ceb10942c14dc952a97de87019bdf923979b4f638ce541a73f2918a494fd03"
           },
           {
             "kind": "executes",
@@ -47990,7 +48189,7 @@
             "operation": "entered measured Python module; no fixture consumption credit",
             "source": "scripts/h62/item2/audit-language/source_roles.py",
             "target": "scripts/h62/item2/audit-language/source_only.py",
-            "validated_for": "validated:scripts/h62/item2/audit-language/test_source_roles.py:module:18a5e237894428d95ab93483f59f34adf649ec31d207fe21248b7bf11c2a0a29"
+            "validated_for": "validated:scripts/h62/item2/audit-language/test_source_roles.py:module:b2ceb10942c14dc952a97de87019bdf923979b4f638ce541a73f2918a494fd03"
           }
         ],
         "entry": {
@@ -48017,7 +48216,7 @@
           "runner_kind": "unittest",
           "source_blob": "8425d6d046fac59ffacc1c2ba2a67c0c7b4aa926"
         },
-        "root": "validated:scripts/h62/item2/audit-language/test_source_roles.py:module:18a5e237894428d95ab93483f59f34adf649ec31d207fe21248b7bf11c2a0a29"
+        "root": "validated:scripts/h62/item2/audit-language/test_source_roles.py:module:b2ceb10942c14dc952a97de87019bdf923979b4f638ce541a73f2918a494fd03"
       },
       "search_candidates": [
         {
@@ -48062,7 +48261,7 @@
             "operation": "entered measured Python module; no fixture consumption credit",
             "source": "scripts/h62/item2/audit-language/test_source_roles.py",
             "target": "scripts/h62/item2/audit-language/source_roles.py",
-            "validated_for": "validated:scripts/h62/item2/audit-language/test_source_roles.py:module:8a023ffd1c62955895d9a7199827050e8d8e7abd3eb39319425866f8d675da12"
+            "validated_for": "validated:scripts/h62/item2/audit-language/test_source_roles.py:module:54a0b8ebe5638626edd1f8635b9d9c2efda54ca4bfcd475790f612be8f895eef"
           }
         ],
         "entry": {
@@ -48089,7 +48288,7 @@
           "runner_kind": "unittest",
           "source_blob": "8425d6d046fac59ffacc1c2ba2a67c0c7b4aa926"
         },
-        "root": "validated:scripts/h62/item2/audit-language/test_source_roles.py:module:8a023ffd1c62955895d9a7199827050e8d8e7abd3eb39319425866f8d675da12"
+        "root": "validated:scripts/h62/item2/audit-language/test_source_roles.py:module:54a0b8ebe5638626edd1f8635b9d9c2efda54ca4bfcd475790f612be8f895eef"
       },
       "search_candidates": [
         {
@@ -49455,7 +49654,7 @@
             ],
             "kind": "unittest declaration and explicit main entry",
             "main_line": 45,
-            "revision": "f976bc1b87d0321f052f59e4b5b4ddcf9b86745c",
+            "revision": "07aa767db1a6ca05f4bff05acbabe6637d451e13",
             "test_contexts": [
               {
                 "code_firstlineno": 7,
@@ -49598,7 +49797,7 @@
             ],
             "kind": "unittest declaration and explicit main entry",
             "main_line": 31,
-            "revision": "f976bc1b87d0321f052f59e4b5b4ddcf9b86745c",
+            "revision": "07aa767db1a6ca05f4bff05acbabe6637d451e13",
             "test_contexts": [
               {
                 "code_firstlineno": 7,
@@ -49721,7 +49920,7 @@
             ],
             "kind": "unittest declaration and explicit main entry",
             "main_line": 94,
-            "revision": "f976bc1b87d0321f052f59e4b5b4ddcf9b86745c",
+            "revision": "07aa767db1a6ca05f4bff05acbabe6637d451e13",
             "test_contexts": [
               {
                 "code_firstlineno": 8,
@@ -49922,7 +50121,7 @@
             ],
             "kind": "unittest declaration and explicit main entry",
             "main_line": 78,
-            "revision": "f976bc1b87d0321f052f59e4b5b4ddcf9b86745c",
+            "revision": "07aa767db1a6ca05f4bff05acbabe6637d451e13",
             "test_contexts": [
               {
                 "code_firstlineno": 7,
@@ -52602,7 +52801,7 @@
             ],
             "kind": "unittest declaration and explicit main entry",
             "main_line": 101,
-            "revision": "f976bc1b87d0321f052f59e4b5b4ddcf9b86745c",
+            "revision": "07aa767db1a6ca05f4bff05acbabe6637d451e13",
             "test_contexts": [
               {
                 "code_firstlineno": 17,
@@ -52839,7 +53038,7 @@
             ],
             "kind": "unittest declaration and explicit main entry",
             "main_line": 49,
-            "revision": "f976bc1b87d0321f052f59e4b5b4ddcf9b86745c",
+            "revision": "07aa767db1a6ca05f4bff05acbabe6637d451e13",
             "test_contexts": [
               {
                 "code_firstlineno": 13,
@@ -52928,7 +53127,7 @@
             ],
             "kind": "unittest declaration and explicit main entry",
             "main_line": 38,
-            "revision": "f976bc1b87d0321f052f59e4b5b4ddcf9b86745c",
+            "revision": "07aa767db1a6ca05f4bff05acbabe6637d451e13",
             "test_contexts": [
               {
                 "code_firstlineno": 11,
@@ -53240,7 +53439,7 @@
             ],
             "kind": "unittest declaration and explicit main entry",
             "main_line": 49,
-            "revision": "f976bc1b87d0321f052f59e4b5b4ddcf9b86745c",
+            "revision": "07aa767db1a6ca05f4bff05acbabe6637d451e13",
             "test_contexts": [
               {
                 "code_firstlineno": 13,
@@ -53330,7 +53529,7 @@
             ],
             "kind": "unittest declaration and explicit main entry",
             "main_line": 89,
-            "revision": "f976bc1b87d0321f052f59e4b5b4ddcf9b86745c",
+            "revision": "07aa767db1a6ca05f4bff05acbabe6637d451e13",
             "test_contexts": [
               {
                 "code_firstlineno": 16,
@@ -53638,7 +53837,7 @@
             ],
             "kind": "unittest declaration and explicit main entry",
             "main_line": 27,
-            "revision": "f976bc1b87d0321f052f59e4b5b4ddcf9b86745c",
+            "revision": "07aa767db1a6ca05f4bff05acbabe6637d451e13",
             "test_contexts": [
               {
                 "code_firstlineno": 9,
@@ -53805,7 +54004,7 @@
             ],
             "kind": "unittest declaration and explicit main entry",
             "main_line": 77,
-            "revision": "f976bc1b87d0321f052f59e4b5b4ddcf9b86745c",
+            "revision": "07aa767db1a6ca05f4bff05acbabe6637d451e13",
             "test_contexts": [
               {
                 "code_firstlineno": 18,
@@ -54653,7 +54852,7 @@
             "operation": "validated Python call stack",
             "source": "scripts/h62/item2/audit-theories/test_import_paths.py",
             "target": "scripts/h62/item2/audit-theories/verify_census.py",
-            "validated_for": "validated:scripts/h62/item2/audit-theories/test_import_paths.py:read:0771670394734484493e9cb4a1c3d69cb689d43f4bacb030b63902c734a5385e"
+            "validated_for": "validated:scripts/h62/item2/audit-theories/test_import_paths.py:read:5fc88d409b0d4084ecf3be6d7544a6fff546744d83fc5446beb95de4cac055e0"
           },
           {
             "kind": "executes",
@@ -54661,7 +54860,7 @@
             "operation": "validated Python call stack",
             "source": "scripts/h62/item2/audit-theories/verify_census.py",
             "target": "scripts/h62/item2/audit-theories/audit_dispositions.py",
-            "validated_for": "validated:scripts/h62/item2/audit-theories/test_import_paths.py:read:0771670394734484493e9cb4a1c3d69cb689d43f4bacb030b63902c734a5385e"
+            "validated_for": "validated:scripts/h62/item2/audit-theories/test_import_paths.py:read:5fc88d409b0d4084ecf3be6d7544a6fff546744d83fc5446beb95de4cac055e0"
           }
         ],
         "entry": {
@@ -54680,7 +54879,7 @@
           "runner_kind": "unittest",
           "source_blob": "b3b629db83c041f96fcf9d4d37fde2f48f126cde"
         },
-        "root": "validated:scripts/h62/item2/audit-theories/test_import_paths.py:read:0771670394734484493e9cb4a1c3d69cb689d43f4bacb030b63902c734a5385e"
+        "root": "validated:scripts/h62/item2/audit-theories/test_import_paths.py:read:5fc88d409b0d4084ecf3be6d7544a6fff546744d83fc5446beb95de4cac055e0"
       },
       "search_candidates": [
         {
@@ -54737,7 +54936,7 @@
             "operation": "entered measured Python module; no fixture consumption credit",
             "source": "scripts/h62/item2/audit-theories/test_census.py",
             "target": "scripts/h62/item2/audit-theories/census.py",
-            "validated_for": "validated:scripts/h62/item2/audit-theories/test_census.py:module:2bb63bc11b913b62c52f7d7f2b000b0a18915af209301dd91976a2298ee532e8"
+            "validated_for": "validated:scripts/h62/item2/audit-theories/test_census.py:module:6e5659a7a00863401d4cb9c0425ea67e022a25578e217a8ef64bbc911614b45e"
           }
         ],
         "entry": {
@@ -54764,7 +54963,7 @@
           "runner_kind": "unittest",
           "source_blob": "47b57700fab39cc2c99fe8bb701dc78b514a7d17"
         },
-        "root": "validated:scripts/h62/item2/audit-theories/test_census.py:module:2bb63bc11b913b62c52f7d7f2b000b0a18915af209301dd91976a2298ee532e8"
+        "root": "validated:scripts/h62/item2/audit-theories/test_census.py:module:6e5659a7a00863401d4cb9c0425ea67e022a25578e217a8ef64bbc911614b45e"
       },
       "search_candidates": [
         {
@@ -54889,7 +55088,7 @@
           "kind": "committed CLI runner source",
           "location": "scripts/h62/item2/audit-theories/check_disposition_controls.py:41",
           "path": "scripts/h62/item2/audit-theories/check_disposition_controls.py",
-          "purpose": "Seven rejection controls for H69 role changes, operational-refusal claims, decision hash, role counts, historical-equivalence substitution and remaining-owner mutation. Historical acceptance assertions are checked data, not current authorization. Configured validation unavailable: required external audit evidence not supplied; ordinary and instrumented bare invocations exit2 for missing options. Committed runner source only; no helper, fixture, passing-reproducer, witness or proof credit.",
+          "purpose": "Seven rejection controls for H69 role changes, operational-refusal claims, decision hash, role counts, historical-equivalence substitution and remaining-owner mutation. Historical acceptance assertions are checked data, not current authorization. Configured validation unavailable: required external audit evidence not supplied; required options are absent from the command prefix. Committed runner source only; no helper, fixture, passing-reproducer, witness or proof credit.",
           "required_options": [
             "--evidence",
             "--historical-evidence",
@@ -54907,7 +55106,7 @@
               "--out",
               "--roles"
             ],
-            "revision": "f976bc1b87d0321f052f59e4b5b4ddcf9b86745c"
+            "revision": "07aa767db1a6ca05f4bff05acbabe6637d451e13"
           },
           "source_blob": "6e807347d481dd7768f2fc9d9da3976d23e1a5d1",
           "source_demonstration_revision": "f976bc1b87d0321f052f59e4b5b4ddcf9b86745c",
@@ -54955,7 +55154,7 @@
           "kind": "committed CLI runner source",
           "location": "scripts/h62/item2/audit-theories/check_evidence_controls.py:50",
           "path": "scripts/h62/item2/audit-theories/check_evidence_controls.py",
-          "purpose": "Positive receipt and corrupt hash, wrong producer, false independent-replay and explicit-module rejection controls. Configured validation unavailable: required external audit evidence not supplied; ordinary and instrumented bare invocations exit2 for missing options. Committed runner source only; no helper, fixture, passing-reproducer, witness or proof credit.",
+          "purpose": "Positive receipt and corrupt hash, wrong producer, false independent-replay and explicit-module rejection controls. Configured validation unavailable: required external audit evidence not supplied; required options are absent from the command prefix. Committed runner source only; no helper, fixture, passing-reproducer, witness or proof credit.",
           "required_options": [
             "--evidence"
           ],
@@ -54967,7 +55166,7 @@
             "required_options": [
               "--evidence"
             ],
-            "revision": "f976bc1b87d0321f052f59e4b5b4ddcf9b86745c"
+            "revision": "07aa767db1a6ca05f4bff05acbabe6637d451e13"
           },
           "source_blob": "a50f657e2df51efe2d0049a0c944d47cebce4bb3",
           "source_demonstration_revision": "f976bc1b87d0321f052f59e4b5b4ddcf9b86745c",
@@ -55045,7 +55244,7 @@
           "kind": "committed CLI runner source",
           "location": "scripts/h62/item2/audit-theories/check_leaf_role_controls.py:49",
           "path": "scripts/h62/item2/audit-theories/check_leaf_role_controls.py",
-          "purpose": "Six rehashed corruption controls for frozen leaf-extension binders, global/horizon laws, type expression and producing-route metadata. Configured validation unavailable: required external audit evidence not supplied; ordinary and instrumented bare invocations exit2 for missing options. Committed runner source only; no helper, fixture, passing-reproducer, witness or proof credit.",
+          "purpose": "Six rehashed corruption controls for frozen leaf-extension binders, global/horizon laws, type expression and producing-route metadata. Configured validation unavailable: required external audit evidence not supplied; required options are absent from the command prefix. Committed runner source only; no helper, fixture, passing-reproducer, witness or proof credit.",
           "required_options": [
             "--historical-evidence",
             "--out",
@@ -55061,7 +55260,7 @@
               "--out",
               "--proof-evidence"
             ],
-            "revision": "f976bc1b87d0321f052f59e4b5b4ddcf9b86745c"
+            "revision": "07aa767db1a6ca05f4bff05acbabe6637d451e13"
           },
           "source_blob": "5c40025618acc07c253fa061c2c801542a7bfe2e",
           "source_demonstration_revision": "f976bc1b87d0321f052f59e4b5b4ddcf9b86745c",
@@ -55114,7 +55313,7 @@
           "kind": "committed CLI runner source",
           "location": "scripts/h62/item2/audit-theories/check_mirror_role_controls.py:47",
           "path": "scripts/h62/item2/audit-theories/check_mirror_role_controls.py",
-          "purpose": "Six rehashed corruption controls for mirror late index, prefix/keeps laws, type expression and source/producer provenance. Configured validation unavailable: required external audit evidence not supplied; ordinary and instrumented bare invocations exit2 for missing options. Committed runner source only; no helper, fixture, passing-reproducer, witness or proof credit.",
+          "purpose": "Six rehashed corruption controls for mirror late index, prefix/keeps laws, type expression and source/producer provenance. Configured validation unavailable: required external audit evidence not supplied; required options are absent from the command prefix. Committed runner source only; no helper, fixture, passing-reproducer, witness or proof credit.",
           "required_options": [
             "--historical-evidence",
             "--out",
@@ -55130,7 +55329,7 @@
               "--out",
               "--proof-evidence"
             ],
-            "revision": "f976bc1b87d0321f052f59e4b5b4ddcf9b86745c"
+            "revision": "07aa767db1a6ca05f4bff05acbabe6637d451e13"
           },
           "source_blob": "69e71ae67b03f9cc903309c1e613b0f81dd3b1a3",
           "source_demonstration_revision": "f976bc1b87d0321f052f59e4b5b4ddcf9b86745c",
@@ -55201,7 +55400,7 @@
               "--archive",
               "--out"
             ],
-            "revision": "f976bc1b87d0321f052f59e4b5b4ddcf9b86745c"
+            "revision": "07aa767db1a6ca05f4bff05acbabe6637d451e13"
           },
           "source_blob": "b4d93269d25d1effa9e943a6cba3f63c88ffd4a6",
           "source_demonstration_revision": "9990777843ea8e47fe455c8815bfbac159504abb",
@@ -55254,7 +55453,7 @@
           "kind": "committed CLI runner source",
           "location": "scripts/h62/item2/audit-theories/check_path_role_controls.py:45",
           "path": "scripts/h62/item2/audit-theories/check_path_role_controls.py",
-          "purpose": "Five rehashed corruption controls for path late replacement, universal frame law, type expression and source/producer provenance. Configured validation unavailable: required external audit evidence not supplied; ordinary and instrumented bare invocations exit2 for missing options. Committed runner source only; no helper, fixture, passing-reproducer, witness or proof credit.",
+          "purpose": "Five rehashed corruption controls for path late replacement, universal frame law, type expression and source/producer provenance. Configured validation unavailable: required external audit evidence not supplied; required options are absent from the command prefix. Committed runner source only; no helper, fixture, passing-reproducer, witness or proof credit.",
           "required_options": [
             "--historical-evidence",
             "--out",
@@ -55270,7 +55469,7 @@
               "--out",
               "--proof-evidence"
             ],
-            "revision": "f976bc1b87d0321f052f59e4b5b4ddcf9b86745c"
+            "revision": "07aa767db1a6ca05f4bff05acbabe6637d451e13"
           },
           "source_blob": "1141a1f46577583ed140e1c4c454d781885b52c1",
           "source_demonstration_revision": "f976bc1b87d0321f052f59e4b5b4ddcf9b86745c",
@@ -55394,7 +55593,7 @@
             "required_options": [
               "--evidence"
             ],
-            "revision": "f976bc1b87d0321f052f59e4b5b4ddcf9b86745c"
+            "revision": "07aa767db1a6ca05f4bff05acbabe6637d451e13"
           },
           "source_blob": "a264dd0c7435a8b5f6e2a1c4bb37a34abafbe980",
           "source_demonstration_revision": "9990777843ea8e47fe455c8815bfbac159504abb",
@@ -55535,19 +55734,60 @@
     },
     {
       "blob": "c459994e09c06ade984aabd8af6483287f5f215a",
-      "class": null,
+      "class": "keep",
       "generator": null,
       "mode": "100644",
       "object_type": "blob",
       "orphan_analysis": null,
       "path": "scripts/h62/item2/audit-theories/coverage_ledger.py",
-      "reason": "No certified consumer or content-based historical role in the current model; further runner/dynamic-path analysis required.",
+      "reason": "committed CLI runner source entry point: python3 -B scripts/h62/item2/audit-theories/coverage_ledger.py",
       "recovery": {
         "blob": "c459994e09c06ade984aabd8af6483287f5f215a",
         "command": "git show 107cb28c032e3bff522ff6db0fdf0be54b2bbefd:scripts/h62/item2/audit-theories/coverage_ledger.py",
         "last_touch_commit": "107cb28c032e3bff522ff6db0fdf0be54b2bbefd"
       },
-      "runner_chain": null,
+      "runner_chain": {
+        "edges": [],
+        "entry": {
+          "command": "python3 -B scripts/h62/item2/audit-theories/coverage_ledger.py",
+          "command_form": "entry prefix; required configuration is not supplied",
+          "cwd": ".",
+          "kind": "committed CLI runner source",
+          "location": "scripts/h62/item2/audit-theories/coverage_ledger.py:80",
+          "path": "scripts/h62/item2/audit-theories/coverage_ledger.py",
+          "purpose": "Authenticates the external frozen census and reconciles original/generated obligations and certificate receipts, preserving pending records and version-fidelity separation. Bare and configured invocations unrun; configured validation unavailable without original historical/evidence prerequisites. Committed checker source only; no helper, fixture, execution, proof, witness or current-authority credit.",
+          "required_options": [
+            "--historical-evidence",
+            "--out",
+            "--proof-evidence"
+          ],
+          "role_provenance": {
+            "function_line": 17,
+            "kind": "curated local argparse entry",
+            "main_line": 80,
+            "parse_args_line": 22,
+            "required_options": [
+              "--historical-evidence",
+              "--out",
+              "--proof-evidence"
+            ],
+            "revision": "07aa767db1a6ca05f4bff05acbabe6637d451e13"
+          },
+          "source_blob": "c459994e09c06ade984aabd8af6483287f5f215a",
+          "source_demonstration_revision": "07aa767db1a6ca05f4bff05acbabe6637d451e13",
+          "source_only": true,
+          "validation_at_measured_revision": {
+            "command_prefix": [
+              "python3",
+              "-B",
+              "scripts/h62/item2/audit-theories/coverage_ledger.py"
+            ],
+            "reason": "Configured checker invocation not validated; required options are absent. Source role only, no helper/fixture or passing-reproducer credit.",
+            "status": "unavailable"
+          }
+        },
+        "root": "committed-cli:scripts/h62/item2/audit-theories/coverage_ledger.py"
+      },
       "search_candidates": [
         {
           "location": "scripts/h62/item2/audit-theories/refresh_history_acceptance.py:28",
@@ -55563,9 +55803,7 @@
           "private-paths"
         ]
       },
-      "unresolved": [
-        "UNRESOLVED_USE: candidate search is not a certified use graph or proof of non-use"
-      ]
+      "unresolved": []
     },
     {
       "blob": "f40c20a5fb16985f4dd09ebeab65247b6241ef61",
@@ -55838,7 +56076,7 @@
             "operation": "validated Python call stack",
             "source": "scripts/h62/item2/audit-theories/test_import_paths.py",
             "target": "scripts/h62/item2/audit-theories/verify_census.py",
-            "validated_for": "validated:scripts/h62/item2/audit-theories/test_import_paths.py:read:0771670394734484493e9cb4a1c3d69cb689d43f4bacb030b63902c734a5385e"
+            "validated_for": "validated:scripts/h62/item2/audit-theories/test_import_paths.py:read:5fc88d409b0d4084ecf3be6d7544a6fff546744d83fc5446beb95de4cac055e0"
           },
           {
             "kind": "executes",
@@ -55846,7 +56084,7 @@
             "operation": "validated Python call stack",
             "source": "scripts/h62/item2/audit-theories/verify_census.py",
             "target": "scripts/h62/item2/audit-theories/audit_dispositions.py",
-            "validated_for": "validated:scripts/h62/item2/audit-theories/test_import_paths.py:read:0771670394734484493e9cb4a1c3d69cb689d43f4bacb030b63902c734a5385e"
+            "validated_for": "validated:scripts/h62/item2/audit-theories/test_import_paths.py:read:5fc88d409b0d4084ecf3be6d7544a6fff546744d83fc5446beb95de4cac055e0"
           },
           {
             "kind": "consumes",
@@ -55854,7 +56092,7 @@
             "operation": "validated Python read of measured bytes",
             "source": "scripts/h62/item2/audit-theories/audit_dispositions.py",
             "target": "scripts/h62/item2/audit-theories/handoff/COORDINATOR-ANSWERS-20261107.json",
-            "validated_for": "validated:scripts/h62/item2/audit-theories/test_import_paths.py:read:0771670394734484493e9cb4a1c3d69cb689d43f4bacb030b63902c734a5385e"
+            "validated_for": "validated:scripts/h62/item2/audit-theories/test_import_paths.py:read:5fc88d409b0d4084ecf3be6d7544a6fff546744d83fc5446beb95de4cac055e0"
           }
         ],
         "entry": {
@@ -55873,7 +56111,7 @@
           "runner_kind": "unittest",
           "source_blob": "b3b629db83c041f96fcf9d4d37fde2f48f126cde"
         },
-        "root": "validated:scripts/h62/item2/audit-theories/test_import_paths.py:read:0771670394734484493e9cb4a1c3d69cb689d43f4bacb030b63902c734a5385e"
+        "root": "validated:scripts/h62/item2/audit-theories/test_import_paths.py:read:5fc88d409b0d4084ecf3be6d7544a6fff546744d83fc5446beb95de4cac055e0"
       },
       "search_candidates": [
         {
@@ -56909,7 +57147,7 @@
             "operation": "entered measured Python module; no fixture consumption credit",
             "source": "scripts/h62/item2/audit-theories/test_indexed_roles.py",
             "target": "scripts/h62/item2/audit-theories/indexed_roles.py",
-            "validated_for": "validated:scripts/h62/item2/audit-theories/test_indexed_roles.py:module:6be444262b627454695e1d1f64a5da55a4db5fddb373d9204b7810c92e2c1dbc"
+            "validated_for": "validated:scripts/h62/item2/audit-theories/test_indexed_roles.py:module:da7e1f66f0b8149b1cf735f54cc680b1f6f2eadfde658a38d25c91ff5c79696e"
           }
         ],
         "entry": {
@@ -56936,7 +57174,7 @@
           "runner_kind": "unittest",
           "source_blob": "0d96e7b54ccf6f8baf5ffe63a98d0ee62e368f13"
         },
-        "root": "validated:scripts/h62/item2/audit-theories/test_indexed_roles.py:module:6be444262b627454695e1d1f64a5da55a4db5fddb373d9204b7810c92e2c1dbc"
+        "root": "validated:scripts/h62/item2/audit-theories/test_indexed_roles.py:module:da7e1f66f0b8149b1cf735f54cc680b1f6f2eadfde658a38d25c91ff5c79696e"
       },
       "search_candidates": [
         {
@@ -56989,7 +57227,7 @@
             "operation": "entered measured Python module; no fixture consumption credit",
             "source": "scripts/h62/item2/audit-theories/test_input_roles.py",
             "target": "scripts/h62/item2/audit-theories/input_roles.py",
-            "validated_for": "validated:scripts/h62/item2/audit-theories/test_input_roles.py:module:c36d69919f7223a273491f9c1f3dc3608a9f850d38285f5fb3f6067357ce902b"
+            "validated_for": "validated:scripts/h62/item2/audit-theories/test_input_roles.py:module:a6f8e48b92efe841528069554beb40d212f42ec0149474c14d548db5a8f0ccfc"
           }
         ],
         "entry": {
@@ -57016,7 +57254,7 @@
           "runner_kind": "unittest",
           "source_blob": "e508c29d26673be869aea5f045710a4946948789"
         },
-        "root": "validated:scripts/h62/item2/audit-theories/test_input_roles.py:module:c36d69919f7223a273491f9c1f3dc3608a9f850d38285f5fb3f6067357ce902b"
+        "root": "validated:scripts/h62/item2/audit-theories/test_input_roles.py:module:a6f8e48b92efe841528069554beb40d212f42ec0149474c14d548db5a8f0ccfc"
       },
       "search_candidates": [
         {
@@ -57061,19 +57299,60 @@
     },
     {
       "blob": "8ebef1f839575345b96af5a093ae053a69456229",
-      "class": null,
+      "class": "keep",
       "generator": null,
       "mode": "100644",
       "object_type": "blob",
       "orphan_analysis": null,
       "path": "scripts/h62/item2/audit-theories/leaf_progress_input_roles.py",
-      "reason": "No certified consumer or content-based historical role in the current model; further runner/dynamic-path analysis required.",
+      "reason": "committed CLI runner source entry point: python3 -B scripts/h62/item2/audit-theories/leaf_progress_input_roles.py",
       "recovery": {
         "blob": "8ebef1f839575345b96af5a093ae053a69456229",
         "command": "git show 792bf4b3571c0bccd2c45b959a4acfe4ef56c0c3:scripts/h62/item2/audit-theories/leaf_progress_input_roles.py",
         "last_touch_commit": "792bf4b3571c0bccd2c45b959a4acfe4ef56c0c3"
       },
-      "runner_chain": null,
+      "runner_chain": {
+        "edges": [],
+        "entry": {
+          "command": "python3 -B scripts/h62/item2/audit-theories/leaf_progress_input_roles.py",
+          "command_form": "entry prefix; required configuration is not supplied",
+          "cwd": ".",
+          "kind": "committed CLI runner source",
+          "location": "scripts/h62/item2/audit-theories/leaf_progress_input_roles.py:117",
+          "path": "scripts/h62/item2/audit-theories/leaf_progress_input_roles.py",
+          "purpose": "Checks exact frozen leaf-extension source/type/binder pins and designated external receipts, retaining all-horizon law and prior-family disjointness boundaries. Bare and configured invocations unrun; configured validation unavailable without original historical/evidence prerequisites. Committed checker source only; no helper, fixture, execution, proof, witness or current-authority credit.",
+          "required_options": [
+            "--historical-evidence",
+            "--out",
+            "--proof-evidence"
+          ],
+          "role_provenance": {
+            "function_line": 90,
+            "kind": "curated local argparse entry",
+            "main_line": 117,
+            "parse_args_line": 93,
+            "required_options": [
+              "--historical-evidence",
+              "--out",
+              "--proof-evidence"
+            ],
+            "revision": "07aa767db1a6ca05f4bff05acbabe6637d451e13"
+          },
+          "source_blob": "8ebef1f839575345b96af5a093ae053a69456229",
+          "source_demonstration_revision": "07aa767db1a6ca05f4bff05acbabe6637d451e13",
+          "source_only": true,
+          "validation_at_measured_revision": {
+            "command_prefix": [
+              "python3",
+              "-B",
+              "scripts/h62/item2/audit-theories/leaf_progress_input_roles.py"
+            ],
+            "reason": "Configured checker invocation not validated; required options are absent. Source role only, no helper/fixture or passing-reproducer credit.",
+            "status": "unavailable"
+          }
+        },
+        "root": "committed-cli:scripts/h62/item2/audit-theories/leaf_progress_input_roles.py"
+      },
       "search_candidates": [
         {
           "location": "docs/feature-work/h62-2-audit-theories.md:21",
@@ -57101,9 +57380,7 @@
           "private-paths"
         ]
       },
-      "unresolved": [
-        "UNRESOLVED_USE: candidate search is not a certified use graph or proof of non-use"
-      ]
+      "unresolved": []
     },
     {
       "blob": "4b02cdfa59af8c8bbf7eedd2da6daa02d0a08055",
@@ -57127,7 +57404,7 @@
             "operation": "validated Python call stack",
             "source": "scripts/h62/item2/audit-theories/test_pair_sources.py",
             "target": "scripts/h62/item2/audit-theories/measure_census_pair.py",
-            "validated_for": "validated:scripts/h62/item2/audit-theories/test_pair_sources.py:read:e9b648060162c11ceb1a7dd9a25f2c0cb4ccce910a58ec1818bee1c6ce6dddfe"
+            "validated_for": "validated:scripts/h62/item2/audit-theories/test_pair_sources.py:read:bd4eaf41e6ee37111549f11d9f600c4093fefc42fa835776da0ddfb6945c434e"
           }
         ],
         "entry": {
@@ -57147,7 +57424,7 @@
           "runner_kind": "unittest",
           "source_blob": "425ce6d432ce3b45b8a92d05d5db79007d63e33d"
         },
-        "root": "validated:scripts/h62/item2/audit-theories/test_pair_sources.py:read:e9b648060162c11ceb1a7dd9a25f2c0cb4ccce910a58ec1818bee1c6ce6dddfe"
+        "root": "validated:scripts/h62/item2/audit-theories/test_pair_sources.py:read:bd4eaf41e6ee37111549f11d9f600c4093fefc42fa835776da0ddfb6945c434e"
       },
       "search_candidates": [
         {
@@ -57164,19 +57441,60 @@
     },
     {
       "blob": "d50e9a8d0c8ee4258bbff1668d9015012bc7830c",
-      "class": null,
+      "class": "keep",
       "generator": null,
       "mode": "100644",
       "object_type": "blob",
       "orphan_analysis": null,
       "path": "scripts/h62/item2/audit-theories/mirror_input_roles.py",
-      "reason": "No certified consumer or content-based historical role in the current model; further runner/dynamic-path analysis required.",
+      "reason": "committed CLI runner source entry point: python3 -B scripts/h62/item2/audit-theories/mirror_input_roles.py",
       "recovery": {
         "blob": "d50e9a8d0c8ee4258bbff1668d9015012bc7830c",
         "command": "git show d121e1b58a6801dc7dff41deae3fb62b82f4c598:scripts/h62/item2/audit-theories/mirror_input_roles.py",
         "last_touch_commit": "d121e1b58a6801dc7dff41deae3fb62b82f4c598"
       },
-      "runner_chain": null,
+      "runner_chain": {
+        "edges": [],
+        "entry": {
+          "command": "python3 -B scripts/h62/item2/audit-theories/mirror_input_roles.py",
+          "command_form": "entry prefix; required configuration is not supplied",
+          "cwd": ".",
+          "kind": "committed CLI runner source",
+          "location": "scripts/h62/item2/audit-theories/mirror_input_roles.py:76",
+          "path": "scripts/h62/item2/audit-theories/mirror_input_roles.py",
+          "purpose": "Checks exact frozen memory-mirror telescope/source pins and designated external receipts, separating selected-heap feasibility from global laws. Bare and configured invocations unrun; configured validation unavailable without original historical/evidence prerequisites. Committed checker source only; no helper, fixture, execution, proof, witness or current-authority credit.",
+          "required_options": [
+            "--historical-evidence",
+            "--out",
+            "--proof-evidence"
+          ],
+          "role_provenance": {
+            "function_line": 43,
+            "kind": "curated local argparse entry",
+            "main_line": 76,
+            "parse_args_line": 46,
+            "required_options": [
+              "--historical-evidence",
+              "--out",
+              "--proof-evidence"
+            ],
+            "revision": "07aa767db1a6ca05f4bff05acbabe6637d451e13"
+          },
+          "source_blob": "d50e9a8d0c8ee4258bbff1668d9015012bc7830c",
+          "source_demonstration_revision": "07aa767db1a6ca05f4bff05acbabe6637d451e13",
+          "source_only": true,
+          "validation_at_measured_revision": {
+            "command_prefix": [
+              "python3",
+              "-B",
+              "scripts/h62/item2/audit-theories/mirror_input_roles.py"
+            ],
+            "reason": "Configured checker invocation not validated; required options are absent. Source role only, no helper/fixture or passing-reproducer credit.",
+            "status": "unavailable"
+          }
+        },
+        "root": "committed-cli:scripts/h62/item2/audit-theories/mirror_input_roles.py"
+      },
       "search_candidates": [
         {
           "location": "docs/feature-work/h62-2-audit-theories.md:11",
@@ -57216,9 +57534,7 @@
           "private-paths"
         ]
       },
-      "unresolved": [
-        "UNRESOLVED_USE: candidate search is not a certified use graph or proof of non-use"
-      ]
+      "unresolved": []
     },
     {
       "blob": "c67019762b0c5dfb9d489b756866d5fa353131ca",
@@ -57314,19 +57630,60 @@
     },
     {
       "blob": "6854beb912fed9853621da7dfaa47acc943eb181",
-      "class": null,
+      "class": "keep",
       "generator": null,
       "mode": "100644",
       "object_type": "blob",
       "orphan_analysis": null,
       "path": "scripts/h62/item2/audit-theories/path_input_roles.py",
-      "reason": "No certified consumer or content-based historical role in the current model; further runner/dynamic-path analysis required.",
+      "reason": "committed CLI runner source entry point: python3 -B scripts/h62/item2/audit-theories/path_input_roles.py",
       "recovery": {
         "blob": "6854beb912fed9853621da7dfaa47acc943eb181",
         "command": "git show 2396a75db75ebe243e78b6498a52bb13690e908b:scripts/h62/item2/audit-theories/path_input_roles.py",
         "last_touch_commit": "2396a75db75ebe243e78b6498a52bb13690e908b"
       },
-      "runner_chain": null,
+      "runner_chain": {
+        "edges": [],
+        "entry": {
+          "command": "python3 -B scripts/h62/item2/audit-theories/path_input_roles.py",
+          "command_form": "entry prefix; required configuration is not supplied",
+          "cwd": ".",
+          "kind": "committed CLI runner source",
+          "location": "scripts/h62/item2/audit-theories/path_input_roles.py:105",
+          "path": "scripts/h62/item2/audit-theories/path_input_roles.py",
+          "purpose": "Checks exact frozen Path/Obs source/type/binder identities and designated external receipts; correlated inputs and universal frame conditions remain explicit. Bare and configured invocations unrun; configured validation unavailable without original historical/evidence prerequisites. Committed checker source only; no helper, fixture, execution, proof, witness or current-authority credit.",
+          "required_options": [
+            "--historical-evidence",
+            "--out",
+            "--proof-evidence"
+          ],
+          "role_provenance": {
+            "function_line": 72,
+            "kind": "curated local argparse entry",
+            "main_line": 105,
+            "parse_args_line": 75,
+            "required_options": [
+              "--historical-evidence",
+              "--out",
+              "--proof-evidence"
+            ],
+            "revision": "07aa767db1a6ca05f4bff05acbabe6637d451e13"
+          },
+          "source_blob": "6854beb912fed9853621da7dfaa47acc943eb181",
+          "source_demonstration_revision": "07aa767db1a6ca05f4bff05acbabe6637d451e13",
+          "source_only": true,
+          "validation_at_measured_revision": {
+            "command_prefix": [
+              "python3",
+              "-B",
+              "scripts/h62/item2/audit-theories/path_input_roles.py"
+            ],
+            "reason": "Configured checker invocation not validated; required options are absent. Source role only, no helper/fixture or passing-reproducer credit.",
+            "status": "unavailable"
+          }
+        },
+        "root": "committed-cli:scripts/h62/item2/audit-theories/path_input_roles.py"
+      },
       "search_candidates": [
         {
           "location": "docs/feature-work/h62-2-audit-theories.md:9",
@@ -57366,9 +57723,7 @@
           "private-paths"
         ]
       },
-      "unresolved": [
-        "UNRESOLVED_USE: candidate search is not a certified use graph or proof of non-use"
-      ]
+      "unresolved": []
     },
     {
       "blob": "2bf62f1f7376305a6e152d1d7f3db2ba6da6de3f",
@@ -57705,7 +58060,7 @@
               "--lean",
               "--out"
             ],
-            "revision": "f976bc1b87d0321f052f59e4b5b4ddcf9b86745c"
+            "revision": "07aa767db1a6ca05f4bff05acbabe6637d451e13"
           },
           "source_blob": "766c1e39caab15fa028423e025bf4c7e0661fdd9",
           "source_demonstration_revision": "9990777843ea8e47fe455c8815bfbac159504abb",
@@ -58077,19 +58432,62 @@
     },
     {
       "blob": "c805842b75bc519260d857f9730671c78421cbe1",
-      "class": null,
+      "class": "keep",
       "generator": null,
       "mode": "100644",
       "object_type": "blob",
       "orphan_analysis": null,
       "path": "scripts/h62/item2/audit-theories/verify_acceptance_snapshot.py",
-      "reason": "No certified consumer or content-based historical role in the current model; further runner/dynamic-path analysis required.",
+      "reason": "committed CLI runner source entry point: python3 -B scripts/h62/item2/audit-theories/verify_acceptance_snapshot.py",
       "recovery": {
         "blob": "c805842b75bc519260d857f9730671c78421cbe1",
         "command": "git show 107cb28c032e3bff522ff6db0fdf0be54b2bbefd:scripts/h62/item2/audit-theories/verify_acceptance_snapshot.py",
         "last_touch_commit": "107cb28c032e3bff522ff6db0fdf0be54b2bbefd"
       },
-      "runner_chain": null,
+      "runner_chain": {
+        "edges": [],
+        "entry": {
+          "command": "python3 -B scripts/h62/item2/audit-theories/verify_acceptance_snapshot.py",
+          "command_form": "entry prefix; required configuration is not supplied",
+          "cwd": ".",
+          "kind": "committed CLI runner source",
+          "location": "scripts/h62/item2/audit-theories/verify_acceptance_snapshot.py:145",
+          "path": "scripts/h62/item2/audit-theories/verify_acceptance_snapshot.py",
+          "purpose": "Cross-checks external original ledger, helper receipts, role union, remaining gaps and mapped source provenance; full-assignment acceptance remains false. Bare and configured invocations unrun; configured validation unavailable without original historical/evidence prerequisites. Committed checker source only; no helper, fixture, execution, proof, witness or current-authority credit.",
+          "required_options": [
+            "--evidence",
+            "--historical-evidence",
+            "--out",
+            "--roles"
+          ],
+          "role_provenance": {
+            "function_line": 19,
+            "kind": "curated local argparse entry",
+            "main_line": 145,
+            "parse_args_line": 22,
+            "required_options": [
+              "--evidence",
+              "--historical-evidence",
+              "--out",
+              "--roles"
+            ],
+            "revision": "07aa767db1a6ca05f4bff05acbabe6637d451e13"
+          },
+          "source_blob": "c805842b75bc519260d857f9730671c78421cbe1",
+          "source_demonstration_revision": "07aa767db1a6ca05f4bff05acbabe6637d451e13",
+          "source_only": true,
+          "validation_at_measured_revision": {
+            "command_prefix": [
+              "python3",
+              "-B",
+              "scripts/h62/item2/audit-theories/verify_acceptance_snapshot.py"
+            ],
+            "reason": "Configured checker invocation not validated; required options are absent. Source role only, no helper/fixture or passing-reproducer credit.",
+            "status": "unavailable"
+          }
+        },
+        "root": "committed-cli:scripts/h62/item2/audit-theories/verify_acceptance_snapshot.py"
+      },
       "search_candidates": [
         {
           "location": "scripts/h62/item2/audit-theories/check_disposition_controls.py:12",
@@ -58109,9 +58507,7 @@
           "private-paths"
         ]
       },
-      "unresolved": [
-        "UNRESOLVED_USE: candidate search is not a certified use graph or proof of non-use"
-      ]
+      "unresolved": []
     },
     {
       "blob": "3946f3e5a45c7532327d84e30c989edd024a9057",
@@ -58135,7 +58531,7 @@
             "operation": "validated Python call stack",
             "source": "scripts/h62/item2/audit-theories/test_import_paths.py",
             "target": "scripts/h62/item2/audit-theories/verify_census.py",
-            "validated_for": "validated:scripts/h62/item2/audit-theories/test_import_paths.py:read:0771670394734484493e9cb4a1c3d69cb689d43f4bacb030b63902c734a5385e"
+            "validated_for": "validated:scripts/h62/item2/audit-theories/test_import_paths.py:read:5fc88d409b0d4084ecf3be6d7544a6fff546744d83fc5446beb95de4cac055e0"
           }
         ],
         "entry": {
@@ -58154,7 +58550,7 @@
           "runner_kind": "unittest",
           "source_blob": "b3b629db83c041f96fcf9d4d37fde2f48f126cde"
         },
-        "root": "validated:scripts/h62/item2/audit-theories/test_import_paths.py:read:0771670394734484493e9cb4a1c3d69cb689d43f4bacb030b63902c734a5385e"
+        "root": "validated:scripts/h62/item2/audit-theories/test_import_paths.py:read:5fc88d409b0d4084ecf3be6d7544a6fff546744d83fc5446beb95de4cac055e0"
       },
       "search_candidates": [
         {
@@ -58232,7 +58628,7 @@
             "required_options": [
               "--evidence"
             ],
-            "revision": "f976bc1b87d0321f052f59e4b5b4ddcf9b86745c"
+            "revision": "07aa767db1a6ca05f4bff05acbabe6637d451e13"
           },
           "source_blob": "a725519cebe318902b7caf85768063fb0b8c191a",
           "source_demonstration_revision": "9990777843ea8e47fe455c8815bfbac159504abb",
@@ -58313,7 +58709,7 @@
             "required_options": [
               "--evidence"
             ],
-            "revision": "f976bc1b87d0321f052f59e4b5b4ddcf9b86745c"
+            "revision": "07aa767db1a6ca05f4bff05acbabe6637d451e13"
           },
           "source_blob": "73b309b26c3d796f34be8f9476421d7f1dfcac62",
           "source_demonstration_revision": "9990777843ea8e47fe455c8815bfbac159504abb",
@@ -58384,7 +58780,7 @@
               "--evidence",
               "--module"
             ],
-            "revision": "f976bc1b87d0321f052f59e4b5b4ddcf9b86745c"
+            "revision": "07aa767db1a6ca05f4bff05acbabe6637d451e13"
           },
           "source_blob": "90e9500177b9bbd54633f0fef42e3caf165a429d",
           "source_demonstration_revision": "9990777843ea8e47fe455c8815bfbac159504abb",
@@ -58453,7 +58849,7 @@
             "required_options": [
               "--evidence"
             ],
-            "revision": "f976bc1b87d0321f052f59e4b5b4ddcf9b86745c"
+            "revision": "07aa767db1a6ca05f4bff05acbabe6637d451e13"
           },
           "source_blob": "d377f90debd83512fd4fc3f0a94400fffdf67f12",
           "source_demonstration_revision": "9990777843ea8e47fe455c8815bfbac159504abb",
@@ -58525,7 +58921,7 @@
             "operation": "entered measured Python module; no fixture consumption credit",
             "source": "scripts/h62/item2/audit-theories/test_import_paths.py",
             "target": "scripts/h62/item2/audit-theories/verify_census.py",
-            "validated_for": "validated:scripts/h62/item2/audit-theories/test_import_paths.py:module:651900eabbacc685ec4a42b5b4d34e0feaba0cda9f72e359c6b9ea384ac879f3"
+            "validated_for": "validated:scripts/h62/item2/audit-theories/test_import_paths.py:module:00439b190cde15cad1094d95568dd4aadceaa9207c87ccf610219a9338da111a"
           },
           {
             "kind": "executes",
@@ -58533,7 +58929,7 @@
             "operation": "entered measured Python module; no fixture consumption credit",
             "source": "scripts/h62/item2/audit-theories/verify_census.py",
             "target": "scripts/h62/item2/audit-theories/witness_registry.py",
-            "validated_for": "validated:scripts/h62/item2/audit-theories/test_import_paths.py:module:651900eabbacc685ec4a42b5b4d34e0feaba0cda9f72e359c6b9ea384ac879f3"
+            "validated_for": "validated:scripts/h62/item2/audit-theories/test_import_paths.py:module:00439b190cde15cad1094d95568dd4aadceaa9207c87ccf610219a9338da111a"
           }
         ],
         "entry": {
@@ -58562,7 +58958,7 @@
           "runner_kind": "unittest",
           "source_blob": "b3b629db83c041f96fcf9d4d37fde2f48f126cde"
         },
-        "root": "validated:scripts/h62/item2/audit-theories/test_import_paths.py:module:651900eabbacc685ec4a42b5b4d34e0feaba0cda9f72e359c6b9ea384ac879f3"
+        "root": "validated:scripts/h62/item2/audit-theories/test_import_paths.py:module:00439b190cde15cad1094d95568dd4aadceaa9207c87ccf610219a9338da111a"
       },
       "search_candidates": [
         {
@@ -60108,7 +60504,7 @@
               "--output",
               "--toolchain"
             ],
-            "revision": "f976bc1b87d0321f052f59e4b5b4ddcf9b86745c"
+            "revision": "07aa767db1a6ca05f4bff05acbabe6637d451e13"
           },
           "source_blob": "40b7b173d0f683039f55497c1d36b20dcfd70116",
           "source_demonstration_revision": "9990777843ea8e47fe455c8815bfbac159504abb",
@@ -60921,7 +61317,7 @@
             ],
             "kind": "unittest declaration and explicit main entry",
             "main_line": 77,
-            "revision": "f976bc1b87d0321f052f59e4b5b4ddcf9b86745c",
+            "revision": "07aa767db1a6ca05f4bff05acbabe6637d451e13",
             "test_contexts": [
               {
                 "code_firstlineno": 14,
@@ -63305,7 +63701,7 @@
               "--frozen",
               "--output"
             ],
-            "revision": "f976bc1b87d0321f052f59e4b5b4ddcf9b86745c"
+            "revision": "07aa767db1a6ca05f4bff05acbabe6637d451e13"
           },
           "source_blob": "2d795e6b300c40e1fe4924f04ad7a9e4b2ba4df8",
           "source_demonstration_revision": "9990777843ea8e47fe455c8815bfbac159504abb",
@@ -63537,7 +63933,7 @@
               "--evidence",
               "--toolchain"
             ],
-            "revision": "f976bc1b87d0321f052f59e4b5b4ddcf9b86745c"
+            "revision": "07aa767db1a6ca05f4bff05acbabe6637d451e13"
           },
           "source_blob": "51652ca513e21150f4c49c49505dc64a5bb8c12d",
           "source_demonstration_revision": "9990777843ea8e47fe455c8815bfbac159504abb",
@@ -63689,7 +64085,7 @@
             "required_options": [
               "--inventory"
             ],
-            "revision": "f976bc1b87d0321f052f59e4b5b4ddcf9b86745c"
+            "revision": "07aa767db1a6ca05f4bff05acbabe6637d451e13"
           },
           "source_blob": "b0d1b50765bf744a5a53cd026695999fb3e6f1c3",
           "source_demonstration_revision": "9990777843ea8e47fe455c8815bfbac159504abb",
@@ -63782,7 +64178,7 @@
             "required_options": [
               "--evidence"
             ],
-            "revision": "f976bc1b87d0321f052f59e4b5b4ddcf9b86745c"
+            "revision": "07aa767db1a6ca05f4bff05acbabe6637d451e13"
           },
           "source_blob": "f08074788981d2635375dcd531c34621ab29faa8",
           "source_demonstration_revision": "9990777843ea8e47fe455c8815bfbac159504abb",
@@ -64277,7 +64673,7 @@
               "--inventory",
               "--output"
             ],
-            "revision": "f976bc1b87d0321f052f59e4b5b4ddcf9b86745c"
+            "revision": "07aa767db1a6ca05f4bff05acbabe6637d451e13"
           },
           "source_blob": "5524cbec706ee5732ddcb15feb808a66cfd13421",
           "source_demonstration_revision": "9990777843ea8e47fe455c8815bfbac159504abb",
@@ -64796,8 +65192,8 @@
           "token": "check"
         },
         {
-          "location": ".github/workflows/lean.yml:34",
-          "token": "check"
+          "location": ".github/workflows/lean-budget.yml:2",
+          "token": "scripts/lean-budget/check.py"
         }
       ],
       "secondary": {
@@ -65076,7 +65472,7 @@
               "--inventory",
               "--output"
             ],
-            "revision": "f976bc1b87d0321f052f59e4b5b4ddcf9b86745c"
+            "revision": "07aa767db1a6ca05f4bff05acbabe6637d451e13"
           },
           "source_blob": "35a5868915fc8b3b1818e2e042a5748df899b9f3",
           "source_demonstration_revision": "9990777843ea8e47fe455c8815bfbac159504abb",
@@ -66170,7 +66566,7 @@
             ],
             "kind": "unittest declaration and explicit main entry",
             "main_line": 21,
-            "revision": "f976bc1b87d0321f052f59e4b5b4ddcf9b86745c",
+            "revision": "07aa767db1a6ca05f4bff05acbabe6637d451e13",
             "test_contexts": [
               {
                 "code_firstlineno": 6,
@@ -66658,7 +67054,7 @@
             "required_options": [
               "--output"
             ],
-            "revision": "f976bc1b87d0321f052f59e4b5b4ddcf9b86745c"
+            "revision": "07aa767db1a6ca05f4bff05acbabe6637d451e13"
           },
           "source_blob": "fc0b06fef2af5c7db8bf451b5b61ae7314ff3343",
           "source_demonstration_revision": "9990777843ea8e47fe455c8815bfbac159504abb",
@@ -66809,7 +67205,7 @@
             "required_options": [
               "--output"
             ],
-            "revision": "f976bc1b87d0321f052f59e4b5b4ddcf9b86745c"
+            "revision": "07aa767db1a6ca05f4bff05acbabe6637d451e13"
           },
           "source_blob": "5416c212d266a6105db8ac41b4f8d3af26de26ee",
           "source_demonstration_revision": "9990777843ea8e47fe455c8815bfbac159504abb",
@@ -67069,7 +67465,7 @@
             ],
             "kind": "unittest declaration and explicit main entry",
             "main_line": 87,
-            "revision": "f976bc1b87d0321f052f59e4b5b4ddcf9b86745c",
+            "revision": "07aa767db1a6ca05f4bff05acbabe6637d451e13",
             "test_contexts": [
               {
                 "code_firstlineno": 13,
@@ -68879,7 +69275,7 @@
               "--lean-bin",
               "--pin"
             ],
-            "revision": "f976bc1b87d0321f052f59e4b5b4ddcf9b86745c"
+            "revision": "07aa767db1a6ca05f4bff05acbabe6637d451e13"
           },
           "source_blob": "15143c90ceead4c5d8f57c1cfa95bed521650358",
           "source_demonstration_revision": "9990777843ea8e47fe455c8815bfbac159504abb",
@@ -69151,7 +69547,7 @@
               "--lean-bin",
               "--pin"
             ],
-            "revision": "f976bc1b87d0321f052f59e4b5b4ddcf9b86745c"
+            "revision": "07aa767db1a6ca05f4bff05acbabe6637d451e13"
           },
           "source_blob": "5568f8e28a28f5daf777efa0c5c7976f2b413a54",
           "source_demonstration_revision": "9990777843ea8e47fe455c8815bfbac159504abb",
@@ -76974,8 +77370,8 @@
           "token": "check"
         },
         {
-          "location": ".github/workflows/lean.yml:34",
-          "token": "check"
+          "location": ".github/workflows/lean-budget.yml:2",
+          "token": "scripts/lean-budget/check.py"
         }
       ],
       "secondary": {
@@ -101465,7 +101861,7 @@
             ],
             "kind": "unittest declaration and explicit main entry",
             "main_line": 44,
-            "revision": "f976bc1b87d0321f052f59e4b5b4ddcf9b86745c",
+            "revision": "07aa767db1a6ca05f4bff05acbabe6637d451e13",
             "test_contexts": [
               {
                 "code_firstlineno": 14,
@@ -102741,7 +103137,7 @@
             ],
             "kind": "unittest declaration and explicit main entry",
             "main_line": 60,
-            "revision": "f976bc1b87d0321f052f59e4b5b4ddcf9b86745c",
+            "revision": "07aa767db1a6ca05f4bff05acbabe6637d451e13",
             "test_contexts": [
               {
                 "code_firstlineno": 16,
@@ -103192,7 +103588,7 @@
             ],
             "kind": "unittest declaration and explicit main entry",
             "main_line": 39,
-            "revision": "f976bc1b87d0321f052f59e4b5b4ddcf9b86745c",
+            "revision": "07aa767db1a6ca05f4bff05acbabe6637d451e13",
             "test_contexts": [
               {
                 "code_firstlineno": 11,
@@ -104237,7 +104633,7 @@
             ],
             "kind": "unittest declaration and explicit main entry",
             "main_line": 19,
-            "revision": "f976bc1b87d0321f052f59e4b5b4ddcf9b86745c",
+            "revision": "07aa767db1a6ca05f4bff05acbabe6637d451e13",
             "test_contexts": [
               {
                 "code_firstlineno": 10,
@@ -104342,7 +104738,7 @@
             ],
             "kind": "unittest declaration and explicit main entry",
             "main_line": 71,
-            "revision": "f976bc1b87d0321f052f59e4b5b4ddcf9b86745c",
+            "revision": "07aa767db1a6ca05f4bff05acbabe6637d451e13",
             "test_contexts": [
               {
                 "code_firstlineno": 21,
@@ -115882,7 +116278,7 @@
             "operation": "entered measured Python module; no fixture consumption credit",
             "source": "tests/h28-sol/mutation-testing/tools/test_runner.py",
             "target": "tests/h28-sol/mutation-testing/tools/test_runner.py",
-            "validated_for": "validated:tests/h28-sol/mutation-testing/tools/test_runner.py:module:7a103c8f856714a010ae6522edb211189be65798b967373f006cd198417b60c3"
+            "validated_for": "validated:tests/h28-sol/mutation-testing/tools/test_runner.py:module:be5f178dd7ee1ea2d54cbfa2f5f02eb2ff02df7f85c0bd3b1d9d6df110422bae"
           },
           {
             "kind": "executes",
@@ -115890,7 +116286,7 @@
             "operation": "entered measured Python module; no fixture consumption credit",
             "source": "tests/h28-sol/mutation-testing/tools/test_runner.py",
             "target": "tests/h28-sol/mutation-testing/tools/runner.py",
-            "validated_for": "validated:tests/h28-sol/mutation-testing/tools/test_runner.py:module:7a103c8f856714a010ae6522edb211189be65798b967373f006cd198417b60c3"
+            "validated_for": "validated:tests/h28-sol/mutation-testing/tools/test_runner.py:module:be5f178dd7ee1ea2d54cbfa2f5f02eb2ff02df7f85c0bd3b1d9d6df110422bae"
           },
           {
             "kind": "executes",
@@ -115898,7 +116294,7 @@
             "operation": "entered measured Python module; no fixture consumption credit",
             "source": "tests/h28-sol/mutation-testing/tools/runner.py",
             "target": "tests/h28-sol/mutation-testing/tools/engine.py",
-            "validated_for": "validated:tests/h28-sol/mutation-testing/tools/test_runner.py:module:7a103c8f856714a010ae6522edb211189be65798b967373f006cd198417b60c3"
+            "validated_for": "validated:tests/h28-sol/mutation-testing/tools/test_runner.py:module:be5f178dd7ee1ea2d54cbfa2f5f02eb2ff02df7f85c0bd3b1d9d6df110422bae"
           },
           {
             "kind": "executes",
@@ -115906,7 +116302,7 @@
             "operation": "entered measured Python module; no fixture consumption credit",
             "source": "tests/h28-sol/mutation-testing/tools/engine.py",
             "target": "tests/h28-sol/mutation-testing/tools/bounded.py",
-            "validated_for": "validated:tests/h28-sol/mutation-testing/tools/test_runner.py:module:7a103c8f856714a010ae6522edb211189be65798b967373f006cd198417b60c3"
+            "validated_for": "validated:tests/h28-sol/mutation-testing/tools/test_runner.py:module:be5f178dd7ee1ea2d54cbfa2f5f02eb2ff02df7f85c0bd3b1d9d6df110422bae"
           }
         ],
         "entry": {
@@ -115933,7 +116329,7 @@
           "runner_kind": "unittest",
           "source_blob": "e0a6693f200205c74aa0bbf302e6ed299190c35b"
         },
-        "root": "validated:tests/h28-sol/mutation-testing/tools/test_runner.py:module:7a103c8f856714a010ae6522edb211189be65798b967373f006cd198417b60c3"
+        "root": "validated:tests/h28-sol/mutation-testing/tools/test_runner.py:module:be5f178dd7ee1ea2d54cbfa2f5f02eb2ff02df7f85c0bd3b1d9d6df110422bae"
       },
       "search_candidates": [
         {
@@ -116056,7 +116452,7 @@
             "operation": "entered measured Python module; no fixture consumption credit",
             "source": "tests/h28-sol/mutation-testing/tools/test_runner.py",
             "target": "tests/h28-sol/mutation-testing/tools/test_runner.py",
-            "validated_for": "validated:tests/h28-sol/mutation-testing/tools/test_runner.py:module:39df5ac4a6892e0b949f32a179d9caf58c146c5885be866f9ed2e640c7360ed7"
+            "validated_for": "validated:tests/h28-sol/mutation-testing/tools/test_runner.py:module:7f9ae1b832f9ef7013bb116af7ee6defe75f580e3f730a0ca5abfde39f8769ef"
           },
           {
             "kind": "executes",
@@ -116064,7 +116460,7 @@
             "operation": "entered measured Python module; no fixture consumption credit",
             "source": "tests/h28-sol/mutation-testing/tools/test_runner.py",
             "target": "tests/h28-sol/mutation-testing/tools/runner.py",
-            "validated_for": "validated:tests/h28-sol/mutation-testing/tools/test_runner.py:module:39df5ac4a6892e0b949f32a179d9caf58c146c5885be866f9ed2e640c7360ed7"
+            "validated_for": "validated:tests/h28-sol/mutation-testing/tools/test_runner.py:module:7f9ae1b832f9ef7013bb116af7ee6defe75f580e3f730a0ca5abfde39f8769ef"
           },
           {
             "kind": "executes",
@@ -116072,7 +116468,7 @@
             "operation": "entered measured Python module; no fixture consumption credit",
             "source": "tests/h28-sol/mutation-testing/tools/runner.py",
             "target": "tests/h28-sol/mutation-testing/tools/engine.py",
-            "validated_for": "validated:tests/h28-sol/mutation-testing/tools/test_runner.py:module:39df5ac4a6892e0b949f32a179d9caf58c146c5885be866f9ed2e640c7360ed7"
+            "validated_for": "validated:tests/h28-sol/mutation-testing/tools/test_runner.py:module:7f9ae1b832f9ef7013bb116af7ee6defe75f580e3f730a0ca5abfde39f8769ef"
           },
           {
             "kind": "executes",
@@ -116080,7 +116476,7 @@
             "operation": "entered measured Python module; no fixture consumption credit",
             "source": "tests/h28-sol/mutation-testing/tools/engine.py",
             "target": "tests/h28-sol/mutation-testing/tools/bulk_inputs.py",
-            "validated_for": "validated:tests/h28-sol/mutation-testing/tools/test_runner.py:module:39df5ac4a6892e0b949f32a179d9caf58c146c5885be866f9ed2e640c7360ed7"
+            "validated_for": "validated:tests/h28-sol/mutation-testing/tools/test_runner.py:module:7f9ae1b832f9ef7013bb116af7ee6defe75f580e3f730a0ca5abfde39f8769ef"
           }
         ],
         "entry": {
@@ -116107,7 +116503,7 @@
           "runner_kind": "unittest",
           "source_blob": "e0a6693f200205c74aa0bbf302e6ed299190c35b"
         },
-        "root": "validated:tests/h28-sol/mutation-testing/tools/test_runner.py:module:39df5ac4a6892e0b949f32a179d9caf58c146c5885be866f9ed2e640c7360ed7"
+        "root": "validated:tests/h28-sol/mutation-testing/tools/test_runner.py:module:7f9ae1b832f9ef7013bb116af7ee6defe75f580e3f730a0ca5abfde39f8769ef"
       },
       "search_candidates": [
         {
@@ -116290,7 +116686,7 @@
             "operation": "entered measured Python module; no fixture consumption credit",
             "source": "tests/h28-sol/mutation-testing/tools/test_runner.py",
             "target": "tests/h28-sol/mutation-testing/tools/test_runner.py",
-            "validated_for": "validated:tests/h28-sol/mutation-testing/tools/test_runner.py:module:457366550c9c1e802a3e758a7a12c40aae4d5f7beb0b1fafbd55f5b9fbf0076d"
+            "validated_for": "validated:tests/h28-sol/mutation-testing/tools/test_runner.py:module:3b3a76e4c48792376bad44a60cd8b4a19bbbf06efa39f5677db0e8a68e727fed"
           },
           {
             "kind": "executes",
@@ -116298,7 +116694,7 @@
             "operation": "entered measured Python module; no fixture consumption credit",
             "source": "tests/h28-sol/mutation-testing/tools/test_runner.py",
             "target": "tests/h28-sol/mutation-testing/tools/runner.py",
-            "validated_for": "validated:tests/h28-sol/mutation-testing/tools/test_runner.py:module:457366550c9c1e802a3e758a7a12c40aae4d5f7beb0b1fafbd55f5b9fbf0076d"
+            "validated_for": "validated:tests/h28-sol/mutation-testing/tools/test_runner.py:module:3b3a76e4c48792376bad44a60cd8b4a19bbbf06efa39f5677db0e8a68e727fed"
           },
           {
             "kind": "executes",
@@ -116306,7 +116702,7 @@
             "operation": "entered measured Python module; no fixture consumption credit",
             "source": "tests/h28-sol/mutation-testing/tools/runner.py",
             "target": "tests/h28-sol/mutation-testing/tools/engine.py",
-            "validated_for": "validated:tests/h28-sol/mutation-testing/tools/test_runner.py:module:457366550c9c1e802a3e758a7a12c40aae4d5f7beb0b1fafbd55f5b9fbf0076d"
+            "validated_for": "validated:tests/h28-sol/mutation-testing/tools/test_runner.py:module:3b3a76e4c48792376bad44a60cd8b4a19bbbf06efa39f5677db0e8a68e727fed"
           },
           {
             "kind": "executes",
@@ -116314,7 +116710,7 @@
             "operation": "entered measured Python module; no fixture consumption credit",
             "source": "tests/h28-sol/mutation-testing/tools/engine.py",
             "target": "tests/h28-sol/mutation-testing/tools/checked.py",
-            "validated_for": "validated:tests/h28-sol/mutation-testing/tools/test_runner.py:module:457366550c9c1e802a3e758a7a12c40aae4d5f7beb0b1fafbd55f5b9fbf0076d"
+            "validated_for": "validated:tests/h28-sol/mutation-testing/tools/test_runner.py:module:3b3a76e4c48792376bad44a60cd8b4a19bbbf06efa39f5677db0e8a68e727fed"
           }
         ],
         "entry": {
@@ -116341,11 +116737,15 @@
           "runner_kind": "unittest",
           "source_blob": "e0a6693f200205c74aa0bbf302e6ed299190c35b"
         },
-        "root": "validated:tests/h28-sol/mutation-testing/tools/test_runner.py:module:457366550c9c1e802a3e758a7a12c40aae4d5f7beb0b1fafbd55f5b9fbf0076d"
+        "root": "validated:tests/h28-sol/mutation-testing/tools/test_runner.py:module:3b3a76e4c48792376bad44a60cd8b4a19bbbf06efa39f5677db0e8a68e727fed"
       },
       "search_candidates": [
         {
           "location": ".claude/rules/derivations.md:76",
+          "token": "checked"
+        },
+        {
+          "location": ".github/workflows/lean-budget.yml:30",
           "token": "checked"
         },
         {
@@ -116370,10 +116770,6 @@
         },
         {
           "location": "Bridge/SolidityBridge/AccessBridge/AbiWord.lean:39",
-          "token": "checked"
-        },
-        {
-          "location": "Bridge/SolidityBridge/AccessBridge/HeadSize.lean:14",
           "token": "checked"
         }
       ],
@@ -116580,7 +116976,7 @@
             "operation": "entered measured Python module; no fixture consumption credit",
             "source": "tests/h28-sol/mutation-testing/tools/test_runner.py",
             "target": "tests/h28-sol/mutation-testing/tools/test_runner.py",
-            "validated_for": "validated:tests/h28-sol/mutation-testing/tools/test_runner.py:module:39df5ac4a6892e0b949f32a179d9caf58c146c5885be866f9ed2e640c7360ed7"
+            "validated_for": "validated:tests/h28-sol/mutation-testing/tools/test_runner.py:module:7f9ae1b832f9ef7013bb116af7ee6defe75f580e3f730a0ca5abfde39f8769ef"
           },
           {
             "kind": "executes",
@@ -116588,7 +116984,7 @@
             "operation": "entered measured Python module; no fixture consumption credit",
             "source": "tests/h28-sol/mutation-testing/tools/test_runner.py",
             "target": "tests/h28-sol/mutation-testing/tools/runner.py",
-            "validated_for": "validated:tests/h28-sol/mutation-testing/tools/test_runner.py:module:39df5ac4a6892e0b949f32a179d9caf58c146c5885be866f9ed2e640c7360ed7"
+            "validated_for": "validated:tests/h28-sol/mutation-testing/tools/test_runner.py:module:7f9ae1b832f9ef7013bb116af7ee6defe75f580e3f730a0ca5abfde39f8769ef"
           },
           {
             "kind": "executes",
@@ -116596,7 +116992,7 @@
             "operation": "entered measured Python module; no fixture consumption credit",
             "source": "tests/h28-sol/mutation-testing/tools/runner.py",
             "target": "tests/h28-sol/mutation-testing/tools/engine.py",
-            "validated_for": "validated:tests/h28-sol/mutation-testing/tools/test_runner.py:module:39df5ac4a6892e0b949f32a179d9caf58c146c5885be866f9ed2e640c7360ed7"
+            "validated_for": "validated:tests/h28-sol/mutation-testing/tools/test_runner.py:module:7f9ae1b832f9ef7013bb116af7ee6defe75f580e3f730a0ca5abfde39f8769ef"
           }
         ],
         "entry": {
@@ -116623,7 +117019,7 @@
           "runner_kind": "unittest",
           "source_blob": "e0a6693f200205c74aa0bbf302e6ed299190c35b"
         },
-        "root": "validated:tests/h28-sol/mutation-testing/tools/test_runner.py:module:39df5ac4a6892e0b949f32a179d9caf58c146c5885be866f9ed2e640c7360ed7"
+        "root": "validated:tests/h28-sol/mutation-testing/tools/test_runner.py:module:7f9ae1b832f9ef7013bb116af7ee6defe75f580e3f730a0ca5abfde39f8769ef"
       },
       "search_candidates": [
         {
@@ -117110,7 +117506,7 @@
             "operation": "entered measured Python module; no fixture consumption credit",
             "source": "tests/h28-sol/mutation-testing/tools/test_runner.py",
             "target": "tests/h28-sol/mutation-testing/tools/runner.py",
-            "validated_for": "validated:tests/h28-sol/mutation-testing/tools/test_runner.py:module:28730b7006bed548cad8002dfd5df40f816b1b5cde01aeb275cfee95dcd00e70"
+            "validated_for": "validated:tests/h28-sol/mutation-testing/tools/test_runner.py:module:9ad92d493d0a0e6482790e6eb9a74145ef91e81c330531cdd77a6c8c61b04e36"
           }
         ],
         "entry": {
@@ -117137,7 +117533,7 @@
           "runner_kind": "unittest",
           "source_blob": "e0a6693f200205c74aa0bbf302e6ed299190c35b"
         },
-        "root": "validated:tests/h28-sol/mutation-testing/tools/test_runner.py:module:28730b7006bed548cad8002dfd5df40f816b1b5cde01aeb275cfee95dcd00e70"
+        "root": "validated:tests/h28-sol/mutation-testing/tools/test_runner.py:module:9ad92d493d0a0e6482790e6eb9a74145ef91e81c330531cdd77a6c8c61b04e36"
       },
       "search_candidates": [
         {
@@ -117571,7 +117967,7 @@
             ],
             "kind": "unittest declaration and explicit main entry",
             "main_line": 51,
-            "revision": "f976bc1b87d0321f052f59e4b5b4ddcf9b86745c",
+            "revision": "07aa767db1a6ca05f4bff05acbabe6637d451e13",
             "test_contexts": [
               {
                 "code_firstlineno": 35,
@@ -118384,8 +118780,8 @@
           "token": "check"
         },
         {
-          "location": ".github/workflows/lean.yml:34",
-          "token": "check"
+          "location": ".github/workflows/lean-budget.yml:2",
+          "token": "scripts/lean-budget/check.py"
         }
       ],
       "secondary": {
@@ -118425,7 +118821,7 @@
             ],
             "kind": "unittest declaration and explicit main entry",
             "main_line": 233,
-            "revision": "f976bc1b87d0321f052f59e4b5b4ddcf9b86745c",
+            "revision": "07aa767db1a6ca05f4bff05acbabe6637d451e13",
             "test_contexts": [
               {
                 "code_firstlineno": 11,
@@ -130977,7 +131373,7 @@
             ],
             "kind": "unittest declaration and explicit main entry",
             "main_line": 92,
-            "revision": "f976bc1b87d0321f052f59e4b5b4ddcf9b86745c",
+            "revision": "07aa767db1a6ca05f4bff05acbabe6637d451e13",
             "test_contexts": [
               {
                 "code_firstlineno": 18,
@@ -131066,7 +131462,7 @@
             ],
             "kind": "unittest declaration and explicit main entry",
             "main_line": 118,
-            "revision": "f976bc1b87d0321f052f59e4b5b4ddcf9b86745c",
+            "revision": "07aa767db1a6ca05f4bff05acbabe6637d451e13",
             "test_contexts": [
               {
                 "code_firstlineno": 16,
@@ -135041,7 +135437,7 @@
             ],
             "kind": "unittest declaration and explicit main entry",
             "main_line": 47,
-            "revision": "f976bc1b87d0321f052f59e4b5b4ddcf9b86745c",
+            "revision": "07aa767db1a6ca05f4bff05acbabe6637d451e13",
             "test_contexts": [
               {
                 "code_firstlineno": 25,
@@ -135915,7 +136311,7 @@
             ],
             "kind": "unittest declaration and explicit main entry",
             "main_line": 41,
-            "revision": "f976bc1b87d0321f052f59e4b5b4ddcf9b86745c",
+            "revision": "07aa767db1a6ca05f4bff05acbabe6637d451e13",
             "test_contexts": [
               {
                 "code_firstlineno": 14,
@@ -136029,7 +136425,7 @@
             ],
             "kind": "unittest declaration and explicit main entry",
             "main_line": 42,
-            "revision": "f976bc1b87d0321f052f59e4b5b4ddcf9b86745c",
+            "revision": "07aa767db1a6ca05f4bff05acbabe6637d451e13",
             "test_contexts": [
               {
                 "code_firstlineno": 14,
@@ -136235,7 +136631,7 @@
             ],
             "kind": "unittest declaration and explicit main entry",
             "main_line": 33,
-            "revision": "f976bc1b87d0321f052f59e4b5b4ddcf9b86745c",
+            "revision": "07aa767db1a6ca05f4bff05acbabe6637d451e13",
             "test_contexts": [
               {
                 "code_firstlineno": 10,
@@ -136296,7 +136692,7 @@
             ],
             "kind": "unittest declaration and explicit main entry",
             "main_line": 28,
-            "revision": "f976bc1b87d0321f052f59e4b5b4ddcf9b86745c",
+            "revision": "07aa767db1a6ca05f4bff05acbabe6637d451e13",
             "test_contexts": [
               {
                 "code_firstlineno": 10,
@@ -136371,7 +136767,7 @@
             ],
             "kind": "unittest declaration and explicit main entry",
             "main_line": 28,
-            "revision": "f976bc1b87d0321f052f59e4b5b4ddcf9b86745c",
+            "revision": "07aa767db1a6ca05f4bff05acbabe6637d451e13",
             "test_contexts": [
               {
                 "code_firstlineno": 9,
@@ -140512,7 +140908,7 @@
             ],
             "kind": "unittest declaration and explicit main entry",
             "main_line": 551,
-            "revision": "f976bc1b87d0321f052f59e4b5b4ddcf9b86745c",
+            "revision": "07aa767db1a6ca05f4bff05acbabe6637d451e13",
             "test_contexts": [
               {
                 "code_firstlineno": 26,
@@ -140720,7 +141116,7 @@
             ],
             "kind": "unittest declaration and explicit main entry",
             "main_line": 119,
-            "revision": "f976bc1b87d0321f052f59e4b5b4ddcf9b86745c",
+            "revision": "07aa767db1a6ca05f4bff05acbabe6637d451e13",
             "test_contexts": [
               {
                 "code_firstlineno": 21,
@@ -141765,7 +142161,7 @@
             ],
             "kind": "unittest declaration and explicit main entry",
             "main_line": 195,
-            "revision": "f976bc1b87d0321f052f59e4b5b4ddcf9b86745c",
+            "revision": "07aa767db1a6ca05f4bff05acbabe6637d451e13",
             "test_contexts": [
               {
                 "code_firstlineno": 35,
@@ -143999,7 +144395,7 @@
             ],
             "kind": "unittest declaration and explicit main entry",
             "main_line": 444,
-            "revision": "f976bc1b87d0321f052f59e4b5b4ddcf9b86745c",
+            "revision": "07aa767db1a6ca05f4bff05acbabe6637d451e13",
             "test_contexts": [
               {
                 "code_firstlineno": 41,
@@ -151216,7 +151612,7 @@
             ],
             "kind": "unittest declaration and explicit main entry",
             "main_line": 59,
-            "revision": "f976bc1b87d0321f052f59e4b5b4ddcf9b86745c",
+            "revision": "07aa767db1a6ca05f4bff05acbabe6637d451e13",
             "test_contexts": [
               {
                 "code_firstlineno": 34,
@@ -151351,7 +151747,7 @@
             ],
             "kind": "unittest declaration and explicit main entry",
             "main_line": 55,
-            "revision": "f976bc1b87d0321f052f59e4b5b4ddcf9b86745c",
+            "revision": "07aa767db1a6ca05f4bff05acbabe6637d451e13",
             "test_contexts": [
               {
                 "code_firstlineno": 31,
@@ -153538,7 +153934,7 @@
             ],
             "kind": "unittest declaration and explicit main entry",
             "main_line": 231,
-            "revision": "f976bc1b87d0321f052f59e4b5b4ddcf9b86745c",
+            "revision": "07aa767db1a6ca05f4bff05acbabe6637d451e13",
             "test_contexts": [
               {
                 "code_firstlineno": 17,
@@ -158842,7 +159238,7 @@
             "operation": "validated Python call stack",
             "source": "scripts/h62/item2/audit-theories/test_pair_sources.py",
             "target": "scripts/h62/item2/audit-theories/test_pair_sources.py",
-            "validated_for": "validated:scripts/h62/item2/audit-theories/test_pair_sources.py:read:1baaf22ac1cf21032740d5facc1a3cb97bae912d84f7fb8f0572a9fc9c4b4ebe"
+            "validated_for": "validated:scripts/h62/item2/audit-theories/test_pair_sources.py:read:3545f44015b072fa11909034472e397734201195c36713498f07185cc4271893"
           },
           {
             "kind": "consumes",
@@ -158850,7 +159246,7 @@
             "operation": "validated Python read of measured bytes",
             "source": "scripts/h62/item2/audit-theories/test_pair_sources.py",
             "target": "tests/h62/item2/audit-theories/ElaboratedCensus.lean",
-            "validated_for": "validated:scripts/h62/item2/audit-theories/test_pair_sources.py:read:1baaf22ac1cf21032740d5facc1a3cb97bae912d84f7fb8f0572a9fc9c4b4ebe"
+            "validated_for": "validated:scripts/h62/item2/audit-theories/test_pair_sources.py:read:3545f44015b072fa11909034472e397734201195c36713498f07185cc4271893"
           }
         ],
         "entry": {
@@ -158870,7 +159266,7 @@
           "runner_kind": "unittest",
           "source_blob": "425ce6d432ce3b45b8a92d05d5db79007d63e33d"
         },
-        "root": "validated:scripts/h62/item2/audit-theories/test_pair_sources.py:read:1baaf22ac1cf21032740d5facc1a3cb97bae912d84f7fb8f0572a9fc9c4b4ebe"
+        "root": "validated:scripts/h62/item2/audit-theories/test_pair_sources.py:read:3545f44015b072fa11909034472e397734201195c36713498f07185cc4271893"
       },
       "search_candidates": [
         {
@@ -165174,7 +165570,7 @@
             ],
             "kind": "unittest declaration and explicit main entry",
             "main_line": 183,
-            "revision": "f976bc1b87d0321f052f59e4b5b4ddcf9b86745c",
+            "revision": "07aa767db1a6ca05f4bff05acbabe6637d451e13",
             "test_contexts": [
               {
                 "code_firstlineno": 23,
@@ -165458,7 +165854,7 @@
             ],
             "kind": "unittest declaration and explicit main entry",
             "main_line": 70,
-            "revision": "f976bc1b87d0321f052f59e4b5b4ddcf9b86745c",
+            "revision": "07aa767db1a6ca05f4bff05acbabe6637d451e13",
             "test_contexts": [
               {
                 "code_firstlineno": 14,
@@ -165580,7 +165976,7 @@
             ],
             "kind": "unittest declaration and explicit main entry",
             "main_line": 47,
-            "revision": "f976bc1b87d0321f052f59e4b5b4ddcf9b86745c",
+            "revision": "07aa767db1a6ca05f4bff05acbabe6637d451e13",
             "test_contexts": [
               {
                 "code_firstlineno": 12,
@@ -165662,7 +166058,7 @@
             ],
             "kind": "unittest declaration and explicit main entry",
             "main_line": 119,
-            "revision": "f976bc1b87d0321f052f59e4b5b4ddcf9b86745c",
+            "revision": "07aa767db1a6ca05f4bff05acbabe6637d451e13",
             "test_contexts": [
               {
                 "code_firstlineno": 16,
@@ -169724,7 +170120,7 @@
             ],
             "kind": "unittest declaration and explicit main entry",
             "main_line": 287,
-            "revision": "f976bc1b87d0321f052f59e4b5b4ddcf9b86745c",
+            "revision": "07aa767db1a6ca05f4bff05acbabe6637d451e13",
             "test_contexts": [
               {
                 "code_firstlineno": 25,
@@ -170508,7 +170904,7 @@
             ],
             "kind": "unittest declaration and explicit main entry",
             "main_line": 107,
-            "revision": "f976bc1b87d0321f052f59e4b5b4ddcf9b86745c",
+            "revision": "07aa767db1a6ca05f4bff05acbabe6637d451e13",
             "test_contexts": [
               {
                 "code_firstlineno": 14,
@@ -171533,7 +171929,7 @@
             ],
             "kind": "unittest declaration and explicit main entry",
             "main_line": 59,
-            "revision": "f976bc1b87d0321f052f59e4b5b4ddcf9b86745c",
+            "revision": "07aa767db1a6ca05f4bff05acbabe6637d451e13",
             "test_contexts": [
               {
                 "code_firstlineno": 17,
@@ -171701,7 +172097,7 @@
             ],
             "kind": "unittest declaration and explicit main entry",
             "main_line": 38,
-            "revision": "f976bc1b87d0321f052f59e4b5b4ddcf9b86745c",
+            "revision": "07aa767db1a6ca05f4bff05acbabe6637d451e13",
             "test_contexts": [
               {
                 "code_firstlineno": 13,
@@ -171790,7 +172186,7 @@
             ],
             "kind": "unittest declaration and explicit main entry",
             "main_line": 40,
-            "revision": "f976bc1b87d0321f052f59e4b5b4ddcf9b86745c",
+            "revision": "07aa767db1a6ca05f4bff05acbabe6637d451e13",
             "test_contexts": [
               {
                 "code_firstlineno": 14,
@@ -175219,7 +175615,7 @@
             ],
             "kind": "unittest declaration and explicit main entry",
             "main_line": 483,
-            "revision": "f976bc1b87d0321f052f59e4b5b4ddcf9b86745c",
+            "revision": "07aa767db1a6ca05f4bff05acbabe6637d451e13",
             "test_contexts": [
               {
                 "code_firstlineno": 46,
@@ -177198,7 +177594,7 @@
             ],
             "kind": "unittest declaration and explicit main entry",
             "main_line": 41,
-            "revision": "f976bc1b87d0321f052f59e4b5b4ddcf9b86745c",
+            "revision": "07aa767db1a6ca05f4bff05acbabe6637d451e13",
             "test_contexts": [
               {
                 "code_firstlineno": 9,
@@ -178532,7 +178928,7 @@
             ],
             "kind": "unittest declaration and explicit main entry",
             "main_line": 37,
-            "revision": "f976bc1b87d0321f052f59e4b5b4ddcf9b86745c",
+            "revision": "07aa767db1a6ca05f4bff05acbabe6637d451e13",
             "test_contexts": [
               {
                 "code_firstlineno": 20,
@@ -179613,7 +180009,7 @@
             ],
             "kind": "unittest declaration and explicit main entry",
             "main_line": 28,
-            "revision": "f976bc1b87d0321f052f59e4b5b4ddcf9b86745c",
+            "revision": "07aa767db1a6ca05f4bff05acbabe6637d451e13",
             "test_contexts": [
               {
                 "code_firstlineno": 10,
@@ -179702,7 +180098,7 @@
             ],
             "kind": "unittest declaration and explicit main entry",
             "main_line": 31,
-            "revision": "f976bc1b87d0321f052f59e4b5b4ddcf9b86745c",
+            "revision": "07aa767db1a6ca05f4bff05acbabe6637d451e13",
             "test_contexts": [
               {
                 "code_firstlineno": 9,
@@ -180020,7 +180416,7 @@
             ],
             "kind": "unittest declaration and explicit main entry",
             "main_line": 87,
-            "revision": "f976bc1b87d0321f052f59e4b5b4ddcf9b86745c",
+            "revision": "07aa767db1a6ca05f4bff05acbabe6637d451e13",
             "test_contexts": [
               {
                 "code_firstlineno": 17,
@@ -183233,7 +183629,7 @@
             ],
             "kind": "unittest declaration and explicit main entry",
             "main_line": 32,
-            "revision": "f976bc1b87d0321f052f59e4b5b4ddcf9b86745c",
+            "revision": "07aa767db1a6ca05f4bff05acbabe6637d451e13",
             "test_contexts": [
               {
                 "code_firstlineno": 8,
@@ -183610,7 +184006,7 @@
             ],
             "kind": "unittest declaration and explicit main entry",
             "main_line": 71,
-            "revision": "f976bc1b87d0321f052f59e4b5b4ddcf9b86745c",
+            "revision": "07aa767db1a6ca05f4bff05acbabe6637d451e13",
             "test_contexts": [
               {
                 "code_firstlineno": 15,
@@ -184483,7 +184879,7 @@
             ],
             "kind": "unittest declaration and explicit main entry",
             "main_line": 32,
-            "revision": "f976bc1b87d0321f052f59e4b5b4ddcf9b86745c",
+            "revision": "07aa767db1a6ca05f4bff05acbabe6637d451e13",
             "test_contexts": [
               {
                 "code_firstlineno": 5,
@@ -211577,8 +211973,8 @@
           "token": "check"
         },
         {
-          "location": ".github/workflows/lean.yml:34",
-          "token": "check"
+          "location": ".github/workflows/lean-budget.yml:2",
+          "token": "scripts/lean-budget/check.py"
         }
       ],
       "secondary": {
@@ -212466,8 +212862,8 @@
           "token": "check"
         },
         {
-          "location": ".github/workflows/lean.yml:34",
-          "token": "check"
+          "location": ".github/workflows/lean-budget.yml:2",
+          "token": "scripts/lean-budget/check.py"
         }
       ],
       "secondary": {
@@ -213224,8 +213620,8 @@
           "token": "check"
         },
         {
-          "location": ".github/workflows/lean.yml:34",
-          "token": "check"
+          "location": ".github/workflows/lean-budget.yml:2",
+          "token": "scripts/lean-budget/check.py"
         }
       ],
       "secondary": {
@@ -213365,8 +213761,8 @@
           "token": "check"
         },
         {
-          "location": ".github/workflows/lean.yml:34",
-          "token": "check"
+          "location": ".github/workflows/lean-budget.yml:2",
+          "token": "scripts/lean-budget/check.py"
         }
       ],
       "secondary": {
@@ -215829,7 +216225,7 @@
             ],
             "kind": "unittest declaration and explicit main entry",
             "main_line": 104,
-            "revision": "f976bc1b87d0321f052f59e4b5b4ddcf9b86745c",
+            "revision": "07aa767db1a6ca05f4bff05acbabe6637d451e13",
             "test_contexts": [
               {
                 "code_firstlineno": 16,
@@ -216107,7 +216503,7 @@
             ],
             "kind": "unittest declaration and explicit main entry",
             "main_line": 93,
-            "revision": "f976bc1b87d0321f052f59e4b5b4ddcf9b86745c",
+            "revision": "07aa767db1a6ca05f4bff05acbabe6637d451e13",
             "test_contexts": [
               {
                 "code_firstlineno": 16,
@@ -216416,7 +216812,7 @@
             ],
             "kind": "unittest declaration and explicit main entry",
             "main_line": 41,
-            "revision": "f976bc1b87d0321f052f59e4b5b4ddcf9b86745c",
+            "revision": "07aa767db1a6ca05f4bff05acbabe6637d451e13",
             "test_contexts": [
               {
                 "code_firstlineno": 12,
@@ -216685,7 +217081,7 @@
             ],
             "kind": "unittest declaration and explicit main entry",
             "main_line": 46,
-            "revision": "f976bc1b87d0321f052f59e4b5b4ddcf9b86745c",
+            "revision": "07aa767db1a6ca05f4bff05acbabe6637d451e13",
             "test_contexts": [
               {
                 "code_firstlineno": 10,
@@ -217273,7 +217669,7 @@
             ],
             "kind": "unittest declaration and explicit main entry",
             "main_line": 101,
-            "revision": "f976bc1b87d0321f052f59e4b5b4ddcf9b86745c",
+            "revision": "07aa767db1a6ca05f4bff05acbabe6637d451e13",
             "test_contexts": [
               {
                 "code_firstlineno": 11,
@@ -217655,7 +218051,7 @@
             ],
             "kind": "unittest declaration and explicit main entry",
             "main_line": 131,
-            "revision": "f976bc1b87d0321f052f59e4b5b4ddcf9b86745c",
+            "revision": "07aa767db1a6ca05f4bff05acbabe6637d451e13",
             "test_contexts": [
               {
                 "code_firstlineno": 10,
@@ -218057,7 +218453,7 @@
             ],
             "kind": "unittest declaration and explicit main entry",
             "main_line": 41,
-            "revision": "f976bc1b87d0321f052f59e4b5b4ddcf9b86745c",
+            "revision": "07aa767db1a6ca05f4bff05acbabe6637d451e13",
             "test_contexts": [
               {
                 "code_firstlineno": 10,
@@ -218694,7 +219090,7 @@
             ],
             "kind": "unittest declaration and explicit main entry",
             "main_line": 232,
-            "revision": "f976bc1b87d0321f052f59e4b5b4ddcf9b86745c",
+            "revision": "07aa767db1a6ca05f4bff05acbabe6637d451e13",
             "test_contexts": [
               {
                 "code_firstlineno": 16,
@@ -219157,7 +219553,7 @@
             ],
             "kind": "unittest declaration and explicit main entry",
             "main_line": 149,
-            "revision": "f976bc1b87d0321f052f59e4b5b4ddcf9b86745c",
+            "revision": "07aa767db1a6ca05f4bff05acbabe6637d451e13",
             "test_contexts": [
               {
                 "code_firstlineno": 32,
@@ -219373,7 +219769,7 @@
             ],
             "kind": "unittest declaration and explicit main entry",
             "main_line": 261,
-            "revision": "f976bc1b87d0321f052f59e4b5b4ddcf9b86745c",
+            "revision": "07aa767db1a6ca05f4bff05acbabe6637d451e13",
             "test_contexts": [
               {
                 "code_firstlineno": 19,
@@ -219732,7 +220128,7 @@
             ],
             "kind": "unittest declaration and explicit main entry",
             "main_line": 119,
-            "revision": "f976bc1b87d0321f052f59e4b5b4ddcf9b86745c",
+            "revision": "07aa767db1a6ca05f4bff05acbabe6637d451e13",
             "test_contexts": [
               {
                 "code_firstlineno": 13,
@@ -219904,7 +220300,7 @@
             ],
             "kind": "unittest declaration and explicit main entry",
             "main_line": 169,
-            "revision": "f976bc1b87d0321f052f59e4b5b4ddcf9b86745c",
+            "revision": "07aa767db1a6ca05f4bff05acbabe6637d451e13",
             "test_contexts": [
               {
                 "code_firstlineno": 14,
@@ -220300,7 +220696,7 @@
             ],
             "kind": "unittest declaration and explicit main entry",
             "main_line": 116,
-            "revision": "f976bc1b87d0321f052f59e4b5b4ddcf9b86745c",
+            "revision": "07aa767db1a6ca05f4bff05acbabe6637d451e13",
             "test_contexts": [
               {
                 "code_firstlineno": 35,
@@ -220676,7 +221072,7 @@
             ],
             "kind": "unittest declaration and explicit main entry",
             "main_line": 230,
-            "revision": "f976bc1b87d0321f052f59e4b5b4ddcf9b86745c",
+            "revision": "07aa767db1a6ca05f4bff05acbabe6637d451e13",
             "test_contexts": [
               {
                 "code_firstlineno": 23,
@@ -221819,7 +222215,7 @@
             ],
             "kind": "unittest declaration and explicit main entry",
             "main_line": 63,
-            "revision": "f976bc1b87d0321f052f59e4b5b4ddcf9b86745c",
+            "revision": "07aa767db1a6ca05f4bff05acbabe6637d451e13",
             "test_contexts": [
               {
                 "code_firstlineno": 25,
@@ -224480,8 +224876,8 @@
           "token": "check"
         },
         {
-          "location": ".github/workflows/lean.yml:34",
-          "token": "check"
+          "location": ".github/workflows/lean-budget.yml:2",
+          "token": "scripts/lean-budget/check.py"
         }
       ],
       "secondary": {
@@ -225480,7 +225876,7 @@
           "token": "check"
         },
         {
-          "location": ".github/workflows/lean.yml:34",
+          "location": ".github/workflows/lean-budget.yml:17",
           "token": "check"
         }
       ],
@@ -242535,7 +242931,7 @@
             ],
             "kind": "unittest declaration and explicit main entry",
             "main_line": 46,
-            "revision": "f976bc1b87d0321f052f59e4b5b4ddcf9b86745c",
+            "revision": "07aa767db1a6ca05f4bff05acbabe6637d451e13",
             "test_contexts": [
               {
                 "code_firstlineno": 7,
@@ -244202,7 +244598,7 @@
             ],
             "kind": "unittest declaration and explicit main entry",
             "main_line": 136,
-            "revision": "f976bc1b87d0321f052f59e4b5b4ddcf9b86745c",
+            "revision": "07aa767db1a6ca05f4bff05acbabe6637d451e13",
             "test_contexts": [
               {
                 "code_firstlineno": 14,
@@ -283334,7 +283730,7 @@
             ],
             "kind": "unittest declaration and explicit main entry",
             "main_line": 61,
-            "revision": "f976bc1b87d0321f052f59e4b5b4ddcf9b86745c",
+            "revision": "07aa767db1a6ca05f4bff05acbabe6637d451e13",
             "test_contexts": [
               {
                 "code_firstlineno": 15,
@@ -289639,11 +290035,11 @@
   },
   "totals": {
     "evidence": 377,
-    "keep": 1129,
+    "keep": 1134,
     "orphan": 0,
     "paths": 5599,
     "regenerable": 0,
-    "unresolved": 4093
+    "unresolved": 4088
   },
   "universe": [
     "tests/",

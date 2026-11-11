@@ -371,7 +371,7 @@ def reviewed_routes(graph):
     routes deliberately do not infer entire H55/H62 trees from the gate.
     """
     repo = graph.repo
-    audited_blobs = {'scripts/coord-tools/gate.sh': 'd60977c0abccb00ccaf1d5a4b777bee9fde34b98', 'scripts/ci/checks-fast.sh': '71ae3185f23f860a4ff907bc53815991e6bc8719', 'scripts/check-trust.sh': '7c93af4335a60c0def576b35d78f1d07a84cfca4', 'scripts/check-trust.mjs': '9a4e8eb53b3a1fb68d7ef8ac8c439600475b7e2d', 'scripts/check-testsuite.sh': '312daf403db3c45a7c26a0d3704febd0099ea2a9', 'scripts/h62/item1/p16-generator/check.py': '1222082617c3db1ba6df27c083ae8ebd71f3d86c', 'scripts/h62/item1/p16-generator/generate.py': 'c79d2fc8a61162f192e5e549f272ee1745c4c3d3', 'tests/h28-sol/non-vacuity/kernel.py': '7190d611d05931e9aebe509685fbc16fbc6a686d'}
+    audited_blobs = {'scripts/coord-tools/gate.sh': 'd60977c0abccb00ccaf1d5a4b777bee9fde34b98', 'scripts/ci/checks-fast.sh': '26f69ccebe922861919519bce0316858f69d179c', 'scripts/check-trust.sh': '7c93af4335a60c0def576b35d78f1d07a84cfca4', 'scripts/check-trust.mjs': '9a4e8eb53b3a1fb68d7ef8ac8c439600475b7e2d', 'scripts/check-testsuite.sh': '312daf403db3c45a7c26a0d3704febd0099ea2a9', 'scripts/h62/item1/p16-generator/check.py': '1222082617c3db1ba6df27c083ae8ebd71f3d86c', 'scripts/h62/item1/p16-generator/generate.py': 'c79d2fc8a61162f192e5e549f272ee1745c4c3d3', 'tests/h28-sol/non-vacuity/kernel.py': '7190d611d05931e9aebe509685fbc16fbc6a686d'}
     def audited(path):
         return path in repo.tree and repo.tree[path][2] == audited_blobs.get(path)
     routes = [
