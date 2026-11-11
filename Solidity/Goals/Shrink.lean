@@ -218,12 +218,15 @@ mutual
 /-- **The writer**, by the same recursion: a whole mapping is not assignable
 (solc), a mismatched tree is refused (`none`, never a no-op). -/
 def Geometry.write (V : Geometry) (P : Params) : Layout → Loc → Tree → Phys → Option Phys
-  | .scalar w, l, .leaf v, m => if v < 256 ^ w then V.writeScalar P w l v m else none
+  | .scalar w, l, .leaf v, m =>
+    if 0 < w ∧ w ≤ 32 ∧ v < 256 ^ w then V.writeScalar P w l v m else none
   | .fixedArray e n, l, .node xs, m =>
-    if xs.length = n then V.writeElems P e l xs 0 m else none
-  | .dynArray e, l, .node xs, m => do
-    let m₁ ← V.writeLength P l xs.length m
-    V.writeElems P e (V.data P l m₁) xs 0 m₁
+    if xs.length = n ∧ n < 2 ^ 256 then V.writeElems P e l xs 0 m else none
+  | .dynArray e, l, .node xs, m =>
+    if xs.length < 2 ^ 256 then do
+      let m₁ ← V.writeLength P l xs.length m
+      V.writeElems P e (V.data P l m₁) xs 0 m₁
+    else none
   | .bytes, l, .blob bs, m => V.writeBlob P l bs m
   | .struct fs, l, .node xs, m => V.writeFields P fs l fs xs 0 m
   | _, _, _, _ => none
@@ -266,28 +269,50 @@ end
 def Apart (a b : Cell → Prop) : Prop := ∀ c, ¬ (a c ∧ b c)
 
 mutual
-/-- **Separation** (aliasing), by the same recursion: distinct elements,
-fields, keys, a length word and its payload occupy disjoint cells (the
-recursive `finiteSeparated`). It is a premise of read-after-write only. -/
-def Geometry.Separated (V : Geometry) (P : Params) : Layout → Loc → Phys → Prop
-  | .scalar _, _, _ => True
-  | .fixedArray e n, l, m => V.ElemsSeparated P e l n m
-  | .dynArray e, l, m => V.ElemsSeparated P e (V.data P l m) (V.length P l m) m ∧
-    Apart (V.lengthCells P l) (V.elemCells P e (V.data P l m) (V.length P l m) 0 m)
-  | .bytes, l, m => Apart (V.lengthCells P l) (V.blobCells P l m)
-  | .struct fs, l, m => V.FieldsSeparated P fs l fs 0 m
-  | .mapping v, l, m => (∀ k, V.Separated P v (V.key P l k) m) ∧
-    ∀ k k', k ≠ k' → Apart (V.cells P v (V.key P l k) m) (V.cells P v (V.key P l k') m)
-def Geometry.ElemsSeparated (V : Geometry) (P : Params) (e : Layout) (l : Loc) (n : Nat)
-    (m : Phys) : Prop :=
-  (∀ i, i < n → V.Separated P e (V.elem P e l i) m) ∧
-  ∀ i j, i < n → j < n → i ≠ j → Apart (V.cells P e (V.elem P e l i) m) (V.cells P e (V.elem P e l j) m)
-def Geometry.FieldsSeparated (V : Geometry) (P : Params) (all : List Layout) (l : Loc) :
-    List Layout → Nat → Phys → Prop
+/-- **The written footprint**, by the same recursion, with lengths taken
+from the written tree (not from a possibly clobbered state). -/
+def Geometry.cellsT (V : Geometry) (P : Params) : Layout → Loc → Tree → Phys → Cell → Prop
+  | .scalar w, l, _, _, c => V.scalarCells P w l c
+  | .fixedArray e _, l, .node xs, m, c => V.elemCellsT P e l xs 0 m c
+  | .dynArray e, l, .node xs, m, c => V.lengthCells P l c ∨ V.elemCellsT P e (V.data P l m) xs 0 m c
+  | .bytes, l, _, m, c => V.lengthCells P l c ∨ V.blobCells P l m c
+  | .struct fs, l, .node xs, m, c => V.fieldCellsT P fs l fs xs 0 m c
+  | _, _, _, _, _ => False
+def Geometry.elemCellsT (V : Geometry) (P : Params) (e : Layout) (l : Loc) :
+    List Tree → Nat → Phys → Cell → Prop
+  | [], _, _, _ => False
+  | x :: xs, i, m, c => V.cellsT P e (V.elem P e l i) x m c ∨ V.elemCellsT P e l xs (i + 1) m c
+def Geometry.fieldCellsT (V : Geometry) (P : Params) (all : List Layout) (l : Loc) :
+    List Layout → List Tree → Nat → Phys → Cell → Prop
+  | f :: fs, x :: xs, i, m, c => V.cellsT P f (V.field P all l i) x m c ∨
+    V.fieldCellsT P all l fs xs (i + 1) m c
+  | _, _, _, _, _ => False
+end
+
+mutual
+/-- **Separation** (aliasing) of a written tree, by the same recursion:
+distinct elements and fields, and a length word and its payload, occupy
+disjoint cells (the recursive `finiteSeparated`). It is the premise of
+read-after-write; a slot region that wraps onto itself violates it. -/
+def Geometry.Separated (V : Geometry) (P : Params) : Layout → Loc → Tree → Phys → Prop
+  | .fixedArray e _, l, .node xs, m => V.ElemsSeparated P e l xs 0 m
+  | .dynArray e, l, .node xs, m => V.ElemsSeparated P e (V.data P l m) xs 0 m ∧
+    Apart (V.lengthCells P l) (V.elemCellsT P e (V.data P l m) xs 0 m)
+  | .bytes, l, _, m => Apart (V.lengthCells P l) (V.blobCells P l m)
+  | .struct fs, l, .node xs, m => V.FieldsSeparated P fs l fs xs 0 m
+  | _, _, _, _ => True
+def Geometry.ElemsSeparated (V : Geometry) (P : Params) (e : Layout) (l : Loc) :
+    List Tree → Nat → Phys → Prop
   | [], _, _ => True
-  | f :: fs, i, m => V.Separated P f (V.field P all l i) m ∧
-    Apart (V.cells P f (V.field P all l i) m) (V.fieldCells P all l fs (i + 1) m) ∧
-    V.FieldsSeparated P all l fs (i + 1) m
+  | x :: xs, i, m => V.Separated P e (V.elem P e l i) x m ∧
+    Apart (V.cellsT P e (V.elem P e l i) x m) (V.elemCellsT P e l xs (i + 1) m) ∧
+    V.ElemsSeparated P e l xs (i + 1) m
+def Geometry.FieldsSeparated (V : Geometry) (P : Params) (all : List Layout) (l : Loc) :
+    List Layout → List Tree → Nat → Phys → Prop
+  | f :: fs, x :: xs, i, m => V.Separated P f (V.field P all l i) x m ∧
+    Apart (V.cellsT P f (V.field P all l i) x m) (V.fieldCellsT P all l fs xs (i + 1) m) ∧
+    V.FieldsSeparated P all l fs xs (i + 1) m
+  | _, _, _, _ => True
 end
 
 mutual
@@ -336,17 +361,17 @@ structure LayoutView.Laws (V : LayoutView) : Prop where
   /-- A read depends on its footprint only. -/
   local_read : ∀ P L l m m', (∀ c, V.geometry.cells P L l m c → m.byte c = m'.byte c) →
     V.geometry.read P L l m = V.geometry.read P L l m'
-  /-- Read after write, for every fitting tree whose result is separated. -/
+  /-- Read after write, for every fitting tree whose written footprint is separated. -/
   write_read : ∀ P L l t m m', L.Fits t → V.geometry.write P L l t m = some m' →
-    V.geometry.Separated P L l m' → V.geometry.read P L l m' = some t
+    V.geometry.Separated P L l t m' → V.geometry.read P L l m' = some t
   /-- A fitting mapping-free persistent/transient write succeeds. -/
   write_total : ∀ P L l t m, l.region ≠ .memory → L.NoMapping → L.Fits t →
     ∃ m', V.geometry.write P L l t m = some m'
   /-- An ill-typed write fails, never a no-op (as `heapPutConcrete_error`). -/
   illTyped : ∀ P L l t m, ¬ L.Fits t → V.geometry.write P L l t m = none
-  /-- Frame: a write changes cells of its footprint (before or after) only. -/
+  /-- Frame: a write changes cells of the written footprint only. -/
   frame : ∀ P L l t m m', V.geometry.write P L l t m = some m' →
-    ∀ c, ¬ V.geometry.cells P L l m' c → ¬ V.geometry.cells P L l m c → m'.byte c = m.byte c
+    ∀ c, ¬ V.geometry.cellsT P L l t m' c → m'.byte c = m.byte c
   /-- Allocation: the tree is readable at the returned address, at or above
   the old free pointer; the object's footprint lies below the new free
   pointer; slots, scratch and memory below the old free pointer (outside the
