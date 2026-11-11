@@ -587,8 +587,9 @@ whose sum is not a word; deployments and requests the code does not resolve;
 a request or deployment whose value the sender's funds in the world do not cover
 (the frame reverts there, the ledger may call it affordable); the final
 observation of a session without outcomes; whether the world after a deployment
-or a credit is listed; bounds with resource failures; environments that are not
-allowed; and the preimages a run hashes and the slot preimages of the keys a typed
+or a credit is listed; bounds with resource failures, beyond the outcome of a
+determined step there (its own, or a revert with empty data); environments that
+are not allowed; and the preimages a run hashes and the slot preimages of the keys a typed
 storage holds (`View.stored` is only required to be accounted for, so this goal
 does not pin `Forward` and `Guard` beyond their definitions). Within a determined
 step the frame's own accounting is the typed world's: global funds, debited from
@@ -777,7 +778,8 @@ structure Laws (F : Fixed) (I : IntrinsicSpec) (V : View I) : Prop where
   whose result no response table changes, is
   the next event exactly when `World.transact` of the actual `World.call`
   completes, with that outcome; the world it reaches is listed and is the next
-  boundary. -/
+  boundary. At a bound with resource failures its outcome is that one or a revert
+  with empty data. -/
   transacts : ∀ x en h n (code : Code) (cw : ContractWorld.World code.catalog)
       (q : Request) (k : Fin code.contracts.length) (st : Storage (code.catalog k))
       (entry : ContractWorld.Entry (code.catalog k) Bytes),
@@ -793,12 +795,16 @@ structure Laws (F : Fixed) (I : IntrinsicSpec) (V : View I) : Prop where
     (∀ ext, frame ext = res) →
     (Ends res.2 → ∃ out, Observed I p en
       (h ++ [Event.tx q.sender q.target q.value q.timestamp q.input out])) ∧
-    ∀ r, Good I r → h <+: (I.lang.sem p en r).events →
+    (∀ r, Good I r → h <+: (I.lang.sem p en r).events →
       (I.lang.sem p en r).events = h ∨ ∃ out,
         let done := Event.tx q.sender q.target q.value q.timestamp q.input out
         h ++ [done] <+: (I.lang.sem p en r).events ∧ Matches res.2 out ∧
         ∃ ω ∈ I.worlds p en r, (V.typed ω).Shows code res.1 ∧
-          V.Boundary x en (h ++ [done]) (n + 1) (V.typed ω)
+          V.Boundary x en (h ++ [done]) (n + 1) (V.typed ω)) ∧
+    ∀ r, I.lang.Admissible r → ∀ out,
+      h ++ [Event.tx q.sender q.target q.value q.timestamp q.input out] <+:
+        (I.lang.sem p en r).events →
+      Matches res.2 out ∨ out = .revert []
   /-- Every completed transaction of an affordable request, whatever its body
   does, is that request's, and reaches a listed world that is the next boundary. -/
   resumes : ∀ x en h n t (q : Request), I.lang.Allowed en → V.Boundary x en h n t →
@@ -814,7 +820,8 @@ structure Laws (F : Fixed) (I : IntrinsicSpec) (V : View I) : Prop where
   covered by a deployer other than the new address, runs as `World.transact` of
   the actual `World.create` at the address `Fixed.createAddress` gives; it is the
   first event exactly when that completes, and on success the world it installs is
-  the first boundary. -/
+  the first boundary. At a bound with resource failures its outcome is that one or
+  a revert with empty data. -/
   deploys : ∀ (code : Code) (en : I.lang.Env) (k : Fin code.contracts.length)
       (body : Prog (code.catalog k) [] []),
     I.lang.Allowed en → k.val = code.main →
@@ -832,12 +839,19 @@ structure Laws (F : Fixed) (I : IntrinsicSpec) (V : View I) : Prop where
     (∀ ext, frame ext = res) →
     (Ends res.2 → ∃ out address, Observed I p en
       [Event.deploy e.deployer e.deployValue e.deployArgs out address]) ∧
-    ∀ r, Good I r → (I.lang.sem p en r).events ≠ [] → ∃ out address,
+    (∀ r, Good I r → (I.lang.sem p en r).events ≠ [] → ∃ out address,
       let done := Event.deploy e.deployer e.deployValue e.deployArgs out address
       [done] <+: (I.lang.sem p en r).events ∧
       match res.2 with
       | .ok _ => (∃ d, out = .success d) ∧ address = some this ∧
         ∃ t', t'.Shows code res.1 ∧ V.Boundary (V.initial code) en [done] 0 t'
+      | .error h => RevertMatches h out ∧ address = none) ∧
+    ∀ r, I.lang.Admissible r → ∀ out address,
+      [Event.deploy e.deployer e.deployValue e.deployArgs out address] <+:
+        (I.lang.sem p en r).events →
+      (out = .revert [] ∧ address = none) ∨
+      match res.2 with
+      | .ok _ => (∃ d, out = .success d) ∧ address = some this
       | .error h => RevertMatches h out ∧ address = none
 
 end IntrinsicSession
