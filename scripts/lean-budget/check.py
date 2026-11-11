@@ -71,7 +71,9 @@ class Lines:
                                capture_output=True, check=True)
             data, pos = p.stdout, 0
             for s in todo:
-                nl = data.index(b"\n", pos); hdr = data[pos:nl].split(); size = int(hdr[2])
+                nl = data.index(b"\n", pos); hdr = data[pos:nl].split()
+                if len(hdr) < 3: raise RuntimeError(f"blob {s} missing (shallow clone? fetch full history)")
+                size = int(hdr[2])
                 body = data[nl + 1: nl + 1 + size]; pos = nl + 2 + size
                 self.cache[s] = body.count(b"\n") + (1 if body and not body.endswith(b"\n") else 0)
         return {s: self.cache.get(s, 0) for s in shas}
