@@ -484,7 +484,7 @@ y1-yul-artifact-producers). Three separate layers:
   certificate failure.
 * `YulArtifact.Fits depth`: the representation limit of the emitted code. Local
   reads use DUP and writes use SWAP, whose Backend index is `Fin 16`; a read at
-  operand height `h` above the `depth` newer words needs `h + i < 16`, and a
+  stack height `h` above the locals (counting the `depth` newer words) needs `h + i < 16`, and a
   write needs `depth + i < 16` (`lowerLocal`, `lowerAssign`, `lowerBinary`).
   Syntactic: computed from the program and the depth, never from success.
 * The goal: the producer must succeed on every accepted program, its emission at
