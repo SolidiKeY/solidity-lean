@@ -162,7 +162,15 @@ export function summarize(raw, sourceFor, {sourceCeilings=false, proofRangesFor=
     fallbacks:fallbacks.sort((a,b)=>a.name.localeCompare(b.name)),ceilings:ceilings.sort((a,b)=>a.module.localeCompare(b.module)),
     totalDeclarations:declarations.length,totalLines:counts.reduce((n,m)=>n+m.lines,0)};
 }
+function assertAllowances(value) {
+  const name=n=>typeof n==='string'&&n.length>0;
+  if(!Array.isArray(value?.roots)||!value.roots.every(name)||
+     !Array.isArray(value.declarations)||!value.declarations.every(d=>name(typeof d==='string'?d:d?.name))||
+     !Array.isArray(value.modules)||!value.modules.every(m=>name(m?.module)&&Number.isSafeInteger(m.lines)&&m.lines>=0))
+    throw Error('malformed closure baseline allowances');
+}
 export function compare(current, baseline) {
+  assertAllowances(current);assertAllowances(baseline);
   for(const n of baseline.roots)if(!current.roots.includes(n))throw Error(`lost public root: ${n}`);
   const old=new Set(baseline.declarations.map(d=>typeof d==='string'?d:d.name));
   for(const d of current.declarations){const name=typeof d==='string'?d:d.name;
@@ -188,6 +196,7 @@ export function extract(script, marker) {
 }
 export function validateRevision(next, previousText) {
   const previous=JSON.parse(previousText);
+  assertAllowances(next);assertAllowances(previous);
   let growth=false;
   try {compare(next,previous);} catch(e) {
     if(e.message.startsWith('lost public root'))throw e;
@@ -218,26 +227,55 @@ export function historyBase({env=process.env,git=(...args)=>execFileSync('git',a
 export function checkHistory(baseline,{env=process.env,git=(...args)=>execFileSync('git',args,
     {encoding:'utf8',stdio:['ignore','pipe','pipe']}).trim()}={}) {
   const base=historyBase({env,git});
-  // Validate every changed snapshot after the event anchor, including initial
-  // adoption and multi-commit PRs. A final HEAD snapshot is never its own anchor.
-  let previous=base && git('ls-tree',base,'--',baselinePath)?
-    execFileSync('git',['show',`${base}:${baselinePath}`],{encoding:'utf8'}):null;
-  const range=base?`${base}..HEAD`:'HEAD';
-  const revisions=git('rev-list','--reverse','--topo-order',range,'--',baselinePath).split('\n').filter(Boolean);
-  for(const revision of revisions) {
-    if(!git('ls-tree',revision,'--',baselinePath))throw Error('baseline history deleted its source');
-    const text=execFileSync('git',['show',`${revision}:${baselinePath}`],{encoding:'utf8'});
-    if(text===previous)continue;
-    const next=JSON.parse(text);
-    if(previous===null) {
+  // Walk the actual commit DAG without path-history simplification. Validate
+  // each snapshot against its own parents, never an unrelated sibling branch.
+  const snapshots=new Map(),blobs=new Map();
+  const snapshot=revision=>{
+    if(snapshots.has(revision))return snapshots.get(revision);
+    const entry=git('ls-tree',revision,'--',baselinePath);
+    let value=null;
+    if(entry) {
+      const blob=entry.split(/\s+/u)[2];
+      if(!blobs.has(blob)) {
+        const text=execFileSync('git',['show',`${revision}:${baselinePath}`],{encoding:'utf8'});
+        blobs.set(blob,{text,data:JSON.parse(text)});
+      }
+      value=blobs.get(blob);
+    }
+    snapshots.set(revision,value);return value;
+  };
+  const validate=(next,parents)=>{
+    assertAllowances(next);for(const previous of parents)assertAllowances(previous.data);
+    if(!parents.length) {
       if(next.change?.previousSha256!==null || !next.change?.reason?.trim())
         throw Error('initial baseline must have a reason and null predecessor');
-    } else validateRevision(next,previous);
-    previous=text;
+      return;
+    }
+    let growth=false;
+    for(const previous of parents)try {compare(next,previous.data);}catch(error) {
+      if(error.message.startsWith('lost public root'))throw error;
+      growth=true;
+    }
+    // Copying an already checked parent introduces no new baseline version.
+    // All parents' public roots must still survive, including on TREESAME merges.
+    if(parents.some(previous=>JSON.stringify(next)===JSON.stringify(previous.data)))return;
+    if(growth) {
+      const anchor=parents.find(previous=>sha(previous.text)===next.change?.previousSha256);
+      if(!anchor || !next.change?.reason?.trim() || next.change.reason===anchor.data.change?.reason)
+        throw Error('baseline growth requires a fresh reason and exact predecessor checksum');
+    }
+  };
+  const range=base?`${base}..HEAD`:'HEAD';
+  const revisions=git('rev-list','--parents','--reverse','--topo-order',range).split('\n').filter(Boolean);
+  for(const row of revisions) {
+    const [revision,...parents]=row.split(' '),next=snapshot(revision);
+    const previous=parents.map(snapshot).filter(Boolean);
+    if(!next) {
+      if(previous.length)throw Error('baseline history deleted its source');
+    } else validate(next.data,previous);
   }
-  if(previous!==null)validateRevision(baseline,previous);
-  else if(baseline.change?.previousSha256!==null)
-    throw Error('initial baseline must have a null predecessor');
+  const head=snapshot('HEAD');
+  validate(baseline,head?[head]:[]);
 }
 // The selected OLean graph and its cache mapping identify the source index.
 // Neither a physical .ilean nor its physical .trace is a freshness witness.

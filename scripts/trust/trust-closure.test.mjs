@@ -214,3 +214,32 @@ test('initial adoption checks each actual predecessor instead of final HEAD',()=
   const lost={...fixed,roots:[]};put(lost);assert.throws(()=>checkHistory(lost,{env}),/lost public root/);
  } finally {process.chdir(cwd);rmSync(root,{recursive:true,force:true});}
 });
+
+// Guards a merge flattening valid siblings, or hiding a bad TREESAME branch.
+test('merge DAG checks real parents and includes invalid merged-branch snapshots',()=>{
+ for(const mode of ['copy-parent','synthesized','hidden-bad','lost-other-root'])historyFixture(({git,before,previous,previousText})=>{
+  const path='scripts/trust/trust-closure-baseline.json';
+  const put=(next,message)=>{const text=JSON.stringify(next,null,2)+'\n';writeFileSync(path,text);git('add','.');git('commit','-qm',message);return text;};
+  git('checkout','-qb','left',before);
+  const left={...previous,roots:mode==='lost-other-root'?['headline','leftRoot']:previous.roots,
+   modules:[{module:'Control',lines:2}],change:{reason:'left growth',previousSha256:sha(previousText)}};
+  const leftText=put(left,'left growth');
+  git('checkout','-qb','right',before);
+  const right={...previous,modules:[{module:'Control',lines:3}],change:{reason:mode==='hidden-bad'?'initial':'right growth',previousSha256:mode==='hidden-bad'?null:sha(previousText)}};
+  put(right,'right growth');git('checkout','-q','left');
+  assert.throws(()=>git('merge','--no-ff','--no-commit','right'));
+  const merged=mode==='hidden-bad'?left:mode==='synthesized'?{...right,modules:[{module:'Control',lines:4}],change:{reason:'merge growth',previousSha256:sha(leftText)}}:right;
+  put(merged,'resolved merge');git('update-ref','refs/remotes/origin/master',git('rev-parse','HEAD'));
+  const env={GITHUB_EVENT_NAME:'push',TRUST_BASE_REF:before};
+  if(mode==='hidden-bad')assert.throws(()=>checkHistory(merged,{env}),/checksum/);
+  else if(mode==='lost-other-root')assert.throws(()=>checkHistory(merged,{env}),/lost public root/);
+  else checkHistory(merged,{env});
+ });
+});
+test('malformed intermediate allowances cannot masquerade as reasoned growth',()=>{
+ const previous={...summarize(raw,()=>source),change:{reason:'initial',previousSha256:null}};
+ const text=JSON.stringify(previous,null,2)+'\n';
+ for(const malformed of [{...previous,roots:undefined},{...previous,modules:[{module:'Control',lines:'999999'}]},
+   {...previous,declarations:[null]}])
+  assert.throws(()=>validateRevision({...malformed,change:{reason:'fresh',previousSha256:sha(text)}},text),/malformed closure/);
+});
