@@ -111,7 +111,7 @@ def emitSummary (counts : Counts) : IO Unit :=
 /-- Guards missing rows/filters and logical-empty-fallback vacuity before any
 public import: independently expect nonempty names for opaque, unsafe and
 partial metadata. A bad map key is reported, not silently omitted. -/
-def runSynthetic : IO Unit := do
+def runSynthetic (announce : Bool := true) : IO Unit := do
   let type := Expr.const `independentType []
   let value := Expr.const `independentValue []
   let opaqueCi : ConstantInfo := .opaqueInfo { name := `opaqueFixture, levelParams := [], type := type, value := value, isUnsafe := true }
@@ -127,12 +127,15 @@ def runSynthetic : IO Unit := do
   let bad ← auditEntries [(`wrongKey, opaqueCi), (`wrongKey, partialCi)]
   unless bad.compared == 2 && bad.keyMismatches == 2 && bad.duplicateKeys == 1 do
     throw <| IO.userError "invalid-key/duplicate control failed"
-  IO.println "H537_SYNTHETIC_PASS nonempty opaque/unsafe/partial; full denominator; bad keys reported; no public import or replay"
+  if announce then
+    IO.println "H537_SYNTHETIC_PASS nonempty opaque/unsafe/partial; full denominator; bad keys reported; no public import or replay"
 
 /-- Exactly one full root import in the admitted external TOTAL300s guard.
 Matches the original checker's private-level, loadExts=false import, but does
 not create an empty kernel or call any replay/addDecl/checker executable. -/
 def comparePublic (rootsFile : System.FilePath) : IO UInt32 := do
+  runSynthetic false
+  emit [("event", toJson "native_oracle"), ("nonempty", toJson true), ("cases", toJson (2 : Nat))]
   initSearchPath (← findSysroot)
   let env ← Lean.importModules #[{ module := `Solidity.Theorems }] {} (loadExts := false)
   for moduleName in env.allImportedModuleNames do
@@ -345,6 +348,7 @@ def validate_binding(data, deadline):
     source, checker, sysroot = (Path(data[k]) for k in ('source', 'checker', 'sysroot'))
     R.require(source_context(source, deadline) == (data['source_head'], data['lake_context']), 'source/Lake context drift')
     R.require(check_frozen(checker, deadline) == data['checker_head'], 'audit revision changed')
+    R.require(R.digest(checker / '.lake/build/lib/lean/Lean4Checker/FusedDepsV3.olean', deadline) == HELPER_OLEAN_SHA, 'compiled v3 helper identity differs')
     R.require(R.digest(Path(__file__).resolve(), deadline) == data['runner_sha256'] ==
               R.digest(source / SCRIPT, deadline), 'executing runner identity differs')
     roots = json.loads((source / 'scripts/trust/trust-closure-baseline.json').read_text())['roots']
@@ -375,7 +379,10 @@ def validate_binding(data, deadline):
     R.require(graph['imports'] == data['selected_imports'], 'current selected import graph changed')
     manifest_path, objects = Path(data['manifest_path']), Path(data['objects'])
     manifest = R.load_json(manifest_path, data['manifest_sha256'], deadline)
-    R.require(manifest['head'] == data['source_head'] and manifest['root'] == data['root'], 'object manifest identity mismatch')
+    R.require(type(manifest['schema']) is int and manifest['schema'] == 1 and manifest['scope'] == R.SCOPE and
+              manifest['head'] == data['source_head'] and manifest['root'] == data['root'] and
+              manifest['provenance']['setupOrigin'] == graph['origin'] and
+              manifest['provenance']['setupSha256'] == data['setup_sha256'], 'object manifest identity/scope mismatch')
     R.require(len(manifest['files']) == data['object_count'] and sum(row['bytes'] for row in manifest['files']) == data['object_bytes'], 'object denominator changed')
     selected_objects = {}
     for name, paths in graph['imports'].items():
@@ -405,12 +412,13 @@ def validate_binding(data, deadline):
 
 
 def evaluate_output(log, data, manifest):
-    modules, domain, summary, witnesses = {}, [], [], []
+    modules, domain, summary, witnesses, oracles = {}, [], [], [], []
     mismatch_rows = 0
     for line in Path(log).read_text().splitlines():
         row = json.loads(line, object_pairs_hook=R.unique_object)
         event = row.get('event')
-        if event == 'module':
+        if event == 'native_oracle': oracles.append(row)
+        elif event == 'module':
             R.require(row['name'] not in modules, 'duplicate module event')
             modules[row['name']] = str(Path(row['object']).resolve())
         elif event == 'domain': domain.append(row)
@@ -418,7 +426,8 @@ def evaluate_output(log, data, manifest):
         elif event == 'witnesses': witnesses.append(row)
         elif event == 'mismatch': mismatch_rows += 1
         else: raise R.InvalidInput('unexpected audit output')
-    R.require(len(domain) == len(summary) == len(witnesses) == 1, 'incomplete/duplicate audit summary')
+    R.require(len(domain) == len(summary) == len(witnesses) == len(oracles) == 1, 'incomplete/duplicate audit summary')
+    R.require(oracles[0].get('nonempty') is True and oracles[0].get('cases') == 2, 'fresh nonempty native oracle absent')
     d, s, w = domain[0], summary[0], witnesses[0]
     for key in ('expected', 'compared', 'mismatches', 'keyMismatches', 'duplicateKeys', 'unsafeEntries', 'partialEntries'):
         R.require(type(s[key]) is int and s[key] >= 0, 'invalid audit count')
@@ -441,6 +450,10 @@ def admit(path, binding_sha):
     with Path(path).open('x') as out:
         json.dump({'authority': 'H537', 'binding_sha256': binding_sha, 'attempted': True,
                    'kernel_replay': False, 'admitted_at_boottime': R.clock()}, out)
+        out.flush(); os.fsync(out.fileno())
+    directory = os.open(Path(path).parent, os.O_RDONLY | os.O_DIRECTORY)
+    try: os.fsync(directory)
+    finally: os.close(directory)
 
 
 def compare(binding, expected, review, review_sha, output):
@@ -562,7 +575,7 @@ class RefusalControls(unittest.TestCase):
             data=dict(root='Solidity.Theorems', public_roots=['witness'], selected_imports={'Solidity.Theorems': []},
                       sysroot_objects=[], objects=str(root))
             manifest={'files':[{'path':'Public.olean'}]}
-            good=[dict(event='module',name='Solidity.Theorems',object=str(obj)),
+            good=[dict(event='native_oracle',nonempty=True,cases=2),dict(event='module',name='Solidity.Theorems',object=str(obj)),
                   dict(event='witnesses',expected=1,missing=[]),
                   dict(event='domain',entries=2,moduleCount=1,root='Solidity.Theorems',loadExts=False),
                   dict(event='summary',expected=2,compared=2,mismatches=0,keyMismatches=0,duplicateKeys=0,
@@ -576,7 +589,7 @@ class RefusalControls(unittest.TestCase):
             for key,value in [('compared',1),('mismatches',1),('kernelReplay',True),('a04Accepted',True),('kinds',[0]*8)]:
                 broken=deepcopy(good);broken[-1][key]=value
                 with self.subTest(key=key),self.assertRaises(R.InvalidInput):run(broken)
-            for index,key,value in [(1,'missing',['witness']),(2,'moduleCount',2),(0,'object',str(root/'unlisted.olean'))]:
+            for index,key,value in [(2,'missing',['witness']),(3,'moduleCount',2),(1,'object',str(root/'unlisted.olean')),(0,'nonempty',False)]:
                 broken=deepcopy(good);broken[index][key]=value
                 with self.subTest(key=key),self.assertRaises(R.InvalidInput):run(broken)
             with self.assertRaises(R.InvalidInput):run(good[:-1])
