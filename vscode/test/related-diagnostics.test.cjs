@@ -71,3 +71,44 @@ test('public EOL edit uses the actual dedicated API; default path keeps the orig
  phaseEdit(api,doc,textForInput('shifted','public-eol-v1'),'shifted','public-eol-v1');assert.equal(edits[0][0],'set');assert.equal(edits[0][2][1].eol,2);
  phaseEdit(api,doc,textFor('shifted'),'shifted');assert.equal(edits[1][0],'replace');
 });
+
+// Controlled transport schedule, not native execution or proof evidence.
+function reopenedPublications(){
+ const value=fixture('public-eol-v1'),before={...value.steps.at(-1).before,session:'fresh-document'},owner=value.steps.at(-1).process,protocol=structuredClone(value.protocol),text=textForInput('fixed','public-eol-v1');
+ protocol.push({...owner,direction:'client',message:{method:'textDocument/didClose',params:{textDocument:{uri:before.uri}}}});
+ const openIndex=protocol.length;protocol.push({...owner,direction:'client',message:{method:'textDocument/didOpen',params:{textDocument:{...before,text,synchronizationId:'fresh-sync'}}}});
+ const staleIndex=protocol.length;protocol.push({...owner,direction:'server',message:{method:'textDocument/publishDiagnostics',params:{uri:before.uri,version:before.version,sourceHash:before.sourceHash,synchronizationId:'sync-epoch',diagnostics:[]}}});
+ protocol.push({...owner,direction:'server',message:{method:'solidityLean/status',params:{uri:before.uri,version:before.version,sourceHash:before.sourceHash,synchronizationId:'sync-epoch',state:'ready'}}});
+ const stale=structuredClone(protocol);protocol.push({...owner,direction:'server',message:{method:'solidityLean/status',params:{uri:before.uri,version:before.version,sourceHash:before.sourceHash,synchronizationId:'fresh-sync',state:'ready'}}});const freshIndex=protocol.length;protocol.push({...owner,direction:'server',message:{method:'textDocument/publishDiagnostics',params:{uri:before.uri,version:before.version,sourceHash:before.sourceHash,synchronizationId:'fresh-sync',diagnostics:[]}}});
+ return{value,before,owner,text,openIndex,staleIndex,freshIndex,stale,fresh:protocol};
+}
+test('collector defers stale same-byte/version publication until actual fresh synchronization appears',async()=>{
+ const {captureDiagnosticStep,assertDiagnosticStep}=require('../parity/related-diagnostics.cjs'),{performance}=require('node:perf_hooks'),f=reopenedPublications(),row={phase:'reopened-fixed',status:'started'},start=performance.now();let reads=0;
+ await captureDiagnosticStep({vscode:{languages:{getDiagnostics:()=>[]}},doc:{uri:{}},binding:()=>({...f.before}),wire:()=>++reads===1?f.stale:f.fresh,events:f.value.events,deadline:start+1000,start,row,kind:'fixed'});
+ assert.equal(row.publicationIndex,f.freshIndex);assert.ok(reads>=2);assert.equal(row.publicationAttempts[0].publicationIndex,f.staleIndex);assert.equal(row.publicationAttempts[0].reason,'synchronization-mismatch');assert.equal(row.publicationAttempts[0].currentSynchronizationId,'fresh-sync');assert.equal(row.publicationAttempts[0].publicationSynchronizationId,'sync-epoch');assert.equal(row.status,'observed');assertDiagnosticStep(row,config,f.fresh,f.value.events,{uri:f.before.uri,session:f.before.session,text:f.text,kind:'fixed',process:f.owner});
+});
+test('stale-only transport exhausts original deadline and retains failed candidates without an observed row',async()=>{
+ const {captureDiagnosticStep}=require('../parity/related-diagnostics.cjs'),{performance}=require('node:perf_hooks'),f=reopenedPublications(),row={phase:'reopened-fixed',status:'started'},start=performance.now();
+ await assert.rejects(captureDiagnosticStep({vscode:{languages:{getDiagnostics:()=>[]}},doc:{uri:{}},binding:()=>({...f.before}),wire:()=>f.stale,events:f.value.events,deadline:start+35,start,row,kind:'fixed'}),e=>e.code==='TIMEOUT');assert.notEqual(row.status,'observed');assert.ok(row.publicationAttempts.length);assert.ok(row.publicationAttempts.every(a=>a.reason==='synchronization-mismatch'));
+});
+test('polling does not fall back to older success when latest candidate has foreign ownership',()=>{
+ const {currentPublication}=require('../parity/related-diagnostics.cjs'),f=reopenedPublications();f.fresh.push({...f.fresh.at(-1),processSession:'foreign',pid:999,birth:'999'});assert.equal(currentPublication(f.fresh,f.before).reason,'no-current-owned-open');
+});
+for(const [name,change,reason]of [
+ ['missing synchronization',f=>delete f.fresh[f.openIndex].message.params.textDocument.synchronizationId,'synchronization-mismatch'],
+ ['wrong source',f=>f.fresh[f.openIndex].message.params.textDocument.text+='x','wire-source-version-mismatch'],
+ ['wrong version',f=>f.fresh[f.openIndex].message.params.textDocument.version++,'wire-source-version-mismatch'],
+ ['current document closed',f=>f.fresh.push({...f.owner,direction:'client',message:{method:'textDocument/didClose',params:{textDocument:{uri:f.before.uri}}}}),'no-current-owned-open'],
+ ['publication predates reopened document',f=>f.fresh.push({...f.owner,direction:'client',message:{method:'textDocument/didOpen',params:{textDocument:{...f.before,text:f.text,synchronizationId:'fresh-sync'}}}}),'publication-before-current-open']
+])test('polling refuses '+name,()=>{const f=reopenedPublications();change(f);assert.equal(require('../parity/related-diagnostics.cjs').currentPublication(f.fresh,f.before).reason,reason);});
+
+test('fixed receipt refuses old ready from before current open or another synchronization',()=>{
+ const {captureDiagnosticStep,assertDiagnosticStep,currentPublication,currentReadyIndex}=require('../parity/related-diagnostics.cjs'),f=reopenedPublications(),selection=currentPublication(f.fresh,f.before),ready=f.fresh.findIndex(r=>r.message?.params?.state==='ready'&&r.message.params.synchronizationId==='fresh-sync');assert.ok(ready>f.openIndex);assert.equal(currentReadyIndex(f.fresh,f.before,f.owner,f.openIndex,'fresh-sync'),ready);
+ const row={phase:'reopened-fixed',status:'observed',before:f.before,after:{...f.before},diagnostics:[],process:f.owner,publicationIndex:f.freshIndex,wireEnd:f.fresh.length,eventEnd:f.value.events.length,elapsedMs:1};assert.doesNotThrow(()=>assertDiagnosticStep(row,config,f.fresh,f.value.events,{uri:f.before.uri,session:f.before.session,text:f.text,kind:'fixed',process:f.owner}));
+ f.fresh[ready].message.params.synchronizationId='sync-epoch';assert.equal(currentReadyIndex(f.fresh,f.before,f.owner,f.openIndex,'fresh-sync'),-1);assert.throws(()=>assertDiagnosticStep(row,config,f.fresh,f.value.events,{uri:f.before.uri,session:f.before.session,text:f.text,kind:'fixed',process:f.owner}),/current compiler-ready/);
+});
+test('latest current cancelled status cannot reuse an earlier ready barrier',()=>{const {currentReadyIndex}=require('../parity/related-diagnostics.cjs'),f=reopenedPublications();f.fresh.push({...f.owner,direction:'server',message:{method:'solidityLean/status',params:{uri:f.before.uri,version:f.before.version,sourceHash:f.before.sourceHash,synchronizationId:'fresh-sync',state:'cancelled'}}});assert.equal(currentReadyIndex(f.fresh,f.before,f.owner,f.openIndex,'fresh-sync'),-1);});
+test('collector waits within same deadline for current ready, not old ready',async()=>{
+ const {captureDiagnosticStep}=require('../parity/related-diagnostics.cjs'),{performance}=require('node:perf_hooks'),f=reopenedPublications(),row={phase:'reopened-fixed',status:'started'},start=performance.now(),old=structuredClone(f.fresh);for(const r of old)if(r.message?.method==='solidityLean/status')r.message.params.synchronizationId='sync-epoch';let reads=0;
+ await captureDiagnosticStep({vscode:{languages:{getDiagnostics:()=>[]}},doc:{uri:{}},binding:()=>({...f.before}),wire:()=>++reads===1?old:f.fresh,events:f.value.events,deadline:start+1000,start,row,kind:'fixed'});assert.ok(reads>=2);assert.equal(row.status,'observed');assert.equal(row.publicationAttempts[0].reason,'no-current-ready');
+});
