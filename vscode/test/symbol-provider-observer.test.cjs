@@ -75,3 +75,17 @@ test('observer cleanup failure is retained without aborting caller cleanup',()=>
  assert.doesNotThrow(()=>observed.dispose());observed.dispose();assert.equal(attempted,1);
  assert.deepEqual(observed.failures,['close disposal failed']);
 });
+
+test('source snapshot failures are recorded without replacing provider return identity',()=>{
+ const f=fixture(),value=[];f.observation.languages.registerDocumentSymbolProvider({}, {provideDocumentSymbols:()=>value});f.doc.getText=()=>{throw Error('actual source getter failed');};
+ assert.equal(f.registrations[0][1].provideDocumentSymbols(f.doc,{}),value);assert.ok(f.observation.failures.some(error=>error==='actual source getter failed'));assert.equal(f.events.at(-1).data.source.unavailable,true);f.observation.dispose();
+});
+
+test('recording finalization keeps original failure/status and snapshots observer cleanup errors',()=>{
+ const {finalizeRecording,recordingErrors}=require('../parity/symbol-provider-observer.cjs');
+ for(const status of ['passed','passed-with-gaps','broken','timeout']){const scenarios=[{id:'original',status:'broken'}],failures=['actual cleanup failure'],result={status,error:'original request failure',scenarios};
+ assert.equal(finalizeRecording(result,failures).length,1);assert.equal(result.status,status==='timeout'?'timeout':'broken');assert.equal(result.error,'original request failure');assert.equal(result.scenarios,scenarios);failures.push('later');assert.deepEqual(result.observations.symbolProviderRecordingFailures,['actual cleanup failure']);}
+ const result={status:'passed-with-gaps'};assert.deepEqual(finalizeRecording(result,[]),[]);assert.equal(result.status,'passed-with-gaps');assert.equal(result.error,undefined);
+ const missing={status:'passed'};assert.ok(finalizeRecording(missing,undefined).length);assert.equal(missing.status,'broken');
+ for(const value of [{},[null],[''],Array(1)])assert.match(recordingErrors(value)[0],/malformed/);
+});

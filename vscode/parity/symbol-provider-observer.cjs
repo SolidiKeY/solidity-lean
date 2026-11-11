@@ -15,7 +15,7 @@ function observeSymbolProviders(vscode,record,sessionFor){
   const source=doc=>{try{
     const state={uri:doc.uri.toString(),version:doc.version,languageId:doc.languageId,closed:doc.isClosed,session:sessionFor(doc),publicCloseEvents:epochs.get(doc)||0};
     return state.closed?state:{...state,textHash:createHash('sha256').update(doc.getText()).digest('hex')};
-  }catch(e){return {unavailable:true,reason:reason(e)};}};
+  }catch(e){const failure=reason(e);failures.push(failure);return {unavailable:true,reason:failure};}};
   // Neutral targets cannot expose frozen source descriptors as nonconfigurable.
   // Enumeration/capability checks still reflect the actual public members.
   const reflection=object=>({has:(_target,key)=>Reflect.has(object,key),ownKeys:()=>Reflect.ownKeys(object),getPrototypeOf:()=>Reflect.getPrototypeOf(object),getOwnPropertyDescriptor(_target,key){const descriptor=Reflect.getOwnPropertyDescriptor(object,key);return descriptor?{...descriptor,configurable:true}:undefined;}});
@@ -54,4 +54,12 @@ function observeSymbolProviders(vscode,record,sessionFor){
   }});
   return {languages,failures,dispose(){if(stopped)return;stopped=true;capture(()=>close.dispose());}};
 }
-module.exports={observeSymbolProviders};
+function recordingErrors(failures){
+ if(!Array.isArray(failures)||!Array.from(failures).every(error=>typeof error==='string'&&error.length))return['Missing or malformed symbol provider recording health'];
+ return failures.map(error=>'Symbol provider recording failed: '+error);
+}
+function finalizeRecording(result,failures){
+ result.observations??={};result.observations.symbolProviderRecordingFailures=Array.isArray(failures)?failures.slice():failures;
+ const errors=recordingErrors(failures);if(errors.length){if(!['broken','timeout'].includes(result.status))result.status='broken';if(result.error===undefined)result.error=errors.join('\n');}return errors;
+}
+module.exports={observeSymbolProviders,recordingErrors,finalizeRecording};

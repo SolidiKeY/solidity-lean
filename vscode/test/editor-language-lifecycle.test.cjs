@@ -64,3 +64,9 @@ test('serialized failed native observations retain their original correlation re
  const decoded=JSON.parse(JSON.stringify(f.o));assert.deepEqual(helper.errors(decoded,f.config),reasons);assert.deepEqual(decoded.validationErrors,reasons);assert.notEqual(helper.errors(decoded,f.config),decoded.validationErrors);
  for(const invalid of [{},[null],[''],Array(1)]){decoded.validationErrors=invalid;assert.match(helper.errors(decoded,f.config)[0],/Malformed retained language validation errors/);}}
 });
+
+test('aggregate refuses failed missing or malformed provider recording health independently of valid language evidence',()=>{
+ const f=fixture(),config={...f.config,suite:'editor-language-scope'},core=require('../parity/core.cjs'),result={schemaVersion:1,status:'passed-with-gaps',runId:f.config.runId,target:f.config.target,scenarios:[{id:'native-editor-language-scope',status:'partial',observation:f.o}],checks:[],observations:{symbolProviderRecordingFailures:[]}};
+ assert.deepEqual(core.hostEvidenceErrors(result,config),[]);
+ for(const failures of [['actual dropped provider start'],undefined,{},[null],Array(1)]){result.observations.symbolProviderRecordingFailures=failures;assert.ok(core.hostEvidenceErrors(result,config).length);}
+});

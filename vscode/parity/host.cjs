@@ -573,7 +573,7 @@ async function run() {
   } catch(error) {result.status=error.code==='TIMEOUT'?'timeout':'broken';result.error=error.stack;}
   finally {
     if(localStatus)api.service.removeListener('status',localStatus);
-    clearInterval(timer);observation.restore();if(observation.symbolProviderFailures)result.observations.symbolProviderRecordingFailures=[...observation.symbolProviderFailures];result.elapsedMs=performance.now()-started;
+    clearInterval(timer);observation.restore();if(observation.symbolProviderFailures)require('./symbol-provider-observer.cjs').finalizeRecording(result,observation.symbolProviderFailures);result.elapsedMs=performance.now()-started;
     writeFileSync(config.result,JSON.stringify(result,null,2));
     if(target==='local'&&!localRetirementStarted) api?.cancel();
     const captureStart=performance.now();
