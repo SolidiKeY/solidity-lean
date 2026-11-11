@@ -1284,7 +1284,7 @@
           "--evidence",
           "--lean"
         ],
-        "revision": "5b78e2313ed50233a7a8373354b0e4586fd75c9e"
+        "revision": "a83beba3351fd4dbd3e5dbf0bfc93a96ec75bf72"
       },
       "source_blob": "422b13e5bc7bc987e87c86cbd709078eefd0cfb3",
       "source_demonstration_revision": "9990777843ea8e47fe455c8815bfbac159504abb",
@@ -1320,7 +1320,7 @@
           "--evidence",
           "--lean"
         ],
-        "revision": "5b78e2313ed50233a7a8373354b0e4586fd75c9e"
+        "revision": "a83beba3351fd4dbd3e5dbf0bfc93a96ec75bf72"
       },
       "source_blob": "682be2da2571b069f46bb3f0ae29e1f1fe03caae",
       "source_demonstration_revision": "9990777843ea8e47fe455c8815bfbac159504abb",
@@ -1356,7 +1356,7 @@
           "--archive",
           "--commit"
         ],
-        "revision": "5b78e2313ed50233a7a8373354b0e4586fd75c9e"
+        "revision": "a83beba3351fd4dbd3e5dbf0bfc93a96ec75bf72"
       },
       "source_blob": "223e96d3fa285f4e838393e9e9afad342bc1d1fc",
       "source_demonstration_revision": "9990777843ea8e47fe455c8815bfbac159504abb",
@@ -1390,7 +1390,7 @@
         "required_options": [
           "--lean"
         ],
-        "revision": "5b78e2313ed50233a7a8373354b0e4586fd75c9e"
+        "revision": "a83beba3351fd4dbd3e5dbf0bfc93a96ec75bf72"
       },
       "source_blob": "ca23eb7d445d4c99f560c70a6c5cb8b6748985c5",
       "source_demonstration_revision": "9990777843ea8e47fe455c8815bfbac159504abb",
@@ -1432,7 +1432,7 @@
           "--repo",
           "--source-census"
         ],
-        "revision": "5b78e2313ed50233a7a8373354b0e4586fd75c9e"
+        "revision": "a83beba3351fd4dbd3e5dbf0bfc93a96ec75bf72"
       },
       "source_blob": "7745ef63eb65f01e5dfe9835ac84bf84f1841c9d",
       "source_demonstration_revision": "9990777843ea8e47fe455c8815bfbac159504abb",
@@ -1470,7 +1470,7 @@
           "--lean",
           "--repo"
         ],
-        "revision": "5b78e2313ed50233a7a8373354b0e4586fd75c9e"
+        "revision": "a83beba3351fd4dbd3e5dbf0bfc93a96ec75bf72"
       },
       "source_blob": "26a9ed6ed79d6252dbb1299b3336d8e9ad8d8fb0",
       "source_demonstration_revision": "9990777843ea8e47fe455c8815bfbac159504abb",
@@ -1504,7 +1504,7 @@
         "required_options": [
           "--evidence"
         ],
-        "revision": "5b78e2313ed50233a7a8373354b0e4586fd75c9e"
+        "revision": "a83beba3351fd4dbd3e5dbf0bfc93a96ec75bf72"
       },
       "source_blob": "675133d51e0202e01e5cf4532a26996debb4371e",
       "source_demonstration_revision": "9990777843ea8e47fe455c8815bfbac159504abb",
@@ -1540,7 +1540,7 @@
           "--evidence",
           "--lean"
         ],
-        "revision": "5b78e2313ed50233a7a8373354b0e4586fd75c9e"
+        "revision": "a83beba3351fd4dbd3e5dbf0bfc93a96ec75bf72"
       },
       "source_blob": "35b0e13c4ed30a28724f454e3d110ea33217b0ed",
       "source_demonstration_revision": "9990777843ea8e47fe455c8815bfbac159504abb",
@@ -1574,7 +1574,7 @@
         "required_options": [
           "--evidence"
         ],
-        "revision": "5b78e2313ed50233a7a8373354b0e4586fd75c9e"
+        "revision": "a83beba3351fd4dbd3e5dbf0bfc93a96ec75bf72"
       },
       "source_blob": "a50f657e2df51efe2d0049a0c944d47cebce4bb3",
       "source_demonstration_revision": "9990777843ea8e47fe455c8815bfbac159504abb",
@@ -1610,7 +1610,7 @@
           "--archive",
           "--out"
         ],
-        "revision": "5b78e2313ed50233a7a8373354b0e4586fd75c9e"
+        "revision": "a83beba3351fd4dbd3e5dbf0bfc93a96ec75bf72"
       },
       "source_blob": "b4d93269d25d1effa9e943a6cba3f63c88ffd4a6",
       "source_demonstration_revision": "9990777843ea8e47fe455c8815bfbac159504abb",
@@ -1644,7 +1644,7 @@
         "required_options": [
           "--evidence"
         ],
-        "revision": "5b78e2313ed50233a7a8373354b0e4586fd75c9e"
+        "revision": "a83beba3351fd4dbd3e5dbf0bfc93a96ec75bf72"
       },
       "source_blob": "a264dd0c7435a8b5f6e2a1c4bb37a34abafbe980",
       "source_demonstration_revision": "9990777843ea8e47fe455c8815bfbac159504abb",
@@ -1680,7 +1680,7 @@
           "--lean",
           "--out"
         ],
-        "revision": "5b78e2313ed50233a7a8373354b0e4586fd75c9e"
+        "revision": "a83beba3351fd4dbd3e5dbf0bfc93a96ec75bf72"
       },
       "source_blob": "766c1e39caab15fa028423e025bf4c7e0661fdd9",
       "source_demonstration_revision": "9990777843ea8e47fe455c8815bfbac159504abb",
@@ -1714,7 +1714,7 @@
         "required_options": [
           "--evidence"
         ],
-        "revision": "5b78e2313ed50233a7a8373354b0e4586fd75c9e"
+        "revision": "a83beba3351fd4dbd3e5dbf0bfc93a96ec75bf72"
       },
       "source_blob": "a725519cebe318902b7caf85768063fb0b8c191a",
       "source_demonstration_revision": "9990777843ea8e47fe455c8815bfbac159504abb",
@@ -1748,7 +1748,7 @@
         "required_options": [
           "--evidence"
         ],
-        "revision": "5b78e2313ed50233a7a8373354b0e4586fd75c9e"
+        "revision": "a83beba3351fd4dbd3e5dbf0bfc93a96ec75bf72"
       },
       "source_blob": "73b309b26c3d796f34be8f9476421d7f1dfcac62",
       "source_demonstration_revision": "9990777843ea8e47fe455c8815bfbac159504abb",
@@ -1784,7 +1784,7 @@
           "--evidence",
           "--module"
         ],
-        "revision": "5b78e2313ed50233a7a8373354b0e4586fd75c9e"
+        "revision": "a83beba3351fd4dbd3e5dbf0bfc93a96ec75bf72"
       },
       "source_blob": "90e9500177b9bbd54633f0fef42e3caf165a429d",
       "source_demonstration_revision": "9990777843ea8e47fe455c8815bfbac159504abb",
@@ -1818,7 +1818,7 @@
         "required_options": [
           "--evidence"
         ],
-        "revision": "5b78e2313ed50233a7a8373354b0e4586fd75c9e"
+        "revision": "a83beba3351fd4dbd3e5dbf0bfc93a96ec75bf72"
       },
       "source_blob": "d377f90debd83512fd4fc3f0a94400fffdf67f12",
       "source_demonstration_revision": "9990777843ea8e47fe455c8815bfbac159504abb",
@@ -1854,7 +1854,7 @@
           "--output",
           "--toolchain"
         ],
-        "revision": "5b78e2313ed50233a7a8373354b0e4586fd75c9e"
+        "revision": "a83beba3351fd4dbd3e5dbf0bfc93a96ec75bf72"
       },
       "source_blob": "40b7b173d0f683039f55497c1d36b20dcfd70116",
       "source_demonstration_revision": "9990777843ea8e47fe455c8815bfbac159504abb",
@@ -1892,7 +1892,7 @@
           "--frozen",
           "--output"
         ],
-        "revision": "5b78e2313ed50233a7a8373354b0e4586fd75c9e"
+        "revision": "a83beba3351fd4dbd3e5dbf0bfc93a96ec75bf72"
       },
       "source_blob": "2d795e6b300c40e1fe4924f04ad7a9e4b2ba4df8",
       "source_demonstration_revision": "9990777843ea8e47fe455c8815bfbac159504abb",
@@ -1928,7 +1928,7 @@
           "--evidence",
           "--toolchain"
         ],
-        "revision": "5b78e2313ed50233a7a8373354b0e4586fd75c9e"
+        "revision": "a83beba3351fd4dbd3e5dbf0bfc93a96ec75bf72"
       },
       "source_blob": "51652ca513e21150f4c49c49505dc64a5bb8c12d",
       "source_demonstration_revision": "9990777843ea8e47fe455c8815bfbac159504abb",
@@ -1962,7 +1962,7 @@
         "required_options": [
           "--inventory"
         ],
-        "revision": "5b78e2313ed50233a7a8373354b0e4586fd75c9e"
+        "revision": "a83beba3351fd4dbd3e5dbf0bfc93a96ec75bf72"
       },
       "source_blob": "b0d1b50765bf744a5a53cd026695999fb3e6f1c3",
       "source_demonstration_revision": "9990777843ea8e47fe455c8815bfbac159504abb",
@@ -1996,7 +1996,7 @@
         "required_options": [
           "--evidence"
         ],
-        "revision": "5b78e2313ed50233a7a8373354b0e4586fd75c9e"
+        "revision": "a83beba3351fd4dbd3e5dbf0bfc93a96ec75bf72"
       },
       "source_blob": "f08074788981d2635375dcd531c34621ab29faa8",
       "source_demonstration_revision": "9990777843ea8e47fe455c8815bfbac159504abb",
@@ -2032,7 +2032,7 @@
           "--inventory",
           "--output"
         ],
-        "revision": "5b78e2313ed50233a7a8373354b0e4586fd75c9e"
+        "revision": "a83beba3351fd4dbd3e5dbf0bfc93a96ec75bf72"
       },
       "source_blob": "5524cbec706ee5732ddcb15feb808a66cfd13421",
       "source_demonstration_revision": "9990777843ea8e47fe455c8815bfbac159504abb",
@@ -2068,7 +2068,7 @@
           "--inventory",
           "--output"
         ],
-        "revision": "5b78e2313ed50233a7a8373354b0e4586fd75c9e"
+        "revision": "a83beba3351fd4dbd3e5dbf0bfc93a96ec75bf72"
       },
       "source_blob": "35a5868915fc8b3b1818e2e042a5748df899b9f3",
       "source_demonstration_revision": "9990777843ea8e47fe455c8815bfbac159504abb",
@@ -2102,7 +2102,7 @@
         "required_options": [
           "--output"
         ],
-        "revision": "5b78e2313ed50233a7a8373354b0e4586fd75c9e"
+        "revision": "a83beba3351fd4dbd3e5dbf0bfc93a96ec75bf72"
       },
       "source_blob": "fc0b06fef2af5c7db8bf451b5b61ae7314ff3343",
       "source_demonstration_revision": "9990777843ea8e47fe455c8815bfbac159504abb",
@@ -2136,7 +2136,7 @@
         "required_options": [
           "--output"
         ],
-        "revision": "5b78e2313ed50233a7a8373354b0e4586fd75c9e"
+        "revision": "a83beba3351fd4dbd3e5dbf0bfc93a96ec75bf72"
       },
       "source_blob": "5416c212d266a6105db8ac41b4f8d3af26de26ee",
       "source_demonstration_revision": "9990777843ea8e47fe455c8815bfbac159504abb",
@@ -2176,7 +2176,7 @@
           "--lean-bin",
           "--pin"
         ],
-        "revision": "5b78e2313ed50233a7a8373354b0e4586fd75c9e"
+        "revision": "a83beba3351fd4dbd3e5dbf0bfc93a96ec75bf72"
       },
       "source_blob": "15143c90ceead4c5d8f57c1cfa95bed521650358",
       "source_demonstration_revision": "9990777843ea8e47fe455c8815bfbac159504abb",
@@ -2216,7 +2216,7 @@
           "--lean-bin",
           "--pin"
         ],
-        "revision": "5b78e2313ed50233a7a8373354b0e4586fd75c9e"
+        "revision": "a83beba3351fd4dbd3e5dbf0bfc93a96ec75bf72"
       },
       "source_blob": "5568f8e28a28f5daf777efa0c5c7976f2b413a54",
       "source_demonstration_revision": "9990777843ea8e47fe455c8815bfbac159504abb",
@@ -2244,7 +2244,7 @@
         ],
         "kind": "unittest declaration and explicit main entry",
         "main_line": 179,
-        "revision": "5b78e2313ed50233a7a8373354b0e4586fd75c9e",
+        "revision": "a83beba3351fd4dbd3e5dbf0bfc93a96ec75bf72",
         "test_contexts": [
           {
             "code_firstlineno": 15,
@@ -2572,7 +2572,7 @@
         ],
         "kind": "unittest declaration and explicit main entry",
         "main_line": 138,
-        "revision": "5b78e2313ed50233a7a8373354b0e4586fd75c9e",
+        "revision": "a83beba3351fd4dbd3e5dbf0bfc93a96ec75bf72",
         "test_contexts": [
           {
             "code_firstlineno": 20,
@@ -2931,7 +2931,7 @@
         ],
         "kind": "unittest declaration and explicit main entry",
         "main_line": 107,
-        "revision": "5b78e2313ed50233a7a8373354b0e4586fd75c9e",
+        "revision": "a83beba3351fd4dbd3e5dbf0bfc93a96ec75bf72",
         "test_contexts": [
           {
             "code_firstlineno": 35,
@@ -3677,7 +3677,7 @@
         ],
         "kind": "unittest declaration and explicit main entry",
         "main_line": 61,
-        "revision": "5b78e2313ed50233a7a8373354b0e4586fd75c9e",
+        "revision": "a83beba3351fd4dbd3e5dbf0bfc93a96ec75bf72",
         "test_contexts": [
           {
             "code_firstlineno": 15,
@@ -3872,7 +3872,7 @@
         ],
         "kind": "unittest declaration and explicit main entry",
         "main_line": 75,
-        "revision": "5b78e2313ed50233a7a8373354b0e4586fd75c9e",
+        "revision": "a83beba3351fd4dbd3e5dbf0bfc93a96ec75bf72",
         "test_contexts": [
           {
             "code_firstlineno": 37,
@@ -3954,7 +3954,7 @@
         ],
         "kind": "unittest declaration and explicit main entry",
         "main_line": 48,
-        "revision": "5b78e2313ed50233a7a8373354b0e4586fd75c9e",
+        "revision": "a83beba3351fd4dbd3e5dbf0bfc93a96ec75bf72",
         "test_contexts": [
           {
             "code_firstlineno": 13,
@@ -4469,7 +4469,7 @@
         ],
         "kind": "unittest declaration and explicit main entry",
         "main_line": 34,
-        "revision": "5b78e2313ed50233a7a8373354b0e4586fd75c9e",
+        "revision": "a83beba3351fd4dbd3e5dbf0bfc93a96ec75bf72",
         "test_contexts": [
           {
             "code_firstlineno": 14,
@@ -4718,7 +4718,7 @@
         ],
         "kind": "unittest declaration and explicit main entry",
         "main_line": 45,
-        "revision": "5b78e2313ed50233a7a8373354b0e4586fd75c9e",
+        "revision": "a83beba3351fd4dbd3e5dbf0bfc93a96ec75bf72",
         "test_contexts": [
           {
             "code_firstlineno": 7,
@@ -4802,7 +4802,7 @@
         ],
         "kind": "unittest declaration and explicit main entry",
         "main_line": 31,
-        "revision": "5b78e2313ed50233a7a8373354b0e4586fd75c9e",
+        "revision": "a83beba3351fd4dbd3e5dbf0bfc93a96ec75bf72",
         "test_contexts": [
           {
             "code_firstlineno": 7,
@@ -4886,7 +4886,7 @@
         ],
         "kind": "unittest declaration and explicit main entry",
         "main_line": 94,
-        "revision": "5b78e2313ed50233a7a8373354b0e4586fd75c9e",
+        "revision": "a83beba3351fd4dbd3e5dbf0bfc93a96ec75bf72",
         "test_contexts": [
           {
             "code_firstlineno": 8,
@@ -5040,7 +5040,7 @@
         ],
         "kind": "unittest declaration and explicit main entry",
         "main_line": 78,
-        "revision": "5b78e2313ed50233a7a8373354b0e4586fd75c9e",
+        "revision": "a83beba3351fd4dbd3e5dbf0bfc93a96ec75bf72",
         "test_contexts": [
           {
             "code_firstlineno": 7,
@@ -5504,7 +5504,7 @@
         ],
         "kind": "unittest declaration and explicit main entry",
         "main_line": 101,
-        "revision": "5b78e2313ed50233a7a8373354b0e4586fd75c9e",
+        "revision": "a83beba3351fd4dbd3e5dbf0bfc93a96ec75bf72",
         "test_contexts": [
           {
             "code_firstlineno": 17,
@@ -5663,7 +5663,7 @@
         ],
         "kind": "unittest declaration and explicit main entry",
         "main_line": 49,
-        "revision": "5b78e2313ed50233a7a8373354b0e4586fd75c9e",
+        "revision": "a83beba3351fd4dbd3e5dbf0bfc93a96ec75bf72",
         "test_contexts": [
           {
             "code_firstlineno": 13,
@@ -5726,7 +5726,7 @@
         ],
         "kind": "unittest declaration and explicit main entry",
         "main_line": 38,
-        "revision": "5b78e2313ed50233a7a8373354b0e4586fd75c9e",
+        "revision": "a83beba3351fd4dbd3e5dbf0bfc93a96ec75bf72",
         "test_contexts": [
           {
             "code_firstlineno": 11,
@@ -5882,7 +5882,7 @@
         ],
         "kind": "unittest declaration and explicit main entry",
         "main_line": 49,
-        "revision": "5b78e2313ed50233a7a8373354b0e4586fd75c9e",
+        "revision": "a83beba3351fd4dbd3e5dbf0bfc93a96ec75bf72",
         "test_contexts": [
           {
             "code_firstlineno": 13,
@@ -5946,7 +5946,7 @@
         ],
         "kind": "unittest declaration and explicit main entry",
         "main_line": 89,
-        "revision": "5b78e2313ed50233a7a8373354b0e4586fd75c9e",
+        "revision": "a83beba3351fd4dbd3e5dbf0bfc93a96ec75bf72",
         "test_contexts": [
           {
             "code_firstlineno": 16,
@@ -6124,7 +6124,7 @@
         ],
         "kind": "unittest declaration and explicit main entry",
         "main_line": 27,
-        "revision": "5b78e2313ed50233a7a8373354b0e4586fd75c9e",
+        "revision": "a83beba3351fd4dbd3e5dbf0bfc93a96ec75bf72",
         "test_contexts": [
           {
             "code_firstlineno": 9,
@@ -6213,7 +6213,7 @@
         ],
         "kind": "unittest declaration and explicit main entry",
         "main_line": 77,
-        "revision": "5b78e2313ed50233a7a8373354b0e4586fd75c9e",
+        "revision": "a83beba3351fd4dbd3e5dbf0bfc93a96ec75bf72",
         "test_contexts": [
           {
             "code_firstlineno": 18,
@@ -6757,7 +6757,7 @@
         ],
         "kind": "unittest declaration and explicit main entry",
         "main_line": 77,
-        "revision": "5b78e2313ed50233a7a8373354b0e4586fd75c9e",
+        "revision": "a83beba3351fd4dbd3e5dbf0bfc93a96ec75bf72",
         "test_contexts": [
           {
             "code_firstlineno": 14,
@@ -6926,7 +6926,7 @@
         ],
         "kind": "unittest declaration and explicit main entry",
         "main_line": 21,
-        "revision": "5b78e2313ed50233a7a8373354b0e4586fd75c9e",
+        "revision": "a83beba3351fd4dbd3e5dbf0bfc93a96ec75bf72",
         "test_contexts": [
           {
             "code_firstlineno": 6,
@@ -7135,7 +7135,7 @@
         ],
         "kind": "unittest declaration and explicit main entry",
         "main_line": 87,
-        "revision": "5b78e2313ed50233a7a8373354b0e4586fd75c9e",
+        "revision": "a83beba3351fd4dbd3e5dbf0bfc93a96ec75bf72",
         "test_contexts": [
           {
             "code_firstlineno": 13,
@@ -7606,7 +7606,7 @@
         ],
         "kind": "unittest declaration and explicit main entry",
         "main_line": 181,
-        "revision": "5b78e2313ed50233a7a8373354b0e4586fd75c9e",
+        "revision": "a83beba3351fd4dbd3e5dbf0bfc93a96ec75bf72",
         "test_contexts": [
           {
             "code_firstlineno": 108,
@@ -7760,7 +7760,7 @@
         ],
         "kind": "unittest declaration and explicit main entry",
         "main_line": 274,
-        "revision": "5b78e2313ed50233a7a8373354b0e4586fd75c9e",
+        "revision": "a83beba3351fd4dbd3e5dbf0bfc93a96ec75bf72",
         "test_contexts": [
           {
             "code_firstlineno": 197,
@@ -7921,7 +7921,7 @@
         ],
         "kind": "unittest declaration and explicit main entry",
         "main_line": 126,
-        "revision": "5b78e2313ed50233a7a8373354b0e4586fd75c9e",
+        "revision": "a83beba3351fd4dbd3e5dbf0bfc93a96ec75bf72",
         "test_contexts": [
           {
             "code_firstlineno": 58,
@@ -8054,7 +8054,7 @@
         ],
         "kind": "unittest declaration and explicit main entry",
         "main_line": 191,
-        "revision": "5b78e2313ed50233a7a8373354b0e4586fd75c9e",
+        "revision": "a83beba3351fd4dbd3e5dbf0bfc93a96ec75bf72",
         "test_contexts": [
           {
             "code_firstlineno": 119,
@@ -8229,7 +8229,7 @@
         ],
         "kind": "unittest declaration and explicit main entry",
         "main_line": 283,
-        "revision": "5b78e2313ed50233a7a8373354b0e4586fd75c9e",
+        "revision": "a83beba3351fd4dbd3e5dbf0bfc93a96ec75bf72",
         "test_contexts": [
           {
             "code_firstlineno": 206,
@@ -8684,7 +8684,7 @@
         ],
         "kind": "unittest declaration and explicit main entry",
         "main_line": 249,
-        "revision": "5b78e2313ed50233a7a8373354b0e4586fd75c9e",
+        "revision": "a83beba3351fd4dbd3e5dbf0bfc93a96ec75bf72",
         "test_contexts": [
           {
             "code_firstlineno": 62,
@@ -8918,7 +8918,7 @@
         ],
         "kind": "unittest declaration and explicit main entry",
         "main_line": 195,
-        "revision": "5b78e2313ed50233a7a8373354b0e4586fd75c9e",
+        "revision": "a83beba3351fd4dbd3e5dbf0bfc93a96ec75bf72",
         "test_contexts": [
           {
             "code_firstlineno": 27,
@@ -9002,7 +9002,7 @@
         ],
         "kind": "unittest declaration and explicit main entry",
         "main_line": 137,
-        "revision": "5b78e2313ed50233a7a8373354b0e4586fd75c9e",
+        "revision": "a83beba3351fd4dbd3e5dbf0bfc93a96ec75bf72",
         "test_contexts": [
           {
             "code_firstlineno": 32,
@@ -9107,7 +9107,7 @@
         ],
         "kind": "unittest declaration and explicit main entry",
         "main_line": 20,
-        "revision": "5b78e2313ed50233a7a8373354b0e4586fd75c9e",
+        "revision": "a83beba3351fd4dbd3e5dbf0bfc93a96ec75bf72",
         "test_contexts": [
           {
             "code_firstlineno": 6,
@@ -9709,7 +9709,7 @@
         ],
         "kind": "unittest declaration and explicit main entry",
         "main_line": 44,
-        "revision": "5b78e2313ed50233a7a8373354b0e4586fd75c9e",
+        "revision": "a83beba3351fd4dbd3e5dbf0bfc93a96ec75bf72",
         "test_contexts": [
           {
             "code_firstlineno": 14,
@@ -9785,7 +9785,7 @@
         ],
         "kind": "unittest declaration and explicit main entry",
         "main_line": 60,
-        "revision": "5b78e2313ed50233a7a8373354b0e4586fd75c9e",
+        "revision": "a83beba3351fd4dbd3e5dbf0bfc93a96ec75bf72",
         "test_contexts": [
           {
             "code_firstlineno": 16,
@@ -9841,7 +9841,7 @@
         ],
         "kind": "unittest declaration and explicit main entry",
         "main_line": 39,
-        "revision": "5b78e2313ed50233a7a8373354b0e4586fd75c9e",
+        "revision": "a83beba3351fd4dbd3e5dbf0bfc93a96ec75bf72",
         "test_contexts": [
           {
             "code_firstlineno": 11,
@@ -9945,7 +9945,7 @@
         ],
         "kind": "unittest declaration and explicit main entry",
         "main_line": 19,
-        "revision": "5b78e2313ed50233a7a8373354b0e4586fd75c9e",
+        "revision": "a83beba3351fd4dbd3e5dbf0bfc93a96ec75bf72",
         "test_contexts": [
           {
             "code_firstlineno": 10,
@@ -9994,7 +9994,7 @@
         ],
         "kind": "unittest declaration and explicit main entry",
         "main_line": 71,
-        "revision": "5b78e2313ed50233a7a8373354b0e4586fd75c9e",
+        "revision": "a83beba3351fd4dbd3e5dbf0bfc93a96ec75bf72",
         "test_contexts": [
           {
             "code_firstlineno": 21,
@@ -10084,7 +10084,7 @@
         ],
         "kind": "unittest declaration and explicit main entry",
         "main_line": 51,
-        "revision": "5b78e2313ed50233a7a8373354b0e4586fd75c9e",
+        "revision": "a83beba3351fd4dbd3e5dbf0bfc93a96ec75bf72",
         "test_contexts": [
           {
             "code_firstlineno": 35,
@@ -10193,7 +10193,7 @@
         ],
         "kind": "unittest declaration and explicit main entry",
         "main_line": 233,
-        "revision": "5b78e2313ed50233a7a8373354b0e4586fd75c9e",
+        "revision": "a83beba3351fd4dbd3e5dbf0bfc93a96ec75bf72",
         "test_contexts": [
           {
             "code_firstlineno": 11,
@@ -10656,7 +10656,7 @@
         ],
         "kind": "unittest declaration and explicit main entry",
         "main_line": 92,
-        "revision": "5b78e2313ed50233a7a8373354b0e4586fd75c9e",
+        "revision": "a83beba3351fd4dbd3e5dbf0bfc93a96ec75bf72",
         "test_contexts": [
           {
             "code_firstlineno": 18,
@@ -10719,7 +10719,7 @@
         ],
         "kind": "unittest declaration and explicit main entry",
         "main_line": 118,
-        "revision": "5b78e2313ed50233a7a8373354b0e4586fd75c9e",
+        "revision": "a83beba3351fd4dbd3e5dbf0bfc93a96ec75bf72",
         "test_contexts": [
           {
             "code_firstlineno": 16,
@@ -12223,7 +12223,7 @@
         ],
         "kind": "unittest declaration and explicit main entry",
         "main_line": 47,
-        "revision": "5b78e2313ed50233a7a8373354b0e4586fd75c9e",
+        "revision": "a83beba3351fd4dbd3e5dbf0bfc93a96ec75bf72",
         "test_contexts": [
           {
             "code_firstlineno": 25,
@@ -12312,7 +12312,7 @@
         ],
         "kind": "unittest declaration and explicit main entry",
         "main_line": 41,
-        "revision": "5b78e2313ed50233a7a8373354b0e4586fd75c9e",
+        "revision": "a83beba3351fd4dbd3e5dbf0bfc93a96ec75bf72",
         "test_contexts": [
           {
             "code_firstlineno": 14,
@@ -12374,7 +12374,7 @@
         ],
         "kind": "unittest declaration and explicit main entry",
         "main_line": 42,
-        "revision": "5b78e2313ed50233a7a8373354b0e4586fd75c9e",
+        "revision": "a83beba3351fd4dbd3e5dbf0bfc93a96ec75bf72",
         "test_contexts": [
           {
             "code_firstlineno": 14,
@@ -12476,7 +12476,7 @@
         ],
         "kind": "unittest declaration and explicit main entry",
         "main_line": 33,
-        "revision": "5b78e2313ed50233a7a8373354b0e4586fd75c9e",
+        "revision": "a83beba3351fd4dbd3e5dbf0bfc93a96ec75bf72",
         "test_contexts": [
           {
             "code_firstlineno": 10,
@@ -12511,7 +12511,7 @@
         ],
         "kind": "unittest declaration and explicit main entry",
         "main_line": 28,
-        "revision": "5b78e2313ed50233a7a8373354b0e4586fd75c9e",
+        "revision": "a83beba3351fd4dbd3e5dbf0bfc93a96ec75bf72",
         "test_contexts": [
           {
             "code_firstlineno": 10,
@@ -12560,7 +12560,7 @@
         ],
         "kind": "unittest declaration and explicit main entry",
         "main_line": 28,
-        "revision": "5b78e2313ed50233a7a8373354b0e4586fd75c9e",
+        "revision": "a83beba3351fd4dbd3e5dbf0bfc93a96ec75bf72",
         "test_contexts": [
           {
             "code_firstlineno": 9,
@@ -13162,7 +13162,7 @@
         ],
         "kind": "unittest declaration and explicit main entry",
         "main_line": 551,
-        "revision": "5b78e2313ed50233a7a8373354b0e4586fd75c9e",
+        "revision": "a83beba3351fd4dbd3e5dbf0bfc93a96ec75bf72",
         "test_contexts": [
           {
             "code_firstlineno": 26,
@@ -13344,7 +13344,7 @@
         ],
         "kind": "unittest declaration and explicit main entry",
         "main_line": 119,
-        "revision": "5b78e2313ed50233a7a8373354b0e4586fd75c9e",
+        "revision": "a83beba3351fd4dbd3e5dbf0bfc93a96ec75bf72",
         "test_contexts": [
           {
             "code_firstlineno": 21,
@@ -13386,7 +13386,7 @@
         ],
         "kind": "unittest declaration and explicit main entry",
         "main_line": 195,
-        "revision": "5b78e2313ed50233a7a8373354b0e4586fd75c9e",
+        "revision": "a83beba3351fd4dbd3e5dbf0bfc93a96ec75bf72",
         "test_contexts": [
           {
             "code_firstlineno": 35,
@@ -13638,7 +13638,7 @@
         ],
         "kind": "unittest declaration and explicit main entry",
         "main_line": 444,
-        "revision": "5b78e2313ed50233a7a8373354b0e4586fd75c9e",
+        "revision": "a83beba3351fd4dbd3e5dbf0bfc93a96ec75bf72",
         "test_contexts": [
           {
             "code_firstlineno": 41,
@@ -14280,7 +14280,7 @@
         ],
         "kind": "unittest declaration and explicit main entry",
         "main_line": 59,
-        "revision": "5b78e2313ed50233a7a8373354b0e4586fd75c9e",
+        "revision": "a83beba3351fd4dbd3e5dbf0bfc93a96ec75bf72",
         "test_contexts": [
           {
             "code_firstlineno": 34,
@@ -14363,7 +14363,7 @@
         ],
         "kind": "unittest declaration and explicit main entry",
         "main_line": 55,
-        "revision": "5b78e2313ed50233a7a8373354b0e4586fd75c9e",
+        "revision": "a83beba3351fd4dbd3e5dbf0bfc93a96ec75bf72",
         "test_contexts": [
           {
             "code_firstlineno": 31,
@@ -14430,7 +14430,7 @@
         ],
         "kind": "unittest declaration and explicit main entry",
         "main_line": 231,
-        "revision": "5b78e2313ed50233a7a8373354b0e4586fd75c9e",
+        "revision": "a83beba3351fd4dbd3e5dbf0bfc93a96ec75bf72",
         "test_contexts": [
           {
             "code_firstlineno": 17,
@@ -14854,7 +14854,7 @@
         ],
         "kind": "unittest declaration and explicit main entry",
         "main_line": 183,
-        "revision": "5b78e2313ed50233a7a8373354b0e4586fd75c9e",
+        "revision": "a83beba3351fd4dbd3e5dbf0bfc93a96ec75bf72",
         "test_contexts": [
           {
             "code_firstlineno": 23,
@@ -14972,7 +14972,7 @@
         ],
         "kind": "unittest declaration and explicit main entry",
         "main_line": 70,
-        "revision": "5b78e2313ed50233a7a8373354b0e4586fd75c9e",
+        "revision": "a83beba3351fd4dbd3e5dbf0bfc93a96ec75bf72",
         "test_contexts": [
           {
             "code_firstlineno": 14,
@@ -15035,7 +15035,7 @@
         ],
         "kind": "unittest declaration and explicit main entry",
         "main_line": 47,
-        "revision": "5b78e2313ed50233a7a8373354b0e4586fd75c9e",
+        "revision": "a83beba3351fd4dbd3e5dbf0bfc93a96ec75bf72",
         "test_contexts": [
           {
             "code_firstlineno": 12,
@@ -15091,7 +15091,7 @@
         ],
         "kind": "unittest declaration and explicit main entry",
         "main_line": 119,
-        "revision": "5b78e2313ed50233a7a8373354b0e4586fd75c9e",
+        "revision": "a83beba3351fd4dbd3e5dbf0bfc93a96ec75bf72",
         "test_contexts": [
           {
             "code_firstlineno": 16,
@@ -15449,7 +15449,7 @@
         ],
         "kind": "unittest declaration and explicit main entry",
         "main_line": 287,
-        "revision": "5b78e2313ed50233a7a8373354b0e4586fd75c9e",
+        "revision": "a83beba3351fd4dbd3e5dbf0bfc93a96ec75bf72",
         "test_contexts": [
           {
             "code_firstlineno": 25,
@@ -15720,7 +15720,7 @@
         ],
         "kind": "unittest declaration and explicit main entry",
         "main_line": 107,
-        "revision": "5b78e2313ed50233a7a8373354b0e4586fd75c9e",
+        "revision": "a83beba3351fd4dbd3e5dbf0bfc93a96ec75bf72",
         "test_contexts": [
           {
             "code_firstlineno": 14,
@@ -15811,7 +15811,7 @@
         ],
         "kind": "unittest declaration and explicit main entry",
         "main_line": 59,
-        "revision": "5b78e2313ed50233a7a8373354b0e4586fd75c9e",
+        "revision": "a83beba3351fd4dbd3e5dbf0bfc93a96ec75bf72",
         "test_contexts": [
           {
             "code_firstlineno": 17,
@@ -15894,7 +15894,7 @@
         ],
         "kind": "unittest declaration and explicit main entry",
         "main_line": 38,
-        "revision": "5b78e2313ed50233a7a8373354b0e4586fd75c9e",
+        "revision": "a83beba3351fd4dbd3e5dbf0bfc93a96ec75bf72",
         "test_contexts": [
           {
             "code_firstlineno": 13,
@@ -15957,7 +15957,7 @@
         ],
         "kind": "unittest declaration and explicit main entry",
         "main_line": 40,
-        "revision": "5b78e2313ed50233a7a8373354b0e4586fd75c9e",
+        "revision": "a83beba3351fd4dbd3e5dbf0bfc93a96ec75bf72",
         "test_contexts": [
           {
             "code_firstlineno": 14,
@@ -16252,7 +16252,7 @@
         ],
         "kind": "unittest declaration and explicit main entry",
         "main_line": 483,
-        "revision": "5b78e2313ed50233a7a8373354b0e4586fd75c9e",
+        "revision": "a83beba3351fd4dbd3e5dbf0bfc93a96ec75bf72",
         "test_contexts": [
           {
             "code_firstlineno": 46,
@@ -16909,7 +16909,7 @@
         ],
         "kind": "unittest declaration and explicit main entry",
         "main_line": 41,
-        "revision": "5b78e2313ed50233a7a8373354b0e4586fd75c9e",
+        "revision": "a83beba3351fd4dbd3e5dbf0bfc93a96ec75bf72",
         "test_contexts": [
           {
             "code_firstlineno": 9,
@@ -17212,7 +17212,7 @@
         ],
         "kind": "unittest declaration and explicit main entry",
         "main_line": 37,
-        "revision": "5b78e2313ed50233a7a8373354b0e4586fd75c9e",
+        "revision": "a83beba3351fd4dbd3e5dbf0bfc93a96ec75bf72",
         "test_contexts": [
           {
             "code_firstlineno": 20,
@@ -17328,7 +17328,7 @@
         ],
         "kind": "unittest declaration and explicit main entry",
         "main_line": 28,
-        "revision": "5b78e2313ed50233a7a8373354b0e4586fd75c9e",
+        "revision": "a83beba3351fd4dbd3e5dbf0bfc93a96ec75bf72",
         "test_contexts": [
           {
             "code_firstlineno": 10,
@@ -17391,7 +17391,7 @@
         ],
         "kind": "unittest declaration and explicit main entry",
         "main_line": 31,
-        "revision": "5b78e2313ed50233a7a8373354b0e4586fd75c9e",
+        "revision": "a83beba3351fd4dbd3e5dbf0bfc93a96ec75bf72",
         "test_contexts": [
           {
             "code_firstlineno": 9,
@@ -17515,7 +17515,7 @@
         ],
         "kind": "unittest declaration and explicit main entry",
         "main_line": 87,
-        "revision": "5b78e2313ed50233a7a8373354b0e4586fd75c9e",
+        "revision": "a83beba3351fd4dbd3e5dbf0bfc93a96ec75bf72",
         "test_contexts": [
           {
             "code_firstlineno": 17,
@@ -17878,7 +17878,7 @@
         ],
         "kind": "unittest declaration and explicit main entry",
         "main_line": 32,
-        "revision": "5b78e2313ed50233a7a8373354b0e4586fd75c9e",
+        "revision": "a83beba3351fd4dbd3e5dbf0bfc93a96ec75bf72",
         "test_contexts": [
           {
             "code_firstlineno": 8,
@@ -17988,7 +17988,7 @@
         ],
         "kind": "unittest declaration and explicit main entry",
         "main_line": 71,
-        "revision": "5b78e2313ed50233a7a8373354b0e4586fd75c9e",
+        "revision": "a83beba3351fd4dbd3e5dbf0bfc93a96ec75bf72",
         "test_contexts": [
           {
             "code_firstlineno": 15,
@@ -18098,7 +18098,7 @@
         ],
         "kind": "unittest declaration and explicit main entry",
         "main_line": 32,
-        "revision": "5b78e2313ed50233a7a8373354b0e4586fd75c9e",
+        "revision": "a83beba3351fd4dbd3e5dbf0bfc93a96ec75bf72",
         "test_contexts": [
           {
             "code_firstlineno": 5,
@@ -18455,7 +18455,7 @@
         ],
         "kind": "unittest declaration and explicit main entry",
         "main_line": 104,
-        "revision": "5b78e2313ed50233a7a8373354b0e4586fd75c9e",
+        "revision": "a83beba3351fd4dbd3e5dbf0bfc93a96ec75bf72",
         "test_contexts": [
           {
             "code_firstlineno": 16,
@@ -18694,7 +18694,7 @@
         ],
         "kind": "unittest declaration and explicit main entry",
         "main_line": 93,
-        "revision": "5b78e2313ed50233a7a8373354b0e4586fd75c9e",
+        "revision": "a83beba3351fd4dbd3e5dbf0bfc93a96ec75bf72",
         "test_contexts": [
           {
             "code_firstlineno": 16,
@@ -18938,7 +18938,7 @@
         ],
         "kind": "unittest declaration and explicit main entry",
         "main_line": 41,
-        "revision": "5b78e2313ed50233a7a8373354b0e4586fd75c9e",
+        "revision": "a83beba3351fd4dbd3e5dbf0bfc93a96ec75bf72",
         "test_contexts": [
           {
             "code_firstlineno": 12,
@@ -19061,7 +19061,7 @@
         ],
         "kind": "unittest declaration and explicit main entry",
         "main_line": 46,
-        "revision": "5b78e2313ed50233a7a8373354b0e4586fd75c9e",
+        "revision": "a83beba3351fd4dbd3e5dbf0bfc93a96ec75bf72",
         "test_contexts": [
           {
             "code_firstlineno": 10,
@@ -19152,7 +19152,7 @@
         ],
         "kind": "unittest declaration and explicit main entry",
         "main_line": 101,
-        "revision": "5b78e2313ed50233a7a8373354b0e4586fd75c9e",
+        "revision": "a83beba3351fd4dbd3e5dbf0bfc93a96ec75bf72",
         "test_contexts": [
           {
             "code_firstlineno": 11,
@@ -19376,7 +19376,7 @@
         ],
         "kind": "unittest declaration and explicit main entry",
         "main_line": 131,
-        "revision": "5b78e2313ed50233a7a8373354b0e4586fd75c9e",
+        "revision": "a83beba3351fd4dbd3e5dbf0bfc93a96ec75bf72",
         "test_contexts": [
           {
             "code_firstlineno": 10,
@@ -19684,7 +19684,7 @@
         ],
         "kind": "unittest declaration and explicit main entry",
         "main_line": 41,
-        "revision": "5b78e2313ed50233a7a8373354b0e4586fd75c9e",
+        "revision": "a83beba3351fd4dbd3e5dbf0bfc93a96ec75bf72",
         "test_contexts": [
           {
             "code_firstlineno": 10,
@@ -19881,7 +19881,7 @@
         ],
         "kind": "unittest declaration and explicit main entry",
         "main_line": 232,
-        "revision": "5b78e2313ed50233a7a8373354b0e4586fd75c9e",
+        "revision": "a83beba3351fd4dbd3e5dbf0bfc93a96ec75bf72",
         "test_contexts": [
           {
             "code_firstlineno": 16,
@@ -20194,7 +20194,7 @@
         ],
         "kind": "unittest declaration and explicit main entry",
         "main_line": 149,
-        "revision": "5b78e2313ed50233a7a8373354b0e4586fd75c9e",
+        "revision": "a83beba3351fd4dbd3e5dbf0bfc93a96ec75bf72",
         "test_contexts": [
           {
             "code_firstlineno": 32,
@@ -20333,7 +20333,7 @@
         ],
         "kind": "unittest declaration and explicit main entry",
         "main_line": 261,
-        "revision": "5b78e2313ed50233a7a8373354b0e4586fd75c9e",
+        "revision": "a83beba3351fd4dbd3e5dbf0bfc93a96ec75bf72",
         "test_contexts": [
           {
             "code_firstlineno": 19,
@@ -20640,7 +20640,7 @@
         ],
         "kind": "unittest declaration and explicit main entry",
         "main_line": 119,
-        "revision": "5b78e2313ed50233a7a8373354b0e4586fd75c9e",
+        "revision": "a83beba3351fd4dbd3e5dbf0bfc93a96ec75bf72",
         "test_contexts": [
           {
             "code_firstlineno": 13,
@@ -20786,7 +20786,7 @@
         ],
         "kind": "unittest declaration and explicit main entry",
         "main_line": 169,
-        "revision": "5b78e2313ed50233a7a8373354b0e4586fd75c9e",
+        "revision": "a83beba3351fd4dbd3e5dbf0bfc93a96ec75bf72",
         "test_contexts": [
           {
             "code_firstlineno": 14,
@@ -21027,7 +21027,7 @@
         ],
         "kind": "unittest declaration and explicit main entry",
         "main_line": 116,
-        "revision": "5b78e2313ed50233a7a8373354b0e4586fd75c9e",
+        "revision": "a83beba3351fd4dbd3e5dbf0bfc93a96ec75bf72",
         "test_contexts": [
           {
             "code_firstlineno": 35,
@@ -21269,7 +21269,7 @@
         ],
         "kind": "unittest declaration and explicit main entry",
         "main_line": 230,
-        "revision": "5b78e2313ed50233a7a8373354b0e4586fd75c9e",
+        "revision": "a83beba3351fd4dbd3e5dbf0bfc93a96ec75bf72",
         "test_contexts": [
           {
             "code_firstlineno": 23,
@@ -21451,7 +21451,7 @@
         ],
         "kind": "unittest declaration and explicit main entry",
         "main_line": 63,
-        "revision": "5b78e2313ed50233a7a8373354b0e4586fd75c9e",
+        "revision": "a83beba3351fd4dbd3e5dbf0bfc93a96ec75bf72",
         "test_contexts": [
           {
             "code_firstlineno": 25,
@@ -21527,7 +21527,7 @@
         ],
         "kind": "unittest declaration and explicit main entry",
         "main_line": 46,
-        "revision": "5b78e2313ed50233a7a8373354b0e4586fd75c9e",
+        "revision": "a83beba3351fd4dbd3e5dbf0bfc93a96ec75bf72",
         "test_contexts": [
           {
             "code_firstlineno": 7,
@@ -21674,7 +21674,7 @@
         ],
         "kind": "unittest declaration and explicit main entry",
         "main_line": 136,
-        "revision": "5b78e2313ed50233a7a8373354b0e4586fd75c9e",
+        "revision": "a83beba3351fd4dbd3e5dbf0bfc93a96ec75bf72",
         "test_contexts": [
           {
             "code_firstlineno": 14,
@@ -21765,7 +21765,7 @@
         ],
         "kind": "unittest declaration and explicit main entry",
         "main_line": 61,
-        "revision": "5b78e2313ed50233a7a8373354b0e4586fd75c9e",
+        "revision": "a83beba3351fd4dbd3e5dbf0bfc93a96ec75bf72",
         "test_contexts": [
           {
             "code_firstlineno": 15,
@@ -22201,7 +22201,7 @@
       "location": "scripts/h62/item2/audit-language/test_source_roles.py:1",
       "other_reads": "unresolved",
       "path": "scripts/h62/item2/audit-language/test_source_roles.py",
-      "purpose": "Fresh ordinary/instrumented unittest command; only separately entered measured frames qualify as helper execution. Source-loader targets have no reviewed data-fixture role.",
+      "purpose": "Fixture roles not reviewed; passing test status and IO alone do not establish data eligibility.",
       "runner_kind": "unittest",
       "source_blob": "8425d6d046fac59ffacc1c2ba2a67c0c7b4aa926"
     },
@@ -22213,7 +22213,7 @@
       "location": "tests/h28-sol/mutation-testing/tools/test_runner.py:1",
       "other_reads": "unresolved",
       "path": "tests/h28-sol/mutation-testing/tools/test_runner.py",
-      "purpose": "Fresh ordinary/instrumented unittest command; only separately entered measured frames qualify as helper execution. Source-loader targets have no reviewed data-fixture role.",
+      "purpose": "Fixture roles not reviewed; passing test status and IO alone do not establish data eligibility.",
       "runner_kind": "unittest",
       "source_blob": "e0a6693f200205c74aa0bbf302e6ed299190c35b"
     },
@@ -22303,7 +22303,7 @@
     }
   },
   "goal_decl": null,
-  "measured_revision": "5b78e2313ed50233a7a8373354b0e4586fd75c9e",
+  "measured_revision": "a83beba3351fd4dbd3e5dbf0bfc93a96ec75bf72",
   "policy_scans": {
     "private-paths": {
       "eligibility": "Secondary coverage only; test, runnable entry point, Lean root or fixture-specific use is required for keep",
@@ -22347,7 +22347,7 @@
         "checkpoint",
         "full"
       ],
-      "selected_scoped_paths": 5595,
+      "selected_scoped_paths": 5596,
       "selection": "All measured tracked regular blobs except the explicit path exclusion; Git grep -a treats binary bytes as text without unpacking archives.",
       "source_blobs": {
         "scripts/check-private-paths.sh": "c2aabdbdd068a861d13d382e337ee6937d911f03",
@@ -22393,7 +22393,7 @@
               "--evidence",
               "--lean"
             ],
-            "revision": "5b78e2313ed50233a7a8373354b0e4586fd75c9e"
+            "revision": "a83beba3351fd4dbd3e5dbf0bfc93a96ec75bf72"
           },
           "source_blob": "422b13e5bc7bc987e87c86cbd709078eefd0cfb3",
           "source_demonstration_revision": "9990777843ea8e47fe455c8815bfbac159504abb",
@@ -22464,7 +22464,7 @@
               "--evidence",
               "--lean"
             ],
-            "revision": "5b78e2313ed50233a7a8373354b0e4586fd75c9e"
+            "revision": "a83beba3351fd4dbd3e5dbf0bfc93a96ec75bf72"
           },
           "source_blob": "682be2da2571b069f46bb3f0ae29e1f1fe03caae",
           "source_demonstration_revision": "9990777843ea8e47fe455c8815bfbac159504abb",
@@ -38207,7 +38207,7 @@
             ],
             "kind": "unittest declaration and explicit main entry",
             "main_line": 61,
-            "revision": "5b78e2313ed50233a7a8373354b0e4586fd75c9e",
+            "revision": "a83beba3351fd4dbd3e5dbf0bfc93a96ec75bf72",
             "test_contexts": [
               {
                 "code_firstlineno": 15,
@@ -38657,7 +38657,7 @@
             ],
             "kind": "unittest declaration and explicit main entry",
             "main_line": 75,
-            "revision": "5b78e2313ed50233a7a8373354b0e4586fd75c9e",
+            "revision": "a83beba3351fd4dbd3e5dbf0bfc93a96ec75bf72",
             "test_contexts": [
               {
                 "code_firstlineno": 37,
@@ -38822,7 +38822,7 @@
             ],
             "kind": "unittest declaration and explicit main entry",
             "main_line": 48,
-            "revision": "5b78e2313ed50233a7a8373354b0e4586fd75c9e",
+            "revision": "a83beba3351fd4dbd3e5dbf0bfc93a96ec75bf72",
             "test_contexts": [
               {
                 "code_firstlineno": 13,
@@ -39902,7 +39902,7 @@
               "--archive",
               "--commit"
             ],
-            "revision": "5b78e2313ed50233a7a8373354b0e4586fd75c9e"
+            "revision": "a83beba3351fd4dbd3e5dbf0bfc93a96ec75bf72"
           },
           "source_blob": "223e96d3fa285f4e838393e9e9afad342bc1d1fc",
           "source_demonstration_revision": "9990777843ea8e47fe455c8815bfbac159504abb",
@@ -40834,7 +40834,7 @@
             "required_options": [
               "--lean"
             ],
-            "revision": "5b78e2313ed50233a7a8373354b0e4586fd75c9e"
+            "revision": "a83beba3351fd4dbd3e5dbf0bfc93a96ec75bf72"
           },
           "source_blob": "ca23eb7d445d4c99f560c70a6c5cb8b6748985c5",
           "source_demonstration_revision": "9990777843ea8e47fe455c8815bfbac159504abb",
@@ -42421,7 +42421,7 @@
             ],
             "kind": "unittest declaration and explicit main entry",
             "main_line": 34,
-            "revision": "5b78e2313ed50233a7a8373354b0e4586fd75c9e",
+            "revision": "a83beba3351fd4dbd3e5dbf0bfc93a96ec75bf72",
             "test_contexts": [
               {
                 "code_firstlineno": 14,
@@ -42874,7 +42874,7 @@
               "--repo",
               "--source-census"
             ],
-            "revision": "5b78e2313ed50233a7a8373354b0e4586fd75c9e"
+            "revision": "a83beba3351fd4dbd3e5dbf0bfc93a96ec75bf72"
           },
           "source_blob": "7745ef63eb65f01e5dfe9835ac84bf84f1841c9d",
           "source_demonstration_revision": "9990777843ea8e47fe455c8815bfbac159504abb",
@@ -43047,7 +43047,7 @@
               "--lean",
               "--repo"
             ],
-            "revision": "5b78e2313ed50233a7a8373354b0e4586fd75c9e"
+            "revision": "a83beba3351fd4dbd3e5dbf0bfc93a96ec75bf72"
           },
           "source_blob": "26a9ed6ed79d6252dbb1299b3336d8e9ad8d8fb0",
           "source_demonstration_revision": "9990777843ea8e47fe455c8815bfbac159504abb",
@@ -43178,7 +43178,7 @@
             "required_options": [
               "--evidence"
             ],
-            "revision": "5b78e2313ed50233a7a8373354b0e4586fd75c9e"
+            "revision": "a83beba3351fd4dbd3e5dbf0bfc93a96ec75bf72"
           },
           "source_blob": "675133d51e0202e01e5cf4532a26996debb4371e",
           "source_demonstration_revision": "9990777843ea8e47fe455c8815bfbac159504abb",
@@ -43273,7 +43273,7 @@
               "--evidence",
               "--lean"
             ],
-            "revision": "5b78e2313ed50233a7a8373354b0e4586fd75c9e"
+            "revision": "a83beba3351fd4dbd3e5dbf0bfc93a96ec75bf72"
           },
           "source_blob": "35b0e13c4ed30a28724f454e3d110ea33217b0ed",
           "source_demonstration_revision": "9990777843ea8e47fe455c8815bfbac159504abb",
@@ -46794,7 +46794,7 @@
             "operation": "entered measured Python module; no fixture consumption credit",
             "source": "scripts/h62/item2/audit-language/test_source_roles.py",
             "target": "scripts/h62/item2/audit-language/census.py",
-            "validated_for": "validated:scripts/h62/item2/audit-language/test_source_roles.py:module:78c294b458155ec0cd3d6f018f58300bb53f6616365e46d8d69b784a112d3dc1"
+            "validated_for": "validated:scripts/h62/item2/audit-language/test_source_roles.py:module:ea01792226ba072bf4d6477ad983dfb914399c9a8df39bf50ff42f6e9cddd9a4"
           }
         ],
         "entry": {
@@ -46817,11 +46817,11 @@
           },
           "other_reads": "unresolved",
           "path": "scripts/h62/item2/audit-language/test_source_roles.py",
-          "purpose": "Fresh ordinary/instrumented unittest command; only separately entered measured frames qualify as helper execution. Source-loader targets have no reviewed data-fixture role.",
+          "purpose": "Fixture roles not reviewed; passing test status and IO alone do not establish data eligibility.",
           "runner_kind": "unittest",
           "source_blob": "8425d6d046fac59ffacc1c2ba2a67c0c7b4aa926"
         },
-        "root": "validated:scripts/h62/item2/audit-language/test_source_roles.py:module:78c294b458155ec0cd3d6f018f58300bb53f6616365e46d8d69b784a112d3dc1"
+        "root": "validated:scripts/h62/item2/audit-language/test_source_roles.py:module:ea01792226ba072bf4d6477ad983dfb914399c9a8df39bf50ff42f6e9cddd9a4"
       },
       "search_candidates": [
         {
@@ -46860,9 +46860,6 @@
       "secondary": {
         "policy_scans": [
           "private-paths"
-        ],
-        "unreviewed_readers": [
-          "validated:scripts/h62/item2/audit-language/test_source_roles.py"
         ]
       },
       "unresolved": []
@@ -46972,7 +46969,7 @@
             "operation": "entered measured Python module; no fixture consumption credit",
             "source": "scripts/h62/item2/audit-language/test_source_roles.py",
             "target": "scripts/h62/item2/audit-language/source_roles.py",
-            "validated_for": "validated:scripts/h62/item2/audit-language/test_source_roles.py:module:4ea5f2b7a695b594a05b8389b87c9a991e75218cc9cff530aeb592df05174ff0"
+            "validated_for": "validated:scripts/h62/item2/audit-language/test_source_roles.py:module:fa7b2c882bed18c70df65d8d2d3dbfb0dfbdb073d34c1bb6434c785270247c3a"
           },
           {
             "kind": "executes",
@@ -46980,7 +46977,7 @@
             "operation": "entered measured Python module; no fixture consumption credit",
             "source": "scripts/h62/item2/audit-language/source_roles.py",
             "target": "scripts/h62/item2/audit-language/classify.py",
-            "validated_for": "validated:scripts/h62/item2/audit-language/test_source_roles.py:module:4ea5f2b7a695b594a05b8389b87c9a991e75218cc9cff530aeb592df05174ff0"
+            "validated_for": "validated:scripts/h62/item2/audit-language/test_source_roles.py:module:fa7b2c882bed18c70df65d8d2d3dbfb0dfbdb073d34c1bb6434c785270247c3a"
           }
         ],
         "entry": {
@@ -47003,11 +47000,11 @@
           },
           "other_reads": "unresolved",
           "path": "scripts/h62/item2/audit-language/test_source_roles.py",
-          "purpose": "Fresh ordinary/instrumented unittest command; only separately entered measured frames qualify as helper execution. Source-loader targets have no reviewed data-fixture role.",
+          "purpose": "Fixture roles not reviewed; passing test status and IO alone do not establish data eligibility.",
           "runner_kind": "unittest",
           "source_blob": "8425d6d046fac59ffacc1c2ba2a67c0c7b4aa926"
         },
-        "root": "validated:scripts/h62/item2/audit-language/test_source_roles.py:module:4ea5f2b7a695b594a05b8389b87c9a991e75218cc9cff530aeb592df05174ff0"
+        "root": "validated:scripts/h62/item2/audit-language/test_source_roles.py:module:fa7b2c882bed18c70df65d8d2d3dbfb0dfbdb073d34c1bb6434c785270247c3a"
       },
       "search_candidates": [
         {
@@ -47046,9 +47043,6 @@
       "secondary": {
         "policy_scans": [
           "private-paths"
-        ],
-        "unreviewed_readers": [
-          "validated:scripts/h62/item2/audit-language/test_source_roles.py"
         ]
       },
       "unresolved": []
@@ -47300,7 +47294,7 @@
             "operation": "entered measured Python module; no fixture consumption credit",
             "source": "scripts/h62/item2/audit-language/test_source_roles.py",
             "target": "scripts/h62/item2/audit-language/test_source_roles.py",
-            "validated_for": "validated:scripts/h62/item2/audit-language/test_source_roles.py:module:a4977c6cc6c484f44f2b0386bce1f721ccc0295f982c55156cd175679946d2e0"
+            "validated_for": "validated:scripts/h62/item2/audit-language/test_source_roles.py:module:74ae8f4a054e2442a07625b584eb264b461251e857810bf82a03a874afa44cf5"
           },
           {
             "kind": "executes",
@@ -47308,7 +47302,7 @@
             "operation": "entered measured Python module; no fixture consumption credit",
             "source": "scripts/h62/item2/audit-language/test_source_roles.py",
             "target": "scripts/h62/item2/audit-language/test_source_roles.py",
-            "validated_for": "validated:scripts/h62/item2/audit-language/test_source_roles.py:module:a4977c6cc6c484f44f2b0386bce1f721ccc0295f982c55156cd175679946d2e0"
+            "validated_for": "validated:scripts/h62/item2/audit-language/test_source_roles.py:module:74ae8f4a054e2442a07625b584eb264b461251e857810bf82a03a874afa44cf5"
           },
           {
             "kind": "executes",
@@ -47316,7 +47310,7 @@
             "operation": "entered measured Python module; no fixture consumption credit",
             "source": "scripts/h62/item2/audit-language/test_source_roles.py",
             "target": "scripts/h62/item2/audit-language/refine_remaining.py",
-            "validated_for": "validated:scripts/h62/item2/audit-language/test_source_roles.py:module:a4977c6cc6c484f44f2b0386bce1f721ccc0295f982c55156cd175679946d2e0"
+            "validated_for": "validated:scripts/h62/item2/audit-language/test_source_roles.py:module:74ae8f4a054e2442a07625b584eb264b461251e857810bf82a03a874afa44cf5"
           }
         ],
         "entry": {
@@ -47339,11 +47333,11 @@
           },
           "other_reads": "unresolved",
           "path": "scripts/h62/item2/audit-language/test_source_roles.py",
-          "purpose": "Fresh ordinary/instrumented unittest command; only separately entered measured frames qualify as helper execution. Source-loader targets have no reviewed data-fixture role.",
+          "purpose": "Fixture roles not reviewed; passing test status and IO alone do not establish data eligibility.",
           "runner_kind": "unittest",
           "source_blob": "8425d6d046fac59ffacc1c2ba2a67c0c7b4aa926"
         },
-        "root": "validated:scripts/h62/item2/audit-language/test_source_roles.py:module:a4977c6cc6c484f44f2b0386bce1f721ccc0295f982c55156cd175679946d2e0"
+        "root": "validated:scripts/h62/item2/audit-language/test_source_roles.py:module:74ae8f4a054e2442a07625b584eb264b461251e857810bf82a03a874afa44cf5"
       },
       "search_candidates": [
         {
@@ -47362,9 +47356,6 @@
       "secondary": {
         "policy_scans": [
           "private-paths"
-        ],
-        "unreviewed_readers": [
-          "validated:scripts/h62/item2/audit-language/test_source_roles.py"
         ]
       },
       "unresolved": []
@@ -47539,7 +47530,7 @@
             "operation": "entered measured Python module; no fixture consumption credit",
             "source": "scripts/h62/item2/audit-language/test_source_roles.py",
             "target": "scripts/h62/item2/audit-language/source_roles.py",
-            "validated_for": "validated:scripts/h62/item2/audit-language/test_source_roles.py:module:fcaf886ace0dbb7152006016818ea3b884599f42d0da7d06945f3232dc53be41"
+            "validated_for": "validated:scripts/h62/item2/audit-language/test_source_roles.py:module:2734ce2288976041f8123eb7e68c0ceedd64b31db0f3eacb1f13444b8197685c"
           },
           {
             "kind": "executes",
@@ -47547,7 +47538,7 @@
             "operation": "entered measured Python module; no fixture consumption credit",
             "source": "scripts/h62/item2/audit-language/source_roles.py",
             "target": "scripts/h62/item2/audit-language/source_only.py",
-            "validated_for": "validated:scripts/h62/item2/audit-language/test_source_roles.py:module:fcaf886ace0dbb7152006016818ea3b884599f42d0da7d06945f3232dc53be41"
+            "validated_for": "validated:scripts/h62/item2/audit-language/test_source_roles.py:module:2734ce2288976041f8123eb7e68c0ceedd64b31db0f3eacb1f13444b8197685c"
           }
         ],
         "entry": {
@@ -47570,11 +47561,11 @@
           },
           "other_reads": "unresolved",
           "path": "scripts/h62/item2/audit-language/test_source_roles.py",
-          "purpose": "Fresh ordinary/instrumented unittest command; only separately entered measured frames qualify as helper execution. Source-loader targets have no reviewed data-fixture role.",
+          "purpose": "Fixture roles not reviewed; passing test status and IO alone do not establish data eligibility.",
           "runner_kind": "unittest",
           "source_blob": "8425d6d046fac59ffacc1c2ba2a67c0c7b4aa926"
         },
-        "root": "validated:scripts/h62/item2/audit-language/test_source_roles.py:module:fcaf886ace0dbb7152006016818ea3b884599f42d0da7d06945f3232dc53be41"
+        "root": "validated:scripts/h62/item2/audit-language/test_source_roles.py:module:2734ce2288976041f8123eb7e68c0ceedd64b31db0f3eacb1f13444b8197685c"
       },
       "search_candidates": [
         {
@@ -47593,9 +47584,6 @@
       "secondary": {
         "policy_scans": [
           "private-paths"
-        ],
-        "unreviewed_readers": [
-          "validated:scripts/h62/item2/audit-language/test_source_roles.py"
         ]
       },
       "unresolved": []
@@ -47608,7 +47596,7 @@
       "object_type": "blob",
       "orphan_analysis": null,
       "path": "scripts/h62/item2/audit-language/source_roles.py",
-      "reason": "validated Python call stack at scripts/h62/item2/audit-language/test_source_roles.py:6",
+      "reason": "entered measured Python module; no fixture consumption credit at scripts/h62/item2/audit-language/test_source_roles.py:6",
       "recovery": {
         "blob": "fbc2eb5bc17f91adabf886d22058615d640dd20d",
         "command": "git show 51e6a775b29d8ac47b5fc7b87f0d4f7e6546da3f:scripts/h62/item2/audit-language/source_roles.py",
@@ -47619,10 +47607,10 @@
           {
             "kind": "executes",
             "line": 6,
-            "operation": "validated Python call stack",
+            "operation": "entered measured Python module; no fixture consumption credit",
             "source": "scripts/h62/item2/audit-language/test_source_roles.py",
             "target": "scripts/h62/item2/audit-language/source_roles.py",
-            "validated_for": "validated:scripts/h62/item2/audit-language/test_source_roles.py:read:d252486a4d307e9ccbbcf026aa0b8dfef4be78c04a88f36de9d7433b0a911ac2"
+            "validated_for": "validated:scripts/h62/item2/audit-language/test_source_roles.py:module:fa7b2c882bed18c70df65d8d2d3dbfb0dfbdb073d34c1bb6434c785270247c3a"
           }
         ],
         "entry": {
@@ -47630,16 +47618,26 @@
           "cwd": ".",
           "data_use_scope": [],
           "derived_from": "validated:scripts/h62/item2/audit-language/test_source_roles.py",
+          "entered_module": "scripts/h62/item2/audit-language/classify.py",
           "kind": "validated standalone runner",
           "location": "scripts/h62/item2/audit-language/test_source_roles.py:1",
-          "observed_target": "scripts/h62/item2/audit-language/classify.py",
+          "module_entry": {
+            "collector_sha256": "42027e7c42dac3912c1f8ef468a6d99bddb8075172c545b6a587692b039cff32",
+            "module_code_sha256": "8acba24c7c56cb172436b3f4fe76d154345f55d91c051b45041445bf0a5f2c9a",
+            "module_frame_line": 0,
+            "python": [
+              3,
+              12,
+              14
+            ]
+          },
           "other_reads": "unresolved",
           "path": "scripts/h62/item2/audit-language/test_source_roles.py",
-          "purpose": "Fresh ordinary/instrumented unittest command; only separately entered measured frames qualify as helper execution. Source-loader targets have no reviewed data-fixture role.",
+          "purpose": "Fixture roles not reviewed; passing test status and IO alone do not establish data eligibility.",
           "runner_kind": "unittest",
           "source_blob": "8425d6d046fac59ffacc1c2ba2a67c0c7b4aa926"
         },
-        "root": "validated:scripts/h62/item2/audit-language/test_source_roles.py:read:d252486a4d307e9ccbbcf026aa0b8dfef4be78c04a88f36de9d7433b0a911ac2"
+        "root": "validated:scripts/h62/item2/audit-language/test_source_roles.py:module:fa7b2c882bed18c70df65d8d2d3dbfb0dfbdb073d34c1bb6434c785270247c3a"
       },
       "search_candidates": [
         {
@@ -47678,9 +47676,6 @@
       "secondary": {
         "policy_scans": [
           "private-paths"
-        ],
-        "unreviewed_readers": [
-          "validated:scripts/h62/item2/audit-language/test_source_roles.py"
         ]
       },
       "unresolved": []
@@ -47801,7 +47796,7 @@
           "location": "scripts/h62/item2/audit-language/test_source_roles.py:1",
           "other_reads": "unresolved",
           "path": "scripts/h62/item2/audit-language/test_source_roles.py",
-          "purpose": "Fresh ordinary/instrumented unittest command; only separately entered measured frames qualify as helper execution. Source-loader targets have no reviewed data-fixture role.",
+          "purpose": "Fixture roles not reviewed; passing test status and IO alone do not establish data eligibility.",
           "runner_kind": "unittest",
           "source_blob": "8425d6d046fac59ffacc1c2ba2a67c0c7b4aa926"
         },
@@ -49008,7 +49003,7 @@
             ],
             "kind": "unittest declaration and explicit main entry",
             "main_line": 45,
-            "revision": "5b78e2313ed50233a7a8373354b0e4586fd75c9e",
+            "revision": "a83beba3351fd4dbd3e5dbf0bfc93a96ec75bf72",
             "test_contexts": [
               {
                 "code_firstlineno": 7,
@@ -49151,7 +49146,7 @@
             ],
             "kind": "unittest declaration and explicit main entry",
             "main_line": 31,
-            "revision": "5b78e2313ed50233a7a8373354b0e4586fd75c9e",
+            "revision": "a83beba3351fd4dbd3e5dbf0bfc93a96ec75bf72",
             "test_contexts": [
               {
                 "code_firstlineno": 7,
@@ -49274,7 +49269,7 @@
             ],
             "kind": "unittest declaration and explicit main entry",
             "main_line": 94,
-            "revision": "5b78e2313ed50233a7a8373354b0e4586fd75c9e",
+            "revision": "a83beba3351fd4dbd3e5dbf0bfc93a96ec75bf72",
             "test_contexts": [
               {
                 "code_firstlineno": 8,
@@ -49475,7 +49470,7 @@
             ],
             "kind": "unittest declaration and explicit main entry",
             "main_line": 78,
-            "revision": "5b78e2313ed50233a7a8373354b0e4586fd75c9e",
+            "revision": "a83beba3351fd4dbd3e5dbf0bfc93a96ec75bf72",
             "test_contexts": [
               {
                 "code_firstlineno": 7,
@@ -52155,7 +52150,7 @@
             ],
             "kind": "unittest declaration and explicit main entry",
             "main_line": 101,
-            "revision": "5b78e2313ed50233a7a8373354b0e4586fd75c9e",
+            "revision": "a83beba3351fd4dbd3e5dbf0bfc93a96ec75bf72",
             "test_contexts": [
               {
                 "code_firstlineno": 17,
@@ -52392,7 +52387,7 @@
             ],
             "kind": "unittest declaration and explicit main entry",
             "main_line": 49,
-            "revision": "5b78e2313ed50233a7a8373354b0e4586fd75c9e",
+            "revision": "a83beba3351fd4dbd3e5dbf0bfc93a96ec75bf72",
             "test_contexts": [
               {
                 "code_firstlineno": 13,
@@ -52481,7 +52476,7 @@
             ],
             "kind": "unittest declaration and explicit main entry",
             "main_line": 38,
-            "revision": "5b78e2313ed50233a7a8373354b0e4586fd75c9e",
+            "revision": "a83beba3351fd4dbd3e5dbf0bfc93a96ec75bf72",
             "test_contexts": [
               {
                 "code_firstlineno": 11,
@@ -52793,7 +52788,7 @@
             ],
             "kind": "unittest declaration and explicit main entry",
             "main_line": 49,
-            "revision": "5b78e2313ed50233a7a8373354b0e4586fd75c9e",
+            "revision": "a83beba3351fd4dbd3e5dbf0bfc93a96ec75bf72",
             "test_contexts": [
               {
                 "code_firstlineno": 13,
@@ -52883,7 +52878,7 @@
             ],
             "kind": "unittest declaration and explicit main entry",
             "main_line": 89,
-            "revision": "5b78e2313ed50233a7a8373354b0e4586fd75c9e",
+            "revision": "a83beba3351fd4dbd3e5dbf0bfc93a96ec75bf72",
             "test_contexts": [
               {
                 "code_firstlineno": 16,
@@ -53191,7 +53186,7 @@
             ],
             "kind": "unittest declaration and explicit main entry",
             "main_line": 27,
-            "revision": "5b78e2313ed50233a7a8373354b0e4586fd75c9e",
+            "revision": "a83beba3351fd4dbd3e5dbf0bfc93a96ec75bf72",
             "test_contexts": [
               {
                 "code_firstlineno": 9,
@@ -53358,7 +53353,7 @@
             ],
             "kind": "unittest declaration and explicit main entry",
             "main_line": 77,
-            "revision": "5b78e2313ed50233a7a8373354b0e4586fd75c9e",
+            "revision": "a83beba3351fd4dbd3e5dbf0bfc93a96ec75bf72",
             "test_contexts": [
               {
                 "code_firstlineno": 18,
@@ -54411,7 +54406,7 @@
             "required_options": [
               "--evidence"
             ],
-            "revision": "5b78e2313ed50233a7a8373354b0e4586fd75c9e"
+            "revision": "a83beba3351fd4dbd3e5dbf0bfc93a96ec75bf72"
           },
           "source_blob": "a50f657e2df51efe2d0049a0c944d47cebce4bb3",
           "source_demonstration_revision": "9990777843ea8e47fe455c8815bfbac159504abb",
@@ -54567,7 +54562,7 @@
               "--archive",
               "--out"
             ],
-            "revision": "5b78e2313ed50233a7a8373354b0e4586fd75c9e"
+            "revision": "a83beba3351fd4dbd3e5dbf0bfc93a96ec75bf72"
           },
           "source_blob": "b4d93269d25d1effa9e943a6cba3f63c88ffd4a6",
           "source_demonstration_revision": "9990777843ea8e47fe455c8815bfbac159504abb",
@@ -54721,7 +54716,7 @@
             "required_options": [
               "--evidence"
             ],
-            "revision": "5b78e2313ed50233a7a8373354b0e4586fd75c9e"
+            "revision": "a83beba3351fd4dbd3e5dbf0bfc93a96ec75bf72"
           },
           "source_blob": "a264dd0c7435a8b5f6e2a1c4bb37a34abafbe980",
           "source_demonstration_revision": "9990777843ea8e47fe455c8815bfbac159504abb",
@@ -56894,7 +56889,7 @@
               "--lean",
               "--out"
             ],
-            "revision": "5b78e2313ed50233a7a8373354b0e4586fd75c9e"
+            "revision": "a83beba3351fd4dbd3e5dbf0bfc93a96ec75bf72"
           },
           "source_blob": "766c1e39caab15fa028423e025bf4c7e0661fdd9",
           "source_demonstration_revision": "9990777843ea8e47fe455c8815bfbac159504abb",
@@ -57430,7 +57425,7 @@
             "required_options": [
               "--evidence"
             ],
-            "revision": "5b78e2313ed50233a7a8373354b0e4586fd75c9e"
+            "revision": "a83beba3351fd4dbd3e5dbf0bfc93a96ec75bf72"
           },
           "source_blob": "a725519cebe318902b7caf85768063fb0b8c191a",
           "source_demonstration_revision": "9990777843ea8e47fe455c8815bfbac159504abb",
@@ -57511,7 +57506,7 @@
             "required_options": [
               "--evidence"
             ],
-            "revision": "5b78e2313ed50233a7a8373354b0e4586fd75c9e"
+            "revision": "a83beba3351fd4dbd3e5dbf0bfc93a96ec75bf72"
           },
           "source_blob": "73b309b26c3d796f34be8f9476421d7f1dfcac62",
           "source_demonstration_revision": "9990777843ea8e47fe455c8815bfbac159504abb",
@@ -57582,7 +57577,7 @@
               "--evidence",
               "--module"
             ],
-            "revision": "5b78e2313ed50233a7a8373354b0e4586fd75c9e"
+            "revision": "a83beba3351fd4dbd3e5dbf0bfc93a96ec75bf72"
           },
           "source_blob": "90e9500177b9bbd54633f0fef42e3caf165a429d",
           "source_demonstration_revision": "9990777843ea8e47fe455c8815bfbac159504abb",
@@ -57651,7 +57646,7 @@
             "required_options": [
               "--evidence"
             ],
-            "revision": "5b78e2313ed50233a7a8373354b0e4586fd75c9e"
+            "revision": "a83beba3351fd4dbd3e5dbf0bfc93a96ec75bf72"
           },
           "source_blob": "d377f90debd83512fd4fc3f0a94400fffdf67f12",
           "source_demonstration_revision": "9990777843ea8e47fe455c8815bfbac159504abb",
@@ -59262,7 +59257,7 @@
               "--output",
               "--toolchain"
             ],
-            "revision": "5b78e2313ed50233a7a8373354b0e4586fd75c9e"
+            "revision": "a83beba3351fd4dbd3e5dbf0bfc93a96ec75bf72"
           },
           "source_blob": "40b7b173d0f683039f55497c1d36b20dcfd70116",
           "source_demonstration_revision": "9990777843ea8e47fe455c8815bfbac159504abb",
@@ -60075,7 +60070,7 @@
             ],
             "kind": "unittest declaration and explicit main entry",
             "main_line": 77,
-            "revision": "5b78e2313ed50233a7a8373354b0e4586fd75c9e",
+            "revision": "a83beba3351fd4dbd3e5dbf0bfc93a96ec75bf72",
             "test_contexts": [
               {
                 "code_firstlineno": 14,
@@ -62459,7 +62454,7 @@
               "--frozen",
               "--output"
             ],
-            "revision": "5b78e2313ed50233a7a8373354b0e4586fd75c9e"
+            "revision": "a83beba3351fd4dbd3e5dbf0bfc93a96ec75bf72"
           },
           "source_blob": "2d795e6b300c40e1fe4924f04ad7a9e4b2ba4df8",
           "source_demonstration_revision": "9990777843ea8e47fe455c8815bfbac159504abb",
@@ -62691,7 +62686,7 @@
               "--evidence",
               "--toolchain"
             ],
-            "revision": "5b78e2313ed50233a7a8373354b0e4586fd75c9e"
+            "revision": "a83beba3351fd4dbd3e5dbf0bfc93a96ec75bf72"
           },
           "source_blob": "51652ca513e21150f4c49c49505dc64a5bb8c12d",
           "source_demonstration_revision": "9990777843ea8e47fe455c8815bfbac159504abb",
@@ -62843,7 +62838,7 @@
             "required_options": [
               "--inventory"
             ],
-            "revision": "5b78e2313ed50233a7a8373354b0e4586fd75c9e"
+            "revision": "a83beba3351fd4dbd3e5dbf0bfc93a96ec75bf72"
           },
           "source_blob": "b0d1b50765bf744a5a53cd026695999fb3e6f1c3",
           "source_demonstration_revision": "9990777843ea8e47fe455c8815bfbac159504abb",
@@ -62936,7 +62931,7 @@
             "required_options": [
               "--evidence"
             ],
-            "revision": "5b78e2313ed50233a7a8373354b0e4586fd75c9e"
+            "revision": "a83beba3351fd4dbd3e5dbf0bfc93a96ec75bf72"
           },
           "source_blob": "f08074788981d2635375dcd531c34621ab29faa8",
           "source_demonstration_revision": "9990777843ea8e47fe455c8815bfbac159504abb",
@@ -63431,7 +63426,7 @@
               "--inventory",
               "--output"
             ],
-            "revision": "5b78e2313ed50233a7a8373354b0e4586fd75c9e"
+            "revision": "a83beba3351fd4dbd3e5dbf0bfc93a96ec75bf72"
           },
           "source_blob": "5524cbec706ee5732ddcb15feb808a66cfd13421",
           "source_demonstration_revision": "9990777843ea8e47fe455c8815bfbac159504abb",
@@ -64230,7 +64225,7 @@
               "--inventory",
               "--output"
             ],
-            "revision": "5b78e2313ed50233a7a8373354b0e4586fd75c9e"
+            "revision": "a83beba3351fd4dbd3e5dbf0bfc93a96ec75bf72"
           },
           "source_blob": "35a5868915fc8b3b1818e2e042a5748df899b9f3",
           "source_demonstration_revision": "9990777843ea8e47fe455c8815bfbac159504abb",
@@ -65324,7 +65319,7 @@
             ],
             "kind": "unittest declaration and explicit main entry",
             "main_line": 21,
-            "revision": "5b78e2313ed50233a7a8373354b0e4586fd75c9e",
+            "revision": "a83beba3351fd4dbd3e5dbf0bfc93a96ec75bf72",
             "test_contexts": [
               {
                 "code_firstlineno": 6,
@@ -65812,7 +65807,7 @@
             "required_options": [
               "--output"
             ],
-            "revision": "5b78e2313ed50233a7a8373354b0e4586fd75c9e"
+            "revision": "a83beba3351fd4dbd3e5dbf0bfc93a96ec75bf72"
           },
           "source_blob": "fc0b06fef2af5c7db8bf451b5b61ae7314ff3343",
           "source_demonstration_revision": "9990777843ea8e47fe455c8815bfbac159504abb",
@@ -65963,7 +65958,7 @@
             "required_options": [
               "--output"
             ],
-            "revision": "5b78e2313ed50233a7a8373354b0e4586fd75c9e"
+            "revision": "a83beba3351fd4dbd3e5dbf0bfc93a96ec75bf72"
           },
           "source_blob": "5416c212d266a6105db8ac41b4f8d3af26de26ee",
           "source_demonstration_revision": "9990777843ea8e47fe455c8815bfbac159504abb",
@@ -66223,7 +66218,7 @@
             ],
             "kind": "unittest declaration and explicit main entry",
             "main_line": 87,
-            "revision": "5b78e2313ed50233a7a8373354b0e4586fd75c9e",
+            "revision": "a83beba3351fd4dbd3e5dbf0bfc93a96ec75bf72",
             "test_contexts": [
               {
                 "code_firstlineno": 13,
@@ -68033,7 +68028,7 @@
               "--lean-bin",
               "--pin"
             ],
-            "revision": "5b78e2313ed50233a7a8373354b0e4586fd75c9e"
+            "revision": "a83beba3351fd4dbd3e5dbf0bfc93a96ec75bf72"
           },
           "source_blob": "15143c90ceead4c5d8f57c1cfa95bed521650358",
           "source_demonstration_revision": "9990777843ea8e47fe455c8815bfbac159504abb",
@@ -68305,7 +68300,7 @@
               "--lean-bin",
               "--pin"
             ],
-            "revision": "5b78e2313ed50233a7a8373354b0e4586fd75c9e"
+            "revision": "a83beba3351fd4dbd3e5dbf0bfc93a96ec75bf72"
           },
           "source_blob": "5568f8e28a28f5daf777efa0c5c7976f2b413a54",
           "source_demonstration_revision": "9990777843ea8e47fe455c8815bfbac159504abb",
@@ -100619,7 +100614,7 @@
             ],
             "kind": "unittest declaration and explicit main entry",
             "main_line": 44,
-            "revision": "5b78e2313ed50233a7a8373354b0e4586fd75c9e",
+            "revision": "a83beba3351fd4dbd3e5dbf0bfc93a96ec75bf72",
             "test_contexts": [
               {
                 "code_firstlineno": 14,
@@ -101895,7 +101890,7 @@
             ],
             "kind": "unittest declaration and explicit main entry",
             "main_line": 60,
-            "revision": "5b78e2313ed50233a7a8373354b0e4586fd75c9e",
+            "revision": "a83beba3351fd4dbd3e5dbf0bfc93a96ec75bf72",
             "test_contexts": [
               {
                 "code_firstlineno": 16,
@@ -102346,7 +102341,7 @@
             ],
             "kind": "unittest declaration and explicit main entry",
             "main_line": 39,
-            "revision": "5b78e2313ed50233a7a8373354b0e4586fd75c9e",
+            "revision": "a83beba3351fd4dbd3e5dbf0bfc93a96ec75bf72",
             "test_contexts": [
               {
                 "code_firstlineno": 11,
@@ -103391,7 +103386,7 @@
             ],
             "kind": "unittest declaration and explicit main entry",
             "main_line": 19,
-            "revision": "5b78e2313ed50233a7a8373354b0e4586fd75c9e",
+            "revision": "a83beba3351fd4dbd3e5dbf0bfc93a96ec75bf72",
             "test_contexts": [
               {
                 "code_firstlineno": 10,
@@ -103496,7 +103491,7 @@
             ],
             "kind": "unittest declaration and explicit main entry",
             "main_line": 71,
-            "revision": "5b78e2313ed50233a7a8373354b0e4586fd75c9e",
+            "revision": "a83beba3351fd4dbd3e5dbf0bfc93a96ec75bf72",
             "test_contexts": [
               {
                 "code_firstlineno": 21,
@@ -106330,7 +106325,7 @@
       ]
     },
     {
-      "blob": "c07b12af871b58dd148e6e2eea269a288046b44c",
+      "blob": "72f081c5d16bb721001ed11ab03b8e61bb0ae1f4",
       "class": null,
       "generator": null,
       "mode": "100644",
@@ -106339,9 +106334,9 @@
       "path": "tests/fullscope-20261104/vt1/ImportFollowup/lake.serial.toml",
       "reason": "No certified consumer or content-based historical role in the current model; further runner/dynamic-path analysis required.",
       "recovery": {
-        "blob": "c07b12af871b58dd148e6e2eea269a288046b44c",
-        "command": "git show e26852e8d26663d1faeda40f39898dd1534c1596:tests/fullscope-20261104/vt1/ImportFollowup/lake.serial.toml",
-        "last_touch_commit": "e26852e8d26663d1faeda40f39898dd1534c1596"
+        "blob": "72f081c5d16bb721001ed11ab03b8e61bb0ae1f4",
+        "command": "git show ca50a35741c5e81648ca355ec00e55559836c404:tests/fullscope-20261104/vt1/ImportFollowup/lake.serial.toml",
+        "last_touch_commit": "ca50a35741c5e81648ca355ec00e55559836c404"
       },
       "runner_chain": null,
       "search_candidates": [
@@ -106673,6 +106668,31 @@
           "token": "IrHelperChecks"
         }
       ],
+      "secondary": {
+        "policy_scans": [
+          "private-paths"
+        ]
+      },
+      "unresolved": [
+        "UNRESOLVED_USE: candidate search is not a certified use graph or proof of non-use"
+      ]
+    },
+    {
+      "blob": "ab5b4b3c4d998427c341a1a2bdab6136d30202e5",
+      "class": null,
+      "generator": null,
+      "mode": "100644",
+      "object_type": "blob",
+      "orphan_analysis": null,
+      "path": "tests/fullscope-20261104/vt1/IrHexChecks.lean",
+      "reason": "No certified consumer or content-based historical role in the current model; further runner/dynamic-path analysis required.",
+      "recovery": {
+        "blob": "ab5b4b3c4d998427c341a1a2bdab6136d30202e5",
+        "command": "git show ca50a35741c5e81648ca355ec00e55559836c404:tests/fullscope-20261104/vt1/IrHexChecks.lean",
+        "last_touch_commit": "ca50a35741c5e81648ca355ec00e55559836c404"
+      },
+      "runner_chain": null,
+      "search_candidates": [],
       "secondary": {
         "policy_scans": [
           "private-paths"
@@ -114943,7 +114963,7 @@
             "operation": "entered measured Python module; no fixture consumption credit",
             "source": "tests/h28-sol/mutation-testing/tools/test_runner.py",
             "target": "tests/h28-sol/mutation-testing/tools/test_runner.py",
-            "validated_for": "validated:tests/h28-sol/mutation-testing/tools/test_runner.py:module:7a08bdc8640ccddb9c49992129b331f91ecb6a8ec24fc4fc0742394f71ce1dee"
+            "validated_for": "validated:tests/h28-sol/mutation-testing/tools/test_runner.py:module:43f70bca8ab896babb8626e753f8f5a24620e0d626da5b504575b05c41d0d810"
           },
           {
             "kind": "executes",
@@ -114951,7 +114971,7 @@
             "operation": "entered measured Python module; no fixture consumption credit",
             "source": "tests/h28-sol/mutation-testing/tools/test_runner.py",
             "target": "tests/h28-sol/mutation-testing/tools/runner.py",
-            "validated_for": "validated:tests/h28-sol/mutation-testing/tools/test_runner.py:module:7a08bdc8640ccddb9c49992129b331f91ecb6a8ec24fc4fc0742394f71ce1dee"
+            "validated_for": "validated:tests/h28-sol/mutation-testing/tools/test_runner.py:module:43f70bca8ab896babb8626e753f8f5a24620e0d626da5b504575b05c41d0d810"
           },
           {
             "kind": "executes",
@@ -114959,7 +114979,7 @@
             "operation": "entered measured Python module; no fixture consumption credit",
             "source": "tests/h28-sol/mutation-testing/tools/runner.py",
             "target": "tests/h28-sol/mutation-testing/tools/engine.py",
-            "validated_for": "validated:tests/h28-sol/mutation-testing/tools/test_runner.py:module:7a08bdc8640ccddb9c49992129b331f91ecb6a8ec24fc4fc0742394f71ce1dee"
+            "validated_for": "validated:tests/h28-sol/mutation-testing/tools/test_runner.py:module:43f70bca8ab896babb8626e753f8f5a24620e0d626da5b504575b05c41d0d810"
           },
           {
             "kind": "executes",
@@ -114967,7 +114987,7 @@
             "operation": "entered measured Python module; no fixture consumption credit",
             "source": "tests/h28-sol/mutation-testing/tools/engine.py",
             "target": "tests/h28-sol/mutation-testing/tools/bounded.py",
-            "validated_for": "validated:tests/h28-sol/mutation-testing/tools/test_runner.py:module:7a08bdc8640ccddb9c49992129b331f91ecb6a8ec24fc4fc0742394f71ce1dee"
+            "validated_for": "validated:tests/h28-sol/mutation-testing/tools/test_runner.py:module:43f70bca8ab896babb8626e753f8f5a24620e0d626da5b504575b05c41d0d810"
           }
         ],
         "entry": {
@@ -114990,11 +115010,11 @@
           },
           "other_reads": "unresolved",
           "path": "tests/h28-sol/mutation-testing/tools/test_runner.py",
-          "purpose": "Fresh ordinary/instrumented unittest command; only separately entered measured frames qualify as helper execution. Source-loader targets have no reviewed data-fixture role.",
+          "purpose": "Fixture roles not reviewed; passing test status and IO alone do not establish data eligibility.",
           "runner_kind": "unittest",
           "source_blob": "e0a6693f200205c74aa0bbf302e6ed299190c35b"
         },
-        "root": "validated:tests/h28-sol/mutation-testing/tools/test_runner.py:module:7a08bdc8640ccddb9c49992129b331f91ecb6a8ec24fc4fc0742394f71ce1dee"
+        "root": "validated:tests/h28-sol/mutation-testing/tools/test_runner.py:module:43f70bca8ab896babb8626e753f8f5a24620e0d626da5b504575b05c41d0d810"
       },
       "search_candidates": [
         {
@@ -115033,9 +115053,6 @@
       "secondary": {
         "policy_scans": [
           "private-paths"
-        ],
-        "unreviewed_readers": [
-          "validated:tests/h28-sol/mutation-testing/tools/test_runner.py"
         ]
       },
       "unresolved": []
@@ -115120,7 +115137,7 @@
             "operation": "entered measured Python module; no fixture consumption credit",
             "source": "tests/h28-sol/mutation-testing/tools/test_runner.py",
             "target": "tests/h28-sol/mutation-testing/tools/test_runner.py",
-            "validated_for": "validated:tests/h28-sol/mutation-testing/tools/test_runner.py:module:93db27c4f0ba41039687e5b8813dc7c83a3a98296e0f10ec20636a2694c07e33"
+            "validated_for": "validated:tests/h28-sol/mutation-testing/tools/test_runner.py:module:fdb58115485f501b8ea6bf3cca29441082947177cf53bf9c027629e22b22f197"
           },
           {
             "kind": "executes",
@@ -115128,7 +115145,7 @@
             "operation": "entered measured Python module; no fixture consumption credit",
             "source": "tests/h28-sol/mutation-testing/tools/test_runner.py",
             "target": "tests/h28-sol/mutation-testing/tools/runner.py",
-            "validated_for": "validated:tests/h28-sol/mutation-testing/tools/test_runner.py:module:93db27c4f0ba41039687e5b8813dc7c83a3a98296e0f10ec20636a2694c07e33"
+            "validated_for": "validated:tests/h28-sol/mutation-testing/tools/test_runner.py:module:fdb58115485f501b8ea6bf3cca29441082947177cf53bf9c027629e22b22f197"
           },
           {
             "kind": "executes",
@@ -115136,7 +115153,7 @@
             "operation": "entered measured Python module; no fixture consumption credit",
             "source": "tests/h28-sol/mutation-testing/tools/runner.py",
             "target": "tests/h28-sol/mutation-testing/tools/engine.py",
-            "validated_for": "validated:tests/h28-sol/mutation-testing/tools/test_runner.py:module:93db27c4f0ba41039687e5b8813dc7c83a3a98296e0f10ec20636a2694c07e33"
+            "validated_for": "validated:tests/h28-sol/mutation-testing/tools/test_runner.py:module:fdb58115485f501b8ea6bf3cca29441082947177cf53bf9c027629e22b22f197"
           },
           {
             "kind": "executes",
@@ -115144,7 +115161,7 @@
             "operation": "entered measured Python module; no fixture consumption credit",
             "source": "tests/h28-sol/mutation-testing/tools/engine.py",
             "target": "tests/h28-sol/mutation-testing/tools/bulk_inputs.py",
-            "validated_for": "validated:tests/h28-sol/mutation-testing/tools/test_runner.py:module:93db27c4f0ba41039687e5b8813dc7c83a3a98296e0f10ec20636a2694c07e33"
+            "validated_for": "validated:tests/h28-sol/mutation-testing/tools/test_runner.py:module:fdb58115485f501b8ea6bf3cca29441082947177cf53bf9c027629e22b22f197"
           }
         ],
         "entry": {
@@ -115167,11 +115184,11 @@
           },
           "other_reads": "unresolved",
           "path": "tests/h28-sol/mutation-testing/tools/test_runner.py",
-          "purpose": "Fresh ordinary/instrumented unittest command; only separately entered measured frames qualify as helper execution. Source-loader targets have no reviewed data-fixture role.",
+          "purpose": "Fixture roles not reviewed; passing test status and IO alone do not establish data eligibility.",
           "runner_kind": "unittest",
           "source_blob": "e0a6693f200205c74aa0bbf302e6ed299190c35b"
         },
-        "root": "validated:tests/h28-sol/mutation-testing/tools/test_runner.py:module:93db27c4f0ba41039687e5b8813dc7c83a3a98296e0f10ec20636a2694c07e33"
+        "root": "validated:tests/h28-sol/mutation-testing/tools/test_runner.py:module:fdb58115485f501b8ea6bf3cca29441082947177cf53bf9c027629e22b22f197"
       },
       "search_candidates": [
         {
@@ -115210,9 +115227,6 @@
       "secondary": {
         "policy_scans": [
           "private-paths"
-        ],
-        "unreviewed_readers": [
-          "validated:tests/h28-sol/mutation-testing/tools/test_runner.py"
         ]
       },
       "unresolved": []
@@ -115357,7 +115371,7 @@
             "operation": "entered measured Python module; no fixture consumption credit",
             "source": "tests/h28-sol/mutation-testing/tools/test_runner.py",
             "target": "tests/h28-sol/mutation-testing/tools/test_runner.py",
-            "validated_for": "validated:tests/h28-sol/mutation-testing/tools/test_runner.py:module:9211b03fdad80763e4102b3841d4587b44d9bb5c2ace229b392542e8838bb4c9"
+            "validated_for": "validated:tests/h28-sol/mutation-testing/tools/test_runner.py:module:dbec992b7b0f8f7c88cf6d16071781013de5971708fe3d7e23c7331dcfa8f59a"
           },
           {
             "kind": "executes",
@@ -115365,7 +115379,7 @@
             "operation": "entered measured Python module; no fixture consumption credit",
             "source": "tests/h28-sol/mutation-testing/tools/test_runner.py",
             "target": "tests/h28-sol/mutation-testing/tools/runner.py",
-            "validated_for": "validated:tests/h28-sol/mutation-testing/tools/test_runner.py:module:9211b03fdad80763e4102b3841d4587b44d9bb5c2ace229b392542e8838bb4c9"
+            "validated_for": "validated:tests/h28-sol/mutation-testing/tools/test_runner.py:module:dbec992b7b0f8f7c88cf6d16071781013de5971708fe3d7e23c7331dcfa8f59a"
           },
           {
             "kind": "executes",
@@ -115373,7 +115387,7 @@
             "operation": "entered measured Python module; no fixture consumption credit",
             "source": "tests/h28-sol/mutation-testing/tools/runner.py",
             "target": "tests/h28-sol/mutation-testing/tools/engine.py",
-            "validated_for": "validated:tests/h28-sol/mutation-testing/tools/test_runner.py:module:9211b03fdad80763e4102b3841d4587b44d9bb5c2ace229b392542e8838bb4c9"
+            "validated_for": "validated:tests/h28-sol/mutation-testing/tools/test_runner.py:module:dbec992b7b0f8f7c88cf6d16071781013de5971708fe3d7e23c7331dcfa8f59a"
           },
           {
             "kind": "executes",
@@ -115381,7 +115395,7 @@
             "operation": "entered measured Python module; no fixture consumption credit",
             "source": "tests/h28-sol/mutation-testing/tools/engine.py",
             "target": "tests/h28-sol/mutation-testing/tools/checked.py",
-            "validated_for": "validated:tests/h28-sol/mutation-testing/tools/test_runner.py:module:9211b03fdad80763e4102b3841d4587b44d9bb5c2ace229b392542e8838bb4c9"
+            "validated_for": "validated:tests/h28-sol/mutation-testing/tools/test_runner.py:module:dbec992b7b0f8f7c88cf6d16071781013de5971708fe3d7e23c7331dcfa8f59a"
           }
         ],
         "entry": {
@@ -115404,11 +115418,11 @@
           },
           "other_reads": "unresolved",
           "path": "tests/h28-sol/mutation-testing/tools/test_runner.py",
-          "purpose": "Fresh ordinary/instrumented unittest command; only separately entered measured frames qualify as helper execution. Source-loader targets have no reviewed data-fixture role.",
+          "purpose": "Fixture roles not reviewed; passing test status and IO alone do not establish data eligibility.",
           "runner_kind": "unittest",
           "source_blob": "e0a6693f200205c74aa0bbf302e6ed299190c35b"
         },
-        "root": "validated:tests/h28-sol/mutation-testing/tools/test_runner.py:module:9211b03fdad80763e4102b3841d4587b44d9bb5c2ace229b392542e8838bb4c9"
+        "root": "validated:tests/h28-sol/mutation-testing/tools/test_runner.py:module:dbec992b7b0f8f7c88cf6d16071781013de5971708fe3d7e23c7331dcfa8f59a"
       },
       "search_candidates": [
         {
@@ -115447,9 +115461,6 @@
       "secondary": {
         "policy_scans": [
           "private-paths"
-        ],
-        "unreviewed_readers": [
-          "validated:tests/h28-sol/mutation-testing/tools/test_runner.py"
         ]
       },
       "unresolved": []
@@ -115636,7 +115647,7 @@
       "object_type": "blob",
       "orphan_analysis": null,
       "path": "tests/h28-sol/mutation-testing/tools/engine.py",
-      "reason": "validated Python call stack at tests/h28-sol/mutation-testing/tools/runner.py:76",
+      "reason": "entered measured Python module; no fixture consumption credit at tests/h28-sol/mutation-testing/tools/runner.py:76",
       "recovery": {
         "blob": "c1578c4b34c88c7e16ed09d1091b223a0406033e",
         "command": "git show 50a5679e38aeaf468850d8f46645bdf5e71aa706:tests/h28-sol/mutation-testing/tools/engine.py",
@@ -115647,26 +115658,26 @@
           {
             "kind": "executes",
             "line": 91,
-            "operation": "validated Python call stack",
+            "operation": "entered measured Python module; no fixture consumption credit",
             "source": "tests/h28-sol/mutation-testing/tools/test_runner.py",
             "target": "tests/h28-sol/mutation-testing/tools/test_runner.py",
-            "validated_for": "validated:tests/h28-sol/mutation-testing/tools/test_runner.py:read:f0e1621fe7a5e629d7f080268a699975c9c09982c271ea297c5cf34541bcd7f0"
+            "validated_for": "validated:tests/h28-sol/mutation-testing/tools/test_runner.py:module:fdb58115485f501b8ea6bf3cca29441082947177cf53bf9c027629e22b22f197"
           },
           {
             "kind": "executes",
             "line": 59,
-            "operation": "validated Python call stack",
+            "operation": "entered measured Python module; no fixture consumption credit",
             "source": "tests/h28-sol/mutation-testing/tools/test_runner.py",
             "target": "tests/h28-sol/mutation-testing/tools/runner.py",
-            "validated_for": "validated:tests/h28-sol/mutation-testing/tools/test_runner.py:read:f0e1621fe7a5e629d7f080268a699975c9c09982c271ea297c5cf34541bcd7f0"
+            "validated_for": "validated:tests/h28-sol/mutation-testing/tools/test_runner.py:module:fdb58115485f501b8ea6bf3cca29441082947177cf53bf9c027629e22b22f197"
           },
           {
             "kind": "executes",
             "line": 76,
-            "operation": "validated Python call stack",
+            "operation": "entered measured Python module; no fixture consumption credit",
             "source": "tests/h28-sol/mutation-testing/tools/runner.py",
             "target": "tests/h28-sol/mutation-testing/tools/engine.py",
-            "validated_for": "validated:tests/h28-sol/mutation-testing/tools/test_runner.py:read:f0e1621fe7a5e629d7f080268a699975c9c09982c271ea297c5cf34541bcd7f0"
+            "validated_for": "validated:tests/h28-sol/mutation-testing/tools/test_runner.py:module:fdb58115485f501b8ea6bf3cca29441082947177cf53bf9c027629e22b22f197"
           }
         ],
         "entry": {
@@ -115674,16 +115685,26 @@
           "cwd": ".",
           "data_use_scope": [],
           "derived_from": "validated:tests/h28-sol/mutation-testing/tools/test_runner.py",
+          "entered_module": "tests/h28-sol/mutation-testing/tools/bulk_inputs.py",
           "kind": "validated standalone runner",
           "location": "tests/h28-sol/mutation-testing/tools/test_runner.py:1",
-          "observed_target": "tests/h28-sol/mutation-testing/tools/bulk_inputs.py",
+          "module_entry": {
+            "collector_sha256": "42027e7c42dac3912c1f8ef468a6d99bddb8075172c545b6a587692b039cff32",
+            "module_code_sha256": "a396c3a66e1107de068565d8ec41c562455a583fa0112356138e2e46df2fe365",
+            "module_frame_line": 0,
+            "python": [
+              3,
+              12,
+              14
+            ]
+          },
           "other_reads": "unresolved",
           "path": "tests/h28-sol/mutation-testing/tools/test_runner.py",
-          "purpose": "Fresh ordinary/instrumented unittest command; only separately entered measured frames qualify as helper execution. Source-loader targets have no reviewed data-fixture role.",
+          "purpose": "Fixture roles not reviewed; passing test status and IO alone do not establish data eligibility.",
           "runner_kind": "unittest",
           "source_blob": "e0a6693f200205c74aa0bbf302e6ed299190c35b"
         },
-        "root": "validated:tests/h28-sol/mutation-testing/tools/test_runner.py:read:f0e1621fe7a5e629d7f080268a699975c9c09982c271ea297c5cf34541bcd7f0"
+        "root": "validated:tests/h28-sol/mutation-testing/tools/test_runner.py:module:fdb58115485f501b8ea6bf3cca29441082947177cf53bf9c027629e22b22f197"
       },
       "search_candidates": [
         {
@@ -115722,9 +115743,6 @@
       "secondary": {
         "policy_scans": [
           "private-paths"
-        ],
-        "unreviewed_readers": [
-          "validated:tests/h28-sol/mutation-testing/tools/test_runner.py"
         ]
       },
       "unresolved": []
@@ -116173,7 +116191,7 @@
             "operation": "entered measured Python module; no fixture consumption credit",
             "source": "tests/h28-sol/mutation-testing/tools/test_runner.py",
             "target": "tests/h28-sol/mutation-testing/tools/runner.py",
-            "validated_for": "validated:tests/h28-sol/mutation-testing/tools/test_runner.py:module:8bb059e70c27866080fd7081dc532505972b4dac138604b853696b0cd4e9a8d5"
+            "validated_for": "validated:tests/h28-sol/mutation-testing/tools/test_runner.py:module:dfc25bee74de58d2514e2ea47aeb9a072327917a434c31396fb1d4a2bf973718"
           }
         ],
         "entry": {
@@ -116196,11 +116214,11 @@
           },
           "other_reads": "unresolved",
           "path": "tests/h28-sol/mutation-testing/tools/test_runner.py",
-          "purpose": "Fresh ordinary/instrumented unittest command; only separately entered measured frames qualify as helper execution. Source-loader targets have no reviewed data-fixture role.",
+          "purpose": "Fixture roles not reviewed; passing test status and IO alone do not establish data eligibility.",
           "runner_kind": "unittest",
           "source_blob": "e0a6693f200205c74aa0bbf302e6ed299190c35b"
         },
-        "root": "validated:tests/h28-sol/mutation-testing/tools/test_runner.py:module:8bb059e70c27866080fd7081dc532505972b4dac138604b853696b0cd4e9a8d5"
+        "root": "validated:tests/h28-sol/mutation-testing/tools/test_runner.py:module:dfc25bee74de58d2514e2ea47aeb9a072327917a434c31396fb1d4a2bf973718"
       },
       "search_candidates": [
         {
@@ -116239,9 +116257,6 @@
       "secondary": {
         "policy_scans": [
           "private-paths"
-        ],
-        "unreviewed_readers": [
-          "validated:tests/h28-sol/mutation-testing/tools/test_runner.py"
         ]
       },
       "unresolved": []
@@ -116637,7 +116652,7 @@
             ],
             "kind": "unittest declaration and explicit main entry",
             "main_line": 51,
-            "revision": "5b78e2313ed50233a7a8373354b0e4586fd75c9e",
+            "revision": "a83beba3351fd4dbd3e5dbf0bfc93a96ec75bf72",
             "test_contexts": [
               {
                 "code_firstlineno": 35,
@@ -116877,7 +116892,7 @@
           "location": "tests/h28-sol/mutation-testing/tools/test_runner.py:1",
           "other_reads": "unresolved",
           "path": "tests/h28-sol/mutation-testing/tools/test_runner.py",
-          "purpose": "Fresh ordinary/instrumented unittest command; only separately entered measured frames qualify as helper execution. Source-loader targets have no reviewed data-fixture role.",
+          "purpose": "Fixture roles not reviewed; passing test status and IO alone do not establish data eligibility.",
           "runner_kind": "unittest",
           "source_blob": "e0a6693f200205c74aa0bbf302e6ed299190c35b"
         },
@@ -117491,7 +117506,7 @@
             ],
             "kind": "unittest declaration and explicit main entry",
             "main_line": 233,
-            "revision": "5b78e2313ed50233a7a8373354b0e4586fd75c9e",
+            "revision": "a83beba3351fd4dbd3e5dbf0bfc93a96ec75bf72",
             "test_contexts": [
               {
                 "code_firstlineno": 11,
@@ -118965,15 +118980,15 @@
           "token": "tests/h28-sol/non-vacuity/lean/Solidity/Assurance/NonVacuityH28/FamiliesV2.lean"
         },
         {
-          "location": "scripts/g07-axiom-pins.json:69332",
+          "location": "scripts/g07-axiom-pins.json:69347",
           "token": "tests/h28-sol/non-vacuity/lean/Solidity/Assurance/NonVacuityH28/FamiliesV2.lean"
         },
         {
-          "location": "scripts/g07-axiom-pins.json:69337",
+          "location": "scripts/g07-axiom-pins.json:69352",
           "token": "tests/h28-sol/non-vacuity/lean/Solidity/Assurance/NonVacuityH28/FamiliesV2.lean"
         },
         {
-          "location": "scripts/g07-axiom-pins.json:69342",
+          "location": "scripts/g07-axiom-pins.json:69357",
           "token": "tests/h28-sol/non-vacuity/lean/Solidity/Assurance/NonVacuityH28/FamiliesV2.lean"
         }
       ],
@@ -130043,7 +130058,7 @@
             ],
             "kind": "unittest declaration and explicit main entry",
             "main_line": 92,
-            "revision": "5b78e2313ed50233a7a8373354b0e4586fd75c9e",
+            "revision": "a83beba3351fd4dbd3e5dbf0bfc93a96ec75bf72",
             "test_contexts": [
               {
                 "code_firstlineno": 18,
@@ -130132,7 +130147,7 @@
             ],
             "kind": "unittest declaration and explicit main entry",
             "main_line": 118,
-            "revision": "5b78e2313ed50233a7a8373354b0e4586fd75c9e",
+            "revision": "a83beba3351fd4dbd3e5dbf0bfc93a96ec75bf72",
             "test_contexts": [
               {
                 "code_firstlineno": 16,
@@ -134107,7 +134122,7 @@
             ],
             "kind": "unittest declaration and explicit main entry",
             "main_line": 47,
-            "revision": "5b78e2313ed50233a7a8373354b0e4586fd75c9e",
+            "revision": "a83beba3351fd4dbd3e5dbf0bfc93a96ec75bf72",
             "test_contexts": [
               {
                 "code_firstlineno": 25,
@@ -134981,7 +134996,7 @@
             ],
             "kind": "unittest declaration and explicit main entry",
             "main_line": 41,
-            "revision": "5b78e2313ed50233a7a8373354b0e4586fd75c9e",
+            "revision": "a83beba3351fd4dbd3e5dbf0bfc93a96ec75bf72",
             "test_contexts": [
               {
                 "code_firstlineno": 14,
@@ -135095,7 +135110,7 @@
             ],
             "kind": "unittest declaration and explicit main entry",
             "main_line": 42,
-            "revision": "5b78e2313ed50233a7a8373354b0e4586fd75c9e",
+            "revision": "a83beba3351fd4dbd3e5dbf0bfc93a96ec75bf72",
             "test_contexts": [
               {
                 "code_firstlineno": 14,
@@ -135301,7 +135316,7 @@
             ],
             "kind": "unittest declaration and explicit main entry",
             "main_line": 33,
-            "revision": "5b78e2313ed50233a7a8373354b0e4586fd75c9e",
+            "revision": "a83beba3351fd4dbd3e5dbf0bfc93a96ec75bf72",
             "test_contexts": [
               {
                 "code_firstlineno": 10,
@@ -135362,7 +135377,7 @@
             ],
             "kind": "unittest declaration and explicit main entry",
             "main_line": 28,
-            "revision": "5b78e2313ed50233a7a8373354b0e4586fd75c9e",
+            "revision": "a83beba3351fd4dbd3e5dbf0bfc93a96ec75bf72",
             "test_contexts": [
               {
                 "code_firstlineno": 10,
@@ -135437,7 +135452,7 @@
             ],
             "kind": "unittest declaration and explicit main entry",
             "main_line": 28,
-            "revision": "5b78e2313ed50233a7a8373354b0e4586fd75c9e",
+            "revision": "a83beba3351fd4dbd3e5dbf0bfc93a96ec75bf72",
             "test_contexts": [
               {
                 "code_firstlineno": 9,
@@ -139150,11 +139165,11 @@
           "token": "tests/h62/item1/evm-lemmas/LocationFixture.lean"
         },
         {
-          "location": "scripts/g07-axiom-pins.json:71550",
+          "location": "scripts/g07-axiom-pins.json:71565",
           "token": "tests/h62/item1/evm-lemmas/LocationFixture.lean"
         },
         {
-          "location": "scripts/g07-axiom-pins.json:71554",
+          "location": "scripts/g07-axiom-pins.json:71569",
           "token": "tests/h62/item1/evm-lemmas/LocationFixture.lean"
         },
         {
@@ -139578,7 +139593,7 @@
             ],
             "kind": "unittest declaration and explicit main entry",
             "main_line": 551,
-            "revision": "5b78e2313ed50233a7a8373354b0e4586fd75c9e",
+            "revision": "a83beba3351fd4dbd3e5dbf0bfc93a96ec75bf72",
             "test_contexts": [
               {
                 "code_firstlineno": 26,
@@ -139786,7 +139801,7 @@
             ],
             "kind": "unittest declaration and explicit main entry",
             "main_line": 119,
-            "revision": "5b78e2313ed50233a7a8373354b0e4586fd75c9e",
+            "revision": "a83beba3351fd4dbd3e5dbf0bfc93a96ec75bf72",
             "test_contexts": [
               {
                 "code_firstlineno": 21,
@@ -140831,7 +140846,7 @@
             ],
             "kind": "unittest declaration and explicit main entry",
             "main_line": 195,
-            "revision": "5b78e2313ed50233a7a8373354b0e4586fd75c9e",
+            "revision": "a83beba3351fd4dbd3e5dbf0bfc93a96ec75bf72",
             "test_contexts": [
               {
                 "code_firstlineno": 35,
@@ -143065,7 +143080,7 @@
             ],
             "kind": "unittest declaration and explicit main entry",
             "main_line": 444,
-            "revision": "5b78e2313ed50233a7a8373354b0e4586fd75c9e",
+            "revision": "a83beba3351fd4dbd3e5dbf0bfc93a96ec75bf72",
             "test_contexts": [
               {
                 "code_firstlineno": 41,
@@ -146204,8 +146219,8 @@
       "reason": "No certified consumer or content-based historical role in the current model; further runner/dynamic-path analysis required.",
       "recovery": {
         "blob": "d7ef2ad6806dcd4beb7d6c68ed65ada83ad76be6",
-        "command": "git show 4170ed9b9ce2a7b3c9ad9a29d7ced5e4f2ff03d4:tests/h62/item2/audit-bytecode-selection/value-checked-body-continuations.lean.txt",
-        "last_touch_commit": "4170ed9b9ce2a7b3c9ad9a29d7ced5e4f2ff03d4"
+        "command": "git show d68a09c87aea7a8877f5769597394a4732ef6b2f:tests/h62/item2/audit-bytecode-selection/value-checked-body-continuations.lean.txt",
+        "last_touch_commit": "d68a09c87aea7a8877f5769597394a4732ef6b2f"
       },
       "runner_chain": null,
       "search_candidates": [
@@ -150362,7 +150377,7 @@
             ],
             "kind": "unittest declaration and explicit main entry",
             "main_line": 59,
-            "revision": "5b78e2313ed50233a7a8373354b0e4586fd75c9e",
+            "revision": "a83beba3351fd4dbd3e5dbf0bfc93a96ec75bf72",
             "test_contexts": [
               {
                 "code_firstlineno": 34,
@@ -150497,7 +150512,7 @@
             ],
             "kind": "unittest declaration and explicit main entry",
             "main_line": 55,
-            "revision": "5b78e2313ed50233a7a8373354b0e4586fd75c9e",
+            "revision": "a83beba3351fd4dbd3e5dbf0bfc93a96ec75bf72",
             "test_contexts": [
               {
                 "code_firstlineno": 31,
@@ -152684,7 +152699,7 @@
             ],
             "kind": "unittest declaration and explicit main entry",
             "main_line": 231,
-            "revision": "5b78e2313ed50233a7a8373354b0e4586fd75c9e",
+            "revision": "a83beba3351fd4dbd3e5dbf0bfc93a96ec75bf72",
             "test_contexts": [
               {
                 "code_firstlineno": 17,
@@ -155212,11 +155227,11 @@
           "token": "tests/h62/item2/audit-precompiles/OsakaWitnesses.lean"
         },
         {
-          "location": "scripts/g07-axiom-pins.json:72046",
+          "location": "scripts/g07-axiom-pins.json:72061",
           "token": "tests/h62/item2/audit-precompiles/OsakaWitnesses.lean"
         },
         {
-          "location": "scripts/g07-axiom-pins.json:72047",
+          "location": "scripts/g07-axiom-pins.json:72062",
           "token": "tests/h62/item2/audit-precompiles/OsakaWitnesses.lean"
         }
       ],
@@ -155328,11 +155343,11 @@
           "token": "tests/h62/item2/audit-precompiles/PointEvalWitnesses.lean"
         },
         {
-          "location": "scripts/g07-axiom-pins.json:72103",
+          "location": "scripts/g07-axiom-pins.json:72118",
           "token": "tests/h62/item2/audit-precompiles/PointEvalWitnesses.lean"
         },
         {
-          "location": "scripts/g07-axiom-pins.json:72107",
+          "location": "scripts/g07-axiom-pins.json:72122",
           "token": "tests/h62/item2/audit-precompiles/PointEvalWitnesses.lean"
         }
       ],
@@ -159843,15 +159858,15 @@
           "token": "tests/h62/item2/audit-v07-lowering/UnsignedFixture.lean"
         },
         {
-          "location": "scripts/g07-axiom-pins.json:72179",
+          "location": "scripts/g07-axiom-pins.json:72194",
           "token": "tests/h62/item2/audit-v07-lowering/UnsignedFixture.lean"
         },
         {
-          "location": "scripts/g07-axiom-pins.json:72180",
+          "location": "scripts/g07-axiom-pins.json:72195",
           "token": "tests/h62/item2/audit-v07-lowering/UnsignedFixture.lean"
         },
         {
-          "location": "scripts/g07-axiom-pins.json:72181",
+          "location": "scripts/g07-axiom-pins.json:72196",
           "token": "tests/h62/item2/audit-v07-lowering/UnsignedFixture.lean"
         }
       ],
@@ -160451,7 +160466,7 @@
           "token": "tests/h62/item2/audit-v08-adapters/LocalGuardSuccess.lean"
         },
         {
-          "location": "scripts/g07-axiom-pins.json:72189",
+          "location": "scripts/g07-axiom-pins.json:72204",
           "token": "tests/h62/item2/audit-v08-adapters/LocalGuardSuccess.lean"
         }
       ],
@@ -161799,7 +161814,7 @@
           "token": "tests/h62/item2/audit-v09-passes/CompilerCallScopeWitness.lean"
         },
         {
-          "location": "scripts/g07-axiom-pins.json:72358",
+          "location": "scripts/g07-axiom-pins.json:72373",
           "token": "tests/h62/item2/audit-v09-passes/CompilerCallScopeWitness.lean"
         }
       ],
@@ -162081,15 +162096,15 @@
           "token": "tests/h62/item2/audit-v09-passes/JoinedMemoryWitness.lean"
         },
         {
-          "location": "scripts/g07-axiom-pins.json:72839",
+          "location": "scripts/g07-axiom-pins.json:72854",
           "token": "tests/h62/item2/audit-v09-passes/JoinedMemoryWitness.lean"
         },
         {
-          "location": "scripts/g07-axiom-pins.json:72844",
+          "location": "scripts/g07-axiom-pins.json:72859",
           "token": "tests/h62/item2/audit-v09-passes/JoinedMemoryWitness.lean"
         },
         {
-          "location": "scripts/g07-axiom-pins.json:72849",
+          "location": "scripts/g07-axiom-pins.json:72864",
           "token": "tests/h62/item2/audit-v09-passes/JoinedMemoryWitness.lean"
         }
       ],
@@ -163299,7 +163314,7 @@
           "token": "tests/h62/item2/audit-v09-passes/SliceCapacityCertificates.lean"
         },
         {
-          "location": "scripts/g07-axiom-pins.json:74018",
+          "location": "scripts/g07-axiom-pins.json:74033",
           "token": "tests/h62/item2/audit-v09-passes/SliceCapacityCertificates.lean"
         }
       ],
@@ -163357,7 +163372,7 @@
           "token": "tests/h62/item2/audit-v09-passes/SourceExpressionContext.lean"
         },
         {
-          "location": "scripts/g07-axiom-pins.json:74039",
+          "location": "scripts/g07-axiom-pins.json:74054",
           "token": "tests/h62/item2/audit-v09-passes/SourceExpressionContext.lean"
         }
       ],
@@ -164285,7 +164300,7 @@
             ],
             "kind": "unittest declaration and explicit main entry",
             "main_line": 183,
-            "revision": "5b78e2313ed50233a7a8373354b0e4586fd75c9e",
+            "revision": "a83beba3351fd4dbd3e5dbf0bfc93a96ec75bf72",
             "test_contexts": [
               {
                 "code_firstlineno": 23,
@@ -164569,7 +164584,7 @@
             ],
             "kind": "unittest declaration and explicit main entry",
             "main_line": 70,
-            "revision": "5b78e2313ed50233a7a8373354b0e4586fd75c9e",
+            "revision": "a83beba3351fd4dbd3e5dbf0bfc93a96ec75bf72",
             "test_contexts": [
               {
                 "code_firstlineno": 14,
@@ -164691,7 +164706,7 @@
             ],
             "kind": "unittest declaration and explicit main entry",
             "main_line": 47,
-            "revision": "5b78e2313ed50233a7a8373354b0e4586fd75c9e",
+            "revision": "a83beba3351fd4dbd3e5dbf0bfc93a96ec75bf72",
             "test_contexts": [
               {
                 "code_firstlineno": 12,
@@ -164773,7 +164788,7 @@
             ],
             "kind": "unittest declaration and explicit main entry",
             "main_line": 119,
-            "revision": "5b78e2313ed50233a7a8373354b0e4586fd75c9e",
+            "revision": "a83beba3351fd4dbd3e5dbf0bfc93a96ec75bf72",
             "test_contexts": [
               {
                 "code_firstlineno": 16,
@@ -165107,15 +165122,15 @@
           "token": "tests/h62/item2/audit-v10-storage/ConditionalH24V2Controls.lean"
         },
         {
-          "location": "scripts/g07-axiom-pins.json:74419",
+          "location": "scripts/g07-axiom-pins.json:74434",
           "token": "tests/h62/item2/audit-v10-storage/ConditionalH24V2Controls.lean"
         },
         {
-          "location": "scripts/g07-axiom-pins.json:74424",
+          "location": "scripts/g07-axiom-pins.json:74439",
           "token": "tests/h62/item2/audit-v10-storage/ConditionalH24V2Controls.lean"
         },
         {
-          "location": "scripts/g07-axiom-pins.json:74429",
+          "location": "scripts/g07-axiom-pins.json:74444",
           "token": "tests/h62/item2/audit-v10-storage/ConditionalH24V2Controls.lean"
         }
       ],
@@ -165277,15 +165292,15 @@
           "token": "tests/h62/item2/audit-v10-storage/H24V2Controls.lean"
         },
         {
-          "location": "scripts/g07-axiom-pins.json:74530",
+          "location": "scripts/g07-axiom-pins.json:74545",
           "token": "tests/h62/item2/audit-v10-storage/H24V2Controls.lean"
         },
         {
-          "location": "scripts/g07-axiom-pins.json:74535",
+          "location": "scripts/g07-axiom-pins.json:74550",
           "token": "tests/h62/item2/audit-v10-storage/H24V2Controls.lean"
         },
         {
-          "location": "scripts/g07-axiom-pins.json:74540",
+          "location": "scripts/g07-axiom-pins.json:74555",
           "token": "tests/h62/item2/audit-v10-storage/H24V2Controls.lean"
         }
       ],
@@ -165679,15 +165694,15 @@
           "token": "tests/h62/item2/audit-v10-storage/SourceAstCorrespondenceControls.lean"
         },
         {
-          "location": "scripts/g07-axiom-pins.json:74783",
+          "location": "scripts/g07-axiom-pins.json:74798",
           "token": "tests/h62/item2/audit-v10-storage/SourceAstCorrespondenceControls.lean"
         },
         {
-          "location": "scripts/g07-axiom-pins.json:74786",
+          "location": "scripts/g07-axiom-pins.json:74801",
           "token": "tests/h62/item2/audit-v10-storage/SourceAstCorrespondenceControls.lean"
         },
         {
-          "location": "scripts/g07-axiom-pins.json:74787",
+          "location": "scripts/g07-axiom-pins.json:74802",
           "token": "tests/h62/item2/audit-v10-storage/SourceAstCorrespondenceControls.lean"
         }
       ],
@@ -165945,7 +165960,7 @@
           "token": "tests/h62/item2/audit-v10-storage/SourceAstUnitResolutionControls.lean"
         },
         {
-          "location": "scripts/g07-axiom-pins.json:74793",
+          "location": "scripts/g07-axiom-pins.json:74808",
           "token": "tests/h62/item2/audit-v10-storage/SourceAstUnitResolutionControls.lean"
         }
       ],
@@ -166115,11 +166130,11 @@
           "token": "tests/h62/item2/audit-v10-storage/TargetInputWitnesses.lean"
         },
         {
-          "location": "scripts/g07-axiom-pins.json:74866",
+          "location": "scripts/g07-axiom-pins.json:74881",
           "token": "tests/h62/item2/audit-v10-storage/TargetInputWitnesses.lean"
         },
         {
-          "location": "scripts/g07-axiom-pins.json:74871",
+          "location": "scripts/g07-axiom-pins.json:74886",
           "token": "tests/h62/item2/audit-v10-storage/TargetInputWitnesses.lean"
         }
       ],
@@ -168835,7 +168850,7 @@
             ],
             "kind": "unittest declaration and explicit main entry",
             "main_line": 287,
-            "revision": "5b78e2313ed50233a7a8373354b0e4586fd75c9e",
+            "revision": "a83beba3351fd4dbd3e5dbf0bfc93a96ec75bf72",
             "test_contexts": [
               {
                 "code_firstlineno": 25,
@@ -169619,7 +169634,7 @@
             ],
             "kind": "unittest declaration and explicit main entry",
             "main_line": 107,
-            "revision": "5b78e2313ed50233a7a8373354b0e4586fd75c9e",
+            "revision": "a83beba3351fd4dbd3e5dbf0bfc93a96ec75bf72",
             "test_contexts": [
               {
                 "code_firstlineno": 14,
@@ -170074,11 +170089,11 @@
           "token": "tests/h62/item4/generic-p10/GenericP10/ByteFixture.lean"
         },
         {
-          "location": "scripts/g07-axiom-pins.json:75281",
+          "location": "scripts/g07-axiom-pins.json:75296",
           "token": "tests/h62/item4/generic-p10/GenericP10/ByteFixture.lean"
         },
         {
-          "location": "scripts/g07-axiom-pins.json:75286",
+          "location": "scripts/g07-axiom-pins.json:75301",
           "token": "tests/h62/item4/generic-p10/GenericP10/ByteFixture.lean"
         }
       ],
@@ -170644,7 +170659,7 @@
             ],
             "kind": "unittest declaration and explicit main entry",
             "main_line": 59,
-            "revision": "5b78e2313ed50233a7a8373354b0e4586fd75c9e",
+            "revision": "a83beba3351fd4dbd3e5dbf0bfc93a96ec75bf72",
             "test_contexts": [
               {
                 "code_firstlineno": 17,
@@ -170812,7 +170827,7 @@
             ],
             "kind": "unittest declaration and explicit main entry",
             "main_line": 38,
-            "revision": "5b78e2313ed50233a7a8373354b0e4586fd75c9e",
+            "revision": "a83beba3351fd4dbd3e5dbf0bfc93a96ec75bf72",
             "test_contexts": [
               {
                 "code_firstlineno": 13,
@@ -170901,7 +170916,7 @@
             ],
             "kind": "unittest declaration and explicit main entry",
             "main_line": 40,
-            "revision": "5b78e2313ed50233a7a8373354b0e4586fd75c9e",
+            "revision": "a83beba3351fd4dbd3e5dbf0bfc93a96ec75bf72",
             "test_contexts": [
               {
                 "code_firstlineno": 14,
@@ -172583,15 +172598,15 @@
           "token": "tests/h62/item4/generic-storageops/AppendFixtures.lean"
         },
         {
-          "location": "scripts/g07-axiom-pins.json:75296",
+          "location": "scripts/g07-axiom-pins.json:75311",
           "token": "tests/h62/item4/generic-storageops/AppendFixtures.lean"
         },
         {
-          "location": "scripts/g07-axiom-pins.json:75297",
+          "location": "scripts/g07-axiom-pins.json:75312",
           "token": "tests/h62/item4/generic-storageops/AppendFixtures.lean"
         },
         {
-          "location": "scripts/g07-axiom-pins.json:75298",
+          "location": "scripts/g07-axiom-pins.json:75313",
           "token": "tests/h62/item4/generic-storageops/AppendFixtures.lean"
         }
       ],
@@ -174330,7 +174345,7 @@
             ],
             "kind": "unittest declaration and explicit main entry",
             "main_line": 483,
-            "revision": "5b78e2313ed50233a7a8373354b0e4586fd75c9e",
+            "revision": "a83beba3351fd4dbd3e5dbf0bfc93a96ec75bf72",
             "test_contexts": [
               {
                 "code_firstlineno": 46,
@@ -175280,7 +175295,7 @@
           "token": "tests/h62/item6/migrate-backend/OpcodeTernaryDependency.lean"
         },
         {
-          "location": "scripts/g07-axiom-pins.json:75300",
+          "location": "scripts/g07-axiom-pins.json:75315",
           "token": "tests/h62/item6/migrate-backend/OpcodeTernaryDependency.lean"
         }
       ],
@@ -175338,7 +175353,7 @@
           "token": "tests/h62/item6/migrate-backend/TernaryDependency.lean"
         },
         {
-          "location": "scripts/g07-axiom-pins.json:75301",
+          "location": "scripts/g07-axiom-pins.json:75316",
           "token": "tests/h62/item6/migrate-backend/TernaryDependency.lean"
         }
       ],
@@ -176309,7 +176324,7 @@
             ],
             "kind": "unittest declaration and explicit main entry",
             "main_line": 41,
-            "revision": "5b78e2313ed50233a7a8373354b0e4586fd75c9e",
+            "revision": "a83beba3351fd4dbd3e5dbf0bfc93a96ec75bf72",
             "test_contexts": [
               {
                 "code_firstlineno": 9,
@@ -177643,7 +177658,7 @@
             ],
             "kind": "unittest declaration and explicit main entry",
             "main_line": 37,
-            "revision": "5b78e2313ed50233a7a8373354b0e4586fd75c9e",
+            "revision": "a83beba3351fd4dbd3e5dbf0bfc93a96ec75bf72",
             "test_contexts": [
               {
                 "code_firstlineno": 20,
@@ -178724,7 +178739,7 @@
             ],
             "kind": "unittest declaration and explicit main entry",
             "main_line": 28,
-            "revision": "5b78e2313ed50233a7a8373354b0e4586fd75c9e",
+            "revision": "a83beba3351fd4dbd3e5dbf0bfc93a96ec75bf72",
             "test_contexts": [
               {
                 "code_firstlineno": 10,
@@ -178813,7 +178828,7 @@
             ],
             "kind": "unittest declaration and explicit main entry",
             "main_line": 31,
-            "revision": "5b78e2313ed50233a7a8373354b0e4586fd75c9e",
+            "revision": "a83beba3351fd4dbd3e5dbf0bfc93a96ec75bf72",
             "test_contexts": [
               {
                 "code_firstlineno": 9,
@@ -179131,7 +179146,7 @@
             ],
             "kind": "unittest declaration and explicit main entry",
             "main_line": 87,
-            "revision": "5b78e2313ed50233a7a8373354b0e4586fd75c9e",
+            "revision": "a83beba3351fd4dbd3e5dbf0bfc93a96ec75bf72",
             "test_contexts": [
               {
                 "code_firstlineno": 17,
@@ -182344,7 +182359,7 @@
             ],
             "kind": "unittest declaration and explicit main entry",
             "main_line": 32,
-            "revision": "5b78e2313ed50233a7a8373354b0e4586fd75c9e",
+            "revision": "a83beba3351fd4dbd3e5dbf0bfc93a96ec75bf72",
             "test_contexts": [
               {
                 "code_firstlineno": 8,
@@ -182721,7 +182736,7 @@
             ],
             "kind": "unittest declaration and explicit main entry",
             "main_line": 71,
-            "revision": "5b78e2313ed50233a7a8373354b0e4586fd75c9e",
+            "revision": "a83beba3351fd4dbd3e5dbf0bfc93a96ec75bf72",
             "test_contexts": [
               {
                 "code_firstlineno": 15,
@@ -183594,7 +183609,7 @@
             ],
             "kind": "unittest declaration and explicit main entry",
             "main_line": 32,
-            "revision": "5b78e2313ed50233a7a8373354b0e4586fd75c9e",
+            "revision": "a83beba3351fd4dbd3e5dbf0bfc93a96ec75bf72",
             "test_contexts": [
               {
                 "code_firstlineno": 5,
@@ -214940,7 +214955,7 @@
             ],
             "kind": "unittest declaration and explicit main entry",
             "main_line": 104,
-            "revision": "5b78e2313ed50233a7a8373354b0e4586fd75c9e",
+            "revision": "a83beba3351fd4dbd3e5dbf0bfc93a96ec75bf72",
             "test_contexts": [
               {
                 "code_firstlineno": 16,
@@ -215218,7 +215233,7 @@
             ],
             "kind": "unittest declaration and explicit main entry",
             "main_line": 93,
-            "revision": "5b78e2313ed50233a7a8373354b0e4586fd75c9e",
+            "revision": "a83beba3351fd4dbd3e5dbf0bfc93a96ec75bf72",
             "test_contexts": [
               {
                 "code_firstlineno": 16,
@@ -215527,7 +215542,7 @@
             ],
             "kind": "unittest declaration and explicit main entry",
             "main_line": 41,
-            "revision": "5b78e2313ed50233a7a8373354b0e4586fd75c9e",
+            "revision": "a83beba3351fd4dbd3e5dbf0bfc93a96ec75bf72",
             "test_contexts": [
               {
                 "code_firstlineno": 12,
@@ -215796,7 +215811,7 @@
             ],
             "kind": "unittest declaration and explicit main entry",
             "main_line": 46,
-            "revision": "5b78e2313ed50233a7a8373354b0e4586fd75c9e",
+            "revision": "a83beba3351fd4dbd3e5dbf0bfc93a96ec75bf72",
             "test_contexts": [
               {
                 "code_firstlineno": 10,
@@ -216384,7 +216399,7 @@
             ],
             "kind": "unittest declaration and explicit main entry",
             "main_line": 101,
-            "revision": "5b78e2313ed50233a7a8373354b0e4586fd75c9e",
+            "revision": "a83beba3351fd4dbd3e5dbf0bfc93a96ec75bf72",
             "test_contexts": [
               {
                 "code_firstlineno": 11,
@@ -216766,7 +216781,7 @@
             ],
             "kind": "unittest declaration and explicit main entry",
             "main_line": 131,
-            "revision": "5b78e2313ed50233a7a8373354b0e4586fd75c9e",
+            "revision": "a83beba3351fd4dbd3e5dbf0bfc93a96ec75bf72",
             "test_contexts": [
               {
                 "code_firstlineno": 10,
@@ -217168,7 +217183,7 @@
             ],
             "kind": "unittest declaration and explicit main entry",
             "main_line": 41,
-            "revision": "5b78e2313ed50233a7a8373354b0e4586fd75c9e",
+            "revision": "a83beba3351fd4dbd3e5dbf0bfc93a96ec75bf72",
             "test_contexts": [
               {
                 "code_firstlineno": 10,
@@ -217805,7 +217820,7 @@
             ],
             "kind": "unittest declaration and explicit main entry",
             "main_line": 232,
-            "revision": "5b78e2313ed50233a7a8373354b0e4586fd75c9e",
+            "revision": "a83beba3351fd4dbd3e5dbf0bfc93a96ec75bf72",
             "test_contexts": [
               {
                 "code_firstlineno": 16,
@@ -218268,7 +218283,7 @@
             ],
             "kind": "unittest declaration and explicit main entry",
             "main_line": 149,
-            "revision": "5b78e2313ed50233a7a8373354b0e4586fd75c9e",
+            "revision": "a83beba3351fd4dbd3e5dbf0bfc93a96ec75bf72",
             "test_contexts": [
               {
                 "code_firstlineno": 32,
@@ -218484,7 +218499,7 @@
             ],
             "kind": "unittest declaration and explicit main entry",
             "main_line": 261,
-            "revision": "5b78e2313ed50233a7a8373354b0e4586fd75c9e",
+            "revision": "a83beba3351fd4dbd3e5dbf0bfc93a96ec75bf72",
             "test_contexts": [
               {
                 "code_firstlineno": 19,
@@ -218843,7 +218858,7 @@
             ],
             "kind": "unittest declaration and explicit main entry",
             "main_line": 119,
-            "revision": "5b78e2313ed50233a7a8373354b0e4586fd75c9e",
+            "revision": "a83beba3351fd4dbd3e5dbf0bfc93a96ec75bf72",
             "test_contexts": [
               {
                 "code_firstlineno": 13,
@@ -219015,7 +219030,7 @@
             ],
             "kind": "unittest declaration and explicit main entry",
             "main_line": 169,
-            "revision": "5b78e2313ed50233a7a8373354b0e4586fd75c9e",
+            "revision": "a83beba3351fd4dbd3e5dbf0bfc93a96ec75bf72",
             "test_contexts": [
               {
                 "code_firstlineno": 14,
@@ -219411,7 +219426,7 @@
             ],
             "kind": "unittest declaration and explicit main entry",
             "main_line": 116,
-            "revision": "5b78e2313ed50233a7a8373354b0e4586fd75c9e",
+            "revision": "a83beba3351fd4dbd3e5dbf0bfc93a96ec75bf72",
             "test_contexts": [
               {
                 "code_firstlineno": 35,
@@ -219787,7 +219802,7 @@
             ],
             "kind": "unittest declaration and explicit main entry",
             "main_line": 230,
-            "revision": "5b78e2313ed50233a7a8373354b0e4586fd75c9e",
+            "revision": "a83beba3351fd4dbd3e5dbf0bfc93a96ec75bf72",
             "test_contexts": [
               {
                 "code_firstlineno": 23,
@@ -220930,7 +220945,7 @@
             ],
             "kind": "unittest declaration and explicit main entry",
             "main_line": 63,
-            "revision": "5b78e2313ed50233a7a8373354b0e4586fd75c9e",
+            "revision": "a83beba3351fd4dbd3e5dbf0bfc93a96ec75bf72",
             "test_contexts": [
               {
                 "code_firstlineno": 25,
@@ -229477,7 +229492,7 @@
         "edges": [
           {
             "kind": "executes",
-            "line": 4173,
+            "line": 4174,
             "operation": "Lean import",
             "repository_lean": true,
             "source": "Solidity.lean",
@@ -229812,7 +229827,7 @@
         "edges": [
           {
             "kind": "executes",
-            "line": 4174,
+            "line": 4175,
             "operation": "Lean import",
             "repository_lean": true,
             "source": "Solidity.lean",
@@ -230130,7 +230145,7 @@
         "edges": [
           {
             "kind": "executes",
-            "line": 4174,
+            "line": 4175,
             "operation": "Lean import",
             "repository_lean": true,
             "source": "Solidity.lean",
@@ -231729,7 +231744,7 @@
         "edges": [
           {
             "kind": "executes",
-            "line": 4174,
+            "line": 4175,
             "operation": "Lean import",
             "repository_lean": true,
             "source": "Solidity.lean",
@@ -233152,7 +233167,7 @@
         "edges": [
           {
             "kind": "executes",
-            "line": 4174,
+            "line": 4175,
             "operation": "Lean import",
             "repository_lean": true,
             "source": "Solidity.lean",
@@ -235984,7 +235999,7 @@
         "edges": [
           {
             "kind": "executes",
-            "line": 4175,
+            "line": 4176,
             "operation": "Lean import",
             "repository_lean": true,
             "source": "Solidity.lean",
@@ -236125,7 +236140,7 @@
         "edges": [
           {
             "kind": "executes",
-            "line": 4175,
+            "line": 4176,
             "operation": "Lean import",
             "repository_lean": true,
             "source": "Solidity.lean",
@@ -236526,7 +236541,7 @@
         "edges": [
           {
             "kind": "executes",
-            "line": 4173,
+            "line": 4174,
             "operation": "Lean import",
             "repository_lean": true,
             "source": "Solidity.lean",
@@ -236811,7 +236826,7 @@
         "edges": [
           {
             "kind": "executes",
-            "line": 4176,
+            "line": 4177,
             "operation": "Lean import",
             "repository_lean": true,
             "source": "Solidity.lean",
@@ -241646,7 +241661,7 @@
             ],
             "kind": "unittest declaration and explicit main entry",
             "main_line": 46,
-            "revision": "5b78e2313ed50233a7a8373354b0e4586fd75c9e",
+            "revision": "a83beba3351fd4dbd3e5dbf0bfc93a96ec75bf72",
             "test_contexts": [
               {
                 "code_firstlineno": 7,
@@ -243313,7 +243328,7 @@
             ],
             "kind": "unittest declaration and explicit main entry",
             "main_line": 136,
-            "revision": "5b78e2313ed50233a7a8373354b0e4586fd75c9e",
+            "revision": "a83beba3351fd4dbd3e5dbf0bfc93a96ec75bf72",
             "test_contexts": [
               {
                 "code_firstlineno": 14,
@@ -244543,11 +244558,11 @@
           "token": "tests/upstream/ByteLiterals.lean"
         },
         {
-          "location": "scripts/g07-axiom-pins.json:79137",
+          "location": "scripts/g07-axiom-pins.json:79152",
           "token": "tests/upstream/ByteLiterals.lean"
         },
         {
-          "location": "scripts/g07-axiom-pins.json:79138",
+          "location": "scripts/g07-axiom-pins.json:79153",
           "token": "tests/upstream/ByteLiterals.lean"
         }
       ],
@@ -244721,7 +244736,7 @@
           "token": "tests/upstream/DeclarationSourceValidation.lean"
         },
         {
-          "location": "scripts/g07-axiom-pins.json:79146",
+          "location": "scripts/g07-axiom-pins.json:79161",
           "token": "tests/upstream/DeclarationSourceValidation.lean"
         }
       ],
@@ -277943,7 +277958,7 @@
           "token": "tests/v14-constructor/BaseAxioms.lean"
         },
         {
-          "location": "scripts/g07-axiom-pins.json:79274",
+          "location": "scripts/g07-axiom-pins.json:79289",
           "token": "tests/v14-constructor/BaseAxioms.lean"
         }
       ],
@@ -277993,15 +278008,15 @@
           "token": "tests/v14-constructor/FailureAxioms.lean"
         },
         {
-          "location": "scripts/g07-axiom-pins.json:79304",
+          "location": "scripts/g07-axiom-pins.json:79319",
           "token": "tests/v14-constructor/FailureAxioms.lean"
         },
         {
-          "location": "scripts/g07-axiom-pins.json:79309",
+          "location": "scripts/g07-axiom-pins.json:79324",
           "token": "tests/v14-constructor/FailureAxioms.lean"
         },
         {
-          "location": "scripts/g07-axiom-pins.json:79314",
+          "location": "scripts/g07-axiom-pins.json:79329",
           "token": "tests/v14-constructor/FailureAxioms.lean"
         }
       ],
@@ -278055,11 +278070,11 @@
           "token": "tests/v14-constructor/FreshnessAxioms.lean"
         },
         {
-          "location": "scripts/g07-axiom-pins.json:79324",
+          "location": "scripts/g07-axiom-pins.json:79339",
           "token": "tests/v14-constructor/FreshnessAxioms.lean"
         },
         {
-          "location": "scripts/g07-axiom-pins.json:79329",
+          "location": "scripts/g07-axiom-pins.json:79344",
           "token": "tests/v14-constructor/FreshnessAxioms.lean"
         }
       ],
@@ -278113,11 +278128,11 @@
           "token": "tests/v14-constructor/InitializationAxioms.lean"
         },
         {
-          "location": "scripts/g07-axiom-pins.json:79349",
+          "location": "scripts/g07-axiom-pins.json:79364",
           "token": "tests/v14-constructor/InitializationAxioms.lean"
         },
         {
-          "location": "scripts/g07-axiom-pins.json:79354",
+          "location": "scripts/g07-axiom-pins.json:79369",
           "token": "tests/v14-constructor/InitializationAxioms.lean"
         }
       ],
@@ -278171,11 +278186,11 @@
           "token": "tests/v14-constructor/LinkIdentityAxioms.lean"
         },
         {
-          "location": "scripts/g07-axiom-pins.json:79374",
+          "location": "scripts/g07-axiom-pins.json:79389",
           "token": "tests/v14-constructor/LinkIdentityAxioms.lean"
         },
         {
-          "location": "scripts/g07-axiom-pins.json:79379",
+          "location": "scripts/g07-axiom-pins.json:79394",
           "token": "tests/v14-constructor/LinkIdentityAxioms.lean"
         }
       ],
@@ -278229,11 +278244,11 @@
           "token": "tests/v14-constructor/PatchOrderAxioms.lean"
         },
         {
-          "location": "scripts/g07-axiom-pins.json:79397",
+          "location": "scripts/g07-axiom-pins.json:79412",
           "token": "tests/v14-constructor/PatchOrderAxioms.lean"
         },
         {
-          "location": "scripts/g07-axiom-pins.json:79402",
+          "location": "scripts/g07-axiom-pins.json:79417",
           "token": "tests/v14-constructor/PatchOrderAxioms.lean"
         }
       ],
@@ -278283,15 +278298,15 @@
           "token": "tests/v14-constructor/StorageFailureAxioms.lean"
         },
         {
-          "location": "scripts/g07-axiom-pins.json:79419",
+          "location": "scripts/g07-axiom-pins.json:79434",
           "token": "tests/v14-constructor/StorageFailureAxioms.lean"
         },
         {
-          "location": "scripts/g07-axiom-pins.json:79424",
+          "location": "scripts/g07-axiom-pins.json:79439",
           "token": "tests/v14-constructor/StorageFailureAxioms.lean"
         },
         {
-          "location": "scripts/g07-axiom-pins.json:79429",
+          "location": "scripts/g07-axiom-pins.json:79444",
           "token": "tests/v14-constructor/StorageFailureAxioms.lean"
         }
       ],
@@ -278623,15 +278638,15 @@
           "token": "tests/v14-help/IntegerReadBoundaryAxioms.lean"
         },
         {
-          "location": "scripts/g07-axiom-pins.json:79439",
+          "location": "scripts/g07-axiom-pins.json:79454",
           "token": "tests/v14-help/IntegerReadBoundaryAxioms.lean"
         },
         {
-          "location": "scripts/g07-axiom-pins.json:79440",
+          "location": "scripts/g07-axiom-pins.json:79455",
           "token": "tests/v14-help/IntegerReadBoundaryAxioms.lean"
         },
         {
-          "location": "scripts/g07-axiom-pins.json:79445",
+          "location": "scripts/g07-axiom-pins.json:79460",
           "token": "tests/v14-help/IntegerReadBoundaryAxioms.lean"
         }
       ],
@@ -282445,7 +282460,7 @@
             ],
             "kind": "unittest declaration and explicit main entry",
             "main_line": 61,
-            "revision": "5b78e2313ed50233a7a8373354b0e4586fd75c9e",
+            "revision": "a83beba3351fd4dbd3e5dbf0bfc93a96ec75bf72",
             "test_contexts": [
               {
                 "code_firstlineno": 15,
@@ -288752,9 +288767,9 @@
     "evidence": 377,
     "keep": 1106,
     "orphan": 0,
-    "paths": 5596,
+    "paths": 5597,
     "regenerable": 0,
-    "unresolved": 4113
+    "unresolved": 4114
   },
   "universe": [
     "tests/",
