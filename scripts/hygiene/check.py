@@ -12,7 +12,7 @@ Rules (tracked Git content of the head commit; the working tree is not read):
           added or changed counts every newline byte of its new content. An exact (100%) rename
           adds nothing. There are no exceptions to this rule.
   paths   no tracked path (Lean paths included) has a segment naming a process or batch ID.
-          A segment is split into tokens at '-', '_', '.', '+' and spaces; it offends when a
+          A segment is split into tokens at every non-alphanumeric character; it offends when a
           token is h<digits>, g<digits>, v<digits> or item<digits> (any case), when it starts
           with 'roadmap-' or 'roadmap_' (any case), or, for a directory segment only, when it
           contains '-2026' followed by four digits and no fifth digit (a dated directory).
@@ -43,7 +43,7 @@ LIMIT_BYTES = 200 * 1024
 LIMIT_LINES = 20000
 ALLOW = "scripts/hygiene/allow.json"
 ZERO = "0" * 40
-TOKEN = re.compile(r"[-_.+ ]+")
+TOKEN = re.compile(r"[^A-Za-z0-9]+")
 ID_TOKEN = re.compile(r"(?:h|g|v|item)[0-9]+", re.I)
 ROADMAP = re.compile(r"roadmap[-_]", re.I)
 DATED_DIR = re.compile(r"-2026[0-9]{4}(?![0-9])")
@@ -83,14 +83,14 @@ def offending_segment(path):
 
 
 def tree(commit):
-    """{path: (sha, size)} of the blobs of `commit` (submodules skipped)."""
+    """{path: (sha, size)} of the blobs and gitlinks (size 0) of `commit`."""
     out, res = git("ls-tree", "-r", "-l", "-z", "--full-tree", commit), {}
     for rec in out.split(b"\0"):
         if not rec: continue
         meta, path = rec.split(b"\t", 1)
         _, typ, sha, size = meta.split()
-        if typ == b"blob":
-            res[path.decode("utf-8", "surrogateescape")] = (sha.decode(), int(size))
+        if typ in (b"blob", b"commit"):
+            res[path.decode("utf-8", "surrogateescape")] = (sha.decode(), int(size) if typ == b"blob" else 0)
     return res
 
 
@@ -187,6 +187,8 @@ def check_allow_history(base, head):
         if not line: continue
         c, *parents = line.split()
         for p in parents:
+            # A merge parent that predates allow.json inherits it from a parent that has one.
+            if blob.get(p) is None and any(blob.get(q) is not None for q in parents): continue
             if blob.get(c) != blob.get(p):
                 bad += ratchet(c, p, allow(c), allow(p), f"commit {c[:12]} (vs parent {p[:12]})")
     bad += ratchet(head, base, allow(head), allow(base), f"head {head[:12]} (vs base {base[:12]})")
@@ -285,6 +287,7 @@ def main(argv):
     ap.add_argument("mode", nargs="?", default="check", choices=["check", "seed"])
     ap.add_argument("--base"); ap.add_argument("--head", default="HEAD"); ap.add_argument("--rev")
     a = ap.parse_args(argv)
+    for f in (sys.stdout, sys.stderr): f.reconfigure(errors="backslashreplace")
     try:
         if git("rev-parse", "--is-shallow-repository").strip() != b"false":
             raise SetupError("shallow clone: the ratchet needs full history (git fetch --unshallow origin)")

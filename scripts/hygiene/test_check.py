@@ -207,11 +207,11 @@ class Paths(unittest.TestCase):
         "docs/notes.v2.md": "notes.v2.md", "a/item5": "item5", "tests/ITEM12/x": "ITEM12",
         "docs/roadmap-g00-scope.md": "roadmap-g00-scope.md", "Roadmap_x/y": "Roadmap_x",
         "tests/directruntime-20261104/x": "directruntime-20261104",
-        "a/run-20261105T1200Z/x": "run-20261105T1200Z",
+        "a/run-20261105T1200Z/x": "run-20261105T1200Z", "a/x~h3/y": "x~h3",
     }
     GOOD = ["h2o.txt", "a/ipv6/x", "items5/x", "vector/x", "Solidity/FrozenV1.lean", "roadmaps-x/y",
             "docs/roadmap.md", "a/x-202611040/y", "notes-20261104.md", "a/x-2025110/y", "sha256.txt",
-            "a/G18Graph.lean", "item/x", "h/x", "a/hv2/x", "a/v/x", "x-2026110/y"]
+            "a/G18Graph.lean", "a/node~h3x/y", "item/x", "h/x", "a/hv2/x", "a/v/x", "x-2026110/y"]
 
     def test_families(self):
         for p, seg in self.BAD.items():
@@ -321,6 +321,16 @@ class AllowRatchet(Base):
         self.r.git("checkout", "-q", "-b", "lane", self.intro)
         self.r.git("merge", "-q", "--no-edit", "-X", "theirs", "other")
         self.fails("changes the seed")
+
+    def test_merge_of_branch_older_than_allowlist_passes(self):
+        self.r.git("checkout", "-q", "-b", "old", self.base); self.r.commit({"old.txt": "x\n"})
+        self.r.git("checkout", "-q", "main"); self.r.git("merge", "-q", "--no-edit", "old")
+        self.ok()
+
+    def test_new_gitlink_offender_fails(self):
+        self.r.git("update-index", "--add", "--cacheinfo", f"160000,{self.base},tests/h99")
+        self.r.git("commit", "-q", "-m", "gitlink")
+        self.fails("'tests/h99'")
 
     def test_merge_of_master_into_lane_passes(self):
         self.r.git("checkout", "-q", "-b", "lane"); self.r.commit({"lane.txt": "x\n"})
