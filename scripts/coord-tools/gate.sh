@@ -97,8 +97,9 @@ else
   run_gate layers node scripts/check-layers.mjs
   run_gate private-paths bash scripts/check-private-paths.sh
   run_gate evidence-files bash scripts/check-evidence-files.sh
-  # CI's `checks` job runs this same script (.github/workflows/lean.yml), so a
-  # tree that passes the gate cannot turn `checks` red.
+  # Every check CI runs without a full build (lean.yml `checks`, trust.yml,
+  # prose-budget.yml); CI's `checks` job runs this same script. What the gate
+  # does not run is listed with its reason in scripts/ci/ci-only.tsv.
   run_gate checks-fast bash scripts/ci/checks-fast.sh
   [ "$failed" -eq 0 ] || exit "$failed"
   run_gate build-touched build_touched

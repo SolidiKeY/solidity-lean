@@ -1,0 +1,33 @@
+# CI steps the lane gate (scripts/coord-tools/gate.sh touched -> scripts/ci/checks-fast.sh) does not run.
+# workflow	job	step	reason. Checked by scripts/ci/check-ci-coverage.py (checks-fast: ci-coverage).
+lean.yml	editor-parity	Check editor parity inventory and integration	non-blocking (continue-on-error); needs the editor-parity bundle kept off git (H44); owned by the editor-parity lane
+lean.yml	library	Seed Lake cache from master	setup: downloads master's Lake artifacts
+lean.yml	library	Build	full library build (~10 min); gate.sh checkpoint/full build Solidity (and examples when the core is touched)
+lean.yml	library	Build H109 slow examples, one budget per module	slow library, ~13 min one core; gate.sh full runs scripts/ci/build-slow-examples.sh
+lean.yml	library	Build H109 slow examples	needs the slow library built; gate.sh full (run-lean.sh) builds SoliditySlowExamples
+lean.yml	library	Restore fetched artifacts	setup: places fetched oleans in .lake/build
+lean.yml	library	Elaborate headline non-vacuity witnesses	needs the full library built (~4 min one core)
+lean.yml	library	Audit every declaration's axioms	needs the full library and slow library built (AxiomAudit imports them)
+lean.yml	library	Audit headline theorem dependencies	needs the full library and slow library built (TrustAudit imports them)
+lean.yml	testsuite	Seed Lake cache from master	setup: downloads master's Lake artifacts
+lean.yml	testsuite	Build the TestSuite	TestSuite build; gate.sh checkpoint builds it when the core is touched, full always
+lean.yml	testsuite	Restore fetched artifacts	setup: places fetched oleans in .lake/build
+lean.yml	testsuite	Check fresh replay timing	fresh replay of the memory-loop groups (~7 min, 600 s budget); needs the TestSuite built
+lean.yml	testsuite	Automation gate	reads the TestSuite build log and replay results; gate.sh full runs check-automatic.mjs --strict
+lean.yml	tools	Seed Lake cache from master	setup: downloads master's Lake artifacts
+lean.yml	tools	Build library and executables	full library and executable build (~10 min)
+lean.yml	tools	Restore fetched artifacts	setup: places fetched oleans in .lake/build
+lean.yml	tools	Test source verification and regression suites	needs the executables built and solc downloaded from solc-bin (~50 min)
+lean.yml	tools	Install real backend editor test launcher	setup: npm install of @vscode/test-electron
+lean.yml	tools	Test editor with solc and Lean	needs the executables built, a VS Code download and xvfb
+lean.yml	tools	Build and test the command line interface	needs the executables built and solc downloaded from solc-bin
+lean.yml	editor	Install editor test launcher	setup: npm install of @vscode/test-electron
+lean.yml	editor	Test actual VS Code extension host	needs a VS Code download and xvfb
+lean.yml	bridge	Bridge cache key	setup: computes the Actions cache key
+lean.yml	bridge	Build optional bridge	Mathlib-based Bridge build (~30 min); the core gate never builds Bridge/
+lean.yml	bridge	Verify pinned reference sources and bridge gate	needs the Bridge built (run-lean.sh --bridge)
+lean.yml	bridge-cache-evict	Evict bridge build caches of older commits	master-only cache maintenance; needs the Actions API
+trust.yml	public-surface	bash scripts/ci/fetch-lake-cache.sh	setup: downloads master's Lake artifacts
+trust.yml	public-surface	Build axiom-audit imports serially	full and slow library build; gate.sh full (run-lean.sh) builds them
+trust.yml	public-surface	Existing transitive axiom and pin audits	AxiomAudit needs the full and slow library built; its pin check runs in checks-fast as axiom-pins
+trust.yml	public-surface	Fresh public kernel replay	scheduled/manual only; installs the pinned external checker

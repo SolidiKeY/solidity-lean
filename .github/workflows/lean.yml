@@ -31,13 +31,15 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: '22'
-      # Every check of this job lives in one script that `gate.sh` runs too, so a
-      # merge that passes the lane gate cannot turn this job red. Lean-free:
-      # trust boundaries, site exporter, Dafny inventory, documentation and
-      # axiom-pin drift, layering, generated roots and bookkeeping files, the slow
-      # example partition and the pinned Solidity feature inventory.
+      # Every check of this job lives in one script that `gate.sh` runs too (all
+      # of it, including trust.yml's and prose-budget.yml's checks), so a merge
+      # that passes the lane gate cannot turn this job red. Lean-free: trust
+      # boundaries, site exporter, Dafny inventory, documentation and axiom-pin
+      # drift, layering, generated roots and bookkeeping files, the slow example
+      # partition, the pinned Solidity feature inventory, and CI coverage
+      # (scripts/ci/ci-only.tsv lists what the gate does not run, and why).
       - name: Fast checks (scripts/ci/checks-fast.sh)
-        run: bash scripts/ci/checks-fast.sh
+        run: bash scripts/ci/checks-fast.sh --workflow lean.yml
 
   # Non-blocking until the editor-parity lane makes it pass from a fresh
   # checkout: the full inventory is a checksum-bound bundle kept off git (H44).
