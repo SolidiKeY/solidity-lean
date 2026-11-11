@@ -391,4 +391,48 @@ run_cmd do
     throwError "same-sized modified raw bytes accepted"
   logInfo "EXECUTABLE_V2 four-case source pin refusal controls passed; original positive inputs unavailable"
 
+/- A nondefault typed candidate under distinct contracts. This is synthetic
+candidate-data preservation, not the four source cases or failure equivalence. -/
+def layoutImported : Contract := { vars := [("x", .prim .uint), ("flag", .prim .bool)] }
+def layoutExecutable : Contract :=
+  { layoutImported with
+    evalOrder := EvalOrder.viaIR
+    funs := [("different", { params := [], body := [] })] }
+def layoutCandidate : Cand layoutImported :=
+  { st := .cons (.prim (PrimTy.ofIntD .uint 37)) (.cons (.prim true) .nil),
+    args := [("flag", .bool true)],
+    tx := { msgSender := PrimTy.ofIntD .uint 9, timestamp := PrimTy.ofIntD .uint 17 },
+    net := [(PrimTy.ofIntD .uint 7, 16)], bal := PrimTy.ofIntD .uint 3 }
+def layoutPair : GoalPairV2 := ⟨layoutImported, layoutExecutable, .ff, .tt⟩
+def layoutRelation : SameCandidateV2 layoutPair :=
+  SameCandidateV2.ofLayout layoutPair layoutCandidate rfl
+
+theorem layoutCandidatePreserved :
+    layoutRelation.imported = layoutCandidate ∧
+    layoutRelation.executable.st = layoutCandidate.st ∧
+    layoutRelation.executable.args = layoutCandidate.args ∧
+    layoutRelation.executable.tx = layoutCandidate.tx ∧
+    layoutRelation.executable.net = layoutCandidate.net ∧
+    layoutRelation.executable.bal = layoutCandidate.bal :=
+  ⟨rfl, rfl, rfl, rfl, rfl, rfl⟩
+
+theorem wrongLayoutRefused (h : layoutImported.vars = C.vars) : False := by
+  change [("x", Ty.prim PrimTy.uint), ("flag", Ty.prim PrimTy.bool)] = [] at h
+  cases h
+
+-- A same-candidate relation cannot supply the missing executable failure.
+theorem layoutRelationDoesNotRefuteTrue (w : SelectedFailureV2 layoutPair) : False := by
+  have h := w.executableFailure
+  change Tri.tt = Tri.ff at h
+  cases h
+
+run_cmd do
+  for name in [``Cand.rebindLayoutV2_storage, ``Cand.rebindLayoutV2_argInts,
+      ``Cand.rebindLayoutV2_vals, ``SameCandidateV2.ofLayout_imported,
+      ``layoutCandidatePreserved, ``wrongLayoutRefused, ``layoutRelationDoesNotRefuteTrue] do
+    let axioms ← collectAxioms name
+    unless axioms.all ([``propext, ``Classical.choice, ``Quot.sound].contains ·) do
+      throwError "candidate layout control has nonstandard axioms"
+    logInfo m!"EXECUTABLE_V2 layout control axioms: {name}: {axioms}"
+
 end ExecutableBindingControls

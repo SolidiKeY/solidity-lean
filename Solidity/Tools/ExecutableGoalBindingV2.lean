@@ -27,6 +27,37 @@ structure SameCandidateV2 (g : GoalPairV2) where
   ledger : imported.net = executable.net
   balance : imported.bal = executable.bal
 
+/-- Reuse an existing candidate under an explicitly proved storage-layout
+identity. No storage defaults, argument conversion or candidate search occurs.
+This transports data only; it does not transport any formula or failure proof. -/
+def Cand.rebindLayoutV2 {C D : Contract} (candidate : Cand C)
+    (layout : C.vars = D.vars) : Cand D :=
+  { st := cast (congrArg SFields layout) candidate.st,
+    args := candidate.args, tx := candidate.tx, net := candidate.net, bal := candidate.bal }
+
+theorem Cand.rebindLayoutV2_storage {C D : Contract} (candidate : Cand C)
+    (layout : C.vars = D.vars) : HEq candidate.st (candidate.rebindLayoutV2 layout).st :=
+  (cast_heq (congrArg SFields layout) candidate.st).symm
+
+theorem Cand.rebindLayoutV2_argInts {C D : Contract} (candidate : Cand C)
+    (layout : C.vars = D.vars) : (candidate.rebindLayoutV2 layout).argInts = candidate.argInts := rfl
+
+theorem Cand.rebindLayoutV2_vals [FreshNames] {C D : Contract} (candidate : Cand C)
+    (layout : C.vars = D.vars) : (candidate.rebindLayoutV2 layout).vals = candidate.vals := rfl
+
+/-- Build the approved typed same-candidate relation from the original candidate
+and a kernel proof of the actual layouts. Source/import/request authentication
+and an independent exact executable failure proof remain frontend obligations. -/
+def SameCandidateV2.ofLayout (g : GoalPairV2) (candidate : Cand g.importedContract)
+    (layout : g.importedContract.vars = g.executableContract.vars) : SameCandidateV2 g :=
+  { imported := candidate, executable := candidate.rebindLayoutV2 layout,
+    storage := candidate.rebindLayoutV2_storage layout,
+    arguments := rfl, transaction := rfl, ledger := rfl, balance := rfl }
+
+theorem SameCandidateV2.ofLayout_imported (g : GoalPairV2) (candidate : Cand g.importedContract)
+    (layout : g.importedContract.vars = g.executableContract.vars) :
+    (ofLayout g candidate layout).imported = candidate := rfl
+
 /-- V1's source-values equation is not a `Cand.vals` equation. Both are required
 before rewriting a retained failure to the candidate-derived values here. -/
 structure RetainedValuesBindingV2 (C : Contract) (candidate : Cand C)
