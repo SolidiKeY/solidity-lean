@@ -589,7 +589,8 @@ a request or deployment whose value the sender's funds in the world do not cover
 observation of a session without outcomes; whether the world after a deployment
 or a credit is listed; bounds with resource failures, beyond an upper bound on
 the outcome a determined first step shows there (its own, or a revert with empty
-data: no failing bound is required to exist); environments that are not allowed; and the preimages a run hashes and the slot preimages of the keys a typed
+data: no failing bound is required to exist); environments that are not allowed;
+and the preimages a run hashes and the slot preimages of the keys a typed
 storage holds (`View.stored` is only required to be accounted for, so this goal
 does not pin `Forward` and `Guard` beyond their definitions). Within a determined
 step the frame's own accounting is the typed world's: global funds, debited from
