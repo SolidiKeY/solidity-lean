@@ -23,3 +23,8 @@ test('contradictory ownership or fixed outer text cannot gain mutating hints',()
 test('explicit storage owner cannot override an explicit nonstorage type suffix',()=>{
  for(const location of ['storage','default'])for(const suffix of ['memory','calldata']){const value=array(null,location,location==='default');value.typeDescriptions.typeString='uint256[] '+suffix;assert.deepEqual(names(value),['length'],location+':'+suffix);}
 });
+
+test('legacy nested parameter locations do not hide outer array hints',()=>{
+ const value={typeDescriptions:{typeString:'function (uint256[] memory) external returns (uint256)[] storage ref'}};assert.deepEqual(names(value),['length','push','pop']);
+ const fixed={typeDescriptions:{typeString:'function (uint256[] memory) external returns (uint256)[][2] storage ref'}};assert.deepEqual(names(fixed),['length']);
+});
