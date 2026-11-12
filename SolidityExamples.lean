@@ -138,6 +138,7 @@ import Solidity.Examples.Goals.Panic
 import Solidity.Examples.Goals.Plan
 import Solidity.Examples.Goals.Shrink
 import Solidity.Examples.Goals.Taclets
+import Solidity.Examples.Goals.Total
 import Solidity.Examples.InputReduction
 import Solidity.Examples.LexDiamond
 import Solidity.Examples.LexMetrics
