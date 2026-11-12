@@ -477,6 +477,8 @@ def build(inp):
         if p in BLANKET_RUNNERS:
             blanket[p] = BLANKET_RUNNERS[p]
             continue
+        if p in S.GENERATED_ROOTS:
+            continue  # imports only; listed as blanket below, its imports are checked as files
         reach = S.closure(imports, imports.get(m, []))
         if reach & set(module_info):
             unextracted[p] = reach & set(module_info)
@@ -566,8 +568,12 @@ def render(state):
     rows = state['rows']
     measured, fetched = timings(inp)
     prov = {
-        'source': 'Lake job time of one build of this revision (lake lean on the library roots '
-                  'through gate.sh per-file)',
+        'source': 'Lake "Built" job times of one incremental build of the library roots '
+                  '(lake lean through gate.sh per-file), possibly interrupted and resumed over '
+                  'several runs, some at an ancestor revision; the logs are concatenated in run '
+                  'order and a later time overrides. Lake rebuilds a module whose source or '
+                  'imports changed, so each measured time is of the last elaboration of that '
+                  'module, whose inputs match this revision',
         'toolchain': inp.toolchain,
         'command': inp.identity['build_command'],
         'context': 'Lake artifact cache seeded by scripts/ci/fetch-lake-cache.sh; 4-core VM, '

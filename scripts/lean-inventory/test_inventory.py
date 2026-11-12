@@ -173,6 +173,8 @@ FILES = {
     'Solidity/Goals.lean': 'def goal : Prop := True\n',
     'Solidity/Examples/T.lean': 'import Solidity.Calc.Mid\ntheorem t1 : m = m := rfl\n',
     'tests/x.lean': 'import Solidity.SolcValidation.E\n#eval e1\n',
+    # A generated root imports only: blanket, never an unextracted consumer.
+    'Bridge/SolidityBridge.lean': 'import Solidity.Optimizer.G\n',
 }
 CONSTS = [  # module, name, kind, refs, range, flags
     ('Solidity.Backend.A', 'Solidity.Backend.A.a1', 'def', [], [1, 1], {}),
@@ -268,7 +270,7 @@ class FixtureTests(unittest.TestCase):
             'dir:Solidity/Frontend/': 'unresolved',       # instance: implicit-use gap
             'dir:Solidity/SolcValidation/': 'unresolved',  # unextracted tests/x.lean
             'dir:Solidity/Source/': 'unresolved',         # no declarations
-            'dir:Solidity/Optimizer/': 'orphan'})
+            'dir:Solidity/Optimizer/': 'orphan'})        # generated Bridge root: blanket
         a = self.fam('triple:Solidity/Backend/A')
         self.assertEqual(a['counts'], {'keep': 1, 'ownerNeeded': 3, 'orphan': 0, 'unresolved': 0})
         self.assertEqual(a['pseudo'], 1)
