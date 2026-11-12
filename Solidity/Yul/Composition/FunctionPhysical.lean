@@ -110,7 +110,7 @@ theorem physical_word : reencodePersistentSlot (representedBanks originRegistry 
 
 theorem all_completed (fuel : Nat) (result : LocalBlockOutcome ctx ⟨false,false⟩)
     (done : run true false fuel = some result) : result=completed :=
-  runLocalBlock_unique ctx (code true false) (policy true false) _ done (Option.some_get completes).symm
+  LocalBlockLogic.completed_unique (code true false) (policy true false) _ done (Option.some_get completes).symm
 
 theorem wrong_callee_control : (run true true 32).map (fun result=>snapshot result.state) =
     some [2,2^256-1,2309737967,1025,22136,2^256-1,171*2^248] := by decide +kernel

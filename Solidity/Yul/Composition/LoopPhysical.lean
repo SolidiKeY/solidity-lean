@@ -51,7 +51,7 @@ theorem loop_physical_word :
 
 theorem loop_all_completed (fuel : Nat) (result : LocalBlockOutcome ctx ⟨false,false⟩)
     (done : run 3 0 fuel = some result) : result=completed :=
-  runLocalBlock_unique ctx (code 3 0) (policy 3 0) _ done (Option.some_get loop_completes).symm
+  LocalBlockLogic.completed_unique (code 3 0) (policy 3 0) _ done (Option.some_get loop_completes).symm
 
 /-- CONTINUE runs the post and next test; BREAK runs neither and is consumed. -/
 theorem transfer_runs_complete : (run 3 1 32).isSome ∧ (run 3 2 32).isSome := by decide +kernel

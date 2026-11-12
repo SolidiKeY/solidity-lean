@@ -41,7 +41,7 @@ theorem nonword_preserved (state : LocalState originEnv ctx.tys) (fuel : Nat)
 theorem completed_from_unique (state : LocalState originEnv ctx.tys) (a b : Nat)
     (first last : LocalBlockOutcome ctx ⟨false,false⟩)
     (one : runFrom true false a state = some first) (two : runFrom true false b state = some last) : first=last :=
-  runLocalBlock_unique ctx (code true false) (policy true false) state one two
+  LocalBlockLogic.completed_unique (code true false) (policy true false) state one two
 
 theorem raw_from (state : LocalState originEnv ctx.tys) (fuel : Nat)
     (result : LocalBlockOutcome ctx ⟨false,false⟩) (done : runFrom true false fuel state = some result) :

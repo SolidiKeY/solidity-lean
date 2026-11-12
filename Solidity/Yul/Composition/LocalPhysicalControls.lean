@@ -1,5 +1,6 @@
 import Solidity.Yul.Composition.LocalPhysicalMemory
 import Solidity.Yul.Composition.PhysicalControls
+import Solidity.Yul.LocalBlockLogic
 
 /-! Inhabited joint VY1/VY2 boundary in the SAME actual Source context.
 A real heap object backs the unchanged nonword local. Physical actions precede
@@ -136,7 +137,7 @@ completed horizon; horizon exhaustion remains distinct from a physical halt. -/
 theorem completed_horizon (fuel : Nat) (result : LocalBlockOutcome ctx ⟨false,false⟩)
     (done : runLocalBlock ctx code (policy _) fuel (LocalState.ofClean firstPhysical.1.1.2) = some result) :
     result = completed :=
-  runLocalBlock_unique ctx code (policy _) _ done (Option.some_get local_done).symm
+  LocalBlockLogic.completed_unique code (policy _) _ done (Option.some_get local_done).symm
 
 def breakCode : Stmt [] X ⟨false,true⟩ 0 := .seq (dirtyCode _) .break_
 def continueCode : Stmt [] X ⟨false,true⟩ 0 := .seq (dirtyCode _) .continue_

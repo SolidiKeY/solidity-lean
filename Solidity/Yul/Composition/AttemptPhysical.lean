@@ -123,7 +123,7 @@ theorem nonword_retained : completed.state.1.get memoryRef.index = (LocalValues.
 
 theorem completed_unique (fuel : Nat) (result : LocalBlockOutcome ctx ⟨false,false⟩)
     (done : continued [0xde,0xad] fuel = some result) : result=completed :=
-  runLocalBlock_unique ctx (continuationCode [0xde,0xad]) (continuationPolicy [0xde,0xad]) _ done (Option.some_get continues_nonempty).symm
+  LocalBlockLogic.completed_unique (continuationCode [0xde,0xad]) (continuationPolicy [0xde,0xad]) _ done (Option.some_get continues_nonempty).symm
 
 theorem continuation_raw (data : List UInt8) (fuel : Nat) (state : LocalState originEnv ctx.tys)
     (result : LocalBlockOutcome ctx ⟨false,false⟩)

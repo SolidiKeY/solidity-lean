@@ -94,7 +94,7 @@ theorem no_clean_resume (action : Source.EM originEnv ctx.tys Unit) :
 
 theorem completed_unique (fuel : Nat) (result : LocalBlockOutcome ctx ⟨false,false⟩)
     (done : runCatch fuel = some result) : result=completed :=
-  runLocalBlock_unique ctx catchCode catchPolicy _ done (Option.some_get completes).symm
+  LocalBlockLogic.completed_unique catchCode catchPolicy _ done (Option.some_get completes).symm
 
 /-- Actual VY4 rollback retains the caller's nonempty log callerPrefix and exact
 failure bytes. Its Effects does not carry VY2 complement/owned-byte journals. -/

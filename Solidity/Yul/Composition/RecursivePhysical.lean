@@ -60,7 +60,7 @@ theorem recursive_words : snapshot completed.state =
 theorem normal_return : completed.flow = .normal := FunctionPhysical.normal_flow _
 theorem completed_unique (fuel : Nat) (result : LocalBlockOutcome ctx ⟨false,false⟩)
     (done : run true fuel = some result) : result=completed :=
-  runLocalBlock_unique ctx (code true) (policy true) _ done (Option.some_get completes).symm
+  LocalBlockLogic.completed_unique (code true) (policy true) _ done (Option.some_get completes).symm
 theorem physical_retained (fuel : Nat) : (joint fuel).1 = LocalPhysicalControls.firstPhysical := rfl
 theorem joint_completes : (joint 32).2 = .ok (some completed) :=
   congrArg Except.ok (Option.some_get completes).symm

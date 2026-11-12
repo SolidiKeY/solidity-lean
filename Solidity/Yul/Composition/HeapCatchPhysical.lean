@@ -207,7 +207,7 @@ theorem no_clean_resume (action : Source.EM originEnv ctx.tys Unit) :
 
 theorem completed_unique (fuel : Nat) (result : LocalBlockOutcome ctx ⟨false,false⟩)
     (done : runLocalBlock ctx (AttemptPhysical.continuationCode [0xde,0xad]) (AttemptPhysical.continuationPolicy [0xde,0xad]) fuel (allocated [0xde,0xad]).2 = some result) : result=completed :=
-  runLocalBlock_unique ctx _ _ _ done (Option.some_get completes).symm
+  LocalBlockLogic.completed_unique _ _ _ done (Option.some_get completes).symm
 
 /-- Actual allocRef rejects non-memory type AFTER allocating; no fake rollback. -/
 def badAllocation := AttemptPhysical.companion
