@@ -2463,6 +2463,7 @@ import Solidity.Correctness.Lowering.Unchecked.VersionedPowerWitness
 import Solidity.Correctness.Lowering.Unchecked.WordAssociation
 import Solidity.Correctness.Lowering.Unchecked.WordOne
 import Solidity.Correctness.Lowering.Unchecked.WordProgram
+import Solidity.Correctness.Lowering.Unchecked.WordUpdateWitness
 import Solidity.Correctness.Lowering.Unchecked.WrappingArithmetic
 import Solidity.Counterexamples.DeleteFamilyGenericOverlap
 import Solidity.Counterexamples.DiamondTry
