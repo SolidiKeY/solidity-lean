@@ -6,6 +6,7 @@ import Solidity.Yul.Compilation.WordMachine
 import Solidity.Roadmap.Contracts
 import Solidity.Semantics.Callback
 import Solidity.Semantics.TransientWorld
+import Solidity.Semantics.IntrinsicStorage.Preimages
 import Solidity.Lowering.V08.EnvironmentProjection
 
 /-! Plan steps outside the finish line: each goal names the theorem expected to close
@@ -590,9 +591,10 @@ observation of a session without outcomes; whether the world after a deployment
 or a credit is listed; bounds with resource failures, beyond an upper bound on
 the outcome a determined first step shows there (its own, or a revert with empty
 data: no failing bound is required to exist); environments that are not allowed;
-and the preimages a run hashes and the slot preimages of the keys a typed
-storage holds (`View.stored` is only required to be accounted for, so this goal
-does not pin `Forward` and `Guard` beyond their definitions). Within a determined
+and whole-session hash equality for interacting bodies. Concrete storage and
+the observed inputs of determined typed frames are pinned below; connecting all
+internal frames to session strategy/history remains the session implementation
+obligation (H720). Within a determined
 step the frame's own accounting is the typed world's: global funds, debited from
 the sender on success. `Lang.Affordable` over a whole history is not required:
 `Fixed.ledger` is an arbitrary function and the history of a transaction includes
@@ -690,8 +692,22 @@ structure View (I : IntrinsicSpec) where
   typed : I.World → TypedWorld
   initial : Code → I.World
   resume : TypedWorld → I.World
-  stored : TypedWorld → List Bytes
   Boundary : I.World → I.lang.Env → List Event → Nat → TypedWorld → Prop
+
+/-- Concrete account-function storage, including shadows and all mapping defaults.
+The finite list is a mathematical specification, never an enumerated test domain.
+Full default coverage can exceed `Forward`'s unchanged hash bound; no finite-support
+or zero-default assumption is imposed. -/
+noncomputable def View.stored {I : IntrinsicSpec} (_ : View I) (t : TypedWorld) : List Bytes :=
+  Semantics.IntrinsicStorage.stored t.world
+
+/-- Accounting for the canonical typed-frame observer. This pins actual reached
+body operands even when its enclosing frame fails; it is not whole-session hash
+equality and does not instrument the opaque caller-side `Entry.result` decoder. -/
+def FrameInputs (I : IntrinsicSpec) (p : I.lang.Prog) (en : I.lang.Env) (r : I.lang.Res)
+    (a : Semantics.IntrinsicStorage.Inputs) : Prop :=
+  (∀ b ∈ a.slots, b ∈ I.slotHashed p en r) ∧
+  (∀ b ∈ a.hashed, b ∈ I.hashed p en r)
 
 /-- A bound the laws speak of: admissible and without resource failure. -/
 def Good (I : IntrinsicSpec) (r : I.lang.Res) : Prop := I.lang.Admissible r ∧ I.NoFail r
@@ -737,6 +753,55 @@ structure Laws (F : Fixed) (I : IntrinsicSpec) (V : View I) : Prop where
       I.slotHashed p = I.slotHashed p'
   /-- A run resumed from a world accounts for the keys the world stores. -/
   stored_hashed : ∀ t e r, ∀ b ∈ V.stored t, b ∈ I.slotHashed (I.ofWorld (V.resume t)) e r
+  /-- A completed determined transaction accounts for a completed observation
+  of its actual typed callee frame, including inputs before a caught or uncaught
+  revert. Fuel is witnessed together with equality to the actual frame result;
+  an insufficient prefix cannot stand in for a completed frame. H720 defers
+  whole-session equality and interacting-frame reachability to is0. -/
+  call_inputs : ∀ x en h n (code : Code) (cw : ContractWorld.World code.catalog)
+      (q : Request) (k : Fin code.contracts.length) (st : Storage (code.catalog k))
+      (entry : ContractWorld.Entry (code.catalog k) Bytes),
+    I.lang.Allowed en → V.Boundary x en h n ⟨code, cw⟩ →
+    (I.session en).requests h n = some (.request q) → Funded F (I.session en) h q →
+    cw.accounts (liftAddress q.target) = some ⟨k, st⟩ → code.entry k q.input = some entry →
+    Prog.callsBack true entry.body = false →
+    (liftWord q.value).1 ≤ (cw.funds (liftAddress q.sender)).1 →
+    let p := I.ofWorld x
+    let w := (cw.atTime (liftWord q.timestamp)).resetTransient
+    let ref : ContractWorld.Handle k := ⟨liftAddress q.target⟩
+    let run := w.call ref entry (requestContext q [])
+    (∀ ext, (cw.atTime (liftWord q.timestamp)).transact
+        (fun w => w.call ref entry (requestContext q ext)) =
+      (cw.atTime (liftWord q.timestamp)).transact
+        (fun w => w.call ref entry (requestContext q []))) →
+    Ends run → ∀ r out, Good I r →
+      h ++ [Event.tx q.sender q.target q.value q.timestamp q.input out] <+:
+        (I.lang.sem p en r).events →
+      ∃ fuel, let a := Semantics.IntrinsicStorage.Frame.call fuel w ref entry (requestContext q [])
+        a.result = run ∧ FrameInputs I p en r a.inputs
+  /-- The same concrete obligation for the selected constructor, before
+  transaction rollback discards its attempted writes and payments. -/
+  create_inputs : ∀ (code : Code) (en : I.lang.Env) (k : Fin code.contracts.length)
+      (body : Prog (code.catalog k) [] []),
+    I.lang.Allowed en → k.val = code.main →
+    code.ctor k (I.session en).deployArgs = some body → Prog.callsBack true body = false →
+    let e := I.session en
+    let p := I.ofWorld (V.initial code)
+    let this := F.createAddress e.deployer e.deployNonce
+    e.deployValue.val ≤ (e.balance e.deployer).val → this ≠ e.deployer →
+    let w := (ContractWorld.World.empty code.catalog (funds e.balance) code.roles).resetTransient
+    let ctx : ContractWorld.Context :=
+      { sender := liftAddress e.deployer, mode := .ordinary (liftWord e.deployValue), ext := [] }
+    let run := w.create k (liftAddress this) body ctx
+    (∀ ext, (ContractWorld.World.empty code.catalog (funds e.balance) code.roles).transact
+        (fun w => w.create k (liftAddress this) body { ctx with ext := ext }) =
+      (ContractWorld.World.empty code.catalog (funds e.balance) code.roles).transact
+        (fun w => w.create k (liftAddress this) body ctx)) →
+    Ends run → ∀ r out address, Good I r →
+      [Event.deploy e.deployer e.deployValue e.deployArgs out address] <+:
+        (I.lang.sem p en r).events →
+      ∃ fuel, let a := Semantics.IntrinsicStorage.Frame.create fuel w k (liftAddress this) body ctx
+        a.result = run ∧ FrameInputs I p en r a.inputs
   /-- A session resumed at a typed world starts at that world. -/
   starts : ∀ (t : TypedWorld) (en : I.lang.Env), I.lang.Allowed en →
     V.Boundary (V.resume t) en [] 0 t
@@ -861,7 +926,9 @@ end IntrinsicSession
 /-- For every fixed parameters there is a concrete intrinsic session semantics: an
 `IntrinsicSpec` (exact session environment, pinned `Forward` and `Guard`, consistent
 prefixes, by its type) whose worlds are actual typed contract worlds and whose
-sessions satisfy `IntrinsicSession.Laws`. -/
+sessions satisfy `IntrinsicSession.Laws`, including concrete storage and completed
+typed-frame preimage accounting. Whole-session hash equality remains deferred
+to the session implementation under H720. -/
 @[goal Solidity.Semantics.IntrinsicSession.session_semantics_correct "is0-intrinsic-session"]
 def intrinsicSessionSemantics : Prop :=
   ∀ F : Solidity.Roadmap.Fixed, ∃ (I : Solidity.Roadmap.IntrinsicSpec)

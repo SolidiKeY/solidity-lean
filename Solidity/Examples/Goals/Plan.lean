@@ -96,6 +96,7 @@ info: open Solidity.Goals.yulAcceptedCompilesWithArtifact ← Solidity.Yul.accep
 info: open Solidity.Goals.intrinsicSessionSemantics ← Solidity.Semantics.IntrinsicSession.session_semantics_correct plan is0-intrinsic-session
 -/
 #guard_msgs in
+-- Concrete storage/frame accounting is specified; session implementation remains OPEN (H720).
 #roadmap_goal intrinsicSessionSemantics
 
 /-! The Lean policy specification only: not the checker's proof, the calibrated
