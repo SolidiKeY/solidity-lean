@@ -3,6 +3,7 @@ import Solidity.Calculus.Symex
 import Solidity.Calculus.CallbackSound
 import Solidity.Evm.Correct
 import Solidity.Evm.Compiler
+import Solidity.Backend.Payments.Versioned
 import Solidity.Calculus.SolkeyProves
 import Solidity.Calculus.TailMode
 import Solidity.Roadmap.G49Final.FoldedPublic
@@ -261,25 +262,18 @@ theorem symex_sound (n : Nat) (σ : State C Γ) : σ ⊧ symex n φ → σ ⊧ �
 
 open Evm Evm in
 /-- **The compiler is correct**: from a machine that represents the typed
-state, the typed run and the compiled code both end, in states the machine
-still represents, or both revert (a panic, a failed `assert`, is solc's
-revert with `Panic(0x01)` data), or the world refuses a payment the program
-makes and the machine alone reverts, or a loop no number of turns ends: the
-typed run diverges and the machine has no outcome (a fault), or stopped at
-a refused payment before it.  `L` bounds every array's length, which solc
-caps at `2^64`.  On the fragment the typed run is never exhausted, and it
-halts in no other way. -/
+state, both end in states the machine still represents, or both revert (a
+panic only in code with an `assert`), or the typed run diverges and the
+machine faults. A payment the world refuses reverts both (`Sim.oracle`).
+`L` bounds every array's length, which solc caps at `2^64`. -/
 theorem compiler_correct {P : Prog C Γ Γ'} {F : Frag Γ} {F' : Frag Γ'} {σ : State C Γ}
     {mc : Machine} {L b : Nat}
     (hP : F ⊩ P ⊣ F') (hm : σ ≈[C, L, b, F] mc) (hL : L + Prog.pushes P ≤ Lmax) :
     (∃ o mc', (P, σ) ⇓ o ∧ (⟦P⟧b, mc) ⇓ₘ mc' ∧ o.st ≈[C, L + Prog.pushes P, b, F'] mc') ∨
       ((Prog.run σ P = .error .revert ∨
           (Prog.asserts P = true ∧ Prog.run σ P = .error .panic)) ∧ (⟦P⟧b, mc) ↯ₘ) ∨
-      (Prog.pays P = true ∧ (⟦P⟧b, mc) ↯ₘ ∧ ∃ o, (P, σ) ⇓ o) ∨
-      (Prog.run σ P = .error .diverge ∧
-        (run (⟦P⟧b) mc = .fault ∨ (Prog.pays P = true ∧ (⟦P⟧b, mc) ↯ₘ))) :=
-  (compile_correct hP hm hL).imp (fun ⟨o, mc', h, h', _, hs⟩ => ⟨o, mc', h, h', hs⟩)
-    (Or.imp id (Or.imp (fun ⟨hp, h, o, _, h', _⟩ => ⟨hp, h, o, h'⟩) id))
+      (Prog.run σ P = .error .diverge ∧ run (⟦P⟧b) mc = .fault) :=
+  (compile_correct_v2 hP hm hL).imp (fun ⟨o, mc', h, h', _, hs⟩ => ⟨o, mc', h, h', hs⟩) id
 
 open Evm Evm in
 /-- **The box reaches the EVM**: where the compiled code succeeds, the typed

@@ -45,14 +45,13 @@ theorem write_compiler_application (n : Int) (hn : PrimTy.uint.inRange n = true)
   rcases Main.compiler_correct (write_fragment n hn)
     (Evm.Sim.init cellContract 0 (by decide) (fun _ => 0) ⟨0, by decide⟩ rfl)
     (by change 1 ≤ Evm.Lmax; decide) with
-    h | ⟨hsrc, _⟩ | ⟨hp, _⟩ | ⟨hd, _⟩
+    h | ⟨hsrc, _⟩ | ⟨hd, _⟩
   · exact h
   · rcases hsrc with hr | ⟨_, hp⟩
     · rw [ho] at hr
       cases hr
     · rw [ho] at hp
       cases hp
-  · cases hp
   · rw [ho] at hd
     cases hd
 

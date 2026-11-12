@@ -31,7 +31,7 @@ theorem fragile_joint :
   obtain ⟨o, ho⟩ := fragile_source
   rcases Main.compiler_correct fragile_fragment (closed_simulation fragileContract)
     (by change 1 ≤ Evm.Lmax; decide) with
-    ⟨o', mc', ho', ht, hr⟩ | ⟨he, _⟩ | ⟨hp, _⟩ | ⟨hd, _⟩
+    ⟨o', mc', ho', ht, hr⟩ | ⟨he, _⟩ | ⟨hd, _⟩
   · have heq : (Except.ok o' : TRes (Out fragileContract (localSource fragileContract).H _)) = .ok o :=
       ho'.symm.trans ho
     cases heq
@@ -43,7 +43,6 @@ theorem fragile_joint :
     · have hbad : (Except.ok o : TRes (Out fragileContract (localSource fragileContract).H _)) = .error .panic :=
         ho.symm.trans he
       cases hbad
-  · cases hp
   · have hbad : (Except.ok o : TRes (Out fragileContract (localSource fragileContract).H _)) = .error .diverge :=
       ho.symm.trans hd
     cases hbad
