@@ -14,4 +14,9 @@ import Solidity.Examples.DecisionStorageArrays
 import Solidity.Examples.DecisionThreeKindCoverage
 import Solidity.Examples.Tactics.OpenLoops
 import Solidity.Examples.Tactics.OpenLoops.RowsNine
+import Solidity.Examples.Tactics.OpenLoops.RowsNine.Checkpoint
+import Solidity.Examples.Tactics.OpenLoops.RowsNine.Finish
+import Solidity.Examples.Tactics.OpenLoops.RowsNine.Stage1
+import Solidity.Examples.Tactics.OpenLoops.RowsNine.Stage2
+import Solidity.Examples.Tactics.OpenLoops.RowsNine.Stage3
 import Solidity.Examples.Tactics.RevertData

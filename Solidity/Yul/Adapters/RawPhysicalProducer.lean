@@ -26,7 +26,6 @@ theorem transport {ctx : Source.Ctx} {returns : List Source.STy} {modifier u : B
     loaded.clean=reached.2.clean ∧ loaded.world=reached.2.world ∧
     (Source.execS glob frame fuel nps ph stmt state.clean).run (Source.L0 ctx.env,state.world)=
       RawLoopBody.represented (reached.1,loaded) := by
-  first | (simp only;done) | decide | omega | rfl | skip
   dsimp only
   have sourceRun := producer.correct glob frame fuel nps ph state coherent
   have raw := frame_bytes base (producer.run fuel state).2 image room

@@ -28,7 +28,6 @@ theorem run {E : Source.Env} {Γ : Source.RCtx} (G : Source.Glob E) (F : Source.
       (.ok (.val (Source.Val.fixedBytes (n:=1) (h:=by decide) [b] rfl)),
         withSourceHeap s (s.2.heap.write a (heapByteData E.layout string (old.set i.val b))
           (heap_ty_of_get s.2.heap a _ _ found))) := by
-  first | (simp only;done) | skip
   rw [expression,Source.evalE,Source.Hoare.run_bind,source_local_value_run G F (n+1) s rhs _ value]
   dsimp only
   rw [Source.Hoare.run_bind,P6ByteReferenceReads.form_location G F n s root index a i reference indexed]
@@ -53,7 +52,6 @@ theorem outside {E : Source.Env} {Γ : Source.RCtx} (G : Source.Glob E) (F : Sou
     (out : old.length≤i.val) :
     (Source.evalE G F (n+3) (expression root index rhs)).run s=
       (.error (.revert (Source.panicData .index)),s) := by
-  first | (simp only;done) | skip
   rw [expression,Source.evalE,Source.Hoare.run_bind,source_local_value_run G F (n+1) s rhs _ value]
   dsimp only
   rw [Source.Hoare.run_bind,P6ByteReferenceReads.form_location G F n s root index a i reference indexed]
@@ -96,7 +94,6 @@ theorem inventory {E : Source.Env} {Γ : Source.RCtx} {origin : Source.Heap E.la
       CoversMixedHeap r.entries ∧ r.entries.map MixedHeapEntry.id=es.map MixedHeapEntry.id ∧
       (∀ H,Source.MemOK E H s → Source.MemOK E H (withSourceHeap s r.heap)) ∧
       r.heap.get a=some ⟨heapByteType string,heapByteData E.layout string (old.set i.val b)⟩ := by
-  first | (simp only;done) | skip
   dsimp only
   obtain ⟨r,write,selected,encoded,covered,ids,other,safe,cell,types,count,addresses,free⟩ :=
     P6ByteWriteInventory.write F (n+2) s allocated p history es coverage distinct μ residual initial a string old found i.val inside b fits

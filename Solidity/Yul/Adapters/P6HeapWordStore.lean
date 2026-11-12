@@ -14,7 +14,6 @@ variable {C : Contract} {Δ : Ctx}
 theorem store_image (image : FrameMem C Δ) (sink : WordSpan image.capacity) (word : Roadmap.Word) :
     frameBytes (store32 image sink (lenU word.val word.isLt))=
       mstore (frameBytes image) sink.offset.val.toNat word := by
-  first | (simp only;done) | decide | omega | rfl | skip
   rw [frameBytes_store32]
   simp only [lenU,Int.toNat_natCast]
   exact PhysicalSnapshotSlice.writeBytes_mstore _ _ _
@@ -45,7 +44,6 @@ theorem transport {E Γ} (H : Source.HeapTy) (s : Source.EMState E Γ) (p : Plac
       ReservedOK (frameBytes reached) q.free ∧
       Solidity.Backend.Environment.cryptoStep (.op .MSTORE) ⟨sink.offset::lenU word.val word.isLt::tail,frameBytes image⟩=
         some ⟨tail,frameBytes reached⟩ ∧ reached.st=image.st ∧ reached.key=image.key := by
-  first | omega | decide | skip
   dsimp only
   have source := ArrayWordHeap.whole H s p ok supported F horizon root τ k n hl old words encoded
     found index value word newEncoded (frameBytes image) oldReads reserved

@@ -57,8 +57,8 @@ theorem initial_safe : Source.MemOK heapByteEnv byteHeap.ty (state 31 32) := by
 /-- The actual late bounds failure keeps the inner write at index31. -/
 theorem outer_panic (pipeline : Pipeline) (n : Nat) :
     (Source.evalE (glob pipeline) byteReadFrame (n+4) assignment).run (state 31 40)=
-      (.error (.revert (Source.panicData .index)),after (state 31 40) 1 true stringOld rfl 31 0xff) := by
-  exact outer_error (glob pipeline) byteReadFrame n (state 31 40) .here (.there .here) (.there (.there .here))
+      (.error (.revert (Source.panicData .index)),after (state 31 40) 1 true stringOld rfl 31 0xff) :=
+  outer_error (glob pipeline) byteReadFrame n (state 31 40) .here (.there .here) (.there (.there .here))
     (.there (.there (.there .here))) 1 31 40 0xff rfl rfl rfl rfl true stringOld rfl (by decide) (by decide)
 
 /-- Inner failure happens first: no successful outer write is invented. -/
@@ -84,5 +84,5 @@ theorem prefix_not_erased : after (state 31 40) 1 true stringOld rfl 31 0xff≠s
 
 /-- The first physical prefix changes only index31, retaining padding/index32. -/
 theorem physical_prefix : frameBytes firstFrame 319=255 ∧ frameBytes firstFrame 320=0x61 ∧
-    frameBytes firstFrame 328=165 := by first | decide | rfl
+    frameBytes firstFrame 328=165 := by decide
 end Solidity.Yul.Adapters.P6ChainedByteAssignment.Controls

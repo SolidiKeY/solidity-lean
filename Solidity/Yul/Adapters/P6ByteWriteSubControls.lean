@@ -50,8 +50,7 @@ theorem caller_reads (n : Nat) : output.1=stringAliasState.1 ∧
     (Source.bytesOfRV byteReadFrame n (.val (output.1.get .here))).run output=
       (.ok (stringOld.set 32 0xff),output) ∧
     (Source.bytesOfRV byteReadFrame n (.val (output.1.get (.there .here)))).run output=
-      (.ok (stringOld.set 32 0xff),output) := by
-  first | rfl | exact ⟨rfl,rfl,rfl⟩
+      (.ok (stringOld.set 32 0xff),output) := ⟨rfl,rfl,rfl⟩
 
 /-- Actual initial owner MemOK is inhabited for the suspended aliased caller. -/
 theorem initial_safe : Source.MemOK heapByteEnv byteHeap.ty stringAliasState := string_alias_initial_MemOK
@@ -61,8 +60,8 @@ theorem outside_child :
     (Source.EM.sub (Source.Locals.nil (D:=heapByteEnv.layout))
       (Source.writeLoc byteReadFrame 0 (.memByte 1 40)
         (Source.Val.fixedBytes (n:=1) (h:=by decide) [0xff] rfl))).run stringAliasState=
-        (.error (.revert (Source.panicData .index)),stringAliasState) := by
-  exact outside byteReadFrame 0 stringAliasState .nil 1 true stringOld rfl 40 (by decide) 0xff
+        (.error (.revert (Source.panicData .index)),stringAliasState) :=
+  outside byteReadFrame 0 stringAliasState .nil 1 true stringOld rfl 40 (by decide) 0xff
 
 /-- Treating late halt as rollback would lose a real changed Source byte. -/
 theorem late_halt_not_rollback : output≠stringAliasState := by

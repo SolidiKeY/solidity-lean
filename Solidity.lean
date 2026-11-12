@@ -2459,6 +2459,7 @@ import Solidity.Correctness.Lowering.Unchecked.PowerV2Arithmetic
 import Solidity.Correctness.Lowering.Unchecked.RawOne
 import Solidity.Correctness.Lowering.Unchecked.Relation
 import Solidity.Correctness.Lowering.Unchecked.SourceOne
+import Solidity.Correctness.Lowering.Unchecked.SourceSpelling
 import Solidity.Correctness.Lowering.Unchecked.UpdateArithmetic
 import Solidity.Correctness.Lowering.Unchecked.VersionedPowerWitness
 import Solidity.Correctness.Lowering.Unchecked.WordAssociation
@@ -3269,6 +3270,7 @@ import Solidity.Goals
 import Solidity.Goals.AuditData
 import Solidity.Goals.Endpoint
 import Solidity.Goals.Finish
+import Solidity.Goals.GoalPinsSpec
 import Solidity.Goals.Hash
 import Solidity.Goals.Headline
 import Solidity.Goals.Loops
