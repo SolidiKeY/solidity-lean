@@ -138,7 +138,7 @@ class Tree:
 
 def specs(t):
     out = [(c, d, k) for c, d, k in FIXED if t.has_dir(d) or
-           (k == "json" and t.has_dir(PIN_FRAGMENT_ROOTS[1]))]
+           (k == "json" and (t.has_dir(PIN_FRAGMENT_ROOTS[1]) or c in t.files))]
     areas = sorted({f.split("/")[2] for f in t.files if f.startswith(AREAS + "/") and f.count("/") >= 3})
     out += [(f"{AREAS}/{a[:-2]}.md", f"{AREAS}/{a}", "md") for a in areas if a.endswith(".d")]
     return out

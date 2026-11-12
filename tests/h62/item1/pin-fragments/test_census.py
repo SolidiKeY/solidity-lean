@@ -240,6 +240,13 @@ class StorageIntegration(unittest.TestCase):
         self.assertEqual(json.loads((self.root / NEW_PATH).read_text()),{NEW_KEY:[]})
         self.assertEqual((self.root / LEGACY).read_text(),self.raw)
 
+    def test_missing_all_fragments_is_not_silently_ignored(self):
+        (self.root / LEGACY).unlink()
+        with contextlib.redirect_stdout(io.StringIO()) as output:
+            self.assertEqual(fragments.write_mode(True,False),1)
+        self.assertIn(census.INVENTORY,output.getvalue())
+        self.assertEqual(json.loads((self.root / census.INVENTORY).read_text()),{KEY:[]})
+
 class PolicyBoundaries(unittest.TestCase):
     def test_unchanged_hygiene_rejects_new_legacy_and_keeps_exact_size_boundaries(self):
         checker = SCRIPT.parents[3] / "hygiene/check.py"
