@@ -147,13 +147,13 @@ def dumpConsts (out : IO.FS.Stream) (env : Environment) (group : String) (m : Na
 /-- Dumps the project modules of `env`, and with `root? = some (m, _)` the constants the
 elaborated root module `m` added. -/
 def dumpEnv (out : IO.FS.Stream) (group : String) (env : Environment)
-    (root? : Option Name := none) : IO Unit := do
+    (root? : Option Name := none) (shard : Nat × Nat := (0, 1)) : IO Unit := do
   let isProject (n : Name) : Bool := match env.getModuleIdxFor? n with
     | some i => !isCore env.header.moduleNames[i]!
     | none => root?.isSome && env.constants.map₂.contains n
   for i in [:env.header.moduleData.size] do
     let m := env.header.moduleNames[i]!
-    if isCore m then continue
+    if isCore m || i % shard.2 != shard.1 then continue
     let data := env.header.moduleData[i]!
     out.putStrLn <| (Json.mkObj [("r", "module"), ("g", toJson group), ("m", toJson m.toString),
       ("imports", toJson (data.imports.map (·.module.toString)))]).compress
@@ -166,10 +166,11 @@ def dumpEnv (out : IO.FS.Stream) (group : String) (env : Environment)
     out.putStrLn <| (Json.mkObj [("r", "module"), ("g", toJson group), ("m", toJson m.toString),
       ("imports", toJson (env.header.imports.map (·.module.toString)))]).compress
     dumpConsts out env group m isProject (declRangeExt.find? env ·) localConsts
-  for e in Solidity.Goal.goalExt.getState env do
-    out.putStrLn <| (Json.mkObj [("r", "goal"), ("g", toJson group),
-      ("decl", toJson e.decl.toString), ("proof", toJson e.proof.toString),
-      ("plan", toJson e.plan), ("deps", toJson (e.deps.map Name.toString))]).compress
+  if shard.1 == 0 then
+    for e in Solidity.Goal.goalExt.getState env do
+      out.putStrLn <| (Json.mkObj [("r", "goal"), ("g", toJson group),
+        ("decl", toJson e.decl.toString), ("proof", toJson e.proof.toString),
+        ("plan", toJson e.plan), ("deps", toJson (e.deps.map Name.toString))]).compress
   out.putStrLn <| (Json.mkObj [("r", "group-end"), ("g", toJson group),
     ("modules", toJson env.header.moduleNames.size)]).compress
 
@@ -192,9 +193,17 @@ def run : IO Unit := do
   let out := IO.FS.Stream.ofHandle h
   out.putStrLn <| (Json.mkObj [("r", "header"), ("lean", toJson Lean.versionString),
     ("githash", toJson Lean.githash)]).compress
+  -- `LEAN_INVENTORY_SHARD=k/n` dumps only the modules whose import index is `k` mod `n`
+  -- (goals with shard 0), so an interrupted extraction resumes shard by shard.
+  let shard : Nat × Nat ← match (← IO.getEnv "LEAN_INVENTORY_SHARD").map (·.splitOn "/") with
+    | some [k, n] => match k.toNat?, n.toNat? with
+      | some k, some (n + 1) => pure (k, n + 1)
+      | _, _ => throw <| IO.userError "bad LEAN_INVENTORY_SHARD"
+    | some _ => throw <| IO.userError "bad LEAN_INVENTORY_SHARD"
+    | none => pure (0, 1)
   for (g, ms) in groups do
     let env ← importModules (ms.map fun n => { module := n }) {} 0
-    dumpEnv out g env
+    dumpEnv out g env (shard := shard)
   for (g, m, file) in roots do
     let env ← elabRoot file m
     dumpEnv out g env (some m)

@@ -37,6 +37,7 @@ import classify as CL  # noqa: E402
 
 SCHEMA = 'solidity-lean/lean-inventory'
 VERSION = 1
+SHARDS = 8
 CACHE_ROOT = '.lake/lean-inventory'
 BLANKET_RUNNERS = {
     # Read: its header says it audits the axioms of every constant the library roots reach.
@@ -137,18 +138,40 @@ def extract(repo, rev):
     earlier = sorted((repo / CACHE_ROOT / 'timing').glob('*.log'))
     (out / 'build.log').write_text(''.join(p.read_text() for p in earlier) + build_logs['lib'])
     restore_artifacts(repo)
-    listing = work / 'modules.tsv'
-    listing.write_text(''.join(f'{g}\t{m}\n' if g == 'lib' else f'{g}\t{m}\t{m}.lean\n'
-                               for g, mods in groups for m in mods))
-    graph = work / 'graph.jsonl'
-    code, log = run_gate(repo, 'scripts/lean-inventory/Extract.lean',
-                         {'LEAN_INVENTORY_OUT': str(graph), 'LEAN_INVENTORY_MODULES': str(listing)},
-                         work / 'gl-extract')
-    if code:
-        sys.exit(f'extract: Extract.lean failed; see {log}')
-    records = [json.loads(line) for line in graph.read_text().splitlines()]
-    if records[-1].get('r') != 'end':
-        sys.exit('extract: truncated graph')
+    # The library dump runs in SHARDS separate passes, each kept once complete, so an
+    # interrupted extraction resumes; the executable roots follow in one more pass.
+    lib_listing, exe_listing = work / 'modules-lib.tsv', work / 'modules-exe.tsv'
+    lib_listing.write_text(''.join(f'{g}\t{m}\n' for g, mods in groups if g == 'lib' for m in mods))
+    exe_listing.write_text(''.join(f'{g}\t{m}\t{m}.lean\n' for g, mods in groups if g != 'lib'
+                                   for m in mods))
+    passes = [(f'graph-{k}-of-{SHARDS}.jsonl', lib_listing, f'{k}/{SHARDS}') for k in range(SHARDS)]
+    passes.append(('graph-exe.jsonl', exe_listing, '0/1'))
+    records = []
+    for name, listing, shard in passes:
+        part = work / name
+        stamp = work / (name + '.key')
+        key = f'{rev} {shard} {S.git(repo, "hash-object", "scripts/lean-inventory/Extract.lean").decode().strip()}\n'
+        lines = part.read_text().splitlines() if part.exists() else []
+        complete = (lines and json.loads(lines[-1]).get('r') == 'end' and stamp.exists()
+                    and stamp.read_text() == key)
+        if not complete:
+            code, log = run_gate(repo, 'scripts/lean-inventory/Extract.lean',
+                                 {'LEAN_INVENTORY_OUT': str(part), 'LEAN_INVENTORY_MODULES': str(listing),
+                                  'LEAN_INVENTORY_SHARD': shard},
+                                 work / ('gl-extract-' + name.split('.')[0]))
+            if code:
+                sys.exit(f'extract: Extract.lean failed; see {log}')
+            lines = part.read_text().splitlines()
+            if not lines or json.loads(lines[-1]).get('r') != 'end':
+                sys.exit(f'extract: truncated {part}')
+            stamp.write_text(key)
+        part_records = [json.loads(line) for line in lines]
+        if not records:
+            records.append(part_records[0])
+        elif part_records[0] != records[0]:
+            sys.exit(f'extract: {part} was written by another Lean')
+        records.extend(r for r in part_records[1:-1])
+    records.append({'r': 'end'})
     with gzip.open(out / 'graph.jsonl.gz', 'wt', compresslevel=6) as f:
         for r in records:
             f.write(json.dumps(r, sort_keys=True) + '\n')
@@ -201,7 +224,7 @@ def extract(repo, rev):
         'missing_compiled': missing,
         'build_command': 'bash scripts/coord-tools/gate.sh per-file '
                          + str((work / 'Build-lib.lean').relative_to(repo)),
-        'extract_command': 'LEAN_INVENTORY_OUT=... LEAN_INVENTORY_MODULES=... bash '
+        'extract_command': 'LEAN_INVENTORY_OUT=... LEAN_INVENTORY_MODULES=... LEAN_INVENTORY_SHARD=k/n bash '
                            'scripts/coord-tools/gate.sh per-file scripts/lean-inventory/Extract.lean',
     }
     (out / 'anon.json').write_text(json.dumps({m: [list(u) for u in v] for m, v in anon.items()},
