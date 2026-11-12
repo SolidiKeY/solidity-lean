@@ -1,0 +1,1862 @@
+{
+ "anchor_unverified_generation_claims": 40,
+ "calibration": {
+  "Solidity/Automation": {
+   "anchor": "86c2fd3658c3ba8e86d5b4a6b1d626c7cb853e38",
+   "denominator_source": "self",
+   "metrics": {
+    "comment_lines": {
+     "anchor_denominator": 38,
+     "anchor_numerator": 28,
+     "case": "ratio",
+     "lookback_commits_with_area": 640,
+     "margin": "0",
+     "margin_witness": null,
+     "ratio": "14/19"
+    },
+    "docs_lines": {
+     "anchor_denominator": 38,
+     "anchor_numerator": 0,
+     "case": "zero_numerator",
+     "lookback_commits_with_area": 640,
+     "margin": "0",
+     "margin_witness": null,
+     "ratio": "0"
+    },
+    "docstring_lines": {
+     "anchor_denominator": 38,
+     "anchor_numerator": 28,
+     "case": "ratio",
+     "lookback_commits_with_area": 640,
+     "margin": "0",
+     "margin_witness": null,
+     "ratio": "14/19"
+    },
+    "process_ids": {
+     "anchor_denominator": 38,
+     "anchor_numerator": 8,
+     "case": "ratio",
+     "lookback_commits_with_area": 640,
+     "margin": "0",
+     "margin_witness": null,
+     "ratio": "4/19"
+    }
+   }
+  },
+  "Solidity/Backend": {
+   "anchor": "86c2fd3658c3ba8e86d5b4a6b1d626c7cb853e38",
+   "denominator_source": "self",
+   "metrics": {
+    "comment_lines": {
+     "anchor_denominator": 226789,
+     "anchor_numerator": 28527,
+     "case": "ratio",
+     "lookback_commits_with_area": 938,
+     "margin": "709442792/226789",
+     "margin_witness": "e6a47c886559a390943a5cc711fe65cae41a48d5",
+     "ratio": "28527/226789"
+    },
+    "docs_lines": {
+     "anchor_denominator": 226789,
+     "anchor_numerator": 0,
+     "case": "zero_numerator",
+     "lookback_commits_with_area": 938,
+     "margin": "0",
+     "margin_witness": null,
+     "ratio": "0"
+    },
+    "docstring_lines": {
+     "anchor_denominator": 226789,
+     "anchor_numerator": 28469,
+     "case": "ratio",
+     "lookback_commits_with_area": 938,
+     "margin": "704365428/226789",
+     "margin_witness": "e6a47c886559a390943a5cc711fe65cae41a48d5",
+     "ratio": "28469/226789"
+    },
+    "process_ids": {
+     "anchor_denominator": 226789,
+     "anchor_numerator": 1208,
+     "case": "ratio",
+     "lookback_commits_with_area": 938,
+     "margin": "48105368/226789",
+     "margin_witness": "fc2db74ab8a826515fcef3b9bfa50d4e5dc789de",
+     "ratio": "1208/226789"
+    }
+   }
+  },
+  "Solidity/Calculus": {
+   "anchor": "86c2fd3658c3ba8e86d5b4a6b1d626c7cb853e38",
+   "denominator_source": "self",
+   "metrics": {
+    "comment_lines": {
+     "anchor_denominator": 130822,
+     "anchor_numerator": 22861,
+     "case": "ratio",
+     "lookback_commits_with_area": 938,
+     "margin": "7851730/65411",
+     "margin_witness": "3a17f451f9e9cb5ca6dd38c566c660b38b9e8746",
+     "ratio": "22861/130822"
+    },
+    "docs_lines": {
+     "anchor_denominator": 130822,
+     "anchor_numerator": 0,
+     "case": "zero_numerator",
+     "lookback_commits_with_area": 938,
+     "margin": "0",
+     "margin_witness": null,
+     "ratio": "0"
+    },
+    "docstring_lines": {
+     "anchor_denominator": 130822,
+     "anchor_numerator": 22004,
+     "case": "ratio",
+     "lookback_commits_with_area": 938,
+     "margin": "5269589/65411",
+     "margin_witness": "3a17f451f9e9cb5ca6dd38c566c660b38b9e8746",
+     "ratio": "11002/65411"
+    },
+    "process_ids": {
+     "anchor_denominator": 130822,
+     "anchor_numerator": 56,
+     "case": "ratio",
+     "lookback_commits_with_area": 938,
+     "margin": "182168/65411",
+     "margin_witness": "1520c8f054083940bad5a031eeea2ba24a8fc7de",
+     "ratio": "28/65411"
+    }
+   }
+  },
+  "Solidity/Corpus": {
+   "anchor": "86c2fd3658c3ba8e86d5b4a6b1d626c7cb853e38",
+   "denominator_source": "self",
+   "metrics": {
+    "comment_lines": {
+     "anchor_denominator": 2406,
+     "anchor_numerator": 1143,
+     "case": "ratio",
+     "lookback_commits_with_area": 938,
+     "margin": "0",
+     "margin_witness": null,
+     "ratio": "381/802"
+    },
+    "docs_lines": {
+     "anchor_denominator": 2406,
+     "anchor_numerator": 0,
+     "case": "zero_numerator",
+     "lookback_commits_with_area": 938,
+     "margin": "0",
+     "margin_witness": null,
+     "ratio": "0"
+    },
+    "docstring_lines": {
+     "anchor_denominator": 2406,
+     "anchor_numerator": 1142,
+     "case": "ratio",
+     "lookback_commits_with_area": 938,
+     "margin": "0",
+     "margin_witness": null,
+     "ratio": "571/1203"
+    },
+    "process_ids": {
+     "anchor_denominator": 2406,
+     "anchor_numerator": 0,
+     "case": "zero_numerator",
+     "lookback_commits_with_area": 938,
+     "margin": "0",
+     "margin_witness": null,
+     "ratio": "0"
+    }
+   }
+  },
+  "Solidity/Correctness": {
+   "anchor": "86c2fd3658c3ba8e86d5b4a6b1d626c7cb853e38",
+   "denominator_source": "self",
+   "metrics": {
+    "comment_lines": {
+     "anchor_denominator": 600,
+     "anchor_numerator": 336,
+     "case": "ratio",
+     "lookback_commits_with_area": 125,
+     "margin": "0",
+     "margin_witness": null,
+     "ratio": "14/25"
+    },
+    "docs_lines": {
+     "anchor_denominator": 600,
+     "anchor_numerator": 0,
+     "case": "zero_numerator",
+     "lookback_commits_with_area": 125,
+     "margin": "0",
+     "margin_witness": null,
+     "ratio": "0"
+    },
+    "docstring_lines": {
+     "anchor_denominator": 600,
+     "anchor_numerator": 336,
+     "case": "ratio",
+     "lookback_commits_with_area": 125,
+     "margin": "0",
+     "margin_witness": null,
+     "ratio": "14/25"
+    },
+    "process_ids": {
+     "anchor_denominator": 600,
+     "anchor_numerator": 26,
+     "case": "ratio",
+     "lookback_commits_with_area": 125,
+     "margin": "0",
+     "margin_witness": null,
+     "ratio": "13/300"
+    }
+   }
+  },
+  "Solidity/Counterexamples": {
+   "anchor": "86c2fd3658c3ba8e86d5b4a6b1d626c7cb853e38",
+   "denominator_source": "self",
+   "metrics": {
+    "comment_lines": {
+     "anchor_denominator": 180,
+     "anchor_numerator": 194,
+     "case": "ratio",
+     "lookback_commits_with_area": 938,
+     "margin": "0",
+     "margin_witness": null,
+     "ratio": "97/90"
+    },
+    "docs_lines": {
+     "anchor_denominator": 180,
+     "anchor_numerator": 0,
+     "case": "zero_numerator",
+     "lookback_commits_with_area": 938,
+     "margin": "0",
+     "margin_witness": null,
+     "ratio": "0"
+    },
+    "docstring_lines": {
+     "anchor_denominator": 180,
+     "anchor_numerator": 174,
+     "case": "ratio",
+     "lookback_commits_with_area": 938,
+     "margin": "0",
+     "margin_witness": null,
+     "ratio": "29/30"
+    },
+    "process_ids": {
+     "anchor_denominator": 180,
+     "anchor_numerator": 0,
+     "case": "zero_numerator",
+     "lookback_commits_with_area": 938,
+     "margin": "0",
+     "margin_witness": null,
+     "ratio": "0"
+    }
+   }
+  },
+  "Solidity/Evm": {
+   "anchor": "86c2fd3658c3ba8e86d5b4a6b1d626c7cb853e38",
+   "denominator_source": "self",
+   "metrics": {
+    "comment_lines": {
+     "anchor_denominator": 37758,
+     "anchor_numerator": 3788,
+     "case": "ratio",
+     "lookback_commits_with_area": 938,
+     "margin": "0",
+     "margin_witness": null,
+     "ratio": "1894/18879"
+    },
+    "docs_lines": {
+     "anchor_denominator": 37758,
+     "anchor_numerator": 0,
+     "case": "zero_numerator",
+     "lookback_commits_with_area": 938,
+     "margin": "0",
+     "margin_witness": null,
+     "ratio": "0"
+    },
+    "docstring_lines": {
+     "anchor_denominator": 37758,
+     "anchor_numerator": 3734,
+     "case": "ratio",
+     "lookback_commits_with_area": 938,
+     "margin": "0",
+     "margin_witness": null,
+     "ratio": "1867/18879"
+    },
+    "process_ids": {
+     "anchor_denominator": 37758,
+     "anchor_numerator": 9,
+     "case": "ratio",
+     "lookback_commits_with_area": 938,
+     "margin": "165/12586",
+     "margin_witness": "9f8df7e206865770ed7372fe760d5a6e628fe1d2",
+     "ratio": "3/12586"
+    }
+   }
+  },
+  "Solidity/Examples": {
+   "anchor": "86c2fd3658c3ba8e86d5b4a6b1d626c7cb853e38",
+   "denominator_source": "self",
+   "metrics": {
+    "comment_lines": {
+     "anchor_denominator": 38301,
+     "anchor_numerator": 16187,
+     "case": "ratio",
+     "lookback_commits_with_area": 938,
+     "margin": "51226109/38301",
+     "margin_witness": "07fcc200489acec6f0e0c65edbee165e49253ce9",
+     "ratio": "16187/38301"
+    },
+    "docs_lines": {
+     "anchor_denominator": 38301,
+     "anchor_numerator": 0,
+     "case": "zero_numerator",
+     "lookback_commits_with_area": 938,
+     "margin": "0",
+     "margin_witness": null,
+     "ratio": "0"
+    },
+    "docstring_lines": {
+     "anchor_denominator": 38301,
+     "anchor_numerator": 15612,
+     "case": "ratio",
+     "lookback_commits_with_area": 938,
+     "margin": "16076413/12767",
+     "margin_witness": "07fcc200489acec6f0e0c65edbee165e49253ce9",
+     "ratio": "5204/12767"
+    },
+    "process_ids": {
+     "anchor_denominator": 38301,
+     "anchor_numerator": 19,
+     "case": "ratio",
+     "lookback_commits_with_area": 938,
+     "margin": "72431/38301",
+     "margin_witness": "b7e4d59705761eb9718381800d2a658d74c78649",
+     "ratio": "19/38301"
+    }
+   }
+  },
+  "Solidity/Frontend": {
+   "anchor": "86c2fd3658c3ba8e86d5b4a6b1d626c7cb853e38",
+   "denominator_source": "self",
+   "metrics": {
+    "comment_lines": {
+     "anchor_denominator": 84862,
+     "anchor_numerator": 9217,
+     "case": "ratio",
+     "lookback_commits_with_area": 938,
+     "margin": "113845447/84862",
+     "margin_witness": "50cfcc9f2fb368831475a1d3be6a43d3969b8725",
+     "ratio": "9217/84862"
+    },
+    "docs_lines": {
+     "anchor_denominator": 84862,
+     "anchor_numerator": 0,
+     "case": "zero_numerator",
+     "lookback_commits_with_area": 938,
+     "margin": "0",
+     "margin_witness": null,
+     "ratio": "0"
+    },
+    "docstring_lines": {
+     "anchor_denominator": 84862,
+     "anchor_numerator": 8451,
+     "case": "ratio",
+     "lookback_commits_with_area": 938,
+     "margin": "41701525/42431",
+     "margin_witness": "7886cf301fa72852d6aec862c353e0d299ea9117",
+     "ratio": "8451/84862"
+    },
+    "process_ids": {
+     "anchor_denominator": 84862,
+     "anchor_numerator": 171,
+     "case": "ratio",
+     "lookback_commits_with_area": 938,
+     "margin": "6126543/84862",
+     "margin_witness": "1e1d4e4f929c19a2408997fce3b6c74a787519d0",
+     "ratio": "171/84862"
+    }
+   }
+  },
+  "Solidity/Goals": {
+   "anchor": "86c2fd3658c3ba8e86d5b4a6b1d626c7cb853e38",
+   "denominator_source": "self",
+   "metrics": {
+    "comment_lines": {
+     "anchor_denominator": 97,
+     "anchor_numerator": 16,
+     "case": "ratio",
+     "lookback_commits_with_area": 1,
+     "margin": "0",
+     "margin_witness": null,
+     "ratio": "16/97"
+    },
+    "docs_lines": {
+     "anchor_denominator": 97,
+     "anchor_numerator": 0,
+     "case": "zero_numerator",
+     "lookback_commits_with_area": 1,
+     "margin": "0",
+     "margin_witness": null,
+     "ratio": "0"
+    },
+    "docstring_lines": {
+     "anchor_denominator": 97,
+     "anchor_numerator": 16,
+     "case": "ratio",
+     "lookback_commits_with_area": 1,
+     "margin": "0",
+     "margin_witness": null,
+     "ratio": "16/97"
+    },
+    "process_ids": {
+     "anchor_denominator": 97,
+     "anchor_numerator": 1,
+     "case": "ratio",
+     "lookback_commits_with_area": 1,
+     "margin": "0",
+     "margin_witness": null,
+     "ratio": "1/97"
+    }
+   }
+  },
+  "Solidity/Hash": {
+   "anchor": "86c2fd3658c3ba8e86d5b4a6b1d626c7cb853e38",
+   "denominator_source": "self",
+   "metrics": {
+    "comment_lines": {
+     "anchor_denominator": 1649,
+     "anchor_numerator": 371,
+     "case": "ratio",
+     "lookback_commits_with_area": 938,
+     "margin": "0",
+     "margin_witness": null,
+     "ratio": "371/1649"
+    },
+    "docs_lines": {
+     "anchor_denominator": 1649,
+     "anchor_numerator": 0,
+     "case": "zero_numerator",
+     "lookback_commits_with_area": 938,
+     "margin": "0",
+     "margin_witness": null,
+     "ratio": "0"
+    },
+    "docstring_lines": {
+     "anchor_denominator": 1649,
+     "anchor_numerator": 371,
+     "case": "ratio",
+     "lookback_commits_with_area": 938,
+     "margin": "0",
+     "margin_witness": null,
+     "ratio": "371/1649"
+    },
+    "process_ids": {
+     "anchor_denominator": 1649,
+     "anchor_numerator": 5,
+     "case": "ratio",
+     "lookback_commits_with_area": 938,
+     "margin": "0",
+     "margin_witness": null,
+     "ratio": "5/1649"
+    }
+   }
+  },
+  "Solidity/Language": {
+   "anchor": "86c2fd3658c3ba8e86d5b4a6b1d626c7cb853e38",
+   "denominator_source": "self",
+   "metrics": {
+    "comment_lines": {
+     "anchor_denominator": 4608,
+     "anchor_numerator": 838,
+     "case": "ratio",
+     "lookback_commits_with_area": 938,
+     "margin": "12431/192",
+     "margin_witness": "50cfcc9f2fb368831475a1d3be6a43d3969b8725",
+     "ratio": "419/2304"
+    },
+    "docs_lines": {
+     "anchor_denominator": 4608,
+     "anchor_numerator": 0,
+     "case": "zero_numerator",
+     "lookback_commits_with_area": 938,
+     "margin": "0",
+     "margin_witness": null,
+     "ratio": "0"
+    },
+    "docstring_lines": {
+     "anchor_denominator": 4608,
+     "anchor_numerator": 829,
+     "case": "ratio",
+     "lookback_commits_with_area": 938,
+     "margin": "24529/384",
+     "margin_witness": "50cfcc9f2fb368831475a1d3be6a43d3969b8725",
+     "ratio": "829/4608"
+    },
+    "process_ids": {
+     "anchor_denominator": 4608,
+     "anchor_numerator": 8,
+     "case": "ratio",
+     "lookback_commits_with_area": 938,
+     "margin": "11/576",
+     "margin_witness": "b6ba0696102a7a038afe2ed333c09dff397cc5b2",
+     "ratio": "1/576"
+    }
+   }
+  },
+  "Solidity/Lowering": {
+   "anchor": "86c2fd3658c3ba8e86d5b4a6b1d626c7cb853e38",
+   "denominator_source": "self",
+   "metrics": {
+    "comment_lines": {
+     "anchor_denominator": 86016,
+     "anchor_numerator": 10320,
+     "case": "ratio",
+     "lookback_commits_with_area": 938,
+     "margin": "149529/448",
+     "margin_witness": "f454527e4bfe54551b443234802cc412bef73f54",
+     "ratio": "215/1792"
+    },
+    "docs_lines": {
+     "anchor_denominator": 86016,
+     "anchor_numerator": 0,
+     "case": "zero_numerator",
+     "lookback_commits_with_area": 938,
+     "margin": "0",
+     "margin_witness": null,
+     "ratio": "0"
+    },
+    "docstring_lines": {
+     "anchor_denominator": 86016,
+     "anchor_numerator": 10158,
+     "case": "ratio",
+     "lookback_commits_with_area": 938,
+     "margin": "1162995/3584",
+     "margin_witness": "f454527e4bfe54551b443234802cc412bef73f54",
+     "ratio": "1693/14336"
+    },
+    "process_ids": {
+     "anchor_denominator": 86016,
+     "anchor_numerator": 468,
+     "case": "ratio",
+     "lookback_commits_with_area": 938,
+     "margin": "0",
+     "margin_witness": null,
+     "ratio": "39/7168"
+    }
+   }
+  },
+  "Solidity/Optimizer": {
+   "anchor": "86c2fd3658c3ba8e86d5b4a6b1d626c7cb853e38",
+   "denominator_source": "self",
+   "metrics": {
+    "comment_lines": {
+     "anchor_denominator": 5379,
+     "anchor_numerator": 709,
+     "case": "ratio",
+     "lookback_commits_with_area": 679,
+     "margin": "19903/489",
+     "margin_witness": "5c11bcef8b7eadc291b2c95268debbd3e700c78b",
+     "ratio": "709/5379"
+    },
+    "docs_lines": {
+     "anchor_denominator": 5379,
+     "anchor_numerator": 0,
+     "case": "zero_numerator",
+     "lookback_commits_with_area": 679,
+     "margin": "0",
+     "margin_witness": null,
+     "ratio": "0"
+    },
+    "docstring_lines": {
+     "anchor_denominator": 5379,
+     "anchor_numerator": 707,
+     "case": "ratio",
+     "lookback_commits_with_area": 679,
+     "margin": "19931/489",
+     "margin_witness": "5c11bcef8b7eadc291b2c95268debbd3e700c78b",
+     "ratio": "707/5379"
+    },
+    "process_ids": {
+     "anchor_denominator": 5379,
+     "anchor_numerator": 1,
+     "case": "ratio",
+     "lookback_commits_with_area": 679,
+     "margin": "478/489",
+     "margin_witness": "b26a5a8fc25b77f86fd62bb57447491da47ae73c",
+     "ratio": "1/5379"
+    }
+   }
+  },
+  "Solidity/Precompiles": {
+   "anchor": "86c2fd3658c3ba8e86d5b4a6b1d626c7cb853e38",
+   "denominator_source": "self",
+   "metrics": {
+    "comment_lines": {
+     "anchor_denominator": 1313,
+     "anchor_numerator": 443,
+     "case": "ratio",
+     "lookback_commits_with_area": 938,
+     "margin": "3560/1313",
+     "margin_witness": "50cfcc9f2fb368831475a1d3be6a43d3969b8725",
+     "ratio": "443/1313"
+    },
+    "docs_lines": {
+     "anchor_denominator": 1313,
+     "anchor_numerator": 0,
+     "case": "zero_numerator",
+     "lookback_commits_with_area": 938,
+     "margin": "0",
+     "margin_witness": null,
+     "ratio": "0"
+    },
+    "docstring_lines": {
+     "anchor_denominator": 1313,
+     "anchor_numerator": 439,
+     "case": "ratio",
+     "lookback_commits_with_area": 938,
+     "margin": "3516/1313",
+     "margin_witness": "50cfcc9f2fb368831475a1d3be6a43d3969b8725",
+     "ratio": "439/1313"
+    },
+    "process_ids": {
+     "anchor_denominator": 1313,
+     "anchor_numerator": 47,
+     "case": "ratio",
+     "lookback_commits_with_area": 938,
+     "margin": "517/1313",
+     "margin_witness": "50cfcc9f2fb368831475a1d3be6a43d3969b8725",
+     "ratio": "47/1313"
+    }
+   }
+  },
+  "Solidity/Roadmap": {
+   "anchor": "86c2fd3658c3ba8e86d5b4a6b1d626c7cb853e38",
+   "denominator_source": "self",
+   "metrics": {
+    "comment_lines": {
+     "anchor_denominator": 3276,
+     "anchor_numerator": 1383,
+     "case": "ratio",
+     "lookback_commits_with_area": 938,
+     "margin": "148079/546",
+     "margin_witness": "50cfcc9f2fb368831475a1d3be6a43d3969b8725",
+     "ratio": "461/1092"
+    },
+    "docs_lines": {
+     "anchor_denominator": 3276,
+     "anchor_numerator": 0,
+     "case": "zero_numerator",
+     "lookback_commits_with_area": 938,
+     "margin": "0",
+     "margin_witness": null,
+     "ratio": "0"
+    },
+    "docstring_lines": {
+     "anchor_denominator": 3276,
+     "anchor_numerator": 1381,
+     "case": "ratio",
+     "lookback_commits_with_area": 938,
+     "margin": "442531/1638",
+     "margin_witness": "50cfcc9f2fb368831475a1d3be6a43d3969b8725",
+     "ratio": "1381/3276"
+    },
+    "process_ids": {
+     "anchor_denominator": 3276,
+     "anchor_numerator": 85,
+     "case": "ratio",
+     "lookback_commits_with_area": 938,
+     "margin": "26641/1638",
+     "margin_witness": "50cfcc9f2fb368831475a1d3be6a43d3969b8725",
+     "ratio": "85/3276"
+    }
+   }
+  },
+  "Solidity/Scratch": {
+   "anchor": "84e9aff49c99cce0e883431c7db8514968a11b8d",
+   "denominator_source": "self",
+   "metrics": {
+    "comment_lines": {
+     "anchor_denominator": 1345,
+     "anchor_numerator": 220,
+     "case": "ratio",
+     "lookback_commits_with_area": 8,
+     "margin": "405/269",
+     "margin_witness": "6fa3e28ff8c79df7a4814a7ccb879b497cc3baf2",
+     "ratio": "44/269"
+    },
+    "docs_lines": {
+     "anchor_denominator": 1345,
+     "anchor_numerator": 0,
+     "case": "zero_numerator",
+     "lookback_commits_with_area": 8,
+     "margin": "0",
+     "margin_witness": null,
+     "ratio": "0"
+    },
+    "docstring_lines": {
+     "anchor_denominator": 1345,
+     "anchor_numerator": 212,
+     "case": "ratio",
+     "lookback_commits_with_area": 8,
+     "margin": "1609/1345",
+     "margin_witness": "6fa3e28ff8c79df7a4814a7ccb879b497cc3baf2",
+     "ratio": "212/1345"
+    },
+    "process_ids": {
+     "anchor_denominator": 1345,
+     "anchor_numerator": 0,
+     "case": "zero_numerator",
+     "lookback_commits_with_area": 8,
+     "margin": "0",
+     "margin_witness": null,
+     "ratio": "0"
+    }
+   }
+  },
+  "Solidity/Semantics": {
+   "anchor": "86c2fd3658c3ba8e86d5b4a6b1d626c7cb853e38",
+   "denominator_source": "self",
+   "metrics": {
+    "comment_lines": {
+     "anchor_denominator": 19034,
+     "anchor_numerator": 3846,
+     "case": "ratio",
+     "lookback_commits_with_area": 938,
+     "margin": "101919/9517",
+     "margin_witness": "3a17f451f9e9cb5ca6dd38c566c660b38b9e8746",
+     "ratio": "1923/9517"
+    },
+    "docs_lines": {
+     "anchor_denominator": 19034,
+     "anchor_numerator": 0,
+     "case": "zero_numerator",
+     "lookback_commits_with_area": 938,
+     "margin": "0",
+     "margin_witness": null,
+     "ratio": "0"
+    },
+    "docstring_lines": {
+     "anchor_denominator": 19034,
+     "anchor_numerator": 3816,
+     "case": "ratio",
+     "lookback_commits_with_area": 938,
+     "margin": "101124/9517",
+     "margin_witness": "3a17f451f9e9cb5ca6dd38c566c660b38b9e8746",
+     "ratio": "1908/9517"
+    },
+    "process_ids": {
+     "anchor_denominator": 19034,
+     "anchor_numerator": 108,
+     "case": "ratio",
+     "lookback_commits_with_area": 938,
+     "margin": "5076/9517",
+     "margin_witness": "b83fc27609fa4ef5060259e2b21799b91b3dc3af",
+     "ratio": "54/9517"
+    }
+   }
+  },
+  "Solidity/SolcValidation": {
+   "anchor": "86c2fd3658c3ba8e86d5b4a6b1d626c7cb853e38",
+   "denominator_source": "self",
+   "metrics": {
+    "comment_lines": {
+     "anchor_denominator": 5584,
+     "anchor_numerator": 1043,
+     "case": "ratio",
+     "lookback_commits_with_area": 644,
+     "margin": "121835/5584",
+     "margin_witness": "ed3b421716d24692f09e52cd99aed87ce4bed10a",
+     "ratio": "1043/5584"
+    },
+    "docs_lines": {
+     "anchor_denominator": 5584,
+     "anchor_numerator": 0,
+     "case": "zero_numerator",
+     "lookback_commits_with_area": 644,
+     "margin": "0",
+     "margin_witness": null,
+     "ratio": "0"
+    },
+    "docstring_lines": {
+     "anchor_denominator": 5584,
+     "anchor_numerator": 985,
+     "case": "ratio",
+     "lookback_commits_with_area": 644,
+     "margin": "132449/5584",
+     "margin_witness": "ed3b421716d24692f09e52cd99aed87ce4bed10a",
+     "ratio": "985/5584"
+    },
+    "process_ids": {
+     "anchor_denominator": 5584,
+     "anchor_numerator": 8,
+     "case": "ratio",
+     "lookback_commits_with_area": 644,
+     "margin": "0",
+     "margin_witness": null,
+     "ratio": "1/698"
+    }
+   }
+  },
+  "Solidity/Solkey": {
+   "anchor": "86c2fd3658c3ba8e86d5b4a6b1d626c7cb853e38",
+   "denominator_source": "self",
+   "metrics": {
+    "comment_lines": {
+     "anchor_denominator": 78,
+     "anchor_numerator": 142,
+     "case": "ratio",
+     "lookback_commits_with_area": 938,
+     "margin": "0",
+     "margin_witness": null,
+     "ratio": "71/39"
+    },
+    "docs_lines": {
+     "anchor_denominator": 78,
+     "anchor_numerator": 0,
+     "case": "zero_numerator",
+     "lookback_commits_with_area": 938,
+     "margin": "0",
+     "margin_witness": null,
+     "ratio": "0"
+    },
+    "docstring_lines": {
+     "anchor_denominator": 78,
+     "anchor_numerator": 140,
+     "case": "ratio",
+     "lookback_commits_with_area": 938,
+     "margin": "0",
+     "margin_witness": null,
+     "ratio": "70/39"
+    },
+    "process_ids": {
+     "anchor_denominator": 78,
+     "anchor_numerator": 0,
+     "case": "zero_numerator",
+     "lookback_commits_with_area": 938,
+     "margin": "0",
+     "margin_witness": null,
+     "ratio": "0"
+    }
+   }
+  },
+  "Solidity/SortCheck": {
+   "anchor": "86c2fd3658c3ba8e86d5b4a6b1d626c7cb853e38",
+   "denominator_source": "self",
+   "metrics": {
+    "comment_lines": {
+     "anchor_denominator": 797,
+     "anchor_numerator": 359,
+     "case": "ratio",
+     "lookback_commits_with_area": 938,
+     "margin": "0",
+     "margin_witness": null,
+     "ratio": "359/797"
+    },
+    "docs_lines": {
+     "anchor_denominator": 797,
+     "anchor_numerator": 0,
+     "case": "zero_numerator",
+     "lookback_commits_with_area": 938,
+     "margin": "0",
+     "margin_witness": null,
+     "ratio": "0"
+    },
+    "docstring_lines": {
+     "anchor_denominator": 797,
+     "anchor_numerator": 310,
+     "case": "ratio",
+     "lookback_commits_with_area": 938,
+     "margin": "0",
+     "margin_witness": null,
+     "ratio": "310/797"
+    },
+    "process_ids": {
+     "anchor_denominator": 797,
+     "anchor_numerator": 0,
+     "case": "zero_numerator",
+     "lookback_commits_with_area": 938,
+     "margin": "0",
+     "margin_witness": null,
+     "ratio": "0"
+    }
+   }
+  },
+  "Solidity/Source": {
+   "anchor": "86c2fd3658c3ba8e86d5b4a6b1d626c7cb853e38",
+   "denominator_source": "self",
+   "metrics": {
+    "comment_lines": {
+     "anchor_denominator": 38066,
+     "anchor_numerator": 6540,
+     "case": "ratio",
+     "lookback_commits_with_area": 938,
+     "margin": "3484462/2719",
+     "margin_witness": "72d69d5a7fd772626133244edf47d589977a28fd",
+     "ratio": "3270/19033"
+    },
+    "docs_lines": {
+     "anchor_denominator": 38066,
+     "anchor_numerator": 0,
+     "case": "zero_numerator",
+     "lookback_commits_with_area": 938,
+     "margin": "0",
+     "margin_witness": null,
+     "ratio": "0"
+    },
+    "docstring_lines": {
+     "anchor_denominator": 38066,
+     "anchor_numerator": 6370,
+     "case": "ratio",
+     "lookback_commits_with_area": 938,
+     "margin": "3342060/2719",
+     "margin_witness": "72d69d5a7fd772626133244edf47d589977a28fd",
+     "ratio": "455/2719"
+    },
+    "process_ids": {
+     "anchor_denominator": 38066,
+     "anchor_numerator": 126,
+     "case": "ratio",
+     "lookback_commits_with_area": 938,
+     "margin": "49387/2719",
+     "margin_witness": "725ea2e0d3645c51ce88a749807e537bb82cfa4d",
+     "ratio": "9/2719"
+    }
+   }
+  },
+  "Solidity/Stipend": {
+   "anchor": "86c2fd3658c3ba8e86d5b4a6b1d626c7cb853e38",
+   "denominator_source": "self",
+   "metrics": {
+    "comment_lines": {
+     "anchor_denominator": 140,
+     "anchor_numerator": 90,
+     "case": "ratio",
+     "lookback_commits_with_area": 938,
+     "margin": "0",
+     "margin_witness": null,
+     "ratio": "9/14"
+    },
+    "docs_lines": {
+     "anchor_denominator": 140,
+     "anchor_numerator": 0,
+     "case": "zero_numerator",
+     "lookback_commits_with_area": 938,
+     "margin": "0",
+     "margin_witness": null,
+     "ratio": "0"
+    },
+    "docstring_lines": {
+     "anchor_denominator": 140,
+     "anchor_numerator": 88,
+     "case": "ratio",
+     "lookback_commits_with_area": 938,
+     "margin": "0",
+     "margin_witness": null,
+     "ratio": "22/35"
+    },
+    "process_ids": {
+     "anchor_denominator": 140,
+     "anchor_numerator": 6,
+     "case": "ratio",
+     "lookback_commits_with_area": 938,
+     "margin": "0",
+     "margin_witness": null,
+     "ratio": "3/70"
+    }
+   }
+  },
+  "Solidity/Storage": {
+   "anchor": "86c2fd3658c3ba8e86d5b4a6b1d626c7cb853e38",
+   "denominator_source": "self",
+   "metrics": {
+    "comment_lines": {
+     "anchor_denominator": 3144,
+     "anchor_numerator": 501,
+     "case": "ratio",
+     "lookback_commits_with_area": 938,
+     "margin": "0",
+     "margin_witness": null,
+     "ratio": "167/1048"
+    },
+    "docs_lines": {
+     "anchor_denominator": 3144,
+     "anchor_numerator": 0,
+     "case": "zero_numerator",
+     "lookback_commits_with_area": 938,
+     "margin": "0",
+     "margin_witness": null,
+     "ratio": "0"
+    },
+    "docstring_lines": {
+     "anchor_denominator": 3144,
+     "anchor_numerator": 487,
+     "case": "ratio",
+     "lookback_commits_with_area": 938,
+     "margin": "0",
+     "margin_witness": null,
+     "ratio": "487/3144"
+    },
+    "process_ids": {
+     "anchor_denominator": 3144,
+     "anchor_numerator": 10,
+     "case": "ratio",
+     "lookback_commits_with_area": 938,
+     "margin": "5/131",
+     "margin_witness": "50cfcc9f2fb368831475a1d3be6a43d3969b8725",
+     "ratio": "5/1572"
+    }
+   }
+  },
+  "Solidity/Syntax": {
+   "anchor": "86c2fd3658c3ba8e86d5b4a6b1d626c7cb853e38",
+   "denominator_source": "self",
+   "metrics": {
+    "comment_lines": {
+     "anchor_denominator": 10276,
+     "anchor_numerator": 3096,
+     "case": "ratio",
+     "lookback_commits_with_area": 938,
+     "margin": "0",
+     "margin_witness": null,
+     "ratio": "774/2569"
+    },
+    "docs_lines": {
+     "anchor_denominator": 10276,
+     "anchor_numerator": 0,
+     "case": "zero_numerator",
+     "lookback_commits_with_area": 938,
+     "margin": "0",
+     "margin_witness": null,
+     "ratio": "0"
+    },
+    "docstring_lines": {
+     "anchor_denominator": 10276,
+     "anchor_numerator": 2532,
+     "case": "ratio",
+     "lookback_commits_with_area": 938,
+     "margin": "0",
+     "margin_witness": null,
+     "ratio": "633/2569"
+    },
+    "process_ids": {
+     "anchor_denominator": 10276,
+     "anchor_numerator": 3,
+     "case": "ratio",
+     "lookback_commits_with_area": 938,
+     "margin": "45/10276",
+     "margin_witness": "50cfcc9f2fb368831475a1d3be6a43d3969b8725",
+     "ratio": "3/10276"
+    }
+   }
+  },
+  "Solidity/TestSuite": {
+   "anchor": "86c2fd3658c3ba8e86d5b4a6b1d626c7cb853e38",
+   "denominator_source": "self",
+   "metrics": {
+    "comment_lines": {
+     "anchor_denominator": 3673,
+     "anchor_numerator": 386,
+     "case": "ratio",
+     "lookback_commits_with_area": 938,
+     "margin": "16001/3673",
+     "margin_witness": "50cfcc9f2fb368831475a1d3be6a43d3969b8725",
+     "ratio": "386/3673"
+    },
+    "docs_lines": {
+     "anchor_denominator": 3673,
+     "anchor_numerator": 0,
+     "case": "zero_numerator",
+     "lookback_commits_with_area": 938,
+     "margin": "0",
+     "margin_witness": null,
+     "ratio": "0"
+    },
+    "docstring_lines": {
+     "anchor_denominator": 3673,
+     "anchor_numerator": 374,
+     "case": "ratio",
+     "lookback_commits_with_area": 938,
+     "margin": "18834/3673",
+     "margin_witness": "50cfcc9f2fb368831475a1d3be6a43d3969b8725",
+     "ratio": "374/3673"
+    },
+    "process_ids": {
+     "anchor_denominator": 3673,
+     "anchor_numerator": 0,
+     "case": "zero_numerator",
+     "lookback_commits_with_area": 938,
+     "margin": "0",
+     "margin_witness": null,
+     "ratio": "0"
+    }
+   }
+  },
+  "Solidity/Theory": {
+   "anchor": "86c2fd3658c3ba8e86d5b4a6b1d626c7cb853e38",
+   "denominator_source": "self",
+   "metrics": {
+    "comment_lines": {
+     "anchor_denominator": 6473,
+     "anchor_numerator": 1481,
+     "case": "ratio",
+     "lookback_commits_with_area": 938,
+     "margin": "0",
+     "margin_witness": null,
+     "ratio": "1481/6473"
+    },
+    "docs_lines": {
+     "anchor_denominator": 6473,
+     "anchor_numerator": 0,
+     "case": "zero_numerator",
+     "lookback_commits_with_area": 938,
+     "margin": "0",
+     "margin_witness": null,
+     "ratio": "0"
+    },
+    "docstring_lines": {
+     "anchor_denominator": 6473,
+     "anchor_numerator": 1481,
+     "case": "ratio",
+     "lookback_commits_with_area": 938,
+     "margin": "0",
+     "margin_witness": null,
+     "ratio": "1481/6473"
+    },
+    "process_ids": {
+     "anchor_denominator": 6473,
+     "anchor_numerator": 14,
+     "case": "ratio",
+     "lookback_commits_with_area": 938,
+     "margin": "1876/6473",
+     "margin_witness": "058d465ccaed8c2db514347c2129efdee836ed0c",
+     "ratio": "14/6473"
+    }
+   }
+  },
+  "Solidity/Tools": {
+   "anchor": "86c2fd3658c3ba8e86d5b4a6b1d626c7cb853e38",
+   "denominator_source": "self",
+   "metrics": {
+    "comment_lines": {
+     "anchor_denominator": 6167,
+     "anchor_numerator": 1700,
+     "case": "ratio",
+     "lookback_commits_with_area": 938,
+     "margin": "513565/6167",
+     "margin_witness": "50cfcc9f2fb368831475a1d3be6a43d3969b8725",
+     "ratio": "1700/6167"
+    },
+    "docs_lines": {
+     "anchor_denominator": 6167,
+     "anchor_numerator": 0,
+     "case": "zero_numerator",
+     "lookback_commits_with_area": 938,
+     "margin": "0",
+     "margin_witness": null,
+     "ratio": "0"
+    },
+    "docstring_lines": {
+     "anchor_denominator": 6167,
+     "anchor_numerator": 1588,
+     "case": "ratio",
+     "lookback_commits_with_area": 938,
+     "margin": "492572/6167",
+     "margin_witness": "50cfcc9f2fb368831475a1d3be6a43d3969b8725",
+     "ratio": "1588/6167"
+    },
+    "process_ids": {
+     "anchor_denominator": 6167,
+     "anchor_numerator": 3,
+     "case": "ratio",
+     "lookback_commits_with_area": 938,
+     "margin": "2049/6167",
+     "margin_witness": "50cfcc9f2fb368831475a1d3be6a43d3969b8725",
+     "ratio": "3/6167"
+    }
+   }
+  },
+  "Solidity/Typing": {
+   "anchor": "86c2fd3658c3ba8e86d5b4a6b1d626c7cb853e38",
+   "denominator_source": "self",
+   "metrics": {
+    "comment_lines": {
+     "anchor_denominator": 5352,
+     "anchor_numerator": 713,
+     "case": "ratio",
+     "lookback_commits_with_area": 938,
+     "margin": "0",
+     "margin_witness": null,
+     "ratio": "713/5352"
+    },
+    "docs_lines": {
+     "anchor_denominator": 5352,
+     "anchor_numerator": 0,
+     "case": "zero_numerator",
+     "lookback_commits_with_area": 938,
+     "margin": "0",
+     "margin_witness": null,
+     "ratio": "0"
+    },
+    "docstring_lines": {
+     "anchor_denominator": 5352,
+     "anchor_numerator": 713,
+     "case": "ratio",
+     "lookback_commits_with_area": 938,
+     "margin": "0",
+     "margin_witness": null,
+     "ratio": "713/5352"
+    },
+    "process_ids": {
+     "anchor_denominator": 5352,
+     "anchor_numerator": 0,
+     "case": "zero_numerator",
+     "lookback_commits_with_area": 938,
+     "margin": "0",
+     "margin_witness": null,
+     "ratio": "0"
+    }
+   }
+  },
+  "Solidity/Yul": {
+   "anchor": "86c2fd3658c3ba8e86d5b4a6b1d626c7cb853e38",
+   "denominator_source": "self",
+   "metrics": {
+    "comment_lines": {
+     "anchor_denominator": 164096,
+     "anchor_numerator": 12762,
+     "case": "ratio",
+     "lookback_commits_with_area": 920,
+     "margin": "12",
+     "margin_witness": "031547a82b4ea92fdf3c22a0d52779c78351394f",
+     "ratio": "6381/82048"
+    },
+    "docs_lines": {
+     "anchor_denominator": 164096,
+     "anchor_numerator": 0,
+     "case": "zero_numerator",
+     "lookback_commits_with_area": 920,
+     "margin": "0",
+     "margin_witness": null,
+     "ratio": "0"
+    },
+    "docstring_lines": {
+     "anchor_denominator": 164096,
+     "anchor_numerator": 12606,
+     "case": "ratio",
+     "lookback_commits_with_area": 920,
+     "margin": "545591/41024",
+     "margin_witness": "2fb51b1f33a4f7d3bfb251c4578ad40c65a05ebb",
+     "ratio": "6303/82048"
+    },
+    "process_ids": {
+     "anchor_denominator": 164096,
+     "anchor_numerator": 295,
+     "case": "ratio",
+     "lookback_commits_with_area": 920,
+     "margin": "12095/82048",
+     "margin_witness": "2fb51b1f33a4f7d3bfb251c4578ad40c65a05ebb",
+     "ratio": "295/164096"
+    }
+   }
+  },
+  "Solidity/_root": {
+   "anchor": "86c2fd3658c3ba8e86d5b4a6b1d626c7cb853e38",
+   "denominator_source": "self",
+   "metrics": {
+    "comment_lines": {
+     "anchor_denominator": 2550,
+     "anchor_numerator": 1217,
+     "case": "ratio",
+     "lookback_commits_with_area": 938,
+     "margin": "4766/51",
+     "margin_witness": "50cfcc9f2fb368831475a1d3be6a43d3969b8725",
+     "ratio": "1217/2550"
+    },
+    "docs_lines": {
+     "anchor_denominator": 2550,
+     "anchor_numerator": 0,
+     "case": "zero_numerator",
+     "lookback_commits_with_area": 938,
+     "margin": "0",
+     "margin_witness": null,
+     "ratio": "0"
+    },
+    "docstring_lines": {
+     "anchor_denominator": 2550,
+     "anchor_numerator": 1149,
+     "case": "ratio",
+     "lookback_commits_with_area": 938,
+     "margin": "1498/17",
+     "margin_witness": "50cfcc9f2fb368831475a1d3be6a43d3969b8725",
+     "ratio": "383/850"
+    },
+    "process_ids": {
+     "anchor_denominator": 2550,
+     "anchor_numerator": 3,
+     "case": "ratio",
+     "lookback_commits_with_area": 938,
+     "margin": "4/17",
+     "margin_witness": "50cfcc9f2fb368831475a1d3be6a43d3969b8725",
+     "ratio": "1/850"
+    }
+   }
+  },
+  "docs/README.d": {
+   "anchor": "86c2fd3658c3ba8e86d5b4a6b1d626c7cb853e38",
+   "denominator_source": "repository-solidity",
+   "metrics": {
+    "comment_lines": {
+     "anchor_denominator": 889524,
+     "anchor_numerator": 0,
+     "case": "zero_numerator",
+     "lookback_commits_with_area": 464,
+     "margin": "0",
+     "margin_witness": null,
+     "ratio": "0"
+    },
+    "docs_lines": {
+     "anchor_denominator": 889524,
+     "anchor_numerator": 20,
+     "case": "ratio",
+     "lookback_commits_with_area": 464,
+     "margin": "21380326/74127",
+     "margin_witness": "9f8df7e206865770ed7372fe760d5a6e628fe1d2",
+     "ratio": "5/222381"
+    },
+    "docstring_lines": {
+     "anchor_denominator": 889524,
+     "anchor_numerator": 0,
+     "case": "zero_numerator",
+     "lookback_commits_with_area": 464,
+     "margin": "0",
+     "margin_witness": null,
+     "ratio": "0"
+    },
+    "process_ids": {
+     "anchor_denominator": 889524,
+     "anchor_numerator": 0,
+     "case": "zero_numerator",
+     "lookback_commits_with_area": 464,
+     "margin": "0",
+     "margin_witness": null,
+     "ratio": "0"
+    }
+   }
+  },
+  "docs/_root": {
+   "anchor": "86c2fd3658c3ba8e86d5b4a6b1d626c7cb853e38",
+   "denominator_source": "repository-solidity",
+   "metrics": {
+    "comment_lines": {
+     "anchor_denominator": 889524,
+     "anchor_numerator": 0,
+     "case": "zero_numerator",
+     "lookback_commits_with_area": 938,
+     "margin": "0",
+     "margin_witness": null,
+     "ratio": "0"
+    },
+    "docs_lines": {
+     "anchor_denominator": 889524,
+     "anchor_numerator": 30244,
+     "case": "ratio",
+     "lookback_commits_with_area": 938,
+     "margin": "495700231/24709",
+     "margin_witness": "50cfcc9f2fb368831475a1d3be6a43d3969b8725",
+     "ratio": "7561/222381"
+    },
+    "docstring_lines": {
+     "anchor_denominator": 889524,
+     "anchor_numerator": 0,
+     "case": "zero_numerator",
+     "lookback_commits_with_area": 938,
+     "margin": "0",
+     "margin_witness": null,
+     "ratio": "0"
+    },
+    "process_ids": {
+     "anchor_denominator": 889524,
+     "anchor_numerator": 0,
+     "case": "zero_numerator",
+     "lookback_commits_with_area": 938,
+     "margin": "0",
+     "margin_witness": null,
+     "ratio": "0"
+    }
+   }
+  },
+  "docs/audits": {
+   "anchor": "86c2fd3658c3ba8e86d5b4a6b1d626c7cb853e38",
+   "denominator_source": "repository-solidity",
+   "metrics": {
+    "comment_lines": {
+     "anchor_denominator": 889524,
+     "anchor_numerator": 0,
+     "case": "zero_numerator",
+     "lookback_commits_with_area": 350,
+     "margin": "0",
+     "margin_witness": null,
+     "ratio": "0"
+    },
+    "docs_lines": {
+     "anchor_denominator": 889524,
+     "anchor_numerator": 368606,
+     "case": "ratio",
+     "lookback_commits_with_area": 350,
+     "margin": "4791878/24709",
+     "margin_witness": "37e12a043160e1e2ac067639794a6a6ccae287d1",
+     "ratio": "184303/444762"
+    },
+    "docstring_lines": {
+     "anchor_denominator": 889524,
+     "anchor_numerator": 0,
+     "case": "zero_numerator",
+     "lookback_commits_with_area": 350,
+     "margin": "0",
+     "margin_witness": null,
+     "ratio": "0"
+    },
+    "process_ids": {
+     "anchor_denominator": 889524,
+     "anchor_numerator": 0,
+     "case": "zero_numerator",
+     "lookback_commits_with_area": 350,
+     "margin": "0",
+     "margin_witness": null,
+     "ratio": "0"
+    }
+   }
+  },
+  "docs/benchmarks": {
+   "anchor": "86c2fd3658c3ba8e86d5b4a6b1d626c7cb853e38",
+   "denominator_source": "repository-solidity",
+   "metrics": {
+    "comment_lines": {
+     "anchor_denominator": 889524,
+     "anchor_numerator": 0,
+     "case": "zero_numerator",
+     "lookback_commits_with_area": 938,
+     "margin": "0",
+     "margin_witness": null,
+     "ratio": "0"
+    },
+    "docs_lines": {
+     "anchor_denominator": 889524,
+     "anchor_numerator": 96119,
+     "case": "ratio",
+     "lookback_commits_with_area": 938,
+     "margin": "8043008156/222381",
+     "margin_witness": "059eb83d4e1d494f42c532513ffbcd3e65adaf75",
+     "ratio": "96119/889524"
+    },
+    "docstring_lines": {
+     "anchor_denominator": 889524,
+     "anchor_numerator": 0,
+     "case": "zero_numerator",
+     "lookback_commits_with_area": 938,
+     "margin": "0",
+     "margin_witness": null,
+     "ratio": "0"
+    },
+    "process_ids": {
+     "anchor_denominator": 889524,
+     "anchor_numerator": 0,
+     "case": "zero_numerator",
+     "lookback_commits_with_area": 938,
+     "margin": "0",
+     "margin_witness": null,
+     "ratio": "0"
+    }
+   }
+  },
+  "docs/feature-work": {
+   "anchor": "86c2fd3658c3ba8e86d5b4a6b1d626c7cb853e38",
+   "denominator_source": "repository-solidity",
+   "metrics": {
+    "comment_lines": {
+     "anchor_denominator": 889524,
+     "anchor_numerator": 0,
+     "case": "zero_numerator",
+     "lookback_commits_with_area": 938,
+     "margin": "0",
+     "margin_witness": null,
+     "ratio": "0"
+    },
+    "docs_lines": {
+     "anchor_denominator": 889524,
+     "anchor_numerator": 114690,
+     "case": "ratio",
+     "lookback_commits_with_area": 938,
+     "margin": "9263764273/74127",
+     "margin_witness": "513b4815e3a97e87a748b45d4f4071409d0a7be8",
+     "ratio": "19115/148254"
+    },
+    "docstring_lines": {
+     "anchor_denominator": 889524,
+     "anchor_numerator": 0,
+     "case": "zero_numerator",
+     "lookback_commits_with_area": 938,
+     "margin": "0",
+     "margin_witness": null,
+     "ratio": "0"
+    },
+    "process_ids": {
+     "anchor_denominator": 889524,
+     "anchor_numerator": 0,
+     "case": "zero_numerator",
+     "lookback_commits_with_area": 938,
+     "margin": "0",
+     "margin_witness": null,
+     "ratio": "0"
+    }
+   }
+  },
+  "docs/module-map": {
+   "anchor": "86c2fd3658c3ba8e86d5b4a6b1d626c7cb853e38",
+   "denominator_source": "repository-solidity",
+   "metrics": {
+    "comment_lines": {
+     "anchor_denominator": 889524,
+     "anchor_numerator": 0,
+     "case": "zero_numerator",
+     "lookback_commits_with_area": 824,
+     "margin": "0",
+     "margin_witness": null,
+     "ratio": "0"
+    },
+    "docs_lines": {
+     "anchor_denominator": 889524,
+     "anchor_numerator": 9696,
+     "case": "ratio",
+     "lookback_commits_with_area": 824,
+     "margin": "0",
+     "margin_witness": null,
+     "ratio": "808/74127"
+    },
+    "docstring_lines": {
+     "anchor_denominator": 889524,
+     "anchor_numerator": 0,
+     "case": "zero_numerator",
+     "lookback_commits_with_area": 824,
+     "margin": "0",
+     "margin_witness": null,
+     "ratio": "0"
+    },
+    "process_ids": {
+     "anchor_denominator": 889524,
+     "anchor_numerator": 0,
+     "case": "zero_numerator",
+     "lookback_commits_with_area": 824,
+     "margin": "0",
+     "margin_witness": null,
+     "ratio": "0"
+    }
+   }
+  },
+  "docs/module-map.d": {
+   "anchor": "86c2fd3658c3ba8e86d5b4a6b1d626c7cb853e38",
+   "denominator_source": "repository-solidity",
+   "metrics": {
+    "comment_lines": {
+     "anchor_denominator": 889524,
+     "anchor_numerator": 0,
+     "case": "zero_numerator",
+     "lookback_commits_with_area": 464,
+     "margin": "0",
+     "margin_witness": null,
+     "ratio": "0"
+    },
+    "docs_lines": {
+     "anchor_denominator": 889524,
+     "anchor_numerator": 103,
+     "case": "ratio",
+     "lookback_commits_with_area": 464,
+     "margin": "1088504/74127",
+     "margin_witness": "e48bad8761955faf6164f878a9c65ba742496f7a",
+     "ratio": "103/889524"
+    },
+    "docstring_lines": {
+     "anchor_denominator": 889524,
+     "anchor_numerator": 0,
+     "case": "zero_numerator",
+     "lookback_commits_with_area": 464,
+     "margin": "0",
+     "margin_witness": null,
+     "ratio": "0"
+    },
+    "process_ids": {
+     "anchor_denominator": 889524,
+     "anchor_numerator": 0,
+     "case": "zero_numerator",
+     "lookback_commits_with_area": 464,
+     "margin": "0",
+     "margin_witness": null,
+     "ratio": "0"
+    }
+   }
+  }
+ },
+ "calibration_sha256": "5c113a614f1f2d04b4b3783022649f9c34e3a79137da44cf549d9eee2ce4d26c",
+ "coverage": {
+  "inventory_areas": 37,
+  "inventory_without_policy": [],
+  "policy_areas": 38,
+  "policy_without_inventory": [
+   "Solidity/Scratch"
+  ],
+  "status": "complete",
+  "universe_areas": 38,
+  "universe_without_policy": []
+ },
+ "relation_to_evaluation": "anchors and lookbacks are first-parent history; any of them inside a replay window is in-sample (retrospective), never out-of-sample validation",
+ "schema": "pb2a-prose-calibration/2",
+ "specification": {
+  "classifier": {
+   "checker_blob": "8c7cdbb9544b8e40defb2eeb34d66334ac794493",
+   "checker_path": "scripts/check-prose-budget",
+   "name": "verified-generated/2",
+   "rule": "exclude an item from numerator and denominator only when its path, its blob and its generator's blob at that commit all equal a verified entry; every other generation claim (headers, BEGIN/END blocks) is counted as handwritten",
+   "verified_generated": []
+  },
+  "denominator_mapping": {
+   "Solidity/Automation": "self",
+   "Solidity/Backend": "self",
+   "Solidity/Calculus": "self",
+   "Solidity/Corpus": "self",
+   "Solidity/Correctness": "self",
+   "Solidity/Counterexamples": "self",
+   "Solidity/Evm": "self",
+   "Solidity/Examples": "self",
+   "Solidity/Frontend": "self",
+   "Solidity/Goals": "self",
+   "Solidity/Hash": "self",
+   "Solidity/Language": "self",
+   "Solidity/Lowering": "self",
+   "Solidity/Optimizer": "self",
+   "Solidity/Precompiles": "self",
+   "Solidity/Roadmap": "self",
+   "Solidity/Scratch": "self",
+   "Solidity/Semantics": "self",
+   "Solidity/SolcValidation": "self",
+   "Solidity/Solkey": "self",
+   "Solidity/SortCheck": "self",
+   "Solidity/Source": "self",
+   "Solidity/Stipend": "self",
+   "Solidity/Storage": "self",
+   "Solidity/Syntax": "self",
+   "Solidity/TestSuite": "self",
+   "Solidity/Theory": "self",
+   "Solidity/Tools": "self",
+   "Solidity/Typing": "self",
+   "Solidity/Yul": "self",
+   "Solidity/_root": "self",
+   "docs/README.d": "repository-solidity",
+   "docs/_root": "repository-solidity",
+   "docs/audits": "repository-solidity",
+   "docs/benchmarks": "repository-solidity",
+   "docs/feature-work": "repository-solidity",
+   "docs/module-map": "repository-solidity",
+   "docs/module-map.d": "repository-solidity"
+  },
+  "endpoint": {
+   "commit": "ffbeb4d4a929935bb671eb6169c88b2715a7db55",
+   "committer_ts": 1794440310,
+   "tree": "3c5d13ea1f2d69631506aa7068026a2513ad3031"
+  },
+  "enforcement_exclusions": {
+   "docs/audits": "H548: measured but outside proposed enforcement until r1"
+  },
+  "inventory": [
+   "Solidity/Automation",
+   "Solidity/Backend",
+   "Solidity/Calculus",
+   "Solidity/Corpus",
+   "Solidity/Correctness",
+   "Solidity/Counterexamples",
+   "Solidity/Evm",
+   "Solidity/Examples",
+   "Solidity/Frontend",
+   "Solidity/Goals",
+   "Solidity/Hash",
+   "Solidity/Language",
+   "Solidity/Lowering",
+   "Solidity/Optimizer",
+   "Solidity/Precompiles",
+   "Solidity/Roadmap",
+   "Solidity/Semantics",
+   "Solidity/SolcValidation",
+   "Solidity/Solkey",
+   "Solidity/SortCheck",
+   "Solidity/Source",
+   "Solidity/Stipend",
+   "Solidity/Storage",
+   "Solidity/Syntax",
+   "Solidity/TestSuite",
+   "Solidity/Theory",
+   "Solidity/Tools",
+   "Solidity/Typing",
+   "Solidity/Yul",
+   "Solidity/_root",
+   "docs/README.d",
+   "docs/_root",
+   "docs/audits",
+   "docs/benchmarks",
+   "docs/feature-work",
+   "docs/module-map",
+   "docs/module-map.d"
+  ],
+  "policy": {
+   "cases": {
+    "ratio": "n_anchor > 0 and d_anchor > 0",
+    "zero_denominator": "d_anchor == 0: no ratio is invented, r = 0, m = max lookback numerator",
+    "zero_numerator": "n_anchor == 0, d_anchor > 0: r = 0, m from lookback"
+   },
+   "fallback": "an area outside the policy (first seen after the evaluation window, or with no anchor) gets r = 0, m = 0 for every metric: only n = 0 passes; it never trains its own allowance",
+   "formula": "pass iff n <= r*d + m, tested as n*b*e <= a*d*e + c*b for r = a/b, m = c/e",
+   "margin": "m = max(0, max over the area anchor's lookback commits containing the area of n_c - r*d_c); exact rational, no rounding",
+   "ratio": "r = n_anchor/d_anchor (reduced) when n_anchor > 0 and d_anchor > 0, else 0"
+  },
+  "schema": "pb2a-prose-calibration-spec/2",
+  "selection": {
+   "anchors": [
+    {
+     "areas": [
+      "Solidity/Automation",
+      "Solidity/Backend",
+      "Solidity/Calculus",
+      "Solidity/Corpus",
+      "Solidity/Correctness",
+      "Solidity/Counterexamples",
+      "Solidity/Evm",
+      "Solidity/Examples",
+      "Solidity/Frontend",
+      "Solidity/Goals",
+      "Solidity/Hash",
+      "Solidity/Language",
+      "Solidity/Lowering",
+      "Solidity/Optimizer",
+      "Solidity/Precompiles",
+      "Solidity/Roadmap",
+      "Solidity/Semantics",
+      "Solidity/SolcValidation",
+      "Solidity/Solkey",
+      "Solidity/SortCheck",
+      "Solidity/Source",
+      "Solidity/Stipend",
+      "Solidity/Storage",
+      "Solidity/Syntax",
+      "Solidity/TestSuite",
+      "Solidity/Theory",
+      "Solidity/Tools",
+      "Solidity/Typing",
+      "Solidity/Yul",
+      "Solidity/_root",
+      "docs/README.d",
+      "docs/_root",
+      "docs/audits",
+      "docs/benchmarks",
+      "docs/feature-work",
+      "docs/module-map",
+      "docs/module-map.d"
+     ],
+     "commit": "86c2fd3658c3ba8e86d5b4a6b1d626c7cb853e38",
+     "committer_ts": 1794271069,
+     "lookback": {
+      "commits": 938,
+      "commits_sha256": "3e74999eff8648105afd46e28270635f232c15df79233ab11385f62d34176fe6",
+      "days": 7,
+      "first": "50cfcc9f2fb368831475a1d3be6a43d3969b8725",
+      "interval": [
+       1793666269,
+       1794271069
+      ],
+      "last": "86c2fd3658c3ba8e86d5b4a6b1d626c7cb853e38",
+      "older_stamped_inside": [],
+      "stamped_after_anchor": []
+     },
+     "role": "coverage",
+     "tree": "4be0092f947a231c47a541c5f8d5e1cdad9c4343"
+    },
+    {
+     "areas": [
+      "Solidity/Scratch"
+     ],
+     "commit": "84e9aff49c99cce0e883431c7db8514968a11b8d",
+     "committer_ts": 1794239805,
+     "lookback": {
+      "commits": 976,
+      "commits_sha256": "c54ca0a8ddbcc0489b41519ade8bcd75b28008501df7b678542ae23fdb175b8f",
+      "days": 7,
+      "first": "bba8401e103ced56ef67d50bfcabafce3fd26c26",
+      "interval": [
+       1793635005,
+       1794239805
+      ],
+      "last": "84e9aff49c99cce0e883431c7db8514968a11b8d",
+      "older_stamped_inside": [],
+      "stamped_after_anchor": []
+     },
+     "role": "latest_before_coverage",
+     "tree": "c6c06d7c0447f1c54b934f18f5739f644ba5c22a"
+    }
+   ],
+   "evaluation_window": {
+    "commits": 1265,
+    "commits_sha256": "a79b07a98965691690636b83786f3621fa0782b79f72d1d5a0e1c442d3981437",
+    "days": 21,
+    "end": "ffbeb4d4a929935bb671eb6169c88b2715a7db55",
+    "interval": [
+     1792625910,
+     1794440310
+    ]
+   },
+   "method": "universe = endpoint inventory plus every area present at any first-parent commit of the evaluation window (existence only, no counts); coverage anchor = earliest first-parent ancestor whose tree contains every endpoint area; it calibrates every area it contains; any other universe area is calibrated at the latest first-parent commit at or before the coverage anchor containing it; each anchor's lookback = the contiguous first-parent run ending at it with committer ts in [anchor_ts - days*86400, anchor_ts]",
+   "no_anchor": [],
+   "revision": "spec/2 adds per-area anchors for window areas absent at the coverage anchor; spec/1 (coverage anchor only, digest 17119abad7c5458bcc71f3bdd81d7c8ae1d290350e3264b0d0c7fcad2bcd25db) left Solidity/Scratch on the fallback; the revision was made after replaying spec/1",
+   "universe": [
+    "Solidity/Automation",
+    "Solidity/Backend",
+    "Solidity/Calculus",
+    "Solidity/Corpus",
+    "Solidity/Correctness",
+    "Solidity/Counterexamples",
+    "Solidity/Evm",
+    "Solidity/Examples",
+    "Solidity/Frontend",
+    "Solidity/Goals",
+    "Solidity/Hash",
+    "Solidity/Language",
+    "Solidity/Lowering",
+    "Solidity/Optimizer",
+    "Solidity/Precompiles",
+    "Solidity/Roadmap",
+    "Solidity/Scratch",
+    "Solidity/Semantics",
+    "Solidity/SolcValidation",
+    "Solidity/Solkey",
+    "Solidity/SortCheck",
+    "Solidity/Source",
+    "Solidity/Stipend",
+    "Solidity/Storage",
+    "Solidity/Syntax",
+    "Solidity/TestSuite",
+    "Solidity/Theory",
+    "Solidity/Tools",
+    "Solidity/Typing",
+    "Solidity/Yul",
+    "Solidity/_root",
+    "docs/README.d",
+    "docs/_root",
+    "docs/audits",
+    "docs/benchmarks",
+    "docs/feature-work",
+    "docs/module-map",
+    "docs/module-map.d"
+   ]
+  },
+  "status": "INACTIVE PROPOSAL: pb2a calibration study only; no checker, baseline or CI reads it"
+ },
+ "specification_sha256": "a4e06bc8c69a1cdbaff52cd1e9c932d526a3367c48a80b58ddef676b42e48e19"
+}

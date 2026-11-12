@@ -8,6 +8,11 @@ Modes (all read Git objects only; nothing in the measured repository is written)
   calibrate         compute a proposed estimate (frozen per-area/per-metric ratios) from
                     one calibration commit; writes only --output.  Replay never writes it.
   audits-inventory  classify docs/audits files at one commit (prose/data/script/unknown).
+  v2-calibrate      pb2a: count-free selection of a historical anchor and lookback, then exact
+                    rational ratio + additive margin per area and metric; writes only --output.
+  v2-replay         pb2a: replay a frozen v2 policy (never rewritten) beside the legacy and
+                    pb1 rules (read from an original-mode replay via --pb1-replay).
+  v2-evaluate       pb2a: read-only evaluation of one commit (e.g. the current head).
 
 The Lean scanner and process-ID semantics are reused from scripts/check-prose-budget
 (the copy beside this directory, whose blob must equal the end commit's copy).
@@ -95,6 +100,17 @@ class Repo:
             line = self._check.stdout.readline()
             self._exists[key] = b" blob " in line
         return self._exists[key]
+
+    def blob_id(self, commit, path):
+        """Blob ID of PATH at COMMIT, or None (v2 verification binding)."""
+        if self._check is None:
+            self._check = subprocess.Popen(
+                ["git", "-C", self.path, "cat-file", "--batch-check"],
+                stdin=subprocess.PIPE, stdout=subprocess.PIPE)
+        self._check.stdin.write(f"{commit}:{path}\n".encode())
+        self._check.stdin.flush()
+        parts = self._check.stdout.readline().split()
+        return parts[0].decode() if len(parts) == 3 and parts[1] == b"blob" else None
 
     def tree(self, commit):
         """(mode, sha, path) for docs/, Solidity/, registry roots, checker and baseline."""
@@ -304,8 +320,12 @@ def area_of(path):
     return tree + "/" + (parts[0] if len(parts) > 1 else "_root")
 
 
-def measure_commit(repo, analyzer, commit, estimate):
-    """Legacy (historical semantics) and normalized counts for one commit."""
+def measure_commit(repo, analyzer, commit, estimate, verified=None):
+    """Legacy (historical semantics) and normalized counts for one commit.
+
+    With VERIFIED (a v2 policy's verified-generated list) it also returns the v2
+    counts ``v2``/``v2_code``; the pb1 fields are computed exactly as before.
+    """
     entries = repo.tree(commit)
     byp = {p: (m, k, s) for m, k, s, p in entries}
     legacy_error = None
@@ -322,6 +342,7 @@ def measure_commit(repo, analyzer, commit, estimate):
     legacy, legacy_v1_pids = {}, {}
     norm, code = {}, {}
     exclusions, unknown, unsupported = [], [], []
+    v2, v2_code, v2_excluded = {}, {}, []
     has_docs = any(p.startswith("docs/") for p in byp)
     has_sol = any(p.startswith("Solidity/") for p in byp)
     legacy_error = legacy_error or (None if has_docs and has_sol else "missing source directory")
@@ -356,6 +377,9 @@ def measure_commit(repo, analyzer, commit, estimate):
             legacy_v1_pids[area] += len(info["raw_pids"])
         else:
             lrow["docs_lines"] += info["physical"]
+        if verified is not None:
+            _measure_v2(repo, analyzer, commit, byp, path, area, sha, info, is_lean, modules,
+                        pids if is_lean else 0, verified, v2, v2_code, v2_excluded)
         # normalized: generated exclusion on both prose and code
         header = info["header"]
         if header is not None:
@@ -395,6 +419,7 @@ def measure_commit(repo, analyzer, commit, estimate):
         "checker_blob": byp.get(CHECKER_PATH, (None, None, None))[2],
         "baseline_blob": byp.get(BASELINE_PATH, (None, None, None))[2],
         "registered_modules": len(modules),
+        "v2": v2, "v2_code": v2_code, "v2_excluded": v2_excluded,
     }
 
 
@@ -702,6 +727,531 @@ def calibrate(args):
     return 0
 
 
+# ---------------------------------------------------------------- v2 (pb2a) additive proposal
+# A separately versioned, inactive proposal.  pb1 functions above are unchanged and
+# its replay output is byte-identical; nothing here feeds a checker, baseline or CI.
+V2_SCHEMA = "pb2a-prose-calibration/2"
+V2_SPEC_SCHEMA = "pb2a-prose-calibration-spec/2"
+V2_REPLAY_SCHEMA = "pb2a-prose-replay/2"
+V2_CLASSIFIER = "verified-generated/2"
+V2_RULES = ("legacy", "pb1_ratio", "v2")
+
+
+def canonical(value):
+    return json.dumps(value, sort_keys=True, separators=(",", ":"), ensure_ascii=True)
+
+
+def sha256_text(text):
+    return hashlib.sha256(text.encode()).hexdigest()
+
+
+def _measure_v2(repo, analyzer, commit, byp, path, area, sha, info, is_lean, modules, pids,
+                verified, v2, v2_code, v2_excluded):
+    """v2 counts: only blob-bound verified generated items leave numerator and denominator."""
+    row = v2.setdefault(area, dict.fromkeys(METRICS, 0))
+    v2_code.setdefault(area, 0)
+    whole, lines = False, set()
+    for entry in verified:
+        if entry["path"] != path or entry["blob"] != sha:
+            continue
+        if repo.blob_id(commit, entry["generator_path"]) != entry["generator_blob"]:
+            continue
+        v2_excluded.append({"path": path, "scope": entry["scope"]})
+        if entry["scope"] == "file":
+            whole = True
+        else:
+            lines.update(range(entry["scope"][0], entry["scope"][1] + 1))
+    if whole:
+        return
+    if is_lean:
+        row["comment_lines"] += len(info["comments"] - lines)
+        row["docstring_lines"] += len(info["docs"] - lines)
+        row["process_ids"] += pids - (analyzer.counted_in_lines(sha, info, modules, lines)
+                                      if lines else 0)
+        v2_code[area] += len(info["code"] - lines)
+    else:
+        row["docs_lines"] += info["physical"] - len(lines & set(range(1, info["physical"] + 1)))
+
+
+def reach_areas(entries):
+    """Areas in the scanner's reach (regular docs/ files, Solidity/ .lean files)."""
+    out = set()
+    for mode, kind, _sha, path in entries:
+        tree = path.split("/", 1)[0]
+        if tree not in ("docs", "Solidity") or "/" not in path:
+            continue
+        if kind != "blob" or mode not in ("100644", "100755"):
+            continue
+        if tree == "Solidity" and not path.endswith(".lean"):
+            continue
+        out.add(area_of(path))
+    return out
+
+
+def default_source(area):
+    """Frozen denominator rule (pb1's mapping, unchanged): own code or all Solidity code."""
+    return "self" if area.startswith("Solidity/") else "repository-solidity"
+
+
+def v2_test(n, d, entry):
+    """Exact n <= r*d + m with r = a/b, m = c/e: n*b*e <= a*d*e + c*b (b, e > 0).
+
+    ENTRY None is the frozen fallback for an area outside the policy: allowance 0.
+    """
+    if entry is None:
+        return n == 0
+    r, m = Fraction(entry["ratio"]), Fraction(entry["margin"])
+    a, b, c, e = r.numerator, r.denominator, m.numerator, m.denominator
+    if a < 0 or c < 0 or b <= 0 or e <= 0:
+        raise ValueError("negative coefficient in frozen policy")
+    return n * b * e <= a * d * e + c * b
+
+
+def v2_allowance(d, entry):
+    """Exact allowance as a Fraction (display; the test is v2_test)."""
+    if entry is None:
+        return Fraction(0)
+    return Fraction(entry["ratio"]) * d + Fraction(entry["margin"])
+
+
+def _chain(repo, end):
+    rows = repo.run("rev-list", "--first-parent", "--format=%H %ct", end).decode().splitlines()
+    return [(x.split()[0], int(x.split()[1])) for x in rows if not x.startswith("commit ")]
+
+
+def _lookback(chain, at, days):
+    """Contiguous first-parent run ending at chain[at] stamped within DAYS before it."""
+    anchor_ts = chain[at][1]
+    start = anchor_ts - days * 86400
+    run, later, walking = [], [], True
+    for sha, ts in chain[at:]:
+        if walking and ts >= start:
+            run.append(sha)
+        elif walking:
+            walking = False
+        elif ts >= start:
+            later.append(sha)                       # older on chain, stamped inside: reported
+    run.reverse()
+    return run, {"days": days, "interval": [start, anchor_ts], "commits": len(run),
+                 "first": run[0], "last": run[-1],
+                 "commits_sha256": sha256_text("".join(s + "\n" for s in run)),
+                 "stamped_after_anchor": [s for s, t in chain[at:at + len(run)] if t > anchor_ts],
+                 "older_stamped_inside": later}
+
+
+def v2_specification(repo, end, days, lookback_days, exclusions, verified):
+    """Count-free selection: inspects area existence and timestamps only (spec/2)."""
+    end = repo.run("rev-parse", "--verify", end + "^{commit}").decode().strip()
+    if repo.run("rev-parse", "--is-shallow-repository").decode().strip() == "true":
+        raise SystemExit("shallow repository: unshallow before selecting calibration inputs")
+    chain = _chain(repo, end)                       # newest first
+    shas = [s for s, _ in chain]
+    frozen = freeze_interval(repo, end, days)
+    window = frozen["first_parent_commits"]
+    inventory = sorted(reach_areas(repo.tree(end)))
+    universe = set(inventory)
+    for commit in window:
+        universe |= reach_areas(repo.tree(commit))
+    need = set(inventory)
+    at = None
+    for index in range(len(chain) - 1, -1, -1):     # oldest first: earliest full coverage
+        if need <= reach_areas(repo.tree(chain[index][0])):
+            at = index
+            break
+    if at is None:
+        raise SystemExit("BLOCKER: no first-parent commit contains every endpoint area")
+    tree_of = lambda c: repo.run("rev-parse", c + "^{tree}").decode().strip()
+    groups = {at: sorted(reach_areas(repo.tree(chain[at][0])))}
+    missing = sorted(universe - set(groups[at]))
+    no_anchor = []
+    for area in missing:                            # latest commit at or before the coverage anchor
+        for index in range(at, len(chain)):
+            if area in reach_areas(repo.tree(chain[index][0])):
+                groups.setdefault(index, []).append(area)
+                break
+        else:
+            no_anchor.append(area)
+    anchors = []
+    for index in sorted(groups):                    # coverage anchor first (newest)
+        _, look = _lookback(chain, index, lookback_days)
+        role = "coverage" if index == at else "latest_before_coverage"
+        anchors.append({"role": role, "commit": chain[index][0], "tree": tree_of(chain[index][0]),
+                        "committer_ts": chain[index][1],
+                        "areas": groups[index] if role == "coverage" else sorted(groups[index]),
+                        "lookback": look})
+    covered = sorted(a for g in groups.values() for a in g)
+    return {
+        "schema": V2_SPEC_SCHEMA,
+        "status": "INACTIVE PROPOSAL: pb2a calibration study only; no checker, baseline or CI reads it",
+        "endpoint": {"commit": end, "tree": tree_of(end), "committer_ts": chain[0][1]},
+        "inventory": inventory,
+        "selection": {
+            "method": "universe = endpoint inventory plus every area present at any first-parent "
+                      "commit of the evaluation window (existence only, no counts); coverage anchor = "
+                      "earliest first-parent ancestor whose tree contains every endpoint area; it "
+                      "calibrates every area it contains; any other universe area is calibrated at "
+                      "the latest first-parent commit at or before the coverage anchor containing it; "
+                      "each anchor's lookback = the contiguous first-parent run ending at it with "
+                      "committer ts in [anchor_ts - days*86400, anchor_ts]",
+            "revision": "spec/2 adds per-area anchors for window areas absent at the coverage anchor; "
+                        "spec/1 (coverage anchor only, digest "
+                        "17119abad7c5458bcc71f3bdd81d7c8ae1d290350e3264b0d0c7fcad2bcd25db) left "
+                        "Solidity/Scratch on the fallback; the revision was made after replaying spec/1",
+            "evaluation_window": {"end": end, "days": days, "interval": frozen["interval"],
+                                  "commits": len(window),
+                                  "commits_sha256": sha256_text("".join(s + "\n" for s in window))},
+            "universe": sorted(universe), "anchors": anchors, "no_anchor": no_anchor,
+        },
+        "denominator_mapping": {a: default_source(a) for a in covered},
+        "classifier": {
+            "name": V2_CLASSIFIER, "checker_path": CHECKER_PATH,
+            "checker_blob": git_blob_id(CHECKER_FILE.read_bytes()),
+            "verified_generated": verified,
+            "rule": "exclude an item from numerator and denominator only when its path, its blob and "
+                    "its generator's blob at that commit all equal a verified entry; every other "
+                    "generation claim (headers, BEGIN/END blocks) is counted as handwritten",
+        },
+        "policy": {
+            "formula": "pass iff n <= r*d + m, tested as n*b*e <= a*d*e + c*b for r = a/b, m = c/e",
+            "ratio": "r = n_anchor/d_anchor (reduced) when n_anchor > 0 and d_anchor > 0, else 0",
+            "margin": "m = max(0, max over the area anchor's lookback commits containing the area of "
+                      "n_c - r*d_c); exact rational, no rounding",
+            "cases": {"ratio": "n_anchor > 0 and d_anchor > 0",
+                      "zero_numerator": "n_anchor == 0, d_anchor > 0: r = 0, m from lookback",
+                      "zero_denominator": "d_anchor == 0: no ratio is invented, r = 0, "
+                                          "m = max lookback numerator"},
+            "fallback": "an area outside the policy (first seen after the evaluation window, or with "
+                        "no anchor) gets r = 0, m = 0 for every metric: only n = 0 passes; it never "
+                        "trains its own allowance",
+        },
+        "enforcement_exclusions": dict(sorted(exclusions.items())),
+    }
+
+
+def v2_calibrate(args):
+    repo = Repo(args.repo)
+    verified = json.loads(Path(args.verified).read_text(encoding="utf-8")) if args.verified else []
+    excl = {a: "H548: measured but outside proposed enforcement until r1"
+            for a in (args.exclude.split(",") if args.exclude else [])}
+    spec = v2_specification(repo, args.end, args.days, args.lookback_days, excl, verified)
+    digest = sha256_text(canonical(spec))
+    print(f"specification sha256 {digest}", file=sys.stderr)
+    analyzer = Analyzer(repo)
+    measured = {}
+    mapping = spec["denominator_mapping"]
+    calibration = {}
+    for anchor in spec["selection"]["anchors"]:
+        chain = [s for s, _ in _chain(repo, anchor["commit"])]
+        commits = list(reversed(chain[:anchor["lookback"]["commits"]]))
+        if sha256_text("".join(s + "\n" for s in commits)) != anchor["lookback"]["commits_sha256"]:
+            raise SystemExit("lookback list does not reproduce")
+        for commit in commits:
+            if commit not in measured:
+                m = measure_commit(repo, analyzer, commit, None, verified)
+                measured[commit] = (m["v2"], m["v2_code"], len(m["exclusions"]) + len(m["unknown"]))
+        counts, codes, _ = measured[anchor["commit"]]
+        for area in anchor["areas"]:
+            d_a, source = denominator(area, codes, mapping)
+            entry = {"anchor": anchor["commit"], "denominator_source": source, "metrics": {}}
+            for metric in METRICS:
+                n_a = counts.get(area, {}).get(metric, 0)
+                case = ("zero_denominator" if d_a == 0 else "zero_numerator" if n_a == 0 else "ratio")
+                r = Fraction(n_a, d_a) if case == "ratio" else Fraction(0)
+                margin, witness, present = Fraction(0), None, 0
+                for commit in commits:
+                    c_counts, c_codes, _ = measured[commit]
+                    if area not in c_counts:
+                        continue
+                    present += 1
+                    residual = c_counts[area][metric] - r * denominator(area, c_codes, mapping)[0]
+                    if residual > margin:
+                        margin, witness = residual, commit
+                entry["metrics"][metric] = {
+                    "case": case, "ratio": str(r), "margin": str(margin),
+                    "anchor_numerator": n_a, "anchor_denominator": d_a,
+                    "margin_witness": witness, "lookback_commits_with_area": present}
+            calibration[area] = entry
+    repo.close()
+    coverage_anchor = spec["selection"]["anchors"][0]["commit"]
+    universe, inventory = set(spec["selection"]["universe"]), set(spec["inventory"])
+    policy = {
+        "schema": V2_SCHEMA,
+        "specification": spec, "specification_sha256": digest,
+        "calibration": dict(sorted(calibration.items())),
+        "calibration_sha256": sha256_text(canonical(calibration)),
+        "coverage": {"inventory_areas": len(inventory), "universe_areas": len(universe),
+                     "policy_areas": len(calibration),
+                     "inventory_without_policy": sorted(inventory - set(calibration)),
+                     "universe_without_policy": sorted(universe - set(calibration)),
+                     "policy_without_inventory": sorted(set(calibration) - inventory),
+                     "status": "complete" if universe <= set(calibration) else "BLOCKER"},
+        "anchor_unverified_generation_claims": measured[coverage_anchor][2],
+        "relation_to_evaluation": "anchors and lookbacks are first-parent history; any of them "
+                                  "inside a replay window is in-sample (retrospective), never "
+                                  "out-of-sample validation",
+    }
+    Path(args.output).write_text(json.dumps(policy, indent=1, sort_keys=True) + "\n", encoding="utf-8")
+    return 0
+
+
+def load_policy(path):
+    """Policy bytes, parsed policy and digests; the spec digest must reproduce."""
+    raw = Path(path).read_bytes()
+    policy = json.loads(raw.decode("utf-8"))
+    if policy.get("schema") != V2_SCHEMA:
+        raise SystemExit("not a v2 policy: " + str(path))
+    if sha256_text(canonical(policy["specification"])) != policy["specification_sha256"]:
+        raise SystemExit("specification digest mismatch: policy was edited after freezing")
+    if sha256_text(canonical(policy["calibration"])) != policy["calibration_sha256"]:
+        raise SystemExit("calibration digest mismatch: coefficients were edited after freezing")
+    local = git_blob_id(CHECKER_FILE.read_bytes())
+    if local != policy["specification"]["classifier"]["checker_blob"]:
+        raise SystemExit(f"checker blob {local} differs from the policy's scanner")
+    return raw, policy
+
+
+def _v2_causes(n, d, pn, pd, entry):
+    causes = []
+    if entry is None:
+        causes.append("unmapped_area")
+    else:
+        if entry["case"] == "zero_denominator":
+            causes.append("calibration_zero_code")
+        if entry["case"] == "zero_numerator":
+            causes.append("prose_where_calibration_had_none")
+        causes.append("allowance_exceeded")
+    if d == 0:
+        causes.append("zero_code")
+    dn = None if pn is None else n - pn
+    dd = None if pd is None else d - pd
+    if dn is None:
+        causes.append("no_prior")
+    else:
+        if dn > 0 and dd <= 0:
+            causes.append("prose_rose_without_code")
+        if dd < 0:
+            causes.append("denominator_shrank")
+        if dn > 0 and dd > 0:
+            causes.append("code_and_prose_rose")
+        if dn == 0 and dd == 0:
+            causes.append("unchanged_counts")
+        if dn == 0 and dd > 0:
+            causes.append("code_rose_prose_flat_still_over")
+        if dn < 0:
+            causes.append("prose_fell_still_over")
+    return causes
+
+
+def _classify(prior_status, ever_failed):
+    if prior_status == "fail":
+        return "inherited"
+    return "reintroduced" if ever_failed else "introduced"
+
+
+def v2_rows(commit, m, policy, prev, prev_codes):
+    """One commit's v2 rows (every policy area and every measured area, all metrics)."""
+    cal = policy["calibration"]
+    mapping = policy["specification"]["denominator_mapping"]
+    codes = m["v2_code"]
+    rows = []
+    for area in sorted(set(m["v2"]) | set(cal)):
+        entry_area = cal.get(area)
+        d, source = denominator(area, codes, mapping) if area in mapping else \
+            denominator(area, codes, {area: default_source(area)})
+        for metric in METRICS:
+            entry = entry_area["metrics"][metric] if entry_area else None
+            n = m["v2"].get(area, {}).get(metric, 0)
+            allow = v2_allowance(d, entry)
+            p = prev.get((area, metric)) if prev is not None else None
+            if p is None and prev is not None:
+                p = {"numerator": 0, "denominator": denominator(
+                    area, prev_codes, {area: mapping.get(area, default_source(area))})[0]}
+            rows.append({
+                "commit": commit, "area": area, "metric": metric, "present": area in m["v2"],
+                "numerator": n, "denominator": d, "denominator_source": source,
+                "case": entry["case"] if entry else "unmapped_fallback",
+                "ratio": entry["ratio"] if entry else "0", "margin": entry["margin"] if entry else "0",
+                "allowance": str(allow), "allowance_floor": allow.numerator // allow.denominator,
+                "status": "pass" if v2_test(n, d, entry) else "fail",
+                "prior_numerator": p["numerator"] if p else None,
+                "prior_denominator": p["denominator"] if p else None,
+                "enforced_in_proposal": area not in policy["specification"]["enforcement_exclusions"]})
+    return rows
+
+
+def _historical(pb1_path, window):
+    """Legacy and pb1 rules from an original-mode replay file (read only)."""
+    raw = Path(pb1_path).read_bytes()
+    pb1 = json.loads(raw.decode("utf-8"))
+    if pb1["frozen_inputs"]["first_parent_commits"] != window:
+        raise SystemExit("pb1 replay covers a different commit set")
+    rules = {"legacy": "legacy", "ratio": "pb1_ratio"}
+    index, ever = [], set()
+    order = {c: i for i, c in enumerate(window)}
+    for f in sorted((f for f in pb1["failure_index"] if f["rule"] in rules),
+                    key=lambda f: (order[f["commit"]], f["rule"], f["area"], f["metric"])):
+        key = (rules[f["rule"]], f["area"], f["metric"])
+        g = dict(f, rule=rules[f["rule"]], classification=_classify(f["prior_status"], key in ever))
+        ever.add(key)
+        index.append(g)
+    states = {c["commit"]: c["legacy_state"] for c in pb1["commits"]}
+    unavailable = {c["commit"]: c["unavailable"]["legacy"] for c in pb1["commits"]}
+    return hashlib.sha256(raw).hexdigest(), index, states, unavailable
+
+
+def _totals(failures, commits, label=None):
+    out = {}
+    for rule in sorted({f["rule"] for f in failures} | set(V2_RULES)):
+        for enforced in (False, True):
+            name = rule + ("_enforced" if enforced else "")
+            picked = [f for f in failures if f["rule"] == rule and f["commit"] in commits
+                      and (not enforced or f.get("enforced_in_proposal") is not False)]
+            out[name] = {"commits": len(commits),
+                         "failing_commits": len({f["commit"] for f in picked}),
+                         "failing_cells": len(picked),
+                         **{k: sum(1 for f in picked if f["classification"] == k)
+                            for k in ("introduced", "inherited", "reintroduced")}}
+    return out
+
+
+def v2_replay(args):
+    raw, policy = load_policy(args.policy)
+    repo = Repo(args.repo)
+    before = hashlib.sha256(raw).hexdigest()
+    spec = policy["specification"]
+    frozen = freeze_interval(repo, args.end, args.days)
+    if frozen["shallow"]:
+        raise SystemExit("shallow repository: the interval cannot be verified")
+    verified = spec["classifier"]["verified_generated"]
+    coverage = spec["selection"]["anchors"][0]
+    anchor, anchor_ts = coverage["commit"], coverage["committer_ts"]
+    look_start = coverage["lookback"]["interval"][0]
+    window = frozen["first_parent_commits"]
+    commits = ([frozen["predecessor"]] if frozen["predecessor"] else []) + window
+    order = {c: i for i, c in enumerate(window)}
+    chain_anchor = order.get(anchor)
+
+    def position(commit):
+        ts = frozen["commit_ts"][commit]
+        if commit == anchor:
+            return "anchor"
+        after = order[commit] > chain_anchor if chain_anchor is not None else ts > anchor_ts
+        if after:
+            return "after_anchor"
+        return "calibration_lookback" if ts >= look_start else "before_lookback"
+    analyzer = Analyzer(repo)
+    rows, failures, summaries = [], [], []
+    prev, prev_codes, prev_status, ever = None, None, {}, set()
+    for i, commit in enumerate(commits):
+        in_window = commit in order
+        m = measure_commit(repo, analyzer, commit, None, verified)
+        current = {}
+        crow = v2_rows(commit, m, policy, prev, prev_codes)
+        pos = position(commit) if in_window else "boundary_predecessor"
+        for row in crow:
+            key = (row["area"], row["metric"])
+            row["prior_status"] = prev_status.get(key)
+            row["in_window"], row["position"] = in_window, pos
+            current[key] = row
+            if in_window and row["status"] == "fail":
+                area_entry = policy["calibration"].get(row["area"]) or {}
+                entry = area_entry.get("metrics", {}).get(row["metric"])
+                failures.append({
+                    "area_anchor": area_entry.get("anchor"),
+                    "rule": "v2", "commit": commit, "area": row["area"], "metric": row["metric"],
+                    "position": pos, "numerator": row["numerator"], "denominator": row["denominator"],
+                    "denominator_source": row["denominator_source"], "allowance": row["allowance"],
+                    "allowance_floor": row["allowance_floor"], "case": row["case"],
+                    "prior_numerator": row["prior_numerator"],
+                    "prior_denominator": row["prior_denominator"], "prior_status": row["prior_status"],
+                    "classification": _classify(row["prior_status"], ("v2",) + key in ever),
+                    "enforced_in_proposal": row["enforced_in_proposal"],
+                    "causes": _v2_causes(row["numerator"], row["denominator"], row["prior_numerator"],
+                                         row["prior_denominator"], entry)})
+                ever.add(("v2",) + key)
+        rows.extend(crow)
+        summaries.append({
+            "commit": commit, "committer_ts": frozen["commit_ts"].get(commit, frozen["predecessor_ts"]),
+            "in_window": in_window, "position": pos,
+            "v2_fail_cells": sum(1 for r in crow if r["status"] == "fail"),
+            "v2_fail_cells_enforced": sum(1 for r in crow if r["status"] == "fail" and r["enforced_in_proposal"]),
+            "verified_generated_excluded": m["v2_excluded"],
+            "generation_claims_counted_as_handwritten": len(m["exclusions"]) + len(m["unknown"]),
+            "areas_outside_policy": sorted(set(m["v2"]) - set(policy["calibration"]))})
+        prev_status = {k: r["status"] for k, r in current.items() if r["present"]}
+        prev, prev_codes = current, m["v2_code"]
+        if args.progress:
+            print(f"{i + 1}/{len(commits)} {commit[:12]}", file=sys.stderr)
+    repo.close()
+    history = {}
+    if args.pb1_replay:
+        digest, hist, states, unavailable = _historical(args.pb1_replay, window)
+        failures = hist + failures
+        history = {"pb1_replay_sha256": digest, "legacy_states": _count(states[c] for c in window),
+                   "legacy_unavailable_cells": sum(unavailable[c] for c in window)}
+        per = _count((f["commit"], f["rule"]) for f in hist)
+        for s in summaries:
+            if s["in_window"]:
+                s["legacy_state"] = states[s["commit"]]
+                for rule in ("legacy", "pb1_ratio"):
+                    s[rule + "_fail_cells"] = per.get((s["commit"], rule), 0)
+    positions = ("before_lookback", "calibration_lookback", "anchor", "after_anchor")
+    residual = {}
+    for f in failures:
+        r = residual.setdefault(f["rule"], {}).setdefault(f["area"], {}).setdefault(
+            f["metric"], {"cells": 0, "first": f["commit"], "last": f["commit"], "causes": {},
+                          "introduced": 0, "inherited": 0, "reintroduced": 0})
+        r["cells"] += 1
+        r["last"] = f["commit"]
+        r[f["classification"]] += 1
+        for c in f["causes"]:
+            r["causes"][c] = r["causes"].get(c, 0) + 1
+    after = Path(args.policy).read_bytes()
+    after_hash = hashlib.sha256(after).hexdigest()
+    if after_hash != before:
+        raise SystemExit("policy bytes changed during replay")
+    output = {
+        "schema": V2_REPLAY_SCHEMA, "frozen_inputs": frozen,
+        "policy_sha256_before": before, "policy_sha256_after": after_hash,
+        "specification_sha256": policy["specification_sha256"], "historical_rules": history,
+        "totals": {"all": _totals(failures, set(window)),
+                   "by_position": {p: _totals(failures, {s["commit"] for s in summaries
+                                                         if s["in_window"] and s["position"] == p})
+                                   for p in positions}},
+        "residual_failures": residual, "commits": summaries, "rows": rows, "failure_index": failures,
+    }
+    Path(args.output).write_text(canonical(output) + "\n", encoding="utf-8")
+    print(canonical({"commits_in_window": len(window), "policy_sha256": before,
+                     "totals": output["totals"]["by_position"]}))
+    return 0
+
+
+def v2_evaluate(args):
+    """Read-only evaluation of one commit (e.g. the current head); never recalibrates."""
+    raw, policy = load_policy(args.policy)
+    repo = Repo(args.repo)
+    commit = repo.run("rev-parse", "--verify", args.commit + "^{commit}").decode().strip()
+    tree = repo.run("rev-parse", commit + "^{tree}").decode().strip()
+    m = measure_commit(repo, Analyzer(repo), commit, None, policy["specification"]["classifier"]["verified_generated"])
+    repo.close()
+    rows = v2_rows(commit, m, policy, None, None)
+    end = policy["specification"]["endpoint"]
+    out = {"schema": V2_REPLAY_SCHEMA, "commit": commit, "tree": tree,
+           "pinned_endpoint": end, "equals_pinned_commit": commit == end["commit"],
+           "equals_pinned_tree": tree == end["tree"],
+           "policy_sha256": hashlib.sha256(raw).hexdigest(),
+           "areas_outside_policy": sorted(set(m["v2"]) - set(policy["calibration"])),
+           "fail_cells": sum(1 for r in rows if r["status"] == "fail"),
+           "fail_cells_enforced": sum(1 for r in rows if r["status"] == "fail" and r["enforced_in_proposal"]),
+           "rows": rows}
+    if hashlib.sha256(Path(args.policy).read_bytes()).hexdigest() != out["policy_sha256"]:
+        raise SystemExit("policy bytes changed during evaluation")
+    Path(args.output).write_text(canonical(out) + "\n", encoding="utf-8")
+    print(canonical({k: out[k] for k in ("commit", "tree", "equals_pinned_commit", "fail_cells",
+                                         "fail_cells_enforced", "areas_outside_policy")}))
+    return 0
+
+
 # ---------------------------------------------------------------- docs/audits inventory
 SCRIPT_EXT = {".py", ".sh", ".mjs", ".js", ".lean", ".patch", ".ts"}
 PROSE_EXT = {".md"}  # .txt is unknown: listings and samples are not prose by default
@@ -760,11 +1310,12 @@ def audits_inventory(args):
 
 def main(argv=None):
     parser = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
-    parser.add_argument("--mode", choices=("replay", "calibrate", "audits-inventory"), default="replay")
+    parser.add_argument("--mode", choices=("replay", "calibrate", "audits-inventory",
+                                                   "v2-calibrate", "v2-replay", "v2-evaluate"), default="replay")
     parser.add_argument("--repo", default=".", help="repository to read (Git objects only)")
     parser.add_argument("--output", required=False, help="output JSON path (written only here)")
-    parser.add_argument("--end", help="replay: full end commit SHA (launch commit)")
-    parser.add_argument("--days", type=int, default=21, help="replay: window length in days")
+    parser.add_argument("--end", help="replay, v2-*: full end commit SHA (launch commit)")
+    parser.add_argument("--days", type=int, default=21, help="replay, v2-*: window length in days")
     parser.add_argument("--estimate", help="replay: frozen estimate JSON (read only)")
     parser.add_argument("--progress", action="store_true", help="replay: progress on stderr")
     parser.add_argument("--full-details", action="store_true",
@@ -773,13 +1324,17 @@ def main(argv=None):
     parser.add_argument("--margin", default="1/20", help="calibrate: fixed rational margin p/q")
     parser.add_argument("--sensitivity", default="0,1/20,1/10", help="calibrate: predeclared margins to report")
     parser.add_argument("--mapping", help="calibrate: JSON area -> 'self' | 'repository-solidity' | [areas]")
-    parser.add_argument("--exclude", default="", help="calibrate: comma list of areas outside proposed enforcement")
+    parser.add_argument("--exclude", default="", help="calibrate, v2-calibrate: comma list of areas outside proposed enforcement")
     parser.add_argument("--baseline-commit", help="calibrate: commit that introduced the reviewed baseline")
     parser.add_argument("--baseline-blob", help="calibrate: reviewed baseline blob")
     parser.add_argument("--review", default="UNVERIFIABLE", help="calibrate: review provenance record")
     parser.add_argument("--versions", help="calibrate: JSON checker blob -> semantic version label")
-    parser.add_argument("--commit", help="audits-inventory: commit to inspect")
+    parser.add_argument("--commit", help="audits-inventory, v2-evaluate: commit to inspect")
     parser.add_argument("--area", default="docs/audits", help="audits-inventory: directory")
+    parser.add_argument("--policy", help="v2-replay/v2-evaluate: frozen v2 policy JSON (read only)")
+    parser.add_argument("--lookback-days", type=int, default=7, help="v2-calibrate: lookback length")
+    parser.add_argument("--verified", help="v2-calibrate: JSON list of verified generated items")
+    parser.add_argument("--pb1-replay", help="v2-replay: original-mode replay JSON of the same window")
     args = parser.parse_args(argv)
     if not args.output:
         parser.error("--output is required")
@@ -787,6 +1342,18 @@ def main(argv=None):
         if not (args.end and args.estimate):
             parser.error("replay needs --end and --estimate")
         return replay(args)
+    if args.mode == "v2-calibrate":
+        if not args.end:
+            parser.error("v2-calibrate needs --end")
+        return v2_calibrate(args)
+    if args.mode == "v2-replay":
+        if not (args.end and args.policy):
+            parser.error("v2-replay needs --end and --policy")
+        return v2_replay(args)
+    if args.mode == "v2-evaluate":
+        if not (args.commit and args.policy):
+            parser.error("v2-evaluate needs --commit and --policy")
+        return v2_evaluate(args)
     if args.mode == "calibrate":
         if not args.calibration:
             parser.error("calibrate needs --calibration")
