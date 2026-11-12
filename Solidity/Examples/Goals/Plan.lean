@@ -1,4 +1,5 @@
 import Solidity.Goals.Plan
+import Solidity.Semantics.IntrinsicStorage.Layout
 
 namespace Solidity.Goals
 
@@ -97,6 +98,66 @@ info: open Solidity.Goals.intrinsicSessionSemantics ← Solidity.Semantics.Intri
 -/
 #guard_msgs in
 #roadmap_goal intrinsicSessionSemantics
+
+/-! Layout controls for the storage prerequisite; the session goal above stays OPEN. -/
+namespace IntrinsicStorageLayoutControls
+open Solidity.Storage Solidity.Semantics Solidity.Semantics.IntrinsicStorage
+
+private def ledgerKey (k : PrimTy.uint.Denote) : Path (.ref (.struct "LedgerUse")) .uint :=
+  .field (f := "ledger") (T := .ref (.struct "Ledger")) (by decide)
+    (.field (f := "balances") (T := .ref (.mapping .uint .uint)) (by decide) (.key k .nil))
+
+-- The nested ledger's nonce occupies slot zero, so its mapping starts at one.
+example (k : PrimTy.uint.Denote) :
+    locate (ledgerKey k) (.root 0) = .hash (keyWord k) (.root 1) 0 := by rfl
+
+private def personAge (i : PrimTy.uint.Denote) :
+    Path (.ref (.array (.ref (.struct "Person")))) .uint :=
+  .at i (.field (f := "age") (T := .uint) (by decide) .nil)
+
+-- Person has three slots; age follows the two-slot Account member.
+example (i : PrimTy.uint.Denote) :
+    locate (personAge i) (.root 7) = .data (.root 7) (i.val.toNat * 3 + 2) := by rfl
+
+-- A mapping to Person arrays composes its key and array/member path.
+example (k i : PrimTy.uint.Denote) :
+    locate ((Path.key k .nil).append (personAge i)) (.root 7) =
+      .data (.hash (keyWord k) (.root 7) 0) (i.val.toNat * 3 + 2) := by
+  rw [locate_append]
+  rfl
+
+-- Descending into an array member retains the enclosing mapping's hash input.
+example (k i : PrimTy.uint.Denote) :
+    ancestry (.hash (keyWord k) (.root 7) 0) <+:
+      ancestry (locate (personAge i) (.hash (keyWord k) (.root 7) 0)) :=
+  ancestry_locate (personAge i) _
+
+-- Field boundaries and fixed-array strides agree with the dependent struct layout.
+example {s f : Name} {T : Ty} (h : lookupBy f (structDef s) = some T) :
+    offset s f + size T ≤ size (.ref (.struct s)) := by
+  rw [size_struct]
+  exact offsetIn_bound h
+
+example (n : Nat) : size (.ref (.fixed (.ref (.struct "Person")) n)) = n * 3 := by
+  rw [size_fixed, size_struct]
+  rfl
+
+-- Equal encoded inputs reached by actual typed references decode to equal preimages.
+-- This neither assumes nor concludes injectivity of keccak.
+example {C : Contract} {T : Ty} (r : SRef C T) {p q : Pre}
+    (hp : p ∈ ancestry (reference r)) (hq : q ∈ ancestry (reference r))
+    (h : encoded p = encoded q) : p = q :=
+  encoded_inj (ancestry_words _ (reference_bounded r) _ hp)
+    (ancestry_words _ (reference_bounded r) _ hq) h
+
+-- Array data and mapping entry encodings cannot be confused, even at the same word.
+example : encoded (.data 7) ≠ encoded (.entry 7 0) := by
+  intro h
+  have e := encoded_inj (p := .data 7) (q := .entry 7 0)
+    (by unfold Pre.Words; decide) (by unfold Pre.Words; decide) h
+  cases e
+
+end IntrinsicStorageLayoutControls
 
 /-! The Lean policy specification only: not the checker's proof, the calibrated
 policy, the Python integration or CI on the merged head. -/

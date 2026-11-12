@@ -61,11 +61,8 @@ fuels. -/
 theorem foldr_congr_add {l : List (Name × Ty)} {f g : Name × Ty → Nat}
     (h : ∀ x ∈ l, f x = g x) :
     l.foldr (fun x acc => f x + acc) 0 = l.foldr (fun x acc => g x + acc) 0 := by
-  induction l with
-  | nil => rfl
-  | cons y l ih =>
-    simp only [List.foldr]
-    rw [h y (List.mem_cons_self), ih (fun x hx => h x (List.mem_cons_of_mem _ hx))]
+  simpa only [List.foldr_map] using
+    congrArg (List.foldr Nat.add 0) (List.map_congr_left h)
 
 /-- Enough fuel is enough: any two fuels above `T`'s rank give its size. -/
 theorem sizeF_eq : ∀ (a b : Nat) (T : Ty), tyRank T < a → tyRank T < b → sizeF a T = sizeF b T
@@ -75,8 +72,8 @@ theorem sizeF_eq : ∀ (a b : Nat) (T : Ty), tyRank T < a → tyRank T < b → s
     match T with
     | .prim _ | .ref (.array _) | .ref (.mapping _ _) => rfl
     | .ref (.fixed E n) =>
-      simp only [sizeF, tyRank] at ha hb ⊢
-      rw [sizeF_eq a b E (by omega) (by omega)]
+      exact congrArg (n * ·) (sizeF_eq a b E
+        (Nat.lt_of_succ_lt_succ ha) (Nat.lt_of_succ_lt_succ hb))
     | .ref (.struct n) =>
       simp only [sizeF]
       apply foldr_congr_add
@@ -88,10 +85,8 @@ theorem sizeF_eq : ∀ (a b : Nat) (T : Ty), tyRank T < a → tyRank T < b → s
 /-- A struct's size is its members' sizes added up: `size Person = size Account
 + size uint = 2 + 1`. -/
 theorem size_struct (n : Name) : size (.ref (.struct n)) = sumSizes (structDef n) := by
-  simp only [size, tyRank, sizeF, sumSizes]
-  apply foldr_congr_add
-  intro x hx
-  exact sizeF_eq _ _ _ (tyRank_member hx) (Nat.lt_succ_self _)
+  exact foldr_congr_add fun x hx =>
+    sizeF_eq _ _ _ (tyRank_member hx) (Nat.lt_succ_self _)
 
 /-- A `uint` or a `bool` takes one slot: `uint total;` is slot `0` alone. -/
 @[simp] theorem size_prim (p : PrimTy) : size (.prim p) = 1 := rfl
