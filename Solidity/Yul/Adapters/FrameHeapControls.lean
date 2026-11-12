@@ -233,6 +233,13 @@ private def residualObserved (pipeline : Pipeline) : List Nat :=
 #guard_msgs in #eval decide (mixedPlacement.address mixedEntry3.id+mixedEntry3.image.span≤928 ∨
   928+32≤mixedPlacement.address mixedEntry3.id)
 
+private theorem byte_outside : ∀ e∈generatedHeapEntries mixedPlacement,
+    mixedPlacement.address e.id+e.image.span≤180 ∨ 180+3≤mixedPlacement.address e.id := by
+  rw [computed_entries_identity]
+  intro e member
+  have bounds := residual_interval e member
+  omega
+
 private def residualByteSpan (pipeline : Pipeline) : ByteSpan (built pipeline).capacity :=
   ⟨lenU 180 (by decide),lenU 3 (by decide),Or.inr (by change 180+3≤2048;decide)⟩
 private def byteChanged (pipeline : Pipeline) : FrameMem C [] :=
@@ -242,16 +249,10 @@ private def byteChanged (pipeline : Pipeline) : FrameMem C [] :=
 not just its selected read projection. Includes both pipeline tags. -/
 theorem residual_byte_source (pipeline : Pipeline) :
     writeback mixedState mixedPlacement mixedPlacement (retainInitial _ _) (byteChanged pipeline)=
-      .ok (some (.ok (),mixedState)) := by
-  have outside : ∀ e∈generatedHeapEntries mixedPlacement,
-      mixedPlacement.address e.id+e.image.span≤180 ∨ 180+3≤mixedPlacement.address e.id := by
-    rw [computed_entries_identity]
-    intro e member
-    have bounds := residual_interval e member
-    omega
-  exact (residual_span_unchanged mixedHeap.ty mixedState mixedPlacement mixedPlacement (retainInitial _ _)
+      .ok (some (.ok (),mixedState)) :=
+  (residual_span_unchanged mixedHeap.ty mixedState mixedPlacement mixedPlacement (retainInitial _ _)
     (residual mixedPlacement.free) mixed_actual_MemOK supported (carrier pipeline) (fits _ _) (room _)
-    (residualByteSpan pipeline) [0,255,2] rfl outside).1
+    (residualByteSpan pipeline) [0,255,2] rfl byte_outside).1
 
 /-- info: ([0, 255, 2, 165], 64) -/
 #guard_msgs in #eval
@@ -269,16 +270,10 @@ theorem calldata_heap (pipeline : Pipeline) : ∃ image : FrameMem C [],
       0 0 5 1 4 false).run mixedState=(.ok ([0,255,2],some image),mixedState) ∧
     writeback mixedState mixedPlacement mixedPlacement (retainInitial _ _) image=
       .ok (some (.ok (),mixedState)) := by
-  have outside : ∀ e∈generatedHeapEntries mixedPlacement,
-      mixedPlacement.address e.id+e.image.span≤180 ∨ 180+3≤mixedPlacement.address e.id := by
-    rw [computed_entries_identity]
-    intro e member
-    have bounds := residual_interval e member
-    omega
   obtain ⟨image,run,source,raw,read⟩ := calldata_residual_unchanged mixedHeap.ty mixedState
     mixedPlacement mixedPlacement (retainInitial _ _) (residual mixedPlacement.free)
     mixed_actual_MemOK supported (carrier pipeline) (fits _ _) (room _) (residualByteSpan pipeline)
-    sliceFrame 0 0 5 1 4 false (by decide) (by decide) (by decide) rfl outside
+    sliceFrame 0 0 5 1 4 false (by decide) (by decide) (by decide) rfl byte_outside
   exact ⟨image,run,source⟩
 
 /-- info: ([0, 255, 2], [0, 255, 2, 165]) -/
