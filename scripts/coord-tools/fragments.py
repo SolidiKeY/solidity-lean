@@ -300,7 +300,8 @@ def resolve(lane, ours_lane):
         errors = []; w = Tree(); text = generate(w, c, d, kind, errors)
         if errors: notes += errors; left.add(c); continue
         pathlib.Path(c).write_bytes(text.encode())
-        dirs = [p for p in PIN_FRAGMENT_ROOTS if w.has_dir(p)] if kind == "json" else [d]
+        # A root can become empty during adoption but still have index deletions.
+        dirs = [p for p in PIN_FRAGMENT_ROOTS if w.has_dir(p) or git("ls-files", "-z", "--", p)] if kind == "json" else [d]
         git("add", "-A", "--", c, *dirs); resolved.add(c)
     if any(r in unmerged for r in ROOTS) or os.path.isfile("scripts/coord-tools/register.sh"):
         r = subprocess.run(["bash", "scripts/coord-tools/register.sh"], capture_output=True, text=True)

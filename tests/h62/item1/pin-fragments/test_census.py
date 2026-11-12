@@ -189,6 +189,36 @@ class StorageIntegration(unittest.TestCase):
 
 
 
+    def test_resolve_stages_last_fragment_deletion_from_unfragmented_side(self):
+        self.assert_last_fragment_deletion_staged(LEGACY, self.raw)
+
+    def test_resolve_stages_last_canonical_fragment_deletion(self):
+        self.git("rm", LEGACY)
+        raw = json.dumps({NEW_KEY: []}) + "\n"
+        self.put(NEW_PATH, raw)
+        self.put(census.INVENTORY, raw)
+        self.git("add", "."); self.git("commit", "-qm", "canonical fixture")
+        self.assert_last_fragment_deletion_staged(NEW_PATH, raw)
+
+    def assert_last_fragment_deletion_staged(self, path, raw):
+        self.git("rm", path)
+        self.git("commit", "-qm", "unfragmented baseline")
+        base = self.git("rev-parse", "HEAD")
+        self.git("checkout", "-qb", "side")
+        self.put(census.INVENTORY, "{}\n")
+        self.git("add", "."); self.git("commit", "-qm", "direct pin removal")
+        self.git("checkout", "-qb", "ours", base)
+        self.put(path, raw)
+        self.git("add", "."); self.git("commit", "-qm", "adopt fragments")
+        self.git("merge", "--no-ff", "side", "-m", "Merge side")
+        with contextlib.redirect_stdout(io.StringIO()):
+            self.assertEqual(fragments.resolve("side", "ours"), 0)
+        self.assertFalse((self.root / path).exists())
+        self.assertEqual(json.loads(self.git("show", ":" + census.INVENTORY)), {})
+        self.assertIn("D\t" + path, self.git("diff", "--cached", "--name-status"))
+        self.assertEqual(self.git("diff", "--name-only"), "")
+        self.assertEqual(self.git("ls-files", "--", *fragments.PIN_FRAGMENT_ROOTS), "")
+
     def test_historical_symlink_fragment_rejected_before_adoption(self):
         (self.root / LEGACY).unlink()
         (self.root / LEGACY).symlink_to(json.dumps({KEY:[]}))
