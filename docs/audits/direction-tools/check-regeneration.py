@@ -135,7 +135,7 @@ def main():
     reject_tracked(tracked_shards(ROOT))
     # Without a remote-tracking ref, conservatively compare against launch.
     merge_base = subprocess.run(['git', '-C', str(ROOT), 'merge-base', 'HEAD', 'origin/master'],
-                                stdout=subprocess.PIPE, stderr=subprocess.DEVNULL)
+                                stdout=subprocess.PIPE, stderr=subprocess.DEVNULL, env=OFFLINE_ENV)
     task_base = os.fsdecode(merge_base.stdout).strip() if merge_base.returncode == 0 else LAUNCH
     removed = deletions(ROOT, task_base)
     if any(p not in manifest for p in removed):
