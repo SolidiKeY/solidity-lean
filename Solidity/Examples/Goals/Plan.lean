@@ -92,6 +92,20 @@ info: open Solidity.Goals.yulAcceptedCompilesWithArtifact ← Solidity.Yul.accep
 #guard_msgs in
 #roadmap_goal yulAcceptedCompilesWithArtifact
 
+/--
+info: open Solidity.Goals.intrinsicSessionSemantics ← Solidity.Semantics.IntrinsicSession.session_semantics_correct plan is0-intrinsic-session
+-/
+#guard_msgs in
+#roadmap_goal intrinsicSessionSemantics
+
+/-! The Lean policy specification only: not the checker's proof, the calibrated
+policy, the Python integration or CI on the merged head. -/
+/--
+info: open Solidity.Goals.proseRatioRuleSound ← Solidity.Docs.prose_ratio_rule_sound plan pb2-prose-ratio-rule
+-/
+#guard_msgs in
+#roadmap_goal proseRatioRuleSound
+
 /-! The accepted Yul language is inhabited at every local count and control, is
 closed under arbitrarily deep composition and arithmetic nesting, admits
 nonzero newer-prefix depths, and refuses constructors the producer does not
@@ -151,5 +165,99 @@ example {c : Yul.Control} {n : Nat} (test : Yul.Expr [] [] n 1) (body : Yul.Stmt
     ¬ Accepted (.if_ test body) := nofun
 
 end YulArtifact
+
+/-! The intrinsic session laws refuse a candidate that never observes an event:
+a resumed session whose first action is a credit must show it. -/
+namespace IntrinsicSession
+
+open Solidity.Roadmap
+
+/-- The code of an empty compilation. -/
+def noCode : Code where
+  contracts := []
+  main := 0
+  roles := fun k => k.elim0
+  ctor := fun k => k.elim0
+  entry := fun k => k.elim0
+
+/-- An allowed environment whose every action is a credit. -/
+def crediting : SessionEnv where
+  deployer := Address.zero
+  deployNonce := ⟨0, by decide⟩
+  deployValue := ⟨0, by decide⟩
+  deployArgs := []
+  balance := fun _ => ⟨0, by decide⟩
+  hasCode := fun _ _ => false
+  requests := fun _ _ => some (.credit Address.zero ⟨1, by decide⟩)
+  callee := fun _ => .answer (.success [])
+
+example : crediting.Allowed := ⟨fun _ => rfl, fun _ _ _ => rfl, fun _ _ _ _ _ _ => rfl⟩
+
+/-- A candidate without events is refused, whatever its view. -/
+example (F : Fixed) (I : IntrinsicSpec) (V : View I)
+    (silent : ∀ p e r, (I.lang.sem p e r).events = []) : ¬ Laws F I V := by
+  intro laws
+  have allowed : I.lang.Allowed (I.ofSession crediting) := by
+    rw [I.allowed_iff, I.session_of]
+    exact ⟨fun _ => rfl, fun _ _ _ => rfl, fun _ _ _ _ _ _ => rfl⟩
+  let start : TypedWorld :=
+    ⟨noCode, ContractWorld.World.empty noCode.catalog (funds crediting.balance) noCode.roles⟩
+  obtain ⟨r, _, shown⟩ := (laws.credited (V.resume start) (I.ofSession crediting) [] 0
+    noCode start.world Address.zero ⟨1, by decide⟩ allowed (laws.starts start _ allowed)
+    (by rw [I.session_of]; rfl)).1
+  rw [silent] at shown
+  exact absurd (List.prefix_nil.mp shown) (by simp)
+
+/-- A resource-failure classification that admits no bound is refused. -/
+example (F : Fixed) (I : IntrinsicSpec) (V : View I) (never : ∀ r, ¬ I.NoFail r) :
+    ¬ Laws F I V := by
+  intro laws
+  have allowed : I.lang.Allowed (I.ofSession crediting) := by
+    rw [I.allowed_iff, I.session_of]
+    exact ⟨fun _ => rfl, fun _ _ _ => rfl, fun _ _ _ _ _ _ => rfl⟩
+  let start : TypedWorld :=
+    ⟨noCode, ContractWorld.World.empty noCode.catalog (funds crediting.balance) noCode.roles⟩
+  obtain ⟨r, good, _⟩ := laws.boundary_observed _ _ _ _ _ (laws.starts start _ allowed)
+  exact never r good.2
+
+end IntrinsicSession
+
+/-! The decision model at its boundaries: equality passes and one line over fails,
+mixed lines count as code, audits padding and value-equal or raised proposals change
+nothing, and an unlisted area allows no prose. -/
+namespace ProseRatio
+
+def scope : Scope String where
+  area p := p.headD ""
+  generated := [["Solidity.lean"]]
+  kind p := if p.headD "" = "Solidity" then .source
+    else if p.headD "" = "docs" then .docs else .outside
+
+/-- Comments in `Solidity`: half a line per code line, plus one. -/
+def half : Allowance := ⟨⟨1, 2, by decide⟩, 1⟩
+
+def pol : Policy String := ⟨scope, [(("Solidity", .comment), half)]⟩
+
+def lean (code comments : Nat) : File :=
+  ⟨["Solidity", "A.lean"], List.replicate code [.code "x"] ++
+    List.replicate comments [.code " ", .comment "-- c"]⟩
+
+example : accepts pol [lean 4 3] = true := by decide
+example : accepts pol [lean 4 4] = false := by decide
+example : accepts pol [lean 0 1] = true := by decide
+example : accepts pol [⟨["Solidity", "B.lean"], [[.code "x ", .comment "-- c"],
+    [.code "y", .comment "-- d"]]⟩] = true := by decide
+example : accepts pol [lean 4 3, ⟨["docs", "audits", "a.md"], [[], []]⟩] = true := by decide
+example : accepts pol [lean 4 3, ⟨["docs", "a.md"], [[]]⟩] = false := by decide
+example : accepts pol [lean 4 3, ⟨["Solidity", "C.lean"], [[.comment "-- e"]]⟩] = false := by decide
+example : accepts pol [lean 4 3, ⟨["Solidity", "C.lean"], [[.code "z"], [.code "w"]]⟩] =
+    true := by decide
+example : accepts (pol.shrink [(("Solidity", .comment), ⟨⟨1, 1, by decide⟩, 9⟩)])
+    [lean 4 4] = false := by decide
+example : accepts ((⟨scope, [(("Solidity", .comment), ⟨⟨2, 4, by decide⟩, 1⟩)]⟩ :
+    Policy String).shrink [(("Solidity", .comment), half)]) [lean 4 3] = true := by decide
+example : accepts (pol.shrink []) [lean 4 1] = false := by decide
+
+end ProseRatio
 
 end Solidity.Goals

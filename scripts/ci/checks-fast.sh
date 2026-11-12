@@ -32,6 +32,10 @@ roots	bash scripts/coord-tools/register.sh --check
 fragments	bash scripts/coord-tools/fragments.sh --check
 slow-partition	python3 -B tests/h55/module-times/test_slow_examples.py
 solidity-features	python3 scripts/solidity-feature-audit.py --check
+lean-budget-test	python3 -B scripts/lean-budget/test_check.py
+lean-budget	python3 -B scripts/lean-budget/check.py
+hygiene-test	python3 -B scripts/hygiene/test_check.py
+hygiene	python3 -B scripts/hygiene/check.py
 EOF
 )
 

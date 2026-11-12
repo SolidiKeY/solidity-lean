@@ -297,6 +297,7 @@ and open obligations. Test proposals remain proposals until applied.
 - [docs/module-map/tools.md](module-map/tools.md)
 - [docs/module-map/try-evidence.md](module-map/try-evidence.md)
 - [docs/module-map/typing.md](module-map/typing.md)
+- [docs/module-map/unchecked-arithmetic.md](module-map/unchecked-arithmetic.md)
 - [docs/module-map/v07-lowering.md](module-map/v07-lowering.md)
 - [docs/module-map/v08-adapters.md](module-map/v08-adapters.md)
 - [docs/module-map/v09-passes.md](module-map/v09-passes.md)
