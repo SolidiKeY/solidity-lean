@@ -93,13 +93,54 @@ def mentionsLean (e : Expr) : Bool :=
 def rangeJson (r : DeclarationRange) : Json :=
   toJson #[r.pos.line, r.endPos.line]
 
-def dumpGroup (out : IO.FS.Stream) (group : String) (mods : Array Name) : IO Unit := do
-  let env ← importModules (mods.map fun n => { module := n }) {} 0
+/-- Elaborates an executable root's source (it is not importable: no `lean_lib` builds an
+`.olean` for it) over the built `.olean` files of its imports. -/
+def elabRoot (file : System.FilePath) (mainModule : Name) : IO Environment := do
+  let input ← IO.FS.readFile file
+  let inputCtx := Parser.mkInputContext input file.toString
+  let (header, parserState, messages) ← Parser.parseHeader inputCtx
+  let (env, messages) ← Elab.processHeader header {} messages inputCtx (mainModule := mainModule)
+  let s ← Elab.IO.processCommands inputCtx parserState (Elab.Command.mkState env messages {})
+  if s.commandState.messages.hasErrors then
+    throw <| IO.userError s!"{file}: elaboration reported errors"
+  return s.commandState.env
+
+/-- One module's constants as JSON lines. -/
+def dumpConsts (out : IO.FS.Stream) (env : Environment) (group : String) (m : Name)
+    (isProject : Name → Bool) (ranges : Name → Option DeclarationRanges)
+    (constants : Array ConstantInfo) : IO Unit := do
   let simps := simpExtension.getState env
   let insts := (instanceExtension.getState env).instanceNames
+  for ci in constants do
+    let n := ci.name
+    let refs := (kernelRefs ci).filter isProject |>.toList.eraseDups.toArray
+    let isMeta := mentionsLean ci.type
+    let lits : Array Name := if isMeta then
+        match ci.value? (allowOpaque := true) with
+        | some v => (nameLits v).filter fun l => l != n && isProject l
+        | none => #[]
+      else #[]
+    let impl := (Compiler.implementedByAttr.getParam? env n).map (·.toString)
+    let mut fields : List (String × Json) :=
+      [("r", "const"), ("g", toJson group), ("m", toJson m.toString),
+       ("n", toJson n.toString), ("k", toJson (constantKind ci)),
+       ("refs", toJson (refs.map Name.toString))]
+    if let some r := ranges n then fields := fields ++ [("range", rangeJson r.range)]
+    if insts.contains n then fields := fields ++ [("inst", toJson true)]
+    if simps.isLemma (.decl n) then fields := fields ++ [("simp", toJson true)]
+    if isMeta then fields := fields ++ [("meta", toJson true)]
+    if !lits.isEmpty then
+      fields := fields ++ [("lits", toJson (lits.toList.eraseDups.map Name.toString))]
+    if let some t := impl then fields := fields ++ [("impl", toJson t)]
+    out.putStrLn (Json.mkObj fields).compress
+
+/-- Dumps the project modules of `env`, and with `root? = some (m, _)` the constants the
+elaborated root module `m` added. -/
+def dumpEnv (out : IO.FS.Stream) (group : String) (env : Environment)
+    (root? : Option Name := none) : IO Unit := do
   let isProject (n : Name) : Bool := match env.getModuleIdxFor? n with
     | some i => !isCore env.header.moduleNames[i]!
-    | none => false
+    | none => root?.isSome && env.constants.map₂.contains n
   for i in [:env.header.moduleData.size] do
     let m := env.header.moduleNames[i]!
     if isCore m then continue
@@ -109,28 +150,12 @@ def dumpGroup (out : IO.FS.Stream) (group : String) (mods : Array Name) : IO Uni
     let mut ranges : NameMap DeclarationRanges := {}
     for (n, r) in declRangeExt.getModuleEntries env i (level := .private) do
       ranges := ranges.insert n r
-    for ci in data.constants do
-      let n := ci.name
-      let refs := (kernelRefs ci).filter isProject |>.toList.eraseDups.toArray
-      let isMeta := mentionsLean ci.type
-      let lits : Array Name := if isMeta then
-          match ci.value? (allowOpaque := true) with
-          | some v => (nameLits v).filter fun l => l != n && isProject l
-          | none => #[]
-        else #[]
-      let impl := (Compiler.implementedByAttr.getParam? env n).map (·.toString)
-      let mut fields : List (String × Json) :=
-        [("r", "const"), ("g", toJson group), ("m", toJson m.toString),
-         ("n", toJson n.toString), ("k", toJson (constantKind ci)),
-         ("refs", toJson (refs.map Name.toString))]
-      if let some r := ranges.find? n then fields := fields ++ [("range", rangeJson r.range)]
-      if insts.contains n then fields := fields ++ [("inst", toJson true)]
-      if simps.isLemma (.decl n) then fields := fields ++ [("simp", toJson true)]
-      if isMeta then fields := fields ++ [("meta", toJson true)]
-      if !lits.isEmpty then
-        fields := fields ++ [("lits", toJson (lits.toList.eraseDups.map Name.toString))]
-      if let some t := impl then fields := fields ++ [("impl", toJson t)]
-      out.putStrLn (Json.mkObj fields).compress
+    dumpConsts out env group m isProject ranges.find? data.constants
+  if let some m := root? then
+    let localConsts := env.constants.map₂.toList.map (·.2) |>.toArray.qsort (·.name.lt ·.name)
+    out.putStrLn <| (Json.mkObj [("r", "module"), ("g", toJson group), ("m", toJson m.toString),
+      ("imports", toJson (env.header.imports.map (·.module.toString)))]).compress
+    dumpConsts out env group m isProject (declRangeExt.find? env ·) localConsts
   for e in Solidity.Goal.goalExt.getState env do
     out.putStrLn <| (Json.mkObj [("r", "goal"), ("g", toJson group),
       ("decl", toJson e.decl.toString), ("proof", toJson e.proof.toString),
@@ -144,18 +169,25 @@ def run : IO Unit := do
     | throw <| IO.userError "LEAN_INVENTORY_MODULES is unset"
   initSearchPath (← findSysroot)
   let mut groups : Array (String × Array Name) := #[]
+  let mut roots : Array (String × Name × String) := #[]
   for line in ← IO.FS.lines listPath do
     match line.splitOn "\t" with
     | [g, m] =>
       match groups.findIdx? (·.1 == g) with
       | some i => groups := groups.modify i fun (g', ms) => (g', ms.push m.toName)
       | none => groups := groups.push (g, #[m.toName])
+    | [g, m, file] => roots := roots.push (g, m.toName, file)
     | _ => if line != "" then throw <| IO.userError s!"bad module line: {line}"
   let h ← IO.FS.Handle.mk outPath .write
   let out := IO.FS.Stream.ofHandle h
   out.putStrLn <| (Json.mkObj [("r", "header"), ("lean", toJson Lean.versionString),
     ("githash", toJson Lean.githash)]).compress
-  for (g, ms) in groups do dumpGroup out g ms
+  for (g, ms) in groups do
+    let env ← importModules (ms.map fun n => { module := n }) {} 0
+    dumpEnv out g env
+  for (g, m, file) in roots do
+    let env ← elabRoot file m
+    dumpEnv out g env (some m)
   out.putStrLn <| (Json.mkObj [("r", "end")]).compress
   out.flush
 

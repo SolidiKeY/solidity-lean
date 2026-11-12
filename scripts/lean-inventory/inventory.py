@@ -108,9 +108,15 @@ def extract(repo, rev):
     groups = [('lib', list(S.LIB_ROOTS))] + [('exe:' + e, [m]) for m, e in S.EXE_ROOTS.items()]
     build_logs = {}
     for g, mods in groups:
-        f = work / ('Build-' + g.replace(':', '-') + '.lean')
-        f.write_text(''.join(f'import {m}\n' for m in mods))
-        code, log = run_gate(repo, f.relative_to(repo), {}, work / ('gl-' + g.replace(':', '-')))
+        if g == 'lib':
+            f = (work / 'Build-lib.lean')
+            f.write_text(''.join(f'import {m}\n' for m in mods))
+            f = f.relative_to(repo)
+        else:
+            # An executable root is no importable module; checking its own file builds
+            # its imports, and Extract.lean elaborates it again over them.
+            f = mods[0] + '.lean'
+        code, log = run_gate(repo, f, {}, work / ('gl-' + g.replace(':', '-')))
         if code:
             sys.exit(f'extract: build of {g} failed; see {log}')
         build_logs[g] = log.read_text()
@@ -120,7 +126,8 @@ def extract(repo, rev):
     (out / 'build.log').write_text(''.join(p.read_text() for p in earlier) + build_logs['lib'])
     subprocess.run([sys.executable, 'scripts/ci/restore-lake-artifacts.py'], cwd=repo, check=True)
     listing = work / 'modules.tsv'
-    listing.write_text(''.join(f'{g}\t{m}\n' for g, mods in groups for m in mods))
+    listing.write_text(''.join(f'{g}\t{m}\n' if g == 'lib' else f'{g}\t{m}\t{m}.lean\n'
+                               for g, mods in groups for m in mods))
     graph = work / 'graph.jsonl'
     code, log = run_gate(repo, 'scripts/lean-inventory/Extract.lean',
                          {'LEAN_INVENTORY_OUT': str(graph), 'LEAN_INVENTORY_MODULES': str(listing)},
