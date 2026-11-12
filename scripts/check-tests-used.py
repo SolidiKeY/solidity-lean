@@ -76,7 +76,30 @@ def decode(b):
 
 
 def canonical(value):
+    """Stable semantic identity bytes; presentation changes must not rekey uses."""
     return (json.dumps(value, ensure_ascii=True, indent=2, sort_keys=True) + '\n').encode()
+
+
+def output_json(value):
+    """Lossless JSON with one top-level collection member per physical line.
+
+    Full path records and claim definitions remain explicit and individually
+    searchable. Compact nested values avoid repeating indentation in bulk data;
+    neither schema, list ordering nor classification provenance is changed.
+    """
+    def compact(item):
+        return json.dumps(item, ensure_ascii=True, sort_keys=True, separators=(',', ':'))
+    if not isinstance(value, dict): return (compact(value) + '\n').encode()
+    members = []
+    for key, item in sorted(value.items()):
+        if isinstance(item, list) and item:
+            encoded = '[\n' + ',\n'.join('  ' + compact(row) for row in item) + '\n ]'
+        elif isinstance(item, dict) and item:
+            encoded = '{\n' + ',\n'.join('  ' + compact(k) + ':' + compact(v)
+                                          for k, v in sorted(item.items())) + '\n }'
+        else: encoded = compact(item)
+        members.append(' ' + compact(key) + ':' + encoded)
+    return ('{\n' + ',\n'.join(members) + '\n}\n').encode()
 
 
 
@@ -371,7 +394,7 @@ def reviewed_routes(graph):
     routes deliberately do not infer entire H55/H62 trees from the gate.
     """
     repo = graph.repo
-    audited_blobs = {'scripts/coord-tools/gate.sh': 'd60977c0abccb00ccaf1d5a4b777bee9fde34b98', 'scripts/ci/checks-fast.sh': '71ae3185f23f860a4ff907bc53815991e6bc8719', 'scripts/check-trust.sh': '7c93af4335a60c0def576b35d78f1d07a84cfca4', 'scripts/check-trust.mjs': '9a4e8eb53b3a1fb68d7ef8ac8c439600475b7e2d', 'scripts/check-testsuite.sh': '312daf403db3c45a7c26a0d3704febd0099ea2a9', 'scripts/h62/item1/p16-generator/check.py': '1222082617c3db1ba6df27c083ae8ebd71f3d86c', 'scripts/h62/item1/p16-generator/generate.py': 'c79d2fc8a61162f192e5e549f272ee1745c4c3d3', 'tests/h28-sol/non-vacuity/kernel.py': '7190d611d05931e9aebe509685fbc16fbc6a686d'}
+    audited_blobs = {'scripts/coord-tools/gate.sh': 'd60977c0abccb00ccaf1d5a4b777bee9fde34b98', 'scripts/ci/checks-fast.sh': '5a12a3702d2677758c31d77028123df2e033ed93', 'scripts/check-trust.sh': '7c93af4335a60c0def576b35d78f1d07a84cfca4', 'scripts/check-trust.mjs': '9a4e8eb53b3a1fb68d7ef8ac8c439600475b7e2d', 'scripts/check-testsuite.sh': '312daf403db3c45a7c26a0d3704febd0099ea2a9', 'scripts/h62/item1/p16-generator/check.py': '1222082617c3db1ba6df27c083ae8ebd71f3d86c', 'scripts/h62/item1/p16-generator/generate.py': 'c79d2fc8a61162f192e5e549f272ee1745c4c3d3', 'tests/h28-sol/non-vacuity/kernel.py': '7190d611d05931e9aebe509685fbc16fbc6a686d'}
     def audited(path):
         return path in repo.tree and repo.tree[path][2] == audited_blobs.get(path)
     routes = [
@@ -1421,7 +1444,7 @@ def declared_configured_cli(repo, path):
             call = main_call(statement)
             if call is not None: calls.append(call)
     if not calls or calls[0].args or calls[0].keywords or function.lineno >= calls[0].lineno: return None
-    parsers = {}
+    parsers = {}; declared_options = {}
     for statement in function.body:
         if isinstance(statement, ast.Expr) and isinstance(statement.value, ast.Constant) and isinstance(statement.value.value, str): continue
         if isinstance(statement, ast.Assign) and len(statement.targets) == 1 and isinstance(statement.targets[0], ast.Name):
@@ -1429,7 +1452,7 @@ def declared_configured_cli(repo, path):
             if isinstance(value, ast.Call) and isinstance(value.func, ast.Attribute):
                 owner = value.func.value
                 if isinstance(owner, ast.Name) and owner.id in modules and value.func.attr == 'ArgumentParser':
-                    parsers[name] = set(); continue
+                    parsers[name] = set(); declared_options[name] = set(); continue
                 if isinstance(owner, ast.Name) and owner.id in parsers and value.func.attr == 'parse_args' and not value.args and not value.keywords:
                     if not parsers[owner.id]: return None
                     return {'kind': 'curated local argparse entry', 'revision': repo.ref,
@@ -1440,12 +1463,63 @@ def declared_configured_cli(repo, path):
             call = statement.value; target = call.func
             if (isinstance(target, ast.Attribute) and isinstance(target.value, ast.Name)
                     and target.value.id in parsers and target.attr == 'add_argument'):
+                literal_options = [a.value for a in call.args if isinstance(a, ast.Constant)
+                                   and isinstance(a.value, str) and a.value.startswith('-')]
+                if (len(set(literal_options)) != len(literal_options)
+                        or set(literal_options) & declared_options[target.value.id]): return None
+                declared_options[target.value.id].update(literal_options)
                 required = [k.value for k in call.keywords if k.arg == 'required']
                 if required and not (len(required) == 1 and isinstance(required[0], ast.Constant) and type(required[0].value) is bool): return None
                 if required and required[0].value is True:
                     if len(call.args) != 1 or not isinstance(call.args[0], ast.Constant) or not isinstance(call.args[0].value, str) or not re.fullmatch(r'--[A-Za-z][A-Za-z0-9-]*', call.args[0].value): return None
                     parsers[target.value.id].add(call.args[0].value)
                 continue
+        if isinstance(statement, ast.For):
+            # A finite literal option declaration, not general loop analysis.
+            # Only -- + the loop name may vary; no body/else side effects,
+            # dynamic iterable, parser rebinding or duplicate option is admitted.
+            if (statement.orelse or not isinstance(statement.target, ast.Name)
+                    or statement.target.id in protected | set(parsers) | {'Path'}
+                    or not isinstance(statement.iter, (ast.Tuple, ast.List))
+                    or not 1 <= len(statement.iter.elts) <= 16
+                    or len(statement.body) != 1
+                    or not isinstance(statement.body[0], ast.Expr)
+                    or not isinstance(statement.body[0].value, ast.Call)): return None
+            call = statement.body[0].value; target = call.func
+            if (not isinstance(target, ast.Attribute) or target.attr != 'add_argument'
+                    or not isinstance(target.value, ast.Name) or target.value.id not in parsers
+                    or len(call.args) != 1): return None
+            option = call.args[0]
+            if (not isinstance(option, ast.BinOp) or not isinstance(option.op, ast.Add)
+                    or not isinstance(option.left, ast.Constant) or option.left.value != '--'
+                    or not isinstance(option.right, ast.Name)
+                    or option.right.id != statement.target.id): return None
+            keys = {keyword.arg for keyword in call.keywords}
+            if keys not in ({'required'}, {'required', 'type'}) or len(keys) != len(call.keywords): return None
+            for keyword in call.keywords:
+                if keyword.arg == 'required':
+                    if not isinstance(keyword.value, ast.Constant) or keyword.value.value is not True: return None
+                elif not isinstance(keyword.value, ast.Name) or keyword.value.id != 'Path': return None
+                else:
+                    if not any(isinstance(n, ast.ImportFrom) and n.module == 'pathlib' and not n.level
+                               and n.lineno < function.lineno
+                               and any(a.name == 'Path' and a.asname in (None, 'Path') for a in n.names)
+                               for n in tree.body): return None
+                    for n in ast.walk(tree):
+                        if isinstance(n, ast.Name) and isinstance(n.ctx, (ast.Store, ast.Del)) and n.id == 'Path': return None
+                        if isinstance(n, (ast.FunctionDef, ast.AsyncFunctionDef, ast.ClassDef)) and n.name == 'Path': return None
+                        if isinstance(n, ast.Import) and any((a.asname or a.name.split('.')[0]) == 'Path' for a in n.names): return None
+                        if isinstance(n, ast.ImportFrom) and any((a.asname or a.name) == 'Path' for a in n.names):
+                            if n.module != 'pathlib' or n.level or any(a.name != 'Path' for a in n.names if (a.asname or a.name) == 'Path'): return None
+            options = []
+            for value in statement.iter.elts:
+                if (not isinstance(value, ast.Constant) or not isinstance(value.value, str)
+                        or not re.fullmatch(r'[A-Za-z][A-Za-z0-9-]*', value.value)): return None
+                options.append('--' + value.value)
+            if len(set(options)) != len(options) or set(options) & declared_options[target.value.id]: return None
+            parsers[target.value.id].update(options)
+            declared_options[target.value.id].update(options)
+            continue
         # No unreviewed setup call, control branch or parser mutation before
         # parse_args may silently alter the declared configuration contract.
         return None
@@ -1876,13 +1950,38 @@ def configured_cli_boundary_controls():
             'function-magic-name': text.replace('if __name__', 'def __name__(): pass\nif __name__'),
             'decorated-main': text.replace('def main():', '@replace_checker\ndef main():'),
         }
-        for name, source in variants.items():
+        loop = text.replace(' p.add_argument("--input", required=True)',
+                            ' for name in ("input", "out"): p.add_argument("--"+name, type=Path, required=True)')
+        loop_variants = {
+            'loop-dynamic': loop.replace('("input", "out")', 'get_options()'),
+            'loop-else': loop.replace(' a=p.parse_args()', ' else: p.add_argument("--extra", required=True)\n a=p.parse_args()'),
+            'loop-duplicate': loop.replace('("input", "out")', '("input", "input")'),
+            'loop-shadow-parser': loop.replace('for name in', 'for p in').replace('"--"+name', '"--"+p'),
+            'loop-shadow-main': loop.replace('for name in', 'for main in').replace('"--"+name', '"--"+main'),
+            'loop-extra-body': loop.replace(' a=p.parse_args()', '  mutate_parser(p)\n a=p.parse_args()').replace(': p.add_argument', ':\n  p.add_argument'),
+            'loop-not-required': loop.replace('required=True', 'required=False'),
+            'loop-type-call': loop.replace('type=Path', 'type=configure()'),
+            'loop-wrong-name': loop.replace('"--"+name', '"--"+other'),
+            'loop-empty': loop.replace('("input", "out")', '()'),
+            'loop-shadow-converter': loop.replace('for name in', 'for Path in').replace('"--"+name', '"--"+Path'),
+            'loop-optional-overlap': loop.replace(' for name in', ' p.add_argument("--input")\n for name in'),
+            'loop-converter-rebound': loop.replace('def main():', 'Path=str\ndef main():'),
+            'loop-converter-import': loop.replace('from pathlib import Path', 'from other import Path'),
+            'loop-converter-late': loop.replace('from pathlib import Path\n', '') + 'from pathlib import Path\n',
+        }
+        variants.update(loop_variants)
+        for name, source in dict(variants, **{'literal-loop': loop}).items():
             target = root/('scripts/h55/' + name + '.py'); target.parent.mkdir(parents=True, exist_ok=True); target.write_text(source)
         (root/'tests').mkdir(); (root/'tests/input.txt').write_text('fixture\n')
         git(root, 'init', '-q'); git(root, 'add', '.')
         git(root, '-c', 'user.name=Control', '-c', 'user.email=control@example.invalid', 'commit', '-qm', 'CLI controls')
         repo = Repository(root, 'HEAD'); path = 'scripts/h55/valid.py'; declaration = declared_configured_cli(repo, path)
         assert declaration and declaration['required_options'] == ['--input']
+        loop_path = 'scripts/h55/literal-loop.py'
+        loop_declaration = declared_configured_cli(repo, loop_path)
+        assert loop_declaration and loop_declaration['required_options'] == ['--input', '--out']
+        loop_refusal = subprocess.run(['python3', '-B', loop_path], cwd=root, capture_output=True)
+        assert loop_refusal.returncode == 2 and b'--input' in loop_refusal.stderr and b'--out' in loop_refusal.stderr
         refusal = subprocess.run(['python3', '-B', path], cwd=root, capture_output=True)
         assert refusal.returncode == 2 and b'--input' in refusal.stderr
         entry = {'path': path, 'input_revision': repo.ref, 'source_blob': repo.tree[path][2],
@@ -2025,6 +2124,16 @@ def module_entry_schema_controls():
 
 
 def self_test():
+    # Formatting must preserve nested provenance and awkward path/string bytes.
+    payload = {'records': [{'path': 'tests/\u03b1\n".py', 'class': None,
+                            'reason': 'braces{},comma,\nline', 'pins': {'b': [True, 0], 'a': {}}},
+                           {'path': 'tests/z.py', 'class': 'keep'}],
+               'entry_points': {'z': {'command': ['python3', '-B']}, 'a': []}}
+    encoded = output_json(payload)
+    assert json.loads(encoded) == payload
+    assert canonical(payload) == (json.dumps(payload, ensure_ascii=True, indent=2, sort_keys=True) + '\n').encode()
+    assert encoded == output_json(dict(reversed(list(payload.items()))))
+    assert sum('"path":' in line for line in encoded.decode().splitlines()) == 2
     module_entry_schema_controls()
     if not __debug__: raise ValueError("self-test requires Python assertions; omit -O")
     import copy
@@ -2604,11 +2713,11 @@ def main():
         root = decode(git(Path.cwd(), 'rev-parse', '--show-toplevel')).strip()
         expected = inventory(Repository(root, args.ref))
         target = Path(root) / OUTPUT
-        if args.write: target.write_bytes(canonical(expected))
+        if args.write: target.write_bytes(output_json(expected))
         else:
             actual = json.loads(target.read_bytes(), object_pairs_hook=unique_json_object)
             verify(actual, expected)
-            if target.read_bytes() != canonical(expected): raise ValueError('noncanonical inventory bytes')
+            if target.read_bytes() != output_json(expected): raise ValueError('noncanonical inventory bytes')
         print(json.dumps(expected['totals'], sort_keys=True))
         if expected['totals']['unresolved'] or expected['analysis_gaps']:
             print('INCOMPLETE: unresolved paths are not justified classes; no pruning authorization.', file=sys.stderr)
