@@ -26,11 +26,6 @@ theorem reach_of_chain (h : ∀ x y, K.Edge x y → W.uses x y) :
   | a, b, [], hc => by cases hc; exact .refl a
   | _, _, _ :: xs, ⟨he, hc⟩ => .step (h _ _ he) (reach_of_chain h xs hc)
 
-theorem reach_edge_of_chain : ∀ {a b : D} (path : List D), Chain K.Edge a path b →
-    Reach K.Edge a b
-  | a, b, [], hc => by cases hc; exact .refl a
-  | _, _, _ :: xs, ⟨he, hc⟩ => .step he (reach_edge_of_chain xs hc)
-
 /-- A recorded-closed set contains everything recorded edges reach from it. -/
 theorem recClosed_reach {p : ConsumerKind F → Bool} {S : List D} (hS : K.RecClosed p S) :
     ∀ {a b : D}, Reach K.Edge a b → a ∈ S → b ∈ S := by
@@ -38,6 +33,14 @@ theorem recClosed_reach {p : ConsumerKind F → Bool} {S : List D} (hS : K.RecCl
   induction h with
   | refl => exact id
   | step he _ ih => exact fun ha => ih (hS.2 _ he ha)
+
+/-- A live gap's covered target lies in a closed set. -/
+theorem gap_mem {p : ConsumerKind F → Bool} {S : List D} (hS : K.Closed p S) {g : Gap D C}
+    (hg : g ∈ K.gaps) (hlive : K.GapLive p S g) {y : D}
+    (ht : g.target = none ∨ g.target = some y) : y ∈ S := by
+  obtain ⟨y', hy', hyS⟩ := hS.2 g hg hlive
+  rcases ht with h | h <;> rw [h] at hy' <;> cases hy'
+  exact hyS
 
 /-- A closed set contains everything the world's uses reach from it. -/
 theorem closed_reach (hA : Adequate W K) {p : ConsumerKind F → Bool} {S : List D}
@@ -50,44 +53,26 @@ theorem closed_reach (hA : Adequate W K) {p : ConsumerKind F → Bool} {S : List
     apply ih
     rcases hA.2.2.2.2.2.2.2.2 x y hu with he | ⟨g, hg, hsrc, htgt⟩
     · exact hS.1.2 _ he hx
-    · have hlive : K.GapLive p S g := by
-        unfold Census.GapLive
-        rcases hsrc with h | h <;> rw [h]
-        · trivial
-        · exact hx
-      obtain ⟨y', hy', hyS⟩ := hS.2 g hg hlive
-      rcases htgt with h | h <;> rw [h] at hy'
-      · cases hy'
-      · cases hy'; exact hyS
+    · refine gap_mem hS hg ?_ htgt
+      rcases hsrc with h | h <;> simp only [Census.GapLive, h, hx]
 
 /-- A closed set holds every actual root of a non-blanket consumer whose kind meets `p`. -/
 theorem closed_root (hA : Adequate W K) (hV : K.Valid X) {p : ConsumerKind F → Bool}
     {S : List D} (hS : K.Closed p S) {c : C} {e : D} (hu : W.rootUse c e)
     (hb : W.kind c ≠ .blanket) (hp : p (W.kind c) = true) : e ∈ S := by
   rcases hA.2.2.2.2.2.2.1 c e hu hb with ⟨hc, hr⟩ | ⟨g, hg, hsrc, htgt⟩
-  · have hk := hA.2.2.2.2.1 c hc
-    exact hS.1.1 _ hr (by rw [hk]; exact hp)
-  · have hlive : K.GapLive p S g := by
-      unfold Census.GapLive
-      rcases hsrc with h | h <;> rw [h]
-      · trivial
-      · have hc := (hV.2.2.2.2.2.1 g hg).2
-        rw [h] at hc
-        dsimp only at hc ⊢
-        rw [hA.2.2.2.2.1 c hc]; exact hp
-    obtain ⟨y', hy', hyS⟩ := hS.2 g hg hlive
-    rcases htgt with h | h <;> rw [h] at hy'
-    · cases hy'
-    · cases hy'; exact hyS
+  · exact hS.1.1 _ hr (by rw [hA.2.2.2.2.1 c hc]; exact hp)
+  · refine gap_mem hS hg ?_ htgt
+    rcases hsrc with h | h <;> simp only [Census.GapLive, h]
+    have hc := (hV.2.2.2.2.2.1 g hg).2
+    simp only [h] at hc
+    rw [hA.2.2.2.2.1 c hc]; exact hp
 
 theorem primary_not_blanket {k : ConsumerKind F} (h : k.primary = true) : k ≠ .blanket := by
   cases k <;> simp_all [ConsumerKind.primary]
 
-theorem demands_iff {k : ConsumerKind F} : k.demands = true ↔ k ≠ .blanket := by
-  cases k <;> simp [ConsumerKind.demands]
-
-theorem primary_demands {k : ConsumerKind F} (h : k.primary = true) : k.demands = true :=
-  demands_iff.2 (primary_not_blanket h)
+theorem primary_demands {k : ConsumerKind F} (h : k.primary = true) : k.demands = true := by
+  cases k <;> simp_all [ConsumerKind.primary, ConsumerKind.demands]
 
 /-- Independently reachable declarations lie in every primary-closed set. -/
 theorem indep_mem (hA : Adequate W K) (hV : K.Valid X) {p : ConsumerKind F → Bool}
@@ -149,20 +134,22 @@ theorem meaning_of_listed (hA : Adequate W K) (hV : K.Valid X) {d : D} (hd : d �
     rintro ⟨c, e, _, hk, hr, hreach⟩
     exact hdS (recClosed_reach hS hreach (hS.1 _ hr hk))
 
-theorem verdict_keep {ev : Evidence D C F} (h : ev.verdict = .keep) :
-    ∃ c e p, ev = .keep c e p := by
-  cases ev <;> simp_all [Evidence.verdict]
+/-- What a listed declaration's verdict alone says about the world. -/
+def VerdictMeaning (W : World M D C F) (K : Census M D C F) (d : D) : Verdict → Prop
+  | .keep => W.IndepReach d
+  | .ownerNeeded => ¬ W.IndepReach d ∧ W.ControlDemand d
+  | .orphan => ¬ W.IndepReach d ∧ ¬ W.ControlDemand d
+  | .unresolved => K.gaps ≠ []
 
-theorem not_indep_of_verdict (hA : Adequate W K) (hV : K.Valid X) {d : D} (hd : d ∈ K.decls)
-    (hk : (X.entry d).evidence.verdict ≠ .keep)
-    (hu : (X.entry d).evidence.verdict ≠ .unresolved) : ¬ W.IndepReach d := by
+theorem verdict_meaning (hA : Adequate W K) (hV : K.Valid X) {d : D} (hd : d ∈ K.decls)
+    {v : Verdict} (hv : (X.entry d).evidence.verdict = v) : VerdictMeaning W K d v := by
   have hm := meaning_of_listed hA hV hd
-  generalize (X.entry d).evidence = ev at hm hk hu
+  subst hv
+  generalize (X.entry d).evidence = ev at hm
   cases ev with
-  | keep => exact absurd rfl hk
-  | ownerNeeded => exact hm.1
-  | orphan => exact hm.1
-  | unresolved => exact absurd rfl hu
+  | keep | orphan => exact hm
+  | ownerNeeded => exact ⟨hm.1, _, hm.2⟩
+  | unresolved => exact List.ne_nil_of_mem hm.1
 
 theorem member_listed (hA : Adequate W K) (hV : K.Valid X) {f : F} {d : D}
     (h : W.Member f d) : d ∈ K.decls ∧ K.family (K.declModule d) = f := by
@@ -188,27 +175,18 @@ theorem family_sound (hA : Adequate W K) (hV : K.Valid X) {f : F} (hf : f ∈ K.
     ∀ d, W.Member f d → W.IndepReach d →
       X.family f = .keep ∨ X.family f = .unresolved := by
   have hok := hV.2.2.2.2.2.2.2.1 f hf
-  have keepCase : X.family f = .keep → ∃ d, W.Member f d ∧ W.IndepReach d := by
-    intro h
-    rw [h] at hok
-    obtain ⟨d, hd, hfd, hv⟩ := hok
-    have hm := meaning_of_listed hA hV hd
-    obtain ⟨c, e, p, hev⟩ := verdict_keep hv
-    rw [hev] at hm
-    exact ⟨d, listed_member hA hV hd hfd, hm⟩
   have ownerCase : X.family f = .ownerNeeded →
       (∀ d, W.Member f d → ¬ W.IndepReach d) ∧ ∃ d, W.Member f d ∧ W.ControlDemand d := by
     intro h
     rw [h] at hok
     obtain ⟨hnk, hnu, d, hd, hfd, hv⟩ := hok
-    refine ⟨fun d' hm' => ?_, ?_⟩
-    · obtain ⟨hd', hf'⟩ := member_listed hA hV hm'
-      exact not_indep_of_verdict hA hV hd' (fun h => hnk ⟨d', hd', hf', h⟩)
-        (fun h => hnu ⟨d', hd', hf', h⟩)
-    · have hm := meaning_of_listed hA hV hd
-      generalize (X.entry d).evidence = ev at hm hv
-      cases ev <;> simp only [Evidence.verdict, reduceCtorEq] at hv
-      exact ⟨d, listed_member hA hV hd hfd, _, hm.2⟩
+    refine ⟨fun d' hm' => ?_, d, listed_member hA hV hd hfd, (verdict_meaning hA hV hd hv).2⟩
+    obtain ⟨hd', hf'⟩ := member_listed hA hV hm'
+    cases hv' : (X.entry d').evidence.verdict
+    · exact absurd ⟨d', hd', hf', hv'⟩ hnk
+    · exact (verdict_meaning hA hV hd' hv').1
+    · exact (verdict_meaning hA hV hd' hv').1
+    · exact absurd ⟨d', hd', hf', hv'⟩ hnu
   have orphanCase : X.family f = .orphan → (∃ d, W.Member f d) ∧
       ∀ d, W.Member f d → ¬ W.IndepReach d ∧ ¬ W.ControlDemand d := by
     intro h
@@ -216,25 +194,16 @@ theorem family_sound (hA : Adequate W K) (hV : K.Valid X) {f : F} (hf : f ∈ K.
     obtain ⟨⟨d, hd, hfd⟩, hall⟩ := hok
     refine ⟨⟨d, listed_member hA hV hd hfd⟩, fun d' hm' => ?_⟩
     obtain ⟨hd', hf'⟩ := member_listed hA hV hm'
-    have hm := meaning_of_listed hA hV hd'
-    have hv := hall d' hd' hf'
-    generalize (X.entry d').evidence = ev at hm hv
-    cases ev <;> simp only [Evidence.verdict, reduceCtorEq] at hv
-    exact hm
-  refine ⟨keepCase, ownerCase, orphanCase, ?_, ?_⟩
-  · intro h
-    rw [h] at hok
+    exact verdict_meaning hA hV hd' (hall d' hd' hf')
+  refine ⟨fun h => ?_, ownerCase, orphanCase, fun h => ?_, fun d hm hi => ?_⟩
+  · rw [h] at hok
+    obtain ⟨d, hd, hfd, hv⟩ := hok
+    exact ⟨d, listed_member hA hV hd hfd, verdict_meaning hA hV hd hv⟩
+  · rw [h] at hok
     rcases hok.2 with ⟨d, hd, _, hv⟩ | hne
-    · left
-      have hm := meaning_of_listed hA hV hd
-      generalize (X.entry d).evidence = ev at hm hv
-      cases ev <;> simp only [Evidence.verdict, reduceCtorEq] at hv
-      intro hnil; have hg := hm.1; rw [hnil] at hg; exact List.not_mem_nil hg
-    · right
-      rintro ⟨d, hm⟩
-      exact hne ⟨d, (member_listed hA hV hm).1, (member_listed hA hV hm).2⟩
-  · intro d hm hi
-    cases hfam : X.family f with
+    · exact .inl (verdict_meaning hA hV hd hv)
+    · exact .inr fun ⟨d, hm⟩ => hne ⟨d, member_listed hA hV hm⟩
+  · cases hfam : X.family f with
     | keep => exact .inl rfl
     | unresolved => exact .inr rfl
     | ownerNeeded => exact absurd hi ((ownerCase hfam).1 d hm)
@@ -244,11 +213,7 @@ theorem family_sound (hA : Adequate W K) (hV : K.Valid X) {f : F} (hf : f ∈ K.
 theorem sound (hA : Adequate W K) (hV : K.Valid X) : Sound W K X := by
   refine ⟨fun d hd => meaning_of_listed hA hV (hA.2.2.1 d hd), ?_,
     fun f hf => family_sound hA hV hf, ?_⟩
-  · intro hnil d hd hv
-    have hok := (hV.2.2.2.2.2.2.1 d (hA.2.2.1 d hd)).2
-    generalize (X.entry d).evidence = ev at hok hv
-    cases ev <;> simp only [Evidence.verdict, reduceCtorEq] at hv
-    have hg := hok.1; rw [hnil] at hg; exact List.not_mem_nil hg
+  · exact fun hnil d hd hv => verdict_meaning hA hV (hA.2.2.1 d hd) hv hnil
   · intro m hm
     have hmm := (hA.1 m).1 hm
     have hpin := hV.2.2.2.2.2.2.2.2.2.2 (K.family m) (hV.1 m hmm)
