@@ -46,7 +46,6 @@ theorem image (initial : FrameMem C Γ) (destination : ByteSpan initial.capacity
     (data : Solidity.Roadmap.Bytes) :
     frameBytes (copy initial destination data)=Environment.writeBytes (frameBytes initial)
       destination.offset.val.toNat (World.callOutput data destination.length.val.toNat) := by
-  first | (simp only;done) | decide | omega | rfl | skip
   rw [copy,P6ByteMemory.touch_image,written,P6ByteMemory.write_image]
   rfl
 
@@ -56,7 +55,6 @@ theorem outside (initial : FrameMem C Γ) (destination : ByteSpan initial.capaci
     (away : i<destination.offset.val.toNat ∨
       destination.offset.val.toNat+min destination.length.val.toNat data.length≤i) :
     frameBytes (copy initial destination data) i=frameBytes initial i := by
-  first | (simp only;done) | decide | omega | rfl | skip
   rw [image]
   apply Environment.writeBytes_frame
   simpa only [World.callOutput_length] using away
@@ -64,7 +62,6 @@ theorem outside (initial : FrameMem C Γ) (destination : ByteSpan initial.capaci
 theorem carrier (initial : FrameMem C Γ) (destination : ByteSpan initial.capacity)
     (data : Solidity.Roadmap.Bytes) :
     (copy initial destination data).st=initial.st ∧ (copy initial destination data).key=initial.key := by
-  first | omega | decide | skip
   have touched := P6ByteMemory.touch_carrier (written initial destination data) (outputArea initial destination data)
   have wrote : (written initial destination data).st=initial.st ∧
       (written initial destination data).key=initial.key := P6ByteMemory.write_carrier initial _ _ _
@@ -72,7 +69,6 @@ theorem carrier (initial : FrameMem C Γ) (destination : ByteSpan initial.capaci
 
 theorem high_mono (initial : FrameMem C Γ) (destination : ByteSpan initial.capacity)
     (data : Solidity.Roadmap.Bytes) : initial.highWaterWords≤(copy initial destination data).highWaterWords := by
-  first | (simp only;done) | decide | omega | rfl | skip
   have wrote : initial.highWaterWords≤(written initial destination data).highWaterWords := by
     unfold written P6ByteMemory.writeSpan
     split
@@ -89,7 +85,6 @@ theorem high (initial : FrameMem C Γ) (destination : ByteSpan initial.capacity)
     (copy initial destination data).highWaterWords=
       max (written initial destination data).highWaterWords
         ((destination.offset.val.toNat+destination.length.val.toNat+31)/32) := by
-  first | (simp only;done) | decide | omega | rfl | skip
   unfold copy P6ByteMemory.touch
   dsimp only [outputArea]
   rw [dif_neg nonempty]
@@ -102,7 +97,6 @@ theorem world_store (initial : FrameMem C Γ) (destination : ByteSpan initial.ca
     World.TargetMemory.port.store (frameBytes initial) (P6ByteMemory.wireWord destination.offset)
       (World.callOutput data (P6ByteMemory.wireWord destination.length).val)=
       some (frameBytes (copy initial destination data)) := by
-  first | (simp only;done) | decide | omega | rfl | skip
   rw [World.TargetMemory.accepted_output_store _ _ _ _ accepted,image]
   rfl
 
@@ -116,7 +110,6 @@ theorem transport (base : Nat) (state : RawFrame.State ctx) (initial : FrameMem 
       frameOf base updated reached reachedRoom=reached ∧
       updated.clean=state.clean ∧ updated.world=state.world ∧
       reached.st=initial.st ∧ reached.key=initial.key := by
-  first | omega | decide | skip
   dsimp only
   have grows := high_mono initial destination data
   have nextRoom : base+32*wordCellCount (localExternalTypes ctx)≤
@@ -141,7 +134,6 @@ theorem call_copied (initial : FrameMem C Γ) (destination : ByteSpan initial.ca
       inputOffset inputSize (P6ByteMemory.wireWord destination.offset) (P6ByteMemory.wireWord destination.length)).map
       (fun completed => completed.copiedMemory)=
       some (some (frameBytes (copy initial destination (World.returnData answer.outcome)))) := by
-  first | (simp only;done) | decide | omega | rfl | skip
   rw [World.callAdapter_exact _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ preflight accepted loaded invoked]
   simp only [Option.map_some]
   rw [world_store initial destination _ accepted]

@@ -37,23 +37,18 @@ theorem all_four (pipeline : Pipeline) :
     RawFrame.view (restored pipeline) flag=word 2 ∧ RawFrame.view (restored pipeline) small=word 257 ∧
     RawFrame.view (restored pipeline) address=word (2^256-1) ∧
     RawFrame.view (restored pipeline) selector=word (2^255+85) := by
-  first | (simp only;done) | decide | omega | rfl | skip
-  have views := (frame_roundtrip 33 dirty (image pipeline) (room pipeline)).1
-  change RawFrame.view (decode 33 dirty (frameBytes (stored pipeline)))=RawFrame.view dirty at views
-  have same : RawFrame.view (restored pipeline)=RawFrame.view dirty := views
+  have same : RawFrame.view (restored pipeline)=RawFrame.view dirty :=
+    (frame_roundtrip 33 dirty (image pipeline) (room pipeline)).1
   rw [same]
   exact ⟨rfl,rfl,rfl,rfl⟩
 
-theorem restored_capture (pipeline : Pipeline) : restored pipeline=RawFrame.capture clean (RawFrame.view dirty) := by
-  first | omega | decide | skip
-  have views := (frame_roundtrip 33 dirty (image pipeline) (room pipeline)).1
-  exact congrArg (RawFrame.capture clean) views
+theorem restored_capture (pipeline : Pipeline) : restored pipeline=RawFrame.capture clean (RawFrame.view dirty) :=
+  congrArg (RawFrame.capture clean) (frame_roundtrip 33 dirty (image pipeline) (room pipeline)).1
 
 theorem source_and_readback (pipeline : Pipeline) (boundary : RawFrame.Pipeline) :
     (restored pipeline).clean=clean.clean ∧ (restored pipeline).world=clean.world ∧
     RawFrame.returnBool boundary (restored pipeline) .here=.bool true ∧
     RawFrame.returnU8 boundary (restored pipeline) (.there .here)=.int 1 (by decide) := by
-  first | (simp only;done) | decide | omega | rfl | skip
   rw [restored_capture]
   refine ⟨rfl,rfl,?_,?_⟩
   · cases boundary <;> rfl
@@ -63,20 +58,18 @@ theorem nonaligned_and_padding (pipeline : Pipeline) :
     offset 33 flag=33 ∧ offset 33 small=65 ∧ offset 33 address=97 ∧ offset 33 selector=129 ∧
     frameBytes (stored pipeline) 32=0xa5 ∧ frameBytes (stored pipeline) 161=0xa5 ∧
     frameBytes (stored pipeline) 191=0xa5 ∧ frameBytes (stored pipeline) 192=0 := by
-  first | (simp only;done) | decide | omega | rfl | skip
   dsimp only [stored]
   rw [frame_bytes]
   cases pipeline <;> decide
 
 theorem dirty_not_cleaned (pipeline : Pipeline) : RawCoherent.coherent (restored pipeline)=false := by
-  first | omega | decide | skip
   rw [restored_capture]
   decide
 
 /-- A clean view roundtrip still installs actual Some overlays. -/
 theorem absent_overlay_not_identity :
     (decode 33 clean (encode 33 clean (fun _=>0))).raw flag≠clean.raw flag := by
-  first | (simp only;done) | decide | omega | rfl
+  decide
 
 def emptyCtx : Source.Ctx := {env:=E,scope:=none,locals:=[]}
 def empty : RawFrame.State emptyCtx := RawFrame.ofClean .nil (Source.St.init E)
@@ -94,9 +87,8 @@ theorem skip_transport (glob : Source.Glob E) (frame : Source.Fr) (fuel nps : Na
     RawCoherent.coherent loaded=true ∧ RawFrame.view loaded=RawFrame.view reached.2 ∧
       (Source.execS glob frame fuel nps ph (.skip : Source.RStmt E [] false ⟨true,false⟩ ctx.tys ctx.tys)
         clean.clean).run (Source.L0 E,clean.world)=RawLoopBody.represented (reached.1,loaded) := by
-  first | (simp only;done) | decide | omega | rfl | skip
-  have result := RawPhysicalProducer.transport skipProducer glob frame fuel nps ph clean
+  obtain ⟨coherent,view,_,_,run⟩ := RawPhysicalProducer.transport skipProducer glob frame fuel nps ph clean
     (RawCoherent.coherent_ofClean _ _) 33 (image pipeline) (room pipeline)
-  exact ⟨result.1,result.2.1,result.2.2.2.2⟩
+  exact ⟨coherent,view,run⟩
 
 end Solidity.Yul.Adapters.RawPhysicalInventory.Controls

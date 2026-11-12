@@ -57,7 +57,6 @@ def string_transport (pipeline : Pipeline) (stackTail : List Solidity.Backend.En
     (reads pipeline) (reserved pipeline) (stringSink pipeline) rfl stackTail
 
 theorem byte_payload (pipeline : Pipeline) : readBytes (frameBytes (image pipeline)) 160 4=growBytes := by
-  first | omega | decide | skip
   have same : readBytes (frameBytes (image pipeline)) 160 4=readBytes memory 160 4 := by
     apply readBytes_congr_on
     intro i small
@@ -65,7 +64,6 @@ theorem byte_payload (pipeline : Pipeline) : readBytes (frameBytes (image pipeli
   exact same.trans RetainedByteHeader.Controls.recovered_payloads.1
 
 theorem string_payload (pipeline : Pipeline) : readBytes (frameBytes (image pipeline)) 288 64=recoveredString := by
-  first | omega | decide | skip
   have same : readBytes (frameBytes (image pipeline)) 288 64=readBytes RetainedByteHeader.Controls.rawA 288 64 := by
     apply readBytes_congr_on
     intro i small
@@ -77,7 +75,6 @@ def stringState (pipeline : Pipeline) := withSourceHeap retainedBothZeroState
   (retainedBothZeroState.2.heap.write 1 (.string (readBytes (frameBytes (image pipeline)) 288 64)) (by rfl))
 theorem alias_string_read (pipeline : Pipeline) :
     (Source.heapBytes (E:=heapByteEnv) (Γ:=_) 1).run (stringState pipeline)=(.ok recoveredString,stringState pipeline) := by
-  first | omega | decide | skip
   unfold stringState
   rw [string_payload]
   rfl
@@ -86,7 +83,6 @@ def oversized (pipeline : Pipeline) := store32 (image pipeline) (stringSink pipe
 theorem beyond_original_none (pipeline : Pipeline) :
     retainedByteStateWriteback retainedBothZeroState (bytePlacement 0) p retainedBothZero 1 true [] rfl
       (frameBytes (oversized pipeline))=none := by
-  first | omega | decide | skip
   dsimp only [oversized]
   rw [P6HeapWordStore.store_image (image pipeline) (stringSink pipeline) (⟨65,by decide⟩:Roadmap.Word)]
   unfold retainedByteStateWriteback retainedByteWriteback
