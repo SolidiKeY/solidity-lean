@@ -162,8 +162,8 @@ def extract(repo, rev):
         stamp = work / (name + '.key')
         key = f'{rev} {shard} {S.git(repo, "hash-object", "scripts/lean-inventory/Extract.lean").decode().strip()}\n'
         lines = part.read_text().splitlines() if part.exists() else []
-        complete = (lines and json.loads(lines[-1]).get('r') == 'end' and stamp.exists()
-                    and stamp.read_text() == key)
+        complete = (lines and lines[-1] == '{"r":"end"}' and stamp.exists()
+                    and stamp.read_text() == key)  # an interrupted pass ends mid-line
         if not complete:
             code, log = run_gate(repo, 'scripts/lean-inventory/Extract.lean',
                                  {'LEAN_INVENTORY_OUT': str(part), 'LEAN_INVENTORY_MODULES': str(listing),
