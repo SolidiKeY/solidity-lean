@@ -20,3 +20,7 @@
 | `Correctness/Lowering/Unchecked/Discarded.lean` | Discarded increment results; unchecked-lowering component, full production endpoint remains unproved. |
 | `Correctness/Lowering/Unchecked/SourceOne.lean` | Supplied typed Source one-update boundary; unchecked-lowering component, full production endpoint remains unproved. |
 | `Correctness/Lowering/Unchecked/PowerV2Arithmetic.lean` | Explicit V2 power operator consumer; unchecked-lowering component, full production endpoint remains unproved. |
+| `Correctness/Lowering/Unchecked/WordOne.lean` | Exact destination/old-value association for word increments; unchecked-lowering component, full production endpoint remains unproved. |
+| `Correctness/Lowering/Unchecked/NamedOne.lean` | Named raw/output/program association for one updates; unchecked-lowering component, full production endpoint remains unproved. |
+| `Correctness/Lowering/Unchecked/PowerCutoffWitness.lean` | Source power cutoff witness; unchecked-lowering component, full production endpoint remains unproved. |
+| `Correctness/Lowering/Unchecked/VersionedPowerWitness.lean` | V2 operator migration controls; unchecked-lowering component, full production endpoint remains unproved. |
