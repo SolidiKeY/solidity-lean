@@ -52,16 +52,10 @@ theorem initial_frame (p : Pipeline) :
     rw [image_bytes]
     decide
 
-theorem full_payload (p : Pipeline) : snapshot (reached p) (region p) = payload := by
-  rw [frame_snapshot_read]
-  unfold reached
-  rw [frameBytes_store32]
-  change Environment.readMemory
-    (Environment.writeBytes (frameBytes (image p)) 32 (Semantics.wordBytes high.val)) 32 32 = payload
-  have h := Environment.read_written (Semantics.wordBytes high.val) 32 (frameBytes (image p))
-  rw [word_bytes_length] at h
-  rw [h]
-  decide
+theorem payload_bytes : payload = Semantics.wordBytes high.val := by decide
+
+theorem full_payload (p : Pipeline) : snapshot (reached p) (region p) = payload :=
+  (store_readback (image p) a n high (fits p) (readFits p) rfl).trans payload_bytes.symm
 
 theorem actual_store (p : Pipeline) :
     Environment.cryptoStep (.op .MSTORE)
@@ -72,12 +66,8 @@ theorem actual_store (p : Pipeline) :
 theorem actual_revert (p : Pipeline) (suffix : Backend.Program) :
     Failure.Slice.run (.op .REVERT :: suffix) ⟨a :: n :: tail, frameBytes (reached p)⟩ =
       some (⟨tail, frameBytes (reached p)⟩, some (.revert payload)) := by
-  have h := (store_capture (image p) a n high (fits p) (readFits p) tail suffix).2.1
-  have hp := full_payload p
-  change snapshot (store32 (image p) (wordSpan (image p) a (fits p)) (U high))
-    (byteSpan (store32 (image p) (wordSpan (image p) a (fits p)) (U high)) a n (readFits p)) = payload at hp
-  rw [hp] at h
-  exact h
+  rw [payload_bytes]
+  exact store_revert (image p) a n high (fits p) (readFits p) rfl tail suffix
 
 theorem represented_after_store (p : Pipeline) :
     WordFrame (Evm.Memory.writeMachine Evm.Machine.init 1 (.val high))
@@ -107,17 +97,8 @@ theorem represented_fresh_after_store (p : Pipeline) :
   exact (initial_frame p).write 2 high (by decide)
 
 theorem fresh_full_payload (p : Pipeline) :
-    snapshot (fresh_reached p) (byteSpan (fresh_reached p) fresh_a n (Or.inr (by change 64 + 32 ≤ 96; decide))) = payload := by
-  rw [frame_snapshot_read]
-  change Environment.readMemory (frameBytes (fresh_reached p)) 64 32 = payload
-  unfold fresh_reached
-  rw [frameBytes_store32]
-  change Environment.readMemory
-    (Environment.writeBytes (frameBytes (image p)) 64 (Semantics.wordBytes high.val)) 64 32 = payload
-  have h := Environment.read_written (Semantics.wordBytes high.val) 64 (frameBytes (image p))
-  rw [word_bytes_length] at h
-  rw [h]
-  decide
+    snapshot (fresh_reached p) (byteSpan (fresh_reached p) fresh_a n (Or.inr (by change 64 + 32 ≤ 96; decide))) = payload :=
+  (store_readback (image p) fresh_a n high (fresh_fits p) _ rfl).trans payload_bytes.symm
 
 
 def fresh_readFits (p : Pipeline) : n.val = 0 ∨ fresh_a.val + n.val ≤ (image p).capacity :=
@@ -132,12 +113,8 @@ theorem actual_fresh_store (p : Pipeline) :
 theorem actual_fresh_revert (p : Pipeline) (suffix : Backend.Program) :
     Failure.Slice.run (.op .REVERT :: suffix) ⟨fresh_a :: n :: tail, frameBytes (fresh_reached p)⟩ =
       some (⟨tail, frameBytes (fresh_reached p)⟩, some (.revert payload)) := by
-  have h := (store_capture (image p) fresh_a n high (fresh_fits p) (fresh_readFits p) tail suffix).2.1
-  have hp := fresh_full_payload p
-  change snapshot (store32 (image p) (wordSpan (image p) fresh_a (fresh_fits p)) (U high))
-    (byteSpan (store32 (image p) (wordSpan (image p) fresh_a (fresh_fits p)) (U high)) fresh_a n (fresh_readFits p)) = payload at hp
-  rw [hp] at h
-  exact h
+  rw [payload_bytes]
+  exact store_revert (image p) fresh_a n high (fresh_fits p) (fresh_readFits p) rfl tail suffix
 
 /-- info: 'Solidity.Yul.Composition.P6FrameControls.actual_fresh_store' depends on axioms: [propext, Classical.choice, Quot.sound] -/
 #guard_msgs (whitespace := lax) in #print axioms actual_fresh_store

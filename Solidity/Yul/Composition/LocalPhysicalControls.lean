@@ -135,12 +135,8 @@ theorem static_halts (fuel : Nat) :
 completed horizon; horizon exhaustion remains distinct from a physical halt. -/
 theorem completed_horizon (fuel : Nat) (result : LocalBlockOutcome ctx ⟨false,false⟩)
     (done : runLocalBlock ctx code (policy _) fuel (LocalState.ofClean firstPhysical.1.1.2) = some result) :
-    result = completed := by
-  rcases Nat.le_total fuel 32 with lower | upper
-  · have stable := runLocalBlock_stable ctx code (policy _) _ lower done
-    exact Option.some.inj (stable.symm.trans (Option.some_get local_done).symm)
-  · have stable := runLocalBlock_stable ctx code (policy _) _ upper (Option.some_get local_done).symm
-    exact Option.some.inj (done.symm.trans stable)
+    result = completed :=
+  runLocalBlock_unique ctx code (policy _) _ done (Option.some_get local_done).symm
 
 def breakCode : Stmt [] X ⟨false,true⟩ 0 := .seq (dirtyCode _) .break_
 def continueCode : Stmt [] X ⟨false,true⟩ 0 := .seq (dirtyCode _) .continue_

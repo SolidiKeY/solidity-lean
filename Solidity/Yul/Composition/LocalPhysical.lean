@@ -117,4 +117,14 @@ theorem represented_local_static (ctx : Source.Ctx)
 #print axioms represented_local_source
 #print axioms local_rebase
 #print axioms represented_local_nonword
+/-- Two completed runs of one local block at any two horizons agree. -/
+theorem runLocalBlock_unique (ctx : Solidity.Source.Ctx) {control}
+    (code : Stmt [] (localExternalTypes ctx) control 0) (policy : Policy.StmtP .A code)
+    (state : LocalState ctx.env ctx.tys) {a b : Nat} {first last}
+    (one : runLocalBlock ctx code policy a state = some first)
+    (two : runLocalBlock ctx code policy b state = some last) : first = last := by
+  rcases Nat.le_total a b with lower | upper
+  · exact Option.some.inj ((runLocalBlock_stable ctx code policy state lower one).symm.trans two)
+  · exact Option.some.inj (one.symm.trans (runLocalBlock_stable ctx code policy state upper two))
+
 end Solidity.Yul.Composition
