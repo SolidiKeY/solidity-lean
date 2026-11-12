@@ -94,6 +94,11 @@ class Scanner(unittest.TestCase):
         self.assertEqual(comments, {1, 2})
         self.assertEqual(code, {1})
 
+    def test_whitespace_only_string_lines_are_not_code(self):
+        comments, _, code = self.lines('def s := "a\n\n   \nb"\n-- c\n')
+        self.assertEqual(code, {1, 4})          # lines 2-3 hold only string whitespace
+        self.assertEqual(comments, {5})
+
     def test_rational_limit_is_exact(self):
         cal = {"numerator": 1, "denominator": 10}
         m = Fraction(1, 20)
@@ -358,6 +363,430 @@ class Replay(GitCase):
         self.replay(c["new"], est)
         self.assertEqual((self.out / "replay.json").read_bytes(), first)
         self.assertEqual(out1["estimate"]["calibration_commit"], c["cal"])
+
+
+# ---------------------------------------------------------------- pb2a v2 (additive) controls
+# Every expected value below is hand-calculated from the file texts; none is computed
+# with backtest.py helpers.
+
+GOALS = "/-- G doc\nline -/\n-- H1 cite\ndef g0 := 0\ndef g1 := 1\ndef g2 := 2\ndef g3 := 3\n"
+# Goals: comment lines {1,2,3} = 3, docstring {1,2} = 2, code {4..7} = 4, process IDs H1 = 1
+
+
+class V2Arithmetic(unittest.TestCase):
+    def entry(self, ratio, margin):
+        return {"ratio": ratio, "margin": margin, "case": "ratio"}
+
+    def test_noninteger_boundary(self):
+        e = self.entry("1/3", "1/2")          # allowance at d = 5: 5/3 + 1/2 = 13/6
+        self.assertTrue(bt.v2_test(2, 5, e))  # 2*3*2 = 12 <= 1*5*2 + 1*3 = 13
+        self.assertFalse(bt.v2_test(3, 5, e))  # 18 > 13
+        self.assertEqual(bt.v2_allowance(5, e), Fraction(13, 6))
+
+    def test_exact_equality_passes(self):
+        e = self.entry("1/4", "1/2")          # 10/4 + 1/2 = 3 exactly
+        self.assertTrue(bt.v2_test(3, 10, e))
+        self.assertFalse(bt.v2_test(4, 10, e))
+
+    def test_zero_ratio_finite_margin_versus_zero_denominator(self):
+        z = self.entry("0", "5/2")            # zero ratio: a flat allowance of 5/2 at any d
+        for d in (0, 1, 10 ** 9):
+            self.assertTrue(bt.v2_test(2, d, z))
+            self.assertFalse(bt.v2_test(3, d, z))
+        r = self.entry("1/2", "0")            # zero denominator at evaluation: allowance 0
+        self.assertTrue(bt.v2_test(0, 0, r))
+        self.assertFalse(bt.v2_test(1, 0, r))
+        self.assertTrue(bt.v2_test(1, 2, r))
+
+    def test_unmapped_fallback_and_negative_rejected(self):
+        self.assertTrue(bt.v2_test(0, 50, None))
+        self.assertFalse(bt.v2_test(1, 50, None))
+        self.assertEqual(bt.v2_allowance(50, None), 0)
+        with self.assertRaises(ValueError):
+            bt.v2_test(0, 1, self.entry("-1/2", "0"))
+
+    def test_classification(self):
+        self.assertEqual(bt._classify("fail", True), "inherited")
+        self.assertEqual(bt._classify("pass", False), "introduced")
+        self.assertEqual(bt._classify(None, False), "introduced")
+        self.assertEqual(bt._classify("pass", True), "reintroduced")
+        self.assertEqual(bt._classify(None, True), "reintroduced")
+
+
+class V2History(GitCase):
+    def build(self):
+        h = self.h
+        c = {}
+        c["pre"] = h.commit(T0 - 1, {"Solidity/Core/A.lean": lean(5, 5), "docs/guide/a.md": "x\n"})
+        c["c0"] = h.commit(T0, {"Solidity/Core/A.lean": lean(10, 4), "docs/guide/a.md": "one\ntwo\n",
+                                "Solidity/Z/Z.lean": "-- a\n-- b\n", "Solidity/Scratch/S.lean": "-- s\n"})
+        c["c1"] = h.commit(T0 + DAY, {"Solidity/Core/A.lean": lean(20, 5),
+                                      "Solidity/Scratch/S.lean": "-- s\n-- t\n"})
+        c["anchor"] = h.commit(T0 + 2 * DAY, {"Solidity/Core/A.lean": lean(20, 4),
+                                              "Solidity/Goals/G.lean": GOALS,
+                                              "Solidity/Z/Z.lean": "-- a\n"},
+                               remove=["Solidity/Scratch/S.lean"])      # transient area, gone
+        c["e1"] = h.commit(T0 + 3 * DAY, {"Solidity/Core/A.lean": lean(40, 10)})        # proportional
+        c["e2"] = h.commit(T0 + 4 * DAY, {"Solidity/Core/A.lean": lean(40, 11),          # density
+                                          "Solidity/New/N.lean": "def a := 1\n-- n\n",
+                                          "docs/guide/a.md": "one\ntwo\n\n\n\n"})          # blank padding
+        c["e3"] = h.commit(T0 + 5 * DAY, {"Solidity/Core/A.lean": lean(30, 11),          # code removed
+                                          "Solidity/Z/Z.lean": "-- a\n-- b\n-- c\n"})
+        c["e4"] = h.commit(T0 + 6 * DAY, {"Solidity/Core/A.lean": lean(30, 8),
+                                          "Solidity/Z/Z.lean": "-- a\n-- b\n"})
+        c["e5"] = h.commit(T0 + 7 * DAY, {"Solidity/Core/A.lean": lean(30, 9),
+                                          "Solidity/Goals/G.lean": GOALS.replace("H1 cite", "H1 cite H2")})
+        return c
+
+    def v2_calibrate(self, end, days=2, verified=None, name="policy.json"):
+        path = self.out / name
+        argv = ["--mode", "v2-calibrate", "--repo", str(self.h.root), "--end", end,
+                "--lookback-days", str(days), "--exclude", "docs/guide", "--output", str(path)]
+        if verified is not None:
+            vpath = self.out / "verified.json"
+            vpath.write_text(json.dumps(verified))
+            argv += ["--verified", str(vpath)]
+        with contextlib.redirect_stderr(io.StringIO()):
+            self.assertEqual(bt.main(argv), 0)
+        return path
+
+    def v2_replay(self, end, policy, days=30, name="v2.json", pb1=None):
+        path = self.out / name
+        argv = ["--mode", "v2-replay", "--repo", str(self.h.root), "--end", end, "--days", str(days),
+                "--policy", str(policy), "--output", str(path)]
+        if pb1:
+            argv += ["--pb1-replay", str(pb1)]
+        with contextlib.redirect_stdout(io.StringIO()):
+            self.assertEqual(bt.main(argv), 0)
+        return json.loads(path.read_text())
+
+    def test_selection_and_coefficients(self):
+        c = self.build()
+        policy = json.loads(self.v2_calibrate(c["e1"]).read_text())
+        sel = policy["specification"]["selection"]
+        cover, late = sel["anchors"]
+        self.assertEqual((cover["role"], cover["commit"]), ("coverage", c["anchor"]))  # Goals appears
+        self.assertEqual(cover["lookback"]["commits"], 3)             # c0, c1, anchor; pre is 1 s early
+        self.assertEqual((cover["lookback"]["first"], cover["lookback"]["last"]), (c["c0"], c["anchor"]))
+        # Scratch is gone before the coverage anchor: its latest earlier commit anchors it
+        self.assertEqual((late["role"], late["commit"], late["areas"]),
+                         ("latest_before_coverage", c["c1"], ["Solidity/Scratch"]))
+        self.assertEqual(late["lookback"]["commits"], 3)              # pre, c0, c1
+        self.assertEqual(policy["coverage"]["status"], "complete")
+        self.assertEqual(policy["specification"]["inventory"],
+                         ["Solidity/Core", "Solidity/Goals", "Solidity/Z", "docs/guide"])
+        self.assertEqual(sel["universe"], ["Solidity/Core", "Solidity/Goals", "Solidity/Scratch",
+                                           "Solidity/Z", "docs/guide"])
+        self.assertEqual(sel["evaluation_window"]["commits"], 5)      # pre .. e1
+        s = policy["calibration"]["Solidity/Scratch"]
+        # zero code; present at c0 (1 line) and c1 (2 lines): r = 0, m = 2
+        self.assertEqual((s["anchor"], s["metrics"]["comment_lines"]["case"], s["metrics"]["comment_lines"]["margin"],
+                          s["metrics"]["comment_lines"]["lookback_commits_with_area"]),
+                         (c["c1"], "zero_denominator", "2", 2))
+        cal = policy["calibration"]
+        core = cal["Solidity/Core"]["metrics"]["comment_lines"]
+        # anchor 4/20 = 1/5; residuals c0: 4 - 10/5 = 2, c1: 5 - 20/5 = 1, anchor 0 -> m = 2
+        self.assertEqual((core["ratio"], core["margin"], core["case"], core["margin_witness"]),
+                         ("1/5", "2", "ratio", c["c0"]))
+        self.assertEqual(cal["Solidity/Core"]["metrics"]["docstring_lines"]["case"], "zero_numerator")
+        guide = cal["docs/guide"]["metrics"]["docs_lines"]
+        # d = all Solidity code = 20 + 4 = 24; r = 2/24 = 1/12; c0: 2 - 10/12 = 7/6, c1: 2 - 20/12 = 1/3
+        self.assertEqual((guide["ratio"], guide["margin"], guide["anchor_denominator"]),
+                         ("1/12", "7/6", 24))
+        self.assertEqual(cal["docs/guide"]["denominator_source"], "repository-solidity")
+        goals = cal["Solidity/Goals"]["metrics"]
+        self.assertEqual([goals[m]["ratio"] for m in bt.METRICS], ["0", "3/4", "1/2", "1/4"])
+        self.assertEqual(goals["comment_lines"]["lookback_commits_with_area"], 1)
+        z = cal["Solidity/Z"]["metrics"]["comment_lines"]
+        # zero code at the anchor: no ratio invented, margin = largest lookback count (c0: 2)
+        self.assertEqual((z["case"], z["ratio"], z["margin"], z["anchor_denominator"]),
+                         ("zero_denominator", "0", "2", 0))
+        self.assertNotIn("Solidity/New", cal)
+        self.assertEqual(policy["specification"]["enforcement_exclusions"], {
+            "docs/guide": "H548: measured but outside proposed enforcement until r1"})
+
+    def test_replay_outcomes(self):
+        c = self.build()
+        policy = self.v2_calibrate(c["e1"])
+        before = policy.read_bytes()
+        out = self.v2_replay(c["e5"], policy)
+        self.assertEqual(policy.read_bytes(), before)
+        self.assertEqual(out["policy_sha256_before"], out["policy_sha256_after"])
+        self.assertEqual(out["frozen_inputs"]["first_parent_commits"],
+                         [c[k] for k in ("pre", "c0", "c1", "anchor", "e1", "e2", "e3", "e4", "e5")])
+        pos = {s["commit"]: s["position"] for s in out["commits"]}
+        self.assertEqual([pos[c[k]] for k in ("pre", "c0", "anchor", "e1")],
+                         ["before_lookback", "calibration_lookback", "anchor", "after_anchor"])
+
+        def row(k, area, metric="comment_lines"):
+            return [r for r in out["rows"] if (r["commit"], r["area"], r["metric"]) == (c[k], area, metric)][0]
+
+        def fail(k, area, metric="comment_lines"):
+            hits = [f for f in out["failure_index"] if f["rule"] == "v2" and
+                    (f["commit"], f["area"], f["metric"]) == (c[k], area, metric)]
+            return hits[0] if hits else None
+        # e1: 10 <= 40/5 + 2 = 10 (boundary, proportional growth passes)
+        r = row("e1", "Solidity/Core")
+        self.assertEqual((r["numerator"], r["denominator"], r["allowance"], r["status"]), (10, 40, "10", "pass"))
+        # e2: 11 > 10, prose rose without code; the cell already failed at pre (5 > 5/5 + 2)
+        # and passed at c0 (4 <= 10/5 + 2), so it is reintroduced, not introduced
+        f = fail("e2", "Solidity/Core")
+        self.assertEqual((f["numerator"], f["allowance"], f["classification"]), (11, "10", "reintroduced"))
+        self.assertEqual(fail("pre", "Solidity/Core")["classification"], "introduced")
+        self.assertIn("prose_rose_without_code", f["causes"])
+        # e3: code 40 -> 30, allowance 8, still 11 -> inherited, denominator shrank
+        f = fail("e3", "Solidity/Core")
+        self.assertEqual((f["allowance"], f["classification"], f["prior_status"]), ("8", "inherited", "fail"))
+        self.assertIn("denominator_shrank", f["causes"])
+        self.assertIsNone(fail("e4", "Solidity/Core"))                # 8 <= 8
+        self.assertEqual(fail("e5", "Solidity/Core")["classification"], "reintroduced")
+        # new area after calibration: frozen fallback, cannot train its own allowance
+        f = fail("e2", "Solidity/New")
+        self.assertEqual((f["case"], f["allowance"], f["denominator"]), ("unmapped_fallback", "0", 1))
+        self.assertIn("unmapped_area", f["causes"])
+        self.assertEqual([s["areas_outside_policy"] for s in out["commits"] if s["commit"] == c["e2"]],
+                         [["Solidity/New"]])
+        # blank docs lines are prose lines; d = 40 + 4 + 1 (New) = 45 Solidity code lines:
+        # 5 > 45/12 + 7/6 = 59/12 (floor 4); docs/guide is measured, not enforced
+        f = fail("e2", "docs/guide", "docs_lines")
+        self.assertEqual((f["numerator"], f["denominator"], f["allowance"], f["allowance_floor"]),
+                         (5, 45, "59/12", 4))
+        self.assertFalse(f["enforced_in_proposal"])
+        # zero code at evaluation: Z allowance = 0 * 0 + 2
+        f = fail("e3", "Solidity/Z")
+        self.assertEqual((f["numerator"], f["denominator"], f["allowance"]), (3, 0, "2"))
+        self.assertIn("zero_code", f["causes"])
+        self.assertIn("calibration_zero_code", f["causes"])
+        self.assertIsNone(fail("e4", "Solidity/Z"))
+        # process IDs and docstrings on the new Goals area
+        f = fail("e5", "Solidity/Goals", "process_ids")
+        self.assertEqual((f["numerator"], f["denominator"], f["allowance"]), (2, 4, "1"))
+        self.assertEqual((f["classification"], f["prior_status"]), ("introduced", "pass"))
+        self.assertIsNone(fail("e5", "Solidity/Goals", "docstring_lines"))
+        self.assertEqual(row("e5", "Solidity/Goals", "docstring_lines")["allowance"], "2")
+        # the pre-anchor commit is evaluated with later coefficients: 5 > 5/5 + 2
+        self.assertEqual(fail("pre", "Solidity/Core")["position"], "before_lookback")
+        # absent policy area: Goals before the anchor counts zero and passes
+        self.assertEqual((row("c0", "Solidity/Goals")["present"], row("c0", "Solidity/Goals")["status"]),
+                         (False, "pass"))
+        # exhaustive index
+        self.assertEqual(sum(1 for r in out["rows"] if r["in_window"] and r["status"] == "fail"),
+                         len([f for f in out["failure_index"] if f["rule"] == "v2"]))
+        enforced = out["totals"]["all"]["v2_enforced"]["failing_cells"]
+        self.assertEqual(out["totals"]["all"]["v2"]["failing_cells"] - enforced,
+                         sum(1 for f in out["failure_index"] if f["area"] == "docs/guide"))
+
+    def test_incomplete_measurement_unavailable_and_calibration_refused(self):
+        c = self.build()
+        policy = self.v2_calibrate(c["e1"])
+        bad = self.h.commit(T0 + 8 * DAY, {"docs/fresh/b.md": b"\xff\xfe\n"})   # new area, unreadable
+        (self.h.root / "Solidity/Core/L.lean").symlink_to("A.lean")   # a symlink in reach
+        (self.h.root / "Solidity/Link").mkdir()
+        (self.h.root / "Solidity/Link/M.lean").symlink_to("../Core/A.lean")  # area with only a link
+        link = self.h.commit(T0 + 9 * DAY, {})
+        out = self.v2_replay(link, policy, name="bad.json")
+        rows = {(r["commit"], r["area"], r["metric"]): r for r in out["rows"]}
+        self.assertEqual(rows[(bad, "docs/fresh", "docs_lines")]["status"], "unavailable")
+        self.assertEqual(rows[(link, "Solidity/Core", "comment_lines")]["status"], "unavailable")
+        # an area holding only an unsupported entry still gets (unavailable) rows
+        self.assertEqual([rows[(link, "Solidity/Link", m)]["status"] for m in bt.METRICS],
+                         ["unavailable"] * 4)
+        # docs rows divide by all Solidity code, which is incomplete here
+        g = rows[(link, "docs/guide", "docs_lines")]
+        self.assertEqual(g["status"], "unavailable")
+        self.assertIn("denominator area Solidity/Core", g["unavailable_reason"])
+        self.assertEqual(rows[(bad, "docs/guide", "docs_lines")]["status"], "fail")  # Solidity complete
+        self.assertNotIn(bad, [f["commit"] for f in out["failure_index"] if f["area"] == "docs/fresh"])
+        summary = {s["commit"]: s for s in out["commits"]}
+        self.assertEqual(summary[bad]["v2_unavailable_cells"], 4)
+        # no historical replay supplied: legacy and pb1 are reported unavailable, not zero
+        self.assertEqual(sorted(out["totals"]["all"]), ["v2", "v2_enforced"])
+        self.assertTrue(out["historical_rules"]["status"].startswith("unavailable"))
+        # the anchor (where docs/fresh first appears) is unmeasurable: no coefficients
+        with self.assertRaises(SystemExit):
+            self.v2_calibrate(bad, name="refused.json")
+
+    def test_unreadable_registry_root_blocks_process_ids(self):
+        h = self.h
+        files = {"Solidity/Core/P.lean": "import Solidity.G7.Mod\n-- H3\ndef q := 1\n",
+                 "docs/a.md": "a\n"}
+        h.commit(T0, files | {"Solidity.lean": "import Solidity.G7.Mod\n"})
+        bad = h.commit(T0 + DAY, {"Solidity.lean": b"import Solidity.G7.Mod\n\xff\n",
+                                  "docs/new/x.md": "x\n"})          # new area: this is the anchor
+        repo = bt.Repo(h.root)
+        m = bt.measure_commit(repo, bt.Analyzer(repo), bad, None, [])
+        repo.close()
+        self.assertEqual(m["v2_registry_error"], "undecodable registry root Solidity.lean")
+        policy = {"calibration": {}, "specification": {"denominator_mapping": {},
+                                                       "enforcement_exclusions": {}}}
+        rows = {(r["area"], r["metric"]): r for r in bt.v2_rows(bad, m, policy, None, None)}
+        self.assertEqual(rows[("Solidity/Core", "process_ids")]["status"], "unavailable")
+        self.assertEqual(rows[("Solidity/Core", "comment_lines")]["status"], "fail")   # still scored
+        self.assertEqual(rows[("docs/_root", "process_ids")]["status"], "pass")
+        with self.assertRaises(SystemExit):
+            self.v2_calibrate(bad, name="reg.json")
+
+    def test_output_may_not_overwrite_frozen_inputs(self):
+        c = self.build()
+        policy = self.v2_calibrate(c["e1"])
+        before = policy.read_bytes()
+        link = self.out / "alias.json"
+        os.link(policy, link)                                          # hard link to the policy
+        sym = self.out / "sym.json"
+        sym.symlink_to(policy)
+        for target in (policy, link, sym):
+            for mode in (["--mode", "v2-replay", "--end", c["e5"]], ["--mode", "v2-evaluate", "--commit", c["e5"]]):
+                with self.assertRaises(SystemExit):
+                    bt.main(mode + ["--repo", str(self.h.root), "--policy", str(policy),
+                                    "--output", str(target)])
+        self.assertEqual(policy.read_bytes(), before)
+
+    def test_area_after_coverage_anchor_has_no_anchor_and_blocks(self):
+        h = self.h
+        h.commit(T0, {"Solidity/Core/A.lean": lean(4, 1), "docs/a.md": "a\n"})
+        h.commit(T0 + DAY, {"Solidity/Goals/G.lean": GOALS})             # coverage anchor
+        t = h.commit(T0 + 2 * DAY, {"Solidity/T/T.lean": "-- t\n"})       # transient, after it
+        end = h.commit(T0 + 3 * DAY, {}, remove=["Solidity/T/T.lean"])
+        policy = json.loads(self.v2_calibrate(end).read_text())
+        self.assertEqual(policy["specification"]["selection"]["no_anchor"], ["Solidity/T"])
+        self.assertEqual(policy["coverage"]["status"], "BLOCKER")
+        self.assertEqual(policy["coverage"]["universe_without_policy"], ["Solidity/T"])
+        out = self.v2_replay(end, self.out / "policy.json")
+        self.assertTrue(out["window_matches_policy"])
+        f = [f for f in out["failure_index"] if f["commit"] == t and f["area"] == "Solidity/T"
+             and f["metric"] == "comment_lines"][0]
+        self.assertEqual((f["case"], f["allowance"]), ("unmapped_fallback", "0"))
+
+    def test_code_padding_does_not_grow_denominator(self):
+        c = self.build()
+        policy = self.v2_calibrate(c["e1"])
+        padded = lean(30, 9).replace("def x0 := 0", "\n\n-- pad\n/- pad\n-/\ndef x0 := 0")
+        p = self.h.commit(T0 + 8 * DAY, {"Solidity/Core/A.lean": padded})
+        out = self.v2_replay(p, policy, name="pad.json")
+        r = [r for r in out["rows"] if (r["commit"], r["area"], r["metric"]) == (p, "Solidity/Core", "comment_lines")][0]
+        # 2 blank lines add nothing; 3 comment lines add 3 prose lines, no code
+        self.assertEqual((r["numerator"], r["denominator"], r["status"]), (12, 30, "fail"))
+        # Core had no docstrings anywhere in the lookback: r = 0, m = 0, so one is a failure
+        q = self.h.commit(T0 + 9 * DAY, {"Solidity/Core/A.lean": "/-- d -/\n" + lean(30, 0)})
+        out = self.v2_replay(q, policy, name="doc.json")
+        f = [f for f in out["failure_index"] if f["rule"] == "v2" and f["commit"] == q
+             and (f["area"], f["metric"]) == ("Solidity/Core", "docstring_lines")][0]
+        self.assertEqual((f["numerator"], f["allowance"], f["case"]), (1, "0", "zero_numerator"))
+        self.assertIn("prose_where_calibration_had_none", f["causes"])
+        self.assertFalse(out["window_matches_policy"])  # a different end: reported, not refused
+
+    def test_policy_immutable_deterministic_and_tamper_evident(self):
+        c = self.build()
+        policy = self.v2_calibrate(c["e1"])
+        first = policy.read_bytes()
+        self.h.commit(T0 + 8 * DAY, {"Solidity/Core/A.lean": lean(1, 50)})   # later history
+        self.assertEqual(self.v2_calibrate(c["e1"]).read_bytes(), first)    # same frozen inputs
+        self.v2_replay(c["e5"], policy, name="a.json")
+        self.v2_replay(c["e5"], policy, name="b.json")
+        self.assertEqual((self.out / "a.json").read_bytes(), (self.out / "b.json").read_bytes())
+        self.assertEqual(policy.read_bytes(), first)
+        data = json.loads(first)
+        data["specification"]["selection"]["anchors"][0]["lookback"]["days"] = 3   # edit spec
+        tampered = self.out / "tampered.json"
+        tampered.write_text(json.dumps(data))
+        with self.assertRaises(SystemExit):
+            self.v2_replay(c["e5"], tampered, name="t.json")
+        data = json.loads(first)
+        data["calibration"]["Solidity/Core"]["metrics"]["comment_lines"]["margin"] = "3"  # hand raise
+        tampered.write_text(json.dumps(data))
+        with self.assertRaises(SystemExit):
+            self.v2_replay(c["e5"], tampered, name="t.json")
+        data = json.loads(first)                                              # recomputed digests
+        data["calibration"]["Solidity/Core"]["metrics"]["comment_lines"]["margin"] = "3"
+        data["calibration_sha256"] = bt.sha256_text(bt.canonical(data["calibration"]))
+        tampered.write_text(json.dumps(data))
+        self.v2_replay(c["e5"], tampered, name="t.json")                      # embedded check passes
+        import hashlib
+        pinned = hashlib.sha256(first).hexdigest()
+        with self.assertRaises(SystemExit):
+            bt.main(["--mode", "v2-replay", "--repo", str(self.h.root), "--end", c["e5"],
+                     "--policy", str(tampered), "--expect-policy-sha256", pinned,
+                     "--output", str(self.out / "p.json")])
+        with self.assertRaises(SystemExit):                                   # pb1 file is not a policy
+            self.v2_replay(c["e5"], self.calibrate(c["anchor"]), name="u.json")
+
+    def test_verified_generated_versus_false_header(self):
+        h = self.h
+        gen = "/-! Generated by scripts/gen.py -/\n-- p\n-- q\ndef g := 1\n"   # 3 comment, 1 code
+        c0 = h.commit(T0, {"scripts/gen.py": "print()\n", "Solidity/Core/A.lean": lean(10, 2),
+                           "Solidity/Core/Gen.lean": gen, "docs/a.md": "a\n"})
+        tree = dict(line.split("\t")[::-1] for line in h.git("ls-tree", "-r", c0).split("\n"))
+        blob, gblob = tree["Solidity/Core/Gen.lean"].split()[2], tree["scripts/gen.py"].split()[2]
+        c1 = h.commit(T0 + DAY, {"Solidity/Core/Gen.lean": gen + "-- r\n"})          # new blob
+        c2 = h.commit(T0 + 2 * DAY, {"Solidity/Core/Gen.lean": gen, "scripts/gen.py": "print(1)\n"})
+        verified = [{"path": "Solidity/Core/Gen.lean", "blob": blob, "generator_path": "scripts/gen.py",
+                     "generator_blob": gblob, "scope": "file", "evidence": "synthetic"}]
+        out = self.v2_replay(c2, self.v2_calibrate(c0, verified=verified, name="v.json"), name="g.json")
+        got = {r["commit"]: (r["numerator"], r["denominator"]) for r in out["rows"]
+               if (r["area"], r["metric"]) == ("Solidity/Core", "comment_lines")}
+        self.assertEqual(got[c0], (2, 10))         # verified blob and generator: excluded both sides
+        self.assertEqual(got[c1], (2 + 4, 11))     # edited output: counted as handwritten
+        self.assertEqual(got[c2], (2 + 3, 11))     # generator changed: verification lapses
+        # the same header without a verification record is padding and stays counted
+        out = self.v2_replay(c2, self.v2_calibrate(c0, name="nv.json"), name="ng.json")
+        got = {r["commit"]: (r["numerator"], r["denominator"]) for r in out["rows"]
+               if (r["area"], r["metric"]) == ("Solidity/Core", "comment_lines")}
+        self.assertEqual(got[c0], (5, 11))
+        self.assertEqual(out["commits"][0]["generation_claims_counted_as_handwritten"], 1)
+
+    def test_verified_block_and_old_mode_fields_unchanged(self):
+        src = ("def a := 1\n-- BEGIN generated by scripts/gen.py\n-- G1 x\ndef b := 2\n"
+               "-- END generated by scripts/gen.py\n-- H2\n")
+        c = self.h.commit(T0, {"scripts/gen.py": "print()\n", "Solidity/Core/B.lean": src, "docs/a.md": "a\n"})
+        repo = bt.Repo(self.h.root)
+        blob = repo.blob_id(c, "Solidity/Core/B.lean")
+        verified = [{"path": "Solidity/Core/B.lean", "blob": blob, "generator_path": "scripts/gen.py",
+                     "generator_blob": repo.blob_id(c, "scripts/gen.py"), "scope": [2, 5], "evidence": "t"}]
+        plain = bt.measure_commit(repo, bt.Analyzer(repo), c, None)
+        m = bt.measure_commit(repo, bt.Analyzer(repo), c, None, verified)
+        for key in plain:                           # old-mode fields are identical with v2 enabled
+            if not key.startswith("v2"):
+                self.assertEqual(plain[key], m[key], key)
+        # outside lines 2-5: comment line 6 only; code line 1 only; H2 counted, G1 dropped
+        self.assertEqual(m["v2"]["Solidity/Core"], {"docs_lines": 0, "comment_lines": 1,
+                                                    "docstring_lines": 0, "process_ids": 1})
+        self.assertEqual(m["v2_code"]["Solidity/Core"], 1)
+        bad = self.h.commit(T0 + 1, {"Solidity/Bad/X.lean": b"\xff\xfe -- not utf-8\n"})
+        mb = bt.measure_commit(repo, bt.Analyzer(repo), bad, None, verified)
+        self.assertIn("Solidity/Bad/X.lean", [u["path"] for u in mb["unknown"]])
+        # undecodable: the area stays visible but is marked unmeasured, never a zero-count pass
+        self.assertEqual(mb["v2_errors"], {"Solidity/Bad": ["undecodable Solidity/Bad/X.lean"]})
+        policy = {"calibration": {}, "specification": {"denominator_mapping": {},
+                                                       "enforcement_exclusions": {}}}
+        rows = {(r["area"], r["metric"]): r for r in bt.v2_rows(bad, mb, policy, None, None)}
+        self.assertEqual(rows[("Solidity/Bad", "comment_lines")]["status"], "unavailable")
+        self.assertEqual(rows[("Solidity/Core", "comment_lines")]["status"], "fail")   # unmapped, measured
+        unverified = bt.measure_commit(repo, bt.Analyzer(repo), c, None, [])
+        self.assertEqual(unverified["v2"]["Solidity/Core"]["comment_lines"], 4)
+        self.assertEqual(unverified["v2_code"]["Solidity/Core"], 2)
+        repo.close()
+
+    def test_historical_rules_side_by_side(self):
+        h = self.h
+        bl = {"Solidity/Core": dict(docs_lines=0, comment_lines=2, docstring_lines=0, process_ids=0),
+              "docs/guide": dict(docs_lines=2, comment_lines=0, docstring_lines=0, process_ids=0)}
+        a = h.commit(T0, base_files(bl))
+        b = h.commit(T0 + DAY, {"Solidity/Core/A.lean": lean(10, 3)})      # legacy fails, introduced
+        h.commit(T0 + 2 * DAY, {"Solidity/Core/A.lean": lean(10, 2)})      # passes again
+        d = h.commit(T0 + 3 * DAY, {"Solidity/Core/A.lean": lean(10, 3)})  # reintroduced
+        pb1 = self.out / "pb1.json"
+        with contextlib.redirect_stdout(io.StringIO()):
+            bt.main(["--repo", str(h.root), "--end", d, "--days", "30",
+                     "--estimate", str(self.calibrate(a)), "--output", str(pb1)])
+        out = self.v2_replay(d, self.v2_calibrate(a, days=0), pb1=pb1)
+        legacy = [(f["commit"], f["classification"]) for f in out["failure_index"]
+                  if f["rule"] == "legacy" and f["area"] == "Solidity/Core" and f["metric"] == "comment_lines"]
+        self.assertEqual(legacy, [(b, "introduced"), (d, "reintroduced")])
+        old = json.loads(pb1.read_text())
+        self.assertEqual(len([f for f in out["failure_index"] if f["rule"] in ("legacy", "pb1_ratio")]),
+                         len([f for f in old["failure_index"] if f["rule"] in ("legacy", "ratio")]))
+        self.assertEqual(old["schema"], "pb1-prose-backtest/1")
+        self.assertEqual(out["historical_rules"]["legacy_states"], {"evaluated": 4})
 
 
 if __name__ == "__main__":
