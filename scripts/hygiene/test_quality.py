@@ -343,6 +343,43 @@ class Provision(unittest.TestCase):
         q.ruff_exe.cache_clear(); self.calls.clear()
         self.assertEqual(q.ruff_exe(), exe); self.assertEqual(self.calls, [])  # kept for later runs
 
+    def test_a_copy_installed_meanwhile_is_reused_not_replaced(self):
+        # Another run finished installing between our first look and taking the lock.
+        q.shutil.which = lambda n: None
+        target = os.path.join(self.tmp.name, "hygiene-tools", self.want.replace(" ", "-"))
+        local = os.path.join(target, "bin", "ruff")
+        looks = []
+
+        def version(e):
+            looks.append(e)
+            if len(looks) == 1: return None  # before the lock: not there yet
+            return self.want if os.path.exists(e) else None
+        q._version_of = version
+        os.makedirs(os.path.dirname(local)); open(local, "w").close()
+        self.fake_pip(True)
+        self.assertEqual(q.ruff_exe(), local)
+        self.assertEqual(self.calls, [])  # no install, so nothing deleted
+        self.assertTrue(os.path.exists(local))
+
+    def test_install_holds_an_exclusive_lock(self):
+        if q.fcntl is None: self.skipTest("no fcntl")
+        q.shutil.which = lambda n: None; q._version_of = lambda e: self.want if os.path.exists(e) else None
+        held = []
+
+        def run(cmd, **kw):
+            import fcntl
+            lock = cmd[cmd.index("--target") + 1].rsplit(".", 1)[0] + ".lock"
+            with open(lock) as f:
+                try:
+                    fcntl.flock(f, fcntl.LOCK_EX | fcntl.LOCK_NB); held.append(False)
+                except OSError:
+                    held.append(True)
+            target = cmd[cmd.index("--target") + 1]
+            os.makedirs(os.path.join(target, "bin")); open(os.path.join(target, "bin", "ruff"), "w").close()
+            return subprocess.CompletedProcess(cmd, 0, "", "")
+        q.subprocess.run = run
+        self.assertIsNotNone(q.ruff_exe()); self.assertEqual(held, [True])
+
     def test_failed_install_gives_none_and_a_reason(self):
         q.shutil.which = lambda n: None; q._version_of = lambda e: self.want; self.fake_pip(False)
         self.assertIsNone(q.ruff_exe())
