@@ -1,6 +1,6 @@
 {
  "comment": "Quality ratchet counts (scripts/hygiene/quality.py); measured on `seed`; values may only go down.",
- "seed": "b74b460fbbc3547779d531443ff7fbeeae3fecc7",
+ "seed": "5fee865fcffe6e3e052ebc7bdae7f200db17a5bd",
  "python_dead_code_tool": "ruff 0.16.9",
  "metrics": {
   "lean_long_files": 43,
