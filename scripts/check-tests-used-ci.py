@@ -11,8 +11,8 @@ import posixpath
 import re
 import shlex
 
-AUDITED = {'.github/workflows/editor-parity.yml': 'bff550f3fa4ae04972f9be9193142f6eca238755',
- '.github/workflows/lean.yml': '0a5f66b11664079ce46781d63119c6c4a201e4af',
+AUDITED = {'.github/workflows/editor-parity.yml': '1e0adb37f2797a6e1323d444c32403595b38cd24',
+ '.github/workflows/lean.yml': 'fb23795aac339cd73d7f82d2ad4cd48d6dc783c4',
  '.github/workflows/pages.yml': 'da4e027df7c1c68cfe6932b802ec09e9a086657a',
  'SolidityLean.lean': '08916603f7ede5699a763e4f2f80fa7471e92496',
  'scripts/aggregates.test.mjs': 'a768f5e74ba9d9f10a41d5fc7440bb11c7fccb4b',
@@ -33,7 +33,7 @@ AUDITED = {'.github/workflows/editor-parity.yml': 'bff550f3fa4ae04972f9be9193142
  'scripts/spec-hygiene.test.mjs': '61f93c59bbe0dba313552ef8ad5fbc8fe68f4b5b',
  'scripts/test-compiler.mjs': '72f956c7eb9ab68c8f5f85dff5788b6687886c1a',
  'scripts/test-solidity.mjs': 'b0c71c0b438aa38b19384fbf3e8920132dc4e172',
- 'scripts/test-solidity.test.mjs': '15c0f09962ec59de89ccc355eeff93c7fbfc2817',
+ 'scripts/test-solidity.test.mjs': '6068d4500c104ce72f44099b9bd43d58ae4f73c7',
  'scripts/tool-job.mjs': 'b4cbb7b75cd41c9fc01ae2bb5336beac7482a8ca',
  'tests/h62/item5/statement-graph/h112-tooling.test.mjs': 'ebf5bf9921b591d697cf9cfcdb0ea6f6c526505c',
  'tests/h62/item5/statement-graph/test_w0_tooling.py': 'ab4358ad36ca3e7426bf328334ff0b52882ac648',
@@ -57,7 +57,7 @@ def add(graph):
         if command.startswith('run:'): command = command[4:].strip()
         graph.root(source, 'CI', command, workflow, line, root_id=identity)
         graph.roots[identity].update({'cwd': '.', **details})
-        if workflow == lean_workflow and line == 188:
+        if workflow == lean_workflow and line == 196:
             graph.roots[identity]['environment_paths_relative_to_checkout'] = {
                 'SOLKEY_ROOT': 'tests/migration/solkey',
                 'SOLJSON_DIR': 'tests/migration/solkey/keyext.solidity.core/build/soljson',
@@ -72,7 +72,7 @@ def add(graph):
     runner = 'scripts/test-solidity.mjs'
     if approved([lean_workflow, test, compiler, migration, runner, 'scripts/solc-ast.mjs', 'scripts/tool-job.mjs']):
         context = 'ci:frozen-solkey-snapshot'
-        ci(test, lean_workflow, 188, context)
+        ci(test, lean_workflow, 196, context)
         edge(test, compiler, 12, 'module initializer calls solkeyTestOptions()', context, True)
         edge(compiler, migration, 33, 'solkeyTestOptions calls verifySnapshot(tests/migration/solkey)', context, True)
         manifest_path = 'tests/migration/solkey/snapshot.json'
@@ -115,26 +115,35 @@ def add(graph):
             for target in re.findall(r'[\x22\x27](tests/[^\x22\x27]+)[\x22\x27]', call[1]):
                 if target not in repo.tree: continue
                 identity = f'ci:source-call:{line}:{target}'
-                ci(test, lean_workflow, 188, identity, selected_call=f'{test}:{line}', source_argument=target)
+                ci(test, lean_workflow, 196, identity, selected_call=f'{test}:{line}', source_argument=target)
                 edge(test, runner, line, 'runSolidityTests(paths, options), wrapper at lines 14-15 delegates to runSourceTests', identity, True)
                 edge(runner, target, 117, 'runSourceTests reads selected source bytes after compilation; source argument bound by selected_call', identity)
+        # Reviewed changed callback: line486 binds this exact source; line487
+        # passes it to runSourceTests with list:true. Source bytes are read at
+        # runner117 before the list/verification branch. The later function
+        # loop is not needed to justify this input and grants no proof credit.
+        target = 'tests/solc/Calldata.sol'
+        identity = 'ci:calldata-admission-source'
+        ci(test, lean_workflow, 196, identity, selected_call=f'{test}:487', source_argument=target)
+        edge(test, runner, 487, 'runSolidityTests([source], {build:false, list:true}); source bound at line486', identity, True)
+        edge(runner, target, 117, 'runSourceTests reads selected source bytes before list-mode branching', identity)
         for name in ('SolcArithmeticOpen', 'SolcConstructorsOpen', 'SolcFunctionCallsOpen',
                      'SolcHigherLevelOpen', 'SolcPaymentsOpen', 'SolcSmtControlFlowOpen', 'SolcTypesOpen'):
             target = f'tests/solc/open/{name}.sol'
             identity = 'ci:open-source:' + name
-            ci(test, lean_workflow, 188, identity, selected_call=f'{test}:949', source_argument=target)
-            edge(test, runner, 952, 'explicit seven-name array maps each name to tests/solc/open/${name}.sol and calls runSolidityTests', identity, True)
+            ci(test, lean_workflow, 196, identity, selected_call=f'{test}:960', source_argument=target)
+            edge(test, runner, 963, 'explicit seven-name array maps each name to tests/solc/open/${name}.sol and calls runSolidityTests', identity, True)
             edge(runner, target, 117, 'runSourceTests reads selected source bytes', identity)
         context = 'ci:enum-fixtures'
-        ci(test, lean_workflow, 188, context)
-        for name, source_line, ast_line in (('EnumDeclarationBounds',1121,1123), ('EnumAbiRanges',1152,1154)):
+        ci(test, lean_workflow, 196, context)
+        for name, source_line, ast_line in (('EnumDeclarationBounds',1132,1134), ('EnumAbiRanges',1163,1165)):
             edge(test, f'tests/solc/{name}.sol', source_line, 'enum regression directly reads source to check sourceSha256', context)
             for suffix in ('', '-viaIR'):
                 edge(test, f'tests/solc/{name}{suffix}.ast.json', ast_line, 'explicit suffix loop reads each pinned enum AST', context)
-        for name, line in (('EnumBounds',1133),('EnumAbiRanges',1163),('AbiEntryReplay',1170),('Replay',1172)):
+        for name, line in (('EnumBounds',1144),('EnumAbiRanges',1174),('AbiEntryReplay',1181),('Replay',1183)):
             target = 'tests/upstream/' + name + '.lean'
             identity = 'ci:upstream-lean:' + name
-            ci(test, lean_workflow, 188, identity)
+            ci(test, lean_workflow, 196, identity)
             edge(test, runner, line, 'calls imported runTool(lake, --no-build lean FILE -- --tstack=131072)', identity, True)
             edge(runner, 'scripts/tool-job.mjs', 36, 'runTool spawns Node supervisor with checkpoint, timeout, command and arguments; cwd=repository root', identity, True)
             edge('scripts/tool-job.mjs', target, 26, 'supervisor spawns lake --no-build lean ' + target + ' -- --tstack=131072', identity, True)
@@ -144,7 +153,7 @@ def add(graph):
         ('scripts/declarations-metadata.test.mjs','DeclarationMetadata.ast.json','DeclarationMetadata.sol',19,7)):
         if not approved([lean_workflow, source, runner]): continue
         context = 'ci:metadata:' + source
-        ci(source, lean_workflow, 188, context)
+        ci(source, lean_workflow, 196, context)
         edge(source, 'tests/solc/' + ast, ast_line, 'direct readFileSync of pinned AST (URL resolved relative to module for declaration metadata)', context)
         if source.endswith('/aggregates.test.mjs'):
             edge(source, 'tests/solc/' + sol, sol_line, 'direct source read for AST source hash comparison', context)
@@ -155,7 +164,7 @@ def add(graph):
     policy = 'scripts/solidity-lean.test.mjs'
     if approved([lean_workflow, policy]):
         context = 'ci:assumption-policy-table'
-        ci(policy, lean_workflow, 222, context)
+        ci(policy, lean_workflow, 243, context)
         edge(policy, 'tests/cli/assumption-policies.txt', 111, 'direct readFileSync compared to exhaustive policyTable output', context)
 
     pages = '.github/workflows/pages.yml'; website = 'web/test/website.cjs'
@@ -168,7 +177,7 @@ def add(graph):
     workflow = '.github/workflows/editor-parity.yml'; stdio = 'vscode/parity/stdio.cjs'; workloads = 'vscode/parity/workloads.cjs'
     if approved([workflow, stdio, workloads]):
         context = 'ci:editor-parity-stdio'
-        ci(stdio, workflow, 117, context, conditional="workflow_dispatch inputs.transport == 'stdio'", targets=['dafny','local'])
+        ci(stdio, workflow, 123, context, conditional="workflow_dispatch inputs.transport == 'stdio'", targets=['dafny','local'])
         edge(stdio, workloads, 124, '--scope full calls servicesWorkload for default dafny and local targets', context, True)
         for suffix in ('dfy','sol'):
             target = 'tests/editor-parity/services.' + suffix
@@ -194,7 +203,7 @@ def add(graph):
         target = 'tests/solc/' + fixture + '.sol'
         if not approved([lean_workflow, source, runner]): continue
         context = f'ci:source-matrix:{name}:{line}'
-        ci(source, lean_workflow, 187, context, selected_call=f'{source}:{line}', source_argument=target)
+        ci(source, lean_workflow, 195, context, selected_call=f'{source}:{line}', source_argument=target)
         edge(source, runner, line, 'test callback calls runSolidityTests with selected committed source', context, True)
         edge(runner, target, 117, 'runSourceTests reads selected source bytes; source argument bound by selected_call', context)
 
@@ -205,7 +214,7 @@ def add(graph):
         for line, name in ((161, 'Cli'), (177, 'CliClean')):
             target = 'tests/solc/' + name + '.sol'
             context = f'ci:native-cli-source:{line}'
-            ci(cli_test, lean_workflow, 222, context, selected_call=f'{cli_test}:{line}', source_argument=target)
+            ci(cli_test, lean_workflow, 243, context, selected_call=f'{cli_test}:{line}', source_argument=target)
             edge(cli_test, bootstrap, line, 'cli helper at lines16-17 executes the native solidity-lean binary with verify/source arguments; cwd=ROOT', context, True)
             edge(bootstrap, cli_main, 29, 'native bootstrap spawns Node with scripts/solidity-lean.mjs and inherited verify/source arguments and cwd', context, True)
             edge(cli_main, runner, 210, 'verify dispatch calls runSolidityTests(paths, options)', context, True)
