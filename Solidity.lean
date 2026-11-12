@@ -3265,6 +3265,7 @@ import Solidity.Goals.Headline
 import Solidity.Goals.Loops
 import Solidity.Goals.Panic
 import Solidity.Goals.Plan
+import Solidity.Goals.ProseCalibrated
 import Solidity.Goals.Shrink
 import Solidity.Goals.Taclets
 import Solidity.Goals.Total
