@@ -17,6 +17,7 @@
     "e4-hash-bridge": ["Solidity/Hash/Bridge*.lean", "Solidity/Hash/CollisionBridge*.lean"],
     "t0-endpoint-total": ["Solidity/Backend/CompilerTotal.lean", "Solidity/Goals/Total.lean"],
     "e2a-lower-total": ["Solidity/Syntax/Elab/Lower.lean"],
-    "e2b-loops-producer": ["Solidity/Correctness/Lowering/Total/**"]
+    "e2b-loops-producer": ["Solidity/Correctness/Lowering/Total/**"],
+    "yv1-yul-layout-view": ["Solidity/Yul/Layout/**"]
   }
 }
