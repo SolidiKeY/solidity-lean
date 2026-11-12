@@ -17,7 +17,6 @@ def carrier (pipeline : Pipeline) : FrameMem C [] :=
    resident:=by decide,zeroAbove:=by intro i h;have hi:=i.isLt;omega}
 def residual : ByteView := fun k=>if k<2048 then 0xa5 else 0
 theorem fits (pipeline : Pipeline) : MemoryAgreement.Fits (carrier pipeline) residual := by
-  first | omega | decide | skip
   intro k high
   exact if_neg (by change 2048≤k at high;omega)
 theorem room (pipeline : Pipeline) : mixedPlacement.free.val≤(carrier pipeline).highWaterWords*32 := by
@@ -32,7 +31,6 @@ def output (pipeline : Pipeline) : ByteSpan (initial pipeline).capacity :=
 
 theorem object_end (e : MixedHeapEntry mixedPlacement) :
     mixedPlacement.address e.id+e.image.span≤1664 := by
-  first | omega | decide | skip
   have present : (mixedHeap.cells e.id).isSome := by
     change (mixedHeap.get e.id).isSome=true
     rw [e.found]
@@ -49,7 +47,6 @@ theorem source_and_raw (pipeline : Pipeline) :
     frameBytes after=Environment.writeBytes (encodeMixedHeap mixedPlacement
       (generatedHeapEntries mixedPlacement) residual) 1800 [17,255] ∧
     after.st=(carrier pipeline).st ∧ after.key=(carrier pipeline).key := by
-  first | omega | decide | skip
   exact residual_unchanged mixedHeap.ty mixedState mixedPlacement mixedPlacement (retainInitial _ _)
     residual mixed_actual_MemOK generated_mixed_types_supported (carrier pipeline) (fits pipeline) (room pipeline)
     (input pipeline) (output pipeline) [17,255] (by
@@ -63,7 +60,6 @@ theorem source_and_raw (pipeline : Pipeline) :
 theorem bytes_and_tail (pipeline : Pipeline) :
     let after := RawPhysicalCallAccess.reached (initial pipeline) (input pipeline) (output pipeline) [17,255]
     frameBytes after 1800=17 ∧ frameBytes after 1801=255 ∧ frameBytes after 1802=0xa5 := by
-  first | omega | decide | skip
   dsimp only
   rw [(source_and_raw pipeline).2.1]
   refine ⟨?_,?_,?_⟩
@@ -84,15 +80,13 @@ def entire (pipeline : Pipeline) : ByteSpan (initial pipeline).capacity :=
 theorem empty_output (pipeline : Pipeline) :
     FrameHeap.writeback mixedState mixedPlacement mixedPlacement (retainInitial _ _)
       (RawPhysicalCallAccess.reached (initial pipeline) (input pipeline) (entire pipeline) [])=
-      .ok (some (.ok (),mixedState)) := by
-  first | omega | decide | skip
-  exact (residual_unchanged mixedHeap.ty mixedState mixedPlacement mixedPlacement (retainInitial _ _)
+      .ok (some (.ok (),mixedState)) :=
+  (residual_unchanged mixedHeap.ty mixedState mixedPlacement mixedPlacement (retainInitial _ _)
     residual mixed_actual_MemOK generated_mixed_types_supported (carrier pipeline) (fits pipeline) (room pipeline)
     (input pipeline) (entire pipeline) [] (by intro e member;right;exact Nat.zero_le _)).1
 
 theorem tail_not_zero (pipeline : Pipeline) :
     frameBytes (RawPhysicalCallAccess.reached (initial pipeline) (input pipeline) (output pipeline) [17,255]) 1802≠0 := by
-  first | omega | decide | skip
   rw [(bytes_and_tail pipeline).2.2]
   decide
 end Solidity.Yul.Adapters.HeapCallOutput.Controls

@@ -37,7 +37,6 @@ theorem execute_eq (initial : FrameMem C Γ) (input output : ByteSpan initial.ca
       (P6ByteMemory.wireWord output.offset) (P6ByteMemory.wireWord output.length)=
       some (completed initial output entry
         (World.childContext entry.effects.execution parent kind callee value (snapshot initial input)) answer) := by
-  first | (simp only;done) | decide | omega | rfl | skip
   have loaded : World.TargetMemory.port.load (frameBytes initial)
       (P6ByteMemory.wireWord input.offset) (P6ByteMemory.wireWord input.length)=some (snapshot initial input) := by
     rw [World.TargetMemory.load_exact _ _ _ inputNonwrap,frame_snapshot_read]
@@ -57,7 +56,6 @@ theorem revert_fields (initial : FrameMem C Γ) (output : ByteSpan initial.capac
     result.observed.effects.returndata=data ∧
     result.observed.trace=World.rollbackTrace entry.trace trace ∧
     result.copiedMemory=some (frameBytes (RawPhysicalCallOutput.copy initial output data)) := by
-  first | (simp only;done) | decide | omega | rfl | skip
   dsimp only [completed]
   have rollback := World.finishObserved_revert entry frame operations trace data
   refine ⟨?_,?_,?_,rollback.2,rfl⟩
@@ -73,7 +71,6 @@ theorem success_fields (initial : FrameMem C Γ) (output : ByteSpan initial.capa
     result.observed.effects.execution=entry.effects.execution.run operations ∧
     result.observed.trace=entry.trace++trace ∧
     result.copiedMemory=some (frameBytes (RawPhysicalCallOutput.copy initial output data)) := by
-  first | (simp only;done) | decide | omega | rfl | skip
   dsimp only [completed]
   have success := World.finishObserved_success entry frame operations trace data
   exact ⟨success.1,success.2,rfl⟩

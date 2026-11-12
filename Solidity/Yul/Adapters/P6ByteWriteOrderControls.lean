@@ -56,8 +56,8 @@ theorem empty_inside (p : Pipeline) :
 /-- The final payload replaces every first payload bit in either pipeline. -/
 theorem replacement (p : Pipeline) :
     writePair (image p) (a p) (a p) [255,2,7] [0,128,1] rfl rfl=
-      writeSpan (image p) (a p) [0,128,1] rfl := by
-  exact writePair_overwrite _ _ _ _ _ _
+      writeSpan (image p) (a p) [0,128,1] rfl :=
+  writePair_overwrite _ _ _ _ _ _
 
 /-- info: ([0, 128, 1], 170, 1) -/
 #guard_msgs in #eval

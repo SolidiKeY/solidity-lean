@@ -23,11 +23,8 @@ private def area (p : Pipeline) : WordSpan (image p).capacity :=
 private def restored (p : Pipeline) : RawFrame.State boolCtx :=
   load (store (image p) (area p) dirty boolCell) 33 initial boolCell
 
-theorem dirty_roundtrip (p : Pipeline) : RawFrame.view (restored p) boolCell=word 2 := by
-  rw [restored,load_view]
-  change readWord (store (image p) (area p) dirty boolCell) (area p).offset.val.toNat=word 2
-  rw [read_store]
-  exact RawFrame.read_write _ _ _
+theorem dirty_roundtrip (p : Pipeline) : RawFrame.view (restored p) boolCell=word 2 :=
+  (load_store_view (image p) (area p) dirty initial boolCell 33 rfl).trans (RawFrame.read_write _ _ _)
 
 theorem clean_preserved (p : Pipeline) : (restored p).clean=initial.clean := rfl
 
@@ -119,11 +116,8 @@ theorem raw_load_target (p : Pipeline) : ∃ a : WordSpan (cellImage p).capacity
     decide
   obtain ⟨a,offset,w,step,view,raw,clean,world,frame⟩ :=
     load_frame (cellImage p) cellMachine (fun c=>c=1) (cellFrame p) 1 rfl room initial boolCell
-  have value : RawFrame.view (load (cellImage p) a.offset.val.toNat initial boolCell) boolCell=word 2 := by
-    rw [offset,load_view]
-    change readWord (store (image p) (cellArea p) dirty boolCell) (cellArea p).offset.val.toNat=word 2
-    rw [read_store]
-    exact RawFrame.read_write _ _ _
+  have value : RawFrame.view (load (cellImage p) a.offset.val.toNat initial boolCell) boolCell=word 2 :=
+    (load_store_view (image p) (cellArea p) dirty initial boolCell _ offset).trans (RawFrame.read_write _ _ _)
   have same : w=word 2 := view.symm.trans value
   rw [same] at step view
   exact ⟨a,offset,step,view,clean⟩

@@ -13,7 +13,6 @@ variable {ctx : Source.Ctx}
 
 theorem bytes_word_inverse (bytes : List UInt8) (length : bytes.length=32) :
     Source.wordBytes (Source.toWord (Source.beValue bytes))=bytes := by
-  first | omega | decide | skip
   have bound := scalar_beValue_bound bytes
   rw [length] at bound
   have power : 256^32=2^256 := by decide
@@ -36,7 +35,6 @@ theorem patch_reads (base : Nat) (state : RawFrame.State ctx) (memory : Views.By
     ∀ query : WordCell (localExternalTypes ctx),
       Environment.readMemory (saveByte memory (offset base cell+index.val) value) (offset base query) 32=
         Source.wordBytes (RawFrame.view (RawFrame.write state cell (wordAfter (RawFrame.view state cell) index value)) query) := by
-  first | omega | decide | skip
   intro query
   by_cases same : query=cell
   · subst query
@@ -60,7 +58,6 @@ theorem reencode (base : Nat) (state : RawFrame.State ctx) (memory : Views.ByteV
     (cell : WordCell (localExternalTypes ctx)) (index : Fin 32) (value : UInt8) :
     let patch := saveByte (encode base state memory) (offset base cell+index.val) value
     encode base (RawFrame.write state cell (wordAfter (RawFrame.view state cell) index value)) patch=patch := by
-  first | omega | decide | skip
   dsimp only
   apply list_unchanged
   intro query member
@@ -71,7 +68,6 @@ theorem decode_view (base : Nat) (state : RawFrame.State ctx) (memory : Views.By
     (cell : WordCell (localExternalTypes ctx)) (index : Fin 32) (value : UInt8) :
     RawFrame.view (decode base state (saveByte (encode base state memory) (offset base cell+index.val) value))=
       RawFrame.view (RawFrame.write state cell (wordAfter (RawFrame.view state cell) index value)) := by
-  first | omega | decide | skip
   funext query
   change Source.toWord (Source.beValue (Environment.readMemory _ (offset base query) 32))=_
   have reads := patch_reads base state (encode base state memory) cell index value
@@ -96,7 +92,6 @@ theorem store8 {C : Contract} {Γ : Ctx} (base : Nat) (state : RawFrame.State ct
     reached.st=image.st ∧ reached.key=image.key ∧
     Environment.dataStep (.op .MSTORE8) ⟨address::value::tail,frameBytes (frameOf base state image room)⟩=
       some ⟨tail,frameBytes reached⟩ := by
-  first | omega | decide | skip
   dsimp only
   have raw := P6ByteMemory.store8_view (frameOf base state image room) address value fit
   change frameBytes (P6ByteMemory.store8 (frameOf base state image room) address value fit)=

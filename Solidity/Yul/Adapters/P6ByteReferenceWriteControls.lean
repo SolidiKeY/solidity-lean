@@ -39,24 +39,20 @@ theorem actual_MemOK : Source.MemOK heapByteEnv byteState.2.heap.ty output :=
 /-- The actual selected source location reads the newly written value. -/
 theorem actual_readback :
     (Source.readLoc byteReadFrame (.memByte 1 32)).run output=
-      (.ok (Source.Val.fixedBytes (n:=1) (h:=by decide) [0xff] rfl),output) := by
-  first | decide | rfl
+      (.ok (Source.Val.fixedBytes (n:=1) (h:=by decide) [0xff] rfl),output) := rfl
 
 /-- One byte changes, including at the end of a partially occupied word; unknown
 padding and the other objects retain their original nonzero bytes. -/
 theorem physical_bytes : frameBytes reached 320=255 ∧ frameBytes reached 328=165 ∧
-    frameBytes reached 160=0x11 ∧ frameBytes reached 416=0xee := by
-  first | decide | rfl
+    frameBytes reached 160=0x11 ∧ frameBytes reached 416=0xee := by decide
 
 /-- A left-aligned Source bytes1 word would store ZERO via MSTORE8 here. -/
 theorem wrong_alignment :
     Environment.dataStep (.op .MSTORE8)
       ⟨[offset,lenU (255*2^248) (by decide)],frameBytes image⟩=
-      some ⟨[],Environment.writeByte (frameBytes image) 320 0⟩ := by
-  first | rfl | decide
+      some ⟨[],Environment.writeByte (frameBytes image) 320 0⟩ := rfl
 
 /-- Repeating the same actual physical byte store replaces the old byte. -/
 theorem repeated : frameBytes (P6ByteMemory.store8 reached offset (byteWord 7) (by decide)) 320=7 ∧
-    frameBytes (P6ByteMemory.store8 reached offset (byteWord 7) (by decide)) 328=165 := by
-  first | decide | rfl
+    frameBytes (P6ByteMemory.store8 reached offset (byteWord 7) (by decide)) 328=165 := by decide
 end Solidity.Yul.Adapters.P6ByteReferenceWrite.Controls

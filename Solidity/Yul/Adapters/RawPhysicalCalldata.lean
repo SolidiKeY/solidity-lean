@@ -14,7 +14,6 @@ variable {C : Contract} {Γ : Ctx} {ctx : Source.Ctx}
 theorem copy_high_mono (image : FrameMem C Γ) (frame : Source.Fr) (source : Environment.Word)
     (destination : ByteSpan image.capacity) :
     image.highWaterWords≤(P6Inputs.copyCalldata image frame source destination).highWaterWords := by
-  first | (simp only;done) | decide | omega | rfl | skip
   unfold P6Inputs.copyCalldata P6ByteMemory.writeSpan
   split
   · exact Nat.le_refl _
@@ -33,7 +32,6 @@ theorem transport (base : Nat) (state : RawFrame.State ctx) (image : FrameMem C 
       frameBytes reached=Environment.writeBytes (frameBytes image) destination.offset.val.toNat
         (P6Inputs.callBytes frame source.val.toNat destination.length.val.toNat) ∧
       reached.st=image.st ∧ reached.key=image.key := by
-  first | omega | decide | skip
   dsimp only
   have grows := copy_high_mono image frame source destination
   have nextRoom : base+32*wordCellCount (localExternalTypes ctx)≤
@@ -50,7 +48,6 @@ theorem copied_raw_word (base : Nat) (state : RawFrame.State ctx) (image : Frame
     (coordinates : destination.offset.val.toNat=offset base cell) :
     RawFrame.view (decode base state (frameBytes (P6Inputs.copyCalldata image frame source destination))) cell=
       Source.toWord (Source.cdWordAt frame source.val.toNat) := by
-  first | omega | decide | skip
   have input := P6Inputs.copied_source_word image frame source destination length
   rw [coordinates] at input
   change Source.toWord (Source.beValue (Environment.readMemory _ (offset base cell) 32))=_
@@ -66,7 +63,6 @@ theorem copied_source_read (base : Nat) (state : RawFrame.State ctx) (image : Fr
     (Source.readLoc (E:=ctx.env) (Γ:=ctx.tys) frame (τ:=ty) (.cd source.val.toNat)).run (state.clean,state.world)=
       (Source.decodeWord ctx.env.layout (Source.beValue (Environment.readMemory (frameBytes reached) (offset base cell) 32)) ty,
         (state.clean,state.world)) := by
-  first | omega | decide | skip
   have exactRead := P6Inputs.copied_source_read image frame source destination length ty (state.clean,state.world)
   rw [coordinates] at exactRead
   exact exactRead
