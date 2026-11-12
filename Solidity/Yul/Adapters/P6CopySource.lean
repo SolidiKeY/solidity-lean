@@ -16,7 +16,6 @@ theorem update_action {E : Source.Env} {Γ : Source.RCtx} {origin h : Source.Hea
     (s : Source.EMState E Γ) :
     (Source.heapPut u.entry.id ⟨u.entry.ty,u.object.data⟩ : Source.EM E Γ Unit).run s=
       (Source.heapPut entry.id ⟨entry.ty,data⟩ : Source.EM E Γ Unit).run s := by
-  first | (simp only; done) | skip
   have identity := update_entry allocated p es entry m u prepared
   cases u with
   | mk e object fits =>
@@ -31,7 +30,6 @@ theorem unchanged_action {E : Source.Env} {Γ : Source.RCtx} {origin h : Source.
     (s : Source.EMState E Γ)
     (found : s.2.heap.get u.entry.id=some ⟨u.entry.ty,u.object.data⟩) :
     (Source.heapPut u.entry.id ⟨u.entry.ty,u.object.data⟩ : Source.EM E Γ Unit).run s=(.ok (),s) := by
-  first | (simp only; done) | skip
   rw [heapPutConcrete_run s _ _ (heap_ty_of_get s.2.heap _ _ _ found),
     heap_write_unchanged s.2.heap _ _ _ found,withSourceHeap_unchanged]
 

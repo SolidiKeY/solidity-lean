@@ -15,7 +15,6 @@ def offset (base : Nat) (cell : WordCell (localExternalTypes ctx)) : Nat := base
 
 theorem separated (base : Nat) (one two : WordCell (localExternalTypes ctx)) (different : one≠two) :
     offset base one+32≤offset base two ∨ offset base two+32≤offset base one := by
-  first | (simp only;done) | decide | omega | rfl | skip
   have slots : one.slot.val≠two.slot.val := by
     intro same
     have equal : one.slot=two.slot := Fin.ext same
@@ -35,7 +34,6 @@ theorem outside (base : Nat) (state : RawFrame.State ctx)
     (cells : List (WordCell (localExternalTypes ctx))) (memory : Views.ByteView) (k : Nat)
     (away : ∀ cell∈cells,k<offset base cell ∨ offset base cell+32≤k) :
     encodeList base state cells memory k=memory k := by
-  first | (simp only;done) | decide | omega | rfl | skip
   induction cells generalizing memory with
   | nil => rfl
   | cons cell rest ih =>
@@ -48,7 +46,6 @@ theorem read_member (base : Nat) (state : RawFrame.State ctx)
     (query : WordCell (localExternalTypes ctx)) (member : query∈cells) :
     Environment.readMemory (encodeList base state cells memory) (offset base query) 32=
       Source.wordBytes (RawFrame.view state query) := by
-  first | omega | decide | skip
   induction cells generalizing memory with
   | nil => cases member
   | cons cell rest ih =>
@@ -81,7 +78,6 @@ def decode (base : Nat) (state : RawFrame.State ctx) (memory : Views.ByteView) :
 
 theorem view_roundtrip (base : Nat) (state : RawFrame.State ctx) (memory : Views.ByteView) :
     RawFrame.view (decode base state (encode base state memory))=RawFrame.view state := by
-  first | (simp only;done) | decide | omega | rfl | skip
   funext cell
   change Source.toWord (Source.beValue (Environment.readMemory (encode base state memory) (offset base cell) 32))=_
   rw [encode,read_member base state _ memory cell (allWordCells_complete cell),Source.wordBytes_value]
@@ -92,7 +88,6 @@ theorem decode_fields (base : Nat) (state : RawFrame.State ctx) (memory : Views.
     (decode base state memory).clean=state.clean ∧ (decode base state memory).world=state.world ∧
       ∀ cell,(decode base state memory).raw cell=
         some (Source.toWord (Source.beValue (Environment.readMemory memory (offset base cell) 32))) := by
-  first | (simp only;done) | decide | omega | rfl | skip
   exact ⟨rfl,rfl,fun _=>rfl⟩
 
 /-- Every byte outside the full constructed inventory is retained, including
@@ -107,7 +102,6 @@ bound does not assert that the coordinates are 256-bit EVM addresses. -/
 theorem fits {C : Contract} {Γ : Ctx} (base : Nat) (state : RawFrame.State ctx)
     (image : FrameMem C Γ) (room : base+32*wordCellCount (localExternalTypes ctx)≤image.highWaterWords*32) :
     MemoryAgreement.Fits image (encode base state (frameBytes image)) := by
-  first | (simp only;done) | decide | omega | rfl | skip
   intro k high
   rw [residual]
   · exact MemoryAgreement.fits_view image k high
@@ -132,7 +126,6 @@ theorem frame_roundtrip {C : Contract} {Γ : Ctx} (base : Nat) (state : RawFrame
     (frameOf base state image room).st=image.st ∧ (frameOf base state image room).key=image.key ∧
     (frameOf base state image room).capacity=image.capacity ∧
     (frameOf base state image room).highWaterWords=image.highWaterWords := by
-  first | (simp only;done) | decide | omega | rfl | skip
   refine ⟨?_,rfl,rfl,rfl,rfl⟩
   rw [frame_bytes]
   exact view_roundtrip base state (frameBytes image)
@@ -141,7 +134,6 @@ theorem frame_roundtrip {C : Contract} {Γ : Ctx} (base : Nat) (state : RawFrame
 physical preparation does not turn an incoherent dirty frame into a clean one. -/
 theorem coherence_roundtrip (base : Nat) (state : RawFrame.State ctx) (memory : Views.ByteView) :
     RawCoherent.coherent (decode base state (encode base state memory))=RawCoherent.coherent state := by
-  first | (simp only;done) | decide | omega | rfl | skip
   unfold RawCoherent.coherent
   rw [view_roundtrip]
   rfl

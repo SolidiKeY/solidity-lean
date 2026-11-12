@@ -20,7 +20,6 @@ theorem success {E : Source.Env} {Γ Γ' : Source.RCtx} (F : Source.Fr) (n : Nat
       (Source.Val.fixedBytes (n:=1) (h:=by decide) [b] rfl))).run s=
       (.ok ((),locals),withSourceHeap s (s.2.heap.write root
         (heapByteData E.layout string (old.set i b)) (heap_ty_of_get s.2.heap root _ _ found))) := by
-  first | (simp only;done) | skip
   rcases s with ⟨caller,store⟩
   rw [Source.run_sub,P6ByteReferenceReads.write_byte F n (locals,store) root string old found i inside b]
   rfl
@@ -37,7 +36,6 @@ theorem late_halt {E : Source.Env} {Γ Γ' : Source.RCtx} (F : Source.Fr) (n : N
         (Source.EM.halt halt : Source.EM E Γ' Unit))).run s=
       (.error halt,withSourceHeap s (s.2.heap.write root
         (heapByteData E.layout string (old.set i b)) (heap_ty_of_get s.2.heap root _ _ found))) := by
-  first | (simp only;done) | skip
   rcases s with ⟨caller,store⟩
   rw [Source.run_sub,Source.Hoare.run_bind,
     P6ByteReferenceReads.write_byte F n (locals,store) root string old found i inside b]
@@ -53,7 +51,6 @@ theorem outside {E : Source.Env} {Γ Γ' : Source.RCtx} (F : Source.Fr) (n : Nat
     (Source.EM.sub locals (Source.writeLoc F n (.memByte root i)
       (Source.Val.fixedBytes (n:=1) (h:=by decide) [b] rfl))).run s=
       (.error (.revert (Source.panicData .index)),s) := by
-  first | (simp only;done) | skip
   rcases s with ⟨caller,store⟩
   rw [Source.run_sub,P6ByteReferenceReads.write_outside F n (locals,store) root string old found i out b]
 
@@ -84,7 +81,6 @@ theorem inventory {E : Source.Env} {Γ Γ' : Source.RCtx} {origin : Source.Heap 
       r.heap.get root=some ⟨heapByteType string,heapByteData E.layout string (old.set i b)⟩ ∧
       (∀ H,Source.MemOK E H s → Source.MemOK E H (withSourceHeap s r.heap)) ∧
       (∀ a,a≠root → r.heap.get a=s.2.heap.get a) := by
-  first | (simp only;done) | skip
   dsimp only
   obtain ⟨r,run,selected,encoded,covered,ids,other,safe,cell,types,count,addresses,free⟩ :=
     P6ByteWriteInventory.write F n s allocated p history es coverage distinct μ residual initial root string old found i inside b fits

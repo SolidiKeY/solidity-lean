@@ -19,23 +19,23 @@ theorem exact_windows :
     returnWindow runtime 33 20 = some (addresses false).toList ∧
     returnWindow runtime 85 20 = some (addresses true).toList := by
   rw [show runtime=expected from exact_runtime]
-  first | decide | rfl | omega
+  decide
 
 theorem wrong_offset_refused : returnWindow runtime 34 20 ≠ some (addresses false).toList := by
   rw [show runtime=expected from exact_runtime]
-  first | decide | rfl | omega
+  decide
 
 theorem no_argument_window : returnWindow runtime 105 2 = none := by
   rw [show runtime=expected from exact_runtime]
-  first | decide | rfl | omega
+  decide
 
 theorem exact_end_zero : returnWindow runtime 105 0 = some [] := by
   rw [show runtime=expected from exact_runtime]
-  first | decide | rfl | omega
+  decide
 
 theorem out_of_source_zero : returnWindow runtime 106 0 = none := by
   rw [show runtime=expected from exact_runtime]
-  first | decide | rfl | omega
+  decide
 
 def conditional (producer : Producer) := CreationReturnWindow.witnessed producer
 end Solidity.Yul.World.CreationReturnWindowControls

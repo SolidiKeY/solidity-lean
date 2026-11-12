@@ -45,6 +45,32 @@ theorem store_capture {C : Contract} {Γ : Ctx} (μ : FrameMem C Γ)
   rw [← hb] at hr
   exact ⟨hs, hr, hst, hk⟩
 
+/-- A stored word reads back, over a 32-byte window at its offset, as its big-endian bytes. -/
+theorem store_readback {C : Contract} {Γ : Ctx} (μ : FrameMem C Γ)
+    (a n w : Roadmap.Word) (fits : a.val + 32 ≤ μ.capacity)
+    (readFits : n.val = 0 ∨ a.val + n.val ≤ μ.capacity) (len : n.val = 32) :
+    let reached := store32 μ (wordSpan μ a fits) (U w)
+    snapshot reached (byteSpan reached a n readFits) = Semantics.wordBytes w.val := by
+  dsimp only
+  rw [frame_snapshot_read, frameBytes_store32]
+  change Environment.readMemory
+    (Environment.writeBytes (frameBytes μ) a.val (Semantics.wordBytes w.val)) a.val n.val = _
+  have h := Environment.read_written (Semantics.wordBytes w.val) a.val (frameBytes μ)
+  rw [word_bytes_length] at h
+  rw [len, h]
+
+/-- REVERT over the stored word's window returns exactly its bytes. -/
+theorem store_revert {C : Contract} {Γ : Ctx} (μ : FrameMem C Γ)
+    (a n w : Roadmap.Word) (fits : a.val + 32 ≤ μ.capacity)
+    (readFits : n.val = 0 ∨ a.val + n.val ≤ μ.capacity) (len : n.val = 32)
+    (tail : List Roadmap.Word) (suffix : Backend.Program) :
+    let reached := store32 μ (wordSpan μ a fits) (U w)
+    Failure.Slice.run (.op .REVERT :: suffix) ⟨a :: n :: tail, frameBytes reached⟩ =
+      some (⟨tail, frameBytes reached⟩, some (.revert (Semantics.wordBytes w.val))) := by
+  have h := (store_capture μ a n w fits readFits tail suffix).2.1
+  rw [store_readback μ a n w fits readFits len] at h
+  exact h
+
 /-- Complete physical complement preservation, not only the returned window. -/
 theorem exterior {C : Contract} {Γ : Ctx} (μ : FrameMem C Γ)
     (a w : Roadmap.Word) (fits : a.val + 32 ≤ μ.capacity)
