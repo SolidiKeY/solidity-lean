@@ -407,58 +407,54 @@ theorem collision_boundary (a b : List Nat)
 
 open Solidity.Goals.GoalPinSpec
 
-theorem outputs_deterministic (env : Environment) (fuel : Nat) :
-    ∀ {pins : List Pin} {left : List (Except Error Tree)},
-      Pointwise (fun (p : Pin) => RootGraph env fuel p.goal) pins left →
-      ∀ {right}, Pointwise (fun (p : Pin) => RootGraph env fuel p.goal) pins right → left = right := by
-  intro pins left h
-  induction h with
-  | nil => intro right h; cases h; rfl
-  | cons first rest ih =>
-    intro right h
-    cases h with
-    | cons other tail =>
-      have headEq := graph_deterministic env fuel _ _ _ first other
-      have tailEq := ih tail
-      cases headEq; cases tailEq; rfl
-
-theorem firstIssue_not_clean {xs : List (Error × Prop)} {err : Error}
-    (h : FirstIssue xs err) (clean : ∀ issue ∈ xs, ¬ issue.2) : False := by
-  induction h with
-  | @here condition err rest proof =>
-    exact clean (err, condition) (by simp) proof
-  | later notCondition rest ih =>
-    apply ih
-    intro issue member
-    exact clean issue (by simp [member])
-
-theorem firstIssue_deterministic {xs : List (Error × Prop)} {a b : Error}
-    (ha : FirstIssue xs a) (hb : FirstIssue xs b) : a = b := by
-  induction ha generalizing b with
-  | here condition =>
-    cases hb with
-    | here _ => rfl
-    | later notCondition rest => exact False.elim (notCondition condition)
-  | later notCondition rest ih =>
-    cases hb with
-    | here condition => exact False.elim (notCondition condition)
-    | later _ other => exact ih other
-
-theorem matches_encodable {pins : List Pin} {trees : List Tree}
-    (h : Matches pins trees) : Encodable trees := by
-  intro t ht
-  induction h with
-  | nil => simp at ht
-  | @cons p tree ps ts first rest ih =>
-    simp only [List.mem_cons] at ht
-    rcases ht with rfl | ht
-    · obtain ⟨bytes, hb, _⟩ := first
-      exact ⟨bytes, hb⟩
-    · exact ih ht
-
 theorem checkGraph_deterministic (s : Snapshot) (m : Manifest) (pins : List Pin)
     (fuel : Nat) (a b : Except Error Unit) (ha : CheckGraph s m pins fuel a)
     (hb : CheckGraph s m pins fuel b) : a = b := by
+  have outputs_deterministic (env : Environment) (fuel : Nat) :
+      ∀ {pins : List Pin} {left : List (Except Error Tree)},
+        Pointwise (fun (p : Pin) => RootGraph env fuel p.goal) pins left →
+        ∀ {right}, Pointwise (fun (p : Pin) => RootGraph env fuel p.goal) pins right → left = right := by
+    intro pins left h
+    induction h with
+    | nil => intro right h; cases h; rfl
+    | cons first rest ih =>
+      intro right h
+      cases h with
+      | cons other tail =>
+        have headEq := graph_deterministic env fuel _ _ _ first other
+        have tailEq := ih tail
+        cases headEq; cases tailEq; rfl
+  have firstIssue_not_clean {xs : List (Error × Prop)} {err : Error}
+      (h : FirstIssue xs err) (clean : ∀ issue ∈ xs, ¬ issue.2) : False := by
+    induction h with
+    | @here condition err rest proof =>
+      exact clean (err, condition) (by simp) proof
+    | later notCondition rest ih =>
+      apply ih
+      intro issue member
+      exact clean issue (by simp [member])
+  have firstIssue_deterministic {xs : List (Error × Prop)} {a b : Error}
+      (ha : FirstIssue xs a) (hb : FirstIssue xs b) : a = b := by
+    induction ha generalizing b with
+    | here condition =>
+      cases hb with
+      | here _ => rfl
+      | later notCondition rest => exact False.elim (notCondition condition)
+    | later notCondition rest ih =>
+      cases hb with
+      | here condition => exact False.elim (notCondition condition)
+      | later _ other => exact ih other
+  have matches_encodable {pins : List Pin} {trees : List Tree}
+      (h : Matches pins trees) : Encodable trees := by
+    intro t ht
+    induction h with
+    | nil => simp at ht
+    | @cons p tree ps ts first rest ih =>
+      simp only [List.mem_cons] at ht
+      rcases ht with rfl | ht
+      · obtain ⟨bytes, hb, _⟩ := first
+        exact ⟨bytes, hb⟩
+      · exact ih ht
   cases ha with
   | structural issue =>
     cases hb with
