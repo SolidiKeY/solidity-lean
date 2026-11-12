@@ -84,23 +84,37 @@ class Coverage(unittest.TestCase):
     def test_split_root_built_and_audited_passes(self):
         h = self.r.commit({"Solidity.lean": "import Solidity.A\n", "SolidityControls.lean": "import Solidity.B\n",
                            ".github/workflows/lean.yml": WORKFLOW.format(targets="Solidity SolidityControls"),
-                           "scripts/AxiomAudit.lean": "import Solidity\nimport SolidityControls\n"}, "split")
+                           "scripts/AxiomAudit.lean": "import Solidity\nimport SolidityControls\n"},
+                          "split\n\nReview-Check: coverage build the new root")
         ok, rep = self.r.check(h); self.assertTrue(ok, rep)
+        old = os.getcwd(); os.chdir(self.r.dir)
+        try: self.assertEqual([l for l in rc.check_coverage(self.r.base, h) if "no longer reached" in l], [])
+        finally: os.chdir(old)
 
     def test_commented_out_build_fails(self):
         h = self.r.commit({".github/workflows/lean.yml": "jobs:\n  b:\n    steps:\n      # - run: lake build Solidity\n"
                            "      - run: lake env lean x.lean # was: lake build Solidity\n"}, "comment out")
         ok, rep = self.r.check(h)
-        self.assertTrue(ok is False and any("CI build" in l for l in rep), rep)
+        self.assertTrue(ok is False and any("workflow line" in l for l in rep), rep)
 
     def test_build_named_but_not_run_fails(self):
         h = self.r.commit({".github/workflows/lean.yml": "jobs:\n  b:\n    steps:\n      - name: lake build Solidity\n"
                            "        run: echo disabled\n"}, "rename step")
         self.assertFalse(self.r.check(h)[0])
 
-    def test_block_scalar_run_counts(self):
-        h = self.r.commit({".github/workflows/lean.yml": "jobs:\n  b:\n    steps:\n      - name: build\n"
-                           "        run: |\n          set -e\n          lake build Solidity\n      - run: true\n"}, "block")
+    def test_echoed_or_env_build_fails(self):
+        for wf in ("jobs:\n  b:\n    steps:\n      - run: echo lake build Solidity solidity-lean\n",
+                   "jobs:\n  b:\n    steps:\n      - run: |\n          echo off\n        env:\n          N: lake build Solidity\n"):
+            h = self.r.commit({".github/workflows/lean.yml": wf}, "evade")
+            self.assertFalse(self.r.check(h)[0], wf)
+
+    def test_build_edit_with_trailer_passes(self):
+        h = self.r.commit({".github/workflows/lean.yml": "jobs:\n  b:\n    steps:\n      - run: 'lake build Solidity'\n"},
+                          "quote\n\nReview-Check: coverage quoting only")
+        ok, rep = self.r.check(h); self.assertTrue(ok, rep)
+
+    def test_unrelated_workflow_edit_passes(self):
+        h = self.r.commit({".github/workflows/lean.yml": BASE[".github/workflows/lean.yml"] + "      - run: echo done\n"}, "more")
         ok, rep = self.r.check(h); self.assertTrue(ok, rep)
 
     def test_imports_joined_on_one_line_pass(self):

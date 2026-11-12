@@ -3,12 +3,15 @@
 
 Rules (tracked Git content of base and head; the working tree is not read):
   coverage  the Solidity.* modules CI builds and the modules the axiom audit sees may not shrink.
-            Built: the import closure of every library named by `lake build A B …` in a workflow
-            step's `run:` command (inline or block scalar; YAML comments ignored; capitalized
-            words: library roots A.lean). Audited: the import closure of scripts/AxiomAudit.lean.
+            Built: the import closure of every library named after `lake build` anywhere in a
+            workflow (capitalized words: library roots A.lean). The scan is generous on purpose:
+            the workflow rule below makes any edit of such a line explicit.
+            Audited: the import closure of scripts/AxiomAudit.lean.
             Imports are read from the module header: `import`, its modifiers, several names per
             command, nested `/- -/` and `--` comments. A Solidity.* module covered at base that
             still exists at head must be covered at head; deleting a module is not a loss.
+            Workflows: a workflow line that mentions `lake build` may not be added, removed or
+            edited (a disabled, echoed, renamed, quoted or commented-out build all edit one).
   tests     a test file that exists at base may not gain todo/skip/xfail markers (counted per
             marker, net, per file; a rename is followed when either name is a test file):
             `test.todo`, `it.skip`, `{todo: …}`, `skip: true`, `pytest.mark.skip`, `unittest.skip`,
@@ -36,7 +39,6 @@ MODIFIERS = {"public", "meta", "private", "all"}
 MODULE = re.compile(r"[A-Z«][A-Za-z0-9_.'«»]*")
 WORD = re.compile(r"[A-Za-z_«][A-Za-z0-9_.'«»]*|\S")
 BUILD = re.compile(r"\blake build ([^\n|&;>]*)")
-RUN = re.compile(r"^(\s*)(?:-\s+)?run\s*:\s*(.*)$")
 TEST_FILE = re.compile(r"(^|/)(test_[^/]*\.py|[^/]*_test\.py|[^/]*\.test\.(js|mjs|cjs|ts))$")
 SOFT = re.compile(r"\b(?:test|it|describe)\.(?:todo|skip)\b|[{,]\s*todo\s*:|\bskip\s*:\s*true\b"
                   r"|pytest\.mark\.(?:skip|xfail)|unittest\.skip|\bskipTest\(|expectedFailure")
@@ -96,38 +98,27 @@ def closure(roots, src):
     return seen
 
 
-def run_commands(yaml):
-    """The text of every `run:` value of a workflow (inline or an indented block scalar)."""
-    lines, out, i = yaml.split("\n"), [], 0
-    while i < len(lines):
-        m = RUN.match(lines[i]); i += 1
-        if not m: continue
-        value = re.sub(r"(^|\s)#.*", "", m.group(2)).strip()
-        if value[:1] in ("|", ">"):
-            indent, block = len(m.group(1)), []
-            while i < len(lines) and (not lines[i].strip() or len(lines[i]) - len(lines[i].lstrip()) > indent):
-                block.append(re.sub(r"(^|\s)#.*", "", lines[i])); i += 1
-            out.append("\n".join(block))
-        else:
-            out.append(value)
-    return out
-
-
 def coverage(r):
     """(modules CI builds, modules the axiom audit imports, Solidity.* modules present) at r."""
     files = [f for f in git("ls-tree", "-r", "--name-only", r).decode().split("\n") if f]
     lean = [f for f in files if f.endswith(".lean") and ("/" not in f or f.startswith("Solidity/"))]
     wf = [f for f in files if f.startswith(".github/workflows/") and f.endswith((".yml", ".yaml"))]
     src = blobs(r, lean + wf + ([AUDIT] if AUDIT in files else []))
-    built = {w for f in wf for cmd in run_commands(src[f] or "") for args in BUILD.findall(cmd)
-             for w in args.split() if re.fullmatch(r"[A-Z][A-Za-z0-9_]*", w)}
+    built = {w for f in wf for args in BUILD.findall(src[f] or "") for w in (x.strip("'\"") for x in args.split())
+             if re.fullmatch(r"[A-Z][A-Za-z0-9_]*", w)}
     present = {f[:-5].replace("/", ".") for f in lean if f.startswith("Solidity/")}
     return closure(built, src), closure(imports(src.get(AUDIT) or ""), src), present
 
 
+def workflow_edits(base, head):
+    diff = git("diff", "-U0", "--no-renames", base, head, "--", ".github/workflows").decode("utf-8", "replace")
+    n = sum(1 for l in diff.split("\n") if l[:1] in "+-" and l[:3] not in ("+++", "---") and "lake build" in l)
+    return [f"coverage: {n} workflow line(s) mentioning `lake build` added, removed or edited"] if n else []
+
+
 def check_coverage(base, head):
     (b_built, b_audit, _), (h_built, h_audit, present) = coverage(base), coverage(head)
-    bad = []
+    bad = workflow_edits(base, head)
     for what, b, h in (("the CI build", b_built, h_built), ("the axiom audit", b_audit, h_audit)):
         lost = sorted((b & present) - h)
         if lost:
