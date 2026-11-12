@@ -2450,13 +2450,17 @@ import Solidity.Correctness.Lowering.Unchecked.Discarded
 import Solidity.Correctness.Lowering.Unchecked.IntegerOne
 import Solidity.Correctness.Lowering.Unchecked.IntegerUpdate
 import Solidity.Correctness.Lowering.Unchecked.LocalUpdate
+import Solidity.Correctness.Lowering.Unchecked.NamedOne
 import Solidity.Correctness.Lowering.Unchecked.PanicData
+import Solidity.Correctness.Lowering.Unchecked.PowerCutoffWitness
 import Solidity.Correctness.Lowering.Unchecked.PowerV2Arithmetic
 import Solidity.Correctness.Lowering.Unchecked.RawOne
 import Solidity.Correctness.Lowering.Unchecked.Relation
 import Solidity.Correctness.Lowering.Unchecked.SourceOne
 import Solidity.Correctness.Lowering.Unchecked.UpdateArithmetic
+import Solidity.Correctness.Lowering.Unchecked.VersionedPowerWitness
 import Solidity.Correctness.Lowering.Unchecked.WordAssociation
+import Solidity.Correctness.Lowering.Unchecked.WordOne
 import Solidity.Correctness.Lowering.Unchecked.WordProgram
 import Solidity.Correctness.Lowering.Unchecked.WrappingArithmetic
 import Solidity.Counterexamples.DeleteFamilyGenericOverlap
@@ -3263,6 +3267,7 @@ import Solidity.Goals
 import Solidity.Goals.AuditData
 import Solidity.Goals.Endpoint
 import Solidity.Goals.Finish
+import Solidity.Goals.GoalPinsSpec
 import Solidity.Goals.Hash
 import Solidity.Goals.Headline
 import Solidity.Goals.Loops
