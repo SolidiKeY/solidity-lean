@@ -281,13 +281,29 @@ def ruff_exe():
     target = os.path.join(os.path.dirname(d), "hygiene-tools", want.replace(" ", "-"))
     local = os.path.join(target, "bin", "ruff.exe" if os.name == "nt" else "ruff")
     if os.path.exists(local) and _version_of(local) == want: return local
-    shutil.rmtree(target, ignore_errors=True)
-    r = subprocess.run([sys.executable, "-m", "pip", "install", "--quiet", "--disable-pip-version-check",
-                        "--no-deps", "--only-binary", ":all:", "--require-hashes", "--target", target,
-                        "-r", RUFF_REQUIREMENTS], capture_output=True, text=True,
-                       env={**os.environ, "PIP_ROOT_USER_ACTION": "ignore"})
-    if r.returncode == 0 and os.path.exists(local) and _version_of(local) == want: return local
-    RUFF_PROBLEM.append(f"installing {want} with pip failed: " + (r.stderr.strip()[-300:] or "no ruff binary"))
+    # Install beside the target and rename it into place, so a concurrent or interrupted run
+    # never sees (or deletes) a half-installed copy.
+    os.makedirs(os.path.dirname(target), exist_ok=True)
+    stage = tempfile.mkdtemp(prefix=os.path.basename(target) + ".", dir=os.path.dirname(target))
+    try:
+        r = subprocess.run([sys.executable, "-m", "pip", "install", "--quiet", "--disable-pip-version-check",
+                            "--no-deps", "--only-binary", ":all:", "--require-hashes", "--target", stage,
+                            "-r", RUFF_REQUIREMENTS], capture_output=True, text=True, timeout=300,
+                           env={**os.environ, "PIP_ROOT_USER_ACTION": "ignore"})
+        staged = os.path.join(stage, "bin", os.path.basename(local))
+        if r.returncode == 0 and os.path.exists(staged) and _version_of(staged) == want:
+            shutil.rmtree(target, ignore_errors=True)
+            try:
+                os.rename(stage, target)
+            except OSError:
+                pass  # a concurrent run placed its copy first
+            if os.path.exists(local) and _version_of(local) == want: return local
+        problem = r.stderr.strip()[-300:] or "no ruff binary"
+    except (OSError, subprocess.SubprocessError) as e:
+        problem = str(e)
+    finally:
+        shutil.rmtree(stage, ignore_errors=True)
+    RUFF_PROBLEM.append(f"installing {want} with pip failed: {problem}")
     return None
 
 
