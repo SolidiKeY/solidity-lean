@@ -8,7 +8,8 @@ import subprocess
 import sys
 
 ROOT = pathlib.Path(__file__).resolve().parents[4]
-DIRECTORY = "scripts/g07-axiom-pins.d/"
+DIRECTORIES = ("scripts/g07-axiom-pins.d/", "scripts/axiom-pins/")
+HELPER = ROOT / "scripts/check-axiom-pins.mjs"
 INVENTORY = "scripts/g07-axiom-pins.json"
 
 def parse(data):
@@ -24,20 +25,28 @@ def parse(data):
     return obj, duplicates
 
 def main():
-    files = subprocess.check_output(["git", "ls-files", "-z", "--", DIRECTORY], cwd=ROOT).decode().split("\0")
+    files = subprocess.check_output(["git", "ls-files", "-z", "--", *DIRECTORIES], cwd=ROOT).decode().split("\0")
     files = sorted(f for f in files if f)
-    untracked = subprocess.check_output(["git", "ls-files", "--others", "--exclude-standard", "-z", "--", DIRECTORY], cwd=ROOT).decode().split("\0")
+    untracked = subprocess.check_output(["git", "ls-files", "--others", "--exclude-standard", "-z", "--", *DIRECTORIES], cwd=ROOT).decode().split("\0")
     untracked = sorted(f for f in untracked if f)
     digest = hashlib.sha256()
     merged = {}
     errors = []
+    raw_fragments = {}
+    for directory in DIRECTORIES:
+        path = ROOT / directory.rstrip("/")
+        if path.is_symlink() or (path.exists() and not path.is_dir()):
+            errors.append(f"non-directory or symbolic fragment root: {directory}")
     for name in files:
         path = ROOT / name
         try:
+            if any(p.is_symlink() for p in [path, *path.parents] if p != ROOT and ROOT in p.parents):
+                raise OSError("symbolic fragment path")
             data = path.read_bytes()
         except OSError as exc:
             errors.append(f"unreadable fragment {name}: {exc}")
             continue
+        raw_fragments[name] = data.decode("utf-8", errors="replace")
         digest.update(name.encode() + b"\0" + hashlib.sha256(data).digest())
         if not name.endswith(".json"):
             errors.append(f"non-json tracked fragment: {name}")
@@ -53,14 +62,21 @@ def main():
         errors.extend(f"duplicate key in {name}: {k}" for k in duplicates)
         for key, value in obj.items():
             pos = key.find(".lean:")
-            expected = DIRECTORY + key[:pos] + ".json" if pos > 0 else None
-            if expected != name or not key[pos + 6:]:
+            if pos <= 0 or not key[pos + 6:]:
                 errors.append(f"wrong fragment: {key} in {name}")
             if not isinstance(value, list) or not all(isinstance(x, str) for x in value):
                 errors.append(f"invalid axiom list: {key}")
             if key in merged:
                 errors.append(f"duplicate across fragments: {key}")
             merged[key] = value
+    checked = subprocess.run(["node", str(HELPER), "--fragment-op"],
+                             input=json.dumps({"root": str(ROOT), "op": "validate", "files": raw_fragments}).encode(),
+                             capture_output=True)
+    if checked.returncode: errors.append(checked.stderr.decode().strip())
+    else:
+        # Retain the independent raw JSON/duplicate checks above; validate placement
+        # with the same immutable-seed/hash contract as both generators.
+        assert json.loads(checked.stdout)["merged"] == merged
     try:
         inventory_bytes = (ROOT / INVENTORY).read_bytes()
         inventory, duplicates = parse(inventory_bytes)

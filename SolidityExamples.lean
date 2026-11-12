@@ -131,6 +131,7 @@ import Solidity.Examples.Goals
 import Solidity.Examples.Goals.AuditData
 import Solidity.Examples.Goals.Endpoint
 import Solidity.Examples.Goals.Finish
+import Solidity.Examples.Goals.GoalPinsSpec
 import Solidity.Examples.Goals.Hash
 import Solidity.Examples.Goals.Headline
 import Solidity.Examples.Goals.Loops
