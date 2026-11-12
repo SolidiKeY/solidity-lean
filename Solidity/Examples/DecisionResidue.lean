@@ -82,7 +82,7 @@ theorem floor_family_countermodel :
 theorem floor_family_answers :
     (partialOrFloorAnswer? (floorClaim 1)).isSome = true ∧
       (partialOrFloorAnswer? floorBad).isSome = true :=
-  ⟨partialOrFloorAnswer_isSome (by decide +kernel),
+  ⟨partialOrFloorAnswer_isSome (partialOrFloor_iff.mpr ⟨floorOneCertificate⟩),
     partialOrFloorAnswer_isSome (by decide +kernel)⟩
 
 /-- The mapping-bearing fixture is semantically valid by memory-object vacuity. -/
