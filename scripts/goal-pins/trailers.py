@@ -11,6 +11,7 @@ from pathlib import Path
 
 PIN_PATH = "Solidity/Goals/Pins.lean"
 DECISION = re.compile(r"H(?:0|[1-9][0-9]*)\Z", re.ASCII)
+RAW_TRAILER = re.compile(rb"Goal-Change: (H(?:0|[1-9][0-9]*))\n?\Z")
 
 
 class TrailerError(ValueError):
@@ -61,5 +62,25 @@ def pin_changes(repo: Path, base: str, head: str) -> list[tuple[str, str]]:
         decision = matches[0][len("Goal-Change: "):]
         if not DECISION.fullmatch(decision):
             raise TrailerError(f"{commit}: malformed Goal-Change decision")
+        # Git normalizes whitespace in its output. Locate an exact raw line and
+        # prove it is the parsed trailer, rather than a lookalike in the body.
+        lines = message.splitlines(keepends=True)
+        sentinel = decision + "0"
+        found = False
+        for index, line in enumerate(lines):
+            raw = RAW_TRAILER.fullmatch(line)
+            if raw is None or raw.group(1).decode("ascii") != decision:
+                continue
+            modified = lines.copy()
+            modified[index] = b"Goal-Change: " + sentinel.encode("ascii") + b"\n"
+            probe = git(repo, "interpret-trailers", "--parse", stdin=b"".join(modified))
+            probe_lines = probe.decode("utf-8", "strict").splitlines()
+            candidates = [item for item in probe_lines
+                          if item.partition(":")[0].lower() == "goal-change"]
+            if candidates == ["Goal-Change: " + sentinel]:
+                found = True
+                break
+        if not found:
+            raise TrailerError(f"{commit}: Goal-Change trailer is not spelled exactly")
         changes.append((commit, decision))
     return changes

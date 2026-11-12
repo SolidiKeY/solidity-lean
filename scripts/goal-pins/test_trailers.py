@@ -51,6 +51,24 @@ class TrailerTests(unittest.TestCase):
                 with self.assertRaises(TrailerError):
                     pin_changes(self.repo, self.base, "HEAD")
 
+    def test_original_trailer_spelling_is_exact(self):
+        for spelling in ("Goal-Change:H1", "Goal-Change:    H1", "Goal-Change : H1",
+                         "goal-change: H1", "Goal-Change: H1\n continued"):
+            with self.subTest(spelling=spelling):
+                self.setUp()
+                self.commit("change\n\n" + spelling)
+                with self.assertRaises(TrailerError):
+                    pin_changes(self.repo, self.base, "HEAD")
+
+    def test_canonical_body_line_cannot_validate_malformed_trailer(self):
+        self.commit("change\n\nGoal-Change: H1\n\ntext\n\nGoal-Change:H1")
+        with self.assertRaises(TrailerError):
+            pin_changes(self.repo, self.base, "HEAD")
+
+    def test_canonical_body_line_and_real_trailer_are_accepted(self):
+        pin = self.commit("change\n\nGoal-Change: H1\n\ntext\n\nGoal-Change: H1")
+        self.assertEqual(pin_changes(self.repo, self.base, "HEAD"), [(pin, "H1")])
+
     def test_intermediate_change_cannot_be_hidden_by_revert(self):
         self.commit("add pin", "pin\n")
         self.git("rm", "-q", "Solidity/Goals/Pins.lean")
