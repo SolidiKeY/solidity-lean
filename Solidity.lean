@@ -3258,6 +3258,7 @@ import Solidity.Frontend.Yul.Parsing
 import Solidity.Frontend.Yul.ScopedParse
 import Solidity.Frontend.Yul.WordParse
 import Solidity.Goals
+import Solidity.Goals.AuditData
 import Solidity.Goals.Endpoint
 import Solidity.Goals.Finish
 import Solidity.Goals.Hash
