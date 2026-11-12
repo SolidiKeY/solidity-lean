@@ -3267,6 +3267,7 @@ import Solidity.Goals
 import Solidity.Goals.AuditData
 import Solidity.Goals.Endpoint
 import Solidity.Goals.Finish
+import Solidity.Goals.GoalPinsSpec
 import Solidity.Goals.Hash
 import Solidity.Goals.Headline
 import Solidity.Goals.Loops
