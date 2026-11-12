@@ -1,6 +1,8 @@
 #!/usr/bin/env python3
 """controls-classify.py [--list reachable|unreachable|edges] [--check]
 
+Read-only report: nothing calls it yet; no module is moved (land review, H677).
+
 Classifies every `*Controls` module of the `Solidity` library (the modules
 `register.sh` puts in `Solidity.lean` or `SolidityControls`) as
 LIBRARY-REACHABLE or UNREACHABLE (t2-controls-off-path, step 1).

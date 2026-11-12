@@ -28,4 +28,4 @@ Commands for people; they prove nothing beyond the certificates they check.
 | `Automation/H28/Prove.lean` | Bounded automation-benchmark checkpoint; typed scope and retained obligations are stated in the module. |
 | `Tools/VerifierMetadata.lean` | Additive kernel facts tying each reported `postFails` index to the exact typed false postcondition clause and final run state; no source span, original-obligation or candidate association is inferred. |
 
-| `**/*Controls.lean` | Library membership (t2-controls-off-path): every `*Controls` module is in `Solidity`. `scripts/coord-tools/controls-classify.py` lists those no library module imports; `REGISTER_CONTROLS_SPLIT=1 register.sh` (off by default) would move them to a `SolidityControls` root once CI and the axiom audit cover it. |
+| `**/*Controls.lean` | Every `*Controls` module is in `Solidity`. `scripts/coord-tools/controls-classify.py` lists those no library module imports (candidates for a future controls library, not moved). |

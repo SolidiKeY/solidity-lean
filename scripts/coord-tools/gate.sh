@@ -83,10 +83,6 @@ out={m for m in out if wide or m in leafs or not leaf(m)}
 if os.environ.get("GATE_MODE") == "checkpoint":
     slow={line.split()[1] for line in pathlib.Path("SoliditySlowExamples.lean").read_text().splitlines() if line.startswith("import ")}
     out.difference_update(slow)
-    # t2-controls-off-path: nor the SolidityControls library (built by full).
-    ctl=pathlib.Path("SolidityControls.lean")
-    if ctl.is_file():
-        out.difference_update(l.split()[1] for l in ctl.read_text().splitlines() if l.startswith("import "))
 print(" ".join(sorted(m for m in out if pathlib.Path(m.replace(".","/")+".lean").is_file())))
 open(os.environ["GATE_CORE_FILE"],"w").write("core" if core else "")
 PY
@@ -104,9 +100,6 @@ else
   # CI's `checks` job runs this same script (.github/workflows/lean.yml), so a
   # tree that passes the gate cannot turn `checks` red.
   run_gate checks-fast bash scripts/ci/checks-fast.sh
-  # t2-controls-off-path: every *Controls module in exactly one root, moved ones unreachable.
-  # (fixture trees without the controls root skip it; register.sh --check keeps the real one present)
-  [ ! -f SolidityControls.lean ] || run_gate controls-roots python3 -B scripts/coord-tools/controls-classify.py --check
   [ "$failed" -eq 0 ] || exit "$failed"
   run_gate build-touched build_touched
   if [ "$mode" != touched ]; then
