@@ -224,6 +224,7 @@ import Solidity.Backend.CalldataPackets.RawUintN.Execution
 import Solidity.Backend.Checks
 import Solidity.Backend.CompilerEndpoint
 import Solidity.Backend.CompilerEndpointWitnesses
+import Solidity.Backend.CompilerTotal
 import Solidity.Backend.Control
 import Solidity.Backend.Creation.Artifact
 import Solidity.Backend.Creation.ArtifactChecks
@@ -2441,14 +2442,21 @@ import Solidity.Correctness.Lowering.Loops.Statement
 import Solidity.Correctness.Lowering.Loops.WhileBreak
 import Solidity.Correctness.Lowering.Loops.WhileContinue
 import Solidity.Correctness.Lowering.Loops.WhileReset
+import Solidity.Correctness.Lowering.Unchecked.CallWitness
 import Solidity.Correctness.Lowering.Unchecked.CalleeMode
 import Solidity.Correctness.Lowering.Unchecked.Composition
 import Solidity.Correctness.Lowering.Unchecked.CompoundOne
+import Solidity.Correctness.Lowering.Unchecked.Discarded
 import Solidity.Correctness.Lowering.Unchecked.IntegerOne
 import Solidity.Correctness.Lowering.Unchecked.IntegerUpdate
 import Solidity.Correctness.Lowering.Unchecked.LocalUpdate
 import Solidity.Correctness.Lowering.Unchecked.PanicData
+import Solidity.Correctness.Lowering.Unchecked.RawOne
 import Solidity.Correctness.Lowering.Unchecked.Relation
+import Solidity.Correctness.Lowering.Unchecked.UpdateArithmetic
+import Solidity.Correctness.Lowering.Unchecked.WordAssociation
+import Solidity.Correctness.Lowering.Unchecked.WordProgram
+import Solidity.Correctness.Lowering.Unchecked.WrappingArithmetic
 import Solidity.Counterexamples.DeleteFamilyGenericOverlap
 import Solidity.Counterexamples.DiamondTry
 import Solidity.Counterexamples.PreFixSortAnnotations
@@ -5226,6 +5234,7 @@ import Solidity.Yul.FunctionScope
 import Solidity.Yul.GlobalExternal
 import Solidity.Yul.HorizonAdapter
 import Solidity.Yul.Interfaces.P16
+import Solidity.Yul.Layout.ReadSequence
 import Solidity.Yul.LocalBlock
 import Solidity.Yul.LocalBlockLogic
 import Solidity.Yul.LocalBoolAgreement

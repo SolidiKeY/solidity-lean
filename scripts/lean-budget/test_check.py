@@ -138,7 +138,8 @@ class Globs(unittest.TestCase):
     def test_allow_json_steps(self):
         self.assertEqual(set(CFG["steps"]), {"b1-backend-endpoint", "e1-loops", "va2-honest-theorems", "w3-panic-codes",
                                              "e4-hash-bridge", "t0-endpoint-total", "e2a-lower-total",
-                                             "e2b-loops-producer"})
+                                             "e2b-loops-producer", "yv1-yul-layout-view"})
+        self.assertEqual(CFG["steps"]["yv1-yul-layout-view"], ["Solidity/Yul/Layout/**"])
 
 
 if __name__ == "__main__":

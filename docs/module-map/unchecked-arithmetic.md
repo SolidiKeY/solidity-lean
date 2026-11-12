@@ -11,3 +11,10 @@
 | `Correctness/Lowering/Unchecked/LocalUpdate.lean` | Shared local compound-one and prefix update; unchecked-lowering component, full production endpoint remains unproved. |
 | `Correctness/Lowering/Unchecked/PanicData.lean` | Panic bytes at the unchecked boundary; unchecked-lowering component, full production endpoint remains unproved. |
 | `Correctness/Lowering/Unchecked/Relation.lean` | Unchecked arithmetic and effect relation groundwork; unchecked-lowering component, full production endpoint remains unproved. |
+| `Correctness/Lowering/Unchecked/CallWitness.lean` | An elaborated unchecked caller with a checked callee; unchecked-lowering component, full production endpoint remains unproved. |
+| `Correctness/Lowering/Unchecked/RawOne.lean` | Supplied raw compound-one/increment association; unchecked-lowering component, full production endpoint remains unproved. |
+| `Correctness/Lowering/Unchecked/WrappingArithmetic.lean` | Shared typed wrapping arithmetic; unchecked-lowering component, full production endpoint remains unproved. |
+| `Correctness/Lowering/Unchecked/WordAssociation.lean` | Supplied word-value association; unchecked-lowering component, full production endpoint remains unproved. |
+| `Correctness/Lowering/Unchecked/WordProgram.lean` | Supplied wrapping word-update programs; unchecked-lowering component, full production endpoint remains unproved. |
+| `Correctness/Lowering/Unchecked/UpdateArithmetic.lean` | Shared typed update arithmetic; unchecked-lowering component, full production endpoint remains unproved. |
+| `Correctness/Lowering/Unchecked/Discarded.lean` | Discarded increment results; unchecked-lowering component, full production endpoint remains unproved. |
