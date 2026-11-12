@@ -9,7 +9,7 @@ per-lane fragments (`docs/parallelism.md`, "Shared registries"):
   docs/module-map/<area>.md       docs/module-map/<area>.d/*.md
   docs/README.md                  docs/README.d/**/*.md
   TERRA-TODO.md                   TERRA-TODO.d/*.md
-  scripts/g07-axiom-pins.json     scripts/g07-axiom-pins.d/<lean path>.json
+  scripts/g07-axiom-pins.json     seeded legacy fragments + neutral scripts/axiom-pins/<sha256>.json
 
 A Markdown file is a marker line plus its fragments concatenated, ordered by
 path component (bytewise: `00-base.md` first, lane names next, `~tail.md`
@@ -38,11 +38,13 @@ FIXED = [("docs/module-map.md", "docs/module-map.d", "md"),
          ("docs/README.md", "docs/README.d", "md"),
          ("TERRA-TODO.md", "TERRA-TODO.d", "md"),
          ("scripts/g07-axiom-pins.json", "scripts/g07-axiom-pins.d", "json")]
+PIN_HELPER = pathlib.Path(__file__).resolve().parents[1] / "check-axiom-pins.mjs"
+PIN_FRAGMENT_ROOTS = ("scripts/g07-axiom-pins.d", "scripts/axiom-pins")
 AREAS = "docs/module-map"
 ROOTS = ["Solidity.lean", "SolidityExamples.lean", "Bridge/SolidityBridge.lean"]
 JS = r"""let s="";process.stdin.setEncoding("utf8");process.stdin.on("data",c=>s+=c).on("end",()=>{
-const m=JSON.parse(s),o={};for(const [p,d] of Object.entries(m)){
-o[p]=JSON.stringify(Object.fromEntries(Object.entries(d).sort(([a],[b])=>a.localeCompare(b))),null,1)+"\n";}
+const {dicts,compact}=JSON.parse(s),o={};for(const [p,d] of Object.entries(dicts)){
+o[p]=JSON.stringify(Object.fromEntries(Object.entries(d).sort(([a],[b])=>a.localeCompare(b))),null,compact?undefined:1)+"\n";}
 process.stdout.write(JSON.stringify(o));});"""
 
 
@@ -64,11 +66,40 @@ def unmark(text, d):
     return text[len(m):] if text.startswith(m) else text
 
 
-def canon(dicts):
+def canon(dicts, compact=False):
     """{path: dict} -> {path: canonical JSON text}, sorted as check-axiom-pins.mjs sorts."""
     if not dicts: return {}
-    r = subprocess.run(["node", "-e", JS], input=json.dumps(dicts).encode(), capture_output=True)
+    r = subprocess.run(["node", "-e", JS], input=json.dumps({"dicts": dicts, "compact": compact}).encode(), capture_output=True)
     if r.returncode: raise Error("node: " + r.stderr.decode()[-300:])
+    return json.loads(r.stdout)
+
+
+def unique_json(raw):
+    def pairs(items):
+        obj = {}
+        for key, value in items:
+            if key in obj: raise ValueError(f"duplicate key: {key}")
+            obj[key] = value
+        return obj
+    return json.loads(raw, object_pairs_hook=pairs)
+
+
+def fragment_op(t, operation="validate", desired=None, objects=None):
+    request = {"op": operation, "root": os.getcwd(), "revision": t.rev}
+    if t.rev is not None:
+        entries = git("ls-tree", "-r", "-z", t.rev, "--", *PIN_FRAGMENT_ROOTS).decode().split("\0")
+        for entry in filter(None, entries):
+            metadata, path = entry.split("\t", 1)
+            if metadata.split()[0] not in ("100644", "100755"):
+                raise Error(f"unexpected nonregular fragment path: {path}")
+        fs = sorted(f for d in PIN_FRAGMENT_ROOTS for f in t.under(d))
+        t.prefetch(fs)
+        request["files"] = {f: t.read(f) for f in fs}
+    if desired is not None: request["desired"] = desired
+    if objects is not None: request["objects"] = objects
+    r = subprocess.run(["node", str(PIN_HELPER), "--fragment-op"],
+                       input=json.dumps(request).encode(), capture_output=True)
+    if r.returncode: raise Error(r.stderr.decode().strip())
     return json.loads(r.stdout)
 
 
@@ -106,7 +137,8 @@ class Tree:
 
 
 def specs(t):
-    out = [(c, d, k) for c, d, k in FIXED if t.has_dir(d)]
+    out = [(c, d, k) for c, d, k in FIXED if t.has_dir(d) or
+           (k == "json" and t.has_dir(PIN_FRAGMENT_ROOTS[1]))]
     areas = sorted({f.split("/")[2] for f in t.files if f.startswith(AREAS + "/") and f.count("/") >= 3})
     out += [(f"{AREAS}/{a[:-2]}.md", f"{AREAS}/{a}", "md") for a in areas if a.endswith(".d")]
     return out
@@ -120,26 +152,10 @@ def ordered(t, d, kind, errors):
     return sorted((f for f in fs if f.endswith(ext)), key=lambda f: tuple(f[len(d) + 1:].split("/")))
 
 
-def pins_file(key):
-    i = key.find(".lean:")
-    return key[:i] + ".lean" if i > 0 else None
-
-
-def frag_of(d, key): return f"{d}/{pins_file(key)[:-len('.lean')]}.json"
-
-
 def json_parts(t, d, errors):
-    """{fragment path: dict} of a pins fragment directory."""
-    fs = ordered(t, d, "json", errors); t.prefetch(fs); out = {}
-    for f in fs:
-        try: obj = json.loads(t.read(f))
-        except ValueError as e: errors.append(f"{f}: {e}"); continue
-        if not isinstance(obj, dict): errors.append(f"{f}: not an object"); continue
-        for k, v in obj.items():
-            if pins_file(k) is None or frag_of(d, k) != f: errors.append(f"{f}: key {k} belongs in {frag_of(d, k) if pins_file(k) else '?'}")
-            if not (isinstance(v, list) and all(isinstance(x, str) for x in v)): errors.append(f"{f}: {k} is not a list of axiom names")
-        out[f] = obj
-    return out
+    """Validated union; placement/seed/duplicate rules are shared with the writer."""
+    try: return fragment_op(t)["parts"]
+    except Error as e: errors.append(str(e)); return {}
 
 
 def generate(t, c, d, kind, errors):
@@ -152,7 +168,7 @@ def generate(t, c, d, kind, errors):
         return marker(d) + "".join(parts)
     merged = {}
     for obj in json_parts(t, d, errors).values(): merged.update(obj)
-    return canon({"x": merged})["x"]
+    return canon({"x": merged}, compact=True)["x"]
 
 
 def lines(s): return s.splitlines(keepends=True)
@@ -191,12 +207,12 @@ def write_mode(check, force):
                 print(f"{c}: differs from its fragments in {d}/ ({sum(1 for l in diff if l[:1] in '+-') - 2} lines)")
                 for l in diff[2:14]: print("  " + l.rstrip("\n")[:160])
             continue
-        if have_text is not None and not force and head is not None and head.has_dir(d):
+        if have_text is not None and not force and head is not None and any(head.has_dir(prefix) for prefix in (PIN_FRAGMENT_ROOTS if kind == "json" else (d,))):
             hgen = generate(head, c, d, kind, [])
             if kind == "md": extra = direct_md(unmark(have_text, d), unmark(want, d), unmark(hgen, d))
             else:
-                try: extra = direct_json(json.loads(have_text), json.loads(want), json.loads(hgen))
-                except ValueError: extra = ["(the file is not valid JSON)"]
+                try: extra = direct_json(unique_json(have_text), unique_json(want), unique_json(hgen))
+                except (ValueError, AttributeError): extra = ["(the file is not a JSON object)"]
             if extra:
                 refused = 1
                 print(f"{c}: {len(extra)} line(s) no fragment produces (a direct edit or a union merge); "
@@ -244,6 +260,15 @@ def resolve(lane, ours_lane):
     ours_lane = lane_name(ours_lane or branch.rstrip("/").split("/")[-1], "ours-" + ours[:8])
     unmerged = set(git("diff", "--name-only", "--diff-filter=U", "-z").decode().split("\0")) - {""}
     w = Tree(); sides = [(Tree(ours), ours_lane), (Tree(theirs), lane)]; tb = Tree(base[0])
+    # Validate all JSON sides before adopting any side's direct edits.
+    for t in [w, tb, *(t for t, _ in sides)]:
+        conflicted = t.rev is None and any(u.startswith(prefix + "/") for u in unmerged for prefix in PIN_FRAGMENT_ROOTS)
+        if not conflicted and any(t.has_dir(prefix) for prefix in PIN_FRAGMENT_ROOTS): fragment_op(t)
+        raw = t.read("scripts/g07-axiom-pins.json")
+        if raw is not None and not (t.rev is None and "scripts/g07-axiom-pins.json" in unmerged):
+            try: obj = unique_json(raw)
+            except ValueError as e: raise Error(f"invalid combined pin inventory: {e}")
+            fragment_op(t, "objects", objects=[obj])
     resolved, notes, left = set(), [], set()
     sp = specs(w); have = {c for c, _, _ in sp}
     # an area file a side created without fragments becomes that side's fragment
@@ -255,23 +280,28 @@ def resolve(lane, ours_lane):
             pathlib.Path(dst).write_bytes(pathlib.Path(f).read_bytes()); notes.append(f"{f}: moved into {dst}")
             sp.append((f, f[:-3] + ".d", "md")); w = Tree()
     for c, d, kind in sp:
-        if any(u.startswith(d + "/") for u in unmerged):
+        if any(u.startswith(prefix + "/") for u in unmerged for prefix in (PIN_FRAGMENT_ROOTS if kind == "json" else (d,))):
             notes.append(f"{c}: a fragment under {d}/ is conflicted; left"); left.add(c); continue
         ok = True
         for t, name in sides:
             comb = t.read(c)
             if comb is None: continue
-            own = t.has_dir(d)
-            if own: gen = generate(t, c, d, kind, [])
-            elif tb.has_dir(d): gen = generate(tb, c, d, kind, [])
+            own = any(t.has_dir(prefix) for prefix in (PIN_FRAGMENT_ROOTS if kind == "json" else (d,)))
+            side_errors = []
+            if own: gen = generate(t, c, d, kind, side_errors)
+            elif any(tb.has_dir(prefix) for prefix in (PIN_FRAGMENT_ROOTS if kind == "json" else (d,))):
+                gen = generate(tb, c, d, kind, side_errors)
             else: gen = tb.read(c) or ("{}\n" if kind == "json" else "")
+            if side_errors:
+                notes.extend(side_errors); ok = False; break
             w = Tree()
             ok &= (apply_md if kind == "md" else apply_json)(w, c, d, unmark(gen, d), unmark(comb, d), name, notes, own)
         if not ok: left.add(c); continue
         errors = []; w = Tree(); text = generate(w, c, d, kind, errors)
         if errors: notes += errors; left.add(c); continue
         pathlib.Path(c).write_bytes(text.encode())
-        git("add", "-A", "--", c, d); resolved.add(c)
+        dirs = [p for p in PIN_FRAGMENT_ROOTS if w.has_dir(p)] if kind == "json" else [d]
+        git("add", "-A", "--", c, *dirs); resolved.add(c)
     if any(r in unmerged for r in ROOTS) or os.path.isfile("scripts/coord-tools/register.sh"):
         r = subprocess.run(["bash", "scripts/coord-tools/register.sh"], capture_output=True, text=True)
         if r.returncode:
@@ -362,32 +392,31 @@ def apply_md(w, c, d, gen, comb, name, notes, own):
 
 
 def apply_json(w, c, d, gen, comb, name, notes, own):
-    try: a, b = json.loads(gen), json.loads(comb)
+    try: a, b = unique_json(gen), unique_json(comb)
     except ValueError as e: notes.append(f"{c}: {name}'s file is not JSON ({e}); left"); return False
-    errors = []; parts = json_parts(w, d, errors); cur = {}
-    for obj in parts.values(): cur.update(obj)
-    ok = True; changed = set()
-    def put(k, v):
-        f = frag_of(d, k); parts.setdefault(f, {})
-        if v is None: parts[f].pop(k, None)
-        else: parts[f][k] = v
-        changed.add(f)
+    try:
+        fragment_op(w, "objects", objects=[a, b])
+        cur = fragment_op(w)["merged"]
+    except Error as e: notes.append(str(e)); return False
+    desired = dict(cur); ok = True
     for k, v in b.items():
         if a.get(k) == v or cur.get(k) == v: continue
-        if own and (k in a or k in cur): continue  # its fragments are the truth; the combined file may be stale
-        if k in cur and cur[k] != a.get(k): notes.append(f"{c}: {k} changed on both sides; left"); ok = False; continue
-        put(k, v)
+        if own and (k in a or k in cur): continue
+        if k in cur and cur[k] != a.get(k):
+            notes.append(f"{c}: {k} changed on both sides; left"); ok = False; continue
+        desired[k] = v
     for k in a:
         if not own and k not in b and k in cur:
-            if cur[k] == a[k]: put(k, None)
+            if cur[k] == a[k]: desired.pop(k, None)
             else: notes.append(f"{c}: {name} removed {k}, changed on the other side; left"); ok = False
     if not ok: return False
-    texts = canon({f: parts[f] for f in changed if parts[f]})
-    for f in changed:
-        p = pathlib.Path(f)
-        if parts[f]: p.parent.mkdir(parents=True, exist_ok=True); p.write_bytes(texts[f].encode())
-        elif p.is_file(): p.unlink()
-    if changed: notes.append(f"{c}: {name}: {len(changed)} pins fragment(s) updated")
+    try: plan = fragment_op(w, "plan", desired)
+    except Error as e: notes.append(str(e)); return False
+    for f, raw in plan["writes"].items():
+        p = pathlib.Path(f); p.parent.mkdir(parents=True, exist_ok=True); p.write_bytes(raw.encode())
+    for f in plan["deletes"]: pathlib.Path(f).unlink()
+    changed = len(plan["writes"]) + len(plan["deletes"])
+    if changed: notes.append(f"{c}: {name}: {changed} pins fragment(s) updated")
     return True
 
 
