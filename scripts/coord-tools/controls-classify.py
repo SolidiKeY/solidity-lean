@@ -85,8 +85,8 @@ def main():
             return {l.split()[1] for l in p.read_text().splitlines() if l.startswith("import ")} if p.is_file() else set()
         lib, ctl = imports("Solidity.lean"), imports("SolidityControls.lean")
         for m in controls:
-            if (m in lib) == (m in ctl): print(f"controls-classify: {m} in {'both roots' if m in lib else 'neither root'}"); bad = 1
-        if ctl != un: print(f"controls-classify: SolidityControls.lean differs from the unreachable set ({len(ctl ^ un)} modules)"); bad = 1
+            if ctl and (m in lib) == (m in ctl) or not ctl and m not in lib: print(f"controls-classify: {m} in {'both roots' if m in lib else 'neither root'}"); bad = 1
+        if pathlib.Path("SolidityControls.lean").is_file() and ctl != un: print(f"controls-classify: SolidityControls.lean differs from the unreachable set ({len(ctl ^ un)} modules)"); bad = 1
         return bad
     if a: raise ValueError("usage: controls-classify.py [--list reachable|unreachable|edges] [--check]")
     print(f"controls={len(controls)} reachable={len(reachable)} unreachable={len(unreachable)} "

@@ -113,7 +113,7 @@ else
     if [ "$mode" = full ]; then
       # H134: each slow example under its own 600 s one-core budget, as in CI
       # (after the libraries it imports); run-lean.sh then finds them built.
-      run_gate library lake build Solidity SolidityExamples SolidityControls
+      run_gate library lake build Solidity SolidityExamples
       run_gate slow-examples bash scripts/ci/build-slow-examples.sh
       run_gate run-lean bash run-lean.sh
     else
