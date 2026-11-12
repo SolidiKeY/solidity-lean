@@ -58,6 +58,10 @@ class Imports(unittest.TestCase):
     def test_several_modules_per_line_and_continuation(self):
         self.assertEqual(rc.imports("import A B\n  C.D\nimport E -- note\ndef x := 1\n  F"), ["A", "B", "C.D", "E"])
 
+    def test_inline_and_nested_comments(self):
+        self.assertEqual(rc.imports("/- a /- nested -/ still -/\nimport Solidity.A /- why -/ Solidity.B\n-- x\nimport C\nnoncomputable section"),
+                         ["Solidity.A", "Solidity.B", "C"])
+
     def test_module_system_prefixes(self):
         self.assertEqual(rc.imports("module\n") , [])
         self.assertEqual(rc.imports("-- c\npublic import A.B\nmeta import all C\n/- x\n-/\nimport D\ndef x := 1"),
@@ -89,6 +93,16 @@ class Coverage(unittest.TestCase):
         ok, rep = self.r.check(h)
         self.assertTrue(ok is False and any("CI build" in l for l in rep), rep)
 
+    def test_build_named_but_not_run_fails(self):
+        h = self.r.commit({".github/workflows/lean.yml": "jobs:\n  b:\n    steps:\n      - name: lake build Solidity\n"
+                           "        run: echo disabled\n"}, "rename step")
+        self.assertFalse(self.r.check(h)[0])
+
+    def test_block_scalar_run_counts(self):
+        h = self.r.commit({".github/workflows/lean.yml": "jobs:\n  b:\n    steps:\n      - name: build\n"
+                           "        run: |\n          set -e\n          lake build Solidity\n      - run: true\n"}, "block")
+        ok, rep = self.r.check(h); self.assertTrue(ok, rep)
+
     def test_imports_joined_on_one_line_pass(self):
         h = self.r.commit({"Solidity.lean": "import Solidity.A Solidity.B\n"}, "join")
         ok, rep = self.r.check(h); self.assertTrue(ok, rep)
@@ -114,6 +128,11 @@ class Coverage(unittest.TestCase):
 
     def test_trailer_for_other_rule_does_not_waive(self):
         h = self.r.commit({"Solidity.lean": "import Solidity.A\n"}, "drop B\n\nReview-Check: tests something")
+        self.assertFalse(self.r.check(h)[0])
+
+    def test_example_in_body_is_not_a_trailer(self):
+        h = self.r.commit({"Solidity.lean": "import Solidity.A\n"},
+                          "drop B\n\nExample:\nReview-Check: coverage looks like this\n\nOrdinary prose ends the message.")
         self.assertFalse(self.r.check(h)[0])
 
     def test_trailer_needs_a_reason(self):
@@ -152,6 +171,13 @@ class Tests(unittest.TestCase):
         body = "".join(f"test('t{i}', () => {{ check({i}); }});\n" for i in range(12))
         self.r.base = self.r.commit({"scripts/x.test.mjs": body}, "grow")
         h = self.r.commit({"scripts/w.test.mjs": body + "test.todo('a', () => {});\n"}, "rename",
+                          delete=["scripts/x.test.mjs"])
+        self.assertFalse(self.r.check(h)[0])
+
+    def test_renamed_to_non_test_name_with_new_marker_fails(self):
+        body = "".join(f"test('t{i}', () => {{ check({i}); }});\n" for i in range(12))
+        self.r.base = self.r.commit({"scripts/x.test.mjs": body}, "grow")
+        h = self.r.commit({"scripts/x.mjs": body + "test.skip('a', () => {});\n"}, "rename",
                           delete=["scripts/x.test.mjs"])
         self.assertFalse(self.r.check(h)[0])
 
