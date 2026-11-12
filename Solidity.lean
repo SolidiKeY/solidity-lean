@@ -2445,10 +2445,10 @@ import Solidity.Correctness.Lowering.Unchecked.CallWitness
 import Solidity.Correctness.Lowering.Unchecked.CalleeMode
 import Solidity.Correctness.Lowering.Unchecked.Composition
 import Solidity.Correctness.Lowering.Unchecked.CompoundOne
+import Solidity.Correctness.Lowering.Unchecked.Discarded
 import Solidity.Correctness.Lowering.Unchecked.IntegerOne
 import Solidity.Correctness.Lowering.Unchecked.IntegerUpdate
 import Solidity.Correctness.Lowering.Unchecked.LocalUpdate
-import Solidity.Correctness.Lowering.Unchecked.ModularPower
 import Solidity.Correctness.Lowering.Unchecked.PanicData
 import Solidity.Correctness.Lowering.Unchecked.RawOne
 import Solidity.Correctness.Lowering.Unchecked.Relation

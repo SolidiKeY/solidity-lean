@@ -16,4 +16,4 @@
 | `Correctness/Lowering/Unchecked/WordAssociation.lean` | Supplied word-value association; unchecked-lowering component, full production endpoint remains unproved. |
 | `Correctness/Lowering/Unchecked/WordProgram.lean` | Supplied wrapping word-update programs; unchecked-lowering component, full production endpoint remains unproved. |
 | `Correctness/Lowering/Unchecked/UpdateArithmetic.lean` | Shared typed update arithmetic; unchecked-lowering component, full production endpoint remains unproved. |
-| `Correctness/Lowering/Unchecked/ModularPower.lean` | Modular power at an intrinsic word exponent; unchecked-lowering component, full production endpoint remains unproved. |
+| `Correctness/Lowering/Unchecked/Discarded.lean` | Discarded increment results; unchecked-lowering component, full production endpoint remains unproved. |
