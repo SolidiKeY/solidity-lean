@@ -23,6 +23,10 @@ import pathlib,re,subprocess,sys
 # H109: the three slow examples and DecisionGaps reverse-import closure.
 SLOW_EXAMPLES = ['Solidity.Examples.DecisionGaps', 'Solidity.Examples.DecisionAPF', 'Solidity.Examples.DecisionBlocks', 'Solidity.Examples.DecisionGapCore', 'Solidity.Examples.DecisionGapHashes', 'Solidity.Examples.DecisionGapKInt', 'Solidity.Examples.DecisionLedger', 'Solidity.Examples.DecisionOperators', 'Solidity.Examples.DecisionRefutations', 'Solidity.Examples.DecisionResidue', 'Solidity.Examples.DecisionStorageArrays', 'Solidity.Examples.DecisionThreeKindCoverage', 'Solidity.Examples.Tactics.OpenLoops', 'Solidity.Examples.Tactics.RevertData', 'Solidity.Examples.Tactics.OpenLoops.RowsNine']
 
+# RowsNine checkpoints belong to the same per-module slow budget as their parent.
+SLOW_EXAMPLES += ['Solidity.Examples.Tactics.OpenLoops.RowsNine.' + name
+                  for name in ['Checkpoint', 'Stage1', 'Stage2', 'Stage3', 'Finish']]
+
 # (root file, source directory, module prefix, excluded module prefixes, header)
 ROOTS=[
     ("Solidity.lean",".","Solidity",
