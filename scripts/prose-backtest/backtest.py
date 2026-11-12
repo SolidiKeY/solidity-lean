@@ -367,6 +367,9 @@ def measure_commit(repo, analyzer, commit, estimate, verified=None):
         if "error" in info:
             legacy_error = legacy_error or f"undecodable {path}"
             unknown.append({"path": path, "reason": "undecodable UTF-8; excluded from both sides"})
+            if verified is not None:   # v2 keeps the area visible (its unknown list records why)
+                v2.setdefault(area, dict.fromkeys(METRICS, 0))
+                v2_code.setdefault(area, 0)
             continue
         # legacy: exactly the checker's per-file contributions
         if is_lean:

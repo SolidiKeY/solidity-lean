@@ -646,6 +646,11 @@ class V2History(GitCase):
         self.assertEqual(m["v2"]["Solidity/Core"], {"docs_lines": 0, "comment_lines": 1,
                                                     "docstring_lines": 0, "process_ids": 1})
         self.assertEqual(m["v2_code"]["Solidity/Core"], 1)
+        bad = self.h.commit(T0 + 1, {"Solidity/Bad/X.lean": b"\xff\xfe -- not utf-8\n"})
+        mb = bt.measure_commit(repo, bt.Analyzer(repo), bad, None, verified)
+        self.assertEqual((mb["v2"]["Solidity/Bad"], mb["v2_code"]["Solidity/Bad"]),
+                         (dict.fromkeys(bt.METRICS, 0), 0))      # undecodable: area kept, reported
+        self.assertIn("Solidity/Bad/X.lean", [u["path"] for u in mb["unknown"]])
         unverified = bt.measure_commit(repo, bt.Analyzer(repo), c, None, [])
         self.assertEqual(unverified["v2"]["Solidity/Core"]["comment_lines"], 4)
         self.assertEqual(unverified["v2_code"]["Solidity/Core"], 2)
