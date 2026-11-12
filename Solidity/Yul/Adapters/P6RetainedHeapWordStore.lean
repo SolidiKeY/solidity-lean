@@ -34,7 +34,6 @@ theorem transport {E Γ} {origin : Source.Heap E.layout} (H : Source.HeapTy) (s 
       ReservedOK (frameBytes reached) q.free ∧
       Solidity.Backend.Environment.cryptoStep (.op .MSTORE) ⟨sink.offset::lenU word.val word.isLt::tail,frameBytes image⟩=
         some ⟨tail,frameBytes reached⟩ ∧ reached.st=image.st ∧ reached.key=image.key := by
-  first | omega | decide | skip
   dsimp only
   have source := ArrayWordRetained.whole H s allocated p prior ok supported F horizon root τ k n hl old words encoded
     found index value word newEncoded (frameBytes image) oldReads reserved

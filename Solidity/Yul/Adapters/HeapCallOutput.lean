@@ -31,7 +31,6 @@ theorem residual_unchanged {E : Source.Env} {Γ : Source.RCtx} {origin : Source.
       frameBytes reached=Environment.writeBytes (encodeMixedHeap p (generatedHeapEntries p) residual)
         output.offset.val.toNat (World.callOutput data output.length.val.toNat) ∧
       reached.st=carrier.st ∧ reached.key=carrier.key := by
-  first | omega | decide | skip
   dsimp only
   have image := RawPhysicalCallAccess.image
     (FrameHeap.frameOf carrier p (generatedHeapEntries p) residual fits room) input output data

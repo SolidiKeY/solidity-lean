@@ -16,23 +16,23 @@ def freshResult := (selfDestructBuiltin .selfdestruct fresh delegated selfArgs).
 
 theorem delegated_dirty_context : delegated.this = addr 1 ∧ delegated.caller = addr 2 ∧ delegated.value = toWord 9 ∧
     entry.execution.journal.length = 3 ∧ calleeAddress (args 0) = addr 2 ∧ (args 0).val ≠ 2 := by
-  first | decide | exact ⟨rfl,rfl,rfl,rfl,rfl,by decide⟩
+  decide
 theorem old_storage_owner_transfer : oldResult.2 = .success [] ∧
     (oldResult.1.execution.world.accounts (addr 1)).balance = toWord 0 ∧
     (oldResult.1.execution.world.accounts (addr 2)).balance = toWord 123 ∧
     (oldResult.1.execution.world.accounts (addr 0x30)).balance = toWord 17 ∧
     (oldResult.1.execution.world.accounts (addr 0x30)).code = some 11 ∧
     (oldResult.1.finish.execution.world.accounts (addr 1)).code = some 7 := by
-  first | decide | exact ⟨rfl,rfl,rfl,rfl,rfl,rfl⟩
+  decide
 theorem fresh_self_finalization : freshResult.2 = .success [] ∧
     (freshResult.1.execution.world.accounts (addr 1)).balance = toWord 0 ∧
     (freshResult.1.execution.world.accounts (addr 1)).code = some 7 ∧
     (freshResult.1.finish.execution.world.accounts (addr 1)).code = none ∧
     (freshResult.1.finish.execution.world.accounts (addr 1)).nonce = 0 := by
-  first | decide | exact ⟨rfl,rfl,rfl,rfl,rfl⟩
+  decide
 theorem static_refusal_isolated : selfDestructBuiltin .selfdestruct entry {delegated with static:=true} args = none ∧
-    (selfDestructBuiltin .selfdestruct entry delegated args).isSome = true := by
-  first | decide | exact ⟨rfl,rfl⟩
+    (selfDestructBuiltin .selfdestruct entry delegated args).isSome = true :=
+  ⟨selfDestructBuiltin_static _ _ _ rfl,rfl⟩
 theorem actual_result_rollback : entry.rollbackDestruction oldResult.1 delegated.this delegated.caller delegated.value
     delegated.input delegated.static = entry := by
   exact selfDestructBuiltin_rollback entry delegated args oldResult (Option.some_get (by decide)).symm

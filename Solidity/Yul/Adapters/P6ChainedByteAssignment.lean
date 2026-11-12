@@ -31,7 +31,6 @@ theorem after_congr {E : Source.Env} {Γ : Source.RCtx} (s t : Source.EMState E 
     (hs : s.2.heap.get a=some ⟨heapByteType string,heapByteData E.layout string old⟩)
     (ht : t.2.heap.get a=some ⟨heapByteType string,heapByteData E.layout string old⟩)
     (i : Nat) (b : UInt8) (same : s=t) : after s a string old hs i b=after t a string old ht i b := by
-  first | (simp only;done) | skip
   cases same
   rfl
 
@@ -51,7 +50,6 @@ theorem run {E : Source.Env} {Γ : Source.RCtx} (G : Source.Glob E) (F : Source.
       (.ok (.val (Source.Val.fixedBytes (n:=1) (h:=by decide) [b] rfl)),
         after (after s a string old found i.val b) a string (old.set i.val b)
           (after_found s a string old found i.val b) j.val b) := by
-  first | (simp only;done) | skip
   have innerRun := P6ByteAssignment.run G F n s root inner rhs a i b reference innerIndex value string old found inside
   change (Source.evalE G F (n+3) (P6ByteAssignment.expression root inner rhs)).run s=
     (.ok (.val (Source.Val.fixedBytes (n:=1) (h:=by decide) [b] rfl)),after s a string old found i.val b) at innerRun
@@ -84,7 +82,6 @@ theorem outer_error {E : Source.Env} {Γ : Source.RCtx} (G : Source.Glob E) (F :
     (inside : i.val<old.length) (out : old.length≤j.val) :
     (Source.evalE G F (n+4) (expression root inner outer rhs)).run s=
       (.error (.revert (Source.panicData .index)),after s a string old found i.val b) := by
-  first | (simp only;done) | skip
   have innerRun := P6ByteAssignment.run G F n s root inner rhs a i b reference innerIndex value string old found inside
   change (Source.evalE G F (n+3) (P6ByteAssignment.expression root inner rhs)).run s=
     (.ok (.val (Source.Val.fixedBytes (n:=1) (h:=by decide) [b] rfl)),after s a string old found i.val b) at innerRun
@@ -138,7 +135,6 @@ theorem inventory {E : Source.Env} {Γ : Source.RCtx} {origin : Source.Heap E.la
       CoversMixedHeap next.entries ∧ next.entries.map MixedHeapEntry.id=es.map MixedHeapEntry.id ∧
       (∀ H,Source.MemOK E H s → Source.MemOK E H (withSourceHeap s next.heap)) ∧
       (∀ q,q≠a → next.heap.get q=s.2.heap.get q) := by
-  first | (simp only;done) | skip
   dsimp only
   let firstFrame := P6ByteMemory.store8 μ (P6ByteReferenceWrite.payloadOffset p a string old found i.val inside)
     (P6ByteReferenceWrite.byteWord b) fits1

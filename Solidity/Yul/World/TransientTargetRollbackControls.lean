@@ -19,19 +19,19 @@ theorem nonempty_entry : decorated.2.heap.next = 1 ∧ decorated.2.ex.journal.le
     caller.2.journal.length = 2 ∧ target.journal.length = 1 ∧
     decorated.1 = .cons (.bool true) .nil ∧
     decorated.2.fnLocals = ⟨[.bool],.cons (.bool false) .nil⟩ := by
-  first | decide | exact ⟨rfl,rfl,rfl,rfl,rfl,rfl⟩
+  exact ⟨rfl,rfl,rfl,rfl,rfl,rfl⟩
 
 theorem actual_two_stores : store (ps:=ps) (ts:=ts) frame 0 rawB decorated caller.2 target =
     some (first,.ok (Transient.write target account 0 rawB)) ∧
     store (ps:=ps) (ts:=ts) frame 99 rawMax first.1.2 first.2
       (Transient.write target account 0 rawB) =
     some (second,.ok (Transient.write (Transient.write target account 0 rawB) account 99 rawMax)) := by
-  first | decide | exact ⟨rfl,rfl⟩
+  exact ⟨rfl,rfl⟩
 
 theorem actual_changed_journals : second.1.2.2.ex.journal.length = 4 ∧ second.2.journal.length = 4 ∧
     transientSlotLoad ts ⟨second.1.2.2.ex,second.2⟩ account 0 = some rawB ∧
     transientSlotLoad ts ⟨second.1.2.2.ex,second.2⟩ account 99 = some rawMax := by
-  first | decide | exact ⟨rfl,rfl,by decide,by decide⟩
+  decide
 
 theorem full_enclosing_rollback : (let entry : ResidualCompanion rootEnv.layout rootEnv.lay rootEnv.lay complementCarrierOwnership :=
        ⟨decorated.2.ex,caller.2⟩
@@ -47,5 +47,5 @@ theorem full_enclosing_rollback : (let entry : ResidualCompanion rootEnv.layout 
 theorem wrong_mark_keeps_mutation : (Transient.rollback (target.journal.length + 2)
     (Transient.write (Transient.write target account 0 rawB) account 99 rawMax)).bank account 0 ≠
       target.bank account 0 := by
-  first | decide | rfl
+  decide
 end Solidity.Yul.World.TransientTarget.RollbackControls

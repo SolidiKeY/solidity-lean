@@ -19,7 +19,6 @@ theorem magic_target {E} (G : Source.Glob E) (F : Source.Fr)
     (tail : List Backend.Environment.Word) (memory : Backend.Environment.Memory) :
     Backend.Environment.runSlice (sourceEnvironmentFrame G F funds) magicCode ⟨tail,memory⟩=
       some ⟨environmentWord F.value::environmentWord (addressInputWord F.sender)::environmentWord G.timestamp::tail,memory⟩ := by
-  first | omega | decide | skip
   change some (⟨environmentWord F.value::(environmentAddress F.sender).1::environmentWord G.timestamp::tail,memory⟩ : Backend.Environment.Slice)=_
   rw [environmentAddress_word]
 
@@ -37,7 +36,6 @@ theorem magic {E Γ} (G : Source.Glob E) (F : Source.Fr) (n : Nat) (s : Source.E
     (Source.Val.address (D:=E.layout) (p:=false) F.sender).word.map environmentWord=
       some (environmentWord (addressInputWord F.sender)) ∧
     (uintValueOfWord E.layout F.value).word.map environmentWord=some (environmentWord F.value) := by
-  first | omega | decide | skip
   refine ⟨sourceMagic_sequence G F n s,magic_target G F funds tail memory,?_,?_,?_⟩
   · rw [uintValueOfWord_word];rfl
   · rw [sourceAddress_input_word];rfl
@@ -50,7 +48,6 @@ theorem balance_target {E Γ} (G : Source.Glob E) (F : Source.Fr) (s : Source.EM
     Backend.Environment.runSlice (sourceEnvironmentFrame G F (sourceObservedFunds G s)) [.op .BALANCE]
       ⟨environmentWord (addressInputWord address)::tail,memory⟩=
         some ⟨environmentWord (sourceObservedBalance G s address)::tail,memory⟩ := by
-  first | omega | decide | skip
   change some (⟨sourceObservedFunds G s (environmentAddress address)::tail,memory⟩ : Backend.Environment.Slice)=_
   rw [sourceObservedFunds_address]
 
@@ -63,7 +60,6 @@ theorem balance_local {E Γ} (G : Source.Glob E) (F : Source.Fr) (n : Nat) (s : 
     Backend.Environment.runSlice (sourceEnvironmentFrame G F (sourceObservedFunds G s)) [.op .BALANCE]
       ⟨environmentWord (addressInputWord address)::tail,memory⟩=
         some ⟨environmentWord (sourceObservedBalance G s address)::tail,memory⟩ := by
-  first | omega | decide | skip
   exact ⟨sourceBalanceLocal_run G F n s index address localValue,balance_target G F s address tail memory⟩
 
 /-- Actual effectful operand results select the post-operand snapshot. This
@@ -78,7 +74,6 @@ theorem balance_operand {E Γ payable} (G : Source.Glob E) (F : Source.Fr) (n : 
     Backend.Environment.runSlice (sourceEnvironmentFrame G F (sourceObservedFunds G after)) [.op .BALANCE]
       ⟨environmentWord (addressInputWord address)::tail,memory⟩=
         some ⟨environmentWord (sourceObservedBalance G after address)::tail,memory⟩ := by
-  first | omega | decide | skip
   exact ⟨sourceBalanceOperand_run G F n operand s after address actual,balance_target G F after address tail memory⟩
 
 theorem magic_bytes : (magicCode.map Backend.Instr.encode).flatten=[0x42,0x33,0x34] := by decide

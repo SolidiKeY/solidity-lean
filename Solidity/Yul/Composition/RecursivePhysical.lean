@@ -59,12 +59,8 @@ theorem recursive_words : snapshot completed.state =
     [2,2^256-1,2309737967,1025,22136,2^256-1,171*2^248] := by decide +kernel
 theorem normal_return : completed.flow = .normal := FunctionPhysical.normal_flow _
 theorem completed_unique (fuel : Nat) (result : LocalBlockOutcome ctx ⟨false,false⟩)
-    (done : run true fuel = some result) : result=completed := by
-  rcases Nat.le_total fuel 32 with lower | upper
-  · have stable := runLocalBlock_stable ctx (code true) (policy true) _ lower done
-    exact Option.some.inj (stable.symm.trans (Option.some_get completes).symm)
-  · have stable := runLocalBlock_stable ctx (code true) (policy true) _ upper (Option.some_get completes).symm
-    exact Option.some.inj (done.symm.trans stable)
+    (done : run true fuel = some result) : result=completed :=
+  LocalBlockLogic.completed_unique (code true) (policy true) _ done (Option.some_get completes).symm
 theorem physical_retained (fuel : Nat) : (joint fuel).1 = LocalPhysicalControls.firstPhysical := rfl
 theorem joint_completes : (joint 32).2 = .ok (some completed) :=
   congrArg Except.ok (Option.some_get completes).symm

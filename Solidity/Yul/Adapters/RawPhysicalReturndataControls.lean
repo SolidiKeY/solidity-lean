@@ -27,20 +27,17 @@ theorem full_transport (pipeline : Pipeline) :
       World.copyReturndata World.TargetMemory.port entry (frameBytes (stored pipeline))
         (P6ByteMemory.wireWord (area pipeline).offset) source (P6ByteMemory.wireWord (area pipeline).length)=
         some (frameBytes (reached pipeline)) ∧
-      (reached pipeline).st=(stored pipeline).st ∧ (reached pipeline).key=(stored pipeline).key := by
-  first | omega | decide | skip
-  exact transport 33 clean (stored pipeline) (room pipeline) (area pipeline) entry source [255]
+      (reached pipeline).st=(stored pipeline).st ∧ (reached pipeline).key=(stored pipeline).key :=
+  transport 33 clean (stored pipeline) (room pipeline) (area pipeline) entry source [255]
     (window pipeline) (by change 34+1≤2^256;decide)
 
 theorem exact_image (pipeline : Pipeline) :
-    frameBytes (reached pipeline)=Environment.writeBytes (frameBytes (stored pipeline)) 34 [255] := by
-  first | (simp only;done) | decide | omega | rfl | skip
-  exact P6ByteMemory.write_image _ _ _ _
+    frameBytes (reached pipeline)=Environment.writeBytes (frameBytes (stored pipeline)) 34 [255] :=
+  P6ByteMemory.write_image _ _ _ _
 
 theorem byte_and_padding (pipeline : Pipeline) :
     frameBytes (reached pipeline) 34=255 ∧ frameBytes (reached pipeline) 32=0xa5 ∧
     frameBytes (reached pipeline) 191=0xa5 ∧ frameBytes (reached pipeline) 192=0 := by
-  first | (simp only;done) | decide | omega | rfl | skip
   rw [exact_image]
   cases pipeline <;> decide +kernel
 
@@ -73,12 +70,12 @@ theorem empty_boundary :
 /-- Invalid zero-size source bounds do not become a successful physical no-op. -/
 theorem invalid_empty (pipeline : Pipeline) :
     World.copyReturndata World.TargetMemory.port entry (frameBytes (stored pipeline))
-      ⟨34,by decide⟩ ⟨4,by decide⟩ ⟨0,by decide⟩=none := by
-  first | (simp only;done) | decide | omega | rfl | exact World.copyReturndata_bounds _ _ _ _ _ _ (by decide)
+      ⟨34,by decide⟩ ⟨4,by decide⟩ ⟨0,by decide⟩=none :=
+  World.copyReturndata_bounds _ _ _ _ _ _ (by decide)
 
 /-- A valid empty window leaves the physical frame, including metadata, exact. -/
 theorem valid_empty (pipeline : Pipeline) :
     copy (stored pipeline) ⟨lenU 34 (by decide),lenU 0 (by decide),Or.inl rfl⟩ entry
-      ⟨3,by decide⟩ [] rfl=stored pipeline := by
-  first | (simp only;done) | decide | omega | rfl
+      ⟨3,by decide⟩ [] rfl=stored pipeline :=
+  P6ByteMemory.write_empty _ _ _ _ rfl
 end Solidity.Yul.Adapters.RawPhysicalReturndata.Controls

@@ -154,7 +154,32 @@ class SlowExamples(unittest.TestCase):
     def test_slow_partition_and_reverse_imports(self):
         slow = set(imports(ROOT / "SoliditySlowExamples.lean"))
         regular = set(imports(ROOT / "SolidityExamples.lean"))
-        self.assertEqual(15, len(slow))
+        original_slow = {
+            "Solidity.Examples.DecisionAPF",
+            "Solidity.Examples.DecisionBlocks",
+            "Solidity.Examples.DecisionGapCore",
+            "Solidity.Examples.DecisionGapHashes",
+            "Solidity.Examples.DecisionGapKInt",
+            "Solidity.Examples.DecisionGaps",
+            "Solidity.Examples.DecisionLedger",
+            "Solidity.Examples.DecisionOperators",
+            "Solidity.Examples.DecisionRefutations",
+            "Solidity.Examples.DecisionResidue",
+            "Solidity.Examples.DecisionStorageArrays",
+            "Solidity.Examples.DecisionThreeKindCoverage",
+            "Solidity.Examples.Tactics.OpenLoops",
+            "Solidity.Examples.Tactics.OpenLoops.RowsNine",
+            "Solidity.Examples.Tactics.RevertData",
+        }
+        rowsnine_children = {
+            "Solidity.Examples.Tactics.OpenLoops.RowsNine.Checkpoint",
+            "Solidity.Examples.Tactics.OpenLoops.RowsNine.Finish",
+            "Solidity.Examples.Tactics.OpenLoops.RowsNine.Stage1",
+            "Solidity.Examples.Tactics.OpenLoops.RowsNine.Stage2",
+            "Solidity.Examples.Tactics.OpenLoops.RowsNine.Stage3",
+        }
+        self.assertEqual(15, len(slow - rowsnine_children))
+        self.assertEqual(original_slow | rowsnine_children, slow)
         self.assertFalse(slow & regular)
         with (ROOT / "lakefile.toml").open("rb") as file:
             roots = default_roots(tomllib.load(file))

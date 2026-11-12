@@ -18,7 +18,6 @@ def updated (pipeline : Pipeline) := RawFrame.write dirty small (value pipeline)
 def reached (pipeline : Pipeline) := storeHash (stored pipeline) (input pipeline) (destination pipeline) dirty small
 
 theorem input_snapshot (pipeline : Pipeline) : snapshot (stored pipeline) (input pipeline)=[2,0] := by
-  first | omega | decide | skip
   rw [frame_snapshot_read]
   have encoded := frame_bytes 33 dirty (image pipeline) (room pipeline)
   change frameBytes (stored pipeline)=_ at encoded
@@ -26,7 +25,6 @@ theorem input_snapshot (pipeline : Pipeline) : snapshot (stored pipeline) (input
   cases pipeline <;> decide +kernel
 
 theorem input_value (pipeline : Pipeline) : value pipeline=P6ByteMemory.wireWord (Environment.digest [2,0]) := by
-  first | omega | decide | skip
   unfold value hashWord
   rw [input_snapshot]
 
@@ -43,7 +41,6 @@ theorem raw_digest_and_siblings (pipeline : Pipeline) (frame : Environment.Frame
     RawFrame.view (decode 33 dirty (frameBytes (reached pipeline))) small=P6ByteMemory.wireWord (Environment.digest [2,0]) ∧
     RawFrame.view (decode 33 dirty (frameBytes (reached pipeline))) flag=word 2 ∧
     RawFrame.view (decode 33 dirty (frameBytes (reached pipeline))) selector=word (2^255+85) := by
-  first | omega | decide | skip
   rw [(whole pipeline frame []).2.1]
   refine ⟨?_,rfl,rfl⟩
   exact (RawFrame.read_write dirty small _).trans (input_value pipeline)
@@ -53,7 +50,6 @@ theorem source_fields (pipeline : Pipeline) : (updated pipeline).clean=dirty.cle
   ⟨RawFrame.write_clean dirty small (value pipeline),RawFrame.write_world dirty small (value pipeline)⟩
 
 theorem padding (pipeline : Pipeline) : frameBytes (reached pipeline) 191=0xa5 := by
-  first | omega | decide | skip
   dsimp only [reached]
   rw [storeHash_bytes,RawPhysical.store_image]
   change Environment.writeBytes (frameBytes (stored pipeline)) 65 (Source.wordBytes (RawFrame.view (updated pipeline) small)) 191=0xa5
@@ -63,7 +59,6 @@ theorem padding (pipeline : Pipeline) : frameBytes (reached pipeline) 191=0xa5 :
 theorem actual_overlap (pipeline : Pipeline) :
     (input pipeline).offset.val.toNat<(destination pipeline).offset.val.toNat ∧
     (destination pipeline).offset.val.toNat<(input pipeline).offset.val.toNat+(input pipeline).length.val.toNat := by
-  first | omega | decide | skip
   change 64<65 ∧ 65<64+2
   decide
 
@@ -77,7 +72,6 @@ def emptyInput (pipeline : Pipeline) : ByteSpan (stored pipeline).capacity :=
   ⟨lenU (2^256-1) (by decide),lenU 0 (by decide),Or.inl rfl⟩
 theorem empty_hash_input (pipeline : Pipeline) : hashWord (stored pipeline) (emptyInput pipeline)=
     P6ByteMemory.wireWord (Environment.digest []) := by
-  first | omega | decide | skip
   have bytes : snapshot (stored pipeline) (emptyInput pipeline)=[] := by
     rw [frame_snapshot_read]
     rfl
@@ -101,7 +95,6 @@ theorem discriminating_read_accounting (pipeline : Pipeline) :
     (storeHash (extendedStored pipeline) (highInput pipeline) (lowDestination pipeline) dirty small).highWaterWords=8 ∧
     (RawPhysical.store (extendedStored pipeline) (lowDestination pipeline)
       (RawFrame.write dirty small (hashWord (extendedStored pipeline) (highInput pipeline))) small).highWaterWords=6 := by
-  first | omega | decide | skip
   have read := read_high (extendedStored pipeline) (highInput pipeline) (lowDestination pipeline) dirty small
     (by change (1 : Nat)≠0;decide)
   rw [store_high] at read
@@ -120,6 +113,5 @@ theorem wrong_preimage : ([2,0] : List UInt8)≠[0,2] ∧ ([2,0] : List UInt8)�
 theorem code_bytes (pipeline : Pipeline) :
     ((code (destination pipeline).offset).map Backend.Instr.encode).flatten=
       [0x20,0x7f]++Source.beBytes 32 65++[0x52] := by
-  first | omega | decide | skip
   cases pipeline <;> decide +kernel
 end Solidity.Yul.Adapters.RawPhysicalHash.Controls

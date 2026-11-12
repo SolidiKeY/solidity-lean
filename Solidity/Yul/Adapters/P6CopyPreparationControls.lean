@@ -17,17 +17,17 @@ def dst : ByteSpan image.capacity :=
   ⟨lenU 160 (by decide),lenU 32 (by decide),Or.inr (by change 192≤512;decide)⟩
 def reached := P6ByteMemory.copySnapshot image src dst rfl
 
-theorem first_word : mload (frameBytes image) 128=(⟨2^256-1,by decide⟩ : Roadmap.Word) := by
+private theorem nominal_reads : UnchangedControls.nominal.image.Reads (frameBytes image)
+    (UnchangedControls.placement.address 0) := by
   rw [image,FrameHeap.frameOf_bytes]
-  have reads := encodeMixedHeap_reads UnchangedControls.placement UnchangedControls.entries
+  exact encodeMixedHeap_reads UnchangedControls.placement UnchangedControls.entries
     (by decide) residual UnchangedControls.nominal List.mem_cons_self
-  exact reads 0 _ (by rfl)
 
-theorem second_word : mload (frameBytes image) 160=32767 := by
-  rw [image,FrameHeap.frameOf_bytes]
-  have reads := encodeMixedHeap_reads UnchangedControls.placement UnchangedControls.entries
-    (by decide) residual UnchangedControls.nominal List.mem_cons_self
-  exact reads 1 _ (by rfl)
+theorem first_word : mload (frameBytes image) 128=(⟨2^256-1,by decide⟩ : Roadmap.Word) :=
+  nominal_reads 0 _ (by rfl)
+
+theorem second_word : mload (frameBytes image) 160=32767 :=
+  nominal_reads 1 _ (by rfl)
 
 theorem copied_words (i : Fin 2) :
     mload (frameBytes reached) (128+i.val*32)=(⟨2^256-1,by decide⟩ : Roadmap.Word) := by

@@ -33,7 +33,6 @@ def sink (pipeline : Pipeline) : WordSpan (image pipeline).capacity :=
   ⟨lenU 256 (by decide),by change 256+32≤384;decide⟩
 def reached (pipeline : Pipeline) := store32 (image pipeline) (sink pipeline) (lenU 288 (by decide))
 theorem new_image (pipeline : Pipeline) : frameBytes (reached pipeline)=patched := by
-  first | omega | decide | skip
   dsimp only [reached]
   rw [store_image (image pipeline) (sink pipeline) (⟨288,by decide⟩:Roadmap.Word),initial_image]
   rfl
@@ -51,7 +50,6 @@ theorem source_and_target (pipeline : Pipeline) (G : Source.Glob E) (n : Nat)
       ⟨(sink pipeline).offset::lenU 288 (by decide)::tail,frameBytes (image pipeline)⟩=
         some ⟨tail,frameBytes (reached pipeline)⟩ ∧
     (reached pipeline).st=(carrier pipeline).st ∧ (reached pipeline).key=(carrier pipeline).key := by
-  first | omega | decide | skip
   have target := frame_store32_target (image pipeline) (sink pipeline) (lenU 288 (by decide)) tail
   change _=some (⟨tail,frameBytes (reached pipeline)⟩ : Solidity.Backend.Environment.Slice) ∧
     (reached pipeline).st=(image pipeline).st ∧ (reached pipeline).key=(image pipeline).key at target
@@ -63,14 +61,10 @@ theorem source_and_target (pipeline : Pipeline) (G : Source.Glob E) (n : Nat)
 theorem alias_read : (Source.readLoc (E:=E) F (.mem (τ:=.bytes .memory) 2 0)).run next=(.ok (.memRef rfl 3),next) := rfl
 
 theorem stored_pointer (pipeline : Pipeline) : mload (frameBytes (reached pipeline)) 256=288 := by
-  first | omega | decide | skip
-  rw [new_image]
-  exact mload_mstore _ _ _
+  rw [new_image];exact mload_mstore _ _ _
 
 theorem unknown_tail (pipeline : Pipeline) : frameBytes (reached pipeline) 383=99 := by
-  first | omega | decide | skip
-  rw [new_image]
-  exact ArrayWordHeap.Controls.unknown_tail
+  rw [new_image];exact ArrayWordHeap.Controls.unknown_tail
 
 theorem interior_not_pointer : decodeMemoryPointer q (generatedHeapEntries q) (.bytes .memory) rfl 289=none :=
   AllocationPointer.Controls.interior_none

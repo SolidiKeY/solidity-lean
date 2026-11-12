@@ -2457,6 +2457,7 @@ import Solidity.Correctness.Lowering.Unchecked.PowerV2Arithmetic
 import Solidity.Correctness.Lowering.Unchecked.RawOne
 import Solidity.Correctness.Lowering.Unchecked.Relation
 import Solidity.Correctness.Lowering.Unchecked.SourceOne
+import Solidity.Correctness.Lowering.Unchecked.SourceSpelling
 import Solidity.Correctness.Lowering.Unchecked.UpdateArithmetic
 import Solidity.Correctness.Lowering.Unchecked.VersionedPowerWitness
 import Solidity.Correctness.Lowering.Unchecked.WordAssociation
