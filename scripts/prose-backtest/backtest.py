@@ -330,15 +330,19 @@ def measure_commit(repo, analyzer, commit, estimate, verified=None):
     entries = repo.tree(commit)
     byp = {p: (m, k, s) for m, k, s, p in entries}
     legacy_error = None
+    registry_error = None
     modules = set()
     for root in REGISTRY_ROOTS:
         if root in byp:
+            if byp[root][1] != "blob" or byp[root][0] not in ("100644", "100755"):
+                registry_error = registry_error or f"unsupported registry root {root}"
             try:
                 for line in text_of(repo.blob(byp[root][2])).splitlines():
                     if token := CHECK._IMPORT.fullmatch(line):
                         modules.add(token[1])
             except UnicodeDecodeError:
                 legacy_error = "undecodable registry root " + root
+                registry_error = registry_error or legacy_error
     modules = frozenset(modules)
     legacy, legacy_v1_pids = {}, {}
     norm, code = {}, {}
@@ -431,6 +435,7 @@ def measure_commit(repo, analyzer, commit, estimate, verified=None):
         "v2": v2, "v2_code": v2_code, "v2_excluded": v2_excluded,
         "v2_errors": {a: sorted(e) for a, e in sorted(v2_errors.items())},
         "v2_commit_error": None if has_docs and has_sol else "missing source directory",
+        "v2_registry_error": registry_error,
     }
 
 
@@ -960,9 +965,9 @@ def v2_calibrate(args):
         for commit in commits:
             if commit not in measured:
                 m = measure_commit(repo, analyzer, commit, None, verified)
-                if m["v2_commit_error"] or m["v2_errors"]:
+                if measurement_errors(m):
                     raise SystemExit(f"BLOCKER: incomplete measurement at lookback commit {commit}: "
-                                     f"{m['v2_commit_error'] or m['v2_errors']}; no coefficient "
+                                     f"{measurement_errors(m)}; no coefficient "
                                      "is derived from it")
                 measured[commit] = (m["v2"], m["v2_code"], len(m["exclusions"]) + len(m["unknown"]))
         counts, codes, _ = measured[anchor["commit"]]
@@ -1084,13 +1089,42 @@ def _classify(prior_status, ever_failed):
     return "reintroduced" if ever_failed else "introduced"
 
 
+def measurement_errors(m):
+    """Every v2 measurement error of one commit, or None."""
+    out = {}
+    if m["v2_commit_error"]:
+        out["commit"] = m["v2_commit_error"]
+    if m["v2_registry_error"]:
+        out["registry"] = m["v2_registry_error"]
+    if m["v2_errors"]:
+        out["areas"] = m["v2_errors"]
+    return out or None
+
+
+def row_error(m, area, source, metric):
+    """Why a row cannot be scored: its own area, its denominator's areas, or the registry."""
+    reasons = [m["v2_commit_error"]] if m["v2_commit_error"] else []
+    reasons += m["v2_errors"].get(area, [])
+    if source == "self":
+        deps = []
+    elif source == "repository-solidity":
+        deps = [a for a in m["v2_errors"] if a.startswith("Solidity/")]
+    else:
+        deps = list(source)
+    for dep in sorted(set(deps) - {area}):
+        reasons += [f"denominator area {dep}: {e}" for e in m["v2_errors"].get(dep, [])]
+    if metric == "process_ids" and area.startswith("Solidity/") and m["v2_registry_error"]:
+        reasons.append(m["v2_registry_error"])
+    return "; ".join(reasons) or None
+
+
 def v2_rows(commit, m, policy, prev, prev_codes):
     """One commit's v2 rows (every policy area and every measured area, all metrics)."""
     cal = policy["calibration"]
     mapping = policy["specification"]["denominator_mapping"]
     codes = m["v2_code"]
     rows = []
-    for area in sorted(set(m["v2"]) | set(cal)):
+    for area in sorted(set(m["v2"]) | set(cal) | set(m["v2_errors"])):
         entry_area = cal.get(area)
         d, source = denominator(area, codes, mapping) if area in mapping else \
             denominator(area, codes, {area: default_source(area)})
@@ -1102,7 +1136,7 @@ def v2_rows(commit, m, policy, prev, prev_codes):
             if p is None and prev is not None:
                 p = {"numerator": 0, "denominator": denominator(
                     area, prev_codes, {area: mapping.get(area, default_source(area))})[0]}
-            error = m["v2_commit_error"] or "; ".join(m["v2_errors"].get(area, [])) or None
+            error = row_error(m, area, mapping.get(area, default_source(area)), metric)
             rows.append({
                 "unavailable_reason": error,
                 "commit": commit, "area": area, "metric": metric, "present": area in m["v2"],
@@ -1219,7 +1253,7 @@ def v2_replay(args):
             "in_window": in_window, "position": pos,
             "v2_fail_cells": sum(1 for r in crow if r["status"] == "fail"),
             "v2_unavailable_cells": sum(1 for r in crow if r["status"] == "unavailable"),
-            "measurement_errors": m["v2_commit_error"] or m["v2_errors"] or None,
+            "measurement_errors": measurement_errors(m),
             "v2_fail_cells_enforced": sum(1 for r in crow if r["status"] == "fail" and r["enforced_in_proposal"]),
             "verified_generated_excluded": m["v2_excluded"],
             "generation_claims_counted_as_handwritten": len(m["exclusions"]) + len(m["unknown"]),
@@ -1293,7 +1327,7 @@ def v2_evaluate(args):
            "areas_outside_policy": sorted(set(m["v2"]) - set(policy["calibration"])),
            "fail_cells": sum(1 for r in rows if r["status"] == "fail"),
            "unavailable_cells": sum(1 for r in rows if r["status"] == "unavailable"),
-           "measurement_errors": m["v2_commit_error"] or m["v2_errors"] or None,
+           "measurement_errors": measurement_errors(m),
            "fail_cells_enforced": sum(1 for r in rows if r["status"] == "fail" and r["enforced_in_proposal"]),
            "rows": rows}
     if hashlib.sha256(Path(args.policy).read_bytes()).hexdigest() != out["policy_sha256"]:

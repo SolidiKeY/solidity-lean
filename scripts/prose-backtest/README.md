@@ -54,7 +54,11 @@ input. Without `--pb1-replay`, the legacy and pb1 totals are omitted and marked
 unavailable; they are never reported as zero.
 
 An area holding an undecodable file, or a symlink or submodule in reach, is marked
-**unavailable** at that commit with its reason. It is never scored as zero prose.
+**unavailable** at that commit with its reason. It is never scored as zero prose and is
+never dropped, even when it holds nothing else. The mark spreads to rows whose
+denominator includes that area: every docs row when any Solidity area is affected.
+An unreadable or non-regular registry root makes the Solidity process-ID rows
+unavailable. A commit missing `docs/` or `Solidity/` makes every row unavailable.
 Calibration refuses any lookback that contains such a measurement. The replayed history
 has none: 0 unavailable cells, and recalibration reproduces the policy byte for byte.
 

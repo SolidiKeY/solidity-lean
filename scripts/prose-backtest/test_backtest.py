@@ -581,11 +581,21 @@ class V2History(GitCase):
         policy = self.v2_calibrate(c["e1"])
         bad = self.h.commit(T0 + 8 * DAY, {"docs/fresh/b.md": b"\xff\xfe\n"})   # new area, unreadable
         (self.h.root / "Solidity/Core/L.lean").symlink_to("A.lean")   # a symlink in reach
+        (self.h.root / "Solidity/Link").mkdir()
+        (self.h.root / "Solidity/Link/M.lean").symlink_to("../Core/A.lean")  # area with only a link
         link = self.h.commit(T0 + 9 * DAY, {})
         out = self.v2_replay(link, policy, name="bad.json")
         rows = {(r["commit"], r["area"], r["metric"]): r for r in out["rows"]}
         self.assertEqual(rows[(bad, "docs/fresh", "docs_lines")]["status"], "unavailable")
         self.assertEqual(rows[(link, "Solidity/Core", "comment_lines")]["status"], "unavailable")
+        # an area holding only an unsupported entry still gets (unavailable) rows
+        self.assertEqual([rows[(link, "Solidity/Link", m)]["status"] for m in bt.METRICS],
+                         ["unavailable"] * 4)
+        # docs rows divide by all Solidity code, which is incomplete here
+        g = rows[(link, "docs/guide", "docs_lines")]
+        self.assertEqual(g["status"], "unavailable")
+        self.assertIn("denominator area Solidity/Core", g["unavailable_reason"])
+        self.assertEqual(rows[(bad, "docs/guide", "docs_lines")]["status"], "fail")  # Solidity complete
         self.assertNotIn(bad, [f["commit"] for f in out["failure_index"] if f["area"] == "docs/fresh"])
         summary = {s["commit"]: s for s in out["commits"]}
         self.assertEqual(summary[bad]["v2_unavailable_cells"], 4)
@@ -595,6 +605,26 @@ class V2History(GitCase):
         # the anchor (where docs/fresh first appears) is unmeasurable: no coefficients
         with self.assertRaises(SystemExit):
             self.v2_calibrate(bad, name="refused.json")
+
+    def test_unreadable_registry_root_blocks_process_ids(self):
+        h = self.h
+        files = {"Solidity/Core/P.lean": "import Solidity.G7.Mod\n-- H3\ndef q := 1\n",
+                 "docs/a.md": "a\n"}
+        h.commit(T0, files | {"Solidity.lean": "import Solidity.G7.Mod\n"})
+        bad = h.commit(T0 + DAY, {"Solidity.lean": b"import Solidity.G7.Mod\n\xff\n",
+                                  "docs/new/x.md": "x\n"})          # new area: this is the anchor
+        repo = bt.Repo(h.root)
+        m = bt.measure_commit(repo, bt.Analyzer(repo), bad, None, [])
+        repo.close()
+        self.assertEqual(m["v2_registry_error"], "undecodable registry root Solidity.lean")
+        policy = {"calibration": {}, "specification": {"denominator_mapping": {},
+                                                       "enforcement_exclusions": {}}}
+        rows = {(r["area"], r["metric"]): r for r in bt.v2_rows(bad, m, policy, None, None)}
+        self.assertEqual(rows[("Solidity/Core", "process_ids")]["status"], "unavailable")
+        self.assertEqual(rows[("Solidity/Core", "comment_lines")]["status"], "fail")   # still scored
+        self.assertEqual(rows[("docs/_root", "process_ids")]["status"], "pass")
+        with self.assertRaises(SystemExit):
+            self.v2_calibrate(bad, name="reg.json")
 
     def test_output_may_not_overwrite_frozen_inputs(self):
         c = self.build()
