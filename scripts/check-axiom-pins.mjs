@@ -15,9 +15,12 @@
 //
 // Usage: node scripts/check-axiom-pins.mjs [--write]
 // Exit 0 = inventory matches, 1 = drift or a non-standard axiom.
-import { readFileSync, writeFileSync, readdirSync, statSync, existsSync, mkdirSync, rmdirSync, unlinkSync } from "node:fs";
+import { readFileSync, writeFileSync, readdirSync, statSync, lstatSync, existsSync, mkdirSync, unlinkSync } from "node:fs";
 import { join, resolve, dirname } from "node:path";
 import { fileURLToPath } from "node:url";
+import { createHash } from "node:crypto";
+import { execFileSync } from "node:child_process";
+import { isDeepStrictEqual } from "node:util";
 import { blankLean } from "./check-trust.mjs";
 import { loadDriftBaseline, changeKey } from "./axiom-pin-drift-baseline.mjs";
 
@@ -76,31 +79,148 @@ export function compare(found, recorded) {
   return { errors, notes, changes };
 }
 
-// The inventory is generated from one fragment per Lean file,
-// `scripts/g07-axiom-pins.d/<file without .lean>.json`, holding that file's
-// pins (`scripts/coord-tools/fragments.sh`); `--write` rewrites both.
+// Seeded legacy fragments retain their paths/bytes; new sources use neutral hashes.
 export const FRAGMENTS = "scripts/g07-axiom-pins.d";
-export function writeFragments(root, obj) {
-  const parts = new Map();
-  for (const [key, axioms] of Object.entries(obj)) {
-    const i = key.indexOf(".lean:");
-    const f = `${FRAGMENTS}/${key.slice(0, i)}.json`;
-    if (!parts.has(f)) parts.set(f, {});
-    parts.get(f)[key] = axioms;
-  }
-  const dir = join(root, FRAGMENTS);
-  (function prune(d) {
-    if (!existsSync(d)) return;
-    for (const f of readdirSync(d)) {
-      const p = join(d, f);
-      if (statSync(p).isDirectory()) { prune(p); if (!readdirSync(p).length) rmdirSync(p); }
-      else if (!parts.has(p.slice(root.length + 1))) unlinkSync(p);
+export const CANONICAL_FRAGMENTS = "scripts/axiom-pins";
+export const fragmentRoots = [FRAGMENTS, CANONICAL_FRAGMENTS];
+
+export function parseUnique(text, label = "JSON") {
+  const obj = JSON.parse(text); // Validate syntax before scanning decoded object keys.
+  const stack = [];
+  for (const m of text.matchAll(/"(?:\\[\s\S]|[^"\\])*"|[{}\[\]]/gu)) {
+    const t = m[0];
+    if (t === "{") stack.push(new Set());
+    else if (t === "[") stack.push(null);
+    else if (t === "}" || t === "]") stack.pop();
+    else {
+      let next = m.index + t.length;
+      while (next < text.length && /\s/u.test(text[next])) next++;
+      if (text[next] !== ":") continue;
+      const key = JSON.parse(t), keys = stack.at(-1);
+      if (keys.has(key)) throw new Error(`${label}: duplicate key ${key}`);
+      keys.add(key);
     }
-  })(dir);
-  for (const [f, part] of parts) {
-    mkdirSync(dirname(join(root, f)), { recursive: true });
-    writeFileSync(join(root, f), JSON.stringify(part, null, 1) + "\n");
   }
+  return obj;
+}
+
+export function pinSource(key) {
+  const i = key.indexOf(".lean:");
+  const source = key.slice(0, i + 5), name = key.slice(i + 6);
+  if (i <= 0 || !name || /[\\\0\r\n]/u.test(source) ||
+      source.split("/").some(p => !p || p === "." || p === ".."))
+    throw new Error(`malformed pin key: ${key}`);
+  return source;
+}
+
+export function validatePinObject(obj, label = "inventory") {
+  if (!obj || Array.isArray(obj) || typeof obj !== "object") throw new Error(`${label}: not an object`);
+  for (const [key, axioms] of Object.entries(obj)) {
+    pinSource(key);
+    if (!Array.isArray(axioms) || !axioms.every(a => typeof a === "string"))
+      throw new Error(`${label}: invalid axiom list: ${key}`);
+    if (axioms.some(a => !STANDARD.includes(a))) throw new Error(`${label}: non-standard axiom: ${key}`);
+  }
+  return obj;
+}
+
+export function legacyPaths(root, revision = null) {
+  const run = args => execFileSync("git", args, { cwd: root, encoding: "utf8" });
+  const historical = revision && run(["ls-tree", "--name-only", revision, "--", "scripts/hygiene/allow.json"]).trim();
+  // A merge base may predate the policy file that names the immutable seed.
+  // Present historical policy is still parsed strictly; only absence falls back.
+  const raw = historical ? run(["show", `${revision}:scripts/hygiene/allow.json`]) :
+    readFileSync(join(root, "scripts/hygiene/allow.json"), "utf8");
+  const { seed } = parseUnique(raw, "hygiene seed");
+  if (!/^[0-9a-f]{40}$/u.test(seed ?? "")) throw new Error("invalid immutable hygiene seed");
+  return new Set(run(["ls-tree", "-r", "--name-only", "-z", seed, "--", FRAGMENTS]).split("\0").filter(Boolean));
+}
+
+export const sourceDigest = source => createHash("sha256").update(source, "utf8").digest("hex");
+export function fragmentPath(source, eligible, digest = sourceDigest) {
+  const legacy = `${FRAGMENTS}/${source.slice(0, -5)}.json`;
+  return eligible.has(legacy) ? legacy : `${CANONICAL_FRAGMENTS}/${digest(source)}.json`;
+}
+
+export function readFragmentFiles(root) {
+  const files = {};
+  function walk(relative) {
+    const full = join(root, relative);
+    const st = lstatSync(full, { throwIfNoEntry: false });
+    if (!st) return;
+    if (st.isSymbolicLink()) throw new Error(`unexpected symbolic fragment path: ${relative}`);
+    if (st.isDirectory()) for (const name of readdirSync(full).sort()) walk(`${relative}/${name}`);
+    else {
+      if (!relative.endsWith(".json") || !st.isFile()) throw new Error(`unexpected fragment file: ${relative}`);
+      files[relative] = readFileSync(full, "utf8");
+    }
+  }
+  for (const relative of fragmentRoots) {
+    const segments = relative.split("/");
+    for (let i = 1; i < segments.length; i++) {
+      const parent = segments.slice(0, i).join("/");
+      if (lstatSync(join(root, parent), { throwIfNoEntry: false })?.isSymbolicLink())
+        throw new Error(`unexpected symbolic fragment path: ${parent}`);
+    }
+    walk(relative);
+  }
+  return files;
+}
+
+export function validateFragments(files, eligible, digest = sourceDigest) {
+  const parts = {}, merged = {}, owners = new Map();
+  for (const [file, raw] of Object.entries(files)) {
+    if (!fragmentRoots.some(d => file.startsWith(d + "/")) || !file.endsWith(".json"))
+      throw new Error(`unexpected fragment file: ${file}`);
+    const part = validatePinObject(parseUnique(raw, file), file);
+    const sources = new Set();
+    for (const [key, value] of Object.entries(part)) {
+      sources.add(pinSource(key));
+      if (owners.has(key)) throw new Error(`duplicate across fragments: ${key} in ${owners.get(key)} and ${file}`);
+      owners.set(key, file); merged[key] = value;
+    }
+    if (sources.size > 1) throw new Error(`${file}: mixed source fragment`);
+    if (!sources.size && !eligible.has(file)) throw new Error(`${file}: unrecognized empty fragment`);
+    parts[file] = part;
+  }
+  for (const [file, part] of Object.entries(parts)) for (const key of Object.keys(part)) {
+    const expected = fragmentPath(pinSource(key), eligible, digest);
+    if (file !== expected) throw new Error(`wrong fragment: ${key} in ${file}; expected ${expected}`);
+  }
+  return { parts, merged };
+}
+
+export function groupFragments(obj, eligible, digest = sourceDigest) {
+  validatePinObject(obj);
+  const parts = {}, sources = new Map();
+  for (const [key, axioms] of Object.entries(obj)) {
+    const source = pinSource(key), file = fragmentPath(source, eligible, digest);
+    if (sources.has(file) && sources.get(file) !== source) throw new Error(`fragment hash collision: ${file}`);
+    sources.set(file, source); parts[file] ??= {}; parts[file][key] = axioms;
+  }
+  return parts;
+}
+
+export const compactInventory = obj => JSON.stringify(Object.fromEntries(
+  Object.entries(obj).sort(([a], [b]) => a.localeCompare(b)))) + "\n";
+
+export function planFragments(files, obj, eligible, digest = sourceDigest) {
+  const current = validateFragments(files, eligible, digest), parts = groupFragments(obj, eligible, digest);
+  const writes = {};
+  for (const [file, part] of Object.entries(parts)) {
+    if (isDeepStrictEqual(part, current.parts[file])) continue; // Preserve raw legacy bytes.
+    writes[file] = JSON.stringify(Object.fromEntries(Object.entries(part).sort(([a], [b]) => a.localeCompare(b))), null, 1) + "\n";
+  }
+  return { writes, deletes: Object.keys(current.parts).filter(file => !Object.hasOwn(parts, file)) };
+}
+
+export function writeFragments(root, obj) {
+  // Validate the complete old/new state before writing or pruning any file.
+  const plan = planFragments(readFragmentFiles(root), obj, legacyPaths(root));
+  for (const [file, raw] of Object.entries(plan.writes)) {
+    mkdirSync(dirname(join(root, file)), { recursive: true }); writeFileSync(join(root, file), raw);
+  }
+  for (const file of plan.deletes) unlinkSync(join(root, file));
 }
 
 export function collect(root) {
@@ -119,16 +239,33 @@ export function collect(root) {
   return found;
 }
 
-if (process.argv[1] && resolve(process.argv[1]) === fileURLToPath(import.meta.url)) {
+const main = process.argv[1] && resolve(process.argv[1]) === fileURLToPath(import.meta.url);
+// Shared storage validation/planning for the Python fragment generator and census.
+if (main && process.argv.includes("--fragment-op")) {
+  try {
+    const input = parseUnique(readFileSync(0, "utf8"), "fragment request");
+    const root = resolve(input.root);
+    if (input.op === "objects") {
+      for (const obj of input.objects) validatePinObject(obj);
+      process.stdout.write("{}\n");
+    } else {
+      const eligible = legacyPaths(root, input.revision ?? null);
+      const files = input.files ?? readFragmentFiles(root);
+      const result = input.op === "plan" ? planFragments(files, input.desired, eligible) :
+        input.op === "validate" ? validateFragments(files, eligible) : (() => { throw new Error("unknown fragment operation"); })();
+      process.stdout.write(JSON.stringify(result) + "\n");
+    }
+  } catch (error) { console.error(`fragments: ${error.message}`); process.exit(2); }
+} else if (main) {
   const root = resolve(dirname(fileURLToPath(import.meta.url)), "..");
   const found = collect(root);
   const path = join(root, INVENTORY);
   if (process.argv.includes("--write")) {
     const obj = Object.fromEntries([...found].sort(([a], [b]) => a.localeCompare(b)).map(([n, { axioms }]) => [n, axioms]));
-    writeFileSync(path, JSON.stringify(obj, null, 1) + "\n");
     writeFragments(root, obj);
+    writeFileSync(path, compactInventory(obj));
   }
-  const recorded = existsSync(path) ? JSON.parse(readFileSync(path, "utf8")) : {};
+  const recorded = existsSync(path) ? validatePinObject(parseUnique(readFileSync(path, "utf8"), INVENTORY)) : {};
   const { errors, notes, changes } = compare(found, recorded);
   let allowed = new Set();
   try { allowed = loadDriftBaseline(root, STANDARD); }
