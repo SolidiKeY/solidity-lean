@@ -1,5 +1,4 @@
 import Solidity.Goals.Plan
-
 /-! Environment-bound goal-pin specification, additive to `GoalPinSpec` v1.
 The reference observations below describe a finite traversal graph; they are not
 an installed pin checker, command, pin table, workflow, or proof of the goal. -/
@@ -8,7 +7,6 @@ namespace GoalPinSpecV2
 
 open Lean
 open GoalPinSpec
-
 /-- Failures are values. Resource exhaustion never means a successful comparison. -/
 inductive Error where
   | definition (reason : DefinitionError)
@@ -18,25 +16,19 @@ inductive Error where
   | duplicatePin | malformedPin | malformedManifest | unknownGoal
   | missingPin | missingDecision | decisionMismatch | digestMismatch
   deriving DecidableEq
-
-/-- The local telescope is innermost first; its types use the preceding outer
-context. It is distinct from the declaration's universe-parameter context. -/
+/-- The local telescope is innermost first; its types use the preceding outer context. It is distinct from the declaration's universe-parameter context. -/
 inductive Pointwise {A B : Type} (R : A → B → Prop) : List A → List B → Prop where
   | nil : Pointwise R [] []
   | cons : R a b → Pointwise R as bs → Pointwise R (a :: as) (b :: bs)
-
 structure Local where
   type : Expr
   info : BinderInfo
-
 structure Task where
   params : List Lean.Name
   locals : List Local
   active : List Lean.Name
   expression : Expr
-
-/-- Erase only binder spelling and metadata, before inspecting application
-spines. All identities, universe expressions, binder annotations and arguments
+/-- Erase only binder spelling and metadata, before inspecting application spines. All identities, universe expressions, binder annotations and arguments
 remain. In particular, metadata cannot hide the head of a matcher application. -/
 def erase : Expr → Expr
   | .app f a => .app (erase f) (erase a)
@@ -46,11 +38,9 @@ def erase : Expr → Expr
   | .mdata _ e => erase e
   | .proj n i e => .proj n i (erase e)
   | e => e
-
 def close : List Local → Expr → Expr
   | [], e => e
   | l :: ls, e => close ls (.lam .anonymous l.type e l.info)
-
 def universesValid (params : List Lean.Name) : Canonical → Bool
   | .sort level => validLevel params level
   | .const _ levels => levels.all (validLevel params)
@@ -60,7 +50,6 @@ def universesValid (params : List Lean.Name) : Canonical → Bool
   | .proj _ _ target => universesValid params target
   | .unfolded .. => false
   | _ => true
-
 def raw (params : List Lean.Name) (depth : Nat) (e : Expr) : Except Error Canonical := do
   if e.hasFVar then throw .freeVariable
   if e.hasMVar then throw .metavariable
@@ -68,23 +57,18 @@ def raw (params : List Lean.Name) (depth : Nat) (e : Expr) : Except Error Canoni
   if !universesValid params c then throw .invalidUniverse
   if !c.sourceScoped params depth then throw .illScoped
   pure c
-
 def kernelFailure (fallback : Error) : Kernel.Exception → Error
   | .deterministicTimeout | .excessiveMemory => .resource
   | .deepRecursion => .recursion
   | .interrupted => .interrupted
   | _ => fallback
-
-/-- Check the closed telescope with the existing kernel inspector. No supplied
-inference or inspection callback participates in the reference graph. -/
+/-- Check the closed telescope with the existing kernel inspector. No supplied inference or inspection callback participates in the reference graph. -/
 def inferred (env : Environment) (t : Task) : Except Error Expr :=
   match Kernel.check env {} (close t.locals (erase t.expression)) with
   | .ok ty => .ok ty
   | .error err => .error (kernelFailure .illTyped err)
-
-/-- Observe the eventual result of the *instantiated application*, including
-partial applications. Kernel head conversion is used only for classification;
-it does not put computational definition bodies into the canonical input. -/
+/-- Observe the eventual result of the *instantiated application*, including partial applications. Kernel head conversion is used only for classification; it
+does not put computational definition bodies into the canonical input. -/
 def propResult (env : Environment) : Nat → Expr → Except Error Bool
   | 0, _ => .error .resource
   | fuel + 1, ty =>
@@ -93,68 +77,50 @@ def propResult (env : Environment) : Nat → Expr → Except Error Bool
     | .ok (.forallE _ _ body _) => propResult env fuel body
     | .ok (.sort .zero) => .ok true
     | .ok _ => .ok false
-
-/-- A v2 label carries raw v1 rawSyntax plus framed declaration/signature records.
-Tags: 0 rawSyntax, 1 folded constant, 2 definition expansion, 3 Prop signatures,
-4 active recursive reference. Lists are ordered, never treated as sets. -/
+/-- A v2 label carries raw v1 rawSyntax plus framed declaration/signature records. Tags: 0 rawSyntax, 1 folded constant, 2 definition expansion, 3 Prop
+signatures, 4 active recursive reference. Lists are ordered, never treated as sets. -/
 structure Label where
   tag : Nat
   names : List Lean.Name
   numbers : List Nat
   rawSyntax : List Canonical
-
 inductive Tree where
   | node (label : Label) (children : List Tree)
-
 /-- The original occurrence is always retained, including its complete spine. -/
 def label (t : Task) (tag : Nat) (names : List Lean.Name := [])
     (numbers : List Nat := []) (rawSyntax : List Canonical := []) : Except Error Label := do
   let source ← raw t.params t.locals.length (erase t.expression)
   pure ⟨tag, t.params ++ names, t.params.length :: t.locals.length :: numbers, source :: rawSyntax⟩
-
 def template (t : Task) (ci : ConstantInfo) (e : Expr) : Task :=
   ⟨ci.levelParams, [], ci.name :: t.active, e⟩
-
-/-- Fold bodies, but retain and traverse their actual signatures. This covers
-constructor owners and named projection owners even when their proof arguments
-are opaque. Active names prevent cycling through signature references. -/
+/-- Fold bodies, but retain and traverse their actual signatures. This covers constructor owners and named projection owners even when their proof arguments are
+opaque. Active names prevent cycling through signature references. -/
 def folded (t : Task) (ci : ConstantInfo) (args : List Task) : Except Error (Label × List Task) := do
   let ty ← raw ci.levelParams 0 ci.type
   let next := if t.active.contains ci.name then [] else [template t ci ci.type]
   pure (← label t 1 (ci.name :: ci.levelParams) [ci.levelParams.length] [ty], args ++ next)
-
 def peel : Nat → Expr → Except Error Expr
   | 0, ty => .ok ty
   | k + 1, .forallE _ _ body _ => peel k body
   | _, _ => .error .illTyped
-
 structure Signature where
   params : List Lean.Name
   source : Canonical
   original : Task
   instantiated : Task
   requestedIndices : List Canonical
-
 def child (t : Task) (e : Expr) : Task := { t with expression := e }
-
 def argumentTasks (t : Task) (e : Expr) : List Task :=
   e.getAppArgs.toList.map (child t)
-
-/-- Capture-avoiding parameter substitution in a signature telescope. Indices
-remain bound by that signature; the occurrence's actual indices are separately
+/-- Capture-avoiding parameter substitution in a signature telescope. Indices remain bound by that signature; the occurrence's actual indices are separately
 retained in its source spine and argument children. -/
 def instantiateParameters : Expr → List Expr → Expr
   | .forallE _ _ body _, a :: args => instantiateParameters (body.instantiate1 a) args
   | ty, _ => ty
-
-/-- Checked indexed signature representation. Universe and owner parameters
-are instantiated in both kinds. Projection indices are instantiated too.
-Constructor result indices remain expressions under the constructor's own field
-binders; they are paired with the supplied occurrence-index tuple, not solved or
-used to filter constructors. Thus every constructor is inspected, including ones
-whose result indices differ from the current occurrence. The two scopes are
-retained separately by original/instantiated tasks and requestedIndices.
-Implementation bodies, proofs and recursor implementations are absent. -/
+/-- Checked indexed signature representation. Universe and owner parameters are instantiated in both kinds. Projection indices are instantiated too. Constructor
+result indices remain expressions under the constructor's own field binders; they are paired with the supplied occurrence-index tuple, not solved or used to
+filter constructors. Thus every constructor is inspected, including ones whose result indices differ from the current occurrence. The two scopes are
+retained separately by original/instantiated tasks and requestedIndices. Implementation bodies, proofs and recursor implementations are absent. -/
 def signature (env : Environment) (t : Task) (owner : InductiveVal)
     (levels : List Level) (args : List Expr) (n : Lean.Name) : Except Error Signature := do
   let some ci := env.toKernelEnv.find? n | throw (.definition .missing)
@@ -169,9 +135,7 @@ def signature (env : Environment) (t : Task) (owner : InductiveVal)
     (raw t.params t.locals.length)
   pure ⟨ci.levelParams, source, template t ci ci.type,
     { t with expression := instantiated }, indices⟩
-
-/-- Constructor order comes from ConstantInfo; field order comes from the actual
-StructureInfo, not alphabetical order or erased binder names. -/
+/-- Constructor order comes from ConstantInfo; field order comes from the actual StructureInfo, not alphabetical order or erased binder names. -/
 def signatureNames (env : Environment) (d : InductiveVal) : Except Error (List Lean.Name × List Lean.Name) := do
   let mut fields := []
   if let some si := getStructureInfo? env d.name then
@@ -180,12 +144,9 @@ def signatureNames (env : Environment) (d : InductiveVal) : Except Error (List L
         | throw .unsupported
       fields := fields ++ [field, fi.projFn]
   pure (d.ctors, fields)
-
-/-- One independent graph observation. Full spines are classified before their
-head is traversed. In particular the generated Input matcher is classified
-with its actual motive/universes, while compile/run/data bodies stay folded.
-Active names terminate recursive/mutual Prop expansion; references retain the
-actual source application, and the first expansion retains its declaration. -/
+/-- One independent graph observation. Full spines are classified before their head is traversed. In particular the generated Input matcher is classified with
+its actual motive/universes, while compile/run/data bodies stay folded. Active names terminate recursive/mutual Prop expansion; references retain the actual
+source application, and the first expansion retains its declaration. -/
 def step (env : Environment) (fuel : Nat) (t : Task) : Except Error (Label × List Task) := do
   let e := erase t.expression
   let _ ← raw t.params t.locals.length e
@@ -240,16 +201,13 @@ def step (env : Environment) (fuel : Nat) (t : Task) : Except Error (Label × Li
         pure [child t target, child t openType]
       | _ => pure []
     return (← label t 0, children)
-
 /-- Child errors propagate in left-to-right preorder. -/
 def collect : List (Except Error Tree) → Except Error (List Tree)
   | [] => .ok []
   | .error e :: _ => .error e
   | .ok tree :: rest => (collect rest).map (tree :: ·)
-
 mutual
-/-- Finite independent evaluation graph, not an implementation callback.
-Fuel bounds both graph depth and classification telescope traversal. -/
+/-- Finite independent evaluation graph, not an implementation callback. Fuel bounds both graph depth and classification telescope traversal. -/
 inductive Derives (env : Environment) : Nat → Task → Except Error Tree → Prop where
   | exhausted : Derives env 0 t (.error .resource)
   | failed (h : step env fuel t = .error err) :
@@ -262,15 +220,12 @@ inductive Derives (env : Environment) : Nat → Task → Except Error Tree → P
       (children : DerivesList env fuel tasks results)
       (output : collect results = .error err) :
       Derives env (fuel + 1) t (.error err)
-
 inductive DerivesList (env : Environment) : Nat → List Task → List (Except Error Tree) → Prop where
   | nil : DerivesList env fuel [] []
   | cons : Derives env fuel task result → DerivesList env fuel tasks results →
       DerivesList env fuel (task :: tasks) (result :: results)
 end
-
-/-- Root inspection is v1's unchanged actual-kernel-environment inspection.
-A goal must itself be a checked safe definition of Prop. -/
+/-- Root inspection is v1's unchanged actual-kernel-environment inspection. A goal must itself be a checked safe definition of Prop. -/
 def root (env : Environment) (n : Lean.Name) : Except Error (Label × Task) := do
   let d ← (inspectIn env n).mapError Error.definition
   let some (.defnInfo info) := env.toKernelEnv.find? n | throw (.definition .notDefinition)
@@ -278,37 +233,29 @@ def root (env : Environment) (n : Lean.Name) : Except Error (Label × Task) := d
   let source := Canonical.const n (d.levelParams.map Level.param)
   let lab : Label := ⟨5, n :: d.levelParams, [d.levelParams.length, 0], [source, d.type, d.value]⟩
   pure (lab, ⟨d.levelParams, [], [n], info.value⟩)
-
-/-- Root capture is unconditional on namespace: every registered goal is bound
- to its actual definition. Only *transitive* definition unfolding is restricted
- to Solidity Prop families. -/
+/-- Root capture is unconditional on namespace: every registered goal is bound to its actual definition. Only *transitive* definition unfolding is restricted to
+Solidity Prop families. -/
 def RootGraph (env : Environment) (fuel : Nat) (n : Lean.Name) (out : Except Error Tree) : Prop :=
   match root env n with
   | .error err => out = .error err
   | .ok (lab, t) => ∃ body : Except Error Tree,
       Derives env fuel t body ∧ out = body.map (fun tree => .node lab [tree])
-
-/-- Fixed reference support requires finite successful environment observations,
-not a caller predicate or success of the future implementation. Downstream
-integration must exhibit this for *every* required current name; unsupported
-names must be rejected, never omitted from the required coverage. -/
+/-- Fixed reference support requires finite successful environment observations, not a caller predicate or success of the future implementation. Downstream
+integration must exhibit this for *every* required current name; unsupported names must be rejected, never omitted from the required coverage. -/
 def Supported (env : Environment) (n : Lean.Name) : Prop :=
   ∃ fuel tree, RootGraph env fuel n (.ok tree)
 
 namespace EncodingV2
-
 def listOf (encode : A → Option (List Nat)) : List A → Option (List Nat)
   | [] => some [0]
   | a :: rest => do
     let bytes ← encode a
     pure ([1] ++ Encoding.number bytes.length ++ bytes ++ (← listOf encode rest))
-
 def labelBytes (lab : Label) : Option (List Nat) := do
   let names ← listOf (fun n => some (Encoding.name n)) lab.names
   let numbers ← listOf (fun n => some (Encoding.number n)) lab.numbers
   let terms ← listOf (Encoding.term ((lab.numbers[1]?).getD 0)) lab.rawSyntax
   pure (Encoding.number lab.tag ++ names ++ numbers ++ terms)
-
 mutual
   def treeBytes : Tree → Option (List Nat)
     | .node lab children => do
@@ -320,55 +267,39 @@ mutual
       let bytes ← treeBytes tree
       pure ([1] ++ Encoding.number bytes.length ++ bytes ++ (← forestBytes rest))
 end
-
-/-- The v2 version prefix is disjoint from unchanged v1. Nodes, fields,
-constructors, arguments and children retain reference traversal order. -/
+/-- The v2 version prefix is disjoint from unchanged v1. Nodes, fields, constructors, arguments and children retain reference traversal order. -/
 def encode (tree : Tree) : Option (List Nat) :=
   (treeBytes tree).map ([71, 80, 2, 0] ++ ·)
 
 end EncodingV2
-
-/-- Independently authenticated by downstream CI before use. A row binds an
-exact triple to a canonical H-number in a specified historical source document;
-it is not an authorization oracle. Pure laws check syntax and exact agreement,
-not whether a person really approved the historical record. -/
+/-- Independently authenticated by downstream CI before use. A row binds an exact triple to a canonical H-number in a specified historical source document; it
+is not an authorization oracle. Pure laws check syntax and exact agreement, not whether a person really approved the historical record. -/
 structure Authorization where
   pin : Pin
   recordId : String
   sourceDocument : String
-
 structure Manifest where
   sourceRevision : String
   records : List Authorization
-
 def Manifest.WellFormed (m : Manifest) : Prop :=
   m.sourceRevision ≠ "" ∧ (m.records.map (·.pin.goal)).Nodup ∧
   ∀ a ∈ m.records, a.pin.WellFormed ∧ a.recordId = a.pin.decisionId ∧ a.sourceDocument ≠ ""
-
-/-- Agreement is with an independent manifest, never an entry compared with
-itself. H0 is neither specially excluded nor treated as authenticated history. -/
+/-- Agreement is with an independent manifest, never an entry compared with itself. H0 is neither specially excluded nor treated as authenticated history. -/
 def AuthorizedTriples (m : Manifest) (pins : List Pin) : Prop :=
   ∀ p ∈ pins, ∃ a ∈ m.records, a.pin = p
-
-/-- Required names are observations of v1.required; there is no list-valued
-coverage argument on the current-environment entry point. -/
+/-- Required names are observations of v1.required; there is no list-valued coverage argument on the current-environment entry point. -/
 structure Snapshot where
   env : Environment
   requiredNames : List Lean.Name
-
 def registryNames (s : Snapshot) : List Lean.Name :=
   (Solidity.Goal.goalExt.getState s.env).toList.map (·.decl)
-
-/-- Read the actual imported environment and unchanged roadmap classifier.
-All duplicate/finish-shape/dependency/status errors from v1 are preserved.
-This action cannot establish that every goal module has been imported. -/
+/-- Read the actual imported environment and unchanged roadmap classifier. All duplicate/finish-shape/dependency/status errors from v1 are preserved. This
+action cannot establish that every goal module has been imported. -/
 def readSnapshot : MetaM (Except Error Snapshot) := do
   let env ← getEnv
   let names ← withEnv env GoalPinSpec.required
   pure (names.mapError Error.coverage |>.map fun ns => ⟨env, ns⟩)
-
-/-- An actual execution of the fixed capture route, from the same environment.
-No caller-supplied inspection action or coverage list is quantified here. -/
+/-- An actual execution of the fixed capture route, from the same environment. No caller-supplied inspection action or coverage list is quantified here. -/
 def ObservedSnapshot (s : Snapshot) : Prop :=
   ∃ (mc : Lean.Meta.Context) (ms : Lean.Meta.State)
     (cc : Lean.Core.Context) (cs post : Lean.Core.State)
@@ -376,10 +307,7 @@ def ObservedSnapshot (s : Snapshot) : Prop :=
     cs.env = s.env ∧
     ((readSnapshot.run' mc ms).run cc cs) world =
       EStateM.Result.ok (.ok s, post) nextWorld
-
-
-/-- Fixed precedence for independent structural/triple failures. The source
-checker must reject identical repeats as duplicates too. -/
+/-- Fixed precedence for independent structural/triple failures. The source checker must reject identical repeats as duplicates too. -/
 def issues (s : Snapshot) (m : Manifest) (pins : List Pin) : List (Error × Prop) :=
   [(.duplicatePin, ¬ Unique pins),
    (.malformedPin, ∃ p ∈ pins, ¬ p.WellFormed),
@@ -388,25 +316,18 @@ def issues (s : Snapshot) (m : Manifest) (pins : List Pin) : List (Error × Prop
    (.missingPin, ¬ Covers s.requiredNames pins),
    (.missingDecision, ∃ p ∈ pins, ¬ ∃ a ∈ m.records, a.pin.goal = p.goal),
    (.decisionMismatch, ¬ AuthorizedTriples m pins)]
-
 inductive FirstIssue : List (Error × Prop) → Error → Prop where
   | here : condition → FirstIssue ((err, condition) :: rest) err
   | later : ¬ condition → FirstIssue rest err → FirstIssue ((other, condition) :: rest) err
-
 def Clean (s : Snapshot) (m : Manifest) (pins : List Pin) : Prop :=
   ∀ issue ∈ issues s m pins, ¬ issue.2
-
 def Encodable (trees : List Tree) : Prop :=
   ∀ tree ∈ trees, ∃ bytes, EncodingV2.encode tree = some bytes
-
-/-- SHA-256 is the existing hash, not an injectivity axiom. Neither logical
- equivalence nor an equal hash by itself identifies canonical input syntax. -/
+/-- SHA-256 is the existing hash, not an injectivity axiom. Neither logical equivalence nor an equal hash by itself identifies canonical input syntax. -/
 def Matches : List Pin → List Tree → Prop :=
   Pointwise fun pin tree => ∃ bytes,
     EncodingV2.encode tree = some bytes ∧ pin.digest = Solidity.Hashes.sha256 bytes
-
-/-- Checking recomputes every committed entry; Covers makes this include every
-required name, without silently dropping unsupported finish/components/proved
+/-- Checking recomputes every committed entry; Covers makes this include every required name, without silently dropping unsupported finish/components/proved
 goals. Optional registered open goals can be pinned without being proved. -/
 inductive CheckGraph (s : Snapshot) (m : Manifest) (pins : List Pin)
     (fuel : Nat) : Except Error Unit → Prop where
@@ -426,36 +347,26 @@ inductive CheckGraph (s : Snapshot) (m : Manifest) (pins : List Pin)
       Pointwise (fun p => RootGraph s.env fuel p.goal) pins outputs →
       collect outputs = .ok trees → Matches pins trees →
       CheckGraph s m pins fuel (.ok ())
-
-/-- Correct pins are characterized by independent actual-environment graphs,
-encoding and manifest agreement, not by the candidate checker's answers. -/
+/-- Correct pins are characterized by independent actual-environment graphs, encoding and manifest agreement, not by the candidate checker's answers. -/
 def CorrectPins (s : Snapshot) (m : Manifest) (pins : List Pin) : Prop :=
   Clean s m pins ∧ ∀ p ∈ pins, ∃ fuel tree bytes,
     RootGraph s.env fuel p.goal (.ok tree) ∧ EncodingV2.encode tree = some bytes ∧
     p.digest = Solidity.Hashes.sha256 bytes
-
-/-- Parsed source rows retain the decision identifier spelling. The scripts'
-byte/file parser must produce these exact rows or reject malformed file syntax;
+/-- Parsed source rows retain the decision identifier spelling. The scripts' byte/file parser must produce these exact rows or reject malformed file syntax;
 that external parser cannot silently repair a digest or decision identifier. -/
 structure RawPin where
   goal : Lean.Name
   digest : List Nat
   decisionId : String
-
 def RowOf (row : RawPin) (pin : Pin) : Prop :=
   row.goal = pin.goal ∧ row.digest = pin.digest ∧ row.decisionId = pin.decisionId ∧ pin.WellFormed
-
-/-- A canonical H<n> string and 32-byte digest are required; any other spelling
-or byte range is rejected. Duplicates are retained for CheckGraph to reject. -/
+/-- A canonical H<n> string and 32-byte digest are required; any other spelling or byte range is rejected. Duplicates are retained for CheckGraph to reject. -/
 inductive DecodeGraph (rows : List RawPin) : Except Error (List Pin) → Prop where
   | success : Pointwise RowOf rows pins → DecodeGraph rows (.ok pins)
   | malformed : (∃ row ∈ rows, ¬ ∃ pin, RowOf row pin) →
       DecodeGraph rows (.error .malformedPin)
-
-/-- Required implementation signatures. The future implementation has a direct
-executable refinement route: recurse on fuel and the finite task list using
-step/collect; implement finite manifest/pin comparisons; bind current to the
-fixed readSnapshot action. No classical selection of a sound callback suffices.
+/-- Required implementation signatures. The future implementation has a direct executable refinement route: recurse on fuel and the finite task list using
+step/collect; implement finite manifest/pin comparisons; bind current to the fixed readSnapshot action. No classical selection of a sound callback suffices.
 No implementation or proof is supplied in this prerequisite. -/
 structure Operations where
   decode : List RawPin → Except Error (List Pin)
@@ -463,9 +374,7 @@ structure Operations where
   recompute : Environment → Nat → Lean.Name → Except Error Tree
   check : Snapshot → Nat → Manifest → List Pin → Except Error Unit
   current : Nat → Manifest → List Pin → MetaM (Except Error Unit)
-
-/-- The entire success and error graphs are fixed independently. In particular,
-reject-all, ignoring committed pins, or accepting a pin's own decision as its
+/-- The entire success and error graphs are fixed independently. In particular, reject-all, ignoring committed pins, or accepting a pin's own decision as its
 authorization cannot satisfy the positive refinement/completeness laws. -/
 structure Laws (ops : Operations) : Prop where
   decode_exact : ∀ rows output, ops.decode rows = output ↔ DecodeGraph rows output
@@ -499,22 +408,17 @@ structure Laws (ops : Operations) : Prop where
     EncodingV2.encode a = some bytesA → EncodingV2.encode b = some bytesB →
     CollisionFreeOn bytesA bytesB →
     Solidity.Hashes.sha256 bytesA = Solidity.Hashes.sha256 bytesB → bytesA = bytesB
-
 inductive Subtree : Tree → Tree → Prop where
   | root : Subtree tree tree
   | descend {inner sub : Tree} {children : List Tree} {lab : Label} :
       inner ∈ children → Subtree sub inner → Subtree sub (.node lab children)
-
 /-- A signature/expansion record for this exact declaration identity. -/
 def HasRecord (tree : Tree) (tag : Nat) (name : Lean.Name) : Prop :=
   ∃ lab children, Subtree (.node lab children) tree ∧ lab.tag = tag ∧
     lab.names[(lab.numbers[0]?).getD 0]? = some name
-
-/-- A mandatory *positive* downstream integration gate, separate from universal
-pure laws. The runner must obtain s from readSnapshot, load the complete registry
-outward, and exhibit successful reference support for every required identity.
-This is required acceptance evidence, not a support assumption used to prove
-Laws or a claim that current support has already been checked here. -/
+/-- A mandatory *positive* downstream integration gate, separate from universal pure laws. The runner must obtain s from readSnapshot, load the complete
+registry outward, and exhibit successful reference support for every required identity. This is required acceptance evidence, not a support assumption used
+to prove Laws or a claim that current support has already been checked here. -/
 def IntegrationAcceptance (ops : Operations) (s : Snapshot) (m : Manifest)
     (pins : List Pin) (fuel : Nat) : Prop :=
   ObservedSnapshot s ∧
@@ -529,9 +433,7 @@ def IntegrationAcceptance (ops : Operations) (s : Snapshot) (m : Manifest)
     ¬ HasRecord tree 2 `Solidity.Evm.Compiler.compile ∧
     ¬ HasRecord tree 2 `Solidity.Evm.run ∧
     ¬ HasRecord tree 3 `Solidity.Evm.Compiler.Compilation
-
 /-! Mandatory future operational acceptance (not facts established by Laws).
-
 * The downstream integration runner must use Operations.current/readSnapshot,
   import the complete generated Goals registry and completed Goals.Pins outward,
   and produce IntegrationAcceptance on correct committed pins. No required name,
@@ -557,7 +459,6 @@ def IntegrationAcceptance (ops : Operations) (s : Snapshot) (m : Manifest)
 * A hash match only compares SHA-256 results. Any inference to encoded-input
   equality requires CollisionFreeOn for that pair. Logical equivalence neither
   implies canonical equality nor independently authorizes a pin change.
-
 The future Tools.GoalPins imports this specification and realizes Operations.
 Goals.Pins imports both and proves Solidity.GoalPins.correct by constructing that
 realizer and Laws; Examples.Goals.Pins performs the outward integration gates.
@@ -569,9 +470,7 @@ work; this prerequisite's separate example deliberately keeps the goal open.
 end GoalPinSpecV2
 
 open Solidity.Goal
-
-/-- Environment-bound statement-pin recomputation and exact committed checking.
-The witness must refine the independent graphs with positive completeness;
+/-- Environment-bound statement-pin recomputation and exact committed checking. The witness must refine the independent graphs with positive completeness;
 operational acceptance additionally requires the integration gates above. -/
 @[goal Solidity.GoalPins.correct "gp-goal-pins"]
 def goalPinsCorrect : Prop := ∃ ops : GoalPinSpecV2.Operations, GoalPinSpecV2.Laws ops
