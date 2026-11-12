@@ -167,6 +167,838 @@
     "docstring_lines": 1149,
     "process_ids": 3
   },
+  "_calibrated_candidate": {
+    "activation_requirements": [
+      "universal calibrated Laws",
+      "actual-checker ImplementationCorrespondence and independent raw-byte bindings",
+      "independent generator reproduction before exclusions",
+      "margin-policy and residual-failure disposition without hand raises",
+      "frozen held-out evidence",
+      "green prose-budget CI on exact merged head",
+      "inherited provenance remains UNVERIFIABLE"
+    ],
+    "active": false,
+    "areas": {
+      "Solidity/Automation": {
+        "comment_lines": {
+          "margin": "0",
+          "ratio": "14/19"
+        },
+        "docs_lines": {
+          "margin": "0",
+          "ratio": "0"
+        },
+        "docstring_lines": {
+          "margin": "0",
+          "ratio": "14/19"
+        },
+        "process_ids": {
+          "margin": "0",
+          "ratio": "4/19"
+        }
+      },
+      "Solidity/Backend": {
+        "comment_lines": {
+          "margin": "709442792/226789",
+          "ratio": "28527/226789"
+        },
+        "docs_lines": {
+          "margin": "0",
+          "ratio": "0"
+        },
+        "docstring_lines": {
+          "margin": "704365428/226789",
+          "ratio": "28469/226789"
+        },
+        "process_ids": {
+          "margin": "48105368/226789",
+          "ratio": "1208/226789"
+        }
+      },
+      "Solidity/Calculus": {
+        "comment_lines": {
+          "margin": "7851730/65411",
+          "ratio": "22861/130822"
+        },
+        "docs_lines": {
+          "margin": "0",
+          "ratio": "0"
+        },
+        "docstring_lines": {
+          "margin": "5269589/65411",
+          "ratio": "11002/65411"
+        },
+        "process_ids": {
+          "margin": "182168/65411",
+          "ratio": "28/65411"
+        }
+      },
+      "Solidity/Corpus": {
+        "comment_lines": {
+          "margin": "0",
+          "ratio": "381/802"
+        },
+        "docs_lines": {
+          "margin": "0",
+          "ratio": "0"
+        },
+        "docstring_lines": {
+          "margin": "0",
+          "ratio": "571/1203"
+        },
+        "process_ids": {
+          "margin": "0",
+          "ratio": "0"
+        }
+      },
+      "Solidity/Correctness": {
+        "comment_lines": {
+          "margin": "0",
+          "ratio": "14/25"
+        },
+        "docs_lines": {
+          "margin": "0",
+          "ratio": "0"
+        },
+        "docstring_lines": {
+          "margin": "0",
+          "ratio": "14/25"
+        },
+        "process_ids": {
+          "margin": "0",
+          "ratio": "13/300"
+        }
+      },
+      "Solidity/Counterexamples": {
+        "comment_lines": {
+          "margin": "0",
+          "ratio": "97/90"
+        },
+        "docs_lines": {
+          "margin": "0",
+          "ratio": "0"
+        },
+        "docstring_lines": {
+          "margin": "0",
+          "ratio": "29/30"
+        },
+        "process_ids": {
+          "margin": "0",
+          "ratio": "0"
+        }
+      },
+      "Solidity/Evm": {
+        "comment_lines": {
+          "margin": "0",
+          "ratio": "1894/18879"
+        },
+        "docs_lines": {
+          "margin": "0",
+          "ratio": "0"
+        },
+        "docstring_lines": {
+          "margin": "0",
+          "ratio": "1867/18879"
+        },
+        "process_ids": {
+          "margin": "165/12586",
+          "ratio": "3/12586"
+        }
+      },
+      "Solidity/Examples": {
+        "comment_lines": {
+          "margin": "51226109/38301",
+          "ratio": "16187/38301"
+        },
+        "docs_lines": {
+          "margin": "0",
+          "ratio": "0"
+        },
+        "docstring_lines": {
+          "margin": "16076413/12767",
+          "ratio": "5204/12767"
+        },
+        "process_ids": {
+          "margin": "72431/38301",
+          "ratio": "19/38301"
+        }
+      },
+      "Solidity/Frontend": {
+        "comment_lines": {
+          "margin": "113845447/84862",
+          "ratio": "9217/84862"
+        },
+        "docs_lines": {
+          "margin": "0",
+          "ratio": "0"
+        },
+        "docstring_lines": {
+          "margin": "41701525/42431",
+          "ratio": "8451/84862"
+        },
+        "process_ids": {
+          "margin": "6126543/84862",
+          "ratio": "171/84862"
+        }
+      },
+      "Solidity/Goals": {
+        "comment_lines": {
+          "margin": "0",
+          "ratio": "16/97"
+        },
+        "docs_lines": {
+          "margin": "0",
+          "ratio": "0"
+        },
+        "docstring_lines": {
+          "margin": "0",
+          "ratio": "16/97"
+        },
+        "process_ids": {
+          "margin": "0",
+          "ratio": "1/97"
+        }
+      },
+      "Solidity/Hash": {
+        "comment_lines": {
+          "margin": "0",
+          "ratio": "371/1649"
+        },
+        "docs_lines": {
+          "margin": "0",
+          "ratio": "0"
+        },
+        "docstring_lines": {
+          "margin": "0",
+          "ratio": "371/1649"
+        },
+        "process_ids": {
+          "margin": "0",
+          "ratio": "5/1649"
+        }
+      },
+      "Solidity/Language": {
+        "comment_lines": {
+          "margin": "12431/192",
+          "ratio": "419/2304"
+        },
+        "docs_lines": {
+          "margin": "0",
+          "ratio": "0"
+        },
+        "docstring_lines": {
+          "margin": "24529/384",
+          "ratio": "829/4608"
+        },
+        "process_ids": {
+          "margin": "11/576",
+          "ratio": "1/576"
+        }
+      },
+      "Solidity/Lowering": {
+        "comment_lines": {
+          "margin": "149529/448",
+          "ratio": "215/1792"
+        },
+        "docs_lines": {
+          "margin": "0",
+          "ratio": "0"
+        },
+        "docstring_lines": {
+          "margin": "1162995/3584",
+          "ratio": "1693/14336"
+        },
+        "process_ids": {
+          "margin": "0",
+          "ratio": "39/7168"
+        }
+      },
+      "Solidity/Optimizer": {
+        "comment_lines": {
+          "margin": "19903/489",
+          "ratio": "709/5379"
+        },
+        "docs_lines": {
+          "margin": "0",
+          "ratio": "0"
+        },
+        "docstring_lines": {
+          "margin": "19931/489",
+          "ratio": "707/5379"
+        },
+        "process_ids": {
+          "margin": "478/489",
+          "ratio": "1/5379"
+        }
+      },
+      "Solidity/Precompiles": {
+        "comment_lines": {
+          "margin": "3560/1313",
+          "ratio": "443/1313"
+        },
+        "docs_lines": {
+          "margin": "0",
+          "ratio": "0"
+        },
+        "docstring_lines": {
+          "margin": "3516/1313",
+          "ratio": "439/1313"
+        },
+        "process_ids": {
+          "margin": "517/1313",
+          "ratio": "47/1313"
+        }
+      },
+      "Solidity/Roadmap": {
+        "comment_lines": {
+          "margin": "148079/546",
+          "ratio": "461/1092"
+        },
+        "docs_lines": {
+          "margin": "0",
+          "ratio": "0"
+        },
+        "docstring_lines": {
+          "margin": "442531/1638",
+          "ratio": "1381/3276"
+        },
+        "process_ids": {
+          "margin": "26641/1638",
+          "ratio": "85/3276"
+        }
+      },
+      "Solidity/Scratch": {
+        "comment_lines": {
+          "margin": "405/269",
+          "ratio": "44/269"
+        },
+        "docs_lines": {
+          "margin": "0",
+          "ratio": "0"
+        },
+        "docstring_lines": {
+          "margin": "1609/1345",
+          "ratio": "212/1345"
+        },
+        "process_ids": {
+          "margin": "0",
+          "ratio": "0"
+        }
+      },
+      "Solidity/Semantics": {
+        "comment_lines": {
+          "margin": "101919/9517",
+          "ratio": "1923/9517"
+        },
+        "docs_lines": {
+          "margin": "0",
+          "ratio": "0"
+        },
+        "docstring_lines": {
+          "margin": "101124/9517",
+          "ratio": "1908/9517"
+        },
+        "process_ids": {
+          "margin": "5076/9517",
+          "ratio": "54/9517"
+        }
+      },
+      "Solidity/SolcValidation": {
+        "comment_lines": {
+          "margin": "121835/5584",
+          "ratio": "1043/5584"
+        },
+        "docs_lines": {
+          "margin": "0",
+          "ratio": "0"
+        },
+        "docstring_lines": {
+          "margin": "132449/5584",
+          "ratio": "985/5584"
+        },
+        "process_ids": {
+          "margin": "0",
+          "ratio": "1/698"
+        }
+      },
+      "Solidity/Solkey": {
+        "comment_lines": {
+          "margin": "0",
+          "ratio": "71/39"
+        },
+        "docs_lines": {
+          "margin": "0",
+          "ratio": "0"
+        },
+        "docstring_lines": {
+          "margin": "0",
+          "ratio": "70/39"
+        },
+        "process_ids": {
+          "margin": "0",
+          "ratio": "0"
+        }
+      },
+      "Solidity/SortCheck": {
+        "comment_lines": {
+          "margin": "0",
+          "ratio": "359/797"
+        },
+        "docs_lines": {
+          "margin": "0",
+          "ratio": "0"
+        },
+        "docstring_lines": {
+          "margin": "0",
+          "ratio": "310/797"
+        },
+        "process_ids": {
+          "margin": "0",
+          "ratio": "0"
+        }
+      },
+      "Solidity/Source": {
+        "comment_lines": {
+          "margin": "3484462/2719",
+          "ratio": "3270/19033"
+        },
+        "docs_lines": {
+          "margin": "0",
+          "ratio": "0"
+        },
+        "docstring_lines": {
+          "margin": "3342060/2719",
+          "ratio": "455/2719"
+        },
+        "process_ids": {
+          "margin": "49387/2719",
+          "ratio": "9/2719"
+        }
+      },
+      "Solidity/Stipend": {
+        "comment_lines": {
+          "margin": "0",
+          "ratio": "9/14"
+        },
+        "docs_lines": {
+          "margin": "0",
+          "ratio": "0"
+        },
+        "docstring_lines": {
+          "margin": "0",
+          "ratio": "22/35"
+        },
+        "process_ids": {
+          "margin": "0",
+          "ratio": "3/70"
+        }
+      },
+      "Solidity/Storage": {
+        "comment_lines": {
+          "margin": "0",
+          "ratio": "167/1048"
+        },
+        "docs_lines": {
+          "margin": "0",
+          "ratio": "0"
+        },
+        "docstring_lines": {
+          "margin": "0",
+          "ratio": "487/3144"
+        },
+        "process_ids": {
+          "margin": "5/131",
+          "ratio": "5/1572"
+        }
+      },
+      "Solidity/Syntax": {
+        "comment_lines": {
+          "margin": "0",
+          "ratio": "774/2569"
+        },
+        "docs_lines": {
+          "margin": "0",
+          "ratio": "0"
+        },
+        "docstring_lines": {
+          "margin": "0",
+          "ratio": "633/2569"
+        },
+        "process_ids": {
+          "margin": "45/10276",
+          "ratio": "3/10276"
+        }
+      },
+      "Solidity/TestSuite": {
+        "comment_lines": {
+          "margin": "16001/3673",
+          "ratio": "386/3673"
+        },
+        "docs_lines": {
+          "margin": "0",
+          "ratio": "0"
+        },
+        "docstring_lines": {
+          "margin": "18834/3673",
+          "ratio": "374/3673"
+        },
+        "process_ids": {
+          "margin": "0",
+          "ratio": "0"
+        }
+      },
+      "Solidity/Theory": {
+        "comment_lines": {
+          "margin": "0",
+          "ratio": "1481/6473"
+        },
+        "docs_lines": {
+          "margin": "0",
+          "ratio": "0"
+        },
+        "docstring_lines": {
+          "margin": "0",
+          "ratio": "1481/6473"
+        },
+        "process_ids": {
+          "margin": "1876/6473",
+          "ratio": "14/6473"
+        }
+      },
+      "Solidity/Tools": {
+        "comment_lines": {
+          "margin": "513565/6167",
+          "ratio": "1700/6167"
+        },
+        "docs_lines": {
+          "margin": "0",
+          "ratio": "0"
+        },
+        "docstring_lines": {
+          "margin": "492572/6167",
+          "ratio": "1588/6167"
+        },
+        "process_ids": {
+          "margin": "2049/6167",
+          "ratio": "3/6167"
+        }
+      },
+      "Solidity/Typing": {
+        "comment_lines": {
+          "margin": "0",
+          "ratio": "713/5352"
+        },
+        "docs_lines": {
+          "margin": "0",
+          "ratio": "0"
+        },
+        "docstring_lines": {
+          "margin": "0",
+          "ratio": "713/5352"
+        },
+        "process_ids": {
+          "margin": "0",
+          "ratio": "0"
+        }
+      },
+      "Solidity/Yul": {
+        "comment_lines": {
+          "margin": "12",
+          "ratio": "6381/82048"
+        },
+        "docs_lines": {
+          "margin": "0",
+          "ratio": "0"
+        },
+        "docstring_lines": {
+          "margin": "545591/41024",
+          "ratio": "6303/82048"
+        },
+        "process_ids": {
+          "margin": "12095/82048",
+          "ratio": "295/164096"
+        }
+      },
+      "Solidity/_root": {
+        "comment_lines": {
+          "margin": "4766/51",
+          "ratio": "1217/2550"
+        },
+        "docs_lines": {
+          "margin": "0",
+          "ratio": "0"
+        },
+        "docstring_lines": {
+          "margin": "1498/17",
+          "ratio": "383/850"
+        },
+        "process_ids": {
+          "margin": "4/17",
+          "ratio": "1/850"
+        }
+      },
+      "docs/README.d": {
+        "comment_lines": {
+          "margin": "0",
+          "ratio": "0"
+        },
+        "docs_lines": {
+          "margin": "21380326/74127",
+          "ratio": "5/222381"
+        },
+        "docstring_lines": {
+          "margin": "0",
+          "ratio": "0"
+        },
+        "process_ids": {
+          "margin": "0",
+          "ratio": "0"
+        }
+      },
+      "docs/_root": {
+        "comment_lines": {
+          "margin": "0",
+          "ratio": "0"
+        },
+        "docs_lines": {
+          "margin": "495700231/24709",
+          "ratio": "7561/222381"
+        },
+        "docstring_lines": {
+          "margin": "0",
+          "ratio": "0"
+        },
+        "process_ids": {
+          "margin": "0",
+          "ratio": "0"
+        }
+      },
+      "docs/audits": {
+        "comment_lines": {
+          "margin": "0",
+          "ratio": "0"
+        },
+        "docs_lines": {
+          "margin": "4791878/24709",
+          "ratio": "184303/444762"
+        },
+        "docstring_lines": {
+          "margin": "0",
+          "ratio": "0"
+        },
+        "process_ids": {
+          "margin": "0",
+          "ratio": "0"
+        }
+      },
+      "docs/benchmarks": {
+        "comment_lines": {
+          "margin": "0",
+          "ratio": "0"
+        },
+        "docs_lines": {
+          "margin": "8043008156/222381",
+          "ratio": "96119/889524"
+        },
+        "docstring_lines": {
+          "margin": "0",
+          "ratio": "0"
+        },
+        "process_ids": {
+          "margin": "0",
+          "ratio": "0"
+        }
+      },
+      "docs/feature-work": {
+        "comment_lines": {
+          "margin": "0",
+          "ratio": "0"
+        },
+        "docs_lines": {
+          "margin": "9263764273/74127",
+          "ratio": "19115/148254"
+        },
+        "docstring_lines": {
+          "margin": "0",
+          "ratio": "0"
+        },
+        "process_ids": {
+          "margin": "0",
+          "ratio": "0"
+        }
+      },
+      "docs/module-map": {
+        "comment_lines": {
+          "margin": "0",
+          "ratio": "0"
+        },
+        "docs_lines": {
+          "margin": "0",
+          "ratio": "808/74127"
+        },
+        "docstring_lines": {
+          "margin": "0",
+          "ratio": "0"
+        },
+        "process_ids": {
+          "margin": "0",
+          "ratio": "0"
+        }
+      },
+      "docs/module-map.d": {
+        "comment_lines": {
+          "margin": "0",
+          "ratio": "0"
+        },
+        "docs_lines": {
+          "margin": "1088504/74127",
+          "ratio": "103/889524"
+        },
+        "docstring_lines": {
+          "margin": "0",
+          "ratio": "0"
+        },
+        "process_ids": {
+          "margin": "0",
+          "ratio": "0"
+        }
+      }
+    },
+    "denominator_mapping": {
+      "Solidity/Automation": "self",
+      "Solidity/Backend": "self",
+      "Solidity/Calculus": "self",
+      "Solidity/Corpus": "self",
+      "Solidity/Correctness": "self",
+      "Solidity/Counterexamples": "self",
+      "Solidity/Evm": "self",
+      "Solidity/Examples": "self",
+      "Solidity/Frontend": "self",
+      "Solidity/Goals": "self",
+      "Solidity/Hash": "self",
+      "Solidity/Language": "self",
+      "Solidity/Lowering": "self",
+      "Solidity/Optimizer": "self",
+      "Solidity/Precompiles": "self",
+      "Solidity/Roadmap": "self",
+      "Solidity/Scratch": "self",
+      "Solidity/Semantics": "self",
+      "Solidity/SolcValidation": "self",
+      "Solidity/Solkey": "self",
+      "Solidity/SortCheck": "self",
+      "Solidity/Source": "self",
+      "Solidity/Stipend": "self",
+      "Solidity/Storage": "self",
+      "Solidity/Syntax": "self",
+      "Solidity/TestSuite": "self",
+      "Solidity/Theory": "self",
+      "Solidity/Tools": "self",
+      "Solidity/Typing": "self",
+      "Solidity/Yul": "self",
+      "Solidity/_root": "self",
+      "docs/README.d": "repository-solidity",
+      "docs/_root": "repository-solidity",
+      "docs/audits": "repository-solidity",
+      "docs/benchmarks": "repository-solidity",
+      "docs/feature-work": "repository-solidity",
+      "docs/module-map": "repository-solidity",
+      "docs/module-map.d": "repository-solidity"
+    },
+    "enforcement_exclusions": {
+      "docs/audits": "H548: measured; excluded until r1-regen-out-of-git"
+    },
+    "schema": "pb2-inactive/1",
+    "source": {
+      "anchors": [
+        {
+          "areas": [
+            "Solidity/Automation",
+            "Solidity/Backend",
+            "Solidity/Calculus",
+            "Solidity/Corpus",
+            "Solidity/Correctness",
+            "Solidity/Counterexamples",
+            "Solidity/Evm",
+            "Solidity/Examples",
+            "Solidity/Frontend",
+            "Solidity/Goals",
+            "Solidity/Hash",
+            "Solidity/Language",
+            "Solidity/Lowering",
+            "Solidity/Optimizer",
+            "Solidity/Precompiles",
+            "Solidity/Roadmap",
+            "Solidity/Semantics",
+            "Solidity/SolcValidation",
+            "Solidity/Solkey",
+            "Solidity/SortCheck",
+            "Solidity/Source",
+            "Solidity/Stipend",
+            "Solidity/Storage",
+            "Solidity/Syntax",
+            "Solidity/TestSuite",
+            "Solidity/Theory",
+            "Solidity/Tools",
+            "Solidity/Typing",
+            "Solidity/Yul",
+            "Solidity/_root",
+            "docs/README.d",
+            "docs/_root",
+            "docs/audits",
+            "docs/benchmarks",
+            "docs/feature-work",
+            "docs/module-map",
+            "docs/module-map.d"
+          ],
+          "commit": "86c2fd3658c3ba8e86d5b4a6b1d626c7cb853e38",
+          "lookback": {
+            "commits": 938,
+            "commits_sha256": "3e74999eff8648105afd46e28270635f232c15df79233ab11385f62d34176fe6",
+            "days": 7,
+            "first": "50cfcc9f2fb368831475a1d3be6a43d3969b8725",
+            "interval": [
+              1793666269,
+              1794271069
+            ],
+            "last": "86c2fd3658c3ba8e86d5b4a6b1d626c7cb853e38",
+            "older_stamped_inside": [],
+            "stamped_after_anchor": []
+          },
+          "tree": "4be0092f947a231c47a541c5f8d5e1cdad9c4343"
+        },
+        {
+          "areas": [
+            "Solidity/Scratch"
+          ],
+          "commit": "84e9aff49c99cce0e883431c7db8514968a11b8d",
+          "lookback": {
+            "commits": 976,
+            "commits_sha256": "c54ca0a8ddbcc0489b41519ade8bcd75b28008501df7b678542ae23fdb175b8f",
+            "days": 7,
+            "first": "bba8401e103ced56ef67d50bfcabafce3fd26c26",
+            "interval": [
+              1793635005,
+              1794239805
+            ],
+            "last": "84e9aff49c99cce0e883431c7db8514968a11b8d",
+            "older_stamped_inside": [],
+            "stamped_after_anchor": []
+          },
+          "tree": "c6c06d7c0447f1c54b934f18f5739f644ba5c22a"
+        }
+      ],
+      "calibration_sha256": "5c113a614f1f2d04b4b3783022649f9c34e3a79137da44cf549d9eee2ce4d26c",
+      "endpoint": {
+        "commit": "ffbeb4d4a929935bb671eb6169c88b2715a7db55",
+        "committer_ts": 1794440310,
+        "tree": "3c5d13ea1f2d69631506aa7068026a2513ad3031"
+      },
+      "path": "scripts/prose-backtest/calibration-additive.json",
+      "sha256": "2688f0889571f568eb7449427b0f94b97be21552d171aa5fe9cf60692ea26f9c",
+      "specification_sha256": "a4e06bc8c69a1cdbaff52cd1e9c932d526a3367c48a80b58ddef676b42e48e19"
+    },
+    "verified_generated": []
+  },
   "docs/README.d": {
     "comment_lines": 0,
     "docs_lines": 19,

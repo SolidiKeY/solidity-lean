@@ -2,6 +2,8 @@
 """Per-area prose ratchet. Missing areas have a zero budget; --update never raises it."""
 import argparse
 from bisect import bisect_left
+from fractions import Fraction
+import hashlib
 import json
 from pathlib import Path
 import re
@@ -113,6 +115,8 @@ class _Scanner:
         while pos < len(source):
             if source[pos] == "«":
                 end = source.find("»", pos + 1)
+                if getattr(self, "strict_names", False) and end < 0:
+                    self.unclosed = True
                 pos = len(source) if end < 0 else end + 1
             elif _identifier_rest(source[pos]):
                 while pos < len(source) and _identifier_rest(source[pos]):
@@ -303,6 +307,8 @@ class _Scanner:
                 pos = self.block(pos, collect)
             elif source[pos] == "«":
                 end = source.find("»", pos + 1)
+                if getattr(self, "strict_names", False) and end < 0:
+                    self.unclosed = True
                 pos = len(source) if end < 0 else end + 1
             elif source[pos] == "`":
                 while pos < len(source) and source[pos] == "`":
@@ -499,11 +505,17 @@ def counts(root):
     return result
 
 
+CANDIDATE_KEY = "_calibrated_candidate"
+FROZEN_SCOPE_SHA256 = 'aa0328769eb74b72e401f75e8237471e3919dee277712e62360dd27a1cacaa6c'
+
+
 def read_baseline(path):
     data = json.loads(path.read_text(encoding="utf-8"))
     if not isinstance(data, dict):
         raise ValueError("baseline must be an area-to-counts object")
     for area, row in data.items():
+        if area == CANDIDATE_KEY:
+            continue
         if not isinstance(row, dict) or set(row) != set(METRICS):
             raise ValueError("invalid metrics for " + area)
         if any(type(n) is not int or n < 0 for n in row.values()):
@@ -511,15 +523,198 @@ def read_baseline(path):
     return data
 
 
+
+def rational(value):
+    """Only exact nonnegative integer/fraction strings, with positive denominators."""
+    if not isinstance(value, str) or not re.fullmatch(r"[0-9]+(?:/[0-9]+)?", value):
+        raise ValueError("candidate coefficients must be nonnegative rational strings")
+    try:
+        return Fraction(value)
+    except ZeroDivisionError as error:
+        raise ValueError("candidate denominator must be positive") from error
+
+
+def validate_candidate(policy):
+    if not isinstance(policy, dict) or "areas" not in policy:
+        raise ValueError("missing candidate policy")
+    metadata = {k: v for k, v in policy.items() if k != "areas"}
+    digest = hashlib.sha256(json.dumps(metadata, sort_keys=True, separators=(",", ":")).encode()).hexdigest()
+    if digest != FROZEN_SCOPE_SHA256:
+        raise ValueError("candidate scope/identities/inactive metadata changed")
+    if not isinstance(policy["areas"], dict) or not set(policy["areas"]) <= set(policy["denominator_mapping"]):
+        raise ValueError("candidate area scope changed")
+    for area, row in policy["areas"].items():
+        if not isinstance(row, dict) or not set(row) <= set(METRICS):
+            raise ValueError("invalid candidate metrics: " + area)
+        for entry in row.values():
+            if not isinstance(entry, dict) or set(entry) != {"ratio", "margin"}:
+                raise ValueError("invalid candidate allowance")
+            rational(entry["ratio"])
+            rational(entry["margin"])
+    return policy
+
+
+def allowance(n, d, entry=None):
+    """Return exact decision and floor of the sum for display only."""
+    if type(n) is not int or type(d) is not int or min(n, d) < 0:
+        raise ValueError("unavailable/invalid candidate measurement")
+    r = rational(entry["ratio"]) if entry else Fraction(0)
+    m = rational(entry["margin"]) if entry else Fraction(0)
+    a, b, c, e = r.numerator, r.denominator, m.numerator, m.denominator
+    return n*b*e <= a*d*e + c*b, (a*d*e + c*b) // (b*e)
+
+
+def code_measurement(source):
+    """Reuse the lexer; remove comment spans, retaining literal text and line offsets."""
+    scanner = _Scanner(source)
+    scanner.strict_names = True
+    spans = []
+    mark = scanner.mark
+
+    def capture(start, end, target):
+        if target is scanner.comments and end > start:
+            spans.append((start, end))
+        mark(start, end, target)
+
+    scanner.mark = capture
+    scanner.code()
+    scanner.scanned = True
+    del scanner.mark
+    if scanner.unclosed:
+        raise ValueError("malformed Lean source (unclosed lexical token)")
+    code, pos = set(), 0
+    for start, end in sorted(spans) + [(len(source), len(source))]:
+        if start > pos:
+            line = bisect_left(scanner.newlines, pos) + 1
+            for piece in source[pos:start].split("\n"):
+                if piece.strip():
+                    code.add(line)
+                line += 1
+        pos = max(pos, end)
+    return scanner, len(code)
+
+
+def blob_id(data):
+    return hashlib.sha1(b"blob %d\0" % len(data) + data).hexdigest()
+
+
+def verified_lines(root, path, data, entries):
+    """Synthetic entries exercise bindings; real frozen policy has none.
+
+    Entry identity is independent of generation headers. A changed identity lapses
+    exclusion. Missing/unreadable generators are unavailable input, not credit.
+    """
+    lines = set()
+    for entry in entries:
+        if entry["path"] != path or entry["blob"] != blob_id(data):
+            continue
+        generator = Path(entry["generator_path"])
+        if generator.is_absolute() or ".." in generator.parts:
+            raise ValueError("invalid generator path")
+        if blob_id((root / generator).read_bytes()) != entry["generator_blob"]:
+            continue
+        if entry["scope"] == "file":
+            return None
+        first, last = entry["scope"]
+        if type(first) is not int or type(last) is not int or not 1 <= first <= last:
+            raise ValueError("invalid generated scope")
+        lines.update(range(first, last + 1))
+    return lines
+
+
+def calibrated_counts(root, entries=()):
+    for tree in ("docs", "Solidity"):
+        if not (root / tree).is_dir():
+            raise ValueError(f"missing source directory: {root / tree}")
+    rows, codes = {}, {}
+    modules = registered_modules(root)
+    for tree in ("docs", "Solidity"):
+        for path in sorted((root / tree).rglob("*")):
+            if not path.is_file() or (tree == "Solidity" and path.suffix != ".lean"):
+                continue
+            relative = path.relative_to(root / tree)
+            area = tree + "/" + (relative.parts[0] if len(relative.parts) > 1 else "_root")
+            row = rows.setdefault(area, dict.fromkeys(METRICS, 0))
+            codes.setdefault(area, 0)
+            data = path.read_bytes()
+            excluded = verified_lines(root, path.relative_to(root).as_posix(), data, entries)
+            if excluded is None:
+                continue
+            source = data.decode("utf-8").replace("\r\n", "\n").replace("\r", "\n")
+            # Replacing verified lines symmetrically preserves physical positions;
+            # registry occurrence classification uses the original source below.
+            if excluded:
+                raise ValueError("partial generated scopes require independent reproduction; unsupported")
+            if tree == "docs":
+                row["docs_lines"] += len(source.splitlines())
+            else:
+                scanner, code = code_measurement(source)
+                codes[area] += code
+                row["comment_lines"] += len(scanner.comments)
+                row["docstring_lines"] += len(scanner.docs)
+                row["process_ids"] += process_ids(source, modules, scanner)
+    return rows, codes
+
+
+def shrink_candidate(old, proposal):
+    validate_candidate(old)
+    validate_candidate(proposal)
+    if (set(proposal["areas"]) != set(old["areas"]) or
+            any(set(proposal["areas"][a]) != set(row) for a, row in old["areas"].items())):
+        raise ValueError("candidate update area/metric scope changed")
+    for area, row in old["areas"].items():
+        for metric, entry in row.items():
+            for coefficient in ("ratio", "margin"):
+                if rational(proposal["areas"][area][metric][coefficient]) > rational(entry[coefficient]):
+                    raise ValueError(f"candidate increase refused: {area} {metric} {coefficient}")
+    return proposal
+
+
+def calibrated_main(args, baseline_path, document):
+    policy = validate_candidate(document.get(CANDIDATE_KEY))
+    if args.update:
+        if args.candidate_proposal is None:
+            raise ValueError("candidate --update requires explicit --candidate-proposal")
+        proposal = json.loads(args.candidate_proposal.read_text(encoding="utf-8"))
+        policy = shrink_candidate(policy, proposal)
+    rows, codes = calibrated_counts(args.root, policy["verified_generated"])
+    global_code = sum(n for a, n in codes.items() if a.startswith("Solidity/"))
+    failed = False
+    for area in sorted(rows.keys() | policy["areas"].keys()):
+        d = codes.get(area, 0) if area.startswith("Solidity/") else global_code
+        for metric in METRICS:
+            n = rows.get(area, {}).get(metric, 0)
+            passed, floor = allowance(n, d, policy["areas"].get(area, {}).get(metric))
+            exempt = area in policy["enforcement_exclusions"]
+            state = "EXEMPT" if exempt else "PASS" if passed else "FAIL"
+            print(f"{area} {metric}: {n} <= {floor} (denominator {d}) {state}")
+            failed |= not passed and not exempt
+    if failed:
+        print("Inactive calibrated prose budget FAIL", file=sys.stderr)
+        return 1
+    if args.update:
+        document[CANDIDATE_KEY] = policy
+        baseline_path.write_text(json.dumps(document, indent=2, sort_keys=True) + "\n", encoding="utf-8")
+    print("Inactive calibrated prose budget PASS")
+    return 0
+
+
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--root", type=Path, default=Path(__file__).resolve().parent.parent)
     parser.add_argument("--baseline", type=Path, help="defaults to ROOT/scripts/prose-baseline.json")
+    parser.add_argument("--calibrated-check", action="store_true", help="evaluate inactive candidate; never replaces legacy enforcement")
+    parser.add_argument("--candidate-proposal", type=Path, help="explicit complete candidate policy for shrink-only --calibrated-check --update")
     parser.add_argument("--update", action="store_true", help="lower existing budgets; refuse every increase")
     args = parser.parse_args()
     baseline_path = args.baseline or args.root / "scripts/prose-baseline.json"
     try:
-        baseline = read_baseline(baseline_path)
+        document = read_baseline(baseline_path)
+        if args.candidate_proposal and not (args.calibrated_check and args.update):
+            raise ValueError("--candidate-proposal requires --calibrated-check --update")
+        if args.calibrated_check:
+            return calibrated_main(args, baseline_path, document)
+        baseline = {k: v for k, v in document.items() if k != CANDIDATE_KEY}
         actual = counts(args.root)
         merged = {area: actual.get(area, dict.fromkeys(METRICS, 0))
                   for area in sorted(baseline.keys() | actual.keys())}
@@ -533,10 +728,12 @@ def main():
             print("Prose budget exceeded:\n" + "\n".join(failures), file=sys.stderr)
             return 1
         if args.update:
+            if CANDIDATE_KEY in document:
+                merged[CANDIDATE_KEY] = document[CANDIDATE_KEY]
             baseline_path.write_text(json.dumps(merged, indent=2, sort_keys=True) + "\n", encoding="utf-8")
-        print(f"Prose budget PASS ({len(merged)} areas)" + ("; baseline lowered" if args.update else ""))
+        print(f"Prose budget PASS ({len(merged) - int(CANDIDATE_KEY in merged)} areas)" + ("; baseline lowered" if args.update else ""))
         return 0
-    except (OSError, ValueError) as error:
+    except (OSError, ValueError, TypeError, KeyError) as error:
         print(f"prose budget: {error}", file=sys.stderr)
         return 2
 
