@@ -70,6 +70,11 @@ class TrailerTests(unittest.TestCase):
         with self.assertRaises(TrailerError):
             pin_changes(self.repo, self.base, "HEAD")
 
+    def test_non_fast_forward_fails_closed(self):
+        pin = self.commit("add pin\n\nGoal-Change: H1")
+        with self.assertRaises(TrailerError):
+            pin_changes(self.repo, pin, self.base)
+
     def test_missing_base_fails_closed(self):
         with self.assertRaises(TrailerError):
             pin_changes(self.repo, "does-not-exist", "HEAD")

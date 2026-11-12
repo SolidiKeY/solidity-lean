@@ -41,6 +41,10 @@ def pin_changes(repo: Path, base: str, head: str) -> list[tuple[str, str]]:
     Merges are compared with every parent, including conflict resolutions.
     """
     before, after = commit_id(repo, base), commit_id(repo, head)
+    ancestor = subprocess.run(["git", "-C", str(repo), "merge-base", "--is-ancestor", before, after],
+                              capture_output=True, check=False)
+    if ancestor.returncode:
+        raise TrailerError("push base is not an ancestor of head, or ancestry cannot be verified")
     commits = git(repo, "rev-list", "--reverse", after, "--not", before).decode().splitlines()
     changes: list[tuple[str, str]] = []
     for commit in commits:
