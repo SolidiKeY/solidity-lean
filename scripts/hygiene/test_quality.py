@@ -361,6 +361,14 @@ class Provision(unittest.TestCase):
         self.assertEqual(self.calls, [])  # no install, so nothing deleted
         self.assertTrue(os.path.exists(local))
 
+    def test_a_copy_failing_its_version_check_is_never_deleted(self):
+        q.shutil.which = lambda n: None; q._version_of = lambda e: None  # spurious failures
+        target = os.path.join(self.tmp.name, "hygiene-tools", self.want.replace(" ", "-"))
+        local = os.path.join(target, "bin", "ruff")
+        os.makedirs(os.path.dirname(local)); open(local, "w").close()
+        self.fake_pip(True)
+        self.assertEqual(q.ruff_exe(), local); self.assertEqual(self.calls, []); self.assertTrue(os.path.exists(local))
+
     def test_install_holds_an_exclusive_lock(self):
         if q.fcntl is None: self.skipTest("no fcntl")
         q.shutil.which = lambda n: None; q._version_of = lambda e: self.want if os.path.exists(e) else None

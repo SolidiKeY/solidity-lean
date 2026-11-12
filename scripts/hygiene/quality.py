@@ -291,7 +291,11 @@ def ruff_exe():
     # an executable another run is using. The copy is staged and renamed into place.
     with open(target + ".lock", "w") as lock:
         if fcntl: fcntl.flock(lock, fcntl.LOCK_EX)
-        if os.path.exists(local) and _version_of(local) == want: return local
+        # A binary at `local` only ever arrives by the rename below, of a staged copy whose
+        # version was checked, so it is trusted here and never deleted: a version check that
+        # fails spuriously cannot remove a copy another run is executing. Only a target without
+        # its binary (partial) is replaced.
+        if os.path.exists(local): return local
         stage = tempfile.mkdtemp(prefix=os.path.basename(target) + ".", dir=os.path.dirname(target))
         try:
             r = subprocess.run([sys.executable, "-m", "pip", "install", "--quiet", "--disable-pip-version-check",
@@ -300,7 +304,7 @@ def ruff_exe():
                                env={**os.environ, "PIP_ROOT_USER_ACTION": "ignore"})
             staged = os.path.join(stage, "bin", os.path.basename(local))
             if r.returncode == 0 and os.path.exists(staged) and _version_of(staged) == want:
-                shutil.rmtree(target, ignore_errors=True)  # invalid or partial: checked under the lock
+                shutil.rmtree(target, ignore_errors=True)  # partial (no binary): checked under the lock
                 os.rename(stage, target)
                 if os.path.exists(local) and _version_of(local) == want: return local
             problem = r.stderr.strip()[-300:] or "no ruff binary"
