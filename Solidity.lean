@@ -4556,6 +4556,7 @@ import Solidity.Tools.DirectRuntime
 import Solidity.Tools.Elementary
 import Solidity.Tools.EntryReturn
 import Solidity.Tools.Goal
+import Solidity.Tools.GoalPins
 import Solidity.Tools.Inspect
 import Solidity.Tools.Latex
 import Solidity.Tools.LatexSolkey
