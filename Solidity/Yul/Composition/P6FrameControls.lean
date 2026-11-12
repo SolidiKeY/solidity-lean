@@ -52,7 +52,7 @@ theorem initial_frame (p : Pipeline) :
     rw [image_bytes]
     decide
 
-theorem payload_bytes : payload = Semantics.wordBytes high.val := by decide
+private theorem payload_bytes : payload = Semantics.wordBytes high.val := by decide
 
 theorem full_payload (p : Pipeline) : snapshot (reached p) (region p) = payload :=
   (store_readback (image p) a n high (fits p) (readFits p) rfl).trans payload_bytes.symm

@@ -11,7 +11,6 @@ open Solidity.Backend Solidity.Backend.MemoryOps.Physical Solidity.Evm.TryByteIm
 /-- Byte equality may relate different physical bases. -/
 theorem readBE_rebase (m m' : ByteView) (a b n : Nat)
     (same : ∀ i,i<n → m (a+i)=m' (b+i)) : readBE m a n=readBE m' b n := by
-  first | (simp only [readBE]; done) | skip
   induction n with
   | zero => rfl
   | succ n ih =>
