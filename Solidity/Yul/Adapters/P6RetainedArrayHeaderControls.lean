@@ -22,7 +22,6 @@ def history : RetainedAllocation allocated placement := retainedMemberArray_hist
 def reached (pipeline : Pipeline) := store32 (image pipeline) (sink pipeline) (lenU 2 (by decide))
 
 theorem supported (a τ d) (found : current.2.heap.get a=some ⟨τ,d⟩) : InventoryTypeSupported E τ := by
-  first | omega | decide | skip
   by_cases same : a=0
   · subst a
     cases found
@@ -55,7 +54,6 @@ theorem dormant_word : mload memory 192=9 := by
 
 theorem tail_reads (pipeline : Pipeline) : ∀ i : Fin length.val,
     mload (frameBytes (image pipeline)) (p.address 0+32+i.val*32)=originalWords i := by
-  first | omega | decide | skip
   dsimp only [image]
   rw [P6RetainedHeapWordStore.Controls.initial_image]
   intro i
@@ -99,7 +97,6 @@ def oversized (pipeline : Pipeline) := store32 (image pipeline) (sink pipeline) 
 theorem beyond_original_none (pipeline : Pipeline) :
     canonicalRetainedState current allocated p prior (generatedHeapEntries p) 0 (.int Source.IntTy.u256)
       (frameBytes (oversized pipeline))=none := by
-  first | omega | decide | skip
   dsimp only [oversized]
   rw [P6HeapWordStore.store_image (image pipeline) (sink pipeline) (⟨3,by decide⟩:Roadmap.Word)]
   rw [show (sink pipeline).offset.val.toNat=p.address 0 from rfl]
