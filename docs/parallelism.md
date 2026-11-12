@@ -288,17 +288,26 @@ The other shared bookkeeping files are generated too, from a fragment
 directory next to each: `docs/module-map.md` from `docs/module-map.d/`, each
 `docs/module-map/<area>.md` from `docs/module-map/<area>.d/`,
 `docs/README.md` from `docs/README.d/`, `TERRA-TODO.md` from `TERRA-TODO.d/`
-and `scripts/g07-axiom-pins.json` from `scripts/g07-axiom-pins.d/`.
+and `scripts/g07-axiom-pins.json` from the pin fragment roots below.
 `scripts/coord-tools/fragments.sh` writes them; the combined files stay
 committed (scripts and `git show REV:path` read them).  A Markdown file is a
 marker line followed by its fragments concatenated in bytewise path order:
 `00-base.md` holds the migrated text, a lane adds `<lane>.md` (lower-case
 branch name), `~tail.md` sorts last, and a subdirectory such as
 `docs/README.d/10-language/` is a slot inside the file (the language table).
-The pin inventory has one fragment per Lean file,
-`scripts/g07-axiom-pins.d/<path without .lean>.json`;
-`check-axiom-pins.mjs --write` rewrites them with the combined file.  A lane
-edits only its own fragments and runs `fragments.sh`, so two lanes never touch
+The pin inventory has one fragment per Lean file. Paths present in the immutable
+hygiene seed (`scripts/hygiene/allow.json`) retain
+`scripts/g07-axiom-pins.d/<path without .lean>.json`. New sources use
+`scripts/axiom-pins/<sha256>.json`, hashing the full UTF-8 source path including
+`.lean`, without a newline. Existing files alone confer no legacy eligibility.
+Both roots form one validated union: duplicate keys (even equal values), malformed
+keys, wrong hashes, mixed sources and nonstandard axiom lists fail generation.
+`check-axiom-pins.mjs --write` computes the complete validated plan before writing
+or pruning verified fragment files; equal fragment maps retain their raw bytes.
+Only the aggregate is compact JSON, with the existing localeCompare key order
+and a final newline. The fragment generator, merge adoption and census share
+these placement checks; axiom comparison and immutable drift baselines are unchanged.
+A lane edits only its own fragments and runs `fragments.sh`, so two lanes never touch
 the same lines.  `fragments.sh --check` (run by `gate.sh`, `run-lean.sh` and
 CI) fails on a stale combined file; the write refuses lines in a combined file
 that no fragment produces (a direct edit) unless `--force`.  The Markdown
