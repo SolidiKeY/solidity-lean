@@ -14,6 +14,7 @@ HISTORICAL = 'dfdfa238b5bf63955048999fefd291d9d55dbd56'
 INPUT = 'd4ad633a9624263a59b14fd2c520b9bc602f88f3'
 LAUNCH = '005eec705a0f8b2a85ab73e3007a7aac69b43092'
 PREFIX = 'docs/audits/direction-tools/'
+OFFLINE_ENV = {**os.environ, 'GIT_NO_LAZY_FETCH': '1'}
 SHARD_NAME = re.compile(r'(?:modules-|duplicates-)[^/]*\.json\Z')
 SHARD = re.compile(r'docs/audits/direction-tools/(?:census/modules-[^/]*|reachability/duplicates-[^/]*)\.json\Z')
 
@@ -22,7 +23,7 @@ class VerificationError(Exception):
 
 def git(*args, cwd=ROOT):
     try:
-        return subprocess.check_output(['git', '-C', str(cwd), *args])
+        return subprocess.check_output(['git', '-C', str(cwd), *args], env=OFFLINE_ENV)
     except subprocess.CalledProcessError as e:
         raise VerificationError('UNVERIFIABLE: Git command failed: ' + ' '.join(args)) from e
 
@@ -106,7 +107,7 @@ def blob(oid):
     return git('cat-file', 'blob', oid)
 
 def run(*args, cwd):
-    subprocess.run(args, cwd=cwd, check=True)
+    subprocess.run(args, cwd=cwd, check=True, env=OFFLINE_ENV)
 
 def main():
     ap = argparse.ArgumentParser(description=__doc__)
