@@ -1142,4 +1142,19 @@ them; the policy values, checker and CI are not part of this statement. -/
 @[goal Solidity.Docs.prose_ratio_rule_sound "pb2-prose-ratio-rule"]
 def proseRatioRuleSound : Prop := ∀ (A : Type) [DecidableEq A], ProseRatio.Laws A
 
+namespace GoalPinSpec
+
+/-- One committed statement digest and its decision identifier. -/
+structure Pin where
+  goal : Lean.Name
+  digest : List Nat
+  decision : Nat
+  deriving DecidableEq
+
+/-- A SHA-256 digest is exactly 32 bytes; decision records are checked separately. -/
+def Pin.WellFormed (p : Pin) : Prop :=
+  p.digest.length = 32 ∧ p.digest.all (fun b => decide (b < 256)) = true
+
+end GoalPinSpec
+
 end Solidity.Goals
