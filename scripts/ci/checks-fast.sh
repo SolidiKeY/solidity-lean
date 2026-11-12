@@ -15,8 +15,10 @@ set -uo pipefail
 root=$(git rev-parse --show-toplevel) || exit 2
 cd "$root" || exit 2
 
-# name<TAB>command, in lean.yml's former step order.
+# name<TAB>command, in lean.yml's former step order; quality-reach (reach.py's census, about a
+# minute without its cache under the Git directory) first, so it overlaps the rest.
 checks=$(cat <<'EOF'
+quality-reach	python3 -B scripts/hygiene/quality.py --only unreachable_declarations
 trust-test	node --test scripts/check-trust.test.mjs
 trust	bash scripts/check-trust.sh
 private-paths	bash scripts/check-private-paths.sh
@@ -37,6 +39,9 @@ lean-budget-test	python3 -B scripts/lean-budget/test_check.py
 lean-budget	python3 -B scripts/lean-budget/check.py
 hygiene-test	python3 -B scripts/hygiene/test_check.py
 checks-fast-test	python3 -B scripts/hygiene/test_checks_fast.py
+quality-test	python3 -B scripts/hygiene/test_quality.py
+quality	python3 -B scripts/hygiene/quality.py --only lean_long_files,long_proofs,python_dead_code,lean_warnings
+quality-duplicates	python3 -B scripts/hygiene/quality.py --only duplicate_windows
 hygiene	python3 -B scripts/hygiene/check.py
 EOF
 )
