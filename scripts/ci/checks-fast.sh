@@ -43,6 +43,8 @@ quality-test	python3 -B scripts/hygiene/test_quality.py
 quality	python3 -B scripts/hygiene/quality.py --only lean_long_files,long_proofs,python_dead_code,lean_warnings
 quality-duplicates	python3 -B scripts/hygiene/quality.py --only duplicate_windows
 hygiene	python3 -B scripts/hygiene/check.py
+review-checks-test	python3 -B scripts/hygiene/test_review_checks.py
+review-checks	python3 -B scripts/hygiene/review_checks.py
 EOF
 )
 
