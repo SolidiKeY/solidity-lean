@@ -61,9 +61,23 @@ class Controls(unittest.TestCase):
             misplaced = root / 'docs/audits/direction-tools/wrong/modules-01.json'
             misplaced.parent.mkdir(parents=True)
             misplaced.write_bytes(b'x')
-            git('add', str(shard.relative_to(root)), str(misplaced.relative_to(root)))
-            self.assertEqual(len(r.tracked_shards(root)), 2)
+            relocated = root / 'docs/audit-copy/modules-00.json'
+            relocated.parent.mkdir(parents=True)
+            relocated.write_bytes(b'x')
+            git('add', str(shard.relative_to(root)), str(misplaced.relative_to(root)), str(relocated.relative_to(root)))
+            self.assertEqual(set(r.tracked_shards(root)), {str(p.relative_to(root)) for p in (shard, misplaced, relocated)})
             self.rejected(r.reject_tracked, r.tracked_shards(root))
+            git('rm', '--cached', '-q', str(shard.relative_to(root)), str(misplaced.relative_to(root)))
+            self.assertEqual(r.tracked_shards(root), [str(relocated.relative_to(root))])
+            self.rejected(r.reject_tracked, r.tracked_shards(root))
+            git('rm', '--cached', '-q', str(relocated.relative_to(root)))
+            renamed = root / 'docs/audit-copy/payload.json'
+            renamed.write_bytes(b'historical shard bytes')
+            git('add', str(renamed.relative_to(root)))
+            oid = subprocess.check_output(['git', '-C', tmp, 'rev-parse', ':' + str(renamed.relative_to(root))], text=True).strip()
+            self.assertEqual(r.tracked_shards(root), [])
+            self.assertEqual(r.tracked_shards(root, {oid: b'historical shard bytes'}), [str(renamed.relative_to(root))])
+            self.rejected(r.reject_tracked, r.tracked_shards(root, {oid: b'historical shard bytes'}))
 
     def test_retained(self):
         retained = [('script', b'x'), ('summary', b'y')]

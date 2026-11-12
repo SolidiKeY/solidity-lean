@@ -83,9 +83,27 @@ def discover(root):
     return [(str(p.relative_to(root)), p.read_bytes()) for p in root.rglob('*.json')
             if p.is_file() and SHARD_NAME.fullmatch(p.name)]
 
-def tracked_shards(root):
-    return [os.fsdecode(p) for p in git('ls-files', '-z', '--', PREFIX, cwd=root).split(b'\0')
-            if p and SHARD_NAME.fullmatch(Path(os.fsdecode(p)).name)]
+def tracked_shards(root, historical_blobs=None):
+    # Match shard-family names anywhere, and historical content even if renamed.
+    historical_blobs = historical_blobs or {}
+    found = set()
+    checked = set()
+    for row in git('ls-files', '-s', '-z', cwd=root).split(b'\0'):
+        if not row:
+            continue
+        metadata, rawpath = row.split(b'\t', 1)
+        _, oid, _ = metadata.split()
+        path = os.fsdecode(rawpath)
+        oid = oid.decode()
+        if SHARD_NAME.fullmatch(Path(path).name):
+            found.add(path)
+        if oid in historical_blobs:
+            if oid not in checked:
+                if git('cat-file', 'blob', oid, cwd=root) != historical_blobs[oid]:
+                    raise VerificationError('UNVERIFIABLE: indexed historical blob differs: ' + oid)
+                checked.add(oid)
+            found.add(path)
+    return sorted(found)
 
 def index_files(root, paths):
     rows = git('ls-files', '-s', '-z', '--', *paths, cwd=root).split(b'\0')
@@ -132,7 +150,8 @@ def main():
     current = [(p, (ROOT / p).read_bytes()) for p, _ in retained if (ROOT / p).is_file()]
     verify_retained(retained, current)
     verify_retained(retained, index_files(ROOT, [p for p, _ in retained]))
-    reject_tracked(tracked_shards(ROOT))
+    historical_blobs = {entry[1]: data for entry, (_, data) in zip(inventory, expected)}
+    reject_tracked(tracked_shards(ROOT, historical_blobs))
     # Without a remote-tracking ref, conservatively compare against launch.
     merge_base = subprocess.run(['git', '-C', str(ROOT), 'merge-base', 'HEAD', 'origin/master'],
                                 stdout=subprocess.PIPE, stderr=subprocess.DEVNULL, env=OFFLINE_ENV)
