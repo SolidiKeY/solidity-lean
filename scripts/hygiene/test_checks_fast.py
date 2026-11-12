@@ -14,6 +14,10 @@ OK = "exit 0\n"
 LOSE_STATUS = 'rm -rf "$(dirname "$(readlink /proc/$$/fd/1)")"\n'
 
 
+def read(path):
+    with open(path) as f: return f.read()
+
+
 class ChecksFastStorage(unittest.TestCase):
     def setUp(self):
         self.tmp = tempfile.mkdtemp(prefix="checks-fast-test.")
@@ -24,7 +28,7 @@ class ChecksFastStorage(unittest.TestCase):
         self.stub("scripts/check-private-paths.sh", OK)     # check `private-paths`
         for args in (["init", "-q"], ["add", "-A"],
                      ["-c", "user.name=t", "-c", "user.email=t@t", "commit", "-qm", "stubs"]):
-            subprocess.run(["git", *args], cwd=self.repo, check=True, capture_output=True)
+            subprocess.run(["git", *args], cwd=self.repo, env=self.env(), check=True, capture_output=True)
 
     def tearDown(self):
         shutil.rmtree(self.tmp, ignore_errors=True)
@@ -33,8 +37,15 @@ class ChecksFastStorage(unittest.TestCase):
         with open(os.path.join(self.repo, rel), "w") as f:
             f.write("#!/usr/bin/env bash\n" + body)
 
+    @staticmethod
+    def env():
+        """The parent environment without TMPDIR, kept logs or Git variables (an exported
+        GIT_DIR would point the fixture's git commands at the outer repository)."""
+        return {k: v for k, v in os.environ.items()
+                if k not in ("TMPDIR", "CHECKS_FAST_KEEP_LOGS") and not k.startswith("GIT_")}
+
     def run_checks(self, *names, tmpdir=None, keep=False):
-        env = {k: v for k, v in os.environ.items() if k not in ("TMPDIR", "CHECKS_FAST_KEEP_LOGS")}
+        env = self.env()
         if tmpdir is not None: env["TMPDIR"] = tmpdir
         if keep: env["CHECKS_FAST_KEEP_LOGS"] = "1"
         return subprocess.run(["bash", "scripts/ci/checks-fast.sh", *names], cwd=self.repo,
@@ -92,6 +103,35 @@ class ChecksFastStorage(unittest.TestCase):
         r = self.run_checks("evidence-files")
         self.assertEqual(r.returncode, 1, r.stdout + r.stderr)
         self.assertIn("FAIL evidence-files (storage error: status record missing", r.stdout)
+
+    def test_checks_get_a_tmpdir_off_tmp(self):
+        seen = os.path.join(self.tmp, "seen")
+        self.stub("scripts/check-evidence-files.sh", f'printf %s "$TMPDIR" > "{seen}"\n')
+        r = self.run_checks("evidence-files", keep=True)
+        self.assertEqual(r.returncode, 0, r.stdout + r.stderr)
+        logs = r.stdout.split("checks-fast: logs in ")[1].strip()
+        self.assertEqual(read(seen), os.path.join(logs, "tmp"))
+        spool = os.path.join(self.tmp, "spool"); os.mkdir(spool)
+        r = self.run_checks("evidence-files", tmpdir=spool)
+        self.assertEqual(r.returncode, 0, r.stdout + r.stderr)
+        self.assertEqual(read(seen), spool)
+
+    def test_status_records_that_are_not_two_numbers_fail(self):
+        with open(SCRIPT) as f: text = f.read()
+        fn = text[text.index("status_of() {"):]; fn = fn[:fn.index("\n}\n") + 3]
+        logs = os.path.join(self.tmp, "logs"); os.mkdir(logs)
+        cases = {"ok": "0 5\n", "fail": "3 1\n", "x": "0 x\n", "one": "0\n", "empty": "",
+                 "neg": "-1 2\n", "word": "pass 1\n"}
+        for k, v in cases.items():
+            with open(os.path.join(logs, k + ".status"), "w") as f: f.write(v)
+        os.mkdir(os.path.join(logs, "dir.status"))
+        script = f'logs="{logs}"\n{fn}for n in {" ".join(cases)} dir gone; do echo "$n=$(status_of $n)"; done\n'
+        out = dict(l.split("=", 1) for l in subprocess.run(["bash", "-c", script], capture_output=True,
+                                                            text=True, check=True).stdout.splitlines())
+        self.assertEqual(out["ok"], "0 5"); self.assertEqual(out["fail"], "3 1")
+        for k in ("x", "one", "neg", "word"): self.assertEqual(out[k], "storage malformed", k)
+        self.assertTrue(out["empty"].startswith("storage"), out["empty"])
+        self.assertEqual(out["dir"], "storage missing"); self.assertEqual(out["gone"], "storage missing")
 
     def test_failing_check_still_reports_exit_and_tail(self):
         self.stub("scripts/check-evidence-files.sh", "echo broken-evidence; exit 3\n")
