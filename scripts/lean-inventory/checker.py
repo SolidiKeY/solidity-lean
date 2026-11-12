@@ -90,8 +90,8 @@ def check(repo, inv):
         if ident.get(k) != v:
             bad('extraction field %s differs from the cache identity' % k)
     for name, key in (('graph.jsonl.gz', 'graph_sha256'), ('anon.json', 'anon_sha256'),
-                      ('build.log', 'build_log_sha256')):
-        if _sha(cdir / name) != ident.get(key):
+                      ('build.log', 'build_log_sha256'), ('xrefs.json', 'xrefs_sha256')):
+        if not (cdir / name).exists() or _sha(cdir / name) != ident.get(key):
             bad('cache file %s altered' % name)
     if ident.get('revision') != rev or ident.get('lean_tree_id') != S.lean_tree_id(files):
         bad('cache identity is for other sources')
@@ -378,6 +378,38 @@ def check(repo, inv):
                 bad('family %s unresolved witness does not check' % f['family'])
     if sorted(orphans) != sorted(inv.get('certified_orphan_families', [])):
         bad('certified orphan list differs')
+
+    # Dependents of orphan families: importers, .ilean name mentions, kernel edges, and
+    # non-Lean files outside docs/ naming a member path or module.
+    xrefs = json.loads((cdir / 'xrefs.json').read_text())
+    orphan_fams = [f for f in inv['families'] if f['verdict'] == 'orphan']
+    if orphan_fams:
+        excl = ('docs/', 'scripts/lean-inventory/', 'scripts/lean-inventory.json')
+        other = [(p, b) for p, b in files if not p.endswith('.lean') and not p.startswith(excl)]
+        otexts = S.blobs(repo, sorted({b for _, b in other}))
+    for f in orphan_fams:
+        ms = {mod_of_path[path] for path, *_ in f['members']}
+        own_nodes = {n for n, m in owner.items() if m in ms}
+        named = {n for n in consts if fold(n) in own_nodes}
+        kern_of = {}
+        for x, ys in edges.items():
+            if ys & own_nodes and x in owner:
+                kern_of[owner[x]] = kern_of.get(owner[x], 0) + 1
+        rows = []
+        for p in lean_paths:
+            m = mod_of_path[p]
+            if m in ms or p in S.GENERATED_ROOTS:
+                continue
+            imp = any(i in ms for i in imports.get(m, []))
+            refs = len(named.intersection(xrefs.get(m, [])))
+            kern = kern_of.get(m, 0)
+            if imp or refs or kern:
+                rows.append([p, imp, refs, kern])
+        needles = [path_of_mod[m] for m in ms] + list(ms)
+        hits = sorted(p for p, b in other if any(n in otexts[b] for n in needles))
+        want = {'lean': sorted(rows), 'files': hits, 'standalone': not rows and not hits}
+        if f.get('dependents') != want:
+            bad('family %s dependents differ' % f['family'])
 
     # Timing records.
     log = (cdir / 'build.log').read_text()

@@ -65,10 +65,20 @@ LIMITATIONS = [
     'builds an import from data without a static prefix is not detected.',
     'Grouping, command classification, attribute detection and runner import detection are '
     'lexical; they only bound gaps or propose candidates and never establish a use or absence.',
-    'Check times come from one recorded Lake build of this revision on a 4-core VM with '
-    'parallel jobs; modules fetched from the Lake artifact cache have no measured time.',
+    'Check times are Lake job times of one incremental build resumed over several runs on a '
+    '4-core VM with parallel jobs (see timing.provenance); modules fetched from the Lake '
+    'artifact cache have no measured time.',
+    'Name references inside scope commands (open, export, variable, attribute [local ...], '
+    'set_option ... in) and proof-script names that leave no kernel constant (simp only [X]) '
+    'are not use edges; such a reference can keep a module building without making it a '
+    'consumer. They are listed for orphan families as dependents, from .ilean name mentions '
+    'in any position.',
     'unresolved is the conservative verdict: it is precise only as far as the listed gaps; '
-    'certified orphan families are deletion candidates only, not deletion evidence.',
+    'certified orphan families are deletion candidates only, not deletion evidence. An '
+    'orphan family whose dependents are not empty cannot be deleted alone: its dependents '
+    '(Lean importers and name mentions in other families, whose uses are themselves '
+    'orphan, and non-Lean files outside docs/ naming its paths or modules) must be edited '
+    'or removed in the same change; standalone marks a family with none.',
 ]
 
 
@@ -185,7 +195,7 @@ def extract(repo, rev):
         elif r['r'] == 'const' and 'range' in r:
             ranges.setdefault(r['m'], []).append(r['range'])
     paths = {S.module_name(p): p for p, _ in S.tracked(repo, rev) if p.endswith('.lean')}
-    anon, ilean_digest, missing = {}, hashlib.sha256(), []
+    anon, xrefs, ilean_digest, missing = {}, {}, hashlib.sha256(), []
     lib_dir = repo / '.lake/build/lib/lean'
     olean_digest = hashlib.sha256()
     for m in sorted(modules):
@@ -200,18 +210,22 @@ def extract(repo, rev):
         if data.get('module') != m:
             sys.exit(f'extract: {il} names module {data.get("module")}')
         spans = sorted(ranges.get(m, []))
-        uses = []
+        uses, named = [], set()
         for key, entry in data['references'].items():
             ident = json.loads(key)
             if 'c' not in ident:
                 continue
             name = ident['c']['n']
+            if entry.get('usages'):
+                named.add(name)
             for u in entry.get('usages', []):
                 line = u[0] + 1
                 if not any(a <= line <= b for a, b in spans):
                     uses.append([line, name])
         if uses:
             anon[m] = sorted(set(map(tuple, uses)))
+        if named:
+            xrefs[m] = sorted(named)
     identity = {
         'revision': rev,
         'lean_tree_id': S.lean_tree_id(S.tracked(repo, rev)),
@@ -229,6 +243,9 @@ def extract(repo, rev):
     }
     (out / 'anon.json').write_text(json.dumps({m: [list(u) for u in v] for m, v in anon.items()},
                                               sort_keys=True))
+    # Every name each module's source mentions (any position): deletion dependents.
+    (out / 'xrefs.json').write_text(json.dumps(xrefs, sort_keys=True))
+    identity['xrefs_sha256'] = sha256_file(out / 'xrefs.json')
     identity['graph_sha256'] = sha256_file(out / 'graph.jsonl.gz')
     identity['anon_sha256'] = sha256_file(out / 'anon.json')
     identity['build_log_sha256'] = sha256_file(out / 'build.log')
@@ -265,14 +282,15 @@ class Inputs:
                 not self.toolchain.endswith('v' + self.identity['lean_version']):
             problems.append('toolchain')
         for name, key in (('graph.jsonl.gz', 'graph_sha256'), ('anon.json', 'anon_sha256'),
-                          ('build.log', 'build_log_sha256')):
-            if sha256_file(cdir / name) != self.identity[key]:
+                          ('build.log', 'build_log_sha256'), ('xrefs.json', 'xrefs_sha256')):
+            if not (cdir / name).exists() or sha256_file(cdir / name) != self.identity.get(key):
                 problems.append(name)
         if problems:
             raise SystemExit('stale or altered extraction: ' + ', '.join(problems))
         with gzip.open(cdir / 'graph.jsonl.gz', 'rt') as f:
             self.records = [json.loads(line) for line in f]
         self.anon = json.loads((cdir / 'anon.json').read_text())
+        self.xrefs = json.loads((cdir / 'xrefs.json').read_text())
         self.build_log = (cdir / 'build.log').read_text()
 
     def lean_text(self, path):
@@ -529,7 +547,56 @@ def build(inp):
         'blanket': blanket, 'unextracted': unextracted, 'reach_modules': reach_modules,
         'runner_modules': runner_modules, 'inline_counts': inline_counts,
         'unclassified': unclassified, 'consts': consts, 'loaded': loaded,
+        'fold': fold, 'node_module': node_module, 'imports': imports,
     }
+
+
+# ------------------------------------------------------------ dependents ----
+
+MENTION_EXCLUDE = ('docs/', 'scripts/lean-inventory/', 'scripts/lean-inventory.json')
+
+
+def orphan_dependents(state, orphans):
+    """What else names an orphan family's modules. An orphan family has no live consumer,
+    but modules of other families (themselves holding only orphan users) may still import
+    it, mention its constants or read its files, so deleting it alone would break them.
+
+    Per family: `lean` rows `[path, imports, names, kernel_uses]` for each tracked Lean file
+    outside the family (generated roots excepted) that imports a member module, whose
+    .ilean mentions a member constant (any position: proofs, `open`, `attribute`, ...), or
+    with a kernel edge into the family; `files`: tracked non-Lean files outside docs/ and
+    this tool whose text names a member path or module; `standalone` when both are empty."""
+    inp, mi = state['inp'], state['module_info']
+    fold, node_module, imports = state['fold'], state['node_module'], state['imports']
+    edges = state['facts'].edges
+    members = {fam: sorted(m for m, info in mi.items() if info['family'] == fam) for fam in orphans}
+    out = {}
+    others = [(p, b) for p, b in inp.files if not p.endswith('.lean')
+              and not p.startswith(MENTION_EXCLUDE)] if orphans else []
+    texts = S.blobs(inp.repo, [b for _, b in others]) if others else {}
+    for fam in orphans:
+        ms = set(members[fam])
+        names = {n for n in fold if node_module.get(fold[n]) in ms}
+        nodes = {fold[n] for n in names}
+        uses = {}
+        for x, ys in edges.items():
+            src = node_module.get(x)
+            if src is not None and src not in ms and ys & nodes:
+                uses[src] = uses.get(src, 0) + 1
+        rows = []
+        for p in sorted(inp.lean_paths):
+            m = S.module_name(p)
+            if m in ms or p in S.GENERATED_ROOTS:
+                continue
+            imp = bool(set(imports.get(m, ())) & ms)
+            named = len(set(inp.xrefs.get(m, ())) & names)
+            k = uses.get(m, 0)
+            if imp or named or k:
+                rows.append([p, imp, named, k])
+        needles = [mi[m]['path'] for m in sorted(ms)] + sorted(ms)
+        files = sorted(p for p, b in others if any(n in texts[b] for n in needles))
+        out[fam] = {'lean': rows, 'files': files, 'standalone': not rows and not files}
+    return out
 
 
 # ------------------------------------------------------------------ timing ----
@@ -689,6 +756,10 @@ def render(state):
             for k, v in sorted(state['sets'].items())}
     unresolved_fams = [f['family'] for f in families if f['verdict'] == 'unresolved']
     orphans = [f['family'] for f in families if f['verdict'] == 'orphan']
+    deps = orphan_dependents(state, orphans)
+    for f in families:
+        if f['verdict'] == 'orphan':
+            f['dependents'] = deps[f['family']]
     out = {
         'schema': SCHEMA, 'version': VERSION,
         'revision': inp.rev, 'lean_tree_id': inp.lean_tree_id, 'toolchain': inp.toolchain,

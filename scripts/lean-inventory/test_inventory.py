@@ -159,7 +159,7 @@ FILES = {
     'lean-toolchain': 'leanprover/lean4:v4.24.0\n',
     'Solidity.lean': ''.join(f'import Solidity.{m}\n' for m in (
         'Backend.A', 'Backend.AControls', 'Yul.B', 'Lowering.C', 'Frontend.D',
-        'SolcValidation.E', 'Source.F', 'Optimizer.G', 'Calc.Mid', 'Goals')),
+        'SolcValidation.E', 'Source.F', 'Optimizer.G', 'Calc.Mid', 'Calc.Use', 'Goals')),
     'SolidityExamples.lean': 'import Solidity.Examples.T\n',
     'Solidity/Backend/A.lean': 'def a1 := 1\ndef a2 := 2\n',
     'Solidity/Backend/AControls.lean': 'import Solidity.Backend.A\ndef c := a2\n#guard b1 = 1\n',
@@ -170,6 +170,9 @@ FILES = {
     'Solidity/Source/F.lean': '-- no declarations\n',
     'Solidity/Optimizer/G.lean': 'def g1 := 1\n',
     'Solidity/Calc/Mid.lean': 'def m := a1\n',
+    # Uses the orphan Lowering family while nothing uses it: a deletion dependent.
+    'Solidity/Calc/Use.lean': 'import Solidity.Lowering.C\ndef u := p\n',
+    'scripts/reads-g.py': "open('Solidity/Optimizer/G.lean')\n",
     'Solidity/Goals.lean': 'def goal : Prop := True\n',
     'Solidity/Examples/T.lean': 'import Solidity.Calc.Mid\ntheorem t1 : m = m := rfl\n',
     'tests/x.lean': 'import Solidity.SolcValidation.E\n#eval e1\n',
@@ -192,9 +195,11 @@ CONSTS = [  # module, name, kind, refs, range, flags
     ('Solidity.SolcValidation.E', 'Solidity.SolcValidation.E.e1', 'def', [], [1, 1], {}),
     ('Solidity.Optimizer.G', 'Solidity.Optimizer.G.g1', 'def', [], [1, 1], {}),
     ('Solidity.Calc.Mid', 'Solidity.Calc.Mid.m', 'def', ['Solidity.Backend.A.a1'], [1, 1], {}),
+    ('Solidity.Calc.Use', 'Solidity.Calc.Use.u', 'def', ['Solidity.Lowering.C.p'], [2, 2], {}),
     ('Solidity.Goals', 'Solidity.Goals.goal', 'def', [], [1, 1], {}),
     ('Solidity.Examples.T', 'Solidity.Examples.T.t1', 'theorem', ['Solidity.Calc.Mid.m'], [2, 2], {}),
 ]
+XREFS = {'Solidity.Calc.Use': ['Solidity.Lowering.C.p']}
 ANON = {'Solidity.Backend.AControls': [[3, 'Solidity.Yul.B.b1']]}
 BUILD_LOG = ('✔ [1/3] Built Solidity.Backend.A (1.5s)\n✔ [2/3] Fetched Solidity.Yul.B\n'
              '✔ [3/3] Built Solidity.Optimizer.G (850ms)\n')
@@ -227,6 +232,7 @@ def make_fixture(root):
         for r in recs:
             f.write(json.dumps(r, sort_keys=True) + '\n')
     (cdir / 'anon.json').write_text(json.dumps(ANON, sort_keys=True))
+    (cdir / 'xrefs.json').write_text(json.dumps(XREFS, sort_keys=True))
     (cdir / 'build.log').write_text(BUILD_LOG)
     ident = {'revision': rev, 'lean_tree_id': S.lean_tree_id(S.tracked(root, rev)),
              'toolchain': 'leanprover/lean4:v4.24.0', 'lean_version': '4.24.0',
@@ -234,7 +240,7 @@ def make_fixture(root):
              'olean_digest': 'x', 'ilean_digest': 'x', 'missing_compiled': [],
              'build_command': 'build', 'extract_command': 'extract'}
     for name, key in (('graph.jsonl.gz', 'graph_sha256'), ('anon.json', 'anon_sha256'),
-                      ('build.log', 'build_log_sha256')):
+                      ('build.log', 'build_log_sha256'), ('xrefs.json', 'xrefs_sha256')):
         ident[key] = INV.sha256_file(cdir / name)
     (cdir / 'identity.json').write_text(json.dumps(ident))
     return rev
@@ -281,6 +287,14 @@ class FixtureTests(unittest.TestCase):
         self.assertEqual(self.inv['certified_orphan_families'],
                          ['dir:Solidity/Lowering/', 'dir:Solidity/Optimizer/'])
 
+    def test_orphan_dependents(self):
+        low = self.fam('dir:Solidity/Lowering/')['dependents']
+        self.assertEqual(low, {'lean': [['Solidity/Calc/Use.lean', True, 1, 1]], 'files': [],
+                               'standalone': False})
+        opt = self.fam('dir:Solidity/Optimizer/')['dependents']
+        # The generated Bridge root imports it but is regenerated, so it is no dependent.
+        self.assertEqual(opt, {'lean': [], 'files': ['scripts/reads-g.py'], 'standalone': False})
+
     def test_timing_records(self):
         rows = {m[0]: m[5] for f in self.inv['families'] for m in f['members']}
         self.assertEqual(rows['Solidity/Backend/A.lean'], 1500)
@@ -313,6 +327,8 @@ class FixtureTests(unittest.TestCase):
             'counts': lambda i: self.fam_in(i, 'dir:Solidity/Yul/')['counts'].update(keep=0),
             'revision': lambda i: i.update(revision='0' * 40),
             'provenance': lambda i: i['timing']['provenance'].update(command=''),
+            'dependents': lambda i: self.fam_in(i, 'dir:Solidity/Lowering/')['dependents'].update(
+                lean=[], standalone=True),
         }
         for name, edit in cases.items():
             with self.subTest(name):
