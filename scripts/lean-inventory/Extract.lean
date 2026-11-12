@@ -87,6 +87,16 @@ def nameLits (e : Expr) : Array Name := Id.run do
     | _ => pure ()
   return out
 
+/-- Order-preserving deduplication in linear time (`List.eraseDups` is quadratic). -/
+def dedup (xs : Array Name) : Array Name := Id.run do
+  let mut seen : Std.HashSet Name := {}
+  let mut out := #[]
+  for x in xs do
+    if !seen.contains x then
+      seen := seen.insert x
+      out := out.push x
+  return out
+
 def mentionsLean (e : Expr) : Bool :=
   e.getUsedConstants.any fun c => c.getRoot == `Lean
 
@@ -113,7 +123,7 @@ def dumpConsts (out : IO.FS.Stream) (env : Environment) (group : String) (m : Na
   let insts := (instanceExtension.getState env).instanceNames
   for ci in constants do
     let n := ci.name
-    let refs := (kernelRefs ci).filter isProject |>.toList.eraseDups.toArray
+    let refs := dedup ((kernelRefs ci).filter isProject)
     let isMeta := mentionsLean ci.type
     let lits : Array Name := if isMeta then
         match ci.value? (allowOpaque := true) with
@@ -130,7 +140,7 @@ def dumpConsts (out : IO.FS.Stream) (env : Environment) (group : String) (m : Na
     if simps.isLemma (.decl n) then fields := fields ++ [("simp", toJson true)]
     if isMeta then fields := fields ++ [("meta", toJson true)]
     if !lits.isEmpty then
-      fields := fields ++ [("lits", toJson (lits.toList.eraseDups.map Name.toString))]
+      fields := fields ++ [("lits", toJson ((dedup lits).map Name.toString))]
     if let some t := impl then fields := fields ++ [("impl", toJson t)]
     out.putStrLn (Json.mkObj fields).compress
 
