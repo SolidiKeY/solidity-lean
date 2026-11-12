@@ -1,13 +1,13 @@
 {
- "comment": "Quality ratchet counts (scripts/hygiene/quality.py); measured on `seed`; values may only go down. Null counts are reported, not enforced (no tool in CI); a set count always is.",
+ "comment": "Quality ratchet counts (scripts/hygiene/quality.py); measured on `seed`; values may only go down. A set count is always enforced; lean_warnings is null (reported with --lean-log).",
  "seed": "5fee865fcffe6e3e052ebc7bdae7f200db17a5bd",
- "python_dead_code_tool": null,
+ "python_dead_code_tool": "ruff 0.16.9",
  "metrics": {
   "lean_long_files": 43,
   "long_proofs": 77,
   "duplicate_windows": 11054,
   "unreachable_declarations": 8297,
-  "python_dead_code": null,
+  "python_dead_code": 266,
   "lean_warnings": null
  }
 }

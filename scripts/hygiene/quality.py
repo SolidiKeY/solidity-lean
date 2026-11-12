@@ -33,12 +33,12 @@ tree) and compared with scripts/hygiene/baseline.json. The count definitions:
                             elaborated extraction, so it cannot run in a fast check.
   python_dead_code          ruff's F401 (unused import), F811 (redefinition of an unused name) and
                             F841 (unused local) findings over tracked .py files outside vendor
-                            paths. Needs ruff; vulture is not used (no new dependency). CI has no
-                            ruff, so the baseline leaves this count null: it is reported where
-                            ruff is installed ("skip with a note" elsewhere), not enforced. Once
-                            CI installs ruff, set the count and python_dead_code_tool (null may
-                            become a number); from then on a run without that exact ruff version
-                            FAILS, since rule details change between versions.
+                            paths, counted with the ruff pinned in ruff-requirements.txt (vulture
+                            is not used). PATH's ruff is used when it is that version; otherwise
+                            the pinned wheel is installed with pip --require-hashes under Git's
+                            directory (once; about 2 s), so CI needs no setup step. The count is
+                            enforced: a run that cannot get the pinned ruff FAILS, since rule
+                            details change between versions.
   lean_warnings             distinct `warning: FILE:LINE:COL: …` lines of a Lake build log given
                             with --lean-log (opt-in; off by default). Lake's artifact cache keeps
                             no logs, so only a build that compiled every module sees every
@@ -248,11 +248,53 @@ def duplicate_windows(texts):
     return total - len(seen), per
 
 
-def ruff_version():
-    exe = shutil.which("ruff")
-    if not exe: return None
-    r = subprocess.run([exe, "--version"], capture_output=True, text=True)
+RUFF_REQUIREMENTS = os.path.join(HERE, "ruff-requirements.txt")
+RUFF_PROBLEM = []  # why the pinned ruff is unavailable, for the report
+
+
+def ruff_pin():
+    with open(RUFF_REQUIREMENTS) as f:
+        m = re.search(r"^ruff==([0-9][0-9A-Za-z.]*)", f.read(), re.M)
+    if not m: raise SetupError(f"{RUFF_REQUIREMENTS}: no ruff==VERSION line")
+    return m.group(1)
+
+
+def _version_of(exe):
+    try:
+        r = subprocess.run([exe, "--version"], capture_output=True, text=True, timeout=60)
+    except (OSError, subprocess.SubprocessError):
+        return None
     return r.stdout.strip() if r.returncode == 0 else None
+
+
+@functools.lru_cache(maxsize=None)
+def ruff_exe():
+    """A ruff of the pinned version: PATH's when it matches, else one installed from the hashed
+    wheels of ruff-requirements.txt under Git's directory (kept for later runs). None, with the
+    reason in RUFF_PROBLEM, when neither works; an enforced count then fails."""
+    want = "ruff " + ruff_pin()
+    exe = shutil.which("ruff")
+    if exe and _version_of(exe) == want: return exe
+    d = cache_dir()
+    if d is None:
+        RUFF_PROBLEM.append("no Git directory to install it in"); return None
+    target = os.path.join(os.path.dirname(d), "hygiene-tools", want.replace(" ", "-"))
+    local = os.path.join(target, "bin", "ruff.exe" if os.name == "nt" else "ruff")
+    if os.path.exists(local) and _version_of(local) == want: return local
+    shutil.rmtree(target, ignore_errors=True)
+    r = subprocess.run([sys.executable, "-m", "pip", "install", "--quiet", "--disable-pip-version-check",
+                        "--no-deps", "--only-binary", ":all:", "--require-hashes", "--target", target,
+                        "-r", RUFF_REQUIREMENTS], capture_output=True, text=True,
+                       env={**os.environ, "PIP_ROOT_USER_ACTION": "ignore"})
+    if r.returncode == 0 and os.path.exists(local) and _version_of(local) == want: return local
+    RUFF_PROBLEM.append(f"installing {want} with pip failed: " + (r.stderr.strip()[-300:] or "no ruff binary"))
+    return None
+
+
+def ruff_version():
+    """'ruff X' of the pinned ruff this run can use, else None."""
+    exe = ruff_exe()
+    return _version_of(exe) if exe else None
 
 
 def python_dead_code(commit, t):
@@ -263,7 +305,7 @@ def python_dead_code(commit, t):
             arch = git("archive", "--format=tar", commit, "--", *paths[i:i + 500])
             r = subprocess.run(["tar", "-x", "-C", d], input=arch, capture_output=True)
             if r.returncode: raise SetupError("cannot unpack Python sources: " + r.stderr.decode(errors="replace"))
-        r = subprocess.run(["ruff", "check", "--isolated", "--no-cache", "--select", RUFF_RULES,
+        r = subprocess.run([ruff_exe(), "check", "--isolated", "--no-cache", "--select", RUFF_RULES,
                             "--output-format", "json", "--exit-zero", "."], cwd=d, capture_output=True, text=True)
         if r.returncode: raise SetupError("ruff failed: " + r.stderr.strip()[-500:])
         rows = [x for x in json.loads(r.stdout or "[]") if x.get("code") in RUFF_RULES.split(",")]
@@ -384,7 +426,9 @@ class Measure:
             return n, "", []
         if metric == "python_dead_code":
             v = ruff_version()
-            if v is None: return None, "skipped: ruff is not installed (vulture is not used: no new dependency)", []
+            if v is None:
+                return None, (f"ruff {ruff_pin()} is not on PATH and could not be installed: "
+                              f"{'; '.join(RUFF_PROBLEM) or 'unknown reason'}"), []
             n, rows = python_dead_code(self.commit, self.t)
             return n, v, [f"{p}:{l} {c}" for p, l, c in rows]
         if metric == "lean_warnings":
@@ -514,12 +558,14 @@ def measure_all(commit, only, lean_log=None, use_cache=True):
 
 def seed_baseline(commit):
     counts = measure_all(commit, METRICS, None, True)
-    # Only counts every gate can measure are set: CI has neither ruff nor a full build log.
+    # lean_warnings stays null: no gate has a full build log. Every other count is enforced.
     metrics = {k: counts[k]["value"] for k in METRICS}
-    metrics["python_dead_code"] = metrics["lean_warnings"] = None
+    if metrics["python_dead_code"] is None:
+        raise SetupError("cannot seed python_dead_code: " + counts["python_dead_code"]["note"])
+    metrics["lean_warnings"] = None
     return {"comment": "Quality ratchet counts (scripts/hygiene/quality.py); measured on `seed`; values may only go down. "
-                       "Null counts are reported, not enforced (no tool in CI); a set count always is.",
-            "seed": commit, "python_dead_code_tool": None, "metrics": metrics}
+                       "A set count is always enforced; lean_warnings is null (reported with --lean-log).",
+            "seed": commit, "python_dead_code_tool": counts["python_dead_code"]["note"], "metrics": metrics}
 
 
 def main(argv):

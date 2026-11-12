@@ -262,7 +262,7 @@ class Ratchet(unittest.TestCase):
         self.assertFalse(ok, rep); self.assertIn("cannot measure it (baseline counted with ruff 1, this host has ruff 2)", rep[0])
         q.ruff_version = lambda: None
         ok, rep = self.run_eval(base, head, ("python_dead_code",))
-        self.assertFalse(ok, rep); self.assertIn("ruff is not installed", rep[0])
+        self.assertFalse(ok, rep); self.assertIn("could not be installed", rep[0])
 
     def test_null_ruff_count_is_reported_with_or_without_ruff(self):
         base = self.base_commit(baseline(python_dead_code=None, lean_warnings=None))
@@ -272,7 +272,7 @@ class Ratchet(unittest.TestCase):
         self.assertTrue(ok, rep); self.assertIn("ok python_dead_code: 9 (baseline is null", rep[0])
         q.ruff_version = lambda: None
         ok, rep = self.run_eval(base, head, ("python_dead_code",))
-        self.assertTrue(ok, rep); self.assertIn("ruff is not installed", rep[0])
+        self.assertTrue(ok, rep); self.assertIn("could not be installed", rep[0])
 
     def test_lean_warnings_null_is_reported_not_enforced(self):
         base = self.base_commit()
@@ -289,11 +289,64 @@ class Committed(unittest.TestCase):
     def test_committed_baseline_parses(self):
         with open(os.path.join(HERE, "baseline.json"), "rb") as f:
             b = q.parse_baseline(f.read(), "working tree")
-        # Only counts every gate (CI included: no ruff, no build log) can measure are set.
-        self.assertIsNone(b["metrics"]["lean_warnings"]); self.assertIsNone(b["metrics"]["python_dead_code"])
-        self.assertIsNone(b["python_dead_code_tool"])
-        unset = ("lean_warnings", "python_dead_code")
-        self.assertTrue(all(isinstance(b["metrics"][k], int) for k in q.METRICS if k not in unset))
+        # Every count is enforced except lean_warnings (no gate has a full build log); the Python
+        # count is pinned to the ruff that quality.py provisions.
+        self.assertIsNone(b["metrics"]["lean_warnings"])
+        self.assertTrue(all(isinstance(b["metrics"][k], int) for k in q.METRICS if k != "lean_warnings"))
+        self.assertEqual(b["python_dead_code_tool"], "ruff " + q.ruff_pin())
+
+    def test_ruff_requirements_pin_every_wheel_by_hash(self):
+        import re
+        with open(q.RUFF_REQUIREMENTS) as f: text = f.read()
+        hashes = re.findall(r"--hash=sha256:(\S+)", text)
+        self.assertGreaterEqual(len(hashes), 10)
+        self.assertTrue(all(re.fullmatch(r"[0-9a-f]{64}", h) for h in hashes))
+        self.assertEqual(len(re.findall(r"^ruff==", text, re.M)), 1)
+
+
+class Provision(unittest.TestCase):
+    """ruff_exe: PATH's ruff when it is the pinned version, else a hashed pip install."""
+
+    def setUp(self):
+        self.tmp = tempfile.TemporaryDirectory()
+        self.saved = (q.shutil.which, q._version_of, q.subprocess.run, q.cache_dir)
+        q.ruff_exe.cache_clear(); del q.RUFF_PROBLEM[:]
+        q.cache_dir = lambda: os.path.join(self.tmp.name, "hygiene-quality-cache")
+        self.want = "ruff " + q.ruff_pin(); self.calls = []
+
+    def tearDown(self):
+        q.shutil.which, q._version_of, q.subprocess.run, q.cache_dir = self.saved
+        q.ruff_exe.cache_clear(); del q.RUFF_PROBLEM[:]; self.tmp.cleanup()
+
+    def fake_pip(self, ok):
+        def run(cmd, **kw):
+            self.calls.append(cmd)
+            if ok:
+                target = cmd[cmd.index("--target") + 1]
+                os.makedirs(os.path.join(target, "bin")); open(os.path.join(target, "bin", "ruff"), "w").close()
+            return subprocess.CompletedProcess(cmd, 0 if ok else 1, "", "" if ok else "network down")
+        q.subprocess.run = run
+
+    def test_path_ruff_of_the_pinned_version_is_used(self):
+        q.shutil.which = lambda n: "/x/ruff"; q._version_of = lambda e: self.want; self.fake_pip(True)
+        self.assertEqual(q.ruff_exe(), "/x/ruff"); self.assertEqual(self.calls, [])
+
+    def test_other_version_installs_the_pinned_wheel_with_hashes(self):
+        q.shutil.which = lambda n: "/x/ruff"
+        q._version_of = lambda e: self.want if e != "/x/ruff" else "ruff 0.0.1"
+        self.fake_pip(True)
+        exe = q.ruff_exe()
+        self.assertTrue(exe.startswith(os.path.join(self.tmp.name, "hygiene-tools")), exe)
+        cmd = self.calls[0]
+        for flag in ("--require-hashes", "--only-binary", "--no-deps"): self.assertIn(flag, cmd)
+        self.assertEqual(cmd[cmd.index("-r") + 1], q.RUFF_REQUIREMENTS)
+        q.ruff_exe.cache_clear(); self.calls.clear()
+        self.assertEqual(q.ruff_exe(), exe); self.assertEqual(self.calls, [])  # kept for later runs
+
+    def test_failed_install_gives_none_and_a_reason(self):
+        q.shutil.which = lambda n: None; q._version_of = lambda e: self.want; self.fake_pip(False)
+        self.assertIsNone(q.ruff_exe())
+        self.assertIn("network down", q.RUFF_PROBLEM[0])
 
 
 if __name__ == "__main__":
