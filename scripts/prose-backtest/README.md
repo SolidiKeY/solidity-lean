@@ -49,6 +49,15 @@ each run and must match. A replay with the frozen end and day count must reprodu
 frozen window's commit digest. Any other window is reported as
 `window_matches_policy: false`.
 
+Replay, evaluation and calibration refuse an `--output` that is, or links to, a frozen
+input. Without `--pb1-replay`, the legacy and pb1 totals are omitted and marked
+unavailable; they are never reported as zero.
+
+An area holding an undecodable file, or a symlink or submodule in reach, is marked
+**unavailable** at that commit with its reason. It is never scored as zero prose.
+Calibration refuses any lookback that contains such a measurement. The replayed history
+has none: 0 unavailable cells, and recalibration reproduces the policy byte for byte.
+
 ### Frozen specification
 
 The selection rules use area existence and committer timestamps only. They never look
@@ -195,7 +204,7 @@ here instead of being tuned.
   the replay's list. Boundary predecessor: `83ad39cbd1…` (ts 1792624132), used for deltas
   only. History is unshallowed. There are no non-monotone timestamps, and no older commit
   is stamped inside the window.
-- **Determinism.** The two v2 replays are byte-identical (`cmp`; SHA-256 `d57fe5c4…`). The
+- **Determinism.** The two v2 replays are byte-identical (`cmp`; SHA-256 `6573e40e…`). The
   policy SHA-256 is equal before and after. The pb1 original-mode replay is byte-identical
   before and after this change, and `estimate.json` has no diff against the pinned commit.
 - **Spot checks.** A separate script recomputed counts and arithmetic with `git show`. It

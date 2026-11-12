@@ -576,9 +576,44 @@ class V2History(GitCase):
         self.assertEqual(out["totals"]["all"]["v2"]["failing_cells"] - enforced,
                          sum(1 for f in out["failure_index"] if f["area"] == "docs/guide"))
 
+    def test_incomplete_measurement_unavailable_and_calibration_refused(self):
+        c = self.build()
+        policy = self.v2_calibrate(c["e1"])
+        bad = self.h.commit(T0 + 8 * DAY, {"docs/fresh/b.md": b"\xff\xfe\n"})   # new area, unreadable
+        (self.h.root / "Solidity/Core/L.lean").symlink_to("A.lean")   # a symlink in reach
+        link = self.h.commit(T0 + 9 * DAY, {})
+        out = self.v2_replay(link, policy, name="bad.json")
+        rows = {(r["commit"], r["area"], r["metric"]): r for r in out["rows"]}
+        self.assertEqual(rows[(bad, "docs/fresh", "docs_lines")]["status"], "unavailable")
+        self.assertEqual(rows[(link, "Solidity/Core", "comment_lines")]["status"], "unavailable")
+        self.assertNotIn(bad, [f["commit"] for f in out["failure_index"] if f["area"] == "docs/fresh"])
+        summary = {s["commit"]: s for s in out["commits"]}
+        self.assertEqual(summary[bad]["v2_unavailable_cells"], 4)
+        # no historical replay supplied: legacy and pb1 are reported unavailable, not zero
+        self.assertEqual(sorted(out["totals"]["all"]), ["v2", "v2_enforced"])
+        self.assertTrue(out["historical_rules"]["status"].startswith("unavailable"))
+        # the anchor (where docs/fresh first appears) is unmeasurable: no coefficients
+        with self.assertRaises(SystemExit):
+            self.v2_calibrate(bad, name="refused.json")
+
+    def test_output_may_not_overwrite_frozen_inputs(self):
+        c = self.build()
+        policy = self.v2_calibrate(c["e1"])
+        before = policy.read_bytes()
+        link = self.out / "alias.json"
+        os.link(policy, link)                                          # hard link to the policy
+        sym = self.out / "sym.json"
+        sym.symlink_to(policy)
+        for target in (policy, link, sym):
+            for mode in (["--mode", "v2-replay", "--end", c["e5"]], ["--mode", "v2-evaluate", "--commit", c["e5"]]):
+                with self.assertRaises(SystemExit):
+                    bt.main(mode + ["--repo", str(self.h.root), "--policy", str(policy),
+                                    "--output", str(target)])
+        self.assertEqual(policy.read_bytes(), before)
+
     def test_area_after_coverage_anchor_has_no_anchor_and_blocks(self):
         h = self.h
-        h.commit(T0, {"Solidity/Core/A.lean": lean(4, 1)})
+        h.commit(T0, {"Solidity/Core/A.lean": lean(4, 1), "docs/a.md": "a\n"})
         h.commit(T0 + DAY, {"Solidity/Goals/G.lean": GOALS})             # coverage anchor
         t = h.commit(T0 + 2 * DAY, {"Solidity/T/T.lean": "-- t\n"})       # transient, after it
         end = h.commit(T0 + 3 * DAY, {}, remove=["Solidity/T/T.lean"])
@@ -688,9 +723,14 @@ class V2History(GitCase):
         self.assertEqual(m["v2_code"]["Solidity/Core"], 1)
         bad = self.h.commit(T0 + 1, {"Solidity/Bad/X.lean": b"\xff\xfe -- not utf-8\n"})
         mb = bt.measure_commit(repo, bt.Analyzer(repo), bad, None, verified)
-        self.assertEqual((mb["v2"]["Solidity/Bad"], mb["v2_code"]["Solidity/Bad"]),
-                         (dict.fromkeys(bt.METRICS, 0), 0))      # undecodable: area kept, reported
         self.assertIn("Solidity/Bad/X.lean", [u["path"] for u in mb["unknown"]])
+        # undecodable: the area stays visible but is marked unmeasured, never a zero-count pass
+        self.assertEqual(mb["v2_errors"], {"Solidity/Bad": ["undecodable Solidity/Bad/X.lean"]})
+        policy = {"calibration": {}, "specification": {"denominator_mapping": {},
+                                                       "enforcement_exclusions": {}}}
+        rows = {(r["area"], r["metric"]): r for r in bt.v2_rows(bad, mb, policy, None, None)}
+        self.assertEqual(rows[("Solidity/Bad", "comment_lines")]["status"], "unavailable")
+        self.assertEqual(rows[("Solidity/Core", "comment_lines")]["status"], "fail")   # unmapped, measured
         unverified = bt.measure_commit(repo, bt.Analyzer(repo), c, None, [])
         self.assertEqual(unverified["v2"]["Solidity/Core"]["comment_lines"], 4)
         self.assertEqual(unverified["v2_code"]["Solidity/Core"], 2)

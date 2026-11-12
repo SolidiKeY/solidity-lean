@@ -24,6 +24,7 @@ import hashlib
 import importlib.machinery
 import importlib.util
 import json
+import os
 from pathlib import Path
 import re
 import subprocess
@@ -342,7 +343,7 @@ def measure_commit(repo, analyzer, commit, estimate, verified=None):
     legacy, legacy_v1_pids = {}, {}
     norm, code = {}, {}
     exclusions, unknown, unsupported = [], [], []
-    v2, v2_code, v2_excluded = {}, {}, []
+    v2, v2_code, v2_excluded, v2_errors = {}, {}, [], {}
     has_docs = any(p.startswith("docs/") for p in byp)
     has_sol = any(p.startswith("Solidity/") for p in byp)
     legacy_error = legacy_error or (None if has_docs and has_sol else "missing source directory")
@@ -352,6 +353,10 @@ def measure_commit(repo, analyzer, commit, estimate, verified=None):
             continue
         if kind != "blob" or mode not in ("100644", "100755"):
             unsupported.append({"path": path, "mode": mode, "kind": kind})
+            if verified is not None and (tree == "docs" or path.endswith(".lean") or kind == "commit"
+                                         or mode == "120000"):
+                # v2: an entry in reach that cannot be read leaves its area unmeasured
+                v2_errors.setdefault(area_of(path), []).append(f"unsupported {kind} {mode} {path}")
             if mode == "120000":   # the checker follows symlinks; this replay cannot
                 legacy_error = legacy_error or f"symlink not replayable {path}"
             continue
@@ -367,9 +372,10 @@ def measure_commit(repo, analyzer, commit, estimate, verified=None):
         if "error" in info:
             legacy_error = legacy_error or f"undecodable {path}"
             unknown.append({"path": path, "reason": "undecodable UTF-8; excluded from both sides"})
-            if verified is not None:   # v2 keeps the area visible (its unknown list records why)
+            if verified is not None:   # v2: the area is visible but its measurement is incomplete
                 v2.setdefault(area, dict.fromkeys(METRICS, 0))
                 v2_code.setdefault(area, 0)
+                v2_errors.setdefault(area, []).append(f"undecodable {path}")
             continue
         # legacy: exactly the checker's per-file contributions
         if is_lean:
@@ -423,6 +429,8 @@ def measure_commit(repo, analyzer, commit, estimate, verified=None):
         "baseline_blob": byp.get(BASELINE_PATH, (None, None, None))[2],
         "registered_modules": len(modules),
         "v2": v2, "v2_code": v2_code, "v2_excluded": v2_excluded,
+        "v2_errors": {a: sorted(e) for a, e in sorted(v2_errors.items())},
+        "v2_commit_error": None if has_docs and has_sol else "missing source directory",
     }
 
 
@@ -932,6 +940,7 @@ def v2_specification(repo, end, days, lookback_days, exclusions, verified):
 
 
 def v2_calibrate(args):
+    refuse_alias(args.output, args.verified)
     repo = Repo(args.repo)
     verified = json.loads(Path(args.verified).read_text(encoding="utf-8")) if args.verified else []
     excl = {a: "H548: measured but outside proposed enforcement until r1"
@@ -951,6 +960,10 @@ def v2_calibrate(args):
         for commit in commits:
             if commit not in measured:
                 m = measure_commit(repo, analyzer, commit, None, verified)
+                if m["v2_commit_error"] or m["v2_errors"]:
+                    raise SystemExit(f"BLOCKER: incomplete measurement at lookback commit {commit}: "
+                                     f"{m['v2_commit_error'] or m['v2_errors']}; no coefficient "
+                                     "is derived from it")
                 measured[commit] = (m["v2"], m["v2_code"], len(m["exclusions"]) + len(m["unknown"]))
         counts, codes, _ = measured[anchor["commit"]]
         for area in anchor["areas"]:
@@ -995,6 +1008,20 @@ def v2_calibrate(args):
     }
     Path(args.output).write_text(json.dumps(policy, indent=1, sort_keys=True) + "\n", encoding="utf-8")
     return 0
+
+
+def refuse_alias(output, *inputs):
+    """Refuse an --output that is, or links to, one of the frozen inputs."""
+    out = Path(output)
+    for item in inputs:
+        if not item:
+            continue
+        src = Path(item)
+        same = out.resolve() == src.resolve()
+        if not same and out.exists() and src.exists():
+            same = os.path.samefile(out, src)
+        if same:
+            raise SystemExit(f"--output {output} would overwrite the frozen input {item}")
 
 
 def load_policy(path, expect=None):
@@ -1075,13 +1102,15 @@ def v2_rows(commit, m, policy, prev, prev_codes):
             if p is None and prev is not None:
                 p = {"numerator": 0, "denominator": denominator(
                     area, prev_codes, {area: mapping.get(area, default_source(area))})[0]}
+            error = m["v2_commit_error"] or "; ".join(m["v2_errors"].get(area, [])) or None
             rows.append({
+                "unavailable_reason": error,
                 "commit": commit, "area": area, "metric": metric, "present": area in m["v2"],
                 "numerator": n, "denominator": d, "denominator_source": source,
                 "case": entry["case"] if entry else "unmapped_fallback",
                 "ratio": entry["ratio"] if entry else "0", "margin": entry["margin"] if entry else "0",
                 "allowance": str(allow), "allowance_floor": allow.numerator // allow.denominator,
-                "status": "pass" if v2_test(n, d, entry) else "fail",
+                "status": "unavailable" if error else "pass" if v2_test(n, d, entry) else "fail",
                 "prior_numerator": p["numerator"] if p else None,
                 "prior_denominator": p["denominator"] if p else None,
                 "enforced_in_proposal": area not in policy["specification"]["enforcement_exclusions"]})
@@ -1108,9 +1137,10 @@ def _historical(pb1_path, window):
     return hashlib.sha256(raw).hexdigest(), index, states, unavailable
 
 
-def _totals(failures, commits, label=None):
+def _totals(failures, commits, rules):
+    """Totals for RULES only: a rule whose results were not supplied is never reported."""
     out = {}
-    for rule in sorted({f["rule"] for f in failures} | set(V2_RULES)):
+    for rule in rules:
         for enforced in (False, True):
             name = rule + ("_enforced" if enforced else "")
             picked = [f for f in failures if f["rule"] == rule and f["commit"] in commits
@@ -1124,6 +1154,7 @@ def _totals(failures, commits, label=None):
 
 
 def v2_replay(args):
+    refuse_alias(args.output, args.policy, args.pb1_replay)
     raw, policy = load_policy(args.policy, args.expect_policy_sha256)
     repo = Repo(args.repo)
     before = hashlib.sha256(raw).hexdigest()
@@ -1187,6 +1218,8 @@ def v2_replay(args):
             "commit": commit, "committer_ts": frozen["commit_ts"].get(commit, frozen["predecessor_ts"]),
             "in_window": in_window, "position": pos,
             "v2_fail_cells": sum(1 for r in crow if r["status"] == "fail"),
+            "v2_unavailable_cells": sum(1 for r in crow if r["status"] == "unavailable"),
+            "measurement_errors": m["v2_commit_error"] or m["v2_errors"] or None,
             "v2_fail_cells_enforced": sum(1 for r in crow if r["status"] == "fail" and r["enforced_in_proposal"]),
             "verified_generated_excluded": m["v2_excluded"],
             "generation_claims_counted_as_handwritten": len(m["exclusions"]) + len(m["unknown"]),
@@ -1196,11 +1229,13 @@ def v2_replay(args):
         if args.progress:
             print(f"{i + 1}/{len(commits)} {commit[:12]}", file=sys.stderr)
     repo.close()
-    history = {}
+    history = {"status": "unavailable: --pb1-replay not supplied; legacy and pb1 totals omitted"}
+    rules = ("v2",)
     if args.pb1_replay:
+        rules = V2_RULES
         digest, hist, states, unavailable = _historical(args.pb1_replay, window)
         failures = hist + failures
-        history = {"pb1_replay_sha256": digest, "legacy_states": _count(states[c] for c in window),
+        history = {"status": "supplied", "pb1_replay_sha256": digest, "legacy_states": _count(states[c] for c in window),
                    "legacy_unavailable_cells": sum(unavailable[c] for c in window)}
         per = _count((f["commit"], f["rule"]) for f in hist)
         for s in summaries:
@@ -1228,9 +1263,9 @@ def v2_replay(args):
         "window_matches_policy": window_match,
         "policy_sha256_before": before, "policy_sha256_after": after_hash,
         "specification_sha256": policy["specification_sha256"], "historical_rules": history,
-        "totals": {"all": _totals(failures, set(window)),
+        "totals": {"all": _totals(failures, set(window), rules),
                    "by_position": {p: _totals(failures, {s["commit"] for s in summaries
-                                                         if s["in_window"] and s["position"] == p})
+                                                         if s["in_window"] and s["position"] == p}, rules)
                                    for p in positions}},
         "residual_failures": residual, "commits": summaries, "rows": rows, "failure_index": failures,
     }
@@ -1242,6 +1277,7 @@ def v2_replay(args):
 
 def v2_evaluate(args):
     """Read-only evaluation of one commit (e.g. the current head); never recalibrates."""
+    refuse_alias(args.output, args.policy)
     raw, policy = load_policy(args.policy, args.expect_policy_sha256)
     repo = Repo(args.repo)
     commit = repo.run("rev-parse", "--verify", args.commit + "^{commit}").decode().strip()
@@ -1256,6 +1292,8 @@ def v2_evaluate(args):
            "policy_sha256": hashlib.sha256(raw).hexdigest(),
            "areas_outside_policy": sorted(set(m["v2"]) - set(policy["calibration"])),
            "fail_cells": sum(1 for r in rows if r["status"] == "fail"),
+           "unavailable_cells": sum(1 for r in rows if r["status"] == "unavailable"),
+           "measurement_errors": m["v2_commit_error"] or m["v2_errors"] or None,
            "fail_cells_enforced": sum(1 for r in rows if r["status"] == "fail" and r["enforced_in_proposal"]),
            "rows": rows}
     if hashlib.sha256(Path(args.policy).read_bytes()).hexdigest() != out["policy_sha256"]:
