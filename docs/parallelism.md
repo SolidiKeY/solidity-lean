@@ -262,7 +262,8 @@ gain is if anything understated.
 ### Shared registries
 
 The library roots are generated: `scripts/coord-tools/register.sh` writes
-`Solidity.lean`, `SolidityExamples.lean` (since the next section) and
+`Solidity.lean`, `SolidityExamples.lean` (since the next section),
+`Solidity/Goals.lean` (every goal module, so each goal step adds its own file) and
 `Bridge/SolidityBridge.lean` from the file tree, each importing every module
 under its prefix, sorted, minus other libraries' subtrees (`Examples/`,
 `Corpus/`, `TestSuite/`, `Solkey/TestSuite.lean`) and `Scratch/`.
