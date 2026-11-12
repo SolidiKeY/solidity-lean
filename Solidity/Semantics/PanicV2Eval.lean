@@ -322,6 +322,101 @@ theorem value_of_ok (σ : State C Γ) {p : PrimTy} (v : Val C Γ p) (a : p.Denot
   | ok b => rw [hv] at he; cases he; rfl
   | error halt => rw [hv] at he; cases he
 
+/-- Typed sources keep expression/path provenance while preserving V1 copies. -/
+def source (σ : State C Γ) {T : Ty} : Src C Γ T → Result (SVal T)
+  | .val v => do pure (.prim (← value σ v))
+  | .copy p _ => do
+    let r ← path σ p
+    ofOpt (σ.storage.find r)
+  | .fixedCopy p shape _ => do
+    let r ← path σ p
+    let v ← ofOpt (σ.storage.find r)
+    pure (shape.apply v)
+  | .copyMem p => do pure (MVal.copyMToSt σ.heap (← mpath σ p))
+  | .fixedCopyMem p shape => do
+    pure (shape.apply (MVal.copyMToSt σ.heap (← mpath σ p)))
+
+/-- Source evaluation projects to the complete V1 value, including copies. -/
+theorem source_erase (σ : State C Γ) {T : Ty} : (src : Src C Γ T) →
+    erase (source σ src) = src.valueT σ
+  | .val v => erase_bind_congr (value_erase σ v) fun _ => rfl
+  | .copy p _ => erase_bind_congr (path_erase σ p) fun _ => erase_ofOpt _
+  | .fixedCopy p _ _ => erase_bind_congr (path_erase σ p) fun _ =>
+      erase_bind_congr (erase_ofOpt _) fun _ => rfl
+  | .copyMem p => erase_bind_congr (mpath_erase σ p) fun _ => rfl
+  | .fixedCopyMem p _ => erase_bind_congr (mpath_erase σ p) fun _ => rfl
+
+/-- A memory assignment source is evaluated before its target address. -/
+def msource (σ : State C Γ) {T : Ty} : MSrc C Γ T → Result (MVal σ.H T)
+  | .val v => value σ v
+  | .ref p => mpath σ p
+
+theorem msource_erase (σ : State C Γ) {T : Ty} (src : MSrc C Γ T) :
+    erase (msource σ src) = src.mvalT σ := by
+  cases src with
+  | val v => exact value_erase σ v
+  | ref p => exact mpath_erase σ p
+
+/-- Gap control for writes: fields are total; an actual indexed-write
+failure retains 0x32. No receiver lookup is reclassified here. -/
+def memoryWrite {H : HTy} (hp : Heap H) {T : Ty} :
+    MAddr H T → MVal H T → Result (Heap H)
+  | .field r h, v => .ok (hp.setField r h v)
+  | .index r a i, v => checked .bounds (hp.setIndex r a i v)
+
+theorem memoryWrite_erase {H : HTy} (hp : Heap H) {T : Ty}
+    (addr : MAddr H T) (v : MVal H T) :
+    erase (memoryWrite hp addr v) = TRes.ofOpt (hp.writeAddr addr v) := by
+  cases addr with
+  | field => rfl
+  | index => exact erase_checked _ _
+
+/-- Gap control: an actual failed array write, after address resolution,
+retains the bounds cause rather than an unknown option failure. -/
+theorem memoryWrite_bounds {H : HTy} (hp : Heap H) {R : RefTy} {E : Ty}
+    (r : HRef H R) (a : ArrTy R E) (i : PrimTy.uint.Denote) (v : MVal H E)
+    (failed : hp.setIndex r a i v = none) :
+    memoryWrite hp (.index r a i) v = .error (.operation .bounds) := by
+  simp only [memoryWrite, failed, checked]
+
+/-- Plain memory assignment preserves V1's source-before-address order. -/
+def assignMem {T : Ty} (l : MLoc C Γ T) (r : MSrc C Γ T)
+    (σ : State C Γ) : Result (Out C σ.H Γ) := do
+  let v ← msource σ r
+  let addr ← mloc σ l
+  let hp ← memoryWrite σ.heap addr v
+  pure ⟨σ.withHeap hp, List.prefix_refl _⟩
+
+/-- Exact whole-state projection guards plain memory writes, not only the halt. -/
+theorem assignMem_erase {T : Ty} (l : MLoc C Γ T) (r : MSrc C Γ T)
+    (σ : State C Γ) : erase (assignMem l r σ) = TRun.assignMem l r σ :=
+  erase_bind_congr (msource_erase σ r) fun _ =>
+    erase_bind_congr (mloc_erase σ l) fun _ =>
+      erase_bind_congr (memoryWrite_erase _ _ _) fun _ => rfl
+
+/-- A source failure wins before target-address evaluation or its bounds test. -/
+theorem assignMem_source_failure {T : Ty} (l : MLoc C Γ T) (r : MSrc C Γ T)
+    (σ : State C Γ) (halt : Halt) (failed : msource σ r = .error halt) :
+    assignMem l r σ = .error halt := by
+  simp only [assignMem, failed]
+  rfl
+
+/-- Gap control for a plain assignment's 0x32: both source and address
+have already succeeded, and the actual indexed write fails. -/
+theorem assignMem_bounds {R : RefTy} {T : Ty} (l : MLoc C Γ T) (src : MSrc C Γ T)
+    (σ : State C Γ) (r : HRef σ.H R) (a : ArrTy R T) (i : PrimTy.uint.Denote)
+    (v : MVal σ.H T) (source_ok : msource σ src = .ok v)
+    (address_ok : mloc σ l = .ok (.index r a i))
+    (failed : σ.heap.setIndex r a i v = none) :
+    assignMem l src σ = .error (.operation .bounds) := by
+  simp only [assignMem, source_ok]
+  change (mloc σ l >>= fun addr => memoryWrite σ.heap addr v >>= fun hp =>
+    pure (⟨σ.withHeap hp, List.prefix_refl _⟩ : Out C σ.H Γ)) = _
+  rw [address_ok]
+  change (memoryWrite σ.heap (.index r a i) v >>= _) = _
+  rw [memoryWrite_bounds _ _ _ _ _ failed]
+  rfl
+
 /-- Classify only the empty-array branch of `pop`. A missing receiver
 and a failed write-back of a nonempty array retain their unknown V1 cause. -/
 def storagePop {E : Ty} (st : Storage C) (keep : Bool)
