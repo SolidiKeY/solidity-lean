@@ -1,15 +1,19 @@
 # Prose back-test (pb1, pb2a)
 
 This directory holds two inactive studies. **pb2a** (the additive v2 proposal,
-`calibration-v2.json`) is described [first](#pb2a-history-backed-additive-calibration-v2).
+`calibration-additive.json`) is described [first](#pb2a-history-backed-additive-calibration-v2).
 The **pb1** sections after it are the original study and its published results,
 kept unchanged as historical inputs. `estimate.json` is byte-for-byte unchanged.
 
 ## pb2a: history-backed additive calibration (v2)
 
 Inactive H629 calibration study for `pb2a-prose-history-calibration`. No checker,
-baseline, workflow or goal reads `calibration-v2.json`, and nothing here discharges
+baseline, workflow or goal reads `calibration-additive.json`, and nothing here discharges
 `pb2a-prose-ratio-goal`. The Python tests are not evidence of CI health or of any Lean proof.
+
+The policy file was first written as `calibration-v2.json` and renamed under H650 with
+its bytes unchanged. The repository's path rule rejects a `v2` segment. The v2 label
+survives only in mode names and schemas.
 
 ### Reproduce (repository root; unshallowed history)
 
@@ -21,19 +25,19 @@ PINNED=ffbeb4d4a929935bb671eb6169c88b2715a7db55
 EVIDENCE_DIR=$(mktemp -d)
 # pb1 original mode, unchanged
 python3 scripts/prose-backtest/backtest.py --mode replay --repo . --end "$PINNED" --days 21 --estimate scripts/prose-backtest/estimate.json --output "$EVIDENCE_DIR/pb1.json"
-# v2 calibration: the only command that writes calibration-v2.json (here to a copy)
-python3 scripts/prose-backtest/backtest.py --mode v2-calibrate --repo . --end "$PINNED" --days 21 --lookback-days 7 --exclude docs/audits --output "$EVIDENCE_DIR/calibration-v2.json"
-cmp "$EVIDENCE_DIR/calibration-v2.json" scripts/prose-backtest/calibration-v2.json
+# v2 calibration: the only command that writes calibration-additive.json (here to a copy)
+python3 scripts/prose-backtest/backtest.py --mode v2-calibrate --repo . --end "$PINNED" --days 21 --lookback-days 7 --exclude docs/audits --output "$EVIDENCE_DIR/calibration-additive.json"
+cmp "$EVIDENCE_DIR/calibration-additive.json" scripts/prose-backtest/calibration-additive.json
 # v2 replay, twice, beside the legacy and pb1 rules
-python3 scripts/prose-backtest/backtest.py --mode v2-replay --repo . --end "$PINNED" --days 21 --policy scripts/prose-backtest/calibration-v2.json --expect-policy-sha256 2688f0889571f568eb7449427b0f94b97be21552d171aa5fe9cf60692ea26f9c --pb1-replay "$EVIDENCE_DIR/pb1.json" --output "$EVIDENCE_DIR/v2-a.json"
-python3 scripts/prose-backtest/backtest.py --mode v2-replay --repo . --end "$PINNED" --days 21 --policy scripts/prose-backtest/calibration-v2.json --expect-policy-sha256 2688f0889571f568eb7449427b0f94b97be21552d171aa5fe9cf60692ea26f9c --pb1-replay "$EVIDENCE_DIR/pb1.json" --output "$EVIDENCE_DIR/v2-b.json"
+python3 scripts/prose-backtest/backtest.py --mode v2-replay --repo . --end "$PINNED" --days 21 --policy scripts/prose-backtest/calibration-additive.json --expect-policy-sha256 2688f0889571f568eb7449427b0f94b97be21552d171aa5fe9cf60692ea26f9c --pb1-replay "$EVIDENCE_DIR/pb1.json" --output "$EVIDENCE_DIR/v2-a.json"
+python3 scripts/prose-backtest/backtest.py --mode v2-replay --repo . --end "$PINNED" --days 21 --policy scripts/prose-backtest/calibration-additive.json --expect-policy-sha256 2688f0889571f568eb7449427b0f94b97be21552d171aa5fe9cf60692ea26f9c --pb1-replay "$EVIDENCE_DIR/pb1.json" --output "$EVIDENCE_DIR/v2-b.json"
 cmp "$EVIDENCE_DIR/v2-a.json" "$EVIDENCE_DIR/v2-b.json"
 sha256sum "$EVIDENCE_DIR/v2-a.json" "$EVIDENCE_DIR/v2-b.json"
 git log --first-parent --format='%H %ct' "$PINNED" > "$EVIDENCE_DIR/first-parent.txt"
 awk '$2>=1792625910 && $2<=1794440310' "$EVIDENCE_DIR/first-parent.txt" | wc -l
 git diff "$PINNED" --exit-code -- scripts/prose-backtest/estimate.json
 # read-only evaluation of the current head
-python3 scripts/prose-backtest/backtest.py --mode v2-evaluate --repo . --commit origin/master --policy scripts/prose-backtest/calibration-v2.json --expect-policy-sha256 2688f0889571f568eb7449427b0f94b97be21552d171aa5fe9cf60692ea26f9c --output "$EVIDENCE_DIR/current-head.json"
+python3 scripts/prose-backtest/backtest.py --mode v2-evaluate --repo . --commit origin/master --policy scripts/prose-backtest/calibration-additive.json --expect-policy-sha256 2688f0889571f568eb7449427b0f94b97be21552d171aa5fe9cf60692ea26f9c --output "$EVIDENCE_DIR/current-head.json"
 ```
 
 Each replay takes about 2.5 minutes on 4 cores. Replay and evaluation read the policy
@@ -226,9 +230,7 @@ here instead of being tuned.
    lookback commits. A held-out period after freezing is needed.
 4. **Unresolved residual failures.** The Goals, Correctness, Lowering and Yul failures at
    the end need explicit allowance decisions. They cannot be erased by raising margins.
-5. **Merge-gate path name.** The mandated file name `calibration-v2.json` fails the
-   hygiene path rule (a `v2` segment). The fix lies outside this study's write scope.
-6. **Inherited provenance.** The pb1 review provenance stays UNVERIFIABLE (H151). Fresh
+5. **Inherited provenance.** The pb1 review provenance stays UNVERIFIABLE (H151). Fresh
    runs do not recover it. The docs/audits enforcement exclusion lasts until r1 (H548).
 
 Full rows, failure indexes, selection lists, reconciliation, spot checks and logs are in
