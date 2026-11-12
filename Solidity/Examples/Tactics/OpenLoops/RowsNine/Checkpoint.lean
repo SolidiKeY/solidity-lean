@@ -22,9 +22,13 @@ def walkPrefix (root : MVarId) (iterations : Nat) : TacticM (List MVarId) :=
       let next ← withCurrHeartbeats do
         let some (C, R, Γ, H, φ) ← Seq.sequent? g
           | throwError "expected a closed sequent"
-        let modalFree ← unsafe evalExpr Bool (mkConst ``Bool)
-          (mkApp3 (mkConst ``Fml.modalFree) C Γ (← Symex.evaluable φ))
-        if modalFree then Seq.closeLeaf g else Seq.chunk g C R Γ H φ 128
+        let modalFree ← whnfD (mkApp3 (mkConst ``Fml.modalFree) C Γ φ)
+        if modalFree.isConstOf ``Bool.true then
+          Seq.closeLeaf g
+        else if modalFree.isConstOf ``Bool.false then
+          Seq.chunk g C R Γ H φ 128
+        else
+          throwError "modal-free classification did not reduce to a Boolean"
       pending := next ++ pending
     return pending
 
