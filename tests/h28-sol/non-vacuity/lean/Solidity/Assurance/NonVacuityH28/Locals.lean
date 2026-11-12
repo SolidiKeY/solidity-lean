@@ -13,7 +13,7 @@ theorem represented_success {C : Contract} {Γ Δ : Ctx} {P : Prog C Γ Δ}
     (hs : Prog.run σ P = .ok o) (ht : Evm.run (Evm.compileProg b P) mc = .ok mc' 0) :
     Evm.Sim C (L + Evm.Prog.pushes P) b G o.st mc' := by
   rcases Main.compiler_correct hf hm hL with
-    ⟨o', mc'', ho, hm', hr⟩ | ⟨_, hrev⟩ | ⟨_, hrev, _⟩ | ⟨_, hdiv | ⟨_, hrev⟩⟩
+    ⟨o', mc'', ho, hm', hr⟩ | ⟨_, hrev⟩ | ⟨_, hdiv⟩
   · have he : (Except.ok o' : TRes (Out C σ.H Δ)) = .ok o := ho.symm.trans hs
     cases he
     have he' : Evm.Out.ok mc'' 0 = .ok mc' 0 := hm'.symm.trans ht
@@ -21,11 +21,7 @@ theorem represented_success {C : Contract} {Γ Δ : Ctx} {P : Prog C Γ Δ}
     exact hr
   · have he : Evm.Out.ok mc' 0 = .revert := ht.symm.trans hrev
     cases he
-  · have he : Evm.Out.ok mc' 0 = .revert := ht.symm.trans hrev
-    cases he
   · have he : Evm.Out.ok mc' 0 = .fault := ht.symm.trans hdiv
-    cases he
-  · have he : Evm.Out.ok mc' 0 = .revert := ht.symm.trans hrev
     cases he
 
 variable (C : Contract)

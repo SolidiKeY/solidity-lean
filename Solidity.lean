@@ -2451,8 +2451,10 @@ import Solidity.Correctness.Lowering.Unchecked.IntegerOne
 import Solidity.Correctness.Lowering.Unchecked.IntegerUpdate
 import Solidity.Correctness.Lowering.Unchecked.LocalUpdate
 import Solidity.Correctness.Lowering.Unchecked.PanicData
+import Solidity.Correctness.Lowering.Unchecked.PowerV2Arithmetic
 import Solidity.Correctness.Lowering.Unchecked.RawOne
 import Solidity.Correctness.Lowering.Unchecked.Relation
+import Solidity.Correctness.Lowering.Unchecked.SourceOne
 import Solidity.Correctness.Lowering.Unchecked.UpdateArithmetic
 import Solidity.Correctness.Lowering.Unchecked.WordAssociation
 import Solidity.Correctness.Lowering.Unchecked.WordProgram

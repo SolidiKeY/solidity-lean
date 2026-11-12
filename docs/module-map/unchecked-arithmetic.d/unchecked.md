@@ -17,3 +17,5 @@
 | `Correctness/Lowering/Unchecked/WordProgram.lean` | Supplied wrapping word-update programs; unchecked-lowering component, full production endpoint remains unproved. |
 | `Correctness/Lowering/Unchecked/UpdateArithmetic.lean` | Shared typed update arithmetic; unchecked-lowering component, full production endpoint remains unproved. |
 | `Correctness/Lowering/Unchecked/Discarded.lean` | Discarded increment results; unchecked-lowering component, full production endpoint remains unproved. |
+| `Correctness/Lowering/Unchecked/SourceOne.lean` | Supplied typed Source one-update boundary; unchecked-lowering component, full production endpoint remains unproved. |
+| `Correctness/Lowering/Unchecked/PowerV2Arithmetic.lean` | Explicit V2 power operator consumer; unchecked-lowering component, full production endpoint remains unproved. |
