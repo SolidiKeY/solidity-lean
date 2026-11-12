@@ -85,9 +85,19 @@ def sha256_file(p):
 
 # ---------------------------------------------------------------- extraction ----
 
-def run_gate(repo, lean_file, env_extra, logs):
-    env = dict(os.environ, **env_extra, GATE_LOGS=str(logs))
+def elan_env(**extra):
+    env = dict(os.environ, **extra)
     env['PATH'] = str(Path.home() / '.elan/bin') + os.pathsep + env.get('PATH', '')
+    return env
+
+
+def restore_artifacts(repo):
+    subprocess.run([sys.executable, 'scripts/ci/restore-lake-artifacts.py'], cwd=repo,
+                   env=elan_env(), check=True)
+
+
+def run_gate(repo, lean_file, env_extra, logs):
+    env = elan_env(**env_extra, GATE_LOGS=str(logs))
     shutil.rmtree(logs, ignore_errors=True)
     r = subprocess.run(['bash', 'scripts/coord-tools/gate.sh', 'per-file', str(lean_file)],
                        cwd=repo, env=env)
@@ -116,6 +126,8 @@ def extract(repo, rev):
             # An executable root is no importable module; checking its own file builds
             # its imports, and Extract.lean elaborates it again over them.
             f = mods[0] + '.lean'
+            # Lake leaves cache-fetched imports out of .lake/build until restored.
+            restore_artifacts(repo)
         code, log = run_gate(repo, f, {}, work / ('gl-' + g.replace(':', '-')))
         if code:
             sys.exit(f'extract: build of {g} failed; see {log}')
@@ -124,7 +136,7 @@ def extract(repo, rev):
     # times of the modules they compiled; .lake/lean-inventory/timing/*.log holds them.
     earlier = sorted((repo / CACHE_ROOT / 'timing').glob('*.log'))
     (out / 'build.log').write_text(''.join(p.read_text() for p in earlier) + build_logs['lib'])
-    subprocess.run([sys.executable, 'scripts/ci/restore-lake-artifacts.py'], cwd=repo, check=True)
+    restore_artifacts(repo)
     listing = work / 'modules.tsv'
     listing.write_text(''.join(f'{g}\t{m}\n' if g == 'lib' else f'{g}\t{m}\t{m}.lean\n'
                                for g, mods in groups for m in mods))
