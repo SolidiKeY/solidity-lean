@@ -4,10 +4,11 @@
 Rules (tracked Git content of base and head; the working tree is not read):
   coverage  the Solidity.* modules CI builds and the modules the axiom audit sees may not shrink.
             Built: the import closure of every library a workflow names in `lake build A B …`
-            (capitalized words: library roots A.lean). Audited: the import closure of
+            (capitalized words: library roots A.lean), YAML comments ignored. Audited: the import closure of
             scripts/AxiomAudit.lean. A Solidity.* module covered at base that still exists at head
             must be covered at head; deleting a module is not a loss.
-  tests     a test file that exists at base may not gain todo/skip/xfail markers (net, per file):
+  tests     a test file that exists at base (renames followed) may not gain todo/skip/xfail markers
+            (counted per marker, net, per file):
             `test.todo`, `it.skip`, `{todo: …}`, `skip: true`, `pytest.mark.skip`, `unittest.skip`,
             `skipTest(` (not behind an `if` on the same line: a platform guard), `expectedFailure`…
             Test files: *.test.{js,mjs,cjs,ts}, test_*.py, *_test.py. New files are not checked:
@@ -28,7 +29,8 @@ sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 from check import SetupError, default_base, git, rev  # noqa: E402
 
 AUDIT = "scripts/AxiomAudit.lean"
-IMPORT = re.compile(r"^(?:(?:public|meta|private)\s+)*import\s+(?:all\s+)?([A-Za-z_][A-Za-z0-9_.']*)")
+IMPORT = re.compile(r"^(?:(?:public|meta|private)\s+)*import\s+(?:all\s+)?(.*)$")
+NAME = re.compile(r"[A-Za-z_][A-Za-z0-9_.']*")
 BUILD = re.compile(r"lake build ([^\n|&;>]*)")
 TEST_FILE = re.compile(r"(^|/)(test_[^/]*\.py|[^/]*_test\.py|[^/]*\.test\.(js|mjs|cjs|ts))$")
 SOFT = re.compile(r"\b(?:test|it|describe)\.(?:todo|skip)\b|[{,]\s*todo\s*:|\bskip\s*:\s*true\b"
@@ -49,18 +51,23 @@ def blobs(r, paths):
 
 
 def imports(text):
-    """Module names of the import header (it ends at the first other non-blank, non-comment line)."""
-    out, block = [], False
+    """Module names of the import header: `import A B`, modifiers, indented continuation lines.
+    It ends at the first other non-blank, non-comment line."""
+    out, block, inside = [], False, False
     for line in text.split("\n"):
-        s = line.strip()
+        s = re.sub(r"--.*", "", line).strip()
         if block:
             block = "-/" not in s; continue
-        if not s or s.startswith("--"): continue
+        if not s: continue
         if s.startswith("/-"):
             block = "-/" not in s[2:]; continue
         m = IMPORT.match(s)
-        if not m: break
-        out.append(m.group(1))
+        if m: rest = m.group(1); inside = True
+        elif inside and line[:1].isspace() and NAME.fullmatch(s.split()[0]): rest = s
+        else: break
+        names = rest.split()
+        if not all(NAME.fullmatch(n) for n in names): break
+        out += names
     return out
 
 
@@ -80,7 +87,8 @@ def coverage(r):
     lean = [f for f in files if f.endswith(".lean") and ("/" not in f or f.startswith("Solidity/"))]
     wf = [f for f in files if f.startswith(".github/workflows/") and f.endswith((".yml", ".yaml"))]
     src = blobs(r, lean + wf + ([AUDIT] if AUDIT in files else []))
-    built = {w for f in wf for args in BUILD.findall(src[f] or "") for w in args.split()
+    yaml = {f: re.sub(r"(^|\s)#.*", "", src[f] or "", flags=re.M) for f in wf}
+    built = {w for f in wf for args in BUILD.findall(yaml[f]) for w in args.split()
              if re.fullmatch(r"[A-Z][A-Za-z0-9_]*", w)}
     present = {f[:-5].replace("/", ".") for f in lean if f.startswith("Solidity/")}
     return closure(built, src), closure(imports(src.get(AUDIT) or ""), src), present
@@ -97,20 +105,26 @@ def check_coverage(base, head):
     return bad
 
 
-def soft(line):
-    m = SOFT.search(line)
-    return bool(m) and not (m.group().startswith("skipTest") and re.match(r"\s*if\b", line))
+def markers(text):
+    """Number of todo/skip/xfail markers in `text` (a `skipTest(` on a line starting with `if` is a guard)."""
+    n = 0
+    for line in (text or "").split("\n"):
+        guard = re.match(r"\s*if\b", line)
+        n += sum(1 for m in SOFT.finditer(line) if not (guard and m.group().startswith("skipTest")))
+    return n
 
 
 def check_tests(base, head):
-    names = git("diff", "--name-only", "--diff-filter=MR", "-M", base, head).decode().split("\n")
+    pairs = []
+    for line in git("diff", "--name-status", "--diff-filter=MR", "-M", base, head).decode().split("\n"):
+        if not line: continue
+        st, *paths = line.split("\t")
+        if TEST_FILE.search(paths[-1]): pairs.append((paths[0], paths[-1]))
+    old = blobs(base, [o for o, _ in pairs]); new = blobs(head, [n for _, n in pairs])
     bad = []
-    for p in sorted(n for n in names if TEST_FILE.search(n)):
-        diff = git("diff", "-U0", "-M", base, head, "--", p).decode("utf-8", "replace").split("\n")
-        added = sum(1 for l in diff if l.startswith("+") and not l.startswith("+++") and soft(l[1:]))
-        removed = sum(1 for l in diff if l.startswith("-") and not l.startswith("---") and soft(l[1:]))
-        if added > removed:
-            bad.append(f"tests: {p} gains {added - removed} todo/skip/xfail marker(s)")
+    for o, n in sorted(pairs, key=lambda x: x[1]):
+        d = markers(new[n]) - markers(old[o])
+        if d > 0: bad.append(f"tests: {n} gains {d} todo/skip/xfail marker(s)")
     return bad
 
 

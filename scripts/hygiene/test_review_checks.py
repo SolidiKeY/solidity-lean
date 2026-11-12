@@ -55,6 +55,9 @@ class Imports(unittest.TestCase):
     def test_header_only(self):
         self.assertEqual(rc.imports(BASE["Solidity/A.lean"]), ["Solidity.C"])
 
+    def test_several_modules_per_line_and_continuation(self):
+        self.assertEqual(rc.imports("import A B\n  C.D\nimport E -- note\ndef x := 1\n  F"), ["A", "B", "C.D", "E"])
+
     def test_module_system_prefixes(self):
         self.assertEqual(rc.imports("module\n") , [])
         self.assertEqual(rc.imports("-- c\npublic import A.B\nmeta import all C\n/- x\n-/\nimport D\ndef x := 1"),
@@ -79,6 +82,21 @@ class Coverage(unittest.TestCase):
                            ".github/workflows/lean.yml": WORKFLOW.format(targets="Solidity SolidityControls"),
                            "scripts/AxiomAudit.lean": "import Solidity\nimport SolidityControls\n"}, "split")
         ok, rep = self.r.check(h); self.assertTrue(ok, rep)
+
+    def test_commented_out_build_fails(self):
+        h = self.r.commit({".github/workflows/lean.yml": "jobs:\n  b:\n    steps:\n      # - run: lake build Solidity\n"
+                           "      - run: lake env lean x.lean # was: lake build Solidity\n"}, "comment out")
+        ok, rep = self.r.check(h)
+        self.assertTrue(ok is False and any("CI build" in l for l in rep), rep)
+
+    def test_imports_joined_on_one_line_pass(self):
+        h = self.r.commit({"Solidity.lean": "import Solidity.A Solidity.B\n"}, "join")
+        ok, rep = self.r.check(h); self.assertTrue(ok, rep)
+
+    def test_import_on_second_name_dropped_fails(self):
+        self.r.base = self.r.commit({"Solidity.lean": "import Solidity.A Solidity.B\n"}, "join")
+        h = self.r.commit({"Solidity.lean": "import Solidity.A\n"}, "drop")
+        self.assertFalse(self.r.check(h)[0])
 
     def test_audit_only_loss(self):
         h = self.r.commit({"scripts/AxiomAudit.lean": "import Solidity.A\n"}, "narrow audit")
@@ -124,6 +142,18 @@ class Tests(unittest.TestCase):
         self.r.base = b
         h = self.r.commit({"scripts/x.test.mjs": "test('a', () => {});\ntest.skip('b', () => {});\n"}, "move")
         ok, rep = self.r.check(h); self.assertTrue(ok, rep)
+
+    def test_second_marker_on_a_line_fails(self):
+        self.r.base = self.r.commit({"scripts/x.test.mjs": "test.skip('a', f); test('b', f);\n"}, "s\n\nReview-Check: tests seed")
+        h = self.r.commit({"scripts/x.test.mjs": "test.skip('a', f); test.skip('b', f);\n"}, "more")
+        self.assertFalse(self.r.check(h)[0])
+
+    def test_renamed_test_with_new_marker_fails(self):
+        body = "".join(f"test('t{i}', () => {{ check({i}); }});\n" for i in range(12))
+        self.r.base = self.r.commit({"scripts/x.test.mjs": body}, "grow")
+        h = self.r.commit({"scripts/w.test.mjs": body + "test.todo('a', () => {});\n"}, "rename",
+                          delete=["scripts/x.test.mjs"])
+        self.assertFalse(self.r.check(h)[0])
 
     def test_new_test_file_passes(self):
         h = self.r.commit({"scripts/z.test.mjs": "test.todo('later');\n"}, "new")
