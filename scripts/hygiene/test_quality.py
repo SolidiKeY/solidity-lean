@@ -253,13 +253,23 @@ class Ratchet(unittest.TestCase):
         ok, rep = self.run_eval(base, head, ("unreachable_declarations", "python_dead_code"))
         self.assertFalse(ok); self.assertIn("FAIL python_dead_code: 3", rep[0])
 
-    def test_other_ruff_version_is_skipped_with_a_note(self):
+    def test_enforced_ruff_count_fails_without_its_tool(self):
         base = self.base_commit()
         head = self.repo.commit({"scripts/x.py": "import os\n"})
-        self.stub[head] = {"ruff": 9}
+        self.stub[head] = {"ruff": 0}
         q.ruff_version = lambda: "ruff 2"
         ok, rep = self.run_eval(base, head, ("python_dead_code",))
-        self.assertTrue(ok, rep); self.assertIn("baseline counted with ruff 1, this host has ruff 2", rep[0])
+        self.assertFalse(ok, rep); self.assertIn("cannot measure it (baseline counted with ruff 1, this host has ruff 2)", rep[0])
+        q.ruff_version = lambda: None
+        ok, rep = self.run_eval(base, head, ("python_dead_code",))
+        self.assertFalse(ok, rep); self.assertIn("ruff is not installed", rep[0])
+
+    def test_null_ruff_count_is_reported_with_or_without_ruff(self):
+        base = self.base_commit(baseline(python_dead_code=None, lean_warnings=None))
+        head = self.repo.commit({"scripts/x.py": "import os\n"})
+        self.stub[head] = {"ruff": 9}
+        ok, rep = self.run_eval(base, head, ("python_dead_code",))
+        self.assertTrue(ok, rep); self.assertIn("ok python_dead_code: 9 (baseline is null", rep[0])
         q.ruff_version = lambda: None
         ok, rep = self.run_eval(base, head, ("python_dead_code",))
         self.assertTrue(ok, rep); self.assertIn("ruff is not installed", rep[0])
@@ -269,13 +279,21 @@ class Ratchet(unittest.TestCase):
         ok, rep = self.run_eval(base, self.repo.commit({}), ("lean_warnings",))
         self.assertTrue(ok, rep); self.assertIn("no --lean-log", rep[0])
 
+    def test_enforced_lean_warnings_fail_without_a_log(self):
+        base = self.base_commit(baseline(lean_warnings=3))
+        ok, rep = self.run_eval(base, self.repo.commit({}), ("lean_warnings",))
+        self.assertFalse(ok, rep); self.assertIn("cannot measure it", rep[0])
+
 
 class Committed(unittest.TestCase):
     def test_committed_baseline_parses(self):
         with open(os.path.join(HERE, "baseline.json"), "rb") as f:
             b = q.parse_baseline(f.read(), "working tree")
-        self.assertIsNone(b["metrics"]["lean_warnings"])
-        self.assertTrue(all(isinstance(b["metrics"][k], int) for k in q.METRICS if k != "lean_warnings"))
+        # Only counts every gate (CI included: no ruff, no build log) can measure are set.
+        self.assertIsNone(b["metrics"]["lean_warnings"]); self.assertIsNone(b["metrics"]["python_dead_code"])
+        self.assertIsNone(b["python_dead_code_tool"])
+        unset = ("lean_warnings", "python_dead_code")
+        self.assertTrue(all(isinstance(b["metrics"][k], int) for k in q.METRICS if k not in unset))
 
 
 if __name__ == "__main__":

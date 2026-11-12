@@ -33,13 +33,19 @@ tree) and compared with scripts/hygiene/baseline.json. The count definitions:
                             elaborated extraction, so it cannot run in a fast check.
   python_dead_code          ruff's F401 (unused import), F811 (redefinition of an unused name) and
                             F841 (unused local) findings over tracked .py files outside vendor
-                            paths. Needs ruff; vulture is not used (no new dependency). Enforced
-                            only by the ruff version named in the baseline; otherwise skipped
-                            with a note, since rule details change between versions.
+                            paths. Needs ruff; vulture is not used (no new dependency). CI has no
+                            ruff, so the baseline leaves this count null: it is reported where
+                            ruff is installed ("skip with a note" elsewhere), not enforced. Once
+                            CI installs ruff, set the count and python_dead_code_tool (null may
+                            become a number); from then on a run without that exact ruff version
+                            FAILS, since rule details change between versions.
   lean_warnings             distinct `warning: FILE:LINE:COL: …` lines of a Lake build log given
                             with --lean-log (opt-in; off by default). Lake's artifact cache keeps
                             no logs, so only a build that compiled every module sees every
                             warning. While the baseline value is null it is reported, not enforced.
+
+A count the baseline sets (a number) is always enforced: a run that cannot measure it (tool or
+--lean-log missing, other ruff version) fails. So set a count only when every gate can measure it.
 
 Ratchet (base: --base REV, else $HYGIENE_BASE, else the merge base with origin/master, as
 check.py): a count passes when its head value is at most the baseline value. When the inputs a
@@ -433,12 +439,14 @@ def baseline_history(base_b, head_b, where):
 
 
 def enforced(b, metric, head_value, note):
-    """(enforce?, reason when not) for `metric` under baseline `b` and the head's measurement."""
-    if head_value is None: return False, note
-    if b["metrics"][metric] is None: return False, "baseline is null: reported, not enforced"
+    """("enforce" | "report" | "unmeasurable", reason) for `metric` under baseline `b` and the
+    head's measurement. A count the baseline sets must be measured: it never passes unmeasured."""
+    if b["metrics"][metric] is None:
+        return "report", (note if head_value is None else "baseline is null: reported, not enforced")
+    if head_value is None: return "unmeasurable", note
     if metric == "python_dead_code" and note != b["python_dead_code_tool"]:
-        return False, f"skipped: baseline counted with {b['python_dead_code_tool']}, this host has {note}"
-    return True, ""
+        return "unmeasurable", f"baseline counted with {b['python_dead_code_tool']}, this host has {note}"
+    return "enforce", ""
 
 
 def judge(metric, limit, head_m, base_m):
@@ -473,11 +481,15 @@ def evaluate(base, head, only, lean_log, use_cache):
         limit = head_b["metrics"][metric]
         if limit is None or metric in ("python_dead_code", "lean_warnings"):
             value, note, _ = head_m.get(metric)
-            on, why = enforced(head_b, metric, value, note)
+            state, why = enforced(head_b, metric, value, note)
         else:
-            on, why = True, ""
-        if on:
+            state, why = "enforce", ""
+        if state == "enforce":
             ok, line, details = judge(metric, limit, head_m, base_m)
+        elif state == "unmeasurable":
+            ok, details = False, []
+            line = (f"FAIL {metric}: the baseline enforces {limit} but this run cannot measure it ({why}); "
+                    f"provide the tool or input, never skip an enforced count")
         else:
             value = head_m.get(metric)[0]
             ok, line, details = True, f"ok {metric}: {'-' if value is None else value} ({why})", []
@@ -502,10 +514,12 @@ def measure_all(commit, only, lean_log=None, use_cache=True):
 
 def seed_baseline(commit):
     counts = measure_all(commit, METRICS, None, True)
-    tool = counts["python_dead_code"]["note"] if counts["python_dead_code"]["value"] is not None else None
-    return {"comment": "Quality ratchet counts (scripts/hygiene/quality.py); measured on `seed`; values may only go down.",
-            "seed": commit, "python_dead_code_tool": tool,
-            "metrics": {k: counts[k]["value"] for k in METRICS}}
+    # Only counts every gate can measure are set: CI has neither ruff nor a full build log.
+    metrics = {k: counts[k]["value"] for k in METRICS}
+    metrics["python_dead_code"] = metrics["lean_warnings"] = None
+    return {"comment": "Quality ratchet counts (scripts/hygiene/quality.py); measured on `seed`; values may only go down. "
+                       "Null counts are reported, not enforced (no tool in CI); a set count always is.",
+            "seed": commit, "python_dead_code_tool": None, "metrics": metrics}
 
 
 def main(argv):
