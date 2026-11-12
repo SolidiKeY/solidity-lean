@@ -94,6 +94,11 @@ class Scanner(unittest.TestCase):
         self.assertEqual(comments, {1, 2})
         self.assertEqual(code, {1})
 
+    def test_whitespace_only_string_lines_are_not_code(self):
+        comments, _, code = self.lines('def s := "a\n\n   \nb"\n-- c\n')
+        self.assertEqual(code, {1, 4})          # lines 2-3 hold only string whitespace
+        self.assertEqual(comments, {5})
+
     def test_rational_limit_is_exact(self):
         cal = {"numerator": 1, "denominator": 10}
         m = Fraction(1, 20)
@@ -571,6 +576,22 @@ class V2History(GitCase):
         self.assertEqual(out["totals"]["all"]["v2"]["failing_cells"] - enforced,
                          sum(1 for f in out["failure_index"] if f["area"] == "docs/guide"))
 
+    def test_area_after_coverage_anchor_has_no_anchor_and_blocks(self):
+        h = self.h
+        h.commit(T0, {"Solidity/Core/A.lean": lean(4, 1)})
+        h.commit(T0 + DAY, {"Solidity/Goals/G.lean": GOALS})             # coverage anchor
+        t = h.commit(T0 + 2 * DAY, {"Solidity/T/T.lean": "-- t\n"})       # transient, after it
+        end = h.commit(T0 + 3 * DAY, {}, remove=["Solidity/T/T.lean"])
+        policy = json.loads(self.v2_calibrate(end).read_text())
+        self.assertEqual(policy["specification"]["selection"]["no_anchor"], ["Solidity/T"])
+        self.assertEqual(policy["coverage"]["status"], "BLOCKER")
+        self.assertEqual(policy["coverage"]["universe_without_policy"], ["Solidity/T"])
+        out = self.v2_replay(end, self.out / "policy.json")
+        self.assertTrue(out["window_matches_policy"])
+        f = [f for f in out["failure_index"] if f["commit"] == t and f["area"] == "Solidity/T"
+             and f["metric"] == "comment_lines"][0]
+        self.assertEqual((f["case"], f["allowance"]), ("unmapped_fallback", "0"))
+
     def test_code_padding_does_not_grow_denominator(self):
         c = self.build()
         policy = self.v2_calibrate(c["e1"])
@@ -580,6 +601,14 @@ class V2History(GitCase):
         r = [r for r in out["rows"] if (r["commit"], r["area"], r["metric"]) == (p, "Solidity/Core", "comment_lines")][0]
         # 2 blank lines add nothing; 3 comment lines add 3 prose lines, no code
         self.assertEqual((r["numerator"], r["denominator"], r["status"]), (12, 30, "fail"))
+        # Core had no docstrings anywhere in the lookback: r = 0, m = 0, so one is a failure
+        q = self.h.commit(T0 + 9 * DAY, {"Solidity/Core/A.lean": "/-- d -/\n" + lean(30, 0)})
+        out = self.v2_replay(q, policy, name="doc.json")
+        f = [f for f in out["failure_index"] if f["rule"] == "v2" and f["commit"] == q
+             and (f["area"], f["metric"]) == ("Solidity/Core", "docstring_lines")][0]
+        self.assertEqual((f["numerator"], f["allowance"], f["case"]), (1, "0", "zero_numerator"))
+        self.assertIn("prose_where_calibration_had_none", f["causes"])
+        self.assertFalse(out["window_matches_policy"])  # a different end: reported, not refused
 
     def test_policy_immutable_deterministic_and_tamper_evident(self):
         c = self.build()
@@ -602,6 +631,17 @@ class V2History(GitCase):
         tampered.write_text(json.dumps(data))
         with self.assertRaises(SystemExit):
             self.v2_replay(c["e5"], tampered, name="t.json")
+        data = json.loads(first)                                              # recomputed digests
+        data["calibration"]["Solidity/Core"]["metrics"]["comment_lines"]["margin"] = "3"
+        data["calibration_sha256"] = bt.sha256_text(bt.canonical(data["calibration"]))
+        tampered.write_text(json.dumps(data))
+        self.v2_replay(c["e5"], tampered, name="t.json")                      # embedded check passes
+        import hashlib
+        pinned = hashlib.sha256(first).hexdigest()
+        with self.assertRaises(SystemExit):
+            bt.main(["--mode", "v2-replay", "--repo", str(self.h.root), "--end", c["e5"],
+                     "--policy", str(tampered), "--expect-policy-sha256", pinned,
+                     "--output", str(self.out / "p.json")])
         with self.assertRaises(SystemExit):                                   # pb1 file is not a policy
             self.v2_replay(c["e5"], self.calibrate(c["anchor"]), name="u.json")
 

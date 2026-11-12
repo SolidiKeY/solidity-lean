@@ -25,21 +25,25 @@ python3 scripts/prose-backtest/backtest.py --mode replay --repo . --end "$PINNED
 python3 scripts/prose-backtest/backtest.py --mode v2-calibrate --repo . --end "$PINNED" --days 21 --lookback-days 7 --exclude docs/audits --output "$EVIDENCE_DIR/calibration-v2.json"
 cmp "$EVIDENCE_DIR/calibration-v2.json" scripts/prose-backtest/calibration-v2.json
 # v2 replay, twice, beside the legacy and pb1 rules
-python3 scripts/prose-backtest/backtest.py --mode v2-replay --repo . --end "$PINNED" --days 21 --policy scripts/prose-backtest/calibration-v2.json --pb1-replay "$EVIDENCE_DIR/pb1.json" --output "$EVIDENCE_DIR/v2-a.json"
-python3 scripts/prose-backtest/backtest.py --mode v2-replay --repo . --end "$PINNED" --days 21 --policy scripts/prose-backtest/calibration-v2.json --pb1-replay "$EVIDENCE_DIR/pb1.json" --output "$EVIDENCE_DIR/v2-b.json"
+python3 scripts/prose-backtest/backtest.py --mode v2-replay --repo . --end "$PINNED" --days 21 --policy scripts/prose-backtest/calibration-v2.json --expect-policy-sha256 2688f0889571f568eb7449427b0f94b97be21552d171aa5fe9cf60692ea26f9c --pb1-replay "$EVIDENCE_DIR/pb1.json" --output "$EVIDENCE_DIR/v2-a.json"
+python3 scripts/prose-backtest/backtest.py --mode v2-replay --repo . --end "$PINNED" --days 21 --policy scripts/prose-backtest/calibration-v2.json --expect-policy-sha256 2688f0889571f568eb7449427b0f94b97be21552d171aa5fe9cf60692ea26f9c --pb1-replay "$EVIDENCE_DIR/pb1.json" --output "$EVIDENCE_DIR/v2-b.json"
 cmp "$EVIDENCE_DIR/v2-a.json" "$EVIDENCE_DIR/v2-b.json"
 sha256sum "$EVIDENCE_DIR/v2-a.json" "$EVIDENCE_DIR/v2-b.json"
 git log --first-parent --format='%H %ct' "$PINNED" > "$EVIDENCE_DIR/first-parent.txt"
 awk '$2>=1792625910 && $2<=1794440310' "$EVIDENCE_DIR/first-parent.txt" | wc -l
 git diff "$PINNED" --exit-code -- scripts/prose-backtest/estimate.json
 # read-only evaluation of the current head
-python3 scripts/prose-backtest/backtest.py --mode v2-evaluate --repo . --commit origin/master --policy scripts/prose-backtest/calibration-v2.json --output "$EVIDENCE_DIR/current-head.json"
+python3 scripts/prose-backtest/backtest.py --mode v2-evaluate --repo . --commit origin/master --policy scripts/prose-backtest/calibration-v2.json --expect-policy-sha256 2688f0889571f568eb7449427b0f94b97be21552d171aa5fe9cf60692ea26f9c --output "$EVIDENCE_DIR/current-head.json"
 ```
 
 Each replay takes about 2.5 minutes on 4 cores. Replay and evaluation read the policy
 and never write it. Both modes refuse a policy whose specification or coefficient
-digest no longer reproduces. That catches hand edits such as a raised margin. The
-policy's SHA-256 is taken before and after each run and must match.
+digest no longer reproduces. That catches hand edits such as a raised margin. An edit
+that also recomputes the embedded digests is caught only by `--expect-policy-sha256`,
+which pins the SHA-256 published above. The policy's SHA-256 is taken before and after
+each run and must match. A replay with the frozen end and day count must reproduce the
+frozen window's commit digest. Any other window is reported as
+`window_matches_policy: false`.
 
 ### Frozen specification
 
@@ -61,9 +65,18 @@ at counts or failures.
 **Revision history (not concealed).** Spec/1 (digest `17119abad7c5…`) used only the
 coverage anchor and was replayed first. That replay showed `Solidity/Scratch` on the
 zero fallback, because Scratch is absent from the endpoint and from the coverage anchor.
-Spec/2 adds only the count-free late-anchor rule. The other 37 entries stay
-byte-identical to spec/1's. Spec/1's policy and replay are kept in the private evidence.
-Scratch's v2 result is therefore post hoc.
+Spec/2 adds only the count-free late-anchor rule. The coefficients, margins and
+witnesses of the other 37 areas are identical to spec/1's; each entry only gains an
+`anchor` field. Spec/1's policy and replay are kept in the private evidence. The current
+code emits only spec/2, so spec/1 cannot be regenerated.
+
+Under spec/1, Scratch failed 16 cells in 8 lookback commits on the zero fallback. Under
+spec/2 every Scratch commit lies in its own lookback, so it cannot fail. Scratch's v2
+result is therefore post hoc and carries no evidential weight.
+
+The method text says lookback commits are stamped inside the interval. Commits in the
+contiguous run stamped after their anchor would also be included, but they are listed
+under `stamped_after_anchor`. There are none.
 
 ### Rule
 
@@ -115,7 +128,7 @@ separately. The legacy rule and pb1 come from the original-mode replay of the sa
 | Position (relative to the coverage anchor) | Commits | Legacy absolute | pb1 ratio (1/20) | v2 additive |
 |---|---|---|---|---|
 | Before lookback (coefficients from later history) | 275 | unavailable (no checker) | 275 / 6063 | 271 / 4082 (17 introduced, 4052 inherited, 13 reintroduced) |
-| Calibration lookback (**in-sample**) | 937 | 164 / 2503 | 803 / 10335 | 0 / 0, by construction |
+| Calibration lookback (**in-sample**) | 937 | 164 / 2503 (only 165 evaluable: 772 had no checker) | 803 / 10335 | 0 / 0, by construction of the envelope margin. Scratch is 0 only because of the spec/2 revision |
 | Anchor | 1 | 1 / 26 | 1 / 8 | 0 / 0 |
 | After anchor (post-calibration, retrospective) | 52 | 52 / 1666 | 52 / 495 | **50 / 211** (7 introduced, 204 inherited) |
 
@@ -143,11 +156,17 @@ pb1 fails 10.
 - **Scratch:** passes everywhere, but entirely in-sample. All 8 Scratch commits lie in its
   own lookback, so this proves nothing about the rule.
 - **docs/audits:** does not fail. It has 368965 lines at the end against an allowance
-  floor of 371812, because the envelope margin absorbs its lookback peak. It stays outside
-  enforcement.
+  floor of 371812. Its margin is only about 194 lines. Most of the headroom comes from the
+  shared denominator: Solidity code grew from 889524 to 896794 lines, and the ratio scales
+  with it. It stays outside enforcement.
 - **Before the lookback:** the failures (Calculus, Counterexamples, Evm, Examples, Solkey,
   TestSuite, Tools, Typing, `_root`, `docs/_root` …) are earlier states with denser prose
-  than the later anchor allowed. 21 v2 cells carry `denominator_shrank`.
+  than the later anchor allowed.
+- **Shrinkage:** 21 v2 cells carry `denominator_shrank`; 2 of them are after the anchor.
+- **Positions:** commits are labelled relative to the coverage anchor, including Scratch rows.
+- **Prior status:** classification uses failures inside the window only. A failure at
+  the boundary predecessor alone does not make a later one "reintroduced". The legacy and
+  pb1 columns follow the same rule.
 
 Every failure row in the private index carries its numerator, denominator, exact
 allowance, prior counts and status, classification, anchor and causes.
@@ -155,8 +174,15 @@ allowance, prior counts and status, classification, anchor and causes.
 **Margin weakness.** The envelope rewards prose cuts made during the lookback. For
 example, docs/feature-work has 237809 lines at witness `513b4815`, against 114690 at the
 anchor, which gives a margin of about 124971 lines. Backend's margin is about 3128 lines
-and docs/benchmarks' about 36167. Such margins make v2 lax for those areas. This is a
-property of the frozen policy, and it is reported here instead of being tuned.
+and docs/benchmarks' about 36167.
+
+Code growth during the lookback inflates margins as well. For 20 of the 38 areas the
+witness is the oldest lookback commit, which had about 1486 Solidity files against 6810
+at the anchor. docs/_root's margin is about 20061 lines, and Tools, Roadmap, `_root` and
+Precompiles are similar.
+
+Such margins make v2 lax. This is a property of the frozen policy, and it is reported
+here instead of being tuned.
 
 ### Verification
 
@@ -165,20 +191,25 @@ property of the frozen policy, and it is reported here instead of being tuned.
   the replay's list. Boundary predecessor: `83ad39cbd1…` (ts 1792624132), used for deltas
   only. History is unshallowed. There are no non-monotone timestamps, and no older commit
   is stamped inside the window.
-- **Determinism.** The two v2 replays are byte-identical (`cmp`; SHA-256 `f53ec5c2…`). The
+- **Determinism.** The two v2 replays are byte-identical (`cmp`; SHA-256 `d57fe5c4…`). The
   policy SHA-256 is equal before and after. The pb1 original-mode replay is byte-identical
   before and after this change, and `estimate.json` has no diff against the pinned commit.
-- **Spot checks.** A separate script that does not import `backtest.py` recomputed counts
-  and arithmetic with `git show` and its own Lean comment/code tokenizer. It covered:
+- **Spot checks.** A separate script recomputed counts and arithmetic with `git show`. It
+  does not import `backtest.py`. It covered:
   - anchor counts for Correctness, Goals, Scratch, `docs/README.d` and Corpus (Corpus
-    includes generated-claimed files);
-  - 4 margin witnesses;
-  - 8 failing cells, including the missing areas and 2 `denominator_shrank` cells.
+    includes generated-claimed files): 20 checks;
+  - 4 margin witnesses, including Scratch;
+  - 6 failing cells: the first introduced failures of Correctness, Goals, `docs/_root`
+    and Syntax, plus 2 `denominator_shrank` cells. Scratch has no failing cell to check.
 
-  All 30 checks agree. The spot tokenizer first disagreed in two ways and was corrected
-  toward the documented rule after a per-file comparison. First, it skipped blank lines
-  inside block comments, which the reference checker counts. Second, it counted
-  whitespace-only lines inside a string, which do not count as code.
+  All 30 checks agree. The script's independence has limits:
+  - Comment and code lines come from its own tokenizer. Docstring lines and process IDs
+    come from the reference checker's `_Scanner` and `process_ids`, which define the
+    measured semantics.
+  - The tokenizer first disagreed in two ways. After a per-file comparison it was
+    corrected toward the documented rule. First, it skipped blank lines inside block
+    comments, which the checker counts. Second, it counted whitespace-only lines inside a
+    string, which are not code.
 - **Current head.** `origin/master` equals the pinned endpoint (same commit, tree
   `3c5d13ea…`). The read-only evaluation finds 5 failing cells and no area outside the
   policy. It did not alter the calibration.
@@ -195,7 +226,9 @@ property of the frozen policy, and it is reported here instead of being tuned.
    lookback commits. A held-out period after freezing is needed.
 4. **Unresolved residual failures.** The Goals, Correctness, Lowering and Yul failures at
    the end need explicit allowance decisions. They cannot be erased by raising margins.
-5. **Inherited provenance.** The pb1 review provenance stays UNVERIFIABLE (H151). Fresh
+5. **Merge-gate path name.** The mandated file name `calibration-v2.json` fails the
+   hygiene path rule (a `v2` segment). The fix lies outside this study's write scope.
+6. **Inherited provenance.** The pb1 review provenance stays UNVERIFIABLE (H151). Fresh
    runs do not recover it. The docs/audits enforcement exclusion lasts until r1 (H548).
 
 Full rows, failure indexes, selection lists, reconciliation, spot checks and logs are in

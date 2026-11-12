@@ -997,9 +997,15 @@ def v2_calibrate(args):
     return 0
 
 
-def load_policy(path):
-    """Policy bytes, parsed policy and digests; the spec digest must reproduce."""
+def load_policy(path, expect=None):
+    """Policy bytes, parsed policy and digests; the spec digest must reproduce.
+
+    The embedded digests catch edits that forget to recompute them; EXPECT (a SHA-256
+    pinned outside the file, e.g. in the README) also catches recomputed ones.
+    """
     raw = Path(path).read_bytes()
+    if expect and hashlib.sha256(raw).hexdigest() != expect:
+        raise SystemExit("policy SHA-256 differs from --expect-policy-sha256")
     policy = json.loads(raw.decode("utf-8"))
     if policy.get("schema") != V2_SCHEMA:
         raise SystemExit("not a v2 policy: " + str(path))
@@ -1118,7 +1124,7 @@ def _totals(failures, commits, label=None):
 
 
 def v2_replay(args):
-    raw, policy = load_policy(args.policy)
+    raw, policy = load_policy(args.policy, args.expect_policy_sha256)
     repo = Repo(args.repo)
     before = hashlib.sha256(raw).hexdigest()
     spec = policy["specification"]
@@ -1130,6 +1136,10 @@ def v2_replay(args):
     anchor, anchor_ts = coverage["commit"], coverage["committer_ts"]
     look_start = coverage["lookback"]["interval"][0]
     window = frozen["first_parent_commits"]
+    frozen_window = spec["selection"]["evaluation_window"]
+    window_match = (sha256_text("".join(c + "\n" for c in window)) == frozen_window["commits_sha256"])
+    if (frozen["end"], args.days) == (frozen_window["end"], frozen_window["days"]) and not window_match:
+        raise SystemExit("replay window differs from the frozen evaluation window")
     commits = ([frozen["predecessor"]] if frozen["predecessor"] else []) + window
     order = {c: i for i, c in enumerate(window)}
     chain_anchor = order.get(anchor)
@@ -1215,6 +1225,7 @@ def v2_replay(args):
         raise SystemExit("policy bytes changed during replay")
     output = {
         "schema": V2_REPLAY_SCHEMA, "frozen_inputs": frozen,
+        "window_matches_policy": window_match,
         "policy_sha256_before": before, "policy_sha256_after": after_hash,
         "specification_sha256": policy["specification_sha256"], "historical_rules": history,
         "totals": {"all": _totals(failures, set(window)),
@@ -1231,7 +1242,7 @@ def v2_replay(args):
 
 def v2_evaluate(args):
     """Read-only evaluation of one commit (e.g. the current head); never recalibrates."""
-    raw, policy = load_policy(args.policy)
+    raw, policy = load_policy(args.policy, args.expect_policy_sha256)
     repo = Repo(args.repo)
     commit = repo.run("rev-parse", "--verify", args.commit + "^{commit}").decode().strip()
     tree = repo.run("rev-parse", commit + "^{tree}").decode().strip()
@@ -1337,6 +1348,7 @@ def main(argv=None):
     parser.add_argument("--policy", help="v2-replay/v2-evaluate: frozen v2 policy JSON (read only)")
     parser.add_argument("--lookback-days", type=int, default=7, help="v2-calibrate: lookback length")
     parser.add_argument("--verified", help="v2-calibrate: JSON list of verified generated items")
+    parser.add_argument("--expect-policy-sha256", help="v2-replay/v2-evaluate: pinned policy SHA-256")
     parser.add_argument("--pb1-replay", help="v2-replay: original-mode replay JSON of the same window")
     args = parser.parse_args(argv)
     if not args.output:
