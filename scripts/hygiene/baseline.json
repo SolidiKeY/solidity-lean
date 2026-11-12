@@ -3,8 +3,8 @@
  "seed": "b74b460fbbc3547779d531443ff7fbeeae3fecc7",
  "python_dead_code_tool": "ruff 0.16.9",
  "metrics": {
-  "lean_long_files": 42,
-  "long_proofs": 78,
+  "lean_long_files": 43,
+  "long_proofs": 77,
   "duplicate_windows": 11054,
   "unreachable_declarations": 8297,
   "python_dead_code": 266,
