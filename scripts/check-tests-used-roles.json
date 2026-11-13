@@ -821,6 +821,24 @@
       "blob": "8bac2707325e14ef8ca563656d3ec51d93e8e6f8",
       "anchor": "  \"stopped_workload_rerun\": false",
       "role": "Historical record: Captured fixture source-location/linkage report with predecessor/master/source pins, accepted-capture receipt/binding digests, external control/link/unlinked counts and zero-change assertions. Recorded source/type linkage, acceptance, statement preservation and non-rerun flags are historical claims, not authenticated current execution or proof. Original792 obligations and +80.254966536% STOP remain as reported historical constraints, not a current budget exception, clearance, permission or authority to replay a stopped workload. External bytes and hashes were not recovered or independently verified. Keep/uncertain-reader precedence and all uncompleted obligations remain. No current source, archive, native, body, proof, compiler adequacy, coverage, trust, policy, baseline, budget, ownership, authorization, consumer, nonuse or deletion credit."
+    },
+    {
+      "path": "tests/h62/item1/duplication-scanner/scope-binding-evidence.json",
+      "blob": "5a20819788cdf9759bd75b9352e653b8547542eb",
+      "anchor": "  \"boundary\": \"No original theorem witness, ownership, body equivalence or runtime acceptance; original792 obligations and +80.254966536%STOP unchanged.\"",
+      "role": "Historical record: Captured intrinsic-Scope binding workflow summary with source/evidence digests, reported external/new controls, lexical/link/unresolved/kernel/ownership counts and unchanged-metadata assertions. The separately consumed primary scope-closure pin contract does not authenticate this old report, its accepted captures, source identities, source/type linkage or coverage claims. Original792 obligations, +80.254966536% STOP and any no-runtime-pass wording remain reported historical constraints, not a current budget exception, clearance, permission or authority to replay a stopped workload. External bytes and hashes were not recovered or independently verified. Keep/uncertain-reader precedence and all uncompleted obligations remain. No current source, archive, native, body, proof, compiler adequacy, coverage, trust, policy, baseline, budget, ownership, authorization, consumer, nonuse or deletion credit."
+    },
+    {
+      "path": "tests/h62/item1/duplication-scanner/project-closure-evidence.json",
+      "blob": "ca7a720a6bc209464eb0a57c1114ce7cb047d567",
+      "anchor": "  \"boundary\": \"AST only visible constants; KeySort fresh checked dependency. Scanner CLI AST consumption, general closure admission, current live ownership, private/unloaded and body equality remain unfinished. No original792 obligation discharged.\"",
+      "role": "Historical record: Captured AST closure workflow report with source/metadata/binding digests, final versus superseded capture labels, reported linkage/unresolved/kernel and test counts. Preserve its explicitly unfinished scanner consumption, general closure, live ownership, private/unloaded and body-equality boundaries; a separate primary project-closure contract does not verify these historical observations. Original792 obligations, +80.254966536% STOP and any no-runtime-pass wording remain reported historical constraints, not a current budget exception, clearance, permission or authority to replay a stopped workload. External bytes and hashes were not recovered or independently verified. Keep/uncertain-reader precedence and all uncompleted obligations remain. No current source, archive, native, body, proof, compiler adequacy, coverage, trust, policy, baseline, budget, ownership, authorization, consumer, nonuse or deletion credit."
+    },
+    {
+      "path": "tests/h62/item1/duplication-scanner/scanner-closure-evidence.json",
+      "blob": "f05af9e922a7b637d8e57c28b00317801266f0f6",
+      "anchor": "  \"boundary\": \"All792original audit obligations unchanged; original +80.254966536%STOP remains, no RUNTIME_GATE_PASS.\"",
+      "role": "Historical record: Captured scanner AST-target regression summary with source/external-evidence digests, old KeySort and AST output/comparison/linkage/unresolved/ownership statistics and zero-production-change assertions. Recorded local live output, deterministic metadata, preserved refusal and zero-change claims are unverified history; no current runtime gate or timing-hold clearance follows. Original792 obligations, +80.254966536% STOP and any no-runtime-pass wording remain reported historical constraints, not a current budget exception, clearance, permission or authority to replay a stopped workload. External bytes and hashes were not recovered or independently verified. Keep/uncertain-reader precedence and all uncompleted obligations remain. No current source, archive, native, body, proof, compiler adequacy, coverage, trust, policy, baseline, budget, ownership, authorization, consumer, nonuse or deletion credit."
     }
   ],
   "schema_version": 1
