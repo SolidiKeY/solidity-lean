@@ -1,7 +1,0 @@
-# Populated observation-domain handoff
-
-Obs.ext now designates ObservationDomains.obs_ext_populated_joint_witness. Same original L/o/o-prime and three universal hypotheses; additional concrete word and length locations coexist, with word=false, length=1 and both present. This improves a case, adds no newly covered original declaration and changes no frozen statement. Abstract observations only: no storage realization, compiler, ABI, gas or fork claim.
-
-Bounded per-file serial checks pass both on current lane dependencies and exact frozen c6 dependencies: new module 0.804 seconds in each check; no resource stop. These are separate correctness checks, not a matched performance trial. Standard permitted axiom dependencies: propext, Classical.choice, Quot.sound; no new axiom, sorry or budget change. Original full helper census now validates 149 theorems/38 fixture definitions/7 private abbreviations, and original statement census remains 103 joint/4 H69/18 no-input/375 explicit pending plus986 generated. All26 compiler audit theorems still pass. Full final integration gate remains pending; no RUNTIME_GATE_PASS.
-
-Evidence: /workspace/h62-audit-observation-domains-20261108-evidence. Independent read-only finder/skeptic PASS with no findings; neither ran Lean/Lake/network or writes. Registration fragment is a proposal only. The earlier148-helper reconstruction checkpoint remains identifiable by its setup/overlay, reports and original manifest; new case evidence is separate. Original assignment and full remaining queue still apply.
