@@ -539,6 +539,30 @@
       "anchor": "    \"reason\": \"Broader cold-build time budget exhausted; no build errors observed before termination. The new upstream module and all five replay checks completed successfully.\"",
       "role": "Historical record: Captured historical command-check statuses and incomplete614/618-target cold build stopped at45minutes; old standard-axiom, orphan, feature and baseline-failure summaries grant no present trust, nonuse, policy or passing-build credit. Reported outcomes, resources, approvals, external artifacts and proofs are not independently verified or adopted. No current authorization, consumer, nonuse or deletion credit.",
       "blob": "f6005bc583618593a8a3a63137cd1084f29674fd"
+    },
+    {
+      "path": "tests/upstream/baseline-20261028/logs/corpus.json",
+      "anchor": "  \"elapsedSeconds\": 2285.716826895,",
+      "role": "Historical record: Captured seven-field historical Node corpus timing receipt with exit1 and child-rusage/cgroup peak counters; no aggregate-RSS, containment or passing-run claim. Receipts contain no log hash, so no receipt-to-sibling identity or reproduction claim follows. Reported outcomes, resources, external artifacts and proofs are not independently verified. No current authorization, consumer, nonuse or deletion credit.",
+      "blob": "14fcce9b01ce82f6e0200ec7b914a2885afa43df"
+    },
+    {
+      "path": "tests/upstream/baseline-20261028/logs/upstream-build.json",
+      "anchor": "  \"elapsedSeconds\": 481.526548818,",
+      "role": "Historical record: Captured seven-field historical timeout/Lake Upstream dependency-build timing receipt with reported exit0; not a fresh full-library gate or authenticated producer execution. Receipts contain no log hash, so no receipt-to-sibling identity or reproduction claim follows. Reported outcomes, resources, external artifacts and proofs are not independently verified. No current authorization, consumer, nonuse or deletion credit.",
+      "blob": "aa4b580cc9ab9c803feba0227c79a0475fc852c4"
+    },
+    {
+      "path": "tests/upstream/baseline-20261028/logs/corpus.log",
+      "anchor": "Lean 1761/1761; {\"working\":4121,\"broken\":190,\"blocked\":5349}",
+      "role": "Historical record: Captured9660-fixture preparation and1761-job corpus transcript retaining190broken5349blocked and scoped compiler metadata; complete enumeration is not universal success or semantic/compiler/EVM proof. Receipts contain no log hash, so no receipt-to-sibling identity or reproduction claim follows. Reported outcomes, resources, external artifacts and proofs are not independently verified. No current authorization, consumer, nonuse or deletion credit.",
+      "blob": "084c7c3cdeaf588b306842269c8293a3b1822212"
+    },
+    {
+      "path": "tests/upstream/baseline-20261028/logs/upstream-build.log",
+      "anchor": "Build completed successfully (77 jobs).",
+      "role": "Historical record: Captured77-job Upstream dependency-build transcript with compiler/linter warnings; not current KeySort, full-library, TestSuite or full-gate acceptance. Linter suggestions are captured data, not editing instructions. Receipts contain no log hash, so no receipt-to-sibling identity or reproduction claim follows. Reported outcomes, resources, external artifacts and proofs are not independently verified. No current authorization, consumer, nonuse or deletion credit.",
+      "blob": "e4fdf03d11c8c142bbf859e15489e55613351c2e"
     }
   ],
   "schema_version": 1
