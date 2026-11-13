@@ -173,6 +173,24 @@
       "blob": "66fe1b6dcac1bd61cbbb1b5bfefe04ccdfb4bb51",
       "path": "scripts/h62/item2/audit-theories/handoff/session-authorizations-and-retirement.txt",
       "role": "Historical record: captured dated coordinator steering, quoted decisions and retirement/successor messages. This is not current authorization, a final-head receipt or independently verified proof/gate evidence."
+    },
+    {
+      "anchor": "  \"innerBuildExitCode\": 127,",
+      "blob": "5a17762ebb38a81288633743a5c5d829d45096d7",
+      "path": "tests/upstream/baseline-20261028/initial-invocation-failure.json",
+      "role": "Historical record: Captured missing-time invocation failure: inner build exit 127 despite container exit zero; no Lean/corpus execution or passing validation credit. External logs, snapshots and reported outcomes are not independently verified."
+    },
+    {
+      "anchor": "  \"exitCode\": 125,",
+      "blob": "cb9810c48b8aa151adfb5e05d18ef154b0fd10a0",
+      "path": "tests/upstream/baseline-20261028/probes/docker-invocation-failure.json",
+      "role": "Historical record: Captured Docker argument-parsing failure: exit 125, invalid and corrected mount arguments, explicitly no compiler/Lean process or passing credit. External logs, snapshots and reported outcomes are not independently verified."
+    },
+    {
+      "anchor": "  \"readerStageExitCode\": 1,",
+      "blob": "3060d4841bf72837b8e6db09eb3cc24160eb42e2",
+      "path": "tests/upstream/baseline-20261028/probes/initial-probe-failure.json",
+      "role": "Historical record: Captured failed reader elaboration despite outer driver exit zero, with original/corrected run references and compiler-invalid source diagnosis; no passing stage, proof or current reproduction credit. External logs, snapshots and reported outcomes are not independently verified."
     }
   ],
   "schema_version": 1
