@@ -713,6 +713,30 @@
       "blob": "402e2fb168dfada85104db4bb2279ab25010ed66",
       "anchor": "  \"note\": \"Function-at-a-time retries replace only original notRun rows in these summary counts. Original uniform audit, errors and strict comparison are preserved; this summary is not a passing comparison report.\"",
       "role": "Historical record: Captured focused-retry aggregate with completed-source/target counts, original and supplementary errors, and explicit excluded/skipped/pending/unsupported/error/compileRejected/notRun labels. Its accounting note explicitly denies passing comparison; completion and recorded proved labels are not accepted proofs or exclusions. No validation of historical replacement/preservation policy or current replay, semantic adequacy, trust, budget or success; no current authorization, consumer, nonuse or deletion credit."
+    },
+    {
+      "path": "tests/migration/proof-2026-10-16.implementation.json",
+      "blob": "9d0512a0c3be17f95f8c5d566b4643bac2e61620",
+      "anchor": "  \"note\": \"Completed audit against unchanged source hashes. Source coverage is complete; bounded proof search may retain unsupported, pending, notRun and error outcomes. Strict comparison is reported without accepting those gaps.\",",
+      "role": "Historical record: Captured after-ledger audit provenance with526-row implementation snapshot and retrospective launch/session/file observations, explicitly not signed pre-launch attestation. Claimed unchanged files coexist with513 comparison changes,17errors and retry pending/unsupported/excluded/skipped/notRun outcomes. Profile and command are historical data, not execution/budget permission; all outcomes and preservation claims remain unverified. Complete table structure and internal aggregate digest were checked, not historical source bytes, archives, proofs or native results. No current source-equivalence, semantic, trust, policy, budget, exclusion, authorization, consumer, nonuse or deletion credit."
+    },
+    {
+      "path": "tests/migration/proof-baseline-current.implementation.json",
+      "blob": "b223dac40b96a32da72293eb3c90587ef3b07451",
+      "anchor": "  \"note\": \"Historical fixed implementation snapshot; does not validate subsequent storage-return changes.\",",
+      "role": "Historical record: Captured340-row fixed implementation snapshot before storage-return changes, retaining12 unaccounted imports,531changed,3missing and28error comparison outcomes. Its unchanged-snapshot flag does not pass that comparison or validate later changes. Complete table structure and internal aggregate digest were checked, not historical source bytes, archives, proofs or native results. No current source-equivalence, semantic, trust, policy, budget, exclusion, authorization, consumer, nonuse or deletion credit."
+    },
+    {
+      "path": "tests/migration/proof-spec-bindings-2026-10-16.implementation.json",
+      "blob": "156d269d9b6cf3e3ae17d41d19fe0da2980724f8",
+      "anchor": "  \"note\": \"Source hashes captured after observed final verification. Only a stale JavaScript test expectation changed after the full run. This report covers only the local binding fixture, not upstream source parity. The earlier112-source audit predates this compiler change.\"",
+      "role": "Historical record: Captured528-row post-binding-renaming snapshot and focused input/report/archive/log references. Recorded full JavaScript run41/42 and corrected group1/1 are retained; only a local binding fixture is covered, not upstream parity, and earlier112-source audit predates compiler changes. No test-expectation edit, current gate or proof acceptance is authorized. Complete table structure and internal aggregate digest were checked, not historical source bytes, archives, proofs or native results. No current source-equivalence, semantic, trust, policy, budget, exclusion, authorization, consumer, nonuse or deletion credit."
+    },
+    {
+      "path": "tests/migration/proof-spec-negation-2026-10-16.implementation.json",
+      "blob": "a67eaeddc19979a6a940fa229c69f222e666d332",
+      "anchor": "  \"note\": \"Focused three-contract rerun against unchanged captured source hashes. Full build, 41 source/tooling regressions and theorem axiom checks are reported separately; this is not a new whole-corpus audit.\",",
+      "role": "Historical record: Captured527-row post-integer-negation snapshot with session/report/archive/input references for focused three-contract rerun. Separate build/regression/axiom claims remain unauthenticated; this is explicitly not a new whole-corpus audit. Complete table structure and internal aggregate digest were checked, not historical source bytes, archives, proofs or native results. No current source-equivalence, semantic, trust, policy, budget, exclusion, authorization, consumer, nonuse or deletion credit."
     }
   ],
   "schema_version": 1
