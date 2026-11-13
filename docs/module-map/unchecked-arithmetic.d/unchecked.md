@@ -24,3 +24,4 @@
 | `Correctness/Lowering/Unchecked/PowerCutoffWitness.lean` | Source power cutoff witness; unchecked-lowering component, full production endpoint remains unproved. |
 | `Correctness/Lowering/Unchecked/VersionedPowerWitness.lean` | V2 operator migration controls; unchecked-lowering component, full production endpoint remains unproved. |
 | `Correctness/Lowering/Unchecked/SourceSpelling.lean` | Total raw/typed/named/model update association and actual original-context paired execution; partial producer, full state/resources and pass remain unproved. |
+| `Correctness/Lowering/Unchecked/WordUpdateWitness.lean` | Actual-output word-association controls; unchecked-lowering component, full production endpoint remains unproved. |
