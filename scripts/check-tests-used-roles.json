@@ -371,6 +371,84 @@
       "anchor": "Constants audit: 46 declarations recorded",
       "role": "Historical record: Captured historical46-declaration Constants axiom-print transcript, including imported sword equation; reported axioms are not fresh kernel checks or adopted trust. Committed contextual manifests pin this transcript; cited passes, causes, resources, external artifacts and proofs are not independently verified. No current authorization, execution, consumer, nonuse or deletion credit.",
       "blob": "6da9ed4345540e6bdf938318d76e6b633cdc3d23"
+    },
+    {
+      "path": "tests/upstream/step12-quantified-diamond/step12-loops-pin.log",
+      "anchor": "elapsedSeconds=54",
+      "role": "Historical record: Captured historical elapsed/memory/swap summary associated with a Loops check; the four resource lines alone do not authenticate proof or successful execution. Associated committed validation identifies this transcript; reported outcomes, resource facts, external inputs and proofs are not independently verified. No current authorization, consumer, nonuse or deletion credit.",
+      "blob": "e6f722e5b94180734f49ddd0025cd4cf8c0ef872"
+    },
+    {
+      "path": "tests/upstream/step12-quantified-diamond/step12-runner.log",
+      "anchor": "sourceReplayStatus=blocked-or-partial",
+      "role": "Historical record: Captured historical legacy/viaIR loop statuses retaining six pending functions per mode and explicit blocked-or-partial replay; no complete runtime acceptance. Associated committed validation identifies this transcript; reported outcomes, resource facts, external inputs and proofs are not independently verified. No current authorization, consumer, nonuse or deletion credit.",
+      "blob": "0e7147f82445e7caadc88c6fd0d9e1a74bfb1050"
+    },
+    {
+      "path": "tests/upstream/step12-quantified-diamond/step12-upstream.log",
+      "anchor": "Prepared 1/4; 2 Lean replay jobs",
+      "role": "Historical record: Captured historical pinned upstream loop report and resource summary with recorded four-fixture outcomes; reported completion does not supply fresh execution or full compiler/EVM conformance. Associated committed validation identifies this transcript; reported outcomes, resource facts, external inputs and proofs are not independently verified. No current authorization, consumer, nonuse or deletion credit.",
+      "blob": "0c7ffb057e13e4ebf7c276a58c4679fe69b2dcb3"
+    },
+    {
+      "path": "tests/upstream/revert-power/logs/cgroup-runtime-pre-version-fix.log",
+      "anchor": "error: unknown long option '--version'",
+      "role": "Historical record: Captured historical runtime gate whose exit0 masks an unknown --version failure; contextual validation marks the gate invalid, so no successful runtime verdict follows. Associated committed validation identifies this transcript; reported outcomes, resource facts, external inputs and proofs are not independently verified. No current authorization, consumer, nonuse or deletion credit.",
+      "blob": "37d83d256bdea8a4fcde4017db83d3d7643d4151"
+    },
+    {
+      "path": "tests/upstream/revert-power/logs/cgroup-runtime-setup-failure.log",
+      "anchor": "/bin/bash: -c: option requires an argument",
+      "role": "Historical record: Captured historical shell setup failure with recorded cgroup limits only; no measured workload, passing check or containment authentication. Associated committed validation identifies this transcript; reported outcomes, resource facts, external inputs and proofs are not independently verified. No current authorization, consumer, nonuse or deletion credit.",
+      "blob": "a2a1409b37d9226099f6e6039364dfa05359d448"
+    },
+    {
+      "path": "tests/upstream/revert-power/logs/cgroup-runtime.log",
+      "anchor": "CGROUP_PEAK_BYTES=25133056 ELAPSED_SECONDS=0 EXIT=0",
+      "role": "Historical record: Captured historical toolchain/build summary and resource counters; reported exit0 and limits are not fresh validation or resource-policy permission. Associated committed validation identifies this transcript; reported outcomes, resource facts, external inputs and proofs are not independently verified. No current authorization, consumer, nonuse or deletion credit.",
+      "blob": "27eab7f091f75330a1fd0b500825c95917d0fa58"
+    },
+    {
+      "path": "tests/upstream/revert-power/logs/doc-paths.log",
+      "anchor": "FAIL: 20 reference(s) name a file that does not exist.",
+      "role": "Historical record: Captured historical documentation path diagnostic failure with missing and ambiguous references retained; no repair, exclusion or current baseline acceptance. Associated committed validation identifies this transcript; reported outcomes, resource facts, external inputs and proofs are not independently verified. No current authorization, consumer, nonuse or deletion credit.",
+      "blob": "11582547b9c542912e2c5e14ada960ad7e725ae9"
+    },
+    {
+      "path": "tests/upstream/revert-power/logs/evm-strict.log",
+      "anchor": "82 exact-byte compiler/EVM observations passed in legacy and viaIR",
+      "role": "Historical record: Captured historical82-observation compiler/EVM summary with resource/exit fields; not independently reproduced observations, kernel proofs or present conformance. Associated committed validation identifies this transcript; reported outcomes, resource facts, external inputs and proofs are not independently verified. No current authorization, consumer, nonuse or deletion credit.",
+      "blob": "34761f6f770a5d21b656ee9582b295805803b951"
+    },
+    {
+      "path": "tests/upstream/revert-power/logs/node-tests.log",
+      "anchor": "\u2139 tests 23",
+      "role": "Historical record: Captured historical23-case Node test report with recorded statuses/durations and resource summary; no current run or independent data-consumer credit. Associated committed validation identifies this transcript; reported outcomes, resource facts, external inputs and proofs are not independently verified. No current authorization, consumer, nonuse or deletion credit.",
+      "blob": "f736cb5e884383a87b99d1542294f6a8e3ca2f63"
+    },
+    {
+      "path": "tests/upstream/revert-power/logs/public-trust.log",
+      "anchor": "trust: 529 headline theorems use only the standard axioms",
+      "role": "Historical record: Captured historical headline-theorem trust summary with resource/exit fields; no fresh axiom audit, theorem acceptance or trust expansion. Associated committed validation identifies this transcript; reported outcomes, resource facts, external inputs and proofs are not independently verified. No current authorization, consumer, nonuse or deletion credit.",
+      "blob": "4cf69c11a0f39c929955f7620c5e68be9deddd39"
+    },
+    {
+      "path": "tests/upstream/revert-power/logs/static-checks.log",
+      "anchor": "check-automatic: 491 automatic, 61 with a step budget, 0 manual; 11 refuted; 0 pending",
+      "role": "Historical record: Captured historical layer/orphan/automatic/trust/feature/parity summaries; old orphan, exclusion, budget and trust counts grant no present nonuse, deletion, disposition or policy authority. Associated committed validation identifies this transcript; reported outcomes, resource facts, external inputs and proofs are not independently verified. No current authorization, consumer, nonuse or deletion credit.",
+      "blob": "2be881b08fae7eca270ed915d706cea64a984f9f"
+    },
+    {
+      "path": "tests/upstream/revert-power/logs/upstream-debug.log",
+      "anchor": "  \"filter\": \"revertStrings/empty_v2.sol\",",
+      "role": "Historical record: Captured historical debug-string upstream report with zero replay jobs, one blocked fixture and exit1; complete enumeration is not a passing semantic result. Associated committed validation identifies this transcript; reported outcomes, resource facts, external inputs and proofs are not independently verified. No current authorization, consumer, nonuse or deletion credit.",
+      "blob": "976368d45733f81ca155c9415946c1a68996d2cc"
+    },
+    {
+      "path": "tests/upstream/revert-power/logs/upstream-panic.log",
+      "anchor": "  \"filter\": \"tryCatch/panic.sol\",",
+      "role": "Historical record: Captured historical panic upstream report with zero replay jobs, one blocked fixture and exit1; no panic execution, witness or semantic pass established. Associated committed validation identifies this transcript; reported outcomes, resource facts, external inputs and proofs are not independently verified. No current authorization, consumer, nonuse or deletion credit.",
+      "blob": "ee78cd32a7d9911ddca24582d4bc5ca483c29b91"
     }
   ],
   "schema_version": 1
