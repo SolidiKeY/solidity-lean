@@ -563,6 +563,114 @@
       "anchor": "Build completed successfully (77 jobs).",
       "role": "Historical record: Captured77-job Upstream dependency-build transcript with compiler/linter warnings; not current KeySort, full-library, TestSuite or full-gate acceptance. Linter suggestions are captured data, not editing instructions. Receipts contain no log hash, so no receipt-to-sibling identity or reproduction claim follows. Reported outcomes, resources, external artifacts and proofs are not independently verified. No current authorization, consumer, nonuse or deletion credit.",
       "blob": "e4fdf03d11c8c142bbf859e15489e55613351c2e"
+    },
+    {
+      "path": "tests/upstream/baseline-20261028/archive.json",
+      "anchor": "  \"historicalReportsModified\": false",
+      "role": "Historical record: Captured historical tar packaging command, archive digest/size and raw-directory ledger; no archive, members or reported preservation authenticated. Reported outcomes, approvals, resources, external artifacts, causes and proofs are not independently verified or adopted. No current authorization, consumer, nonuse or deletion credit.",
+      "blob": "2f76f1f63b9974cb3ddef3dc25009e85f2614f63"
+    },
+    {
+      "path": "tests/upstream/baseline-20261028/attribution/final-staged-check.json",
+      "anchor": "  \"reason\": \"Staged newly created review/handoff/validation records are included; no new missing citations.\"",
+      "role": "Historical record: Captured staged documentation check exit1,20missing references and claimed unchanged log bytes; no passing-doc or baseline-exception credit. Reported outcomes, approvals, resources, external artifacts, causes and proofs are not independently verified or adopted. No current authorization, consumer, nonuse or deletion credit.",
+      "blob": "3b7bafae9fe99b87bd72366785376ea29dc5350f"
+    },
+    {
+      "path": "tests/upstream/baseline-20261028/build-archive.json",
+      "anchor": "  \"scope\": \"Blocked cold command logs, actual configuration/wrapper/harness, state, fingerprint and last resource samples; compiled partial artifacts remain on this VM, not in the archive.\"",
+      "role": "Historical record: Captured blocked cold-build archive packaging ledger; partial compiled artifacts explicitly remained on the old VM, not inside the archive. No recovery or passing build. Reported outcomes, approvals, resources, external artifacts, causes and proofs are not independently verified or adopted. No current authorization, consumer, nonuse or deletion credit.",
+      "blob": "6562fd05198dca65c298dab478ef93329b047a37"
+    },
+    {
+      "path": "tests/upstream/baseline-20261028/build-readback.json",
+      "anchor": "  \"allArchivedBytesMatchLiveEvidence\": true,",
+      "role": "Historical record: Captured nine-file archive readback digest/size report and equality assertion; no present archive/live-byte verification. Reported outcomes, approvals, resources, external artifacts, causes and proofs are not independently verified or adopted. No current authorization, consumer, nonuse or deletion credit.",
+      "blob": "583e34518cb18d14bc28ebfa413a167c51abb2d6"
+    },
+    {
+      "path": "tests/upstream/baseline-20261028/final-gates/root-guard.json",
+      "anchor": "  \"classification\": \"Passing guard probe; no build attempted and no other checkout accessed.\"",
+      "role": "Historical record: Captured attached-root refusal probe with expected/actualexit2,stderr and destination-not-created assertion; no current containment or checkout-access acceptance. Reported outcomes, approvals, resources, external artifacts, causes and proofs are not independently verified or adopted. No current authorization, consumer, nonuse or deletion credit.",
+      "blob": "641467a4b158488c4d6a9d791385fc82a0add6ee"
+    },
+    {
+      "path": "tests/upstream/baseline-20261028/gates-before/doc-paths-before.json",
+      "anchor": "  \"elapsedSeconds\": 5.6123498639999525",
+      "role": "Historical record: Captured failed documentation command exit1 and elapsed measurement; no current result, log binding or exception. Reported outcomes, approvals, resources, external artifacts, causes and proofs are not independently verified or adopted. No current authorization, consumer, nonuse or deletion credit.",
+      "blob": "629c1b693c37445e0e3e15e1ad19fb6db8d201a1"
+    },
+    {
+      "path": "tests/upstream/baseline-20261028/invocations/solidity-baseline-20261028-02.json",
+      "anchor": "    \"FinishedAt\": \"2026-10-28T01:43:26.643763232Z\",",
+      "role": "Historical record: Captured historical Docker terminal-state and command/image/configuration snapshot reporting exit1/OOMKilledtrue; no verified cause, current OOM, launch permission or adopted limits. Reported outcomes, approvals, resources, external artifacts, causes and proofs are not independently verified or adopted. No current authorization, consumer, nonuse or deletion credit.",
+      "blob": "d592c82fa33e40bae9c0046f9ef4ba4cb9537acf"
+    },
+    {
+      "path": "tests/upstream/baseline-20261028/invocations/solidity-baseline-20261028.json",
+      "anchor": "    \"FinishedAt\": \"2026-10-28T00:56:54.350888022Z\",",
+      "role": "Historical record: Captured historical Docker terminal-state snapshot with short exit0 and embedded shell command; shell status may mask constituent failures, so no successful build/corpus inference or launch permission. Reported outcomes, approvals, resources, external artifacts, causes and proofs are not independently verified or adopted. No current authorization, consumer, nonuse or deletion credit.",
+      "blob": "65257da4793e444fac7b9fa61ec8cb2d66929122"
+    },
+    {
+      "path": "tests/upstream/baseline-20261028/merge.json",
+      "anchor": "  \"allObservationGuardsPassed\": true",
+      "role": "Historical record: Captured retry-report merge command, exit/stdout and guard assertion retaining196broken5329blocked; report merging grants no Git integration permission or semantic acceptance. Reported outcomes, approvals, resources, external artifacts, causes and proofs are not independently verified or adopted. No current authorization, consumer, nonuse or deletion credit.",
+      "blob": "269827c9814c16f1e14d150e2c173763e9baee70"
+    },
+    {
+      "path": "tests/upstream/baseline-20261028/native-cache/final-staged-check.json",
+      "anchor": "  \"originalDiagnosticsByteIdentical\": true,",
+      "role": "Historical record: Captured failed staged documentation check with20original missing references and claimed byte equality; no present baseline exception. Reported outcomes, approvals, resources, external artifacts, causes and proofs are not independently verified or adopted. No current authorization, consumer, nonuse or deletion credit.",
+      "blob": "47f3c7fbfb547cfd9ea27bf670c12560d9534cbd"
+    },
+    {
+      "path": "tests/upstream/baseline-20261028/native-cache/reproduction-extraction-check.json",
+      "anchor": "  \"noNativeChecksOrBuildsRepeated\": true",
+      "role": "Historical record: Captured20-source extraction check exit/timing/helper digest and explicit no repeated native checks/builds; not current native execution, reproduction or proof. Reported outcomes, approvals, resources, external artifacts, causes and proofs are not independently verified or adopted. No current authorization, consumer, nonuse or deletion credit.",
+      "blob": "cf2927f88a91be3dec208c1d977bec65b07edc57"
+    },
+    {
+      "path": "tests/upstream/baseline-20261028/performance.json",
+      "anchor": "    \"status\": \"blocked-controlled-timeout\",",
+      "role": "Historical record: Captured blocked coldexit124 after5400seconds,546/685targets and warm unrun, with resource/rusage/cache/transport limitations; old bounds and recovery assertions grant no present budget or cache-operation permission. Reported outcomes, approvals, resources, external artifacts, causes and proofs are not independently verified or adopted. No current authorization, consumer, nonuse or deletion credit.",
+      "blob": "f16134488c7c1ea5e9ed18b3a104283217ce8978"
+    },
+    {
+      "path": "tests/upstream/baseline-20261028/probes/packaging-check.json",
+      "anchor": "  \"allOriginalBytesPreserved\": true,",
+      "role": "Historical record: Captured packaging-helper elapsed/exit/digest/23-input preservation report with placeholder argv; no actual configured-invocation identity, archive verification or regeneration credit. Reported outcomes, approvals, resources, external artifacts, causes and proofs are not independently verified or adopted. No current authorization, consumer, nonuse or deletion credit.",
+      "blob": "a6f25e055bd01f9825ebdfec673b0afb3a6f2eff"
+    },
+    {
+      "path": "tests/upstream/baseline-20261028/probes/staged-final-check.json",
+      "anchor": "  \"coreManifestHistoricalReportsUnchanged\": true",
+      "role": "Historical record: Captured failed staged documentation check,20missing references and old log/manifest equality assertions; no current policy or baseline acceptance. Reported outcomes, approvals, resources, external artifacts, causes and proofs are not independently verified or adopted. No current authorization, consumer, nonuse or deletion credit.",
+      "blob": "ad9c6b1033bceb8305fac0bd25da09cfaa68045c"
+    },
+    {
+      "path": "tests/upstream/baseline-20261028/runtime.json",
+      "anchor": "  \"scope\": \"Diagnostic evidence, not a universal semantic or compiler/EVM proof.\"",
+      "role": "Historical record: Captured historical checkout/toolchain/environment/resource descriptors and KeySort smoke output; no current KeySort, VM qualification or universal semantic/compiler/EVM proof. Reported outcomes, approvals, resources, external artifacts, causes and proofs are not independently verified or adopted. No current authorization, consumer, nonuse or deletion credit.",
+      "blob": "d5705b644b03f92ec41f6473c093b30344ee2b01"
+    },
+    {
+      "path": "tests/upstream/baseline-20261028/value-entry/container-inspection.json",
+      "anchor": "  \"interpreted\": \"Memory=12GiB, MemorySwap=12GiB total memory+swap means no swap; cgroup swap.max=0 independently verified\"",
+      "role": "Historical record: Captured historical Docker inspect argv/exit/output and memory/swap interpretation; no Docker query, authenticated current no-swap or containment facts. Reported outcomes, approvals, resources, external artifacts, causes and proofs are not independently verified or adopted. No current authorization, consumer, nonuse or deletion credit.",
+      "blob": "a735b217a95316dac6609677d07ec01717b371b4"
+    },
+    {
+      "path": "tests/upstream/baseline-20261028/value-entry/final-staged-check.json",
+      "anchor": "  \"notNewPassingRuntimeEvidence\": true",
+      "role": "Historical record: Captured staged whitespace/source-diff/documentation results retaining docPathExit1 and explicit no new passing runtime evidence. Reported outcomes, approvals, resources, external artifacts, causes and proofs are not independently verified or adopted. No current authorization, consumer, nonuse or deletion credit.",
+      "blob": "b2ed6cff42a8140ad0d6440672ffa3acbcc0ed6b"
+    },
+    {
+      "path": "tests/upstream/baseline-20261028/value-runtime/verification.json",
+      "anchor": "  \"historicalNativeValidationComplete\": \"false remains unchanged in historical matrix\",",
+      "role": "Historical record: Captured bounded value-entry verifier output for two zero-argument pipelines,16transactions and five static mutation controls; funding assumption, rollback-policy and stale proof/full-build limits remain, with no universal/native/EVM or kernel trace acceptance. Reported outcomes, approvals, resources, external artifacts, causes and proofs are not independently verified or adopted. No current authorization, consumer, nonuse or deletion credit.",
+      "blob": "d9d721899ea308bca79c87dab54a5202f75d9591"
     }
   ],
   "schema_version": 1
