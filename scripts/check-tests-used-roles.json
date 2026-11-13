@@ -797,6 +797,12 @@
       "blob": "13b056f0ce6446455742637e38370433b0c5798b",
       "anchor": "  \"status\": \"partial-preparation\",",
       "role": "Historical record: Captured partial-preparation inventory of off-tree historical validation text and checkpoint checksum publications, explicitly not authenticated proof or a release gate, with releaseClosedfalse and semanticPremisesDischargedfalse. External bytes, digests, original sources and retention were not recovered or independently verified. Keep/uncertain-reader precedence and all uncompleted obligations remain. No current source, archive, native, proof, trust, policy, baseline, budget, authorization, consumer, nonuse or deletion credit."
+    },
+    {
+      "path": "tests/h62/item2/audit-abi-world/portable-evidence-index.json",
+      "blob": "00a8485070a7a79f9f08e515923669df5c766b64",
+      "anchor": "  \"assignment_complete\": false,",
+      "role": "Historical record: Captured portable-publication index for historical 902e archive and off-tree manifest, with assignment_completefalse and G07 blocked/open. Reported build success, coverage counts, archive digests, ticket authentication and external gas/fork observations remain unverified historical claims; no fresh a282/c977 build or inventory is certified. The committed byte-integrity verifier takes operator-supplied archive and manifest arguments; no archive or private input was recovered or replayed. Keep/uncertain-reader precedence and all uncompleted obligations remain. No current source, archive, native, EVM, gas, world/general compiler proof, trust, policy, baseline, budget, authorization, owner disposition, consumer, nonuse or deletion credit."
     }
   ],
   "schema_version": 1
