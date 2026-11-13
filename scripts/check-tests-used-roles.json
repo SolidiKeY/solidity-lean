@@ -64,7 +64,7 @@
       "anchor": "  \"answers\": {",
       "blob": "391ee8ba9494cd39762e8f0014308be77a611f59",
       "path": "scripts/h62/item2/audit-theories/handoff/COORDINATOR-ANSWERS-20261107.json",
-      "role": "Historical record: Stored coordinator-answer packet for Q-FROZEN-REBASE and Q-STATIC-VALUE. Captured directives, authority claims, exclusion rationale and proof conclusions are historical data, not current authorization or independently verified acceptance. Live parsing/hash consumption is justified separately by the admitted runner chain."
+      "role": "Historical record: Stored coordinator-answer packet for Q-FROZEN-REBASE and Q-STATIC-VALUE. Captured directives, authority claims, exclusion rationale and proof conclusions are historical data, not current authorization or independently verified acceptance. This historical role establishes no current parsing/hash consumption; any such credit requires a separately admitted runner chain."
     },
     {
       "anchor": "# Frozen evidence reconstruction",
@@ -173,6 +173,42 @@
       "blob": "66fe1b6dcac1bd61cbbb1b5bfefe04ccdfb4bb51",
       "path": "scripts/h62/item2/audit-theories/handoff/session-authorizations-and-retirement.txt",
       "role": "Historical record: captured dated coordinator steering, quoted decisions and retirement/successor messages. This is not current authorization, a final-head receipt or independently verified proof/gate evidence."
+    },
+    {
+      "anchor": "# Upstream baseline of 2026-10-28 (frozen)",
+      "blob": "64941f09a0e0322c03e74cf4a63f932eeaa20a79",
+      "path": "tests/upstream/baseline-20261028/README.md",
+      "role": "Historical record: Frozen dated baseline narrative recording counts, failed cold build, later diagnostic supplements and their limitations. Recorded assertions, external artifacts and passing outcomes are not independently verified or adopted; reproduction commands are historical data, not current execution authorization. No current consumption, reproduction, proof or non-use credit follows."
+    },
+    {
+      "anchor": "  \"innerBuildExitCode\": 127,",
+      "blob": "5a17762ebb38a81288633743a5c5d829d45096d7",
+      "path": "tests/upstream/baseline-20261028/initial-invocation-failure.json",
+      "role": "Historical record: Captured missing-time invocation failure: inner build exit 127 despite container exit zero; no Lean/corpus execution or passing validation credit. External logs, snapshots and reported outcomes are not independently verified."
+    },
+    {
+      "anchor": "  \"exitCode\": 125,",
+      "blob": "cb9810c48b8aa151adfb5e05d18ef154b0fd10a0",
+      "path": "tests/upstream/baseline-20261028/probes/docker-invocation-failure.json",
+      "role": "Historical record: Captured Docker argument-parsing failure: exit 125, invalid and corrected mount arguments, explicitly no compiler/Lean process or passing credit. External logs, snapshots and reported outcomes are not independently verified."
+    },
+    {
+      "anchor": "  \"readerStageExitCode\": 1,",
+      "blob": "3060d4841bf72837b8e6db09eb3cc24160eb42e2",
+      "path": "tests/upstream/baseline-20261028/probes/initial-probe-failure.json",
+      "role": "Historical record: Captured failed reader elaboration despite outer driver exit zero, with original/corrected run references and compiler-invalid source diagnosis; no passing stage, proof or current reproduction credit. External logs, snapshots and reported outcomes are not independently verified."
+    },
+    {
+      "anchor": "# Value-aware entry prerequisite audit (2026-10-28)",
+      "blob": "98c870d4ef8d8c9f7c92c9051384ca867a52c0c5",
+      "path": "tests/upstream/baseline-20261028/value-entry/README.md",
+      "role": "Historical record: Captured blocked value-entry prerequisite audit and static integrity controls; this follow-up explicitly records no Lean/compiler/EVM/runtime probe execution. Recorded assertions, external artifacts and passing outcomes are not independently verified or adopted; reproduction commands are historical data, not current execution authorization. No current consumption, reproduction, proof or non-use credit follows."
+    },
+    {
+      "anchor": "# Value-entry runtime supplement (2026-10-28)",
+      "blob": "2b741e369e20acb98876077d8532d82da23efe9b",
+      "path": "tests/upstream/baseline-20261028/value-runtime/README.md",
+      "role": "Historical record: Captured bounded value-entry runtime supplement and independent result-check narrative, distinguishing historical native observations from universal lowering, generated-EVM or new kernel proof claims. Recorded assertions, external artifacts and passing outcomes are not independently verified or adopted; reproduction commands are historical data, not current execution authorization. No current consumption, reproduction, proof or non-use credit follows."
     }
   ],
   "schema_version": 1
