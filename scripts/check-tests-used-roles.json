@@ -209,6 +209,60 @@
       "blob": "2b741e369e20acb98876077d8532d82da23efe9b",
       "path": "tests/upstream/baseline-20261028/value-runtime/README.md",
       "role": "Historical record: Captured bounded value-entry runtime supplement and independent result-check narrative, distinguishing historical native observations from universal lowering, generated-EVM or new kernel proof claims. Recorded assertions, external artifacts and passing outcomes are not independently verified or adopted; reproduction commands are historical data, not current execution authorization. No current consumption, reproduction, proof or non-use credit follows."
+    },
+    {
+      "anchor": "# Runtime array-copy classification",
+      "blob": "f5a2023a2a213497d97164419a2692c49194d05d",
+      "path": "tests/h62/item2/audit-calculus/ARRAY-COPY-CLASSIFICATION.md",
+      "role": "Historical record: captured array-copy V127 checkpoint counts, publication pins and static premise interpretations. Reported source equality, counts, theorem interpretations, private artifacts and ownership statements are historical claims, not independently verified facts or current authority; no fresh execution, proof, runtime, consumer-absence, deletion or STOP-release credit."
+    },
+    {
+      "anchor": "# Typed byte-capture classification",
+      "blob": "518d20f66f1e7659c812cf0d0e4c583caca16f18",
+      "path": "tests/h62/item2/audit-calculus/BYTE-CAPTURE-CLASSIFICATION.md",
+      "role": "Historical record: captured byte-capture V128 checkpoint counts, publication pins and static premise interpretations. Reported source equality, counts, theorem interpretations, private artifacts and ownership statements are historical claims, not independently verified facts or current authority; no fresh execution, proof, runtime, consumer-absence, deletion or STOP-release credit."
+    },
+    {
+      "anchor": "# Finite scalar-frame byte-image classification",
+      "blob": "5cd407cb0c0a6bcba441f242a17baa297e0af27f",
+      "path": "tests/h62/item2/audit-calculus/BYTE-IMAGE-CLASSIFICATION.md",
+      "role": "Historical record: captured byte-image V129 checkpoint counts, publication pins and static premise interpretations. Reported source equality, counts, theorem interpretations, private artifacts and ownership statements are historical claims, not independently verified facts or current authority; no fresh execution, proof, runtime, consumer-absence, deletion or STOP-release credit."
+    },
+    {
+      "anchor": "# Callback frame premise interpretation",
+      "blob": "9f129bae85a5e53324a09953aab219fcf3d96e66",
+      "path": "tests/h62/item2/audit-calculus/CALLBACK-FRAME-CLASSIFICATION.md",
+      "role": "Historical record: captured callback-frame V138/V141 checkpoint counts, publication pins and static premise interpretations. Reported source equality, counts, theorem interpretations, private artifacts and ownership statements are historical claims, not independently verified facts or current authority; no fresh execution, proof, runtime, consumer-absence, deletion or STOP-release credit."
+    },
+    {
+      "anchor": "# External return byte decoder premises",
+      "blob": "cc43135d50d147f3b975854429e2fcfddd8ceb6a",
+      "path": "tests/h62/item2/audit-calculus/EXTERNAL-RETURN-CLASSIFICATION.md",
+      "role": "Historical record: captured external-return V140/V141 checkpoint counts, publication pins and static premise interpretations. Reported source equality, counts, theorem interpretations, private artifacts and ownership statements are historical claims, not independently verified facts or current authority; no fresh execution, proof, runtime, consumer-absence, deletion or STOP-release credit."
+    },
+    {
+      "anchor": "# Constructed intrinsic panic-carrier classification",
+      "blob": "de2d6eb94634c5270c32e6a34846a2bb8e6e82cd",
+      "path": "tests/h62/item2/audit-calculus/PANIC-CARRIER-CLASSIFICATION.md",
+      "role": "Historical record: captured panic-carrier V132 checkpoint counts, publication pins and static premise interpretations. Reported source equality, counts, theorem interpretations, private artifacts and ownership statements are historical claims, not independently verified facts or current authority; no fresh execution, proof, runtime, consumer-absence, deletion or STOP-release credit."
+    },
+    {
+      "anchor": "# Computed panic-producer classification",
+      "blob": "4377464a10d4354afb62a77d8f85d2e85c9df61f",
+      "path": "tests/h62/item2/audit-calculus/PANIC-PRODUCER-CLASSIFICATION.md",
+      "role": "Historical record: captured panic-producer V136 checkpoint counts, publication pins and static premise interpretations. Reported source equality, counts, theorem interpretations, private artifacts and ownership statements are historical claims, not independently verified facts or current authority; no fresh execution, proof, runtime, consumer-absence, deletion or STOP-release credit."
+    },
+    {
+      "anchor": "# Primitive return validation and projection premises",
+      "blob": "c4a1dd4b0d7556a8d94caf22510eec26ca88784f",
+      "path": "tests/h62/item2/audit-calculus/PRIMITIVE-PROJECTION-CLASSIFICATION.md",
+      "role": "Historical record: captured primitive-projection V139/V141 checkpoint counts, publication pins and static premise interpretations. Reported source equality, counts, theorem interpretations, private artifacts and ownership statements are historical claims, not independently verified facts or current authority; no fresh execution, proof, runtime, consumer-absence, deletion or STOP-release credit."
+    },
+    {
+      "anchor": "# Finite-entry and completed-branch determinism classification",
+      "blob": "1af8dd6c27ac8d314c9093ad336076d10bc8bc1f",
+      "path": "tests/h62/item2/audit-calculus/SOURCE-DETERMINISM-CLASSIFICATION.md",
+      "role": "Historical record: captured source-determinism V133 checkpoint counts, publication pins and static premise interpretations. Reported source equality, counts, theorem interpretations, private artifacts and ownership statements are historical claims, not independently verified facts or current authority; no fresh execution, proof, runtime, consumer-absence, deletion or STOP-release credit."
     }
   ],
   "schema_version": 1
