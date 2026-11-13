@@ -671,6 +671,30 @@
       "anchor": "  \"historicalNativeValidationComplete\": \"false remains unchanged in historical matrix\",",
       "role": "Historical record: Captured bounded value-entry verifier output for two zero-argument pipelines,16transactions and five static mutation controls; funding assumption, rollback-policy and stale proof/full-build limits remain, with no universal/native/EVM or kernel trace acceptance. Reported outcomes, approvals, resources, external artifacts, causes and proofs are not independently verified or adopted. No current authorization, consumer, nonuse or deletion credit.",
       "blob": "d9d721899ea308bca79c87dab54a5202f75d9591"
+    },
+    {
+      "path": "tests/upstream/baseline-20261028/archive-readback.json",
+      "anchor": "  \"allBytesMatchLiveInputs\": true,",
+      "role": "Historical record: Captured2141-row archived-file readback report with recorded195455338uncompressed bytes and a byte-equality assertion; internal table consistency does not authenticate archive/live bytes, extraction, source proofs or nonuse. Tables and internal payload-hash bindings are reviewed as captured report structure, not semantic auditing of embedded Lean. Reported facts, resources, external artifacts, approvals and proofs are unverified/unadopted. No current authorization, consumer, nonuse or deletion credit.",
+      "blob": "9727dd1e4813a7bdd7c2a540a637037fbd1f04bb"
+    },
+    {
+      "path": "tests/upstream/baseline-20261028/value-entry/audit.json",
+      "anchor": "  \"nativeValidationComplete\": false,",
+      "role": "Historical record: Captured original cache/interface diagnostic with304snapshot rows,146historical-file hashes,8embedded source texts and unrun payment checks; original28-module prerequisite and metadata are historical, not current artifact identity or runtime approval. Tables and internal payload-hash bindings are reviewed as captured report structure, not semantic auditing of embedded Lean. Reported facts, resources, external artifacts, approvals and proofs are unverified/unadopted. No current authorization, consumer, nonuse or deletion credit.",
+      "blob": "e2b146fd22d4a550d42bb9048f2d2350e728ca0b"
+    },
+    {
+      "path": "tests/upstream/baseline-20261028/value-entry/audit-final.json",
+      "anchor": "  \"nativeValidationComplete\": false,",
+      "role": "Historical record: Captured final cache/interface diagnostic retaining nativeValidationCompletefalse and unrun runtime checks; corrected root-against27dependencies prerequisite, self-rusage and source snapshots are historical, not current ABI/world semantics or cache acceptance. Tables and internal payload-hash bindings are reviewed as captured report structure, not semantic auditing of embedded Lean. Reported facts, resources, external artifacts, approvals and proofs are unverified/unadopted. No current authorization, consumer, nonuse or deletion credit.",
+      "blob": "f42acfb9cc6eae1d69f0cdeb514007c851b6f1f9"
+    },
+    {
+      "path": "tests/upstream/baseline-20261028/value-entry/capped/audit.json",
+      "anchor": "  \"nativeValidationComplete\": false,",
+      "role": "Historical record: Captured separately measured final cache/interface diagnostic with retained false descriptor identities and native/runtime incompleteness; measured self RSS is not aggregate/cgroup authentication and embedded source/feature text grants no proof or policy acceptance. Tables and internal payload-hash bindings are reviewed as captured report structure, not semantic auditing of embedded Lean. Reported facts, resources, external artifacts, approvals and proofs are unverified/unadopted. No current authorization, consumer, nonuse or deletion credit.",
+      "blob": "d2ee821622d937c387bd91b38eda3875dfc42953"
     }
   ],
   "schema_version": 1
