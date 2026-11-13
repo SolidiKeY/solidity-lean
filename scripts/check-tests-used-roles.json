@@ -737,6 +737,30 @@
       "blob": "a67eaeddc19979a6a940fa229c69f222e666d332",
       "anchor": "  \"note\": \"Focused three-contract rerun against unchanged captured source hashes. Full build, 41 source/tooling regressions and theorem axiom checks are reported separately; this is not a new whole-corpus audit.\",",
       "role": "Historical record: Captured527-row post-integer-negation snapshot with session/report/archive/input references for focused three-contract rerun. Separate build/regression/axiom claims remain unauthenticated; this is explicitly not a new whole-corpus audit. Complete table structure and internal aggregate digest were checked, not historical source bytes, archives, proofs or native results. No current source-equivalence, semantic, trust, policy, budget, exclusion, authorization, consumer, nonuse or deletion credit."
+    },
+    {
+      "path": "tests/migration/comparison-2026-10-16.json",
+      "blob": "87471aa29ffd9fe26f6e899a96b2d292df8cfd2c",
+      "anchor": "  \"passed\": false,",
+      "role": "Historical record: Captured failed migration comparison with530 diagnostic findings:513changed and17error, explicitly passedfalse. Expected-versus-actual labels and recorded tool errors are retained, not a new accepted baseline, proof outcome or current source comparison. Complete row structures/counts were inspected; diagnostic reason strings and source/proof outcomes were not semantically authenticated. No current source, archive, native, proof, trust, policy, budget, exclusion, authorization, consumer, nonuse or deletion credit."
+    },
+    {
+      "path": "tests/migration/comparison-before-loop-enum.json",
+      "blob": "7377f76aef9e3e0347365db0c94c9deba78b141f",
+      "anchor": "    \"reason\": \"/tmp/solidity-test-a2SeA0/Test.lean:2:0: error: contract `ERC20` inherits: the import reads one contract's own members\\n/tmp/solidity-test-a2SeA0/Test.lean:3:21: error(lean.unknownIdentifier): Unknown constant `SolTests.ERC20`\\n/tmp/solidity-test-a2SeA0/Test.lean:4:13: error(lean.unknownIdentifier): Unknown constant `SolTests.ERC20`\"",
+      "role": "Historical record: Captured pre-loop-enum comparison diagnostics:572findings including12unaccounted imports,532changed and28error outcomes. Temporary Lean error text records a reported historical failure; no expected values, error truth, source semantics or import/exclusion policy is accepted. Complete row structures/counts were inspected; diagnostic reason strings and source/proof outcomes were not semantically authenticated. No current source, archive, native, proof, trust, policy, budget, exclusion, authorization, consumer, nonuse or deletion credit."
+    },
+    {
+      "path": "tests/migration/comparison-current.json",
+      "blob": "d12bfd91773d5d30b0b9ea047b47718c36986115",
+      "anchor": "    \"reason\": \"lake exited 1\\n/tmp/solidity-test-ESGpxm/Test.lean:2:0: error: contract `ERC20` inherits: the import reads one contract's own members\\n/tmp/solidity-test-ESGpxm/Test.lean:3:21: error(lean.unknownIdentifier): Unknown constant `SolTests.ERC20`\\n/tmp/solidity-test-ESGpxm/Test.lean:4:13: error(lean.unknownIdentifier): Unknown constant `SolTests.ERC20`\",",
+      "role": "Historical record: Captured historical comparison diagnostics:574findings including12unaccounted imports,531changed,3missing and28error outcomes, with recorded failed lake calls. The current filename does not grant current validity, a passing comparison, baseline approval, or acceptance of missing/import/error gaps. Complete row structures/counts were inspected; diagnostic reason strings and source/proof outcomes were not semantically authenticated. No current source, archive, native, proof, trust, policy, budget, exclusion, authorization, consumer, nonuse or deletion credit."
+    },
+    {
+      "path": "tests/migration/proof-testsuite-retry-2026-10-16.json",
+      "blob": "39e096457c121e7deabd276165173d78397dbc5f",
+      "anchor": "  \"note\": \"Supplementary retry of original notRun TestSuite rows. Does not overwrite the uniform audit or erase its timeout.\",",
+      "role": "Historical record: Captured13-function focused supplementary TestSuite retry, with11reported proved labels,1pending and1unsupported plus recorded elapsed times/profile. Explicitly does not replace the original uniform audit or erase its timeout; neither reported proofs nor old timeout profile/retry policy authorize present success, budgets or replay. Complete row structures/counts were inspected; diagnostic reason strings and source/proof outcomes were not semantically authenticated. No current source, archive, native, proof, trust, policy, budget, exclusion, authorization, consumer, nonuse or deletion credit."
     }
   ],
   "schema_version": 1
