@@ -41,6 +41,10 @@ def pin_changes(repo: Path, base: str, head: str) -> list[tuple[str, str]]:
     and checks every returned id against authenticated exact-triple approvals.
     Merges are compared with every parent, including conflict resolutions.
     """
+    # A shallow boundary can hide commits on a merge side even when base is
+    # an ancestor of head. Require complete history before enumerating changes.
+    if git(repo, "rev-parse", "--is-shallow-repository").strip() != b"false":
+        raise TrailerError("shallow repository cannot establish complete push history")
     before, after = commit_id(repo, base), commit_id(repo, head)
     ancestor = subprocess.run(["git", "-C", str(repo), "merge-base", "--is-ancestor", before, after],
                               capture_output=True, check=False)

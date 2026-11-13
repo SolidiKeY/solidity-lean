@@ -93,6 +93,16 @@ class TrailerTests(unittest.TestCase):
         with self.assertRaises(TrailerError):
             pin_changes(self.repo, pin, self.base)
 
+    def test_shallow_history_fails_closed_even_with_ancestor_base(self):
+        self.git("commit", "--allow-empty", "-qm", "first")
+        self.git("commit", "--allow-empty", "-qm", "second")
+        with tempfile.TemporaryDirectory() as tmp:
+            clone = Path(tmp) / "shallow"
+            subprocess.check_call(["git", "clone", "-q", "--depth", "2",
+                                   self.repo.as_uri(), str(clone)])
+            with self.assertRaisesRegex(TrailerError, "shallow repository"):
+                pin_changes(clone, "HEAD^", "HEAD")
+
     def test_missing_base_fails_closed(self):
         with self.assertRaises(TrailerError):
             pin_changes(self.repo, "does-not-exist", "HEAD")
