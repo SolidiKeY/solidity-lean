@@ -1826,4 +1826,38 @@ theorem decode_exact (rows : List RawPin) (output : Except Error (List Pin)) :
 
 end Draft
 
+/-- Executable operations use the fixed snapshot route and independent checker. -/
+def operations : Operations where
+  decode := Draft.decode
+  recompute := recompute
+  check := Draft.check
+  current := fun fuel manifest pins => do
+    let snapshot ← readSnapshot
+    match snapshot with
+    | .error err => pure (.error err)
+    | .ok s => pure (Draft.check s fuel manifest pins)
+  rawCurrent := fun fuel manifest rows => do
+    match Draft.decode rows with
+    | .error err => pure (.error err)
+    | .ok pins => do
+      let snapshot ← readSnapshot
+      match snapshot with
+      | .error err => pure (.error err)
+      | .ok s => pure (Draft.check s fuel manifest pins)
+
+/-- The current law shape would imply that every possible snapshot was observed. -/
+theorem laws_force_observed (ops : Operations) (laws : Laws ops) (s : Snapshot) :
+    ObservedSnapshot s := by
+  classical
+  by_cases observed : ObservedSnapshot s
+  · exact observed
+  · let manifest : Manifest := ⟨"", []⟩
+    have first : CheckGraph s manifest [] 1 (.error .malformedPin) :=
+      (laws.check_exact s 1 manifest [] (.error .malformedPin)).1
+        (fun evidence => False.elim (observed evidence))
+    have second : CheckGraph s manifest [] 1 (.ok ()) :=
+      (laws.check_exact s 1 manifest [] (.ok ())).1
+        (fun evidence => False.elim (observed evidence))
+    have contradiction := laws.check_deterministic s manifest [] 1 _ _ first second
+    cases contradiction
 end Solidity.GoalPins
