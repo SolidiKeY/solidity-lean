@@ -1,7 +1,0 @@
-# Frozen leaf-premise accounting
-
-Six full frozen telescopes and two logical hAll occurrences are recorded by ordered binder/type/source/owner pins and designated original-history packets. A/Q are predicate DATA; the soundness conclusion is not assumed. Both hAll laws retain every horizon/frame for the fixed configuration. Actual Q-frame support and admitted require(true) success coexist, without claiming event/custom-error execution or internal-call admission.
-
-Run leaf_progress_input_roles.py from the exact original frozen validation overlay. Current Leaves has a historical BuiltinNode.callTy mapFree change, so the unchanged-file guard deliberately refuses current-tree use; current packet checking is reported separately. Fidelity closes by original history under the committed coordinator answer, with no auditor statement change/versioned pair.
-
-Evidence /workspace/h62-audit-leaf-roles-20261108-evidence:positive6records/2logical occurrences and6rehashed refusals for weakened law, selected horizon, predicate reclassification, dropped global program, replaced full type and invented producer route.17Python tests and diff check pass. Finder/skeptic independently PASS with no residual findings; read-only/no Lean/Lake/server/network/writes. Prior115/new6 specifications are disjoint:121 names/379remaining in separate reports, not merged121 acceptance. No new witness count or compiler/physical coverage is inferred. Original assignment, queue and scope are adjacent; full assignment remains partial.
