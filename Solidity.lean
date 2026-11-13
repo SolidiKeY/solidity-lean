@@ -4119,6 +4119,7 @@ import Solidity.Semantics.EntryReturn
 import Solidity.Semantics.ExternalReturnBytes
 import Solidity.Semantics.ExternalTryWitness
 import Solidity.Semantics.Heap
+import Solidity.Semantics.IntrinsicStorage.Layout
 import Solidity.Semantics.LexMetrics
 import Solidity.Semantics.LibraryTryFrame
 import Solidity.Semantics.Lifetime
@@ -4160,6 +4161,7 @@ import Solidity.Semantics.StaticInvocation
 import Solidity.Semantics.Storage
 import Solidity.Semantics.Storage.Anon
 import Solidity.Semantics.Storage.Ops
+import Solidity.Semantics.Storage.TypeLayout
 import Solidity.Semantics.Storage.Values
 import Solidity.Semantics.StorageWt
 import Solidity.Semantics.Termination

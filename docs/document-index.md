@@ -292,6 +292,7 @@ and open obligations. Test proposals remain proposals until applied.
 - [docs/module-map/precompiles.md](module-map/precompiles.md)
 - [docs/module-map/readonly-calls.md](module-map/readonly-calls.md)
 - [docs/module-map/roadmap.md](module-map/roadmap.md)
+- [docs/module-map/semantics.md](module-map/semantics.md)
 - [docs/module-map/source-definitions.md](module-map/source-definitions.md)
 - [docs/module-map/theories.md](module-map/theories.md)
 - [docs/module-map/tools.md](module-map/tools.md)
