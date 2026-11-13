@@ -328,24 +328,7 @@ every payment calling back into a contract that keeps the declared
 invariant: solkey's specified problem under `transferSemantics:withCallback`.
 The call is inlined under callbacks (`ProvesC.callRets`). -/
 theorem withdraw_spec : ValidC invariant[Bank] spec[Bank]{withdraw} := by
-  refine ProvesC.fmlValid ?_
-  apply ProvesC.bindIntro
-  apply ProvesC.intro
-  apply ProvesC.callRets
-  apply ProvesC.bind (.key .localValueDeclInitDrop) rfl rfl
-  apply ProvesC.update (.key .localValueAssign) rfl
-  apply ProvesC.block
-  apply ProvesC.bind (.key .localValueDeclInitDrop) rfl rfl
-  apply ProvesC.update (.key .storageRootReadSelect) rfl
-  apply ProvesC.update (.key .storageRootWriteStore) rfl
-  apply ProvesC.update (.key .storageRootOpAssign) rfl
-  apply ProvesC.callback .transferWithCallbackBox
-  · refine ProvesC.plain ?_ rfl
-    sol_prove (steps := 128)
-    sol_leaf
-    sol_close
-  · refine ProvesC.plain ?_ rfl
-    exact Proves.assumeInv
+  sol_prove
 
 /-! ## Calls whose callee calls back
 
