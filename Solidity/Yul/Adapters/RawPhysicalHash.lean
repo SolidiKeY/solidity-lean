@@ -13,7 +13,6 @@ variable {ctx : Source.Ctx}
 
 theorem word_roundtrip (value : Environment.Word) :
     lenU (P6ByteMemory.wireWord value).val (P6ByteMemory.wireWord value).isLt=value := by
-  first | omega | decide | skip
   apply Subtype.ext
   have lower : 0≤value.1 := (of_decide_eq_true value.2).1
   change (value.1.toNat : Int)=value.1
@@ -34,7 +33,6 @@ theorem target {C : Contract} {Γ : Ctx} (targetFrame : Environment.Frame)
     let reached := RawPhysical.store image destination updated cell
     Environment.runSlice targetFrame (code destination.offset)
       ⟨input.offset::input.length::tail,frameBytes image⟩=some ⟨tail,frameBytes reached⟩ := by
-  first | omega | decide | skip
   dsimp only
   have hashed : Environment.cryptoStep (.op .KECCAK256)
       ⟨input.offset::input.length::tail,frameBytes image⟩=
@@ -83,7 +81,6 @@ theorem storeHash_carrier {C : Contract} {Γ : Ctx} (image : FrameMem C Γ) (inp
     (destination : WordSpan image.capacity) (state : RawFrame.State ctx) (cell : WordCell (localExternalTypes ctx)) :
     (storeHash image input destination state cell).st=image.st ∧
     (storeHash image input destination state cell).key=image.key := by
-  first | omega | decide | skip
   have touched := P6ByteMemory.touch_carrier
     (RawPhysical.store image destination (RawFrame.write state cell (hashWord image input)) cell)
     (readArea image input destination (RawFrame.write state cell (hashWord image input)) cell)
@@ -95,7 +92,6 @@ theorem store_high {C : Contract} {Γ : Ctx} (image : FrameMem C Γ)
     (destination : WordSpan image.capacity) (state : RawFrame.State ctx) (cell : WordCell (localExternalTypes ctx)) :
     (RawPhysical.store image destination state cell).highWaterWords=
       max image.highWaterWords ((destination.offset.val.toNat+32+31)/32) := by
-  first | omega | decide | skip
   unfold RawPhysical.store P6ByteMemory.writeSpan
   dsimp only [RawPhysical.span]
   simp only [lenU,Int.toNat_natCast]
@@ -109,7 +105,6 @@ theorem read_high {C : Contract} {Γ : Ctx} (image : FrameMem C Γ) (input : Byt
     (storeHash image input destination state cell).highWaterWords=
       max (RawPhysical.store image destination (RawFrame.write state cell (hashWord image input)) cell).highWaterWords
         ((input.offset.val.toNat+input.length.val.toNat+31)/32) := by
-  first | omega | decide | skip
   unfold storeHash P6ByteMemory.touch
   dsimp only [readArea]
   rw [dif_neg nonempty]
@@ -131,7 +126,6 @@ theorem transport {C : Contract} {Γ : Ctx} (base : Nat) (state : RawFrame.State
     reached.st=image.st ∧ reached.key=image.key ∧
     Environment.runSlice targetFrame (code destination.offset)
       ⟨input.offset::input.length::tail,frameBytes initial⟩=some ⟨tail,frameBytes reached⟩ := by
-  first | omega | decide | skip
   dsimp only
   have physical := RawPhysicalUpdate.store base state image room cell
     (hashWord (frameOf base state image room) input) destination coordinates tail

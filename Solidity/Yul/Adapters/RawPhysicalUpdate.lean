@@ -17,7 +17,6 @@ theorem patch_reads (base : Nat) (state : RawFrame.State ctx) (memory : Views.By
     ∀ query : WordCell (localExternalTypes ctx),
       Environment.readMemory (Environment.writeBytes memory (offset base cell) (Source.wordBytes value))
         (offset base query) 32=Source.wordBytes (RawFrame.view (RawFrame.write state cell value) query) := by
-  first | omega | decide | skip
   intro query
   by_cases same : query=cell
   · subst query
@@ -41,7 +40,6 @@ theorem reencode (base : Nat) (state : RawFrame.State ctx) (memory : Views.ByteV
     (cell : WordCell (localExternalTypes ctx)) (value : Word) :
     let patch := Environment.writeBytes (encode base state memory) (offset base cell) (Source.wordBytes value)
     encode base (RawFrame.write state cell value) patch=patch := by
-  first | omega | decide | skip
   dsimp only
   apply list_unchanged
   intro query member
@@ -53,7 +51,6 @@ theorem decode_view (base : Nat) (state : RawFrame.State ctx) (memory : Views.By
     RawFrame.view (decode base state
       (Environment.writeBytes (encode base state memory) (offset base cell) (Source.wordBytes value)))=
       RawFrame.view (RawFrame.write state cell value) := by
-  first | omega | decide | skip
   funext query
   change Source.toWord (Source.beValue (Environment.readMemory _ (offset base query) 32))=_
   have reads := patch_reads base state (encode base state memory) cell value
@@ -77,7 +74,6 @@ theorem store {C : Contract} {Γ : Ctx} (base : Nat) (state : RawFrame.State ctx
     Environment.cryptoStep (.op .MSTORE)
       ⟨area.offset::lenU value.val value.isLt::tail,frameBytes (frameOf base state image room)⟩=
         some ⟨tail,frameBytes reached⟩ := by
-  first | omega | decide | skip
   dsimp only
   have bytes := RawPhysical.store_image (frameOf base state image room) area (RawFrame.write state cell value) cell
   rw [coordinates,RawFrame.read_write,frame_bytes] at bytes

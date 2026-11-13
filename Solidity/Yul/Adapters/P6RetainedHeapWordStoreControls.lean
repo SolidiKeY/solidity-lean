@@ -16,7 +16,6 @@ def program : Source.EM E [] Unit := do
   Source.heapPut 0 ⟨_,shortData⟩
   Source.writeLoc F 0 (.mem 0 0) (uintValueOfWord E.layout 42)
 theorem actual_sequence : program.run empty=(.ok (),after) := by
-  first | (simp only;done) | decide | omega | rfl | skip
   unfold program
   rw [Source.Hoare.run_bind,objectAllocRef_run empty originalData rfl]
   simp only []
@@ -46,7 +45,6 @@ def sink (pipeline : Pipeline) : WordSpan (image pipeline).capacity :=
   ⟨lenU 160 (by decide),by change 160+32≤320;decide⟩
 def reached (pipeline : Pipeline) := store32 (image pipeline) (sink pipeline) (lenU 42 (by decide))
 theorem new_image (pipeline : Pipeline) : frameBytes (reached pipeline)=patch := by
-  first | omega | decide | skip
   dsimp only [reached]
   rw [P6HeapWordStore.store_image (image pipeline) (sink pipeline) (⟨42,by decide⟩:Roadmap.Word),initial_image]
   rfl
@@ -60,7 +58,6 @@ theorem original_history_and_target (pipeline : Pipeline) (tail : List Solidity.
       ⟨(sink pipeline).offset::lenU 42 (by decide)::tail,frameBytes (image pipeline)⟩=
       some ⟨tail,frameBytes (reached pipeline)⟩ ∧
     (reached pipeline).st=(carrier pipeline).st ∧ (reached pipeline).key=(carrier pipeline).key := by
-  first | omega | decide | skip
   have target := frame_store32_target (image pipeline) (sink pipeline) (lenU 42 (by decide)) tail
   change _=some (⟨tail,frameBytes (reached pipeline)⟩ : Solidity.Backend.Environment.Slice) ∧
     (reached pipeline).st=(image pipeline).st ∧ (reached pipeline).key=(image pipeline).key at target
@@ -71,7 +68,6 @@ theorem original_history_and_target (pipeline : Pipeline) (tail : List Solidity.
 theorem retained_bytes (pipeline : Pipeline) :
     mload (frameBytes (reached pipeline)) 160=42 ∧
     mload (frameBytes (reached pipeline)) 192=9 ∧ frameBytes (reached pipeline) 319=170 := by
-  first | omega | decide | skip
   rw [new_image]
   exact ⟨mload_mstore _ _ _,dormant_tail.1,dormant_tail.2⟩
 

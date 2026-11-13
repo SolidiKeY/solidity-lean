@@ -16,7 +16,6 @@ theorem preserve (initial : FrameMem C Γ) (input output : ByteSpan initial.capa
     (away : ∀ i : Fin 64,64+i.val<output.offset.val.toNat ∨
       output.offset.val.toNat+min output.length.val.toNat data.length≤64+i.val) :
     ReservedOK (frameBytes (RawPhysicalCallAccess.reached initial input output data)) free := by
-  first | (simp only;done) | decide | omega | rfl | skip
   rw [RawPhysicalCallAccess.image]
   constructor
   · have words := mload_congr (frameBytes (RawPhysicalCallOutput.copy initial output data))
@@ -40,7 +39,6 @@ theorem preserve_interval (initial : FrameMem C Γ) (input output : ByteSpan ini
     (safe : min output.length.val.toNat data.length=0 ∨
       output.offset.val.toNat+min output.length.val.toNat data.length≤64 ∨ 128≤output.offset.val.toNat) :
     ReservedOK (frameBytes (RawPhysicalCallAccess.reached initial input output data)) free := by
-  first | omega | decide | skip
   apply preserve initial input output data free reserved
   intro i
   have bound:=i.isLt

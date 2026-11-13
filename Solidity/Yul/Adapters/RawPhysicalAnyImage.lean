@@ -14,7 +14,6 @@ theorem decode_reads (base : Nat) (state : RawFrame.State ctx) (memory : Views.B
     (cell : WordCell (localExternalTypes ctx)) :
     Environment.readMemory memory (offset base cell) 32=
       Source.wordBytes (RawFrame.view (decode base state memory) cell) := by
-  first | omega | decide | skip
   exact (RawPhysicalInterior.bytes_word_inverse _
     (by simp only [Environment.readMemory,List.length_map,List.length_range])).symm
 
@@ -22,7 +21,6 @@ theorem decode_reads (base : Nat) (state : RawFrame.State ctx) (memory : Views.B
 cleaning or a final encoded-view premise. All complementary bytes stay exact. -/
 theorem encode_decode (base : Nat) (state : RawFrame.State ctx) (memory : Views.ByteView) :
     encode base (decode base state memory) memory=memory := by
-  first | omega | decide | skip
   apply list_unchanged
   intro cell member
   exact decode_reads base state memory cell
@@ -32,7 +30,6 @@ raw words. Room locates the inventory; it is not EVM Word nonwrapping. -/
 theorem frame_identity {C : Contract} {Γ : Ctx} (base : Nat) (state : RawFrame.State ctx)
     (image : FrameMem C Γ) (room : base+32*wordCellCount (localExternalTypes ctx)≤image.highWaterWords*32) :
     frameOf base (decode base state (frameBytes image)) image room=image := by
-  first | omega | decide | skip
   apply MemoryAgreement.unchanged
   exact encode_decode base state (frameBytes image)
 
@@ -41,7 +38,6 @@ for zero lengths and source=destination. No gas or allocator law follows. -/
 theorem copy_high_mono {C : Contract} {Γ : Ctx} (image : FrameMem C Γ)
     (source destination : ByteSpan image.capacity) (same : source.length=destination.length) :
     image.highWaterWords≤(P6ByteMemory.copySnapshot image source destination same).highWaterWords := by
-  first | (simp only;done) | decide | omega | rfl | skip
   by_cases empty : source.length.val.toNat=0
   · rw [P6ByteMemory.copy_empty image source destination same empty]
     exact Nat.le_refl _
@@ -61,7 +57,6 @@ theorem copy_transport {C : Contract} {Γ : Ctx} (base : Nat) (state : RawFrame.
       frameBytes reached=Environment.writeBytes (frameBytes image) destination.offset.val.toNat
         (Environment.readMemory (frameBytes image) source.offset.val.toNat source.length.val.toNat) ∧
       reached.st=image.st ∧ reached.key=image.key := by
-  first | omega | decide | skip
   dsimp only
   have grows := copy_high_mono image source destination same
   have nextRoom : base+32*wordCellCount (localExternalTypes ctx)≤

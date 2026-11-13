@@ -1,6 +1,0 @@
-Independent resumed-tooling finder /root/finder and skeptic /root/skeptic; no edits, tests, Lean or Lean server by reviewers.
-Initial findings: bind saved logs to successful command/toolchain/source/object receipts; naming flags do not establish visibility; additions require separate trust audit. Fixed: required receipt, byte consistency, archive/version and command fields, explicit non-attestation/H81 boundary, added-declaration audit and no full-migration pass claim.
-Second findings: substring versions accepted 4.24.01, same-version receipts could fill old/new roles, and -j8 could accompany -j1. Fixed exact version parsing, old4.24/new4.35 roles, one unambiguous -j1 and expected Lean fixture path. Regression controls cover all findings.
-Both final static re-reviews pass with no further actionable tooling issue. Exporter compilation, actual inventory completeness and visibility/accessibility remain pending. 22 external controls were run separately by the worker; not proofs or actual compiler export evidence.
-
-Final factual finder/skeptic reviews pass: saved22 controls and static outcomes verified, unchanged production/checker baseline confirmed, unfinished gates explicit. Commit includes state/reviews before final reporting.
