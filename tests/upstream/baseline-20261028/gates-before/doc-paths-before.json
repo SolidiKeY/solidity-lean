@@ -1,8 +1,0 @@
-{
-  "command": [
-    "bash",
-    "scripts/check-doc-paths.sh"
-  ],
-  "exitCode": 1,
-  "elapsedSeconds": 5.6123498639999525
-}
