@@ -803,6 +803,24 @@
       "blob": "00a8485070a7a79f9f08e515923669df5c766b64",
       "anchor": "  \"assignment_complete\": false,",
       "role": "Historical record: Captured portable-publication index for historical 902e archive and off-tree manifest, with assignment_completefalse and G07 blocked/open. Reported build success, coverage counts, archive digests, ticket authentication and external gas/fork observations remain unverified historical claims; no fresh a282/c977 build or inventory is certified. The committed byte-integrity verifier takes operator-supplied archive and manifest arguments; no archive or private input was recovered or replayed. Keep/uncertain-reader precedence and all uncompleted obligations remain. No current source, archive, native, EVM, gas, world/general compiler proof, trust, policy, baseline, budget, authorization, owner disposition, consumer, nonuse or deletion credit."
+    },
+    {
+      "path": "tests/h62/item1/duplication-scanner/checked-log-evidence.json",
+      "blob": "7520d49ffe3326225b55915a6c89288cd3e15d3c",
+      "anchor": "  \"boundary\": \"No new proof or compiler-adequacy result; original792 obligations and +80.254966536% Lean STOP retained.\"",
+      "role": "Historical record: Captured detached-probe/child-log-substitution regression report with source/test/external-evidence digests and reported controls, source/KeySort/AST linkage and header-navigation statistics. Fresh synthetic checked-log tests do not authenticate these old captures, source identities, counters or acceptance claims. Original792 obligations and +80.254966536% STOP remain as reported historical constraints, not a current budget exception, clearance, permission or authority to replay a stopped workload. External bytes and hashes were not recovered or independently verified. Keep/uncertain-reader precedence and all uncompleted obligations remain. No current source, archive, native, body, proof, compiler adequacy, coverage, trust, policy, baseline, budget, ownership, authorization, consumer, nonuse or deletion credit."
+    },
+    {
+      "path": "tests/h62/item1/duplication-scanner/metadata-observation-evidence.json",
+      "blob": "bc67361d50b86ee4e79ed37422d5535ca619ff16",
+      "anchor": "  \"boundary\": \"Separate local type observation only; no scanner annotation, theorem witness, ownership/equivalence or runtime acceptance. All792original obligations and +80.254966536%STOP remain.\"",
+      "role": "Historical record: Captured separate local type-observation summary with source/evidence digests, reported legacy refusals and v2 serialization/control counts, final and superseded capture labels, and preservation assertions. Recorded accepted labels and domain comparisons establish no current approval, contract permission, scanner annotation, equivalence or removed refusal. Original792 obligations and +80.254966536% STOP remain as reported historical constraints, not a current budget exception, clearance, permission or authority to replay a stopped workload. External bytes and hashes were not recovered or independently verified. Keep/uncertain-reader precedence and all uncompleted obligations remain. No current source, archive, native, body, proof, compiler adequacy, coverage, trust, policy, baseline, budget, ownership, authorization, consumer, nonuse or deletion credit."
+    },
+    {
+      "path": "tests/h62/item1/duplication-scanner/source-location-evidence.json",
+      "blob": "8bac2707325e14ef8ca563656d3ec51d93e8e6f8",
+      "anchor": "  \"stopped_workload_rerun\": false",
+      "role": "Historical record: Captured fixture source-location/linkage report with predecessor/master/source pins, accepted-capture receipt/binding digests, external control/link/unlinked counts and zero-change assertions. Recorded source/type linkage, acceptance, statement preservation and non-rerun flags are historical claims, not authenticated current execution or proof. Original792 obligations and +80.254966536% STOP remain as reported historical constraints, not a current budget exception, clearance, permission or authority to replay a stopped workload. External bytes and hashes were not recovered or independently verified. Keep/uncertain-reader precedence and all uncompleted obligations remain. No current source, archive, native, body, proof, compiler adequacy, coverage, trust, policy, baseline, budget, ownership, authorization, consumer, nonuse or deletion credit."
     }
   ],
   "schema_version": 1
