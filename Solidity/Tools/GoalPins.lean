@@ -565,4 +565,413 @@ elab "#goal_pins_complete" : command => do
     unless pins.any (·.goal == name) do
       throwError "goal pin: missing required entry for {name}"
 
+open Lean Solidity.Goals.GoalPinSpec Solidity.Goals.GoalPinSpecV2 Solidity.GoalPins
+
+namespace Draft
+instance (p : Pin) : Decidable p.WellFormed := by
+  unfold Pin.WellFormed
+  infer_instance
+instance (pins : List Pin) : Decidable (Unique pins) := by
+  unfold Unique
+  infer_instance
+instance (required : List Lean.Name) (pins : List Pin) : Decidable (Covers required pins) := by
+  unfold Covers
+  infer_instance
+instance (m : Manifest) : Decidable m.WellFormed := by
+  unfold Manifest.WellFormed
+  infer_instance
+instance (m : Manifest) (pins : List Pin) : Decidable (AuthorizedTriples m pins) := by
+  unfold AuthorizedTriples
+  infer_instance
+
+def structural (s : Snapshot) (m : Manifest) (pins : List Pin) : Except Error Unit :=
+  if ¬ Unique pins then .error .duplicatePin
+  else if ∃ p ∈ pins, ¬ p.WellFormed then .error .malformedPin
+  else if ¬ m.WellFormed then .error .malformedManifest
+  else if ∃ p ∈ pins, p.goal ∉ registryNames s then .error .unknownGoal
+  else if ¬ Covers s.requiredNames pins then .error .missingPin
+  else if ∃ p ∈ pins, ¬ ∃ a ∈ m.records, a.pin.goal = p.goal then .error .missingDecision
+  else if ¬ AuthorizedTriples m pins then .error .decisionMismatch
+  else .ok ()
+
+theorem structural_ok (s : Snapshot) (m : Manifest) (pins : List Pin) :
+    structural s m pins = .ok () ↔ Clean s m pins := by
+  unfold structural
+  repeat' (split <;> simp_all [Clean, issues])
+  all_goals grind
+
+theorem firstIssue_cons_iff (label : Error) (p : Prop) (rest : List (Error × Prop)) (err : Error) :
+    FirstIssue ((label, p) :: rest) err ↔ (label = err ∧ p) ∨ (¬p ∧ FirstIssue rest err) := by
+  constructor
+  · intro h
+    cases h with
+    | here hp => exact Or.inl ⟨rfl, hp⟩
+    | later hn ht => exact Or.inr ⟨hn, ht⟩
+  · rintro (⟨rfl, hp⟩ | ⟨hn, ht⟩)
+    · exact .here hp
+    · exact .later hn ht
+
+theorem structural_error_sound (s : Snapshot) (m : Manifest) (pins : List Pin)
+    (err : Error) (h : structural s m pins = .error err) :
+    FirstIssue (issues s m pins) err := by
+  unfold structural at h
+  unfold issues
+  simp only [firstIssue_cons_iff]
+  repeat' (split at h <;> simp_all)
+  all_goals grind
+
+theorem firstIssue_unique {xs : List (Error × Prop)} {a b : Error}
+    (ha : FirstIssue xs a) (hb : FirstIssue xs b) : a = b := by
+  induction ha generalizing b with
+  | here condition =>
+    cases hb with
+    | here _ => rfl
+    | later notCondition _ => exact False.elim (notCondition condition)
+  | later notCondition _ ih =>
+    cases hb with
+    | here condition => exact False.elim (notCondition condition)
+    | later _ other => exact ih other
+
+theorem firstIssue_not_clean {xs : List (Error × Prop)} {err : Error}
+    (h : FirstIssue xs err) (clean : ∀ issue ∈ xs, ¬issue.2) : False := by
+  induction h with
+  | @here condition err rest proof => exact clean (err, condition) (by simp) proof
+  | later _ _ ih =>
+    apply ih
+    intro issue member
+    exact clean issue (by simp [member])
+
+theorem structural_error_exact (s : Snapshot) (m : Manifest) (pins : List Pin)
+    (err : Error) : structural s m pins = .error err ↔ FirstIssue (issues s m pins) err := by
+  constructor
+  · exact structural_error_sound s m pins err
+  · intro h
+    cases hs : structural s m pins with
+    | error actual =>
+      have actualIssue := structural_error_sound s m pins actual hs
+      have eq := firstIssue_unique actualIssue h
+      cases eq
+      rfl
+    | ok value =>
+      cases value
+      have clean := (structural_ok s m pins).1 hs
+      exact False.elim (firstIssue_not_clean h clean)
+
+/-- Encoding remains a separate pass so its failures precede digest mismatches. -/
+def encodeAll : List Tree → Except Error (List (List Nat))
+  | [] => .ok []
+  | tree :: trees => do
+    let some bytes := EncodingV2.encode tree | throw .unsupported
+    let rest ← encodeAll trees
+    pure (bytes :: rest)
+
+theorem encodeAll_sound : ∀ trees bytes,
+    encodeAll trees = .ok bytes → Pointwise (fun tree bs => EncodingV2.encode tree = some bs) trees bytes := by
+  intro trees
+  induction trees with
+  | nil =>
+    intro bytes h
+    simp [encodeAll] at h
+    subst bytes
+    exact .nil
+  | cons tree trees ih =>
+    intro bytes h
+    cases he : EncodingV2.encode tree with
+    | none => simp [encodeAll, he] at h
+    | some bs =>
+      cases hr : encodeAll trees with
+      | error err => simp [encodeAll, he, hr, bind, Except.bind] at h
+      | ok rest =>
+        have eq : bs :: rest = bytes := by simpa [encodeAll, he, hr, bind, Except.bind, Pure.pure, Except.pure] using h
+        subst bytes
+        exact .cons he (ih rest hr)
+
+theorem encodeAll_complete : ∀ {trees bytes},
+    Pointwise (fun tree bs => EncodingV2.encode tree = some bs) trees bytes →
+    encodeAll trees = .ok bytes := by
+  intro trees bytes h
+  induction h with
+  | nil => rfl
+  | cons he _ ih => simp [encodeAll, he, ih, bind, Except.bind, Pure.pure, Except.pure]
+
+theorem encoded_encodable {trees : List Tree} {bytes : List (List Nat)}
+    (h : Pointwise (fun tree bs => EncodingV2.encode tree = some bs) trees bytes) : Encodable trees := by
+  intro tree ht
+  induction h with
+  | nil => simp at ht
+  | @cons first bytes tail rest he _ ih =>
+    simp only [List.mem_cons] at ht
+    rcases ht with rfl | ht
+    · exact ⟨bytes, he⟩
+    · exact ih ht
+
+theorem encodable_encoded (trees : List Tree) (h : Encodable trees) :
+    ∃ bytes, Pointwise (fun tree bs => EncodingV2.encode tree = some bs) trees bytes := by
+  induction trees with
+  | nil => exact ⟨[], .nil⟩
+  | cons tree trees ih =>
+    have first := h tree (by simp)
+    obtain ⟨bytes, he⟩ := first
+    have tail : Encodable trees := by
+      intro t ht
+      exact h t (by simp [ht])
+    obtain ⟨rest, hr⟩ := ih tail
+    exact ⟨bytes :: rest, .cons he hr⟩
+
+theorem encodeAll_error_kind (trees : List Tree) (err : Error)
+    (h : encodeAll trees = .error err) : err = .unsupported := by
+  induction trees with
+  | nil => simp [encodeAll] at h
+  | cons tree trees ih =>
+    cases he : EncodingV2.encode tree with
+    | none =>
+      simp only [encodeAll, he] at h
+      change Except.error Error.unsupported = Except.error err at h
+      cases h
+      rfl
+    | some bytes =>
+      cases hr : encodeAll trees with
+      | error e =>
+        have eq : e = err := by simpa [encodeAll, he, hr, bind, Except.bind] using h
+        subst err
+        exact ih hr
+      | ok rest => simp [encodeAll, he, hr, bind, Except.bind, Pure.pure, Except.pure] at h
+
+def matchBytes : List Pin → List (List Nat) → Bool
+  | [], [] => true
+  | p :: ps, bytes :: rest => (p.digest == Solidity.Hashes.sha256 bytes) && matchBytes ps rest
+  | _, _ => false
+
+theorem matchBytes_exact {trees : List Tree} {bytes : List (List Nat)}
+    (h : Pointwise (fun tree bs => EncodingV2.encode tree = some bs) trees bytes) :
+    ∀ pins, matchBytes pins bytes = true ↔ Matches pins trees := by
+  induction h with
+  | nil =>
+    intro pins
+    cases pins with
+    | nil =>
+      constructor
+      · intro _; exact .nil
+      · intro _; rfl
+    | cons p ps =>
+      constructor
+      · intro h; contradiction
+      · intro h; cases h
+  | @cons tree bs trees rest he tail ih =>
+    intro pins
+    cases pins with
+    | nil =>
+      constructor
+      · intro h; contradiction
+      · intro h; cases h
+    | cons p ps =>
+      simp only [matchBytes, Bool.and_eq_true, beq_iff_eq]
+      constructor
+      · rintro ⟨equal, remaining⟩
+        exact .cons ⟨bs, he, equal⟩ ((ih ps).1 remaining)
+      · intro matched
+        cases matched with
+        | cons first remaining =>
+          obtain ⟨other, ho, eq⟩ := first
+          have same : other = bs := Option.some.inj (ho.symm.trans he)
+          subst other
+          exact ⟨eq, (ih ps).2 remaining⟩
+
+/-- Check all reference trees before encoding, and all encodings before comparing. -/
+def check (s : Snapshot) (fuel : Nat) (m : Manifest) (pins : List Pin) : Except Error Unit := do
+  structural s m pins
+  let trees ← collect (pins.map (fun p => recompute s.env fuel p.goal))
+  let bytes ← encodeAll trees
+  if matchBytes pins bytes then
+    pure ()
+  else
+    throw .digestMismatch
+
+theorem recompute_pointwise (s : Snapshot) (fuel : Nat) (pins : List Pin) :
+    Pointwise (fun p => RootGraph s.env fuel p.goal) pins
+      (pins.map fun p => recompute s.env fuel p.goal) := by
+  induction pins with
+  | nil => exact .nil
+  | cons p ps ih =>
+    exact .cons ((recompute_exact s.env fuel p.goal _).1 rfl) ih
+
+theorem check_sound (s : Snapshot) (fuel : Nat) (m : Manifest) (pins : List Pin) :
+    CheckGraph s m pins fuel (check s fuel m pins) := by
+  let outputs := pins.map fun p => recompute s.env fuel p.goal
+  have graphs : Pointwise (fun p => RootGraph s.env fuel p.goal) pins outputs :=
+    recompute_pointwise s fuel pins
+  cases hs : structural s m pins with
+  | error err =>
+    have issue := (structural_error_exact s m pins err).1 hs
+    simpa [check, hs, bind, Except.bind] using (CheckGraph.structural issue)
+  | ok value =>
+    cases value
+    have clean := (structural_ok s m pins).1 hs
+    cases hc : collect outputs with
+    | error err =>
+      simp only [outputs] at hc
+      simpa [check, hs, hc, bind, Except.bind] using
+        (CheckGraph.computation clean graphs hc)
+    | ok trees =>
+      simp only [outputs] at hc
+      cases he : encodeAll trees with
+      | error err =>
+        have eq := encodeAll_error_kind trees err he
+        subst err
+        have notEncodable : ¬ Encodable trees := by
+          intro valid
+          obtain ⟨bytes, encoded⟩ := encodable_encoded trees valid
+          have good := encodeAll_complete encoded
+          rw [he] at good
+          cases good
+        simpa [check, hs, hc, he, bind, Except.bind] using
+          (CheckGraph.encoding clean graphs hc notEncodable)
+      | ok bytes =>
+        have encoded := encodeAll_sound trees bytes he
+        have encodable := encoded_encodable encoded
+        cases hm : matchBytes pins bytes with
+        | false =>
+          have notMatched : ¬ Matches pins trees := by
+            intro matched
+            have good := (matchBytes_exact encoded pins).2 matched
+            rw [hm] at good
+            cases good
+          simpa [check, hs, hc, he, hm, bind, Except.bind] using
+            (CheckGraph.mismatch clean graphs hc encodable notMatched)
+        | true =>
+          have matched := (matchBytes_exact encoded pins).1 hm
+          simpa [check, hs, hc, he, hm, bind, Except.bind, Pure.pure, Except.pure] using
+            (CheckGraph.success clean graphs hc matched)
+
+theorem check_exact (s : Snapshot) (fuel : Nat) (m : Manifest) (pins : List Pin)
+    (output : Except Error Unit) :
+    check s fuel m pins = output ↔ CheckGraph s m pins fuel output := by
+  constructor
+  · intro h
+    rw [← h]
+    exact check_sound s fuel m pins
+  · intro h
+    exact check_graph_deterministic s m pins fuel _ _ (check_sound s fuel m pins) h
+
+theorem witnesses_bound (s : Snapshot) (pins : List Pin)
+    (witnesses : ∀ p ∈ pins, ∃ fuel tree bytes,
+      RootGraph s.env fuel p.goal (.ok tree) ∧ EncodingV2.encode tree = some bytes ∧
+        p.digest = Solidity.Hashes.sha256 bytes) :
+    ∃ bound trees, Matches pins trees ∧ ∀ fuel, bound ≤ fuel →
+      Pointwise (fun p tree => RootGraph s.env fuel p.goal (.ok tree)) pins trees := by
+  induction pins with
+  | nil =>
+    exact ⟨0, [], .nil, fun _ _ => .nil⟩
+  | cons p pins ih =>
+    obtain ⟨firstFuel, tree, bytes, graph, encoding, digest⟩ := witnesses p (by simp)
+    have restWitnesses : ∀ q ∈ pins, ∃ fuel tree bytes,
+        RootGraph s.env fuel q.goal (.ok tree) ∧ EncodingV2.encode tree = some bytes ∧
+          q.digest = Solidity.Hashes.sha256 bytes := by
+      intro q hq
+      exact witnesses q (by simp [hq])
+    obtain ⟨restFuel, trees, matched, restGraphs⟩ := ih restWitnesses
+    refine ⟨max firstFuel restFuel, tree :: trees, .cons ⟨bytes, encoding, digest⟩ matched, ?_⟩
+    intro fuel hf
+    have firstLe : firstFuel ≤ fuel := Nat.le_trans (Nat.le_max_left ..) hf
+    have restLe : restFuel ≤ fuel := Nat.le_trans (Nat.le_max_right ..) hf
+    exact .cons (graph_budget_adequate s.env p.goal firstFuel tree graph fuel firstLe)
+      (restGraphs fuel restLe)
+
+theorem lifted_graphs (s : Snapshot) (fuel : Nat) {pins : List Pin} {trees : List Tree}
+    (graphs : Pointwise (fun p tree => RootGraph s.env fuel p.goal (.ok tree)) pins trees) :
+    Pointwise (fun p => RootGraph s.env fuel p.goal) pins (trees.map Except.ok) := by
+  induction graphs with
+  | nil => exact .nil
+  | cons first _ ih => exact .cons first ih
+
+theorem collect_oks (trees : List Tree) : collect (trees.map Except.ok) = .ok trees := by
+  induction trees with
+  | nil => rfl
+  | cons tree trees ih => simp [collect, ih, Except.map]
+
+theorem correct_pins_complete (s : Snapshot) (m : Manifest) (pins : List Pin)
+    (correct : CorrectPins s m pins) :
+    ∃ bound, ∀ fuel, bound ≤ fuel → check s fuel m pins = .ok () := by
+  obtain ⟨clean, witnesses⟩ := correct
+  obtain ⟨bound, trees, matched, graphs⟩ := witnesses_bound s pins witnesses
+  refine ⟨bound, fun fuel hf => ?_⟩
+  exact (check_exact s fuel m pins (.ok ())).2
+    (.success clean (lifted_graphs s fuel (graphs fuel hf)) (collect_oks trees) matched)
+
+/-- Draft row decoder; completeness against every canonical decision remains to be proved. -/
+def decodeRow (row : RawPin) : Except Error Pin := do
+  let some number := (String.mk (row.decisionId.toList.drop 1)).toNat?
+    | throw .malformedPin
+  let pin : Pin := ⟨row.goal, row.digest, number⟩
+  if row.decisionId = pin.decisionId ∧ pin.WellFormed then pure pin
+  else throw .malformedPin
+
+def decode : List RawPin → Except Error (List Pin)
+  | [] => .ok []
+  | row :: rows => do
+    let pin ← decodeRow row
+    let rest ← decode rows
+    pure (pin :: rest)
+
+theorem decodeRow_sound (row : RawPin) (pin : Pin)
+    (h : decodeRow row = .ok pin) : RowOf row pin := by
+  cases hs : (String.mk (row.decisionId.toList.drop 1)).toNat? with
+  | none =>
+    simp only [decodeRow, hs] at h
+    change Except.error Error.malformedPin = Except.ok pin at h
+    cases h
+  | some number =>
+    simp only [decodeRow, hs] at h
+    split at h
+    · rename_i valid
+      have eq : (⟨row.goal, row.digest, number⟩ : Pin) = pin := by
+        simpa [Pure.pure, Except.pure] using h
+      subst pin
+      exact ⟨rfl, rfl, valid.1, valid.2⟩
+    · change Except.error Error.malformedPin = Except.ok pin at h
+      cases h
+
+theorem decode_sound : ∀ rows pins,
+    decode rows = .ok pins → Pointwise RowOf rows pins := by
+  intro rows
+  induction rows with
+  | nil =>
+    intro pins h
+    simp [decode] at h
+    subst pins
+    exact .nil
+  | cons row rows ih =>
+    intro pins h
+    cases hr : decodeRow row with
+    | error err => simp [decode, hr, bind, Except.bind] at h
+    | ok pin =>
+      cases hs : decode rows with
+      | error err => simp [decode, hr, hs, bind, Except.bind] at h
+      | ok rest =>
+        have eq : pin :: rest = pins := by
+          simpa [decode, hr, hs, bind, Except.bind, Pure.pure, Except.pure] using h
+        subst pins
+        exact .cons (decodeRow_sound row pin hr) (ih rest hs)
+
+/-- Upstream decimal parser property required to finish decoder completeness. -/
+def DecisionRoundTrip : Prop := ∀ number : Nat,
+  (String.mk (("H" ++ toString number).toList.drop 1)).toNat? = some number
+
+theorem decodeRow_complete (roundtrip : DecisionRoundTrip) {row : RawPin} {pin : Pin}
+    (h : RowOf row pin) : decodeRow row = .ok pin := by
+  cases row with
+  | mk goal digest decisionId =>
+    cases pin with
+    | mk pinGoal pinDigest number =>
+      simp only [RowOf] at h
+      obtain ⟨hgoal, hdigest, hid, hwell⟩ := h
+      cases hgoal
+      cases hdigest
+      cases hid
+      have parsed : (toString number).toNat? = some number := by
+        simpa using roundtrip number
+      simp [decodeRow, Pin.decisionId, parsed, hwell, Pure.pure, Except.pure]
+
+end Draft
+
 end Solidity.GoalPins
