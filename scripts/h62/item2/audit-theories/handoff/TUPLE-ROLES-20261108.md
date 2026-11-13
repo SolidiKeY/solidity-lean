@@ -1,9 +1,0 @@
-# All frozen tuple premise roles
-
-All six original tuple telescopes and ten logical occurrences are pinned by full ordered binder/type/source/owner metadata and exact canonical certificates. Same-named anonymous fit/SlotsOK and horizon/ArgsFragment premises remain distinct occurrences. Later types/expressions and post-fit locals are retained; full lower-horizon laws remain global for the fixed configuration.
-
-Solidity.Theory.Progress.Val.not_tuple is explicitly intentional H69 type separation: a plain Val at ANY tuple type cannot exist. Its checked no_plain_tuple_input impossibility proof is the audit result, not a joint or operational-refusal witness. The inhabited RVal.tuple domain of untuple_ok stays distinct. Five ordinary records use designated joint certificates; the sixth derives its impossibility classification/certificate from trusted IMPOSSIBLE data, never a supplied status label. No statement is changed.
-
-Evidence /workspace/h62-audit-tuple-roles-20261108-evidence:positive6records/10logical occurrences;seven rehashed refusals for dropped/aliased anonymous premises, weakened horizon law, late-expression/post-fit-local deletion, changed tuple kind and invented producer route. A forged historical joint status is ACCEPTED AS INPUT BUT NORMALIZED BACK TO H69 with the same impossibility certificate and no joint certificate: it is not falsely reported as a nonzero-exit refusal.17Python tests/whitespace checks pass; independent read-only finder/skeptic PASS, no Lean/Lake/server/network/writes.
-
-Run only on exact frozen history; current mapFree signatures and packet types are separately checked. Prior121 and new6 specification names are disjoint:127total/373remaining, separate reports, no merged127acceptance or whole-tree equivalence. All original checkpoints remain partial. Source-stage support is not compiler/EVM/gas/fork coverage. Q-DOC-CATALOG remains open; index unchanged. Original full assignment/queue/scope files are adjacent.
