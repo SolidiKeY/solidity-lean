@@ -449,6 +449,72 @@
       "anchor": "  \"filter\": \"tryCatch/panic.sol\",",
       "role": "Historical record: Captured historical panic upstream report with zero replay jobs, one blocked fixture and exit1; no panic execution, witness or semantic pass established. Associated committed validation identifies this transcript; reported outcomes, resource facts, external inputs and proofs are not independently verified. No current authorization, consumer, nonuse or deletion credit.",
       "blob": "ee78cd32a7d9911ddca24582d4bc5ca483c29b91"
+    },
+    {
+      "path": "tests/directruntime-20261104/native-browser/environment/review.json",
+      "anchor": "  \"boundary\": \"Scoped environment qualification only; full queue and runtime/performance holds remain open.\"",
+      "role": "Historical record: Captured scoped environment-review assertions and private archive/source/binary pointers retaining full-queue/runtime/performance holds; no environment qualification or archive verification adopted. Reported approvals, outcomes, resources, exclusions, external artifacts and proofs are not independently verified or adopted. No current authorization, consumer, nonuse or deletion credit.",
+      "blob": "8a48734d46de20fdfe0ea9374a41639106d8259e"
+    },
+    {
+      "path": "tests/h28-sol/non-vacuity/adoption-reviews.json",
+      "anchor": "  \"status\": \"PASS for adoption boundary only; fresh exact-head gates pending\",",
+      "role": "Historical record: Captured adoption-boundary review with frozen-source/merge-parent assertions, fresh exact-head gates pending and no registry/cache-route authorization. Reported approvals, outcomes, resources, exclusions, external artifacts and proofs are not independently verified or adopted. No current authorization, consumer, nonuse or deletion credit.",
+      "blob": "24128e1406ea22680624fcc4b85f73635f81616a"
+    },
+    {
+      "path": "tests/h28-sol/non-vacuity/pin-proposal/reviews.json",
+      "anchor": "      \"scope\": \"Proposal preparation only; no authorization or final-gate completion\"",
+      "role": "Historical record: Captured finder/skeptic proposal-preparation review receipts with artifact hashes; no pin-registration permission, final gate or completion. Reported approvals, outcomes, resources, exclusions, external artifacts and proofs are not independently verified or adopted. No current authorization, consumer, nonuse or deletion credit.",
+      "blob": "9224f57a90ca57738fc146efe5fda585a32c2779"
+    },
+    {
+      "path": "tests/upstream/baseline-20261028/attribution/reviews.json",
+      "anchor": "  \"newKernelOrCompilerEvmEvidence\": false",
+      "role": "Historical record: Captured attribution catalog review and corrected historical findings; exclusions, evidence counts and archived pointers are not newly approved dispositions or kernel/compiler/EVM evidence. Reported approvals, outcomes, resources, exclusions, external artifacts and proofs are not independently verified or adopted. No current authorization, consumer, nonuse or deletion credit.",
+      "blob": "bc874a579a67dc7f14d4141af908b40649c0bc7e"
+    },
+    {
+      "path": "tests/upstream/baseline-20261028/final-review.json",
+      "anchor": "  \"scope\": \"Diagnostic evidence, not universal semantic/source-lowering/compiler/EVM proof.\"",
+      "role": "Historical record: Captured final diagnostic baseline review retaining blocked cold timing, unmeasured warm timing, unresolved gap mappings and historical documentation failures; not universal semantic/compiler/EVM proof. Reported approvals, outcomes, resources, exclusions, external artifacts and proofs are not independently verified or adopted. No current authorization, consumer, nonuse or deletion credit.",
+      "blob": "12b7ec64b4295fb9f604384e810be731acccfb53"
+    },
+    {
+      "path": "tests/upstream/baseline-20261028/native-cache/reviews.json",
+      "anchor": "    \"Historical document hashes labeled snapshot provenance; reports were not regenerated.\"",
+      "role": "Historical record: Captured cache/native-controls review narratives and snapshot hashes; refused batches, native observations and kernel/EVM proof remain distinct, with no current cache or resource-policy adoption. Reported approvals, outcomes, resources, exclusions, external artifacts and proofs are not independently verified or adopted. No current authorization, consumer, nonuse or deletion credit.",
+      "blob": "09d587725149a612b865a694ed85493bf8d61074"
+    },
+    {
+      "path": "tests/upstream/baseline-20261028/probes/reviews.json",
+      "anchor": "    \"Prepared panic/wrong-output vectors were not replayed.\"",
+      "role": "Historical record: Captured historical probe reviewer findings distinguishing reduced source-reader behavior from production parser/runtime; prepared panic/wrong-output vectors were not replayed. Reported approvals, outcomes, resources, exclusions, external artifacts and proofs are not independently verified or adopted. No current authorization, consumer, nonuse or deletion credit.",
+      "blob": "0d1bb9993b10ff7b40123ce5f82d09a3e8e48242"
+    },
+    {
+      "path": "tests/upstream/baseline-20261028/reviews.json",
+      "anchor": "  \"remainingGateFailure\": \"20 pre-existing documentation citations; final missing list equals before.\"",
+      "role": "Historical record: Captured corrected baseline review retaining pending cold/warm measurements, unmapped feature gaps and documentation failure; historical cache/retry policies are data, not present instructions. Reported approvals, outcomes, resources, exclusions, external artifacts and proofs are not independently verified or adopted. No current authorization, consumer, nonuse or deletion credit.",
+      "blob": "eb047e5cea6090a5603e25da3b2f1db4a110b2c7"
+    },
+    {
+      "path": "tests/upstream/baseline-20261028/value-entry/reviews.json",
+      "anchor": "  \"noSemanticOrRuntimeApproval\": true",
+      "role": "Historical record: Captured value-entry diagnostic reviews and closure/cache/source snapshot assertions explicitly denying semantic or runtime approval. Reported approvals, outcomes, resources, exclusions, external artifacts and proofs are not independently verified or adopted. No current authorization, consumer, nonuse or deletion credit.",
+      "blob": "1fb05b8cb3eba1ff5a8160840bf6be9a23ae0034"
+    },
+    {
+      "path": "tests/upstream/baseline-20261028/value-runtime/reviews.json",
+      "anchor": "      \"Completion scoped as valueEntryDiagnosticComplete, historical nativefalse preserved.\",",
+      "role": "Historical record: Captured value-runtime diagnostic review assertions about exact observations, archived overlays and expected gate exits; historical diagnostic completion grants no current runtime or rollback acceptance. Reported approvals, outcomes, resources, exclusions, external artifacts and proofs are not independently verified or adopted. No current authorization, consumer, nonuse or deletion credit.",
+      "blob": "543a66124a17a537217823ee5623bb151ae6f2a5"
+    },
+    {
+      "path": "tests/upstream/group10-aggregate-review.json",
+      "anchor": "    \"result\": \"Branches diverged; no fast-forward, merge or rebase performed; implementation and working files unchanged\"",
+      "role": "Historical record: Captured timestamped Group10 fixture/gate review assertions, implementation and evidence hashes, historical baseline failures and divergent pull exit128; no replay, trust acceptance or merge permission. Reported approvals, outcomes, resources, exclusions, external artifacts and proofs are not independently verified or adopted. No current authorization, consumer, nonuse or deletion credit.",
+      "blob": "72cbc203d5cd3c199ca7886ebf90db9e2156c3bb"
     }
   ],
   "schema_version": 1
