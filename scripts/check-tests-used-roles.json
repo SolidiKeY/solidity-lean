@@ -347,6 +347,30 @@
       "blob": "1b29eb772e28168c89b24da304bb58966b713daa",
       "path": "tests/upstream/baseline-20261028/gates-before/5.log",
       "role": "Historical record: Captured old feature/category and upstream-symbol/generated-status summary. Historical exclude30 is data, not present exclusion authority; no current scope change, regeneration, symbol coverage, proof or gate acceptance. No non-use or deletion credit."
+    },
+    {
+      "path": "tests/upstream/step2-source-units-callback-current-invocation.log",
+      "anchor": "END 2026-10-28T13:52:01Z exit=137 --tstack=131072 -j1 /workspace/solidity-lean-source-units/Solidity/Examples/Tactics/CallbackStrategy.lean -o /workspace/solidity-lean-source-units/.lake/build/lib/lean/Solidity/Examples/Tactics/CallbackStrategy.olean -i /workspace/solidity-lean-source-units/.lake/build/lib/lean/Solidity/Examples/Tactics/CallbackStrategy.ilean -c /workspace/solidity-lean-source-units/.lake/build/ir/Solidity/Examples/Tactics/CallbackStrategy.c --setup /workspace/solidity-lean-source-units/.lake/build/ir/Solidity/Examples/Tactics/CallbackStrategy.setup.json --json",
+      "role": "Historical record: Captured historical CallbackStrategy invocation START/END argv and exit137; termination cause and OOM are not established. Committed contextual manifests pin this transcript; cited passes, causes, resources, external artifacts and proofs are not independently verified. No current authorization, execution, consumer, nonuse or deletion credit.",
+      "blob": "e2bf20542fc7e97e4781fc6b2a229429110be594"
+    },
+    {
+      "path": "tests/upstream/step2-source-units-isolated-sort.log",
+      "anchor": "solkeycheck: parsed 377 taclets, 131 read-bearing, table covers 131",
+      "role": "Historical record: Captured historical solkey taclet-annotation report with old external rules path; not a current Lean KeySort result or tool-availability claim. Committed contextual manifests pin this transcript; cited passes, causes, resources, external artifacts and proofs are not independently verified. No current authorization, execution, consumer, nonuse or deletion credit.",
+      "blob": "575aaac0f9302cb32bf20099219a46da5c97e5d7"
+    },
+    {
+      "path": "tests/upstream/step2-source-units-runtime-audit-cache-failure.log",
+      "anchor": "Failed to save input mappings to the local artifact cache.",
+      "role": "Historical record: Captured historical failed KeySort build with permission-denied //.cache and saved resource counters; not a theorem failure or passing runtime check. Committed contextual manifests pin this transcript; cited passes, causes, resources, external artifacts and proofs are not independently verified. No current authorization, execution, consumer, nonuse or deletion credit.",
+      "blob": "9b801059959205a1ac96a027eca640f45e376a2a"
+    },
+    {
+      "path": "tests/primitive-packets-1105/Constants/adoption-e2c/audit.log",
+      "anchor": "Constants audit: 46 declarations recorded",
+      "role": "Historical record: Captured historical46-declaration Constants axiom-print transcript, including imported sword equation; reported axioms are not fresh kernel checks or adopted trust. Committed contextual manifests pin this transcript; cited passes, causes, resources, external artifacts and proofs are not independently verified. No current authorization, execution, consumer, nonuse or deletion credit.",
+      "blob": "6da9ed4345540e6bdf938318d76e6b633cdc3d23"
     }
   ],
   "schema_version": 1
