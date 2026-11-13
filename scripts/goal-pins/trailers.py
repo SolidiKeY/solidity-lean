@@ -5,12 +5,14 @@ single canonical Goal-Change trailer. It is not an authorization decision.
 """
 from __future__ import annotations
 
+import os
 import re
 import subprocess
 from pathlib import Path
 
 PIN_PATH = "Solidity/Goals/Pins.lean"
 DECISION = re.compile(r"H(?:0|[1-9][0-9]*)\Z", re.ASCII)
+GIT_ENV = {**os.environ, "GIT_NO_REPLACE_OBJECTS": "1"}
 RAW_TRAILER = re.compile(rb"Goal-Change: (H(?:0|[1-9][0-9]*))\n?\Z")
 
 
@@ -20,7 +22,7 @@ class TrailerError(ValueError):
 
 def git(repo: Path, *args: str, stdin: bytes | None = None) -> bytes:
     result = subprocess.run(
-        ["git", "-C", str(repo), *args], input=stdin, capture_output=True, check=False
+        ["git", "-C", str(repo), *args], input=stdin, capture_output=True, check=False, env=GIT_ENV
     )
     if result.returncode:
         raise TrailerError(f"git {args[0]} failed: {result.stderr.decode(errors='replace').strip()}")
@@ -47,7 +49,7 @@ def pin_changes(repo: Path, base: str, head: str) -> list[tuple[str, str]]:
         raise TrailerError("shallow repository cannot establish complete push history")
     before, after = commit_id(repo, base), commit_id(repo, head)
     ancestor = subprocess.run(["git", "-C", str(repo), "merge-base", "--is-ancestor", before, after],
-                              capture_output=True, check=False)
+                              capture_output=True, check=False, env=GIT_ENV)
     if ancestor.returncode:
         raise TrailerError("push base is not an ancestor of head, or ancestry cannot be verified")
     commits = git(repo, "rev-list", "--reverse", after, "--not", before).decode().splitlines()

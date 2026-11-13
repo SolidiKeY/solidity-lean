@@ -116,6 +116,15 @@ class TrailerTests(unittest.TestCase):
             with self.assertRaisesRegex(TrailerError, "shallow repository"):
                 pin_changes(clone, "HEAD^1", "HEAD")
 
+    def test_replace_ref_cannot_hide_missing_trailer(self):
+        original = self.commit("unauthorized pin change")
+        tree = self.git("rev-parse", "HEAD^{tree}")
+        replacement = self.git("commit-tree", tree, "-p", self.base,
+                               "-m", "replacement\n\nGoal-Change: H42")
+        self.git("replace", original, replacement)
+        with self.assertRaisesRegex(TrailerError, "expected exactly one"):
+            pin_changes(self.repo, self.base, original)
+
     def test_missing_base_fails_closed(self):
         with self.assertRaises(TrailerError):
             pin_changes(self.repo, "does-not-exist", "HEAD")
