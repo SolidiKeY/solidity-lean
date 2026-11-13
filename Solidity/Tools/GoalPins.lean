@@ -384,6 +384,45 @@ theorem graph_outputs_unique (env : Environment) (fuel : Nat)
       cases he
       rw [ih _ tail']
 
+/-- Structural failures are incompatible with a clean issue list. -/
+theorem first_issue_not_clean (issues : List (Error × Prop)) (err : Error)
+    (h : FirstIssue issues err) : ¬ (∀ issue ∈ issues, ¬ issue.2) := by
+  induction h with
+  | here condition =>
+    intro clean
+    exact clean _ (List.mem_cons_self) condition
+  | later _ rest ih =>
+    intro clean
+    apply ih
+    intro issue member
+    exact clean issue (by simp [member])
+
+/-- The first structural issue is uniquely determined. -/
+theorem first_issue_unique (issues : List (Error × Prop)) (a b : Error)
+    (ha : FirstIssue issues a) (hb : FirstIssue issues b) : a = b := by
+  induction ha generalizing b with
+  | here condition =>
+    cases hb with
+    | here _ => rfl
+    | later notCondition _ => exact False.elim (notCondition condition)
+  | later notCondition rest ih =>
+    cases hb with
+    | here condition => exact False.elim (notCondition condition)
+    | later _ other => exact ih _ other
+
+/-- Matching pin digests requires an encoding for every corresponding tree. -/
+theorem matches_encodable (pins : List Solidity.Goals.GoalPinSpec.Pin) (trees : List Tree)
+    (h : Matches pins trees) : Encodable trees := by
+  intro tree member
+  induction h with
+  | nil => simp at member
+  | cons first rest ih =>
+    simp only [List.mem_cons] at member
+    rcases member with rfl | member
+    · obtain ⟨bytes, encoded, _⟩ := first
+      exact ⟨bytes, encoded⟩
+    · exact ih member
+
 /-- A successful reference graph remains valid at every larger fuel bound. -/
 theorem graph_budget_adequate (env : Environment) (name : Lean.Name) (fuel : Nat)
     (tree : Tree) (h : RootGraph env fuel name (.ok tree)) (larger : Nat)
