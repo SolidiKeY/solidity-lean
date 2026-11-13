@@ -761,6 +761,36 @@
       "blob": "39e096457c121e7deabd276165173d78397dbc5f",
       "anchor": "  \"note\": \"Supplementary retry of original notRun TestSuite rows. Does not overwrite the uniform audit or erase its timeout.\",",
       "role": "Historical record: Captured13-function focused supplementary TestSuite retry, with11reported proved labels,1pending and1unsupported plus recorded elapsed times/profile. Explicitly does not replace the original uniform audit or erase its timeout; neither reported proofs nor old timeout profile/retry policy authorize present success, budgets or replay. Complete row structures/counts were inspected; diagnostic reason strings and source/proof outcomes were not semantically authenticated. No current source, archive, native, proof, trust, policy, budget, exclusion, authorization, consumer, nonuse or deletion credit."
+    },
+    {
+      "path": "tests/migration/proof-unattempted-retry-2026-10-16.json",
+      "blob": "d8ace0ec4473d64fa1a13690007307ab0ca9a431",
+      "anchor": "  \"note\": \"Supplementary retries of exact notRun rows from completed sources. Includes the separately saved TestSuite retry. Original audit errors and outcomes remain unchanged.\",",
+      "role": "Historical record: Captured87-target focused retry with exact target/completion/result bindings,47reported proved labels,14pending,14unsupported,4notRun,5error and3internal outcomes. Five recorded lake timeouts/SIGKILL and old120000ms profile remain data, not budget or replay permission; original uniform audit errors/outcomes are expressly retained. Metadata, row structures and internal cross-record byte hashes were checked;142831error-reason bytes were not semantically authenticated. No proof, source, timing, native or error-truth validation. Keep/uncertain-reader precedence and maintained workflow remain mandatory. No current trust, policy, baseline, budget, authorization, consumer, nonuse or deletion credit."
+    },
+    {
+      "path": "tests/migration/rule-delta-473da8944c.json",
+      "blob": "486d4127cb602baf99a4254e547382a2d347c529",
+      "anchor": "  \"keyext.solidity.core/src/main/resources/org/key_project/solidity/proof/rules/binaryLemmas.key\": {",
+      "role": "Historical record: Captured lexical named-rule body-difference output across5Key files:44added,0removed,19changed names. Entire lists and committed diff producer/documented workflow were reviewed; before/after revisions and external rule bodies were not authenticated. This is still documented migration review material: accounting constructors/RuleShapes/unclaimed reasons/map rows and theory dispositions is not waived. No present rule adoption, removal, omission, exclusion, premise change, regeneration or semantic-equivalence authority. Keep/uncertain-reader precedence and maintained workflow remain mandatory. No current trust, policy, baseline, budget, authorization, consumer, nonuse or deletion credit."
+    },
+    {
+      "path": "tests/migration/rule-delta.json",
+      "blob": "f06334316884f4a1ef3d3670247b17b724df43b4",
+      "anchor": "  \"keyext.solidity.core/src/main/resources/org/key_project/solidity/proof/rules/memoryRules.key\": {",
+      "role": "Historical record: Captured lexical named-rule body-difference output across3Key files:61added,10removed,10changed names. Entire lists and committed diff producer/documented workflow were reviewed; before/after revisions and external rule bodies were not authenticated. The saved delta remains migration review material with constructor/RuleShapes/unclaimed/map and theory-accounting obligations intact. Removed names are not permission to delete rules or weaken premises; no adoption, exclusion, regeneration or semantic-equivalence authority. Keep/uncertain-reader precedence and maintained workflow remain mandatory. No current trust, policy, baseline, budget, authorization, consumer, nonuse or deletion credit."
+    },
+    {
+      "path": "tests/sol-expression-uniqueness/bulk-manifest.json",
+      "blob": "fba3f907b1cf211f3f25451a0420df44e1206991",
+      "anchor": "  \"retained\": \"All control, obligation, source-pin, axiom, declaration and registration JSON retained in Git. Only evidence and five generated kernel inventory dumps externalized.\"",
+      "role": "Historical record: Captured H44 bulk-publication metadata with reported archive size/digest/member count and original-path/retained-control claims. The archive and externalized inventory dumps were not recovered, authenticated or regenerated; preservation claims are historical data, not verification or permission to remove current controls, fixtures or evidence. Keep/uncertain-reader precedence and all uncompleted obligations remain. No current source, archive, native, proof, trust, policy, baseline, budget, authorization, consumer, nonuse or deletion credit."
+    },
+    {
+      "path": "tests/h28-sol/non-vacuity/retirement-h82/H44-OFF-TREE.json",
+      "blob": "a8dc9fb2f73244a10519dc729f6d0948a4ee97c9",
+      "anchor": "  \"classification\": \"Unfinished draft census; not accepted proof evidence\",",
+      "role": "Historical record: Captured H44 off-tree pointer to an explicitly unfinished draft census, with proofAcceptedfalse and original-commit retention claim. The draft/private path and commit member were not recovered or authenticated; no proof acceptance, goal completion, retired-lane revival, scheduler permission or deletion authority follows. Keep/uncertain-reader precedence and all uncompleted obligations remain. No current source, archive, native, proof, trust, policy, baseline, budget, authorization, consumer, nonuse or deletion credit."
     }
   ],
   "schema_version": 1
