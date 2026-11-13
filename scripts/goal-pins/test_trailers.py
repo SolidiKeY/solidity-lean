@@ -93,15 +93,28 @@ class TrailerTests(unittest.TestCase):
         with self.assertRaises(TrailerError):
             pin_changes(self.repo, pin, self.base)
 
-    def test_shallow_history_fails_closed_even_with_ancestor_base(self):
-        self.git("commit", "--allow-empty", "-qm", "first")
-        self.git("commit", "--allow-empty", "-qm", "second")
+    def test_shallow_history_cannot_hide_unauthorized_merge_side(self):
+        branch = self.git("branch", "--show-current")
+        self.git("checkout", "-qb", "side")
+        hidden = self.commit("unauthorized pin change")
+        self.git("commit", "--allow-empty", "-qm", "side tip\n\nGoal-Change: H1")
+        self.git("checkout", "-q", branch)
+        self.git("commit", "--allow-empty", "-qm", "main")
+        base = self.git("rev-parse", "HEAD")
+        self.git("merge", "-q", "--no-ff", "side", "-m", "merge\n\nGoal-Change: H1")
+        with self.assertRaisesRegex(TrailerError, "expected exactly one"):
+            pin_changes(self.repo, base, "HEAD")
         with tempfile.TemporaryDirectory() as tmp:
             clone = Path(tmp) / "shallow"
             subprocess.check_call(["git", "clone", "-q", "--depth", "2",
                                    self.repo.as_uri(), str(clone)])
+            subprocess.check_call(["git", "-C", str(clone), "merge-base",
+                                   "--is-ancestor", "HEAD^1", "HEAD"])
+            missing = subprocess.run(["git", "-C", str(clone), "cat-file", "-e",
+                                      hidden + "^{commit}"], capture_output=True, check=False)
+            self.assertNotEqual(missing.returncode, 0)
             with self.assertRaisesRegex(TrailerError, "shallow repository"):
-                pin_changes(clone, "HEAD^", "HEAD")
+                pin_changes(clone, "HEAD^1", "HEAD")
 
     def test_missing_base_fails_closed(self):
         with self.assertRaises(TrailerError):
