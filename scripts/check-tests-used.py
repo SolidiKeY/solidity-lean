@@ -798,7 +798,7 @@ def validated_routes(graph, catalog):
             source = frame['path']
             if source not in repo.tree or repo.tree[source][2] != frame['blob']:
                 raise ValueError('validated read source mismatch')
-            if not isinstance(frame['line'], int) or not 1 <= frame['line'] <= len(repo.texts.get(source, '').splitlines()):
+            if type(frame['line']) is not int or not 1 <= frame['line'] <= len(repo.texts.get(source, '').splitlines()):
                 raise ValueError('validated read location mismatch')
         if nonpassing and not any(frame['path'] == graph.roots[original]['path'] and
                 any(c['first'] <= frame['line'] <= c['last'] and c['qualname'] == frame['code_qualname'] and c['code_firstlineno'] == frame['code_firstlineno'] for c in graph.roots[original]['role_provenance']['test_contexts']) for frame in frames):
@@ -2483,6 +2483,14 @@ def self_test():
         assert unreviewed_rows['tests/live.py']['class'] == 'keep'  # actually observed helper frame
         expected = inventory(repo, catalog)
         rows = {r['path']: r for r in expected['records']}
+        # JSON booleans must not masquerade as observed source line numbers.
+        for frame_index in (0, 1):
+            for line in (True, False, 1.0, '1', 0, -1):
+                malformed = copy.deepcopy(catalog)
+                malformed['reads'][0]['frames'][frame_index]['line'] = line
+                try: inventory(repo, malformed)
+                except ValueError as error: assert 'validated read location' in str(error)
+                else: raise AssertionError('non-integer or nonpositive observed line accepted')
         ordered = copy.deepcopy(catalog)
         ordered['reads'] = sorted(ordered['reads'], key=lambda r: json.dumps(r, sort_keys=True))
         grouped = copy.deepcopy(ordered)
