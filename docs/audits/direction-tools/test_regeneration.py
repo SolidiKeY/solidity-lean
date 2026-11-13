@@ -63,13 +63,18 @@ class Controls(unittest.TestCase):
             misplaced.write_bytes(b'x')
             relocated = root / 'docs/audit-copy/modules-00.json'
             relocated.parent.mkdir(parents=True)
-            relocated.write_bytes(b'x')
-            git('add', str(shard.relative_to(root)), str(misplaced.relative_to(root)), str(relocated.relative_to(root)))
-            self.assertEqual(set(r.tracked_shards(root)), {str(p.relative_to(root)) for p in (shard, misplaced, relocated)})
-            self.rejected(r.reject_tracked, r.tracked_shards(root))
+            relocated.write_bytes(b'historical shard bytes')
+            unrelated = root / 'docs/unrelated/modules-00.json'
+            unrelated.parent.mkdir(parents=True)
+            unrelated.write_bytes(b'unrelated bytes')
+            git('add', str(shard.relative_to(root)), str(misplaced.relative_to(root)), str(relocated.relative_to(root)), str(unrelated.relative_to(root)))
+            oid = subprocess.check_output(['git', '-C', tmp, 'rev-parse', ':' + str(relocated.relative_to(root))], text=True).strip()
+            historical = {oid: b'historical shard bytes'}
+            self.assertEqual(set(r.tracked_shards(root, historical)), {str(p.relative_to(root)) for p in (shard, misplaced, relocated)})
+            self.rejected(r.reject_tracked, r.tracked_shards(root, historical))
             git('rm', '--cached', '-q', str(shard.relative_to(root)), str(misplaced.relative_to(root)))
-            self.assertEqual(r.tracked_shards(root), [str(relocated.relative_to(root))])
-            self.rejected(r.reject_tracked, r.tracked_shards(root))
+            self.assertEqual(r.tracked_shards(root, historical), [str(relocated.relative_to(root))])
+            self.rejected(r.reject_tracked, r.tracked_shards(root, historical))
             git('rm', '--cached', '-q', str(relocated.relative_to(root)))
             renamed = root / 'docs/audit-copy/payload.json'
             renamed.write_bytes(b'historical shard bytes')
@@ -78,6 +83,9 @@ class Controls(unittest.TestCase):
             self.assertEqual(r.tracked_shards(root), [])
             self.assertEqual(r.tracked_shards(root, {oid: b'historical shard bytes'}), [str(renamed.relative_to(root))])
             self.rejected(r.reject_tracked, r.tracked_shards(root, {oid: b'historical shard bytes'}))
+            git('rm', '--cached', '-q', str(renamed.relative_to(root)))
+            self.assertEqual(r.tracked_shards(root, historical), [])
+            r.reject_tracked(r.tracked_shards(root, historical))
 
     def test_retained(self):
         retained = [('script', b'x'), ('summary', b'y')]

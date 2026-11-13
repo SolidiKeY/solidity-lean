@@ -84,7 +84,7 @@ def discover(root):
             if p.is_file() and SHARD_NAME.fullmatch(p.name)]
 
 def tracked_shards(root, historical_blobs=None):
-    # Match shard-family names anywhere, and historical content even if renamed.
+    # Preserve the tool-tree filename check; match historical content anywhere.
     historical_blobs = historical_blobs or {}
     found = set()
     checked = set()
@@ -95,7 +95,7 @@ def tracked_shards(root, historical_blobs=None):
         _, oid, _ = metadata.split()
         path = os.fsdecode(rawpath)
         oid = oid.decode()
-        if SHARD_NAME.fullmatch(Path(path).name):
+        if path.startswith(PREFIX) and SHARD_NAME.fullmatch(Path(path).name):
             found.add(path)
         if oid in historical_blobs:
             if oid not in checked:
