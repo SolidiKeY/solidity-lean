@@ -423,6 +423,31 @@ theorem matches_encodable (pins : List Solidity.Goals.GoalPinSpec.Pin) (trees : 
       exact ⟨bytes, encoded⟩
     · exact ih member
 
+/-- A named relation exposes the environment and budget for output comparison. -/
+def GraphOutputs (env : Environment) (fuel : Nat)
+    (pins : List Solidity.Goals.GoalPinSpec.Pin) (outputs : List (Except Error Tree)) : Prop :=
+  Pointwise (fun p => RootGraph env fuel p.goal) pins outputs
+
+theorem graphOutputs_def (env : Environment) (fuel : Nat)
+    (pins : List Solidity.Goals.GoalPinSpec.Pin) (outputs : List (Except Error Tree)) :
+    GraphOutputs env fuel pins outputs ↔
+      Pointwise (fun p => RootGraph env fuel p.goal) pins outputs := Iff.rfl
+
+theorem graphOutputs_unique (env : Environment) (fuel : Nat)
+    (pins : List Solidity.Goals.GoalPinSpec.Pin) (xs ys : List (Except Error Tree))
+    (hx : GraphOutputs env fuel pins xs) (hy : GraphOutputs env fuel pins ys) : xs = ys :=
+  graph_outputs_unique env fuel pins xs ys hx hy
+
+local grind_pattern graphOutputs_unique => GraphOutputs env fuel pins xs, GraphOutputs env fuel pins ys
+
+/-- The reference checker has a unique result for a fixed snapshot and budget. -/
+theorem check_graph_deterministic (s : Snapshot) (m : Manifest)
+    (pins : List Solidity.Goals.GoalPinSpec.Pin) (fuel : Nat) (a b : Except Error Unit)
+    (ha : CheckGraph s m pins fuel a) (hb : CheckGraph s m pins fuel b) : a = b := by
+  cases ha <;> cases hb <;> simp_all <;>
+    simp only [← graphOutputs_def] at * <;>
+    grind [first_issue_unique, first_issue_not_clean, matches_encodable, Clean]
+
 /-- A successful reference graph remains valid at every larger fuel bound. -/
 theorem graph_budget_adequate (env : Environment) (name : Lean.Name) (fuel : Nat)
     (tree : Tree) (h : RootGraph env fuel name (.ok tree)) (larger : Nat)
