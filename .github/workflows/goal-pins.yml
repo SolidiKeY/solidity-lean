@@ -1,0 +1,37 @@
+name: goal-pins
+
+on:
+  push:
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  checker-tests:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+      - name: Set up Lean
+        uses: leanprover/lean-action@v1
+        with:
+          build: "false"
+          use-github-cache: "false"
+          use-mathlib-cache: "false"
+          test: "false"
+          lint: "false"
+      - name: Seed Lake cache
+        run: bash scripts/ci/fetch-lake-cache.sh
+      - name: Build checker
+        env:
+          LEAN_NUM_THREADS: "1"
+        run: lake build Solidity.Tools.GoalPins
+      - name: Restore fetched artifacts
+        run: python3 scripts/ci/restore-lake-artifacts.py
+      - name: Check decoder examples
+        env:
+          LEAN_NUM_THREADS: "1"
+        run: lake env lean scripts/goal-pins/DecoderTests.lean --tstack=131072
+      - name: Test trailer inspection
+        run: python3 -m unittest discover -s scripts/goal-pins -p "test_*.py"
