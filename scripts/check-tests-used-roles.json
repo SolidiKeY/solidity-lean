@@ -791,6 +791,12 @@
       "blob": "a8dc9fb2f73244a10519dc729f6d0948a4ee97c9",
       "anchor": "  \"classification\": \"Unfinished draft census; not accepted proof evidence\",",
       "role": "Historical record: Captured H44 off-tree pointer to an explicitly unfinished draft census, with proofAcceptedfalse and original-commit retention claim. The draft/private path and commit member were not recovered or authenticated; no proof acceptance, goal completion, retired-lane revival, scheduler permission or deletion authority follows. Keep/uncertain-reader precedence and all uncompleted obligations remain. No current source, archive, native, proof, trust, policy, baseline, budget, authorization, consumer, nonuse or deletion credit."
+    },
+    {
+      "path": "tests/roadmap-v17/h44-evidence-manifest.json",
+      "blob": "13b056f0ce6446455742637e38370433b0c5798b",
+      "anchor": "  \"status\": \"partial-preparation\",",
+      "role": "Historical record: Captured partial-preparation inventory of off-tree historical validation text and checkpoint checksum publications, explicitly not authenticated proof or a release gate, with releaseClosedfalse and semanticPremisesDischargedfalse. External bytes, digests, original sources and retention were not recovered or independently verified. Keep/uncertain-reader precedence and all uncompleted obligations remain. No current source, archive, native, proof, trust, policy, baseline, budget, authorization, consumer, nonuse or deletion credit."
     }
   ],
   "schema_version": 1
