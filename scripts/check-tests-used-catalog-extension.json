@@ -2188,6 +2188,59 @@
           "target": "scripts/h62/item6/migrate-semantics/census.py",
           "target_blob": "7ec009cb1bb39545d320702a783a8a67e243deeb"
         }
+      },
+      {
+        "entry": {
+          "collector_sha256": "74a8ac05edadf4a4a1cf901134a8c23b24a844284ee8fe2a5f4e6fba274d251c",
+          "frames": [
+            {
+              "blob": "a4739d283013ffcafef2d3abc8427b2e742f28fe",
+              "line": 6,
+              "path": "tests/h62/item6/migrate-lowering/proof_budget_controls.py"
+            },
+            {
+              "blob": "d1b45cc7e239d8ee97e25c3dc59086e7d901b436",
+              "line": 5,
+              "path": "scripts/h62/item6/migrate-lowering/proof_budgets.py"
+            }
+          ],
+          "input_revision": "cf402ccfc9aaf549ce5f86f75f2078b9d3774524",
+          "module_code_sha256": "220fb86b8ff0f63a616836ffc684a997dcc10de82cd48be0189daa7bc70c73de",
+          "module_frame_line": 0,
+          "operation": "entered measured Python module; no fixture consumption credit",
+          "python": [
+            3,
+            12,
+            14
+          ],
+          "runner": "validated:tests/h62/item6/migrate-lowering/proof_budget_controls.py",
+          "target": "scripts/h62/item6/migrate-lowering/census.py",
+          "target_blob": "efac5e747881996ab2f248f7043f1935fd9cb143"
+        }
+      },
+      {
+        "entry": {
+          "collector_sha256": "74a8ac05edadf4a4a1cf901134a8c23b24a844284ee8fe2a5f4e6fba274d251c",
+          "frames": [
+            {
+              "blob": "a4739d283013ffcafef2d3abc8427b2e742f28fe",
+              "line": 6,
+              "path": "tests/h62/item6/migrate-lowering/proof_budget_controls.py"
+            }
+          ],
+          "input_revision": "cf402ccfc9aaf549ce5f86f75f2078b9d3774524",
+          "module_code_sha256": "b51243240eb46697888e40bc3ce948121b2349cfe2cca597e93ed74d0b47ab49",
+          "module_frame_line": 0,
+          "operation": "entered measured Python module; no fixture consumption credit",
+          "python": [
+            3,
+            12,
+            14
+          ],
+          "runner": "validated:tests/h62/item6/migrate-lowering/proof_budget_controls.py",
+          "target": "scripts/h62/item6/migrate-lowering/proof_budgets.py",
+          "target_blob": "d1b45cc7e239d8ee97e25c3dc59086e7d901b436"
+        }
       }
     ],
     "reads": [
@@ -2986,10 +3039,27 @@
           "purpose": "Five in-memory comment/string false-import negative controls only; not real-tree census,elaborated dependency inventory,migration,compiler or semantic proof acceptance. Actual ordinary/traced successful default assertion path; no fixture,child,semantic adequacy,resource policy,trust or proof credit.",
           "source_blob": "824a0746d77d6c729fc210dd8b7fc7726e064ff8"
         }
+      },
+      {
+        "entry": {
+          "command": [
+            "python3",
+            "-B",
+            "tests/h62/item6/migrate-lowering/proof_budget_controls.py"
+          ],
+          "entry_line": 8,
+          "input_revision": "cf402ccfc9aaf549ce5f86f75f2078b9d3774524",
+          "input_scope": [],
+          "kind": "runnable-entrypoint",
+          "other_reads": "unresolved",
+          "path": "tests/h62/item6/migrate-lowering/proof_budget_controls.py",
+          "purpose": "Synthetic lexical masking and candidate-label regression only; not effective elaborated options,budget permission,tactic/kernel/native execution,proof or migration acceptance. Actual ordinary/traced successful default assertion path; no fixture,child,semantic adequacy,resource policy,trust or proof credit.",
+          "source_blob": "a4739d283013ffcafef2d3abc8427b2e742f28fe"
+        }
       }
     ]
   },
   "base_sha256": "0c09ce59255e3cdc5d6e7ba68de7505968deb43aa9e84050259f392f93cd0723",
-  "expanded_sha256": "489f961d250216a649553b058b7d55c2d22aae9e81d8a844a12989901f8c29c2",
+  "expanded_sha256": "c8f16345526b736da7c661263e99e8262fc8250f12de269d08dbe1f57f3a8d39",
   "schema_version": 2
 }
