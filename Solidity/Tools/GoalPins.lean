@@ -370,6 +370,20 @@ theorem graph_deterministic (env : Environment) (fuel : Nat) (name : Lean.Name)
   ((recompute_exact env fuel name a).2 ha).symm.trans
     ((recompute_exact env fuel name b).2 hb)
 
+/-- Pointwise reference computations have unique output lists. -/
+theorem graph_outputs_unique (env : Environment) (fuel : Nat)
+    (pins : List Solidity.Goals.GoalPinSpec.Pin) (xs ys : List (Except Error Tree))
+    (hx : Pointwise (fun p => RootGraph env fuel p.goal) pins xs)
+    (hy : Pointwise (fun p => RootGraph env fuel p.goal) pins ys) : xs = ys := by
+  induction hx generalizing ys with
+  | nil => cases hy; rfl
+  | cons h tail ih =>
+    cases hy with
+    | cons h' tail' =>
+      have he := graph_deterministic env fuel _ _ _ h h'
+      cases he
+      rw [ih _ tail']
+
 /-- A successful reference graph remains valid at every larger fuel bound. -/
 theorem graph_budget_adequate (env : Environment) (name : Lean.Name) (fuel : Nat)
     (tree : Tree) (h : RootGraph env fuel name (.ok tree)) (larger : Nat)
