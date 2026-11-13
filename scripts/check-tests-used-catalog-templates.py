@@ -9,6 +9,7 @@ import argparse
 import copy
 import importlib.util
 import json
+import math
 from pathlib import Path
 import re
 import sys
@@ -25,8 +26,15 @@ def nonfinite(value):
     raise ValueError('nonfinite JSON constant: ' + value)
 
 
+def finite_float(value):
+    result = float(value)
+    if not math.isfinite(result): raise ValueError('nonfinite JSON number')
+    return result
+
+
 def parse(raw):
-    return json.loads(raw, object_pairs_hook=v1.unique_json_object, parse_constant=nonfinite)
+    return json.loads(raw, object_pairs_hook=v1.unique_json_object,
+                      parse_constant=nonfinite, parse_float=finite_float)
 
 
 def revision(value):
@@ -187,7 +195,9 @@ def controls():
         try: expand(raw, changed)
         except (ValueError, TypeError, KeyError): pass
         else: raise AssertionError('accepted malformed template catalog')
-    for malformed in ['{"x":1,"x":2}', '{"x":NaN}', '{"x":Infinity}']:
+    assert parse('{"x":1.25}') == {'x': 1.25}
+    for malformed in ['{"x":1,"x":2}', '{"x":NaN}', '{"x":Infinity}',
+                      '{"x":1e999}', '{"x":-1e999}']:
         try: parse(malformed)
         except ValueError: pass
         else: raise AssertionError('accepted ambiguous JSON')
