@@ -1,0 +1,24 @@
+name: Goal pin proof checks
+on: [push, pull_request]
+permissions:
+  contents: read
+jobs:
+  checker:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+      - uses: leanprover/lean-action@v1
+        with:
+          build: 'false'
+          use-github-cache: 'false'
+          use-mathlib-cache: 'false'
+          test: 'false'
+          lint: 'false'
+      - name: Seed Lake cache from master
+        run: bash scripts/ci/fetch-lake-cache.sh
+      - name: Build the goal pin checker
+        env:
+          LEAN_NUM_THREADS: '1'
+        run: lake build Solidity.Tools.GoalPins
+      - name: Test trailer inspection
+        run: python3 -B -m unittest discover -s scripts/goal-pins -p test_trailers.py
