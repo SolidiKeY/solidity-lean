@@ -568,6 +568,14 @@ elab "#goal_pins_complete" : command => do
 open Lean Solidity.Goals.GoalPinSpec Solidity.Goals.GoalPinSpecV2 Solidity.GoalPins
 
 namespace Draft
+/-- Parse the decimal suffix of a decision identifier without accepting empty or non-digit text. -/
+def parseDecision (text : String) : Option Nat :=
+  match text.toList with
+  | 'H' :: digits =>
+    if digits.isEmpty || !(digits.all Char.isDigit) then none
+    else some (digits.foldl (fun n c => n * 10 + (c.toNat - '0'.toNat)) 0)
+  | _ => none
+
 instance (p : Pin) : Decidable p.WellFormed := by
   unfold Pin.WellFormed
   infer_instance
@@ -900,7 +908,7 @@ theorem correct_pins_complete (s : Snapshot) (m : Manifest) (pins : List Pin)
 
 /-- Draft row decoder; completeness against every canonical decision remains to be proved. -/
 def decodeRow (row : RawPin) : Except Error Pin := do
-  let some number := (String.mk (row.decisionId.toList.drop 1)).toNat?
+  let some number := parseDecision row.decisionId
     | throw .malformedPin
   let pin : Pin := ⟨row.goal, row.digest, number⟩
   if row.decisionId = pin.decisionId ∧ pin.WellFormed then pure pin
@@ -915,7 +923,7 @@ def decode : List RawPin → Except Error (List Pin)
 
 theorem decodeRow_sound (row : RawPin) (pin : Pin)
     (h : decodeRow row = .ok pin) : RowOf row pin := by
-  cases hs : (String.mk (row.decisionId.toList.drop 1)).toNat? with
+  cases hs : parseDecision row.decisionId with
   | none =>
     simp only [decodeRow, hs] at h
     change Except.error Error.malformedPin = Except.ok pin at h
@@ -955,7 +963,7 @@ theorem decode_sound : ∀ rows pins,
 
 /-- Upstream decimal parser property required to finish decoder completeness. -/
 def DecisionRoundTrip : Prop := ∀ number : Nat,
-  (String.mk (("H" ++ toString number).toList.drop 1)).toNat? = some number
+  parseDecision ("H" ++ toString number) = some number
 
 theorem decodeRow_complete (roundtrip : DecisionRoundTrip) {row : RawPin} {pin : Pin}
     (h : RowOf row pin) : decodeRow row = .ok pin := by
@@ -968,9 +976,8 @@ theorem decodeRow_complete (roundtrip : DecisionRoundTrip) {row : RawPin} {pin :
       cases hgoal
       cases hdigest
       cases hid
-      have parsed : (toString number).toNat? = some number := by
-        simpa using roundtrip number
-      simp [decodeRow, Pin.decisionId, parsed, hwell, Pure.pure, Except.pure]
+      simp [decodeRow, Pin.decisionId, roundtrip number, hwell, Pure.pure, Except.pure]
+
 
 end Draft
 
@@ -1711,6 +1718,13 @@ theorem decimal_digits_properties (n : Nat) :
     simp only [Nat.zero_mul, Nat.zero_add]
     have h := digitsCore_value (n + 1) n [] (by omega)
     simpa [Nat.toDigits, digitsValue] using h
+
+/-- Every canonical decision identifier parses to its represented number. -/
+theorem decision_roundtrip : DecisionRoundTrip := by
+  intro number
+  obtain ⟨nonempty, valid, value⟩ := decimal_digits_properties number
+  have repr : (toString number).data = Nat.toDigits 10 number := rfl
+  simpa [parseDecision, repr, nonempty] using And.intro valid value
 
 end Draft
 
