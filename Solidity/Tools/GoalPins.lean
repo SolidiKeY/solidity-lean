@@ -1601,4 +1601,117 @@ theorem success_encodes (env : Environment) (fuel : Nat) (name : Lean.Name)
 
 end Draft
 
+namespace Draft
+
+theorem digit_properties (n : Nat) (h : n < 10) :
+    (Nat.digitChar n).isDigit = true ∧ (Nat.digitChar n).toNat - '0'.toNat = n := by
+  have cases : n = 0 ∨ n = 1 ∨ n = 2 ∨ n = 3 ∨ n = 4 ∨
+      n = 5 ∨ n = 6 ∨ n = 7 ∨ n = 8 ∨ n = 9 := by omega
+  rcases cases with h0 | h1 | h2 | h3 | h4 | h5 | h6 | h7 | h8 | h9 <;> subst n <;> decide
+
+def digitsValue : List Char → Nat
+  | [] => 0
+  | c :: cs => (c.toNat - '0'.toNat) * 10 ^ cs.length + digitsValue cs
+
+theorem digitsCore_value : ∀ fuel n digits, n < fuel →
+    digitsValue (Nat.toDigitsCore 10 fuel n digits) = n * 10 ^ digits.length + digitsValue digits := by
+  intro fuel
+  induction fuel with
+  | zero =>
+    intro n digits h
+    omega
+  | succ fuel ih =>
+    intro n digits h
+    have hmod : n % 10 < 10 := Nat.mod_lt _ (by decide)
+    have digit := (digit_properties (n % 10) hmod).2
+    simp only [Nat.toDigitsCore]
+    by_cases hz : n / 10 = 0
+    · simp only [hz, ↓reduceIte, digitsValue, digit]
+      have hn : n % 10 = n := Nat.mod_eq_of_lt (by omega)
+      rw [hn]
+    · simp only [hz, ↓reduceIte]
+      have hn : n / 10 < fuel := by
+        have positive : 0 < n := by omega
+        have smaller := Nat.div_lt_self positive (by decide : 1 < 10)
+        omega
+      rw [ih (n / 10) (Nat.digitChar (n % 10) :: digits) hn]
+      simp only [List.length_cons, digitsValue, digit, Nat.pow_succ]
+      calc
+        n / 10 * (10 ^ digits.length * 10) +
+            (n % 10 * 10 ^ digits.length + digitsValue digits) =
+          (10 * (n / 10) + n % 10) * 10 ^ digits.length + digitsValue digits := by
+            simp [Nat.add_mul, Nat.mul_assoc, Nat.mul_comm, Nat.mul_left_comm, Nat.add_assoc]
+        _ = n * 10 ^ digits.length + digitsValue digits := by rw [Nat.div_add_mod]
+
+theorem digitsCore_valid : ∀ fuel n digits, n < fuel →
+    (∀ c ∈ digits, c.isDigit = true) →
+    ∀ c ∈ Nat.toDigitsCore 10 fuel n digits, c.isDigit = true := by
+  intro fuel
+  induction fuel with
+  | zero =>
+    intro n digits h
+    omega
+  | succ fuel ih =>
+    intro n digits h valid
+    have digit := (digit_properties (n % 10) (Nat.mod_lt _ (by decide))).1
+    simp only [Nat.toDigitsCore]
+    by_cases hz : n / 10 = 0
+    · simp only [hz, ↓reduceIte, List.mem_cons]
+      intro c hc
+      rcases hc with rfl | hc
+      · exact digit
+      · exact valid c hc
+    · simp only [hz, ↓reduceIte]
+      have hn : n / 10 < fuel := by
+        have positive : 0 < n := by omega
+        have smaller := Nat.div_lt_self positive (by decide : 1 < 10)
+        omega
+      apply ih (n / 10) _ hn
+      intro c hc
+      simp only [List.mem_cons] at hc
+      rcases hc with rfl | hc
+      · exact digit
+      · exact valid c hc
+
+theorem digitsCore_nonempty : ∀ fuel n digits, n < fuel →
+    Nat.toDigitsCore 10 fuel n digits ≠ [] := by
+  intro fuel
+  induction fuel with
+  | zero => intro n digits h; omega
+  | succ fuel ih =>
+    intro n digits h
+    simp only [Nat.toDigitsCore]
+    by_cases hz : n / 10 = 0
+    · simp [hz]
+    · simp only [hz, ↓reduceIte]
+      have hn : n / 10 < fuel := by
+        have positive : 0 < n := by omega
+        have smaller := Nat.div_lt_self positive (by decide : 1 < 10)
+        omega
+      exact ih _ _ hn
+
+theorem digitsValue_fold (digits : List Char) (acc : Nat) :
+    digits.foldl (fun n c => n * 10 + (c.toNat - '0'.toNat)) acc =
+      acc * 10 ^ digits.length + digitsValue digits := by
+  induction digits generalizing acc with
+  | nil => simp [digitsValue]
+  | cons c rest ih =>
+    simp only [List.foldl_cons, ih, List.length_cons, digitsValue, Nat.pow_succ]
+    simp [Nat.mul_add, Nat.mul_assoc, Nat.mul_comm, Nat.add_assoc]
+
+theorem decimal_digits_properties (n : Nat) :
+    Nat.toDigits 10 n ≠ [] ∧
+    (∀ c ∈ Nat.toDigits 10 n, c.isDigit = true) ∧
+    (Nat.toDigits 10 n).foldl (fun x c => x * 10 + (c.toNat - '0'.toNat)) 0 = n := by
+  constructor
+  · exact digitsCore_nonempty (n + 1) n [] (by omega)
+  constructor
+  · exact digitsCore_valid (n + 1) n [] (by omega) (by simp)
+  · rw [digitsValue_fold]
+    simp only [Nat.zero_mul, Nat.zero_add]
+    have h := digitsCore_value (n + 1) n [] (by omega)
+    simpa [Nat.toDigits, digitsValue] using h
+
+end Draft
+
 end Solidity.GoalPins
