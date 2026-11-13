@@ -63,7 +63,7 @@ def expand(raw, delta):
 
 def load_catalog():
     return expand((HERE / 'check-tests-used-routes.json').read_bytes(),
-                  json.loads((HERE / 'check-tests-used-v2-catalog.json').read_bytes(),
+                  json.loads((HERE / 'check-tests-used-catalog-extension.json').read_bytes(),
                              object_pairs_hook=v1.unique_json_object))
 
 
