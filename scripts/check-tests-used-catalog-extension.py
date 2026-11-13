@@ -101,6 +101,22 @@ def controls():
     literal = copy.deepcopy(good)
     literal['append']['standalone'] = [{'entry': expected['standalone'][1]}]
     assert expand(raw, literal) == expected
+    # Order and frozen entries are provenance, even for literal additions.
+    ordered = copy.deepcopy(good)
+    ordered['append']['standalone'] = [{'entry': {'label': 'first'}},
+                                       {'entry': {'label': 'second'}}]
+    ordered_expected = copy.deepcopy(base)
+    ordered_expected['standalone'].extend([{'label': 'first'}, {'label': 'second'}])
+    ordered['expanded_sha256'] = digest(ordered_expected)
+    assert expand(raw, ordered) == ordered_expected
+    reversed_entries = copy.deepcopy(ordered)
+    reversed_entries['append']['standalone'].reverse()
+    omitted_entry = copy.deepcopy(ordered)
+    omitted_entry['append']['standalone'].pop()
+    for changed in (reversed_entries, omitted_entry):
+        try: expand(raw, changed)
+        except ValueError: pass
+        else: raise AssertionError('accepted reordered or missing provenance')
     load_catalog()
     print('PASS v2 catalog controls')
 
