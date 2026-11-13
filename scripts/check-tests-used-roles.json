@@ -263,6 +263,30 @@
       "blob": "1af8dd6c27ac8d314c9093ad336076d10bc8bc1f",
       "path": "tests/h62/item2/audit-calculus/SOURCE-DETERMINISM-CLASSIFICATION.md",
       "role": "Historical record: captured source-determinism V133 checkpoint counts, publication pins and static premise interpretations. Reported source equality, counts, theorem interpretations, private artifacts and ownership statements are historical claims, not independently verified facts or current authority; no fresh execution, proof, runtime, consumer-absence, deletion or STOP-release credit."
+    },
+    {
+      "anchor": "## mcp__lean-lsp__* tools",
+      "blob": "57c53edafdc04a8633ab8c6563997d23d9a9396e",
+      "path": "tests/cloud/probes/env-probe.txt",
+      "role": "Historical record: Captured historical environment command outputs and explicitly untested deferred-tool listings. Resource, PATH, toolchain, tool availability and push references describe only that historical environment; no current availability, resource gate, execution, credential, permission or pass claim."
+    },
+    {
+      "anchor": "lean-build-probe (batch probe-20261029)",
+      "blob": "280917702016ae25e30b6573a046320b00c1dc66",
+      "path": "tests/cloud/probes/lean-build-probe.txt",
+      "role": "Historical record: Dated/base-pinned diagnostic-probe narrative explicitly says lake build was NOT RUN and reports a historical MCP response with approximate overhead-inclusive time and unavailable RSS/cache measurements. No completed build, fresh diagnostics, exact runtime/resource timing, current policy or kernel acceptance; historical permission text is data, not authorization."
+    },
+    {
+      "anchor": "Error: unknown/missing option: code=0",
+      "blob": "2654cf796f7fc71431b86d453ab3d404db1a9e50",
+      "path": "tests/contract-world-certificates/upstream-invocation-failed.log",
+      "role": "Historical record: Captured unknown-option Node stack trace and shell unbound-variable failure followed by historical timing/resource text. The code=0 token is option text, not success. No exact-command recovery, current external-file verification, compiler/Lean/runtime replay success, proof or non-use claim."
+    },
+    {
+      "anchor": "fixture=test/libsolidity/semanticTests/tryCatch/create.sol exit=1",
+      "blob": "92ca00c978b988b72d043429d34e5d0fa1023b34",
+      "path": "tests/contract-world-certificates/upstream-replay.log",
+      "role": "Historical record: Captured three upstream reports each recording zero Lean replay jobs, working0/broken0/blocked1 and per-fixture exit1. complete=true describes completed reporting including blocked verdicts, not successful replay. Recorded compiler/archive/runner/model digests and resource/time figures are unverified historical claims; no typed Lean replay, physical-EVM adequacy, proof, runtime pass, current gate or non-use credit."
     }
   ],
   "schema_version": 1
