@@ -1726,6 +1726,104 @@ theorem decision_roundtrip : DecisionRoundTrip := by
   have repr : (toString number).data = Nat.toDigits 10 number := rfl
   simpa [parseDecision, repr, nonempty] using And.intro valid value
 
+/-- Every well-formed reference row is accepted by the executable decoder. -/
+theorem decode_complete {rows : List RawPin} {pins : List Pin}
+    (h : Pointwise RowOf rows pins) : decode rows = .ok pins := by
+  induction h with
+  | nil => rfl
+  | cons first rest ih =>
+    simp [decode, decodeRow_complete decision_roundtrip first, ih,
+      bind, Except.bind, Pure.pure, Except.pure]
+
+/-- Each reference row has an associated pin. -/
+theorem pointwise_row_exists {rows : List RawPin} {pins : List Pin}
+    (h : Pointwise RowOf rows pins) : ∀ row ∈ rows, ∃ pin, RowOf row pin := by
+  induction h with
+  | nil => simp
+  | cons first rest ih =>
+    intro row member
+    simp only [List.mem_cons] at member
+    rcases member with rfl | member
+    · exact ⟨_, first⟩
+    · exact ih row member
+
+/-- A row decoder error has the single specified error class. -/
+theorem decodeRow_error_kind (row : RawPin) (err : Error)
+    (h : decodeRow row = .error err) : err = .malformedPin := by
+  cases hp : parseDecision row.decisionId with
+  | none =>
+    simp only [decodeRow, hp] at h
+    change Except.error Error.malformedPin = Except.error err at h
+    cases h
+    rfl
+  | some number =>
+    simp only [decodeRow, hp, Except.bind, Pure.pure, Except.pure] at h
+    split at h
+    · cases h
+    · change Except.error Error.malformedPin = Except.error err at h
+      cases h
+      rfl
+
+/-- A failed row decoder identifies a row with no valid reference pin. -/
+theorem decodeRow_error_invalid (row : RawPin) (err : Error)
+    (h : decodeRow row = .error err) : ¬ ∃ pin, RowOf row pin := by
+  rintro ⟨pin, valid⟩
+  have accepted := decodeRow_complete decision_roundtrip valid
+  rw [h] at accepted
+  cases accepted
+
+/-- Every decoder result is a result in the independent decode graph. -/
+theorem decode_graph (rows : List RawPin) : DecodeGraph rows (decode rows) := by
+  induction rows with
+  | nil => exact .success .nil
+  | cons row rows ih =>
+    cases hr : decodeRow row with
+    | error err =>
+      have kind := decodeRow_error_kind row err hr
+      subst err
+      have invalid := decodeRow_error_invalid row .malformedPin hr
+      simpa [decode, hr, bind, Except.bind] using
+        (DecodeGraph.malformed (rows := row :: rows) ⟨row, by simp, invalid⟩)
+    | ok pin =>
+      cases ht : decode rows with
+      | error err =>
+        rw [ht] at ih
+        cases ih with
+        | malformed invalid =>
+          simpa [decode, hr, ht, bind, Except.bind] using
+            (DecodeGraph.malformed (rows := row :: rows) (by
+              obtain ⟨bad, member, invalid⟩ := invalid
+              exact ⟨bad, by simp [member], invalid⟩))
+      | ok pins =>
+        rw [ht] at ih
+        cases ih with
+        | success valid =>
+          have first := decodeRow_sound row pin hr
+          simpa [decode, hr, ht, bind, Except.bind, Pure.pure, Except.pure] using
+            (DecodeGraph.success (.cons first valid))
+
+/-- The decoder is exact for both successful rows and malformed input. -/
+theorem decode_exact (rows : List RawPin) (output : Except Error (List Pin)) :
+    decode rows = output ↔ DecodeGraph rows output := by
+  constructor
+  · intro h
+    rw [← h]
+    exact decode_graph rows
+  · intro graph
+    cases graph with
+    | success valid => exact decode_complete valid
+    | malformed invalid =>
+      have actual := decode_graph rows
+      cases h : decode rows with
+      | error err =>
+        rw [h] at actual
+        cases actual
+        rfl
+      | ok pins =>
+        have valid := decode_sound rows pins h
+        obtain ⟨row, member, bad⟩ := invalid
+        exact False.elim (bad (pointwise_row_exists valid row member))
+
 end Draft
 
 end Solidity.GoalPins
