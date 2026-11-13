@@ -287,6 +287,66 @@
       "blob": "92ca00c978b988b72d043429d34e5d0fa1023b34",
       "path": "tests/contract-world-certificates/upstream-replay.log",
       "role": "Historical record: Captured three upstream reports each recording zero Lean replay jobs, working0/broken0/blocked1 and per-fixture exit1. complete=true describes completed reporting including blocked verdicts, not successful replay. Recorded compiler/archive/runner/model digests and resource/time figures are unverified historical claims; no typed Lean replay, physical-EVM adequacy, proof, runtime pass, current gate or non-use credit."
+    },
+    {
+      "anchor": "RuntimeError: Event loop is closed",
+      "blob": "53fd4ee512f10cbbf6302187a37ab9ee6b78140f",
+      "path": "tests/contract-world-certificates/world-diagnostics.log",
+      "role": "Historical record: Captured dated MCP server output with four reported successful empty-error diagnostic responses and an ignored subprocess cleanup exception. No overall clean-run, current tool availability, kernel closure, proof or present diagnostic acceptance. No non-use or deletion credit."
+    },
+    {
+      "anchor": "Build completed successfully (52 jobs).",
+      "blob": "6b4cbe230a963ddad7cd88b6e0724a8f4240f19a",
+      "path": "tests/contract-world-certificates/world-focused-final.log",
+      "role": "Historical record: Captured successful 52-job focused build report with warnings, printed axiom dependencies and resource/time text. Reported subset success and axiom output are unverified historical claims; no current full gate, proof closure, trust adoption or performance acceptance. No non-use or deletion credit."
+    },
+    {
+      "anchor": "'Solidity.Examples.Tactics.ContractWorldSource.Direct.run_certificate' depends on axioms: [propext,",
+      "blob": "7690363578e3a940dc74a267490732c8df2c0faa",
+      "path": "tests/contract-world-certificates/world-pipeline-legacy.log",
+      "role": "Historical record: Captured legacy pipeline AST path/size/hash/compiler-version and theorem axiom-list output. External AST identity and axiom assertions are not verified or adopted; no current compiler, proof, trust, runtime or pipeline acceptance. No non-use or deletion credit."
+    },
+    {
+      "anchor": "'Solidity.Examples.Tactics.ContractWorldSource.Direct.run_certificate' depends on axioms: [propext,",
+      "blob": "8e8fb471c0512918a42a3eb3d6625849650550c4",
+      "path": "tests/contract-world-certificates/world-pipeline-viaIR.log",
+      "role": "Historical record: Captured viaIR pipeline AST path/size/hash/compiler-version and theorem axiom-list output. External AST identity and axiom assertions are not verified or adopted; no current compiler, proof, trust, runtime or pipeline acceptance. No non-use or deletion credit."
+    },
+    {
+      "anchor": "legacy passed 7430ms",
+      "blob": "7ecc3409ef9fa7dafeee3a9ea1a04c25ffef55db",
+      "path": "tests/contract-world-certificates/world-pipelines-run.log",
+      "role": "Historical record: Captured two pipeline pass/timing labels and aggregate historical time/memory text, without independently recovered commands or complete input identities. No current pipeline/runtime pass, resource attestation or performance acceptance. No non-use or deletion credit."
+    },
+    {
+      "anchor": "700 reachable, 0 orphaned, 0 not allowed",
+      "blob": "0964104290e1de8bc1282d98eacd0f80ed37d4e5",
+      "path": "tests/upstream/baseline-20261028/gates-before/1.log",
+      "role": "Historical record: Captured old reachability/orphan-policy count excerpt. Counts lack current command/input/exit validation and do not establish present references, non-use, orphan classification, deletion permission or gate acceptance. No non-use or deletion credit."
+    },
+    {
+      "anchor": "152 core modules, 0 reach the elaborator",
+      "blob": "08697cf93ee91dd80b50e4a5bdb08ccf8a2e126d",
+      "path": "tests/upstream/baseline-20261028/gates-before/2.log",
+      "role": "Historical record: Captured old core-module/import-boundary count excerpt. No current import graph, source coverage, dependency or layer-gate acceptance follows. No non-use or deletion credit."
+    },
+    {
+      "anchor": "check-automatic: 491 automatic, 61 with a step budget, 0 manual; 11 refuted; 0 pending",
+      "blob": "44f4438e1399d8052f4545a864d365882695ff9e",
+      "path": "tests/upstream/baseline-20261028/gates-before/3.log",
+      "role": "Historical record: Captured old automation/budget/refutation/pending-count summary. No current proof closure, coverage, budget change, manual/automatic disposition or gate acceptance follows. No non-use or deletion credit."
+    },
+    {
+      "anchor": "trust: 714 sources, 240 inventoried implementation/recovery sites, 0 findings",
+      "blob": "cc4b7d0a583f272eda836ba893ccd39109edcebe",
+      "path": "tests/upstream/baseline-20261028/gates-before/4.log",
+      "role": "Historical record: Captured old trust inventory counts and zero-findings report. It does not verify current source coverage, proof premises, closedness or trust policy and grants no trust expansion or current pass. No non-use or deletion credit."
+    },
+    {
+      "anchor": "212 features: {'model': 151, 'abstract': 23, 'exclude': 30, 'upstream': 8}",
+      "blob": "1b29eb772e28168c89b24da304bb58966b713daa",
+      "path": "tests/upstream/baseline-20261028/gates-before/5.log",
+      "role": "Historical record: Captured old feature/category and upstream-symbol/generated-status summary. Historical exclude30 is data, not present exclusion authority; no current scope change, regeneration, symbol coverage, proof or gate acceptance. No non-use or deletion credit."
     }
   ],
   "schema_version": 1
