@@ -8,6 +8,6 @@ open Solidity.Goals.GoalPinSpecV2 Solidity.GoalPins.Draft
 #guard match decodeRow ⟨`example, List.replicate 32 0, "H042"⟩ with
   | .error .malformedPin => true
   | _ => false
-#guard match decodeRow ⟨`example, [256], "H42"⟩ with
+#guard match decodeRow ⟨`example, 256 :: List.replicate 31 0, "H42"⟩ with
   | .error .malformedPin => true
   | _ => false
