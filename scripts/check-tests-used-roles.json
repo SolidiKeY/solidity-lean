@@ -515,6 +515,30 @@
       "anchor": "    \"result\": \"Branches diverged; no fast-forward, merge or rebase performed; implementation and working files unchanged\"",
       "role": "Historical record: Captured timestamped Group10 fixture/gate review assertions, implementation and evidence hashes, historical baseline failures and divergent pull exit128; no replay, trust acceptance or merge permission. Reported approvals, outcomes, resources, exclusions, external artifacts and proofs are not independently verified or adopted. No current authorization, consumer, nonuse or deletion credit.",
       "blob": "72cbc203d5cd3c199ca7886ebf90db9e2156c3bb"
+    },
+    {
+      "path": "tests/upstream/baseline-20261028/doc-paths-validation.json",
+      "anchor": "  \"reason\": \"The first new scan recursively cited the preserved plaintext diagnostic log, adding 13 citation locations but no new missing targets. Preserve logs losslessly compressed; historical failures remain failures.\",",
+      "role": "Historical record: Captured historical documentation diagnostic attempts and compressed/uncompressed hash pointers retaining exit1 and missing references; final-equals-before claims do not authorize a baseline exception or authenticate archived logs. Reported outcomes, resources, approvals, external artifacts and proofs are not independently verified or adopted. No current authorization, consumer, nonuse or deletion credit.",
+      "blob": "f497bddf11313578fed8dd91b26f8c45774bbe45"
+    },
+    {
+      "path": "tests/upstream/baseline-20261028/final-validation.json",
+      "anchor": "  \"kernelVersusCompilerEvidence\": \"Typed execution observations are diagnostic; 3478 pinned-solc diagnostic agreements are reference-compiler evidence. No EVM replay or universal source-lowering/semantic proof is claimed.\",",
+      "role": "Historical record: Captured timestamped final diagnostic baseline counts and measured command windows retaining blocked cold90-minute and unrun warm gates; compiler observations are not EVM replay or universal semantic proof. Reported outcomes, resources, approvals, external artifacts and proofs are not independently verified or adopted. No current authorization, consumer, nonuse or deletion credit.",
+      "blob": "b5ca013391b2336cc5945dd69bec5e7ed332c1c1"
+    },
+    {
+      "path": "tests/upstream/baseline-20261028/validation.json",
+      "anchor": "  \"scope\": \"Diagnostic baseline only; no universal semantic, compiler or EVM equivalence proof.\"",
+      "role": "Historical record: Captured timestamped baseline status/stage counters, preservation assertions and pending performance measurement; source/manifest equality and old merge-gate reports are not fresh proofs or current acceptance. Reported outcomes, resources, approvals, external artifacts and proofs are not independently verified or adopted. No current authorization, consumer, nonuse or deletion credit.",
+      "blob": "a78310165b4a92c2d712517c359c219ac9ff80b7"
+    },
+    {
+      "path": "tests/upstream/results/validation.json",
+      "anchor": "    \"reason\": \"Broader cold-build time budget exhausted; no build errors observed before termination. The new upstream module and all five replay checks completed successfully.\"",
+      "role": "Historical record: Captured historical command-check statuses and incomplete614/618-target cold build stopped at45minutes; old standard-axiom, orphan, feature and baseline-failure summaries grant no present trust, nonuse, policy or passing-build credit. Reported outcomes, resources, approvals, external artifacts and proofs are not independently verified or adopted. No current authorization, consumer, nonuse or deletion credit.",
+      "blob": "f6005bc583618593a8a3a63137cd1084f29674fd"
     }
   ],
   "schema_version": 1
