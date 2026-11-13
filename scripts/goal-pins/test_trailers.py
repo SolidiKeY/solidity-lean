@@ -125,6 +125,14 @@ class TrailerTests(unittest.TestCase):
         with self.assertRaisesRegex(TrailerError, "expected exactly one"):
             pin_changes(self.repo, self.base, original)
 
+    def test_legacy_graft_is_rejected(self):
+        pin = self.commit("add pin\n\nGoal-Change: H42")
+        graft = self.repo / self.git("rev-parse", "--git-path", "info/grafts")
+        graft.parent.mkdir(parents=True, exist_ok=True)
+        graft.write_text(pin + "\n")
+        with self.assertRaisesRegex(TrailerError, "legacy grafts"):
+            pin_changes(self.repo, self.base, pin)
+
     def test_missing_base_fails_closed(self):
         with self.assertRaises(TrailerError):
             pin_changes(self.repo, "does-not-exist", "HEAD")

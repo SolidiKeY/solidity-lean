@@ -47,6 +47,18 @@ def pin_changes(repo: Path, base: str, head: str) -> list[tuple[str, str]]:
     # an ancestor of head. Require complete history before enumerating changes.
     if git(repo, "rev-parse", "--is-shallow-repository").strip() != b"false":
         raise TrailerError("shallow repository cannot establish complete push history")
+    # Legacy grafts also rewrite parentage and are not disabled by
+    # GIT_NO_REPLACE_OBJECTS. Reject them rather than inspect altered history.
+    graft_path = Path(os.fsdecode(git(repo, "rev-parse", "--git-path", "info/grafts").rstrip(b"\n")))
+    if not graft_path.is_absolute():
+        graft_path = repo / graft_path
+    try:
+        if graft_path.read_bytes():
+            raise TrailerError("repository has active legacy grafts")
+    except FileNotFoundError:
+        pass
+    except OSError as exc:
+        raise TrailerError("cannot inspect legacy grafts") from exc
     before, after = commit_id(repo, base), commit_id(repo, head)
     ancestor = subprocess.run(["git", "-C", str(repo), "merge-base", "--is-ancestor", before, after],
                               capture_output=True, check=False, env=GIT_ENV)
