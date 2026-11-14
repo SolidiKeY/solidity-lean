@@ -1,0 +1,7 @@
+{
+ "Solidity/Examples/DecisionGapPartialOrSub.lean:Solidity.Examples.DecisionGapPartialOrSub.family_answers": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ]
+}
