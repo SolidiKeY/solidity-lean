@@ -119,3 +119,69 @@ example : ((Halt.intrinsic .assert (.assertion 7)).mapOrigin line).toV1 =
   Halt.toV1_mapOrigin line _
 
 end Solidity.Examples.PanicResult
+
+namespace Solidity.Examples.PanicResult
+
+open Solidity.Semantics
+open Solidity.Semantics.Panic
+
+/-- V1 distinguishes assertion sites from failed checked operations.
+Code alone cannot choose this interpretation. -/
+def legacySite (_ : Code) : Site → THalt
+  | .assertion _ => .panic
+  | .arithmetic _ => .revert
+
+/-- Equal solc codes can have different V1 failure classes. -/
+example : (Halt.intrinsic .arithmetic (.assertion 7)).toV1With legacySite = .panic ∧
+    (Halt.intrinsic .arithmetic (.arithmetic 7)).toV1With legacySite = .revert :=
+  ⟨rfl, rfl⟩
+
+/-- A checked option uses an operation origin only for the actual failure. -/
+def checkedOption {α : Type} : Option α → Result Site α
+  | some value => .ok value
+  | none => .error (.intrinsic .arithmetic (.arithmetic 99))
+
+/-- Local correspondence with the existing primitive option adapter, for both
+failure and full success. This is not a whole-program run correspondence. -/
+example {α : Type} (value : Option α) :
+    Result.toV1With legacySite (checkedOption value) = TRes.ofOpt value := by
+  cases value <;> rfl
+
+example {C : Contract} {H : HTy} {Γ : Ctx} (out : Out C H Γ) :
+    Result.toV1With legacySite (Result.success out) = .ok out :=
+  Result.toV1With_ok legacySite out
+
+example {C : Contract} {H : HTy} {Γ : Ctx} (out : Out C H Γ)
+    (result : Result Site (Out C H Γ)) (h : result.toV1With legacySite = .ok out) :
+    result = .ok out :=
+  (Result.toV1With_eq_ok_iff legacySite result out).mp h
+
+example {C : Contract} {H : HTy} {Γ : Ctx} (out : Out C H Γ) :
+    Result.toV1With legacySite ((.ok out : Result Site (Out C H Γ)).map Out.st) =
+      (.ok out.st : TRes (State C Γ)) := by
+  rw [Result.toV1With_map, Result.toV1With_ok]
+  rfl
+
+example : Result.toV1With legacySite ((.ok 7 : Result Site Nat) >>= next) =
+    ((Result.toV1With legacySite (.ok 7 : Result Site Nat)) >>=
+      fun n => (next n).toV1With legacySite) :=
+  Result.toV1With_bind legacySite _ next
+
+example : Result.toV1With legacySite ((.ok 7 : Result Site Nat) >>= next) =
+    (.error .revert : TRes Nat) := rfl
+
+example : (Halt.externalRevert (encodePanic 0x11)).toV1With legacySite =
+    .revertWith (encodePanic 0x11) := rfl
+
+/-- Compatibility of classifier and origin transport is explicit. -/
+example : ((Halt.intrinsic .arithmetic (.arithmetic 7)).mapOrigin
+    (fun site => (site, line site))).toV1With (fun code pair => legacySite code pair.1) =
+      (Halt.intrinsic .arithmetic (.arithmetic 7)).toV1With legacySite :=
+  Halt.toV1With_mapOrigin _ _ _
+
+/-- The existing default API remains its original structural projection. -/
+example (result : Result Site Nat) :
+    result.toV1With (fun _ _ => .panic) = result.toV1 :=
+  Result.toV1With_default result
+
+end Solidity.Examples.PanicResult

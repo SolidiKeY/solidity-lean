@@ -135,3 +135,69 @@ theorem success_project {Origin α : Type} (value : α) :
 
 end Result
 end Solidity.Semantics.Panic
+
+namespace Solidity.Semantics.Panic
+
+namespace Halt
+
+/-- Interpret intrinsic origins locally in V1. An operation and an assertion
+may share a solc code but project respectively to `revert` and `panic`.
+The producer must prove classifier adequacy; this is no interpreter erasure. -/
+def toV1With {Origin : Type} (classify : Code → Origin → THalt) : Halt Origin → THalt
+  | .intrinsic code origin => classify code origin
+  | .externalRevert data => THalt.ofData data
+  | .revert => .revert
+  | .revertWith data => .revertWith data
+  | .exhausted => .exhausted
+  | .diverge => .diverge
+
+/-- The original structural projection is the constant-panic interpretation. -/
+theorem toV1With_default {Origin : Type} (halt : Halt Origin) :
+    halt.toV1With (fun _ _ => .panic) = halt.toV1 := by
+  cases halt <;> rfl
+
+/-- Origin transport also transports the classifier; arbitrary classifiers
+need not ignore a changed origin. -/
+theorem toV1With_mapOrigin {Origin Other : Type} (f : Origin → Other)
+    (classify : Code → Other → THalt) (halt : Halt Origin) :
+    (halt.mapOrigin f).toV1With classify =
+      halt.toV1With (fun code origin => classify code (f origin)) := by
+  cases halt <;> rfl
+
+end Halt
+
+namespace Result
+
+/-- A local classifier changes only the interpretation of intrinsic failures. -/
+def toV1With {Origin α : Type} (classify : Code → Origin → THalt) :
+    Result Origin α → TRes α
+  | .ok value => .ok value
+  | .error halt => .error (halt.toV1With classify)
+
+theorem toV1With_ok {Origin α : Type} (classify : Code → Origin → THalt) (value : α) :
+    toV1With classify (.ok value : Result Origin α) = .ok value := rfl
+
+/-- Even an origin-sensitive interpretation cannot invent or alter success. -/
+theorem toV1With_eq_ok_iff {Origin α : Type} (classify : Code → Origin → THalt)
+    (result : Result Origin α) (value : α) :
+    result.toV1With classify = .ok value ↔ result = .ok value := by
+  cases result <;> simp only [toV1With, Except.ok.injEq, reduceCtorEq]
+
+theorem toV1With_map {Origin α β : Type} (classify : Code → Origin → THalt)
+    (f : α → β) (result : Result Origin α) :
+    toV1With classify (result.map f) = (result.toV1With classify).map f := by
+  cases result <;> rfl
+
+/-- Only the same continuation and classifier appear on both sides. -/
+theorem toV1With_bind {Origin α β : Type} (classify : Code → Origin → THalt)
+    (result : Result Origin α) (next : α → Result Origin β) :
+    toV1With classify (result >>= next) =
+      (result.toV1With classify >>= fun value => (next value).toV1With classify) := by
+  cases result <;> rfl
+
+theorem toV1With_default {Origin α : Type} (result : Result Origin α) :
+    result.toV1With (fun _ _ => .panic) = result.toV1 := by
+  cases result <;> simp only [toV1With, toV1, Halt.toV1With_default]
+
+end Result
+end Solidity.Semantics.Panic
