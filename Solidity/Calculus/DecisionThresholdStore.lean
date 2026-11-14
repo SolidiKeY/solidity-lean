@@ -9,9 +9,9 @@ array its own length, every mapping one default and no entries, and every
 primitive leaf reads `lo` when each array index on its path is below `n`,
 `hi` otherwise. A whole storage of the contract is built this way, without
 listing keys or slots of a mapping: a mapping is its default. It is the
-candidate countermodel of literal-bounded blocks (`Calculus/DecisionBlockRefute.lean`),
-where reads at an index below the bound see `lo` and a read past it sees `hi`
-or halts.
+candidate construction for literal-bounded blocks; a consumer must check that
+its chosen region actually refutes a claim. No refutation is inferred from
+the construction alone.
 
 The construction follows `SVal.dflt`: recursion on a rank bound, and inside
 one rank structurally on the type. No property of the result is assumed by
