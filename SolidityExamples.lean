@@ -58,6 +58,7 @@ import Solidity.Examples.DecisionGapBinderChecks
 import Solidity.Examples.DecisionGapBlockChecks
 import Solidity.Examples.DecisionGapCensus
 import Solidity.Examples.DecisionGapData
+import Solidity.Examples.DecisionGapKIntResidue
 import Solidity.Examples.DecisionGapLiteralChecks
 import Solidity.Examples.DecisionGapMembershipChecks
 import Solidity.Examples.DecisionGapModularChecks
