@@ -37,11 +37,10 @@ theorem joined (pipeline : Roadmap.Pipeline) (fuel : Nat) (flag checked : Bool) 
       (R := []) (M := false) (k := ⟨false,false⟩) (statement steps) (source flag).1).run (.nil,(source flag).2) =
       (.ok (Source.Out.normal (sourceAfter steps (source flag).1)),(.nil,(source flag).2)) ∧
     StmtOut C 1 0 (Frag.init TargetCtx) false false false
-      ((code index steps).run (caller flag)) (run emitted (machine flag)) (machine flag) := by
-  rcases correct (G0 pipeline) {F0 with checked := checked} fuel 0 none (returns := []) (M := false)
+      ((code index steps).run (caller flag)) (run emitted (machine flag)) (machine flag) :=
+  And.imp_right (fun rest => rest.2.2.2) (correct (G0 pipeline) {F0 with checked := checked} fuel 0 none (returns := []) (M := false)
     (k := ⟨false,false⟩) steps (source flag) (caller flag) mapping Rel index maps (initial flag)
-    (entry flag) rfl (by decide) with ⟨src,_,_,_,compiled⟩
-  exact ⟨src,compiled⟩
+    (entry flag) rfl (by decide))
 
 theorem observed (flag : Bool) : snapshot (run emitted (machine flag)) =
     some [.val (bword flag),.val (bword (!flag)),.val (bword flag),w[0],w[0],w[99],w[77]] := by
