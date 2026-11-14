@@ -1288,6 +1288,7 @@ theorem running_tick_related (F : Roadmap.Fixed) (slots : List Slot)
         cases ha : idealResult (i.step m) <;> cases hv : numericAtom F i v <;>
           simp only [ha, hv, ResultRelated, Related, true_and] at h ⊢ <;> exact h
 
+
 end Solidity.Hash.CompilerCorrect
 
 /-- info: 'Solidity.Hash.CompilerCorrect.producer_produces' depends on axioms: [propext, Classical.choice, Quot.sound] -/
