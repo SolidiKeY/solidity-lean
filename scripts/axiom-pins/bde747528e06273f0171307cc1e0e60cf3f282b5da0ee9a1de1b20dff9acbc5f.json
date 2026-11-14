@@ -1,0 +1,22 @@
+{
+ "Solidity/Hash/CompilerCorrect/Prefix.lean:Solidity.Hash.CompilerCorrect.codeSafe_of_nonfault": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Hash/CompilerCorrect/Prefix.lean:Solidity.Hash.CompilerCorrect.prefix_related_of_safe": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Hash/CompilerCorrect/Prefix.lean:Solidity.Hash.CompilerCorrect.safe_append": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Hash/CompilerCorrect/Prefix.lean:Solidity.Hash.CompilerCorrect.safe_loop": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ]
+}
