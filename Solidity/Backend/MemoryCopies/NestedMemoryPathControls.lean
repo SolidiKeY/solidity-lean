@@ -135,14 +135,9 @@ private theorem heap_repr (cursor : Fin W) (payloads : List (Fin W)) :
   · intro name field R reference chosen
     rcases refs reference with ⟨different,_⟩ | ⟨different,_⟩ <;> cases different
 
-private theorem represented (cursor : Fin W) (payloads : List (Fin W)) (bounded : payloads.length < 128) : Objects.StateRepr 128 1 8 (Frag.init Γ) (state payloads bounded) bases (machine cursor payloads) := by
-  refine ⟨core cursor payloads bounded,heap_repr cursor payloads,?_,by decide⟩
-  intro R index
-  cases index with
-  | here => exact ⟨old,rfl,rfl⟩
-  | there index => cases index with
-    | here => exact ⟨old,rfl,rfl⟩
-    | there index => nomatch index
+private theorem represented (cursor : Fin W) (payloads : List (Fin W)) (bounded : payloads.length < 128) : Objects.StateRepr 128 1 8 (Frag.init Γ) (state payloads bounded) bases (machine cursor payloads) :=
+  memory_pair_state_repr (core cursor payloads bounded) (heap_repr cursor payloads)
+    old old rfl rfl rfl (by decide)
 
 private theorem allocator (cursor : Fin W) (room : 23 ≤ cursor.val) (payloads : List (Fin W)) :
     Objects.AllocatorRepr heap bases 8 cursor (machine cursor payloads) := by

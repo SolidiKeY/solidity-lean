@@ -82,14 +82,9 @@ private theorem heap_repr (payload : Fin W) : Objects.HeapRepr heap bases 8 (mac
       cases index with
       | zero => cases selected; exact ReprV.uint_of rfl
       | succ index => cases selected)
-private theorem represented (payload : Fin W) : Objects.StateRepr 2 1 8 (Frag.init Γ) (state payload) bases (machine payload) := by
-  refine ⟨core payload,heap_repr payload,?_,by decide⟩
-  intro R index
-  cases index with
-  | here => exact ⟨old,rfl,rfl⟩
-  | there index => cases index with
-    | here => exact ⟨old,rfl,rfl⟩
-    | there index => nomatch index
+private theorem represented (payload : Fin W) : Objects.StateRepr 2 1 8 (Frag.init Γ) (state payload) bases (machine payload) :=
+  memory_pair_state_repr (core payload) (heap_repr payload)
+    old old rfl rfl rfl (by decide)
 
 private theorem allocator (payload : Fin W) : Objects.AllocatorRepr heap bases 8 (wmod 40) (machine payload) := by
   refine ⟨heap_repr payload,⟨by decide,by decide,rfl,?_⟩,?_⟩
