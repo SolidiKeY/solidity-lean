@@ -58,6 +58,7 @@ import Solidity.Examples.DecisionGapBinderChecks
 import Solidity.Examples.DecisionGapBlockChecks
 import Solidity.Examples.DecisionGapCensus
 import Solidity.Examples.DecisionGapData
+import Solidity.Examples.DecisionGapKIntResidue
 import Solidity.Examples.DecisionGapLiteralChecks
 import Solidity.Examples.DecisionGapMembershipChecks
 import Solidity.Examples.DecisionGapModularChecks
@@ -136,6 +137,7 @@ import Solidity.Examples.Goals.GoalPinsSpec
 import Solidity.Examples.Goals.Hash
 import Solidity.Examples.Goals.Headline
 import Solidity.Examples.Goals.Loops
+import Solidity.Examples.Goals.LoopsProducer
 import Solidity.Examples.Goals.Panic
 import Solidity.Examples.Goals.Plan
 import Solidity.Examples.Goals.ProseCalibrated

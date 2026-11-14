@@ -233,6 +233,7 @@ commands; it never enters the core import graph.
 | `Hash/CollisionBridgeCompiler.lean` | PublicCorrectness guarded refinement, decoded reachability and hash-indexed compiler failure bound. |
 | `Hash/CollisionBridgeControls.lean` | Concrete admitted, compiled quiet success using HashPremise.nil. |
 | `Hash/CompilerCorrect.lean` | Operational producers and encoding facts for the frozen E4A contract. |
+| `Hash/CompilerCorrect/Prefix.lean` | Finite-prefix transport and divergence-safe composition for the frozen E4A contract. |
 The diagnostic generators `scripts/h62/item2/audit-v08-adapters/generate_mapped_census.py`
 and `scripts/h62/item2/audit-v08-adapters/generate_calldata_census.py` accept
 `--stream` to omit the global imported-constant sort. This still materializes

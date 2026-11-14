@@ -278,7 +278,8 @@ example : memStructFixed =
   .allocAll (.user "t") (.struct "FixedTriple")
   (.eq (MemoryWitness.fieldRead (p := .uint) (f := "tag") (by decide)) (.app0 (.lit (uintOfNat 0)))) := rfl
 
-/-- Mapping-bearing structs retain their scope refusal, even for reflexivity. -/
+/-- A mapping-bearing struct has no memory object, so the fresh binder is vacuously
+valid (`Calculus/DecisionMappingStruct.lean`); formerly unknown. -/
 def memStructMapping : Fml StandardExample [] := cdl[StandardExample]{ ∀ fresh Wallet w; w.owner = w.owner }
 
 example : memStructMapping =
@@ -286,7 +287,7 @@ example : memStructMapping =
   (.eq (MemoryWitness.fieldRead (p := .uint) (f := "owner") (by decide))
     (MemoryWitness.fieldRead (p := .uint) (f := "owner") (by decide))) := rfl
 
-/-- info: ["proved", "refuted", "refuted", "refuted", "unknown"] -/
+/-- info: ["proved", "refuted", "refuted", "refuted", "proved"] -/
 #guard_msgs in #eval [verdict memStructSame, verdict memStructFive, verdict memStructBool,
   verdict memStructFixed, verdict memStructMapping]
 
