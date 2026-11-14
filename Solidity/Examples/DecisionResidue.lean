@@ -68,7 +68,7 @@ private def floorOneCertificate : PartialOrFloor (floorClaim 1) :=
 
 /-- The rescued family independently certifies the existing valid floor fixture. -/
 theorem floor_family_valid : Fml.Valid (floorClaim 1) :=
-  floorOneCertificate.valid_iff.mpr (by decide +kernel)
+  (floorOneCertificate.valid_iff).mpr (by decide +kernel)
 
 private def floorRoots : PartialOrRoots FloorProbe := ⟨"value", "balances", rfl, rfl⟩
 
@@ -82,7 +82,7 @@ theorem floor_family_countermodel :
 theorem floor_family_answers :
     (partialOrFloorAnswer? (floorClaim 1)).isSome = true ∧
       (partialOrFloorAnswer? floorBad).isSome = true :=
-  ⟨partialOrFloorAnswer_isSome (partialOrFloor_iff.mpr ⟨floorOneCertificate⟩),
+  ⟨partialOrFloorAnswer_isSome ((partialOrFloor_iff).mpr ⟨floorOneCertificate⟩),
     partialOrFloorAnswer_isSome (by decide +kernel)⟩
 
 /-- The mapping-bearing fixture is semantically valid by memory-object vacuity. -/
