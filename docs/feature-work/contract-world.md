@@ -164,7 +164,7 @@ analysis fixtures for legacy (7.430 s) and viaIR (7.326 s), retaining every
 positive/negative test and axiom query. Total pipeline validation took 15.987 s,
 cgroup peak 332,320,768 bytes. Compiler SHA-256 is
 `6c74ffba0ea4cf9521e78b16052a98208770bb7677616de08ced239f4312d390`.
-[New evidence](../../tests/contract-world-certificates/world-pipelines.json)
+[New evidence](https://github.com/SolidiKeY/solidity-lean-coord/blob/ced15e7e599c870312ede4956f351d8838116fad/evidence/plan-x2c-archive-links-1114/x2c-archive-links/tests/contract-world-certificates/world-pipelines.json)
 records source/control/fixture hashes and exact pipeline commands. Raw focused,
 MCP and pipeline logs and environment-specific replay commands are in the same
 new directory; no historical report was overwritten.
@@ -204,7 +204,7 @@ The reviewable implementation is `1e37a2256e277ef24b04284ad0de9f822feaca8c` on
 `feature/world-reachable-catch`. Complete commands, per-fixture outcomes,
 standard-axiom checks, compressed raw logs, exact remaining refusals and shared
 file edits are in
-[validation.json](../../tests/contract-world-certificates/validation.json).
+[validation.json](https://github.com/SolidiKeY/solidity-lean-coord/blob/ced15e7e599c870312ede4956f351d8838116fad/evidence/plan-x2c-archive-links-1114/x2c-archive-links/tests/contract-world-certificates/validation.json).
 The source certification increment is complete; dynamic source creation
 arguments, general library arguments/results and ordinary world-aware execution
 remain explicitly unsupported. No master push or merge was performed.
