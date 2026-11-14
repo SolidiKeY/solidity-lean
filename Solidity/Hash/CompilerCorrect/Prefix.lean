@@ -876,3 +876,482 @@ theorem core_call_safe {C : Contract} {Γ Γ' ps rs Γf : Ctx} {L b : Nat}
 #guard_msgs in #print axioms Solidity.Hash.CompilerCorrect.core_call_safe
 
 end Solidity.Hash.CompilerCorrect
+
+
+namespace Solidity.Hash.CompilerCorrect
+open Solidity.Evm Solidity.Goals.HashContract
+
+/-- Alias operations may exhaust storage but cannot themselves diverge. -/
+theorem alias_noDiv {C : Contract} {Γ : Ctx} (σ : State C Γ) {R : RefTy} :
+    (r : ARhs C Γ R) → (r.evalT σ).NoDiv
+  | .path p => TRes.NoDiv.bind (p.resolveT_ends σ).1 fun _ => TRes.NoDiv.ok _
+  | .push b _ => TRes.NoDiv.bind (b.resolveT_ends σ).1 fun r => by
+    show (if σ.storage.full r then .error .exhausted else do
+      let (st, n) ← TRes.ofOpt (σ.storage.pushPlace r)
+      pure (st, r.index (.arr .dyn) n) : TRes _).NoDiv
+    split
+    · exact fun h => nomatch h
+    · exact (TRes.NoDiv.ofOpt _).bind fun _ => TRes.NoDiv.ok _
+
+theorem push_noDiv {C : Contract} {Γ : Ctx} (σ : State C Γ) {E : Ty}
+    (b : SPath C Γ (.array E)) (v : Option (Src C Γ E)) :
+    (TRun.push b v σ).NoDiv := by
+  unfold TRun.push
+  refine TRes.NoDiv.bind (b.resolveT_ends σ).1 fun ref => ?_
+  cases v with
+  | none =>
+    dsimp only
+    split
+    · exact fun h => nomatch h
+    · exact (TRes.NoDiv.ofOpt _).bind fun _ => TRes.NoDiv.ok _
+  | some r =>
+    refine TRes.NoDiv.bind (r.valueT_ends σ).1 fun _ => ?_
+    dsimp only
+    split
+    · exact fun h => nomatch h
+    · exact (TRes.NoDiv.ofOpt _).bind fun _ => TRes.NoDiv.ok _
+
+/-- Internal classification of leaf constructors only; the mutual proof below
+handles the structural constructors without a non-divergence restriction. -/
+def CoreLeaf {C : Contract} {Γ Δ : Ctx} : Solidity.Stmt C Γ Δ → Prop
+  | .assign .. | .rebind .. | .assignLocal .. | .declLocal .. | .declStorage ..
+  | .opAssign .. | .incDec .. | .assignIncDec .. | .push .. | .pop ..
+  | .transfer .. | .delete .. | .require .. | .assert .. | .revert => True
+  | _ => False
+
+theorem core_leaf_noDiv {C : Contract} {Γ Δ : Ctx} (s : Solidity.Stmt C Γ Δ)
+    (leaf : CoreLeaf s) (σ : State C Γ) : (s.run σ).NoDiv := by
+  cases s <;> simp only [CoreLeaf] at leaf
+  case assign l r =>
+    exact TRes.NoDiv.bind (r.valueT_ends σ).1 fun _ => TRes.NoDiv.bind (l.resolveT_ends σ).1
+      fun _ => (TRes.NoDiv.ofOpt _).bind fun _ => TRes.NoDiv.ok _
+  case rebind i r => exact (alias_noDiv σ r).bind fun _ => TRes.NoDiv.ok _
+  case assignLocal i r => exact TRes.NoDiv.bind (r.evalT_ends σ).1 fun _ => TRes.NoDiv.ok _
+  case declLocal p x init =>
+    cases init with
+    | none => exact TRes.NoDiv.ok _
+    | some e => exact TRes.NoDiv.bind (e.evalT_ends σ).1 fun _ => TRes.NoDiv.ok _
+  case declStorage R x init =>
+    cases init with
+    | none => exact TRes.NoDiv.ok _
+    | some r => exact (alias_noDiv σ r).bind fun _ => TRes.NoDiv.ok _
+  case opAssign op hop hp l r =>
+    exact TRes.NoDiv.bind (r.evalT_ends σ).1 fun _ => (OpLoc.storeT_ends σ op l _).1
+  case incDec op hp l => exact TRes.NoDiv.bind (OpLoc.bumpT_ends σ op l).1 fun _ => TRes.NoDiv.ok _
+  case assignIncDec op hp i l hs =>
+    exact TRes.NoDiv.bind (OpLoc.bumpT_ends σ op l).1 fun _ => TRes.NoDiv.ok _
+  case push b v hd => exact push_noDiv σ b v
+  case pop b => exact TRes.NoDiv.bind (b.resolveT_ends σ).1 fun _ =>
+    (TRes.NoDiv.ofOpt _).bind fun _ => TRes.NoDiv.ok _
+  case transfer r a =>
+    apply TRes.NoDiv.bind (r.evalT_ends σ).1
+    intro _
+    apply TRes.NoDiv.bind (a.evalT_ends σ).1
+    intro _
+    split
+    · exact TRes.NoDiv.ok _
+    · exact fun h => nomatch h
+  case delete l => exact TRes.NoDiv.bind (l.resolveT_ends σ).1 fun _ =>
+    (TRes.NoDiv.ofOpt _).bind fun _ => TRes.NoDiv.ok _
+  case require c =>
+    apply TRes.NoDiv.bind (c.evalT_ends σ).1
+    intro _
+    split
+    · exact TRes.NoDiv.ok _
+    · exact fun h => nomatch h
+  case assert c =>
+    apply TRes.NoDiv.bind (c.evalT_ends σ).1
+    intro _
+    split
+    · exact TRes.NoDiv.ok _
+    · exact fun h => nomatch h
+  case revert => exact fun h => nomatch h
+
+theorem stmtOut_nonfault {C : Contract} {L b : Nat} {Γ : Ctx} {frag : Frag Γ}
+    {sh pays asserts : Bool} {H : HTy} {res : TRes (Solidity.Out C H Γ)}
+    {out : Evm.Out} {m : Machine} (h : StmtOut C L b frag sh pays asserts res out m)
+    (finite : res.NoDiv) : out ≠ .fault := by
+  intro bad
+  cases h with
+  | inl h => obtain ⟨o, s, ho, hc, rest⟩ := h; rw [hc] at bad; cases bad
+  | inr h => rw [h.2] at bad; cases bad
+  | panic _ h => rw [h.2] at bad; cases bad
+  | refused _ h => rw [h.1] at bad; cases bad
+  | diverge h => exact finite h.1
+
+theorem core_leaf_safe {C : Contract} {Γ Δ : Ctx} {L b : Nat}
+    {frag : Frag Γ} {post : Frag Δ} (s : Solidity.Stmt C Γ Δ) (leaf : CoreLeaf s)
+    {σ : State C Γ} {m : Machine} (input : Sim C L b frag σ m)
+    (cert : inFrag frag s = some post) (bound : L + Evm.Stmt.pushes s ≤ Lmax) :
+    CodeSafe (compileStmt b s) m :=
+  codeSafe_of_nonfault _ _ (stmtOut_nonfault (Evm.stmt_sim s input cert bound)
+    (core_leaf_noDiv s leaf σ))
+
+theorem core_outside_safe {C : Contract} {Γ Δ : Ctx} (s : Solidity.Stmt C Γ Δ)
+    (outside : Evm.Stmt.evmOutside s = true) {L b : Nat}
+    {frag : Frag Γ} {post : Frag Δ} {σ : State C Γ} {m : Machine} :
+    Sim C L b frag σ m → inFrag frag s = some post → L + Evm.Stmt.pushes s ≤ Lmax →
+      CodeSafe (compileStmt b s) m :=
+  fun _ cert _ => Option.noConfusion ((Evm.inFrag_outside _ _ outside).symm.trans cert)
+
+mutual
+
+theorem core_stmt_safe : ∀ {C : Contract} {Γ Δ : Ctx} (s : Solidity.Stmt C Γ Δ)
+    {L b : Nat} {frag : Frag Γ} {post : Frag Δ} {σ : State C Γ} {m : Machine},
+    Sim C L b frag σ m → inFrag frag s = some post → L + Evm.Stmt.pushes s ≤ Lmax →
+      CodeSafe (compileStmt b s) m
+  | _, _, _, .assign l r => fun hm hw hL => core_leaf_safe (.assign l r) (by trivial) hm hw hL
+  | _, _, _, .rebind i r => fun hm hw hL => core_leaf_safe (.rebind i r) (by trivial) hm hw hL
+  | _, _, _, .assignLocal i r => fun hm hw hL => core_leaf_safe (.assignLocal i r) (by trivial) hm hw hL
+  | _, _, _, .declLocal p x init => fun hm hw hL => core_leaf_safe (.declLocal p x init) (by trivial) hm hw hL
+  | _, _, _, .declStorage R x init => fun hm hw hL => core_leaf_safe (.declStorage R x init) (by trivial) hm hw hL
+  | _, _, _, .opAssign op hop hp l r => fun hm hw hL => core_leaf_safe (.opAssign op hop hp l r) (by trivial) hm hw hL
+  | _, _, _, .incDec op hp l => fun hm hw hL => core_leaf_safe (.incDec op hp l) (by trivial) hm hw hL
+  | _, _, _, .assignIncDec i op hp l hs => fun hm hw hL => core_leaf_safe (.assignIncDec i op hp l hs) (by trivial) hm hw hL
+  | _, _, _, .push q v hd => fun hm hw hL => core_leaf_safe (.push q v hd) (by trivial) hm hw hL
+  | _, _, _, .pop q => fun hm hw hL => core_leaf_safe (.pop q) (by trivial) hm hw hL
+  | _, _, _, .transfer r a => fun hm hw hL => core_leaf_safe (.transfer r a) (by trivial) hm hw hL
+  | _, _, _, .delete l => fun hm hw hL => core_leaf_safe (.delete l) (by trivial) hm hw hL
+  | _, _, _, .require c => fun hm hw hL => core_leaf_safe (.require c) (by trivial) hm hw hL
+  | _, _, _, .assert c => fun hm hw hL => core_leaf_safe (.assert c) (by trivial) hm hw hL
+  | _, _, _, .revert => fun hm hw hL => core_leaf_safe (.revert) (by trivial) hm hw hL
+  | _, _, _, .assumeFalse => fun _ hw _ => nomatch hw
+  | _, _, _, .ite c t e => fun hm hw hL => by
+    obtain ⟨hwc, F₁, F₂, ht, he, rfl⟩ := Evm.ite_frag hw
+    have bound : _ + (Evm.Prog.pushes t + Evm.Prog.pushes e) ≤ Lmax := hL
+    exact core_ite_safe c t e hm hwc ht (by omega)
+      (core_prog_safe t hm ht (by omega)) (core_prog_safe e hm he (by omega))
+  | _, _, _, .block body => fun hm hw hL => by
+    obtain ⟨G, hb, rfl⟩ := Evm.block_frag hw
+    exact core_prog_safe body hm hb hL
+  | _, _, _, .call f args ret body => fun hm hw hL =>
+    core_call_safe f args ret body hm hw hL fun hb hm₂ => core_prog_safe body hm₂ hb hL
+  | _, _, _, .loop a c body => fun hm hw hL => by
+    obtain ⟨hwc, hpush, hpay, hshr, G, hb, hG, rfl⟩ := Evm.loop_frag hw
+    exact core_loop_safe c body hwc hb hpush hG hL
+      (fun τ m hm' => core_prog_safe body hm' hb (by simpa [hpush] using hL)) hm
+  | _, _, _, .tryCall .. => fun _ hw _ => by rw [Evm.inFrag_tryCall] at hw; cases hw
+  | _, _, _, .send a0 a1 a2 a3 => core_outside_safe (.send a0 a1 a2 a3) rfl
+  | _, _, _, .declMem a0 a1 a2 a3 a4 => core_outside_safe (.declMem a0 a1 a2 a3 a4) rfl
+  | _, _, _, .rebindMem a0 a1 => core_outside_safe (.rebindMem a0 a1) rfl
+  | _, _, _, .assignFromMem a0 a1 => core_outside_safe (.assignFromMem a0 a1) rfl
+  | _, _, _, .assignMem a0 a1 => core_outside_safe (.assignMem a0 a1) rfl
+  | _, _, _, .deleteMem a0 a1 => core_outside_safe (.deleteMem a0 a1) rfl
+  | _, _, _, .assignNew a0 a1 a2 => core_outside_safe (.assignNew a0 a1 a2) rfl
+  | _, _, _, .assignLocalPush a0 a1 => core_outside_safe (.assignLocalPush a0 a1) rfl
+  | _, _, _, .pushOpAssign a0 a1 a2 a3 a4 => core_outside_safe (.pushOpAssign a0 a1 a2 a3 a4) rfl
+  | _, _, _, .pushIncDec a0 a1 a2 => core_outside_safe (.pushIncDec a0 a1 a2) rfl
+  | _, _, _, .callReceiver a0 a1 a2 a3 a4 => core_outside_safe (.callReceiver a0 a1 a2 a3 a4) rfl
+  | _, _, _, .callReceiverPush a0 a1 a2 a3 a4 a5 => core_outside_safe (.callReceiverPush a0 a1 a2 a3 a4 a5) rfl
+  | _, _, _, .callRec a0 a1 a2 a3 a4 => core_outside_safe (.callRec a0 a1 a2 a3 a4) rfl
+  | _, _, _, .revertData a0 => core_outside_safe (.revertData a0) rfl
+  | _, _, _, .catchData c rets sargs sbody self kind x body => core_outside_safe (.catchData c rets sargs sbody self kind x body) rfl
+
+theorem core_prog_safe : ∀ {C : Contract} {Γ Δ : Ctx} (P : Prog C Γ Δ)
+    {L b : Nat} {frag : Frag Γ} {post : Frag Δ} {σ : State C Γ} {m : Machine},
+    Sim C L b frag σ m → inFragP frag P = some post → L + Evm.Prog.pushes P ≤ Lmax →
+      CodeSafe (compileProg b P) m
+  | _, _, _, .nil => fun _ _ _ => codeSafe_of_nonfault _ _ (by intro bad; cases bad)
+  | _, _, _, .cons s P => fun hm hw hL => by
+    simp only [inFragP] at hw
+    split at hw
+    · rename_i F₁ hs
+      have bound : _ + (Evm.Stmt.pushes s + Evm.Prog.pushes P) ≤ Lmax := hL
+      exact core_seq_safe s P hm hs (by omega) (core_stmt_safe s hm hs (by omega))
+        fun τ m hm' => core_prog_safe P hm' hw (by omega)
+    · cases hw
+
+end
+
+/-- The invariant retains actual reached source prefixes and allocator growth;
+capacity is obtained from the existing full LoopRoom obligation. -/
+theorem memory_loop_safe {C : Contract} {Γ Δ : Ctx} {L b frame : Nat}
+    {frag : Frag Γ} {c : Solidity.Val C Γ .bool} {body : Prog C Γ Δ}
+    {cond code : List Instr} (cert : Memory.LoopCert b frag c body cond code)
+    {σ : State C Γ} {base : Nat → Fin W} {m : Machine}
+    (repr : Memory.StateRepr L b frame frag σ base m)
+    (cap : b + Memory.frameNeedProg body ≤ frame)
+    (room : Memory.LoopRoom b frame c body σ base m) :
+    CodeSafe [.loop cond code] m := by
+  let I : Machine → Prop := fun s =>
+    ∃ (o : Solidity.Out C σ.H Γ) (bases : Nat → Fin W) (cost : Nat),
+      Memory.LoopPrefix c body σ o cost ∧ Memory.StateRepr L b frame frag o.st bases s ∧
+      Memory.GrowsAllocator b frame cost σ base m o.st bases s
+  let J : Machine → Prop := fun s =>
+    ∃ (o : Solidity.Out C σ.H Γ) (bases : Nat → Fin W) (cost : Nat),
+      Memory.LoopPrefix c body σ o cost ∧ Memory.StateRepr L b frame frag o.st bases s ∧
+      Memory.GrowsAllocator b frame cost σ base m o.st bases s ∧ c.evalT o.st = .ok true
+  apply safe_loop I J cond code m
+  · exact ⟨⟨σ, List.prefix_refl _⟩, base, 0, .start, repr, fun _ _ ha _ => ha⟩
+  · intro s hs
+    obtain ⟨o, bases, cost, hp, hr, hg⟩ := hs
+    apply codeSafe_of_nonfault
+    rcases cert.condition.correct hr with ⟨v, w, hv, hw, hc⟩ | ⟨hv, hc⟩
+    all_goals intro bad; rw [hc] at bad; cases bad
+  · intro s t k hs done
+    obtain ⟨o, bases, cost, hp, hr, hg⟩ := hs
+    rcases cert.condition.correct hr with ⟨v, w, hv, hw, hc⟩ | ⟨hv, hc⟩
+    · obtain rfl := hw.bool_inv
+      rw [hc] at done
+      cases done
+      refine ⟨rfl, bword v, s.stack, rfl, ?_⟩
+      intro nonzero
+      cases v with
+      | false => exact False.elim (nonzero rfl)
+      | true =>
+        exact ⟨o, bases, cost, hp, by simpa [Machine.push] using hr,
+          by simpa [Machine.push] using hg, hv⟩
+    · rw [hc] at done
+      cases done
+  · intro s hs
+    obtain ⟨o, bases, cost, hp, hr, hg, hv⟩ := hs
+    have capacity := hg.nextInput (room o cost hp hv)
+    apply codeSafe_of_nonfault
+    rcases cert.bodyCert.correct hr cap capacity with
+      ⟨o', t, bases', ho, hc, hr', hstack, hbase, hg'⟩ | ⟨ho, hc⟩
+    all_goals intro bad; rw [hc] at bad; cases bad
+  · intro s t k hs done
+    obtain ⟨o, bases, cost, hp, hr, hg, hv⟩ := hs
+    have capacity := hg.nextInput (room o cost hp hv)
+    rcases cert.bodyCert.correct hr cap capacity with
+      ⟨o', t', bases', ho, hc, hr', hstack, hbase, hg'⟩ | ⟨ho, hc⟩
+    · rw [hc] at done
+      cases done
+      refine ⟨rfl, ⟨o'.st.drop body.ext, o.ext.trans o'.ext⟩, bases',
+        cost + Memory.allocationCostProg body o.st, .next hp hv ho, ?_, hg.comp hg'⟩
+      rw [← cert.stable]
+      exact hr'.drop body.ext
+    · rw [hc] at done
+      cases done
+
+
+theorem loops_stmt_safe {C : Contract} {b L frame Γ Δ F G stmt code}
+    (hs : Memory.Loops.StmtCert (C := C) b (Γ := Γ) (Δ := Δ) F G stmt code)
+    {σ : State C Γ} {base : Nat → Fin W} {m : Machine}
+    (repr : Memory.StateRepr L b frame F σ base m) (cap : b + hs.need ≤ frame)
+    (room : ∀ amount, hs.Demand σ amount → Memory.AllocationInput b frame amount σ base m) :
+    CodeSafe code m := by
+  cases hs with
+  | finite cert =>
+    apply codeSafe_of_nonfault
+    rcases cert.correct repr cap (room _ rfl) with
+      ⟨o, t, bases, ho, hc, rest⟩ | ⟨ho, hc⟩
+    all_goals intro bad; rw [hc] at bad; cases bad
+  | loop a c body cond code G hc hb stable =>
+    apply memory_loop_safe ⟨hc, G, hb, stable⟩ repr
+    · change b + max Γ.length (Memory.frameNeedProg body) ≤ frame at cap
+      omega
+    · exact fun o cost hp hv => room _ (.inr ⟨o, cost, hp, hv, rfl⟩)
+
+theorem loops_stmt_success {C : Contract} {b L frame Γ Δ F G stmt code}
+    (hs : Memory.Loops.StmtCert (C := C) b (Γ := Γ) (Δ := Δ) F G stmt code)
+    {σ : State C Γ} {base : Nat → Fin W} {m t : Machine} {k : Nat}
+    (repr : Memory.StateRepr L b frame F σ base m) (cap : b + hs.need ≤ frame)
+    (room : ∀ amount, hs.Demand σ amount → Memory.AllocationInput b frame amount σ base m)
+    (done : Evm.run code m = .ok t k) :
+    ∃ (o : Solidity.Out C σ.H Δ) (bases : Nat → Fin W) (cost : Nat),
+      stmt.run σ = .ok o ∧ k = 0 ∧ hs.Cost σ o cost ∧
+      Memory.StateRepr L b frame G o.st bases t ∧
+      Memory.GrowsAllocator b frame cost σ base m o.st bases t := by
+  cases hs with
+  | finite cert =>
+    rcases cert.correct repr cap (room _ rfl) with
+      ⟨o, t', bases, ho, hc, hr, hstack, hbase, hg⟩ | ⟨ho, hc⟩
+    · rw [hc] at done
+      cases done
+      exact ⟨o, bases, _, ho, rfl, rfl, hr, hg⟩
+    · rw [hc] at done
+      cases done
+  | loop a c body cond code G hc hb stable =>
+    have cap' : b + Memory.frameNeedProg body ≤ frame := by
+      change b + max Γ.length (Memory.frameNeedProg body) ≤ frame at cap
+      omega
+    have room' : Memory.LoopRoom b frame c body σ base m :=
+      fun o cost hp hv => room _ (.inr ⟨o, cost, hp, hv, rfl⟩)
+    rcases Memory.LoopCert.correct ⟨hc, G, hb, stable⟩ a repr cap' room' with
+      ⟨o, t', bases, cost, ho, hout, hp, hr, hstack, hbase, hg⟩ | ⟨ho, hout⟩ | ⟨ho, hout⟩
+    · rw [hout] at done
+      cases done
+      exact ⟨o, bases, cost, ho, rfl, hp, hr, hg⟩
+    · rw [hout] at done
+      cases done
+    · rw [hout] at done
+      cases done
+
+theorem loops_prog_safe {C : Contract} {b L frame Γ Δ F G P code}
+    (hp : Memory.Loops.ProgCert (C := C) b (Γ := Γ) (Δ := Δ) F G P code)
+    {σ : State C Γ} {base : Nat → Fin W} {m : Machine}
+    (repr : Memory.StateRepr L b frame F σ base m) (cap : b + hp.need ≤ frame)
+    (room : Memory.Loops.Room hp frame σ base m) : CodeSafe code m := by
+  induction hp generalizing base m with
+  | nil F => exact codeSafe_of_nonfault _ _ (by intro bad; cases bad)
+  | @cons Γ Δ Ξ F G K stmt P head tail hs hp ih =>
+    have caps : b + hs.need ≤ frame := by change b + max hs.need hp.need ≤ frame at cap; omega
+    have capp : b + hp.need ≤ frame := by change b + max hs.need hp.need ≤ frame at cap; omega
+    have roomHead := fun amount h => room amount (Memory.Loops.Demand.head h)
+    apply safe_append head tail m (loops_stmt_safe hs repr caps roomHead)
+    intro t k done
+    obtain ⟨o, bases, cost, ho, hk, hc, hr, hg⟩ := loops_stmt_success hs repr caps roomHead done
+    subst k
+    exact ih hr capp (fun amount hd => hg.nextInput (room _ (.tail ho hc hd)))
+
+/-- Capacity and safety are required only for the actually selected arm. -/
+theorem branch_safe_selected (yes no : List Instr) (m : Machine) (v : Bool)
+    (hy : v = true → CodeSafe yes m) (hn : v = false → CodeSafe no m)
+    (hyDone : v = true → ∀ s k, Evm.run yes m = .ok s k → k = 0) :
+    CodeSafe ([.iszero, .jumpi (yes.length + 1)] ++ yes ++
+      [.jump no.length] ++ no) (m.push (.val (bword v))) := by
+  have header : Evm.run [.iszero, .jumpi (yes.length + 1)] (m.push (.val (bword v))) =
+      .ok m (if v then 0 else yes.length + 1) := by cases v <;> rfl
+  rw [List.append_assoc, List.append_assoc]
+  apply safe_append
+  · apply codeSafe_of_nonfault
+    intro bad
+    rw [header] at bad
+    cases bad
+  · intro s k done
+    rw [header] at done
+    cases done
+    cases v with
+    | false =>
+      have skip := safeFrom_skip (yes ++ [.jump no.length]) no m (hn rfl)
+      simpa only [List.append_assoc, List.length_append, List.length_singleton] using skip
+    | true =>
+      change CodeSafe (yes ++ ([.jump no.length] ++ no)) m
+      refine safe_append yes ([Instr.jump no.length] ++ no) m (hy rfl) ?_
+      intro s k done
+      have hk := hyDone rfl s k done
+      subst k
+      apply codeSafe_of_nonfault
+      have jump : Evm.run ([.jump no.length] ++ no) s = .ok s 0 := by
+        change exec no no.length s = .ok s 0
+        exact exec_length no s
+      intro bad
+      rw [jump] at bad
+      cases bad
+
+
+def ScopeStmtSafe {C : Contract} {b Γ Δ F G stmt code}
+    (hs : Memory.LoopScopes.StmtCert (C := C) b (Γ := Γ) (Δ := Δ) F G stmt code)
+    (L frame : Nat) : Prop :=
+  ∀ (σ : State C Γ) (base : Nat → Fin W) (m : Machine),
+    Memory.StateRepr L b frame F σ base m → b + hs.need ≤ frame →
+    (∀ amount, Memory.LoopScopes.StmtDemand hs σ amount →
+      Memory.AllocationInput b frame amount σ base m) → CodeSafe code m
+
+def ScopeProgSafe {C : Contract} {b Γ Δ F G P code}
+    (hp : Memory.LoopScopes.ProgCert (C := C) b (Γ := Γ) (Δ := Δ) F G P code)
+    (L frame : Nat) : Prop :=
+  ∀ (σ : State C Γ) (base : Nat → Fin W) (m : Machine),
+    Memory.StateRepr L b frame F σ base m → b + hp.need ≤ frame →
+    Memory.LoopScopes.Room hp frame σ base m → CodeSafe code m
+
+theorem scopes_prog_safe {C : Contract} {b L frame Γ Δ F G P code}
+    (hp : Memory.LoopScopes.ProgCert (C := C) b (Γ := Γ) (Δ := Δ) F G P code) :
+    ScopeProgSafe hp L frame := by
+  induction hp using Memory.LoopScopes.ProgCert.rec
+    (motive_1 := fun F G stmt code hs => ScopeStmtSafe hs L frame) with
+  | base hs =>
+    intro σ base m hr cap room
+    have safe := loops_prog_safe (Memory.LoopScopes.singleton hs) hr cap
+      (fun amount hd => room amount (.base hd))
+    simpa only [List.append_nil] using safe
+  | @block Γ Δ F G body code hp ih =>
+    intro σ base m hr cap room
+    have cap' : b + hp.need ≤ frame := by
+      change b + max Γ.length hp.need ≤ frame at cap
+      omega
+    exact ih σ base m hr cap' (fun amount hd => room amount (.block hd))
+  | @ite Γ Δ Ξ F G K c thn els cond left right hc ht he iht ihe =>
+    intro σ base m hr cap room
+    have capt : b + ht.need ≤ frame := by
+      change b + max Γ.length (max ht.need he.need) ≤ frame at cap
+      omega
+    have cape : b + he.need ≤ frame := by
+      change b + max Γ.length (max ht.need he.need) ≤ frame at cap
+      omega
+    simp only [Memory.conditionalCode, List.append_assoc]
+    apply safe_append
+    · apply codeSafe_of_nonfault
+      rcases hc.correct hr with ⟨v, w, hv, hw, hout⟩ | ⟨hv, hout⟩
+      all_goals intro bad; rw [hout] at bad; cases bad
+    · intro s k done
+      rcases hc.correct hr with ⟨v, w, hv, hw, hout⟩ | ⟨hv, hout⟩
+      · obtain rfl := hw.bool_inv
+        rw [hout] at done
+        cases done
+        have selected : CodeSafe ([.iszero, .jumpi (left.length + 1)] ++ left ++
+            [.jump right.length] ++ right) (m.push (.val (bword v))) := by
+          apply branch_safe_selected
+          · intro choice
+            subst v
+            exact iht σ base m hr capt (fun amount hd => room amount (.iteTrue hv hd))
+          · intro choice
+            subst v
+            exact ihe σ base m hr cape (fun amount hd => room amount (.iteFalse hv hd))
+          · intro choice t k done
+            subst v
+            rcases ht.correct σ base m hr capt (fun amount hd => room amount (.iteTrue hv hd)) with
+              ⟨o, t', bases, amount, ho, hout, rest⟩ | ⟨ho, hout⟩ | ⟨ho, hout⟩
+            · rw [hout] at done
+              cases done
+              rfl
+            · rw [hout] at done
+              cases done
+            · rw [hout] at done
+              cases done
+        simpa only [List.append_assoc] using selected
+      · rw [hout] at done
+        cases done
+  | nil F => intro σ base m hr cap room; exact codeSafe_of_nonfault _ _ (by intro bad; cases bad)
+  | @cons Γ Δ Ξ F G K stmt P head tail hs hp ihs ihp =>
+    intro σ base m hr cap room
+    have caps : b + hs.need ≤ frame := by change b + max hs.need hp.need ≤ frame at cap; omega
+    have capp : b + hp.need ≤ frame := by change b + max hs.need hp.need ≤ frame at cap; omega
+    have headRoom := fun amount hd => room amount (Memory.LoopScopes.Demand.head hd)
+    apply safe_append head tail m (ihs σ base m hr caps headRoom)
+    intro t k done
+    rcases hs.correct σ base m hr caps headRoom with
+      ⟨o, t', bases, amount, ho, hout, hc, hr', hstack, hbase, hg⟩ | ⟨ho, hout⟩ | ⟨ho, hout⟩
+    · rw [hout] at done
+      cases done
+      exact ihp o.st bases _ hr' capp (fun n hd => hg.nextInput (room _ (.tail ho hc hd)))
+    · rw [hout] at done
+      cases done
+    · rw [hout] at done
+      cases done
+
+/-- Every checked compiler certificate supplies local safety from its unchanged Input. -/
+theorem compilation_safe {C : Contract} {Γ Δ : Ctx} {b L frame : Nat}
+    {frag : Frag Γ} {P : Prog C Γ Δ} (r : Evm.Compiler.Compilation b frag P)
+    {base : Nat → Fin W} {σ : State C Γ} {m : Machine}
+    (input : r.Input L frame base σ m) : CodeSafe r.code m := by
+  cases r with
+  | core post cert => exact core_prog_safe P input.1 cert input.2
+  | memory out => exact memory_safe out input
+  | referenceArrays out => exact referenceArrays_safe out input
+  | objects out => exact objects_safe out input
+  | construction out => exact construction_safe out input
+  | memoryLoops out => exact loops_prog_safe out.cert input.1 input.2.1 input.2.2
+  | memoryLoopScopes out => exact scopes_prog_safe out.cert σ base m input.1 input.2.1 input.2.2
+  | memoryCalls out hz => exact memoryCalls_safe out hz input
+  | memoryCopy out => exact memoryCopy_safe out input
+  | fixedMemory out => exact fixedMemory_safe out input
+  | copyConstruction out => exact copyConstruction_safe out input
+
+theorem compiler_bridge : CompilerBridge producer :=
+  compilerBridge_of_safe fun _ _ _ r _ _ _ _ _ _ input => compilation_safe r input
+
+end Solidity.Hash.CompilerCorrect
+
+namespace Solidity.Hash
+/-- The frozen E4A compiler collision-free contract, with actual operational prefixes. -/
+theorem compiler_correct_collisionFree : Solidity.Goals.compilerCorrectCollisionFree :=
+  ⟨Backend.compiler_endpoint_correct, CompilerCorrect.producer,
+    CompilerCorrect.producer_produces, CompilerCorrect.producer_idealAdequacy,
+    CompilerCorrect.compiler_bridge,
+    CompilerCorrect.adaptive_of_compilerBridge _ CompilerCorrect.compiler_bridge⟩
+end Solidity.Hash
+
+/-- info: 'Solidity.Hash.compiler_correct_collisionFree' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in #print axioms Solidity.Hash.compiler_correct_collisionFree
