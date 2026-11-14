@@ -2154,6 +2154,7 @@ import Solidity.Calculus.DecisionLeafEquality
 import Solidity.Calculus.DecisionLeafPreparation
 import Solidity.Calculus.DecisionMappingFieldBoundary
 import Solidity.Calculus.DecisionMappingFieldReason
+import Solidity.Calculus.DecisionMappingStruct
 import Solidity.Calculus.DecisionMemoryCoverage
 import Solidity.Calculus.DecisionMemoryExtension
 import Solidity.Calculus.DecisionNegativeInstantiation
@@ -2173,6 +2174,7 @@ import Solidity.Calculus.DecisionNumericStages
 import Solidity.Calculus.DecisionNumericTraversal
 import Solidity.Calculus.DecisionNumericTwoPrefix
 import Solidity.Calculus.DecisionNumericTwoPrefixFormula
+import Solidity.Calculus.DecisionPartialOrFloor
 import Solidity.Calculus.DecisionPrefixNormalizationResidue
 import Solidity.Calculus.DecisionResidue
 import Solidity.Calculus.DecisionResidueReasons
