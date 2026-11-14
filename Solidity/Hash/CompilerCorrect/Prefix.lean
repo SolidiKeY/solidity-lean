@@ -455,4 +455,424 @@ theorem safe_loop (I J : Machine → Prop) (c b : List Instr) (m : Machine)
 
 /-- info: 'Solidity.Hash.CompilerCorrect.safe_loop' depends on axioms: [propext, Classical.choice, Quot.sound] -/
 #guard_msgs in #print axioms Solidity.Hash.CompilerCorrect.safe_loop
+/-- Internal finite-run helper; divergence must be handled separately by
+compiler invariants, never excluded from the public theorem. -/
+theorem compilation_safe_of_nondiv {C : Contract} {b L frame : Nat}
+    {Γ Δ : Ctx} {frag : Frag Γ} {P : Prog C Γ Δ}
+    (r : Evm.Compiler.Compilation b frag P) {base : Nat → Fin W}
+    {σ : State C Γ} {m : Machine} (input : r.Input L frame base σ m)
+    (finite : P.run σ ≠ .error .diverge) : CodeSafe r.code m := by
+  apply codeSafe_of_nonfault
+  rcases r.correct_exact input with ⟨o, s, ho, hc, rest⟩ | ⟨ho, hc⟩ | ⟨ho, hc⟩
+  · rw [hc]
+    intro impossible
+    cases impossible
+  · rw [hc]
+    intro impossible
+    cases impossible
+  · exact False.elim (finite ho)
+
+/-- Internal assembly only: the compiler proof must supply safety for every
+successful branch without adding it to the frozen caller interface. -/
+theorem compilerBridge_of_safe
+    (safe : ∀ {C : Contract} {Γ Δ : Ctx} (b : Nat) (frag : Frag Γ)
+      (P : Prog C Γ Δ) (r : Evm.Compiler.Compilation b frag P),
+      Evm.Compiler.compile b frag P = some r →
+      ∀ (L frame : Nat) (base : Nat → Fin W) (σ : State C Γ) (m : Machine),
+      r.Input L frame base σ m → CodeSafe r.code m) : CompilerBridge producer := by
+  intro C Γ Δ b frag P r accepted L frame base σ m input
+  refine ⟨r.correct_exact input, ?_⟩
+  intro F v observed
+  have hsafe := safe b frag P r accepted L frame base σ m input
+  refine ⟨fun n ready premise => prefix_related_of_safe F n r.code m v observed hsafe ready premise, ?_⟩
+  intro all
+  apply numeric_limits
+  intro n
+  exact (prefix_related_of_safe F n r.code m v observed hsafe (all n).1 (all n).2).1 n (Nat.le_refl n)
+
+/-- Safety follows from this branch's actual finite-result certificate. -/
+theorem memory_safe {C : Contract} {b L frame : Nat}
+    {Γ Δ : Ctx} {frag : Frag Γ} {P : Prog C Γ Δ}
+    (out : Memory.CompiledProg b frag P) {base : Nat → Fin W}
+    {σ : State C Γ} {m : Machine}
+    (input : (Evm.Compiler.Compilation.memory out).Input L frame base σ m) :
+    CodeSafe out.code m := by
+  apply codeSafe_of_nonfault
+  rcases out.cert.correct input.1 input.2.1 input.2.2 with ⟨o, s, base2, ho, hc, rest⟩ | ⟨ho, hc⟩
+  all_goals
+    intro bad
+    rw [hc] at bad
+    cases bad
+
+/-- Safety follows from this branch's actual finite-result certificate. -/
+theorem referenceArrays_safe {C : Contract} {b L frame : Nat}
+    {Γ Δ : Ctx} {frag : Frag Γ} {P : Prog C Γ Δ}
+    (out : Memory.ReferenceArrays.CompiledProg b frag P) {base : Nat → Fin W}
+    {σ : State C Γ} {m : Machine}
+    (input : (Evm.Compiler.Compilation.referenceArrays out).Input L frame base σ m) :
+    CodeSafe out.code m := by
+  apply codeSafe_of_nonfault
+  rcases out.cert.correct input with ⟨o, s, ho, hc, rest⟩ | ⟨ho, hc⟩
+  all_goals
+    intro bad
+    rw [hc] at bad
+    cases bad
+
+/-- Safety follows from this branch's actual finite-result certificate. -/
+theorem objects_safe {C : Contract} {b L frame : Nat}
+    {Γ Δ : Ctx} {frag : Frag Γ} {P : Prog C Γ Δ}
+    (out : Memory.Objects.CompiledProg b frag P) {base : Nat → Fin W}
+    {σ : State C Γ} {m : Machine}
+    (input : (Evm.Compiler.Compilation.objects out).Input L frame base σ m) :
+    CodeSafe out.code m := by
+  apply codeSafe_of_nonfault
+  rcases out.cert.correct input.1 input.2 with ⟨o, s, ho, hc, rest⟩ | ⟨ho, hc⟩
+  all_goals
+    intro bad
+    rw [hc] at bad
+    cases bad
+
+/-- Safety follows from this branch's actual finite-result certificate. -/
+theorem construction_safe {C : Contract} {b L frame : Nat}
+    {Γ Δ : Ctx} {frag : Frag Γ} {P : Prog C Γ Δ}
+    (out : Memory.Construction.CompiledProg b frag P) {base : Nat → Fin W}
+    {σ : State C Γ} {m : Machine}
+    (input : (Evm.Compiler.Compilation.construction out).Input L frame base σ m) :
+    CodeSafe out.code m := by
+  apply codeSafe_of_nonfault
+  rcases out.cert.correct input.1 input.2.1 input.2.2 with ⟨o, s, base2, ho, hc, rest⟩ | ⟨ho, hc⟩
+  all_goals
+    intro bad
+    rw [hc] at bad
+    cases bad
+
+/-- Safety follows from this branch's actual finite-result certificate. -/
+theorem memoryCalls_safe {C : Contract} {b L frame : Nat}
+    {Γ Δ : Ctx} {frag : Frag Γ} {P : Prog C Γ Δ}
+    (out : Memory.Calls.Program b frag P) (hz : Evm.Prog.pushes P = 0) {base : Nat → Fin W}
+    {σ : State C Γ} {m : Machine}
+    (input : (Evm.Compiler.Compilation.memoryCalls out hz).Input L frame base σ m) :
+    CodeSafe out.code m := by
+  apply codeSafe_of_nonfault
+  rcases out.sound input.1 input.2.1 input.2.2 with ⟨o, s, base2, ho, hc, rest⟩ | ⟨ho, hc⟩
+  all_goals
+    intro bad
+    rw [hc] at bad
+    cases bad
+
+/-- Safety follows from this branch's actual finite-result certificate. -/
+theorem memoryCopy_safe {C : Contract} {b L frame : Nat}
+    {Γ Δ : Ctx} {frag : Frag Γ} {P : Prog C Γ Δ}
+    (out : Memory.StorageCopy.CompiledProg b frag P) {base : Nat → Fin W}
+    {σ : State C Γ} {m : Machine}
+    (input : (Evm.Compiler.Compilation.memoryCopy out).Input L frame base σ m) :
+    CodeSafe out.code m := by
+  apply codeSafe_of_nonfault
+  rcases out.cert.correct input.1 input.2.1 input.2.2.1 input.2.2.2 with ⟨o, s, base2, ho, hc, rest⟩ | ⟨ho, hc⟩
+  all_goals
+    intro bad
+    rw [hc] at bad
+    cases bad
+
+/-- Safety follows from this branch's actual finite-result certificate. -/
+theorem fixedMemory_safe {C : Contract} {b L frame : Nat}
+    {Γ Δ : Ctx} {frag : Frag Γ} {P : Prog C Γ Δ}
+    (out : Memory.Fixed.CompiledProg b frag P) {base : Nat → Fin W}
+    {σ : State C Γ} {m : Machine}
+    (input : (Evm.Compiler.Compilation.fixedMemory out).Input L frame base σ m) :
+    CodeSafe out.code m := by
+  apply codeSafe_of_nonfault
+  rcases out.cert.correct input.1 input.2 with ⟨o, s, ho, hc, rest⟩ | ⟨ho, hc⟩
+  all_goals
+    intro bad
+    rw [hc] at bad
+    cases bad
+
+/-- Safety follows from this branch's actual finite-result certificate. -/
+theorem copyConstruction_safe {C : Contract} {b L frame : Nat}
+    {Γ Δ : Ctx} {frag : Frag Γ} {P : Prog C Γ Δ}
+    (out : Memory.CopyConstruction.CompiledProg b frag P) {base : Nat → Fin W}
+    {σ : State C Γ} {m : Machine}
+    (input : (Evm.Compiler.Compilation.copyConstruction out).Input L frame base σ m) :
+    CodeSafe out.code m := by
+  apply codeSafe_of_nonfault
+  rcases out.cert.correct input.1 input.2.1 input.2.2.1 input.2.2.2 with ⟨o, s, base2, ho, hc, rest⟩ | ⟨ho, hc⟩
+  all_goals
+    intro bad
+    rw [hc] at bad
+    cases bad
+
+/-- A successful segment retains its exact zero skip and post-state simulation. -/
+theorem stmtOut_success {C : Contract} {L b : Nat} {Γ : Ctx}
+    {frag : Frag Γ} {sh pays asserts : Bool} {H : HTy}
+    {res : TRes (Solidity.Out C H Γ)} {out : Evm.Out} {m t : Machine} {k : Nat}
+    (h : StmtOut C L b frag sh pays asserts res out m)
+    (done : out = .ok t k) :
+    ∃ o, res = .ok o ∧ k = 0 ∧ t.stack = m.stack ∧
+      Keeps C b sh m t ∧ Sim C L b frag o.st t := by
+  cases h with
+  | inl h =>
+    obtain ⟨o, s, ho, hc, hs, hk, hm⟩ := h
+    rw [hc] at done
+    cases done
+    exact ⟨o, ho, rfl, hs, hk, hm⟩
+  | inr h => rw [h.2] at done; cases done
+  | panic _ h => rw [h.2] at done; cases done
+  | refused _ h => rw [h.1] at done; cases done
+  | diverge h =>
+    rcases h.2 with bad | ⟨_, bad⟩ <;> rw [bad] at done <;> cases done
+
+/-- Loop safety follows from a state invariant and safety of every reached body,
+including bodies whose denotational execution diverges. -/
+theorem core_loop_safe {C : Contract} {Γ Δ : Ctx} {L b : Nat}
+    {frag : Frag Γ} {post : Frag Δ} (c : Solidity.Val C Γ .bool)
+    (body : Prog C Γ Δ) (condition : valIn frag c = true)
+    (bodyFrag : inFragP frag body = some post) (pushes : Evm.Prog.pushes body = 0)
+    (restrict : post.restrict Γ = frag) (bound : L ≤ Lmax)
+    (bodySafe : ∀ (σ : State C Γ) (m : Machine),
+      Sim C L b frag σ m → CodeSafe (compileProg b body) m)
+    {σ : State C Γ} {m : Machine} (input : Sim C L b frag σ m) :
+    CodeSafe [.loop (compileVal b c) (compileProg b body)] m := by
+  let I : Machine → Prop := fun s => ∃ τ : State C Γ, Sim C L b frag τ s
+  apply safe_loop I I (compileVal b c) (compileProg b body) m ⟨σ, input⟩
+  · intro s hs
+    obtain ⟨τ, hm⟩ := hs
+    apply codeSafe_of_nonfault
+    rcases Evm.val_sim c hm condition with ⟨v, w, hv, hw, hc⟩ | ⟨hv, hc⟩
+    all_goals intro bad; rw [hc] at bad; cases bad
+  · intro s t k hs done
+    obtain ⟨τ, hm⟩ := hs
+    rcases Evm.val_sim c hm condition with ⟨v, w, hv, hw, hc⟩ | ⟨hv, hc⟩
+    · obtain rfl := hw.bool_inv
+      rw [hc] at done
+      cases done
+      refine ⟨rfl, bword v, s.stack, rfl, ?_⟩
+      intro _
+      exact ⟨τ, by simpa [Machine.push] using hm⟩
+    · rw [hc] at done
+      cases done
+  · intro s hs
+    obtain ⟨τ, hm⟩ := hs
+    exact bodySafe τ s hm
+  · intro s t k hs done
+    obtain ⟨τ, hm⟩ := hs
+    have hb := Evm.prog_sim body hm bodyFrag (by simpa [pushes] using bound)
+    obtain ⟨o, ho, hk, hstack, hkeep, hsim⟩ := stmtOut_success hb done
+    refine ⟨hk, o.st.drop body.ext, ?_⟩
+    have dropped := Sim.dropState body.ext hsim
+    simpa [pushes, restrict] using dropped
+
+/-- Advance the actual cursor by one safe transition. -/
+theorem safeFrom_tick (cur : Cursor Machine) (now : CursorSafe cur)
+    (next : SafeFrom (tick (fun i s => idealResult (i.step s)) idealTest cur)) :
+    SafeFrom cur := by
+  intro n
+  cases n with
+  | zero => exact now
+  | succ n =>
+    change CursorSafe (iteratePrefix _ _ (n + 1) cur)
+    rw [Nat.add_comm n 1, prefix_add]
+    exact next n
+
+/-- Skipped instructions impose no operand condition and retain the exact tail. -/
+theorem safeFrom_skip (skipCode suffix : List Instr) (m : Machine)
+    (safe : CodeSafe suffix m) :
+    SafeFrom (.running (skipCode ++ suffix) skipCode.length [] m) := by
+  induction skipCode with
+  | nil => exact safe
+  | cons i rest ih =>
+    apply safeFrom_tick
+    · trivial
+    · simpa only [List.cons_append, List.length_cons, tick] using ih
+
+/-- Sequence safety uses the successful first segment's actual post-state. -/
+theorem core_seq_safe {C : Contract} {Γ Δ Ξ : Ctx} {L b : Nat}
+    {frag : Frag Γ} {mid : Frag Δ} (s : Solidity.Stmt C Γ Δ) (tail : Prog C Δ Ξ)
+    {σ : State C Γ} {m : Machine} (input : Sim C L b frag σ m)
+    (cert : inFrag frag s = some mid) (bound : L + Evm.Stmt.pushes s ≤ Lmax)
+    (first : CodeSafe (compileStmt b s) m)
+    (rest : ∀ (τ : State C Δ) (t : Machine),
+      Sim C (L + Evm.Stmt.pushes s) b mid τ t → CodeSafe (compileProg b tail) t) :
+    CodeSafe (compileProg b (.cons s tail)) m := by
+  apply safe_append (compileStmt b s) (compileProg b tail) m first
+  intro t k done
+  obtain ⟨o, ho, hk, hstack, hkeep, hsim⟩ :=
+    stmtOut_success (Evm.stmt_sim s input cert bound) done
+  subst k
+  exact rest o.st t hsim
+
+/-- Both conditional arms use the actual skip counts, including the unselected arm. -/
+theorem branch_safe (yes no : List Instr) (m : Machine) (v : Bool)
+    (hy : CodeSafe yes m) (hn : CodeSafe no m)
+    (hyDone : ∀ s k, Evm.run yes m = .ok s k → k = 0) :
+    CodeSafe ([.iszero, .jumpi (yes.length + 1)] ++ yes ++
+      [.jump no.length] ++ no) (m.push (.val (bword v))) := by
+  have header : Evm.run [.iszero, .jumpi (yes.length + 1)] (m.push (.val (bword v))) =
+      .ok m (if v then 0 else yes.length + 1) := by cases v <;> rfl
+  rw [List.append_assoc, List.append_assoc]
+  apply safe_append
+  · apply codeSafe_of_nonfault
+    intro bad
+    rw [header] at bad
+    cases bad
+  · intro s k done
+    rw [header] at done
+    cases done
+    cases v with
+    | false =>
+      have skip := safeFrom_skip (yes ++ [.jump no.length]) no m hn
+      simpa only [List.append_assoc, List.length_append, List.length_singleton] using skip
+    | true =>
+      change CodeSafe (yes ++ ([.jump no.length] ++ no)) m
+      refine safe_append yes ([Instr.jump no.length] ++ no) m hy ?_
+      intro s k done
+      have hk := hyDone s k done
+      subst k
+      apply codeSafe_of_nonfault
+      have jump : Evm.run ([.jump no.length] ++ no) s = .ok s 0 := by
+        change exec no no.length s = .ok s 0
+        exact exec_length no s
+      intro bad
+      rw [jump] at bad
+      cases bad
+
+/-- A compiled conditional is safe even when its selected branch diverges. -/
+theorem core_ite_safe {C : Contract} {Γ Δ Ξ : Ctx} {L b : Nat}
+    {frag : Frag Γ} {yesFrag : Frag Δ}
+    (c : Solidity.Val C Γ .bool) (yes : Prog C Γ Δ) (no : Prog C Γ Ξ)
+    {σ : State C Γ} {m : Machine} (input : Sim C L b frag σ m)
+    (condition : valIn frag c = true)
+    (yesCert : inFragP frag yes = some yesFrag)
+    (yesBound : L + Evm.Prog.pushes yes ≤ Lmax)
+    (hy : CodeSafe (compileProg b yes) m) (hn : CodeSafe (compileProg b no) m) :
+    CodeSafe (compileStmt b (.ite c yes no)) m := by
+  simp only [compileStmt, List.append_assoc]
+  apply safe_append
+  · apply codeSafe_of_nonfault
+    rcases Evm.val_sim c input condition with ⟨v, w, hv, hw, hc⟩ | ⟨hv, hc⟩
+    all_goals intro bad; rw [hc] at bad; cases bad
+  · intro s k done
+    rcases Evm.val_sim c input condition with ⟨v, w, hv, hw, hc⟩ | ⟨hv, hc⟩
+    · obtain rfl := hw.bool_inv
+      rw [hc] at done
+      cases done
+      have branch := branch_safe (compileProg b yes) (compileProg b no) m v hy hn
+        (fun s k done => (stmtOut_success (Evm.prog_sim yes input yesCert yesBound) done).choose_spec.2.1)
+      simpa only [List.append_assoc] using branch
+    · rw [hc] at done
+      cases done
+
+/-- Calls enter the actual argument frame, preserve divergent body prefixes,
+and leave through the compiler's finite return code. -/
+theorem core_call_safe {C : Contract} {Γ Γ' ps rs Γf : Ctx} {L b : Nat}
+    {frag : Frag Γ} {post : Frag Γ'} (f : Name) (args : Solidity.Args C Γ ps)
+    (ret : Solidity.CallRet Γ rs Γ') (body : Prog C (rs ++ ps) Γf)
+    {σ : State C Γ} {m : Machine} (input : Sim C L b frag σ m)
+    (cert : inFrag frag (.call f args ret body) = some post)
+    (bound : L + Evm.Prog.pushes body ≤ Lmax)
+    (bodySafe : ∀ {G : Frag Γf} {τ : State C (rs ++ ps)} {s : Machine},
+      inFragP (Frag.init (rs ++ ps)) body = some G →
+      Sim C L (b + Γ.length) (Frag.init (rs ++ ps)) τ s →
+      CodeSafe (compileProg (b + Γ.length) body) s) :
+    CodeSafe (compileStmt b (.call f args ret body)) m := by
+  obtain ⟨hwa, ⟨G, hb⟩, hret⟩ := Evm.call_frag cert
+  cases ret with
+  | none =>
+    simp only [compileStmt, retEnterCode, retLeaveCode, List.append_nil]
+    apply safe_append
+    · apply codeSafe_of_nonfault
+      rcases Evm.args_sim input args hwa with ⟨a, mem1, ha, hc, hmem, hv⟩ | ⟨ha, hc⟩
+      all_goals intro bad; rw [hc] at bad; cases bad
+    · intro s k done
+      rcases Evm.args_sim input args hwa with ⟨a, mem1, ha, hc, hmem, hv⟩ | ⟨ha, hc⟩
+      · rw [hc] at done
+        cases done
+        have entered := (input.congrMem (mem := mem1) fun l _ hl => hmem l hl).enter
+          (b + Γ.length) (Look.ofTEnv a) hv (Args.noAlias args hwa)
+        exact bodySafe hb (τ := σ.withEnv a) entered
+      · rw [hc] at done
+        cases done
+  | val p r res =>
+    simp only [compileStmt, List.append_assoc]
+    apply safe_append
+    · apply codeSafe_of_nonfault
+      rcases Evm.args_sim input args hwa with ⟨a, mem1, ha, hc, hmem, hv⟩ | ⟨ha, hc⟩
+      all_goals intro bad; rw [hc] at bad; cases bad
+    · intro s k done
+      rcases Evm.args_sim input args hwa with ⟨a, mem1, ha, hc, hmem, hv⟩ | ⟨ha, hc⟩
+      · rw [hc] at done
+        cases done
+        have entered := ((input.congrMem (mem := mem1) fun l _ hl => hmem l hl).enter
+          (b + Γ.length) (Look.ofTEnv a) hv (Args.noAlias args hwa)).consVal
+          (v := PrimTy.dflt p) (ReprV.dflt_zero p)
+        have simulated : Sim C L (b + Γ.length) (Frag.init ([.val p] ++ ps))
+            ((σ.withEnv a).push (t := .val p) (PrimTy.dflt p))
+            {m with mem := Evm.upd mem1 (cell (b + Γ.length + ps.length)) w[0]} :=
+          entered.congrLook fun j => Look.ofTEnv_cons (u := .val p) (PrimTy.dflt p) a j
+        have enterRun : Evm.run (retEnterCode b ps (.val p r res)) {m with mem := mem1} =
+            .ok {m with mem := Evm.upd mem1 (cell (b + Γ.length + ps.length)) w[0]} 0 := rfl
+        change CodeSafe _ _
+        apply safe_append
+        · apply codeSafe_of_nonfault
+          intro bad
+          rw [enterRun] at bad
+          cases bad
+        · intro s k done
+          rw [enterRun] at done
+          cases done
+          refine safe_append (compileProg (b + Γ.length) body)
+            (retLeaveCode b ps (.val p r res)) _ (bodySafe hb simulated) ?_
+          intro t k done
+          have hk := (stmtOut_success (Evm.prog_sim body simulated hb bound) done).choose_spec.2.1
+          subst k
+          apply codeSafe_of_nonfault
+          cases res <;> intro bad <;> cases bad
+      · rw [hc] at done
+        cases done
+  | rets _ => cases hret
+  | mem _ _ _ _ => cases hret
+  | storage _ _ => cases hret
+
+/-- info: 'Solidity.Hash.CompilerCorrect.compilation_safe_of_nondiv' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in #print axioms Solidity.Hash.CompilerCorrect.compilation_safe_of_nondiv
+
+/-- info: 'Solidity.Hash.CompilerCorrect.compilerBridge_of_safe' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in #print axioms Solidity.Hash.CompilerCorrect.compilerBridge_of_safe
+
+/-- info: 'Solidity.Hash.CompilerCorrect.memory_safe' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in #print axioms Solidity.Hash.CompilerCorrect.memory_safe
+
+/-- info: 'Solidity.Hash.CompilerCorrect.referenceArrays_safe' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in #print axioms Solidity.Hash.CompilerCorrect.referenceArrays_safe
+
+/-- info: 'Solidity.Hash.CompilerCorrect.objects_safe' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in #print axioms Solidity.Hash.CompilerCorrect.objects_safe
+
+/-- info: 'Solidity.Hash.CompilerCorrect.construction_safe' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in #print axioms Solidity.Hash.CompilerCorrect.construction_safe
+
+/-- info: 'Solidity.Hash.CompilerCorrect.memoryCalls_safe' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in #print axioms Solidity.Hash.CompilerCorrect.memoryCalls_safe
+
+/-- info: 'Solidity.Hash.CompilerCorrect.memoryCopy_safe' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in #print axioms Solidity.Hash.CompilerCorrect.memoryCopy_safe
+
+/-- info: 'Solidity.Hash.CompilerCorrect.fixedMemory_safe' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in #print axioms Solidity.Hash.CompilerCorrect.fixedMemory_safe
+
+/-- info: 'Solidity.Hash.CompilerCorrect.copyConstruction_safe' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in #print axioms Solidity.Hash.CompilerCorrect.copyConstruction_safe
+
+/-- info: 'Solidity.Hash.CompilerCorrect.core_loop_safe' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in #print axioms Solidity.Hash.CompilerCorrect.core_loop_safe
+
+/-- info: 'Solidity.Hash.CompilerCorrect.core_seq_safe' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in #print axioms Solidity.Hash.CompilerCorrect.core_seq_safe
+
+/-- info: 'Solidity.Hash.CompilerCorrect.core_ite_safe' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in #print axioms Solidity.Hash.CompilerCorrect.core_ite_safe
+
+/-- info: 'Solidity.Hash.CompilerCorrect.core_call_safe' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in #print axioms Solidity.Hash.CompilerCorrect.core_call_safe
+
 end Solidity.Hash.CompilerCorrect
