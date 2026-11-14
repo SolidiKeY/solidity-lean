@@ -50,7 +50,8 @@ def Checked.op : Checked → BinOp
 a negative exponent; that failure has no Solidity panic origin here. -/
 def Checked.failure (op : Checked) (y : Int) : Option Site :=
   match op with
-  | .div | .mod => some (if y = 0 then .zeroDivisor else .arithmetic)
+  | .div => some (if y = 0 then .zeroDivisor else .arithmetic)
+  | .mod => if y = 0 then some .zeroDivisor else none
   | .pow => if y < 0 then none else some .arithmetic
   | _ => some .arithmetic
 
@@ -61,6 +62,8 @@ inductive Producer : Type → Type where
   | binary (op : Checked) (p : PrimTy)
       (accepts : op.op.accepts p = true) (x y : p.Denote) :
       Producer (op.op.ret p).Denote
+  | modular (op : ModOp) (x y modulus : PrimTy.uint.Denote) :
+      Producer PrimTy.uint.Denote
   | neg (x : PrimTy.int.Denote) : Producer PrimTy.int.Denote
   | enumConversion (members : Nat) (value : PrimTy.uint.Denote) :
       Producer PrimTy.uint.Denote
@@ -70,15 +73,11 @@ inductive Producer : Type → Type where
   | index {H : HTy} {R : RefTy} {E : Ty} (hp : Heap H)
       (ref : HRef H R) (array : ArrTy R E) (i : PrimTy.uint.Denote) :
       Producer (MVal H E)
+  | storageIndex {C : Contract} {R : RefTy} {E : Ty} (st : Storage C)
+      (ref : SRef C (.ref R)) (array : ArrTy R E) (i : PrimTy.uint.Denote) :
+      Producer Unit
   | allocation (input : AbiEntry.Input) (used size : Nat) : Producer Nat
   | internalFunction (tag : PrimTy.uint.Denote) : Producer PrimTy.uint.Denote
-
-/-- The integer underlying a numeric operand; bool cannot occur at a binary
-producer because that constructor retains the intrinsic acceptance proof. -/
-def integer : {p : PrimTy} → p.Denote → Int
-  | .bool, b => cond b 1 0
-  | .uint, n => n.val
-  | .int, n => n.val
 
 /-- Solc's storage-byte length check: short encodings have length < 32,
 long encodings have length ≥ 32. The low bit selects the representation. -/
@@ -96,7 +95,10 @@ def checked {α : Type} (site : Option Site) : Option α → Except (Option Site
 
 def Producer.run {α : Type} : Producer α → Except (Option Site) α
   | .assertion b => if b then .ok () else .error (some .assertion)
-  | .binary op p h x y => checked (op.failure (integer y)) (op.op.evalT h x y)
+  | .binary op p h x y => checked (op.failure (PrimTy.key y)) (op.op.evalT h x y)
+  | .modular op x y modulus =>
+      checked (if modulus.val = 0 then some .zeroDivisor else none)
+        (op.evalT x y modulus)
   | .neg x => checked (some .arithmetic) (UnOp.neg.evalT rfl x)
   | .enumConversion members value =>
       if value.val.toNat < members then .ok value else .error (some .enumConversion)
@@ -110,6 +112,10 @@ def Producer.run {α : Type} : Producer α → Except (Option Site) α
             | none => .error none
             | some next => .ok next
   | .index hp ref array i => checked (some .bounds) (hp.index ref array i)
+  | .storageIndex st ref array i =>
+      match st.find ref with
+      | none => .error none
+      | some value => checked (some .bounds) (Storage.inBounds (.arr array) i value)
   | .allocation input used size =>
       match AbiEntry.alloc input used size with
       | .ok n => .ok n
@@ -128,9 +134,13 @@ theorem assertion_origin : Origin (.assertion false) .assertion := rfl
 theorem binary_origin (op : Checked) (p : PrimTy)
     (ha : op.op.accepts p = true) (x y : p.Denote)
     (failed : op.op.evalT ha x y = none) (site : Site)
-    (classified : op.failure (integer y) = some site) :
+    (classified : op.failure (PrimTy.key y) = some site) :
     Origin (.binary op p ha x y) site := by
   simp only [Origin, Producer.run, failed, checked, classified]
+
+theorem modular_zero_origin (op : ModOp) (x y modulus : PrimTy.uint.Denote)
+    (zero : modulus.val = 0) : Origin (.modular op x y modulus) .zeroDivisor := by
+  simp only [Origin, Producer.run, ModOp.evalT, zero, ↓reduceIte, checked]
 
 theorem neg_origin (x : PrimTy.int.Denote)
     (failed : UnOp.neg.evalT rfl x = none) : Origin (.neg x) .arithmetic := by
@@ -158,6 +168,16 @@ theorem index_origin {H : HTy} {R : RefTy} {E : Ty} (hp : Heap H)
     (failed : hp.index ref array i = none) :
     Origin (.index hp ref array i) .bounds := by
   simp only [Origin, Producer.run, failed, checked]
+
+theorem storage_index_origin {C : Contract} {R : RefTy} {E : Ty} (st : Storage C)
+    (ref : SRef C (.ref R)) (array : ArrTy R E) (i : PrimTy.uint.Denote)
+    (value : SVal (.ref R)) (found : st.find ref = some value)
+    (failed : Storage.inBounds (.arr array) i value = none) :
+    Origin (.storageIndex st ref array i) .bounds ∧
+      st.checkIndex ref (.arr array) i = none := by
+  constructor
+  · simp only [Origin, Producer.run, found, failed, checked]
+  · simp only [Storage.checkIndex, found, Option.bind_some, failed]
 
 theorem allocation_origin (input : AbiEntry.Input) (used size : Nat)
     (failed : AbiEntry.alloc input used size = .error .panic) :
