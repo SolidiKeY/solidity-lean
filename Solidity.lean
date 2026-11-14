@@ -4152,6 +4152,7 @@ import Solidity.Semantics.Nondeterminism.SourceWitness
 import Solidity.Semantics.Nondeterminism.Split
 import Solidity.Semantics.NumericLowering
 import Solidity.Semantics.Ops
+import Solidity.Semantics.Panic.Eval
 import Solidity.Semantics.Panic.Origins
 import Solidity.Semantics.Panic.Result
 import Solidity.Semantics.PaymentWorld
@@ -4575,6 +4576,8 @@ import Solidity.Tools.DirectArithmetic
 import Solidity.Tools.DirectRuntime
 import Solidity.Tools.Elementary
 import Solidity.Tools.EntryReturn
+import Solidity.Tools.FastMode.Engine
+import Solidity.Tools.FastMode.Meta
 import Solidity.Tools.Goal
 import Solidity.Tools.GoalPins
 import Solidity.Tools.Inspect
