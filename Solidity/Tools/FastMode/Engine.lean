@@ -22,29 +22,56 @@ private def primitivePositions {Γ : Ctx} : (xs : List ((t : LTy) × Idx Γ t)) 
 
 /-- A sound compiled version of the existing anonymous-local leaf preparation.
 The copied positions stay intrinsic; its proof is erased from the executable. -/
+private def throughImp {C : Contract} {Γ : Ctx} {b : Fml C Γ}
+    (a : Fml C Γ) (r : Stronger b) : Stronger (.imp a b) :=
+  ⟨.imp a r.formula, fun σ h ha => r.sound σ (h ha)⟩
+
+private def withoutPremise {C : Contract} {Γ : Ctx} {b : Fml C Γ}
+    (a : Fml C Γ) (r : Stronger b) : Stronger (.imp a b) :=
+  ⟨r.formula, fun σ h _ => r.sound σ h⟩
+
+private def throughAnd {C : Contract} {Γ : Ctx} {a b : Fml C Γ}
+    (ra : Stronger a) (rb : Stronger b) : Stronger (.and a b) :=
+  ⟨.and ra.formula rb.formula, fun σ h => ⟨ra.sound σ h.1, rb.sound σ h.2⟩⟩
+
+private def throughUpdate {C : Contract} {Γ Δ : Ctx} {b : Fml C Δ}
+    (m : Modality) (U : Upd C Γ Δ) (r : Stronger b) : Stronger (.upd m U b) :=
+  ⟨.upd m U r.formula, fun _ h => Upd.afterT_imp h (fun τ hτ => r.sound τ hτ)⟩
+
+private def throughAll {C : Contract} {Γ : Ctx} (x : Var) (p : PrimTy)
+    {b : Fml C (.val p :: Γ)} (r : Stronger b) : Stronger (.all x p b) :=
+  ⟨.all x p r.formula, fun σ h v => r.sound (σ.push v) (h v)⟩
+
+private def throughValueBind {C : Contract} {Γ : Ctx} (m : Modality) (x : Var) (p : PrimTy)
+    {b : Fml C (.val p :: Γ)} (r : Stronger b) : Stronger (.bind m x (.val p) b) :=
+  ⟨.all x p r.formula, fun σ h v => r.sound (σ.push v) (h v)⟩
+
+private def throughBind {C : Contract} {Γ : Ctx} (m : Modality) (x : Var) (t : LTy)
+    {b : Fml C (t :: Γ)} (r : Stronger b) : Stronger (.bind m x t b) :=
+  ⟨.bind m x t r.formula, fun σ h => Modality.forallB_imp (fun v hv => r.sound (σ.push v) hv) h⟩
+
 private def prepareLeaf {C : Contract} : Nat → {Γ : Ctx} → (φ : Fml C Γ) → Stronger φ
   | 0, _, φ => ⟨φ, fun _ h => h⟩
   | n+1, _, .imp a b =>
     let r := prepareLeaf n b
     let skipPremise := match a with | .wellFormed _ => true | _ => false
-    if skipPremise then ⟨r.formula, fun σ h _ => r.sound σ h⟩
-    else ⟨.imp a r.formula, fun σ h ha => r.sound σ (h ha)⟩
+    if skipPremise then withoutPremise a r else throughImp a r
   | n+1, _, .and a b =>
     let ra := prepareLeaf n a
     let rb := prepareLeaf n b
-    ⟨.and ra.formula rb.formula, fun σ h => ⟨ra.sound σ h.1, rb.sound σ h.2⟩⟩
+    throughAnd ra rb
   | n+1, _, .upd m U b =>
     let r := prepareLeaf n b
-    ⟨.upd m U r.formula, fun _ h => Upd.afterT_imp h (fun τ hτ => r.sound τ hτ)⟩
+    throughUpdate m U r
   | n+1, _, .all x p b =>
     let r := prepareLeaf n b
-    ⟨.all x p r.formula, fun σ h v => r.sound (σ.push v) (h v)⟩
-  | n+1, _, .bind _ x (.val p) b =>
+    throughAll x p r
+  | n+1, _, .bind m x (.val p) b =>
     let r := prepareLeaf n b
-    ⟨.all x p r.formula, fun σ h v => r.sound (σ.push v) (h v)⟩
+    throughValueBind m x p r
   | n+1, _, .bind m x t b =>
     let r := prepareLeaf n b
-    ⟨.bind m x t r.formula, fun σ h => Modality.forallB_imp (fun v hv => r.sound (σ.push v) hv) h⟩
+    throughBind m x t r
   | n+1, _, .anon xs b =>
     match primitivePositions xs with
     | none => ⟨.anon xs b, fun _ h => h⟩
