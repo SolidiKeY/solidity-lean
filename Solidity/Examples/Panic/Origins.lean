@@ -199,4 +199,46 @@ theorem code_boundary :
 theorem division_codes : (Checked.div.failure 0).map Site.code = some 0x12 ∧
     (Checked.mod.failure 0).map Site.code = some 0x12 := zero_divisor_codes
 
+/-- Observe only a local producer's code, never ABI bytes or external payloads. -/
+private def observedCode {α : Type} (p : Producer α) : Option Nat :=
+  match p.run with
+  | .error (some site) => some site.code
+  | _ => none
+
+private theorem observed_origin {α : Type} {p : Producer α} {site : Site}
+    (h : Origin p site) : observedCode p = some site.code := by
+  unfold observedCode
+  rw [h]
+
+/-- Real failed producers reach all nine code observations. This couples the
+code-table contract to typed failure witnesses rather than merely aliasing it. -/
+theorem observed_codes :
+    observedCode (.assertion false) = some 0x01 ∧
+    observedCode (.binary .add .uint rfl umax (u 1)) = some 0x11 ∧
+    observedCode (.binary .div .int rfl im ⟨0, by decide⟩) = some 0x12 ∧
+    observedCode (.enumConversion 2 (u 2)) = some 0x21 ∧
+    observedCode (.storageEncoding (u 63)) = some 0x22 ∧
+    observedCode (.pop (Storage.init C) false ref) = some 0x31 ∧
+    observedCode (.storageIndex (Storage.init C) ref .dyn (u 0)) = some 0x32 ∧
+    observedCode (.allocation ⟨[], AbiEntry.lim - 31⟩ 0 1) = some 0x41 ∧
+    observedCode (.internalFunction (u 0)) = some 0x51 := by
+  rcases code_boundary with ⟨a, b, _, d, e, f, g, h, i⟩
+  have z : some Site.zeroDivisor.code = some 0x12 := by
+    simpa only [Checked.failure, ↓reduceIte, Option.map_some] using division_codes.1
+  exact ⟨(observed_origin assertion_origin).trans (congrArg some a),
+    (observed_origin add_overflow).trans (congrArg some b),
+    (observed_origin zero_divisors.1).trans z,
+    (observed_origin enum_boundary.1).trans (congrArg some d),
+    (observed_origin encoding_boundary.2.1).trans (congrArg some e),
+    (observed_origin (empty_pop false)).trans (congrArg some f),
+    (observed_origin storage_bounds.1).trans (congrArg some g),
+    (observed_origin allocation_boundary.2.1).trans (congrArg some h),
+    (observed_origin internal_boundary.1).trans (congrArg some i)⟩
+
+/-- Neither successful assertion nor missing-path failure invents a code. -/
+theorem no_spurious_code : observedCode (.assertion true) = none ∧
+    observedCode (.pop (Storage.init C) false missing) = none := by
+  simp only [observedCode, missing_path.1]
+  exact ⟨rfl, trivial⟩
+
 end Solidity.Examples.Panic.Origins
