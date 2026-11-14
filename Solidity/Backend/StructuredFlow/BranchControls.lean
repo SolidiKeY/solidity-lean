@@ -23,9 +23,8 @@ theorem true_writes (value : Fin W) :
 
 theorem false_writes (value : Fin W) :
     run (Branch.emit (condition false) [.revert] (write value)) initial =
-      .ok (stored value) 0 := by
-  rw [Branch.false_run (post := initial) rfl]
-  rfl
+      .ok (stored value) 0 :=
+  Branch.false_run (post := initial) rfl
 
 /-- Fixed memory cells of a hand-built machine (no `StateRepr`) all
 survive the selected body's one real local write. -/
@@ -40,9 +39,8 @@ theorem selected_revert :
   Branch.true_revert (post := initial) rfl rfl
 
 theorem selected_fault :
-    run (Branch.emit (condition false) (write ⟨7, by decide⟩) [.pop, .pop]) initial = .fault := by
-  rw [Branch.false_run (post := initial) rfl]
-  rfl
+    run (Branch.emit (condition false) (write ⟨7, by decide⟩) [.pop, .pop]) initial = .fault :=
+  Branch.false_run (post := initial) rfl
 
 /-- Condition effects belong to the actual post-condition machine, not an
 invented unchanged initial state. -/
@@ -55,9 +53,8 @@ theorem condition_effect :
 /-- Dropping a pending body skip would incorrectly hide the reached else. -/
 theorem pending_skip_reaches_else :
     run (Branch.emit (condition true) [.jump 1] (write ⟨3, by decide⟩)) initial =
-      .ok (stored ⟨3, by decide⟩) 0 := by
-  rw [Branch.true_pending_skip (post := initial) (skip := 0) rfl rfl]
-  rfl
+      .ok (stored ⟨3, by decide⟩) 0 :=
+  Branch.true_pending_skip (post := initial) (skip := 0) rfl rfl
 
 theorem pending_skip_is_not_return :
     run (Branch.emit (condition true) [.jump 1] [.revert]) initial ≠ .ok initial 0 := by
