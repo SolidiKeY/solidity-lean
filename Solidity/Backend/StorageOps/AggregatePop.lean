@@ -272,6 +272,28 @@ theorem outside {n N : Nat} {G : Schema n} {E : TypeGraph.Ty n}
       sequence_outside_frame N hash machine (updates old base) address apart
   · cases executed
 
+/-- Specialize an existential execution certificate at a known result and
+project any result-indexed postcondition without repeating determinism proofs. -/
+theorem certificate_at {α : Type u} {execution : Option α} {result : α}
+    {P Q : α → Prop} (certificate : ∃ actual, execution = some actual ∧ P actual)
+    (executed : execution = some result) (project : ∀ actual, P actual → Q actual) :
+    execution = some result ∧ Q result := by
+  obtain ⟨actual, same, post⟩ := certificate
+  have equal := Option.some.inj (same.symm.trans executed)
+  subst actual
+  exact ⟨same, project result post⟩
+
+/-- Reorder or restrict finite observations while specializing the SAME
+execution certificate. Coverage is required for every requested query. -/
+theorem certificate_at_observations {α β : Type u} {execution : Option α} {result : α}
+    {queries requested : List β} {observation : β → Prop} {post : α → Prop}
+    (certificate : ∃ actual, execution = some actual ∧ (∀ q ∈ queries, observation q) ∧ post actual)
+    (executed : execution = some result) (covered : ∀ q ∈ requested, q ∈ queries) :
+    execution = some result ∧ (∀ q ∈ requested, observation q) ∧ post result :=
+  certificate_at (Q := fun actual => (∀ q ∈ requested, observation q) ∧ post actual)
+    certificate executed (fun _ facts =>
+    ⟨fun q member => facts.1 q (covered q member), facts.2⟩)
+
 /-- info: 'Solidity.Backend.StorageOps.AggregatePop.child_location' depends on axioms: [propext, Classical.choice, Quot.sound] -/
 #guard_msgs in #print axioms child_location
 /-- info: 'Solidity.Backend.StorageOps.AggregatePop.old_last_read' depends on axioms: [propext, Quot.sound] -/
