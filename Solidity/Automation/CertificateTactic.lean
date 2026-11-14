@@ -79,7 +79,9 @@ private def checkedAttempt (candidate : TacticM Unit) : TacticM Unit := withMain
     throwError "certificate: unresolved metavariables"
   let some remaining ← Budget.remaining
     | throwError "certificate: missing local budget"
-  let kernelBudget := remaining / 1000
+  let configured := Lean.Core.getMaxHeartbeats (← getOptions)
+  let allowance := if configured == 0 then remaining else min remaining configured
+  let kernelBudget := allowance / 1000
   if kernelBudget == 0 then throwError "certificate: checking budget exhausted"
   let checked ← withOptions (fun o =>
       ((Elab.async.set o false).setBool `debug.skipKernelTC false).setNat

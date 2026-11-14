@@ -1,4 +1,9 @@
 import Solidity.Automation.CertificateTactic
+import Solidity.Typing.Constructibility
+import Solidity.Calculus.Closers
+import Solidity.Calculus.Surface
+
+/-! Regression proofs for leaf checking, certificate production, and verified fallback. -/
 
 namespace Solidity.Automation
 open Decide
@@ -95,4 +100,16 @@ example : Proves C .all [] .nil (.tt : Fml C []) := by
   change Proves C .all [] .nil φ
   sol_certificate_or (fail "unexpected local-let refusal")
 
+section CleanTailFallback
+local instance : InContract := ⟨Tokens⟩
+open scoped Scoped
+
+/-- The established clean-tail push/read obligation retains its original premise
+and verified strategy when the certificate producer refuses. -/
+theorem cleanTailFallback : Proves Tokens .all [] .nil
+    (dl!{ cleanTail(storage) = true →
+      [ tokens.push(); ] tokens[tokens.length - 1].value == 0 } : Fml Tokens []) := by
+  sol_certificate_or (sol_prove)
+
+end CleanTailFallback
 end Solidity.Automation

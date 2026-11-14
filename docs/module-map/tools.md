@@ -29,3 +29,8 @@ Commands for people; they prove nothing beyond the certificates they check.
 | `Tools/VerifierMetadata.lean` | Additive kernel facts tying each reported `postFails` index to the exact typed false postcondition clause and final run state; no source span, original-obligation or candidate association is inferred. |
 
 | `**/*Controls.lean` | Every `*Controls` module is in `Solidity`. `scripts/coord-tools/controls-classify.py` lists those no library module imports (candidates for a future controls library, not moved). |
+| `Automation/Certificate.lean` | Typed certificates contain selected rule applications and local witnesses. |
+| `Automation/CertificateExamples.lean` | Regression proofs for leaf checking, certificate production, and verified fallback. |
+| `Automation/CertificateTactic.lean` | Bounded certificate production. |
+| `Automation/LeafReflection.lean` | Premise selection is an untrusted optimization: any selection is sound when its stronger residual closes. |
+| `Automation/LeafSpine.lean` | A structural terminal-leaf checker. |
