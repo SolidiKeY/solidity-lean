@@ -23,9 +23,23 @@ sdk_paths+=sorted((prefix/'include').rglob('*.h'))
 sdk_paths+=[p for p in (prefix/'lib').rglob('*') if p.is_file() and (p.suffix in ['.a','.so','.dylib'] or '.so.' in p.name)]
 sdk_before={str(p.resolve()):digest_file(p) for p in sdk_paths}
 sdk_key=hashlib.sha256(json.dumps(sdk_before,sort_keys=True).encode()).hexdigest()
-run(str(prefix/'bin/lake'),'build','Solidity.Tools.FastMode.Meta')
-setup=json.loads((root/'.lake/build/ir/Solidity/Tools/FastMode/Meta.setup.json').read_text())
-modules=sorted({m for m in setup['importArts'] if m.startswith('Solidity.')}|{'Solidity.Tools.FastMode.Meta'})
+# Fresh setup discovers the closure; query paired artifacts from one Lake build
+# rather than trusting stale local C/setup files after an artifact-cache fetch.
+with tempfile.TemporaryDirectory(prefix='verify-meta-build-') as scratch:
+ source=pathlib.Path(scratch)/'Input.lean'
+ source.write_text('import Solidity.Tools.FastMode.Meta\n')
+ setup=json.loads(subprocess.check_output(
+  [str(prefix/'bin/lake'),'--quiet','setup-file',str(source)],cwd=root,text=True))
+modules=sorted(setup['importArts'])
+if not modules or any(not m.startswith('Solidity.') for m in modules):
+ raise ValueError('unexpected native runtime import closure')
+targets=[m+':'+facet for m in modules for facet in ['c','olean']]
+artifacts=subprocess.check_output([str(prefix/'bin/lake'),'--quiet','query',*targets],cwd=root,text=True).splitlines()
+if len(artifacts)!=len(targets):raise ValueError('unexpected native artifact query count')
+c_paths={m:pathlib.Path(artifacts[2*i]).resolve() for i,m in enumerate(modules)}
+compiled_imports={m:[artifacts[2*i+1]] for i,m in enumerate(modules)}
+if any(not p.is_file() or p.suffix!='.c' for p in c_paths.values()):
+ raise ValueError('unexpected native C artifact query')
 probes={
  'l_Solidity_Tools_FastMode_elabCheckExtended':'command',
  'l_Solidity_Recursion_autoGoal':'rec_auto',
@@ -34,36 +48,19 @@ probes={
  'l_Solidity_Recursion_closeLeaf':'closing',
 }
 sha=lambda b:hashlib.sha256(b).hexdigest()
-# Capture every source and actual imported artifact before compiling any C.
+# Freeze paired C/olean artifacts before compiling C, then admit only identical
+# runtime aliases. Both the root and every dependency must match.
 frozen={}
 for module in modules:
- stem=module.replace('.','/')
- paths=[root/(stem+'.lean'),root/('.lake/build/ir/'+stem+'.c')]
- paths += [root/('.lake/build/lib/lean/'+stem+ext) for ext in ('.olean','.olean.private','.olean.server','.ir')
-           if (root/('.lake/build/lib/lean/'+stem+ext)).is_file()]
- for path in paths:frozen[str(path)]=path.read_bytes()
-for paths in setup['importArts'].values():
- for artifact in paths:
-  path=pathlib.Path(artifact).resolve();frozen[str(path)]=path.read_bytes()
-root_artifact=subprocess.check_output([str(prefix/'bin/lake'),'--quiet','query',
- 'Solidity.Tools.FastMode.Meta:olean'],cwd=root,text=True).strip()
-if not root_artifact.endswith('.olean') or not pathlib.Path(root_artifact).is_file():
- raise ValueError('unexpected root artifact query')
-path=pathlib.Path(root_artifact).resolve();frozen[str(path)]=path.read_bytes()
-# Cached module setups and fresh runtime setups can use different cache paths.
-# Admit those paths only after matching the compiled closure and artifact bytes.
-with tempfile.TemporaryDirectory(prefix='verify-meta-build-') as scratch:
- source=pathlib.Path(scratch)/'Input.lean'
- source.write_text('import Solidity.Tools.FastMode.Meta\n')
- runtime_setup=json.loads(subprocess.check_output(
-  [str(prefix/'bin/lake'),'--quiet','setup-file',str(source)],cwd=root,text=True))
- compiled_imports={**setup['importArts'],'Solidity.Tools.FastMode.Meta':[root_artifact]}
- frozen.update(runtime_aliases(compiled_imports,runtime_setup['importArts'],frozen))
+ for path in [root/(module.replace('.','/')+'.lean'),c_paths[module],
+              *map(pathlib.Path,compiled_imports[module])]:
+  path=path.resolve();frozen[str(path)]=path.read_bytes()
+frozen.update(runtime_aliases(compiled_imports,setup['importArts'],frozen))
 for relative in ['lean-toolchain' ,'lakefile.toml','scripts/verify-meta-build.py','scripts/verify_artifacts.py']:
  path=root/relative;frozen[str(path)]=path.read_bytes()
 objects=[];seen=set();compiled=[]
 for module in modules:
- source=root/('.lake/build/ir/'+module.replace('.','/')+'.c')
+ source=c_paths[module]
  raw=frozen[str(source)];text=raw.decode();labels=[]
  for symbol,label in probes.items():
   pattern=r'(?m)^LEAN_EXPORT [^\n;]*\b'+re.escape(symbol)+r'\([^;\n]*\) \{\n'
@@ -81,7 +78,7 @@ for module in modules:
   temporary=out/(key+'.tmp.o')
   run(str(prefix/'bin/leanc'),'-O0','-DLEAN_EXPORTING','-c',str(snapshot),'-o',str(temporary))
   temporary.replace(obj)
- objects.append(str(obj));compiled.append({'module':module,'sourceC':sha(raw),'compiledC':sha(captured),'probes':labels})
+ objects.append(str(obj));compiled.append({'module':module,'cPath':str(source),'sourceC':sha(raw),'compiledC':sha(captured),'probes':labels})
  print('compiled native module '+module,flush=True)
 if seen!=set(probes):raise ValueError('required C probe definitions missing: '+str(set(probes)-seen))
 plugin_name='libSolidity_Tools_FastMode_Meta.so'

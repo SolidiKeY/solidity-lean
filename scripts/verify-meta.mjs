@@ -43,8 +43,12 @@ export function metaBuild() {
   if(!Array.isArray(manifest.modules) || manifest.modules.length!==closure.size
       || new Set(manifest.modules.map(m=>m.module)).size!==closure.size
       || manifest.modules.some(m=>!closure.has(m.module)))throw new Error('extended native import closure mismatch');
-  for(const name of closure)for(const file of [name.replaceAll('.','/')+'.lean','.lake/build/ir/'+name.replaceAll('.','/')+'.c']) {
-    const path=join(root,file);if(manifest.files?.[path]!==sha(path))throw new Error('extended native source changed: '+name);
+  for(const entry of manifest.modules) {
+    const source=join(root,entry.module.replaceAll('.','/')+'.lean');
+    if(manifest.files?.[source]!==sha(source) || typeof entry.cPath!=='string'
+        || !entry.cPath.endsWith('.c') || manifest.files?.[entry.cPath]!==entry.sourceC
+        || sha(entry.cPath)!==entry.sourceC)
+      throw new Error('extended native source changed: '+entry.module);
   }
   for(const relative of ['lean-toolchain','lakefile.toml','scripts/verify-meta-build.py','scripts/verify_artifacts.py']) {
     const path=join(root,relative);if(manifest.files?.[path]!==sha(path))throw new Error('extended native build input changed');
