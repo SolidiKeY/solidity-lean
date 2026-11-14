@@ -4576,6 +4576,8 @@ import Solidity.Tools.DirectArithmetic
 import Solidity.Tools.DirectRuntime
 import Solidity.Tools.Elementary
 import Solidity.Tools.EntryReturn
+import Solidity.Tools.FastMode.Engine
+import Solidity.Tools.FastMode.Meta
 import Solidity.Tools.Goal
 import Solidity.Tools.GoalPins
 import Solidity.Tools.Inspect
