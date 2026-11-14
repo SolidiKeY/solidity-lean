@@ -2442,6 +2442,8 @@ import Solidity.Correctness.Lowering.Loops.Statement
 import Solidity.Correctness.Lowering.Loops.WhileBreak
 import Solidity.Correctness.Lowering.Loops.WhileContinue
 import Solidity.Correctness.Lowering.Loops.WhileReset
+import Solidity.Correctness.Lowering.Total.Contract
+import Solidity.Correctness.Lowering.Total.Relation
 import Solidity.Correctness.Lowering.Unchecked.CallWitness
 import Solidity.Correctness.Lowering.Unchecked.CalleeMode
 import Solidity.Correctness.Lowering.Unchecked.Composition
