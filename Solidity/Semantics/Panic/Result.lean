@@ -1,5 +1,4 @@
 import Solidity.Semantics.Run
-import Solidity.Source.Observe
 
 /-!
 # Panic-carrying typed results
@@ -14,12 +13,33 @@ panic code and hence choose a different continuation.
 
 namespace Solidity.Semantics.Panic
 
+/-- Intrinsic solc panic classes, kept in the core independently of Source.
+The source-association step relates these to the source model's classes. -/
+inductive Code where
+  | generic | assert | arithmetic | divZero | enumConv | storageEncoding
+  | popEmpty | index | alloc | zeroFn
+  deriving Repr, DecidableEq
+
+/-- The concrete `Panic(uint256)` code assigned by solc. -/
+def Code.code : Code → Nat
+  | .generic => 0x00
+  | .assert => 0x01
+  | .arithmetic => 0x11
+  | .divZero => 0x12
+  | .enumConv => 0x21
+  | .storageEncoding => 0x22
+  | .popEmpty => 0x31
+  | .index => 0x32
+  | .alloc => 0x41
+  | .zeroFn => 0x51
+
+
 /-- An intrinsic failure has a solc code and a caller-supplied typed origin.
 External revert bytes remain external even when they encode `Panic(uint256)`.
 `revertWith` retains explicit local revert data without labeling it external.
 Exhaustion and divergence are separate from all reverting outcomes. -/
 inductive Halt (Origin : Type) where
-  | intrinsic (code : Source.PanicCode) (origin : Origin)
+  | intrinsic (code : Code) (origin : Origin)
   | externalRevert (data : List UInt8)
   | revert
   | revertWith (data : List UInt8)
@@ -56,7 +76,7 @@ theorem toV1_mapOrigin {Origin Other : Type} (f : Origin → Other) (h : Halt Or
   cases h <;> rfl
 
 /-- Constructor injectivity retains both the exact code and its origin. -/
-theorem intrinsic_eq_iff {Origin : Type} (c d : Source.PanicCode) (o p : Origin) :
+theorem intrinsic_eq_iff {Origin : Type} (c d : Code) (o p : Origin) :
     (Halt.intrinsic c o = .intrinsic d p) ↔ c = d ∧ o = p := by
   constructor
   · intro h
@@ -66,7 +86,7 @@ theorem intrinsic_eq_iff {Origin : Type} (c d : Source.PanicCode) (o p : Origin)
     rfl
 
 /-- Even a byte-for-byte panic payload cannot become an intrinsic panic. -/
-theorem intrinsic_ne_external {Origin : Type} (c : Source.PanicCode) (o : Origin)
+theorem intrinsic_ne_external {Origin : Type} (c : Code) (o : Origin)
     (data : List UInt8) : Halt.intrinsic c o ≠ .externalRevert data := by
   intro h
   cases h
@@ -83,7 +103,7 @@ def toV1 {Origin α : Type} : Result Origin α → TRes α
 theorem toV1_ok {Origin α : Type} (value : α) :
     toV1 (.ok value : Result Origin α) = .ok value := rfl
 
-theorem toV1_intrinsic {Origin α : Type} (code : Source.PanicCode) (origin : Origin) :
+theorem toV1_intrinsic {Origin α : Type} (code : Code) (origin : Origin) :
     toV1 (.error (.intrinsic code origin) : Result Origin α) = .error .panic := rfl
 
 theorem toV1_external {Origin α : Type} (data : List UInt8) :
