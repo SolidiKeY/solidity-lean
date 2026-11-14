@@ -1139,6 +1139,36 @@
       "blob": "fba5168948fc7481a477c4c71328eb67539a0014",
       "anchor": "CGROUP_PEAK_BYTES=4282904576 ELAPSED_SECONDS=1800 EXIT=124",
       "role": "Historical record: Captured old cgroup-wrapped partial Lake/library transcript with replay/build status and linter/axiom output. The full-run label, including final, is not a completed gate: terminal1800seconds/EXIT124 is a timeout and remains failed/incomplete. Partial job successes establish no current proof, complete build, warm/cold performance comparison, cache authenticity or full acceptance. The old12GiB/no-swap header, recorded peak/timing/exit, tool/source references and every validation assertion remain unverified history. Historical resource limits and timeout observations grant no current budget exception, STOP clearance or replay authorization. Keep/uncertain-reader precedence and every unfinished obligation remain. No current source/archive/native/proof authentication, resource containment, compiler adequacy, owner agreement, runtime/full-gate acceptance, interface/premise/exclusion/axiom/policy/baseline/budget/trust adoption, permission, private recovery, stopped-workload replay, consumer/nonuse or deletion credit."
+    },
+    {
+      "path": "tests/directruntime-20261104/native-browser/environment/registration-proposal.json",
+      "blob": "d1f9e1182f84880625ea3577be09cbc18229c17b",
+      "anchor": "  \"guardedRegression\": \"Environmentmetadata/identity/errororderkernelguards are standalone testdriver,notnewproductionroot.\",",
+      "role": "Historical record: Captured MetadataControls standalone driver/15metadata-foil/signature/axiom purpose and proposal-only placement. The committed manifest writer contains this exact proposal literal; it was not invoked or authenticated. No new production-root registration is approved. Every source, count, signature, axiom, regression, ownership and preservation assertion remains unverified history. Keep/uncertain-reader precedence and every unfinished condition remain. No generated-root/module-map/registry/Lake/interface/placement/design adoption, current source/archive/native/proof authentication, semantic/compiler adequacy, owner agreement, runtime/full-gate acceptance, policy/baseline/budget/exclusion/trust adoption, permission, STOP clearance, generation/consumer/nonuse/deletion credit, private recovery or stopped-workload replay."
+    },
+    {
+      "path": "tests/directruntime-20261104/native-browser/address/registration-proposal.json",
+      "blob": "802208b10d2b912f2f2381f5d1c061750c5fbfd2",
+      "anchor": "  \"guardedRegression\": \"Address marker/identity/error-order driver stays standalone;no shared generatedroot edits.\",",
+      "role": "Historical record: Captured MarkerIdentityControls local standalone proposal with per-file guard and three decoder signature/axiom inventory descriptions. The explicit no-generated-production-root wording is old proposal intent, not current registration, tested coverage or axiom acceptance. Every source, count, signature, axiom, regression, ownership and preservation assertion remains unverified history. Keep/uncertain-reader precedence and every unfinished condition remain. No generated-root/module-map/registry/Lake/interface/placement/design adoption, current source/archive/native/proof authentication, semantic/compiler adequacy, owner agreement, runtime/full-gate acceptance, policy/baseline/budget/exclusion/trust adoption, permission, STOP clearance, generation/consumer/nonuse/deletion credit, private recovery or stopped-workload replay."
+    },
+    {
+      "path": "tests/directruntime-20261104/native-browser/fixed-byte/registration-proposal.json",
+      "blob": "dbfffff9bd10914ec33dd4801ea135053d289081",
+      "anchor": "  \"guardedRegression\": \"Fixed-byte decoder marker guards remain a standalone test driver,with no generated root edits.\",",
+      "role": "Historical record: Captured MarkerControls standalone32spelling/strict-decoder guard proposal and no-generated-root-edit intent. Decoder/signature/axiom descriptions remain unverified old metadata, not current elaboration, proof or policy acceptance. Every source, count, signature, axiom, regression, ownership and preservation assertion remains unverified history. Keep/uncertain-reader precedence and every unfinished condition remain. No generated-root/module-map/registry/Lake/interface/placement/design adoption, current source/archive/native/proof authentication, semantic/compiler adequacy, owner agreement, runtime/full-gate acceptance, policy/baseline/budget/exclusion/trust adoption, permission, STOP clearance, generation/consumer/nonuse/deletion credit, private recovery or stopped-workload replay."
+    },
+    {
+      "path": "tests/directruntime-20261104/native-browser/primitive-return/registration.json",
+      "blob": "166e319bbab12c852bbad90bec50af6c69515794",
+      "anchor": "  \"proposal\": \"Local docs row only,no generatedlibraryroot registration needed for standaloneper-file driver.\",",
+      "role": "Historical record: Captured FiniteControls standalone docs-row intent, two import names and primitive-return regression description. The no-library-registration-needed assertion is historical proposal data, not a fresh placement decision, import execution, side-effect correctness, reference/width adequacy or compiler claim. Every source, count, signature, axiom, regression, ownership and preservation assertion remains unverified history. Keep/uncertain-reader precedence and every unfinished condition remain. No generated-root/module-map/registry/Lake/interface/placement/design adoption, current source/archive/native/proof authentication, semantic/compiler adequacy, owner agreement, runtime/full-gate acceptance, policy/baseline/budget/exclusion/trust adoption, permission, STOP clearance, generation/consumer/nonuse/deletion credit, private recovery or stopped-workload replay."
+    },
+    {
+      "path": "tests/directruntime-20261104/memory-references/registration.json",
+      "blob": "171efc294409071d4de7a26619f1a4c49dc067be",
+      "anchor": "  \"centralRegistration\": \"proposal only; coordinator owns generated roots and shared maps\",",
+      "role": "Historical record: Captured Reader library-root/module-map-row proposal and V1StorageCases development-library/counterexample capability description. Shared roots/maps remain coordinator-owned; proposal-only intent and retained-metadata-not-certification limits are preserved. No actual integration, approved area/placement or ordinary-verifier import is established. Every source, count, signature, axiom, regression, ownership and preservation assertion remains unverified history. Keep/uncertain-reader precedence and every unfinished condition remain. No generated-root/module-map/registry/Lake/interface/placement/design adoption, current source/archive/native/proof authentication, semantic/compiler adequacy, owner agreement, runtime/full-gate acceptance, policy/baseline/budget/exclusion/trust adoption, permission, STOP clearance, generation/consumer/nonuse/deletion credit, private recovery or stopped-workload replay."
     }
   ],
   "schema_version": 1
