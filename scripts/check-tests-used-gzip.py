@@ -5,10 +5,13 @@ Frozen classifiers and their observation interfaces remain unchanged. This
 module adds an exact-object adapter only when explicitly invoked.
 Decoded content is historical text, never execution or deletion evidence.
 
-Consumer contract: reviewed_objects(repo, catalog) validates schema_version=2
+Proposed H896 consumer contract (separate review required before adoption):
+reviewed_objects(repo, catalog) validates schema_version=2
 and records with exactly path, blob, decoded_sha256, anchor, role, review.
-review has exactly content, producer, consumers: nonempty written attestations
-for this individual object. A catalog is trusted review input, not a role
+review has exactly content, producer, consumers, input_revision, independent.
+The first three are nonempty written attestations for this individual object;
+input_revision pins the reviewed consumer context to repo.ref, and independent
+must be the JSON boolean true. These declarations do not authenticate review. A catalog is trusted review input, not a role
 approval request. Before supplying it, the independent factory review must
 affirmatively inspect that object's decoded content and producer/consumer
 context. Nonempty strings, suffixes, scans and absent reader metadata do not
@@ -138,8 +141,13 @@ def reviewed_objects(repo, data):
                 or any(c not in '0123456789abcdef' for c in row['blob'])
                 or not isinstance(row['role'], str) or not row['role'].strip()
                 or not isinstance(row['review'], dict)
-                or set(row['review']) != {'content', 'producer', 'consumers'}
-                or any(not isinstance(v, str) or not v.strip() for v in row['review'].values())):
+                or set(row['review']) != {'content', 'producer', 'consumers', 'input_revision', 'independent'}
+                or row['review']['independent'] is not True
+                or any(not isinstance(row['review'][key], str) or not row['review'][key].strip()
+                       for key in ('content', 'producer', 'consumers'))
+                or not isinstance(row['review']['input_revision'], str)
+                or len(row['review']['input_revision']) != 40
+                or any(c not in '0123456789abcdef' for c in row['review']['input_revision'])):
             raise ValueError('unreviewed or duplicate gzip role')
         seen.add(path)
         # Validate the digest and anchor even when a historical object is absent.
@@ -153,6 +161,8 @@ def reviewed_objects(repo, data):
             continue
         if path not in repo.paths or repo.tree[path] != ('100644', 'blob', row['blob']):
             raise ValueError('stale or nonregular gzip role object: ' + path)
+        if row['review']['input_revision'] != repo.ref:
+            raise ValueError('stale gzip consumer-context review: ' + path)
         anchored_text(repo.bytes(path), digest, anchor)
         active.append(row)
     return active
@@ -167,6 +177,8 @@ def apply_roles(repo, original, data):
     """
     import copy
     import shlex
+    if not isinstance(original, dict) or original.get('measured_revision') != repo.ref:
+        raise ValueError('gzip inventory differs from repository snapshot')
     roles = reviewed_objects(repo, data)
     output = copy.deepcopy(original)
     by_path = {row['path']: row for row in output['records']}
@@ -207,9 +219,11 @@ def adapter_controls():
     role = dict(path=path, blob=blob, decoded_sha256=hashlib.sha256(b'old result: unverified\n').hexdigest(),
                 anchor='old result: unverified', role='An old result log, not a live fixture.',
                 review=dict(content='Full synthetic historical log reviewed.', producer='Synthetic old test report.',
-                            consumers='Synthetic control has no consumer; no real-object nonuse conclusion.'))
+                            consumers='Synthetic control has no consumer; no real-object nonuse conclusion.',
+                            input_revision='c' * 40, independent=True))
     data = dict(schema_version=2, records=[role])
-    repo = types.SimpleNamespace(paths=[path], tree={path: ('100644', 'blob', blob)}, bytes=lambda p: raw)
+    repo = types.SimpleNamespace(ref='c' * 40, paths=[path],
+                                 tree={path: ('100644', 'blob', blob)}, bytes=lambda p: raw)
     record = dict(path=path, **{'class': None}, reason='Unresolved', mode='100644', object_type='blob', blob=blob,
                   recovery=dict(last_touch_commit=commit, command='git show ' + commit + ':' + path, blob=blob),
                   runner_chain=None, secondary={}, search_candidates=[], generator=None, orphan_analysis=None,
@@ -295,7 +309,7 @@ def adapter_controls():
             raise AssertionError('nonregular tracked object accepted')
     for member in (raw + raw, raw[:-1], raw + b'x',
                    gzip.compress(b'x' * (MAX_DECODED + 1), mtime=0)):
-        malformed = types.SimpleNamespace(paths=[path], tree=repo.tree, bytes=lambda p: member)
+        malformed = types.SimpleNamespace(paths=[path], tree=repo.tree, bytes=lambda p: member, ref=repo.ref)
         try:
             reviewed_objects(malformed, data)
         except ValueError:
@@ -308,6 +322,33 @@ def adapter_controls():
         current = copy.deepcopy(original)
         current['records'][0]['recovery'] = pin
         assert apply_roles(repo, current, data) == current
+    for field, values in [('independent', [False, 1, 'true', None]),
+                          ('input_revision', ['HEAD', 'd' * 40, True, 'C' * 40])]:
+        for value in values:
+            bad = copy.deepcopy(data)
+            bad['records'][0]['review'][field] = value
+            try:
+                reviewed_objects(repo, bad)
+            except ValueError:
+                pass
+            else:
+                raise AssertionError('unaffirmed or stale review accepted')
+        bad = copy.deepcopy(data)
+        del bad['records'][0]['review'][field]
+        try:
+            reviewed_objects(repo, bad)
+        except ValueError:
+            pass
+        else:
+            raise AssertionError('missing review context accepted')
+    stale = copy.deepcopy(original)
+    stale['measured_revision'] = 'd' * 40
+    try:
+        apply_roles(repo, stale, data)
+    except ValueError:
+        pass
+    else:
+        raise AssertionError('stale input inventory accepted')
     # Mutating returned review metadata cannot mutate the catalog or input.
     output['records'][0]['secondary']['historical_gzip_role']['review']['content'] = 'changed'
     assert data['records'][0]['review']['content'] == role['review']['content']
