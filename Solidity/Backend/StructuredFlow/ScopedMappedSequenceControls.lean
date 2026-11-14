@@ -36,17 +36,21 @@ theorem entry (flag : Bool) :
 
 theorem checked_good (flag : Bool) :
     StmtOut C 1 0 (Frag.init [.val .bool,.val .bool,.val .bool]) false false false
-      (core.run (caller flag)) (run emitted (loadedCanary flag)) (loadedCanary flag) :=
-  correct (F₁ := Frag.init [.val .bool,.val .bool,.val .bool])
+      (core.run (caller flag)) (run emitted (loadedCanary flag)) (loadedCanary flag) := by
+  apply correct (F₁ := Frag.init [.val .bool,.val .bool,.val .bool])
     (F₂ := Frag.init [.val .bool,.val .bool,.val .bool])
-    mapping .here (.there .here) rfl rfl left right tail (entry flag) rfl rfl rfl (entry flag).bound
+    mapping .here (.there .here) rfl rfl left right tail (entry flag) rfl rfl rfl
+  change 1 ≤ Lmax
+  exact (entry flag).bound
 
 theorem checked_bad (flag : Bool) :
     StmtOut C 1 0 (Frag.init [.val .bool,.val .bool,.val .bool]) false false false
-      (badCore.run (caller flag)) (run badEmitted (loadedCanary flag)) (loadedCanary flag) :=
-  correct (F₁ := Frag.init [.val .bool,.val .bool,.val .bool])
+      (badCore.run (caller flag)) (run badEmitted (loadedCanary flag)) (loadedCanary flag) := by
+  apply correct (F₁ := Frag.init [.val .bool,.val .bool,.val .bool])
     (F₂ := Frag.init [.val .bool,.val .bool,.val .bool])
-    mapping .here (.there .here) rfl rfl left right badTail (entry flag) rfl rfl rfl (entry flag).bound
+    mapping .here (.there .here) rfl rfl left right badTail (entry flag) rfl rfl rfl
+  change 1 ≤ Lmax
+  exact (entry flag).bound
 
 theorem typed_runs (flag : Bool) :
     core.run (caller flag) = .ok ⟨outState flag,List.prefix_refl _⟩ ∧

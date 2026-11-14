@@ -18,11 +18,15 @@ theorem represented : Sim C 1 0 (Frag.init []) caller machine :=
 theorem admitted (flag : Bool) : inFrag (Frag.init []) (statement flag) = some (Frag.init []) := rfl
 
 theorem source_true : Solidity.Stmt.run caller (statement true) =
-    .ok ⟨caller,List.prefix_refl _⟩ :=
-  congrFun (Solidity.Stmt.runR_eq (statement true)) caller
+    .ok ⟨caller,List.prefix_refl _⟩ := by
+  change Solidity.Stmt.runR (statement true) caller = _
+  rw [Solidity.Stmt.runR_eq]
+  rfl
 
-theorem source_false : Solidity.Stmt.run caller (statement false) = .error .revert :=
-  congrFun (Solidity.Stmt.runR_eq (statement false)) caller
+theorem source_false : Solidity.Stmt.run caller (statement false) = .error .revert := by
+  change Solidity.Stmt.runR (statement false) caller = _
+  rw [Solidity.Stmt.runR_eq]
+  rfl
 
 theorem target_true : run (emitted true) machine =
     .ok {machine with mem := upd machine.mem 0 w[7]} 0 := by rfl
@@ -32,8 +36,11 @@ theorem target_false : run (emitted false) machine = .revert := by rfl
 theorem checked_agreement (flag : Bool) :
     StmtOut C (1 + Stmt.pushes (statement flag)) 0 (Frag.init [])
       (Stmt.shrinks (statement flag)) (Stmt.pays (statement flag)) (Stmt.asserts (statement flag))
-      (Solidity.Stmt.run caller (statement flag)) (run (emitted flag) machine) machine :=
-  CoreScopes.branch_admitted _ left right represented (admitted flag) represented.bound
+      (Solidity.Stmt.run caller (statement flag)) (run (emitted flag) machine) machine := by
+  apply CoreScopes.branch_admitted _ left right represented (admitted flag)
+  change 1 + 0 ≤ Lmax
+  unfold Lmax
+  decide
 
 private def machineTail : Machine := {machine with stack := [w[77]]}
 
@@ -46,16 +53,21 @@ theorem target_tail : run (emitted true) machineTail =
 theorem checked_tail (flag : Bool) :
     StmtOut C (1 + Stmt.pushes (statement flag)) 0 (Frag.init [])
       (Stmt.shrinks (statement flag)) (Stmt.pays (statement flag)) (Stmt.asserts (statement flag))
-      (Solidity.Stmt.run caller (statement flag)) (run (emitted flag) machineTail) machineTail :=
-  CoreScopes.branch_admitted _ left right represented_tail (admitted flag) represented_tail.bound
+      (Solidity.Stmt.run caller (statement flag)) (run (emitted flag) machineTail) machineTail := by
+  apply CoreScopes.branch_admitted _ left right represented_tail (admitted flag)
+  change 1 + 0 ≤ Lmax
+  unfold Lmax
+  decide
 
 theorem unsupported_refused :
     inFrag (Frag.init [])
       (.ite (.simple (.bool true)) (.cons .assumeFalse .nil) (.nil : Solidity.Prog C [] [])) = none := rfl
 
 theorem block_source : Solidity.Stmt.run caller (.block left) =
-    .ok ⟨caller,List.prefix_refl _⟩ :=
-  congrFun (Solidity.Stmt.runR_eq (.block left)) caller
+    .ok ⟨caller,List.prefix_refl _⟩ := by
+  change Solidity.Stmt.runR (.block left) caller = _
+  rw [Solidity.Stmt.runR_eq]
+  rfl
 
 theorem block_target : run (CoreScopes.block 0 left) machine =
     .ok {machine with mem := upd machine.mem 0 w[7]} 0 := by rfl
