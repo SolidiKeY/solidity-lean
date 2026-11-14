@@ -2175,6 +2175,8 @@ import Solidity.Calculus.DecisionNumericTraversal
 import Solidity.Calculus.DecisionNumericTwoPrefix
 import Solidity.Calculus.DecisionNumericTwoPrefixFormula
 import Solidity.Calculus.DecisionPartialOrFloor
+import Solidity.Calculus.DecisionPartialOrSub
+import Solidity.Calculus.DecisionPartialOrSubComplete
 import Solidity.Calculus.DecisionPrefixNormalizationResidue
 import Solidity.Calculus.DecisionResidue
 import Solidity.Calculus.DecisionResidueReasons
@@ -4144,6 +4146,7 @@ import Solidity.Semantics.Nondeterminism.SourceWitness
 import Solidity.Semantics.Nondeterminism.Split
 import Solidity.Semantics.NumericLowering
 import Solidity.Semantics.Ops
+import Solidity.Semantics.Panic.Origins
 import Solidity.Semantics.Panic.Result
 import Solidity.Semantics.PaymentWorld
 import Solidity.Semantics.PrimitiveReturnProjection
