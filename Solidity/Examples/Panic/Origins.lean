@@ -241,4 +241,11 @@ theorem no_spurious_code : observedCode (.assertion true) = none ∧
   simp only [observedCode, missing_path.1]
   exact ⟨rfl, trivial⟩
 
+/-- Modulus three detects premature word wrapping: max+1 gives1 rather than0,
+and max*2 gives0 rather than the wrapped result2. -/
+theorem modular_no_wrap :
+    (Producer.modular .addmod umax (u 1) (u 3)).run = .ok (u 1) ∧
+    (Producer.modular .mulmod umax (u 2) (u 3)).run = .ok (u 0) :=
+  ⟨rfl, rfl⟩
+
 end Solidity.Examples.Panic.Origins
