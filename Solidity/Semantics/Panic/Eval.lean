@@ -23,7 +23,11 @@ theorem siteCode_code (site : Site) : (siteCode site).code = site.code := by
 /-- The finite family of result types of intrinsic producers. This keeps
 heterogeneous typed operands in Type without erasing them into an existential proof. -/
 inductive ValueKind where
-  | unit | nat | prim (p : PrimTy) | storage (C : Contract) | memory (H : HTy) (E : Ty)
+  | unit
+  | nat
+  | prim (p : PrimTy)
+  | storage (C : Contract)
+  | memory (H : HTy) (E : Ty)
 
 def ValueKind.Denote : ValueKind → Type
   | .unit => Unit
