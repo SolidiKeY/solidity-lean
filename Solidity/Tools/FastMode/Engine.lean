@@ -119,7 +119,9 @@ def result (C : Contract) (formula : Fml C []) (encoded : String) (parameters : 
     let branches := match residue with
       | some leaves => leaves.toArray.mapIdx fun i leaf => openBranch i leaf
       | none => #[Json.mkObj [("id", toJson "root"),
-          ("sequent", toJson "symbolic walk exhausted; the original obligation remains open")]]
+          ("sequent", toJson ((metadata.getObjValAs? String "obligation").toOption.getD
+            "the original intrinsic obligation remains open")),
+          ("reason", toJson "symbolic walk exhausted or reached a step with no applicable rule")]]
     verdict := verdict.setObjVal! "openBranches" (toJson branches)
   if let .ok witness := verdict.getObjVal? "counterexample" then
     if let .ok arguments := witness.getObjValAs? (Array Json) "arguments" then
@@ -129,7 +131,7 @@ def result (C : Contract) (formula : Fml C []) (encoded : String) (parameters : 
         | none => argument
         | some i => argument.setObjVal! "paramIndex" (toJson i)
       verdict := verdict.setObjVal! "counterexample" (witness.setObjVal! "arguments" (toJson arguments))
-  for key in ["function", "signature", "sourceId", "tag", "reading"] do
+  for key in ["function", "signature", "sourceId", "tag", "reading", "obligation"] do
     if let .ok value := metadata.getObjVal? key then verdict := verdict.setObjVal! key value
   return verdict.setObjVal! "verification" (toJson "native")
 
@@ -192,10 +194,14 @@ def elabExportInput : CommandElab := fun stx => do
       let displayName := if row.sourceName.isEmpty then row.name else row.sourceName
       let signature := if row.sourceSignature.isEmpty then
         s!"{displayName}({",".intercalate (row.params.map Prod.snd)})" else row.sourceSignature
+      let obligation ← match formula with
+        | some goal => pure (toString (← ppExpr goal))
+        | none => pure ""
       let metadata := Json.mkObj [("function", toJson displayName),
         ("signature", toJson signature), ("sourceId", toJson row.sourceId),
         ("tag", toJson row.tag.toStr), ("reading", toJson reading),
-        ("verification", toJson "native"), ("status", toJson status), ("reason", toJson reason)]
+        ("verification", toJson "native"), ("status", toJson status), ("reason", toJson reason),
+        ("obligation", toJson obligation)]
       let formulaType := mkApp2 (mkConst ``Fml) (mkConst N) (ctxE [])
       let value ← match formula with
         | some goal => do

@@ -117,3 +117,18 @@ test('a valid executable hash cannot bind a cache to a different generated input
     assert.throws(()=>nativeBuild(output),/different cache/);
   } finally {rmSync(directory,{recursive:true,force:true});}
 });
+
+import {sourceCounterexample} from './verify-source.mjs';
+test('inherited witness presentation follows exact source IDs across duplicate contract names',()=>{
+  const owner=(id,name)=>({nodeType:'ContractDefinition',name:'Base',nodes:[{
+    nodeType:'FunctionDefinition',id,parameters:{parameters:[{name,typeDescriptions:{typeString:'uint256'}}]}}]});
+  const base=owner(7,'actualParameter'),other=owner(8,'wrongParameter');
+  const ast={nodes:[other,base,{nodeType:'ContractDefinition',name:'Derived',nodes:[]}]};
+  const row={sourceId:7,contract:'Derived',status:'refuted',counterexample:{certified:false,
+    arguments:[{paramIndex:0,modelName:'bound0',value:'42'}]}};
+  const before=JSON.stringify(row),witness=sourceCounterexample(ast,row);
+  assert.deepEqual(witness,{certified:false,arguments:[{paramIndex:0,modelName:'bound0',value:'42',sourceName:'actualParameter',sourceType:'uint256'}]});
+  assert.equal(JSON.stringify(row),before);
+  for(const sourceId of [-1,0,99]) assert.equal(sourceCounterexample(ast,{...row,sourceId}),row.counterexample);
+  assert.equal(sourceCounterexample({nodes:[base,owner(7,'ambiguous')]},row),row.counterexample);
+});

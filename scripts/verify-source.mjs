@@ -23,6 +23,15 @@ export function freezeSources(compiled,source,options={}) {
   check();return check;
 }
 
+/** Resolve inherited/imported witness presentation by exact declaration ID.
+ * Ambiguous or absent declarations preserve the original witness unchanged. */
+export function sourceCounterexample(ast,row) {
+  if(!Number.isSafeInteger(row.sourceId) || row.sourceId<=0) return row.counterexample;
+  const owners=(ast.nodes??[]).flatMap(owner=>owner.nodeType==='ContractDefinition'
+    ? (owner.nodes??[]).filter(n=>n.nodeType==='FunctionDefinition' && n.id===row.sourceId).map(()=>owner) : []);
+  return owners.length===1 ? sourceWitness({nodes:[owners[0]]},owners[0].name,row) : row.counterexample;
+}
+
 export function compileSnapshot(source,options={}) {
   const scratch=mkdtempSync(join(tmpdir(),'verify-source-'));
   try {
@@ -64,7 +73,7 @@ export function compileSnapshot(source,options={}) {
       return {};
     };
     const aggregate={nodes:units.flatMap(unit=>unit.ast?.nodes??[])};
-    const witness=row=>sourceWitness(aggregate,row.contract,row);
+    const witness=row=>sourceCounterexample(aggregate,row);
     return {sourceBytes,sourceSha256,fixtureBytes,compiled,compilationSha256:sourceHash(fixtureBytes),
       assertUnchanged,locate,witness,close:()=>rmSync(scratch,{recursive:true,force:true})};
   } catch(error) {rmSync(scratch,{recursive:true,force:true});throw error;}
