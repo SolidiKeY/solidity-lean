@@ -20,12 +20,11 @@ theorem joined (pipeline : Roadmap.Pipeline) (fuel : Nat) (flag checked : Bool)
       (.nil,(source flag).2) =
       (.ok (Source.Out.ret ((source flag).1.set sci (.bool flag))),(.nil,(source flag).2)) ∧
     StmtOut C 1 0 (Frag.init (.val .bool :: TargetCtx)) false false false
-      (core.run (caller flag)) (run emitted (machine flag)) (machine flag) := by
-  rcases correct (G0 pipeline) {F0 with checked := checked} fuel 0 none
+      (core.run (caller flag)) (run emitted (machine flag)) (machine flag) :=
+  And.imp_right (fun rest => rest.2.2.2.2) (correct (G0 pipeline) {F0 with checked := checked} fuel 0 none
     (M := false) (l := false) (u := false) (source flag) (caller flag) mapping Rel
     (initial flag) (fun _ _ h => h) sci sca rfl rfl rfl rfl condition
-    (entry flag) rfl (by decide) with ⟨src,_,_,_,_,compiled⟩
-  exact ⟨src,compiled⟩
+    (entry flag) rfl (by decide))
 
 theorem observed (flag : Bool) : snapshot (run emitted (machine flag)) =
     some [.val (bword flag),.val (bword flag),.val (bword (!flag)),w[1],w[99],w[77]] := by
