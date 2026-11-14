@@ -49,6 +49,12 @@ example (C : Contract) (input : ProductionInput) (c : CalleeRequest) (o : Produc
     sc.top = false ∧ sc.unchecked = false ∧
       sc.inlined = List.cons (c.start, o.after.locals.2) input.scope.inlined := ⟨rfl, rfl, rfl⟩
 
+/-- Fresh-name comparison has the equivalence laws needed for changing a
+reference allocation and composing independent naming choices. -/
+example (live : List Var) : Equivalence (FreshNameEquiv live) :=
+  ⟨FreshNameEquiv.refl live, fun h => FreshNameEquiv.symm h,
+    fun h k => FreshNameEquiv.trans h k⟩
+
 /-- Consume the universal candidate for an arbitrary admitted successful pipeline.
 The source is obtained from coverage, not supplied as a sample association.
 The full pass certificate retains both forward and backward obligations. -/
@@ -64,5 +70,23 @@ theorem contract_pipeline (b : SemanticBoundary) (i : RawSourceInterpretation)
   have decoded : decode r = some s := (h.2.1.decoder r s entry).mpr associated
   exact ⟨s, decoded, (h.2.1.association r s).mp associated,
     h.2.1.pipeline r o after parts program s entry decoded pipeline⟩
+
+/-- Specialize the candidate to the actual normal production/elaboration
+pipeline. The same successful run gives the raw relation and the decoded
+Source semantic certificate; neither is replaced by a sample association. -/
+theorem contract_normal_pipeline (b : SemanticBoundary) (i : RawSourceInterpretation)
+    (decode : Request → Option SourceProgram) (h : LowerLoopsCorrectContract b i decode)
+    (input : ProductionInput) (output : ProductionOutput) (C : Contract)
+    (after : Checker.Snapshot) (parts : SProg C) (program : Blk C input.caller.ctx)
+    (entry : i.entry ⟨C, input, none⟩)
+    (pipeline : SuccessfulLoopPipeline input output C after parts program) :
+    SuccessfulProductionInput input ∧
+    @LowersTo input.names input.returnSlots input.raw output.raw input.scope input.before output.after ∧
+    ∃ s, decode ⟨C, input, none⟩ = some s ∧
+      b.reference.associated ⟨C, input, none⟩ s ∧ b.relates s program ∧
+      Nonempty (Solidity.Roadmap.G49Final.PassCorrect
+        (i.source s).behaviour (i.target program).behaviour) :=
+  ⟨⟨output, pipeline.1⟩, h.1 input output pipeline.1,
+    contract_pipeline b i decode h ⟨C, input, none⟩ output after parts program entry pipeline⟩
 
 end Solidity.Examples.Goals.LoopsProducer
