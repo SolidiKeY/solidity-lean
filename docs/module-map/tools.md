@@ -30,5 +30,5 @@ Commands for people; they prove nothing beyond the certificates they check.
 
 | `**/*Controls.lean` | Every `*Controls` module is in `Solidity`. `scripts/coord-tools/controls-classify.py` lists those no library module imports (candidates for a future controls library, not moved). |
 | `Automation/SummaryCache.lean` | Proof-carrying verdict cache with exact semantic-input keys. |
-| `Automation/SummaryCacheControls.lean` | Collision, invalidation and retry controls for the Summary cache. |
 | `Automation/SummaryContracts.lean` | Reusable typed function specifications and callee certificates. |
+| `Automation/SummaryTests.lean` | Regression tests for cache collision, invalidation, retry and typed summary reuse. |
