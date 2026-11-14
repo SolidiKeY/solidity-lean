@@ -132,3 +132,16 @@ test('inherited witness presentation follows exact source IDs across duplicate c
   for(const sourceId of [-1,0,99]) assert.equal(sourceCounterexample(ast,{...row,sourceId}),row.counterexample);
   assert.equal(sourceCounterexample({nodes:[base,owner(7,'ambiguous')]},row),row.counterexample);
 });
+
+import {decodeMeta} from './verify-meta.mjs';
+test('extended native responses require challenge-bound C command and tactic probes',()=>{
+  const nonce='a'.repeat(32),request={sourceId:7,function:'f'};
+  const row={...request,reading:'solc',verification:'native',status:'proved',nativeStrategy:'rec_auto'};
+  const diagnostics=`FAST_META_C ${nonce} command\nFAST_META_C ${nonce} rec_auto\n`;
+  assert.equal(decodeMeta(JSON.stringify([row]),diagnostics,[request],nonce)[0].status,'proved');
+  for(const trace of ['',`FAST_META_C command\nFAST_META_C rec_auto\n`,`FAST_META_C ${nonce} command\n`])
+    assert.throws(()=>decodeMeta(JSON.stringify([row]),trace,[request],nonce),/compiled/);
+  assert.throws(()=>decodeMeta(JSON.stringify([row]),diagnostics,[request],'b'.repeat(32)),/compiled/);
+  for(const change of [{sourceId:8},{reading:'clean'},{verification:'certified'}])
+    assert.throws(()=>decodeMeta(JSON.stringify([{...row,...change}]),diagnostics,[request],nonce),/identity/);
+});
