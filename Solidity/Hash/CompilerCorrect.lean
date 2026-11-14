@@ -1231,25 +1231,6 @@ theorem nonfault_access_agrees (F : Roadmap.Fixed) (slots : List Slot)
     exact sstore_access_agrees F slots m v rep s a tail shape rest fs
 
 
-/-- Applying the common continuation to related atom results preserves skips,
-reverts and faults exactly. -/
-theorem atom_continuation_related (F : Roadmap.Fixed) (slots : List Slot)
-    (rest : List Instr) (fs : List Frame) (a : Result Machine) (b : Result Numeric)
-    : ResultRelated F slots a b →
-    Related F slots
-      (match a with
-       | .ok m k => .running rest k fs m
-       | .revert => .halted .revert
-       | .fault => .halted .fault)
-      (match b with
-       | .ok v k => .running rest k fs v
-       | .revert => .halted .revert
-       | .fault => .halted .fault) := by
-  intro h
-  cases a <;> cases b <;> simp only [Related, ResultRelated, true_and] <;> exact h
-
-
-
 theorem tick_atom_eq (atom : Instr → S → Result S) (test : S → Option (Bool × S))
     (i : Instr) (rest : List Instr) (fs : List Frame) (m : S)
     (nonloop : ∀ a b, i ≠ .loop a b) :
@@ -1352,3 +1333,6 @@ end Solidity.Hash.CompilerCorrect
 #guard_msgs in #print axioms Solidity.Hash.CompilerCorrect.nonfault_atom_related
 /-- info: 'Solidity.Hash.CompilerCorrect.nonfault_access_agrees' depends on axioms: [propext, Classical.choice, Quot.sound] -/
 #guard_msgs in #print axioms Solidity.Hash.CompilerCorrect.nonfault_access_agrees
+
+/-- info: 'Solidity.Hash.CompilerCorrect.running_tick_related' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in #print axioms Solidity.Hash.CompilerCorrect.running_tick_related
