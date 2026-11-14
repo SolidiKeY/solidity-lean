@@ -16,11 +16,10 @@ def machine (flag : Bool) : Machine :=
   {ConditionalSourceCompiler.Controls.machine flag with
     mem := upd (ConditionalSourceCompiler.Controls.machine flag).mem 2 (.val (bword (!flag)))}
 
-theorem initial (flag : Bool) : mapping.Related Rel (source flag).1 (caller flag).env := by
-  intro τ i
-  exact (ContextMap.related_write mapping Rel
+theorem initial (flag : Bool) : mapping.Related Rel (source flag).1 (caller flag).env :=
+  ContextMap.related_write mapping Rel
     (ConditionalSourceCompiler.Controls.source flag).1 (ConditionalSourceCompiler.Controls.caller flag).env
-    (ConditionalSourceCompiler.Controls.initial flag) .here .here rfl (.bool (!flag)) (!flag) rfl) i
+    (ConditionalSourceCompiler.Controls.initial flag) .here .here rfl (.bool (!flag)) (!flag) rfl
 
 theorem entry (flag : Bool) : Sim C 1 0 (Frag.init TargetCtx) (caller flag) (machine flag) := by
   exact Sim.setLocalVal (ConditionalSourceCompiler.Controls.entry flag) .here

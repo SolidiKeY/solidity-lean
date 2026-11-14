@@ -40,23 +40,16 @@ theorem checked (flag : Bool) :
     StmtOut C (1 + Prog.pushes (rest flag)) 0 (Frag.init [.val .uint,.val .uint])
       (Prog.shrinks (rest flag)) (Prog.pays (rest flag))
       (Prog.asserts (rest flag)) (Solidity.Prog.run caller (rest flag))
-      (run (emitted flag) loaded) loaded := by
-  apply CoreSequence.admitted _ left right tail represented (branch_admitted flag) tail_admitted
-  change 1 + 0 ≤ Lmax
-  unfold Lmax
-  decide
+      (run (emitted flag) loaded) loaded :=
+  CoreSequence.admitted _ left right tail represented (branch_admitted flag) tail_admitted represented.bound
 
 theorem source_true : Solidity.Prog.run caller (rest true) =
     .ok ⟨(initial.push (t := .val .uint) (uintT 7 (by decide))).push
-      (t := .val .uint) (uintT 7 (by decide)),List.prefix_refl _⟩ := by
-  change Solidity.Prog.runR (rest true) caller = _
-  simp only [Solidity.Prog.runR_eq]
-  rfl
+      (t := .val .uint) (uintT 7 (by decide)),List.prefix_refl _⟩ :=
+  congrFun (Solidity.Prog.runR_eq (rest true)) caller
 
-theorem source_false : Solidity.Prog.run caller (rest false) = .error .revert := by
-  change Solidity.Prog.runR (rest false) caller = _
-  simp only [Solidity.Prog.runR_eq]
-  rfl
+theorem source_false : Solidity.Prog.run caller (rest false) = .error .revert :=
+  congrFun (Solidity.Prog.runR_eq (rest false)) caller
 
 theorem refusal_short_circuits : run (emitted false) loaded ≠
     .ok {loaded with mem := upd loaded.mem 1 w[41]} 0 := by

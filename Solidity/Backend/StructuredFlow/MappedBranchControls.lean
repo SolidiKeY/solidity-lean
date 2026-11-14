@@ -42,12 +42,10 @@ theorem emitted_code (base : Nat) :
 
 theorem checked (flag : Bool) :
     StmtOut C 1 0 (Frag.init [.val .bool,.val .bool,.val .bool]) false false false
-      (core.run (caller flag)) (run (emitted 0) (loaded flag)) (loaded flag) := by
-  apply correct (F₁ := Frag.init [.val .bool,.val .bool,.val .bool])
+      (core.run (caller flag)) (run (emitted 0) (loaded flag)) (loaded flag) :=
+  correct (F₁ := Frag.init [.val .bool,.val .bool,.val .bool])
     (F₂ := Frag.init [.val .bool,.val .bool,.val .bool])
-    mapping .here (.there .here) rfl rfl left right (represented flag) rfl rfl
-  change 1 ≤ Lmax
-  exact (represented flag).bound
+    mapping .here (.there .here) rfl rfl left right (represented flag) rfl rfl (represented flag).bound
 
 theorem typed_run (flag : Bool) :
     core.run (caller flag) = .ok ⟨(caller flag).push (t := .val .bool) flag,List.prefix_refl _⟩ := by
@@ -110,14 +108,9 @@ theorem wrong_capture_refused :
 
 theorem pending_exit_exact :
     run (emit 0 mapping .here (.there .here) rfl rfl [.jump 4] [.push w[9],.mstore 3]) (loaded true) =
-      .ok (MappedCondition.after 0 mapping .here (.there .here) rfl rfl (loaded true)) 1 := by
-  have selected : run (emit 0 mapping .here (.there .here) rfl rfl
-      [.jump 4] [.push w[9],.mstore 3]) (loaded true) =
-      exec [.push w[9],.mstore 3] 3
-        (MappedCondition.after 0 mapping .here (.there .here) rfl rfl (loaded true)) :=
-    true_pending_skip (skip := 3) mapping .here (.there .here) rfl rfl (represented true) rfl
-      [.jump 4] [.push w[9],.mstore 3] rfl
-  exact selected
+      .ok (MappedCondition.after 0 mapping .here (.there .here) rfl rfl (loaded true)) 1 :=
+  true_pending_skip (skip := 3) mapping .here (.there .here) rfl rfl (represented true) rfl
+    [.jump 4] [.push w[9],.mstore 3] rfl
 
 theorem short_exit_refused :
     exitObservation (run (emit 0 mapping .here (.there .here) rfl rfl
