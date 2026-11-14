@@ -304,3 +304,5 @@ same option to its monitor fixtures; no environment fallback enables it.
 | `Syntax/NumericV2.lean` | Additive full-domain signed-power range guard and statement/value pair; v1 remains unchanged. |
 | `Syntax/NumericV2Correct.lean` | Exact mathematical range/value, guard-before-value execution and full Source arithmetic panic-payload proofs. |
 | `Syntax/NumericV2Controls.lean` | Magnitude-overflow, signed-boundary, huge-exponent unit and unchanged successful-state regressions. |
+| `Semantics/Panic/Result.lean` | Origin-parameterized panic-carrying typed results: full successes, intrinsic solc code and origin, external revert bytes, ordinary revert, exhaustion and divergence; local V1 projections and map/bind laws, without interpreter erasure. |
+| `Examples/Panic/Result.lean` | Kernel-checked panic-result regressions: full typed outputs, all failure projections, code/origin and external-payload distinctions, continuation behavior and origin transport. |
