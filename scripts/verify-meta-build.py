@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """Compile the complete extended frontend closure, with observed C path probes."""
-import hashlib,json,os,pathlib,platform,re,subprocess,sys
+import hashlib,json,os,pathlib,platform,re,subprocess,sys,tempfile
 root=pathlib.Path.cwd().resolve()
 prefix=pathlib.Path(sys.argv[1]).resolve()
 out=pathlib.Path(sys.argv[2]).resolve();out.mkdir(parents=True,exist_ok=True)
@@ -41,9 +41,20 @@ for module in modules:
  paths += [root/('.lake/build/lib/lean/'+stem+ext) for ext in ('.olean','.olean.private','.olean.server','.ir')
            if (root/('.lake/build/lib/lean/'+stem+ext)).is_file()]
  for path in paths:frozen[str(path)]=path.read_bytes()
-for paths in setup['importArts'].values():
- for artifact in paths:
-  path=pathlib.Path(artifact).resolve();frozen[str(path)]=path.read_bytes()
+# A cached module setup may name a different Lake cache directory than a fresh
+# runtime setup. Freeze the actual runtime imports too; never accept aliases at
+# validation time merely because their names or hashes happen to agree.
+with tempfile.TemporaryDirectory(prefix='verify-meta-build-') as scratch:
+ source=pathlib.Path(scratch)/'Input.lean'
+ source.write_text('import Solidity.Tools.FastMode.Meta\n')
+ runtime_setup=json.loads(subprocess.check_output(
+  [str(prefix/'bin/lake'),'--quiet','setup-file',str(source)],cwd=root,text=True))
+ if not runtime_setup.get('importArts',{}).get('Solidity.Tools.FastMode.Meta'):
+  raise ValueError('native runtime root artifact missing')
+ for imports in [setup['importArts'],runtime_setup['importArts']]:
+  for paths in imports.values():
+   for artifact in paths:
+    path=pathlib.Path(artifact).resolve();frozen[str(path)]=path.read_bytes()
 root_artifact=subprocess.check_output([str(prefix/'bin/lake'),'--quiet','query',
  'Solidity.Tools.FastMode.Meta:olean'],cwd=root,text=True).strip()
 if not root_artifact.endswith('.olean') or not pathlib.Path(root_artifact).is_file():
