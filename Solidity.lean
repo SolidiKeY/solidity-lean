@@ -2175,6 +2175,8 @@ import Solidity.Calculus.DecisionNumericTraversal
 import Solidity.Calculus.DecisionNumericTwoPrefix
 import Solidity.Calculus.DecisionNumericTwoPrefixFormula
 import Solidity.Calculus.DecisionPartialOrFloor
+import Solidity.Calculus.DecisionPartialOrSub
+import Solidity.Calculus.DecisionPartialOrSubComplete
 import Solidity.Calculus.DecisionPrefixNormalizationResidue
 import Solidity.Calculus.DecisionResidue
 import Solidity.Calculus.DecisionResidueReasons

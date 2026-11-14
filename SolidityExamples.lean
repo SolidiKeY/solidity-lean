@@ -62,6 +62,7 @@ import Solidity.Examples.DecisionGapLiteralChecks
 import Solidity.Examples.DecisionGapMembershipChecks
 import Solidity.Examples.DecisionGapModularChecks
 import Solidity.Examples.DecisionGapOperators
+import Solidity.Examples.DecisionGapPartialOrSub
 import Solidity.Examples.DecisionGivenHeapComputedReason
 import Solidity.Examples.DecisionGivenHeapFixed
 import Solidity.Examples.DecisionGivenHeapNegative
