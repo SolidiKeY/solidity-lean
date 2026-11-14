@@ -1169,6 +1169,36 @@
       "blob": "171efc294409071d4de7a26619f1a4c49dc067be",
       "anchor": "  \"centralRegistration\": \"proposal only; coordinator owns generated roots and shared maps\",",
       "role": "Historical record: Captured Reader library-root/module-map-row proposal and V1StorageCases development-library/counterexample capability description. Shared roots/maps remain coordinator-owned; proposal-only intent and retained-metadata-not-certification limits are preserved. No actual integration, approved area/placement or ordinary-verifier import is established. Every source, count, signature, axiom, regression, ownership and preservation assertion remains unverified history. Keep/uncertain-reader precedence and every unfinished condition remain. No generated-root/module-map/registry/Lake/interface/placement/design adoption, current source/archive/native/proof authentication, semantic/compiler adequacy, owner agreement, runtime/full-gate acceptance, policy/baseline/budget/exclusion/trust adoption, permission, STOP clearance, generation/consumer/nonuse/deletion credit, private recovery or stopped-workload replay."
+    },
+    {
+      "path": "tests/upstream/step12-quantified-diamond/step12-apis.log",
+      "blob": "32cfb826149c98976b9a6f58998f932f0a8ef059",
+      "anchor": "swapLimitBytes=0",
+      "role": "Historical record: Captured Lake replay/build/linter transcript, not an API-type golden. The historical validation ledger names the two library build targets and log hash. Reported263jobs success,229seconds and old peak/cap/swap remain unverified; no current elaboration, proof or API acceptance. All source, command, hash, count, theorem/axiom, resource, timing, owner and validation assertions remain unverified history. Keep/uncertain-reader precedence and every unfinished obligation remain. Old caps/reserves/timeouts and STOPs grant no new budget, policy, headroom, replay or permission. No current source/archive/native/proof authentication, compiler adequacy, owner agreement, runtime/full-gate acceptance, interface/premise/exclusion/axiom/baseline/budget/trust adoption, STOP clearance, private recovery, stopped-workload replay, consumer/nonuse, retention/deletion or orphan credit."
+    },
+    {
+      "path": "tests/upstream/step12-quantified-diamond/step12-node.log",
+      "blob": "973d930331b7a7e0f5622eb3e1e89dd1fa2c7739",
+      "anchor": "swapLimitBytes=0",
+      "role": "Historical record: Captured four-file serial Node regression transcript with embedded Lake/linter output and reported37tests/37pass/0fail/0skip,288seconds and old peak/cap/swap. The old validation ledger binds its command/hash; these are historical claims, not fresh tests, compiler correctness or semantics. All source, command, hash, count, theorem/axiom, resource, timing, owner and validation assertions remain unverified history. Keep/uncertain-reader precedence and every unfinished obligation remain. Old caps/reserves/timeouts and STOPs grant no new budget, policy, headroom, replay or permission. No current source/archive/native/proof authentication, compiler adequacy, owner agreement, runtime/full-gate acceptance, interface/premise/exclusion/axiom/baseline/budget/trust adoption, STOP clearance, private recovery, stopped-workload replay, consumer/nonuse, retention/deletion or orphan credit."
+    },
+    {
+      "path": "tests/upstream/step2-source-units-isolated-library.log",
+      "blob": "2e8304504f8e84d3bf4e2ed13f8a8a3299365e5c",
+      "anchor": "error: build failed",
+      "role": "Historical record: Captured failed isolated library build with four Killed/Leanexit137 targets and terminal build failure. The historical publication ledger binds log bytes/hash. Failure remains failed/incomplete; no later independent success, default-library or run-lean acceptance follows. All source, command, hash, count, theorem/axiom, resource, timing, owner and validation assertions remain unverified history. Keep/uncertain-reader precedence and every unfinished obligation remain. Old caps/reserves/timeouts and STOPs grant no new budget, policy, headroom, replay or permission. No current source/archive/native/proof authentication, compiler adequacy, owner agreement, runtime/full-gate acceptance, interface/premise/exclusion/axiom/baseline/budget/trust adoption, STOP clearance, private recovery, stopped-workload replay, consumer/nonuse, retention/deletion or orphan credit."
+    },
+    {
+      "path": "tests/upstream/step2-source-units-isolated-suite-guard-stop.log",
+      "blob": "06db823d4b6d301338d83acb9ec9a8fc21fbda8a",
+      "anchor": "\u2714 [240/243] Built Solidity.TestSuite.Derived16 (7.8s)",
+      "role": "Historical record: Captured partial suite transcript ending at Derived16/job240of243 without terminal completion or exit footer. Published byte/hash context is historical only. No final pass, actual stop cause or unrecorded resource peak is inferred from the filename or partial successes. All source, command, hash, count, theorem/axiom, resource, timing, owner and validation assertions remain unverified history. Keep/uncertain-reader precedence and every unfinished obligation remain. Old caps/reserves/timeouts and STOPs grant no new budget, policy, headroom, replay or permission. No current source/archive/native/proof authentication, compiler adequacy, owner agreement, runtime/full-gate acceptance, interface/premise/exclusion/axiom/baseline/budget/trust adoption, STOP clearance, private recovery, stopped-workload replay, consumer/nonuse, retention/deletion or orphan credit."
+    },
+    {
+      "path": "tests/upstream/step2-source-units-runtime-audit.log",
+      "blob": "c0fbcdb175515af8dcba3e16401d7cdb15e12e94",
+      "anchor": "\u2714 [246/688] Built Solidity.Semantics.CallbackWk (27s)",
+      "role": "Historical record: Captured partial runtime-audit transcript with focused two-job output then incomplete default progress246of688. Old JSON/doc context reports resource stop/containerexit137 superseding an earlier live flag; exact crossing/peak remain missing. Reported cause and resource state are unverified, never an interrupted-check pass, current memory-policy adoption or capacity requirement. All source, command, hash, count, theorem/axiom, resource, timing, owner and validation assertions remain unverified history. Keep/uncertain-reader precedence and every unfinished obligation remain. Old caps/reserves/timeouts and STOPs grant no new budget, policy, headroom, replay or permission. No current source/archive/native/proof authentication, compiler adequacy, owner agreement, runtime/full-gate acceptance, interface/premise/exclusion/axiom/baseline/budget/trust adoption, STOP clearance, private recovery, stopped-workload replay, consumer/nonuse, retention/deletion or orphan credit."
     }
   ],
   "schema_version": 1
