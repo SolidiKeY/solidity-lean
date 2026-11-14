@@ -2,6 +2,9 @@
 """Final lightweight checks only. Does not start Lean or rerun diagnostics."""
 import datetime,gzip,hashlib,json,os,time
 from pathlib import Path
+import sys
+sys.path.insert(0, str(Path(__file__).resolve().parents[2]))
+from historical_inputs import read_historical
 ROOT=Path(__file__).resolve().parents[4];OUT=Path(__file__).resolve().parent
 COMMANDS=[
  ['python3','scripts/solidity-baseline-probe-index.py','--check'],
@@ -36,7 +39,7 @@ def main():
   with gzip.GzipFile(filename=str(path)+'.gz',mode='wb',mtime=0) as z:z.write(data)
   row=dict(command=command,exitCode=code,elapsedSeconds=time.monotonic()-before,wait4MaxRssKiB=usage.ru_maxrss,log=path.name+'.gz',uncompressedLogSha256=hashlib.sha256(data).hexdigest())
   if 'scripts/check-doc-paths.sh' in command:
-   original=gzip.decompress((ROOT/'tests/upstream/baseline-20261028/final-gates/doc-paths.log.gz').read_bytes());assert data==original;assert data.count(b'missing:')==20;row.update(historicalMissing=20,originalDiagnosticsByteIdentical=True)
+   original=gzip.decompress(read_historical(ROOT/'tests/upstream/baseline-20261028/final-gates/doc-paths.log.gz'));assert data==original;assert data.count(b'missing:')==20;row.update(historicalMissing=20,originalDiagnosticsByteIdentical=True)
   rows.append(row);print(json.dumps(row),flush=True)
   if code!=expected:raise RuntimeError('unexpected gate result')
  result=dict(recordedAt=datetime.datetime.now(datetime.timezone.utc).isoformat(),commands=rows,elapsedSeconds=time.monotonic()-start,maxWait4JobRssKiB=max(r['wait4MaxRssKiB'] for r in rows),resourceInterpretation='These are lightweight read-only Python/Node/shell checks; wait4 peak is per reaped job, not an aggregate cgroup peak. Actual Lean stage cgroup peaks/stops are in evidence.tar.gz logs/*.json.',nativeValidation='blocked, no new Lean job in these final checks',originalCoreAndCorpus='unchanged',newTheoremAxiomAudit='N/A; generated IO diagnostic wrappers add no semantic theorem or axiom. Static trust inventory only.')
