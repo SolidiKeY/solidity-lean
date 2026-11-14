@@ -7,6 +7,9 @@ import Solidity.AST
 import Solidity.Automation.H28.Chain
 import Solidity.Automation.H28.Context
 import Solidity.Automation.H28.Prove
+import Solidity.Automation.SummaryCache
+import Solidity.Automation.SummaryContracts
+import Solidity.Automation.SummaryTests
 import Solidity.Backend.AbiEntry.BoolBinding
 import Solidity.Backend.AbiEntry.BoolBindingBody
 import Solidity.Backend.AbiEntry.BoolBindingBodyControls
@@ -2151,6 +2154,7 @@ import Solidity.Calculus.DecisionLeafEquality
 import Solidity.Calculus.DecisionLeafPreparation
 import Solidity.Calculus.DecisionMappingFieldBoundary
 import Solidity.Calculus.DecisionMappingFieldReason
+import Solidity.Calculus.DecisionMappingStruct
 import Solidity.Calculus.DecisionMemoryCoverage
 import Solidity.Calculus.DecisionMemoryExtension
 import Solidity.Calculus.DecisionNegativeInstantiation
@@ -2170,6 +2174,7 @@ import Solidity.Calculus.DecisionNumericStages
 import Solidity.Calculus.DecisionNumericTraversal
 import Solidity.Calculus.DecisionNumericTwoPrefix
 import Solidity.Calculus.DecisionNumericTwoPrefixFormula
+import Solidity.Calculus.DecisionPartialOrFloor
 import Solidity.Calculus.DecisionPrefixNormalizationResidue
 import Solidity.Calculus.DecisionResidue
 import Solidity.Calculus.DecisionResidueReasons

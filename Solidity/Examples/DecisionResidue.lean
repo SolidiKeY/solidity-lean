@@ -1,4 +1,6 @@
 import Solidity.Calculus.DecisionResidue
+import Solidity.Calculus.DecisionPartialOrFloor
+import Solidity.Calculus.DecisionMappingStruct
 import Solidity.Examples.DecisionHaltingOrGaps
 import Solidity.Examples.DecisionMappingFieldReason
 import Solidity.Examples.DecisionNormalizationResidue
@@ -55,6 +57,45 @@ theorem not_answered_of_residue {C : Contract} {φ : Fml C []} (h : φ.Residue) 
   rintro (⟨hp, _⟩ | ⟨σ, hs, _⟩)
   · rw [hu] at hp; cases hp
   · rw [hu] at hs; cases hs
+
+/-! ## Family certificates, independently of the public route -/
+
+section FamilyCertificates
+open Solidity.Decide.ResidueReason Solidity.Examples.DecisionHaltingOrGaps
+
+private def floorOneCertificate : PartialOrFloor (floorClaim 1) :=
+  (partialOrFloor? _).get (by decide +kernel)
+
+/-- The rescued family independently certifies the existing valid floor fixture. -/
+theorem floor_family_valid : Fml.Valid (floorClaim 1) :=
+  (floorOneCertificate.valid_iff).mpr (by decide +kernel)
+
+private def floorRoots : PartialOrRoots FloorProbe := ⟨"value", "balances", rfl, rfl⟩
+
+/-- An actual symbolic state refutes the bad floor fixture, without a verdict premise. -/
+theorem floor_family_countermodel :
+    ¬ holds (floorRoots.counterState (uintOfNat 0) (uintOfNat 1)) floorBad :=
+  floorRoots.sourceClaim_counter_refutes (.user "i") (.user "j")
+    (uintOfNat 0) (uintOfNat 1) (uintOfNat 1) (by decide +kernel)
+
+/-- Both polarities have certified family answers before any public-route hookup. -/
+theorem floor_family_answers :
+    (partialOrFloorAnswer? (floorClaim 1)).isSome = true ∧
+      (partialOrFloorAnswer? floorBad).isSome = true :=
+  ⟨partialOrFloorAnswer_isSome ((partialOrFloor_iff).mpr ⟨floorOneCertificate⟩),
+    partialOrFloorAnswer_isSome (by decide +kernel)⟩
+
+/-- The mapping-bearing fixture is semantically valid by memory-object vacuity. -/
+theorem mapping_family_valid : Fml.Valid DecisionResidueReasons.mappingReversed := by
+  intro σ
+  exact MappingStruct.allocAll_void_holds σ _ _ (by decide +kernel) _
+
+/-- Helper recognition and its certified answer are separate from the public verdict. -/
+theorem mapping_family_answer :
+    (MappingStruct.voidAnswer? DecisionResidueReasons.mappingReversed).isSome = true :=
+  MappingStruct.voidAnswer_isSome (by decide +kernel)
+
+end FamilyCertificates
 
 /-! ## Residue members, one per named reason -/
 
