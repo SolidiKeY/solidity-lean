@@ -133,7 +133,7 @@ test('inherited witness presentation follows exact source IDs across duplicate c
   assert.equal(sourceCounterexample({nodes:[base,owner(7,'ambiguous')]},row),row.counterexample);
 });
 
-import {decodeMeta} from './verify-meta.mjs';
+import {decodeMeta,decodeReadings} from './verify-meta.mjs';
 test('extended native responses require challenge-bound C command and tactic probes',()=>{
   const nonce='a'.repeat(32),request={sourceId:7,function:'f'};
   const row={...request,reading:'solc',verification:'native',status:'proved',nativeStrategy:'rec_auto'};
@@ -144,4 +144,14 @@ test('extended native responses require challenge-bound C command and tactic pro
   assert.throws(()=>decodeMeta(JSON.stringify([row]),diagnostics,[request],'b'.repeat(32)),/compiled/);
   for(const change of [{sourceId:8},{reading:'clean'},{verification:'certified'}])
     assert.throws(()=>decodeMeta(JSON.stringify([{...row,...change}]),diagnostics,[request],nonce),/identity/);
+});
+
+test('discovery metadata cannot masquerade as a native verdict',()=>{
+  const requests=[{sourceId:7,function:'f'}],rows=[{sourceId:7,reading:'solc'}];
+  assert.deepEqual(decodeReadings(JSON.stringify(rows),requests),rows);
+  for(const value of [[],[null],[{sourceId:8,reading:'solc'}],
+      [{sourceId:7,reading:'certified'}],[{...rows[0],verification:'native',status:'proved'}]])
+    assert.throws(()=>decodeReadings(JSON.stringify(value),requests),/discovery identity/);
+  const nonce='a'.repeat(32),trace=`FAST_META_C ${nonce} command\nFAST_META_C ${nonce} rec_auto\n`;
+  assert.throws(()=>decodeMeta(JSON.stringify(rows),trace,requests,nonce),/identity/);
 });
