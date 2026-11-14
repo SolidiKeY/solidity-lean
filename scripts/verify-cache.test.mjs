@@ -2,13 +2,16 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import {mkdtempSync,mkdirSync,readFileSync,writeFileSync,rmSync,readdirSync} from 'node:fs';
 import {tmpdir} from 'node:os';
-import {join,resolve} from 'node:path';
+import {join,resolve,dirname} from 'node:path';
+import {fileURLToPath} from 'node:url';
 import {execFileSync} from 'node:child_process';
 import {runTool} from './test-solidity.mjs';
 
 // Explicit serial integration target; caller holds the repository writer lock.
 // All destructive cache controls are confined to this owned temporary worktree.
 test('ordinary native build ignores absent and stale local C after artifact-cache reuse',()=>{
+  const root=resolve(dirname(fileURLToPath(import.meta.url)),'..');
+  const solkey=resolve(root,process.env.SOLKEY_ROOT??'../solkey');
   const parent=mkdtempSync(join(tmpdir(),'verify-cache-control-')),tree=join(parent,'tree');
   let added=false;
   try {
@@ -20,7 +23,7 @@ test('ordinary native build ignores absent and stale local C after artifact-cach
     mkdirSync(resolve(stale,'..'),{recursive:true});writeFileSync(stale,sentinel);
     const report=JSON.parse(runTool(process.execPath,[join(tree,'scripts/verify.mjs'),
       join(tree,'scripts/verify-fixtures/InvariantLeaves.sol'),'--mode','fast','--compare','--json',
-      '--contract','TestSuite','--function','whileCountsUp'],600000));
+      '--contract','TestSuite','--function','whileCountsUp','--solkey',solkey],600000));
     assert.equal(report.status,'agree');assert.equal(report.fast.results[0].verification,'native');
     assert.equal(readFileSync(stale,'utf8'),sentinel);
     const native=join(tree,'.lake/verify/native');
