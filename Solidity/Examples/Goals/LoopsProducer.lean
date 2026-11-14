@@ -35,4 +35,18 @@ private def aliasNames : FreshNames where
 example : ¬ SafeSpellings aliasNames ["caller"] [("brk", 1)] :=
   fun h => h.2.2 ("brk", 1) List.mem_cons_self "caller" List.mem_cons_self rfl
 
+/-- The relational rules reproduce the frozen kernel equations exactly. -/
+example [FreshNames] : listStep = Solidity.Goals.loweringKernelList := rfl
+example [FreshNames] : stmtStep = Solidity.Goals.loweringKernelStmt := rfl
+example [FreshNames] : Solidity.Correctness.Lowering.Total.loopStep = Solidity.Goals.loweringKernelLoop := rfl
+
+/-- Empty input is in the relation at every complete initial state, not just a probe. -/
+example [FreshNames] (sc : ElabScope) (st : Checker.Snapshot) : LowersTo none [] [] sc st st := ⟨1, rfl⟩
+
+/-- Callee elaboration uses the actual inlining reader, not the incoming top-level reader. -/
+example (C : Contract) (input : ProductionInput) (c : CalleeRequest) (o : ProductionOutput) :
+    let sc := (Request.mk C input (some c)).elabScope o
+    sc.top = false ∧ sc.unchecked = false ∧
+      sc.inlined = List.cons (c.start, o.after.locals.2) input.scope.inlined := ⟨rfl, rfl, rfl⟩
+
 end Solidity.Examples.Goals.LoopsProducer
