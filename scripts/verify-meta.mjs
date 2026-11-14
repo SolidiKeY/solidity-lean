@@ -46,7 +46,7 @@ export function metaBuild() {
   for(const name of closure)for(const file of [name.replaceAll('.','/')+'.lean','.lake/build/ir/'+name.replaceAll('.','/')+'.c']) {
     const path=join(root,file);if(manifest.files?.[path]!==sha(path))throw new Error('extended native source changed: '+name);
   }
-  for(const relative of ['lean-toolchain','lakefile.toml','scripts/verify-meta-build.py']) {
+  for(const relative of ['lean-toolchain','lakefile.toml','scripts/verify-meta-build.py','scripts/verify_artifacts.py']) {
     const path=join(root,relative);if(manifest.files?.[path]!==sha(path))throw new Error('extended native build input changed');
   }
   if(manifest.plugin!==join(directory,manifest.pluginSha256,'libSolidity_Tools_FastMode_Meta.so')

@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 """Compile the complete extended frontend closure, with observed C path probes."""
 import hashlib,json,os,pathlib,platform,re,subprocess,sys,tempfile
+from verify_artifacts import runtime_aliases
 root=pathlib.Path.cwd().resolve()
 prefix=pathlib.Path(sys.argv[1]).resolve()
 out=pathlib.Path(sys.argv[2]).resolve();out.mkdir(parents=True,exist_ok=True)
@@ -15,7 +16,7 @@ def digest_file(path):
  return h.hexdigest()
 for name in ['LEAN_CC','LEAN_SYSROOT','CPATH','C_INCLUDE_PATH','CPLUS_INCLUDE_PATH','LIBRARY_PATH','COMPILER_PATH','LD_PRELOAD','LD_LIBRARY_PATH']:
  if os.environ.get(name):raise ValueError('unpinned native toolchain override: '+name)
-source_paths=lambda:sorted((root/'Solidity').rglob('*.lean'))+[root/p for p in ['lean-toolchain','lakefile.toml','scripts/verify-meta-build.py']]
+source_paths=lambda:sorted((root/'Solidity').rglob('*.lean'))+[root/p for p in ['lean-toolchain','lakefile.toml','scripts/verify-meta-build.py','scripts/verify_artifacts.py']]
 source_before={str(p):digest_file(p) for p in source_paths()}
 sdk_paths=[prefix/'bin'/name for name in ['lean','lake','leanc','clang','ld.lld','llvm-ar']]
 sdk_paths+=sorted((prefix/'include').rglob('*.h'))
@@ -41,26 +42,24 @@ for module in modules:
  paths += [root/('.lake/build/lib/lean/'+stem+ext) for ext in ('.olean','.olean.private','.olean.server','.ir')
            if (root/('.lake/build/lib/lean/'+stem+ext)).is_file()]
  for path in paths:frozen[str(path)]=path.read_bytes()
-# A cached module setup may name a different Lake cache directory than a fresh
-# runtime setup. Freeze the actual runtime imports too; never accept aliases at
-# validation time merely because their names or hashes happen to agree.
-with tempfile.TemporaryDirectory(prefix='verify-meta-build-') as scratch:
- source=pathlib.Path(scratch)/'Input.lean'
- source.write_text('import Solidity.Tools.FastMode.Meta\n')
- runtime_setup=json.loads(subprocess.check_output(
-  [str(prefix/'bin/lake'),'--quiet','setup-file',str(source)],cwd=root,text=True))
- if not runtime_setup.get('importArts',{}).get('Solidity.Tools.FastMode.Meta'):
-  raise ValueError('native runtime root artifact missing')
- for imports in [setup['importArts'],runtime_setup['importArts']]:
-  for paths in imports.values():
-   for artifact in paths:
-    path=pathlib.Path(artifact).resolve();frozen[str(path)]=path.read_bytes()
+for paths in setup['importArts'].values():
+ for artifact in paths:
+  path=pathlib.Path(artifact).resolve();frozen[str(path)]=path.read_bytes()
 root_artifact=subprocess.check_output([str(prefix/'bin/lake'),'--quiet','query',
  'Solidity.Tools.FastMode.Meta:olean'],cwd=root,text=True).strip()
 if not root_artifact.endswith('.olean') or not pathlib.Path(root_artifact).is_file():
  raise ValueError('unexpected root artifact query')
 path=pathlib.Path(root_artifact).resolve();frozen[str(path)]=path.read_bytes()
-for relative in ['lean-toolchain' ,'lakefile.toml','scripts/verify-meta-build.py']:
+# Cached module setups and fresh runtime setups can use different cache paths.
+# Admit those paths only after matching the compiled closure and artifact bytes.
+with tempfile.TemporaryDirectory(prefix='verify-meta-build-') as scratch:
+ source=pathlib.Path(scratch)/'Input.lean'
+ source.write_text('import Solidity.Tools.FastMode.Meta\n')
+ runtime_setup=json.loads(subprocess.check_output(
+  [str(prefix/'bin/lake'),'--quiet','setup-file',str(source)],cwd=root,text=True))
+ compiled_imports={**setup['importArts'],'Solidity.Tools.FastMode.Meta':[root_artifact]}
+ frozen.update(runtime_aliases(compiled_imports,runtime_setup['importArts'],frozen))
+for relative in ['lean-toolchain' ,'lakefile.toml','scripts/verify-meta-build.py','scripts/verify_artifacts.py']:
  path=root/relative;frozen[str(path)]=path.read_bytes()
 objects=[];seen=set();compiled=[]
 for module in modules:
