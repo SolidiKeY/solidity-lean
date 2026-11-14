@@ -7,6 +7,9 @@ cold-build measurement remains separate and unchanged.
 """
 import datetime,gzip,hashlib,json,os,resource,subprocess,time
 from pathlib import Path
+import sys
+sys.path.insert(0, str(Path(__file__).resolve().parents[2]))
+from historical_inputs import read_historical
 ROOT=Path(__file__).resolve().parents[4]
 OUT=Path(__file__).resolve().parent
 COMMANDS=[
@@ -43,7 +46,7 @@ def main():
   # The path gate's twenty historical missing references remain blocked.
   doc_missing=data.count(b'missing:')
   if 'scripts/check-doc-paths.sh' in command:
-   previous=gzip.decompress((ROOT/'tests/upstream/baseline-20261028/final-gates/doc-paths.log.gz').read_bytes())
+   previous=gzip.decompress(read_historical(ROOT/'tests/upstream/baseline-20261028/final-gates/doc-paths.log.gz'))
    if data!=previous: raise RuntimeError('documentation diagnostics drifted from original checkpoint')
    if doc_missing!=20: raise RuntimeError('expected exactly20 historical missing references')
   row=dict(command=command,exitCode=code,expectedExitCode=expected,elapsedSeconds=elapsed,

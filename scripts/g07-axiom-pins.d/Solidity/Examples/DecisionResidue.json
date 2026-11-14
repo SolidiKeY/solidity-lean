@@ -1,4 +1,14 @@
 {
+ "Solidity/Examples/DecisionResidue.lean:Solidity.Examples.DecisionResidue.apf_residue": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Examples/DecisionResidue.lean:Solidity.Examples.DecisionResidue.apf_routeRefusals": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
  "Solidity/Examples/DecisionResidue.lean:Solidity.Examples.DecisionResidue.arrayBlock_witness": [
   "Classical.choice",
   "Quot.sound",
@@ -15,16 +25,6 @@
   "propext"
  ],
  "Solidity/Examples/DecisionResidue.lean:Solidity.Examples.DecisionResidue.fixedArray_witnesses": [
-  "Classical.choice",
-  "Quot.sound",
-  "propext"
- ],
- "Solidity/Examples/DecisionResidue.lean:Solidity.Examples.DecisionResidue.floorBad_residue": [
-  "Classical.choice",
-  "Quot.sound",
-  "propext"
- ],
- "Solidity/Examples/DecisionResidue.lean:Solidity.Examples.DecisionResidue.floorValid_residue": [
   "Classical.choice",
   "Quot.sound",
   "propext"
@@ -49,22 +49,22 @@
   "Quot.sound",
   "propext"
  ],
+ "Solidity/Examples/DecisionResidue.lean:Solidity.Examples.DecisionResidue.kintBad_residue": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Examples/DecisionResidue.lean:Solidity.Examples.DecisionResidue.kintValid_residue": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
  "Solidity/Examples/DecisionResidue.lean:Solidity.Examples.DecisionResidue.ledger_witness": [
   "Classical.choice",
   "Quot.sound",
   "propext"
  ],
  "Solidity/Examples/DecisionResidue.lean:Solidity.Examples.DecisionResidue.ledgerBlock_witness": [
-  "Classical.choice",
-  "Quot.sound",
-  "propext"
- ],
- "Solidity/Examples/DecisionResidue.lean:Solidity.Examples.DecisionResidue.mapping_residue": [
-  "Classical.choice",
-  "Quot.sound",
-  "propext"
- ],
- "Solidity/Examples/DecisionResidue.lean:Solidity.Examples.DecisionResidue.mapping_routeRefusals": [
   "Classical.choice",
   "Quot.sound",
   "propext"

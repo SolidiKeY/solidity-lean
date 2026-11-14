@@ -205,6 +205,43 @@ class Lines(Base):
         self.ok()
 
 
+class HistoricalReportException(unittest.TestCase):
+    def test_exact_path_and_blob_only(self):
+        path = "tests/upstream/results/results.json"
+        repo_root = os.path.dirname(os.path.dirname(os.path.dirname(CHECK)))
+        data = subprocess.check_output(["git", "-C", repo_root, "show",
+            "a54b902abfee1370356560ea37ef9ad35725057e:" + path])
+        with tempfile.TemporaryDirectory() as directory:
+            r = Repo(directory)
+            r.git("init", "-q", "-b", "main")
+            seed = r.commit({path: data, "README.md": "base\n"})
+            r.write("scripts/hygiene/allow.json", r.seed(seed))
+            r.commit()
+            r.rm(path)
+            base = r.commit()
+            r.master(base)
+            exact = r.commit({path: data})
+            code, out = r.run()
+            self.assertEqual(code, 0, out)
+            self.assertIn("exact pinned historical report exempted", out)
+            r.commit({"other/data.txt": lines(20001)})
+            code, out = r.run()
+            self.assertEqual(code, 1, out)
+            self.assertIn("add 20001 lines", out)
+            r.git("reset", "-q", "--hard", exact)
+            changed = bytes([data[0] ^ 1]) + data[1:]
+            r.commit({path: changed})
+            code, out = r.run()
+            self.assertEqual(code, 1, out)
+            self.assertIn("FAIL lines", out)
+            r.git("reset", "-q", "--hard", exact)
+            r.git("mv", path, "tests/upstream/results/other.json")
+            r.commit()
+            code, out = r.run()
+            self.assertEqual(code, 1, out)
+            self.assertIn("FAIL lines", out)
+
+
 class Paths(unittest.TestCase):
     BAD = {
         "tests/h62/a.txt": "h62", "H7/x.md": "H7", "docs/h62-handoff.md": "h62-handoff.md",

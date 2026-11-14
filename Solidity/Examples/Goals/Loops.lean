@@ -14,8 +14,18 @@ info: open Solidity.Goals.loweringStudyTarget ← Solidity.Correctness.Lowering.
 #guard_msgs in
 #roadmap_goal loweringStudyTarget
 
+/-- The local production contract is exactly the dedicated roadmap goal. -/
+example :
+    (∀ [FreshNames],
+      LowerKernel.Fix lowerList lowerStmt lowerLoop ∧
+      (∃ (μL : List RawStmt → Nat) (μS μP : RawStmt → Nat),
+        LowerKernel.Contractive μL μS μP) ∧
+      LowerKernel.Helpers) = Solidity.Goals.loweringKernelTotal := rfl
+
+example : Solidity.Goals.loweringKernelTotal := Solidity.lowerKernel_total
+
 /--
-info: open Solidity.Goals.loweringKernelTotal ← Solidity.lowerKernel_total plan e2a-lower-total
+info: proved Solidity.Goals.loweringKernelTotal ← Solidity.lowerKernel_total plan e2a-lower-total
 -/
 #guard_msgs in
 #roadmap_goal loweringKernelTotal

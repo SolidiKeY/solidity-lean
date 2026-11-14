@@ -161,3 +161,4 @@ At the root, the notation's own tests:
 |---|---|
 | `Examples/Tactics/OpenLoops/RowsNine.lean` | Existing `binomialRowsNine` obligation, checked with chunk 128 and preserved in the non-default H109 slow library and CI/full/lane-end/axiom-audit closure. Scoped CI acceptance uses 600 s; the 300 s default/VM STOP remains. |
 | `Examples/Tactics/OpenLoops/RowsNine/{Checkpoint,Stage1,Stage2,Stage3,Finish}.lean` | Kernel-checked continuation checkpoints for the unchanged nine-row binomial walk; 128-step chunks, the original aggregate iteration allowance, and one slow-library time cap per module. |
+| `Examples/Panic/Origins.lean` | Typed panic-origin regressions V1 erases the cause of a panic. |
