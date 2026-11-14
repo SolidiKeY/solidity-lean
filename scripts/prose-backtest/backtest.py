@@ -15,7 +15,7 @@ Modes (all read Git objects only; nothing in the measured repository is written)
   v2-evaluate       pb2a: read-only evaluation of one commit (e.g. the current head).
 
 The Lean scanner and process-ID semantics are reused from scripts/check-prose-budget
-(the live checker, or the exact published historical checker blob).
+(the copy beside this directory, whose blob must equal the end commit's copy).
 """
 import argparse
 from bisect import bisect_left
@@ -58,38 +58,10 @@ def load_checker(path):
 HERE = Path(__file__).resolve().parent
 CHECKER_FILE = HERE.parent / "check-prose-budget"
 CHECK = load_checker(CHECKER_FILE)
-LIVE_CHECK = CHECK
 
 
 def git_blob_id(data):
     return hashlib.sha1(b"blob %d\0" % len(data) + data).hexdigest()
-
-
-PUBLISHED_CHECKER = "8c7cdbb9544b8e40defb2eeb34d66334ac794493"
-CHECKER_ID = git_blob_id(CHECKER_FILE.read_bytes())
-
-
-def select_checker(blob, repo=None):
-    """Keep the published scanner exact while allowing tooling-only evolution.
-
-    Only the live checker and the published historical blob are trusted. Never
-    execute arbitrary code named by a policy, or substitute a live scanner for
-    the historical classifier. All other identities continue to fail closed.
-    """
-    global CHECK, CHECKER_ID
-    live = git_blob_id(CHECKER_FILE.read_bytes())
-    if blob == live:
-        CHECK, CHECKER_ID = LIVE_CHECK, live
-        return
-    if blob != PUBLISHED_CHECKER:
-        raise SystemExit("unsupported pinned checker blob: " + str(blob))
-    directory = repo.path if repo is not None else str(HERE.parent.parent)
-    raw = subprocess.check_output(["git", "-C", directory, "cat-file", "blob", blob])
-    if git_blob_id(raw) != blob:
-        raise SystemExit("historical checker blob mismatch")
-    module = importlib.util.module_from_spec(importlib.util.spec_from_loader("published_prose_checker", loader=None))
-    exec(compile(raw, str(CHECKER_FILE) + "@" + blob, "exec"), module.__dict__)
-    CHECK, CHECKER_ID = module, blob
 
 
 # ---------------------------------------------------------------- git access
@@ -246,7 +218,32 @@ def generated_claims(text, comment_spans, lean):
 
 def lean_lines(text):
     """Comment, docstring and code physical-line sets plus comment spans."""
-    return LIVE_CHECK.measure_lines(text, CHECK._Scanner(text))
+    scanner = CHECK._Scanner(text)
+    spans = []
+    original = scanner.mark
+
+    def mark(start, end, target):
+        if target is scanner.comments and end > start:
+            spans.append((start, end))
+        original(start, end, target)
+
+    scanner.mark = mark
+    scanner.code()
+    scanner.scanned = True
+    del scanner.mark
+    newlines = scanner.newlines
+    code = set()
+    pos = 0
+    for start, end in sorted(spans) + [(len(text), len(text))]:
+        if start > pos:
+            # each physical line piece of the non-comment segment
+            line = bisect_left(newlines, pos) + 1
+            for piece in text[pos:start].split("\n"):
+                if piece.strip():
+                    code.add(line)
+                line += 1
+        pos = max(pos, end)
+    return scanner, spans, code
 
 
 class Analyzer:
@@ -510,10 +507,10 @@ def replay(args):
     frozen = freeze_interval(repo, args.end, args.days)
     end_checker = repo.tree(frozen["end"])
     end_checker = {p: s for _, _, s, p in end_checker}.get(CHECKER_PATH)
-    expected = estimate["classifier"]["checker_blob"]
-    if end_checker != expected:
-        raise SystemExit(f"end checker blob {end_checker} differs from estimate {expected}")
-    select_checker(expected, repo)
+    local = git_blob_id(CHECKER_FILE.read_bytes())
+    if local != end_checker or local != estimate["classifier"]["checker_blob"]:
+        raise SystemExit(f"checker blob {local} differs from end commit {end_checker} "
+                         f"or estimate {estimate['classifier']['checker_blob']}")
     margin = Fraction(estimate["margin"]["value"])
     sensitivity = [Fraction(x) for x in estimate["margin"]["sensitivity"]]
     cal = estimate["calibration"]
@@ -702,7 +699,6 @@ def _count(items):
 def calibrate(args):
     repo = Repo(args.repo)
     commit = repo.run("rev-parse", "--verify", args.calibration + "^{commit}").decode().strip()
-    select_checker(repo.blob_id(commit, CHECKER_PATH) or git_blob_id(CHECKER_FILE.read_bytes()), repo)
     margin = Fraction(args.margin)
     m = measure_commit(repo, Analyzer(repo), commit, None)
     mapping = json.loads(args.mapping) if args.mapping else {}
@@ -730,7 +726,7 @@ def calibrate(args):
         "reviewed_baseline": {"commit": args.baseline_commit, "blob": baseline_blob,
                               "review_provenance": args.review,
                               "calibration_label": "provisional" if args.review.startswith("UNVERIFIABLE") else "reviewed"},
-        "classifier": {"checker_path": CHECKER_PATH, "checker_blob": CHECKER_ID,
+        "classifier": {"checker_path": CHECKER_PATH, "checker_blob": git_blob_id(CHECKER_FILE.read_bytes()),
                        "generated_rules": CLASSIFIER_RULES},
         "margin": {"value": str(margin), "sensitivity": args.sensitivity.split(","),
                    "formula": "pass iff n * cal_d * q <= cal_n * (p + q) * d, margin = p/q; "
@@ -925,7 +921,7 @@ def v2_specification(repo, end, days, lookback_days, exclusions, verified):
         "denominator_mapping": {a: default_source(a) for a in covered},
         "classifier": {
             "name": V2_CLASSIFIER, "checker_path": CHECKER_PATH,
-            "checker_blob": CHECKER_ID,
+            "checker_blob": git_blob_id(CHECKER_FILE.read_bytes()),
             "verified_generated": verified,
             "rule": "exclude an item from numerator and denominator only when its path, its blob and "
                     "its generator's blob at that commit all equal a verified entry; every other "
@@ -951,7 +947,6 @@ def v2_specification(repo, end, days, lookback_days, exclusions, verified):
 def v2_calibrate(args):
     refuse_alias(args.output, args.verified)
     repo = Repo(args.repo)
-    select_checker(repo.blob_id(args.end, CHECKER_PATH) or git_blob_id(CHECKER_FILE.read_bytes()), repo)
     verified = json.loads(Path(args.verified).read_text(encoding="utf-8")) if args.verified else []
     excl = {a: "H548: measured but outside proposed enforcement until r1"
             for a in (args.exclude.split(",") if args.exclude else [])}
@@ -1050,7 +1045,9 @@ def load_policy(path, expect=None):
         raise SystemExit("specification digest mismatch: policy was edited after freezing")
     if sha256_text(canonical(policy["calibration"])) != policy["calibration_sha256"]:
         raise SystemExit("calibration digest mismatch: coefficients were edited after freezing")
-    select_checker(policy["specification"]["classifier"]["checker_blob"])
+    local = git_blob_id(CHECKER_FILE.read_bytes())
+    if local != policy["specification"]["classifier"]["checker_blob"]:
+        raise SystemExit(f"checker blob {local} differs from the policy's scanner")
     return raw, policy
 
 

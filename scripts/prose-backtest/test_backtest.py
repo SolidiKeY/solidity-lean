@@ -789,32 +789,5 @@ class V2History(GitCase):
         self.assertEqual(out["historical_rules"]["legacy_states"], {"evaluated": 4})
 
 
-class PublishedCheckerCompatibility(unittest.TestCase):
-    def tearDown(self):
-        bt.select_checker(bt.git_blob_id(bt.CHECKER_FILE.read_bytes()))
-
-    def test_published_policy_selects_exact_historical_scanner(self):
-        raw, policy = bt.load_policy(HERE / 'calibration-additive.json',
-            '2688f0889571f568eb7449427b0f94b97be21552d171aa5fe9cf60692ea26f9c')
-        self.assertEqual(bt.CHECKER_ID, policy['specification']['classifier']['checker_blob'])
-        self.assertEqual(bt.CHECKER_ID, bt.PUBLISHED_CHECKER)
-        self.assertIsNot(bt.CHECK._Scanner, bt.LIVE_CHECK._Scanner)
-        scanner, spans, code = bt.lean_lines('-- generated H1\ndef x := 1 -- mixed\n')
-        self.assertIsInstance(scanner, bt.CHECK._Scanner)
-        self.assertEqual(scanner.comments, {1, 2})
-        self.assertEqual(code, {2})
-        self.assertTrue(spans)
-
-    def test_unknown_checker_still_rejected(self):
-        with self.assertRaisesRegex(SystemExit, 'unsupported pinned checker'):
-            bt.select_checker('0' * 40)
-
-    def test_live_checker_can_be_restored_after_published_policy(self):
-        bt.select_checker(bt.PUBLISHED_CHECKER)
-        bt.select_checker(bt.git_blob_id(bt.CHECKER_FILE.read_bytes()))
-        self.assertIs(bt.CHECK, bt.LIVE_CHECK)
-        self.assertEqual(bt.CHECKER_ID, bt.git_blob_id(bt.CHECKER_FILE.read_bytes()))
-
-
 if __name__ == "__main__":
     unittest.main()
