@@ -170,4 +170,14 @@ example (σ : State C Γ) :
   int_narrow_guard_origin σ (Checked.litI (-129) (by decide)) ⟨-129, by decide⟩ 8
     (by decide) (by decide) (by decide) rfl rfl
 
+/-- The actual uint8 producer emits this arithmetic guard and leaves the
+elaboration context and fresh counter unchanged for the literal boundary. -/
+example : (narrowCheck C .uint 8 (.num 256)).runFrom
+    { funs := [], retainFailureData := true } ([], 0) =
+    .ok ([.of [] (panicStmt 17 (Checked.cmpU .le rfl rfl
+      (Checked.litU 256 (by decide)) (Checked.litU 255 (by decide))))], ([], 0)) := by
+  simp [narrowCheck_source, inTyCond, checkIn, check, checkVia, synth,
+    RawExpr.constRat?, RawExpr.isLit, litAt]
+  rfl
+
 end Solidity.Examples.PanicSource
