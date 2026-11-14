@@ -16,7 +16,8 @@ example : Leaf.spine (C := C) (.not .tt) = false := rfl
 example : Leaf.spine (C := C) (.and .tt (.not .tt)) = false := rfl
 example : Leaf.spine (C := C) (.imp (.not .tt) (.not .tt)) = false := rfl
 example : Leaf.prefer (some false) (fun _ => some true) = some true := rfl
-example : Leaf.prefer none (fun _ => some true) = some true := rfl
+example : Leaf.prefer none (fun _ => some true) = some true :=
+  Leaf.prefer_refusal (by decide)
 example : Leaf.prefer (some true) (fun _ => none) = some true := rfl
 
 /-- A real conditional-join step, followed by a structural local leaf witness.
@@ -39,6 +40,9 @@ example : Proves C .all [] .nil (.tt : Fml C []) :=
 
 example : Proves C .all [] .nil (.tt : Fml C []) :=
   Certificate.useOr none (fun _ => trueLeaf.proves)
+
+/-- The premise-free checker closes a literal terminal leaf. -/
+example : Leaf.check (C := C) Leaf.dropAll .tt = some true := rfl
 
 /-- Production must succeed without using the fallback. -/
 theorem producedConjunction : Proves C .all [] .nil (.and .tt .tt : Fml C []) := by
@@ -110,6 +114,16 @@ theorem cleanTailFallback : Proves Tokens .all [] .nil
     (dl!{ cleanTail(storage) = true →
       [ tokens.push(); ] tokens[tokens.length - 1].value == 0 } : Fml Tokens []) := by
   sol_certificate_or (sol_prove)
+
+/-- Generalized trimming preserves the established clean-tail closer after
+symbolic execution; the original premise and postcondition remain intact. -/
+theorem reflectedCleanTailFallback : Fml.Valid
+    (dl!{ cleanTail(storage) = true →
+      [ tokens.push(); ] tokens[tokens.length - 1].value == 0 } : Fml Tokens []) := by
+  sol_symex
+  apply Leaf.check_valid (drop := Leaf.dropTrue)
+  apply Leaf.check_accepts
+  decide +kernel
 
 end CleanTailFallback
 end Solidity.Automation
