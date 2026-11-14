@@ -173,4 +173,23 @@ def elabCheckExtended : CommandElab := fun stx => do
       finally before.restore
   IO.FS.writeFile output (toJson results).pretty
 
+/-- Discovery uses the original per-obligation classifiers, without attempting a proof. -/
+syntax (name := listReadings) "#fast_readings " ident " ids " str " to " str : command
+
+@[command_elab listReadings]
+def elabListReadings : CommandElab := fun stx => do
+  let N ← liftCoreM <| realizeGlobalConstNoOverloadWithInfo stx[1]
+  let some text := stx[3].isStrLit? | throwError "expected literal source IDs"
+  let some output := stx[5].isStrLit? | throwError "expected literal output path"
+  let requested ← Lean.ofExcept (fromJson? (← Lean.ofExcept (Json.parse text)) : Except String (Array Int))
+  let rows ← reportRows N
+  let tail ← contractTailMode N rows
+  let results ← liftTermElabM <| requested.mapM fun id => do
+    let some row := rows.find? (·.sourceId == id) | throwError "unknown source obligation ID"
+    let formula ← Symex.evaluable (← testFormula N row)
+    let mode ← if ← testOrdinaryTree N formula then testTailMode N row tail formula else pure .solc
+    pure <| Json.mkObj [("sourceId", toJson id),
+      ("reading", toJson (if mode == .clean then "clean" else "solc"))]
+  IO.FS.writeFile output (toJson results).pretty
+
 end Solidity.Tools.FastMode

@@ -4,6 +4,7 @@ import {resolve,dirname,join} from 'node:path';
 import {fileURLToPath} from 'node:url';
 import {tmpdir} from 'node:os';
 import {runTool,runSolidityTests,solidityFiles} from './test-solidity.mjs';
+import {runReadings} from './verify-meta.mjs';
 import {sourceHash,sourceLocations,sourceWitness} from './source-locations.mjs';
 const root=resolve(dirname(fileURLToPath(import.meta.url)),'..');
 
@@ -79,6 +80,23 @@ export function compileSnapshot(source,options={}) {
   } catch(error) {rmSync(scratch,{recursive:true,force:true});throw error;}
 }
 
+/** Correct contract-level list metadata with the original per-function classifiers. */
+export function discoverSnapshot(snapshot,source,options={}) {
+  const report=runSolidityTests([source],{...options,list:true,counterexamples:false});
+  const groups=new Map();
+  for(const row of report.results) {
+    if(row.sourceHash!==snapshot.sourceSha256)throw new Error('discovery source differs from frozen input');
+    if(row.status!=='ready')continue;
+    const rows=groups.get(row.contract)??[];rows.push(row);groups.set(row.contract,rows);
+  }
+  for(const [contract,requests] of groups) {
+    const readings=runReadings(snapshot.fixtureBytes,contract,requests,options);
+    requests.forEach((row,i)=>{row.reading=readings[i].reading;});
+  }
+  snapshot.assertUnchanged();
+  return report;
+}
+
 export function sourceReport(paths,options={}) {
   const files=solidityFiles(paths);
   if(!files.length) throw new Error('no Solidity files selected');
@@ -87,7 +105,7 @@ export function sourceReport(paths,options={}) {
     let snapshot;
     try {
       snapshot=compileSnapshot(source,options);
-      const actual=runSolidityTests([source],options);
+      const actual=options.list?discoverSnapshot(snapshot,source,options):runSolidityTests([source],options);
       snapshot.assertUnchanged();
       if(actual.results.some(row=>row.sourceHash!==snapshot.sourceSha256)) throw new Error('backend source identity differs from frozen input');
       report.results.push(...actual.results.map(row=>({...row,...snapshot.locate(row),...(row.counterexample?{counterexample:snapshot.witness(row)}:{}),compilationSha256:snapshot.compilationSha256})));

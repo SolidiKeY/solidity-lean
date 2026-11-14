@@ -84,7 +84,7 @@ export function decodeMeta(text,diagnostics,requests,nonce) {
   });
 }
 
-export function runExtended(fixtureBytes,contract,requests,options={}) {
+function executeMeta(fixtureBytes,contract,requests,options,discovery) {
   if(!/^[A-Za-z_$][A-Za-z0-9_$]*$/.test(contract))throw new Error('invalid extended contract name');
   const {build,sdk}=ensureBuild(options),scratch=mkdtempSync(join(tmpdir(),'verify-meta-'));
   const priorNonce=process.env.VERIFY_META_NATIVE_NONCE,nonce=randomBytes(16).toString('hex');
@@ -97,7 +97,7 @@ export function runExtended(fixtureBytes,contract,requests,options={}) {
     writeFileSync(source,`import ${moduleName}
 solc_import "source.ast.json" hash 0x${hash.toString(16)} as ${namespace} testing
 solc_scoped_problems ${namespace} decl${self}
-#fast_meta ${namespace} ids ${JSON.stringify(JSON.stringify(requests.map(r=>r.sourceId)))} to ${JSON.stringify(output)}
+${discovery?"#fast_readings":"#fast_meta"} ${namespace} ids ${JSON.stringify(JSON.stringify(requests.map(r=>r.sourceId)))} to ${JSON.stringify(output)}
 `);
     const setup=JSON.parse(runTool(join(sdk,'bin/lake'),['--quiet','setup-file',source],options.timeoutMs??300000));
     const validateImports=()=>{
@@ -110,9 +110,18 @@ solc_scoped_problems ${namespace} decl${self}
     const diagnostics=runTool(join(sdk,'bin/lean'),['--setup='+setupPath,'--plugin='+build.plugin,'-j1','--tstack=131072',source],options.timeoutMs??300000);
     const after=metaBuild();validateImports();
     if(build.identity!==after.identity)throw new Error('extended native build changed during verification');
-    return decodeMeta(readFileSync(output,'utf8'),diagnostics,requests,nonce);
+    const text=readFileSync(output,'utf8');
+    if(!discovery)return decodeMeta(text,diagnostics,requests,nonce);
+    const rows=JSON.parse(text);
+    if(!Array.isArray(rows)||rows.length!==requests.length||rows.some((row,i)=>
+        !row||row.sourceId!==requests[i].sourceId||!['clean','solc'].includes(row.reading)))
+      throw new Error('per-obligation reading discovery identity mismatch');
+    return rows;
   } finally {
     if(priorNonce===undefined)delete process.env.VERIFY_META_NATIVE_NONCE;else process.env.VERIFY_META_NATIVE_NONCE=priorNonce;
     rmSync(scratch,{recursive:true,force:true});
   }
 }
+
+export const runExtended=(fixture,contract,requests,options={})=>executeMeta(fixture,contract,requests,options,false);
+export const runReadings=(fixture,contract,requests,options={})=>executeMeta(fixture,contract,requests,options,true);

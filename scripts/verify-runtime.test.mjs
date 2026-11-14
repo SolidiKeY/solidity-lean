@@ -17,3 +17,23 @@ test('compiled invariant leaves agree with the unchanged certified obligation',(
   assert.equal(report.certified.results[0].reading,'clean');
   assert.equal(report.fast.results[0].sourceHash,report.certified.results[0].sourceHash);
 });
+
+test('compiled recursion executes the walk and closer without declaring a result theorem',()=>{
+  const report=JSON.parse(runTool(process.execPath,['scripts/verify.mjs',
+    'tests/solc/Recursion.sol','--mode','fast','--compare','--json','--function','countdown'],600000));
+  assert.equal(report.status,'agree');
+  const row=report.fast.results[0];
+  assert.equal(row.status,'proved');assert.equal(row.verification,'native');
+  for(const probe of ['command','rec_auto','closing'])assert.ok(row.nativeCProbes.includes(probe));
+});
+
+test('callback discovery preserves the certified per-function solc reading',()=>{
+  const report=JSON.parse(runTool(process.execPath,['scripts/verify.mjs',
+    'scripts/verify-fixtures/CallbackDiscovery.sol','--mode','fast','--compare','--json',
+    '--function','localKept'],600000));
+  assert.equal(report.status,'agree');
+  const row=report.fast.results[0];
+  assert.equal(row.status,'proved');assert.equal(row.verification,'native');
+  assert.equal(row.reading,'solc');assert.equal(report.certified.results[0].reading,'solc');
+  assert.ok(row.nativeCProbes.includes('sol_prove'));
+});

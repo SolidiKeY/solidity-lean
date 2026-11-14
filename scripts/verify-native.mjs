@@ -6,7 +6,7 @@ import {createHash} from 'node:crypto';
 import {spawnSync} from 'node:child_process';
 import {performance} from 'node:perf_hooks';
 import {solidityFiles, runTool, runSolidityTests} from './test-solidity.mjs';
-import {compileSnapshot} from './verify-source.mjs';
+import {compileSnapshot,discoverSnapshot} from './verify-source.mjs';
 import {runExtended} from './verify-meta.mjs';
 import {sourceHash, sourceLocations, sourceWitness} from './source-locations.mjs';
 const root=resolve(dirname(fileURLToPath(import.meta.url)), '..');
@@ -127,7 +127,7 @@ export function fastReport(paths, options={}) {
       const ast=compiled.ast??primary?.ast;
       const partial={results:[],errors:[]};
       const location=sourceLocations(ast,sourceBytes);
-      const listing=runSolidityTests([source],{...options,list:true,counterexamples:false});
+      const listing=discoverSnapshot(snapshot,source,options);
       partial.errors.push(...listing.errors);
       const groups=new Map();
       for(const expected of listing.results) {
