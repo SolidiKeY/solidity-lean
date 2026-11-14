@@ -54,7 +54,10 @@ private def prepareLeaf {C : Contract} : Nat → {Γ : Ctx} → (φ : Fml C Γ) 
   | 0, _, φ => ⟨φ, fun _ h => h⟩
   | n+1, _, .imp a b =>
     let r := prepareLeaf n b
-    let skipPremise := match a with | .wellFormed _ => true | _ => false
+    let skipPremise := match a with
+      | .wellFormed _ => true
+      | .eq (.app1 .cleanTail _) _ => true
+      | _ => false
     if skipPremise then withoutPremise a r else throughImp a r
   | n+1, _, .and a b =>
     let ra := prepareLeaf n a
