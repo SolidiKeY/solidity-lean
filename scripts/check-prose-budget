@@ -566,13 +566,13 @@ def validate_candidate(candidate, ceiling=None):
                     raise ValueError("frozen calibration metadata")
 
 
-def code_lines(source):
+def measure_lines(source, scanner=None):
     """Published physical-line denominator: nonblank noncomment pieces count.
 
     Mixed code/comment lines belong to both sets. No generated exclusion is
     verified in the published policy, so all generation claims count on both sides.
     """
-    scanner = _Scanner(source)
+    scanner = scanner or _Scanner(source)
     spans = []
     original = scanner.mark
 
@@ -583,6 +583,8 @@ def code_lines(source):
 
     scanner.mark = mark
     scanner.code()
+    scanner.scanned = True
+    del scanner.mark
     lines, pos = set(), 0
     for start, end in sorted(spans) + [(len(source), len(source))]:
         if start > pos:
@@ -592,7 +594,11 @@ def code_lines(source):
                     lines.add(line)
                 line += 1
         pos = max(pos, end)
-    return len(lines)
+    return scanner, spans, lines
+
+
+def code_lines(source):
+    return len(measure_lines(source)[2])
 
 
 def candidate_report(root, actual, policy):
