@@ -1,0 +1,1 @@
+| `Semantics/Panic/Result.lean` | Origin-parameterized panic-carrying typed results: full successes, intrinsic solc code and origin, external revert bytes, ordinary revert, exhaustion and divergence; local V1 projections and map/bind laws, without interpreter erasure. |
