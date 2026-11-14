@@ -46,11 +46,13 @@ def Checked.op : Checked → BinOp
   | .add => .add | .sub => .sub | .mul => .mul
   | .pow => .pow | .div => .div | .mod => .mod
 
-/-- Zero division is distinguished before the range check. -/
-def Checked.failure (op : Checked) (y : Int) : Site :=
+/-- Zero division is distinguished before the range check. V1 also permits
+a negative exponent; that failure has no Solidity panic origin here. -/
+def Checked.failure (op : Checked) (y : Int) : Option Site :=
   match op with
-  | .div | .mod => if y = 0 then .zeroDivisor else .arithmetic
-  | _ => .arithmetic
+  | .div | .mod => some (if y = 0 then .zeroDivisor else .arithmetic)
+  | .pow => if y < 0 then none else some .arithmetic
+  | _ => some .arithmetic
 
 /-- A producer carries typed operands and its successful result type.
 Guards are total on their inputs: failure witnesses add no admission condition. -/
@@ -88,17 +90,17 @@ def storageLength (word : PrimTy.uint.Denote) : Option Nat :=
 
 /-- Local diagnostic outcome. `none` preserves an unclassified V1 failure
 (e.g. a missing storage path), without inventing a panic origin. -/
-def checked {α : Type} (site : Site) : Option α → Except (Option Site) α
+def checked {α : Type} (site : Option Site) : Option α → Except (Option Site) α
   | some value => .ok value
-  | none => .error (some site)
+  | none => .error site
 
 def Producer.run {α : Type} : Producer α → Except (Option Site) α
   | .assertion b => if b then .ok () else .error (some .assertion)
   | .binary op p h x y => checked (op.failure (integer y)) (op.op.evalT h x y)
-  | .neg x => checked .arithmetic (UnOp.neg.evalT rfl x)
+  | .neg x => checked (some .arithmetic) (UnOp.neg.evalT rfl x)
   | .enumConversion members value =>
       if value.val.toNat < members then .ok value else .error (some .enumConversion)
-  | .storageEncoding word => checked .storageEncoding (storageLength word)
+  | .storageEncoding word => checked (some .storageEncoding) (storageLength word)
   | .pop st keep ref =>
       match st.find ref with
       | none => .error none
@@ -107,7 +109,7 @@ def Producer.run {α : Type} : Producer α → Except (Option Site) α
           else match st.pop keep ref with
             | none => .error none
             | some next => .ok next
-  | .index hp ref array i => checked .bounds (hp.index ref array i)
+  | .index hp ref array i => checked (some .bounds) (hp.index ref array i)
   | .allocation input used size =>
       match AbiEntry.alloc input used size with
       | .ok n => .ok n
@@ -125,9 +127,10 @@ theorem assertion_origin : Origin (.assertion false) .assertion := rfl
 
 theorem binary_origin (op : Checked) (p : PrimTy)
     (ha : op.op.accepts p = true) (x y : p.Denote)
-    (failed : op.op.evalT ha x y = none) :
-    Origin (.binary op p ha x y) (op.failure (integer y)) := by
-  simp only [Origin, Producer.run, failed, checked]
+    (failed : op.op.evalT ha x y = none) (site : Site)
+    (classified : op.failure (integer y) = some site) :
+    Origin (.binary op p ha x y) site := by
+  simp only [Origin, Producer.run, failed, checked, classified]
 
 theorem neg_origin (x : PrimTy.int.Denote)
     (failed : UnOp.neg.evalT rfl x = none) : Origin (.neg x) .arithmetic := by
@@ -188,8 +191,14 @@ theorem binary_success (op : Checked) (p : PrimTy)
 
 /-- Both zero-divisor operations use 0x12, including checked signed division. -/
 theorem zero_divisor_codes :
-    (Checked.div.failure 0).code = 0x12 ∧
-    (Checked.mod.failure 0).code = 0x12 := by decide
+    (Checked.div.failure 0).map Site.code = some 0x12 ∧
+    (Checked.mod.failure 0).map Site.code = some 0x12 := by decide
+
+/-- Negative exponents remain admitted intrinsic inputs, but their V1 failure
+is not misreported as Solidity checked overflow. -/
+theorem negative_exponent_unclassified (y : Int) (negative : y < 0) :
+    Checked.pow.failure y = none := by
+  simp only [Checked.failure, if_pos negative]
 
 /-- Every original site has its prescribed code. -/
 theorem original_codes :
