@@ -1,0 +1,56 @@
+{
+ "Solidity/Hash/CompilerCorrect.lean:Solidity.Hash.CompilerCorrect.add_slot_related": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Hash/CompilerCorrect.lean:Solidity.Hash.CompilerCorrect.address_injective_on": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Hash/CompilerCorrect.lean:Solidity.Hash.CompilerCorrect.empty_stack_fault_related": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Hash/CompilerCorrect.lean:Solidity.Hash.CompilerCorrect.encoded_inj": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Hash/CompilerCorrect.lean:Solidity.Hash.CompilerCorrect.keccakArr_related": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Hash/CompilerCorrect.lean:Solidity.Hash.CompilerCorrect.keccakMap_related": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Hash/CompilerCorrect.lean:Solidity.Hash.CompilerCorrect.prefix_limit_unique": [
+  "propext"
+ ],
+ "Solidity/Hash/CompilerCorrect.lean:Solidity.Hash.CompilerCorrect.producer_produces": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Hash/CompilerCorrect.lean:Solidity.Hash.CompilerCorrect.sload_access_agrees": [
+  "propext"
+ ],
+ "Solidity/Hash/CompilerCorrect.lean:Solidity.Hash.CompilerCorrect.sload_related": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Hash/CompilerCorrect.lean:Solidity.Hash.CompilerCorrect.sstore_access_agrees": [
+  "propext"
+ ],
+ "Solidity/Hash/CompilerCorrect.lean:Solidity.Hash.CompilerCorrect.sstore_related": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ]
+}
