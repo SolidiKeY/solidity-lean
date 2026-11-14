@@ -1,6 +1,8 @@
 import Solidity.Calculus.DecisionResidue
 import Solidity.Calculus.DecisionPartialOrFloor
 import Solidity.Calculus.DecisionMappingStruct
+import Solidity.Examples.DecisionGapPartialOrSub
+import Solidity.Examples.DecisionGapKIntResidue
 import Solidity.Examples.DecisionHaltingOrGaps
 import Solidity.Examples.DecisionMappingFieldReason
 import Solidity.Examples.DecisionNormalizationResidue
@@ -18,12 +20,11 @@ import Solidity.Examples.DecisionGaps
 `DecisionTheorem'`'s totality off it holds by definition and is not a
 completeness result. These fixtures show what the statement does carry:
 
-* **Residue members** (in target, every route refuses): on leaves without a
-  hash, a halting `||` guard in an APF block, valid (`floorClaim 1`) and false
-  (`floorBad`), with no VA1 label; leaves carrying VA1's mapping-bearing
-  reversed-field label (`mappingReversed`, every leaf route's refusal listed)
-  and normalization-budget labels (`exhausted`); a leaf in no labelled class
-  (`sibling`). On a leaf with a hash, every hash try refusing (`hashBudget`).
+* **Residue members** (in target, every route refuses): an APF guard outside
+  the decided partial-OR families (`otherClaim`); valid and false KeY-`int`
+  implications past the two-word encoding (`negBigGood`, `negBig`);
+  normalization-budget leaves (`exhausted`, `sibling`), and a leaf on which
+  every hash try refuses (`hashBudget`).
 * **Witness controls**: the theorem's hypotheses are jointly satisfiable, by
   in-target, non-residue leaves from the feature fixtures of earlier
   milestones (quantified arithmetic, APF blocks, storage and fixed arrays,
@@ -33,9 +34,8 @@ completeness result. These fixtures show what the statement does carry:
 * **Negative controls**: a residue leaf is not claimed; a valid one and a
   false one sit in the residue alike, and the theorem's conclusion fails there.
 
-Membership comes from the existing kernel-checked `unknown` pins through
-`residue_iff_unknown` where one exists (`floorClaim 1`, `floorBad`,
-`mappingReversed`), and from `decide +kernel` on `Fml.Residue` otherwise.
+Membership is pinned on `Fml.Residue` itself with `decide +kernel`;
+noncoverage alone does not establish that every route refuses.
 -/
 
 namespace Solidity.Examples.DecisionResidue
@@ -100,33 +100,38 @@ end FamilyCertificates
 /-! ## Residue members, one per named reason -/
 
 section Members
-open Solidity.Examples.DecisionHaltingOrGaps
+open Solidity.Examples.DecisionGapKIntResidue
 
-/-- Halting `||` guard, valid leaf: in target, in the residue. -/
-theorem floorValid_residue : (floorClaim 1).inTarget {} = true ∧ (floorClaim 1).Residue :=
-  ⟨validAPF_target, residue_iff_unknown.2 validAPF_unknown⟩
+/-- Valid KeY-`int` implication past two words: in target, in the residue. -/
+theorem kintValid_residue : negBigGood.inTarget {} = true ∧ negBigGood.Residue := by
+  decide +kernel
 
-/-- Halting `||` guard, false leaf: in target, in the residue. -/
-theorem floorBad_residue : floorBad.inTarget {} = true ∧ floorBad.Residue :=
-  ⟨falseAPF_target, residue_iff_unknown.2 falseAPF_unknown⟩
+/-- False KeY-`int` implication past two words: in target, in the residue. -/
+theorem kintBad_residue : negBig.inTarget {} = true ∧ negBig.Residue := by
+  decide +kernel
 
 end Members
 
-section Mapping
+section APF
+open Solidity.Examples.DecisionGapPartialOrSub
+
+/-- The APF guard outside both decided families remains in the residue. -/
+theorem apf_residue : otherClaim.inTarget {} = true ∧ otherClaim.Residue := by
+  decide +kernel
+
+/-- Every leaf route refuses the nonmember APF shape, in route order. -/
+theorem apf_routeRefusals : otherClaim.routeRefusals = leafRoutes := by decide +kernel
+
+end APF
+
+section SourceLabel
 open Solidity.Examples.DecisionResidueReasons
 
-/-- VA1's mapping-bearing reversed field: in target, in the residue. -/
-theorem mapping_residue : mappingReversed.inTarget {} = true ∧ mappingReversed.Residue :=
-  ⟨mapping_target_control, residue_iff_unknown.2 mapping_global_unknown⟩
-
-/-- Every leaf route refuses it, each refusal named, in `decideGoal`'s order. -/
-theorem mapping_routeRefusals : mappingReversed.routeRefusals = leafRoutes := by decide +kernel
-
-/-- Its finer VA1 source reason is reported (the source reasons consult no route). -/
+/-- The mapping fixture retains its source label independently of certified semantics. -/
 theorem mapping_sourceReason : mappingReversed.sourceReasons =
     [ResidueReason.mappingReversedFreshFieldReason] := by decide +kernel
 
-end Mapping
+end SourceLabel
 
 section Budget
 open Solidity.Examples.DecisionNormalizationResidue
@@ -261,11 +266,11 @@ end Witnesses
 /-- A valid leaf and a false leaf of one shape are both in target and in the
 residue; the theorem's conclusion fails at each, so it claims neither. -/
 theorem residue_not_claimed :
-    Fml.Valid (DecisionHaltingOrGaps.floorClaim 1) ∧ ¬ Fml.Valid DecisionHaltingOrGaps.floorBad ∧
-      ¬ Answered (DecisionHaltingOrGaps.floorClaim 1) ∧
-      ¬ Answered DecisionHaltingOrGaps.floorBad :=
-  ⟨DecisionHaltingOrGaps.floorClaim_one_valid, DecisionHaltingOrGaps.floorBad_notValid,
-    not_answered_of_residue floorValid_residue.2, not_answered_of_residue floorBad_residue.2⟩
+    Fml.Valid DecisionGapKIntResidue.negBigGood ∧ ¬ Fml.Valid DecisionGapKIntResidue.negBig ∧
+      ¬ Answered DecisionGapKIntResidue.negBigGood ∧
+      ¬ Answered DecisionGapKIntResidue.negBig :=
+  ⟨DecisionGapKIntResidue.negBigGood_valid, DecisionGapKIntResidue.negBig_notValid,
+    not_answered_of_residue kintValid_residue.2, not_answered_of_residue kintBad_residue.2⟩
 
 /-- info: 'Solidity.Examples.DecisionResidue.dependent_witnesses' depends on axioms: [propext, Classical.choice, Quot.sound] -/
 #guard_msgs in #print axioms dependent_witnesses
@@ -306,17 +311,17 @@ theorem residue_not_claimed :
 /-- info: 'Solidity.Examples.DecisionResidue.residue_not_claimed' depends on axioms: [propext, Classical.choice, Quot.sound] -/
 #guard_msgs in #print axioms residue_not_claimed
 
-/-- info: 'Solidity.Examples.DecisionResidue.floorValid_residue' depends on axioms: [propext, Classical.choice, Quot.sound] -/
-#guard_msgs in #print axioms floorValid_residue
+/-- info: 'Solidity.Examples.DecisionResidue.kintValid_residue' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in #print axioms kintValid_residue
 
-/-- info: 'Solidity.Examples.DecisionResidue.floorBad_residue' depends on axioms: [propext, Classical.choice, Quot.sound] -/
-#guard_msgs in #print axioms floorBad_residue
+/-- info: 'Solidity.Examples.DecisionResidue.kintBad_residue' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in #print axioms kintBad_residue
 
-/-- info: 'Solidity.Examples.DecisionResidue.mapping_residue' depends on axioms: [propext, Classical.choice, Quot.sound] -/
-#guard_msgs in #print axioms mapping_residue
+/-- info: 'Solidity.Examples.DecisionResidue.apf_residue' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in #print axioms apf_residue
 
-/-- info: 'Solidity.Examples.DecisionResidue.mapping_routeRefusals' depends on axioms: [propext, Classical.choice, Quot.sound] -/
-#guard_msgs in #print axioms mapping_routeRefusals
+/-- info: 'Solidity.Examples.DecisionResidue.apf_routeRefusals' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in #print axioms apf_routeRefusals
 
 /-- info: 'Solidity.Examples.DecisionResidue.exhausted_residue' depends on axioms: [propext, Classical.choice, Quot.sound] -/
 #guard_msgs in #print axioms exhausted_residue
