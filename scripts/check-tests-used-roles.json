@@ -1247,6 +1247,12 @@
       "blob": "debdc5ae5fc34761176a788306de750676f1eb65",
       "anchor": "Build completed successfully (235 jobs).",
       "role": "Historical record: Captured Step12 replay/build/linter transcript ending with a reported235-job build, twelve printed declaration-axiom summaries and old53-second/cgroup footer. Historical validation metadata names the exact build command and log. Full901line structure is reviewed as recorded output, not semantic authentication of linter rewrites, theorem statements, axiom closure, source preservation or actual kernel checking. All success, timing, peak/cap/swap and source/hash assertions remain unverified history; no fresh proof/compiler adequacy, current build/full-gate pass, resource/budget/trust/premise/exclusion policy, owner agreement or permission is adopted. Keep/uncertain-reader precedence and every unfinished obligation remain; no runtime/child/read/consumer/nonuse/deletion/orphan, stopped-workload replay, private recovery or STOP-clearance credit."
+    },
+    {
+      "path": "tests/upstream/step12-quantified-diamond/before.txt",
+      "blob": "5c4fe80474686e2b2e8e3fef3e53b5530ead6b99",
+      "anchor": "Starting origin/master: f4dee4a29c2e208b36db4a4161a4723c735cd775",
+      "role": "Historical record: Dated before-edit calculus-baseline report with captured quantifiedDiamondBefore Lean source, named old checkout revisions/tool versions and reported bounded command exit0/propext-only output. The generic refusal/calculus-versus-EVM interpretation, source preservation, kernel result and axiom closure are unverified historical assertions, not adopted current theorem statements, premises, regressions, compiler adequacy or proof acceptance. No archived Lean snippet or old prlimit/resource setting is executed, restored, substituted into a theorem or adopted as current policy. Keep/uncertain-reader precedence and all unfinished obligations remain; no fresh execution, child/read/consumer/nonuse/deletion/orphan, full-gate, resource/budget/trust/exclusion/permission, stopped-workload replay or private-recovery credit."
     }
   ],
   "schema_version": 1
