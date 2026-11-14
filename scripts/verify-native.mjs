@@ -31,7 +31,7 @@ export function nativeBuild(directory) {
   if (sha(join(root,'web/browser/direct-bridge.c'))!==manifest.bridgeSha256
       || sha(join(root,'scripts/direct-runtime-closure.py'))!==manifest.closureScriptSha256)
     throw new Error('native bridge or closure builder changed; rebuild with scripts/verify-build');
-  for(const relative of ['scripts/verify-build.py','scripts/direct-runtime-closure.py','web/browser/direct-bridge.c','lean-toolchain','lakefile.toml']) {
+  for(const relative of ['scripts/verify-build.py','scripts/verify_artifacts.py','scripts/direct-runtime-closure.py','web/browser/direct-bridge.c','lean-toolchain','lakefile.toml']) {
     const path=join(root,relative);
     if(manifest.buildInputs?.[path]!==sha(path)) throw new Error('native build input changed: '+relative);
   }
@@ -58,10 +58,17 @@ export function nativeBuild(directory) {
     if (!/^Solidity(?:\.[A-Za-z_][A-Za-z_0-9]*)+$/.test(entry.module) || seen.has(entry.module))
       throw new Error('invalid native source manifest');
     seen.add(entry.module);
+    if(typeof entry.cPath!=='string' || !entry.cPath.endsWith('.c')
+        || manifest.selectedArtifacts?.[entry.cPath]!==entry.cSha256 || sha(entry.cPath)!==entry.cSha256)
+      throw new Error('native selected C artifact changed: '+entry.module);
     if (sha(join(root,entry.module.replaceAll('.','/')+'.lean'))!==entry.sourceSha256)
       throw new Error(`native source changed: ${entry.module}; rebuild with scripts/verify-build`);
   }
   if(seen.size!==closure.size || [...closure].some(name=>!seen.has(name))) throw new Error('native source manifest does not cover current import closure');
+  if(!manifest.selectedArtifacts || !Object.keys(manifest.selectedArtifacts).length)
+    throw new Error('native selected artifact manifest missing');
+  for(const [file,hash] of Object.entries(manifest.selectedArtifacts))
+    if(sha(file)!==hash)throw new Error('native selected artifact changed: '+file);
   return {executable, manifestSha256:sha(manifestPath), executableSha256:manifest.executable};
 }
 

@@ -13,6 +13,8 @@ import re
 import subprocess
 import shutil
 import sys
+import tempfile
+from verify_artifacts import runtime_aliases
 
 for override in ['LEAN_CC','LEAN_SYSROOT','CPATH','C_INCLUDE_PATH','CPLUS_INCLUDE_PATH','LIBRARY_PATH','COMPILER_PATH']:
     if os.environ.get(override):
@@ -41,7 +43,7 @@ bridge_bytes=bridge_path.read_bytes()
 cc=shutil.which(os.environ.get('CC','cc'))
 if not cc: raise ValueError('System C compiler not found')
 def provenance_paths():
-    return [pathlib.Path(__file__).resolve(), closure_path, bridge_path, root/'lean-toolchain', root/'lakefile.toml',
+    return [pathlib.Path(__file__).resolve(), root/'scripts/verify_artifacts.py', closure_path, bridge_path, root/'lean-toolchain', root/'lakefile.toml',
             pathlib.Path(cc), *[prefix/'bin'/n for n in ['lean','lake','leanc','clang','ld.lld','llvm-ar']],
             *sorted((prefix/'include').rglob('*.h')),
             *sorted((prefix/'lib').rglob('*.a'))]
@@ -56,6 +58,31 @@ subprocess.run([str(prefix/'bin/lake'), 'build', 'Solidity.Tools.FastMode.Engine
 input_c = output/(module+'.c')
 setup = json.loads(subprocess.check_output([str(prefix/'bin/lake'), '--quiet', 'setup-file', str(input_source)],
     cwd=root, env=dict(os.environ, LEAN_NUM_THREADS='1'), text=True))
+# Query paired C/olean facets from the current build graph. Default cached
+# builds need not restore C into .lake/build/ir, so the extractor gets an owned
+# overlay of selected artifacts instead of reading those fixed local paths.
+modules=sorted(setup['importArts'])
+if not modules or any(not name.startswith('Solidity.') for name in modules):
+    raise ValueError('Unexpected ordinary native import closure')
+targets=[name+':'+facet for name in modules for facet in ['c','olean']]
+artifacts=subprocess.check_output([str(prefix/'bin/lake'),'--quiet','query',*targets],
+    cwd=root,env=dict(os.environ,LEAN_NUM_THREADS='1'),text=True).splitlines()
+if len(artifacts)!=len(targets):raise ValueError('Unexpected ordinary artifact query count')
+c_paths={name:pathlib.Path(artifacts[2*i]).resolve() for i,name in enumerate(modules)}
+compiled_imports={name:[artifacts[2*i+1]] for i,name in enumerate(modules)}
+if any(not path.is_file() or path.suffix!='.c' for path in c_paths.values()):
+    raise ValueError('Unexpected ordinary native C artifact query')
+selected=helper.snapshot_files([*c_paths.values(),
+    *(pathlib.Path(p).resolve() for paths in compiled_imports.values() for p in paths)])
+frozen={str(pathlib.Path(p).resolve()):pathlib.Path(p).read_bytes()
+        for paths in compiled_imports.values() for p in paths}
+aliases=runtime_aliases(compiled_imports,setup['importArts'],frozen)
+selected.update({path:hashlib.sha256(raw).hexdigest() for path,raw in aliases.items()})
+selected_tree=tempfile.TemporaryDirectory(prefix='selected-',dir=output)
+selected_root=pathlib.Path(selected_tree.name)
+for name,path in c_paths.items():
+    link=selected_root/'.lake/build/ir'/(name.replace('.','/')+'.c')
+    link.parent.mkdir(parents=True,exist_ok=True);link.symlink_to(path)
 setup['name'] = module
 setup_path=output/(module+'.setup.json')
 setup_path.write_text(json.dumps(setup)+'\n')
@@ -75,11 +102,11 @@ if generated_link.is_symlink(): generated_link.unlink()
 if generated_link.exists(): raise ValueError('Unexpected generated C staging file')
 generated_link.symlink_to(input_c)
 symbols = subprocess.check_output(['nm', '--undefined-only', '--format=posix', str(prefix/'lib/lean/libleanrt.a')], text=True)
-inputs, closure = helper.extract(root, stage, module=module, native_roots=set(re.findall(r'^(\w+) U ', symbols, re.M)))
+inputs, closure = helper.extract(selected_root, stage, module=module, native_roots=set(re.findall(r'^(\w+) U ', symbols, re.M)))
 sha = helper.file_sha256
-names = sorted(name for name in helper.collect(root, stage, module)[0] if name.startswith('Solidity.'))
+names = sorted(name for name in helper.collect(selected_root, stage, module)[0] if name.startswith('Solidity.'))
 sources = [{'module': n, 'sourceSha256': source_snapshot[str(root/(n.replace('.', '/')+'.lean'))],
-            'cSha256': sha(root/'.lake/build/ir'/(n.replace('.', '/')+'.c'))} for n in names]
+            'cPath': str(c_paths[n]), 'cSha256': selected[str(c_paths[n])]} for n in names]
 flags = ['-O2', '-ffunction-sections', '-fdata-sections', '-I'+str(prefix/'include')]
 compiler = prefix/'bin/leanc'
 identity = json.dumps(provenance,sort_keys=True)
@@ -124,6 +151,7 @@ for _, _, original, expected in inputs:
 for entry in sources:
     if sha(root/(entry['module'].replace('.', '/')+'.lean')) != entry['sourceSha256']:
         raise ValueError('Changed source during compilation')
+helper.verify_snapshot(selected,selected.keys())
 helper.verify_snapshot(provenance,provenance_paths())
 helper.verify_snapshot(input_snapshot,[input_source,fixture])
 helper.verify_snapshot(source_snapshot,(root/'Solidity').rglob('*.lean'))
@@ -136,7 +164,7 @@ manifest = {'version': 2, 'rootModule': module,
             'sourceFiles': sources, 'executable': sha(executable), 'closure': closure,
             'optimization': '-O2', 'bridgeSha256': hashlib.sha256(bridge_bytes).hexdigest(),
             'closureScriptSha256': hashlib.sha256(closure_bytes).hexdigest(),
-            'buildInputs': provenance, 'compilerCommand': cc}
+            'buildInputs': provenance, 'selectedArtifacts': selected, 'compilerCommand': cc}
 (output/'build.json').write_text(json.dumps(manifest, indent=2)+'\n')
 licenses = output/'licenses'
 licenses.mkdir(exist_ok=True)

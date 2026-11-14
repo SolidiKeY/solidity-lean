@@ -100,7 +100,7 @@ test('a valid executable hash cannot bind a cache to a different generated input
   const hashFile=path=>sourceHash(readFileSync(path));
   try {
     mkdirSync(output);writeFileSync(join(output,'direct-check'),'control bytes, never executed');
-    const buildInputs=Object.fromEntries(['scripts/verify-build.py','scripts/direct-runtime-closure.py',
+    const buildInputs=Object.fromEntries(['scripts/verify-build.py','scripts/verify_artifacts.py','scripts/direct-runtime-closure.py',
       'web/browser/direct-bridge.c','lean-toolchain','lakefile.toml'].map(p=>[join(root,p),hashFile(join(root,p))]));
     const manifest={version:2,platform:process.platform,arch:process.arch.replace('x64','x86_64'),
       leanCommit:'797c613eb9b6d4ec95db23e3e00af9ac6657f24b',toolchain:readFileSync(join(root,'lean-toolchain'),'utf8').trim(),
