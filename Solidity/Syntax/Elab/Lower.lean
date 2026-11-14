@@ -411,12 +411,70 @@ def LowerM.outside {α : Type} (x : LowerM α) : LowerM α := do
   set fl
   pure r
 
+namespace LowerKernel
+
+/- We count only statement children visited by the loop kernel. An effectful
+while condition carries enough extra weight for its synthetic break and block;
+list/statement/loop phase offsets handle calls on the same statement. -/
+mutual
+  def stmtWeight : RawStmt → Nat
+    | .block b | .unchecked b | .checked _ b => listWeight b + 1
+    | .ite _ t e => listWeight t + listWeight e + 1
+    | .tryCall _ _ _ _ ok err _ pnc other =>
+      listWeight ok + listWeight err + listWeight pnc + listWeight other + 1
+    | .whileLoop _ c b => listWeight b + if c.hasIncDec then 10 else 1
+    | .forLoop _ _ _ _ b | .doWhile _ b _ | .loop _ _ b => listWeight b + 1
+    | _ => 1
+  def listWeight : List RawStmt → Nat
+    | [] => 0
+    | s :: ss => stmtWeight s + listWeight ss
+end
+
+def listMeasure (ss : List RawStmt) : Nat := 3 * listWeight ss + 3
+def stmtMeasure (s : RawStmt) : Nat := 3 * stmtWeight s + 2
+def loopMeasure (s : RawStmt) : Nat := 3 * stmtWeight s + 1
+
+omit [FreshNames] in
+theorem stmtWeight_pos (s : RawStmt) : 0 < stmtWeight s := by
+  cases s <;> simp only [stmtWeight]
+  all_goals first | omega | (split <;> omega)
+
+omit [FreshNames] in
+theorem list_head_lt (s : RawStmt) (ss : List RawStmt) :
+    stmtMeasure s < listMeasure (s :: ss) := by
+  simp only [stmtMeasure, listMeasure, listWeight]
+  omega
+
+omit [FreshNames] in
+theorem list_tail_lt (s : RawStmt) (ss : List RawStmt) :
+    listMeasure ss < listMeasure (s :: ss) := by
+  have := stmtWeight_pos s
+  simp only [listMeasure, listWeight]
+  omega
+
+omit [FreshNames] in
+theorem loop_phase_lt (s : RawStmt) : loopMeasure s < stmtMeasure s := by
+  simp only [loopMeasure, stmtMeasure]
+  omega
+
+omit [FreshNames] in
+theorem synthetic_lt (a : RawLoopSpec) (c : RawExpr) (b : List RawStmt)
+    (h : c.hasIncDec = true) :
+    loopMeasure (.whileLoop a (.bool true) [.ite (.unop .not c) [.brk] [], .block b]) <
+    loopMeasure (.whileLoop a c b) := by
+  have hf : (RawExpr.bool true).hasIncDec = false := by
+    simp [RawExpr.hasIncDec, RawExpr.any]
+  simp [loopMeasure, stmtWeight, listWeight, h, hf]
+  omega
+
+end LowerKernel
+
 mutual
 
 /-- A block, lowered: its statements, and how it may end abruptly.  After a
 statement that may set a flag, the rest runs under `if (!flag…)`; after a
 jump it is dropped. -/
-partial def lowerList (rs : Option (List String)) :
+def lowerList (rs : Option (List String)) :
     List RawStmt → LowerM (List RawStmt × List Abrupt)
   | [] => pure ([], [])
   | s :: ss => do
@@ -430,20 +488,24 @@ partial def lowerList (rs : Option (List String)) :
       if ss'.isEmpty then pure ([s'], ab)
       else pure ([s', .ite (← notAny ab) ss' []], Abrupt.union ab ab')
 
+termination_by ss => LowerKernel.listMeasure ss
+decreasing_by
+  all_goals simp_wf
+  all_goals first | apply LowerKernel.list_head_lt | apply LowerKernel.list_tail_lt
+
 /-- A statement, lowered.  `rs` are the return variables of the body it is
 in, none outside a function. -/
-partial def lowerStmt (rs : Option (List String)) (s : RawStmt) :
+def lowerStmt (rs : Option (List String)) (s : RawStmt) :
     LowerM (RawStmt × List Abrupt) := do
   if s matches .whileLoop .. | .forLoop .. | .doWhile .. | .loop .. then return ← lowerLoop rs s
-  let lowerB (b : List RawStmt) : LowerM (List RawStmt) := do pure (← lowerList rs b).1
   unless (← get).inLoop do
     return ← match s with
-      | .block b => do pure (.block (← lowerB b), [])
-      | .unchecked b => do pure (.unchecked (← lowerB b), [])
-      | .checked o b => do pure (.checked o (← lowerB b), [])
-      | .ite c t e => do pure (.ite c (← lowerB t) (← lowerB e), [])
+      | .block b => do pure (.block (← lowerList rs b).1, [])
+      | .unchecked b => do pure (.unchecked (← lowerList rs b).1, [])
+      | .checked o b => do pure (.checked o (← lowerList rs b).1, [])
+      | .ite c t e => do pure (.ite c (← lowerList rs t).1 (← lowerList rs e).1, [])
       | .tryCall e g as rets ok err code pnc other => do
-        pure (.tryCall e g as rets (← lowerB ok) (← lowerB err) code (← lowerB pnc) (← lowerB other),
+        pure (.tryCall e g as rets (← lowerList rs ok).1 (← lowerList rs err).1 code (← lowerList rs pnc).1 (← lowerList rs other).1,
           [])
       | .brk => throw "`break` outside a loop"
       | .cont => throw "`continue` outside a loop"
@@ -473,20 +535,27 @@ partial def lowerStmt (rs : Option (List String)) (s : RawStmt) :
   | .tryCall e g as rets ok err code pnc other => do
     if s.hasJump then throw "`break`, `continue` or `return` inside `try` inside a loop"
     LowerM.outside do
-      pure (.tryCall e g as rets (← lowerB ok) (← lowerB err) code (← lowerB pnc) (← lowerB other),
+      pure (.tryCall e g as rets (← lowerList rs ok).1 (← lowerList rs err).1 code (← lowerList rs pnc).1 (← lowerList rs other).1,
         [])
   | s => pure (s, [])
+
+termination_by LowerKernel.stmtMeasure s
+decreasing_by
+  all_goals simp_wf
+  all_goals simp_all [LowerKernel.listMeasure, LowerKernel.stmtMeasure, LowerKernel.loopMeasure, LowerKernel.stmtWeight]
+  all_goals omega
 
 /-- A loop, lowered to `RawStmt.loop`: `{ before; while (!brk && !ret && c)
 { bool cnt = false; body } }`, with what `for` and `do … while` add, and
 `if (ret) return;` after the outermost loop of a nest with a `return`. -/
-partial def lowerLoop (rs : Option (List String)) (s : RawStmt) :
+def lowerLoop (rs : Option (List String)) (s : RawStmt) :
     LowerM (RawStmt × List Abrupt) := do
-  let (spec, c, init, upd, body, isDo) := match s with
-    | .forLoop a i c u b => (a, c.getD (.bool true), i, u, b, false)
-    | .doWhile a b c => (a, c, [], [], b, true)
-    | .whileLoop a c b | .loop a c b => (a, c, [], [], b, false)
-    | _ => ({}, .bool true, [], [], [], false)
+  let spec := (match s with | .forLoop a .. | .doWhile a .. | .whileLoop a .. | .loop a .. => a | _ => {})
+  let c := (match s with | .forLoop _ _ c _ _ => c.getD (.bool true) | .doWhile _ _ c | .whileLoop _ c _ | .loop _ c _ => c | _ => .bool true)
+  let init := (match s with | .forLoop _ i _ _ _ => i | _ => [])
+  let upd := (match s with | .forLoop _ _ _ u _ => u | _ => [])
+  let body := (match s with | .forLoop _ _ _ _ b | .doWhile _ b _ | .whileLoop _ _ b | .loop _ _ b => b | _ => [])
+  let isDo := (s matches .doWhile ..)
   -- An effectful while condition is a statement at the iteration head, not
   -- a prefix outside the loop. Lower its synthetic break with the original
   -- jumps, so continue rechecks it and break/return suppress another check.
@@ -536,6 +605,13 @@ partial def lowerLoop (rs : Option (List String)) (s : RawStmt) :
   if returns && outermost then
     return (.block (before ++ [w, .ite (.name retX) [.ret none] []]), [])
   pure (.block (before ++ [w]), ab')
+
+termination_by LowerKernel.loopMeasure s
+decreasing_by
+  all_goals simp_wf
+  all_goals cases s <;> simp_all [LowerKernel.listMeasure, LowerKernel.loopMeasure, LowerKernel.stmtWeight, LowerKernel.listWeight]
+  all_goals try simp_all +zetaDelta [RawExpr.hasIncDec, RawExpr.any]
+  all_goals first | omega | (split <;> (try simp_all [RawExpr.hasIncDec, RawExpr.any]) <;> omega)
 
 end
 
@@ -1750,4 +1826,371 @@ def extCallStmt (r : RawExpr) (g : String) (as : List RawExpr) (rs : List String
 
 end Elab
 
+end Solidity
+
+namespace Solidity.LowerKernel
+section Kernel
+
+variable [FreshNames]
+
+/-- One step of `lowerList`, its calls of `lowerList` and `lowerStmt` given. -/
+def listStep
+    (L : Option (List String) → List RawStmt → LowerM (List RawStmt × List Abrupt))
+    (S : Option (List String) → RawStmt → LowerM (RawStmt × List Abrupt))
+    (rs : Option (List String)) : List RawStmt → LowerM (List RawStmt × List Abrupt)
+  | [] => pure ([], [])
+  | s :: ss => do
+    let (s', ab) ← S rs s
+    if ab.isEmpty then
+      let (ss', ab') ← L rs ss
+      pure (s' :: ss', ab')
+    else if s.isJump then pure ([s'], ab)
+    else
+      let (ss', ab') ← L rs ss
+      if ss'.isEmpty then pure ([s'], ab)
+      else pure ([s', .ite (← notAny ab) ss' []], Abrupt.union ab ab')
+
+/-- One step of `lowerStmt`, its calls of `lowerList` and `lowerLoop` given. -/
+def stmtStep
+    (L : Option (List String) → List RawStmt → LowerM (List RawStmt × List Abrupt))
+    (P : Option (List String) → RawStmt → LowerM (RawStmt × List Abrupt))
+    (rs : Option (List String)) (s : RawStmt) : LowerM (RawStmt × List Abrupt) := do
+  if s matches .whileLoop .. | .forLoop .. | .doWhile .. | .loop .. then return ← P rs s
+  let lowerB (b : List RawStmt) : LowerM (List RawStmt) := do pure (← L rs b).1
+  unless (← get).inLoop do
+    return ← match s with
+      | .block b => do pure (.block (← lowerB b), [])
+      | .unchecked b => do pure (.unchecked (← lowerB b), [])
+      | .checked o b => do pure (.checked o (← lowerB b), [])
+      | .ite c t e => do pure (.ite c (← lowerB t) (← lowerB e), [])
+      | .tryCall e g as rets ok err code pnc other => do
+        pure (.tryCall e g as rets (← lowerB ok) (← lowerB err) code (← lowerB pnc) (← lowerB other),
+          [])
+      | .brk => throw "`break` outside a loop"
+      | .cont => throw "`continue` outside a loop"
+      | s => pure (s, [])
+  match s with
+  | .brk => pure (.setBool (← LoopFlags.flag .brk) true, [.brk])
+  | .cont => pure (.setBool (← LoopFlags.flag .cnt) true, [.cnt])
+  | .ret e =>
+    let some rs := rs | throw "`return` outside a function's body"
+    let pre ← match e with
+      | none => pure []
+      | some e => ElabM.lift (lowerReturn rs e)
+    pure (.block (pre ++ [.setBool (← LoopFlags.flag .ret) true]), [.ret])
+  | .block b => do
+    let (b', ab) ← L rs b
+    pure (.block b', ab)
+  | .unchecked b => do
+    let (b', ab) ← L rs b
+    pure (.unchecked b', ab)
+  | .checked o b => do
+    let (b', ab) ← L rs b
+    pure (.checked o b', ab)
+  | .ite c t e => do
+    let (t', a) ← L rs t
+    let (e', b) ← L rs e
+    pure (.ite c t' e', Abrupt.union a b)
+  | .tryCall e g as rets ok err code pnc other => do
+    if s.hasJump then throw "`break`, `continue` or `return` inside `try` inside a loop"
+    LowerM.outside do
+      pure (.tryCall e g as rets (← lowerB ok) (← lowerB err) code (← lowerB pnc) (← lowerB other),
+        [])
+  | s => pure (s, [])
+
+/-- One step of `lowerLoop`, its calls of `lowerList` and `lowerLoop` given; the
+second is the synthetic rewrite of an effectful `while` condition. -/
+def loopStep
+    (L : Option (List String) → List RawStmt → LowerM (List RawStmt × List Abrupt))
+    (P : Option (List String) → RawStmt → LowerM (RawStmt × List Abrupt))
+    (rs : Option (List String)) (s : RawStmt) : LowerM (RawStmt × List Abrupt) := do
+  let (spec, c, init, upd, body, isDo) := match s with
+    | .forLoop a i c u b => (a, c.getD (.bool true), i, u, b, false)
+    | .doWhile a b c => (a, c, [], [], b, true)
+    | .whileLoop a c b | .loop a c b => (a, c, [], [], b, false)
+    | _ => ({}, .bool true, [], [], [], false)
+  if (s matches .whileLoop ..) && c.hasIncDec && spec.inv.isEmpty &&
+      spec.qinv.isEmpty && spec.dec.isNone && spec.unwind.isNone then
+    return ← P rs (.whileLoop spec (.bool true)
+      [.ite (.unop .not c) [.brk] [], .block body])
+  let outer ← get
+  let outermost := !outer.inLoop
+  set ({ ret := if outermost then none else outer.ret, inLoop := true } : LoopFlags)
+  let (body', ab) ← L rs body
+  let exits := ab.filter (· != .cnt)
+  let mut before : List RawStmt := init
+  let mut iter : List RawStmt := []
+  let mut cond := c
+  let mut heads : List String := []
+  if isDo then
+    let first := toString (← freshCapture "first")
+    before := before ++ [.declBool first true]
+    iter := [.setBool first false]
+    cond := .binop .or (.name first) cond
+    heads := heads ++ [first]
+  if let some x := (← get).cnt then iter := iter ++ [.declBool x false]
+  iter := iter ++ body'
+  unless upd.isEmpty do
+    if exits.isEmpty then iter := iter ++ upd
+    else iter := iter ++ [.ite (← notAny exits) upd []]
+  unless exits.isEmpty do cond ← notAny exits (some cond)
+  let fl ← get
+  if exits.contains .brk then heads := heads ++ fl.brk.toList
+  if exits.contains .ret then heads := heads ++ fl.ret.toList
+  if let some x := fl.brk then before := before ++ [.declBool x false]
+  let returns := exits.contains .ret
+  let retX := fl.ret.getD ""
+  if returns && outermost then before := before ++ [.declBool retX false]
+  set { outer with ret := if outermost then outer.ret else fl.ret }
+  let spec := if spec.inv.isEmpty && spec.qinv.isEmpty then spec else
+    { spec with inv := spec.inv ++ heads.map fun f => .binop .or (.name f) (.unop .not (.name f)),
+                brk := spec.brk || exits.contains .brk }
+  let w := RawStmt.loop spec cond iter
+  let ab' := if returns then [Abrupt.ret] else []
+  if before.isEmpty && !(returns && outermost) then return (w, ab')
+  if returns && outermost then
+    return (.block (before ++ [w, .ite (.name retX) [.ret none] []]), [])
+  pure (.block (before ++ [w]), ab')
+
+/-- `L`, `S`, `P` satisfy the lowering kernel's defining equations. -/
+def Fix
+    (L : Option (List String) → List RawStmt → LowerM (List RawStmt × List Abrupt))
+    (S P : Option (List String) → RawStmt → LowerM (RawStmt × List Abrupt)) : Prop :=
+  (∀ rs ss, L rs ss = listStep L S rs ss) ∧
+  (∀ rs s, S rs s = stmtStep L P rs s) ∧
+  (∀ rs s, P rs s = loopStep L P rs s)
+
+/-- The kernel's step reads the recursive calls only below the measure of its
+argument: two sets of calls that agree below `n` give the same step at measure
+`n`.  Lists are measured by `μL`, statements given to `lowerStmt` by `μS` and to
+`lowerLoop` by `μP`. -/
+def Contractive (μL : List RawStmt → Nat) (μS μP : RawStmt → Nat) : Prop :=
+  ∀ (n : Nat)
+    (L L' : Option (List String) → List RawStmt → LowerM (List RawStmt × List Abrupt))
+    (S S' P P' : Option (List String) → RawStmt → LowerM (RawStmt × List Abrupt)),
+    (∀ rs ss, μL ss < n → L rs ss = L' rs ss) →
+    (∀ rs s, μS s < n → S rs s = S' rs s) →
+    (∀ rs s, μP s < n → P rs s = P' rs s) →
+    (∀ rs ss, μL ss = n → listStep L S rs ss = listStep L' S' rs ss) ∧
+    (∀ rs s, μS s = n → stmtStep L P rs s = stmtStep L' P' rs s) ∧
+    (∀ rs s, μP s = n → loopStep L P rs s = loopStep L' P' rs s)
+
+/-- The helpers in `Lower.lean` that `lowerLoops` reaches, as they are. -/
+def Helpers : Prop :=
+  (∀ rs ss, lowerLoops rs ss = do pure (← (lowerList rs ss).run' {}).1) ∧
+  (∀ k, LoopFlags.flag k = do
+    let fl ← get
+    let cur := match k with
+      | .brk => fl.brk
+      | .cnt => fl.cnt
+      | .ret => fl.ret
+    if let some x := cur then return x
+    let x := toString (← freshCapture (match k with | .brk => "brk" | .cnt => "cnt" | .ret => "ret"))
+    match k with
+    | .brk => set { fl with brk := some x }
+    | .cnt => set { fl with cnt := some x }
+    | .ret => set { fl with ret := some x }
+    pure x) ∧
+  (∀ ks c, notAny ks c = do
+    let gs ← ks.mapM fun k => do pure (RawExpr.unop .not (.name (← LoopFlags.flag k)))
+    match c, gs.reverse with
+    | some c, _ => pure (RawExpr.andAll gs c)
+    | none, g :: rest => pure (RawExpr.andAll rest.reverse g)
+    | none, [] => pure (.bool true)) ∧
+  (∀ {α : Type} (x : LowerM α), LowerM.outside x = do
+    let fl ← get
+    set ({} : LoopFlags)
+    let r ← x
+    set fl
+    pure r) ∧
+  (∀ rs e, lowerReturn rs e =
+    match rs, e with
+    | [], _ => throw "`return` of a value from a function that returns none"
+    | [_], .tuple es => throw s!"`return` of {es.length} values from a function that returns one"
+    | [n], e => pure [.assign (.name n) e]
+    | rs, .tuple es =>
+      if es.length != rs.length then
+        throw s!"`return` of {es.length} values from a function that returns {rs.length}"
+      else if es.any fun e => rs.any e.mentions then
+        pure [.tupleAssign (rs.map fun n => some (.name n)) (.tuple es)]
+      else pure ((rs.zip es).map fun (n, e) => .assign (.name n) e)
+    | rs, e@(.call ..) => pure [.tupleAssign (rs.map fun n => some (.name n)) e]
+    | rs, e@(.ternary _ (.call ..) (.call ..)) =>
+      pure [.tupleAssign (rs.map fun n => some (.name n)) e]
+    | rs, _ => throw s!"`return` of one value from a function that returns {rs.length}") ∧
+  (∀ es c, RawExpr.andAll es c = es.foldr (fun e acc => .binop .and e acc) c) ∧
+  (∀ a b, Abrupt.union a b = [.brk, .cnt, .ret].filter fun k => a.contains k || b.contains k) ∧
+  (∀ x b, RawStmt.declBool x b = .decl (.named "bool") x (some (.bool b))) ∧
+  (∀ x b, RawStmt.setBool x b = .assign (.name x) (.bool b)) ∧
+  (∀ s, RawStmt.isJump s = match s with
+    | .brk | .cont | .ret _ => true
+    | _ => false) ∧
+  (∀ s, RawStmt.hasJump s = s.anyDeep RawStmt.isJump)
+
+end Kernel
+abbrev ListCalls := Option (List String) → List RawStmt → LowerM (List RawStmt × List Abrupt)
+abbrev StmtCalls := Option (List String) → RawStmt → LowerM (RawStmt × List Abrupt)
+abbrev LoopParts := RawLoopSpec × RawExpr × List RawStmt × List RawStmt × List RawStmt × Bool
+
+def loopParts : RawStmt → LoopParts
+  | .forLoop a i c u b => (a, c.getD (.bool true), i, u, b, false)
+  | .doWhile a b c => (a, c, [], [], b, true)
+  | .whileLoop a c b | .loop a c b => (a, c, [], [], b, false)
+  | _ => ({}, .bool true, [], [], [], false)
+
+def loopBody (s : RawStmt) : List RawStmt := (loopParts s).2.2.2.2.1
+
+def loopGuard (s : RawStmt) : Bool :=
+  let (spec, c, _, _, _, _) := loopParts s
+  (s matches .whileLoop ..) && c.hasIncDec && spec.inv.isEmpty &&
+    spec.qinv.isEmpty && spec.dec.isNone && spec.unwind.isNone
+
+def loopRewrite (s : RawStmt) : RawStmt :=
+  let (spec, c, _, _, body, _) := loopParts s
+  .whileLoop spec (.bool true) [.ite (.unop .not c) [.brk] [], .block body]
+
+def loopFinish [FreshNames] (spec : RawLoopSpec) (c : RawExpr)
+    (init upd : List RawStmt) (isDo : Bool)
+    (bodyCall : LowerM (List RawStmt × List Abrupt)) : LowerM (RawStmt × List Abrupt) := do
+  let outer ← get
+  let outermost := !outer.inLoop
+  set ({ ret := if outermost then none else outer.ret, inLoop := true } : LoopFlags)
+  let (body', ab) ← bodyCall
+  let exits := ab.filter (· != .cnt)
+  let mut before : List RawStmt := init
+  let mut iter : List RawStmt := []
+  let mut cond := c
+  let mut heads : List String := []
+  if isDo then
+    let first := toString (← freshCapture "first")
+    before := before ++ [.declBool first true]
+    iter := [.setBool first false]
+    cond := .binop .or (.name first) cond
+    heads := heads ++ [first]
+  if let some x := (← get).cnt then iter := iter ++ [.declBool x false]
+  iter := iter ++ body'
+  unless upd.isEmpty do
+    if exits.isEmpty then iter := iter ++ upd
+    else iter := iter ++ [.ite (← notAny exits) upd []]
+  unless exits.isEmpty do cond ← notAny exits (some cond)
+  let fl ← get
+  if exits.contains .brk then heads := heads ++ fl.brk.toList
+  if exits.contains .ret then heads := heads ++ fl.ret.toList
+  if let some x := fl.brk then before := before ++ [.declBool x false]
+  let returns := exits.contains .ret
+  let retX := fl.ret.getD ""
+  if returns && outermost then before := before ++ [.declBool retX false]
+  set { outer with ret := if outermost then outer.ret else fl.ret }
+  let spec := if spec.inv.isEmpty && spec.qinv.isEmpty then spec else
+    { spec with inv := spec.inv ++ heads.map fun f => .binop .or (.name f) (.unop .not (.name f)),
+                brk := spec.brk || exits.contains .brk }
+  let w := RawStmt.loop spec cond iter
+  let ab' := if returns then [Abrupt.ret] else []
+  if before.isEmpty && !(returns && outermost) then return (w, ab')
+  if returns && outermost then
+    return (.block (before ++ [w, .ite (.name retX) [.ret none] []]), [])
+  pure (.block (before ++ [w]), ab')
+
+
+def factoredStep [FreshNames] (L : ListCalls) (P : StmtCalls)
+    (rs : Option (List String)) (s : RawStmt) : LowerM (RawStmt × List Abrupt) := do
+  let (spec, c, init, upd, body, isDo) := loopParts s
+  if loopGuard s then return ← P rs (loopRewrite s)
+  loopFinish spec c init upd isDo (L rs body)
+
+theorem factoredStep_eq [FreshNames] (L : ListCalls) (P : StmtCalls)
+    (rs : Option (List String)) (s : RawStmt) :
+    factoredStep L P rs s = loopStep L P rs s := by
+  rfl
+
+theorem loop_step_congr [FreshNames] (L L' : ListCalls) (P P' : StmtCalls)
+    (rs : Option (List String)) (s : RawStmt)
+    (hb : L rs (loopBody s) = L' rs (loopBody s))
+    (hp : loopGuard s = true → P rs (loopRewrite s) = P' rs (loopRewrite s)) :
+    loopStep L P rs s = loopStep L' P' rs s := by
+  change factoredStep L P rs s = factoredStep L' P' rs s
+  unfold factoredStep
+  unfold loopBody at hb
+  generalize he : loopParts s = parts at *
+  rcases parts with ⟨spec, c, init, upd, body, isDo⟩
+  dsimp only
+  split
+  · rw [hp ‹loopGuard s = true›]
+  · exact congrArg (loopFinish spec c init upd isDo) hb
+
+theorem loop_body_lt (s : RawStmt) : listMeasure (loopBody s) < loopMeasure s := by
+  cases s <;> simp only [loopBody, loopParts, listMeasure, loopMeasure, stmtWeight, listWeight]
+  all_goals first | omega | (split <;> omega)
+
+theorem loop_rewrite_lt (s : RawStmt) (h : loopGuard s = true) :
+    loopMeasure (loopRewrite s) < loopMeasure s := by
+  cases s <;> simp only [loopGuard, loopParts, Bool.false_and, Bool.false_eq_true] at h
+  all_goals try contradiction
+  rename_i a c b
+  apply synthetic_lt
+  simp only [Bool.true_and, Bool.and_eq_true] at h
+  exact h.1.1.1.1
+
+theorem contractive [FreshNames] : Contractive listMeasure stmtMeasure loopMeasure := by
+  intro n L L' S S' P P' hL hS hP
+  refine ⟨?_, ?_, ?_⟩
+  · intro rs ss hn
+    subst n
+    cases ss with
+    | nil => rfl
+    | cons s ss =>
+      simp only [listStep, hS rs s (list_head_lt s ss),
+        hL rs ss (list_tail_lt s ss)]
+  · intro rs s hn
+    subst n
+    have phase := hP rs s (loop_phase_lt s)
+    cases s <;>
+      simp (disch := (simp_all only [listMeasure, stmtMeasure, stmtWeight, listWeight]; omega))
+        [stmtStep, hL, phase]
+  · intro rs s hn
+    subst n
+    exact loop_step_congr L L' P P' rs s
+      (hL rs (loopBody s) (loop_body_lt s))
+      (fun hg => hP rs (loopRewrite s) (loop_rewrite_lt s hg))
+
+theorem helpers_unchanged [FreshNames] : Helpers := by
+  refine ⟨?_, ?_, ?_, ?_, ?_, ?_, ?_, ?_, ?_, ?_, ?_⟩ <;> intros <;> rfl
+
+
+
+
+theorem fixed [FreshNames] : Fix lowerList lowerStmt lowerLoop := by
+  constructor
+  · intro rs ss
+    cases ss <;> rw [lowerList.eq_def] <;> rfl
+  constructor
+  · intro rs s
+    rw [lowerStmt.eq_def]
+    simp only [stmtStep, bind_assoc, pure_bind]
+  · intro rs s
+    have hp : loopParts s =
+        ((match s with | .forLoop a .. | .doWhile a .. | .whileLoop a .. | .loop a .. => a | _ => {}),
+         (match s with | .forLoop _ _ c _ _ => c.getD (.bool true) | .doWhile _ _ c | .whileLoop _ c _ | .loop _ c _ => c | _ => .bool true),
+         (match s with | .forLoop _ i _ _ _ => i | _ => []),
+         (match s with | .forLoop _ _ _ u _ => u | _ => []),
+         (match s with | .forLoop _ _ _ _ b | .doWhile _ b _ | .whileLoop _ _ b | .loop _ _ b => b | _ => []),
+         (s matches .doWhile ..)) := by
+      cases s <;> rfl
+    change lowerLoop rs s = factoredStep lowerList lowerLoop rs s
+    rw [lowerLoop.eq_def]
+    unfold factoredStep loopGuard loopRewrite
+    rw [hp]
+    rfl
+
+
+end Solidity.LowerKernel
+namespace Solidity
+theorem lowerKernel_total : ∀ [FreshNames],
+    LowerKernel.Fix lowerList lowerStmt lowerLoop ∧
+    (∃ (μL : List RawStmt → Nat) (μS μP : RawStmt → Nat),
+      LowerKernel.Contractive μL μS μP) ∧
+    LowerKernel.Helpers := by
+  intro inst
+  exact ⟨LowerKernel.fixed,
+    ⟨⟨_, _, _, LowerKernel.contractive⟩, LowerKernel.helpers_unchanged⟩⟩
 end Solidity
