@@ -18,7 +18,7 @@ spec = importlib.util.spec_from_file_location('tests_used_templates', HERE / 'ch
 templates = importlib.util.module_from_spec(spec)
 spec.loader.exec_module(templates)
 v1 = templates.v1
-DATA = HERE / 'check-tests-used-fixtures-v2.json'
+DATA = HERE / 'check-tests-used-fixtures.json'
 
 
 def reviewed_refusals(repo, data):
