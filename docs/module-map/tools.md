@@ -29,3 +29,5 @@ Commands for people; they prove nothing beyond the certificates they check.
 | `Tools/VerifierMetadata.lean` | Additive kernel facts tying each reported `postFails` index to the exact typed false postcondition clause and final run state; no source span, original-obligation or candidate association is inferred. |
 
 | `**/*Controls.lean` | Every `*Controls` module is in `Solidity`. `scripts/coord-tools/controls-classify.py` lists those no library module imports (candidates for a future controls library, not moved). |
+
+| `Tools/FastMode/Engine.lean` | Compiled JSON verdicts over exact frontend obligations, proved rule/closer execution, native open-sequent diagnostics and `#fast_export` executable definitions; no result theorem. |
