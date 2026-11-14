@@ -4,7 +4,7 @@ import Solidity.Calculus.Surface
 import Solidity.Calculus.CloseFrame
 
 /-! # Positive-key certificate clients and the zero-key boundary
-No closer is registered and original partial-OR verdict observations are preserved.
+No closer is registered here; the partial-OR floor family now decides these members.
 -/
 namespace Solidity.Examples.DecisionHaltingOrCertificate
 open Solidity.Decide Solidity.Decide.ResidueReason
@@ -58,12 +58,14 @@ theorem zero_guard_halts : roots.sourceGuard.denote
 theorem zero_not_positive : ¬ (0 < (uintOfNat 0).1) := by decide +kernel
 
 theorem one_target : (claim (uintOfNat 1)).inTarget {} = true := by rfl
-/-- info: false -/
+/- Formerly unknown and uncovered; the partial-OR floor family now decides both
+(`Calculus/DecisionPartialOrFloor.lean`). -/
+/-- info: true -/
 #guard_msgs in #eval (claim (uintOfNat 1)).Covered
-/-- info: "unknown" -/
+/-- info: "proved" -/
 #guard_msgs in #eval (match decideGoal (claim (uintOfNat 1)) with
   | .proved => "proved" | .refuted _ => "refuted" | .unknown => "unknown")
-/-- info: "unknown" -/
+/-- info: "refuted" -/
 #guard_msgs in #eval (match decideGoal (claim (uintOfNat 0)) with
   | .proved => "proved" | .refuted _ => "refuted" | .unknown => "unknown")
 

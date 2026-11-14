@@ -658,14 +658,16 @@ theorem decideLeaf_not_valid {φ : Fml C []} {σ : State C []} (h : decideLeaf �
 /-- **The complete memory fragment**: a covered fresh-array cut, a certified
 fresh-struct answer, the exact given-heap literal-read source certificate, or
 a discovered source chain without fresh allocation, or an exact computed-index
-reflexive given-heap read of a dynamic or fixed array. These source routes never
-promote truth at one candidate heap to validity. -/
+reflexive given-heap read of a dynamic or fixed array, or a member of a decided
+gap family without fresh allocation (`Fml.gapCovered`, `Calculus/DecisionGapAnswer.lean`).
+These source routes never promote truth at one candidate heap to validity. -/
 def _root_.Solidity.Fml.memCovered (φ : Fml C []) : Bool :=
   (φ.hasAllocAll && match ((mxNegativePrepare φ).body.hoist 1024).mxTop with
     | some ψ => ψ.CoveredA
     | none => (structAnswerWithCompound φ).isSome) || φ.givenHeapLiteralReadReflexive ||
     (!φ.hasAllocAll && sourceUIntLiteralSkeleton φ && (sourceUIntLiteralDiscovery? φ).isSome) ||
-    (φ.givenHeapLinearReadReflexive || φ.givenHeapFixedReadReflexive)
+    (φ.givenHeapLinearReadReflexive || φ.givenHeapFixedReadReflexive) ||
+    (!φ.hasAllocAll && φ.gapCovered)
 
 /-- **The fragment with binders of KeY's `int`**: the leaf binds one where
 `Fml.zT` reads it, is in `Fml.zOK`, and its rewriting is in `Fml.CoveredA`. -/
@@ -691,7 +693,7 @@ def _root_.Solidity.Fml.Covered (φ : Fml C []) : Bool :=
 theorem decideMem_complete {φ : Fml C []} (h : φ.memCovered = true) : decideMem φ ≠ .unknown := by
   unfold Fml.memCovered at h
   simp only [Bool.or_eq_true] at h
-  rcases h with ((hfresh | hgiven) | hsource) | (hcomputed | hfixed)
+  rcases h with (((hfresh | hgiven) | hsource) | (hcomputed | hfixed)) | hgap
   · simp only [Bool.and_eq_true] at hfresh
     obtain ⟨ha, hc⟩ := hfresh
     unfold decideMem
@@ -726,6 +728,12 @@ theorem decideMem_complete {φ : Fml C []} (h : φ.memCovered = true) : decideMe
     unfold decideMem
     rw [ha]
     exact decideGiven_complete_fixed (givenHeapAnswerWithFixed_source hfixed)
+
+  · simp only [Bool.and_eq_true, Bool.not_eq_true'] at hgap
+    obtain ⟨ha, hg⟩ := hgap
+    unfold decideMem
+    rw [ha]
+    exact decideGiven_complete_fixed (givenHeapAnswerWithFixed_gap hg)
 
 /-- Actual finite source discovery supplies coverage on the existing no-fresh-allocation
 route. This is a syntactic hit premise, not an arbitrary supplied validity proof. -/
