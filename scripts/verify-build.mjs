@@ -8,7 +8,7 @@ const root=resolve(dirname(fileURLToPath(import.meta.url)),'..');
 const commit='797c613eb9b6d4ec95db23e3e00af9ac6657f24b';
 const run=(command,args,options={})=>execFileSync(command,args,{cwd:root,stdio:'inherit',...options});
 try {
-  if(process.argv.length>2) throw new Error('verify-build takes no arguments; set VERIFY_LEAN_SOURCE to reuse a pinned checkout');
+  if(process.argv.length!==4) throw new Error('usage: verify-build INPUT_LEAN OUTPUT; VERIFY_LEAN_SOURCE may reuse a pinned source checkout');
   const prefix=execFileSync('lean',['--print-prefix'],{encoding:'utf8'}).trim();
   const actual=execFileSync(join(prefix,'bin/lean'),['--githash'],{encoding:'utf8'}).trim();
   if(actual!==commit) throw new Error('verify requires the repository-pinned Lean toolchain');
@@ -22,6 +22,6 @@ try {
   const head=execFileSync('git',['-C',source,'rev-parse','HEAD'],{encoding:'utf8'}).trim();
   if(execFileSync('git',['-C',source,'status','--porcelain'],{encoding:'utf8'}).trim()) throw new Error('pinned Lean source checkout has local changes');
   if(head!==commit) throw new Error('VERIFY_LEAN_SOURCE is not the pinned Lean source revision');
-  run('python3',['scripts/build-direct-native.py',prefix,source,join(root,'.lake/direct-native')],
+  run('python3',['scripts/verify-build.py',prefix,source,resolve(process.argv[2]),resolve(process.argv[3])],
     {env:{...process.env,LEAN_NUM_THREADS:'1'}});
 } catch(error) {console.error('verify-build: '+error.message);process.exitCode=2;}

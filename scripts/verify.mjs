@@ -4,7 +4,7 @@ import {resolve} from 'node:path';
 import {fileURLToPath} from 'node:url';
 import {performance} from 'node:perf_hooks';
 import {parseArgs, annotate, reportExitCode} from './solidity-lean.mjs';
-import {runSolidityTests} from './test-solidity.mjs';
+import {sourceReport} from './verify-source.mjs';
 import {fastReport} from './verify-native.mjs';
 import {differential} from './verify-differential.mjs';
 export function parseVerify(args) {
@@ -35,7 +35,7 @@ export function main(args) {
     }
     const started=performance.now();
     const raw=parsed.mode==='fast' ? fastReport(parsed.paths,parsed.options)
-      : runSolidityTests(parsed.paths,{...parsed.options,counterexamples:true});
+      : sourceReport(parsed.paths,{...parsed.options,counterexamples:true});
     const report=annotate('verify',raw,parsed.options);
     if(parsed.mode==='certified') report.results=report.results.map(row=>{
       if(row.verification!==undefined && row.verification!=='certified') {
@@ -48,7 +48,8 @@ export function main(args) {
     else {
       for(const row of result.results) {
         const line=row.range?.start.line;
-        console.log(`${row.source}${line===undefined?'':':'+(line+1)}: ${row.contract}.${row.function}: ${row.status} (${row.verification})${row.reason?': '+row.reason:''}`);
+        console.log(`${row.diagnosticSource??row.source}${line===undefined?'':':'+(line+1)}: ${row.contract}.${row.function}: ${row.status} (${row.verification})${row.reason?': '+row.reason:''}`);
+        for(const branch of row.openBranches??[]) console.log(`  branch ${branch.id}: ${branch.sequent}`);
         if(row.counterexample) console.log(JSON.stringify(row.counterexample,null,2));
       }
       for(const error of result.errors) console.error(`${error.source??'verify'}: ${error.reason}`);

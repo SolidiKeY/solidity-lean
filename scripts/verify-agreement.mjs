@@ -3,7 +3,7 @@ export function compareModes(fast, certified, expected) {
   const bugs = [];
   const assumptionKeys = ['callback','overflow','tails','order','hash','zeroAddress'];
   const identity = row => JSON.stringify([row.source, row.contract, row.sourceId,
-    row.signature ?? row.function, row.reading, row.sourceSha256, row.requestSha256, assumptionKeys.map(k => row.assumptions[k])]);
+    row.signature ?? row.function, row.reading, row.sourceSha256, row.requestSha256, row.compilationSha256, assumptionKeys.map(k => row.assumptions[k])]);
   function validRow(row) {
     return row && typeof row === 'object' && typeof row.source === 'string' && row.source.length > 0
       && typeof row.contract === 'string' && row.contract.length > 0
@@ -12,7 +12,8 @@ export function compareModes(fast, certified, expected) {
       && row.assumptions && assumptionKeys.every(k => typeof row.assumptions[k] === 'string' && row.assumptions[k].length > 0)
       && typeof row.reading === 'string' && row.reading.length > 0
       && /^[a-f0-9]{64}$/.test(row.sourceSha256 ?? '')
-      && /^[a-f0-9]{64}$/.test(row.requestSha256 ?? '');
+      && /^[a-f0-9]{64}$/.test(row.requestSha256 ?? '')
+      && /^[a-f0-9]{64}$/.test(row.compilationSha256 ?? '');
   }
   const manifest = new Set();
   if (!Array.isArray(expected) || !expected.length) bugs.push('missing expected workload');
@@ -37,7 +38,7 @@ export function compareModes(fast, certified, expected) {
       if (rows.has(key)) bugs.push(`${mode}: duplicate obligation: ${key}`);
       const expected = mode === 'fast' ? 'native' : 'certified';
       if (row.verification !== expected) bugs.push(`${mode}: expected ${expected} marker: ${key}`);
-      if (!['proved', 'refuted', 'pending', 'unsupported', 'skipped', 'skip', 'internal', 'error'].includes(row.status))
+      if (!['proved', 'refuted', 'pending', 'unsupported', 'excluded', 'skipped', 'skip', 'internal', 'error'].includes(row.status))
         bugs.push(`${mode}: invalid verdict: ${key}`);
       rows.set(key, row);
     }

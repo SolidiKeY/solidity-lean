@@ -1,7 +1,7 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import {compareModes} from './verify-agreement.mjs';
-const row = {source:'fixture.sol', contract:'C', function:'f', sourceId:12, status:'proved', reading:'solc', assumptions:{callback:'noCallback',overflow:'default',tails:'solc',order:'legacy',hash:'opaque',zeroAddress:'noCode'}, sourceSha256:'a'.repeat(64), requestSha256:'b'.repeat(64)};
+const row = {source:'fixture.sol', contract:'C', function:'f', sourceId:12, status:'proved', reading:'solc', assumptions:{callback:'noCallback',overflow:'default',tails:'solc',order:'legacy',hash:'opaque',zeroAddress:'noCode'}, sourceSha256:'a'.repeat(64), requestSha256:'b'.repeat(64), compilationSha256:'c'.repeat(64)};
 const report = (verification, rows = [row]) => ({results:rows.map(r => ({...r, verification})), errors:[]});
 const fast = () => report('native');
 const certified = () => report('certified');
