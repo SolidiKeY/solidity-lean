@@ -125,4 +125,31 @@ example (members : Nat) (expression : RawExpr) (state : ECtx × Nat) :
   rw [enumCapture_source]
   rfl
 
+/-- Actual zero-divisor instrumentation emits code 18 at any typed state. -/
+example (σ : State C Γ) :
+    (panicStmt 18 (Checked.cmpU .neB rfl rfl
+      (Checked.litU 0 (by decide)) (Checked.litU 0 (by decide)))).runR σ =
+      .error (THalt.ofData (Semantics.encodePanic 18)) :=
+  (uint_divisor_source σ (Checked.litU 7 (by decide)) (Checked.litU 0 (by decide))
+    ⟨7, by decide⟩ ⟨0, by decide⟩ rfl rfl rfl).2.2.2
+
+/-- A nonzero divisor makes the actual guard true. -/
+example (σ : State C Γ) :
+    (Checked.cmpU .neB rfl rfl (Checked.litU 1 (by decide))
+      (Checked.litU 0 (by decide))).evalT σ = .ok true :=
+  uint_divisor_guard_eval σ _ ⟨1, by decide⟩ rfl
+
+/-- A failure while reading a guard condition is not relabelled with the
+outer enum code. Here the condition itself contains division by zero. -/
+example (σ : State C Γ) :
+    (panicStmt 33 (.binop .eqB rfl rfl
+      (.binop .div rfl rfl (Checked.litU 1 (by decide)) (Checked.litU 0 (by decide)))
+      (Checked.litU 0 (by decide)))).runR σ = .error .revert :=
+  panic_guard_source_halt σ _ .revert rfl 33
+
+/-- The first out-of-enum value fails the evaluated membership guard. -/
+example (σ : State C Γ) :
+    OriginV2 (.original (.enumConversion 1 ⟨1, by decide⟩)) .enumConversion :=
+  enum_guard_origin σ (Checked.litU 1 (by decide)) ⟨1, by decide⟩ 1 (by decide) rfl rfl
+
 end Solidity.Examples.PanicSource

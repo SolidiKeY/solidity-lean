@@ -4151,6 +4151,7 @@ import Solidity.Semantics.NumericLowering
 import Solidity.Semantics.Ops
 import Solidity.Semantics.Panic.Origins
 import Solidity.Semantics.Panic.Result
+import Solidity.Semantics.Panic.Source
 import Solidity.Semantics.PaymentWorld
 import Solidity.Semantics.PrimitiveReturnProjection
 import Solidity.Semantics.RecursiveStorage
@@ -4520,6 +4521,7 @@ import Solidity.Syntax.Elab
 import Solidity.Syntax.Elab.Arms
 import Solidity.Syntax.Elab.Context
 import Solidity.Syntax.Elab.Lower
+import Solidity.Syntax.Elab.Panic
 import Solidity.Syntax.Elab.SliceCopy
 import Solidity.Syntax.Elab.Stmt
 import Solidity.Syntax.Elab.Values
