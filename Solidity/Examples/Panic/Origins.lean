@@ -139,7 +139,8 @@ theorem pop_success (keep : Bool) :
   have found : one.find ref = some singleton := rfl
   cases keep <;>
     simp only [Producer.run, Storage.pop, found, singleton, SVal.view_array,
-      Option.bind_eq_bind, Option.bind_some, SVec.ofList, SList.ofList, SVec.toList, SList.toList]
+      Option.bind_eq_bind, Option.bind_some, SVec.ofList, SList.ofList,
+      SVec.toList, SList.toList]
     <;> rfl
 
 
@@ -156,11 +157,11 @@ by
   constructor
   · apply index_origin
     simp only [Heap.index, MObj.elems_dyn, hp, hr, Heap.get, Heap.alloc,
-      Objs.get, Objs.wk, Objs.snoc, MObj.wk, MVal.wk, obj]
+      Objs.get, Objs.snoc, MObj.wk, obj]
     rfl
   · have h : hp.index hr .dyn (u 0) = some (u 7) := by
       simp only [Heap.index, MObj.elems_dyn, hp, hr, Heap.get, Heap.alloc,
-        Objs.get, Objs.wk, Objs.snoc, MObj.wk, MVal.wk, obj]
+        Objs.get, Objs.snoc, MObj.wk, obj]
       rfl
     simp only [Producer.run, h, checked]
 
