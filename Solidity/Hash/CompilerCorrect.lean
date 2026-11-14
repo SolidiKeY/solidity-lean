@@ -839,6 +839,474 @@ theorem test_step_related (F : Roadmap.Fixed) (slots : List Slot)
   · simp only [numericTest, rep.1, shape, List.map_cons, word]
   · exact ⟨rfl, rep.2⟩
 
+/-- PUSH translates the actual symbolic operand without a synthetic runtime hash. -/
+theorem push_related (F : Roadmap.Fixed) (slots : List Slot)
+    (m : Machine) (v : Numeric) (rep : Represents F slots m v) (w : Word) :
+    ResultRelated F slots (idealResult ((Instr.push w).step m)) (numericAtom F (.push w) v) := by
+  simp only [Instr.step, Machine.next, idealResult, numericAtom, ResultRelated]
+  exact ⟨True.intro, by simpa only [List.map_cons] using congrArg (List.cons (word F w)) rep.1,
+    rep.2⟩
+
+/-- POP preserves the representation even when the discarded word is a slot. -/
+theorem pop_related (F : Roadmap.Fixed) (slots : List Slot)
+    (m : Machine) (v : Numeric) (rep : Represents F slots m v)
+    (w : Word) (tail : List Word) (shape : m.stack = w :: tail) :
+    ResultRelated F slots (idealResult (Instr.pop.step m)) (numericAtom F .pop v) := by
+  obtain ⟨stack, mem, store, env⟩ := rep
+  simp only [numericAtom, embed, stack, shape, List.map_cons, Instr.step, Machine.next,
+    idealResult, resultMap, project, ResultRelated, Represents, List.map_map,
+    Function.comp_def, word, true_and]
+  exact ⟨rfl, mem, store, env⟩
+
+/-- Ordinary binary arithmetic acts identically on represented value operands. -/
+theorem binary_values_related (F : Roadmap.Fixed) (slots : List Slot)
+    (m : Machine) (v : Numeric) (rep : Represents F slots m v)
+    (a b : Fin W) (tail : List Word) (shape : m.stack = .val a :: .val b :: tail)
+    (i : Instr) (hi : i ∈ [.add, .sub, .mul, .div, .mod, .lt, .gt, .eq, .or, .and,
+      .slt, .sgt, .sdiv, .smod, .xor, .shl, .shr, .exp, .sar]) :
+    ResultRelated F slots (idealResult (i.step m)) (numericAtom F i v) := by
+  obtain ⟨stack, mem, store, env⟩ := rep
+  simp only [List.mem_cons, List.not_mem_nil, or_false] at hi
+  rcases hi with rfl | rfl | rfl | rfl | rfl | rfl | rfl | rfl | rfl | rfl |
+    rfl | rfl | rfl | rfl | rfl | rfl | rfl | rfl | rfl <;>
+    simp only [numericAtom, embed, stack, shape, List.map_cons, word, Instr.step,
+      Machine.next, idealResult, resultMap, project, ResultRelated, Represents,
+      List.map_map, Function.comp_def, true_and] <;>
+    exact ⟨rfl, mem, store, env⟩
+
+theorem unary_values_related (F : Roadmap.Fixed) (slots : List Slot)
+    (m : Machine) (v : Numeric) (rep : Represents F slots m v)
+    (a : Fin W) (tail : List Word) (shape : m.stack = .val a :: tail)
+    (i : Instr) (hi : i = .iszero ∨ i = .not) :
+    ResultRelated F slots (idealResult (i.step m)) (numericAtom F i v) := by
+  obtain ⟨stack, mem, store, env⟩ := rep
+  rcases hi with rfl | rfl <;>
+    simp only [numericAtom, embed, stack, shape, List.map_cons, word, Instr.step,
+      Machine.next, idealResult, resultMap, project, ResultRelated, Represents,
+      List.map_map, Function.comp_def, true_and] <;>
+    exact ⟨rfl, mem, store, env⟩
+
+/-- Loading a symbolic memory word returns its represented numeric value. -/
+theorem mload_related (F : Roadmap.Fixed) (slots : List Slot)
+    (m : Machine) (v : Numeric) (rep : Represents F slots m v) (x : Nat) :
+    ResultRelated F slots (idealResult ((Instr.mload x).step m)) (numericAtom F (.mload x) v) := by
+  obtain ⟨stack, mem, store, env⟩ := rep
+  simp only [numericAtom, embed, stack, Instr.step, Machine.next, idealResult,
+    resultMap, project, ResultRelated, Represents, List.map_cons, List.map_map,
+    Function.comp_def, word, true_and]
+  exact ⟨by rw [mem x]; rfl, mem, store, env⟩
+
+/-- Memory stores commute on every cell, including symbolic pointer values. -/
+theorem mstore_related (F : Roadmap.Fixed) (slots : List Slot)
+    (m : Machine) (v : Numeric) (rep : Represents F slots m v)
+    (x : Nat) (w : Word) (tail : List Word) (shape : m.stack = w :: tail) :
+    ResultRelated F slots (idealResult ((Instr.mstore x).step m))
+      (numericAtom F (.mstore x) v) := by
+  obtain ⟨stack, mem, store, env⟩ := rep
+  simp only [numericAtom, embed, stack, shape, Instr.step, idealResult, resultMap,
+    project, ResultRelated, Represents, List.map_cons, List.map_map,
+    Function.comp_def, word, true_and]
+  refine ⟨rfl, ?_, store, env⟩
+  intro y
+  by_cases h : y = x <;> simp [Evm.upd, h, word, mem]
+
+theorem mloadAt_related (F : Roadmap.Fixed) (slots : List Slot)
+    (m : Machine) (v : Numeric) (rep : Represents F slots m v)
+    (x : Fin W) (tail : List Word) (shape : m.stack = .val x :: tail) :
+    ResultRelated F slots (idealResult (Instr.mloadAt.step m)) (numericAtom F .mloadAt v) := by
+  obtain ⟨stack, mem, store, env⟩ := rep
+  simp only [numericAtom, embed, stack, shape, Instr.step, Machine.next, idealResult,
+    resultMap, project, ResultRelated, Represents, List.map_cons, List.map_map,
+    Function.comp_def, word, true_and]
+  exact ⟨by rw [mem x.val]; rfl, mem, store, env⟩
+
+theorem mstoreAt_related (F : Roadmap.Fixed) (slots : List Slot)
+    (m : Machine) (v : Numeric) (rep : Represents F slots m v)
+    (x : Fin W) (w : Word) (tail : List Word) (shape : m.stack = .val x :: w :: tail) :
+    ResultRelated F slots (idealResult (Instr.mstoreAt.step m))
+      (numericAtom F .mstoreAt v) := by
+  obtain ⟨stack, mem, store, env⟩ := rep
+  simp only [numericAtom, embed, stack, shape, Instr.step, idealResult, resultMap,
+    project, ResultRelated, Represents, List.map_cons, List.map_map,
+    Function.comp_def, word, true_and]
+  refine ⟨rfl, ?_, store, env⟩
+  intro y
+  by_cases h : y = x.val <;> simp [Evm.upd, h, word, mem]
+
+/-- Unconditional jumps preserve the exact pending skip count. -/
+theorem jump_related (F : Roadmap.Fixed) (slots : List Slot)
+    (m : Machine) (v : Numeric) (rep : Represents F slots m v) (n : Nat) :
+    ResultRelated F slots (idealResult ((Instr.jump n).step m)) (numericAtom F (.jump n) v) := by
+  obtain ⟨stack, mem, store, env⟩ := rep
+  simp only [numericAtom, embed, stack, Instr.step, idealResult, resultMap, project,
+    ResultRelated, Represents, List.map_map, Function.comp_def, word, true_and]
+  exact ⟨rfl, mem, store, env⟩
+
+theorem jumpi_related (F : Roadmap.Fixed) (slots : List Slot)
+    (m : Machine) (v : Numeric) (rep : Represents F slots m v)
+    (n : Nat) (x : Fin W) (tail : List Word) (shape : m.stack = .val x :: tail) :
+    ResultRelated F slots (idealResult ((Instr.jumpi n).step m))
+      (numericAtom F (.jumpi n) v) := by
+  obtain ⟨stack, mem, store, env⟩ := rep
+  simp only [numericAtom, embed, stack, shape, Instr.step, idealResult, resultMap, project,
+    ResultRelated, Represents, List.map_cons, List.map_map, Function.comp_def, word, true_and]
+  exact ⟨rfl, mem, store, env⟩
+
+/-- Environment reads retain the unchanged world components of Represents. -/
+theorem environment_related (F : Roadmap.Fixed) (slots : List Slot)
+    (m : Machine) (v : Numeric) (rep : Represents F slots m v)
+    (i : Instr) (hi : i ∈ [.caller, .callvalue, .timestamp, .selfbalance, .address]) :
+    ResultRelated F slots (idealResult (i.step m)) (numericAtom F i v) := by
+  obtain ⟨stack, mem, store, bal, bal₀, self, accepts, caller, value, time⟩ := rep
+  simp only [List.mem_cons, List.not_mem_nil, or_false] at hi
+  rcases hi with rfl | rfl | rfl | rfl | rfl <;>
+    simp only [numericAtom, embed, stack, Instr.step, Machine.next, idealResult,
+      resultMap, project, ResultRelated, Represents, List.map_cons, List.map_map,
+      Function.comp_def, word, bal, bal₀, self, accepts, caller, value, time, true_and, and_true]
+    <;> exact ⟨rfl, mem, store⟩
+
+/-- CALL uses the same balance and payment oracle, including refusal and self-call. -/
+theorem call_related (F : Roadmap.Fixed) (slots : List Slot)
+    (m : Machine) (v : Numeric) (rep : Represents F slots m v)
+    (amount dest : Fin W) (tail : List Word)
+    (shape : m.stack = .val amount :: .val dest :: tail) :
+    ResultRelated F slots (idealResult (Instr.call.step m)) (numericAtom F .call v) := by
+  obtain ⟨stack, mem, store, bal, bal₀, self, accepts, caller, value, time⟩ := rep
+  by_cases refused : m.bal m.self < amount.val ∨ m.accepts dest amount = false
+  · simp only [numericAtom, embed, stack, shape, Instr.step, Machine.next, idealResult,
+      resultMap, project, ResultRelated, Represents, List.map_cons, List.map_map,
+      Function.comp_def, word, bal, bal₀, self, accepts, caller, value, time,
+      refused, if_true, true_and, and_true]
+    exact ⟨rfl, mem, store⟩
+  · by_cases same : dest = m.self <;>
+      simp_all only [numericAtom, embed, Instr.step, Machine.next, idealResult,
+        resultMap, project, ResultRelated, Represents, List.map_cons, List.map_map,
+        Function.comp_def, word, if_true, if_false, true_and, and_true] <;>
+      exact ⟨rfl, fun _ => True.intro, fun _ _ => True.intro⟩
+
+/-- DUP copies the represented word at the exact checked stack position. -/
+theorem dup_related (F : Roadmap.Fixed) (slots : List Slot)
+    (m : Machine) (v : Numeric) (rep : Represents F slots m v)
+    (n : Nat) (w : Word) (found : m.stack[n]? = some w) :
+    ResultRelated F slots (idealResult ((Instr.dup (n + 1)).step m))
+      (numericAtom F (.dup (n + 1)) v) := by
+  obtain ⟨stack, mem, store, env⟩ := rep
+  simp only [numericAtom, embed, stack, Instr.step, Nat.add_sub_cancel,
+    List.getElem?_map, found, Option.map_some, Machine.next, idealResult,
+    resultMap, project, ResultRelated, Represents, List.map_cons, List.map_map,
+    Function.comp_def, word, true_and]
+  exact ⟨rfl, mem, store, env⟩
+
+/-- SWAP preserves symbolic words at both positions and throughout the tail. -/
+theorem swap_related (F : Roadmap.Fixed) (slots : List Slot)
+    (m : Machine) (v : Numeric) (rep : Represents F slots m v)
+    (n : Nat) (a b : Word) (tail : List Word)
+    (shape : m.stack = a :: tail) (found : tail[n]? = some b) :
+    ResultRelated F slots (idealResult ((Instr.swap (n + 1)).step m))
+      (numericAtom F (.swap (n + 1)) v) := by
+  obtain ⟨stack, mem, store, env⟩ := rep
+  simp only [numericAtom, embed, stack, shape, Instr.step, List.map_cons,
+    List.getElem?_map, found, Option.map_some, Machine.next, idealResult,
+    resultMap, project, ResultRelated, Represents, List.map_set, List.map_map,
+    Function.comp_def, word, true_and]
+  exact ⟨rfl, mem, store, env⟩
+
+theorem revert_related (F : Roadmap.Fixed) (slots : List Slot) (m : Machine) (v : Numeric) :
+    ResultRelated F slots (idealResult (Instr.revert.step m)) (numericAtom F .revert v) := by
+  trivial
+
+/-- Invert an actual non-fault unary value operation. -/
+theorem nonfault_one_value {st : List Word} {f : Fin W → List Word → Evm.Out}
+    (h : (match st with | .val a :: tail => f a tail | _ => .fault) ≠ .fault) :
+    ∃ a tail, st = .val a :: tail := by
+  cases st with
+  | nil => exact False.elim (h rfl)
+  | cons w tail =>
+    cases w with
+    | slot s => exact False.elim (h rfl)
+    | val a => exact ⟨a, tail, rfl⟩
+
+/-- Invert an actual non-fault binary value operation. -/
+theorem nonfault_two_values {st : List Word}
+    {f : Fin W → Fin W → List Word → Evm.Out}
+    (h : (match st with | .val a :: .val b :: tail => f a b tail | _ => .fault) ≠ .fault) :
+    ∃ a b tail, st = .val a :: .val b :: tail := by
+  cases st with
+  | nil => exact False.elim (h rfl)
+  | cons w tail =>
+    cases w with
+    | slot s => exact False.elim (h rfl)
+    | val a =>
+      cases tail with
+      | nil => exact False.elim (h rfl)
+      | cons w tail =>
+        cases w with
+        | slot s => exact False.elim (h rfl)
+        | val b => exact ⟨a, b, tail, rfl⟩
+
+/-- Value-only binary opcodes cannot silently accept symbolic slot operands. -/
+theorem binary_nonfault_related (F : Roadmap.Fixed) (slots : List Slot)
+    (m : Machine) (v : Numeric) (rep : Represents F slots m v)
+    (i : Instr) (hi : i ∈ [.sub, .mul, .div, .mod, .lt, .gt, .eq, .or, .and,
+      .slt, .sgt, .sdiv, .smod, .xor, .shl, .shr, .exp, .sar])
+    (safe : i.step m ≠ .fault) :
+    ResultRelated F slots (idealResult (i.step m)) (numericAtom F i v) := by
+  have shape : ∃ a b tail, m.stack = .val a :: .val b :: tail := by
+    simp only [List.mem_cons, List.not_mem_nil, or_false] at hi
+    rcases hi with rfl | rfl | rfl | rfl | rfl | rfl | rfl | rfl | rfl |
+      rfl | rfl | rfl | rfl | rfl | rfl | rfl | rfl | rfl <;>
+      exact nonfault_two_values safe
+  obtain ⟨a, b, tail, shape⟩ := shape
+  exact binary_values_related F slots m v rep a b tail shape i (List.mem_cons_of_mem _ hi)
+
+theorem nonfault_one_slot {st : List Word} {f : Slot → List Word → Evm.Out}
+    (h : (match st with | .slot s :: tail => f s tail | _ => .fault) ≠ .fault) :
+    ∃ s tail, st = .slot s :: tail := by
+  cases st with
+  | nil => exact False.elim (h rfl)
+  | cons w tail =>
+    cases w with
+    | val a => exact False.elim (h rfl)
+    | slot s => exact ⟨s, tail, rfl⟩
+
+theorem nonfault_value_slot {st : List Word}
+    {f : Fin W → Slot → List Word → Evm.Out}
+    (h : (match st with | .val a :: .slot s :: tail => f a s tail | _ => .fault) ≠ .fault) :
+    ∃ a s tail, st = .val a :: .slot s :: tail := by
+  cases st with
+  | nil => exact False.elim (h rfl)
+  | cons w tail =>
+    cases w with
+    | slot s => exact False.elim (h rfl)
+    | val a =>
+      cases tail with
+      | nil => exact False.elim (h rfl)
+      | cons w tail =>
+        cases w with
+        | val b => exact False.elim (h rfl)
+        | slot s => exact ⟨a, s, tail, rfl⟩
+
+theorem nonfault_slot_value {st : List Word}
+    {f : Slot → Fin W → List Word → Evm.Out}
+    (h : (match st with | .slot s :: .val a :: tail => f s a tail | _ => .fault) ≠ .fault) :
+    ∃ s a tail, st = .slot s :: .val a :: tail := by
+  cases st with
+  | nil => exact False.elim (h rfl)
+  | cons w tail =>
+    cases w with
+    | val a => exact False.elim (h rfl)
+    | slot s =>
+      cases tail with
+      | nil => exact False.elim (h rfl)
+      | cons w tail =>
+        cases w with
+        | slot t => exact False.elim (h rfl)
+        | val a => exact ⟨s, a, tail, rfl⟩
+
+
+/-- ADD's non-fault shapes include both symbolic offset orders. -/
+theorem add_nonfault_related (F : Roadmap.Fixed) (slots : List Slot)
+    (m : Machine) (v : Numeric) (rep : Represents F slots m v)
+    (safe : Instr.add.step m ≠ .fault) :
+    ResultRelated F slots (idealResult (Instr.add.step m)) (numericAtom F .add v) := by
+  cases shape : m.stack with
+  | nil => exact False.elim (safe (by simp [Instr.step, shape]))
+  | cons a tail =>
+    cases tail with
+    | nil => cases a <;> exact False.elim (safe (by simp [Instr.step, shape]))
+    | cons b tail =>
+      cases a with
+      | val a =>
+        cases b with
+        | val b => exact binary_values_related F slots m v rep a b tail shape .add (by simp)
+        | slot b => exact add_slot_related F slots m v rep b a tail (Or.inl shape)
+      | slot a =>
+        cases b with
+        | val b => exact add_slot_related F slots m v rep a b tail (Or.inr shape)
+        | slot b => exact False.elim (safe (by simp [Instr.step, shape]))
+
+/-- Every non-fault atomic step preserves the concrete representation. Storage
+writes use the explicit bounded regions; no storage simulation is a premise. -/
+theorem nonfault_atom_related (F : Roadmap.Fixed) (slots : List Slot)
+    (hL : F.regionLen ≤ W) (hR : F.rootSlots ≤ W)
+    (hb : ∀ s ∈ slots, (Storage.ofSlot s).Bounded F.regionLen F.rootSlots)
+    (hr : RegionsDisjoint W F.regionLen (fun b => (F.hash b).val)
+      (List.range F.rootSlots) (preimages F slots))
+    (m : Machine) (v : Numeric) (rep : Represents F slots m v)
+    (i : Instr) (nonloop : ∀ c b, i ≠ .loop c b)
+    (safe : i.step m ≠ .fault)
+    (covered : ∀ s ∈ stackSlots m, s ∈ slots) :
+    ResultRelated F slots (idealResult (i.step m)) (numericAtom F i v) := by
+  cases i
+  case sub | mul | div | mod | lt | gt | eq | or | and | slt | sgt | sdiv |
+      smod | xor | shl | shr | exp | sar =>
+    exact binary_nonfault_related F slots m v rep _ (by simp) safe
+  case caller | callvalue | timestamp | selfbalance | address =>
+    exact environment_related F slots m v rep _ (by simp)
+  case push w => exact push_related F slots m v rep w
+  case pop =>
+    cases shape : m.stack with
+    | nil => exact False.elim (safe (by simp [Instr.step, shape]))
+    | cons w tail => exact pop_related F slots m v rep w tail shape
+  case dup n =>
+    cases n with
+    | zero => exact False.elim (safe (by simp [Instr.step]))
+    | succ n =>
+      cases found : m.stack[n]? with
+      | none => exact False.elim (safe (by simp [Instr.step, found]))
+      | some w => exact dup_related F slots m v rep n w found
+  case swap n =>
+    cases n with
+    | zero => exact False.elim (safe (by simp [Instr.step]))
+    | succ n =>
+      cases shape : m.stack with
+      | nil => exact False.elim (safe (by simp [Instr.step, shape]))
+      | cons a tail =>
+        cases found : tail[n]? with
+        | none => exact False.elim (safe (by simp [Instr.step, shape, found]))
+        | some b => exact swap_related F slots m v rep n a b tail shape found
+  case add => exact add_nonfault_related F slots m v rep safe
+  case iszero =>
+    obtain ⟨a, tail, shape⟩ := nonfault_one_value safe
+    exact unary_values_related F slots m v rep a tail shape _ (Or.inl rfl)
+  case not =>
+    obtain ⟨a, tail, shape⟩ := nonfault_one_value safe
+    exact unary_values_related F slots m v rep a tail shape _ (Or.inr rfl)
+  case keccakMap =>
+    obtain ⟨a, s, tail, shape⟩ := nonfault_value_slot safe
+    exact keccakMap_related F slots m v rep a s tail shape
+  case keccakArr =>
+    obtain ⟨s, tail, shape⟩ := nonfault_one_slot safe
+    exact keccakArr_related F slots m v rep s tail shape
+  case sload =>
+    obtain ⟨s, tail, shape⟩ := nonfault_one_slot safe
+    exact sload_related F slots m v rep s tail shape (covered s (by simp [stackSlots, shape]))
+  case sstore =>
+    obtain ⟨s, a, tail, shape⟩ := nonfault_slot_value safe
+    exact sstore_related F slots hL hR hb hr m v rep s a tail shape
+      (covered s (by simp [stackSlots, shape]))
+  case mload x => exact mload_related F slots m v rep x
+  case mstore x =>
+    cases shape : m.stack with
+    | nil => exact False.elim (safe (by simp [Instr.step, shape]))
+    | cons w tail => exact mstore_related F slots m v rep x w tail shape
+  case mloadAt =>
+    obtain ⟨x, tail, shape⟩ := nonfault_one_value safe
+    exact mloadAt_related F slots m v rep x tail shape
+  case mstoreAt =>
+    cases shape : m.stack with
+    | nil => exact False.elim (safe (by simp [Instr.step, shape]))
+    | cons w tail =>
+      cases w with
+      | slot s => exact False.elim (safe (by simp [Instr.step, shape]))
+      | val x =>
+        cases tail with
+        | nil => exact False.elim (safe (by simp [Instr.step, shape]))
+        | cons w tail => exact mstoreAt_related F slots m v rep x w tail shape
+  case jump n => exact jump_related F slots m v rep n
+  case jumpi n =>
+    obtain ⟨x, tail, shape⟩ := nonfault_one_value safe
+    exact jumpi_related F slots m v rep n x tail shape
+  case call =>
+    obtain ⟨a, b, tail, shape⟩ := nonfault_two_values safe
+    exact call_related F slots m v rep a b tail shape
+  case revert => exact revert_related F slots m v
+  case loop c b => exact False.elim (nonloop c b rfl)
+
+
+/-- Access correspondence keeps each actual storage read and write, including
+steps before reversion; it does not substitute representation coverage for events. -/
+theorem nonfault_access_agrees (F : Roadmap.Fixed) (slots : List Slot)
+    (m : Machine) (v : Numeric) (rep : Represents F slots m v)
+    (i : Instr) (safe : i.step m ≠ .fault)
+    (rest : List Instr) (fs : List Frame) :
+    (idealAccessAt (.running (i :: rest) 0 fs m)).map (mapAccess (address F)) =
+      numericAccessAt (.running (i :: rest) 0 fs v) := by
+  cases i <;> try rfl
+  case sload =>
+    obtain ⟨s, tail, shape⟩ := nonfault_one_slot safe
+    exact sload_access_agrees F slots m v rep s tail shape rest fs
+  case sstore =>
+    obtain ⟨s, a, tail, shape⟩ := nonfault_slot_value safe
+    exact sstore_access_agrees F slots m v rep s a tail shape rest fs
+
+
+/-- Applying the common continuation to related atom results preserves skips,
+reverts and faults exactly. -/
+theorem atom_continuation_related (F : Roadmap.Fixed) (slots : List Slot)
+    (rest : List Instr) (fs : List Frame) (a : Result Machine) (b : Result Numeric)
+    : ResultRelated F slots a b →
+    Related F slots
+      (match a with
+       | .ok m k => .running rest k fs m
+       | .revert => .halted .revert
+       | .fault => .halted .fault)
+      (match b with
+       | .ok v k => .running rest k fs v
+       | .revert => .halted .revert
+       | .fault => .halted .fault) := by
+  intro h
+  cases a <;> cases b <;> simp only [Related, ResultRelated, true_and] <;> exact h
+
+
+
+theorem tick_atom_eq (atom : Instr → S → Result S) (test : S → Option (Bool × S))
+    (i : Instr) (rest : List Instr) (fs : List Frame) (m : S)
+    (nonloop : ∀ a b, i ≠ .loop a b) :
+    tick atom test (.running (i :: rest) 0 fs m) =
+      match atom i m with
+      | .ok s k => .running rest k fs s
+      | .revert => .halted .revert
+      | .fault => .halted .fault := by
+  cases i <;> try rfl
+  case loop a b => exact False.elim (nonloop a b rfl)
+
+/-- The exact protocol preserves representation once the reached atom and
+condition obligations have been established; loop entry never executes an atom. -/
+theorem running_tick_related (F : Roadmap.Fixed) (slots : List Slot)
+    (c : List Instr) (k : Nat) (fs : List Frame)
+    (m : Machine) (v : Numeric) (rep : Represents F slots m v)
+    (atom : ∀ i rest, c = i :: rest → k = 0 → (∀ a b, i ≠ .loop a b) →
+      ResultRelated F slots (idealResult (i.step m)) (numericAtom F i v))
+    (test : ∀ a b rest gs, c = [] → k = 0 → fs = .test a b rest :: gs →
+      ∃ w tail, m.stack = .val w :: tail) :
+    Related F slots
+      (tick (fun i s => idealResult (i.step s)) idealTest (.running c k fs m))
+      (tick (numericAtom F) numericTest (.running c k fs v)) := by
+  cases c with
+  | nil =>
+    cases fs with
+    | nil =>
+      simp only [tick, Related, ResultRelated, true_and]
+      exact rep
+    | cons f fs =>
+      cases k with
+      | succ k => trivial
+      | zero =>
+        cases f with
+        | body a b rest => exact ⟨rfl, rfl, rfl, rep⟩
+        | test a b rest =>
+          obtain ⟨w, tail, shape⟩ := test a b rest fs rfl rfl rfl
+          obtain ⟨m', v', hm, hv, hrep⟩ := test_step_related F slots m v rep w tail shape
+          simp only [tick, hm, hv]
+          cases h : (w.val != 0) <;> exact ⟨rfl, rfl, rfl, hrep⟩
+  | cons i rest =>
+    cases k with
+    | succ k =>
+      simp only [tick, Related, true_and]
+      exact rep
+    | zero =>
+      by_cases loop : ∃ a b, i = .loop a b
+      · obtain ⟨a, b, rfl⟩ := loop
+        exact ⟨rfl, rfl, rfl, rep⟩
+      · have nonloop : ∀ a b, i ≠ .loop a b := by
+          intro a b h
+          exact loop ⟨a, b, h⟩
+        rw [tick_atom_eq _ _ _ _ _ _ nonloop, tick_atom_eq _ _ _ _ _ _ nonloop]
+        have h := atom i rest rfl rfl nonloop
+        cases ha : idealResult (i.step m) <;> cases hv : numericAtom F i v <;>
+          simp only [ha, hv, ResultRelated, Related, true_and] at h ⊢ <;> exact h
+
 end Solidity.Hash.CompilerCorrect
 
 /-- info: 'Solidity.Hash.CompilerCorrect.producer_produces' depends on axioms: [propext, Classical.choice, Quot.sound] -/
@@ -879,3 +1347,8 @@ end Solidity.Hash.CompilerCorrect
 
 /-- info: 'Solidity.Hash.CompilerCorrect.numeric_limits' depends on axioms: [propext, Classical.choice, Quot.sound] -/
 #guard_msgs in #print axioms Solidity.Hash.CompilerCorrect.numeric_limits
+
+/-- info: 'Solidity.Hash.CompilerCorrect.nonfault_atom_related' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in #print axioms Solidity.Hash.CompilerCorrect.nonfault_atom_related
+/-- info: 'Solidity.Hash.CompilerCorrect.nonfault_access_agrees' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in #print axioms Solidity.Hash.CompilerCorrect.nonfault_access_agrees
