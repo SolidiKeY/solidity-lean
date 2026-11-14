@@ -28,11 +28,9 @@
       "mcp__lean-lsp__lean_run_code",
       "mcp__lean-lsp__lean_verify",
       "mcp__lean-lsp__lean_code_actions",
-      "mcp__lean-lsp__lean_minimal_hypotheses"
-    ],
-    "deny": [
-      "Bash(lake env:*)",
+      "mcp__lean-lsp__lean_minimal_hypotheses",
       "Bash(lake build:*)",
+      "Bash(lake env:*)",
       "Bash(lake lean:*)",
       "Bash(lean:*)"
     ]

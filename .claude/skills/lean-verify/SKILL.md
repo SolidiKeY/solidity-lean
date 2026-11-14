@@ -64,6 +64,14 @@ Outside the server: `scripts/coord-tools/gate.sh per-file FILE`
 recursion). `lake env lean` sees cache-fetched modules only after
 `scripts/ci/restore-lake-artifacts.py`.
 
+## MCP or lake
+
+`lake` and `lean` are allowed in the shell. Prefer the MCP server for the edit
+loop, but it is not always faster: try `lake lean FILE -- --tstack=131072` (or
+`gate.sh per-file`) when the server stalls, re-elaborates a file it evicted, or
+mixes worktrees, and for a one-shot check of a file no session has open. Never
+run two `lake build`s on one checkout at once.
+
 ## Done
 
 - No new `sorry` or `axiom` (`rg -c sorry Solidity --stats | tail -3` against
