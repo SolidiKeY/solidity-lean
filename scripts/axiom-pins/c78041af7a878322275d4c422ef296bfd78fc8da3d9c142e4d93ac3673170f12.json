@@ -39,6 +39,16 @@
   "Quot.sound",
   "propext"
  ],
+ "Solidity/Hash/CompilerCorrect.lean:Solidity.Hash.CompilerCorrect.nonfault_access_agrees": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Hash/CompilerCorrect.lean:Solidity.Hash.CompilerCorrect.nonfault_atom_related": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
  "Solidity/Hash/CompilerCorrect.lean:Solidity.Hash.CompilerCorrect.numeric_limits": [
   "Classical.choice",
   "Quot.sound",
@@ -53,6 +63,11 @@
   "propext"
  ],
  "Solidity/Hash/CompilerCorrect.lean:Solidity.Hash.CompilerCorrect.producer_produces": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Hash/CompilerCorrect.lean:Solidity.Hash.CompilerCorrect.running_tick_related": [
   "Classical.choice",
   "Quot.sound",
   "propext"
