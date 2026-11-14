@@ -331,7 +331,7 @@ theorem add_slot_related (F : Roadmap.Fixed) (slots : List Slot)
   rcases shape with shape | shape <;>
     simp only [numericAtom, embed, stack, shape, List.map_cons, word, Instr.step,
       Machine.next, idealResult, resultMap, project, ResultRelated, Represents,
-      List.map_map, Function.comp_def, List.map_id_fun', address_add, Nat.add_comm,
+      List.map_map, Function.comp_def, address_add, Nat.add_comm,
       true_and] <;>
     exact ⟨rfl, mem, store, env⟩
 
@@ -360,7 +360,7 @@ theorem empty_stack_fault_related (F : Roadmap.Fixed) (slots : List Slot)
     (m : Machine) (v : Numeric) (rep : Represents F slots m v) (shape : m.stack = [])
     (i : Instr) (hi : i ∈ [.sload, .sstore, .keccakMap, .keccakArr, .add]) :
     ResultRelated F slots (idealResult (i.step m)) (numericAtom F i v) := by
-  simp only [List.mem_cons, List.mem_singleton, List.not_mem_nil, or_false] at hi
+  simp only [List.mem_cons, List.not_mem_nil, or_false] at hi
   rcases hi with rfl | rfl | rfl | rfl | rfl <;>
     simp only [Instr.step, shape, numericAtom, rep.1, List.map_nil, embed,
       idealResult, resultMap, ResultRelated]
