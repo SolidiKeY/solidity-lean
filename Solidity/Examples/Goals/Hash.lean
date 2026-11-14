@@ -1,4 +1,4 @@
-import Solidity.Goals.Hash
+import Solidity.Hash.CompilerCorrect
 
 namespace Solidity.Goals
 
@@ -32,5 +32,39 @@ example :
     (Hash.tuples 2 1).countP
       (Hash.CollisionBridge.eagerPremiseFails (fun _ => (0 : Nat)) [0] 2 1 [0] 1) = 1 :=
   Hash.CollisionBridge.one_query_root_hit
+
+open Solidity.Hash.CompilerCorrect
+
+/-- A producer satisfying E4A cannot select a different ideal or numeric history. -/
+example (E : Producer) (h : Produces E) (F : Roadmap.Fixed) (n : Nat)
+    (c : List Instr) (m : Machine) (v : Numeric) :
+    E.ideal n c m = producer.ideal n c m ∧
+    E.numeric F n c v = producer.numeric F n c v :=
+  ⟨ideal_unique E h n c m, numeric_unique E h F n c v⟩
+
+/-- An executed hash before a revert remains in the actual producer's transcript. -/
+example (F : Roadmap.Fixed) (m : Numeric) (s : Fin W) (tail : List (Fin W)) :
+    queries producer F 3 [.keccakArr, .revert] { m with stack := s :: tail } =
+      [encoded (.data s.val)] := rfl
+
+/-- The limit convention has one outcome even for an unfinished infinite run. -/
+example (F : Roadmap.Fixed) (c : List Instr) (m : Numeric) :
+    ∃ r, Limit (fun n => producer.numeric F n c m) r ∧
+      ∀ t, Limit (fun n => producer.numeric F n c m) t → t = r := by
+  obtain ⟨r, hr⟩ := prefix_limit_exists (numericAtom F) numericTest (.running c 0 [] m)
+  exact ⟨r, hr, fun t ht =>
+    prefix_limit_unique (numericAtom F) numericTest (.running c 0 [] m) ht hr⟩
+
+/-- Distinct word-domain preimages cannot be identified by byte conversion. -/
+example (p q : Storage.Pre) (hp : p.Words) (hq : q.Words) (hne : p ≠ q) :
+    encoded p ≠ encoded q := fun h => hne (encoded_inj hp hq h)
+
+/-- The frozen run premises separate every pair in the entire reached footprint. -/
+example (E : Producer) (F : Roadmap.Fixed) (n : Nat) (c : List Instr)
+    (m : Machine) (v : Numeric) (observed : List Slot)
+    (ready : Ready E F n c m v observed) (premise : HashContract.Premise E F n c m v observed)
+    {s t : Slot} (hs : s ∈ locations E n c m observed)
+    (ht : t ∈ locations E n c m observed) (he : address F s = address F t) : s = t :=
+  address_injective_on F _ ready.1 ready.2.1 ready.2.2.1 premise.2 hs ht he
 
 end Solidity.Goals

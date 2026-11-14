@@ -133,6 +133,69 @@ theorem encoded_inj {p q : Storage.Pre} (hp : p.Words) (hq : q.Words)
     (h : encoded p = encoded q) : p = q :=
   Storage.encode_inj hp hq ((encoded_eq_iff p q).mp h)
 
+/-- Symbolic slot interpretation is already reduced to a word. -/
+theorem slot_word_lt (F : Roadmap.Fixed) (s : Slot) :
+    (Storage.ofSlot s).word W (hashPre F) < W := by
+  cases s <;> exact Nat.mod_lt _ W_pos
+
+theorem address_val (F : Roadmap.Fixed) (s : Slot) :
+    (address F s).val = (Storage.ofSlot s).word W (hashPre F) :=
+  Nat.mod_eq_of_lt (slot_word_lt F s)
+
+/-- Every recursively accessed representation preimage has word-sized fields. -/
+theorem slot_pres_words (F : Roadmap.Fixed) (s : Slot) :
+    ∀ p ∈ (Storage.ofSlot s).pres W (hashPre F), p.Words := by
+  induction s with
+  | root o => intro p hp; cases hp
+  | hash k s o ih =>
+    intro p hp
+    rcases List.mem_append.mp hp with hp | hp
+    · exact ih p hp
+    · have he := List.mem_singleton.mp hp
+      subst p
+      exact ⟨k.isLt, slot_word_lt F s⟩
+  | data s o ih =>
+    intro p hp
+    rcases List.mem_append.mp hp with hp | hp
+    · exact ih p hp
+    · have he := List.mem_singleton.mp hp
+      subst p
+      exact slot_word_lt F s
+
+/-- Move the exact byte-level region obligation to its natural preimages. -/
+theorem representation_regions (F : Roadmap.Fixed) (slots : List Slot)
+    (hr : RegionsDisjoint W F.regionLen (fun b => (F.hash b).val)
+      (List.range F.rootSlots) (preimages F slots)) :
+    RegionsDisjoint W F.regionLen (hashPre F) (List.range F.rootSlots)
+      (slots.flatMap (fun s => (Storage.ofSlot s).pres W (hashPre F))) := by
+  have hw : ∀ p ∈ slots.flatMap (fun s => (Storage.ofSlot s).pres W (hashPre F)),
+      p.Words := by
+    intro p hp
+    obtain ⟨s, _, hp⟩ := List.mem_flatMap.mp hp
+    exact slot_pres_words F s p hp
+  constructor
+  · intro p hp q hq hne
+    exact hr.1 (encoded p) (List.mem_map_of_mem hp)
+      (encoded q) (List.mem_map_of_mem hq)
+      (fun he => hne (encoded_inj (hw p hp) (hw q hq) he))
+  · intro p hp r hroot
+    exact hr.2 (encoded p) (List.mem_map_of_mem hp) r hroot
+
+/-- On the explicit bounded footprint, numeric address equality reflects slot equality. -/
+theorem address_injective_on (F : Roadmap.Fixed) (slots : List Slot)
+    (hL : F.regionLen ≤ W) (hR : F.rootSlots ≤ W)
+    (hb : ∀ s ∈ slots, (Storage.ofSlot s).Bounded F.regionLen F.rootSlots)
+    (hr : RegionsDisjoint W F.regionLen (fun b => (F.hash b).val)
+      (List.range F.rootSlots) (preimages F slots))
+    {s t : Slot} (hs : s ∈ slots) (ht : t ∈ slots)
+    (he : address F s = address F t) : s = t := by
+  apply Storage.slot_word_inj (fun p => (F.hash (encoded p)).isLt) hL hR
+    (representation_regions F slots hr) (hb s hs) (hb t ht)
+    (fun p hp => List.mem_flatMap.mpr ⟨s, hs, hp⟩)
+    (fun p hp => List.mem_flatMap.mpr ⟨t, ht, hp⟩)
+  have hv := congrArg Fin.val he
+  simpa only [address_val] using hv
+
 end Solidity.Hash.CompilerCorrect
 
 /-- info: 'Solidity.Hash.CompilerCorrect.producer_produces' depends on axioms: [propext, Classical.choice, Quot.sound] -/
@@ -141,3 +204,6 @@ end Solidity.Hash.CompilerCorrect
 #guard_msgs in #print axioms Solidity.Hash.CompilerCorrect.prefix_limit_unique
 /-- info: 'Solidity.Hash.CompilerCorrect.encoded_inj' depends on axioms: [propext, Classical.choice, Quot.sound] -/
 #guard_msgs in #print axioms Solidity.Hash.CompilerCorrect.encoded_inj
+
+/-- info: 'Solidity.Hash.CompilerCorrect.address_injective_on' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in #print axioms Solidity.Hash.CompilerCorrect.address_injective_on
