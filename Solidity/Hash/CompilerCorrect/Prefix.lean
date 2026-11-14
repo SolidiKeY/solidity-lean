@@ -701,10 +701,10 @@ theorem core_seq_safe {C : Contract} {Γ Δ Ξ : Ctx} {L b : Nat}
   subst k
   exact rest o.st t hsim
 
-/-- Both conditional arms use the actual skip counts, including the unselected arm. -/
+/-- Capacity and safety are required only for the actually selected arm. -/
 theorem branch_safe (yes no : List Instr) (m : Machine) (v : Bool)
-    (hy : CodeSafe yes m) (hn : CodeSafe no m)
-    (hyDone : ∀ s k, Evm.run yes m = .ok s k → k = 0) :
+    (hy : v = true → CodeSafe yes m) (hn : v = false → CodeSafe no m)
+    (hyDone : v = true → ∀ s k, Evm.run yes m = .ok s k → k = 0) :
     CodeSafe ([.iszero, .jumpi (yes.length + 1)] ++ yes ++
       [.jump no.length] ++ no) (m.push (.val (bword v))) := by
   have header : Evm.run [.iszero, .jumpi (yes.length + 1)] (m.push (.val (bword v))) =
@@ -720,13 +720,13 @@ theorem branch_safe (yes no : List Instr) (m : Machine) (v : Bool)
     cases done
     cases v with
     | false =>
-      have skip := safeFrom_skip (yes ++ [.jump no.length]) no m hn
+      have skip := safeFrom_skip (yes ++ [.jump no.length]) no m (hn rfl)
       simpa only [List.append_assoc, List.length_append, List.length_singleton] using skip
     | true =>
       change CodeSafe (yes ++ ([.jump no.length] ++ no)) m
-      refine safe_append yes ([Instr.jump no.length] ++ no) m hy ?_
+      refine safe_append yes ([Instr.jump no.length] ++ no) m (hy rfl) ?_
       intro s k done
-      have hk := hyDone s k done
+      have hk := hyDone rfl s k done
       subst k
       apply codeSafe_of_nonfault
       have jump : Evm.run ([.jump no.length] ++ no) s = .ok s 0 := by
@@ -756,8 +756,8 @@ theorem core_ite_safe {C : Contract} {Γ Δ Ξ : Ctx} {L b : Nat}
     · obtain rfl := hw.bool_inv
       rw [hc] at done
       cases done
-      have branch := branch_safe (compileProg b yes) (compileProg b no) m v hy hn
-        (fun s k done => (stmtOut_success (Evm.prog_sim yes input yesCert yesBound) done).choose_spec.2.1)
+      have branch := branch_safe (compileProg b yes) (compileProg b no) m v (fun _ => hy) (fun _ => hn)
+        (fun _ s k done => (stmtOut_success (Evm.prog_sim yes input yesCert yesBound) done).choose_spec.2.1)
       simpa only [List.append_assoc] using branch
     · rw [hc] at done
       cases done
@@ -1195,41 +1195,6 @@ theorem loops_prog_safe {C : Contract} {b L frame Γ Δ F G P code}
     subst k
     exact ih hr capp (fun amount hd => hg.nextInput (room _ (.tail ho hc hd)))
 
-/-- Capacity and safety are required only for the actually selected arm. -/
-theorem branch_safe_selected (yes no : List Instr) (m : Machine) (v : Bool)
-    (hy : v = true → CodeSafe yes m) (hn : v = false → CodeSafe no m)
-    (hyDone : v = true → ∀ s k, Evm.run yes m = .ok s k → k = 0) :
-    CodeSafe ([.iszero, .jumpi (yes.length + 1)] ++ yes ++
-      [.jump no.length] ++ no) (m.push (.val (bword v))) := by
-  have header : Evm.run [.iszero, .jumpi (yes.length + 1)] (m.push (.val (bword v))) =
-      .ok m (if v then 0 else yes.length + 1) := by cases v <;> rfl
-  rw [List.append_assoc, List.append_assoc]
-  apply safe_append
-  · apply codeSafe_of_nonfault
-    intro bad
-    rw [header] at bad
-    cases bad
-  · intro s k done
-    rw [header] at done
-    cases done
-    cases v with
-    | false =>
-      have skip := safeFrom_skip (yes ++ [.jump no.length]) no m (hn rfl)
-      simpa only [List.append_assoc, List.length_append, List.length_singleton] using skip
-    | true =>
-      change CodeSafe (yes ++ ([.jump no.length] ++ no)) m
-      refine safe_append yes ([Instr.jump no.length] ++ no) m (hy rfl) ?_
-      intro s k done
-      have hk := hyDone rfl s k done
-      subst k
-      apply codeSafe_of_nonfault
-      have jump : Evm.run ([.jump no.length] ++ no) s = .ok s 0 := by
-        change exec no no.length s = .ok s 0
-        exact exec_length no s
-      intro bad
-      rw [jump] at bad
-      cases bad
-
 
 def ScopeStmtSafe {C : Contract} {b Γ Δ F G stmt code}
     (hs : Memory.LoopScopes.StmtCert (C := C) b (Γ := Γ) (Δ := Δ) F G stmt code)
@@ -1282,7 +1247,7 @@ theorem scopes_prog_safe {C : Contract} {b L frame Γ Δ F G P code}
         cases done
         have selected : CodeSafe ([.iszero, .jumpi (left.length + 1)] ++ left ++
             [.jump right.length] ++ right) (m.push (.val (bword v))) := by
-          apply branch_safe_selected
+          apply branch_safe
           · intro choice
             subst v
             exact iht σ base m hr capt (fun amount hd => room amount (.iteTrue hv hd))
