@@ -10,7 +10,8 @@ Rules (tracked Git content of the head commit; the working tree is not read):
           directories does not help, because the limit is on the sum over the whole candidate
           tree. A text path counts the added lines of `git diff --numstat`; a binary blob that is
           added or changed counts every newline byte of its new content. An exact (100%) rename
-          adds nothing. There are no exceptions to this rule.
+          adds nothing. H813 exempts the exact pinned historical baseline report at its original
+          path; any other blob or path remains subject to the normal limit.
   paths   no tracked path (Lean paths included) has a segment naming a process or batch ID.
           A segment is split into tokens at every non-alphanumeric character; it offends when a
           token is h<digits>, g<digits>, v<digits> or item<digits> (any case), when it starts
@@ -41,6 +42,10 @@ import argparse, json, os, re, subprocess, sys
 
 LIMIT_BYTES = 200 * 1024
 LIMIT_LINES = 20000
+# H813: preserve the exact historical comparison input authorized by H812.
+LINE_EXEMPTIONS = {
+    "tests/upstream/results/results.json": "2084c30ae21fc5bc3ec05915564c79c9bbffb183",
+}
 ALLOW = "scripts/hygiene/allow.json"
 ZERO = "0" * 40
 TOKEN = re.compile(r"[^A-Za-z0-9]+")
@@ -250,6 +255,10 @@ def evaluate(base, head):
             bad.append(f"FAIL size {p!r}: {size} bytes; its legacy exception stops at {cap} bytes "
                        f"(limit {LIMIT_BYTES})")
     added = line_additions(base, head)
+    for path, blob in LINE_EXEMPTIONS.items():
+        if t.get(path, (None,))[0] == blob and path in added:
+            del added[path]
+            rep.append(f"ok lines: exact pinned historical report exempted: {path} ({blob})")
     total = sum(added.values())
     if total > LIMIT_LINES:
         by_dir = {}
