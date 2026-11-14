@@ -307,3 +307,4 @@ same option to its monitor fixtures; no environment fallback enables it.
 | `Syntax/NumericV2Controls.lean` | Magnitude-overflow, signed-boundary, huge-exponent unit and unchanged successful-state regressions. |
 | `Semantics/Panic/Result.lean` | Origin-parameterized panic-carrying typed results: full successes, intrinsic solc code and origin, external revert bytes, ordinary revert, exhaustion and divergence; local V1 projections and map/bind laws, without interpreter erasure. |
 | `Examples/Panic/Result.lean` | Kernel-checked panic-result regressions: full typed outputs, all failure projections, code/origin and external-payload distinctions, continuation behavior and origin transport. |
+| `Semantics/Panic/Origins.lean` | Typed W3 panic-site producers, code-indexed origins, and local links to intrinsic operations; independent of panic result transport. |

@@ -137,6 +137,7 @@ import Solidity.Examples.Goals.GoalPinsSpec
 import Solidity.Examples.Goals.Hash
 import Solidity.Examples.Goals.Headline
 import Solidity.Examples.Goals.Loops
+import Solidity.Examples.Goals.LoopsProducer
 import Solidity.Examples.Goals.Panic
 import Solidity.Examples.Goals.Plan
 import Solidity.Examples.Goals.ProseCalibrated
@@ -156,6 +157,7 @@ import Solidity.Examples.MemoryNegativeCountermodel
 import Solidity.Examples.MemoryNegativeDecision
 import Solidity.Examples.MemoryStructWitness
 import Solidity.Examples.Notation
+import Solidity.Examples.Panic.Origins
 import Solidity.Examples.Panic.Result
 import Solidity.Examples.ParameterReduction
 import Solidity.Examples.Preconditions
