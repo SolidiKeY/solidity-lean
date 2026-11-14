@@ -3,7 +3,7 @@
 import datetime,gzip,hashlib,json,os,time
 from pathlib import Path
 import sys
-sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
+sys.path.insert(0, str(Path(__file__).resolve().parents[2]))
 from historical_inputs import read_historical
 ROOT=Path(__file__).resolve().parents[4];OUT=Path(__file__).resolve().parent
 COMMANDS=[

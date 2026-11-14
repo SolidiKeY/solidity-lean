@@ -3,7 +3,7 @@ import hashlib
 from pathlib import Path
 import subprocess
 
-ROOT = Path(__file__).resolve().parents[3]
+ROOT = Path(__file__).resolve().parents[2]
 PINS = {
     "tests/upstream/baseline-20261028/summary.json": ("2207c1bba286538fd63e4a0ff4960ed4a593a8ab", "e0031a071dc040fed1ad329c354c330f5ec150b0"),
     "tests/upstream/baseline-20261028/final-gates/doc-paths.log.gz": ("66629757c15a819af17bb2d97e18c9bea4777351", "7339f2dcfb81bf405f987e5e0e18677146d9ac2c"),
