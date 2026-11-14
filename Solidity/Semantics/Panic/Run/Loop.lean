@@ -22,20 +22,24 @@ def iterN (body : α → EvalResult α) (c : α → EvalResult Bool) : Nat → �
     | .inl τ => iterN body c n τ
     | .inr r => .inr r
 
-partial def runImpl [Inhabited α] (body : α → EvalResult α) (c : α → EvalResult Bool) (σ : α) : EvalResult α :=
-  match step body c σ with
-  | .inl τ => runImpl body c τ
-  | .inr r => r
+/-- The existing trusted loop engine carries the richer terminal result as data.
+No intrinsic failure is projected to a V1 halt. -/
+def advance (body : α → EvalResult α) (c : α → EvalResult Bool) :
+    α ⊕ EvalResult α → TRes (α ⊕ EvalResult α)
+  | .inl σ => .ok (step body c σ)
+  | .inr r => .ok (.inr r)
 
-/-- The compiled loop, for a state type with no `Inhabited` instance. -/
-def runImpl' (body : α → EvalResult α) (c : α → EvalResult Bool) (σ : α) : EvalResult α :=
-  @runImpl α ⟨σ⟩ body c σ
+def active : α ⊕ EvalResult α → TRes Bool
+  | .inl _ => .ok true
+  | .inr _ => .ok false
 
-open Classical in
-/-- The loop's outcome, or `diverge` when no iteration is done. -/
-@[implemented_by runImpl']
-noncomputable def run (body : α → EvalResult α) (c : α → EvalResult Bool) (σ : α) : EvalResult α :=
-  if h : ∃ r n, iterN body c n σ = .inr r then Classical.choose h else .error .diverge
+def finish : TRes (α ⊕ EvalResult α) → EvalResult α
+  | .ok (.inr r) => r
+  | _ => .error .diverge
+
+/-- Reuse TLoop's inventoried implementation, preserving all panic payloads. -/
+def run (body : α → EvalResult α) (c : α → EvalResult Bool) (σ : α) : EvalResult α :=
+  finish (TLoop.run (advance body c) active (.inl σ))
 
 theorem iterN_done_le {body : α → EvalResult α} {c : α → EvalResult Bool} {n m : Nat} {σ : α} {r : EvalResult α}
     (hnm : n ≤ m) (h : iterN body c n σ = .inr r) : iterN body c m σ = .inr r := by
@@ -57,46 +61,62 @@ theorem iterN_done_unique {body : α → EvalResult α} {c : α → EvalResult B
   · rw [iterN_done_le hmn h'] at h
     exact (Sum.inr.inj h).symm
 
-/-- A loop done at `n` ends as it is done there. -/
-theorem run_of_iterN {body : α → EvalResult α} {c : α → EvalResult Bool} {n : Nat} {σ : α} {r : EvalResult α}
-    (h : iterN body c n σ = .inr r) : run body c σ = r := by
-  have hex : ∃ r n, iterN body c n σ = .inr r := ⟨r, n, h⟩
-  simp only [run, hex, dite_true]
-  obtain ⟨n', h'⟩ := Classical.choose_spec hex
-  exact iterN_done_unique h' h
+/-- A terminal panic iteration becomes terminal data in the existing loop engine. -/
+theorem lifted_done {body : α → EvalResult α} {c : α → EvalResult Bool}
+    {n : Nat} {σ : α} {r : EvalResult α} (h : iterN body c n σ = .inr r) :
+    TLoop.iterN (advance body c) active (n + 1) (.inl σ) = .inr (.ok (.inr r)) := by
+  induction n generalizing σ with
+  | zero => cases h
+  | succ n ih =>
+    cases hs : step body c σ with
+    | inl τ =>
+      simp only [iterN, hs] at h
+      change TLoop.iterN (advance body c) active (n + 1) (step body c σ) = _
+      rw [hs]
+      exact ih h
+    | inr result =>
+      simp only [iterN, hs, Sum.inr.injEq] at h
+      subst result
+      simp only [TLoop.iterN, TLoop.step, active, advance, hs]
 
-/-- **Induction over a loop's run**: `P` holds of the first state and of
-every state an iteration from a state in `P` goes on in, and `Q` of every
-outcome an iteration from a state in `P` is done with, and of a divergence:
-then `Q` holds of the loop's run. -/
-theorem run_induct {body : α → EvalResult α} {c : α → EvalResult Bool} {P : α → Prop} {Q : EvalResult α → Prop}
-    {σ : α} (h0 : P σ)
+/-- A loop done at n returns exactly that outcome, with its complete origin. -/
+theorem run_of_iterN {body : α → EvalResult α} {c : α → EvalResult Bool}
+    {n : Nat} {σ : α} {r : EvalResult α}
+    (h : iterN body c n σ = .inr r) : run body c σ = r := by
+  unfold run
+  rw [TLoop.run_of_iterN (lifted_done h)]
+  rfl
+
+/-- Induction preserves arbitrary properties of the complete panic result. -/
+theorem run_induct {body : α → EvalResult α} {c : α → EvalResult Bool}
+    {P : α → Prop} {Q : EvalResult α → Prop} {σ : α} (h0 : P σ)
     (hstep : ∀ τ, P τ →
       match step body c τ with
       | .inl τ' => P τ'
       | .inr r => Q r)
     (hdiv : Q (.error .diverge)) : Q (run body c σ) := by
-  have key : ∀ (n : Nat) (τ : α) (r : EvalResult α), P τ → iterN body c n τ = .inr r → Q r := by
-    intro n
-    induction n with
-    | zero => intro τ r _ h; exact nomatch h
-    | succ n ih =>
-      intro τ r hp h
-      have hs := hstep τ hp
-      simp only [iterN] at h
-      revert hs h
-      cases step body c τ with
-      | inl τ' => exact fun he hp => ih τ' r hp he
-      | inr r' =>
-        intro he hp
-        cases (show Sum.inr r' = (Sum.inr r : α ⊕ EvalResult α) from he)
-        exact hp
-  unfold run
-  split
-  · rename_i hex
-    obtain ⟨n, hn⟩ := Classical.choose_spec hex
-    exact key n σ _ h0 hn
+  let invariant : α ⊕ EvalResult α → Prop
+    | .inl τ => P τ
+    | .inr r => Q r
+  apply TLoop.run_induct (P := invariant) (Q := fun r => Q (finish r)) h0
+  · intro state h
+    cases state with
+    | inl τ => exact hstep τ h
+    | inr r => exact h
   · exact hdiv
+
+/-- Absence of a terminal iteration is exactly the diverging execution case. -/
+theorem run_diverge {body : α → EvalResult α} {c : α → EvalResult Bool} {σ : α}
+    (h : ¬ ∃ r n, iterN body c n σ = .inr r) : run body c σ = .error .diverge := by
+  apply run_induct (P := fun τ => ¬ ∃ r n, iterN body c n τ = .inr r)
+    (Q := fun result => result = .error .diverge) h ?_ rfl
+  intro τ hn
+  cases hs : step body c τ with
+  | inl next =>
+    intro ⟨r, n, hr⟩
+    exact hn ⟨r, n + 1, by simp only [iterN, hs, hr]⟩
+  | inr r =>
+    exact False.elim (hn ⟨r, 1, by simp only [iterN, hs]⟩)
 
 /-- A condition failure propagates unchanged, including resource failures. -/
 theorem run_condition_error (body : α → EvalResult α) (c : α → EvalResult Bool)
