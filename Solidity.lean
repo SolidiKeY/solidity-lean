@@ -4146,6 +4146,7 @@ import Solidity.Semantics.Nondeterminism.SourceWitness
 import Solidity.Semantics.Nondeterminism.Split
 import Solidity.Semantics.NumericLowering
 import Solidity.Semantics.Ops
+import Solidity.Semantics.Panic.Origins
 import Solidity.Semantics.Panic.Result
 import Solidity.Semantics.PaymentWorld
 import Solidity.Semantics.PrimitiveReturnProjection

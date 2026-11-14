@@ -155,6 +155,7 @@ import Solidity.Examples.MemoryNegativeCountermodel
 import Solidity.Examples.MemoryNegativeDecision
 import Solidity.Examples.MemoryStructWitness
 import Solidity.Examples.Notation
+import Solidity.Examples.Panic.Origins
 import Solidity.Examples.Panic.Result
 import Solidity.Examples.ParameterReduction
 import Solidity.Examples.Preconditions
