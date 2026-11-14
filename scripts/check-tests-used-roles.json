@@ -1169,6 +1169,90 @@
       "blob": "171efc294409071d4de7a26619f1a4c49dc067be",
       "anchor": "  \"centralRegistration\": \"proposal only; coordinator owns generated roots and shared maps\",",
       "role": "Historical record: Captured Reader library-root/module-map-row proposal and V1StorageCases development-library/counterexample capability description. Shared roots/maps remain coordinator-owned; proposal-only intent and retained-metadata-not-certification limits are preserved. No actual integration, approved area/placement or ordinary-verifier import is established. Every source, count, signature, axiom, regression, ownership and preservation assertion remains unverified history. Keep/uncertain-reader precedence and every unfinished condition remain. No generated-root/module-map/registry/Lake/interface/placement/design adoption, current source/archive/native/proof authentication, semantic/compiler adequacy, owner agreement, runtime/full-gate acceptance, policy/baseline/budget/exclusion/trust adoption, permission, STOP clearance, generation/consumer/nonuse/deletion credit, private recovery or stopped-workload replay."
+    },
+    {
+      "path": "tests/upstream/step12-quantified-diamond/step12-apis.log",
+      "blob": "32cfb826149c98976b9a6f58998f932f0a8ef059",
+      "anchor": "swapLimitBytes=0",
+      "role": "Historical record: Captured Lake replay/build/linter transcript, not an API-type golden. The historical validation ledger names the two library build targets and log hash. Reported263jobs success,229seconds and old peak/cap/swap remain unverified; no current elaboration, proof or API acceptance. All source, command, hash, count, theorem/axiom, resource, timing, owner and validation assertions remain unverified history. Keep/uncertain-reader precedence and every unfinished obligation remain. Old caps/reserves/timeouts and STOPs grant no new budget, policy, headroom, replay or permission. No current source/archive/native/proof authentication, compiler adequacy, owner agreement, runtime/full-gate acceptance, interface/premise/exclusion/axiom/baseline/budget/trust adoption, STOP clearance, private recovery, stopped-workload replay, consumer/nonuse, retention/deletion or orphan credit."
+    },
+    {
+      "path": "tests/upstream/step12-quantified-diamond/step12-node.log",
+      "blob": "973d930331b7a7e0f5622eb3e1e89dd1fa2c7739",
+      "anchor": "swapLimitBytes=0",
+      "role": "Historical record: Captured four-file serial Node regression transcript with embedded Lake/linter output and reported37tests/37pass/0fail/0skip,288seconds and old peak/cap/swap. The old validation ledger binds its command/hash; these are historical claims, not fresh tests, compiler correctness or semantics. All source, command, hash, count, theorem/axiom, resource, timing, owner and validation assertions remain unverified history. Keep/uncertain-reader precedence and every unfinished obligation remain. Old caps/reserves/timeouts and STOPs grant no new budget, policy, headroom, replay or permission. No current source/archive/native/proof authentication, compiler adequacy, owner agreement, runtime/full-gate acceptance, interface/premise/exclusion/axiom/baseline/budget/trust adoption, STOP clearance, private recovery, stopped-workload replay, consumer/nonuse, retention/deletion or orphan credit."
+    },
+    {
+      "path": "tests/upstream/step2-source-units-isolated-library.log",
+      "blob": "2e8304504f8e84d3bf4e2ed13f8a8a3299365e5c",
+      "anchor": "error: build failed",
+      "role": "Historical record: Captured failed isolated library build with four Killed/Leanexit137 targets and terminal build failure. The historical publication ledger binds log bytes/hash. Failure remains failed/incomplete; no later independent success, default-library or run-lean acceptance follows. All source, command, hash, count, theorem/axiom, resource, timing, owner and validation assertions remain unverified history. Keep/uncertain-reader precedence and every unfinished obligation remain. Old caps/reserves/timeouts and STOPs grant no new budget, policy, headroom, replay or permission. No current source/archive/native/proof authentication, compiler adequacy, owner agreement, runtime/full-gate acceptance, interface/premise/exclusion/axiom/baseline/budget/trust adoption, STOP clearance, private recovery, stopped-workload replay, consumer/nonuse, retention/deletion or orphan credit."
+    },
+    {
+      "path": "tests/upstream/step2-source-units-isolated-suite-guard-stop.log",
+      "blob": "06db823d4b6d301338d83acb9ec9a8fc21fbda8a",
+      "anchor": "\u2714 [240/243] Built Solidity.TestSuite.Derived16 (7.8s)",
+      "role": "Historical record: Captured partial suite transcript ending at Derived16/job240of243 without terminal completion or exit footer. Published byte/hash context is historical only. No final pass, actual stop cause or unrecorded resource peak is inferred from the filename or partial successes. All source, command, hash, count, theorem/axiom, resource, timing, owner and validation assertions remain unverified history. Keep/uncertain-reader precedence and every unfinished obligation remain. Old caps/reserves/timeouts and STOPs grant no new budget, policy, headroom, replay or permission. No current source/archive/native/proof authentication, compiler adequacy, owner agreement, runtime/full-gate acceptance, interface/premise/exclusion/axiom/baseline/budget/trust adoption, STOP clearance, private recovery, stopped-workload replay, consumer/nonuse, retention/deletion or orphan credit."
+    },
+    {
+      "path": "tests/upstream/step2-source-units-runtime-audit.log",
+      "blob": "c0fbcdb175515af8dcba3e16401d7cdb15e12e94",
+      "anchor": "\u2714 [246/688] Built Solidity.Semantics.CallbackWk (27s)",
+      "role": "Historical record: Captured partial runtime-audit transcript with focused two-job output then incomplete default progress246of688. Old JSON/doc context reports resource stop/containerexit137 superseding an earlier live flag; exact crossing/peak remain missing. Reported cause and resource state are unverified, never an interrupted-check pass, current memory-policy adoption or capacity requirement. All source, command, hash, count, theorem/axiom, resource, timing, owner and validation assertions remain unverified history. Keep/uncertain-reader precedence and every unfinished obligation remain. Old caps/reserves/timeouts and STOPs grant no new budget, policy, headroom, replay or permission. No current source/archive/native/proof authentication, compiler adequacy, owner agreement, runtime/full-gate acceptance, interface/premise/exclusion/axiom/baseline/budget/trust adoption, STOP clearance, private recovery, stopped-workload replay, consumer/nonuse, retention/deletion or orphan credit."
+    },
+    {
+      "path": "tests/upstream/step08-transient-world/combined-container-state.txt",
+      "blob": "b5d87297d38fba3b749f5fab519c57c27997b1bd",
+      "anchor": "{\"Status\":\"exited\",\"Running\":false,\"Paused\":false,\"Restarting\":false,\"OOMKilled\":false,\"Dead\":false,\"Pid\":0,\"ExitCode\":0,\"Error\":\"\",\"StartedAt\":\"2026-10-28T01:20:52.637155772Z\",\"FinishedAt\":\"2026-10-28T04:16:40.48700741Z\"} 12884901888 12884901888",
+      "role": "Historical record: Reported old combined-container exited/nonrunning state with ExitCode0 and OOMKilledfalse, timestamps and repeated12884901888values. Snapshot alone certifies neither executed commands, full checks, real peak/headroom, proof nor successful cleanup. Keep/uncertain-reader precedence and every unfinished obligation remain. No current execution, child/read consumption, source/hash authentication, full-gate acceptance, consumer/nonuse, retention/deletion, orphan, permission, premise/exclusion/budget/baseline/trust adoption or stopped-workload replay credit."
+    },
+    {
+      "path": "tests/upstream/step08-transient-world/remaining-container-state.txt",
+      "blob": "aee17905308063e9721d02fb918aca3df19ea521",
+      "anchor": "{\"Status\":\"exited\",\"Running\":false,\"Paused\":false,\"Restarting\":false,\"OOMKilled\":false,\"Dead\":false,\"Pid\":0,\"ExitCode\":0,\"Error\":\"\",\"StartedAt\":\"2026-10-28T04:17:48.654538988Z\",\"FinishedAt\":\"2026-10-28T04:18:09.923335185Z\"} 12884901888 12884901888",
+      "role": "Historical record: Reported old remaining-container exited/nonrunning state with ExitCode0 and OOMKilledfalse, timestamps and repeated12884901888values. No command, dependency closure, actual peak/headroom, proof or current resource acceptance is established. Keep/uncertain-reader precedence and every unfinished obligation remain. No current execution, child/read consumption, source/hash authentication, full-gate acceptance, consumer/nonuse, retention/deletion, orphan, permission, premise/exclusion/budget/baseline/trust adoption or stopped-workload replay credit."
+    },
+    {
+      "path": "tests/upstream/step12-quantified-diamond/axioms.txt",
+      "blob": "9933cfffb468d8e78954d636bc264fba740dfc98",
+      "anchor": "Solidity.Examples.Tactics.QuantifiedDiamond.count: propext, Classical.choice, Quot.sound",
+      "role": "Historical record: Twelve-line historical declared axiom summary for QuantifiedDiamond and two loop obligations, naming propext/Classical.choice/Quot.sound. These are captured assertions, not fresh kernel checks, verified complete axiom closure, premise adequacy or a changed trust policy. Keep/uncertain-reader precedence and every unfinished obligation remain. No current execution, child/read consumption, source/hash authentication, full-gate acceptance, consumer/nonuse, retention/deletion, orphan, permission, premise/exclusion/budget/baseline/trust adoption or stopped-workload replay credit."
+    },
+    {
+      "path": "tests/upstream/step12-quantified-diamond/blocked-attempts.txt",
+      "blob": "9987568c2a1b4203f33456a9acd232ddc3787180",
+      "anchor": "BLOCKED ATTEMPTS, NOT PASSING EVIDENCE",
+      "role": "Historical record: Explicit BLOCKED ATTEMPTS, NOT PASSING EVIDENCE report. Retains four200000heartbeat timeouts, staged open-goal/compiler-no-executable-code failures, interrupted address-space/thread and container cleanup attempts; advanced nested/mapping-post obligations remain unproved. Reported source hash and old runtime/budget data grant no replay, budget change or successful proof credit. Keep/uncertain-reader precedence and every unfinished obligation remain. No current execution, child/read consumption, source/hash authentication, full-gate acceptance, consumer/nonuse, retention/deletion, orphan, permission, premise/exclusion/budget/baseline/trust adoption or stopped-workload replay credit."
+    },
+    {
+      "path": "tests/upstream/step12-quantified-diamond/gate-summary.txt",
+      "blob": "95bfeb140de5a663eb583ae7f1d629a284142173",
+      "anchor": "passed: lake -f lakefile.step12.toml build Solidity.Solkey.QuantifiedDiamond Solidity.Examples.Tactics.QuantifiedDiamond (clean incremental import/proof build)",
+      "role": "Historical record: Historical command/outcome summary with reported passes and one partial source replay exit2. Reported old run-lean exit0/one-second launcher result is not current full-gate evidence; no source replay completeness or resource/budget policy is adopted. Keep/uncertain-reader precedence and every unfinished obligation remain. No current execution, child/read consumption, source/hash authentication, full-gate acceptance, consumer/nonuse, retention/deletion, orphan, permission, premise/exclusion/budget/baseline/trust adoption or stopped-workload replay credit."
+    },
+    {
+      "path": "tests/upstream/step12-quantified-diamond/per-file-passed.txt",
+      "blob": "27b255200e0f014501458f6f19b5f133cadc9d96",
+      "anchor": "Lean (version 4.24.0, x86_64-unknown-linux-gnu, commit 797c613eb9b6d4ec95db23e3e00af9ac6657f24b, Release)",
+      "role": "Historical record: Captured old tool versions/two-job result, ten CHECK labels and twelve printed axiom summaries with timing/resource footer. Labels and axiom output are not current per-file diagnostics, proofs or complete full-gate validation. Keep/uncertain-reader precedence and every unfinished obligation remain. No current execution, child/read consumption, source/hash authentication, full-gate acceptance, consumer/nonuse, retention/deletion, orphan, permission, premise/exclusion/budget/baseline/trust adoption or stopped-workload replay credit."
+    },
+    {
+      "path": "tests/upstream/step12-quantified-diamond/reviews.txt",
+      "blob": "847fd06288b12822ce2b66e3b5be3fc3fa0a78f0",
+      "anchor": "Final independent read-only finder and skeptic reviews used no Lean server or Lean workers.",
+      "role": "Historical record: Historical finder/skeptic review summary, portable-log/scanner-base64 requests and reported display-only binder-order assessment. Review and no-new-defect assertions remain unverified history, not current owner agreement, source equality, proof, premise or review acceptance. Keep/uncertain-reader precedence and every unfinished obligation remain. No current execution, child/read consumption, source/hash authentication, full-gate acceptance, consumer/nonuse, retention/deletion, orphan, permission, premise/exclusion/budget/baseline/trust adoption or stopped-workload replay credit."
+    },
+    {
+      "path": "tests/upstream/step12-quantified-diamond/kernel-build.txt",
+      "blob": "debdc5ae5fc34761176a788306de750676f1eb65",
+      "anchor": "Build completed successfully (235 jobs).",
+      "role": "Historical record: Captured Step12 replay/build/linter transcript ending with a reported235-job build, twelve printed declaration-axiom summaries and old53-second/cgroup footer. Historical validation metadata names the exact build command and log. Full901line structure is reviewed as recorded output, not semantic authentication of linter rewrites, theorem statements, axiom closure, source preservation or actual kernel checking. All success, timing, peak/cap/swap and source/hash assertions remain unverified history; no fresh proof/compiler adequacy, current build/full-gate pass, resource/budget/trust/premise/exclusion policy, owner agreement or permission is adopted. Keep/uncertain-reader precedence and every unfinished obligation remain; no runtime/child/read/consumer/nonuse/deletion/orphan, stopped-workload replay, private recovery or STOP-clearance credit."
+    },
+    {
+      "path": "tests/upstream/step12-quantified-diamond/before.txt",
+      "blob": "5c4fe80474686e2b2e8e3fef3e53b5530ead6b99",
+      "anchor": "Starting origin/master: f4dee4a29c2e208b36db4a4161a4723c735cd775",
+      "role": "Historical record: Before-edit calculus-baseline report with captured quantifiedDiamondBefore Lean source, named old checkout revisions/tool versions and reported bounded command exit0/propext-only output. The generic refusal/calculus-versus-EVM interpretation, source preservation, kernel result and axiom closure are unverified historical assertions, not adopted current theorem statements, premises, regressions, compiler adequacy or proof acceptance. No archived Lean snippet or old prlimit/resource setting is executed, restored, substituted into a theorem or adopted as current policy. Keep/uncertain-reader precedence and all unfinished obligations remain; no fresh execution, child/read/consumer/nonuse/deletion/orphan, full-gate, resource/budget/trust/exclusion/permission, stopped-workload replay or private-recovery credit."
     }
   ],
   "schema_version": 1
