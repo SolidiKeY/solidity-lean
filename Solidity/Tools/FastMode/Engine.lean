@@ -178,7 +178,7 @@ def elabExportInput : CommandElab := fun stx => do
       let mut reason := row.reason
       let mut formula : Option Expr := none
       if status == "ready" then
-        let original ← testFormula N row
+        let original ← Symex.evaluable (← testFormula N row)
         if !(← testOrdinaryTree N original) then
           status := "unsupported"
           reason := "native recursive/callback-frame verification is not implemented"
