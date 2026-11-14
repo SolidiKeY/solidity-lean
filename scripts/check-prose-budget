@@ -1,6 +1,8 @@
 #!/usr/bin/env python3
 """Per-area prose ratchet. Missing areas have a zero budget; --update never raises it."""
 import argparse
+import hashlib
+from fractions import Fraction
 from bisect import bisect_left
 import json
 from pathlib import Path
@@ -504,6 +506,8 @@ def read_baseline(path):
     if not isinstance(data, dict):
         raise ValueError("baseline must be an area-to-counts object")
     for area, row in data.items():
+        if area == "_candidate":
+            continue
         if not isinstance(row, dict) or set(row) != set(METRICS):
             raise ValueError("invalid metrics for " + area)
         if any(type(n) is not int or n < 0 for n in row.values()):
@@ -511,16 +515,137 @@ def read_baseline(path):
     return data
 
 
+
+CANDIDATE_VERSION = "history-calibrated/1"
+PUBLISHED_SHA256 = "2688f0889571f568eb7449427b0f94b97be21552d171aa5fe9cf60692ea26f9c"
+
+
+def published_candidate():
+    path = Path(__file__).resolve().parent / "prose-backtest/calibration-additive.json"
+    raw = path.read_bytes()
+    if hashlib.sha256(raw).hexdigest() != PUBLISHED_SHA256:
+        raise ValueError("published calibration digest mismatch")
+    policy = json.loads(raw)
+    return {"version": CANDIDATE_VERSION, "active": False, "goal_decl": None,
+            "excluded_until_r1": ["docs/audits"],
+            "specification": policy["specification"], "calibration": policy["calibration"]}
+
+
+def validate_candidate(candidate, ceiling=None):
+    """Only coefficients may change, and only downwards; compare rational values."""
+    ceiling = published_candidate() if ceiling is None else ceiling
+    if not isinstance(candidate, dict) or set(candidate) != set(ceiling):
+        raise ValueError("invalid candidate fields")
+    for key in ceiling.keys() - {"calibration"}:
+        if candidate[key] != ceiling[key]:
+            raise ValueError("frozen candidate field: " + key)
+    rows = candidate["calibration"]
+    if not isinstance(rows, dict) or rows.keys() != ceiling["calibration"].keys():
+        raise ValueError("frozen calibration reach")
+    for area, original in ceiling["calibration"].items():
+        row = rows[area]
+        if not isinstance(row, dict) or row.keys() != original.keys():
+            raise ValueError("invalid candidate area: " + area)
+        for key in original.keys() - {"metrics"}:
+            if row[key] != original[key]:
+                raise ValueError("frozen area metadata: " + area)
+        if not isinstance(row["metrics"], dict) or row["metrics"].keys() != original["metrics"].keys():
+            raise ValueError("frozen metrics: " + area)
+        for metric, bound in original["metrics"].items():
+            entry = row["metrics"][metric]
+            if not isinstance(entry, dict) or entry.keys() != bound.keys():
+                raise ValueError("invalid coefficient fields")
+            for key in bound:
+                if key in ("ratio", "margin"):
+                    value = entry[key]
+                    if not isinstance(value, str) or not re.fullmatch(r"[0-9]+(?:/[1-9][0-9]*)?", value):
+                        raise ValueError("invalid rational coefficient")
+                    if not 0 <= Fraction(value) <= Fraction(bound[key]):
+                        raise ValueError("candidate coefficient increase")
+                elif entry[key] != bound[key]:
+                    raise ValueError("frozen calibration metadata")
+
+
+def code_lines(source):
+    """Published physical-line denominator: nonblank noncomment pieces count.
+
+    Mixed code/comment lines belong to both sets. No generated exclusion is
+    verified in the published policy, so all generation claims count on both sides.
+    """
+    scanner = _Scanner(source)
+    spans = []
+    original = scanner.mark
+
+    def mark(start, end, target):
+        if target is scanner.comments and end > start:
+            spans.append((start, end))
+        original(start, end, target)
+
+    scanner.mark = mark
+    scanner.code()
+    lines, pos = set(), 0
+    for start, end in sorted(spans) + [(len(source), len(source))]:
+        if start > pos:
+            line = bisect_left(scanner.newlines, pos) + 1
+            for piece in source[pos:start].split("\n"):
+                if piece.strip():
+                    lines.add(line)
+                line += 1
+        pos = max(pos, end)
+    return len(lines)
+
+
+def candidate_report(root, actual, policy):
+    validate_candidate(policy)
+    codes = {}
+    for path in sorted((root / "Solidity").rglob("*.lean")):
+        if path.is_file():
+            rel = path.relative_to(root / "Solidity")
+            area = "Solidity/" + (rel.parts[0] if len(rel.parts) > 1 else "_root")
+            codes[area] = codes.get(area, 0) + code_lines(path.read_text(encoding="utf-8"))
+    total = sum(codes.values())
+    rows = []
+    for area in sorted(actual.keys() | policy["calibration"].keys()):
+        calibration = policy["calibration"].get(area)
+        denominator = codes.get(area, 0) if area.startswith("Solidity/") else total
+        for metric in METRICS:
+            entry = calibration["metrics"][metric] if calibration else None
+            allowance = (Fraction(entry["ratio"]) * denominator + Fraction(entry["margin"])) if entry else Fraction(0)
+            value = actual.get(area, {}).get(metric, 0)
+            rows.append(dict(area=area, metric=metric, numerator=value,
+                             denominator=denominator, allowance=str(allowance),
+                             passed=value <= allowance,
+                             enforced=area not in policy["excluded_until_r1"]))
+    return {"version": CANDIDATE_VERSION, "active": False, "goal_decl": None,
+            "diagnostic_only": True,
+            "activation_obligations": ["universal laws", "actual-checker ImplementationCorrespondence",
+                                       "verified symmetric generated exclusions", "approved margin/residual policy",
+                                       "held-out evidence", "prose-budget.yml green on merged head"],
+            "rows": rows}
+
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--root", type=Path, default=Path(__file__).resolve().parent.parent)
     parser.add_argument("--baseline", type=Path, help="defaults to ROOT/scripts/prose-baseline.json")
     parser.add_argument("--update", action="store_true", help="lower existing budgets; refuse every increase")
+    parser.add_argument("--candidate", choices=[CANDIDATE_VERSION], help="emit inactive JSON diagnostics; legacy still determines success")
+    parser.add_argument("--candidate-update", type=Path, help="with --update, import a shrink-only candidate policy JSON; never calibrate from source")
     args = parser.parse_args()
+    if args.candidate_update and not args.update:
+        parser.error("--candidate-update requires --update")
     baseline_path = args.baseline or args.root / "scripts/prose-baseline.json"
     try:
         baseline = read_baseline(baseline_path)
+        candidate = baseline.pop("_candidate", None)
+        if args.candidate_update:
+            validate_candidate(candidate)
+            proposed = json.loads(args.candidate_update.read_text(encoding="utf-8"))
+            validate_candidate(proposed, ceiling=candidate)
+            candidate = proposed
         actual = counts(args.root)
+        if args.candidate:
+            report = candidate_report(args.root, actual, candidate)
+            print(json.dumps(report, sort_keys=True))
         merged = {area: actual.get(area, dict.fromkeys(METRICS, 0))
                   for area in sorted(baseline.keys() | actual.keys())}
         failures = []
@@ -533,7 +658,12 @@ def main():
             print("Prose budget exceeded:\n" + "\n".join(failures), file=sys.stderr)
             return 1
         if args.update:
+            if candidate is not None:
+                validate_candidate(candidate)
+                merged["_candidate"] = candidate
             baseline_path.write_text(json.dumps(merged, indent=2, sort_keys=True) + "\n", encoding="utf-8")
+        if args.candidate:
+            return 0
         print(f"Prose budget PASS ({len(merged)} areas)" + ("; baseline lowered" if args.update else ""))
         return 0
     except (OSError, ValueError) as error:
