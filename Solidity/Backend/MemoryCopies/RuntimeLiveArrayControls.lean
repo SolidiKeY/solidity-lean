@@ -1,3 +1,4 @@
+import Solidity.Backend.MemoryCopies.AliasBindingInterface
 import Solidity.Backend.MemoryCopies.RuntimeLiveArray
 import Solidity.Evm.Correct
 
@@ -49,11 +50,8 @@ private def path (index : Nat) : SPath C Γ (.ref leaf) :=
     (.simple (.lit (indexValue (wmod index)).val (indexValue (wmod index)).property)))
 private def reference : SRef C (.ref leaf) := (SRef.ofRoot "matrix" root).index (.arr .dyn) (indexValue (wmod 0))
 private def destination : Idx Γ (.mem leaf) := .here
-private theorem refs {R : RefTy} (reference : HRef H R) : R = leaf ∧ HEq reference old := by
-  rcases reference with ⟨index,selected⟩
-  cases index with
-  | zero => cases selected; exact ⟨rfl,HEq.rfl⟩
-  | succ index => cases selected
+private theorem refs {R : RefTy} (reference : HRef H R) : R = leaf ∧ HEq reference old :=
+  singleton_reference reference
 
 private theorem leaf_repr (payloads : List (Fin W)) (bounded : payloads.length < 128) :
     ReprAt (store payloads) 128 (.ref leaf) (.data (.root 0) 0) (array payloads bounded) := by
@@ -98,26 +96,9 @@ private theorem core (payloads : List (Fin W)) (bounded : payloads.length < 128)
     | there index => cases index with
       | there index => nomatch index
 
-private theorem heap_repr (payloads : List (Fin W)) : Objects.HeapRepr heap bases 8 (machine payloads) := by
-  refine ⟨⟨?_,?_,?_⟩,?_,?_,?_⟩
-  · intro R reference
-    obtain ⟨rfl,equal⟩ := refs reference
-    cases equal
-    decide +kernel
-  · intro R reference
-    obtain ⟨rfl,equal⟩ := refs reference
-    cases equal
-    decide +kernel
-  · intro R Q left right different
-    obtain ⟨rfl,leftEq⟩ := refs left
-    obtain ⟨rfl,rightEq⟩ := refs right
-    cases leftEq
-    cases rightEq
-    exact (different rfl).elim
-  · intro A E array reference
-    obtain ⟨rfl,equal⟩ := refs reference
-    cases equal
-    cases array
+private theorem heap_repr (payloads : List (Fin W)) : Objects.HeapRepr heap bases 8 (machine payloads) :=
+  singleton_array_heap_repr .dyn (by
+    decide +kernel) (by
     refine ⟨?_,?_,?_⟩
     · with_unfolding_all change 16 + 2 ≤ W
       decide
@@ -127,14 +108,7 @@ private theorem heap_repr (payloads : List (Fin W)) : Objects.HeapRepr heap base
       with_unfolding_all change ([indexValue (wmod 7)] : List PrimTy.uint.Denote)[index]? = some item at selected
       cases index with
       | zero => cases selected; exact ReprV.uint_of rfl
-      | succ index => cases selected
-  · intro name reference
-    obtain ⟨different,_⟩ := refs reference
-    cases different
-  · intro name field R reference fieldType
-    obtain ⟨different,_⟩ := refs reference
-    cases different
-
+      | succ index => cases selected)
 private theorem represented (payloads : List (Fin W)) (bounded : payloads.length < 128) : Objects.StateRepr 128 1 8 (Frag.init Γ) (state payloads bounded) bases (machine payloads) := by
   refine ⟨core payloads bounded,heap_repr payloads,?_,by decide⟩
   intro R index
