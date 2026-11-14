@@ -1,1 +1,2 @@
 | `Semantics/Panic/Result.lean` | Origin-parameterized panic-carrying typed results: full successes, intrinsic solc code and origin, external revert bytes, ordinary revert, exhaustion and divergence; local V1 projections and map/bind laws, without interpreter erasure. |
+| `Examples/Panic/Result.lean` | Kernel-checked panic-result regressions: full typed outputs, all failure projections, code/origin and external-payload distinctions, continuation behavior and origin transport. |
