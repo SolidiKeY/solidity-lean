@@ -58,6 +58,7 @@ import Solidity.Examples.DecisionGapBinderChecks
 import Solidity.Examples.DecisionGapBlockChecks
 import Solidity.Examples.DecisionGapCensus
 import Solidity.Examples.DecisionGapData
+import Solidity.Examples.DecisionGapKIntResidue
 import Solidity.Examples.DecisionGapLiteralChecks
 import Solidity.Examples.DecisionGapMembershipChecks
 import Solidity.Examples.DecisionGapModularChecks
@@ -156,6 +157,7 @@ import Solidity.Examples.MemoryNegativeCountermodel
 import Solidity.Examples.MemoryNegativeDecision
 import Solidity.Examples.MemoryStructWitness
 import Solidity.Examples.Notation
+import Solidity.Examples.Panic.Eval
 import Solidity.Examples.Panic.Origins
 import Solidity.Examples.Panic.Result
 import Solidity.Examples.Panic.Source

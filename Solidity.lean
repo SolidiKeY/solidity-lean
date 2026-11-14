@@ -2126,6 +2126,7 @@ import Solidity.Calculus.DecideScoped
 import Solidity.Calculus.DecideTyped
 import Solidity.Calculus.Decision
 import Solidity.Calculus.DecisionArrayReasons
+import Solidity.Calculus.DecisionBlockRefute
 import Solidity.Calculus.DecisionBoundedInstance
 import Solidity.Calculus.DecisionBoundedInstanceSearch
 import Solidity.Calculus.DecisionBoundedInstanceSource
@@ -2138,6 +2139,7 @@ import Solidity.Calculus.DecisionCompoundFieldReason
 import Solidity.Calculus.DecisionFixedArrayPair
 import Solidity.Calculus.DecisionFixedArrayPath
 import Solidity.Calculus.DecisionFixedArrayStorage
+import Solidity.Calculus.DecisionGapAnswer
 import Solidity.Calculus.DecisionGivenHeapBoundary
 import Solidity.Calculus.DecisionGivenHeapComputedBoundary
 import Solidity.Calculus.DecisionGivenHeapComputedExtension
@@ -2185,6 +2187,7 @@ import Solidity.Calculus.DecisionSourceBoundary
 import Solidity.Calculus.DecisionSourceChain
 import Solidity.Calculus.DecisionSourceDiscovery
 import Solidity.Calculus.DecisionSourceInstance
+import Solidity.Calculus.DecisionThresholdStore
 import Solidity.Calculus.DecisionUIntConstant
 import Solidity.Calculus.DecisionUIntFormula
 import Solidity.Calculus.DecisionUIntFormulaRecognizer
@@ -4149,6 +4152,7 @@ import Solidity.Semantics.Nondeterminism.SourceWitness
 import Solidity.Semantics.Nondeterminism.Split
 import Solidity.Semantics.NumericLowering
 import Solidity.Semantics.Ops
+import Solidity.Semantics.Panic.Eval
 import Solidity.Semantics.Panic.Origins
 import Solidity.Semantics.Panic.Result
 import Solidity.Semantics.Panic.Source
@@ -4574,6 +4578,8 @@ import Solidity.Tools.DirectArithmetic
 import Solidity.Tools.DirectRuntime
 import Solidity.Tools.Elementary
 import Solidity.Tools.EntryReturn
+import Solidity.Tools.FastMode.Engine
+import Solidity.Tools.FastMode.Meta
 import Solidity.Tools.Goal
 import Solidity.Tools.GoalPins
 import Solidity.Tools.Inspect

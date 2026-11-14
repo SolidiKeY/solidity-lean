@@ -3,11 +3,13 @@ import Solidity.Calculus.DecisionPartialOrSubComplete
 import Solidity.Calculus.Surface
 
 /-!
-# Standalone subtraction-literal family controls (proposed S2)
+# Partial-OR floor at any halting subtraction literal: both polarities
 
-Source recognition, validity and explicit countermodels are checked before
-public-dispatcher integration. The preserved public verdict/coverage controls
-remain binding and are deferred until their production dependencies land.
+`((i ≤ j && i < cap - 3) || i ≤ i) == true → owed[i] == 5` blocks: valid at a
+positive key with value `5`, refuted at key zero and at a wrong value, decided
+by `Calculus/DecisionPartialOrSub.lean` with the region countermodel. A guard
+whose right disjunct is not `i ≤ i` (`j ≤ i`) is not a member and stays an
+in-target unknown: the narrowed Residue shape of partial APF guards.
 -/
 namespace Solidity.Examples.DecisionGapPartialOrSub
 open Solidity.Decide Solidity.Decide.ResidueReason
@@ -46,6 +48,17 @@ def otherClaim : Fml Floors [] :=
       (.eq (roots.mapRead (.pvV (.there .here))) (.app0 (.lit (uintOfNat 5)))))))
     (.eq (roots.mapRead (.app0 (.lit (uintOfNat 2)))) (.app0 (.lit (uintOfNat 5))))
 
+/-- Target, membership, coverage and the public verdict. -/
+@[noinline] def observe (φ : Fml Floors []) : Bool × Bool × Bool × String :=
+  (φ.inTarget {}, φ.partialOrSub, φ.Covered, match decideGoal φ with
+    | .proved => "proved" | .refuted _ => "refuted" | .unknown => "unknown")
+
+/--
+info: [(true, true, true, "proved"), (true, true, true, "refuted"), (true, true, true, "refuted"),
+  (true, false, false, "unknown")]
+-/
+#guard_msgs in #eval [good, atZero, wrongValue, otherClaim].map observe
+
 /-- Members and the non-member control. -/
 theorem members : good.partialOrSub = true ∧ atZero.partialOrSub = true ∧
     wrongValue.partialOrSub = true ∧ otherClaim.partialOrSub = false := by
@@ -57,6 +70,14 @@ theorem members : good.partialOrSub = true ∧ atZero.partialOrSub = true ∧
       by decide +kernel, .user "i", .user "j", rfl⟩⟩
   · exact ⟨⟨roots, uintOfNat 7, uintOfNat 5, uintOfNat 4, uintOfNat 6,
       by decide +kernel, .user "i", .user "j", rfl⟩⟩
+
+/-- The three members are in the target and covered. -/
+theorem covered : good.inTarget {} = true ∧ good.Covered = true ∧ atZero.Covered = true ∧
+    wrongValue.Covered = true := by decide +kernel
+
+/-- The narrowed Residue control: in the target, not covered. -/
+theorem other_residue : otherClaim.inTarget {} = true ∧ otherClaim.Covered = false := by
+  decide +kernel
 
 /-- The region state refutes key zero, independently of the decider. -/
 theorem atZero_countermodel :
@@ -71,6 +92,17 @@ theorem wrongValue_countermodel :
 /-- The positive member, by the family's semantics. -/
 theorem good_valid : Fml.Valid good :=
   roots.subClaim_positive_valid _ _ _ _ _ (by decide)
+
+/-- The decider proves the positive member. -/
+theorem good_proved : decideGoal good = .proved := by
+  have hd : decideGoal good ≠ .unknown := decideGoal_complete covered.2.1 rfl
+  cases he : decideGoal good with
+  | proved => rfl
+  | refuted σ => exact absurd ((Fml.holdsH_iff σ good rfl).mpr (good_valid σ)) (decideGoal_refutes he)
+  | unknown => exact absurd he hd
+
+/-- info: 'Solidity.Examples.DecisionGapPartialOrSub.good_proved' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in #print axioms good_proved
 
 /-- Every recognized example has a certified family answer, before public integration. -/
 theorem family_answers : (partialOrSubAnswer? good).isSome = true ∧

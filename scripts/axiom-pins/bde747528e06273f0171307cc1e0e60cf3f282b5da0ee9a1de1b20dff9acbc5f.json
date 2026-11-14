@@ -1,10 +1,85 @@
 {
+ "Solidity/Hash/CompilerCorrect/Prefix.lean:Solidity.Hash.compiler_correct_collisionFree": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
  "Solidity/Hash/CompilerCorrect/Prefix.lean:Solidity.Hash.CompilerCorrect.codeSafe_of_nonfault": [
   "Classical.choice",
   "Quot.sound",
   "propext"
  ],
+ "Solidity/Hash/CompilerCorrect/Prefix.lean:Solidity.Hash.CompilerCorrect.compilation_safe_of_nondiv": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Hash/CompilerCorrect/Prefix.lean:Solidity.Hash.CompilerCorrect.compilerBridge_of_safe": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Hash/CompilerCorrect/Prefix.lean:Solidity.Hash.CompilerCorrect.construction_safe": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Hash/CompilerCorrect/Prefix.lean:Solidity.Hash.CompilerCorrect.copyConstruction_safe": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Hash/CompilerCorrect/Prefix.lean:Solidity.Hash.CompilerCorrect.core_call_safe": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Hash/CompilerCorrect/Prefix.lean:Solidity.Hash.CompilerCorrect.core_ite_safe": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Hash/CompilerCorrect/Prefix.lean:Solidity.Hash.CompilerCorrect.core_loop_safe": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Hash/CompilerCorrect/Prefix.lean:Solidity.Hash.CompilerCorrect.core_seq_safe": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Hash/CompilerCorrect/Prefix.lean:Solidity.Hash.CompilerCorrect.fixedMemory_safe": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Hash/CompilerCorrect/Prefix.lean:Solidity.Hash.CompilerCorrect.memory_safe": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Hash/CompilerCorrect/Prefix.lean:Solidity.Hash.CompilerCorrect.memoryCalls_safe": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Hash/CompilerCorrect/Prefix.lean:Solidity.Hash.CompilerCorrect.memoryCopy_safe": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Hash/CompilerCorrect/Prefix.lean:Solidity.Hash.CompilerCorrect.objects_safe": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
  "Solidity/Hash/CompilerCorrect/Prefix.lean:Solidity.Hash.CompilerCorrect.prefix_related_of_safe": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Hash/CompilerCorrect/Prefix.lean:Solidity.Hash.CompilerCorrect.referenceArrays_safe": [
   "Classical.choice",
   "Quot.sound",
   "propext"

@@ -87,8 +87,9 @@ theorem new_sources_refuted :
   exact ⟨((reversedFreshField? reversedFive).get (by decide +kernel)).refuted,
     ((reversedFreshField? reversedBool).get (by decide +kernel)).refuted⟩
 
-/-- Mapping-bearing sources remain outside this map-free fallback. -/
-theorem mapping_global_unknown : decideGoal mappingReversed = .unknown := by rfl
+/-- Mapping-bearing sources stay outside this map-free fallback; the void-binder
+route proves them instead (`Calculus/DecisionMappingStruct.lean`). -/
+theorem mapping_global_proved : decideGoal mappingReversed = .proved := by rfl
 
 /-- Both independently certified memory routes now have actual global results. -/
 theorem certified_memory_controls :
