@@ -72,6 +72,9 @@ private def prepareLeaf {C : Contract} : Nat → {Γ : Ctx} → (φ : Fml C Γ) 
   | n+1, _, .bind m x t b =>
     let r := prepareLeaf n b
     throughBind m x t r
+  | n+1, _, .modal m P κ b =>
+    let r := prepareLeaf n (symex 1 (.modal m P κ b))
+    ⟨r.formula, fun σ h => symex_sound 1 (.modal m P κ b) σ (r.sound σ h)⟩
   | n+1, _, .anon xs b =>
     match primitivePositions xs with
     | none => ⟨.anon xs b, fun _ h => h⟩
@@ -93,8 +96,9 @@ private def arithmeticLeaf {C : Contract} {Γ : Ctx} (H : Hyps C [] Γ) (φ : Fm
     Option (List (Seq.SLeaf C)) :=
   match SpecProposal.leaf H φ with
   | some [] => some []
-  | result => if (H.wrap φ).modalFree && Tools.directArithmetic (prepareLeaf 512 (H.wrap φ)).formula
-      then some [] else result
+  | result =>
+    let prepared := (prepareLeaf 512 (H.wrap φ)).formula
+    if prepared.modalFree && Tools.directArithmetic prepared then some [] else result
 
 
 private def openBranch {C : Contract} (index : Nat) (leaf : Seq.SLeaf C) : Json :=
