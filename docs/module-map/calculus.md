@@ -250,6 +250,9 @@
 | `Calculus/DecisionBlockRefute.lean` | Certified refutations of literal-bounded blocks at checked threshold regions; a sound capped semi-decision whose misses remain unknown. |
 | `Calculus/DecisionGapAnswer.lean` | Certified floor/subtraction/block gap answers and source coverage, used only after prior given-heap routes miss. |
 | `Examples/DecisionGapKIntResidue.lean` | KeY-int cases beyond the two-word encoding, with explicit semantic validity/countermodel controls and residue pins. |
+| `Examples/DecisionGapPartialOrFloor.lean` | Public positive floor-family answers and explicit zero-key/wrong-value countermodels. |
+| `Examples/DecisionGapArrayNegatives.lean` | Checked bounded-block countermodels for array, field and struct guards, with positive non-refutation controls. |
+| `Examples/DecisionGapVoidBinder.lean` | Public coverage, verdict and semantic controls for impossible fresh memory binders, including mapping-bearing structs. |
 | `Calculus/DecisionResidue.lean` | M7-next: `Fml.Residue`, the leaves every route of `decideGoal` refuses, each refusal named (`RouteRefusal`) and computed from the route's front end (a hash try's refusal is its own verdict); exact by construction (`residue_iff_unknown`), decidable, kernel-evaluable. `DecisionTheorem'`: in target and off the residue, `decideGoal` proves (valid under the goal's hash premise) or refutes (certified state); totality holds by definition, not a completeness result. `decideGoal_proved_iff_off_residue`, `decisionTheorem_iff_residue_disjoint`, and VA1's source classes attached as labels to residue leaves (`Fml.sourceReasons`, `Fml.residueReasons`; not residue tests). |
 | `Calculus/ReadBoundsStack.lean` | H126 typed tail worklist for compiled tree-size bounds; preserves occurrence counting and existing limits. |
 | `Calculus/ReadBoundsStackCorrect.lean` | Exact remaining-fuel equalities to existing ReadBounds logical counters; no extra premises or axioms. |
