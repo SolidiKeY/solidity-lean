@@ -365,6 +365,480 @@ theorem empty_stack_fault_related (F : Roadmap.Fixed) (slots : List Slot)
     simp only [Instr.step, shape, numericAtom, rep.1, List.map_nil, embed,
       idealResult, resultMap, ResultRelated]
 
+/-- One semantic loop turn unfolds even when its remaining execution diverges. -/
+theorem loop_run_unfold (rc rb : Machine → Evm.Out) (m : Machine) :
+    loopRun rc rb m =
+      match loopTurn rc rb m with
+      | .inl next => loopRun rc rb next
+      | .inr out => out := by
+  cases ht : loopTurn rc rb m with
+  | inr r =>
+    exact loopRun_of_iterN (n := 1) (by simp only [loopIterN, ht])
+  | inl next =>
+    by_cases h : ∃ r n, loopIterN rc rb n next = .inr r
+    · obtain ⟨r, n, hn⟩ := h
+      simp only [loopRun_of_iterN hn]
+      exact loopRun_of_iterN (n := n + 1) (by simp only [loopIterN, ht, hn])
+    · have hm : ¬ ∃ r n, loopIterN rc rb n m = .inr r := by
+        rintro ⟨r, n, hn⟩
+        cases n with
+        | zero => cases hn
+        | succ n => exact h ⟨r, n, by simpa only [loopIterN, ht] using hn⟩
+      simp only [loopRun, h, hm, dif_neg, not_false_eq_true]
+
+/-- Reinterpret the contract result in the existing EVM outcome type. -/
+def outOfResult : Result Machine → Evm.Out
+  | .ok m k => .ok m k
+  | .revert => .revert
+  | .fault => .fault
+
+/-- Remaining loop execution, followed by the code after the loop. -/
+noncomputable def continueLoop (c b rest : List Instr) (m : Machine) : Evm.Out :=
+  (loopRun (Evm.run c) (Evm.run b) m).bind (fun m k => Evm.exec rest k m)
+
+noncomputable def bodyResult (c b rest : List Instr) : Evm.Out → Evm.Out
+  | .ok m 0 => continueLoop c b rest m
+  | .ok _ (_ + 1) => .fault
+  | .revert => .revert
+  | .fault => .fault
+
+noncomputable def testResult (c b rest : List Instr) : Evm.Out → Evm.Out
+  | .ok m 0 =>
+    match m.stack with
+    | .val w :: tail =>
+      if w.val = 0 then Evm.run rest {m with stack := tail}
+      else bodyResult c b rest (Evm.run b {m with stack := tail})
+    | _ => .fault
+  | .ok _ (_ + 1) => .fault
+  | .revert => .revert
+  | .fault => .fault
+
+noncomputable def frameResult : Frame → Evm.Out → Evm.Out
+  | .test c b rest => testResult c b rest
+  | .body c b rest => bodyResult c b rest
+
+noncomputable def finishFrames : List Frame → Evm.Out → Evm.Out
+  | [], r => r
+  | f :: fs, r => finishFrames fs (frameResult f r)
+
+/-- Denotation includes all pending frames, including divergent continuations. -/
+noncomputable def denoteCursor : Cursor Machine → Evm.Out
+  | .running c k fs m => finishFrames fs (Evm.exec c k m)
+  | .halted r => outOfResult r
+
+theorem finishFrames_fault (fs : List Frame) : finishFrames fs .fault = .fault := by
+  induction fs with
+  | nil => rfl
+  | cons f fs ih => cases f <;> exact ih
+
+theorem finishFrames_revert (fs : List Frame) : finishFrames fs .revert = .revert := by
+  induction fs with
+  | nil => rfl
+  | cons f fs ih => cases f <;> exact ih
+
+theorem continueLoop_test (c b rest : List Instr) (m : Machine) :
+    continueLoop c b rest m = testResult c b rest (Evm.run c m) := by
+  unfold continueLoop
+  rw [loop_run_unfold]
+  cases hc : Evm.run c m with
+  | fault => simp [loopTurn, hc, testResult, Evm.Out.bind]
+  | revert => simp [loopTurn, hc, testResult, Evm.Out.bind]
+  | ok s k =>
+    cases k with
+    | succ k => simp [loopTurn, hc, testResult, Evm.Out.bind]
+    | zero =>
+      cases hs : s.stack with
+      | nil => simp [loopTurn, hc, hs, testResult, Evm.Out.bind]
+      | cons x tail =>
+        cases x with
+        | slot a => simp [loopTurn, hc, hs, testResult, Evm.Out.bind]
+        | val w =>
+          by_cases hz : w.val = 0
+          · simp only [loopTurn, hc, hs, hz, if_pos, testResult, Evm.Out.bind]; rfl
+          · cases hb : Evm.run b {s with stack := tail} with
+            | fault => simp [loopTurn, hc, hs, hz, hb, testResult, bodyResult, Evm.Out.bind]
+            | revert => simp [loopTurn, hc, hs, hz, hb, testResult, bodyResult, Evm.Out.bind]
+            | ok t j =>
+              cases j <;> simp [loopTurn, hc, hs, hz, hb, testResult, bodyResult,
+                continueLoop, Evm.Out.bind]
+
+/-- An atomic transition preserves the denotation of its entire continuation. -/
+theorem denote_atom (out : Evm.Out) (rest : List Instr) (fs : List Frame) :
+    denoteCursor (match idealResult out with
+      | .ok m k => .running rest k fs m
+      | .revert => .halted .revert
+      | .fault => .halted .fault) =
+    finishFrames fs (out.bind (fun m k => Evm.exec rest k m)) := by
+  cases out with
+  | ok m k => rfl
+  | revert => exact (finishFrames_revert fs).symm
+  | fault => exact (finishFrames_fault fs).symm
+
+/-- Every specified ideal tick preserves the complete EVM denotation. -/
+theorem denote_tick (cur : Cursor Machine) :
+    denoteCursor (tick (fun i s => idealResult (i.step s)) idealTest cur) =
+      denoteCursor cur := by
+  cases cur with
+  | halted r => rfl
+  | running code k fs m =>
+    cases code with
+    | nil =>
+      cases fs with
+      | nil => cases k <;> rfl
+      | cons f fs =>
+        cases k with
+        | succ k =>
+          cases f <;>
+            simp [tick, denoteCursor, Evm.exec, finishFrames, frameResult,
+              testResult, bodyResult, outOfResult, finishFrames_fault]
+        | zero =>
+          cases f with
+          | body c b rest =>
+            exact congrArg (finishFrames fs) (continueLoop_test c b rest m).symm
+          | test c b rest =>
+            cases hs : m.stack with
+            | nil =>
+              simp [tick, idealTest, hs, denoteCursor, Evm.exec, finishFrames,
+                frameResult, testResult, outOfResult, finishFrames_fault]
+            | cons x tail =>
+              cases x with
+              | slot a =>
+                simp [tick, idealTest, hs, denoteCursor, Evm.exec, finishFrames,
+                  frameResult, testResult, outOfResult, finishFrames_fault]
+              | val w =>
+                by_cases hz : w.val = 0
+                · simp [tick, idealTest, hs, hz, denoteCursor, Evm.exec, finishFrames,
+                    frameResult, testResult, Evm.run]
+                · have flag : (w.val == 0) = false :=
+                    Bool.eq_false_iff.mpr (fun h => hz (beq_iff_eq.mp h))
+                  simp [tick, idealTest, hs, hz, flag, bne, denoteCursor, Evm.exec,
+                    finishFrames, frameResult, testResult, Evm.run]
+    | cons i rest =>
+      cases k with
+      | succ k => simp only [tick, denoteCursor, Evm.exec]
+      | zero =>
+        have ha := denote_atom (i.step m) rest fs
+        generalize ho : i.step m = out at ha
+        cases i <;> try
+          simp only [tick, denoteCursor, exec_cons_zero, ho]
+          cases out <;> simpa only [idealResult, denoteCursor, Evm.Out.bind] using ha
+        case loop c b =>
+          exact congrArg (finishFrames fs) (continueLoop_test c b rest m).symm
+
+theorem denote_prefix (n : Nat) (cur : Cursor Machine) :
+    denoteCursor (iteratePrefix (fun i s => idealResult (i.step s)) idealTest n cur) =
+      denoteCursor cur := by
+  induction n with
+  | zero => rfl
+  | succ n ih => rw [iteratePrefix, denote_tick, ih]
+
+/-- Any actual finite terminal prefix agrees with the original EVM semantics. -/
+theorem ideal_finite_sound (n : Nat) (c : List Instr) (m : Machine) (r : Result Machine)
+    (h : producer.ideal n c m = .halted r) : idealResult (Evm.run c m) = r := by
+  have hd := denote_prefix n (.running c 0 [] m)
+  change denoteCursor (producer.ideal n c m) = Evm.run c m at hd
+  rw [h] at hd
+  have hr : idealResult (outOfResult r) = r := by cases r <;> rfl
+  exact (congrArg idealResult hd).symm.trans hr
+
+/-- Reachability uses precisely the already fixed ideal tick sequence. -/
+def IdealReaches (a b : Cursor Machine) : Prop :=
+  ∃ n, iteratePrefix (fun i s => idealResult (i.step s)) idealTest n a = b
+
+theorem reaches_refl (a : Cursor Machine) : IdealReaches a a := ⟨0, rfl⟩
+
+theorem reaches_tick (a : Cursor Machine) :
+    IdealReaches a (tick (fun i s => idealResult (i.step s)) idealTest a) := ⟨1, rfl⟩
+
+theorem reaches_trans {a b c : Cursor Machine} (hab : IdealReaches a b)
+    (hbc : IdealReaches b c) : IdealReaches a c := by
+  obtain ⟨n, hn⟩ := hab
+  obtain ⟨k, hk⟩ := hbc
+  exact ⟨n + k, by rw [prefix_add, hn, hk]⟩
+
+/-- Non-fault loop outcomes have a finite witness, even with unbounded loops. -/
+theorem loop_nonfault_witness (rc rb : Machine → Evm.Out) (m : Machine)
+    (h : loopRun rc rb m ≠ .fault) :
+    ∃ n, loopIterN rc rb n m = .inr (loopRun rc rb m) := by
+  by_cases hex : ∃ r n, loopIterN rc rb n m = .inr r
+  · obtain ⟨r, n, hn⟩ := hex
+    exact ⟨n, by rw [loopRun_of_iterN hn]; exact hn⟩
+  · exact False.elim (h (by simp only [loopRun, hex, dif_neg, not_false_eq_true]))
+
+/-- A completed subcode leaves successful results at its frame boundary. -/
+def afterCode (fs : List Frame) : Evm.Out → Cursor Machine
+  | .ok m k => .running [] k fs m
+  | .revert => .halted .revert
+  | .fault => .halted .fault
+
+/-- Internal induction property; no completeness premise is added to the goal. -/
+def CodeComplete (c : List Instr) : Prop :=
+  ∀ k fs m, Evm.exec c k m ≠ .fault →
+    IdealReaches (.running c k fs m) (afterCode fs (Evm.exec c k m))
+
+theorem complete_run {c : List Instr} (hc : CodeComplete c) (fs : List Frame)
+    (m : Machine) (r : Evm.Out) (hr : Evm.run c m = r) (hne : r ≠ .fault) :
+    IdealReaches (.running c 0 fs m) (afterCode fs r) := by
+  have h := hc 0 fs m
+  change Evm.run c m ≠ .fault →
+    IdealReaches (.running c 0 fs m) (afterCode fs (Evm.run c m)) at h
+  rw [hr] at h
+  exact h hne
+
+theorem complete_nil : CodeComplete [] := by
+  intro k fs m _
+  exact reaches_refl _
+
+/-- Pending jumps consume instructions without invoking their semantics. -/
+theorem complete_skip {rest : List Instr} (hr : CodeComplete rest)
+    (i : Instr) (k : Nat) (fs : List Frame) (m : Machine)
+    (hne : Evm.exec (i :: rest) (k + 1) m ≠ .fault) :
+    IdealReaches (.running (i :: rest) (k + 1) fs m)
+      (afterCode fs (Evm.exec (i :: rest) (k + 1) m)) := by
+  rw [exec_cons_succ] at hne ⊢
+  have ht := reaches_tick (.running (i :: rest) (k + 1) fs m)
+  simp only [tick] at ht
+  exact reaches_trans ht (hr k fs m hne)
+
+def afterAtom (rest : List Instr) (fs : List Frame) : Evm.Out → Cursor Machine
+  | .ok m k => .running rest k fs m
+  | .revert => .halted .revert
+  | .fault => .halted .fault
+
+/-- Realize finitely many semantic loop turns using the actual ideal ticks. -/
+theorem loop_turns_complete (c b : List Instr) (hc : CodeComplete c)
+    (hb : CodeComplete b) (rest : List Instr) (fs : List Frame)
+    (n : Nat) (m : Machine) (r : Evm.Out)
+    (hn : loopIterN (Evm.run c) (Evm.run b) n m = .inr r) (hne : r ≠ .fault) :
+    IdealReaches (.running c 0 (.test c b rest :: fs) m) (afterAtom rest fs r) := by
+  induction n generalizing m with
+  | zero => cases hn
+  | succ n ih =>
+    cases hcond : Evm.run c m with
+    | fault => simp [loopIterN, loopTurn, hcond] at hn; exact False.elim (hne hn.symm)
+    | revert =>
+      simp only [loopIterN, loopTurn, hcond, Sum.inr.injEq] at hn
+      subst r
+      exact complete_run hc _ m .revert hcond (by intro h; cases h)
+    | ok s k =>
+      cases k with
+      | succ k => simp [loopIterN, loopTurn, hcond] at hn; exact False.elim (hne hn.symm)
+      | zero =>
+        have hcr := complete_run hc (.test c b rest :: fs) m (.ok s 0) hcond
+          (by intro h; cases h)
+        cases hs : s.stack with
+        | nil => simp [loopIterN, loopTurn, hcond, hs] at hn; exact False.elim (hne hn.symm)
+        | cons x tail =>
+          cases x with
+          | slot a => simp [loopIterN, loopTurn, hcond, hs] at hn; exact False.elim (hne hn.symm)
+          | val w =>
+            have ht := reaches_tick (.running [] 0 (.test c b rest :: fs) s)
+            by_cases hz : w.val = 0
+            · simp only [loopIterN, loopTurn, hcond, hs, hz, if_pos, Sum.inr.injEq] at hn
+              subst r
+              simp [tick, idealTest, hs, hz] at ht
+              exact reaches_trans hcr ht
+            · have flag : (w.val == 0) = false :=
+                Bool.eq_false_iff.mpr (fun h => hz (beq_iff_eq.mp h))
+              simp [tick, idealTest, hs, flag, bne] at ht
+              cases hbody : Evm.run b {s with stack := tail} with
+              | fault =>
+                simp [loopIterN, loopTurn, hcond, hs, hz, hbody] at hn
+                exact False.elim (hne hn.symm)
+              | revert =>
+                simp only [loopIterN, loopTurn, hcond, hs, hz, if_false, hbody,
+                  Sum.inr.injEq] at hn
+                subst r
+                exact reaches_trans (reaches_trans hcr ht)
+                  (complete_run hb _ _ .revert hbody (by intro h; cases h))
+              | ok t j =>
+                cases j with
+                | succ j =>
+                  simp [loopIterN, loopTurn, hcond, hs, hz, hbody] at hn
+                  exact False.elim (hne hn.symm)
+                | zero =>
+                  simp only [loopIterN, loopTurn, hcond, hs, hz, if_false, hbody] at hn
+                  have hbr := complete_run hb (.body c b rest :: fs) _ (.ok t 0) hbody
+                    (by intro h; cases h)
+                  have hbt := reaches_tick (.running [] 0 (.body c b rest :: fs) t)
+                  exact reaches_trans (reaches_trans (reaches_trans (reaches_trans hcr ht)
+                    hbr) hbt) (ih t hn)
+
+mutual
+/-- Every non-fault instruction outcome has its actual finite execution. -/
+theorem instr_complete (i : Instr) (m : Machine) (rest : List Instr) (fs : List Frame)
+    (hne : i.step m ≠ .fault) :
+    IdealReaches (.running (i :: rest) 0 fs m) (afterAtom rest fs (i.step m)) := by
+  have ht := reaches_tick (.running (i :: rest) 0 fs m)
+  generalize ho : i.step m = out at *
+  cases shape : i <;> simp only [shape] at ho ht <;> try
+    cases out <;> simpa only [tick, ho, idealResult, afterAtom] using ht
+  case loop c b =>
+    have hloop : loopRun (Evm.run c) (Evm.run b) m ≠ .fault := by
+      change (Instr.loop c b).step m ≠ .fault
+      rwa [ho]
+    obtain ⟨n, hn⟩ := loop_nonfault_witness (Evm.run c) (Evm.run b) m hloop
+    have hr := loop_turns_complete c b (code_complete c) (code_complete b)
+      rest fs n m _ hn hloop
+    change IdealReaches _ (afterAtom rest fs ((Instr.loop c b).step m)) at hr
+    rw [ho] at hr
+    exact reaches_trans ht hr
+termination_by sizeOf i
+decreasing_by all_goals simp_all only; all_goals simp_wf; all_goals omega
+
+/-- Structural completeness includes nested loops and arbitrary pending frames. -/
+theorem code_complete (c : List Instr) : CodeComplete c := by
+  intro k fs m hne
+  cases shape : c with
+  | nil => exact complete_nil k fs m (by simpa only [shape] using hne)
+  | cons i rest =>
+    rw [shape] at hne
+    cases k with
+    | succ k => exact complete_skip (code_complete rest) i k fs m hne
+    | zero =>
+      rw [exec_cons_zero] at hne ⊢
+      cases hi : i.step m with
+      | fault => simp only [hi, Evm.Out.bind, ne_eq, not_true_eq_false] at hne
+      | revert =>
+        have h := instr_complete i m rest fs (by rw [hi]; intro h; cases h)
+        simpa only [hi, Evm.Out.bind, afterCode, afterAtom] using h
+      | ok t j =>
+        have h := instr_complete i m rest fs (by rw [hi]; intro h; cases h)
+        simp only [hi, Evm.Out.bind] at hne ⊢
+        rw [hi] at h
+        exact reaches_trans h (code_complete rest j fs t hne)
+termination_by sizeOf c
+decreasing_by all_goals simp_all only; all_goals simp_wf; all_goals omega
+end
+
+theorem ideal_nonfault_complete (c : List Instr) (m : Machine)
+    (hne : Evm.run c m ≠ .fault) :
+    ∃ n, producer.ideal n c m = .halted (idealResult (Evm.run c m)) := by
+  have hc := complete_run (code_complete c) [] m (Evm.run c m) rfl hne
+  cases hr : Evm.run c m with
+  | fault => exact False.elim (hne hr)
+  | revert => simpa only [hr, afterCode, idealResult, IdealReaches, producer] using hc
+  | ok t k =>
+    rw [hr] at hc
+    have ht : IdealReaches (.running [] k [] t) (.halted (.ok t k)) :=
+      ⟨1, by cases k <;> rfl⟩
+    exact reaches_trans hc ht
+
+/-- Limit soundness uses non-fault completeness in the no-terminal-prefix case. -/
+theorem ideal_limit_sound (c : List Instr) (m : Machine) (out : Result Machine)
+    (h : Limit (fun n => producer.ideal n c m) out) :
+    out = idealResult (Evm.run c m) := by
+  rcases h with ⟨n, hn⟩ | ⟨rfl, hn⟩
+  · exact (ideal_finite_sound n c m out hn).symm
+  · by_cases hf : Evm.run c m = .fault
+    · rw [hf]; rfl
+    · obtain ⟨n, he⟩ := ideal_nonfault_complete c m hf
+      exact False.elim (hn n _ he)
+
+/-- Adequacy for all ideal code, including nested loops and divergence. -/
+theorem producer_idealAdequacy : IdealAdequacy producer := by
+  intro c m out
+  constructor
+  · exact ideal_limit_sound c m out
+  · intro h
+    obtain ⟨r, hr⟩ := prefix_limit_exists (fun i s => idealResult (i.step s)) idealTest
+      (.running c 0 [] m)
+    have he := ideal_limit_sound c m r hr
+    rw [← h] at he
+    cases he
+    exact hr
+
+/-- Once the compiler simulation is proved, its actual prefix failures are
+bounded by the existing adaptive theorem on one shared transcript. -/
+theorem adaptive_of_compilerBridge (E : Producer) (bridge : CompilerBridge E) :
+    AdaptiveBridge E := by
+  classical
+  intro C Γ Δ b frag P r compiled F s dom q n L frame base σ m v observed
+    hs hroots hinput hready hqueries
+  let ys := fun g => preimages (CollisionBridge.oracleFixed F dom g)
+    (locations E n r.code (m g) observed)
+  let xs := fun g => queries E (CollisionBridge.oracleFixed F dom g) n r.code (v g) ++ ys g
+  have hbound := CollisionBridge.run_premise_le F hs hroots q xs ys hqueries
+    (fun g hg x hx => hqueries g hg x (List.mem_append_right _ hx))
+  apply CollisionBridge.scale_count_le (b :=
+    (tuples W dom.length).countP (CollisionBridge.runPremiseFails F dom xs ys)) _ hbound
+  apply countP_le_of_imp
+  intro g hg hbad
+  simp only [Solidity.Goals.HashContract.failure, decide_eq_true_eq] at hbad
+  apply decide_eq_true
+  intro hp
+  have hb := bridge b frag P r compiled L frame (base g) (σ g) (m g) (hinput g hg)
+  exact hbad ((hb.2 (CollisionBridge.oracleFixed F dom g) (v g) observed).1 n
+    (hready g hg) hp)
+
+/-- Pointwise correspondence preserves both terminal and divergent limits. -/
+theorem limits_related (F : Roadmap.Fixed) (c : List Instr) (m : Machine) (v : Numeric)
+    (observed : List Slot) (ir : Result Machine) (nr : Result Numeric)
+    (hi : Limit (fun n => producer.ideal n c m) ir)
+    (hn : Limit (fun n => producer.numeric F n c v) nr)
+    (hrel : ∀ n, Related F observed (producer.ideal n c m) (producer.numeric F n c v)) :
+    ResultRelated F observed ir nr := by
+  rcases hi with ⟨i, hi⟩ | ⟨rfl, hi⟩
+  · rcases hn with ⟨j, hn⟩ | ⟨rfl, hn⟩
+    · have hi' : producer.ideal (max i j) c m = .halted ir :=
+        prefix_done_le _ _ (Nat.le_max_left i j) hi
+      have hn' : producer.numeric F (max i j) c v = .halted nr :=
+        prefix_done_le _ _ (Nat.le_max_right i j) hn
+      have h := hrel (max i j)
+      rw [hi', hn'] at h
+      exact h
+    · have h := hrel i
+      change producer.ideal i c m = .halted ir at hi
+      rw [hi] at h
+      cases he : producer.numeric F i c v with
+      | running code k fs s => simp only [he, Related] at h
+      | halted r => exact False.elim (hn i r he)
+  · rcases hn with ⟨j, hn⟩ | ⟨rfl, hn⟩
+    · have h := hrel j
+      change producer.numeric F j c v = .halted nr at hn
+      rw [hn] at h
+      cases he : producer.ideal j c m with
+      | running code k fs s => simp only [he, Related] at h
+      | halted r => exact False.elim (hi j r he)
+    · trivial
+
+/-- The compiler's limit clause follows once every actual prefix is related. -/
+theorem numeric_limits (F : Roadmap.Fixed) (c : List Instr) (m : Machine) (v : Numeric)
+    (observed : List Slot)
+    (hrel : ∀ n, Related F observed (producer.ideal n c m) (producer.numeric F n c v)) :
+    (∃ out, Limit (fun n => producer.numeric F n c v) out ∧
+      ResultRelated F observed (idealResult (Evm.run c m)) out) ∧
+    (∀ out, Limit (fun n => producer.numeric F n c v) out →
+      ResultRelated F observed (idealResult (Evm.run c m)) out) := by
+  have hi := (producer_idealAdequacy c m (idealResult (Evm.run c m))).mpr rfl
+  have hall := fun out hn => limits_related F c m v observed _ out hi hn hrel
+  obtain ⟨out, hn⟩ := prefix_limit_exists (numericAtom F) numericTest (.running c 0 [] v)
+  exact ⟨⟨out, hn, hall out hn⟩, hall⟩
+
+/-- A non-fault execution cannot reach an atom whose ideal step faults.
+Compiler certificates, rather than a new caller premise, must supply this fact. -/
+theorem reached_step_nonfault (c : List Instr) (m : Machine) (n : Nat)
+    (i : Instr) (rest : List Instr) (fs : List Frame) (s : Machine)
+    (hr : producer.ideal n c m = .running (i :: rest) 0 fs s)
+    (hne : Evm.run c m ≠ .fault) : i.step s ≠ .fault := by
+  intro hf
+  have hd := denote_prefix n (.running c 0 [] m)
+  change denoteCursor (producer.ideal n c m) = Evm.run c m at hd
+  rw [hr] at hd
+  simp only [denoteCursor, exec_cons_zero, hf, Evm.Out.bind, finishFrames_fault] at hd
+  exact hne hd.symm
+
+/-- Value-headed loop tests agree and preserve every represented field. -/
+theorem test_step_related (F : Roadmap.Fixed) (slots : List Slot)
+    (m : Machine) (v : Numeric) (rep : Represents F slots m v)
+    (w : Fin W) (tail : List Word) (shape : m.stack = .val w :: tail) :
+    ∃ m' v', idealTest m = some (w.val != 0, m') ∧
+      numericTest v = some (w.val != 0, v') ∧ Represents F slots m' v' := by
+  refine ⟨{m with stack := tail}, {v with stack := tail.map (word F)}, ?_, ?_, ?_⟩
+  · simp only [idealTest, shape]
+  · simp only [numericTest, rep.1, shape, List.map_cons, word]
+  · exact ⟨rfl, rep.2⟩
+
 end Solidity.Hash.CompilerCorrect
 
 /-- info: 'Solidity.Hash.CompilerCorrect.producer_produces' depends on axioms: [propext, Classical.choice, Quot.sound] -/
@@ -393,3 +867,15 @@ end Solidity.Hash.CompilerCorrect
 #guard_msgs in #print axioms Solidity.Hash.CompilerCorrect.sstore_access_agrees
 /-- info: 'Solidity.Hash.CompilerCorrect.empty_stack_fault_related' depends on axioms: [propext, Classical.choice, Quot.sound] -/
 #guard_msgs in #print axioms Solidity.Hash.CompilerCorrect.empty_stack_fault_related
+
+/-- info: 'Solidity.Hash.CompilerCorrect.ideal_finite_sound' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in #print axioms Solidity.Hash.CompilerCorrect.ideal_finite_sound
+
+/-- info: 'Solidity.Hash.CompilerCorrect.producer_idealAdequacy' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in #print axioms Solidity.Hash.CompilerCorrect.producer_idealAdequacy
+
+/-- info: 'Solidity.Hash.CompilerCorrect.adaptive_of_compilerBridge' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in #print axioms Solidity.Hash.CompilerCorrect.adaptive_of_compilerBridge
+
+/-- info: 'Solidity.Hash.CompilerCorrect.numeric_limits' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in #print axioms Solidity.Hash.CompilerCorrect.numeric_limits
