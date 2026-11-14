@@ -3294,6 +3294,7 @@ import Solidity.Hash.CollisionBound
 import Solidity.Hash.CollisionBridge
 import Solidity.Hash.CollisionBridgeCompiler
 import Solidity.Hash.CollisionBridgeControls
+import Solidity.Hash.CompilerCorrect
 import Solidity.Hashes
 import Solidity.Keccak
 import Solidity.KeySort

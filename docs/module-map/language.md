@@ -232,6 +232,7 @@ commands; it never enters the core import graph.
 | `Hash/CollisionBridge.lean` | Combined adaptive oracle count, exact fixed-hash replacement, actual-query inclusion and corrected q=0/q=1 controls. |
 | `Hash/CollisionBridgeCompiler.lean` | PublicCorrectness guarded refinement, decoded reachability and hash-indexed compiler failure bound. |
 | `Hash/CollisionBridgeControls.lean` | Concrete admitted, compiled quiet success using HashPremise.nil. |
+| `Hash/CompilerCorrect.lean` | Operational producers and encoding facts for the frozen E4A contract. |
 The diagnostic generators `scripts/h62/item2/audit-v08-adapters/generate_mapped_census.py`
 and `scripts/h62/item2/audit-v08-adapters/generate_calldata_census.py` accept
 `--stream` to omit the global imported-constant sort. This still materializes
