@@ -79,4 +79,7 @@ theorem family_answers : (partialOrSubAnswer? good).isSome = true ∧
   ⟨partialOrSubAnswer_isSome members.1, partialOrSubAnswer_isSome members.2.1,
     partialOrSubAnswer_isSome members.2.2.1⟩
 
+/-- info: 'Solidity.Examples.DecisionGapPartialOrSub.family_answers' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in #print axioms family_answers
+
 end Solidity.Examples.DecisionGapPartialOrSub
