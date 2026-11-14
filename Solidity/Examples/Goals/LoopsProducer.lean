@@ -49,4 +49,20 @@ example (C : Contract) (input : ProductionInput) (c : CalleeRequest) (o : Produc
     sc.top = false ∧ sc.unchecked = false ∧
       sc.inlined = List.cons (c.start, o.after.locals.2) input.scope.inlined := ⟨rfl, rfl, rfl⟩
 
+/-- Consume the universal candidate for an arbitrary admitted successful pipeline.
+The source is obtained from coverage, not supplied as a sample association.
+The full pass certificate retains both forward and backward obligations. -/
+theorem contract_pipeline (b : SemanticBoundary) (i : RawSourceInterpretation)
+    (decode : Request → Option SourceProgram) (h : LowerLoopsCorrectContract b i decode)
+    (r : Request) (o : ProductionOutput) (after : Checker.Snapshot)
+    (parts : SProg r.contract) (program : Blk r.contract r.context.ctx)
+    (entry : i.entry r) (pipeline : r.pipeline o after parts program) :
+    ∃ s, decode r = some s ∧ b.reference.associated r s ∧ b.relates s program ∧
+      Nonempty (Solidity.Roadmap.G49Final.PassCorrect
+        (i.source s).behaviour (i.target program).behaviour) := by
+  obtain ⟨s, associated⟩ := h.2.1.source r entry
+  have decoded : decode r = some s := (h.2.1.decoder r s entry).mpr associated
+  exact ⟨s, decoded, (h.2.1.association r s).mp associated,
+    h.2.1.pipeline r o after parts program s entry decoded pipeline⟩
+
 end Solidity.Examples.Goals.LoopsProducer
