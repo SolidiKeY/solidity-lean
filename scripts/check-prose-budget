@@ -657,6 +657,7 @@ def main():
         if failures:
             print("Prose budget exceeded:\n" + "\n".join(failures), file=sys.stderr)
             return 1
+        area_count = len(merged)
         if args.update:
             if candidate is not None:
                 validate_candidate(candidate)
@@ -664,7 +665,7 @@ def main():
             baseline_path.write_text(json.dumps(merged, indent=2, sort_keys=True) + "\n", encoding="utf-8")
         if args.candidate:
             return 0
-        print(f"Prose budget PASS ({len(merged)} areas)" + ("; baseline lowered" if args.update else ""))
+        print(f"Prose budget PASS ({area_count} areas)" + ("; baseline lowered" if args.update else ""))
         return 0
     except (OSError, ValueError) as error:
         print(f"prose budget: {error}", file=sys.stderr)

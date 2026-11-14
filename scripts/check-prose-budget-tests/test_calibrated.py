@@ -112,3 +112,55 @@ class Calibrated(unittest.TestCase):
             run = subprocess.run([sys.executable, str(SCRIPT), '--root', str(root), '--baseline', str(baseline), '--update'], capture_output=True, text=True)
             self.assertEqual(run.returncode, 0, run.stderr)
             self.assertEqual(json.loads(baseline.read_text())['_candidate'], policy)
+
+
+    def test_candidate_import_is_monotone_and_preserves_legacy(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            (root / 'Solidity').mkdir()
+            (root / 'docs').mkdir()
+            policy = check.published_candidate()
+            baseline = root / 'baseline.json'
+            baseline.write_text(json.dumps({'_candidate': policy}))
+            proposed = root / 'proposed.json'
+            cell = policy['calibration']['Solidity/Backend']['metrics']['comment_lines']
+            cell['ratio'] = '0'
+            cell['margin'] = '0'
+            proposed.write_text(json.dumps(policy))
+            command = [sys.executable, str(SCRIPT), '--root', str(root), '--baseline', str(baseline), '--update', '--candidate-update', str(proposed)]
+            run = subprocess.run(command, capture_output=True, text=True)
+            self.assertEqual(run.returncode, 0, run.stderr)
+            self.assertEqual(json.loads(baseline.read_text())['_candidate'], policy)
+            before = baseline.read_bytes()
+            cell['ratio'] = '1/999999'
+            proposed.write_text(json.dumps(policy))
+            run = subprocess.run(command, capture_output=True, text=True)
+            self.assertEqual(run.returncode, 2, run.stderr)
+            self.assertEqual(baseline.read_bytes(), before)
+
+    def test_mapping_generated_claims_and_rational_boundary(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            (root / 'Solidity/Automation').mkdir(parents=True)
+            (root / 'Solidity/Other').mkdir()
+            (root / 'docs/audits').mkdir(parents=True)
+            (root / 'Solidity/Automation/A.lean').write_text('-- generated H123\ndef x := 1 -- comment\n')
+            (root / 'Solidity/Other/B.lean').write_text('def y := 2\ndef z := 3\n')
+            (root / 'docs/audits/a.md').write_text('generated\n')
+            actual = check.counts(root)
+            policy = check.published_candidate()
+            entry = policy['calibration']['Solidity/Automation']['metrics']['comment_lines']
+            entry['ratio'] = '1/2'
+            entry['margin'] = '0'
+            # Two comments over one own code line fail; other-area growth cannot help.
+            report = check.candidate_report(root, actual, policy)
+            row = next(r for r in report['rows'] if r['area'] == 'Solidity/Automation' and r['metric'] == 'comment_lines')
+            self.assertEqual((row['numerator'], row['denominator'], row['allowance'], row['passed']), (2, 1, '1/2', False))
+            audit = next(r for r in report['rows'] if r['area'] == 'docs/audits' and r['metric'] == 'docs_lines')
+            self.assertEqual(audit['denominator'], 3)
+            self.assertFalse(audit['enforced'])
+            # Exercise equality and a one-unit excess without rounding.
+            actual['Solidity/Automation']['comment_lines'] = 0
+            row = next(r for r in check.candidate_report(root, actual, policy)['rows'] if r['area'] == 'Solidity/Automation' and r['metric'] == 'comment_lines')
+            self.assertTrue(row['passed'])
+            self.assertEqual(actual['Solidity/Automation']['process_ids'], 1)
