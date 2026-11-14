@@ -1,4 +1,9 @@
 {
+ "Solidity/Hash/CompilerCorrect.lean:Solidity.Hash.CompilerCorrect.adaptive_of_compilerBridge": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
  "Solidity/Hash/CompilerCorrect.lean:Solidity.Hash.CompilerCorrect.add_slot_related": [
   "Classical.choice",
   "Quot.sound",
@@ -19,6 +24,11 @@
   "Quot.sound",
   "propext"
  ],
+ "Solidity/Hash/CompilerCorrect.lean:Solidity.Hash.CompilerCorrect.ideal_finite_sound": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
  "Solidity/Hash/CompilerCorrect.lean:Solidity.Hash.CompilerCorrect.keccakArr_related": [
   "Classical.choice",
   "Quot.sound",
@@ -29,7 +39,17 @@
   "Quot.sound",
   "propext"
  ],
+ "Solidity/Hash/CompilerCorrect.lean:Solidity.Hash.CompilerCorrect.numeric_limits": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
  "Solidity/Hash/CompilerCorrect.lean:Solidity.Hash.CompilerCorrect.prefix_limit_unique": [
+  "propext"
+ ],
+ "Solidity/Hash/CompilerCorrect.lean:Solidity.Hash.CompilerCorrect.producer_idealAdequacy": [
+  "Classical.choice",
+  "Quot.sound",
   "propext"
  ],
  "Solidity/Hash/CompilerCorrect.lean:Solidity.Hash.CompilerCorrect.producer_produces": [
