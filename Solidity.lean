@@ -4159,9 +4159,9 @@ import Solidity.Semantics.Panic.Run.Calls
 import Solidity.Semantics.Panic.Run.Checked
 import Solidity.Semantics.Panic.Run.Control
 import Solidity.Semantics.Panic.Run.Loop
-import Solidity.Semantics.Panic.Run.Receivers
 import Solidity.Semantics.Panic.Run.Tests
 import Solidity.Semantics.Panic.Run.UpdateProofs
+import Solidity.Semantics.Panic.Run.UpdateTests
 import Solidity.Semantics.Panic.Run.Updates
 import Solidity.Semantics.PaymentWorld
 import Solidity.Semantics.PrimitiveReturnProjection

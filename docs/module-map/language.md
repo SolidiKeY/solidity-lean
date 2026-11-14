@@ -318,4 +318,4 @@ same option to its monitor fixtures; no environment fallback enables it.
 | `Semantics/Panic/Run/Checked.lean` | Typed compound arithmetic and increments with sound local V1 projections. |
 | `Semantics/Panic/Run/Updates.lean` | Panic-preserving storage, memory, local and array updates. |
 | `Semantics/Panic/Run/UpdateProofs.lean` | Update failure ordering, capacity exhaustion and actual empty-pop origin proofs. |
-| `Semantics/Panic/Run/Receivers.lean` | Storage-returning calls and deferred operands with exact failure propagation. |
+| `Semantics/Panic/Run/UpdateTests.lean` | Update API availability and concrete compound-arithmetic panic-code regressions. |
