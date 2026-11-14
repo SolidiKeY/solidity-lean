@@ -1,9 +1,9 @@
-import Solidity.Hash.CompilerCorrect
+import Solidity.Hash.CompilerCorrect.Prefix
 
 namespace Solidity.Goals
 
 /--
-info: open Solidity.Goals.compilerCorrectCollisionFree ← Solidity.Hash.compiler_correct_collisionFree plan e4-hash-bridge
+info: proved Solidity.Goals.compilerCorrectCollisionFree ← Solidity.Hash.compiler_correct_collisionFree plan e4-hash-bridge
 -/
 #guard_msgs in
 #roadmap_goal compilerCorrectCollisionFree

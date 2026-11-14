@@ -1,4 +1,9 @@
 {
+ "Solidity/Hash/CompilerCorrect/Prefix.lean:Solidity.Hash.compiler_correct_collisionFree": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
  "Solidity/Hash/CompilerCorrect/Prefix.lean:Solidity.Hash.CompilerCorrect.codeSafe_of_nonfault": [
   "Classical.choice",
   "Quot.sound",
