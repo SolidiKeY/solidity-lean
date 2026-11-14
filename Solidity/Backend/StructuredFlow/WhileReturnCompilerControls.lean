@@ -20,12 +20,11 @@ theorem joined (pipeline : Roadmap.Pipeline) (fuel : Nat) (flag : Bool) :
       ((code mapping .here (.there .here) rfl rfl : Prog C _ _).run (caller flag))
       (run (emit 0 mapping .here (.there .here) rfl rfl) (machine flag)) (machine flag) ∧
     run (emit 0 mapping .here (.there .here) rfl rfl) (machine flag) =
-      .ok (MappedCondition.after 0 mapping .here (.there .here) rfl rfl (machine flag)) 0 := by
-  rcases correct (G0 pipeline) F0 fuel 0 none (M := false) (l := false) (u := false)
+      .ok (MappedCondition.after 0 mapping .here (.there .here) rfl rfl (machine flag)) 0 :=
+  And.imp_right (fun rest => rest.2.2.2.2) (correct (G0 pipeline) F0 fuel 0 none (M := false) (l := false) (u := false)
     (source flag) (caller flag) mapping Rel (initial flag) (fun _ _ h => h)
     .here (.there .here) rfl rfl rfl rfl
-    (entry flag) with ⟨src,_,_,_,_,compiled,native⟩
-  exact ⟨src,compiled,native⟩
+    (entry flag))
 
 theorem observed (flag : Bool) :
     snapshot 0 (run (emit 0 mapping .here (.there .here) rfl rfl) (machine flag)) =

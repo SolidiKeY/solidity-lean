@@ -18,12 +18,10 @@ theorem joined (pipeline : Roadmap.Pipeline) (fuel : Nat) (flag : Bool) :
         (.nil,(source flag).2)) ∧
     StmtOut C 1 0 (Frag.init [.val .bool,.val .bool]) false false false
       (core.run (caller flag)) (run (emit (C := C) 0 mapping .here (.there .here) rfl rfl) (machine flag))
-      (machine flag) := by
-  rcases correct (G0 pipeline) F0 fuel 0 none (returns := []) (M := false) (l := false) (u := false)
+      (machine flag) :=
+  And.imp_right (fun rest => rest.2.2.2) (correct (G0 pipeline) F0 fuel 0 none (returns := []) (M := false) (l := false) (u := false)
     (source flag) (caller flag) mapping Rel (initial flag) (fun _ _ h => h) rfl
-    .here (.there .here) rfl rfl rfl rfl tail (entry flag) rfl (by decide) with
-    ⟨src,_,_,_,compiled⟩
-  exact ⟨src,compiled⟩
+    .here (.there .here) rfl rfl rfl rfl tail (entry flag) rfl (by decide))
 
 /-- Exact equality to the already compiled reset loop, not a new expected-output oracle. -/
 theorem emitted_eq : emit (C := C) 0 mapping .here (.there .here) rfl rfl =
