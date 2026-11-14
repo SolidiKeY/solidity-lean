@@ -105,7 +105,7 @@ theorem run_induct {body : α → EvalResult α} {c : α → EvalResult Bool}
     | inr r => exact h
   · exact hdiv
 
-/-- Absence of a terminal iteration is exactly the diverging execution case. -/
+/-- Absence of a terminal iteration yields divergence. -/
 theorem run_diverge {body : α → EvalResult α} {c : α → EvalResult Bool} {σ : α}
     (h : ¬ ∃ r n, iterN body c n σ = .inr r) : run body c σ = .error .diverge := by
   apply run_induct (P := fun τ => ¬ ∃ r n, iterN body c n τ = .inr r)
