@@ -72,13 +72,15 @@ export function decodeMeta(text,diagnostics,requests,nonce) {
   if(!Array.isArray(rows) || rows.length!==requests.length)throw new Error('extended native response count mismatch');
   return rows.map((row,i)=>{
     const request=requests[i];
-    if(row.sourceId!==request.sourceId || row.function!==request.function || row.reading!=='solc'
+    if(!row || typeof row!=='object' || row.sourceId!==request.sourceId || row.function!==request.function || row.reading!=='solc'
         || row.verification!=='native' || !['proved','pending','unsupported','error'].includes(row.status))
-      throw new Error('extended native response identity mismatch');
+      throw new Error('extended native response identity mismatch: '+JSON.stringify(row));
     if(row.status!=='error' && (!['rec_auto','rec_auto_c','sol_prove'].includes(row.nativeStrategy)
         || !diagnostics.split(/\r?\n/).includes('FAST_META_C '+nonce+' '+row.nativeStrategy)))
       throw new Error('compiled extended tactic walk did not execute');
-    return row;
+    const nativeCProbes=['command','rec_auto','rec_auto_c','sol_prove','closing']
+      .filter(label=>diagnostics.split(/\r?\n/).includes('FAST_META_C '+nonce+' '+label));
+    return {...row,nativeCProbes,nativeProbeScope:'process shared across selected requests'};
   });
 }
 

@@ -108,7 +108,7 @@ private def extendedRow (N : Lean.Name) (row : ImportRow) : TermElabM Json := wi
   let raw ← testFormula N row
   let formula ← Symex.evaluable raw
   let recursive ← containsRecursive N (if row.tag == .specified then raw else formula)
-  let callback ← if recursive then return !(← noCallbackFrames raw) else callbackValue raw
+  let callback ← if recursive then do pure (!(← noCallbackFrames raw)) else callbackValue raw
   unless recursive || callback do throwError "native extended entry received an ordinary reading"
   let target ← if callback then do
       let type ← closed (← `(ValidT (C := $(mkCIdent N))
@@ -123,16 +123,22 @@ private def extendedRow (N : Lean.Name) (row : ImportRow) : TermElabM Json := wi
   let attempt (share : Bool) := tryCatchRuntimeEx
     (withOptions (·.setBool `sol.prove.sharedResidues false) <| searchExtended target recursive callback share)
     (fun error => return outcome "error" (← error.toMessageData.toString))
-  let result ← do
-    let first ← attempt shared
-    if (first.getObjValAs? String "status").toOption == some "proved" || !shared then return first
-    before.restore
-    let some deadline := deadline | return ← attempt false
-    let now ← IO.getNumHeartbeats
-    let remaining := deadline - now
-    if remaining == 0 then return outcome "error" "proof proposal exhausted the original heartbeat budget"
-    withTheReader Core.Context (fun context => {context with initHeartbeats := now, maxHeartbeats := remaining}) <|
-      attempt false
+  let first ← attempt shared
+  let result ← if (first.getObjValAs? String "status").toOption == some "proved" || !shared then
+      pure first
+    else do
+      before.restore
+      match deadline with
+      | none => attempt false
+      | some deadline =>
+        let now ← IO.getNumHeartbeats
+        let remaining := deadline - now
+        if remaining == 0 then
+          pure (outcome "error" "proof proposal exhausted the original heartbeat budget")
+        else
+          withTheReader Core.Context (fun context => {context with initHeartbeats := now, maxHeartbeats := remaining}) <|
+            attempt false
+  unless result matches .obj _ do throwError "extended search returned a non-object: {result.compress}"
   return result.setObjVal! "nativeStrategy" (toJson
     (if recursive then (if callback then "rec_auto_c" else "rec_auto") else "sol_prove"))
 
@@ -145,7 +151,7 @@ def elabCheckExtended : CommandElab := fun stx => do
   let some output := stx[5].isStrLit? | throwError "expected literal output path"
   let requested ← Lean.ofExcept (fromJson? (← Lean.ofExcept (Json.parse requestText)) : Except String (Array Int))
   let rows ← reportRows N
-  let results ← withScope (fun scope => {scope with openDecls := .simple `Solidity [] :: scope.openDecls}) <|
+  let results : Array Json ← withScope (fun scope => {scope with openDecls := .simple `Solidity [] :: scope.openDecls}) <|
     liftTermElabM do
       let before ← Term.saveState
       try
@@ -155,14 +161,15 @@ def elabCheckExtended : CommandElab := fun stx => do
             throwError "native extended entry requires an eligible source obligation"
           let result ← tryCatchRuntimeEx (extendedRow N row)
             (fun error => return outcome "error" (← error.toMessageData.toString))
+          unless result matches .obj _ do throwError "extended row returned a non-object: {result.compress}"
           let display := if row.sourceName.isEmpty then row.name else row.sourceName
           let signature := if row.sourceSignature.isEmpty then
             s!"{display}({",".intercalate (row.params.map Prod.snd)})" else row.sourceSignature
-          return result.setObjVal! "sourceId" (toJson id)
-            |>.setObjVal! "function" (toJson display)
-            |>.setObjVal! "signature" (toJson signature)
-            |>.setObjVal! "tag" (toJson row.tag.toStr)
-            |>.setObjVal! "reading" (toJson "solc")
+          let mut result := result
+          for (key, value) in [("sourceId", toJson id), ("function", toJson display),
+              ("signature", toJson signature), ("tag", toJson row.tag.toStr), ("reading", toJson "solc")] do
+            result := result.setObjVal! key value
+          return result
       finally before.restore
   IO.FS.writeFile output (toJson results).pretty
 

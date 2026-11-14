@@ -44,9 +44,10 @@ for module in modules:
 for paths in setup['importArts'].values():
  for artifact in paths:
   path=pathlib.Path(artifact).resolve();frozen[str(path)]=path.read_bytes()
-root_artifact=json.loads(subprocess.check_output([str(prefix/'bin/lake'),'--quiet','query',
- 'Solidity.Tools.FastMode.Meta:olean'],cwd=root,text=True))
-if not isinstance(root_artifact,str):raise ValueError('unexpected root artifact query')
+root_artifact=subprocess.check_output([str(prefix/'bin/lake'),'--quiet','query',
+ 'Solidity.Tools.FastMode.Meta:olean'],cwd=root,text=True).strip()
+if not root_artifact.endswith('.olean') or not pathlib.Path(root_artifact).is_file():
+ raise ValueError('unexpected root artifact query')
 path=pathlib.Path(root_artifact).resolve();frozen[str(path)]=path.read_bytes()
 for relative in ['lean-toolchain' ,'lakefile.toml','scripts/verify-meta-build.py']:
  path=root/relative;frozen[str(path)]=path.read_bytes()

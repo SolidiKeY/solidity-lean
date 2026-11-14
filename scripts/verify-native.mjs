@@ -7,6 +7,7 @@ import {spawnSync} from 'node:child_process';
 import {performance} from 'node:perf_hooks';
 import {solidityFiles, runTool, runSolidityTests} from './test-solidity.mjs';
 import {compileSnapshot} from './verify-source.mjs';
+import {runExtended} from './verify-meta.mjs';
 import {sourceHash, sourceLocations, sourceWitness} from './source-locations.mjs';
 const root=resolve(dirname(fileURLToPath(import.meta.url)), '..');
 const sha=path=>createHash('sha256').update(readFileSync(path)).digest('hex');
@@ -141,6 +142,12 @@ export function fastReport(paths, options={}) {
           const requests=expectedRows.map(expected=>({sourceId:expected.sourceId,function:expected.function,
             reading:expected.tag==='specified'?'solc':expected.reading}));
           const actualRows=runNative(requests,{...options,directory});
+          const extendedIndices=actualRows.flatMap((row,i)=>row.status==='unsupported'
+            && row.reason==='native recursive/callback-frame verification is not implemented'?[i]:[]);
+          if(extendedIndices.length) {
+            const extended=runExtended(fixtureBytes,contract,extendedIndices.map(i=>requests[i]),options);
+            extendedIndices.forEach((index,i)=>{actualRows[index]=extended[i];});
+          }
           const nativeBatchMs=performance.now()-started;
           for(let i=0;i<actualRows.length;i++) {
             const expected=expectedRows[i],actual=actualRows[i];
