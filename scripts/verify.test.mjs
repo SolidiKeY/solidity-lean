@@ -1,7 +1,7 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import {parseVerify,main} from './verify.mjs';
-import {decodeNative} from './verify-native.mjs';
+import {decodeNative,nativeArchitectureMatches} from './verify-native.mjs';
 const request={sourceId:7,function:'f'};
 const row={sourceId:7,function:'f',reading:'solc',verification:'native',status:'proved'};
 const protocol=r=>JSON.stringify({ready:true})+'\n'+JSON.stringify({results:[r]})+'\n';
@@ -154,4 +154,11 @@ test('discovery metadata cannot masquerade as a native verdict',()=>{
     assert.throws(()=>decodeReadings(JSON.stringify(value),requests),/discovery identity/);
   const nonce='a'.repeat(32),trace=`FAST_META_C ${nonce} command\nFAST_META_C ${nonce} rec_auto\n`;
   assert.throws(()=>decodeMeta(JSON.stringify(rows),trace,requests,nonce),/identity/);
+});
+
+test('native architecture identity accepts Python ARM64 aliases and rejects other targets',()=>{
+  for(const [recorded,runtime] of [['aarch64','arm64'],['arm64','arm64'],['x86_64','x64'],['AMD64','x64'],['x64','x64']])
+    assert.equal(nativeArchitectureMatches(recorded,runtime),true);
+  for(const [recorded,runtime] of [['aarch64','x64'],['x86_64','arm64'],['arm','arm64'],[undefined,'arm64']])
+    assert.equal(nativeArchitectureMatches(recorded,runtime),false);
 });

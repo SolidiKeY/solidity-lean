@@ -12,11 +12,17 @@ import {sourceHash, sourceLocations, sourceWitness} from './source-locations.mjs
 const root=resolve(dirname(fileURLToPath(import.meta.url)), '..');
 const sha=path=>createHash('sha256').update(readFileSync(path)).digest('hex');
 
+// Python's platform.machine() and Node's process.arch use different aliases.
+export function nativeArchitectureMatches(recorded, runtime=process.arch) {
+  const canonical=arch=>({x86_64:'x64',AMD64:'x64',aarch64:'arm64'}[arch]??arch);
+  return typeof recorded==='string' && canonical(recorded)===canonical(runtime);
+}
+
 export function nativeBuild(directory) {
   const manifestPath=join(directory,'build.json');
   const manifest=JSON.parse(readFileSync(manifestPath,'utf8'));
   const executable=join(directory,'direct-check');
-  if (manifest.version!==2 || manifest.platform!==process.platform || manifest.arch!==process.arch.replace('x64','x86_64')
+  if (manifest.version!==2 || manifest.platform!==process.platform || !nativeArchitectureMatches(manifest.arch)
       || manifest.toolchain!==readFileSync(join(root,'lean-toolchain'),'utf8').trim()
       || manifest.leanCommit!=='797c613eb9b6d4ec95db23e3e00af9ac6657f24b'
       || !Array.isArray(manifest.sourceFiles) || !manifest.sourceFiles.length)
