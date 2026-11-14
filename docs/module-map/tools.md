@@ -34,3 +34,6 @@ Commands for people; they prove nothing beyond the certificates they check.
 | `Automation/CertificateTactic.lean` | Bounded certificate production. |
 | `Automation/LeafReflection.lean` | Premise selection is an untrusted optimization: any selection is sound when its stronger residual closes. |
 | `Automation/LeafSpine.lean` | A structural terminal-leaf checker. |
+| `Automation/SummaryCache.lean` | Proof-carrying verdict cache with exact semantic-input keys. |
+| `Automation/SummaryContracts.lean` | Reusable typed function specifications and callee certificates. |
+| `Automation/SummaryTests.lean` | Regression tests for cache collision, invalidation, retry and typed summary reuse. |
