@@ -104,6 +104,21 @@ example : Proves C .all [] .nil (.tt : Fml C []) := by
   change Proves C .all [] .nil φ
   sol_certificate_or (fail "unexpected local-let refusal")
 
+/-- Production of a selected update must not need the supplied fallback. -/
+theorem producedSelectedUpdate : Proves C .all [] .nil
+    (.all (.user "b") .bool
+      (.modal .box (.cons (.ite (.simple (.local .here)) .nil .nil) .nil) .nil .tt)) := by
+  sol_certificate_or (fail "unexpected selected-update refusal")
+
+/-- An assigning diamond context cannot use the box-only truth certificate. -/
+example (e : UpdElem C [] []) :
+    (Hyps.upd .nil .diamond (.snoc .nil e)).boxOnly = false := rfl
+
+example (e : UpdElem C [] [])
+    (h : Proves C .all [] (.upd .nil .diamond (.snoc .nil e)) .tt) :
+    Proves C .all [] (.upd .nil .diamond (.snoc .nil e)) .tt := by
+  sol_certificate_or (exact h)
+
 section CleanTailFallback
 local instance : InContract := ⟨Tokens⟩
 open scoped Scoped

@@ -38,6 +38,8 @@ inductive Certificate (C : Contract) (R : RuleSet) :
       (lowered : (H.wrap φ).toLS true SymS.init = some l)
       (witness : LeafWitness l) (modalFree : (H.wrap φ).modalFree = true) :
       Certificate C R H φ
+  | closeTrue {Γ} {H : Hyps C [] Γ} (boxOnly : H.boxOnly = true) :
+      Certificate C R H .tt
   | intro {Γ} {H : Hyps C [] Γ} {a φ : Fml C Γ}
       (child : Certificate C R (H.pre a) φ) : Certificate C R H (.imp a φ)
   | hideLeft {Γ} {H : Hyps C [] Γ} {a φ : Fml C Γ}
@@ -64,6 +66,7 @@ theorem Certificate.proves {R : RuleSet} {Γ : Ctx} {H : Hyps C [] Γ} {φ : Fml
   induction cert with
   | leaf l lowered witness modalFree =>
     exact .closeHolds (Fml.Valid.of_toLS lowered witness.valid) modalFree
+  | closeTrue boxOnly => exact .closeTrue boxOnly
   | intro child ih => exact .intro ih
   | hideLeft child ih => exact .hideLeft ih
   | andIntro left right ihl ihr => exact .andIntro ihl ihr

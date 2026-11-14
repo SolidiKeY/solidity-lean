@@ -16,8 +16,20 @@ private def produce : Nat → TacticM Unit
     let type ← instantiateMVars (← (← getMainGoal).getType)
     let_expr Certificate C R Γ H φ := type
       | throwError "certificate: expected a certificate goal"
-    if φ.isAppOf ``Fml.all then
-      evalTactic (← `(tactic| apply Certificate.allIntro))
+    let φ ← whnf φ
+    if φ.isAppOf ``Fml.tt then
+      (← getMainGoal).assign (mkAppN (mkConst ``Certificate.closeTrue)
+        #[C, R, Γ, H, ← mkEqRefl (mkConst ``Bool.true)])
+      replaceMainGoal []
+    else if φ.isAppOf ``Fml.all then
+      let_expr Fml.all _ _ x p body := φ
+        | throwError "certificate: expected universal closure"
+      let nextH ← mkAppM ``Hyps.all #[H, x, p]
+      let child ← mkFreshExprSyntheticOpaqueMVar
+        (← mkAppM ``Certificate #[C, R, nextH, body])
+      (← getMainGoal).assign (mkAppN (mkConst ``Certificate.allIntro)
+        #[C, R, Γ, H, x, p, body, child])
+      replaceMainGoal [child.mvarId!]
     else if φ.isAppOf ``Fml.imp then
       evalTactic (← `(tactic| apply Certificate.intro))
     else if φ.isAppOf ``Fml.upd then
