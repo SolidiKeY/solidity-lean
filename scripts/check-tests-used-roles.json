@@ -911,6 +911,24 @@
       "blob": "0b6161732bfafbcc150c691b5f807a1b4072ebb5",
       "anchor": "  \"checkpoint\": \"C1/C2/C3 verified; C4 partial; worker retired and stopped\",",
       "role": "Historical record: Captured G25 artifact/publication inventory with off-Git primary-file/cache/checkpoint paths and hashes, reported311proof credit and55new public success theorems, and C1/C2/C3 verified labels. All proof, verification, source, cache, review, acceptance and preservation claims are unverified history, not current proof credit or authentication. Preserve C4 partial, retired/stopped worker and implementation_continuation_authorizedfalse. Old handoff target and pause/capability/retirement pointers grant no current assignment, permission, cache reuse, resumption or authority to replay a retired workload. No private artifact or archive was recovered. Keep/uncertain-reader precedence and all uncompleted obligations remain. No current source/native/proof/runtime/full-gate acceptance, owner agreement, trust/policy/baseline/budget exception, authorization, nonuse or deletion credit."
+    },
+    {
+      "path": "tests/h62/item2/audit-memory-operations/bulk-manifest.json",
+      "blob": "012dd2dc0fa3c265621afe85ecda12c328567646",
+      "anchor": "  \"evidence_directory\": \"/workspace/h62-audit-memory-evidence\",",
+      "role": "Historical record: Captured70-entry off-Git memory-audit publication inventory naming census/repeat, prerequisite and ABI-entry command/log/compiled-olean outputs, checks, KeySort and reviews across intermediate/pass/final directories. Different compiled EntryAudit digests remain distinct reported entries; pass/final names and empty-log digests authenticate no success, compiled source, proof or cache suitability. No listed external byte, digest, cache, source, receipt or retained artifact was recovered or authenticated. All publication, log, command, review, compilation, census, ownership and timing assertions remain unverified history. Keep/uncertain-reader precedence and all uncompleted obligations remain. No current source/archive/native/proof authentication, cache reuse or compatibility, runtime/full-gate acceptance, trust/policy/baseline/budget exception, permission, private recovery, stopped-workload replay, nonuse or deletion credit."
+    },
+    {
+      "path": "tests/h62/item2/audit-memory-operations/h70-bulk-manifest.json",
+      "blob": "08da5e937773f14ad613fcfc5dcf062e94e951be",
+      "anchor": "  \"evidence_directory\": \"/workspace/h62-audit-memory-h70-evidence\",",
+      "role": "Historical record: Captured12-entry off-Git H70 memory-audit publication inventory naming acceptance, command/check/review/escalation outputs, generator/reconciled-census repeats and uncovered-statement repeats. Equal reported digests do not prove independent execution, actual repeat identity, complete coverage, absence of escalation, current routing or owner agreement. No listed external byte, digest, cache, source, receipt or retained artifact was recovered or authenticated. All publication, log, command, review, compilation, census, ownership and timing assertions remain unverified history. Keep/uncertain-reader precedence and all uncompleted obligations remain. No current source/archive/native/proof authentication, cache reuse or compatibility, runtime/full-gate acceptance, trust/policy/baseline/budget exception, permission, private recovery, stopped-workload replay, nonuse or deletion credit."
+    },
+    {
+      "path": "tests/h62/item2/audit-memory-operations/headers-bulk-manifest.json",
+      "blob": "3776987e1a77d5dfad436f01822c1b9bc6a44f29",
+      "anchor": "  \"evidence_directory\": \"/workspace/h62-audit-memory-headers-evidence\",",
+      "role": "Historical record: Captured52-entry off-Git header-audit publication inventory naming successive parser/header/command/input/output/log files, overlay patch and owner receipt, malformed/negative controls, reconciliations/census/uncovered repeats, reviews, toolchain and timing-stop records. Preserve all negative, error, escalation and uncovered-work entries. No parser/compiler/kernel success, overlay acceptance, owner agreement, coverage or STOP clearance follows from filenames or repeated hashes. No listed external byte, digest, cache, source, receipt or retained artifact was recovered or authenticated. All publication, log, command, review, compilation, census, ownership and timing assertions remain unverified history. Keep/uncertain-reader precedence and all uncompleted obligations remain. No current source/archive/native/proof authentication, cache reuse or compatibility, runtime/full-gate acceptance, trust/policy/baseline/budget exception, permission, private recovery, stopped-workload replay, nonuse or deletion credit."
     }
   ],
   "schema_version": 1
