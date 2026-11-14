@@ -64,22 +64,4 @@ theorem singleton_array_heap_repr {R : RefTy} {E : Ty} {heap : Heap [R]}
   · intro name reference
     exact (noStruct reference).elim
 
-
-theorem memory_pair_state_repr {C : Contract} {R Q : RefTy} {L b frame : Nat}
-    {F : Frag [.mem R,.mem Q]} {state : State C [.mem R,.mem Q]}
-    {base : Nat → Fin W} {machine : Machine}
-    (core : Sim C L b F state machine) (heap : Objects.HeapRepr state.heap base frame machine)
-    (head : HRef state.H R) (tail : HRef state.H Q)
-    (environment : state.env = (some head,(some tail,())))
-    (headPointer : machine.mem (b + 1) = .val (base head.id))
-    (tailPointer : machine.mem b = .val (base tail.id)) (locals : b + 2 ≤ frame) :
-    Objects.StateRepr L b frame F state base machine := by
-  refine ⟨core,heap,?_,locals⟩
-  intro S index
-  cases index with
-  | here => exact ⟨head,environment.symm ▸ rfl,headPointer⟩
-  | there index => cases index with
-    | here => exact ⟨tail,environment.symm ▸ rfl,tailPointer⟩
-    | there index => nomatch index
-
 end Solidity.Backend.MemoryCopies

@@ -92,9 +92,14 @@ private theorem core (payloads : List (Fin W)) (bounded : payloads.length < 128)
     | there index => cases index with
       | there index => nomatch index
 private theorem represented (payloads : List (Fin W)) (bounded : payloads.length < 128) :
-    Objects.StateRepr 128 1 8 (Frag.init Γ) (state payloads bounded) bases (machine payloads) :=
-  memory_pair_state_repr (core payloads bounded) (heap_repr payloads bounded)
-    old old rfl rfl rfl (by decide)
+    Objects.StateRepr 128 1 8 (Frag.init Γ) (state payloads bounded) bases (machine payloads) := by
+  refine ⟨core payloads bounded,heap_repr payloads bounded,?_,by decide⟩
+  intro Q index
+  cases index with
+  | here => exact ⟨old,rfl,rfl⟩
+  | there index => cases index with
+    | here => exact ⟨old,rfl,rfl⟩
+    | there index => nomatch index
 private theorem resolved (payloads : List (Fin W)) (bounded : payloads.length < 128) :
     path.mvalT (state payloads bounded) = .ok old := by with_unfolding_all rfl
 private theorem room (payloads : List (Fin W)) (bounded : payloads.length < 128)
