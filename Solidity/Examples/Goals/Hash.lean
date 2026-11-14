@@ -67,4 +67,67 @@ example (E : Producer) (F : Roadmap.Fixed) (n : Nat) (c : List Instr)
     (ht : t ∈ locations E n c m observed) (he : address F s = address F t) : s = t :=
   address_injective_on F _ ready.1 ready.2.1 ready.2.2.1 premise.2 hs ht he
 
+/-- The actual write preserves the other requested cell and the complete reached footprint. -/
+example (F : Roadmap.Fixed) (m : Machine) (v : Numeric) (s t : Slot) (a : Fin W)
+    (tail : List Word) (shape : m.stack = .slot s :: .val a :: tail)
+    (ready : Ready producer F 1 [.sstore] m v [s, t])
+    (premise : HashContract.Premise producer F 1 [.sstore] m v [s, t]) :
+    ResultRelated F (locations producer 1 [.sstore] m [s, t])
+      (idealResult (Instr.sstore.step m)) (numericAtom F .sstore v) :=
+  sstore_related F _ ready.1 ready.2.1 ready.2.2.1 premise.2 m v ready.2.2.2
+    s a tail shape (List.mem_append.mpr (Or.inl (List.mem_cons_self ..)))
+
+/-- The actual read uses initial footprint agreement, without a storage simulation premise. -/
+example (F : Roadmap.Fixed) (m : Machine) (v : Numeric) (s : Slot) (tail : List Word)
+    (shape : m.stack = .slot s :: tail) (ready : Ready producer F 1 [.sload] m v [s]) :
+    ResultRelated F (locations producer 1 [.sload] m [s])
+      (idealResult (Instr.sload.step m)) (numericAtom F .sload v) :=
+  sload_related F _ m v ready.2.2.2 s tail shape
+    (List.mem_append.mpr (Or.inl (List.mem_cons_self ..)))
+
+/-- Both actual KECCAK forms preserve representation for arbitrary symbolic parents. -/
+example (F : Roadmap.Fixed) (slots : List Slot) (m : Machine) (v : Numeric)
+    (rep : Represents F slots m v) (k : Fin W) (s : Slot) (tail : List Word) :
+    (m.stack = .val k :: .slot s :: tail →
+      ResultRelated F slots (idealResult (Instr.keccakMap.step m)) (numericAtom F .keccakMap v)) ∧
+    (m.stack = .slot s :: tail →
+      ResultRelated F slots (idealResult (Instr.keccakArr.step m)) (numericAtom F .keccakArr v)) :=
+  ⟨keccakMap_related F slots m v rep k s tail, keccakArr_related F slots m v rep s tail⟩
+
+/-- Both legal slot-offset operand orders use modular address arithmetic. -/
+example (F : Roadmap.Fixed) (slots : List Slot) (m : Machine) (v : Numeric)
+    (rep : Represents F slots m v) (s : Slot) (i : Fin W) (tail : List Word)
+    (shape : m.stack = .val i :: .slot s :: tail ∨ m.stack = .slot s :: .val i :: tail) :
+    ResultRelated F slots (idealResult (Instr.add.step m)) (numericAtom F .add v) :=
+  add_slot_related F slots m v rep s i tail shape
+
+/-- A full word-period offset wraps even for a nested symbolic slot. -/
+example (F : Roadmap.Fixed) (s : Slot) : address F (s.add W) = address F s := by
+  rw [address_add]
+  apply Fin.ext
+  simp only [wmod, Nat.add_mod, Nat.mod_self, Nat.add_zero,
+    Nat.mod_eq_of_lt (address F s).isLt]
+
+/-- The access list records the write value as well as its interpreted address. -/
+example (F : Roadmap.Fixed) (slots : List Slot) (m : Machine) (v : Numeric)
+    (rep : Represents F slots m v) (s : Slot) (a : Fin W) (tail : List Word)
+    (shape : m.stack = .slot s :: .val a :: tail) :
+    (idealAccessAt (.running [.sstore] 0 [] m)).map (mapAccess (address F)) =
+      numericAccessAt (.running [.sstore] 0 [] v) :=
+  sstore_access_agrees F slots m v rep s a tail shape [] []
+
+/-- Reads are retained as events even though they do not change the store. -/
+example (F : Roadmap.Fixed) (slots : List Slot) (m : Machine) (v : Numeric)
+    (rep : Represents F slots m v) (s : Slot) (tail : List Word)
+    (shape : m.stack = .slot s :: tail) :
+    (idealAccessAt (.running [.sload] 0 [] m)).map (mapAccess (address F)) =
+      numericAccessAt (.running [.sload] 0 [] v) :=
+  sload_access_agrees F slots m v rep s tail shape [] []
+
+/-- An actual empty-stack SSTORE prefix faults in both machines. -/
+example (F : Roadmap.Fixed) (slots : List Slot) (m : Machine) (v : Numeric)
+    (rep : Represents F slots m v) (shape : m.stack = []) :
+    ResultRelated F slots (idealResult (Instr.sstore.step m)) (numericAtom F .sstore v) :=
+  empty_stack_fault_related F slots m v rep shape .sstore (by simp)
+
 end Solidity.Goals
