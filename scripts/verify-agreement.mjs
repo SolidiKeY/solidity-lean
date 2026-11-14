@@ -8,7 +8,7 @@ export function compareModes(fast, certified, expected) {
     return row && typeof row === 'object' && typeof row.source === 'string' && row.source.length > 0
       && typeof row.contract === 'string' && row.contract.length > 0
       && typeof (row.signature ?? row.function) === 'string' && (row.signature ?? row.function).length > 0
-      && Number.isSafeInteger(row.sourceId) && row.sourceId > 0
+      && Number.isSafeInteger(row.sourceId) && (row.sourceId > 0 || (row.sourceId === -1 && row.function === 'constructor'))
       && row.assumptions && assumptionKeys.every(k => typeof row.assumptions[k] === 'string' && row.assumptions[k].length > 0)
       && typeof row.reading === 'string' && row.reading.length > 0
       && /^[a-f0-9]{64}$/.test(row.sourceSha256 ?? '')
