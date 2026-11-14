@@ -72,10 +72,16 @@ theorem nested_certificate :
     Represented popped (queries CopyDemandControls.old selected) CopyDemandControls.root
       ((updates CopyDemandControls.old CopyDemandControls.root).foldl (fun w op => write w op.1 op.2) CopyDemandControls.store) ∧
     Transport 128 CopyDemandControls.hash CopyDemandControls.locations
-      ((updates CopyDemandControls.old CopyDemandControls.root).foldl (fun w op => write w op.1 op.2) CopyDemandControls.store) final :=
-  certificate_at (complete_numeric CopyDemandControls.old popped popped_ok selected CopyDemandControls.root
-    CopyDemandControls.store CopyDemandControls.machine CopyDemandControls.run before (fun _ _ => rfl)
-    (by decide) queryCovered written separation headerSeparate) rfl (fun _ post => post)
+      ((updates CopyDemandControls.old CopyDemandControls.root).foldl (fun w op => write w op.1 op.2) CopyDemandControls.store) final := by
+  obtain ⟨actual,executed,represented,transported⟩ := complete_numeric CopyDemandControls.old popped popped_ok
+    selected CopyDemandControls.root CopyDemandControls.store CopyDemandControls.machine CopyDemandControls.run
+    before (fun _ _ => rfl) (by decide) queryCovered written separation headerSeparate
+  have equal : actual = final := by
+    have expected : execute (N := 128) CopyDemandControls.old CopyDemandControls.hash CopyDemandControls.root
+        CopyDemandControls.machine = some final := rfl
+    exact Option.some.inj (executed.symm.trans expected)
+  subst actual
+  exact ⟨executed,represented,transported⟩
 
 private def allQueries := CopyDemandControls.demands ++ CopyDemandControls.queries
 private def graphView (value : Value G Outer) := allQueries.map (fun q => q.read value)
@@ -119,8 +125,8 @@ private def emptyMachine : WordStore := writeWord CopyDemandControls.machine 0 z
 /-- Empty retained arrays fail without running a clear sequence. This pure
 Option statement does not assert world rollback. -/
 theorem empty_failure : recursivePop emptyRetained = none ∧
-    execute (N := 128) emptyRetained CopyDemandControls.hash CopyDemandControls.root emptyMachine = none :=
-  And.intro rfl rfl
+    execute (N := 128) emptyRetained CopyDemandControls.hash CopyDemandControls.root emptyMachine = none := by
+  constructor <;> rfl
 
 
 private abbrev Map : TypeGraph.Ty 0 := .mapping .bool (.prim .bool)
@@ -170,8 +176,8 @@ private theorem mapBefore : Represented maps (queries maps mapSelected) mapRoot 
 certificate observes BOTH keys in the cleared last slot under a GOOD run. -/
 theorem mapping_certificate : execute (N := 128) maps mapHash mapRoot mapMachine = some mapFinal ∧
     Represented mapResult (queries maps mapSelected) mapRoot
-      ((updates maps mapRoot).foldl (fun w op => write w op.1 op.2) mapStore) :=
-  certificate_at (complete_numeric maps mapResult rfl mapSelected mapRoot
+      ((updates maps mapRoot).foldl (fun w op => write w op.1 op.2) mapStore) := by
+  obtain ⟨actual,executed,represented,transported⟩ := complete_numeric maps mapResult rfl mapSelected mapRoot
     mapStore mapMachine mapRun mapBefore (fun _ _ => rfl) (by decide) (by
       intro q member
       simp only [mapSelected,List.mem_cons,List.not_mem_nil,or_false] at member
@@ -179,8 +185,11 @@ theorem mapping_certificate : execute (N := 128) maps mapHash mapRoot mapMachine
       (by intro q member d generated; cases generated) (by
         intro q member
         simp only [mapSelected,List.mem_cons,List.not_mem_nil,or_false] at member
-        rcases member with rfl | rfl <;> decide)) rfl (fun _ post => post.1)
-
+        rcases member with rfl | rfl <;> decide)
+  have expected : execute (N := 128) maps mapHash mapRoot mapMachine = some mapFinal := rfl
+  have equal := Option.some.inj (executed.symm.trans expected)
+  subst actual
+  exact ⟨executed,represented⟩
 private def mapGraphView (v : Value G (.array Map)) :=
   (v.length.val,v.extent.val,([ix 0,ix 1,ix 2].flatMap (fun i => [false,true].map
     (fun k => v.observe (.cons (.index i) (.cons (.key k) .nil))))))
@@ -214,12 +223,16 @@ private theorem absentBefore : Represented absentOld (queries absentOld [.length
 
 theorem absent_certificate : execute (N := 128) absentOld CopyDemandControls.hash CopyDemandControls.root absentMachine = some absentFinal ∧
     Represented absentResult (queries absentOld [.length .nil]) CopyDemandControls.root
-      ((updates absentOld CopyDemandControls.root).foldl (fun w op => write w op.1 op.2) absentStore) :=
-  certificate_at (complete_numeric absentOld absentResult rfl [.length .nil]
+      ((updates absentOld CopyDemandControls.root).foldl (fun w op => write w op.1 op.2) absentStore) := by
+  obtain ⟨actual,executed,represented,transported⟩ := complete_numeric absentOld absentResult rfl [.length .nil]
     CopyDemandControls.root absentStore absentMachine CopyDemandControls.run absentBefore (fun _ _ => rfl) (by decide)
     (by intro q member; have same := List.mem_singleton.mp member; subst q; decide)
     (by intro d member; cases member) (by intro q member d generated; cases generated)
-    (by intro q member; have same := List.mem_singleton.mp member; subst q; decide)) rfl (fun _ post => post.1)
+    (by intro q member; have same := List.mem_singleton.mp member; subst q; decide)
+  have expected : execute (N := 128) absentOld CopyDemandControls.hash CopyDemandControls.root absentMachine = some absentFinal := rfl
+  have equal := Option.some.inj (executed.symm.trans expected)
+  subst actual
+  exact ⟨executed,represented⟩
 
 theorem absent_complete_observations :
     (graphView absentOld,graphView absentResult,CopyDemandControls.numericView absentMachine,CopyDemandControls.numericView absentFinal) =

@@ -102,17 +102,24 @@ older shadows and a failed out-of-extent read, share one actual numeric pop. -/
 theorem whole_fixture_certificate : AggregatePop.execute (N := 128) CopyDemandControls.old CopyDemandControls.hash
     CopyDemandControls.root CopyDemandControls.machine = some final ∧
     Represented popped (CopyDemandControls.demands ++ CopyDemandControls.queries) CopyDemandControls.root after ∧
-    Transport 128 CopyDemandControls.hash CopyDemandControls.locations after final :=
-  AggregatePop.certificate_at_observations (complete_all CopyDemandControls.old popped rfl selected groups
+    Transport 128 CopyDemandControls.hash CopyDemandControls.locations after final := by
+  obtain ⟨actual,executed,represented,transported⟩ := complete_all CopyDemandControls.old popped rfl selected groups
     CopyDemandControls.root CopyDemandControls.store CopyDemandControls.machine CopyDemandControls.run
-    targetBefore contextBefore (fun _ _ => rfl) (by decide) targetCovered contextCovered written separated headerSeparated otherIndices noAlias)
-    rfl (by
-      intro q member
-      change q ∈ [leaf 0 0,leaf 0 1,header 0,leaf 1 0,leaf 1 1,header 1,.length .nil,
-        leaf 0 2,leaf 1 2,leaf 2 0,header 2,leaf 3 0] at member
-      change q ∈ [.length .nil,leaf 1 0,leaf 1 1,leaf 1 2,header 1,leaf 0 0,leaf 0 1,leaf 0 2,header 0,leaf 2 0,header 2,leaf 3 0]
-      simpa only [List.mem_cons,List.not_mem_nil,or_false,or_assoc,or_left_comm,or_comm] using member)
-
+    targetBefore contextBefore (fun _ _ => rfl) (by decide) targetCovered contextCovered written separated headerSeparated otherIndices noAlias
+  have expected : AggregatePop.execute (N := 128) CopyDemandControls.old CopyDemandControls.hash CopyDemandControls.root
+      CopyDemandControls.machine = some final := rfl
+  have equal := Option.some.inj (executed.symm.trans expected)
+  subst actual
+  refine ⟨executed,?_,transported⟩
+  intro q member
+  change q ∈ [leaf 0 0,leaf 0 1,header 0,leaf 1 0,leaf 1 1,header 1,.length .nil,
+    leaf 0 2,leaf 1 2,leaf 2 0,header 2,leaf 3 0] at member
+  simp only [List.mem_cons,List.not_mem_nil,or_false] at member
+  rcases member with rfl | rfl | rfl | rfl | rfl | rfl | rfl | rfl | rfl | rfl | rfl | rfl
+  all_goals apply represented
+  all_goals change _ ∈ [.length .nil,leaf 1 0,leaf 1 1,leaf 1 2,header 1,leaf 0 0,leaf 0 1,leaf 0 2,header 0,leaf 2 0,header 2,leaf 3 0]
+  all_goals simp only [List.mem_cons,List.not_mem_nil,or_false,true_or,or_true]
+  all_goals first | exact Or.inl rfl | exact Or.inr (Or.inl rfl) | exact Or.inr (Or.inr (Or.inl rfl))
 
 /-- Preserve the COMPLETE original observation vectors, not a reduced context
 projection. C40 controls and their expected verdicts remain unchanged. -/
