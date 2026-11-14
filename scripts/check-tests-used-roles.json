@@ -695,6 +695,240 @@
       "anchor": "  \"nativeValidationComplete\": false,",
       "role": "Historical record: Captured separately measured final cache/interface diagnostic with retained false descriptor identities and native/runtime incompleteness; measured self RSS is not aggregate/cgroup authentication and embedded source/feature text grants no proof or policy acceptance. Tables and internal payload-hash bindings are reviewed as captured report structure, not semantic auditing of embedded Lean. Reported facts, resources, external artifacts, approvals and proofs are unverified/unadopted. No current authorization, consumer, nonuse or deletion credit.",
       "blob": "d2ee821622d937c387bd91b38eda3875dfc42953"
+    },
+    {
+      "path": "tests/directruntime-20261104/shared-translator/h90-checkpoint-manifest.json",
+      "blob": "520dd74884a7f8e0d251a34bcdd78e1a98670667",
+      "anchor": "  \"boundary\": \"Bulk remains off git; includes failed setup/proof attempts and final exit0 evidence. No source/native adequacy or whole-assignment gate claim.\"",
+      "role": "Historical record: Captured narrow H90 checkpoint archive publication manifest with byte/file counts and reported digest, explicitly retaining failed setup/proof attempts alongside final exit0 evidence. No current archive existence, digest/member/source/native authentication, semantic adequacy, complete queue gate or reproduction claim. Reported artifacts and outcomes are unverified/unadopted; no current authorization, consumer, nonuse or deletion credit."
+    },
+    {
+      "path": "tests/migration/proof-inheritance-2026-10-16.implementation.json",
+      "blob": "dc3c7543e68ccf4c51862475b0e3aa230de2dbb7",
+      "anchor": "  \"note\": \"Historical completed audit; does not validate subsequent importer repairs. Runtime failures and unattempted rows are retained.\"",
+      "role": "Historical record: Captured phase-specific migration audit provenance with upstream/base, temporary overlay archive and proof-report pins. Explicitly predates later importer repairs and retains runtime failures/unattempted rows. Stored batch/time profile is data, not budget or replay permission. No current archive, source, proof-report, later repair, semantic, trust or policy validation; no current authorization, consumer, nonuse or deletion credit."
+    },
+    {
+      "path": "tests/migration/proof-retry-combined-2026-10-16.summary.json",
+      "blob": "402e2fb168dfada85104db4bb2279ab25010ed66",
+      "anchor": "  \"note\": \"Function-at-a-time retries replace only original notRun rows in these summary counts. Original uniform audit, errors and strict comparison are preserved; this summary is not a passing comparison report.\"",
+      "role": "Historical record: Captured focused-retry aggregate with completed-source/target counts, original and supplementary errors, and explicit excluded/skipped/pending/unsupported/error/compileRejected/notRun labels. Its accounting note explicitly denies passing comparison; completion and recorded proved labels are not accepted proofs or exclusions. No validation of historical replacement/preservation policy or current replay, semantic adequacy, trust, budget or success; no current authorization, consumer, nonuse or deletion credit."
+    },
+    {
+      "path": "tests/migration/proof-2026-10-16.implementation.json",
+      "blob": "9d0512a0c3be17f95f8c5d566b4643bac2e61620",
+      "anchor": "  \"note\": \"Completed audit against unchanged source hashes. Source coverage is complete; bounded proof search may retain unsupported, pending, notRun and error outcomes. Strict comparison is reported without accepting those gaps.\",",
+      "role": "Historical record: Captured after-ledger audit provenance with526-row implementation snapshot and retrospective launch/session/file observations, explicitly not signed pre-launch attestation. Claimed unchanged files coexist with513 comparison changes,17errors and retry pending/unsupported/excluded/skipped/notRun outcomes. Profile and command are historical data, not execution/budget permission; all outcomes and preservation claims remain unverified. Complete table structure and internal aggregate digest were checked, not historical source bytes, archives, proofs or native results. No current source-equivalence, semantic, trust, policy, budget, exclusion, authorization, consumer, nonuse or deletion credit."
+    },
+    {
+      "path": "tests/migration/proof-baseline-current.implementation.json",
+      "blob": "b223dac40b96a32da72293eb3c90587ef3b07451",
+      "anchor": "  \"note\": \"Historical fixed implementation snapshot; does not validate subsequent storage-return changes.\",",
+      "role": "Historical record: Captured340-row fixed implementation snapshot before storage-return changes, retaining12 unaccounted imports,531changed,3missing and28error comparison outcomes. Its unchanged-snapshot flag does not pass that comparison or validate later changes. Complete table structure and internal aggregate digest were checked, not historical source bytes, archives, proofs or native results. No current source-equivalence, semantic, trust, policy, budget, exclusion, authorization, consumer, nonuse or deletion credit."
+    },
+    {
+      "path": "tests/migration/proof-spec-bindings-2026-10-16.implementation.json",
+      "blob": "156d269d9b6cf3e3ae17d41d19fe0da2980724f8",
+      "anchor": "  \"note\": \"Source hashes captured after observed final verification. Only a stale JavaScript test expectation changed after the full run. This report covers only the local binding fixture, not upstream source parity. The earlier112-source audit predates this compiler change.\"",
+      "role": "Historical record: Captured528-row post-binding-renaming snapshot and focused input/report/archive/log references. Recorded full JavaScript run41/42 and corrected group1/1 are retained; only a local binding fixture is covered, not upstream parity, and earlier112-source audit predates compiler changes. No test-expectation edit, current gate or proof acceptance is authorized. Complete table structure and internal aggregate digest were checked, not historical source bytes, archives, proofs or native results. No current source-equivalence, semantic, trust, policy, budget, exclusion, authorization, consumer, nonuse or deletion credit."
+    },
+    {
+      "path": "tests/migration/proof-spec-negation-2026-10-16.implementation.json",
+      "blob": "a67eaeddc19979a6a940fa229c69f222e666d332",
+      "anchor": "  \"note\": \"Focused three-contract rerun against unchanged captured source hashes. Full build, 41 source/tooling regressions and theorem axiom checks are reported separately; this is not a new whole-corpus audit.\",",
+      "role": "Historical record: Captured527-row post-integer-negation snapshot with session/report/archive/input references for focused three-contract rerun. Separate build/regression/axiom claims remain unauthenticated; this is explicitly not a new whole-corpus audit. Complete table structure and internal aggregate digest were checked, not historical source bytes, archives, proofs or native results. No current source-equivalence, semantic, trust, policy, budget, exclusion, authorization, consumer, nonuse or deletion credit."
+    },
+    {
+      "path": "tests/migration/comparison-2026-10-16.json",
+      "blob": "87471aa29ffd9fe26f6e899a96b2d292df8cfd2c",
+      "anchor": "  \"passed\": false,",
+      "role": "Historical record: Captured failed migration comparison with530 diagnostic findings:513changed and17error, explicitly passedfalse. Expected-versus-actual labels and recorded tool errors are retained, not a new accepted baseline, proof outcome or current source comparison. Complete row structures/counts were inspected; diagnostic reason strings and source/proof outcomes were not semantically authenticated. No current source, archive, native, proof, trust, policy, budget, exclusion, authorization, consumer, nonuse or deletion credit."
+    },
+    {
+      "path": "tests/migration/comparison-before-loop-enum.json",
+      "blob": "7377f76aef9e3e0347365db0c94c9deba78b141f",
+      "anchor": "    \"reason\": \"/tmp/solidity-test-a2SeA0/Test.lean:2:0: error: contract `ERC20` inherits: the import reads one contract's own members\\n/tmp/solidity-test-a2SeA0/Test.lean:3:21: error(lean.unknownIdentifier): Unknown constant `SolTests.ERC20`\\n/tmp/solidity-test-a2SeA0/Test.lean:4:13: error(lean.unknownIdentifier): Unknown constant `SolTests.ERC20`\"",
+      "role": "Historical record: Captured pre-loop-enum comparison diagnostics:572findings including12unaccounted imports,532changed and28error outcomes. Temporary Lean error text records a reported historical failure; no expected values, error truth, source semantics or import/exclusion policy is accepted. Complete row structures/counts were inspected; diagnostic reason strings and source/proof outcomes were not semantically authenticated. No current source, archive, native, proof, trust, policy, budget, exclusion, authorization, consumer, nonuse or deletion credit."
+    },
+    {
+      "path": "tests/migration/comparison-current.json",
+      "blob": "d12bfd91773d5d30b0b9ea047b47718c36986115",
+      "anchor": "    \"reason\": \"lake exited 1\\n/tmp/solidity-test-ESGpxm/Test.lean:2:0: error: contract `ERC20` inherits: the import reads one contract's own members\\n/tmp/solidity-test-ESGpxm/Test.lean:3:21: error(lean.unknownIdentifier): Unknown constant `SolTests.ERC20`\\n/tmp/solidity-test-ESGpxm/Test.lean:4:13: error(lean.unknownIdentifier): Unknown constant `SolTests.ERC20`\",",
+      "role": "Historical record: Captured historical comparison diagnostics:574findings including12unaccounted imports,531changed,3missing and28error outcomes, with recorded failed lake calls. The current filename does not grant current validity, a passing comparison, baseline approval, or acceptance of missing/import/error gaps. Complete row structures/counts were inspected; diagnostic reason strings and source/proof outcomes were not semantically authenticated. No current source, archive, native, proof, trust, policy, budget, exclusion, authorization, consumer, nonuse or deletion credit."
+    },
+    {
+      "path": "tests/migration/proof-testsuite-retry-2026-10-16.json",
+      "blob": "39e096457c121e7deabd276165173d78397dbc5f",
+      "anchor": "  \"note\": \"Supplementary retry of original notRun TestSuite rows. Does not overwrite the uniform audit or erase its timeout.\",",
+      "role": "Historical record: Captured13-function focused supplementary TestSuite retry, with11reported proved labels,1pending and1unsupported plus recorded elapsed times/profile. Explicitly does not replace the original uniform audit or erase its timeout; neither reported proofs nor old timeout profile/retry policy authorize present success, budgets or replay. Complete row structures/counts were inspected; diagnostic reason strings and source/proof outcomes were not semantically authenticated. No current source, archive, native, proof, trust, policy, budget, exclusion, authorization, consumer, nonuse or deletion credit."
+    },
+    {
+      "path": "tests/migration/proof-unattempted-retry-2026-10-16.json",
+      "blob": "d8ace0ec4473d64fa1a13690007307ab0ca9a431",
+      "anchor": "  \"note\": \"Supplementary retries of exact notRun rows from completed sources. Includes the separately saved TestSuite retry. Original audit errors and outcomes remain unchanged.\",",
+      "role": "Historical record: Captured87-target focused retry with exact target/completion/result bindings,47reported proved labels,14pending,14unsupported,4notRun,5error and3internal outcomes. Five recorded lake timeouts/SIGKILL and old120000ms profile remain data, not budget or replay permission; original uniform audit errors/outcomes are expressly retained. Metadata, row structures and internal cross-record byte hashes were checked;142831error-reason bytes were not semantically authenticated. No proof, source, timing, native or error-truth validation. Keep/uncertain-reader precedence and maintained workflow remain mandatory. No current trust, policy, baseline, budget, authorization, consumer, nonuse or deletion credit."
+    },
+    {
+      "path": "tests/migration/rule-delta-473da8944c.json",
+      "blob": "486d4127cb602baf99a4254e547382a2d347c529",
+      "anchor": "  \"keyext.solidity.core/src/main/resources/org/key_project/solidity/proof/rules/binaryLemmas.key\": {",
+      "role": "Historical record: Captured lexical named-rule body-difference output across5Key files:44added,0removed,19changed names. Entire lists and committed diff producer/documented workflow were reviewed; before/after revisions and external rule bodies were not authenticated. This is still documented migration review material: accounting constructors/RuleShapes/unclaimed reasons/map rows and theory dispositions is not waived. No present rule adoption, removal, omission, exclusion, premise change, regeneration or semantic-equivalence authority. Keep/uncertain-reader precedence and maintained workflow remain mandatory. No current trust, policy, baseline, budget, authorization, consumer, nonuse or deletion credit."
+    },
+    {
+      "path": "tests/migration/rule-delta.json",
+      "blob": "f06334316884f4a1ef3d3670247b17b724df43b4",
+      "anchor": "  \"keyext.solidity.core/src/main/resources/org/key_project/solidity/proof/rules/memoryRules.key\": {",
+      "role": "Historical record: Captured lexical named-rule body-difference output across3Key files:61added,10removed,10changed names. Entire lists and committed diff producer/documented workflow were reviewed; before/after revisions and external rule bodies were not authenticated. The saved delta remains migration review material with constructor/RuleShapes/unclaimed/map and theory-accounting obligations intact. Removed names are not permission to delete rules or weaken premises; no adoption, exclusion, regeneration or semantic-equivalence authority. Keep/uncertain-reader precedence and maintained workflow remain mandatory. No current trust, policy, baseline, budget, authorization, consumer, nonuse or deletion credit."
+    },
+    {
+      "path": "tests/sol-expression-uniqueness/bulk-manifest.json",
+      "blob": "fba3f907b1cf211f3f25451a0420df44e1206991",
+      "anchor": "  \"retained\": \"All control, obligation, source-pin, axiom, declaration and registration JSON retained in Git. Only evidence and five generated kernel inventory dumps externalized.\"",
+      "role": "Historical record: Captured H44 bulk-publication metadata with reported archive size/digest/member count and original-path/retained-control claims. The archive and externalized inventory dumps were not recovered, authenticated or regenerated; preservation claims are historical data, not verification or permission to remove current controls, fixtures or evidence. Keep/uncertain-reader precedence and all uncompleted obligations remain. No current source, archive, native, proof, trust, policy, baseline, budget, authorization, consumer, nonuse or deletion credit."
+    },
+    {
+      "path": "tests/h28-sol/non-vacuity/retirement-h82/H44-OFF-TREE.json",
+      "blob": "a8dc9fb2f73244a10519dc729f6d0948a4ee97c9",
+      "anchor": "  \"classification\": \"Unfinished draft census; not accepted proof evidence\",",
+      "role": "Historical record: Captured H44 off-tree pointer to an explicitly unfinished draft census, with proofAcceptedfalse and original-commit retention claim. The draft/private path and commit member were not recovered or authenticated; no proof acceptance, goal completion, retired-lane revival, scheduler permission or deletion authority follows. Keep/uncertain-reader precedence and all uncompleted obligations remain. No current source, archive, native, proof, trust, policy, baseline, budget, authorization, consumer, nonuse or deletion credit."
+    },
+    {
+      "path": "tests/roadmap-v17/h44-evidence-manifest.json",
+      "blob": "13b056f0ce6446455742637e38370433b0c5798b",
+      "anchor": "  \"status\": \"partial-preparation\",",
+      "role": "Historical record: Captured partial-preparation inventory of off-tree historical validation text and checkpoint checksum publications, explicitly not authenticated proof or a release gate, with releaseClosedfalse and semanticPremisesDischargedfalse. External bytes, digests, original sources and retention were not recovered or independently verified. Keep/uncertain-reader precedence and all uncompleted obligations remain. No current source, archive, native, proof, trust, policy, baseline, budget, authorization, consumer, nonuse or deletion credit."
+    },
+    {
+      "path": "tests/h62/item2/audit-abi-world/portable-evidence-index.json",
+      "blob": "00a8485070a7a79f9f08e515923669df5c766b64",
+      "anchor": "  \"assignment_complete\": false,",
+      "role": "Historical record: Captured portable-publication index for historical 902e archive and off-tree manifest, with assignment_completefalse and G07 blocked/open. Reported build success, coverage counts, archive digests, ticket authentication and external gas/fork observations remain unverified historical claims; no fresh a282/c977 build or inventory is certified. The committed byte-integrity verifier takes operator-supplied archive and manifest arguments; no archive or private input was recovered or replayed. Keep/uncertain-reader precedence and all uncompleted obligations remain. No current source, archive, native, EVM, gas, world/general compiler proof, trust, policy, baseline, budget, authorization, owner disposition, consumer, nonuse or deletion credit."
+    },
+    {
+      "path": "tests/h62/item1/duplication-scanner/checked-log-evidence.json",
+      "blob": "7520d49ffe3326225b55915a6c89288cd3e15d3c",
+      "anchor": "  \"boundary\": \"No new proof or compiler-adequacy result; original792 obligations and +80.254966536% Lean STOP retained.\"",
+      "role": "Historical record: Captured detached-probe/child-log-substitution regression report with source/test/external-evidence digests and reported controls, source/KeySort/AST linkage and header-navigation statistics. Fresh synthetic checked-log tests do not authenticate these old captures, source identities, counters or acceptance claims. Original792 obligations and +80.254966536% STOP remain as reported historical constraints, not a current budget exception, clearance, permission or authority to replay a stopped workload. External bytes and hashes were not recovered or independently verified. Keep/uncertain-reader precedence and all uncompleted obligations remain. No current source, archive, native, body, proof, compiler adequacy, coverage, trust, policy, baseline, budget, ownership, authorization, consumer, nonuse or deletion credit."
+    },
+    {
+      "path": "tests/h62/item1/duplication-scanner/metadata-observation-evidence.json",
+      "blob": "bc67361d50b86ee4e79ed37422d5535ca619ff16",
+      "anchor": "  \"boundary\": \"Separate local type observation only; no scanner annotation, theorem witness, ownership/equivalence or runtime acceptance. All792original obligations and +80.254966536%STOP remain.\"",
+      "role": "Historical record: Captured separate local type-observation summary with source/evidence digests, reported legacy refusals and v2 serialization/control counts, final and superseded capture labels, and preservation assertions. Recorded accepted labels and domain comparisons establish no current approval, contract permission, scanner annotation, equivalence or removed refusal. Original792 obligations and +80.254966536% STOP remain as reported historical constraints, not a current budget exception, clearance, permission or authority to replay a stopped workload. External bytes and hashes were not recovered or independently verified. Keep/uncertain-reader precedence and all uncompleted obligations remain. No current source, archive, native, body, proof, compiler adequacy, coverage, trust, policy, baseline, budget, ownership, authorization, consumer, nonuse or deletion credit."
+    },
+    {
+      "path": "tests/h62/item1/duplication-scanner/source-location-evidence.json",
+      "blob": "8bac2707325e14ef8ca563656d3ec51d93e8e6f8",
+      "anchor": "  \"stopped_workload_rerun\": false",
+      "role": "Historical record: Captured fixture source-location/linkage report with predecessor/master/source pins, accepted-capture receipt/binding digests, external control/link/unlinked counts and zero-change assertions. Recorded source/type linkage, acceptance, statement preservation and non-rerun flags are historical claims, not authenticated current execution or proof. Original792 obligations and +80.254966536% STOP remain as reported historical constraints, not a current budget exception, clearance, permission or authority to replay a stopped workload. External bytes and hashes were not recovered or independently verified. Keep/uncertain-reader precedence and all uncompleted obligations remain. No current source, archive, native, body, proof, compiler adequacy, coverage, trust, policy, baseline, budget, ownership, authorization, consumer, nonuse or deletion credit."
+    },
+    {
+      "path": "tests/h62/item1/duplication-scanner/scope-binding-evidence.json",
+      "blob": "5a20819788cdf9759bd75b9352e653b8547542eb",
+      "anchor": "  \"boundary\": \"No original theorem witness, ownership, body equivalence or runtime acceptance; original792 obligations and +80.254966536%STOP unchanged.\"",
+      "role": "Historical record: Captured intrinsic-Scope binding workflow summary with source/evidence digests, reported external/new controls, lexical/link/unresolved/kernel/ownership counts and unchanged-metadata assertions. The separately consumed primary scope-closure pin contract does not authenticate this old report, its accepted captures, source identities, source/type linkage or coverage claims. Original792 obligations, +80.254966536% STOP and any no-runtime-pass wording remain reported historical constraints, not a current budget exception, clearance, permission or authority to replay a stopped workload. External bytes and hashes were not recovered or independently verified. Keep/uncertain-reader precedence and all uncompleted obligations remain. No current source, archive, native, body, proof, compiler adequacy, coverage, trust, policy, baseline, budget, ownership, authorization, consumer, nonuse or deletion credit."
+    },
+    {
+      "path": "tests/h62/item1/duplication-scanner/project-closure-evidence.json",
+      "blob": "ca7a720a6bc209464eb0a57c1114ce7cb047d567",
+      "anchor": "  \"boundary\": \"AST only visible constants; KeySort fresh checked dependency. Scanner CLI AST consumption, general closure admission, current live ownership, private/unloaded and body equality remain unfinished. No original792 obligation discharged.\"",
+      "role": "Historical record: Captured AST closure workflow report with source/metadata/binding digests, final versus superseded capture labels, reported linkage/unresolved/kernel and test counts. Preserve its explicitly unfinished scanner consumption, general closure, live ownership, private/unloaded and body-equality boundaries; a separate primary project-closure contract does not verify these historical observations. Original792 obligations, +80.254966536% STOP and any no-runtime-pass wording remain reported historical constraints, not a current budget exception, clearance, permission or authority to replay a stopped workload. External bytes and hashes were not recovered or independently verified. Keep/uncertain-reader precedence and all uncompleted obligations remain. No current source, archive, native, body, proof, compiler adequacy, coverage, trust, policy, baseline, budget, ownership, authorization, consumer, nonuse or deletion credit."
+    },
+    {
+      "path": "tests/h62/item1/duplication-scanner/scanner-closure-evidence.json",
+      "blob": "f05af9e922a7b637d8e57c28b00317801266f0f6",
+      "anchor": "  \"boundary\": \"All792original audit obligations unchanged; original +80.254966536%STOP remains, no RUNTIME_GATE_PASS.\"",
+      "role": "Historical record: Captured scanner AST-target regression summary with source/external-evidence digests, old KeySort and AST output/comparison/linkage/unresolved/ownership statistics and zero-production-change assertions. Recorded local live output, deterministic metadata, preserved refusal and zero-change claims are unverified history; no current runtime gate or timing-hold clearance follows. Original792 obligations, +80.254966536% STOP and any no-runtime-pass wording remain reported historical constraints, not a current budget exception, clearance, permission or authority to replay a stopped workload. External bytes and hashes were not recovered or independently verified. Keep/uncertain-reader precedence and all uncompleted obligations remain. No current source, archive, native, body, proof, compiler adequacy, coverage, trust, policy, baseline, budget, ownership, authorization, consumer, nonuse or deletion credit."
+    },
+    {
+      "path": "tests/h62/item1/duplication-scanner/kernel-census-evidence.json",
+      "blob": "f72bf34bb99c484c25e018c9f85e5439625f50c8",
+      "anchor": "  \"scope\": \"Only constants visible in imported pinned fixture module; no source-line mapping, unloaded/private artifact levels, general project binding, live ownership or remote attestation. Structural validator does not authenticate completeness.\",",
+      "role": "Historical record: Captured imported-fixture kernel-census report with predecessor/master/source/census/accepted-receipt/evidence pins, external-control counts and zero-change assertions. Scope is visible imported fixture constants only; it disclaims completeness authentication, source locations, unloaded/private artifacts, general binding, live ownership and attestation. No accepted census, source identity or original non-rerun/timing assertion is authenticated. All reported hashes, counters, acceptance labels and preservation assertions remain unverified history. Original792 obligations and any +80.254966536% STOP/non-rerun wording remain historical constraints, not a current budget exception, clearance, permission or authority to replay a stopped workload. Primary pin contracts remain separate. Keep/uncertain-reader precedence and all uncompleted obligations remain. No current source, archive, native, body, proof, compiler adequacy, general coverage, trust, policy, baseline, budget, ownership, authorization, consumer, nonuse or deletion credit."
+    },
+    {
+      "path": "tests/h62/item1/duplication-scanner/declaration-accounting-evidence.json",
+      "blob": "605b0fa8f34d59fb489a72a93e272e7fc1c790d6",
+      "anchor": "  \"boundary\": \"Completed child observations, not current full artifact/runtime recertification or proof/witness/ownership/equivalence. All792original obligations and +80.254966536%STOP remain.\"",
+      "role": "Historical record: Captured declaration-accounting report with source/evidence/ledger pins, external/new controls, kernel/lexical/legacy/v2 counts and range/kind/refusal tables. Recorded identical ledgers, completed child observations, ownershipfalse and no-additional-witness assertions are historical data, not current artifact/runtime certification, source/type binding, proof, witness equivalence or ownership. All reported hashes, counters, acceptance labels and preservation assertions remain unverified history. Original792 obligations and any +80.254966536% STOP/non-rerun wording remain historical constraints, not a current budget exception, clearance, permission or authority to replay a stopped workload. Primary pin contracts remain separate. Keep/uncertain-reader precedence and all uncompleted obligations remain. No current source, archive, native, body, proof, compiler adequacy, general coverage, trust, policy, baseline, budget, ownership, authorization, consumer, nonuse or deletion credit."
+    },
+    {
+      "path": "tests/h62/item1/duplication-scanner/header-dependency-evidence.json",
+      "blob": "7c6526a4aeb1ad219a3e6629230bbd0c29b0a6e5",
+      "anchor": "  \"boundary\": \"Only default package layout with nonoverlapping additional roots. Declared headers do not establish body/private/dynamic/registration/signature coverage, ownership or compilation permission. SDK resolution is observation only.\"",
+      "role": "Historical record: Captured header-dependency publication report with source-head/source/accepted-receipt/inventory/evidence pins, external/live controls, nodes/targets/held-path counts and zero-change/STOP/non-rerun assertions. Default nonoverlapping package layout and SDK observations establish no body/private/dynamic/registration/signature coverage, ownership, compilation permission or nonuse. All reported hashes, counters, acceptance labels and preservation assertions remain unverified history. Original792 obligations and any +80.254966536% STOP/non-rerun wording remain historical constraints, not a current budget exception, clearance, permission or authority to replay a stopped workload. Primary pin contracts remain separate. Keep/uncertain-reader precedence and all uncompleted obligations remain. No current source, archive, native, body, proof, compiler adequacy, general coverage, trust, policy, baseline, budget, ownership, authorization, consumer, nonuse or deletion credit."
+    },
+    {
+      "path": "tests/h62/item1/duplication-scanner/project-leaf-evidence.json",
+      "blob": "f0a52f81afa8888da281a88aac55d28e95b3ccdd",
+      "anchor": "  \"boundary\": \"Only admitted unchanged KeySort source/name/type linkage. Anonymous rows unresolved; no general/private/unloaded, ownership, body-equivalence, owner compiler adequacy or full runtime acceptance claim.\"",
+      "role": "Historical record: Captured KeySort project-leaf workflow report with predecessor/master/source/production-input/evidence/receipt pins, accepted and fixture-default capture labels, control/link/anonymous-unresolved/kernel counts and zero-change assertions. Its twice-passing fresh bounded KeySort compile is an unverified historical claim, not a current compile or runtime gate. Preserve anonymous rows and general/private/unloaded/body/owner/compiler-adequacy exclusions. All reported hashes, counts, accepted labels, timings, preservation and waiver assertions remain unverified history. Original792 obligations and any +80.254966536% STOP or non-rerun wording remain historical constraints, not a current budget exception, clearance or authority to replay a stopped workload. Primary pin contracts remain separate. Keep/uncertain-reader precedence and all uncompleted obligations remain. No current source, archive, native, body, proof, compiler adequacy, general coverage, trust, policy, baseline, budget, ownership, authorization, consumer, nonuse or deletion credit."
+    },
+    {
+      "path": "tests/h62/item1/duplication-scanner/scanner-project-evidence.json",
+      "blob": "8a36a2bf172e917ba249f330a86a8b8c59d3f5a3",
+      "anchor": "  \"H110\": \"fresh-thread boundary waived for this lane; original goal/VM/branch preserved\",",
+      "role": "Historical record: Captured scanner project-binding report with scanner/test/external-output and six before/after timing-pair digests, accepted seals, control/link/unresolved/kernel counts and timing/zero-change assertions. H110 fresh-thread waiver text is old lane disposition data only: it grants no present authorization, scheduler permission, budget exception, branch/workflow disposition, goal completion or replay authority. No old accepted seal, source compatibility or measured timing establishes current binding or timing-hold clearance. All reported hashes, counts, accepted labels, timings, preservation and waiver assertions remain unverified history. Original792 obligations and any +80.254966536% STOP or non-rerun wording remain historical constraints, not a current budget exception, clearance or authority to replay a stopped workload. Primary pin contracts remain separate. Keep/uncertain-reader precedence and all uncompleted obligations remain. No current source, archive, native, body, proof, compiler adequacy, general coverage, trust, policy, baseline, budget, ownership, authorization, consumer, nonuse or deletion credit."
+    },
+    {
+      "path": "tests/h62/item1/duplication-scanner/scanner-source-evidence.json",
+      "blob": "cd05ef3823acbaf618b1e91234f25172e2911e64",
+      "anchor": "  \"boundary\": \"Trusted fixture source/name/type linkage only; all candidate refusal and ownership gates retained. No general/private/unloaded coverage, proof-body equivalence or model witness claim.\"",
+      "role": "Historical record: Captured scanner source-binding report with predecessor/master/scanner/test/evidence and six before/after timing-pair digests, accepted seals, source/legacy/live capture labels, control/link/unresolved/kernel counts and scoped-timing/STOP/non-rerun/zero-change assertions. Preserve original refusal and ownership gates and all general/private/unloaded/body-equivalence/model-witness exclusions; recorded source/type linkage or timing deltas provide no current authentication or acceptance. All reported hashes, counts, accepted labels, timings, preservation and waiver assertions remain unverified history. Original792 obligations and any +80.254966536% STOP or non-rerun wording remain historical constraints, not a current budget exception, clearance or authority to replay a stopped workload. Primary pin contracts remain separate. Keep/uncertain-reader precedence and all uncompleted obligations remain. No current source, archive, native, body, proof, compiler adequacy, general coverage, trust, policy, baseline, budget, ownership, authorization, consumer, nonuse or deletion credit."
+    },
+    {
+      "path": "tests/h62/item1/duplication-scanner/binding-evidence.json",
+      "blob": "f8f94cf5978d8cd74a48f3794690a8d038acb35a",
+      "anchor": "  \"boundary\": \"Trusted local five-fixture linkage and authenticated allocation census only; raw signature protocol stays unbound. No remote attestation, global signature/ownership completion, unowned grant or Solidity compiler proof. Development runs are not accepted evidence.\"",
+      "role": "Historical record: Captured scanner binding checkpoint with guarded-regression list, accepted-live-run/receipt/scan/binding pins, private ownership-snapshot path/digest/head, source pins and reported71tests. Five-fixture linkage and authenticated-allocation/ownership wording are unverified historical claims, not current authentication, live ownership, an unowned-work grant, compiler proof or authority to recover private inputs. Preserve unbound raw protocol and all global/attestation/development-run exclusions. All reported hashes, counts, acceptance, review, authentication and preservation assertions remain unverified history. Original792 obligations and any +80.254966536% STOP/non-rerun wording remain historical constraints, not a current budget exception, clearance, permission or authority to replay a stopped workload. Primary pin contracts remain separate. Keep/uncertain-reader precedence and all uncompleted obligations remain. No current source, archive, native, body, proof, compiler adequacy, general coverage, trust, policy, baseline, budget, ownership, authorization, consumer, nonuse or deletion credit."
+    },
+    {
+      "path": "tests/h62/item1/duplication-scanner/coverage-evidence.json",
+      "blob": "ea24157d499ed378eaea36f7845b7e8a9eca3c1c",
+      "anchor": "  \"proof_boundary\": \"External tooling checks and trusted isolated fixture execution only; no production theorem, ownership or complete kernel census claim\",",
+      "role": "Historical record: Captured incomplete scanner coverage report with predecessor/master/source/test/receipt/evidence pins,20selected/5linked/15unresolved, completefalse and generated-censusfalse,73tests and a quoted historical review. Preserve the recorded documentation gate exit1 with four inherited references and the original timing STOP/non-rerun assertion. These old failures are not an exception or excuse for any current gate; no complete census, production theorem, owner agreement or matched performance result follows. All reported hashes, counts, acceptance, review, authentication and preservation assertions remain unverified history. Original792 obligations and any +80.254966536% STOP/non-rerun wording remain historical constraints, not a current budget exception, clearance, permission or authority to replay a stopped workload. Primary pin contracts remain separate. Keep/uncertain-reader precedence and all uncompleted obligations remain. No current source, archive, native, body, proof, compiler adequacy, general coverage, trust, policy, baseline, budget, ownership, authorization, consumer, nonuse or deletion credit."
+    },
+    {
+      "path": "tests/h62/item2/audit-language/merge-resolution.json",
+      "blob": "db8e1250b83a4056989c988297b110060de7f526",
+      "anchor": "  \"full_gate\": \"not claimed; coordinator rerun pending\",",
+      "role": "Historical record: Captured audit-language merge/conflict resolution with parent/upstream/file digest, file/index preservation assertions, zero-statement/budget/axiom/sorry claims, private check pointer and reported local KeySort/FixedPoint4.35 checks under old resource settings. Full gate is explicitly unclaimed and coordinator rerun pending; historical static documentation findings remain. No old source identity, preservation, proof, toolchain, resource or gate assertion is authenticated here or adopted as current policy. Resume references this path as provenance; its continuation-state integrity contract and patch/overlay authorities remain separate and unresolved. Keep/uncertain-reader precedence and all uncompleted obligations remain. No current proof, source/archive/native authentication, owner agreement, runtime/full-gate acceptance, policy/baseline/budget exception, authorization, private recovery, replay, nonuse or deletion credit."
+    },
+    {
+      "path": "tests/h62/item2/audit-language/ownership-evidence.json",
+      "blob": "583a44cb0bd7086bbe5570ec7702cdb3b586477b",
+      "anchor": "  \"boundary\": \"Pinned original audit input and existing portable evidence; no live-owner reassignment or full audit completion. Bulk archive remains off Git.\"",
+      "role": "Historical record: Captured ownership-input publication pointer with recipient, original snapshot path/size/digest, off-Git archive/member/checksum paths, sizes and hashes. These are unverified historical retention and publication claims, not authenticated archive bytes, a current owner snapshot, live-owner reassignment or full audit completion. No archive/member/private input was recovered or verified. All reported hashes, counts, recipient/routing/ownership and preservation assertions remain unverified history. Keep/uncertain-reader precedence and all uncompleted obligations remain. No current source/archive/native/proof authentication, owner agreement, live routing, runtime/full-gate acceptance, trust/policy/baseline/budget exception, permission, private recovery, replay, nonuse or deletion credit."
+    },
+    {
+      "path": "tests/h62/item2/audit-language/owner-resolution-request.json",
+      "blob": "342eb3654ff7646d7cd795abba6974698b947e36",
+      "anchor": "  \"request\": \"Identify the live producer for each exact path, or explicitly confirm that no producer reservation is recorded. Retain existing cleanup and migration roles separately. This request grants no write permission, scope expansion or ownership transfer.\",",
+      "role": "Historical record: Captured H70 missing-authoritative-routing request with source tags, off-Git path-list digest, reported262paths/2876declarations and pending migration/owner/Lean/gate waits. The committed export embeds this old object unchanged as requests-list message provenance; it does not adopt fields as routing, integrity or permission decisions. No export was run. Preserve no-write/no-scope/no-ownership-transfer wording, delivery-not-owner-agreement/validation boundary and no-relay-installation-task statement. This old request creates no current question, reservation, assignment or authorization. All reported hashes, counts, recipient/routing/ownership and preservation assertions remain unverified history. Keep/uncertain-reader precedence and all uncompleted obligations remain. No current source/archive/native/proof authentication, owner agreement, live routing, runtime/full-gate acceptance, trust/policy/baseline/budget exception, permission, private recovery, replay, nonuse or deletion credit."
+    },
+    {
+      "path": "tests/h62/item2/audit-g25-scalar-lowering/evidence-manifest.json",
+      "blob": "0b6161732bfafbcc150c691b5f807a1b4072ebb5",
+      "anchor": "  \"checkpoint\": \"C1/C2/C3 verified; C4 partial; worker retired and stopped\",",
+      "role": "Historical record: Captured G25 artifact/publication inventory with off-Git primary-file/cache/checkpoint paths and hashes, reported311proof credit and55new public success theorems, and C1/C2/C3 verified labels. All proof, verification, source, cache, review, acceptance and preservation claims are unverified history, not current proof credit or authentication. Preserve C4 partial, retired/stopped worker and implementation_continuation_authorizedfalse. Old handoff target and pause/capability/retirement pointers grant no current assignment, permission, cache reuse, resumption or authority to replay a retired workload. No private artifact or archive was recovered. Keep/uncertain-reader precedence and all uncompleted obligations remain. No current source/native/proof/runtime/full-gate acceptance, owner agreement, trust/policy/baseline/budget exception, authorization, nonuse or deletion credit."
+    },
+    {
+      "path": "tests/h62/item2/audit-memory-operations/bulk-manifest.json",
+      "blob": "012dd2dc0fa3c265621afe85ecda12c328567646",
+      "anchor": "  \"evidence_directory\": \"/workspace/h62-audit-memory-evidence\",",
+      "role": "Historical record: Captured70-entry off-Git memory-audit publication inventory naming census/repeat, prerequisite and ABI-entry command/log/compiled-olean outputs, checks, KeySort and reviews across intermediate/pass/final directories. Different compiled EntryAudit digests remain distinct reported entries; pass/final names and empty-log digests authenticate no success, compiled source, proof or cache suitability. No listed external byte, digest, cache, source, receipt or retained artifact was recovered or authenticated. All publication, log, command, review, compilation, census, ownership and timing assertions remain unverified history. Keep/uncertain-reader precedence and all uncompleted obligations remain. No current source/archive/native/proof authentication, cache reuse or compatibility, runtime/full-gate acceptance, trust/policy/baseline/budget exception, permission, private recovery, stopped-workload replay, nonuse or deletion credit."
+    },
+    {
+      "path": "tests/h62/item2/audit-memory-operations/h70-bulk-manifest.json",
+      "blob": "08da5e937773f14ad613fcfc5dcf062e94e951be",
+      "anchor": "  \"evidence_directory\": \"/workspace/h62-audit-memory-h70-evidence\",",
+      "role": "Historical record: Captured12-entry off-Git H70 memory-audit publication inventory naming acceptance, command/check/review/escalation outputs, generator/reconciled-census repeats and uncovered-statement repeats. Equal reported digests do not prove independent execution, actual repeat identity, complete coverage, absence of escalation, current routing or owner agreement. No listed external byte, digest, cache, source, receipt or retained artifact was recovered or authenticated. All publication, log, command, review, compilation, census, ownership and timing assertions remain unverified history. Keep/uncertain-reader precedence and all uncompleted obligations remain. No current source/archive/native/proof authentication, cache reuse or compatibility, runtime/full-gate acceptance, trust/policy/baseline/budget exception, permission, private recovery, stopped-workload replay, nonuse or deletion credit."
+    },
+    {
+      "path": "tests/h62/item2/audit-memory-operations/headers-bulk-manifest.json",
+      "blob": "3776987e1a77d5dfad436f01822c1b9bc6a44f29",
+      "anchor": "  \"evidence_directory\": \"/workspace/h62-audit-memory-headers-evidence\",",
+      "role": "Historical record: Captured52-entry off-Git header-audit publication inventory naming successive parser/header/command/input/output/log files, overlay patch and owner receipt, malformed/negative controls, reconciliations/census/uncovered repeats, reviews, toolchain and timing-stop records. Preserve all negative, error, escalation and uncovered-work entries. No parser/compiler/kernel success, overlay acceptance, owner agreement, coverage or STOP clearance follows from filenames or repeated hashes. No listed external byte, digest, cache, source, receipt or retained artifact was recovered or authenticated. All publication, log, command, review, compilation, census, ownership and timing assertions remain unverified history. Keep/uncertain-reader precedence and all uncompleted obligations remain. No current source/archive/native/proof authentication, cache reuse or compatibility, runtime/full-gate acceptance, trust/policy/baseline/budget exception, permission, private recovery, stopped-workload replay, nonuse or deletion credit."
     }
   ],
   "schema_version": 1
