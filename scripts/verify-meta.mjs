@@ -99,7 +99,7 @@ solc_import "source.ast.json" hash 0x${hash.toString(16)} as ${namespace} testin
 solc_scoped_problems ${namespace} decl${self}
 #fast_meta ${namespace} ids ${JSON.stringify(JSON.stringify(requests.map(r=>r.sourceId)))} to ${JSON.stringify(output)}
 `);
-    const setup=JSON.parse(runTool(join(sdk,'bin/lake'),['--quiet','setup-file',source],options.timeoutMs??300000));
+    const setup=JSON.parse(runTool(join(sdk,'bin/lake'),['--quiet',...(options.build===false?['--no-build']:[]),'setup-file',source],options.timeoutMs??300000));
     const validateImports=()=>{
       for(const artifacts of Object.values(setup.importArts))for(const file of artifacts)
         if(build.files[realpathSync(file)]!==sha(file))throw new Error('runtime import differs from compiled extended build: '+file);
@@ -173,7 +173,7 @@ solc_import "source.ast.json" hash 0x${hash.toString(16)} as ${namespace} testin
 solc_scoped_problems ${namespace} decl${self}
 #fast_readings ${namespace} ids ${JSON.stringify(JSON.stringify(requests.map(r=>r.sourceId)))} to ${JSON.stringify(output)}
 `);
-    const setup=JSON.parse(runTool(join(sdk,'bin/lake'),['--quiet','setup-file',source],options.timeoutMs??300000));
+    const setup=JSON.parse(runTool(join(sdk,'bin/lake'),['--quiet',...(options.build===false?['--no-build']:[]),'setup-file',source],options.timeoutMs??300000));
     if(!setup.importArts?.[moduleName]?.length)throw new Error('reading discovery root artifact missing');
     const snapshot=()=>Object.fromEntries([...new Set(Object.values(setup.importArts).flat().map(file=>realpathSync(file)))]
       .sort().map(file=>[file,sha(file)]));
