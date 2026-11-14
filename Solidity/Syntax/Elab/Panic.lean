@@ -158,4 +158,50 @@ theorem enum_guard_origin (σ : State C Γ) (captured : Val C Γ .uint)
   have nonneg := PrimTy.uint_nonneg value
   omega
 
+/-- The evaluated unsigned range guard identifies narrow overflow; the width
+bound distinguishes this check from the producer's full-width bypass. -/
+theorem uint_narrow_guard_origin (σ : State C Γ) (expression : Val C Γ .uint)
+    (value : PrimTy.uint.Denote) (width : Nat) (narrow : width < 256)
+    (range : PrimTy.uint.inRange (((2 ^ width - 1 : Nat) : Int)) = true)
+    (read : expression.evalT σ = .ok value)
+    (failed : (Checked.cmpU .le rfl rfl expression
+      (Checked.litU ((2 ^ width - 1 : Nat) : Int) range)).evalT σ = .ok false) :
+    Panic.Source.OriginV2 (.narrowing (.unsigned width value)) .arithmetic := by
+  have evaluated : (Checked.cmpU .le rfl rfl expression
+      (Checked.litU ((2 ^ width - 1 : Nat) : Int) range)).evalT σ =
+      .ok (decide (value.val ≤ ((2 ^ width - 1 : Nat) : Int))) := by
+    simp [Checked.cmpU, Checked.litU, Val.evalT, read, BinOp.shortT,
+      Simple.evalT, PrimTy.ofLit, BinOp.evalT, BinOp.evalNum,
+      TRes.ofOpt, bind, Except.bind]
+  rw [evaluated] at failed
+  apply Panic.Source.narrowing_origin
+  rw [Panic.Source.Narrowing.passed, Panic.Source.fits, if_neg (Nat.not_le.mpr narrow)]
+  exact Except.ok.inj failed
+
+/-- The signed source range guard checks the lower bound before the upper
+bound and classifies a failed check at the supplied narrow width. -/
+theorem int_narrow_guard_origin (σ : State C Γ) (expression : Val C Γ .int)
+    (value : PrimTy.int.Denote) (width : Nat) (narrow : width < 256)
+    (lo : PrimTy.int.inRange (-((2 ^ (width - 1) : Nat) : Int)) = true)
+    (hi : PrimTy.int.inRange ((2 ^ (width - 1) - 1 : Nat) : Int) = true)
+    (read : expression.evalT σ = .ok value)
+    (failed : (Checked.andB
+      (Checked.cmpI .le rfl rfl (Checked.litI (-((2 ^ (width - 1) : Nat) : Int)) lo) expression)
+      (Checked.cmpI .le rfl rfl expression (Checked.litI ((2 ^ (width - 1) - 1 : Nat) : Int) hi))).evalT σ =
+        .ok false) :
+    Panic.Source.OriginV2 (.narrowing (.signed width value)) .arithmetic := by
+  have evaluated : (Checked.andB
+      (Checked.cmpI .le rfl rfl (Checked.litI (-((2 ^ (width - 1) : Nat) : Int)) lo) expression)
+      (Checked.cmpI .le rfl rfl expression (Checked.litI ((2 ^ (width - 1) - 1 : Nat) : Int) hi))).evalT σ =
+      .ok (decide (-((2 ^ (width - 1) : Nat) : Int) ≤ value.val ∧
+        value.val ≤ ((2 ^ (width - 1) - 1 : Nat) : Int))) := by
+    by_cases lower : -((2 : Int) ^ (width - 1)) ≤ value.val <;>
+      simp [Checked.andB, Checked.cmpI, Checked.litI, Val.evalT, read, BinOp.shortT,
+        Simple.evalT, PrimTy.ofLit, BinOp.evalT, BinOp.evalNum,
+        TRes.ofOpt, bind, Except.bind, BinOp.evalBool, pure, Except.pure, lower]
+  rw [evaluated] at failed
+  apply Panic.Source.narrowing_origin
+  rw [Panic.Source.Narrowing.passed, Panic.Source.fits, if_neg (Nat.not_le.mpr narrow)]
+  exact Except.ok.inj failed
+
 end Solidity

@@ -7,7 +7,7 @@ Kernel-checked local contracts: narrow uint8 overflow must retain code 17 even
 when the uint256 operation succeeds; enum rejection retains code 33; legacy
 assertions keep code 1. Data-retaining and ignoring modes remain distinct.
 The emitted-order check places a divisor guard before its statement and tail.
-These tests do not establish the missing runtime evaluation bridge, opaque
+These tests do not establish the missing elaboration/capture linkage, opaque
 self-call/dispatch association, whole-program erasure or an external EVM claim.
 -/
 
@@ -151,5 +151,23 @@ example (σ : State C Γ) :
 example (σ : State C Γ) :
     OriginV2 (.original (.enumConversion 1 ⟨1, by decide⟩)) .enumConversion :=
   enum_guard_origin σ (Checked.litU 1 (by decide)) ⟨1, by decide⟩ 1 (by decide) rfl rfl
+
+/-- The evaluated uint8 guard rejects 256 even though uint256 represents it. -/
+example (σ : State C Γ) :
+    OriginV2 (.narrowing (.unsigned 8 u256)) .arithmetic :=
+  uint_narrow_guard_origin σ (Checked.litU 256 (by decide)) u256 8
+    (by decide) (by decide) rfl rfl
+
+/-- The signed upper bound rejects 128 after the lower comparison succeeds. -/
+example (σ : State C Γ) :
+    OriginV2 (.narrowing (.signed 8 ⟨128, by decide⟩)) .arithmetic :=
+  int_narrow_guard_origin σ (Checked.litI 128 (by decide)) ⟨128, by decide⟩ 8
+    (by decide) (by decide) (by decide) rfl rfl
+
+/-- The signed lower bound rejects -129 through the first comparison. -/
+example (σ : State C Γ) :
+    OriginV2 (.narrowing (.signed 8 ⟨-129, by decide⟩)) .arithmetic :=
+  int_narrow_guard_origin σ (Checked.litI (-129) (by decide)) ⟨-129, by decide⟩ 8
+    (by decide) (by decide) (by decide) rfl rfl
 
 end Solidity.Examples.PanicSource
