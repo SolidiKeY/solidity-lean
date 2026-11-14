@@ -95,6 +95,11 @@ theorem mapping_family_answer :
     (MappingStruct.voidAnswer? DecisionResidueReasons.mappingReversed).isSome = true :=
   MappingStruct.voidAnswer_isSome (by decide +kernel)
 
+/-- The composed production fallback answers the mapping-bearing source. -/
+theorem mapping_composed_answer :
+    (structAnswerWithCompound DecisionResidueReasons.mappingReversed).isSome = true :=
+  structAnswerWithCompound_void (by decide +kernel)
+
 end FamilyCertificates
 
 /-! ## Residue members, one per named reason -/
