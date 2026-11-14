@@ -1,4 +1,5 @@
 import Solidity.Backend.StructuredFlow.ScopedMappedSequence
+import Solidity.Backend.StructuredFlow.ReturnTailCompiler
 import Solidity.Backend.StructuredFlow.MappedBranchControls
 
 namespace Solidity.Backend.StructuredFlow.ScopedMappedSequence.Controls
@@ -62,42 +63,26 @@ theorem no_canary_store : codeStoresCell 3 emitted = false ∧ codeStoresCell 3 
 theorem observed_good (flag : Bool) :
     ∃ final, run emitted (loadedCanary flag) = .ok final 0 ∧
       final.mem 0 = .val (bword flag) ∧ final.mem 1 = .val (bword (!flag)) ∧
-      final.mem 2 = .val (bword (!flag)) ∧ final.mem 3 = w[99] ∧ final.stack = [w[77]] := by
-  rcases checked_good flag with ⟨o,final,sourceRun,targetRun,stack,_,post⟩ |
-    ⟨sourceRun,_⟩ | ⟨assertion,_⟩ | ⟨payment,_⟩ | ⟨sourceRun,_⟩
-  · rw [(typed_runs flag).1] at sourceRun
-    cases sourceRun
-    refine ⟨final,targetRun,?_,?_,?_,?_,stack⟩
-    · exact post.vals (.there (.there .here))
-    · exact post.vals (.there .here)
-    · exact post.vals .here
-    · exact exec_mem no_canary_store.1 targetRun
-  · rw [(typed_runs flag).1] at sourceRun
-    cases sourceRun
-  · cases assertion
-  · cases payment
-  · rw [(typed_runs flag).1] at sourceRun
-    cases sourceRun
+      final.mem 2 = .val (bword (!flag)) ∧ final.mem 3 = w[99] ∧ final.stack = [w[77]] :=
+  Exists.elim (ReturnTailCompiler.normal_of_ok ((typed_runs flag).1 ▸ checked_good flag))
+    (fun final ⟨targetRun,stack,post⟩ => by
+      refine ⟨final,targetRun,?_,?_,?_,?_,stack⟩
+      · exact post.vals (.there (.there .here))
+      · exact post.vals (.there .here)
+      · exact post.vals .here
+      · exact exec_mem no_canary_store.1 targetRun)
 
 theorem observed_bad (flag : Bool) :
     ∃ final, run badEmitted (loadedCanary flag) = .ok final 0 ∧
       final.mem 0 = .val (bword flag) ∧ final.mem 1 = .val (bword (!flag)) ∧
-      final.mem 2 = .val (bword flag) ∧ final.mem 3 = w[99] ∧ final.stack = [w[77]] := by
-  rcases checked_bad flag with ⟨o,final,sourceRun,targetRun,stack,_,post⟩ |
-    ⟨sourceRun,_⟩ | ⟨assertion,_⟩ | ⟨payment,_⟩ | ⟨sourceRun,_⟩
-  · rw [(typed_runs flag).2] at sourceRun
-    cases sourceRun
-    refine ⟨final,targetRun,?_,?_,?_,?_,stack⟩
-    · exact post.vals (.there (.there .here))
-    · exact post.vals (.there .here)
-    · exact post.vals .here
-    · exact exec_mem no_canary_store.2 targetRun
-  · rw [(typed_runs flag).2] at sourceRun
-    cases sourceRun
-  · cases assertion
-  · cases payment
-  · rw [(typed_runs flag).2] at sourceRun
-    cases sourceRun
+      final.mem 2 = .val (bword flag) ∧ final.mem 3 = w[99] ∧ final.stack = [w[77]] :=
+  Exists.elim (ReturnTailCompiler.normal_of_ok ((typed_runs flag).2 ▸ checked_bad flag))
+    (fun final ⟨targetRun,stack,post⟩ => by
+      refine ⟨final,targetRun,?_,?_,?_,?_,stack⟩
+      · exact post.vals (.there (.there .here))
+      · exact post.vals (.there .here)
+      · exact post.vals .here
+      · exact exec_mem no_canary_store.2 targetRun)
 
 theorem wrong_index_refused (flag : Bool) :
     run badEmitted (loadedCanary flag) ≠ run emitted (loadedCanary flag) := by
