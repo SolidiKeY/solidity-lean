@@ -1415,6 +1415,13 @@
       "anchor": "You are the Codex Cloud worker for batch \"solidity-h62-4-20261106\", task \"generic-p10\": H62 4 generic-p10.",
       "role": "Historical record: Captured89-line generic-P10 original launch/assignment, old scope/owner map, work/backfill queues, reporting schema and resource/continuation clauses. This is provenance for another lane, not current authorization, ownership, goal state, report protocol or a new task. No captured proof, timing, tool/server or command is run, applied or accepted. Keep/uncertain-reader precedence remains; no fixture/generation, proof/runtime/full-gate, nonuse/orphan/deletion, permission, budget reset or STOP-clearance credit."
     }
+  ,
+    {
+      "path": "tests/upstream/g06-osaka-repin/osaka.txt",
+      "blob": "ade260175a3df3d0a620582bd0db1e3d0ad3442f",
+      "anchor": "16/16 checks passed",
+      "role": "Historical record: Captured Osaka vector-run summary with truncated report lines. Reported compiler/EVM passes are unverified, not current execution, kernel proof or completeness."
+    }
   ],
   "schema_version": 1
 }
