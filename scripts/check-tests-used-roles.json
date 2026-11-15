@@ -1253,6 +1253,12 @@
       "blob": "5c4fe80474686e2b2e8e3fef3e53b5530ead6b99",
       "anchor": "Starting origin/master: f4dee4a29c2e208b36db4a4161a4723c735cd775",
       "role": "Historical record: Before-edit calculus-baseline report with captured quantifiedDiamondBefore Lean source, named old checkout revisions/tool versions and reported bounded command exit0/propext-only output. The generic refusal/calculus-versus-EVM interpretation, source preservation, kernel result and axiom closure are unverified historical assertions, not adopted current theorem statements, premises, regressions, compiler adequacy or proof acceptance. No archived Lean snippet or old prlimit/resource setting is executed, restored, substituted into a theorem or adopted as current policy. Keep/uncertain-reader precedence and all unfinished obligations remain; no fresh execution, child/read/consumer/nonuse/deletion/orphan, full-gate, resource/budget/trust/exclusion/permission, stopped-workload replay or private-recovery credit."
+    },
+    {
+      "path": "tests/fullscope-20261104/vo1/unused-functions-registration.md",
+      "blob": "a4c63230d18e5e553641f91596c97c02396e3a20",
+      "anchor": "# VO1 idle-group pruning: registration (done)",
+      "role": "Historical record: Captured VO1 immediate idle-group pruning registration handoff, reported source/control checks, root/orphan registration status and corpus budget failure. The note explicitly retains general reachability, D6 and full compiler/physical obligations. Reported theorem, pass, axiom, acceptance and permission claims are historical assertions, not independently revalidated results or current authorization. Documentation links are secondary context, not execution or consumer certification. No keep, exact-generation, nonuse, orphan, deletion, proof, trust, premise, exclusion, budget or STOP-clearance credit; live keep and uncertain-reader precedence remain unchanged."
     }
   ],
   "schema_version": 1

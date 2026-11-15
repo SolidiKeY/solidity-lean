@@ -7,13 +7,13 @@
  "base_sha256":"0c09ce59255e3cdc5d6e7ba68de7505968deb43aa9e84050259f392f93cd0723",
  "expanded_sha256":"e1072d0330eb44325a8573c6b71ff9da979ebca5ebf5532b699f1d49fa8bca50",
  "inventory_manifest": {
-   "bytes": 8623629,
-   "evidence_commit": "8911c4072a6c2f0a49b49ca776fb95091c7e4d3c",
-   "evidence_path": "evidence/plan-x1-census-validation-1114/x1-census-validation/x1-h901-artifact-089d4978/inventory.json",
-   "input_revision": "089d4978e1ebae57bbfa6db9c161c3dfd15827dd",
+   "bytes": 8624942,
+   "evidence_commit": "0e6446e0e83a11c428cb926749e139b4db45ff2e",
+   "evidence_path": "evidence/plan-x1-census-validation-1114/x1-census-validation/x1-vo1-artifact-ca73d1a4/inventory.json",
+   "input_revision": "ca73d1a4e1aecbcbc566acaa1aa7392cad472b3d",
    "repository": "SolidiKeY/solidity-lean-coord",
    "schema_version": 1,
-   "sha256": "d01ca59a5c6dc86d086ea7a470946defc5c50274da1b35c65b3fe47dc9ffe5db"
+   "sha256": "b05f58ca103ab1b4928234d330f72d2cad7bbc26f3995c2c7d7ffb5ef2947202"
  },
  "schema_version":3,
  "templates":{
