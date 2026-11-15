@@ -10,10 +10,24 @@
        140
      ]
    }
+  ,
+   {
+     "input_revision": "e6558de17d3a721d47de20c84330b42ea5a7d636",
+     "template_indices": [
+       141,
+       142,
+       143,
+       144,
+       145,
+       146,
+       147,
+       148
+     ]
+   }
   ]
  },
  "base_sha256":"0c09ce59255e3cdc5d6e7ba68de7505968deb43aa9e84050259f392f93cd0723",
- "expanded_sha256":"e64325ff8d5c8fdf045a18e0bea042375e3af11933520115912d3ca085b2e745",
+ "expanded_sha256":"3a924624f33f10cd4e4b306c07b51b5335098d1b044a2f02b31950bb8243bec6",
  "gzip_roles": {
    "schema_version": 2,
    "records": [
@@ -25,9 +39,9 @@
        "role": "Proposed historical missing-GNU-time launcher diagnostic for ordinary H828 independent land review. It reports a launch failure, not native build, test, proof or runtime completion. Original failing launcher source is not established; later corrected source is not substituted. No execution, child/read, nonuse, deletion, budget, permission, trust or proof credit.",
        "review": {
          "content": "/tmp/solidity-cloud-post-build.sh: line 13: /usr/bin/time: No such file or directory\n",
-         "producer": "At measured revision 7734b8f5912a3959615cfff9c83d81a773b4e4b4, validation.json blob dd9ff2f4a5e5923f03632f42f1e0a9a7922a32fa records the historical GNU-time/launcher failures; post-build-command.sh.txt blob f8f66a4657b2c30cbaca33ee924380b8ba4a39e8 now uses a Python timing wrapper, so it is not authenticated as the missing original failing launcher. Historical assertions are unverified data; no command replay.",
+         "producer": "At measured revision e6558de17d3a721d47de20c84330b42ea5a7d636, validation.json blob dd9ff2f4a5e5923f03632f42f1e0a9a7922a32fa records the historical GNU-time/launcher failures; post-build-command.sh.txt blob f8f66a4657b2c30cbaca33ee924380b8ba4a39e8 now uses a Python timing wrapper, so it is not authenticated as the missing original failing launcher. Historical assertions are unverified data; no command replay.",
          "consumers": "At that exact revision, validation.json references this exact compressed object and its decoded length/hash. This metadata reference and repository scans are secondary context only, not a qualified consumer, proof of absence or nonuse. No empty-reader inference; keep, uncertain-reader and fixture-refusal precedence remain unchanged.",
-         "input_revision": "7734b8f5912a3959615cfff9c83d81a773b4e4b4",
+         "input_revision": "e6558de17d3a721d47de20c84330b42ea5a7d636",
          "independent": true
        }
      }
@@ -82,6 +96,160 @@
          "--census",
          "--measurement",
          "--out"
+       ]
+     }
+   }
+  ,
+   {
+     "entry": {
+       "path": "scripts/h62/item2/audit-readonly-calls/check_execution_replies.py",
+       "source_blob": "430a0844738b80c027759184d28a4d73c4d344ca",
+       "command": [
+         "python3",
+         "-B",
+         "scripts/h62/item2/audit-readonly-calls/check_execution_replies.py"
+       ],
+       "kind": "committed-cli",
+       "purpose": "Declared CLI source for private SourceCallBytes/MachineV2 closure and same native-call reply adapter, with source/theorem inventories, SDK and type/axiom/log bindings. SDK remains trusted tool input; no whole Source/world adequacy. Required configuration/private evidence is not supplied; source role only, no current execution, child/read/fixture, proof, runtime, nonuse, deletion or STOP-clearance credit.",
+       "entry_line": 91,
+       "required_options": [
+         "--output"
+       ]
+     }
+   },
+   {
+     "entry": {
+       "path": "scripts/h62/item2/audit-readonly-calls/obligation_dependencies.py",
+       "source_blob": "50ff8ad1adb99e9f62254eaab48b20da465138c0",
+       "command": [
+         "python3",
+         "-B",
+         "scripts/h62/item2/audit-readonly-calls/obligation_dependencies.py"
+       ],
+       "kind": "committed-cli",
+       "purpose": "Declared CLI source joining the pinned 792-obligation/129-module audit with pinned header dependencies and current lexical declarations, retaining every identity, historical owner/witness status and the +80.254966536% Lean STOP. No-path never clears a hold; lexical headers do not prove kernel fidelity or feasibility. Required configuration/private evidence is not supplied; source role only, no current execution, child/read/fixture, proof, runtime, nonuse, deletion or STOP-clearance credit.",
+       "entry_line": 109,
+       "required_options": [
+         "--frozen",
+         "--headers",
+         "--headers-sha256",
+         "--output"
+       ]
+     }
+   },
+   {
+     "entry": {
+       "path": "scripts/h62/item2/audit-readonly-calls/primitive_read_coverage.py",
+       "source_blob": "aeab6dd75625f88350bc5807f98067f9e4ef222b",
+       "command": [
+         "python3",
+         "-B",
+         "scripts/h62/item2/audit-readonly-calls/primitive_read_coverage.py"
+       ],
+       "kind": "committed-cli",
+       "purpose": "Declared CLI source for source-digest-admitted eight-case primitive-read coverage, preserving the original 792 identities and checking exact frozen/current type, receipt and historical-tool bindings. No compiler, Source-body, call or native-frame adequacy. Required configuration/private evidence is not supplied; source role only, no current execution, child/read/fixture, proof, runtime, nonuse, deletion or STOP-clearance credit.",
+       "entry_line": 110,
+       "required_options": [
+         "--admission",
+         "--output",
+         "--reviewed",
+         "--root"
+       ]
+     }
+   },
+   {
+     "entry": {
+       "path": "scripts/h62/item2/audit-readonly-calls/effect_coverage.py",
+       "source_blob": "34ec837690201749e0d09bca9fb0d1f52fd63484",
+       "command": [
+         "python3",
+         "-B",
+         "scripts/h62/item2/audit-readonly-calls/effect_coverage.py"
+       ],
+       "kind": "committed-cli",
+       "purpose": "Declared CLI source for the exact admitted frozen/current ten-EffectRules coverage pair, reparsing sealed type/axiom logs and preserving all 792 original identities and other rows. Joint-premise/application metadata does not establish definition equivalence, compiler or whole-model adequacy. Required configuration/private evidence is not supplied; source role only, no current execution, child/read/fixture, proof, runtime, nonuse, deletion or STOP-clearance credit.",
+       "entry_line": 112,
+       "required_options": [
+         "--output",
+         "--reviewed",
+         "--root"
+       ]
+     }
+   },
+   {
+     "entry": {
+       "path": "scripts/h62/item2/audit-readonly-calls/check_primitive_transport.py",
+       "source_blob": "e5aed5d239bbd524a3a18c9e04cdc9bafffc3247",
+       "command": [
+         "python3",
+         "-B",
+         "scripts/h62/item2/audit-readonly-calls/check_primitive_transport.py"
+       ],
+       "kind": "committed-cli",
+       "purpose": "Declared CLI source for isolated frozen/current snapshots of eight PrimitiveValues/PrimitiveLocals interfaces and the same joint client, checking captured headers, toolchain and exact type/axiom data. No compiler success or Source/world/native adequacy. Required configuration/private evidence is not supplied; source role only, no current execution, child/read/fixture, proof, runtime, nonuse, deletion or STOP-clearance credit.",
+       "entry_line": 115,
+       "required_options": [
+         "--mode",
+         "--output",
+         "--reviewed"
+       ]
+     }
+   },
+   {
+     "entry": {
+       "path": "scripts/h62/item2/audit-readonly-calls/check_effect_rules.py",
+       "source_blob": "cc4c5d5edc2c9518025fc884e0c64f2994f02003",
+       "command": [
+         "python3",
+         "-B",
+         "scripts/h62/item2/audit-readonly-calls/check_effect_rules.py"
+       ],
+       "kind": "committed-cli",
+       "purpose": "Declared CLI source for same-client frozen/current isolated EffectRules closures, ten original interfaces and exact type/axiom/dependency checks. Joint-premise applications do not establish compiler success, whole Source/world/native adequacy or runtime acceptance. Required configuration/private evidence is not supplied; source role only, no current execution, child/read/fixture, proof, runtime, nonuse, deletion or STOP-clearance credit.",
+       "entry_line": 117,
+       "required_options": [
+         "--mode",
+         "--output",
+         "--reviewed"
+       ]
+     }
+   },
+   {
+     "entry": {
+       "path": "scripts/h62/item2/audit-readonly-calls/check_initialization.py",
+       "source_blob": "80c31a9ebc924b9424d50731ac15bd8ff970a11a",
+       "command": [
+         "python3",
+         "-B",
+         "scripts/h62/item2/audit-readonly-calls/check_initialization.py"
+       ],
+       "kind": "committed-cli",
+       "purpose": "Declared CLI source for frozen/current PrimitiveInitialization joint clients, four original interfaces, exhaustion cases and explicitly verified executed-parent dependency reuse. No held-premise/project-cache substitution or compiler/Source/world/native adequacy. Required configuration/private evidence is not supplied; source role only, no current execution, child/read/fixture, proof, runtime, nonuse, deletion or STOP-clearance credit.",
+       "entry_line": 117,
+       "required_options": [
+         "--mode",
+         "--output",
+         "--parent",
+         "--reviewed"
+       ]
+     }
+   },
+   {
+     "entry": {
+       "path": "scripts/h62/item2/audit-readonly-calls/signature_drift.py",
+       "source_blob": "a2e0c503967ca27e0ccd26d301a3b25da65a1d3c",
+       "command": [
+         "python3",
+         "-B",
+         "scripts/h62/item2/audit-readonly-calls/signature_drift.py"
+       ],
+       "kind": "committed-cli",
+       "purpose": "Declared CLI source for pinned lexical drift dossiers retaining all 792 original signatures, contexts, historical statuses and exact observed pairs. H19/H60 explain historical upstream evolution, not frozen/current theorem transport, live ownership, kernel fidelity or witness credit. Required configuration/private evidence is not supplied; source role only, no current execution, child/read/fixture, proof, runtime, nonuse, deletion or STOP-clearance credit.",
+       "entry_line": 119,
+       "required_options": [
+         "--decisions",
+         "--output",
+         "--reviewed"
        ]
      }
    }
