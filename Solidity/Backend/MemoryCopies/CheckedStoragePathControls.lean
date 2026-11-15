@@ -258,8 +258,17 @@ theorem old_pointer_rejected (target : Machine)
 
 private def saturated (payloads : List (Fin W)) : Machine := writeMachine (machine payloads) 0 (.val wMax)
 private theorem saturated_repr (payloads : List (Fin W)) (bounded : payloads.length < 128) :
-    Objects.StateRepr 128 1 8 (Frag.init Γ) (state payloads bounded) bases (saturated payloads) :=
-  state_repr_write_below (represented payloads bounded) 0 (by decide) (by decide) (.val wMax)
+    Objects.StateRepr 128 1 8 (Frag.init Γ) (state payloads bounded) bases (saturated payloads) := by
+  have initial : Objects.StateRepr 128 1 8 (Frag.init Γ) (state payloads bounded) bases (machine payloads) := represented payloads bounded
+  refine ⟨initial.core.congrMem ?_,initial.heap.localWrite 0 (by decide) (.val wMax),?_,initial.locals⟩
+  · intro level lower upper
+    exact upd_other _ _ (by change level ≠ 0; omega)
+  · intro R index
+    obtain ⟨reference,found,word⟩ := initial.pointers index
+    refine ⟨reference,found,?_⟩
+    change upd (machine payloads).mem 0 (.val wMax) (cellOf 1 index) = _
+    rw [upd_other _ _ (by have lower : 1 ≤ lvl 1 index := le_lvl 1 index; change lvl 1 index ≠ 0; omega)]
+    exact word
 private theorem saturated_allocator (payloads : List (Fin W)) :
     Objects.AllocatorRepr heap bases 8 wMax (saturated payloads) := by
   have initial : Objects.AllocatorRepr heap bases 8 (wmod 40) (machine payloads) := allocator payloads

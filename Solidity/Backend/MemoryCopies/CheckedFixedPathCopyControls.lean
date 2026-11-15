@@ -301,8 +301,17 @@ theorem indexed_refusal :
 
 private def saturated (payloads : List (Fin W)) : Machine := writeMachine (machine payloads) 0 (.val wMax)
 private theorem saturated_repr (payloads : List (Fin W)) (bounded : payloads.length < 128) :
-    Objects.StateRepr 128 1 8 (Frag.init (Γ payloads.length)) (state payloads) bases (saturated payloads) :=
-  state_repr_write_below (represented payloads bounded) 0 (by decide) (by decide) (.val wMax)
+    Objects.StateRepr 128 1 8 (Frag.init (Γ payloads.length)) (state payloads) bases (saturated payloads) := by
+  have initial : Objects.StateRepr 128 1 8 (Frag.init (Γ payloads.length)) (state payloads) bases (machine payloads) := represented payloads bounded
+  refine ⟨initial.core.congrMem ?_,initial.heap.localWrite 0 (by decide) (.val wMax),?_,initial.locals⟩
+  · intro level lower upper
+    exact upd_other _ _ (by change level ≠ 0; omega)
+  · intro Q index
+    obtain ⟨reference,found,word⟩ := initial.pointers index
+    refine ⟨reference,found,?_⟩
+    change upd (machine payloads).mem 0 (.val wMax) (cellOf 1 index) = _
+    rw [upd_other _ _ (by have lower : 1 ≤ lvl 1 index := le_lvl 1 index; change lvl 1 index ≠ 0; omega)]
+    exact word
 private theorem saturated_allocator (payloads : List (Fin W)) (bounded : payloads.length < 128) :
     Objects.AllocatorRepr (heap payloads) bases 8 wMax (saturated payloads) := by
   have initial : Objects.AllocatorRepr (heap payloads) bases 8 (wmod 256) (machine payloads) := allocator payloads bounded
@@ -345,8 +354,17 @@ theorem empty_capacity_refusal :
   (capacity_refusal [] (by decide)).2.2
 
 private def indexedSaturated : Machine := writeMachine indexed.machine 0 (.val wMax)
-private theorem indexed_saturated_repr : Objects.StateRepr 1 1 8 indexed.frag indexed.state indexed.base indexedSaturated :=
-  state_repr_write_below indexed.represented 0 (by decide) (by decide) (.val wMax)
+private theorem indexed_saturated_repr : Objects.StateRepr 1 1 8 indexed.frag indexed.state indexed.base indexedSaturated := by
+  have initial : Objects.StateRepr 1 1 8 indexed.frag indexed.state indexed.base indexed.machine := indexed.represented
+  refine ⟨initial.core.congrMem ?_,initial.heap.localWrite 0 (by decide) (.val wMax),?_,initial.locals⟩
+  · intro level lower upper
+    exact upd_other _ _ (by change level ≠ 0; omega)
+  · intro Q index
+    obtain ⟨reference,found,word⟩ := initial.pointers index
+    refine ⟨reference,found,?_⟩
+    change upd indexed.machine.mem 0 (.val wMax) (cellOf 1 index) = _
+    rw [upd_other _ _ (by have lower : 1 ≤ lvl 1 index := le_lvl 1 index; change lvl 1 index ≠ 0; omega)]
+    exact word
 private theorem indexed_saturated_allocator : Objects.AllocatorRepr indexed.state.heap indexed.base 8 wMax indexedSaturated := by
   have initial : Objects.AllocatorRepr indexed.state.heap indexed.base 8 (wmod 40) indexed.machine := indexed.allocator
   have high : 40 ≤ wMax.val := by decide
