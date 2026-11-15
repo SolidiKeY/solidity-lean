@@ -1,3 +1,4 @@
+import Solidity.Backend.MemoryCopies.AliasBindingInterface
 import Solidity.Backend.MemoryCopies.FixedReferenceRebind
 import Solidity.Evm.Correct
 
@@ -39,13 +40,8 @@ private def path : SPath C Γ (.ref (.fixed (.ref leaf) 1)) := .loc (.root "matr
 private def reference : SRef C (.ref (.fixed (.ref leaf) 1)) := SRef.ofRoot "matrix" root
 private def destination : Idx Γ (.mem parent) := .here
 private theorem refs {R : RefTy} (reference : HRef H R) :
-    (R = leaf ∧ HEq reference oldChild) ∨ (R = parent ∧ HEq reference old) := by
-  rcases reference with ⟨index,selected⟩
-  cases index with
-  | zero => cases selected; exact .inl ⟨rfl,HEq.rfl⟩
-  | succ index => cases index with
-    | zero => cases selected; exact .inr ⟨rfl,HEq.rfl⟩
-    | succ index => cases selected
+    (R = leaf ∧ HEq reference oldChild) ∨ (R = parent ∧ HEq reference old) :=
+  two_reference reference
 
 private theorem leaf_repr (payloads : List (Fin W)) (bounded : payloads.length < 128) :
     ReprAt (store payloads) 128 (.ref leaf) (.root 0) (array payloads bounded) := by
@@ -91,40 +87,27 @@ private theorem core (cursor : Fin W) (payloads : List (Fin W)) (bounded : paylo
       | there index => nomatch index
 
 private theorem heap_repr (cursor : Fin W) (payloads : List (Fin W)) :
-    Objects.HeapRepr heap bases 8 (machine cursor payloads) := by
-  refine ⟨⟨?_,?_,?_⟩,?_,?_,?_⟩
-  · intro R reference
-    rcases refs reference with ⟨rfl,equal⟩ | ⟨rfl,equal⟩ <;> cases equal <;> decide +kernel
-  · intro R reference
-    rcases refs reference with ⟨rfl,equal⟩ | ⟨rfl,equal⟩ <;> cases equal <;> decide +kernel
-  · intro R Q left right different
-    rcases refs left with ⟨rfl,leftEq⟩ | ⟨rfl,leftEq⟩ <;> cases leftEq
-      <;> rcases refs right with ⟨rfl,rightEq⟩ | ⟨rfl,rightEq⟩ <;> cases rightEq
-      <;> first | exact (different rfl).elim | decide +kernel
-  · intro A E array reference
-    rcases refs reference with ⟨rfl,equal⟩ | ⟨rfl,equal⟩
-    · cases equal
-      cases array
+    Objects.HeapRepr heap bases 8 (machine cursor payloads) :=
+  two_array_heap_repr .dyn .fixed (by decide +kernel) (by decide +kernel)
+    (Or.inr (by decide +kernel))
+    (by
+      change Objects.ArrayRepr heap oldChild .dyn bases (machine cursor payloads)
       refine ⟨by decide +kernel,?_,?_⟩
       · intro _; with_unfolding_all rfl
       · intro index item selected
         with_unfolding_all change ([indexValue (wmod 7)] : List PrimTy.uint.Denote)[index]? = some item at selected
         cases index with
         | zero => cases selected; exact ReprV.uint_of rfl
-        | succ index => cases selected
-    · cases equal
-      cases array
+        | succ index => cases selected)
+    (by
+      change Objects.ArrayRepr heap old .fixed bases (machine cursor payloads)
       refine ⟨by decide +kernel,?_,?_⟩
       · intro impossible; cases impossible
       · intro index item selected
         with_unfolding_all change ([oldChild] : List (HRef H leaf))[index]? = some item at selected
         cases index with
         | zero => cases selected; with_unfolding_all rfl
-        | succ index => cases selected
-  · intro name reference
-    rcases refs reference with ⟨different,_⟩ | ⟨different,_⟩ <;> cases different
-  · intro name field R reference chosen
-    rcases refs reference with ⟨different,_⟩ | ⟨different,_⟩ <;> cases different
+        | succ index => cases selected)
 
 private theorem represented (cursor : Fin W) (payloads : List (Fin W)) (bounded : payloads.length < 128) : Objects.StateRepr 128 1 8 (Frag.init Γ) (state payloads bounded) bases (machine cursor payloads) := by
   refine ⟨core cursor payloads bounded,heap_repr cursor payloads,?_,by decide⟩

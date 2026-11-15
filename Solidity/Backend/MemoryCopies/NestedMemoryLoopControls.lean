@@ -1,3 +1,4 @@
+import Solidity.Backend.MemoryCopies.AliasBindingInterface
 import Solidity.Backend.MemoryCopies.NestedMemoryLoop
 import Solidity.Backend.MemoryCopies.StorageMemoryPipeline
 
@@ -21,13 +22,8 @@ private def machine (payloads : List (Fin W)) : Machine :=
     else if address = 16 then .val (wmod payloads.length) else if address = 160 then w[2]
     else if address = 161 ∨ address = 162 then w[16]
     else if 17 ≤ address ∧ address < 17 + payloads.length then .val (payloads[address - 17]?.getD (wmod 0)) else w[0]}
-private theorem refs {Q : RefTy} (reference : HRef H Q) : (Q = R ∧ HEq reference child) ∨ (Q = P ∧ HEq reference source) := by
-  rcases reference with ⟨index, selected⟩
-  cases index with
-  | zero => cases selected; exact .inl ⟨rfl, HEq.rfl⟩
-  | succ index => cases index with
-    | zero => cases selected; exact .inr ⟨rfl, HEq.rfl⟩
-    | succ index => cases selected
+private theorem refs {Q : RefTy} (reference : HRef H Q) : (Q = R ∧ HEq reference child) ∨ (Q = P ∧ HEq reference source) :=
+  two_reference reference
 private theorem cells_child (payloads : List (Fin W)) (bounded : payloads.length < 128) :
     Objects.cells (heap payloads bounded) child = 1 + payloads.length := by
   with_unfolding_all change 1 + (values payloads).length = 1 + payloads.length
@@ -36,34 +32,16 @@ private theorem cells_source (payloads : List (Fin W)) (bounded : payloads.lengt
     Objects.cells (heap payloads bounded) source = 3 := by
   with_unfolding_all rfl
 private theorem heap_repr (payloads : List (Fin W)) (bounded : payloads.length < 128) :
-    Objects.HeapRepr (heap payloads bounded) base 8 (machine payloads) := by
-  refine ⟨⟨?_, ?_, ?_⟩, ?_, ?_, ?_⟩
-  · intro Q reference
-    rcases refs reference with ⟨rfl, eq⟩ | ⟨rfl, eq⟩ <;> cases eq <;> decide
-  · intro Q reference
-    rcases refs reference with ⟨rfl, eq⟩ | ⟨rfl, eq⟩ <;> cases eq
-    · rw [cells_child]
-      change 16 + (1 + payloads.length) ≤ W
-      have large : 512 < W := by decide
-      omega
-    · rw [cells_source]
-      decide
-  · intro Q S left right different
-    rcases refs left with ⟨rfl, eq⟩ | ⟨rfl, eq⟩ <;> cases eq
-      <;> rcases refs right with ⟨rfl, eq⟩ | ⟨rfl, eq⟩ <;> cases eq
-    · exact (different rfl).elim
-    · left
+    Objects.HeapRepr (heap payloads bounded) base 8 (machine payloads) :=
+  two_array_heap_repr .dyn .dyn (by decide +kernel) (by decide +kernel)
+    (Or.inl (by
+      change (base 0).val + Objects.cells (heap payloads bounded) child ≤ (base 1).val
       rw [cells_child]
       change 16 + (1 + payloads.length) ≤ 160
-      omega
-    · right
-      rw [cells_child]
-      change 16 + (1 + payloads.length) ≤ 160
-      omega
-    · exact (different rfl).elim
-  · intro A E shape reference
-    rcases refs reference with ⟨rfl, eq⟩ | ⟨rfl, eq⟩ <;> cases eq <;> cases shape
-    · refine ⟨?_, ?_, ?_⟩
+      omega))
+    (by
+      change Objects.ArrayRepr (heap payloads bounded) child .dyn base (machine payloads)
+      refine ⟨?_, ?_, ?_⟩
       · rw [cells_child]
         change 16 + (1 + payloads.length) ≤ W
         have large : 512 < W := by decide
@@ -85,8 +63,10 @@ private theorem heap_repr (payloads : List (Fin W)) (bounded : payloads.length <
             if_neg (show 17 + index ≠ 16 by omega), if_neg (show 17 + index ≠ 160 by omega),
             if_neg (show ¬(17 + index = 161 ∨ 17 + index = 162) by omega),
             if_pos (show 17 ≤ 17 + index ∧ 17 + index < 17 + payloads.length by omega), Nat.add_sub_cancel_left, found, Option.getD_some]
-          exact ReprV.uint_of rfl
-    · refine ⟨by rw [cells_source]; decide, ?_, ?_⟩
+          exact ReprV.uint_of rfl)
+    (by
+      change Objects.ArrayRepr (heap payloads bounded) source .dyn base (machine payloads)
+      refine ⟨by rw [cells_source]; decide, ?_, ?_⟩
       · intro _
         with_unfolding_all rfl
       · intro index item selected
@@ -95,11 +75,7 @@ private theorem heap_repr (payloads : List (Fin W)) (bounded : payloads.length <
         | zero => cases selected; rfl
         | succ index => cases index with
           | zero => cases selected; rfl
-          | succ index => cases selected
-  · intro name reference
-    rcases refs reference with ⟨different, _⟩ | ⟨different, _⟩ <;> cases different
-  · intro name field Q reference fieldType
-    rcases refs reference with ⟨different, _⟩ | ⟨different, _⟩ <;> cases different
+          | succ index => cases selected)
 private theorem allocator (payloads : List (Fin W)) (bounded : payloads.length < 128) :
     Objects.AllocatorRepr (heap payloads bounded) base 8 (wmod 192) (machine payloads) := by
   refine ⟨heap_repr payloads bounded, ⟨by decide, by decide, rfl, ?_⟩, ?_⟩
