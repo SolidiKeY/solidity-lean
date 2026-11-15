@@ -180,6 +180,15 @@ def validate_manifest(data):
     return data
 
 
+def validate_proposal(proposal):
+    fields = {'repository', 'evidence_commit', 'evidence_path', 'bytes', 'sha256'}
+    if not isinstance(proposal, dict) or set(proposal) != fields:
+        raise ValueError('invalid proposal locator fields')
+    # Reuse the inventory location, size and digest checks.
+    validate_manifest({**proposal, 'schema_version': 1,
+               'input_revision': proposal['evidence_commit']})
+
+
 def catalog_document():
     data = parse((HERE / 'check-tests-used-catalog-templates.json').read_bytes())
     if not isinstance(data, dict):
@@ -187,13 +196,7 @@ def catalog_document():
     if MANIFEST_KEY in data:
         validate_manifest(data[MANIFEST_KEY])
     if PROPOSAL_KEY in data:
-        proposal = data[PROPOSAL_KEY]
-        fields = {'repository', 'evidence_commit', 'evidence_path', 'bytes', 'sha256'}
-        if not isinstance(proposal, dict) or set(proposal) != fields:
-            raise ValueError('invalid proposal locator fields')
-        # Reuse the inventory location, size and digest checks.
-        validate_manifest({**proposal, 'schema_version': 1,
-                           'input_revision': proposal['evidence_commit']})
+        validate_proposal(data[PROPOSAL_KEY])
     return data
 
 
@@ -310,6 +313,20 @@ def controls():
         try: parse(malformed)
         except ValueError: pass
         else: raise AssertionError('accepted ambiguous JSON')
+    proposal = catalog_document()[PROPOSAL_KEY]
+    validate_proposal(proposal)
+    for field, value in [('extra', 0), ('repository', 'wrong'),
+                         ('evidence_commit', 'HEAD'), ('evidence_path', 'evidence/../bad'),
+                         ('bytes', True), ('sha256', 'bad')]:
+        changed = dict(proposal, **{field: value})
+        try: validate_proposal(changed)
+        except ValueError: pass
+        else: raise AssertionError('accepted invalid proposal locator ' + field)
+    missing = dict(proposal)
+    del missing['evidence_path']
+    try: validate_proposal(missing)
+    except ValueError: pass
+    else: raise AssertionError('accepted incomplete proposal locator')
     load_catalog()
     print('PASS catalog template controls')
 
