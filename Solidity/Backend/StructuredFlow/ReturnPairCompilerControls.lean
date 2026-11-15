@@ -27,7 +27,7 @@ theorem joined (pipeline : Roadmap.Pipeline) (fuel : Nat) (flag : Bool) :
 
 theorem observed (flag : Bool) : snapshot (run emitted (machine flag)) =
     some [w[1],w[1],.val (bword (!flag)),.val (bword flag),w[99],w[77]] :=
-  Exists.elim (ReturnTailCompiler.normal_of_ok
+  Exists.elim (ReturnTailCompiler.normal_of_ok (L := 1) (base := 0) (frame := Frag.init (.val .bool :: TargetCtx))
       ((ReturnPair.target_run (caller flag) tci tca flag tci .here tca tci rfl) ▸
         ((joined .legacy 0 flag).2)))
     (fun final ⟨hr,stack,repr⟩ => by
@@ -59,7 +59,7 @@ theorem omitted_second_refused :
 theorem omitted_second_native_refused :
     snapshot (run (compileProg 0 (ReturnTail.code (C := C) tci tca tci .here)) (machine false)) ≠
       snapshot (run emitted (machine false)) :=
-  Exists.elim (ReturnTailCompiler.normal_of_ok
+  Exists.elim (ReturnTailCompiler.normal_of_ok (L := 1) (base := 0) (frame := Frag.init (.val .bool :: TargetCtx))
       ((ReturnTail.target_run (caller false) tci tca false tci .here rfl) ▸
         (prog_sim (ReturnTail.code (C := C) tci tca tci .here) (entry false) rfl (by decide))))
     (fun bad ⟨hr,_,repr⟩ => by
@@ -74,7 +74,7 @@ theorem omitted_second_native_refused :
 theorem stale_second_native_refused :
     snapshot (run (compileProg 0 (ReturnPair.code (C := C) tci tca tci .here tca tca)) (machine false)) ≠
       snapshot (run emitted (machine false)) :=
-  Exists.elim (ReturnTailCompiler.normal_of_ok
+  Exists.elim (ReturnTailCompiler.normal_of_ok (L := 1) (base := 0) (frame := Frag.init (.val .bool :: TargetCtx))
       ((ReturnPair.target_run (caller false) tci tca false tci .here tca tca rfl) ▸
         (prog_sim (ReturnPair.code (C := C) tci tca tci .here tca tca) (entry false) rfl (by decide))))
     (fun bad ⟨hr,_,repr⟩ => by

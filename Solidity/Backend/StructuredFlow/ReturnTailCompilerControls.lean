@@ -48,7 +48,7 @@ theorem joined (pipeline : Roadmap.Pipeline) (fuel : Nat) (flag : Bool) :
 
 theorem observed (flag : Bool) : snapshot (run emitted (machine flag)) =
     some [.val (bword flag),.val (bword flag),w[0],.val (bword flag),w[99],w[77]] :=
-  Exists.elim (normal_of_ok
+  Exists.elim (normal_of_ok (L := 1) (base := 0) (frame := Frag.init (.val .bool :: TargetCtx))
       ((ReturnTail.target_run (caller flag) tci tca flag .here tci rfl) ▸
         ((joined .legacy 0 flag).2)))
     (fun final ⟨hr,stack,repr⟩ => by
@@ -92,7 +92,7 @@ theorem eager_tail_refused :
 theorem omitted_tail_refused :
     snapshot (run (compileProg 0 (assignLocalOperand (C := C) tci tca).code) (machine false)) ≠
       snapshot (run emitted (machine false)) :=
-  Exists.elim (normal_of_ok
+  Exists.elim (normal_of_ok (L := 1) (base := 0) (frame := Frag.init (.val .bool :: TargetCtx))
       ((assigned_condition_prefix_run (caller false) tci tca) ▸
         (prog_sim (assignLocalOperand (C := C) tci tca).code (entry false) rfl (by decide))))
     (fun bad ⟨hr,_,repr⟩ => by
@@ -109,7 +109,7 @@ selector remains false, preserving the actual Source outcome classification. -/
 theorem alias_observed :
     snapshot (run (emit (C := C) 0 tci tca tci .here) (machine false)) =
       some [w[0],w[1],w[1],w[0],w[99],w[77]] :=
-  Exists.elim (normal_of_ok
+  Exists.elim (normal_of_ok (L := 1) (base := 0) (frame := Frag.init (.val .bool :: TargetCtx))
       (out := run (emit (C := C) 0 tci tca tci .here) (machine false))
       ((ReturnTail.target_run (caller false) tci tca false tci .here rfl) ▸
         (prog_sim (ReturnTail.code (C := C) tci tca tci .here) (entry false) rfl (by decide))))
