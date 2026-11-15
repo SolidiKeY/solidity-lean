@@ -64,4 +64,15 @@ theorem singleton_array_heap_repr {R : RefTy} {E : Ty} {heap : Heap [R]}
   · intro name reference
     exact (noStruct reference).elim
 
+theorem singleton_allocator_repr {R : RefTy} {heap : Heap [R]} {base : Nat → Fin W}
+    {frame : Nat} {cursor : Fin W} {machine : Machine}
+    (represented : Objects.HeapRepr heap base frame machine) (free : FreeMemory frame cursor machine)
+    (contained : (base 0).val + Objects.cells heap (⟨0,rfl⟩ : HRef [R] R) ≤ cursor.val) :
+    Objects.AllocatorRepr heap base frame cursor machine := by
+  refine ⟨represented,free,?_⟩
+  intro Q reference
+  obtain ⟨rfl,equal⟩ := singleton_reference reference
+  cases equal
+  exact contained
+
 end Solidity.Backend.MemoryCopies
