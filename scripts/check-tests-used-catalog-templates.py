@@ -197,6 +197,20 @@ def external_artifact(root, artifact):
     return path
 
 
+def write_artifact(root, artifact, raw):
+    target = external_artifact(root, artifact)
+    target.parent.mkdir(parents=True, exist_ok=True)
+    temporary = None
+    try:
+        with tempfile.NamedTemporaryFile(dir=target.parent, delete=False) as stream:
+            temporary = Path(stream.name)
+            stream.write(raw)
+        temporary.replace(target)  # Do not overwrite an existing inode through a hardlink.
+    finally:
+        if temporary is not None:
+            temporary.unlink(missing_ok=True)
+
+
 def verify_manifest_artifact(root, manifest, expected, artifact):
     validate_manifest(manifest)
     if manifest['input_revision'] != expected['measured_revision']:
@@ -359,6 +373,10 @@ def manifest_controls():
         else:
             raise AssertionError('manifest mode could overwrite a tracked artifact')
         assert external_artifact(root, root / 'untracked.json') == root / 'untracked.json'
+        alias = base / 'outside-hardlink.json'
+        alias.hardlink_to(tracked)
+        write_artifact(root, alias, b'private replacement')
+        assert tracked.read_bytes() == b'{}' and alias.read_bytes() == b'private replacement'
     print('PASS H901 manifest controls: private identity, tamper/re-pin/stale refusal, canonical full-model comparison and mandatory completeness')
 
 
@@ -393,8 +411,7 @@ def main():
                 raw = v1.output_json(expected)
                 if len(raw) > MAX_ARTIFACT_BYTES:
                     raise ValueError('inventory exceeds private-evidence per-file limit')
-                target.parent.mkdir(parents=True, exist_ok=True)
-                target.write_bytes(raw)
+                write_artifact(root, target, raw)
                 print(json.dumps({'input_revision': resolved, 'bytes': len(raw),
                                   'sha256': v2.hashlib.sha256(raw).hexdigest()}, sort_keys=True))
             else:
