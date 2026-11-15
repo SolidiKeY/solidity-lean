@@ -1086,9 +1086,9 @@
  },
  "role_delta_proposal": {
   "repository": "SolidiKeY/solidity-lean-coord",
-  "evidence_commit": "ec05afcb3a43dd2d5301191742a6708e0c8085ac",
-  "evidence_path": "evidence/plan-x1-census-validation-1114/x1-census-validation/x1-h908-proposal-1115/proposal.txt",
-  "bytes": 3975,
-  "sha256": "4407034756f40c30dcc565583f4a1edeeaad2b1b95ce0bafdc597e6b3cae5778"
+  "evidence_commit": "b1c91ba0c1ed647ac156e0364b3e9f6548ab3fa5",
+  "evidence_path": "evidence/plan-x1-census-validation-1114/x1-census-validation/x1-role-proposal-v3-1115/proposal.txt",
+  "bytes": 6640,
+  "sha256": "69e42aa9697ca29f11f605e23ae57a51d83a02a043f4aca0a3466c2add81cc43"
  }
 }
