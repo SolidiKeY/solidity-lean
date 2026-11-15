@@ -1322,6 +1322,67 @@
       "anchor": "info SliceCopies.ast.json/SliceCopies: 12 rows, 0 changed",
       "role": "Historical record: Captured14-line H102 pair-comparison transcript reporting61 rows and zero changes. Adjacent contract scopes this to selected functionSelector-drift fixture comparisons and separately records a selector exception; no general ABI identity, canonical-reader migration, current fixture consumption, kernel/semantic proof or full-gate acceptance is adopted. Reported zero-change rows are unverified historical observations, not a current permission or pass. Content/metadata references are secondary context. Live keep and uncertain-reader precedence remain; no child/read/fixture/generation, nonuse/orphan/deletion, proof/runtime, budget reset or STOP-clearance credit."
     }
+  ,
+    {
+      "path": "tests/upstream/revert-power/runtime/bin-lake.txt",
+      "blob": "559a4d8306e6dd47025c034b5feea3fec097f2e5",
+      "anchor": "if [ \"$#\" -eq 1 ] && [ \"$1\" = --version ]; then",
+      "role": "Historical record: Captured old Lake launcher with special version/serve branches and a temporary task configuration. It is not a current runner, executable installation, MCP server setting or proof/cache validation; no recorded exec branch or arguments are invoked. Historical handoff/context claims remain unverified. Live keep and uncertain-reader precedence remain; no child/read/fixture/generation, proof/runtime/full-gate, nonuse/orphan/deletion, permission or STOP-clearance credit."
+    },
+    {
+      "path": "tests/upstream/revert-power/runtime/bounded.py.txt",
+      "blob": "dfc5625ee4f43281c55b0bf07d51af93e4fac7f0",
+      "anchor": "    resource.setrlimit(resource.RLIMIT_AS,(12*1024**3,12*1024**3))",
+      "role": "Historical record: Captured process-group monitor source declaring a12GiB address-space/RSS threshold and1800-second bound. Its scanning, descendant containment and stop behavior are not independently certified; no old limit, timing window or resource clearance becomes current policy and no workload is run. Historical handoff/context claims remain unverified. Live keep and uncertain-reader precedence remain; no child/read/fixture/generation, proof/runtime/full-gate, nonuse/orphan/deletion, permission or STOP-clearance credit."
+    },
+    {
+      "path": "tests/upstream/revert-power/runtime/cgroup-run.sh.txt",
+      "blob": "2dfb8accc098de7d97b0cbf6cd21485fbc59e29d",
+      "anchor": "exec env -u DOCKER_HOST -u DOCKER_CONTEXT -u DOCKER_TLS -u DOCKER_TLS_VERIFY -u DOCKER_CERT_PATH \\",
+      "role": "Historical record: Captured Docker/cgroup launcher with environment clearing, bind mounts, pinned image and12GiB/one-CPU flags. These are recorded harness inputs, not an available or authenticated container, current isolation approval, VM provisioning or permission to fetch images/mount files/run commands. Historical handoff/context claims remain unverified. Live keep and uncertain-reader precedence remain; no child/read/fixture/generation, proof/runtime/full-gate, nonuse/orphan/deletion, permission or STOP-clearance credit."
+    },
+    {
+      "path": "tests/upstream/revert-power/runtime/container-command.sh.txt",
+      "blob": "6a39063a929cd079f9b83779b4574fb99a61a5d7",
+      "anchor": "source /workspace/.setup/activate.sh",
+      "role": "Historical record: Captured container command wrapper sourcing an old activation script, prepending a temporary Lake launcher and setting historical SolKey/Lean environment before exec. No activation file, external repository, current PATH/toolchain policy, actual command execution or dependency/proof validity is established. Historical handoff/context claims remain unverified. Live keep and uncertain-reader precedence remain; no child/read/fixture/generation, proof/runtime/full-gate, nonuse/orphan/deletion, permission or STOP-clearance credit."
+    },
+    {
+      "path": "tests/upstream/revert-power/runtime/container-supervisor.sh.txt",
+      "blob": "82a7cb1325fa242a8805dc99d20b315927d93c87",
+      "anchor": "timeout --kill-after=5s 1800 /bin/bash /workspace/solidity-lean/.lake/revert-task/container-command.sh \"$@\"",
+      "role": "Historical record: Captured timeout/cgroup-metric wrapper with a1800-second command bound and reported peak/elapsed/exit fields. The text authenticates no actual supervised run, complete metric coverage, process draining or current resource clearance; no timing or STOP budget is reset. Historical handoff/context claims remain unverified. Live keep and uncertain-reader precedence remain; no child/read/fixture/generation, proof/runtime/full-gate, nonuse/orphan/deletion, permission or STOP-clearance credit."
+    },
+    {
+      "path": "tests/upstream/revert-power/runtime/diagnose.py.txt",
+      "blob": "9d6a75c568ef60ebd8f5c09479956e65672a0264",
+      "anchor": "    server=StdioServerParameters(command='/workspace/solidity-lean/scripts/run-lean-mcp.sh',cwd='/workspace/solidity-lean',env=dict(os.environ))",
+      "role": "Historical record: Captured asynchronous MCP diagnostic client source naming an old server command and error-severity timeout requests. This is not a current callable service, per-file diagnostic result, server-attachment grant or kernel/proof validation; no client/server or requested file check is launched. Historical handoff/context claims remain unverified. Live keep and uncertain-reader precedence remain; no child/read/fixture/generation, proof/runtime/full-gate, nonuse/orphan/deletion, permission or STOP-clearance credit."
+    },
+    {
+      "path": "tests/upstream/revert-power/runtime/lakefile.independent.toml.txt",
+      "blob": "47325e5539b45bc7e8e5ff127d2e975f4607a9b9",
+      "anchor": "defaultTargets = [\"Solidity\", \"solkeycheck\", \"solidity-lean\"]",
+      "role": "Historical record: Captured independently-labelled Lake configuration snapshot with old default targets, package libraries, artifact-cache setting and weak arguments. Its label does not authenticate independent execution, dependency closure, cache freshness or current root registration; settings are not applied. Historical handoff/context claims remain unverified. Live keep and uncertain-reader precedence remain; no child/read/fixture/generation, proof/runtime/full-gate, nonuse/orphan/deletion, permission or STOP-clearance credit."
+    },
+    {
+      "path": "tests/upstream/revert-power/runtime/lakefile.library-continuation.toml.txt",
+      "blob": "47325e5539b45bc7e8e5ff127d2e975f4607a9b9",
+      "anchor": "defaultTargets = [\"Solidity\", \"solkeycheck\", \"solidity-lean\"]",
+      "role": "Historical record: Captured library-continuation-labelled Lake configuration snapshot, separately pinned even where content duplicates another variant. A second path is not an independent passing run, cold-build result or completed library proof; old targets, cache and weak flags remain inert data. Historical handoff/context claims remain unverified. Live keep and uncertain-reader precedence remain; no child/read/fixture/generation, proof/runtime/full-gate, nonuse/orphan/deletion, permission or STOP-clearance credit."
+    },
+    {
+      "path": "tests/upstream/revert-power/runtime/lakefile.profile-diagnostic.toml.txt",
+      "blob": "dc6238a0e3d0ea9a65cec760953c6239c878e7e5",
+      "anchor": "weakLeanArgs = [\"--tstack=131072\", \"-j1\", \"-Dprofiler=true\"]",
+      "role": "Historical record: Captured profiler-enabled Lake diagnostic configuration. Adjacent historical handoff retains the failed profiling run and guarded-message pollution; this source grants no current profiler setting, successful gate, performance improvement or permission to retry the original stopped workload. Historical handoff/context claims remain unverified. Live keep and uncertain-reader precedence remain; no child/read/fixture/generation, proof/runtime/full-gate, nonuse/orphan/deletion, permission or STOP-clearance credit."
+    },
+    {
+      "path": "tests/upstream/revert-power/runtime/lakefile.toml.txt",
+      "blob": "3468a37d78ca2311ba7cddb4349125020eb22a29",
+      "anchor": "defaultTargets = [\"Solidity\", \"solkeycheck\", \"solidity-lean\"]",
+      "role": "Historical record: Captured original task Lake configuration snapshot with old library/executable declarations and selected weak Lean flags. It is not the active Lake file, current dependency/target registration, default-stack result, source preservation or an adopted budget/resource/trust setting. Historical handoff/context claims remain unverified. Live keep and uncertain-reader precedence remain; no child/read/fixture/generation, proof/runtime/full-gate, nonuse/orphan/deletion, permission or STOP-clearance credit."
+    }
   ],
   "schema_version": 1
 }
