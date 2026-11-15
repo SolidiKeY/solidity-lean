@@ -36,10 +36,22 @@
        154
      ]
    }
+  ,
+{
+    "input_revision": "eb7956bdaaac974bf27df6113e59e402a46570e0",
+    "template_indices": [
+      155,
+      156,
+      157,
+      158,
+      159,
+      160
+    ]
+  }
   ]
  },
  "base_sha256":"0c09ce59255e3cdc5d6e7ba68de7505968deb43aa9e84050259f392f93cd0723",
- "expanded_sha256":"c028ebb3ebcee4bb3626d48e953aef0ead5941c695fe900e1410369f27eebfcd",
+ "expanded_sha256":"9a4cc9f0552c336552bae5abf71ba393cfa011b2a3a204f40cb5842b9076b809",
  "gzip_roles": {
    "schema_version": 2,
    "records": [
@@ -51,22 +63,22 @@
        "role": "Proposed historical missing-GNU-time launcher diagnostic for ordinary H828 independent land review. It reports a launch failure, not native build, test, proof or runtime completion. Original failing launcher source is not established; later corrected source is not substituted. No execution, child/read, nonuse, deletion, budget, permission, trust or proof credit.",
        "review": {
          "content": "/tmp/solidity-cloud-post-build.sh: line 13: /usr/bin/time: No such file or directory\n",
-         "producer": "At measured revision b1419be8d87e8ed8ea6836789e7898ffa22dd5c8, validation.json blob dd9ff2f4a5e5923f03632f42f1e0a9a7922a32fa records the historical GNU-time/launcher failures; post-build-command.sh.txt blob f8f66a4657b2c30cbaca33ee924380b8ba4a39e8 now uses a Python timing wrapper, so it is not authenticated as the missing original failing launcher. Historical assertions are unverified data; no command replay.",
+         "producer": "At measured revision eb7956bdaaac974bf27df6113e59e402a46570e0, validation.json blob dd9ff2f4a5e5923f03632f42f1e0a9a7922a32fa records the historical GNU-time/launcher failures; post-build-command.sh.txt blob f8f66a4657b2c30cbaca33ee924380b8ba4a39e8 now uses a Python timing wrapper, so it is not authenticated as the missing original failing launcher. Historical assertions are unverified data; no command replay.",
          "consumers": "At that exact revision, validation.json references this exact compressed object and its decoded length/hash. This metadata reference and repository scans are secondary context only, not a qualified consumer, proof of absence or nonuse. No empty-reader inference; keep, uncertain-reader and fixture-refusal precedence remain unchanged.",
-         "input_revision": "b1419be8d87e8ed8ea6836789e7898ffa22dd5c8",
+         "input_revision": "eb7956bdaaac974bf27df6113e59e402a46570e0",
          "independent": true
        }
      }
    ]
  },
  "inventory_manifest": {
-   "bytes": 8678053,
-   "evidence_commit": "8cabd9c329d7a9731381d5ea9fc630adf4aa640e",
-   "evidence_path": "evidence/plan-x1-census-validation-1114/x1-census-validation/x1-readonly-rest-artifact-b1419be8/inventory.json",
-   "input_revision": "b1419be8d87e8ed8ea6836789e7898ffa22dd5c8",
+   "bytes": 8698035,
+   "evidence_commit": "10b798d53db6356747592130d711663176c13966",
+   "evidence_path": "evidence/plan-x1-census-validation-1114/x1-census-validation/x1-readonly-bind-artifact-eb7956bd/inventory.json",
+   "input_revision": "eb7956bdaaac974bf27df6113e59e402a46570e0",
    "repository": "SolidiKeY/solidity-lean-coord",
    "schema_version": 1,
-   "sha256": "eb75df1eaeebf8e9b968ac529e7f4b1450ce0d50a10e1ab64c13635cbe8080a9"
+   "sha256": "1d4bb6400492531f0e79c99a2276c2e1111b56dc404474b6318888f5f6eeefd3"
  },
  "schema_version":3,
  "templates":{
@@ -374,6 +386,115 @@
        ]
      }
    }
+  ,
+{
+    "entry": {
+      "path": "scripts/h62/item1/readonly-bind/case_ledger.py",
+      "source_blob": "095af3abc7ada2d6c487d5eb6b9e5bef054bef9c",
+      "command": [
+        "python3",
+        "-B",
+        "scripts/h62/item1/readonly-bind/case_ledger.py"
+      ],
+      "kind": "committed-cli",
+      "purpose": "Declared CLI source checking exact byte transformations of three frozen readonly files against original792 membership and25 declarations, recording10 public source-case references. Removed private identities stay unrestored; fixture references certify no elaboration, private identity restoration, witness feasibility, owner authority or body equivalence. Required configuration or private evidence is not supplied; source role only, no current execution, child/read/fixture, generation, proof/runtime, nonuse/deletion, permission or STOP-clearance credit.",
+      "entry_line": 149,
+      "required_options": [
+        "--frozen",
+        "--output"
+      ]
+    }
+  },
+{
+    "entry": {
+      "path": "scripts/h62/item1/readonly-bind/check_callback_boundaries.py",
+      "source_blob": "174e0c578d697dde31681737c3dddacae0b9a271",
+      "command": [
+        "python3",
+        "-B",
+        "scripts/h62/item1/readonly-bind/check_callback_boundaries.py"
+      ],
+      "kind": "committed-cli",
+      "purpose": "Declared CLI source admitting one exact saved fresh-closure parent receipt, checking current source/import/object/SDK pins before and after compiling eight additive callback-boundary theorems and allowed axioms. Checked parent-artifact reuse is not a fresh dependency rebuild, arbitrary receipt authentication, SDK-source certification or whole-goal acceptance. Required configuration or private evidence is not supplied; source role only, no current execution, child/read/fixture, generation, proof/runtime, nonuse/deletion, permission or STOP-clearance credit.",
+      "entry_line": 129,
+      "required_options": [
+        "--output",
+        "--parent"
+      ]
+    }
+  },
+{
+    "entry": {
+      "path": "scripts/h62/item1/readonly-bind/check_capture_fixtures.py",
+      "source_blob": "cad3c970c4c2db72e22881dc6112a642236b1f58",
+      "command": [
+        "python3",
+        "-B",
+        "scripts/h62/item1/readonly-bind/check_capture_fixtures.py"
+      ],
+      "kind": "committed-cli",
+      "purpose": "Declared CLI source rebuilding the actual capture fixture project closure in a private sanitized library, refusing held Premises and checking a missing-project-object negative control, exact source/tool/log pins and38 theorem axiom records. SDK dependencies remain trusted compiler inputs; no shared project-cache fallback or whole-goal acceptance is asserted. Required configuration or private evidence is not supplied; source role only, no current execution, child/read/fixture, generation, proof/runtime, nonuse/deletion, permission or STOP-clearance credit.",
+      "entry_line": 206,
+      "required_options": [
+        "--output"
+      ]
+    }
+  },
+{
+    "entry": {
+      "path": "scripts/h62/item1/readonly-bind/check_credit_joints.py",
+      "source_blob": "5170ae52a59bfe61cde9b22b275e6f69bc23400a",
+      "command": [
+        "python3",
+        "-B",
+        "scripts/h62/item1/readonly-bind/check_credit_joints.py"
+      ],
+      "kind": "committed-cli",
+      "purpose": "Declared CLI source admitting only pinned frozen/current parent receipts for selected credit, capture-failure or composition suites, verifying reused source/object/log pins and frozen supplements, rejecting held or unverified extra imports, and probing original interface types and additive theorem axioms. Parent reuse is not a fresh closure rebuild, SDK certification or full original-goal proof. Required configuration or private evidence is not supplied; source role only, no current execution, child/read/fixture, generation, proof/runtime, nonuse/deletion, permission or STOP-clearance credit.",
+      "entry_line": 244,
+      "required_options": [
+        "--frozen",
+        "--output",
+        "--parent",
+        "--profile"
+      ]
+    }
+  },
+{
+    "entry": {
+      "path": "scripts/h62/item1/readonly-bind/check_encoding_fixture.py",
+      "source_blob": "eaf236f9f48b3380cee4db8912f1623eaab4a260",
+      "command": [
+        "python3",
+        "-B",
+        "scripts/h62/item1/readonly-bind/check_encoding_fixture.py"
+      ],
+      "kind": "committed-cli",
+      "purpose": "Declared CLI source staging exact current Hoare/capture leaves and encoding-failure fixture, checking four theorem axiom records and source/tool/artifact/log pins. Other project objects are explicitly cached symlink inputs and SDK dependencies are trusted; no fresh full-closure validation or independent dependency certification is asserted. Required configuration or private evidence is not supplied; source role only, no current execution, child/read/fixture, generation, proof/runtime, nonuse/deletion, permission or STOP-clearance credit.",
+      "entry_line": 136,
+      "required_options": [
+        "--output"
+      ]
+    }
+  },
+{
+    "entry": {
+      "path": "scripts/h62/item1/readonly-bind/check_original_callback.py",
+      "source_blob": "3f7bc0a34cd8af2f6fad18ab1040a0f0ef470a24",
+      "command": [
+        "python3",
+        "-B",
+        "scripts/h62/item1/readonly-bind/check_original_callback.py"
+      ],
+      "kind": "committed-cli",
+      "purpose": "Declared CLI source authenticating the assigned frozen Git base, original792 artifact and toolchain, rebuilding its unheld callback closure in isolation and checking selected original interface types and eight additive witness axioms. It rejects held Premises and substitutes no current closure; no cache fallback, statement repair, old/current timing claim or whole-goal acceptance is asserted. Required configuration or private evidence is not supplied; source role only, no current execution, child/read/fixture, generation, proof/runtime, nonuse/deletion, permission or STOP-clearance credit.",
+      "entry_line": 170,
+      "required_options": [
+        "--frozen",
+        "--output"
+      ]
+    }
+  }
   ]
  }
 }
