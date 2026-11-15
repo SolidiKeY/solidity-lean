@@ -10,6 +10,9 @@ Obtain that private artifact from the manifest repository/commit/path. Both
 new modes take --ref REV and optional H871 --roles PATH. The additive
 gzip_roles catalog field opts in when --roles is absent; explicit --roles
 selects its supplied catalog as before. Both use the unchanged landed helper.
+The role_delta_proposal locator pins the unadopted H908 bounded role-delta/
+manifest contract proposal. In a clone of its repository, check its bytes with
+`git show <evidence_commit>:<evidence_path> | sha256sum` against its sha256.
 Real-object reviews
 remain independently required. A matching SHA256 never replaces rebuilding
 the complete model or the unchanged mandatory completeness check.
@@ -31,7 +34,7 @@ spec.loader.exec_module(v2)
 v1 = v2.v1
 SECTIONS = {'standalone', 'module_entries', 'reads', 'generators', 'orphans'}
 MANIFEST_KEY = 'inventory_manifest'
-PROPOSAL_KEY = 'role_delta_proposal_sha256'
+PROPOSAL_KEY = 'role_delta_proposal'
 GZIP_KEY = 'gzip_roles'  # Explicit opt-in data in the landed H871 schema.
 MAX_ARTIFACT_BYTES = 50 * 1024 * 1024  # Existing private-evidence per-file limit.
 
@@ -183,8 +186,14 @@ def catalog_document():
         raise ValueError('invalid template document')
     if MANIFEST_KEY in data:
         validate_manifest(data[MANIFEST_KEY])
-    if PROPOSAL_KEY in data and not sha(data[PROPOSAL_KEY]):
-        raise ValueError('invalid proposal SHA256 reference')
+    if PROPOSAL_KEY in data:
+        proposal = data[PROPOSAL_KEY]
+        fields = {'repository', 'evidence_commit', 'evidence_path', 'bytes', 'sha256'}
+        if not isinstance(proposal, dict) or set(proposal) != fields:
+            raise ValueError('invalid proposal locator fields')
+        # Reuse the inventory location, size and digest checks.
+        validate_manifest({**proposal, 'schema_version': 1,
+                           'input_revision': proposal['evidence_commit']})
     return data
 
 
