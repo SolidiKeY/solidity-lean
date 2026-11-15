@@ -90,102 +90,102 @@
    "schema_version": 2,
    "records": [
      {
-       "path": "tests/upstream/cloud-integration-20261028/native-tools-launch-error.log.gz",
-       "blob": "2c30db6fa8c9afb1fdd5ce3d22150bfe93a20b39",
-       "decoded_sha256": "baa09140658114c7ebd08ad50f7d56253617ce1751a671920427a754b4506cdb",
-       "anchor": "/tmp/solidity-cloud-post-build.sh: line 13: /usr/bin/time: No such file or directory",
-       "role": "Proposed historical missing-GNU-time launcher diagnostic for ordinary H828 independent land review. It reports a launch failure, not native build, test, proof or runtime completion. Original failing launcher source is not established; later corrected source is not substituted. No execution, child/read, nonuse, deletion, budget, permission, trust or proof credit.",
-       "review": {
-         "content": "/tmp/solidity-cloud-post-build.sh: line 13: /usr/bin/time: No such file or directory\n",
-         "producer": "At measured revision d0ff94dba3562bb336c31c7448d5d8f15ffc5d11, validation.json blob dd9ff2f4a5e5923f03632f42f1e0a9a7922a32fa records the historical GNU-time/launcher failures; post-build-command.sh.txt blob f8f66a4657b2c30cbaca33ee924380b8ba4a39e8 now uses a Python timing wrapper, so it is not authenticated as the missing original failing launcher. Historical assertions are unverified data; no command replay.",
-         "consumers": "At that exact revision, validation.json references this exact compressed object and its decoded length/hash. This metadata reference and repository scans are secondary context only, not a qualified consumer, proof of absence or nonuse. No empty-reader inference; keep, uncertain-reader and fixture-refusal precedence remain unchanged.",
-         "input_revision": "d0ff94dba3562bb336c31c7448d5d8f15ffc5d11",
-         "independent": true
-       }
+ "path": "tests/upstream/cloud-integration-20261028/native-tools-launch-error.log.gz",
+ "blob": "2c30db6fa8c9afb1fdd5ce3d22150bfe93a20b39",
+ "decoded_sha256": "baa09140658114c7ebd08ad50f7d56253617ce1751a671920427a754b4506cdb",
+ "anchor": "/tmp/solidity-cloud-post-build.sh: line 13: /usr/bin/time: No such file or directory",
+ "role": "Proposed historical missing-GNU-time launcher diagnostic for ordinary H828 independent land review. It reports a launch failure, not native build, test, proof or runtime completion. Original failing launcher source is not established; later corrected source is not substituted. No execution, child/read, nonuse, deletion, budget, permission, trust or proof credit.",
+ "review": {
+   "content": "/tmp/solidity-cloud-post-build.sh: line 13: /usr/bin/time: No such file or directory\n",
+   "producer": "At measured revision d0ff94dba3562bb336c31c7448d5d8f15ffc5d11, validation.json blob dd9ff2f4a5e5923f03632f42f1e0a9a7922a32fa records the historical GNU-time/launcher failures; post-build-command.sh.txt blob f8f66a4657b2c30cbaca33ee924380b8ba4a39e8 now uses a Python timing wrapper, so it is not authenticated as the missing original failing launcher. Historical assertions are unverified data; no command replay.",
+   "consumers": "At that exact revision, validation.json references this exact compressed object and its decoded length/hash. This metadata reference and repository scans are secondary context only, not a qualified consumer, proof of absence or nonuse. No empty-reader inference; keep, uncertain-reader and fixture-refusal precedence remain unchanged.",
+   "input_revision": "d0ff94dba3562bb336c31c7448d5d8f15ffc5d11",
+   "independent": true
+ }
      },
      {
-       "path": "tests/upstream/cloud-integration-20261028/final-source-launch-error.log.gz",
-       "blob": "8d6b0b8cbb590e0ed066f0cf78b951ef2691563b",
-       "decoded_sha256": "1148d0681dffb6cefaff8bf0aac3cde0f6ef18c5d8f9a035aa898357ed508e64",
-       "anchor": "error: unknown long option '--tstack'",
-       "role": "Historical unknown-tstack-option launcher failure with recorded nonzero memory-guard result; no accepted source/proof gate. Assertions remain unverified historical data; no execution, child/read, nonuse/deletion, budget, permission or proof/runtime credit.",
-       "review": {
-         "content": "error: unknown long option '--tstack'\nmemory guard: peak aggregate RSS 0.04 GiB; result 1\n",
-         "producer": "At measured revision d0ff94dba3562bb336c31c7448d5d8f15ffc5d11, validation.json blob dd9ff2f4a5e5923f03632f42f1e0a9a7922a32fa: Metadata nonpassingAttemptsPreserved reports Lake argument-order failures. Retained final-source-command.sh.txt is a later command record, not authentication of the original failing argv. Exact retained command blob 44e22845e931d726d261e34e7275a9c01bac8567.",
-         "consumers": "At that exact revision, validation.json artifacts[final-source-launch-error.log] references this exact compressed object, decoded SHA256 and 90 bytes. This metadata reference and scans are secondary context, not a qualified reader or proof of absence/nonuse. No empty-reader inference; live keep, uncertain-reader and fixture-refusal precedence survive.",
-         "input_revision": "d0ff94dba3562bb336c31c7448d5d8f15ffc5d11",
-         "independent": true
-       }
+ "path": "tests/upstream/cloud-integration-20261028/final-source-launch-error.log.gz",
+ "blob": "8d6b0b8cbb590e0ed066f0cf78b951ef2691563b",
+ "decoded_sha256": "1148d0681dffb6cefaff8bf0aac3cde0f6ef18c5d8f9a035aa898357ed508e64",
+ "anchor": "error: unknown long option '--tstack'",
+ "role": "Historical unknown-tstack-option launcher failure with recorded nonzero memory-guard result; no accepted source/proof gate. Assertions remain unverified historical data; no execution, child/read, nonuse/deletion, budget, permission or proof/runtime credit.",
+ "review": {
+   "content": "error: unknown long option '--tstack'\nmemory guard: peak aggregate RSS 0.04 GiB; result 1\n",
+   "producer": "At measured revision d0ff94dba3562bb336c31c7448d5d8f15ffc5d11, validation.json blob dd9ff2f4a5e5923f03632f42f1e0a9a7922a32fa: Metadata nonpassingAttemptsPreserved reports Lake argument-order failures. Retained final-source-command.sh.txt is a later command record, not authentication of the original failing argv. Exact retained command blob 44e22845e931d726d261e34e7275a9c01bac8567.",
+   "consumers": "At that exact revision, validation.json artifacts[final-source-launch-error.log] references this exact compressed object, decoded SHA256 and 90 bytes. This metadata reference and scans are secondary context, not a qualified reader or proof of absence/nonuse. No empty-reader inference; live keep, uncertain-reader and fixture-refusal precedence survive.",
+   "input_revision": "d0ff94dba3562bb336c31c7448d5d8f15ffc5d11",
+   "independent": true
+ }
      },
      {
-       "path": "tests/upstream/cloud-integration-20261028/post-build-launch-error.log.gz",
-       "blob": "1f9d736a8703a572d2b85126d2ef9148234a83a1",
-       "decoded_sha256": "1728d08a8101db656d90cca8b9af77e13e25de707691c4f50945886eb5333136",
-       "anchor": "START native-tools 2026-10-28T22:55:31+01:00",
-       "role": "Historical native-tools phase start and result127 launcher failure; no native-tool build or post-build gate acceptance. Assertions remain unverified historical data; no execution, child/read, nonuse/deletion, budget, permission or proof/runtime credit.",
-       "review": {
-         "content": "START native-tools 2026-10-28T22:55:31+01:00\nmemory guard: peak aggregate RSS 0.01 GiB; result 127\n",
-         "producer": "At measured revision d0ff94dba3562bb336c31c7448d5d8f15ffc5d11, validation.json blob dd9ff2f4a5e5923f03632f42f1e0a9a7922a32fa: Metadata nonpassingAttemptsPreserved reports GNU-time launcher failures. Retained post-build-command.sh.txt now uses a Python timing wrapper; it is not substituted as the missing original failing launcher. Exact retained command blob f8f66a4657b2c30cbaca33ee924380b8ba4a39e8.",
-         "consumers": "At that exact revision, validation.json artifacts[post-build-launch-error.log] references this exact compressed object, decoded SHA256 and 99 bytes. This metadata reference and scans are secondary context, not a qualified reader or proof of absence/nonuse. No empty-reader inference; live keep, uncertain-reader and fixture-refusal precedence survive.",
-         "input_revision": "d0ff94dba3562bb336c31c7448d5d8f15ffc5d11",
-         "independent": true
-       }
+ "path": "tests/upstream/cloud-integration-20261028/post-build-launch-error.log.gz",
+ "blob": "1f9d736a8703a572d2b85126d2ef9148234a83a1",
+ "decoded_sha256": "1728d08a8101db656d90cca8b9af77e13e25de707691c4f50945886eb5333136",
+ "anchor": "START native-tools 2026-10-28T22:55:31+01:00",
+ "role": "Historical native-tools phase start and result127 launcher failure; no native-tool build or post-build gate acceptance. Assertions remain unverified historical data; no execution, child/read, nonuse/deletion, budget, permission or proof/runtime credit.",
+ "review": {
+   "content": "START native-tools 2026-10-28T22:55:31+01:00\nmemory guard: peak aggregate RSS 0.01 GiB; result 127\n",
+   "producer": "At measured revision d0ff94dba3562bb336c31c7448d5d8f15ffc5d11, validation.json blob dd9ff2f4a5e5923f03632f42f1e0a9a7922a32fa: Metadata nonpassingAttemptsPreserved reports GNU-time launcher failures. Retained post-build-command.sh.txt now uses a Python timing wrapper; it is not substituted as the missing original failing launcher. Exact retained command blob f8f66a4657b2c30cbaca33ee924380b8ba4a39e8.",
+   "consumers": "At that exact revision, validation.json artifacts[post-build-launch-error.log] references this exact compressed object, decoded SHA256 and 99 bytes. This metadata reference and scans are secondary context, not a qualified reader or proof of absence/nonuse. No empty-reader inference; live keep, uncertain-reader and fixture-refusal precedence survive.",
+   "input_revision": "d0ff94dba3562bb336c31c7448d5d8f15ffc5d11",
+   "independent": true
+ }
      },
      {
-       "path": "tests/upstream/cloud-integration-20261028/static-automatic.log.gz",
-       "blob": "c3efe49c6317356ce31585972f6752fb21ea5d63",
-       "decoded_sha256": "af5228ef5205e66a36b7008d5476cc4c11a1c77bd6b2c29e896d85d083c47b81",
-       "anchor": "check-automatic: 491 automatic, 61 with a step budget, 0 manual; 11 refuted; 0 pending",
-       "role": "Historical automatic/manual/refuted/pending count summary; no current automatic classification, proof or completeness acceptance. Assertions remain unverified historical data; no execution, child/read, nonuse/deletion, budget, permission or proof/runtime credit.",
-       "review": {
-         "content": "check-automatic: 491 automatic, 61 with a step budget, 0 manual; 11 refuted; 0 pending\n",
-         "producer": "At measured revision d0ff94dba3562bb336c31c7448d5d8f15ffc5d11, validation.json blob dd9ff2f4a5e5923f03632f42f1e0a9a7922a32fa: Metadata staticChecks[automatic] reports command [\"node\", \"scripts/check-automatic.mjs\", \"--strict\"] and exitCode 0. This is a declared historical producer, not an authenticated current execution.",
-         "consumers": "At that exact revision, validation.json artifacts[static-automatic.log] references this exact compressed object, decoded SHA256 and 87 bytes. This metadata reference and scans are secondary context, not a qualified reader or proof of absence/nonuse. No empty-reader inference; live keep, uncertain-reader and fixture-refusal precedence survive.",
-         "input_revision": "d0ff94dba3562bb336c31c7448d5d8f15ffc5d11",
-         "independent": true
-       }
+ "path": "tests/upstream/cloud-integration-20261028/static-automatic.log.gz",
+ "blob": "c3efe49c6317356ce31585972f6752fb21ea5d63",
+ "decoded_sha256": "af5228ef5205e66a36b7008d5476cc4c11a1c77bd6b2c29e896d85d083c47b81",
+ "anchor": "check-automatic: 491 automatic, 61 with a step budget, 0 manual; 11 refuted; 0 pending",
+ "role": "Historical automatic/manual/refuted/pending count summary; no current automatic classification, proof or completeness acceptance. Assertions remain unverified historical data; no execution, child/read, nonuse/deletion, budget, permission or proof/runtime credit.",
+ "review": {
+   "content": "check-automatic: 491 automatic, 61 with a step budget, 0 manual; 11 refuted; 0 pending\n",
+   "producer": "At measured revision d0ff94dba3562bb336c31c7448d5d8f15ffc5d11, validation.json blob dd9ff2f4a5e5923f03632f42f1e0a9a7922a32fa: Metadata staticChecks[automatic] reports command [\"node\", \"scripts/check-automatic.mjs\", \"--strict\"] and exitCode 0. This is a declared historical producer, not an authenticated current execution.",
+   "consumers": "At that exact revision, validation.json artifacts[static-automatic.log] references this exact compressed object, decoded SHA256 and 87 bytes. This metadata reference and scans are secondary context, not a qualified reader or proof of absence/nonuse. No empty-reader inference; live keep, uncertain-reader and fixture-refusal precedence survive.",
+   "input_revision": "d0ff94dba3562bb336c31c7448d5d8f15ffc5d11",
+   "independent": true
+ }
      },
      {
-       "path": "tests/upstream/cloud-integration-20261028/static-inventory.log.gz",
-       "blob": "6264868e1ad72434725eefbd5e81a6d46e6be37f",
-       "decoded_sha256": "641537a8f69c2326aba00ec0da863be95421b2118df770ab73bf4ccbac3d573c",
-       "anchor": "212 features: {'model': 151, 'abstract': 23, 'exclude': 30, 'upstream': 8}",
-       "role": "Historical feature/upstream-symbol inventory count summary; no current inventory, generated-output freshness or semantic coverage acceptance. Assertions remain unverified historical data; no execution, child/read, nonuse/deletion, budget, permission or proof/runtime credit.",
-       "review": {
-         "content": "212 features: {'model': 151, 'abstract': 23, 'exclude': 30, 'upstream': 8}\n783 upstream symbols classified; generated files current\n",
-         "producer": "At measured revision d0ff94dba3562bb336c31c7448d5d8f15ffc5d11, validation.json blob dd9ff2f4a5e5923f03632f42f1e0a9a7922a32fa: Metadata staticChecks[inventory] reports command [\"python3\", \"scripts/solidity-feature-audit.py\", \"--check\"] and exitCode 0. This is a declared historical producer, not an authenticated current execution.",
-         "consumers": "At that exact revision, validation.json artifacts[static-inventory.log] references this exact compressed object, decoded SHA256 and 132 bytes. This metadata reference and scans are secondary context, not a qualified reader or proof of absence/nonuse. No empty-reader inference; live keep, uncertain-reader and fixture-refusal precedence survive.",
-         "input_revision": "d0ff94dba3562bb336c31c7448d5d8f15ffc5d11",
-         "independent": true
-       }
+ "path": "tests/upstream/cloud-integration-20261028/static-inventory.log.gz",
+ "blob": "6264868e1ad72434725eefbd5e81a6d46e6be37f",
+ "decoded_sha256": "641537a8f69c2326aba00ec0da863be95421b2118df770ab73bf4ccbac3d573c",
+ "anchor": "212 features: {'model': 151, 'abstract': 23, 'exclude': 30, 'upstream': 8}",
+ "role": "Historical feature/upstream-symbol inventory count summary; no current inventory, generated-output freshness or semantic coverage acceptance. Assertions remain unverified historical data; no execution, child/read, nonuse/deletion, budget, permission or proof/runtime credit.",
+ "review": {
+   "content": "212 features: {'model': 151, 'abstract': 23, 'exclude': 30, 'upstream': 8}\n783 upstream symbols classified; generated files current\n",
+   "producer": "At measured revision d0ff94dba3562bb336c31c7448d5d8f15ffc5d11, validation.json blob dd9ff2f4a5e5923f03632f42f1e0a9a7922a32fa: Metadata staticChecks[inventory] reports command [\"python3\", \"scripts/solidity-feature-audit.py\", \"--check\"] and exitCode 0. This is a declared historical producer, not an authenticated current execution.",
+   "consumers": "At that exact revision, validation.json artifacts[static-inventory.log] references this exact compressed object, decoded SHA256 and 132 bytes. This metadata reference and scans are secondary context, not a qualified reader or proof of absence/nonuse. No empty-reader inference; live keep, uncertain-reader and fixture-refusal precedence survive.",
+   "input_revision": "d0ff94dba3562bb336c31c7448d5d8f15ffc5d11",
+   "independent": true
+ }
      },
      {
-       "path": "tests/upstream/cloud-integration-20261028/static-layers.log.gz",
-       "blob": "fcbd1fa487605edc82f470d9048752ae86bc6d40",
-       "decoded_sha256": "81a7e7c2838baa810e1c75f8db0e0b95bde1a4be0dd819ff0f3fbe533ad02bc7",
-       "anchor": "154 core modules, 0 reach the elaborator",
-       "role": "Historical core/elaborator reachability count summary; no current layering verification or dependency/nonuse conclusion. Assertions remain unverified historical data; no execution, child/read, nonuse/deletion, budget, permission or proof/runtime credit.",
-       "review": {
-         "content": "154 core modules, 0 reach the elaborator\n",
-         "producer": "At measured revision d0ff94dba3562bb336c31c7448d5d8f15ffc5d11, validation.json blob dd9ff2f4a5e5923f03632f42f1e0a9a7922a32fa: Metadata staticChecks[layers] reports command [\"node\", \"scripts/check-layers.mjs\"] and exitCode 0. This is a declared historical producer, not an authenticated current execution.",
-         "consumers": "At that exact revision, validation.json artifacts[static-layers.log] references this exact compressed object, decoded SHA256 and 41 bytes. This metadata reference and scans are secondary context, not a qualified reader or proof of absence/nonuse. No empty-reader inference; live keep, uncertain-reader and fixture-refusal precedence survive.",
-         "input_revision": "d0ff94dba3562bb336c31c7448d5d8f15ffc5d11",
-         "independent": true
-       }
+ "path": "tests/upstream/cloud-integration-20261028/static-layers.log.gz",
+ "blob": "fcbd1fa487605edc82f470d9048752ae86bc6d40",
+ "decoded_sha256": "81a7e7c2838baa810e1c75f8db0e0b95bde1a4be0dd819ff0f3fbe533ad02bc7",
+ "anchor": "154 core modules, 0 reach the elaborator",
+ "role": "Historical core/elaborator reachability count summary; no current layering verification or dependency/nonuse conclusion. Assertions remain unverified historical data; no execution, child/read, nonuse/deletion, budget, permission or proof/runtime credit.",
+ "review": {
+   "content": "154 core modules, 0 reach the elaborator\n",
+   "producer": "At measured revision d0ff94dba3562bb336c31c7448d5d8f15ffc5d11, validation.json blob dd9ff2f4a5e5923f03632f42f1e0a9a7922a32fa: Metadata staticChecks[layers] reports command [\"node\", \"scripts/check-layers.mjs\"] and exitCode 0. This is a declared historical producer, not an authenticated current execution.",
+   "consumers": "At that exact revision, validation.json artifacts[static-layers.log] references this exact compressed object, decoded SHA256 and 41 bytes. This metadata reference and scans are secondary context, not a qualified reader or proof of absence/nonuse. No empty-reader inference; live keep, uncertain-reader and fixture-refusal precedence survive.",
+   "input_revision": "d0ff94dba3562bb336c31c7448d5d8f15ffc5d11",
+   "independent": true
+ }
      },
      {
-       "path": "tests/upstream/cloud-integration-20261028/static-orphans.log.gz",
-       "blob": "0e38e1972871691b290698f53e1bbf9aaf37854c",
-       "decoded_sha256": "3f272939fd82b9773a977cbeb18ff96c26783e4c8f366ad1522992920aac67ee",
-       "anchor": "713 reachable, 33 orphaned, 0 not allowed",
-       "role": "Historical reachable/orphan count summary under a reported preexisting scratch allowlist; no orphan approval, current nonuse, exclusion or deletion authority. Assertions remain unverified historical data; no execution, child/read, nonuse/deletion, budget, permission or proof/runtime credit.",
-       "review": {
-         "content": "713 reachable, 33 orphaned, 0 not allowed\n",
-         "producer": "At measured revision d0ff94dba3562bb336c31c7448d5d8f15ffc5d11, validation.json blob dd9ff2f4a5e5923f03632f42f1e0a9a7922a32fa: Metadata staticChecks[orphans] reports command [\"node\", \"scripts/check-orphans.mjs\", \"--allow\", \".lake/cloud-integration-20261028/preexisting-scratch-allow.txt\"] and exitCode 0. This is a declared historical producer, not an authenticated current execution.",
-         "consumers": "At that exact revision, validation.json artifacts[static-orphans.log] references this exact compressed object, decoded SHA256 and 42 bytes. This metadata reference and scans are secondary context, not a qualified reader or proof of absence/nonuse. No empty-reader inference; live keep, uncertain-reader and fixture-refusal precedence survive.",
-         "input_revision": "d0ff94dba3562bb336c31c7448d5d8f15ffc5d11",
-         "independent": true
-       }
+ "path": "tests/upstream/cloud-integration-20261028/static-orphans.log.gz",
+ "blob": "0e38e1972871691b290698f53e1bbf9aaf37854c",
+ "decoded_sha256": "3f272939fd82b9773a977cbeb18ff96c26783e4c8f366ad1522992920aac67ee",
+ "anchor": "713 reachable, 33 orphaned, 0 not allowed",
+ "role": "Historical reachable/orphan count summary under a reported preexisting scratch allowlist; no orphan approval, current nonuse, exclusion or deletion authority. Assertions remain unverified historical data; no execution, child/read, nonuse/deletion, budget, permission or proof/runtime credit.",
+ "review": {
+   "content": "713 reachable, 33 orphaned, 0 not allowed\n",
+   "producer": "At measured revision d0ff94dba3562bb336c31c7448d5d8f15ffc5d11, validation.json blob dd9ff2f4a5e5923f03632f42f1e0a9a7922a32fa: Metadata staticChecks[orphans] reports command [\"node\", \"scripts/check-orphans.mjs\", \"--allow\", \".lake/cloud-integration-20261028/preexisting-scratch-allow.txt\"] and exitCode 0. This is a declared historical producer, not an authenticated current execution.",
+   "consumers": "At that exact revision, validation.json artifacts[static-orphans.log] references this exact compressed object, decoded SHA256 and 42 bytes. This metadata reference and scans are secondary context, not a qualified reader or proof of absence/nonuse. No empty-reader inference; live keep, uncertain-reader and fixture-refusal precedence survive.",
+   "input_revision": "d0ff94dba3562bb336c31c7448d5d8f15ffc5d11",
+   "independent": true
+ }
      },
      {
        "path": "tests/upstream/cloud-integration-20261028/static-testsuite-static.log.gz",
