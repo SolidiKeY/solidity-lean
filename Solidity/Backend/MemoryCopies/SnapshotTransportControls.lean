@@ -58,9 +58,10 @@ theorem missing_index_preserved : shared.1.index shared.2 .dyn (indexValue (wmod
 theorem allocation_preserves {R : RefTy} (value : SVal (.ref R)) (memory : (Ty.ref R).mapFree = true) :
     let first := value.copyStToM initial memory
     let second := nested.copyStToM first.heap rfl
-    MVal.copyMToSt second.heap (T := .ref R) (first.val.wk second.ext) = value.strip :=
-  Eq.trans (kept_snapshot _ _ _ (SVal.keeps_copyStToM nested rfl _) (.ref R) _)
-    ((storageHeapContents value memory).contents initial)
+    MVal.copyMToSt second.heap (T := .ref R) (first.val.wk second.ext) = value.strip := by
+  dsimp only
+  rw [kept_snapshot _ _ _ (SVal.keeps_copyStToM nested rfl _) (.ref R) _]
+  exact (storageHeapContents value memory).contents initial
 
 theorem nested_preserved :
     let first := nested.copyStToM initial rfl
