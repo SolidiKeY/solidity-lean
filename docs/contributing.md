@@ -19,6 +19,8 @@ path, navigation and generator checks.
 | `bash scripts/coord-tools/gate.sh touched` | Merge pre-gate: layers on the merged tree, then touched modules and their library importers |
 | `node scripts/check-orphans.mjs` | Every module reachable from a library root |
 | `node scripts/check-layers.mjs` | No new core import boundary beyond the pinned snapshot |
+| `GATE_DECL_INDEX=1 bash scripts/coord-tools/gate.sh touched` | Also compares the touched modules' statements with the cached master index: a new theorem restating an existing one fails ([deterministic tools](audits/deterministic-tools.md)) |
+| `python3 scripts/decl-index/decl_index.py duplicates FILE` | Statement-hash duplicate groups of an index written by `decl_index.py dump` |
 | `node scripts/check-axiom-pins.mjs` | Axiom policy and unrecorded pin changes (H112 baseline shrinks only) |
 | `python3 scripts/check-doc-navigation.py` | Every Markdown document reachable from `AGENTS.md` and `CLAUDE.md`; catalog current |
 | `./scripts/check-doc-paths.sh` | Backticked Lean paths in prose exist |

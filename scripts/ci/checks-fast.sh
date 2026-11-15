@@ -45,6 +45,7 @@ quality-duplicates	python3 -B scripts/hygiene/quality.py --only duplicate_window
 hygiene	python3 -B scripts/hygiene/check.py
 review-checks-test	python3 -B scripts/hygiene/test_review_checks.py
 review-checks	python3 -B scripts/hygiene/review_checks.py
+decl-index-test	python3 -B scripts/decl-index/test_decl_index.py
 EOF
 )
 

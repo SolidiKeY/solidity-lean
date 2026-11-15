@@ -157,6 +157,15 @@ class Baseline(unittest.TestCase):
         tool = baseline(); tool["python_dead_code_tool"] = "ruff 2"
         self.assertIn("python_dead_code_tool", q.baseline_history(base, tool, "w")[0])
 
+    def test_optional_count_may_be_absent(self):
+        old = baseline(); del old["metrics"]["python_errors"]
+        self.assertIsNone(q.parse_baseline(json.dumps(old), "t")["metrics"]["python_errors"])
+        short = baseline(); del short["metrics"]["long_proofs"]
+        with self.assertRaises(q.SetupError): q.parse_baseline(json.dumps(short), "t")
+        parsed = q.parse_baseline(json.dumps(old), "t")
+        self.assertEqual(q.baseline_history(parsed, baseline(python_errors=3), "w"), [])
+        self.assertIn("rises", q.baseline_history(baseline(python_errors=3), baseline(python_errors=4), "w")[0])
+
 
 class Repo:
     def __init__(self, d): self.d = d
@@ -186,7 +195,8 @@ class Ratchet(unittest.TestCase):
         self.saved = (q.unreachable_declarations, q.ruff_version, q.python_dead_code, q.cache_dir)
         q.unreachable_declarations = lambda c: self.stub.get(c, {}).get("unreachable", 0)
         q.ruff_version = lambda: "ruff 1"
-        q.python_dead_code = lambda c, t: (self.stub.get(c, {}).get("ruff", 0), [])
+        q.python_dead_code = lambda c, t, rules=q.RUFF_RULES: (
+            self.stub.get(c, {}).get("ruff" if rules == q.RUFF_RULES else "ruff_errors", 0), [])
         q.cache_dir = lambda: None
 
     def tearDown(self):
@@ -252,6 +262,16 @@ class Ratchet(unittest.TestCase):
         self.stub[head] = {"unreachable": 4, "ruff": 3}
         ok, rep = self.run_eval(base, head, ("unreachable_declarations", "python_dead_code"))
         self.assertFalse(ok); self.assertIn("FAIL python_dead_code: 3", rep[0])
+
+    def test_python_errors_count(self):
+        base = self.base_commit(baseline(python_errors=1, lean_warnings=None))
+        head = self.repo.commit({"scripts/x.py": "print(undefined_name)\n"})
+        self.stub[head] = {"ruff_errors": 1}; self.stub[base] = {"ruff_errors": 1}
+        ok, rep = self.run_eval(base, head, ("python_errors",))
+        self.assertTrue(ok, rep)
+        self.stub[head] = {"ruff_errors": 2}
+        ok, rep = self.run_eval(base, head, ("python_errors",))
+        self.assertFalse(ok); self.assertIn("FAIL python_errors: 2", rep[0])
 
     def test_enforced_ruff_count_fails_without_its_tool(self):
         base = self.base_commit()

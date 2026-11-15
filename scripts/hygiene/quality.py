@@ -39,6 +39,12 @@ tree) and compared with scripts/hygiene/baseline.json. The count definitions:
                             directory (once; about 2 s), so CI needs no setup step. The count is
                             enforced: a run that cannot get the pinned ruff FAILS, since rule
                             details change between versions.
+  python_errors             ruff's error rules over the same files and with the same pinned ruff:
+                            undefined names (F821-F823), invalid comparisons and literals (F63),
+                            misplaced statements (F7), syntax and IO errors (E9), pylint errors
+                            (PLE) and mutable or call defaults (B006, B008, B012). Its seed counts
+                            11 F821 for `inspect_reuse`, which scripts/v08-reuse-*.py define with
+                            exec. A missing key in an older baseline reads as null.
   lean_warnings             distinct `warning: FILE:LINE:COL: …` lines of a Lake build log given
                             with --lean-log (opt-in; off by default). Lake's artifact cache keeps
                             no logs, so only a build that compiled every module sees every
@@ -77,10 +83,13 @@ import check as hygiene  # noqa: E402  (git helpers and the base rule shared wit
 BASELINE = "scripts/hygiene/baseline.json"
 REACH = "docs/audits/direction-tools/reachability/reach.py"
 METRICS = ("lean_long_files", "long_proofs", "duplicate_windows", "unreachable_declarations",
-           "python_dead_code", "lean_warnings")
+           "python_dead_code", "python_errors", "lean_warnings")
+OPTIONAL = {"python_errors"}  # may be absent from an older baseline.json (null)
+RUFF_TOOL = ("python_dead_code", "python_errors")  # counted with python_dead_code_tool
 FILE_LINES, PROOF_LINES, WINDOW = 1500, 150, 30
 CODE_EXT = (".lean", ".py", ".mjs", ".js", ".cjs", ".ts", ".sh")
 RUFF_RULES = "F401,F811,F841"
+RUFF_ERROR_RULES = "F821,F822,F823,F63,F7,E9,PLE,B006,B008,B012"
 PROOF_KINDS = ("theorem", "lemma")
 DIRECTIVE = re.compile(r'^(?:namespace|section|end|open|variable|attribute|set_option|import)\b', re.M)
 ROOTS = ("Solidity.lean", "SolidityExamples.lean", "Bridge/SolidityBridge.lean", "SolidityCorpus.lean")
@@ -322,18 +331,18 @@ def ruff_version():
     return _version_of(exe) if exe else None
 
 
-def python_dead_code(commit, t):
-    """(count, findings) of ruff's RUFF_RULES over the tracked .py files of `commit`."""
+def python_dead_code(commit, t, rules=RUFF_RULES):
+    """(count, findings) of ruff's `rules` over the tracked .py files of `commit`."""
     paths = sorted(p for p in t if p.endswith(".py") and not vendored(p))
     with tempfile.TemporaryDirectory(prefix="hygiene-ruff.") as d:
         for i in range(0, len(paths), 500):
             arch = git("archive", "--format=tar", commit, "--", *paths[i:i + 500])
             r = subprocess.run(["tar", "-x", "-C", d], input=arch, capture_output=True)
             if r.returncode: raise SetupError("cannot unpack Python sources: " + r.stderr.decode(errors="replace"))
-        r = subprocess.run([ruff_exe(), "check", "--isolated", "--no-cache", "--select", RUFF_RULES,
+        r = subprocess.run([ruff_exe(), "check", "--isolated", "--no-cache", "--select", rules,
                             "--output-format", "json", "--exit-zero", "."], cwd=d, capture_output=True, text=True)
         if r.returncode: raise SetupError("ruff failed: " + r.stderr.strip()[-500:])
-        rows = [x for x in json.loads(r.stdout or "[]") if x.get("code") in RUFF_RULES.split(",")]
+        rows = [x for x in json.loads(r.stdout or "[]") if x.get("code") and x["code"].startswith(tuple(rules.split(",")))]
         found = sorted((os.path.relpath(x["filename"], d), x["location"]["row"], x["code"]) for x in rows)
     return len(found), found
 
@@ -362,7 +371,7 @@ def inputs_key(metric, commit, t):
     elif metric == "unreachable_declarations":
         sel = [p for p in t if p.endswith(".lean") or p.startswith(".github/workflows/")
                or p in ("lakefile.toml", "docs/audits/architecture-tools/timing-sample.tsv")]
-    elif metric == "python_dead_code":
+    elif metric in RUFF_TOOL:
         sel = [p for p in t if p.endswith(".py")]
     else:
         return None
@@ -456,6 +465,13 @@ class Measure:
                               f"{'; '.join(RUFF_PROBLEM) or 'unknown reason'}"), []
             n, rows = python_dead_code(self.commit, self.t)
             return n, v, [f"{p}:{l} {c}" for p, l, c in rows]
+        if metric == "python_errors":
+            v = ruff_version()
+            if v is None:
+                return None, (f"ruff {ruff_pin()} is not on PATH and could not be installed: "
+                              f"{'; '.join(RUFF_PROBLEM) or 'unknown reason'}"), []
+            n, rows = python_dead_code(self.commit, self.t, RUFF_ERROR_RULES)
+            return n, v, [f"{p}:{l} {c}" for p, l, c in rows]
         if metric == "lean_warnings":
             if not self.lean_log: return None, "skipped: no --lean-log (opt-in: a full Lake build log)", []
             n, rows = lean_warnings(self.lean_log)
@@ -479,13 +495,15 @@ def parse_baseline(data, where):
     ok = (isinstance(b, dict) and set(b) - {"comment"} == {"seed", "python_dead_code_tool", "metrics"}
           and isinstance(b["seed"], str) and re.fullmatch(r"[0-9a-f]{40}", b["seed"])
           and (b["python_dead_code_tool"] is None or isinstance(b["python_dead_code_tool"], str))
-          and isinstance(b["metrics"], dict) and set(b["metrics"]) == set(METRICS)
+          and isinstance(b["metrics"], dict) and set(METRICS) - OPTIONAL <= set(b["metrics"]) <= set(METRICS)
           and all(v is None or (isinstance(v, int) and not isinstance(v, bool) and v >= 0)
                   for v in b["metrics"].values()))
     if not ok:
         raise SetupError(f"{BASELINE} at {where} is malformed: need seed (40-hex commit), "
                          f"python_dead_code_tool (string or null) and metrics with exactly the keys "
-                         f"{', '.join(METRICS)} (non-negative int or null), and an optional comment")
+                         f"{', '.join(METRICS)} (non-negative int or null; {', '.join(sorted(OPTIONAL))} may be "
+                         f"absent), and an optional comment")
+    for m in OPTIONAL: b["metrics"].setdefault(m, None)
     return b
 
 
@@ -500,7 +518,7 @@ def baseline_history(base_b, head_b, where):
         if old is None: continue
         if new is None: bad.append(f"FAIL {where}: {m} goes from {old} to null; a set count stays set")
         elif new > old: bad.append(f"FAIL {where}: {m} rises from {old} to {new}; counts may only go down")
-    if (base_b["metrics"]["python_dead_code"] is not None
+    if (any(base_b["metrics"][m] is not None for m in RUFF_TOOL)
             and head_b["python_dead_code_tool"] != base_b["python_dead_code_tool"]):
         bad.append(f"FAIL {where}: python_dead_code_tool changes from {base_b['python_dead_code_tool']!r} to "
                    f"{head_b['python_dead_code_tool']!r} while its count is set")
@@ -513,7 +531,7 @@ def enforced(b, metric, head_value, note):
     if b["metrics"][metric] is None:
         return "report", (note if head_value is None else "baseline is null: reported, not enforced")
     if head_value is None: return "unmeasurable", note
-    if metric == "python_dead_code" and note != b["python_dead_code_tool"]:
+    if metric in RUFF_TOOL and note != b["python_dead_code_tool"]:
         return "unmeasurable", f"baseline counted with {b['python_dead_code_tool']}, this host has {note}"
     return "enforce", ""
 
@@ -548,7 +566,7 @@ def evaluate(base, head, only, lean_log, use_cache):
     for metric in only:
         start = time.monotonic()
         limit = head_b["metrics"][metric]
-        if limit is None or metric in ("python_dead_code", "lean_warnings"):
+        if limit is None or metric in RUFF_TOOL + ("lean_warnings",):
             value, note, _ = head_m.get(metric)
             state, why = enforced(head_b, metric, value, note)
         else:
@@ -622,7 +640,7 @@ def main(argv):
             counts = measure_all(hygiene.rev("HEAD"), only, a.lean_log, not a.no_cache)
             for k, c in counts.items():
                 old, new = b["metrics"][k], c["value"]
-                if old is not None and new is not None and new < old and (k != "python_dead_code" or c["note"] == b["python_dead_code_tool"]):
+                if old is not None and new is not None and new < old and (k not in RUFF_TOOL or c["note"] == b["python_dead_code_tool"]):
                     b["metrics"][k] = new; print(f"lowered {k}: {old} -> {new}")
             with open(path, "w") as f: f.write(json.dumps(b, indent=1) + "\n")
             return 0

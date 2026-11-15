@@ -102,17 +102,28 @@ else
   run_gate checks-fast bash scripts/ci/checks-fast.sh
   [ "$failed" -eq 0 ] || exit "$failed"
   run_gate build-touched build_touched
+  # Statement-level duplicates and changes (scripts/decl-index/decl_index.py), opt-in because
+  # a checkpoint indexes the whole library (about 4 min, 5 GB): the factory sets it.
+  if [ "${GATE_DECL_INDEX:-0}" = 1 ] && [ "$mode" = touched ] && [ "$failed" -eq 0 ]; then
+    run_gate decl-index python3 -B scripts/decl-index/decl_index.py gate touched
+  fi
   if [ "$mode" != touched ]; then
     if [ "$mode" = full ]; then
       # H134: each slow example under its own 600 s one-core budget, as in CI
       # (after the libraries it imports); run-lean.sh then finds them built.
       run_gate library lake build Solidity SolidityExamples
+      if [ "${GATE_DECL_INDEX:-0}" = 1 ] && [ "$failed" -eq 0 ]; then
+        run_gate decl-index python3 -B scripts/decl-index/decl_index.py gate full
+      fi
       run_gate slow-examples bash scripts/ci/build-slow-examples.sh
       run_gate run-lean bash run-lean.sh
     else
       # A checkpoint builds the library alone; a lane touching the core also
       # builds the examples and the TestSuite (`docs/contributing.md`).
       run_gate library lake build Solidity
+      if [ "${GATE_DECL_INDEX:-0}" = 1 ] && [ "$failed" -eq 0 ]; then
+        run_gate decl-index python3 -B scripts/decl-index/decl_index.py gate checkpoint
+      fi
       if [ -s "$logs/core" ] || [ "${GATE_EXAMPLES:-0}" = 1 ]; then
         run_gate examples lake build SolidityExamples SolkeyTestSuite
       fi
