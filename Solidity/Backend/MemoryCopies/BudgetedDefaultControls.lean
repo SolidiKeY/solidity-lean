@@ -53,14 +53,12 @@ theorem nested_success :
   actual_success ⟨55,by decide⟩ [2,3] (by decide)
 
 theorem nested_refusal :
-    run (budgetedDefaultCode ⟨54,by decide⟩ (chosen [2,3])) input.machine = .revert := by
-  rw [budgeted_default_run _ _ _ _ _ _ _ input.allocator]
-  rw [if_neg (by decide)]
+    run (budgetedDefaultCode ⟨54,by decide⟩ (chosen [2,3])) input.machine = .revert :=
+  Eq.trans (budgeted_default_run _ _ _ _ _ _ _ input.allocator) (if_neg (by decide))
 
 theorem zero_budget_refusal :
-    run (budgetedDefaultCode ⟨0,by decide⟩ (chosen [])) input.machine = .revert := by
-  rw [budgeted_default_run _ _ _ _ _ _ _ input.allocator]
-  rw [if_neg (by decide)]
+    run (budgetedDefaultCode ⟨0,by decide⟩ (chosen [])) input.machine = .revert :=
+  Eq.trans (budgeted_default_run _ _ _ _ _ _ _ input.allocator) (if_neg (by decide))
 
 theorem wrong_cursor_rejected :
     observe (run (budgetedDefaultCode ⟨55,by decide⟩ (chosen [2,3])) input.machine) ≠ some (40,55,7) := by

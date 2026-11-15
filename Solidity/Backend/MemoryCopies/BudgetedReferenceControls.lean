@@ -135,14 +135,12 @@ theorem wrong_cursor_rejected :
   decide
 
 theorem strict_boundary_refusal :
-    run (budgetedReferenceCode ⟨45,by decide⟩ (chosen [])) (input.machine.push w[2]) = .revert := by
-  rw [budgeted_reference_run _ _ _ _ _ _ _ _ input.allocator]
-  rw [if_neg (by decide)]
+    run (budgetedReferenceCode ⟨45,by decide⟩ (chosen [])) (input.machine.push w[2]) = .revert :=
+  Eq.trans (budgeted_reference_run _ _ _ _ _ _ _ _ input.allocator) (if_neg (by decide))
 
 theorem zero_budget_refusal :
-    run (budgetedReferenceCode ⟨0,by decide⟩ (chosen [])) (input.machine.push w[0]) = .revert := by
-  rw [budgeted_reference_run _ _ _ _ _ _ _ _ input.allocator]
-  rw [if_neg (by decide)]
+    run (budgetedReferenceCode ⟨0,by decide⟩ (chosen [])) (input.machine.push w[0]) = .revert :=
+  Eq.trans (budgeted_reference_run _ _ _ _ _ _ _ _ input.allocator) (if_neg (by decide))
 
 theorem full_budget_code {root : RefTy} {memory : (Ty.ref root).mapFree = true}
     (selected : SelectedCheckedDefault root memory) :
