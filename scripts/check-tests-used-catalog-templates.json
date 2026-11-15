@@ -48,10 +48,24 @@
       160
     ]
   }
+  ,
+{
+    "input_revision": "6364b7bb4b2e124a92195baf75a80aad3929bde3",
+    "template_indices": [
+      161,
+      162,
+      163,
+      164,
+      165,
+      166,
+      167,
+      168
+    ]
+  }
   ]
  },
  "base_sha256":"0c09ce59255e3cdc5d6e7ba68de7505968deb43aa9e84050259f392f93cd0723",
- "expanded_sha256":"9a4cc9f0552c336552bae5abf71ba393cfa011b2a3a204f40cb5842b9076b809",
+ "expanded_sha256":"f35919904758bca2019f3dbb67513f4dd0ec9c7fb2ad035f98d0756f6c69d4af",
  "gzip_roles": {
    "schema_version": 2,
    "records": [
@@ -63,22 +77,22 @@
        "role": "Proposed historical missing-GNU-time launcher diagnostic for ordinary H828 independent land review. It reports a launch failure, not native build, test, proof or runtime completion. Original failing launcher source is not established; later corrected source is not substituted. No execution, child/read, nonuse, deletion, budget, permission, trust or proof credit.",
        "review": {
          "content": "/tmp/solidity-cloud-post-build.sh: line 13: /usr/bin/time: No such file or directory\n",
-         "producer": "At measured revision eb7956bdaaac974bf27df6113e59e402a46570e0, validation.json blob dd9ff2f4a5e5923f03632f42f1e0a9a7922a32fa records the historical GNU-time/launcher failures; post-build-command.sh.txt blob f8f66a4657b2c30cbaca33ee924380b8ba4a39e8 now uses a Python timing wrapper, so it is not authenticated as the missing original failing launcher. Historical assertions are unverified data; no command replay.",
+         "producer": "At measured revision 6364b7bb4b2e124a92195baf75a80aad3929bde3, validation.json blob dd9ff2f4a5e5923f03632f42f1e0a9a7922a32fa records the historical GNU-time/launcher failures; post-build-command.sh.txt blob f8f66a4657b2c30cbaca33ee924380b8ba4a39e8 now uses a Python timing wrapper, so it is not authenticated as the missing original failing launcher. Historical assertions are unverified data; no command replay.",
          "consumers": "At that exact revision, validation.json references this exact compressed object and its decoded length/hash. This metadata reference and repository scans are secondary context only, not a qualified consumer, proof of absence or nonuse. No empty-reader inference; keep, uncertain-reader and fixture-refusal precedence remain unchanged.",
-         "input_revision": "eb7956bdaaac974bf27df6113e59e402a46570e0",
+         "input_revision": "6364b7bb4b2e124a92195baf75a80aad3929bde3",
          "independent": true
        }
      }
    ]
  },
  "inventory_manifest": {
-   "bytes": 8698035,
-   "evidence_commit": "10b798d53db6356747592130d711663176c13966",
-   "evidence_path": "evidence/plan-x1-census-validation-1114/x1-census-validation/x1-readonly-bind-artifact-eb7956bd/inventory.json",
-   "input_revision": "eb7956bdaaac974bf27df6113e59e402a46570e0",
+   "bytes": 8724405,
+   "evidence_commit": "6082dd2a5630dd66ae9fddd329242e982b8f391f",
+   "evidence_path": "evidence/plan-x1-census-validation-1114/x1-census-validation/x1-signature-yul-artifact-6364b7bb/inventory.json",
+   "input_revision": "6364b7bb4b2e124a92195baf75a80aad3929bde3",
    "repository": "SolidiKeY/solidity-lean-coord",
    "schema_version": 1,
-   "sha256": "1d4bb6400492531f0e79c99a2276c2e1111b56dc404474b6318888f5f6eeefd3"
+   "sha256": "d17162e96bde2edd455b0bee6b4fa149427ae116dba29a2bfed576c999fec53a"
  },
  "schema_version":3,
  "templates":{
@@ -491,6 +505,144 @@
       "entry_line": 170,
       "required_options": [
         "--frozen",
+        "--output"
+      ]
+    }
+  }
+  ,
+{
+    "entry": {
+      "path": "scripts/h62/item1/duplication-scanner/bind_signature_fixture.py",
+      "source_blob": "7959500d77df619f6db0805b973193d2b473b84b",
+      "command": [
+        "python3",
+        "-B",
+        "scripts/h62/item1/duplication-scanner/bind_signature_fixture.py"
+      ],
+      "kind": "committed-cli",
+      "purpose": "Declared CLI source rebuilding only pinned canonical signature fixtures under writer/resource guards, comparing fresh discovery/compiled environments, dependency companions, runtime and exact completed logs before creating five local source/signature links. Raw signatures stay environment-unbound; this is no remote attestation, ABA-proof provenance, compiler proof or general repository binding. Required configuration or private evidence is not supplied; source role only, no current execution, child/read/fixture, generation, proof/runtime, nonuse/deletion, permission or STOP-clearance credit.",
+      "entry_line": 289,
+      "required_options": [
+        "--output"
+      ]
+    }
+  },
+{
+    "entry": {
+      "path": "scripts/h62/item1/duplication-scanner/bind_source_locations.py",
+      "source_blob": "58bf4293737b5e55de253be3e5d360f4a0f1cf6c",
+      "command": [
+        "python3",
+        "-B",
+        "scripts/h62/item1/duplication-scanner/bind_source_locations.py"
+      ],
+      "kind": "committed-cli",
+      "purpose": "Declared CLI source invoking pinned live fixture/kernel builds and joining direct compiler positions, exact source names/lines and declaration kinds to lexical rows. It verifies child bytes against successful live return hashes and retains absent, ambiguous, unsupported or generated-alias matches; no general ownership, unloaded/private artifact coverage, proof-body equality or remote attestation follows. Required configuration or private evidence is not supplied; source role only, no current execution, child/read/fixture, generation, proof/runtime, nonuse/deletion, permission or STOP-clearance credit.",
+      "entry_line": 206,
+      "required_options": [
+        "--output"
+      ]
+    }
+  },
+{
+    "entry": {
+      "path": "scripts/h62/item1/duplication-scanner/census_fixture_kernel.py",
+      "source_blob": "cfdf3ac215d0429eb5bf6b423145373e8a97f3e1",
+      "command": [
+        "python3",
+        "-B",
+        "scripts/h62/item1/duplication-scanner/census_fixture_kernel.py"
+      ],
+      "kind": "committed-cli",
+      "purpose": "Declared CLI source enumerating imported constants only from one pinned fixture module after a live local rebuild, checking generated recursor/matcher and namespace/binder/universe controls plus source/runtime/environment/log stability. Structural saved-packet validation alone authenticates no execution or completeness; no source-line mapping, project-wide coverage, ownership or unloaded/private levels are claimed. Required configuration or private evidence is not supplied; source role only, no current execution, child/read/fixture, generation, proof/runtime, nonuse/deletion, permission or STOP-clearance credit.",
+      "entry_line": 191,
+      "required_options": [
+        "--output"
+      ]
+    }
+  },
+{
+    "entry": {
+      "path": "scripts/h62/item2/audit-yul/census.py",
+      "source_blob": "b3d08f94bdeff0e62bf6c6a7072024a43801eb64",
+      "command": [
+        "python3",
+        "-B",
+        "scripts/h62/item2/audit-yul/census.py"
+      ],
+      "kind": "committed-cli",
+      "purpose": "Declared CLI source producing a conservative source census from frozen module-map patterns and local Yul import closure, optionally joining supplied parser spans, witness records and kernel metadata while retaining unmatched or ambiguous declarations. Lexical rows and area-owner conventions establish no witness feasibility, independent ownership, current kernel validation or full audit acceptance. Required configuration or private evidence is not supplied; source role only, no current execution, child/read/fixture, generation, proof/runtime, nonuse/deletion, permission or STOP-clearance credit.",
+      "entry_line": 190,
+      "required_options": [
+        "--output"
+      ]
+    }
+  },
+{
+    "entry": {
+      "path": "scripts/h62/item4/generic-yul-views/acceptance.py",
+      "source_blob": "ef73cc19f9a708c9e3ee21c6e8bf8b5584a253a1",
+      "command": [
+        "python3",
+        "-B",
+        "scripts/h62/item4/generic-yul-views/acceptance.py"
+      ],
+      "kind": "committed-cli",
+      "purpose": "Declared CLI source checking supplied local input digests, external census/bounded controls, exact frozen Views file universe/blobs, census reproduction and lexical shortcut scans. Its static acceptance explicitly leaves Lean proofs, refusal coverage, full gates and timings pending; input hashes establish no coordinator origin or semantic coverage. Required configuration or private evidence is not supplied; source role only, no current execution, child/read/fixture, generation, proof/runtime, nonuse/deletion, permission or STOP-clearance credit.",
+      "entry_line": 76,
+      "required_options": [
+        "--evidence",
+        "--inputs"
+      ]
+    }
+  },
+{
+    "entry": {
+      "path": "scripts/h62/item4/generic-yul-views/census.py",
+      "source_blob": "24df327e36cf9bfe537da98d10734c7c45ffc56a",
+      "command": [
+        "python3",
+        "-B",
+        "scripts/h62/item4/generic-yul-views/census.py"
+      ],
+      "kind": "committed-cli",
+      "purpose": "Declared CLI source deterministically inventorying every Views declaration and guard with exact UTF-8 file, statement and command digests, preserved guard messages and optional exact byte reproduction. This is lexical current-source metadata, not a Lean parser, elaborated statement equivalence, frozen-source preservation or semantic proof. Required configuration or private evidence is not supplied; source role only, no current execution, child/read/fixture, generation, proof/runtime, nonuse/deletion, permission or STOP-clearance credit.",
+      "entry_line": 154,
+      "required_options": [
+        "--output"
+      ]
+    }
+  },
+{
+    "entry": {
+      "path": "scripts/h62/item4/generic-yul-views/correspondence.py",
+      "source_blob": "089d93d31071ff96405e44d89a6dad7447c145fe",
+      "command": [
+        "python3",
+        "-B",
+        "scripts/h62/item4/generic-yul-views/correspondence.py"
+      ],
+      "kind": "committed-cli",
+      "purpose": "Declared CLI source comparing two selected simple lexical theorem types while refusing unsupported literal/compound syntax, and classifying whole-file Views source identity against authenticated frozen Git blobs. Modified, added and removed files remain explicit; current control rows and matching text establish no kernel equivalence, proof or transitive semantic preservation. Required configuration or private evidence is not supplied; source role only, no current execution, child/read/fixture, generation, proof/runtime, nonuse/deletion, permission or STOP-clearance credit.",
+      "entry_line": 167,
+      "required_options": [
+        "--output"
+      ]
+    }
+  },
+{
+    "entry": {
+      "path": "scripts/h62/item4/generic-yul-views/reconcile_frozen.py",
+      "source_blob": "f0f13298dc085df8c76d80cca0d95e39cb2d7a71",
+      "command": [
+        "python3",
+        "-B",
+        "scripts/h62/item4/generic-yul-views/reconcile_frozen.py"
+      ],
+      "kind": "committed-cli",
+      "purpose": "Declared CLI source reconstructing every frozen Views Controls theorem from authenticated Git blobs and retaining all current command/statement candidates plus secondary namespace hints. Ambiguous and unmatched rows survive; even same-file matches establish no elaborated/private namespace identity, semantic equivalence, proof validation or accepted migration. Required configuration or private evidence is not supplied; source role only, no current execution, child/read/fixture, generation, proof/runtime, nonuse/deletion, permission or STOP-clearance credit.",
+      "entry_line": 171,
+      "required_options": [
         "--output"
       ]
     }
