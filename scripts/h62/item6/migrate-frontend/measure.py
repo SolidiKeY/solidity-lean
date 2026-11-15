@@ -169,10 +169,6 @@ def main():
 
 """Regression: signals arriving after spawn but before assignment reap the child."""
 import importlib.util
-import os
-from pathlib import Path
-import signal
-import subprocess
 import sys
 import tempfile
 import unittest
