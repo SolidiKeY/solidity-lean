@@ -52,33 +52,46 @@ theorem actual_runtime (payloads : List (Fin W)) (bounded : payloads.length < 12
       Objects.AllocatorRepr (grown payloads bounded).heap base' 8 ⟨40 + (payloads.length + 1),fits⟩ target ∧
       target.mem 0 = .val (wmod (40 + payloads.length + 1)) ∧ target.mem 40 = .val (wmod payloads.length) ∧
       target.mem 17 = w[7] ∧ target.store = (machine payloads).store ∧ target.stack = [w[77]] ∧
-      (∀ (index : Nat) (payload : Fin W), payloads[index]? = some payload → target.mem (41 + index) = .val payload) :=
-  (checked_storage_array_success input.heap .uint (values payloads)
-    (by rw [values,List.length_map]; exact Nat.lt_trans bounded wide)
-    input.base 8 (wmod 40) (machine payloads) source 128 (allocator payloads) (represented payloads bounded)
-    (by simpa only [values,List.length_map] using fits)).elim
-    (fun base' ⟨target,ran,allocated,rootAt,_,shape,below,_⟩ => by
-      have observed := dynamic_uint_array_words (grown payloads bounded).heap (grown payloads bounded).val
-        base' target payloads (allocated.heap.arrays .dyn (grown payloads bounded).val) (by
-          dsimp only [grown,value]
-          rw [primitive_array_source]
-          simp only [Grown.alloc,Heap.get_alloc,MObj.elems_dyn,MObj.wk,primitiveArrayObject,MVal.wk,values,List.map_map,Function.comp_def])
-      have header := observed.1
-      change base' (grown payloads bounded).val.id = wmod 40 at rootAt
-      rw [rootAt] at header
-      refine ⟨base',target,ran,?_,?_,header,below 17 (by decide) (by decide),?_,?_,?_⟩
-      · simpa only [values,List.length_map] using allocated
-      · refine allocated.free.cell.trans ?_
-        apply congrArg Word.val
-        apply Fin.ext
-        simp only [values,List.length_map,wmod_def,Nat.mod_eq_of_lt (show 40 < W by decide),Nat.add_assoc]
-        exact (Nat.mod_eq_of_lt fits).symm
-      · rw [shape]
-      · exact congrArg Machine.stack shape
-      · intro index payload selected
-        have stored := observed.2 index payload selected
-        rw [rootAt] at stored
-        exact stored)
+      (∀ (index : Nat) (payload : Fin W), payloads[index]? = some payload → target.mem (41 + index) = .val payload) := by
+  obtain ⟨base',target,ran,allocated,rootAt,_,shape,below,_⟩ :=
+    checked_storage_array_success input.heap .uint (values payloads)
+      (by rw [values,List.length_map]; exact Nat.lt_trans bounded wide)
+      input.base 8 (wmod 40) (machine payloads) source 128 (allocator payloads) (represented payloads bounded)
+      (by simpa only [values,List.length_map] using fits)
+  have sourceLength : (grown payloads bounded).heap.len (grown payloads bounded).val .dyn = payloads.length := by
+    dsimp only [grown,value]
+    rw [primitive_array_source]
+    simp only [Grown.alloc,Heap.len,Heap.get_alloc,MObj.elems_dyn,MObj.wk,primitiveArrayObject,values,List.length_map]
+  have header : target.mem (base' (grown payloads bounded).val.id).val = .val (wmod payloads.length) := by
+    have length : target.mem (base' (grown payloads bounded).val.id).val =
+        .val (wmod ((grown payloads bounded).heap.len (grown payloads bounded).val .dyn)) :=
+      (allocated.heap.arrays .dyn (grown payloads bounded).val).length rfl
+    rw [sourceLength] at length
+    exact length
+  change base' (grown payloads bounded).val.id = wmod 40 at rootAt
+  rw [rootAt] at header
+  refine ⟨base',target,ran,?_,?_,header,below 17 (by decide) (by decide),?_,?_,?_⟩
+  · simpa only [values,List.length_map] using allocated
+  · refine allocated.free.cell.trans ?_
+    apply congrArg Word.val
+    apply Fin.ext
+    simp only [values,List.length_map,wmod_def,Nat.mod_eq_of_lt (show 40 < W by decide),Nat.add_assoc]
+    exact (Nat.mod_eq_of_lt fits).symm
+  · rw [shape]
+  · exact congrArg Machine.stack shape
+  · intro index payload selected
+    have item : (MObj.elems .dyn ((grown payloads bounded).heap.get (grown payloads bounded).val))[index]? = some (indexValue payload) := by
+      dsimp only [grown,value]
+      rw [primitive_array_source]
+      simp only [Grown.alloc,Heap.get_alloc,MObj.elems_dyn,MObj.wk,primitiveArrayObject,MVal.wk,values,
+        List.getElem?_map,selected,Option.map_some]
+    have contents : ReprV .uint (indexValue payload) (target.mem ((base' (grown payloads bounded).val.id).val + 1 + index)) :=
+      (allocated.heap.arrays .dyn (grown payloads bounded).val).elements index (indexValue payload) item
+    obtain ⟨word,stored,equal⟩ := contents
+    have same : word = payload := Fin.ext (Int.ofNat_inj.mp equal.symm)
+    subst word
+    rw [rootAt] at stored
+    exact stored
 
 theorem empty_runtime : ∃ target : Machine,
     run checkedStorageArrayCode ((machine []).push (.slot source)) = .ok (target.push w[40]) 0 ∧
