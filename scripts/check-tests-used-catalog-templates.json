@@ -6,14 +6,33 @@
  },
  "base_sha256":"0c09ce59255e3cdc5d6e7ba68de7505968deb43aa9e84050259f392f93cd0723",
  "expanded_sha256":"e1072d0330eb44325a8573c6b71ff9da979ebca5ebf5532b699f1d49fa8bca50",
+ "gzip_roles": {
+   "schema_version": 2,
+   "records": [
+     {
+       "path": "tests/upstream/cloud-integration-20261028/native-tools-launch-error.log.gz",
+       "blob": "2c30db6fa8c9afb1fdd5ce3d22150bfe93a20b39",
+       "decoded_sha256": "baa09140658114c7ebd08ad50f7d56253617ce1751a671920427a754b4506cdb",
+       "anchor": "/tmp/solidity-cloud-post-build.sh: line 13: /usr/bin/time: No such file or directory",
+       "role": "Proposed historical missing-GNU-time launcher diagnostic for ordinary H828 independent land review. It reports a launch failure, not native build, test, proof or runtime completion. Original failing launcher source is not established; later corrected source is not substituted. No execution, child/read, nonuse, deletion, budget, permission, trust or proof credit.",
+       "review": {
+         "content": "/tmp/solidity-cloud-post-build.sh: line 13: /usr/bin/time: No such file or directory\n",
+         "producer": "At measured revision 826de47d874a7d6417bba1303bf10af60fda52f3, validation.json blob dd9ff2f4a5e5923f03632f42f1e0a9a7922a32fa records the historical GNU-time/launcher failures; post-build-command.sh.txt blob f8f66a4657b2c30cbaca33ee924380b8ba4a39e8 now uses a Python timing wrapper, so it is not authenticated as the missing original failing launcher. Historical assertions are unverified data; no command replay.",
+         "consumers": "At that exact revision, validation.json references this exact compressed object and its decoded length/hash. This metadata reference and repository scans are secondary context only, not a qualified consumer, proof of absence or nonuse. No empty-reader inference; keep, uncertain-reader and fixture-refusal precedence remain unchanged.",
+         "input_revision": "826de47d874a7d6417bba1303bf10af60fda52f3",
+         "independent": true
+       }
+     }
+   ]
+ },
  "inventory_manifest": {
-   "bytes": 8624942,
-   "evidence_commit": "0e6446e0e83a11c428cb926749e139b4db45ff2e",
-   "evidence_path": "evidence/plan-x1-census-validation-1114/x1-census-validation/x1-vo1-artifact-ca73d1a4/inventory.json",
-   "input_revision": "ca73d1a4e1aecbcbc566acaa1aa7392cad472b3d",
+   "bytes": 8626828,
+   "evidence_commit": "f31804f1d5039e2e05566f134f5bfafb8c90b59e",
+   "evidence_path": "evidence/plan-x1-census-validation-1114/x1-census-validation/x1-gzip-artifact-826de47d/inventory.json",
+   "input_revision": "826de47d874a7d6417bba1303bf10af60fda52f3",
    "repository": "SolidiKeY/solidity-lean-coord",
    "schema_version": 1,
-   "sha256": "b05f58ca103ab1b4928234d330f72d2cad7bbc26f3995c2c7d7ffb5ef2947202"
+   "sha256": "9e9e4fa1f2dfa9894a95d312ef97b4673169a5dc02db9e3793d16991464e4e50"
  },
  "schema_version":3,
  "templates":{

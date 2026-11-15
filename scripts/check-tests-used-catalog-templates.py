@@ -7,7 +7,10 @@ are delegated unchanged to v1. Legacy --write/--check remain available.
 H901 --export --artifact PATH writes the current fixture/gzip census outside
 Git; --check-manifest --artifact PATH reads its committed identity and SHA256.
 Obtain that private artifact from the manifest repository/commit/path. Both
-new modes take --ref REV and optional H871 --roles PATH; real-object reviews
+new modes take --ref REV and optional H871 --roles PATH. The additive
+gzip_roles catalog field opts in when --roles is absent; explicit --roles
+selects its supplied catalog as before. Both use the unchanged landed helper.
+Real-object reviews
 remain independently required. A matching SHA256 never replaces rebuilding
 the complete model or the unchanged mandatory completeness check.
 """
@@ -28,6 +31,7 @@ spec.loader.exec_module(v2)
 v1 = v2.v1
 SECTIONS = {'standalone', 'module_entries', 'reads', 'generators', 'orphans'}
 MANIFEST_KEY = 'inventory_manifest'
+GZIP_KEY = 'gzip_roles'  # Explicit opt-in data in the landed H871 schema.
 MAX_ARTIFACT_BYTES = 50 * 1024 * 1024  # Existing private-evidence per-file limit.
 
 
@@ -182,7 +186,7 @@ def catalog_document():
 
 
 def load_catalog():
-    data = {key: value for key, value in catalog_document().items() if key != MANIFEST_KEY}
+    data = {key: value for key, value in catalog_document().items() if key not in {MANIFEST_KEY, GZIP_KEY}}
     return expand((HERE / 'check-tests-used-routes.json').read_bytes(), data)
 
 
@@ -232,8 +236,11 @@ def current_inventory(root, ref, roles):
     fixtures = adapter.classifier()
     repo = fixtures.v1.Repository(root, ref)
     expected = fixtures.inventory(repo, fixtures.templates.load_catalog())
-    if roles is not None:
-        expected = adapter.apply_roles(repo, expected, parse(roles.read_bytes()))
+    # Explicit --roles retains its existing selection semantics. Otherwise the
+    # additive catalog field opts into the exact landed helper contract.
+    selected = parse(roles.read_bytes()) if roles is not None else catalog_document().get(GZIP_KEY)
+    if selected is not None:
+        expected = adapter.apply_roles(repo, expected, selected)
     return expected
 
 
@@ -380,6 +387,54 @@ def manifest_controls():
     print('PASS H901 manifest controls: private identity, tamper/re-pin/stale refusal, canonical full-model comparison and mandatory completeness')
 
 
+
+def gzip_binding_controls():
+    """Exercise the consumer on a real tiny Git snapshot, never a real role."""
+    import gzip
+    with tempfile.TemporaryDirectory(prefix='tests-used-gzip-binding-') as directory:
+        root = Path(directory)
+        path = 'tests/__gzip_binding__.log.gz'
+        text = b'synthetic historical diagnostic: unverified\n'
+        (root / 'tests').mkdir()
+        (root / path).write_bytes(gzip.compress(text, mtime=0))
+        v1.git(root, 'init', '-q')
+        v1.git(root, 'add', '--', path)
+        v1.git(root, '-c', 'user.name=control', '-c', 'user.email=control@example.invalid',
+               'commit', '-qm', 'Synthetic gzip binding control')
+        ref = v1.decode(v1.git(root, 'rev-parse', 'HEAD')).strip()
+        blob = v1.decode(v1.git(root, 'rev-parse', 'HEAD:' + path)).strip()
+        row = dict(path=path, blob=blob, decoded_sha256=v2.hashlib.sha256(text).hexdigest(),
+                   anchor=text.decode().strip(), role='Synthetic diagnostic; no actual review credit.',
+                   review=dict(content=text.decode(), producer='Synthetic control bytes.',
+                               consumers='Synthetic input-selection control; no real-object claim.',
+                               input_revision=ref, independent=True))
+        data = dict(schema_version=2, records=[row])
+        saved = globals()['catalog_document']
+        try:
+            globals()['catalog_document'] = lambda: {}
+            baseline = current_inventory(root, ref, None)
+            assert baseline['records'][0]['class'] is None
+            globals()['catalog_document'] = lambda: {GZIP_KEY: data}
+            selected = current_inventory(root, ref, None)
+            assert selected['records'][0]['class'] == 'evidence'
+            assert selected['records'][0]['recovery'] == baseline['records'][0]['recovery']
+            assert selected['records'][0]['secondary']['historical_gzip_role'] == row
+            explicit = root / 'explicit-empty.json'
+            explicit.write_text(json.dumps(dict(schema_version=2, records=[])))
+            # Existing explicit selection overrides embedded opt-in data.
+            assert current_inventory(root, ref, explicit) == baseline
+            row['review']['input_revision'] = 'f' * 40
+            try:
+                current_inventory(root, ref, None)
+            except ValueError as error:
+                assert 'stale gzip consumer-context review' in str(error)
+            else:
+                raise AssertionError('embedded catalog bypassed landed revision guard')
+        finally:
+            globals()['catalog_document'] = saved
+    print('PASS H871 catalog binding: absent opt-in, exact object/recovery, explicit selection and stale-context refusal')
+
+
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument('--ref', default='origin/master')
@@ -396,6 +451,7 @@ def main():
         if args.self_test:
             controls()
             manifest_controls()
+            gzip_binding_controls()
             v2.controls()
             v1.self_test()
             return 0
