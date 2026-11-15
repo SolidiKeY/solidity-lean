@@ -62,10 +62,23 @@
       168
     ]
   }
+  ,
+{
+    "input_revision": "f812628e097ab58e8c6c7b941f0b33fa1b991a5b",
+    "template_indices": [
+      169,
+      170,
+      171,
+      172,
+      173,
+      174,
+      175
+    ]
+  }
   ]
  },
  "base_sha256":"0c09ce59255e3cdc5d6e7ba68de7505968deb43aa9e84050259f392f93cd0723",
- "expanded_sha256":"f35919904758bca2019f3dbb67513f4dd0ec9c7fb2ad035f98d0756f6c69d4af",
+ "expanded_sha256":"189226a20ed9a3f7016215b03a77cb2afb53b0b0126d43b8851bc51b1e213fa2",
  "gzip_roles": {
    "schema_version": 2,
    "records": [
@@ -77,22 +90,22 @@
        "role": "Proposed historical missing-GNU-time launcher diagnostic for ordinary H828 independent land review. It reports a launch failure, not native build, test, proof or runtime completion. Original failing launcher source is not established; later corrected source is not substituted. No execution, child/read, nonuse, deletion, budget, permission, trust or proof credit.",
        "review": {
          "content": "/tmp/solidity-cloud-post-build.sh: line 13: /usr/bin/time: No such file or directory\n",
-         "producer": "At measured revision 6364b7bb4b2e124a92195baf75a80aad3929bde3, validation.json blob dd9ff2f4a5e5923f03632f42f1e0a9a7922a32fa records the historical GNU-time/launcher failures; post-build-command.sh.txt blob f8f66a4657b2c30cbaca33ee924380b8ba4a39e8 now uses a Python timing wrapper, so it is not authenticated as the missing original failing launcher. Historical assertions are unverified data; no command replay.",
+         "producer": "At measured revision f812628e097ab58e8c6c7b941f0b33fa1b991a5b, validation.json blob dd9ff2f4a5e5923f03632f42f1e0a9a7922a32fa records the historical GNU-time/launcher failures; post-build-command.sh.txt blob f8f66a4657b2c30cbaca33ee924380b8ba4a39e8 now uses a Python timing wrapper, so it is not authenticated as the missing original failing launcher. Historical assertions are unverified data; no command replay.",
          "consumers": "At that exact revision, validation.json references this exact compressed object and its decoded length/hash. This metadata reference and repository scans are secondary context only, not a qualified consumer, proof of absence or nonuse. No empty-reader inference; keep, uncertain-reader and fixture-refusal precedence remain unchanged.",
-         "input_revision": "6364b7bb4b2e124a92195baf75a80aad3929bde3",
+         "input_revision": "f812628e097ab58e8c6c7b941f0b33fa1b991a5b",
          "independent": true
        }
      }
    ]
  },
  "inventory_manifest": {
-   "bytes": 8724405,
-   "evidence_commit": "6082dd2a5630dd66ae9fddd329242e982b8f391f",
-   "evidence_path": "evidence/plan-x1-census-validation-1114/x1-census-validation/x1-signature-yul-artifact-6364b7bb/inventory.json",
-   "input_revision": "6364b7bb4b2e124a92195baf75a80aad3929bde3",
+   "bytes": 8748183,
+   "evidence_commit": "2700a517bae9cd70e66c2dbee108db18a137bd24",
+   "evidence_path": "evidence/plan-x1-census-validation-1114/x1-census-validation/x1-migration-artifact-f812628e/inventory.json",
+   "input_revision": "f812628e097ab58e8c6c7b941f0b33fa1b991a5b",
    "repository": "SolidiKeY/solidity-lean-coord",
    "schema_version": 1,
-   "sha256": "d17162e96bde2edd455b0bee6b4fa149427ae116dba29a2bfed576c999fec53a"
+   "sha256": "9c26423c34da25d3b4385915e8cca10619d6a86c8440eb23f262b2504aa5b6c5"
  },
  "schema_version":3,
  "templates":{
@@ -644,6 +657,138 @@
       "entry_line": 171,
       "required_options": [
         "--output"
+      ]
+    }
+  }
+  ,
+{
+    "entry": {
+      "path": "scripts/h62/item6/migrate-examples/dag_inventory.py",
+      "source_blob": "067089cce1274c78ca677ee9dab8f5d63a10eca3",
+      "command": [
+        "python3",
+        "-B",
+        "scripts/h62/item6/migrate-examples/dag_inventory.py"
+      ],
+      "kind": "committed-cli",
+      "purpose": "Declared CLI source validating complete frozen ModuleData name/type DAG streams, exact compiler/fixture/source provenance, closed types, per-module counts, seal and generated sentinels. All kernel/compiler-extra occurrences survive, with export access and extra signatures unresolved; stream integrity establishes no new parity, semantic equivalence, axiom equality or full H78 acceptance. Required configuration or private evidence is not supplied; source role only, no current execution, child/read/fixture, generation, proof/runtime, nonuse/deletion, permission or STOP-clearance credit.",
+      "entry_line": 267,
+      "required_options": [
+        "--census",
+        "--compiler-result",
+        "--fixture-manifest",
+        "--log",
+        "--output"
+      ]
+    }
+  },
+{
+    "entry": {
+      "path": "scripts/h62/item6/migrate-examples/dependencies.py",
+      "source_blob": "a2b69a96d71e6f9e1fd9cf9fcd24a507548820e5",
+      "command": [
+        "python3",
+        "-B",
+        "scripts/h62/item6/migrate-examples/dependencies.py"
+      ],
+      "kind": "committed-cli",
+      "purpose": "Declared CLI source reconstructing explicit source-header import closure from committed Git blobs while preserving every frozen Examples module, reporting changed/additional files, ambiguous resolution and unresolved imports. Standard-library leaves are recognized only by artifact presence; implicit Init, command-produced imports, elaborated API, axiom and semantic claims remain outside this scanner. Required configuration or private evidence is not supplied; source role only, no current execution, child/read/fixture, generation, proof/runtime, nonuse/deletion, permission or STOP-clearance credit.",
+      "entry_line": 154,
+      "required_options": [
+        "--output",
+        "--stdlib"
+      ]
+    }
+  },
+{
+    "entry": {
+      "path": "scripts/h62/item6/migrate-examples/generate-dag-inventory.py",
+      "source_blob": "a2d87bdb84deebc063fc14ec6b62da53a2a0e8bb",
+      "command": [
+        "python3",
+        "-B",
+        "scripts/h62/item6/migrate-examples/generate-dag-inventory.py"
+      ],
+      "kind": "committed-cli",
+      "purpose": "Declared CLI source emitting an off-checkout exact-scope ModuleData fixture and manifest only after matching current and frozen source closures. Shared encoder traversal retains structural content fingerprints and every compiler-only name with unresolved signatures; pointer memoization grants no new-toolchain compatibility, semantic equivalence or generator execution authority. Required configuration or private evidence is not supplied; source role only, no current execution, child/read/fixture, generation, proof/runtime, nonuse/deletion, permission or STOP-clearance credit.",
+      "entry_line": 155,
+      "required_options": [
+        "--census",
+        "--manifest",
+        "--output",
+        "--stdlib"
+      ]
+    }
+  },
+{
+    "entry": {
+      "path": "scripts/h62/item6/migrate-frontend/parser_overlay.py",
+      "source_blob": "22bf8ca0ed23cb0f181e7c0be7f6621ef7e17cc8",
+      "command": [
+        "python3",
+        "-B",
+        "scripts/h62/item6/migrate-frontend/parser_overlay.py"
+      ],
+      "kind": "committed-cli",
+      "purpose": "Declared CLI source preparing an unapplied six-context SCtx/Bool parser proposal from frozen source, binding an existing Token proposal and supplied old API/dependency observations, and describing isolated old/new controls and selected type/axiom comparisons. Production Check/SourceCtor, full affected acceptance, axiom review and performance remain pending; its final exit2 is intentional, not a passing full gate. Required configuration or private evidence is not supplied; source role only, no current execution, child/read/fixture, generation, proof/runtime, nonuse/deletion, permission or STOP-clearance credit.",
+      "entry_line": 150,
+      "required_options": [
+        "--out",
+        "--token-proposal"
+      ]
+    }
+  },
+{
+    "entry": {
+      "path": "scripts/h62/item6/migrate-frontend/token_overlay.py",
+      "source_blob": "9d9cf4c9a2dfe53f19b66aa4975c71fe29cbbd5a",
+      "command": [
+        "python3",
+        "-B",
+        "scripts/h62/item6/migrate-frontend/token_overlay.py"
+      ],
+      "kind": "committed-cli",
+      "purpose": "Declared CLI source preparing an unapplied frozen Token representation proposal, describing original incompatibility reproduction, universal all-byte and high-byte controls, selected declaration/type/axiom comparisons and isolated dependent smoke checks. Existing supplied compiler/API observations are inputs, not independently authenticated current validation; no directory/root gate, timing acceptance, permission grant or applied migration follows. Required configuration or private evidence is not supplied; source role only, no current execution, child/read/fixture, generation, proof/runtime, nonuse/deletion, permission or STOP-clearance credit.",
+      "entry_line": 143,
+      "required_options": [
+        "--out"
+      ]
+    }
+  },
+{
+    "entry": {
+      "path": "scripts/h62/item6/migrate-solkey/export.py",
+      "source_blob": "d2779b6db5201788788faba0fba6c54182fd7e92",
+      "command": [
+        "python3",
+        "-B",
+        "scripts/h62/item6/migrate-solkey/export.py"
+      ],
+      "kind": "committed-cli",
+      "purpose": "Declared CLI source exporting already committed lane work after measurements stop, verifying base ancestry and Git bundle head, and deterministically archiving selected off-Git JSON/log observations with checksums. Archive-only mode writes an immutable bulk archive; official compiler archives and oleans stay at recorded VM paths. This is transport, not cache shipment, provenance attestation or proof acceptance. Required configuration or private evidence is not supplied; source role only, no current execution, child/read/fixture, generation, proof/runtime, nonuse/deletion, permission or STOP-clearance credit.",
+      "entry_line": 64,
+      "required_options": [
+        "--evidence",
+        "--out",
+        "--root"
+      ]
+    }
+  },
+{
+    "entry": {
+      "path": "scripts/h62/item6/migrate-yul/metadata-coverage.py",
+      "source_blob": "00a16586e7f757cff336af3bce62e0c9d275b69b",
+      "command": [
+        "python3",
+        "-B",
+        "scripts/h62/item6/migrate-yul/metadata-coverage.py"
+      ],
+      "kind": "committed-cli",
+      "purpose": "Declared CLI source revalidating supplied selected old-metadata observations against the exact pinned original1774-module plan, resealing actual raw observations and retaining every pending module and input binding. It executes no Lean and claims no general attribute census, public API, migration, semantic proof or performance acceptance; external initializer IO remains outside model/proofs. Required configuration or private evidence is not supplied; source role only, no current execution, child/read/fixture, generation, proof/runtime, nonuse/deletion, permission or STOP-clearance credit.",
+      "entry_line": 160,
+      "required_options": [
+        "--output",
+        "--plan"
       ]
     }
   }
