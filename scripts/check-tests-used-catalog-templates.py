@@ -13,6 +13,69 @@ selects its supplied catalog as before. Both use the unchanged landed helper.
 Real-object reviews
 remain independently required. A matching SHA256 never replaces rebuilding
 the complete model or the unchanged mandatory completeness check.
+
+H908 external historical-role delta contract proposal (not implemented)
+---------------------------------------------------------------------
+This is a separately reviewed storage proposal, not an enabled interface.
+No flag, catalog key, file reader or classification behavior below implements
+it. Approval of this proposal authenticates no real-object role. A later
+implementation/adoption checkpoint must pass its original gates and review.
+
+Proposed opt-in: --historical-role-delta PATH, only with H901 --export or
+--check-manifest. No flag means precisely today's behavior. The existing
+--roles flag continues to mean H871 gzip roles only. Legacy --write/--check,
+frozen v1, fixture refusals and the gzip helper remain unchanged.
+
+Proposed committed key: historical_role_delta_manifest, in the additive
+check-tests-used-catalog-templates.json document. Its exact fields are:
+  schema_version: integer 1 (not boolean)
+  input_revision: resolved 40-lowercase-hex measured Git commit
+  base_sha256: 64-lowercase-hex digest of unchanged tracked roles.json bytes
+  sha256: 64-lowercase-hex digest of the complete private delta artifact
+  bytes: positive integer <= existing MAX_ARTIFACT_BYTES (not boolean)
+  repository: literal SolidiKeY/solidity-lean-coord
+  evidence_commit: immutable 40-lowercase-hex private evidence commit
+  evidence_path: safe evidence/ path under existing H901 location rules
+All fields are mandatory; unknown fields are errors. A supplied path requires
+this descriptor and vice versa in external inventory modes. There is no
+network fetch, fallback, implicit discovery, or omission of an unavailable
+artifact. A descriptor in legacy modes must not activate a delta consumer.
+
+Proposed artifact: canonical UTF-8 JSON, json.dumps(data, indent=2) + newline,
+with exactly schema_version: 1 and records: a list. Each record has exactly
+the existing historical-note fields path, blob, anchor, role. The private
+artifact is a cumulative ordered delta relative to the unchanged tracked
+roles table, never a replacement for it. One descriptor binds its full bytes;
+no unbounded manifest chain or path-selected role subset is permitted.
+Readable records and ordinary actual-line caps apply to every delivery.
+
+Before classification, require exact resolved revision, base digest, bounded
+artifact bytes, SHA256 and canonical encoding; reject duplicate JSON keys,
+nonfinite numbers, schema errors and any delta path duplicated within itself
+or the base. The artifact must be outside Git tracking under the existing
+H901 path rule. Validate the combined base-plus-delta with the unchanged
+reviewed_historical_notes predicate, including its blob/anchor behavior.
+Stale object bytes cannot gain a role. SHA256 and prose prove no review.
+
+Proposed implementation seam: on an isolated, invocation-local classifier
+module instance only, supply the combined definitions to its existing
+reviewed_historical_notes function. Call its unchanged inventory control
+flow through the unchanged fixture-refusal and H871 gzip stages, at the same
+Repository revision. Do not edit frozen v1, mutate a shared imported module,
+post-promote output rows, create graph edges or introduce another classifier.
+Restore any local binding in finally, including on errors. Absence of the
+opt-in must use the original function and definitions without interception.
+
+Acceptance controls required before later adoption: no-opt-in equivalence;
+exact complete-model comparison; valid synthetic role through the existing
+predicate; missing/tampered/re-pinned/noncanonical/wrong-revision/base inputs;
+unknown fields, duplicate keys/paths and overlap with base; stale blob and
+bad anchor; private path bounds; original live-keep/uncertain-reader and
+fixture-refusal precedence; unchanged gzip and v1 controls; mandatory global
+completeness refusal. No synthetic result approves a real object. Independent
+per-object content/context review, recovery pins, original performance STOPs,
+proof/execution budgets and full-census obligations survive unchanged.
+
 """
 import argparse
 import copy
