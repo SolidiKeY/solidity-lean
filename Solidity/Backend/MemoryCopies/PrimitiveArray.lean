@@ -12,6 +12,28 @@ theorem primitive_array_source {H : HTy} (heap : Heap H) (primitive : PrimTy)
   rw [primitiveArrayValue,SVal.copyStToM_array,SVec.copyStToM_prims]
   rfl
 
+theorem dynamic_uint_array_words {H : HTy} (heap : Heap H)
+    (reference : HRef H (.array (.prim .uint))) (base : Nat → Fin W) (target : Machine)
+    (payloads : List (Fin W))
+    (representation : Objects.ArrayRepr heap reference .dyn base target)
+    (contents : MObj.elems .dyn (heap.get reference) = payloads.map indexValue) :
+    target.mem (base reference.id).val = .val (wmod payloads.length) ∧
+      ∀ (index : Nat) (payload : Fin W), payloads[index]? = some payload →
+        target.mem ((base reference.id).val + 1 + index) = .val payload := by
+  refine ⟨?_, ?_⟩
+  · have length : heap.len reference .dyn = payloads.length := by
+      change (MObj.elems .dyn (heap.get reference)).length = payloads.length
+      rw [contents,List.length_map]
+    exact (representation.length rfl).trans (congrArg (fun size => Word.val (wmod size)) length)
+  · intro index payload selected
+    have item : (MObj.elems .dyn (heap.get reference))[index]? = some (indexValue payload) := by
+      rw [contents,List.getElem?_map,selected]
+      rfl
+    obtain ⟨word,stored,equal⟩ := representation.elements index (indexValue payload) item
+    have same : word = payload := Fin.ext (Int.ofNat_inj.mp equal.symm)
+    subst word
+    exact stored
+
 theorem array_words_shape (cursor : Fin W) (offset : Nat) (words : List Word) (machine : Machine) :
     arrayWordsMachine cursor offset words machine =
       {machine with mem := (arrayWordsMachine cursor offset words machine).mem} := by
