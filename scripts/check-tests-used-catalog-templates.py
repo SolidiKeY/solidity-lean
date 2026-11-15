@@ -3,7 +3,13 @@
 
 Frozen v1 and v2 remain independently runnable. This opt-in driver changes
 storage only; classification, positive observations and mandatory completeness
-are delegated unchanged to v1. Use --ref REV --write/--check, or --self-test.
+are delegated unchanged to v1. Legacy --write/--check remain available.
+H901 --export --artifact PATH writes the current fixture/gzip census outside
+Git; --check-manifest --artifact PATH reads its committed identity and SHA256.
+Obtain that private artifact from the manifest repository/commit/path. Both
+new modes take --ref REV and optional H871 --roles PATH; real-object reviews
+remain independently required. A matching SHA256 never replaces rebuilding
+the complete model or the unchanged mandatory completeness check.
 """
 import argparse
 import copy
@@ -13,6 +19,7 @@ import math
 from pathlib import Path
 import re
 import sys
+import tempfile
 
 HERE = Path(__file__).resolve().parent
 spec = importlib.util.spec_from_file_location('tests_used_extension', HERE / 'check-tests-used-catalog-extension.py')
@@ -20,6 +27,8 @@ v2 = importlib.util.module_from_spec(spec)
 spec.loader.exec_module(v2)
 v1 = v2.v1
 SECTIONS = {'standalone', 'module_entries', 'reads', 'generators', 'orphans'}
+MANIFEST_KEY = 'inventory_manifest'
+MAX_ARTIFACT_BYTES = 50 * 1024 * 1024  # Existing private-evidence per-file limit.
 
 
 def nonfinite(value):
@@ -143,9 +152,89 @@ def encode(raw, catalog):
     return data
 
 
+def validate_manifest(data):
+    fields = {'schema_version', 'input_revision', 'sha256', 'bytes',
+              'repository', 'evidence_commit', 'evidence_path'}
+    if not isinstance(data, dict) or set(data) != fields:
+        raise ValueError('invalid inventory manifest fields')
+    if type(data['schema_version']) is not int or data['schema_version'] != 1:
+        raise ValueError('invalid inventory manifest version')
+    if not revision(data['input_revision']) or not revision(data['evidence_commit']) or not sha(data['sha256']):
+        raise ValueError('invalid inventory manifest identity')
+    if type(data['bytes']) is not int or not 0 < data['bytes'] <= MAX_ARTIFACT_BYTES:
+        raise ValueError('invalid inventory manifest size')
+    path = data['evidence_path']
+    if (data['repository'] != 'SolidiKeY/solidity-lean-coord'
+            or not isinstance(path, str) or not path.startswith('evidence/')
+            or any(part in ('', '.', '..') for part in path.split('/'))
+            or any(c in path for c in '\0\r\n')):
+        raise ValueError('invalid private inventory evidence location')
+    return data
+
+
+def catalog_document():
+    data = parse((HERE / 'check-tests-used-catalog-templates.json').read_bytes())
+    if not isinstance(data, dict):
+        raise ValueError('invalid template document')
+    if MANIFEST_KEY in data:
+        validate_manifest(data[MANIFEST_KEY])
+    return data
+
+
 def load_catalog():
-    return expand((HERE / 'check-tests-used-routes.json').read_bytes(),
-                  parse((HERE / 'check-tests-used-catalog-templates.json').read_bytes()))
+    data = {key: value for key, value in catalog_document().items() if key != MANIFEST_KEY}
+    return expand((HERE / 'check-tests-used-routes.json').read_bytes(), data)
+
+
+def external_artifact(root, artifact):
+    path = Path(artifact).resolve()
+    try:
+        relative = path.relative_to(Path(root).resolve())
+    except ValueError:
+        return path
+    if v1.git(root, 'ls-files', '--', relative.as_posix()):
+        raise ValueError('inventory artifact must be outside Git tracking')
+    return path
+
+
+def write_artifact(root, artifact, raw):
+    target = external_artifact(root, artifact)
+    target.parent.mkdir(parents=True, exist_ok=True)
+    temporary = None
+    try:
+        with tempfile.NamedTemporaryFile(dir=target.parent, delete=False) as stream:
+            temporary = Path(stream.name)
+            stream.write(raw)
+        temporary.replace(target)  # Do not overwrite an existing inode through a hardlink.
+    finally:
+        if temporary is not None:
+            temporary.unlink(missing_ok=True)
+
+
+def verify_manifest_artifact(root, manifest, expected, artifact):
+    validate_manifest(manifest)
+    if manifest['input_revision'] != expected['measured_revision']:
+        raise ValueError('inventory manifest differs from resolved input revision')
+    with external_artifact(root, artifact).open('rb') as stream:
+        raw = stream.read(manifest['bytes'] + 1)
+    if len(raw) != manifest['bytes'] or v2.hashlib.sha256(raw).hexdigest() != manifest['sha256']:
+        raise ValueError('inventory artifact size or SHA256 mismatch')
+    actual = parse(raw)
+    if raw != v1.output_json(actual):
+        raise ValueError('noncanonical manifest inventory bytes')
+    v1.verify(actual, expected)  # Full rebuild comparison AND mandatory completeness.
+
+
+def current_inventory(root, ref, roles):
+    spec = importlib.util.spec_from_file_location('tests_used_gzip', HERE / 'check-tests-used-gzip.py')
+    adapter = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(adapter)
+    fixtures = adapter.classifier()
+    repo = fixtures.v1.Repository(root, ref)
+    expected = fixtures.inventory(repo, fixtures.templates.load_catalog())
+    if roles is not None:
+        expected = adapter.apply_roles(repo, expected, parse(roles.read_bytes()))
+    return expected
 
 
 def controls():
@@ -205,26 +294,138 @@ def controls():
     print('PASS catalog template controls')
 
 
+def manifest_controls():
+    with tempfile.TemporaryDirectory(prefix='tests-used-manifest-controls-') as directory:
+        base = Path(directory)
+        root = base / 'repository'
+        root.mkdir()
+        v1.git(root, 'init', '-q')
+        artifact = base / 'inventory.json'
+        expected = dict(schema_version=v1.SCHEMA, measured_revision='c' * 40,
+                        analysis_gaps=[], records=[dict(path='tests/pending.txt', **{'class': None})],
+                        totals=dict(paths=1, keep=0, evidence=0, regenerable=0, orphan=0, unresolved=1))
+        def pinned(raw):
+            artifact.write_bytes(raw)
+            return dict(schema_version=1, input_revision='c' * 40, bytes=len(raw),
+                        sha256=v2.hashlib.sha256(raw).hexdigest(),
+                        repository='SolidiKeY/solidity-lean-coord', evidence_commit='b' * 40,
+                        evidence_path='evidence/control/inventory.json')
+        manifest = pinned(v1.output_json(expected))
+        def refused(record, model, message):
+            try:
+                verify_manifest_artifact(root, record, model, artifact)
+            except ValueError as error:
+                assert message in str(error), str(error)
+            else:
+                raise AssertionError('manifest bypassed original verification')
+        refused(manifest, expected, 'incomplete classification: 1 unresolved paths')
+        complete = copy.deepcopy(expected)
+        complete['records'][0]['class'] = 'keep'
+        complete['totals'].update(keep=1, unresolved=0)
+        manifest = pinned(v1.output_json(complete))
+        verify_manifest_artifact(root, manifest, complete, artifact)
+        forged = copy.deepcopy(complete)
+        forged['records'][0]['class'] = 'evidence'
+        forged['totals'].update(keep=0, evidence=1)
+        # Even a correctly re-pinned artifact cannot override the rebuilt model.
+        refused(pinned(v1.output_json(forged)), complete, 'classification provenance')
+        refused(pinned(json.dumps(complete, indent=2).encode()), complete, 'noncanonical')
+        refused(pinned(b'{"schema_version":1,"schema_version":1}'), complete, 'duplicate')
+        manifest = pinned(v1.output_json(complete))
+        artifact.write_bytes(artifact.read_bytes() + b'x')
+        refused(manifest, complete, 'size or SHA256')
+        manifest = pinned(v1.output_json(complete))
+        wrong = dict(manifest, input_revision='d' * 40)
+        refused(wrong, complete, 'resolved input revision')
+        wrong = dict(manifest, sha256='0' * 64)
+        refused(wrong, complete, 'size or SHA256')
+        for field, value in [('schema_version', True), ('schema_version', 2),
+                             ('input_revision', 'HEAD'), ('sha256', '0'),
+                             ('bytes', True), ('bytes', 0), ('bytes', MAX_ARTIFACT_BYTES + 1),
+                             ('repository', 'other/repository'), ('evidence_commit', 'main'),
+                             ('evidence_path', '/evidence/file'), ('evidence_path', 'evidence/../file'),
+                             ('evidence_path', 'evidence/line\nfile')]:
+            try:
+                validate_manifest(dict(manifest, **{field: value}))
+            except ValueError:
+                pass
+            else:
+                raise AssertionError('invalid manifest accepted: ' + field)
+        for change in ['extra', 'missing']:
+            invalid = dict(manifest)
+            if change == 'extra':
+                invalid['extra'] = 0
+            else:
+                del invalid['evidence_commit']
+            try:
+                validate_manifest(invalid)
+            except ValueError:
+                pass
+            else:
+                raise AssertionError('manifest fields not exact')
+        tracked = root / 'tracked.json'
+        tracked.write_text('{}')
+        v1.git(root, 'add', '--', 'tracked.json')
+        try:
+            external_artifact(root, tracked)
+        except ValueError:
+            pass
+        else:
+            raise AssertionError('manifest mode could overwrite a tracked artifact')
+        assert external_artifact(root, root / 'untracked.json') == root / 'untracked.json'
+        alias = base / 'outside-hardlink.json'
+        alias.hardlink_to(tracked)
+        write_artifact(root, alias, b'private replacement')
+        assert tracked.read_bytes() == b'{}' and alias.read_bytes() == b'private replacement'
+    print('PASS H901 manifest controls: private identity, tamper/re-pin/stale refusal, canonical full-model comparison and mandatory completeness')
+
+
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument('--ref', default='origin/master')
+    parser.add_argument('--artifact', type=Path, help='Private H145 inventory artifact, outside Git tracking')
+    parser.add_argument('--roles', type=Path, help='Explicit independently reviewed H871 gzip roles')
     modes = parser.add_mutually_exclusive_group(required=True)
-    for mode in ['write', 'check', 'self-test']: modes.add_argument('--' + mode, action='store_true')
+    for mode in ['write', 'check', 'self-test', 'export', 'check-manifest']:
+        modes.add_argument('--' + mode, action='store_true')
     args = parser.parse_args()
+    external = args.export or args.check_manifest
+    if external != (args.artifact is not None) or args.roles is not None and not external:
+        parser.error('--artifact is required only for --export/--check-manifest; --roles is exclusive to those modes')
     try:
         if args.self_test:
             controls()
+            manifest_controls()
             v2.controls()
             v1.self_test()
             return 0
         root = v1.decode(v1.git(Path.cwd(), 'rev-parse', '--show-toplevel')).strip()
-        expected = v1.inventory(v1.Repository(root, args.ref), load_catalog())
-        target = Path(root) / v1.OUTPUT
-        if args.write: target.write_bytes(v1.output_json(expected))
+        if external:
+            manifest = catalog_document().get(MANIFEST_KEY)
+            resolved = v1.decode(v1.git(root, 'rev-parse', '--verify', args.ref + '^{commit}')).strip()
+            if args.check_manifest and (manifest is None or manifest['input_revision'] != resolved):
+                raise ValueError('missing inventory manifest or mismatched resolved input revision')
+            target = external_artifact(root, args.artifact)
+            expected = current_inventory(root, resolved, args.roles)
+            if args.export:
+                raw = v1.output_json(expected)
+                if len(raw) > MAX_ARTIFACT_BYTES:
+                    raise ValueError('inventory exceeds private-evidence per-file limit')
+                write_artifact(root, target, raw)
+                print(json.dumps({'input_revision': resolved, 'bytes': len(raw),
+                                  'sha256': v2.hashlib.sha256(raw).hexdigest()}, sort_keys=True))
+            else:
+                verify_manifest_artifact(root, manifest, expected, target)
         else:
-            actual = parse(target.read_bytes())
-            v1.verify(actual, expected)
-            if target.read_bytes() != v1.output_json(expected): raise ValueError('noncanonical inventory bytes')
+            expected = v1.inventory(v1.Repository(root, args.ref), load_catalog())
+            target = Path(root) / v1.OUTPUT
+            if args.write:
+                target.write_bytes(v1.output_json(expected))
+            else:
+                actual = parse(target.read_bytes())
+                v1.verify(actual, expected)
+                if target.read_bytes() != v1.output_json(expected):
+                    raise ValueError('noncanonical inventory bytes')
         print(json.dumps(expected['totals'], sort_keys=True))
         if expected['totals']['unresolved'] or expected['analysis_gaps']:
             print('INCOMPLETE: unresolved paths are not justified classes; no pruning authorization.', file=sys.stderr)
