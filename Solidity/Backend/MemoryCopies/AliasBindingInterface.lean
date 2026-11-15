@@ -64,4 +64,50 @@ theorem singleton_array_heap_repr {R : RefTy} {E : Ty} {heap : Heap [R]}
   · intro name reference
     exact (noStruct reference).elim
 
+theorem two_reference {R S Q : RefTy} (reference : HRef [R,S] Q) :
+    (Q = R ∧ HEq reference (⟨0,rfl⟩ : HRef [R,S] R)) ∨
+      (Q = S ∧ HEq reference (⟨1,rfl⟩ : HRef [R,S] S)) := by
+  rcases reference with ⟨index,selected⟩
+  cases index with
+  | zero => cases selected; exact .inl ⟨rfl,HEq.rfl⟩
+  | succ index => cases index with
+    | zero => cases selected; exact .inr ⟨rfl,HEq.rfl⟩
+    | succ index => cases selected
+
+theorem two_array_heap_repr {R S : RefTy} {E F : Ty} {heap : Heap [R,S]}
+    {base : Nat → Fin W} {frame : Nat} {machine : Machine}
+    (shapeR : ArrTy R E) (shapeS : ArrTy S F)
+    (aboveR : frame ≤ (base 0).val) (aboveS : frame ≤ (base 1).val)
+    (apart : (base 0).val + Objects.cells heap (⟨0,rfl⟩ : HRef [R,S] R) ≤ (base 1).val ∨
+      (base 1).val + Objects.cells heap (⟨1,rfl⟩ : HRef [R,S] S) ≤ (base 0).val)
+    (representedR : Objects.ArrayRepr heap (⟨0,rfl⟩ : HRef [R,S] R) shapeR base machine)
+    (representedS : Objects.ArrayRepr heap (⟨1,rfl⟩ : HRef [R,S] S) shapeS base machine) :
+    Objects.HeapRepr heap base frame machine := by
+  have noStruct {name : Name} (reference : HRef [R,S] (.struct name)) : False := by
+    rcases two_reference reference with ⟨same,_⟩ | ⟨same,_⟩
+    · exact shapeR.ne_struct name same.symm
+    · exact shapeS.ne_struct name same.symm
+  refine ⟨⟨?_,?_,?_⟩,?_,?_,RefFieldsRepr.withoutStructs heap base machine noStruct⟩
+  · intro Q reference
+    rcases two_reference reference with ⟨rfl,equal⟩ | ⟨rfl,equal⟩
+    · cases equal; exact aboveR
+    · cases equal; exact aboveS
+  · intro Q reference
+    rcases two_reference reference with ⟨rfl,equal⟩ | ⟨rfl,equal⟩
+    · cases equal; exact representedR.space
+    · cases equal; exact representedS.space
+  · intro Q T left right different
+    rcases two_reference left with ⟨rfl,leftEq⟩ | ⟨rfl,leftEq⟩ <;> cases leftEq
+      <;> rcases two_reference right with ⟨rfl,rightEq⟩ | ⟨rfl,rightEq⟩ <;> cases rightEq
+    · exact (different rfl).elim
+    · exact apart
+    · exact apart.elim Or.inr Or.inl
+    · exact (different rfl).elim
+  · intro A G array reference
+    rcases two_reference reference with ⟨rfl,equal⟩ | ⟨rfl,equal⟩
+    · cases equal; cases shapeR <;> cases array <;> exact representedR
+    · cases equal; cases shapeS <;> cases array <;> exact representedS
+  · intro name reference
+    exact (noStruct reference).elim
+
 end Solidity.Backend.MemoryCopies
