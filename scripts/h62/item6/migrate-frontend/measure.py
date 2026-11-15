@@ -38,9 +38,10 @@ def available():
     used = int(Path('/sys/fs/cgroup/memory.current').read_text())
     return min(host, int(cap)-used) if cap != 'max' else host
 
-def child_limits():
+def child_limits(signal_mask):
     # The VM already has a hard cgroup memory cap. Stack reservations are
     # virtual, not RSS; RLIMIT_AS can break bounded --tstack=131072 checks.
+    signal.pthread_sigmask(signal.SIG_SETMASK, signal_mask)
     resource.setrlimit(resource.RLIMIT_CORE, (0, 0))
 
 def run(cmd, root, env, logfile):
@@ -56,8 +57,12 @@ def run(cmd, root, env, logfile):
     p = None
     try:
         with logfile.open('w') as log:
-            p = subprocess.Popen(cmd, cwd=root, env=env, stdout=log, stderr=subprocess.STDOUT,
-                                 start_new_session=True, preexec_fn=child_limits)
+            old_mask = signal.pthread_sigmask(signal.SIG_BLOCK, (signal.SIGINT, signal.SIGTERM))
+            try:
+                p = subprocess.Popen(cmd, cwd=root, env=env, stdout=log, stderr=subprocess.STDOUT,
+                                     start_new_session=True, preexec_fn=lambda: child_limits(old_mask))
+            finally:
+                signal.pthread_sigmask(signal.SIG_SETMASK, old_mask)
             while p.poll() is None:
                 rows = [row for row in usage() if row[1] == p.pid]
                 rss = sum(row[2] for row in rows)

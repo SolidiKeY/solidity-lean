@@ -80,8 +80,13 @@ def main():
     signal.signal(signal.SIGINT, interrupted)
     try:
         with a.output.with_suffix('.log').open('x') as log:
-            child = subprocess.Popen(a.command, stdout=log, stderr=subprocess.STDOUT,
-                                     start_new_session=True)
+            old_mask = signal.pthread_sigmask(signal.SIG_BLOCK, (signal.SIGINT, signal.SIGTERM))
+            try:
+                child = subprocess.Popen(a.command, stdout=log, stderr=subprocess.STDOUT,
+                                         start_new_session=True,
+                                         preexec_fn=lambda: signal.pthread_sigmask(signal.SIG_SETMASK, old_mask))
+            finally:
+                signal.pthread_sigmask(signal.SIG_SETMASK, old_mask)
             while child.poll() is None:
                 available, swap, current = resources()
                 peak = max(peak, group_rss(child.pid))
