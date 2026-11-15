@@ -47,28 +47,25 @@ theorem joined (pipeline : Roadmap.Pipeline) (fuel : Nat) (flag : Bool) :
     sci sca .here sci tci tca .here tci rfl rfl rfl rfl (entry flag) rfl (by decide))
 
 theorem observed (flag : Bool) : snapshot (run emitted (machine flag)) =
-    some [.val (bword flag),.val (bword flag),w[0],.val (bword flag),w[99],w[77]] := by
-  have typed : core.run (caller flag) =
-      .ok ⟨ReturnTail.reached (caller flag) tci flag .here tci,List.prefix_refl _⟩ :=
-    ReturnTail.target_run (caller flag) tci tca flag .here tci rfl
-  have noCanary : codeStoresCell 5 emitted = false := by decide
-  have compiled : StmtOut C 1 0 (Frag.init (.val .bool :: TargetCtx)) false false false
-      (core.run (caller flag)) (run emitted (machine flag)) (machine flag) := (joined .legacy 0 flag).2
-  rw [typed] at compiled
-  rcases normal_of_ok compiled with ⟨final,hr,stack,repr⟩
-  have m0 : final.mem 0 = .val (bword flag) := by
-    cases flag <;> exact repr.vals (.there (.there (.there .here)))
-  have m1 : final.mem 1 = .val (bword flag) := by
-    cases flag <;> exact repr.vals (.there (.there .here))
-  have m2 : final.mem 2 = w[0] := by
-    cases flag <;> exact repr.vals (.there .here)
-  have m3 : final.mem 3 = .val (bword flag) := by
-    cases flag <;> exact repr.vals .here
-  have m5 : final.mem 5 = w[99] := exec_mem noCanary hr
-  rw [hr]
-  change some ([final.mem 0,final.mem 1,final.mem 2,final.mem 3,final.mem 5] ++ final.stack) = _
-  rw [m0,m1,m2,m3,m5,stack]
-  rfl
+    some [.val (bword flag),.val (bword flag),w[0],.val (bword flag),w[99],w[77]] :=
+  Exists.elim (normal_of_ok
+      ((ReturnTail.target_run (caller flag) tci tca flag .here tci rfl) ▸
+        ((joined .legacy 0 flag).2)))
+    (fun final ⟨hr,stack,repr⟩ => by
+      have noCanary : codeStoresCell 5 emitted = false := by decide
+      have m0 : final.mem 0 = .val (bword flag) := by
+        cases flag <;> exact repr.vals (.there (.there (.there .here)))
+      have m1 : final.mem 1 = .val (bword flag) := by
+        cases flag <;> exact repr.vals (.there (.there .here))
+      have m2 : final.mem 2 = w[0] := by
+        cases flag <;> exact repr.vals (.there .here)
+      have m3 : final.mem 3 = .val (bword flag) := by
+        cases flag <;> exact repr.vals .here
+      have m5 : final.mem 5 = w[99] := exec_mem noCanary hr
+      rw [hr]
+      change some ([final.mem 0,final.mem 1,final.mem 2,final.mem 3,final.mem 5] ++ final.stack) = _
+      rw [m0,m1,m2,m3,m5,stack]
+      rfl)
 
 def eager : Prog C TargetCtx (.val .bool :: TargetCtx) :=
   (assignLocalOperand (C := C) tci tca).code.join
@@ -94,47 +91,38 @@ theorem eager_tail_refused :
 
 theorem omitted_tail_refused :
     snapshot (run (compileProg 0 (assignLocalOperand (C := C) tci tca).code) (machine false)) ≠
-      snapshot (run emitted (machine false)) := by
-  have typed : (assignLocalOperand (C := C) tci tca).code.run (caller false) =
-      .ok ⟨((caller false).setLocal tci false).push (t := .val .bool) false,List.prefix_refl _⟩ :=
-    assigned_condition_prefix_run (caller false) tci tca
-  have compiled : StmtOut C 1 0 (Frag.init (.val .bool :: TargetCtx)) false false false
-      ((assignLocalOperand (C := C) tci tca).code.run (caller false))
-      (run (compileProg 0 (assignLocalOperand (C := C) tci tca).code) (machine false)) (machine false) :=
-    prog_sim (assignLocalOperand (C := C) tci tca).code (entry false) rfl (by decide)
-  rw [typed] at compiled
-  rcases normal_of_ok compiled with ⟨bad,hr,_,repr⟩
-  intro same
-  rw [hr,observed] at same
-  have selected : some (bad.mem 2) = some w[0] := congrArg (fun out : Option (List Word) => match out with | some (_ :: _ :: x :: _) => some x | _ => none) same
-  change some (bad.mem 2) = some w[0] at selected
-  have zero : bad.mem 2 = w[0] := Option.some.inj selected
-  have one : bad.mem 2 = w[1] := repr.vals (.there .here)
-  exact (by decide : (w[1] : Word) ≠ w[0]) (one.symm.trans zero)
+      snapshot (run emitted (machine false)) :=
+  Exists.elim (normal_of_ok
+      ((assigned_condition_prefix_run (caller false) tci tca) ▸
+        (prog_sim (assignLocalOperand (C := C) tci tca).code (entry false) rfl (by decide))))
+    (fun bad ⟨hr,_,repr⟩ => by
+      intro same
+      rw [hr,observed] at same
+      have selected : some (bad.mem 2) = some w[0] := congrArg (fun out : Option (List Word) => match out with | some (_ :: _ :: x :: _) => some x | _ => none) same
+      change some (bad.mem 2) = some w[0] at selected
+      have zero : bad.mem 2 = w[0] := Option.some.inj selected
+      have one : bad.mem 2 = w[1] := repr.vals (.there .here)
+      exact (by decide : (w[1] : Word) ≠ w[0]) (one.symm.trans zero))
 
 /-- False fallthrough may overwrite the caller condition true; the private
 selector remains false, preserving the actual Source outcome classification. -/
 theorem alias_observed :
     snapshot (run (emit (C := C) 0 tci tca tci .here) (machine false)) =
-      some [w[0],w[1],w[1],w[0],w[99],w[77]] := by
-  have typed : (ReturnTail.code (C := C) tci tca tci .here).run (caller false) =
-      .ok ⟨ReturnTail.reached (caller false) tci false tci .here,List.prefix_refl _⟩ :=
-    ReturnTail.target_run (caller false) tci tca false tci .here rfl
-  have noCanary : codeStoresCell 5 (emit (C := C) 0 tci tca tci .here) = false := by decide
-  have compiled : StmtOut C 1 0 (Frag.init (.val .bool :: TargetCtx)) false false false
-      ((ReturnTail.code (C := C) tci tca tci .here).run (caller false))
-      (run (emit (C := C) 0 tci tca tci .here) (machine false)) (machine false) :=
-    prog_sim (ReturnTail.code (C := C) tci tca tci .here) (entry false) rfl (by decide)
-  rw [typed] at compiled
-  rcases normal_of_ok compiled with ⟨final,hr,stack,repr⟩
-  have m0 : final.mem 0 = w[0] := repr.vals (.there (.there (.there .here)))
-  have m1 : final.mem 1 = w[1] := repr.vals (.there (.there .here))
-  have m2 : final.mem 2 = w[1] := repr.vals (.there .here)
-  have m3 : final.mem 3 = w[0] := repr.vals .here
-  have m5 : final.mem 5 = w[99] := exec_mem noCanary hr
-  rw [hr]
-  change some ([final.mem 0,final.mem 1,final.mem 2,final.mem 3,final.mem 5] ++ final.stack) = _
-  rw [m0,m1,m2,m3,m5,stack]
-  rfl
+      some [w[0],w[1],w[1],w[0],w[99],w[77]] :=
+  Exists.elim (normal_of_ok
+      (out := run (emit (C := C) 0 tci tca tci .here) (machine false))
+      ((ReturnTail.target_run (caller false) tci tca false tci .here rfl) ▸
+        (prog_sim (ReturnTail.code (C := C) tci tca tci .here) (entry false) rfl (by decide))))
+    (fun final ⟨hr,stack,repr⟩ => by
+      have noCanary : codeStoresCell 5 (emit (C := C) 0 tci tca tci .here) = false := by decide
+      have m0 : final.mem 0 = w[0] := repr.vals (.there (.there (.there .here)))
+      have m1 : final.mem 1 = w[1] := repr.vals (.there (.there .here))
+      have m2 : final.mem 2 = w[1] := repr.vals (.there .here)
+      have m3 : final.mem 3 = w[0] := repr.vals .here
+      have m5 : final.mem 5 = w[99] := exec_mem noCanary hr
+      rw [hr]
+      change some ([final.mem 0,final.mem 1,final.mem 2,final.mem 3,final.mem 5] ++ final.stack) = _
+      rw [m0,m1,m2,m3,m5,stack]
+      rfl)
 
 end Solidity.Backend.StructuredFlow.ReturnTailCompiler.Controls
