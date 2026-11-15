@@ -139,23 +139,16 @@ theorem capacity_refusal_after_path :
     · exact refusal.2
 
 theorem empty_child_success : ∃ fits,
-    FixedReferencePathCopyResult 1 8 (state [] (by decide)) bases (wmod 40) (machine (wmod 40) []) path (value [] (by decide)) fits := by
-  rcases all_fitting_payloads (wmod 40) (by decide) [] (by decide) with success | refusal
-  · exact success
-  · have fits : (wmod 40).val + fixedReferenceStorageParentDemand (fixedReferenceLiveRows (value [] (by decide))) < W := by
-      with_unfolding_all decide
-    exact (refusal.1 fits).elim
+    FixedReferencePathCopyResult 1 8 (state [] (by decide)) bases (wmod 40) (machine (wmod 40) []) path (value [] (by decide)) fits :=
+  (all_fitting_payloads (wmod 40) (by decide) [] (by decide)).resolve_right
+    (fun refusal => refusal.1 (by with_unfolding_all decide))
 
 theorem long_child_success : ∃ fits,
     FixedReferencePathCopyResult 1 8 (state (List.replicate 64 (wmod 11)) (by rw [List.length_replicate]; decide)) bases
       (wmod 40) (machine (wmod 40) (List.replicate 64 (wmod 11))) path
-      (value (List.replicate 64 (wmod 11)) (by rw [List.length_replicate]; decide)) fits := by
-  rcases all_fitting_payloads (wmod 40) (by decide) (List.replicate 64 (wmod 11)) (by rw [List.length_replicate]; decide) with success | refusal
-  · exact success
-  · have fits : (wmod 40).val + fixedReferenceStorageParentDemand
-        (fixedReferenceLiveRows (value (List.replicate 64 (wmod 11)) (by rw [List.length_replicate]; decide))) < W := by
-      with_unfolding_all decide
-    exact (refusal.1 fits).elim
+      (value (List.replicate 64 (wmod 11)) (by rw [List.length_replicate]; decide)) fits :=
+  (all_fitting_payloads (wmod 40) (by decide) (List.replicate 64 (wmod 11)) (by rw [List.length_replicate]; decide)).resolve_right
+    (fun refusal => refusal.1 (by with_unfolding_all decide))
 
 /--
 info: 'Solidity.Backend.MemoryCopies.FixedReferencePathCopyControls.certificate_inhabited' depends on axioms: [propext,
