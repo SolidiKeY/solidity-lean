@@ -24,7 +24,7 @@ matter). On that index:
               the factory's master check); with no cached index it says SKIP and passes.
               GATE_STATEMENT_PRESERVING=1 adds --statement-preserving.
 Cache: $DECL_INDEX_CACHE, else <git common dir>/decl-index (shared by worktrees), one
-<sha>.jsonl per indexed commit, the newest 30 kept.
+<sha>.jsonl per indexed commit (about 45 MB), the newest 10 kept.
 
 Usage: decl_index.py dump [--out FILE] [MODULE...]       (default module Solidity)
        decl_index.py duplicates INDEX [--top N]
@@ -40,7 +40,7 @@ sys.dont_write_bytecode = True
 HERE = pathlib.Path(__file__).resolve().parent
 SCRIPT = HERE / "DeclIndex.lean"
 BASELINE = HERE / "baseline.json"
-KEEP = 30
+KEEP = 10
 INCREMENTAL_DEPTH, INCREMENTAL_MODULES = 50, 400
 
 

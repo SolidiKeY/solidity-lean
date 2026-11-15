@@ -13,6 +13,8 @@
 # 2: usage error, or no writable storage for logs and status records.
 set -uo pipefail
 root=$(git rev-parse --show-toplevel) || exit 2
+# Gate options for the caller's own gate.sh run, not for the test gates these checks run.
+unset GATE_DECL_INDEX GATE_STATEMENT_PRESERVING
 cd "$root" || exit 2
 
 # name<TAB>command, in lean.yml's former step order; quality-reach (reach.py's census, about a
