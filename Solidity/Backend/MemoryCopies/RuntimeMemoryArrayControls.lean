@@ -58,20 +58,18 @@ private theorem heap_repr (payloads : List (Fin W)) (bounded : payloads.length <
           Nat.add_sub_cancel_left,chosen,Option.getD_some]
         exact ReprV.uint_of rfl)
 private theorem allocator (payloads : List (Fin W)) (bounded : payloads.length < 128) :
-    Objects.AllocatorRepr (heap payloads bounded) bases 8 (wmod 256) (machine payloads) := by
-  refine ⟨heap_repr payloads bounded,⟨by decide,by decide,rfl,?_⟩,?_⟩
-  · intro address above
+    Objects.AllocatorRepr (heap payloads bounded) bases 8 (wmod 256) (machine payloads) :=
+  singleton_allocator_repr (heap_repr payloads bounded) ⟨by decide,by decide,rfl,by
+    intro address above
     change 256 ≤ address at above
     simp only [machine,if_neg (show address ≠ 0 by omega),
       if_neg (show ¬(address = 1 ∨ address = 2) by omega),if_neg (show address ≠ 7 by omega),
       if_neg (show address ≠ 16 by omega),
       if_neg (show ¬(17 ≤ address ∧ address < 17 + payloads.length) by omega)]
-  · intro Q reference
-    obtain ⟨rfl,equal⟩ := refs reference
-    cases equal
+  ⟩ (by
     with_unfolding_all change 16 + (1 + (values payloads).length) ≤ 256
     rw [values,List.length_map]
-    omega
+    omega)
 private def grown (payloads : List (Fin W)) (bounded : payloads.length < 128) :=
   (MVal.copyMToSt (heap payloads bounded) (T := .ref R) old).copyStToM (heap payloads bounded) rfl
 
