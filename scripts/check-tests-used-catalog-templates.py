@@ -10,8 +10,12 @@ Obtain that private artifact from the manifest repository/commit/path. Both
 new modes take --ref REV and optional H871 --roles PATH. The additive
 gzip_roles catalog field opts in when --roles is absent; explicit --roles
 selects its supplied catalog as before. Both use the unchanged landed helper.
-The role_delta_proposal locator pins the unadopted H908 bounded role-delta/
-manifest contract proposal. In a clone of its repository, check its bytes with
+The role_delta_proposal locator pins a separately reviewed contract.
+The historical_role_delta_manifest locator opts external modes into paired
+--historical-role-delta-manifest and --historical-role-delta private files.
+Opt-in rebuilds both the base-only and combined models; orphan reviews and
+every blocker beyond the eligible path's own generic-use marker fail closed.
+In a clone of the proposal repository, check its bytes with
 `git show <evidence_commit>:<evidence_path> | sha256sum` against its sha256.
 Real-object reviews
 remain independently required. A matching SHA256 never replaces rebuilding
@@ -35,6 +39,7 @@ v1 = v2.v1
 SECTIONS = {'standalone', 'module_entries', 'reads', 'generators', 'orphans'}
 MANIFEST_KEY = 'inventory_manifest'
 PROPOSAL_KEY = 'role_delta_proposal'
+ROLE_DELTA_KEY = 'historical_role_delta_manifest'
 GZIP_KEY = 'gzip_roles'  # Explicit opt-in data in the landed H871 schema.
 MAX_ARTIFACT_BYTES = 50 * 1024 * 1024  # Existing private-evidence per-file limit.
 
@@ -197,11 +202,15 @@ def catalog_document():
         validate_manifest(data[MANIFEST_KEY])
     if PROPOSAL_KEY in data:
         validate_proposal(data[PROPOSAL_KEY])
+    if ROLE_DELTA_KEY in data:
+        validate_proposal(data[ROLE_DELTA_KEY])
+        if PROPOSAL_KEY in data:
+            raise ValueError('proposal and role-delta manifest cannot coexist')
     return data
 
 
 def load_catalog():
-    data = {key: value for key, value in catalog_document().items() if key not in {MANIFEST_KEY, GZIP_KEY, PROPOSAL_KEY}}
+    data = {key: value for key, value in catalog_document().items() if key not in {MANIFEST_KEY, GZIP_KEY, PROPOSAL_KEY, ROLE_DELTA_KEY}}
     return expand((HERE / 'check-tests-used-routes.json').read_bytes(), data)
 
 
@@ -244,20 +253,110 @@ def verify_manifest_artifact(root, manifest, expected, artifact):
     v1.verify(actual, expected)  # Full rebuild comparison AND mandatory completeness.
 
 
-def current_inventory(root, ref, roles):
+def canonical_private_json(data):
+    return (json.dumps(data, indent=2, sort_keys=True) + '\n').encode('utf-8')
+
+
+def bounded_private_json(root, path, identity):
+    with external_artifact(root, path).open('rb') as stream:
+        raw = stream.read(identity['bytes'] + 1)
+    if len(raw) != identity['bytes'] or v2.hashlib.sha256(raw).hexdigest() != identity['sha256']:
+        raise ValueError('role-delta private input size or SHA256 mismatch')
+    data = parse(raw)
+    if raw != canonical_private_json(data):
+        raise ValueError('noncanonical role-delta private input')
+    return data
+
+
+def role_delta_inputs(repo, catalog, document, manifest_path, delta_path):
+    locator = document.get(ROLE_DELTA_KEY)
+    if locator is None or manifest_path is None or delta_path is None:
+        raise ValueError('role-delta locator and both private files are required')
+    validate_proposal(locator)
+    manifest = bounded_private_json(repo.root, manifest_path, locator)
+    fields = {'schema_version', 'input_revision', 'base_sha256', 'sha256',
+              'bytes', 'repository', 'evidence_commit', 'evidence_path'}
+    if not isinstance(manifest, dict) or set(manifest) != fields:
+        raise ValueError('invalid role-delta manifest fields')
+    validate_manifest({key: value for key, value in manifest.items() if key != 'base_sha256'})
+    base_raw = (HERE / 'check-tests-used-roles.json').read_bytes()
+    if (manifest['input_revision'] != repo.ref or not sha(manifest['base_sha256'])
+            or manifest['base_sha256'] != v2.hashlib.sha256(base_raw).hexdigest()):
+        raise ValueError('role-delta revision or base differs from current inputs')
+    delta = bounded_private_json(repo.root, delta_path, manifest)
+    # The frozen predicate validates every field, including stale records.
+    base = parse(base_raw)
+    v1.reviewed_historical_notes(repo, base)
+    eligible = v1.reviewed_historical_notes(repo, delta)
+    paths = {row['path'] for row in delta['records']}
+    if paths & {row['path'] for row in catalog['orphans']}:
+        raise ValueError('role-delta path has an orphan review')
+    combined = dict(schema_version=1, records=base['records'] + delta['records'])
+    v1.reviewed_historical_notes(repo, combined)  # Includes duplicate/overlap refusal.
+    return combined, eligible, paths
+
+
+def guard_role_delta(catalog, baseline, candidate, paths, eligible):
+    """Allow only predicate-bound provenance and its own generic-use removal."""
+    if paths & {row['path'] for row in catalog['orphans']}:
+        raise ValueError('role-delta path has an orphan review')
+    if len(candidate['records']) != len(baseline['records']):
+        raise ValueError('role-delta changed the inventory universe')
+    allowed = copy.deepcopy(baseline)
+    marker = 'UNRESOLVED_USE: candidate search is not a certified use graph or proof of non-use'
+    for old, new, target in zip(baseline['records'], candidate['records'], allowed['records']):
+        path = old['path']
+        if path in paths and path in eligible:
+            role = eligible[path]
+            target['secondary']['historical_role'] = role
+            own = (old['class'] is None and new['class'] == 'evidence'
+                   and old['unresolved'].count(marker) == 1 and new['reason'] == role)
+            if own:
+                target['class'] = 'evidence'
+                target['unresolved'].remove(marker)
+            if own or old['class'] == 'evidence':
+                target['reason'] = role
+        if canonical_private_json(target) != canonical_private_json(new):
+            raise ValueError('role-delta changed a blocker, field, pin or unrelated provenance')
+    allowed['totals'] = {**{c: sum(r['class'] == c for r in allowed['records']) for c in v1.CLASSES},
+                         'paths': len(allowed['records']),
+                         'unresolved': sum(bool(r['unresolved']) for r in allowed['records'])}
+    # Full serialized equality also refuses added/dropped header and row fields.
+    if canonical_private_json(allowed) != canonical_private_json(candidate):
+        raise ValueError('role-delta changed inventory headers, field sets or totals')
+    return candidate
+
+
+def current_inventory(root, ref, roles, role_manifest=None, role_delta=None):
     spec = importlib.util.spec_from_file_location('tests_used_gzip', HERE / 'check-tests-used-gzip.py')
     adapter = importlib.util.module_from_spec(spec)
     spec.loader.exec_module(adapter)
     fixtures = adapter.classifier()
     repo = fixtures.v1.Repository(root, ref)
-    expected = fixtures.inventory(repo, fixtures.templates.load_catalog())
-    # Explicit --roles retains its existing selection semantics. Otherwise the
-    # additive catalog field opts into the exact landed helper contract.
+    catalog = fixtures.templates.load_catalog()
     document = catalog_document()
-    if roles is not None or GZIP_KEY in document:
+    opted = ROLE_DELTA_KEY in document or role_manifest is not None or role_delta is not None
+    inputs = role_delta_inputs(repo, catalog, document, role_manifest, role_delta) if opted else None
+    expected = fixtures.inventory(repo, catalog)
+    selected = None
+    gzip_opted = roles is not None or GZIP_KEY in document
+    if gzip_opted:
         selected = parse(roles.read_bytes()) if roles is not None else document[GZIP_KEY]
         expected = adapter.apply_roles(repo, expected, selected)
-    return expected
+    if inputs is None:
+        return expected
+    combined, eligible, paths = inputs
+    isolated = adapter.classifier()
+    original = isolated.v1.reviewed_historical_notes
+    try:
+        isolated.v1.reviewed_historical_notes = lambda r, definitions=None: original(
+            r, combined if definitions is None else definitions)
+        candidate = isolated.inventory(repo, catalog)
+    finally:
+        isolated.v1.reviewed_historical_notes = original
+    if gzip_opted:
+        candidate = adapter.apply_roles(repo, candidate, selected)
+    return guard_role_delta(catalog, expected, candidate, paths, eligible)
 
 
 def controls():
@@ -475,11 +574,177 @@ def gzip_binding_controls():
     print('PASS H871 catalog binding: absent opt-in, exact object/recovery, explicit selection, null-input rejection and stale-context refusal')
 
 
+def role_delta_controls():
+    """Exercise actual CLI/private inputs on a disposable synthetic repository."""
+    import subprocess
+    with tempfile.TemporaryDirectory(prefix='tests-used-role-delta-') as directory:
+        temporary = Path(directory)
+        root, code = temporary / 'repo', temporary / 'code'
+        root.mkdir()
+        code.mkdir()
+        (root / 'tests').mkdir()
+        path = 'tests/role-control.txt'
+        (root / path).write_text('synthetic unverified historical note\n')
+        (root / 'context.py').write_text('REFERENCE = "tests/role-control.txt"\n')
+        v1.git(root, 'init', '-q')
+        v1.git(root, 'add', '.')
+        v1.git(root, '-c', 'user.name=control', '-c', 'user.email=control@example.invalid',
+               'commit', '-qm', 'Synthetic role-delta input')
+        repo = v1.Repository(root, 'HEAD')
+        catalog = dict(schema_version=3, standalone=[], module_entries=[], reads=[], generators=[], orphans=[])
+        base = dict(schema_version=1, records=[])
+        raw_catalog = canonical_private_json(catalog)
+        document = encode(raw_catalog, catalog)
+        for source in HERE.glob('check-tests-used*.py'):
+            (code / source.name).write_bytes(source.read_bytes())
+        (code / 'check-tests-used-routes.json').write_bytes(raw_catalog)
+        (code / 'check-tests-used-roles.json').write_bytes(canonical_private_json(base))
+        (code / 'check-tests-used-fixtures.json').write_bytes(canonical_private_json(dict(schema_version=2, records=[])))
+        target = temporary / 'inventory.json'
+        manifest_path, delta_path = temporary / 'manifest.json', temporary / 'delta.json'
+        row = dict(path=path, blob=repo.tree[path][2], anchor='synthetic unverified historical note',
+                   role='Historical record: Synthetic unverified diagnostic; no real-object approval.')
+        delta = dict(schema_version=1, records=[row])
+        locator = dict(repository='SolidiKeY/solidity-lean-coord', evidence_commit='a' * 40,
+                       evidence_path='evidence/synthetic/delta.json')
+        def pin(data=delta, change_manifest=None, delta_raw=None):
+            raw = canonical_private_json(data) if delta_raw is None else delta_raw
+            delta_path.write_bytes(raw)
+            manifest = dict(locator, schema_version=1, input_revision=repo.ref,
+                            base_sha256=v2.hashlib.sha256(canonical_private_json(base)).hexdigest(),
+                            bytes=len(raw), sha256=v2.hashlib.sha256(raw).hexdigest())
+            if change_manifest is not None:
+                change_manifest(manifest)
+            raw = canonical_private_json(manifest)
+            manifest_path.write_bytes(raw)
+            document[ROLE_DELTA_KEY] = dict(locator, bytes=len(raw), sha256=v2.hashlib.sha256(raw).hexdigest())
+            save_document()
+        def save_document():
+            (code / 'check-tests-used-catalog-templates.json').write_bytes(canonical_private_json(document))
+        def cli(*extra, status=1):
+            result = subprocess.run([sys.executable, '-B', str(code / 'check-tests-used-catalog-templates.py'),
+                     '--ref', repo.ref, '--export', '--artifact', str(target), *extra], cwd=root, capture_output=True)
+            assert result.returncode == status, (result.stdout, result.stderr)
+            return result
+        flags = ['--historical-role-delta-manifest', str(manifest_path), '--historical-role-delta', str(delta_path)]
+        save_document()
+        baseline = v1.inventory(repo, catalog)
+        cli()  # Full CLI no-opt-in output equals the unchanged frozen pipeline.
+        assert target.read_bytes() == v1.output_json(baseline)
+        pin()
+        cli(*flags, status=0)
+        candidate = parse(target.read_bytes())
+        eligible = v1.reviewed_historical_notes(repo, delta)
+        assert guard_role_delta(catalog, baseline, candidate, {path}, eligible) == candidate
+        assert candidate['records'][0]['class'] == 'evidence'
+        v1.verify(candidate, candidate)
+        frozen_output = target.read_bytes()
+        def must_refuse(extra=flags):
+            result = cli(*extra)
+            assert b'tests-used-templates:' in result.stderr
+            assert target.read_bytes() == frozen_output  # Refusal never replaces output.
+        for extra in [[], flags[:2], flags[2:]]:
+            if extra:
+                cli(*extra, status=2)
+                assert target.read_bytes() == frozen_output
+            else:
+                must_refuse(extra)
+        delta_path.write_bytes(delta_path.read_bytes() + b' ')
+        must_refuse()
+        pin()
+        manifest_path.write_bytes(manifest_path.read_bytes() + b' ')
+        must_refuse()
+        for field, value in [('input_revision', 'b' * 40), ('base_sha256', '0' * 64),
+                             ('schema_version', True), ('bytes', True), ('extra', 0),
+                             ('bytes', MAX_ARTIFACT_BYTES + 1), ('repository', 'other/repo')]:
+            pin(change_manifest=lambda data: data.update({field: value}))
+            must_refuse()
+        for invalid in [dict(delta, extra=0), dict(delta, schema_version=True),
+                        dict(delta, records=[row, row]),
+                        dict(delta, records=[dict(row, anchor='missing literal anchor')])]:
+            pin(invalid)
+            must_refuse()
+        for raw in [b'{"schema_version":1,"schema_version":1,"records":[]}',
+                    b'{"schema_version":1,"records":[],"x":NaN}', b'{}\n ']:
+            pin(delta_raw=raw)
+            must_refuse()
+        pin(dict(delta, records=[dict(row, blob='0' * 40)]))
+        cli(*flags)  # Stale object skips its role, exports unresolved baseline, exits 1.
+        assert target.read_bytes() == v1.output_json(baseline)
+        frozen_output = target.read_bytes()
+        base['records'] = [row]
+        (code / 'check-tests-used-roles.json').write_bytes(canonical_private_json(base))
+        pin()
+        must_refuse()  # Base/delta overlap is invalid even when definitions agree.
+        base['records'] = []
+        (code / 'check-tests-used-roles.json').write_bytes(canonical_private_json(base))
+        pin()
+        cli(*flags, status=0)
+        frozen_output = target.read_bytes()
+        refusal = dict(path=path, blob=row['blob'], reason='Synthetic exact regression fixture',
+                       consumers=[dict(path='context.py', blob=repo.tree['context.py'][2],
+                                       anchors=['REFERENCE = "tests/role-control.txt"'])])
+        (code / 'check-tests-used-fixtures.json').write_bytes(
+            canonical_private_json(dict(schema_version=2, records=[refusal])))
+        must_refuse()  # The role cannot discard a newly exposed fixture-refusal blocker.
+        (code / 'check-tests-used-fixtures.json').write_bytes(
+            canonical_private_json(dict(schema_version=2, records=[])))
+        for mutate in [lambda d: d.update(extra_header=0),
+                       lambda d: d['records'][0].update(extra_row=0),
+                       lambda d: d['records'][0].update(recovery=None),
+                       lambda d: d['records'][0]['secondary'].update(extra_provenance=0)]:
+            invalid = copy.deepcopy(candidate)
+            mutate(invalid)
+            try:
+                guard_role_delta(catalog, baseline, invalid, {path}, eligible)
+            except ValueError:
+                pass
+            else:
+                raise AssertionError('role-delta accepted an added field or changed provenance')
+        for marker in ['UNSUPPORTED_ORPHAN_REVIEW: synthetic', 'UNRESOLVED_READ_ROLE: synthetic',
+                       'UNRESOLVED_GENERATED_CONSUMPTION: synthetic', 'UNVERIFIABLE: synthetic',
+                       'FUTURE_UNKNOWN_BLOCKER: synthetic']:
+            blocked = copy.deepcopy(baseline)
+            blocked['records'][0]['unresolved'].append(marker)
+            try:
+                guard_role_delta(catalog, blocked, candidate, {path}, eligible)
+            except ValueError:
+                pass
+            else:
+                raise AssertionError('role-delta erased an independent blocker')
+        for revision_pin in [repo.ref, 'f' * 40]:
+            orphan = dict(path=path, input_revision=revision_pin, blob=row['blob'],
+                          reason='Synthetic orphan review', dynamic_review='Candidate still present')
+            blocked_catalog = dict(catalog, orphans=[orphan])
+            if revision_pin == repo.ref:
+                orphan_baseline = v1.inventory(repo, blocked_catalog)
+                assert any(item.startswith('UNSUPPORTED_ORPHAN_REVIEW:')
+                           for item in orphan_baseline['records'][0]['unresolved'])
+                try:
+                    guard_role_delta(catalog, orphan_baseline, candidate, {path}, eligible)
+                except ValueError:
+                    pass
+                else:
+                    raise AssertionError('post-flight failed the frozen-v1 orphan counterexample')
+            document.update(encode(raw_catalog, blocked_catalog))
+            save_document()
+            must_refuse()  # Both current and inactive orphan records refuse the actual CLI.
+        document.update(encode(raw_catalog, catalog))
+        document.pop(ROLE_DELTA_KEY)
+        save_document()
+        must_refuse()  # Supplied files without the committed locator cannot opt in.
+        cli()
+        assert target.read_bytes() == v1.output_json(baseline)  # Invocation isolation.
+    print('PASS role-delta controls: full CLI default equivalence, private bindings, orphan/blocker and exact-field refusals, stale skip versus anchor rejection, no real-role approval')
+
+
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument('--ref', default='origin/master')
     parser.add_argument('--artifact', type=Path, help='Private H145 inventory artifact, outside Git tracking')
     parser.add_argument('--roles', type=Path, help='Explicit independently reviewed H871 gzip roles')
+    parser.add_argument('--historical-role-delta-manifest', type=Path)
+    parser.add_argument('--historical-role-delta', type=Path)
     modes = parser.add_mutually_exclusive_group(required=True)
     for mode in ['write', 'check', 'self-test', 'export', 'check-manifest']:
         modes.add_argument('--' + mode, action='store_true')
@@ -487,11 +752,15 @@ def main():
     external = args.export or args.check_manifest
     if external != (args.artifact is not None) or args.roles is not None and not external:
         parser.error('--artifact is required only for --export/--check-manifest; --roles is exclusive to those modes')
+    if ((args.historical_role_delta_manifest is None) != (args.historical_role_delta is None)
+            or not external and args.historical_role_delta is not None):
+        parser.error('historical role-delta files must be paired and require an external mode')
     try:
         if args.self_test:
             controls()
             manifest_controls()
             gzip_binding_controls()
+            role_delta_controls()
             v2.controls()
             v1.self_test()
             return 0
@@ -502,7 +771,8 @@ def main():
             if args.check_manifest and (manifest is None or manifest['input_revision'] != resolved):
                 raise ValueError('missing inventory manifest or mismatched resolved input revision')
             target = external_artifact(root, args.artifact)
-            expected = current_inventory(root, resolved, args.roles)
+            expected = current_inventory(root, resolved, args.roles,
+                                         args.historical_role_delta_manifest, args.historical_role_delta)
             if args.export:
                 raw = v1.output_json(expected)
                 if len(raw) > MAX_ARTIFACT_BYTES:
