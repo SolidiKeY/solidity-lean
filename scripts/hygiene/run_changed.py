@@ -278,7 +278,7 @@ def path_in_run(path, run):
 
 def collect(repo, base, head, wt, validators=False):
     ch = changed_paths(repo, base, head)
-    items, covered = [], []
+    items = []
     cf_path = os.path.join(wt, "scripts/ci/checks-fast.sh")
     fast = checks_fast_cmds(open(cf_path).read()) if os.path.exists(cf_path) else {}
     fast_files = set()
