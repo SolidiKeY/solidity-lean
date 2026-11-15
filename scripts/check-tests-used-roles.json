@@ -1383,6 +1383,38 @@
       "anchor": "defaultTargets = [\"Solidity\", \"solkeycheck\", \"solidity-lean\"]",
       "role": "Historical record: Captured original task Lake configuration snapshot with old library/executable declarations and selected weak Lean flags. It is not the active Lake file, current dependency/target registration, default-stack result, source preservation or an adopted budget/resource/trust setting. Historical handoff/context claims remain unverified. Live keep and uncertain-reader precedence remain; no child/read/fixture/generation, proof/runtime/full-gate, nonuse/orphan/deletion, permission or STOP-clearance credit."
     }
+  ,
+    {
+      "path": "tests/upstream/step12-quantified-diamond/focused-checks.sh.txt",
+      "blob": "dd430d21b90d1a8d996aa4bb86b7d244c7931d75",
+      "anchor": "lake -f lakefile.step12.toml build Solidity.KeySort",
+      "role": "Historical record: Captured focused-check command list printing tool versions and naming KeySort plus ten per-file Lean targets. Adjacent validation reports an old pass, not authenticated current execution, source/kernel verification, resource clearance or a new RUNTIME_GATE_PASS. No listed check or stopped workload is run. Captured instructions/results are inert and unverified. Keep/uncertain-reader precedence remains; no generation, nonuse/orphan/deletion, permission, budget reset or STOP-clearance credit."
+    },
+    {
+      "path": "tests/upstream/step12-quantified-diamond/lake-launcher.sh.txt",
+      "blob": "99b7f1484bce8b5463dbe5f3571976adcfec200f",
+      "anchor": "  if [ \"$arg\" = lean ]; then",
+      "role": "Historical record: Captured Step12 Lake launcher source selecting a temporary configuration and adding serial flags to its Lean branch. It is not an active executable, current command interface, dependency/cache validation or permission to restore a launcher or alter current proof/resource settings. Captured instructions/results are inert and unverified. Keep/uncertain-reader precedence remains; no generation, nonuse/orphan/deletion, permission, budget reset or STOP-clearance credit."
+    },
+    {
+      "path": "tests/upstream/step12-quantified-diamond/lakefile.step12.toml.txt",
+      "blob": "c7bf262ceaef1a52a807980885194730155f0b4a",
+      "anchor": "defaultTargets = [\"Solidity\", \"solkeycheck\", \"solidity-lean\"]",
+      "role": "Historical record: Captured Step12 Lake configuration snapshot with old default targets, package declarations, artifact cache and weak stack/serial flags. It is not the active Lake file or current registration, source preservation, default-stack result, budget/resource policy or proof acceptance; no option is applied. Captured instructions/results are inert and unverified. Keep/uncertain-reader precedence remains; no generation, nonuse/orphan/deletion, permission, budget reset or STOP-clearance credit."
+    },
+    {
+      "path": "tests/upstream/step12-quantified-diamond/source-replay.mjs.txt",
+      "blob": "cb66210b7a56da388a0be796ef17247092dca099",
+      "anchor": "console.log('sourceReplayStatus='+(blocked?'blocked-or-partial':'passed'));",
+      "role": "Historical record: Captured Node source constructing temporary old/new pipeline Lean wrappers, checking eight function names and writing runner reports. Adjacent validation marks source replay partial with exit2; no replay, fixture/output generation, current runner/child/read, all-case proof, equivalence or full-gate pass is inferred or authorized. Captured instructions/results are inert and unverified. Keep/uncertain-reader precedence remains; no generation, nonuse/orphan/deletion, permission, budget reset or STOP-clearance credit."
+    }
+  ,
+    {
+      "path": "tests/h62/item4/generic-p10/original-assignment.txt",
+      "blob": "5b92c4364de8b6df8529dc37fadc199e46af0a6e",
+      "anchor": "You are the Codex Cloud worker for batch \"solidity-h62-4-20261106\", task \"generic-p10\": H62 4 generic-p10.",
+      "role": "Historical record: Captured89-line generic-P10 original launch/assignment, old scope/owner map, work/backfill queues, reporting schema and resource/continuation clauses. This is provenance for another lane, not current authorization, ownership, goal state, report protocol or a new task. No captured proof, timing, tool/server or command is run, applied or accepted. Keep/uncertain-reader precedence remains; no fixture/generation, proof/runtime/full-gate, nonuse/orphan/deletion, permission, budget reset or STOP-clearance credit."
+    }
   ],
   "schema_version": 1
 }
