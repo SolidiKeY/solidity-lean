@@ -64,4 +64,20 @@ theorem singleton_array_heap_repr {R : RefTy} {E : Ty} {heap : Heap [R]}
   · intro name reference
     exact (noStruct reference).elim
 
+/-- A write below the local region preserves every represented source value and object. -/
+theorem state_repr_write_below {C : Contract} {Γ : Ctx} {L b frame : Nat} {frag : Frag Γ}
+    {state : State C Γ} {base : Nat → Fin W} {machine : Machine}
+    (represented : Objects.StateRepr L b frame frag state base machine)
+    (address : Nat) (below : address < b) (withinFrame : address < frame) (word : Word) :
+    Objects.StateRepr L b frame frag state base (writeMachine machine address word) := by
+  refine ⟨represented.core.congrMem ?_, represented.heap.localWrite address withinFrame word, ?_, represented.locals⟩
+  · intro level lower upper
+    exact upd_other _ _ (by change level ≠ address; omega)
+  · intro Q index
+    obtain ⟨reference, found, stored⟩ := represented.pointers index
+    refine ⟨reference, found, ?_⟩
+    change upd machine.mem address word (cellOf b index) = _
+    rw [upd_other _ _ (by have lower := le_lvl b index; change lvl b index ≠ address; omega)]
+    exact stored
+
 end Solidity.Backend.MemoryCopies
