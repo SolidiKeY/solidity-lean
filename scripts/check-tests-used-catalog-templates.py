@@ -238,8 +238,9 @@ def current_inventory(root, ref, roles):
     expected = fixtures.inventory(repo, fixtures.templates.load_catalog())
     # Explicit --roles retains its existing selection semantics. Otherwise the
     # additive catalog field opts into the exact landed helper contract.
-    selected = parse(roles.read_bytes()) if roles is not None else catalog_document().get(GZIP_KEY)
-    if selected is not None:
+    document = catalog_document()
+    if roles is not None or GZIP_KEY in document:
+        selected = parse(roles.read_bytes()) if roles is not None else document[GZIP_KEY]
         expected = adapter.apply_roles(repo, expected, selected)
     return expected
 
@@ -423,6 +424,16 @@ def gzip_binding_controls():
             explicit.write_text(json.dumps(dict(schema_version=2, records=[])))
             # Existing explicit selection overrides embedded opt-in data.
             assert current_inventory(root, ref, explicit) == baseline
+            explicit.write_text('null')
+            for document, supplied in [({GZIP_KEY: data}, explicit), ({GZIP_KEY: None}, None)]:
+                globals()['catalog_document'] = lambda: document
+                try:
+                    current_inventory(root, ref, supplied)
+                except ValueError as error:
+                    assert 'invalid gzip role catalog' in str(error)
+                else:
+                    raise AssertionError('present null role input silently disabled validation')
+            globals()['catalog_document'] = lambda: {GZIP_KEY: data}
             row['review']['input_revision'] = 'f' * 40
             try:
                 current_inventory(root, ref, None)
@@ -432,7 +443,7 @@ def gzip_binding_controls():
                 raise AssertionError('embedded catalog bypassed landed revision guard')
         finally:
             globals()['catalog_document'] = saved
-    print('PASS H871 catalog binding: absent opt-in, exact object/recovery, explicit selection and stale-context refusal')
+    print('PASS H871 catalog binding: absent opt-in, exact object/recovery, explicit selection, null-input rejection and stale-context refusal')
 
 
 def main():
