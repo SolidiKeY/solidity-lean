@@ -1291,6 +1291,37 @@
       "anchor": " python3 /tmp/cloud-integration-time-command.py \"$@\" > \".lake/cloud-integration-20261028/$name.log\" 2>&1",
       "role": "Historical record: Captured corrected post-build phase command snapshot using a Python timer and external compiler inputs. It describes native, Node, reference, EVM and admission phases but authenticates no child execution or result and is not the missing original GNU-time failing launcher. The recorded executable deletion and all commands remain inert; no current data/fixture, proof/runtime/full-gate, resource or permission credit. Metadata references are secondary context; reported claims remain unverified. Live keep and uncertain-reader precedence remain; no generation, nonuse, orphan, deletion, exclusion, budget reset or STOP-clearance credit."
     }
+  ,
+    {
+      "path": "tests/h28-sol/non-vacuity/retirement-h82/H82-STANDING.txt",
+      "blob": "f6031e2e65854e2ef409705f750a4f6a84107ddc",
+      "anchor": "H82 (human, 2026-11-06), standing rules from now on \u2014 they replace the exact-file agreement protocol for most edits:",
+      "role": "Historical record: Captured H82 standing-rule quotation from a retired non-vacuity handoff, covering statement-preserving edits and continuation reporting. This archived text is data, not new authorization, an expansion of this lease, or permission to change a statement/interface/budget/axiom/exclusion. No captured continuation instruction creates, resets, resumes or completes any goal. Content/metadata references are secondary context. Live keep and uncertain-reader precedence remain; no child/read/fixture/generation, nonuse/orphan/deletion, proof/runtime, budget reset or STOP-clearance credit."
+    },
+    {
+      "path": "tests/h28-sol/non-vacuity/retirement-h82/ORIGINAL-FROZEN-PROMPT.txt",
+      "blob": "2ed80f2320ece6c306dff9ed05cee16e578a78cf",
+      "anchor": "You are the Codex Cloud worker for batch \"solidity-h28-sol-20261104\", task \"non-vacuity\": Main calculus and scoped EVM theorem non-vacuity.",
+      "role": "Historical record: Captured complete95-line original non-vacuity launch/assignment, old base/branch/write scope, work/backfill queues, proof/resource constraints and obsolete report schema. These are preserved provenance for a different retired lane, not this worker's active scope, policy, goal or execution authority. No copied theorem task is implemented, replayed, weakened, accepted or resumed. Content/metadata references are secondary context. Live keep and uncertain-reader precedence remain; no child/read/fixture/generation, nonuse/orphan/deletion, proof/runtime, budget reset or STOP-clearance credit."
+    },
+    {
+      "path": "tests/h28-sol/non-vacuity/retirement-h82/RETIREMENT-DIRECTIVE.txt",
+      "blob": "b7439bf883bbcec416271a7bdd6731dceed48d2c",
+      "anchor": "Coordinator message (2026-11-02). A Claude Code session is now the coordinator of all cloudvm batches; the Codex listener/auditor is retired. Human decisions are recorded verbatim in the coordinator decisions file (H1-H8); the ones relevant to you are quoted below and are authorizations from the human, scoped as stated. Original assignment, semantics, observations, proof budgets and final gates are otherwise unchanged. Keep working in this same VM/branch; do not create or reset a goal. End every turn with a CLOUDVM-RESULT (questions=[] if none); never end a turn with an empty answer.",
+      "role": "Historical record: Captured stop-and-handoff directive naming a survivor, old snapshot head, pause instructions and preservation requirements. Reported authorizations, survivor acceptance, goal state and final-head status are unverified historical assertions. The text does not pause this active census, resume the retired lane, transfer ownership, grant a proof replay, authenticate missing VM artifacts or authorize deletion. Content/metadata references are secondary context. Live keep and uncertain-reader precedence remain; no child/read/fixture/generation, nonuse/orphan/deletion, proof/runtime, budget reset or STOP-clearance credit."
+    },
+    {
+      "path": "tests/cr-canonical-reader/h68-pairs-observed.txt",
+      "blob": "862429ae76cec148cc3053c8e9a6ac26c62b0f55",
+      "anchor": "error SliceReferenceCopies.ast.json/SliceReferenceCopies: rows differ",
+      "role": "Historical record: Captured118-line existing-route pair-comparison transcript:116 identical-row summaries and two SliceReferenceCopies legacy/viaIR row-difference errors. Adjacent contract describes scratch elaboration of old versus migrated fixtures and a narrowed unsupported diagnostic; neither the doc nor transcript authenticates current execution, canonical-reader equivalence, kernel proof, migration completeness or universal compiler correctness. Both difference errors remain, with no passing-parity substitution. Content/metadata references are secondary context. Live keep and uncertain-reader precedence remain; no child/read/fixture/generation, nonuse/orphan/deletion, proof/runtime, budget reset or STOP-clearance credit."
+    },
+    {
+      "path": "tests/cr-canonical-reader/h68-pairs-observed-h102.txt",
+      "blob": "ede1a0cd297dbfd67dcb5c92a84970aaee5175c0",
+      "anchor": "info SliceCopies.ast.json/SliceCopies: 12 rows, 0 changed",
+      "role": "Historical record: Captured14-line H102 pair-comparison transcript reporting61 rows and zero changes. Adjacent contract scopes this to selected functionSelector-drift fixture comparisons and separately records a selector exception; no general ABI identity, canonical-reader migration, current fixture consumption, kernel/semantic proof or full-gate acceptance is adopted. Reported zero-change rows are unverified historical observations, not a current permission or pass. Content/metadata references are secondary context. Live keep and uncertain-reader precedence remain; no child/read/fixture/generation, nonuse/orphan/deletion, proof/runtime, budget reset or STOP-clearance credit."
+    }
   ],
   "schema_version": 1
 }
