@@ -4195,6 +4195,7 @@ import Solidity.Semantics.StaticInvocation
 import Solidity.Semantics.Storage
 import Solidity.Semantics.Storage.Anon
 import Solidity.Semantics.Storage.Ops
+import Solidity.Semantics.Storage.TypeLayout
 import Solidity.Semantics.Storage.Values
 import Solidity.Semantics.StorageWt
 import Solidity.Semantics.Termination
