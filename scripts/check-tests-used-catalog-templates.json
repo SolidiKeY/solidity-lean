@@ -36,10 +36,49 @@
        154
      ]
    }
+  ,
+{
+    "input_revision": "eb7956bdaaac974bf27df6113e59e402a46570e0",
+    "template_indices": [
+      155,
+      156,
+      157,
+      158,
+      159,
+      160
+    ]
+  }
+  ,
+{
+    "input_revision": "6364b7bb4b2e124a92195baf75a80aad3929bde3",
+    "template_indices": [
+      161,
+      162,
+      163,
+      164,
+      165,
+      166,
+      167,
+      168
+    ]
+  }
+  ,
+{
+    "input_revision": "f812628e097ab58e8c6c7b941f0b33fa1b991a5b",
+    "template_indices": [
+      169,
+      170,
+      171,
+      172,
+      173,
+      174,
+      175
+    ]
+  }
   ]
  },
  "base_sha256":"0c09ce59255e3cdc5d6e7ba68de7505968deb43aa9e84050259f392f93cd0723",
- "expanded_sha256":"c028ebb3ebcee4bb3626d48e953aef0ead5941c695fe900e1410369f27eebfcd",
+ "expanded_sha256":"189226a20ed9a3f7016215b03a77cb2afb53b0b0126d43b8851bc51b1e213fa2",
  "gzip_roles": {
    "schema_version": 2,
    "records": [
@@ -51,22 +90,288 @@
        "role": "Proposed historical missing-GNU-time launcher diagnostic for ordinary H828 independent land review. It reports a launch failure, not native build, test, proof or runtime completion. Original failing launcher source is not established; later corrected source is not substituted. No execution, child/read, nonuse, deletion, budget, permission, trust or proof credit.",
        "review": {
          "content": "/tmp/solidity-cloud-post-build.sh: line 13: /usr/bin/time: No such file or directory\n",
-         "producer": "At measured revision b1419be8d87e8ed8ea6836789e7898ffa22dd5c8, validation.json blob dd9ff2f4a5e5923f03632f42f1e0a9a7922a32fa records the historical GNU-time/launcher failures; post-build-command.sh.txt blob f8f66a4657b2c30cbaca33ee924380b8ba4a39e8 now uses a Python timing wrapper, so it is not authenticated as the missing original failing launcher. Historical assertions are unverified data; no command replay.",
+         "producer": "At measured revision 3e5a30bfba10688352fe0a42dca7beb58e385f00, validation.json blob dd9ff2f4a5e5923f03632f42f1e0a9a7922a32fa records the historical GNU-time/launcher failures; post-build-command.sh.txt blob f8f66a4657b2c30cbaca33ee924380b8ba4a39e8 now uses a Python timing wrapper, so it is not authenticated as the missing original failing launcher. Historical assertions are unverified data; no command replay.",
          "consumers": "At that exact revision, validation.json references this exact compressed object and its decoded length/hash. This metadata reference and repository scans are secondary context only, not a qualified consumer, proof of absence or nonuse. No empty-reader inference; keep, uncertain-reader and fixture-refusal precedence remain unchanged.",
-         "input_revision": "b1419be8d87e8ed8ea6836789e7898ffa22dd5c8",
+         "input_revision": "3e5a30bfba10688352fe0a42dca7beb58e385f00",
+         "independent": true
+       }
+     },
+     {
+       "path": "tests/upstream/cloud-integration-20261028/final-source-launch-error.log.gz",
+       "blob": "8d6b0b8cbb590e0ed066f0cf78b951ef2691563b",
+       "decoded_sha256": "1148d0681dffb6cefaff8bf0aac3cde0f6ef18c5d8f9a035aa898357ed508e64",
+       "anchor": "error: unknown long option '--tstack'",
+       "role": "Historical unknown-tstack-option launcher failure with recorded nonzero memory-guard result; no accepted source/proof gate. Assertions remain unverified historical data; no execution, child/read, nonuse/deletion, budget, permission or proof/runtime credit.",
+       "review": {
+         "content": "error: unknown long option '--tstack'\nmemory guard: peak aggregate RSS 0.04 GiB; result 1\n",
+         "producer": "At measured revision 3e5a30bfba10688352fe0a42dca7beb58e385f00, validation.json blob dd9ff2f4a5e5923f03632f42f1e0a9a7922a32fa: Metadata nonpassingAttemptsPreserved reports Lake argument-order failures. Retained final-source-command.sh.txt is a later command record, not authentication of the original failing argv. Exact retained command blob 44e22845e931d726d261e34e7275a9c01bac8567.",
+         "consumers": "At that exact revision, validation.json artifacts[final-source-launch-error.log] references this exact compressed object, decoded SHA256 and 90 bytes. This metadata reference and scans are secondary context, not a qualified reader or proof of absence/nonuse. No empty-reader inference; live keep, uncertain-reader and fixture-refusal precedence survive.",
+         "input_revision": "3e5a30bfba10688352fe0a42dca7beb58e385f00",
+         "independent": true
+       }
+     },
+     {
+       "path": "tests/upstream/cloud-integration-20261028/post-build-launch-error.log.gz",
+       "blob": "1f9d736a8703a572d2b85126d2ef9148234a83a1",
+       "decoded_sha256": "1728d08a8101db656d90cca8b9af77e13e25de707691c4f50945886eb5333136",
+       "anchor": "START native-tools 2026-10-28T22:55:31+01:00",
+       "role": "Historical native-tools phase start and result127 launcher failure; no native-tool build or post-build gate acceptance. Assertions remain unverified historical data; no execution, child/read, nonuse/deletion, budget, permission or proof/runtime credit.",
+       "review": {
+         "content": "START native-tools 2026-10-28T22:55:31+01:00\nmemory guard: peak aggregate RSS 0.01 GiB; result 127\n",
+         "producer": "At measured revision 3e5a30bfba10688352fe0a42dca7beb58e385f00, validation.json blob dd9ff2f4a5e5923f03632f42f1e0a9a7922a32fa: Metadata nonpassingAttemptsPreserved reports GNU-time launcher failures. Retained post-build-command.sh.txt now uses a Python timing wrapper; it is not substituted as the missing original failing launcher. Exact retained command blob f8f66a4657b2c30cbaca33ee924380b8ba4a39e8.",
+         "consumers": "At that exact revision, validation.json artifacts[post-build-launch-error.log] references this exact compressed object, decoded SHA256 and 99 bytes. This metadata reference and scans are secondary context, not a qualified reader or proof of absence/nonuse. No empty-reader inference; live keep, uncertain-reader and fixture-refusal precedence survive.",
+         "input_revision": "3e5a30bfba10688352fe0a42dca7beb58e385f00",
+         "independent": true
+       }
+     },
+     {
+       "path": "tests/upstream/cloud-integration-20261028/static-automatic.log.gz",
+       "blob": "c3efe49c6317356ce31585972f6752fb21ea5d63",
+       "decoded_sha256": "af5228ef5205e66a36b7008d5476cc4c11a1c77bd6b2c29e896d85d083c47b81",
+       "anchor": "check-automatic: 491 automatic, 61 with a step budget, 0 manual; 11 refuted; 0 pending",
+       "role": "Historical automatic/manual/refuted/pending count summary; no current automatic classification, proof or completeness acceptance. Assertions remain unverified historical data; no execution, child/read, nonuse/deletion, budget, permission or proof/runtime credit.",
+       "review": {
+         "content": "check-automatic: 491 automatic, 61 with a step budget, 0 manual; 11 refuted; 0 pending\n",
+         "producer": "At measured revision 3e5a30bfba10688352fe0a42dca7beb58e385f00, validation.json blob dd9ff2f4a5e5923f03632f42f1e0a9a7922a32fa: Metadata staticChecks[automatic] reports command [\"node\", \"scripts/check-automatic.mjs\", \"--strict\"] and exitCode 0. This is a declared historical producer, not an authenticated current execution.",
+         "consumers": "At that exact revision, validation.json artifacts[static-automatic.log] references this exact compressed object, decoded SHA256 and 87 bytes. This metadata reference and scans are secondary context, not a qualified reader or proof of absence/nonuse. No empty-reader inference; live keep, uncertain-reader and fixture-refusal precedence survive.",
+         "input_revision": "3e5a30bfba10688352fe0a42dca7beb58e385f00",
+         "independent": true
+       }
+     },
+     {
+       "path": "tests/upstream/cloud-integration-20261028/static-inventory.log.gz",
+       "blob": "6264868e1ad72434725eefbd5e81a6d46e6be37f",
+       "decoded_sha256": "641537a8f69c2326aba00ec0da863be95421b2118df770ab73bf4ccbac3d573c",
+       "anchor": "212 features: {'model': 151, 'abstract': 23, 'exclude': 30, 'upstream': 8}",
+       "role": "Historical feature/upstream-symbol inventory count summary; no current inventory, generated-output freshness or semantic coverage acceptance. Assertions remain unverified historical data; no execution, child/read, nonuse/deletion, budget, permission or proof/runtime credit.",
+       "review": {
+         "content": "212 features: {'model': 151, 'abstract': 23, 'exclude': 30, 'upstream': 8}\n783 upstream symbols classified; generated files current\n",
+         "producer": "At measured revision 3e5a30bfba10688352fe0a42dca7beb58e385f00, validation.json blob dd9ff2f4a5e5923f03632f42f1e0a9a7922a32fa: Metadata staticChecks[inventory] reports command [\"python3\", \"scripts/solidity-feature-audit.py\", \"--check\"] and exitCode 0. This is a declared historical producer, not an authenticated current execution.",
+         "consumers": "At that exact revision, validation.json artifacts[static-inventory.log] references this exact compressed object, decoded SHA256 and 132 bytes. This metadata reference and scans are secondary context, not a qualified reader or proof of absence/nonuse. No empty-reader inference; live keep, uncertain-reader and fixture-refusal precedence survive.",
+         "input_revision": "3e5a30bfba10688352fe0a42dca7beb58e385f00",
+         "independent": true
+       }
+     },
+     {
+       "path": "tests/upstream/cloud-integration-20261028/static-layers.log.gz",
+       "blob": "fcbd1fa487605edc82f470d9048752ae86bc6d40",
+       "decoded_sha256": "81a7e7c2838baa810e1c75f8db0e0b95bde1a4be0dd819ff0f3fbe533ad02bc7",
+       "anchor": "154 core modules, 0 reach the elaborator",
+       "role": "Historical core/elaborator reachability count summary; no current layering verification or dependency/nonuse conclusion. Assertions remain unverified historical data; no execution, child/read, nonuse/deletion, budget, permission or proof/runtime credit.",
+       "review": {
+         "content": "154 core modules, 0 reach the elaborator\n",
+         "producer": "At measured revision 3e5a30bfba10688352fe0a42dca7beb58e385f00, validation.json blob dd9ff2f4a5e5923f03632f42f1e0a9a7922a32fa: Metadata staticChecks[layers] reports command [\"node\", \"scripts/check-layers.mjs\"] and exitCode 0. This is a declared historical producer, not an authenticated current execution.",
+         "consumers": "At that exact revision, validation.json artifacts[static-layers.log] references this exact compressed object, decoded SHA256 and 41 bytes. This metadata reference and scans are secondary context, not a qualified reader or proof of absence/nonuse. No empty-reader inference; live keep, uncertain-reader and fixture-refusal precedence survive.",
+         "input_revision": "3e5a30bfba10688352fe0a42dca7beb58e385f00",
+         "independent": true
+       }
+     },
+     {
+       "path": "tests/upstream/cloud-integration-20261028/static-orphans.log.gz",
+       "blob": "0e38e1972871691b290698f53e1bbf9aaf37854c",
+       "decoded_sha256": "3f272939fd82b9773a977cbeb18ff96c26783e4c8f366ad1522992920aac67ee",
+       "anchor": "713 reachable, 33 orphaned, 0 not allowed",
+       "role": "Historical reachable/orphan count summary under a reported preexisting scratch allowlist; no orphan approval, current nonuse, exclusion or deletion authority. Assertions remain unverified historical data; no execution, child/read, nonuse/deletion, budget, permission or proof/runtime credit.",
+       "review": {
+         "content": "713 reachable, 33 orphaned, 0 not allowed\n",
+         "producer": "At measured revision 3e5a30bfba10688352fe0a42dca7beb58e385f00, validation.json blob dd9ff2f4a5e5923f03632f42f1e0a9a7922a32fa: Metadata staticChecks[orphans] reports command [\"node\", \"scripts/check-orphans.mjs\", \"--allow\", \".lake/cloud-integration-20261028/preexisting-scratch-allow.txt\"] and exitCode 0. This is a declared historical producer, not an authenticated current execution.",
+         "consumers": "At that exact revision, validation.json artifacts[static-orphans.log] references this exact compressed object, decoded SHA256 and 42 bytes. This metadata reference and scans are secondary context, not a qualified reader or proof of absence/nonuse. No empty-reader inference; live keep, uncertain-reader and fixture-refusal precedence survive.",
+         "input_revision": "3e5a30bfba10688352fe0a42dca7beb58e385f00",
+         "independent": true
+       }
+     },
+     {
+       "path": "tests/upstream/cloud-integration-20261028/static-testsuite-static.log.gz",
+       "blob": "a5a3501c73be896eeff23e5d544323158bbae3aa",
+       "decoded_sha256": "01ecf2dcc6c959975f7250b957c09d68ebc8297c0d1cf0fa1e9642261b612613",
+       "anchor": "trust: 31 modules: no native_decide, decide +native, sorry, admit, maxHeartbeats or skipKernelTC in code",
+       "role": "Historical trust/axiom/parity/testsuite summary; no current kernel proof, parity, skip/exclusion approval or full testsuite acceptance. Assertions remain unverified historical data; no execution, child/read, nonuse/deletion, budget, permission or proof/runtime credit.",
+       "review": {
+         "content": "trust: 31 modules: no native_decide, decide +native, sorry, admit, maxHeartbeats or skipKernelTC in code\naxioms: #solkey_obligations counts a theorem derived only with propext, Classical.choice and Quot.sound; Report.lean pins no unsound or mismatched theorem\nparity: 564 testSuiteFunctions = 552 derived + 11 refuted + 0 pending + 0 divergent + 1 excluded; 2 skip\ncheck-testsuite: ok\n",
+         "producer": "At measured revision 3e5a30bfba10688352fe0a42dca7beb58e385f00, validation.json blob dd9ff2f4a5e5923f03632f42f1e0a9a7922a32fa: Metadata staticChecks[testsuite-static] reports command [\"bash\", \"scripts/check-testsuite.sh\", \"--solkey\", \"tests/migration/solkey/keyext.solidity.examples\"] and exitCode 0. This is a declared historical producer, not an authenticated current execution.",
+         "consumers": "At that exact revision, validation.json artifacts[static-testsuite-static.log] references this exact compressed object, decoded SHA256 and 385 bytes. This metadata reference and scans are secondary context, not a qualified reader or proof of absence/nonuse. No empty-reader inference; live keep, uncertain-reader and fixture-refusal precedence survive.",
+         "input_revision": "3e5a30bfba10688352fe0a42dca7beb58e385f00",
+         "independent": true
+       }
+     },
+     {
+       "path": "tests/upstream/cloud-integration-20261028/static-testsuite.log.gz",
+       "blob": "a5a3501c73be896eeff23e5d544323158bbae3aa",
+       "decoded_sha256": "01ecf2dcc6c959975f7250b957c09d68ebc8297c0d1cf0fa1e9642261b612613",
+       "anchor": "trust: 31 modules: no native_decide, decide +native, sorry, admit, maxHeartbeats or skipKernelTC in code",
+       "role": "Historical duplicate-content trust/axiom/parity/testsuite summary, separately pinned path; not an independently demonstrated second test run or current acceptance. Assertions remain unverified historical data; no execution, child/read, nonuse/deletion, budget, permission or proof/runtime credit.",
+       "review": {
+         "content": "trust: 31 modules: no native_decide, decide +native, sorry, admit, maxHeartbeats or skipKernelTC in code\naxioms: #solkey_obligations counts a theorem derived only with propext, Classical.choice and Quot.sound; Report.lean pins no unsound or mismatched theorem\nparity: 564 testSuiteFunctions = 552 derived + 11 refuted + 0 pending + 0 divergent + 1 excluded; 2 skip\ncheck-testsuite: ok\n",
+         "producer": "At measured revision 3e5a30bfba10688352fe0a42dca7beb58e385f00, validation.json blob dd9ff2f4a5e5923f03632f42f1e0a9a7922a32fa: Metadata staticChecks[testsuite-static] reports command [\"bash\", \"scripts/check-testsuite.sh\", \"--solkey\", \"tests/migration/solkey/keyext.solidity.examples\"] and exitCode 0. This is a declared historical producer, not an authenticated current execution.",
+         "consumers": "At that exact revision, validation.json artifacts[static-testsuite.log] references this exact compressed object, decoded SHA256 and 385 bytes. This metadata reference and scans are secondary context, not a qualified reader or proof of absence/nonuse. No empty-reader inference; live keep, uncertain-reader and fixture-refusal precedence survive.",
+         "input_revision": "3e5a30bfba10688352fe0a42dca7beb58e385f00",
+         "independent": true
+       }
+     },
+     {
+       "path": "tests/upstream/cloud-integration-20261028/static-trust.log.gz",
+       "blob": "e131d0862d1bf68a17e13035aa204116598e1c67",
+       "decoded_sha256": "36c8194d38039e419e9f08abf81b0a39bbcdcf41ecb7b67e11aec7e07cb206ad",
+       "anchor": "trust: 728 sources, 240 inventoried implementation/recovery sites, 0 findings",
+       "role": "Historical source/recovery-site trust-scan count summary; no current trust audit, axiom approval, implementation adequacy or proof acceptance. Assertions remain unverified historical data; no execution, child/read, nonuse/deletion, budget, permission or proof/runtime credit.",
+       "review": {
+         "content": "trust: 728 sources, 240 inventoried implementation/recovery sites, 0 findings\n",
+         "producer": "At measured revision 3e5a30bfba10688352fe0a42dca7beb58e385f00, validation.json blob dd9ff2f4a5e5923f03632f42f1e0a9a7922a32fa: Metadata staticChecks[trust] reports command [\"bash\", \"scripts/check-trust.sh\"] and exitCode 0. This is a declared historical producer, not an authenticated current execution.",
+         "consumers": "At that exact revision, validation.json artifacts[static-trust.log] references this exact compressed object, decoded SHA256 and 78 bytes. This metadata reference and scans are secondary context, not a qualified reader or proof of absence/nonuse. No empty-reader inference; live keep, uncertain-reader and fixture-refusal precedence survive.",
+         "input_revision": "3e5a30bfba10688352fe0a42dca7beb58e385f00",
+         "independent": true
+       }
+     },
+     {
+       "path": "tests/upstream/cloud-integration-20261028/baseline-tests.json.gz",
+       "blob": "c5f1fbc75530850b302a543ad686bd9507c908de",
+       "decoded_sha256": "1e5bf1f0ddca74b3f76af5a6ac8012570c98a4bd3c3e8a86599baf0da4794f8a",
+       "anchor": "{",
+       "role": "Historical five-suite49-test count summary with reported zero exits, not current test execution, fixture consumption or whole-corpus acceptance. Assertions are unverified historical data; no execution, child/read, nonuse/deletion, budget, permission or proof/runtime credit.",
+       "review": {
+         "content": "Read all587 decoded bytes: five named suites report8/17/10/5/9 tests,49 total and zero exits. Assertions unverified; no current test acceptance.",
+         "producer": "validation.json blob dd9ff2f4a5e5923f03632f42f1e0a9a7922a32fa and retained post-build-command.sh.txt blob f8f66a4657b2c30cbaca33ee924380b8ba4a39e8: regressions.baselinePython repeats these exact five named suites and counts; the exact original invocation/supervisor is not established by that summary.",
+         "consumers": "validation.json artifacts[baseline-tests.json] pins this compressed object and decoded digest/length at review.input_revision. Metadata is secondary context, not a qualified reader or absence/nonuse proof; keep/uncertain-reader/refusal precedence unchanged.",
+         "input_revision": "3e5a30bfba10688352fe0a42dca7beb58e385f00",
+         "independent": true
+       }
+     },
+     {
+       "path": "tests/upstream/cloud-integration-20261028/generated-evm.log.gz",
+       "blob": "bc1fae1eec5f9cbf75b1a1ed828f5d6b94ca960c",
+       "decoded_sha256": "7ef8c0d64d766a13b4d53d8cd95c283fecc727bc8c3adfb6afecc50395a531e0",
+       "anchor": "{\"agree\":640,\"mismatch\":0,\"blocked\":0}",
+       "role": "Historical640-agreement external compiler/EVM summary and timing/RSS labels; no universal equivalence, model proof, source-interface or current runtime acceptance. Assertions are unverified historical data; no execution, child/read, nonuse/deletion, budget, permission or proof/runtime credit.",
+       "review": {
+         "content": "Read all98 decoded bytes:640 agreements and zero mismatch/blocked, with timing/RSS labels. Unverified external observations, not universal equivalence.",
+         "producer": "validation.json blob dd9ff2f4a5e5923f03632f42f1e0a9a7922a32fa and retained post-build-command.sh.txt blob f8f66a4657b2c30cbaca33ee924380b8ba4a39e8: regressions.generatedEvm repeats640 agree,0 mismatch,0 blocked; retained post-build command declares the generated-evm phase with seed0 and supplied external compiler. Script declaration does not authenticate a live run.",
+         "consumers": "validation.json artifacts[generated-evm.log] pins this compressed object and decoded digest/length at review.input_revision. Metadata is secondary context, not a qualified reader or absence/nonuse proof; keep/uncertain-reader/refusal precedence unchanged.",
+         "input_revision": "3e5a30bfba10688352fe0a42dca7beb58e385f00",
+         "independent": true
+       }
+     },
+     {
+       "path": "tests/upstream/cloud-integration-20261028/lean-cgroup-metrics.json.gz",
+       "blob": "564a4826e22a16aa7e522b93d2c109663486f093",
+       "decoded_sha256": "be8e4d9a7d06fe79cfc969bcc34c39a0b0a4f329afb3cb739618322d376eca4c",
+       "anchor": "{",
+       "role": "Historical main-scope resource sample with high-water equal to its12GiB cap and5503 max events, retaining zero reported OOM counters; not current resource clearance or proof of complete sampling. Assertions are unverified historical data; no execution, child/read, nonuse/deletion, budget, permission or proof/runtime credit.",
+       "review": {
+         "content": "Read all586 decoded bytes: main high-water equals12GiB cap,5503 max events and reported zero OOM counters. Historical sample, not current clearance.",
+         "producer": "validation.json blob dd9ff2f4a5e5923f03632f42f1e0a9a7922a32fa and retained post-build-command.sh.txt blob f8f66a4657b2c30cbaca33ee924380b8ba4a39e8: resources.mainCgroup repeats this exact historical sample and its2-second sampling description. Sampler source, complete sampling interval and executor are not authenticated here; recorded limits do not change current budgets.",
+         "consumers": "validation.json artifacts[lean-cgroup-metrics.json] pins this compressed object and decoded digest/length at review.input_revision. Metadata is secondary context, not a qualified reader or absence/nonuse proof; keep/uncertain-reader/refusal precedence unchanged.",
+         "input_revision": "3e5a30bfba10688352fe0a42dca7beb58e385f00",
+         "independent": true
+       }
+     },
+     {
+       "path": "tests/upstream/cloud-integration-20261028/native-historical-check.log.gz",
+       "blob": "76324cbf65c49cd10d68006d4a1a09bb4b6ef5f8",
+       "decoded_sha256": "23a3efaa498cd6c4f4a35d0b97a95b9e9190b659cf3e8d3586e7befaf77bc312",
+       "anchor": "{\"statistics\": {\"typedImportModes\": 40, \"replayModes\": 38, \"replayStatuses\": {\"broken\": 12, \"working\": 26}, \"matchingRuntimeObservations\": 122, \"wrongExpectedValueControls\": 2, \"productionProvenanceRefusals\": 4, \"internalAbiEntryRefusals\": 2, \"typedOnlyModes\": 2}, \"historicalGeneratorSha256\": \"c9284b640131b882501f0bda1789f1324dc9854a34b5b616fa89c9b587943a46\", \"executingGeneratorSha256\": \"51043591e0f05c0c02b811425bc2f4b88c3ada31b7d35701ea5745b004ad8055\", \"historicalObservationsMatch\": true}",
+       "role": "Historical native-check statistics with distinct original/executing generator digests, including broken and typed-only modes; no current replay, production provenance, ABI-entry or semantic acceptance. Assertions are unverified historical data; no execution, child/read, nonuse/deletion, budget, permission or proof/runtime credit.",
+       "review": {
+         "content": "Read all495 decoded bytes: broken and typed-only modes remain, original/executing generator hashes differ. Reported observation matching is unverified.",
+         "producer": "validation.json blob dd9ff2f4a5e5923f03632f42f1e0a9a7922a32fa and retained post-build-command.sh.txt blob f8f66a4657b2c30cbaca33ee924380b8ba4a39e8: historicalEvidence says original/current generator identities were reported separately and this is not a new full merged-corpus run. The captured statistics and historicalObservationsMatch assertion are unverified; no original verifier invocation is authenticated.",
+         "consumers": "validation.json artifacts[native-historical-check.log] pins this compressed object and decoded digest/length at review.input_revision. Metadata is secondary context, not a qualified reader or absence/nonuse proof; keep/uncertain-reader/refusal precedence unchanged.",
+         "input_revision": "3e5a30bfba10688352fe0a42dca7beb58e385f00",
+         "independent": true
+       }
+     },
+     {
+       "path": "tests/upstream/cloud-integration-20261028/native-tools.log.gz",
+       "blob": "8695b4c3292a07e35d3ed158d87ca7f319e37485",
+       "decoded_sha256": "f604eedc0a7cf468498c54695f26be034509d8bd6113b969acc436d5dd8b34ec",
+       "anchor": "\u26a0 [6/63] Replayed Solidity.AST",
+       "role": "Historical63-job native-tool build summary, warning and phase timing/RSS labels; no current native tool, cache freshness, kernel/proof or runtime acceptance. Assertions are unverified historical data; no execution, child/read, nonuse/deletion, budget, permission or proof/runtime credit.",
+       "review": {
+         "content": "Read all267 decoded bytes: replayed AST warning,63-job completion and phase metrics. Historical assertion, not current build or proof acceptance.",
+         "producer": "validation.json blob dd9ff2f4a5e5923f03632f42f1e0a9a7922a32fa and retained post-build-command.sh.txt blob f8f66a4657b2c30cbaca33ee924380b8ba4a39e8: Retained post-build command declares native-tools lake build solidity-lean solcases after removing executable destinations. That historical source declaration does not authenticate the reported build or establish current artifacts.",
+         "consumers": "validation.json artifacts[native-tools.log] pins this compressed object and decoded digest/length at review.input_revision. Metadata is secondary context, not a qualified reader or absence/nonuse proof; keep/uncertain-reader/refusal precedence unchanged.",
+         "input_revision": "3e5a30bfba10688352fe0a42dca7beb58e385f00",
+         "independent": true
+       }
+     },
+     {
+       "path": "tests/upstream/cloud-integration-20261028/panic-evm.log.gz",
+       "blob": "9bd6c3d2f89a9b67bd551668ac4ccc8fa89a91fb",
+       "decoded_sha256": "8d900c2217fb5b60cfb989cdf39dc80e47447efb3c5cd388f26dd948c3b0e518",
+       "anchor": "82 exact-byte compiler/EVM observations passed in legacy and viaIR",
+       "role": "Historical82 exact-byte legacy/viaIR compiler/EVM observations and timing/RSS labels; external concrete observations do not establish universal compiler/model equivalence or current runtime acceptance. Assertions are unverified historical data; no execution, child/read, nonuse/deletion, budget, permission or proof/runtime credit.",
+       "review": {
+         "content": "Read all125 decoded bytes:82 legacy/viaIR observations and phase metrics. Unverified external result, not a model proof.",
+         "producer": "validation.json blob dd9ff2f4a5e5923f03632f42f1e0a9a7922a32fa and retained post-build-command.sh.txt blob f8f66a4657b2c30cbaca33ee924380b8ba4a39e8: regressions.panicEvmObservations repeats82; retained post-build command declares panic-evm check-self-power-data with external compiler/node inputs. Captured outcome and exact executor remain unverified.",
+         "consumers": "validation.json artifacts[panic-evm.log] pins this compressed object and decoded digest/length at review.input_revision. Metadata is secondary context, not a qualified reader or absence/nonuse proof; keep/uncertain-reader/refusal precedence unchanged.",
+         "input_revision": "3e5a30bfba10688352fe0a42dca7beb58e385f00",
+         "independent": true
+       }
+     },
+     {
+       "path": "tests/upstream/cloud-integration-20261028/post-build.log.gz",
+       "blob": "0c2f9bea6505909eee0f20cad752bb34e2688219",
+       "decoded_sha256": "5b72cb3215e2eeca831e7a99bdf4fece6c4c1f7789f9c9b87f2f6a11a4e0b1fb",
+       "anchor": "START native-tools 2026-10-28T22:56:07+01:00",
+       "role": "Historical phase START/PASS sequence, POST_BUILD_GATES_PASS marker and sampled RSS/result0 report; no current gate acceptance, reconstructed child runs or completeness claim. Assertions are unverified historical data; no execution, child/read, nonuse/deletion, budget, permission or proof/runtime credit.",
+       "review": {
+         "content": "Read all822 decoded bytes: eight START/PASS phases, final marker and sampled RSS/result0. Sequence does not authenticate child runs or current acceptance.",
+         "producer": "validation.json blob dd9ff2f4a5e5923f03632f42f1e0a9a7922a32fa and retained post-build-command.sh.txt blob f8f66a4657b2c30cbaca33ee924380b8ba4a39e8: Retained post-build command defines phase START/PASS output and lists native-tools, node/reference controls, external EVM and slice-admission phases. Matching source structure is context, not authentication of captured phase execution or child outputs.",
+         "consumers": "validation.json artifacts[post-build.log] pins this compressed object and decoded digest/length at review.input_revision. Metadata is secondary context, not a qualified reader or absence/nonuse proof; keep/uncertain-reader/refusal precedence unchanged.",
+         "input_revision": "3e5a30bfba10688352fe0a42dca7beb58e385f00",
+         "independent": true
+       }
+     },
+     {
+       "path": "tests/upstream/cloud-integration-20261028/post-cgroup-metrics.json.gz",
+       "blob": "e369bbf65e5785a9711cf77a30ac89187922a7be",
+       "decoded_sha256": "773dbc9f724884958793556e8e45ed721e56bd745fe33c0e61c1ebeb23aa883e",
+       "anchor": "{",
+       "role": "Historical post-scope resource sample with separate current/high-water/max/swap/event values; no current memory guard clearance or substitution of kernel high-water for sampled aggregate RSS. Assertions are unverified historical data; no execution, child/read, nonuse/deletion, budget, permission or proof/runtime credit.",
+       "review": {
+         "content": "Read all575 decoded bytes: post-scope high-water3990081536 bytes differs from sampled2.15GiB RSS. Historical metrics, not current resource clearance.",
+         "producer": "validation.json blob dd9ff2f4a5e5923f03632f42f1e0a9a7922a32fa and retained post-build-command.sh.txt blob f8f66a4657b2c30cbaca33ee924380b8ba4a39e8: resources.postCgroup repeats this exact2-second sample while resources.postSampledPeakAggregateRSSGiB separately reports2.15GiB. These metrics are not conflated; sampler source and interval completeness remain unverified.",
+         "consumers": "validation.json artifacts[post-cgroup-metrics.json] pins this compressed object and decoded digest/length at review.input_revision. Metadata is secondary context, not a qualified reader or absence/nonuse proof; keep/uncertain-reader/refusal precedence unchanged.",
+         "input_revision": "3e5a30bfba10688352fe0a42dca7beb58e385f00",
+         "independent": true
+       }
+     },
+     {
+       "path": "tests/upstream/cloud-integration-20261028/slice-admission.log.gz",
+       "blob": "40a1262e60c11eb91d87b59dbf50467e8501793f",
+       "decoded_sha256": "6b44589082ac1e7ae061582100f388ca9c1da384638d8dd40e3c3325b5a66e28",
+       "anchor": "\u26a0 [3/27] Replayed Solidity.AST",
+       "role": "Historical warning output and two admitted strings with timing/RSS labels; no general admission theorem, actual current fixture use, model/compiler equivalence or runtime acceptance. Assertions are unverified historical data; no execution, child/read, nonuse/deletion, budget, permission or proof/runtime credit.",
+       "review": {
+         "content": "Read all638 decoded bytes: three replay warnings, two admitted strings and phase metrics. No general admission proof or current fixture-use credit.",
+         "producer": "validation.json blob dd9ff2f4a5e5923f03632f42f1e0a9a7922a32fa and retained post-build-command.sh.txt blob f8f66a4657b2c30cbaca33ee924380b8ba4a39e8: regressions.sliceAdmissionExit reports0 and retained post-build command declares the Admission.lean phase. Neither metadata nor the two strings authenticate current Lean execution or broader admission coverage.",
+         "consumers": "validation.json artifacts[slice-admission.log] pins this compressed object and decoded digest/length at review.input_revision. Metadata is secondary context, not a qualified reader or absence/nonuse proof; keep/uncertain-reader/refusal precedence unchanged.",
+         "input_revision": "3e5a30bfba10688352fe0a42dca7beb58e385f00",
+         "independent": true
+       }
+     },
+     {
+       "path": "tests/upstream/cloud-integration-20261028/solidity-baseline.test.py.log.gz",
+       "blob": "de4a5257643413a41218eea58515754dbd59ffd4",
+       "decoded_sha256": "c03384b9f9f47119b3ad0256178e1b4a338e4f29646678bc981f53da8abd89c3",
+       "anchor": "{",
+       "role": "Historical nine-test unittest summary retaining one blocked/unrouted feature and partialFeature1; no full corpus, feature support, current regression, fixture or semantic acceptance. Assertions are unverified historical data; no execution, child/read, nonuse/deletion, budget, permission or proof/runtime credit.",
+       "review": {
+         "content": "Read all664 decoded bytes: one blocked/unrouted partial feature remains before nine-test OK. No whole-corpus or current semantic acceptance.",
+         "producer": "validation.json blob dd9ff2f4a5e5923f03632f42f1e0a9a7922a32fa and retained post-build-command.sh.txt blob f8f66a4657b2c30cbaca33ee924380b8ba4a39e8: regressions.baselinePython names scripts/solidity-baseline.test.py with9 tests and exit0. The captured route/count diagnostic and OK text do not establish current execution or turn the blocked/unrouted case into supported behavior.",
+         "consumers": "validation.json artifacts[solidity-baseline.test.py.log] pins this compressed object and decoded digest/length at review.input_revision. Metadata is secondary context, not a qualified reader or absence/nonuse proof; keep/uncertain-reader/refusal precedence unchanged.",
+         "input_revision": "3e5a30bfba10688352fe0a42dca7beb58e385f00",
          "independent": true
        }
      }
    ]
  },
  "inventory_manifest": {
-   "bytes": 8678053,
-   "evidence_commit": "8cabd9c329d7a9731381d5ea9fc630adf4aa640e",
-   "evidence_path": "evidence/plan-x1-census-validation-1114/x1-census-validation/x1-readonly-rest-artifact-b1419be8/inventory.json",
-   "input_revision": "b1419be8d87e8ed8ea6836789e7898ffa22dd5c8",
+   "bytes": 8792481,
+   "evidence_commit": "247145695d7a861d2378e4b9d0893bd3cab9dcb3",
+   "evidence_path": "evidence/plan-x1-census-validation-1114/x1-census-validation/x1-retired-reader-artifact-3e5a30bf/inventory.json",
+   "input_revision": "3e5a30bfba10688352fe0a42dca7beb58e385f00",
    "repository": "SolidiKeY/solidity-lean-coord",
    "schema_version": 1,
-   "sha256": "eb75df1eaeebf8e9b968ac529e7f4b1450ce0d50a10e1ab64c13635cbe8080a9"
+   "sha256": "30e3314d4cb0ec56a886661baada38dbf315a44a5a81159ddc3d5fd3a3b9b7fa"
  },
  "schema_version":3,
  "templates":{
@@ -374,6 +679,385 @@
        ]
      }
    }
+  ,
+{
+    "entry": {
+      "path": "scripts/h62/item1/readonly-bind/case_ledger.py",
+      "source_blob": "095af3abc7ada2d6c487d5eb6b9e5bef054bef9c",
+      "command": [
+        "python3",
+        "-B",
+        "scripts/h62/item1/readonly-bind/case_ledger.py"
+      ],
+      "kind": "committed-cli",
+      "purpose": "Declared CLI source checking exact byte transformations of three frozen readonly files against original792 membership and25 declarations, recording10 public source-case references. Removed private identities stay unrestored; fixture references certify no elaboration, private identity restoration, witness feasibility, owner authority or body equivalence. Required configuration or private evidence is not supplied; source role only, no current execution, child/read/fixture, generation, proof/runtime, nonuse/deletion, permission or STOP-clearance credit.",
+      "entry_line": 149,
+      "required_options": [
+        "--frozen",
+        "--output"
+      ]
+    }
+  },
+{
+    "entry": {
+      "path": "scripts/h62/item1/readonly-bind/check_callback_boundaries.py",
+      "source_blob": "174e0c578d697dde31681737c3dddacae0b9a271",
+      "command": [
+        "python3",
+        "-B",
+        "scripts/h62/item1/readonly-bind/check_callback_boundaries.py"
+      ],
+      "kind": "committed-cli",
+      "purpose": "Declared CLI source admitting one exact saved fresh-closure parent receipt, checking current source/import/object/SDK pins before and after compiling eight additive callback-boundary theorems and allowed axioms. Checked parent-artifact reuse is not a fresh dependency rebuild, arbitrary receipt authentication, SDK-source certification or whole-goal acceptance. Required configuration or private evidence is not supplied; source role only, no current execution, child/read/fixture, generation, proof/runtime, nonuse/deletion, permission or STOP-clearance credit.",
+      "entry_line": 129,
+      "required_options": [
+        "--output",
+        "--parent"
+      ]
+    }
+  },
+{
+    "entry": {
+      "path": "scripts/h62/item1/readonly-bind/check_capture_fixtures.py",
+      "source_blob": "cad3c970c4c2db72e22881dc6112a642236b1f58",
+      "command": [
+        "python3",
+        "-B",
+        "scripts/h62/item1/readonly-bind/check_capture_fixtures.py"
+      ],
+      "kind": "committed-cli",
+      "purpose": "Declared CLI source rebuilding the actual capture fixture project closure in a private sanitized library, refusing held Premises and checking a missing-project-object negative control, exact source/tool/log pins and38 theorem axiom records. SDK dependencies remain trusted compiler inputs; no shared project-cache fallback or whole-goal acceptance is asserted. Required configuration or private evidence is not supplied; source role only, no current execution, child/read/fixture, generation, proof/runtime, nonuse/deletion, permission or STOP-clearance credit.",
+      "entry_line": 206,
+      "required_options": [
+        "--output"
+      ]
+    }
+  },
+{
+    "entry": {
+      "path": "scripts/h62/item1/readonly-bind/check_credit_joints.py",
+      "source_blob": "5170ae52a59bfe61cde9b22b275e6f69bc23400a",
+      "command": [
+        "python3",
+        "-B",
+        "scripts/h62/item1/readonly-bind/check_credit_joints.py"
+      ],
+      "kind": "committed-cli",
+      "purpose": "Declared CLI source admitting only pinned frozen/current parent receipts for selected credit, capture-failure or composition suites, verifying reused source/object/log pins and frozen supplements, rejecting held or unverified extra imports, and probing original interface types and additive theorem axioms. Parent reuse is not a fresh closure rebuild, SDK certification or full original-goal proof. Required configuration or private evidence is not supplied; source role only, no current execution, child/read/fixture, generation, proof/runtime, nonuse/deletion, permission or STOP-clearance credit.",
+      "entry_line": 244,
+      "required_options": [
+        "--frozen",
+        "--output",
+        "--parent",
+        "--profile"
+      ]
+    }
+  },
+{
+    "entry": {
+      "path": "scripts/h62/item1/readonly-bind/check_encoding_fixture.py",
+      "source_blob": "eaf236f9f48b3380cee4db8912f1623eaab4a260",
+      "command": [
+        "python3",
+        "-B",
+        "scripts/h62/item1/readonly-bind/check_encoding_fixture.py"
+      ],
+      "kind": "committed-cli",
+      "purpose": "Declared CLI source staging exact current Hoare/capture leaves and encoding-failure fixture, checking four theorem axiom records and source/tool/artifact/log pins. Other project objects are explicitly cached symlink inputs and SDK dependencies are trusted; no fresh full-closure validation or independent dependency certification is asserted. Required configuration or private evidence is not supplied; source role only, no current execution, child/read/fixture, generation, proof/runtime, nonuse/deletion, permission or STOP-clearance credit.",
+      "entry_line": 136,
+      "required_options": [
+        "--output"
+      ]
+    }
+  },
+{
+    "entry": {
+      "path": "scripts/h62/item1/readonly-bind/check_original_callback.py",
+      "source_blob": "3f7bc0a34cd8af2f6fad18ab1040a0f0ef470a24",
+      "command": [
+        "python3",
+        "-B",
+        "scripts/h62/item1/readonly-bind/check_original_callback.py"
+      ],
+      "kind": "committed-cli",
+      "purpose": "Declared CLI source authenticating the assigned frozen Git base, original792 artifact and toolchain, rebuilding its unheld callback closure in isolation and checking selected original interface types and eight additive witness axioms. It rejects held Premises and substitutes no current closure; no cache fallback, statement repair, old/current timing claim or whole-goal acceptance is asserted. Required configuration or private evidence is not supplied; source role only, no current execution, child/read/fixture, generation, proof/runtime, nonuse/deletion, permission or STOP-clearance credit.",
+      "entry_line": 170,
+      "required_options": [
+        "--frozen",
+        "--output"
+      ]
+    }
+  }
+  ,
+{
+    "entry": {
+      "path": "scripts/h62/item1/duplication-scanner/bind_signature_fixture.py",
+      "source_blob": "7959500d77df619f6db0805b973193d2b473b84b",
+      "command": [
+        "python3",
+        "-B",
+        "scripts/h62/item1/duplication-scanner/bind_signature_fixture.py"
+      ],
+      "kind": "committed-cli",
+      "purpose": "Declared CLI source rebuilding only pinned canonical signature fixtures under writer/resource guards, comparing fresh discovery/compiled environments, dependency companions, runtime and exact completed logs before creating five local source/signature links. Raw signatures stay environment-unbound; this is no remote attestation, ABA-proof provenance, compiler proof or general repository binding. Required configuration or private evidence is not supplied; source role only, no current execution, child/read/fixture, generation, proof/runtime, nonuse/deletion, permission or STOP-clearance credit.",
+      "entry_line": 289,
+      "required_options": [
+        "--output"
+      ]
+    }
+  },
+{
+    "entry": {
+      "path": "scripts/h62/item1/duplication-scanner/bind_source_locations.py",
+      "source_blob": "58bf4293737b5e55de253be3e5d360f4a0f1cf6c",
+      "command": [
+        "python3",
+        "-B",
+        "scripts/h62/item1/duplication-scanner/bind_source_locations.py"
+      ],
+      "kind": "committed-cli",
+      "purpose": "Declared CLI source invoking pinned live fixture/kernel builds and joining direct compiler positions, exact source names/lines and declaration kinds to lexical rows. It verifies child bytes against successful live return hashes and retains absent, ambiguous, unsupported or generated-alias matches; no general ownership, unloaded/private artifact coverage, proof-body equality or remote attestation follows. Required configuration or private evidence is not supplied; source role only, no current execution, child/read/fixture, generation, proof/runtime, nonuse/deletion, permission or STOP-clearance credit.",
+      "entry_line": 206,
+      "required_options": [
+        "--output"
+      ]
+    }
+  },
+{
+    "entry": {
+      "path": "scripts/h62/item1/duplication-scanner/census_fixture_kernel.py",
+      "source_blob": "cfdf3ac215d0429eb5bf6b423145373e8a97f3e1",
+      "command": [
+        "python3",
+        "-B",
+        "scripts/h62/item1/duplication-scanner/census_fixture_kernel.py"
+      ],
+      "kind": "committed-cli",
+      "purpose": "Declared CLI source enumerating imported constants only from one pinned fixture module after a live local rebuild, checking generated recursor/matcher and namespace/binder/universe controls plus source/runtime/environment/log stability. Structural saved-packet validation alone authenticates no execution or completeness; no source-line mapping, project-wide coverage, ownership or unloaded/private levels are claimed. Required configuration or private evidence is not supplied; source role only, no current execution, child/read/fixture, generation, proof/runtime, nonuse/deletion, permission or STOP-clearance credit.",
+      "entry_line": 191,
+      "required_options": [
+        "--output"
+      ]
+    }
+  },
+{
+    "entry": {
+      "path": "scripts/h62/item2/audit-yul/census.py",
+      "source_blob": "b3d08f94bdeff0e62bf6c6a7072024a43801eb64",
+      "command": [
+        "python3",
+        "-B",
+        "scripts/h62/item2/audit-yul/census.py"
+      ],
+      "kind": "committed-cli",
+      "purpose": "Declared CLI source producing a conservative source census from frozen module-map patterns and local Yul import closure, optionally joining supplied parser spans, witness records and kernel metadata while retaining unmatched or ambiguous declarations. Lexical rows and area-owner conventions establish no witness feasibility, independent ownership, current kernel validation or full audit acceptance. Required configuration or private evidence is not supplied; source role only, no current execution, child/read/fixture, generation, proof/runtime, nonuse/deletion, permission or STOP-clearance credit.",
+      "entry_line": 190,
+      "required_options": [
+        "--output"
+      ]
+    }
+  },
+{
+    "entry": {
+      "path": "scripts/h62/item4/generic-yul-views/acceptance.py",
+      "source_blob": "ef73cc19f9a708c9e3ee21c6e8bf8b5584a253a1",
+      "command": [
+        "python3",
+        "-B",
+        "scripts/h62/item4/generic-yul-views/acceptance.py"
+      ],
+      "kind": "committed-cli",
+      "purpose": "Declared CLI source checking supplied local input digests, external census/bounded controls, exact frozen Views file universe/blobs, census reproduction and lexical shortcut scans. Its static acceptance explicitly leaves Lean proofs, refusal coverage, full gates and timings pending; input hashes establish no coordinator origin or semantic coverage. Required configuration or private evidence is not supplied; source role only, no current execution, child/read/fixture, generation, proof/runtime, nonuse/deletion, permission or STOP-clearance credit.",
+      "entry_line": 76,
+      "required_options": [
+        "--evidence",
+        "--inputs"
+      ]
+    }
+  },
+{
+    "entry": {
+      "path": "scripts/h62/item4/generic-yul-views/census.py",
+      "source_blob": "24df327e36cf9bfe537da98d10734c7c45ffc56a",
+      "command": [
+        "python3",
+        "-B",
+        "scripts/h62/item4/generic-yul-views/census.py"
+      ],
+      "kind": "committed-cli",
+      "purpose": "Declared CLI source deterministically inventorying every Views declaration and guard with exact UTF-8 file, statement and command digests, preserved guard messages and optional exact byte reproduction. This is lexical current-source metadata, not a Lean parser, elaborated statement equivalence, frozen-source preservation or semantic proof. Required configuration or private evidence is not supplied; source role only, no current execution, child/read/fixture, generation, proof/runtime, nonuse/deletion, permission or STOP-clearance credit.",
+      "entry_line": 154,
+      "required_options": [
+        "--output"
+      ]
+    }
+  },
+{
+    "entry": {
+      "path": "scripts/h62/item4/generic-yul-views/correspondence.py",
+      "source_blob": "089d93d31071ff96405e44d89a6dad7447c145fe",
+      "command": [
+        "python3",
+        "-B",
+        "scripts/h62/item4/generic-yul-views/correspondence.py"
+      ],
+      "kind": "committed-cli",
+      "purpose": "Declared CLI source comparing two selected simple lexical theorem types while refusing unsupported literal/compound syntax, and classifying whole-file Views source identity against authenticated frozen Git blobs. Modified, added and removed files remain explicit; current control rows and matching text establish no kernel equivalence, proof or transitive semantic preservation. Required configuration or private evidence is not supplied; source role only, no current execution, child/read/fixture, generation, proof/runtime, nonuse/deletion, permission or STOP-clearance credit.",
+      "entry_line": 167,
+      "required_options": [
+        "--output"
+      ]
+    }
+  },
+{
+    "entry": {
+      "path": "scripts/h62/item4/generic-yul-views/reconcile_frozen.py",
+      "source_blob": "f0f13298dc085df8c76d80cca0d95e39cb2d7a71",
+      "command": [
+        "python3",
+        "-B",
+        "scripts/h62/item4/generic-yul-views/reconcile_frozen.py"
+      ],
+      "kind": "committed-cli",
+      "purpose": "Declared CLI source reconstructing every frozen Views Controls theorem from authenticated Git blobs and retaining all current command/statement candidates plus secondary namespace hints. Ambiguous and unmatched rows survive; even same-file matches establish no elaborated/private namespace identity, semantic equivalence, proof validation or accepted migration. Required configuration or private evidence is not supplied; source role only, no current execution, child/read/fixture, generation, proof/runtime, nonuse/deletion, permission or STOP-clearance credit.",
+      "entry_line": 171,
+      "required_options": [
+        "--output"
+      ]
+    }
+  }
+  ,
+{
+    "entry": {
+      "path": "scripts/h62/item6/migrate-examples/dag_inventory.py",
+      "source_blob": "067089cce1274c78ca677ee9dab8f5d63a10eca3",
+      "command": [
+        "python3",
+        "-B",
+        "scripts/h62/item6/migrate-examples/dag_inventory.py"
+      ],
+      "kind": "committed-cli",
+      "purpose": "Declared CLI source validating complete frozen ModuleData name/type DAG streams, exact compiler/fixture/source provenance, closed types, per-module counts, seal and generated sentinels. All kernel/compiler-extra occurrences survive, with export access and extra signatures unresolved; stream integrity establishes no new parity, semantic equivalence, axiom equality or full H78 acceptance. Required configuration or private evidence is not supplied; source role only, no current execution, child/read/fixture, generation, proof/runtime, nonuse/deletion, permission or STOP-clearance credit.",
+      "entry_line": 267,
+      "required_options": [
+        "--census",
+        "--compiler-result",
+        "--fixture-manifest",
+        "--log",
+        "--output"
+      ]
+    }
+  },
+{
+    "entry": {
+      "path": "scripts/h62/item6/migrate-examples/dependencies.py",
+      "source_blob": "a2b69a96d71e6f9e1fd9cf9fcd24a507548820e5",
+      "command": [
+        "python3",
+        "-B",
+        "scripts/h62/item6/migrate-examples/dependencies.py"
+      ],
+      "kind": "committed-cli",
+      "purpose": "Declared CLI source reconstructing explicit source-header import closure from committed Git blobs while preserving every frozen Examples module, reporting changed/additional files, ambiguous resolution and unresolved imports. Standard-library leaves are recognized only by artifact presence; implicit Init, command-produced imports, elaborated API, axiom and semantic claims remain outside this scanner. Required configuration or private evidence is not supplied; source role only, no current execution, child/read/fixture, generation, proof/runtime, nonuse/deletion, permission or STOP-clearance credit.",
+      "entry_line": 154,
+      "required_options": [
+        "--output",
+        "--stdlib"
+      ]
+    }
+  },
+{
+    "entry": {
+      "path": "scripts/h62/item6/migrate-examples/generate-dag-inventory.py",
+      "source_blob": "a2d87bdb84deebc063fc14ec6b62da53a2a0e8bb",
+      "command": [
+        "python3",
+        "-B",
+        "scripts/h62/item6/migrate-examples/generate-dag-inventory.py"
+      ],
+      "kind": "committed-cli",
+      "purpose": "Declared CLI source emitting an off-checkout exact-scope ModuleData fixture and manifest only after matching current and frozen source closures. Shared encoder traversal retains structural content fingerprints and every compiler-only name with unresolved signatures; pointer memoization grants no new-toolchain compatibility, semantic equivalence or generator execution authority. Required configuration or private evidence is not supplied; source role only, no current execution, child/read/fixture, generation, proof/runtime, nonuse/deletion, permission or STOP-clearance credit.",
+      "entry_line": 155,
+      "required_options": [
+        "--census",
+        "--manifest",
+        "--output",
+        "--stdlib"
+      ]
+    }
+  },
+{
+    "entry": {
+      "path": "scripts/h62/item6/migrate-frontend/parser_overlay.py",
+      "source_blob": "22bf8ca0ed23cb0f181e7c0be7f6621ef7e17cc8",
+      "command": [
+        "python3",
+        "-B",
+        "scripts/h62/item6/migrate-frontend/parser_overlay.py"
+      ],
+      "kind": "committed-cli",
+      "purpose": "Declared CLI source preparing an unapplied six-context SCtx/Bool parser proposal from frozen source, binding an existing Token proposal and supplied old API/dependency observations, and describing isolated old/new controls and selected type/axiom comparisons. Production Check/SourceCtor, full affected acceptance, axiom review and performance remain pending; its final exit2 is intentional, not a passing full gate. Required configuration or private evidence is not supplied; source role only, no current execution, child/read/fixture, generation, proof/runtime, nonuse/deletion, permission or STOP-clearance credit.",
+      "entry_line": 150,
+      "required_options": [
+        "--out",
+        "--token-proposal"
+      ]
+    }
+  },
+{
+    "entry": {
+      "path": "scripts/h62/item6/migrate-frontend/token_overlay.py",
+      "source_blob": "9d9cf4c9a2dfe53f19b66aa4975c71fe29cbbd5a",
+      "command": [
+        "python3",
+        "-B",
+        "scripts/h62/item6/migrate-frontend/token_overlay.py"
+      ],
+      "kind": "committed-cli",
+      "purpose": "Declared CLI source preparing an unapplied frozen Token representation proposal, describing original incompatibility reproduction, universal all-byte and high-byte controls, selected declaration/type/axiom comparisons and isolated dependent smoke checks. Existing supplied compiler/API observations are inputs, not independently authenticated current validation; no directory/root gate, timing acceptance, permission grant or applied migration follows. Required configuration or private evidence is not supplied; source role only, no current execution, child/read/fixture, generation, proof/runtime, nonuse/deletion, permission or STOP-clearance credit.",
+      "entry_line": 143,
+      "required_options": [
+        "--out"
+      ]
+    }
+  },
+{
+    "entry": {
+      "path": "scripts/h62/item6/migrate-solkey/export.py",
+      "source_blob": "d2779b6db5201788788faba0fba6c54182fd7e92",
+      "command": [
+        "python3",
+        "-B",
+        "scripts/h62/item6/migrate-solkey/export.py"
+      ],
+      "kind": "committed-cli",
+      "purpose": "Declared CLI source exporting already committed lane work after measurements stop, verifying base ancestry and Git bundle head, and deterministically archiving selected off-Git JSON/log observations with checksums. Archive-only mode writes an immutable bulk archive; official compiler archives and oleans stay at recorded VM paths. This is transport, not cache shipment, provenance attestation or proof acceptance. Required configuration or private evidence is not supplied; source role only, no current execution, child/read/fixture, generation, proof/runtime, nonuse/deletion, permission or STOP-clearance credit.",
+      "entry_line": 64,
+      "required_options": [
+        "--evidence",
+        "--out",
+        "--root"
+      ]
+    }
+  },
+{
+    "entry": {
+      "path": "scripts/h62/item6/migrate-yul/metadata-coverage.py",
+      "source_blob": "00a16586e7f757cff336af3bce62e0c9d275b69b",
+      "command": [
+        "python3",
+        "-B",
+        "scripts/h62/item6/migrate-yul/metadata-coverage.py"
+      ],
+      "kind": "committed-cli",
+      "purpose": "Declared CLI source revalidating supplied selected old-metadata observations against the exact pinned original1774-module plan, resealing actual raw observations and retaining every pending module and input binding. It executes no Lean and claims no general attribute census, public API, migration, semantic proof or performance acceptance; external initializer IO remains outside model/proofs. Required configuration or private evidence is not supplied; source role only, no current execution, child/read/fixture, generation, proof/runtime, nonuse/deletion, permission or STOP-clearance credit.",
+      "entry_line": 160,
+      "required_options": [
+        "--output",
+        "--plan"
+      ]
+    }
+  }
   ]
  }
 }
