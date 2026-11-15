@@ -14,7 +14,8 @@ private def heap (payloads : List (Fin W)) (bounded : payloads.length < 128) : H
   (⟨values payloads,by rw [values,List.length_map]; omega⟩,())
 private theorem heap_length (payloads : List (Fin W)) (bounded : payloads.length < 128) :
     (heap payloads bounded).len old .dyn = payloads.length := by
-  with_unfolding_all exact List.length_map (as := payloads) indexValue
+  with_unfolding_all change (values payloads).length = payloads.length
+  rw [values,List.length_map]
 private theorem snapshot (payloads : List (Fin W)) (bounded : payloads.length < 128) :
     MVal.copyMToSt (heap payloads bounded) (T := .ref R) old =
       primitiveArrayValue .uint (values payloads) (by rw [values,List.length_map]; have large : 256 < W := wide; omega) := by
