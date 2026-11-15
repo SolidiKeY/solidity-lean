@@ -234,6 +234,7 @@ commands; it never enters the core import graph.
 | `Hash/CollisionBridgeControls.lean` | Concrete admitted, compiled quiet success using HashPremise.nil. |
 | `Hash/CompilerCorrect.lean` | Operational producers and encoding facts for the frozen E4A contract. |
 | `Hash/CompilerCorrect/Prefix.lean` | Finite-prefix transport and divergence-safe composition for the frozen E4A contract. |
+| `Solidity/Semantics/Storage/TypeLayout.lean` | AST-only full-word sizes, member offsets and bounds; preserves the established `Solidity.Evm` definitions and equation lemmas. |
 The diagnostic generators `scripts/h62/item2/audit-v08-adapters/generate_mapped_census.py`
 and `scripts/h62/item2/audit-v08-adapters/generate_calldata_census.py` accept
 `--stream` to omit the global imported-constant sort. This still materializes
