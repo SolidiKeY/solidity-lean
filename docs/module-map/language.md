@@ -308,6 +308,9 @@ same option to its monitor fixtures; no environment fallback enables it.
 | `Syntax/NumericV2Controls.lean` | Magnitude-overflow, signed-boundary, huge-exponent unit and unchanged successful-state regressions. |
 | `Semantics/Panic/Eval.lean` | Panic-carrying evaluation of typed intrinsic producers, arithmetic and bounds helpers, mutually recursive paths and expressions, and assignment sources; retained producer operands and origin proofs, exact site codes, and local V1 projection laws. |
 | `Examples/Panic/Eval.lean` | Kernel panic-evaluation boundary controls for all nine origin codes, signed overflow, short-circuiting, local V1 behavior, and the exported evaluator API. |
+| `Semantics/Panic/Source.lean` | Additive V2 source producer interface retaining V1 origins exactly and width-aware narrowing results; local origin and boundary lemmas. |
+| `Syntax/Elab/Panic.lean` | Exact equations for transparent generated guards, enum capture and narrowing producers, retaining emitted statement order and modes; separate local enum origin lemma. |
+| `Examples/Panic/Source.lean` | Kernel-checked source panic regressions: signed/unsigned narrow boundaries, retained V1 origins, failure modes, divisor guard order, width bypass and enum capture data routes. |
 | `Semantics/Panic/Result.lean` | Origin-parameterized panic-carrying typed results: full successes, intrinsic solc code and origin, external revert bytes, ordinary revert, exhaustion and divergence; local V1 projections and map/bind laws, without interpreter erasure. |
 | `Examples/Panic/Result.lean` | Kernel-checked panic-result regressions: full typed outputs, all failure projections, code/origin and external-payload distinctions, continuation behavior and origin transport. |
 | `Semantics/Panic/Origins.lean` | Typed W3 panic-site producers, code-indexed origins, and local links to intrinsic operations; independent of panic result transport. |

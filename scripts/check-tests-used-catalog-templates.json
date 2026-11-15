@@ -8,12 +8,12 @@
  "expanded_sha256":"e1072d0330eb44325a8573c6b71ff9da979ebca5ebf5532b699f1d49fa8bca50",
  "inventory_manifest": {
    "bytes": 8623629,
-   "evidence_commit": "8c14cb086423e882508b69882acae1c012700678",
-   "evidence_path": "evidence/plan-x1-census-validation-1114/x1-census-validation/x1-h901-artifact-a66d079f/inventory.json",
-   "input_revision": "a66d079fef599f33dcbda22e690d45e1dedef357",
+   "evidence_commit": "8911c4072a6c2f0a49b49ca776fb95091c7e4d3c",
+   "evidence_path": "evidence/plan-x1-census-validation-1114/x1-census-validation/x1-h901-artifact-089d4978/inventory.json",
+   "input_revision": "089d4978e1ebae57bbfa6db9c161c3dfd15827dd",
    "repository": "SolidiKeY/solidity-lean-coord",
    "schema_version": 1,
-   "sha256": "8e9263280c249ca61def0b0103a7537830aef114516aef8dfc9fa3b2b5091ef8"
+   "sha256": "d01ca59a5c6dc86d086ea7a470946defc5c50274da1b35c65b3fe47dc9ffe5db"
  },
  "schema_version":3,
  "templates":{
