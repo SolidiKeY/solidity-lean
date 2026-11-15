@@ -31,6 +31,7 @@ spec.loader.exec_module(v2)
 v1 = v2.v1
 SECTIONS = {'standalone', 'module_entries', 'reads', 'generators', 'orphans'}
 MANIFEST_KEY = 'inventory_manifest'
+PROPOSAL_KEY = 'role_delta_proposal_sha256'
 GZIP_KEY = 'gzip_roles'  # Explicit opt-in data in the landed H871 schema.
 MAX_ARTIFACT_BYTES = 50 * 1024 * 1024  # Existing private-evidence per-file limit.
 
@@ -182,11 +183,13 @@ def catalog_document():
         raise ValueError('invalid template document')
     if MANIFEST_KEY in data:
         validate_manifest(data[MANIFEST_KEY])
+    if PROPOSAL_KEY in data and not sha(data[PROPOSAL_KEY]):
+        raise ValueError('invalid proposal SHA256 reference')
     return data
 
 
 def load_catalog():
-    data = {key: value for key, value in catalog_document().items() if key not in {MANIFEST_KEY, GZIP_KEY}}
+    data = {key: value for key, value in catalog_document().items() if key not in {MANIFEST_KEY, GZIP_KEY, PROPOSAL_KEY}}
     return expand((HERE / 'check-tests-used-routes.json').read_bytes(), data)
 
 
