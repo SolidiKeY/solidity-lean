@@ -48,6 +48,8 @@ hygiene	python3 -B scripts/hygiene/check.py
 review-checks-test	python3 -B scripts/hygiene/test_review_checks.py
 review-checks	python3 -B scripts/hygiene/review_checks.py
 decl-index-test	python3 -B scripts/decl-index/test_decl_index.py
+run-changed-test	python3 -B scripts/hygiene/test_run_changed.py
+au-test	python3 -B scripts/coord-tools/test_au.py
 EOF
 )
 

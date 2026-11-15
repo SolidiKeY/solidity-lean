@@ -100,6 +100,12 @@ else
   # CI's `checks` job runs this same script (.github/workflows/lean.yml), so a
   # tree that passes the gate cannot turn `checks` red.
   run_gate checks-fast bash scripts/ci/checks-fast.sh
+  # The workflow steps a merge adds or changes, run on the merged tree as CI would (Lean steps
+  # skipped); its changed tests and validators only print (scripts/hygiene/run_changed.py).
+  if [ "$mode" = touched ] && [ -f scripts/hygiene/run_changed.py ]; then
+    run_gate run-changed python3 -B scripts/hygiene/run_changed.py --block workflow --validators \
+      --base "$(git merge-base "${GATE_BASE:-origin/master}" HEAD)" --head HEAD
+  fi
   [ "$failed" -eq 0 ] || exit "$failed"
   run_gate build-touched build_touched
   # Statement-level duplicates and changes (scripts/decl-index/decl_index.py), opt-in because
