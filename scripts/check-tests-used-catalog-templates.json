@@ -90,9 +90,9 @@
        "role": "Proposed historical missing-GNU-time launcher diagnostic for ordinary H828 independent land review. It reports a launch failure, not native build, test, proof or runtime completion. Original failing launcher source is not established; later corrected source is not substituted. No execution, child/read, nonuse, deletion, budget, permission, trust or proof credit.",
        "review": {
          "content": "/tmp/solidity-cloud-post-build.sh: line 13: /usr/bin/time: No such file or directory\n",
-         "producer": "At measured revision 369172b6a297cc1fa7170caf5fcbddba237d4b27, validation.json blob dd9ff2f4a5e5923f03632f42f1e0a9a7922a32fa records the historical GNU-time/launcher failures; post-build-command.sh.txt blob f8f66a4657b2c30cbaca33ee924380b8ba4a39e8 now uses a Python timing wrapper, so it is not authenticated as the missing original failing launcher. Historical assertions are unverified data; no command replay.",
+         "producer": "At measured revision d4ede5c56ee65d8b28a2bf0b986c276d941b8ed7, validation.json blob dd9ff2f4a5e5923f03632f42f1e0a9a7922a32fa records the historical GNU-time/launcher failures; post-build-command.sh.txt blob f8f66a4657b2c30cbaca33ee924380b8ba4a39e8 now uses a Python timing wrapper, so it is not authenticated as the missing original failing launcher. Historical assertions are unverified data; no command replay.",
          "consumers": "At that exact revision, validation.json references this exact compressed object and its decoded length/hash. This metadata reference and repository scans are secondary context only, not a qualified consumer, proof of absence or nonuse. No empty-reader inference; keep, uncertain-reader and fixture-refusal precedence remain unchanged.",
-         "input_revision": "369172b6a297cc1fa7170caf5fcbddba237d4b27",
+         "input_revision": "d4ede5c56ee65d8b28a2bf0b986c276d941b8ed7",
          "independent": true
        }
      },
@@ -104,9 +104,9 @@
        "role": "Historical unknown-tstack-option launcher failure with recorded nonzero memory-guard result; no accepted source/proof gate. Assertions remain unverified historical data; no execution, child/read, nonuse/deletion, budget, permission or proof/runtime credit.",
        "review": {
          "content": "error: unknown long option '--tstack'\nmemory guard: peak aggregate RSS 0.04 GiB; result 1\n",
-         "producer": "At measured revision 369172b6a297cc1fa7170caf5fcbddba237d4b27, validation.json blob dd9ff2f4a5e5923f03632f42f1e0a9a7922a32fa: Metadata nonpassingAttemptsPreserved reports Lake argument-order failures. Retained final-source-command.sh.txt is a later command record, not authentication of the original failing argv. Exact retained command blob 44e22845e931d726d261e34e7275a9c01bac8567.",
+         "producer": "At measured revision d4ede5c56ee65d8b28a2bf0b986c276d941b8ed7, validation.json blob dd9ff2f4a5e5923f03632f42f1e0a9a7922a32fa: Metadata nonpassingAttemptsPreserved reports Lake argument-order failures. Retained final-source-command.sh.txt is a later command record, not authentication of the original failing argv. Exact retained command blob 44e22845e931d726d261e34e7275a9c01bac8567.",
          "consumers": "At that exact revision, validation.json artifacts[final-source-launch-error.log] references this exact compressed object, decoded SHA256 and 90 bytes. This metadata reference and scans are secondary context, not a qualified reader or proof of absence/nonuse. No empty-reader inference; live keep, uncertain-reader and fixture-refusal precedence survive.",
-         "input_revision": "369172b6a297cc1fa7170caf5fcbddba237d4b27",
+         "input_revision": "d4ede5c56ee65d8b28a2bf0b986c276d941b8ed7",
          "independent": true
        }
      },
@@ -118,9 +118,9 @@
        "role": "Historical native-tools phase start and result127 launcher failure; no native-tool build or post-build gate acceptance. Assertions remain unverified historical data; no execution, child/read, nonuse/deletion, budget, permission or proof/runtime credit.",
        "review": {
          "content": "START native-tools 2026-10-28T22:55:31+01:00\nmemory guard: peak aggregate RSS 0.01 GiB; result 127\n",
-         "producer": "At measured revision 369172b6a297cc1fa7170caf5fcbddba237d4b27, validation.json blob dd9ff2f4a5e5923f03632f42f1e0a9a7922a32fa: Metadata nonpassingAttemptsPreserved reports GNU-time launcher failures. Retained post-build-command.sh.txt now uses a Python timing wrapper; it is not substituted as the missing original failing launcher. Exact retained command blob f8f66a4657b2c30cbaca33ee924380b8ba4a39e8.",
+         "producer": "At measured revision d4ede5c56ee65d8b28a2bf0b986c276d941b8ed7, validation.json blob dd9ff2f4a5e5923f03632f42f1e0a9a7922a32fa: Metadata nonpassingAttemptsPreserved reports GNU-time launcher failures. Retained post-build-command.sh.txt now uses a Python timing wrapper; it is not substituted as the missing original failing launcher. Exact retained command blob f8f66a4657b2c30cbaca33ee924380b8ba4a39e8.",
          "consumers": "At that exact revision, validation.json artifacts[post-build-launch-error.log] references this exact compressed object, decoded SHA256 and 99 bytes. This metadata reference and scans are secondary context, not a qualified reader or proof of absence/nonuse. No empty-reader inference; live keep, uncertain-reader and fixture-refusal precedence survive.",
-         "input_revision": "369172b6a297cc1fa7170caf5fcbddba237d4b27",
+         "input_revision": "d4ede5c56ee65d8b28a2bf0b986c276d941b8ed7",
          "independent": true
        }
      },
@@ -132,9 +132,9 @@
        "role": "Historical automatic/manual/refuted/pending count summary; no current automatic classification, proof or completeness acceptance. Assertions remain unverified historical data; no execution, child/read, nonuse/deletion, budget, permission or proof/runtime credit.",
        "review": {
          "content": "check-automatic: 491 automatic, 61 with a step budget, 0 manual; 11 refuted; 0 pending\n",
-         "producer": "At measured revision 369172b6a297cc1fa7170caf5fcbddba237d4b27, validation.json blob dd9ff2f4a5e5923f03632f42f1e0a9a7922a32fa: Metadata staticChecks[automatic] reports command [\"node\", \"scripts/check-automatic.mjs\", \"--strict\"] and exitCode 0. This is a declared historical producer, not an authenticated current execution.",
+         "producer": "At measured revision d4ede5c56ee65d8b28a2bf0b986c276d941b8ed7, validation.json blob dd9ff2f4a5e5923f03632f42f1e0a9a7922a32fa: Metadata staticChecks[automatic] reports command [\"node\", \"scripts/check-automatic.mjs\", \"--strict\"] and exitCode 0. This is a declared historical producer, not an authenticated current execution.",
          "consumers": "At that exact revision, validation.json artifacts[static-automatic.log] references this exact compressed object, decoded SHA256 and 87 bytes. This metadata reference and scans are secondary context, not a qualified reader or proof of absence/nonuse. No empty-reader inference; live keep, uncertain-reader and fixture-refusal precedence survive.",
-         "input_revision": "369172b6a297cc1fa7170caf5fcbddba237d4b27",
+         "input_revision": "d4ede5c56ee65d8b28a2bf0b986c276d941b8ed7",
          "independent": true
        }
      },
@@ -146,9 +146,9 @@
        "role": "Historical feature/upstream-symbol inventory count summary; no current inventory, generated-output freshness or semantic coverage acceptance. Assertions remain unverified historical data; no execution, child/read, nonuse/deletion, budget, permission or proof/runtime credit.",
        "review": {
          "content": "212 features: {'model': 151, 'abstract': 23, 'exclude': 30, 'upstream': 8}\n783 upstream symbols classified; generated files current\n",
-         "producer": "At measured revision 369172b6a297cc1fa7170caf5fcbddba237d4b27, validation.json blob dd9ff2f4a5e5923f03632f42f1e0a9a7922a32fa: Metadata staticChecks[inventory] reports command [\"python3\", \"scripts/solidity-feature-audit.py\", \"--check\"] and exitCode 0. This is a declared historical producer, not an authenticated current execution.",
+         "producer": "At measured revision d4ede5c56ee65d8b28a2bf0b986c276d941b8ed7, validation.json blob dd9ff2f4a5e5923f03632f42f1e0a9a7922a32fa: Metadata staticChecks[inventory] reports command [\"python3\", \"scripts/solidity-feature-audit.py\", \"--check\"] and exitCode 0. This is a declared historical producer, not an authenticated current execution.",
          "consumers": "At that exact revision, validation.json artifacts[static-inventory.log] references this exact compressed object, decoded SHA256 and 132 bytes. This metadata reference and scans are secondary context, not a qualified reader or proof of absence/nonuse. No empty-reader inference; live keep, uncertain-reader and fixture-refusal precedence survive.",
-         "input_revision": "369172b6a297cc1fa7170caf5fcbddba237d4b27",
+         "input_revision": "d4ede5c56ee65d8b28a2bf0b986c276d941b8ed7",
          "independent": true
        }
      },
@@ -160,9 +160,9 @@
        "role": "Historical core/elaborator reachability count summary; no current layering verification or dependency/nonuse conclusion. Assertions remain unverified historical data; no execution, child/read, nonuse/deletion, budget, permission or proof/runtime credit.",
        "review": {
          "content": "154 core modules, 0 reach the elaborator\n",
-         "producer": "At measured revision 369172b6a297cc1fa7170caf5fcbddba237d4b27, validation.json blob dd9ff2f4a5e5923f03632f42f1e0a9a7922a32fa: Metadata staticChecks[layers] reports command [\"node\", \"scripts/check-layers.mjs\"] and exitCode 0. This is a declared historical producer, not an authenticated current execution.",
+         "producer": "At measured revision d4ede5c56ee65d8b28a2bf0b986c276d941b8ed7, validation.json blob dd9ff2f4a5e5923f03632f42f1e0a9a7922a32fa: Metadata staticChecks[layers] reports command [\"node\", \"scripts/check-layers.mjs\"] and exitCode 0. This is a declared historical producer, not an authenticated current execution.",
          "consumers": "At that exact revision, validation.json artifacts[static-layers.log] references this exact compressed object, decoded SHA256 and 41 bytes. This metadata reference and scans are secondary context, not a qualified reader or proof of absence/nonuse. No empty-reader inference; live keep, uncertain-reader and fixture-refusal precedence survive.",
-         "input_revision": "369172b6a297cc1fa7170caf5fcbddba237d4b27",
+         "input_revision": "d4ede5c56ee65d8b28a2bf0b986c276d941b8ed7",
          "independent": true
        }
      },
@@ -174,9 +174,9 @@
        "role": "Historical reachable/orphan count summary under a reported preexisting scratch allowlist; no orphan approval, current nonuse, exclusion or deletion authority. Assertions remain unverified historical data; no execution, child/read, nonuse/deletion, budget, permission or proof/runtime credit.",
        "review": {
          "content": "713 reachable, 33 orphaned, 0 not allowed\n",
-         "producer": "At measured revision 369172b6a297cc1fa7170caf5fcbddba237d4b27, validation.json blob dd9ff2f4a5e5923f03632f42f1e0a9a7922a32fa: Metadata staticChecks[orphans] reports command [\"node\", \"scripts/check-orphans.mjs\", \"--allow\", \".lake/cloud-integration-20261028/preexisting-scratch-allow.txt\"] and exitCode 0. This is a declared historical producer, not an authenticated current execution.",
+         "producer": "At measured revision d4ede5c56ee65d8b28a2bf0b986c276d941b8ed7, validation.json blob dd9ff2f4a5e5923f03632f42f1e0a9a7922a32fa: Metadata staticChecks[orphans] reports command [\"node\", \"scripts/check-orphans.mjs\", \"--allow\", \".lake/cloud-integration-20261028/preexisting-scratch-allow.txt\"] and exitCode 0. This is a declared historical producer, not an authenticated current execution.",
          "consumers": "At that exact revision, validation.json artifacts[static-orphans.log] references this exact compressed object, decoded SHA256 and 42 bytes. This metadata reference and scans are secondary context, not a qualified reader or proof of absence/nonuse. No empty-reader inference; live keep, uncertain-reader and fixture-refusal precedence survive.",
-         "input_revision": "369172b6a297cc1fa7170caf5fcbddba237d4b27",
+         "input_revision": "d4ede5c56ee65d8b28a2bf0b986c276d941b8ed7",
          "independent": true
        }
      },
@@ -188,9 +188,9 @@
        "role": "Historical trust/axiom/parity/testsuite summary; no current kernel proof, parity, skip/exclusion approval or full testsuite acceptance. Assertions remain unverified historical data; no execution, child/read, nonuse/deletion, budget, permission or proof/runtime credit.",
        "review": {
          "content": "trust: 31 modules: no native_decide, decide +native, sorry, admit, maxHeartbeats or skipKernelTC in code\naxioms: #solkey_obligations counts a theorem derived only with propext, Classical.choice and Quot.sound; Report.lean pins no unsound or mismatched theorem\nparity: 564 testSuiteFunctions = 552 derived + 11 refuted + 0 pending + 0 divergent + 1 excluded; 2 skip\ncheck-testsuite: ok\n",
-         "producer": "At measured revision 369172b6a297cc1fa7170caf5fcbddba237d4b27, validation.json blob dd9ff2f4a5e5923f03632f42f1e0a9a7922a32fa: Metadata staticChecks[testsuite-static] reports command [\"bash\", \"scripts/check-testsuite.sh\", \"--solkey\", \"tests/migration/solkey/keyext.solidity.examples\"] and exitCode 0. This is a declared historical producer, not an authenticated current execution.",
+         "producer": "At measured revision d4ede5c56ee65d8b28a2bf0b986c276d941b8ed7, validation.json blob dd9ff2f4a5e5923f03632f42f1e0a9a7922a32fa: Metadata staticChecks[testsuite-static] reports command [\"bash\", \"scripts/check-testsuite.sh\", \"--solkey\", \"tests/migration/solkey/keyext.solidity.examples\"] and exitCode 0. This is a declared historical producer, not an authenticated current execution.",
          "consumers": "At that exact revision, validation.json artifacts[static-testsuite-static.log] references this exact compressed object, decoded SHA256 and 385 bytes. This metadata reference and scans are secondary context, not a qualified reader or proof of absence/nonuse. No empty-reader inference; live keep, uncertain-reader and fixture-refusal precedence survive.",
-         "input_revision": "369172b6a297cc1fa7170caf5fcbddba237d4b27",
+         "input_revision": "d4ede5c56ee65d8b28a2bf0b986c276d941b8ed7",
          "independent": true
        }
      },
@@ -202,9 +202,9 @@
        "role": "Historical duplicate-content trust/axiom/parity/testsuite summary, separately pinned path; not an independently demonstrated second test run or current acceptance. Assertions remain unverified historical data; no execution, child/read, nonuse/deletion, budget, permission or proof/runtime credit.",
        "review": {
          "content": "trust: 31 modules: no native_decide, decide +native, sorry, admit, maxHeartbeats or skipKernelTC in code\naxioms: #solkey_obligations counts a theorem derived only with propext, Classical.choice and Quot.sound; Report.lean pins no unsound or mismatched theorem\nparity: 564 testSuiteFunctions = 552 derived + 11 refuted + 0 pending + 0 divergent + 1 excluded; 2 skip\ncheck-testsuite: ok\n",
-         "producer": "At measured revision 369172b6a297cc1fa7170caf5fcbddba237d4b27, validation.json blob dd9ff2f4a5e5923f03632f42f1e0a9a7922a32fa: Metadata staticChecks[testsuite-static] reports command [\"bash\", \"scripts/check-testsuite.sh\", \"--solkey\", \"tests/migration/solkey/keyext.solidity.examples\"] and exitCode 0. This is a declared historical producer, not an authenticated current execution.",
+         "producer": "At measured revision d4ede5c56ee65d8b28a2bf0b986c276d941b8ed7, validation.json blob dd9ff2f4a5e5923f03632f42f1e0a9a7922a32fa: Metadata staticChecks[testsuite-static] reports command [\"bash\", \"scripts/check-testsuite.sh\", \"--solkey\", \"tests/migration/solkey/keyext.solidity.examples\"] and exitCode 0. This is a declared historical producer, not an authenticated current execution.",
          "consumers": "At that exact revision, validation.json artifacts[static-testsuite.log] references this exact compressed object, decoded SHA256 and 385 bytes. This metadata reference and scans are secondary context, not a qualified reader or proof of absence/nonuse. No empty-reader inference; live keep, uncertain-reader and fixture-refusal precedence survive.",
-         "input_revision": "369172b6a297cc1fa7170caf5fcbddba237d4b27",
+         "input_revision": "d4ede5c56ee65d8b28a2bf0b986c276d941b8ed7",
          "independent": true
        }
      },
@@ -216,9 +216,9 @@
        "role": "Historical source/recovery-site trust-scan count summary; no current trust audit, axiom approval, implementation adequacy or proof acceptance. Assertions remain unverified historical data; no execution, child/read, nonuse/deletion, budget, permission or proof/runtime credit.",
        "review": {
          "content": "trust: 728 sources, 240 inventoried implementation/recovery sites, 0 findings\n",
-         "producer": "At measured revision 369172b6a297cc1fa7170caf5fcbddba237d4b27, validation.json blob dd9ff2f4a5e5923f03632f42f1e0a9a7922a32fa: Metadata staticChecks[trust] reports command [\"bash\", \"scripts/check-trust.sh\"] and exitCode 0. This is a declared historical producer, not an authenticated current execution.",
+         "producer": "At measured revision d4ede5c56ee65d8b28a2bf0b986c276d941b8ed7, validation.json blob dd9ff2f4a5e5923f03632f42f1e0a9a7922a32fa: Metadata staticChecks[trust] reports command [\"bash\", \"scripts/check-trust.sh\"] and exitCode 0. This is a declared historical producer, not an authenticated current execution.",
          "consumers": "At that exact revision, validation.json artifacts[static-trust.log] references this exact compressed object, decoded SHA256 and 78 bytes. This metadata reference and scans are secondary context, not a qualified reader or proof of absence/nonuse. No empty-reader inference; live keep, uncertain-reader and fixture-refusal precedence survive.",
-         "input_revision": "369172b6a297cc1fa7170caf5fcbddba237d4b27",
+         "input_revision": "d4ede5c56ee65d8b28a2bf0b986c276d941b8ed7",
          "independent": true
        }
      },
@@ -232,7 +232,7 @@
          "content": "Read all587 decoded bytes: five named suites report8/17/10/5/9 tests,49 total and zero exits. Assertions unverified; no current test acceptance.",
          "producer": "validation.json blob dd9ff2f4a5e5923f03632f42f1e0a9a7922a32fa and retained post-build-command.sh.txt blob f8f66a4657b2c30cbaca33ee924380b8ba4a39e8: regressions.baselinePython repeats these exact five named suites and counts; the exact original invocation/supervisor is not established by that summary.",
          "consumers": "validation.json artifacts[baseline-tests.json] pins this compressed object and decoded digest/length at review.input_revision. Metadata is secondary context, not a qualified reader or absence/nonuse proof; keep/uncertain-reader/refusal precedence unchanged.",
-         "input_revision": "369172b6a297cc1fa7170caf5fcbddba237d4b27",
+         "input_revision": "d4ede5c56ee65d8b28a2bf0b986c276d941b8ed7",
          "independent": true
        }
      },
@@ -246,7 +246,7 @@
          "content": "Read all98 decoded bytes:640 agreements and zero mismatch/blocked, with timing/RSS labels. Unverified external observations, not universal equivalence.",
          "producer": "validation.json blob dd9ff2f4a5e5923f03632f42f1e0a9a7922a32fa and retained post-build-command.sh.txt blob f8f66a4657b2c30cbaca33ee924380b8ba4a39e8: regressions.generatedEvm repeats640 agree,0 mismatch,0 blocked; retained post-build command declares the generated-evm phase with seed0 and supplied external compiler. Script declaration does not authenticate a live run.",
          "consumers": "validation.json artifacts[generated-evm.log] pins this compressed object and decoded digest/length at review.input_revision. Metadata is secondary context, not a qualified reader or absence/nonuse proof; keep/uncertain-reader/refusal precedence unchanged.",
-         "input_revision": "369172b6a297cc1fa7170caf5fcbddba237d4b27",
+         "input_revision": "d4ede5c56ee65d8b28a2bf0b986c276d941b8ed7",
          "independent": true
        }
      },
@@ -260,7 +260,7 @@
          "content": "Read all586 decoded bytes: main high-water equals12GiB cap,5503 max events and reported zero OOM counters. Historical sample, not current clearance.",
          "producer": "validation.json blob dd9ff2f4a5e5923f03632f42f1e0a9a7922a32fa and retained post-build-command.sh.txt blob f8f66a4657b2c30cbaca33ee924380b8ba4a39e8: resources.mainCgroup repeats this exact historical sample and its2-second sampling description. Sampler source, complete sampling interval and executor are not authenticated here; recorded limits do not change current budgets.",
          "consumers": "validation.json artifacts[lean-cgroup-metrics.json] pins this compressed object and decoded digest/length at review.input_revision. Metadata is secondary context, not a qualified reader or absence/nonuse proof; keep/uncertain-reader/refusal precedence unchanged.",
-         "input_revision": "369172b6a297cc1fa7170caf5fcbddba237d4b27",
+         "input_revision": "d4ede5c56ee65d8b28a2bf0b986c276d941b8ed7",
          "independent": true
        }
      },
@@ -274,7 +274,7 @@
          "content": "Read all495 decoded bytes: broken and typed-only modes remain, original/executing generator hashes differ. Reported observation matching is unverified.",
          "producer": "validation.json blob dd9ff2f4a5e5923f03632f42f1e0a9a7922a32fa and retained post-build-command.sh.txt blob f8f66a4657b2c30cbaca33ee924380b8ba4a39e8: historicalEvidence says original/current generator identities were reported separately and this is not a new full merged-corpus run. The captured statistics and historicalObservationsMatch assertion are unverified; no original verifier invocation is authenticated.",
          "consumers": "validation.json artifacts[native-historical-check.log] pins this compressed object and decoded digest/length at review.input_revision. Metadata is secondary context, not a qualified reader or absence/nonuse proof; keep/uncertain-reader/refusal precedence unchanged.",
-         "input_revision": "369172b6a297cc1fa7170caf5fcbddba237d4b27",
+         "input_revision": "d4ede5c56ee65d8b28a2bf0b986c276d941b8ed7",
          "independent": true
        }
      },
@@ -288,7 +288,7 @@
          "content": "Read all267 decoded bytes: replayed AST warning,63-job completion and phase metrics. Historical assertion, not current build or proof acceptance.",
          "producer": "validation.json blob dd9ff2f4a5e5923f03632f42f1e0a9a7922a32fa and retained post-build-command.sh.txt blob f8f66a4657b2c30cbaca33ee924380b8ba4a39e8: Retained post-build command declares native-tools lake build solidity-lean solcases after removing executable destinations. That historical source declaration does not authenticate the reported build or establish current artifacts.",
          "consumers": "validation.json artifacts[native-tools.log] pins this compressed object and decoded digest/length at review.input_revision. Metadata is secondary context, not a qualified reader or absence/nonuse proof; keep/uncertain-reader/refusal precedence unchanged.",
-         "input_revision": "369172b6a297cc1fa7170caf5fcbddba237d4b27",
+         "input_revision": "d4ede5c56ee65d8b28a2bf0b986c276d941b8ed7",
          "independent": true
        }
      },
@@ -302,7 +302,7 @@
          "content": "Read all125 decoded bytes:82 legacy/viaIR observations and phase metrics. Unverified external result, not a model proof.",
          "producer": "validation.json blob dd9ff2f4a5e5923f03632f42f1e0a9a7922a32fa and retained post-build-command.sh.txt blob f8f66a4657b2c30cbaca33ee924380b8ba4a39e8: regressions.panicEvmObservations repeats82; retained post-build command declares panic-evm check-self-power-data with external compiler/node inputs. Captured outcome and exact executor remain unverified.",
          "consumers": "validation.json artifacts[panic-evm.log] pins this compressed object and decoded digest/length at review.input_revision. Metadata is secondary context, not a qualified reader or absence/nonuse proof; keep/uncertain-reader/refusal precedence unchanged.",
-         "input_revision": "369172b6a297cc1fa7170caf5fcbddba237d4b27",
+         "input_revision": "d4ede5c56ee65d8b28a2bf0b986c276d941b8ed7",
          "independent": true
        }
      },
@@ -316,7 +316,7 @@
          "content": "Read all822 decoded bytes: eight START/PASS phases, final marker and sampled RSS/result0. Sequence does not authenticate child runs or current acceptance.",
          "producer": "validation.json blob dd9ff2f4a5e5923f03632f42f1e0a9a7922a32fa and retained post-build-command.sh.txt blob f8f66a4657b2c30cbaca33ee924380b8ba4a39e8: Retained post-build command defines phase START/PASS output and lists native-tools, node/reference controls, external EVM and slice-admission phases. Matching source structure is context, not authentication of captured phase execution or child outputs.",
          "consumers": "validation.json artifacts[post-build.log] pins this compressed object and decoded digest/length at review.input_revision. Metadata is secondary context, not a qualified reader or absence/nonuse proof; keep/uncertain-reader/refusal precedence unchanged.",
-         "input_revision": "369172b6a297cc1fa7170caf5fcbddba237d4b27",
+         "input_revision": "d4ede5c56ee65d8b28a2bf0b986c276d941b8ed7",
          "independent": true
        }
      },
@@ -330,7 +330,7 @@
          "content": "Read all575 decoded bytes: post-scope high-water3990081536 bytes differs from sampled2.15GiB RSS. Historical metrics, not current resource clearance.",
          "producer": "validation.json blob dd9ff2f4a5e5923f03632f42f1e0a9a7922a32fa and retained post-build-command.sh.txt blob f8f66a4657b2c30cbaca33ee924380b8ba4a39e8: resources.postCgroup repeats this exact2-second sample while resources.postSampledPeakAggregateRSSGiB separately reports2.15GiB. These metrics are not conflated; sampler source and interval completeness remain unverified.",
          "consumers": "validation.json artifacts[post-cgroup-metrics.json] pins this compressed object and decoded digest/length at review.input_revision. Metadata is secondary context, not a qualified reader or absence/nonuse proof; keep/uncertain-reader/refusal precedence unchanged.",
-         "input_revision": "369172b6a297cc1fa7170caf5fcbddba237d4b27",
+         "input_revision": "d4ede5c56ee65d8b28a2bf0b986c276d941b8ed7",
          "independent": true
        }
      },
@@ -344,7 +344,7 @@
          "content": "Read all638 decoded bytes: three replay warnings, two admitted strings and phase metrics. No general admission proof or current fixture-use credit.",
          "producer": "validation.json blob dd9ff2f4a5e5923f03632f42f1e0a9a7922a32fa and retained post-build-command.sh.txt blob f8f66a4657b2c30cbaca33ee924380b8ba4a39e8: regressions.sliceAdmissionExit reports0 and retained post-build command declares the Admission.lean phase. Neither metadata nor the two strings authenticate current Lean execution or broader admission coverage.",
          "consumers": "validation.json artifacts[slice-admission.log] pins this compressed object and decoded digest/length at review.input_revision. Metadata is secondary context, not a qualified reader or absence/nonuse proof; keep/uncertain-reader/refusal precedence unchanged.",
-         "input_revision": "369172b6a297cc1fa7170caf5fcbddba237d4b27",
+         "input_revision": "d4ede5c56ee65d8b28a2bf0b986c276d941b8ed7",
          "independent": true
        }
      },
@@ -358,20 +358,20 @@
          "content": "Read all664 decoded bytes: one blocked/unrouted partial feature remains before nine-test OK. No whole-corpus or current semantic acceptance.",
          "producer": "validation.json blob dd9ff2f4a5e5923f03632f42f1e0a9a7922a32fa and retained post-build-command.sh.txt blob f8f66a4657b2c30cbaca33ee924380b8ba4a39e8: regressions.baselinePython names scripts/solidity-baseline.test.py with9 tests and exit0. The captured route/count diagnostic and OK text do not establish current execution or turn the blocked/unrouted case into supported behavior.",
          "consumers": "validation.json artifacts[solidity-baseline.test.py.log] pins this compressed object and decoded digest/length at review.input_revision. Metadata is secondary context, not a qualified reader or absence/nonuse proof; keep/uncertain-reader/refusal precedence unchanged.",
-         "input_revision": "369172b6a297cc1fa7170caf5fcbddba237d4b27",
+         "input_revision": "d4ede5c56ee65d8b28a2bf0b986c276d941b8ed7",
          "independent": true
        }
      }
    ]
  },
  "inventory_manifest": {
-   "bytes": 8780439,
-   "evidence_commit": "dc0e5ef2cf263118005d63aece5699ce357937d2",
-   "evidence_path": "evidence/plan-x1-census-validation-1114/x1-census-validation/x1-gzip-observations-artifact-369172b6-reviewed/inventory.json",
-   "input_revision": "369172b6a297cc1fa7170caf5fcbddba237d4b27",
+   "bytes": 8786218,
+   "evidence_commit": "0ddba6f919c69e53466ee3a2954c466a5c2f1a82",
+   "evidence_path": "evidence/plan-x1-census-validation-1114/x1-census-validation/x1-cloud-snapshots-artifact-d4ede5c5/inventory.json",
+   "input_revision": "d4ede5c56ee65d8b28a2bf0b986c276d941b8ed7",
    "repository": "SolidiKeY/solidity-lean-coord",
    "schema_version": 1,
-   "sha256": "0376cd38701ccfd119475dd3c1e1e72b9014a6651de102a48ab3f893bf7dcf38"
+   "sha256": "b7b27b7b093333b5d594c35f59bc88aa9ca354dcd37af8d8aa9b13a0ffefa139"
  },
  "schema_version":3,
  "templates":{

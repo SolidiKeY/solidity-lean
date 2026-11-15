@@ -1260,6 +1260,37 @@
       "anchor": "# VO1 idle-group pruning: registration (done)",
       "role": "Historical record: Captured VO1 immediate idle-group pruning registration handoff, reported source/control checks, root/orphan registration status and corpus budget failure. The note explicitly retains general reachability, D6 and full compiler/physical obligations. Reported theorem, pass, axiom, acceptance and permission claims are historical assertions, not independently revalidated results or current authorization. Documentation links are secondary context, not execution or consumer certification. No keep, exact-generation, nonuse, orphan, deletion, proof, trust, premise, exclusion, budget or STOP-clearance credit; live keep and uncertain-reader precedence remain unchanged."
     }
+  ,
+    {
+      "path": "tests/upstream/cloud-integration-20261028/combined-command.sh.txt",
+      "blob": "ef699c2291b9c8b230f8c4a3c94e7d64151f13d0",
+      "anchor": "export INTEG_CONFIG=\"$PWD/.cloud-integration.toml\"",
+      "role": "Historical record: Captured combined Lean-gate command/configuration snapshot: temporary worker configuration, external SolKey/compiler inputs, run-lean and solcases declarations plus reported completion marker. No command is executed, and the text authenticates neither historical completion nor current artifact identity, cold timing, fixture consumption, proof/runtime/full-gate acceptance or any resource/permission setting. Metadata references are secondary context; reported claims remain unverified. Live keep and uncertain-reader precedence remain; no generation, nonuse, orphan, deletion, exclusion, budget reset or STOP-clearance credit."
+    },
+    {
+      "path": "tests/upstream/cloud-integration-20261028/default-cli-stack-command.sh.txt",
+      "blob": "8e73faf50d641c24e86d15c23bd9191387f20d54",
+      "anchor": "for file in SolkeyCheck.lean SolidityLean.lean SolCases.lean; do",
+      "role": "Historical record: Captured default-stack CLI-root and rehash/no-build command snapshot naming three old executable roots. This is recorded invocation text, not a validated current runner, child/read chain, default-stack result, cache freshness, source preservation or current proof/runtime/full-gate acceptance. Old flags and resource settings are not adopted. Metadata references are secondary context; reported claims remain unverified. Live keep and uncertain-reader precedence remain; no generation, nonuse, orphan, deletion, exclusion, budget reset or STOP-clearance credit."
+    },
+    {
+      "path": "tests/upstream/cloud-integration-20261028/final-source-command.sh.txt",
+      "blob": "44e22845e931d726d261e34e7275a9c01bac8567",
+      "anchor": "~/.elan/bin/lake -f .cloud-integration.toml lean Solidity/Solkey/QuantifiedDiamond.lean -- --tstack=131072 -j1",
+      "role": "Historical record: Captured final-source/default-and-testsuite rehash command snapshot. The retained command is not substituted as authenticated original failing launcher argv or a successful current check, nor permission to replay a stopped workload. No current theorem, stack/budget, cache, source, proof/runtime or full-gate acceptance is inferred. Metadata references are secondary context; reported claims remain unverified. Live keep and uncertain-reader precedence remain; no generation, nonuse, orphan, deletion, exclusion, budget reset or STOP-clearance credit."
+    },
+    {
+      "path": "tests/upstream/cloud-integration-20261028/final-worker-lakefile.toml.txt",
+      "blob": "88e291d114cb9f546c2e954b47c7fcb19cc06bcc",
+      "anchor": "defaultTargets = [\"Solidity\", \"solkeycheck\", \"solidity-lean\"]",
+      "role": "Historical record: Captured historical worker Lake configuration with old library/executable targets, source directories, artifact-cache and weak Lean flags. It is not the active project configuration or current root registration, dependency certification, cache validity, budget/resource/trust policy or proof/runtime acceptance; no captured option is applied. Metadata references are secondary context; reported claims remain unverified. Live keep and uncertain-reader precedence remain; no generation, nonuse, orphan, deletion, exclusion, budget reset or STOP-clearance credit."
+    },
+    {
+      "path": "tests/upstream/cloud-integration-20261028/post-build-command.sh.txt",
+      "blob": "f8f66a4657b2c30cbaca33ee924380b8ba4a39e8",
+      "anchor": " python3 /tmp/cloud-integration-time-command.py \"$@\" > \".lake/cloud-integration-20261028/$name.log\" 2>&1",
+      "role": "Historical record: Captured corrected post-build phase command snapshot using a Python timer and external compiler inputs. It describes native, Node, reference, EVM and admission phases but authenticates no child execution or result and is not the missing original GNU-time failing launcher. The recorded executable deletion and all commands remain inert; no current data/fixture, proof/runtime/full-gate, resource or permission credit. Metadata references are secondary context; reported claims remain unverified. Live keep and uncertain-reader precedence remain; no generation, nonuse, orphan, deletion, exclusion, budget reset or STOP-clearance credit."
+    }
   ],
   "schema_version": 1
 }
