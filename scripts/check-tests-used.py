@@ -13,25 +13,12 @@ A partial --write is useful for review but returns 1 and is NOT acceptance.
 Run recorded generators/reproducers only in disposable committed-byte copies;
 their commands can write fixed paths. Normal write/check never executes them.
 
-The use graph is deliberately an under-approximation: explicit reviewed routes,
-Lean imports/solc_imports, observed Python reads of measured bytes, and
-separately reviewed opt-in entered-module claims. Module entry is execution
-coverage only: it grants no fixture reads, child execution or proof credit.
-Separately audited nonpassing unittest routes retain failure status and grant
-no passing-reproducer credit; actual test/setup method identity is required.
-Unreviewed unittest data reads remain unresolved even when the test passes.
-Unchanged demonstrated committed runners may be source-only roots with
-unavailable current validation, without fixture/child or passing-reproducer credit.
-Text matches are search candidates, never invocation edges. Shell expansion,
-Python eval/importlib, computed Node reads and producer environments need review;
-no static absence is sufficient to prune a candidate. Unresolved paths have a
-null class and make the completion check fail. Repository-wide policy scans
-are secondary coverage; keep requires independent test/runner/Lean/fixture use.
-The inventory cannot justify itself: classifier and inventory paths are excluded from candidate discovery.
+The use graph is an under-approximation. Explicit reviewed routes, imports and
+observed reads provide evidence; search matches do not. Unresolved paths remain
+unclassified and make the completion check fail. Recovery selects the first
+change in topological history introducing each blob at its path, verified against
+the measured object; shallow history may prevent recovery.
 
-Recovery selects the first change in Git's topological history that introduced
-the measured blob at that path (no rename following). A unique merge resolution uses Git path-specific history. Every selected commit:path is checked against the measured object.
-No receipt, timestamp, workstation path or execution result belongs in this data.
 """
 from __future__ import annotations
 
@@ -112,13 +99,68 @@ def unique_json_object(pairs):
     return result
 
 
-fragment_spec = importlib.util.spec_from_file_location(
-    'tests_used_fragments', Path(__file__).with_name('check-tests-used.d') / 'fragments.py')
-fragment_rules = importlib.util.module_from_spec(fragment_spec)
-fragment_spec.loader.exec_module(fragment_rules)
-FRAGMENT_SECTIONS = fragment_rules.FRAGMENT_SECTIONS
-read_fragments = fragment_rules.read_fragments
-merge_fragment_entries = fragment_rules.merge_fragment_entries
+FRAGMENT_SECTIONS = ('standalone', 'generators', 'reads', 'orphans', 'module_entries')
+
+
+def fragment_identity(section, row):
+    if not isinstance(row, dict): raise ValueError('fragment entry must be an object')
+    if section in ('roles', 'fixtures'):
+        keys = ('path',)
+    elif section in ('standalone', 'generators', 'orphans'):
+        keys = ('path', 'input_revision')
+    elif section in ('module_entries', 'reads'):
+        keys = ('runner', 'input_revision', 'target', 'frames')
+    else:
+        raise ValueError('unknown fragment section')
+    if any(k not in row for k in keys): raise ValueError('fragment entry lacks identity: ' + section)
+    values = [row[k] for k in keys]
+    if section in ('module_entries', 'reads'):
+        frames = row['frames']
+        if not isinstance(frames, list) or any(not isinstance(f, dict) for f in frames):
+            raise ValueError('invalid fragment frames')
+        values[-1] = [{k: v for k, v in frame.items() if k != 'blob'} for frame in frames]
+    return canonical(values)
+
+
+def read_fragments(directory):
+    result = {key: [] for key in FRAGMENT_SECTIONS + ('roles', 'fixtures')}
+    for path in sorted(directory.glob('*.json')):
+        document = json.loads(path.read_bytes(), object_pairs_hook=unique_json_object)
+        if (not isinstance(document, dict) or type(document.get('schema_version')) is not int
+                or document['schema_version'] != 1
+                or not set(document) <= {'schema_version', 'routes', 'catalog_extensions', 'roles', 'fixtures'}):
+            raise ValueError('invalid classification fragment: ' + str(path))
+        for group in ('routes', 'catalog_extensions'):
+            sections = document.get(group, {})
+            if not isinstance(sections, dict) or not set(sections) <= set(FRAGMENT_SECTIONS):
+                raise ValueError('invalid fragment catalog sections: ' + str(path))
+            for section, entries in sections.items():
+                if not isinstance(entries, list): raise ValueError('fragment section must be a list')
+                result[section].extend(entries)
+        for section in ('roles', 'fixtures'):
+            entries = document.get(section, [])
+            if not isinstance(entries, list): raise ValueError('fragment section must be a list')
+            result[section].extend(entries)
+    return result
+
+
+def merge_fragment_entries(section, existing, additions):
+    # Repeated identical claims are harmless; a different claim for the same
+    # identity is ambiguous and rejected, regardless of file order.
+    seen = {}
+    for row in existing:
+        key = fragment_identity(section, row)
+        if key in seen and seen[key] != row: raise ValueError('conflicting existing ' + section + ' entries')
+        seen[key] = row
+    result = list(existing)
+    for row in additions:
+        key = fragment_identity(section, row)
+        if key in seen:
+            if seen[key] != row: raise ValueError('conflicting ' + section + ' fragment entries')
+            continue
+        seen[key] = row
+        result.append(row)
+    return result
 
 
 def excluded(p):
@@ -605,15 +647,7 @@ def validated_module_entries(graph, entries):
 
 
 def validated_routes(graph, catalog, extra_reads=()):
-    """Reviewed validation definitions; raw run receipts live outside the branch.
-
-    A passing-validation definition is bound to an exact input revision, command and source blob.
-    Identical demonstrated committed runner sources may remain source-only roots
-    at another revision, with explicit unavailable validation and no edge credit.
-    Check/write do not execute it. Changes to the measured revision invalidate
-    it until deliberate validation updates the definition. Definitions are part
-    of the classifier, not evidence supplied by the inventory under test.
-    """
+    """Validate reviewed, revision-bound definitions without executing commands."""
     repo = graph.repo
     fields = {'schema_version', 'standalone', 'generators', 'reads', 'orphans'}
     if (not isinstance(catalog, dict) or type(catalog.get('schema_version')) is not int
@@ -1705,6 +1739,16 @@ def inventory(repo, catalog=None):
     fragments = read_fragments(Path(__file__).with_name('check-tests-used.d'))
     extra_reads = []
     if any(fragments[key] for key in FRAGMENT_SECTIONS):
+        # Check both frozen extension formats without implicitly enabling either.
+        extension_spec = importlib.util.spec_from_file_location('fragment_extension_check', Path(__file__).with_name('check-tests-used-catalog-extension.py'))
+        extension = importlib.util.module_from_spec(extension_spec); extension_spec.loader.exec_module(extension)
+        template_spec = importlib.util.spec_from_file_location('fragment_template_check', Path(__file__).with_name('check-tests-used-catalog-templates.py'))
+        template = importlib.util.module_from_spec(template_spec); template_spec.loader.exec_module(template)
+        for existing_catalog in (extension.load_catalog(), template.load_catalog()):
+            for section in FRAGMENT_SECTIONS:
+                if fragments[section]:
+                    existing = list(read_routes(existing_catalog)) if section == 'reads' else existing_catalog.get(section, [])
+                    merge_fragment_entries(section, existing, fragments[section])
         catalog = dict(catalog)
         for section in FRAGMENT_SECTIONS:
             additions = fragments[section]
@@ -1738,7 +1782,7 @@ def inventory(repo, catalog=None):
         orphan_reviews[p] = entry
     pins = repo.pins()
     historical = historical_outputs(repo)
-    historical.update(reviewed_historical_notes(repo, additions=fragments['roles']))
+    historical.update(reviewed_historical_notes(repo, additions=fragments['roles']) if fragments['roles'] else reviewed_historical_notes(repo))
     # Search coverage is explicitly broader than the certified use graph. A
     # textual hit is negative-evidence context, not a consumer certification.
     names = collections.defaultdict(list)
@@ -2156,7 +2200,9 @@ def module_entry_schema_controls():
 
 
 def self_test():
-    fragment_rules.fragment_controls()
+    spec = importlib.util.spec_from_file_location('fragment_controls', Path(__file__).with_name('check-tests-used.d') / 'fragments.py')
+    if spec.origin and Path(spec.origin).exists():
+        controls = importlib.util.module_from_spec(spec); spec.loader.exec_module(controls); controls.fragment_controls()
     # Formatting must preserve nested provenance and awkward path/string bytes.
     payload = {'records': [{'path': 'tests/\u03b1\n".py', 'class': None,
                             'reason': 'braces{},comma,\nline', 'pins': {'b': [True, 0], 'a': {}}},

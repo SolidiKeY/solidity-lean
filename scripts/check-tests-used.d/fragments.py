@@ -29,14 +29,18 @@ def fragment_identity(section, row):
         keys = ('path',)
     elif section in ('standalone', 'generators', 'orphans'):
         keys = ('path', 'input_revision')
-    elif section == 'module_entries':
+    elif section in ('module_entries', 'reads'):
         keys = ('runner', 'input_revision', 'target', 'frames')
-    elif section == 'reads':
-        keys = ('runner', 'input_revision', 'target', 'frames', 'operation')
     else:
         raise ValueError('unknown fragment section')
     if any(k not in row for k in keys): raise ValueError('fragment entry lacks identity: ' + section)
-    return canonical([row[k] for k in keys])
+    values = [row[k] for k in keys]
+    if section in ('module_entries', 'reads'):
+        frames = row['frames']
+        if not isinstance(frames, list) or any(not isinstance(f, dict) for f in frames):
+            raise ValueError('invalid fragment frames')
+        values[-1] = [{k: v for k, v in frame.items() if k != 'blob'} for frame in frames]
+    return canonical(values)
 
 
 def read_fragments(directory):
