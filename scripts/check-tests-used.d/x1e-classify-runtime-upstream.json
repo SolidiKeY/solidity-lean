@@ -97,6 +97,36 @@
         "purpose": "Compare current ReadBounds source with an immutable Git source after removing only the authorized import and compiled-twin attributes; scan the two implementation/proof source files for listed trust shortcuts. Source/specification preservation guard only, not Lean kernel checking, equality-proof validation, native/WASM execution or performance acceptance; no fixture/helper credit.",
         "input_scope": [],
         "other_reads": "unresolved"
+      },
+      {
+        "path": "tests/directruntime-20261104/shared-translator/fixture-census.py",
+        "input_revision": "864791951adeda9b9e8c16f24df8777f1ce8a097",
+        "source_blob": "ae5bd56d0c1142a6122356a6b94d75506e164901",
+        "command": [
+          "python3",
+          "-B",
+          "tests/directruntime-20261104/shared-translator/fixture-census.py"
+        ],
+        "kind": "runnable-entrypoint",
+        "entry_line": 11,
+        "purpose": "Enumerate committed compiler fixtures and selected source/header-hash-anchored node witnesses; default ordinary and instrumented invocations completed at the measured revision and reported78 fixtures/57 modern kinds with witnesses. This is finite fixture inventory generation, not authenticated compilation, source/AST equivalence, admission or semantic proof. Observed process completion only; input_scope is empty, other reads unresolved, and no generated-output, fixture/helper/child execution, proof or runtime credit is certified.",
+        "input_scope": [],
+        "other_reads": "unresolved"
+      },
+      {
+        "path": "tests/directruntime-20261104/shared-translator/fixture-variants.py",
+        "input_revision": "864791951adeda9b9e8c16f24df8777f1ce8a097",
+        "source_blob": "eb382e93c9b1955d5440ec09bb2b2c23a4940eeb",
+        "command": [
+          "python3",
+          "-B",
+          "tests/directruntime-20261104/shared-translator/fixture-variants.py"
+        ],
+        "kind": "runnable-entrypoint",
+        "entry_line": 21,
+        "purpose": "Enumerate observed field subvariants and witnesses from committed compiler fixtures; default ordinary and instrumented invocations completed at the measured revision and reported806 variants. An empty generated-output directory was created for the observation. No semantic support, compiler authenticity, admission, intrinsic or backend proof follows. Observed process completion only; input_scope is empty, other reads unresolved, and no generated-output, fixture/helper/child execution, proof or runtime credit is certified.",
+        "input_scope": [],
+        "other_reads": "unresolved"
       }
     ]
   }
