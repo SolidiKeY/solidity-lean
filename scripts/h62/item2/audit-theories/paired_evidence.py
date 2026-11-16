@@ -3,8 +3,13 @@
 Blobs are content-addressed. Absolute receipt paths remain provenance only: verify
 uses solely the archive, never the original VM paths. Original/current proofs
 are kept separate and no definition-equivalence or operational refusal is claimed.
+
+Export v2 is opt-in: --interface-version 2 --historical-input-root DIR reads
+three exact historical attachments from the private archive pinned below. DIR
+is external and contains scripts/h62/...; no download or fallback occurs. These
+attachments are historical records, not current authority or proof. V1 is default.
 """
-import argparse,gzip,hashlib,io,json,re,subprocess,tarfile
+import argparse,gzip,hashlib,io,json,re,stat,subprocess,tarfile
 from collections import Counter
 from pathlib import Path
 from census import ROOT,mask,module_to_path,scan
@@ -12,11 +17,77 @@ from witness_registry import WITNESSES,IMPOSSIBLE
 ALLOW={"propext","Classical.choice","Quot.sound"}
 def h(data):return hashlib.sha256(data).hexdigest()
 def canonical(obj):return(json.dumps(obj,sort_keys=True,separators=(",",":"))+"\n").encode()
-def export(a):
+HISTORICAL_ARCHIVE_COMMIT = "73bffce8dc01a2b07d86fa2dd8578b53f838c23f"
+HISTORICAL_ARCHIVE_PREFIX = (
+    "evidence/plan-x1e-classify-h62-scripts-1116/x1e-classify-h62-scripts/"
+    "data-read-evidence/doc-proposal/source-copies/"
+)
+HISTORICAL_INPUT_PREFIX = Path("scripts/h62/item2/audit-theories/handoff")
+HISTORICAL_PINS = {
+    "original-frozen-assignment.txt": (15961, "c384ab0c70ca3eaeeb25dde8605c6cc253213a655c9cbb9fb2d6714995461711"),
+    "original-work-and-backfill-queue.md": (1502, "12e25680c0b5fff74951aae3f885f02475e7f5b091904175470a9a355c7e53eb"),
+    "CONFLICT-RESOLUTION-20261108.md": (2233, "cf807fce6c7cdf349824e1ae8fe6aa7f53c82c9303fe17fe464106746ec0bea2"),
+}
+
+
+def validate_historical_attachments(attachments):
+    """Snapshot only the three immutable, exact-byte historical records."""
+    if type(attachments) is not dict or set(attachments) != set(HISTORICAL_PINS):
+        raise ValueError("historical attachment set mismatch")
+    verified = {}
+    for name, (size, digest) in HISTORICAL_PINS.items():
+        data = attachments[name]
+        if type(data) is not bytes or len(data) != size or h(data) != digest:
+            raise ValueError("historical attachment checksum mismatch: " + name)
+        verified[name] = data
+    return verified
+
+
+def load_historical_attachments(root, *, repositories=()):
+    """Read private files only; missing, escaped or changed inputs fail closed."""
+    root = Path(root).resolve()
+    forbidden = tuple(Path(repo).resolve() for repo in (ROOT, *repositories))
+    if any(root.is_relative_to(repo) for repo in forbidden):
+        raise ValueError("historical input root must be outside repositories")
+    attachments = {}
+    for name in HISTORICAL_PINS:
+        path = root
+        for component in (HISTORICAL_INPUT_PREFIX / name).parts:
+            path = path / component
+            if path.is_symlink():
+                raise ValueError("historical attachment path contains a symlink")
+        resolved = path.resolve()
+        if not resolved.is_relative_to(root):
+            raise ValueError("historical attachment escapes private root")
+        if any(resolved.is_relative_to(repo) for repo in forbidden):
+            raise ValueError("historical attachment must be outside repositories")
+        if not stat.S_ISREG(path.stat().st_mode):
+            raise ValueError("historical attachment must be a regular file")
+        with path.open("rb") as stream:
+            attachments[name] = stream.read(HISTORICAL_PINS[name][0] + 1)
+    return validate_historical_attachments(attachments)
+
+
+def provider_bytes(provider):
+    """Private records stay in the same authenticated immutable buffer."""
+    return provider if type(provider) is bytes else provider.read_bytes()
+
+
+def export_v2(a):
+    attachments = load_historical_attachments(
+        a.historical_input_root,
+        repositories=(a.current_repository, a.original_repository),
+    )
+    return export(a, historical_attachments=attachments)
+
+
+def export(a, *, historical_attachments=None):
+    if historical_attachments is not None:
+        historical_attachments = validate_historical_attachments(historical_attachments)
     output=a.out.resolve();assert not output.is_relative_to(ROOT)
     providers={};sizes={}
     def blob(path):
-        data=path.read_bytes();key=h(data);providers.setdefault(key,path);sizes[key]=len(data);return key
+        data=provider_bytes(path);key=h(data);providers.setdefault(key,path);sizes[key]=len(data);return key
     contexts={}
     for label,repo,evidence in[("original",a.original_repository.resolve(),a.original_evidence.resolve()),("rebased",a.current_repository.resolve(),a.current_evidence.resolve())]:
         helpers=json.loads((evidence/"verified-helpers.json").read_text());version=json.loads((evidence/"serial/baseline-results.json").read_text())["version"];records={};fingerprints={}
@@ -40,7 +111,8 @@ def export(a):
     history=json.loads(a.history_record.read_text());assert contexts["original"]["git_head"]==history["frozen_commit"]and history["original_tracked_sources_unchanged"]is True
     attachments={"frozen-history-audit.json":blob(a.history_record),"original-typed-census.json":blob(a.historical_evidence/"verified-census.json")}
     for name in["original-frozen-assignment.txt","original-work-and-backfill-queue.md","scope-manifest.json","CONFLICT-RESOLUTION-20261108.md","COORDINATOR-ANSWERS-20261107.json"]:
-        attachments[name]=blob(a.current_repository/"scripts/h62/item2/audit-theories/handoff"/name)
+        attachments[name]=blob(historical_attachments[name] if historical_attachments is not None and name in HISTORICAL_PINS
+                               else a.current_repository/HISTORICAL_INPUT_PREFIX/name)
     index={"schema_version":1,"contexts":contexts,"attachments":attachments,"blob_sizes":sizes,
       "boundary":"Portable source/import/artifact/log/hash and axiom-log checks only; no kernel rerun, original/current equivalence, operational static refusal or full assignment acceptance.","full_assignment_acceptance":False}
     output.parent.mkdir(parents=True,exist_ok=True)
@@ -49,7 +121,7 @@ def export(a):
             item=tarfile.TarInfo(name);item.size=len(data);item.mtime=0;tar.addfile(item,io.BytesIO(data))
         add("index.json",canonical(index))
         for key in sorted(providers):
-            data=providers[key].read_bytes();assert h(data)==key;add("blobs/"+key,data)
+            data=provider_bytes(providers[key]);assert h(data)==key;add("blobs/"+key,data)
     print(json.dumps({"archive":str(output),"sha256":h(output.read_bytes()),"blobs":len(providers),"contexts":{k:len(v["modules"])for k,v in contexts.items()}}))
 def verify(a):
     source_data={};seen=set();index=None
@@ -191,5 +263,16 @@ def verify(a):
 def main():
     ap=argparse.ArgumentParser(description=__doc__);sub=ap.add_subparsers(dest="mode",required=True);ex=sub.add_parser("export")
     for n in("current-repository","current-evidence","original-repository","original-evidence","history-record","historical-evidence","out"):ex.add_argument("--"+n,type=Path,required=True)
-    ve=sub.add_parser("verify");ve.add_argument("--archive",type=Path,required=True);a=ap.parse_args();export(a)if a.mode=="export"else verify(a)
+    ex.add_argument("--interface-version", type=int, choices=(1, 2), default=1)
+    ex.add_argument("--historical-input-root", type=Path)
+    ve=sub.add_parser("verify");ve.add_argument("--archive",type=Path,required=True);a=ap.parse_args()
+    if a.mode == "verify":
+        return verify(a)
+    if a.interface_version == 2:
+        if a.historical_input_root is None:
+            ap.error("export v2 requires --historical-input-root")
+        return export_v2(a)
+    if a.historical_input_root is not None:
+        ap.error("--historical-input-root requires export --interface-version 2")
+    return export(a)
 if __name__=="__main__":main()
