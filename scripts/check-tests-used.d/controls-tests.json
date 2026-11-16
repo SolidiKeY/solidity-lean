@@ -225,6 +225,22 @@
         "purpose": "Historical Python syntax-census and comparison regression controls: actual default invocation passed at the recorded committed revision with identical source bytes. Current fixed inventory/header checks remain unchanged and are not certified against the growing corpus. Source role only; no fixture, child, Lean or EVM proof credit.",
         "input_scope": [],
         "other_reads": "unresolved"
+      },
+      {
+        "path": "tests/h62/item6/migrate-semantics/resource_controls.py",
+        "input_revision": "f4e7cc73dc028e5035d729fe673750a411fcd67f",
+        "source_blob": "ccd286d038a4ae6ff26fe0d21b47d24fddd16c91",
+        "command": [
+          "python3",
+          "-B",
+          "tests/h62/item6/migrate-semantics/resource_controls.py"
+        ],
+        "kind": "committed-cli",
+        "entry_line": 46,
+        "required_options": [
+          "--out"
+        ],
+        "purpose": "Source contract for the existing OS-backed resource control CLI requiring --out: cap enforcement, allocation refusal, per-child RSS, timeout and descendant cleanup, and stop/exit policy checks. The command prefix lacks required configuration; source role only, with no helper/fixture, current passing-reproducer, Lean or EVM proof credit."
       }
     ]
   }
