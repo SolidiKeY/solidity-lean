@@ -18,9 +18,9 @@ and are not touched here.
 | Item | Where | Result |
 |---|---|---|
 | uint8 and support control | `Solidity/Frontend/Admission/CanonicalReaderContract.lean`, fixture `tests/solc/CanonicalReaderContract.{sol,ast.json}` | One H68 fixture (`solc_import` pin `0x86bd4cd2be87c02a`; compiler 0.8.34 with compiler sha256 `c8649f8d…`; 50 type identifiers, 1 `tryCall`). Existing route: all six probe functions `elaborated`. Canonical reader on the same JSON: `wide`, `signedWide`, `flag`, `memoryArray` and (since the H90 narrow-local reader increment) `narrowLocal` admitted; `narrowParam` refused with `compact verifier: unsupported type uint8`. Both pinned (`decide` on the rows; `#guard_msgs` on the outcomes). |
-| H68 fixture migration dry run | `scripts/solc-ast-h68-migrate.py`, receipt `tests/cr-canonical-reader/h68-migration-dryrun.json` | Of 46 modern fixtures: 34 `exact` (regenerated with each fixture's own recorded compiler and solkey commit; equal to the committed AST after removing only the H68 fields, header equal), 1 `current` (the new probe), 7 `drift`, 4 `no-source`. |
-| Existing-route rows before/after | Scratch elaboration; one of the four generated files is kept as `tests/cr-canonical-reader/H68Pairs0.lean.txt`, and every observed line is in `h68-pairs-observed.txt` | 118 `solc_import` pairs over the 29 `exact` fixtures that `solc_import` pins (same options, old versus migrated bytes): 116 report lists (531 rows, none empty) equal; the two `SliceReferenceCopies` pairs (legacy and via-IR pipelines) differ in one row only. The `nominal` row stays `unsupported`, and its reason narrows from `a calldata slice of nominal enum/UDVT elements …` to `a calldata slice of nominal UDVT elements …`. The importer's UDVT-identifier check (`Frontend/SolcJson/Body.lean`, `IndexRangeAccess`) now fires before its name-based fallback for trimmed fixtures. |
-| Support census | Scratch census (`tests/cr-canonical-reader/CrCensus.lean.txt`, run as a module under `Solidity/Scratch/`) over all 68 `tests/solc` fixtures (`readContract` printed-body stage versus `Shared.function executableReader`) | 1,599 functions: existing printed bodies 1,446; canonical admitted 226; both 222. Among the 1,224 that only the existing route admits, the most frequent canonical diagnostics are `binary expression lacks its common type` (293, legacy fixtures without `commonType`), `unsupported expression` (180), `unsupported type declaration` (158), `String expected` (86, missing pre-H68 metadata), `unsupported statement` (78), narrow integers `uint8`/`int8`/`uint16`/`uint32`/`uint8[]`/`uint8[2][]`/… (≈86), `address`/`bytes*`/`string`/enum/struct/contract types (≈110). The printed-body stage is an upper bound on existing admission, not elaboration. |
+| H68 fixture migration dry run | `scripts/solc-ast-h68-migrate.py`, receipt [h68-migration-dryrun.json](https://github.com/SolidiKeY/solidity-lean-coord/blob/6ab872f8bc801f99ad3448d34a0b10741f300d36/evidence/plan-x1e-classify-rest-1116/x1e-classify-rest/tests/cr-canonical-reader/h68-migration-dryrun.json) | Of 46 modern fixtures: 34 `exact` (regenerated with each fixture's own recorded compiler and solkey commit; equal to the committed AST after removing only the H68 fields, header equal), 1 `current` (the new probe), 7 `drift`, 4 `no-source`. |
+| Existing-route rows before/after | Scratch elaboration; one of the four generated files is archived as [H68Pairs0.lean.txt](https://github.com/SolidiKeY/solidity-lean-coord/blob/f50f3c05f75937adad347a524ab13aba29d4fec7/evidence/plan-x1e-classify-rest-1116/x1e-classify-rest/tests/cr-canonical-reader/H68Pairs0.lean.txt), and every observed line is in [h68-pairs-observed.txt](https://github.com/SolidiKeY/solidity-lean-coord/blob/31351403baef6c2ce1e047fc093d9fdd5b7b67e7/evidence/plan-x1e-classify-rest-1116/x1e-classify-rest/tests/cr-canonical-reader/h68-pairs-observed.txt) | 118 `solc_import` pairs over the 29 `exact` fixtures that `solc_import` pins (same options, old versus migrated bytes): 116 report lists (531 rows, none empty) equal; the two `SliceReferenceCopies` pairs (legacy and via-IR pipelines) differ in one row only. The `nominal` row stays `unsupported`, and its reason narrows from `a calldata slice of nominal enum/UDVT elements …` to `a calldata slice of nominal UDVT elements …`. The importer's UDVT-identifier check (`Frontend/SolcJson/Body.lean`, `IndexRangeAccess`) now fires before its name-based fallback for trimmed fixtures. |
+| Support census | Scratch census ([CrCensus.lean.txt](https://github.com/SolidiKeY/solidity-lean-coord/blob/f50f3c05f75937adad347a524ab13aba29d4fec7/evidence/plan-x1e-classify-rest-1116/x1e-classify-rest/tests/cr-canonical-reader/CrCensus.lean.txt), run as a module under `Solidity/Scratch/`) over all 68 `tests/solc` fixtures (`readContract` printed-body stage versus `Shared.function executableReader`) | 1,599 functions: existing printed bodies 1,446; canonical admitted 226; both 222. Among the 1,224 that only the existing route admits, the most frequent canonical diagnostics are `binary expression lacks its common type` (293, legacy fixtures without `commonType`), `unsupported expression` (180), `unsupported type declaration` (158), `String expected` (86, missing pre-H68 metadata), `unsupported statement` (78), narrow integers `uint8`/`int8`/`uint16`/`uint32`/`uint8[]`/`uint8[2][]`/… (≈86), `address`/`bytes*`/`string`/enum/struct/contract types (≈110). The printed-body stage is an upper bound on existing admission, not elaboration. |
 
 ## Contract clauses
 
@@ -158,7 +158,7 @@ Coordinator relay of user decisions on this lane's questions:
   and the H55 lane keep them. OT-CR-4 is closed on that basis.
 - **Q3, CR applies and re-pins (H82).** Done on top of master `a897dac76`:
   - `scripts/solc-ast-h68-migrate.py --apply` replaced the 34 `exact` fixtures,
-    with receipt `tests/cr-canonical-reader/h68-migration-applied.json`. The
+    with receipt [h68-migration-applied.json](https://github.com/SolidiKeY/solidity-lean-coord/blob/6ab872f8bc801f99ad3448d34a0b10741f300d36/evidence/plan-x1e-classify-rest-1116/x1e-classify-rest/tests/cr-canonical-reader/h68-migration-applied.json). The
     merged-tree dry run first confirmed the same 34/1/7/4 classification and old
     hashes.
   - 128 `hash 0x…` pin lines in 20 modules were rewritten, covering
@@ -169,7 +169,7 @@ Coordinator relay of user decisions on this lane's questions:
   - Shared-translator sha256 pins were re-pinned in `construct-reader-cases.json`,
     `coverage-inventory.json`, `fixture-census.json`, `fixture-variants.json` and
     `reader-comparison.json`: 44 (file, fixture) entries, 861 occurrences.
-    Every entry is in `tests/cr-canonical-reader/shared-translator-repins.json`
+    Every entry is in [shared-translator-repins.json](https://github.com/SolidiKeY/solidity-lean-coord/blob/6ab872f8bc801f99ad3448d34a0b10741f300d36/evidence/plan-x1e-classify-rest-1116/x1e-classify-rest/tests/cr-canonical-reader/shared-translator-repins.json)
     for owner verification.
   - `preflight-construct-cases.py` passes every fixture sha256, pointer, node id
     and `src` assertion for both 57-kind suites (existing 11/26/20, fresh 14/23/20).
@@ -191,7 +191,7 @@ Coordinator relay of user decisions on this lane's questions:
     uncompiled text records: `tests/upstream/revert-power/ConditionalBefore.lean.txt`,
     `tests/upstream/step08-transient-world/baseline-probes.txt`,
     `docs/feature-work/roadmap-g06-osaka.md` and the intentional old-bytes record
-    `tests/cr-canonical-reader/H68Pairs0.lean.txt`. The two h28-terra manifests
+    [H68Pairs0.lean.txt](https://github.com/SolidiKeY/solidity-lean-coord/blob/f50f3c05f75937adad347a524ab13aba29d4fec7/evidence/plan-x1e-classify-rest-1116/x1e-classify-rest/tests/cr-canonical-reader/H68Pairs0.lean.txt). The two h28-terra manifests
     list fixture paths only and hold no hashes.
 
 ### Lean checks after the apply
@@ -239,10 +239,10 @@ fixtures, all pins):
   functionSelector`. Each differs from its parent only by added
   `typeIdentifier`, `tryCall` and `functionSelector` keys; headers are equal.
   - Old-versus-new `solc_import` comparison: 14 pairs, 61 rows, **0 changed
-    rows** (`tests/cr-canonical-reader/h68-pairs-observed-h102.txt`).
+    rows** ([h68-pairs-observed-h102.txt](https://github.com/SolidiKeY/solidity-lean-coord/blob/31351403baef6c2ce1e047fc093d9fdd5b7b67e7/evidence/plan-x1e-classify-rest-1116/x1e-classify-rest/tests/cr-canonical-reader/h68-pairs-observed-h102.txt)).
   - ContractWorld's world/library imports (`solc_world_factory`,
     `solc_world_library`) are covered by per-file diagnostics only.
-  - Selector check (`SelectorCheck.lean.txt`): each newly present compiler
+  - Selector check ([SelectorCheck.lean.txt](https://github.com/SolidiKeY/solidity-lean-coord/blob/f50f3c05f75937adad347a524ab13aba29d4fec7/evidence/plan-x1e-classify-rest-1116/x1e-classify-rest/tests/cr-canonical-reader/SelectorCheck.lean.txt)): each newly present compiler
     selector was compared with the importer's previous fallback,
     `Keccak.selector` of its own `sourceAbiSignature`. 70 of 71 agree.
   - The exception is the library function `WorldLibrary.mutate(WorldBox
@@ -262,8 +262,8 @@ fixtures, all pins):
     `solc_creation_try` and `solc_library_try` modules elaborate with 0 errors.
 - **Pins.** 29 hash-pin lines in 9 modules, with no stale value. The
   shared-translator hash-only re-pin covers 15 entries and 179 occurrences
-  (`shared-translator-repins-h102.json`); no owner generator was run.
-- **Not rewritten.** `tests/contract-world-certificates/validation.json`
+  ([shared-translator-repins-h102.json](https://github.com/SolidiKeY/solidity-lean-coord/blob/6ab872f8bc801f99ad3448d34a0b10741f300d36/evidence/plan-x1e-classify-rest-1116/x1e-classify-rest/tests/cr-canonical-reader/shared-translator-repins-h102.json)); no owner generator was run.
+- **Not rewritten.** [archived ContractWorld validation](https://github.com/SolidiKeY/solidity-lean-coord/blob/31351403baef6c2ce1e047fc093d9fdd5b7b67e7/evidence/plan-x1e-classify-rest-1116/x1e-classify-rest/tests/contract-world-certificates/validation.json)
   `baseline.fixtureSha256` keeps the old ContractWorld hash as a historical
   baseline.
 - **Result.** All 46 modern fixtures now carry H68 metadata. Per-file
