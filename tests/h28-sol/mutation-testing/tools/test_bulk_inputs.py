@@ -41,3 +41,7 @@ class ExternalBulkInputControls(unittest.TestCase):
                         bulk_inputs.read(repo, mirror)
                 else:
                     with self.assertRaises(ValueError): bulk_inputs.read(repo, mirror)
+
+
+if __name__ == "__main__":
+    unittest.main()
