@@ -305,6 +305,21 @@
         "purpose": "Historical Python source-premise reconciliation and fail-closed metadata controls, demonstrated by an actual default invocation at the recorded committed source revision with checksum-matched producer census and authenticated documentary snapshots. Documentary inputs are not live ownership authority. Current missing-input/frozen-source checks remain unchanged; historical source role only, with no fixture, child, current passing-validation, Lean or EVM proof credit.",
         "input_scope": [],
         "other_reads": "unresolved"
+      },
+      {
+        "path": "tests/h62/item6/migrate-storage/overlay-acceptance.py",
+        "input_revision": "abddffb473dec55619a0c7f848c8688068658198",
+        "source_blob": "f9fffee1e6629bb2421a2dc535b8b1806061b3af",
+        "command": [
+          "python3",
+          "-B",
+          "tests/h62/item6/migrate-storage/overlay-acceptance.py"
+        ],
+        "kind": "runnable-entrypoint",
+        "entry_line": 11,
+        "purpose": "Historical Python overlay provenance/postimage and unchanged-production negative controls, demonstrated by an actual default invocation at the recorded committed source revision using the existing strictly guarded private-fixture producer. Original checkout, patch/postimage pins, proof-budget guards and checks remain unchanged. Fixture reproduction grants no live Hash edit, ownership authority or proof acceptance; historical source role only, with no fixture/child/current passing-validation, Lean or EVM credit.",
+        "input_scope": [],
+        "other_reads": "unresolved"
       }
     ]
   }
