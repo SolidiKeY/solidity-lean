@@ -400,7 +400,7 @@ attempts separately; no timeout or resource stop is counted as passing.
 Commands, complete original
 before/after observations, all new EVM inputs/results, source/compiler/model
 hashes, axiom audits and resource measurements are in
-[`tests/upstream/step03/validation.json`](../../tests/upstream/step03/validation.json)
+[tests/upstream/step03/validation.json](https://github.com/SolidiKeY/solidity-lean-coord/blob/2b7866202ef9487cf11a98ef70e1184018e1df9a/evidence/plan-x1e-classify-runtime-upstrea-1116/x1e-classify-runtime-upstream/tests/upstream/step03/validation.json)
 and its linked sibling JSON files. The final model hash is
 `be4ab09309dc97d966038e71ca23811a94cae995684ecc9f873506ba957a0818`.
 Independent read-only evidence reviews reproduced both model hashes and all
