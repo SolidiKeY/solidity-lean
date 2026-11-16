@@ -379,7 +379,7 @@ arguments, despite its filename. No assigned case was already fixed on the
 current base. Every exact-path run uses `--batch-size 1` and a distinct output
 directory. Complete selected reports, fixture SHA-256 values, model/compiler/
 runner/archive hashes and exact commands are preserved in
-[the Group 01 evidence](../tests/upstream/group01/validation.json).
+[the Group 01 evidence](https://github.com/SolidiKeY/solidity-lean-coord/blob/2b7866202ef9487cf11a98ef70e1184018e1df9a/evidence/plan-x1e-classify-runtime-upstrea-1116/x1e-classify-runtime-upstream/tests/upstream/group01/validation.json).
 Historical `tests/upstream/results`, the pinned archive, source bytes and
 expectation bytes remain unchanged. The first loop attempt stopped during an
 overlapping runner build with Lean exit 135; the isolated sequential retry
@@ -559,7 +559,7 @@ agreement remains unproved, and the unassigned family gaps remain outside
 this lane. No broader family rerun or universal compiler theorem is claimed.
 
 Exact commands, terminal results, fixture/report hashes, resource measurements
-and log digests are in [the completion evidence](../tests/upstream/group01/resume-validation.json).
+and log digests are in [the completion evidence](https://github.com/SolidiKeY/solidity-lean-coord/blob/2b7866202ef9487cf11a98ef70e1184018e1df9a/evidence/plan-x1e-classify-runtime-upstrea-1116/x1e-classify-runtime-upstream/tests/upstream/group01/resume-validation.json).
 The old incomplete attempts remain recorded. The documentation-path gate
 retains the same 13 missing references; none were introduced here.
 
