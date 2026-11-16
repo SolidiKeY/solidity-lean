@@ -178,6 +178,81 @@
         "purpose": "Synthetic scope/refusal controls using disposable Git trees or mocked missing inputs; no native/compiler/proof or live-resource acceptance credit.",
         "input_scope": [],
         "other_reads": "unresolved"
+      },
+      {
+        "path": "tests/fullscope-20261104/vt1/extract-helpers.py",
+        "input_revision": "279fa3fbcf10da40e9ac159944d3486efcda56e4",
+        "source_blob": "4301124002d7f04fe34ed7809f4d691b09689a2d",
+        "command": [
+          "python3",
+          "-B",
+          "tests/fullscope-20261104/vt1/extract-helpers.py"
+        ],
+        "kind": "runnable-entrypoint",
+        "entry_line": 52,
+        "purpose": "Default saved-fixture generator executed only in a disposable committed checkout; source role only, no generated-output consumption, regeneration, elaboration, compiler, kernel or proof credit.",
+        "input_scope": [],
+        "other_reads": "unresolved"
+      },
+      {
+        "path": "tests/fullscope-20261104/vt1/gen-census-modules.py",
+        "input_revision": "279fa3fbcf10da40e9ac159944d3486efcda56e4",
+        "source_blob": "98286e1e324d013d63e2a075e57b3bd38094256f",
+        "command": [
+          "python3",
+          "-B",
+          "tests/fullscope-20261104/vt1/gen-census-modules.py"
+        ],
+        "kind": "runnable-entrypoint",
+        "entry_line": 253,
+        "purpose": "Default saved-fixture generator executed only in a disposable committed checkout; source role only, no generated-output consumption, regeneration, elaboration, compiler, kernel or proof credit.",
+        "input_scope": [],
+        "other_reads": "unresolved"
+      },
+      {
+        "path": "tests/fullscope-20261104/vt1/gen-helper-modules.py",
+        "input_revision": "279fa3fbcf10da40e9ac159944d3486efcda56e4",
+        "source_blob": "2d32807415e8849ca788dfd00f9b473c1a4c01f2",
+        "command": [
+          "python3",
+          "-B",
+          "tests/fullscope-20261104/vt1/gen-helper-modules.py"
+        ],
+        "kind": "runnable-entrypoint",
+        "entry_line": 129,
+        "purpose": "Default saved-fixture generator executed only in a disposable committed checkout; source role only, no generated-output consumption, regeneration, elaboration, compiler, kernel or proof credit.",
+        "input_scope": [],
+        "other_reads": "unresolved"
+      },
+      {
+        "path": "tests/fullscope-20261104/vt1/generate-artifacts.py",
+        "input_revision": "279fa3fbcf10da40e9ac159944d3486efcda56e4",
+        "source_blob": "983908338270e281a620c8e24a5b97c528878bd3",
+        "command": [
+          "python3",
+          "-B",
+          "tests/fullscope-20261104/vt1/generate-artifacts.py"
+        ],
+        "kind": "runnable-entrypoint",
+        "entry_line": 43,
+        "purpose": "Default saved-fixture generator executed only in a disposable committed checkout; source role only, no generated-output consumption, regeneration, elaboration, compiler, kernel or proof credit.",
+        "input_scope": [],
+        "other_reads": "unresolved"
+      },
+      {
+        "path": "tests/v08/unsigned-update-callable/integrity.py",
+        "input_revision": "279fa3fbcf10da40e9ac159944d3486efcda56e4",
+        "source_blob": "faf8c1a9e3db160bc5a710c37ef7befc6f2bd14a",
+        "command": [
+          "python3",
+          "-B",
+          "tests/v08/unsigned-update-callable/integrity.py"
+        ],
+        "kind": "runnable-entrypoint",
+        "entry_line": 25,
+        "purpose": "Portable exact-source binding and synthetic guard/axiom corruption controls; lexical checks only, no kernel or EVM validation credit.",
+        "input_scope": [],
+        "other_reads": "unresolved"
       }
     ]
   }
