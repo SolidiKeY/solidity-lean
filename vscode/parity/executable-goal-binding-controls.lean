@@ -263,11 +263,6 @@ theorem preparationFreshSpelling : ¬ Fml.Valid (.ff : Fml C []) :=
 -- Explicit injected table: this proof does not claim default string-parser reduction.
 def foreignProofNames : FreshNames :=
   { name := fun _ _ => "foreign", parse := fun _ => some ("foreign", 0) }
-theorem freshSpellingBridgeFalse : freshSpellingCandidate.sourceValuesV1 ≠
-    (letI : FreshNames := foreignProofNames; freshSpellingCandidate.vals) := by
-  decide
-
-section InvocationRetentionControls
 
 /- A distinct injected first invocation; lookups must never rerun it. -/
 run_cmd do
@@ -465,7 +460,9 @@ run_cmd do
   logInfo m!"EXECUTABLE_V2 actual injected invocation receipt: {receiptBefore.compress}"
   logInfo "EXECUTABLE_V2 no-search lookup, rollback replay, coherent forgery, synchronous rejection and atomic-failure controls passed"
 
-end InvocationRetentionControls
+theorem freshSpellingBridgeFalse : freshSpellingCandidate.sourceValuesV1 ≠
+    (letI : FreshNames := foreignProofNames; freshSpellingCandidate.vals) := by
+  decide
 
 section ForeignProofNameControl
 local instance : FreshNames := foreignProofNames
