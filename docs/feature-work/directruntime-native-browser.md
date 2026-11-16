@@ -397,7 +397,7 @@ Required runtime/Identity/semantic/full-gate obligations remain open.
 
 ## H81 fresh native/browser checkpoint (partial)
 
-[Compact manifest](../../tests/directruntime-20261104/native-browser/h81-progress-manifest.json)
+[Compact manifest](https://github.com/SolidiKeY/solidity-lean-coord/blob/22e47285aa4ea105ea5e36b2c21e67dc38ca9bd7/evidence/plan-x1e-classify-runtime-upstrea-1116/x1e-classify-runtime-upstream/tests/directruntime-20261104/native-browser/h81-progress-manifest.json)
 records the externally retained, individually hash-verified evidence and cache.
 Fresh builds at source head0140eb13 use206 matching extracted C modules.
 All343 runtime Lean source hashes also match B head64796174; all9 source pins
@@ -443,7 +443,7 @@ the index,454 archive members. Neither reviewer used Lean or reran benchmarks.
 
 ## Exact B journal receipt and reconciliation
 
-[Reconciliation manifest](../../tests/directruntime-20261104/native-browser/b-original-reconciliation-manifest.json)
+[Reconciliation manifest](https://github.com/SolidiKeY/solidity-lean-coord/blob/22e47285aa4ea105ea5e36b2c21e67dc38ca9bd7/evidence/plan-x1e-classify-runtime-upstrea-1116/x1e-classify-runtime-upstream/tests/directruntime-20261104/native-browser/b-original-reconciliation-manifest.json)
 records verified delivery of the original537822-byte journal and handoff. The
 84 cases match saved source/compiler identities; explicit selectors identify
 the intended function. Common-field values match, but zero complete request
@@ -468,7 +468,7 @@ open. All bulk stays outside Git with the committed checksum manifest.
 
 ## Exact B journal functional replay
 
-[Replay manifest](../../tests/directruntime-20261104/native-browser/b-original-replay-manifest.json)
+[Replay manifest](https://github.com/SolidiKeY/solidity-lean-coord/blob/22e47285aa4ea105ea5e36b2c21e67dc38ca9bd7/evidence/plan-x1e-classify-runtime-upstrea-1116/x1e-classify-runtime-upstream/tests/directruntime-20261104/native-browser/b-original-replay-manifest.json)
 advances the preceding receipt-only checkpoint. The exact delivered original
 84-request journal now runs through native and real Chromium WASM. All84
 complete request objects and reconstructed compact wire lines match delivery.
@@ -522,7 +522,7 @@ IDE job128176919315, succeeded. All16 reported steps passed, including the
 native build/audit guards, generated-C/leanrt/GMP WASM build, offline HTML and
 fresh offline launch/proof/reopening tests. Independent finder and skeptic
 confirmed the head and result through live GitHub reads. The
-[CI manifest](../../tests/directruntime-20261104/native-browser/pages-sdk-config-ci-manifest.json)
+[CI manifest](https://github.com/SolidiKeY/solidity-lean-coord/blob/22e47285aa4ea105ea5e36b2c21e67dc38ca9bd7/evidence/plan-x1e-classify-runtime-upstrea-1116/x1e-classify-runtime-upstream/tests/directruntime-20261104/native-browser/pages-sdk-config-ci-manifest.json)
 pins externally retained logs and metadata. This clears the IDE-fix validation
 wait; the overall workflow was still running its Solidity job at inspection.
 No default-branch deployment, original timing STOP resolution or whole-goal
@@ -530,7 +530,7 @@ completion is inferred. This documentation increment changes no tested code.
 
 ## Reviewed primitive-return intake and fresh regressions
 
-[Results manifest](../../tests/directruntime-20261104/native-browser/primitive-return/results-manifest.json)
+[Results manifest](https://github.com/SolidiKeY/solidity-lean-coord/blob/22e47285aa4ea105ea5e36b2c21e67dc38ca9bd7/evidence/plan-x1e-classify-runtime-upstrea-1116/x1e-classify-runtime-upstream/tests/directruntime-20261104/native-browser/primitive-return/results-manifest.json)
 records source build `1e8b4cee884df7f90bf711abfddce5a6f8957d10`. After adopting
 published master33eb46304, this consumes exactly the listed production file
 `Shared/Intrinsic.lean` from reviewed producer957e5def, SHA74c01bac…4577.
@@ -658,7 +658,7 @@ ship-cache.sh or H88 cross-cache coherence claim is made.
 
 ## H71 address-local qualification and owner conflict versions
 
-[Address results manifest](../../tests/directruntime-20261104/native-browser/address/results-manifest.json)
+[Address results manifest](https://github.com/SolidiKeY/solidity-lean-coord/blob/22e47285aa4ea105ea5e36b2c21e67dc38ca9bd7/evidence/plan-x1e-classify-runtime-upstrea-1116/x1e-classify-runtime-upstream/tests/directruntime-20261104/native-browser/address/results-manifest.json)
 pins source build4234b74778787f681ebb50f2890355d99f37731a,exact producer0834bc67
 Translate/Compose hashes and verified packet c19c588e…ec5dfb. The delivered
 0a96c06e producer archive was inspected without execution. H71authorizes scoped
@@ -727,7 +727,7 @@ Published master4f0a2d6abe3a920d8c5a20c8c06d373a1014824d contains reviewed
 owner09bb5b5e. After saving the qualification checkpoint,the clean ort merge
 0eb39db1dba7f81e4d8d0b4756ab50b87d4dcd6d retained both exact owner files and
 the H100explicit EM_CONFIG fix. The coordinator merge wait is fulfilled.
-[Post-merge manifest](../../tests/directruntime-20261104/native-browser/address/post-merge-manifest.json)
+[Post-merge manifest](https://github.com/SolidiKeY/solidity-lean-coord/blob/22e47285aa4ea105ea5e36b2c21e67dc38ca9bd7/evidence/plan-x1e-classify-runtime-upstrea-1116/x1e-classify-runtime-upstream/tests/directruntime-20261104/native-browser/address/post-merge-manifest.json)
 records refreshed builds and all controls;prior4234receipts remain frozen.
 
 All343currentruntime sourcefiles match published4f0. Compared with09bb,the only
@@ -758,11 +758,11 @@ per-file indexes and SHA256;cache delivery remains coordinator-pending.
 The H71environment packet pins producer44d89439 and an eight-module frontier.
 Seven current file hashes match;Translate90479 is missing. The advertised branch
 fetch succeeds,but exact-SHA fetch returns128/notourref,and packet/evidence paths
-are absent. The [exact delivery request](../../tests/directruntime-20261104/native-browser/environment-source-request.json)
+are absent. The [exact delivery request](https://github.com/SolidiKeY/solidity-lean-coord/blob/22e47285aa4ea105ea5e36b2c21e67dc38ca9bd7/evidence/plan-x1e-classify-runtime-upstrea-1116/x1e-classify-runtime-upstream/tests/directruntime-20261104/native-browser/environment-source-request.json)
 records hashes and required bytes;no decoder/source fixture is reconstructed.
 The requested16environment cases and15metadata negatives remain unqualified.
 
-Independent [source-ID preparation](../../tests/directruntime-20261104/native-browser/request-identity/preparation-manifest.json)
+Independent [source-ID preparation](https://github.com/SolidiKeY/solidity-lean-coord/blob/22e47285aa4ea105ea5e36b2c21e67dc38ca9bd7/evidence/plan-x1e-classify-runtime-upstrea-1116/x1e-classify-runtime-upstream/tests/directruntime-20261104/native-browser/request-identity/preparation-manifest.json)
 now binds actual positive unique compiler function IDs into fixture and guard
 requests,then checks returned IDs on native and real Chromium. Sixteen retained
 address fixtures plus2guards perbackend pass unchanged verdict/tag expectations,
@@ -816,7 +816,7 @@ After validation, the branch fast-forwarded to published master
 3a5b9de412b84a13777b6fbf8c8f310e10b3448e. All 343 compiled runtime sources and
 checked repository build inputs are unchanged. The original source-build and
 binary identities remain explicit in the
-[results manifest](../../tests/directruntime-20261104/native-browser/environment/results-manifest.json).
+[results manifest](https://github.com/SolidiKeY/solidity-lean-coord/blob/22e47285aa4ea105ea5e36b2c21e67dc38ca9bd7/evidence/plan-x1e-classify-runtime-upstrea-1116/x1e-classify-runtime-upstream/tests/directruntime-20261104/native-browser/environment/results-manifest.json).
 
 The original producer AST and evidence archive remain undelivered. A fresh
 independent compilation of the authenticated source with the producer arguments
