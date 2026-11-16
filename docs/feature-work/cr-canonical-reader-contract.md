@@ -263,7 +263,7 @@ fixtures, all pins):
 - **Pins.** 29 hash-pin lines in 9 modules, with no stale value. The
   shared-translator hash-only re-pin covers 15 entries and 179 occurrences
   ([shared-translator-repins-h102.json](https://github.com/SolidiKeY/solidity-lean-coord/blob/6ab872f8bc801f99ad3448d34a0b10741f300d36/evidence/plan-x1e-classify-rest-1116/x1e-classify-rest/tests/cr-canonical-reader/shared-translator-repins-h102.json)); no owner generator was run.
-- **Not rewritten.** `tests/contract-world-certificates/validation.json`
+- **Not rewritten.** [archived ContractWorld validation](https://github.com/SolidiKeY/solidity-lean-coord/blob/31351403baef6c2ce1e047fc093d9fdd5b7b67e7/evidence/plan-x1e-classify-rest-1116/x1e-classify-rest/tests/contract-world-certificates/validation.json)
   `baseline.fixtureSha256` keeps the old ContractWorld hash as a historical
   baseline.
 - **Result.** All 46 modern fixtures now carry H68 metadata. Per-file
