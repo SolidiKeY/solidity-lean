@@ -245,7 +245,7 @@ source-suite comparison remains 5 passing and 3 failing on both master and
 this patch: one unsupported stored-function observation and two unchanged
 300-second source-proof timeouts. No expected result or proof limit changed.
 Full commands, logs and review findings are retained in
-[group02-validation.json](../../tests/upstream/repairs/group02-validation.json).
+[group02-validation.json](https://github.com/SolidiKeY/solidity-lean-coord/blob/2b7866202ef9487cf11a98ef70e1184018e1df9a/evidence/plan-x1e-classify-runtime-upstrea-1116/x1e-classify-runtime-upstream/tests/upstream/repairs/group02-validation.json).
 
 
 ### Group 02 initialization-order completion
@@ -373,11 +373,11 @@ These frontend observations are not a universal source-correctness theorem.
 ### Reproduction and remaining scope
 
 The reviewable per-fixture evidence is in
-`tests/upstream/group05/reproduction.json`: exact commands, fixture/source
+[tests/upstream/group05/reproduction.json](https://github.com/SolidiKeY/solidity-lean-coord/blob/2b7866202ef9487cf11a98ef70e1184018e1df9a/evidence/plan-x1e-classify-runtime-upstrea-1116/x1e-classify-runtime-upstream/tests/upstream/group05/reproduction.json): exact commands, fixture/source
 hashes, model/runner/compiler/archive hashes, before/after statuses, every
 required pipeline and all retained observations/gaps. Each exact fixture uses
 `--filter`, `--batch-size 1` and its own output directory. Final validation and
-long-log locations are recorded in `tests/upstream/group05/validation.json`.
+long-log locations are recorded in [tests/upstream/group05/validation.json](https://github.com/SolidiKeY/solidity-lean-coord/blob/2b7866202ef9487cf11a98ef70e1184018e1df9a/evidence/plan-x1e-classify-runtime-upstrea-1116/x1e-classify-runtime-upstream/tests/upstream/group05/validation.json).
 The 24 assigned historical failures reproduce on current master as 12 working
 and 12 broken in the pre-patch runner's raw labels. Four of those twelve are
 caught resource-depth failures, not demonstrated semantic disagreements. The
@@ -492,7 +492,7 @@ The broader inheritance/call suite passes 12 of its 13 tests after the original
 base-constructor negative-control test is rerun without contention. Its full
 `RevertData` source-contract invocation still reaches the original 300 s wall
 limit. Individual checks retain every one of its ten original asserted
-properties and the same proof limits in `tests/upstream/group05/revert-properties.json`.
+properties and the same proof limits in [tests/upstream/group05/revert-properties.json](https://github.com/SolidiKeY/solidity-lean-coord/blob/2b7866202ef9487cf11a98ef70e1184018e1df9a/evidence/plan-x1e-classify-runtime-upstrea-1116/x1e-classify-runtime-upstream/tests/upstream/group05/revert-properties.json).
 `reasonBytes` and `reasonOfBranch` retain open proof goals; they are not relabeled
 as expected failures or passing cases. Read-only path inspection finds that the
 new lowering branches are not selected by `reasonBytes`, but this does not
@@ -528,7 +528,7 @@ and an effectful unannotated `while` head. All 24 assigned fixtures now agree in
 observations): 12 were already fixed on the starting master, seven were fixed
 on the previous lane, and these five complete the remaining repair. The final
 combined evidence is recorded separately
-in `tests/upstream/group05/resumed-reproduction.json`, leaving the earlier
+in [tests/upstream/group05/resumed-reproduction.json](https://github.com/SolidiKeY/solidity-lean-coord/blob/2b7866202ef9487cf11a98ef70e1184018e1df9a/evidence/plan-x1e-classify-runtime-upstrea-1116/x1e-classify-runtime-upstream/tests/upstream/group05/resumed-reproduction.json), leaving the earlier
 19/24 milestone and historical upstream results intact.
 
 The function-type component grammar retains data locations. Admission and the
@@ -623,7 +623,7 @@ path audit retains its 13 pre-existing missing references. Earlier unrelated
 DeclarationMetadata/RevertData coverage limits remain recorded in the prior
 milestone; their full source suites are not claimed repaired here. Peak
 resource observations and exact log hashes are in
-`tests/upstream/group05/resumed-validation.json`; long logs remain under
+[tests/upstream/group05/resumed-validation.json](https://github.com/SolidiKeY/solidity-lean-coord/blob/2b7866202ef9487cf11a98ef70e1184018e1df9a/evidence/plan-x1e-classify-runtime-upstrea-1116/x1e-classify-runtime-upstream/tests/upstream/group05/resumed-validation.json); long logs remain under
 `.lake/upstream/group05-resume/`. Both independent read-only reviews found no
 remaining confirmed issue and opened no Lean worker.
 
