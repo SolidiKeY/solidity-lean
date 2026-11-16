@@ -1086,6 +1086,34 @@ example (h ty : String) (args : List RawExpr) (res : Option (Var × PrimTy))
   (elabRec_fnDispatch C h ty args res resW resNew).trans
     (fnDispatch_eq C h ty args res resW resNew)
 
+/-- Executing the memory callback preserves the result and final elaboration state. -/
+example (h : RawExpr) (ty : String) (args : List RawExpr) (sc : ElabScope) (st : ECtx × Nat) :
+    ((elabRec C ()).fnMemoryDispatch h ty args).runFrom sc st =
+      (fnMemoryDispatchWith C (panicProducerRec C ()) h ty args).runFrom sc st :=
+  congrArg (fun p => ElabM.runFrom p sc st)
+    ((elabRec_fnMemoryDispatch C h ty args).trans (fnMemoryDispatch_eq C h ty args))
+
+/-- The self-call equation is usable with its dependent context at the callback boundary. -/
+example (g : String) {Γ : NCtx} (args : List (ExtArg C Γ.ctx)) (ρ : Ctx)
+    (sc : ElabScope) (st : ECtx × Nat) :
+    ((elabRec C ()).trySelfBody g args ρ).runFrom sc st =
+      (trySelfBodyWith C (panicProducerRec C ()) g args ρ).runFrom sc st :=
+  congrArg (fun p => ElabM.runFrom p sc st)
+    ((elabRec_trySelfBody C g args ρ).trans (trySelfBody_eq C g args ρ))
+
+/-- Tuple dispatch's public equation also preserves failures and the returned context. -/
+example (ts : List (Option RawExpr)) (h ty : String) (args : List RawExpr)
+    (sc : ElabScope) (st : ECtx × Nat) :
+    (fnTupleDispatch C ts h ty args).runFrom sc st =
+      (fnTupleDispatchWith C (panicProducerRec C ()) ts h ty args).runFrom sc st :=
+  congrArg (fun p => ElabM.runFrom p sc st) (fnTupleDispatch_eq C ts h ty args)
+
+/-- Receive execution uses its public equation without adding panic instrumentation. -/
+example {Γ : NCtx} (v : RawExpr) (sc : ElabScope) (st : ECtx × Nat) :
+    (receiveSelfBody C (Γ := Γ) v).runFrom sc st =
+      (receiveSelfBodyWith C (panicProducerRec C ()) (Γ := Γ) v).runFrom sc st :=
+  congrArg (fun p => ElabM.runFrom p sc st) (receiveSelfBody_eq C (Γ := Γ) v)
+
 -- H30/H48: standard-only dependencies inherited from dispatchCaptures.
 /-- info: 'Solidity.fnDispatch' depends on axioms: [propext, Quot.sound] -/
 #guard_msgs in #print axioms fnDispatch
