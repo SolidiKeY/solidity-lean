@@ -191,7 +191,7 @@ It requires the private actual-invocation record, durable process token and
 all exact closed declarations. Source/session/candidate admission is separate. -/
 def retainedInvocationV2? (name : Lean.Name) (request : Json) :
     CommandElabM (Option RetainedInvocationV2) := do
-  let some attempt := (invocationAttemptsV2.getState (← getEnv)).find? name | return none
+  let some attempt := ((invocationAttemptsV2.getState (← getEnv)).find? name : Option InvocationAttemptV2) | return none
   let some retained := attempt.retained | return none
   unless (← invocationClaimV2? name) == some retained.token do return none
   unless retained.request.compress == request.compress do return none
@@ -549,7 +549,7 @@ def checkSourceBoundRetainedExecutableV2 (captureDeclaration namespaceName : Lea
 
 /-- Diagnostic receipt only, never certificate admission. -/
 def invocationReceiptV2? (name : Lean.Name) : CommandElabM (Option Json) := do
-  let some attempt := (invocationAttemptsV2.getState (← getEnv)).find? name | return none
+  let some attempt := ((invocationAttemptsV2.getState (← getEnv)).find? name : Option InvocationAttemptV2) | return none
   let report := attempt.report.map fun result => match result with
     | .ok rows => Json.mkObj [("ok", rows)]
     | .error reason => Json.mkObj [("error", toJson reason)]
