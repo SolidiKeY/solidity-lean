@@ -722,7 +722,7 @@ Final exact fixture results (both legacy and viaIR): **11 broken → 11 working*
 with **224 retained observations**, zero already-fixed cases, zero assigned
 expected exclusions and zero assigned adapter/resource blocks. Complete reports,
 source/model/compiler/runner hashes and every exact command are in
-`tests/upstream/group04/validation.json` and its before/after report files.
+[tests/upstream/group04/validation.json](https://github.com/SolidiKeY/solidity-lean-coord/blob/2b7866202ef9487cf11a98ef70e1184018e1df9a/evidence/plan-x1e-classify-runtime-upstrea-1116/x1e-classify-runtime-upstream/tests/upstream/group04/validation.json) and its before/after report files.
 The historical `tests/upstream/results` directory is untouched. Preliminary
 runs interrupted by rebuilding are inconclusive and are not used for these
 statuses.

@@ -1,8 +1,0 @@
-[
-  {
-    "path": "test/libsolidity/semanticTests/revertStrings/empty_v2.sol",
-    "stage": "lean-runtime",
-    "status": "blocked",
-    "reason": "unadapted fixture setting: revertStrings=debug"
-  }
-]
