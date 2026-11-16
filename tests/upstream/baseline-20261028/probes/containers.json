@@ -1,0 +1,158 @@
+[
+  {
+    "name": "/solidity-baseline-probe-preflight",
+    "id": "8695d572f940c24ac5d013362ca13e922e773dae7cd4922f0c0c579c1f2488ff",
+    "image": "sha256:d9b8c34d61a9b9a3c44cab883d7d2f2619d674966ab520186f799cf32e3e0377",
+    "state": {
+      "Status": "exited",
+      "Running": false,
+      "Paused": false,
+      "Restarting": false,
+      "OOMKilled": false,
+      "Dead": false,
+      "Pid": 0,
+      "ExitCode": 3,
+      "Error": "",
+      "StartedAt": "2026-10-28T07:13:34.823621052Z",
+      "FinishedAt": "2026-10-28T07:13:35.267595906Z"
+    },
+    "command": [
+      "/bin/bash",
+      "-c",
+      "source /workspace/.setup/activate.sh; export LEAN_NUM_THREADS=1; python3 scripts/solidity-baseline-time.py tests/upstream/baseline-20261028/probes/logs/preflight timeout -k 10 120 lake -f .diagnostic-lakefile.toml --quiet --no-build lean tests/upstream/baseline-20261028/probes/Preflight.lean -- --tstack=131072 -j1"
+    ],
+    "memoryMax": 12884901888,
+    "memorySwap": 12884901888,
+    "nanoCpus": 1000000000
+  },
+  {
+    "name": "/solidity-baseline-probe-harness",
+    "id": "f0d2714ee06b8059fb921bb088370ea01a47d0e71e0376c79a5b219aed13ed75",
+    "image": "sha256:d9b8c34d61a9b9a3c44cab883d7d2f2619d674966ab520186f799cf32e3e0377",
+    "state": {
+      "Status": "exited",
+      "Running": false,
+      "Paused": false,
+      "Restarting": false,
+      "OOMKilled": false,
+      "Dead": false,
+      "Pid": 0,
+      "ExitCode": 124,
+      "Error": "",
+      "StartedAt": "2026-10-28T07:14:43.98540266Z",
+      "FinishedAt": "2026-10-28T07:29:44.198677145Z"
+    },
+    "command": [
+      "/bin/bash",
+      "-c",
+      "source /workspace/.setup/activate.sh; export LEAN_NUM_THREADS=1; python3 scripts/solidity-baseline-time.py tests/upstream/baseline-20261028/probes/logs/harness-build timeout -k 10 900 lake -f .diagnostic-lakefile.toml build Solidity.Tools.Upstream Solidity.Frontend.Testing"
+    ],
+    "memoryMax": 12884901888,
+    "memorySwap": 12884901888,
+    "nanoCpus": 1000000000
+  },
+  {
+    "name": "/solidity-baseline-probe-reader-preflight",
+    "id": "3bdff0ce09e60974a99ad47e29939ed1e1ceaf7d7c8db8d584fe94e756e7d1bc",
+    "image": "sha256:d9b8c34d61a9b9a3c44cab883d7d2f2619d674966ab520186f799cf32e3e0377",
+    "state": {
+      "Status": "exited",
+      "Running": false,
+      "Paused": false,
+      "Restarting": false,
+      "OOMKilled": false,
+      "Dead": false,
+      "Pid": 0,
+      "ExitCode": 0,
+      "Error": "",
+      "StartedAt": "2026-10-28T07:30:36.098670221Z",
+      "FinishedAt": "2026-10-28T07:30:37.769423833Z"
+    },
+    "command": [
+      "/bin/bash",
+      "-c",
+      "source /workspace/.setup/activate.sh; export LEAN_NUM_THREADS=1; python3 scripts/solidity-baseline-time.py tests/upstream/baseline-20261028/probes/logs/reader-preflight timeout -k 10 120 lake -f .diagnostic-lakefile.toml --quiet --no-build lean tests/upstream/baseline-20261028/probes/ReaderPreflight.lean -- --tstack=131072 -j1"
+    ],
+    "memoryMax": 12884901888,
+    "memorySwap": 12884901888,
+    "nanoCpus": 1000000000
+  },
+  {
+    "name": "/solidity-baseline-probe-priority",
+    "id": "9f2063703ffa61b84bf64c08cf2918e07d228ce276214c7ce8b54d39fa62e525",
+    "image": "sha256:d9b8c34d61a9b9a3c44cab883d7d2f2619d674966ab520186f799cf32e3e0377",
+    "state": {
+      "Status": "exited",
+      "Running": false,
+      "Paused": false,
+      "Restarting": false,
+      "OOMKilled": false,
+      "Dead": false,
+      "Pid": 0,
+      "ExitCode": 0,
+      "Error": "",
+      "StartedAt": "2026-10-28T07:32:28.463311773Z",
+      "FinishedAt": "2026-10-28T07:32:57.944365206Z"
+    },
+    "command": [
+      "/bin/bash",
+      "-c",
+      "export PATH=/opt/codex/runtimes/codex-primary-runtime/dependencies/node/bin:/usr/bin:/bin; source /workspace/.setup/activate.sh; export LEAN_NUM_THREADS=1 BASELINE_READER_ONLY=1; export PATH=/workspace/solidity-lean/.lake/diagnostic-tools:$PATH; python3 scripts/solidity-baseline-time.py tests/upstream/baseline-20261028/probes/logs/priority timeout -k 10 600 node scripts/solidity-baseline-probe.mjs SourceIdentifiers CommentRanges VersionReject WrongIdentifier ConstantsEnums SourceTypes WrongNominal WrongBounds ScalarMatrix"
+    ],
+    "memoryMax": 12884901888,
+    "memorySwap": 12884901888,
+    "nanoCpus": 1000000000
+  },
+  {
+    "name": "/solidity-baseline-probe-rechecked",
+    "id": "918e9a09ab26139d245d2d0c6ac8980fa5acd2a21b5de225c218422f03410acf",
+    "image": "sha256:d9b8c34d61a9b9a3c44cab883d7d2f2619d674966ab520186f799cf32e3e0377",
+    "state": {
+      "Status": "exited",
+      "Running": false,
+      "Paused": false,
+      "Restarting": false,
+      "OOMKilled": false,
+      "Dead": false,
+      "Pid": 0,
+      "ExitCode": 0,
+      "Error": "",
+      "StartedAt": "2026-10-28T07:34:59.432741671Z",
+      "FinishedAt": "2026-10-28T07:36:39.320577928Z"
+    },
+    "command": [
+      "/bin/bash",
+      "-c",
+      "export PATH=/opt/codex/runtimes/codex-primary-runtime/dependencies/node/bin:/usr/bin:/bin; source /workspace/.setup/activate.sh; export LEAN_NUM_THREADS=1 BASELINE_READER_ONLY=1 BASELINE_PROBE_OUT=/workspace/solidity-lean/tests/upstream/baseline-20261028/probes/rechecked; export PATH=/workspace/solidity-lean/.lake/diagnostic-tools:$PATH; python3 scripts/solidity-baseline-time.py tests/upstream/baseline-20261028/probes/logs/rechecked timeout -k 10 600 node scripts/solidity-baseline-probe.mjs SourceIdentifiers CommentRanges VersionReject WrongIdentifier ConstantsEnums SourceTypes WrongNominal WrongBounds ScalarMatrixValid SourceLiterals WrongAddress InvalidDelete PushedMember TryContinue NominalStruct HexArray ExactRethrow WrongRethrow ComputedRevert SpecBindings"
+    ],
+    "memoryMax": 12884901888,
+    "memorySwap": 12884901888,
+    "nanoCpus": 1000000000
+  },
+  {
+    "name": "/solidity-baseline-probe-metadata",
+    "id": "ebcc050d47f5ca4241eee2e82eb232d82e99edeeed259f7ea927e9795bba5876",
+    "image": "sha256:d9b8c34d61a9b9a3c44cab883d7d2f2619d674966ab520186f799cf32e3e0377",
+    "state": {
+      "Status": "exited",
+      "Running": false,
+      "Paused": false,
+      "Restarting": false,
+      "OOMKilled": false,
+      "Dead": false,
+      "Pid": 0,
+      "ExitCode": 0,
+      "Error": "",
+      "StartedAt": "2026-10-28T07:39:04.733791041Z",
+      "FinishedAt": "2026-10-28T07:40:17.063105757Z"
+    },
+    "command": [
+      "/bin/bash",
+      "-c",
+      "export PATH=/opt/codex/runtimes/codex-primary-runtime/dependencies/node/bin:/usr/bin:/bin; source /workspace/.setup/activate.sh; export LEAN_NUM_THREADS=1 BASELINE_READER_ONLY=1 BASELINE_PROBE_OUT=/workspace/solidity-lean/tests/upstream/baseline-20261028/probes/rechecked; export PATH=/workspace/solidity-lean/.lake/diagnostic-tools:$PATH; python3 scripts/solidity-baseline-time.py tests/upstream/baseline-20261028/probes/logs/additional timeout -k 10 120 node scripts/solidity-baseline-probe.mjs BadClause HexArrayExplicit || exit $?; python3 scripts/solidity-baseline-time.py tests/upstream/baseline-20261028/probes/logs/metadata timeout -k 10 300 node scripts/solidity-baseline-reader-metadata.mjs"
+    ],
+    "memoryMax": 12884901888,
+    "memorySwap": 12884901888,
+    "nanoCpus": 1000000000
+  }
+]
