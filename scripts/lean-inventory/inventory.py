@@ -194,7 +194,6 @@ def extract(repo, rev):
             modules.add(r['m'])
         elif r['r'] == 'const' and 'range' in r:
             ranges.setdefault(r['m'], []).append(r['range'])
-    paths = {S.module_name(p): p for p, _ in S.tracked(repo, rev) if p.endswith('.lean')}
     anon, xrefs, ilean_digest, missing = {}, {}, hashlib.sha256(), []
     lib_dir = repo / '.lake/build/lib/lean'
     olean_digest = hashlib.sha256()
