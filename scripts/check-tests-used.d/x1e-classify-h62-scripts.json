@@ -654,6 +654,2501 @@
           "--plan"
         ],
         "input_revision": "f812628e097ab58e8c6c7b941f0b33fa1b991a5b"
+      },
+      {
+        "command": [
+          "python3",
+          "-B",
+          "scripts/h62/item2/audit-language/test_source_roles.py"
+        ],
+        "input_revision": "4c8e0f3dcd5e35e81de6a65a69532ac5e3ccaef7",
+        "kind": "unittest",
+        "path": "scripts/h62/item2/audit-language/test_source_roles.py",
+        "source_blob": "8425d6d046fac59ffacc1c2ba2a67c0c7b4aa926"
+      },
+      {
+        "command": [
+          "python3",
+          "-B",
+          "scripts/h62/item2/audit-readonly-calls/test_private_evidence.py"
+        ],
+        "input_scope": [],
+        "kind": "unittest",
+        "other_reads": "unresolved",
+        "path": "scripts/h62/item2/audit-readonly-calls/test_private_evidence.py",
+        "purpose": "Synthetic private-admission/output-boundary controls: digest and mode-pair integrity, reject in-checkout admission/output, incomplete pin pairs and overwrite; no real private-receipt validation or proof run.",
+        "source_blob": "b9c1322109b11f6bc32a671c5e276ce67558d8a3",
+        "input_revision": "4c8e0f3dcd5e35e81de6a65a69532ac5e3ccaef7"
+      },
+      {
+        "command": [
+          "python3",
+          "-B",
+          "scripts/h62/item2/audit-readonly-calls/test_rebuild_native_closure.py"
+        ],
+        "input_scope": [],
+        "kind": "unittest",
+        "other_reads": "unresolved",
+        "path": "scripts/h62/item2/audit-readonly-calls/test_rebuild_native_closure.py",
+        "purpose": "Synthetic cache-object controls reject replaced, missing and unplanned objects, restrict SDK families and verify sibling order; no actual cache rebuild, compiler or proof run.",
+        "source_blob": "6affec1ecb3fb1c3b36aa3d2c7884bc0a9742d06",
+        "input_revision": "4c8e0f3dcd5e35e81de6a65a69532ac5e3ccaef7"
+      },
+      {
+        "command": [
+          "python3",
+          "-B",
+          "scripts/h62/item2/audit-theories/test_import_paths.py"
+        ],
+        "input_revision": "4c8e0f3dcd5e35e81de6a65a69532ac5e3ccaef7",
+        "input_scope": [
+          "scripts/h62/item2/audit-theories/handoff/COORDINATOR-ANSWERS-20261107.json"
+        ],
+        "kind": "unittest",
+        "other_reads": "unresolved",
+        "path": "scripts/h62/item2/audit-theories/test_import_paths.py",
+        "purpose": "Exercise quoted import-path and transitive-fingerprint controls with temporary sources. Imported audit_dispositions parses and hashes its exact stored historical decision JSON at module initialization. This is a runtime-input dependency, not current authority, exclusion adoption, kernel validation or proof acceptance.",
+        "source_blob": "b3b629db83c041f96fcf9d4d37fde2f48f126cde"
+      },
+      {
+        "command": [
+          "python3",
+          "-B",
+          "scripts/h62/item2/audit-theories/test_indexed_roles.py"
+        ],
+        "input_revision": "4c8e0f3dcd5e35e81de6a65a69532ac5e3ccaef7",
+        "kind": "unittest",
+        "path": "scripts/h62/item2/audit-theories/test_indexed_roles.py",
+        "source_blob": "0d96e7b54ccf6f8baf5ffe63a98d0ee62e368f13"
+      },
+      {
+        "command": [
+          "python3",
+          "-B",
+          "scripts/h62/item4/generic-yul-views/test_reconcile_frozen.py"
+        ],
+        "input_scope": [],
+        "kind": "unittest",
+        "other_reads": "unresolved",
+        "path": "scripts/h62/item4/generic-yul-views/test_reconcile_frozen.py",
+        "purpose": "Temporary Git source/candidate/namespace/duplicate/missing/corrupt/stale reconciliation controls; candidates are not semantic or original-case acceptance. Paired execution only; no fixture-read, child, production resource, containment or proof credit.",
+        "source_blob": "ce72e6ead7eeedb4f9050309573818bcc6aa8c78",
+        "input_revision": "4c8e0f3dcd5e35e81de6a65a69532ac5e3ccaef7"
+      },
+      {
+        "command": [
+          "python3",
+          "-B",
+          "scripts/h62/item4/generic-yul-views/test_timings.py"
+        ],
+        "input_scope": [],
+        "kind": "unittest",
+        "other_reads": "unresolved",
+        "path": "scripts/h62/item4/generic-yul-views/test_timings.py",
+        "purpose": "Synthetic matching/serial-thread/threshold/aggregate/nonfinite timing controls; no measured performance, resource policy or Lean execution acceptance. Paired execution only; no fixture-read, child, production resource, containment or proof credit.",
+        "source_blob": "5c5e1010d2f993cfc1ac6483209a2429f697ae13",
+        "input_revision": "4c8e0f3dcd5e35e81de6a65a69532ac5e3ccaef7"
+      },
+      {
+        "command": [
+          "python3",
+          "-B",
+          "tests/h62/item1/duplication-scanner/test_index.py"
+        ],
+        "input_scope": [
+          "tests/h62/item1/duplication-scanner/audit-index.json"
+        ],
+        "kind": "unittest",
+        "other_reads": "unresolved",
+        "path": "tests/h62/item1/duplication-scanner/test_index.py",
+        "purpose": "Frozen index value and exact golden-byte regression. Historical audit decision strings are fixture data, not authorization, refactor or ownership/nonuse proof. No inferred child/source-fixture data credit or configured CLI validation.",
+        "source_blob": "4cc6f8a9c905c8ed827805cee1c0baba12e1e268",
+        "input_revision": "4c8e0f3dcd5e35e81de6a65a69532ac5e3ccaef7"
+      },
+      {
+        "command": [
+          "python3",
+          "-B",
+          "tests/h62/item2/audit-calculus/test_handoff_index.py"
+        ],
+        "input_revision": "4c8e0f3dcd5e35e81de6a65a69532ac5e3ccaef7",
+        "kind": "unittest",
+        "path": "tests/h62/item2/audit-calculus/test_handoff_index.py",
+        "source_blob": "873df01e20af8815478c9bd3ffd5550f69624ad2"
+      },
+      {
+        "command": [
+          "python3",
+          "-B",
+          "tests/h62/item2/audit-calculus/test_packet_transition.py"
+        ],
+        "input_revision": "4c8e0f3dcd5e35e81de6a65a69532ac5e3ccaef7",
+        "kind": "unittest",
+        "path": "tests/h62/item2/audit-calculus/test_packet_transition.py",
+        "source_blob": "135dcd08d9b6489268377602011de0dcebd83838"
+      },
+      {
+        "command": [
+          "python3",
+          "-B",
+          "tests/h62/item2/audit-calculus/test_receipts.py"
+        ],
+        "input_revision": "4c8e0f3dcd5e35e81de6a65a69532ac5e3ccaef7",
+        "kind": "unittest",
+        "path": "tests/h62/item2/audit-calculus/test_receipts.py",
+        "source_blob": "68da1e61d3c0abb61e12398ef9bb0240da55df58"
+      },
+      {
+        "command": [
+          "python3",
+          "-B",
+          "tests/h62/item2/audit-calculus/test_reconcile.py"
+        ],
+        "input_revision": "4c8e0f3dcd5e35e81de6a65a69532ac5e3ccaef7",
+        "kind": "unittest",
+        "path": "tests/h62/item2/audit-calculus/test_reconcile.py",
+        "source_blob": "a10452c60df5311a27fef8722bb5e06e3f40f488"
+      },
+      {
+        "command": [
+          "python3",
+          "-B",
+          "tests/h62/item2/audit-calculus/test_semantic_classification.py"
+        ],
+        "input_revision": "4c8e0f3dcd5e35e81de6a65a69532ac5e3ccaef7",
+        "kind": "unittest",
+        "path": "tests/h62/item2/audit-calculus/test_semantic_classification.py",
+        "source_blob": "767d10cb27be5c6f5504627a07ac8ded1a3b0806"
+      },
+      {
+        "command": [
+          "python3",
+          "-B",
+          "tests/h62/item2/audit-calculus/test_standing_owners.py"
+        ],
+        "input_revision": "4c8e0f3dcd5e35e81de6a65a69532ac5e3ccaef7",
+        "kind": "unittest",
+        "path": "tests/h62/item2/audit-calculus/test_standing_owners.py",
+        "source_blob": "55e3837cbb78a61206ba4b4b0416a0c95b4f5b58"
+      },
+      {
+        "command": [
+          "python3",
+          "-B",
+          "tests/h62/item2/audit-evm-compiler/check_evidence.py"
+        ],
+        "input_scope": [],
+        "kind": "unittest",
+        "other_reads": "unresolved",
+        "path": "tests/h62/item2/audit-evm-compiler/check_evidence.py",
+        "purpose": "Synthetic source/artifact corruption, compact-index/full-manifest, duplicate-TAR and path-refusal controls using only owned temporary inputs. All verify calls override manifest and repository root; real DEFAULT archive index is not read. Parent helper execution only if positively observed; no historical archive/source/proof authentication, fixture consumption, child, Lean/kernel, resource or owner credit.",
+        "source_blob": "699f524b402d78056da3d53aeccd4dd9b11a1e98",
+        "input_revision": "4c8e0f3dcd5e35e81de6a65a69532ac5e3ccaef7"
+      },
+      {
+        "command": [
+          "python3",
+          "-B",
+          "tests/h62/item6/migrate-bridge/test_timings.py"
+        ],
+        "input_scope": [],
+        "kind": "unittest",
+        "other_reads": "unresolved",
+        "path": "tests/h62/item6/migrate-bridge/test_timings.py",
+        "purpose": "Synthetic receipt/scope/toolchain/metric/resource/watchdog comparison and bounded helper-CLI malformed-input controls; no actual Bridge build, timing, watchdog or resource acceptance. Paired execution only; no fixture-read, child, production resource, containment or proof credit.",
+        "source_blob": "f5d70b840655a7efee786e89bb09619cc53286d5",
+        "input_revision": "4c8e0f3dcd5e35e81de6a65a69532ac5e3ccaef7"
+      },
+      {
+        "command": [
+          "python3",
+          "-B",
+          "tests/h62/item6/migrate-examples/test_dag_inventory.py"
+        ],
+        "input_scope": [],
+        "kind": "unittest",
+        "other_reads": "unresolved",
+        "path": "tests/h62/item6/migrate-examples/test_dag_inventory.py",
+        "purpose": "Synthetic DAG inventory/provenance/seal/name/visibility/count/refusal controls with temporary generated source and real helper-input hashes; all source/hash reads unresolved, no Lean/compiler/migration acceptance. Paired execution only; no fixture-read, child, production resource, containment or proof credit.",
+        "source_blob": "5b7e1f2bffe6b09b5f2095d189f8b334f28e02c1",
+        "input_revision": "4c8e0f3dcd5e35e81de6a65a69532ac5e3ccaef7"
+      },
+      {
+        "command": [
+          "python3",
+          "-B",
+          "tests/h62/item6/migrate-examples/test_verify_evidence.py"
+        ],
+        "input_scope": [],
+        "kind": "unittest",
+        "other_reads": "unresolved",
+        "path": "tests/h62/item6/migrate-examples/test_verify_evidence.py",
+        "purpose": "Temporary separate-root manifest/hash/path/duplicate/symlink tampering controls; no actual external evidence or proof acceptance. Paired execution only; no fixture-read, child, production resource, containment or proof credit.",
+        "source_blob": "c7f2b1823dabde9c6112916456bc0ea91f8a7ae2",
+        "input_revision": "4c8e0f3dcd5e35e81de6a65a69532ac5e3ccaef7"
+      },
+      {
+        "command": [
+          "python3",
+          "-B",
+          "tests/h62/item6/migrate-lowering/memory_controls.py"
+        ],
+        "entry_line": 10,
+        "input_scope": [],
+        "kind": "runnable-entrypoint",
+        "other_reads": "unresolved",
+        "path": "tests/h62/item6/migrate-lowering/memory_controls.py",
+        "purpose": "Synthetic arithmetic and refusal-decision regression only; not live headroom,cache reclaimability,resource policy or production containment acceptance. Actual ordinary/traced successful default assertion path; no fixture,child,semantic adequacy,resource policy,trust or proof credit.",
+        "source_blob": "e5706fd76acea423390cdbe96d958e63c84308cf",
+        "input_revision": "4c8e0f3dcd5e35e81de6a65a69532ac5e3ccaef7"
+      },
+      {
+        "command": [
+          "python3",
+          "-B",
+          "tests/h62/item6/migrate-lowering/proof_budget_controls.py"
+        ],
+        "entry_line": 8,
+        "input_scope": [],
+        "kind": "runnable-entrypoint",
+        "other_reads": "unresolved",
+        "path": "tests/h62/item6/migrate-lowering/proof_budget_controls.py",
+        "purpose": "Synthetic lexical masking and candidate-label regression only; not effective elaborated options,budget permission,tactic/kernel/native execution,proof or migration acceptance. Actual ordinary/traced successful default assertion path; no fixture,child,semantic adequacy,resource policy,trust or proof credit.",
+        "source_blob": "a4739d283013ffcafef2d3abc8427b2e742f28fe",
+        "input_revision": "4c8e0f3dcd5e35e81de6a65a69532ac5e3ccaef7"
+      },
+      {
+        "command": [
+          "python3",
+          "-B",
+          "tests/h62/item6/migrate-roadmap/test_classify_api.py"
+        ],
+        "input_scope": [],
+        "kind": "unittest",
+        "other_reads": "unresolved",
+        "path": "tests/h62/item6/migrate-roadmap/test_classify_api.py",
+        "purpose": "Synthetic structural alpha/binder/universe/name/tree-difference/refusal controls; no frozen API equivalence or migration proof. Paired execution only; no fixture-read, child, production resource, containment or proof credit.",
+        "source_blob": "cbd02cbb8b353c6625a0ad72fe8ce3de2c3edccc",
+        "input_revision": "4c8e0f3dcd5e35e81de6a65a69532ac5e3ccaef7"
+      },
+      {
+        "command": [
+          "python3",
+          "-B",
+          "tests/h62/item6/migrate-roadmap/test_producer_receipt.py"
+        ],
+        "input_scope": [],
+        "kind": "unittest",
+        "other_reads": "unresolved",
+        "path": "tests/h62/item6/migrate-roadmap/test_producer_receipt.py",
+        "purpose": "Current-source byte guard/identity and synthetic mutation/duplicate refusal controls; source reads unresolved, no publication, trust-guard proof or kernel acceptance. Paired execution only; no fixture-read, child, production resource, containment or proof credit.",
+        "source_blob": "9c981131d79114450ec0e6904f151ebfb9b7e1aa",
+        "input_revision": "4c8e0f3dcd5e35e81de6a65a69532ac5e3ccaef7"
+      },
+      {
+        "command": [
+          "python3",
+          "-B",
+          "tests/h62/item6/migrate-roadmap/test_public_api_inventory.py"
+        ],
+        "input_scope": [],
+        "kind": "unittest",
+        "other_reads": "unresolved",
+        "path": "tests/h62/item6/migrate-roadmap/test_public_api_inventory.py",
+        "purpose": "Synthetic declaration/visibility/binder/signature/alias/refusal controls with committed fixture hash checks; hash reads unresolved, no Lean proof or frozen API/migration acceptance. Paired execution only; no fixture-read, child, production resource, containment or proof credit.",
+        "source_blob": "2255bc16dd441ffcb9ebbad32e71e6a3533922da",
+        "input_revision": "4c8e0f3dcd5e35e81de6a65a69532ac5e3ccaef7"
+      },
+      {
+        "command": [
+          "python3",
+          "-B",
+          "tests/h62/item6/migrate-root-gate/test_historical_byte_audit.py"
+        ],
+        "input_scope": [],
+        "kind": "unittest",
+        "other_reads": "unresolved",
+        "path": "tests/h62/item6/migrate-root-gate/test_historical_byte_audit.py",
+        "purpose": "Temporary literal-path/normalization/file/directory classification controls preserving unverifiable history; no actual historical byte recovery or API acceptance. Paired execution only; no fixture-read, child, production resource, containment or proof credit.",
+        "source_blob": "373cf9cd36a3809d3b4d3355098291ecfc25a64e",
+        "input_revision": "4c8e0f3dcd5e35e81de6a65a69532ac5e3ccaef7"
+      },
+      {
+        "command": [
+          "python3",
+          "-B",
+          "tests/h62/item6/migrate-root-gate/test_root_api_inventory.py"
+        ],
+        "input_scope": [],
+        "kind": "unittest",
+        "other_reads": "unresolved",
+        "path": "tests/h62/item6/migrate-root-gate/test_root_api_inventory.py",
+        "purpose": "Synthetic root coverage and lexical header/gap/generated-family controls; source/config parsing unresolved, no generated compiler exports or API acceptance. Paired execution only; no fixture-read, child, production resource, containment or proof credit.",
+        "source_blob": "883f225a15347635876feabe7bed791bd7dca057",
+        "input_revision": "4c8e0f3dcd5e35e81de6a65a69532ac5e3ccaef7"
+      },
+      {
+        "command": [
+          "python3",
+          "-B",
+          "tests/h62/item6/migrate-semantics/scanner_controls.py"
+        ],
+        "entry_line": 8,
+        "input_scope": [],
+        "kind": "runnable-entrypoint",
+        "other_reads": "unresolved",
+        "path": "tests/h62/item6/migrate-semantics/scanner_controls.py",
+        "purpose": "Five in-memory comment/string false-import negative controls only; not real-tree census,elaborated dependency inventory,migration,compiler or semantic proof acceptance. Actual ordinary/traced successful default assertion path; no fixture,child,semantic adequacy,resource policy,trust or proof credit.",
+        "source_blob": "824a0746d77d6c729fc210dd8b7fc7726e064ff8",
+        "input_revision": "4c8e0f3dcd5e35e81de6a65a69532ac5e3ccaef7"
+      },
+      {
+        "command": [
+          "python3",
+          "-B",
+          "tests/h62/item6/migrate-solkey/test_compare.py"
+        ],
+        "input_scope": [],
+        "kind": "unittest",
+        "other_reads": "unresolved",
+        "path": "tests/h62/item6/migrate-solkey/test_compare.py",
+        "purpose": "Synthetic complete/diagnostic/input/resource/metric/threshold comparison controls; no build or migration acceptance. Paired execution only; no fixture-read, child, production resource, containment or proof credit.",
+        "source_blob": "549b388d6aa0087dce02e62ab77d6589b26c4876",
+        "input_revision": "4c8e0f3dcd5e35e81de6a65a69532ac5e3ccaef7"
+      },
+      {
+        "command": [
+          "python3",
+          "-B",
+          "tests/h62/item6/migrate-solkey/test_interfaces.py"
+        ],
+        "input_scope": [],
+        "kind": "unittest",
+        "other_reads": "unresolved",
+        "path": "tests/h62/item6/migrate-solkey/test_interfaces.py",
+        "purpose": "Synthetic log interface/type/body/proof/kind/axiom output coverage and drift/refusal controls; no actual Lean runs or frozen interface proof. Paired execution only; no fixture-read, child, production resource, containment or proof credit.",
+        "source_blob": "37f350f082163d97b270142c13ce348fb3db40fc",
+        "input_revision": "4c8e0f3dcd5e35e81de6a65a69532ac5e3ccaef7"
+      },
+      {
+        "command": [
+          "python3",
+          "-B",
+          "tests/h62/item6/migrate-stipend/test_public_api.py"
+        ],
+        "input_scope": [
+          "tests/h62/item6/migrate-stipend/PublicInventory.lean"
+        ],
+        "kind": "unittest",
+        "other_reads": "unresolved",
+        "path": "tests/h62/item6/migrate-stipend/test_public_api.py",
+        "purpose": "Synthetic API structure/signature/receipt/hash/toolchain/refusal controls plus one separately reviewed direct full-byte committed fixture comparison; other source/hash reads unresolved, no Lean/proof/child/compiler/migration credit. Paired execution with only the separately reviewed direct fixture-byte comparison read; all other reads unresolved. No child, production resource, containment, regeneration or proof credit.",
+        "source_blob": "135c8803973eee027766bcaaf31c975b4c9ef725",
+        "input_revision": "4c8e0f3dcd5e35e81de6a65a69532ac5e3ccaef7"
+      },
+      {
+        "command": [
+          "python3",
+          "-B",
+          "tests/h62/item6/migrate-testsuite/test_evidence.py"
+        ],
+        "input_scope": [],
+        "kind": "unittest",
+        "other_reads": "unresolved",
+        "path": "tests/h62/item6/migrate-testsuite/test_evidence.py",
+        "purpose": "Temporary portable evidence manifest/detail/archive relocation/hash/path/duplicate/tampering controls; no actual external evidence or proof acceptance. Paired execution only; no fixture-read, child, production resource, containment or proof credit.",
+        "source_blob": "c9290b7a0ceedd1fe3220e0bb96a2b2784b6a329",
+        "input_revision": "4c8e0f3dcd5e35e81de6a65a69532ac5e3ccaef7"
+      },
+      {
+        "command": [
+          "python3",
+          "-B",
+          "tests/h62/item6/migrate-testsuite/test_module_report.py"
+        ],
+        "input_scope": [],
+        "kind": "unittest",
+        "other_reads": "unresolved",
+        "path": "tests/h62/item6/migrate-testsuite/test_module_report.py",
+        "purpose": "Temporary config and synthetic partial/full build version/input/metric/module reporting controls; no measured build acceptance. Paired execution only; no fixture-read, child, production resource, containment or proof credit.",
+        "source_blob": "a66ea04ae0014e8ea6a8c388e7768aef384facaa",
+        "input_revision": "4c8e0f3dcd5e35e81de6a65a69532ac5e3ccaef7"
+      },
+      {
+        "command": [
+          "python3",
+          "-B",
+          "tests/h62/item6/migrate-testsuite/test_tools.py"
+        ],
+        "input_scope": [],
+        "kind": "unittest",
+        "other_reads": "unresolved",
+        "path": "tests/h62/item6/migrate-testsuite/test_tools.py",
+        "purpose": "Temporary Git/census and synthetic interface/DAG/timing/config/identity refusal controls; no real Lean server, build or measured performance acceptance. Paired execution only; no fixture-read, child, production resource, containment or proof credit.",
+        "source_blob": "8bc42cb0644f4433042fc29992dc684a7a762575",
+        "input_revision": "4c8e0f3dcd5e35e81de6a65a69532ac5e3ccaef7"
+      },
+      {
+        "command": [
+          "python3",
+          "-B",
+          "tests/h62/item6/migrate-tools/test_api_inventory.py"
+        ],
+        "input_scope": [],
+        "kind": "unittest",
+        "other_reads": "unresolved",
+        "path": "tests/h62/item6/migrate-tools/test_api_inventory.py",
+        "purpose": "Synthetic module/theorem/generated-name/receipt-log/type-hash coverage and mutation controls; no frozen-interface evidence or Lean execution. Paired execution only; no fixture-read, child, production resource, containment or proof credit.",
+        "source_blob": "74e19a45b755de092172767baba05bcafec1f235",
+        "input_revision": "4c8e0f3dcd5e35e81de6a65a69532ac5e3ccaef7"
+      },
+      {
+        "command": [
+          "python3",
+          "-B",
+          "tests/h62/item6/migrate-tools/test_h78_ledger.py"
+        ],
+        "input_scope": [],
+        "kind": "unittest",
+        "other_reads": "unresolved",
+        "path": "tests/h62/item6/migrate-tools/test_h78_ledger.py",
+        "purpose": "Synthetic generated/private declaration retention, unknown visibility/kind, duplicate/coverage/shim/old-only refusal controls; no compatibility acceptance. Paired execution only; no fixture-read, child, production resource, containment or proof credit.",
+        "source_blob": "a32f51fd3b9bd20ac8ca5f39fb89920dd75ae9be",
+        "input_revision": "4c8e0f3dcd5e35e81de6a65a69532ac5e3ccaef7"
+      },
+      {
+        "command": [
+          "python3",
+          "-B",
+          "tests/h62/item6/migrate-typing/test_compare.py"
+        ],
+        "input_scope": [],
+        "kind": "unittest",
+        "other_reads": "unresolved",
+        "path": "tests/h62/item6/migrate-typing/test_compare.py",
+        "purpose": "Synthetic complete/toolchain/resource/input/threshold/nonfinite comparison controls; no actual performance or migration acceptance. Paired execution only; no fixture-read, child, production resource, containment or proof credit.",
+        "source_blob": "238a47f9a568c6bf8a5c507729b8df33d1a9edc7",
+        "input_revision": "4c8e0f3dcd5e35e81de6a65a69532ac5e3ccaef7"
+      },
+      {
+        "command": [
+          "python3",
+          "-B",
+          "tests/h62/item6/migrate-yul/test_compare.py"
+        ],
+        "input_scope": [],
+        "kind": "unittest",
+        "other_reads": "unresolved",
+        "path": "tests/h62/item6/migrate-yul/test_compare.py",
+        "purpose": "Synthetic report-comparison threshold/escalation/resource-drift/incomplete/nonfinite controls; no actual performance acceptance. Paired execution only; no fixture-read, child, production resource, containment or proof credit.",
+        "source_blob": "acd572d4a25fddaa1878ed4c21c5dde42ed22343",
+        "input_revision": "4c8e0f3dcd5e35e81de6a65a69532ac5e3ccaef7"
+      },
+      {
+        "command": [
+          "python3",
+          "-B",
+          "tests/h62/item6/migrate-yul/test_compiler_inventory_plan.py"
+        ],
+        "input_scope": [],
+        "kind": "unittest",
+        "other_reads": "unresolved",
+        "path": "tests/h62/item6/migrate-yul/test_compiler_inventory_plan.py",
+        "purpose": "Temporary summary/kernel/name count and identity-binding controls preventing contradictory zero-count query omission; no compiler query. Paired execution only; no fixture-read, child, production resource, containment or proof credit.",
+        "source_blob": "4e6ce41317ce01822f0dfdf42f04c32d851ca9ed",
+        "input_revision": "4c8e0f3dcd5e35e81de6a65a69532ac5e3ccaef7"
+      },
+      {
+        "command": [
+          "python3",
+          "-B",
+          "tests/h62/item6/migrate-yul/test_compiler_inventory_verification.py"
+        ],
+        "input_scope": [],
+        "kind": "unittest",
+        "other_reads": "unresolved",
+        "path": "tests/h62/item6/migrate-yul/test_compiler_inventory_verification.py",
+        "purpose": "Temporary partial/substituted pinned-inventory refusal controls; no original corpus or migration acceptance. Paired execution only; no fixture-read, child, production resource, containment or proof credit.",
+        "source_blob": "a0ce3b623ec16d4826e52b4461d63a5cc3bf547a",
+        "input_revision": "4c8e0f3dcd5e35e81de6a65a69532ac5e3ccaef7"
+      },
+      {
+        "command": [
+          "python3",
+          "-B",
+          "tests/h62/item6/migrate-yul/test_compiler_names.py"
+        ],
+        "input_scope": [],
+        "kind": "unittest",
+        "other_reads": "unresolved",
+        "path": "tests/h62/item6/migrate-yul/test_compiler_names.py",
+        "purpose": "Temporary compiler-name accounting, overlap/unknown IR visibility, digest/incomplete/duplicate/invalid-name controls; no IR type or visibility correctness. Paired execution only; no fixture-read, child, production resource, containment or proof credit.",
+        "source_blob": "d54674ae092ac8b1766b1b43ea80000a5aaf69c3",
+        "input_revision": "4c8e0f3dcd5e35e81de6a65a69532ac5e3ccaef7"
+      },
+      {
+        "command": [
+          "python3",
+          "-B",
+          "tests/h62/item6/migrate-yul/test_metadata_coverage.py"
+        ],
+        "input_scope": [],
+        "kind": "unittest",
+        "other_reads": "unresolved",
+        "path": "tests/h62/item6/migrate-yul/test_metadata_coverage.py",
+        "purpose": "Synthetic temporary observation ledger pending/duplicate/scope/reseal/probe/count/input-race controls; no saved observation or metadata/migration acceptance. Paired execution only; no fixture-read, child, production resource, containment or proof credit.",
+        "source_blob": "ef95148a73c0e5da1c0361e2e7118ce84eec4246",
+        "input_revision": "4c8e0f3dcd5e35e81de6a65a69532ac5e3ccaef7"
+      },
+      {
+        "command": [
+          "python3",
+          "-B",
+          "tests/h62/item6/migrate-yul/test_resources.py"
+        ],
+        "input_scope": [],
+        "kind": "unittest",
+        "other_reads": "unresolved",
+        "path": "tests/h62/item6/migrate-yul/test_resources.py",
+        "purpose": "Synthetic availability/cache/headroom arithmetic and invalid-counter controls; no production resource attestation or gate acceptance. Paired execution only; no fixture-read, child, production resource, containment or proof credit.",
+        "source_blob": "fc28e096e42dbe5520d2abf83190e0aa690ba761",
+        "input_revision": "4c8e0f3dcd5e35e81de6a65a69532ac5e3ccaef7"
+      }
+    ],
+    "module_entries": [
+      {
+        "runner": "validated:scripts/h62/item2/audit-readonly-calls/test_private_evidence.py",
+        "input_revision": "4c8e0f3dcd5e35e81de6a65a69532ac5e3ccaef7",
+        "frames": [
+          {
+            "path": "scripts/h62/item2/audit-readonly-calls/test_private_evidence.py",
+            "blob": "b9c1322109b11f6bc32a671c5e276ce67558d8a3",
+            "line": 9
+          },
+          {
+            "path": "scripts/h62/item2/audit-readonly-calls/primitive_read_coverage.py",
+            "blob": "aeab6dd75625f88350bc5807f98067f9e4ef222b",
+            "line": 16
+          },
+          {
+            "path": "scripts/h62/item2/audit-readonly-calls/check_primitive_reads.py",
+            "blob": "ad926b4789f0b49b046d5789b4011de594f8e2a8",
+            "line": 11
+          },
+          {
+            "path": "scripts/h62/item2/audit-readonly-calls/check_initialization.py",
+            "blob": "80c31a9ebc924b9424d50731ac15bd8ff970a11a",
+            "line": 21
+          },
+          {
+            "path": "scripts/h62/item2/audit-readonly-calls/check_initialization.py",
+            "blob": "80c31a9ebc924b9424d50731ac15bd8ff970a11a",
+            "line": 18
+          },
+          {
+            "path": "scripts/h62/item2/audit-readonly-calls/current_dependencies.py",
+            "blob": "8db0824226125c9828a3872bdb4150d49f686cc7",
+            "line": 20
+          }
+        ],
+        "target": "scripts/h62/item1/duplication-scanner/header_dependencies.py",
+        "target_blob": "9cf6eb556ff236312a45f9d9d3f9ca0995f7fcd5",
+        "operation": "entered measured Python module; no fixture consumption credit",
+        "module_code_sha256": "40db55dac295b822cddc97294fea1907fd730c4b15b9847d566e551932b6d312",
+        "python": [
+          3,
+          12,
+          14
+        ],
+        "module_frame_line": 0,
+        "collector_sha256": "74a8ac05edadf4a4a1cf901134a8c23b24a844284ee8fe2a5f4e6fba274d251c"
+      },
+      {
+        "runner": "validated:tests/h62/item1/duplication-scanner/test_index.py",
+        "input_revision": "4c8e0f3dcd5e35e81de6a65a69532ac5e3ccaef7",
+        "frames": [
+          {
+            "path": "tests/h62/item1/duplication-scanner/test_index.py",
+            "blob": "4cc6f8a9c905c8ed827805cee1c0baba12e1e268",
+            "line": 12
+          }
+        ],
+        "target": "scripts/h62/item1/duplication-scanner/index_audit.py",
+        "target_blob": "afffc92b649ad5d52b3de263334fb060a2a619d3",
+        "operation": "entered measured Python module; no fixture consumption credit",
+        "module_code_sha256": "e322456aae6d8ad655a797296a37c70264173b5c757324927441c375b9c07c0b",
+        "python": [
+          3,
+          12,
+          14
+        ],
+        "module_frame_line": 0,
+        "collector_sha256": "74a8ac05edadf4a4a1cf901134a8c23b24a844284ee8fe2a5f4e6fba274d251c"
+      },
+      {
+        "runner": "validated:scripts/h62/item2/audit-readonly-calls/test_private_evidence.py",
+        "input_revision": "4c8e0f3dcd5e35e81de6a65a69532ac5e3ccaef7",
+        "frames": [
+          {
+            "path": "scripts/h62/item2/audit-readonly-calls/test_private_evidence.py",
+            "blob": "b9c1322109b11f6bc32a671c5e276ce67558d8a3",
+            "line": 9
+          },
+          {
+            "path": "scripts/h62/item2/audit-readonly-calls/primitive_read_coverage.py",
+            "blob": "aeab6dd75625f88350bc5807f98067f9e4ef222b",
+            "line": 16
+          },
+          {
+            "path": "scripts/h62/item2/audit-readonly-calls/check_primitive_reads.py",
+            "blob": "ad926b4789f0b49b046d5789b4011de594f8e2a8",
+            "line": 11
+          },
+          {
+            "path": "scripts/h62/item2/audit-readonly-calls/check_initialization.py",
+            "blob": "80c31a9ebc924b9424d50731ac15bd8ff970a11a",
+            "line": 21
+          },
+          {
+            "path": "scripts/h62/item2/audit-readonly-calls/check_initialization.py",
+            "blob": "80c31a9ebc924b9424d50731ac15bd8ff970a11a",
+            "line": 18
+          },
+          {
+            "path": "scripts/h62/item2/audit-readonly-calls/current_dependencies.py",
+            "blob": "8db0824226125c9828a3872bdb4150d49f686cc7",
+            "line": 20
+          },
+          {
+            "path": "scripts/h62/item1/duplication-scanner/header_dependencies.py",
+            "blob": "9cf6eb556ff236312a45f9d9d3f9ca0995f7fcd5",
+            "line": 18
+          },
+          {
+            "path": "scripts/h62/item1/duplication-scanner/bind_signature_fixture.py",
+            "blob": "7959500d77df619f6db0805b973193d2b473b84b",
+            "line": 38
+          },
+          {
+            "path": "scripts/h62/item1/duplication-scanner/bind_signature_fixture.py",
+            "blob": "7959500d77df619f6db0805b973193d2b473b84b",
+            "line": 34
+          }
+        ],
+        "target": "scripts/h62/item1/duplication-scanner/observe_signature_environment.py",
+        "target_blob": "0e6fd6f8f0ac05011f37651807733930fd52d257",
+        "operation": "entered measured Python module; no fixture consumption credit",
+        "module_code_sha256": "55ff23ceed50e5ded09f4950404f42484138cd1115c976d1106b9abcb860b588",
+        "python": [
+          3,
+          12,
+          14
+        ],
+        "module_frame_line": 0,
+        "collector_sha256": "74a8ac05edadf4a4a1cf901134a8c23b24a844284ee8fe2a5f4e6fba274d251c"
+      },
+      {
+        "runner": "validated:scripts/h62/item2/audit-readonly-calls/test_private_evidence.py",
+        "input_revision": "4c8e0f3dcd5e35e81de6a65a69532ac5e3ccaef7",
+        "frames": [
+          {
+            "path": "scripts/h62/item2/audit-readonly-calls/test_private_evidence.py",
+            "blob": "b9c1322109b11f6bc32a671c5e276ce67558d8a3",
+            "line": 9
+          },
+          {
+            "path": "scripts/h62/item2/audit-readonly-calls/primitive_read_coverage.py",
+            "blob": "aeab6dd75625f88350bc5807f98067f9e4ef222b",
+            "line": 16
+          },
+          {
+            "path": "scripts/h62/item2/audit-readonly-calls/check_primitive_reads.py",
+            "blob": "ad926b4789f0b49b046d5789b4011de594f8e2a8",
+            "line": 11
+          },
+          {
+            "path": "scripts/h62/item2/audit-readonly-calls/check_initialization.py",
+            "blob": "80c31a9ebc924b9424d50731ac15bd8ff970a11a",
+            "line": 21
+          },
+          {
+            "path": "scripts/h62/item2/audit-readonly-calls/check_initialization.py",
+            "blob": "80c31a9ebc924b9424d50731ac15bd8ff970a11a",
+            "line": 18
+          },
+          {
+            "path": "scripts/h62/item2/audit-readonly-calls/current_dependencies.py",
+            "blob": "8db0824226125c9828a3872bdb4150d49f686cc7",
+            "line": 20
+          },
+          {
+            "path": "scripts/h62/item1/duplication-scanner/header_dependencies.py",
+            "blob": "9cf6eb556ff236312a45f9d9d3f9ca0995f7fcd5",
+            "line": 18
+          },
+          {
+            "path": "scripts/h62/item1/duplication-scanner/bind_signature_fixture.py",
+            "blob": "7959500d77df619f6db0805b973193d2b473b84b",
+            "line": 39
+          },
+          {
+            "path": "scripts/h62/item1/duplication-scanner/bind_signature_fixture.py",
+            "blob": "7959500d77df619f6db0805b973193d2b473b84b",
+            "line": 34
+          }
+        ],
+        "target": "scripts/h62/item1/duplication-scanner/scan.py",
+        "target_blob": "366f753500d82dc138fd59a2659e476c7321a382",
+        "operation": "entered measured Python module; no fixture consumption credit",
+        "module_code_sha256": "fb43ab16dc84730fea4933dd8a24476b849b3b895344a7d6829780567c7a5046",
+        "python": [
+          3,
+          12,
+          14
+        ],
+        "module_frame_line": 0,
+        "collector_sha256": "74a8ac05edadf4a4a1cf901134a8c23b24a844284ee8fe2a5f4e6fba274d251c"
+      },
+      {
+        "runner": "validated:scripts/h62/item2/audit-readonly-calls/test_private_evidence.py",
+        "input_revision": "4c8e0f3dcd5e35e81de6a65a69532ac5e3ccaef7",
+        "frames": [
+          {
+            "path": "scripts/h62/item2/audit-readonly-calls/test_private_evidence.py",
+            "blob": "b9c1322109b11f6bc32a671c5e276ce67558d8a3",
+            "line": 9
+          },
+          {
+            "path": "scripts/h62/item2/audit-readonly-calls/primitive_read_coverage.py",
+            "blob": "aeab6dd75625f88350bc5807f98067f9e4ef222b",
+            "line": 16
+          },
+          {
+            "path": "scripts/h62/item2/audit-readonly-calls/check_primitive_reads.py",
+            "blob": "ad926b4789f0b49b046d5789b4011de594f8e2a8",
+            "line": 11
+          },
+          {
+            "path": "scripts/h62/item2/audit-readonly-calls/check_initialization.py",
+            "blob": "80c31a9ebc924b9424d50731ac15bd8ff970a11a",
+            "line": 19
+          },
+          {
+            "path": "scripts/h62/item2/audit-readonly-calls/check_initialization.py",
+            "blob": "80c31a9ebc924b9424d50731ac15bd8ff970a11a",
+            "line": 18
+          },
+          {
+            "path": "scripts/h62/item1/readonly-bind/check_original_callback.py",
+            "blob": "3f7bc0a34cd8af2f6fad18ab1040a0f0ef470a24",
+            "line": 19
+          },
+          {
+            "path": "scripts/h62/item1/readonly-bind/check_callback_boundaries.py",
+            "blob": "174e0c578d697dde31681737c3dddacae0b9a271",
+            "line": 22
+          },
+          {
+            "path": "scripts/h62/item1/readonly-bind/check_capture_fixtures.py",
+            "blob": "cad3c970c4c2db72e22881dc6112a642236b1f58",
+            "line": 27
+          },
+          {
+            "path": "scripts/h62/item1/readonly-bind/check_capture_fixtures.py",
+            "blob": "cad3c970c4c2db72e22881dc6112a642236b1f58",
+            "line": 23
+          },
+          {
+            "path": "scripts/h62/item1/readonly-bind/case_ledger.py",
+            "blob": "095af3abc7ada2d6c487d5eb6b9e5bef054bef9c",
+            "line": 29
+          },
+          {
+            "path": "scripts/h62/item1/readonly-bind/case_ledger.py",
+            "blob": "095af3abc7ada2d6c487d5eb6b9e5bef054bef9c",
+            "line": 26
+          }
+        ],
+        "target": "scripts/h62/item1/readonly-bind/overlay.py",
+        "target_blob": "c1e5e522ab432f93eeefd6ef7ebe790b33d277b4",
+        "operation": "entered measured Python module; no fixture consumption credit",
+        "module_code_sha256": "1683f7035f7ef55e504ee76af61602aee006f14554c1648f97037297bf213377",
+        "python": [
+          3,
+          12,
+          14
+        ],
+        "module_frame_line": 0,
+        "collector_sha256": "74a8ac05edadf4a4a1cf901134a8c23b24a844284ee8fe2a5f4e6fba274d251c"
+      },
+      {
+        "runner": "validated:tests/h62/item2/audit-calculus/test_semantic_classification.py",
+        "input_revision": "4c8e0f3dcd5e35e81de6a65a69532ac5e3ccaef7",
+        "frames": [
+          {
+            "path": "tests/h62/item2/audit-calculus/test_semantic_classification.py",
+            "blob": "767d10cb27be5c6f5504627a07ac8ded1a3b0806",
+            "line": 13
+          },
+          {
+            "path": "scripts/h62/item2/audit-calculus/classify_frozen_signatures.py",
+            "blob": "c30794fac6a0ed8a4d1e3226e52018e4ad607a21",
+            "line": 15
+          }
+        ],
+        "target": "scripts/h62/item2/audit-calculus/bulk_inputs.py",
+        "target_blob": "455b16030ed40dce95c200c1df86ec4f23916c35",
+        "operation": "entered measured Python module; no fixture consumption credit",
+        "module_code_sha256": "7135b3f38e6bc07c59c6f995a53fc1ac87becf52fa52ed6d79a2fc83cde8a428",
+        "python": [
+          3,
+          12,
+          14
+        ],
+        "module_frame_line": 0,
+        "collector_sha256": "74a8ac05edadf4a4a1cf901134a8c23b24a844284ee8fe2a5f4e6fba274d251c"
+      },
+      {
+        "runner": "validated:tests/h62/item2/audit-calculus/test_semantic_classification.py",
+        "input_revision": "4c8e0f3dcd5e35e81de6a65a69532ac5e3ccaef7",
+        "frames": [
+          {
+            "path": "tests/h62/item2/audit-calculus/test_semantic_classification.py",
+            "blob": "767d10cb27be5c6f5504627a07ac8ded1a3b0806",
+            "line": 13
+          }
+        ],
+        "target": "scripts/h62/item2/audit-calculus/classify_frozen_signatures.py",
+        "target_blob": "c30794fac6a0ed8a4d1e3226e52018e4ad607a21",
+        "operation": "entered measured Python module; no fixture consumption credit",
+        "module_code_sha256": "ee29b57bfda62dffa2856f13b8e9c78bf60ee3fede41ea8fa298d261691d571f",
+        "python": [
+          3,
+          12,
+          14
+        ],
+        "module_frame_line": 0,
+        "collector_sha256": "74a8ac05edadf4a4a1cf901134a8c23b24a844284ee8fe2a5f4e6fba274d251c"
+      },
+      {
+        "runner": "validated:tests/h62/item2/audit-calculus/test_handoff_index.py",
+        "input_revision": "4c8e0f3dcd5e35e81de6a65a69532ac5e3ccaef7",
+        "frames": [
+          {
+            "path": "tests/h62/item2/audit-calculus/test_handoff_index.py",
+            "blob": "873df01e20af8815478c9bd3ffd5550f69624ad2",
+            "line": 12
+          }
+        ],
+        "target": "scripts/h62/item2/audit-calculus/handoff_index.py",
+        "target_blob": "db6b945340c15546194c227b25f8924e334b0ddf",
+        "operation": "entered measured Python module; no fixture consumption credit",
+        "module_code_sha256": "d0f2ada9fe4de9a2cd59096d45d19f75750e85b349309b1c0d13f0ae6b3af1ad",
+        "python": [
+          3,
+          12,
+          14
+        ],
+        "module_frame_line": 0,
+        "collector_sha256": "74a8ac05edadf4a4a1cf901134a8c23b24a844284ee8fe2a5f4e6fba274d251c"
+      },
+      {
+        "runner": "validated:tests/h62/item2/audit-calculus/test_receipts.py",
+        "input_revision": "4c8e0f3dcd5e35e81de6a65a69532ac5e3ccaef7",
+        "frames": [
+          {
+            "path": "tests/h62/item2/audit-calculus/test_receipts.py",
+            "blob": "68da1e61d3c0abb61e12398ef9bb0240da55df58",
+            "line": 11
+          }
+        ],
+        "target": "scripts/h62/item2/audit-calculus/receipts.py",
+        "target_blob": "133d53e56e924f86609fa98451cac11e25d46632",
+        "operation": "entered measured Python module; no fixture consumption credit",
+        "module_code_sha256": "425908f61a6cefd46cdac04167b2650fdacb03e2a91fd42798e5e1e1e17bb099",
+        "python": [
+          3,
+          12,
+          14
+        ],
+        "module_frame_line": 0,
+        "collector_sha256": "74a8ac05edadf4a4a1cf901134a8c23b24a844284ee8fe2a5f4e6fba274d251c"
+      },
+      {
+        "runner": "validated:tests/h62/item2/audit-calculus/test_reconcile.py",
+        "input_revision": "4c8e0f3dcd5e35e81de6a65a69532ac5e3ccaef7",
+        "frames": [
+          {
+            "path": "tests/h62/item2/audit-calculus/test_reconcile.py",
+            "blob": "a10452c60df5311a27fef8722bb5e06e3f40f488",
+            "line": 10
+          }
+        ],
+        "target": "scripts/h62/item2/audit-calculus/reconcile.py",
+        "target_blob": "07a6e65fd652db2b8fb6f310c881ed6a6003d1c1",
+        "operation": "entered measured Python module; no fixture consumption credit",
+        "module_code_sha256": "338b780ab69d443aeb5a7063c6f70dc6f4b423a496c31a8c02a457c25c3912c2",
+        "python": [
+          3,
+          12,
+          14
+        ],
+        "module_frame_line": 0,
+        "collector_sha256": "74a8ac05edadf4a4a1cf901134a8c23b24a844284ee8fe2a5f4e6fba274d251c"
+      },
+      {
+        "runner": "validated:tests/h62/item2/audit-calculus/test_standing_owners.py",
+        "input_revision": "4c8e0f3dcd5e35e81de6a65a69532ac5e3ccaef7",
+        "frames": [
+          {
+            "path": "tests/h62/item2/audit-calculus/test_standing_owners.py",
+            "blob": "55e3837cbb78a61206ba4b4b0416a0c95b4f5b58",
+            "line": 5
+          }
+        ],
+        "target": "scripts/h62/item2/audit-calculus/standing_owners.py",
+        "target_blob": "59ae8fd76982386eb353ac42eeb423fa9e068427",
+        "operation": "entered measured Python module; no fixture consumption credit",
+        "module_code_sha256": "a02f8b8622fb6e4b1e4ad80c43bc74b2ba11a97489e9271bed9a20b7a01dd17f",
+        "python": [
+          3,
+          12,
+          14
+        ],
+        "module_frame_line": 0,
+        "collector_sha256": "74a8ac05edadf4a4a1cf901134a8c23b24a844284ee8fe2a5f4e6fba274d251c"
+      },
+      {
+        "runner": "validated:tests/h62/item2/audit-calculus/test_packet_transition.py",
+        "input_revision": "4c8e0f3dcd5e35e81de6a65a69532ac5e3ccaef7",
+        "frames": [
+          {
+            "path": "tests/h62/item2/audit-calculus/test_packet_transition.py",
+            "blob": "135dcd08d9b6489268377602011de0dcebd83838",
+            "line": 7
+          }
+        ],
+        "target": "scripts/h62/item2/audit-calculus/verify_packet_transition.py",
+        "target_blob": "38a0992822fb39c0d01463862069cb4de5f9e055",
+        "operation": "entered measured Python module; no fixture consumption credit",
+        "module_code_sha256": "c9d8daea94daf691d19de5bb114f672af61adf1eb954e6aa09b3a773e5877db2",
+        "python": [
+          3,
+          12,
+          14
+        ],
+        "module_frame_line": 0,
+        "collector_sha256": "74a8ac05edadf4a4a1cf901134a8c23b24a844284ee8fe2a5f4e6fba274d251c"
+      },
+      {
+        "runner": "validated:tests/h62/item2/audit-evm-compiler/check_evidence.py",
+        "input_revision": "4c8e0f3dcd5e35e81de6a65a69532ac5e3ccaef7",
+        "frames": [
+          {
+            "path": "tests/h62/item2/audit-evm-compiler/check_evidence.py",
+            "blob": "699f524b402d78056da3d53aeccd4dd9b11a1e98",
+            "line": 5
+          }
+        ],
+        "target": "scripts/h62/item2/audit-evm-compiler/verify_evidence.py",
+        "target_blob": "ea344fa9627a75cc632f08caaab49a489362effe",
+        "operation": "entered measured Python module; no fixture consumption credit",
+        "module_code_sha256": "a3dbe8d98ab27b122fe7b0ddec250eb45b111ad0aa8bd7297528b04e9fb0101f",
+        "python": [
+          3,
+          12,
+          14
+        ],
+        "module_frame_line": 0,
+        "collector_sha256": "74a8ac05edadf4a4a1cf901134a8c23b24a844284ee8fe2a5f4e6fba274d251c"
+      },
+      {
+        "runner": "validated:scripts/h62/item2/audit-language/test_source_roles.py",
+        "input_revision": "4c8e0f3dcd5e35e81de6a65a69532ac5e3ccaef7",
+        "frames": [
+          {
+            "path": "scripts/h62/item2/audit-language/test_source_roles.py",
+            "blob": "8425d6d046fac59ffacc1c2ba2a67c0c7b4aa926",
+            "line": 5
+          }
+        ],
+        "target": "scripts/h62/item2/audit-language/census.py",
+        "target_blob": "6cb2604529e8d5249ce907890d85071ea92112db",
+        "operation": "entered measured Python module; no fixture consumption credit",
+        "module_code_sha256": "3c9dab57f2b08e4b1c1ef7ae59a1642c25c41d47d0b2686eca7329eb5249e64c",
+        "python": [
+          3,
+          12,
+          14
+        ],
+        "module_frame_line": 0,
+        "collector_sha256": "74a8ac05edadf4a4a1cf901134a8c23b24a844284ee8fe2a5f4e6fba274d251c"
+      },
+      {
+        "runner": "validated:scripts/h62/item2/audit-language/test_source_roles.py",
+        "input_revision": "4c8e0f3dcd5e35e81de6a65a69532ac5e3ccaef7",
+        "frames": [
+          {
+            "path": "scripts/h62/item2/audit-language/test_source_roles.py",
+            "blob": "8425d6d046fac59ffacc1c2ba2a67c0c7b4aa926",
+            "line": 6
+          },
+          {
+            "path": "scripts/h62/item2/audit-language/source_roles.py",
+            "blob": "fbc2eb5bc17f91adabf886d22058615d640dd20d",
+            "line": 13
+          }
+        ],
+        "target": "scripts/h62/item2/audit-language/classify.py",
+        "target_blob": "c83b17a257020515a2491be5b3c489a93428ffd2",
+        "operation": "entered measured Python module; no fixture consumption credit",
+        "module_code_sha256": "8acba24c7c56cb172436b3f4fe76d154345f55d91c051b45041445bf0a5f2c9a",
+        "python": [
+          3,
+          12,
+          14
+        ],
+        "module_frame_line": 0,
+        "collector_sha256": "74a8ac05edadf4a4a1cf901134a8c23b24a844284ee8fe2a5f4e6fba274d251c"
+      },
+      {
+        "runner": "validated:scripts/h62/item2/audit-language/test_source_roles.py",
+        "input_revision": "4c8e0f3dcd5e35e81de6a65a69532ac5e3ccaef7",
+        "frames": [
+          {
+            "path": "scripts/h62/item2/audit-language/test_source_roles.py",
+            "blob": "8425d6d046fac59ffacc1c2ba2a67c0c7b4aa926",
+            "line": 6
+          }
+        ],
+        "target": "scripts/h62/item2/audit-language/source_roles.py",
+        "target_blob": "fbc2eb5bc17f91adabf886d22058615d640dd20d",
+        "operation": "entered measured Python module; no fixture consumption credit",
+        "module_code_sha256": "c594243841c23498b284fd99507029c0514ef313ad18c697363fe48cd3f85371",
+        "python": [
+          3,
+          12,
+          14
+        ],
+        "module_frame_line": 0,
+        "collector_sha256": "74a8ac05edadf4a4a1cf901134a8c23b24a844284ee8fe2a5f4e6fba274d251c"
+      },
+      {
+        "runner": "validated:scripts/h62/item2/audit-readonly-calls/test_private_evidence.py",
+        "input_revision": "4c8e0f3dcd5e35e81de6a65a69532ac5e3ccaef7",
+        "frames": [
+          {
+            "path": "scripts/h62/item2/audit-readonly-calls/test_private_evidence.py",
+            "blob": "b9c1322109b11f6bc32a671c5e276ce67558d8a3",
+            "line": 9
+          },
+          {
+            "path": "scripts/h62/item2/audit-readonly-calls/primitive_read_coverage.py",
+            "blob": "aeab6dd75625f88350bc5807f98067f9e4ef222b",
+            "line": 16
+          },
+          {
+            "path": "scripts/h62/item2/audit-readonly-calls/check_primitive_reads.py",
+            "blob": "ad926b4789f0b49b046d5789b4011de594f8e2a8",
+            "line": 11
+          },
+          {
+            "path": "scripts/h62/item2/audit-readonly-calls/check_initialization.py",
+            "blob": "80c31a9ebc924b9424d50731ac15bd8ff970a11a",
+            "line": 19
+          },
+          {
+            "path": "scripts/h62/item2/audit-readonly-calls/check_initialization.py",
+            "blob": "80c31a9ebc924b9424d50731ac15bd8ff970a11a",
+            "line": 18
+          },
+          {
+            "path": "scripts/h62/item1/readonly-bind/check_original_callback.py",
+            "blob": "3f7bc0a34cd8af2f6fad18ab1040a0f0ef470a24",
+            "line": 21
+          },
+          {
+            "path": "scripts/h62/item1/readonly-bind/check_capture_fixtures.py",
+            "blob": "cad3c970c4c2db72e22881dc6112a642236b1f58",
+            "line": 23
+          },
+          {
+            "path": "scripts/h62/item2/audit-readonly-calls/export_signatures.py",
+            "blob": "3bb370c5160d7646a1f9f843a8e931860c88ea8d",
+            "line": 19
+          }
+        ],
+        "target": "scripts/h62/item2/audit-readonly-calls/census.py",
+        "target_blob": "14d904d7d3b1f5a303e180c6ce7415f23416a901",
+        "operation": "entered measured Python module; no fixture consumption credit",
+        "module_code_sha256": "ea19f7db621fb7d7559a49223983ea504d70a590fd61ef77227664affcce9e8f",
+        "python": [
+          3,
+          12,
+          14
+        ],
+        "module_frame_line": 0,
+        "collector_sha256": "74a8ac05edadf4a4a1cf901134a8c23b24a844284ee8fe2a5f4e6fba274d251c"
+      },
+      {
+        "runner": "validated:scripts/h62/item2/audit-readonly-calls/test_private_evidence.py",
+        "input_revision": "4c8e0f3dcd5e35e81de6a65a69532ac5e3ccaef7",
+        "frames": [
+          {
+            "path": "scripts/h62/item2/audit-readonly-calls/test_private_evidence.py",
+            "blob": "b9c1322109b11f6bc32a671c5e276ce67558d8a3",
+            "line": 9
+          },
+          {
+            "path": "scripts/h62/item2/audit-readonly-calls/primitive_read_coverage.py",
+            "blob": "aeab6dd75625f88350bc5807f98067f9e4ef222b",
+            "line": 16
+          }
+        ],
+        "target": "scripts/h62/item2/audit-readonly-calls/check_primitive_reads.py",
+        "target_blob": "ad926b4789f0b49b046d5789b4011de594f8e2a8",
+        "operation": "entered measured Python module; no fixture consumption credit",
+        "module_code_sha256": "93420a1a432ab9622e01ebc413650445ede67e3fa6d6fb7ececcd116cdc6587f",
+        "python": [
+          3,
+          12,
+          14
+        ],
+        "module_frame_line": 0,
+        "collector_sha256": "74a8ac05edadf4a4a1cf901134a8c23b24a844284ee8fe2a5f4e6fba274d251c"
+      },
+      {
+        "runner": "validated:scripts/h62/item2/audit-readonly-calls/test_rebuild_native_closure.py",
+        "input_revision": "4c8e0f3dcd5e35e81de6a65a69532ac5e3ccaef7",
+        "frames": [
+          {
+            "path": "scripts/h62/item2/audit-readonly-calls/test_rebuild_native_closure.py",
+            "blob": "6affec1ecb3fb1c3b36aa3d2c7884bc0a9742d06",
+            "line": 9
+          },
+          {
+            "path": "scripts/h62/item2/audit-readonly-calls/rebuild_native_closure.py",
+            "blob": "29a5a2107db1b9d55f9e1603581e835f784160f9",
+            "line": 22
+          }
+        ],
+        "target": "scripts/h62/item2/audit-readonly-calls/check_source_void.py",
+        "target_blob": "88012b0331d8ca908ae006f0477a756298e8b13a",
+        "operation": "entered measured Python module; no fixture consumption credit",
+        "module_code_sha256": "832d752c8af3e5368cfe6306560159ebdd6068dffaf8426b9db794ea5b714214",
+        "python": [
+          3,
+          12,
+          14
+        ],
+        "module_frame_line": 0,
+        "collector_sha256": "74a8ac05edadf4a4a1cf901134a8c23b24a844284ee8fe2a5f4e6fba274d251c"
+      },
+      {
+        "runner": "validated:scripts/h62/item2/audit-readonly-calls/test_private_evidence.py",
+        "input_revision": "4c8e0f3dcd5e35e81de6a65a69532ac5e3ccaef7",
+        "frames": [
+          {
+            "path": "scripts/h62/item2/audit-readonly-calls/test_private_evidence.py",
+            "blob": "b9c1322109b11f6bc32a671c5e276ce67558d8a3",
+            "line": 9
+          },
+          {
+            "path": "scripts/h62/item2/audit-readonly-calls/primitive_read_coverage.py",
+            "blob": "aeab6dd75625f88350bc5807f98067f9e4ef222b",
+            "line": 16
+          },
+          {
+            "path": "scripts/h62/item2/audit-readonly-calls/check_primitive_reads.py",
+            "blob": "ad926b4789f0b49b046d5789b4011de594f8e2a8",
+            "line": 11
+          },
+          {
+            "path": "scripts/h62/item2/audit-readonly-calls/check_initialization.py",
+            "blob": "80c31a9ebc924b9424d50731ac15bd8ff970a11a",
+            "line": 19
+          },
+          {
+            "path": "scripts/h62/item2/audit-readonly-calls/check_initialization.py",
+            "blob": "80c31a9ebc924b9424d50731ac15bd8ff970a11a",
+            "line": 18
+          },
+          {
+            "path": "scripts/h62/item1/readonly-bind/check_original_callback.py",
+            "blob": "3f7bc0a34cd8af2f6fad18ab1040a0f0ef470a24",
+            "line": 21
+          },
+          {
+            "path": "scripts/h62/item1/readonly-bind/check_capture_fixtures.py",
+            "blob": "cad3c970c4c2db72e22881dc6112a642236b1f58",
+            "line": 23
+          }
+        ],
+        "target": "scripts/h62/item2/audit-readonly-calls/export_signatures.py",
+        "target_blob": "3bb370c5160d7646a1f9f843a8e931860c88ea8d",
+        "operation": "entered measured Python module; no fixture consumption credit",
+        "module_code_sha256": "002da5b3cab41ba1688eba062779083162198931a8a4f66082213bfd68bd0d75",
+        "python": [
+          3,
+          12,
+          14
+        ],
+        "module_frame_line": 0,
+        "collector_sha256": "74a8ac05edadf4a4a1cf901134a8c23b24a844284ee8fe2a5f4e6fba274d251c"
+      },
+      {
+        "runner": "validated:scripts/h62/item2/audit-readonly-calls/test_private_evidence.py",
+        "input_revision": "4c8e0f3dcd5e35e81de6a65a69532ac5e3ccaef7",
+        "frames": [
+          {
+            "path": "scripts/h62/item2/audit-readonly-calls/test_private_evidence.py",
+            "blob": "b9c1322109b11f6bc32a671c5e276ce67558d8a3",
+            "line": 9
+          },
+          {
+            "path": "scripts/h62/item2/audit-readonly-calls/primitive_read_coverage.py",
+            "blob": "aeab6dd75625f88350bc5807f98067f9e4ef222b",
+            "line": 16
+          },
+          {
+            "path": "scripts/h62/item2/audit-readonly-calls/check_primitive_reads.py",
+            "blob": "ad926b4789f0b49b046d5789b4011de594f8e2a8",
+            "line": 11
+          },
+          {
+            "path": "scripts/h62/item2/audit-readonly-calls/check_initialization.py",
+            "blob": "80c31a9ebc924b9424d50731ac15bd8ff970a11a",
+            "line": 21
+          },
+          {
+            "path": "scripts/h62/item2/audit-readonly-calls/check_initialization.py",
+            "blob": "80c31a9ebc924b9424d50731ac15bd8ff970a11a",
+            "line": 18
+          },
+          {
+            "path": "scripts/h62/item2/audit-readonly-calls/current_dependencies.py",
+            "blob": "8db0824226125c9828a3872bdb4150d49f686cc7",
+            "line": 22
+          },
+          {
+            "path": "scripts/h62/item2/audit-readonly-calls/obligation_dependencies.py",
+            "blob": "50ff8ad1adb99e9f62254eaab48b20da465138c0",
+            "line": 17
+          }
+        ],
+        "target": "scripts/h62/item2/audit-readonly-calls/fidelity_delta.py",
+        "target_blob": "3217cae84a71f0dc56138e01d58b6c54f8c0c38f",
+        "operation": "entered measured Python module; no fixture consumption credit",
+        "module_code_sha256": "9ef6818f020eea2e4b4ce512642f975de6b1129895d987fa986d0294d64c8509",
+        "python": [
+          3,
+          12,
+          14
+        ],
+        "module_frame_line": 0,
+        "collector_sha256": "74a8ac05edadf4a4a1cf901134a8c23b24a844284ee8fe2a5f4e6fba274d251c"
+      },
+      {
+        "runner": "validated:scripts/h62/item2/audit-readonly-calls/test_private_evidence.py",
+        "input_revision": "4c8e0f3dcd5e35e81de6a65a69532ac5e3ccaef7",
+        "frames": [
+          {
+            "path": "scripts/h62/item2/audit-readonly-calls/test_private_evidence.py",
+            "blob": "b9c1322109b11f6bc32a671c5e276ce67558d8a3",
+            "line": 9
+          },
+          {
+            "path": "scripts/h62/item2/audit-readonly-calls/primitive_read_coverage.py",
+            "blob": "aeab6dd75625f88350bc5807f98067f9e4ef222b",
+            "line": 16
+          },
+          {
+            "path": "scripts/h62/item2/audit-readonly-calls/check_primitive_reads.py",
+            "blob": "ad926b4789f0b49b046d5789b4011de594f8e2a8",
+            "line": 11
+          },
+          {
+            "path": "scripts/h62/item2/audit-readonly-calls/check_initialization.py",
+            "blob": "80c31a9ebc924b9424d50731ac15bd8ff970a11a",
+            "line": 21
+          },
+          {
+            "path": "scripts/h62/item2/audit-readonly-calls/check_initialization.py",
+            "blob": "80c31a9ebc924b9424d50731ac15bd8ff970a11a",
+            "line": 18
+          },
+          {
+            "path": "scripts/h62/item2/audit-readonly-calls/current_dependencies.py",
+            "blob": "8db0824226125c9828a3872bdb4150d49f686cc7",
+            "line": 20
+          },
+          {
+            "path": "scripts/h62/item1/duplication-scanner/header_dependencies.py",
+            "blob": "9cf6eb556ff236312a45f9d9d3f9ca0995f7fcd5",
+            "line": 18
+          },
+          {
+            "path": "scripts/h62/item1/duplication-scanner/bind_signature_fixture.py",
+            "blob": "7959500d77df619f6db0805b973193d2b473b84b",
+            "line": 40
+          },
+          {
+            "path": "scripts/h62/item1/duplication-scanner/bind_signature_fixture.py",
+            "blob": "7959500d77df619f6db0805b973193d2b473b84b",
+            "line": 34
+          },
+          {
+            "path": "scripts/h62/item2/audit-readonly-calls/bounded.py",
+            "blob": "9ea242bdbc550943c2c8da8ab6107d418e82948c",
+            "line": 25
+          }
+        ],
+        "target": "scripts/h62/item2/audit-readonly-calls/runtime_policy.py",
+        "target_blob": "4ae8533902a16280a36cf0bb11fba23c687a3e8c",
+        "operation": "entered measured Python module; no fixture consumption credit",
+        "module_code_sha256": "013fbd4336ca3dcbcd5243fc32aa851579fbac524b532f85b1c68608c13677ba",
+        "python": [
+          3,
+          12,
+          14
+        ],
+        "module_frame_line": 0,
+        "collector_sha256": "74a8ac05edadf4a4a1cf901134a8c23b24a844284ee8fe2a5f4e6fba274d251c"
+      },
+      {
+        "runner": "validated:scripts/h62/item2/audit-readonly-calls/test_rebuild_native_closure.py",
+        "input_revision": "4c8e0f3dcd5e35e81de6a65a69532ac5e3ccaef7",
+        "frames": [
+          {
+            "path": "scripts/h62/item2/audit-readonly-calls/test_rebuild_native_closure.py",
+            "blob": "6affec1ecb3fb1c3b36aa3d2c7884bc0a9742d06",
+            "line": 9
+          },
+          {
+            "path": "scripts/h62/item2/audit-readonly-calls/rebuild_native_closure.py",
+            "blob": "29a5a2107db1b9d55f9e1603581e835f784160f9",
+            "line": 22
+          },
+          {
+            "path": "scripts/h62/item2/audit-readonly-calls/check_source_void.py",
+            "blob": "88012b0331d8ca908ae006f0477a756298e8b13a",
+            "line": 35
+          },
+          {
+            "path": "scripts/h62/item2/audit-readonly-calls/check_source_void.py",
+            "blob": "88012b0331d8ca908ae006f0477a756298e8b13a",
+            "line": 19
+          }
+        ],
+        "target": "scripts/h62/item2/audit-readonly-calls/verified_dependency_cache.py",
+        "target_blob": "ea3ab894a590e608702dac48943434bf1b515624",
+        "operation": "entered measured Python module; no fixture consumption credit",
+        "module_code_sha256": "cd8e938265068ec2cfdd6f7abaac198327768bd8abdd846717ac9af9f07847a0",
+        "python": [
+          3,
+          12,
+          14
+        ],
+        "module_frame_line": 0,
+        "collector_sha256": "74a8ac05edadf4a4a1cf901134a8c23b24a844284ee8fe2a5f4e6fba274d251c"
+      },
+      {
+        "runner": "validated:scripts/h62/item2/audit-theories/test_import_paths.py",
+        "input_revision": "4c8e0f3dcd5e35e81de6a65a69532ac5e3ccaef7",
+        "frames": [
+          {
+            "path": "scripts/h62/item2/audit-theories/test_import_paths.py",
+            "blob": "b3b629db83c041f96fcf9d4d37fde2f48f126cde",
+            "line": 6
+          },
+          {
+            "path": "scripts/h62/item2/audit-theories/verify_census.py",
+            "blob": "3946f3e5a45c7532327d84e30c989edd024a9057",
+            "line": 41
+          }
+        ],
+        "target": "scripts/h62/item2/audit-theories/audit_dispositions.py",
+        "target_blob": "6fbc1ebcdd5f235d5b670241cfbac2a9f801722f",
+        "operation": "entered measured Python module; no fixture consumption credit",
+        "module_code_sha256": "5f45770326ad74dc6db4c882e292171d0a00df9d2f7d4af3914eee4e94514bc6",
+        "python": [
+          3,
+          12,
+          14
+        ],
+        "module_frame_line": 0,
+        "collector_sha256": "74a8ac05edadf4a4a1cf901134a8c23b24a844284ee8fe2a5f4e6fba274d251c"
+      },
+      {
+        "runner": "validated:scripts/h62/item2/audit-theories/test_indexed_roles.py",
+        "input_revision": "4c8e0f3dcd5e35e81de6a65a69532ac5e3ccaef7",
+        "frames": [
+          {
+            "path": "scripts/h62/item2/audit-theories/test_indexed_roles.py",
+            "blob": "0d96e7b54ccf6f8baf5ffe63a98d0ee62e368f13",
+            "line": 3
+          }
+        ],
+        "target": "scripts/h62/item2/audit-theories/indexed_roles.py",
+        "target_blob": "59a4fe20ce0efdc170f1e2a5dd20965282382c41",
+        "operation": "entered measured Python module; no fixture consumption credit",
+        "module_code_sha256": "346922c5c5098d67d374470991207702cca8914a8fa3b8ea35e3e53e349e1eba",
+        "python": [
+          3,
+          12,
+          14
+        ],
+        "module_frame_line": 0,
+        "collector_sha256": "74a8ac05edadf4a4a1cf901134a8c23b24a844284ee8fe2a5f4e6fba274d251c"
+      },
+      {
+        "runner": "validated:scripts/h62/item2/audit-theories/test_import_paths.py",
+        "input_revision": "4c8e0f3dcd5e35e81de6a65a69532ac5e3ccaef7",
+        "frames": [
+          {
+            "path": "scripts/h62/item2/audit-theories/test_import_paths.py",
+            "blob": "b3b629db83c041f96fcf9d4d37fde2f48f126cde",
+            "line": 6
+          },
+          {
+            "path": "scripts/h62/item2/audit-theories/verify_census.py",
+            "blob": "3946f3e5a45c7532327d84e30c989edd024a9057",
+            "line": 35
+          }
+        ],
+        "target": "scripts/h62/item2/audit-theories/witness_registry.py",
+        "target_blob": "5de98fed742742a82f59628fe4716b6ca38f8ed3",
+        "operation": "entered measured Python module; no fixture consumption credit",
+        "module_code_sha256": "6c144f1e3128f5a94d2501b7c0a37716406e516973b9e2814ec141d9bc6f4afb",
+        "python": [
+          3,
+          12,
+          14
+        ],
+        "module_frame_line": 0,
+        "collector_sha256": "74a8ac05edadf4a4a1cf901134a8c23b24a844284ee8fe2a5f4e6fba274d251c"
+      },
+      {
+        "runner": "validated:scripts/h62/item4/generic-yul-views/test_timings.py",
+        "input_revision": "4c8e0f3dcd5e35e81de6a65a69532ac5e3ccaef7",
+        "frames": [
+          {
+            "path": "scripts/h62/item4/generic-yul-views/test_timings.py",
+            "blob": "5c5e1010d2f993cfc1ac6483209a2429f697ae13",
+            "line": 3
+          }
+        ],
+        "target": "scripts/h62/item4/generic-yul-views/compare_timings.py",
+        "target_blob": "0374e2aca1e0a3f483e6369e8978a3b10a75fa96",
+        "operation": "entered measured Python module; no fixture consumption credit",
+        "module_code_sha256": "810091f9c765192cccf0f2028b7ae577da3906bb1a64199ae96a9f380d70ac90",
+        "python": [
+          3,
+          12,
+          14
+        ],
+        "module_frame_line": 0,
+        "collector_sha256": "74a8ac05edadf4a4a1cf901134a8c23b24a844284ee8fe2a5f4e6fba274d251c"
+      },
+      {
+        "runner": "validated:scripts/h62/item4/generic-yul-views/test_reconcile_frozen.py",
+        "input_revision": "4c8e0f3dcd5e35e81de6a65a69532ac5e3ccaef7",
+        "frames": [
+          {
+            "path": "scripts/h62/item4/generic-yul-views/test_reconcile_frozen.py",
+            "blob": "ce72e6ead7eeedb4f9050309573818bcc6aa8c78",
+            "line": 10
+          },
+          {
+            "path": "scripts/h62/item4/generic-yul-views/reconcile_frozen.py",
+            "blob": "f0f13298dc085df8c76d80cca0d95e39cb2d7a71",
+            "line": 15
+          },
+          {
+            "path": "scripts/h62/item4/generic-yul-views/acceptance.py",
+            "blob": "ef73cc19f9a708c9e3ee21c6e8bf8b5584a253a1",
+            "line": 11
+          }
+        ],
+        "target": "scripts/h62/item4/generic-yul-views/verify_manifest.py",
+        "target_blob": "ccfda02f4d3c234dafe4cb4fd1142dd81bab597f",
+        "operation": "entered measured Python module; no fixture consumption credit",
+        "module_code_sha256": "85bb196dcda3e2b5f7713cfd29b06ff65c22c42a3bc3a2fb95efc8df11a01102",
+        "python": [
+          3,
+          12,
+          14
+        ],
+        "module_frame_line": 0,
+        "collector_sha256": "74a8ac05edadf4a4a1cf901134a8c23b24a844284ee8fe2a5f4e6fba274d251c"
+      },
+      {
+        "runner": "validated:tests/h62/item6/migrate-bridge/test_timings.py",
+        "input_revision": "4c8e0f3dcd5e35e81de6a65a69532ac5e3ccaef7",
+        "frames": [
+          {
+            "path": "tests/h62/item6/migrate-bridge/test_timings.py",
+            "blob": "f5d70b840655a7efee786e89bb09619cc53286d5",
+            "line": 4
+          }
+        ],
+        "target": "scripts/h62/item6/migrate-bridge/compare-timings.py",
+        "target_blob": "c6d153d803c768735ee59b5b82de19da57c583ff",
+        "operation": "entered measured Python module; no fixture consumption credit",
+        "module_code_sha256": "65499c54bbc40fdca43c44d8205f39e4f2c2ae2946ea99c8a52e43ac37919ed3",
+        "python": [
+          3,
+          12,
+          14
+        ],
+        "module_frame_line": 0,
+        "collector_sha256": "74a8ac05edadf4a4a1cf901134a8c23b24a844284ee8fe2a5f4e6fba274d251c"
+      },
+      {
+        "runner": "validated:tests/h62/item6/migrate-examples/test_dag_inventory.py",
+        "input_revision": "4c8e0f3dcd5e35e81de6a65a69532ac5e3ccaef7",
+        "frames": [
+          {
+            "path": "tests/h62/item6/migrate-examples/test_dag_inventory.py",
+            "blob": "5b7e1f2bffe6b09b5f2095d189f8b334f28e02c1",
+            "line": 14
+          },
+          {
+            "path": "scripts/h62/item6/migrate-examples/dag_inventory.py",
+            "blob": "067089cce1274c78ca677ee9dab8f5d63a10eca3",
+            "line": 14
+          }
+        ],
+        "target": "scripts/h62/item6/migrate-examples/census.py",
+        "target_blob": "57943173135f3a35307882d33364da2302662335",
+        "operation": "entered measured Python module; no fixture consumption credit",
+        "module_code_sha256": "4ff0288fc0f75bc0533c2b8015e34f326bd41afec23a922ea797b82a5b580ada",
+        "python": [
+          3,
+          12,
+          14
+        ],
+        "module_frame_line": 0,
+        "collector_sha256": "74a8ac05edadf4a4a1cf901134a8c23b24a844284ee8fe2a5f4e6fba274d251c"
+      },
+      {
+        "runner": "validated:tests/h62/item6/migrate-examples/test_dag_inventory.py",
+        "input_revision": "4c8e0f3dcd5e35e81de6a65a69532ac5e3ccaef7",
+        "frames": [
+          {
+            "path": "tests/h62/item6/migrate-examples/test_dag_inventory.py",
+            "blob": "5b7e1f2bffe6b09b5f2095d189f8b334f28e02c1",
+            "line": 14
+          },
+          {
+            "path": "scripts/h62/item6/migrate-examples/dag_inventory.py",
+            "blob": "067089cce1274c78ca677ee9dab8f5d63a10eca3",
+            "line": 15
+          }
+        ],
+        "target": "scripts/h62/item6/migrate-examples/dag_support.py",
+        "target_blob": "57302d0c47439dfeab2b0ba0daad98856a531564",
+        "operation": "entered measured Python module; no fixture consumption credit",
+        "module_code_sha256": "783f50fbab573114a4d2ed1bf6a14603a3e221ddcdb2b075667f4a7a9a898374",
+        "python": [
+          3,
+          12,
+          14
+        ],
+        "module_frame_line": 0,
+        "collector_sha256": "74a8ac05edadf4a4a1cf901134a8c23b24a844284ee8fe2a5f4e6fba274d251c"
+      },
+      {
+        "runner": "validated:tests/h62/item6/migrate-examples/test_verify_evidence.py",
+        "input_revision": "4c8e0f3dcd5e35e81de6a65a69532ac5e3ccaef7",
+        "frames": [
+          {
+            "path": "tests/h62/item6/migrate-examples/test_verify_evidence.py",
+            "blob": "c7f2b1823dabde9c6112916456bc0ea91f8a7ae2",
+            "line": 10
+          }
+        ],
+        "target": "scripts/h62/item6/migrate-examples/verify_evidence.py",
+        "target_blob": "3c1d8bac9fafe2bb1a0a37b262bf31f6e3ea3791",
+        "operation": "entered measured Python module; no fixture consumption credit",
+        "module_code_sha256": "e58103031f2372a71e5825567a544bb665d2494045aafad8155f2120d5f0c2f5",
+        "python": [
+          3,
+          12,
+          14
+        ],
+        "module_frame_line": 0,
+        "collector_sha256": "74a8ac05edadf4a4a1cf901134a8c23b24a844284ee8fe2a5f4e6fba274d251c"
+      },
+      {
+        "runner": "validated:tests/h62/item6/migrate-lowering/proof_budget_controls.py",
+        "input_revision": "4c8e0f3dcd5e35e81de6a65a69532ac5e3ccaef7",
+        "frames": [
+          {
+            "path": "tests/h62/item6/migrate-lowering/proof_budget_controls.py",
+            "blob": "a4739d283013ffcafef2d3abc8427b2e742f28fe",
+            "line": 6
+          },
+          {
+            "path": "scripts/h62/item6/migrate-lowering/proof_budgets.py",
+            "blob": "d1b45cc7e239d8ee97e25c3dc59086e7d901b436",
+            "line": 5
+          }
+        ],
+        "target": "scripts/h62/item6/migrate-lowering/census.py",
+        "target_blob": "efac5e747881996ab2f248f7043f1935fd9cb143",
+        "operation": "entered measured Python module; no fixture consumption credit",
+        "module_code_sha256": "220fb86b8ff0f63a616836ffc684a997dcc10de82cd48be0189daa7bc70c73de",
+        "python": [
+          3,
+          12,
+          14
+        ],
+        "module_frame_line": 0,
+        "collector_sha256": "74a8ac05edadf4a4a1cf901134a8c23b24a844284ee8fe2a5f4e6fba274d251c"
+      },
+      {
+        "runner": "validated:tests/h62/item6/migrate-lowering/memory_controls.py",
+        "input_revision": "4c8e0f3dcd5e35e81de6a65a69532ac5e3ccaef7",
+        "frames": [
+          {
+            "path": "tests/h62/item6/migrate-lowering/memory_controls.py",
+            "blob": "e5706fd76acea423390cdbe96d958e63c84308cf",
+            "line": 6
+          }
+        ],
+        "target": "scripts/h62/item6/migrate-lowering/memory_headroom.py",
+        "target_blob": "2cff9ff753ef00690ecf89a7fd67359ac734ab90",
+        "operation": "entered measured Python module; no fixture consumption credit",
+        "module_code_sha256": "e592ec2a0fd385867346a44449eae6415226bcda16e5b41c76206d410bed1610",
+        "python": [
+          3,
+          12,
+          14
+        ],
+        "module_frame_line": 0,
+        "collector_sha256": "74a8ac05edadf4a4a1cf901134a8c23b24a844284ee8fe2a5f4e6fba274d251c"
+      },
+      {
+        "runner": "validated:tests/h62/item6/migrate-lowering/proof_budget_controls.py",
+        "input_revision": "4c8e0f3dcd5e35e81de6a65a69532ac5e3ccaef7",
+        "frames": [
+          {
+            "path": "tests/h62/item6/migrate-lowering/proof_budget_controls.py",
+            "blob": "a4739d283013ffcafef2d3abc8427b2e742f28fe",
+            "line": 6
+          }
+        ],
+        "target": "scripts/h62/item6/migrate-lowering/proof_budgets.py",
+        "target_blob": "d1b45cc7e239d8ee97e25c3dc59086e7d901b436",
+        "operation": "entered measured Python module; no fixture consumption credit",
+        "module_code_sha256": "b51243240eb46697888e40bc3ce948121b2349cfe2cca597e93ed74d0b47ab49",
+        "python": [
+          3,
+          12,
+          14
+        ],
+        "module_frame_line": 0,
+        "collector_sha256": "74a8ac05edadf4a4a1cf901134a8c23b24a844284ee8fe2a5f4e6fba274d251c"
+      },
+      {
+        "runner": "validated:tests/h62/item6/migrate-roadmap/test_classify_api.py",
+        "input_revision": "4c8e0f3dcd5e35e81de6a65a69532ac5e3ccaef7",
+        "frames": [
+          {
+            "path": "tests/h62/item6/migrate-roadmap/test_classify_api.py",
+            "blob": "cbd02cbb8b353c6625a0ad72fe8ce3de2c3edccc",
+            "line": 5
+          }
+        ],
+        "target": "scripts/h62/item6/migrate-roadmap/classify_api.py",
+        "target_blob": "52fca7297a70d6d17a526490e0ca350b2e000818",
+        "operation": "entered measured Python module; no fixture consumption credit",
+        "module_code_sha256": "e77add1d821785049df7d8b0292da38205ebcfc4d82987a8a6b95e38ccbbf1bc",
+        "python": [
+          3,
+          12,
+          14
+        ],
+        "module_frame_line": 0,
+        "collector_sha256": "74a8ac05edadf4a4a1cf901134a8c23b24a844284ee8fe2a5f4e6fba274d251c"
+      },
+      {
+        "runner": "validated:tests/h62/item6/migrate-roadmap/test_producer_receipt.py",
+        "input_revision": "4c8e0f3dcd5e35e81de6a65a69532ac5e3ccaef7",
+        "frames": [
+          {
+            "path": "tests/h62/item6/migrate-roadmap/test_producer_receipt.py",
+            "blob": "9c981131d79114450ec0e6904f151ebfb9b7e1aa",
+            "line": 7
+          }
+        ],
+        "target": "scripts/h62/item6/migrate-roadmap/producer_receipt.py",
+        "target_blob": "8007b808d8fb50988139cbc600bfc51a07387964",
+        "operation": "entered measured Python module; no fixture consumption credit",
+        "module_code_sha256": "69b0c8d72afea2c01d91de6e388834c953b1e93b718c0ee908ea5a29a3fa17f4",
+        "python": [
+          3,
+          12,
+          14
+        ],
+        "module_frame_line": 0,
+        "collector_sha256": "74a8ac05edadf4a4a1cf901134a8c23b24a844284ee8fe2a5f4e6fba274d251c"
+      },
+      {
+        "runner": "validated:tests/h62/item6/migrate-roadmap/test_public_api_inventory.py",
+        "input_revision": "4c8e0f3dcd5e35e81de6a65a69532ac5e3ccaef7",
+        "frames": [
+          {
+            "path": "tests/h62/item6/migrate-roadmap/test_public_api_inventory.py",
+            "blob": "2255bc16dd441ffcb9ebbad32e71e6a3533922da",
+            "line": 9
+          }
+        ],
+        "target": "scripts/h62/item6/migrate-roadmap/public_api_inventory.py",
+        "target_blob": "e64b6e99b77d80e99128b76f37d689aa94d4e4c2",
+        "operation": "entered measured Python module; no fixture consumption credit",
+        "module_code_sha256": "25a63a0d73bb2a5cbb66b1cf472262b9ca0f7246727c98a7ba39ec1c27a3575a",
+        "python": [
+          3,
+          12,
+          14
+        ],
+        "module_frame_line": 0,
+        "collector_sha256": "74a8ac05edadf4a4a1cf901134a8c23b24a844284ee8fe2a5f4e6fba274d251c"
+      },
+      {
+        "runner": "validated:tests/h62/item6/migrate-root-gate/test_historical_byte_audit.py",
+        "input_revision": "4c8e0f3dcd5e35e81de6a65a69532ac5e3ccaef7",
+        "frames": [
+          {
+            "path": "tests/h62/item6/migrate-root-gate/test_historical_byte_audit.py",
+            "blob": "373cf9cd36a3809d3b4d3355098291ecfc25a64e",
+            "line": 9
+          }
+        ],
+        "target": "scripts/h62/item6/migrate-root-gate/historical-byte-audit.py",
+        "target_blob": "4fa796fe0c1e06422d84b2b83800bc428a25b291",
+        "operation": "entered measured Python module; no fixture consumption credit",
+        "module_code_sha256": "e0da8224bcc1f059326f716b882f6431b6c124775b1902ccbedbce7ff43e4f0e",
+        "python": [
+          3,
+          12,
+          14
+        ],
+        "module_frame_line": 0,
+        "collector_sha256": "74a8ac05edadf4a4a1cf901134a8c23b24a844284ee8fe2a5f4e6fba274d251c"
+      },
+      {
+        "runner": "validated:tests/h62/item6/migrate-root-gate/test_root_api_inventory.py",
+        "input_revision": "4c8e0f3dcd5e35e81de6a65a69532ac5e3ccaef7",
+        "frames": [
+          {
+            "path": "tests/h62/item6/migrate-root-gate/test_root_api_inventory.py",
+            "blob": "883f225a15347635876feabe7bed791bd7dca057",
+            "line": 18
+          },
+          {
+            "path": "tests/h62/item6/migrate-root-gate/test_root_api_inventory.py",
+            "blob": "883f225a15347635876feabe7bed791bd7dca057",
+            "line": 14
+          }
+        ],
+        "target": "scripts/h62/item6/migrate-root-gate/public-api-inventory.py",
+        "target_blob": "a5d6dde5be926751371f820ea6afb463281d515a",
+        "operation": "entered measured Python module; no fixture consumption credit",
+        "module_code_sha256": "9c7873a0aa98c13b56c94d1bf18dfd43337789cdb13cb928271b88c9ae265ffe",
+        "python": [
+          3,
+          12,
+          14
+        ],
+        "module_frame_line": 0,
+        "collector_sha256": "74a8ac05edadf4a4a1cf901134a8c23b24a844284ee8fe2a5f4e6fba274d251c"
+      },
+      {
+        "runner": "validated:tests/h62/item6/migrate-root-gate/test_root_api_inventory.py",
+        "input_revision": "4c8e0f3dcd5e35e81de6a65a69532ac5e3ccaef7",
+        "frames": [
+          {
+            "path": "tests/h62/item6/migrate-root-gate/test_root_api_inventory.py",
+            "blob": "883f225a15347635876feabe7bed791bd7dca057",
+            "line": 17
+          },
+          {
+            "path": "tests/h62/item6/migrate-root-gate/test_root_api_inventory.py",
+            "blob": "883f225a15347635876feabe7bed791bd7dca057",
+            "line": 14
+          }
+        ],
+        "target": "scripts/h62/item6/migrate-root-gate/root-api-inventory.py",
+        "target_blob": "ada4acb4e9c3f4e8dbbf0c9ad7abe6c5d4500879",
+        "operation": "entered measured Python module; no fixture consumption credit",
+        "module_code_sha256": "dee65adb5d3488ae33a8ee3eb396be0dec20d61df92b797db36cb47883a536a8",
+        "python": [
+          3,
+          12,
+          14
+        ],
+        "module_frame_line": 0,
+        "collector_sha256": "74a8ac05edadf4a4a1cf901134a8c23b24a844284ee8fe2a5f4e6fba274d251c"
+      },
+      {
+        "runner": "validated:tests/h62/item6/migrate-semantics/scanner_controls.py",
+        "input_revision": "4c8e0f3dcd5e35e81de6a65a69532ac5e3ccaef7",
+        "frames": [
+          {
+            "path": "tests/h62/item6/migrate-semantics/scanner_controls.py",
+            "blob": "824a0746d77d6c729fc210dd8b7fc7726e064ff8",
+            "line": 7
+          }
+        ],
+        "target": "scripts/h62/item6/migrate-semantics/census.py",
+        "target_blob": "7ec009cb1bb39545d320702a783a8a67e243deeb",
+        "operation": "entered measured Python module; no fixture consumption credit",
+        "module_code_sha256": "e406913c0b9e0c1f9c4ab38549b025ce3fa3004f83f597ce4fe6f685dfc39012",
+        "python": [
+          3,
+          12,
+          14
+        ],
+        "module_frame_line": 0,
+        "collector_sha256": "74a8ac05edadf4a4a1cf901134a8c23b24a844284ee8fe2a5f4e6fba274d251c"
+      },
+      {
+        "runner": "validated:tests/h62/item6/migrate-solkey/test_compare.py",
+        "input_revision": "4c8e0f3dcd5e35e81de6a65a69532ac5e3ccaef7",
+        "frames": [
+          {
+            "path": "tests/h62/item6/migrate-solkey/test_compare.py",
+            "blob": "549b388d6aa0087dce02e62ab77d6589b26c4876",
+            "line": 11
+          }
+        ],
+        "target": "scripts/h62/item6/migrate-solkey/compare.py",
+        "target_blob": "04ec89a050e203452612771c023f42a31cefa4ed",
+        "operation": "entered measured Python module; no fixture consumption credit",
+        "module_code_sha256": "b31e1b7f6360eef0b35366c5eb2ea66dcce7973b53e3324a3e768127a7824dd6",
+        "python": [
+          3,
+          12,
+          14
+        ],
+        "module_frame_line": 0,
+        "collector_sha256": "74a8ac05edadf4a4a1cf901134a8c23b24a844284ee8fe2a5f4e6fba274d251c"
+      },
+      {
+        "runner": "validated:tests/h62/item6/migrate-solkey/test_interfaces.py",
+        "input_revision": "4c8e0f3dcd5e35e81de6a65a69532ac5e3ccaef7",
+        "frames": [
+          {
+            "path": "tests/h62/item6/migrate-solkey/test_interfaces.py",
+            "blob": "37f350f082163d97b270142c13ce348fb3db40fc",
+            "line": 11
+          }
+        ],
+        "target": "scripts/h62/item6/migrate-solkey/interfaces.py",
+        "target_blob": "e020a6d11e788500328086aea843b4dc8d6fad0c",
+        "operation": "entered measured Python module; no fixture consumption credit",
+        "module_code_sha256": "069b88897ec9db3249898c9ebb135a354bb987b9aa40554f2cb3a4562df5f7f0",
+        "python": [
+          3,
+          12,
+          14
+        ],
+        "module_frame_line": 0,
+        "collector_sha256": "74a8ac05edadf4a4a1cf901134a8c23b24a844284ee8fe2a5f4e6fba274d251c"
+      },
+      {
+        "runner": "validated:tests/h62/item6/migrate-stipend/test_public_api.py",
+        "input_revision": "4c8e0f3dcd5e35e81de6a65a69532ac5e3ccaef7",
+        "frames": [
+          {
+            "path": "tests/h62/item6/migrate-stipend/test_public_api.py",
+            "blob": "135c8803973eee027766bcaaf31c975b4c9ef725",
+            "line": 15
+          }
+        ],
+        "target": "scripts/h62/item6/migrate-stipend/public_api.py",
+        "target_blob": "75d390f1158c848ecd49965e3e187043c08f6fe7",
+        "operation": "entered measured Python module; no fixture consumption credit",
+        "module_code_sha256": "a53e5dac3916a4e01f6bf8976903bb97512b0af0408dc41075f0bf39de58a894",
+        "python": [
+          3,
+          12,
+          14
+        ],
+        "module_frame_line": 0,
+        "collector_sha256": "74a8ac05edadf4a4a1cf901134a8c23b24a844284ee8fe2a5f4e6fba274d251c"
+      },
+      {
+        "runner": "validated:tests/h62/item6/migrate-testsuite/test_tools.py",
+        "input_revision": "4c8e0f3dcd5e35e81de6a65a69532ac5e3ccaef7",
+        "frames": [
+          {
+            "path": "tests/h62/item6/migrate-testsuite/test_tools.py",
+            "blob": "8bc42cb0644f4433042fc29992dc684a7a762575",
+            "line": 8
+          }
+        ],
+        "target": "scripts/h62/item6/migrate-testsuite/census.py",
+        "target_blob": "4b3f1c2fca2c97cb10759dbde3802306a5ca712b",
+        "operation": "entered measured Python module; no fixture consumption credit",
+        "module_code_sha256": "8157b3560a27fd84745186bb5d3129da58bcb45d68f950493afea681329f47a9",
+        "python": [
+          3,
+          12,
+          14
+        ],
+        "module_frame_line": 0,
+        "collector_sha256": "74a8ac05edadf4a4a1cf901134a8c23b24a844284ee8fe2a5f4e6fba274d251c"
+      },
+      {
+        "runner": "validated:tests/h62/item6/migrate-testsuite/test_tools.py",
+        "input_revision": "4c8e0f3dcd5e35e81de6a65a69532ac5e3ccaef7",
+        "frames": [
+          {
+            "path": "tests/h62/item6/migrate-testsuite/test_tools.py",
+            "blob": "8bc42cb0644f4433042fc29992dc684a7a762575",
+            "line": 13
+          }
+        ],
+        "target": "scripts/h62/item6/migrate-testsuite/collect-interfaces.py",
+        "target_blob": "b1d60841ac47018e956a4d8dbbc859cc9fc75f1f",
+        "operation": "entered measured Python module; no fixture consumption credit",
+        "module_code_sha256": "b3969aba626c6e92ccf2c9de0124d73bad1fa095d217b3117b8e1ff17c781e1e",
+        "python": [
+          3,
+          12,
+          14
+        ],
+        "module_frame_line": 0,
+        "collector_sha256": "74a8ac05edadf4a4a1cf901134a8c23b24a844284ee8fe2a5f4e6fba274d251c"
+      },
+      {
+        "runner": "validated:tests/h62/item6/migrate-testsuite/test_tools.py",
+        "input_revision": "4c8e0f3dcd5e35e81de6a65a69532ac5e3ccaef7",
+        "frames": [
+          {
+            "path": "tests/h62/item6/migrate-testsuite/test_tools.py",
+            "blob": "8bc42cb0644f4433042fc29992dc684a7a762575",
+            "line": 10
+          }
+        ],
+        "target": "scripts/h62/item6/migrate-testsuite/compare.py",
+        "target_blob": "5970221ff74f3ffe4f3aa75e092c3f020387224b",
+        "operation": "entered measured Python module; no fixture consumption credit",
+        "module_code_sha256": "8d00fd26aed1515fe11a8247852d355b666b86960905e9d25256dd728060b4a9",
+        "python": [
+          3,
+          12,
+          14
+        ],
+        "module_frame_line": 0,
+        "collector_sha256": "74a8ac05edadf4a4a1cf901134a8c23b24a844284ee8fe2a5f4e6fba274d251c"
+      },
+      {
+        "runner": "validated:tests/h62/item6/migrate-testsuite/test_tools.py",
+        "input_revision": "4c8e0f3dcd5e35e81de6a65a69532ac5e3ccaef7",
+        "frames": [
+          {
+            "path": "tests/h62/item6/migrate-testsuite/test_tools.py",
+            "blob": "8bc42cb0644f4433042fc29992dc684a7a762575",
+            "line": 13
+          },
+          {
+            "path": "scripts/h62/item6/migrate-testsuite/collect-interfaces.py",
+            "blob": "b1d60841ac47018e956a4d8dbbc859cc9fc75f1f",
+            "line": 8
+          }
+        ],
+        "target": "scripts/h62/item6/migrate-testsuite/dag_codec.py",
+        "target_blob": "474b41200ac802b616d2648911087a2500c041fb",
+        "operation": "entered measured Python module; no fixture consumption credit",
+        "module_code_sha256": "ff87a6f902cd9d8bf85561ed96fdc33f77e969b9da4e1029e72c079b126fd1e7",
+        "python": [
+          3,
+          12,
+          14
+        ],
+        "module_frame_line": 0,
+        "collector_sha256": "74a8ac05edadf4a4a1cf901134a8c23b24a844284ee8fe2a5f4e6fba274d251c"
+      },
+      {
+        "runner": "validated:tests/h62/item6/migrate-examples/test_dag_inventory.py",
+        "input_revision": "4c8e0f3dcd5e35e81de6a65a69532ac5e3ccaef7",
+        "frames": [
+          {
+            "path": "tests/h62/item6/migrate-examples/test_dag_inventory.py",
+            "blob": "5b7e1f2bffe6b09b5f2095d189f8b334f28e02c1",
+            "line": 148
+          },
+          {
+            "path": "tests/h62/item6/migrate-examples/test_dag_inventory.py",
+            "blob": "5b7e1f2bffe6b09b5f2095d189f8b334f28e02c1",
+            "line": 103
+          },
+          {
+            "path": "scripts/h62/item6/migrate-examples/generate-dag-inventory.py",
+            "blob": "a2d87bdb84deebc063fc14ec6b62da53a2a0e8bb",
+            "line": 26
+          },
+          {
+            "path": "scripts/h62/item6/migrate-examples/dag_support.py",
+            "blob": "57302d0c47439dfeab2b0ba0daad98856a531564",
+            "line": 15
+          }
+        ],
+        "target": "scripts/h62/item6/migrate-testsuite/expr_dag.py",
+        "target_blob": "d83755f2daf6f61d71165eac032a29d3b082dc9b",
+        "operation": "entered measured Python module; no fixture consumption credit",
+        "module_code_sha256": "2e6f143bd98367676952be371e0ad3681fc6e3625a44aca0d0a399a1eed783f2",
+        "python": [
+          3,
+          12,
+          14
+        ],
+        "module_frame_line": 0,
+        "collector_sha256": "74a8ac05edadf4a4a1cf901134a8c23b24a844284ee8fe2a5f4e6fba274d251c"
+      },
+      {
+        "runner": "validated:tests/h62/item6/migrate-testsuite/test_module_report.py",
+        "input_revision": "4c8e0f3dcd5e35e81de6a65a69532ac5e3ccaef7",
+        "frames": [
+          {
+            "path": "tests/h62/item6/migrate-testsuite/test_module_report.py",
+            "blob": "a66ea04ae0014e8ea6a8c388e7768aef384facaa",
+            "line": 8
+          }
+        ],
+        "target": "scripts/h62/item6/migrate-testsuite/module-report.py",
+        "target_blob": "0e02908485bd50331f42873919b22380daa54c13",
+        "operation": "entered measured Python module; no fixture consumption credit",
+        "module_code_sha256": "778cc24b774a9b7a0cc8ccc25b64eccf867a48396dec5eb2556ef90fe28e99b1",
+        "python": [
+          3,
+          12,
+          14
+        ],
+        "module_frame_line": 0,
+        "collector_sha256": "74a8ac05edadf4a4a1cf901134a8c23b24a844284ee8fe2a5f4e6fba274d251c"
+      },
+      {
+        "runner": "validated:tests/h62/item6/migrate-testsuite/test_evidence.py",
+        "input_revision": "4c8e0f3dcd5e35e81de6a65a69532ac5e3ccaef7",
+        "frames": [
+          {
+            "path": "tests/h62/item6/migrate-testsuite/test_evidence.py",
+            "blob": "c9290b7a0ceedd1fe3220e0bb96a2b2784b6a329",
+            "line": 7
+          },
+          {
+            "path": "tests/h62/item6/migrate-testsuite/test_evidence.py",
+            "blob": "c9290b7a0ceedd1fe3220e0bb96a2b2784b6a329",
+            "line": 6
+          }
+        ],
+        "target": "scripts/h62/item6/migrate-testsuite/public-api-report.py",
+        "target_blob": "ae9f4b33e8ac28d28065900fe94a901341b3f716",
+        "operation": "entered measured Python module; no fixture consumption credit",
+        "module_code_sha256": "53f323d02db66660a1f376d2689673881fcba254773c8fb5be55ae01ef67cfda",
+        "python": [
+          3,
+          12,
+          14
+        ],
+        "module_frame_line": 0,
+        "collector_sha256": "74a8ac05edadf4a4a1cf901134a8c23b24a844284ee8fe2a5f4e6fba274d251c"
+      },
+      {
+        "runner": "validated:tests/h62/item6/migrate-testsuite/test_evidence.py",
+        "input_revision": "4c8e0f3dcd5e35e81de6a65a69532ac5e3ccaef7",
+        "frames": [
+          {
+            "path": "tests/h62/item6/migrate-testsuite/test_evidence.py",
+            "blob": "c9290b7a0ceedd1fe3220e0bb96a2b2784b6a329",
+            "line": 7
+          },
+          {
+            "path": "tests/h62/item6/migrate-testsuite/test_evidence.py",
+            "blob": "c9290b7a0ceedd1fe3220e0bb96a2b2784b6a329",
+            "line": 6
+          }
+        ],
+        "target": "scripts/h62/item6/migrate-testsuite/verify-evidence.py",
+        "target_blob": "3a9b31889611c69fd855fc5cc81fa09baf66b229",
+        "operation": "entered measured Python module; no fixture consumption credit",
+        "module_code_sha256": "b5afe615da98381e13169d265614f57d8dfd3fbc4c52364ad91fe85665ac74b8",
+        "python": [
+          3,
+          12,
+          14
+        ],
+        "module_frame_line": 0,
+        "collector_sha256": "74a8ac05edadf4a4a1cf901134a8c23b24a844284ee8fe2a5f4e6fba274d251c"
+      },
+      {
+        "runner": "validated:tests/h62/item6/migrate-tools/test_h78_ledger.py",
+        "input_revision": "4c8e0f3dcd5e35e81de6a65a69532ac5e3ccaef7",
+        "frames": [
+          {
+            "path": "tests/h62/item6/migrate-tools/test_h78_ledger.py",
+            "blob": "a32f51fd3b9bd20ac8ca5f39fb89920dd75ae9be",
+            "line": 7
+          }
+        ],
+        "target": "scripts/h62/item6/migrate-tools/h78-ledger.py",
+        "target_blob": "0cadf0e140d3ad306a6b93981a53b594bec651e6",
+        "operation": "entered measured Python module; no fixture consumption credit",
+        "module_code_sha256": "70e57791b19dddaa2cfe8c5f08eebf8f393046bcd12abf37b1960efda3992b1d",
+        "python": [
+          3,
+          12,
+          14
+        ],
+        "module_frame_line": 0,
+        "collector_sha256": "74a8ac05edadf4a4a1cf901134a8c23b24a844284ee8fe2a5f4e6fba274d251c"
+      },
+      {
+        "runner": "validated:tests/h62/item6/migrate-tools/test_api_inventory.py",
+        "input_revision": "4c8e0f3dcd5e35e81de6a65a69532ac5e3ccaef7",
+        "frames": [
+          {
+            "path": "tests/h62/item6/migrate-tools/test_api_inventory.py",
+            "blob": "74e19a45b755de092172767baba05bcafec1f235",
+            "line": 8
+          }
+        ],
+        "target": "scripts/h62/item6/migrate-tools/normalize-api.py",
+        "target_blob": "0a9f912e1734613a6817259f5693ebae69d90386",
+        "operation": "entered measured Python module; no fixture consumption credit",
+        "module_code_sha256": "43d4820d7f07fb83adcdc0d73fdf3b69cf3deea5b015169ecc83b536022d0d01",
+        "python": [
+          3,
+          12,
+          14
+        ],
+        "module_frame_line": 0,
+        "collector_sha256": "74a8ac05edadf4a4a1cf901134a8c23b24a844284ee8fe2a5f4e6fba274d251c"
+      },
+      {
+        "runner": "validated:tests/h62/item6/migrate-typing/test_compare.py",
+        "input_revision": "4c8e0f3dcd5e35e81de6a65a69532ac5e3ccaef7",
+        "frames": [
+          {
+            "path": "tests/h62/item6/migrate-typing/test_compare.py",
+            "blob": "238a47f9a568c6bf8a5c507729b8df33d1a9edc7",
+            "line": 5
+          }
+        ],
+        "target": "scripts/h62/item6/migrate-typing/compare.py",
+        "target_blob": "76dce6d4b39a91cd18a4c096e6a3d89f704f8548",
+        "operation": "entered measured Python module; no fixture consumption credit",
+        "module_code_sha256": "c0551210178f04ed54ac64e5ca26e2f5bc5370c100318a962599e39dd6b217e6",
+        "python": [
+          3,
+          12,
+          14
+        ],
+        "module_frame_line": 0,
+        "collector_sha256": "74a8ac05edadf4a4a1cf901134a8c23b24a844284ee8fe2a5f4e6fba274d251c"
+      },
+      {
+        "runner": "validated:tests/h62/item6/migrate-yul/test_compiler_names.py",
+        "input_revision": "4c8e0f3dcd5e35e81de6a65a69532ac5e3ccaef7",
+        "frames": [
+          {
+            "path": "tests/h62/item6/migrate-yul/test_compiler_names.py",
+            "blob": "d54674ae092ac8b1766b1b43ea80000a5aaf69c3",
+            "line": 8
+          }
+        ],
+        "target": "scripts/h62/item6/migrate-yul/census-ir-names.py",
+        "target_blob": "f73198206c123f4e8076b83c4c44ccd9ad91cc4e",
+        "operation": "entered measured Python module; no fixture consumption credit",
+        "module_code_sha256": "3845e1326a7c5981add0365484ab961cd1d9a7fa973c19ef9edf596fb886493c",
+        "python": [
+          3,
+          12,
+          14
+        ],
+        "module_frame_line": 0,
+        "collector_sha256": "74a8ac05edadf4a4a1cf901134a8c23b24a844284ee8fe2a5f4e6fba274d251c"
+      },
+      {
+        "runner": "validated:tests/h62/item6/migrate-yul/test_compare.py",
+        "input_revision": "4c8e0f3dcd5e35e81de6a65a69532ac5e3ccaef7",
+        "frames": [
+          {
+            "path": "tests/h62/item6/migrate-yul/test_compare.py",
+            "blob": "acd572d4a25fddaa1878ed4c21c5dde42ed22343",
+            "line": 3
+          }
+        ],
+        "target": "scripts/h62/item6/migrate-yul/compare.py",
+        "target_blob": "a6193d75efd1e101e2b0df0a885d4b82f2c62b2d",
+        "operation": "entered measured Python module; no fixture consumption credit",
+        "module_code_sha256": "dce265968eaf0babc320d15b80f761f16a193d3f130f20cdab0e37db5014f82b",
+        "python": [
+          3,
+          12,
+          14
+        ],
+        "module_frame_line": 0,
+        "collector_sha256": "74a8ac05edadf4a4a1cf901134a8c23b24a844284ee8fe2a5f4e6fba274d251c"
+      },
+      {
+        "runner": "validated:tests/h62/item6/migrate-yul/test_compiler_inventory_plan.py",
+        "input_revision": "4c8e0f3dcd5e35e81de6a65a69532ac5e3ccaef7",
+        "frames": [
+          {
+            "path": "tests/h62/item6/migrate-yul/test_compiler_inventory_plan.py",
+            "blob": "4e6ce41317ce01822f0dfdf42f04c32d851ca9ed",
+            "line": 7
+          },
+          {
+            "path": "scripts/h62/item6/migrate-yul/export-old-compiler-signatures.py",
+            "blob": "f9d3a886912a0e43ea2c4894fa330f2c2a4550a6",
+            "line": 9
+          }
+        ],
+        "target": "scripts/h62/item6/migrate-yul/compiler-signatures-batch.py",
+        "target_blob": "efb908b5e9d239f69ae12cde5567e59f457c9df2",
+        "operation": "entered measured Python module; no fixture consumption credit",
+        "module_code_sha256": "1e036d698e4e8a125608a0649d9681cb0fa34ccafb8099cbb286f657d19c9980",
+        "python": [
+          3,
+          12,
+          14
+        ],
+        "module_frame_line": 0,
+        "collector_sha256": "74a8ac05edadf4a4a1cf901134a8c23b24a844284ee8fe2a5f4e6fba274d251c"
+      },
+      {
+        "runner": "validated:tests/h62/item6/migrate-yul/test_compiler_inventory_plan.py",
+        "input_revision": "4c8e0f3dcd5e35e81de6a65a69532ac5e3ccaef7",
+        "frames": [
+          {
+            "path": "tests/h62/item6/migrate-yul/test_compiler_inventory_plan.py",
+            "blob": "4e6ce41317ce01822f0dfdf42f04c32d851ca9ed",
+            "line": 7
+          },
+          {
+            "path": "scripts/h62/item6/migrate-yul/export-old-compiler-signatures.py",
+            "blob": "f9d3a886912a0e43ea2c4894fa330f2c2a4550a6",
+            "line": 9
+          },
+          {
+            "path": "scripts/h62/item6/migrate-yul/compiler-signatures-batch.py",
+            "blob": "efb908b5e9d239f69ae12cde5567e59f457c9df2",
+            "line": 9
+          }
+        ],
+        "target": "scripts/h62/item6/migrate-yul/compiler-signatures.py",
+        "target_blob": "1685352e7c6edb4745b9504eb1e130ac8c5443ae",
+        "operation": "entered measured Python module; no fixture consumption credit",
+        "module_code_sha256": "0c8d899e2dea4d594f1e94c7d723bc423bdf72b4db5d2d51ebb1a749052e4f64",
+        "python": [
+          3,
+          12,
+          14
+        ],
+        "module_frame_line": 0,
+        "collector_sha256": "74a8ac05edadf4a4a1cf901134a8c23b24a844284ee8fe2a5f4e6fba274d251c"
+      },
+      {
+        "runner": "validated:tests/h62/item6/migrate-yul/test_metadata_coverage.py",
+        "input_revision": "4c8e0f3dcd5e35e81de6a65a69532ac5e3ccaef7",
+        "frames": [
+          {
+            "path": "tests/h62/item6/migrate-yul/test_metadata_coverage.py",
+            "blob": "ef95148a73c0e5da1c0361e2e7118ce84eec4246",
+            "line": 15
+          },
+          {
+            "path": "scripts/h62/item6/migrate-yul/metadata-coverage.py",
+            "blob": "00a16586e7f757cff336af3bce62e0c9d275b69b",
+            "line": 15
+          },
+          {
+            "path": "scripts/h62/item6/migrate-yul/metadata-coverage.py",
+            "blob": "00a16586e7f757cff336af3bce62e0c9d275b69b",
+            "line": 11
+          }
+        ],
+        "target": "scripts/h62/item6/migrate-yul/declaration-metadata.py",
+        "target_blob": "803e621f5f53bd9a24a74d9795979fd585991f24",
+        "operation": "entered measured Python module; no fixture consumption credit",
+        "module_code_sha256": "8914f850acfcd1781746e6ca35b08bc8c84627f3487044c1b743f36f12f22398",
+        "python": [
+          3,
+          12,
+          14
+        ],
+        "module_frame_line": 0,
+        "collector_sha256": "74a8ac05edadf4a4a1cf901134a8c23b24a844284ee8fe2a5f4e6fba274d251c"
+      },
+      {
+        "runner": "validated:tests/h62/item6/migrate-yul/test_compiler_inventory_plan.py",
+        "input_revision": "4c8e0f3dcd5e35e81de6a65a69532ac5e3ccaef7",
+        "frames": [
+          {
+            "path": "tests/h62/item6/migrate-yul/test_compiler_inventory_plan.py",
+            "blob": "4e6ce41317ce01822f0dfdf42f04c32d851ca9ed",
+            "line": 7
+          }
+        ],
+        "target": "scripts/h62/item6/migrate-yul/export-old-compiler-signatures.py",
+        "target_blob": "f9d3a886912a0e43ea2c4894fa330f2c2a4550a6",
+        "operation": "entered measured Python module; no fixture consumption credit",
+        "module_code_sha256": "0e8bd9b1d0bf457f60ef3f23f3b8d842d2c8464a52f614491f8580dfc4c1d27a",
+        "python": [
+          3,
+          12,
+          14
+        ],
+        "module_frame_line": 0,
+        "collector_sha256": "74a8ac05edadf4a4a1cf901134a8c23b24a844284ee8fe2a5f4e6fba274d251c"
+      },
+      {
+        "runner": "validated:tests/h62/item6/migrate-yul/test_compiler_names.py",
+        "input_revision": "4c8e0f3dcd5e35e81de6a65a69532ac5e3ccaef7",
+        "frames": [
+          {
+            "path": "tests/h62/item6/migrate-yul/test_compiler_names.py",
+            "blob": "d54674ae092ac8b1766b1b43ea80000a5aaf69c3",
+            "line": 8
+          },
+          {
+            "path": "scripts/h62/item6/migrate-yul/census-ir-names.py",
+            "blob": "f73198206c123f4e8076b83c4c44ccd9ad91cc4e",
+            "line": 7
+          }
+        ],
+        "target": "scripts/h62/item6/migrate-yul/expr_dag.py",
+        "target_blob": "b1192b00e571a5995353a223c32c6eb7e661faf1",
+        "operation": "entered measured Python module; no fixture consumption credit",
+        "module_code_sha256": "2fbd89cfd633c2b46d6167be1d946c9dd0e2f9cee31ae0778cb1cfb3baf6d1e7",
+        "python": [
+          3,
+          12,
+          14
+        ],
+        "module_frame_line": 0,
+        "collector_sha256": "74a8ac05edadf4a4a1cf901134a8c23b24a844284ee8fe2a5f4e6fba274d251c"
+      },
+      {
+        "runner": "validated:tests/h62/item6/migrate-yul/test_compiler_inventory_plan.py",
+        "input_revision": "4c8e0f3dcd5e35e81de6a65a69532ac5e3ccaef7",
+        "frames": [
+          {
+            "path": "tests/h62/item6/migrate-yul/test_compiler_inventory_plan.py",
+            "blob": "4e6ce41317ce01822f0dfdf42f04c32d851ca9ed",
+            "line": 7
+          },
+          {
+            "path": "scripts/h62/item6/migrate-yul/export-old-compiler-signatures.py",
+            "blob": "f9d3a886912a0e43ea2c4894fa330f2c2a4550a6",
+            "line": 9
+          },
+          {
+            "path": "scripts/h62/item6/migrate-yul/compiler-signatures-batch.py",
+            "blob": "efb908b5e9d239f69ae12cde5567e59f457c9df2",
+            "line": 9
+          },
+          {
+            "path": "scripts/h62/item6/migrate-yul/compiler-signatures.py",
+            "blob": "1685352e7c6edb4745b9504eb1e130ac8c5443ae",
+            "line": 5
+          }
+        ],
+        "target": "scripts/h62/item6/migrate-yul/interfaces.py",
+        "target_blob": "8dad79469dee8d5d2e14c092fd13eb4b48cbdd4d",
+        "operation": "entered measured Python module; no fixture consumption credit",
+        "module_code_sha256": "52a3e7a4071ba849c3e32efc79288ece83a746b10ac650bce11b4b1e16289468",
+        "python": [
+          3,
+          12,
+          14
+        ],
+        "module_frame_line": 0,
+        "collector_sha256": "74a8ac05edadf4a4a1cf901134a8c23b24a844284ee8fe2a5f4e6fba274d251c"
+      },
+      {
+        "runner": "validated:tests/h62/item6/migrate-yul/test_metadata_coverage.py",
+        "input_revision": "4c8e0f3dcd5e35e81de6a65a69532ac5e3ccaef7",
+        "frames": [
+          {
+            "path": "tests/h62/item6/migrate-yul/test_metadata_coverage.py",
+            "blob": "ef95148a73c0e5da1c0361e2e7118ce84eec4246",
+            "line": 15
+          },
+          {
+            "path": "scripts/h62/item6/migrate-yul/metadata-coverage.py",
+            "blob": "00a16586e7f757cff336af3bce62e0c9d275b69b",
+            "line": 14
+          },
+          {
+            "path": "scripts/h62/item6/migrate-yul/metadata-coverage.py",
+            "blob": "00a16586e7f757cff336af3bce62e0c9d275b69b",
+            "line": 11
+          }
+        ],
+        "target": "scripts/h62/item6/migrate-yul/plan-old-metadata.py",
+        "target_blob": "967f768dca9226a0b790a9a4b4b78dbdec984db8",
+        "operation": "entered measured Python module; no fixture consumption credit",
+        "module_code_sha256": "386c9514699c496c47766dc96850a676c707a8ab630f285a71f53a573ae78b49",
+        "python": [
+          3,
+          12,
+          14
+        ],
+        "module_frame_line": 0,
+        "collector_sha256": "74a8ac05edadf4a4a1cf901134a8c23b24a844284ee8fe2a5f4e6fba274d251c"
+      },
+      {
+        "runner": "validated:tests/h62/item6/migrate-yul/test_resources.py",
+        "input_revision": "4c8e0f3dcd5e35e81de6a65a69532ac5e3ccaef7",
+        "frames": [
+          {
+            "path": "tests/h62/item6/migrate-yul/test_resources.py",
+            "blob": "fc28e096e42dbe5520d2abf83190e0aa690ba761",
+            "line": 3
+          }
+        ],
+        "target": "scripts/h62/item6/migrate-yul/resources.py",
+        "target_blob": "915a8fc0e05ceebc45c1ab2f2fda188fd74dd778",
+        "operation": "entered measured Python module; no fixture consumption credit",
+        "module_code_sha256": "f65e3fbe3616eaa5ce629ccaf3242b484899b684df399e16a10be8eb5c274249",
+        "python": [
+          3,
+          12,
+          14
+        ],
+        "module_frame_line": 0,
+        "collector_sha256": "74a8ac05edadf4a4a1cf901134a8c23b24a844284ee8fe2a5f4e6fba274d251c"
+      },
+      {
+        "runner": "validated:tests/h62/item6/migrate-yul/test_compiler_inventory_verification.py",
+        "input_revision": "4c8e0f3dcd5e35e81de6a65a69532ac5e3ccaef7",
+        "frames": [
+          {
+            "path": "tests/h62/item6/migrate-yul/test_compiler_inventory_verification.py",
+            "blob": "a0ce3b623ec16d4826e52b4461d63a5cc3bf547a",
+            "line": 7
+          }
+        ],
+        "target": "scripts/h62/item6/migrate-yul/verify-old-compiler-inventory.py",
+        "target_blob": "22205c4bca05382a350db5567074f8504eec2961",
+        "operation": "entered measured Python module; no fixture consumption credit",
+        "module_code_sha256": "c3f59fd8cb419aa0207338e7dfc0c82af19153724936b5e80776e6e7a352642b",
+        "python": [
+          3,
+          12,
+          14
+        ],
+        "module_frame_line": 0,
+        "collector_sha256": "74a8ac05edadf4a4a1cf901134a8c23b24a844284ee8fe2a5f4e6fba274d251c"
       }
     ]
   }
