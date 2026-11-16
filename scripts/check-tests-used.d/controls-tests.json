@@ -241,6 +241,55 @@
           "--out"
         ],
         "purpose": "Source contract for the existing OS-backed resource control CLI requiring --out: cap enforcement, allocation refusal, per-child RSS, timeout and descendant cleanup, and stop/exit policy checks. The command prefix lacks required configuration; source role only, with no helper/fixture, current passing-reproducer, Lean or EVM proof credit."
+      },
+      {
+        "path": "tests/h62/item1/infer-helpers/audit_helpers.py",
+        "input_revision": "7bbde968cda2a00affc87217a16d717d3e4fe81b",
+        "source_blob": "5986946334743f156726878f9aa1bdfa57a15886",
+        "command": [
+          "python3",
+          "-B",
+          "tests/h62/item1/infer-helpers/audit_helpers.py"
+        ],
+        "kind": "committed-cli",
+        "entry_line": 39,
+        "required_options": [
+          "--output"
+        ],
+        "purpose": "Source contract for the existing infer-helper axiom-query probe generator requiring --output. It preserves and renders the named declarations; generation alone is not Lean checking, signature fidelity, witness feasibility or a passing proof gate. The bare prefix lacks required configuration; source role only, with no helper/fixture, current passing-reproducer, Lean or EVM proof credit."
+      },
+      {
+        "path": "tests/h62/item2/audit-evm-compiler/check_runtime.py",
+        "input_revision": "7bbde968cda2a00affc87217a16d717d3e4fe81b",
+        "source_blob": "66a654c512105ea85883727d62862ec59582d555",
+        "command": [
+          "python3",
+          "-B",
+          "tests/h62/item2/audit-evm-compiler/check_runtime.py"
+        ],
+        "kind": "committed-cli",
+        "entry_line": 20,
+        "required_options": [
+          "--evidence"
+        ],
+        "purpose": "Source contract for existing bounded process-tree timeout and missing-j1 refusal controls requiring --evidence. Its synthetic process named lean is Python, not native Lean elaboration or EVM conformance. The bare prefix lacks required configuration; source role only, with no helper/fixture, current passing-reproducer, Lean or EVM proof credit."
+      },
+      {
+        "path": "tests/h62/item2/audit-memory-operations/check-header-inventory.py",
+        "input_revision": "7bbde968cda2a00affc87217a16d717d3e4fe81b",
+        "source_blob": "394569c6487395650bcea36f16e66347498635af",
+        "command": [
+          "python3",
+          "-B",
+          "tests/h62/item2/audit-memory-operations/check-header-inventory.py"
+        ],
+        "kind": "committed-cli",
+        "entry_line": 101,
+        "required_options": [
+          "--evidence",
+          "--lean"
+        ],
+        "purpose": "Source contract for the existing header-inventory CLI requiring historical evidence and an explicit Lean path. All fixed counts, private prerequisites, malformed-input rejection and zero-proof-credit checks remain unchanged; configured validation is unavailable here. The bare prefix lacks required configuration; source role only, with no helper/fixture, current passing-reproducer, Lean or EVM proof credit."
       }
     ]
   }
