@@ -1,0 +1,61 @@
+{
+  "scope": "Erratum to frozen draft inventory only; neither changes executed manifest nor claims full coverage.",
+  "affected_row": "Tms.Term.binopC",
+  "finding": "affected_constructor_uses is partial: it omits transitive Term.binopI users.",
+  "source_chain": [
+    "Rules.lean:95-98 Term.binopC",
+    "Rules.lean:99-102 Term.binopI delegates to binopC",
+    "RuleSyntax/Schemas.lean:249 increment lowering uses binopI"
+  ],
+  "additional_candidates_with_plus_minus_schema": [
+    {
+      "constructor": "localIncrement",
+      "line": 583
+    },
+    {
+      "constructor": "storageRootIncrement",
+      "line": 585
+    },
+    {
+      "constructor": "storageFieldIncrement",
+      "line": 587
+    },
+    {
+      "constructor": "storageIndexIncrement",
+      "line": 589
+    },
+    {
+      "constructor": "memoryFieldIncrement",
+      "line": 591
+    },
+    {
+      "constructor": "memoryIndexArrayIncrement",
+      "line": 593
+    },
+    {
+      "constructor": "localAssignIncrement",
+      "line": 603
+    },
+    {
+      "constructor": "storageRootIncrementAssignment",
+      "line": 605
+    },
+    {
+      "constructor": "storageFieldIncrementAssignment",
+      "line": 607
+    },
+    {
+      "constructor": "storageIndexIncrementAssignment",
+      "line": 610
+    },
+    {
+      "constructor": "memoryFieldIncrementAssignment",
+      "line": 613
+    },
+    {
+      "constructor": "memoryIndexArrayIncrementAssignment",
+      "line": 616
+    }
+  ],
+  "effect": "Fixed-sub helper changes increments using add; decrement sub remains unchanged. Full clause and operator audit remains pending."
+}
