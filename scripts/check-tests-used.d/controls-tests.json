@@ -195,6 +195,21 @@
         "purpose": "Lightweight OS process-group controls for inherited writer locks, atomic metrics, signal cleanup and descendants after leader exit. Source only; no Lean checking, fixture or EVM proof credit.",
         "input_scope": [],
         "other_reads": "unresolved"
+      },
+      {
+        "path": "tests/h62/item2/audit-memory-operations/check-census.py",
+        "input_revision": "30935a9f43cdcb76317db3cbca4e089b5a883091",
+        "source_blob": "1f2162860be94b45906a9581bf4b75c8b1655628",
+        "command": [
+          "python3",
+          "-B",
+          "tests/h62/item2/audit-memory-operations/check-census.py"
+        ],
+        "kind": "runnable-entrypoint",
+        "entry_line": 29,
+        "purpose": "Historical Python lexical/census regression controls: actual default invocation passed at the recorded committed revision with the same source bytes. Current fixed-count assertions are not certified against the growing corpus. Source role only; no fixture, child, Lean or EVM proof credit.",
+        "input_scope": [],
+        "other_reads": "unresolved"
       }
     ]
   }
