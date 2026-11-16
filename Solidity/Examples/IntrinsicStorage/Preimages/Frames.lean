@@ -26,19 +26,24 @@ example (E : Ty) (o : Nat) :
         (by simp only [SList.toList_cons, List.getElem?_cons_zero]) (.root o))
     exact ⟨_, _, _, .refl _ _, .data _ _ _ _⟩
 
-/-- For `mapping(K => T[])`, an overwritten explicit entry still contributes
-its nested array origin, regardless of the current entry or default value. -/
+/-- For `mapping(K => T[][])`, an overwritten entry containing an inner array
+contributes an origin beyond the empty current array's own data origin. -/
 example {K : PrimTy} {E : Ty} (k : K.Denote)
-    (current fallback : SVal (.ref (.array E))) {n : Nat}
+    (fallback : SVal (.ref (.array (.ref (.array E))))) {n : Nat}
     (vs : SVec E n) (sh : SList E) (hn : n < 2 ^ 256) (o : Nat) :
-    let old := SVal.array vs sh hn
+    let inner := SVal.array vs sh hn
+    let old := SVal.array (.cons inner .nil) .nil (by decide)
+    let current : SVal (.ref (.array (.ref (.array E)))) := .array .nil .nil (by decide)
     let entries := SMap.cons k current (.cons k old .nil)
-    encoded (.data ((Storage.Loc.hash (keyWord k) (.root o) 0).word (2 ^ 256) keccakH)) ∈
-      valueInputs (.map entries fallback) (.root o) := by
+    encoded (.data ((Storage.Loc.data (.hash (keyWord k) (.root o) 0) 0).word
+      (2 ^ 256) keccakH)) ∈ valueInputs (.map entries fallback) (.root o) := by
   dsimp only
   apply valueInputs_covers _ (.root o) True.intro
-  apply ValueInput.child (Child.entry _ _ (k := k) (v := .array vs sh hn) ?_ _)
-  · exact ⟨_, _, _, .refl _ _, .data vs sh hn _⟩
+  apply ValueInput.child (Child.entry _ _ (k := k)
+    (v := .array (.cons (.array vs sh hn) .nil) .nil (by decide)) ?_ _)
+  · apply ValueInput.child (Child.live _ _ _ (i := 0) (v := .array vs sh hn)
+        (by simp only [SVec.toList_cons, List.getElem?_cons_zero]) _)
+    exact ⟨_, _, _, .refl _ _, .data vs sh hn _⟩
   · rw [SMap.toList_cons, SMap.toList_cons, SMap.toList_nil]
     exact List.mem_cons_of_mem _ (List.mem_cons_self)
 
