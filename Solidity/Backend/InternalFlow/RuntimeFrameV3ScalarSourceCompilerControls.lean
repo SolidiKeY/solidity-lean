@@ -1,14 +1,32 @@
+import Solidity.Backend.CompilerEndpoint
 import Solidity.Backend.InternalFlow.RuntimeFrameV3ScalarSourceCompilerClient
 
 /-! Actual selected success/bare-revert clients and syntax-authentication
 counterexamples. The deeper-child witness passes one-layer inspection but
 fails complete verification. Exhaustion remains outside the two conditional
-frozen claims; no full simulation or failed-state relation is inferred. -/
+frozen claims; no full simulation or failed-state relation is inferred.
+
+Legacy conditional-execution owners: `Client.returned`, `bad_target` and
+`exhausted_boundary`. `selected_but_endpoint_refused` owns the b1 R1 boundary;
+these executions stay outside b1 accepted coverage (H949). -/
 namespace Solidity.Backend.InternalFlow.RuntimeFrame.ScalarSourceCompiler.Controls
 open Evm Evm.Memory ScalarRecursiveSource
 open DisjointScalarReturn.Client (Γ F caller before reference)
 abbrev A := CountdownWitness.A
 abbrev C := CountdownWitness.P.C
+
+/-- The b1 endpoint refuses this scalar fixture at every depth. Its local selector receipt
+is not a receipt from the checked compiler entry. This pins the boundary of
+`Solidity.Backend.compiler_endpoint_correct` without weakening either claim. -/
+theorem endpoint_refused (depth : Nat) :
+ Evm.Compiler.compile 1 F (.cons (Client.input depth) .nil)=none := by
+ rfl
+
+/-- A successful local selector and R1 of the public endpoint coexist. -/
+theorem selected_but_endpoint_refused (depth : Nat) :
+ compile 1 5 16 9 8 F (Client.input depth)=some (Client.selected depth) ∧
+ Evm.Compiler.compile 1 F (.cons (Client.input depth) .nil)=none :=
+ ⟨Client.root depth, endpoint_refused depth⟩
 
 def alteredChild : Prog C (Frame A) (Frame A) :=
  step A rfl 1 (fun _ => .cons .revert .nil)

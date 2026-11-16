@@ -23,7 +23,10 @@ every positive depth; the target always succeeds.
   universal return and bare-revert claims (the latter vacuous here), coverage,
   coherence, the successful witness and the agreement.
 
-General families are not delivered: see `docs/feature-work/runtime-frame-p1.md`. -/
+General families are not delivered: see `docs/feature-work/runtime-frame-p1.md`.
+
+Retained theorem/test owners: `P1Bridge.satisfiable`, `refused_frame`
+and `pass`; `pass` preserves both forward and backward PassCorrect obligations. -/
 namespace Solidity.Backend.InternalFlow.RuntimeFrame.P1Bridge
 open Evm Evm.Memory P1Lang V4TrivialFamily
 open Solidity.Roadmap (Event Outcome Prefix Lang Prefixes)

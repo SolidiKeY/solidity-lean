@@ -4,7 +4,10 @@ import Solidity.Backend.InternalFlow.RuntimeFrameResult
 /-! A private scalar result is exported to a physically distinct retained
 caller destination after actual different-reference parent restoration.
 The full reached representation comes from the proved save/entry/unwind
-client. This is not a recursive-call compiler or source-call history proof. -/
+client. This is not a recursive-call compiler or source-call history proof.
+
+Retained regression owners: `DistinctScalarExport.completed`, `words`,
+`not_noop` and `not_child_reference` test actual export and caller identity. -/
 namespace Solidity.Backend.InternalFlow.RuntimeFrame.DistinctScalarExport
 open Evm Evm.Memory RecursiveSource ScalarRecursiveSource CountdownWitness
 namespace P

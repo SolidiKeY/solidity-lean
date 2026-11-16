@@ -1,5 +1,5 @@
 import Solidity.Backend.Passes.ValueCertificate
-import Solidity.Backend.InternalFlow.RuntimeFrameRestoredRepresentation
+import Solidity.Backend.Passes.CapturedValueStability
 import Solidity.Lowering.V07.UnsignedAddition
 
 /-! Unchecked unsigned addition transported from independent Source locals to
@@ -33,12 +33,7 @@ theorem execution {E : Source.Env} {srcΓ : Source.RCtx} {C : Contract} {Γ : Ct
       run compiled.code {machine with stack := tail} = .ok ({machine with stack := tail}.push word) 0 := by
 
   have transport := UnsignedAddition.locals_transport G SF fuel source target bits valid si ti family a b x y hx hy readA readB
-  obtain ⟨word,repr,_⟩ := value_success_tail compiled represented transport.2.1 []
-  refine ⟨transport.1,transport.2.1,transport.2.2,word,repr,?_⟩
-  intro tail
-  obtain ⟨actual,actualRep,run⟩ := value_success_tail compiled represented transport.2.1 tail
-  have same : actual = word := Backend.InternalFlow.RuntimeFrame.Restored.value_unique actualRep repr
-  rw [same] at run
-  exact run
+  obtain ⟨word,repr,runs⟩ := CapturedValueStability.value_shared _ compiled represented _ transport.2.1
+  exact ⟨transport.1,transport.2.1,transport.2.2,word,repr,runs⟩
 
 end Solidity.Backend.Passes.SourceAdditionValue

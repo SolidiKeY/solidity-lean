@@ -2,7 +2,10 @@ import Solidity.Backend.InternalFlow.RuntimeFrameV3AllocatorReturn
 
 /-! Actual intrinsic source and hand-written runtime execution packaged in the
 existing GrowingResult relation. This is a success client, not compiler output
-or a dual-outcome recursive producer. Native unrolling exhaustion is retained. -/
+or a dual-outcome recursive producer. Native unrolling exhaustion is retained.
+
+Retained regression owners: `RecursiveResult.success` and
+`RecursiveResult.shallow_refused` test success and the exhaustion boundary. -/
 namespace Solidity.Backend.InternalFlow.RuntimeFrame.RecursiveResult
 open Evm Evm.Memory RecursiveSource RecursiveReturn
 open CountdownWitness
