@@ -1078,6 +1078,14 @@ theorem elabRec_fnMemoryDispatch (h : RawExpr) (ty : String) (args : List RawExp
 theorem elabRec_trySelfBody (g : String) {Γ : NCtx} (args : List (ExtArg C Γ.ctx)) (ρ : Ctx) :
     (elabRec C ()).trySelfBody g args ρ = trySelfBody C g args ρ := rfl
 
+/-- The actual arms callback exposes the total producer through the public equations. -/
+example (h ty : String) (args : List RawExpr) (res : Option (Var × PrimTy))
+    (resW : Nat) (resNew : Bool) :
+    (elabRec C ()).fnDispatch h ty args res resW resNew =
+      fnDispatchWith C (panicProducerRec C ()) h ty args res resW resNew :=
+  (elabRec_fnDispatch C h ty args res resW resNew).trans
+    (fnDispatch_eq C h ty args res resW resNew)
+
 -- H30/H48: standard-only dependencies inherited from dispatchCaptures.
 /-- info: 'Solidity.fnDispatch' depends on axioms: [propext, Quot.sound] -/
 #guard_msgs in #print axioms fnDispatch
