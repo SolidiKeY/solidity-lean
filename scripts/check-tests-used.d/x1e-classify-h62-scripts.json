@@ -1213,6 +1213,457 @@
         "purpose": "Synthetic availability/cache/headroom arithmetic and invalid-counter controls; no production resource attestation or gate acceptance. Paired execution only; no fixture-read, child, production resource, containment or proof credit.",
         "source_blob": "fc28e096e42dbe5520d2abf83190e0aa690ba761",
         "input_revision": "4c8e0f3dcd5e35e81de6a65a69532ac5e3ccaef7"
+      },
+      {
+        "command": [
+          "python3",
+          "-B",
+          "scripts/h62/item1/packet-panic/test_overlay_consumer.py"
+        ],
+        "input_revision": "4c8e0f3dcd5e35e81de6a65a69532ac5e3ccaef7",
+        "kind": "unittest",
+        "path": "scripts/h62/item1/packet-panic/test_overlay_consumer.py",
+        "source_blob": "8dcae5b9e52edb61930d7d7e067bafc5534c7bd1"
+      },
+      {
+        "command": [
+          "python3",
+          "-B",
+          "scripts/h62/item1/packet-panic/test_panic_occurrence_windows.py"
+        ],
+        "input_revision": "4c8e0f3dcd5e35e81de6a65a69532ac5e3ccaef7",
+        "kind": "unittest",
+        "path": "scripts/h62/item1/packet-panic/test_panic_occurrence_windows.py",
+        "source_blob": "c5e6a0d8b045970a03e9784457ef24cd2e14545a"
+      },
+      {
+        "command": [
+          "python3",
+          "-B",
+          "scripts/h62/item1/packet-panic/test_project_artifact_manifest.py"
+        ],
+        "input_revision": "4c8e0f3dcd5e35e81de6a65a69532ac5e3ccaef7",
+        "kind": "unittest",
+        "path": "scripts/h62/item1/packet-panic/test_project_artifact_manifest.py",
+        "source_blob": "d327185ece67d99b1f089ff0cc76f4855a75a564"
+      },
+      {
+        "command": [
+          "python3",
+          "-B",
+          "scripts/h62/item1/readonly-bind/test_census.py"
+        ],
+        "input_revision": "4c8e0f3dcd5e35e81de6a65a69532ac5e3ccaef7",
+        "kind": "unittest",
+        "path": "scripts/h62/item1/readonly-bind/test_census.py",
+        "source_blob": "0ffc0ad2d4f5cfa95efc75c27769ec85165fc71b"
+      },
+      {
+        "command": [
+          "python3",
+          "-B",
+          "scripts/h62/item2/audit-g25-scalar-lowering/runner_tests.py"
+        ],
+        "input_revision": "4c8e0f3dcd5e35e81de6a65a69532ac5e3ccaef7",
+        "kind": "unittest",
+        "path": "scripts/h62/item2/audit-g25-scalar-lowering/runner_tests.py",
+        "source_blob": "e05345453e3b7b6f646f4a3f1efaca5d2735fe2b"
+      },
+      {
+        "command": [
+          "python3",
+          "-B",
+          "scripts/h62/item2/audit-readonly-calls/test_call_boundaries.py"
+        ],
+        "input_revision": "4c8e0f3dcd5e35e81de6a65a69532ac5e3ccaef7",
+        "kind": "unittest",
+        "path": "scripts/h62/item2/audit-readonly-calls/test_call_boundaries.py",
+        "source_blob": "ac72ee18604b3de51ca507538565614b2a5139a6"
+      },
+      {
+        "command": [
+          "python3",
+          "-B",
+          "scripts/h62/item2/audit-readonly-calls/test_caller_storage.py"
+        ],
+        "input_revision": "4c8e0f3dcd5e35e81de6a65a69532ac5e3ccaef7",
+        "kind": "unittest",
+        "path": "scripts/h62/item2/audit-readonly-calls/test_caller_storage.py",
+        "source_blob": "6a00a8047f3c1f5870fcf7ee0a6088318a5798dd"
+      },
+      {
+        "command": [
+          "python3",
+          "-B",
+          "scripts/h62/item2/audit-readonly-calls/test_captured_values.py"
+        ],
+        "input_revision": "4c8e0f3dcd5e35e81de6a65a69532ac5e3ccaef7",
+        "kind": "unittest",
+        "path": "scripts/h62/item2/audit-readonly-calls/test_captured_values.py",
+        "source_blob": "3742052061735b0fbe5bba498103217b8121f5e9"
+      },
+      {
+        "command": [
+          "python3",
+          "-B",
+          "scripts/h62/item2/audit-readonly-calls/test_invocation_modes.py"
+        ],
+        "input_revision": "4c8e0f3dcd5e35e81de6a65a69532ac5e3ccaef7",
+        "kind": "unittest",
+        "path": "scripts/h62/item2/audit-readonly-calls/test_invocation_modes.py",
+        "source_blob": "c6340e121526e1eea64ddc3a2720752b4630025c"
+      },
+      {
+        "command": [
+          "python3",
+          "-B",
+          "scripts/h62/item2/audit-readonly-calls/test_journal_witnesses.py"
+        ],
+        "input_revision": "4c8e0f3dcd5e35e81de6a65a69532ac5e3ccaef7",
+        "kind": "unittest",
+        "path": "scripts/h62/item2/audit-readonly-calls/test_journal_witnesses.py",
+        "source_blob": "cf467269fe78543be96c1d77572f8eb557c42a59"
+      },
+      {
+        "command": [
+          "python3",
+          "-B",
+          "scripts/h62/item2/audit-readonly-calls/test_loaded_original_types.py"
+        ],
+        "input_revision": "4c8e0f3dcd5e35e81de6a65a69532ac5e3ccaef7",
+        "kind": "unittest",
+        "path": "scripts/h62/item2/audit-readonly-calls/test_loaded_original_types.py",
+        "source_blob": "6c7d6e51fb9e139cb2ea6a581fd5ef2e52941ba0"
+      },
+      {
+        "command": [
+          "python3",
+          "-B",
+          "scripts/h62/item2/audit-readonly-calls/test_private_bind.py"
+        ],
+        "input_revision": "4c8e0f3dcd5e35e81de6a65a69532ac5e3ccaef7",
+        "kind": "unittest",
+        "path": "scripts/h62/item2/audit-readonly-calls/test_private_bind.py",
+        "source_blob": "7c5e542d60ec37840c8cc9a53c95b08f55edf739"
+      },
+      {
+        "command": [
+          "python3",
+          "-B",
+          "scripts/h62/item2/audit-readonly-calls/test_private_transport.py"
+        ],
+        "input_revision": "4c8e0f3dcd5e35e81de6a65a69532ac5e3ccaef7",
+        "kind": "unittest",
+        "path": "scripts/h62/item2/audit-readonly-calls/test_private_transport.py",
+        "source_blob": "f40ea3fec1a598da76f0839606c50736ea2aaf79"
+      },
+      {
+        "command": [
+          "python3",
+          "-B",
+          "scripts/h62/item2/audit-readonly-calls/test_transport_intake.py"
+        ],
+        "input_revision": "4c8e0f3dcd5e35e81de6a65a69532ac5e3ccaef7",
+        "kind": "unittest",
+        "path": "scripts/h62/item2/audit-readonly-calls/test_transport_intake.py",
+        "source_blob": "b43722502db8416ac7744da51787aab8c7254426"
+      },
+      {
+        "command": [
+          "python3",
+          "-B",
+          "scripts/h62/item2/audit-v07-lowering/test_reproduce_frozen.py"
+        ],
+        "input_revision": "4c8e0f3dcd5e35e81de6a65a69532ac5e3ccaef7",
+        "kind": "unittest",
+        "path": "scripts/h62/item2/audit-v07-lowering/test_reproduce_frozen.py",
+        "source_blob": "1720a1713ffcd93c6e871d260f312bbd49dd7aa3"
+      },
+      {
+        "command": [
+          "python3",
+          "-B",
+          "tests/h62/item1/binding-fixtures/test_reconciliation.py"
+        ],
+        "input_revision": "4c8e0f3dcd5e35e81de6a65a69532ac5e3ccaef7",
+        "kind": "unittest",
+        "path": "tests/h62/item1/binding-fixtures/test_reconciliation.py",
+        "source_blob": "efe4c4d9366f9e7be8b71ba684e6f85dffb41dc9"
+      },
+      {
+        "command": [
+          "python3",
+          "-B",
+          "tests/h62/item1/binding-fixtures/test_source_intervals.py"
+        ],
+        "input_revision": "4c8e0f3dcd5e35e81de6a65a69532ac5e3ccaef7",
+        "kind": "unittest",
+        "path": "tests/h62/item1/binding-fixtures/test_source_intervals.py",
+        "source_blob": "a8a7afd8fce55c86e7dcb755bff0b5fab3f1b535"
+      },
+      {
+        "command": [
+          "python3",
+          "-B",
+          "tests/h62/item1/duplication-scanner/test_ownership_census.py"
+        ],
+        "input_revision": "4c8e0f3dcd5e35e81de6a65a69532ac5e3ccaef7",
+        "kind": "unittest",
+        "path": "tests/h62/item1/duplication-scanner/test_ownership_census.py",
+        "source_blob": "b32c2feb10ed739093bcf297c065ab7044b2d3e7"
+      },
+      {
+        "command": [
+          "python3",
+          "-B",
+          "tests/h62/item2/audit-bytecode-selection/test_projection_metadata.py"
+        ],
+        "input_revision": "4c8e0f3dcd5e35e81de6a65a69532ac5e3ccaef7",
+        "kind": "unittest",
+        "path": "tests/h62/item2/audit-bytecode-selection/test_projection_metadata.py",
+        "source_blob": "9177c884e720d98cd51584bf35f0c9f33163ead5"
+      },
+      {
+        "command": [
+          "python3",
+          "-B",
+          "tests/h62/item2/audit-exact-verification/test_partition.py"
+        ],
+        "input_revision": "4c8e0f3dcd5e35e81de6a65a69532ac5e3ccaef7",
+        "kind": "unittest",
+        "path": "tests/h62/item2/audit-exact-verification/test_partition.py",
+        "source_blob": "cdca971557f8620320cdf48e9f41a710da71d2a2"
+      },
+      {
+        "command": [
+          "python3",
+          "-B",
+          "tests/h62/item2/audit-v10-storage/test_transport_pairs.py"
+        ],
+        "input_revision": "4c8e0f3dcd5e35e81de6a65a69532ac5e3ccaef7",
+        "kind": "unittest",
+        "path": "tests/h62/item2/audit-v10-storage/test_transport_pairs.py",
+        "source_blob": "4a048711ca1ad4e04f7184f4d6942002de1ea509"
+      },
+      {
+        "command": [
+          "python3",
+          "-B",
+          "tests/h62/item3/g52-differential/test_archive_census.py"
+        ],
+        "input_revision": "4c8e0f3dcd5e35e81de6a65a69532ac5e3ccaef7",
+        "kind": "unittest",
+        "path": "tests/h62/item3/g52-differential/test_archive_census.py",
+        "source_blob": "3713c01db021020107d8678f8a07175ed750f76f"
+      },
+      {
+        "command": [
+          "python3",
+          "-B",
+          "tests/h62/item3/g52-differential/test_blockchain_export.py"
+        ],
+        "input_revision": "4c8e0f3dcd5e35e81de6a65a69532ac5e3ccaef7",
+        "kind": "unittest",
+        "path": "tests/h62/item3/g52-differential/test_blockchain_export.py",
+        "source_blob": "b44088c3b5490594d5af1a84e280bd13f697b807"
+      },
+      {
+        "command": [
+          "python3",
+          "-B",
+          "tests/h62/item3/g52-differential/test_engine_rejection_qualification.py"
+        ],
+        "input_revision": "4c8e0f3dcd5e35e81de6a65a69532ac5e3ccaef7",
+        "kind": "unittest",
+        "path": "tests/h62/item3/g52-differential/test_engine_rejection_qualification.py",
+        "source_blob": "67503e15e50584fdaa2a11984c691416934e94d9"
+      },
+      {
+        "command": [
+          "python3",
+          "-B",
+          "tests/h62/item4/generic-p10/test_runtime.py"
+        ],
+        "input_revision": "4c8e0f3dcd5e35e81de6a65a69532ac5e3ccaef7",
+        "kind": "unittest",
+        "path": "tests/h62/item4/generic-p10/test_runtime.py",
+        "source_blob": "26f0dbba174c1cecf8c3856e0bd590f53b5a69c4"
+      },
+      {
+        "command": [
+          "python3",
+          "-B",
+          "tests/h62/item4/generic-v08/test_census.py"
+        ],
+        "input_revision": "4c8e0f3dcd5e35e81de6a65a69532ac5e3ccaef7",
+        "kind": "unittest",
+        "path": "tests/h62/item4/generic-v08/test_census.py",
+        "source_blob": "3e249ffb2be489ed0067ccba94f2f6c94ac06a48"
+      },
+      {
+        "command": [
+          "python3",
+          "-B",
+          "tests/h62/item4/generic-v08/test_drift.py"
+        ],
+        "input_revision": "4c8e0f3dcd5e35e81de6a65a69532ac5e3ccaef7",
+        "kind": "unittest",
+        "path": "tests/h62/item4/generic-v08/test_drift.py",
+        "source_blob": "1fb3e96a8f9753b6fe779a871f27a32d0fedcf68"
+      },
+      {
+        "command": [
+          "python3",
+          "-B",
+          "tests/h62/item4/generic-v08/test_width_v2_lifecycle.py"
+        ],
+        "input_revision": "4c8e0f3dcd5e35e81de6a65a69532ac5e3ccaef7",
+        "kind": "unittest",
+        "path": "tests/h62/item4/generic-v08/test_width_v2_lifecycle.py",
+        "source_blob": "de3b9f1b41c8e4e7fcbaeefcfe0be990b7582861"
+      },
+      {
+        "command": [
+          "python3",
+          "-B",
+          "tests/h62/item4/generic-v08/test_width_v2_route.py"
+        ],
+        "input_revision": "4c8e0f3dcd5e35e81de6a65a69532ac5e3ccaef7",
+        "kind": "unittest",
+        "path": "tests/h62/item4/generic-v08/test_width_v2_route.py",
+        "source_blob": "4672a33c8e56a5659bf035fe3163e32aba9b1cdb"
+      },
+      {
+        "command": [
+          "python3",
+          "-B",
+          "tests/h62/item4/generic-v08/test_width_v2_scope.py"
+        ],
+        "input_revision": "4c8e0f3dcd5e35e81de6a65a69532ac5e3ccaef7",
+        "kind": "unittest",
+        "path": "tests/h62/item4/generic-v08/test_width_v2_scope.py",
+        "source_blob": "c8203b406f3d287609d008120ea8bb9725204a05"
+      },
+      {
+        "command": [
+          "python3",
+          "-B",
+          "tests/h62/item5/statement-graph/test_source_intake.py"
+        ],
+        "input_revision": "4c8e0f3dcd5e35e81de6a65a69532ac5e3ccaef7",
+        "kind": "unittest",
+        "path": "tests/h62/item5/statement-graph/test_source_intake.py",
+        "source_blob": "7092b3c4aa1932dd265aed54f0dffc349134bd1c"
+      },
+      {
+        "command": [
+          "python3",
+          "-B",
+          "tests/h62/item6/migrate-automation/test_census.py"
+        ],
+        "input_revision": "4c8e0f3dcd5e35e81de6a65a69532ac5e3ccaef7",
+        "kind": "unittest",
+        "path": "tests/h62/item6/migrate-automation/test_census.py",
+        "source_blob": "bfcc1ee3d57ddbfa8cb8c54859c4cf2084f17a35"
+      },
+      {
+        "command": [
+          "python3",
+          "-B",
+          "tests/h62/item6/migrate-backend/test_api_inventory.py"
+        ],
+        "input_revision": "4c8e0f3dcd5e35e81de6a65a69532ac5e3ccaef7",
+        "kind": "unittest",
+        "path": "tests/h62/item6/migrate-backend/test_api_inventory.py",
+        "source_blob": "b8947be9d97a5c957d3c1868961823842fc9a9f5"
+      },
+      {
+        "command": [
+          "python3",
+          "-B",
+          "tests/h62/item6/migrate-backend/test_census.py"
+        ],
+        "input_revision": "4c8e0f3dcd5e35e81de6a65a69532ac5e3ccaef7",
+        "kind": "unittest",
+        "path": "tests/h62/item6/migrate-backend/test_census.py",
+        "source_blob": "a68a1227c9ed6ad1caae5e0924411e9117fff227"
+      },
+      {
+        "command": [
+          "python3",
+          "-B",
+          "tests/h62/item6/migrate-backend/test_linking_generator.py"
+        ],
+        "input_revision": "4c8e0f3dcd5e35e81de6a65a69532ac5e3ccaef7",
+        "kind": "unittest",
+        "path": "tests/h62/item6/migrate-backend/test_linking_generator.py",
+        "source_blob": "6eb0125027325bcd03bdbf842f7da22e45267311"
+      },
+      {
+        "command": [
+          "python3",
+          "-B",
+          "tests/h62/item6/migrate-backend/test_reconcile_imports.py"
+        ],
+        "input_revision": "4c8e0f3dcd5e35e81de6a65a69532ac5e3ccaef7",
+        "kind": "unittest",
+        "path": "tests/h62/item6/migrate-backend/test_reconcile_imports.py",
+        "source_blob": "489c1166a11148986b319afa0883f3cd5c967a2d"
+      },
+      {
+        "command": [
+          "python3",
+          "-B",
+          "tests/h62/item6/migrate-bridge/test_build_preflight.py"
+        ],
+        "input_revision": "4c8e0f3dcd5e35e81de6a65a69532ac5e3ccaef7",
+        "kind": "unittest",
+        "path": "tests/h62/item6/migrate-bridge/test_build_preflight.py",
+        "source_blob": "473435e4082c1213417fe9d8db064a15666ff839"
+      },
+      {
+        "command": [
+          "python3",
+          "-B",
+          "tests/h62/item6/migrate-bridge/test_census.py"
+        ],
+        "input_revision": "4c8e0f3dcd5e35e81de6a65a69532ac5e3ccaef7",
+        "kind": "unittest",
+        "path": "tests/h62/item6/migrate-bridge/test_census.py",
+        "source_blob": "ebac78d0f3deb487115bb8b630fefb1e40ee5d66"
+      },
+      {
+        "command": [
+          "python3",
+          "-B",
+          "tests/h62/item6/migrate-examples/acceptance.py"
+        ],
+        "input_revision": "4c8e0f3dcd5e35e81de6a65a69532ac5e3ccaef7",
+        "kind": "unittest",
+        "path": "tests/h62/item6/migrate-examples/acceptance.py",
+        "source_blob": "c107aeade7f170db7cb958bede0a00fd7a178dd9"
+      },
+      {
+        "command": [
+          "python3",
+          "-B",
+          "tests/h62/item6/migrate-frontend/test_measure.py"
+        ],
+        "input_revision": "4c8e0f3dcd5e35e81de6a65a69532ac5e3ccaef7",
+        "kind": "unittest",
+        "path": "tests/h62/item6/migrate-frontend/test_measure.py",
+        "source_blob": "67e6406d0a42c393ef6b422b4dff0b167336251d"
+      },
+      {
+        "command": [
+          "python3",
+          "-B",
+          "tests/h62/item6/migrate-typing/test_census.py"
+        ],
+        "input_revision": "4c8e0f3dcd5e35e81de6a65a69532ac5e3ccaef7",
+        "kind": "unittest",
+        "path": "tests/h62/item6/migrate-typing/test_census.py",
+        "source_blob": "9d7088a5b11815279639338fa148ec3f0198b91a"
       }
     ],
     "module_entries": [
@@ -3142,6 +3593,1159 @@
         "target_blob": "22205c4bca05382a350db5567074f8504eec2961",
         "operation": "entered measured Python module; no fixture consumption credit",
         "module_code_sha256": "c3f59fd8cb419aa0207338e7dfc0c82af19153724936b5e80776e6e7a352642b",
+        "python": [
+          3,
+          12,
+          14
+        ],
+        "module_frame_line": 0,
+        "collector_sha256": "74a8ac05edadf4a4a1cf901134a8c23b24a844284ee8fe2a5f4e6fba274d251c"
+      },
+      {
+        "runner": "validated:tests/h62/item1/binding-fixtures/test_source_intervals.py",
+        "input_revision": "4c8e0f3dcd5e35e81de6a65a69532ac5e3ccaef7",
+        "frames": [
+          {
+            "path": "tests/h62/item1/binding-fixtures/test_source_intervals.py",
+            "blob": "a8a7afd8fce55c86e7dcb755bff0b5fab3f1b535",
+            "line": 15
+          },
+          {
+            "path": "scripts/h62/item1/binding-fixtures/source_intervals.py",
+            "blob": "21154477304beb66563d167f00a942dd8c726c80",
+            "line": 14
+          }
+        ],
+        "target": "scripts/h62/item1/binding-fixtures/lexical.py",
+        "target_blob": "d0c0f16af8d2c818b8acfe1f8eb7d6cf54de836f",
+        "operation": "entered measured Python module; no fixture consumption credit",
+        "module_code_sha256": "5bb95114ff3add82b8930dd17e614bed03b355bd1b103a616c859ee167be7f8b",
+        "python": [
+          3,
+          12,
+          14
+        ],
+        "module_frame_line": 0,
+        "collector_sha256": "74a8ac05edadf4a4a1cf901134a8c23b24a844284ee8fe2a5f4e6fba274d251c"
+      },
+      {
+        "runner": "validated:tests/h62/item1/binding-fixtures/test_reconciliation.py",
+        "input_revision": "4c8e0f3dcd5e35e81de6a65a69532ac5e3ccaef7",
+        "frames": [
+          {
+            "path": "tests/h62/item1/binding-fixtures/test_reconciliation.py",
+            "blob": "efe4c4d9366f9e7be8b71ba684e6f85dffb41dc9",
+            "line": 15
+          }
+        ],
+        "target": "scripts/h62/item1/binding-fixtures/reconcile.py",
+        "target_blob": "8074ae2376e9044a1624799381f89e42c495aa24",
+        "operation": "entered measured Python module; no fixture consumption credit",
+        "module_code_sha256": "301c790e4e0db59ec17351f4e623b6f981247fd34a6e88c76da0d6f31a667728",
+        "python": [
+          3,
+          12,
+          14
+        ],
+        "module_frame_line": 0,
+        "collector_sha256": "74a8ac05edadf4a4a1cf901134a8c23b24a844284ee8fe2a5f4e6fba274d251c"
+      },
+      {
+        "runner": "validated:tests/h62/item1/binding-fixtures/test_source_intervals.py",
+        "input_revision": "4c8e0f3dcd5e35e81de6a65a69532ac5e3ccaef7",
+        "frames": [
+          {
+            "path": "tests/h62/item1/binding-fixtures/test_source_intervals.py",
+            "blob": "a8a7afd8fce55c86e7dcb755bff0b5fab3f1b535",
+            "line": 15
+          }
+        ],
+        "target": "scripts/h62/item1/binding-fixtures/source_intervals.py",
+        "target_blob": "21154477304beb66563d167f00a942dd8c726c80",
+        "operation": "entered measured Python module; no fixture consumption credit",
+        "module_code_sha256": "76b2fafb574ba9696cba7cedd27b3fbfc6d122ce7b151f820d3f3402a98c0f38",
+        "python": [
+          3,
+          12,
+          14
+        ],
+        "module_frame_line": 0,
+        "collector_sha256": "74a8ac05edadf4a4a1cf901134a8c23b24a844284ee8fe2a5f4e6fba274d251c"
+      },
+      {
+        "runner": "validated:tests/h62/item1/duplication-scanner/test_ownership_census.py",
+        "input_revision": "4c8e0f3dcd5e35e81de6a65a69532ac5e3ccaef7",
+        "frames": [
+          {
+            "path": "tests/h62/item1/duplication-scanner/test_ownership_census.py",
+            "blob": "b32c2feb10ed739093bcf297c065ab7044b2d3e7",
+            "line": 9
+          }
+        ],
+        "target": "scripts/h62/item1/duplication-scanner/ownership_census.py",
+        "target_blob": "c800aae27be351d9d3660c27acc5a451e6052cbf",
+        "operation": "entered measured Python module; no fixture consumption credit",
+        "module_code_sha256": "b0f84335b8928b255314f901f769a5042e9d36194980f2b67d263982433042d8",
+        "python": [
+          3,
+          12,
+          14
+        ],
+        "module_frame_line": 0,
+        "collector_sha256": "74a8ac05edadf4a4a1cf901134a8c23b24a844284ee8fe2a5f4e6fba274d251c"
+      },
+      {
+        "runner": "validated:scripts/h62/item1/packet-panic/test_overlay_consumer.py",
+        "input_revision": "4c8e0f3dcd5e35e81de6a65a69532ac5e3ccaef7",
+        "frames": [
+          {
+            "path": "scripts/h62/item1/packet-panic/test_overlay_consumer.py",
+            "blob": "8dcae5b9e52edb61930d7d7e067bafc5534c7bd1",
+            "line": 12
+          }
+        ],
+        "target": "scripts/h62/item1/packet-panic/diagnostic_policy.py",
+        "target_blob": "201ee352f143a3881e52e0544ffdcd93cb403664",
+        "operation": "entered measured Python module; no fixture consumption credit",
+        "module_code_sha256": "f0b25a6d0f2deeb23bdf62d83f306ee7661e59634ed4f03c06fe16bd271f7e1e",
+        "python": [
+          3,
+          12,
+          14
+        ],
+        "module_frame_line": 0,
+        "collector_sha256": "74a8ac05edadf4a4a1cf901134a8c23b24a844284ee8fe2a5f4e6fba274d251c"
+      },
+      {
+        "runner": "validated:scripts/h62/item1/packet-panic/test_panic_occurrence_windows.py",
+        "input_revision": "4c8e0f3dcd5e35e81de6a65a69532ac5e3ccaef7",
+        "frames": [
+          {
+            "path": "scripts/h62/item1/packet-panic/test_panic_occurrence_windows.py",
+            "blob": "c5e6a0d8b045970a03e9784457ef24cd2e14545a",
+            "line": 13
+          },
+          {
+            "path": "scripts/h62/item1/packet-panic/panic_occurrence_windows.py",
+            "blob": "54736a98f66fc59d288f8780d6a3cfeffda872c1",
+            "line": 4
+          }
+        ],
+        "target": "scripts/h62/item1/packet-panic/lexical_mask.py",
+        "target_blob": "503735f09f473004db5c7e1e3d41b5868b2fd9da",
+        "operation": "entered measured Python module; no fixture consumption credit",
+        "module_code_sha256": "8e7c014f034e1653877a5159b89b426426b8bbaf01980746b2d055b92fcd522c",
+        "python": [
+          3,
+          12,
+          14
+        ],
+        "module_frame_line": 0,
+        "collector_sha256": "74a8ac05edadf4a4a1cf901134a8c23b24a844284ee8fe2a5f4e6fba274d251c"
+      },
+      {
+        "runner": "validated:scripts/h62/item1/packet-panic/test_panic_occurrence_windows.py",
+        "input_revision": "4c8e0f3dcd5e35e81de6a65a69532ac5e3ccaef7",
+        "frames": [
+          {
+            "path": "scripts/h62/item1/packet-panic/test_panic_occurrence_windows.py",
+            "blob": "c5e6a0d8b045970a03e9784457ef24cd2e14545a",
+            "line": 13
+          }
+        ],
+        "target": "scripts/h62/item1/packet-panic/panic_occurrence_windows.py",
+        "target_blob": "54736a98f66fc59d288f8780d6a3cfeffda872c1",
+        "operation": "entered measured Python module; no fixture consumption credit",
+        "module_code_sha256": "453947ff3d3e951299a290b5801d80aff0917b53ba95e5f0c4d2aa268dad27d9",
+        "python": [
+          3,
+          12,
+          14
+        ],
+        "module_frame_line": 0,
+        "collector_sha256": "74a8ac05edadf4a4a1cf901134a8c23b24a844284ee8fe2a5f4e6fba274d251c"
+      },
+      {
+        "runner": "validated:scripts/h62/item1/packet-panic/test_project_artifact_manifest.py",
+        "input_revision": "4c8e0f3dcd5e35e81de6a65a69532ac5e3ccaef7",
+        "frames": [
+          {
+            "path": "scripts/h62/item1/packet-panic/test_project_artifact_manifest.py",
+            "blob": "d327185ece67d99b1f089ff0cc76f4855a75a564",
+            "line": 8
+          }
+        ],
+        "target": "scripts/h62/item1/packet-panic/project_artifact_manifest.py",
+        "target_blob": "1722e943b827cebf1a25b5c316ad9c89da775746",
+        "operation": "entered measured Python module; no fixture consumption credit",
+        "module_code_sha256": "cbd917e9f617efcab049bb6e8f24222f194f3ff7cd03b73090f8a021c7b844ee",
+        "python": [
+          3,
+          12,
+          14
+        ],
+        "module_frame_line": 0,
+        "collector_sha256": "74a8ac05edadf4a4a1cf901134a8c23b24a844284ee8fe2a5f4e6fba274d251c"
+      },
+      {
+        "runner": "validated:scripts/h62/item1/readonly-bind/test_census.py",
+        "input_revision": "4c8e0f3dcd5e35e81de6a65a69532ac5e3ccaef7",
+        "frames": [
+          {
+            "path": "scripts/h62/item1/readonly-bind/test_census.py",
+            "blob": "0ffc0ad2d4f5cfa95efc75c27769ec85165fc71b",
+            "line": 14
+          }
+        ],
+        "target": "scripts/h62/item1/readonly-bind/census.py",
+        "target_blob": "8770fcd1ab8a8f23448588de247af2b8cedb3342",
+        "operation": "entered measured Python module; no fixture consumption credit",
+        "module_code_sha256": "be2821d32e359abcf34c8a57e2ee92b2ed29ce18bb2554437d65fbcb542cd578",
+        "python": [
+          3,
+          12,
+          14
+        ],
+        "module_frame_line": 0,
+        "collector_sha256": "74a8ac05edadf4a4a1cf901134a8c23b24a844284ee8fe2a5f4e6fba274d251c"
+      },
+      {
+        "runner": "validated:tests/h62/item2/audit-bytecode-selection/test_projection_metadata.py",
+        "input_revision": "4c8e0f3dcd5e35e81de6a65a69532ac5e3ccaef7",
+        "frames": [
+          {
+            "path": "tests/h62/item2/audit-bytecode-selection/test_projection_metadata.py",
+            "blob": "9177c884e720d98cd51584bf35f0c9f33163ead5",
+            "line": 6
+          },
+          {
+            "path": "scripts/h62/item2/audit-bytecode-selection/projection_metadata.py",
+            "blob": "001a7982aabfa9f7568c3d1a682f4692f7deb114",
+            "line": 4
+          }
+        ],
+        "target": "scripts/h62/item2/audit-bytecode-selection/kernel_metadata.py",
+        "target_blob": "2d86485ff102d8bf983e89a315a565d5cf05275d",
+        "operation": "entered measured Python module; no fixture consumption credit",
+        "module_code_sha256": "af388f5676d7d03c941670ff78e8c73765ae6a6390408ddf3297c3871e456201",
+        "python": [
+          3,
+          12,
+          14
+        ],
+        "module_frame_line": 0,
+        "collector_sha256": "74a8ac05edadf4a4a1cf901134a8c23b24a844284ee8fe2a5f4e6fba274d251c"
+      },
+      {
+        "runner": "validated:tests/h62/item2/audit-bytecode-selection/test_projection_metadata.py",
+        "input_revision": "4c8e0f3dcd5e35e81de6a65a69532ac5e3ccaef7",
+        "frames": [
+          {
+            "path": "tests/h62/item2/audit-bytecode-selection/test_projection_metadata.py",
+            "blob": "9177c884e720d98cd51584bf35f0c9f33163ead5",
+            "line": 6
+          }
+        ],
+        "target": "scripts/h62/item2/audit-bytecode-selection/projection_metadata.py",
+        "target_blob": "001a7982aabfa9f7568c3d1a682f4692f7deb114",
+        "operation": "entered measured Python module; no fixture consumption credit",
+        "module_code_sha256": "15cf78d23004fdb32af6afd4704d62674f47f1745c63c1fe77e2a5a43c1c05df",
+        "python": [
+          3,
+          12,
+          14
+        ],
+        "module_frame_line": 0,
+        "collector_sha256": "74a8ac05edadf4a4a1cf901134a8c23b24a844284ee8fe2a5f4e6fba274d251c"
+      },
+      {
+        "runner": "validated:tests/h62/item2/audit-exact-verification/test_partition.py",
+        "input_revision": "4c8e0f3dcd5e35e81de6a65a69532ac5e3ccaef7",
+        "frames": [
+          {
+            "path": "tests/h62/item2/audit-exact-verification/test_partition.py",
+            "blob": "cdca971557f8620320cdf48e9f41a710da71d2a2",
+            "line": 16
+          }
+        ],
+        "target": "scripts/h62/item2/audit-exact-verification/census_partition.py",
+        "target_blob": "baad70349c177ce659e597321cb5f8f427b2e277",
+        "operation": "entered measured Python module; no fixture consumption credit",
+        "module_code_sha256": "9680765b5e946321afa37102c3a0f1f284cde37b7744608f0007a13bc0073ca2",
+        "python": [
+          3,
+          12,
+          14
+        ],
+        "module_frame_line": 0,
+        "collector_sha256": "74a8ac05edadf4a4a1cf901134a8c23b24a844284ee8fe2a5f4e6fba274d251c"
+      },
+      {
+        "runner": "validated:scripts/h62/item2/audit-g25-scalar-lowering/runner_tests.py",
+        "input_revision": "4c8e0f3dcd5e35e81de6a65a69532ac5e3ccaef7",
+        "frames": [
+          {
+            "path": "scripts/h62/item2/audit-g25-scalar-lowering/runner_tests.py",
+            "blob": "e05345453e3b7b6f646f4a3f1efaca5d2735fe2b",
+            "line": 15
+          }
+        ],
+        "target": "scripts/h62/item2/audit-g25-scalar-lowering/bounded_lean.py",
+        "target_blob": "cd95f2471fa6e6899855aabeb738fde3d0338e8b",
+        "operation": "entered measured Python module; no fixture consumption credit",
+        "module_code_sha256": "39db8fa8c2b6c2ffa0af39b1f720ebf3ba1c3460476910d82c50e2c6dd8be7e1",
+        "python": [
+          3,
+          12,
+          14
+        ],
+        "module_frame_line": 0,
+        "collector_sha256": "74a8ac05edadf4a4a1cf901134a8c23b24a844284ee8fe2a5f4e6fba274d251c"
+      },
+      {
+        "runner": "validated:scripts/h62/item2/audit-readonly-calls/test_call_boundaries.py",
+        "input_revision": "4c8e0f3dcd5e35e81de6a65a69532ac5e3ccaef7",
+        "frames": [
+          {
+            "path": "scripts/h62/item2/audit-readonly-calls/test_call_boundaries.py",
+            "blob": "ac72ee18604b3de51ca507538565614b2a5139a6",
+            "line": 6
+          }
+        ],
+        "target": "scripts/h62/item2/audit-readonly-calls/check_call_boundaries.py",
+        "target_blob": "0c695495561bdda77644fd3398c2008b38649b3c",
+        "operation": "entered measured Python module; no fixture consumption credit",
+        "module_code_sha256": "28d874590a819d10aa534e444e8195eedee910319fc5b393a0f9221b4d4391c4",
+        "python": [
+          3,
+          12,
+          14
+        ],
+        "module_frame_line": 0,
+        "collector_sha256": "74a8ac05edadf4a4a1cf901134a8c23b24a844284ee8fe2a5f4e6fba274d251c"
+      },
+      {
+        "runner": "validated:scripts/h62/item2/audit-readonly-calls/test_caller_storage.py",
+        "input_revision": "4c8e0f3dcd5e35e81de6a65a69532ac5e3ccaef7",
+        "frames": [
+          {
+            "path": "scripts/h62/item2/audit-readonly-calls/test_caller_storage.py",
+            "blob": "6a00a8047f3c1f5870fcf7ee0a6088318a5798dd",
+            "line": 7
+          }
+        ],
+        "target": "scripts/h62/item2/audit-readonly-calls/check_caller_storage.py",
+        "target_blob": "ea8195587cb222ac68fdadfed4c9502e747ca563",
+        "operation": "entered measured Python module; no fixture consumption credit",
+        "module_code_sha256": "dd365b65fc1bc40b39d160a9bd935027158360e2edc2e6437a8ae62bc2cfdb3c",
+        "python": [
+          3,
+          12,
+          14
+        ],
+        "module_frame_line": 0,
+        "collector_sha256": "74a8ac05edadf4a4a1cf901134a8c23b24a844284ee8fe2a5f4e6fba274d251c"
+      },
+      {
+        "runner": "validated:scripts/h62/item2/audit-readonly-calls/test_captured_values.py",
+        "input_revision": "4c8e0f3dcd5e35e81de6a65a69532ac5e3ccaef7",
+        "frames": [
+          {
+            "path": "scripts/h62/item2/audit-readonly-calls/test_captured_values.py",
+            "blob": "3742052061735b0fbe5bba498103217b8121f5e9",
+            "line": 7
+          }
+        ],
+        "target": "scripts/h62/item2/audit-readonly-calls/check_captured_values.py",
+        "target_blob": "d1e14042039ec96294a8c67d587af7e2dea03d79",
+        "operation": "entered measured Python module; no fixture consumption credit",
+        "module_code_sha256": "6d3c5685c3b63f3bcb7773d2955f4c3dcafb0b07132d179d3c5cde2aacfc7ce2",
+        "python": [
+          3,
+          12,
+          14
+        ],
+        "module_frame_line": 0,
+        "collector_sha256": "74a8ac05edadf4a4a1cf901134a8c23b24a844284ee8fe2a5f4e6fba274d251c"
+      },
+      {
+        "runner": "validated:scripts/h62/item2/audit-readonly-calls/test_invocation_modes.py",
+        "input_revision": "4c8e0f3dcd5e35e81de6a65a69532ac5e3ccaef7",
+        "frames": [
+          {
+            "path": "scripts/h62/item2/audit-readonly-calls/test_invocation_modes.py",
+            "blob": "c6340e121526e1eea64ddc3a2720752b4630025c",
+            "line": 7
+          }
+        ],
+        "target": "scripts/h62/item2/audit-readonly-calls/check_invocation_modes.py",
+        "target_blob": "d8afb2181b464b912d559df05581527735ffefd6",
+        "operation": "entered measured Python module; no fixture consumption credit",
+        "module_code_sha256": "0b689d00bafb61c6a2b91a10fec94c76cf7d55017be75caf85a01706e9713563",
+        "python": [
+          3,
+          12,
+          14
+        ],
+        "module_frame_line": 0,
+        "collector_sha256": "74a8ac05edadf4a4a1cf901134a8c23b24a844284ee8fe2a5f4e6fba274d251c"
+      },
+      {
+        "runner": "validated:scripts/h62/item2/audit-readonly-calls/test_journal_witnesses.py",
+        "input_revision": "4c8e0f3dcd5e35e81de6a65a69532ac5e3ccaef7",
+        "frames": [
+          {
+            "path": "scripts/h62/item2/audit-readonly-calls/test_journal_witnesses.py",
+            "blob": "cf467269fe78543be96c1d77572f8eb557c42a59",
+            "line": 7
+          }
+        ],
+        "target": "scripts/h62/item2/audit-readonly-calls/check_journal_witnesses.py",
+        "target_blob": "434021b3c0fcaf7b7082f7ae431df4052f68874d",
+        "operation": "entered measured Python module; no fixture consumption credit",
+        "module_code_sha256": "c6c69cf3fd0f6810a23f33f73c555275ba8e7fb1b99fc240926202dab875f983",
+        "python": [
+          3,
+          12,
+          14
+        ],
+        "module_frame_line": 0,
+        "collector_sha256": "74a8ac05edadf4a4a1cf901134a8c23b24a844284ee8fe2a5f4e6fba274d251c"
+      },
+      {
+        "runner": "validated:scripts/h62/item2/audit-readonly-calls/test_private_bind.py",
+        "input_revision": "4c8e0f3dcd5e35e81de6a65a69532ac5e3ccaef7",
+        "frames": [
+          {
+            "path": "scripts/h62/item2/audit-readonly-calls/test_private_bind.py",
+            "blob": "7c5e542d60ec37840c8cc9a53c95b08f55edf739",
+            "line": 10
+          }
+        ],
+        "target": "scripts/h62/item2/audit-readonly-calls/check_private_bind.py",
+        "target_blob": "72929abaf88c2cf0a0f74a1fadb06262bbe98646",
+        "operation": "entered measured Python module; no fixture consumption credit",
+        "module_code_sha256": "bfa5295960f02d7b46463892ab8cf3efb26b478aad6bec0230af2baf7601829f",
+        "python": [
+          3,
+          12,
+          14
+        ],
+        "module_frame_line": 0,
+        "collector_sha256": "74a8ac05edadf4a4a1cf901134a8c23b24a844284ee8fe2a5f4e6fba274d251c"
+      },
+      {
+        "runner": "validated:scripts/h62/item2/audit-readonly-calls/test_private_transport.py",
+        "input_revision": "4c8e0f3dcd5e35e81de6a65a69532ac5e3ccaef7",
+        "frames": [
+          {
+            "path": "scripts/h62/item2/audit-readonly-calls/test_private_transport.py",
+            "blob": "f40ea3fec1a598da76f0839606c50736ea2aaf79",
+            "line": 7
+          }
+        ],
+        "target": "scripts/h62/item2/audit-readonly-calls/check_private_transport.py",
+        "target_blob": "87b185043b090b25962e34e1310f0b81ff46e97f",
+        "operation": "entered measured Python module; no fixture consumption credit",
+        "module_code_sha256": "1e91b967b33665e2fe8a1160c3a73c208f620353ff30525dce33be676965d29b",
+        "python": [
+          3,
+          12,
+          14
+        ],
+        "module_frame_line": 0,
+        "collector_sha256": "74a8ac05edadf4a4a1cf901134a8c23b24a844284ee8fe2a5f4e6fba274d251c"
+      },
+      {
+        "runner": "validated:scripts/h62/item2/audit-readonly-calls/test_transport_intake.py",
+        "input_revision": "4c8e0f3dcd5e35e81de6a65a69532ac5e3ccaef7",
+        "frames": [
+          {
+            "path": "scripts/h62/item2/audit-readonly-calls/test_transport_intake.py",
+            "blob": "b43722502db8416ac7744da51787aab8c7254426",
+            "line": 9
+          }
+        ],
+        "target": "scripts/h62/item2/audit-readonly-calls/intake_transport_pairs.py",
+        "target_blob": "993741eafcfd686212b21d4c68a1302fdccb75fd",
+        "operation": "entered measured Python module; no fixture consumption credit",
+        "module_code_sha256": "5adb26b6980b27b3ae172fab37d55026762484351371bae348babf1865d6da5d",
+        "python": [
+          3,
+          12,
+          14
+        ],
+        "module_frame_line": 0,
+        "collector_sha256": "74a8ac05edadf4a4a1cf901134a8c23b24a844284ee8fe2a5f4e6fba274d251c"
+      },
+      {
+        "runner": "validated:scripts/h62/item2/audit-readonly-calls/test_loaded_original_types.py",
+        "input_revision": "4c8e0f3dcd5e35e81de6a65a69532ac5e3ccaef7",
+        "frames": [
+          {
+            "path": "scripts/h62/item2/audit-readonly-calls/test_loaded_original_types.py",
+            "blob": "6c7d6e51fb9e139cb2ea6a581fd5ef2e52941ba0",
+            "line": 7
+          }
+        ],
+        "target": "scripts/h62/item2/audit-readonly-calls/loaded_original_types.py",
+        "target_blob": "9b7c9d4f5b4a22c3cacf605f464a6ff0407a7c24",
+        "operation": "entered measured Python module; no fixture consumption credit",
+        "module_code_sha256": "ccf7fc8e065214167717a5870606e5a1e3f39bcbfc84ed6163b0a53e39f8cf4a",
+        "python": [
+          3,
+          12,
+          14
+        ],
+        "module_frame_line": 0,
+        "collector_sha256": "74a8ac05edadf4a4a1cf901134a8c23b24a844284ee8fe2a5f4e6fba274d251c"
+      },
+      {
+        "runner": "validated:scripts/h62/item2/audit-v07-lowering/test_reproduce_frozen.py",
+        "input_revision": "4c8e0f3dcd5e35e81de6a65a69532ac5e3ccaef7",
+        "frames": [
+          {
+            "path": "scripts/h62/item2/audit-v07-lowering/test_reproduce_frozen.py",
+            "blob": "1720a1713ffcd93c6e871d260f312bbd49dd7aa3",
+            "line": 12
+          }
+        ],
+        "target": "scripts/h62/item2/audit-v07-lowering/reproduce_frozen.py",
+        "target_blob": "1127cf4ffab53685dd985695f2c137284dcf4407",
+        "operation": "entered measured Python module; no fixture consumption credit",
+        "module_code_sha256": "1b1865afc787728f981d59d13e2a76f6484ae52751ec1228a7bd2925d62f17c5",
+        "python": [
+          3,
+          12,
+          14
+        ],
+        "module_frame_line": 0,
+        "collector_sha256": "74a8ac05edadf4a4a1cf901134a8c23b24a844284ee8fe2a5f4e6fba274d251c"
+      },
+      {
+        "runner": "validated:tests/h62/item2/audit-v10-storage/test_transport_pairs.py",
+        "input_revision": "4c8e0f3dcd5e35e81de6a65a69532ac5e3ccaef7",
+        "frames": [
+          {
+            "path": "tests/h62/item2/audit-v10-storage/test_transport_pairs.py",
+            "blob": "4a048711ca1ad4e04f7184f4d6942002de1ea509",
+            "line": 9
+          }
+        ],
+        "target": "scripts/h62/item2/audit-v10-storage/transport_pairs.py",
+        "target_blob": "91c3942f87d9250ea0a6c28ee2f1cd2f9187767b",
+        "operation": "entered measured Python module; no fixture consumption credit",
+        "module_code_sha256": "efd187b6d4e73c9cc6fd9283764edf9337c7ae5171c0e1fd98b5b8f02f77e963",
+        "python": [
+          3,
+          12,
+          14
+        ],
+        "module_frame_line": 0,
+        "collector_sha256": "74a8ac05edadf4a4a1cf901134a8c23b24a844284ee8fe2a5f4e6fba274d251c"
+      },
+      {
+        "runner": "validated:tests/h62/item3/g52-differential/test_archive_census.py",
+        "input_revision": "4c8e0f3dcd5e35e81de6a65a69532ac5e3ccaef7",
+        "frames": [
+          {
+            "path": "tests/h62/item3/g52-differential/test_archive_census.py",
+            "blob": "3713c01db021020107d8678f8a07175ed750f76f",
+            "line": 7
+          }
+        ],
+        "target": "scripts/h62/item3/g52-differential/archive_census.py",
+        "target_blob": "93d6c287e8d8ae5e2273cf7d678e44029e0e6970",
+        "operation": "entered measured Python module; no fixture consumption credit",
+        "module_code_sha256": "bf7d0ae5758cd2f4419faaf94fcd8972e3bb564541ccc29b50bba477647effee",
+        "python": [
+          3,
+          12,
+          14
+        ],
+        "module_frame_line": 0,
+        "collector_sha256": "74a8ac05edadf4a4a1cf901134a8c23b24a844284ee8fe2a5f4e6fba274d251c"
+      },
+      {
+        "runner": "validated:tests/h62/item3/g52-differential/test_blockchain_export.py",
+        "input_revision": "4c8e0f3dcd5e35e81de6a65a69532ac5e3ccaef7",
+        "frames": [
+          {
+            "path": "tests/h62/item3/g52-differential/test_blockchain_export.py",
+            "blob": "b44088c3b5490594d5af1a84e280bd13f697b807",
+            "line": 12
+          }
+        ],
+        "target": "scripts/h62/item3/g52-differential/eest_export.py",
+        "target_blob": "ad0353db5e76003b5b825364bac84c16ec7cd341",
+        "operation": "entered measured Python module; no fixture consumption credit",
+        "module_code_sha256": "7fc906eaaa6c1537f9e3ae294067453a955d77bc8875c3f1b97deb5a5f8e7871",
+        "python": [
+          3,
+          12,
+          14
+        ],
+        "module_frame_line": 0,
+        "collector_sha256": "74a8ac05edadf4a4a1cf901134a8c23b24a844284ee8fe2a5f4e6fba274d251c"
+      },
+      {
+        "runner": "validated:tests/h62/item3/g52-differential/test_engine_rejection_qualification.py",
+        "input_revision": "4c8e0f3dcd5e35e81de6a65a69532ac5e3ccaef7",
+        "frames": [
+          {
+            "path": "tests/h62/item3/g52-differential/test_engine_rejection_qualification.py",
+            "blob": "67503e15e50584fdaa2a11984c691416934e94d9",
+            "line": 16
+          },
+          {
+            "path": "scripts/h62/item3/g52-differential/engine_rejection_qualification.py",
+            "blob": "0d77f92b35517b17addcfe1fb4d6fd64f9c56bae",
+            "line": 15
+          }
+        ],
+        "target": "scripts/h62/item3/g52-differential/engine_execution_coverage.py",
+        "target_blob": "917d813323a5538db01285d753ecdfe294efcb90",
+        "operation": "entered measured Python module; no fixture consumption credit",
+        "module_code_sha256": "46df4ac4eafb4f9d17a871dfde75d10be88976902506406484bacdb4454d298a",
+        "python": [
+          3,
+          12,
+          14
+        ],
+        "module_frame_line": 0,
+        "collector_sha256": "74a8ac05edadf4a4a1cf901134a8c23b24a844284ee8fe2a5f4e6fba274d251c"
+      },
+      {
+        "runner": "validated:tests/h62/item3/g52-differential/test_engine_rejection_qualification.py",
+        "input_revision": "4c8e0f3dcd5e35e81de6a65a69532ac5e3ccaef7",
+        "frames": [
+          {
+            "path": "tests/h62/item3/g52-differential/test_engine_rejection_qualification.py",
+            "blob": "67503e15e50584fdaa2a11984c691416934e94d9",
+            "line": 16
+          }
+        ],
+        "target": "scripts/h62/item3/g52-differential/engine_rejection_qualification.py",
+        "target_blob": "0d77f92b35517b17addcfe1fb4d6fd64f9c56bae",
+        "operation": "entered measured Python module; no fixture consumption credit",
+        "module_code_sha256": "cc247b5b567707b1475a44cbaa7a28266303b4fdc9f2f8ef38cd098e2abefc9d",
+        "python": [
+          3,
+          12,
+          14
+        ],
+        "module_frame_line": 0,
+        "collector_sha256": "74a8ac05edadf4a4a1cf901134a8c23b24a844284ee8fe2a5f4e6fba274d251c"
+      },
+      {
+        "runner": "validated:tests/h62/item4/generic-p10/test_runtime.py",
+        "input_revision": "4c8e0f3dcd5e35e81de6a65a69532ac5e3ccaef7",
+        "frames": [
+          {
+            "path": "tests/h62/item4/generic-p10/test_runtime.py",
+            "blob": "26f0dbba174c1cecf8c3856e0bd590f53b5a69c4",
+            "line": 15
+          },
+          {
+            "path": "scripts/h62/item4/generic-p10/measure.py",
+            "blob": "d2f9dbbb2a1f1349a3d09a748cdae4b4dc8d5e2e",
+            "line": 19
+          }
+        ],
+        "target": "scripts/h62/item4/generic-p10/export_migration.py",
+        "target_blob": "00894beb914185cf42f10d7cf9cfeb57d8cced7c",
+        "operation": "entered measured Python module; no fixture consumption credit",
+        "module_code_sha256": "69f2b0e6670dfcb284a2cfd46cca3c4a5e3b7e8a086e11cee6e32d821a63d182",
+        "python": [
+          3,
+          12,
+          14
+        ],
+        "module_frame_line": 0,
+        "collector_sha256": "74a8ac05edadf4a4a1cf901134a8c23b24a844284ee8fe2a5f4e6fba274d251c"
+      },
+      {
+        "runner": "validated:tests/h62/item4/generic-p10/test_runtime.py",
+        "input_revision": "4c8e0f3dcd5e35e81de6a65a69532ac5e3ccaef7",
+        "frames": [
+          {
+            "path": "tests/h62/item4/generic-p10/test_runtime.py",
+            "blob": "26f0dbba174c1cecf8c3856e0bd590f53b5a69c4",
+            "line": 15
+          },
+          {
+            "path": "scripts/h62/item4/generic-p10/measure.py",
+            "blob": "d2f9dbbb2a1f1349a3d09a748cdae4b4dc8d5e2e",
+            "line": 21
+          },
+          {
+            "path": "scripts/h62/item4/generic-p10/accept_semantics.py",
+            "blob": "f08074788981d2635375dcd531c34621ab29faa8",
+            "line": 14
+          }
+        ],
+        "target": "scripts/h62/item4/generic-p10/make_axiom_audit.py",
+        "target_blob": "271300562d79ae5b0d043ae0d4d31b87cfd22005",
+        "operation": "entered measured Python module; no fixture consumption credit",
+        "module_code_sha256": "912f47b481d44f2640e23d391484ce0152961620bc3a9ad63bcb3c994ee74b51",
+        "python": [
+          3,
+          12,
+          14
+        ],
+        "module_frame_line": 0,
+        "collector_sha256": "74a8ac05edadf4a4a1cf901134a8c23b24a844284ee8fe2a5f4e6fba274d251c"
+      },
+      {
+        "runner": "validated:tests/h62/item4/generic-p10/test_runtime.py",
+        "input_revision": "4c8e0f3dcd5e35e81de6a65a69532ac5e3ccaef7",
+        "frames": [
+          {
+            "path": "tests/h62/item4/generic-p10/test_runtime.py",
+            "blob": "26f0dbba174c1cecf8c3856e0bd590f53b5a69c4",
+            "line": 15
+          },
+          {
+            "path": "scripts/h62/item4/generic-p10/measure.py",
+            "blob": "d2f9dbbb2a1f1349a3d09a748cdae4b4dc8d5e2e",
+            "line": 19
+          },
+          {
+            "path": "scripts/h62/item4/generic-p10/export_migration.py",
+            "blob": "00894beb914185cf42f10d7cf9cfeb57d8cced7c",
+            "line": 14
+          }
+        ],
+        "target": "scripts/h62/item4/generic-p10/make_candidate.py",
+        "target_blob": "0ef9f88b9e8d48e82a69745411702b4ec00c4bae",
+        "operation": "entered measured Python module; no fixture consumption credit",
+        "module_code_sha256": "2aa568123511fd275a0a644f69689a285a6c8da0a86cc4998858e687af8d51c9",
+        "python": [
+          3,
+          12,
+          14
+        ],
+        "module_frame_line": 0,
+        "collector_sha256": "74a8ac05edadf4a4a1cf901134a8c23b24a844284ee8fe2a5f4e6fba274d251c"
+      },
+      {
+        "runner": "validated:tests/h62/item4/generic-v08/test_census.py",
+        "input_revision": "4c8e0f3dcd5e35e81de6a65a69532ac5e3ccaef7",
+        "frames": [
+          {
+            "path": "tests/h62/item4/generic-v08/test_census.py",
+            "blob": "3e249ffb2be489ed0067ccba94f2f6c94ac06a48",
+            "line": 69
+          },
+          {
+            "path": "tests/h62/item4/generic-v08/test_census.py",
+            "blob": "3e249ffb2be489ed0067ccba94f2f6c94ac06a48",
+            "line": 52
+          }
+        ],
+        "target": "scripts/h62/item4/generic-v08/accept.py",
+        "target_blob": "8136082eda2535fbbe26c3f7bcec6e3295370ccc",
+        "operation": "entered measured Python module; no fixture consumption credit",
+        "module_code_sha256": "724dd72a2757a130b8f2b98bf4c74fab837646a452d6a6f201e4ba379004dd0d",
+        "python": [
+          3,
+          12,
+          14
+        ],
+        "module_frame_line": 0,
+        "collector_sha256": "74a8ac05edadf4a4a1cf901134a8c23b24a844284ee8fe2a5f4e6fba274d251c"
+      },
+      {
+        "runner": "validated:tests/h62/item4/generic-v08/test_width_v2_route.py",
+        "input_revision": "4c8e0f3dcd5e35e81de6a65a69532ac5e3ccaef7",
+        "frames": [
+          {
+            "path": "tests/h62/item4/generic-v08/test_width_v2_route.py",
+            "blob": "4672a33c8e56a5659bf035fe3163e32aba9b1cdb",
+            "line": 248
+          },
+          {
+            "path": "tests/h62/item4/generic-v08/test_width_v2_route.py",
+            "blob": "4672a33c8e56a5659bf035fe3163e32aba9b1cdb",
+            "line": 165
+          },
+          {
+            "path": "tests/h62/item4/generic-v08/test_width_v2_route.py",
+            "blob": "4672a33c8e56a5659bf035fe3163e32aba9b1cdb",
+            "line": 159
+          }
+        ],
+        "target": "scripts/h62/item4/generic-v08/bounded.py",
+        "target_blob": "790321ece20c40b1d66e43c4c5215916a5237c65",
+        "operation": "entered measured Python module; no fixture consumption credit",
+        "module_code_sha256": "fce23ca659b7b8ea3a5d65a47fb544311f51fcf61016e428492179834d727ad2",
+        "python": [
+          3,
+          12,
+          14
+        ],
+        "module_frame_line": 0,
+        "collector_sha256": "74a8ac05edadf4a4a1cf901134a8c23b24a844284ee8fe2a5f4e6fba274d251c"
+      },
+      {
+        "runner": "validated:tests/h62/item4/generic-v08/test_drift.py",
+        "input_revision": "4c8e0f3dcd5e35e81de6a65a69532ac5e3ccaef7",
+        "frames": [
+          {
+            "path": "tests/h62/item4/generic-v08/test_drift.py",
+            "blob": "1fb3e96a8f9753b6fe779a871f27a32d0fedcf68",
+            "line": 5
+          }
+        ],
+        "target": "scripts/h62/item4/generic-v08/drift.py",
+        "target_blob": "758da416d2a212029db63f64f5eb24afb0836ad9",
+        "operation": "entered measured Python module; no fixture consumption credit",
+        "module_code_sha256": "97b2667432c5f54e7190bd05903aa1c41f85cafd622e9ab787a4c029f8d04f65",
+        "python": [
+          3,
+          12,
+          14
+        ],
+        "module_frame_line": 0,
+        "collector_sha256": "74a8ac05edadf4a4a1cf901134a8c23b24a844284ee8fe2a5f4e6fba274d251c"
+      },
+      {
+        "runner": "validated:tests/h62/item4/generic-v08/test_width_v2_scope.py",
+        "input_revision": "4c8e0f3dcd5e35e81de6a65a69532ac5e3ccaef7",
+        "frames": [
+          {
+            "path": "tests/h62/item4/generic-v08/test_width_v2_scope.py",
+            "blob": "c8203b406f3d287609d008120ea8bb9725204a05",
+            "line": 15
+          }
+        ],
+        "target": "scripts/h62/item4/generic-v08/reproduce-width-v2.py",
+        "target_blob": "fd592c7823dbb18f26e82bda2a8b7f94b74a685b",
+        "operation": "entered measured Python module; no fixture consumption credit",
+        "module_code_sha256": "f07e08b59d68ec84699a60d9669674eacff7bacf8a1bd5ecd6fd6b4447bee4f5",
+        "python": [
+          3,
+          12,
+          14
+        ],
+        "module_frame_line": 0,
+        "collector_sha256": "74a8ac05edadf4a4a1cf901134a8c23b24a844284ee8fe2a5f4e6fba274d251c"
+      },
+      {
+        "runner": "validated:tests/h62/item4/generic-v08/test_width_v2_lifecycle.py",
+        "input_revision": "4c8e0f3dcd5e35e81de6a65a69532ac5e3ccaef7",
+        "frames": [
+          {
+            "path": "tests/h62/item4/generic-v08/test_width_v2_lifecycle.py",
+            "blob": "de3b9f1b41c8e4e7fcbaeefcfe0be990b7582861",
+            "line": 21
+          }
+        ],
+        "target": "scripts/h62/item4/generic-v08/width_resources.py",
+        "target_blob": "8cb706b6ffba140bfb0da594cd6359f0e18849d2",
+        "operation": "entered measured Python module; no fixture consumption credit",
+        "module_code_sha256": "5b3de0792ef3713662dd68f42bf6642ea17e2d68aada272654530713fefe911f",
+        "python": [
+          3,
+          12,
+          14
+        ],
+        "module_frame_line": 0,
+        "collector_sha256": "74a8ac05edadf4a4a1cf901134a8c23b24a844284ee8fe2a5f4e6fba274d251c"
+      },
+      {
+        "runner": "validated:tests/h62/item4/generic-v08/test_width_v2_scope.py",
+        "input_revision": "4c8e0f3dcd5e35e81de6a65a69532ac5e3ccaef7",
+        "frames": [
+          {
+            "path": "tests/h62/item4/generic-v08/test_width_v2_scope.py",
+            "blob": "c8203b406f3d287609d008120ea8bb9725204a05",
+            "line": 12
+          }
+        ],
+        "target": "scripts/h62/item4/generic-v08/width_scope.py",
+        "target_blob": "527f31b7761429cb3e2b5f416692a9ce349f5615",
+        "operation": "entered measured Python module; no fixture consumption credit",
+        "module_code_sha256": "8a9c7d2dd99e1f70e6e8aef5b044dd7b27cbade3ebaf818b9d79421364ac9254",
+        "python": [
+          3,
+          12,
+          14
+        ],
+        "module_frame_line": 0,
+        "collector_sha256": "74a8ac05edadf4a4a1cf901134a8c23b24a844284ee8fe2a5f4e6fba274d251c"
+      },
+      {
+        "runner": "validated:tests/h62/item5/statement-graph/test_source_intake.py",
+        "input_revision": "4c8e0f3dcd5e35e81de6a65a69532ac5e3ccaef7",
+        "frames": [
+          {
+            "path": "tests/h62/item5/statement-graph/test_source_intake.py",
+            "blob": "7092b3c4aa1932dd265aed54f0dffc349134bd1c",
+            "line": 23
+          },
+          {
+            "path": "tests/h62/item5/statement-graph/test_source_intake.py",
+            "blob": "7092b3c4aa1932dd265aed54f0dffc349134bd1c",
+            "line": 19
+          }
+        ],
+        "target": "scripts/h62/item5/statement-graph/graph.py",
+        "target_blob": "5a455596d3fa56f6e2f82863aab75ed27fa7cba2",
+        "operation": "entered measured Python module; no fixture consumption credit",
+        "module_code_sha256": "e8e81b56a6149b39142bc7cb6399322eae9507b2211b42ed226450e0144f7d36",
+        "python": [
+          3,
+          12,
+          14
+        ],
+        "module_frame_line": 0,
+        "collector_sha256": "74a8ac05edadf4a4a1cf901134a8c23b24a844284ee8fe2a5f4e6fba274d251c"
+      },
+      {
+        "runner": "validated:tests/h62/item6/migrate-automation/test_census.py",
+        "input_revision": "4c8e0f3dcd5e35e81de6a65a69532ac5e3ccaef7",
+        "frames": [
+          {
+            "path": "tests/h62/item6/migrate-automation/test_census.py",
+            "blob": "bfcc1ee3d57ddbfa8cb8c54859c4cf2084f17a35",
+            "line": 4
+          }
+        ],
+        "target": "scripts/h62/item6/migrate-automation/census.py",
+        "target_blob": "5ddbc95e655a5cfea6c372c084762eab79a8a7dc",
+        "operation": "entered measured Python module; no fixture consumption credit",
+        "module_code_sha256": "6f88237b3c0f80b992119efad2261b6e16682c3466e5a6a5973977277fbdf530",
+        "python": [
+          3,
+          12,
+          14
+        ],
+        "module_frame_line": 0,
+        "collector_sha256": "74a8ac05edadf4a4a1cf901134a8c23b24a844284ee8fe2a5f4e6fba274d251c"
+      },
+      {
+        "runner": "validated:tests/h62/item6/migrate-backend/test_api_inventory.py",
+        "input_revision": "4c8e0f3dcd5e35e81de6a65a69532ac5e3ccaef7",
+        "frames": [
+          {
+            "path": "tests/h62/item6/migrate-backend/test_api_inventory.py",
+            "blob": "b8947be9d97a5c957d3c1868961823842fc9a9f5",
+            "line": 11
+          }
+        ],
+        "target": "scripts/h62/item6/migrate-backend/api_inventory.py",
+        "target_blob": "5b58267d3510189331ebb81813b2ea63aab2c225",
+        "operation": "entered measured Python module; no fixture consumption credit",
+        "module_code_sha256": "a19a994923fbc90903e30ec63953fdfea54a3c26ba339495cec0bd8ee32c8baf",
+        "python": [
+          3,
+          12,
+          14
+        ],
+        "module_frame_line": 0,
+        "collector_sha256": "74a8ac05edadf4a4a1cf901134a8c23b24a844284ee8fe2a5f4e6fba274d251c"
+      },
+      {
+        "runner": "validated:tests/h62/item6/migrate-backend/test_census.py",
+        "input_revision": "4c8e0f3dcd5e35e81de6a65a69532ac5e3ccaef7",
+        "frames": [
+          {
+            "path": "tests/h62/item6/migrate-backend/test_census.py",
+            "blob": "a68a1227c9ed6ad1caae5e0924411e9117fff227",
+            "line": 8
+          }
+        ],
+        "target": "scripts/h62/item6/migrate-backend/census.py",
+        "target_blob": "26b7e42f9e7840a1761a4591e348ddfbe9c11397",
+        "operation": "entered measured Python module; no fixture consumption credit",
+        "module_code_sha256": "2908b3d74a0ac51d8f2d23d553c16e42aabadb735b77e9db556e2a0ebad3f4f4",
+        "python": [
+          3,
+          12,
+          14
+        ],
+        "module_frame_line": 0,
+        "collector_sha256": "74a8ac05edadf4a4a1cf901134a8c23b24a844284ee8fe2a5f4e6fba274d251c"
+      },
+      {
+        "runner": "validated:tests/h62/item6/migrate-backend/test_linking_generator.py",
+        "input_revision": "4c8e0f3dcd5e35e81de6a65a69532ac5e3ccaef7",
+        "frames": [
+          {
+            "path": "tests/h62/item6/migrate-backend/test_linking_generator.py",
+            "blob": "6eb0125027325bcd03bdbf842f7da22e45267311",
+            "line": 8
+          }
+        ],
+        "target": "scripts/h62/item6/migrate-backend/generate_linking_fixture.py",
+        "target_blob": "6606e31b289a2da1c54babb3600594211c48c5fd",
+        "operation": "entered measured Python module; no fixture consumption credit",
+        "module_code_sha256": "cb595fbb36d85385094c3542ba58cdcecf67ddfd6afb750ec94e8f957784ae0e",
+        "python": [
+          3,
+          12,
+          14
+        ],
+        "module_frame_line": 0,
+        "collector_sha256": "74a8ac05edadf4a4a1cf901134a8c23b24a844284ee8fe2a5f4e6fba274d251c"
+      },
+      {
+        "runner": "validated:tests/h62/item6/migrate-backend/test_reconcile_imports.py",
+        "input_revision": "4c8e0f3dcd5e35e81de6a65a69532ac5e3ccaef7",
+        "frames": [
+          {
+            "path": "tests/h62/item6/migrate-backend/test_reconcile_imports.py",
+            "blob": "489c1166a11148986b319afa0883f3cd5c967a2d",
+            "line": 14
+          }
+        ],
+        "target": "scripts/h62/item6/migrate-backend/reconcile_imports.py",
+        "target_blob": "b8b21e81e077f1304b8277f204e51ba2808210fd",
+        "operation": "entered measured Python module; no fixture consumption credit",
+        "module_code_sha256": "e7ecca9162a722e77ca67196d4f6ebeca5c48cf11ba990eea95b2bee5cdea37c",
+        "python": [
+          3,
+          12,
+          14
+        ],
+        "module_frame_line": 0,
+        "collector_sha256": "74a8ac05edadf4a4a1cf901134a8c23b24a844284ee8fe2a5f4e6fba274d251c"
+      },
+      {
+        "runner": "validated:tests/h62/item6/migrate-bridge/test_census.py",
+        "input_revision": "4c8e0f3dcd5e35e81de6a65a69532ac5e3ccaef7",
+        "frames": [
+          {
+            "path": "tests/h62/item6/migrate-bridge/test_census.py",
+            "blob": "ebac78d0f3deb487115bb8b630fefb1e40ee5d66",
+            "line": 4
+          }
+        ],
+        "target": "scripts/h62/item6/migrate-bridge/census.py",
+        "target_blob": "9d2b2405ada2ce6273d318a76ea2d9f1614049e3",
+        "operation": "entered measured Python module; no fixture consumption credit",
+        "module_code_sha256": "26ad644cf281e2411d8414e3aaf164bae98aa2df7dbeb3490e556b575482dc8c",
+        "python": [
+          3,
+          12,
+          14
+        ],
+        "module_frame_line": 0,
+        "collector_sha256": "74a8ac05edadf4a4a1cf901134a8c23b24a844284ee8fe2a5f4e6fba274d251c"
+      },
+      {
+        "runner": "validated:tests/h62/item6/migrate-bridge/test_build_preflight.py",
+        "input_revision": "4c8e0f3dcd5e35e81de6a65a69532ac5e3ccaef7",
+        "frames": [
+          {
+            "path": "tests/h62/item6/migrate-bridge/test_build_preflight.py",
+            "blob": "473435e4082c1213417fe9d8db064a15666ff839",
+            "line": 4
+          }
+        ],
+        "target": "scripts/h62/item6/migrate-bridge/run-bounded.py",
+        "target_blob": "3f9ec179c41caade81f61ff36d823c6eaf882a4c",
+        "operation": "entered measured Python module; no fixture consumption credit",
+        "module_code_sha256": "ee9fd6e8654eaef580e8c7968a88c658377b18f1d8c738f919fb85b6022a2419",
+        "python": [
+          3,
+          12,
+          14
+        ],
+        "module_frame_line": 0,
+        "collector_sha256": "74a8ac05edadf4a4a1cf901134a8c23b24a844284ee8fe2a5f4e6fba274d251c"
+      },
+      {
+        "runner": "validated:tests/h62/item6/migrate-examples/acceptance.py",
+        "input_revision": "4c8e0f3dcd5e35e81de6a65a69532ac5e3ccaef7",
+        "frames": [
+          {
+            "path": "tests/h62/item6/migrate-examples/acceptance.py",
+            "blob": "c107aeade7f170db7cb958bede0a00fd7a178dd9",
+            "line": 8
+          },
+          {
+            "path": "tests/h62/item6/migrate-examples/acceptance.py",
+            "blob": "c107aeade7f170db7cb958bede0a00fd7a178dd9",
+            "line": 7
+          }
+        ],
+        "target": "scripts/h62/item6/migrate-examples/bounded-run.py",
+        "target_blob": "44a3bcb2ad004217ee21b50913b5c5beaced88c8",
+        "operation": "entered measured Python module; no fixture consumption credit",
+        "module_code_sha256": "a5c21b134d3b49dde5da30c434baa79a6119c98ac2e030dbf7ac60f70fb35fe6",
+        "python": [
+          3,
+          12,
+          14
+        ],
+        "module_frame_line": 0,
+        "collector_sha256": "74a8ac05edadf4a4a1cf901134a8c23b24a844284ee8fe2a5f4e6fba274d251c"
+      },
+      {
+        "runner": "validated:tests/h62/item6/migrate-examples/acceptance.py",
+        "input_revision": "4c8e0f3dcd5e35e81de6a65a69532ac5e3ccaef7",
+        "frames": [
+          {
+            "path": "tests/h62/item6/migrate-examples/acceptance.py",
+            "blob": "c107aeade7f170db7cb958bede0a00fd7a178dd9",
+            "line": 8
+          },
+          {
+            "path": "tests/h62/item6/migrate-examples/acceptance.py",
+            "blob": "c107aeade7f170db7cb958bede0a00fd7a178dd9",
+            "line": 7
+          }
+        ],
+        "target": "scripts/h62/item6/migrate-examples/interfaces.py",
+        "target_blob": "8f174e8eb72bc2ccde8d323b50a52fa7e379c12f",
+        "operation": "entered measured Python module; no fixture consumption credit",
+        "module_code_sha256": "888a2d085bb2fcc0e9c7713754bf6067df0faadc1591b19ddda8f1c241de19b1",
+        "python": [
+          3,
+          12,
+          14
+        ],
+        "module_frame_line": 0,
+        "collector_sha256": "74a8ac05edadf4a4a1cf901134a8c23b24a844284ee8fe2a5f4e6fba274d251c"
+      },
+      {
+        "runner": "validated:tests/h62/item6/migrate-frontend/test_measure.py",
+        "input_revision": "4c8e0f3dcd5e35e81de6a65a69532ac5e3ccaef7",
+        "frames": [
+          {
+            "path": "tests/h62/item6/migrate-frontend/test_measure.py",
+            "blob": "67e6406d0a42c393ef6b422b4dff0b167336251d",
+            "line": 14
+          }
+        ],
+        "target": "scripts/h62/item6/migrate-frontend/measure.py",
+        "target_blob": "505dfe2874e25035c3c2ea92fa71575f99da846e",
+        "operation": "entered measured Python module; no fixture consumption credit",
+        "module_code_sha256": "acd6be883d6dc7b295ef38a3ce90594169727e149ae5200dbe35c919bb934caa",
+        "python": [
+          3,
+          12,
+          14
+        ],
+        "module_frame_line": 0,
+        "collector_sha256": "74a8ac05edadf4a4a1cf901134a8c23b24a844284ee8fe2a5f4e6fba274d251c"
+      },
+      {
+        "runner": "validated:tests/h62/item6/migrate-typing/test_census.py",
+        "input_revision": "4c8e0f3dcd5e35e81de6a65a69532ac5e3ccaef7",
+        "frames": [
+          {
+            "path": "tests/h62/item6/migrate-typing/test_census.py",
+            "blob": "9d7088a5b11815279639338fa148ec3f0198b91a",
+            "line": 5
+          }
+        ],
+        "target": "scripts/h62/item6/migrate-typing/census.py",
+        "target_blob": "38ae2141f1f2a83b006a8dcd8640a7c5c8e7495a",
+        "operation": "entered measured Python module; no fixture consumption credit",
+        "module_code_sha256": "675110fde6c93da5cf0746e3b96ea5f865ba7887df93dd2ed00d71a4fc6f84be",
         "python": [
           3,
           12,
