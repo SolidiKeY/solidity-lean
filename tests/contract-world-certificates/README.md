@@ -44,8 +44,8 @@ bash tests/contract-world-certificates/bounded-check-command.sh 'time ./run-lean
 ```
  Pipeline
 replay copies the entire existing control file and regenerates hash-checked
-fixtures. For a fresh upstream replay, change `--out` to a new directory so the
-archived reports remain intact. The initial malformed replay invocation ran no
+fixtures. For a fresh upstream replay, change `--out` to a new external evidence directory.
+Prior reports remain immutable in the private archive. The initial malformed replay invocation ran no
 fixtures; its [log is archived](https://github.com/SolidiKeY/solidity-lean-coord/blob/31351403baef6c2ce1e047fc093d9fdd5b7b67e7/evidence/plan-x1e-classify-rest-1116/x1e-classify-rest/tests/contract-world-certificates/upstream-invocation-failed.log) and was not counted as evidence.
 
 Trust, orphan, layer, strict automation, inventory consistency and the affected
