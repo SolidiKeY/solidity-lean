@@ -283,5 +283,49 @@
         "other_reads": "unresolved"
       }
     ]
-  }
+  },
+  "roles": [
+    {
+      "path": "tests/editor-parity/audit.json",
+      "blob": "278043e509edcc6cdad8735dfde27992a8f07ce4",
+      "anchor": "  \"fullParityEstablished\": false,",
+      "role": "Historical record: Saved editor-parity measurement or review; not current validation. UNVERIFIABLE closed gap (H151/H30/H41, QX1E-INV491): tests/editor-parity/inventory/dafny-editor-features.json, 776611 bytes, payload SHA256 d891815fcf92a6bbdf9fb5806ce04ee150a8ccda5baa20970ae675f3498eda0e; original archive /workspace/dafny-time-limit-20261107/inventory/bulk.tar.gz, SHA256 22dd1fad3f79b2284e2edd5d7207eab29576e7bc5ef5cb821ae61057418d3e99. original VM offline; no checksum-identical copy. Do not rebuild or substitute the 778412-byte related-location payload. parity-gate.cjs assessment.evidenceFiles/testEvidence.artifact routes remain uncertified. This report is retained, not declared unused or deletable; no validated-consumer, route, parity or proof credit."
+    },
+    {
+      "path": "tests/editor-parity/baseline.json",
+      "blob": "1f983011e29f972a2542c191bf047bf69048273f",
+      "anchor": "  \"generated\": \"2026-10-31T14:47:11.110Z\",",
+      "role": "Historical record: Saved editor-parity measurement or review; not current validation. UNVERIFIABLE closed gap (H151/H30/H41, QX1E-INV491): tests/editor-parity/inventory/dafny-editor-features.json, 776611 bytes, payload SHA256 d891815fcf92a6bbdf9fb5806ce04ee150a8ccda5baa20970ae675f3498eda0e; original archive /workspace/dafny-time-limit-20261107/inventory/bulk.tar.gz, SHA256 22dd1fad3f79b2284e2edd5d7207eab29576e7bc5ef5cb821ae61057418d3e99. original VM offline; no checksum-identical copy. Do not rebuild or substitute the 778412-byte related-location payload. parity-gate.cjs assessment.evidenceFiles/testEvidence.artifact routes remain uncertified. This report is retained, not declared unused or deletable; no validated-consumer, route, parity or proof credit."
+    },
+    {
+      "path": "tests/editor-parity/compiler-project-baseline.json",
+      "blob": "150c8a0f86285460c9242c79d8ff4d5db23e0685",
+      "anchor": "  \"generated\": \"2026-10-31T21:28:22.856Z\",",
+      "role": "Historical record: Saved editor-parity measurement or review; not current validation. UNVERIFIABLE closed gap (H151/H30/H41, QX1E-INV491): tests/editor-parity/inventory/dafny-editor-features.json, 776611 bytes, payload SHA256 d891815fcf92a6bbdf9fb5806ce04ee150a8ccda5baa20970ae675f3498eda0e; original archive /workspace/dafny-time-limit-20261107/inventory/bulk.tar.gz, SHA256 22dd1fad3f79b2284e2edd5d7207eab29576e7bc5ef5cb821ae61057418d3e99. original VM offline; no checksum-identical copy. Do not rebuild or substitute the 778412-byte related-location payload. parity-gate.cjs assessment.evidenceFiles/testEvidence.artifact routes remain uncertified. This report is retained, not declared unused or deletable; no validated-consumer, route, parity or proof credit."
+    },
+    {
+      "path": "tests/editor-parity/compiler-project-validation.json",
+      "blob": "50b77aa2a9fb394f083c9c5d51ff84ec4ac979e7",
+      "anchor": "  \"recorded\": \"2026-10-31T21:28:22.901Z\",",
+      "role": "Historical record: Saved editor-parity measurement or review; not current validation. UNVERIFIABLE closed gap (H151/H30/H41, QX1E-INV491): tests/editor-parity/inventory/dafny-editor-features.json, 776611 bytes, payload SHA256 d891815fcf92a6bbdf9fb5806ce04ee150a8ccda5baa20970ae675f3498eda0e; original archive /workspace/dafny-time-limit-20261107/inventory/bulk.tar.gz, SHA256 22dd1fad3f79b2284e2edd5d7207eab29576e7bc5ef5cb821ae61057418d3e99. original VM offline; no checksum-identical copy. Do not rebuild or substitute the 778412-byte related-location payload. parity-gate.cjs assessment.evidenceFiles/testEvidence.artifact routes remain uncertified. This report is retained, not declared unused or deletable; no validated-consumer, route, parity or proof credit."
+    },
+    {
+      "path": "tests/editor-parity/lsp-baseline.json",
+      "blob": "dcda792d8e14b33ef9145d5e0b1a01d2e642aa5b",
+      "anchor": "  \"generated\": \"2026-10-31T18:37:35.999Z\",",
+      "role": "Historical record: Saved editor-parity measurement or review; not current validation. UNVERIFIABLE closed gap (H151/H30/H41, QX1E-INV491): tests/editor-parity/inventory/dafny-editor-features.json, 776611 bytes, payload SHA256 d891815fcf92a6bbdf9fb5806ce04ee150a8ccda5baa20970ae675f3498eda0e; original archive /workspace/dafny-time-limit-20261107/inventory/bulk.tar.gz, SHA256 22dd1fad3f79b2284e2edd5d7207eab29576e7bc5ef5cb821ae61057418d3e99. original VM offline; no checksum-identical copy. Do not rebuild or substitute the 778412-byte related-location payload. parity-gate.cjs assessment.evidenceFiles/testEvidence.artifact routes remain uncertified. This report is retained, not declared unused or deletable; no validated-consumer, route, parity or proof credit."
+    },
+    {
+      "path": "tests/editor-parity/lsp-validation.json",
+      "blob": "5a9f5b1c0ebf104d55ecfe98993340d13bfc5c02",
+      "anchor": "  \"recorded\": \"2026-10-31T18:31:43.169Z\",",
+      "role": "Historical record: Saved editor-parity measurement or review; not current validation. UNVERIFIABLE closed gap (H151/H30/H41, QX1E-INV491): tests/editor-parity/inventory/dafny-editor-features.json, 776611 bytes, payload SHA256 d891815fcf92a6bbdf9fb5806ce04ee150a8ccda5baa20970ae675f3498eda0e; original archive /workspace/dafny-time-limit-20261107/inventory/bulk.tar.gz, SHA256 22dd1fad3f79b2284e2edd5d7207eab29576e7bc5ef5cb821ae61057418d3e99. original VM offline; no checksum-identical copy. Do not rebuild or substitute the 778412-byte related-location payload. parity-gate.cjs assessment.evidenceFiles/testEvidence.artifact routes remain uncertified. This report is retained, not declared unused or deletable; no validated-consumer, route, parity or proof credit."
+    },
+    {
+      "path": "tests/editor-parity/stdio-baseline.json",
+      "blob": "226ad819e352b43dc521909cd8c1308305c138f0",
+      "anchor": "  \"generated\": \"2026-11-03T23:16:38.244Z\",",
+      "role": "Historical record: Saved editor-parity measurement or review; not current validation. UNVERIFIABLE closed gap (H151/H30/H41, QX1E-INV491): tests/editor-parity/inventory/dafny-editor-features.json, 776611 bytes, payload SHA256 d891815fcf92a6bbdf9fb5806ce04ee150a8ccda5baa20970ae675f3498eda0e; original archive /workspace/dafny-time-limit-20261107/inventory/bulk.tar.gz, SHA256 22dd1fad3f79b2284e2edd5d7207eab29576e7bc5ef5cb821ae61057418d3e99. original VM offline; no checksum-identical copy. Do not rebuild or substitute the 778412-byte related-location payload. parity-gate.cjs assessment.evidenceFiles/testEvidence.artifact routes remain uncertified. This report is retained, not declared unused or deletable; no validated-consumer, route, parity or proof credit."
+    }
+  ]
 }
