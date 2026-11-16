@@ -109,3 +109,7 @@ class DifferentialControls(unittest.TestCase):
     result=d.collect(Path(tmp)/'new')
    launch.assert_not_called();self.assertEqual(result['preflightResources'],observed)
    self.assertEqual(result['exit'],2);self.assertIsNone(result['rawCommandExit'])
+
+
+if __name__ == "__main__":
+    unittest.main()
