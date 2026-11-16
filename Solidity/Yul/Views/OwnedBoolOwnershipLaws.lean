@@ -48,12 +48,8 @@ theorem RepresentedOwnershipPlan.rollback {E ds d active Γ F layout fixed writt
 theorem RepresentedOwnershipPlan.unchanged_encoding {E ds d active Γ F layout fixed written value s r encoding}
     (p : @RepresentedOwnershipPlan E ds d active Γ F layout fixed written value s r encoding)
     (sameWord : p.raw written=value) : p.nextEncoding=encoding := by
-  have sameRaw : p.nextRaw=p.raw := by
-    funext q
-    by_cases same : q=written
-    · subst q
-      exact (find_saveSlot p.raw written value).trans sameWord.symm
-    · exact find_saveSlot_other _ _ _ _ same
+  have sameRaw : p.nextRaw=p.raw :=
+    (congrArg (saveSlot p.raw written) sameWord.symm).trans (saveSlot_unchanged p.raw written)
   have view := finiteEncode_view _ _ _ p.raw
     (representedRegistry_separated _ _ _ _ ((packedSeparationCheck_iff _).mp p.oldChecked)) p.encoded
   unfold nextEncoding primitiveEncodingNext
@@ -64,12 +60,8 @@ theorem RepresentedOwnershipPlan.same_word_store {E ds d active Γ F layout fixe
     (p : @RepresentedOwnershipPlan E ds d active Γ F layout fixed written value s r encoding)
     (static : F.static=false) (sameWord : p.raw written=value) :
     (p.after.source.world.accounts F.this).storage=(s.2.ex.world.accounts F.this).storage := by
-  have sameRaw : p.nextRaw=p.raw := by
-    funext q
-    by_cases same : q=written
-    · subst q
-      exact (find_saveSlot p.raw written value).trans sameWord.symm
-    · exact find_saveSlot_other _ _ _ _ same
+  have sameRaw : p.nextRaw=p.raw :=
+    (congrArg (saveSlot p.raw written) sameWord.symm).trans (saveSlot_unchanged p.raw written)
   have view := finiteEncode_view _ _ _ p.raw
     (representedRegistry_separated _ _ _ _ ((packedSeparationCheck_iff _).mp p.oldChecked)) p.encoded
   have nextView : finiteView p.next (s.2.ex.world.accounts F.this).storage p.nextRaw := by
