@@ -235,6 +235,7 @@ commands; it never enters the core import graph.
 | `Hash/CompilerCorrect.lean` | Operational producers and encoding facts for the frozen E4A contract. |
 | `Hash/CompilerCorrect/Prefix.lean` | Finite-prefix transport and divergence-safe composition for the frozen E4A contract. |
 | `Solidity/Semantics/Storage/TypeLayout.lean` | AST-only full-word sizes, member offsets and bounds; preserves the established `Solidity.Evm` definitions and equation lemmas. |
+| `Solidity/Semantics/IntrinsicStorage/Layout.lean` | Typed full-word locations for dependent storage paths, nested hash ancestry, bounded keys and lossless byte encoding of preimages; reuses the shared type layout. |
 The diagnostic generators `scripts/h62/item2/audit-v08-adapters/generate_mapped_census.py`
 and `scripts/h62/item2/audit-v08-adapters/generate_calldata_census.py` accept
 `--stream` to omit the global imported-constant sort. This still materializes
