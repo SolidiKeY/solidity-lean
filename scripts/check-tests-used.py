@@ -13,12 +13,25 @@ A partial --write is useful for review but returns 1 and is NOT acceptance.
 Run recorded generators/reproducers only in disposable committed-byte copies;
 their commands can write fixed paths. Normal write/check never executes them.
 
-The use graph is an under-approximation. Explicit reviewed routes, imports and
-observed reads provide evidence; search matches do not. Unresolved paths remain
-unclassified and make the completion check fail. Recovery selects the first
-change in topological history introducing each blob at its path, verified against
-the measured object; shallow history may prevent recovery.
+The use graph is deliberately an under-approximation: explicit reviewed routes,
+Lean imports/solc_imports, observed Python reads of measured bytes, and
+separately reviewed opt-in entered-module claims. Module entry is execution
+coverage only: it grants no fixture reads, child execution or proof credit.
+Separately audited nonpassing unittest routes retain failure status and grant
+no passing-reproducer credit; actual test/setup method identity is required.
+Unreviewed unittest data reads remain unresolved even when the test passes.
+Unchanged demonstrated committed runners may be source-only roots with
+unavailable current validation, without fixture/child or passing-reproducer credit.
+Text matches are search candidates, never invocation edges. Shell expansion,
+Python eval/importlib, computed Node reads and producer environments need review;
+no static absence is sufficient to prune a candidate. Unresolved paths have a
+null class and make the completion check fail. Repository-wide policy scans
+are secondary coverage; keep requires independent test/runner/Lean/fixture use.
+The inventory cannot justify itself: classifier and inventory paths are excluded from candidate discovery.
 
+Recovery selects the first change in Git's topological history that introduced
+the measured blob at that path (no rename following). A unique merge resolution uses Git path-specific history. Every selected commit:path is checked against the measured object.
+No receipt, timestamp, workstation path or execution result belongs in this data.
 """
 from __future__ import annotations
 
@@ -99,68 +112,22 @@ def unique_json_object(pairs):
     return result
 
 
-FRAGMENT_SECTIONS = ('standalone', 'generators', 'reads', 'orphans', 'module_entries')
-
-
-def fragment_identity(section, row):
-    if not isinstance(row, dict): raise ValueError('fragment entry must be an object')
-    if section in ('roles', 'fixtures'):
-        keys = ('path',)
-    elif section in ('standalone', 'generators', 'orphans'):
-        keys = ('path', 'input_revision')
-    elif section in ('module_entries', 'reads'):
-        keys = ('runner', 'input_revision', 'target', 'frames')
-    else:
-        raise ValueError('unknown fragment section')
-    if any(k not in row for k in keys): raise ValueError('fragment entry lacks identity: ' + section)
-    values = [row[k] for k in keys]
-    if section in ('module_entries', 'reads'):
-        frames = row['frames']
-        if not isinstance(frames, list) or any(not isinstance(f, dict) for f in frames):
-            raise ValueError('invalid fragment frames')
-        values[-1] = [{k: v for k, v in frame.items() if k != 'blob'} for frame in frames]
-    return canonical(values)
-
-
-def read_fragments(directory):
-    result = {key: [] for key in FRAGMENT_SECTIONS + ('roles', 'fixtures')}
-    for path in sorted(directory.glob('*.json')):
-        document = json.loads(path.read_bytes(), object_pairs_hook=unique_json_object)
-        if (not isinstance(document, dict) or type(document.get('schema_version')) is not int
-                or document['schema_version'] != 1
-                or not set(document) <= {'schema_version', 'routes', 'catalog_extensions', 'roles', 'fixtures'}):
-            raise ValueError('invalid classification fragment: ' + str(path))
-        for group in ('routes', 'catalog_extensions'):
-            sections = document.get(group, {})
-            if not isinstance(sections, dict) or not set(sections) <= set(FRAGMENT_SECTIONS):
-                raise ValueError('invalid fragment catalog sections: ' + str(path))
-            for section, entries in sections.items():
-                if not isinstance(entries, list): raise ValueError('fragment section must be a list')
-                result[section].extend(entries)
-        for section in ('roles', 'fixtures'):
-            entries = document.get(section, [])
-            if not isinstance(entries, list): raise ValueError('fragment section must be a list')
-            result[section].extend(entries)
-    return result
-
-
-def merge_fragment_entries(section, existing, additions):
-    # Repeated identical claims are harmless; a different claim for the same
-    # identity is ambiguous and rejected, regardless of file order.
-    seen = {}
-    for row in existing:
-        key = fragment_identity(section, row)
-        if key in seen and canonical(seen[key]) != canonical(row): raise ValueError('conflicting existing ' + section + ' entries')
-        seen[key] = row
-    result = list(existing)
-    for row in additions:
-        key = fragment_identity(section, row)
-        if key in seen:
-            if canonical(seen[key]) != canonical(row): raise ValueError('conflicting ' + section + ' fragment entries')
-            continue
-        seen[key] = row
-        result.append(row)
-    return result
+fragment_directory = Path(__file__).with_name('check-tests-used.d')
+fragment_helper = fragment_directory / 'fragments.py'
+if fragment_helper.is_file():
+    fragment_spec = importlib.util.spec_from_file_location('tests_used_fragments', fragment_helper)
+    fragment_rules = importlib.util.module_from_spec(fragment_spec); fragment_spec.loader.exec_module(fragment_rules)
+    FRAGMENT_SECTIONS = fragment_rules.FRAGMENT_SECTIONS
+    read_fragments = fragment_rules.read_fragments
+    merge_fragment_entries = fragment_rules.merge_fragment_entries
+else:
+    # Historical standalone drivers copy only check-tests-used*.py files.
+    FRAGMENT_SECTIONS = ('standalone', 'generators', 'reads', 'orphans', 'module_entries')
+    def read_fragments(directory):
+        if directory.exists(): raise ValueError('missing fragment helper')
+        return {key: [] for key in FRAGMENT_SECTIONS + ('roles', 'fixtures')}
+    def merge_fragment_entries(*args):
+        raise ValueError('missing fragment helper')
 
 
 def excluded(p):
@@ -647,7 +614,15 @@ def validated_module_entries(graph, entries):
 
 
 def validated_routes(graph, catalog, extra_reads=()):
-    """Validate reviewed, revision-bound definitions without executing commands."""
+    """Reviewed validation definitions; raw run receipts live outside the branch.
+
+    A passing-validation definition is bound to an exact input revision, command and source blob.
+    Identical demonstrated committed runner sources may remain source-only roots
+    at another revision, with explicit unavailable validation and no edge credit.
+    Check/write do not execute it. Changes to the measured revision invalidate
+    it until deliberate validation updates the definition. Definitions are part
+    of the classifier, not evidence supplied by the inventory under test.
+    """
     repo = graph.repo
     fields = {'schema_version', 'standalone', 'generators', 'reads', 'orphans'}
     if (not isinstance(catalog, dict) or type(catalog.get('schema_version')) is not int
