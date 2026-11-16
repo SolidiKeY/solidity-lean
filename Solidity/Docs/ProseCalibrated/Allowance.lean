@@ -52,9 +52,6 @@ theorem zeroEvaluation : ∀ (w : Allowance) (n : Nat),
       n * w.margin.den * w.ratio.den ≤ w.margin.num * w.ratio.den ↔
         n * w.margin.den ≤ w.margin.num)
 
-theorem rational_total (x y : Rational) : x.le y ∨ y.le x :=
-  Nat.le_total _ _
-
 theorem min_below (w v : Allowance) : (w.min v).le w ∧ (w.min v).le v := by
   have lower (x y : Rational) : (x.min y).le x ∧ (x.min y).le y := by
     unfold Solidity.Goals.ProseRatio.Ratio.min
@@ -62,7 +59,7 @@ theorem min_below (w v : Allowance) : (w.min v).le w ∧ (w.min v).le v := by
     · rename_i h
       exact ⟨rational_refl x, h⟩
     · rename_i h
-      exact ⟨(rational_total x y).resolve_left h, rational_refl y⟩
+      exact ⟨(Nat.le_total (x.num * y.den) (y.num * x.den)).resolve_left h, rational_refl y⟩
   exact ⟨⟨(lower w.ratio v.ratio).1, (lower w.margin v.margin).1⟩,
     ⟨(lower w.ratio v.ratio).2, (lower w.margin v.margin).2⟩⟩
 
@@ -72,63 +69,61 @@ theorem fits_antitone (w : Allowance) (n m d : Nat) (h : n ≤ m)
   apply (floorSum w n d).mp
   exact Nat.le_trans h ((floorSum w m d).mpr ((exact w m d).mp hm))
 
-theorem scale_le (x y : Rational) (h : x.le y) (d : Nat) :
-    (x.scale d).le (y.scale d) := by
-  have hd := Nat.mul_le_mul_right d h
-  simpa only [Rational.scale, Solidity.Goals.ProseRatio.Ratio.le,
-    Nat.mul_assoc, Nat.mul_comm, Nat.mul_left_comm] using hd
-
-theorem add_le (x y u v : Rational) (h : x.le y) (k : u.le v) :
-    (x.add u).le (y.add v) := by
-  change (x.num * u.den + u.num * x.den) * (y.den * v.den) ≤
-    (y.num * v.den + v.num * y.den) * (x.den * u.den)
-  have h' := Nat.mul_le_mul_right (u.den * v.den) h
-  have k' := Nat.mul_le_mul_right (x.den * y.den) k
-  calc
-    _ = (x.num * y.den) * (u.den * v.den) +
-        (u.num * v.den) * (x.den * y.den) := by
-      simp only [Nat.add_mul]; congr 1 <;> ac_rfl
-    _ ≤ (y.num * x.den) * (u.den * v.den) +
-        (v.num * u.den) * (x.den * y.den) := Nat.add_le_add h' k'
-    _ = _ := by simp only [Nat.add_mul]; congr 1 <;> ac_rfl
-
-theorem value_le (w v : Allowance) (h : w.le v) (d : Nat) :
-    (w.value d).le (v.value d) :=
-  add_le _ _ _ _ (scale_le _ _ h.1 d) h.2
-
 theorem byValue : ∀ (w v : Allowance), w.equiv v →
     ∀ n d, w.fits n d = v.fits n d := by
   intro w v h n d
+  have scale_le (x y : Rational) (h : x.le y) (d : Nat) :
+      (x.scale d).le (y.scale d) := by
+    have hd := Nat.mul_le_mul_right d h
+    simpa only [Rational.scale, Solidity.Goals.ProseRatio.Ratio.le,
+      Nat.mul_assoc, Nat.mul_comm, Nat.mul_left_comm] using hd
+
+  have add_le (x y u v : Rational) (h : x.le y) (k : u.le v) :
+      (x.add u).le (y.add v) := by
+    change (x.num * u.den + u.num * x.den) * (y.den * v.den) ≤
+      (y.num * v.den + v.num * y.den) * (x.den * u.den)
+    have h' := Nat.mul_le_mul_right (u.den * v.den) h
+    have k' := Nat.mul_le_mul_right (x.den * y.den) k
+    calc
+      _ = (x.num * y.den) * (u.den * v.den) +
+          (u.num * v.den) * (x.den * y.den) := by
+        simp only [Nat.add_mul]; congr 1 <;> ac_rfl
+      _ ≤ (y.num * x.den) * (u.den * v.den) +
+          (v.num * u.den) * (x.den * y.den) := Nat.add_le_add h' k'
+      _ = _ := by simp only [Nat.add_mul]; congr 1 <;> ac_rfl
+
+  have value_le (w v : Allowance) (h : w.le v) (d : Nat) :
+      (w.value d).le (v.value d) :=
+    add_le _ _ _ _ (scale_le _ _ h.1 d) h.2
   have hwv : w.fits n d = true ↔ v.fits n d = true := by
     rw [exact, exact]
     exact ⟨fun hn => rational_trans _ _ _ hn (value_le w v h.1 d),
       fun hn => rational_trans _ _ _ hn (value_le v w h.2 d)⟩
   cases hw : w.fits n d <;> cases hv : v.fits n d <;> simp_all
 
-private theorem history_zero (r : Rational) (hr : r.num = 0)
-    (h : List (Nat × Nat)) (m : Rational) (a : Nat) (hm : m.num = a * m.den) :
-    (h.foldl (fun m nd => let x := residual r nd.1 nd.2; if m.le x then x else m) m).num =
-    ((h.map (·.1)).foldl Nat.max a) *
-      (h.foldl (fun m nd => let x := residual r nd.1 nd.2; if m.le x then x else m) m).den := by
-  induction h generalizing m a with
-  | nil => exact hm
-  | cons nd h ih =>
-    have hc : m.le (residual r nd.1 nd.2) ↔ a ≤ nd.1 := by
-      simp only [Solidity.Goals.ProseRatio.Ratio.le, residual, hr, Nat.zero_mul,
-        Nat.sub_zero, hm]
-      simpa only [Nat.mul_assoc, Nat.mul_comm, Nat.mul_left_comm] using
-        (Nat.mul_le_mul_right_iff (Nat.mul_pos m.den_pos r.den_pos) :
-          a * (m.den * r.den) ≤ nd.1 * (m.den * r.den) ↔ a ≤ nd.1)
-    simp only [List.foldl_cons, List.map_cons, Nat.max_eq_max]
-    by_cases ha : a ≤ nd.1
-    · rw [if_pos (hc.mpr ha), Nat.max_eq_right ha]
-      apply ih _ nd.1
-      simp only [residual, hr, Nat.zero_mul, Nat.sub_zero]
-    · rw [if_neg (fun hx => ha (hc.mp hx)), Nat.max_eq_left (Nat.le_of_not_ge ha)]
-      exact ih m a hm
-
 private theorem margin_zero (r : Rational) (hr : r.num = 0) (h : List (Nat × Nat)) :
     (historicalMargin r h).equiv (Rational.ofNat ((h.map (·.1)).foldl Nat.max 0)) := by
+  have history_zero (r : Rational) (hr : r.num = 0)
+      (h : List (Nat × Nat)) (m : Rational) (a : Nat) (hm : m.num = a * m.den) :
+      (h.foldl (fun m nd => let x := residual r nd.1 nd.2; if m.le x then x else m) m).num =
+      ((h.map (·.1)).foldl Nat.max a) *
+        (h.foldl (fun m nd => let x := residual r nd.1 nd.2; if m.le x then x else m) m).den := by
+    induction h generalizing m a with
+    | nil => exact hm
+    | cons nd h ih =>
+      have hc : m.le (residual r nd.1 nd.2) ↔ a ≤ nd.1 := by
+        simp only [Solidity.Goals.ProseRatio.Ratio.le, residual, hr, Nat.zero_mul,
+          Nat.sub_zero, hm]
+        simpa only [Nat.mul_assoc, Nat.mul_comm, Nat.mul_left_comm] using
+          (Nat.mul_le_mul_right_iff (Nat.mul_pos m.den_pos r.den_pos) :
+            a * (m.den * r.den) ≤ nd.1 * (m.den * r.den) ↔ a ≤ nd.1)
+      simp only [List.foldl_cons, List.map_cons, Nat.max_eq_max]
+      by_cases ha : a ≤ nd.1
+      · rw [if_pos (hc.mpr ha), Nat.max_eq_right ha]
+        apply ih _ nd.1
+        simp only [residual, hr, Nat.zero_mul, Nat.sub_zero]
+      · rw [if_neg (fun hx => ha (hc.mp hx)), Nat.max_eq_left (Nat.le_of_not_ge ha)]
+        exact ih m a hm
   have he := history_zero r hr h Rational.zero 0 rfl
   constructor <;>
     simp only [Solidity.Goals.ProseRatio.Ratio.le, Rational.ofNat, Nat.mul_one]
