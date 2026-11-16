@@ -25,6 +25,24 @@ variable (C)
 /-- `ElabRec`'s default, as `Syntax/Elab/Arms.lean` states it. -/
 local instance {α : Type} : Inhabited (ElabM α) := ⟨fun _ _ => .error ""⟩
 
+/-- Recursive hooks used by the panic producers. External dispatch remains a
+separate hook; this record does not extend `ElabRec`. -/
+structure PanicProducerRec where
+  extDispatch : String → String → List String → List String → List RawExpr →
+    Option (Var × PrimTy) → Nat → Bool → ElabM (SProg C)
+  elabStmtsP : List RawStmt → ElabM (SProg C)
+  elabScope : (Γ : NCtx) → List RawStmt → ElabM (Blk C Γ.ctx)
+  elabCallRet : (f : String) → (args : List RawExpr) → (res : Option (Var × PrimTy)) →
+    (resW : Nat := 256) → (targets : Bool := false) → (ctor : Bool := false) →
+    (resNew : Bool := false) → (selfFrame : Bool := false) →
+    ElabM (SProg C × Option (NCtx × RefTy × Var × Bool) × List (Var × LocalTy))
+
+local instance : Inhabited (PanicProducerRec C) := ⟨{
+  extDispatch := fun _ _ _ _ _ _ _ _ => fun _ _ => .error ""
+  elabStmtsP := fun _ => fun _ _ => .error ""
+  elabScope := fun _ _ => fun _ _ => .error ""
+  elabCallRet := fun _ _ _ _ _ _ _ _ => fun _ _ => .error "" }⟩
+
 /-- The captures before an internal dispatch: the callee's tag first under
 the source-order schedule (solc's IR pipeline reads the callee value before
 the arguments, the legacy one after them; `tests/solc/FunctionValueReferences.sol`,
@@ -85,12 +103,10 @@ read as the ordinary solkey revert. A function
 of `ty` this one may not call (declared after it) is refused when it is named
 as a value in the contract; one that is not cannot reach here (`fnTag`).
 With `resNew`, `res` is declared by the statement before (`elabCallRet`). -/
-def fnDispatchWith (rc : ElabRec C)
-    (extDispatch : String → String → List String → List String → List RawExpr →
-      Option (Var × PrimTy) → Nat → Bool → ElabM (SProg C)) (h ty : String) (args : List RawExpr) (res : Option (Var × PrimTy))
+def fnDispatchWith (rc : PanicProducerRec C) (h ty : String) (args : List RawExpr) (res : Option (Var × PrimTy))
     (resW : Nat) (resNew : Bool) : ElabM (SProg C) := do
   let some (ps, rs, ext) := fnParts? ty | throw s!"{h}: the function type {ty}"
-  if ext then return ← extDispatch h ty ps rs args res resW resNew
+  if ext then return ← rc.extDispatch h ty ps rs args res resW resNew
   unless ps.length == args.length do
     throw s!"{h} takes {ps.length} arguments, not {args.length}"
   -- a reference parameter or return: no function's signature is spelled so
@@ -140,7 +156,7 @@ struct in memory, one return) uses the same source tags, scope checks and argume
 scalar dispatch (`dispatchCaptures`). The shared destination is intrinsically
 a memory reference, and each branch binds the selected call's returned alias;
 no storage copy or scalar encoding of the returned reference is introduced. -/
-def fnMemoryDispatchWith (rc : ElabRec C) (h : RawExpr) (ty : String) (args : List RawExpr) :
+def fnMemoryDispatchWith (rc : PanicProducerRec C) (h : RawExpr) (ty : String) (args : List RawExpr) :
     ElabM (SProg C × RawExpr) := do
   let some (ps, [r], false) := fnParts? ty
     | throw "memory dispatch needs an internal signature with one memory return"
@@ -184,7 +200,7 @@ call with targets (`elabCallRet`), its environment the frame's
 parameters take the arguments' types and whose return variables are the
 `try`'s `ρ`, or a `try` that binds none (`try this.g(x) { … }`); `none` otherwise (another contract's function, or one this
 function may not call: the restriction that keeps the run structural). -/
-def trySelfBodyWith (rc : ElabRec C) (g : String) {Γ : NCtx} (args : List (ExtArg C Γ.ctx)) (ρ : Ctx) :
+def trySelfBodyWith (rc : PanicProducerRec C) (g : String) {Γ : NCtx} (args : List (ExtArg C Γ.ctx)) (ρ : Ctx) :
     ElabM (Option ((ps : Ctx) × (Γf : Ctx) × Args C Γ.ctx ps × Prog C (ρ ++ ps) Γf)) := do
   unless fnExternalEntry C g do return none
   let some (_, d) := (← read).funs.find? (·.1 == g) | pure none
@@ -194,7 +210,7 @@ def trySelfBodyWith (rc : ElabRec C) (g : String) {Γ : NCtx} (args : List (ExtA
   -- a `try` that binds none: the callee called as a statement (`selfCall?`)
   let targets := !ρ.isEmpty || d.rets.isEmpty
   let r ← tryCatch (do
-      let (P, _, _) ← elabCallRetWith C rc g raw none (targets := targets) (selfFrame := true)
+      let (P, _, _) ← rc.elabCallRet g raw none (targets := targets) (selfFrame := true)
       pure (some P)) fun _ => pure none
   let some [st] := r | pure none
   if h : st.Γ.ctx = Γ.ctx then
@@ -217,7 +233,7 @@ with no targets, in a frame of its own: `msg.sender` is `address(this)`, and
 caller's scope).  `none` where there is no such `receive`, or where it does
 not elaborate so: a function it calls reads `msg.value` (its frame does not
 have the parameter). -/
-def receiveSelfBodyWith (rc : ElabRec C) {Γ : NCtx} (v : RawExpr) :
+def receiveSelfBodyWith (rc : PanicProducerRec C) {Γ : NCtx} (v : RawExpr) :
     ElabM (Option ((ps : Ctx) × (Γf : Ctx) × Args C Γ.ctx ps × Prog C ([] ++ ps) Γf)) := do
   let funs := (← read).funs
   let some (_, d) := funs.find? (·.1 == "receive") | pure none
@@ -231,7 +247,7 @@ def receiveSelfBodyWith (rc : ElabRec C) {Γ : NCtx} (v : RawExpr) :
   let r ← tryCatch (do
       let nested : RawExpr := .name (receiveValueParam ++ "nested")
       let (P, _, _) ← withReader (fun sc => { sc with funs := funs', selfValue := nested })
-        (elabCallRetWith C rc "receive" [v] none (targets := true) (selfFrame := true))
+        (rc.elabCallRet "receive" [v] none (targets := true) (selfFrame := true))
       pure (some P)) fun _ => pure none
   let some [st] := r | pure none
   if h : st.Γ.ctx = Γ.ctx then
@@ -243,7 +259,7 @@ def receiveSelfBodyWith (rc : ElabRec C) {Γ : NCtx} (v : RawExpr) :
 branch per candidate `g` of `h`'s type, the direct tuple assignment
 `(a, b) = g(y)` on the captured arguments, then the unassigned-value failure.
 Value returns only: a direct tuple call binds primitive returns. -/
-def fnTupleDispatchWith (rc : ElabRec C) (ts : List (Option RawExpr)) (h ty : String) (args : List RawExpr) :
+def fnTupleDispatchWith (rc : PanicProducerRec C) (ts : List (Option RawExpr)) (h ty : String) (args : List RawExpr) :
     ElabM (SProg C) := do
   let some (ps, rs, false) := fnParts? ty
     | throw s!"{h}(…): an external function value in a tuple assignment"
@@ -273,11 +289,26 @@ def fnTupleDispatchWith (rc : ElabRec C) (ts : List (Option RawExpr)) (h ty : St
     RawStmt.ite (.binop .eqB tag (.num t)) [.tupleAssign ts (.call g as)] [rest]) failure
   rc.elabStmtsP (pre ++ [dispatch])
 
+/-- Expose producer fields even when the remaining recursive callbacks are
+opaque. Both the recursive arms and the public record use this constructor. -/
+def elabRecWithProducers (rc : ElabRec C) (pr : PanicProducerRec C) : ElabRec C :=
+  { rc with
+    fnDispatch := fnDispatchWith C pr
+    fnMemoryDispatch := fnMemoryDispatchWith C pr
+    trySelfBody := fun g {_} args ρ => trySelfBodyWith C pr g args ρ }
+
 mutual
+
+/-- The recursive hooks, delayed until a producer is called. -/
+partial def panicProducerRec (_ : Unit) : PanicProducerRec C where
+  extDispatch := extDispatch
+  elabStmtsP := elabStmtsP
+  elabScope := elabScope
+  elabCallRet := @elabCallRet
 
 /-- The record of the block's functions (`ElabRec`), which ties the arms
 defined before it. -/
-partial def elabRec (_ : Unit) : ElabRec C where
+partial def elabRecCore (_ : Unit) : ElabRec C where
   hoist := hoist
   hoistBinop := hoistBinop
   hoistTop := hoistTop
@@ -288,15 +319,15 @@ partial def elabRec (_ : Unit) : ElabRec C where
   abiEncode := @abiEncode
   hoistCallArgs := hoistCallArgs
   fnDispatch := fun h ty args res resW resNew =>
-    fnDispatchWith C (elabRec ()) extDispatch h ty args res resW resNew
-  fnMemoryDispatch := fun h ty args => fnMemoryDispatchWith C (elabRec ()) h ty args
+    fnDispatchWith C (panicProducerRec ()) h ty args res resW resNew
+  fnMemoryDispatch := fun h ty args => fnMemoryDispatchWith C (panicProducerRec ()) h ty args
   callValue := callValue
   elabCall := @elabCall
   elabMemCall := elabMemCall
   elabStorageCall := elabStorageCall
   elabCallReceiver := elabCallReceiver
   elabCallReceiverPush := elabCallReceiverPush
-  trySelfBody := fun g {_} args ρ => trySelfBodyWith C (elabRec ()) g args ρ
+  trySelfBody := fun g {_} args ρ => trySelfBodyWith C (panicProducerRec ()) g args ρ
   elabValueCall := elabValueCall
   elabCtor := elabCtor
   hoistStmt := hoistStmt
@@ -331,7 +362,7 @@ narrow check is captured where solc evaluates it, under a test of its own: `a
 && b` is `bool se = a; if (se) { se = b; }`, and `c ? a : b` is
 `uint se; if (c) { se = a; } else { se = b; }`. -/
 partial def hoist (s0 : RawExpr) : ElabM (SProg C × RawExpr) :=
-  hoistWith C (elabRec ()) s0
+  hoistWith C (elabRecWithProducers C (elabRecCore ()) (panicProducerRec ())) s0
 
 /-- Two operands in evaluation order: hold the first read before the second
 operand's effects or explicit overflow guards. -/
@@ -450,7 +481,7 @@ partial def abiDecodeBytes (T : String) (d : ByteSrc) (h n : Nat) : ElabM (SProg
 fresh memory `bytes` of solc's layout (`AbiKind`). -/
 partial def abiEncode (std strs : Bool) (args : List RawExpr) (marks : List (Option AbiKind))
     (sel : Option RawExpr := none) : ElabM (SProg C × RawExpr) :=
-  abiEncodeWith C (elabRec ()) std strs args marks sel
+  abiEncodeWith C (elabRecWithProducers C (elabRecCore ()) (panicProducerRec ())) std strs args marks sel
 
 /-- Prepare a reference call in argument order. Storage-to-memory conversion
 copies at the argument's evaluation point under the legacy schedule, after
@@ -662,7 +693,7 @@ partial def elabMemCall (f : String) (args : List RawExpr) (R : RefTy)
       | _, _ => throw s!"memory function value returns a {r}"
     let (T, _) ← ElabM.lift (elabTyW C expected)
     unless T == .ref R do throw "memory function value returns a different reference type"
-    let (P, _) ← (fnMemoryDispatchWith C (elabRec ())) h ty actuals
+    let (P, _) ← (fnMemoryDispatchWith C (panicProducerRec ())) h ty actuals
     let (r, _) :: Γ ← nctx | throw "internal: memory dispatch did not export its reference"
     let ⟨hm⟩ ← ElabM.lift (memOk R)
     return P ++ [← ElabM.lift (bind Γ r hm)]
@@ -747,7 +778,7 @@ partial def elabCallRet (f : String) (args : List RawExpr) (res : Option (Var ×
     (resW : Nat := 256) (targets : Bool := false) (ctor : Bool := false) (resNew : Bool := false)
     (selfFrame : Bool := false) :
     ElabM (SProg C × Option (NCtx × RefTy × Var × Bool) × List (Var × LocalTy)) :=
-  elabCallRetWith C (elabRec ()) f args res resW targets ctor resNew selfFrame
+  elabCallRetWith C (elabRecWithProducers C (elabRecCore ()) (panicProducerRec ())) f args res resW targets ctor resNew selfFrame
 
 
 
@@ -773,7 +804,7 @@ partial def elabValueCall (Γ : NCtx) (ix : Idx Γ.ctx (.val .bool)) (okName : R
   let ⟨Γ', _, ixc⟩ ← afterCapture Γ1 x (.val .bool)
   let addr' := addr1.wk (← ElabM.lift (Γ1.wkTo Γ'))
   let ix' := ix.wk (← ElabM.lift (Γ.wkTo Γ'))
-  let some ⟨_, _, sargs, sbody⟩ ← receiveSelfBodyWith C (elabRec ()) (Γ := Γ') a | set st; plain
+  let some ⟨_, _, sargs, sbody⟩ ← receiveSelfBodyWith C (panicProducerRec ()) (Γ := Γ') a | set st; plain
   let v ← checkIn C Γ' .uint a
   let setOk (b : Bool) : List RawStmt := [.assign okName (.bool b)]
   let (Γe, _) ← get
@@ -814,17 +845,17 @@ statement left: a right-hand side before the left-hand side, as the
 interpreter evaluates them, a receiver before an argument.  A branch's statements are elaborated on their
 own. -/
 partial def hoistStmt (s0 : RawStmt) : ElabM (SProg C × RawStmt) :=
-  hoistStmtWith C (elabRec ()) s0
+  hoistStmtWith C (elabRecWithProducers C (elabRecCore ()) (panicProducerRec ())) s0
 
 /-- A statement, as a block: its narrow rewrites (`narrowPure`), its captures
 (`hoistStmt`), then the statement,
 whose compound target may need a capture of its own. -/
 partial def elabStmtP (s : RawStmt) : ElabM (SProg C) :=
-  elabStmtPWith C (elabRec ()) s
+  elabStmtPWith C (elabRecWithProducers C (elabRecCore ()) (panicProducerRec ())) s
 
 /-- A statement whose expressions have no effect left. -/
 partial def elabStmt1 (s0 : RawStmt) : ElabM (SProg C) :=
-  elabStmt1With C (elabRec ()) s0
+  elabStmt1With C (elabRecWithProducers C (elabRecCore ()) (panicProducerRec ())) s0
 
 /-- A loop's condition, invariant or variant, of type `p` (its narrow
 rewrites done, `elabStmtP`), read in `Γ`: nothing may be captured before it,
@@ -928,11 +959,11 @@ partial def elabTuple (ts : List (Option RawExpr)) (rhs : RawExpr) (direct : Boo
         if let some ty := fnTyOfExpr C (← ctx) h then
           let y := toString (← freshCapture "se")
           let P ← elabStmtsP [.decl (.named ty) y (some h)]
-          return P ++ (← (fnTupleDispatchWith C (elabRec ())) ts y ty rest)
+          return P ++ (← (fnTupleDispatchWith C (panicProducerRec ())) ts y ty rest)
     -- a call through an internal function value (`fnTupleDispatch`)
     if (← read).funs.all (·.1 != f) then
       if let some ty := fnTyOf? C (← ctx) f then
-        return ← (fnTupleDispatchWith C (elabRec ())) ts f ty args
+        return ← (fnTupleDispatchWith C (panicProducerRec ())) ts f ty args
     -- a function not declared before this one is `elabCallRet`'s error
     unless (castTy? f).isNone do
       throw s!"{f}(…): the right-hand side of a tuple assignment is a call of a function"
@@ -979,30 +1010,73 @@ partial def elabTuple (ts : List (Option RawExpr)) (rhs : RawExpr) (direct : Boo
 
 end
 
+/-- The public recursion record exposes its panic producers definitionally. -/
+def elabRec (_ : Unit) : ElabRec C :=
+  elabRecWithProducers C (elabRecCore C ()) (panicProducerRec C ())
+
 /-- Public producer equation, with recursion supplied by the elaborator knot. -/
 def fnDispatch (h ty : String) (args : List RawExpr) (res : Option (Var × PrimTy))
     (resW : Nat) (resNew : Bool) : ElabM (SProg C) :=
-  fnDispatchWith C (elabRec C ()) (extDispatch C) h ty args res resW resNew
+  fnDispatchWith C (panicProducerRec C ()) h ty args res resW resNew
 
 /-- Public producer equation, with recursion supplied by the elaborator knot. -/
 def fnMemoryDispatch (h : RawExpr) (ty : String) (args : List RawExpr) :
     ElabM (SProg C × RawExpr) :=
-  fnMemoryDispatchWith C (elabRec C ()) h ty args
+  fnMemoryDispatchWith C (panicProducerRec C ()) h ty args
 
 /-- Public producer equation, with recursion supplied by the elaborator knot. -/
 def trySelfBody (g : String) {Γ : NCtx} (args : List (ExtArg C Γ.ctx)) (ρ : Ctx) :
     ElabM (Option ((ps : Ctx) × (Γf : Ctx) × Args C Γ.ctx ps × Prog C (ρ ++ ps) Γf)) :=
-  trySelfBodyWith C (elabRec C ()) g (Γ := Γ) args ρ
+  trySelfBodyWith C (panicProducerRec C ()) g (Γ := Γ) args ρ
 
 /-- Public producer equation, with recursion supplied by the elaborator knot. -/
 def receiveSelfBody {Γ : NCtx} (v : RawExpr) :
     ElabM (Option ((ps : Ctx) × (Γf : Ctx) × Args C Γ.ctx ps × Prog C ([] ++ ps) Γf)) :=
-  receiveSelfBodyWith C (elabRec C ()) (Γ := Γ) v
+  receiveSelfBodyWith C (panicProducerRec C ()) (Γ := Γ) v
 
 /-- Public producer equation, with recursion supplied by the elaborator knot. -/
 def fnTupleDispatch (ts : List (Option RawExpr)) (h ty : String) (args : List RawExpr) :
     ElabM (SProg C) :=
-  fnTupleDispatchWith C (elabRec C ()) ts h ty args
+  fnTupleDispatchWith C (panicProducerRec C ()) ts h ty args
+
+-- Keep the large producer bodies folded while checking the wiring equations.
+attribute [local irreducible] fnDispatchWith fnMemoryDispatchWith
+
+/-- Unfold the public scalar producer without reducing its recursive hooks. -/
+theorem fnDispatch_eq (h ty : String) (args : List RawExpr) (res : Option (Var × PrimTy))
+    (resW : Nat) (resNew : Bool) :
+    fnDispatch C h ty args res resW resNew =
+      fnDispatchWith C (panicProducerRec C ()) h ty args res resW resNew := rfl
+
+/-- The public memory producer's equation. -/
+theorem fnMemoryDispatch_eq (h : RawExpr) (ty : String) (args : List RawExpr) :
+    fnMemoryDispatch C h ty args = fnMemoryDispatchWith C (panicProducerRec C ()) h ty args := rfl
+
+/-- The public tuple producer's equation. -/
+theorem fnTupleDispatch_eq (ts : List (Option RawExpr)) (h ty : String) (args : List RawExpr) :
+    fnTupleDispatch C ts h ty args = fnTupleDispatchWith C (panicProducerRec C ()) ts h ty args := rfl
+
+/-- The public self-call producer's equation, including its dependent context. -/
+theorem trySelfBody_eq (g : String) {Γ : NCtx} (args : List (ExtArg C Γ.ctx)) (ρ : Ctx) :
+    trySelfBody C g args ρ = trySelfBodyWith C (panicProducerRec C ()) g args ρ := rfl
+
+/-- The public receive producer's equation, including its dependent context. -/
+theorem receiveSelfBody_eq {Γ : NCtx} (v : RawExpr) :
+    receiveSelfBody C (Γ := Γ) v = receiveSelfBodyWith C (panicProducerRec C ()) (Γ := Γ) v := rfl
+
+/-- The callback used by the arms is the public scalar producer. -/
+theorem elabRec_fnDispatch (h ty : String) (args : List RawExpr) (res : Option (Var × PrimTy))
+    (resW : Nat) (resNew : Bool) :
+    (elabRec C ()).fnDispatch h ty args res resW resNew =
+      fnDispatch C h ty args res resW resNew := rfl
+
+/-- The callback used by the arms is the public memory producer. -/
+theorem elabRec_fnMemoryDispatch (h : RawExpr) (ty : String) (args : List RawExpr) :
+    (elabRec C ()).fnMemoryDispatch h ty args = fnMemoryDispatch C h ty args := rfl
+
+/-- The callback used by the arms is the public self-call producer. -/
+theorem elabRec_trySelfBody (g : String) {Γ : NCtx} (args : List (ExtArg C Γ.ctx)) (ρ : Ctx) :
+    (elabRec C ()).trySelfBody g args ρ = trySelfBody C g args ρ := rfl
 
 end Elab
 
