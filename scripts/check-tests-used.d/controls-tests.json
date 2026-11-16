@@ -91,6 +91,65 @@
         "purpose": "Adversarial scanner controls; no Lean/proof acceptance claim. Python controls only; no Lean or external EVM proof credit.",
         "input_scope": [],
         "other_reads": "unresolved"
+      },
+      {
+        "path": "tests/h62/item6/migrate-lowering/memory_controls.py",
+        "input_revision": "06d4e10c21836663c38dc7bbc300ba3992db40dc",
+        "source_blob": "e5706fd76acea423390cdbe96d958e63c84308cf",
+        "command": [
+          "python3",
+          "-B",
+          "tests/h62/item6/migrate-lowering/memory_controls.py"
+        ],
+        "kind": "runnable-entrypoint",
+        "entry_line": 5,
+        "purpose": "Cache-heavy and real low-headroom cases under unchanged cap/reserve. Python control source only; no fixture, Lean, or EVM proof claim.",
+        "input_scope": [],
+        "other_reads": "unresolved"
+      },
+      {
+        "path": "tests/h62/item6/migrate-lowering/acceptance_controls.py",
+        "input_revision": "06d4e10c21836663c38dc7bbc300ba3992db40dc",
+        "source_blob": "213b925f8e0cbe1cea43c7b9a1b2beec7a6d1677",
+        "command": [
+          "python3",
+          "-B",
+          "tests/h62/item6/migrate-lowering/acceptance_controls.py"
+        ],
+        "kind": "runnable-entrypoint",
+        "entry_line": 9,
+        "purpose": "Prevent a module regression or an incomplete/failed gate being misclassified. Python control source only; no fixture, Lean, or EVM proof claim.",
+        "input_scope": [],
+        "other_reads": "unresolved"
+      },
+      {
+        "path": "tests/h62/item6/migrate-semantics/scanner_controls.py",
+        "input_revision": "06d4e10c21836663c38dc7bbc300ba3992db40dc",
+        "source_blob": "824a0746d77d6c729fc210dd8b7fc7726e064ff8",
+        "command": [
+          "python3",
+          "-B",
+          "tests/h62/item6/migrate-semantics/scanner_controls.py"
+        ],
+        "kind": "runnable-entrypoint",
+        "entry_line": 7,
+        "purpose": "Negative controls for lexical census; not semantic proof acceptance. Python control source only; no fixture, Lean, or EVM proof claim.",
+        "input_scope": [],
+        "other_reads": "unresolved"
+      },
+      {
+        "path": "tests/h62/item2/audit-v09-passes/test_selected_heap_artifacts.py",
+        "input_revision": "d8137d4543ba30364ef82e2c6b61650235e82179",
+        "source_blob": "bd578d200080bf80c050f1b0103150ff124bad63",
+        "command": [
+          "python3",
+          "-B",
+          "tests/h62/item2/audit-v09-passes/test_selected_heap_artifacts.py"
+        ],
+        "kind": "unittest",
+        "purpose": "Four existing artifact-boundary tests exercise byte integrity, missing/tampered inputs, path confinement and preservation of different local work using temporary fixtures. Source role only at successor revisions; no Lean or external proof credit.",
+        "input_scope": [],
+        "other_reads": "unresolved"
       }
     ]
   }
