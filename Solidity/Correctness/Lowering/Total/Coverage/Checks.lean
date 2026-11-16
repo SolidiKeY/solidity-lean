@@ -34,14 +34,10 @@ theorem sample_inputs (st : Checker.Snapshot) (slots : List String) :
    ⟨_, .whileReturn _ _ _ (hasIncDec_assign _ _)⟩, ⟨_, .doReturn _ _ _ _ _⟩,
    ⟨_, .whileReturnThen _ _ _ _ _ (hasIncDec_assign _ _)⟩, ⟨_, .returnFlag _ _ _⟩⟩
 
-/-- A sample's output is the same at every depth and scope: the relation's
-outputs on the `for`/`break` sample are equal, with equal outgoing states. -/
-theorem forBreak_unique (sc : ElabScope) (st after after' : Checker.Snapshot)
-    (out out' : List RawStmt) (h : LowersTo none Loops.Capture.forBreakInput out sc st after)
-    (k : LowersTo none Loops.Capture.forBreakInput out' sc st after') :
-    out = out' ∧ after = after' ∧ after = taken st 1 :=
-  ⟨(LowersTo.unique h k).1, (LowersTo.unique h k).2,
-    ((covered (.forBreak none _ st) sc out after).mp h).2⟩
+/-- Every output of the `for`/`break` sample takes exactly one fresh name. -/
+theorem forBreak_taken (sc : ElabScope) (st after : Checker.Snapshot) (out : List RawStmt)
+    (h : LowersTo none Loops.Capture.forBreakInput out sc st after) : after = taken st 1 :=
+  ((covered (.forBreak none _ st) sc out after).mp h).2
 
 end Names
 

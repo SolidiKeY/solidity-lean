@@ -3,12 +3,10 @@ import Solidity.Correctness.Lowering.Total.Relation
 /-!
 # Raw coverage of the loop family inputs by `LowersTo` (e2e-loops-coverage)
 
-Proved here, about the frozen relation `Total.LowersTo` alone (no production
-totality, no `lowerLoops`):
+About the frozen relation `Total.LowersTo` alone (no production totality):
 
 * `LowersTo.unique`: for fixed return slots, scope, fresh-name spelling, input
   and incoming state, the relation has at most one output and outgoing state.
-  A deeper derivation refines a shallower one (`derive_mono`).
 * `covered`: on each `Template` input the relation holds of exactly the listed
   output and outgoing state, at every scope, state and spelling of fresh names.
   The templates are the raw inputs of the six `Loops.Shape` loops and of the
@@ -21,17 +19,13 @@ totality, no `lowerLoops`):
 * `Coverage.Checks`: the e1 sample inputs are template instances, and the
   quoted actual output of the while/break probe is the relation's only output.
 
-Not proved, and not provable from this interface. The loop families
-(`Loops.NormalFamilyCorrect`, `Loops.ReturnFamilyCorrect`) speak of intrinsic
-programs, reached from a raw output only through `elabStmtsP` and `SProg.chain`.
-`elabStmtsP` is `partial`, so `Total.SuccessfulElaboration` constrains nothing
-in the kernel, and no theorem quantifying over its results can conclude
-`Loops.Accepts`; membership would also need typing of the operands and name
-safety, which the templates do not assume. And `LowersTo` holds outside the
-families' raw image (the three templates above, `[]`, general bodies), where
-no family member or semantic lemma exists. So "every `LowersTo` output lies in
-the loop families" is unprovable here, and false of the running elaborator;
-this module is its raw half. `Solidity.Goals.lowerLoopsCorrect` stays unstated.
+Not provable from this interface: that these outputs lie in the loop families
+(`Loops.NormalFamilyCorrect`, `Loops.ReturnFamilyCorrect`). Those speak of
+intrinsic programs, reached only through `elabStmtsP`, which is `partial`:
+`Total.SuccessfulElaboration` constrains nothing in the kernel. Membership also
+needs operand typing and name safety, not assumed here; and `LowersTo` holds
+outside the families' raw image (the three templates above, `[]`, general
+bodies). `Solidity.Goals.lowerLoopsCorrect` stays unstated.
 -/
 namespace Solidity.Correctness.Lowering.Total.Coverage
 
@@ -66,7 +60,6 @@ section Names
 
 variable [FreshNames]
 
-/- Structural refinement of two computations built alike from refined calls. -/
 set_option hygiene false in
 local macro "le_calls" : tactic => `(tactic|
   repeat' first
@@ -158,7 +151,6 @@ theorem derive_mono {m n : Nat} (h : m ≤ n) (rs : Option (List String)) (ss : 
   | refl => exact Le.refl _
   | step _ ih => exact ih.trans ((derive_succ _).1 rs ss)
 
-/-- The run inside `LowersTo`, at one depth. -/
 def runAt (depth : Nat) (rs : Option (List String)) (input : List RawStmt) (scope : ElabScope)
     (before : Checker.Snapshot) : Except String ((List RawStmt × ECtx × Nat) × CallMemo) :=
   (((do pure (← ((derive depth).list rs input).run' {}).1 :
@@ -249,11 +241,6 @@ theorem whileGuard_false (a : RawLoopSpec) (c : RawExpr) (b : List RawStmt)
     (hc : c.hasIncDec = false) : loopGuard (.whileLoop a c b) = false := by
   simp [loopGuard, loopParts, hc]
 
-omit [FreshNames] in
-theorem whileGuard_true (c : RawExpr) (b : List RawStmt) (hc : c.hasIncDec = true) :
-    loopGuard (.whileLoop {} c b) = true := by
-  simp [loopGuard, loopParts, hc]
-
 theorem loopStep_rewrite (L : ListCalls) (P : StmtCalls) (rs : Option (List String))
     (s : RawStmt) (hg : loopGuard s = true) :
     LowerKernel.loopStep L P rs s = P rs (loopRewrite s) := by
@@ -263,7 +250,6 @@ theorem loopStep_rewrite (L : ListCalls) (P : StmtCalls) (rs : Option (List Stri
   rcases parts with ⟨spec, c, init, upd, body, isDo⟩
   simp [hg]
 
-/-- An effectful `while` condition with no specification: the synthetic head. -/
 theorem stmt_while_effect (n : Nat) (rs : Option (List String)) (c : RawExpr)
     (b : List RawStmt) (hc : c.hasIncDec = true) :
     (derive (n + 3)).stmt rs (.whileLoop {} c b) =
@@ -272,12 +258,11 @@ theorem stmt_while_effect (n : Nat) (rs : Option (List String)) (c : RawExpr)
   have hf : loopGuard (.whileLoop {} (.bool true) [.ite (.unop .not c) [.brk] [], .block b]) =
       false := whileGuard_false _ _ _ (by simp [RawExpr.hasIncDec, RawExpr.any])
   rw [derive_stmt (n + 2), derive_loop (n + 1)]
-  simp only [LowerKernel.stmtStep, loopStep_rewrite _ _ _ _ (whileGuard_true c b hc)]
+  simp only [LowerKernel.stmtStep, loopStep_rewrite _ _ _ _ (show loopGuard (.whileLoop {} c b) = true by simp [loopGuard, loopParts, hc])]
   simp only [loopRewrite, loopParts, ↓reduceIte, bind_pure]
   rw [derive_loop n, loopStep_finish _ _ _ _ hf]
   rfl
 
-/-- A derivation's list rule, rewritten to `x`, with a successful run of `x`. -/
 theorem lowersTo_of_run {depth : Nat} {rs : Option (List String)} {input output : List RawStmt}
     {scope : ElabScope} {before after : Checker.Snapshot} {x : LowerM (List RawStmt × List Abrupt)}
     {ab : List Abrupt} {fl : LoopFlags} (eq : (derive depth).list rs input = x)
@@ -288,9 +273,8 @@ theorem lowersTo_of_run {depth : Nat} {rs : Option (List String)} {input output 
   show runAt depth rs input scope before = _
   rw [runAt_eq, eq, run]
 
-/-- `LowersTo` is a partial function of the input and the whole incoming state:
-for fixed return slots, scope and spelling, two derivations, of any depths,
-give the same output and the same outgoing state. No totality of the production kernel is used. -/
+/-- For fixed return slots, scope and spelling, two derivations of any depths
+give the same output and the same outgoing state. -/
 theorem LowersTo.unique {rs : Option (List String)} {input output output' : List RawStmt}
     {scope : ElabScope} {before after after' : Checker.Snapshot}
     (h : LowersTo rs input output scope before after)
@@ -306,21 +290,14 @@ theorem LowersTo.unique {rs : Option (List String)} {input output output' : List
   obtain ⟨⟨rfl, rfl⟩, rfl⟩ := hn'
   exact ⟨rfl, rfl⟩
 
-theorem LowersTo.iff_of {rs : Option (List String)} {input output output' : List RawStmt}
-    {scope : ElabScope} {before after after' : Checker.Snapshot}
-    (h : LowersTo rs input output scope before after) :
-    LowersTo rs input output' scope before after' ↔ output' = output ∧ after' = after :=
-  ⟨fun k => ⟨(LowersTo.unique h k).1.symm, (LowersTo.unique h k).2.symm⟩, fun e => e.1 ▸ e.2 ▸ h⟩
-
 /-! ### Raw outputs of the family inputs -/
 
-/-- The spelling of the `j`-th fresh name after the incoming counter. -/
+/-- Spelling of the `j`-th fresh name after the incoming counter; `taken`: `k` names used. -/
 def flag (base : String) (st : Checker.Snapshot) (j : Nat) : String :=
   toString (Var.fresh base (st.locals.2 + j))
 
 def nb (x : String) : RawExpr := .unop .not (.name x)
 
-/-- The incoming state with `k` fresh names taken; locals and memo unchanged. -/
 def taken (st : Checker.Snapshot) (k : Nat) : Checker.Snapshot :=
   ⟨(st.locals.1, st.locals.2 + k), st.memo⟩
 
@@ -328,7 +305,6 @@ omit [FreshNames] in
 theorem hasIncDec_assign (l r : RawExpr) : (RawExpr.assign l r).hasIncDec = true := by
   simp [RawExpr.hasIncDec, RawExpr.any]
 
-/- Rewrite the derivation's list rule with the loop equations, then run it. -/
 local macro "lower_run " d:num " [" rules:Lean.Parser.Tactic.rwRule,* "]" : tactic => `(tactic|
   (refine lowersTo_of_run (depth := $d) (x := ?x) (ab := ?ab) (fl := ?fl) ?eq ?run
    case eq => rw [$rules,*]
@@ -447,14 +423,14 @@ theorem Template.lowers {rs : Option (List String)} {input output : List RawStmt
     lower_run 12 [list_cons, stmt_while _ _ _ _ _ (whileGuard_false _ _ _ hc),
       list_cons, stmt_while _ _ _ _ _ (whileGuard_false _ _ _ hd)]
 
-/-- **Raw coverage.** On a template input, the outputs `LowersTo` admits are
-exactly the listed one, with the listed outgoing state: at every scope, and
-whatever the depth of the derivation. -/
+/-- **Raw coverage.** On a template input `LowersTo` admits exactly the listed
+output and outgoing state, at every scope and derivation depth. -/
 theorem covered {rs : Option (List String)} {input output : List RawStmt}
     {st after : Checker.Snapshot} (h : Template rs input st output after) (sc : ElabScope)
     (output' : List RawStmt) (after' : Checker.Snapshot) :
     LowersTo rs input output' sc st after' ↔ output' = output ∧ after' = after :=
-  LowersTo.iff_of (h.lowers sc)
+  ⟨fun k => ⟨(LowersTo.unique (h.lowers sc) k).1.symm, (LowersTo.unique (h.lowers sc) k).2.symm⟩,
+    fun e => e.1 ▸ e.2 ▸ h.lowers sc⟩
 
 end Names
 
