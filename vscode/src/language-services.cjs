@@ -96,7 +96,20 @@ function fallbackMembers(text,point){
   else{
     const receiver=match[1].replace(/\$/g,'\\$');
     const declarations=[...before.slice(0,match.index).matchAll(new RegExp('([A-Za-z_$][\\w$]*(?:\\s*\\[\\s*\\])?)(?:\\s+(storage|memory|calldata))?\\s+'+receiver+'(?![\\w$])','g'))];
-    const declaration=declarations.at(-1);if(declaration){type=declaration[1].replace(/\s+/g,'');storage=declaration[2]==='storage'||declaration[2]===undefined&&before.slice(0,declaration.index).lastIndexOf('function')<0;}
+    const declaration=declarations.at(-1);if(declaration){
+      type=declaration[1].replace(/\s+/g,'');
+      const ownerAt=position=>scopes.find(s=>['contract','library','interface'].includes(s.kind)&&s.start<position&&s.end>position);
+      // This additional fallback requires a directly owned declaration and properly nested delimiters.
+      const owner=ownerAt(declaration.index),delimiters=[];let valid=true;
+      if(owner&&owner===ownerAt(match.index))for(const token of ts){
+        if(token.start<=owner.start||token.start>=declaration.index)continue;
+        if(['{','(','['].includes(token.text))delimiters.push(token.text);
+        const opening=token.text==='}'?'{':token.text===')'?'(':token.text===']'?'[':null;
+        if(opening&&delimiters.pop()!==opening)valid=false;
+      }
+      const directState=owner&&owner===ownerAt(match.index)&&valid&&delimiters.length===0;
+      storage=declaration[2]==='storage'||declaration[2]===undefined&&(before.slice(0,declaration.index).lastIndexOf('function')<0||directState);
+    }
   }
   if(/\[\]$/.test(type||'')||type==='bytes')return [{name:'length'},...(storage?[{name:'push',nodeType:'FunctionDefinition'},{name:'pop',nodeType:'FunctionDefinition'}]:[])];
   const scope=scopes.find(s=>s.name===type);if(!scope)return [];

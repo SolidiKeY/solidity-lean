@@ -31,3 +31,13 @@ test('fallback receivers preserve dollar identifiers and cannot borrow longer na
  assert.deepEqual(names('bool items; uint[] items$; items.'),[],'items$ cannot masquerade as items');
  assert.deepEqual(names('uint[] $items; bool $items; $items.'),[],'Actual same-name shadowing still wins');
 });
+
+test('same-contract state declarations after methods retain default-storage fallback hints',()=>{
+ const expected=['length','push','pop'];
+ for(const prior of ['constructor() {}','function toString() public {}','function valueOf() public {}','function __proto__() public {}','function before() public {}','struct functionMarker { uint value; }','function before() public returns(uint){return 1;}'])assert.deepEqual(names('contract C { '+prior+' uint[] items; function use() public { items.'),expected,prior);
+ for(const local of ['uint[] items;','uint[] memory items;'])assert.deepEqual(names('contract C { function prior() public {} function use() public { '+local+' items.'),['length']);
+ assert.deepEqual(names('contract C { function use(uint[] items) public { items.'),['length'],'Parameters are not state declarations');
+ assert.deepEqual(names('contract First { function before() public {} uint[] items; } contract Second { function use() public { items.'),['length'],'No new mutation inference across contract owners');
+ assert.deepEqual(names('contract C { function before() public {} ) uint[] items; function use() public { items.'),['length'],'Malformed declaration prefix cannot gain new storage inference');
+ for(const broken of ['function before() public { ( } )','function before() public {} [','function before() public {} ]'])assert.deepEqual(names('contract C { '+broken+' uint[] items; function use() public { items.'),['length'],'Broken nesting: '+broken);
+});

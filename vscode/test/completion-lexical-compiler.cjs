@@ -13,3 +13,10 @@ test('pinned compiler admits spaced arrays and dollar names used by live fallbac
  t.diagnostic(JSON.stringify({boundary:'Actual compiler admission plus JavaScript fallback hints; no native UI/kernel/EVM parity',compiler:compiled.compiler,sourceHash:compiled.sourceHash,observations}));
  }finally{fs.rmSync(dir,{recursive:true,force:true});}
 });
+
+test('pinned compiler state declaration after a method has storage fallback members',async t=>{
+ const dir=fs.mkdtempSync(path.join(os.tmpdir(),'completion-state-scope-')),source=path.join(dir,'StateScope.sol'),text='pragma solidity ^0.8.34; contract StateScope { function before() public pure returns(uint256){return 1;} uint256[] items; function size() public view returns(uint256){return items.length;} }';fs.writeFileSync(source,text);
+ try{const {compileFixture}=await import('../../scripts/solc-ast.mjs'),compiled=compileFixture({args:['--source',source,'--out',path.join(dir,'out.json'),'--no-wrapper'],sourceBytes:Buffer.from(text),analysisOnly:true,quiet:true}),point=lang.position(text,text.indexOf('items.length')+'items.'.length),labels=lang.completion(text,point,null).items.map(item=>item.label);assert.deepEqual(labels,['length','push','pop']);
+ t.diagnostic(JSON.stringify({boundary:'Actual compiler admission plus controlled fallback hints; no native UI/kernel/EVM parity',compiler:compiled.compiler,sourceHash:compiled.sourceHash,labels}));
+ }finally{fs.rmSync(dir,{recursive:true,force:true});}
+});
