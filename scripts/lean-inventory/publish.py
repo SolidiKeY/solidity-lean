@@ -192,6 +192,32 @@ def consistent(pub):
     return p
 
 
+def verify_pins(repo, pub):
+    """Problems with the recovery pin, from Git objects only: the pin resolves, its Lean tree is
+    the census's, and every orphan member exists there with its recorded line count."""
+    import sources as S
+    rev = pub['recovery']['revision']
+    try:
+        if S.resolve(repo, rev) != rev:
+            return [f'recovery pin {rev} does not resolve to itself']
+    except Exception:
+        return [f'recovery pin {rev} is unknown to the repository (fetch it)']
+    files = S.tracked(repo, rev)
+    p = []
+    if S.lean_tree_id(files) != pub['census']['lean_tree_id']:
+        p.append('Lean tree at the recovery pin differs from the census')
+    blob = dict(files)
+    paths = [m[0] for o in pub['orphans'] for m in o['members']]
+    missing = [x for x in paths if x not in blob]
+    p += [f'{x}: absent at the recovery pin' for x in missing]
+    texts = S.blobs(repo, [blob[x] for x in paths if x in blob])
+    for o in pub['orphans']:
+        for path, _, lines in o['members']:
+            if path in blob and S.line_count(texts[blob[path]]) != lines:
+                p.append(f'{path}: {lines} lines recorded, not the pinned blob')
+    return p
+
+
 def main(argv=None):
     ap = argparse.ArgumentParser(description=__doc__.split('\n')[0])
     ap.add_argument('--census', default='scripts/lean-inventory.json')
@@ -202,9 +228,12 @@ def main(argv=None):
                     help='regenerate from the census files and fail on any difference')
     ap.add_argument('--consistent', action='store_true',
                     help='check the published file alone (no census needed)')
+    ap.add_argument('--verify-pins', metavar='REPO',
+                    help='with --consistent: also check the recovery pin from Git objects')
     a = ap.parse_args(argv)
     if a.consistent:
-        problems = consistent(json.loads(Path(a.output).read_text()))
+        pub = json.loads(Path(a.output).read_text())
+        problems = consistent(pub) + (verify_pins(a.verify_pins, pub) if a.verify_pins else [])
         for q in problems:
             print('publish: inconsistent:', q)
         print('publish: consistent' if not problems else f'publish: {len(problems)} problem(s)')

@@ -3,6 +3,7 @@
     python3 -B -m unittest discover -s scripts/lean-inventory -p 'test_*.py'
 """
 import copy
+import subprocess
 import json
 from pathlib import Path
 import sys
@@ -115,6 +116,30 @@ class PublishTest(unittest.TestCase):
             self.assertEqual(P.main(['--output', str(o), '--consistent']), 0)
             c.write_bytes(raw(census(tree='t2')))
             self.assertEqual(P.main(['--census', str(c), '--output', str(o), '--check']), 1)
+
+    def test_verify_pins(self):
+        import sources as S
+        with tempfile.TemporaryDirectory() as d:
+            def git(*a):
+                return subprocess.run(['git', '-C', d, *a], check=True, capture_output=True,
+                                      text=True).stdout.strip()
+            git('init', '-q')
+            Path(d, 'Solidity/Yul/B').mkdir(parents=True)
+            Path(d, 'Solidity/Yul/B/A.lean').write_text('def x := 1\n' * 10)
+            git('add', '-A')
+            git('-c', 'user.name=t', '-c', 'user.email=t@t', 'commit', '-qm', 'c')
+            rev = git('rev-parse', 'HEAD')
+            tree = S.lean_tree_id(S.tracked(d, rev))
+            pub = json.loads(P.publish(raw(census(rev=rev, tree=tree)), 'c.json'))
+            self.assertEqual(P.verify_pins(d, pub), [])
+            pub['orphans'][0]['members'][0][2] = 11
+            self.assertEqual(len(P.verify_pins(d, pub)), 1)
+            pub['orphans'][0]['members'][0][0] = 'Solidity/Yul/B/Gone.lean'
+            self.assertIn('absent', P.verify_pins(d, pub)[0])
+            pub['census']['lean_tree_id'] = 'other'
+            self.assertIn('differs', P.verify_pins(d, pub)[0])
+            pub['recovery']['revision'] = 'c' * 40
+            self.assertIn('unknown', P.verify_pins(d, pub)[0])
 
     def test_rejects_non_census(self):
         with self.assertRaises(SystemExit):
