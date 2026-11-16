@@ -3,7 +3,7 @@
   "state": "frozen",
   "scope": "pilot",
   "base": "6f3eedf0788ee1f8a3bcf230558c712ecdca04d5",
-  "coverage_claim": "One conditional division helper mutation with signed minimum/-1 and zero-divisor inhabited semantic witnesses, plus independent known-kill. Pilot only; full division/operator/family and nine-family coverage pending. Helper inventory affected-use list is partial; see inventory.extended.errata.json.",
+  "coverage_claim": "One conditional division helper mutation with signed minimum/-1 and zero-divisor inhabited semantic witnesses, plus independent known-kill. Pilot only; full division/operator/family and nine-family coverage pending. Helper inventory affected-use list is partial; see the archived erratum via `git show e25db89bbf30d9213e7b121a23eccccbd844d376:tests/h28-sol/mutation-testing/inventory.extended.errata.json`.",
   "inventory": "tests/h28-sol/mutation-testing/inventory.extended.draft.json",
   "inventory_sha256": "e7f8f223586b55837584f57385d46061e00d03377e160f2a25d8d23587002554",
   "production_inputs": {
