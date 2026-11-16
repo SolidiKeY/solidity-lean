@@ -1,0 +1,49 @@
+{
+  "schema_version": 1,
+  "routes": {
+    "standalone": [
+      {
+        "path": "tests/roadmap-v17/test_derived17.py",
+        "source_blob": "87e66ccc308a01c86a2426a5ae53963720df45fc",
+        "input_revision": "6f9d33d5b8d7384e70096d0c362dea838a5b7e46",
+        "command": [
+          "python3",
+          "-B",
+          "tests/roadmap-v17/test_derived17.py"
+        ],
+        "kind": "unittest",
+        "purpose": "Synthetic host-side wire, refusal and orchestration regression controls; no kernel, native compiler or EVM correctness credit. Fixture reads remain unresolved.",
+        "input_scope": [],
+        "other_reads": "unresolved"
+      },
+      {
+        "path": "tests/roadmap-v17/test_differential.py",
+        "source_blob": "dd1ce8e2310918c3f37cddd49e8ddd20e7487ee8",
+        "input_revision": "6f9d33d5b8d7384e70096d0c362dea838a5b7e46",
+        "command": [
+          "python3",
+          "-B",
+          "tests/roadmap-v17/test_differential.py"
+        ],
+        "kind": "unittest",
+        "purpose": "Synthetic host-side wire, refusal and orchestration regression controls; no kernel, native compiler or EVM correctness credit. Fixture reads remain unresolved.",
+        "input_scope": [],
+        "other_reads": "unresolved"
+      },
+      {
+        "path": "tests/roadmap-v17/test_setups.py",
+        "source_blob": "57a5b5f7b21b6cc4690fb347349a4a1e3bf552d3",
+        "input_revision": "6f9d33d5b8d7384e70096d0c362dea838a5b7e46",
+        "command": [
+          "python3",
+          "-B",
+          "tests/roadmap-v17/test_setups.py"
+        ],
+        "kind": "unittest",
+        "purpose": "Synthetic host-side wire, refusal and orchestration regression controls; no kernel, native compiler or EVM correctness credit. Fixture reads remain unresolved.",
+        "input_scope": [],
+        "other_reads": "unresolved"
+      }
+    ]
+  }
+}

@@ -92,3 +92,7 @@ class DeliveryReceiptControls(unittest.TestCase):
             git("init", "-q"); git("add", "."); git("commit", "-qm", "untrusted archive control")
             with self.assertRaisesRegex(ValueError, "archive hash mismatch"):
                 verify_combined.verify(repo)
+
+
+if __name__ == "__main__":
+    unittest.main()
