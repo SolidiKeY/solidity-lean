@@ -1270,6 +1270,664 @@
         "purpose": "Historical standalone script source role: Standalone exact saved-axiom-log checker for memory-delete controls, including count, duplicate, forbidden and missing-report refusals. Recorded command is an entry prefix, not a certified complete/default run. Argument/environment requirements and outputs remain uncertified. Source only: no current validation, fixture/helper/child execution, cache delivery, Lean/kernel/proof or EVM credit.",
         "input_scope": [],
         "other_reads": "unresolved"
+      },
+      {
+        "path": "tests/roadmap-v17/differential-current.test.mjs",
+        "input_revision": "fbeec65da0925115532589752bd0f7e6efa4b647",
+        "source_blob": "eccfb77fb94112436e50e04842a2e408710df840",
+        "command": [
+          "node",
+          "--test",
+          "tests/roadmap-v17/differential-current.test.mjs"
+        ],
+        "kind": "node-test",
+        "purpose": "Historical Node test/control source role: Declared host-side full-matrix receipt mutation test; case skips without V17_DIFFERENTIAL_RESULT. No actual full-matrix case execution or compiler parity credit. Recorded Node test command is an entry prefix, not a certified complete/default run. Source only; report/environment requirements remain uncertified, with no fixture/import/helper/child/current-validation, Lean/kernel/proof or EVM credit.",
+        "input_scope": [],
+        "other_reads": "unresolved"
+      },
+      {
+        "path": "tests/source-immutables/guards.test.mjs",
+        "input_revision": "fbeec65da0925115532589752bd0f7e6efa4b647",
+        "source_blob": "f81659ffae125c4ae235bbf9b65dc0f7a113db2f",
+        "command": [
+          "node",
+          "--test",
+          "tests/source-immutables/guards.test.mjs"
+        ],
+        "kind": "node-test",
+        "purpose": "Historical Node test/control source role: Declared immutable-source/compiler catalog and diagnostic corruption controls; requires the original external baseline logs and evidence environment. No current test-execution credit. Recorded Node test command is an entry prefix, not a certified complete/default run. Source only; report/environment requirements remain uncertified, with no fixture/import/helper/child/current-validation, Lean/kernel/proof or EVM credit.",
+        "input_scope": [],
+        "other_reads": "unresolved"
+      },
+      {
+        "path": "tests/yul-views/abi-input-reference.test.mjs",
+        "input_revision": "fbeec65da0925115532589752bd0f7e6efa4b647",
+        "source_blob": "d9317b88e12dc7de19958fbbb7b1fa14185df450",
+        "command": [
+          "node",
+          "--test",
+          "tests/yul-views/abi-input-reference.test.mjs"
+        ],
+        "kind": "node-test",
+        "purpose": "Historical Node test/control source role: Declared abi-input-reference report regression and mutation controls; requires a configured saved-report argument. No report authenticity, replay execution or finite EVM observation credit. Recorded Node test command is an entry prefix, not a certified complete/default run. Source only; report/environment requirements remain uncertified, with no fixture/import/helper/child/current-validation, Lean/kernel/proof or EVM credit.",
+        "input_scope": [],
+        "other_reads": "unresolved"
+      },
+      {
+        "path": "tests/yul-views/aggregate-dynamic-reference.test.mjs",
+        "input_revision": "fbeec65da0925115532589752bd0f7e6efa4b647",
+        "source_blob": "bc20e80e0293c6928b67c64f31f038626698ce97",
+        "command": [
+          "node",
+          "--test",
+          "tests/yul-views/aggregate-dynamic-reference.test.mjs"
+        ],
+        "kind": "node-test",
+        "purpose": "Historical Node test/control source role: Declared aggregate-dynamic-reference report regression and mutation controls; requires a configured saved-report argument. No report authenticity, replay execution or finite EVM observation credit. Recorded Node test command is an entry prefix, not a certified complete/default run. Source only; report/environment requirements remain uncertified, with no fixture/import/helper/child/current-validation, Lean/kernel/proof or EVM credit.",
+        "input_scope": [],
+        "other_reads": "unresolved"
+      },
+      {
+        "path": "tests/yul-views/aggregate-writeback-reference.test.mjs",
+        "input_revision": "fbeec65da0925115532589752bd0f7e6efa4b647",
+        "source_blob": "f3c2f879b027768e6fd744fee87a79b08c706c6b",
+        "command": [
+          "node",
+          "--test",
+          "tests/yul-views/aggregate-writeback-reference.test.mjs"
+        ],
+        "kind": "node-test",
+        "purpose": "Historical Node test/control source role: Declared aggregate-writeback-reference report regression and mutation controls; requires a configured saved-report argument. No report authenticity, replay execution or finite EVM observation credit. Recorded Node test command is an entry prefix, not a certified complete/default run. Source only; report/environment requirements remain uncertified, with no fixture/import/helper/child/current-validation, Lean/kernel/proof or EVM credit.",
+        "input_scope": [],
+        "other_reads": "unresolved"
+      },
+      {
+        "path": "tests/yul-views/declaration-packing-reference.test.mjs",
+        "input_revision": "fbeec65da0925115532589752bd0f7e6efa4b647",
+        "source_blob": "413c8a68732baf98de2351b1257e9afe6fd109e9",
+        "command": [
+          "node",
+          "--test",
+          "tests/yul-views/declaration-packing-reference.test.mjs"
+        ],
+        "kind": "node-test",
+        "purpose": "Historical Node test/control source role: Declared declaration-packing-reference report regression and mutation controls; requires a configured saved-report argument. No report authenticity, replay execution or finite EVM observation credit. Recorded Node test command is an entry prefix, not a certified complete/default run. Source only; report/environment requirements remain uncertified, with no fixture/import/helper/child/current-validation, Lean/kernel/proof or EVM credit.",
+        "input_scope": [],
+        "other_reads": "unresolved"
+      },
+      {
+        "path": "tests/yul-views/dynamic-storage-reference.test.mjs",
+        "input_revision": "fbeec65da0925115532589752bd0f7e6efa4b647",
+        "source_blob": "47b9d90e409c0cd6810aaafff7bece477ca0b9fd",
+        "command": [
+          "node",
+          "--test",
+          "tests/yul-views/dynamic-storage-reference.test.mjs"
+        ],
+        "kind": "node-test",
+        "purpose": "Historical Node test/control source role: Declared dynamic-storage-reference report regression and mutation controls; requires a configured saved-report argument. No report authenticity, replay execution or finite EVM observation credit. Recorded Node test command is an entry prefix, not a certified complete/default run. Source only; report/environment requirements remain uncertified, with no fixture/import/helper/child/current-validation, Lean/kernel/proof or EVM credit.",
+        "input_scope": [],
+        "other_reads": "unresolved"
+      },
+      {
+        "path": "tests/yul-views/dynamic-uint-reference.test.mjs",
+        "input_revision": "fbeec65da0925115532589752bd0f7e6efa4b647",
+        "source_blob": "e62c19b081a0c905999864bb0c844d8283a1ec26",
+        "command": [
+          "node",
+          "--test",
+          "tests/yul-views/dynamic-uint-reference.test.mjs"
+        ],
+        "kind": "node-test",
+        "purpose": "Historical Node test/control source role: Declared dynamic-uint-reference report regression and mutation controls; requires a configured saved-report argument. No report authenticity, replay execution or finite EVM observation credit. Recorded Node test command is an entry prefix, not a certified complete/default run. Source only; report/environment requirements remain uncertified, with no fixture/import/helper/child/current-validation, Lean/kernel/proof or EVM credit.",
+        "input_scope": [],
+        "other_reads": "unresolved"
+      },
+      {
+        "path": "tests/yul-views/finite-reference.test.mjs",
+        "input_revision": "fbeec65da0925115532589752bd0f7e6efa4b647",
+        "source_blob": "7ab57d16aa568478df6eef977e315bb14f8c90bc",
+        "command": [
+          "node",
+          "--test",
+          "tests/yul-views/finite-reference.test.mjs"
+        ],
+        "kind": "node-test",
+        "purpose": "Historical Node test/control source role: Declared finite-reference report regression and mutation controls; requires a configured saved-report argument. No report authenticity, replay execution or finite EVM observation credit. Recorded Node test command is an entry prefix, not a certified complete/default run. Source only; report/environment requirements remain uncertified, with no fixture/import/helper/child/current-validation, Lean/kernel/proof or EVM credit.",
+        "input_scope": [],
+        "other_reads": "unresolved"
+      },
+      {
+        "path": "tests/yul-views/frame-calldata-reference.test.mjs",
+        "input_revision": "fbeec65da0925115532589752bd0f7e6efa4b647",
+        "source_blob": "ed092162118150f8bda4187aafcff96f3b0891e5",
+        "command": [
+          "node",
+          "--test",
+          "tests/yul-views/frame-calldata-reference.test.mjs"
+        ],
+        "kind": "node-test",
+        "purpose": "Historical Node test/control source role: Declared frame-calldata-reference report regression and mutation controls; requires a configured saved-report argument. No report authenticity, replay execution or finite EVM observation credit. Recorded Node test command is an entry prefix, not a certified complete/default run. Source only; report/environment requirements remain uncertified, with no fixture/import/helper/child/current-validation, Lean/kernel/proof or EVM credit.",
+        "input_scope": [],
+        "other_reads": "unresolved"
+      },
+      {
+        "path": "tests/yul-views/heap-bytes-reference.test.mjs",
+        "input_revision": "fbeec65da0925115532589752bd0f7e6efa4b647",
+        "source_blob": "15c710b41fb651f5c5ff36362825528e630c5b86",
+        "command": [
+          "node",
+          "--test",
+          "tests/yul-views/heap-bytes-reference.test.mjs"
+        ],
+        "kind": "node-test",
+        "purpose": "Historical Node test/control source role: Declared heap-bytes-reference report regression and mutation controls; requires a configured saved-report argument. No report authenticity, replay execution or finite EVM observation credit. Recorded Node test command is an entry prefix, not a certified complete/default run. Source only; report/environment requirements remain uncertified, with no fixture/import/helper/child/current-validation, Lean/kernel/proof or EVM credit.",
+        "input_scope": [],
+        "other_reads": "unresolved"
+      },
+      {
+        "path": "tests/yul-views/heap-resize-reference.test.mjs",
+        "input_revision": "fbeec65da0925115532589752bd0f7e6efa4b647",
+        "source_blob": "cdeb1a13c2f4d6fa02fa06486416f4bd70105f1c",
+        "command": [
+          "node",
+          "--test",
+          "tests/yul-views/heap-resize-reference.test.mjs"
+        ],
+        "kind": "node-test",
+        "purpose": "Historical Node test/control source role: Declared heap-resize-reference report regression and mutation controls; requires a configured saved-report argument. No report authenticity, replay execution or finite EVM observation credit. Recorded Node test command is an entry prefix, not a certified complete/default run. Source only; report/environment requirements remain uncertified, with no fixture/import/helper/child/current-validation, Lean/kernel/proof or EVM credit.",
+        "input_scope": [],
+        "other_reads": "unresolved"
+      },
+      {
+        "path": "tests/yul-views/inherited-sequence-reference.test.mjs",
+        "input_revision": "fbeec65da0925115532589752bd0f7e6efa4b647",
+        "source_blob": "8e6fc97778be05744b64a94b2ae286cb561cd2b4",
+        "command": [
+          "node",
+          "--test",
+          "tests/yul-views/inherited-sequence-reference.test.mjs"
+        ],
+        "kind": "node-test",
+        "purpose": "Historical Node test/control source role: Declared inherited-sequence-reference report regression and mutation controls; requires a configured saved-report argument. No report authenticity, replay execution or finite EVM observation credit. Recorded Node test command is an entry prefix, not a certified complete/default run. Source only; report/environment requirements remain uncertified, with no fixture/import/helper/child/current-validation, Lean/kernel/proof or EVM credit.",
+        "input_scope": [],
+        "other_reads": "unresolved"
+      },
+      {
+        "path": "tests/yul-views/joint-memory-reference.test.mjs",
+        "input_revision": "fbeec65da0925115532589752bd0f7e6efa4b647",
+        "source_blob": "02701007386fa4d8fe1047fc45d298dfdf8b0bc9",
+        "command": [
+          "node",
+          "--test",
+          "tests/yul-views/joint-memory-reference.test.mjs"
+        ],
+        "kind": "node-test",
+        "purpose": "Historical Node test/control source role: Declared joint-memory-reference report regression and mutation controls; requires a configured saved-report argument. No report authenticity, replay execution or finite EVM observation credit. Recorded Node test command is an entry prefix, not a certified complete/default run. Source only; report/environment requirements remain uncertified, with no fixture/import/helper/child/current-validation, Lean/kernel/proof or EVM credit.",
+        "input_scope": [],
+        "other_reads": "unresolved"
+      },
+      {
+        "path": "tests/yul-views/mapping-transient-reference.test.mjs",
+        "input_revision": "fbeec65da0925115532589752bd0f7e6efa4b647",
+        "source_blob": "40fd18eaa547e0ef899708342f7918b9dc1da4ca",
+        "command": [
+          "node",
+          "--test",
+          "tests/yul-views/mapping-transient-reference.test.mjs"
+        ],
+        "kind": "node-test",
+        "purpose": "Historical Node test/control source role: Declared mapping-transient-reference report regression and mutation controls; requires a configured saved-report argument. No report authenticity, replay execution or finite EVM observation credit. Recorded Node test command is an entry prefix, not a certified complete/default run. Source only; report/environment requirements remain uncertified, with no fixture/import/helper/child/current-validation, Lean/kernel/proof or EVM credit.",
+        "input_scope": [],
+        "other_reads": "unresolved"
+      },
+      {
+        "path": "tests/yul-views/member-arrays-reference.test.mjs",
+        "input_revision": "fbeec65da0925115532589752bd0f7e6efa4b647",
+        "source_blob": "50924035e89d3d3e52a2d84db8a200ac36f697ba",
+        "command": [
+          "node",
+          "--test",
+          "tests/yul-views/member-arrays-reference.test.mjs"
+        ],
+        "kind": "node-test",
+        "purpose": "Historical Node test/control source role: Declared member-arrays-reference report regression and mutation controls; requires a configured saved-report argument. No report authenticity, replay execution or finite EVM observation credit. Recorded Node test command is an entry prefix, not a certified complete/default run. Source only; report/environment requirements remain uncertified, with no fixture/import/helper/child/current-validation, Lean/kernel/proof or EVM credit.",
+        "input_scope": [],
+        "other_reads": "unresolved"
+      },
+      {
+        "path": "tests/yul-views/memory-scalar-words-reference.test.mjs",
+        "input_revision": "fbeec65da0925115532589752bd0f7e6efa4b647",
+        "source_blob": "de2348f94bc116dc2bd61370ab6ad06d2460207f",
+        "command": [
+          "node",
+          "--test",
+          "tests/yul-views/memory-scalar-words-reference.test.mjs"
+        ],
+        "kind": "node-test",
+        "purpose": "Historical Node test/control source role: Declared memory-scalar-words-reference report regression and mutation controls; requires a configured saved-report argument. No report authenticity, replay execution or finite EVM observation credit. Recorded Node test command is an entry prefix, not a certified complete/default run. Source only; report/environment requirements remain uncertified, with no fixture/import/helper/child/current-validation, Lean/kernel/proof or EVM credit.",
+        "input_scope": [],
+        "other_reads": "unresolved"
+      },
+      {
+        "path": "tests/yul-views/mixed-heap-reference.test.mjs",
+        "input_revision": "fbeec65da0925115532589752bd0f7e6efa4b647",
+        "source_blob": "a8bc42d682693e0bbe29b8e8c6ea818f94a5a8d8",
+        "command": [
+          "node",
+          "--test",
+          "tests/yul-views/mixed-heap-reference.test.mjs"
+        ],
+        "kind": "node-test",
+        "purpose": "Historical Node test/control source role: Declared mixed-heap-reference report regression and mutation controls; requires a configured saved-report argument. No report authenticity, replay execution or finite EVM observation credit. Recorded Node test command is an entry prefix, not a certified complete/default run. Source only; report/environment requirements remain uncertified, with no fixture/import/helper/child/current-validation, Lean/kernel/proof or EVM credit.",
+        "input_scope": [],
+        "other_reads": "unresolved"
+      },
+      {
+        "path": "tests/yul-views/nested-dynamic-reference.test.mjs",
+        "input_revision": "fbeec65da0925115532589752bd0f7e6efa4b647",
+        "source_blob": "630e84a02c2ea731c75946cf2dcb5923aeff6c0d",
+        "command": [
+          "node",
+          "--test",
+          "tests/yul-views/nested-dynamic-reference.test.mjs"
+        ],
+        "kind": "node-test",
+        "purpose": "Historical Node test/control source role: Declared nested-dynamic-reference report regression and mutation controls; requires a configured saved-report argument. No report authenticity, replay execution or finite EVM observation credit. Recorded Node test command is an entry prefix, not a certified complete/default run. Source only; report/environment requirements remain uncertified, with no fixture/import/helper/child/current-validation, Lean/kernel/proof or EVM credit.",
+        "input_scope": [],
+        "other_reads": "unresolved"
+      },
+      {
+        "path": "tests/yul-views/nested-mapping-reference.test.mjs",
+        "input_revision": "fbeec65da0925115532589752bd0f7e6efa4b647",
+        "source_blob": "4e2c5fa4224d1a97c696972dc99c0615588d6825",
+        "command": [
+          "node",
+          "--test",
+          "tests/yul-views/nested-mapping-reference.test.mjs"
+        ],
+        "kind": "node-test",
+        "purpose": "Historical Node test/control source role: Declared nested-mapping-reference report regression and mutation controls; requires a configured saved-report argument. No report authenticity, replay execution or finite EVM observation credit. Recorded Node test command is an entry prefix, not a certified complete/default run. Source only; report/environment requirements remain uncertified, with no fixture/import/helper/child/current-validation, Lean/kernel/proof or EVM credit.",
+        "input_scope": [],
+        "other_reads": "unresolved"
+      },
+      {
+        "path": "tests/yul-views/object-allocation-reference.test.mjs",
+        "input_revision": "fbeec65da0925115532589752bd0f7e6efa4b647",
+        "source_blob": "f3213a197128440aaafa5e2d34ce2eb16642b53a",
+        "command": [
+          "node",
+          "--test",
+          "tests/yul-views/object-allocation-reference.test.mjs"
+        ],
+        "kind": "node-test",
+        "purpose": "Historical Node test/control source role: Declared object-allocation-reference report regression and mutation controls; requires a configured saved-report argument. No report authenticity, replay execution or finite EVM observation credit. Recorded Node test command is an entry prefix, not a certified complete/default run. Source only; report/environment requirements remain uncertified, with no fixture/import/helper/child/current-validation, Lean/kernel/proof or EVM credit.",
+        "input_scope": [],
+        "other_reads": "unresolved"
+      },
+      {
+        "path": "tests/yul-views/origin-sequence-reference.test.mjs",
+        "input_revision": "fbeec65da0925115532589752bd0f7e6efa4b647",
+        "source_blob": "128e63f2611bce14c9ed3e63a7838f88651a6347",
+        "command": [
+          "node",
+          "--test",
+          "tests/yul-views/origin-sequence-reference.test.mjs"
+        ],
+        "kind": "node-test",
+        "purpose": "Historical Node test/control source role: Declared origin-sequence-reference report regression and mutation controls; requires a configured saved-report argument. No report authenticity, replay execution or finite EVM observation credit. Recorded Node test command is an entry prefix, not a certified complete/default run. Source only; report/environment requirements remain uncertified, with no fixture/import/helper/child/current-validation, Lean/kernel/proof or EVM credit.",
+        "input_scope": [],
+        "other_reads": "unresolved"
+      },
+      {
+        "path": "tests/yul-views/owned-bool-dynamic-reference.test.mjs",
+        "input_revision": "fbeec65da0925115532589752bd0f7e6efa4b647",
+        "source_blob": "c7f08b1e44ab682ebb3644084bc4fe0b784886a8",
+        "command": [
+          "node",
+          "--test",
+          "tests/yul-views/owned-bool-dynamic-reference.test.mjs"
+        ],
+        "kind": "node-test",
+        "purpose": "Historical Node test/control source role: Declared owned-bool-dynamic-reference report regression and mutation controls; requires a configured saved-report argument. No report authenticity, replay execution or finite EVM observation credit. Recorded Node test command is an entry prefix, not a certified complete/default run. Source only; report/environment requirements remain uncertified, with no fixture/import/helper/child/current-validation, Lean/kernel/proof or EVM credit.",
+        "input_scope": [],
+        "other_reads": "unresolved"
+      },
+      {
+        "path": "tests/yul-views/owned-bool-reference.test.mjs",
+        "input_revision": "fbeec65da0925115532589752bd0f7e6efa4b647",
+        "source_blob": "82eb6dbbada3f2b1a1289a00b5d1f47bf87461f7",
+        "command": [
+          "node",
+          "--test",
+          "tests/yul-views/owned-bool-reference.test.mjs"
+        ],
+        "kind": "node-test",
+        "purpose": "Historical Node test/control source role: Declared owned-bool-reference report regression and mutation controls; requires a configured saved-report argument. No report authenticity, replay execution or finite EVM observation credit. Recorded Node test command is an entry prefix, not a certified complete/default run. Source only; report/environment requirements remain uncertified, with no fixture/import/helper/child/current-validation, Lean/kernel/proof or EVM credit.",
+        "input_scope": [],
+        "other_reads": "unresolved"
+      },
+      {
+        "path": "tests/yul-views/owned-inventory-reference.test.mjs",
+        "input_revision": "fbeec65da0925115532589752bd0f7e6efa4b647",
+        "source_blob": "71bbc5323f2de41350071406a6749df435de08d5",
+        "command": [
+          "node",
+          "--test",
+          "tests/yul-views/owned-inventory-reference.test.mjs"
+        ],
+        "kind": "node-test",
+        "purpose": "Historical Node test/control source role: Declared owned-inventory-reference report regression and mutation controls; requires a configured saved-report argument. No report authenticity, replay execution or finite EVM observation credit. Recorded Node test command is an entry prefix, not a certified complete/default run. Source only; report/environment requirements remain uncertified, with no fixture/import/helper/child/current-validation, Lean/kernel/proof or EVM credit.",
+        "input_scope": [],
+        "other_reads": "unresolved"
+      },
+      {
+        "path": "tests/yul-views/ownership-transport.test.mjs",
+        "input_revision": "fbeec65da0925115532589752bd0f7e6efa4b647",
+        "source_blob": "58d4e896c283ea34ce312fc6dbdc4334241ec6a6",
+        "command": [
+          "node",
+          "--test",
+          "tests/yul-views/ownership-transport.test.mjs"
+        ],
+        "kind": "node-test",
+        "purpose": "Historical Node test/control source role: Declared ownership-transport report regression and mutation controls; requires a configured saved-report argument. No report authenticity, replay execution or finite EVM observation credit. Recorded Node test command is an entry prefix, not a certified complete/default run. Source only; report/environment requirements remain uncertified, with no fixture/import/helper/child/current-validation, Lean/kernel/proof or EVM credit.",
+        "input_scope": [],
+        "other_reads": "unresolved"
+      },
+      {
+        "path": "tests/yul-views/packed-dynamic-reference.test.mjs",
+        "input_revision": "fbeec65da0925115532589752bd0f7e6efa4b647",
+        "source_blob": "380a49b79e269f2734175d7ced411a726fe99cbf",
+        "command": [
+          "node",
+          "--test",
+          "tests/yul-views/packed-dynamic-reference.test.mjs"
+        ],
+        "kind": "node-test",
+        "purpose": "Historical Node test/control source role: Declared packed-dynamic-reference report regression and mutation controls; requires a configured saved-report argument. No report authenticity, replay execution or finite EVM observation credit. Recorded Node test command is an entry prefix, not a certified complete/default run. Source only; report/environment requirements remain uncertified, with no fixture/import/helper/child/current-validation, Lean/kernel/proof or EVM credit.",
+        "input_scope": [],
+        "other_reads": "unresolved"
+      },
+      {
+        "path": "tests/yul-views/packed-residual-reference.test.mjs",
+        "input_revision": "fbeec65da0925115532589752bd0f7e6efa4b647",
+        "source_blob": "4f426765033b5defd659cb8705c6c35878f0936a",
+        "command": [
+          "node",
+          "--test",
+          "tests/yul-views/packed-residual-reference.test.mjs"
+        ],
+        "kind": "node-test",
+        "purpose": "Historical Node test/control source role: Declared packed-residual-reference report regression and mutation controls; requires a configured saved-report argument. No report authenticity, replay execution or finite EVM observation credit. Recorded Node test command is an entry prefix, not a certified complete/default run. Source only; report/environment requirements remain uncertified, with no fixture/import/helper/child/current-validation, Lean/kernel/proof or EVM credit.",
+        "input_scope": [],
+        "other_reads": "unresolved"
+      },
+      {
+        "path": "tests/yul-views/physical-upstream.test.mjs",
+        "input_revision": "fbeec65da0925115532589752bd0f7e6efa4b647",
+        "source_blob": "ef1072194b08b8674db5d2c8e11c65855b544981",
+        "command": [
+          "node",
+          "--test",
+          "tests/yul-views/physical-upstream.test.mjs"
+        ],
+        "kind": "node-test",
+        "purpose": "Historical Node test/control source role: Declared physical-upstream report regression and mutation controls; requires a configured saved-report argument. No report authenticity, replay execution or finite EVM observation credit. Recorded Node test command is an entry prefix, not a certified complete/default run. Source only; report/environment requirements remain uncertified, with no fixture/import/helper/child/current-validation, Lean/kernel/proof or EVM credit.",
+        "input_scope": [],
+        "other_reads": "unresolved"
+      },
+      {
+        "path": "tests/yul-views/primitive-dynamic-reference.test.mjs",
+        "input_revision": "fbeec65da0925115532589752bd0f7e6efa4b647",
+        "source_blob": "52c8097ea9cebb0af7591129aa5c57c4b667b715",
+        "command": [
+          "node",
+          "--test",
+          "tests/yul-views/primitive-dynamic-reference.test.mjs"
+        ],
+        "kind": "node-test",
+        "purpose": "Historical Node test/control source role: Declared primitive-dynamic-reference report regression and mutation controls; requires a configured saved-report argument. No report authenticity, replay execution or finite EVM observation credit. Recorded Node test command is an entry prefix, not a certified complete/default run. Source only; report/environment requirements remain uncertified, with no fixture/import/helper/child/current-validation, Lean/kernel/proof or EVM credit.",
+        "input_scope": [],
+        "other_reads": "unresolved"
+      },
+      {
+        "path": "tests/yul-views/recursive-declaration-reference.test.mjs",
+        "input_revision": "fbeec65da0925115532589752bd0f7e6efa4b647",
+        "source_blob": "76450a377bfe245445e192e19d998836a342f1f5",
+        "command": [
+          "node",
+          "--test",
+          "tests/yul-views/recursive-declaration-reference.test.mjs"
+        ],
+        "kind": "node-test",
+        "purpose": "Historical Node test/control source role: Declared recursive-declaration-reference report regression and mutation controls; requires a configured saved-report argument. No report authenticity, replay execution or finite EVM observation credit. Recorded Node test command is an entry prefix, not a certified complete/default run. Source only; report/environment requirements remain uncertified, with no fixture/import/helper/child/current-validation, Lean/kernel/proof or EVM credit.",
+        "input_scope": [],
+        "other_reads": "unresolved"
+      },
+      {
+        "path": "tests/yul-views/recursive-dynamic-reference.test.mjs",
+        "input_revision": "fbeec65da0925115532589752bd0f7e6efa4b647",
+        "source_blob": "e0126f2a27a5aa036681e9bc14313245364d4694",
+        "command": [
+          "node",
+          "--test",
+          "tests/yul-views/recursive-dynamic-reference.test.mjs"
+        ],
+        "kind": "node-test",
+        "purpose": "Historical Node test/control source role: Declared recursive-dynamic-reference report regression and mutation controls; requires a configured saved-report argument. No report authenticity, replay execution or finite EVM observation credit. Recorded Node test command is an entry prefix, not a certified complete/default run. Source only; report/environment requirements remain uncertified, with no fixture/import/helper/child/current-validation, Lean/kernel/proof or EVM credit.",
+        "input_scope": [],
+        "other_reads": "unresolved"
+      },
+      {
+        "path": "tests/yul-views/residual-mcopy-reference.test.mjs",
+        "input_revision": "fbeec65da0925115532589752bd0f7e6efa4b647",
+        "source_blob": "99bd40e3c2f9b2a7fa839a480a868b9ac7b409e4",
+        "command": [
+          "node",
+          "--test",
+          "tests/yul-views/residual-mcopy-reference.test.mjs"
+        ],
+        "kind": "node-test",
+        "purpose": "Historical Node test/control source role: Declared residual-mcopy-reference report regression and mutation controls; requires a configured saved-report argument. No report authenticity, replay execution or finite EVM observation credit. Recorded Node test command is an entry prefix, not a certified complete/default run. Source only; report/environment requirements remain uncertified, with no fixture/import/helper/child/current-validation, Lean/kernel/proof or EVM credit.",
+        "input_scope": [],
+        "other_reads": "unresolved"
+      },
+      {
+        "path": "tests/yul-views/residual-memory-reference.test.mjs",
+        "input_revision": "fbeec65da0925115532589752bd0f7e6efa4b647",
+        "source_blob": "4428d2ae50dba29877e1f4b0ae88a8d062dcb6db",
+        "command": [
+          "node",
+          "--test",
+          "tests/yul-views/residual-memory-reference.test.mjs"
+        ],
+        "kind": "node-test",
+        "purpose": "Historical Node test/control source role: Declared residual-memory-reference report regression and mutation controls; requires a configured saved-report argument. No report authenticity, replay execution or finite EVM observation credit. Recorded Node test command is an entry prefix, not a certified complete/default run. Source only; report/environment requirements remain uncertified, with no fixture/import/helper/child/current-validation, Lean/kernel/proof or EVM credit.",
+        "input_scope": [],
+        "other_reads": "unresolved"
+      },
+      {
+        "path": "tests/yul-views/residual-reference.test.mjs",
+        "input_revision": "fbeec65da0925115532589752bd0f7e6efa4b647",
+        "source_blob": "87ac6e2371e92380dd0d15dce06491e69c58c8d8",
+        "command": [
+          "node",
+          "--test",
+          "tests/yul-views/residual-reference.test.mjs"
+        ],
+        "kind": "node-test",
+        "purpose": "Historical Node test/control source role: Declared residual-reference report regression and mutation controls; requires a configured saved-report argument. No report authenticity, replay execution or finite EVM observation credit. Recorded Node test command is an entry prefix, not a certified complete/default run. Source only; report/environment requirements remain uncertified, with no fixture/import/helper/child/current-validation, Lean/kernel/proof or EVM credit.",
+        "input_scope": [],
+        "other_reads": "unresolved"
+      },
+      {
+        "path": "tests/yul-views/retained-allocation-reference.test.mjs",
+        "input_revision": "fbeec65da0925115532589752bd0f7e6efa4b647",
+        "source_blob": "ad3decf88461f8252f237422b22af647d947bdd6",
+        "command": [
+          "node",
+          "--test",
+          "tests/yul-views/retained-allocation-reference.test.mjs"
+        ],
+        "kind": "node-test",
+        "purpose": "Historical Node test/control source role: Declared retained-allocation-reference report regression and mutation controls; requires a configured saved-report argument. No report authenticity, replay execution or finite EVM observation credit. Recorded Node test command is an entry prefix, not a certified complete/default run. Source only; report/environment requirements remain uncertified, with no fixture/import/helper/child/current-validation, Lean/kernel/proof or EVM credit.",
+        "input_scope": [],
+        "other_reads": "unresolved"
+      },
+      {
+        "path": "tests/yul-views/retained-heap-reference.test.mjs",
+        "input_revision": "fbeec65da0925115532589752bd0f7e6efa4b647",
+        "source_blob": "c92da806f190542cf052607a509b9a2f7359f264",
+        "command": [
+          "node",
+          "--test",
+          "tests/yul-views/retained-heap-reference.test.mjs"
+        ],
+        "kind": "node-test",
+        "purpose": "Historical Node test/control source role: Declared retained-heap-reference report regression and mutation controls; requires a configured saved-report argument. No report authenticity, replay execution or finite EVM observation credit. Recorded Node test command is an entry prefix, not a certified complete/default run. Source only; report/environment requirements remain uncertified, with no fixture/import/helper/child/current-validation, Lean/kernel/proof or EVM credit.",
+        "input_scope": [],
+        "other_reads": "unresolved"
+      },
+      {
+        "path": "tests/yul-views/retained-member-arrays-reference.test.mjs",
+        "input_revision": "fbeec65da0925115532589752bd0f7e6efa4b647",
+        "source_blob": "f9730a67b68983cdf7044e72432f54d0ccc1b076",
+        "command": [
+          "node",
+          "--test",
+          "tests/yul-views/retained-member-arrays-reference.test.mjs"
+        ],
+        "kind": "node-test",
+        "purpose": "Historical Node test/control source role: Declared retained-member-arrays-reference report regression and mutation controls; requires a configured saved-report argument. No report authenticity, replay execution or finite EVM observation credit. Recorded Node test command is an entry prefix, not a certified complete/default run. Source only; report/environment requirements remain uncertified, with no fixture/import/helper/child/current-validation, Lean/kernel/proof or EVM credit.",
+        "input_scope": [],
+        "other_reads": "unresolved"
+      },
+      {
+        "path": "tests/yul-views/retained-storage-reference.test.mjs",
+        "input_revision": "fbeec65da0925115532589752bd0f7e6efa4b647",
+        "source_blob": "3802f2b143c319dfc06e9a0dea8b387c7a716969",
+        "command": [
+          "node",
+          "--test",
+          "tests/yul-views/retained-storage-reference.test.mjs"
+        ],
+        "kind": "node-test",
+        "purpose": "Historical Node test/control source role: Declared retained-storage-reference report regression and mutation controls; requires a configured saved-report argument. No report authenticity, replay execution or finite EVM observation credit. Recorded Node test command is an entry prefix, not a certified complete/default run. Source only; report/environment requirements remain uncertified, with no fixture/import/helper/child/current-validation, Lean/kernel/proof or EVM credit.",
+        "input_scope": [],
+        "other_reads": "unresolved"
+      },
+      {
+        "path": "tests/yul-views/root-sequence-reference.test.mjs",
+        "input_revision": "fbeec65da0925115532589752bd0f7e6efa4b647",
+        "source_blob": "596d20664c832128d4da92def1f28de0be9f4b14",
+        "command": [
+          "node",
+          "--test",
+          "tests/yul-views/root-sequence-reference.test.mjs"
+        ],
+        "kind": "node-test",
+        "purpose": "Historical Node test/control source role: Declared root-sequence-reference report regression and mutation controls; requires a configured saved-report argument. No report authenticity, replay execution or finite EVM observation credit. Recorded Node test command is an entry prefix, not a certified complete/default run. Source only; report/environment requirements remain uncertified, with no fixture/import/helper/child/current-validation, Lean/kernel/proof or EVM credit.",
+        "input_scope": [],
+        "other_reads": "unresolved"
+      },
+      {
+        "path": "tests/yul-views/scalar-dynamic-reference.test.mjs",
+        "input_revision": "fbeec65da0925115532589752bd0f7e6efa4b647",
+        "source_blob": "e19a1e1a9779a451535799ec54e2bb2aa6e35a60",
+        "command": [
+          "node",
+          "--test",
+          "tests/yul-views/scalar-dynamic-reference.test.mjs"
+        ],
+        "kind": "node-test",
+        "purpose": "Historical Node test/control source role: Declared scalar-dynamic-reference report regression and mutation controls; requires a configured saved-report argument. No report authenticity, replay execution or finite EVM observation credit. Recorded Node test command is an entry prefix, not a certified complete/default run. Source only; report/environment requirements remain uncertified, with no fixture/import/helper/child/current-validation, Lean/kernel/proof or EVM credit.",
+        "input_scope": [],
+        "other_reads": "unresolved"
+      },
+      {
+        "path": "tests/yul-views/scalar-memory-alias-reference.test.mjs",
+        "input_revision": "fbeec65da0925115532589752bd0f7e6efa4b647",
+        "source_blob": "827a358e0018ca27f16db559281fa5ca672c527e",
+        "command": [
+          "node",
+          "--test",
+          "tests/yul-views/scalar-memory-alias-reference.test.mjs"
+        ],
+        "kind": "node-test",
+        "purpose": "Historical Node test/control source role: Declared scalar-memory-alias-reference report regression and mutation controls; requires a configured saved-report argument. No report authenticity, replay execution or finite EVM observation credit. Recorded Node test command is an entry prefix, not a certified complete/default run. Source only; report/environment requirements remain uncertified, with no fixture/import/helper/child/current-validation, Lean/kernel/proof or EVM credit.",
+        "input_scope": [],
+        "other_reads": "unresolved"
+      },
+      {
+        "path": "tests/yul-views/scalar-memory-ops-reference.test.mjs",
+        "input_revision": "fbeec65da0925115532589752bd0f7e6efa4b647",
+        "source_blob": "945d17a66d1ec5caec726a691d0a000bc266850b",
+        "command": [
+          "node",
+          "--test",
+          "tests/yul-views/scalar-memory-ops-reference.test.mjs"
+        ],
+        "kind": "node-test",
+        "purpose": "Historical Node test/control source role: Declared scalar-memory-ops-reference report regression and mutation controls; requires a configured saved-report argument. No report authenticity, replay execution or finite EVM observation credit. Recorded Node test command is an entry prefix, not a certified complete/default run. Source only; report/environment requirements remain uncertified, with no fixture/import/helper/child/current-validation, Lean/kernel/proof or EVM credit.",
+        "input_scope": [],
+        "other_reads": "unresolved"
+      },
+      {
+        "path": "tests/yul-views/signed-dynamic-reference.test.mjs",
+        "input_revision": "fbeec65da0925115532589752bd0f7e6efa4b647",
+        "source_blob": "84c69ecde8a58c8b5da01af9d57c5d1f045f3920",
+        "command": [
+          "node",
+          "--test",
+          "tests/yul-views/signed-dynamic-reference.test.mjs"
+        ],
+        "kind": "node-test",
+        "purpose": "Historical Node test/control source role: Declared signed-dynamic-reference report regression and mutation controls; requires a configured saved-report argument. No report authenticity, replay execution or finite EVM observation credit. Recorded Node test command is an entry prefix, not a certified complete/default run. Source only; report/environment requirements remain uncertified, with no fixture/import/helper/child/current-validation, Lean/kernel/proof or EVM credit.",
+        "input_scope": [],
+        "other_reads": "unresolved"
+      },
+      {
+        "path": "tests/yul-views/tuple-storage-reference.test.mjs",
+        "input_revision": "fbeec65da0925115532589752bd0f7e6efa4b647",
+        "source_blob": "7b64d24a725748b3f781fcd6a387eca7cd1c4a59",
+        "command": [
+          "node",
+          "--test",
+          "tests/yul-views/tuple-storage-reference.test.mjs"
+        ],
+        "kind": "node-test",
+        "purpose": "Historical Node test/control source role: Declared tuple-storage-reference report regression and mutation controls; requires a configured saved-report argument. No report authenticity, replay execution or finite EVM observation credit. Recorded Node test command is an entry prefix, not a certified complete/default run. Source only; report/environment requirements remain uncertified, with no fixture/import/helper/child/current-validation, Lean/kernel/proof or EVM credit.",
+        "input_scope": [],
+        "other_reads": "unresolved"
+      },
+      {
+        "path": "tests/yul-views/word-writeback-reference.test.mjs",
+        "input_revision": "fbeec65da0925115532589752bd0f7e6efa4b647",
+        "source_blob": "5936ef3444ac8941fe6da6ff18f2de5e4cee0ed6",
+        "command": [
+          "node",
+          "--test",
+          "tests/yul-views/word-writeback-reference.test.mjs"
+        ],
+        "kind": "node-test",
+        "purpose": "Historical Node test/control source role: Declared word-writeback-reference report regression and mutation controls; requires a configured saved-report argument. No report authenticity, replay execution or finite EVM observation credit. Recorded Node test command is an entry prefix, not a certified complete/default run. Source only; report/environment requirements remain uncertified, with no fixture/import/helper/child/current-validation, Lean/kernel/proof or EVM credit.",
+        "input_scope": [],
+        "other_reads": "unresolved"
+      },
+      {
+        "path": "tests/yul-views/writeback-reference.test.mjs",
+        "input_revision": "fbeec65da0925115532589752bd0f7e6efa4b647",
+        "source_blob": "bdff4da912f5b4ca306fc3d52821d28c2b77d495",
+        "command": [
+          "node",
+          "--test",
+          "tests/yul-views/writeback-reference.test.mjs"
+        ],
+        "kind": "node-test",
+        "purpose": "Historical Node test/control source role: Declared writeback-reference report regression and mutation controls; requires a configured saved-report argument. No report authenticity, replay execution or finite EVM observation credit. Recorded Node test command is an entry prefix, not a certified complete/default run. Source only; report/environment requirements remain uncertified, with no fixture/import/helper/child/current-validation, Lean/kernel/proof or EVM credit.",
+        "input_scope": [],
+        "other_reads": "unresolved"
       }
     ]
   },
