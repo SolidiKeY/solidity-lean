@@ -1,0 +1,97 @@
+{
+  "schema_version": 1,
+  "routes": {
+    "standalone": [
+      {
+        "path": "tests/h62/item6/migrate-lowering/hash_overlay_controls.py",
+        "input_revision": "c7f33cfc9e1b3c8d0e634f0b267971aa2671688d",
+        "source_blob": "bb98cfc4e2cd11d8eaba77302bb4f3517f86d6c4",
+        "command": [
+          "python3",
+          "-B",
+          "tests/h62/item6/migrate-lowering/hash_overlay_controls.py"
+        ],
+        "kind": "runnable-entrypoint",
+        "entry_line": 5,
+        "purpose": "Reject corrupt context/counts rather than accepting a misleading overlay candidate. Python controls only; no Lean or external EVM proof credit.",
+        "input_scope": [],
+        "other_reads": "unresolved"
+      },
+      {
+        "path": "tests/h62/item6/migrate-lowering/proof_budget_controls.py",
+        "input_revision": "c7f33cfc9e1b3c8d0e634f0b267971aa2671688d",
+        "source_blob": "a4739d283013ffcafef2d3abc8427b2e742f28fe",
+        "command": [
+          "python3",
+          "-B",
+          "tests/h62/item6/migrate-lowering/proof_budget_controls.py"
+        ],
+        "kind": "runnable-entrypoint",
+        "entry_line": 5,
+        "purpose": "Controls for false budget/tactic evidence and mixed decide modes. Python controls only; no Lean or external EVM proof credit.",
+        "input_scope": [],
+        "other_reads": "unresolved"
+      },
+      {
+        "path": "tests/h62/item6/migrate-lowering/census_controls.py",
+        "input_revision": "c7f33cfc9e1b3c8d0e634f0b267971aa2671688d",
+        "source_blob": "ccaa8e792e56ff67dce2567ffb1f47793bd71fc1",
+        "command": [
+          "python3",
+          "-B",
+          "tests/h62/item6/migrate-lowering/census_controls.py"
+        ],
+        "kind": "runnable-entrypoint",
+        "entry_line": 6,
+        "purpose": "Regression controls for review-discovered census omissions and false import edges. Python controls only; no Lean or external EVM proof credit.",
+        "input_scope": [],
+        "other_reads": "unresolved"
+      },
+      {
+        "path": "tests/h62/item6/migrate-source/generated-uses-acceptance.py",
+        "input_revision": "c7f33cfc9e1b3c8d0e634f0b267971aa2671688d",
+        "source_blob": "ed762a582a4c53a889e3719fac10e6820e9359be",
+        "command": [
+          "python3",
+          "-B",
+          "tests/h62/item6/migrate-source/generated-uses-acceptance.py"
+        ],
+        "kind": "runnable-entrypoint",
+        "entry_line": 8,
+        "purpose": "Negative controls for the bounded direct-use census; no Lean invocation. Python controls only; no Lean or external EVM proof credit.",
+        "input_scope": [],
+        "other_reads": "unresolved"
+      },
+      {
+        "path": "tests/h62/item6/migrate-source/h78-inventory-acceptance.py",
+        "input_revision": "c7f33cfc9e1b3c8d0e634f0b267971aa2671688d",
+        "source_blob": "80d62d8945bb5ced3faa1bc512a77b1ca3404415",
+        "command": [
+          "python3",
+          "-B",
+          "tests/h62/item6/migrate-source/h78-inventory-acceptance.py"
+        ],
+        "kind": "runnable-entrypoint",
+        "entry_line": 10,
+        "purpose": "Static parser and evidence-boundary controls; no Lean invocation. Python controls only; no Lean or external EVM proof credit.",
+        "input_scope": [],
+        "other_reads": "unresolved"
+      },
+      {
+        "path": "tests/h62/item6/migrate-storage/acceptance.py",
+        "input_revision": "c7f33cfc9e1b3c8d0e634f0b267971aa2671688d",
+        "source_blob": "970733a7a5cc563161c3d01379ca4a3577b30b49",
+        "command": [
+          "python3",
+          "-B",
+          "tests/h62/item6/migrate-storage/acceptance.py"
+        ],
+        "kind": "runnable-entrypoint",
+        "entry_line": 7,
+        "purpose": "Adversarial scanner controls; no Lean/proof acceptance claim. Python controls only; no Lean or external EVM proof credit.",
+        "input_scope": [],
+        "other_reads": "unresolved"
+      }
+    ]
+  }
+}
