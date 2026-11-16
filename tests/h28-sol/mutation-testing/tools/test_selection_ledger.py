@@ -110,3 +110,7 @@ class SelectionLedgerControls(unittest.TestCase):
         c, m, s, i = self.inputs(); m.pop("declared_case_counts")
         with self.assertRaisesRegex(ValueError, "declared case counts are required"):
             ledger.account(c, m, s, i)
+
+
+if __name__ == "__main__":
+    unittest.main()

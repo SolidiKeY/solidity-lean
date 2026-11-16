@@ -46,3 +46,7 @@ class ScopePolicyTests(unittest.TestCase):
   self.write(self.outside,'protected original bytes\n')
   self.assertNotIn(self.outside,self.git('diff','--no-renames','--name-only',self.published).splitlines())
   self.assertIn(self.outside,scope_violations(self.published,self.root))
+
+
+if __name__ == "__main__":
+    unittest.main()
