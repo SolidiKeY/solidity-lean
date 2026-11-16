@@ -66,7 +66,7 @@
         "required_options": [
           "--out"
         ],
-        "purpose": "Diagnose saved value-entry cache descriptors against current source/import and saved artifact identities, with synthetic missing/changed descriptor controls. No Lean invocation, typed execution, nonzero-payment runtime validation or semantic verdict; configured source role only, no fixture/helper execution credit."
+        "purpose": "Diagnose saved value-entry cache descriptors against current source/import and saved artifact identities, with synthetic missing/changed descriptor controls. No Lean invocation, typed execution, nonzero-payment runtime validation or semantic verdict; configured source role only, no fixture/helper execution credit. Its current ROOT resolves under baseline-20261028 and the top-level cache-audit helper import is missing there; configured execution is unavailable in this checkout."
       }
     ]
   }
