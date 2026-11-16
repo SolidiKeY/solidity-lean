@@ -385,6 +385,21 @@
         "purpose": "Mock-only resource-stop regression: auto-removal and concurrent exit-zero races retain failing receipts. No Docker command, actual container stop, live resource gate, Lean or proof credit. Historical source-only after catalog commit; no fixture, child or current-validation credit.",
         "input_scope": [],
         "other_reads": "unresolved"
+      },
+      {
+        "path": "tests/roadmap-v15-thread-group-exit.py",
+        "input_revision": "142a6a85559022088502285fe40a9cfb7887e83a",
+        "source_blob": "9d95030b43fbe77c172c2100df2ff4eb1e686d09",
+        "command": [
+          "python3",
+          "-B",
+          "tests/roadmap-v15-thread-group-exit.py"
+        ],
+        "kind": "runnable-entrypoint",
+        "entry_line": 82,
+        "purpose": "Actual bounded Linux pidfd/thread-group lifecycle regression using only a controlled Python child: live worker refuses terminal status and real group exit permits retirement. No Lean execution, historical Lean process reconstruction or proof credit. Historical source-only after catalog commit; no fixture, child or current-validation propagation.",
+        "input_scope": [],
+        "other_reads": "unresolved"
       }
     ]
   },
