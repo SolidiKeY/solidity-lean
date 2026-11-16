@@ -1045,6 +1045,231 @@
         "purpose": "Historical standalone script source role: Generate the reconciled control inventory and exact-source frozen contract. Recorded command is an entry prefix, not a certified complete/default run. Argument/environment requirements and outputs remain uncertified. Source only: no current validation, fixture/helper/child execution, cache delivery, Lean/kernel/proof or EVM credit.",
         "input_scope": [],
         "other_reads": "unresolved"
+      },
+      {
+        "path": "tests/calldata-packets-1105/RawBool/audit.py",
+        "input_revision": "fbeec65da0925115532589752bd0f7e6efa4b647",
+        "source_blob": "8337ca82d58b0d8196b7e366891365acacbf5292",
+        "command": [
+          "python3",
+          "-B",
+          "tests/calldata-packets-1105/RawBool/audit.py"
+        ],
+        "kind": "runnable-entrypoint",
+        "entry_line": 3,
+        "purpose": "Historical standalone script source role: RawBool source-printed axiom inventory script; scans guarded print declarations and writes inventory metadata, not fresh kernel output. Recorded command is an entry prefix, not a certified complete/default run. Argument/environment requirements and outputs remain uncertified. Source only: no current validation, fixture/helper/child execution, cache delivery, Lean/kernel/proof or EVM credit.",
+        "input_scope": [],
+        "other_reads": "unresolved"
+      },
+      {
+        "path": "tests/calldata-packets-1105/RawBool/prepare.py",
+        "input_revision": "fbeec65da0925115532589752bd0f7e6efa4b647",
+        "source_blob": "c71ed0879652ee0c42538b9f7f07488929aea6a3",
+        "command": [
+          "python3",
+          "-B",
+          "tests/calldata-packets-1105/RawBool/prepare.py"
+        ],
+        "kind": "runnable-entrypoint",
+        "entry_line": 11,
+        "purpose": "Historical standalone script source role: Serial RawBool import-dependency preparation script using the existing bounded run.py wrapper and resumable state. Recorded command is an entry prefix, not a certified complete/default run. Argument/environment requirements and outputs remain uncertified. Source only: no current validation, fixture/helper/child execution, cache delivery, Lean/kernel/proof or EVM credit.",
+        "input_scope": [],
+        "other_reads": "unresolved"
+      },
+      {
+        "path": "tests/contract-world-certificates/diagnostics-command.py",
+        "input_revision": "fbeec65da0925115532589752bd0f7e6efa4b647",
+        "source_blob": "939e574f5bcaddb275bf96dbb8da566eb1ad848f",
+        "command": [
+          "python3",
+          "-B",
+          "tests/contract-world-certificates/diagnostics-command.py"
+        ],
+        "kind": "runnable-entrypoint",
+        "entry_line": 15,
+        "purpose": "Historical standalone script source role: Standalone asynchronous MCP diagnostic command for four contract-world source modules; requires its original configured MCP environment. Recorded command is an entry prefix, not a certified complete/default run. Argument/environment requirements and outputs remain uncertified. Source only: no current validation, fixture/helper/child execution, cache delivery, Lean/kernel/proof or EVM credit.",
+        "input_scope": [],
+        "other_reads": "unresolved"
+      },
+      {
+        "path": "tests/primitive-packets-1105/SignedCheckedMul/check.py",
+        "input_revision": "fbeec65da0925115532589752bd0f7e6efa4b647",
+        "source_blob": "17859713b79962b86d8c9b8ebaa54ab16302d25d",
+        "command": [
+          "python3",
+          "-B",
+          "tests/primitive-packets-1105/SignedCheckedMul/check.py"
+        ],
+        "kind": "runnable-entrypoint",
+        "entry_line": 10,
+        "purpose": "Historical standalone script source role: Check all thirty-two complete native/Source observation rows independently. Recorded command is an entry prefix, not a certified complete/default run. Argument/environment requirements and outputs remain uncertified. Source only: no current validation, fixture/helper/child execution, cache delivery, Lean/kernel/proof or EVM credit.",
+        "input_scope": [],
+        "other_reads": "unresolved"
+      },
+      {
+        "path": "tests/primitive-packets-1105/SignedCheckedSub/check.py",
+        "input_revision": "fbeec65da0925115532589752bd0f7e6efa4b647",
+        "source_blob": "4dcb5282ac75749d15d981b261edb9de6c3e77b4",
+        "command": [
+          "python3",
+          "-B",
+          "tests/primitive-packets-1105/SignedCheckedSub/check.py"
+        ],
+        "kind": "runnable-entrypoint",
+        "entry_line": 9,
+        "purpose": "Historical standalone script source role: Check all twenty complete native/Source observation rows independently. Recorded command is an entry prefix, not a certified complete/default run. Argument/environment requirements and outputs remain uncertified. Source only: no current validation, fixture/helper/child execution, cache delivery, Lean/kernel/proof or EVM credit.",
+        "input_scope": [],
+        "other_reads": "unresolved"
+      },
+      {
+        "path": "tests/sol-override-validation/make_coverage.py",
+        "input_revision": "fbeec65da0925115532589752bd0f7e6efa4b647",
+        "source_blob": "29b95b827b2d171024d3b1c15e94825ca26ef5bd",
+        "command": [
+          "python3",
+          "-B",
+          "tests/sol-override-validation/make_coverage.py"
+        ],
+        "kind": "runnable-entrypoint",
+        "entry_line": 84,
+        "purpose": "Historical standalone script source role: Emit the reviewed arm/clause/control map and complete proof/fixture inventory. Recorded command is an entry prefix, not a certified complete/default run. Argument/environment requirements and outputs remain uncertified. Source only: no current validation, fixture/helper/child execution, cache delivery, Lean/kernel/proof or EVM credit.",
+        "input_scope": [],
+        "other_reads": "unresolved"
+      },
+      {
+        "path": "tests/sol-override-validation/replay.py",
+        "input_revision": "fbeec65da0925115532589752bd0f7e6efa4b647",
+        "source_blob": "e0ab924854c4ae25559ee246edfa44da3ff864b9",
+        "command": [
+          "python3",
+          "-B",
+          "tests/sol-override-validation/replay.py"
+        ],
+        "kind": "runnable-entrypoint",
+        "entry_line": 16,
+        "purpose": "Historical standalone script source role: Run both checked-Source replays in the existing bounded serial container. Recorded command is an entry prefix, not a certified complete/default run. Argument/environment requirements and outputs remain uncertified. Source only: no current validation, fixture/helper/child execution, cache delivery, Lean/kernel/proof or EVM credit.",
+        "input_scope": [],
+        "other_reads": "unresolved"
+      },
+      {
+        "path": "tests/sol-override-validation/test_gate.py",
+        "input_revision": "fbeec65da0925115532589752bd0f7e6efa4b647",
+        "source_blob": "f4556a998d7b626855e50fbb6b823fbb52ba0852",
+        "command": [
+          "python3",
+          "-B",
+          "tests/sol-override-validation/test_gate.py"
+        ],
+        "kind": "runnable-entrypoint",
+        "entry_line": 12,
+        "purpose": "Historical standalone script source role: Adversarial regression controls for the external evidence gate. Recorded command is an entry prefix, not a certified complete/default run. Argument/environment requirements and outputs remain uncertified. Previously observed run failed; no passing credit. Source only: no current validation, fixture/helper/child execution, cache delivery, Lean/kernel/proof or EVM credit.",
+        "input_scope": [],
+        "other_reads": "unresolved"
+      },
+      {
+        "path": "tests/v14-help/check-bool-array-axioms.py",
+        "input_revision": "fbeec65da0925115532589752bd0f7e6efa4b647",
+        "source_blob": "59301525d1e562b95b0c645820b31ebd7d7e6e4a",
+        "command": [
+          "python3",
+          "-B",
+          "tests/v14-help/check-bool-array-axioms.py"
+        ],
+        "kind": "runnable-entrypoint",
+        "entry_line": 5,
+        "purpose": "Historical standalone script source role: Standalone exact saved-axiom-log checker for bool-array controls, including count, duplicate, forbidden and missing-report refusals. Recorded command is an entry prefix, not a certified complete/default run. Argument/environment requirements and outputs remain uncertified. Source only: no current validation, fixture/helper/child execution, cache delivery, Lean/kernel/proof or EVM credit.",
+        "input_scope": [],
+        "other_reads": "unresolved"
+      },
+      {
+        "path": "tests/v14-help/check-bool-entry-axioms.py",
+        "input_revision": "fbeec65da0925115532589752bd0f7e6efa4b647",
+        "source_blob": "fc83ab283de9a38b3783094417eedd50e7bcd168",
+        "command": [
+          "python3",
+          "-B",
+          "tests/v14-help/check-bool-entry-axioms.py"
+        ],
+        "kind": "runnable-entrypoint",
+        "entry_line": 5,
+        "purpose": "Historical standalone script source role: Standalone exact saved-axiom-log checker for bool-entry controls, including count, duplicate, forbidden and missing-report refusals. Recorded command is an entry prefix, not a certified complete/default run. Argument/environment requirements and outputs remain uncertified. Source only: no current validation, fixture/helper/child execution, cache delivery, Lean/kernel/proof or EVM credit.",
+        "input_scope": [],
+        "other_reads": "unresolved"
+      },
+      {
+        "path": "tests/v14-help/check-bool-expression-axioms.py",
+        "input_revision": "fbeec65da0925115532589752bd0f7e6efa4b647",
+        "source_blob": "9f69816ee8db42663d269b6590feac8bf2838f91",
+        "command": [
+          "python3",
+          "-B",
+          "tests/v14-help/check-bool-expression-axioms.py"
+        ],
+        "kind": "runnable-entrypoint",
+        "entry_line": 5,
+        "purpose": "Historical standalone script source role: Standalone exact saved-axiom-log checker for bool-expression controls, including count, duplicate, forbidden and missing-report refusals. Recorded command is an entry prefix, not a certified complete/default run. Argument/environment requirements and outputs remain uncertified. Source only: no current validation, fixture/helper/child execution, cache delivery, Lean/kernel/proof or EVM credit.",
+        "input_scope": [],
+        "other_reads": "unresolved"
+      },
+      {
+        "path": "tests/v14-help/check-byte-axioms.py",
+        "input_revision": "fbeec65da0925115532589752bd0f7e6efa4b647",
+        "source_blob": "7043bdb3efbde38d7b60e77ab73e3e4be8f06ea4",
+        "command": [
+          "python3",
+          "-B",
+          "tests/v14-help/check-byte-axioms.py"
+        ],
+        "kind": "runnable-entrypoint",
+        "entry_line": 5,
+        "purpose": "Historical standalone script source role: Standalone exact saved-axiom-log checker for byte controls, including count, duplicate, forbidden and missing-report refusals. Recorded command is an entry prefix, not a certified complete/default run. Argument/environment requirements and outputs remain uncertified. Source only: no current validation, fixture/helper/child execution, cache delivery, Lean/kernel/proof or EVM credit.",
+        "input_scope": [],
+        "other_reads": "unresolved"
+      },
+      {
+        "path": "tests/v14-help/check-copy-access-axioms.py",
+        "input_revision": "fbeec65da0925115532589752bd0f7e6efa4b647",
+        "source_blob": "be1ff1ba3b8f003761bb2c945d21e81aca6f30d5",
+        "command": [
+          "python3",
+          "-B",
+          "tests/v14-help/check-copy-access-axioms.py"
+        ],
+        "kind": "runnable-entrypoint",
+        "entry_line": 5,
+        "purpose": "Historical standalone script source role: Standalone exact saved-axiom-log checker for copy-access controls, including count, duplicate, forbidden and missing-report refusals. Recorded command is an entry prefix, not a certified complete/default run. Argument/environment requirements and outputs remain uncertified. Source only: no current validation, fixture/helper/child execution, cache delivery, Lean/kernel/proof or EVM credit.",
+        "input_scope": [],
+        "other_reads": "unresolved"
+      },
+      {
+        "path": "tests/v14-help/check-copy-axioms.py",
+        "input_revision": "fbeec65da0925115532589752bd0f7e6efa4b647",
+        "source_blob": "49c1d2eaeb41623542a4d7825a340f80e0a517f5",
+        "command": [
+          "python3",
+          "-B",
+          "tests/v14-help/check-copy-axioms.py"
+        ],
+        "kind": "runnable-entrypoint",
+        "entry_line": 5,
+        "purpose": "Historical standalone script source role: Standalone exact saved-axiom-log checker for copy controls, including count, duplicate, forbidden and missing-report refusals. Recorded command is an entry prefix, not a certified complete/default run. Argument/environment requirements and outputs remain uncertified. Source only: no current validation, fixture/helper/child execution, cache delivery, Lean/kernel/proof or EVM credit.",
+        "input_scope": [],
+        "other_reads": "unresolved"
+      },
+      {
+        "path": "tests/v14-help/check-memory-delete-axioms.py",
+        "input_revision": "fbeec65da0925115532589752bd0f7e6efa4b647",
+        "source_blob": "07668cd46d8c1f4b2df76637bba3f69a360b0943",
+        "command": [
+          "python3",
+          "-B",
+          "tests/v14-help/check-memory-delete-axioms.py"
+        ],
+        "kind": "runnable-entrypoint",
+        "entry_line": 5,
+        "purpose": "Historical standalone script source role: Standalone exact saved-axiom-log checker for memory-delete controls, including count, duplicate, forbidden and missing-report refusals. Recorded command is an entry prefix, not a certified complete/default run. Argument/environment requirements and outputs remain uncertified. Source only: no current validation, fixture/helper/child execution, cache delivery, Lean/kernel/proof or EVM credit.",
+        "input_scope": [],
+        "other_reads": "unresolved"
       }
     ]
   },
