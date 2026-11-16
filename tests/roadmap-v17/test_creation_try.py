@@ -79,3 +79,6 @@ class CreationControls(unittest.TestCase):
         self.assertEqual(c.axiom_prints(raw,expected),expected)
         for bad in [raw[:-3],raw+raw,raw+b"'A' depends on axioms: []\n",raw.replace(b'Quot.sound',b'sorryAx'),raw+b'unknown output\n',b'V17_CREATION_KERNEL_END\n']:
             with self.subTest(bad=bad[-50:]),self.assertRaises(ValueError):c.axiom_prints(bad,expected)
+
+if __name__ == "__main__":
+    unittest.main()
