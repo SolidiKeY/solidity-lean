@@ -253,6 +253,34 @@
         "purpose": "Portable exact-source binding and synthetic guard/axiom corruption controls; lexical checks only, no kernel or EVM validation credit.",
         "input_scope": [],
         "other_reads": "unresolved"
+      },
+      {
+        "path": "tests/fullscope-20261104/vt1/object-data.test.mjs",
+        "input_revision": "279fa3fbcf10da40e9ac159944d3486efcda56e4",
+        "source_blob": "d1d58d4be87b373b1521bc136de497f7cf82c7e6",
+        "command": [
+          "node",
+          "--test",
+          "tests/fullscope-20261104/vt1/object-data.test.mjs"
+        ],
+        "kind": "node-test",
+        "purpose": "Default saved-object-data positive and corruption controls demonstrated with exact SHA256/version-pinned external solc. Source role only; no compiler-correctness, label-association, EVM, Lean/kernel/proof or current-head child/fixture credit.",
+        "input_scope": [],
+        "other_reads": "unresolved"
+      },
+      {
+        "path": "tests/roadmap-v17/runtime.test.mjs",
+        "input_revision": "279fa3fbcf10da40e9ac159944d3486efcda56e4",
+        "source_blob": "ced3591fe76aeede8388f24c35f167cd3b5917d9",
+        "command": [
+          "node",
+          "--test",
+          "tests/roadmap-v17/runtime.test.mjs"
+        ],
+        "kind": "node-test",
+        "purpose": "Host-side runtime metadata, checkout/output binding and refusal controls; optional historical-report cases unavailable by default. No native execution, proof, compiler/EVM agreement or fixture-read credit.",
+        "input_scope": [],
+        "other_reads": "unresolved"
       }
     ]
   }
