@@ -1664,6 +1664,20 @@
         "kind": "unittest",
         "path": "tests/h62/item6/migrate-typing/test_census.py",
         "source_blob": "9d7088a5b11815279639338fa148ec3f0198b91a"
+      },
+      {
+        "path": "scripts/h62/item4/generic-source-frontend/test_annotations.py",
+        "input_revision": "261a03706400a73817b91e87c63ab1d7b3674e8c",
+        "source_blob": "b3b55b58ce81d86b6c660a698ae31f153273f523",
+        "command": [
+          "python3",
+          "-B",
+          "scripts/h62/item4/generic-source-frontend/test_annotations.py"
+        ],
+        "kind": "unittest",
+        "purpose": "Six existing annotation guard regressions exercise exact annotation-only byte differences, all 30 eligible paths, proof/import/duplicate refusals and Git path/mode/status boundaries. Synthetic source bytes only; no production proof, helper-data or fixture credit.",
+        "input_scope": [],
+        "other_reads": "unresolved"
       }
     ],
     "module_entries": [
