@@ -281,6 +281,80 @@
         "purpose": "Host-side runtime metadata, checkout/output binding and refusal controls; optional historical-report cases unavailable by default. No native execution, proof, compiler/EVM agreement or fixture-read credit.",
         "input_scope": [],
         "other_reads": "unresolved"
+      },
+      {
+        "path": "tests/fullscope-20261104/vt1/verify-fixtures.test.mjs",
+        "input_revision": "65359b4b0e79c0441c231eb9c84cb2cc33419f9f",
+        "source_blob": "c9f651c5f68f23af6b6a6672150d2d7905d335d4",
+        "command": [
+          "node",
+          "--test",
+          "tests/fullscope-20261104/vt1/verify-fixtures.test.mjs"
+        ],
+        "kind": "node-test",
+        "purpose": "Historical default provenance controls against the original complete fixture tree. Current default fails its extra-fixture inventory check; no assertions or fixtures changed. Historical source-only role, no current validation, fixture/child, regeneration, Lean/kernel/proof or EVM credit.",
+        "input_scope": [],
+        "other_reads": "unresolved"
+      },
+      {
+        "path": "tests/terra-20261103/disk/accept.py",
+        "input_revision": "d46961ebf40af5570fd9828c9c25b46d11b71f53",
+        "source_blob": "e0e5aec706aea7080cc964db26fa72c18515dc26",
+        "command": [
+          "python3",
+          "-B",
+          "tests/terra-20261103/disk/accept.py"
+        ],
+        "kind": "runnable-entrypoint",
+        "entry_line": 32,
+        "purpose": "TF-disk default no-commit-argument regression: real production script in disposable Git trees with mocked container engines/cgroup files. No live host cleanup/resource policy, Lean, proof or missing-capture authenticity credit. Historical source-only role after catalog commit; no fixture/child/current-validation credit.",
+        "input_scope": [],
+        "other_reads": "unresolved"
+      },
+      {
+        "path": "tests/terra-20261103/mcp/accept.py",
+        "input_revision": "d46961ebf40af5570fd9828c9c25b46d11b71f53",
+        "source_blob": "6a4292f642baf9f2d863df65b1f7860cc81c540b",
+        "command": [
+          "python3",
+          "-B",
+          "tests/terra-20261103/mcp/accept.py"
+        ],
+        "kind": "runnable-entrypoint",
+        "entry_line": 32,
+        "purpose": "TF-mcp default no-commit-argument protocol regression: real production bridge with a private recording JSON-RPC substitute. No real Lean server, proof, lost final delivery or original-capture authentication credit. Historical source-only role after catalog commit; no fixture/child/current-validation credit.",
+        "input_scope": [],
+        "other_reads": "unresolved"
+      },
+      {
+        "path": "tests/terra-20261103/seal/accept.py",
+        "input_revision": "d46961ebf40af5570fd9828c9c25b46d11b71f53",
+        "source_blob": "c9d5f30b67a8b659e0d4eb71445661d456595b4f",
+        "command": [
+          "python3",
+          "-B",
+          "tests/terra-20261103/seal/accept.py"
+        ],
+        "kind": "runnable-entrypoint",
+        "entry_line": 32,
+        "purpose": "TF-seal default no-commit-argument regression: real script and disposable Git bundles. Not authenticity against fully rewritten manifests/bundles or recovery of missing historical captures; external source/head trust remains required. Historical source-only role after catalog commit; no fixture/child/current-validation credit.",
+        "input_scope": [],
+        "other_reads": "unresolved"
+      },
+      {
+        "path": "tests/terra-20261103/tactics/accept.py",
+        "input_revision": "d46961ebf40af5570fd9828c9c25b46d11b71f53",
+        "source_blob": "3882757d2580f04db32611dd13edd3c7cfd7f6b3",
+        "command": [
+          "python3",
+          "-B",
+          "tests/terra-20261103/tactics/accept.py"
+        ],
+        "kind": "runnable-entrypoint",
+        "entry_line": 32,
+        "purpose": "TF-tactics default no-commit-argument process/cleanup regression with recording Lake/MCP substitutes. No tactic proof validity, real Lean execution or missing historical-delivery authentication credit. Historical source-only role after catalog commit; no fixture/child/current-validation credit.",
+        "input_scope": [],
+        "other_reads": "unresolved"
       }
     ]
   },
