@@ -150,13 +150,13 @@ def merge_fragment_entries(section, existing, additions):
     seen = {}
     for row in existing:
         key = fragment_identity(section, row)
-        if key in seen and seen[key] != row: raise ValueError('conflicting existing ' + section + ' entries')
+        if key in seen and canonical(seen[key]) != canonical(row): raise ValueError('conflicting existing ' + section + ' entries')
         seen[key] = row
     result = list(existing)
     for row in additions:
         key = fragment_identity(section, row)
         if key in seen:
-            if seen[key] != row: raise ValueError('conflicting ' + section + ' fragment entries')
+            if canonical(seen[key]) != canonical(row): raise ValueError('conflicting ' + section + ' fragment entries')
             continue
         seen[key] = row
         result.append(row)
