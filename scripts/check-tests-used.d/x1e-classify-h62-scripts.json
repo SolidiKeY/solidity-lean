@@ -1,0 +1,660 @@
+{
+  "schema_version": 1,
+  "routes": {
+    "standalone": [
+      {
+        "command": [
+          "python3",
+          "-B",
+          "scripts/h62/item1/assignment-twins/test_census.py"
+        ],
+        "entry_line": 42,
+        "input_scope": [],
+        "kind": "runnable-entrypoint",
+        "other_reads": "unresolved",
+        "path": "scripts/h62/item1/assignment-twins/test_census.py",
+        "purpose": "Bare parent regression validates six frozen file hashes/declaration names/legacy-viaIR arms and three output mutations; census child executes separately and earns no child/helper/data/proof credit. Separately successful ordinary/traced default; no unittest case count, source theorem/semantic/compiler adequacy, child execution, data consumption or proof acceptance.",
+        "source_blob": "d9ec3c74e41e1894ab407610df1c6caf307b62b8",
+        "input_revision": "26810f4d3dadd1725128c2e71560b3325c7b2811"
+      },
+      {
+        "path": "scripts/h62/item1/duplication-scanner/bind_signature_fixture.py",
+        "source_blob": "7959500d77df619f6db0805b973193d2b473b84b",
+        "command": [
+          "python3",
+          "-B",
+          "scripts/h62/item1/duplication-scanner/bind_signature_fixture.py"
+        ],
+        "kind": "committed-cli",
+        "purpose": "Declared CLI source rebuilding only pinned canonical signature fixtures under writer/resource guards, comparing fresh discovery/compiled environments, dependency companions, runtime and exact completed logs before creating five local source/signature links. Raw signatures stay environment-unbound; this is no remote attestation, ABA-proof provenance, compiler proof or general repository binding. Required configuration or private evidence is not supplied; source role only, no current execution, child/read/fixture, generation, proof/runtime, nonuse/deletion, permission or STOP-clearance credit.",
+        "entry_line": 289,
+        "required_options": [
+          "--output"
+        ],
+        "input_revision": "6364b7bb4b2e124a92195baf75a80aad3929bde3"
+      },
+      {
+        "path": "scripts/h62/item1/duplication-scanner/bind_source_locations.py",
+        "source_blob": "58bf4293737b5e55de253be3e5d360f4a0f1cf6c",
+        "command": [
+          "python3",
+          "-B",
+          "scripts/h62/item1/duplication-scanner/bind_source_locations.py"
+        ],
+        "kind": "committed-cli",
+        "purpose": "Declared CLI source invoking pinned live fixture/kernel builds and joining direct compiler positions, exact source names/lines and declaration kinds to lexical rows. It verifies child bytes against successful live return hashes and retains absent, ambiguous, unsupported or generated-alias matches; no general ownership, unloaded/private artifact coverage, proof-body equality or remote attestation follows. Required configuration or private evidence is not supplied; source role only, no current execution, child/read/fixture, generation, proof/runtime, nonuse/deletion, permission or STOP-clearance credit.",
+        "entry_line": 206,
+        "required_options": [
+          "--output"
+        ],
+        "input_revision": "6364b7bb4b2e124a92195baf75a80aad3929bde3"
+      },
+      {
+        "path": "scripts/h62/item1/duplication-scanner/census_fixture_kernel.py",
+        "source_blob": "cfdf3ac215d0429eb5bf6b423145373e8a97f3e1",
+        "command": [
+          "python3",
+          "-B",
+          "scripts/h62/item1/duplication-scanner/census_fixture_kernel.py"
+        ],
+        "kind": "committed-cli",
+        "purpose": "Declared CLI source enumerating imported constants only from one pinned fixture module after a live local rebuild, checking generated recursor/matcher and namespace/binder/universe controls plus source/runtime/environment/log stability. Structural saved-packet validation alone authenticates no execution or completeness; no source-line mapping, project-wide coverage, ownership or unloaded/private levels are claimed. Required configuration or private evidence is not supplied; source role only, no current execution, child/read/fixture, generation, proof/runtime, nonuse/deletion, permission or STOP-clearance credit.",
+        "entry_line": 191,
+        "required_options": [
+          "--output"
+        ],
+        "input_revision": "6364b7bb4b2e124a92195baf75a80aad3929bde3"
+      },
+      {
+        "path": "scripts/h62/item1/readonly-bind/case_ledger.py",
+        "source_blob": "095af3abc7ada2d6c487d5eb6b9e5bef054bef9c",
+        "command": [
+          "python3",
+          "-B",
+          "scripts/h62/item1/readonly-bind/case_ledger.py"
+        ],
+        "kind": "committed-cli",
+        "purpose": "Declared CLI source checking exact byte transformations of three frozen readonly files against original792 membership and25 declarations, recording10 public source-case references. Removed private identities stay unrestored; fixture references certify no elaboration, private identity restoration, witness feasibility, owner authority or body equivalence. Required configuration or private evidence is not supplied; source role only, no current execution, child/read/fixture, generation, proof/runtime, nonuse/deletion, permission or STOP-clearance credit.",
+        "entry_line": 149,
+        "required_options": [
+          "--frozen",
+          "--output"
+        ],
+        "input_revision": "eb7956bdaaac974bf27df6113e59e402a46570e0"
+      },
+      {
+        "path": "scripts/h62/item1/readonly-bind/check_callback_boundaries.py",
+        "source_blob": "174e0c578d697dde31681737c3dddacae0b9a271",
+        "command": [
+          "python3",
+          "-B",
+          "scripts/h62/item1/readonly-bind/check_callback_boundaries.py"
+        ],
+        "kind": "committed-cli",
+        "purpose": "Declared CLI source admitting one exact saved fresh-closure parent receipt, checking current source/import/object/SDK pins before and after compiling eight additive callback-boundary theorems and allowed axioms. Checked parent-artifact reuse is not a fresh dependency rebuild, arbitrary receipt authentication, SDK-source certification or whole-goal acceptance. Required configuration or private evidence is not supplied; source role only, no current execution, child/read/fixture, generation, proof/runtime, nonuse/deletion, permission or STOP-clearance credit.",
+        "entry_line": 129,
+        "required_options": [
+          "--output",
+          "--parent"
+        ],
+        "input_revision": "eb7956bdaaac974bf27df6113e59e402a46570e0"
+      },
+      {
+        "path": "scripts/h62/item1/readonly-bind/check_capture_fixtures.py",
+        "source_blob": "cad3c970c4c2db72e22881dc6112a642236b1f58",
+        "command": [
+          "python3",
+          "-B",
+          "scripts/h62/item1/readonly-bind/check_capture_fixtures.py"
+        ],
+        "kind": "committed-cli",
+        "purpose": "Declared CLI source rebuilding the actual capture fixture project closure in a private sanitized library, refusing held Premises and checking a missing-project-object negative control, exact source/tool/log pins and38 theorem axiom records. SDK dependencies remain trusted compiler inputs; no shared project-cache fallback or whole-goal acceptance is asserted. Required configuration or private evidence is not supplied; source role only, no current execution, child/read/fixture, generation, proof/runtime, nonuse/deletion, permission or STOP-clearance credit.",
+        "entry_line": 206,
+        "required_options": [
+          "--output"
+        ],
+        "input_revision": "eb7956bdaaac974bf27df6113e59e402a46570e0"
+      },
+      {
+        "path": "scripts/h62/item1/readonly-bind/check_credit_joints.py",
+        "source_blob": "5170ae52a59bfe61cde9b22b275e6f69bc23400a",
+        "command": [
+          "python3",
+          "-B",
+          "scripts/h62/item1/readonly-bind/check_credit_joints.py"
+        ],
+        "kind": "committed-cli",
+        "purpose": "Declared CLI source admitting only pinned frozen/current parent receipts for selected credit, capture-failure or composition suites, verifying reused source/object/log pins and frozen supplements, rejecting held or unverified extra imports, and probing original interface types and additive theorem axioms. Parent reuse is not a fresh closure rebuild, SDK certification or full original-goal proof. Required configuration or private evidence is not supplied; source role only, no current execution, child/read/fixture, generation, proof/runtime, nonuse/deletion, permission or STOP-clearance credit.",
+        "entry_line": 244,
+        "required_options": [
+          "--frozen",
+          "--output",
+          "--parent",
+          "--profile"
+        ],
+        "input_revision": "eb7956bdaaac974bf27df6113e59e402a46570e0"
+      },
+      {
+        "path": "scripts/h62/item1/readonly-bind/check_encoding_fixture.py",
+        "source_blob": "eaf236f9f48b3380cee4db8912f1623eaab4a260",
+        "command": [
+          "python3",
+          "-B",
+          "scripts/h62/item1/readonly-bind/check_encoding_fixture.py"
+        ],
+        "kind": "committed-cli",
+        "purpose": "Declared CLI source staging exact current Hoare/capture leaves and encoding-failure fixture, checking four theorem axiom records and source/tool/artifact/log pins. Other project objects are explicitly cached symlink inputs and SDK dependencies are trusted; no fresh full-closure validation or independent dependency certification is asserted. Required configuration or private evidence is not supplied; source role only, no current execution, child/read/fixture, generation, proof/runtime, nonuse/deletion, permission or STOP-clearance credit.",
+        "entry_line": 136,
+        "required_options": [
+          "--output"
+        ],
+        "input_revision": "eb7956bdaaac974bf27df6113e59e402a46570e0"
+      },
+      {
+        "path": "scripts/h62/item1/readonly-bind/check_original_callback.py",
+        "source_blob": "3f7bc0a34cd8af2f6fad18ab1040a0f0ef470a24",
+        "command": [
+          "python3",
+          "-B",
+          "scripts/h62/item1/readonly-bind/check_original_callback.py"
+        ],
+        "kind": "committed-cli",
+        "purpose": "Declared CLI source authenticating the assigned frozen Git base, original792 artifact and toolchain, rebuilding its unheld callback closure in isolation and checking selected original interface types and eight additive witness axioms. It rejects held Premises and substitutes no current closure; no cache fallback, statement repair, old/current timing claim or whole-goal acceptance is asserted. Required configuration or private evidence is not supplied; source role only, no current execution, child/read/fixture, generation, proof/runtime, nonuse/deletion, permission or STOP-clearance credit.",
+        "entry_line": 170,
+        "required_options": [
+          "--frozen",
+          "--output"
+        ],
+        "input_revision": "eb7956bdaaac974bf27df6113e59e402a46570e0"
+      },
+      {
+        "path": "scripts/h62/item2/audit-readonly-calls/bounded.py",
+        "source_blob": "9ea242bdbc550943c2c8da8ab6107d418e82948c",
+        "command": [
+          "python3",
+          "-B",
+          "scripts/h62/item2/audit-readonly-calls/bounded.py"
+        ],
+        "kind": "committed-cli",
+        "purpose": "Declared CLI source wrapping a supplied audit command with exclusive writer lock, explicit SDK selection, serial descendant/argv/resource monitoring and existing proof/group/aggregate deadlines. Its original cap/reserve, zero-swap policy and14400-second window are not reset or cleared by cataloging the source. Required configuration, command or private evidence is not supplied; source role only, no current execution, child/read/fixture, generation, proof/runtime, nonuse/deletion, permission or STOP-clearance credit.",
+        "entry_line": 184,
+        "required_options": [
+          "--evidence",
+          "--tag"
+        ],
+        "input_revision": "b1419be8d87e8ed8ea6836789e7898ffa22dd5c8"
+      },
+      {
+        "path": "scripts/h62/item2/audit-readonly-calls/check_effect_rules.py",
+        "source_blob": "cc4c5d5edc2c9518025fc884e0c64f2994f02003",
+        "command": [
+          "python3",
+          "-B",
+          "scripts/h62/item2/audit-readonly-calls/check_effect_rules.py"
+        ],
+        "kind": "committed-cli",
+        "purpose": "Declared CLI source for same-client frozen/current isolated EffectRules closures, ten original interfaces and exact type/axiom/dependency checks. Joint-premise applications do not establish compiler success, whole Source/world/native adequacy or runtime acceptance. Required configuration/private evidence is not supplied; source role only, no current execution, child/read/fixture, proof, runtime, nonuse, deletion or STOP-clearance credit.",
+        "entry_line": 117,
+        "required_options": [
+          "--mode",
+          "--output",
+          "--reviewed"
+        ],
+        "input_revision": "e6558de17d3a721d47de20c84330b42ea5a7d636"
+      },
+      {
+        "path": "scripts/h62/item2/audit-readonly-calls/check_execution_call.py",
+        "source_blob": "fd7cf2f8eabd8929ed18f7aacaede33a0f172335",
+        "command": [
+          "python3",
+          "-B",
+          "scripts/h62/item2/audit-readonly-calls/check_execution_call.py"
+        ],
+        "kind": "committed-cli",
+        "purpose": "Declared CLI source authenticating the exact checked native parent, current source/object/tool/log identities and an additive target caller. Optional checked mode retains the typed-core void full Returned contract and canonical module identities; neither mode establishes full P1, Source/world or runtime adequacy. Required configuration, command or private evidence is not supplied; source role only, no current execution, child/read/fixture, generation, proof/runtime, nonuse/deletion, permission or STOP-clearance credit.",
+        "entry_line": 183,
+        "required_options": [
+          "--output",
+          "--parent"
+        ],
+        "input_revision": "b1419be8d87e8ed8ea6836789e7898ffa22dd5c8"
+      },
+      {
+        "path": "scripts/h62/item2/audit-readonly-calls/check_execution_replies.py",
+        "source_blob": "430a0844738b80c027759184d28a4d73c4d344ca",
+        "command": [
+          "python3",
+          "-B",
+          "scripts/h62/item2/audit-readonly-calls/check_execution_replies.py"
+        ],
+        "kind": "committed-cli",
+        "purpose": "Declared CLI source for private SourceCallBytes/MachineV2 closure and same native-call reply adapter, with source/theorem inventories, SDK and type/axiom/log bindings. SDK remains trusted tool input; no whole Source/world adequacy. Required configuration/private evidence is not supplied; source role only, no current execution, child/read/fixture, proof, runtime, nonuse, deletion or STOP-clearance credit.",
+        "entry_line": 91,
+        "required_options": [
+          "--output"
+        ],
+        "input_revision": "e6558de17d3a721d47de20c84330b42ea5a7d636"
+      },
+      {
+        "path": "scripts/h62/item2/audit-readonly-calls/check_initialization.py",
+        "source_blob": "80c31a9ebc924b9424d50731ac15bd8ff970a11a",
+        "command": [
+          "python3",
+          "-B",
+          "scripts/h62/item2/audit-readonly-calls/check_initialization.py"
+        ],
+        "kind": "committed-cli",
+        "purpose": "Declared CLI source for frozen/current PrimitiveInitialization joint clients, four original interfaces, exhaustion cases and explicitly verified executed-parent dependency reuse. No held-premise/project-cache substitution or compiler/Source/world/native adequacy. Required configuration/private evidence is not supplied; source role only, no current execution, child/read/fixture, proof, runtime, nonuse, deletion or STOP-clearance credit.",
+        "entry_line": 117,
+        "required_options": [
+          "--mode",
+          "--output",
+          "--parent",
+          "--reviewed"
+        ],
+        "input_revision": "e6558de17d3a721d47de20c84330b42ea5a7d636"
+      },
+      {
+        "path": "scripts/h62/item2/audit-readonly-calls/check_native_frame.py",
+        "source_blob": "d146af7bc6e20aa74dadf2934e8ebf5ff7e1c3d0",
+        "command": [
+          "python3",
+          "-B",
+          "scripts/h62/item2/audit-readonly-calls/check_native_frame.py"
+        ],
+        "kind": "committed-cli",
+        "purpose": "Declared CLI source authenticating a selected-call parent and rebuilding changed current native-frame dependencies plus all local transitive consumers; only checked unchanged objects may be hard-linked, never rewritten. Typed-core void Returned-frame checks do not establish full H121 adequacy. Required configuration, command or private evidence is not supplied; source role only, no current execution, child/read/fixture, generation, proof/runtime, nonuse/deletion, permission or STOP-clearance credit.",
+        "entry_line": 122,
+        "required_options": [
+          "--output",
+          "--parent"
+        ],
+        "input_revision": "b1419be8d87e8ed8ea6836789e7898ffa22dd5c8"
+      },
+      {
+        "path": "scripts/h62/item2/audit-readonly-calls/check_primitive_transport.py",
+        "source_blob": "e5aed5d239bbd524a3a18c9e04cdc9bafffc3247",
+        "command": [
+          "python3",
+          "-B",
+          "scripts/h62/item2/audit-readonly-calls/check_primitive_transport.py"
+        ],
+        "kind": "committed-cli",
+        "purpose": "Declared CLI source for isolated frozen/current snapshots of eight PrimitiveValues/PrimitiveLocals interfaces and the same joint client, checking captured headers, toolchain and exact type/axiom data. No compiler success or Source/world/native adequacy. Required configuration/private evidence is not supplied; source role only, no current execution, child/read/fixture, proof, runtime, nonuse, deletion or STOP-clearance credit.",
+        "entry_line": 115,
+        "required_options": [
+          "--mode",
+          "--output",
+          "--reviewed"
+        ],
+        "input_revision": "e6558de17d3a721d47de20c84330b42ea5a7d636"
+      },
+      {
+        "path": "scripts/h62/item2/audit-readonly-calls/current_dependencies.py",
+        "source_blob": "8db0824226125c9828a3872bdb4150d49f686cc7",
+        "command": [
+          "python3",
+          "-B",
+          "scripts/h62/item2/audit-readonly-calls/current_dependencies.py"
+        ],
+        "kind": "committed-cli",
+        "purpose": "Declared CLI source retaining the exact129-module/792-obligation audit while joining compiler-parsed source headers and declared closure fingerprints. Historical classifications and unknown/private rows and timing holds remain; lexical observations do not establish kernel fidelity, joint witnesses, live ownership or dynamic dependencies. Required configuration, command or private evidence is not supplied; source role only, no current execution, child/read/fixture, generation, proof/runtime, nonuse/deletion, permission or STOP-clearance credit.",
+        "entry_line": 177,
+        "required_options": [
+          "--output",
+          "--reviewed"
+        ],
+        "input_revision": "b1419be8d87e8ed8ea6836789e7898ffa22dd5c8"
+      },
+      {
+        "path": "scripts/h62/item2/audit-readonly-calls/effect_coverage.py",
+        "source_blob": "34ec837690201749e0d09bca9fb0d1f52fd63484",
+        "command": [
+          "python3",
+          "-B",
+          "scripts/h62/item2/audit-readonly-calls/effect_coverage.py"
+        ],
+        "kind": "committed-cli",
+        "purpose": "Declared CLI source for the exact admitted frozen/current ten-EffectRules coverage pair, reparsing sealed type/axiom logs and preserving all 792 original identities and other rows. Joint-premise/application metadata does not establish definition equivalence, compiler or whole-model adequacy. Required configuration/private evidence is not supplied; source role only, no current execution, child/read/fixture, proof, runtime, nonuse, deletion or STOP-clearance credit.",
+        "entry_line": 112,
+        "required_options": [
+          "--output",
+          "--reviewed",
+          "--root"
+        ],
+        "input_revision": "e6558de17d3a721d47de20c84330b42ea5a7d636"
+      },
+      {
+        "path": "scripts/h62/item2/audit-readonly-calls/initialization_coverage.py",
+        "source_blob": "9ada969424cbf744484428c451d4fd36c552b4e4",
+        "command": [
+          "python3",
+          "-B",
+          "scripts/h62/item2/audit-readonly-calls/initialization_coverage.py"
+        ],
+        "kind": "committed-cli",
+        "purpose": "Declared CLI source for the exact admitted frozen/current four-case initialization coverage pair, preserving all792 original identities and validating parent dependency-reuse provenance, exact types/axioms and sealed compiler logs. Joint-input applications do not prove definition equivalence or compiler/whole-model adequacy. Required configuration, command or private evidence is not supplied; source role only, no current execution, child/read/fixture, generation, proof/runtime, nonuse/deletion, permission or STOP-clearance credit.",
+        "entry_line": 122,
+        "required_options": [
+          "--output",
+          "--reviewed",
+          "--root"
+        ],
+        "input_revision": "b1419be8d87e8ed8ea6836789e7898ffa22dd5c8"
+      },
+      {
+        "path": "scripts/h62/item2/audit-readonly-calls/obligation_dependencies.py",
+        "source_blob": "50ff8ad1adb99e9f62254eaab48b20da465138c0",
+        "command": [
+          "python3",
+          "-B",
+          "scripts/h62/item2/audit-readonly-calls/obligation_dependencies.py"
+        ],
+        "kind": "committed-cli",
+        "purpose": "Declared CLI source joining the pinned 792-obligation/129-module audit with pinned header dependencies and current lexical declarations, retaining every identity, historical owner/witness status and the +80.254966536% Lean STOP. No-path never clears a hold; lexical headers do not prove kernel fidelity or feasibility. Required configuration/private evidence is not supplied; source role only, no current execution, child/read/fixture, proof, runtime, nonuse, deletion or STOP-clearance credit.",
+        "entry_line": 109,
+        "required_options": [
+          "--frozen",
+          "--headers",
+          "--headers-sha256",
+          "--output"
+        ],
+        "input_revision": "e6558de17d3a721d47de20c84330b42ea5a7d636"
+      },
+      {
+        "path": "scripts/h62/item2/audit-readonly-calls/primitive_read_coverage.py",
+        "source_blob": "aeab6dd75625f88350bc5807f98067f9e4ef222b",
+        "command": [
+          "python3",
+          "-B",
+          "scripts/h62/item2/audit-readonly-calls/primitive_read_coverage.py"
+        ],
+        "kind": "committed-cli",
+        "purpose": "Declared CLI source for source-digest-admitted eight-case primitive-read coverage, preserving the original 792 identities and checking exact frozen/current type, receipt and historical-tool bindings. No compiler, Source-body, call or native-frame adequacy. Required configuration/private evidence is not supplied; source role only, no current execution, child/read/fixture, proof, runtime, nonuse, deletion or STOP-clearance credit.",
+        "entry_line": 110,
+        "required_options": [
+          "--admission",
+          "--output",
+          "--reviewed",
+          "--root"
+        ],
+        "input_revision": "e6558de17d3a721d47de20c84330b42ea5a7d636"
+      },
+      {
+        "path": "scripts/h62/item2/audit-readonly-calls/rebuild_native_closure.py",
+        "source_blob": "29a5a2107db1b9d55f9e1603581e835f784160f9",
+        "command": [
+          "python3",
+          "-B",
+          "scripts/h62/item2/audit-readonly-calls/rebuild_native_closure.py"
+        ],
+        "kind": "committed-cli",
+        "purpose": "Declared CLI source for a fully staged fresh current Source/callee/native closure with direct-import object identities, both sibling import orders and all local witness axioms. No Lake/project cache, prior receipt or copied object is an input; closed fixture checking is not full H121 or runtime acceptance. Required configuration, command or private evidence is not supplied; source role only, no current execution, child/read/fixture, generation, proof/runtime, nonuse/deletion, permission or STOP-clearance credit.",
+        "entry_line": 164,
+        "required_options": [
+          "--output"
+        ],
+        "input_revision": "b1419be8d87e8ed8ea6836789e7898ffa22dd5c8"
+      },
+      {
+        "path": "scripts/h62/item2/audit-readonly-calls/signature_drift.py",
+        "source_blob": "a2e0c503967ca27e0ccd26d301a3b25da65a1d3c",
+        "command": [
+          "python3",
+          "-B",
+          "scripts/h62/item2/audit-readonly-calls/signature_drift.py"
+        ],
+        "kind": "committed-cli",
+        "purpose": "Declared CLI source for pinned lexical drift dossiers retaining all 792 original signatures, contexts, historical statuses and exact observed pairs. H19/H60 explain historical upstream evolution, not frozen/current theorem transport, live ownership, kernel fidelity or witness credit. Required configuration/private evidence is not supplied; source role only, no current execution, child/read/fixture, proof, runtime, nonuse, deletion or STOP-clearance credit.",
+        "entry_line": 119,
+        "required_options": [
+          "--decisions",
+          "--output",
+          "--reviewed"
+        ],
+        "input_revision": "e6558de17d3a721d47de20c84330b42ea5a7d636"
+      },
+      {
+        "path": "scripts/h62/item2/audit-yul/census.py",
+        "source_blob": "b3d08f94bdeff0e62bf6c6a7072024a43801eb64",
+        "command": [
+          "python3",
+          "-B",
+          "scripts/h62/item2/audit-yul/census.py"
+        ],
+        "kind": "committed-cli",
+        "purpose": "Declared CLI source producing a conservative source census from frozen module-map patterns and local Yul import closure, optionally joining supplied parser spans, witness records and kernel metadata while retaining unmatched or ambiguous declarations. Lexical rows and area-owner conventions establish no witness feasibility, independent ownership, current kernel validation or full audit acceptance. Required configuration or private evidence is not supplied; source role only, no current execution, child/read/fixture, generation, proof/runtime, nonuse/deletion, permission or STOP-clearance credit.",
+        "entry_line": 190,
+        "required_options": [
+          "--output"
+        ],
+        "input_revision": "6364b7bb4b2e124a92195baf75a80aad3929bde3"
+      },
+      {
+        "path": "scripts/h62/item4/generic-yul-views/acceptance.py",
+        "source_blob": "ef73cc19f9a708c9e3ee21c6e8bf8b5584a253a1",
+        "command": [
+          "python3",
+          "-B",
+          "scripts/h62/item4/generic-yul-views/acceptance.py"
+        ],
+        "kind": "committed-cli",
+        "purpose": "Declared CLI source checking supplied local input digests, external census/bounded controls, exact frozen Views file universe/blobs, census reproduction and lexical shortcut scans. Its static acceptance explicitly leaves Lean proofs, refusal coverage, full gates and timings pending; input hashes establish no coordinator origin or semantic coverage. Required configuration or private evidence is not supplied; source role only, no current execution, child/read/fixture, generation, proof/runtime, nonuse/deletion, permission or STOP-clearance credit.",
+        "entry_line": 76,
+        "required_options": [
+          "--evidence",
+          "--inputs"
+        ],
+        "input_revision": "6364b7bb4b2e124a92195baf75a80aad3929bde3"
+      },
+      {
+        "path": "scripts/h62/item4/generic-yul-views/census.py",
+        "source_blob": "24df327e36cf9bfe537da98d10734c7c45ffc56a",
+        "command": [
+          "python3",
+          "-B",
+          "scripts/h62/item4/generic-yul-views/census.py"
+        ],
+        "kind": "committed-cli",
+        "purpose": "Declared CLI source deterministically inventorying every Views declaration and guard with exact UTF-8 file, statement and command digests, preserved guard messages and optional exact byte reproduction. This is lexical current-source metadata, not a Lean parser, elaborated statement equivalence, frozen-source preservation or semantic proof. Required configuration or private evidence is not supplied; source role only, no current execution, child/read/fixture, generation, proof/runtime, nonuse/deletion, permission or STOP-clearance credit.",
+        "entry_line": 154,
+        "required_options": [
+          "--output"
+        ],
+        "input_revision": "6364b7bb4b2e124a92195baf75a80aad3929bde3"
+      },
+      {
+        "path": "scripts/h62/item4/generic-yul-views/correspondence.py",
+        "source_blob": "089d93d31071ff96405e44d89a6dad7447c145fe",
+        "command": [
+          "python3",
+          "-B",
+          "scripts/h62/item4/generic-yul-views/correspondence.py"
+        ],
+        "kind": "committed-cli",
+        "purpose": "Declared CLI source comparing two selected simple lexical theorem types while refusing unsupported literal/compound syntax, and classifying whole-file Views source identity against authenticated frozen Git blobs. Modified, added and removed files remain explicit; current control rows and matching text establish no kernel equivalence, proof or transitive semantic preservation. Required configuration or private evidence is not supplied; source role only, no current execution, child/read/fixture, generation, proof/runtime, nonuse/deletion, permission or STOP-clearance credit.",
+        "entry_line": 167,
+        "required_options": [
+          "--output"
+        ],
+        "input_revision": "6364b7bb4b2e124a92195baf75a80aad3929bde3"
+      },
+      {
+        "path": "scripts/h62/item4/generic-yul-views/reconcile_frozen.py",
+        "source_blob": "f0f13298dc085df8c76d80cca0d95e39cb2d7a71",
+        "command": [
+          "python3",
+          "-B",
+          "scripts/h62/item4/generic-yul-views/reconcile_frozen.py"
+        ],
+        "kind": "committed-cli",
+        "purpose": "Declared CLI source reconstructing every frozen Views Controls theorem from authenticated Git blobs and retaining all current command/statement candidates plus secondary namespace hints. Ambiguous and unmatched rows survive; even same-file matches establish no elaborated/private namespace identity, semantic equivalence, proof validation or accepted migration. Required configuration or private evidence is not supplied; source role only, no current execution, child/read/fixture, generation, proof/runtime, nonuse/deletion, permission or STOP-clearance credit.",
+        "entry_line": 171,
+        "required_options": [
+          "--output"
+        ],
+        "input_revision": "6364b7bb4b2e124a92195baf75a80aad3929bde3"
+      },
+      {
+        "path": "scripts/h62/item6/migrate-examples/dag_inventory.py",
+        "source_blob": "067089cce1274c78ca677ee9dab8f5d63a10eca3",
+        "command": [
+          "python3",
+          "-B",
+          "scripts/h62/item6/migrate-examples/dag_inventory.py"
+        ],
+        "kind": "committed-cli",
+        "purpose": "Declared CLI source validating complete frozen ModuleData name/type DAG streams, exact compiler/fixture/source provenance, closed types, per-module counts, seal and generated sentinels. All kernel/compiler-extra occurrences survive, with export access and extra signatures unresolved; stream integrity establishes no new parity, semantic equivalence, axiom equality or full H78 acceptance. Required configuration or private evidence is not supplied; source role only, no current execution, child/read/fixture, generation, proof/runtime, nonuse/deletion, permission or STOP-clearance credit.",
+        "entry_line": 267,
+        "required_options": [
+          "--census",
+          "--compiler-result",
+          "--fixture-manifest",
+          "--log",
+          "--output"
+        ],
+        "input_revision": "f812628e097ab58e8c6c7b941f0b33fa1b991a5b"
+      },
+      {
+        "path": "scripts/h62/item6/migrate-examples/dependencies.py",
+        "source_blob": "a2b69a96d71e6f9e1fd9cf9fcd24a507548820e5",
+        "command": [
+          "python3",
+          "-B",
+          "scripts/h62/item6/migrate-examples/dependencies.py"
+        ],
+        "kind": "committed-cli",
+        "purpose": "Declared CLI source reconstructing explicit source-header import closure from committed Git blobs while preserving every frozen Examples module, reporting changed/additional files, ambiguous resolution and unresolved imports. Standard-library leaves are recognized only by artifact presence; implicit Init, command-produced imports, elaborated API, axiom and semantic claims remain outside this scanner. Required configuration or private evidence is not supplied; source role only, no current execution, child/read/fixture, generation, proof/runtime, nonuse/deletion, permission or STOP-clearance credit.",
+        "entry_line": 154,
+        "required_options": [
+          "--output",
+          "--stdlib"
+        ],
+        "input_revision": "f812628e097ab58e8c6c7b941f0b33fa1b991a5b"
+      },
+      {
+        "path": "scripts/h62/item6/migrate-examples/generate-dag-inventory.py",
+        "source_blob": "a2d87bdb84deebc063fc14ec6b62da53a2a0e8bb",
+        "command": [
+          "python3",
+          "-B",
+          "scripts/h62/item6/migrate-examples/generate-dag-inventory.py"
+        ],
+        "kind": "committed-cli",
+        "purpose": "Declared CLI source emitting an off-checkout exact-scope ModuleData fixture and manifest only after matching current and frozen source closures. Shared encoder traversal retains structural content fingerprints and every compiler-only name with unresolved signatures; pointer memoization grants no new-toolchain compatibility, semantic equivalence or generator execution authority. Required configuration or private evidence is not supplied; source role only, no current execution, child/read/fixture, generation, proof/runtime, nonuse/deletion, permission or STOP-clearance credit.",
+        "entry_line": 155,
+        "required_options": [
+          "--census",
+          "--manifest",
+          "--output",
+          "--stdlib"
+        ],
+        "input_revision": "f812628e097ab58e8c6c7b941f0b33fa1b991a5b"
+      },
+      {
+        "path": "scripts/h62/item6/migrate-frontend/api_snapshot.py",
+        "source_blob": "a865dc87ef27e110ee8626db906bbcc7c1ab0be5",
+        "command": [
+          "python3",
+          "-B",
+          "scripts/h62/item6/migrate-frontend/api_snapshot.py"
+        ],
+        "kind": "committed-cli",
+        "purpose": "Committed source-only CLI for provenance-checked imported Frontend ConstantInfo and axiom census under a supplied passing measurement and source/configuration census. Private/generated constants are included; hashes alone do not establish frozen public-interface equivalence. Required configuration/measurement and Lean execution are unavailable; no helper, fixture/read, proof or acceptance credit.",
+        "entry_line": 110,
+        "required_options": [
+          "--census",
+          "--measurement",
+          "--out"
+        ],
+        "input_revision": "7734b8f5912a3959615cfff9c83d81a773b4e4b4"
+      },
+      {
+        "path": "scripts/h62/item6/migrate-frontend/compare.py",
+        "source_blob": "251750c4bb94aa79a9e8023fb607ebce8300b486",
+        "command": [
+          "python3",
+          "-B",
+          "scripts/h62/item6/migrate-frontend/compare.py"
+        ],
+        "kind": "committed-cli",
+        "purpose": "Committed source-only CLI for fail-closed comparison of complete measured target sets/order/settings and finite wall/RSS values, emitting blocked, escalation and wall-regression STOP reports. Required old/new/output artifacts are not supplied; no fresh timing, performance, semantics, passing-validation or budget/STOP-clearance credit.",
+        "entry_line": 42,
+        "required_options": [
+          "--new",
+          "--old",
+          "--out"
+        ],
+        "input_revision": "7734b8f5912a3959615cfff9c83d81a773b4e4b4"
+      },
+      {
+        "path": "scripts/h62/item6/migrate-frontend/parser_overlay.py",
+        "source_blob": "22bf8ca0ed23cb0f181e7c0be7f6621ef7e17cc8",
+        "command": [
+          "python3",
+          "-B",
+          "scripts/h62/item6/migrate-frontend/parser_overlay.py"
+        ],
+        "kind": "committed-cli",
+        "purpose": "Declared CLI source preparing an unapplied six-context SCtx/Bool parser proposal from frozen source, binding an existing Token proposal and supplied old API/dependency observations, and describing isolated old/new controls and selected type/axiom comparisons. Production Check/SourceCtor, full affected acceptance, axiom review and performance remain pending; its final exit2 is intentional, not a passing full gate. Required configuration or private evidence is not supplied; source role only, no current execution, child/read/fixture, generation, proof/runtime, nonuse/deletion, permission or STOP-clearance credit.",
+        "entry_line": 150,
+        "required_options": [
+          "--out",
+          "--token-proposal"
+        ],
+        "input_revision": "f812628e097ab58e8c6c7b941f0b33fa1b991a5b"
+      },
+      {
+        "path": "scripts/h62/item6/migrate-frontend/token_overlay.py",
+        "source_blob": "9d9cf4c9a2dfe53f19b66aa4975c71fe29cbbd5a",
+        "command": [
+          "python3",
+          "-B",
+          "scripts/h62/item6/migrate-frontend/token_overlay.py"
+        ],
+        "kind": "committed-cli",
+        "purpose": "Declared CLI source preparing an unapplied frozen Token representation proposal, describing original incompatibility reproduction, universal all-byte and high-byte controls, selected declaration/type/axiom comparisons and isolated dependent smoke checks. Existing supplied compiler/API observations are inputs, not independently authenticated current validation; no directory/root gate, timing acceptance, permission grant or applied migration follows. Required configuration or private evidence is not supplied; source role only, no current execution, child/read/fixture, generation, proof/runtime, nonuse/deletion, permission or STOP-clearance credit.",
+        "entry_line": 143,
+        "required_options": [
+          "--out"
+        ],
+        "input_revision": "f812628e097ab58e8c6c7b941f0b33fa1b991a5b"
+      },
+      {
+        "path": "scripts/h62/item6/migrate-solkey/export.py",
+        "source_blob": "d2779b6db5201788788faba0fba6c54182fd7e92",
+        "command": [
+          "python3",
+          "-B",
+          "scripts/h62/item6/migrate-solkey/export.py"
+        ],
+        "kind": "committed-cli",
+        "purpose": "Declared CLI source exporting already committed lane work after measurements stop, verifying base ancestry and Git bundle head, and deterministically archiving selected off-Git JSON/log observations with checksums. Archive-only mode writes an immutable bulk archive; official compiler archives and oleans stay at recorded VM paths. This is transport, not cache shipment, provenance attestation or proof acceptance. Required configuration or private evidence is not supplied; source role only, no current execution, child/read/fixture, generation, proof/runtime, nonuse/deletion, permission or STOP-clearance credit.",
+        "entry_line": 64,
+        "required_options": [
+          "--evidence",
+          "--out",
+          "--root"
+        ],
+        "input_revision": "f812628e097ab58e8c6c7b941f0b33fa1b991a5b"
+      },
+      {
+        "path": "scripts/h62/item6/migrate-yul/metadata-coverage.py",
+        "source_blob": "00a16586e7f757cff336af3bce62e0c9d275b69b",
+        "command": [
+          "python3",
+          "-B",
+          "scripts/h62/item6/migrate-yul/metadata-coverage.py"
+        ],
+        "kind": "committed-cli",
+        "purpose": "Declared CLI source revalidating supplied selected old-metadata observations against the exact pinned original1774-module plan, resealing actual raw observations and retaining every pending module and input binding. It executes no Lean and claims no general attribute census, public API, migration, semantic proof or performance acceptance; external initializer IO remains outside model/proofs. Required configuration or private evidence is not supplied; source role only, no current execution, child/read/fixture, generation, proof/runtime, nonuse/deletion, permission or STOP-clearance credit.",
+        "entry_line": 160,
+        "required_options": [
+          "--output",
+          "--plan"
+        ],
+        "input_revision": "f812628e097ab58e8c6c7b941f0b33fa1b991a5b"
+      }
+    ]
+  }
+}
