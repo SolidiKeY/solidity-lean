@@ -1,0 +1,18 @@
+{
+ "Solidity/Syntax/Elab/Stmt.lean:Solidity.elabRec": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Syntax/Elab/Stmt.lean:Solidity.fnDispatch": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Syntax/Elab/Stmt.lean:Solidity.fnMemoryDispatch": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Syntax/Elab/Stmt.lean:Solidity.fnTupleDispatch": [
+  "Quot.sound",
+  "propext"
+ ]
+}
