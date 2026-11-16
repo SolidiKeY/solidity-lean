@@ -60,3 +60,7 @@ class SetupControls(unittest.TestCase):
     for key,value in mutations:
      bad=copy.deepcopy(good);bad[key]=value
      with self.subTest(key=key),self.assertRaises((ValueError,KeyError)):s.validate(bad,root,current,False)
+
+
+if __name__ == "__main__":
+    unittest.main()

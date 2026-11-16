@@ -76,3 +76,7 @@ class TimingControls(unittest.TestCase):
     path.write_bytes(saved)
    (group/'extra.olean').write_bytes(b'unmatched')
    with self.assertRaises(ValueError):p.validate_timing_outputs(record,out)
+
+
+if __name__ == "__main__":
+    unittest.main()
