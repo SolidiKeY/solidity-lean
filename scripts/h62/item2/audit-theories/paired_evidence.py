@@ -5,9 +5,9 @@ uses solely the archive, never the original VM paths. Original/current proofs
 are kept separate and no definition-equivalence or operational refusal is claimed.
 
 Export v2 is opt-in: --interface-version 2 --historical-input-root DIR reads
-three exact historical attachments from the private archive pinned below. DIR
-is external and contains scripts/h62/...; no download or fallback occurs. These
-attachments are historical records, not current authority or proof. V1 is default.
+three historical attachments authenticated by the size and SHA256 pins below.
+DIR is external and contains scripts/h62/...; no download or fallback occurs.
+These records grant no current authority or proof. V1 is the default.
 """
 import argparse,gzip,hashlib,io,json,re,stat,subprocess,tarfile
 from collections import Counter
@@ -17,11 +17,6 @@ from witness_registry import WITNESSES,IMPOSSIBLE
 ALLOW={"propext","Classical.choice","Quot.sound"}
 def h(data):return hashlib.sha256(data).hexdigest()
 def canonical(obj):return(json.dumps(obj,sort_keys=True,separators=(",",":"))+"\n").encode()
-HISTORICAL_ARCHIVE_COMMIT = "73bffce8dc01a2b07d86fa2dd8578b53f838c23f"
-HISTORICAL_ARCHIVE_PREFIX = (
-    "evidence/plan-x1e-classify-h62-scripts-1116/x1e-classify-h62-scripts/"
-    "data-read-evidence/doc-proposal/source-copies/"
-)
 HISTORICAL_INPUT_PREFIX = Path("scripts/h62/item2/audit-theories/handoff")
 HISTORICAL_PINS = {
     "original-frozen-assignment.txt": (15961, "c384ab0c70ca3eaeeb25dde8605c6cc253213a655c9cbb9fb2d6714995461711"),
