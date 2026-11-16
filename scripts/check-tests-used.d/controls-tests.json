@@ -103,7 +103,7 @@
         ],
         "kind": "runnable-entrypoint",
         "entry_line": 5,
-        "purpose": "Cache-heavy and real low-headroom cases under unchanged cap/reserve. Python control source only; no fixture, Lean, or EVM proof claim.",
+        "purpose": "Synthetic memory-accounting policy controls for cache credit, protected memory, reserve thresholds and swap refusal; no actual VM headroom measurement. Python control source only; no fixture, Lean, or EVM proof claim.",
         "input_scope": [],
         "other_reads": "unresolved"
       },
