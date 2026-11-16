@@ -32,33 +32,29 @@ theorem identityMismatch : ∀ (e : GeneratedEntry) (f : File),
       beq_iff_eq, h, false_and, beq_eq_false_iff_ne, ne_eq, false_implies, and_false, not_false_eq_true,
       implies_true]
 
-private theorem line_subset (l : Line) : l.prose .docstring ≤ l.prose .comment := by
-  have h : l.any Segment.isDocstring = true →
-      l.any (fun s => s.isComment || s.isDocstring) = true := by
-    simp only [List.any_eq_true]
-    rintro ⟨s, hs, hd⟩
-    exact ⟨s, hs, by simp only [hd, Bool.or_true]⟩
-  simp only [ProseRatio.Line.prose]
-  split <;> split <;> simp_all only [imp_self, List.any_eq_true, Bool.or_eq_true, Nat.le_refl,
-      Bool.false_eq_true, imp_false, not_true_eq_false, implies_true, not_exists, not_and,
-      Bool.not_eq_true, Nat.zero_le, or_false]
-
-private theorem sum_mono {α : Type} (xs : List α) (f g : α → Nat)
-    (h : ∀ x ∈ xs, f x ≤ g x) : (xs.map f).sum ≤ (xs.map g).sum := by
-  induction xs with
-  | nil => simp only [List.map_nil, List.sum_nil, Nat.le_refl]
-  | cons x xs ih =>
-    simp only [List.map_cons, List.sum_cons]
-    exact Nat.add_le_add (h x (by simp only [List.mem_cons, true_or])) (ih (fun y hy => h y (by simp only [List.mem_cons, hy, or_true])))
-
 theorem docstringSubset : ∀ (s : Scope) (f : File),
     proseFile s f .docstring ≤ proseFile s f .comment := by
   intro s f
+  have hline : ∀ (l : Line), l.prose .docstring ≤ l.prose .comment := by
+    intro l
+    have h : l.any Segment.isDocstring = true →
+        l.any (fun s => s.isComment || s.isDocstring) = true := by
+      simp only [List.any_eq_true]
+      rintro ⟨s, hs, hd⟩
+      exact ⟨s, hs, by simp only [hd, Bool.or_true]⟩
+    simp only [ProseRatio.Line.prose]
+    split <;> split <;> simp_all only [imp_self, List.any_eq_true, Bool.or_eq_true, Nat.le_refl,
+        Bool.false_eq_true, imp_false, not_true_eq_false, implies_true, not_exists, not_and,
+        Bool.not_eq_true, Nat.zero_le, or_false]
   simp only [proseFile]
   split
   · exact Nat.le_refl 0
   · cases s.kind f.path
-    · exact sum_mono _ _ _ (fun x _ => line_subset x.1)
+    · change (f.lines.zipIdx.map (fun x => x.1.prose .docstring)).sum ≤
+          (f.lines.zipIdx.map (fun x => x.1.prose .comment)).sum
+      induction f.lines.zipIdx with
+      | nil => exact Nat.le_refl 0
+      | cons x xs ih => exact Nat.add_le_add (hline x.1) ih
     · exact Nat.le_refl 0
     · exact Nat.le_refl 0
 
@@ -92,14 +88,6 @@ private theorem denominator_append (s : Scope) (t : Tree) (f : File) (a : RepoPa
   simp only [denominator, List.filter_append, List.map_append, List.sum_append_nat]
   cases s.denominator a <;> simp only [List.filter_cons] <;> split <;> simp_all only [beq_iff_eq, List.filter_nil, List.map_cons, List.map_nil, List.sum_cons, List.sum_nil, Nat.add_zero]
 
-private theorem fits_zero (w : Allowance) (d : Nat) : w.fits 0 d = true := by
-  simp only [Allowance.fits, Nat.zero_mul, Nat.zero_le, decide_true]
-
-private theorem fits_down (w : Allowance) (n m d : Nat) (h : n ≤ m)
-    (hm : w.fits m d = true) : w.fits n d = true := by
-  simp only [Allowance.fits, decide_eq_true_eq] at *
-  exact Nat.le_trans (Nat.mul_le_mul_right _ (Nat.mul_le_mul_right _ h)) hm
-
 private theorem accepts_iff (p : Policy) (t : Tree) : accepts p t = true ↔
     ∀ a k, enforced a = true →
       (lookup p.entries (a,k)).fits (numerator p.scope t a k) (denominator p.scope t a) = true := by
@@ -126,7 +114,7 @@ private theorem accepts_iff (p : Policy) (t : Tree) : accepts p t = true ↔
           simp only [beq_iff_eq, ht f hf, not_false_eq_true]
         simp only [this, List.map_nil, List.sum_nil]
       rw [hz]
-      exact fits_zero _ _
+      simp only [Allowance.fits, Nat.zero_mul, Nat.zero_le, decide_true]
   · intro h
     apply List.all_eq_true.mpr
     intro a _
@@ -162,7 +150,7 @@ theorem codeFreePadding : ∀ (p : Policy) (t : Tree) (f : File),
       rw [this]
       induction f.lines with
       | nil => rfl
-      | cons l ls ih => simpa using ih
+      | cons l ls ih => simpa only [List.map_cons, List.sum_cons, Nat.zero_add] using ih
     simp only [codeFile, Bool.and_eq_true, beq_iff_eq, hz, ite_self]
   have hd : ∀ a, denominator p.scope (t ++ [f]) a = denominator p.scope t a := by
     intro a
@@ -178,7 +166,11 @@ theorem codeFreePadding : ∀ (p : Policy) (t : Tree) (f : File),
       have hfit : (lookup p.entries (a,k)).fits (numerator p.scope (t ++ [f]) a k)
           (denominator p.scope (t ++ [f]) a) = true := (accepts_iff _ _).mp he a k ha
       rw [hd a] at hfit
-      apply fits_down _ _ _ _ (by rw [numerator_append]; omega) hfit
+      have hn : numerator p.scope t a k ≤ numerator p.scope (t ++ [f]) a k := by
+        rw [numerator_append]
+        omega
+      simp only [Allowance.fits, decide_eq_true_eq] at hfit ⊢
+      exact Nat.le_trans (Nat.mul_le_mul_right _ (Nat.mul_le_mul_right _ hn)) hfit
     simp only [ht, Bool.false_eq_true] at old
 
 end Classification
