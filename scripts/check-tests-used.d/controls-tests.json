@@ -150,6 +150,51 @@
         "purpose": "Four existing artifact-boundary tests exercise byte integrity, missing/tampered inputs, path confinement and preservation of different local work using temporary fixtures. Source role only at successor revisions; no Lean or external proof credit.",
         "input_scope": [],
         "other_reads": "unresolved"
+      },
+      {
+        "path": "tests/h62/item2/audit-evm-compiler/check_scanner.py",
+        "input_revision": "af5d41462877a9f2e85a282064476c9b31bfab15",
+        "source_blob": "bbc4540d6993915e1f098b3810b87a0d65600038",
+        "command": [
+          "python3",
+          "-B",
+          "tests/h62/item2/audit-evm-compiler/check_scanner.py"
+        ],
+        "kind": "runnable-entrypoint",
+        "entry_line": 24,
+        "purpose": "Regression controls for lexical declaration extraction, comments, proof separators and context boundaries; passed default Python invocation. Source only; no fixture, Lean or EVM proof credit.",
+        "input_scope": [],
+        "other_reads": "unresolved"
+      },
+      {
+        "path": "tests/h62/item2/audit-v08-adapters/check_census.py",
+        "input_revision": "af5d41462877a9f2e85a282064476c9b31bfab15",
+        "source_blob": "db63d271f2fa744c36e71534229ad719791e385e",
+        "command": [
+          "python3",
+          "-B",
+          "tests/h62/item2/audit-v08-adapters/check_census.py"
+        ],
+        "kind": "runnable-entrypoint",
+        "entry_line": 49,
+        "purpose": "Default lexical census regression controls with explicit zero witness/fidelity claims. Optional supplied report is not certified by this source role; no fixture, Lean or EVM proof credit.",
+        "input_scope": [],
+        "other_reads": "unresolved"
+      },
+      {
+        "path": "tests/h62/item6/migrate-lowering/runner_controls.py",
+        "input_revision": "af5d41462877a9f2e85a282064476c9b31bfab15",
+        "source_blob": "831cad493816b6b409fdf8c8b457daa8ef2a28d2",
+        "command": [
+          "python3",
+          "-B",
+          "tests/h62/item6/migrate-lowering/runner_controls.py"
+        ],
+        "kind": "runnable-entrypoint",
+        "entry_line": 10,
+        "purpose": "Lightweight OS process-group controls for inherited writer locks, atomic metrics, signal cleanup and descendants after leader exit. Source only; no Lean checking, fixture or EVM proof credit.",
+        "input_scope": [],
+        "other_reads": "unresolved"
       }
     ]
   }
