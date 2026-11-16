@@ -89,26 +89,6 @@ theorem prefix_limit_unique (atom : Instr → S → Result S)
     · exact False.elim (hn k t hk)
     · rfl
 
-/-- Each natural byte emitted by the ABI encoder fits in UInt8. -/
-theorem bytesBE_lt (n v : Nat) : ∀ b ∈ Storage.bytesBE n v, b < 256 := by
-  induction n generalizing v with
-  | zero => simp [Storage.bytesBE]
-  | succ n ih =>
-    intro b hb
-    simp only [Storage.bytesBE, List.mem_append, List.mem_singleton] at hb
-    rcases hb with hb | rfl
-    · exact ih _ _ hb
-    · exact Nat.mod_lt _ (by decide)
-
-theorem encode_lt (p : Storage.Pre) : ∀ b ∈ Storage.encode p, b < 256 := by
-  cases p with
-  | entry k w =>
-    intro b hb
-    rcases List.mem_append.mp hb with hb | hb
-    · exact bytesBE_lt 32 k b hb
-    · exact bytesBE_lt 32 w b hb
-  | data w => exact bytesBE_lt 32 w
-
 /-- Decoding runtime bytes recovers the complete natural-byte preimage. -/
 theorem encoded_toNat (p : Storage.Pre) :
     (encoded p).map UInt8.toNat = Storage.encode p := by
