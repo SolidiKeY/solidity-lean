@@ -267,6 +267,8 @@ theorem freshSpellingBridgeFalse : freshSpellingCandidate.sourceValuesV1 ≠
     (letI : FreshNames := foreignProofNames; freshSpellingCandidate.vals) := by
   decide
 
+section InvocationRetentionControls
+
 /- A distinct injected first invocation; lookups must never rerun it. -/
 run_cmd do
   let .ok fixture := Json.parse r#"{"contract":{"nodeType":"ContractDefinition","contractKind":"contract","nodes":[{"nodeType":"FunctionDefinition","id":1,"name":"first","kind":"function","visibility":"public","stateMutability":"pure","modifiers":[],"parameters":{"parameters":[]},"returnParameters":{"parameters":[]},"body":{"nodeType":"Block","statements":[]},"documentation":""},{"nodeType":"FunctionDefinition","id":2,"name":"second","kind":"function","visibility":"public","stateMutability":"pure","modifiers":[],"parameters":{"parameters":[]},"returnParameters":{"parameters":[]},"body":{"nodeType":"Block","statements":[]},"documentation":""}]},"listing":true}"# | throwError "invocation fixture JSON"
@@ -462,6 +464,8 @@ run_cmd do
     throwError "retention failure detail was lost"
   logInfo m!"EXECUTABLE_V2 actual injected invocation receipt: {receiptBefore.compress}"
   logInfo "EXECUTABLE_V2 no-search lookup, rollback replay, coherent forgery, synchronous rejection and atomic-failure controls passed"
+
+end InvocationRetentionControls
 
 section ForeignProofNameControl
 local instance : FreshNames := foreignProofNames
