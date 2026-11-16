@@ -105,25 +105,11 @@ theorem reference_bounded {C : Contract} {T : Ty} (r : SRef C T) :
 /-- Explicit conversion from the layout's natural bytes to runtime bytes. -/
 def encoded (p : Pre) : List UInt8 := (Storage.encode p).map UInt8.ofNat
 
-theorem bytesBE_bound (n v : Nat) : ∀ b ∈ bytesBE n v, b < 256 := by
-  induction n generalizing v with
-  | zero => simp [bytesBE]
-  | succ n ih =>
-    intro b hb
-    rcases List.mem_append.mp hb with hb | hb
-    · exact ih _ b hb
-    · have e := List.mem_singleton.mp hb
-      subst b
-      exact Nat.mod_lt _ (by decide)
+theorem bytesBE_bound (n v : Nat) : ∀ b ∈ bytesBE n v, b < 256 :=
+  Storage.bytesBE_bound n v
 
-theorem encode_bound (p : Pre) : ∀ b ∈ Storage.encode p, b < 256 := by
-  cases p with
-  | data w => exact bytesBE_bound 32 w
-  | entry k w =>
-    intro b hb
-    rcases List.mem_append.mp hb with hb | hb
-    · exact bytesBE_bound 32 k b hb
-    · exact bytesBE_bound 32 w b hb
+theorem encode_bound (p : Pre) : ∀ b ∈ Storage.encode p, b < 256 :=
+  Storage.encode_bound p
 
 theorem encoded_toNat (p : Pre) : (encoded p).map UInt8.toNat = Storage.encode p := by
   unfold encoded
