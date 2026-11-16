@@ -99,8 +99,8 @@ theorem bad_execution : run (outputPlan.at 0).code rejectedMachine=.revert :=
 
 /-- Assemble the frozen V3 record from explicit external agreement, coverage
 and memberships. Agreement alone does not authenticate approved-domain
-provenance; that remains a separate ApprovedProfile duty. No domain, whitelist
-or target simulation is selected here. -/
+provenance; original-source/resource linkage remains separate. No domain,
+whitelist or target simulation is selected here. -/
 def with_domain (approved admitted : Nat → InterfaceV3.Admission CountdownWitness.P.C Γ)
  (agreement : InterfaceV3.FamilyAdmissionAgreement approved admitted)
  (coverage : InterfaceV3.FamilyEntryCoverage 1 F admitted outputPlan)
