@@ -27,11 +27,11 @@ retained separately. Docker wait recorded terminal exit 0.
 
 The three selected upstream cases are all **blocked**, in both required
 legacy/viaIR pipelines, by the unchanged cross-contract host-adapter boundary.
-[Original fixture text and expectations](upstream/fixture-observations.json)
-are retained in full, including gas rows. No runtime or EVM agreement is claimed.
-Per-filter runner reports are retained in the [immutable private archive](https://github.com/SolidiKeY/solidity-lean-coord/tree/31351403baef6c2ce1e047fc093d9fdd5b7b67e7/evidence/plan-x1e-classify-rest-1116/x1e-classify-rest/tests/contract-world-certificates/). Their large
-all-snapshot coverage inventories remain byte-for-byte as gzip files here,
-with compressed and uncompressed hashes recorded in the archived validation.json.
+[Original fixture text and expectations](https://github.com/SolidiKeY/solidity-lean-coord/blob/c733074aa2a0ff46f54ea629cf9ad9a4c87c6362/evidence/plan-x1e-classify-rest-1116/x1e-classify-rest/tests/contract-world-certificates/upstream/fixture-observations.json)
+are retained in full in the private archive, including gas rows. No runtime or EVM agreement is claimed.
+Per-filter runner reports and their large all-snapshot coverage inventories
+are retained byte-for-byte in the [immutable private archive](https://github.com/SolidiKeY/solidity-lean-coord/tree/c733074aa2a0ff46f54ea629cf9ad9a4c87c6362/evidence/plan-x1e-classify-rest-1116/x1e-classify-rest/tests/contract-world-certificates/). Compressed
+and uncompressed hashes are recorded in the archived validation.json.
 
 The command scripts are exact records for this saved managed environment:
 source the setup activation, copy `bounded-lakefile.toml` to the repository
