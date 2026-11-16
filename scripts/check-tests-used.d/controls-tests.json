@@ -210,6 +210,21 @@
         "purpose": "Historical Python lexical/census regression controls: actual default invocation passed at the recorded committed revision with the same source bytes. Current fixed-count assertions are not certified against the growing corpus. Source role only; no fixture, child, Lean or EVM proof credit.",
         "input_scope": [],
         "other_reads": "unresolved"
+      },
+      {
+        "path": "tests/h62/item6/migrate-syntax/accept.py",
+        "input_revision": "df554535e9c8d308276a99ea23611c7d63ae5919",
+        "source_blob": "74bb52f55803b2518c725cd0294f0e68eec4e68e",
+        "command": [
+          "python3",
+          "-B",
+          "tests/h62/item6/migrate-syntax/accept.py"
+        ],
+        "kind": "runnable-entrypoint",
+        "entry_line": 11,
+        "purpose": "Historical Python syntax-census and comparison regression controls: actual default invocation passed at the recorded committed revision with identical source bytes. Current fixed inventory/header checks remain unchanged and are not certified against the growing corpus. Source role only; no fixture, child, Lean or EVM proof credit.",
+        "input_scope": [],
+        "other_reads": "unresolved"
       }
     ]
   }
