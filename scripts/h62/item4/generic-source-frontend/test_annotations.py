@@ -43,3 +43,7 @@ class AnnotationTests(unittest.TestCase):
                 check_changed_paths(changed, b'')
         with self.assertRaises(SystemExit):
             check_changed_paths(b'', b'Solidity/Frontend/new.txt\0')
+
+
+if __name__ == "__main__":
+    unittest.main()
