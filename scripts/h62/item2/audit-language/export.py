@@ -1,5 +1,11 @@
 #!/usr/bin/env python3
-"""Export this isolated committed checkpoint; keep bulk evidence outside Git."""
+"""Export a committed checkpoint, with an opt-in private historical reader v2.
+
+Use --interface-version 2 --historical-input-root DIR to read the exact request
+from private archive fa68e0ac599d1f6a59dab0af5b19dbf2ae029c9f. DIR is external
+and contains tests/h62/...; no download or fallback occurs. The request is
+historical report data, not current authority or proof. V1 remains the default.
+"""
 import argparse
 import hashlib
 import json
@@ -78,11 +84,45 @@ def export(output, *, owner_request=None):
                       "patch_sha256": hashlib.sha256((args.output / "original.patch").read_bytes()).hexdigest()}))
 
 
+
+REQUEST = "tests/h62/item2/audit-language/owner-resolution-request.json"
+REQUEST_BYTES = 1477
+REQUEST_SHA256 = "45666be1711a6b63c303b3fe9d3bfa04e1bf4e349f07a56a202144ba3feda41d"
+
+
+def load_historical_request(directory):
+    root = directory.resolve()
+    if root.is_relative_to(ROOT.resolve()):
+        raise ValueError("Historical input root must be outside the repository")
+    path = (root / REQUEST).resolve(strict=True)
+    if not path.is_relative_to(root):
+        raise ValueError("Historical request escapes its input root")
+    raw = path.read_bytes()
+    if len(raw) != REQUEST_BYTES or hashlib.sha256(raw).hexdigest() != REQUEST_SHA256:
+        raise ValueError("Historical request checksum mismatch: " + REQUEST)
+    return json.loads(raw)
+
+
+
+def export_v2(output, historical_input_root):
+    """Use only pinned private historical request data; retain v1 export guards."""
+    export(output, owner_request=load_historical_request(historical_input_root))
+
+
 def main():
     p = argparse.ArgumentParser(description=__doc__)
     p.add_argument("--output", type=Path, required=True)
+    p.add_argument("--interface-version", type=int, choices=(1, 2), default=1)
+    p.add_argument("--historical-input-root", type=Path)
     args = p.parse_args()
-    export(args.output)
+    if args.interface_version == 2:
+        if args.historical_input_root is None:
+            p.error("v2 requires --historical-input-root")
+        export_v2(args.output, args.historical_input_root)
+    else:
+        if args.historical_input_root is not None:
+            p.error("--historical-input-root requires --interface-version 2")
+        export(args.output)
 
 
 if __name__ == "__main__":
