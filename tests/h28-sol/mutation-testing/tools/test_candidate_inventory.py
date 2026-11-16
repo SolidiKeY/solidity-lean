@@ -86,3 +86,7 @@ class InventoryVersionCleanupControls(unittest.TestCase):
         with tempfile.TemporaryDirectory() as tmp:
             with patch("check_candidate_inventory.bounded.headroom", return_value={}), patch("check_candidate_inventory.subprocess.run", side_effect=subprocess.TimeoutExpired("owned-version-probe", 30)), patch("check_candidate_inventory.bounded.remove_owned", return_value=False):
                 with self.assertRaises(audit.bounded.CleanupError): audit.version_probe(Path(tmp))
+
+
+if __name__ == "__main__":
+    unittest.main()

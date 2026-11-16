@@ -77,10 +77,9 @@ theorem abi_calldatacopy_slice_word (m : ByteView) (input : Roadmap.Bytes)
     (dst base i : Nat) :
     mload (calldatacopy m input dst (base + 32 * i) 32) dst = abiInputWord (input.drop base) i := by
   apply Fin.ext
-  exact (abi_beValue_readBytes (calldatacopy m input dst (base + 32 * i) 32) dst 32).symm.trans
-    ((congrArg Source.beValue (calldatacopy_readBytes m input dst (base + 32 * i) 32)).trans
-      ((abi_beValue_readBytes (calldataBytes input) (base + 32 * i) 32).trans
-        (abi_wordAt_slice_calldataload input base i).symm))
+  change readBE (calldatacopy m input dst (base + 32 * i) 32) dst 32 =
+    Source.beValue (Source.fitBytes 32 ((input.drop base).drop (32 * i)))
+  rw [← abi_beValue_readBytes, abi_calldatacopy_fit, List.drop_drop]
 
 /-- The actual generic ABI word decoder observes the same copied word and
 explicit source slice, including unchanged success, revert and stuck results.
