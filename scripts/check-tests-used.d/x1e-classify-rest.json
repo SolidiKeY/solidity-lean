@@ -43,6 +43,141 @@
         "purpose": "Synthetic host-side wire, refusal and orchestration regression controls; no kernel, native compiler or EVM correctness credit. Fixture reads remain unresolved.",
         "input_scope": [],
         "other_reads": "unresolved"
+      },
+      {
+        "path": "tests/v14-help/test-bool-array-axioms.py",
+        "input_revision": "279fa3fbcf10da40e9ac159944d3486efcda56e4",
+        "source_blob": "4cd04b8ec7cf630cb340c0414d403ea28e2ed5e6",
+        "command": [
+          "python3",
+          "-B",
+          "tests/v14-help/test-bool-array-axioms.py"
+        ],
+        "kind": "runnable-entrypoint",
+        "entry_line": 13,
+        "purpose": "Synthetic axiom-audit verdict controls using copied Python checkers and generated logs; no Lean elaboration, kernel, theorem or production axiom-closure credit.",
+        "input_scope": [],
+        "other_reads": "unresolved"
+      },
+      {
+        "path": "tests/v14-help/test-bool-entry-axioms.py",
+        "input_revision": "279fa3fbcf10da40e9ac159944d3486efcda56e4",
+        "source_blob": "dc3d7efd683a455e13e39625e18e516a1fbaec6d",
+        "command": [
+          "python3",
+          "-B",
+          "tests/v14-help/test-bool-entry-axioms.py"
+        ],
+        "kind": "runnable-entrypoint",
+        "entry_line": 13,
+        "purpose": "Synthetic axiom-audit verdict controls using copied Python checkers and generated logs; no Lean elaboration, kernel, theorem or production axiom-closure credit.",
+        "input_scope": [],
+        "other_reads": "unresolved"
+      },
+      {
+        "path": "tests/v14-help/test-bool-expression-axioms.py",
+        "input_revision": "279fa3fbcf10da40e9ac159944d3486efcda56e4",
+        "source_blob": "4dd59f5983431fc6c9f66896572d1a2ea6067d05",
+        "command": [
+          "python3",
+          "-B",
+          "tests/v14-help/test-bool-expression-axioms.py"
+        ],
+        "kind": "runnable-entrypoint",
+        "entry_line": 13,
+        "purpose": "Synthetic axiom-audit verdict controls using copied Python checkers and generated logs; no Lean elaboration, kernel, theorem or production axiom-closure credit.",
+        "input_scope": [],
+        "other_reads": "unresolved"
+      },
+      {
+        "path": "tests/v14-help/test-byte-axioms.py",
+        "input_revision": "279fa3fbcf10da40e9ac159944d3486efcda56e4",
+        "source_blob": "6f7afc726e2633bd0dda52fab8104497880491ec",
+        "command": [
+          "python3",
+          "-B",
+          "tests/v14-help/test-byte-axioms.py"
+        ],
+        "kind": "runnable-entrypoint",
+        "entry_line": 13,
+        "purpose": "Synthetic axiom-audit verdict controls using copied Python checkers and generated logs; no Lean elaboration, kernel, theorem or production axiom-closure credit.",
+        "input_scope": [],
+        "other_reads": "unresolved"
+      },
+      {
+        "path": "tests/v14-help/test-copy-access-axioms.py",
+        "input_revision": "279fa3fbcf10da40e9ac159944d3486efcda56e4",
+        "source_blob": "2a0fdbfa127f1a53f87f77e7f2c4c8717ad70521",
+        "command": [
+          "python3",
+          "-B",
+          "tests/v14-help/test-copy-access-axioms.py"
+        ],
+        "kind": "runnable-entrypoint",
+        "entry_line": 13,
+        "purpose": "Synthetic axiom-audit verdict controls using copied Python checkers and generated logs; no Lean elaboration, kernel, theorem or production axiom-closure credit.",
+        "input_scope": [],
+        "other_reads": "unresolved"
+      },
+      {
+        "path": "tests/v14-help/test-copy-axioms.py",
+        "input_revision": "279fa3fbcf10da40e9ac159944d3486efcda56e4",
+        "source_blob": "1057bc19e64374c1ceeeeb8db1bcd867a655279d",
+        "command": [
+          "python3",
+          "-B",
+          "tests/v14-help/test-copy-axioms.py"
+        ],
+        "kind": "runnable-entrypoint",
+        "entry_line": 13,
+        "purpose": "Synthetic axiom-audit verdict controls using copied Python checkers and generated logs; no Lean elaboration, kernel, theorem or production axiom-closure credit.",
+        "input_scope": [],
+        "other_reads": "unresolved"
+      },
+      {
+        "path": "tests/v14-help/test-memory-delete-axioms.py",
+        "input_revision": "279fa3fbcf10da40e9ac159944d3486efcda56e4",
+        "source_blob": "556c693435035d0af35df5125850a4eeffe44825",
+        "command": [
+          "python3",
+          "-B",
+          "tests/v14-help/test-memory-delete-axioms.py"
+        ],
+        "kind": "runnable-entrypoint",
+        "entry_line": 13,
+        "purpose": "Synthetic axiom-audit verdict controls using copied Python checkers and generated logs; no Lean elaboration, kernel, theorem or production axiom-closure credit.",
+        "input_scope": [],
+        "other_reads": "unresolved"
+      },
+      {
+        "path": "tests/primitive-packets-1105/Constants/test-scope-base.py",
+        "input_revision": "279fa3fbcf10da40e9ac159944d3486efcda56e4",
+        "source_blob": "b3133da70192cc87ca89058139e3a7c498c1b1ce",
+        "command": [
+          "python3",
+          "-B",
+          "tests/primitive-packets-1105/Constants/test-scope-base.py"
+        ],
+        "kind": "runnable-entrypoint",
+        "entry_line": 5,
+        "purpose": "Synthetic scope/refusal controls using disposable Git trees or mocked missing inputs; no native/compiler/proof or live-resource acceptance credit.",
+        "input_scope": [],
+        "other_reads": "unresolved"
+      },
+      {
+        "path": "tests/primitive-packets-1105/Constants/test-vm-only-inputs.py",
+        "input_revision": "279fa3fbcf10da40e9ac159944d3486efcda56e4",
+        "source_blob": "21830dd82c6944f04eb8c0a715d801af8d952e13",
+        "command": [
+          "python3",
+          "-B",
+          "tests/primitive-packets-1105/Constants/test-vm-only-inputs.py"
+        ],
+        "kind": "runnable-entrypoint",
+        "entry_line": 7,
+        "purpose": "Synthetic scope/refusal controls using disposable Git trees or mocked missing inputs; no native/compiler/proof or live-resource acceptance credit.",
+        "input_scope": [],
+        "other_reads": "unresolved"
       }
     ]
   }
