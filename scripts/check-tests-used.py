@@ -2202,7 +2202,7 @@ def module_entry_schema_controls():
 def self_test():
     spec = importlib.util.spec_from_file_location('fragment_controls', Path(__file__).with_name('check-tests-used.d') / 'fragments.py')
     if spec.origin and Path(spec.origin).exists():
-        controls = importlib.util.module_from_spec(spec); spec.loader.exec_module(controls); controls.fragment_controls()
+        controls = importlib.util.module_from_spec(spec); spec.loader.exec_module(controls); controls.fragment_controls(globals())
     # Formatting must preserve nested provenance and awkward path/string bytes.
     payload = {'records': [{'path': 'tests/\u03b1\n".py', 'class': None,
                             'reason': 'braces{},comma,\nline', 'pins': {'b': [True, 0], 'a': {}}},

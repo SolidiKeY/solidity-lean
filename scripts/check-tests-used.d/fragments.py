@@ -84,8 +84,11 @@ def merge_fragment_entries(section, existing, additions):
     return result
 
 
-def fragment_controls():
+def fragment_controls(classifier):
     import copy
+    global read_fragments, merge_fragment_entries
+    read_fragments = classifier["read_fragments"]
+    merge_fragment_entries = classifier["merge_fragment_entries"]
     with tempfile.TemporaryDirectory() as tmp:
         directory = Path(tmp)
         first = {'path': 'tests/a', 'input_revision': 'a' * 40, 'source_blob': 'b' * 40}
@@ -114,3 +117,50 @@ def fragment_controls():
         assert read_fragments(directory) == fragments
 
 
+
+    with tempfile.TemporaryDirectory() as tmp:
+        root = Path(tmp) / 'repo'
+        (root / 'tests').mkdir(parents=True)
+        runner = 'tests/check.py'
+        source = "import unittest\nclass T(unittest.TestCase):\n def test_it(self):\n  open('tests/data.txt').read()\nif __name__ == '__main__': unittest.main()\n"
+        (root / runner).write_text(source)
+        (root / 'tests/data.txt').write_text('fixture content\n')
+        (root / 'tests/note.txt').write_text('reviewed note anchor\n')
+        (root / 'tests/receipt.txt').write_text('....\n----------------------------------------------------------------------\nRan 4 tests in 0.001s\n\nOK\n')
+        git = classifier['git']
+        git(root, 'init', '-q'); git(root, 'add', '.')
+        git(root, '-c', 'user.name=Control', '-c', 'user.email=control@example.invalid', 'commit', '-qm', 'fragment controls')
+        repo = classifier['Repository'](root, 'HEAD')
+        blob = lambda path: repo.tree[path][2]
+        catalog = {'schema_version': 1, 'standalone': [], 'reads': [], 'generators': [], 'orphans': []}
+        standalone = {'path': runner, 'input_revision': repo.ref, 'source_blob': blob(runner),
+                      'command': ['python3', '-B', runner], 'kind': 'unittest',
+                      'purpose': 'Check the named fixture.', 'input_scope': ['tests/data.txt'], 'other_reads': 'unresolved'}
+        route = {'runner': 'validated:' + runner, 'input_revision': repo.ref,
+                 'frames': [{'path': runner, 'blob': blob(runner), 'line': 4}],
+                 'target': 'tests/data.txt', 'target_blob': blob('tests/data.txt'),
+                 'operation': 'validated Python read of measured bytes'}
+        role = {'path': 'tests/note.txt', 'blob': blob('tests/note.txt'), 'anchor': 'reviewed note anchor',
+                'role': 'Historical record: Synthetic reviewed note.'}
+        fixture = {'path': 'tests/receipt.txt', 'blob': blob('tests/receipt.txt'),
+                   'consumers': [{'path': runner, 'blob': blob(runner), 'anchors': [' def test_it(self):']}],
+                   'reason': 'Synthetic receipt is also a regression fixture.'}
+        directory = Path(tmp) / 'fragments'; directory.mkdir()
+        (directory / 'step.json').write_text(json.dumps({'schema_version': 1, 'routes': {'standalone': [standalone]},
+            'catalog_extensions': {'reads': [route]}, 'roles': [role], 'fixtures': [fixture]}))
+        original = classifier['read_fragments']
+        try:
+            classifier['read_fragments'] = lambda _: original(directory)
+            model = classifier['inventory'](repo, catalog)
+            rows = {r['path']: r for r in model['records']}
+            assert rows['tests/data.txt']['class'] == 'keep'
+            assert rows['tests/note.txt']['class'] == 'evidence'
+            assert rows['tests/receipt.txt']['class'] is None
+            assert 'reviewed_fixture_refusal' in rows['tests/receipt.txt']['secondary']
+            conflicting = dict(standalone, source_blob='0' * 40)
+            (directory / 'other.json').write_text(json.dumps({'schema_version': 1, 'routes': {'standalone': [conflicting]}}))
+            try: classifier['inventory'](repo, catalog)
+            except ValueError as error: assert 'conflicting' in str(error)
+            else: raise AssertionError('end-to-end conflict accepted')
+        finally:
+            classifier['read_fragments'] = original
