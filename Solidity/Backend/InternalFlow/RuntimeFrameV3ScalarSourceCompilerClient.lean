@@ -1,3 +1,4 @@
+import Solidity.Backend.CompilerEndpoint
 import Solidity.Backend.InternalFlow.RuntimeFrameV3ScalarSourceCompiler
 import Solidity.Backend.InternalFlow.RuntimeFrameV3ScalarReentryControls
 
@@ -79,3 +80,22 @@ theorem native_default_returned : InterfaceV1.Returned (selected recDepth).plan 
  ⟨ScalarReentry.Endpoint.resultState,List.prefix_refl _⟩ := returned recDepth (by decide)
 
 end Solidity.Backend.InternalFlow.RuntimeFrame.ScalarSourceCompiler.Client
+
+/-! Legacy owners: `Client.returned`, Controls `bad_target`/`exhausted_boundary`.
+The b1 R1 tests below keep these executions outside accepted coverage (H949). -/
+namespace Solidity.Backend.InternalFlow.RuntimeFrame.ScalarSourceCompiler.Controls
+open Evm Evm.Memory ScalarRecursiveSource
+open DisjointScalarReturn.Client (Γ F caller before reference)
+
+/-- R1 of b1 refuses this scalar fixture at every depth; local selector
+acceptance remains a separate claim. -/
+theorem endpoint_refused (depth : Nat) :
+ Evm.Compiler.compile 1 F (.cons (Client.input depth) .nil)=none := rfl
+
+/-- A successful local selector and R1 of the public endpoint coexist. -/
+theorem selected_but_endpoint_refused (depth : Nat) :
+ compile 1 5 16 9 8 F (Client.input depth)=some (Client.selected depth) ∧
+ Evm.Compiler.compile 1 F (.cons (Client.input depth) .nil)=none :=
+ ⟨Client.root depth, endpoint_refused depth⟩
+
+end Solidity.Backend.InternalFlow.RuntimeFrame.ScalarSourceCompiler.Controls

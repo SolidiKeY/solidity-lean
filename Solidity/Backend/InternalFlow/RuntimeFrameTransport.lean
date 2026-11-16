@@ -66,11 +66,8 @@ theorem target_return {b L frame : Nat} {F : Frag Γ}
       target.stack = machine.stack ∧ BaseExtends caller.H base addresses ∧
       GrowsAllocator b frame (checked.cost caller) caller base machine
         (exported ret body.ext caller arguments out).st addresses target := by
-  have source : (.call f args ret body : Stmt C Γ Δ).run caller =
-      .ok (exported ret body.ext caller arguments out) :=
-    call_return args ret body.ext body.runR caller arguments evaluated out executed
-  exact statement_endpoint checked repr room capacity
-    (exported ret body.ext caller arguments out) source
+  exact statement_endpoint checked repr room capacity _
+    (call_return args ret body.ext body.runR caller arguments evaluated out executed)
 
 /-- The actual recursive-call CONSTRUCTOR receives the same exact checked
 frame endpoint. This does not turn a finite supplied thunk into an unbounded
@@ -93,9 +90,6 @@ theorem target_recursive_return {b L frame : Nat} {F : Frag Γ}
       target.stack = machine.stack ∧ BaseExtends caller.H base addresses ∧
       GrowsAllocator b frame (checked.cost caller) caller base machine
         (exported ret (body ()).ext caller arguments out).st addresses target := by
-  have source : (.callRec f d args ret body : Stmt C Γ Δ).run caller =
-      .ok (exported ret (body ()).ext caller arguments out) :=
-    call_return args ret (body ()).ext (body ()).runR caller arguments evaluated out executed
-  exact statement_endpoint checked repr room capacity
-    (exported ret (body ()).ext caller arguments out) source
+  exact statement_endpoint checked repr room capacity _
+    (call_return args ret (body ()).ext (body ()).runR caller arguments evaluated out executed)
 end Solidity.Backend.InternalFlow.RuntimeFrame

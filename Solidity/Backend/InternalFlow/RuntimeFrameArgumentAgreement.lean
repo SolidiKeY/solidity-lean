@@ -1,3 +1,4 @@
+import Solidity.Backend.Passes.ValueCertificate
 import Solidity.Backend.InternalFlow.RuntimeFrameV3DisjointScalarEntry
 
 /-! Checked primitive expressions with the same actual source value push the
@@ -13,19 +14,11 @@ theorem common_value {C : Contract} {Γ : Ctx} {p : PrimTy} {L b frame : Nat} {F
  (first : x.evalT caller=.ok value) (second : y.evalT caller=.ok value) :
  ∃ word, ReprV p value word ∧ run left.code before=.ok (before.push word) 0 ∧
    run right.code before=.ok (before.push word) 0 := by
- rcases left.cert.correct repr with ⟨a,wa,ea,ra,xa⟩ | ⟨failed,xa⟩
- · have av : a=value := Except.ok.inj (ea.symm.trans first)
-   subst a
-   rcases right.cert.correct repr with ⟨z,wz,ez,rz,xz⟩ | ⟨failed,xz⟩
-   · have zv : z=value := Except.ok.inj (ez.symm.trans second)
-     subst z
-     have same := Restored.value_unique ra rz
-     rw [←same] at xz
-     exact ⟨wa,ra,xa,xz⟩
-   · rw [second] at failed
-     cases failed
- · rw [first] at failed
-   cases failed
+ obtain ⟨wa,ra,xa⟩ := Passes.value_success_tail left repr first before.stack
+ obtain ⟨wz,rz,xz⟩ := Passes.value_success_tail right repr second before.stack
+ have same := Restored.value_unique ra rz
+ rw [←same] at xz
+ exact ⟨wa,ra,xa,xz⟩
 
 theorem entry_suffix {C : Contract} {Γ : Ctx} {R : RefTy} {L b c frame : Nat} {F : Frag Γ}
  {x y : Val C Γ .uint} (left : CompiledVal b F x) (right : CompiledVal b F y)

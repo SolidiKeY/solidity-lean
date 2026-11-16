@@ -2,11 +2,7 @@ import Solidity.Backend.InternalFlow.RuntimeFrameCodeEquality
 
 /-! Total structural authentication of existing instruction lists, including
 nested loop children. This compares code data only; it is not another machine
-or execution relation. The earlier flat recognizer remains unchanged.
-
-Retained test owner: `CodeAuthentication.Client` in
-`RuntimeFrameCodeAuthenticationControls.lean`, including selected-image and
-nested-instruction positive/negative authentication tests. -/
+or execution relation. The earlier flat recognizer remains unchanged. -/
 namespace Solidity.Backend.InternalFlow.RuntimeFrame.CodeAuthentication
 open Evm
 
