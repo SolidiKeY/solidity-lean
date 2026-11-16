@@ -166,19 +166,16 @@ def preUniverse : List Pre :=
   ((List.finRange (2 ^ 256)).flatMap (fun k =>
     (List.finRange (2 ^ 256)).map (fun w => Pre.entry k.val w.val)))
 
-private theorem in_finRange {n : Nat} (i : Fin n) : i ∈ List.finRange n :=
-  List.mem_ofFn.mpr ⟨i, rfl⟩
-
 theorem mem_preUniverse {p : Pre} (hp : p.Words) : p ∈ preUniverse := by
   cases p with
   | data w =>
     apply List.mem_append_left
-    exact List.mem_map.mpr ⟨⟨w, hp⟩, in_finRange _, rfl⟩
+    exact List.mem_map.mpr ⟨⟨w, hp⟩, List.mem_ofFn.mpr ⟨_, rfl⟩, rfl⟩
   | entry k w =>
     apply List.mem_append_right
     apply List.mem_flatMap.mpr
-    exact ⟨⟨k, hp.1⟩, in_finRange _,
-      List.mem_map.mpr ⟨⟨w, hp.2⟩, in_finRange _, rfl⟩⟩
+    exact ⟨⟨k, hp.1⟩, List.mem_ofFn.mpr ⟨_, rfl⟩,
+      List.mem_map.mpr ⟨⟨w, hp.2⟩, List.mem_ofFn.mpr ⟨_, rfl⟩, rfl⟩⟩
 
 /-- Choice decides occurrence, not which accounts or defaults to omit. -/
 noncomputable def stored {K : Type} {contracts : K → Contract}
