@@ -46,3 +46,7 @@ class ArtifactBoundary(unittest.TestCase):
             target.write_bytes(b'work')
             with self.assertRaises(ValueError): artifacts.materialize(self.entry,b'good')
             self.assertEqual(target.read_bytes(),b'work')
+
+
+if __name__ == "__main__":
+    unittest.main()

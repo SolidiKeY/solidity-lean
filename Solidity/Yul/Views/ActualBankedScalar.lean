@@ -59,14 +59,12 @@ theorem actualBankedScalarPair_MemOK {E Γ} (F : Source.Fr) (secondStatic : Bool
     (H : Source.HeapTy) (ok : Source.MemOK E H s) :
     Source.MemOK E H (actualBankedScalarPair F secondStatic first second maps s).1.2 := by
   first | (simp only;done) | decide | omega | rfl | skip
-  have safe := Source.Hoare.bind (Source.writeAt_mem (H:=H) F first.1.path first.2)
-    (fun _=>Source.writeAt_mem (H:=H) {F with static:=secondStatic} second.1.path second.2) s ok
+  have safe := actualScalarWritePair_MemOK F {F with static:=secondStatic}
+    first.1.path second.1.path first.1.codec second.1.codec first.1.slot second.1.slot
+    first.2 second.2 maps.1 s H ok
+  rw [actualScalarWritePair_source] at safe
   rw [actualBankedScalarPair_source]
-  cases actual : (do Source.writeAt F first.1.path first.2
-                     Source.writeAt {F with static:=secondStatic} second.1.path second.2).run s with
-  | mk result after =>
-    rw [actual] at safe
-    cases result <;> exact safe
+  exact safe
 theorem actualBankedScalarPair_view {E Γ} (F : Source.Fr)
     (first second : FiniteCellWrites.Request E F.this) (maps : SlotView × SlotView) (s : Source.EMState E Γ)
     (ps ts : List (ScalarPath E.layout (E.lay F.this))) (psep : finiteSeparated ps) (tsep : finiteSeparated ts)
