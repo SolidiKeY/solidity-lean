@@ -400,6 +400,651 @@
         "purpose": "Actual bounded Linux pidfd/thread-group lifecycle regression using only a controlled Python child: live worker refuses terminal status and real group exit permits retirement. No Lean execution, historical Lean process reconstruction or proof credit. Historical source-only after catalog commit; no fixture, child or current-validation propagation.",
         "input_scope": [],
         "other_reads": "unresolved"
+      },
+      {
+        "path": "tests/abi-entry/replay-cf1-length.py",
+        "input_revision": "fbeec65da0925115532589752bd0f7e6efa4b647",
+        "source_blob": "69b8911d3a170582b7e515cfdc1c4c9c2c39cb62",
+        "command": [
+          "python3",
+          "-B",
+          "tests/abi-entry/replay-cf1-length.py"
+        ],
+        "kind": "runnable-entrypoint",
+        "entry_line": 14,
+        "purpose": "Historical standalone script source role: Generate decoder-only checks from the saved cf1 length and bounds fixtures. Recorded command is an entry prefix, not a certified complete/default run. Argument/environment requirements and outputs remain uncertified. Source only: no current validation, fixture/helper/child execution, cache delivery, Lean/kernel/proof or EVM credit.",
+        "input_scope": [],
+        "other_reads": "unresolved"
+      },
+      {
+        "path": "tests/calldata-packets-1105/RawBool/PinFollowup/run.py",
+        "input_revision": "fbeec65da0925115532589752bd0f7e6efa4b647",
+        "source_blob": "1cb31966bc4a2cfd64d368190a114619fc63f5c1",
+        "command": [
+          "python3",
+          "-B",
+          "tests/calldata-packets-1105/RawBool/PinFollowup/run.py"
+        ],
+        "kind": "runnable-entrypoint",
+        "entry_line": 5,
+        "purpose": "Historical standalone script source role: Measured single-job runner, executed inside the fixed Docker cgroup. Recorded command is an entry prefix, not a certified complete/default run. Argument/environment requirements and outputs remain uncertified. Source only: no current validation, fixture/helper/child execution, cache delivery, Lean/kernel/proof or EVM credit.",
+        "input_scope": [],
+        "other_reads": "unresolved"
+      },
+      {
+        "path": "tests/calldata-packets-1105/RawBool/run.py",
+        "input_revision": "fbeec65da0925115532589752bd0f7e6efa4b647",
+        "source_blob": "d90110e97bdac59d9f915071c16e5cc5def17f94",
+        "command": [
+          "python3",
+          "-B",
+          "tests/calldata-packets-1105/RawBool/run.py"
+        ],
+        "kind": "runnable-entrypoint",
+        "entry_line": 5,
+        "purpose": "Historical standalone script source role: Measured single-job runner, executed inside the fixed Docker cgroup. Recorded command is an entry prefix, not a certified complete/default run. Argument/environment requirements and outputs remain uncertified. Source only: no current validation, fixture/helper/child execution, cache delivery, Lean/kernel/proof or EVM credit.",
+        "input_scope": [],
+        "other_reads": "unresolved"
+      },
+      {
+        "path": "tests/fullscope-20261104/vt1/ImportFollowup/audit.py",
+        "input_revision": "fbeec65da0925115532589752bd0f7e6efa4b647",
+        "source_blob": "c9790375db52d5b2b65c2955627cf26ff3551a24",
+        "command": [
+          "python3",
+          "-B",
+          "tests/fullscope-20261104/vt1/ImportFollowup/audit.py"
+        ],
+        "kind": "runnable-entrypoint",
+        "entry_line": 6,
+        "purpose": "Historical standalone script source role: Audit all six importer and 22 kernel-control theorem axiom sets. Recorded command is an entry prefix, not a certified complete/default run. Argument/environment requirements and outputs remain uncertified. Source only: no current validation, fixture/helper/child execution, cache delivery, Lean/kernel/proof or EVM credit.",
+        "input_scope": [],
+        "other_reads": "unresolved"
+      },
+      {
+        "path": "tests/fullscope-20261104/vt1/ImportFollowup/run.py",
+        "input_revision": "fbeec65da0925115532589752bd0f7e6efa4b647",
+        "source_blob": "3d9dbf33b76bd852db37daee5b58eca8dc869f02",
+        "command": [
+          "python3",
+          "-B",
+          "tests/fullscope-20261104/vt1/ImportFollowup/run.py"
+        ],
+        "kind": "runnable-entrypoint",
+        "entry_line": 5,
+        "purpose": "Historical standalone script source role: Measured single-job runner, executed inside the fixed Docker cgroup. Recorded command is an entry prefix, not a certified complete/default run. Argument/environment requirements and outputs remain uncertified. Source only: no current validation, fixture/helper/child execution, cache delivery, Lean/kernel/proof or EVM credit.",
+        "input_scope": [],
+        "other_reads": "unresolved"
+      },
+      {
+        "path": "tests/fullscope-20261104/vt1/measured-checks.py",
+        "input_revision": "fbeec65da0925115532589752bd0f7e6efa4b647",
+        "source_blob": "ebd43872a5d03727af210e161b193fcccff21892",
+        "command": [
+          "python3",
+          "-B",
+          "tests/fullscope-20261104/vt1/measured-checks.py"
+        ],
+        "kind": "runnable-entrypoint",
+        "entry_line": 4,
+        "purpose": "Historical standalone script source role: Serial, bounded checks inside the verified Docker cgroup; sample aggregate RSS. Recorded command is an entry prefix, not a certified complete/default run. Argument/environment requirements and outputs remain uncertified. Source only: no current validation, fixture/helper/child execution, cache delivery, Lean/kernel/proof or EVM credit.",
+        "input_scope": [],
+        "other_reads": "unresolved"
+      },
+      {
+        "path": "tests/primitive-packets-1104/UnsignedCast/check.py",
+        "input_revision": "fbeec65da0925115532589752bd0f7e6efa4b647",
+        "source_blob": "ac8b0876b24e35943c811728c1c097a0ed883586",
+        "command": [
+          "python3",
+          "-B",
+          "tests/primitive-packets-1104/UnsignedCast/check.py"
+        ],
+        "kind": "runnable-entrypoint",
+        "entry_line": 44,
+        "purpose": "Historical standalone script source role: Pinned packet acceptance. --full also runs unchanged repository gates. Recorded command is an entry prefix, not a certified complete/default run. Argument/environment requirements and outputs remain uncertified. Source only: no current validation, fixture/helper/child execution, cache delivery, Lean/kernel/proof or EVM credit.",
+        "input_scope": [],
+        "other_reads": "unresolved"
+      },
+      {
+        "path": "tests/primitive-packets-1104/UnsignedCast/run.py",
+        "input_revision": "fbeec65da0925115532589752bd0f7e6efa4b647",
+        "source_blob": "51468aa56b44dc691a27a4d342fdfe27bbadebaf",
+        "command": [
+          "python3",
+          "-B",
+          "tests/primitive-packets-1104/UnsignedCast/run.py"
+        ],
+        "kind": "runnable-entrypoint",
+        "entry_line": 5,
+        "purpose": "Historical standalone script source role: Serial bounded Lean checks for the owned unsigned-cast packet. Recorded command is an entry prefix, not a certified complete/default run. Argument/environment requirements and outputs remain uncertified. Source only: no current validation, fixture/helper/child execution, cache delivery, Lean/kernel/proof or EVM credit.",
+        "input_scope": [],
+        "other_reads": "unresolved"
+      },
+      {
+        "path": "tests/primitive-packets-1105/Constants/check.py",
+        "input_revision": "fbeec65da0925115532589752bd0f7e6efa4b647",
+        "source_blob": "587803946d0a6d60fffab4e63eda9e4d3dd22601",
+        "command": [
+          "python3",
+          "-B",
+          "tests/primitive-packets-1105/Constants/check.py"
+        ],
+        "kind": "runnable-entrypoint",
+        "entry_line": 191,
+        "purpose": "Historical standalone script source role: Exact Constants scope, source, diagnostics, kernel and control acceptance. Recorded command is an entry prefix, not a certified complete/default run. Argument/environment requirements and outputs remain uncertified. Source only: no current validation, fixture/helper/child execution, cache delivery, Lean/kernel/proof or EVM credit.",
+        "input_scope": [],
+        "other_reads": "unresolved"
+      },
+      {
+        "path": "tests/primitive-packets-1105/Constants/h44-storage-check.py",
+        "input_revision": "fbeec65da0925115532589752bd0f7e6efa4b647",
+        "source_blob": "679d996917c95674a56ea7d235664babebab4657",
+        "command": [
+          "python3",
+          "-B",
+          "tests/primitive-packets-1105/Constants/h44-storage-check.py"
+        ],
+        "kind": "runnable-entrypoint",
+        "entry_line": 32,
+        "purpose": "Historical standalone script source role: Require external evidence bytes and strict sealed-HEAD equality; no exemptions. Recorded command is an entry prefix, not a certified complete/default run. Argument/environment requirements and outputs remain uncertified. Source only: no current validation, fixture/helper/child execution, cache delivery, Lean/kernel/proof or EVM credit.",
+        "input_scope": [],
+        "other_reads": "unresolved"
+      },
+      {
+        "path": "tests/primitive-packets-1105/Constants/h57-check-transport.py",
+        "input_revision": "fbeec65da0925115532589752bd0f7e6efa4b647",
+        "source_blob": "e2c5f5be0b679ec7644ef0c163989037061c00e5",
+        "command": [
+          "python3",
+          "-B",
+          "tests/primitive-packets-1105/Constants/h57-check-transport.py"
+        ],
+        "kind": "runnable-entrypoint",
+        "entry_line": 82,
+        "purpose": "Historical standalone script source role: Guard regression: mapFree transport must retain the frozen refusal domain and strict failure. Recorded command is an entry prefix, not a certified complete/default run. Argument/environment requirements and outputs remain uncertified. Source only: no current validation, fixture/helper/child execution, cache delivery, Lean/kernel/proof or EVM credit.",
+        "input_scope": [],
+        "other_reads": "unresolved"
+      },
+      {
+        "path": "tests/primitive-packets-1105/Constants/registration-plan.py",
+        "input_revision": "fbeec65da0925115532589752bd0f7e6efa4b647",
+        "source_blob": "7cd773c99afbb2456a801b931d9ffd741bff7000",
+        "command": [
+          "python3",
+          "-B",
+          "tests/primitive-packets-1105/Constants/registration-plan.py"
+        ],
+        "kind": "runnable-entrypoint",
+        "entry_line": 136,
+        "purpose": "Historical standalone script source role: Coordinator-only map proposal; default checks pins and never edits a registry. Recorded command is an entry prefix, not a certified complete/default run. Argument/environment requirements and outputs remain uncertified. Source only: no current validation, fixture/helper/child execution, cache delivery, Lean/kernel/proof or EVM credit.",
+        "input_scope": [],
+        "other_reads": "unresolved"
+      },
+      {
+        "path": "tests/primitive-packets-1105/Constants/runtime.py",
+        "input_revision": "fbeec65da0925115532589752bd0f7e6efa4b647",
+        "source_blob": "65677b0629e6571f92115feb05ff05db676c7985",
+        "command": [
+          "python3",
+          "-B",
+          "tests/primitive-packets-1105/Constants/runtime.py"
+        ],
+        "kind": "runnable-entrypoint",
+        "entry_line": 7,
+        "purpose": "Historical standalone script source role: Run one owned-container command, with aggregate cap and H1 reserve checks. Recorded command is an entry prefix, not a certified complete/default run. Argument/environment requirements and outputs remain uncertified. Source only: no current validation, fixture/helper/child execution, cache delivery, Lean/kernel/proof or EVM credit.",
+        "input_scope": [],
+        "other_reads": "unresolved"
+      },
+      {
+        "path": "tests/primitive-packets-1105/Constants/validate-fresh.py",
+        "input_revision": "fbeec65da0925115532589752bd0f7e6efa4b647",
+        "source_blob": "37b4324ea7f8d25e7861c5893c981ff5618c404d",
+        "command": [
+          "python3",
+          "-B",
+          "tests/primitive-packets-1105/Constants/validate-fresh.py"
+        ],
+        "kind": "runnable-entrypoint",
+        "entry_line": 88,
+        "purpose": "Historical standalone script source role: Fresh unaffected numeric proof evidence; never claims final runtime completion. Recorded command is an entry prefix, not a certified complete/default run. Argument/environment requirements and outputs remain uncertified. Source only: no current validation, fixture/helper/child execution, cache delivery, Lean/kernel/proof or EVM credit.",
+        "input_scope": [],
+        "other_reads": "unresolved"
+      },
+      {
+        "path": "tests/runtime-frame/check-allocating-resume-axioms.py",
+        "input_revision": "fbeec65da0925115532589752bd0f7e6efa4b647",
+        "source_blob": "d7de2c33beebaa615eab1cb605f1182f5c6efdc2",
+        "command": [
+          "python3",
+          "-B",
+          "tests/runtime-frame/check-allocating-resume-axioms.py"
+        ],
+        "kind": "runnable-entrypoint",
+        "entry_line": 24,
+        "purpose": "Historical standalone script source role: Exact ordered builtin reports; independent actual outer hard-cap receipt. Recorded command is an entry prefix, not a certified complete/default run. Argument/environment requirements and outputs remain uncertified. Source only: no current validation, fixture/helper/child execution, cache delivery, Lean/kernel/proof or EVM credit.",
+        "input_scope": [],
+        "other_reads": "unresolved"
+      },
+      {
+        "path": "tests/sol-c3-exactness/check-publication.py",
+        "input_revision": "fbeec65da0925115532589752bd0f7e6efa4b647",
+        "source_blob": "482b8f6dedc3c860128a21d08d8c29db8cfd77b6",
+        "command": [
+          "python3",
+          "-B",
+          "tests/sol-c3-exactness/check-publication.py"
+        ],
+        "kind": "runnable-entrypoint",
+        "entry_line": 61,
+        "purpose": "Historical standalone script source role: Read-only exact publication/delta audit; does not run Lean or certify master gates. Recorded command is an entry prefix, not a certified complete/default run. Argument/environment requirements and outputs remain uncertified. Source only: no current validation, fixture/helper/child execution, cache delivery, Lean/kernel/proof or EVM credit.",
+        "input_scope": [],
+        "other_reads": "unresolved"
+      },
+      {
+        "path": "tests/sol-c3-exactness/final-checks.py",
+        "input_revision": "fbeec65da0925115532589752bd0f7e6efa4b647",
+        "source_blob": "7549934dfe8dd030dec3ca2faa23dbed1305868a",
+        "command": [
+          "python3",
+          "-B",
+          "tests/sol-c3-exactness/final-checks.py"
+        ],
+        "kind": "runnable-entrypoint",
+        "entry_line": 6,
+        "purpose": "Historical standalone script source role: Run unchanged repository source gates; no shared registrations are rewritten. Recorded command is an entry prefix, not a certified complete/default run. Argument/environment requirements and outputs remain uncertified. Source only: no current validation, fixture/helper/child execution, cache delivery, Lean/kernel/proof or EVM credit.",
+        "input_scope": [],
+        "other_reads": "unresolved"
+      },
+      {
+        "path": "tests/sol-expression-uniqueness/bounded.py",
+        "input_revision": "fbeec65da0925115532589752bd0f7e6efa4b647",
+        "source_blob": "d69977454aeffa8ef183f68a00fc29631e623970",
+        "command": [
+          "python3",
+          "-B",
+          "tests/sol-expression-uniqueness/bounded.py"
+        ],
+        "kind": "runnable-entrypoint",
+        "entry_line": 6,
+        "purpose": "Historical standalone script source role: Owned Docker run with writer lock, unchanged hard limits and H1 reserve guard. Recorded command is an entry prefix, not a certified complete/default run. Argument/environment requirements and outputs remain uncertified. Source only: no current validation, fixture/helper/child execution, cache delivery, Lean/kernel/proof or EVM credit.",
+        "input_scope": [],
+        "other_reads": "unresolved"
+      },
+      {
+        "path": "tests/sol-expression-uniqueness/inside.py",
+        "input_revision": "fbeec65da0925115532589752bd0f7e6efa4b647",
+        "source_blob": "e748c55cd4221213ae538f83be1cacce94e46624",
+        "command": [
+          "python3",
+          "-B",
+          "tests/sol-expression-uniqueness/inside.py"
+        ],
+        "kind": "runnable-entrypoint",
+        "entry_line": 5,
+        "purpose": "Historical standalone script source role: Run exactly one command, recording this hard-limited container's resources. Recorded command is an entry prefix, not a certified complete/default run. Argument/environment requirements and outputs remain uncertified. Source only: no current validation, fixture/helper/child execution, cache delivery, Lean/kernel/proof or EVM credit.",
+        "input_scope": [],
+        "other_reads": "unresolved"
+      },
+      {
+        "path": "tests/sol-expression-uniqueness/refresh-audit.py",
+        "input_revision": "fbeec65da0925115532589752bd0f7e6efa4b647",
+        "source_blob": "ece53663c9d2c7c3826303da93527d1c9be13320",
+        "command": [
+          "python3",
+          "-B",
+          "tests/sol-expression-uniqueness/refresh-audit.py"
+        ],
+        "kind": "runnable-entrypoint",
+        "entry_line": 86,
+        "purpose": "Historical standalone script source role: Refresh owned audit artifacts from source and an actual kernel axiom report. Recorded command is an entry prefix, not a certified complete/default run. Argument/environment requirements and outputs remain uncertified. Source only: no current validation, fixture/helper/child execution, cache delivery, Lean/kernel/proof or EVM credit.",
+        "input_scope": [],
+        "other_reads": "unresolved"
+      },
+      {
+        "path": "tests/sol-expression-uniqueness/serial-build.py",
+        "input_revision": "fbeec65da0925115532589752bd0f7e6efa4b647",
+        "source_blob": "16e9865f01e29fccef3678ee3e6230f4e11fb872",
+        "command": [
+          "python3",
+          "-B",
+          "tests/sol-expression-uniqueness/serial-build.py"
+        ],
+        "kind": "runnable-entrypoint",
+        "entry_line": 22,
+        "purpose": "Historical standalone script source role: Build import dependencies in topological order, one target per invocation. Recorded command is an entry prefix, not a certified complete/default run. Argument/environment requirements and outputs remain uncertified. Source only: no current validation, fixture/helper/child execution, cache delivery, Lean/kernel/proof or EVM credit.",
+        "input_scope": [],
+        "other_reads": "unresolved"
+      },
+      {
+        "path": "tests/sol-numeric-literals/differential.py",
+        "input_revision": "fbeec65da0925115532589752bd0f7e6efa4b647",
+        "source_blob": "2766f10489114665c3d66d195600b84dc23bb406",
+        "command": [
+          "python3",
+          "-B",
+          "tests/sol-numeric-literals/differential.py"
+        ],
+        "kind": "runnable-entrypoint",
+        "entry_line": 58,
+        "purpose": "Historical standalone script source role: Exact paired observations, retaining every lexical/compiler stage difference. Recorded command is an entry prefix, not a certified complete/default run. Argument/environment requirements and outputs remain uncertified. Source only: no current validation, fixture/helper/child execution, cache delivery, Lean/kernel/proof or EVM credit.",
+        "input_scope": [],
+        "other_reads": "unresolved"
+      },
+      {
+        "path": "tests/sol-numeric-literals/generate-fixtures.py",
+        "input_revision": "fbeec65da0925115532589752bd0f7e6efa4b647",
+        "source_blob": "26150c4c72ef87e36bf4fc47c5edec114592aa6d",
+        "command": [
+          "python3",
+          "-B",
+          "tests/sol-numeric-literals/generate-fixtures.py"
+        ],
+        "kind": "runnable-entrypoint",
+        "entry_line": 6,
+        "purpose": "Historical standalone script source role: Keep every fixed compiler spelling paired with a kernel-checked typed Lean row. Recorded command is an entry prefix, not a certified complete/default run. Argument/environment requirements and outputs remain uncertified. Source only: no current validation, fixture/helper/child execution, cache delivery, Lean/kernel/proof or EVM credit.",
+        "input_scope": [],
+        "other_reads": "unresolved"
+      },
+      {
+        "path": "tests/sol-numeric-literals/generate-wordtable.py",
+        "input_revision": "fbeec65da0925115532589752bd0f7e6efa4b647",
+        "source_blob": "d484d65fa1b1b54ac070e51cd87931d4218952c1",
+        "command": [
+          "python3",
+          "-B",
+          "tests/sol-numeric-literals/generate-wordtable.py"
+        ],
+        "kind": "runnable-entrypoint",
+        "entry_line": 8,
+        "purpose": "Historical standalone script source role: Generate structural exclusion proofs from the frozen word table, not numeric grammar. Recorded command is an entry prefix, not a certified complete/default run. Argument/environment requirements and outputs remain uncertified. Source only: no current validation, fixture/helper/child execution, cache delivery, Lean/kernel/proof or EVM credit.",
+        "input_scope": [],
+        "other_reads": "unresolved"
+      },
+      {
+        "path": "tests/sol-numeric-literals/h35/prepare-owned-cache.py",
+        "input_revision": "fbeec65da0925115532589752bd0f7e6efa4b647",
+        "source_blob": "8dca018aa501a0112208f0a3ba249439727ea36e",
+        "command": [
+          "python3",
+          "-B",
+          "tests/sol-numeric-literals/h35/prepare-owned-cache.py"
+        ],
+        "kind": "runnable-entrypoint",
+        "entry_line": 5,
+        "purpose": "Historical standalone script source role: Prepare a verified local cache asset; this does not deliver or satisfy H35 shipment. Recorded command is an entry prefix, not a certified complete/default run. Argument/environment requirements and outputs remain uncertified. Source only: no current validation, fixture/helper/child execution, cache delivery, Lean/kernel/proof or EVM credit.",
+        "input_scope": [],
+        "other_reads": "unresolved"
+      },
+      {
+        "path": "tests/sol-numeric-literals/h35/test-h41.py",
+        "input_revision": "fbeec65da0925115532589752bd0f7e6efa4b647",
+        "source_blob": "3cdf4e7b333ceac73c4dd977ce8c93f0cc02d33d",
+        "command": [
+          "python3",
+          "-B",
+          "tests/sol-numeric-literals/h35/test-h41.py"
+        ],
+        "kind": "runnable-entrypoint",
+        "entry_line": 8,
+        "purpose": "Historical standalone script source role: Regression for self-consistent replacement of mutable cache evidence. Recorded command is an entry prefix, not a certified complete/default run. Argument/environment requirements and outputs remain uncertified. Observed run failed; no passing credit. Source only: no current validation, fixture/helper/child execution, cache delivery, Lean/kernel/proof or EVM credit.",
+        "input_scope": [],
+        "other_reads": "unresolved"
+      },
+      {
+        "path": "tests/sol-numeric-literals/h35/validate-axioms.py",
+        "input_revision": "fbeec65da0925115532589752bd0f7e6efa4b647",
+        "source_blob": "8786f59b15523c190dfa4e47a62296f92e323592",
+        "command": [
+          "python3",
+          "-B",
+          "tests/sol-numeric-literals/h35/validate-axioms.py"
+        ],
+        "kind": "runnable-entrypoint",
+        "entry_line": 9,
+        "purpose": "Historical standalone script source role: Check complete H35 print output against exact expected source and kernel pins. Recorded command is an entry prefix, not a certified complete/default run. Argument/environment requirements and outputs remain uncertified. Source only: no current validation, fixture/helper/child execution, cache delivery, Lean/kernel/proof or EVM credit.",
+        "input_scope": [],
+        "other_reads": "unresolved"
+      },
+      {
+        "path": "tests/sol-numeric-literals/make-manifest.py",
+        "input_revision": "fbeec65da0925115532589752bd0f7e6efa4b647",
+        "source_blob": "1fe7e5a2238b4fce9d246bb002ceb24813971119",
+        "command": [
+          "python3",
+          "-B",
+          "tests/sol-numeric-literals/make-manifest.py"
+        ],
+        "kind": "runnable-entrypoint",
+        "entry_line": 7,
+        "purpose": "Historical standalone script source role: Explicit pin-recording step. Acceptance never calls this script. Recorded command is an entry prefix, not a certified complete/default run. Argument/environment requirements and outputs remain uncertified. Source only: no current validation, fixture/helper/child execution, cache delivery, Lean/kernel/proof or EVM credit.",
+        "input_scope": [],
+        "other_reads": "unresolved"
+      },
+      {
+        "path": "tests/sol-numeric-literals/runtime/check.py",
+        "input_revision": "fbeec65da0925115532589752bd0f7e6efa4b647",
+        "source_blob": "eded1ac02d4a14e28d032c78d6afb9d3352f545c",
+        "command": [
+          "python3",
+          "-B",
+          "tests/sol-numeric-literals/runtime/check.py"
+        ],
+        "kind": "runnable-entrypoint",
+        "entry_line": 5,
+        "purpose": "Historical standalone script source role: Run one owned-container command, with aggregate cap and H1 reserve checks. Recorded command is an entry prefix, not a certified complete/default run. Argument/environment requirements and outputs remain uncertified. Source only: no current validation, fixture/helper/child execution, cache delivery, Lean/kernel/proof or EVM credit.",
+        "input_scope": [],
+        "other_reads": "unresolved"
+      },
+      {
+        "path": "tests/sol-numeric-literals/runtime/timed.py",
+        "input_revision": "fbeec65da0925115532589752bd0f7e6efa4b647",
+        "source_blob": "dc48cd35f00d0a63a1270f488afd6bb2d0dafc98",
+        "command": [
+          "python3",
+          "-B",
+          "tests/sol-numeric-literals/runtime/timed.py"
+        ],
+        "kind": "runnable-entrypoint",
+        "entry_line": 8,
+        "purpose": "Historical standalone script source role: Linux child-process timing/RSS; aggregate memory is separately cgroup-enforced. Recorded command is an entry prefix, not a certified complete/default run. Argument/environment requirements and outputs remain uncertified. Source only: no current validation, fixture/helper/child execution, cache delivery, Lean/kernel/proof or EVM credit.",
+        "input_scope": [],
+        "other_reads": "unresolved"
+      },
+      {
+        "path": "tests/sol-numeric-literals/test-adoption.py",
+        "input_revision": "fbeec65da0925115532589752bd0f7e6efa4b647",
+        "source_blob": "1c890b29c36d6a734a27401434b4d72a6e068d2c",
+        "command": [
+          "python3",
+          "-B",
+          "tests/sol-numeric-literals/test-adoption.py"
+        ],
+        "kind": "runnable-entrypoint",
+        "entry_line": 7,
+        "purpose": "Historical standalone script source role: Check adoption boundaries in a temporary Git index; never edit foreign source. Recorded command is an entry prefix, not a certified complete/default run. Argument/environment requirements and outputs remain uncertified. Observed run failed; no passing credit. Source only: no current validation, fixture/helper/child execution, cache delivery, Lean/kernel/proof or EVM credit.",
+        "input_scope": [],
+        "other_reads": "unresolved"
+      },
+      {
+        "path": "tests/sol-override-validation/check_controls.py",
+        "input_revision": "fbeec65da0925115532589752bd0f7e6efa4b647",
+        "source_blob": "a2866acc03a8ae6b8bc4695a2d5ee244dfd55b75",
+        "command": [
+          "python3",
+          "-B",
+          "tests/sol-override-validation/check_controls.py"
+        ],
+        "kind": "runnable-entrypoint",
+        "entry_line": 31,
+        "purpose": "Historical standalone script source role: Compare committed guarded controls; never derive expectations from execution. Recorded command is an entry prefix, not a certified complete/default run. Argument/environment requirements and outputs remain uncertified. Source only: no current validation, fixture/helper/child execution, cache delivery, Lean/kernel/proof or EVM credit.",
+        "input_scope": [],
+        "other_reads": "unresolved"
+      },
+      {
+        "path": "tests/sol-override-validation/final_gates.py",
+        "input_revision": "fbeec65da0925115532589752bd0f7e6efa4b647",
+        "source_blob": "d578f1cb2cc4057732e68f422c936820b3d8a8a6",
+        "command": [
+          "python3",
+          "-B",
+          "tests/sol-override-validation/final_gates.py"
+        ],
+        "kind": "runnable-entrypoint",
+        "entry_line": 47,
+        "purpose": "Historical standalone script source role: Run required serial gates; any failed gate makes the process fail. Recorded command is an entry prefix, not a certified complete/default run. Argument/environment requirements and outputs remain uncertified. Source only: no current validation, fixture/helper/child execution, cache delivery, Lean/kernel/proof or EVM credit.",
+        "input_scope": [],
+        "other_reads": "unresolved"
+      },
+      {
+        "path": "tests/sol-qualified-units/claude-gates.py",
+        "input_revision": "fbeec65da0925115532589752bd0f7e6efa4b647",
+        "source_blob": "1ae4a30a680dd9b06a7e583bf61f73ac0c666f2d",
+        "command": [
+          "python3",
+          "-B",
+          "tests/sol-qualified-units/claude-gates.py"
+        ],
+        "kind": "runnable-entrypoint",
+        "entry_line": 284,
+        "purpose": "Historical standalone script source role: Claude-VM gate driver for SOL-QN (replaces the Codex Docker runner here). Recorded command is an entry prefix, not a certified complete/default run. Argument/environment requirements and outputs remain uncertified. Source only: no current validation, fixture/helper/child execution, cache delivery, Lean/kernel/proof or EVM credit.",
+        "input_scope": [],
+        "other_reads": "unresolved"
+      },
+      {
+        "path": "tests/sol-qualified-units/generate-constructor-fixtures.py",
+        "input_revision": "fbeec65da0925115532589752bd0f7e6efa4b647",
+        "source_blob": "359e66bab27ce07f5bcacc756cfcc7a7127d9750",
+        "command": [
+          "python3",
+          "-B",
+          "tests/sol-qualified-units/generate-constructor-fixtures.py"
+        ],
+        "kind": "runnable-entrypoint",
+        "entry_line": 75,
+        "purpose": "Historical standalone script source role: Owned traversal and exhaustive intrinsic specimens; structural coverage only. Recorded command is an entry prefix, not a certified complete/default run. Argument/environment requirements and outputs remain uncertified. Source only: no current validation, fixture/helper/child execution, cache delivery, Lean/kernel/proof or EVM credit.",
+        "input_scope": [],
+        "other_reads": "unresolved"
+      },
+      {
+        "path": "tests/sol-qualified-units/run-candidate-gates.py",
+        "input_revision": "fbeec65da0925115532589752bd0f7e6efa4b647",
+        "source_blob": "4ba1d06666c3822ce9fc7cc12caa4967703f8c68",
+        "command": [
+          "python3",
+          "-B",
+          "tests/sol-qualified-units/run-candidate-gates.py"
+        ],
+        "kind": "runnable-entrypoint",
+        "entry_line": 6,
+        "purpose": "Historical standalone script source role: Task-owned bounded candidate gate. Does not claim full acceptance. Recorded command is an entry prefix, not a certified complete/default run. Argument/environment requirements and outputs remain uncertified. Source only: no current validation, fixture/helper/child execution, cache delivery, Lean/kernel/proof or EVM credit.",
+        "input_scope": [],
+        "other_reads": "unresolved"
+      },
+      {
+        "path": "tests/sol-qualified-units/test-signature-audit.py",
+        "input_revision": "fbeec65da0925115532589752bd0f7e6efa4b647",
+        "source_blob": "860d231f593b646b8968defaeaeebdf199466c8b",
+        "command": [
+          "python3",
+          "-B",
+          "tests/sol-qualified-units/test-signature-audit.py"
+        ],
+        "kind": "runnable-entrypoint",
+        "entry_line": 3,
+        "purpose": "Historical standalone script source role: Read-only negative controls for the explicitly scoped H27 evidence audit. Recorded command is an entry prefix, not a certified complete/default run. Argument/environment requirements and outputs remain uncertified. Observed run failed; no passing credit. Source only: no current validation, fixture/helper/child execution, cache delivery, Lean/kernel/proof or EVM credit.",
+        "input_scope": [],
+        "other_reads": "unresolved"
+      },
+      {
+        "path": "tests/storage-values/check-files.py",
+        "input_revision": "fbeec65da0925115532589752bd0f7e6efa4b647",
+        "source_blob": "5e4a9d637debfc3af5ff83f2e6558ba0749e82a4",
+        "command": [
+          "python3",
+          "-B",
+          "tests/storage-values/check-files.py"
+        ],
+        "kind": "runnable-entrypoint",
+        "entry_line": 6,
+        "purpose": "Historical standalone script source role: Serial per-file diagnostics when Lean MCP is unavailable. Recorded command is an entry prefix, not a certified complete/default run. Argument/environment requirements and outputs remain uncertified. Source only: no current validation, fixture/helper/child execution, cache delivery, Lean/kernel/proof or EVM credit.",
+        "input_scope": [],
+        "other_reads": "unresolved"
+      },
+      {
+        "path": "tests/storage-values/run-bounded.py",
+        "input_revision": "fbeec65da0925115532589752bd0f7e6efa4b647",
+        "source_blob": "6520454123a2b7e5ac369d5f41a266f0fdda0c6e",
+        "command": [
+          "python3",
+          "-B",
+          "tests/storage-values/run-bounded.py"
+        ],
+        "kind": "runnable-entrypoint",
+        "entry_line": 10,
+        "purpose": "Historical standalone script source role: Task-local Docker resource guard and evidence recorder (no Lean server). Recorded command is an entry prefix, not a certified complete/default run. Argument/environment requirements and outputs remain uncertified. Source only: no current validation, fixture/helper/child execution, cache delivery, Lean/kernel/proof or EVM credit.",
+        "input_scope": [],
+        "other_reads": "unresolved"
+      },
+      {
+        "path": "tests/terra-20261103/audit-selection/accept.py",
+        "input_revision": "fbeec65da0925115532589752bd0f7e6efa4b647",
+        "source_blob": "3c9e7694c6fb5adcd5d064654d15aa5cbb25dcfd",
+        "command": [
+          "python3",
+          "-B",
+          "tests/terra-20261103/audit-selection/accept.py"
+        ],
+        "kind": "runnable-entrypoint",
+        "entry_line": 40,
+        "purpose": "Historical standalone script source role: Frozen static Selection audit source; checks source pins, declaration rows and dimension coverage without Lean verification. Recorded command is an entry prefix, not a certified complete/default run. Argument/environment requirements and outputs remain uncertified. Observed run failed; no passing credit. Source only: no current validation, fixture/helper/child execution, cache delivery, Lean/kernel/proof or EVM credit.",
+        "input_scope": [],
+        "other_reads": "unresolved"
+      },
+      {
+        "path": "tests/terra-20261103/gate/accept.py",
+        "input_revision": "fbeec65da0925115532589752bd0f7e6efa4b647",
+        "source_blob": "daaac500909c6dc61f1c52ba95cdfdcd42a41d93",
+        "command": [
+          "python3",
+          "-B",
+          "tests/terra-20261103/gate/accept.py"
+        ],
+        "kind": "runnable-entrypoint",
+        "entry_line": 32,
+        "purpose": "Historical standalone script source role: Frozen historical gate regression contract source; enforces exact gate hash and test-case inventory. Recorded command is an entry prefix, not a certified complete/default run. Argument/environment requirements and outputs remain uncertified. Observed run failed; no passing credit. Source only: no current validation, fixture/helper/child execution, cache delivery, Lean/kernel/proof or EVM credit.",
+        "input_scope": [],
+        "other_reads": "unresolved"
+      },
+      {
+        "path": "tests/terra-20261103/gate/accept_repaired.py",
+        "input_revision": "fbeec65da0925115532589752bd0f7e6efa4b647",
+        "source_blob": "bc00d0052414f0e734c7c0e8b9a4c85e21834bf6",
+        "command": [
+          "python3",
+          "-B",
+          "tests/terra-20261103/gate/accept_repaired.py"
+        ],
+        "kind": "runnable-entrypoint",
+        "entry_line": 102,
+        "purpose": "Historical standalone script source role: Frozen reconciled gate contract source; requires --head and exact committed snapshot, artifact and assertion bindings. Recorded command is an entry prefix, not a certified complete/default run. Argument/environment requirements and outputs remain uncertified. Source only: no current validation, fixture/helper/child execution, cache delivery, Lean/kernel/proof or EVM credit.",
+        "input_scope": [],
+        "other_reads": "unresolved"
+      },
+      {
+        "path": "tests/terra-20261103/gate/freeze_acceptance.py",
+        "input_revision": "fbeec65da0925115532589752bd0f7e6efa4b647",
+        "source_blob": "88c5bfb3260b9617024ed76686d5a7bd0ba9080a",
+        "command": [
+          "python3",
+          "-B",
+          "tests/terra-20261103/gate/freeze_acceptance.py"
+        ],
+        "kind": "runnable-entrypoint",
+        "entry_line": 255,
+        "purpose": "Historical standalone script source role: Generate the reconciled control inventory and exact-source frozen contract. Recorded command is an entry prefix, not a certified complete/default run. Argument/environment requirements and outputs remain uncertified. Source only: no current validation, fixture/helper/child execution, cache delivery, Lean/kernel/proof or EVM credit.",
+        "input_scope": [],
+        "other_reads": "unresolved"
       }
     ]
   },
