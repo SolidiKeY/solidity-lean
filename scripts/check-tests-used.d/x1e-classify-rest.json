@@ -355,6 +355,36 @@
         "purpose": "TF-tactics default no-commit-argument process/cleanup regression with recording Lake/MCP substitutes. No tactic proof validity, real Lean execution or missing historical-delivery authentication credit. Historical source-only role after catalog commit; no fixture/child/current-validation credit.",
         "input_scope": [],
         "other_reads": "unresolved"
+      },
+      {
+        "path": "tests/sol-expression-uniqueness/checker-controls.py",
+        "input_revision": "142a6a85559022088502285fe40a9cfb7887e83a",
+        "source_blob": "c3aaa100b1f4c7651c1e626503712056314b524f",
+        "command": [
+          "python3",
+          "-B",
+          "tests/sol-expression-uniqueness/checker-controls.py"
+        ],
+        "kind": "runnable-entrypoint",
+        "entry_line": 53,
+        "purpose": "Host-side audit positive and corruption controls for source pins, checkpoint receipts and proof-scope metadata. Kernel environment controls are explicitly skipped when H44 dumps are absent; no Lean uniqueness, theorem closure, kernel execution or build authenticity credit. Historical source-only after catalog commit; no fixture, child or current-validation credit.",
+        "input_scope": [],
+        "other_reads": "unresolved"
+      },
+      {
+        "path": "tests/sol-numeric-literals/runtime/test-check.py",
+        "input_revision": "142a6a85559022088502285fe40a9cfb7887e83a",
+        "source_blob": "44ec81123f8aa5bca11c050ae72a746e8536791b",
+        "command": [
+          "python3",
+          "-B",
+          "tests/sol-numeric-literals/runtime/test-check.py"
+        ],
+        "kind": "runnable-entrypoint",
+        "entry_line": 47,
+        "purpose": "Mock-only resource-stop regression: auto-removal and concurrent exit-zero races retain failing receipts. No Docker command, actual container stop, live resource gate, Lean or proof credit. Historical source-only after catalog commit; no fixture, child or current-validation credit.",
+        "input_scope": [],
+        "other_reads": "unresolved"
       }
     ]
   },
