@@ -1,0 +1,70 @@
+/-! Guards last-match selector routing, treating a padded short selector as
+ordinary input, and dropping the full-input per-row value gate. Instantiate
+existing routes with shared table/machine fixtures. These are continuation labels,
+not accepted calls or executed Source/ABI/special bodies, native code or gas. -/
+def plainRouteTable : RouteTable := payableTable.map (fun row => (row.1,row.2.1))
+def plainRouteCompilation := SelectorRoutes.compiled payableContract 3 plainRouteTable payableFallback
+def shortRouteLabel : Fin W := wmod 88
+def shortRouteCompilation := ShortRoutes.compiled payableContract 3 payableTable payableFallback shortRouteLabel
+
+theorem plain_route_found : Compiler.compile 3 (Frag.init RouteCtx)
+    (SelectorRoutes.route payableContract plainRouteTable payableFallback)=some plainRouteCompilation :=
+  SelectorRoutes.selected payableContract 3 plainRouteTable payableFallback
+
+theorem short_route_found : Compiler.compile 3 (Frag.init RouteCtx)
+    (ShortRoutes.route payableContract payableTable payableFallback shortRouteLabel)=some shortRouteCompilation :=
+  ShortRoutes.selected payableContract 3 payableTable payableFallback shortRouteLabel
+
+theorem plain_route_actual (selector value : Fin W) :
+    run plainRouteCompilation.code (entryMachine selector (wmod 4) value)=.ok
+      (entryWritten selector (wmod 4) value (routeResult plainRouteTable payableFallback selector)) 0 :=
+  SelectorRoutes.executed payableContract 3 plainRouteTable payableFallback plainRouteCompilation plain_route_found
+    (entryMachine selector (wmod 4) value) selector rfl
+
+theorem plain_route_first_match (value : Fin W) : run plainRouteCompilation.code (entryMachine (wmod 5) (wmod 4) value)=
+    .ok (entryWritten (wmod 5) (wmod 4) value (wmod 22)) 0 := by
+  have chosen : routeResult plainRouteTable payableFallback (wmod 5)=wmod 22 := by decide
+  simpa only [chosen] using plain_route_actual (wmod 5) value
+
+theorem plain_route_miss (value : Fin W) : run plainRouteCompilation.code (entryMachine (wmod 7) (wmod 4) value)=
+    .ok (entryWritten (wmod 7) (wmod 4) value payableFallback) 0 := by
+  have missed : routeResult plainRouteTable payableFallback (wmod 7)=payableFallback := by decide
+  simpa only [missed] using plain_route_actual (wmod 7) value
+
+theorem short_route_actual (selector size value : Fin W) :
+    run shortRouteCompilation.code (entryMachine selector size value)=
+      shortRouteOutcome 3 payableTable payableFallback shortRouteLabel selector size (entryMachine selector size value) :=
+  ShortRoutes.executed payableContract 3 payableTable payableFallback shortRouteLabel shortRouteCompilation short_route_found
+    (entryMachine selector size value) selector size rfl rfl
+
+theorem short_route_all_small (selector size value : Fin W) (small : size.val<4) :
+    run shortRouteCompilation.code (entryMachine selector size value)=.ok (entryWritten selector size value shortRouteLabel) 0 := by
+  simpa only [shortRouteOutcome,if_pos small] using short_route_actual selector size value
+
+theorem short_route_full_zero : run shortRouteCompilation.code (entryMachine (wmod 5) (wmod 4) (wmod 0))=
+    .ok (entryWritten (wmod 5) (wmod 4) (wmod 0) (wmod 22)) 0 := by
+  have full : ¬(wmod 4).val<4 := by decide
+  simpa only [shortRouteOutcome,if_neg full,payableRouteOutcome,payable_first_row,Bool.false_or,decide_true,if_true]
+    using short_route_actual (wmod 5) (wmod 4) (wmod 0)
+
+theorem short_route_full_value_refused (value : Fin W) (nonzero : value.val≠0) :
+    run shortRouteCompilation.code (entryMachine (wmod 5) (wmod 4) value)=.revert := by
+  have full : ¬(wmod 4).val<4 := by decide
+  have observed : (entryMachine (wmod 5) (wmod 4) value).callvalue.val≠0 := nonzero
+  simpa only [shortRouteOutcome,if_neg full,payableRouteOutcome,payable_first_row,Bool.false_or,
+    decide_eq_false observed,if_false] using short_route_actual (wmod 5) (wmod 4) value
+
+theorem short_route_paid_short_label : run shortRouteCompilation.code (entryMachine (wmod 5) (wmod 3) (wmod 1))=
+    .ok (entryWritten (wmod 5) (wmod 3) (wmod 1) shortRouteLabel) 0 :=
+  short_route_all_small (wmod 5) (wmod 3) (wmod 1) (by decide)
+
+#print axioms plain_route_found
+#print axioms short_route_found
+#print axioms plain_route_actual
+#print axioms plain_route_first_match
+#print axioms plain_route_miss
+#print axioms short_route_actual
+#print axioms short_route_all_small
+#print axioms short_route_full_zero
+#print axioms short_route_full_value_refused
+#print axioms short_route_paid_short_label

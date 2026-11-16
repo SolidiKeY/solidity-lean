@@ -34,7 +34,6 @@ theorem write {E : Source.Env} {Γ : Source.RCtx} {origin : Source.Heap E.layout
       r.heap.get root=some ⟨heapByteType string,heapByteData E.layout string (old.set i b)⟩ ∧
       r.heap.ty=s.2.heap.ty ∧ r.heap.next=s.2.heap.next ∧
       r.placement.address=p.address ∧ r.placement.free=p.free := by
-  first | (simp only;done) | skip
   dsimp only
   let reached := P6ByteMemory.store8 μ (payloadOffset p root string old found i inside) (byteWord b) fits
   have entry := mixed_entry p es distinct coverage residual root string old found

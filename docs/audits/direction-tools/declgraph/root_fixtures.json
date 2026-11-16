@@ -1,0 +1,9 @@
+[
+  {"name":"plain", "source":"example : True := by trivial\n#eval (1 + 2)\n#eval! (2 + 3)\n", "kinds":["example","eval","eval"]},
+  {"name":"quoted", "source":"def quoted : Lean.Syntax := `(command| example : True := by trivial)\ndef quotedEval : Lean.Syntax := `(command| #eval 3)\n", "kinds":[]},
+  {"name":"guarded", "source":"#guard_msgs in\nexample : True := by trivial\n#guard_msgs in #eval 3\n", "kinds":["example","eval"]},
+  {"name":"comments_strings", "source":"/- example : False := by contradiction -/\ndef text := \"#eval 7; example\"\n", "kinds":[]},
+  {"name":"utf16", "source":"#eval \"😀\"\n", "kinds":["eval"], "ranges":[[0,0,0,10]]},
+  {"name":"scope", "source":"namespace DeclgraphFixture\nopen Lean\nset_option pp.universes true\nexample : True := by trivial\nend DeclgraphFixture\n", "kinds":["example"]},
+  {"name":"bodies_not_executed", "source":"example : False := by exact True.intro\n#eval (throw (IO.userError \"MUST_NOT_RUN\") : IO Unit)\n", "kinds":["example","eval"]}
+]

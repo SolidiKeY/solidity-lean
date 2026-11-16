@@ -171,6 +171,22 @@ def canonical_payloads(input_name, index_name, stream_name, inventory_name,
     return tuple(MappingProxyType(ref) for ref in input_allocation_refs), immutable_payloads, tuple(identities), tuple(unsupported_profiles)
 
 
+@lru_cache(maxsize=2)
+def canonical_inventory(inventory_name, inventory_sha):
+    """Guard a warm expectation cache hiding changed inventory bytes.
+    Callers rehash current files against regenerated archive expectations before
+    consulting this immutable metadata cache; no native outcome is retained.
+    """
+    require(digest(Path(inventory_name)) == inventory_sha, 'canonical inventory source changed')
+    identities = []
+    with gzip.open(inventory_name, 'rt') as stream:
+        for line in stream:
+            row = json.loads(line)
+            if row.get('role') == 'fixture' and row.get('selection') == 'exact-osaka' and row.get('format') == 'blockchain_test_engine_x':
+                identities.append((row['path'], row['case']))
+    return tuple(identities)
+
+
 def coverage(repo, bulk, labels):
     require(labels and len(labels) == len(set(labels)), 'duplicate or empty run labels')
     require(all(re.fullmatch('[a-z0-9-]+', x) for x in labels), 'invalid run label')
@@ -210,12 +226,8 @@ def coverage(repo, bulk, labels):
     require(allocation['index_sha256'] == digest(bulk/'engine-x-allocations-index.json'), 'allocation index mismatch')
     index = read('engine-x-allocations-index.json')
     require(len(index) == allocation['groups'], 'allocation group count mismatch')
-    identities = []
-    with gzip.open(bulk/'archive-inventory.jsonl.gz', 'rt') as stream:
-        for line in stream:
-            row = json.loads(line)
-            if row.get('role') == 'fixture' and row.get('selection') == 'exact-osaka' and row.get('format') == 'blockchain_test_engine_x':
-                identities.append((row['path'], row['case']))
+    identities = canonical_inventory(str((bulk/'archive-inventory.jsonl.gz').resolve()),
+                                     archive_binding['files']['archive-inventory.jsonl.gz'])
     total = export['cases']
     require(type(total) is int and total == archive_binding['cases'], 'archive case count mismatch')
     require(len(identities) == total, 'inventory count mismatch')
@@ -256,6 +268,7 @@ def coverage(repo, bulk, labels):
     counts = Counter()
     transactions = logs = blocks = 0
     receipts = []
+    admitted_runs = []
     for label in labels:
         summary = read('evidence/'+label+'-summary.json')
         command = read('evidence/'+label+'-command.json')
@@ -281,16 +294,22 @@ def coverage(repo, bulk, labels):
         require(summary['selected'] == end-start and 'stopped' in command and command['stopped'] is None, 'stopped/incomplete native run')
         external_bounds(command, source)
         require(type(summary.get('peak_aggregate_rss')) is int and 0 < summary['peak_aggregate_rss'] <= 12*1024**3, 'internal resource observation')
-        raw_transactions = [tx for expected in payload_expectations[start:end] if expected
-                            for payload in expected for tx in payload['transactions']]
-        parsed = subprocess.run(['node', '--max-old-space-size=4096',
-                                 str(source/'engine_input_transactions.mjs'), str(bulk)],
-                                input=json.dumps(raw_transactions), text=True, capture_output=True,
-                                cwd=repo, timeout=60, check=True)
-        transaction_expectations = json.loads(parsed.stdout)
-        require(isinstance(transaction_expectations, list) and len(transaction_expectations) == len(raw_transactions),
-                'input transaction expectation count mismatch')
-        transaction_position = 0
+        admitted_runs.append((label, summary, command, rows_path, start, end))
+    # Decode only independently pinned input bytes, once across admitted runs.
+    # No native outcome is cached; run/block/transaction boundaries below still
+    # come from the exact input ranges and every original row check remains.
+    raw_transactions = [tx for label, summary, command, rows_path, start, end in admitted_runs
+                        for expected in payload_expectations[start:end] if expected
+                        for payload in expected for tx in payload['transactions']]
+    parsed = subprocess.run(['node', '--max-old-space-size=4096',
+                             str(source/'engine_input_transactions.mjs'), str(bulk)],
+                            input=json.dumps(raw_transactions), text=True, capture_output=True,
+                            cwd=repo, timeout=60, check=True)
+    transaction_expectations = json.loads(parsed.stdout)
+    require(isinstance(transaction_expectations, list) and len(transaction_expectations) == len(raw_transactions),
+            'input transaction expectation count mismatch')
+    transaction_position = 0
+    for label, summary, command, rows_path, start, end in admitted_runs:
         expected_transactions = {}
         for input_index in range(start, end):
             expected = payload_expectations[input_index]
@@ -376,6 +395,7 @@ def coverage(repo, bulk, labels):
         require(type(command['exit']) is int and command['exit'] == (1 if local['payload_reference_mismatch'] or local['engine_error'] else 2), 'wrong native exit')
         counts.update(local)
         receipts.append(dict(label=label, start=start, end=end, results_sha256=summary['results_sha256']))
+    require(transaction_position == len(transaction_expectations), 'input transaction expectation mapping mismatch')
     gaps = []
     start = None
     for i in range(total+1):

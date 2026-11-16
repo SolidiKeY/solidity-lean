@@ -1,0 +1,87 @@
+/-! Guards treating raw-carrier validation as actual body execution or silently
+borrowing numeric-word/size premises for early value refusal. Reuses the uint-body
+machine and actual generic word-carrier entry compiler with a nonempty typed body.
+The carrier remains raw uint data, not Source local/signature/body/native/gas/G01
+adequacy; parked WordValidation fixtures receive no additional credit. -/
+
+def carrierEntryBody : Prog bodyContract UIntBoundCtx UIntBoundCtx :=
+  .cons (.assignLocal .here (.simple (.lit 0 (by decide)))) .nil
+
+def carrierEntryWhole (kind : Solidity.AbiEntry.Kind) (payable : Bool) :=
+  WordCarrierEntryBody.compiled 7 kind payable bodyLabel carrierEntryBody (Frag.init UIntBoundCtx) rfl
+
+def carrierEntryBack := WordCarrierEntryBody.Binding.selectedBody 7 carrierEntryBody (Frag.init UIntBoundCtx) rfl
+
+theorem carrier_entry_whole_found (kind : Solidity.AbiEntry.Kind) (payable : Bool) :
+    Compiler.compile 7 (Frag.init RouteCtx) (WordCarrierEntryBody.program kind payable bodyLabel carrierEntryBody)=
+      some (carrierEntryWhole kind payable) :=
+  WordCarrierEntryBody.selected 7 kind payable bodyLabel carrierEntryBody (Frag.init UIntBoundCtx) rfl
+
+theorem carrier_entry_back_found : Compiler.compile 7 (Frag.init UIntBoundCtx) carrierEntryBody=some carrierEntryBack :=
+  WordCarrierEntryBody.Binding.body_selected 7 carrierEntryBody (Frag.init UIntBoundCtx) rfl
+
+def carrierEntryMachine (word size value : Fin W) : Machine := {bodyMachine word size with callvalue := value}
+def carrierEntryWritten (word size value : Fin W) : Machine :=
+  let bound := uintBoundMachine 7 bodyLabel word (carrierEntryMachine word size value)
+  {bound with mem := upd bound.mem 9 (.val (wmod 0))}
+
+theorem carrier_entry_actual (kind : Solidity.AbiEntry.Kind) (payable : Bool) (word size value : Fin W) :
+    run (carrierEntryWhole kind payable).code (carrierEntryMachine word size value)=
+      if payable || decide (value.val=0) then
+        if size.val<36 then .revert else if kind.valid word.val then
+          run carrierEntryBack.code (uintBoundMachine 7 bodyLabel word (carrierEntryMachine word size value))
+        else .revert else .revert :=
+  WordCarrierEntryBody.executed 7 kind payable bodyLabel carrierEntryBody (Frag.init UIntBoundCtx) rfl
+    (carrierEntryWhole kind payable) carrierEntryBack (carrier_entry_whole_found kind payable) carrier_entry_back_found
+    (carrierEntryMachine word size value) word size rfl rfl
+
+theorem carrier_entry_zero_value_success :
+    run (carrierEntryWhole (.enumBelow 3) false).code (carrierEntryMachine (wmod 2) (wmod 36) (wmod 0))=
+      .ok (carrierEntryWritten (wmod 2) (wmod 36) (wmod 0)) 0 := by
+  rw [carrier_entry_actual]
+  rfl
+
+theorem carrier_entry_payable_success :
+    run (carrierEntryWhole (.fixedBytes 1) true).code (carrierEntryMachine (wmod (2^248)) (wmod 36) (wmod 1))=
+      .ok (carrierEntryWritten (wmod (2^248)) (wmod 36) (wmod 1)) 0 := by
+  rw [carrier_entry_actual]
+  rfl
+
+theorem carrier_entry_bad_word_refused :
+    run (carrierEntryWhole (.enumBelow 3) true).code (carrierEntryMachine (wmod 3) (wmod 36) (wmod 1))=.revert := by
+  rw [carrier_entry_actual]
+  rfl
+
+theorem carrier_entry_body_effect (word size value : Fin W) :
+    (carrierEntryWritten word size value).mem 9=.val (wmod 0) ∧
+    (carrierEntryWritten word size value).stack=[.val (wmod 11),.val (wmod 99)] := ⟨rfl,rfl⟩
+
+theorem carrier_entry_revert_all_refused :
+    run (carrierEntryWhole (.enumBelow 3) false).code (carrierEntryMachine (wmod 2) (wmod 36) (wmod 0))≠.revert := by
+  rw [carrier_entry_zero_value_success]
+  intro impossible
+  cases impossible
+
+def carrierEntryBlocked : Machine :=
+  {Machine.init with callvalue := wmod 1, mem := fun _ => .slot (.root 0)}
+
+theorem carrier_entry_early_refusal (kind : Solidity.AbiEntry.Kind) (machine : Machine)
+    (blocked : (false || decide (machine.callvalue.val=0))=false) :
+    run (carrierEntryWhole kind false).code machine=.revert :=
+  WordCarrierEntryBody.early_rejection 7 kind false bodyLabel carrierEntryBody (Frag.init UIntBoundCtx) rfl
+    (carrierEntryWhole kind false) (carrier_entry_whole_found kind false) machine blocked
+
+theorem carrier_entry_malformed_memory_refused (kind : Solidity.AbiEntry.Kind) :
+    run (carrierEntryWhole kind false).code carrierEntryBlocked=.revert :=
+  carrier_entry_early_refusal kind carrierEntryBlocked rfl
+
+#print axioms carrier_entry_whole_found
+#print axioms carrier_entry_back_found
+#print axioms carrier_entry_actual
+#print axioms carrier_entry_zero_value_success
+#print axioms carrier_entry_payable_success
+#print axioms carrier_entry_bad_word_refused
+#print axioms carrier_entry_body_effect
+#print axioms carrier_entry_revert_all_refused
+#print axioms carrier_entry_early_refusal
+#print axioms carrier_entry_malformed_memory_refused

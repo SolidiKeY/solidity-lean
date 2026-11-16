@@ -1,0 +1,678 @@
+{
+  "schema": "shrink-pilot-v1",
+  "batch": "shrink-pilots-1108",
+  "slug": "tv-yul",
+  "base": "381328f608032dd19c405373c2b265e83a969850",
+  "status": "partial",
+  "verdict": "NO-GO",
+  "technique": "Semantic translation validation; Views remains the required comparison endpoint.",
+  "endpoint_authorization": {
+    "current": "H299 A approves the existing operation bridge as the pilot basis, conditional on restoring both original word exports, preserving/counting retained Nat proofs, completing the Views comparison and ordinary validation. No family-reduction acceptance.",
+    "source": "User decision H299 for TVYUL-BRIDGE.",
+    "historical": "H264 A previously authorized Compilation comparison and was acknowledged; latest decision supersedes that endpoint. Compilation results below are auxiliary only."
+  },
+  "prototype_commit": "2aa3a2a21a1e081be5a2a760f91c0d11a084c3e2",
+  "prototype_role": "Auxiliary Compilation checker, not an approved Views bridge.",
+  "merge_scope": "Audit changes live under docs/audits/shrink/tv-yul/**. Coordinator TVYUL-ROOTS standing rule R2 additionally authorized generator-only root repair: ad622a854 adds the existing V08 SharedFailureFixture import using register.sh. Prototype commits remain on the separate owned prototype branch and are not audit-branch ancestors.",
+  "before": {
+    "selected_covered_family": null,
+    "lines": 152,
+    "declarations": 23,
+    "kernel_check_seconds": 0.4691671319997113,
+    "largest_module_candidate_not_a_covered_family": {
+      "path": "Solidity/Yul/Views/PackedAggregates.lean",
+      "physical_lines": 383,
+      "lexical_declarations": 41,
+      "theorems": [
+        "reverseByteIndex_twice",
+        "patchBytes_at",
+        "patchBytes_outside",
+        "patchBytes_unchanged",
+        "packedStart_spec",
+        "PackedMembers.end_mono",
+        "PackedMembers.encode_before",
+        "PackedMembers.encode_residual",
+        "PackedMembers.decode_encode",
+        "PackedMembers.encode_exists",
+        "PackedMembers.encode_unchanged",
+        "PackedMembers.encode_matches",
+        "PackedMembers.encode_idempotent",
+        "PackedMembers.owned_bounds",
+        "packedStruct_roundtrip",
+        "membersArray_arrayMembers",
+        "arrayMembers_scalar",
+        "packedArray_roundtrip",
+        "PackedMembers.head_tail_disjoint",
+        "PackedMembers.nextSlot_spec",
+        "PackedMembers.decode_congr"
+      ]
+    },
+    "selected_comparison_family": "Solidity.Yul.Views.Packing"
+  },
+  "after": {
+    "lines": 982,
+    "declarations": 121,
+    "kernel_check_seconds": 8.064909809003439
+  },
+  "preserved_family_exports": [
+    {
+      "name": "Solidity.Yul.Views.split_join",
+      "signature": "theorem split_join (w b : Nat) : w % b + b * (w / b) = w"
+    },
+    {
+      "name": "Solidity.Yul.Views.Field.save_unchanged",
+      "signature": "theorem Field.save_unchanged (f : Field) (w : Nat) : f.save w \u27e8f.find w, Nat.mod_lt _ (Nat.pow_pos (by decide))\u27e9 = w"
+    },
+    {
+      "name": "Solidity.Yul.Views.Field.find_save",
+      "signature": "theorem Field.find_save (f : Field) (w : Nat) (v : f.Value) : f.find (f.save w v) = v.val"
+    },
+    {
+      "name": "Solidity.Yul.Views.Field.save_low",
+      "signature": "theorem Field.save_low (f : Field) (w : Nat) (v : f.Value) : f.save w v % f.base = w % f.base"
+    },
+    {
+      "name": "Solidity.Yul.Views.Field.save_high",
+      "signature": "theorem Field.save_high (f : Field) (w : Nat) (v : f.Value) : f.save w v / f.base / f.modulus = w / f.base / f.modulus"
+    },
+    {
+      "name": "Solidity.Yul.Views.Field.save_lt",
+      "signature": "theorem Field.save_lt (f : Field) (w : Nat) (hw : w < 256 ^ 32) (v : f.Value) : f.save w v < 256 ^ 32"
+    },
+    {
+      "name": "Solidity.Yul.Views.Field.find_saveWord",
+      "signature": "theorem Field.find_saveWord (f : Field) (w : Roadmap.Word) (v : f.Value) : f.findWord (f.saveWord w v) = v"
+    },
+    {
+      "name": "Solidity.Yul.Views.Field.saveWord_unchanged",
+      "signature": "theorem Field.saveWord_unchanged (f : Field) (w : Roadmap.Word) : f.saveWord w (f.findWord w) = w"
+    },
+    {
+      "name": "Solidity.Yul.Views.Field.find_save_above",
+      "signature": "theorem Field.find_save_above (f g : Field) (w : Nat) (v : f.Value) (h : f.offset + f.width \u2264 g.offset) : g.find (f.save w v) = g.find w"
+    },
+    {
+      "name": "Solidity.Yul.Views.Field.find_save_below",
+      "signature": "theorem Field.find_save_below (f g : Field) (w : Nat) (v : f.Value) (h : g.offset + g.width \u2264 f.offset) : g.find (f.save w v) = g.find w"
+    },
+    {
+      "name": "Solidity.Yul.Views.Field.find_save_disjoint",
+      "signature": "theorem Field.find_save_disjoint (f g : Field) (w : Nat) (v : f.Value) (h : f.offset + f.width \u2264 g.offset \u2228 g.offset + g.width \u2264 f.offset) : g.find (f.save w v) = g.find w"
+    }
+  ],
+  "all_family_theorem_statements_preserved": true,
+  "weakened_existing_statements": [],
+  "proved_views_replacements": 0,
+  "size_ratio": 0.15478615071283094,
+  "auxiliary_compilation_pilot": {
+    "verdict": "NO-GO",
+    "technique": "Finite exhaustive semantic translation validation of loop-free WordControl-selected Backend.Block output",
+    "prototype_commit": "2aa3a2a21a1e081be5a2a760f91c0d11a084c3e2",
+    "prototype_branch": "codex/shrink-pilots-1108/tv-yul-prototype",
+    "prototype_paths": [
+      "prototypes/TvYulBlock.lean",
+      "prototypes/shadow/Solidity/Yul/Compilation/NormalWordTransport.lean"
+    ],
+    "family": "NormalControl word-selector transports and unchanged controls",
+    "family_inventory": "pilot.json",
+    "before": {
+      "lines": 647,
+      "declarations": 57,
+      "kernel_check_seconds": 8.452641716996368,
+      "round_seconds": [
+        8.452641716996368,
+        8.467021418999138,
+        8.262572702002217
+      ]
+    },
+    "after": {
+      "lines": 1059,
+      "declarations": 108,
+      "prototype_lines": 535,
+      "prototype_declarations": 53,
+      "retained_lines": 524,
+      "retained_declarations": 55,
+      "kernel_check_seconds": 10.874163247000979,
+      "round_seconds": [
+        10.874163247000979,
+        10.866237109001304,
+        10.879695370998888
+      ]
+    },
+    "size_ratio_before_over_after": 0.6109537299339,
+    "required_ratio": 3,
+    "verdict_reasons": [
+      "The matched workload grows from647 to1059 physical lines (57 to108 lexical declarations). Checker plus soundness, completeness, instances, tests and original-name facade alone is535 lines; five retained files cannot be counted as deleted.",
+      "Direct exhaustive evaluation on the existing two-local word-control fixture fails at the unchanged default maximum recursion depth. This is a failed experiment, not a passing kernel check. Generic proof-derived acceptance works but does not remove that runtime cost."
+    ],
+    "timing": {
+      "method": "Median of three sums of fresh serial Lean elaboration and kernel-check processes, including cached import loading and artifact writes. Not isolated proof-term kernel CPU time. Both workloads use the same source snapshot, toolchain, cache and VM resource policy; imports warmed by cache fetch before measurement.",
+      "command": "python3 -B docs/audits/shrink/tv-yul/measure.py PROTOTYPE_WORKTREE EVIDENCE_DIRECTORY --lean-bin LEAN_BIN",
+      "lean": "Lean 4.24.0 commit797c613eb9b6d4ec95db23e3e00af9ac6657f24b",
+      "lake": "Lake 5.0.0-src+797c613",
+      "options": [
+        "-j1",
+        "--tstack=131072"
+      ],
+      "cache": "Initial frozen-base pack381328f608: +6710 entries. Refreshed before final exact-source rounds: pack5414256fdf, +4490 entries; first parts URL404, fallback archive and installation succeeded.",
+      "resources": "All39fresh checks rerun under12GiB RLIMIT_AS (preserving any lower inherited bound), hardVM<=16GiB, no swap, both4GiBOS/effective-free reserves, serial-j1. Single-threaded pidfd monitoring; failures refuse. No resource bypass.",
+      "passed_kernel_workloads": true,
+      "raw_checker_within_default_budget": false
+    },
+    "checker": {
+      "entry": "Solidity.Yul.Compilation.TvYulBlock.validate",
+      "soundness": [
+        "checkedArtifact",
+        "check_sound",
+        "validate_code"
+      ],
+      "completeness": [
+        "check_complete",
+        "check_correct",
+        "generated_check",
+        "validate_complete"
+      ],
+      "domain": "Full256bit locals and newer prefix, existing StmtWordP source profile, loop-free existing Backend.Block, existing WordControl selection, and one fixed total source horizon. NormalControl.Derivation derives the horizon/loop-free conditions, so the two original exported theorem signatures gain no premise.",
+      "relation": "Returns the unchanged actual Artifact type, preserving Artifact.source_to_model (every source horizon and full machine/caller frame), Artifact.model_to_source (every successful target run, zero skip and full final frame), normal_to_model and completion_iff.",
+      "scope_boundary": "Existing Backend.Block plus proved selector, not arbitrary raw EVM bytecode. No loops, native/gas/resource or Source/G24 adequacy claimed.",
+      "positive_controls": "Actual source sequence with conditional branches; selected block accepted; semantically equivalent different-size selected output accepted. Concrete direct proofs use zero locals/depth. Existing two-local/depth13 controls replay symbolically through generic acceptance.",
+      "negative_controls": "Wrong appended push rejected and proved to have no Artifact; insufficient horizon, loops and unsupported SSTORE selection refused.",
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ]
+    },
+    "preserved_family_exports": [
+      {
+        "name": "Solidity.Yul.Compilation.NormalControl.Derivation.source",
+        "method": "unchanged source recompiled against private facade"
+      },
+      {
+        "name": "Solidity.Yul.Compilation.NormalWordTransport.machine",
+        "method": "exact-header facade and kernel proof-type equality"
+      },
+      {
+        "name": "Solidity.Yul.Compilation.NormalWordTransport.source_machine",
+        "method": "exact-header facade and kernel proof-type equality"
+      },
+      {
+        "name": "Solidity.Yul.Compilation.NormalWordTransport.Controls.actual_visit",
+        "method": "unchanged source recompiled against private facade"
+      },
+      {
+        "name": "Solidity.Yul.Compilation.NormalWordTransport.Controls.actual_emission",
+        "method": "unchanged source recompiled against private facade"
+      },
+      {
+        "name": "Solidity.Yul.Compilation.NormalWordTransport.Controls.actual_selection",
+        "method": "unchanged source recompiled against private facade"
+      },
+      {
+        "name": "Solidity.Yul.Compilation.NormalWordTransport.Controls.source",
+        "method": "unchanged source recompiled against private facade"
+      },
+      {
+        "name": "Solidity.Yul.Compilation.NormalWordTransport.Controls.model_run",
+        "method": "unchanged source recompiled against private facade"
+      },
+      {
+        "name": "Solidity.Yul.Compilation.NormalWordTransport.Controls.shifted_run",
+        "method": "unchanged source recompiled against private facade"
+      },
+      {
+        "name": "Solidity.Yul.Compilation.NormalWordTransport.Controls.source_model",
+        "method": "unchanged source recompiled against private facade"
+      },
+      {
+        "name": "Solidity.Yul.Compilation.NormalWordTransport.Controls.unequal_update",
+        "method": "unchanged source recompiled against private facade"
+      },
+      {
+        "name": "Solidity.Yul.Compilation.NormalWordTransport.Controls.equal_update",
+        "method": "unchanged source recompiled against private facade"
+      },
+      {
+        "name": "Solidity.Yul.Compilation.NormalWordTransport.Controls.zero_update",
+        "method": "unchanged source recompiled against private facade"
+      },
+      {
+        "name": "Solidity.Yul.Compilation.NormalWordTransport.Controls.high_update",
+        "method": "unchanged source recompiled against private facade"
+      },
+      {
+        "name": "Solidity.Yul.Compilation.NormalWordTransport.Controls.high_run",
+        "method": "unchanged source recompiled against private facade"
+      },
+      {
+        "name": "Solidity.Yul.Compilation.NormalWordTransport.Controls.oversized",
+        "method": "unchanged source recompiled against private facade"
+      },
+      {
+        "name": "Solidity.Yul.Compilation.NormalFramedTransport.word_instruction",
+        "method": "unchanged source recompiled against private facade"
+      },
+      {
+        "name": "Solidity.Yul.Compilation.NormalFramedTransport.word_selection",
+        "method": "unchanged source recompiled against private facade"
+      },
+      {
+        "name": "Solidity.Yul.Compilation.NormalFramedTransport.irStack_words",
+        "method": "unchanged source recompiled against private facade"
+      },
+      {
+        "name": "Solidity.Yul.Compilation.NormalFramedTransport.Controls.source_and_run",
+        "method": "unchanged source recompiled against private facade"
+      },
+      {
+        "name": "Solidity.Yul.Compilation.NormalFramedTransport.Controls.whole_reflected",
+        "method": "unchanged source recompiled against private facade"
+      },
+      {
+        "name": "Solidity.Yul.Compilation.NormalFramedTransport.Controls.shifted_success",
+        "method": "unchanged source recompiled against private facade"
+      },
+      {
+        "name": "Solidity.Yul.Compilation.NormalFramedTransport.Controls.high_only_success",
+        "method": "unchanged source recompiled against private facade"
+      }
+    ],
+    "all_family_theorem_statements_preserved": true,
+    "weakened_existing_statements": [],
+    "proved_views_replacements": 0,
+    "preservation_evidence": "Original qualified machine/source_machine headers compared exactly; kernel equality of original and replacement theorem proof types passes. Six original modules (five unchanged plus replacement facade) and all23 original theorem exports recompiled in matched after rounds; existing guards and axioms pins retained.",
+    "largest_family_boundary": "WordControl-selected loop-free Backend.Block, uniform source horizon. Selected groups include their control fixtures (and NumericControls imported stack transport); shared transitive dependencies are excluded, so these are not complete import closures. Word is largest of the listed groups by source lines; no repository-wide maximum or numeric/stack selector-inclusion theorem claimed. Larger ScopedControl has LoopControl leaves outside this domain.",
+    "normal_control_comparison_groups": {
+      "word": {
+        "physical_lines": 647,
+        "lexical_declarations": 57
+      },
+      "numeric": {
+        "physical_lines": 600,
+        "lexical_declarations": 51
+      },
+      "stack": {
+        "physical_lines": 328,
+        "lexical_declarations": 24
+      }
+    },
+    "raw_experiment": {
+      "command": "lean -j1 --tstack=131072 RawAttempt.lean",
+      "fixture": "NormalWordTransport.Controls.statement, compiled at horizon11, locals2, depth0",
+      "exit": 1,
+      "decisive_output": "maximum recursion depth has been reached",
+      "raised_budget": false,
+      "seconds": 0.6449559109996699
+    },
+    "shared_dependency_boundary": "The selected source-family counts and fresh checks exclude the complete transitive dependency closures. The after workload additionally reuses existing Artifact, WordBlockExecution, WordBlockFramed and their transitive correctness proofs. Five original family modules are counted as retained; no existing shared lemma is deleted or charged as newly written prototype code. Both before/after load prepared dependency artifacts outside measured sums.",
+    "reproduction": "measure.py validates pinned prototype HEAD, clean tracked sources, all eight source SHA256s, and actual Lean/Lake versions; then prepares imports through the existing Lake build before the matched serial checks.",
+    "status": "Measured NO-GO auxiliary experiment; it does not satisfy the restored Views endpoint."
+  },
+  "views_bridge_candidate": {
+    "approved": true,
+    "proved": true,
+    "coverage_claimed": false,
+    "module_inventory": {
+      "commit": "381328f608032dd19c405373c2b265e83a969850",
+      "path": "Solidity/Yul/Views/Packing.lean",
+      "sha256": "21d4b720606c3846eca903d5b15420bca34c1468969f8069aa7508e85e3988ef",
+      "physical_lines": 152,
+      "lexical_declarations": 23,
+      "theorems": [
+        {
+          "name": "Solidity.Yul.Views.split_join",
+          "signature": "theorem split_join (w b : Nat) : w % b + b * (w / b) = w"
+        },
+        {
+          "name": "Solidity.Yul.Views.Field.save_unchanged",
+          "signature": "theorem Field.save_unchanged (f : Field) (w : Nat) : f.save w \u27e8f.find w, Nat.mod_lt _ (Nat.pow_pos (by decide))\u27e9 = w"
+        },
+        {
+          "name": "Solidity.Yul.Views.Field.find_save",
+          "signature": "theorem Field.find_save (f : Field) (w : Nat) (v : f.Value) : f.find (f.save w v) = v.val"
+        },
+        {
+          "name": "Solidity.Yul.Views.Field.save_low",
+          "signature": "theorem Field.save_low (f : Field) (w : Nat) (v : f.Value) : f.save w v % f.base = w % f.base"
+        },
+        {
+          "name": "Solidity.Yul.Views.Field.save_high",
+          "signature": "theorem Field.save_high (f : Field) (w : Nat) (v : f.Value) : f.save w v / f.base / f.modulus = w / f.base / f.modulus"
+        },
+        {
+          "name": "Solidity.Yul.Views.Field.save_lt",
+          "signature": "theorem Field.save_lt (f : Field) (w : Nat) (hw : w < 256 ^ 32) (v : f.Value) : f.save w v < 256 ^ 32"
+        },
+        {
+          "name": "Solidity.Yul.Views.Field.find_saveWord",
+          "signature": "theorem Field.find_saveWord (f : Field) (w : Roadmap.Word) (v : f.Value) : f.findWord (f.saveWord w v) = v"
+        },
+        {
+          "name": "Solidity.Yul.Views.Field.saveWord_unchanged",
+          "signature": "theorem Field.saveWord_unchanged (f : Field) (w : Roadmap.Word) : f.saveWord w (f.findWord w) = w"
+        },
+        {
+          "name": "Solidity.Yul.Views.Field.find_save_above",
+          "signature": "theorem Field.find_save_above (f g : Field) (w : Nat) (v : f.Value) (h : f.offset + f.width \u2264 g.offset) : g.find (f.save w v) = g.find w"
+        },
+        {
+          "name": "Solidity.Yul.Views.Field.find_save_below",
+          "signature": "theorem Field.find_save_below (f g : Field) (w : Nat) (v : f.Value) (h : g.offset + g.width \u2264 f.offset) : g.find (f.save w v) = g.find w"
+        },
+        {
+          "name": "Solidity.Yul.Views.Field.find_save_disjoint",
+          "signature": "theorem Field.find_save_disjoint (f g : Field) (w : Nat) (v : f.Value) (h : f.offset + f.width \u2264 g.offset \u2228 g.offset + g.width \u2264 f.offset) : g.find (f.save w v) = g.find w"
+        }
+      ]
+    },
+    "bounded_endpoints": [
+      "Solidity.Yul.Views.Field.find_saveWord",
+      "Solidity.Yul.Views.Field.saveWord_unchanged"
+    ],
+    "candidate_encoding": "Existing Roadmap.Word and intrinsically bounded Field.Value into existing Scalar.Word/Vector2 locals through BitVec.ofFin, with lossless conversion diagrams.",
+    "candidate_operations": "Read via SHR/AND; write via AND/NOT/SHL/OR with lowMask=2^(8*width)-1. Masks fit at width32 and avoid a wrapping2^256 modulus literal. Normalize arbitrary payload words so no canonicality premise is added.",
+    "remaining_obligations": [
+      "Ordinary repository validation after upstream pin-owner repairs; no family-reduction acceptance inferred."
+    ],
+    "proof_scope": "Primitive read/write operation bridge4667 remains unchanged and proved. At9e8e83ae97b466c01e9306fb8b2246ded6469462 both original word laws now genuinely consume its checker-produced Artifact run equalities and lossless stack decoding. All algebra/refinement work remains necessary and counted. Helpers execute one code block on a mathematically prepared input, not a concatenated read/write run. H299 approves the operation basis; no broader typed-state coverage or family-reduction acceptance inferred.",
+    "family_preservation_proved": true,
+    "prototype_commit": "4667f91cf7860a18ef63607c0127196b029f01c2",
+    "prototype_paths": [
+      "prototypes/ViewsPackingBase.lean",
+      "prototypes/ViewsPackingBridge.lean",
+      "prototypes/ViewsPackingProgram.lean"
+    ],
+    "convention": "Depth0, two existing word locals; arbitrary full machine and caller. No arbitrary newer-prefix-depth claim. Isolated harness copies frozen definitions except the two target word theorems; original Packing is absent from its import closure.",
+    "source_access": {
+      "commit": "4667f91cf7860a18ef63607c0127196b029f01c2",
+      "bundle_evidence_commit": "4bbd9340b3cc0140ee596fbb5cf630aaec221229",
+      "bundle_path": "evidence/shrink-pilots-1108/tv-yul/tv-yul-guard-bridge/prototype.bundle",
+      "bundle_sha256": "d494dc998c97ddb062769b79a3ffe611c381b06d9840fca93325a79317982a90",
+      "review_instruction": "Fetch bundle ref codex/shrink-pilots-1108/tv-yul-prototype into a separate review ref; requires published base381328f608. This bundle contains the requested4667 operation bridge; the older410195 bundle contains only auxiliary2aa. Never merge prototype history."
+    },
+    "basis_approval": "H299 A",
+    "family_reduction_accepted": false,
+    "approval_status": "H299 conditional basis approval; ordinary validation remains pending."
+  },
+  "scope_findings": [
+    "Frozen882 Views modules /74635physical lines; lexical inventory and imports are not semantic impossibility proofs.",
+    "Existing PhysicalStore/SelectedPhysicalStore bridge byte-addressed Views to Backend.Environment.runData/runSlice, not the Artifact Evm.Machine relation.",
+    "Packing includes unbounded Nat exports; ScalarWriteback adds typed Source.Storage and administrative Option cells; PackedAggregates adds arbitrary byte views, heterogeneous lists and unbounded layout coordinates."
+  ],
+  "limitations": [
+    "H299 A approves the operation basis. Both original word exports are restored through actual validated Artifact runs; all11Packing statements and retained Nat proofs are preserved/countable. This measured prototype is NO-GO, not family-reduction acceptance. Ordinary validation is incomplete.",
+    "Auxiliary checker covers selected loop-free Backend.Block with a fixed total source horizon, not arbitrary raw EVM bytecode, loops or native/Source-G24 execution.",
+    "get_goal is not exposed; the original persistent goal is retained without creating or resetting a goal. Ordinary validation remains incomplete.",
+    "No systemd scope on cloud VM(H232). Resource guard restores a12GiB RLIMIT_AS process cap, hard cgroup cap at most16GiB, no swap, and both4GiBOS/effective-free reserves. The16GiB bypass is removed; previous gates using it are withdrawn as current-policy validation and retained only as historical evidence. Strict-guard39-job measurements now pass; the earlier 37-record pin failure is historical and resolved upstream. Ordinary final validation remains pending; resource reserves remain mandatory.",
+    "Latest resumed full gate has13 observed PASS and2 FAIL outcomes, but its aggregate resource-monitor receipt is missing after an environment reconnect. These per-gate logs do not certify uninterrupted resource monitoring. The isolated Derived19 retry has a complete strict receipt and exits134; its no-stop result is not generalized to the full run."
+  ],
+  "outstanding": [
+    "Ordinary validation at integrated master ea93028b5dc9411bb95c2ca979c5df2945f99ae2: run-lean and corpus fail with allocation/thread-creation aborts in existing modules under the unchanged resource policy; other gate outcomes pass. TVYUL-VALIDATE routes the concrete repair to coordinator. H232/no-systemd guidance is already applied and does not resolve these aborts.",
+    "Complete the same required gates and final handoff after matching validated artifacts or an owner repair becomes available. Do not mark the original goal complete or accept family reduction."
+  ],
+  "questions": [],
+  "resource_guard": {
+    "process_limit": "12GiB RLIMIT_AS configured maximum; lower inherited limits preserved and actual applied cap reported.",
+    "reserves": "4GiB OS available and4GiB effective free, neither bypassable",
+    "ownership": "Signals only the fresh child process group; pidfd/select observes exit without reaping, and waitid(WNOWAIT) retains the leader until single-threaded monitoring ends. No watcher thread, constant tag or /proc-wide signal loop. Trusted commands must wait for their workers; detached daemons are outside this runner contract.",
+    "monitoring": "Sampling errors at initial, periodic or final sample mark refusal and terminate the owned group; no successful result after monitor failure.",
+    "tests": "test_bounded.py covers actual virtual-address refusal without resident allocation, lower inherited cap preservation/reporting, both reserves, unrelated-process survival, initial/periodic/final sampling errors, pidfd monitoring errors, and removed bypass refusal.",
+    "validation": "Nine guard regressions,39auxiliary and25new9ePacking checks pass under12GiBAS/both4GiBreserves. Prior strict full gate14/15PASS with library6771jobs; soleFAIL axiom-pins24then28aftermerge. No complete full-gate pass claimed. Latest integrated-master run has13 observed gate passes and2 failures(run-lean/corpus), with no aggregate monitoring receipt after reconnect. No uninterrupted-monitoring or full-pass claim is made. Only the isolated Derived19 retry has a complete strict receipt for its failed outcome."
+  },
+  "prototype_source_access": {
+    "commit": "2aa3a2a21a1e081be5a2a760f91c0d11a084c3e2",
+    "audit_history_excludes_prototype": true,
+    "bundle_evidence_commit": "410195ff3ea67b1cf651959d45e4d33bf382f772",
+    "bundle_path": "evidence/shrink-pilots-1108/tv-yul/tv-yul-views-checkpoint/prototype.bundle",
+    "bundle_sha256": "f4f8057896aa8285c22a6cd2bc907e45ae1764b554dffba2c5266e41ab34e7d7",
+    "review_instruction": "Fetch bundle ref codex/shrink-pilots-1108/tv-yul-prototype into a separate review ref if its Git object is unavailable. Requires published base381328f608; never merge prototype history."
+  },
+  "upstream_gate_dependency": {
+    "head": "ea93028b5dc9411bb95c2ca979c5df2945f99ae2",
+    "gate": "run-lean and corpus",
+    "status": "fail",
+    "decisive_output": "Existing modules abort with std::bad_alloc or failed to create thread, exit134; isolated Derived19 also aborts under explicit-j1 and unchanged12GiB cap. Pin registry and roots are repaired and pass.",
+    "scope": "No theorem, proof budget, process cap, reserve or gate changed. H232 applied; no systemd block. Coordinator repair routing requested under TVYUL-VALIDATE."
+  },
+  "provisional_views_comparison": {
+    "status": "basis_approved_validation_pending",
+    "prototype_commit": "9e8e83ae97b466c01e9306fb8b2246ded6469462",
+    "inventory": "views.json",
+    "measurement_script": "measure-views.py",
+    "candidate": "Solidity.Yul.Views.Packing",
+    "covered_family": null,
+    "verdict": "NO-GO",
+    "method_boundary": "Restored word exports now consume checker-produced Artifact run equalities and decode their equal first stack words. BitVec identities and refinement lemmas remain necessary and counted. Each helper executes one read or write code on a mathematically prepared input, not a concatenated two-code run. H299 approves this operation bridge as the pilot basis; no broader family coverage or reduction acceptance is claimed.",
+    "count_boundary": "Packing only; two word proofs rederived, every other declaration retained. Shared existing library imports are excluded symmetrically; this is not a full import-closure size. All new checker, soundness/completeness, bridge, program, algebra and facade sources count. Counts are physical source lines and lexical declarations, not automatically generated elaborated declarations.",
+    "before": {
+      "lines": 152,
+      "declarations": 23,
+      "kernel_check_seconds": 0.4691671319997113,
+      "round_seconds": [
+        0.4691671319997113,
+        0.45438434000243433,
+        0.4712439889990492
+      ]
+    },
+    "after": {
+      "lines": 982,
+      "declarations": 121,
+      "kernel_check_seconds": 8.064909809003439,
+      "round_seconds": [
+        8.064909809003439,
+        8.11893347699879,
+        8.044904926995514
+      ],
+      "components": [
+        {
+          "path": "prototypes/TvYulBlock.lean",
+          "lines": 508,
+          "declarations": 51
+        },
+        {
+          "path": "prototypes/ViewsPackingBase.lean",
+          "lines": 142,
+          "declarations": 21
+        },
+        {
+          "path": "prototypes/ViewsPackingBridge.lean",
+          "lines": 87,
+          "declarations": 16
+        },
+        {
+          "path": "prototypes/ViewsPackingProgram.lean",
+          "lines": 148,
+          "declarations": 27
+        },
+        {
+          "path": "prototypes/ViewsPackingLaws.lean",
+          "lines": 96,
+          "declarations": 6
+        },
+        {
+          "path": "prototypes/shadow/Solidity/Yul/Views/Packing.lean",
+          "lines": 1,
+          "declarations": 0
+        }
+      ]
+    },
+    "all_candidate_theorem_statements_preserved": true,
+    "preserved_statements": [
+      {
+        "name": "Solidity.Yul.Views.split_join",
+        "signature": "theorem split_join (w b : Nat) : w % b + b * (w / b) = w"
+      },
+      {
+        "name": "Solidity.Yul.Views.Field.save_unchanged",
+        "signature": "theorem Field.save_unchanged (f : Field) (w : Nat) : f.save w \u27e8f.find w, Nat.mod_lt _ (Nat.pow_pos (by decide))\u27e9 = w"
+      },
+      {
+        "name": "Solidity.Yul.Views.Field.find_save",
+        "signature": "theorem Field.find_save (f : Field) (w : Nat) (v : f.Value) : f.find (f.save w v) = v.val"
+      },
+      {
+        "name": "Solidity.Yul.Views.Field.save_low",
+        "signature": "theorem Field.save_low (f : Field) (w : Nat) (v : f.Value) : f.save w v % f.base = w % f.base"
+      },
+      {
+        "name": "Solidity.Yul.Views.Field.save_high",
+        "signature": "theorem Field.save_high (f : Field) (w : Nat) (v : f.Value) : f.save w v / f.base / f.modulus = w / f.base / f.modulus"
+      },
+      {
+        "name": "Solidity.Yul.Views.Field.save_lt",
+        "signature": "theorem Field.save_lt (f : Field) (w : Nat) (hw : w < 256 ^ 32) (v : f.Value) : f.save w v < 256 ^ 32"
+      },
+      {
+        "name": "Solidity.Yul.Views.Field.find_saveWord",
+        "signature": "theorem Field.find_saveWord (f : Field) (w : Roadmap.Word) (v : f.Value) : f.findWord (f.saveWord w v) = v"
+      },
+      {
+        "name": "Solidity.Yul.Views.Field.saveWord_unchanged",
+        "signature": "theorem Field.saveWord_unchanged (f : Field) (w : Roadmap.Word) : f.saveWord w (f.findWord w) = w"
+      },
+      {
+        "name": "Solidity.Yul.Views.Field.find_save_above",
+        "signature": "theorem Field.find_save_above (f g : Field) (w : Nat) (v : f.Value) (h : f.offset + f.width \u2264 g.offset) : g.find (f.save w v) = g.find w"
+      },
+      {
+        "name": "Solidity.Yul.Views.Field.find_save_below",
+        "signature": "theorem Field.find_save_below (f g : Field) (w : Nat) (v : f.Value) (h : g.offset + g.width \u2264 f.offset) : g.find (f.save w v) = g.find w"
+      },
+      {
+        "name": "Solidity.Yul.Views.Field.find_save_disjoint",
+        "signature": "theorem Field.find_save_disjoint (f g : Field) (w : Nat) (v : f.Value) (h : f.offset + f.width \u2264 g.offset \u2228 g.offset + g.width \u2264 f.offset) : g.find (f.save w v) = g.find w"
+      }
+    ],
+    "unchanged_consumers": [
+      "Solidity.Yul.Views.Widths",
+      "Solidity.Yul.Views.Regions"
+    ],
+    "kernel_checks": "25fresh serial-j1source/consumer checks plus preparation pass; both consumers checked against original and replacement Packing entry. All receipts applied12GiBAS, both4GiBreserves, no swap/resource stops/monitor errors.",
+    "timing": "Median of3 sums of fresh serial Lean elaboration+kernel checks including cached import loading/output writes, not isolated kernel CPU time. Shared imports prepared outside sums; unchanged downstream checks separately reported. Same frozen sources/toolchain/VM; cache fetched first; no systemd scope(H232).",
+    "size_ratio_before_over_after": 0.15478615071283094,
+    "required_ratio": 3,
+    "numerical_assessment": "NO-GO:152/982<3;6.46xsource growth,23->121lexicaldeclarations and0.4692s->8.0649s. Ordinary validation pending; no reduction acceptance.",
+    "axioms": [
+      "propext",
+      "Classical.choice",
+      "Quot.sound"
+    ],
+    "largest_covered_family": "Packing is the sole existing Views family with explicit mappings in this implemented operation bridge. Its two word exports are transferred; nine other theorem exports are retained. No broader typed-state or aggregate coverage or family-reduction acceptance.",
+    "reviews": "Read-only Codex finder/skeptic PASS on new9e code and receipts: exact11headers, real checker-produced Artifact dependency, no circularity/premise weakening/fullwidth exclusion; all25checks/consumers/pins/medians verified. Single-code prepared inputs, not concatenated execution; no concrete exhaustive-check success claimed.",
+    "previous_arithmetic_only_snapshot": {
+      "prototype_commit": "9d1088b7450a83dea259df26bcf7aae5fa190984",
+      "before": {
+        "lines": 152,
+        "declarations": 23,
+        "kernel_check_seconds": 0.467322514999978,
+        "round_seconds": [
+          0.47417068799950357,
+          0.467322514999978,
+          0.46457417599958717
+        ]
+      },
+      "after": {
+        "lines": 944,
+        "declarations": 119,
+        "kernel_check_seconds": 7.620030712001608,
+        "round_seconds": [
+          7.620030712001608,
+          7.598721588999979,
+          7.662551959998382
+        ],
+        "components": [
+          {
+            "path": "prototypes/TvYulBlock.lean",
+            "lines": 508,
+            "declarations": 51
+          },
+          {
+            "path": "prototypes/ViewsPackingBase.lean",
+            "lines": 142,
+            "declarations": 21
+          },
+          {
+            "path": "prototypes/ViewsPackingBridge.lean",
+            "lines": 87,
+            "declarations": 16
+          },
+          {
+            "path": "prototypes/ViewsPackingProgram.lean",
+            "lines": 148,
+            "declarations": 27
+          },
+          {
+            "path": "prototypes/ViewsPackingLaws.lean",
+            "lines": 58,
+            "declarations": 4
+          },
+          {
+            "path": "prototypes/shadow/Solidity/Yul/Views/Packing.lean",
+            "lines": 1,
+            "declarations": 0
+          }
+        ]
+      },
+      "method_boundary": "Restored word exports use BitVec algebra/refinement, not Artifact/checker as a proof dependency. Actual bidirectional checker-produced Artifacts are proved separately. No translation-validation family replacement or reduction is claimed.",
+      "source_access": {
+        "commit": "9d1088b7450a83dea259df26bcf7aae5fa190984",
+        "bundle_evidence_commit": "2c0eb6ee82a2fed5e75bd03bf21f098036a67864",
+        "bundle_path": "evidence/shrink-pilots-1108/tv-yul/tv-yul-packing-checkpoint/prototype.bundle",
+        "bundle_sha256": "100974d5938e05fcde127c210fca0588bd42881f9bbbeefd8ef3587de788cad2",
+        "review_instruction": "Fetch prototype bundle ref into a separate review ref, requiring published base381328f608. Includes4667operationbridge and9dexactexport restoration. Never merge prototype history."
+      },
+      "evidence": "evidence: 2c0eb6ee82a2fed5e75bd03bf21f098036a67864 evidence/shrink-pilots-1108/tv-yul/tv-yul-packing-checkpoint/"
+    },
+    "implemented_footprint": {
+      "mapped_functions": [
+        "Solidity.Yul.Views.Field.findWord",
+        "Solidity.Yul.Views.Field.saveWord"
+      ],
+      "transferred_exports": [
+        "Solidity.Yul.Views.Field.find_saveWord",
+        "Solidity.Yul.Views.Field.saveWord_unchanged"
+      ],
+      "retained_theorems": [
+        "Solidity.Yul.Views.split_join",
+        "Solidity.Yul.Views.Field.save_unchanged",
+        "Solidity.Yul.Views.Field.find_save",
+        "Solidity.Yul.Views.Field.save_low",
+        "Solidity.Yul.Views.Field.save_high",
+        "Solidity.Yul.Views.Field.save_lt",
+        "Solidity.Yul.Views.Field.find_save_above",
+        "Solidity.Yul.Views.Field.find_save_below",
+        "Solidity.Yul.Views.Field.find_save_disjoint"
+      ],
+      "boundary": "Packing is the sole family with explicit operation/Artifact mappings in this prototype. Widths/Regions are compatibility consumers. No mappings for typed storage/world writeback or arbitrary heterogeneous aggregate/byte geometry are implemented; their existing proofs are not deleted or given word-sized premises. This is the sole explicitly mapped family in this prototype, not a global impossibility result or family-reduction acceptance."
+    },
+    "artifact_dependency_proved": true,
+    "candidate_transferred_word_exports": 2,
+    "source_access": {
+      "commit": "9e8e83ae97b466c01e9306fb8b2246ded6469462",
+      "bundle_evidence_commit": "5c0b96e56ce5a1ab3cafaa40a58cd061704aacdd",
+      "bundle_path": "evidence/shrink-pilots-1108/tv-yul/tv-yul-artifact-path-checkpoint/prototype.bundle",
+      "bundle_sha256": "063f1825f50e8a06a9ab4503abb9b6c592e667879954b7ea98777169379c9d7b",
+      "review_instruction": "Fetch prototype bundle ref into a separate review ref; requires published base381328f608. This9e bundle includes unchanged4667operation bridge and the actual Artifact-dependent word exports. Previous2c0eb6 bundle is historical9d arithmetic-only export path. Never merge prototype history."
+    },
+    "evidence": "evidence: 5c0b96e56ce5a1ab3cafaa40a58cd061704aacdd evidence/shrink-pilots-1108/tv-yul/tv-yul-artifact-path-checkpoint/",
+    "raw_checker_trial": {
+      "program": "Program.writeStatement byteField with its actual compiledWrite profile/writeBlock;2full256bitlocals,depth0,fuel12",
+      "result": "Raw decide fails at the unchanged default maximum recursion depth. Exact same proposition has the existing generated_check proof witness.",
+      "interpretation": "This is a failed kernel-reduction feasibility experiment, not a passing concrete checker run or an unfinished soundness theorem. The measured982line/121declaration workload uses proof-derived acceptance. Standalone negative benchmark source/logs are private validation evidence and not replacement implementation code.",
+      "budget_changes": []
+    },
+    "basis_authorization": "H299 A: operation bridge approved as pilot basis, conditional on exact export restoration, retained Nat accounting, Views comparison and ordinary validation; no family-reduction acceptance.",
+    "selected_family": "Solidity.Yul.Views.Packing",
+    "family_reduction_accepted": false,
+    "largest_implemented_family": "Packing is the sole existing Views family with explicit mappings in this implemented operation bridge. Its two word exports are transferred; nine other theorem exports are retained. No broader typed-state or aggregate coverage or family-reduction acceptance."
+  },
+  "replacement_count_boundary": "Two exact word exports are restored in the branch-only pilot, with nine other theorem exports retained and counted. H299 approves the operation basis only; zero family reductions or production Lean replacements are accepted.",
+  "verdict_status": "Measured negative result on the approved operation basis; ordinary repository validation remains pending. This is not family-reduction acceptance or goal completion.",
+  "family": "Solidity.Yul.Views.Packing",
+  "family_reduction_accepted": false,
+  "verdict_reasons": [
+    "The full replacement footprint grows from152physical lines/23lexicaldeclarations to982/121; required before/after ratio>=3, actual152/982=0.1547861507. All142retained Nat/codec lines and every new checker/proof/bridge/program/instance line count.",
+    "Median fresh serial source elaboration+kernel-check sums grow from0.469167132s to8.064909809s. These are proof-derived acceptance checks, not successful exhaustive Boolean evaluation.",
+    "Raw decide on the actual byte-field write program fails at unchanged default maximum recursion depth. Its proposition has the generated_check witness; the failure is practical reduction feasibility, not soundness/completeness."
+  ]
+}

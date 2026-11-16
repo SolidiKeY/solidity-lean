@@ -1,0 +1,61 @@
+{
+  "base": "d6fd95f0886775d7c286813fa9b993a40ba7a777",
+  "binding_counts": {
+    "native_key_bound": 43314
+  },
+  "boundaries": [
+    "Positive imported-pointer observations are matched to native structural key and kind before native graph source ranges; printed names select lookup candidates only.",
+    "Graph-body/cache provenance is externally trusted. A fresh key match does not attest proof-body equivalence or repair that provenance gap.",
+    "Observed support outside this fixed facade context is not global test exclusivity, unusedness or necessity of every charged line.",
+    "Source ranges use raw LF lines, valid UTF16 codepoint endpoints and facade-first union; missing/invalid ranges are explicit. Stage2 name/range inventory is excluded; no new correspondence is asserted.",
+    "Untraced provenance is not certified handwritten; generated and unresolved generator labels remain separate.",
+    "The accepted combined/replay receipts and all their inputs/outputs are sealed here; semantic root replay is reused, not re-executed by this footprint.",
+    "H347 exact pinned baseline retained; verification blocked, additive v2 unadopted and zero deletions certified."
+  ],
+  "deletable_now_verified_lines": 0,
+  "facade_boundary": {},
+  "facade_loaded_constants": 14117,
+  "facade_selected_constants": 11089,
+  "facade_theorem_roots": 21,
+  "imported_units": 43314,
+  "observed_additional_sources": 529,
+  "observed_dense_sources": 19,
+  "observed_imported_inside_facade": 9583,
+  "observed_imported_outside_facade": 33731,
+  "queried_modules": 1136,
+  "query_chunks": 12,
+  "query_failures": [],
+  "selected_cached_sources": 550,
+  "stage2_name_range_units_excluded": 11645,
+  "status": "partial",
+  "tables": [
+    "areas.csv",
+    "directories.csv",
+    "provenance.csv",
+    "units-0000.tsv",
+    "units-0001.tsv",
+    "units-0002.tsv",
+    "units-0003.tsv",
+    "units-0004.tsv",
+    "units-0005.tsv",
+    "units-0006.tsv",
+    "units-0007.tsv",
+    "units-0008.tsv",
+    "units-0009.tsv",
+    "units-000a.tsv",
+    "units-000b.tsv",
+    "units-000c.tsv",
+    "units-000d.tsv",
+    "units-000e.tsv",
+    "units-000f.tsv"
+  ],
+  "totals": {
+    "facade_native_range_lines": 53330,
+    "facade_serialized_constants": 11089,
+    "facade_without_source_range_units": 4898,
+    "native_key_bound_imported_units": 43314,
+    "observed_imported_outside_facade_native_range_lines": 132744,
+    "observed_imported_without_source_range_units": 20212,
+    "outside_both_observed_footprints_lines": 940042
+  }
+}

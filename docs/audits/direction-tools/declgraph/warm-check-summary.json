@@ -1,0 +1,32 @@
+{
+  "base": "d6fd95f0886775d7c286813fa9b993a40ba7a777",
+  "boundaries": [
+    "Only these three modules are compiled individually against a warm import view.",
+    "Successful compilation recovers artifacts; it does not recover discarded check roots or certify deletion."
+  ],
+  "lean": "Lean (version 4.24.0, x86_64-unknown-linux-gnu, commit 797c613eb9b6d4ec95db23e3e00af9ac6657f24b, Release)",
+  "recovered_modules": 3,
+  "targets": [
+    {
+      "exit_code": 0,
+      "module": "Solidity.Examples.DecisionGaps",
+      "source": "Solidity/Examples/DecisionGaps.lean",
+      "source_sha256": "f162818821d1c5bffe8d1b3102eb4056d802091e55bda39bea6fe89466387025",
+      "status": "pass"
+    },
+    {
+      "exit_code": 0,
+      "module": "Solidity.Examples.Tactics.OpenLoops",
+      "source": "Solidity/Examples/Tactics/OpenLoops.lean",
+      "source_sha256": "c7792125666cc42b8b5eb7b9b35fa789485727859341ee79e37da805b824c355",
+      "status": "pass"
+    },
+    {
+      "exit_code": 0,
+      "module": "Solidity.Examples.Tactics.RevertData",
+      "source": "Solidity/Examples/Tactics/RevertData.lean",
+      "source_sha256": "3c8781c5ad7efee8fb0e56da0fe92865aed350caba2034d053899273772d8d9d",
+      "status": "pass"
+    }
+  ]
+}

@@ -5,7 +5,7 @@ settings; no changed fixture observations, constructor bytes or model profile. -
 namespace Solidity.Examples.Tactics.CreationTrySourceIR
 open Solidity.Frontend.CreationTry Solidity.ContractWorld Semantics
 open Solidity.Examples.Tactics.CreationTrySource
-solc_creation_try "../../../tests/solc/CreationTryIR.ast.json" hash 0x344c89cf834dcc10
+solc_creation_try "../../../tests/solc/CreationTryIR.ast.json" hash 0x333450333a496262
   from_contract "C" as OriginalIR
 
 def initialIR := World.empty OriginalIR.contracts initial.funds

@@ -14,18 +14,17 @@ def overflowArgs : Fin 2 → Word := fun i => (#v[⟨2^256-1,by decide⟩,toWord
 def missing : BytePort Memory := {TargetMemory.port with load := fun _ _ _ => none}
 
 theorem full_payloads : terminalBuiltin .«return» TargetMemory.port image args = some (.success payload) ∧
-    terminalBuiltin .«revert» TargetMemory.port image args = some (.revert payload) := by
-  first | decide | exact ⟨rfl,rfl⟩
+    terminalBuiltin .«revert» TargetMemory.port image args = some (.revert payload) :=
+  ⟨terminal_return _ _ _ _ rfl,terminal_revert _ _ _ _ rfl⟩
 theorem empty_outcomes_distinct : terminalBuiltin .«return» TargetMemory.port image zeroArgs = some (.success []) ∧
-    terminalBuiltin .«revert» TargetMemory.port image zeroArgs = some (.revert []) := by
-  first | decide | exact ⟨rfl,rfl⟩
-theorem stop_without_memory : terminalBuiltin .stop missing image (fun i => Fin.elim0 i) = some (.success []) := by
-  first | rfl | decide
+    terminalBuiltin .«revert» TargetMemory.port image zeroArgs = some (.revert []) :=
+  ⟨terminal_return _ _ _ _ rfl,terminal_revert _ _ _ _ rfl⟩
+theorem stop_without_memory : terminalBuiltin .stop missing image (fun i => Fin.elim0 i) = some (.success []) :=
+  terminal_stop _ _ _
 theorem missing_and_overflow : terminalBuiltin .«revert» missing image args = none ∧
-    terminalBuiltin .«revert» TargetMemory.port image overflowArgs = none := by
-  first | decide | exact ⟨rfl,rfl⟩
+    terminalBuiltin .«revert» TargetMemory.port image overflowArgs = none :=
+  ⟨terminal_revert_missing _ _ _ rfl,terminal_revert_missing _ _ _ rfl⟩
 theorem truncated_payload_refused : terminalBuiltin .«revert» TargetMemory.port image args ≠ some (.revert [0xde,0xad,0]) := by
-  first | decide | rfl
-theorem invalid_unhandled : terminalBuiltin .invalid TargetMemory.port image (fun i => Fin.elim0 i) = none := by
-  first | rfl | decide
+  decide
+theorem invalid_unhandled : terminalBuiltin .invalid TargetMemory.port image (fun i => Fin.elim0 i) = none := rfl
 end Solidity.Yul.World.TerminalBuiltinControls

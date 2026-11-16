@@ -1,0 +1,118 @@
+/-! Guards splitting Source selector/prefix/callvalue/compiler premises across
+incompatible fixtures, dropping first-match refusal, or equating continuation
+labels with Source-body execution. Reuses the exact frozen SourcePayableControls
+fixture and synthetic hash; these are model routing/refusal controls, not Keccak,
+native loader, deployment, gas/fork or G01 operational acceptance. -/
+open Solidity Solidity.Evm Solidity.Backend.AbiEntry
+open Solidity.Backend.AbiEntry.Interface
+
+def sourceFixtureEnv (payable : Bool) : Source.Env := (frozen_fixture% "_private.Solidity.Backend.AbiEntry.SourcePayableControls.0.Solidity.Backend.AbiEntry.SourcePayableControls.E" against% "Lean.Expr.forallE\n  `payable\n  (Lean.Expr.const `Bool [])\n  (Lean.Expr.const `Solidity.Source.Env [])\n  (Lean.BinderInfo.default)") payable
+def sourceFixtureGlobal (payable : Bool) : Source.Glob (sourceFixtureEnv payable) := (frozen_fixture% "_private.Solidity.Backend.AbiEntry.SourcePayableControls.0.Solidity.Backend.AbiEntry.SourcePayableControls.global" against% "Lean.Expr.forallE\n  `payable\n  (Lean.Expr.const `Bool [])\n  (Lean.Expr.forallE\n    `pipeline\n    (Lean.Expr.const `Solidity.Roadmap.Pipeline [])\n    (Lean.Expr.app\n      (Lean.Expr.const `Solidity.Source.Glob [])\n      (Lean.Expr.app\n        (Lean.Expr.const\n          (Lean.Name.mkStr (Lean.Name.mkStr (Lean.Name.mkStr (Lean.Name.mkStr (Lean.Name.mkStr (Lean.Name.mkNum `_private.Solidity.Backend.AbiEntry.SourcePayableControls 0) \"Solidity\") \"Backend\") \"AbiEntry\") \"SourcePayableControls\") \"E\")\n          [])\n        (Lean.Expr.bvar 1)))\n    (Lean.BinderInfo.default))\n  (Lean.BinderInfo.default)") payable .legacy
+def sourceFixtureContract : Contract := (frozen_fixture% "_private.Solidity.Backend.AbiEntry.SourcePayableControls.0.Solidity.Backend.AbiEntry.SourcePayableControls.C" against% "Lean.Expr.const `Solidity.Contract []")
+def sourceFixtureBytes : List UInt8 := (frozen_fixture% "_private.Solidity.Backend.AbiEntry.SourcePayableControls.0.Solidity.Backend.AbiEntry.SourcePayableControls.fullBytes" against% "Lean.Expr.app (Lean.Expr.const `List [Lean.Level.zero]) (Lean.Expr.const `UInt8 [])")
+def sourceFixtureMissBytes : List UInt8 := (frozen_fixture% "_private.Solidity.Backend.AbiEntry.SourcePayableControls.0.Solidity.Backend.AbiEntry.SourcePayableControls.missBytes" against% "Lean.Expr.app (Lean.Expr.const `List [Lean.Level.zero]) (Lean.Expr.const `UInt8 [])")
+def sourceFixtureLabels : Source.Decl → Fin W := (frozen_fixture% "_private.Solidity.Backend.AbiEntry.SourcePayableControls.0.Solidity.Backend.AbiEntry.SourcePayableControls.labels" against% "Lean.Expr.forallE\n  `declaration\n  (Lean.Expr.const `Solidity.Source.Decl [])\n  (Lean.Expr.app (Lean.Expr.const `Fin []) (Lean.Expr.const `Solidity.Evm.W []))\n  (Lean.BinderInfo.default)")
+def sourceFixtureFallback : Fin W := (frozen_fixture% "_private.Solidity.Backend.AbiEntry.SourcePayableControls.0.Solidity.Backend.AbiEntry.SourcePayableControls.fallback" against% "Lean.Expr.app (Lean.Expr.const `Fin []) (Lean.Expr.const `Solidity.Evm.W [])")
+def sourceFixtureFrame (bytes : List UInt8) (value : Fin W) : Source.Fr := (frozen_fixture% "_private.Solidity.Backend.AbiEntry.SourcePayableControls.0.Solidity.Backend.AbiEntry.SourcePayableControls.frame" against% "Lean.Expr.forallE\n  `bytes\n  (Lean.Expr.app (Lean.Expr.const `List [Lean.Level.zero]) (Lean.Expr.const `UInt8 []))\n  (Lean.Expr.forallE\n    `value\n    (Lean.Expr.const `Solidity.Roadmap.Word [])\n    (Lean.Expr.const `Solidity.Source.Fr [])\n    (Lean.BinderInfo.default))\n  (Lean.BinderInfo.default)") bytes value
+def sourceFixtureMachine (bytes : List UInt8) (value : Fin W) : Machine := (frozen_fixture% "_private.Solidity.Backend.AbiEntry.SourcePayableControls.0.Solidity.Backend.AbiEntry.SourcePayableControls.machine" against% "Lean.Expr.forallE\n  `bytes\n  (Lean.Expr.app (Lean.Expr.const `List [Lean.Level.zero]) (Lean.Expr.const `UInt8 []))\n  (Lean.Expr.forallE\n    `value\n    (Lean.Expr.const `Solidity.Roadmap.Word [])\n    (Lean.Expr.const `Solidity.Evm.Machine [])\n    (Lean.BinderInfo.default))\n  (Lean.BinderInfo.default)") bytes value
+def sourceFixtureWritten (bytes : List UInt8) (value label : Fin W) : Machine := (frozen_fixture% "_private.Solidity.Backend.AbiEntry.SourcePayableControls.0.Solidity.Backend.AbiEntry.SourcePayableControls.written" against% "Lean.Expr.forallE\n  `bytes\n  (Lean.Expr.app (Lean.Expr.const `List [Lean.Level.zero]) (Lean.Expr.const `UInt8 []))\n  (Lean.Expr.forallE\n    `value\n    (Lean.Expr.const `Solidity.Roadmap.Word [])\n    (Lean.Expr.forallE\n      `label\n      (Lean.Expr.app (Lean.Expr.const `Fin []) (Lean.Expr.const `Solidity.Evm.W []))\n      (Lean.Expr.const `Solidity.Evm.Machine [])\n      (Lean.BinderInfo.default))\n    (Lean.BinderInfo.default))\n  (Lean.BinderInfo.default)") bytes value label
+
+def sourceOrdinaryCompilation := SelectorRoutes.compiled sourceFixtureContract 7
+  (SourceRoutes.table (sourceFixtureGlobal false) "C" sourceFixtureLabels) sourceFixtureFallback
+
+def sourcePayableCompilation (payable : Bool) := PayableRoutes.compiled sourceFixtureContract 7
+  (SourcePayable.table (sourceFixtureGlobal payable) "C" sourceFixtureLabels) sourceFixtureFallback
+
+theorem source_fixture_full (value : Fin W) : 4≤(sourceFixtureFrame sourceFixtureBytes value).cd.length := by
+  change 4≤6
+  decide
+
+theorem source_ordinary_found (value : Fin W) : Compiler.compile 7 (Frag.init RouteCtx)
+    (SelectorRoutes.route sourceFixtureContract
+      (SourceRoutes.table (sourceFixtureGlobal false) (sourceFixtureFrame sourceFixtureBytes value).contract sourceFixtureLabels)
+      sourceFixtureFallback)=some sourceOrdinaryCompilation :=
+  SourceRoutes.selected (sourceFixtureGlobal false) "C" sourceFixtureLabels sourceFixtureFallback sourceFixtureContract 7
+
+theorem source_payable_found (payable : Bool) (value : Fin W) : Compiler.compile 7 (Frag.init RouteCtx)
+    (PayableRoutes.route sourceFixtureContract
+      (SourcePayable.table (sourceFixtureGlobal payable) (sourceFixtureFrame sourceFixtureBytes value).contract sourceFixtureLabels)
+      sourceFixtureFallback)=some (sourcePayableCompilation payable) :=
+  SourcePayable.selected (sourceFixtureGlobal payable) "C" sourceFixtureLabels sourceFixtureFallback sourceFixtureContract 7
+
+theorem source_ordinary_actual (value : Fin W) :
+    run sourceOrdinaryCompilation.code (sourceFixtureMachine sourceFixtureBytes value)=.ok
+      (sourceFixtureWritten sourceFixtureBytes value
+        ((((sourceFixtureGlobal false).pickFn (sourceFixtureFrame sourceFixtureBytes value) sourceFixtureBytes).map
+          sourceFixtureLabels).getD sourceFixtureFallback)) 0 :=
+  SourceRoutes.executed (sourceFixtureGlobal false) (sourceFixtureFrame sourceFixtureBytes value)
+    sourceFixtureLabels sourceFixtureFallback (source_fixture_full value) sourceFixtureContract 7
+    sourceOrdinaryCompilation (source_ordinary_found value) (sourceFixtureMachine sourceFixtureBytes value) rfl
+
+theorem source_ordinary_revert_all_refused (value : Fin W) :
+    run sourceOrdinaryCompilation.code (sourceFixtureMachine sourceFixtureBytes value)≠.revert := by
+  rw [source_ordinary_actual]
+  intro impossible
+  cases impossible
+
+theorem source_payable_actual (payable : Bool) (value : Fin W) :
+    run (sourcePayableCompilation payable).code (sourceFixtureMachine sourceFixtureBytes value)=
+      sourcePayableOutcome (sourceFixtureGlobal payable) (sourceFixtureFrame sourceFixtureBytes value)
+        sourceFixtureLabels sourceFixtureFallback 7 (sourceFixtureMachine sourceFixtureBytes value) :=
+  SourcePayable.executed (sourceFixtureGlobal payable) (sourceFixtureFrame sourceFixtureBytes value)
+    sourceFixtureLabels sourceFixtureFallback (source_fixture_full value) sourceFixtureContract 7
+    (sourcePayableCompilation payable) (source_payable_found payable value)
+    (sourceFixtureMachine sourceFixtureBytes value) rfl rfl
+
+theorem source_fixture_table (payable : Bool) :
+    (SourcePayable.table (sourceFixtureGlobal payable) "C" sourceFixtureLabels).length=2 ∧
+    sourcePayableResult (sourceFixtureGlobal payable) (sourceFixtureFrame sourceFixtureBytes (wmod 0))
+      sourceFixtureLabels sourceFixtureFallback=(wmod 11,payable) :=
+  SourcePayableControls.source_table payable .legacy
+
+theorem source_zero_nonpayable_success :
+    run (sourcePayableCompilation false).code (sourceFixtureMachine sourceFixtureBytes (wmod 0))=
+      .ok (sourceFixtureWritten sourceFixtureBytes (wmod 0) (wmod 11)) 0 :=
+  SourcePayableControls.zero_nonpayable .legacy
+
+theorem source_payable_all_values (value : Fin W) :
+    run (sourcePayableCompilation true).code (sourceFixtureMachine sourceFixtureBytes value)=
+      .ok (sourceFixtureWritten sourceFixtureBytes value (wmod 11)) 0 :=
+  SourcePayableControls.payable_all_values .legacy value
+
+theorem source_first_collision_refused (value : Fin W) (nonzero : value.val≠0) :
+    run (sourcePayableCompilation false).code (sourceFixtureMachine sourceFixtureBytes value)=.revert :=
+  SourcePayableControls.rejected_collision .legacy value nonzero
+
+theorem source_no_collision_fallthrough (value : Fin W) (nonzero : value.val≠0) :
+    run (sourcePayableCompilation false).code (sourceFixtureMachine sourceFixtureBytes value)≠
+      .ok (sourceFixtureWritten sourceFixtureBytes value (wmod 22)) 0 :=
+  SourcePayableControls.no_collision_fallthrough .legacy value nonzero
+
+theorem source_unmatched_label (payable : Bool) (value : Fin W) :
+    run (sourcePayableCompilation payable).code (sourceFixtureMachine sourceFixtureMissBytes value)=
+      .ok (sourceFixtureWritten sourceFixtureMissBytes value sourceFixtureFallback) 0 :=
+  SourcePayableControls.no_match payable .legacy value
+
+theorem source_same_dispatch_refusal (fuel : Nat) (value : Fin W) (nonzero : value.val≠0) :
+    Source.dispatch (sourceFixtureGlobal false) (sourceFixtureFrame sourceFixtureBytes value)
+      (fuel+1) sourceFixtureBytes=Source.EM.halt (.revert []) :=
+  SourcePayableControls.source_revert_bytes .legacy fuel value nonzero
+
+theorem source_written_preserves_caller (bytes : List UInt8) (value label : Fin W) :
+    (sourceFixtureWritten bytes value label).stack=[.val (wmod 258),.val (wmod 513)] ∧
+    (sourceFixtureWritten bytes value label).callvalue=value := ⟨rfl,rfl⟩
+
+#print axioms source_fixture_full
+#print axioms source_ordinary_found
+#print axioms source_payable_found
+#print axioms source_ordinary_actual
+#print axioms source_ordinary_revert_all_refused
+#print axioms source_payable_actual
+#print axioms source_fixture_table
+#print axioms source_zero_nonpayable_success
+#print axioms source_payable_all_values
+#print axioms source_first_collision_refused
+#print axioms source_no_collision_fallthrough
+#print axioms source_unmatched_label
+#print axioms source_same_dispatch_refusal
+#print axioms source_written_preserves_caller

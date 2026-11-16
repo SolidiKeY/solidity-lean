@@ -5,8 +5,10 @@ import Solidity.Examples.DecisionCoefficientBoundary
 # The halting-OR APF floor hazard
 
 Boolean lowering already handles the short-circuit operand. The separately
-reproduced negative mapping block remains unknown; an illustrative key collapse
-is not a full reconstruction Setting or a counterexample to GuardP.floors.
+reproduced negative mapping block was unknown; it is now decided exactly by
+the partial-OR floor family (`Calculus/DecisionPartialOrFloor.lean`), not by
+a repaired APF guard floor. An illustrative key collapse is not a full
+reconstruction Setting or a counterexample to GuardP.floors.
 -/
 namespace Solidity.Examples.DecisionHaltingOrGaps
 open Solidity.Decide
@@ -66,11 +68,11 @@ def floorClaim (n : Nat) : Fml FloorProbe [] := .imp floorBlock (.eq (atKey (nat
 @[noinline] def floorObserve (φ : Fml FloorProbe []) : Bool × Bool × String :=
   (φ.inTarget {}, φ.Covered, match decideGoal φ with
     | .proved => "proved" | .refuted _ => "refuted" | .unknown => "unknown")
-/-- info: [(true, false, "unknown"), (true, false, "unknown")] -/
+/-- info: [(true, true, "proved"), (true, true, "refuted")] -/
 #guard_msgs in #eval [floorClaim 1, floorClaim 0].map floorObserve
 
 def floorBad : Fml FloorProbe [] := .imp floorBlock (.eq (atKey (natLit 1)) (natLit 1))
-/-- info: (true, false, "unknown") -/
+/-- info: (true, true, "refuted") -/
 #guard_msgs in #eval floorObserve floorBad
 
 theorem floorClaim_one_valid : Fml.Valid (floorClaim 1) := by
@@ -144,33 +146,31 @@ private theorem refuted_of_check {C : Contract} (φ : Fml C [])
   | refuted σ => exact ⟨σ, rfl, decideGoal_refutes hd⟩
   | unknown => rw [hd] at h; cases h
 
-
-private def unknownCheck {C : Contract} : LeafVerdict C → Bool
-  | .unknown => true
-  | _ => false
-
-private theorem unknown_of_check {C : Contract} (φ : Fml C [])
-    (h : unknownCheck (decideGoal φ) = true) : decideGoal φ = .unknown := by
-  cases hd : decideGoal φ with
-  | proved => rw [hd] at h; cases h
-  | refuted σ => rw [hd] at h; cases h
-  | unknown => rfl
-
-
+/-- `floorClaim 1` is in the target. -/
 theorem validAPF_target : (floorClaim 1).inTarget {} = true := by decide +kernel
-theorem validAPF_notCovered : (floorClaim 1).Covered = false := by decide +kernel
-theorem validAPF_unknown : decideGoal (floorClaim 1) = .unknown :=
-  unknown_of_check (floorClaim 1) (by decide +kernel)
+/-- The former unknown is covered by the decided partial-OR floor family. -/
+theorem validAPF_covered : (floorClaim 1).Covered = true := by decide +kernel
+/-- `floorClaim 1`: proved. -/
+theorem validAPF_proved : decideGoal (floorClaim 1) = .proved :=
+  proved_of_check (floorClaim 1) (by decide +kernel)
 
+/-- `floorClaim 0` is in the target. -/
 theorem zeroAPF_target : (floorClaim 0).inTarget {} = true := by decide +kernel
-theorem zeroAPF_notCovered : (floorClaim 0).Covered = false := by decide +kernel
-theorem zeroAPF_unknown : decideGoal (floorClaim 0) = .unknown :=
-  unknown_of_check (floorClaim 0) (by decide +kernel)
+/-- `floorClaim 0` is covered. -/
+theorem zeroAPF_covered : (floorClaim 0).Covered = true := by decide +kernel
+/-- Key zero is unconstrained when the scalar is zero: a certified countermodel. -/
+theorem zeroAPF_refuted : ∃ σ : State FloorProbe [],
+    decideGoal (floorClaim 0) = .refuted σ ∧ ¬ Fml.holdsH σ (floorClaim 0) :=
+  refuted_of_check (floorClaim 0) (by decide +kernel)
 
+/-- `floorBad` is in the target. -/
 theorem falseAPF_target : (floorBad).inTarget {} = true := by decide +kernel
-theorem falseAPF_notCovered : (floorBad).Covered = false := by decide +kernel
-theorem falseAPF_unknown : decideGoal (floorBad) = .unknown :=
-  unknown_of_check (floorBad) (by decide +kernel)
+/-- `floorBad` is covered. -/
+theorem falseAPF_covered : (floorBad).Covered = true := by decide +kernel
+/-- `floorBad`: a certified countermodel. -/
+theorem falseAPF_refuted : ∃ σ : State FloorProbe [],
+    decideGoal floorBad = .refuted σ ∧ ¬ Fml.holdsH σ floorBad :=
+  refuted_of_check floorBad (by decide +kernel)
 
 theorem guarded_proved : decideGoal guarded = .proved :=
   proved_of_check guarded (by decide +kernel)

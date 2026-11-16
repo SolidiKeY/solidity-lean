@@ -81,3 +81,5 @@
 | `Lowering/Readonly/SourceCallAddressEffects.lean` | Complete actual callAddr successor history, known/unknown instances and original guards. |
 | `Lowering/Readonly/SourceAllHistories.lean` | Closed seventeen-component bounded Source induction, actual callbacks and static storage law. |
 | `Semantics/CallResume.lean` | Bounded readonly-external checkpoint; typed scope and retained obligations are stated in the module. |
+| `Lowering/Readonly/SourceKnownHistory.lean`, `SourceKnownExpressionEffects.lean`, `SourceKnownTryEffects.lean`, `SourceKnownStatementEffects.lean` | One journal-history interface for available and unavailable delegated calldata, exact contract try factoring and exhaustive typed expression/statement proofs. |
+| `Lowering/Readonly/LibraryFrameEffects.lean`, `SourceKnownLibraryEffects.lean`, `SourceKnownAllHistories.lean` | Actual live-mark library rollback and independent 18-component journal induction; projects to the unchanged ordinary `At` interface. |

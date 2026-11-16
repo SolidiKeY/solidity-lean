@@ -1,5 +1,6 @@
 import Solidity.Yul.Compilation.SourceLoopCompletion
 import Solidity.Yul.Compilation.FramedLoop
+import Solidity.Yul.Compilation.CompletionControls
 /-! Success equivalence for actual emitted normal-component source for loops.
 Source horizons and model iteration witnesses are recovered from completions;
 no finite guards or chosen counts are premises. This does not equate horizon
@@ -106,25 +107,12 @@ theorem completion_iff (condition : Compiled fc test)
      some ⟨sourceLocals out,.normal⟩) ↔
  Evm.run code {m with stack := (newer.toList++locals.toList).map coreWord++caller} =
  .ok {m with stack := (newer.toList++out.toList).map coreWord++caller} 0 := by
- constructor
- · rintro ⟨fuel,ran⟩
-   obtain ⟨actual,same,target⟩ := source_to_model condition post body depth block code emitted selected
-     fuel locals ⟨sourceLocals out,.normal⟩ ran newer m caller
-   have values : sourceLocals out = sourceLocals actual := congrArg Outcome.vars same
-   have equal : out = actual := sourceLocals_injective values
-   cases equal
-   exact target
- · intro ran
-   obtain ⟨fuel,actual,source,_,frame⟩ := model_to_source condition post body depth block code emitted selected
-     locals newer m {m with stack := (newer.toList++out.toList).map coreWord++caller} caller 0 ran
-   have stacks := congrArg Evm.Machine.stack frame
-   have mapped : (newer.toList++out.toList).map coreWord =
-     (newer.toList++actual.toList).map coreWord := List.append_cancel_right stacks
-   have lists : newer.toList++out.toList = newer.toList++actual.toList :=
-     (List.map_inj_right (fun _ _ h => coreWord_injective h)).mp mapped
-   have equal : out = actual := Vector.toList_inj.mp (List.append_cancel_left lists)
-   cases equal
-   exact ⟨fuel,source⟩
+ exact CompletionControls.completion_iff_of_transport
+   (Solidity.Yul.Stmt.for_ (c := c) .skip test step work)
+   ⟨True.intro,condition.profile,post.profile,body.profile⟩ code
+   (SourceLoopCompletion.source_to_model condition post body depth block code emitted selected)
+   (model_to_source condition post body depth block code emitted selected)
+   locals out newer m caller
 
 /-- info: 'Solidity.Yul.Compilation.SourceLoopModelCompletion.iteration_completed' depends on axioms: [propext,
  Classical.choice,

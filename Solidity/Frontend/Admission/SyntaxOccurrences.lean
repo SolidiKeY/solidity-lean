@@ -1,7 +1,6 @@
 import Solidity.Source.Ctor
 
-/-! Typed syntax occurrence inventory. Categories/payloads are retained;
-no executable syntax/state representation or feature policy is replaced. -/
+/-! Typed syntax occurrence inventory. Categories/payloads are retained; no executable syntax/state representation or feature policy is replaced. -/
 namespace Solidity.Frontend.Admission
 open Solidity.Source
 

@@ -1,0 +1,20 @@
+{
+  "boundary": "Fixture only: native parent-declaration metadata covers these three checks; snapshot/event repetitions are not unique roots or general completeness.",
+  "counts": {
+    "binding": 16,
+    "check_event": 3,
+    "command": 4,
+    "root_event": 22,
+    "snapshot_summary": 10
+  },
+  "covered_check_commands": 3,
+  "imported_shared_body_origins": [
+    "Right"
+  ],
+  "missing_native_constants": 0,
+  "observed_check_commands": 3,
+  "producer_sha256": "b9164fe7db52832bc6106f02c23cdd4137bd7eb3b335d6bd2bef5faee4c243e5",
+  "quote_is_not_body_use": true,
+  "source_sha256": "a0b530237dbd4640d96e2a169863d3cb6292997a4cea8ee10acfac8ab841aa6d",
+  "unresolved_import_origins": 0
+}

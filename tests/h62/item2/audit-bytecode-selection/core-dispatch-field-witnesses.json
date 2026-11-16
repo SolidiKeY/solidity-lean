@@ -1,0 +1,14 @@
+{
+  "core_dispatch_body_selected_joint_domain": {
+    "target": "Solidity.Backend.AbiEntry.Interface.CoreDispatchCertificate.bodies_selected",
+    "proof": "\u27e8CoreDispatch.route,CoreDispatch.certificate,dispatchContract,dispatchCtx,0,Frag.init dispatchCtx,dispatchHit,True.intro\u27e9"
+  },
+  "core_dispatch_selected_joint_domain": {
+    "target": "Solidity.Backend.AbiEntry.Interface.CoreDispatchCertificate.selected",
+    "proof": "\u27e8CoreDispatch.route,CoreDispatch.certificate,dispatchContract,dispatchCtx,0,Frag.init dispatchCtx,(Idx.here),dispatchRows,dispatchFallback,True.intro\u27e9"
+  },
+  "core_dispatch_executed_joint_domain": {
+    "target": "Solidity.Backend.AbiEntry.Interface.CoreDispatchCertificate.executed",
+    "proof": "\u27e8CoreDispatch.route,CoreDispatch.certificate,dispatchContract,dispatchCtx,1,0,Frag.init dispatchCtx,(Idx.here),dispatchRows,dispatchFallback,dispatchBuilt dispatchRows,dispatch_found dispatchRows,dispatchState,dispatchMachine,dispatch_represented,dispatch_room,wmod 5,rfl,True.intro\u27e9"
+  }
+}

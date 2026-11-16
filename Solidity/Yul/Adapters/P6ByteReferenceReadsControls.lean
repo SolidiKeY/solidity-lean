@@ -29,7 +29,7 @@ theorem retained_access : ∃ r : InventoryRealization P6ByteFamilyCopy.Controls
   obtain ⟨r,found,next,prepared,regrown,reencoded,read⟩ := kernel_regrow
   have inside : 40 < (readBytes
       (frameBytes (P6ByteMemory.copySnapshot zero.1 growSource growTarget rfl)) 288 64).length := by
-    first | simp only [readBytes_length]; decide | decide
+    decide
   exact ⟨r,found,next,prepared,regrown,
     read_outside byteReadFrame (withSourceHeap byteState r.heap) 1 true [] found 40 (by decide),
     inside,read_byte byteReadFrame (withSourceHeap byteState next.heap) 1 true _ read 40 inside⟩
@@ -40,13 +40,13 @@ theorem string_write (n : Nat) :
     (Source.writeLoc byteReadFrame n (.memByte 1 0)
       (Source.Val.fixedBytes (n:=1) (h:=by decide) [0xff] rfl)).run byteState=
       (.ok (),withSourceHeap byteState (byteState.2.heap.write 1
-        (Source.Data.string (l:=.memory) (stringOld.set 0 0xff)) (by rfl))) := by
-  exact write_byte byteReadFrame n byteState 1 true stringOld rfl 0 (by decide) 0xff
+        (Source.Data.string (l:=.memory) (stringOld.set 0 0xff)) (by rfl))) :=
+  write_byte byteReadFrame n byteState 1 true stringOld rfl 0 (by decide) 0xff
 
 /-- An out-of-bounds write preserves the entire state and exact panic payload. -/
 theorem string_write_outside (n : Nat) :
     (Source.writeLoc byteReadFrame n (.memByte 1 40)
       (Source.Val.fixedBytes (n:=1) (h:=by decide) [0xff] rfl)).run byteState=
-      (.error (.revert (Source.panicData .index)),byteState) := by
-  exact write_outside byteReadFrame n byteState 1 true stringOld rfl 40 (by decide) 0xff
+      (.error (.revert (Source.panicData .index)),byteState) :=
+  write_outside byteReadFrame n byteState 1 true stringOld rfl 40 (by decide) 0xff
 end Solidity.Yul.Adapters.P6ByteReferenceReads.Controls

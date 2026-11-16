@@ -1,0 +1,15 @@
+{
+  "numericLiterals": {
+    "theorems": [
+      {
+        "name": "Solidity.Frontend.NumericLiteralProofs.fixture_observations_pass",
+        "module": "Solidity.Frontend.NumericLiteralProofs.Fixtures",
+        "class": "c",
+        "premises": [],
+        "direction": "model-to-solc"
+      }
+    ],
+    "note": "Finite paired numeric-token observations: 42 spellings, 18 accepted exact values and five retained lexical-versus-expression-stage differences. The kernel pins the model observations; the original external solc fixture checker and differential.py validate the pair. This is not universal lexer, constant-expression or compiler parity.",
+    "gap": "General source/compiler numeric correspondence remains open beyond these finite observations; stage differences are retained, not excluded."
+  }
+}

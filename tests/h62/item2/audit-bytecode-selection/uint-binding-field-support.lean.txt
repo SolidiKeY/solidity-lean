@@ -1,0 +1,58 @@
+/-! Guards inconsistent uint-binding field witnesses and accepting an oversized
+uint8 word or reading a short nonnumeric word slot. Reuses the uint-body fixture's
+machine, contract, label and caller data; direct binding compiler and rejection
+proofs keep the original raw-word/size facts and fuel+2. No native byte loader,
+Source-body, physical memory, gas or G01 correspondence is asserted. -/
+
+def uintBindingCompilation := UIntBinding.compiled bodyContract 7 8 bodyLabel
+
+theorem uint_binding_found : Compiler.compile 7 (Frag.init RouteCtx)
+    (UIntBinding.program bodyContract 8 bodyLabel)=some uintBindingCompilation :=
+  UIntBinding.selected bodyContract 7 8 bodyLabel
+
+theorem uint_binding_actual (word size : Fin W) :
+    run uintBindingCompilation.code (bodyMachine word size)=
+      uintBindingOutcome 7 8 bodyLabel word size (bodyMachine word size) :=
+  UIntBinding.executed bodyContract 7 8 bodyLabel uintBindingCompilation uint_binding_found
+    (bodyMachine word size) word size rfl rfl
+
+theorem uint_binding_success :
+    run uintBindingCompilation.code (bodyMachine (wmod 255) (wmod 36))=
+      .ok (uintBoundMachine 7 bodyLabel (wmod 255) (bodyMachine (wmod 255) (wmod 36))) 0 := by
+  rw [uint_binding_actual]
+  rfl
+
+theorem uint_binding_overflow_refused :
+    run uintBindingCompilation.code (bodyMachine (wmod 256) (wmod 36))=.revert := by
+  rw [uint_binding_actual]
+  rfl
+
+theorem uint_binding_revert_all_refused :
+    run uintBindingCompilation.code (bodyMachine (wmod 255) (wmod 36))≠.revert := by
+  rw [uint_binding_success]
+  intro impossible
+  cases impossible
+
+theorem uint_binding_short_skips_word :
+    run uintBindingCompilation.code uintBodyShortMachine=.revert := by
+  change run (compileProg 7 (UIntBinding.program bodyContract 8 bodyLabel)) uintBodyShortMachine=.revert
+  rw [UIntBinding.code]
+  exact run_append_revert (SingleWordGate.short_before_word bodyContract 7 (.uint 8)
+    bodyLabel uintBodyShortMachine (wmod 35) rfl (by decide))
+
+def uintBindingEmptyInput : Solidity.AbiEntry.Input := {data := [],free := 0}
+
+theorem uint_binding_entry_refusal (input : Solidity.AbiEntry.Input) (fuel : Nat) (size : Fin W)
+    (represented : size.val=input.size) :
+    (run uintBindingCompilation.code (bodyMachine (rawArgumentWord input) size)=.revert ↔
+      Solidity.AbiEntry.entry input (fuel+2) (singleWordParams (.uint 8))=.error .revert) :=
+  UIntBinding.entry_rejection bodyContract 7 8 bodyLabel uintBindingCompilation uint_binding_found
+    input fuel (bodyMachine (rawArgumentWord input) size) size rfl rfl represented
+
+#print axioms uint_binding_found
+#print axioms uint_binding_actual
+#print axioms uint_binding_success
+#print axioms uint_binding_overflow_refused
+#print axioms uint_binding_revert_all_refused
+#print axioms uint_binding_short_skips_word
+#print axioms uint_binding_entry_refusal

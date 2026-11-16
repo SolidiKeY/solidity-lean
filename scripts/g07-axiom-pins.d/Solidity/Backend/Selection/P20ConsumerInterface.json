@@ -1,0 +1,7 @@
+{
+ "Solidity/Backend/Selection/P20ConsumerInterface.lean:Solidity.Backend.Selection.P20RepresentedConsumerV2": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ]
+}

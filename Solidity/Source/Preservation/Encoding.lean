@@ -1,8 +1,6 @@
 import Solidity.Source.Preservation.AllocationSites
 
-/-! Preservation through the real ABI encoder, including storage-byte reads.
-This proves memory preservation, not absence of the encoder's named refusals.
--/
+/-! Preservation through the real ABI encoder, including storage-byte reads. This proves memory preservation, not absence of the encoder's named refusals. -/
 namespace Solidity.Source.Preservation
 open EM
 variable {E : Env} {Γ : RCtx}
@@ -76,4 +74,35 @@ theorem evalE_abiEncode_mem (G : Glob E) (F : Fr) (n : Nat) {H : HeapTy}
 #print axioms bytesOfRV_mem
 #print axioms encodeVals_mem
 #print axioms evalE_abiEncode_mem
+
+/-- Actual successful storage reads select an exhausted byte-copy branch; the encoder outcome itself is derived, not a premise. -/
+theorem encode_storage_bytes_timeout_two (frame : Fr) (path : SPath)
+    (packed : Bool) (before : EMState E Γ) (byte : UInt8)
+    (lengthRead : (readLen frame path : EM E Γ Nat).run before = (.ok 2,before))
+    (firstRead : (readAt frame (path.go (.index 0)) (.fixedBytes 1 (by decide)) : EM E Γ _).run before =
+      (.ok (.fixedBytes [byte] rfl),before)) :
+    (encodeVals frame 2 packed
+      (.cons (.val (.storRef rfl path) : RVal E.layout (.bytes .storage)) .nil) : EM E Γ Roadmap.Bytes).run before =
+      (.error .timeout,before) := by
+  have copied : (loadBytes frame 1 path 0 2 : EM E Γ _).run before =
+      (.error .timeout,before) := by
+    change ((do
+      let value ← readAt (E := E) frame (path.go (.index 0)) (.fixedBytes 1 (by decide))
+      match value with
+      | .fixedBytes bs _ => pure ((bs.headD 0) :: (← loadBytes frame 0 path 1 1))) :
+        EM E Γ (List UInt8)).run before = _
+    rw [Hoare.run_bind,firstRead]
+    rfl
+  have loaded : (loadMem frame 2 (.bytes .memory) path : EM E Γ _).run before =
+      (.error .timeout,before) := by
+    change ((do pure (Data.bytes (← loadBytes frame 1 path 0 (← readLen frame path)))) :
+      EM E Γ (Data E.layout (.bytes .memory))).run before = _
+    rw [Hoare.run_bind,lengthRead]
+    change ((do pure (Data.bytes (← loadBytes frame 1 path 0 2))) :
+      EM E Γ (Data E.layout (.bytes .memory))).run before = _
+    rw [Hoare.run_bind,copied]
+  simp only [encodeVals,encodeParts,encodeOne,bytesOfRV,Hoare.run_bind,loaded]
+/-- info: 'Solidity.Source.Preservation.encode_storage_bytes_timeout_two' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in #print axioms encode_storage_bytes_timeout_two
+
 end Solidity.Source.Preservation

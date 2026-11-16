@@ -1,0 +1,153 @@
+{
+ "Solidity/Frontend/Admission/StructuralFeatures.lean:Solidity.Frontend.Admission.arrayTypeFeaturesAt_iff": [
+  "propext"
+ ],
+ "Solidity/Frontend/Admission/StructuralFeatures.lean:Solidity.Frontend.Admission.assignment_payload_none_iff": [],
+ "Solidity/Frontend/Admission/StructuralFeatures.lean:Solidity.Frontend.Admission.constnessFeaturesAt_iff": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Frontend/Admission/StructuralFeatures.lean:Solidity.Frontend.Admission.constnessFieldsAt_iff": [
+  "propext"
+ ],
+ "Solidity/Frontend/Admission/StructuralFeatures.lean:Solidity.Frontend.Admission.constructor_feature_covered": [
+  "propext"
+ ],
+ "Solidity/Frontend/Admission/StructuralFeatures.lean:Solidity.Frontend.Admission.constructor_payload_gaps": [],
+ "Solidity/Frontend/Admission/StructuralFeatures.lean:Solidity.Frontend.Admission.declarationConstnessUses_iff": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Frontend/Admission/StructuralFeatures.lean:Solidity.Frontend.Admission.declarationMutabilityUses_iff": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Frontend/Admission/StructuralFeatures.lean:Solidity.Frontend.Admission.declarationQualifierFeaturesAt_iff": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Frontend/Admission/StructuralFeatures.lean:Solidity.Frontend.Admission.declarationVisibilityUses_iff": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Frontend/Admission/StructuralFeatures.lean:Solidity.Frontend.Admission.denomination_payload_tags": [],
+ "Solidity/Frontend/Admission/StructuralFeatures.lean:Solidity.Frontend.Admission.elementary_feature_covered": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Frontend/Admission/StructuralFeatures.lean:Solidity.Frontend.Admission.explicitFunctionTypeFeaturesAt_iff": [
+  "propext"
+ ],
+ "Solidity/Frontend/Admission/StructuralFeatures.lean:Solidity.Frontend.Admission.freeFunctionFeaturesAt_iff": [
+  "propext"
+ ],
+ "Solidity/Frontend/Admission/StructuralFeatures.lean:Solidity.Frontend.Admission.literal_payload_tags": [],
+ "Solidity/Frontend/Admission/StructuralFeatures.lean:Solidity.Frontend.Admission.literal_root_uses": [],
+ "Solidity/Frontend/Admission/StructuralFeatures.lean:Solidity.Frontend.Admission.location_feature_covered": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Frontend/Admission/StructuralFeatures.lean:Solidity.Frontend.Admission.memoryCreationHeadFeaturesAt_iff": [
+  "propext"
+ ],
+ "Solidity/Frontend/Admission/StructuralFeatures.lean:Solidity.Frontend.Admission.mutabilityFeaturesAt_iff": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Frontend/Admission/StructuralFeatures.lean:Solidity.Frontend.Admission.mutabilityFieldsAt_iff": [
+  "propext"
+ ],
+ "Solidity/Frontend/Admission/StructuralFeatures.lean:Solidity.Frontend.Admission.pragmaWordsAt_iff": [
+  "propext"
+ ],
+ "Solidity/Frontend/Admission/StructuralFeatures.lean:Solidity.Frontend.Admission.prefix_payload_tags": [],
+ "Solidity/Frontend/Admission/StructuralFeatures.lean:Solidity.Frontend.Admission.sourceStructuralSubset_elementary": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Frontend/Admission/StructuralFeatures.lean:Solidity.Frontend.Admission.sourceStructuralSubset_iff": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Frontend/Admission/StructuralFeatures.lean:Solidity.Frontend.Admission.sourceStructuralSubset_location": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Frontend/Admission/StructuralFeatures.lean:Solidity.Frontend.Admission.sourceStructuralSubset_not_env_only": [],
+ "Solidity/Frontend/Admission/StructuralFeatures.lean:Solidity.Frontend.Admission.sourceStructuralUses_iff": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Frontend/Admission/StructuralFeatures.lean:Solidity.Frontend.Admission.structuralImportUnit_env": [],
+ "Solidity/Frontend/Admission/StructuralFeatures.lean:Solidity.Frontend.Admission.structuralImportUnit_features": [],
+ "Solidity/Frontend/Admission/StructuralFeatures.lean:Solidity.Frontend.Admission.syntaxArrayTypeUses_iff": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Frontend/Admission/StructuralFeatures.lean:Solidity.Frontend.Admission.syntaxConstnessFeatures_eq": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Frontend/Admission/StructuralFeatures.lean:Solidity.Frontend.Admission.syntaxConstnessRefusals_eq": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Frontend/Admission/StructuralFeatures.lean:Solidity.Frontend.Admission.syntaxConstnessUses_iff": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Frontend/Admission/StructuralFeatures.lean:Solidity.Frontend.Admission.syntaxDeclarationQualifierRefusals_iff": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Frontend/Admission/StructuralFeatures.lean:Solidity.Frontend.Admission.syntaxDeclarationQualifierUses_iff": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Frontend/Admission/StructuralFeatures.lean:Solidity.Frontend.Admission.syntaxExplicitFunctionTypeUses_iff": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Frontend/Admission/StructuralFeatures.lean:Solidity.Frontend.Admission.syntaxFreeFunctionUses_iff": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Frontend/Admission/StructuralFeatures.lean:Solidity.Frontend.Admission.syntaxLiteralUses_iff": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Frontend/Admission/StructuralFeatures.lean:Solidity.Frontend.Admission.syntaxMemoryCreationHeadUses_iff": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Frontend/Admission/StructuralFeatures.lean:Solidity.Frontend.Admission.syntaxMutabilityUses_iff": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Frontend/Admission/StructuralFeatures.lean:Solidity.Frontend.Admission.syntaxPayloadUses_iff": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Frontend/Admission/StructuralFeatures.lean:Solidity.Frontend.Admission.syntaxPragmaUses_iff": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Frontend/Admission/StructuralFeatures.lean:Solidity.Frontend.Admission.syntaxTupleShapeUses_iff": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Frontend/Admission/StructuralFeatures.lean:Solidity.Frontend.Admission.syntaxVisibilityUses_iff": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Frontend/Admission/StructuralFeatures.lean:Solidity.Frontend.Admission.tupleShapeFeaturesAt_iff": [
+  "propext"
+ ],
+ "Solidity/Frontend/Admission/StructuralFeatures.lean:Solidity.Frontend.Admission.visibilityFeaturesAt_iff": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Frontend/Admission/StructuralFeatures.lean:Solidity.Frontend.Admission.visibilityFieldsAt_iff": [
+  "propext"
+ ]
+}

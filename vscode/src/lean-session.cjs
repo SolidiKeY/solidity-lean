@@ -83,10 +83,16 @@ class LeanSession {
       try{
         if(probe){terminateTree(probe.child);await waitForClose(probe.child,{closed:probe.closed,deadline});}
         if(!child)return;
-        if(peer&&!peer.closed){
-          const remaining=deadline-Date.now();if(remaining<=0)throw Error('Lean retirement deadline exhausted');
-          await peer.request('shutdown',null,{timeoutMs:remaining});peer.notify('exit',null);
-        }else terminateTree(child);
+        // The graceful LSP shutdown gets at most the first half of the window;
+        // a busy server that has not replied or closed by then is terminated,
+        // leaving the rest of the same deadline for close confirmation.
+        const grace=Math.min(deadline,Date.now()+Math.floor(Math.max(0,deadline-Date.now())/2));
+        let graceful=false;
+        if(peer&&!peer.closed&&grace>Date.now()){
+          try{await peer.request('shutdown',null,{timeoutMs:grace-Date.now()});peer.notify('exit',null);graceful=true;}catch{}
+          if(graceful)try{await waitForClose(child,{closed,deadline:grace});return;}catch{}
+        }
+        terminateTree(child);
         await waitForClose(child,{closed,deadline});
       }catch(error){if(child)terminateTree(child);throw error;}
       finally{peer?.close();this.retiringChild=null;}

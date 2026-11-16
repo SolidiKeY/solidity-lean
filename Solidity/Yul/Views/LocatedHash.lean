@@ -12,25 +12,11 @@ theorem fixedLayoutHash_agreement (fixed : Roadmap.Evm.Fixed) : HashInputAgreeme
 
 theorem fixedLayoutHash_lt (fixed : Roadmap.Evm.Fixed) (p : Storage.Pre) : fixedLayoutHash fixed p < 2^256 := fixed.keccak_lt _
 
-theorem layout_bytesBE_bound (n value : Nat) : ∀ b ∈ Storage.bytesBE n value, b < 256 := by
-  induction n generalizing value with
-  | zero => intro b member; cases member
-  | succ n ih =>
-    intro b member
-    rcases List.mem_append.mp member with old | last
-    · exact ih _ b old
-    · have same : b = value % 256 := List.mem_singleton.mp last
-      rw [same]
-      exact Nat.mod_lt _ (by decide)
+theorem layout_bytesBE_bound (n value : Nat) : ∀ b ∈ Storage.bytesBE n value, b < 256 :=
+  Storage.bytesBE_bound n value
 
-theorem layout_encode_bound (p : Storage.Pre) : ∀ b ∈ Storage.encode p, b < 256 := by
-  cases p with
-  | data w => exact layout_bytesBE_bound 32 w
-  | entry k w =>
-    intro b member
-    rcases List.mem_append.mp member with key | word
-    · exact layout_bytesBE_bound 32 k b key
-    · exact layout_bytesBE_bound 32 w b word
+theorem layout_encode_bound (p : Storage.Pre) : ∀ b ∈ Storage.encode p, b < 256 :=
+  Storage.encode_bound p
 
 theorem layoutPreimageBytes_roundtrip (p : Storage.Pre) : (layoutPreimageBytes p).map UInt8.toNat = Storage.encode p := by
   rw [layoutPreimageBytes,List.map_map]

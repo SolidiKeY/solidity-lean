@@ -55,6 +55,8 @@
 | `Backend/Environment/Frames.lean` | Exact environment/ledger-footprint stability, repeated BALANCE/EnvKey reads, source/oracle framing and exhaustive composed opcode refusals. |
 | `Backend/Environment/CompositionChecks.lean` | Inhabited mixed environment/metadata/hash certificate, retained source effects, order/forced-credit/time counterexamples and axiom pins. |
 
+| `Backend/Environment/LoadV2.lean` | H274/H57 separately named byte load step and v1 non-MLOAD compatibility; full producer and consumer freeze pending. |
+
 Memory-loop validation helpers: `scripts/memory-loop-evm.mjs` records actual
 four-mode upstream EVM observations and refusal controls;
 `scripts/check-memory-loop-timing.py` freshly checks the entire original

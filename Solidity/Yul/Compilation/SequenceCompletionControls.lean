@@ -36,8 +36,7 @@ theorem final_height (locals : Vector Scalar.Word 2) (m final : Evm.Machine) (ca
  skip = 0 ∧ final.stack.length = 2+caller.length := by
  obtain ⟨_,out,_,done,frame⟩ := artifact_reflected artifact locals m final caller skip ran
  refine ⟨done,?_⟩
- rw [frame]
- simp only [List.length_append,List.length_map,Vector.length_toList]
+ exact CompletionControls.frame_height #v[] out m final caller frame
 
 /-- Omitting the third original switch would leave 6. Actual compiled execution
 cannot yield that truncated result, for any nonstack state or caller tail. -/

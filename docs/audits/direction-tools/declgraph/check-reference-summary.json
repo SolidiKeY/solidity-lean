@@ -1,0 +1,7474 @@
+{
+  "base": "d6fd95f0886775d7c286813fa9b993a40ba7a777",
+  "boundaries": [
+    "Constant names are native pre-coalescing identities; module hints do not select imported proof bodies.",
+    "Check-info and reference events can repeat; counts are not unique successful root statements.",
+    "Unsuccessful files contribute no semantic roots; continue remaining files.",
+    "Imported cache artifacts are externally trusted; receipts bind source, producers, raw output and logs."
+  ],
+  "files": [
+    {
+      "check_info_events": 4,
+      "check_reference_events": 48,
+      "check_top_commands": 4,
+      "exit_code": 0,
+      "finished_diagnostic_snapshots": 0,
+      "observed_constants": [
+        {
+          "name": "List.cons",
+          "name_key": [
+            "str",
+            [
+              "str",
+              "anonymous",
+              "List"
+            ],
+            "cons"
+          ]
+        },
+        {
+          "name": "List.nil",
+          "name_key": [
+            "str",
+            [
+              "str",
+              "anonymous",
+              "List"
+            ],
+            "nil"
+          ]
+        },
+        {
+          "name": "List.toArray",
+          "name_key": [
+            "str",
+            [
+              "str",
+              "anonymous",
+              "List"
+            ],
+            "toArray"
+          ]
+        },
+        {
+          "name": "Option.none",
+          "name_key": [
+            "str",
+            [
+              "str",
+              "anonymous",
+              "Option"
+            ],
+            "none"
+          ]
+        },
+        {
+          "name": "Option.some",
+          "name_key": [
+            "str",
+            [
+              "str",
+              "anonymous",
+              "Option"
+            ],
+            "some"
+          ]
+        },
+        {
+          "name": "Prod.mk",
+          "name_key": [
+            "str",
+            [
+              "str",
+              "anonymous",
+              "Prod"
+            ],
+            "mk"
+          ]
+        },
+        {
+          "name": "Lean.Json.arr",
+          "name_key": [
+            "str",
+            [
+              "str",
+              [
+                "str",
+                "anonymous",
+                "Lean"
+              ],
+              "Json"
+            ],
+            "arr"
+          ]
+        },
+        {
+          "name": "Lean.Json.mkObj",
+          "name_key": [
+            "str",
+            [
+              "str",
+              [
+                "str",
+                "anonymous",
+                "Lean"
+              ],
+              "Json"
+            ],
+            "mkObj"
+          ]
+        },
+        {
+          "name": "Lean.Json.null",
+          "name_key": [
+            "str",
+            [
+              "str",
+              [
+                "str",
+                "anonymous",
+                "Lean"
+              ],
+              "Json"
+            ],
+            "null"
+          ]
+        },
+        {
+          "name": "Lean.Json.num",
+          "name_key": [
+            "str",
+            [
+              "str",
+              [
+                "str",
+                "anonymous",
+                "Lean"
+              ],
+              "Json"
+            ],
+            "num"
+          ]
+        },
+        {
+          "name": "Lean.Json.str",
+          "name_key": [
+            "str",
+            [
+              "str",
+              [
+                "str",
+                "anonymous",
+                "Lean"
+              ],
+              "Json"
+            ],
+            "str"
+          ]
+        },
+        {
+          "name": "Solidity.Frontend.CallMetadata.walk",
+          "name_key": [
+            "str",
+            [
+              "str",
+              [
+                "str",
+                [
+                  "str",
+                  "anonymous",
+                  "Solidity"
+                ],
+                "Frontend"
+              ],
+              "CallMetadata"
+            ],
+            "walk"
+          ]
+        },
+        {
+          "name": "Solidity.Frontend.CallMetadata.Edge.field",
+          "name_key": [
+            "str",
+            [
+              "str",
+              [
+                "str",
+                [
+                  "str",
+                  [
+                    "str",
+                    "anonymous",
+                    "Solidity"
+                  ],
+                  "Frontend"
+                ],
+                "CallMetadata"
+              ],
+              "Edge"
+            ],
+            "field"
+          ]
+        },
+        {
+          "name": "Solidity.Frontend.CallMetadata.Edge.index",
+          "name_key": [
+            "str",
+            [
+              "str",
+              [
+                "str",
+                [
+                  "str",
+                  [
+                    "str",
+                    "anonymous",
+                    "Solidity"
+                  ],
+                  "Frontend"
+                ],
+                "CallMetadata"
+              ],
+              "Edge"
+            ],
+            "index"
+          ]
+        }
+      ],
+      "path": "Solidity/Frontend/SolcJson/CallMetadataPathControls.lean",
+      "status": "pass",
+      "top_commands": 53
+    },
+    {
+      "check_info_events": 3,
+      "check_reference_events": 57,
+      "check_top_commands": 3,
+      "exit_code": 0,
+      "finished_diagnostic_snapshots": 0,
+      "observed_constants": [
+        {
+          "name": "List.drop",
+          "name_key": [
+            "str",
+            [
+              "str",
+              "anonymous",
+              "List"
+            ],
+            "drop"
+          ]
+        },
+        {
+          "name": "List.take",
+          "name_key": [
+            "str",
+            [
+              "str",
+              "anonymous",
+              "List"
+            ],
+            "take"
+          ]
+        },
+        {
+          "name": "Prod.mk",
+          "name_key": [
+            "str",
+            [
+              "str",
+              "anonymous",
+              "Prod"
+            ],
+            "mk"
+          ]
+        },
+        {
+          "name": "Prod.snd",
+          "name_key": [
+            "str",
+            [
+              "str",
+              "anonymous",
+              "Prod"
+            ],
+            "snd"
+          ]
+        },
+        {
+          "name": "UInt8.toNat",
+          "name_key": [
+            "str",
+            [
+              "str",
+              "anonymous",
+              "UInt8"
+            ],
+            "toNat"
+          ]
+        },
+        {
+          "name": "Solidity.Source.Fr.cd",
+          "name_key": [
+            "str",
+            [
+              "str",
+              [
+                "str",
+                [
+                  "str",
+                  "anonymous",
+                  "Solidity"
+                ],
+                "Source"
+              ],
+              "Fr"
+            ],
+            "cd"
+          ]
+        },
+        {
+          "name": "Solidity.Source.Heap.next",
+          "name_key": [
+            "str",
+            [
+              "str",
+              [
+                "str",
+                [
+                  "str",
+                  "anonymous",
+                  "Solidity"
+                ],
+                "Source"
+              ],
+              "Heap"
+            ],
+            "next"
+          ]
+        },
+        {
+          "name": "Solidity.Source.St.heap",
+          "name_key": [
+            "str",
+            [
+              "str",
+              [
+                "str",
+                [
+                  "str",
+                  "anonymous",
+                  "Solidity"
+                ],
+                "Source"
+              ],
+              "St"
+            ],
+            "heap"
+          ]
+        },
+        {
+          "name": "Solidity.Yul.Views.calldatacopy",
+          "name_key": [
+            "str",
+            [
+              "str",
+              [
+                "str",
+                [
+                  "str",
+                  "anonymous",
+                  "Solidity"
+                ],
+                "Yul"
+              ],
+              "Views"
+            ],
+            "calldatacopy"
+          ]
+        },
+        {
+          "name": "Solidity.Yul.Views.readBytes",
+          "name_key": [
+            "str",
+            [
+              "str",
+              [
+                "str",
+                [
+                  "str",
+                  "anonymous",
+                  "Solidity"
+                ],
+                "Yul"
+              ],
+              "Views"
+            ],
+            "readBytes"
+          ]
+        },
+        {
+          "name": "_private.Solidity.Yul.Views.CalldataHashBindingControls.0.Solidity.Yul.Views.CalldataHashControls.F",
+          "name_key": [
+            "str",
+            [
+              "str",
+              [
+                "str",
+                [
+                  "str",
+                  [
+                    "str",
+                    [
+                      "num",
+                      [
+                        "str",
+                        [
+                          "str",
+                          [
+                            "str",
+                            [
+                              "str",
+                              [
+                                "str",
+                                "anonymous",
+                                "_private"
+                              ],
+                              "Solidity"
+                            ],
+                            "Yul"
+                          ],
+                          "Views"
+                        ],
+                        "CalldataHashBindingControls"
+                      ],
+                      0
+                    ],
+                    "Solidity"
+                  ],
+                  "Yul"
+                ],
+                "Views"
+              ],
+              "CalldataHashControls"
+            ],
+            "F"
+          ]
+        },
+        {
+          "name": "_private.Solidity.Yul.Views.CalldataHashBindingControls.0.Solidity.Yul.Views.CalldataHashControls.after",
+          "name_key": [
+            "str",
+            [
+              "str",
+              [
+                "str",
+                [
+                  "str",
+                  [
+                    "str",
+                    [
+                      "num",
+                      [
+                        "str",
+                        [
+                          "str",
+                          [
+                            "str",
+                            [
+                              "str",
+                              [
+                                "str",
+                                "anonymous",
+                                "_private"
+                              ],
+                              "Solidity"
+                            ],
+                            "Yul"
+                          ],
+                          "Views"
+                        ],
+                        "CalldataHashBindingControls"
+                      ],
+                      0
+                    ],
+                    "Solidity"
+                  ],
+                  "Yul"
+                ],
+                "Views"
+              ],
+              "CalldataHashControls"
+            ],
+            "after"
+          ]
+        },
+        {
+          "name": "_private.Solidity.Yul.Views.CalldataHashBindingControls.0.Solidity.Yul.Views.CalldataHashControls.residual",
+          "name_key": [
+            "str",
+            [
+              "str",
+              [
+                "str",
+                [
+                  "str",
+                  [
+                    "str",
+                    [
+                      "num",
+                      [
+                        "str",
+                        [
+                          "str",
+                          [
+                            "str",
+                            [
+                              "str",
+                              [
+                                "str",
+                                "anonymous",
+                                "_private"
+                              ],
+                              "Solidity"
+                            ],
+                            "Yul"
+                          ],
+                          "Views"
+                        ],
+                        "CalldataHashBindingControls"
+                      ],
+                      0
+                    ],
+                    "Solidity"
+                  ],
+                  "Yul"
+                ],
+                "Views"
+              ],
+              "CalldataHashControls"
+            ],
+            "residual"
+          ]
+        },
+        {
+          "name": "_private.Solidity.Yul.Views.CalldataHashBindingControls.0.Solidity.Yul.Views.CalldataHashControls.state",
+          "name_key": [
+            "str",
+            [
+              "str",
+              [
+                "str",
+                [
+                  "str",
+                  [
+                    "str",
+                    [
+                      "num",
+                      [
+                        "str",
+                        [
+                          "str",
+                          [
+                            "str",
+                            [
+                              "str",
+                              [
+                                "str",
+                                "anonymous",
+                                "_private"
+                              ],
+                              "Solidity"
+                            ],
+                            "Yul"
+                          ],
+                          "Views"
+                        ],
+                        "CalldataHashBindingControls"
+                      ],
+                      0
+                    ],
+                    "Solidity"
+                  ],
+                  "Yul"
+                ],
+                "Views"
+              ],
+              "CalldataHashControls"
+            ],
+            "state"
+          ]
+        }
+      ],
+      "path": "Solidity/Yul/Views/CalldataHashBindingControls.lean",
+      "status": "pass",
+      "top_commands": 17
+    },
+    {
+      "check_info_events": 2,
+      "check_reference_events": 17,
+      "check_top_commands": 2,
+      "exit_code": 0,
+      "finished_diagnostic_snapshots": 0,
+      "observed_constants": [
+        {
+          "name": "Fin.val",
+          "name_key": [
+            "str",
+            [
+              "str",
+              "anonymous",
+              "Fin"
+            ],
+            "val"
+          ]
+        },
+        {
+          "name": "Prod.mk",
+          "name_key": [
+            "str",
+            [
+              "str",
+              "anonymous",
+              "Prod"
+            ],
+            "mk"
+          ]
+        },
+        {
+          "name": "Solidity.Yul.Views.Placement.address",
+          "name_key": [
+            "str",
+            [
+              "str",
+              [
+                "str",
+                [
+                  "str",
+                  [
+                    "str",
+                    "anonymous",
+                    "Solidity"
+                  ],
+                  "Yul"
+                ],
+                "Views"
+              ],
+              "Placement"
+            ],
+            "address"
+          ]
+        },
+        {
+          "name": "Solidity.Yul.Views.Placement.free",
+          "name_key": [
+            "str",
+            [
+              "str",
+              [
+                "str",
+                [
+                  "str",
+                  [
+                    "str",
+                    "anonymous",
+                    "Solidity"
+                  ],
+                  "Yul"
+                ],
+                "Views"
+              ],
+              "Placement"
+            ],
+            "free"
+          ]
+        },
+        {
+          "name": "_private.Solidity.Yul.Views.ComputedAllocationControls.0.Solidity.Yul.Views.ComputedPlacement.Controls.thirdPlacement",
+          "name_key": [
+            "str",
+            [
+              "str",
+              [
+                "str",
+                [
+                  "str",
+                  [
+                    "str",
+                    [
+                      "str",
+                      [
+                        "num",
+                        [
+                          "str",
+                          [
+                            "str",
+                            [
+                              "str",
+                              [
+                                "str",
+                                [
+                                  "str",
+                                  "anonymous",
+                                  "_private"
+                                ],
+                                "Solidity"
+                              ],
+                              "Yul"
+                            ],
+                            "Views"
+                          ],
+                          "ComputedAllocationControls"
+                        ],
+                        0
+                      ],
+                      "Solidity"
+                    ],
+                    "Yul"
+                  ],
+                  "Views"
+                ],
+                "ComputedPlacement"
+              ],
+              "Controls"
+            ],
+            "thirdPlacement"
+          ]
+        },
+        {
+          "name": "_private.Solidity.Yul.Views.ComputedAllocationControls.0.Solidity.Yul.Views.ComputedPlacement.Controls.zeroPlacement",
+          "name_key": [
+            "str",
+            [
+              "str",
+              [
+                "str",
+                [
+                  "str",
+                  [
+                    "str",
+                    [
+                      "str",
+                      [
+                        "num",
+                        [
+                          "str",
+                          [
+                            "str",
+                            [
+                              "str",
+                              [
+                                "str",
+                                [
+                                  "str",
+                                  "anonymous",
+                                  "_private"
+                                ],
+                                "Solidity"
+                              ],
+                              "Yul"
+                            ],
+                            "Views"
+                          ],
+                          "ComputedAllocationControls"
+                        ],
+                        0
+                      ],
+                      "Solidity"
+                    ],
+                    "Yul"
+                  ],
+                  "Views"
+                ],
+                "ComputedPlacement"
+              ],
+              "Controls"
+            ],
+            "zeroPlacement"
+          ]
+        }
+      ],
+      "path": "Solidity/Yul/Views/ComputedAllocationControls.lean",
+      "status": "pass",
+      "top_commands": 24
+    },
+    {
+      "check_info_events": 2,
+      "check_reference_events": 14,
+      "check_top_commands": 2,
+      "exit_code": 0,
+      "finished_diagnostic_snapshots": 1,
+      "observed_constants": [
+        {
+          "name": "List.cons",
+          "name_key": [
+            "str",
+            [
+              "str",
+              "anonymous",
+              "List"
+            ],
+            "cons"
+          ]
+        },
+        {
+          "name": "List.nil",
+          "name_key": [
+            "str",
+            [
+              "str",
+              "anonymous",
+              "List"
+            ],
+            "nil"
+          ]
+        },
+        {
+          "name": "_private.Solidity.Yul.Views.ComputedAllocationWriteControls.0.Solidity.Yul.Views.ComputedAllocationWrite.Controls.observed",
+          "name_key": [
+            "str",
+            [
+              "str",
+              [
+                "str",
+                [
+                  "str",
+                  [
+                    "str",
+                    [
+                      "str",
+                      [
+                        "num",
+                        [
+                          "str",
+                          [
+                            "str",
+                            [
+                              "str",
+                              [
+                                "str",
+                                [
+                                  "str",
+                                  "anonymous",
+                                  "_private"
+                                ],
+                                "Solidity"
+                              ],
+                              "Yul"
+                            ],
+                            "Views"
+                          ],
+                          "ComputedAllocationWriteControls"
+                        ],
+                        0
+                      ],
+                      "Solidity"
+                    ],
+                    "Yul"
+                  ],
+                  "Views"
+                ],
+                "ComputedAllocationWrite"
+              ],
+              "Controls"
+            ],
+            "observed"
+          ]
+        }
+      ],
+      "path": "Solidity/Yul/Views/ComputedAllocationWriteControls.lean",
+      "status": "pass",
+      "top_commands": 24
+    },
+    {
+      "check_info_events": 2,
+      "check_reference_events": 20,
+      "check_top_commands": 2,
+      "exit_code": 0,
+      "finished_diagnostic_snapshots": 0,
+      "observed_constants": [
+        {
+          "name": "Fin.val",
+          "name_key": [
+            "str",
+            [
+              "str",
+              "anonymous",
+              "Fin"
+            ],
+            "val"
+          ]
+        },
+        {
+          "name": "List.cons",
+          "name_key": [
+            "str",
+            [
+              "str",
+              "anonymous",
+              "List"
+            ],
+            "cons"
+          ]
+        },
+        {
+          "name": "List.nil",
+          "name_key": [
+            "str",
+            [
+              "str",
+              "anonymous",
+              "List"
+            ],
+            "nil"
+          ]
+        },
+        {
+          "name": "Prod.mk",
+          "name_key": [
+            "str",
+            [
+              "str",
+              "anonymous",
+              "Prod"
+            ],
+            "mk"
+          ]
+        },
+        {
+          "name": "Solidity.Yul.Views.ComputedPlacement.unsupported",
+          "name_key": [
+            "str",
+            [
+              "str",
+              [
+                "str",
+                [
+                  "str",
+                  [
+                    "str",
+                    "anonymous",
+                    "Solidity"
+                  ],
+                  "Yul"
+                ],
+                "Views"
+              ],
+              "ComputedPlacement"
+            ],
+            "unsupported"
+          ]
+        },
+        {
+          "name": "Solidity.Yul.Views.Placement.address",
+          "name_key": [
+            "str",
+            [
+              "str",
+              [
+                "str",
+                [
+                  "str",
+                  [
+                    "str",
+                    "anonymous",
+                    "Solidity"
+                  ],
+                  "Yul"
+                ],
+                "Views"
+              ],
+              "Placement"
+            ],
+            "address"
+          ]
+        },
+        {
+          "name": "Solidity.Yul.Views.Placement.free",
+          "name_key": [
+            "str",
+            [
+              "str",
+              [
+                "str",
+                [
+                  "str",
+                  [
+                    "str",
+                    "anonymous",
+                    "Solidity"
+                  ],
+                  "Yul"
+                ],
+                "Views"
+              ],
+              "Placement"
+            ],
+            "free"
+          ]
+        },
+        {
+          "name": "Solidity.Yul.Views.ComputedPlacement.Controls.placement",
+          "name_key": [
+            "str",
+            [
+              "str",
+              [
+                "str",
+                [
+                  "str",
+                  [
+                    "str",
+                    [
+                      "str",
+                      "anonymous",
+                      "Solidity"
+                    ],
+                    "Yul"
+                  ],
+                  "Views"
+                ],
+                "ComputedPlacement"
+              ],
+              "Controls"
+            ],
+            "placement"
+          ]
+        },
+        {
+          "name": "Solidity.Yul.Views.ComputedPlacement.Controls.sparse",
+          "name_key": [
+            "str",
+            [
+              "str",
+              [
+                "str",
+                [
+                  "str",
+                  [
+                    "str",
+                    [
+                      "str",
+                      "anonymous",
+                      "Solidity"
+                    ],
+                    "Yul"
+                  ],
+                  "Views"
+                ],
+                "ComputedPlacement"
+              ],
+              "Controls"
+            ],
+            "sparse"
+          ]
+        }
+      ],
+      "path": "Solidity/Yul/Views/ComputedPlacementControls.lean",
+      "status": "pass",
+      "top_commands": 19
+    },
+    {
+      "check_info_events": 3,
+      "check_reference_events": 52,
+      "check_top_commands": 3,
+      "exit_code": 0,
+      "finished_diagnostic_snapshots": 0,
+      "observed_constants": [
+        {
+          "name": "rfl",
+          "name_key": [
+            "str",
+            "anonymous",
+            "rfl"
+          ]
+        },
+        {
+          "name": "List.cons",
+          "name_key": [
+            "str",
+            [
+              "str",
+              "anonymous",
+              "List"
+            ],
+            "cons"
+          ]
+        },
+        {
+          "name": "List.nil",
+          "name_key": [
+            "str",
+            [
+              "str",
+              "anonymous",
+              "List"
+            ],
+            "nil"
+          ]
+        },
+        {
+          "name": "List.reverse",
+          "name_key": [
+            "str",
+            [
+              "str",
+              "anonymous",
+              "List"
+            ],
+            "reverse"
+          ]
+        },
+        {
+          "name": "Option.isNone",
+          "name_key": [
+            "str",
+            [
+              "str",
+              "anonymous",
+              "Option"
+            ],
+            "isNone"
+          ]
+        },
+        {
+          "name": "Option.isSome",
+          "name_key": [
+            "str",
+            [
+              "str",
+              "anonymous",
+              "Option"
+            ],
+            "isSome"
+          ]
+        },
+        {
+          "name": "Option.none",
+          "name_key": [
+            "str",
+            [
+              "str",
+              "anonymous",
+              "Option"
+            ],
+            "none"
+          ]
+        },
+        {
+          "name": "Prod.mk",
+          "name_key": [
+            "str",
+            [
+              "str",
+              "anonymous",
+              "Prod"
+            ],
+            "mk"
+          ]
+        },
+        {
+          "name": "Solidity.Source.DataLoc.memory",
+          "name_key": [
+            "str",
+            [
+              "str",
+              [
+                "str",
+                [
+                  "str",
+                  "anonymous",
+                  "Solidity"
+                ],
+                "Source"
+              ],
+              "DataLoc"
+            ],
+            "memory"
+          ]
+        },
+        {
+          "name": "Solidity.Source.STy.array",
+          "name_key": [
+            "str",
+            [
+              "str",
+              [
+                "str",
+                [
+                  "str",
+                  "anonymous",
+                  "Solidity"
+                ],
+                "Source"
+              ],
+              "STy"
+            ],
+            "array"
+          ]
+        },
+        {
+          "name": "Solidity.Source.STy.bool",
+          "name_key": [
+            "str",
+            [
+              "str",
+              [
+                "str",
+                [
+                  "str",
+                  "anonymous",
+                  "Solidity"
+                ],
+                "Source"
+              ],
+              "STy"
+            ],
+            "bool"
+          ]
+        },
+        {
+          "name": "Solidity.Source.STy.bytes",
+          "name_key": [
+            "str",
+            [
+              "str",
+              [
+                "str",
+                [
+                  "str",
+                  "anonymous",
+                  "Solidity"
+                ],
+                "Source"
+              ],
+              "STy"
+            ],
+            "bytes"
+          ]
+        },
+        {
+          "name": "Solidity.Yul.Views.decodeMemoryPointer",
+          "name_key": [
+            "str",
+            [
+              "str",
+              [
+                "str",
+                [
+                  "str",
+                  "anonymous",
+                  "Solidity"
+                ],
+                "Yul"
+              ],
+              "Views"
+            ],
+            "decodeMemoryPointer"
+          ]
+        },
+        {
+          "name": "Solidity.Yul.Views.inventoryStateWriteback",
+          "name_key": [
+            "str",
+            [
+              "str",
+              [
+                "str",
+                [
+                  "str",
+                  "anonymous",
+                  "Solidity"
+                ],
+                "Yul"
+              ],
+              "Views"
+            ],
+            "inventoryStateWriteback"
+          ]
+        },
+        {
+          "name": "Solidity.Yul.Views.retainInitial",
+          "name_key": [
+            "str",
+            [
+              "str",
+              [
+                "str",
+                [
+                  "str",
+                  "anonymous",
+                  "Solidity"
+                ],
+                "Yul"
+              ],
+              "Views"
+            ],
+            "retainInitial"
+          ]
+        },
+        {
+          "name": "Solidity.Yul.Views.Controls.mixedEntries",
+          "name_key": [
+            "str",
+            [
+              "str",
+              [
+                "str",
+                [
+                  "str",
+                  [
+                    "str",
+                    "anonymous",
+                    "Solidity"
+                  ],
+                  "Yul"
+                ],
+                "Views"
+              ],
+              "Controls"
+            ],
+            "mixedEntries"
+          ]
+        },
+        {
+          "name": "Solidity.Yul.Views.Controls.mixedEntry1",
+          "name_key": [
+            "str",
+            [
+              "str",
+              [
+                "str",
+                [
+                  "str",
+                  [
+                    "str",
+                    "anonymous",
+                    "Solidity"
+                  ],
+                  "Yul"
+                ],
+                "Views"
+              ],
+              "Controls"
+            ],
+            "mixedEntry1"
+          ]
+        },
+        {
+          "name": "Solidity.Yul.Views.Controls.mixedPlacement",
+          "name_key": [
+            "str",
+            [
+              "str",
+              [
+                "str",
+                [
+                  "str",
+                  [
+                    "str",
+                    "anonymous",
+                    "Solidity"
+                  ],
+                  "Yul"
+                ],
+                "Views"
+              ],
+              "Controls"
+            ],
+            "mixedPlacement"
+          ]
+        },
+        {
+          "name": "Solidity.Yul.Views.Controls.mixedState",
+          "name_key": [
+            "str",
+            [
+              "str",
+              [
+                "str",
+                [
+                  "str",
+                  [
+                    "str",
+                    "anonymous",
+                    "Solidity"
+                  ],
+                  "Yul"
+                ],
+                "Views"
+              ],
+              "Controls"
+            ],
+            "mixedState"
+          ]
+        },
+        {
+          "name": "_private.Solidity.Yul.Views.InventoryCandidateOrderControls.0.Solidity.Yul.Views.Controls.duplicateCandidates",
+          "name_key": [
+            "str",
+            [
+              "str",
+              [
+                "str",
+                [
+                  "str",
+                  [
+                    "str",
+                    [
+                      "num",
+                      [
+                        "str",
+                        [
+                          "str",
+                          [
+                            "str",
+                            [
+                              "str",
+                              [
+                                "str",
+                                "anonymous",
+                                "_private"
+                              ],
+                              "Solidity"
+                            ],
+                            "Yul"
+                          ],
+                          "Views"
+                        ],
+                        "InventoryCandidateOrderControls"
+                      ],
+                      0
+                    ],
+                    "Solidity"
+                  ],
+                  "Yul"
+                ],
+                "Views"
+              ],
+              "Controls"
+            ],
+            "duplicateCandidates"
+          ]
+        },
+        {
+          "name": "_private.Solidity.Yul.Views.InventoryCandidateOrderControls.0.Solidity.Yul.Views.Controls.invalidCandidateRaw",
+          "name_key": [
+            "str",
+            [
+              "str",
+              [
+                "str",
+                [
+                  "str",
+                  [
+                    "str",
+                    [
+                      "num",
+                      [
+                        "str",
+                        [
+                          "str",
+                          [
+                            "str",
+                            [
+                              "str",
+                              [
+                                "str",
+                                "anonymous",
+                                "_private"
+                              ],
+                              "Solidity"
+                            ],
+                            "Yul"
+                          ],
+                          "Views"
+                        ],
+                        "InventoryCandidateOrderControls"
+                      ],
+                      0
+                    ],
+                    "Solidity"
+                  ],
+                  "Yul"
+                ],
+                "Views"
+              ],
+              "Controls"
+            ],
+            "invalidCandidateRaw"
+          ]
+        },
+        {
+          "name": "_private.Solidity.Yul.Views.InventoryCandidateOrderControls.0.Solidity.Yul.Views.Controls.observed",
+          "name_key": [
+            "str",
+            [
+              "str",
+              [
+                "str",
+                [
+                  "str",
+                  [
+                    "str",
+                    [
+                      "num",
+                      [
+                        "str",
+                        [
+                          "str",
+                          [
+                            "str",
+                            [
+                              "str",
+                              [
+                                "str",
+                                "anonymous",
+                                "_private"
+                              ],
+                              "Solidity"
+                            ],
+                            "Yul"
+                          ],
+                          "Views"
+                        ],
+                        "InventoryCandidateOrderControls"
+                      ],
+                      0
+                    ],
+                    "Solidity"
+                  ],
+                  "Yul"
+                ],
+                "Views"
+              ],
+              "Controls"
+            ],
+            "observed"
+          ]
+        }
+      ],
+      "path": "Solidity/Yul/Views/InventoryCandidateOrderControls.lean",
+      "status": "pass",
+      "top_commands": 16
+    },
+    {
+      "check_info_events": 3,
+      "check_reference_events": 36,
+      "check_top_commands": 3,
+      "exit_code": 0,
+      "finished_diagnostic_snapshots": 0,
+      "observed_constants": [
+        {
+          "name": "List.cons",
+          "name_key": [
+            "str",
+            [
+              "str",
+              "anonymous",
+              "List"
+            ],
+            "cons"
+          ]
+        },
+        {
+          "name": "List.nil",
+          "name_key": [
+            "str",
+            [
+              "str",
+              "anonymous",
+              "List"
+            ],
+            "nil"
+          ]
+        },
+        {
+          "name": "List.reverse",
+          "name_key": [
+            "str",
+            [
+              "str",
+              "anonymous",
+              "List"
+            ],
+            "reverse"
+          ]
+        },
+        {
+          "name": "Option.isNone",
+          "name_key": [
+            "str",
+            [
+              "str",
+              "anonymous",
+              "Option"
+            ],
+            "isNone"
+          ]
+        },
+        {
+          "name": "Prod.mk",
+          "name_key": [
+            "str",
+            [
+              "str",
+              "anonymous",
+              "Prod"
+            ],
+            "mk"
+          ]
+        },
+        {
+          "name": "Solidity.Yul.Views.decodeInventoryUpdates",
+          "name_key": [
+            "str",
+            [
+              "str",
+              [
+                "str",
+                [
+                  "str",
+                  "anonymous",
+                  "Solidity"
+                ],
+                "Yul"
+              ],
+              "Views"
+            ],
+            "decodeInventoryUpdates"
+          ]
+        },
+        {
+          "name": "Solidity.Yul.Views.Controls.mixedEntries",
+          "name_key": [
+            "str",
+            [
+              "str",
+              [
+                "str",
+                [
+                  "str",
+                  [
+                    "str",
+                    "anonymous",
+                    "Solidity"
+                  ],
+                  "Yul"
+                ],
+                "Views"
+              ],
+              "Controls"
+            ],
+            "mixedEntries"
+          ]
+        },
+        {
+          "name": "Solidity.Yul.Views.Controls.mixedPlacement",
+          "name_key": [
+            "str",
+            [
+              "str",
+              [
+                "str",
+                [
+                  "str",
+                  [
+                    "str",
+                    "anonymous",
+                    "Solidity"
+                  ],
+                  "Yul"
+                ],
+                "Views"
+              ],
+              "Controls"
+            ],
+            "mixedPlacement"
+          ]
+        },
+        {
+          "name": "_private.Solidity.Yul.Views.InventoryDecodeOrderControls.0.Solidity.Yul.Views.Controls.invalid",
+          "name_key": [
+            "str",
+            [
+              "str",
+              [
+                "str",
+                [
+                  "str",
+                  [
+                    "str",
+                    [
+                      "num",
+                      [
+                        "str",
+                        [
+                          "str",
+                          [
+                            "str",
+                            [
+                              "str",
+                              [
+                                "str",
+                                "anonymous",
+                                "_private"
+                              ],
+                              "Solidity"
+                            ],
+                            "Yul"
+                          ],
+                          "Views"
+                        ],
+                        "InventoryDecodeOrderControls"
+                      ],
+                      0
+                    ],
+                    "Solidity"
+                  ],
+                  "Yul"
+                ],
+                "Views"
+              ],
+              "Controls"
+            ],
+            "invalid"
+          ]
+        },
+        {
+          "name": "_private.Solidity.Yul.Views.InventoryDecodeOrderControls.0.Solidity.Yul.Views.Controls.observed",
+          "name_key": [
+            "str",
+            [
+              "str",
+              [
+                "str",
+                [
+                  "str",
+                  [
+                    "str",
+                    [
+                      "num",
+                      [
+                        "str",
+                        [
+                          "str",
+                          [
+                            "str",
+                            [
+                              "str",
+                              [
+                                "str",
+                                "anonymous",
+                                "_private"
+                              ],
+                              "Solidity"
+                            ],
+                            "Yul"
+                          ],
+                          "Views"
+                        ],
+                        "InventoryDecodeOrderControls"
+                      ],
+                      0
+                    ],
+                    "Solidity"
+                  ],
+                  "Yul"
+                ],
+                "Views"
+              ],
+              "Controls"
+            ],
+            "observed"
+          ]
+        }
+      ],
+      "path": "Solidity/Yul/Views/InventoryDecodeOrderControls.lean",
+      "status": "pass",
+      "top_commands": 15
+    },
+    {
+      "check_info_events": 4,
+      "check_reference_events": 51,
+      "check_top_commands": 4,
+      "exit_code": 0,
+      "finished_diagnostic_snapshots": 0,
+      "observed_constants": [
+        {
+          "name": "List.cons",
+          "name_key": [
+            "str",
+            [
+              "str",
+              "anonymous",
+              "List"
+            ],
+            "cons"
+          ]
+        },
+        {
+          "name": "List.nil",
+          "name_key": [
+            "str",
+            [
+              "str",
+              "anonymous",
+              "List"
+            ],
+            "nil"
+          ]
+        },
+        {
+          "name": "List.reverse",
+          "name_key": [
+            "str",
+            [
+              "str",
+              "anonymous",
+              "List"
+            ],
+            "reverse"
+          ]
+        },
+        {
+          "name": "Option.isSome",
+          "name_key": [
+            "str",
+            [
+              "str",
+              "anonymous",
+              "Option"
+            ],
+            "isSome"
+          ]
+        },
+        {
+          "name": "Prod.mk",
+          "name_key": [
+            "str",
+            [
+              "str",
+              "anonymous",
+              "Prod"
+            ],
+            "mk"
+          ]
+        },
+        {
+          "name": "Solidity.Yul.Views.decodeInventoryUpdates",
+          "name_key": [
+            "str",
+            [
+              "str",
+              [
+                "str",
+                [
+                  "str",
+                  "anonymous",
+                  "Solidity"
+                ],
+                "Yul"
+              ],
+              "Views"
+            ],
+            "decodeInventoryUpdates"
+          ]
+        },
+        {
+          "name": "Solidity.Yul.Views.inventoryStateWriteback",
+          "name_key": [
+            "str",
+            [
+              "str",
+              [
+                "str",
+                [
+                  "str",
+                  "anonymous",
+                  "Solidity"
+                ],
+                "Yul"
+              ],
+              "Views"
+            ],
+            "inventoryStateWriteback"
+          ]
+        },
+        {
+          "name": "Solidity.Yul.Views.Controls.inventoryPhysical",
+          "name_key": [
+            "str",
+            [
+              "str",
+              [
+                "str",
+                [
+                  "str",
+                  [
+                    "str",
+                    "anonymous",
+                    "Solidity"
+                  ],
+                  "Yul"
+                ],
+                "Views"
+              ],
+              "Controls"
+            ],
+            "inventoryPhysical"
+          ]
+        },
+        {
+          "name": "Solidity.Yul.Views.Controls.inventoryZeroAfter",
+          "name_key": [
+            "str",
+            [
+              "str",
+              [
+                "str",
+                [
+                  "str",
+                  [
+                    "str",
+                    "anonymous",
+                    "Solidity"
+                  ],
+                  "Yul"
+                ],
+                "Views"
+              ],
+              "Controls"
+            ],
+            "inventoryZeroAfter"
+          ]
+        },
+        {
+          "name": "Solidity.Yul.Views.Controls.inventoryZeroPhysical",
+          "name_key": [
+            "str",
+            [
+              "str",
+              [
+                "str",
+                [
+                  "str",
+                  [
+                    "str",
+                    "anonymous",
+                    "Solidity"
+                  ],
+                  "Yul"
+                ],
+                "Views"
+              ],
+              "Controls"
+            ],
+            "inventoryZeroPhysical"
+          ]
+        },
+        {
+          "name": "Solidity.Yul.Views.Controls.inventoryZeroRealized",
+          "name_key": [
+            "str",
+            [
+              "str",
+              [
+                "str",
+                [
+                  "str",
+                  [
+                    "str",
+                    "anonymous",
+                    "Solidity"
+                  ],
+                  "Yul"
+                ],
+                "Views"
+              ],
+              "Controls"
+            ],
+            "inventoryZeroRealized"
+          ]
+        },
+        {
+          "name": "Solidity.Yul.Views.Controls.mixedPlacement",
+          "name_key": [
+            "str",
+            [
+              "str",
+              [
+                "str",
+                [
+                  "str",
+                  [
+                    "str",
+                    "anonymous",
+                    "Solidity"
+                  ],
+                  "Yul"
+                ],
+                "Views"
+              ],
+              "Controls"
+            ],
+            "mixedPlacement"
+          ]
+        },
+        {
+          "name": "Solidity.Yul.Views.InventoryRealization.entries",
+          "name_key": [
+            "str",
+            [
+              "str",
+              [
+                "str",
+                [
+                  "str",
+                  [
+                    "str",
+                    "anonymous",
+                    "Solidity"
+                  ],
+                  "Yul"
+                ],
+                "Views"
+              ],
+              "InventoryRealization"
+            ],
+            "entries"
+          ]
+        },
+        {
+          "name": "Solidity.Yul.Views.InventoryRealization.history",
+          "name_key": [
+            "str",
+            [
+              "str",
+              [
+                "str",
+                [
+                  "str",
+                  [
+                    "str",
+                    "anonymous",
+                    "Solidity"
+                  ],
+                  "Yul"
+                ],
+                "Views"
+              ],
+              "InventoryRealization"
+            ],
+            "history"
+          ]
+        },
+        {
+          "name": "Solidity.Yul.Views.InventoryRealization.placement",
+          "name_key": [
+            "str",
+            [
+              "str",
+              [
+                "str",
+                [
+                  "str",
+                  [
+                    "str",
+                    "anonymous",
+                    "Solidity"
+                  ],
+                  "Yul"
+                ],
+                "Views"
+              ],
+              "InventoryRealization"
+            ],
+            "placement"
+          ]
+        },
+        {
+          "name": "_private.Solidity.Yul.Views.InventoryReplayControls.0.Solidity.Yul.Views.Controls.replayObserved",
+          "name_key": [
+            "str",
+            [
+              "str",
+              [
+                "str",
+                [
+                  "str",
+                  [
+                    "str",
+                    [
+                      "num",
+                      [
+                        "str",
+                        [
+                          "str",
+                          [
+                            "str",
+                            [
+                              "str",
+                              [
+                                "str",
+                                "anonymous",
+                                "_private"
+                              ],
+                              "Solidity"
+                            ],
+                            "Yul"
+                          ],
+                          "Views"
+                        ],
+                        "InventoryReplayControls"
+                      ],
+                      0
+                    ],
+                    "Solidity"
+                  ],
+                  "Yul"
+                ],
+                "Views"
+              ],
+              "Controls"
+            ],
+            "replayObserved"
+          ]
+        }
+      ],
+      "path": "Solidity/Yul/Views/InventoryReplayControls.lean",
+      "status": "pass",
+      "top_commands": 11
+    },
+    {
+      "check_info_events": 10,
+      "check_reference_events": 203,
+      "check_top_commands": 10,
+      "exit_code": 0,
+      "finished_diagnostic_snapshots": 0,
+      "observed_constants": [
+        {
+          "name": "And",
+          "name_key": [
+            "str",
+            "anonymous",
+            "And"
+          ]
+        },
+        {
+          "name": "Bool.false",
+          "name_key": [
+            "str",
+            [
+              "str",
+              "anonymous",
+              "Bool"
+            ],
+            "false"
+          ]
+        },
+        {
+          "name": "Bool.true",
+          "name_key": [
+            "str",
+            [
+              "str",
+              "anonymous",
+              "Bool"
+            ],
+            "true"
+          ]
+        },
+        {
+          "name": "Decidable.decide",
+          "name_key": [
+            "str",
+            [
+              "str",
+              "anonymous",
+              "Decidable"
+            ],
+            "decide"
+          ]
+        },
+        {
+          "name": "Fin.mk",
+          "name_key": [
+            "str",
+            [
+              "str",
+              "anonymous",
+              "Fin"
+            ],
+            "mk"
+          ]
+        },
+        {
+          "name": "Fin.val",
+          "name_key": [
+            "str",
+            [
+              "str",
+              "anonymous",
+              "Fin"
+            ],
+            "val"
+          ]
+        },
+        {
+          "name": "List.cons",
+          "name_key": [
+            "str",
+            [
+              "str",
+              "anonymous",
+              "List"
+            ],
+            "cons"
+          ]
+        },
+        {
+          "name": "List.length",
+          "name_key": [
+            "str",
+            [
+              "str",
+              "anonymous",
+              "List"
+            ],
+            "length"
+          ]
+        },
+        {
+          "name": "List.nil",
+          "name_key": [
+            "str",
+            [
+              "str",
+              "anonymous",
+              "List"
+            ],
+            "nil"
+          ]
+        },
+        {
+          "name": "Option.isNone",
+          "name_key": [
+            "str",
+            [
+              "str",
+              "anonymous",
+              "Option"
+            ],
+            "isNone"
+          ]
+        },
+        {
+          "name": "Option.isSome",
+          "name_key": [
+            "str",
+            [
+              "str",
+              "anonymous",
+              "Option"
+            ],
+            "isSome"
+          ]
+        },
+        {
+          "name": "Option.some",
+          "name_key": [
+            "str",
+            [
+              "str",
+              "anonymous",
+              "Option"
+            ],
+            "some"
+          ]
+        },
+        {
+          "name": "Prod.mk",
+          "name_key": [
+            "str",
+            [
+              "str",
+              "anonymous",
+              "Prod"
+            ],
+            "mk"
+          ]
+        },
+        {
+          "name": "Prod.snd",
+          "name_key": [
+            "str",
+            [
+              "str",
+              "anonymous",
+              "Prod"
+            ],
+            "snd"
+          ]
+        },
+        {
+          "name": "Sigma.fst",
+          "name_key": [
+            "str",
+            [
+              "str",
+              "anonymous",
+              "Sigma"
+            ],
+            "fst"
+          ]
+        },
+        {
+          "name": "Sigma.snd",
+          "name_key": [
+            "str",
+            [
+              "str",
+              "anonymous",
+              "Sigma"
+            ],
+            "snd"
+          ]
+        },
+        {
+          "name": "Solidity.Source.Heap.next",
+          "name_key": [
+            "str",
+            [
+              "str",
+              [
+                "str",
+                [
+                  "str",
+                  "anonymous",
+                  "Solidity"
+                ],
+                "Source"
+              ],
+              "Heap"
+            ],
+            "next"
+          ]
+        },
+        {
+          "name": "Solidity.Source.Idx.here",
+          "name_key": [
+            "str",
+            [
+              "str",
+              [
+                "str",
+                [
+                  "str",
+                  "anonymous",
+                  "Solidity"
+                ],
+                "Source"
+              ],
+              "Idx"
+            ],
+            "here"
+          ]
+        },
+        {
+          "name": "Solidity.Source.Idx.there",
+          "name_key": [
+            "str",
+            [
+              "str",
+              [
+                "str",
+                [
+                  "str",
+                  "anonymous",
+                  "Solidity"
+                ],
+                "Source"
+              ],
+              "Idx"
+            ],
+            "there"
+          ]
+        },
+        {
+          "name": "Solidity.Source.St.heap",
+          "name_key": [
+            "str",
+            [
+              "str",
+              [
+                "str",
+                [
+                  "str",
+                  "anonymous",
+                  "Solidity"
+                ],
+                "Source"
+              ],
+              "St"
+            ],
+            "heap"
+          ]
+        },
+        {
+          "name": "Solidity.Yul.Views.encodeMixedHeap",
+          "name_key": [
+            "str",
+            [
+              "str",
+              [
+                "str",
+                [
+                  "str",
+                  "anonymous",
+                  "Solidity"
+                ],
+                "Yul"
+              ],
+              "Views"
+            ],
+            "encodeMixedHeap"
+          ]
+        },
+        {
+          "name": "Solidity.Yul.Views.mload",
+          "name_key": [
+            "str",
+            [
+              "str",
+              [
+                "str",
+                [
+                  "str",
+                  "anonymous",
+                  "Solidity"
+                ],
+                "Yul"
+              ],
+              "Views"
+            ],
+            "mload"
+          ]
+        },
+        {
+          "name": "Solidity.Yul.Views.readBytes",
+          "name_key": [
+            "str",
+            [
+              "str",
+              [
+                "str",
+                [
+                  "str",
+                  "anonymous",
+                  "Solidity"
+                ],
+                "Yul"
+              ],
+              "Views"
+            ],
+            "readBytes"
+          ]
+        },
+        {
+          "name": "Solidity.Yul.Views.MemoryShape.array",
+          "name_key": [
+            "str",
+            [
+              "str",
+              [
+                "str",
+                [
+                  "str",
+                  [
+                    "str",
+                    "anonymous",
+                    "Solidity"
+                  ],
+                  "Yul"
+                ],
+                "Views"
+              ],
+              "MemoryShape"
+            ],
+            "array"
+          ]
+        },
+        {
+          "name": "Solidity.Yul.Views.NominalInventory.runSnapshots",
+          "name_key": [
+            "str",
+            [
+              "str",
+              [
+                "str",
+                [
+                  "str",
+                  [
+                    "str",
+                    "anonymous",
+                    "Solidity"
+                  ],
+                  "Yul"
+                ],
+                "Views"
+              ],
+              "NominalInventory"
+            ],
+            "runSnapshots"
+          ]
+        },
+        {
+          "name": "Solidity.Yul.Views.NominalInventory.snapshotStep",
+          "name_key": [
+            "str",
+            [
+              "str",
+              [
+                "str",
+                [
+                  "str",
+                  [
+                    "str",
+                    "anonymous",
+                    "Solidity"
+                  ],
+                  "Yul"
+                ],
+                "Views"
+              ],
+              "NominalInventory"
+            ],
+            "snapshotStep"
+          ]
+        },
+        {
+          "name": "Solidity.Yul.Views.NominalInventory.update",
+          "name_key": [
+            "str",
+            [
+              "str",
+              [
+                "str",
+                [
+                  "str",
+                  [
+                    "str",
+                    "anonymous",
+                    "Solidity"
+                  ],
+                  "Yul"
+                ],
+                "Views"
+              ],
+              "NominalInventory"
+            ],
+            "update"
+          ]
+        },
+        {
+          "name": "Solidity.Yul.Views.Placement.free",
+          "name_key": [
+            "str",
+            [
+              "str",
+              [
+                "str",
+                [
+                  "str",
+                  [
+                    "str",
+                    "anonymous",
+                    "Solidity"
+                  ],
+                  "Yul"
+                ],
+                "Views"
+              ],
+              "Placement"
+            ],
+            "free"
+          ]
+        },
+        {
+          "name": "Solidity.Yul.Views.Placement.shape",
+          "name_key": [
+            "str",
+            [
+              "str",
+              [
+                "str",
+                [
+                  "str",
+                  [
+                    "str",
+                    "anonymous",
+                    "Solidity"
+                  ],
+                  "Yul"
+                ],
+                "Views"
+              ],
+              "Placement"
+            ],
+            "shape"
+          ]
+        },
+        {
+          "name": "Solidity.Yul.Views.RetainedAllocation.initial",
+          "name_key": [
+            "str",
+            [
+              "str",
+              [
+                "str",
+                [
+                  "str",
+                  [
+                    "str",
+                    "anonymous",
+                    "Solidity"
+                  ],
+                  "Yul"
+                ],
+                "Views"
+              ],
+              "RetainedAllocation"
+            ],
+            "initial"
+          ]
+        },
+        {
+          "name": "Solidity.Yul.Views.NominalInventory.SnapshotControls.changedRaw",
+          "name_key": [
+            "str",
+            [
+              "str",
+              [
+                "str",
+                [
+                  "str",
+                  [
+                    "str",
+                    [
+                      "str",
+                      "anonymous",
+                      "Solidity"
+                    ],
+                    "Yul"
+                  ],
+                  "Views"
+                ],
+                "NominalInventory"
+              ],
+              "SnapshotControls"
+            ],
+            "changedRaw"
+          ]
+        },
+        {
+          "name": "Solidity.Yul.Views.NominalInventory.SnapshotControls.cursor",
+          "name_key": [
+            "str",
+            [
+              "str",
+              [
+                "str",
+                [
+                  "str",
+                  [
+                    "str",
+                    [
+                      "str",
+                      "anonymous",
+                      "Solidity"
+                    ],
+                    "Yul"
+                  ],
+                  "Views"
+                ],
+                "NominalInventory"
+              ],
+              "SnapshotControls"
+            ],
+            "cursor"
+          ]
+        },
+        {
+          "name": "Solidity.Yul.Views.NominalInventory.SnapshotControls.cycle",
+          "name_key": [
+            "str",
+            [
+              "str",
+              [
+                "str",
+                [
+                  "str",
+                  [
+                    "str",
+                    [
+                      "str",
+                      "anonymous",
+                      "Solidity"
+                    ],
+                    "Yul"
+                  ],
+                  "Views"
+                ],
+                "NominalInventory"
+              ],
+              "SnapshotControls"
+            ],
+            "cycle"
+          ]
+        },
+        {
+          "name": "Solidity.Yul.Views.NominalInventory.SnapshotControls.firstStop",
+          "name_key": [
+            "str",
+            [
+              "str",
+              [
+                "str",
+                [
+                  "str",
+                  [
+                    "str",
+                    [
+                      "str",
+                      "anonymous",
+                      "Solidity"
+                    ],
+                    "Yul"
+                  ],
+                  "Views"
+                ],
+                "NominalInventory"
+              ],
+              "SnapshotControls"
+            ],
+            "firstStop"
+          ]
+        },
+        {
+          "name": "Solidity.Yul.Views.NominalInventory.SnapshotControls.invalidRaw",
+          "name_key": [
+            "str",
+            [
+              "str",
+              [
+                "str",
+                [
+                  "str",
+                  [
+                    "str",
+                    [
+                      "str",
+                      "anonymous",
+                      "Solidity"
+                    ],
+                    "Yul"
+                  ],
+                  "Views"
+                ],
+                "NominalInventory"
+              ],
+              "SnapshotControls"
+            ],
+            "invalidRaw"
+          ]
+        },
+        {
+          "name": "Solidity.Yul.Views.NominalInventory.SnapshotControls.mixed",
+          "name_key": [
+            "str",
+            [
+              "str",
+              [
+                "str",
+                [
+                  "str",
+                  [
+                    "str",
+                    [
+                      "str",
+                      "anonymous",
+                      "Solidity"
+                    ],
+                    "Yul"
+                  ],
+                  "Views"
+                ],
+                "NominalInventory"
+              ],
+              "SnapshotControls"
+            ],
+            "mixed"
+          ]
+        },
+        {
+          "name": "Solidity.Yul.Views.NominalInventory.SnapshotControls.mixedBad",
+          "name_key": [
+            "str",
+            [
+              "str",
+              [
+                "str",
+                [
+                  "str",
+                  [
+                    "str",
+                    [
+                      "str",
+                      "anonymous",
+                      "Solidity"
+                    ],
+                    "Yul"
+                  ],
+                  "Views"
+                ],
+                "NominalInventory"
+              ],
+              "SnapshotControls"
+            ],
+            "mixedBad"
+          ]
+        },
+        {
+          "name": "Solidity.Yul.Views.NominalInventory.SnapshotControls.repeated",
+          "name_key": [
+            "str",
+            [
+              "str",
+              [
+                "str",
+                [
+                  "str",
+                  [
+                    "str",
+                    [
+                      "str",
+                      "anonymous",
+                      "Solidity"
+                    ],
+                    "Yul"
+                  ],
+                  "Views"
+                ],
+                "NominalInventory"
+              ],
+              "SnapshotControls"
+            ],
+            "repeated"
+          ]
+        },
+        {
+          "name": "Solidity.Yul.Views.NominalInventory.SnapshotControls.stopped",
+          "name_key": [
+            "str",
+            [
+              "str",
+              [
+                "str",
+                [
+                  "str",
+                  [
+                    "str",
+                    [
+                      "str",
+                      "anonymous",
+                      "Solidity"
+                    ],
+                    "Yul"
+                  ],
+                  "Views"
+                ],
+                "NominalInventory"
+              ],
+              "SnapshotControls"
+            ],
+            "stopped"
+          ]
+        },
+        {
+          "name": "Solidity.Yul.Views.NominalInventory.SnapshotControls.zero",
+          "name_key": [
+            "str",
+            [
+              "str",
+              [
+                "str",
+                [
+                  "str",
+                  [
+                    "str",
+                    [
+                      "str",
+                      "anonymous",
+                      "Solidity"
+                    ],
+                    "Yul"
+                  ],
+                  "Views"
+                ],
+                "NominalInventory"
+              ],
+              "SnapshotControls"
+            ],
+            "zero"
+          ]
+        },
+        {
+          "name": "Solidity.Yul.Views.NominalInventory.SnapshotCursor.entries",
+          "name_key": [
+            "str",
+            [
+              "str",
+              [
+                "str",
+                [
+                  "str",
+                  [
+                    "str",
+                    [
+                      "str",
+                      "anonymous",
+                      "Solidity"
+                    ],
+                    "Yul"
+                  ],
+                  "Views"
+                ],
+                "NominalInventory"
+              ],
+              "SnapshotCursor"
+            ],
+            "entries"
+          ]
+        },
+        {
+          "name": "Solidity.Yul.Views.NominalInventory.SnapshotCursor.mk",
+          "name_key": [
+            "str",
+            [
+              "str",
+              [
+                "str",
+                [
+                  "str",
+                  [
+                    "str",
+                    [
+                      "str",
+                      "anonymous",
+                      "Solidity"
+                    ],
+                    "Yul"
+                  ],
+                  "Views"
+                ],
+                "NominalInventory"
+              ],
+              "SnapshotCursor"
+            ],
+            "mk"
+          ]
+        },
+        {
+          "name": "Solidity.Yul.Views.NominalInventory.SnapshotCursor.placement",
+          "name_key": [
+            "str",
+            [
+              "str",
+              [
+                "str",
+                [
+                  "str",
+                  [
+                    "str",
+                    [
+                      "str",
+                      "anonymous",
+                      "Solidity"
+                    ],
+                    "Yul"
+                  ],
+                  "Views"
+                ],
+                "NominalInventory"
+              ],
+              "SnapshotCursor"
+            ],
+            "placement"
+          ]
+        },
+        {
+          "name": "Solidity.Yul.Views.NominalInventory.SnapshotProgress.current",
+          "name_key": [
+            "str",
+            [
+              "str",
+              [
+                "str",
+                [
+                  "str",
+                  [
+                    "str",
+                    [
+                      "str",
+                      "anonymous",
+                      "Solidity"
+                    ],
+                    "Yul"
+                  ],
+                  "Views"
+                ],
+                "NominalInventory"
+              ],
+              "SnapshotProgress"
+            ],
+            "current"
+          ]
+        },
+        {
+          "name": "Solidity.Yul.Views.NominalInventory.SnapshotProgress.pending",
+          "name_key": [
+            "str",
+            [
+              "str",
+              [
+                "str",
+                [
+                  "str",
+                  [
+                    "str",
+                    [
+                      "str",
+                      "anonymous",
+                      "Solidity"
+                    ],
+                    "Yul"
+                  ],
+                  "Views"
+                ],
+                "NominalInventory"
+              ],
+              "SnapshotProgress"
+            ],
+            "pending"
+          ]
+        },
+        {
+          "name": "Solidity.Yul.Views.NominalInventory.UnchangedControls.placement",
+          "name_key": [
+            "str",
+            [
+              "str",
+              [
+                "str",
+                [
+                  "str",
+                  [
+                    "str",
+                    [
+                      "str",
+                      "anonymous",
+                      "Solidity"
+                    ],
+                    "Yul"
+                  ],
+                  "Views"
+                ],
+                "NominalInventory"
+              ],
+              "UnchangedControls"
+            ],
+            "placement"
+          ]
+        },
+        {
+          "name": "Solidity.Yul.Views.NominalMemory.Controls.aliasRead",
+          "name_key": [
+            "str",
+            [
+              "str",
+              [
+                "str",
+                [
+                  "str",
+                  [
+                    "str",
+                    [
+                      "str",
+                      "anonymous",
+                      "Solidity"
+                    ],
+                    "Yul"
+                  ],
+                  "Views"
+                ],
+                "NominalMemory"
+              ],
+              "Controls"
+            ],
+            "aliasRead"
+          ]
+        },
+        {
+          "name": "Solidity.Yul.Views.NominalMemory.RetainedControls.aliasRead",
+          "name_key": [
+            "str",
+            [
+              "str",
+              [
+                "str",
+                [
+                  "str",
+                  [
+                    "str",
+                    [
+                      "str",
+                      "anonymous",
+                      "Solidity"
+                    ],
+                    "Yul"
+                  ],
+                  "Views"
+                ],
+                "NominalMemory"
+              ],
+              "RetainedControls"
+            ],
+            "aliasRead"
+          ]
+        },
+        {
+          "name": "Solidity.Yul.Views.NominalMemory.RetainedControls.placement",
+          "name_key": [
+            "str",
+            [
+              "str",
+              [
+                "str",
+                [
+                  "str",
+                  [
+                    "str",
+                    [
+                      "str",
+                      "anonymous",
+                      "Solidity"
+                    ],
+                    "Yul"
+                  ],
+                  "Views"
+                ],
+                "NominalMemory"
+              ],
+              "RetainedControls"
+            ],
+            "placement"
+          ]
+        },
+        {
+          "name": "Solidity.Yul.Views.NominalMemory.RetainedControls.regrownRaw",
+          "name_key": [
+            "str",
+            [
+              "str",
+              [
+                "str",
+                [
+                  "str",
+                  [
+                    "str",
+                    [
+                      "str",
+                      "anonymous",
+                      "Solidity"
+                    ],
+                    "Yul"
+                  ],
+                  "Views"
+                ],
+                "NominalMemory"
+              ],
+              "RetainedControls"
+            ],
+            "regrownRaw"
+          ]
+        },
+        {
+          "name": "Solidity.Yul.Views.NominalMemory.RetainedControls.shrunkRaw",
+          "name_key": [
+            "str",
+            [
+              "str",
+              [
+                "str",
+                [
+                  "str",
+                  [
+                    "str",
+                    [
+                      "str",
+                      "anonymous",
+                      "Solidity"
+                    ],
+                    "Yul"
+                  ],
+                  "Views"
+                ],
+                "NominalMemory"
+              ],
+              "RetainedControls"
+            ],
+            "shrunkRaw"
+          ]
+        },
+        {
+          "name": "Solidity.Yul.Views.NominalMemory.RetainedControls.state",
+          "name_key": [
+            "str",
+            [
+              "str",
+              [
+                "str",
+                [
+                  "str",
+                  [
+                    "str",
+                    [
+                      "str",
+                      "anonymous",
+                      "Solidity"
+                    ],
+                    "Yul"
+                  ],
+                  "Views"
+                ],
+                "NominalMemory"
+              ],
+              "RetainedControls"
+            ],
+            "state"
+          ]
+        }
+      ],
+      "path": "Solidity/Yul/Views/InventorySnapshotHistoryControls.lean",
+      "status": "pass",
+      "top_commands": 33
+    },
+    {
+      "check_info_events": 3,
+      "check_reference_events": 62,
+      "check_top_commands": 3,
+      "exit_code": 0,
+      "finished_diagnostic_snapshots": 0,
+      "observed_constants": [
+        {
+          "name": "ExceptT.run",
+          "name_key": [
+            "str",
+            [
+              "str",
+              "anonymous",
+              "ExceptT"
+            ],
+            "run"
+          ]
+        },
+        {
+          "name": "Fin.val",
+          "name_key": [
+            "str",
+            [
+              "str",
+              "anonymous",
+              "Fin"
+            ],
+            "val"
+          ]
+        },
+        {
+          "name": "List.cons",
+          "name_key": [
+            "str",
+            [
+              "str",
+              "anonymous",
+              "List"
+            ],
+            "cons"
+          ]
+        },
+        {
+          "name": "List.nil",
+          "name_key": [
+            "str",
+            [
+              "str",
+              "anonymous",
+              "List"
+            ],
+            "nil"
+          ]
+        },
+        {
+          "name": "Prod.mk",
+          "name_key": [
+            "str",
+            [
+              "str",
+              "anonymous",
+              "Prod"
+            ],
+            "mk"
+          ]
+        },
+        {
+          "name": "Prod.snd",
+          "name_key": [
+            "str",
+            [
+              "str",
+              "anonymous",
+              "Prod"
+            ],
+            "snd"
+          ]
+        },
+        {
+          "name": "UInt8.toNat",
+          "name_key": [
+            "str",
+            [
+              "str",
+              "anonymous",
+              "UInt8"
+            ],
+            "toNat"
+          ]
+        },
+        {
+          "name": "Solidity.Source.Heap.next",
+          "name_key": [
+            "str",
+            [
+              "str",
+              [
+                "str",
+                [
+                  "str",
+                  "anonymous",
+                  "Solidity"
+                ],
+                "Source"
+              ],
+              "Heap"
+            ],
+            "next"
+          ]
+        },
+        {
+          "name": "Solidity.Source.St.heap",
+          "name_key": [
+            "str",
+            [
+              "str",
+              [
+                "str",
+                [
+                  "str",
+                  "anonymous",
+                  "Solidity"
+                ],
+                "Source"
+              ],
+              "St"
+            ],
+            "heap"
+          ]
+        },
+        {
+          "name": "Solidity.Yul.Views.mload",
+          "name_key": [
+            "str",
+            [
+              "str",
+              [
+                "str",
+                [
+                  "str",
+                  "anonymous",
+                  "Solidity"
+                ],
+                "Yul"
+              ],
+              "Views"
+            ],
+            "mload"
+          ]
+        },
+        {
+          "name": "Solidity.Yul.Views.MemoryImage.encode",
+          "name_key": [
+            "str",
+            [
+              "str",
+              [
+                "str",
+                [
+                  "str",
+                  [
+                    "str",
+                    "anonymous",
+                    "Solidity"
+                  ],
+                  "Yul"
+                ],
+                "Views"
+              ],
+              "MemoryImage"
+            ],
+            "encode"
+          ]
+        },
+        {
+          "name": "_private.Solidity.Yul.Views.MemoryImageOrderControls.0.Solidity.Yul.Views.ImageOrderControls.arrayImage",
+          "name_key": [
+            "str",
+            [
+              "str",
+              [
+                "str",
+                [
+                  "str",
+                  [
+                    "str",
+                    [
+                      "num",
+                      [
+                        "str",
+                        [
+                          "str",
+                          [
+                            "str",
+                            [
+                              "str",
+                              [
+                                "str",
+                                "anonymous",
+                                "_private"
+                              ],
+                              "Solidity"
+                            ],
+                            "Yul"
+                          ],
+                          "Views"
+                        ],
+                        "MemoryImageOrderControls"
+                      ],
+                      0
+                    ],
+                    "Solidity"
+                  ],
+                  "Yul"
+                ],
+                "Views"
+              ],
+              "ImageOrderControls"
+            ],
+            "arrayImage"
+          ]
+        },
+        {
+          "name": "_private.Solidity.Yul.Views.MemoryImageOrderControls.0.Solidity.Yul.Views.ImageOrderControls.combined",
+          "name_key": [
+            "str",
+            [
+              "str",
+              [
+                "str",
+                [
+                  "str",
+                  [
+                    "str",
+                    [
+                      "num",
+                      [
+                        "str",
+                        [
+                          "str",
+                          [
+                            "str",
+                            [
+                              "str",
+                              [
+                                "str",
+                                "anonymous",
+                                "_private"
+                              ],
+                              "Solidity"
+                            ],
+                            "Yul"
+                          ],
+                          "Views"
+                        ],
+                        "MemoryImageOrderControls"
+                      ],
+                      0
+                    ],
+                    "Solidity"
+                  ],
+                  "Yul"
+                ],
+                "Views"
+              ],
+              "ImageOrderControls"
+            ],
+            "combined"
+          ]
+        },
+        {
+          "name": "_private.Solidity.Yul.Views.MemoryImageOrderControls.0.Solidity.Yul.Views.ImageOrderControls.missingFirst",
+          "name_key": [
+            "str",
+            [
+              "str",
+              [
+                "str",
+                [
+                  "str",
+                  [
+                    "str",
+                    [
+                      "num",
+                      [
+                        "str",
+                        [
+                          "str",
+                          [
+                            "str",
+                            [
+                              "str",
+                              [
+                                "str",
+                                "anonymous",
+                                "_private"
+                              ],
+                              "Solidity"
+                            ],
+                            "Yul"
+                          ],
+                          "Views"
+                        ],
+                        "MemoryImageOrderControls"
+                      ],
+                      0
+                    ],
+                    "Solidity"
+                  ],
+                  "Yul"
+                ],
+                "Views"
+              ],
+              "ImageOrderControls"
+            ],
+            "missingFirst"
+          ]
+        },
+        {
+          "name": "_private.Solidity.Yul.Views.MemoryImageOrderControls.0.Solidity.Yul.Views.ImageOrderControls.missingLast",
+          "name_key": [
+            "str",
+            [
+              "str",
+              [
+                "str",
+                [
+                  "str",
+                  [
+                    "str",
+                    [
+                      "num",
+                      [
+                        "str",
+                        [
+                          "str",
+                          [
+                            "str",
+                            [
+                              "str",
+                              [
+                                "str",
+                                "anonymous",
+                                "_private"
+                              ],
+                              "Solidity"
+                            ],
+                            "Yul"
+                          ],
+                          "Views"
+                        ],
+                        "MemoryImageOrderControls"
+                      ],
+                      0
+                    ],
+                    "Solidity"
+                  ],
+                  "Yul"
+                ],
+                "Views"
+              ],
+              "ImageOrderControls"
+            ],
+            "missingLast"
+          ]
+        },
+        {
+          "name": "_private.Solidity.Yul.Views.MemoryImageOrderControls.0.Solidity.Yul.Views.ImageOrderControls.raw",
+          "name_key": [
+            "str",
+            [
+              "str",
+              [
+                "str",
+                [
+                  "str",
+                  [
+                    "str",
+                    [
+                      "num",
+                      [
+                        "str",
+                        [
+                          "str",
+                          [
+                            "str",
+                            [
+                              "str",
+                              [
+                                "str",
+                                "anonymous",
+                                "_private"
+                              ],
+                              "Solidity"
+                            ],
+                            "Yul"
+                          ],
+                          "Views"
+                        ],
+                        "MemoryImageOrderControls"
+                      ],
+                      0
+                    ],
+                    "Solidity"
+                  ],
+                  "Yul"
+                ],
+                "Views"
+              ],
+              "ImageOrderControls"
+            ],
+            "raw"
+          ]
+        },
+        {
+          "name": "_private.Solidity.Yul.Views.MemoryImageOrderControls.0.Solidity.Yul.Views.ImageOrderControls.state",
+          "name_key": [
+            "str",
+            [
+              "str",
+              [
+                "str",
+                [
+                  "str",
+                  [
+                    "str",
+                    [
+                      "num",
+                      [
+                        "str",
+                        [
+                          "str",
+                          [
+                            "str",
+                            [
+                              "str",
+                              [
+                                "str",
+                                "anonymous",
+                                "_private"
+                              ],
+                              "Solidity"
+                            ],
+                            "Yul"
+                          ],
+                          "Views"
+                        ],
+                        "MemoryImageOrderControls"
+                      ],
+                      0
+                    ],
+                    "Solidity"
+                  ],
+                  "Yul"
+                ],
+                "Views"
+              ],
+              "ImageOrderControls"
+            ],
+            "state"
+          ]
+        },
+        {
+          "name": "_private.Solidity.Yul.Views.MemoryImageOrderControls.0.Solidity.Yul.Views.ImageOrderControls.stringImage",
+          "name_key": [
+            "str",
+            [
+              "str",
+              [
+                "str",
+                [
+                  "str",
+                  [
+                    "str",
+                    [
+                      "num",
+                      [
+                        "str",
+                        [
+                          "str",
+                          [
+                            "str",
+                            [
+                              "str",
+                              [
+                                "str",
+                                "anonymous",
+                                "_private"
+                              ],
+                              "Solidity"
+                            ],
+                            "Yul"
+                          ],
+                          "Views"
+                        ],
+                        "MemoryImageOrderControls"
+                      ],
+                      0
+                    ],
+                    "Solidity"
+                  ],
+                  "Yul"
+                ],
+                "Views"
+              ],
+              "ImageOrderControls"
+            ],
+            "stringImage"
+          ]
+        }
+      ],
+      "path": "Solidity/Yul/Views/MemoryImageOrderControls.lean",
+      "status": "pass",
+      "top_commands": 24
+    },
+    {
+      "check_info_events": 3,
+      "check_reference_events": 44,
+      "check_top_commands": 3,
+      "exit_code": 0,
+      "finished_diagnostic_snapshots": 0,
+      "observed_constants": [
+        {
+          "name": "Bool.and",
+          "name_key": [
+            "str",
+            [
+              "str",
+              "anonymous",
+              "Bool"
+            ],
+            "and"
+          ]
+        },
+        {
+          "name": "Fin.val",
+          "name_key": [
+            "str",
+            [
+              "str",
+              "anonymous",
+              "Fin"
+            ],
+            "val"
+          ]
+        },
+        {
+          "name": "List.cons",
+          "name_key": [
+            "str",
+            [
+              "str",
+              "anonymous",
+              "List"
+            ],
+            "cons"
+          ]
+        },
+        {
+          "name": "List.map",
+          "name_key": [
+            "str",
+            [
+              "str",
+              "anonymous",
+              "List"
+            ],
+            "map"
+          ]
+        },
+        {
+          "name": "List.nil",
+          "name_key": [
+            "str",
+            [
+              "str",
+              "anonymous",
+              "List"
+            ],
+            "nil"
+          ]
+        },
+        {
+          "name": "List.take",
+          "name_key": [
+            "str",
+            [
+              "str",
+              "anonymous",
+              "List"
+            ],
+            "take"
+          ]
+        },
+        {
+          "name": "Prod.mk",
+          "name_key": [
+            "str",
+            [
+              "str",
+              "anonymous",
+              "Prod"
+            ],
+            "mk"
+          ]
+        },
+        {
+          "name": "UInt8.toNat",
+          "name_key": [
+            "str",
+            [
+              "str",
+              "anonymous",
+              "UInt8"
+            ],
+            "toNat"
+          ]
+        },
+        {
+          "name": "Solidity.Yul.Views.encodeMixedHeap",
+          "name_key": [
+            "str",
+            [
+              "str",
+              [
+                "str",
+                [
+                  "str",
+                  "anonymous",
+                  "Solidity"
+                ],
+                "Yul"
+              ],
+              "Views"
+            ],
+            "encodeMixedHeap"
+          ]
+        },
+        {
+          "name": "Solidity.Yul.Views.mload",
+          "name_key": [
+            "str",
+            [
+              "str",
+              [
+                "str",
+                [
+                  "str",
+                  "anonymous",
+                  "Solidity"
+                ],
+                "Yul"
+              ],
+              "Views"
+            ],
+            "mload"
+          ]
+        },
+        {
+          "name": "Solidity.Yul.Views.Controls.mixedPlacement",
+          "name_key": [
+            "str",
+            [
+              "str",
+              [
+                "str",
+                [
+                  "str",
+                  [
+                    "str",
+                    "anonymous",
+                    "Solidity"
+                  ],
+                  "Yul"
+                ],
+                "Views"
+              ],
+              "Controls"
+            ],
+            "mixedPlacement"
+          ]
+        },
+        {
+          "name": "_private.Solidity.Yul.Views.MixedHeapOrderControls.0.Solidity.Yul.Views.Controls.backward",
+          "name_key": [
+            "str",
+            [
+              "str",
+              [
+                "str",
+                [
+                  "str",
+                  [
+                    "str",
+                    [
+                      "num",
+                      [
+                        "str",
+                        [
+                          "str",
+                          [
+                            "str",
+                            [
+                              "str",
+                              [
+                                "str",
+                                "anonymous",
+                                "_private"
+                              ],
+                              "Solidity"
+                            ],
+                            "Yul"
+                          ],
+                          "Views"
+                        ],
+                        "MixedHeapOrderControls"
+                      ],
+                      0
+                    ],
+                    "Solidity"
+                  ],
+                  "Yul"
+                ],
+                "Views"
+              ],
+              "Controls"
+            ],
+            "backward"
+          ]
+        },
+        {
+          "name": "_private.Solidity.Yul.Views.MixedHeapOrderControls.0.Solidity.Yul.Views.Controls.orderEntries",
+          "name_key": [
+            "str",
+            [
+              "str",
+              [
+                "str",
+                [
+                  "str",
+                  [
+                    "str",
+                    [
+                      "num",
+                      [
+                        "str",
+                        [
+                          "str",
+                          [
+                            "str",
+                            [
+                              "str",
+                              [
+                                "str",
+                                "anonymous",
+                                "_private"
+                              ],
+                              "Solidity"
+                            ],
+                            "Yul"
+                          ],
+                          "Views"
+                        ],
+                        "MixedHeapOrderControls"
+                      ],
+                      0
+                    ],
+                    "Solidity"
+                  ],
+                  "Yul"
+                ],
+                "Views"
+              ],
+              "Controls"
+            ],
+            "orderEntries"
+          ]
+        },
+        {
+          "name": "_private.Solidity.Yul.Views.MixedHeapOrderControls.0.Solidity.Yul.Views.Controls.orderResidual",
+          "name_key": [
+            "str",
+            [
+              "str",
+              [
+                "str",
+                [
+                  "str",
+                  [
+                    "str",
+                    [
+                      "num",
+                      [
+                        "str",
+                        [
+                          "str",
+                          [
+                            "str",
+                            [
+                              "str",
+                              [
+                                "str",
+                                "anonymous",
+                                "_private"
+                              ],
+                              "Solidity"
+                            ],
+                            "Yul"
+                          ],
+                          "Views"
+                        ],
+                        "MixedHeapOrderControls"
+                      ],
+                      0
+                    ],
+                    "Solidity"
+                  ],
+                  "Yul"
+                ],
+                "Views"
+              ],
+              "Controls"
+            ],
+            "orderResidual"
+          ]
+        }
+      ],
+      "path": "Solidity/Yul/Views/MixedHeapOrderControls.lean",
+      "status": "pass",
+      "top_commands": 16
+    },
+    {
+      "check_info_events": 2,
+      "check_reference_events": 23,
+      "check_top_commands": 2,
+      "exit_code": 0,
+      "finished_diagnostic_snapshots": 9,
+      "observed_constants": [
+        {
+          "name": "List",
+          "name_key": [
+            "str",
+            "anonymous",
+            "List"
+          ]
+        },
+        {
+          "name": "rfl",
+          "name_key": [
+            "str",
+            "anonymous",
+            "rfl"
+          ]
+        },
+        {
+          "name": "List.cons",
+          "name_key": [
+            "str",
+            [
+              "str",
+              "anonymous",
+              "List"
+            ],
+            "cons"
+          ]
+        },
+        {
+          "name": "List.nil",
+          "name_key": [
+            "str",
+            [
+              "str",
+              "anonymous",
+              "List"
+            ],
+            "nil"
+          ]
+        },
+        {
+          "name": "Option.none",
+          "name_key": [
+            "str",
+            [
+              "str",
+              "anonymous",
+              "Option"
+            ],
+            "none"
+          ]
+        },
+        {
+          "name": "Solidity.Roadmap.Word",
+          "name_key": [
+            "str",
+            [
+              "str",
+              [
+                "str",
+                "anonymous",
+                "Solidity"
+              ],
+              "Roadmap"
+            ],
+            "Word"
+          ]
+        },
+        {
+          "name": "Solidity.Source.Env",
+          "name_key": [
+            "str",
+            [
+              "str",
+              [
+                "str",
+                "anonymous",
+                "Solidity"
+              ],
+              "Source"
+            ],
+            "Env"
+          ]
+        },
+        {
+          "name": "Solidity.Source.DeclName.mk",
+          "name_key": [
+            "str",
+            [
+              "str",
+              [
+                "str",
+                [
+                  "str",
+                  "anonymous",
+                  "Solidity"
+                ],
+                "Source"
+              ],
+              "DeclName"
+            ],
+            "mk"
+          ]
+        },
+        {
+          "name": "Solidity.Source.Env.mk",
+          "name_key": [
+            "str",
+            [
+              "str",
+              [
+                "str",
+                [
+                  "str",
+                  "anonymous",
+                  "Solidity"
+                ],
+                "Source"
+              ],
+              "Env"
+            ],
+            "mk"
+          ]
+        },
+        {
+          "name": "Solidity.Storage.Loc.hash",
+          "name_key": [
+            "str",
+            [
+              "str",
+              [
+                "str",
+                [
+                  "str",
+                  "anonymous",
+                  "Solidity"
+                ],
+                "Storage"
+              ],
+              "Loc"
+            ],
+            "hash"
+          ]
+        },
+        {
+          "name": "Solidity.Storage.Loc.root",
+          "name_key": [
+            "str",
+            [
+              "str",
+              [
+                "str",
+                [
+                  "str",
+                  "anonymous",
+                  "Solidity"
+                ],
+                "Storage"
+              ],
+              "Loc"
+            ],
+            "root"
+          ]
+        },
+        {
+          "name": "Solidity.Yul.Views.nestedMappingLocation",
+          "name_key": [
+            "str",
+            [
+              "str",
+              [
+                "str",
+                [
+                  "str",
+                  "anonymous",
+                  "Solidity"
+                ],
+                "Yul"
+              ],
+              "Views"
+            ],
+            "nestedMappingLocation"
+          ]
+        },
+        {
+          "name": "Solidity.Yul.Views.prepareNestedWordMappingRoot",
+          "name_key": [
+            "str",
+            [
+              "str",
+              [
+                "str",
+                [
+                  "str",
+                  "anonymous",
+                  "Solidity"
+                ],
+                "Yul"
+              ],
+              "Views"
+            ],
+            "prepareNestedWordMappingRoot"
+          ]
+        }
+      ],
+      "path": "Solidity/Yul/Views/NestedMappingLayout.lean",
+      "status": "pass",
+      "top_commands": 23
+    },
+    {
+      "check_info_events": 8,
+      "check_reference_events": 50,
+      "check_top_commands": 8,
+      "exit_code": 0,
+      "finished_diagnostic_snapshots": 0,
+      "observed_constants": [
+        {
+          "name": "List.cons",
+          "name_key": [
+            "str",
+            [
+              "str",
+              "anonymous",
+              "List"
+            ],
+            "cons"
+          ]
+        },
+        {
+          "name": "List.nil",
+          "name_key": [
+            "str",
+            [
+              "str",
+              "anonymous",
+              "List"
+            ],
+            "nil"
+          ]
+        },
+        {
+          "name": "Option.isSome",
+          "name_key": [
+            "str",
+            [
+              "str",
+              "anonymous",
+              "Option"
+            ],
+            "isSome"
+          ]
+        },
+        {
+          "name": "Option.some",
+          "name_key": [
+            "str",
+            [
+              "str",
+              "anonymous",
+              "Option"
+            ],
+            "some"
+          ]
+        },
+        {
+          "name": "Solidity.Yul.Views.decodeInventoryObject",
+          "name_key": [
+            "str",
+            [
+              "str",
+              [
+                "str",
+                [
+                  "str",
+                  "anonymous",
+                  "Solidity"
+                ],
+                "Yul"
+              ],
+              "Views"
+            ],
+            "decodeInventoryObject"
+          ]
+        },
+        {
+          "name": "Solidity.Yul.Views.mstore",
+          "name_key": [
+            "str",
+            [
+              "str",
+              [
+                "str",
+                [
+                  "str",
+                  "anonymous",
+                  "Solidity"
+                ],
+                "Yul"
+              ],
+              "Views"
+            ],
+            "mstore"
+          ]
+        },
+        {
+          "name": "Solidity.Yul.Views.NominalInventory.decode",
+          "name_key": [
+            "str",
+            [
+              "str",
+              [
+                "str",
+                [
+                  "str",
+                  [
+                    "str",
+                    "anonymous",
+                    "Solidity"
+                  ],
+                  "Yul"
+                ],
+                "Views"
+              ],
+              "NominalInventory"
+            ],
+            "decode"
+          ]
+        },
+        {
+          "name": "Solidity.Yul.Views.NominalInventory.snapshot",
+          "name_key": [
+            "str",
+            [
+              "str",
+              [
+                "str",
+                [
+                  "str",
+                  [
+                    "str",
+                    "anonymous",
+                    "Solidity"
+                  ],
+                  "Yul"
+                ],
+                "Views"
+              ],
+              "NominalInventory"
+            ],
+            "snapshot"
+          ]
+        },
+        {
+          "name": "Solidity.Yul.Views.NominalInventory.Controls.entry",
+          "name_key": [
+            "str",
+            [
+              "str",
+              [
+                "str",
+                [
+                  "str",
+                  [
+                    "str",
+                    [
+                      "str",
+                      "anonymous",
+                      "Solidity"
+                    ],
+                    "Yul"
+                  ],
+                  "Views"
+                ],
+                "NominalInventory"
+              ],
+              "Controls"
+            ],
+            "entry"
+          ]
+        },
+        {
+          "name": "Solidity.Yul.Views.NominalInventory.Controls.observe",
+          "name_key": [
+            "str",
+            [
+              "str",
+              [
+                "str",
+                [
+                  "str",
+                  [
+                    "str",
+                    [
+                      "str",
+                      "anonymous",
+                      "Solidity"
+                    ],
+                    "Yul"
+                  ],
+                  "Views"
+                ],
+                "NominalInventory"
+              ],
+              "Controls"
+            ],
+            "observe"
+          ]
+        },
+        {
+          "name": "Solidity.Yul.Views.NominalInventory.Controls.reconstruction",
+          "name_key": [
+            "str",
+            [
+              "str",
+              [
+                "str",
+                [
+                  "str",
+                  [
+                    "str",
+                    [
+                      "str",
+                      "anonymous",
+                      "Solidity"
+                    ],
+                    "Yul"
+                  ],
+                  "Views"
+                ],
+                "NominalInventory"
+              ],
+              "Controls"
+            ],
+            "reconstruction"
+          ]
+        },
+        {
+          "name": "Solidity.Yul.Views.NominalMemory.Controls.arrayTy",
+          "name_key": [
+            "str",
+            [
+              "str",
+              [
+                "str",
+                [
+                  "str",
+                  [
+                    "str",
+                    [
+                      "str",
+                      "anonymous",
+                      "Solidity"
+                    ],
+                    "Yul"
+                  ],
+                  "Views"
+                ],
+                "NominalMemory"
+              ],
+              "Controls"
+            ],
+            "arrayTy"
+          ]
+        },
+        {
+          "name": "Solidity.Yul.Views.NominalMemory.Controls.missing",
+          "name_key": [
+            "str",
+            [
+              "str",
+              [
+                "str",
+                [
+                  "str",
+                  [
+                    "str",
+                    [
+                      "str",
+                      "anonymous",
+                      "Solidity"
+                    ],
+                    "Yul"
+                  ],
+                  "Views"
+                ],
+                "NominalMemory"
+              ],
+              "Controls"
+            ],
+            "missing"
+          ]
+        },
+        {
+          "name": "Solidity.Yul.Views.NominalMemory.Controls.newRaw",
+          "name_key": [
+            "str",
+            [
+              "str",
+              [
+                "str",
+                [
+                  "str",
+                  [
+                    "str",
+                    [
+                      "str",
+                      "anonymous",
+                      "Solidity"
+                    ],
+                    "Yul"
+                  ],
+                  "Views"
+                ],
+                "NominalMemory"
+              ],
+              "Controls"
+            ],
+            "newRaw"
+          ]
+        },
+        {
+          "name": "Solidity.Yul.Views.NominalMemory.Controls.oldRaw",
+          "name_key": [
+            "str",
+            [
+              "str",
+              [
+                "str",
+                [
+                  "str",
+                  [
+                    "str",
+                    [
+                      "str",
+                      "anonymous",
+                      "Solidity"
+                    ],
+                    "Yul"
+                  ],
+                  "Views"
+                ],
+                "NominalMemory"
+              ],
+              "Controls"
+            ],
+            "oldRaw"
+          ]
+        },
+        {
+          "name": "Solidity.Yul.Views.NominalMemory.Controls.placement",
+          "name_key": [
+            "str",
+            [
+              "str",
+              [
+                "str",
+                [
+                  "str",
+                  [
+                    "str",
+                    [
+                      "str",
+                      "anonymous",
+                      "Solidity"
+                    ],
+                    "Yul"
+                  ],
+                  "Views"
+                ],
+                "NominalMemory"
+              ],
+              "Controls"
+            ],
+            "placement"
+          ]
+        }
+      ],
+      "path": "Solidity/Yul/Views/NominalInventoryControls.lean",
+      "status": "pass",
+      "top_commands": 19
+    },
+    {
+      "check_info_events": 2,
+      "check_reference_events": 47,
+      "check_top_commands": 2,
+      "exit_code": 0,
+      "finished_diagnostic_snapshots": 0,
+      "observed_constants": [
+        {
+          "name": "And",
+          "name_key": [
+            "str",
+            "anonymous",
+            "And"
+          ]
+        },
+        {
+          "name": "Decidable.decide",
+          "name_key": [
+            "str",
+            [
+              "str",
+              "anonymous",
+              "Decidable"
+            ],
+            "decide"
+          ]
+        },
+        {
+          "name": "Fin.mk",
+          "name_key": [
+            "str",
+            [
+              "str",
+              "anonymous",
+              "Fin"
+            ],
+            "mk"
+          ]
+        },
+        {
+          "name": "List.cons",
+          "name_key": [
+            "str",
+            [
+              "str",
+              "anonymous",
+              "List"
+            ],
+            "cons"
+          ]
+        },
+        {
+          "name": "List.nil",
+          "name_key": [
+            "str",
+            [
+              "str",
+              "anonymous",
+              "List"
+            ],
+            "nil"
+          ]
+        },
+        {
+          "name": "Option.isNone",
+          "name_key": [
+            "str",
+            [
+              "str",
+              "anonymous",
+              "Option"
+            ],
+            "isNone"
+          ]
+        },
+        {
+          "name": "Option.isSome",
+          "name_key": [
+            "str",
+            [
+              "str",
+              "anonymous",
+              "Option"
+            ],
+            "isSome"
+          ]
+        },
+        {
+          "name": "Prod.mk",
+          "name_key": [
+            "str",
+            [
+              "str",
+              "anonymous",
+              "Prod"
+            ],
+            "mk"
+          ]
+        },
+        {
+          "name": "Solidity.Source.Env.layout",
+          "name_key": [
+            "str",
+            [
+              "str",
+              [
+                "str",
+                [
+                  "str",
+                  "anonymous",
+                  "Solidity"
+                ],
+                "Source"
+              ],
+              "Env"
+            ],
+            "layout"
+          ]
+        },
+        {
+          "name": "Solidity.Yul.Views.mload",
+          "name_key": [
+            "str",
+            [
+              "str",
+              [
+                "str",
+                [
+                  "str",
+                  "anonymous",
+                  "Solidity"
+                ],
+                "Yul"
+              ],
+              "Views"
+            ],
+            "mload"
+          ]
+        },
+        {
+          "name": "Solidity.Yul.Views.NominalInventory.writeback",
+          "name_key": [
+            "str",
+            [
+              "str",
+              [
+                "str",
+                [
+                  "str",
+                  [
+                    "str",
+                    "anonymous",
+                    "Solidity"
+                  ],
+                  "Yul"
+                ],
+                "Views"
+              ],
+              "NominalInventory"
+            ],
+            "writeback"
+          ]
+        },
+        {
+          "name": "Solidity.Yul.Views.NominalMemory.decodeArray",
+          "name_key": [
+            "str",
+            [
+              "str",
+              [
+                "str",
+                [
+                  "str",
+                  [
+                    "str",
+                    "anonymous",
+                    "Solidity"
+                  ],
+                  "Yul"
+                ],
+                "Views"
+              ],
+              "NominalMemory"
+            ],
+            "decodeArray"
+          ]
+        },
+        {
+          "name": "Solidity.Yul.Views.Placement.address",
+          "name_key": [
+            "str",
+            [
+              "str",
+              [
+                "str",
+                [
+                  "str",
+                  [
+                    "str",
+                    "anonymous",
+                    "Solidity"
+                  ],
+                  "Yul"
+                ],
+                "Views"
+              ],
+              "Placement"
+            ],
+            "address"
+          ]
+        },
+        {
+          "name": "Solidity.Yul.Views.RetainedAllocation.initial",
+          "name_key": [
+            "str",
+            [
+              "str",
+              [
+                "str",
+                [
+                  "str",
+                  [
+                    "str",
+                    "anonymous",
+                    "Solidity"
+                  ],
+                  "Yul"
+                ],
+                "Views"
+              ],
+              "RetainedAllocation"
+            ],
+            "initial"
+          ]
+        },
+        {
+          "name": "Solidity.Yul.Views.NominalInventory.DynamicControls.beyond",
+          "name_key": [
+            "str",
+            [
+              "str",
+              [
+                "str",
+                [
+                  "str",
+                  [
+                    "str",
+                    [
+                      "str",
+                      "anonymous",
+                      "Solidity"
+                    ],
+                    "Yul"
+                  ],
+                  "Views"
+                ],
+                "NominalInventory"
+              ],
+              "DynamicControls"
+            ],
+            "beyond"
+          ]
+        },
+        {
+          "name": "Solidity.Yul.Views.NominalInventory.DynamicControls.originalEntry",
+          "name_key": [
+            "str",
+            [
+              "str",
+              [
+                "str",
+                [
+                  "str",
+                  [
+                    "str",
+                    [
+                      "str",
+                      "anonymous",
+                      "Solidity"
+                    ],
+                    "Yul"
+                  ],
+                  "Views"
+                ],
+                "NominalInventory"
+              ],
+              "DynamicControls"
+            ],
+            "originalEntry"
+          ]
+        },
+        {
+          "name": "Solidity.Yul.Views.NominalMemory.RetainedControls.env",
+          "name_key": [
+            "str",
+            [
+              "str",
+              [
+                "str",
+                [
+                  "str",
+                  [
+                    "str",
+                    [
+                      "str",
+                      "anonymous",
+                      "Solidity"
+                    ],
+                    "Yul"
+                  ],
+                  "Views"
+                ],
+                "NominalMemory"
+              ],
+              "RetainedControls"
+            ],
+            "env"
+          ]
+        },
+        {
+          "name": "Solidity.Yul.Views.NominalMemory.RetainedControls.placement",
+          "name_key": [
+            "str",
+            [
+              "str",
+              [
+                "str",
+                [
+                  "str",
+                  [
+                    "str",
+                    [
+                      "str",
+                      "anonymous",
+                      "Solidity"
+                    ],
+                    "Yul"
+                  ],
+                  "Views"
+                ],
+                "NominalMemory"
+              ],
+              "RetainedControls"
+            ],
+            "placement"
+          ]
+        },
+        {
+          "name": "Solidity.Yul.Views.NominalMemory.RetainedControls.regrownRaw",
+          "name_key": [
+            "str",
+            [
+              "str",
+              [
+                "str",
+                [
+                  "str",
+                  [
+                    "str",
+                    [
+                      "str",
+                      "anonymous",
+                      "Solidity"
+                    ],
+                    "Yul"
+                  ],
+                  "Views"
+                ],
+                "NominalMemory"
+              ],
+              "RetainedControls"
+            ],
+            "regrownRaw"
+          ]
+        },
+        {
+          "name": "Solidity.Yul.Views.NominalMemory.RetainedControls.shrunkRaw",
+          "name_key": [
+            "str",
+            [
+              "str",
+              [
+                "str",
+                [
+                  "str",
+                  [
+                    "str",
+                    [
+                      "str",
+                      "anonymous",
+                      "Solidity"
+                    ],
+                    "Yul"
+                  ],
+                  "Views"
+                ],
+                "NominalMemory"
+              ],
+              "RetainedControls"
+            ],
+            "shrunkRaw"
+          ]
+        },
+        {
+          "name": "Solidity.Yul.Views.NominalMemory.RetainedControls.small",
+          "name_key": [
+            "str",
+            [
+              "str",
+              [
+                "str",
+                [
+                  "str",
+                  [
+                    "str",
+                    [
+                      "str",
+                      "anonymous",
+                      "Solidity"
+                    ],
+                    "Yul"
+                  ],
+                  "Views"
+                ],
+                "NominalMemory"
+              ],
+              "RetainedControls"
+            ],
+            "small"
+          ]
+        },
+        {
+          "name": "Solidity.Yul.Views.NominalMemory.RetainedControls.state",
+          "name_key": [
+            "str",
+            [
+              "str",
+              [
+                "str",
+                [
+                  "str",
+                  [
+                    "str",
+                    [
+                      "str",
+                      "anonymous",
+                      "Solidity"
+                    ],
+                    "Yul"
+                  ],
+                  "Views"
+                ],
+                "NominalMemory"
+              ],
+              "RetainedControls"
+            ],
+            "state"
+          ]
+        }
+      ],
+      "path": "Solidity/Yul/Views/NominalInventoryDynamicControls.lean",
+      "status": "pass",
+      "top_commands": 21
+    },
+    {
+      "check_info_events": 4,
+      "check_reference_events": 87,
+      "check_top_commands": 4,
+      "exit_code": 0,
+      "finished_diagnostic_snapshots": 0,
+      "observed_constants": [
+        {
+          "name": "Option.isSome",
+          "name_key": [
+            "str",
+            [
+              "str",
+              "anonymous",
+              "Option"
+            ],
+            "isSome"
+          ]
+        },
+        {
+          "name": "Prod.mk",
+          "name_key": [
+            "str",
+            [
+              "str",
+              "anonymous",
+              "Prod"
+            ],
+            "mk"
+          ]
+        },
+        {
+          "name": "Solidity.Yul.Views.MixedHeapEntry.ty",
+          "name_key": [
+            "str",
+            [
+              "str",
+              [
+                "str",
+                [
+                  "str",
+                  [
+                    "str",
+                    "anonymous",
+                    "Solidity"
+                  ],
+                  "Yul"
+                ],
+                "Views"
+              ],
+              "MixedHeapEntry"
+            ],
+            "ty"
+          ]
+        },
+        {
+          "name": "Solidity.Yul.Views.NominalInventory.decode",
+          "name_key": [
+            "str",
+            [
+              "str",
+              [
+                "str",
+                [
+                  "str",
+                  [
+                    "str",
+                    "anonymous",
+                    "Solidity"
+                  ],
+                  "Yul"
+                ],
+                "Views"
+              ],
+              "NominalInventory"
+            ],
+            "decode"
+          ]
+        },
+        {
+          "name": "Solidity.Yul.Views.NominalInventory.update",
+          "name_key": [
+            "str",
+            [
+              "str",
+              [
+                "str",
+                [
+                  "str",
+                  [
+                    "str",
+                    "anonymous",
+                    "Solidity"
+                  ],
+                  "Yul"
+                ],
+                "Views"
+              ],
+              "NominalInventory"
+            ],
+            "update"
+          ]
+        },
+        {
+          "name": "Solidity.Yul.Views.NominalInventory.SequentialControls.beyondRaw",
+          "name_key": [
+            "str",
+            [
+              "str",
+              [
+                "str",
+                [
+                  "str",
+                  [
+                    "str",
+                    [
+                      "str",
+                      "anonymous",
+                      "Solidity"
+                    ],
+                    "Yul"
+                  ],
+                  "Views"
+                ],
+                "NominalInventory"
+              ],
+              "SequentialControls"
+            ],
+            "beyondRaw"
+          ]
+        },
+        {
+          "name": "Solidity.Yul.Views.NominalInventory.SequentialControls.firstRaw",
+          "name_key": [
+            "str",
+            [
+              "str",
+              [
+                "str",
+                [
+                  "str",
+                  [
+                    "str",
+                    [
+                      "str",
+                      "anonymous",
+                      "Solidity"
+                    ],
+                    "Yul"
+                  ],
+                  "Views"
+                ],
+                "NominalInventory"
+              ],
+              "SequentialControls"
+            ],
+            "firstRaw"
+          ]
+        },
+        {
+          "name": "Solidity.Yul.Views.NominalInventory.SequentialControls.lateRaw",
+          "name_key": [
+            "str",
+            [
+              "str",
+              [
+                "str",
+                [
+                  "str",
+                  [
+                    "str",
+                    [
+                      "str",
+                      "anonymous",
+                      "Solidity"
+                    ],
+                    "Yul"
+                  ],
+                  "Views"
+                ],
+                "NominalInventory"
+              ],
+              "SequentialControls"
+            ],
+            "lateRaw"
+          ]
+        },
+        {
+          "name": "Solidity.Yul.Views.NominalInventory.SequentialControls.mixedRaw",
+          "name_key": [
+            "str",
+            [
+              "str",
+              [
+                "str",
+                [
+                  "str",
+                  [
+                    "str",
+                    [
+                      "str",
+                      "anonymous",
+                      "Solidity"
+                    ],
+                    "Yul"
+                  ],
+                  "Views"
+                ],
+                "NominalInventory"
+              ],
+              "SequentialControls"
+            ],
+            "mixedRaw"
+          ]
+        },
+        {
+          "name": "Solidity.Yul.Views.NominalInventory.UnchangedControls.bytes",
+          "name_key": [
+            "str",
+            [
+              "str",
+              [
+                "str",
+                [
+                  "str",
+                  [
+                    "str",
+                    [
+                      "str",
+                      "anonymous",
+                      "Solidity"
+                    ],
+                    "Yul"
+                  ],
+                  "Views"
+                ],
+                "NominalInventory"
+              ],
+              "UnchangedControls"
+            ],
+            "bytes"
+          ]
+        },
+        {
+          "name": "Solidity.Yul.Views.NominalInventory.UnchangedControls.entries",
+          "name_key": [
+            "str",
+            [
+              "str",
+              [
+                "str",
+                [
+                  "str",
+                  [
+                    "str",
+                    [
+                      "str",
+                      "anonymous",
+                      "Solidity"
+                    ],
+                    "Yul"
+                  ],
+                  "Views"
+                ],
+                "NominalInventory"
+              ],
+              "UnchangedControls"
+            ],
+            "entries"
+          ]
+        },
+        {
+          "name": "Solidity.Yul.Views.NominalInventory.UnchangedControls.nominal",
+          "name_key": [
+            "str",
+            [
+              "str",
+              [
+                "str",
+                [
+                  "str",
+                  [
+                    "str",
+                    [
+                      "str",
+                      "anonymous",
+                      "Solidity"
+                    ],
+                    "Yul"
+                  ],
+                  "Views"
+                ],
+                "NominalInventory"
+              ],
+              "UnchangedControls"
+            ],
+            "nominal"
+          ]
+        },
+        {
+          "name": "Solidity.Yul.Views.NominalInventory.UnchangedControls.placement",
+          "name_key": [
+            "str",
+            [
+              "str",
+              [
+                "str",
+                [
+                  "str",
+                  [
+                    "str",
+                    [
+                      "str",
+                      "anonymous",
+                      "Solidity"
+                    ],
+                    "Yul"
+                  ],
+                  "Views"
+                ],
+                "NominalInventory"
+              ],
+              "UnchangedControls"
+            ],
+            "placement"
+          ]
+        },
+        {
+          "name": "Solidity.Yul.Views.NominalInventory.UnchangedControls.repeatedEntries",
+          "name_key": [
+            "str",
+            [
+              "str",
+              [
+                "str",
+                [
+                  "str",
+                  [
+                    "str",
+                    [
+                      "str",
+                      "anonymous",
+                      "Solidity"
+                    ],
+                    "Yul"
+                  ],
+                  "Views"
+                ],
+                "NominalInventory"
+              ],
+              "UnchangedControls"
+            ],
+            "repeatedEntries"
+          ]
+        },
+        {
+          "name": "_private.Solidity.Yul.Views.NominalInventorySequentialControls.0.Solidity.Yul.Views.NominalInventory.SequentialControls.sequentialReady",
+          "name_key": [
+            "str",
+            [
+              "str",
+              [
+                "str",
+                [
+                  "str",
+                  [
+                    "str",
+                    [
+                      "str",
+                      [
+                        "num",
+                        [
+                          "str",
+                          [
+                            "str",
+                            [
+                              "str",
+                              [
+                                "str",
+                                [
+                                  "str",
+                                  "anonymous",
+                                  "_private"
+                                ],
+                                "Solidity"
+                              ],
+                              "Yul"
+                            ],
+                            "Views"
+                          ],
+                          "NominalInventorySequentialControls"
+                        ],
+                        0
+                      ],
+                      "Solidity"
+                    ],
+                    "Yul"
+                  ],
+                  "Views"
+                ],
+                "NominalInventory"
+              ],
+              "SequentialControls"
+            ],
+            "sequentialReady"
+          ]
+        }
+      ],
+      "path": "Solidity/Yul/Views/NominalInventorySequentialControls.lean",
+      "status": "pass",
+      "top_commands": 16
+    },
+    {
+      "check_info_events": 5,
+      "check_reference_events": 75,
+      "check_top_commands": 5,
+      "exit_code": 0,
+      "finished_diagnostic_snapshots": 0,
+      "observed_constants": [
+        {
+          "name": "And",
+          "name_key": [
+            "str",
+            "anonymous",
+            "And"
+          ]
+        },
+        {
+          "name": "Decidable.decide",
+          "name_key": [
+            "str",
+            [
+              "str",
+              "anonymous",
+              "Decidable"
+            ],
+            "decide"
+          ]
+        },
+        {
+          "name": "Fin.mk",
+          "name_key": [
+            "str",
+            [
+              "str",
+              "anonymous",
+              "Fin"
+            ],
+            "mk"
+          ]
+        },
+        {
+          "name": "Fin.val",
+          "name_key": [
+            "str",
+            [
+              "str",
+              "anonymous",
+              "Fin"
+            ],
+            "val"
+          ]
+        },
+        {
+          "name": "List.cons",
+          "name_key": [
+            "str",
+            [
+              "str",
+              "anonymous",
+              "List"
+            ],
+            "cons"
+          ]
+        },
+        {
+          "name": "List.map",
+          "name_key": [
+            "str",
+            [
+              "str",
+              "anonymous",
+              "List"
+            ],
+            "map"
+          ]
+        },
+        {
+          "name": "List.nil",
+          "name_key": [
+            "str",
+            [
+              "str",
+              "anonymous",
+              "List"
+            ],
+            "nil"
+          ]
+        },
+        {
+          "name": "Option.isSome",
+          "name_key": [
+            "str",
+            [
+              "str",
+              "anonymous",
+              "Option"
+            ],
+            "isSome"
+          ]
+        },
+        {
+          "name": "Option.some",
+          "name_key": [
+            "str",
+            [
+              "str",
+              "anonymous",
+              "Option"
+            ],
+            "some"
+          ]
+        },
+        {
+          "name": "Prod.snd",
+          "name_key": [
+            "str",
+            [
+              "str",
+              "anonymous",
+              "Prod"
+            ],
+            "snd"
+          ]
+        },
+        {
+          "name": "UInt8.toNat",
+          "name_key": [
+            "str",
+            [
+              "str",
+              "anonymous",
+              "UInt8"
+            ],
+            "toNat"
+          ]
+        },
+        {
+          "name": "Solidity.Source.Heap.next",
+          "name_key": [
+            "str",
+            [
+              "str",
+              [
+                "str",
+                [
+                  "str",
+                  "anonymous",
+                  "Solidity"
+                ],
+                "Source"
+              ],
+              "Heap"
+            ],
+            "next"
+          ]
+        },
+        {
+          "name": "Solidity.Source.Idx.here",
+          "name_key": [
+            "str",
+            [
+              "str",
+              [
+                "str",
+                [
+                  "str",
+                  "anonymous",
+                  "Solidity"
+                ],
+                "Source"
+              ],
+              "Idx"
+            ],
+            "here"
+          ]
+        },
+        {
+          "name": "Solidity.Source.Idx.there",
+          "name_key": [
+            "str",
+            [
+              "str",
+              [
+                "str",
+                [
+                  "str",
+                  "anonymous",
+                  "Solidity"
+                ],
+                "Source"
+              ],
+              "Idx"
+            ],
+            "there"
+          ]
+        },
+        {
+          "name": "Solidity.Source.St.heap",
+          "name_key": [
+            "str",
+            [
+              "str",
+              [
+                "str",
+                [
+                  "str",
+                  "anonymous",
+                  "Solidity"
+                ],
+                "Source"
+              ],
+              "St"
+            ],
+            "heap"
+          ]
+        },
+        {
+          "name": "Solidity.Yul.Views.encodeMixedHeap",
+          "name_key": [
+            "str",
+            [
+              "str",
+              [
+                "str",
+                [
+                  "str",
+                  "anonymous",
+                  "Solidity"
+                ],
+                "Yul"
+              ],
+              "Views"
+            ],
+            "encodeMixedHeap"
+          ]
+        },
+        {
+          "name": "Solidity.Yul.Views.generatedHeapEntries",
+          "name_key": [
+            "str",
+            [
+              "str",
+              [
+                "str",
+                [
+                  "str",
+                  "anonymous",
+                  "Solidity"
+                ],
+                "Yul"
+              ],
+              "Views"
+            ],
+            "generatedHeapEntries"
+          ]
+        },
+        {
+          "name": "Solidity.Yul.Views.mload",
+          "name_key": [
+            "str",
+            [
+              "str",
+              [
+                "str",
+                [
+                  "str",
+                  "anonymous",
+                  "Solidity"
+                ],
+                "Yul"
+              ],
+              "Views"
+            ],
+            "mload"
+          ]
+        },
+        {
+          "name": "Solidity.Yul.Views.mstore",
+          "name_key": [
+            "str",
+            [
+              "str",
+              [
+                "str",
+                [
+                  "str",
+                  "anonymous",
+                  "Solidity"
+                ],
+                "Yul"
+              ],
+              "Views"
+            ],
+            "mstore"
+          ]
+        },
+        {
+          "name": "Solidity.Yul.Views.readBytes",
+          "name_key": [
+            "str",
+            [
+              "str",
+              [
+                "str",
+                [
+                  "str",
+                  "anonymous",
+                  "Solidity"
+                ],
+                "Yul"
+              ],
+              "Views"
+            ],
+            "readBytes"
+          ]
+        },
+        {
+          "name": "Solidity.Yul.Views.MixedHeapEntry.id",
+          "name_key": [
+            "str",
+            [
+              "str",
+              [
+                "str",
+                [
+                  "str",
+                  [
+                    "str",
+                    "anonymous",
+                    "Solidity"
+                  ],
+                  "Yul"
+                ],
+                "Views"
+              ],
+              "MixedHeapEntry"
+            ],
+            "id"
+          ]
+        },
+        {
+          "name": "Solidity.Yul.Views.NominalInventory.snapshot",
+          "name_key": [
+            "str",
+            [
+              "str",
+              [
+                "str",
+                [
+                  "str",
+                  [
+                    "str",
+                    "anonymous",
+                    "Solidity"
+                  ],
+                  "Yul"
+                ],
+                "Views"
+              ],
+              "NominalInventory"
+            ],
+            "snapshot"
+          ]
+        },
+        {
+          "name": "Solidity.Yul.Views.NominalInventory.UnchangedControls.entries",
+          "name_key": [
+            "str",
+            [
+              "str",
+              [
+                "str",
+                [
+                  "str",
+                  [
+                    "str",
+                    [
+                      "str",
+                      "anonymous",
+                      "Solidity"
+                    ],
+                    "Yul"
+                  ],
+                  "Views"
+                ],
+                "NominalInventory"
+              ],
+              "UnchangedControls"
+            ],
+            "entries"
+          ]
+        },
+        {
+          "name": "Solidity.Yul.Views.NominalInventory.UnchangedControls.placement",
+          "name_key": [
+            "str",
+            [
+              "str",
+              [
+                "str",
+                [
+                  "str",
+                  [
+                    "str",
+                    [
+                      "str",
+                      "anonymous",
+                      "Solidity"
+                    ],
+                    "Yul"
+                  ],
+                  "Views"
+                ],
+                "NominalInventory"
+              ],
+              "UnchangedControls"
+            ],
+            "placement"
+          ]
+        },
+        {
+          "name": "Solidity.Yul.Views.NominalInventory.UnchangedControls.residual",
+          "name_key": [
+            "str",
+            [
+              "str",
+              [
+                "str",
+                [
+                  "str",
+                  [
+                    "str",
+                    [
+                      "str",
+                      "anonymous",
+                      "Solidity"
+                    ],
+                    "Yul"
+                  ],
+                  "Views"
+                ],
+                "NominalInventory"
+              ],
+              "UnchangedControls"
+            ],
+            "residual"
+          ]
+        },
+        {
+          "name": "Solidity.Yul.Views.NominalInventory.UnchangedControls.state",
+          "name_key": [
+            "str",
+            [
+              "str",
+              [
+                "str",
+                [
+                  "str",
+                  [
+                    "str",
+                    [
+                      "str",
+                      "anonymous",
+                      "Solidity"
+                    ],
+                    "Yul"
+                  ],
+                  "Views"
+                ],
+                "NominalInventory"
+              ],
+              "UnchangedControls"
+            ],
+            "state"
+          ]
+        },
+        {
+          "name": "Solidity.Yul.Views.NominalMemory.Controls.aliasRead",
+          "name_key": [
+            "str",
+            [
+              "str",
+              [
+                "str",
+                [
+                  "str",
+                  [
+                    "str",
+                    [
+                      "str",
+                      "anonymous",
+                      "Solidity"
+                    ],
+                    "Yul"
+                  ],
+                  "Views"
+                ],
+                "NominalMemory"
+              ],
+              "Controls"
+            ],
+            "aliasRead"
+          ]
+        },
+        {
+          "name": "Solidity.Yul.Views.NominalMemory.Controls.small",
+          "name_key": [
+            "str",
+            [
+              "str",
+              [
+                "str",
+                [
+                  "str",
+                  [
+                    "str",
+                    [
+                      "str",
+                      "anonymous",
+                      "Solidity"
+                    ],
+                    "Yul"
+                  ],
+                  "Views"
+                ],
+                "NominalMemory"
+              ],
+              "Controls"
+            ],
+            "small"
+          ]
+        }
+      ],
+      "path": "Solidity/Yul/Views/NominalInventoryUnchangedControls.lean",
+      "status": "pass",
+      "top_commands": 34
+    },
+    {
+      "check_info_events": 16,
+      "check_reference_events": 135,
+      "check_top_commands": 16,
+      "exit_code": 0,
+      "finished_diagnostic_snapshots": 0,
+      "observed_constants": [
+        {
+          "name": "And",
+          "name_key": [
+            "str",
+            "anonymous",
+            "And"
+          ]
+        },
+        {
+          "name": "Bool.false",
+          "name_key": [
+            "str",
+            [
+              "str",
+              "anonymous",
+              "Bool"
+            ],
+            "false"
+          ]
+        },
+        {
+          "name": "Bool.true",
+          "name_key": [
+            "str",
+            [
+              "str",
+              "anonymous",
+              "Bool"
+            ],
+            "true"
+          ]
+        },
+        {
+          "name": "Decidable.decide",
+          "name_key": [
+            "str",
+            [
+              "str",
+              "anonymous",
+              "Decidable"
+            ],
+            "decide"
+          ]
+        },
+        {
+          "name": "Except.error",
+          "name_key": [
+            "str",
+            [
+              "str",
+              "anonymous",
+              "Except"
+            ],
+            "error"
+          ]
+        },
+        {
+          "name": "Fin.mk",
+          "name_key": [
+            "str",
+            [
+              "str",
+              "anonymous",
+              "Fin"
+            ],
+            "mk"
+          ]
+        },
+        {
+          "name": "Option.none",
+          "name_key": [
+            "str",
+            [
+              "str",
+              "anonymous",
+              "Option"
+            ],
+            "none"
+          ]
+        },
+        {
+          "name": "Option.some",
+          "name_key": [
+            "str",
+            [
+              "str",
+              "anonymous",
+              "Option"
+            ],
+            "some"
+          ]
+        },
+        {
+          "name": "Prod.mk",
+          "name_key": [
+            "str",
+            [
+              "str",
+              "anonymous",
+              "Prod"
+            ],
+            "mk"
+          ]
+        },
+        {
+          "name": "Solidity.Source.Env.layout",
+          "name_key": [
+            "str",
+            [
+              "str",
+              [
+                "str",
+                [
+                  "str",
+                  "anonymous",
+                  "Solidity"
+                ],
+                "Source"
+              ],
+              "Env"
+            ],
+            "layout"
+          ]
+        },
+        {
+          "name": "Solidity.Source.Halt.stuck",
+          "name_key": [
+            "str",
+            [
+              "str",
+              [
+                "str",
+                [
+                  "str",
+                  "anonymous",
+                  "Solidity"
+                ],
+                "Source"
+              ],
+              "Halt"
+            ],
+            "stuck"
+          ]
+        },
+        {
+          "name": "Solidity.Source.Layout.underlying",
+          "name_key": [
+            "str",
+            [
+              "str",
+              [
+                "str",
+                [
+                  "str",
+                  "anonymous",
+                  "Solidity"
+                ],
+                "Source"
+              ],
+              "Layout"
+            ],
+            "underlying"
+          ]
+        },
+        {
+          "name": "Solidity.Source.STy.bool",
+          "name_key": [
+            "str",
+            [
+              "str",
+              [
+                "str",
+                [
+                  "str",
+                  "anonymous",
+                  "Solidity"
+                ],
+                "Source"
+              ],
+              "STy"
+            ],
+            "bool"
+          ]
+        },
+        {
+          "name": "Solidity.Source.STy.int",
+          "name_key": [
+            "str",
+            [
+              "str",
+              [
+                "str",
+                [
+                  "str",
+                  "anonymous",
+                  "Solidity"
+                ],
+                "Source"
+              ],
+              "STy"
+            ],
+            "int"
+          ]
+        },
+        {
+          "name": "Solidity.Yul.Views.mstore",
+          "name_key": [
+            "str",
+            [
+              "str",
+              [
+                "str",
+                [
+                  "str",
+                  "anonymous",
+                  "Solidity"
+                ],
+                "Yul"
+              ],
+              "Views"
+            ],
+            "mstore"
+          ]
+        },
+        {
+          "name": "Solidity.Yul.Views.NominalMemory.arrayState",
+          "name_key": [
+            "str",
+            [
+              "str",
+              [
+                "str",
+                [
+                  "str",
+                  [
+                    "str",
+                    "anonymous",
+                    "Solidity"
+                  ],
+                  "Yul"
+                ],
+                "Views"
+              ],
+              "NominalMemory"
+            ],
+            "arrayState"
+          ]
+        },
+        {
+          "name": "Solidity.Yul.Views.NominalMemory.declaredUDVT",
+          "name_key": [
+            "str",
+            [
+              "str",
+              [
+                "str",
+                [
+                  "str",
+                  [
+                    "str",
+                    "anonymous",
+                    "Solidity"
+                  ],
+                  "Yul"
+                ],
+                "Views"
+              ],
+              "NominalMemory"
+            ],
+            "declaredUDVT"
+          ]
+        },
+        {
+          "name": "Solidity.Yul.Views.NominalMemory.Controls.aliasesAgree",
+          "name_key": [
+            "str",
+            [
+              "str",
+              [
+                "str",
+                [
+                  "str",
+                  [
+                    "str",
+                    [
+                      "str",
+                      "anonymous",
+                      "Solidity"
+                    ],
+                    "Yul"
+                  ],
+                  "Views"
+                ],
+                "NominalMemory"
+              ],
+              "Controls"
+            ],
+            "aliasesAgree"
+          ]
+        },
+        {
+          "name": "Solidity.Yul.Views.NominalMemory.Controls.env",
+          "name_key": [
+            "str",
+            [
+              "str",
+              [
+                "str",
+                [
+                  "str",
+                  [
+                    "str",
+                    [
+                      "str",
+                      "anonymous",
+                      "Solidity"
+                    ],
+                    "Yul"
+                  ],
+                  "Views"
+                ],
+                "NominalMemory"
+              ],
+              "Controls"
+            ],
+            "env"
+          ]
+        },
+        {
+          "name": "Solidity.Yul.Views.NominalMemory.Controls.flag",
+          "name_key": [
+            "str",
+            [
+              "str",
+              [
+                "str",
+                [
+                  "str",
+                  [
+                    "str",
+                    [
+                      "str",
+                      "anonymous",
+                      "Solidity"
+                    ],
+                    "Yul"
+                  ],
+                  "Views"
+                ],
+                "NominalMemory"
+              ],
+              "Controls"
+            ],
+            "flag"
+          ]
+        },
+        {
+          "name": "Solidity.Yul.Views.NominalMemory.Controls.i16",
+          "name_key": [
+            "str",
+            [
+              "str",
+              [
+                "str",
+                [
+                  "str",
+                  [
+                    "str",
+                    [
+                      "str",
+                      "anonymous",
+                      "Solidity"
+                    ],
+                    "Yul"
+                  ],
+                  "Views"
+                ],
+                "NominalMemory"
+              ],
+              "Controls"
+            ],
+            "i16"
+          ]
+        },
+        {
+          "name": "Solidity.Yul.Views.NominalMemory.Controls.inspect",
+          "name_key": [
+            "str",
+            [
+              "str",
+              [
+                "str",
+                [
+                  "str",
+                  [
+                    "str",
+                    [
+                      "str",
+                      "anonymous",
+                      "Solidity"
+                    ],
+                    "Yul"
+                  ],
+                  "Views"
+                ],
+                "NominalMemory"
+              ],
+              "Controls"
+            ],
+            "inspect"
+          ]
+        },
+        {
+          "name": "Solidity.Yul.Views.NominalMemory.Controls.lengthOK",
+          "name_key": [
+            "str",
+            [
+              "str",
+              [
+                "str",
+                [
+                  "str",
+                  [
+                    "str",
+                    [
+                      "str",
+                      "anonymous",
+                      "Solidity"
+                    ],
+                    "Yul"
+                  ],
+                  "Views"
+                ],
+                "NominalMemory"
+              ],
+              "Controls"
+            ],
+            "lengthOK"
+          ]
+        },
+        {
+          "name": "Solidity.Yul.Views.NominalMemory.Controls.missing",
+          "name_key": [
+            "str",
+            [
+              "str",
+              [
+                "str",
+                [
+                  "str",
+                  [
+                    "str",
+                    [
+                      "str",
+                      "anonymous",
+                      "Solidity"
+                    ],
+                    "Yul"
+                  ],
+                  "Views"
+                ],
+                "NominalMemory"
+              ],
+              "Controls"
+            ],
+            "missing"
+          ]
+        },
+        {
+          "name": "Solidity.Yul.Views.NominalMemory.Controls.newRaw",
+          "name_key": [
+            "str",
+            [
+              "str",
+              [
+                "str",
+                [
+                  "str",
+                  [
+                    "str",
+                    [
+                      "str",
+                      "anonymous",
+                      "Solidity"
+                    ],
+                    "Yul"
+                  ],
+                  "Views"
+                ],
+                "NominalMemory"
+              ],
+              "Controls"
+            ],
+            "newRaw"
+          ]
+        },
+        {
+          "name": "Solidity.Yul.Views.NominalMemory.Controls.observe",
+          "name_key": [
+            "str",
+            [
+              "str",
+              [
+                "str",
+                [
+                  "str",
+                  [
+                    "str",
+                    [
+                      "str",
+                      "anonymous",
+                      "Solidity"
+                    ],
+                    "Yul"
+                  ],
+                  "Views"
+                ],
+                "NominalMemory"
+              ],
+              "Controls"
+            ],
+            "observe"
+          ]
+        },
+        {
+          "name": "Solidity.Yul.Views.NominalMemory.Controls.oldRaw",
+          "name_key": [
+            "str",
+            [
+              "str",
+              [
+                "str",
+                [
+                  "str",
+                  [
+                    "str",
+                    [
+                      "str",
+                      "anonymous",
+                      "Solidity"
+                    ],
+                    "Yul"
+                  ],
+                  "Views"
+                ],
+                "NominalMemory"
+              ],
+              "Controls"
+            ],
+            "oldRaw"
+          ]
+        },
+        {
+          "name": "Solidity.Yul.Views.NominalMemory.Controls.other",
+          "name_key": [
+            "str",
+            [
+              "str",
+              [
+                "str",
+                [
+                  "str",
+                  [
+                    "str",
+                    [
+                      "str",
+                      "anonymous",
+                      "Solidity"
+                    ],
+                    "Yul"
+                  ],
+                  "Views"
+                ],
+                "NominalMemory"
+              ],
+              "Controls"
+            ],
+            "other"
+          ]
+        },
+        {
+          "name": "Solidity.Yul.Views.NominalMemory.Controls.placement",
+          "name_key": [
+            "str",
+            [
+              "str",
+              [
+                "str",
+                [
+                  "str",
+                  [
+                    "str",
+                    [
+                      "str",
+                      "anonymous",
+                      "Solidity"
+                    ],
+                    "Yul"
+                  ],
+                  "Views"
+                ],
+                "NominalMemory"
+              ],
+              "Controls"
+            ],
+            "placement"
+          ]
+        },
+        {
+          "name": "Solidity.Yul.Views.NominalMemory.Controls.small",
+          "name_key": [
+            "str",
+            [
+              "str",
+              [
+                "str",
+                [
+                  "str",
+                  [
+                    "str",
+                    [
+                      "str",
+                      "anonymous",
+                      "Solidity"
+                    ],
+                    "Yul"
+                  ],
+                  "Views"
+                ],
+                "NominalMemory"
+              ],
+              "Controls"
+            ],
+            "small"
+          ]
+        },
+        {
+          "name": "Solidity.Yul.Views.NominalMemory.Controls.state",
+          "name_key": [
+            "str",
+            [
+              "str",
+              [
+                "str",
+                [
+                  "str",
+                  [
+                    "str",
+                    [
+                      "str",
+                      "anonymous",
+                      "Solidity"
+                    ],
+                    "Yul"
+                  ],
+                  "Views"
+                ],
+                "NominalMemory"
+              ],
+              "Controls"
+            ],
+            "state"
+          ]
+        },
+        {
+          "name": "Solidity.Yul.Views.NominalMemory.Controls.tag",
+          "name_key": [
+            "str",
+            [
+              "str",
+              [
+                "str",
+                [
+                  "str",
+                  [
+                    "str",
+                    [
+                      "str",
+                      "anonymous",
+                      "Solidity"
+                    ],
+                    "Yul"
+                  ],
+                  "Views"
+                ],
+                "NominalMemory"
+              ],
+              "Controls"
+            ],
+            "tag"
+          ]
+        }
+      ],
+      "path": "Solidity/Yul/Views/NominalMemoryControls.lean",
+      "status": "pass",
+      "top_commands": 51
+    },
+    {
+      "check_info_events": 6,
+      "check_reference_events": 126,
+      "check_top_commands": 6,
+      "exit_code": 0,
+      "finished_diagnostic_snapshots": 0,
+      "observed_constants": [
+        {
+          "name": "And",
+          "name_key": [
+            "str",
+            "anonymous",
+            "And"
+          ]
+        },
+        {
+          "name": "Bool.false",
+          "name_key": [
+            "str",
+            [
+              "str",
+              "anonymous",
+              "Bool"
+            ],
+            "false"
+          ]
+        },
+        {
+          "name": "Bool.true",
+          "name_key": [
+            "str",
+            [
+              "str",
+              "anonymous",
+              "Bool"
+            ],
+            "true"
+          ]
+        },
+        {
+          "name": "Decidable.decide",
+          "name_key": [
+            "str",
+            [
+              "str",
+              "anonymous",
+              "Decidable"
+            ],
+            "decide"
+          ]
+        },
+        {
+          "name": "Except.error",
+          "name_key": [
+            "str",
+            [
+              "str",
+              "anonymous",
+              "Except"
+            ],
+            "error"
+          ]
+        },
+        {
+          "name": "Fin.mk",
+          "name_key": [
+            "str",
+            [
+              "str",
+              "anonymous",
+              "Fin"
+            ],
+            "mk"
+          ]
+        },
+        {
+          "name": "Option.isNone",
+          "name_key": [
+            "str",
+            [
+              "str",
+              "anonymous",
+              "Option"
+            ],
+            "isNone"
+          ]
+        },
+        {
+          "name": "Option.none",
+          "name_key": [
+            "str",
+            [
+              "str",
+              "anonymous",
+              "Option"
+            ],
+            "none"
+          ]
+        },
+        {
+          "name": "Option.some",
+          "name_key": [
+            "str",
+            [
+              "str",
+              "anonymous",
+              "Option"
+            ],
+            "some"
+          ]
+        },
+        {
+          "name": "Prod.mk",
+          "name_key": [
+            "str",
+            [
+              "str",
+              "anonymous",
+              "Prod"
+            ],
+            "mk"
+          ]
+        },
+        {
+          "name": "Solidity.Source.Halt.stuck",
+          "name_key": [
+            "str",
+            [
+              "str",
+              [
+                "str",
+                [
+                  "str",
+                  "anonymous",
+                  "Solidity"
+                ],
+                "Source"
+              ],
+              "Halt"
+            ],
+            "stuck"
+          ]
+        },
+        {
+          "name": "Solidity.Source.Idx.here",
+          "name_key": [
+            "str",
+            [
+              "str",
+              [
+                "str",
+                [
+                  "str",
+                  "anonymous",
+                  "Solidity"
+                ],
+                "Source"
+              ],
+              "Idx"
+            ],
+            "here"
+          ]
+        },
+        {
+          "name": "Solidity.Source.Idx.there",
+          "name_key": [
+            "str",
+            [
+              "str",
+              [
+                "str",
+                [
+                  "str",
+                  "anonymous",
+                  "Solidity"
+                ],
+                "Source"
+              ],
+              "Idx"
+            ],
+            "there"
+          ]
+        },
+        {
+          "name": "Solidity.Yul.Views.mload",
+          "name_key": [
+            "str",
+            [
+              "str",
+              [
+                "str",
+                [
+                  "str",
+                  "anonymous",
+                  "Solidity"
+                ],
+                "Yul"
+              ],
+              "Views"
+            ],
+            "mload"
+          ]
+        },
+        {
+          "name": "Solidity.Yul.Views.mstore",
+          "name_key": [
+            "str",
+            [
+              "str",
+              [
+                "str",
+                [
+                  "str",
+                  "anonymous",
+                  "Solidity"
+                ],
+                "Yul"
+              ],
+              "Views"
+            ],
+            "mstore"
+          ]
+        },
+        {
+          "name": "Solidity.Yul.Views.retainInitial",
+          "name_key": [
+            "str",
+            [
+              "str",
+              [
+                "str",
+                [
+                  "str",
+                  "anonymous",
+                  "Solidity"
+                ],
+                "Yul"
+              ],
+              "Views"
+            ],
+            "retainInitial"
+          ]
+        },
+        {
+          "name": "Solidity.Yul.Views.NominalMemory.retainedState",
+          "name_key": [
+            "str",
+            [
+              "str",
+              [
+                "str",
+                [
+                  "str",
+                  [
+                    "str",
+                    "anonymous",
+                    "Solidity"
+                  ],
+                  "Yul"
+                ],
+                "Views"
+              ],
+              "NominalMemory"
+            ],
+            "retainedState"
+          ]
+        },
+        {
+          "name": "Solidity.Yul.Views.NominalMemory.Controls.missing",
+          "name_key": [
+            "str",
+            [
+              "str",
+              [
+                "str",
+                [
+                  "str",
+                  [
+                    "str",
+                    [
+                      "str",
+                      "anonymous",
+                      "Solidity"
+                    ],
+                    "Yul"
+                  ],
+                  "Views"
+                ],
+                "NominalMemory"
+              ],
+              "Controls"
+            ],
+            "missing"
+          ]
+        },
+        {
+          "name": "Solidity.Yul.Views.NominalMemory.Controls.other",
+          "name_key": [
+            "str",
+            [
+              "str",
+              [
+                "str",
+                [
+                  "str",
+                  [
+                    "str",
+                    [
+                      "str",
+                      "anonymous",
+                      "Solidity"
+                    ],
+                    "Yul"
+                  ],
+                  "Views"
+                ],
+                "NominalMemory"
+              ],
+              "Controls"
+            ],
+            "other"
+          ]
+        },
+        {
+          "name": "Solidity.Yul.Views.NominalMemory.RetainedControls.aliasRead",
+          "name_key": [
+            "str",
+            [
+              "str",
+              [
+                "str",
+                [
+                  "str",
+                  [
+                    "str",
+                    [
+                      "str",
+                      "anonymous",
+                      "Solidity"
+                    ],
+                    "Yul"
+                  ],
+                  "Views"
+                ],
+                "NominalMemory"
+              ],
+              "RetainedControls"
+            ],
+            "aliasRead"
+          ]
+        },
+        {
+          "name": "Solidity.Yul.Views.NominalMemory.RetainedControls.heap",
+          "name_key": [
+            "str",
+            [
+              "str",
+              [
+                "str",
+                [
+                  "str",
+                  [
+                    "str",
+                    [
+                      "str",
+                      "anonymous",
+                      "Solidity"
+                    ],
+                    "Yul"
+                  ],
+                  "Views"
+                ],
+                "NominalMemory"
+              ],
+              "RetainedControls"
+            ],
+            "heap"
+          ]
+        },
+        {
+          "name": "Solidity.Yul.Views.NominalMemory.RetainedControls.placement",
+          "name_key": [
+            "str",
+            [
+              "str",
+              [
+                "str",
+                [
+                  "str",
+                  [
+                    "str",
+                    [
+                      "str",
+                      "anonymous",
+                      "Solidity"
+                    ],
+                    "Yul"
+                  ],
+                  "Views"
+                ],
+                "NominalMemory"
+              ],
+              "RetainedControls"
+            ],
+            "placement"
+          ]
+        },
+        {
+          "name": "Solidity.Yul.Views.NominalMemory.RetainedControls.raw",
+          "name_key": [
+            "str",
+            [
+              "str",
+              [
+                "str",
+                [
+                  "str",
+                  [
+                    "str",
+                    [
+                      "str",
+                      "anonymous",
+                      "Solidity"
+                    ],
+                    "Yul"
+                  ],
+                  "Views"
+                ],
+                "NominalMemory"
+              ],
+              "RetainedControls"
+            ],
+            "raw"
+          ]
+        },
+        {
+          "name": "Solidity.Yul.Views.NominalMemory.RetainedControls.regrownRaw",
+          "name_key": [
+            "str",
+            [
+              "str",
+              [
+                "str",
+                [
+                  "str",
+                  [
+                    "str",
+                    [
+                      "str",
+                      "anonymous",
+                      "Solidity"
+                    ],
+                    "Yul"
+                  ],
+                  "Views"
+                ],
+                "NominalMemory"
+              ],
+              "RetainedControls"
+            ],
+            "regrownRaw"
+          ]
+        },
+        {
+          "name": "Solidity.Yul.Views.NominalMemory.RetainedControls.regrownState",
+          "name_key": [
+            "str",
+            [
+              "str",
+              [
+                "str",
+                [
+                  "str",
+                  [
+                    "str",
+                    [
+                      "str",
+                      "anonymous",
+                      "Solidity"
+                    ],
+                    "Yul"
+                  ],
+                  "Views"
+                ],
+                "NominalMemory"
+              ],
+              "RetainedControls"
+            ],
+            "regrownState"
+          ]
+        },
+        {
+          "name": "Solidity.Yul.Views.NominalMemory.RetainedControls.shrunkRaw",
+          "name_key": [
+            "str",
+            [
+              "str",
+              [
+                "str",
+                [
+                  "str",
+                  [
+                    "str",
+                    [
+                      "str",
+                      "anonymous",
+                      "Solidity"
+                    ],
+                    "Yul"
+                  ],
+                  "Views"
+                ],
+                "NominalMemory"
+              ],
+              "RetainedControls"
+            ],
+            "shrunkRaw"
+          ]
+        },
+        {
+          "name": "Solidity.Yul.Views.NominalMemory.RetainedControls.shrunkState",
+          "name_key": [
+            "str",
+            [
+              "str",
+              [
+                "str",
+                [
+                  "str",
+                  [
+                    "str",
+                    [
+                      "str",
+                      "anonymous",
+                      "Solidity"
+                    ],
+                    "Yul"
+                  ],
+                  "Views"
+                ],
+                "NominalMemory"
+              ],
+              "RetainedControls"
+            ],
+            "shrunkState"
+          ]
+        },
+        {
+          "name": "Solidity.Yul.Views.NominalMemory.RetainedControls.small",
+          "name_key": [
+            "str",
+            [
+              "str",
+              [
+                "str",
+                [
+                  "str",
+                  [
+                    "str",
+                    [
+                      "str",
+                      "anonymous",
+                      "Solidity"
+                    ],
+                    "Yul"
+                  ],
+                  "Views"
+                ],
+                "NominalMemory"
+              ],
+              "RetainedControls"
+            ],
+            "small"
+          ]
+        },
+        {
+          "name": "Solidity.Yul.Views.NominalMemory.RetainedControls.state",
+          "name_key": [
+            "str",
+            [
+              "str",
+              [
+                "str",
+                [
+                  "str",
+                  [
+                    "str",
+                    [
+                      "str",
+                      "anonymous",
+                      "Solidity"
+                    ],
+                    "Yul"
+                  ],
+                  "Views"
+                ],
+                "NominalMemory"
+              ],
+              "RetainedControls"
+            ],
+            "state"
+          ]
+        }
+      ],
+      "path": "Solidity/Yul/Views/NominalRetainedControls.lean",
+      "status": "pass",
+      "top_commands": 33
+    },
+    {
+      "check_info_events": 3,
+      "check_reference_events": 9,
+      "check_top_commands": 3,
+      "exit_code": 0,
+      "finished_diagnostic_snapshots": 0,
+      "observed_constants": [
+        {
+          "name": "Decidable.decide",
+          "name_key": [
+            "str",
+            [
+              "str",
+              "anonymous",
+              "Decidable"
+            ],
+            "decide"
+          ]
+        },
+        {
+          "name": "Option.some",
+          "name_key": [
+            "str",
+            [
+              "str",
+              "anonymous",
+              "Option"
+            ],
+            "some"
+          ]
+        },
+        {
+          "name": "Solidity.Yul.Views.Controls.emReadCalldata",
+          "name_key": [
+            "str",
+            [
+              "str",
+              [
+                "str",
+                [
+                  "str",
+                  [
+                    "str",
+                    "anonymous",
+                    "Solidity"
+                  ],
+                  "Yul"
+                ],
+                "Views"
+              ],
+              "Controls"
+            ],
+            "emReadCalldata"
+          ]
+        }
+      ],
+      "path": "Solidity/Yul/Views/SourceEnvironmentControls.lean",
+      "status": "pass",
+      "top_commands": 21
+    }
+  ],
+  "selection": "Native syntax census selects candidate-family files containing explicit check syntax; macro-only files and external consumers are not covered.",
+  "status": "partial",
+  "verdict": "Successful captures witness check references only. No file or declaration is certified unused or deletable."
+}

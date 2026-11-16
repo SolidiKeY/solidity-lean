@@ -38,9 +38,10 @@ def available():
     used = int(Path('/sys/fs/cgroup/memory.current').read_text())
     return min(host, int(cap)-used) if cap != 'max' else host
 
-def child_limits():
+def child_limits(signal_mask):
     # The VM already has a hard cgroup memory cap. Stack reservations are
     # virtual, not RSS; RLIMIT_AS can break bounded --tstack=131072 checks.
+    signal.pthread_sigmask(signal.SIG_SETMASK, signal_mask)
     resource.setrlimit(resource.RLIMIT_CORE, (0, 0))
 
 def run(cmd, root, env, logfile):
@@ -56,8 +57,12 @@ def run(cmd, root, env, logfile):
     p = None
     try:
         with logfile.open('w') as log:
-            p = subprocess.Popen(cmd, cwd=root, env=env, stdout=log, stderr=subprocess.STDOUT,
-                                 start_new_session=True, preexec_fn=child_limits)
+            old_mask = signal.pthread_sigmask(signal.SIG_BLOCK, (signal.SIGINT, signal.SIGTERM))
+            try:
+                p = subprocess.Popen(cmd, cwd=root, env=env, stdout=log, stderr=subprocess.STDOUT,
+                                     start_new_session=True, preexec_fn=lambda: child_limits(old_mask))
+            finally:
+                signal.pthread_sigmask(signal.SIG_SETMASK, old_mask)
             while p.poll() is None:
                 rows = [row for row in usage() if row[1] == p.pid]
                 rss = sum(row[2] for row in rows)
@@ -161,4 +166,66 @@ def main():
     meta['status']='pass'
     (out/'measurement.json').write_text(json.dumps(meta,indent=2)+'\n')
 
-if __name__=='__main__': main()
+
+"""Regression: signals arriving after spawn but before assignment reap the child."""
+import importlib.util
+import sys
+import tempfile
+import unittest
+from unittest import mock
+
+HERE = Path(__file__).resolve().parent
+
+
+def worker(script, sig):
+    spec = importlib.util.spec_from_file_location("measure", script)
+    measure = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(measure)
+    real_popen = subprocess.Popen
+    spawned = []
+
+    def interrupt_before_assignment(*args, **kwargs):
+        child = real_popen(*args, **kwargs)
+        spawned.append(child)
+        os.kill(os.getpid(), sig)
+        return child
+
+    with tempfile.TemporaryDirectory() as tmp, mock.patch.object(measure.subprocess, "Popen", interrupt_before_assignment):
+        command = [sys.executable, "-c", "import time; time.sleep(60)"]
+        if "migrate-frontend" in str(script):
+            with mock.patch.object(measure, "available", return_value=8 * measure.GIB):
+                result = measure.run(command, tmp, os.environ.copy(), Path(tmp) / "run.log")
+            assert result["stop"].startswith("InterruptedError:")
+        else:
+            with mock.patch.object(measure, "resources", return_value=(8 * measure.GIB, 0, 0)), mock.patch.object(sys, "argv", [str(script), str(Path(tmp) / "result.json"), *command]):
+                try:
+                    measure.main()
+                except SystemExit as exc:
+                    assert exc.code == 75
+                else:
+                    raise AssertionError("expected resource-stop exit")
+        assert len(spawned) == 1 and spawned[0].poll() is not None
+        try:
+            os.killpg(spawned[0].pid, 0)
+        except ProcessLookupError:
+            pass
+        else:
+            raise AssertionError("child process group survived")
+
+
+class SignalRaceTest(unittest.TestCase):
+    def test_signal_during_spawn(self):
+        scripts = [HERE / "measure.py", HERE.parent / "migrate-root-gate" / "measure.py"]
+        for script in scripts:
+            for sig in (signal.SIGINT, signal.SIGTERM):
+                with self.subTest(script=script, signal=sig):
+                    subprocess.run([sys.executable, __file__, "--signal-test-worker", str(script), str(sig)], check=True, timeout=15)
+
+
+if __name__ == "__main__":
+    if len(sys.argv) > 1 and sys.argv[1] == "--signal-test-worker":
+        worker(Path(sys.argv[2]), int(sys.argv[3]))
+    elif len(sys.argv) > 1 and sys.argv[1] == "--signal-test":
+        unittest.main(argv=[sys.argv[0]])
+    else:
+        main()

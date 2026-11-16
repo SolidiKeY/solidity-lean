@@ -37,10 +37,12 @@ theorem model_to_source {c : Control} {n fuel : Nat} {stmt : Stmt [] [] c n}
      (condition.value locals) locals m final caller skip ran
    let H := max fuel (max hc hf)
    have casesH : evalCases H .nil True.intro arms cases.profile (condition.value locals).toFin (sourceLocals locals) = some chosen := by
-     obtain ⟨extra,eq⟩ := Nat.exists_eq_add_of_le (show hc ≤ H by dsimp only [H]; omega)
-     rw [eq]
-     exact evalCases_refines_add hc extra .nil True.intro arms cases.profile
-       (condition.value locals).toFin (sourceLocals locals) _ caseSource
+     exact CompletionControls.completed_horizon
+       (fun fuel => evalCases fuel .nil True.intro arms cases.profile
+         (condition.value locals).toFin (sourceLocals locals))
+       (fun fuel extra => evalCases_refines_add fuel extra .nil True.intro arms cases.profile
+         (condition.value locals).toFin (sourceLocals locals))
+       (show hc ≤ H by dsimp only [H]; omega) caseSource
    have continuedH : (match chosen with
      | some result => some result
      | none => evalStmt H .nil True.intro fallbackStmt default.compiled.profile (sourceLocals locals)) =

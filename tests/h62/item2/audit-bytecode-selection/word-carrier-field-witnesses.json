@@ -1,0 +1,14 @@
+{
+  "word_carrier_selected_joint_domain": {
+    "target": "Solidity.Backend.AbiEntry.Interface.WordCarrierBindingCertificate.selected",
+    "proof": "\u27e8WordCarrierBinding.program,WordCarrierBinding.certificate,bodyContract,7,Solidity.AbiEntry.Kind.enumBelow 3,bodyLabel,True.intro\u27e9"
+  },
+  "word_carrier_executed_joint_domain": {
+    "target": "Solidity.Backend.AbiEntry.Interface.WordCarrierBindingCertificate.executed",
+    "proof": "\u27e8WordCarrierBinding.program,WordCarrierBinding.certificate,bodyContract,7,Solidity.AbiEntry.Kind.enumBelow 3,bodyLabel,carrierCompilation (.enumBelow 3),carrier_found (.enumBelow 3),bodyMachine (wmod 2) (wmod 36),wmod 2,wmod 36,rfl,rfl,True.intro\u27e9"
+  },
+  "word_carrier_entry_rejection_joint_domain": {
+    "target": "Solidity.Backend.AbiEntry.Interface.WordCarrierBindingCertificate.entry_rejection",
+    "proof": "\u27e8WordCarrierBinding.program,WordCarrierBinding.certificate,bodyContract,7,Solidity.AbiEntry.Kind.enumBelow 3,bodyLabel,carrierCompilation (.enumBelow 3),carrier_found (.enumBelow 3),carrierEmptyInput,0,bodyMachine (rawArgumentWord carrierEmptyInput) (wmod 0),wmod 0,rfl,rfl,rfl,True.intro\u27e9"
+  }
+}

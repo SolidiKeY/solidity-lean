@@ -87,10 +87,8 @@ theorem normal_to_model (artifact : Artifact depth stmt) (horizon : Nat)
     (m : Evm.Machine) (caller : List Evm.Word) :
     Evm.run artifact.code {m with stack := (newer.toList ++ locals.toList).map coreWord ++ caller} =
       .ok {m with stack := (newer.toList ++ out.toList).map coreWord ++ caller} 0 := by
-  obtain ⟨actual,same,target⟩ := artifact.source_to_model horizon locals ⟨sourceLocals out,.normal⟩ ran newer m caller
-  have equal : out = actual := CompletionControls.sourceLocals_injective (congrArg Outcome.vars same)
-  cases equal
-  exact target
+  exact CompletionControls.normal_output out _
+    (artifact.source_to_model horizon locals ⟨sourceLocals out,.normal⟩ ran newer m caller)
 
 theorem completion_iff (artifact : Artifact depth stmt) (locals out : Vector Scalar.Word n)
     (newer : Vector Scalar.Word depth) (m : Evm.Machine) (caller : List Evm.Word) :

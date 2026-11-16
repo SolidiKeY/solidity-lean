@@ -1,0 +1,7 @@
+{
+ "Solidity/Source/Preservation/Encoding.lean:Solidity.Source.Preservation.encode_storage_bytes_timeout_two": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ]
+}

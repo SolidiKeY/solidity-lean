@@ -1,0 +1,66 @@
+{
+  "all_loaded_collision_names": 2187,
+  "all_loaded_constant_records": 455138,
+  "all_loaded_modules": 8276,
+  "base": "d6fd95f0886775d7c286813fa9b993a40ba7a777",
+  "boundaries": [
+    "Module/name pairs preserve per-module serialized constant identities, including realized auxiliaries.",
+    "Native declaration ranges replace editor-index source bindings; no editor-index reference edges are used.",
+    "Facade closure traverses all serialized imported bodies in the fixed final Solidity.Theorems environment, including unselected core/dependency modules; ordinary project graph edges model defining-module compilation contexts.",
+    "Reference providers follow cached import DFS order and the pinned native import subsumption relation.",
+    "Only the named theorem facade is rooted here. Outside its closure does not mean unused.",
+    "Compiler/attribute extensions, discarded anonymous check proofs, command execution, dynamic effects and missing-module consumers remain outside this native-expression graph."
+  ],
+  "deletable_now_verified_lines": 0,
+  "facade_reached_loaded_records": 14117,
+  "facade_reached_records": 11089,
+  "facade_root_boundary": {},
+  "facade_theorem_roots": 21,
+  "graph_sha256": "8f0934d9bd78964146422cef24d84fceaeb498751cd19b66d5441bb11532f05b",
+  "indexed_physical_lines": 1126116,
+  "legacy_splitlines_indexed_lines": 1126116,
+  "missing_files": 1574,
+  "provenance": {
+    "axiom_pins": {
+      "facade_used_native_range_lines": 0,
+      "outside_facade_closure_native_range_lines": 0,
+      "unattributed_physical_lines": 4054
+    },
+    "generated_root": {
+      "facade_used_native_range_lines": 0,
+      "outside_facade_closure_native_range_lines": 0,
+      "unattributed_physical_lines": 6663
+    },
+    "marked_generated": {
+      "facade_used_native_range_lines": 0,
+      "outside_facade_closure_native_range_lines": 12258,
+      "outside_facade_closure_serialized_constants": 17322,
+      "unattributed_physical_lines": 2071,
+      "without_native_source_range": 9288
+    },
+    "unresolved_chain_agreement": {
+      "facade_used_native_range_lines": 0,
+      "outside_facade_closure_native_range_lines": 15628,
+      "outside_facade_closure_serialized_constants": 3143,
+      "unattributed_physical_lines": 6067,
+      "without_native_source_range": 1737
+    },
+    "untraced": {
+      "facade_used_native_range_lines": 53330,
+      "facade_used_serialized_constants": 11089,
+      "outside_facade_closure_native_range_lines": 766202,
+      "outside_facade_closure_serialized_constants": 286268,
+      "unattributed_physical_lines": 259843,
+      "without_native_source_range": 176464
+    }
+  },
+  "selected_module_system_modules": 0,
+  "selected_modules": 6717,
+  "selected_to_dependency_reference_occurrences": 4655429,
+  "selected_to_selected_expression_edges": 5037312,
+  "serialized_constant_records": 317822,
+  "source_line_unit": "Raw LF physical lines, excluding an empty line after terminal LF",
+  "status": "partial",
+  "unique_selected_constant_names": 310800,
+  "unresolved_references": {}
+}

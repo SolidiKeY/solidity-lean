@@ -1,0 +1,18 @@
+{
+  "source_routes_lookup_joint_domain": {
+    "target": "Solidity.Backend.AbiEntry.Interface.SourceRoutesCertificate.lookup",
+    "proof": "\u27e8SourceRoutes.table,SourceRoutes.certificate,sourceFixtureEnv false,sourceFixtureGlobal false,sourceFixtureFrame sourceFixtureBytes (wmod 0),sourceFixtureLabels,sourceFixtureFallback,source_fixture_full (wmod 0),True.intro\u27e9"
+  },
+  "source_routes_executed_joint_domain": {
+    "target": "Solidity.Backend.AbiEntry.Interface.SourceRoutesCertificate.executed",
+    "proof": "\u27e8SourceRoutes.table,SourceRoutes.certificate,sourceFixtureEnv false,sourceFixtureGlobal false,sourceFixtureFrame sourceFixtureBytes (wmod 0),sourceFixtureLabels,sourceFixtureFallback,source_fixture_full (wmod 0),sourceFixtureContract,7,sourceOrdinaryCompilation,source_ordinary_found (wmod 0),sourceFixtureMachine sourceFixtureBytes (wmod 0),rfl,True.intro\u27e9"
+  },
+  "source_payable_lookup_joint_domain": {
+    "target": "Solidity.Backend.AbiEntry.Interface.SourcePayableCertificate.lookup",
+    "proof": "\u27e8SourcePayable.table,SourcePayable.certificate,sourceFixtureEnv false,sourceFixtureGlobal false,sourceFixtureFrame sourceFixtureBytes (wmod 0),sourceFixtureLabels,sourceFixtureFallback,source_fixture_full (wmod 0),True.intro\u27e9"
+  },
+  "source_payable_executed_joint_domain": {
+    "target": "Solidity.Backend.AbiEntry.Interface.SourcePayableCertificate.executed",
+    "proof": "\u27e8SourcePayable.table,SourcePayable.certificate,sourceFixtureEnv false,sourceFixtureGlobal false,sourceFixtureFrame sourceFixtureBytes (wmod 0),sourceFixtureLabels,sourceFixtureFallback,source_fixture_full (wmod 0),sourceFixtureContract,7,sourcePayableCompilation false,source_payable_found false (wmod 0),sourceFixtureMachine sourceFixtureBytes (wmod 0),rfl,rfl,True.intro\u27e9"
+  }
+}

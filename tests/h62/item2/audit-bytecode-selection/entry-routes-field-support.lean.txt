@@ -1,0 +1,82 @@
+/-! Guards routing short input through ordinary matches, losing receive
+priority, and allowing a rejected ordinary match to finish at a special label.
+Reuse the actual compiler and shared payable table. Only continuation labels
+are observed; ABI/body binding, Source authority, native/physical and gas remain separate. -/
+def entryReceive : Option SpecialRow := some (wmod 44,true)
+def entryFallback : Option SpecialRow := some (wmod 55,true)
+def entryCompilation := EntryRoutes.compiled payableContract 3 payableTable entryReceive entryFallback
+
+def entryMachine (selector size value : Fin W) : Machine :=
+  {Machine.init with
+    mem := fun address => if address=3 then .val selector else if address=4 then .val size else .val (wmod 71)
+    stack := [.val (wmod 17),.val (wmod 29)]
+    callvalue := value}
+def entryWritten (selector size value label : Fin W) : Machine :=
+  {entryMachine selector size value with mem := upd (entryMachine selector size value).mem 4 (.val label)}
+
+theorem entry_found : Compiler.compile 3 (Frag.init RouteCtx)
+    (EntryRoutes.route payableContract payableTable entryReceive entryFallback)=some entryCompilation :=
+  EntryRoutes.selected payableContract 3 payableTable entryReceive entryFallback
+
+theorem entry_actual (selector size value : Fin W) : run entryCompilation.code (entryMachine selector size value)=
+    entryRouteOutcome 3 payableTable entryReceive entryFallback selector size (entryMachine selector size value) :=
+  EntryRoutes.executed payableContract 3 payableTable entryReceive entryFallback entryCompilation entry_found
+    (entryMachine selector size value) selector size rfl rfl
+
+theorem entry_empty_receive (selector value : Fin W) : run entryCompilation.code (entryMachine selector (wmod 0) value)=
+    .ok (entryWritten selector (wmod 0) value (wmod 44)) 0 := by
+  have small : (wmod 0).val<4 := by decide
+  have empty : (wmod 0).val=0 := rfl
+  simpa only [entryRouteOutcome,if_pos small,specialOutcome,specialResult,if_pos empty,entryReceive,
+    Option.orElse_some,specialRowOutcome,Bool.true_or,if_true] using entry_actual selector (wmod 0) value
+
+theorem entry_short_fallback (selector size value : Fin W) (nonempty : size.val≠0) (small : size.val<4) :
+    run entryCompilation.code (entryMachine selector size value)=.ok (entryWritten selector size value (wmod 55)) 0 := by
+  simpa only [entryRouteOutcome,if_pos small,specialOutcome,specialResult,if_neg nonempty,entryFallback,
+    specialRowOutcome,Bool.true_or,if_true] using entry_actual selector size value
+
+theorem entry_ordinary_zero : run entryCompilation.code (entryMachine (wmod 5) (wmod 4) (wmod 0))=
+    .ok (entryWritten (wmod 5) (wmod 4) (wmod 0) (wmod 22)) 0 := by
+  have full : ¬(wmod 4).val<4 := by decide
+  have chosen : ordinaryResult payableTable (wmod 5)=some (wmod 22,false) := by decide
+  simpa only [entryRouteOutcome,if_neg full,chosen,specialRowOutcome,Bool.false_or,decide_true,if_true]
+    using entry_actual (wmod 5) (wmod 4) (wmod 0)
+
+theorem entry_ordinary_rejects_value (value : Fin W) (nonzero : value.val≠0) :
+    run entryCompilation.code (entryMachine (wmod 5) (wmod 4) value)=.revert := by
+  have full : ¬(wmod 4).val<4 := by decide
+  have chosen : ordinaryResult payableTable (wmod 5)=some (wmod 22,false) := by decide
+  have observed : (entryMachine (wmod 5) (wmod 4) value).callvalue.val≠0 := nonzero
+  simpa only [entryRouteOutcome,if_neg full,chosen,specialRowOutcome,Bool.false_or,decide_eq_false observed,if_false]
+    using entry_actual (wmod 5) (wmod 4) value
+
+theorem entry_full_miss_fallback (value : Fin W) : run entryCompilation.code (entryMachine (wmod 7) (wmod 4) value)=
+    .ok (entryWritten (wmod 7) (wmod 4) value (wmod 55)) 0 := by
+  have full : ¬(wmod 4).val<4 := by decide
+  have nonempty : (wmod 4).val≠0 := by decide
+  have missed : ordinaryResult payableTable (wmod 7)=none := by decide
+  simpa only [entryRouteOutcome,if_neg full,missed,specialOutcome,specialResult,if_neg nonempty,entryFallback,
+    specialRowOutcome,Bool.true_or,if_true] using entry_actual (wmod 7) (wmod 4) value
+
+theorem entry_no_payable_collision_outcome (value : Fin W) (nonzero : value.val≠0) :
+    run entryCompilation.code (entryMachine (wmod 5) (wmod 4) value)≠
+      .ok (entryWritten (wmod 5) (wmod 4) value (wmod 77)) 0 := by
+  rw [entry_ordinary_rejects_value value nonzero]
+  intro impossible
+  cases impossible
+
+theorem entry_preserves_caller (selector size value label : Fin W) :
+    (entryWritten selector size value label).mem 3=.val selector ∧
+    (entryWritten selector size value label).mem 5=.val (wmod 71) ∧
+    (entryWritten selector size value label).stack=[.val (wmod 17),.val (wmod 29)] ∧
+    (entryWritten selector size value label).callvalue=value := ⟨rfl,rfl,rfl,rfl⟩
+
+#print axioms entry_found
+#print axioms entry_actual
+#print axioms entry_empty_receive
+#print axioms entry_short_fallback
+#print axioms entry_ordinary_zero
+#print axioms entry_ordinary_rejects_value
+#print axioms entry_full_miss_fallback
+#print axioms entry_no_payable_collision_outcome
+#print axioms entry_preserves_caller

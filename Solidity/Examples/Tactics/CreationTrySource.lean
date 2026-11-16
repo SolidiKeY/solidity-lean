@@ -5,7 +5,7 @@ pinned compiler AST. These are concrete typed world/caller executions, not
 universal source validity or a CREATE nonce-model equivalence claim. -/
 namespace Solidity.Examples.Tactics.CreationTrySource
 open Solidity.Frontend.CreationTry Solidity.ContractWorld Semantics
-solc_creation_try "../../../tests/solc/CreationTry.ast.json" hash 0xd3643a80701c47bf
+solc_creation_try "../../../tests/solc/CreationTry.ast.json" hash 0xabfe191d03fd7603
   from_contract "C" as Original
 
 def sender : Address := ⟨⟨103164821458651970696730694074090566093359944210, by decide +kernel⟩, by decide +kernel⟩

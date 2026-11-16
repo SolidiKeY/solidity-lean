@@ -24,7 +24,6 @@ theorem high_mono (image : FrameMem C Γ) (destination : ByteSpan image.capacity
     (bytes : Solidity.Roadmap.Bytes)
     (window : World.returnWindow entry.returndata source.val destination.length.val.toNat=some bytes) :
     image.highWaterWords≤(copy image destination entry source bytes window).highWaterWords := by
-  first | (simp only;done) | decide | omega | rfl | skip
   unfold copy P6ByteMemory.writeSpan
   split
   · exact Nat.le_refl _
@@ -39,7 +38,6 @@ theorem world_copy (image : FrameMem C Γ) (destination : ByteSpan image.capacit
     World.copyReturndata World.TargetMemory.port entry (frameBytes image)
       (P6ByteMemory.wireWord destination.offset) source (P6ByteMemory.wireWord destination.length)=
       some (frameBytes (copy image destination entry source bytes window)) := by
-  first | (simp only;done) | decide | omega | rfl | skip
   rw [World.copyReturndata_exact _ _ _ _ _ _ bytes window,
     World.TargetMemory.store_exact _ _ _ nonwrap]
   rw [copy,P6ByteMemory.write_image]
@@ -63,7 +61,6 @@ theorem transport (base : Nat) (state : RawFrame.State ctx) (image : FrameMem C 
         (P6ByteMemory.wireWord destination.offset) source (P6ByteMemory.wireWord destination.length)=
         some (frameBytes reached) ∧
       reached.st=image.st ∧ reached.key=image.key := by
-  first | omega | decide | skip
   dsimp only
   have grows := high_mono image destination entry source bytes window
   have nextRoom : base+32*wordCellCount (localExternalTypes ctx)≤

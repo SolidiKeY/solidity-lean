@@ -1,0 +1,32 @@
+{
+ "Solidity/Lowering/G16/PanicGuard.lean:Solidity.Lowering.G16.PanicGuard.afterPrefix_false_rejected": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/G16/PanicGuard.lean:Solidity.Lowering.G16.PanicGuard.afterPrefix_run": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/G16/PanicGuard.lean:Solidity.Lowering.G16.PanicGuard.checked_false_rejected": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/G16/PanicGuard.lean:Solidity.Lowering.G16.PanicGuard.checkedOperand_run": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/G16/PanicGuard.lean:Solidity.Lowering.G16.PanicGuard.false_guard_not_success": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/G16/PanicGuard.lean:Solidity.Lowering.G16.PanicGuard.run": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ]
+}

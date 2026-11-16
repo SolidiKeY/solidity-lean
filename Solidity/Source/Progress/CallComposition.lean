@@ -44,7 +44,7 @@ theorem sub_ready_memory_call_mem {G : Glob E} {c : String} {ds : List Decl}
   rw [actual] at result
   have finish (valid : MemOK E s.heap.ty (last,after)) : MemOK E H (l,after) :=
     Preservation.relocalize (valid.weaken outer.le) l (LocalsOK.mono valid.le l outer.1.2)
-  have actual' : callInternal (plan := none) G F n d vs rs (.nil,s) = (r,(last,after)) := actual
+  have actual' : callInternal (plan := none) (calldataKnown := true) G F n d vs rs (.nil,s) = (r,(last,after)) := actual
   cases r with
   | ok a =>
     simp only [ExceptT.run,ExceptT.mk,actual']

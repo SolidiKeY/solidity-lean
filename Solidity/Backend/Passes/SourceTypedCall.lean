@@ -54,7 +54,7 @@ theorem eval_external (G : Glob E) (F : Fr) (n : Nat)
     (value : RExpr E Γ (.int IntTy.u256)) (args : RConvArgs E Γ ps) :
     evalE G F (n + 1) (.extCall target d signature value args) =
       (capture G F n target d value args >>= resume G F n d rs) := by
-  simp only [evalE, capture, bind_assoc, pure_bind]
+  simp only [evalE, withLibraryCalldata, capture, bind_assoc, pure_bind]
   congr 1
   funext raw
   congr 1

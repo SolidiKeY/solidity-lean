@@ -1334,3 +1334,10 @@ theorem Fml.Valid.of_updAtSD (r : UpdRuleNameS) {φ : Fml C []} (h : Fml.Valid (
   | some ψ => rw [hr] at h; exact Fml.Valid.of_updAtS hr h
 
 end Solidity
+
+namespace Solidity
+/-- Universal implementation equality for rewriting `{x := y} x == y`. -/
+theorem Fml.rwAtS_eq_rwAtSM_universal : @Fml.rwAtS = @Fml.rwAtSM := by
+  funext C top Γ φ
+  exact Fml.rwAtS_eq_rwAtSM top φ
+end Solidity

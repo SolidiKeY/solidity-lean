@@ -228,3 +228,106 @@ commands; it never enters the core import graph.
 | `Theorems.lean` | The headline theorems in notation, over the scoped calculus and the typed run, their axioms pinned: soundness, the rule table against the strategy (`rule_exists`, `rule_of_step`), the solkey fragment at the rule level (`solkey_rule_exists`, `solkey_rule_lt_calculus`, `solkey_step_taclet`) and at the judgement level (`solkey_eq_calculus`, `solkey_lt_calculus`), the compiler (`σ ≈[C, L, b, F] m`: `Evm.Sim` of the typed state). |
 
 | `Semantics/StaticCallState.lean` | Existing-frame resumption and exact visible havoc equality; no execution producer. |
+| `Hash/Bridge.lean` | Run-local ideal special case, exact region clearance, guard/prefix transfer and concrete collision control. |
+| `Hash/CollisionBridge.lean` | Combined adaptive oracle count, exact fixed-hash replacement, actual-query inclusion and corrected q=0/q=1 controls. |
+| `Hash/CollisionBridgeCompiler.lean` | PublicCorrectness guarded refinement, decoded reachability and hash-indexed compiler failure bound. |
+| `Hash/CollisionBridgeControls.lean` | Concrete admitted, compiled quiet success using HashPremise.nil. |
+| `Hash/CompilerCorrect.lean` | Operational producers and encoding facts for the frozen E4A contract. |
+| `Hash/CompilerCorrect/Prefix.lean` | Finite-prefix transport and divergence-safe composition for the frozen E4A contract. |
+| `Solidity/Semantics/Storage/TypeLayout.lean` | AST-only full-word sizes, member offsets and bounds; preserves the established `Solidity.Evm` definitions and equation lemmas. |
+| `Solidity/Semantics/IntrinsicStorage/Layout.lean` | Typed full-word locations for dependent storage paths, nested hash ancestry, bounded keys and lossless byte encoding of preimages; reuses the shared type layout. |
+| `Solidity/Semantics/IntrinsicStorage/Preimages/Frames.lean` | Structural storage cells and descendants, actual-world stored hash inputs, and aggregate value input coverage. |
+| `Solidity/Examples/IntrinsicStorage/Preimages/Frames.lean` | Coverage regressions for nested live/shadow arrays, overwritten mapping entries, arbitrary defaults and installed account array fields. |
+The diagnostic generators `scripts/h62/item2/audit-v08-adapters/generate_mapped_census.py`
+and `scripts/h62/item2/audit-v08-adapters/generate_calldata_census.py` accept
+`--stream` to omit the global imported-constant sort. This still materializes
+`toList`; it is not lazy or a bounded-memory guarantee. Default generated source
+is unchanged. Source hashes, selected-module filtering, captured fields and
+exclusive-write guards are retained. Bind any new capture to the current
+collector/template hashes; do not relabel historical receipts. Sort captured
+rows outside Lean when deterministic presentation is needed. Inventory and
+name matching do not establish feasibility, statement fidelity or H68 adequacy.
+
+`--result-shapes` optionally captures the conclusion head after all binders,
+equality operand heads and their kernel defining modules, and syntactic
+reflexivity. These are structural observations, without reduction or semantic
+proof. A generated equation's defining module does not transfer ownership of
+the referenced evaluator. Default captured fields remain unchanged unless the
+option is enabled. Bind shaped captures to their own fresh generator hashes.
+| `tests/h62/item4/generic-v08/IntrinsicWidthsV2.lean` | Explicit-mapFree fixed-bytes width consumers; isolated checker `scripts/h62/item4/generic-v08/check-width-v2.sh`. Frozen v1 headers remain unresolved; this test proves no historical correspondence or execution adequacy. |
+
+Run the v2 checker with `--toolchain TOOLCHAIN_ROOT --output FRESH_ABSOLUTE_DIR`
+outside the checkout. It explicitly requires master Lean4.24.0 commit
+`797c613eb9b6d4ec95db23e3e00af9ac6657f24b`; ambient Lake is not used. The frozen
+v1 `reproduce-width.py` keeps its separate Lean4.35.0/archive pin unchanged.
+The existing `bounded.py` runs every local import and the v2 test with `-j1`,
+H232 cloud-VM isolation, a12GiB host reserve,
+plus the existing address-space and sampled-RSS diagnostics, and a shared
+300second execution deadline. No pass is accepted after the observed deadline;
+monitor sampling is0.25seconds and failed-check termination has up to5seconds
+grace. Runtime monitor exceptions/signals fail closed and clean the child
+process group. Before/after hashes bind dependencies, target and helper scripts. Aggregate sampling is opt-in for v2; v1 defaults
+remain unchanged. Existing output directories are refused to preserve receipts.
+Its explicit `mapFree` consumers neither import nor certify the frozen original
+module. Predicate independence compares two current-signature calls only.
+The five original headers remain unresolved. Missing dirty work and unrecovered
+historical validation remain UNVERIFIABLE under H151.
+
+The driver forwards handled termination and waits for monitor cleanup while
+holding the writer lock. The monitor also inherits the lock descriptor and
+retains the original driver PID; parent loss stops the worker before ownership
+is released. It never substitutes a new parent in resource measurements.
+Kernel parent-ID discovery and live-owned status reads fail closed; missing
+data is ignored only when process exit is confirmed. The guard regressions
+use lightweight process fixtures and do not establish any Lean theorem.
+
+Handled interruption is deferred across process creation until the child handle
+is owned. Aggregate-mode workers inherit the writer lease and use a Linux
+parent-death SIGKILL guard, including the parent-loss-before-registration race;
+monitor SIGKILL therefore cannot leave an unowned worker running. Lifecycle
+regressions separately cover the fork-to-assignment window and monitor death.
+If required host-memory/no-swap observations are unavailable, those lifecycle tests report
+NOT VALIDATED/skipped; that is not successful cleanup evidence. The public
+checker itself still refuses unavailable resource observations.
+
+Only on the authorized cloud VM, explicitly add `--cloud-vm-h232` to select
+H232 admission. It is propagated explicitly to each monitor; absent that flag,
+the driver and monitor require the strict12GiB/no-swap hard scope. No ambient
+variable or ordinary-host fallback selects the cloud exception. Both modes
+record actual unified cgroup membership and fail on observed migration.
+H232 authorizes serial execution without a systemd scope: no systemd scope on
+the cloud VM (H232). The VM is the isolation; the host pre-gate separately
+enforces its16GiB/no-swap merge cap. Local checks retain one Lean process,
+12GiB address-space and sampled aggregate-RSS bounds, no swap, the existing
+host reserve and deadline. Local success does not certify the host pre-gate.
+The separate strict scope verifier remains regression-tested and is the default admission route. Frozen v1 defaults remain unchanged.
+
+Lifecycle regressions also default to strict host admission, including under
+unittest discovery. On the authorized cloud VM run
+`python3 -B tests/h62/item4/generic-v08/test_width_v2_lifecycle.py --cloud-vm-h232`.
+Only this explicit test-runner option selects cloud admission and passes the
+same option to its monitor fixtures; no environment fallback enables it.
+| `Syntax/NumericV2.lean` | Additive full-domain signed-power range guard and statement/value pair; v1 remains unchanged. |
+| `Syntax/NumericV2Correct.lean` | Exact mathematical range/value, guard-before-value execution and full Source arithmetic panic-payload proofs. |
+| `Syntax/NumericV2Controls.lean` | Magnitude-overflow, signed-boundary, huge-exponent unit and unchanged successful-state regressions. |
+| `Semantics/Panic/Eval.lean` | Panic-carrying evaluation of typed intrinsic producers, arithmetic and bounds helpers, mutually recursive paths and expressions, and assignment sources; retained producer operands and origin proofs, exact site codes, and local V1 projection laws. |
+| `Examples/Panic/Eval.lean` | Kernel panic-evaluation boundary controls for all nine origin codes, signed overflow, short-circuiting, local V1 behavior, and the exported evaluator API. |
+| `Semantics/Panic/Source.lean` | Additive V2 source producer interface retaining V1 origins exactly and width-aware narrowing results; local origin and boundary lemmas. |
+| `Syntax/Elab/Panic.lean` | Exact equations for transparent generated guards, enum capture and narrowing producers, retaining emitted statement order and modes; separate local enum origin lemma. |
+| `Examples/Panic/Source.lean` | Kernel-checked source panic regressions: signed/unsigned narrow boundaries, retained V1 origins, failure modes, divisor guard order, width bypass and enum capture data routes. |
+| `Semantics/Panic/Result.lean` | Origin-parameterized panic-carrying typed results: full successes, intrinsic solc code and origin, external revert bytes, ordinary revert, exhaustion and divergence; local V1 projections and map/bind laws, without interpreter erasure. |
+| `Examples/Panic/Result.lean` | Kernel-checked panic-result regressions: full typed outputs, all failure projections, code/origin and external-payload distinctions, continuation behavior and origin transport. |
+| `Semantics/Panic/Origins.lean` | Typed W3 panic-site producers, code-indexed origins, and local links to intrinsic operations; independent of panic result transport. |
+| `Semantics/Panic/Run/Loop.lean` | Panic-carrying loop execution, termination witnesses, induction and exact failure propagation. |
+| `Semantics/Panic/Run/Calls.lean` | Typed call arguments, internal frames, external outcomes and lazy self-catch dispatch using the actual callee code. |
+| `Semantics/Panic/Run/Control.lean` | Panic-carrying conditions, assertions, sequences and loops; assertion-origin and actual-code trust links. |
+| `Semantics/Panic/Run/Tests.lean` | Countdown, nested failure, skipped-branch, external-panic-byte and resource-halt regressions; exported Run proof API checks. |
+| `Semantics/Panic/Run/Checked.lean` | Typed compound arithmetic and increments with sound local V1 projections. |
+| `Semantics/Panic/Run/Updates.lean` | Panic-preserving storage, memory, local and array updates. |
+| `Semantics/Panic/Run/UpdateProofs.lean` | Update failure ordering, capacity exhaustion and actual empty-pop origin proofs. |
+| `Semantics/Panic/Run/UpdateTests.lean` | Update API availability and concrete compound-arithmetic panic-code regressions. |
+| `Semantics/Panic/Run.lean` | Complete panic-carrying statement and program execution, separate from V1. |
+| `Semantics/Panic/Run/Receivers.lean` | Storage-returning calls and deferred operands with exact failure propagation. |
+| `Semantics/Panic/Run/Data.lean` | Rich revert-data evaluation, byte literals and actual-outcome catch-data execution. |
+| `Semantics/Panic/Run/Contracts.lean` | Full-run failure propagation, actual assertion origins and self-catch code/resource contracts. |
+| `Semantics/Panic/Run/RunTests.lean` | End-to-end self/oracle code distinction, external calls, resource failures, loops and catch-data regressions. |

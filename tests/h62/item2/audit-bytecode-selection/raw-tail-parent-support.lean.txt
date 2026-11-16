@@ -1,0 +1,31 @@
+/-! Guards omitting inherited tail-guard obligations or associating a raw
+certificate's parent with different code. This is a global certificate domain,
+not per-input feasibility. Reuse the actual parent correct/capacity fields;
+no new decoder, native operand load, branch, physical or gas claim is supplied. -/
+open Solidity Solidity.Backend.AbiEntry
+
+def inheritedTail : Interface.TailGuardCertificate TailGuard.code :=
+  RawTailGuard.certificate.toTailGuardCertificate
+
+theorem inherited_numeric_accepts (suffix : Solidity.Backend.Scalar.Stack) :
+    Solidity.Backend.Scalar.run TailGuard.code
+      ((32 : Solidity.Backend.Scalar.Word)::64::0::0::0::32::64::0::suffix)=some (1::suffix) := by
+  rw [inheritedTail.correct 64 0 0 32 0 32 0 suffix]
+  apply congrArg (fun word : Solidity.Backend.Scalar.Word => some (word::suffix))
+  decide
+
+theorem inherited_numeric_refuses (suffix : Solidity.Backend.Scalar.Stack) :
+    Solidity.Backend.Scalar.run TailGuard.code
+      ((32 : Solidity.Backend.Scalar.Word)::0::0::0::0::32::0::0::suffix)=some (0::suffix) := by
+  rw [inheritedTail.correct 0 0 0 32 0 32 0 suffix]
+  apply congrArg (fun word : Solidity.Backend.Scalar.Word => some (word::suffix))
+  decide
+
+theorem inherited_capacity (suffix : Solidity.Backend.Scalar.Stack) (room : suffix.length+9≤1024) :
+    Solidity.Backend.Scalar.stackBound TailGuard.code ((suffix.length+8 : Nat) : Int)=true :=
+  inheritedTail.capacity suffix room
+
+#print axioms inheritedTail
+#print axioms inherited_numeric_accepts
+#print axioms inherited_numeric_refuses
+#print axioms inherited_capacity

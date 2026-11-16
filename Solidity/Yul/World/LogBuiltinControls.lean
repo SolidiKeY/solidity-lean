@@ -41,8 +41,7 @@ theorem log4_exact : logBuiltin .log4 TargetMemory.port observed memory parent a
 theorem delegated_emitter :
     logBuiltin .log4 TargetMemory.port observed memory
       (childContext observed.effects.execution parent .delegatecall (addr 3) (toWord 99) [9]) args4 =
-    some (emitObserved observed log4) := by
-  rfl
+    some (emitObserved observed log4) := log4_binding _ _ _ _ _ _ rfl input_loaded
 
 theorem static_refusal :
     logBuiltin .log4 TargetMemory.port observed memory {parent with static:=true} args4 = none :=
@@ -58,9 +57,9 @@ theorem failed_frame :
     (finishObserved observed parent ⟨havoc,calleeTrace ++ [.log log4],.revert [253]⟩).trace =
       rollbackTrace observed.trace calleeTrace := finishObserved_logged_revert _ _ _ _ _ _
 theorem topic_order_negative : log4.topics ≠ #v[toWord 68,toWord 51,toWord 34,high] := by
-  first | decide | rfl | omega | simp only
+  decide
 
 theorem high_topic_retained : (log4.topics.get ⟨0,by decide⟩).val = 2^255+17 := by
-  first | rfl | decide | omega | simp only
+  rfl
 
 end Solidity.Yul.World.LogBuiltinControls

@@ -3,28 +3,28 @@ import Solidity.Tools.Run
 
 /-! Admission distinguishes unused declarations, executed bodies, specifications,
 compiler modes, malformed metadata and deliberate profile exclusions. -/
-solc_import "../../../tests/solc/SourceAdmission.ast.json" hash 0x8d25db399f7c6231
+solc_import "../../../tests/solc/SourceAdmission.ast.json" hash 0xf2fdec9ddb1e1dd3
   as Imported.SourceAdmission testing
-solc_import "../../../tests/solc/SourceAdmission.ast.json" hash 0x8d25db399f7c6231
+solc_import "../../../tests/solc/SourceAdmission.ast.json" hash 0xf2fdec9ddb1e1dd3
   as Imported.PaymentFallback testing
-solc_import "../../../tests/solc/SourceAdmission.ast.json" hash 0x8d25db399f7c6231
+solc_import "../../../tests/solc/SourceAdmission.ast.json" hash 0xf2fdec9ddb1e1dd3
   as Imported.ConstructorArguments testing
-solc_import "../../../tests/solc/SourceAdmission.ast.json" hash 0x8d25db399f7c6231
+solc_import "../../../tests/solc/SourceAdmission.ast.json" hash 0xf2fdec9ddb1e1dd3
   as Imported.InvariantOwner testing
-solc_import "../../../tests/solc/SourceAdmission.ast.json" hash 0x8d25db399f7c6231
+solc_import "../../../tests/solc/SourceAdmission.ast.json" hash 0xf2fdec9ddb1e1dd3
   as Imported.InheritedPayment testing
-solc_import "../../../tests/solc/SourceAdmission.ast.json" hash 0x8d25db399f7c6231
+solc_import "../../../tests/solc/SourceAdmission.ast.json" hash 0xf2fdec9ddb1e1dd3
   as Imported.VirtualOwner testing
-solc_import "../../../tests/solc/SourceAdmission.ast.json" hash 0x8d25db399f7c6231
+solc_import "../../../tests/solc/SourceAdmission.ast.json" hash 0xf2fdec9ddb1e1dd3
   as Imported.LoopOwner testing
-solc_import "../../../tests/solc/SourceAdmission.ast.json" hash 0x8d25db399f7c6231
+solc_import "../../../tests/solc/SourceAdmission.ast.json" hash 0xf2fdec9ddb1e1dd3
   as Imported.InvariantParameter testing
-solc_import "../../../tests/solc/SourceAdmission.ast.json" hash 0x8d25db399f7c6231
+solc_import "../../../tests/solc/SourceAdmission.ast.json" hash 0xf2fdec9ddb1e1dd3
   as Imported.ConstructorLoopOwner testing
 
-solc_import "../../../tests/solc/SourceCoder.ast.json" hash 0xd8dc007becc019e4
+solc_import "../../../tests/solc/SourceCoder.ast.json" hash 0x057e504cf5b2db58
   as Imported.SourceCoder testing
-solc_import "../../../tests/solc/SourceCoderIR.ast.json" hash 0xcc2d282d719f2d57
+solc_import "../../../tests/solc/SourceCoderIR.ast.json" hash 0xf83462502e01b729
   as Imported.IR.SourceCoder testing
 
 namespace Solidity.Examples.Tactics.SourceAdmissionImport

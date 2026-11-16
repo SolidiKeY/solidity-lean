@@ -1,0 +1,375 @@
+{
+  "files_created_and_deleted": 7860,
+  "files_edited_more_than_5_times": 885,
+  "monthly": {
+    "2026-09": {
+      "categories": {
+        "ci": {
+          "added": 42,
+          "binary_changes": 0,
+          "deleted": 0,
+          "file_changes": 1
+        },
+        "docs": {
+          "added": 11899,
+          "binary_changes": 0,
+          "deleted": 9181,
+          "file_changes": 288
+        },
+        "generated_corpus": {
+          "added": 4305,
+          "binary_changes": 0,
+          "deleted": 12,
+          "file_changes": 10
+        },
+        "generated_docs": {
+          "added": 857,
+          "binary_changes": 0,
+          "deleted": 582,
+          "file_changes": 103
+        },
+        "generated_other": {
+          "added": 1492,
+          "binary_changes": 0,
+          "deleted": 138,
+          "file_changes": 5
+        },
+        "generated_roots": {
+          "added": 313,
+          "binary_changes": 0,
+          "deleted": 185,
+          "file_changes": 75
+        },
+        "other": {
+          "added": 9128,
+          "binary_changes": 0,
+          "deleted": 8422,
+          "file_changes": 109
+        },
+        "other_lean": {
+          "added": 288,
+          "binary_changes": 0,
+          "deleted": 194,
+          "file_changes": 10
+        },
+        "scripts_other": {
+          "added": 3122,
+          "binary_changes": 0,
+          "deleted": 1446,
+          "file_changes": 57
+        },
+        "solidity_header_unmarked_proofs_and_definitions": {
+          "added": 231353,
+          "binary_changes": 0,
+          "deleted": 162676,
+          "file_changes": 1585
+        }
+      },
+      "commits": 201,
+      "revert_subjects": 0
+    },
+    "2026-10": {
+      "categories": {
+        "ci": {
+          "added": 339,
+          "binary_changes": 0,
+          "deleted": 19,
+          "file_changes": 23
+        },
+        "docs": {
+          "added": 194773,
+          "binary_changes": 0,
+          "deleted": 48484,
+          "file_changes": 2479
+        },
+        "generated_corpus": {
+          "added": 5410,
+          "binary_changes": 0,
+          "deleted": 5519,
+          "file_changes": 90
+        },
+        "generated_docs": {
+          "added": 3828,
+          "binary_changes": 0,
+          "deleted": 2177,
+          "file_changes": 768
+        },
+        "generated_other": {
+          "added": 2142,
+          "binary_changes": 0,
+          "deleted": 107,
+          "file_changes": 12
+        },
+        "generated_registry": {
+          "added": 4079,
+          "binary_changes": 0,
+          "deleted": 355,
+          "file_changes": 50
+        },
+        "generated_roots": {
+          "added": 1204,
+          "binary_changes": 0,
+          "deleted": 252,
+          "file_changes": 434
+        },
+        "other": {
+          "added": 2529847,
+          "binary_changes": 259,
+          "deleted": 50120,
+          "file_changes": 1823
+        },
+        "other_lean": {
+          "added": 45964,
+          "binary_changes": 0,
+          "deleted": 876,
+          "file_changes": 427
+        },
+        "scripts_other": {
+          "added": 33848,
+          "binary_changes": 3,
+          "deleted": 6050,
+          "file_changes": 668
+        },
+        "solidity_header_unmarked_proofs_and_definitions": {
+          "added": 693685,
+          "binary_changes": 0,
+          "deleted": 365309,
+          "file_changes": 9536
+        }
+      },
+      "commits": 2339,
+      "revert_subjects": 27
+    },
+    "2026-11": {
+      "categories": {
+        "axiom_pins_files": {
+          "added": 7959,
+          "binary_changes": 0,
+          "deleted": 0,
+          "file_changes": 16
+        },
+        "ci": {
+          "added": 518,
+          "binary_changes": 0,
+          "deleted": 94,
+          "file_changes": 42
+        },
+        "coordination": {
+          "added": 1874,
+          "binary_changes": 2,
+          "deleted": 214,
+          "file_changes": 75
+        },
+        "docs": {
+          "added": 838534,
+          "binary_changes": 256,
+          "deleted": 726143,
+          "file_changes": 10523
+        },
+        "generated_docs": {
+          "added": 7929,
+          "binary_changes": 0,
+          "deleted": 4347,
+          "file_changes": 1762
+        },
+        "generated_other": {
+          "added": 1700,
+          "binary_changes": 0,
+          "deleted": 1,
+          "file_changes": 56
+        },
+        "generated_registry": {
+          "added": 150141,
+          "binary_changes": 0,
+          "deleted": 52994,
+          "file_changes": 237
+        },
+        "generated_roots": {
+          "added": 11813,
+          "binary_changes": 0,
+          "deleted": 4997,
+          "file_changes": 1542
+        },
+        "other": {
+          "added": 1430319,
+          "binary_changes": 35,
+          "deleted": 872715,
+          "file_changes": 14685
+        },
+        "other_lean": {
+          "added": 148277,
+          "binary_changes": 0,
+          "deleted": 3158,
+          "file_changes": 1769
+        },
+        "scripts_other": {
+          "added": 251607,
+          "binary_changes": 5,
+          "deleted": 11305,
+          "file_changes": 4648
+        },
+        "solidity_header_unmarked_proofs_and_definitions": {
+          "added": 838188,
+          "binary_changes": 0,
+          "deleted": 44340,
+          "file_changes": 8784
+        }
+      },
+      "commits": 5453,
+      "revert_subjects": 3
+    }
+  },
+  "path_lifecycle_note": "reachable DAG, path-based; moves and branch deletion/recreation count, not necessarily abandoned work",
+  "revert_subjects": [
+    {
+      "month": "2026-11",
+      "sha": "4e7929f0bf488c8c23c7b42f6a186121c6951a4c",
+      "subject": "Revert dependent Precompiles definition changes per merge review"
+    },
+    {
+      "month": "2026-11",
+      "sha": "339b425a2917c4b947e3c9aed8d14f8829224124",
+      "subject": "Revert the v14 cdStride Source import (960fb18d)"
+    },
+    {
+      "month": "2026-11",
+      "sha": "48db8306421812236202a812a44451c98aeb30a2",
+      "subject": "Revert \"Import: pass calldata parameters as slice origins to obligation bodies\""
+    },
+    {
+      "month": "2026-10",
+      "sha": "191897a1f34a3919237e79d7ee3c950024a55dc4",
+      "subject": "Revert \"Getters of bytes/string state variables (a run-time gap closed)\""
+    },
+    {
+      "month": "2026-10",
+      "sha": "d9e742f37548f20a308da62e8843cef0b755a791",
+      "subject": "Revert data: checked"
+    },
+    {
+      "month": "2026-10",
+      "sha": "503343e61f5e18ba8c73de8b85b0c600363bde3c",
+      "subject": "Revert data: an unread catch name binds nothing"
+    },
+    {
+      "month": "2026-10",
+      "sha": "cdc770359f5926cbb4c1f8f07501c8fd214daf94",
+      "subject": "Revert data: docs"
+    },
+    {
+      "month": "2026-10",
+      "sha": "75dc97b405331e5942fc85108d89e4e694af3623",
+      "subject": "Revert data: solc test"
+    },
+    {
+      "month": "2026-10",
+      "sha": "aa47a432b7646fc8354ece911afb3bcfbaeb86a0",
+      "subject": "Revert data: a goal per raw datum, walks flatten them"
+    },
+    {
+      "month": "2026-10",
+      "sha": "b6d0186a2b6dfd9242948b920e4246306ccd5869",
+      "subject": "Revert data: examples"
+    },
+    {
+      "month": "2026-10",
+      "sha": "5a822a6cd1d2de5390696f381e9b3a1d4604edfb",
+      "subject": "Revert data: elaborator binds catch data, keeps self-call reasons"
+    },
+    {
+      "month": "2026-10",
+      "sha": "9cf6f0d4039fc332fceeda36bc9bd8b778929823",
+      "subject": "Revert data: status"
+    },
+    {
+      "month": "2026-10",
+      "sha": "e11003eace915aaea5fe60e3086c376e1d42fa41",
+      "subject": "Revert data: rule lines print"
+    },
+    {
+      "month": "2026-10",
+      "sha": "10dd18db8fae3458401d579342a43b71f0502871",
+      "subject": "Revert data: printer, tools"
+    },
+    {
+      "month": "2026-10",
+      "sha": "66901445767179c0b6d610aab6050cef29c0a8a2",
+      "subject": "Revert data: callback soundness, fragments"
+    },
+    {
+      "month": "2026-10",
+      "sha": "afec4b6f792adb6a39ffa236ad6300c95e4831e7",
+      "subject": "Revert data: catchData soundness"
+    },
+    {
+      "month": "2026-10",
+      "sha": "c02eda8bcbc43caaa9c7bf40efe367fea273d9dc",
+      "subject": "Revert data: data of a run is the program's"
+    },
+    {
+      "month": "2026-10",
+      "sha": "58bec65c8d531d5127a0096c7a4c7a4f5b64dee3",
+      "subject": "Revert data: revertData soundness"
+    },
+    {
+      "month": "2026-10",
+      "sha": "d25c077428bdff3fabf5fc64f178437f2ca431a1",
+      "subject": "Revert data: soundness adjustments"
+    },
+    {
+      "month": "2026-10",
+      "sha": "4ab1f076128d6b674c0a72e8f0f5cd8889740630",
+      "subject": "Revert data: callback unweakening"
+    },
+    {
+      "month": "2026-10",
+      "sha": "091c178d3eaa2628e2beaf3caa5daf91d15e5f0a",
+      "subject": "Revert data: clean tails, constructive range proofs"
+    },
+    {
+      "month": "2026-10",
+      "sha": "5ef3d972aecbfdc8087f04199bb792724b1df350",
+      "subject": "Revert data: callback weakening, fragments"
+    },
+    {
+      "month": "2026-10",
+      "sha": "a2aa81b87ab6610f098e511c3aeda57456456e1d",
+      "subject": "Revert data: callback runs"
+    },
+    {
+      "month": "2026-10",
+      "sha": "9494076b2bdc8f67d447e8e9bf4096ca6232767c",
+      "subject": "Revert data: typing invariants"
+    },
+    {
+      "month": "2026-10",
+      "sha": "b890a6208685ea7e30de778af789401e59915a79",
+      "subject": "Revert data: downstream run lemmas, EVM"
+    },
+    {
+      "month": "2026-10",
+      "sha": "59c077b0e8a82dddc9a4a6ee44b2d93ab5a81909",
+      "subject": "Revert data: rules"
+    },
+    {
+      "month": "2026-10",
+      "sha": "52b8136134864020c4bb5800f63b301a20d51fe3",
+      "subject": "Revert data: literal continuation"
+    },
+    {
+      "month": "2026-10",
+      "sha": "7e4f645c982151ed12a7bd190d4294e221217559",
+      "subject": "Revert data: run lemmas"
+    },
+    {
+      "month": "2026-10",
+      "sha": "5aa7a93d41ce23848759d2339c22b555703aec00",
+      "subject": "Revert data: run, syntax (WIP)"
+    },
+    {
+      "month": "2026-10",
+      "sha": "75069c14188c3987938d6dceddc0d7e3ca478344",
+      "subject": "Revert data: design"
+    }
+  ]
+}

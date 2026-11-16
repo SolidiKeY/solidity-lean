@@ -1,0 +1,32 @@
+{
+  "base": "d6fd95f0886775d7c286813fa9b993a40ba7a777",
+  "boundaries": [
+    "Diagnostics are from the normal Lean file runner, not an inferred lexical use graph.",
+    "Source citation observations locate the parent import and child theorem definition; they do not add graph edges.",
+    "A failing baseline does not establish which declarations are unused or safe to delete."
+  ],
+  "ci_citation": {
+    "line": 133,
+    "path": ".github/workflows/lean.yml"
+  },
+  "diagnostics": [
+    {
+      "column": 6,
+      "line": 736,
+      "message": "Unknown constant `Solidity.Examples.Tactics.OpenLoops.binomialRowsNine`",
+      "source": "    ``Solidity.Examples.Tactics.OpenLoops.binomialRowsNine,"
+    }
+  ],
+  "exit_code": 1,
+  "settling_measurement": "In a separately authorized source revision, add the missing child import, check that module within its existing proof budget, and rerun the same trust-audit command. The pinned-base failure remains a finding.",
+  "source": "TrustAudit.lean",
+  "source_observations": {
+    "child_import_present": false,
+    "definition_line": 19,
+    "definition_path": "Solidity/Examples/Tactics/OpenLoops/RowsNine.lean",
+    "parent_import_line": 44
+  },
+  "source_sha256": "ece2e6cebbee95d82fec246892993662e81dcfd895831981583d2b0867a37482",
+  "status": "fail",
+  "verdict": "The unmodified pinned CI trust audit fails. This run cannot certify baseline root coverage."
+}

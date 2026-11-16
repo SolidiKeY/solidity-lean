@@ -1,0 +1,1130 @@
+{
+  "areas": {
+    "Bridge/MergeAxioms.lean": {
+      "bookkeeping_kind_groups": 0,
+      "cached_files": 0,
+      "commands": 19,
+      "diagnostic_clear_cached_files": 0,
+      "diagnostic_clear_files": 0,
+      "files": 1,
+      "local_grammar_replays": 0,
+      "missing_imports_files": 1
+    },
+    "Bridge/RuleCheck.lean": {
+      "bookkeeping_kind_groups": 0,
+      "cached_files": 0,
+      "commands": 2,
+      "diagnostic_clear_cached_files": 0,
+      "diagnostic_clear_files": 0,
+      "files": 1,
+      "local_grammar_replays": 0,
+      "missing_imports_files": 1
+    },
+    "Bridge/SolidityBridge": {
+      "bookkeeping_kind_groups": 0,
+      "cached_files": 0,
+      "commands": 12383,
+      "diagnostic_clear_cached_files": 0,
+      "diagnostic_clear_files": 11,
+      "example_syntax_occurrences": 2,
+      "files": 524,
+      "local_grammar_replays": 0,
+      "missing_imports_files": 513,
+      "parse_errors_files": 369
+    },
+    "Bridge/SolidityBridge.lean": {
+      "bookkeeping_kind_groups": 0,
+      "cached_files": 0,
+      "commands": 0,
+      "diagnostic_clear_cached_files": 0,
+      "diagnostic_clear_files": 0,
+      "files": 1,
+      "local_grammar_replays": 0,
+      "missing_imports_files": 1
+    },
+    "Bridge/SolidityVelvet": {
+      "bookkeeping_kind_groups": 0,
+      "cached_files": 0,
+      "commands": 260,
+      "diagnostic_clear_cached_files": 0,
+      "diagnostic_clear_files": 0,
+      "files": 5,
+      "local_grammar_replays": 0,
+      "missing_imports_files": 5,
+      "parse_errors_files": 5,
+      "unsupported_registrations_files": 1
+    },
+    "Bridge/SolidityVelvet.lean": {
+      "bookkeeping_kind_groups": 0,
+      "cached_files": 0,
+      "commands": 9,
+      "diagnostic_clear_cached_files": 0,
+      "diagnostic_clear_files": 0,
+      "files": 1,
+      "local_grammar_replays": 0,
+      "missing_imports_files": 1,
+      "parse_errors_files": 1
+    },
+    "Bridge/tests": {
+      "bookkeeping_kind_groups": 0,
+      "cached_files": 0,
+      "commands": 305,
+      "diagnostic_clear_cached_files": 0,
+      "diagnostic_clear_files": 0,
+      "files": 10,
+      "local_grammar_replays": 0,
+      "missing_imports_files": 10,
+      "parse_errors_files": 4
+    },
+    "Bridge/vendor": {
+      "bookkeeping_kind_groups": 0,
+      "cached_files": 0,
+      "commands": 2088,
+      "diagnostic_clear_cached_files": 0,
+      "diagnostic_clear_files": 6,
+      "files": 93,
+      "local_grammar_replays": 0,
+      "missing_imports_files": 86,
+      "parse_errors_files": 47,
+      "unsupported_registrations_files": 19
+    },
+    "SolCases.lean": {
+      "bookkeeping_kind_groups": 0,
+      "cached_files": 0,
+      "commands": 1,
+      "diagnostic_clear_cached_files": 0,
+      "diagnostic_clear_files": 1,
+      "files": 1,
+      "local_grammar_replays": 0
+    },
+    "Solidity.lean": {
+      "bookkeeping_kind_groups": 0,
+      "cached_files": 1,
+      "commands": 0,
+      "diagnostic_clear_cached_files": 1,
+      "diagnostic_clear_files": 1,
+      "files": 1,
+      "local_grammar_replays": 0
+    },
+    "Solidity/AST.lean": {
+      "bookkeeping_kind_groups": 0,
+      "cached_files": 1,
+      "commands": 165,
+      "diagnostic_clear_cached_files": 1,
+      "diagnostic_clear_files": 1,
+      "files": 1,
+      "local_grammar_replays": 0
+    },
+    "Solidity/Automation": {
+      "bookkeeping_kind_groups": 0,
+      "cached_files": 3,
+      "commands": 18,
+      "diagnostic_clear_cached_files": 3,
+      "diagnostic_clear_files": 3,
+      "files": 3,
+      "local_grammar_replays": 0
+    },
+    "Solidity/Backend": {
+      "bookkeeping_kind_groups": 2,
+      "cached_files": 2015,
+      "commands": 47726,
+      "diagnostic_clear_cached_files": 2015,
+      "diagnostic_clear_files": 2015,
+      "eval_syntax_occurrences": 70,
+      "example_syntax_occurrences": 171,
+      "files": 2015,
+      "local_grammar_replays": 4
+    },
+    "Solidity/Calculus": {
+      "bookkeeping_kind_groups": 4,
+      "cached_files": 388,
+      "commands": 16397,
+      "diagnostic_clear_cached_files": 387,
+      "diagnostic_clear_files": 387,
+      "eval_syntax_occurrences": 8,
+      "example_syntax_occurrences": 37,
+      "files": 388,
+      "local_grammar_replays": 7,
+      "unapplied_parser_groups_files": 1
+    },
+    "Solidity/Corpus": {
+      "bookkeeping_kind_groups": 0,
+      "cached_files": 0,
+      "commands": 655,
+      "diagnostic_clear_cached_files": 0,
+      "diagnostic_clear_files": 0,
+      "files": 9,
+      "local_grammar_replays": 0,
+      "missing_imports_files": 8,
+      "parse_errors_files": 7,
+      "unsupported_registrations_files": 1
+    },
+    "Solidity/Counterexamples": {
+      "bookkeeping_kind_groups": 0,
+      "cached_files": 4,
+      "commands": 62,
+      "diagnostic_clear_cached_files": 4,
+      "diagnostic_clear_files": 4,
+      "example_syntax_occurrences": 11,
+      "files": 4,
+      "local_grammar_replays": 0
+    },
+    "Solidity/ERC7201.lean": {
+      "bookkeeping_kind_groups": 0,
+      "cached_files": 1,
+      "commands": 8,
+      "diagnostic_clear_cached_files": 1,
+      "diagnostic_clear_files": 1,
+      "files": 1,
+      "local_grammar_replays": 0
+    },
+    "Solidity/Eqns.lean": {
+      "bookkeeping_kind_groups": 0,
+      "cached_files": 1,
+      "commands": 7,
+      "diagnostic_clear_cached_files": 1,
+      "diagnostic_clear_files": 1,
+      "files": 1,
+      "local_grammar_replays": 0
+    },
+    "Solidity/Evm": {
+      "bookkeeping_kind_groups": 1,
+      "cached_files": 279,
+      "commands": 6106,
+      "diagnostic_clear_cached_files": 279,
+      "diagnostic_clear_files": 279,
+      "eval_syntax_occurrences": 67,
+      "example_syntax_occurrences": 247,
+      "files": 279,
+      "local_grammar_replays": 3
+    },
+    "Solidity/Examples": {
+      "bookkeeping_kind_groups": 0,
+      "cached_files": 341,
+      "commands": 12634,
+      "diagnostic_clear_cached_files": 340,
+      "diagnostic_clear_files": 343,
+      "eval_syntax_occurrences": 387,
+      "example_syntax_occurrences": 1118,
+      "files": 356,
+      "local_grammar_replays": 0,
+      "missing_imports_files": 12,
+      "parse_errors_files": 2
+    },
+    "Solidity/FreshNames.lean": {
+      "bookkeeping_kind_groups": 0,
+      "cached_files": 1,
+      "commands": 8,
+      "diagnostic_clear_cached_files": 1,
+      "diagnostic_clear_files": 1,
+      "files": 1,
+      "local_grammar_replays": 0
+    },
+    "Solidity/Frontend": {
+      "bookkeeping_kind_groups": 2,
+      "cached_files": 512,
+      "commands": 13834,
+      "diagnostic_clear_cached_files": 511,
+      "diagnostic_clear_files": 511,
+      "example_syntax_occurrences": 46,
+      "files": 512,
+      "local_grammar_replays": 2,
+      "parse_errors_files": 1
+    },
+    "Solidity/Hash": {
+      "bookkeeping_kind_groups": 0,
+      "cached_files": 6,
+      "commands": 260,
+      "diagnostic_clear_cached_files": 6,
+      "diagnostic_clear_files": 6,
+      "files": 6,
+      "local_grammar_replays": 0
+    },
+    "Solidity/Hashes.lean": {
+      "bookkeeping_kind_groups": 0,
+      "cached_files": 1,
+      "commands": 40,
+      "diagnostic_clear_cached_files": 1,
+      "diagnostic_clear_files": 1,
+      "files": 1,
+      "local_grammar_replays": 0
+    },
+    "Solidity/Keccak.lean": {
+      "bookkeeping_kind_groups": 0,
+      "cached_files": 1,
+      "commands": 22,
+      "diagnostic_clear_cached_files": 1,
+      "diagnostic_clear_files": 1,
+      "files": 1,
+      "local_grammar_replays": 0
+    },
+    "Solidity/KeySort.lean": {
+      "bookkeeping_kind_groups": 0,
+      "cached_files": 1,
+      "commands": 38,
+      "diagnostic_clear_cached_files": 1,
+      "diagnostic_clear_files": 1,
+      "example_syntax_occurrences": 16,
+      "files": 1,
+      "local_grammar_replays": 0
+    },
+    "Solidity/Language": {
+      "bookkeeping_kind_groups": 0,
+      "cached_files": 8,
+      "commands": 526,
+      "diagnostic_clear_cached_files": 8,
+      "diagnostic_clear_files": 8,
+      "example_syntax_occurrences": 44,
+      "files": 8,
+      "local_grammar_replays": 0
+    },
+    "Solidity/Lowering": {
+      "bookkeeping_kind_groups": 0,
+      "cached_files": 716,
+      "commands": 20774,
+      "diagnostic_clear_cached_files": 711,
+      "diagnostic_clear_files": 711,
+      "eval_syntax_occurrences": 282,
+      "example_syntax_occurrences": 103,
+      "files": 716,
+      "local_grammar_replays": 0,
+      "parse_errors_files": 5
+    },
+    "Solidity/Optimizer": {
+      "bookkeeping_kind_groups": 0,
+      "cached_files": 16,
+      "commands": 582,
+      "diagnostic_clear_cached_files": 16,
+      "diagnostic_clear_files": 16,
+      "files": 16,
+      "local_grammar_replays": 0
+    },
+    "Solidity/Precompiles": {
+      "bookkeeping_kind_groups": 0,
+      "cached_files": 11,
+      "commands": 473,
+      "diagnostic_clear_cached_files": 11,
+      "diagnostic_clear_files": 11,
+      "files": 11,
+      "local_grammar_replays": 0
+    },
+    "Solidity/RevertBytes.lean": {
+      "bookkeeping_kind_groups": 0,
+      "cached_files": 1,
+      "commands": 15,
+      "diagnostic_clear_cached_files": 1,
+      "diagnostic_clear_files": 1,
+      "example_syntax_occurrences": 1,
+      "files": 1,
+      "local_grammar_replays": 0
+    },
+    "Solidity/Roadmap": {
+      "bookkeeping_kind_groups": 0,
+      "cached_files": 20,
+      "commands": 679,
+      "diagnostic_clear_cached_files": 20,
+      "diagnostic_clear_files": 20,
+      "files": 20,
+      "local_grammar_replays": 0
+    },
+    "Solidity/Scope.lean": {
+      "bookkeeping_kind_groups": 0,
+      "cached_files": 1,
+      "commands": 52,
+      "diagnostic_clear_cached_files": 1,
+      "diagnostic_clear_files": 1,
+      "files": 1,
+      "local_grammar_replays": 0
+    },
+    "Solidity/Secp256k1.lean": {
+      "bookkeeping_kind_groups": 0,
+      "cached_files": 1,
+      "commands": 20,
+      "diagnostic_clear_cached_files": 1,
+      "diagnostic_clear_files": 1,
+      "files": 1,
+      "local_grammar_replays": 0
+    },
+    "Solidity/Semantics": {
+      "bookkeeping_kind_groups": 1,
+      "cached_files": 82,
+      "commands": 3175,
+      "diagnostic_clear_cached_files": 82,
+      "diagnostic_clear_files": 82,
+      "example_syntax_occurrences": 72,
+      "files": 82,
+      "local_grammar_replays": 1
+    },
+    "Solidity/Semantics.lean": {
+      "bookkeeping_kind_groups": 0,
+      "cached_files": 1,
+      "commands": 19,
+      "diagnostic_clear_cached_files": 1,
+      "diagnostic_clear_files": 1,
+      "files": 1,
+      "local_grammar_replays": 0
+    },
+    "Solidity/Signature.lean": {
+      "bookkeeping_kind_groups": 0,
+      "cached_files": 1,
+      "commands": 60,
+      "diagnostic_clear_cached_files": 1,
+      "diagnostic_clear_files": 1,
+      "files": 1,
+      "local_grammar_replays": 0
+    },
+    "Solidity/SolcValidation": {
+      "bookkeeping_kind_groups": 0,
+      "cached_files": 30,
+      "commands": 1061,
+      "diagnostic_clear_cached_files": 30,
+      "diagnostic_clear_files": 30,
+      "files": 30,
+      "local_grammar_replays": 0
+    },
+    "Solidity/Solkey": {
+      "bookkeeping_kind_groups": 0,
+      "cached_files": 5,
+      "commands": 52,
+      "diagnostic_clear_cached_files": 5,
+      "diagnostic_clear_files": 5,
+      "eval_syntax_occurrences": 8,
+      "example_syntax_occurrences": 1,
+      "files": 5,
+      "local_grammar_replays": 0
+    },
+    "Solidity/SortCheck": {
+      "bookkeeping_kind_groups": 0,
+      "cached_files": 3,
+      "commands": 179,
+      "diagnostic_clear_cached_files": 3,
+      "diagnostic_clear_files": 3,
+      "example_syntax_occurrences": 2,
+      "files": 3,
+      "local_grammar_replays": 0
+    },
+    "Solidity/Source": {
+      "bookkeeping_kind_groups": 0,
+      "cached_files": 262,
+      "commands": 8300,
+      "diagnostic_clear_cached_files": 262,
+      "diagnostic_clear_files": 262,
+      "example_syntax_occurrences": 14,
+      "files": 262,
+      "local_grammar_replays": 0
+    },
+    "Solidity/SpecSyntax.lean": {
+      "bookkeeping_kind_groups": 0,
+      "cached_files": 1,
+      "commands": 57,
+      "diagnostic_clear_cached_files": 1,
+      "diagnostic_clear_files": 1,
+      "files": 1,
+      "local_grammar_replays": 0
+    },
+    "Solidity/Stipend": {
+      "bookkeeping_kind_groups": 0,
+      "cached_files": 1,
+      "commands": 41,
+      "diagnostic_clear_cached_files": 1,
+      "diagnostic_clear_files": 1,
+      "files": 1,
+      "local_grammar_replays": 0
+    },
+    "Solidity/Storage": {
+      "bookkeeping_kind_groups": 0,
+      "cached_files": 21,
+      "commands": 529,
+      "diagnostic_clear_cached_files": 21,
+      "diagnostic_clear_files": 21,
+      "files": 21,
+      "local_grammar_replays": 0
+    },
+    "Solidity/Syntax": {
+      "bookkeeping_kind_groups": 0,
+      "cached_files": 21,
+      "commands": 1274,
+      "diagnostic_clear_cached_files": 21,
+      "diagnostic_clear_files": 21,
+      "eval_syntax_occurrences": 5,
+      "example_syntax_occurrences": 21,
+      "files": 21,
+      "local_grammar_replays": 0
+    },
+    "Solidity/Syntax.lean": {
+      "bookkeeping_kind_groups": 0,
+      "cached_files": 1,
+      "commands": 1,
+      "diagnostic_clear_cached_files": 1,
+      "diagnostic_clear_files": 1,
+      "files": 1,
+      "local_grammar_replays": 0
+    },
+    "Solidity/TestSuite": {
+      "bookkeeping_kind_groups": 0,
+      "cached_files": 49,
+      "commands": 2730,
+      "diagnostic_clear_cached_files": 49,
+      "diagnostic_clear_files": 49,
+      "example_syntax_occurrences": 9,
+      "files": 49,
+      "local_grammar_replays": 0
+    },
+    "Solidity/Theorems.lean": {
+      "bookkeeping_kind_groups": 0,
+      "cached_files": 1,
+      "commands": 84,
+      "diagnostic_clear_cached_files": 1,
+      "diagnostic_clear_files": 1,
+      "files": 1,
+      "local_grammar_replays": 0
+    },
+    "Solidity/Theory": {
+      "bookkeeping_kind_groups": 0,
+      "cached_files": 25,
+      "commands": 932,
+      "diagnostic_clear_cached_files": 25,
+      "diagnostic_clear_files": 25,
+      "example_syntax_occurrences": 1,
+      "files": 25,
+      "local_grammar_replays": 0
+    },
+    "Solidity/Tools": {
+      "bookkeeping_kind_groups": 0,
+      "cached_files": 31,
+      "commands": 817,
+      "diagnostic_clear_cached_files": 28,
+      "diagnostic_clear_files": 28,
+      "files": 31,
+      "local_grammar_replays": 0,
+      "unsupported_registrations_files": 3
+    },
+    "Solidity/TypeGraph.lean": {
+      "bookkeeping_kind_groups": 0,
+      "cached_files": 1,
+      "commands": 24,
+      "diagnostic_clear_cached_files": 1,
+      "diagnostic_clear_files": 1,
+      "files": 1,
+      "local_grammar_replays": 0
+    },
+    "Solidity/Typing": {
+      "bookkeeping_kind_groups": 0,
+      "cached_files": 12,
+      "commands": 740,
+      "diagnostic_clear_cached_files": 12,
+      "diagnostic_clear_files": 12,
+      "files": 12,
+      "local_grammar_replays": 0
+    },
+    "Solidity/Update.lean": {
+      "bookkeeping_kind_groups": 0,
+      "cached_files": 1,
+      "commands": 10,
+      "diagnostic_clear_cached_files": 1,
+      "diagnostic_clear_files": 1,
+      "files": 1,
+      "local_grammar_replays": 0
+    },
+    "Solidity/Yul": {
+      "bookkeeping_kind_groups": 0,
+      "cached_files": 1827,
+      "commands": 41858,
+      "diagnostic_clear_cached_files": 1813,
+      "diagnostic_clear_files": 1813,
+      "eval_syntax_occurrences": 261,
+      "example_syntax_occurrences": 1914,
+      "files": 1827,
+      "local_grammar_replays": 0,
+      "parse_errors_files": 14
+    },
+    "Solidity/Yul.lean": {
+      "bookkeeping_kind_groups": 0,
+      "cached_files": 1,
+      "commands": 1,
+      "diagnostic_clear_cached_files": 1,
+      "diagnostic_clear_files": 1,
+      "files": 1,
+      "local_grammar_replays": 0
+    },
+    "SolidityCorpus.lean": {
+      "bookkeeping_kind_groups": 0,
+      "cached_files": 0,
+      "commands": 4,
+      "diagnostic_clear_cached_files": 0,
+      "diagnostic_clear_files": 0,
+      "files": 1,
+      "local_grammar_replays": 0,
+      "missing_imports_files": 1
+    },
+    "SolidityExamples.lean": {
+      "bookkeeping_kind_groups": 0,
+      "cached_files": 1,
+      "commands": 0,
+      "diagnostic_clear_cached_files": 1,
+      "diagnostic_clear_files": 1,
+      "files": 1,
+      "local_grammar_replays": 0
+    },
+    "SolidityLean.lean": {
+      "bookkeeping_kind_groups": 0,
+      "cached_files": 0,
+      "commands": 3,
+      "diagnostic_clear_cached_files": 0,
+      "diagnostic_clear_files": 1,
+      "files": 1,
+      "local_grammar_replays": 0
+    },
+    "SoliditySlowExamples.lean": {
+      "bookkeeping_kind_groups": 0,
+      "cached_files": 0,
+      "commands": 0,
+      "diagnostic_clear_cached_files": 0,
+      "diagnostic_clear_files": 0,
+      "files": 1,
+      "local_grammar_replays": 0,
+      "missing_imports_files": 1
+    },
+    "SolkeyCheck.lean": {
+      "bookkeeping_kind_groups": 0,
+      "cached_files": 0,
+      "commands": 8,
+      "diagnostic_clear_cached_files": 0,
+      "diagnostic_clear_files": 1,
+      "files": 1,
+      "local_grammar_replays": 0
+    },
+    "SolkeyTestSuite.lean": {
+      "bookkeeping_kind_groups": 0,
+      "cached_files": 1,
+      "commands": 0,
+      "diagnostic_clear_cached_files": 1,
+      "diagnostic_clear_files": 1,
+      "files": 1,
+      "local_grammar_replays": 0
+    },
+    "TrustAudit.lean": {
+      "bookkeeping_kind_groups": 0,
+      "cached_files": 0,
+      "commands": 101,
+      "diagnostic_clear_cached_files": 0,
+      "diagnostic_clear_files": 0,
+      "files": 1,
+      "local_grammar_replays": 0,
+      "missing_imports_files": 1
+    },
+    "docs/feature-work": {
+      "bookkeeping_kind_groups": 0,
+      "cached_files": 0,
+      "commands": 52,
+      "diagnostic_clear_cached_files": 0,
+      "diagnostic_clear_files": 3,
+      "eval_syntax_occurrences": 7,
+      "files": 3,
+      "local_grammar_replays": 0
+    },
+    "scripts/AxiomAudit.lean": {
+      "bookkeeping_kind_groups": 0,
+      "cached_files": 0,
+      "commands": 18,
+      "diagnostic_clear_cached_files": 0,
+      "diagnostic_clear_files": 0,
+      "files": 1,
+      "local_grammar_replays": 0,
+      "missing_imports_files": 1
+    },
+    "scripts/ParseCorpus.lean": {
+      "bookkeeping_kind_groups": 0,
+      "cached_files": 0,
+      "commands": 6,
+      "diagnostic_clear_cached_files": 0,
+      "diagnostic_clear_files": 1,
+      "eval_syntax_occurrences": 1,
+      "files": 1,
+      "local_grammar_replays": 0
+    },
+    "scripts/fixtures": {
+      "bookkeeping_kind_groups": 0,
+      "cached_files": 0,
+      "commands": 15,
+      "diagnostic_clear_cached_files": 0,
+      "diagnostic_clear_files": 1,
+      "eval_syntax_occurrences": 1,
+      "files": 1,
+      "local_grammar_replays": 0
+    },
+    "scripts/h55": {
+      "bookkeeping_kind_groups": 0,
+      "cached_files": 0,
+      "commands": 6,
+      "diagnostic_clear_cached_files": 0,
+      "diagnostic_clear_files": 2,
+      "files": 2,
+      "local_grammar_replays": 0
+    },
+    "scripts/h62": {
+      "bookkeeping_kind_groups": 0,
+      "cached_files": 0,
+      "commands": 9,
+      "diagnostic_clear_cached_files": 0,
+      "diagnostic_clear_files": 1,
+      "files": 2,
+      "local_grammar_replays": 0,
+      "missing_imports_files": 1,
+      "parse_errors_files": 1
+    },
+    "scripts/roadmap-v17-creation-try-query.lean": {
+      "bookkeeping_kind_groups": 0,
+      "cached_files": 0,
+      "commands": 13,
+      "diagnostic_clear_cached_files": 0,
+      "diagnostic_clear_files": 0,
+      "files": 1,
+      "local_grammar_replays": 0,
+      "unsupported_registrations_files": 1
+    },
+    "scripts/roadmap-v17-kernel-query.lean": {
+      "bookkeeping_kind_groups": 0,
+      "cached_files": 0,
+      "commands": 15,
+      "diagnostic_clear_cached_files": 0,
+      "diagnostic_clear_files": 1,
+      "files": 1,
+      "local_grammar_replays": 0
+    },
+    "scripts/roadmap-v17-memory-calls-query.lean": {
+      "bookkeeping_kind_groups": 0,
+      "cached_files": 0,
+      "commands": 36,
+      "diagnostic_clear_cached_files": 0,
+      "diagnostic_clear_files": 0,
+      "files": 1,
+      "local_grammar_replays": 0,
+      "parse_errors_files": 1,
+      "unsupported_registrations_files": 1
+    },
+    "tests/automation": {
+      "bookkeeping_kind_groups": 0,
+      "cached_files": 0,
+      "commands": 64,
+      "diagnostic_clear_cached_files": 0,
+      "diagnostic_clear_files": 6,
+      "example_syntax_occurrences": 1,
+      "files": 9,
+      "local_grammar_replays": 0,
+      "parse_errors_files": 1,
+      "unsupported_registrations_files": 3
+    },
+    "tests/backend-environment": {
+      "bookkeeping_kind_groups": 0,
+      "cached_files": 0,
+      "commands": 3,
+      "diagnostic_clear_cached_files": 0,
+      "diagnostic_clear_files": 1,
+      "eval_syntax_occurrences": 1,
+      "files": 1,
+      "local_grammar_replays": 0
+    },
+    "tests/calldata-packets-1105": {
+      "bookkeeping_kind_groups": 0,
+      "cached_files": 0,
+      "commands": 111,
+      "diagnostic_clear_cached_files": 0,
+      "diagnostic_clear_files": 2,
+      "files": 2,
+      "local_grammar_replays": 0
+    },
+    "tests/creation-artifacts": {
+      "bookkeeping_kind_groups": 0,
+      "cached_files": 0,
+      "commands": 20,
+      "diagnostic_clear_cached_files": 0,
+      "diagnostic_clear_files": 1,
+      "eval_syntax_occurrences": 16,
+      "files": 1,
+      "local_grammar_replays": 0
+    },
+    "tests/directruntime-20261104": {
+      "bookkeeping_kind_groups": 0,
+      "cached_files": 0,
+      "commands": 857,
+      "diagnostic_clear_cached_files": 0,
+      "diagnostic_clear_files": 36,
+      "eval_syntax_occurrences": 29,
+      "files": 37,
+      "local_grammar_replays": 0,
+      "missing_imports_files": 1,
+      "parse_errors_files": 1
+    },
+    "tests/failure-emission": {
+      "bookkeeping_kind_groups": 0,
+      "cached_files": 0,
+      "commands": 18,
+      "diagnostic_clear_cached_files": 0,
+      "diagnostic_clear_files": 1,
+      "eval_syntax_occurrences": 12,
+      "files": 1,
+      "local_grammar_replays": 0
+    },
+    "tests/fullscope-20261104": {
+      "bookkeeping_kind_groups": 0,
+      "cached_files": 0,
+      "commands": 697,
+      "diagnostic_clear_cached_files": 0,
+      "diagnostic_clear_files": 16,
+      "eval_syntax_occurrences": 17,
+      "example_syntax_occurrences": 70,
+      "files": 16,
+      "local_grammar_replays": 0
+    },
+    "tests/h28-sol": {
+      "bookkeeping_kind_groups": 0,
+      "cached_files": 0,
+      "commands": 7138,
+      "diagnostic_clear_cached_files": 0,
+      "diagnostic_clear_files": 124,
+      "eval_syntax_occurrences": 2,
+      "example_syntax_occurrences": 45,
+      "files": 154,
+      "local_grammar_replays": 0,
+      "missing_imports_files": 22,
+      "parse_errors_files": 8,
+      "unsupported_registrations_files": 8
+    },
+    "tests/h55": {
+      "bookkeeping_kind_groups": 0,
+      "cached_files": 0,
+      "commands": 1529,
+      "diagnostic_clear_cached_files": 0,
+      "diagnostic_clear_files": 21,
+      "eval_syntax_occurrences": 4,
+      "example_syntax_occurrences": 6,
+      "files": 24,
+      "local_grammar_replays": 0,
+      "missing_imports_files": 3,
+      "parse_errors_files": 1
+    },
+    "tests/h62": {
+      "bookkeeping_kind_groups": 0,
+      "cached_files": 0,
+      "commands": 10636,
+      "diagnostic_clear_cached_files": 0,
+      "diagnostic_clear_files": 267,
+      "eval_syntax_occurrences": 9,
+      "example_syntax_occurrences": 155,
+      "files": 491,
+      "local_grammar_replays": 0,
+      "missing_imports_files": 196,
+      "parse_errors_files": 138,
+      "unsupported_registrations_files": 42
+    },
+    "tests/p8-spec": {
+      "bookkeeping_kind_groups": 0,
+      "cached_files": 0,
+      "commands": 8,
+      "diagnostic_clear_cached_files": 0,
+      "diagnostic_clear_files": 1,
+      "files": 1,
+      "local_grammar_replays": 0
+    },
+    "tests/primitive-packets-1104": {
+      "bookkeeping_kind_groups": 0,
+      "cached_files": 0,
+      "commands": 54,
+      "diagnostic_clear_cached_files": 0,
+      "diagnostic_clear_files": 3,
+      "eval_syntax_occurrences": 6,
+      "files": 3,
+      "local_grammar_replays": 0
+    },
+    "tests/primitive-packets-1105": {
+      "bookkeeping_kind_groups": 0,
+      "cached_files": 0,
+      "commands": 85,
+      "diagnostic_clear_cached_files": 0,
+      "diagnostic_clear_files": 6,
+      "eval_syntax_occurrences": 11,
+      "files": 6,
+      "local_grammar_replays": 0
+    },
+    "tests/quant-ledger": {
+      "bookkeeping_kind_groups": 0,
+      "cached_files": 0,
+      "commands": 7,
+      "diagnostic_clear_cached_files": 0,
+      "diagnostic_clear_files": 1,
+      "files": 1,
+      "local_grammar_replays": 0
+    },
+    "tests/roadmap-g19": {
+      "bookkeeping_kind_groups": 0,
+      "cached_files": 0,
+      "commands": 405,
+      "diagnostic_clear_cached_files": 0,
+      "diagnostic_clear_files": 23,
+      "files": 23,
+      "local_grammar_replays": 0
+    },
+    "tests/roadmap-g36": {
+      "bookkeeping_kind_groups": 0,
+      "cached_files": 0,
+      "commands": 234,
+      "diagnostic_clear_cached_files": 0,
+      "diagnostic_clear_files": 14,
+      "files": 14,
+      "local_grammar_replays": 0
+    },
+    "tests/roadmap-v17": {
+      "bookkeeping_kind_groups": 0,
+      "cached_files": 0,
+      "commands": 9,
+      "diagnostic_clear_cached_files": 0,
+      "diagnostic_clear_files": 0,
+      "files": 1,
+      "local_grammar_replays": 0,
+      "missing_imports_files": 1
+    },
+    "tests/runtime-frame": {
+      "bookkeeping_kind_groups": 0,
+      "cached_files": 0,
+      "commands": 24,
+      "diagnostic_clear_cached_files": 0,
+      "diagnostic_clear_files": 1,
+      "files": 1,
+      "local_grammar_replays": 0
+    },
+    "tests/sol-constant-depth": {
+      "bookkeeping_kind_groups": 0,
+      "cached_files": 0,
+      "commands": 84,
+      "diagnostic_clear_cached_files": 0,
+      "diagnostic_clear_files": 1,
+      "files": 1,
+      "local_grammar_replays": 0
+    },
+    "tests/sol-expression-uniqueness": {
+      "bookkeeping_kind_groups": 0,
+      "cached_files": 0,
+      "commands": 2488,
+      "diagnostic_clear_cached_files": 0,
+      "diagnostic_clear_files": 2,
+      "files": 3,
+      "local_grammar_replays": 0,
+      "parse_errors_files": 1,
+      "unsupported_registrations_files": 1
+    },
+    "tests/sol-numeric-literals": {
+      "bookkeeping_kind_groups": 0,
+      "cached_files": 0,
+      "commands": 631,
+      "diagnostic_clear_cached_files": 0,
+      "diagnostic_clear_files": 2,
+      "files": 2,
+      "local_grammar_replays": 0
+    },
+    "tests/sol-override-validation": {
+      "bookkeeping_kind_groups": 0,
+      "cached_files": 0,
+      "commands": 310,
+      "diagnostic_clear_cached_files": 0,
+      "diagnostic_clear_files": 7,
+      "eval_syntax_occurrences": 14,
+      "files": 7,
+      "local_grammar_replays": 0
+    },
+    "tests/source-failures": {
+      "bookkeeping_kind_groups": 0,
+      "cached_files": 0,
+      "commands": 39,
+      "diagnostic_clear_cached_files": 0,
+      "diagnostic_clear_files": 2,
+      "files": 2,
+      "local_grammar_replays": 0
+    },
+    "tests/storage-values": {
+      "bookkeeping_kind_groups": 0,
+      "cached_files": 0,
+      "commands": 8,
+      "diagnostic_clear_cached_files": 0,
+      "diagnostic_clear_files": 1,
+      "files": 1,
+      "local_grammar_replays": 0
+    },
+    "tests/upstream": {
+      "bookkeeping_kind_groups": 0,
+      "cached_files": 0,
+      "commands": 1115,
+      "diagnostic_clear_cached_files": 0,
+      "diagnostic_clear_files": 40,
+      "eval_syntax_occurrences": 217,
+      "example_syntax_occurrences": 17,
+      "files": 41,
+      "local_grammar_replays": 0,
+      "missing_imports_files": 1
+    },
+    "tests/v13-help": {
+      "bookkeeping_kind_groups": 0,
+      "cached_files": 0,
+      "commands": 34,
+      "diagnostic_clear_cached_files": 0,
+      "diagnostic_clear_files": 1,
+      "eval_syntax_occurrences": 3,
+      "files": 1,
+      "local_grammar_replays": 0
+    },
+    "tests/v14-constructor": {
+      "bookkeeping_kind_groups": 0,
+      "cached_files": 0,
+      "commands": 38,
+      "diagnostic_clear_cached_files": 0,
+      "diagnostic_clear_files": 8,
+      "files": 8,
+      "local_grammar_replays": 0
+    },
+    "tests/v14-help": {
+      "bookkeeping_kind_groups": 0,
+      "cached_files": 0,
+      "commands": 460,
+      "diagnostic_clear_cached_files": 0,
+      "diagnostic_clear_files": 9,
+      "files": 9,
+      "local_grammar_replays": 0
+    },
+    "tests/yul-composition": {
+      "bookkeeping_kind_groups": 0,
+      "cached_files": 0,
+      "commands": 440,
+      "diagnostic_clear_cached_files": 0,
+      "diagnostic_clear_files": 19,
+      "files": 24,
+      "local_grammar_replays": 0,
+      "missing_imports_files": 5,
+      "parse_errors_files": 4
+    },
+    "tests/yul-views": {
+      "bookkeeping_kind_groups": 0,
+      "cached_files": 0,
+      "commands": 3,
+      "diagnostic_clear_cached_files": 0,
+      "diagnostic_clear_files": 1,
+      "files": 1,
+      "local_grammar_replays": 0
+    },
+    "vendor/LeanTeX": {
+      "bookkeeping_kind_groups": 0,
+      "cached_files": 8,
+      "commands": 150,
+      "diagnostic_clear_cached_files": 7,
+      "diagnostic_clear_files": 7,
+      "files": 8,
+      "local_grammar_replays": 0,
+      "unsupported_registrations_files": 1
+    },
+    "vscode/parity": {
+      "bookkeeping_kind_groups": 0,
+      "cached_files": 0,
+      "commands": 85,
+      "diagnostic_clear_cached_files": 0,
+      "diagnostic_clear_files": 1,
+      "files": 6,
+      "local_grammar_replays": 0,
+      "missing_imports_files": 1,
+      "parse_errors_files": 5,
+      "unsupported_registrations_files": 4
+    },
+    "web/browser": {
+      "bookkeeping_kind_groups": 0,
+      "cached_files": 0,
+      "commands": 6,
+      "diagnostic_clear_cached_files": 0,
+      "diagnostic_clear_files": 1,
+      "files": 1,
+      "local_grammar_replays": 0
+    },
+    "web/test": {
+      "bookkeeping_kind_groups": 0,
+      "cached_files": 0,
+      "commands": 6,
+      "diagnostic_clear_cached_files": 0,
+      "diagnostic_clear_files": 1,
+      "files": 1,
+      "local_grammar_replays": 0
+    },
+    "web/tools": {
+      "bookkeeping_kind_groups": 0,
+      "cached_files": 0,
+      "commands": 3,
+      "diagnostic_clear_cached_files": 0,
+      "diagnostic_clear_files": 1,
+      "files": 1,
+      "local_grammar_replays": 0
+    }
+  },
+  "base": "d6fd95f0886775d7c286813fa9b993a40ba7a777",
+  "boundaries": [
+    "complete in the raw index means only that recorded diagnostic flags are clear; it does not certify actual parser context.",
+    "Only builtin declaration, in, and guard_msgs ancestry is counted; unknown nested-check wrappers suppress the file.",
+    "Skipped custom commands can install grammar and change later parsing. Semantic-root coverage is unverified.",
+    "Missing native/reference consumers and separate parser registrations remain explicit gaps.",
+    "Command-macro-generated checks remain unmeasured. Scope/grammar replay may invoke term elaborators.",
+    "No new liveness classification or deletion safety follows from this syntax census."
+  ],
+  "compiler_override_edges": 251,
+  "counts": {
+    "bookkeeping_kind_groups": 10,
+    "cached_files": 6717,
+    "commands": 226197,
+    "diagnostic_clear_cached_files": 6691,
+    "diagnostic_clear_files": 7344,
+    "eval_syntax_occurrences": 1438,
+    "example_syntax_occurrences": 4124,
+    "files": 8291,
+    "local_grammar_replays": 17,
+    "missing_imports_files": 873,
+    "parse_errors_files": 616,
+    "unapplied_parser_groups_files": 1,
+    "unsupported_registrations_files": 85
+  },
+  "index_sha256": "e6dc5554bf3fcd3131707d5763bf11c0fd03bd40b37f659c1d3fbdae0bb153eb",
+  "lean": "Lean (version 4.24.0, x86_64-unknown-linux-gnu, commit 797c613eb9b6d4ec95db23e3e00af9ac6657f24b, Release)",
+  "method": "Lean-native check syntax under reconstructed grammar; recognized top-level example/eval bodies are not replayed",
+  "producer_sha256": "735353b2ef077c89ff3c5213e71565d7b6e1127350b105582fc84b6015f67074",
+  "provenance": {
+    "axiom_pins": {
+      "diagnostic_clear_files": 2,
+      "files": 2,
+      "syntax_occurrences": 0
+    },
+    "explicit_handwritten_corpus_exception": {
+      "diagnostic_clear_files": 0,
+      "files": 2,
+      "syntax_occurrences": 0
+    },
+    "generated_corpus": {
+      "diagnostic_clear_files": 0,
+      "files": 8,
+      "syntax_occurrences": 0
+    },
+    "generated_root": {
+      "diagnostic_clear_files": 2,
+      "files": 4,
+      "syntax_occurrences": 0
+    },
+    "marked_generated": {
+      "diagnostic_clear_files": 46,
+      "files": 53,
+      "syntax_occurrences": 3
+    },
+    "unresolved_chain_agreement": {
+      "diagnostic_clear_files": 131,
+      "files": 157,
+      "syntax_occurrences": 139
+    },
+    "untraced": {
+      "diagnostic_clear_files": 7163,
+      "files": 8065,
+      "syntax_occurrences": 5420
+    }
+  },
+  "status": "partial"
+}

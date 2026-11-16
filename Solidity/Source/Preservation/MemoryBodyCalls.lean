@@ -53,7 +53,7 @@ theorem sub_memory_body_mem {A : Decl → Prop} {G : Glob E} {c : String}
   rw [actual] at result
   have finish (valid : MemOK E s.heap.ty (last,after)) : MemOK E H (l,after) :=
     relocalize (valid.weaken outer.le) l (LocalsOK.mono valid.le l outer.1.2)
-  have actual' : callInternal (plan := none) G F n d vs rs (.nil,s) = (r,(last,after)) := actual
+  have actual' : callInternal (plan := none) (calldataKnown := true) G F n d vs rs (.nil,s) = (r,(last,after)) := actual
   cases r with
   | ok a =>
     simp only [ExceptT.run,ExceptT.mk,actual']

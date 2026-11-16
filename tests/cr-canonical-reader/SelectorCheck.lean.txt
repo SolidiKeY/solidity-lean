@@ -1,0 +1,23 @@
+import Solidity.Frontend.Import
+open Lean Solidity Solidity.Frontend
+
+#eval show IO Unit from do
+  for f in ["ContractWorld", "SliceCopies", "SourceAdmission", "SourceCoder", "SourceCoderIR",
+      "SourceIdentifiers", "SourceLiterals"] do
+    let j ← IO.ofExcept (Json.parse (← IO.FS.readFile s!"tests/solc/{f}.ast.json"))
+    let cu ← IO.ofExcept (Source.readCompilationUnit j)
+    let ast := if cu.asts.isEmpty then cu.primary else .arr cu.asts.toArray
+    let decls := (J.nodes ast).filter (fun n => (J.id? n).isSome)
+    let mut ok := 0
+    let mut bad := 0
+    for n in J.nodes ast do
+      if J.kind n == "FunctionDefinition" then
+        if let some sel := J.str? n "functionSelector" then
+          match sourceAbiSignature decls n with
+          | none => bad := bad + 1; IO.println s!"{f}: {J.str? n "name"} no importer signature"
+          | some sig =>
+            let k := Keccak.selector sig
+            let hex := String.mk ((Nat.toDigits 16 k).leftpad 8 '0')
+            if hex == sel then ok := ok + 1 else
+              bad := bad + 1; IO.println s!"{f}: {sig} keccak {hex} vs solc {sel}"
+    IO.println s!"{f}: {ok} match, {bad} differ"

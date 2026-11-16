@@ -1,0 +1,69 @@
+{
+ "tests/h62/item2/audit-precompiles/CompilerSuccess.lean:H62.AuditPrecompiles.CompilerSuccess.actual_success": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "tests/h62/item2/audit-precompiles/CompilerSuccess.lean:H62.AuditPrecompiles.CompilerSuccess.admitted": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "tests/h62/item2/audit-precompiles/CompilerSuccess.lean:H62.AuditPrecompiles.CompilerSuccess.always_revert_excluded": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "tests/h62/item2/audit-precompiles/CompilerSuccess.lean:H62.AuditPrecompiles.CompilerSuccess.checked_v2": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "tests/h62/item2/audit-precompiles/CompilerSuccess.lean:H62.AuditPrecompiles.CompilerSuccess.fragment": [
+  "propext"
+ ],
+ "tests/h62/item2/audit-precompiles/CompilerSuccess.lean:H62.AuditPrecompiles.CompilerSuccess.inhabited_success": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "tests/h62/item2/audit-precompiles/CompilerSuccess.lean:H62.AuditPrecompiles.CompilerSuccess.machine": [],
+ "tests/h62/item2/audit-precompiles/CompilerSuccess.lean:H62.AuditPrecompiles.CompilerSuccess.nonempty": [
+  "propext"
+ ],
+ "tests/h62/item2/audit-precompiles/CompilerSuccess.lean:H62.AuditPrecompiles.CompilerSuccess.reject_all_excluded": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "tests/h62/item2/audit-precompiles/CompilerSuccess.lean:H62.AuditPrecompiles.CompilerSuccess.represented": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "tests/h62/item2/audit-precompiles/CompilerSuccess.lean:H62.AuditPrecompiles.CompilerSuccess.source": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "tests/h62/item2/audit-precompiles/CompilerSuccess.lean:H62.AuditPrecompiles.CompilerSuccess.source_success": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "tests/h62/item2/audit-precompiles/CompilerSuccess.lean:H62.AuditPrecompiles.CompilerSuccess.source_zero_reverts": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "tests/h62/item2/audit-precompiles/CompilerSuccess.lean:H62.AuditPrecompiles.CompilerSuccess.target_preserved": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "tests/h62/item2/audit-precompiles/CompilerSuccess.lean:H62.AuditPrecompiles.CompilerSuccess.target_zero_reverts": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ]
+}

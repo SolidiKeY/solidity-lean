@@ -3,8 +3,12 @@ import Solidity.Calculus.Symex
 import Solidity.Calculus.CallbackSound
 import Solidity.Evm.Correct
 import Solidity.Evm.Compiler
+import Solidity.Backend.Payments.Versioned
 import Solidity.Calculus.SolkeyProves
 import Solidity.Calculus.TailMode
+import Solidity.Roadmap.G49Final.FoldedPublic
+import Solidity.Semantics.CtxEquiv.Unify
+import Solidity.Backend.CompilerEndpoint
 
 /-!
 # The main theorems, in one page
@@ -258,25 +262,18 @@ theorem symex_sound (n : Nat) (σ : State C Γ) : σ ⊧ symex n φ → σ ⊧ �
 
 open Evm Evm in
 /-- **The compiler is correct**: from a machine that represents the typed
-state, the typed run and the compiled code both end, in states the machine
-still represents, or both revert (a panic, a failed `assert`, is solc's
-revert with `Panic(0x01)` data), or the world refuses a payment the program
-makes and the machine alone reverts, or a loop no number of turns ends: the
-typed run diverges and the machine has no outcome (a fault), or stopped at
-a refused payment before it.  `L` bounds every array's length, which solc
-caps at `2^64`.  On the fragment the typed run is never exhausted, and it
-halts in no other way. -/
+state, both end in states the machine still represents, or both revert (a
+panic only in code with an `assert`), or the typed run diverges and the
+machine faults. A payment the world refuses reverts both (`Sim.oracle`).
+`L` bounds every array's length, which solc caps at `2^64`. -/
 theorem compiler_correct {P : Prog C Γ Γ'} {F : Frag Γ} {F' : Frag Γ'} {σ : State C Γ}
     {mc : Machine} {L b : Nat}
     (hP : F ⊩ P ⊣ F') (hm : σ ≈[C, L, b, F] mc) (hL : L + Prog.pushes P ≤ Lmax) :
     (∃ o mc', (P, σ) ⇓ o ∧ (⟦P⟧b, mc) ⇓ₘ mc' ∧ o.st ≈[C, L + Prog.pushes P, b, F'] mc') ∨
       ((Prog.run σ P = .error .revert ∨
           (Prog.asserts P = true ∧ Prog.run σ P = .error .panic)) ∧ (⟦P⟧b, mc) ↯ₘ) ∨
-      (Prog.pays P = true ∧ (⟦P⟧b, mc) ↯ₘ ∧ ∃ o, (P, σ) ⇓ o) ∨
-      (Prog.run σ P = .error .diverge ∧
-        (run (⟦P⟧b) mc = .fault ∨ (Prog.pays P = true ∧ (⟦P⟧b, mc) ↯ₘ))) :=
-  (compile_correct hP hm hL).imp (fun ⟨o, mc', h, h', _, hs⟩ => ⟨o, mc', h, h', hs⟩)
-    (Or.imp id (Or.imp (fun ⟨hp, h, o, _, h', _⟩ => ⟨hp, h, o, h'⟩) id))
+      (Prog.run σ P = .error .diverge ∧ run (⟦P⟧b) mc = .fault) :=
+  (compile_correct_v2 hP hm hL).imp (fun ⟨o, mc', h, h', _, hs⟩ => ⟨o, mc', h, h', hs⟩) id
 
 open Evm Evm in
 /-- **The box reaches the EVM**: where the compiled code succeeds, the typed
@@ -299,6 +296,108 @@ theorem compiler_checked {P : Prog C Γ Γ'} {F : Evm.Frag Γ} {b L frame : Nat}
     {σ : State C Γ} {mc : Evm.Machine}
     (h : compiled.Input L frame base σ mc) : compiled.Agrees L frame base σ mc :=
   compiled.correct h
+
+/-! ## Full compiler and public pipeline statements
+
+These retain the original premises and conclusions, including the conditional
+pass certificates and residual deployment/session obligations. They do not
+construct a compiler or a solc validator. -/
+
+open Evm in
+/-- The full compiler theorem, retaining the final stack equality. -/
+theorem compile_correct_full {P : Solidity.Prog C Γ Γ'} {F : Evm.Frag Γ} {F' : Evm.Frag Γ'}
+    {σ : State C Γ} {m : Evm.Machine} {L b : Nat} (hP : inFragP F P = some F')
+    (hm : Sim C L b F σ m) (hL : L + Prog.pushes P ≤ Lmax) :
+    (∃ o m', Solidity.Prog.run σ P = .ok o ∧ run (compileProg b P) m = .ok m' 0 ∧
+      m'.stack = m.stack ∧ Sim C (L + Prog.pushes P) b F' o.st m') ∨
+    ((Solidity.Prog.run σ P = .error .revert ∨
+        (Prog.asserts P = true ∧ Solidity.Prog.run σ P = .error .panic)) ∧
+      run (compileProg b P) m = .revert) ∨
+    (Prog.pays P = true ∧ run (compileProg b P) m = .revert ∧ ∃ o m',
+      Solidity.Prog.run σ P = .ok o ∧
+      Sim C (L + Prog.pushes P) b F' o.st m') ∨
+    (Solidity.Prog.run σ P = .error .diverge ∧ (run (compileProg b P) m = .fault ∨
+      (Prog.pays P = true ∧ run (compileProg b P) m = .revert))) :=
+  Evm.compile_correct hP hm hL
+
+open Roadmap Roadmap.G49Final in
+/-- Exact restatement of `Roadmap.G49Final.public_end_to_end`; all supplied certificates remain premises. -/
+theorem public_end_to_end {a b : Behaviour} (passes : PassList a b)
+    (e : b.Env) (allowed : b.Allowed e) (r : a.Res)
+    (source : a.Ready (passes.fold.envAbs e) r) :
+    (b.Ready e (passes.fold.need e r) ∧
+      (a.observe (passes.fold.envAbs e) r).Le (b.observe e (passes.fold.need e r))) ∧
+    (∀ rt, b.Admissible rt → b.Guard e rt →
+      ∃ rs, a.Admissible rs ∧ a.Guard (passes.fold.envAbs e) rs ∧
+        (b.observe e rt).Le (a.observe (passes.fold.envAbs e) rs)) :=
+  Roadmap.G49Final.public_end_to_end passes e allowed r source
+
+open Roadmap Roadmap.G49Final in
+/-- Exact restatement of `Roadmap.G49Final.g49_g50_of_fold`; all supplied certificates remain premises. -/
+theorem public_g49_g50 {S : SourceSpec} {I : IntrinsicSpec}
+    {Asm : Lang Event Outcome} {V : EvmSpec}
+    (lowering : Lowering S I) (backend : Compilation I Asm) (execution : Execution Asm V)
+    (compiler : S.Input → Option Artifact) (decode : List Bytes → V.World → Option I.World)
+    (obligations : PublicObligations lowering backend execution compiler decode) :
+    FoldStatement lowering backend execution compiler obligations.artifact ∧
+      S.Approved ∧ S.NonVacuous ∧ V.Approved ∧ V.fixed.Keccak ∧
+      PublicCorrectness S V compiler (sourceEnv lowering backend execution)
+        (foldedExport lowering backend execution decode) ∧
+      SpecTransfer S V compiler (sourceEnv lowering backend execution) :=
+  Roadmap.G49Final.g49_g50_of_fold lowering backend execution compiler decode obligations
+
+open Roadmap CtxEquiv in
+/-- Exact restatement of `CtxEquiv.Validator.ctxRefines_back`; all supplied certificates remain premises. -/
+theorem solc_validator_backward {S : SourceSpec} {V : EvmSpec} (T : Validator S V)
+    {i : S.Input} {art : Artifact} (hv : T.validate i art = true) {r : S.Resolved}
+    (adm : S.Admitted i r) (w : S.WellFormed r) (p : S.InProfile r) :
+    CtxRefines (V.contractGuarded art) (S.contract (S.meaning r w p art)) :=
+  CtxEquiv.Validator.ctxRefines_back T hv adm w p
+
+open Roadmap CtxEquiv in
+/-- Exact restatement of `CtxEquiv.Validator.ctxRefines_forward`; all supplied certificates remain premises. -/
+theorem solc_validator_forward {S : SourceSpec} {V : EvmSpec} (T : Validator S V)
+    {i : S.Input} {art : Artifact} (hv : T.validate i art = true) {r : S.Resolved}
+    (adm : S.Admitted i r) (w : S.WellFormed r) (p : S.InProfile r) :
+    CtxRefines (S.contractForward (S.meaning r w p art)) (V.contract art) :=
+  CtxEquiv.Validator.ctxRefines_forward T hv adm w p
+
+open Roadmap CtxEquiv in
+/-- Exact public contextual statement; the public certificate remains an input. -/
+theorem public_context_backward {I : Roadmap.IntrinsicSpec} {S : Roadmap.SourceSpec} {V : Roadmap.EvmSpec}
+    {compiler : S.Input → Option Roadmap.Artifact} {envAbs : V.lang.Env → S.lang.Env}
+    {X : Roadmap.StateExport S I V} (h : PublicCorrectness S V compiler envAbs X)
+    {i : S.Input} {r : S.Resolved} (adm : S.Admitted i r) (w : S.WellFormed r) (p : S.InProfile r)
+    {art : Artifact} (hc : compiler i = some art) :
+    CtxRefines (V.contractGuarded art) (S.contract (S.meaning r w p art)) :=
+  Roadmap.PublicCorrectness.ctxRefines_back h adm w p hc
+
+open Roadmap CtxEquiv in
+/-- Exact public contextual statement; the public certificate remains an input. -/
+theorem public_context_forward {I : Roadmap.IntrinsicSpec} {S : Roadmap.SourceSpec} {V : Roadmap.EvmSpec}
+    {compiler : S.Input → Option Roadmap.Artifact} {envAbs : V.lang.Env → S.lang.Env}
+    {X : Roadmap.StateExport S I V} (h : PublicCorrectness S V compiler envAbs X)
+    {i : S.Input} {r : S.Resolved} (adm : S.Admitted i r) (w : S.WellFormed r) (p : S.InProfile r)
+    {art : Artifact} (hc : compiler i = some art) :
+    CtxRefines (S.contractForward (S.meaning r w p art)) (V.contract art) :=
+  Roadmap.PublicCorrectness.ctxRefines_forward h adm w p hc
+
+open Roadmap CtxEquiv in
+/-- Exact public contextual statement; the public certificate remains an input. -/
+theorem public_context_success {I : Roadmap.IntrinsicSpec} {S : Roadmap.SourceSpec} {V : Roadmap.EvmSpec}
+    {compiler : S.Input → Option Roadmap.Artifact} {envAbs : V.lang.Env → S.lang.Env}
+    {X : Roadmap.StateExport S I V} (h : PublicCorrectness S V compiler envAbs X)
+    (hv : S.NonVacuous) : ∃ i art s π d, compiler i = some art ∧ s.Allowed ∧
+      (V.contract art).behav s π ∧ π.final = some (.success d) ∧ d ≠ [] :=
+  Roadmap.PublicCorrectness.ctx_succeeds h hv
+
+open Roadmap CtxEquiv in
+/-- Exact public contextual statement; the public certificate remains an input. -/
+theorem public_context_transfer {I : Roadmap.IntrinsicSpec} {S : Roadmap.SourceSpec} {V : Roadmap.EvmSpec}
+    {compiler : S.Input → Option Roadmap.Artifact} {envAbs : V.lang.Env → S.lang.Env}
+    {X : Roadmap.StateExport S I V} (h : PublicCorrectness S V compiler envAbs X) :
+    SpecTransfer S V compiler envAbs :=
+  Roadmap.PublicCorrectness.transfer' h
 
 /-! ## Their axioms: Lean's three at most -/
 
@@ -355,6 +454,35 @@ theorem compiler_checked {P : Prog C Γ Γ'} {F : Evm.Frag Γ} {b L frame : Nat}
 
 /-- info: 'Solidity.Main.compiler_checked' depends on axioms: [propext, Classical.choice, Quot.sound] -/
 #guard_msgs in #print axioms compiler_checked
+
+open Evm Evm.Compiler in
+/-- Additive v2 endpoint surface: preserve both refusals and the accepted-world
+premise of the newly merged backend endpoint. The frozen earlier public
+end-to-end statement remains above. -/
+theorem public_compiler_endpoint_v2 :
+    ∀ {C : Contract} {Γ Δ : Ctx} (b : Nat) (F : Frag Γ) (P : Prog C Γ Δ),
+      Compiler.compile b F P = none ∨
+      ∃ r : Compilation b F P, Compiler.compile b F P = some r ∧
+        ∀ L frame : Nat,
+          (Backend.Passes.WholeProgram.staticRefused r L frame = true ∧
+            ∀ (base : Nat → Fin W) (σ : State C Γ) (m : Machine),
+              ¬ r.Input L frame base σ m) ∨
+          (Backend.Passes.WholeProgram.staticRefused r L frame = false ∧
+            ∀ (base : Nat → Fin W) (σ : State C Γ) (m : Machine),
+              r.Input L frame base σ m → r.AgreesExact L frame base σ m) :=
+  Backend.compiler_endpoint_correct
+
+-- New headline axioms are also validated by scripts/trust/trust-closure.lean.
+#print axioms public_compiler_endpoint_v2
+#print axioms compile_correct_full
+#print axioms public_end_to_end
+#print axioms public_g49_g50
+#print axioms solc_validator_backward
+#print axioms solc_validator_forward
+#print axioms public_context_backward
+#print axioms public_context_forward
+#print axioms public_context_success
+#print axioms public_context_transfer
 
 end Main
 end Solidity

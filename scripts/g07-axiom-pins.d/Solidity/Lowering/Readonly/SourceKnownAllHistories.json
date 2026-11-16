@@ -1,0 +1,7 @@
+{
+ "Solidity/Lowering/Readonly/SourceKnownAllHistories.lean:Solidity.Lowering.Readonly.SourceHistory.all_known_at": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ]
+}

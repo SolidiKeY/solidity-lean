@@ -55,7 +55,6 @@ theorem payload_outside (μ : FrameMem C Δ) (source destination : ByteSpan μ.c
       destination.offset.val.toNat+destination.length.val.toNat≤base+32+length)
     (a : Nat) (outside : a<base+32 ∨ base+32+length≤a) :
     frameBytes (P6ByteMemory.copySnapshot μ source destination same) a=frameBytes μ a := by
-  first | (simp only;done) | skip
   rcases inside with empty | inside
   · have zero : source.length.val.toNat=0 := by rw [same];exact empty
     rw [P6ByteMemory.copy_empty μ source destination same zero]

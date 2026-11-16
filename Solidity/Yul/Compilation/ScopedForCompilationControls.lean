@@ -60,7 +60,12 @@ theorem source_done (b c : Scalar.Word) :
   by_cases zero : b = 0
   · subst b
     rw [finish,if_pos rfl]
-    rfl
+    exact CompletionControls.completed_horizon
+      (fun fuel => evalLoop (c := root) fuel .nil True.intro (.local 0) True.intro
+        step stepReference.profile work body.compiled.profile (sourceLocals #v[0,c+3]))
+      (fun fuel extra => evalLoop_refines_add (c := root) fuel extra .nil True.intro (.local 0) True.intro
+        step stepReference.profile work body.compiled.profile (sourceLocals #v[0,c+3]))
+      (show 2 ≤ 7 by omega) (by rfl)
   · rw [finish,if_neg zero]
     exact loop_source b (c+3) zero
  exact source_for (c := root) (pre := startup) (test := .local 0) (post := step) (body := work) startupReference.profile True.intro stepReference.profile body.compiled.profile

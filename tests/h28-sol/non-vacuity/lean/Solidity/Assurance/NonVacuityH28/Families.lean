@@ -85,14 +85,13 @@ theorem correct_success (balance : Nat) (hb : balance < Evm.W)
       Evm.Sim C (1 + Evm.Prog.pushes (requireProgram C true)) 0 (Evm.Frag.init []) o.st mc' := by
   rcases Main.compiler_correct (fragment_family C true)
     (simulation_family C balance hb bal self heq) (by change 1 ≤ Evm.Lmax; decide) with
-    h | ⟨hsrc, _⟩ | ⟨hp, _⟩ | ⟨hsrc, _⟩
+    h | ⟨hsrc, _⟩ | ⟨hsrc, _⟩
   · exact h
   · rcases hsrc with hr | ⟨_, hp⟩
     · rw [source_true] at hr
       cases hr
     · rw [source_true] at hp
       cases hp
-  · cases hp
   · rw [source_true] at hsrc
     cases hsrc
 
@@ -155,10 +154,9 @@ theorem correct_revert (balance : Nat) (hb : balance < Evm.W)
     Evm.run (Evm.compileProg 0 (requireProgram C false)) (Evm.Machine.init bal self) = .revert := by
   rcases Main.compiler_correct (fragment_family C false)
     (simulation_family C balance hb bal self heq) (by change 1 ≤ Evm.Lmax; decide) with
-    ⟨_, _, ho, _⟩ | ⟨_, hr⟩ | ⟨hp, _⟩ | ⟨hd, _⟩
+    ⟨_, _, ho, _⟩ | ⟨_, hr⟩ | ⟨hd, _⟩
   · simp only [Main.Runs, source_false, reduceCtorEq] at ho
   · exact hr
-  · cases hp
   · rw [source_false] at hd
     cases hd
 

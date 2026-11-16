@@ -28,7 +28,6 @@ theorem refresh {E Γ} {origin : Source.Heap E.layout} (H : Source.HeapTy)
         (∀ e∈generatedHeapEntries q,e.image.Reads (frameBytes out.2) (q.address e.id)) ∧
         ReservedOK (frameBytes out.2) q.free ∧
         enumeratedMemoryWriteback out.1.2 allocated q history (frameBytes out.2)=.ok (some (.ok (),out.1.2)) := by
-  first | (simp only;done) | decide | omega | rfl | skip
   dsimp only
   let out := P6MultiRootByte.run F horizon requests s p supported image room
   have physical := P6MultiRootByte.sound H allocated F horizon requests s p prior ok supported image room oldReads reserved
@@ -59,7 +58,6 @@ theorem append_success {E Γ} (F : Source.Fr) (horizon : Nat) (first second : Li
     let out := P6MultiRootByte.run F horizon first s p supported image room
     let final := P6MultiRootByte.run F horizon second out.1.2 q nextSupport out.2 nextRoom
     coupled F horizon p.address (first++second) s (frameBytes image)=(final.1,frameBytes final.2) := by
-  first | (simp only;done) | decide | omega | rfl | skip
   dsimp only
   let out := P6MultiRootByte.run F horizon first s p supported image room
   have prefixRun : coupled F horizon p.address first s (frameBytes image)=(out.1,frameBytes out.2) := by

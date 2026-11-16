@@ -32,7 +32,9 @@ def summary (result : Option (Solidity.Yul.World.Effects D₀ LW LW ×
 
 theorem reverted_witness : summary revertedCopy = some [0,7,1,238,171,205,238,1] := by decide +kernel
 theorem success_witness : summary successfulCopy = some [1,42,2,238,171,205,238,1] := by decide +kernel
-theorem rollback_discriminates : summary revertedCopy ≠ summary successfulCopy := by decide +kernel
+theorem rollback_discriminates : summary revertedCopy ≠ summary successfulCopy := by
+  rw [reverted_witness,success_witness]
+  decide
 example : (completeAndCopy entry (addr 2) (addr 1) ⟨0, by decide⟩ [] false
     writes [callerLog] (.revert [0xab,0xcd]) 3 0 31 memory).isNone = true := by decide +kernel
 

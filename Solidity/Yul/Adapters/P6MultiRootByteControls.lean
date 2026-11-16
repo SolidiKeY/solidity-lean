@@ -21,7 +21,6 @@ theorem room (pipeline : Pipeline) : mixedPlacement.free.val≤(image pipeline).
 
 theorem initial_reads (pipeline : Pipeline) :
     ∀ e∈generatedHeapEntries mixedPlacement,e.image.Reads (frameBytes (image pipeline)) (mixedPlacement.address e.id) := by
-  first | (simp only;done) | decide | omega | rfl | skip
   intro e member
   apply e.image.reads_congr _ mixedPhysical _ _ (ByteElementStore.Controls.oldReads e member)
   intro i small
@@ -35,7 +34,6 @@ theorem initial_reads (pipeline : Pipeline) :
   exact dif_pos bound
 
 theorem initial_reserved (pipeline : Pipeline) : ReservedOK (frameBytes (image pipeline)) mixedPlacement.free := by
-  first | (simp only;done) | decide | omega | rfl | skip
   constructor
   · exact (congrArg Fin.val (mload_congr (frameBytes (image pipeline)) mixedPhysical 64
       (fun byte => dif_pos (by change 64+byte.val<2048;have small:=byte.isLt;omega)))).trans mixed_reserved.1
@@ -46,7 +44,7 @@ def reached (pipeline : Pipeline) := run mixedReadFrame 0 requests mixedState mi
   StructWordHeap.Controls.support (image pipeline) (room pipeline)
 
 theorem source_prefix (pipeline : Pipeline) : (reached pipeline).1=(.error (.stuck "not bytes"),after) := by
-  first | (simp only;done) | decide | omega | rfl
+  rfl
 
 theorem whole (pipeline : Pipeline) (H : Source.HeapTy) (ok : Source.MemOK mixedEnv H mixedState) :
     Source.MemOK mixedEnv H after ∧
@@ -56,7 +54,6 @@ theorem whole (pipeline : Pipeline) (H : Source.HeapTy) (ok : Source.MemOK mixed
       ∃ history : RetainedAllocation mixedPlacement q,
         enumeratedMemoryWriteback after mixedPlacement q history (frameBytes (reached pipeline).2)=.ok (some (.ok (),after)) ∧
         ReservedOK (frameBytes (reached pipeline).2) q.free := by
-  first | (simp only;done) | decide | omega | rfl | skip
   have result := sound H mixedPlacement mixedReadFrame 0 requests mixedState mixedPlacement (retainInitial _ _) ok
     StructWordHeap.Controls.support (image pipeline) (room pipeline) (initial_reads pipeline) (initial_reserved pipeline)
   obtain ⟨q,safe,addresses,free,full,history,wb,reserved⟩ := result.2.2.2.2.2
@@ -76,7 +73,6 @@ theorem whole (pipeline : Pipeline) (H : Source.HeapTy) (ok : Source.MemOK mixed
 /-- Factor out the proof-carrying finite frame before reducing fixture bytes. -/
 theorem raw_projection (pipeline : Pipeline) :
     frameBytes (reached pipeline).2=saveByte (saveByte (saveByte (frameBytes (image pipeline)) 162 0xff) 416 0x80) 162 0x55 := by
-  first | (simp only;done) | decide | omega | rfl | skip
   change frameBytes (run mixedReadFrame 0 requests mixedState mixedPlacement
     StructWordHeap.Controls.support (image pipeline) (room pipeline)).2= _
   rw [bytes]
@@ -87,13 +83,11 @@ theorem changed_payload_padding_and_boundary (pipeline : Pipeline) :
     readBytes (frameBytes (reached pipeline).2) 416 2=[0x80,0x61] ∧
     frameBytes (reached pipeline).2 163=0xa5 ∧ frameBytes (reached pipeline).2 2047=0xa5 ∧
     frameBytes (reached pipeline).2 2048=0 := by
-  first | (simp only;done) | decide | omega | rfl | skip
   rw [raw_projection]
   cases pipeline <;> decide
 
 theorem outside_write_rejected (pipeline : Pipeline) :
     ¬MemoryAgreement.Fits (image pipeline) (saveByte (frameBytes (image pipeline)) 2048 0xff) := by
-  first | (simp only;done) | decide | omega | rfl | skip
   intro bad
   have impossible := bad 2048 (by change 64*32≤2048;decide)
   change (0xff : UInt8)=0 at impossible

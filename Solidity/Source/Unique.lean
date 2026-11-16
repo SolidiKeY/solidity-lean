@@ -1803,6 +1803,7 @@ theorem StmtD.unique {C : Ctx} {k : SCtx} {L L₁ L₂ : List (String × STy)} {
       exact ⟨rfl, by simp only [StmtD.toR]; rw [eq_of_heq h]⟩
   | _, _, .tryCall dc da ho hs _ ht _ dok hcb dcb, d' => by
     cases d' with
+    | tryLibrary _ _ _ _ _ _ _ _ _ => cases hcb
     | tryCall dc' da' ho' hs' _ ht' _ dok' hcb' dcb' =>
       obtain ⟨e1, h1⟩ := Typed.unique dc dc'
       cases e1
@@ -1818,6 +1819,20 @@ theorem StmtD.unique {C : Ctx} {k : SCtx} {L L₁ L₂ : List (String × STy)} {
       obtain ⟨e4, h4⟩ := ItemsD.unique dcb dcb'
       subst e4
       exact ⟨rfl, by simp only [StmtD.toR]; rw [eq_of_heq h1, eq_of_heq h2, eq_of_heq h3, eq_of_heq h4]⟩
+  | _, _, .tryLibrary da ho hs _ _ ht _ success failure, other => by
+    cases other with
+    | tryCall _ _ _ _ _ _ _ _ caught _ => cases caught
+    | tryLibrary da2 ho2 hs2 _ _ ht2 _ success2 failure2 =>
+      obtain ⟨types, argv⟩ := TypedArgs.unique da da2
+      subst types
+      rw [ho] at ho2; cases ho2
+      rw [hs] at hs2; cases hs2
+      rw [ht] at ht2; cases ht2
+      obtain ⟨okLocals, ok⟩ := ItemsD.unique success success2
+      subst okLocals
+      obtain ⟨badLocals, bad⟩ := ItemsD.unique failure failure2
+      subst badLocals
+      exact ⟨rfl, by simp only [StmtD.toR]; rw [eq_of_heq argv, eq_of_heq ok, eq_of_heq bad]⟩
   | _, _, .rethrow _ hr _ hp, d' => by
     cases d' with
     | rethrow _ hr' _ hp' =>

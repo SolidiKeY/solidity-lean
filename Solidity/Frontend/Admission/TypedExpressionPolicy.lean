@@ -1,8 +1,6 @@
 import Solidity.Frontend.Admission.TypedObservationPolicy
 
-/-! Intrinsic expression-visitor policy closure by the actual mutual
-recursor. This does not establish full feature/profile or semantic adequacy.
-Statement and Program policy closure is supplied in TypedStatementPolicy. -/
+/-! Intrinsic expression-visitor policy closure by the actual mutual recursor. This does not establish full feature/profile or semantic adequacy. Statement and Program policy closure is supplied in TypedStatementPolicy. -/
 namespace Solidity.Frontend.Admission.TypedObservationPolicy
 open Source
 

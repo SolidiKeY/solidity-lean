@@ -16,7 +16,7 @@ namespace Solidity.Examples.Tactics.PublicGetters
 open Frontend
 open scoped Scoped
 
-solc_import "../../../tests/solc/PublicGetters.ast.json" hash 0x968ad03a36798cc3
+solc_import "../../../tests/solc/PublicGetters.ast.json" hash 0x6a499756be427a70
   as Imported.PublicGetters testing
 solc_scoped_problems Imported.PublicGetters decl
 
@@ -96,14 +96,14 @@ example : ((sourceMember "inherited").bind fun (name, _) =>
     fnSignature? Imported.PublicGetters name) = some "inherited(uint8)" := by
   decide +kernel
 
-solc_import "../../../tests/solc/PublicGetters.ast.json" hash 0x968ad03a36798cc3
+solc_import "../../../tests/solc/PublicGetters.ast.json" hash 0x6a499756be427a70
   as Imported.GetterReferences testing
 
 /- Bytes/string are returned, so lack of reference ABI returns rejects the whole getter. -/
 #guard ["rejectedBytes", "rejectedMixed"].all fun name =>
   (Imported.GetterReferences.report.find? (·.name == name)).any (·.status == .unsupported)
 
-solc_import "../../../tests/solc/PublicGetters.ast.json" hash 0x968ad03a36798cc3
+solc_import "../../../tests/solc/PublicGetters.ast.json" hash 0x6a499756be427a70
   as Imported.GetterCtorCollision testing
 solc_scoped_problems Imported.GetterCtorCollision decl
 
@@ -116,7 +116,7 @@ example : (fnTag Imported.GetterCtorCollision "solcCtorBody721_").isOk = false �
     fnSelector? Imported.GetterCtorCollision "solcCtorBody721_" = none := by
   decide +kernel
 
-solc_import "../../../tests/solc/PublicGetters.ast.json" hash 0x968ad03a36798cc3
+solc_import "../../../tests/solc/PublicGetters.ast.json" hash 0x6a499756be427a70
   as Imported.GetterCtorStructAlias renaming GetterBox => solcCtorBody721 testing
 solc_scoped_problems Imported.GetterCtorStructAlias decl
 
@@ -129,7 +129,7 @@ example : SourceFunction.internalValue { callable := .abi .externalFn .selected 
     SourceFunction.externalEntry { callable := .abi .publicFn .retained none } = false := by
   decide +kernel
 
-solc_import "../../../tests/solc/PublicGetters.ast.json" hash 0x968ad03a36798cc3
+solc_import "../../../tests/solc/PublicGetters.ast.json" hash 0x6a499756be427a70
   as Imported.GetterFunctionSlot testing
 solc_scoped_problems Imported.GetterFunctionSlot decl
 
@@ -349,7 +349,7 @@ theorem falseBoundsPanic_exec : Prog.run getterState Imported.PublicGetters.fals
   apply fuelPanic
   decide +kernel
 
-solc_import "../../../tests/solc/PublicGetters.ast.json" hash 0x968ad03a36798cc3
+solc_import "../../../tests/solc/PublicGetters.ast.json" hash 0x6a499756be427a70
   as Imported.GetterBytePrefixes testing
 solc_scoped_problems Imported.GetterBytePrefixes decl
 

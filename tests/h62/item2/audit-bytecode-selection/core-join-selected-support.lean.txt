@@ -1,0 +1,36 @@
+/-! Guards reject-all compiler contracts and incompatible classifier/data bundles.
+Reuse the actual core compiler and DispatchBody record. This nil-body fixture
+checks compile success, caller preservation and a join skipping a reverting tail.
+It does not establish the joined field's State/Machine simulation premises or
+Source/native/physical/resource adequacy. -/
+open Solidity Solidity.Evm Solidity.Backend.AbiEntry
+open Solidity.Backend.AbiEntry.Interface
+
+def joinContract : Contract := {vars := []}
+def joinNil : Prog joinContract [] [] := .nil
+def joinBody : DispatchBody joinContract [] (Frag.init []) :=
+  {outCtx := [],program := joinNil,outFrag := Frag.init [],admitted := rfl}
+def joinCompilation (base : Nat) := CoreJoin.compiled base (Frag.init []) joinNil (Frag.init []) rfl
+
+theorem join_found (base : Nat) : Compiler.compile base (Frag.init []) joinNil=some (joinCompilation base) :=
+  CoreJoin.selected base (Frag.init []) joinNil (Frag.init []) rfl
+
+theorem join_reject_all_refused (base : Nat) : Compiler.compile base (Frag.init []) joinNil≠none := by
+  rw [join_found]
+  intro impossible
+  cases impossible
+
+def joinMachine : Machine := {Machine.init with stack := [.val (wmod 17),.val (wmod 29)]}
+
+theorem join_nil_preserves_caller : run (joinCompilation 7).code joinMachine=.ok joinMachine 0 := rfl
+
+theorem join_skips_reverting_tail :
+    run ((joinCompilation 7).code++[.jump 1,.revert]) joinMachine=.ok joinMachine 0 := rfl
+
+theorem join_missing_jump_reverts : run ((joinCompilation 7).code++[.revert]) joinMachine=.revert := rfl
+
+#print axioms join_found
+#print axioms join_reject_all_refused
+#print axioms join_nil_preserves_caller
+#print axioms join_skips_reverting_tail
+#print axioms join_missing_jump_reverts

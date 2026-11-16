@@ -83,14 +83,15 @@ async function run() {
       const report = await api.verify(realDocument);
       assert.deepEqual(report.errors, []);
       assert.equal(report.results.find(row => row.function === 'passes').status, 'proved');
-      assert.equal(report.results.find(row => row.function === 'staysOpen').status, 'pending');
+      // The compiled verifier (the IDE default) decides `assert(false)` as refuted.
+      assert.equal(report.results.find(row => row.function === 'staysOpen').status, 'refuted');
       assert.equal(report.results.find(row => row.function === 'choice').status, 'proved');
       assert.ok(report.results.filter(row => row.sourceId >= 0).every(row => row.range && row.sourceHash));
       const realDiagnostics = vscode.languages.getDiagnostics(realDocument.uri).filter(d => d.source === 'Solidity Lean');
       assert.equal(realDiagnostics.length, 1);
-      assert.equal(realDiagnostics[0].severity, vscode.DiagnosticSeverity.Warning);
+      assert.equal(realDiagnostics[0].severity, vscode.DiagnosticSeverity.Error);
       assert.equal(realDiagnostics[0].range.start.line, 1);
-      checks.push('real solc + Lean proof', 'real pending obligation', 'real declaration ranges', 'real finite membership proof');
+      checks.push('real solc + Lean proof', 'real refuted obligation', 'real declaration ranges', 'real finite membership proof');
       const auditSource = join(root, 'EntryAudit.sol');
       writeFileSync(auditSource, 'pragma solidity ^0.8.34;\ncontract EntryAudit {\n/// @custom:key requires x > 10 && x < 3\n/// @custom:key ensures false\nfunction vacuous(uint x) public pure { assert(false); }\n/// @custom:key requires x > 0\n/// @custom:key ensures \\result == x\nfunction possible(uint x) public pure returns(uint) { return x; }\n}\n');
       await config.update('auditPreconditions', true, vscode.ConfigurationTarget.Global);
@@ -204,7 +205,10 @@ assert(n == 0);
       const equalHovers = await vscode.commands.executeCommand('vscode.executeHoverProvider', diamondDocument.uri, new vscode.Position(9, 15));
       assert.ok(equalHovers.some(hover => hover.contents.some(content => /pending/.test(content.value || String(content)))));
       assert.ok(equalHovers.every(hover => hover.contents.every(content => !/certified model prestate/.test((content.value || String(content)).replace(/&nbsp;/g, ' ')))));
-      const diamondItems = [...api.controller.items.get(diamondDocument.uri.toString()).children].map(([, item]) => item);
+      // Result items sit under their compiler symbols (file > contract > row), so
+      // collect every `Contract.function(...)` item in the document's tree.
+      const resultItems = uri => { const out = []; const walk = item => { for (const [, child] of item.children) { out.push(child); walk(child); } }; walk(api.controller.items.get(uri.toString())); return out.filter(item => /^[^.\s]+\.[^.\s]+\(.*\)$/.test(item.label)); };
+      const diamondItems = resultItems(diamondDocument.uri);
       assert.equal(diamondItems.find(item => item.label === 'TupleDiamond.defaultDiamond()').description, 'proved');
       assert.equal(diamondItems.find(item => item.label === 'TupleDiamond.badEqualTuple()').description, 'pending');
       checks.push('real default-diamond tuple VC proof', 'real equal tuple pending diagnostic', 'real tuple diamond proof and pending hovers', 'real tuple diamond Test Explorer statuses');
@@ -231,7 +235,7 @@ contract FilteredHost {
       assert.ok(filtered.errors.some(error => error.stage === 'lean' && typeof error.reason === 'string' && error.reason.length > 0),
         'native Lean diagnostics must propagate alongside retained sibling rows');
       const filteredDiagnostics = vscode.languages.getDiagnostics(filteredDocument.uri).filter(d => d.source === 'Solidity Lean');
-      const filteredItems = [...api.controller.items.get(filteredDocument.uri.toString()).children].map(([, item]) => item);
+      const filteredItems = resultItems(filteredDocument.uri);
       assert.equal(filteredItems.length, 3);
       for (const [name, status, line] of [['provesChoice', 'proved', 3], ['pendingChoice', 'pending', 5], ['captureResult', 'error', 7]]) {
         const row = filteredRows.get(name);

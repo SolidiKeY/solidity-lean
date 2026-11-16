@@ -1,15 +1,12 @@
-import Solidity.Examples.Tactics.OpenLoops
+import Solidity.Examples.Tactics.OpenLoops.RowsNine.Finish
 
 /-!
 # `binomialRowsNine`, the nested-loop binomial over nine memory rows
 
-The slowest obligation of `Examples/Tactics/OpenLoops.lean`, in its own module:
-its walk of about two thousand steps is checked in chunks
-(`sol_prove (chunk := n)`, `Calculus/ProveChunked.lean`). At
-`LEAN_NUM_THREADS=1`, chunks of 128 peaked at 8992 MiB and 457 s, over the
-8 GiB pre-gate bound; chunks of 64 peak at 5876 MiB but take 594 s. The
-300 s bound needs the walk checkpointed across modules, which
-`sol_prove (chunk := n)` does not offer yet.
+The original walk is checked in 128-step chunks. Three continuation lemmas
+checkpoint it after four iterations each, so no module elaborates the entire
+walk under the slow library's per-module time cap. Each continuation is
+kernel checked; the final theorem composes them without changing the problem.
 -/
 
 namespace Solidity.Examples.Tactics.OpenLoops
@@ -17,6 +14,6 @@ open scoped Solidity.Scoped
 
 /-- `binomial(9, 5) == 70` over nine rows of memory arrays. -/
 theorem binomialRowsNine : ⊢ Solc.SolcLoopsOpen.binomialRowsNine.problem := by
-  sol_prove (chunk := 64)
+  exact RowsNine.Stage1.stage1 (RowsNine.Stage2.stage2 (RowsNine.Stage3.stage3 RowsNine.Finish.finish))
 
 end Solidity.Examples.Tactics.OpenLoops

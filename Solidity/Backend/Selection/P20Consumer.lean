@@ -68,3 +68,64 @@ theorem p20_false_domain
 #print axioms p20_false_domain
 
 end Solidity.Backend.Selection
+
+namespace Solidity.Backend.Selection
+open Solidity.Yul.Closed
+open Solidity.Yul.Compilation.ProducerExpressions
+variable {C : Contract} {Γ Δ : Ctx} {b : Nat}
+  {F : Evm.Frag Γ} {program : Solidity.Prog C Γ Δ}
+  (result : Evm.Compiler.Compilation b F program)
+  {c : Solidity.Yul.Control} {n : Nat} (stmt : Solidity.Yul.Stmt [] [] c n)
+  (profile : StmtWordP stmt) (block : Block) (domain : State C Γ → Prop)
+  (encodeInput : State C Γ → Vector Scalar.Word n)
+  (encodeOutput : (σ : State C Γ) → Solidity.Out C σ.H Δ → Vector Scalar.Word n)
+
+/-- Consume the reviewed V2 represented endpoint directly. V1 assembly
+consumption above and its unrestricted lowering requirement remain unchanged. -/
+def p20RepresentedConsumerV2 :
+    P20RepresentedConsumerV2 result stmt profile block domain encodeInput encodeOutput :=
+  fun link => Solidity.Yul.Compilation.P20.InterfaceV2.PendingG24.represented
+    result stmt profile block domain encodeInput encodeOutput link
+
+/-- The consumed joint input produces an actual represented target success.
+The original source/Yul run, payment freedom and full G24 Rep are retained;
+no target execution or coverage theorem is added as a premise. -/
+theorem p20_joint_success_v2
+    (link : Solidity.Yul.Compilation.P20.InterfaceV2.PendingG24
+      result stmt profile block domain encodeInput encodeOutput) :
+    ∃ (L frame : Nat) (base : Nat → Fin Evm.W)
+      (σ : State C Γ) (m : Evm.Machine) (out : Solidity.Out C σ.H Δ)
+      (fuel : Nat) (target : Evm.Machine),
+      domain σ ∧ result.Input L frame base σ m ∧ Evm.Prog.pays program = false ∧
+      program.run σ = .ok out ∧
+      evalStmt fuel .nil True.intro stmt profile (sourceLocals (encodeInput σ)) =
+        some ⟨sourceLocals (encodeOutput σ out),.normal⟩ ∧
+      Evm.run result.code m = .ok target 0 ∧ target.stack = m.stack ∧
+      result.Rep (L + Evm.Prog.pushes program) frame base σ m out.st target := by
+  let consumed := p20RepresentedConsumerV2 result stmt profile block domain
+    encodeInput encodeOutput link
+  obtain ⟨L,frame,base,σ,m,out,fuel,admitted,input,noPay,sourceRun,yulRun⟩ :=
+    consumed.required_input
+  obtain ⟨out',target,sourceRun',_encoding,targetRun,stack,represented⟩ :=
+    consumed.success L frame base σ m admitted input noPay fuel (encodeOutput σ out) yulRun
+  have same : out' = out := Except.ok.inj (sourceRun'.symm.trans sourceRun)
+  subst out'
+  exact ⟨L,frame,base,σ,m,out,fuel,target,admitted,input,noPay,sourceRun,
+    yulRun,targetRun,stack,represented⟩
+
+/-- V2's actual joint input prevents vacuous acceptance through a false domain. -/
+theorem p20_false_domain_v2
+    (link : Solidity.Yul.Compilation.P20.InterfaceV2.PendingG24
+      result stmt profile block (fun _ => False) encodeInput encodeOutput) : False := by
+  obtain ⟨L,frame,base,σ,m,out,fuel,target,impossible,_rest⟩ :=
+    p20_joint_success_v2 result stmt profile block (fun _ => False)
+      encodeInput encodeOutput link
+  exact impossible
+
+/-- info: 'Solidity.Backend.Selection.p20RepresentedConsumerV2' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in #print axioms p20RepresentedConsumerV2
+/-- info: 'Solidity.Backend.Selection.p20_joint_success_v2' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in #print axioms p20_joint_success_v2
+/-- info: 'Solidity.Backend.Selection.p20_false_domain_v2' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in #print axioms p20_false_domain_v2
+end Solidity.Backend.Selection

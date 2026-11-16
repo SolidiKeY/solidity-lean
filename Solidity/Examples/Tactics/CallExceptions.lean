@@ -14,7 +14,7 @@ run by `runF_approx`; executable reference EVM checks are separate.
 No source-equivalence or callback-completeness theorem is assumed.
 -/
 
-solc_import "../../../tests/solc/CallExceptions.ast.json" hash 0x13163372312c84bc
+solc_import "../../../tests/solc/CallExceptions.ast.json" hash 0xbce4593be5a370f8
   as Imported.CallExceptions testing
 
 namespace Solidity.Examples.Tactics.CallExceptions

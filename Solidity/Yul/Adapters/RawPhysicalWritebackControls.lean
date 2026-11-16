@@ -9,13 +9,11 @@ open Solidity.Backend Solidity.Backend.MemoryOps.Physical Solidity.Evm.TryByteIm
 open RawPhysicalInventory RawPhysicalInventory.Controls
 
 theorem whole_frame_identity (pipeline : Pipeline) :
-    frameOf 33 (restored pipeline) (stored pipeline) (room pipeline)=stored pipeline := by
-  first | omega | decide | skip
-  exact frame_unchanged 33 dirty (image pipeline) (room pipeline)
+    frameOf 33 (restored pipeline) (stored pipeline) (room pipeline)=stored pipeline :=
+  frame_unchanged 33 dirty (image pipeline) (room pipeline)
 
 theorem tail_outside (cell : WordCell (localExternalTypes ctx)) :
     191<offset 33 cell ∨ offset 33 cell+32≤191 := by
-  first | omega | decide | skip
   have bound := cell.slot.isLt
   change cell.slot.val<4 at bound
   unfold RawPhysicalInventory.offset
@@ -27,7 +25,6 @@ def paddedImage := encode 33 dirty (fun _=>0xa5)
 theorem same_view_different_padding :
     RawFrame.view (decode 33 clean zeroImage)=RawFrame.view (decode 33 clean paddedImage) ∧
       zeroImage 191≠paddedImage 191 := by
-  first | omega | decide | skip
   have zero : zeroImage 191=0 := residual 33 dirty (fun _=>0) 191 tail_outside
   have padded : paddedImage 191=0xa5 := residual 33 dirty (fun _=>0xa5) 191 tail_outside
   refine ⟨?_,?_⟩
@@ -36,14 +33,12 @@ theorem same_view_different_padding :
     decide
 
 theorem unchanged_map :
-    encode 33 (decode 33 clean paddedImage) paddedImage=paddedImage := by
-  first | omega | decide | skip
-  exact unchanged 33 dirty (fun _=>0xa5)
+    encode 33 (decode 33 clean paddedImage) paddedImage=paddedImage :=
+  unchanged 33 dirty (fun _=>0xa5)
 
 /-- Even a correct raw word snapshot cannot justify erasing the complement. -/
 theorem erased_padding_negative :
     encode 33 (decode 33 clean paddedImage) (fun _=>0)≠paddedImage := by
-  first | omega | decide | skip
   intro same
   have zero := residual 33 (decode 33 clean paddedImage) (fun _=>0) 191 tail_outside
   have padded := residual 33 dirty (fun _=>0xa5) 191 tail_outside

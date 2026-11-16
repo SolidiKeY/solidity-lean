@@ -26,9 +26,16 @@ theorem source_nonzero {c : Control} {n fc : Nat} {test : Expr [] [] n 1} {body 
  (nonzero : condition.value locals ≠ 0)
  (ran : evalStmt horizon .nil True.intro body hb (sourceLocals locals) = some result) :
  evalStmt (max fc horizon+1) .nil True.intro (.if_ test body) ⟨condition.profile,hb⟩ (sourceLocals locals) = some result := by
- have tested := evalExpr_stable (Nat.le_max_left fc horizon) .nil True.intro test condition.profile
-   (sourceLocals locals) (condition.source locals)
- have completed := evalStmt_stable (Nat.le_max_right fc horizon) .nil True.intro body hb (sourceLocals locals) ran
+ have tested : evalExpr (max fc horizon) .nil True.intro test condition.profile (sourceLocals locals) =
+   some (fun _ => (condition.value locals).toFin) := CompletionControls.completed_horizon
+   (fun fuel => evalExpr fuel .nil True.intro test condition.profile (sourceLocals locals))
+   (fun fuel extra => evalExpr_refines_add fuel extra .nil True.intro test condition.profile (sourceLocals locals))
+   (Nat.le_max_left fc horizon) (condition.source locals)
+ have completed : evalStmt (max fc horizon) .nil True.intro body hb (sourceLocals locals) = some result :=
+   CompletionControls.completed_horizon
+     (fun fuel => evalStmt fuel .nil True.intro body hb (sourceLocals locals))
+     (fun fuel extra => evalStmt_refines_add fuel extra .nil True.intro body hb (sourceLocals locals))
+     (Nat.le_max_right fc horizon) ran
  change Option.bind (evalExpr (max fc horizon) .nil True.intro test condition.profile (sourceLocals locals)) _ = _
  rw [tested]
  have nz : (condition.value locals).toNat ≠ 0 := fun h => nonzero (BitVec.eq_of_toNat_eq h)
@@ -80,10 +87,16 @@ theorem model_to_source {c : Control} {n fuel : Nat} {stmt : Stmt [] [] c n}
      change Evm.run qb middle = .ok final skip at whole
      rw [frame] at whole
      obtain ⟨f2,out,source2,done,finalFrame⟩ := ihRight b qb hb sb mid final skip whole
-     have firstSource := evalStmt_stable (Nat.le_max_left f1 f2) .nil True.intro _ left.profile
-       (sourceLocals locals) source1
-     have lastSource := evalStmt_stable (Nat.le_max_right f1 f2) .nil True.intro _ right.profile
-       (sourceLocals mid) source2
+     have firstSource : evalStmt (max f1 f2) .nil True.intro _ left.profile (sourceLocals locals) =
+       some ⟨sourceLocals mid,.normal⟩ := CompletionControls.completed_horizon
+       (fun fuel => evalStmt fuel .nil True.intro _ left.profile (sourceLocals locals))
+       (fun fuel extra => evalStmt_refines_add fuel extra .nil True.intro _ left.profile (sourceLocals locals))
+       (Nat.le_max_left f1 f2) source1
+     have lastSource : evalStmt (max f1 f2) .nil True.intro _ right.profile (sourceLocals mid) =
+       some ⟨sourceLocals out,.normal⟩ := CompletionControls.completed_horizon
+       (fun fuel => evalStmt fuel .nil True.intro _ right.profile (sourceLocals mid))
+       (fun fuel extra => evalStmt_refines_add fuel extra .nil True.intro _ right.profile (sourceLocals mid))
+       (Nat.le_max_right f1 f2) source2
      exact ⟨max f1 f2+1,out,LoopControlCompilation.sequence_source _ _ left.profile right.profile
        (max f1 f2) (sourceLocals locals) (sourceLocals mid) (sourceLocals out) firstSource lastSource,done,finalFrame⟩
  | branch condition arm ih =>

@@ -26,13 +26,11 @@ theorem joined (pipeline : Roadmap.Pipeline) (fuel : Nat) (flag checked : Bool) 
       (.ok (Source.Out.ret (ConditionalAssignments.sourceAfter (source flag) sci flag .here sci sca .here).1),
         (.nil,(source flag).2)) ∧
     StmtOut C 1 0 (Frag.init (.val .bool :: TargetCtx)) false false false
-      (core.run (caller flag)) (run emitted (machine flag)) (machine flag) := by
-  rcases correct (G0 pipeline) {F0 with checked := checked} fuel 0 none
+      (core.run (caller flag)) (run emitted (machine flag)) (machine flag) :=
+  And.imp_right (fun rest => rest.2.2.2.2) (correct (G0 pipeline) {F0 with checked := checked} fuel 0 none
     (M := false) (k := ⟨false,false⟩) (source flag) (caller flag) mapping Rel
     (initial flag) (fun _ _ h => h) sci sca .here sci sca .here
-    tci tca .here tci tca .here rfl rfl rfl rfl rfl rfl (entry flag) rfl (by decide) with
-    ⟨src,_,_,_,_,compiled⟩
-  exact ⟨src,compiled⟩
+    tci tca .here tci tca .here rfl rfl rfl rfl rfl rfl (entry flag) rfl (by decide))
 
 theorem prefix_typed (flag : Bool) : (ConditionalAssignments.code (C := C) tci tca .here tci tca .here).run (caller flag) =
     .ok ⟨((ConditionalAssignments.targetAfter (caller flag) tci flag .here tci tca .here).push

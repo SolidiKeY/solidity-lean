@@ -1,0 +1,12 @@
+{
+ "Solidity/Source/Preservation/EncodingVariantControls.lean:Solidity.Source.Preservation.EncodingVariantControls.StorageTimeout.encoder_completes": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Source/Preservation/EncodingVariantControls.lean:Solidity.Source.Preservation.EncodingVariantControls.StorageTimeout.encoder_timeout": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ]
+}

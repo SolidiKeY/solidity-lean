@@ -1,0 +1,473 @@
+{
+  "base": "381328f608032dd19c405373c2b265e83a969850",
+  "prototype_commit": "9e8e83ae97b466c01e9306fb8b2246ded6469462",
+  "status": "basis_approved_validation_pending",
+  "basis_authorization": "H299 A: operation bridge approved as pilot basis, conditional on exact export restoration, retained Nat accounting, Views comparison and ordinary validation; no family-reduction acceptance.",
+  "selected_family": "Solidity.Yul.Views.Packing",
+  "family_reduction_accepted": false,
+  "covered_views_family": null,
+  "verdict": "NO-GO",
+  "boundary": "Packing only; two word proofs rederived, every other declaration retained. Shared existing library imports are excluded symmetrically; this is not a full import-closure size. All new checker, soundness/completeness, bridge, program, algebra and facade sources count.",
+  "technique_boundary": "Restored word exports now consume checker-produced Artifact run equalities and decode their equal first stack words. BitVec identities and refinement lemmas remain necessary and counted. Each helper executes one read or write code on a mathematically prepared input, not a concatenated two-code run. H299 approves this operation bridge as the pilot basis; no broader family coverage or reduction acceptance is claimed.",
+  "before": {
+    "commit": "381328f608032dd19c405373c2b265e83a969850",
+    "path": "Solidity/Yul/Views/Packing.lean",
+    "sha256": "21d4b720606c3846eca903d5b15420bca34c1468969f8069aa7508e85e3988ef",
+    "physical_lines": 152,
+    "lexical_declarations": 23,
+    "theorems": [
+      {
+        "name": "Solidity.Yul.Views.split_join",
+        "signature": "theorem split_join (w b : Nat) : w % b + b * (w / b) = w"
+      },
+      {
+        "name": "Solidity.Yul.Views.Field.save_unchanged",
+        "signature": "theorem Field.save_unchanged (f : Field) (w : Nat) : f.save w \u27e8f.find w, Nat.mod_lt _ (Nat.pow_pos (by decide))\u27e9 = w"
+      },
+      {
+        "name": "Solidity.Yul.Views.Field.find_save",
+        "signature": "theorem Field.find_save (f : Field) (w : Nat) (v : f.Value) : f.find (f.save w v) = v.val"
+      },
+      {
+        "name": "Solidity.Yul.Views.Field.save_low",
+        "signature": "theorem Field.save_low (f : Field) (w : Nat) (v : f.Value) : f.save w v % f.base = w % f.base"
+      },
+      {
+        "name": "Solidity.Yul.Views.Field.save_high",
+        "signature": "theorem Field.save_high (f : Field) (w : Nat) (v : f.Value) : f.save w v / f.base / f.modulus = w / f.base / f.modulus"
+      },
+      {
+        "name": "Solidity.Yul.Views.Field.save_lt",
+        "signature": "theorem Field.save_lt (f : Field) (w : Nat) (hw : w < 256 ^ 32) (v : f.Value) : f.save w v < 256 ^ 32"
+      },
+      {
+        "name": "Solidity.Yul.Views.Field.find_saveWord",
+        "signature": "theorem Field.find_saveWord (f : Field) (w : Roadmap.Word) (v : f.Value) : f.findWord (f.saveWord w v) = v"
+      },
+      {
+        "name": "Solidity.Yul.Views.Field.saveWord_unchanged",
+        "signature": "theorem Field.saveWord_unchanged (f : Field) (w : Roadmap.Word) : f.saveWord w (f.findWord w) = w"
+      },
+      {
+        "name": "Solidity.Yul.Views.Field.find_save_above",
+        "signature": "theorem Field.find_save_above (f g : Field) (w : Nat) (v : f.Value) (h : f.offset + f.width \u2264 g.offset) : g.find (f.save w v) = g.find w"
+      },
+      {
+        "name": "Solidity.Yul.Views.Field.find_save_below",
+        "signature": "theorem Field.find_save_below (f g : Field) (w : Nat) (v : f.Value) (h : g.offset + g.width \u2264 f.offset) : g.find (f.save w v) = g.find w"
+      },
+      {
+        "name": "Solidity.Yul.Views.Field.find_save_disjoint",
+        "signature": "theorem Field.find_save_disjoint (f g : Field) (w : Nat) (v : f.Value) (h : f.offset + f.width \u2264 g.offset \u2228 g.offset + g.width \u2264 f.offset) : g.find (f.save w v) = g.find w"
+      }
+    ]
+  },
+  "after": {
+    "modules": [
+      {
+        "commit": "9e8e83ae97b466c01e9306fb8b2246ded6469462",
+        "path": "prototypes/TvYulBlock.lean",
+        "sha256": "fcf181983c37b315e3d1b0987a2885ab696399163bf0cc8c4a84c3a4a19a9da3",
+        "physical_lines": 508,
+        "lexical_declarations": 51,
+        "theorems": [
+          {
+            "name": "Solidity.Yul.Compilation.TvYulBlock.run_sound",
+            "signature": "theorem run_sound {block : Backend.Block} {input output : Scalar.Stack} (done : run block input = some output) : StructuredExec block input output"
+          },
+          {
+            "name": "Solidity.Yul.Compilation.TvYulBlock.run_complete",
+            "signature": "theorem run_complete {block : Backend.Block} {input output : Scalar.Stack} (executed : StructuredExec block input output) : loopFree block = true \u2192 run block input = some output"
+          },
+          {
+            "name": "Solidity.Yul.Compilation.TvYulBlock.run_iff",
+            "signature": "theorem run_iff {block : Backend.Block} {input output : Scalar.Stack} (free : loopFree block = true) : run block input = some output \u2194 StructuredExec block input output"
+          },
+          {
+            "name": "Solidity.Yul.Compilation.TvYulBlock.allWords_iff",
+            "signature": "theorem allWords_iff (predicate : Scalar.Word \u2192 Bool) : allWords predicate = true \u2194 \u2200 word, predicate word = true"
+          },
+          {
+            "name": "Solidity.Yul.Compilation.TvYulBlock.allFunctions_iff",
+            "signature": "theorem allFunctions_iff (n : Nat) (predicate : (Fin n \u2192 Scalar.Word) \u2192 Bool) : allFunctions n predicate = true \u2194 \u2200 values, predicate values = true"
+          },
+          {
+            "name": "Solidity.Yul.Compilation.TvYulBlock.allInputs_iff",
+            "signature": "theorem allInputs_iff {n : Nat} (predicate : Vector Scalar.Word n \u2192 Bool) : allInputs predicate = true \u2194 \u2200 values, predicate values = true"
+          },
+          {
+            "name": "Solidity.Yul.Compilation.TvYulBlock.sourceLocals_toWords",
+            "signature": "theorem sourceLocals_toWords {n : Nat} (values : Values n) : sourceLocals (toWords values) = values"
+          },
+          {
+            "name": "Solidity.Yul.Compilation.TvYulBlock.toWords_sourceLocals",
+            "signature": "theorem toWords_sourceLocals {n : Nat} (values : Vector Scalar.Word n) : toWords (sourceLocals values) = values"
+          },
+          {
+            "name": "Solidity.Yul.Compilation.TvYulBlock.sourceResult_iff",
+            "signature": "theorem sourceResult_iff {c : Control} {n : Nat} (fuel : Nat) (stmt : Stmt [] [] c n) (profile : StmtWordP stmt) (locals out : Vector Scalar.Word n) : sourceResult fuel stmt profile locals = some out \u2194 evalStmt fuel .nil True.intro stmt profile (sourceLocals locals) = some \u27e8sourceLocals out, .normal\u27e9"
+          },
+          {
+            "name": "Solidity.Yul.Compilation.TvYulBlock.check_iff",
+            "signature": "theorem check_iff {c : Control} {n : Nat} (fuel depth : Nat) (stmt : Stmt [] [] c n) (profile : StmtWordP stmt) (block : Backend.Block) : check fuel depth stmt profile block = true \u2194 loopFree block = true \u2227 \u2200 locals : Vector Scalar.Word n, \u2203 out : Vector Scalar.Word n, sourceResult fuel stmt profile locals = some out \u2227 \u2200 newer : Vector Scalar.Word depth, run block (newer.toList ++ locals.toList) = some (newer.toList ++ out.toList)"
+          },
+          {
+            "name": "Solidity.Yul.Compilation.TvYulBlock.check_sound",
+            "signature": "theorem check_sound {c : Control} {n : Nat} (fuel depth : Nat) (stmt : Stmt [] [] c n) (profile : StmtWordP stmt) (block : Backend.Block) (code : List Evm.Instr) (selected : WordControl.blockCode block = some code) (accepted : check fuel depth stmt profile block = true) : \u2203 artifact : Artifact depth stmt, artifact.code = code"
+          },
+          {
+            "name": "Solidity.Yul.Compilation.TvYulBlock.check_complete",
+            "signature": "theorem check_complete {c : Control} {n : Nat} (fuel depth : Nat) (stmt : Stmt [] [] c n) (profile : StmtWordP stmt) (block : Backend.Block) (code : List Evm.Instr) (selected : WordControl.blockCode block = some code) (free : loopFree block = true) (total : \u2200 locals : Vector Scalar.Word n, \u2203 out : Vector Scalar.Word n, evalStmt fuel .nil True.intro stmt profile (sourceLocals locals) = some \u27e8sourceLocals out, .normal\u27e9) (artifact : Artifact depth stmt) (sameCode : artifact.code = code) : check fuel depth stmt profile block = true"
+          },
+          {
+            "name": "Solidity.Yul.Compilation.TvYulBlock.check_correct",
+            "signature": "theorem check_correct {c : Control} {n : Nat} (fuel depth : Nat) (stmt : Stmt [] [] c n) (profile : StmtWordP stmt) (block : Backend.Block) (code : List Evm.Instr) (selected : WordControl.blockCode block = some code) (free : loopFree block = true) (total : \u2200 locals : Vector Scalar.Word n, \u2203 out : Vector Scalar.Word n, evalStmt fuel .nil True.intro stmt profile (sourceLocals locals) = some \u27e8sourceLocals out, .normal\u27e9) : check fuel depth stmt profile block = true \u2194 \u2203 artifact : Artifact depth stmt, artifact.code = code"
+          },
+          {
+            "name": "Solidity.Yul.Compilation.TvYulBlock.generated",
+            "signature": "theorem generated {c : Control} {n fuel : Nat} {stmt : Stmt [] [] c n} (compiled : NormalControl.Derivation fuel stmt) (depth : Nat) (block : Backend.Block) (emitted : compiled.emit depth = some block) : loopFree block = true \u2227 \u2200 (locals : Vector Scalar.Word n) (newer : Vector Scalar.Word depth), StructuredExec block (newer.toList ++ locals.toList) (newer.toList ++ (compiled.update locals).toList)"
+          },
+          {
+            "name": "Solidity.Yul.Compilation.TvYulBlock.generated_check",
+            "signature": "theorem generated_check {c : Control} {n fuel : Nat} {stmt : Stmt [] [] c n} (compiled : NormalControl.Derivation fuel stmt) (depth : Nat) (block : Backend.Block) (emitted : compiled.emit depth = some block) : check fuel depth stmt compiled.profile block = true"
+          },
+          {
+            "name": "Solidity.Yul.Compilation.TvYulBlock.machine",
+            "signature": "theorem machine {c n fuel} {stmt : Stmt [] [] c n} (compiled : NormalControl.Derivation fuel stmt) (depth : Nat) (block : Backend.Block) (code : List Evm.Instr) (emitted : compiled.emit depth = some block) (translated : WordControl.blockCode block = some code) (locals : Vector Scalar.Word n) (newer : Vector Scalar.Word depth) (m : Evm.Machine) (caller : List Evm.Word) : Evm.run code {m with stack := (newer.toList ++ locals.toList).map coreWord ++ caller} = .ok {m with stack := (newer.toList ++ (compiled.update locals).toList).map coreWord ++ caller} 0"
+          },
+          {
+            "name": "Solidity.Yul.Compilation.TvYulBlock.source_machine",
+            "signature": "theorem source_machine {c n fuel} (stmt : Stmt [] [] c n) (compiled : NormalControl.Derivation fuel stmt) (_visited : NormalControl.compile fuel stmt = some compiled) (depth : Nat) (block : Backend.Block) (code : List Evm.Instr) (emitted : compiled.emit depth = some block) (translated : WordControl.blockCode block = some code) (locals : Vector Scalar.Word n) (newer : Vector Scalar.Word depth) (m : Evm.Machine) (caller : List Evm.Word) : (evalStmt fuel .nil True.intro stmt compiled.profile (ProducerExpressions.sourceLocals locals) = some \u27e8ProducerExpressions.sourceLocals (compiled.update locals),.normal\u27e9) \u2227 Evm.run code {m with stack := (newer.toList++locals.toList).map coreWord++caller} = .ok {m with stack := (newer.toList++(compiled.update locals).toList).map coreWord++caller} 0"
+          },
+          {
+            "name": "Solidity.Yul.Compilation.TvYulBlock.Controls.actual_check",
+            "signature": "theorem actual_check : check 4 0 statement compiled.profile block = true"
+          },
+          {
+            "name": "Solidity.Yul.Compilation.TvYulBlock.Controls.equivalent_output",
+            "signature": "theorem equivalent_output : check 4 0 statement compiled.profile alternative = true"
+          },
+          {
+            "name": "Solidity.Yul.Compilation.TvYulBlock.Controls.different_output",
+            "signature": "theorem different_output : alternativeCode.length \u2260 code.length"
+          },
+          {
+            "name": "Solidity.Yul.Compilation.TvYulBlock.Controls.mutant_rejected",
+            "signature": "theorem mutant_rejected : check 4 0 statement compiled.profile mutant = false"
+          },
+          {
+            "name": "Solidity.Yul.Compilation.TvYulBlock.Controls.mutant_has_no_artifact",
+            "signature": "theorem mutant_has_no_artifact : \u00ac \u2203 artifact : Artifact 0 statement, artifact.code = mutantCode"
+          },
+          {
+            "name": "Solidity.Yul.Compilation.TvYulBlock.Controls.horizon_refused",
+            "signature": "theorem horizon_refused : check 0 0 statement compiled.profile block = false"
+          },
+          {
+            "name": "Solidity.Yul.Compilation.TvYulBlock.Controls.loop_refused",
+            "signature": "theorem loop_refused : check 4 0 statement compiled.profile (.loop [] (.code [])) = false"
+          },
+          {
+            "name": "Solidity.Yul.Compilation.TvYulBlock.validate_some",
+            "signature": "theorem validate_some {c : Control} {n : Nat} (fuel depth : Nat) (stmt : Stmt [] [] c n) (profile : StmtWordP stmt) (block : Backend.Block) (code : List Evm.Instr) (selected : WordControl.blockCode block = some code) (accepted : check fuel depth stmt profile block = true) : validate fuel depth stmt profile block = some (checkedArtifact fuel depth stmt profile block code selected accepted)"
+          },
+          {
+            "name": "Solidity.Yul.Compilation.TvYulBlock.validate_complete",
+            "signature": "theorem validate_complete {c : Control} {n fuel : Nat} {stmt : Stmt [] [] c n} (compiled : NormalControl.Derivation fuel stmt) (depth : Nat) (block : Backend.Block) (code : List Evm.Instr) (emitted : compiled.emit depth = some block) (selected : WordControl.blockCode block = some code) : (validate fuel depth stmt compiled.profile block).isSome = true"
+          },
+          {
+            "name": "Solidity.Yul.Compilation.TvYulBlock.validate_code",
+            "signature": "theorem validate_code {c : Control} {n : Nat} (fuel depth : Nat) (stmt : Stmt [] [] c n) (profile : StmtWordP stmt) (block : Backend.Block) (artifact : Artifact depth stmt) (returned : validate fuel depth stmt profile block = some artifact) : WordControl.blockCode block = some artifact.code"
+          },
+          {
+            "name": "Solidity.Yul.Compilation.TvYulBlock.ProducedControls.accepts",
+            "signature": "theorem accepts : (validate 4 0 Controls.statement Controls.compiled.profile Controls.block).isSome = true"
+          },
+          {
+            "name": "Solidity.Yul.Compilation.TvYulBlock.ProducedControls.accepts_alternative",
+            "signature": "theorem accepts_alternative : (validate 4 0 Controls.statement Controls.compiled.profile Controls.alternative).isSome = true"
+          },
+          {
+            "name": "Solidity.Yul.Compilation.TvYulBlock.ProducedControls.rejects_mutant",
+            "signature": "theorem rejects_mutant : (validate 4 0 Controls.statement Controls.compiled.profile Controls.mutant).isSome = false"
+          },
+          {
+            "name": "Solidity.Yul.Compilation.TvYulBlock.ProducedControls.rejects_loop",
+            "signature": "theorem rejects_loop : (validate 4 0 Controls.statement Controls.compiled.profile (.loop [] (.code []))).isSome = false"
+          },
+          {
+            "name": "Solidity.Yul.Compilation.TvYulBlock.ProducedControls.selector_refusal",
+            "signature": "theorem selector_refusal : (validate 1 0 oneLocal True.intro (.code [.op .SSTORE])).isSome = false"
+          }
+        ]
+      },
+      {
+        "commit": "9e8e83ae97b466c01e9306fb8b2246ded6469462",
+        "path": "prototypes/ViewsPackingBase.lean",
+        "sha256": "32c0a964af1e360d4308c91cf18f53f90474bfde13b4664157af524ea60ad7ba",
+        "physical_lines": 142,
+        "lexical_declarations": 21,
+        "theorems": [
+          {
+            "name": "Solidity.Yul.Views.split_join",
+            "signature": "theorem split_join (w b : Nat) : w % b + b * (w / b) = w"
+          },
+          {
+            "name": "Solidity.Yul.Views.Field.save_unchanged",
+            "signature": "theorem Field.save_unchanged (f : Field) (w : Nat) : f.save w \u27e8f.find w, Nat.mod_lt _ (Nat.pow_pos (by decide))\u27e9 = w"
+          },
+          {
+            "name": "Solidity.Yul.Views.Field.find_save",
+            "signature": "theorem Field.find_save (f : Field) (w : Nat) (v : f.Value) : f.find (f.save w v) = v.val"
+          },
+          {
+            "name": "Solidity.Yul.Views.Field.save_low",
+            "signature": "theorem Field.save_low (f : Field) (w : Nat) (v : f.Value) : f.save w v % f.base = w % f.base"
+          },
+          {
+            "name": "Solidity.Yul.Views.Field.save_high",
+            "signature": "theorem Field.save_high (f : Field) (w : Nat) (v : f.Value) : f.save w v / f.base / f.modulus = w / f.base / f.modulus"
+          },
+          {
+            "name": "Solidity.Yul.Views.Field.save_lt",
+            "signature": "theorem Field.save_lt (f : Field) (w : Nat) (hw : w < 256 ^ 32) (v : f.Value) : f.save w v < 256 ^ 32"
+          },
+          {
+            "name": "Solidity.Yul.Views.Field.find_save_above",
+            "signature": "theorem Field.find_save_above (f g : Field) (w : Nat) (v : f.Value) (h : f.offset + f.width \u2264 g.offset) : g.find (f.save w v) = g.find w"
+          },
+          {
+            "name": "Solidity.Yul.Views.Field.find_save_below",
+            "signature": "theorem Field.find_save_below (f g : Field) (w : Nat) (v : f.Value) (h : g.offset + g.width \u2264 f.offset) : g.find (f.save w v) = g.find w"
+          },
+          {
+            "name": "Solidity.Yul.Views.Field.find_save_disjoint",
+            "signature": "theorem Field.find_save_disjoint (f g : Field) (w : Nat) (v : f.Value) (h : f.offset + f.width \u2264 g.offset \u2228 g.offset + g.width \u2264 f.offset) : g.find (f.save w v) = g.find w"
+          }
+        ]
+      },
+      {
+        "commit": "9e8e83ae97b466c01e9306fb8b2246ded6469462",
+        "path": "prototypes/ViewsPackingBridge.lean",
+        "sha256": "5e29944b1b44bf77e4416413198bf63282cd6d130bdd36c96c08b0865ab9bb90",
+        "physical_lines": 87,
+        "lexical_declarations": 16,
+        "theorems": [
+          {
+            "name": "Solidity.Yul.Compilation.TvYulViews.base_eq",
+            "signature": "theorem base_eq (f : Field) : f.base = 2^(8*f.offset)"
+          },
+          {
+            "name": "Solidity.Yul.Compilation.TvYulViews.modulus_eq",
+            "signature": "theorem modulus_eq (f : Field) : f.modulus = 2^(8*f.width)"
+          },
+          {
+            "name": "Solidity.Yul.Compilation.TvYulViews.lowMask_bit",
+            "signature": "theorem lowMask_bit (f : Field) (i : Nat) : (lowMask f).getLsbD i = (decide (i < 256) && decide (i < 8*f.width))"
+          },
+          {
+            "name": "Solidity.Yul.Compilation.TvYulViews.writeField_bit",
+            "signature": "theorem writeField_bit (f : Field) (w payload : BitVec 256) (i : Nat) (inside : i < 256) : (writeField f w payload).getLsbD i = if 8*f.offset \u2264 i \u2227 i < 8*(f.offset+f.width) then payload.getLsbD (i-8*f.offset) else w.getLsbD i"
+          },
+          {
+            "name": "Solidity.Yul.Compilation.TvYulViews.save_bit",
+            "signature": "theorem save_bit (f : Field) (w : Nat) (v : f.Value) (i : Nat) : Nat.testBit (f.save w v) i = if 8*f.offset \u2264 i \u2227 i < 8*(f.offset+f.width) then Nat.testBit v.val (i-8*f.offset) else Nat.testBit w i"
+          },
+          {
+            "name": "Solidity.Yul.Compilation.TvYulViews.write_eq",
+            "signature": "theorem write_eq (f : Field) (w : Roadmap.Word) (v : f.Value) : writeField f (BitVec.ofFin w) (BitVec.ofNat 256 v.val) = BitVec.ofFin (f.saveWord w v)"
+          },
+          {
+            "name": "Solidity.Yul.Compilation.TvYulViews.read_eq",
+            "signature": "theorem read_eq (f : Field) (w : Roadmap.Word) : readField f (BitVec.ofFin w) = BitVec.ofNat 256 (f.findWord w).val"
+          },
+          {
+            "name": "Solidity.Yul.Compilation.TvYulViews.full_width_write",
+            "signature": "theorem full_width_write (w payload : BitVec 256) : writeField fullField w payload = payload"
+          },
+          {
+            "name": "Solidity.Yul.Compilation.TvYulViews.dirty_payload_clips",
+            "signature": "theorem dirty_payload_clips : writeField byteField 0x1234 0x101 = 0x1201"
+          },
+          {
+            "name": "Solidity.Yul.Compilation.TvYulViews.high_offset_write",
+            "signature": "theorem high_offset_write : writeField highField (BitVec.ofNat 256 (2^200+257)) 255 = BitVec.ofNat 256 (255*2^248+2^200+257)"
+          }
+        ]
+      },
+      {
+        "commit": "9e8e83ae97b466c01e9306fb8b2246ded6469462",
+        "path": "prototypes/ViewsPackingProgram.lean",
+        "sha256": "6e7f99d2bd8750ae7ca06c92774835f9bd49b9386f0323ef8b61d0628312e361",
+        "physical_lines": 148,
+        "lexical_declarations": 27,
+        "theorems": [
+          {
+            "name": "Solidity.Yul.Compilation.TvYulViews.Program.shift_value",
+            "signature": "theorem shift_value (f : Field) : (BitVec.ofNat 256 (8*f.offset)).toNat = 8*f.offset"
+          },
+          {
+            "name": "Solidity.Yul.Compilation.TvYulViews.Program.write_update",
+            "signature": "theorem write_update (f : Field) (a b : Scalar.Word) : (compiledWrite f).update #v[a,b] = #v[writeField f a b,b]"
+          },
+          {
+            "name": "Solidity.Yul.Compilation.TvYulViews.Program.read_update",
+            "signature": "theorem read_update (f : Field) (a b : Scalar.Word) : (compiledRead f).update #v[a,b] = #v[readField f a,b]"
+          },
+          {
+            "name": "Solidity.Yul.Compilation.TvYulViews.Program.write_source",
+            "signature": "theorem write_source (f : Field) (w : Roadmap.Word) (v : f.Value) : evalStmt 12 .nil True.intro (writeStatement f) (writeArtifact f).profile (sourceLocals #v[BitVec.ofFin w, BitVec.ofNat 256 v.val]) = some \u27e8sourceLocals #v[BitVec.ofFin (f.saveWord w v), BitVec.ofNat 256 v.val], .normal\u27e9"
+          },
+          {
+            "name": "Solidity.Yul.Compilation.TvYulViews.Program.read_source",
+            "signature": "theorem read_source (f : Field) (w : Roadmap.Word) (other : Scalar.Word) : evalStmt 12 .nil True.intro (readStatement f) (readArtifact f).profile (sourceLocals #v[BitVec.ofFin w, other]) = some \u27e8sourceLocals #v[BitVec.ofNat 256 (f.findWord w).val, other], .normal\u27e9"
+          },
+          {
+            "name": "Solidity.Yul.Compilation.TvYulViews.Program.write_model",
+            "signature": "theorem write_model (f : Field) (w : Roadmap.Word) (v : f.Value) (m : Evm.Machine) (caller : List Evm.Word) : Evm.run (writeArtifact f).code {m with stack := [BitVec.ofFin w, BitVec.ofNat 256 v.val].map coreWord ++ caller} = .ok {m with stack := [BitVec.ofFin (f.saveWord w v), BitVec.ofNat 256 v.val].map coreWord ++ caller} 0"
+          },
+          {
+            "name": "Solidity.Yul.Compilation.TvYulViews.Program.read_model",
+            "signature": "theorem read_model (f : Field) (w : Roadmap.Word) (other : Scalar.Word) (m : Evm.Machine) (caller : List Evm.Word) : Evm.run (readArtifact f).code {m with stack := [BitVec.ofFin w, other].map coreWord ++ caller} = .ok {m with stack := [BitVec.ofNat 256 (f.findWord w).val, other].map coreWord ++ caller} 0"
+          },
+          {
+            "name": "Solidity.Yul.Compilation.TvYulViews.Program.write_backward",
+            "signature": "theorem write_backward (f : Field) (w : Roadmap.Word) (v : f.Value) (m final : Evm.Machine) (caller : List Evm.Word) (skip : Nat) (ran : Evm.run (writeArtifact f).code {m with stack := [BitVec.ofFin w, BitVec.ofNat 256 v.val].map coreWord ++ caller} = .ok final skip) : (evalStmt 12 .nil True.intro (writeStatement f) (writeArtifact f).profile (sourceLocals #v[BitVec.ofFin w, BitVec.ofNat 256 v.val]) = some \u27e8sourceLocals #v[BitVec.ofFin (f.saveWord w v), BitVec.ofNat 256 v.val], .normal\u27e9) \u2227 skip = 0 \u2227 final = {m with stack := [BitVec.ofFin (f.saveWord w v), BitVec.ofNat 256 v.val].map coreWord ++ caller}"
+          },
+          {
+            "name": "Solidity.Yul.Compilation.TvYulViews.Program.read_backward",
+            "signature": "theorem read_backward (f : Field) (w : Roadmap.Word) (other : Scalar.Word) (m final : Evm.Machine) (caller : List Evm.Word) (skip : Nat) (ran : Evm.run (readArtifact f).code {m with stack := [BitVec.ofFin w, other].map coreWord ++ caller} = .ok final skip) : (evalStmt 12 .nil True.intro (readStatement f) (readArtifact f).profile (sourceLocals #v[BitVec.ofFin w, other]) = some \u27e8sourceLocals #v[BitVec.ofNat 256 (f.findWord w).val, other], .normal\u27e9) \u2227 skip = 0 \u2227 final = {m with stack := [BitVec.ofNat 256 (f.findWord w).val, other].map coreWord ++ caller}"
+          },
+          {
+            "name": "Solidity.Yul.Compilation.TvYulViews.Program.value_encoding",
+            "signature": "theorem value_encoding (f : Field) (v : f.Value) : (BitVec.ofNat 256 v.val).toNat = v.val"
+          }
+        ]
+      },
+      {
+        "commit": "9e8e83ae97b466c01e9306fb8b2246ded6469462",
+        "path": "prototypes/ViewsPackingLaws.lean",
+        "sha256": "afc27d5338f4c421a0f0c81de0e8c305dd2957dff23251bfb71f775c90c50b28",
+        "physical_lines": 96,
+        "lexical_declarations": 6,
+        "theorems": [
+          {
+            "name": "Solidity.Yul.Compilation.TvYulViews.read_write",
+            "signature": "theorem read_write (f : Field) (w : BitVec 256) (v : f.Value) : readField f (writeField f w (BitVec.ofNat 256 v.val)) = BitVec.ofNat 256 v.val"
+          },
+          {
+            "name": "Solidity.Yul.Compilation.TvYulViews.write_read",
+            "signature": "theorem write_read (f : Field) (w : BitVec 256) : writeField f w (readField f w) = w"
+          },
+          {
+            "name": "Solidity.Yul.Compilation.TvYulViews.Program.read_after_write_run",
+            "signature": "theorem read_after_write_run (f : Field) (w : Roadmap.Word) (v : f.Value) (m : Evm.Machine) (caller : List Evm.Word) : Evm.run (readArtifact f).code {m with stack := [BitVec.ofFin (f.saveWord w v), BitVec.ofNat 256 v.val].map coreWord ++ caller} = .ok {m with stack := [BitVec.ofNat 256 v.val, BitVec.ofNat 256 v.val].map coreWord ++ caller} 0"
+          },
+          {
+            "name": "Solidity.Yul.Compilation.TvYulViews.Program.write_after_read_run",
+            "signature": "theorem write_after_read_run (f : Field) (w : Roadmap.Word) (m : Evm.Machine) (caller : List Evm.Word) : Evm.run (writeArtifact f).code {m with stack := [BitVec.ofFin w, BitVec.ofNat 256 (f.findWord w).val].map coreWord ++ caller} = .ok {m with stack := [BitVec.ofFin w, BitVec.ofNat 256 (f.findWord w).val].map coreWord ++ caller} 0"
+          },
+          {
+            "name": "Solidity.Yul.Views.Field.find_saveWord",
+            "signature": "theorem Field.find_saveWord (f : Field) (w : Roadmap.Word) (v : f.Value) : f.findWord (f.saveWord w v) = v"
+          },
+          {
+            "name": "Solidity.Yul.Views.Field.saveWord_unchanged",
+            "signature": "theorem Field.saveWord_unchanged (f : Field) (w : Roadmap.Word) : f.saveWord w (f.findWord w) = w"
+          }
+        ]
+      },
+      {
+        "commit": "9e8e83ae97b466c01e9306fb8b2246ded6469462",
+        "path": "prototypes/shadow/Solidity/Yul/Views/Packing.lean",
+        "sha256": "28f0dfa6fdd0b8bef7e9b0e07ca5aaefa5628c1892fe6cb3c79c1f64065ce2c0",
+        "physical_lines": 1,
+        "lexical_declarations": 0,
+        "theorems": []
+      }
+    ],
+    "physical_lines": 982,
+    "lexical_declarations": 121
+  },
+  "statements_preserved": [
+    "Solidity.Yul.Views.split_join",
+    "Solidity.Yul.Views.Field.save_unchanged",
+    "Solidity.Yul.Views.Field.find_save",
+    "Solidity.Yul.Views.Field.save_low",
+    "Solidity.Yul.Views.Field.save_high",
+    "Solidity.Yul.Views.Field.save_lt",
+    "Solidity.Yul.Views.Field.find_saveWord",
+    "Solidity.Yul.Views.Field.saveWord_unchanged",
+    "Solidity.Yul.Views.Field.find_save_above",
+    "Solidity.Yul.Views.Field.find_save_below",
+    "Solidity.Yul.Views.Field.find_save_disjoint"
+  ],
+  "signatures_exact": true,
+  "consumers_unchanged": [
+    {
+      "commit": "381328f608032dd19c405373c2b265e83a969850",
+      "path": "Solidity/Yul/Views/Widths.lean",
+      "sha256": "caf30ee58ec49eb329a4ef72d5a560204130e2d33f89eb2177f3088d120d0e8a",
+      "physical_lines": 32,
+      "lexical_declarations": 2,
+      "theorems": [
+        {
+          "name": "Solidity.Yul.Views.StorageWidth.bounds",
+          "signature": "theorem StorageWidth.bounds {D : Source.Layout} {\u03c4 : Source.STy} {n : Nat} (h : StorageWidth D \u03c4 n) : 0 < n \u2227 n \u2264 32"
+        }
+      ]
+    },
+    {
+      "commit": "381328f608032dd19c405373c2b265e83a969850",
+      "path": "Solidity/Yul/Views/Regions.lean",
+      "sha256": "7784657467293d4b77f90f2b2635a8e8e2a0b0139dabcdd0490b63f1bfa3dcfc",
+      "physical_lines": 84,
+      "lexical_declarations": 9,
+      "theorems": [
+        {
+          "name": "Solidity.Yul.Views.Regions.encode_at",
+          "signature": "theorem Regions.encode_at {P : Type} (r : Regions P) {D : Source.Layout} {\u03c4 : P \u2192 Source.STy} (c : (p : P) \u2192 ByteCodec D (\u03c4 p) (r.width p)) (v : (p : P) \u2192 Source.Val D (\u03c4 p)) (res : r.Residual) (p : P) (i : Fin (r.width p)) : r.encode c v res (r.address p i) = (c p).encode (v p) i"
+        },
+        {
+          "name": "Solidity.Yul.Views.Regions.decode_encode",
+          "signature": "theorem Regions.decode_encode {P : Type} (r : Regions P) {D : Source.Layout} {\u03c4 : P \u2192 Source.STy} (c : (p : P) \u2192 ByteCodec D (\u03c4 p) (r.width p)) (v : (p : P) \u2192 Source.Val D (\u03c4 p)) (res : r.Residual) (p : P) : (c p).decode (fun i => r.encode c v res (r.address p i)) = some (v p)"
+        },
+        {
+          "name": "Solidity.Yul.Views.Regions.encode_residual",
+          "signature": "theorem Regions.encode_residual {P : Type} (r : Regions P) {D : Source.Layout} {\u03c4 : P \u2192 Source.STy} (c : (p : P) \u2192 ByteCodec D (\u03c4 p) (r.width p)) (v : (p : P) \u2192 Source.Val D (\u03c4 p)) (res : r.Residual) (a : {a // r.owner a = none}) : r.encode c v res a.val = res a"
+        },
+        {
+          "name": "Solidity.Yul.Views.Regions.unchanged",
+          "signature": "theorem Regions.unchanged {P : Type} (r : Regions P) {D : Source.Layout} {\u03c4 : P \u2192 Source.STy} (c : (p : P) \u2192 ByteCodec D (\u03c4 p) (r.width p)) (m : ByteView) (v : (p : P) \u2192 Source.Val D (\u03c4 p)) (canonical : \u2200 p i, (c p).encode (v p) i = m (r.address p i)) : r.encode c v (fun a => m a.val) = m"
+        },
+        {
+          "name": "Solidity.Yul.Views.Regions.disjoint",
+          "signature": "theorem Regions.disjoint {P : Type} (r : Regions P) {p q : P} {i : Fin (r.width p)} {j : Fin (r.width q)} (h : r.address p i = r.address q j) : (\u27e8p, i\u27e9 : Sigma fun p => Fin (r.width p)) = \u27e8q, j\u27e9"
+        }
+      ]
+    }
+  ],
+  "implemented_footprint": {
+    "mapped_functions": [
+      "Solidity.Yul.Views.Field.findWord",
+      "Solidity.Yul.Views.Field.saveWord"
+    ],
+    "transferred_exports": [
+      "Solidity.Yul.Views.Field.find_saveWord",
+      "Solidity.Yul.Views.Field.saveWord_unchanged"
+    ],
+    "retained_theorems": [
+      "Solidity.Yul.Views.split_join",
+      "Solidity.Yul.Views.Field.save_unchanged",
+      "Solidity.Yul.Views.Field.find_save",
+      "Solidity.Yul.Views.Field.save_low",
+      "Solidity.Yul.Views.Field.save_high",
+      "Solidity.Yul.Views.Field.save_lt",
+      "Solidity.Yul.Views.Field.find_save_above",
+      "Solidity.Yul.Views.Field.find_save_below",
+      "Solidity.Yul.Views.Field.find_save_disjoint"
+    ],
+    "boundary": "Packing is the sole family with explicit operation/Artifact mappings in this prototype. Widths/Regions are compatibility consumers. No mappings for typed storage/world writeback or arbitrary heterogeneous aggregate/byte geometry are implemented; their existing proofs are not deleted or given word-sized premises. This is the sole explicitly mapped family in this prototype, not a global impossibility result or family-reduction acceptance."
+  },
+  "largest_covered_family": "Packing is the sole existing Views family with explicit mappings in this implemented operation bridge. Its two word exports are transferred; nine other theorem exports are retained. No broader typed-state or aggregate coverage or family-reduction acceptance."
+}

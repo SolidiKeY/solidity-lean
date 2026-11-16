@@ -1,0 +1,5 @@
+context,group,source_constants,without_native_source_range,native_range_lines
+SolidityLean,.,6,4,27
+SolkeyCheck,.,13,4,70
+SolkeyCheck,Solidity,99,47,88
+SolkeyCheck,Solidity/SortCheck,157,69,480

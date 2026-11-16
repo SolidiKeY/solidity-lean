@@ -1,0 +1,46 @@
+/-! Guards inhabiting literal-return views with mismatched indexed contexts or
+an unrelated Boolean statement, and replacing actual return compiler selection
+with a generic structure count. Uses the existing indexed Source statement/view
+and emitter; this is narrow view/selection evidence, not whole Source/EVM,
+physical, gas/fork or G01 operational correspondence. -/
+open Solidity Solidity.Backend
+
+def boolReturnEnv : Source.Env := ⟨[]⟩
+def boolReturnStmt (value : Bool) : Source.RStmt boolReturnEnv [.bool] false .body [.bool] [.bool] :=
+  FailurePaths.BooleanReturn.statement value
+
+def boolReturnView (value : Bool) : FailurePaths.BooleanReturn.View (boolReturnStmt value) :=
+  ⟨value,rfl,HEq.rfl⟩
+
+theorem bool_return_recognized (value : Bool) :
+    (FailurePaths.BooleanReturn.view (boolReturnStmt value)).map (fun selected => selected.value)=some value := rfl
+
+theorem bool_return_compiled (value : Bool) (offset : Nat) :
+    FailurePaths.BooleanReturn.compile offset (boolReturnStmt value)=
+      some (Failure.emit offset (.returned (FailurePaths.BooleanReturn.payload value))) := rfl
+
+theorem bool_return_wrong_statement_refused : ¬HEq (boolReturnStmt false) (boolReturnStmt true) := by
+  intro same
+  have syntaxEq : boolReturnStmt false=boolReturnStmt true := eq_of_heq same
+  let observe (stmt : Source.RStmt boolReturnEnv [.bool] false .body [.bool] [.bool]) : Option Bool :=
+    (FailurePaths.BooleanReturn.view stmt).map (fun selected : FailurePaths.BooleanReturn.View stmt => selected.value)
+  have observed : observe (boolReturnStmt false)=observe (boolReturnStmt true) := congrArg observe syntaxEq
+  change (some false : Option Bool)=some true at observed
+  cases observed
+
+theorem bool_return_context_mismatch_refused {Γ Δ : Source.RCtx}
+    (stmt : Source.RStmt boolReturnEnv [.bool] false .body Γ Δ) (different : Δ≠Γ) :
+    ¬Nonempty (FailurePaths.BooleanReturn.View stmt) := by
+  intro witnessed
+  rcases witnessed with ⟨selected⟩
+  exact different selected.contexts
+
+theorem bool_return_payload_length (value : Bool) : (FailurePaths.BooleanReturn.payload value).length=32 := by
+  simpa only [FailurePaths.BooleanReturn.payload,List.length_cons,List.length_nil,Nat.mul_one] using
+    Solidity.Lowering.V08.BoolErrorLowering.encoded_length [value]
+
+#print axioms bool_return_recognized
+#print axioms bool_return_compiled
+#print axioms bool_return_wrong_statement_refused
+#print axioms bool_return_context_mismatch_refused
+#print axioms bool_return_payload_length

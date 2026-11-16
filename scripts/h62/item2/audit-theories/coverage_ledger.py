@@ -10,6 +10,7 @@ from pathlib import Path
 from census import ROOT,BASE
 import verify_census as verification
 from pending_impossibility import PENDING
+from audit_dispositions import HISTORY_POLICY,ACCEPTED,accepted_fields
 
 def sha(path):return hashlib.sha256(path.read_bytes()).hexdigest()
 
@@ -34,7 +35,7 @@ def main():
     file_status={}
     for file in {r["file"]for r in originals}:
         frozen=subprocess.check_output(["git","show",BASE+":"+file],cwd=ROOT)
-        file_status[file]="byte-unchanged" if (ROOT/file).read_bytes()==frozen else "changed-frozen-file-version-pending"
+        file_status[file]="byte-unchanged" if (ROOT/file).read_bytes()==frozen else "changed-rebased-file-original-history-separate"
     rows=[];gaps=[]
     for oldrow in originals:
         row={k:oldrow[k]for k in ("source_name","file","line","visibility","source_header","elaborated_type_sha256","documented_producing_lane","proving_owner")}
@@ -47,6 +48,7 @@ def main():
             row["status"]="H69-intentional-impossibility-certificate-present"
             row["current_certificate"]=verification.certificate(proof/"serial",*verification.IMPOSSIBLE[name])
             row["intentional_reason"]=verification.INTENTIONAL_REASONS[name]
+            if name in ACCEPTED:row.update(**accepted_fields(name))
         elif oldrow["status"]=="no-inputs":row["status"]="historical-empty-input-telescope"
         else:
             row["status"]="private-witness-pending" if row["visibility"]=="private"else "public-witness-pending"
@@ -69,7 +71,7 @@ def main():
       "original_explicit_declarations":rows,"original_generated_candidates_pending":len(generated),
       "current_generated_inventory":"Not refreshed; original986 candidates retained without exclusion.",
       "remaining_original_records":len(gaps),"pending_impossibility_questions":[dict(theorem=n,question=i["question"],accepted_H69=False)for n,i in PENDING.items()],"changed_frozen_files":sorted(f for f,s in file_status.items()if s!="byte-unchanged"),
-      "version_fidelity_boundary":"Current joint proof receipts and historical signature accounting are separate. No equivalence claim for changed files or definitions; original full census remains fail-closed pending Q-FROZEN-REBASE.","full_assignment_acceptance":False}
+      "fidelity_disposition":HISTORY_POLICY,"version_fidelity_boundary":"Q-FROZEN-REBASE resolved by original-history audit. Original frozen obligations and current rebased coverage remain separate; no definition-equivalence claim or auditor-created versioned pairs.","full_assignment_acceptance":False}
     out.mkdir(parents=True,exist_ok=True)
     (out/"original-coverage-ledger.json").write_text(json.dumps(payload,indent=2)+"\n")
     (out/"remaining-original-records.json").write_text(json.dumps(gaps,indent=2)+"\n")

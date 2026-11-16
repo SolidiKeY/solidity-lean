@@ -122,12 +122,8 @@ theorem nonword_retained : completed.state.1.get memoryRef.index = (LocalValues.
   exact kept.trans CatchFunctionPhysical.nonword_retained
 
 theorem completed_unique (fuel : Nat) (result : LocalBlockOutcome ctx ⟨false,false⟩)
-    (done : continued [0xde,0xad] fuel = some result) : result=completed := by
-  rcases Nat.le_total fuel 32 with lower | upper
-  · have stable := runLocalBlock_stable ctx (continuationCode [0xde,0xad]) (continuationPolicy [0xde,0xad]) _ lower done
-    exact Option.some.inj (stable.symm.trans (Option.some_get continues_nonempty).symm)
-  · have stable := runLocalBlock_stable ctx (continuationCode [0xde,0xad]) (continuationPolicy [0xde,0xad]) _ upper (Option.some_get continues_nonempty).symm
-    exact Option.some.inj (done.symm.trans stable)
+    (done : continued [0xde,0xad] fuel = some result) : result=completed :=
+  LocalBlockLogic.completed_unique (continuationCode [0xde,0xad]) (continuationPolicy [0xde,0xad]) _ done (Option.some_get continues_nonempty).symm
 
 theorem continuation_raw (data : List UInt8) (fuel : Nat) (state : LocalState originEnv ctx.tys)
     (result : LocalBlockOutcome ctx ⟨false,false⟩)

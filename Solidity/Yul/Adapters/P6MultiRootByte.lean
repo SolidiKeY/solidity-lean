@@ -15,7 +15,6 @@ theorem fits {E Γ} (F : Source.Fr) (horizon : Nat) (requests : List Request)
     (supported : ∀ a τ d,s.2.heap.get a=some ⟨τ,d⟩ → InventoryTypeSupported E τ)
     (image : FrameMem C Δ) (room : p.free.val≤image.highWaterWords*32) :
     MemoryAgreement.Fits image (coupled F horizon p.address requests s (frameBytes image)).2 := by
-  first | (simp only;done) | decide | omega | rfl | skip
   intro k high
   rw [MultiRootByteBoundary.above_free F horizon requests s p supported (frameBytes image) k (by omega)]
   exact MemoryAgreement.fits_view image k high
@@ -58,7 +57,6 @@ theorem sound {E Γ} {origin : Source.Heap E.layout} (H : Source.HeapTy)
       ∃ history : RetainedAllocation allocated q,
         enumeratedMemoryWriteback out.1.2 allocated q history (frameBytes out.2)=.ok (some (.ok (),out.1.2)) ∧
         ReservedOK (frameBytes out.2) q.free := by
-  first | (simp only;done) | decide | omega | rfl | skip
   have actual := MultiRootByteWrites.sound H allocated F horizon requests s p prior ok supported
     (frameBytes image) oldReads reserved
   dsimp only

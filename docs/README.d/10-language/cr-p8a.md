@@ -1,0 +1,1 @@
+| [feature-work/cr-canonical-reader-contract.md](feature-work/cr-canonical-reader-contract.md) | CR canonical-reader migration contract under H68: pinned uint8 support witness, H68 fixture migration dry run and existing-route row comparison, owner tickets. |

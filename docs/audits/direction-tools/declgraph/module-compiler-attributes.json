@@ -1,0 +1,1759 @@
+[
+  {
+    "implementation": "Solidity.CallFunctionSearch.subtermsM",
+    "implementation_module": "Solidity.Calculus.CallFunctionSearch",
+    "module": "Solidity.Calculus.CallFunctionSearch",
+    "name": "Solidity.CallFunctionSearch.subterms",
+    "record": "implemented_by"
+  },
+  {
+    "implementation": "Solidity.CallFunctionTransform.transformM",
+    "implementation_module": "Solidity.Calculus.CallFunctionTransform",
+    "module": "Solidity.Calculus.CallFunctionTransform",
+    "name": "Solidity.CallFunctionTransform.transform",
+    "record": "implemented_by"
+  },
+  {
+    "implementation": "Solidity.Prog.hasCallM",
+    "implementation_module": "Solidity.Calculus.CallSummary",
+    "module": "Solidity.Calculus.CallSummary",
+    "name": "Solidity.Prog.hasCall",
+    "record": "implemented_by"
+  },
+  {
+    "implementation": "Solidity.Prog.symM",
+    "implementation_module": "Solidity.Calculus.CallSummary",
+    "module": "Solidity.Calculus.CallSummary",
+    "name": "Solidity.Prog.sym",
+    "record": "implemented_by"
+  },
+  {
+    "implementation": "Solidity.Stmt.symM",
+    "implementation_module": "Solidity.Calculus.CallSummary",
+    "module": "Solidity.Calculus.CallSummary",
+    "name": "Solidity.Stmt.sym",
+    "record": "implemented_by"
+  },
+  {
+    "implementation": "Solidity.Tm.normM",
+    "implementation_module": "Solidity.Calculus.CallSummary",
+    "module": "Solidity.Calculus.CallSummary",
+    "name": "Solidity.Tm.norm",
+    "record": "implemented_by"
+  },
+  {
+    "implementation": "Solidity.Tm.strictReadsM",
+    "implementation_module": "Solidity.Calculus.CallSummary",
+    "module": "Solidity.Calculus.CallSummary",
+    "name": "Solidity.Tm.strictReads",
+    "record": "implemented_by"
+  },
+  {
+    "implementation": "Solidity.Tm.substEM",
+    "implementation_module": "Solidity.Calculus.CallSummary",
+    "module": "Solidity.Calculus.CallSummary",
+    "name": "Solidity.Tm.substE",
+    "record": "implemented_by"
+  },
+  {
+    "implementation": "Solidity.Tm.valOnlyM",
+    "implementation_module": "Solidity.Calculus.CallSummary",
+    "module": "Solidity.Calculus.CallSummary",
+    "name": "Solidity.Tm.valOnly",
+    "record": "implemented_by"
+  },
+  {
+    "implementation": "Solidity.CallbackWalk.pruneFalse.unsafe_1",
+    "implementation_module": "Solidity.Calculus.CallbackDerive",
+    "module": "Solidity.Calculus.CallbackDerive",
+    "name": "Solidity.CallbackWalk.pruneFalse.unsafe_impl_3",
+    "record": "implemented_by"
+  },
+  {
+    "implementation": "_private.Solidity.Calculus.CallbackDerive.0.Solidity.CallbackWalk.memoryCertificate.unsafe_1",
+    "implementation_module": "Solidity.Calculus.CallbackDerive",
+    "module": "Solidity.Calculus.CallbackDerive",
+    "name": "_private.Solidity.Calculus.CallbackDerive.0.Solidity.CallbackWalk.memoryCertificate.unsafe_impl_3",
+    "record": "implemented_by"
+  },
+  {
+    "implementation": "_private.Solidity.Calculus.CallbackDerive.0.Solidity.CallbackWalk.memoryCertificate.unsafe_6",
+    "implementation_module": "Solidity.Calculus.CallbackDerive",
+    "module": "Solidity.Calculus.CallbackDerive",
+    "name": "_private.Solidity.Calculus.CallbackDerive.0.Solidity.CallbackWalk.memoryCertificate.unsafe_impl_8",
+    "record": "implemented_by"
+  },
+  {
+    "implementation": "_private.Solidity.Calculus.CallbackDerive.0.Solidity.CallbackWalk.refuteAtom.unsafe_1",
+    "implementation_module": "Solidity.Calculus.CallbackDerive",
+    "module": "Solidity.Calculus.CallbackDerive",
+    "name": "_private.Solidity.Calculus.CallbackDerive.0.Solidity.CallbackWalk.refuteAtom.unsafe_impl_3",
+    "record": "implemented_by"
+  },
+  {
+    "implementation": "_private.Solidity.Calculus.CallbackDerive.0.Solidity.CallbackWalk.refuteAtom.unsafe_4",
+    "implementation_module": "Solidity.Calculus.CallbackDerive",
+    "module": "Solidity.Calculus.CallbackDerive",
+    "name": "_private.Solidity.Calculus.CallbackDerive.0.Solidity.CallbackWalk.refuteAtom.unsafe_impl_6",
+    "record": "implemented_by"
+  },
+  {
+    "implementation": "Solidity.Chain.readings.unsafe_3",
+    "implementation_module": "Solidity.Calculus.Chains.Proofs",
+    "module": "Solidity.Calculus.Chains.Proofs",
+    "name": "Solidity.Chain.readings.unsafe_impl_5",
+    "record": "implemented_by"
+  },
+  {
+    "implementation": "Solidity.Chain.closedRun.unsafe_3",
+    "implementation_module": "Solidity.Calculus.Chains.Strategy",
+    "module": "Solidity.Calculus.Chains.Strategy",
+    "name": "Solidity.Chain.closedRun.unsafe_impl_5",
+    "record": "implemented_by"
+  },
+  {
+    "implementation": "Solidity.Chain.mergeCands.unsafe_1",
+    "implementation_module": "Solidity.Calculus.Chains.Strategy",
+    "module": "Solidity.Calculus.Chains.Strategy",
+    "name": "Solidity.Chain.mergeCands.unsafe_impl_3",
+    "record": "implemented_by"
+  },
+  {
+    "implementation": "Solidity.Chain.scopedRwCandsMany.unsafe_9",
+    "implementation_module": "Solidity.Calculus.Chains.Strategy",
+    "module": "Solidity.Calculus.Chains.Strategy",
+    "name": "Solidity.Chain.scopedRwCandsMany.unsafe_impl_11",
+    "record": "implemented_by"
+  },
+  {
+    "implementation": "Solidity.Chain.scopedRwCandsMany.unsafe_1",
+    "implementation_module": "Solidity.Calculus.Chains.Strategy",
+    "module": "Solidity.Calculus.Chains.Strategy",
+    "name": "Solidity.Chain.scopedRwCandsMany.unsafe_impl_3",
+    "record": "implemented_by"
+  },
+  {
+    "implementation": "Solidity.Chain.scopedRwCandsMany.unsafe_34",
+    "implementation_module": "Solidity.Calculus.Chains.Strategy",
+    "module": "Solidity.Calculus.Chains.Strategy",
+    "name": "Solidity.Chain.scopedRwCandsMany.unsafe_impl_36",
+    "record": "implemented_by"
+  },
+  {
+    "implementation": "Solidity.Chain.scopedRwCandsMany.unsafe_4",
+    "implementation_module": "Solidity.Calculus.Chains.Strategy",
+    "module": "Solidity.Calculus.Chains.Strategy",
+    "name": "Solidity.Chain.scopedRwCandsMany.unsafe_impl_6",
+    "record": "implemented_by"
+  },
+  {
+    "implementation": "_private.Solidity.Calculus.CloseCallSharing.0.Solidity.CloseCallSharing.shareCore.unsafe_1",
+    "implementation_module": "Solidity.Calculus.CloseCallSharing",
+    "module": "Solidity.Calculus.CloseCallSharing",
+    "name": "_private.Solidity.Calculus.CloseCallSharing.0.Solidity.CloseCallSharing.shareCore.unsafe_impl_3",
+    "record": "implemented_by"
+  },
+  {
+    "implementation": "Solidity.Decide.Facts.nfM",
+    "implementation_module": "Solidity.Calculus.Closer.Bytes",
+    "module": "Solidity.Calculus.Closer.Bytes",
+    "name": "Solidity.Decide.Facts.nf",
+    "record": "implemented_by"
+  },
+  {
+    "implementation": "Solidity.Decide.Facts.returnsM",
+    "implementation_module": "Solidity.Calculus.Closer.Facts",
+    "module": "Solidity.Calculus.Closer.Facts",
+    "name": "Solidity.Decide.Facts.returns",
+    "record": "implemented_by"
+  },
+  {
+    "implementation": "Solidity.Decide.Facts.rwWithM",
+    "implementation_module": "Solidity.Calculus.Closer.Facts",
+    "module": "Solidity.Calculus.Closer.Facts",
+    "name": "Solidity.Decide.Facts.rwWith",
+    "record": "implemented_by"
+  },
+  {
+    "implementation": "Solidity.Decide.LFml.closeM",
+    "implementation_module": "Solidity.Calculus.Closer.Leaf",
+    "module": "Solidity.Calculus.Closer.Leaf",
+    "name": "Solidity.Decide.LFml.close",
+    "record": "implemented_by"
+  },
+  {
+    "implementation": "Solidity.Decide.LTm.mentionsM",
+    "implementation_module": "Solidity.Calculus.Closer.Leaf",
+    "module": "Solidity.Calculus.Closer.Leaf",
+    "name": "Solidity.Decide.LTm.mentions",
+    "record": "implemented_by"
+  },
+  {
+    "implementation": "Solidity.Decide.LTm.pickM",
+    "implementation_module": "Solidity.Calculus.Closer.Leaf",
+    "module": "Solidity.Calculus.Closer.Leaf",
+    "name": "Solidity.Decide.LTm.pick",
+    "record": "implemented_by"
+  },
+  {
+    "implementation": "Solidity.Decide.LTm.strictM",
+    "implementation_module": "Solidity.Calculus.Closer.Leaf",
+    "module": "Solidity.Calculus.Closer.Leaf",
+    "name": "Solidity.Decide.LTm.strict",
+    "record": "implemented_by"
+  },
+  {
+    "implementation": "Solidity.Decide.LTm.condSimpM",
+    "implementation_module": "Solidity.Calculus.CondLift",
+    "module": "Solidity.Calculus.CondLift",
+    "name": "Solidity.Decide.LTm.condSimp",
+    "record": "implemented_by"
+  },
+  {
+    "implementation": "Solidity.Decide.LTm.condSplitM",
+    "implementation_module": "Solidity.Calculus.CondLift",
+    "module": "Solidity.Calculus.CondLift",
+    "name": "Solidity.Decide.LTm.condSplit",
+    "record": "implemented_by"
+  },
+  {
+    "implementation": "Solidity.Decide.LTm.beqM",
+    "implementation_module": "Solidity.Calculus.Decide",
+    "module": "Solidity.Calculus.Decide",
+    "name": "Solidity.Decide.LTm.beqR",
+    "record": "implemented_by"
+  },
+  {
+    "implementation": "Solidity.Decide.LTm.elimM",
+    "implementation_module": "Solidity.Calculus.Decide",
+    "module": "Solidity.Calculus.Decide",
+    "name": "Solidity.Decide.LTm.elim",
+    "record": "implemented_by"
+  },
+  {
+    "implementation": "Solidity.Decide.TSegs.appendM",
+    "implementation_module": "Solidity.Calculus.Decide",
+    "module": "Solidity.Calculus.Decide",
+    "name": "Solidity.Decide.TSegs.append",
+    "record": "implemented_by"
+  },
+  {
+    "implementation": "Solidity.Decide.TSegs.hasFromM",
+    "implementation_module": "Solidity.Calculus.Decide",
+    "module": "Solidity.Calculus.Decide",
+    "name": "Solidity.Decide.TSegs.hasFrom",
+    "record": "implemented_by"
+  },
+  {
+    "implementation": "Solidity.Decide.TSegs.mtHasM",
+    "implementation_module": "Solidity.Calculus.Decide",
+    "module": "Solidity.Calculus.Decide",
+    "name": "Solidity.Decide.TSegs.mtHas",
+    "record": "implemented_by"
+  },
+  {
+    "implementation": "Solidity.Decide.TSegs.toLTmM",
+    "implementation_module": "Solidity.Calculus.Decide",
+    "module": "Solidity.Calculus.Decide",
+    "name": "Solidity.Decide.TSegs.toLTm",
+    "record": "implemented_by"
+  },
+  {
+    "implementation": "Solidity.Decide.arrRdM",
+    "implementation_module": "Solidity.Calculus.Decide",
+    "module": "Solidity.Calculus.Decide",
+    "name": "Solidity.Decide.arrRd",
+    "record": "implemented_by"
+  },
+  {
+    "implementation": "Solidity.Decide.delRSM",
+    "implementation_module": "Solidity.Calculus.Decide",
+    "module": "Solidity.Calculus.Decide",
+    "name": "Solidity.Decide.delRS",
+    "record": "implemented_by"
+  },
+  {
+    "implementation": "Solidity.Decide.dfltHasM",
+    "implementation_module": "Solidity.Calculus.Decide",
+    "module": "Solidity.Calculus.Decide",
+    "name": "Solidity.Decide.dfltHas",
+    "record": "implemented_by"
+  },
+  {
+    "implementation": "Solidity.Decide.memRdM",
+    "implementation_module": "Solidity.Calculus.Decide",
+    "module": "Solidity.Calculus.Decide",
+    "name": "Solidity.Decide.memRd",
+    "record": "implemented_by"
+  },
+  {
+    "implementation": "Solidity.Decide.ovRSM",
+    "implementation_module": "Solidity.Calculus.Decide",
+    "module": "Solidity.Calculus.Decide",
+    "name": "Solidity.Decide.ovRS",
+    "record": "implemented_by"
+  },
+  {
+    "implementation": "Solidity.Decide.relSegsM",
+    "implementation_module": "Solidity.Calculus.Decide",
+    "module": "Solidity.Calculus.Decide",
+    "name": "Solidity.Decide.relSegs",
+    "record": "implemented_by"
+  },
+  {
+    "implementation": "Solidity.Decide.stripRSM",
+    "implementation_module": "Solidity.Calculus.Decide",
+    "module": "Solidity.Calculus.Decide",
+    "name": "Solidity.Decide.stripRS",
+    "record": "implemented_by"
+  },
+  {
+    "implementation": "Solidity.Decide.svalRdM",
+    "implementation_module": "Solidity.Calculus.Decide",
+    "module": "Solidity.Calculus.Decide",
+    "name": "Solidity.Decide.svalRd",
+    "record": "implemented_by"
+  },
+  {
+    "implementation": "Solidity.Decide.writeAtM",
+    "implementation_module": "Solidity.Calculus.Decide",
+    "module": "Solidity.Calculus.Decide",
+    "name": "Solidity.Decide.writeAt",
+    "record": "implemented_by"
+  },
+  {
+    "implementation": "Solidity.Decide.LFml.ctFoldM",
+    "implementation_module": "Solidity.Calculus.DecideCleanTail",
+    "module": "Solidity.Calculus.DecideCleanTail",
+    "name": "Solidity.Decide.LFml.ctFold",
+    "record": "implemented_by"
+  },
+  {
+    "implementation": "Solidity.Decide.LTm.ctFoldKM",
+    "implementation_module": "Solidity.Calculus.DecideCleanTail",
+    "module": "Solidity.Calculus.DecideCleanTail",
+    "name": "Solidity.Decide.LTm.ctFoldK",
+    "record": "implemented_by"
+  },
+  {
+    "implementation": "Solidity.Decide.LTm.ctGuardsM",
+    "implementation_module": "Solidity.Calculus.DecideCleanTail",
+    "module": "Solidity.Calculus.DecideCleanTail",
+    "name": "Solidity.Decide.LTm.ctGuards",
+    "record": "implemented_by"
+  },
+  {
+    "implementation": "Solidity.Decide.LTm.dropSeqM",
+    "implementation_module": "Solidity.Calculus.DecideCleanTail",
+    "module": "Solidity.Calculus.DecideCleanTail",
+    "name": "Solidity.Decide.LTm.dropSeq",
+    "record": "implemented_by"
+  },
+  {
+    "implementation": "Solidity.Fml.assumesCTM",
+    "implementation_module": "Solidity.Calculus.DecideCleanTail",
+    "module": "Solidity.Calculus.DecideCleanTail",
+    "name": "Solidity.Fml.assumesCT",
+    "record": "implemented_by"
+  },
+  {
+    "implementation": "Solidity.Fml.isCTPremM",
+    "implementation_module": "Solidity.Calculus.DecideCleanTail",
+    "module": "Solidity.Calculus.DecideCleanTail",
+    "name": "Solidity.Fml.isCTPrem",
+    "record": "implemented_by"
+  },
+  {
+    "implementation": "Solidity.Decide.evalCore.unsafe_1",
+    "implementation_module": "Solidity.Calculus.DecideComplete",
+    "module": "Solidity.Calculus.DecideComplete",
+    "name": "Solidity.Decide.evalCore.unsafe_impl_3",
+    "record": "implemented_by"
+  },
+  {
+    "implementation": "Solidity.Decide.reduceExpr.unsafe_1",
+    "implementation_module": "Solidity.Calculus.DecideComplete",
+    "module": "Solidity.Calculus.DecideComplete",
+    "name": "Solidity.Decide.reduceExpr.unsafe_impl_3",
+    "record": "implemented_by"
+  },
+  {
+    "implementation": "Solidity.Decide.LTm.retsSM",
+    "implementation_module": "Solidity.Calculus.DecideLang",
+    "module": "Solidity.Calculus.DecideLang",
+    "name": "Solidity.Decide.LTm.retsS",
+    "record": "implemented_by"
+  },
+  {
+    "implementation": "Solidity.Decide.BEnv.thinM",
+    "implementation_module": "Solidity.Calculus.DecideScoped",
+    "module": "Solidity.Calculus.DecideScoped",
+    "name": "Solidity.Decide.BEnv.thin",
+    "record": "implemented_by"
+  },
+  {
+    "implementation": "Solidity.Fml.toLSM",
+    "implementation_module": "Solidity.Calculus.DecideScoped",
+    "module": "Solidity.Calculus.DecideScoped",
+    "name": "Solidity.Fml.toLS",
+    "record": "implemented_by"
+  },
+  {
+    "implementation": "Solidity.Tm.toLM",
+    "implementation_module": "Solidity.Calculus.DecideScoped",
+    "module": "Solidity.Calculus.DecideScoped",
+    "name": "Solidity.Tm.toL",
+    "record": "implemented_by"
+  },
+  {
+    "implementation": "Solidity.Upd.toLSM",
+    "implementation_module": "Solidity.Calculus.DecideScoped",
+    "module": "Solidity.Calculus.DecideScoped",
+    "name": "Solidity.Upd.toLS",
+    "record": "implemented_by"
+  },
+  {
+    "implementation": "Solidity.DeclarationFacts.elabDeclarationFacts.unsafe_1",
+    "implementation_module": "Solidity.Calculus.DeclarationFacts",
+    "module": "Solidity.Calculus.DeclarationFacts",
+    "name": "Solidity.DeclarationFacts.elabDeclarationFacts.unsafe_impl_3",
+    "record": "implemented_by"
+  },
+  {
+    "implementation": "_private.Solidity.Calculus.DeclarationStaticReduction.0.Solidity.DeclarationReduction.compileReduced.unsafe_1",
+    "implementation_module": "Solidity.Calculus.DeclarationStaticReduction",
+    "module": "Solidity.Calculus.DeclarationStaticReduction",
+    "name": "_private.Solidity.Calculus.DeclarationStaticReduction.0.Solidity.DeclarationReduction.compileReduced.unsafe_impl_3",
+    "record": "implemented_by"
+  },
+  {
+    "implementation": "Solidity.Decide.ElimM.rwFM",
+    "implementation_module": "Solidity.Calculus.ElimFacts",
+    "module": "Solidity.Calculus.ElimFacts",
+    "name": "Solidity.Decide.ElimM.rwF",
+    "record": "implemented_by"
+  },
+  {
+    "implementation": "Solidity.Decide.LFml.elimFM",
+    "implementation_module": "Solidity.Calculus.ElimFacts",
+    "module": "Solidity.Calculus.ElimFacts",
+    "name": "Solidity.Decide.LFml.elimF",
+    "record": "implemented_by"
+  },
+  {
+    "implementation": "Solidity.Decide.LFml.factsOfM",
+    "implementation_module": "Solidity.Calculus.ElimFacts",
+    "module": "Solidity.Calculus.ElimFacts",
+    "name": "Solidity.Decide.LFml.factsOf",
+    "record": "implemented_by"
+  },
+  {
+    "implementation": "Solidity.Decide.LTm.elimFM",
+    "implementation_module": "Solidity.Calculus.ElimFacts",
+    "module": "Solidity.Calculus.ElimFacts",
+    "name": "Solidity.Decide.LTm.elimF",
+    "record": "implemented_by"
+  },
+  {
+    "implementation": "Solidity.Idx.name",
+    "implementation_module": "Solidity.Scope",
+    "module": "Solidity.Calculus.FirstOrder",
+    "name": "Solidity.Idx.nameR",
+    "record": "implemented_by"
+  },
+  {
+    "implementation": "Solidity.Thin.names",
+    "implementation_module": "Solidity.Calculus.Fml",
+    "module": "Solidity.Calculus.FirstOrder",
+    "name": "Solidity.Thin.namesR",
+    "record": "implemented_by"
+  },
+  {
+    "implementation": "Solidity.Rhs.evalM",
+    "implementation_module": "Solidity.Calculus.Lands",
+    "module": "Solidity.Calculus.Lands",
+    "name": "Solidity.Rhs.eval",
+    "record": "implemented_by"
+  },
+  {
+    "implementation": "Solidity.Upd.applyVM",
+    "implementation_module": "Solidity.Calculus.Lands",
+    "module": "Solidity.Calculus.Lands",
+    "name": "Solidity.Upd.applyV",
+    "record": "implemented_by"
+  },
+  {
+    "implementation": "Solidity.Upd.globTM",
+    "implementation_module": "Solidity.Calculus.Lands",
+    "module": "Solidity.Calculus.Lands",
+    "name": "Solidity.Upd.globT",
+    "record": "implemented_by"
+  },
+  {
+    "implementation": "Solidity.Upd.heldM",
+    "implementation_module": "Solidity.Calculus.Lands",
+    "module": "Solidity.Calculus.Lands",
+    "name": "Solidity.Upd.held",
+    "record": "implemented_by"
+  },
+  {
+    "implementation": "Solidity.UpdElem.applyVM",
+    "implementation_module": "Solidity.Calculus.Lands",
+    "module": "Solidity.Calculus.Lands",
+    "name": "Solidity.UpdElem.applyV",
+    "record": "implemented_by"
+  },
+  {
+    "implementation": "Solidity.UpdElem.globTM",
+    "implementation_module": "Solidity.Calculus.Lands",
+    "module": "Solidity.Calculus.Lands",
+    "name": "Solidity.UpdElem.globT",
+    "record": "implemented_by"
+  },
+  {
+    "implementation": "Solidity.Decide.LFml.dropPremM",
+    "implementation_module": "Solidity.Calculus.LeafDerive",
+    "module": "Solidity.Calculus.LeafDerive",
+    "name": "Solidity.Decide.LFml.dropPrem",
+    "record": "implemented_by"
+  },
+  {
+    "implementation": "Solidity.Decide.LFml.readsM",
+    "implementation_module": "Solidity.Calculus.LeafDerive",
+    "module": "Solidity.Calculus.LeafDerive",
+    "name": "Solidity.Decide.LFml.reads",
+    "record": "implemented_by"
+  },
+  {
+    "implementation": "Solidity.Decide.LFml.spineM",
+    "implementation_module": "Solidity.Calculus.LeafDerive",
+    "module": "Solidity.Calculus.LeafDerive",
+    "name": "Solidity.Decide.LFml.spine",
+    "record": "implemented_by"
+  },
+  {
+    "implementation": "Solidity.Decide.LTm.readsM",
+    "implementation_module": "Solidity.Calculus.LeafDerive",
+    "module": "Solidity.Calculus.LeafDerive",
+    "name": "Solidity.Decide.LTm.reads",
+    "record": "implemented_by"
+  },
+  {
+    "implementation": "Solidity.Fml.litPosM",
+    "implementation_module": "Solidity.Calculus.LeafDerive",
+    "module": "Solidity.Calculus.LeafDerive",
+    "name": "Solidity.Fml.litPos",
+    "record": "implemented_by"
+  },
+  {
+    "implementation": "Solidity.Hyps.groundInSM",
+    "implementation_module": "Solidity.Calculus.LeafDerive",
+    "module": "Solidity.Calculus.LeafDerive",
+    "name": "Solidity.Hyps.groundInS",
+    "record": "implemented_by"
+  },
+  {
+    "implementation": "Solidity.Idx.toNat",
+    "implementation_module": "Solidity.Scope",
+    "module": "Solidity.Calculus.LeafDerive",
+    "name": "Solidity.Idx.toNatR",
+    "record": "implemented_by"
+  },
+  {
+    "implementation": "Solidity.Thin.posWkM",
+    "implementation_module": "Solidity.Calculus.LeafDerive",
+    "module": "Solidity.Calculus.LeafDerive",
+    "name": "Solidity.Thin.posWk",
+    "record": "implemented_by"
+  },
+  {
+    "implementation": "Solidity.Upd.resolveSM",
+    "implementation_module": "Solidity.Calculus.LeafDerive",
+    "module": "Solidity.Calculus.LeafDerive",
+    "name": "Solidity.Upd.resolveS",
+    "record": "implemented_by"
+  },
+  {
+    "implementation": "Solidity.Decide.LFml.hasStRdM",
+    "implementation_module": "Solidity.Calculus.MemRead.Pass",
+    "module": "Solidity.Calculus.MemRead.Pass",
+    "name": "Solidity.Decide.LFml.hasStRd",
+    "record": "implemented_by"
+  },
+  {
+    "implementation": "Solidity.Decide.LFml.memResM",
+    "implementation_module": "Solidity.Calculus.MemRead.Pass",
+    "module": "Solidity.Calculus.MemRead.Pass",
+    "name": "Solidity.Decide.LFml.memRes",
+    "record": "implemented_by"
+  },
+  {
+    "implementation": "Solidity.Decide.LFml.nfEM",
+    "implementation_module": "Solidity.Calculus.MemRead.Pass",
+    "module": "Solidity.Calculus.MemRead.Pass",
+    "name": "Solidity.Decide.LFml.nfE",
+    "record": "implemented_by"
+  },
+  {
+    "implementation": "Solidity.Decide.LTm.hasStRdM",
+    "implementation_module": "Solidity.Calculus.MemRead.Pass",
+    "module": "Solidity.Calculus.MemRead.Pass",
+    "name": "Solidity.Decide.LTm.hasStRd",
+    "record": "implemented_by"
+  },
+  {
+    "implementation": "Solidity.Decide.LTm.memResM",
+    "implementation_module": "Solidity.Calculus.MemRead.Pass",
+    "module": "Solidity.Calculus.MemRead.Pass",
+    "name": "Solidity.Decide.LTm.memRes",
+    "record": "implemented_by"
+  },
+  {
+    "implementation": "Solidity.Decide.LTm.seqMemM",
+    "implementation_module": "Solidity.Calculus.MemRead.Pass",
+    "module": "Solidity.Calculus.MemRead.Pass",
+    "name": "Solidity.Decide.LTm.seqMem",
+    "record": "implemented_by"
+  },
+  {
+    "implementation": "Solidity.Decide.LTm.boundedInM",
+    "implementation_module": "Solidity.Calculus.MemRead.Spine",
+    "module": "Solidity.Calculus.MemRead.Spine",
+    "name": "Solidity.Decide.LTm.boundedIn",
+    "record": "implemented_by"
+  },
+  {
+    "implementation": "Solidity.Decide.LTm.freshPathM",
+    "implementation_module": "Solidity.Calculus.MemRead.Spine",
+    "module": "Solidity.Calculus.MemRead.Spine",
+    "name": "Solidity.Decide.LTm.freshPath?",
+    "record": "implemented_by"
+  },
+  {
+    "implementation": "Solidity.Decide.LTm.onSpineAnyM",
+    "implementation_module": "Solidity.Calculus.MemRead.Spine",
+    "module": "Solidity.Calculus.MemRead.Spine",
+    "name": "Solidity.Decide.LTm.onSpineAny",
+    "record": "implemented_by"
+  },
+  {
+    "implementation": "Solidity.Decide.LTm.peelM",
+    "implementation_module": "Solidity.Calculus.MemRead.Spine",
+    "module": "Solidity.Calculus.MemRead.Spine",
+    "name": "Solidity.Decide.LTm.peel",
+    "record": "implemented_by"
+  },
+  {
+    "implementation": "Solidity.Decide.LTm.stripWM",
+    "implementation_module": "Solidity.Calculus.MemRead.Spine",
+    "module": "Solidity.Calculus.MemRead.Spine",
+    "name": "Solidity.Decide.LTm.stripW",
+    "record": "implemented_by"
+  },
+  {
+    "implementation": "Solidity.Seq.MemoryReplay._aux_Solidity_Calculus_MemoryLoopReplay___elabRules_Solidity_Seq_MemoryReplay_commandPrepare_memory_replay__1.unsafe_1",
+    "implementation_module": "Solidity.Calculus.MemoryLoopReplay",
+    "module": "Solidity.Calculus.MemoryLoopReplay",
+    "name": "Solidity.Seq.MemoryReplay._aux_Solidity_Calculus_MemoryLoopReplay___elabRules_Solidity_Seq_MemoryReplay_commandPrepare_memory_replay__1.unsafe_impl_3",
+    "record": "implemented_by"
+  },
+  {
+    "implementation": "Solidity.Seq.MemoryReplay._aux_Solidity_Calculus_MemoryLoopReplay___elabRules_Solidity_Seq_MemoryReplay_commandPrepare_memory_replay__1.unsafe_4",
+    "implementation_module": "Solidity.Calculus.MemoryLoopReplay",
+    "module": "Solidity.Calculus.MemoryLoopReplay",
+    "name": "Solidity.Seq.MemoryReplay._aux_Solidity_Calculus_MemoryLoopReplay___elabRules_Solidity_Seq_MemoryReplay_commandPrepare_memory_replay__1.unsafe_impl_6",
+    "record": "implemented_by"
+  },
+  {
+    "implementation": "Solidity.Fml.checkMemoryAtM",
+    "implementation_module": "Solidity.Calculus.MemoryWitness",
+    "module": "Solidity.Calculus.MemoryWitness",
+    "name": "Solidity.Fml.checkMemoryAt",
+    "record": "implemented_by"
+  },
+  {
+    "implementation": "Solidity.Seq.chunk.unsafe_1",
+    "implementation_module": "Solidity.Calculus.ProveChunked",
+    "module": "Solidity.Calculus.ProveChunked",
+    "name": "Solidity.Seq.chunk.unsafe_impl_3",
+    "record": "implemented_by"
+  },
+  {
+    "implementation": "Solidity.Seq.proveChunked.unsafe_1",
+    "implementation_module": "Solidity.Calculus.ProveChunked",
+    "module": "Solidity.Calculus.ProveChunked",
+    "name": "Solidity.Seq.proveChunked.unsafe_impl_3",
+    "record": "implemented_by"
+  },
+  {
+    "implementation": "Solidity.Hyps.rwEqCM",
+    "implementation_module": "Solidity.Calculus.Proves",
+    "module": "Solidity.Calculus.Proves",
+    "name": "Solidity.Hyps.rwEqC",
+    "record": "implemented_by"
+  },
+  {
+    "implementation": "Solidity.Seq.goalFits.unsafe_1",
+    "implementation_module": "Solidity.Calculus.ProvesDerive",
+    "module": "Solidity.Calculus.ProvesDerive",
+    "name": "Solidity.Seq.goalFits.unsafe_impl_3",
+    "record": "implemented_by"
+  },
+  {
+    "implementation": "Solidity.Seq.prove.unsafe_21",
+    "implementation_module": "Solidity.Calculus.ProvesDerive",
+    "module": "Solidity.Calculus.ProvesDerive",
+    "name": "Solidity.Seq.prove.unsafe_impl_23",
+    "record": "implemented_by"
+  },
+  {
+    "implementation": "Solidity.Decide.LFml.exposeDepthM",
+    "implementation_module": "Solidity.Calculus.ReadBounds",
+    "module": "Solidity.Calculus.ReadBounds",
+    "name": "Solidity.Decide.LFml.exposeDepth",
+    "record": "implemented_by"
+  },
+  {
+    "implementation": "Solidity.Decide.LFml.fitsM",
+    "implementation_module": "Solidity.Calculus.ReadBounds",
+    "module": "Solidity.Calculus.ReadBounds",
+    "name": "Solidity.Decide.LFml.fits",
+    "record": "implemented_by"
+  },
+  {
+    "implementation": "Solidity.Decide.LFml.fitsStack",
+    "implementation_module": "Solidity.Calculus.ReadBoundsStack",
+    "module": "Solidity.Calculus.ReadBounds",
+    "name": "Solidity.Decide.LFml.fitsM",
+    "record": "implemented_by"
+  },
+  {
+    "implementation": "Solidity.Decide.LFml.knownM",
+    "implementation_module": "Solidity.Calculus.ReadBounds",
+    "module": "Solidity.Calculus.ReadBounds",
+    "name": "Solidity.Decide.LFml.known",
+    "record": "implemented_by"
+  },
+  {
+    "implementation": "Solidity.Decide.LFml.stDepthM",
+    "implementation_module": "Solidity.Calculus.ReadBounds",
+    "module": "Solidity.Calculus.ReadBounds",
+    "name": "Solidity.Decide.LFml.stDepth",
+    "record": "implemented_by"
+  },
+  {
+    "implementation": "Solidity.Decide.LTm.exposeDepthM",
+    "implementation_module": "Solidity.Calculus.ReadBounds",
+    "module": "Solidity.Calculus.ReadBounds",
+    "name": "Solidity.Decide.LTm.exposeDepth",
+    "record": "implemented_by"
+  },
+  {
+    "implementation": "Solidity.Decide.LTm.fitsM",
+    "implementation_module": "Solidity.Calculus.ReadBounds",
+    "module": "Solidity.Calculus.ReadBounds",
+    "name": "Solidity.Decide.LTm.fits",
+    "record": "implemented_by"
+  },
+  {
+    "implementation": "Solidity.Decide.LTm.fitsStack",
+    "implementation_module": "Solidity.Calculus.ReadBoundsStack",
+    "module": "Solidity.Calculus.ReadBounds",
+    "name": "Solidity.Decide.LTm.fitsM",
+    "record": "implemented_by"
+  },
+  {
+    "implementation": "Solidity.Decide.LTm.knownM",
+    "implementation_module": "Solidity.Calculus.ReadBounds",
+    "module": "Solidity.Calculus.ReadBounds",
+    "name": "Solidity.Decide.LTm.known?",
+    "record": "implemented_by"
+  },
+  {
+    "implementation": "Solidity.Decide.LTm.litRootM",
+    "implementation_module": "Solidity.Calculus.ReadBounds",
+    "module": "Solidity.Calculus.ReadBounds",
+    "name": "Solidity.Decide.LTm.litRoot?",
+    "record": "implemented_by"
+  },
+  {
+    "implementation": "Solidity.Decide.LTm.rootAnyM",
+    "implementation_module": "Solidity.Calculus.ReadBounds",
+    "module": "Solidity.Calculus.ReadBounds",
+    "name": "Solidity.Decide.LTm.rootAny?",
+    "record": "implemented_by"
+  },
+  {
+    "implementation": "Solidity.Decide.LTm.stDepthM",
+    "implementation_module": "Solidity.Calculus.ReadBounds",
+    "module": "Solidity.Calculus.ReadBounds",
+    "name": "Solidity.Decide.LTm.stDepth",
+    "record": "implemented_by"
+  },
+  {
+    "implementation": "Solidity.Recursion.specContract?.unsafe_1",
+    "implementation_module": "Solidity.Calculus.Recursion",
+    "module": "Solidity.Calculus.Recursion",
+    "name": "Solidity.Recursion.specContract?.unsafe_impl_3",
+    "record": "implemented_by"
+  },
+  {
+    "implementation": "Solidity.Tm.spineHasM",
+    "implementation_module": "Solidity.Calculus.RewritePast.Merge",
+    "module": "Solidity.Calculus.RewritePast.Merge",
+    "name": "Solidity.Tm.spineHas",
+    "record": "implemented_by"
+  },
+  {
+    "implementation": "Solidity.Walk.evalQuoteOptImpl",
+    "implementation_module": "Solidity.Calculus.RewriteSyntax",
+    "module": "Solidity.Calculus.RewriteSyntax",
+    "name": "Solidity.Walk.evalQuoteOpt",
+    "record": "implemented_by"
+  },
+  {
+    "implementation": "Solidity.Hyps.rigidM",
+    "implementation_module": "Solidity.Calculus.Rigid",
+    "module": "Solidity.Calculus.Rigid",
+    "name": "Solidity.Hyps.rigid",
+    "record": "implemented_by"
+  },
+  {
+    "implementation": "_private.Solidity.Calculus.RuleShapes.0.Solidity.evalNamesImpl",
+    "implementation_module": "Solidity.Calculus.RuleShapes",
+    "module": "Solidity.Calculus.RuleShapes",
+    "name": "_private.Solidity.Calculus.RuleShapes.0.Solidity.evalNames",
+    "record": "implemented_by"
+  },
+  {
+    "implementation": "Solidity.freshName.unsafe_1",
+    "implementation_module": "Solidity.Calculus.RuleSyntax.Print",
+    "module": "Solidity.Calculus.RuleSyntax.Print",
+    "name": "Solidity.freshName.unsafe_impl_3",
+    "record": "implemented_by"
+  },
+  {
+    "implementation": "Solidity.intOf?.unsafe_1",
+    "implementation_module": "Solidity.Calculus.RuleSyntax.Print",
+    "module": "Solidity.Calculus.RuleSyntax.Print",
+    "name": "Solidity.intOf?.unsafe_impl_3",
+    "record": "implemented_by"
+  },
+  {
+    "implementation": "Solidity.natOf?.unsafe_3",
+    "implementation_module": "Solidity.Calculus.RuleSyntax.Print",
+    "module": "Solidity.Calculus.RuleSyntax.Print",
+    "name": "Solidity.natOf?.unsafe_impl_5",
+    "record": "implemented_by"
+  },
+  {
+    "implementation": "Solidity.Fml.rwEqCM",
+    "implementation_module": "Solidity.Calculus.SeqRewrite",
+    "module": "Solidity.Calculus.SeqRewrite",
+    "name": "Solidity.Fml.rwEqC",
+    "record": "implemented_by"
+  },
+  {
+    "implementation": "Solidity.Upd.graftFM",
+    "implementation_module": "Solidity.Calculus.StatePartsScoped",
+    "module": "Solidity.Calculus.StatePartsScoped",
+    "name": "Solidity.Upd.graftF",
+    "record": "implemented_by"
+  },
+  {
+    "implementation": "Solidity.Fml.stepAt",
+    "implementation_module": "Solidity.Calculus.Step",
+    "module": "Solidity.Calculus.Step",
+    "name": "Solidity.Fml.stepR",
+    "record": "implemented_by"
+  },
+  {
+    "implementation": "Solidity.Fml.stepAtS",
+    "implementation_module": "Solidity.Calculus.Symex",
+    "module": "Solidity.Calculus.Symex",
+    "name": "Solidity.Fml.stepRS",
+    "record": "implemented_by"
+  },
+  {
+    "implementation": "Solidity.Symex.normValid.unsafe_1",
+    "implementation_module": "Solidity.Calculus.Symex",
+    "module": "Solidity.Calculus.Symex",
+    "name": "Solidity.Symex.normValid.unsafe_impl_3",
+    "record": "implemented_by"
+  },
+  {
+    "implementation": "Solidity.Symex.normValid.unsafe_4",
+    "implementation_module": "Solidity.Calculus.Symex",
+    "module": "Solidity.Calculus.Symex",
+    "name": "Solidity.Symex.normValid.unsafe_impl_6",
+    "record": "implemented_by"
+  },
+  {
+    "implementation": "Solidity.Tm.beqM",
+    "implementation_module": "Solidity.Calculus.TermEq",
+    "module": "Solidity.Calculus.TermEq",
+    "name": "Solidity.Tm.beqR",
+    "record": "implemented_by"
+  },
+  {
+    "implementation": "Solidity.Tm.litVarsSM",
+    "implementation_module": "Solidity.Calculus.TermEq",
+    "module": "Solidity.Calculus.TermEq",
+    "name": "Solidity.Tm.litVarsS",
+    "record": "implemented_by"
+  },
+  {
+    "implementation": "Solidity.Tm.evalM",
+    "implementation_module": "Solidity.Calculus.TermEval",
+    "module": "Solidity.Calculus.TermEval",
+    "name": "Solidity.Tm.eval",
+    "record": "implemented_by"
+  },
+  {
+    "implementation": "Solidity.Fml.cleanBM",
+    "implementation_module": "Solidity.Calculus.UpdRuleScoped",
+    "module": "Solidity.Calculus.UpdRuleScoped",
+    "name": "Solidity.Fml.cleanB",
+    "record": "implemented_by"
+  },
+  {
+    "implementation": "Solidity.Fml.mergeBM",
+    "implementation_module": "Solidity.Calculus.UpdRuleScoped",
+    "module": "Solidity.Calculus.UpdRuleScoped",
+    "name": "Solidity.Fml.mergeB",
+    "record": "implemented_by"
+  },
+  {
+    "implementation": "Solidity.Fml.rwAtSM",
+    "implementation_module": "Solidity.Calculus.UpdRuleScoped",
+    "module": "Solidity.Calculus.UpdRuleScoped",
+    "name": "Solidity.Fml.rwAtS",
+    "record": "implemented_by"
+  },
+  {
+    "implementation": "Solidity.Fml.simpUpdsSM",
+    "implementation_module": "Solidity.Calculus.UpdRuleScoped",
+    "module": "Solidity.Calculus.UpdRuleScoped",
+    "name": "Solidity.Fml.simpUpdsS",
+    "record": "implemented_by"
+  },
+  {
+    "implementation": "Solidity.Upd.redeclM",
+    "implementation_module": "Solidity.Calculus.UpdRuleScoped",
+    "module": "Solidity.Calculus.UpdRuleScoped",
+    "name": "Solidity.Upd.redecl",
+    "record": "implemented_by"
+  },
+  {
+    "implementation": "Solidity.Upd.shadowM",
+    "implementation_module": "Solidity.Calculus.UpdRuleScoped",
+    "module": "Solidity.Calculus.UpdRuleScoped",
+    "name": "Solidity.Upd.shadow",
+    "record": "implemented_by"
+  },
+  {
+    "implementation": "Solidity.Upd.sizeM",
+    "implementation_module": "Solidity.Calculus.UpdRuleScoped",
+    "module": "Solidity.Calculus.UpdRuleScoped",
+    "name": "Solidity.Upd.size",
+    "record": "implemented_by"
+  },
+  {
+    "implementation": "Solidity.Upd.totalBM",
+    "implementation_module": "Solidity.Calculus.UpdRuleScoped",
+    "module": "Solidity.Calculus.UpdRuleScoped",
+    "name": "Solidity.Upd.totalB",
+    "record": "implemented_by"
+  },
+  {
+    "implementation": "Solidity.Upd.unsetAtM",
+    "implementation_module": "Solidity.Calculus.UpdRuleScoped",
+    "module": "Solidity.Calculus.UpdRuleScoped",
+    "name": "Solidity.Upd.unsetAt",
+    "record": "implemented_by"
+  },
+  {
+    "implementation": "Solidity.Evm.loopImpl",
+    "implementation_module": "Solidity.Evm.Machine",
+    "module": "Solidity.Evm.Machine",
+    "name": "Solidity.Evm.loopRun",
+    "record": "implemented_by"
+  },
+  {
+    "implementation": "_private.Solidity.Evm.MemoryLoopScopeCompile.0.Solidity.Evm.Memory.LoopScopes.compileProgM",
+    "implementation_module": "Solidity.Evm.MemoryLoopScopeCompile",
+    "module": "Solidity.Evm.MemoryLoopScopeCompile",
+    "name": "Solidity.Evm.Memory.LoopScopes.compileProg",
+    "record": "implemented_by"
+  },
+  {
+    "implementation": "_private.Solidity.Evm.MemoryLoopScopeCompile.0.Solidity.Evm.Memory.LoopScopes.compileStmtM",
+    "implementation_module": "Solidity.Evm.MemoryLoopScopeCompile",
+    "module": "Solidity.Evm.MemoryLoopScopeCompile",
+    "name": "Solidity.Evm.Memory.LoopScopes.compileStmt",
+    "record": "implemented_by"
+  },
+  {
+    "implementation": "_private.Solidity.Evm.MemoryLoopScopeMeta.0.Solidity.Evm.Memory.LoopScopes.progMetaM",
+    "implementation_module": "Solidity.Evm.MemoryLoopScopeMeta",
+    "module": "Solidity.Evm.MemoryLoopScopeMeta",
+    "name": "_private.Solidity.Evm.MemoryLoopScopeMeta.0.Solidity.Evm.Memory.LoopScopes.progMeta",
+    "record": "implemented_by"
+  },
+  {
+    "implementation": "_private.Solidity.Evm.MemoryLoopScopeMeta.0.Solidity.Evm.Memory.LoopScopes.stmtMetaM",
+    "implementation_module": "Solidity.Evm.MemoryLoopScopeMeta",
+    "module": "Solidity.Evm.MemoryLoopScopeMeta",
+    "name": "_private.Solidity.Evm.MemoryLoopScopeMeta.0.Solidity.Evm.Memory.LoopScopes.stmtMeta",
+    "record": "implemented_by"
+  },
+  {
+    "implementation": "_private.Solidity.Evm.MemoryRecursiveCert.0.Solidity.Evm.Memory.Recursive.progneedM",
+    "implementation_module": "Solidity.Evm.MemoryRecursiveCert",
+    "module": "Solidity.Evm.MemoryRecursiveCert",
+    "name": "Solidity.Evm.Memory.Recursive.ProgCert.need",
+    "record": "implemented_by"
+  },
+  {
+    "implementation": "_private.Solidity.Evm.MemoryRecursiveCert.0.Solidity.Evm.Memory.Recursive.stmtneedM",
+    "implementation_module": "Solidity.Evm.MemoryRecursiveCert",
+    "module": "Solidity.Evm.MemoryRecursiveCert",
+    "name": "Solidity.Evm.Memory.Recursive.StmtCert.need",
+    "record": "implemented_by"
+  },
+  {
+    "implementation": "_private.Solidity.Evm.MemoryRecursiveCompile.0.Solidity.Evm.Memory.Recursive.compileProgM",
+    "implementation_module": "Solidity.Evm.MemoryRecursiveCompile",
+    "module": "Solidity.Evm.MemoryRecursiveCompile",
+    "name": "Solidity.Evm.Memory.Recursive.compileProg",
+    "record": "implemented_by"
+  },
+  {
+    "implementation": "_private.Solidity.Evm.MemoryRecursiveCompile.0.Solidity.Evm.Memory.Recursive.compileStmtM",
+    "implementation_module": "Solidity.Evm.MemoryRecursiveCompile",
+    "module": "Solidity.Evm.MemoryRecursiveCompile",
+    "name": "Solidity.Evm.Memory.Recursive.compileStmt",
+    "record": "implemented_by"
+  },
+  {
+    "implementation": "_private.Solidity.Evm.MemoryRecursiveRoom.0.Solidity.Evm.Memory.Recursive.progallocatesM",
+    "implementation_module": "Solidity.Evm.MemoryRecursiveRoom",
+    "module": "Solidity.Evm.MemoryRecursiveRoom",
+    "name": "Solidity.Evm.Memory.Recursive.ProgCert.allocates",
+    "record": "implemented_by"
+  },
+  {
+    "implementation": "_private.Solidity.Evm.MemoryRecursiveRoom.0.Solidity.Evm.Memory.Recursive.stmtallocatesM",
+    "implementation_module": "Solidity.Evm.MemoryRecursiveRoom",
+    "module": "Solidity.Evm.MemoryRecursiveRoom",
+    "name": "Solidity.Evm.Memory.Recursive.StmtCert.allocates",
+    "record": "implemented_by"
+  },
+  {
+    "implementation": "Solidity.Frontend.elabSolidityCli.unsafe_1",
+    "implementation_module": "Solidity.Frontend.Cli",
+    "module": "Solidity.Frontend.Cli",
+    "name": "Solidity.Frontend.elabSolidityCli.unsafe_impl_3",
+    "record": "implemented_by"
+  },
+  {
+    "implementation": "_private.Solidity.Frontend.Cli.0.Solidity.Frontend.inspectRequest.unsafe_3",
+    "implementation_module": "Solidity.Frontend.Cli",
+    "module": "Solidity.Frontend.Cli",
+    "name": "_private.Solidity.Frontend.Cli.0.Solidity.Frontend.inspectRequest.unsafe_impl_5",
+    "record": "implemented_by"
+  },
+  {
+    "implementation": "_private.Solidity.Frontend.Cli.0.Solidity.Frontend.inspectRequest.unsafe_6",
+    "implementation_module": "Solidity.Frontend.Cli",
+    "module": "Solidity.Frontend.Cli",
+    "name": "_private.Solidity.Frontend.Cli.0.Solidity.Frontend.inspectRequest.unsafe_impl_8",
+    "record": "implemented_by"
+  },
+  {
+    "implementation": "Solidity.Frontend.elabSolcImport.unsafe_16",
+    "implementation_module": "Solidity.Frontend.Import",
+    "module": "Solidity.Frontend.Import",
+    "name": "Solidity.Frontend.elabSolcImport.unsafe_impl_18",
+    "record": "implemented_by"
+  },
+  {
+    "implementation": "Solidity.Frontend.elabSolcImport.unsafe_1",
+    "implementation_module": "Solidity.Frontend.Import",
+    "module": "Solidity.Frontend.Import",
+    "name": "Solidity.Frontend.elabSolcImport.unsafe_impl_3",
+    "record": "implemented_by"
+  },
+  {
+    "implementation": "Solidity.Frontend.elabSolcShow.unsafe_1",
+    "implementation_module": "Solidity.Frontend.Import",
+    "module": "Solidity.Frontend.Import",
+    "name": "Solidity.Frontend.elabSolcShow.unsafe_impl_3",
+    "record": "implemented_by"
+  },
+  {
+    "implementation": "Solidity.Frontend.elabSolcShow.unsafe_4",
+    "implementation_module": "Solidity.Frontend.Import",
+    "module": "Solidity.Frontend.Import",
+    "name": "Solidity.Frontend.elabSolcShow.unsafe_impl_6",
+    "record": "implemented_by"
+  },
+  {
+    "implementation": "Solidity.Frontend.PaymentSource.elabPaymentSource.unsafe_9",
+    "implementation_module": "Solidity.Frontend.PaymentImport",
+    "module": "Solidity.Frontend.PaymentImport",
+    "name": "Solidity.Frontend.PaymentSource.elabPaymentSource.unsafe_impl_11",
+    "record": "implemented_by"
+  },
+  {
+    "implementation": "Solidity.Frontend.PaymentSource.elabPaymentSource.unsafe_12",
+    "implementation_module": "Solidity.Frontend.PaymentImport",
+    "module": "Solidity.Frontend.PaymentImport",
+    "name": "Solidity.Frontend.PaymentSource.elabPaymentSource.unsafe_impl_14",
+    "record": "implemented_by"
+  },
+  {
+    "implementation": "Solidity.Frontend.PaymentSource.elabPaymentSource.unsafe_1",
+    "implementation_module": "Solidity.Frontend.PaymentImport",
+    "module": "Solidity.Frontend.PaymentImport",
+    "name": "Solidity.Frontend.PaymentSource.elabPaymentSource.unsafe_impl_3",
+    "record": "implemented_by"
+  },
+  {
+    "implementation": "Solidity.Frontend.PaymentSource.elabPaymentSource.unsafe_4",
+    "implementation_module": "Solidity.Frontend.PaymentImport",
+    "module": "Solidity.Frontend.PaymentImport",
+    "name": "Solidity.Frontend.PaymentSource.elabPaymentSource.unsafe_impl_6",
+    "record": "implemented_by"
+  },
+  {
+    "implementation": "Solidity.Frontend.elabSolkeyProblem.unsafe_1",
+    "implementation_module": "Solidity.Frontend.Problems",
+    "module": "Solidity.Frontend.Problems",
+    "name": "Solidity.Frontend.elabSolkeyProblem.unsafe_impl_3",
+    "record": "implemented_by"
+  },
+  {
+    "implementation": "Solidity.Frontend.elabSolkeyProblem.unsafe_4",
+    "implementation_module": "Solidity.Frontend.Problems",
+    "module": "Solidity.Frontend.Problems",
+    "name": "Solidity.Frontend.elabSolkeyProblem.unsafe_impl_6",
+    "record": "implemented_by"
+  },
+  {
+    "implementation": "Solidity.Frontend.elabSolkeyScan.unsafe_1",
+    "implementation_module": "Solidity.Frontend.Problems",
+    "module": "Solidity.Frontend.Problems",
+    "name": "Solidity.Frontend.elabSolkeyScan.unsafe_impl_3",
+    "record": "implemented_by"
+  },
+  {
+    "implementation": "Solidity.Frontend.reportRows.unsafe_1",
+    "implementation_module": "Solidity.Frontend.Problems",
+    "module": "Solidity.Frontend.Problems",
+    "name": "Solidity.Frontend.reportRows.unsafe_impl_3",
+    "record": "implemented_by"
+  },
+  {
+    "implementation": "Solidity.Frontend.QualifiedUnits.expressionPathAnyM",
+    "implementation_module": "Solidity.Frontend.QualifiedUnits.References",
+    "module": "Solidity.Frontend.QualifiedUnits.References",
+    "name": "Solidity.Frontend.QualifiedUnits.expressionPathAny",
+    "record": "implemented_by"
+  },
+  {
+    "implementation": "Solidity.Frontend.QualifiedUnits.referencesM",
+    "implementation_module": "Solidity.Frontend.QualifiedUnits.References",
+    "module": "Solidity.Frontend.QualifiedUnits.References",
+    "name": "Solidity.Frontend.QualifiedUnits.references",
+    "record": "implemented_by"
+  },
+  {
+    "implementation": "Solidity.Frontend.testDirectObligation.unsafe_1",
+    "implementation_module": "Solidity.Frontend.Testing",
+    "module": "Solidity.Frontend.Testing",
+    "name": "Solidity.Frontend.testDirectObligation.unsafe_impl_3",
+    "record": "implemented_by"
+  },
+  {
+    "implementation": "_private.Solidity.Frontend.Testing.0.Solidity.Frontend.callsBackE.unsafe_1",
+    "implementation_module": "Solidity.Frontend.Testing",
+    "module": "Solidity.Frontend.Testing",
+    "name": "_private.Solidity.Frontend.Testing.0.Solidity.Frontend.callsBackE.unsafe_impl_3",
+    "record": "implemented_by"
+  },
+  {
+    "implementation": "_private.Solidity.Frontend.Testing.0.Solidity.Frontend.closedSpecProof?.unsafe_1",
+    "implementation_module": "Solidity.Frontend.Testing",
+    "module": "Solidity.Frontend.Testing",
+    "name": "_private.Solidity.Frontend.Testing.0.Solidity.Frontend.closedSpecProof?.unsafe_impl_3",
+    "record": "implemented_by"
+  },
+  {
+    "implementation": "Solidity.Frontend.elabSolcWorldFactory.unsafe_1",
+    "implementation_module": "Solidity.Frontend.WorldImport",
+    "module": "Solidity.Frontend.WorldImport",
+    "name": "Solidity.Frontend.elabSolcWorldFactory.unsafe_impl_3",
+    "record": "implemented_by"
+  },
+  {
+    "implementation": "Solidity.Prog.runC",
+    "implementation_module": "Solidity.Semantics.Run",
+    "module": "Solidity.Semantics.Run",
+    "name": "Solidity.Prog.runR",
+    "record": "implemented_by"
+  },
+  {
+    "implementation": "Solidity.Stmt.runC",
+    "implementation_module": "Solidity.Semantics.Run",
+    "module": "Solidity.Semantics.Run",
+    "name": "Solidity.Stmt.runR",
+    "record": "implemented_by"
+  },
+  {
+    "implementation": "Solidity.TLoop.runImpl'",
+    "implementation_module": "Solidity.Semantics.Run",
+    "module": "Solidity.Semantics.Run",
+    "name": "Solidity.TLoop.run",
+    "record": "implemented_by"
+  },
+  {
+    "implementation": "Solidity.Prog.runAC",
+    "implementation_module": "Solidity.Semantics.RunAccel",
+    "module": "Solidity.Semantics.RunAccel",
+    "name": "Solidity.Prog.runA",
+    "record": "implemented_by"
+  },
+  {
+    "implementation": "Solidity.Stmt.runAC",
+    "implementation_module": "Solidity.Semantics.RunAccel",
+    "module": "Solidity.Semantics.RunAccel",
+    "name": "Solidity.Stmt.runA",
+    "record": "implemented_by"
+  },
+  {
+    "implementation": "Solidity.Prog.runFC",
+    "implementation_module": "Solidity.Semantics.RunFuel",
+    "module": "Solidity.Semantics.RunFuel",
+    "name": "Solidity.Prog.runF",
+    "record": "implemented_by"
+  },
+  {
+    "implementation": "Solidity.Stmt.runFC",
+    "implementation_module": "Solidity.Semantics.RunFuel",
+    "module": "Solidity.Semantics.RunFuel",
+    "name": "Solidity.Stmt.runF",
+    "record": "implemented_by"
+  },
+  {
+    "implementation": "Solidity.SFields.defaultOfM",
+    "implementation_module": "Solidity.Semantics.Storage.Ops",
+    "module": "Solidity.Semantics.Storage.Ops",
+    "name": "Solidity.SFields.defaultOf",
+    "record": "implemented_by"
+  },
+  {
+    "implementation": "Solidity.SFields.overlayM",
+    "implementation_module": "Solidity.Semantics.Storage.Ops",
+    "module": "Solidity.Semantics.Storage.Ops",
+    "name": "Solidity.SFields.overlay",
+    "record": "implemented_by"
+  },
+  {
+    "implementation": "Solidity.SFields.stripM",
+    "implementation_module": "Solidity.Semantics.Storage.Ops",
+    "module": "Solidity.Semantics.Storage.Ops",
+    "name": "Solidity.SFields.strip",
+    "record": "implemented_by"
+  },
+  {
+    "implementation": "Solidity.SList.defaultOfM",
+    "implementation_module": "Solidity.Semantics.Storage.Ops",
+    "module": "Solidity.Semantics.Storage.Ops",
+    "name": "Solidity.SList.defaultOf",
+    "record": "implemented_by"
+  },
+  {
+    "implementation": "Solidity.SList.stripM",
+    "implementation_module": "Solidity.Semantics.Storage.Ops",
+    "module": "Solidity.Semantics.Storage.Ops",
+    "name": "Solidity.SList.strip",
+    "record": "implemented_by"
+  },
+  {
+    "implementation": "Solidity.SVal.defaultOfM",
+    "implementation_module": "Solidity.Semantics.Storage.Ops",
+    "module": "Solidity.Semantics.Storage.Ops",
+    "name": "Solidity.SVal.defaultOf",
+    "record": "implemented_by"
+  },
+  {
+    "implementation": "Solidity.SVal.findM",
+    "implementation_module": "Solidity.Semantics.Storage.Ops",
+    "module": "Solidity.Semantics.Storage.Ops",
+    "name": "Solidity.SVal.find",
+    "record": "implemented_by"
+  },
+  {
+    "implementation": "Solidity.SVal.findLiveM",
+    "implementation_module": "Solidity.Semantics.Storage.Ops",
+    "module": "Solidity.Semantics.Storage.Ops",
+    "name": "Solidity.SVal.findLive",
+    "record": "implemented_by"
+  },
+  {
+    "implementation": "Solidity.SVal.overlayM",
+    "implementation_module": "Solidity.Semantics.Storage.Ops",
+    "module": "Solidity.Semantics.Storage.Ops",
+    "name": "Solidity.SVal.overlay",
+    "record": "implemented_by"
+  },
+  {
+    "implementation": "Solidity.SVal.saveM",
+    "implementation_module": "Solidity.Semantics.Storage.Ops",
+    "module": "Solidity.Semantics.Storage.Ops",
+    "name": "Solidity.SVal.save",
+    "record": "implemented_by"
+  },
+  {
+    "implementation": "Solidity.SVal.stripM",
+    "implementation_module": "Solidity.Semantics.Storage.Ops",
+    "module": "Solidity.Semantics.Storage.Ops",
+    "name": "Solidity.SVal.strip",
+    "record": "implemented_by"
+  },
+  {
+    "implementation": "Solidity.SVec.defaultOfM",
+    "implementation_module": "Solidity.Semantics.Storage.Ops",
+    "module": "Solidity.Semantics.Storage.Ops",
+    "name": "Solidity.SVec.defaultOf",
+    "record": "implemented_by"
+  },
+  {
+    "implementation": "Solidity.SVec.overlayOnM",
+    "implementation_module": "Solidity.Semantics.Storage.Ops",
+    "module": "Solidity.Semantics.Storage.Ops",
+    "name": "Solidity.SVec.overlayOn",
+    "record": "implemented_by"
+  },
+  {
+    "implementation": "Solidity.SVec.stripM",
+    "implementation_module": "Solidity.Semantics.Storage.Ops",
+    "module": "Solidity.Semantics.Storage.Ops",
+    "name": "Solidity.SVec.strip",
+    "record": "implemented_by"
+  },
+  {
+    "implementation": "Solidity.Path.appendM",
+    "implementation_module": "Solidity.Semantics.Storage.Values",
+    "module": "Solidity.Semantics.Storage.Values",
+    "name": "Solidity.Path.append",
+    "record": "implemented_by"
+  },
+  {
+    "implementation": "Solidity.Path.segmentsM",
+    "implementation_module": "Solidity.Semantics.Storage.Values",
+    "module": "Solidity.Semantics.Storage.Values",
+    "name": "Solidity.Path.segments",
+    "record": "implemented_by"
+  },
+  {
+    "implementation": "Solidity.SFields.foldM",
+    "implementation_module": "Solidity.Semantics.Storage.Values",
+    "module": "Solidity.Semantics.Storage.Values",
+    "name": "Solidity.SFields.fold",
+    "record": "implemented_by"
+  },
+  {
+    "implementation": "Solidity.SFields.getM",
+    "implementation_module": "Solidity.Semantics.Storage.Values",
+    "module": "Solidity.Semantics.Storage.Values",
+    "name": "Solidity.SFields.get",
+    "record": "implemented_by"
+  },
+  {
+    "implementation": "Solidity.SFields.setM",
+    "implementation_module": "Solidity.Semantics.Storage.Values",
+    "module": "Solidity.Semantics.Storage.Values",
+    "name": "Solidity.SFields.set",
+    "record": "implemented_by"
+  },
+  {
+    "implementation": "Solidity.SList.foldM",
+    "implementation_module": "Solidity.Semantics.Storage.Values",
+    "module": "Solidity.Semantics.Storage.Values",
+    "name": "Solidity.SList.fold",
+    "record": "implemented_by"
+  },
+  {
+    "implementation": "Solidity.SList.toListM",
+    "implementation_module": "Solidity.Semantics.Storage.Values",
+    "module": "Solidity.Semantics.Storage.Values",
+    "name": "Solidity.SList.toList",
+    "record": "implemented_by"
+  },
+  {
+    "implementation": "Solidity.SMap.foldM",
+    "implementation_module": "Solidity.Semantics.Storage.Values",
+    "module": "Solidity.Semantics.Storage.Values",
+    "name": "Solidity.SMap.fold",
+    "record": "implemented_by"
+  },
+  {
+    "implementation": "Solidity.SMap.toListM",
+    "implementation_module": "Solidity.Semantics.Storage.Values",
+    "module": "Solidity.Semantics.Storage.Values",
+    "name": "Solidity.SMap.toList",
+    "record": "implemented_by"
+  },
+  {
+    "implementation": "Solidity.SVal.foldM",
+    "implementation_module": "Solidity.Semantics.Storage.Values",
+    "module": "Solidity.Semantics.Storage.Values",
+    "name": "Solidity.SVal.fold",
+    "record": "implemented_by"
+  },
+  {
+    "implementation": "Solidity.SVec.foldM",
+    "implementation_module": "Solidity.Semantics.Storage.Values",
+    "module": "Solidity.Semantics.Storage.Values",
+    "name": "Solidity.SVec.fold",
+    "record": "implemented_by"
+  },
+  {
+    "implementation": "Solidity.SVec.setM",
+    "implementation_module": "Solidity.Semantics.Storage.Values",
+    "module": "Solidity.Semantics.Storage.Values",
+    "name": "Solidity.SVec.set",
+    "record": "implemented_by"
+  },
+  {
+    "implementation": "Solidity.SVec.toListM",
+    "implementation_module": "Solidity.Semantics.Storage.Values",
+    "module": "Solidity.Semantics.Storage.Values",
+    "name": "Solidity.SVec.toList",
+    "record": "implemented_by"
+  },
+  {
+    "implementation": "Solidity.Semantics.Segs.labelsM",
+    "implementation_module": "Solidity.Semantics.Storage.Values",
+    "module": "Solidity.Semantics.Storage.Values",
+    "name": "Solidity.Semantics.Segs.labels",
+    "record": "implemented_by"
+  },
+  {
+    "implementation": "Solidity.MAddrT.resolveM",
+    "implementation_module": "Solidity.Signature",
+    "module": "Solidity.Signature",
+    "name": "Solidity.MAddrT.resolve",
+    "record": "implemented_by"
+  },
+  {
+    "implementation": "Solidity.Op0.evalM",
+    "implementation_module": "Solidity.Signature",
+    "module": "Solidity.Signature",
+    "name": "Solidity.Op0.eval",
+    "record": "implemented_by"
+  },
+  {
+    "implementation": "Solidity.Op1.evalM",
+    "implementation_module": "Solidity.Signature",
+    "module": "Solidity.Signature",
+    "name": "Solidity.Op1.eval",
+    "record": "implemented_by"
+  },
+  {
+    "implementation": "Solidity.Op2.evalM",
+    "implementation_module": "Solidity.Signature",
+    "module": "Solidity.Signature",
+    "name": "Solidity.Op2.eval",
+    "record": "implemented_by"
+  },
+  {
+    "implementation": "Solidity.Op3.evalM",
+    "implementation_module": "Solidity.Signature",
+    "module": "Solidity.Signature",
+    "name": "Solidity.Op3.eval",
+    "record": "implemented_by"
+  },
+  {
+    "implementation": "_private.Solidity.Syntax.Elab.Context.0.Solidity.RecThunk.getImpl",
+    "implementation_module": "Solidity.Syntax.Elab.Context",
+    "module": "Solidity.Syntax.Elab.Context",
+    "name": "Solidity.RecThunk.get",
+    "record": "implemented_by"
+  },
+  {
+    "implementation": "Solidity.CallMemo.bodyImpl?",
+    "implementation_module": "Solidity.Syntax.Elab.Values",
+    "module": "Solidity.Syntax.Elab.Values",
+    "name": "Solidity.CallMemo.body?",
+    "record": "implemented_by"
+  },
+  {
+    "implementation": "Solidity.CallMemo.setBodyImpl",
+    "implementation_module": "Solidity.Syntax.Elab.Values",
+    "module": "Solidity.Syntax.Elab.Values",
+    "name": "Solidity.CallMemo.setBody",
+    "record": "implemented_by"
+  },
+  {
+    "implementation": "Solidity.QMemo.addImpl",
+    "implementation_module": "Solidity.Syntax.Quote",
+    "module": "Solidity.Syntax.Quote",
+    "name": "Solidity.QMemo.add",
+    "record": "implemented_by"
+  },
+  {
+    "implementation": "Solidity.QMemo.findImpl",
+    "implementation_module": "Solidity.Syntax.Quote",
+    "module": "Solidity.Syntax.Quote",
+    "name": "Solidity.QMemo.find",
+    "record": "implemented_by"
+  },
+  {
+    "implementation": "Solidity.elabAgainstWith.unsafe_1",
+    "implementation_module": "Solidity.Syntax.Splice",
+    "module": "Solidity.Syntax.Splice",
+    "name": "Solidity.elabAgainstWith.unsafe_impl_3",
+    "record": "implemented_by"
+  },
+  {
+    "implementation": "Solidity.Tools.CallFunctionShare.elabShareSize.unsafe_1",
+    "implementation_module": "Solidity.Tools.CallFunctionShare",
+    "module": "Solidity.Tools.CallFunctionShare",
+    "name": "Solidity.Tools.CallFunctionShare.elabShareSize.unsafe_impl_3",
+    "record": "implemented_by"
+  },
+  {
+    "implementation": "Solidity.Tools.CallFunctionShare.elabShareSize.unsafe_4",
+    "implementation_module": "Solidity.Tools.CallFunctionShare",
+    "module": "Solidity.Tools.CallFunctionShare",
+    "name": "Solidity.Tools.CallFunctionShare.elabShareSize.unsafe_impl_6",
+    "record": "implemented_by"
+  },
+  {
+    "implementation": "Solidity.Tools.evalLines.unsafe_1",
+    "implementation_module": "Solidity.Tools.Common",
+    "module": "Solidity.Tools.Common",
+    "name": "Solidity.Tools.evalLines.unsafe_impl_3",
+    "record": "implemented_by"
+  },
+  {
+    "implementation": "Solidity.Tools.resolveTarget?.unsafe_1",
+    "implementation_module": "Solidity.Tools.Common",
+    "module": "Solidity.Tools.Common",
+    "name": "Solidity.Tools.resolveTarget?.unsafe_impl_3",
+    "record": "implemented_by"
+  },
+  {
+    "implementation": "Solidity.Tools.resolveTarget?.unsafe_4",
+    "implementation_module": "Solidity.Tools.Common",
+    "module": "Solidity.Tools.Common",
+    "name": "Solidity.Tools.resolveTarget?.unsafe_impl_6",
+    "record": "implemented_by"
+  },
+  {
+    "implementation": "_private.Solidity.Tools.CompleteVerification.0.Solidity.Tools.detailedExactRefutation.unsafe_3",
+    "implementation_module": "Solidity.Tools.CompleteVerification",
+    "module": "Solidity.Tools.CompleteVerification",
+    "name": "_private.Solidity.Tools.CompleteVerification.0.Solidity.Tools.detailedExactRefutation.unsafe_impl_5",
+    "record": "implemented_by"
+  },
+  {
+    "implementation": "_private.Solidity.Tools.CompleteVerification.0.Solidity.Tools.renderRefutation.unsafe_1",
+    "implementation_module": "Solidity.Tools.CompleteVerification",
+    "module": "Solidity.Tools.CompleteVerification",
+    "name": "_private.Solidity.Tools.CompleteVerification.0.Solidity.Tools.renderRefutation.unsafe_impl_3",
+    "record": "implemented_by"
+  },
+  {
+    "implementation": "_private.Solidity.Tools.CompleteVerification.0.Solidity.Tools.verifyReduction.unsafe_1",
+    "implementation_module": "Solidity.Tools.CompleteVerification",
+    "module": "Solidity.Tools.CompleteVerification",
+    "name": "_private.Solidity.Tools.CompleteVerification.0.Solidity.Tools.verifyReduction.unsafe_impl_3",
+    "record": "implemented_by"
+  },
+  {
+    "implementation": "Solidity.Fml.eval3C",
+    "implementation_module": "Solidity.Tools.Counterexample",
+    "module": "Solidity.Tools.Counterexample",
+    "name": "Solidity.Fml.eval3",
+    "record": "implemented_by"
+  },
+  {
+    "implementation": "Solidity.Fml.peelC",
+    "implementation_module": "Solidity.Tools.Counterexample",
+    "module": "Solidity.Tools.Counterexample",
+    "name": "Solidity.Fml.peel",
+    "record": "implemented_by"
+  },
+  {
+    "implementation": "Solidity.Tools.certifyLong.unsafe_1",
+    "implementation_module": "Solidity.Tools.Counterexample",
+    "module": "Solidity.Tools.Counterexample",
+    "name": "Solidity.Tools.certifyLong.unsafe_impl_3",
+    "record": "implemented_by"
+  },
+  {
+    "implementation": "Solidity.Tools.elabCounterexample.unsafe_8",
+    "implementation_module": "Solidity.Tools.Counterexample",
+    "module": "Solidity.Tools.Counterexample",
+    "name": "Solidity.Tools.elabCounterexample.unsafe_impl_10",
+    "record": "implemented_by"
+  },
+  {
+    "implementation": "Solidity.Tools.elabCounterexample.unsafe_5",
+    "implementation_module": "Solidity.Tools.Counterexample",
+    "module": "Solidity.Tools.Counterexample",
+    "name": "Solidity.Tools.elabCounterexample.unsafe_impl_7",
+    "record": "implemented_by"
+  },
+  {
+    "implementation": "Solidity.Tools.evalSolRefute.unsafe_3",
+    "implementation_module": "Solidity.Tools.Counterexample",
+    "module": "Solidity.Tools.Counterexample",
+    "name": "Solidity.Tools.evalSolRefute.unsafe_impl_5",
+    "record": "implemented_by"
+  },
+  {
+    "implementation": "Solidity.Tools.evalSolRefute.unsafe_6",
+    "implementation_module": "Solidity.Tools.Counterexample",
+    "module": "Solidity.Tools.Counterexample",
+    "name": "Solidity.Tools.evalSolRefute.unsafe_impl_8",
+    "record": "implemented_by"
+  },
+  {
+    "implementation": "Solidity.Tools.CreationTryReplay.elaborate.unsafe_1",
+    "implementation_module": "Solidity.Tools.CreationTryReplay",
+    "module": "Solidity.Tools.CreationTryReplay",
+    "name": "Solidity.Tools.CreationTryReplay.elaborate.unsafe_impl_3",
+    "record": "implemented_by"
+  },
+  {
+    "implementation": "Solidity.Elementary.candidateFor.unsafe_1",
+    "implementation_module": "Solidity.Tools.Elementary",
+    "module": "Solidity.Tools.Elementary",
+    "name": "Solidity.Elementary.candidateFor.unsafe_impl_3",
+    "record": "implemented_by"
+  },
+  {
+    "implementation": "Solidity.Tools.elabStepCore.unsafe_1",
+    "implementation_module": "Solidity.Tools.Inspect",
+    "module": "Solidity.Tools.Inspect",
+    "name": "Solidity.Tools.elabStepCore.unsafe_impl_3",
+    "record": "implemented_by"
+  },
+  {
+    "implementation": "Solidity.Tools.elabWpCore.unsafe_1",
+    "implementation_module": "Solidity.Tools.Inspect",
+    "module": "Solidity.Tools.Inspect",
+    "name": "Solidity.Tools.elabWpCore.unsafe_impl_3",
+    "record": "implemented_by"
+  },
+  {
+    "implementation": "Solidity.Tools.leafCountermodel.unsafe_1",
+    "implementation_module": "Solidity.Tools.LeafArithmetic",
+    "module": "Solidity.Tools.LeafArithmetic",
+    "name": "Solidity.Tools.leafCountermodel.unsafe_impl_3",
+    "record": "implemented_by"
+  },
+  {
+    "implementation": "Solidity.Tools.LibraryTryReplay.elaborate.unsafe_1",
+    "implementation_module": "Solidity.Tools.LibraryTryReplay",
+    "module": "Solidity.Tools.LibraryTryReplay",
+    "name": "Solidity.Tools.LibraryTryReplay.elaborate.unsafe_impl_3",
+    "record": "implemented_by"
+  },
+  {
+    "implementation": "Solidity.Tools.PaymentReplay.elabPaymentBatch.unsafe_1",
+    "implementation_module": "Solidity.Tools.PaymentReplay",
+    "module": "Solidity.Tools.PaymentReplay",
+    "name": "Solidity.Tools.PaymentReplay.elabPaymentBatch.unsafe_impl_3",
+    "record": "implemented_by"
+  },
+  {
+    "implementation": "Solidity.Tools.leafSize.unsafe_1",
+    "implementation_module": "Solidity.Tools.ProofTree",
+    "module": "Solidity.Tools.ProofTree",
+    "name": "Solidity.Tools.leafSize.unsafe_impl_3",
+    "record": "implemented_by"
+  },
+  {
+    "implementation": "Solidity.Tools.queryCountermodel.unsafe_1",
+    "implementation_module": "Solidity.Tools.QueryArithmetic",
+    "module": "Solidity.Tools.QueryArithmetic",
+    "name": "Solidity.Tools.queryCountermodel.unsafe_impl_3",
+    "record": "implemented_by"
+  },
+  {
+    "implementation": "Solidity.Tools.refuteSource?.unsafe_1",
+    "implementation_module": "Solidity.Tools.SourceCounterexample",
+    "module": "Solidity.Tools.SourceCounterexample",
+    "name": "Solidity.Tools.refuteSource?.unsafe_impl_3",
+    "record": "implemented_by"
+  },
+  {
+    "implementation": "Solidity.Tools.refuteSource?.unsafe_4",
+    "implementation_module": "Solidity.Tools.SourceCounterexample",
+    "module": "Solidity.Tools.SourceCounterexample",
+    "name": "Solidity.Tools.refuteSource?.unsafe_impl_6",
+    "record": "implemented_by"
+  },
+  {
+    "implementation": "Solidity.Tools.Upstream.elabUpstreamBatch.unsafe_1",
+    "implementation_module": "Solidity.Tools.Upstream",
+    "module": "Solidity.Tools.Upstream",
+    "name": "Solidity.Tools.Upstream.elabUpstreamBatch.unsafe_impl_3",
+    "record": "implemented_by"
+  },
+  {
+    "implementation": "Solidity.Tools.verifyFunction.unsafe_1",
+    "implementation_module": "Solidity.Tools.Verify",
+    "module": "Solidity.Tools.Verify",
+    "name": "Solidity.Tools.verifyFunction.unsafe_impl_3",
+    "record": "implemented_by"
+  },
+  {
+    "implementation": "Solidity.Yul.Views.localStoragePathsM",
+    "implementation_module": "Solidity.Yul.Views.RetainedEntryPaths",
+    "module": "Solidity.Yul.Views.RetainedEntryPaths",
+    "name": "Solidity.Yul.Views.localStoragePaths",
+    "record": "implemented_by"
+  },
+  {
+    "implementation": "Solidity.Yul.Views.returnStoragePathsM",
+    "implementation_module": "Solidity.Yul.Views.RetainedEntryPaths",
+    "module": "Solidity.Yul.Views.RetainedEntryPaths",
+    "name": "Solidity.Yul.Views.returnStoragePaths",
+    "record": "implemented_by"
+  },
+  {
+    "implementation": "Solidity.Yul.Views.valueStoragePathsM",
+    "implementation_module": "Solidity.Yul.Views.RetainedEntryPaths",
+    "module": "Solidity.Yul.Views.RetainedEntryPaths",
+    "name": "Solidity.Yul.Views.valueStoragePaths",
+    "record": "implemented_by"
+  },
+  {
+    "implementation": "Solidity.Yul.Views.locationStoragePathsM",
+    "implementation_module": "Solidity.Yul.Views.RetainedLocationRun",
+    "module": "Solidity.Yul.Views.RetainedLocationRun",
+    "name": "Solidity.Yul.Views.locationStoragePaths",
+    "record": "implemented_by"
+  },
+  {
+    "implementation": "Solidity.Yul.Views.runtimeStoragePathsM",
+    "implementation_module": "Solidity.Yul.Views.RetainedRuntimePaths",
+    "module": "Solidity.Yul.Views.RetainedRuntimePaths",
+    "name": "Solidity.Yul.Views.runtimeStoragePaths",
+    "record": "implemented_by"
+  },
+  {
+    "implementation": "Solidity.Yul.Views.runtimeValuesPathsM",
+    "implementation_module": "Solidity.Yul.Views.RetainedRuntimePaths",
+    "module": "Solidity.Yul.Views.RetainedRuntimePaths",
+    "name": "Solidity.Yul.Views.runtimeValuesPaths",
+    "record": "implemented_by"
+  }
+]

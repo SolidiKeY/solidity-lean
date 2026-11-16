@@ -1,0 +1,48 @@
+{
+  "base": "d6fd95f0886775d7c286813fa9b993a40ba7a777",
+  "boundaries": [
+    "This measures observed native identifier infos; it does not certify exhaustive roots, runtime dependencies or deletions.",
+    "Prepared import-view contents are trusted externally; the receipt binds the view path and compared ilean, not every imported olean byte.",
+    "Module hints are first-owner metadata; typed names and const/fvar classes are retained without coalescing.",
+    "The module-wide coalescing comparison is diagnostic only. Promotions include legitimate aliases and are not counted as false dependency edges.",
+    "Fresh serial elaboration need not reproduce cached asynchronous alias decisions; the cached span and fresh native observations are compared separately.",
+    "Snapshot acceptance is limited to already-finished diagnostic-only trees; errors are propagated and unfinished/separate-info work is unsupported."
+  ],
+  "coalescing_fvar_to_const_diagnostics": 7,
+  "comparison": {
+    "cached_definition_line": 51,
+    "cached_definition_lsp": [
+      50,
+      5,
+      50,
+      6
+    ],
+    "cached_definition_text": "\u03c3",
+    "native_constant_binder_lsp": [
+      69,
+      4,
+      69,
+      12
+    ],
+    "native_definition_line": 70,
+    "native_definition_text": "headCode",
+    "raw_binders_at_cached_location": 2,
+    "raw_cached_location_kinds": [
+      "fvar"
+    ],
+    "target": "Solidity.Backend.InternalFlow.RuntimeFrame.Reference.headCode"
+  },
+  "counts": {
+    "coalescing_change": 249,
+    "command": 13,
+    "command_info": 14,
+    "identifier": 972
+  },
+  "finished_diagnostic_snapshots": 2,
+  "native_original_identifier_events": 940,
+  "native_other_origin_identifier_events": 32,
+  "source": "Solidity/Backend/InternalFlow/RuntimeFrameReference.lean",
+  "source_sha256": "1c01b76027d56f713ac3adf2deebfe700112362a068fbd7d7d5850acffe550a6",
+  "status": "partial",
+  "verdict": "The cached editor definition range is not the declaration range. Fresh native info identifies local-variable binders there and the actual headCode constant binder at its own source location."
+}

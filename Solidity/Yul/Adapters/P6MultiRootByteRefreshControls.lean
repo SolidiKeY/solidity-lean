@@ -16,7 +16,7 @@ def firstOut (pipeline : Pipeline) := P6MultiRootByte.run mixedReadFrame 0 first
   StructWordHeap.Controls.support (image pipeline) (room pipeline)
 
 theorem first_success (pipeline : Pipeline) : (firstOut pipeline).1.1=.ok () := by
-  first | (simp only;done) | decide | omega | rfl
+  rfl
 
 theorem derived_sequence (pipeline : Pipeline) (H : Source.HeapTy) (ok : Source.MemOK mixedEnv H mixedState) :
     ∃ q : Placement (firstOut pipeline).1.2.2.heap,
@@ -27,7 +27,6 @@ theorem derived_sequence (pipeline : Pipeline) (H : Source.HeapTy) (ok : Source.
           nextSupport (firstOut pipeline).2 nextRoom
         final.1=(.error (.stuck "not bytes"),after) ∧
         frameBytes final.2=frameBytes (P6MultiRootByte.Controls.reached pipeline).2 := by
-  first | (simp only;done) | decide | omega | rfl | skip
   have prepared := refresh H mixedPlacement mixedReadFrame 0 firstPlan mixedState mixedPlacement
     (retainInitial _ _) ok StructWordHeap.Controls.support (image pipeline) (room pipeline)
     (initial_reads pipeline) (initial_reserved pipeline)
@@ -55,7 +54,6 @@ theorem failed_prefix_skips (pipeline : Pipeline) :
 mutation. This compares actual bytes, without a hash-injectivity premise. -/
 theorem stale_source_negative :
     (program mixedReadFrame 0 secondPlan).run mixedState≠(.error (.stuck "not bytes"),after) := by
-  first | (simp only;done) | decide | omega | rfl | skip
   intro same
   have lost := congrArg (fun result : Source.R Unit × Source.EMState mixedEnv _ =>
     (Source.heapBytes 1).run result.2) same

@@ -22,7 +22,7 @@ theorem source_run (global : Glob E) (frame : Fr) (n nps : Nat) (ph : Option (Ph
     (execS global frame (n + 2) nps ph
       (RStmt.expr (R := R) (M := M) (k := k) (.state d signature)) locals).run (L0 E, state) =
       (.ok (.normal locals), (L0 E, state)) := by
-  change evalE (plan := none) global frame (n + 1) (.state d signature) (locals, state) = _ at evaluation
+  change evalE (plan := none) (calldataKnown := true) global frame (n + 1) (.state d signature) (locals, state) = _ at evaluation
   simp only [execS, EM.sub, bind, pure, ExceptT.bind, ExceptT.pure,
     ExceptT.bindCont, ExceptT.run, ExceptT.mk, StateT.bind, StateT.pure, evaluation]
 

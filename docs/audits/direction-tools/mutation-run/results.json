@@ -1,0 +1,2076 @@
+[
+  {
+    "id": "M32",
+    "area": "Calculus",
+    "file": "Solidity/Calculus/Closers.lean",
+    "line": 213,
+    "description": "TRes.isFail: | .error .exhausted => false -> | .error .exhausted => true",
+    "verdict": "KILLED",
+    "killed_by": [
+      "Solidity.Calculus.Closers:231:_root_.Solidity.Modality.afterRunTR_diamond_fail"
+    ],
+    "seconds": 4.458,
+    "baseline_pass": true,
+    "checks": [
+      {
+        "returncode": 1,
+        "seconds": 4.458,
+        "log": "/workspace/da-mutation-runtime/final-run/M32-Solidity.Calculus.Closers.log",
+        "module": "Solidity.Calculus.Closers",
+        "pristine": {
+          "returncode": 0,
+          "seconds": 2.771,
+          "log": "/workspace/da-mutation-runtime/final-run/pristine-Solidity.Calculus.Closers.log",
+          "module": "Solidity.Calculus.Closers"
+        },
+        "decisive_output": "Solidity/Calculus/Closers.lean:231:16: error: unsolved goals\ncase error.exhausted.refl\n\u03b1 : Type\np : \u03b1 \u2192 Prop\nh : Modality.diamond.afterRunTR p (Except.error THalt.exhausted)\n\u22a2 False\n"
+      }
+    ]
+  },
+  {
+    "id": "M33",
+    "area": "Evm",
+    "file": "Solidity/Evm/Machine.lean",
+    "line": 76,
+    "description": "signed word threshold: def H : Nat := 2 ^ 255 -> def H : Nat := 2 ^ 254",
+    "verdict": "KILLED",
+    "killed_by": [
+      "Solidity.Evm.Machine:79:W_eq"
+    ],
+    "seconds": 4.048,
+    "baseline_pass": true,
+    "checks": [
+      {
+        "returncode": 1,
+        "seconds": 4.048,
+        "log": "/workspace/da-mutation-runtime/final-run/M33-Solidity.Evm.Machine.log",
+        "module": "Solidity.Evm.Machine",
+        "pristine": {
+          "returncode": 0,
+          "seconds": 3.573,
+          "log": "/workspace/da-mutation-runtime/final-run/pristine-Solidity.Evm.Machine.log",
+          "module": "Solidity.Evm.Machine"
+        },
+        "decisive_output": "Solidity/Evm/Machine.lean:79:28: error: unsolved goals\n\u22a2 2 * 2 ^ 255 = 2 * 2 ^ 254\n"
+      }
+    ]
+  },
+  {
+    "id": "M34",
+    "area": "Evm",
+    "file": "Solidity/Evm/Machine.lean",
+    "line": 107,
+    "description": "root slot offset: | .root o, i => .root (o + i) -> | .root o, i => .root (o + i + 1)",
+    "verdict": "KILLED",
+    "killed_by": [
+      "Solidity.Evm.Layout:203:Slot.add_zero",
+      "Solidity.Evm.Layout:207:Slot.add_add"
+    ],
+    "seconds": 7.768,
+    "baseline_pass": true,
+    "checks": [
+      {
+        "returncode": 0,
+        "seconds": 4.128,
+        "log": "/workspace/da-mutation-runtime/final-run/M34-Solidity.Evm.Machine.log",
+        "module": "Solidity.Evm.Machine",
+        "pristine": {
+          "returncode": 0,
+          "seconds": 3.573,
+          "log": "/workspace/da-mutation-runtime/final-run/pristine-Solidity.Evm.Machine.log",
+          "module": "Solidity.Evm.Machine"
+        }
+      },
+      {
+        "returncode": 1,
+        "seconds": 3.64,
+        "log": "/workspace/da-mutation-runtime/final-run/M34-Solidity.Evm.Layout.log",
+        "module": "Solidity.Evm.Layout",
+        "pristine": {
+          "returncode": 0,
+          "seconds": 3.409,
+          "log": "/workspace/da-mutation-runtime/final-run/pristine-Solidity.Evm.Layout.log",
+          "module": "Solidity.Evm.Layout"
+        },
+        "decisive_output": "Solidity/Evm/Layout.lean:203:14: error: Tactic `rfl` failed: The left-hand side\n  (root off\u271d).add 0\nis not definitionally equal to the right-hand side\n  root off\u271d\n\ncase root\noff\u271d : Nat\n\u22a2 (root off\u271d).add 0 = root off\u271d\nSolidity/Evm/Layout.lean:207:81: error: unsolved goals\ncase root\ni j off\u271d : Nat\n\u22a2 False\n"
+      }
+    ]
+  },
+  {
+    "id": "M35",
+    "area": "Backend",
+    "file": "Solidity/Backend/Scalar/Checked.lean",
+    "line": 48,
+    "description": "overflow-test arithmetic: .op .ADD,\n   .op (.DUP \u27e81, by decide\u27e9), .op .GT] -> .op .SUB,\n   .op (.DUP \u27e81, by decide\u27e9), .op .GT]",
+    "verdict": "KILLED",
+    "killed_by": [
+      "Solidity.Backend.Scalar.Checked:58:unsignedAddTest_raw"
+    ],
+    "seconds": 2.115,
+    "baseline_pass": true,
+    "checks": [
+      {
+        "returncode": 1,
+        "seconds": 2.115,
+        "log": "/workspace/da-mutation-runtime/final-run/M35-Solidity.Backend.Scalar.Checked.log",
+        "module": "Solidity.Backend.Scalar.Checked",
+        "pristine": {
+          "returncode": 0,
+          "seconds": 2.071,
+          "log": "/workspace/da-mutation-runtime/final-run/pristine-Solidity.Backend.Scalar.Checked.log",
+          "module": "Solidity.Backend.Scalar.Checked"
+        },
+        "decisive_output": "Solidity/Backend/Scalar/Checked.lean:58:2: error: 'change' tactic failed, pattern\n  some (flag (decide (BitVec.toNat (a + b) < BitVec.toNat a)) :: a :: b :: tail) = ?m.45\nis not definitionally equal to target\n  run unsignedAddTest (a :: b :: tail) =\n    some (flag (decide (2 ^ 256 \u2264 BitVec.toNat a + BitVec.toNat b)) :: a :: b :: tail)\n'Solidity.Backend.Scalar.checkedUintAdd' depends on axioms: [propext, sorryAx, Classical.choice, Quot.sound]\n'Solidity.Backend.Scalar.checkedUintSub' depends on axioms: [propext, Classical.choice, Quot.sound]\n"
+      }
+    ]
+  },
+  {
+    "id": "M36",
+    "area": "Backend",
+    "file": "Solidity/Backend/Scalar/Checked.lean",
+    "line": 53,
+    "description": "underflow-test comparison: .op (.DUP \u27e81, by decide\u27e9), .op .LT] -> .op (.DUP \u27e81, by decide\u27e9), .op .GT]",
+    "verdict": "KILLED",
+    "killed_by": [
+      "Solidity.Backend.Scalar.Checked:146:anonymous example",
+      "Solidity.Backend.Scalar.Checked:72:unsignedSubTest_raw",
+      "Solidity.Backend.Scalar.Checked:74:unsignedSubTest_raw"
+    ],
+    "seconds": 2.248,
+    "baseline_pass": true,
+    "checks": [
+      {
+        "returncode": 1,
+        "seconds": 2.248,
+        "log": "/workspace/da-mutation-runtime/final-run/M36-Solidity.Backend.Scalar.Checked.log",
+        "module": "Solidity.Backend.Scalar.Checked",
+        "pristine": {
+          "returncode": 0,
+          "seconds": 2.071,
+          "log": "/workspace/da-mutation-runtime/final-run/pristine-Solidity.Backend.Scalar.Checked.log",
+          "module": "Solidity.Backend.Scalar.Checked"
+        },
+        "decisive_output": "Solidity/Backend/Scalar/Checked.lean:72:0: error: Not a definitional equality: the left-hand side\n  run unsignedSubTest (a :: b :: tail)\nis not definitionally equal to the right-hand side\n  some (flag (decide (BitVec.toNat a < BitVec.toNat b)) :: a :: b :: tail)\nSolidity/Backend/Scalar/Checked.lean:74:68: error: Type mismatch\n  rfl\nhas type\n  ?m.14 = ?m.14\nbut is expected to have type\n  run unsignedSubTest (a :: b :: tail) = some (flag (decide (BitVec.toNat a < BitVec.toNat b)) :: a :: b :: tail)\nSolidity/Backend/Scalar/Checked.lean:146:37: error: Type mismatch\n  rfl\nhas type\n  ?m.19 = ?m.19\nbut is expected to have type\n  guarded unsignedSubTest [Instr.op Op.SUB] overflowFailure [3, 7, 99] = some (Except.error overflowFailure)\n'Solidity.Backend.Scalar.checkedUintAdd' depends on axioms: [propext, Classical.choice, Quot.sound]\n'Solidity.Backend.Scalar.checkedUintSub' depends on axioms: [propext, sorryAx, Classical.choice, Quot.sound]\n"
+      }
+    ]
+  },
+  {
+    "id": "M37",
+    "area": "Yul",
+    "file": "Solidity/Yul/Words.lean",
+    "line": 94,
+    "description": "modulo zero divisor: if (xs 1).val = 0 then word 0 else word ((xs 0).val % (xs 1).val) -> if (xs 1).val = 0 then word 1 else word ((xs 0).val % (xs 1).val)",
+    "verdict": "KILLED",
+    "killed_by": [
+      "Solidity.Yul.Words:130:mod_zero"
+    ],
+    "seconds": 0.861,
+    "baseline_pass": true,
+    "checks": [
+      {
+        "returncode": 1,
+        "seconds": 0.861,
+        "log": "/workspace/da-mutation-runtime/final-run/M37-Solidity.Yul.Words.log",
+        "module": "Solidity.Yul.Words",
+        "pristine": {
+          "returncode": 0,
+          "seconds": 0.831,
+          "log": "/workspace/da-mutation-runtime/final-run/pristine-Solidity.Yul.Words.log",
+          "module": "Solidity.Yul.Words"
+        },
+        "decisive_output": "Solidity/Yul/Words.lean:130:2: error: Tactic `rfl` failed: The left-hand side\n  Pure.mod.eval fun i => if i = 0 then x else word 0\nis not definitionally equal to the right-hand side\n  word 0\n\nx : Word\n\u22a2 (Pure.mod.eval fun i => if i = 0 then x else word 0) = word 0\n"
+      }
+    ]
+  },
+  {
+    "id": "M38",
+    "area": "Yul",
+    "file": "Solidity/Yul/Words.lean",
+    "line": 107,
+    "description": "large shift result: if (xs 0).val \u2265 256 then word 0 else word ((xs 1).val <<< (xs 0).val) -> if (xs 0).val \u2265 256 then word 1 else word ((xs 1).val <<< (xs 0).val)",
+    "verdict": "KILLED",
+    "killed_by": [
+      "Solidity.Yul.WordLaws:26:shl_large"
+    ],
+    "seconds": 1.14,
+    "baseline_pass": true,
+    "checks": [
+      {
+        "returncode": 0,
+        "seconds": 0.794,
+        "log": "/workspace/da-mutation-runtime/final-run/M38-Solidity.Yul.Words.log",
+        "module": "Solidity.Yul.Words",
+        "pristine": {
+          "returncode": 0,
+          "seconds": 0.831,
+          "log": "/workspace/da-mutation-runtime/final-run/pristine-Solidity.Yul.Words.log",
+          "module": "Solidity.Yul.Words"
+        }
+      },
+      {
+        "returncode": 1,
+        "seconds": 0.346,
+        "log": "/workspace/da-mutation-runtime/final-run/M38-Solidity.Yul.WordLaws.log",
+        "module": "Solidity.Yul.WordLaws",
+        "pristine": {
+          "returncode": 0,
+          "seconds": 0.312,
+          "log": "/workspace/da-mutation-runtime/final-run/pristine-Solidity.Yul.WordLaws.log",
+          "module": "Solidity.Yul.WordLaws"
+        },
+        "decisive_output": "Solidity/Yul/WordLaws.lean:26:2: error: 'change' tactic failed, pattern\n  (if \u2191k \u2265 256 then word 0 else ?m.28) = word 0\nis not definitionally equal to target\n  (Pure.shl.eval fun i => if i = 0 then k else x) = word 0\n"
+      }
+    ]
+  },
+  {
+    "id": "M39",
+    "area": "Lowering",
+    "file": "Solidity/Lowering/V07/WordCasts.lean",
+    "line": 8,
+    "description": "signed cast width: def signed : Source.IntTy := \u27e8true,256,by decide\u27e9 -> def signed : Source.IntTy := \u27e8true,128,by decide\u27e9",
+    "verdict": "KILLED",
+    "killed_by": [
+      "Solidity.Lowering.V07.WordCasts:140:assignment_to_int_transport",
+      "Solidity.Lowering.V07.WordCasts:14:signed_wrap",
+      "Solidity.Lowering.V07.WordCasts:180:assignment_to_uint_transport",
+      "Solidity.Lowering.V07.WordCasts:63:source_to_int",
+      "Solidity.Lowering.V07.WordCasts:73:source_to_uint"
+    ],
+    "seconds": 1.624,
+    "baseline_pass": true,
+    "checks": [
+      {
+        "returncode": 1,
+        "seconds": 1.624,
+        "log": "/workspace/da-mutation-runtime/final-run/M39-Solidity.Lowering.V07.WordCasts.log",
+        "module": "Solidity.Lowering.V07.WordCasts",
+        "pristine": {
+          "returncode": 0,
+          "seconds": 1.826,
+          "log": "/workspace/da-mutation-runtime/final-run/pristine-Solidity.Lowering.V07.WordCasts.log",
+          "module": "Solidity.Lowering.V07.WordCasts"
+        },
+        "decisive_output": "Solidity/Lowering/V07/WordCasts.lean:14:6: error: Tactic `rewrite` failed: Did not find an occurrence of the pattern\n  x % \u2191(2 ^ 256)\nin the target expression\n  (if \u2191(2 ^ (128 - 1) - 1) < x % \u2191(2 ^ 128) then x % \u2191(2 ^ 128) - \u2191(2 ^ 128) else x % \u2191(2 ^ 128)) =\n    if x < Semantics.intBound then x else x - Semantics.uintBound\n\nx : Int\nhx : 0 \u2264 x \u2227 x < \u2191(2 ^ 256)\n\u22a2 (if \u2191(2 ^ (128 - 1) - 1) < x % \u2191(2 ^ 128) then x % \u2191(2 ^ 128) - \u2191(2 ^ 128) else x % \u2191(2 ^ 128)) =\n    if x < Semantics.intBound then x else x - Semantics.uintBound\nSolidity/Lowering/V07/WordCasts.lean:63:71: error: Tactic `rfl` failed: The left-hand side\n  Source.STy.explicit E.isBase E.mapFree (Source.STy.int Source.IntTy.u256) (Source.STy.int signed)\nis not definitionally equal to the right-hand side\n  true\n\nE : Source.Env\n\u0393 : Source.RCtx\nG : Source.Glob E\nF : Source.Fr\nfuel : Nat\ns mid : Source.EMState E \u0393\ne : Source.RExpr E \u0393 (Source.STy.int Source.IntTy.u256)\nx : Int\nhx : Source.IntTy.u256.lo \u2264 x \u2227 x \u2264 Source.IntTy.u256.hi\nread : ExceptT.run (Source.evalE G F fuel e) s = (Except.ok (Source.RVal.val (Source.Val.int x hx)), mid)\n\u22a2 Source.STy.explicit E.isBase E.mapFree (Source.STy.int Source.IntTy.u256) (Source.STy.int signed) = true\nSolidity/Lowering/V07/WordCasts.lean:73:70: error: Tactic `rfl` failed: The left-hand side\n  Source.STy.explicit E.isBase E.mapFree (Source.STy.int signed) (Source.STy.int Source.IntTy.u256)\nis not definitionally equal to the right-hand side\n  true\n\nE : Source.Env\n\u0393 : Source.RCtx\nG : Source.Glob E\nF : Source.Fr\nfuel : Nat\ns mid : Source.EMState E \u0393\ne : Source.RExpr E \u0393 (Source.STy.int signed)\nx : Int\nhx : signed.lo \u2264 x \u2227 x \u2264 signed.hi\nread : ExceptT.run (Source.evalE G F fuel e) s = (Except.ok (Source.RVal.val (Source.Val.int x hx)), mid)\n\u22a2 Source.STy.explicit E.isBase E.mapFree (Source.STy.int signed) (Source.STy.int Source.IntTy.u256) = true\nSolidity/Lowering/V07/WordCasts.lean:140:54: error: Tactic `rfl` failed: The left-hand side\n  Source.STy.explicit E.isBase E.mapFree (Source.STy.int Source.IntTy.u256) (Source.STy.int signed)\nis not definitionally equal to the right-hand side\n  true\n\nE : Source.Env\nsrc\u0393 : Source.RCtx\nC : Contract\n\u0393 : Ctx\n\u03b9 : Type\nG : Source.Glob E\nF : Source.Fr\nfuel : Nat\nsource : Source.EMState E src\u0393\ntarget : State C \u0393\nsi : \u03b9 \u2192 Source.Idx src\u0393 (Source.STy.int Source.IntTy.u256)\nti : \u03b9 \u2192 Idx \u0393 (LTy.val PrimTy.uint)\nfamily : IntegerLocalFamily Source.IntTy.u256 si ti source.fst target.env\ni a : \u03b9\nx : Int\nhx : Source.IntTy.u256.lo \u2264 x \u2227 x \u2264 Source.IntTy.u256.hi\nreadA : source.fst.get (si a) = Source.Val.int x hx\n\u22a2 Source.STy.explicit E.isBase E.mapFree (Source.STy.int Source.IntTy.u256) (Source.STy.int signed) = true\nSolidity/Lowering/V07/WordCasts.lean:180:54: error: Tactic `rfl` failed: The left-hand side\n  Source.STy.explicit E.isBase E.mapFree (Source.STy.int signed) (Source.STy.int Source.IntTy.u256)\nis not definitionally equal to the right-hand side\n  true\n\nE : Source.Env\nsrc\u0393 : Source.RCtx\nC : Contract\n\u0393 : Ctx\n\u03b9 : Type\nG : Source.Glob E\nF : Source.Fr\nfuel : Nat\nsource : Source.EMState E src\u0393\ntarget : State C \u0393\nsi : \u03b9 \u2192 Source.Idx src\u0393 (Source.STy.int signed)\nti : \u03b9 \u2192 Idx \u0393 (LTy.val PrimTy.int)\nfamily : IntegerLocalFamily signed si ti source.fst target.env\ni a : \u03b9\nx : Int\nhx : signed.lo \u2264 x \u2227 x \u2264 signed.hi\nreadA : source.fst.get (si a) = Source.Val.int x hx\n\u22a2 Source.STy.explicit E.isBase E.mapFree (Source.STy.int signed) (Source.STy.int Source.IntTy.u256) = true\n"
+      }
+    ]
+  },
+  {
+    "id": "M01",
+    "area": "Semantics",
+    "file": "Solidity/Semantics/Ops.lean",
+    "line": 53,
+    "description": "arithInt: some (x + y) -> some (x - y)",
+    "verdict": "KILLED",
+    "killed_by": [
+      "Solidity.Evm.SimLemmas:291:utail_simT",
+      "Solidity.Evm.SimLemmas:439:stail_simT",
+      "Solidity.Evm.SimLemmas:605:bump_simT",
+      "Solidity.Evm.SimLemmas:611:bump_simT"
+    ],
+    "seconds": 17.065,
+    "baseline_pass": true,
+    "checks": [
+      {
+        "returncode": 0,
+        "seconds": 1.398,
+        "log": "/workspace/da-mutation-runtime/final-run/M01-Solidity.Semantics.Ops.log",
+        "module": "Solidity.Semantics.Ops",
+        "pristine": {
+          "returncode": 0,
+          "seconds": 1.428,
+          "log": "/workspace/da-mutation-runtime/final-run/pristine-Solidity.Semantics.Ops.log",
+          "module": "Solidity.Semantics.Ops"
+        }
+      },
+      {
+        "returncode": 0,
+        "seconds": 6.537,
+        "log": "/workspace/da-mutation-runtime/final-run/M01-Solidity.Semantics.Run.log",
+        "module": "Solidity.Semantics.Run",
+        "pristine": {
+          "returncode": 0,
+          "seconds": 6.18,
+          "log": "/workspace/da-mutation-runtime/final-run/pristine-Solidity.Semantics.Run.log",
+          "module": "Solidity.Semantics.Run"
+        }
+      },
+      {
+        "returncode": 1,
+        "seconds": 9.13,
+        "log": "/workspace/da-mutation-runtime/final-run/M01-Solidity.Evm.SimLemmas.log",
+        "module": "Solidity.Evm.SimLemmas",
+        "pristine": {
+          "returncode": 0,
+          "seconds": 8.778,
+          "log": "/workspace/da-mutation-runtime/final-run/pristine-Solidity.Evm.SimLemmas.log",
+          "module": "Solidity.Evm.SimLemmas"
+        },
+        "decisive_output": "Solidity/Evm/SimLemmas.lean:218:18: warning: This simp argument is unused:\n  if_true\n\nHint: Omit it from the simp argument list.\n  simp only [h,\u0335 \u0335i\u0335f\u0335_\u0335t\u0335r\u0335u\u0335e\u0335]\n\nNote: This linter can be disabled with `set_option linter.unusedSimpArgs false`\nSolidity/Evm/SimLemmas.lean:224:18: warning: This simp argument is unused:\n  if_false\n\nHint: Omit it from the simp argument list.\n  simp only [h,\u0335 \u0335i\u0335f\u0335_\u0335f\u0335a\u0335l\u0335s\u0335e\u0335]\n\nNote: This linter can be disabled with `set_option linter.unusedSimpArgs false`\nSolidity/Evm/SimLemmas.lean:291:10: error: maximum recursion depth has been reached\nuse `set_option maxRecDepth <num>` to increase limit\nuse `set_option diagnostics true` to get diagnostic information\nSolidity/Evm/SimLemmas.lean:291:60: error: omega could not prove the goal:\na possible counterexample may satisfy the constraints\n  e \u2265 0\n  d \u2265 0\n  c \u2265 0\n  c - d \u2265 1\n  c - d - e \u2264 0\n  c - e \u2265 1\nwhere\n c := \u2191W\n d := \u2191a\n e := \u2191b\nSolidity/Evm/SimLemmas.lean:439:36: error: Type mismatch\n  out_int_if m\nhas type\n  ValOutT PrimTy.int (TRes.ofOpt (PrimTy.int.ofInt? ?m.578))\n    (if -\u2191H \u2264 ?m.578 \u2227 ?m.578 < \u2191H then\n      Out.ok\n        { stack := Word.val (sword ?m.578) :: m.stack, store := m.store, mem := m.mem, bal := m.bal, bal\u2080 := m.bal\u2080,\n          self := m.self, accepts := m.accepts, caller := m.caller, callvalue := m.callvalue, timestamp := m.timestamp }\n        0\n    else Out.revert)\n    m\nbut is expected to have type\n  ValOutT (BinOp.add.ret PrimTy.int) (TRes.ofOpt (PrimTy.int.ofInt? (sgn a - sgn b)))\n    (if -\u2191H \u2264 sgn a + sgn b \u2227 sgn a + sgn b < \u2191H then\n      Out.ok\n        { stack := Word.val (sword (sgn a + sgn b)) :: m.stack, store := m.store, mem := m.mem, bal := m.bal,\n          bal\u2080 := m.bal\u2080, self := m.self, accepts := m.accepts, caller := m.caller, callvalue := m.callvalue,\n          timestamp := m.timestamp }\n        0\n    else Out.revert)\n    m\nSolidity/Evm/SimLemmas.lean:605:17: error: Type mismatch\n  ht\nhas type\n  ValOutT (IncDec.preInc.binOp.ret PrimTy.uint) (TRes.ofOpt (IncDec.preInc.binOp.evalT \u22ef a \u27e81, \u22ef\u27e9))\n    (run (binTail PrimTy.uint IncDec.preInc.binOp)\n      { stack := Word.val \u27e81, \u22ef\u27e9 :: w :: m.stack, store := m.store, mem := m.mem, bal := m.bal, bal\u2080 := m.bal\u2080,\n        self := m.self, accepts := m.accepts, caller := m.caller, callvalue := m.callvalue, timestamp := m.timestamp })\n    m\nbut is expected to have type\n  ValOutT PrimTy.uint (TRes.ofOpt (bumpT IncDec.preInc PrimTy.uint (PrimTy.key a)))\n    (run (binTail PrimTy.uint IncDec.preInc.binOp)\n      { stack := Word.val \u27e81, \u22ef\u27e9 :: w :: m.stack, store := m.store, mem := m.mem, bal := m.bal, bal\u2080 := m.bal\u2080,\n        self := m.self, accepts := m.accepts, caller := m.caller, callvalue := m.callvalue, timestamp := m.timestamp })\n    m\nSolidity/Evm/SimLemmas.lean:605:17: error: Type mismatch\n  ht\nhas type\n  ValOutT (IncDec.postInc.binOp.ret PrimTy.uint) (TRes.ofOpt (IncDec.postInc.binOp.evalT \u22ef a \u27e81, \u22ef\u27e9))\n    (run (binTail PrimTy.uint IncDec.postInc.binOp)\n      { stack := Word.val \u27e81, \u22ef\u27e9 :: w :: m.stack, store := m.store, mem := m.mem, bal := m.bal, bal\u2080 := m.bal\u2080,\n        self := m.self, accepts := m.accepts, caller := m.caller, callvalue := m.callvalue, timestamp := m.timestamp })\n    m\nbut is expected to have type\n  ValOutT PrimTy.uint (TRes.ofOpt (bumpT IncDec.postInc PrimTy.uint (PrimTy.key a)))\n    (run (binTail PrimTy.uint IncDec.postInc.binOp)\n      { stack := Word.val \u27e81, \u22ef\u27e9 :: w :: m.stack, store := m.store, mem := m.mem, bal := m.bal, bal\u2080 := m.bal\u2080,\n        self := m.self, accepts := m.accepts, caller := m.caller, callvalue := m.callvalue, timestamp := m.timestamp })\n    m\nSolidity/Evm/SimLemmas.lean:611:17: error: Type mismatch\n  ht\nhas type\n  ValOutT (IncDec.preInc.binOp.ret PrimTy.int) (TRes.ofOpt (IncDec.preInc.binOp.evalT \u22ef a \u27e81, \u22ef\u27e9))\n    (run (binTail PrimTy.int IncDec.preInc.binOp)\n      { stack := Word.val \u27e81, \u22ef\u27e9 :: w :: m.stack, store := m.store, mem := m.mem, bal := m.bal, bal\u2080 := m.bal\u2080,\n        self := m.self, accepts := m.accepts, caller := m.caller, callvalue := m.callvalue, timestamp := m.timestamp })\n    m\nbut is expected to have type\n  ValOutT PrimTy.int (TRes.ofOpt (bumpT IncDec.preInc PrimTy.int (PrimTy.key a)))\n    (run (binTail PrimTy.int IncDec.preInc.binOp)\n      { stack := Word.val \u27e81, \u22ef\u27e9 :: w :: m.stack, store := m.store, mem := m.mem, bal := m.bal, bal\u2080 := m.bal\u2080,\n        self := m.self, accepts := m.accepts, caller := m.caller, callvalue := m.callvalue, timestamp := m.timestamp })\n    m\nSolidity/Evm/SimLemmas.lean:611:17: error: Type mismatch\n  ht\nhas type\n  ValOutT (IncDec.postInc.binOp.ret PrimTy.int) (TRes.ofOpt (IncDec.postInc.binOp.evalT \u22ef a \u27e81, \u22ef\u27e9))\n    (run (binTail PrimTy.int IncDec.postInc.binOp)\n      { stack := Word.val \u27e81, \u22ef\u27e9 :: w :: m.stack, store := m.store, mem := m.mem, bal := m.bal, bal\u2080 := m.bal\u2080,\n        self := m.self, accepts := m.accepts, caller := m.caller, callvalue := m.callvalue, timestamp := m.timestamp })\n    m\nbut is expected to have type\n  ValOutT PrimTy.int (TRes.ofOpt (bumpT IncDec.postInc PrimTy.int (PrimTy.key a)))\n    (run (binTail PrimTy.int IncDec.postInc.binOp)\n      { stack := Word.val \u27e81, \u22ef\u27e9 :: w :: m.stack, store := m.store, mem := m.mem, bal := m.bal, bal\u2080 := m.bal\u2080,\n        self := m.self, accepts := m.accepts, caller := m.caller, callvalue := m.callvalue, timestamp := m.timestamp })\n    m\n"
+      }
+    ]
+  },
+  {
+    "id": "M02",
+    "area": "Semantics",
+    "file": "Solidity/Semantics/Ops.lean",
+    "line": 54,
+    "description": "arithInt: some (x - y) -> some (x + y)",
+    "verdict": "KILLED",
+    "killed_by": [
+      "Solidity.Evm.SimLemmas:294:utail_simT",
+      "Solidity.Evm.SimLemmas:440:stail_simT",
+      "Solidity.Evm.SimLemmas:605:bump_simT",
+      "Solidity.Evm.SimLemmas:611:bump_simT"
+    ],
+    "seconds": 18.252,
+    "baseline_pass": true,
+    "checks": [
+      {
+        "returncode": 0,
+        "seconds": 1.574,
+        "log": "/workspace/da-mutation-runtime/final-run/M02-Solidity.Semantics.Ops.log",
+        "module": "Solidity.Semantics.Ops",
+        "pristine": {
+          "returncode": 0,
+          "seconds": 1.428,
+          "log": "/workspace/da-mutation-runtime/final-run/pristine-Solidity.Semantics.Ops.log",
+          "module": "Solidity.Semantics.Ops"
+        }
+      },
+      {
+        "returncode": 0,
+        "seconds": 7.479,
+        "log": "/workspace/da-mutation-runtime/final-run/M02-Solidity.Semantics.Run.log",
+        "module": "Solidity.Semantics.Run",
+        "pristine": {
+          "returncode": 0,
+          "seconds": 6.18,
+          "log": "/workspace/da-mutation-runtime/final-run/pristine-Solidity.Semantics.Run.log",
+          "module": "Solidity.Semantics.Run"
+        }
+      },
+      {
+        "returncode": 1,
+        "seconds": 9.199,
+        "log": "/workspace/da-mutation-runtime/final-run/M02-Solidity.Evm.SimLemmas.log",
+        "module": "Solidity.Evm.SimLemmas",
+        "pristine": {
+          "returncode": 0,
+          "seconds": 8.778,
+          "log": "/workspace/da-mutation-runtime/final-run/pristine-Solidity.Evm.SimLemmas.log",
+          "module": "Solidity.Evm.SimLemmas"
+        },
+        "decisive_output": "Solidity/Evm/SimLemmas.lean:218:18: warning: This simp argument is unused:\n  if_true\n\nHint: Omit it from the simp argument list.\n  simp only [h,\u0335 \u0335i\u0335f\u0335_\u0335t\u0335r\u0335u\u0335e\u0335]\n\nNote: This linter can be disabled with `set_option linter.unusedSimpArgs false`\nSolidity/Evm/SimLemmas.lean:224:18: warning: This simp argument is unused:\n  if_false\n\nHint: Omit it from the simp argument list.\n  simp only [h,\u0335 \u0335i\u0335f\u0335_\u0335f\u0335a\u0335l\u0335s\u0335e\u0335]\n\nNote: This linter can be disabled with `set_option linter.unusedSimpArgs false`\nSolidity/Evm/SimLemmas.lean:294:10: error: maximum recursion depth has been reached\nuse `set_option maxRecDepth <num>` to increase limit\nuse `set_option diagnostics true` to get diagnostic information\nSolidity/Evm/SimLemmas.lean:294:60: error: omega could not prove the goal:\na possible counterexample may satisfy the constraints\n  e \u2265 0\n  d \u2265 0\n  d - e \u2264 -1\n  c \u2265 0\n  c - d \u2265 1\n  c - e \u2265 1\nwhere\n c := \u2191W\n d := \u2191a\n e := \u2191b\nSolidity/Evm/SimLemmas.lean:294:80: error: omega could not prove the goal:\na possible counterexample may satisfy the constraints\n  e \u2265 0\n  d \u2265 0\n  d - e \u2264 -1\n  d - e \u2264 -1\n  c \u2265 0\n  c - d \u2265 1\n  c - e \u2265 1\nwhere\n c := \u2191W\n d := \u2191a\n e := \u2191b\nSolidity/Evm/SimLemmas.lean:440:36: error: Type mismatch\n  out_int_if m\nhas type\n  ValOutT PrimTy.int (TRes.ofOpt (PrimTy.int.ofInt? ?m.582))\n    (if -\u2191H \u2264 ?m.582 \u2227 ?m.582 < \u2191H then\n      Out.ok\n        { stack := Word.val (sword ?m.582) :: m.stack, store := m.store, mem := m.mem, bal := m.bal, bal\u2080 := m.bal\u2080,\n          self := m.self, accepts := m.accepts, caller := m.caller, callvalue := m.callvalue, timestamp := m.timestamp }\n        0\n    else Out.revert)\n    m\nbut is expected to have type\n  ValOutT (BinOp.sub.ret PrimTy.int) (TRes.ofOpt (PrimTy.int.ofInt? (sgn a + sgn b)))\n    (if -\u2191H \u2264 sgn a - sgn b \u2227 sgn a - sgn b < \u2191H then\n      Out.ok\n        { stack := Word.val (sword (sgn a - sgn b)) :: m.stack, store := m.store, mem := m.mem, bal := m.bal,\n          bal\u2080 := m.bal\u2080, self := m.self, accepts := m.accepts, caller := m.caller, callvalue := m.callvalue,\n          timestamp := m.timestamp }\n        0\n    else Out.revert)\n    m\nSolidity/Evm/SimLemmas.lean:605:17: error: Type mismatch\n  ht\nhas type\n  ValOutT (IncDec.preDec.binOp.ret PrimTy.uint) (TRes.ofOpt (IncDec.preDec.binOp.evalT \u22ef a \u27e81, \u22ef\u27e9))\n    (run (binTail PrimTy.uint IncDec.preDec.binOp)\n      { stack := Word.val \u27e81, \u22ef\u27e9 :: w :: m.stack, store := m.store, mem := m.mem, bal := m.bal, bal\u2080 := m.bal\u2080,\n        self := m.self, accepts := m.accepts, caller := m.caller, callvalue := m.callvalue, timestamp := m.timestamp })\n    m\nbut is expected to have type\n  ValOutT PrimTy.uint (TRes.ofOpt (bumpT IncDec.preDec PrimTy.uint (PrimTy.key a)))\n    (run (binTail PrimTy.uint IncDec.preDec.binOp)\n      { stack := Word.val \u27e81, \u22ef\u27e9 :: w :: m.stack, store := m.store, mem := m.mem, bal := m.bal, bal\u2080 := m.bal\u2080,\n        self := m.self, accepts := m.accepts, caller := m.caller, callvalue := m.callvalue, timestamp := m.timestamp })\n    m\nSolidity/Evm/SimLemmas.lean:605:17: error: Type mismatch\n  ht\nhas type\n  ValOutT (IncDec.postDec.binOp.ret PrimTy.uint) (TRes.ofOpt (IncDec.postDec.binOp.evalT \u22ef a \u27e81, \u22ef\u27e9))\n    (run (binTail PrimTy.uint IncDec.postDec.binOp)\n      { stack := Word.val \u27e81, \u22ef\u27e9 :: w :: m.stack, store := m.store, mem := m.mem, bal := m.bal, bal\u2080 := m.bal\u2080,\n        self := m.self, accepts := m.accepts, caller := m.caller, callvalue := m.callvalue, timestamp := m.timestamp })\n    m\nbut is expected to have type\n  ValOutT PrimTy.uint (TRes.ofOpt (bumpT IncDec.postDec PrimTy.uint (PrimTy.key a)))\n    (run (binTail PrimTy.uint IncDec.postDec.binOp)\n      { stack := Word.val \u27e81, \u22ef\u27e9 :: w :: m.stack, store := m.store, mem := m.mem, bal := m.bal, bal\u2080 := m.bal\u2080,\n        self := m.self, accepts := m.accepts, caller := m.caller, callvalue := m.callvalue, timestamp := m.timestamp })\n    m\nSolidity/Evm/SimLemmas.lean:611:17: error: Type mismatch\n  ht\nhas type\n  ValOutT (IncDec.preDec.binOp.ret PrimTy.int) (TRes.ofOpt (IncDec.preDec.binOp.evalT \u22ef a \u27e81, \u22ef\u27e9))\n    (run (binTail PrimTy.int IncDec.preDec.binOp)\n      { stack := Word.val \u27e81, \u22ef\u27e9 :: w :: m.stack, store := m.store, mem := m.mem, bal := m.bal, bal\u2080 := m.bal\u2080,\n        self := m.self, accepts := m.accepts, caller := m.caller, callvalue := m.callvalue, timestamp := m.timestamp })\n    m\nbut is expected to have type\n  ValOutT PrimTy.int (TRes.ofOpt (bumpT IncDec.preDec PrimTy.int (PrimTy.key a)))\n    (run (binTail PrimTy.int IncDec.preDec.binOp)\n      { stack := Word.val \u27e81, \u22ef\u27e9 :: w :: m.stack, store := m.store, mem := m.mem, bal := m.bal, bal\u2080 := m.bal\u2080,\n        self := m.self, accepts := m.accepts, caller := m.caller, callvalue := m.callvalue, timestamp := m.timestamp })\n    m\nSolidity/Evm/SimLemmas.lean:611:17: error: Type mismatch\n  ht\nhas type\n  ValOutT (IncDec.postDec.binOp.ret PrimTy.int) (TRes.ofOpt (IncDec.postDec.binOp.evalT \u22ef a \u27e81, \u22ef\u27e9))\n    (run (binTail PrimTy.int IncDec.postDec.binOp)\n      { stack := Word.val \u27e81, \u22ef\u27e9 :: w :: m.stack, store := m.store, mem := m.mem, bal := m.bal, bal\u2080 := m.bal\u2080,\n        self := m.self, accepts := m.accepts, caller := m.caller, callvalue := m.callvalue, timestamp := m.timestamp })\n    m\nbut is expected to have type\n  ValOutT PrimTy.int (TRes.ofOpt (bumpT IncDec.postDec PrimTy.int (PrimTy.key a)))\n    (run (binTail PrimTy.int IncDec.postDec.binOp)\n      { stack := Word.val \u27e81, \u22ef\u27e9 :: w :: m.stack, store := m.store, mem := m.mem, bal := m.bal, bal\u2080 := m.bal\u2080,\n        self := m.self, accepts := m.accepts, caller := m.caller, callvalue := m.callvalue, timestamp := m.timestamp })\n    m\n"
+      }
+    ]
+  },
+  {
+    "id": "M03",
+    "area": "Semantics",
+    "file": "Solidity/Semantics/Ops.lean",
+    "line": 55,
+    "description": "arithInt: some (x * y) -> some (x + y)",
+    "verdict": "KILLED",
+    "killed_by": [
+      "Solidity.Evm.SimLemmas:296:utail_simT",
+      "Solidity.Evm.SimLemmas:441:stail_simT"
+    ],
+    "seconds": 20.196,
+    "baseline_pass": true,
+    "checks": [
+      {
+        "returncode": 0,
+        "seconds": 1.492,
+        "log": "/workspace/da-mutation-runtime/final-run/M03-Solidity.Semantics.Ops.log",
+        "module": "Solidity.Semantics.Ops",
+        "pristine": {
+          "returncode": 0,
+          "seconds": 1.428,
+          "log": "/workspace/da-mutation-runtime/final-run/pristine-Solidity.Semantics.Ops.log",
+          "module": "Solidity.Semantics.Ops"
+        }
+      },
+      {
+        "returncode": 0,
+        "seconds": 9.773,
+        "log": "/workspace/da-mutation-runtime/final-run/M03-Solidity.Semantics.Run.log",
+        "module": "Solidity.Semantics.Run",
+        "pristine": {
+          "returncode": 0,
+          "seconds": 6.18,
+          "log": "/workspace/da-mutation-runtime/final-run/pristine-Solidity.Semantics.Run.log",
+          "module": "Solidity.Semantics.Run"
+        }
+      },
+      {
+        "returncode": 1,
+        "seconds": 8.931,
+        "log": "/workspace/da-mutation-runtime/final-run/M03-Solidity.Evm.SimLemmas.log",
+        "module": "Solidity.Evm.SimLemmas",
+        "pristine": {
+          "returncode": 0,
+          "seconds": 8.778,
+          "log": "/workspace/da-mutation-runtime/final-run/pristine-Solidity.Evm.SimLemmas.log",
+          "module": "Solidity.Evm.SimLemmas"
+        },
+        "decisive_output": "Solidity/Evm/SimLemmas.lean:218:18: warning: This simp argument is unused:\n  if_true\n\nHint: Omit it from the simp argument list.\n  simp only [h,\u0335 \u0335i\u0335f\u0335_\u0335t\u0335r\u0335u\u0335e\u0335]\n\nNote: This linter can be disabled with `set_option linter.unusedSimpArgs false`\nSolidity/Evm/SimLemmas.lean:224:18: warning: This simp argument is unused:\n  if_false\n\nHint: Omit it from the simp argument list.\n  simp only [h,\u0335 \u0335i\u0335f\u0335_\u0335f\u0335a\u0335l\u0335s\u0335e\u0335]\n\nNote: This linter can be disabled with `set_option linter.unusedSimpArgs false`\nSolidity/Evm/SimLemmas.lean:296:34: error: Tactic `rewrite` failed: Did not find an occurrence of the pattern\n  \u2191?n * \u2191?m\nin the target expression\n  ValOutT (BinOp.mul.ret PrimTy.uint) (TRes.ofOpt (PrimTy.uint.ofInt? (\u2191a + \u2191b)))\n    (if x : a * b < W then\n      Out.ok\n        { stack := Word.val \u27e8a * b, x\u27e9 :: m.stack, store := m.store, mem := m.mem, bal := m.bal, bal\u2080 := m.bal\u2080,\n          self := m.self, accepts := m.accepts, caller := m.caller, callvalue := m.callvalue, timestamp := m.timestamp }\n        0\n    else Out.revert)\n    m\n\ncase mul\na b : Nat\nha : a < W\nhb : b < W\nm : Machine\nhop : binInFrag BinOp.mul PrimTy.uint = true\nhand : BinOp.mul \u2260 BinOp.and\nhor : BinOp.mul \u2260 BinOp.or\nhacc : BinOp.mul.accepts PrimTy.uint = true\n\u22a2 ValOutT (BinOp.mul.ret PrimTy.uint) (TRes.ofOpt (PrimTy.uint.ofInt? (\u2191a + \u2191b)))\n    (if x : a * b < W then\n      Out.ok\n        { stack := Word.val \u27e8a * b, x\u27e9 :: m.stack, store := m.store, mem := m.mem, bal := m.bal, bal\u2080 := m.bal\u2080,\n          self := m.self, accepts := m.accepts, caller := m.caller, callvalue := m.callvalue, timestamp := m.timestamp }\n        0\n    else Out.revert)\n    m\nSolidity/Evm/SimLemmas.lean:441:36: error: Type mismatch\n  out_int_if m\nhas type\n  ValOutT PrimTy.int (TRes.ofOpt (PrimTy.int.ofInt? ?m.586))\n    (if -\u2191H \u2264 ?m.586 \u2227 ?m.586 < \u2191H then\n      Out.ok\n        { stack := Word.val (sword ?m.586) :: m.stack, store := m.store, mem := m.mem, bal := m.bal, bal\u2080 := m.bal\u2080,\n          self := m.self, accepts := m.accepts, caller := m.caller, callvalue := m.callvalue, timestamp := m.timestamp }\n        0\n    else Out.revert)\n    m\nbut is expected to have type\n  ValOutT (BinOp.mul.ret PrimTy.int) (TRes.ofOpt (PrimTy.int.ofInt? (sgn a + sgn b)))\n    (if -\u2191H \u2264 sgn a * sgn b \u2227 sgn a * sgn b < \u2191H then\n      Out.ok\n        { stack := Word.val (sword (sgn a * sgn b)) :: m.stack, store := m.store, mem := m.mem, bal := m.bal,\n          bal\u2080 := m.bal\u2080, self := m.self, accepts := m.accepts, caller := m.caller, callvalue := m.callvalue,\n          timestamp := m.timestamp }\n        0\n    else Out.revert)\n    m\n"
+      }
+    ]
+  },
+  {
+    "id": "M04",
+    "area": "Semantics",
+    "file": "Solidity/Semantics/Ops.lean",
+    "line": 56,
+    "description": "arithInt: if y < 0 then none else some (x ^ y.toNat) -> if y < 0 then none else some (x ^ (y.toNat + 1))",
+    "verdict": "KILLED",
+    "killed_by": [
+      "Solidity.Evm.SimLemmas:301:utail_simT"
+    ],
+    "seconds": 16.713,
+    "baseline_pass": true,
+    "checks": [
+      {
+        "returncode": 0,
+        "seconds": 1.407,
+        "log": "/workspace/da-mutation-runtime/final-run/M04-Solidity.Semantics.Ops.log",
+        "module": "Solidity.Semantics.Ops",
+        "pristine": {
+          "returncode": 0,
+          "seconds": 1.428,
+          "log": "/workspace/da-mutation-runtime/final-run/pristine-Solidity.Semantics.Ops.log",
+          "module": "Solidity.Semantics.Ops"
+        }
+      },
+      {
+        "returncode": 0,
+        "seconds": 6.595,
+        "log": "/workspace/da-mutation-runtime/final-run/M04-Solidity.Semantics.Run.log",
+        "module": "Solidity.Semantics.Run",
+        "pristine": {
+          "returncode": 0,
+          "seconds": 6.18,
+          "log": "/workspace/da-mutation-runtime/final-run/pristine-Solidity.Semantics.Run.log",
+          "module": "Solidity.Semantics.Run"
+        }
+      },
+      {
+        "returncode": 1,
+        "seconds": 8.711,
+        "log": "/workspace/da-mutation-runtime/final-run/M04-Solidity.Evm.SimLemmas.log",
+        "module": "Solidity.Evm.SimLemmas",
+        "pristine": {
+          "returncode": 0,
+          "seconds": 8.778,
+          "log": "/workspace/da-mutation-runtime/final-run/pristine-Solidity.Evm.SimLemmas.log",
+          "module": "Solidity.Evm.SimLemmas"
+        },
+        "decisive_output": "Solidity/Evm/SimLemmas.lean:218:18: warning: This simp argument is unused:\n  if_true\n\nHint: Omit it from the simp argument list.\n  simp only [h,\u0335 \u0335i\u0335f\u0335_\u0335t\u0335r\u0335u\u0335e\u0335]\n\nNote: This linter can be disabled with `set_option linter.unusedSimpArgs false`\nSolidity/Evm/SimLemmas.lean:224:18: warning: This simp argument is unused:\n  if_false\n\nHint: Omit it from the simp argument list.\n  simp only [h,\u0335 \u0335i\u0335f\u0335_\u0335f\u0335a\u0335l\u0335s\u0335e\u0335]\n\nNote: This linter can be disabled with `set_option linter.unusedSimpArgs false`\nSolidity/Evm/SimLemmas.lean:301:10: error: maximum recursion depth has been reached\nuse `set_option maxRecDepth <num>` to increase limit\nuse `set_option diagnostics true` to get diagnostic information\nSolidity/Evm/SimLemmas.lean:301:68: error: omega could not prove the goal:\na possible counterexample may satisfy the constraints\n  f \u2265 0\n  e \u2265 0\n  d \u2265 0\n  c \u2265 0\n  c - d \u2265 1\n  c - e \u2265 1\n  c - f \u2264 0\nwhere\n c := \u2191W\n d := \u2191a\n e := \u2191b\n f := \u2191(a ^ b)\n"
+      }
+    ]
+  },
+  {
+    "id": "M05",
+    "area": "Semantics",
+    "file": "Solidity/Semantics/Ops.lean",
+    "line": 57,
+    "description": "arithInt: if y = 0 then none else some (Int.tdiv x y) -> if y = 0 then some 0 else some (Int.tdiv x y)",
+    "verdict": "KILLED",
+    "killed_by": [
+      "Solidity.Evm.SimLemmas:305:utail_simT",
+      "Solidity.Evm.SimLemmas:445:stail_simT"
+    ],
+    "seconds": 16.191,
+    "baseline_pass": true,
+    "checks": [
+      {
+        "returncode": 0,
+        "seconds": 1.431,
+        "log": "/workspace/da-mutation-runtime/final-run/M05-Solidity.Semantics.Ops.log",
+        "module": "Solidity.Semantics.Ops",
+        "pristine": {
+          "returncode": 0,
+          "seconds": 1.428,
+          "log": "/workspace/da-mutation-runtime/final-run/pristine-Solidity.Semantics.Ops.log",
+          "module": "Solidity.Semantics.Ops"
+        }
+      },
+      {
+        "returncode": 0,
+        "seconds": 6.25,
+        "log": "/workspace/da-mutation-runtime/final-run/M05-Solidity.Semantics.Run.log",
+        "module": "Solidity.Semantics.Run",
+        "pristine": {
+          "returncode": 0,
+          "seconds": 6.18,
+          "log": "/workspace/da-mutation-runtime/final-run/pristine-Solidity.Semantics.Run.log",
+          "module": "Solidity.Semantics.Run"
+        }
+      },
+      {
+        "returncode": 1,
+        "seconds": 8.51,
+        "log": "/workspace/da-mutation-runtime/final-run/M05-Solidity.Evm.SimLemmas.log",
+        "module": "Solidity.Evm.SimLemmas",
+        "pristine": {
+          "returncode": 0,
+          "seconds": 8.778,
+          "log": "/workspace/da-mutation-runtime/final-run/pristine-Solidity.Evm.SimLemmas.log",
+          "module": "Solidity.Evm.SimLemmas"
+        },
+        "decisive_output": "Solidity/Evm/SimLemmas.lean:218:18: warning: This simp argument is unused:\n  if_true\n\nHint: Omit it from the simp argument list.\n  simp only [h,\u0335 \u0335i\u0335f\u0335_\u0335t\u0335r\u0335u\u0335e\u0335]\n\nNote: This linter can be disabled with `set_option linter.unusedSimpArgs false`\nSolidity/Evm/SimLemmas.lean:224:18: warning: This simp argument is unused:\n  if_false\n\nHint: Omit it from the simp argument list.\n  simp only [h,\u0335 \u0335i\u0335f\u0335_\u0335f\u0335a\u0335l\u0335s\u0335e\u0335]\n\nNote: This linter can be disabled with `set_option linter.unusedSimpArgs false`\nSolidity/Evm/SimLemmas.lean:305:40: error: Type mismatch\n  out_revert\nhas type\n  ValOutT ?m.639 (TRes.ofOpt none) Out.revert ?m.640\nbut is expected to have type\n  ValOutT (BinOp.div.ret PrimTy.uint) (TRes.ofOpt ((some 0).bind PrimTy.uint.ofInt?)) Out.revert m\nSolidity/Evm/SimLemmas.lean:445:41: error: Type mismatch\n  out_revert\nhas type\n  ValOutT ?m.616 (TRes.ofOpt none) Out.revert ?m.617\nbut is expected to have type\n  ValOutT (BinOp.div.ret PrimTy.int) (TRes.ofOpt ((some 0).bind PrimTy.int.ofInt?)) Out.revert m\n"
+      }
+    ]
+  },
+  {
+    "id": "M06",
+    "area": "Semantics",
+    "file": "Solidity/Semantics/Ops.lean",
+    "line": 58,
+    "description": "arithInt: if y = 0 then none else some (Int.tmod x y) -> if y = 0 then some 0 else some (Int.tmod x y)",
+    "verdict": "KILLED",
+    "killed_by": [
+      "Solidity.Evm.SimLemmas:312:utail_simT",
+      "Solidity.Evm.SimLemmas:460:stail_simT"
+    ],
+    "seconds": 16.352,
+    "baseline_pass": true,
+    "checks": [
+      {
+        "returncode": 0,
+        "seconds": 1.459,
+        "log": "/workspace/da-mutation-runtime/final-run/M06-Solidity.Semantics.Ops.log",
+        "module": "Solidity.Semantics.Ops",
+        "pristine": {
+          "returncode": 0,
+          "seconds": 1.428,
+          "log": "/workspace/da-mutation-runtime/final-run/pristine-Solidity.Semantics.Ops.log",
+          "module": "Solidity.Semantics.Ops"
+        }
+      },
+      {
+        "returncode": 0,
+        "seconds": 6.388,
+        "log": "/workspace/da-mutation-runtime/final-run/M06-Solidity.Semantics.Run.log",
+        "module": "Solidity.Semantics.Run",
+        "pristine": {
+          "returncode": 0,
+          "seconds": 6.18,
+          "log": "/workspace/da-mutation-runtime/final-run/pristine-Solidity.Semantics.Run.log",
+          "module": "Solidity.Semantics.Run"
+        }
+      },
+      {
+        "returncode": 1,
+        "seconds": 8.505,
+        "log": "/workspace/da-mutation-runtime/final-run/M06-Solidity.Evm.SimLemmas.log",
+        "module": "Solidity.Evm.SimLemmas",
+        "pristine": {
+          "returncode": 0,
+          "seconds": 8.778,
+          "log": "/workspace/da-mutation-runtime/final-run/pristine-Solidity.Evm.SimLemmas.log",
+          "module": "Solidity.Evm.SimLemmas"
+        },
+        "decisive_output": "Solidity/Evm/SimLemmas.lean:218:18: warning: This simp argument is unused:\n  if_true\n\nHint: Omit it from the simp argument list.\n  simp only [h,\u0335 \u0335i\u0335f\u0335_\u0335t\u0335r\u0335u\u0335e\u0335]\n\nNote: This linter can be disabled with `set_option linter.unusedSimpArgs false`\nSolidity/Evm/SimLemmas.lean:224:18: warning: This simp argument is unused:\n  if_false\n\nHint: Omit it from the simp argument list.\n  simp only [h,\u0335 \u0335i\u0335f\u0335_\u0335f\u0335a\u0335l\u0335s\u0335e\u0335]\n\nNote: This linter can be disabled with `set_option linter.unusedSimpArgs false`\nSolidity/Evm/SimLemmas.lean:312:40: error: Type mismatch\n  out_revert\nhas type\n  ValOutT ?m.709 (TRes.ofOpt none) Out.revert ?m.710\nbut is expected to have type\n  ValOutT (BinOp.mod.ret PrimTy.uint) (TRes.ofOpt ((some 0).bind PrimTy.uint.ofInt?)) Out.revert m\nSolidity/Evm/SimLemmas.lean:460:41: error: Type mismatch\n  out_revert\nhas type\n  ValOutT ?m.910 (TRes.ofOpt none) Out.revert ?m.911\nbut is expected to have type\n  ValOutT (BinOp.mod.ret PrimTy.int) (TRes.ofOpt ((some 0).bind PrimTy.int.ofInt?)) Out.revert m\n"
+      }
+    ]
+  },
+  {
+    "id": "M07",
+    "area": "Semantics",
+    "file": "Solidity/Semantics/Ops.lean",
+    "line": 59,
+    "description": "arithInt: (\u00b7 &&& \u00b7) -> (\u00b7 ||| \u00b7)",
+    "verdict": "KILLED",
+    "killed_by": [
+      "Solidity.Evm.SimLemmas:323:utail_simT",
+      "Solidity.Evm.SimLemmas:428:stail_simT"
+    ],
+    "seconds": 17.021,
+    "baseline_pass": true,
+    "checks": [
+      {
+        "returncode": 0,
+        "seconds": 1.398,
+        "log": "/workspace/da-mutation-runtime/final-run/M07-Solidity.Semantics.Ops.log",
+        "module": "Solidity.Semantics.Ops",
+        "pristine": {
+          "returncode": 0,
+          "seconds": 1.428,
+          "log": "/workspace/da-mutation-runtime/final-run/pristine-Solidity.Semantics.Ops.log",
+          "module": "Solidity.Semantics.Ops"
+        }
+      },
+      {
+        "returncode": 0,
+        "seconds": 6.933,
+        "log": "/workspace/da-mutation-runtime/final-run/M07-Solidity.Semantics.Run.log",
+        "module": "Solidity.Semantics.Run",
+        "pristine": {
+          "returncode": 0,
+          "seconds": 6.18,
+          "log": "/workspace/da-mutation-runtime/final-run/pristine-Solidity.Semantics.Run.log",
+          "module": "Solidity.Semantics.Run"
+        }
+      },
+      {
+        "returncode": 1,
+        "seconds": 8.69,
+        "log": "/workspace/da-mutation-runtime/final-run/M07-Solidity.Evm.SimLemmas.log",
+        "module": "Solidity.Evm.SimLemmas",
+        "pristine": {
+          "returncode": 0,
+          "seconds": 8.778,
+          "log": "/workspace/da-mutation-runtime/final-run/pristine-Solidity.Evm.SimLemmas.log",
+          "module": "Solidity.Evm.SimLemmas"
+        },
+        "decisive_output": "Solidity/Evm/SimLemmas.lean:218:18: warning: This simp argument is unused:\n  if_true\n\nHint: Omit it from the simp argument list.\n  simp only [h,\u0335 \u0335i\u0335f\u0335_\u0335t\u0335r\u0335u\u0335e\u0335]\n\nNote: This linter can be disabled with `set_option linter.unusedSimpArgs false`\nSolidity/Evm/SimLemmas.lean:224:18: warning: This simp argument is unused:\n  if_false\n\nHint: Omit it from the simp argument list.\n  simp only [h,\u0335 \u0335i\u0335f\u0335_\u0335f\u0335a\u0335l\u0335s\u0335e\u0335]\n\nNote: This linter can be disabled with `set_option linter.unusedSimpArgs false`\nSolidity/Evm/SimLemmas.lean:323:41: error: 'show' tactic failed, pattern\n  \u2191(a &&& b) = ?m.844\nis not definitionally equal to target\n  Semantics.uintBitwise (fun x1 x2 => x1 ||| x2) \u2191a \u2191b = \u2191(b &&& a)\nSolidity/Evm/SimLemmas.lean:428:8: error: Tactic `rewrite` failed: Did not find an occurrence of the pattern\n  Semantics.uintBitwise (fun x y => x &&& y) (sgn a) (sgn b)\nin the target expression\n  ValOutT (BinOp.band.ret PrimTy.int)\n    (TRes.ofOpt (PrimTy.int.ofInt? (Semantics.uintBitwise (fun x1 x2 => x1 ||| x2) (sgn a) (sgn b))))\n    (run (sTail BinOp.band)\n      { stack := Word.val \u27e8b, hb\u27e9 :: Word.val \u27e8a, ha\u27e9 :: m.stack, store := m.store, mem := m.mem, bal := m.bal,\n        bal\u2080 := m.bal\u2080, self := m.self, accepts := m.accepts, caller := m.caller, callvalue := m.callvalue,\n        timestamp := m.timestamp })\n    m\n\na b : Nat\nha : a < W\nhb : b < W\nm : Machine\nhb0 : sgn b = 0 \u2194 b = 0\nheq : decide (a = b) = decide (sgn a = sgn b)\nhop : binInFrag BinOp.band PrimTy.int = true\nhand : BinOp.band \u2260 BinOp.and\nhor : BinOp.band \u2260 BinOp.or\nhacc : BinOp.band.accepts PrimTy.int = true\n\u22a2 ValOutT (BinOp.band.ret PrimTy.int)\n    (TRes.ofOpt (PrimTy.int.ofInt? (Semantics.uintBitwise (fun x1 x2 => x1 ||| x2) (sgn a) (sgn b))))\n    (run (sTail BinOp.band)\n      { stack := Word.val \u27e8b, hb\u27e9 :: Word.val \u27e8a, ha\u27e9 :: m.stack, store := m.store, mem := m.mem, bal := m.bal,\n        bal\u2080 := m.bal\u2080, self := m.self, accepts := m.accepts, caller := m.caller, callvalue := m.callvalue,\n        timestamp := m.timestamp })\n    m\n"
+      }
+    ]
+  },
+  {
+    "id": "M08",
+    "area": "Semantics",
+    "file": "Solidity/Semantics/Ops.lean",
+    "line": 60,
+    "description": "arithInt: (\u00b7 ||| \u00b7) -> (\u00b7 &&& \u00b7)",
+    "verdict": "KILLED",
+    "killed_by": [
+      "Solidity.Evm.SimLemmas:326:utail_simT",
+      "Solidity.Evm.SimLemmas:432:stail_simT"
+    ],
+    "seconds": 16.994,
+    "baseline_pass": true,
+    "checks": [
+      {
+        "returncode": 0,
+        "seconds": 1.38,
+        "log": "/workspace/da-mutation-runtime/final-run/M08-Solidity.Semantics.Ops.log",
+        "module": "Solidity.Semantics.Ops",
+        "pristine": {
+          "returncode": 0,
+          "seconds": 1.428,
+          "log": "/workspace/da-mutation-runtime/final-run/pristine-Solidity.Semantics.Ops.log",
+          "module": "Solidity.Semantics.Ops"
+        }
+      },
+      {
+        "returncode": 0,
+        "seconds": 6.717,
+        "log": "/workspace/da-mutation-runtime/final-run/M08-Solidity.Semantics.Run.log",
+        "module": "Solidity.Semantics.Run",
+        "pristine": {
+          "returncode": 0,
+          "seconds": 6.18,
+          "log": "/workspace/da-mutation-runtime/final-run/pristine-Solidity.Semantics.Run.log",
+          "module": "Solidity.Semantics.Run"
+        }
+      },
+      {
+        "returncode": 1,
+        "seconds": 8.897,
+        "log": "/workspace/da-mutation-runtime/final-run/M08-Solidity.Evm.SimLemmas.log",
+        "module": "Solidity.Evm.SimLemmas",
+        "pristine": {
+          "returncode": 0,
+          "seconds": 8.778,
+          "log": "/workspace/da-mutation-runtime/final-run/pristine-Solidity.Evm.SimLemmas.log",
+          "module": "Solidity.Evm.SimLemmas"
+        },
+        "decisive_output": "Solidity/Evm/SimLemmas.lean:218:18: warning: This simp argument is unused:\n  if_true\n\nHint: Omit it from the simp argument list.\n  simp only [h,\u0335 \u0335i\u0335f\u0335_\u0335t\u0335r\u0335u\u0335e\u0335]\n\nNote: This linter can be disabled with `set_option linter.unusedSimpArgs false`\nSolidity/Evm/SimLemmas.lean:224:18: warning: This simp argument is unused:\n  if_false\n\nHint: Omit it from the simp argument list.\n  simp only [h,\u0335 \u0335i\u0335f\u0335_\u0335f\u0335a\u0335l\u0335s\u0335e\u0335]\n\nNote: This linter can be disabled with `set_option linter.unusedSimpArgs false`\nSolidity/Evm/SimLemmas.lean:326:41: error: 'show' tactic failed, pattern\n  \u2191(a ||| b) = ?m.868\nis not definitionally equal to target\n  Semantics.uintBitwise (fun x1 x2 => x1 &&& x2) \u2191a \u2191b = \u2191(b ||| a)\nSolidity/Evm/SimLemmas.lean:432:8: error: Tactic `rewrite` failed: Did not find an occurrence of the pattern\n  Semantics.uintBitwise (fun x x_1 => x ||| x_1) (sgn a) (sgn b)\nin the target expression\n  ValOutT (BinOp.bor.ret PrimTy.int)\n    (TRes.ofOpt (PrimTy.int.ofInt? (Semantics.uintBitwise (fun x1 x2 => x1 &&& x2) (sgn a) (sgn b))))\n    (run (sTail BinOp.bor)\n      { stack := Word.val \u27e8b, hb\u27e9 :: Word.val \u27e8a, ha\u27e9 :: m.stack, store := m.store, mem := m.mem, bal := m.bal,\n        bal\u2080 := m.bal\u2080, self := m.self, accepts := m.accepts, caller := m.caller, callvalue := m.callvalue,\n        timestamp := m.timestamp })\n    m\n\na b : Nat\nha : a < W\nhb : b < W\nm : Machine\nhb0 : sgn b = 0 \u2194 b = 0\nheq : decide (a = b) = decide (sgn a = sgn b)\nhop : binInFrag BinOp.bor PrimTy.int = true\nhand : BinOp.bor \u2260 BinOp.and\nhor : BinOp.bor \u2260 BinOp.or\nhacc : BinOp.bor.accepts PrimTy.int = true\n\u22a2 ValOutT (BinOp.bor.ret PrimTy.int)\n    (TRes.ofOpt (PrimTy.int.ofInt? (Semantics.uintBitwise (fun x1 x2 => x1 &&& x2) (sgn a) (sgn b))))\n    (run (sTail BinOp.bor)\n      { stack := Word.val \u27e8b, hb\u27e9 :: Word.val \u27e8a, ha\u27e9 :: m.stack, store := m.store, mem := m.mem, bal := m.bal,\n        bal\u2080 := m.bal\u2080, self := m.self, accepts := m.accepts, caller := m.caller, callvalue := m.callvalue,\n        timestamp := m.timestamp })\n    m\n"
+      }
+    ]
+  },
+  {
+    "id": "M09",
+    "area": "Semantics",
+    "file": "Solidity/Semantics/Ops.lean",
+    "line": 61,
+    "description": "arithInt: (\u00b7 ^^^ \u00b7) -> (\u00b7 ||| \u00b7)",
+    "verdict": "KILLED",
+    "killed_by": [
+      "Solidity.Evm.SimLemmas:329:utail_simT",
+      "Solidity.Evm.SimLemmas:436:stail_simT"
+    ],
+    "seconds": 16.859,
+    "baseline_pass": true,
+    "checks": [
+      {
+        "returncode": 0,
+        "seconds": 1.374,
+        "log": "/workspace/da-mutation-runtime/final-run/M09-Solidity.Semantics.Ops.log",
+        "module": "Solidity.Semantics.Ops",
+        "pristine": {
+          "returncode": 0,
+          "seconds": 1.428,
+          "log": "/workspace/da-mutation-runtime/final-run/pristine-Solidity.Semantics.Ops.log",
+          "module": "Solidity.Semantics.Ops"
+        }
+      },
+      {
+        "returncode": 0,
+        "seconds": 6.686,
+        "log": "/workspace/da-mutation-runtime/final-run/M09-Solidity.Semantics.Run.log",
+        "module": "Solidity.Semantics.Run",
+        "pristine": {
+          "returncode": 0,
+          "seconds": 6.18,
+          "log": "/workspace/da-mutation-runtime/final-run/pristine-Solidity.Semantics.Run.log",
+          "module": "Solidity.Semantics.Run"
+        }
+      },
+      {
+        "returncode": 1,
+        "seconds": 8.799,
+        "log": "/workspace/da-mutation-runtime/final-run/M09-Solidity.Evm.SimLemmas.log",
+        "module": "Solidity.Evm.SimLemmas",
+        "pristine": {
+          "returncode": 0,
+          "seconds": 8.778,
+          "log": "/workspace/da-mutation-runtime/final-run/pristine-Solidity.Evm.SimLemmas.log",
+          "module": "Solidity.Evm.SimLemmas"
+        },
+        "decisive_output": "Solidity/Evm/SimLemmas.lean:218:18: warning: This simp argument is unused:\n  if_true\n\nHint: Omit it from the simp argument list.\n  simp only [h,\u0335 \u0335i\u0335f\u0335_\u0335t\u0335r\u0335u\u0335e\u0335]\n\nNote: This linter can be disabled with `set_option linter.unusedSimpArgs false`\nSolidity/Evm/SimLemmas.lean:224:18: warning: This simp argument is unused:\n  if_false\n\nHint: Omit it from the simp argument list.\n  simp only [h,\u0335 \u0335i\u0335f\u0335_\u0335f\u0335a\u0335l\u0335s\u0335e\u0335]\n\nNote: This linter can be disabled with `set_option linter.unusedSimpArgs false`\nSolidity/Evm/SimLemmas.lean:329:41: error: 'show' tactic failed, pattern\n  \u2191(a ^^^ b) = ?m.892\nis not definitionally equal to target\n  Semantics.uintBitwise (fun x1 x2 => x1 ||| x2) \u2191a \u2191b = \u2191(b ^^^ a)\nSolidity/Evm/SimLemmas.lean:436:8: error: Tactic `rewrite` failed: Did not find an occurrence of the pattern\n  Semantics.uintBitwise (fun x x_1 => x ^^^ x_1) (sgn a) (sgn b)\nin the target expression\n  ValOutT (BinOp.bxor.ret PrimTy.int)\n    (TRes.ofOpt (PrimTy.int.ofInt? (Semantics.uintBitwise (fun x1 x2 => x1 ||| x2) (sgn a) (sgn b))))\n    (run (sTail BinOp.bxor)\n      { stack := Word.val \u27e8b, hb\u27e9 :: Word.val \u27e8a, ha\u27e9 :: m.stack, store := m.store, mem := m.mem, bal := m.bal,\n        bal\u2080 := m.bal\u2080, self := m.self, accepts := m.accepts, caller := m.caller, callvalue := m.callvalue,\n        timestamp := m.timestamp })\n    m\n\na b : Nat\nha : a < W\nhb : b < W\nm : Machine\nhb0 : sgn b = 0 \u2194 b = 0\nheq : decide (a = b) = decide (sgn a = sgn b)\nhop : binInFrag BinOp.bxor PrimTy.int = true\nhand : BinOp.bxor \u2260 BinOp.and\nhor : BinOp.bxor \u2260 BinOp.or\nhacc : BinOp.bxor.accepts PrimTy.int = true\n\u22a2 ValOutT (BinOp.bxor.ret PrimTy.int)\n    (TRes.ofOpt (PrimTy.int.ofInt? (Semantics.uintBitwise (fun x1 x2 => x1 ||| x2) (sgn a) (sgn b))))\n    (run (sTail BinOp.bxor)\n      { stack := Word.val \u27e8b, hb\u27e9 :: Word.val \u27e8a, ha\u27e9 :: m.stack, store := m.store, mem := m.mem, bal := m.bal,\n        bal\u2080 := m.bal\u2080, self := m.self, accepts := m.accepts, caller := m.caller, callvalue := m.callvalue,\n        timestamp := m.timestamp })\n    m\n"
+      }
+    ]
+  },
+  {
+    "id": "M10",
+    "area": "Semantics",
+    "file": "Solidity/Semantics/Ops.lean",
+    "line": 62,
+    "description": "arithInt: n < 256 then a * -> n < 255 then a *",
+    "verdict": "KILLED",
+    "killed_by": [
+      "Solidity.Evm.SimLemmas:335:utail_simT"
+    ],
+    "seconds": 19.705,
+    "baseline_pass": true,
+    "checks": [
+      {
+        "returncode": 0,
+        "seconds": 1.563,
+        "log": "/workspace/da-mutation-runtime/final-run/M10-Solidity.Semantics.Ops.log",
+        "module": "Solidity.Semantics.Ops",
+        "pristine": {
+          "returncode": 0,
+          "seconds": 1.428,
+          "log": "/workspace/da-mutation-runtime/final-run/pristine-Solidity.Semantics.Ops.log",
+          "module": "Solidity.Semantics.Ops"
+        }
+      },
+      {
+        "returncode": 0,
+        "seconds": 6.257,
+        "log": "/workspace/da-mutation-runtime/final-run/M10-Solidity.Semantics.Run.log",
+        "module": "Solidity.Semantics.Run",
+        "pristine": {
+          "returncode": 0,
+          "seconds": 6.18,
+          "log": "/workspace/da-mutation-runtime/final-run/pristine-Solidity.Semantics.Run.log",
+          "module": "Solidity.Semantics.Run"
+        }
+      },
+      {
+        "returncode": 1,
+        "seconds": 11.885,
+        "log": "/workspace/da-mutation-runtime/final-run/M10-Solidity.Evm.SimLemmas.log",
+        "module": "Solidity.Evm.SimLemmas",
+        "pristine": {
+          "returncode": 0,
+          "seconds": 8.778,
+          "log": "/workspace/da-mutation-runtime/final-run/pristine-Solidity.Evm.SimLemmas.log",
+          "module": "Solidity.Evm.SimLemmas"
+        },
+        "decisive_output": "Solidity/Evm/SimLemmas.lean:218:18: warning: This simp argument is unused:\n  if_true\n\nHint: Omit it from the simp argument list.\n  simp only [h,\u0335 \u0335i\u0335f\u0335_\u0335t\u0335r\u0335u\u0335e\u0335]\n\nNote: This linter can be disabled with `set_option linter.unusedSimpArgs false`\nSolidity/Evm/SimLemmas.lean:224:18: warning: This simp argument is unused:\n  if_false\n\nHint: Omit it from the simp argument list.\n  simp only [h,\u0335 \u0335i\u0335f\u0335_\u0335f\u0335a\u0335l\u0335s\u0335e\u0335]\n\nNote: This linter can be disabled with `set_option linter.unusedSimpArgs false`\nSolidity/Evm/SimLemmas.lean:335:21: error: omega could not prove the goal:\na possible counterexample may satisfy the constraints\n  d \u2265 0\n  c \u2265 0\n  c - d \u2265 1\n  c \u2265 256\nwhere\n c := \u2191W\n d := \u2191a\n"
+      }
+    ]
+  },
+  {
+    "id": "M11",
+    "area": "Semantics",
+    "file": "Solidity/Semantics/Ops.lean",
+    "line": 64,
+    "description": "arithInt: n < 256 then a / -> n < 255 then a /",
+    "verdict": "KILLED",
+    "killed_by": [
+      "Solidity.Evm.SimLemmas:344:utail_simT",
+      "Solidity.Evm.SimLemmas:426:stail_simT"
+    ],
+    "seconds": 18.104,
+    "baseline_pass": true,
+    "checks": [
+      {
+        "returncode": 0,
+        "seconds": 1.424,
+        "log": "/workspace/da-mutation-runtime/final-run/M11-Solidity.Semantics.Ops.log",
+        "module": "Solidity.Semantics.Ops",
+        "pristine": {
+          "returncode": 0,
+          "seconds": 1.428,
+          "log": "/workspace/da-mutation-runtime/final-run/pristine-Solidity.Semantics.Ops.log",
+          "module": "Solidity.Semantics.Ops"
+        }
+      },
+      {
+        "returncode": 0,
+        "seconds": 7.495,
+        "log": "/workspace/da-mutation-runtime/final-run/M11-Solidity.Semantics.Run.log",
+        "module": "Solidity.Semantics.Run",
+        "pristine": {
+          "returncode": 0,
+          "seconds": 6.18,
+          "log": "/workspace/da-mutation-runtime/final-run/pristine-Solidity.Semantics.Run.log",
+          "module": "Solidity.Semantics.Run"
+        }
+      },
+      {
+        "returncode": 1,
+        "seconds": 9.185,
+        "log": "/workspace/da-mutation-runtime/final-run/M11-Solidity.Evm.SimLemmas.log",
+        "module": "Solidity.Evm.SimLemmas",
+        "pristine": {
+          "returncode": 0,
+          "seconds": 8.778,
+          "log": "/workspace/da-mutation-runtime/final-run/pristine-Solidity.Evm.SimLemmas.log",
+          "module": "Solidity.Evm.SimLemmas"
+        },
+        "decisive_output": "Solidity/Evm/SimLemmas.lean:218:18: warning: This simp argument is unused:\n  if_true\n\nHint: Omit it from the simp argument list.\n  simp only [h,\u0335 \u0335i\u0335f\u0335_\u0335t\u0335r\u0335u\u0335e\u0335]\n\nNote: This linter can be disabled with `set_option linter.unusedSimpArgs false`\nSolidity/Evm/SimLemmas.lean:224:18: warning: This simp argument is unused:\n  if_false\n\nHint: Omit it from the simp argument list.\n  simp only [h,\u0335 \u0335i\u0335f\u0335_\u0335f\u0335a\u0335l\u0335s\u0335e\u0335]\n\nNote: This linter can be disabled with `set_option linter.unusedSimpArgs false`\nSolidity/Evm/SimLemmas.lean:344:21: error: omega could not prove the goal:\na possible counterexample may satisfy the constraints\n  d \u2265 0\n  c \u2265 0\n  c - d \u2265 1\n  c \u2265 256\nwhere\n c := \u2191W\n d := \u2191a\nSolidity/Evm/SimLemmas.lean:426:4: error: Type mismatch\n  out_int_ok (sarShr_range (sgn b) (sgn_range ha)) rfl\nhas type\n  ValOutT PrimTy.int (TRes.ofOpt (PrimTy.int.ofInt? (sarShr (sgn a) (sgn b))))\n    (Out.ok (Machine.push ?m.484 (Word.val (sword (sarShr (sgn a) (sgn b))))) 0) ?m.484\nbut is expected to have type\n  ValOutT (BinOp.shr.ret PrimTy.int)\n    (TRes.ofOpt (PrimTy.int.ofInt? (if sgn b < 255 then sgn a / 2 ^ (sgn b).toNat else if sgn a < 0 then -1 else 0)))\n    (Out.ok\n      { stack := Word.val (sword (sarShr (sgn a) (sgn b))) :: m.stack, store := m.store, mem := m.mem, bal := m.bal,\n        bal\u2080 := m.bal\u2080, self := m.self, accepts := m.accepts, caller := m.caller, callvalue := m.callvalue,\n        timestamp := m.timestamp }\n      0)\n    m\n"
+      }
+    ]
+  },
+  {
+    "id": "M12",
+    "area": "Semantics",
+    "file": "Solidity/Semantics/Ops.lean",
+    "line": 64,
+    "description": "arithInt: if a < 0 then -1 else 0 -> if a < 0 then 0 else 0",
+    "verdict": "KILLED",
+    "killed_by": [
+      "Solidity.Evm.SimLemmas:426:stail_simT"
+    ],
+    "seconds": 15.6,
+    "baseline_pass": true,
+    "checks": [
+      {
+        "returncode": 0,
+        "seconds": 1.442,
+        "log": "/workspace/da-mutation-runtime/final-run/M12-Solidity.Semantics.Ops.log",
+        "module": "Solidity.Semantics.Ops",
+        "pristine": {
+          "returncode": 0,
+          "seconds": 1.428,
+          "log": "/workspace/da-mutation-runtime/final-run/pristine-Solidity.Semantics.Ops.log",
+          "module": "Solidity.Semantics.Ops"
+        }
+      },
+      {
+        "returncode": 0,
+        "seconds": 5.877,
+        "log": "/workspace/da-mutation-runtime/final-run/M12-Solidity.Semantics.Run.log",
+        "module": "Solidity.Semantics.Run",
+        "pristine": {
+          "returncode": 0,
+          "seconds": 6.18,
+          "log": "/workspace/da-mutation-runtime/final-run/pristine-Solidity.Semantics.Run.log",
+          "module": "Solidity.Semantics.Run"
+        }
+      },
+      {
+        "returncode": 1,
+        "seconds": 8.281,
+        "log": "/workspace/da-mutation-runtime/final-run/M12-Solidity.Evm.SimLemmas.log",
+        "module": "Solidity.Evm.SimLemmas",
+        "pristine": {
+          "returncode": 0,
+          "seconds": 8.778,
+          "log": "/workspace/da-mutation-runtime/final-run/pristine-Solidity.Evm.SimLemmas.log",
+          "module": "Solidity.Evm.SimLemmas"
+        },
+        "decisive_output": "Solidity/Evm/SimLemmas.lean:218:18: warning: This simp argument is unused:\n  if_true\n\nHint: Omit it from the simp argument list.\n  simp only [h,\u0335 \u0335i\u0335f\u0335_\u0335t\u0335r\u0335u\u0335e\u0335]\n\nNote: This linter can be disabled with `set_option linter.unusedSimpArgs false`\nSolidity/Evm/SimLemmas.lean:224:18: warning: This simp argument is unused:\n  if_false\n\nHint: Omit it from the simp argument list.\n  simp only [h,\u0335 \u0335i\u0335f\u0335_\u0335f\u0335a\u0335l\u0335s\u0335e\u0335]\n\nNote: This linter can be disabled with `set_option linter.unusedSimpArgs false`\nSolidity/Evm/SimLemmas.lean:426:4: error: Type mismatch\n  out_int_ok (sarShr_range (sgn b) (sgn_range ha)) rfl\nhas type\n  ValOutT PrimTy.int (TRes.ofOpt (PrimTy.int.ofInt? (sarShr (sgn a) (sgn b))))\n    (Out.ok (Machine.push ?m.484 (Word.val (sword (sarShr (sgn a) (sgn b))))) 0) ?m.484\nbut is expected to have type\n  ValOutT (BinOp.shr.ret PrimTy.int)\n    (TRes.ofOpt (PrimTy.int.ofInt? (if sgn b < 256 then sgn a / 2 ^ (sgn b).toNat else if sgn a < 0 then 0 else 0)))\n    (Out.ok\n      { stack := Word.val (sword (sarShr (sgn a) (sgn b))) :: m.stack, store := m.store, mem := m.mem, bal := m.bal,\n        bal\u2080 := m.bal\u2080, self := m.self, accepts := m.accepts, caller := m.caller, callvalue := m.callvalue,\n        timestamp := m.timestamp }\n      0)\n    m\n"
+      }
+    ]
+  },
+  {
+    "id": "M13",
+    "area": "Semantics",
+    "file": "Solidity/Semantics/Ops.lean",
+    "line": 65,
+    "description": "arithInt: some ((x + y) % Semantics.uintBound) -> some ((x - y) % Semantics.uintBound)",
+    "verdict": "KILLED",
+    "killed_by": [
+      "Solidity.Evm.SimLemmas:349:utail_simT"
+    ],
+    "seconds": 15.625,
+    "baseline_pass": true,
+    "checks": [
+      {
+        "returncode": 0,
+        "seconds": 1.335,
+        "log": "/workspace/da-mutation-runtime/final-run/M13-Solidity.Semantics.Ops.log",
+        "module": "Solidity.Semantics.Ops",
+        "pristine": {
+          "returncode": 0,
+          "seconds": 1.428,
+          "log": "/workspace/da-mutation-runtime/final-run/pristine-Solidity.Semantics.Ops.log",
+          "module": "Solidity.Semantics.Ops"
+        }
+      },
+      {
+        "returncode": 0,
+        "seconds": 5.869,
+        "log": "/workspace/da-mutation-runtime/final-run/M13-Solidity.Semantics.Run.log",
+        "module": "Solidity.Semantics.Run",
+        "pristine": {
+          "returncode": 0,
+          "seconds": 6.18,
+          "log": "/workspace/da-mutation-runtime/final-run/pristine-Solidity.Semantics.Run.log",
+          "module": "Solidity.Semantics.Run"
+        }
+      },
+      {
+        "returncode": 1,
+        "seconds": 8.421,
+        "log": "/workspace/da-mutation-runtime/final-run/M13-Solidity.Evm.SimLemmas.log",
+        "module": "Solidity.Evm.SimLemmas",
+        "pristine": {
+          "returncode": 0,
+          "seconds": 8.778,
+          "log": "/workspace/da-mutation-runtime/final-run/pristine-Solidity.Evm.SimLemmas.log",
+          "module": "Solidity.Evm.SimLemmas"
+        },
+        "decisive_output": "Solidity/Evm/SimLemmas.lean:218:18: warning: This simp argument is unused:\n  if_true\n\nHint: Omit it from the simp argument list.\n  simp only [h,\u0335 \u0335i\u0335f\u0335_\u0335t\u0335r\u0335u\u0335e\u0335]\n\nNote: This linter can be disabled with `set_option linter.unusedSimpArgs false`\nSolidity/Evm/SimLemmas.lean:224:18: warning: This simp argument is unused:\n  if_false\n\nHint: Omit it from the simp argument list.\n  simp only [h,\u0335 \u0335i\u0335f\u0335_\u0335f\u0335a\u0335l\u0335s\u0335e\u0335]\n\nNote: This linter can be disabled with `set_option linter.unusedSimpArgs false`\nSolidity/Evm/SimLemmas.lean:349:4: error: 'show' tactic failed, pattern\n  (\u2191a + \u2191b) % \u2191W = ?m.1107\nis not definitionally equal to target\n  (\u2191a - \u2191b) % Semantics.uintBound = \u2191((b + a) % W)\n"
+      }
+    ]
+  },
+  {
+    "id": "M14",
+    "area": "Semantics",
+    "file": "Solidity/Semantics/Ops.lean",
+    "line": 66,
+    "description": "arithInt: some ((x - y) % Semantics.uintBound) -> some ((x + y) % Semantics.uintBound)",
+    "verdict": "KILLED",
+    "killed_by": [
+      "Solidity.Evm.SimLemmas:352:utail_simT"
+    ],
+    "seconds": 15.993,
+    "baseline_pass": true,
+    "checks": [
+      {
+        "returncode": 0,
+        "seconds": 1.341,
+        "log": "/workspace/da-mutation-runtime/final-run/M14-Solidity.Semantics.Ops.log",
+        "module": "Solidity.Semantics.Ops",
+        "pristine": {
+          "returncode": 0,
+          "seconds": 1.428,
+          "log": "/workspace/da-mutation-runtime/final-run/pristine-Solidity.Semantics.Ops.log",
+          "module": "Solidity.Semantics.Ops"
+        }
+      },
+      {
+        "returncode": 0,
+        "seconds": 6.041,
+        "log": "/workspace/da-mutation-runtime/final-run/M14-Solidity.Semantics.Run.log",
+        "module": "Solidity.Semantics.Run",
+        "pristine": {
+          "returncode": 0,
+          "seconds": 6.18,
+          "log": "/workspace/da-mutation-runtime/final-run/pristine-Solidity.Semantics.Run.log",
+          "module": "Solidity.Semantics.Run"
+        }
+      },
+      {
+        "returncode": 1,
+        "seconds": 8.611,
+        "log": "/workspace/da-mutation-runtime/final-run/M14-Solidity.Evm.SimLemmas.log",
+        "module": "Solidity.Evm.SimLemmas",
+        "pristine": {
+          "returncode": 0,
+          "seconds": 8.778,
+          "log": "/workspace/da-mutation-runtime/final-run/pristine-Solidity.Evm.SimLemmas.log",
+          "module": "Solidity.Evm.SimLemmas"
+        },
+        "decisive_output": "Solidity/Evm/SimLemmas.lean:218:18: warning: This simp argument is unused:\n  if_true\n\nHint: Omit it from the simp argument list.\n  simp only [h,\u0335 \u0335i\u0335f\u0335_\u0335t\u0335r\u0335u\u0335e\u0335]\n\nNote: This linter can be disabled with `set_option linter.unusedSimpArgs false`\nSolidity/Evm/SimLemmas.lean:224:18: warning: This simp argument is unused:\n  if_false\n\nHint: Omit it from the simp argument list.\n  simp only [h,\u0335 \u0335i\u0335f\u0335_\u0335f\u0335a\u0335l\u0335s\u0335e\u0335]\n\nNote: This linter can be disabled with `set_option linter.unusedSimpArgs false`\nSolidity/Evm/SimLemmas.lean:352:10: error: maximum recursion depth has been reached\nuse `set_option maxRecDepth <num>` to increase limit\nuse `set_option diagnostics true` to get diagnostic information\n"
+      }
+    ]
+  },
+  {
+    "id": "M15",
+    "area": "Semantics",
+    "file": "Solidity/Semantics/Ops.lean",
+    "line": 67,
+    "description": "arithInt: some (x * y % Semantics.uintBound) -> some ((x + y) % Semantics.uintBound)",
+    "verdict": "KILLED",
+    "killed_by": [
+      "Solidity.Evm.SimLemmas:355:utail_simT"
+    ],
+    "seconds": 16.076,
+    "baseline_pass": true,
+    "checks": [
+      {
+        "returncode": 0,
+        "seconds": 1.352,
+        "log": "/workspace/da-mutation-runtime/final-run/M15-Solidity.Semantics.Ops.log",
+        "module": "Solidity.Semantics.Ops",
+        "pristine": {
+          "returncode": 0,
+          "seconds": 1.428,
+          "log": "/workspace/da-mutation-runtime/final-run/pristine-Solidity.Semantics.Ops.log",
+          "module": "Solidity.Semantics.Ops"
+        }
+      },
+      {
+        "returncode": 0,
+        "seconds": 6.114,
+        "log": "/workspace/da-mutation-runtime/final-run/M15-Solidity.Semantics.Run.log",
+        "module": "Solidity.Semantics.Run",
+        "pristine": {
+          "returncode": 0,
+          "seconds": 6.18,
+          "log": "/workspace/da-mutation-runtime/final-run/pristine-Solidity.Semantics.Run.log",
+          "module": "Solidity.Semantics.Run"
+        }
+      },
+      {
+        "returncode": 1,
+        "seconds": 8.61,
+        "log": "/workspace/da-mutation-runtime/final-run/M15-Solidity.Evm.SimLemmas.log",
+        "module": "Solidity.Evm.SimLemmas",
+        "pristine": {
+          "returncode": 0,
+          "seconds": 8.778,
+          "log": "/workspace/da-mutation-runtime/final-run/pristine-Solidity.Evm.SimLemmas.log",
+          "module": "Solidity.Evm.SimLemmas"
+        },
+        "decisive_output": "Solidity/Evm/SimLemmas.lean:218:18: warning: This simp argument is unused:\n  if_true\n\nHint: Omit it from the simp argument list.\n  simp only [h,\u0335 \u0335i\u0335f\u0335_\u0335t\u0335r\u0335u\u0335e\u0335]\n\nNote: This linter can be disabled with `set_option linter.unusedSimpArgs false`\nSolidity/Evm/SimLemmas.lean:224:18: warning: This simp argument is unused:\n  if_false\n\nHint: Omit it from the simp argument list.\n  simp only [h,\u0335 \u0335i\u0335f\u0335_\u0335f\u0335a\u0335l\u0335s\u0335e\u0335]\n\nNote: This linter can be disabled with `set_option linter.unusedSimpArgs false`\nSolidity/Evm/SimLemmas.lean:355:4: error: 'show' tactic failed, pattern\n  \u2191a * \u2191b % \u2191W = ?m.1168\nis not definitionally equal to target\n  (\u2191a + \u2191b) % Semantics.uintBound = \u2191(b * a % W)\n"
+      }
+    ]
+  },
+  {
+    "id": "M16",
+    "area": "Semantics",
+    "file": "Solidity/Semantics/Ops.lean",
+    "line": 68,
+    "description": "arithInt: x ^ y.toNat % Semantics.uintBound -> x ^ (y.toNat + 1) % Semantics.uintBound",
+    "verdict": "KILLED",
+    "killed_by": [
+      "Solidity.Evm.SimLemmas:360:utail_simT"
+    ],
+    "seconds": 17.019,
+    "baseline_pass": true,
+    "checks": [
+      {
+        "returncode": 0,
+        "seconds": 1.318,
+        "log": "/workspace/da-mutation-runtime/final-run/M16-Solidity.Semantics.Ops.log",
+        "module": "Solidity.Semantics.Ops",
+        "pristine": {
+          "returncode": 0,
+          "seconds": 1.428,
+          "log": "/workspace/da-mutation-runtime/final-run/pristine-Solidity.Semantics.Ops.log",
+          "module": "Solidity.Semantics.Ops"
+        }
+      },
+      {
+        "returncode": 0,
+        "seconds": 6.548,
+        "log": "/workspace/da-mutation-runtime/final-run/M16-Solidity.Semantics.Run.log",
+        "module": "Solidity.Semantics.Run",
+        "pristine": {
+          "returncode": 0,
+          "seconds": 6.18,
+          "log": "/workspace/da-mutation-runtime/final-run/pristine-Solidity.Semantics.Run.log",
+          "module": "Solidity.Semantics.Run"
+        }
+      },
+      {
+        "returncode": 1,
+        "seconds": 9.153,
+        "log": "/workspace/da-mutation-runtime/final-run/M16-Solidity.Evm.SimLemmas.log",
+        "module": "Solidity.Evm.SimLemmas",
+        "pristine": {
+          "returncode": 0,
+          "seconds": 8.778,
+          "log": "/workspace/da-mutation-runtime/final-run/pristine-Solidity.Evm.SimLemmas.log",
+          "module": "Solidity.Evm.SimLemmas"
+        },
+        "decisive_output": "Solidity/Evm/SimLemmas.lean:218:18: warning: This simp argument is unused:\n  if_true\n\nHint: Omit it from the simp argument list.\n  simp only [h,\u0335 \u0335i\u0335f\u0335_\u0335t\u0335r\u0335u\u0335e\u0335]\n\nNote: This linter can be disabled with `set_option linter.unusedSimpArgs false`\nSolidity/Evm/SimLemmas.lean:224:18: warning: This simp argument is unused:\n  if_false\n\nHint: Omit it from the simp argument list.\n  simp only [h,\u0335 \u0335i\u0335f\u0335_\u0335f\u0335a\u0335l\u0335s\u0335e\u0335]\n\nNote: This linter can be disabled with `set_option linter.unusedSimpArgs false`\nSolidity/Evm/SimLemmas.lean:360:4: error: 'show' tactic failed, pattern\n  \u2191a ^ b % \u2191W = ?m.1222\nis not definitionally equal to target\n  \u2191a ^ (b + 1) % Semantics.uintBound = \u2191(a ^ b % W)\n"
+      }
+    ]
+  },
+  {
+    "id": "M17",
+    "area": "Semantics",
+    "file": "Solidity/Semantics/Ops.lean",
+    "line": 91,
+    "description": "evalNum: decide (x < y) -> decide (x \u2264 y)",
+    "verdict": "KILLED",
+    "killed_by": [
+      "Solidity.Evm.SimLemmas:316:utail_simT",
+      "Solidity.Evm.SimLemmas:463:stail_simT"
+    ],
+    "seconds": 24.809,
+    "baseline_pass": true,
+    "checks": [
+      {
+        "returncode": 0,
+        "seconds": 1.598,
+        "log": "/workspace/da-mutation-runtime/final-run/M17-Solidity.Semantics.Ops.log",
+        "module": "Solidity.Semantics.Ops",
+        "pristine": {
+          "returncode": 0,
+          "seconds": 1.428,
+          "log": "/workspace/da-mutation-runtime/final-run/pristine-Solidity.Semantics.Ops.log",
+          "module": "Solidity.Semantics.Ops"
+        }
+      },
+      {
+        "returncode": 0,
+        "seconds": 6.436,
+        "log": "/workspace/da-mutation-runtime/final-run/M17-Solidity.Semantics.Run.log",
+        "module": "Solidity.Semantics.Run",
+        "pristine": {
+          "returncode": 0,
+          "seconds": 6.18,
+          "log": "/workspace/da-mutation-runtime/final-run/pristine-Solidity.Semantics.Run.log",
+          "module": "Solidity.Semantics.Run"
+        }
+      },
+      {
+        "returncode": 1,
+        "seconds": 16.775,
+        "log": "/workspace/da-mutation-runtime/final-run/M17-Solidity.Evm.SimLemmas.log",
+        "module": "Solidity.Evm.SimLemmas",
+        "pristine": {
+          "returncode": 0,
+          "seconds": 8.778,
+          "log": "/workspace/da-mutation-runtime/final-run/pristine-Solidity.Evm.SimLemmas.log",
+          "module": "Solidity.Evm.SimLemmas"
+        },
+        "decisive_output": "Solidity/Evm/SimLemmas.lean:218:18: warning: This simp argument is unused:\n  if_true\n\nHint: Omit it from the simp argument list.\n  simp only [h,\u0335 \u0335i\u0335f\u0335_\u0335t\u0335r\u0335u\u0335e\u0335]\n\nNote: This linter can be disabled with `set_option linter.unusedSimpArgs false`\nSolidity/Evm/SimLemmas.lean:224:18: warning: This simp argument is unused:\n  if_false\n\nHint: Omit it from the simp argument list.\n  simp only [h,\u0335 \u0335i\u0335f\u0335_\u0335f\u0335a\u0335l\u0335s\u0335e\u0335]\n\nNote: This linter can be disabled with `set_option linter.unusedSimpArgs false`\nSolidity/Evm/SimLemmas.lean:316:23: error: `simp` made no progress\nSolidity/Evm/SimLemmas.lean:463:23: error: Application type mismatch: The argument\n  (scmp_tail m m.stack ha hb).left\nhas type\n  run (sTail BinOp.lt)\n      { stack := Word.val \u27e8b, hb\u27e9 :: Word.val \u27e8a, ha\u27e9 :: m.stack, store := m.store, mem := m.mem, bal := m.bal,\n        bal\u2080 := m.bal\u2080, self := m.self, accepts := m.accepts, caller := m.caller, callvalue := m.callvalue,\n        timestamp := m.timestamp } =\n    Out.ok\n      { stack := Word.val (bword (decide (sgn a < sgn b))) :: m.stack, store := m.store, mem := m.mem, bal := m.bal,\n        bal\u2080 := m.bal\u2080, self := m.self, accepts := m.accepts, caller := m.caller, callvalue := m.callvalue,\n        timestamp := m.timestamp }\n      0\nbut is expected to have type\n  run (sTail BinOp.lt)\n      { stack := Word.val \u27e8b, hb\u27e9 :: Word.val \u27e8a, ha\u27e9 :: m.stack, store := m.store, mem := m.mem, bal := m.bal,\n        bal\u2080 := m.bal\u2080, self := m.self, accepts := m.accepts, caller := m.caller, callvalue := m.callvalue,\n        timestamp := m.timestamp } =\n    Out.ok\n      { stack := Word.val (bword (decide (sgn a \u2264 sgn b))) :: m.stack, store := m.store, mem := m.mem, bal := m.bal,\n        bal\u2080 := m.bal\u2080, self := m.self, accepts := m.accepts, caller := m.caller, callvalue := m.callvalue,\n        timestamp := m.timestamp }\n      0\nin the application\n  out_bool rfl (scmp_tail m m.stack ha hb).left\n"
+      }
+    ]
+  },
+  {
+    "id": "M18",
+    "area": "Semantics",
+    "file": "Solidity/Semantics/Ops.lean",
+    "line": 92,
+    "description": "evalNum: decide (y < x) -> decide (y \u2264 x)",
+    "verdict": "KILLED",
+    "killed_by": [
+      "Solidity.Evm.SimLemmas:317:utail_simT",
+      "Solidity.Evm.SimLemmas:464:stail_simT"
+    ],
+    "seconds": 17.862,
+    "baseline_pass": true,
+    "checks": [
+      {
+        "returncode": 0,
+        "seconds": 1.426,
+        "log": "/workspace/da-mutation-runtime/final-run/M18-Solidity.Semantics.Ops.log",
+        "module": "Solidity.Semantics.Ops",
+        "pristine": {
+          "returncode": 0,
+          "seconds": 1.428,
+          "log": "/workspace/da-mutation-runtime/final-run/pristine-Solidity.Semantics.Ops.log",
+          "module": "Solidity.Semantics.Ops"
+        }
+      },
+      {
+        "returncode": 0,
+        "seconds": 8.052,
+        "log": "/workspace/da-mutation-runtime/final-run/M18-Solidity.Semantics.Run.log",
+        "module": "Solidity.Semantics.Run",
+        "pristine": {
+          "returncode": 0,
+          "seconds": 6.18,
+          "log": "/workspace/da-mutation-runtime/final-run/pristine-Solidity.Semantics.Run.log",
+          "module": "Solidity.Semantics.Run"
+        }
+      },
+      {
+        "returncode": 1,
+        "seconds": 8.384,
+        "log": "/workspace/da-mutation-runtime/final-run/M18-Solidity.Evm.SimLemmas.log",
+        "module": "Solidity.Evm.SimLemmas",
+        "pristine": {
+          "returncode": 0,
+          "seconds": 8.778,
+          "log": "/workspace/da-mutation-runtime/final-run/pristine-Solidity.Evm.SimLemmas.log",
+          "module": "Solidity.Evm.SimLemmas"
+        },
+        "decisive_output": "Solidity/Evm/SimLemmas.lean:218:18: warning: This simp argument is unused:\n  if_true\n\nHint: Omit it from the simp argument list.\n  simp only [h,\u0335 \u0335i\u0335f\u0335_\u0335t\u0335r\u0335u\u0335e\u0335]\n\nNote: This linter can be disabled with `set_option linter.unusedSimpArgs false`\nSolidity/Evm/SimLemmas.lean:224:18: warning: This simp argument is unused:\n  if_false\n\nHint: Omit it from the simp argument list.\n  simp only [h,\u0335 \u0335i\u0335f\u0335_\u0335f\u0335a\u0335l\u0335s\u0335e\u0335]\n\nNote: This linter can be disabled with `set_option linter.unusedSimpArgs false`\nSolidity/Evm/SimLemmas.lean:317:23: error: `simp` made no progress\nSolidity/Evm/SimLemmas.lean:464:23: error: Application type mismatch: The argument\n  (scmp_tail m m.stack ha hb).right.left\nhas type\n  run (sTail BinOp.gt)\n      { stack := Word.val \u27e8b, hb\u27e9 :: Word.val \u27e8a, ha\u27e9 :: m.stack, store := m.store, mem := m.mem, bal := m.bal,\n        bal\u2080 := m.bal\u2080, self := m.self, accepts := m.accepts, caller := m.caller, callvalue := m.callvalue,\n        timestamp := m.timestamp } =\n    Out.ok\n      { stack := Word.val (bword (decide (sgn b < sgn a))) :: m.stack, store := m.store, mem := m.mem, bal := m.bal,\n        bal\u2080 := m.bal\u2080, self := m.self, accepts := m.accepts, caller := m.caller, callvalue := m.callvalue,\n        timestamp := m.timestamp }\n      0\nbut is expected to have type\n  run (sTail BinOp.gt)\n      { stack := Word.val \u27e8b, hb\u27e9 :: Word.val \u27e8a, ha\u27e9 :: m.stack, store := m.store, mem := m.mem, bal := m.bal,\n        bal\u2080 := m.bal\u2080, self := m.self, accepts := m.accepts, caller := m.caller, callvalue := m.callvalue,\n        timestamp := m.timestamp } =\n    Out.ok\n      { stack := Word.val (bword (decide (sgn b \u2264 sgn a))) :: m.stack, store := m.store, mem := m.mem, bal := m.bal,\n        bal\u2080 := m.bal\u2080, self := m.self, accepts := m.accepts, caller := m.caller, callvalue := m.callvalue,\n        timestamp := m.timestamp }\n      0\nin the application\n  out_bool rfl (scmp_tail m m.stack ha hb).right.left\n"
+      }
+    ]
+  },
+  {
+    "id": "M19",
+    "area": "Semantics",
+    "file": "Solidity/Semantics/Ops.lean",
+    "line": 93,
+    "description": "evalNum: decide (x \u2264 y) -> decide (x < y)",
+    "verdict": "KILLED",
+    "killed_by": [
+      "Solidity.Evm.SimLemmas:318:utail_simT",
+      "Solidity.Evm.SimLemmas:465:stail_simT"
+    ],
+    "seconds": 15.304,
+    "baseline_pass": true,
+    "checks": [
+      {
+        "returncode": 0,
+        "seconds": 1.356,
+        "log": "/workspace/da-mutation-runtime/final-run/M19-Solidity.Semantics.Ops.log",
+        "module": "Solidity.Semantics.Ops",
+        "pristine": {
+          "returncode": 0,
+          "seconds": 1.428,
+          "log": "/workspace/da-mutation-runtime/final-run/pristine-Solidity.Semantics.Ops.log",
+          "module": "Solidity.Semantics.Ops"
+        }
+      },
+      {
+        "returncode": 0,
+        "seconds": 5.851,
+        "log": "/workspace/da-mutation-runtime/final-run/M19-Solidity.Semantics.Run.log",
+        "module": "Solidity.Semantics.Run",
+        "pristine": {
+          "returncode": 0,
+          "seconds": 6.18,
+          "log": "/workspace/da-mutation-runtime/final-run/pristine-Solidity.Semantics.Run.log",
+          "module": "Solidity.Semantics.Run"
+        }
+      },
+      {
+        "returncode": 1,
+        "seconds": 8.097,
+        "log": "/workspace/da-mutation-runtime/final-run/M19-Solidity.Evm.SimLemmas.log",
+        "module": "Solidity.Evm.SimLemmas",
+        "pristine": {
+          "returncode": 0,
+          "seconds": 8.778,
+          "log": "/workspace/da-mutation-runtime/final-run/pristine-Solidity.Evm.SimLemmas.log",
+          "module": "Solidity.Evm.SimLemmas"
+        },
+        "decisive_output": "Solidity/Evm/SimLemmas.lean:218:18: warning: This simp argument is unused:\n  if_true\n\nHint: Omit it from the simp argument list.\n  simp only [h,\u0335 \u0335i\u0335f\u0335_\u0335t\u0335r\u0335u\u0335e\u0335]\n\nNote: This linter can be disabled with `set_option linter.unusedSimpArgs false`\nSolidity/Evm/SimLemmas.lean:224:18: warning: This simp argument is unused:\n  if_false\n\nHint: Omit it from the simp argument list.\n  simp only [h,\u0335 \u0335i\u0335f\u0335_\u0335f\u0335a\u0335l\u0335s\u0335e\u0335]\n\nNote: This linter can be disabled with `set_option linter.unusedSimpArgs false`\nSolidity/Evm/SimLemmas.lean:318:23: error: `simp` made no progress\nSolidity/Evm/SimLemmas.lean:465:23: error: Application type mismatch: The argument\n  (scmp_tail m m.stack ha hb).right.right.left\nhas type\n  run (sTail BinOp.le)\n      { stack := Word.val \u27e8b, hb\u27e9 :: Word.val \u27e8a, ha\u27e9 :: m.stack, store := m.store, mem := m.mem, bal := m.bal,\n        bal\u2080 := m.bal\u2080, self := m.self, accepts := m.accepts, caller := m.caller, callvalue := m.callvalue,\n        timestamp := m.timestamp } =\n    Out.ok\n      { stack := Word.val (bword (decide (sgn a \u2264 sgn b))) :: m.stack, store := m.store, mem := m.mem, bal := m.bal,\n        bal\u2080 := m.bal\u2080, self := m.self, accepts := m.accepts, caller := m.caller, callvalue := m.callvalue,\n        timestamp := m.timestamp }\n      0\nbut is expected to have type\n  run (sTail BinOp.le)\n      { stack := Word.val \u27e8b, hb\u27e9 :: Word.val \u27e8a, ha\u27e9 :: m.stack, store := m.store, mem := m.mem, bal := m.bal,\n        bal\u2080 := m.bal\u2080, self := m.self, accepts := m.accepts, caller := m.caller, callvalue := m.callvalue,\n        timestamp := m.timestamp } =\n    Out.ok\n      { stack := Word.val (bword (decide (sgn a < sgn b))) :: m.stack, store := m.store, mem := m.mem, bal := m.bal,\n        bal\u2080 := m.bal\u2080, self := m.self, accepts := m.accepts, caller := m.caller, callvalue := m.callvalue,\n        timestamp := m.timestamp }\n      0\nin the application\n  out_bool rfl (scmp_tail m m.stack ha hb).right.right.left\n"
+      }
+    ]
+  },
+  {
+    "id": "M20",
+    "area": "Semantics",
+    "file": "Solidity/Semantics/Ops.lean",
+    "line": 94,
+    "description": "evalNum: decide (y \u2264 x) -> decide (y < x)",
+    "verdict": "KILLED",
+    "killed_by": [
+      "Solidity.Evm.SimLemmas:319:utail_simT",
+      "Solidity.Evm.SimLemmas:466:stail_simT"
+    ],
+    "seconds": 15.969,
+    "baseline_pass": true,
+    "checks": [
+      {
+        "returncode": 0,
+        "seconds": 1.32,
+        "log": "/workspace/da-mutation-runtime/final-run/M20-Solidity.Semantics.Ops.log",
+        "module": "Solidity.Semantics.Ops",
+        "pristine": {
+          "returncode": 0,
+          "seconds": 1.428,
+          "log": "/workspace/da-mutation-runtime/final-run/pristine-Solidity.Semantics.Ops.log",
+          "module": "Solidity.Semantics.Ops"
+        }
+      },
+      {
+        "returncode": 0,
+        "seconds": 6.501,
+        "log": "/workspace/da-mutation-runtime/final-run/M20-Solidity.Semantics.Run.log",
+        "module": "Solidity.Semantics.Run",
+        "pristine": {
+          "returncode": 0,
+          "seconds": 6.18,
+          "log": "/workspace/da-mutation-runtime/final-run/pristine-Solidity.Semantics.Run.log",
+          "module": "Solidity.Semantics.Run"
+        }
+      },
+      {
+        "returncode": 1,
+        "seconds": 8.148,
+        "log": "/workspace/da-mutation-runtime/final-run/M20-Solidity.Evm.SimLemmas.log",
+        "module": "Solidity.Evm.SimLemmas",
+        "pristine": {
+          "returncode": 0,
+          "seconds": 8.778,
+          "log": "/workspace/da-mutation-runtime/final-run/pristine-Solidity.Evm.SimLemmas.log",
+          "module": "Solidity.Evm.SimLemmas"
+        },
+        "decisive_output": "Solidity/Evm/SimLemmas.lean:218:18: warning: This simp argument is unused:\n  if_true\n\nHint: Omit it from the simp argument list.\n  simp only [h,\u0335 \u0335i\u0335f\u0335_\u0335t\u0335r\u0335u\u0335e\u0335]\n\nNote: This linter can be disabled with `set_option linter.unusedSimpArgs false`\nSolidity/Evm/SimLemmas.lean:224:18: warning: This simp argument is unused:\n  if_false\n\nHint: Omit it from the simp argument list.\n  simp only [h,\u0335 \u0335i\u0335f\u0335_\u0335f\u0335a\u0335l\u0335s\u0335e\u0335]\n\nNote: This linter can be disabled with `set_option linter.unusedSimpArgs false`\nSolidity/Evm/SimLemmas.lean:319:23: error: `simp` made no progress\nSolidity/Evm/SimLemmas.lean:466:23: error: Application type mismatch: The argument\n  (scmp_tail m m.stack ha hb).right.right.right.left\nhas type\n  run (sTail BinOp.ge)\n      { stack := Word.val \u27e8b, hb\u27e9 :: Word.val \u27e8a, ha\u27e9 :: m.stack, store := m.store, mem := m.mem, bal := m.bal,\n        bal\u2080 := m.bal\u2080, self := m.self, accepts := m.accepts, caller := m.caller, callvalue := m.callvalue,\n        timestamp := m.timestamp } =\n    Out.ok\n      { stack := Word.val (bword (decide (sgn b \u2264 sgn a))) :: m.stack, store := m.store, mem := m.mem, bal := m.bal,\n        bal\u2080 := m.bal\u2080, self := m.self, accepts := m.accepts, caller := m.caller, callvalue := m.callvalue,\n        timestamp := m.timestamp }\n      0\nbut is expected to have type\n  run (sTail BinOp.ge)\n      { stack := Word.val \u27e8b, hb\u27e9 :: Word.val \u27e8a, ha\u27e9 :: m.stack, store := m.store, mem := m.mem, bal := m.bal,\n        bal\u2080 := m.bal\u2080, self := m.self, accepts := m.accepts, caller := m.caller, callvalue := m.callvalue,\n        timestamp := m.timestamp } =\n    Out.ok\n      { stack := Word.val (bword (decide (sgn b < sgn a))) :: m.stack, store := m.store, mem := m.mem, bal := m.bal,\n        bal\u2080 := m.bal\u2080, self := m.self, accepts := m.accepts, caller := m.caller, callvalue := m.callvalue,\n        timestamp := m.timestamp }\n      0\nin the application\n  out_bool rfl (scmp_tail m m.stack ha hb).right.right.right.left\n"
+      }
+    ]
+  },
+  {
+    "id": "M21",
+    "area": "Semantics",
+    "file": "Solidity/Semantics/Ops.lean",
+    "line": 105,
+    "description": "evalBool: some (a && b) -> some (a || b)",
+    "verdict": "KILLED",
+    "killed_by": [
+      "Solidity.Optimizer.Simplify:289:and_true_r",
+      "Solidity.Optimizer.Simplify:300:and_true_l"
+    ],
+    "seconds": 61.032,
+    "baseline_pass": true,
+    "checks": [
+      {
+        "returncode": 0,
+        "seconds": 1.442,
+        "log": "/workspace/da-mutation-runtime/final-run/M21-Solidity.Semantics.Ops.log",
+        "module": "Solidity.Semantics.Ops",
+        "pristine": {
+          "returncode": 0,
+          "seconds": 1.428,
+          "log": "/workspace/da-mutation-runtime/final-run/pristine-Solidity.Semantics.Ops.log",
+          "module": "Solidity.Semantics.Ops"
+        }
+      },
+      {
+        "returncode": 0,
+        "seconds": 6.093,
+        "log": "/workspace/da-mutation-runtime/final-run/M21-Solidity.Semantics.Run.log",
+        "module": "Solidity.Semantics.Run",
+        "pristine": {
+          "returncode": 0,
+          "seconds": 6.18,
+          "log": "/workspace/da-mutation-runtime/final-run/pristine-Solidity.Semantics.Run.log",
+          "module": "Solidity.Semantics.Run"
+        }
+      },
+      {
+        "returncode": 0,
+        "seconds": 8.274,
+        "log": "/workspace/da-mutation-runtime/final-run/M21-Solidity.Evm.SimLemmas.log",
+        "module": "Solidity.Evm.SimLemmas",
+        "pristine": {
+          "returncode": 0,
+          "seconds": 8.778,
+          "log": "/workspace/da-mutation-runtime/final-run/pristine-Solidity.Evm.SimLemmas.log",
+          "module": "Solidity.Evm.SimLemmas"
+        }
+      },
+      {
+        "returncode": 0,
+        "seconds": 3.194,
+        "log": "/workspace/da-mutation-runtime/final-run/M21-Solidity.Optimizer.ConstFold.log",
+        "module": "Solidity.Optimizer.ConstFold",
+        "pristine": {
+          "returncode": 0,
+          "seconds": 3.116,
+          "log": "/workspace/da-mutation-runtime/final-run/pristine-Solidity.Optimizer.ConstFold.log",
+          "module": "Solidity.Optimizer.ConstFold"
+        }
+      },
+      {
+        "returncode": 0,
+        "seconds": 13.251,
+        "log": "/workspace/da-mutation-runtime/final-run/M21-Solidity.Optimizer.StmtFold.log",
+        "module": "Solidity.Optimizer.StmtFold",
+        "pristine": {
+          "returncode": 0,
+          "seconds": 10.862,
+          "log": "/workspace/da-mutation-runtime/final-run/pristine-Solidity.Optimizer.StmtFold.log",
+          "module": "Solidity.Optimizer.StmtFold"
+        }
+      },
+      {
+        "returncode": 0,
+        "seconds": 9.425,
+        "log": "/workspace/da-mutation-runtime/final-run/M21-Solidity.Optimizer.Propagate.log",
+        "module": "Solidity.Optimizer.Propagate",
+        "pristine": {
+          "returncode": 0,
+          "seconds": 9.425,
+          "log": "/workspace/da-mutation-runtime/final-run/pristine-Solidity.Optimizer.Propagate.log",
+          "module": "Solidity.Optimizer.Propagate"
+        }
+      },
+      {
+        "returncode": 1,
+        "seconds": 19.353,
+        "log": "/workspace/da-mutation-runtime/final-run/M21-Solidity.Optimizer.Simplify.log",
+        "module": "Solidity.Optimizer.Simplify",
+        "pristine": {
+          "returncode": 0,
+          "seconds": 21.091,
+          "log": "/workspace/da-mutation-runtime/final-run/pristine-Solidity.Optimizer.Simplify.log",
+          "module": "Solidity.Optimizer.Simplify"
+        },
+        "decisive_output": "Solidity/Optimizer/Simplify.lean:289:9: error: unsolved goals\ncase ok.true\nC : Contract\n\u0393 : Ctx\n\u03c3 : State C \u0393\na : Val C \u0393 PrimTy.bool\nh : BinOp.and.accepts PrimTy.bool = true\nhq : BinOp.and.ret PrimTy.bool = PrimTy.bool\nha : Val.evalT \u03c3 a = Except.ok true\n\u22a2 Except.ok (true || true) = Except.ok true\nSolidity/Optimizer/Simplify.lean:292:22: warning: This simp argument is unused:\n  Bool.and_self\n\nHint: Omit it from the simp argument list.\n  simp only [Val.evalT, bind, Except.bind, ha, BinOp.shortT, boolT,\n        Bool.false_eq_true, \u2193reduceIte, pure, Except.pure, Simple.evalT, TRes.ofOpt, BinOp.evalT,\n        BinOp.evalBool,\u0335 \u0335B\u0335o\u0335o\u0335l\u0335.\u0335a\u0335n\u0335d\u0335_\u0335s\u0335e\u0335l\u0335f\u0335]\n\nNote: This linter can be disabled with `set_option linter.unusedSimpArgs false`\nSolidity/Optimizer/Simplify.lean:300:9: error: unsolved goals\ncase ok.false\nC : Contract\n\u0393 : Ctx\n\u03c3 : State C \u0393\nb : Val C \u0393 PrimTy.bool\nh : BinOp.and.accepts PrimTy.bool = true\nhq : BinOp.and.ret PrimTy.bool = PrimTy.bool\nhb : Val.evalT \u03c3 b = Except.ok false\n\u22a2 Except.ok (true || false) = Except.ok false\n\ncase ok.true\nC : Contract\n\u0393 : Ctx\n\u03c3 : State C \u0393\nb : Val C \u0393 PrimTy.bool\nh : BinOp.and.accepts PrimTy.bool = true\nhq : BinOp.and.ret PrimTy.bool = PrimTy.bool\nhb : Val.evalT \u03c3 b = Except.ok true\n\u22a2 Except.ok (true || true) = Except.ok true\nSolidity/Optimizer/Simplify.lean:302:63: warning: This simp argument is unused:\n  Bool.and_false\n\nHint: Omit it from the simp argument list.\n  simp only [Val.evalT, bind, Except.bind, Simple.evalT, BinOp.shortT, boolT,\n        \u2193reduceIte, hb, TRes.ofOpt, BinOp.evalT, BinOp.evalBool, Bool.and_f\u0335a\u0335l\u0335se,\u0335 \u0335B\u0335o\u0335o\u0335l.\u0335a\u0335n\u0335d\u0335_\u0335s\u0335e\u0335l\u0335f]\n\nNote: This linter can be disabled with `set_option linter.unusedSimpArgs false`\nSolidity/Optimizer/Simplify.lean:302:79: warning: This simp argument is unused:\n  Bool.and_self\n\nHint: Omit it from the simp argument list.\n  simp only [Val.evalT, bind, Except.bind, Simple.evalT, BinOp.shortT, boolT,\n        \u2193reduceIte, hb, TRes.ofOpt, BinOp.evalT, BinOp.evalBool, Bool.and_false,\u0335 \u0335B\u0335o\u0335o\u0335l\u0335.\u0335a\u0335n\u0335d\u0335_\u0335s\u0335e\u0335l\u0335f\u0335]\n\nNote: This linter can be disabled with `set_option linter.unusedSimpArgs false`\n"
+      }
+    ]
+  },
+  {
+    "id": "M22",
+    "area": "Semantics",
+    "file": "Solidity/Semantics/Ops.lean",
+    "line": 106,
+    "description": "evalBool: some (a || b) -> some (a && b)",
+    "verdict": "KILLED",
+    "killed_by": [
+      "Solidity.Optimizer.Simplify:309:or_false_r",
+      "Solidity.Optimizer.Simplify:320:or_false_l"
+    ],
+    "seconds": 63.648,
+    "baseline_pass": true,
+    "checks": [
+      {
+        "returncode": 0,
+        "seconds": 1.697,
+        "log": "/workspace/da-mutation-runtime/final-run/M22-Solidity.Semantics.Ops.log",
+        "module": "Solidity.Semantics.Ops",
+        "pristine": {
+          "returncode": 0,
+          "seconds": 1.428,
+          "log": "/workspace/da-mutation-runtime/final-run/pristine-Solidity.Semantics.Ops.log",
+          "module": "Solidity.Semantics.Ops"
+        }
+      },
+      {
+        "returncode": 0,
+        "seconds": 6.031,
+        "log": "/workspace/da-mutation-runtime/final-run/M22-Solidity.Semantics.Run.log",
+        "module": "Solidity.Semantics.Run",
+        "pristine": {
+          "returncode": 0,
+          "seconds": 6.18,
+          "log": "/workspace/da-mutation-runtime/final-run/pristine-Solidity.Semantics.Run.log",
+          "module": "Solidity.Semantics.Run"
+        }
+      },
+      {
+        "returncode": 0,
+        "seconds": 8.755,
+        "log": "/workspace/da-mutation-runtime/final-run/M22-Solidity.Evm.SimLemmas.log",
+        "module": "Solidity.Evm.SimLemmas",
+        "pristine": {
+          "returncode": 0,
+          "seconds": 8.778,
+          "log": "/workspace/da-mutation-runtime/final-run/pristine-Solidity.Evm.SimLemmas.log",
+          "module": "Solidity.Evm.SimLemmas"
+        }
+      },
+      {
+        "returncode": 0,
+        "seconds": 3.22,
+        "log": "/workspace/da-mutation-runtime/final-run/M22-Solidity.Optimizer.ConstFold.log",
+        "module": "Solidity.Optimizer.ConstFold",
+        "pristine": {
+          "returncode": 0,
+          "seconds": 3.116,
+          "log": "/workspace/da-mutation-runtime/final-run/pristine-Solidity.Optimizer.ConstFold.log",
+          "module": "Solidity.Optimizer.ConstFold"
+        }
+      },
+      {
+        "returncode": 0,
+        "seconds": 11.91,
+        "log": "/workspace/da-mutation-runtime/final-run/M22-Solidity.Optimizer.StmtFold.log",
+        "module": "Solidity.Optimizer.StmtFold",
+        "pristine": {
+          "returncode": 0,
+          "seconds": 10.862,
+          "log": "/workspace/da-mutation-runtime/final-run/pristine-Solidity.Optimizer.StmtFold.log",
+          "module": "Solidity.Optimizer.StmtFold"
+        }
+      },
+      {
+        "returncode": 0,
+        "seconds": 11.066,
+        "log": "/workspace/da-mutation-runtime/final-run/M22-Solidity.Optimizer.Propagate.log",
+        "module": "Solidity.Optimizer.Propagate",
+        "pristine": {
+          "returncode": 0,
+          "seconds": 9.425,
+          "log": "/workspace/da-mutation-runtime/final-run/pristine-Solidity.Optimizer.Propagate.log",
+          "module": "Solidity.Optimizer.Propagate"
+        }
+      },
+      {
+        "returncode": 1,
+        "seconds": 20.969,
+        "log": "/workspace/da-mutation-runtime/final-run/M22-Solidity.Optimizer.Simplify.log",
+        "module": "Solidity.Optimizer.Simplify",
+        "pristine": {
+          "returncode": 0,
+          "seconds": 21.091,
+          "log": "/workspace/da-mutation-runtime/final-run/pristine-Solidity.Optimizer.Simplify.log",
+          "module": "Solidity.Optimizer.Simplify"
+        },
+        "decisive_output": "Solidity/Optimizer/Simplify.lean:309:9: error: unsolved goals\ncase ok.false\nC : Contract\n\u0393 : Ctx\n\u03c3 : State C \u0393\na : Val C \u0393 PrimTy.bool\nh : BinOp.or.accepts PrimTy.bool = true\nhq : BinOp.or.ret PrimTy.bool = PrimTy.bool\nha : Val.evalT \u03c3 a = Except.ok false\n\u22a2 Except.ok (false && false) = Except.ok false\nSolidity/Optimizer/Simplify.lean:312:22: warning: This simp argument is unused:\n  Bool.or_self\n\nHint: Omit it from the simp argument list.\n  simp only [Val.evalT, bind, Except.bind, ha, BinOp.shortT, boolT,\n        Bool.false_eq_true, \u2193reduceIte, pure, Except.pure, Simple.evalT, TRes.ofOpt, BinOp.evalT,\n        BinOp.evalBool,\u0335 \u0335B\u0335o\u0335o\u0335l\u0335.\u0335o\u0335r\u0335_\u0335s\u0335e\u0335l\u0335f\u0335]\n\nNote: This linter can be disabled with `set_option linter.unusedSimpArgs false`\nSolidity/Optimizer/Simplify.lean:320:9: error: unsolved goals\ncase ok.false\nC : Contract\n\u0393 : Ctx\n\u03c3 : State C \u0393\nb : Val C \u0393 PrimTy.bool\nh : BinOp.or.accepts PrimTy.bool = true\nhq : BinOp.or.ret PrimTy.bool = PrimTy.bool\nhb : Val.evalT \u03c3 b = Except.ok false\n\u22a2 Except.ok (false && false) = Except.ok false\n\ncase ok.true\nC : Contract\n\u0393 : Ctx\n\u03c3 : State C \u0393\nb : Val C \u0393 PrimTy.bool\nh : BinOp.or.accepts PrimTy.bool = true\nhq : BinOp.or.ret PrimTy.bool = PrimTy.bool\nhb : Val.evalT \u03c3 b = Except.ok true\n\u22a2 Except.ok (false && true) = Except.ok true\nSolidity/Optimizer/Simplify.lean:322:83: warning: This simp argument is unused:\n  Bool.or_self\n\nHint: Omit it from the simp argument list.\n  simp only [Val.evalT, bind, Except.bind, Simple.evalT, BinOp.shortT, boolT,\n        Bool.false_eq_true, \u2193reduceIte, hb, TRes.ofOpt, BinOp.evalT, BinOp.evalBool, Bool.or_s\u0335e\u0335l\u0335f\u0335,\u0335\n  \u0335 \u0335 \u0335 \u0335 \u0335 \u0335 \u0335B\u0335o\u0335o\u0335l\u0335.\u0335o\u0335r\u0335_\u0335true]\n\nNote: This linter can be disabled with `set_option linter.unusedSimpArgs false`\nSolidity/Optimizer/Simplify.lean:323:6: warning: This simp argument is unused:\n  Bool.or_true\n\nHint: Omit it from the simp argument list.\n  simp only [Val.evalT, bind, Except.bind, Simple.evalT, BinOp.shortT, boolT,\n        Bool.false_eq_true, \u2193reduceIte, hb, TRes.ofOpt, BinOp.evalT, BinOp.evalBool, Bool.or_self,\u0335\n  \u0335 \u0335 \u0335 \u0335 \u0335 \u0335 \u0335B\u0335o\u0335o\u0335l\u0335.\u0335o\u0335r\u0335_\u0335t\u0335r\u0335u\u0335e\u0335]\n\nNote: This linter can be disabled with `set_option linter.unusedSimpArgs false`\n"
+      }
+    ]
+  },
+  {
+    "id": "M31",
+    "area": "Calculus",
+    "file": "Solidity/Calculus/Closers.lean",
+    "line": 207,
+    "description": "TRes.isPanic: | .error .panic => true -> | .error .panic => false",
+    "verdict": "KILLED",
+    "killed_by": [
+      "Solidity.Examples.Tactics.CheckedBlock:105:narrow",
+      "Solidity.Examples.Tactics.CheckedBlock:39:underflowChecked",
+      "Solidity.Examples.Tactics.CheckedBlock:64:unbounded"
+    ],
+    "seconds": 11.091,
+    "baseline_pass": true,
+    "checks": [
+      {
+        "returncode": 0,
+        "seconds": 2.407,
+        "log": "/workspace/da-mutation-runtime/final-run/M31-Solidity.Calculus.Closers.log",
+        "module": "Solidity.Calculus.Closers",
+        "pristine": {
+          "returncode": 0,
+          "seconds": 3.153,
+          "log": "/workspace/da-mutation-runtime/final-run/pristine-Solidity.Calculus.Closers.log",
+          "module": "Solidity.Calculus.Closers"
+        }
+      },
+      {
+        "returncode": 1,
+        "seconds": 8.684,
+        "log": "/workspace/da-mutation-runtime/final-run/M31-Solidity.Examples.Tactics.CheckedBlock.log",
+        "module": "Solidity.Examples.Tactics.CheckedBlock",
+        "pristine": {
+          "returncode": 0,
+          "seconds": 9.618,
+          "log": "/workspace/da-mutation-runtime/final-run/pristine-Solidity.Examples.Tactics.CheckedBlock.log",
+          "module": "Solidity.Examples.Tactics.CheckedBlock"
+        },
+        "decisive_output": "Solidity/Examples/Tactics/CheckedBlock.lean:39:64: error: Tactic `decide` proved that the proposition\n  (Prog.runFrames (State.init StandardExample)\n        (Prog.cons (Stmt.declLocal PrimTy.uint (Var.user \"x\") (some (Val.simple (Simple.lit 0 \u22ef))))\n          (Prog.cons\n            (Stmt.assert (Val.binop BinOp.le \u22ef \u22ef (Val.simple (Simple.lit 1 \u22ef)) (Val.simple (Simple.local Idx.here))))\n            (Prog.cons (Stmt.opAssign BinOp.sub \u22ef \u22ef (OpLoc.local Idx.here) (Val.simple (Simple.lit 1 \u22ef))) Prog.nil)))\n        Frames.nil).isPanic =\n    true\nis false\nSolidity/Examples/Tactics/CheckedBlock.lean:64:8: error: Tactic `decide` proved that the proposition\n  (Prog.runFrames ((State.init StandardExample).push \u27e8\u2191(2 ^ 256 - 1), \u22ef\u27e9)\n        (Prog.cons\n          (Stmt.assert\n            (Val.binop BinOp.le \u22ef \u22ef (Val.simple (Simple.local Idx.here))\n              (Val.binop BinOp.addW \u22ef \u22ef (Val.simple (Simple.local Idx.here)) (Val.simple (Simple.lit 1 \u22ef)))))\n          (Prog.cons\n            (Stmt.declLocal PrimTy.uint (Var.user \"y\")\n              (some (Val.binop BinOp.add \u22ef \u22ef (Val.simple (Simple.local Idx.here)) (Val.simple (Simple.lit 1 \u22ef)))))\n            Prog.nil))\n        Frames.nil).isPanic =\n    true\nis false\nSolidity/Examples/Tactics/CheckedBlock.lean:105:64: error: Tactic `decide` proved that the proposition\n  (Prog.runFrames (State.init StandardExample)\n        (Prog.cons (Stmt.declLocal PrimTy.uint (Var.user \"x\") (some (Val.simple (Simple.lit 250 \u22ef))))\n          (Prog.cons\n            (Stmt.assert\n              (Val.binop BinOp.le \u22ef \u22ef (Val.simple (Simple.local Idx.here))\n                (Val.binop BinOp.addW \u22ef \u22ef (Val.simple (Simple.local Idx.here)) (Val.simple (Simple.lit 10 \u22ef)))))\n            (Prog.cons (Stmt.opAssign BinOp.add \u22ef \u22ef (OpLoc.local Idx.here) (Val.simple (Simple.lit 10 \u22ef)))\n              (Prog.cons\n                (Stmt.assert\n                  (Val.binop BinOp.le \u22ef \u22ef (Val.simple (Simple.local Idx.here)) (Val.simple (Simple.lit 255 \u22ef))))\n                Prog.nil))))\n        Frames.nil).isPanic =\n    true\nis false\n"
+      }
+    ]
+  },
+  {
+    "id": "M23",
+    "area": "Semantics",
+    "file": "Solidity/Semantics/Ops.lean",
+    "line": 125,
+    "description": "wide: | .addmod, x, y => x + y -> | .addmod, x, y => x - y",
+    "verdict": "KILLED",
+    "killed_by": [
+      "Solidity.Backend.Scalar.Modular:105:anonymous example",
+      "Solidity.Backend.Scalar.Modular:54:addmod_correct"
+    ],
+    "seconds": 7.652,
+    "baseline_pass": true,
+    "checks": [
+      {
+        "returncode": 0,
+        "seconds": 1.402,
+        "log": "/workspace/da-mutation-runtime/final-run/M23-Solidity.Semantics.Ops.log",
+        "module": "Solidity.Semantics.Ops",
+        "pristine": {
+          "returncode": 0,
+          "seconds": 1.441,
+          "log": "/workspace/da-mutation-runtime/final-run/pristine-Solidity.Semantics.Ops.log",
+          "module": "Solidity.Semantics.Ops"
+        }
+      },
+      {
+        "returncode": 0,
+        "seconds": 1.605,
+        "log": "/workspace/da-mutation-runtime/final-run/M23-Solidity.Backend.Scalar.Typed.log",
+        "module": "Solidity.Backend.Scalar.Typed",
+        "pristine": {
+          "returncode": 0,
+          "seconds": 1.624,
+          "log": "/workspace/da-mutation-runtime/final-run/pristine-Solidity.Backend.Scalar.Typed.log",
+          "module": "Solidity.Backend.Scalar.Typed"
+        }
+      },
+      {
+        "returncode": 0,
+        "seconds": 1.108,
+        "log": "/workspace/da-mutation-runtime/final-run/M23-Solidity.Backend.Scalar.Wrapping.log",
+        "module": "Solidity.Backend.Scalar.Wrapping",
+        "pristine": {
+          "returncode": 0,
+          "seconds": 1.247,
+          "log": "/workspace/da-mutation-runtime/final-run/pristine-Solidity.Backend.Scalar.Wrapping.log",
+          "module": "Solidity.Backend.Scalar.Wrapping"
+        }
+      },
+      {
+        "returncode": 0,
+        "seconds": 1.146,
+        "log": "/workspace/da-mutation-runtime/final-run/M23-Solidity.Backend.Scalar.Casts.log",
+        "module": "Solidity.Backend.Scalar.Casts",
+        "pristine": {
+          "returncode": 0,
+          "seconds": 1.116,
+          "log": "/workspace/da-mutation-runtime/final-run/pristine-Solidity.Backend.Scalar.Casts.log",
+          "module": "Solidity.Backend.Scalar.Casts"
+        }
+      },
+      {
+        "returncode": 0,
+        "seconds": 0.824,
+        "log": "/workspace/da-mutation-runtime/final-run/M23-Solidity.Backend.Scalar.Guards.log",
+        "module": "Solidity.Backend.Scalar.Guards",
+        "pristine": {
+          "returncode": 0,
+          "seconds": 0.893,
+          "log": "/workspace/da-mutation-runtime/final-run/pristine-Solidity.Backend.Scalar.Guards.log",
+          "module": "Solidity.Backend.Scalar.Guards"
+        }
+      },
+      {
+        "returncode": 1,
+        "seconds": 1.567,
+        "log": "/workspace/da-mutation-runtime/final-run/M23-Solidity.Backend.Scalar.Modular.log",
+        "module": "Solidity.Backend.Scalar.Modular",
+        "pristine": {
+          "returncode": 0,
+          "seconds": 1.516,
+          "log": "/workspace/da-mutation-runtime/final-run/pristine-Solidity.Backend.Scalar.Modular.log",
+          "module": "Solidity.Backend.Scalar.Modular"
+        },
+        "decisive_output": "Solidity/Backend/Scalar/Modular.lean:54:35: error: Tactic `rewrite` failed: Did not find an occurrence of the pattern\n  \u2191?n + \u2191?m\nin the target expression\n  BitVec.ofInt 256 ((\u2191a.val.toNat - \u2191b.val.toNat) % \u2191k.val.toNat) =\n    BitVec.ofNat 256 (((\u2191a.val.toNat).toNat + (\u2191b.val.toNat).toNat) % (\u2191k.val.toNat).toNat)\n\na b k : PrimTy.uint.Denote\ntail : Stack\nhk : \u00ack.val = 0\nhrk : 0 \u2264 k.val \u2227 k.val < \u2191(2 ^ 256)\nhp : 0 < k.val\nhn : PrimTy.uint.inRange (ModOp.addmod.wide a.val b.val % k.val) = true\nha : a.val = \u2191a.val.toNat\nhb : b.val = \u2191b.val.toNat\nhkk : k.val = \u2191k.val.toNat\n\u22a2 BitVec.ofInt 256 ((\u2191a.val.toNat - \u2191b.val.toNat) % \u2191k.val.toNat) =\n    BitVec.ofNat 256 (((\u2191a.val.toNat).toNat + (\u2191b.val.toNat).toNat) % (\u2191k.val.toNat).toNat)\n'Solidity.Backend.Scalar.addmod_correct' depends on axioms: [propext, sorryAx, Quot.sound]\nSolidity/Backend/Scalar/Modular.lean:105:0: error: \u274c\ufe0f Docstring on `#guard_msgs` does not match generated message:\n\n- info: 'Solidity.Backend.Scalar.addmod_correct' depends on axioms: [propext, Quot.sound]\n+ info: 'Solidity.Backend.Scalar.addmod_correct' depends on axioms: [propext, sorryAx, Quot.sound]\n"
+      }
+    ]
+  },
+  {
+    "id": "M24",
+    "area": "Semantics",
+    "file": "Solidity/Semantics/Ops.lean",
+    "line": 126,
+    "description": "wide: | .mulmod, x, y => x * y -> | .mulmod, x, y => x + y",
+    "verdict": "KILLED",
+    "killed_by": [
+      "Solidity.Backend.Scalar.Modular:107:anonymous example",
+      "Solidity.Backend.Scalar.Modular:85:mulmod_correct"
+    ],
+    "seconds": 7.914,
+    "baseline_pass": true,
+    "checks": [
+      {
+        "returncode": 0,
+        "seconds": 1.398,
+        "log": "/workspace/da-mutation-runtime/final-run/M24-Solidity.Semantics.Ops.log",
+        "module": "Solidity.Semantics.Ops",
+        "pristine": {
+          "returncode": 0,
+          "seconds": 1.441,
+          "log": "/workspace/da-mutation-runtime/final-run/pristine-Solidity.Semantics.Ops.log",
+          "module": "Solidity.Semantics.Ops"
+        }
+      },
+      {
+        "returncode": 0,
+        "seconds": 1.65,
+        "log": "/workspace/da-mutation-runtime/final-run/M24-Solidity.Backend.Scalar.Typed.log",
+        "module": "Solidity.Backend.Scalar.Typed",
+        "pristine": {
+          "returncode": 0,
+          "seconds": 1.624,
+          "log": "/workspace/da-mutation-runtime/final-run/pristine-Solidity.Backend.Scalar.Typed.log",
+          "module": "Solidity.Backend.Scalar.Typed"
+        }
+      },
+      {
+        "returncode": 0,
+        "seconds": 1.158,
+        "log": "/workspace/da-mutation-runtime/final-run/M24-Solidity.Backend.Scalar.Wrapping.log",
+        "module": "Solidity.Backend.Scalar.Wrapping",
+        "pristine": {
+          "returncode": 0,
+          "seconds": 1.247,
+          "log": "/workspace/da-mutation-runtime/final-run/pristine-Solidity.Backend.Scalar.Wrapping.log",
+          "module": "Solidity.Backend.Scalar.Wrapping"
+        }
+      },
+      {
+        "returncode": 0,
+        "seconds": 1.196,
+        "log": "/workspace/da-mutation-runtime/final-run/M24-Solidity.Backend.Scalar.Casts.log",
+        "module": "Solidity.Backend.Scalar.Casts",
+        "pristine": {
+          "returncode": 0,
+          "seconds": 1.116,
+          "log": "/workspace/da-mutation-runtime/final-run/pristine-Solidity.Backend.Scalar.Casts.log",
+          "module": "Solidity.Backend.Scalar.Casts"
+        }
+      },
+      {
+        "returncode": 0,
+        "seconds": 0.886,
+        "log": "/workspace/da-mutation-runtime/final-run/M24-Solidity.Backend.Scalar.Guards.log",
+        "module": "Solidity.Backend.Scalar.Guards",
+        "pristine": {
+          "returncode": 0,
+          "seconds": 0.893,
+          "log": "/workspace/da-mutation-runtime/final-run/pristine-Solidity.Backend.Scalar.Guards.log",
+          "module": "Solidity.Backend.Scalar.Guards"
+        }
+      },
+      {
+        "returncode": 1,
+        "seconds": 1.626,
+        "log": "/workspace/da-mutation-runtime/final-run/M24-Solidity.Backend.Scalar.Modular.log",
+        "module": "Solidity.Backend.Scalar.Modular",
+        "pristine": {
+          "returncode": 0,
+          "seconds": 1.516,
+          "log": "/workspace/da-mutation-runtime/final-run/pristine-Solidity.Backend.Scalar.Modular.log",
+          "module": "Solidity.Backend.Scalar.Modular"
+        },
+        "decisive_output": "Solidity/Backend/Scalar/Modular.lean:85:35: error: Tactic `rewrite` failed: Did not find an occurrence of the pattern\n  \u2191?n * \u2191?m\nin the target expression\n  BitVec.ofInt 256 ((\u2191a.val.toNat + \u2191b.val.toNat) % \u2191k.val.toNat) =\n    BitVec.ofNat 256 ((\u2191a.val.toNat).toNat * (\u2191b.val.toNat).toNat % (\u2191k.val.toNat).toNat)\n\na b k : PrimTy.uint.Denote\ntail : Stack\nhk : \u00ack.val = 0\nhrk : 0 \u2264 k.val \u2227 k.val < \u2191(2 ^ 256)\nhp : 0 < k.val\nhn : PrimTy.uint.inRange (ModOp.mulmod.wide a.val b.val % k.val) = true\nha : a.val = \u2191a.val.toNat\nhb : b.val = \u2191b.val.toNat\nhkk : k.val = \u2191k.val.toNat\n\u22a2 BitVec.ofInt 256 ((\u2191a.val.toNat + \u2191b.val.toNat) % \u2191k.val.toNat) =\n    BitVec.ofNat 256 ((\u2191a.val.toNat).toNat * (\u2191b.val.toNat).toNat % (\u2191k.val.toNat).toNat)\n'Solidity.Backend.Scalar.mulmod_correct' depends on axioms: [propext, sorryAx, Quot.sound]\nSolidity/Backend/Scalar/Modular.lean:107:0: error: \u274c\ufe0f Docstring on `#guard_msgs` does not match generated message:\n\n- info: 'Solidity.Backend.Scalar.mulmod_correct' depends on axioms: [propext, Quot.sound]\n+ info: 'Solidity.Backend.Scalar.mulmod_correct' depends on axioms: [propext, sorryAx, Quot.sound]\n"
+      }
+    ]
+  },
+  {
+    "id": "M25",
+    "area": "Semantics",
+    "file": "Solidity/Semantics/Ops.lean",
+    "line": 131,
+    "description": "evalT: if k.val = 0 then none -> if k.val = 0 then some (PrimTy.dflt .uint)",
+    "verdict": "KILLED",
+    "killed_by": [
+      "Solidity.Backend.Scalar.Modular:105:anonymous example",
+      "Solidity.Backend.Scalar.Modular:107:anonymous example",
+      "Solidity.Backend.Scalar.Modular:41:addmod_correct",
+      "Solidity.Backend.Scalar.Modular:72:mulmod_correct"
+    ],
+    "seconds": 9.936,
+    "baseline_pass": true,
+    "checks": [
+      {
+        "returncode": 0,
+        "seconds": 2.147,
+        "log": "/workspace/da-mutation-runtime/final-run/M25-Solidity.Semantics.Ops.log",
+        "module": "Solidity.Semantics.Ops",
+        "pristine": {
+          "returncode": 0,
+          "seconds": 1.441,
+          "log": "/workspace/da-mutation-runtime/final-run/pristine-Solidity.Semantics.Ops.log",
+          "module": "Solidity.Semantics.Ops"
+        }
+      },
+      {
+        "returncode": 0,
+        "seconds": 2.728,
+        "log": "/workspace/da-mutation-runtime/final-run/M25-Solidity.Backend.Scalar.Typed.log",
+        "module": "Solidity.Backend.Scalar.Typed",
+        "pristine": {
+          "returncode": 0,
+          "seconds": 1.624,
+          "log": "/workspace/da-mutation-runtime/final-run/pristine-Solidity.Backend.Scalar.Typed.log",
+          "module": "Solidity.Backend.Scalar.Typed"
+        }
+      },
+      {
+        "returncode": 0,
+        "seconds": 1.349,
+        "log": "/workspace/da-mutation-runtime/final-run/M25-Solidity.Backend.Scalar.Wrapping.log",
+        "module": "Solidity.Backend.Scalar.Wrapping",
+        "pristine": {
+          "returncode": 0,
+          "seconds": 1.247,
+          "log": "/workspace/da-mutation-runtime/final-run/pristine-Solidity.Backend.Scalar.Wrapping.log",
+          "module": "Solidity.Backend.Scalar.Wrapping"
+        }
+      },
+      {
+        "returncode": 0,
+        "seconds": 1.228,
+        "log": "/workspace/da-mutation-runtime/final-run/M25-Solidity.Backend.Scalar.Casts.log",
+        "module": "Solidity.Backend.Scalar.Casts",
+        "pristine": {
+          "returncode": 0,
+          "seconds": 1.116,
+          "log": "/workspace/da-mutation-runtime/final-run/pristine-Solidity.Backend.Scalar.Casts.log",
+          "module": "Solidity.Backend.Scalar.Casts"
+        }
+      },
+      {
+        "returncode": 0,
+        "seconds": 0.848,
+        "log": "/workspace/da-mutation-runtime/final-run/M25-Solidity.Backend.Scalar.Guards.log",
+        "module": "Solidity.Backend.Scalar.Guards",
+        "pristine": {
+          "returncode": 0,
+          "seconds": 0.893,
+          "log": "/workspace/da-mutation-runtime/final-run/pristine-Solidity.Backend.Scalar.Guards.log",
+          "module": "Solidity.Backend.Scalar.Guards"
+        }
+      },
+      {
+        "returncode": 1,
+        "seconds": 1.636,
+        "log": "/workspace/da-mutation-runtime/final-run/M25-Solidity.Backend.Scalar.Modular.log",
+        "module": "Solidity.Backend.Scalar.Modular",
+        "pristine": {
+          "returncode": 0,
+          "seconds": 1.516,
+          "log": "/workspace/da-mutation-runtime/final-run/pristine-Solidity.Backend.Scalar.Modular.log",
+          "module": "Solidity.Backend.Scalar.Modular"
+        },
+        "decisive_output": "Solidity/Backend/Scalar/Modular.lean:41:2: error: unsolved goals\ncase pos\na b k : PrimTy.uint.Denote\ntail : Stack\nhk : k.val = 0\n\u22a2 some (Except.error divisionFailure) = some (Except.ok (encodeValue PrimTy.uint PrimTy.uint.dflt :: tail))\nSolidity/Backend/Scalar/Modular.lean:72:2: error: unsolved goals\ncase pos\na b k : PrimTy.uint.Denote\ntail : Stack\nhk : k.val = 0\n\u22a2 some (Except.error divisionFailure) = some (Except.ok (encodeValue PrimTy.uint PrimTy.uint.dflt :: tail))\n'Solidity.Backend.Scalar.addmod_correct' depends on axioms: [propext, sorryAx, Quot.sound]\nSolidity/Backend/Scalar/Modular.lean:105:0: error: \u274c\ufe0f Docstring on `#guard_msgs` does not match generated message:\n\n- info: 'Solidity.Backend.Scalar.addmod_correct' depends on axioms: [propext, Quot.sound]\n+ info: 'Solidity.Backend.Scalar.addmod_correct' depends on axioms: [propext, sorryAx, Quot.sound]\n'Solidity.Backend.Scalar.mulmod_correct' depends on axioms: [propext, sorryAx, Quot.sound]\nSolidity/Backend/Scalar/Modular.lean:107:0: error: \u274c\ufe0f Docstring on `#guard_msgs` does not match generated message:\n\n- info: 'Solidity.Backend.Scalar.mulmod_correct' depends on axioms: [propext, Quot.sound]\n+ info: 'Solidity.Backend.Scalar.mulmod_correct' depends on axioms: [propext, sorryAx, Quot.sound]\n"
+      }
+    ]
+  },
+  {
+    "id": "M26",
+    "area": "Semantics",
+    "file": "Solidity/Semantics/Ops.lean",
+    "line": 140,
+    "description": "evalT: PrimTy.int.ofInt? (-a.1) -> PrimTy.int.ofInt? (a.1)",
+    "verdict": "KILLED",
+    "killed_by": [
+      "Solidity.Evm.SimLemmas:516:neg_simT"
+    ],
+    "seconds": 17.157,
+    "baseline_pass": true,
+    "checks": [
+      {
+        "returncode": 0,
+        "seconds": 1.428,
+        "log": "/workspace/da-mutation-runtime/final-run/M26-Solidity.Semantics.Ops.log",
+        "module": "Solidity.Semantics.Ops",
+        "pristine": {
+          "returncode": 0,
+          "seconds": 1.441,
+          "log": "/workspace/da-mutation-runtime/final-run/pristine-Solidity.Semantics.Ops.log",
+          "module": "Solidity.Semantics.Ops"
+        }
+      },
+      {
+        "returncode": 0,
+        "seconds": 6.83,
+        "log": "/workspace/da-mutation-runtime/final-run/M26-Solidity.Semantics.Run.log",
+        "module": "Solidity.Semantics.Run",
+        "pristine": {
+          "returncode": 0,
+          "seconds": 6.189,
+          "log": "/workspace/da-mutation-runtime/final-run/pristine-Solidity.Semantics.Run.log",
+          "module": "Solidity.Semantics.Run"
+        }
+      },
+      {
+        "returncode": 1,
+        "seconds": 8.899,
+        "log": "/workspace/da-mutation-runtime/final-run/M26-Solidity.Evm.SimLemmas.log",
+        "module": "Solidity.Evm.SimLemmas",
+        "pristine": {
+          "returncode": 0,
+          "seconds": 8.789,
+          "log": "/workspace/da-mutation-runtime/final-run/pristine-Solidity.Evm.SimLemmas.log",
+          "module": "Solidity.Evm.SimLemmas"
+        },
+        "decisive_output": "Solidity/Evm/SimLemmas.lean:218:18: warning: This simp argument is unused:\n  if_true\n\nHint: Omit it from the simp argument list.\n  simp only [h,\u0335 \u0335i\u0335f\u0335_\u0335t\u0335r\u0335u\u0335e\u0335]\n\nNote: This linter can be disabled with `set_option linter.unusedSimpArgs false`\nSolidity/Evm/SimLemmas.lean:224:18: warning: This simp argument is unused:\n  if_false\n\nHint: Omit it from the simp argument list.\n  simp only [h,\u0335 \u0335i\u0335f\u0335_\u0335f\u0335a\u0335l\u0335s\u0335e\u0335]\n\nNote: This linter can be disabled with `set_option linter.unusedSimpArgs false`\nSolidity/Evm/SimLemmas.lean:516:2: error: 'show' tactic failed, pattern\n  ValOutT PrimTy.int (TRes.ofOpt (PrimTy.int.ofInt? (-a.val)))\n    (run negCode\n      { stack := Word.val \u27e8x, hx\u27e9 :: m.stack, store := m.store, mem := m.mem, bal := m.bal, bal\u2080 := m.bal\u2080,\n        self := m.self, accepts := m.accepts, caller := m.caller, callvalue := m.callvalue, timestamp := m.timestamp })\n    m\nis not definitionally equal to target\n  ValOutT PrimTy.int (TRes.ofOpt (UnOp.neg.evalT \u22ef a)) (run negCode (m.push (Word.val \u27e8x, hx\u27e9))) m\n"
+      }
+    ]
+  },
+  {
+    "id": "M27",
+    "area": "Semantics",
+    "file": "Solidity/Semantics/Ops.lean",
+    "line": 141,
+    "description": "evalT: some (!a) -> some a",
+    "verdict": "KILLED",
+    "killed_by": [
+      "Solidity.Backend.Scalar.Typed:105:booleanNot",
+      "Solidity.Backend.Scalar.Typed:157:anonymous example"
+    ],
+    "seconds": 3.039,
+    "baseline_pass": true,
+    "checks": [
+      {
+        "returncode": 0,
+        "seconds": 1.475,
+        "log": "/workspace/da-mutation-runtime/final-run/M27-Solidity.Semantics.Ops.log",
+        "module": "Solidity.Semantics.Ops",
+        "pristine": {
+          "returncode": 0,
+          "seconds": 1.441,
+          "log": "/workspace/da-mutation-runtime/final-run/pristine-Solidity.Semantics.Ops.log",
+          "module": "Solidity.Semantics.Ops"
+        }
+      },
+      {
+        "returncode": 1,
+        "seconds": 1.564,
+        "log": "/workspace/da-mutation-runtime/final-run/M27-Solidity.Backend.Scalar.Typed.log",
+        "module": "Solidity.Backend.Scalar.Typed",
+        "pristine": {
+          "returncode": 0,
+          "seconds": 1.624,
+          "log": "/workspace/da-mutation-runtime/final-run/pristine-Solidity.Backend.Scalar.Typed.log",
+          "module": "Solidity.Backend.Scalar.Typed"
+        },
+        "decisive_output": "Solidity/Backend/Scalar/Typed.lean:105:16: error: Tactic `rfl` failed: The left-hand side\n  run [Instr.op Op.ISZERO] (encodeValue PrimTy.bool false :: tail)\nis not definitionally equal to the right-hand side\n  Option.map (fun r => encodeValue (UnOp.not.ret PrimTy.bool) r :: tail) (UnOp.not.evalT \u22ef false)\n\ncase false\ntail : Stack\n\u22a2 run [Instr.op Op.ISZERO] (encodeValue PrimTy.bool false :: tail) =\n    Option.map (fun r => encodeValue (UnOp.not.ret PrimTy.bool) r :: tail) (UnOp.not.evalT \u22ef false)\nSolidity/Backend/Scalar/Typed.lean:105:16: error: Tactic `rfl` failed: The left-hand side\n  run [Instr.op Op.ISZERO] (encodeValue PrimTy.bool true :: tail)\nis not definitionally equal to the right-hand side\n  Option.map (fun r => encodeValue (UnOp.not.ret PrimTy.bool) r :: tail) (UnOp.not.evalT \u22ef true)\n\ncase true\ntail : Stack\n\u22a2 run [Instr.op Op.ISZERO] (encodeValue PrimTy.bool true :: tail) =\n    Option.map (fun r => encodeValue (UnOp.not.ret PrimTy.bool) r :: tail) (UnOp.not.evalT \u22ef true)\n'Solidity.Backend.Scalar.booleanNot' depends on axioms: [propext, sorryAx, Quot.sound]\nSolidity/Backend/Scalar/Typed.lean:157:0: error: \u274c\ufe0f Docstring on `#guard_msgs` does not match generated message:\n\n- info: 'Solidity.Backend.Scalar.booleanNot' depends on axioms: [propext, Quot.sound]\n+ info: 'Solidity.Backend.Scalar.booleanNot' depends on axioms: [propext, sorryAx, Quot.sound]\n'Solidity.Backend.Scalar.encodeValue_toWord' depends on axioms: [propext, Classical.choice, Quot.sound]\n"
+      }
+    ]
+  },
+  {
+    "id": "M28",
+    "area": "Semantics",
+    "file": "Solidity/Semantics/Ops.lean",
+    "line": 142,
+    "description": "evalT: Semantics.uintBound - 1 - a.1 -> Semantics.uintBound - 2 - a.1",
+    "verdict": "KILLED",
+    "killed_by": [
+      "Solidity.Evm.SimLemmas:525:bnot_simT"
+    ],
+    "seconds": 20.862,
+    "baseline_pass": true,
+    "checks": [
+      {
+        "returncode": 0,
+        "seconds": 1.54,
+        "log": "/workspace/da-mutation-runtime/final-run/M28-Solidity.Semantics.Ops.log",
+        "module": "Solidity.Semantics.Ops",
+        "pristine": {
+          "returncode": 0,
+          "seconds": 1.441,
+          "log": "/workspace/da-mutation-runtime/final-run/pristine-Solidity.Semantics.Ops.log",
+          "module": "Solidity.Semantics.Ops"
+        }
+      },
+      {
+        "returncode": 0,
+        "seconds": 7.015,
+        "log": "/workspace/da-mutation-runtime/final-run/M28-Solidity.Semantics.Run.log",
+        "module": "Solidity.Semantics.Run",
+        "pristine": {
+          "returncode": 0,
+          "seconds": 6.189,
+          "log": "/workspace/da-mutation-runtime/final-run/pristine-Solidity.Semantics.Run.log",
+          "module": "Solidity.Semantics.Run"
+        }
+      },
+      {
+        "returncode": 1,
+        "seconds": 12.307,
+        "log": "/workspace/da-mutation-runtime/final-run/M28-Solidity.Evm.SimLemmas.log",
+        "module": "Solidity.Evm.SimLemmas",
+        "pristine": {
+          "returncode": 0,
+          "seconds": 8.789,
+          "log": "/workspace/da-mutation-runtime/final-run/pristine-Solidity.Evm.SimLemmas.log",
+          "module": "Solidity.Evm.SimLemmas"
+        },
+        "decisive_output": "Solidity/Evm/SimLemmas.lean:218:18: warning: This simp argument is unused:\n  if_true\n\nHint: Omit it from the simp argument list.\n  simp only [h,\u0335 \u0335i\u0335f\u0335_\u0335t\u0335r\u0335u\u0335e\u0335]\n\nNote: This linter can be disabled with `set_option linter.unusedSimpArgs false`\nSolidity/Evm/SimLemmas.lean:224:18: warning: This simp argument is unused:\n  if_false\n\nHint: Omit it from the simp argument list.\n  simp only [h,\u0335 \u0335i\u0335f\u0335_\u0335f\u0335a\u0335l\u0335s\u0335e\u0335]\n\nNote: This linter can be disabled with `set_option linter.unusedSimpArgs false`\nSolidity/Evm/SimLemmas.lean:525:2: error: 'show' tactic failed, pattern\n  ValOutT PrimTy.uint (TRes.ofOpt (PrimTy.uint.ofInt? (Semantics.uintBound - 1 - a.val))) ?m.55 m\nis not definitionally equal to target\n  ValOutT PrimTy.uint (TRes.ofOpt (UnOp.bnot.evalT \u22ef a)) (run [Instr.not] (m.push (Word.val \u27e8x, hx\u27e9))) m\n"
+      }
+    ]
+  },
+  {
+    "id": "M29",
+    "area": "Semantics",
+    "file": "Solidity/Semantics/Ops.lean",
+    "line": 145,
+    "description": "evalT: a.1 < Semantics.intBound -> a.1 \u2264 Semantics.intBound",
+    "verdict": "KILLED",
+    "killed_by": [
+      "Solidity.Evm.SimLemmas:544:toInt_simT"
+    ],
+    "seconds": 19.841,
+    "baseline_pass": true,
+    "checks": [
+      {
+        "returncode": 0,
+        "seconds": 1.486,
+        "log": "/workspace/da-mutation-runtime/final-run/M29-Solidity.Semantics.Ops.log",
+        "module": "Solidity.Semantics.Ops",
+        "pristine": {
+          "returncode": 0,
+          "seconds": 1.441,
+          "log": "/workspace/da-mutation-runtime/final-run/pristine-Solidity.Semantics.Ops.log",
+          "module": "Solidity.Semantics.Ops"
+        }
+      },
+      {
+        "returncode": 0,
+        "seconds": 8.257,
+        "log": "/workspace/da-mutation-runtime/final-run/M29-Solidity.Semantics.Run.log",
+        "module": "Solidity.Semantics.Run",
+        "pristine": {
+          "returncode": 0,
+          "seconds": 6.189,
+          "log": "/workspace/da-mutation-runtime/final-run/pristine-Solidity.Semantics.Run.log",
+          "module": "Solidity.Semantics.Run"
+        }
+      },
+      {
+        "returncode": 1,
+        "seconds": 10.098,
+        "log": "/workspace/da-mutation-runtime/final-run/M29-Solidity.Evm.SimLemmas.log",
+        "module": "Solidity.Evm.SimLemmas",
+        "pristine": {
+          "returncode": 0,
+          "seconds": 8.789,
+          "log": "/workspace/da-mutation-runtime/final-run/pristine-Solidity.Evm.SimLemmas.log",
+          "module": "Solidity.Evm.SimLemmas"
+        },
+        "decisive_output": "Solidity/Evm/SimLemmas.lean:218:18: warning: This simp argument is unused:\n  if_true\n\nHint: Omit it from the simp argument list.\n  simp only [h,\u0335 \u0335i\u0335f\u0335_\u0335t\u0335r\u0335u\u0335e\u0335]\n\nNote: This linter can be disabled with `set_option linter.unusedSimpArgs false`\nSolidity/Evm/SimLemmas.lean:224:18: warning: This simp argument is unused:\n  if_false\n\nHint: Omit it from the simp argument list.\n  simp only [h,\u0335 \u0335i\u0335f\u0335_\u0335f\u0335a\u0335l\u0335s\u0335e\u0335]\n\nNote: This linter can be disabled with `set_option linter.unusedSimpArgs false`\nSolidity/Evm/SimLemmas.lean:544:2: error: 'show' tactic failed, pattern\n  ValOutT PrimTy.int\n    (TRes.ofOpt (PrimTy.int.ofInt? (if a.val < Semantics.intBound then a.val else a.val - Semantics.uintBound))) ?m.137\n    m\nis not definitionally equal to target\n  ValOutT PrimTy.int (TRes.ofOpt (UnOp.toInt.evalT \u22ef a)) (run [] (m.push (Word.val \u27e8x, hx\u27e9))) m\n"
+      }
+    ]
+  },
+  {
+    "id": "M30",
+    "area": "Semantics",
+    "file": "Solidity/Semantics/Ops.lean",
+    "line": 147,
+    "description": "evalT: (a.1 % Semantics.uintBound) -> ((a.1 + 1) % Semantics.uintBound)",
+    "verdict": "KILLED",
+    "killed_by": [
+      "Solidity.Evm.SimLemmas:554:toUint_simT"
+    ],
+    "seconds": 20.082,
+    "baseline_pass": true,
+    "checks": [
+      {
+        "returncode": 0,
+        "seconds": 1.479,
+        "log": "/workspace/da-mutation-runtime/final-run/M30-Solidity.Semantics.Ops.log",
+        "module": "Solidity.Semantics.Ops",
+        "pristine": {
+          "returncode": 0,
+          "seconds": 1.441,
+          "log": "/workspace/da-mutation-runtime/final-run/pristine-Solidity.Semantics.Ops.log",
+          "module": "Solidity.Semantics.Ops"
+        }
+      },
+      {
+        "returncode": 0,
+        "seconds": 9.058,
+        "log": "/workspace/da-mutation-runtime/final-run/M30-Solidity.Semantics.Run.log",
+        "module": "Solidity.Semantics.Run",
+        "pristine": {
+          "returncode": 0,
+          "seconds": 6.189,
+          "log": "/workspace/da-mutation-runtime/final-run/pristine-Solidity.Semantics.Run.log",
+          "module": "Solidity.Semantics.Run"
+        }
+      },
+      {
+        "returncode": 1,
+        "seconds": 9.545,
+        "log": "/workspace/da-mutation-runtime/final-run/M30-Solidity.Evm.SimLemmas.log",
+        "module": "Solidity.Evm.SimLemmas",
+        "pristine": {
+          "returncode": 0,
+          "seconds": 8.789,
+          "log": "/workspace/da-mutation-runtime/final-run/pristine-Solidity.Evm.SimLemmas.log",
+          "module": "Solidity.Evm.SimLemmas"
+        },
+        "decisive_output": "Solidity/Evm/SimLemmas.lean:218:18: warning: This simp argument is unused:\n  if_true\n\nHint: Omit it from the simp argument list.\n  simp only [h,\u0335 \u0335i\u0335f\u0335_\u0335t\u0335r\u0335u\u0335e\u0335]\n\nNote: This linter can be disabled with `set_option linter.unusedSimpArgs false`\nSolidity/Evm/SimLemmas.lean:224:18: warning: This simp argument is unused:\n  if_false\n\nHint: Omit it from the simp argument list.\n  simp only [h,\u0335 \u0335i\u0335f\u0335_\u0335f\u0335a\u0335l\u0335s\u0335e\u0335]\n\nNote: This linter can be disabled with `set_option linter.unusedSimpArgs false`\nSolidity/Evm/SimLemmas.lean:554:2: error: 'show' tactic failed, pattern\n  ValOutT PrimTy.uint (TRes.ofOpt (PrimTy.uint.ofInt? (a.val % Semantics.uintBound))) ?m.45 m\nis not definitionally equal to target\n  ValOutT PrimTy.uint (TRes.ofOpt (UnOp.toUint.evalT \u22ef a)) (run [] (m.push (Word.val \u27e8x, hx\u27e9))) m\n"
+      }
+    ]
+  }
+]

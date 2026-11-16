@@ -1,0 +1,14 @@
+{
+  "size_branches_selected_joint_domain": {
+    "target": "Solidity.Backend.AbiEntry.Interface.SizeBranchesCertificate.selected",
+    "proof": "\u27e8SizeBranches.program,SizeBranches.certificate,dispatchContract,dispatchCtx,dispatchCtx,dispatchCtx,0,Frag.init dispatchCtx,(Idx.here),dispatchHit.program,dispatchFallback.program,dispatchHit.outFrag,dispatchFallback.outFrag,dispatchHit.admitted,dispatchFallback.admitted,True.intro\u27e9"
+  },
+  "size_branches_executed_joint_domain": {
+    "target": "Solidity.Backend.AbiEntry.Interface.SizeBranchesCertificate.executed",
+    "proof": "\u27e8SizeBranches.program,SizeBranches.certificate,dispatchContract,dispatchCtx,dispatchCtx,dispatchCtx,0,Frag.init dispatchCtx,(Idx.here),dispatchHit.program,dispatchFallback.program,dispatchHit.outFrag,dispatchFallback.outFrag,dispatchHit.admitted,dispatchFallback.admitted,sizeBranchWhole,sizeBranchLeft,sizeBranchRight,size_branch_whole_found,size_branch_left_found,size_branch_right_found,sizeBranchMachine (wmod 3),wmod 3,rfl,True.intro\u27e9"
+  },
+  "size_branches_body_outcome_joint_domain": {
+    "target": "Solidity.Backend.AbiEntry.Interface.SizeBranchesCertificate.body_outcome",
+    "proof": "\u27e8SizeBranches.program,SizeBranches.certificate,dispatchContract,dispatchCtx,dispatchCtx,dispatchCtx,1,0,Frag.init dispatchCtx,(Idx.here),dispatchHit.program,dispatchFallback.program,dispatchHit.outFrag,dispatchFallback.outFrag,dispatchHit.admitted,dispatchFallback.admitted,sizeBranchWhole,sizeBranchLeft,sizeBranchRight,size_branch_whole_found,size_branch_left_found,size_branch_right_found,sizeBranchState (wmod 3),sizeBranchMachine (wmod 3),size_branch_represented (wmod 3),size_branch_room,wmod 3,rfl,True.intro\u27e9"
+  }
+}

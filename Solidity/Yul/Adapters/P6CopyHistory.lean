@@ -55,7 +55,6 @@ theorem run_MemOK {E : Source.Env} {Γ : Source.RCtx} {origin : Source.Heap E.la
     (c : SnapshotCursor allocated s) (μ : FrameMem C Δ) (bound : μ.capacity=capacity)
     (requests : List (SpanPair capacity)) (H : Source.HeapTy) (ok : Source.MemOK E H s) :
     Source.MemOK E H (run allocated capacity s c μ bound requests).current.1 := by
-  first | (simp only;done) | skip
   induction requests generalizing s μ with
   | nil => exact ok
   | cons spans rest ih =>
@@ -77,7 +76,6 @@ theorem run_preserves {E : Source.Env} {Γ : Source.RCtx} {origin : Source.Heap 
     out.1=withSourceHeap s out.1.2.heap ∧
       out.2.entries.map MixedHeapEntry.id=c.entries.map MixedHeapEntry.id ∧
       (CoversMixedHeap c.entries → CoversMixedHeap out.2.entries) := by
-  first | (simp only;done) | skip
   induction requests generalizing s μ with
   | nil => exact ⟨(withSourceHeap_unchanged s).symm,rfl,id⟩
   | cons spans rest ih =>
@@ -100,7 +98,6 @@ theorem run_suffix {E : Source.Env} {Γ : Source.RCtx} {origin : Source.Heap E.l
     (c : SnapshotCursor allocated s) (μ : FrameMem C Δ) (bound : μ.capacity=capacity)
     (requests : List (SpanPair capacity)) :
     ∃ done,requests=done++(run allocated capacity s c μ bound requests).pending := by
-  first | (simp only;done) | skip
   induction requests generalizing s μ with
   | nil => exact ⟨[],rfl⟩
   | cons spans rest ih =>
@@ -122,7 +119,6 @@ theorem run_stopped {E : Source.Env} {Γ : Source.RCtx} {origin : Source.Heap E.
     (pending : (run allocated capacity s c μ bound requests).pending=spans::rest) :
     let out := run allocated capacity s c μ bound requests
     snapshotStep allocated out.current.1 out.current.2 (frameBytes out.frame)=none := by
-  first | (simp only at pending ⊢;done) | skip
   induction requests generalizing s μ with
   | nil => cases pending
   | cons first requests ih =>
@@ -145,7 +141,6 @@ theorem run_reencode {E : Source.Env} {Γ : Source.RCtx} {origin : Source.Heap E
     (complete : (run allocated capacity s c μ bound requests).pending=[]) :
     let out := run allocated capacity s c μ bound requests
     encodeMixedHeap out.current.2.placement out.current.2.entries (frameBytes out.frame)=frameBytes out.frame := by
-  first | (simp only;done) | skip
   induction requests generalizing s μ with
   | nil => exact initial
   | cons spans requests ih =>

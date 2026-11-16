@@ -1,0 +1,34 @@
+[
+  {
+    "project": "CakeML",
+    "url": "https://raw.githubusercontent.com/CakeML/cakeml/b3e6ea34ca1aed91a57703a30549260ce6f6448e/build-instructions.sh",
+    "kind": "cited, not measured",
+    "seconds": 72000,
+    "comparable_to_serial_module_elaboration": false,
+    "source_sha256": "7ea19557d33c516a7e50ad50cf0e5f28a8ea2424f9454951f86a3df6302aab9d",
+    "excerpts": [
+      {
+        "line": 41,
+        "text": "## note: a full build (including the bootstrapped compiler)"
+      },
+      {
+        "line": 42,
+        "text": "## takes a long time (~20 hours) and requires much RAM (~16 GB)"
+      }
+    ],
+    "boundary": "full CakeML including bootstrapped compiler; parallelism, CPU and HOL revision unspecified; not a matched check-only timing"
+  },
+  {
+    "project": "CompCert",
+    "url": "https://compcert.org/man/manual002.html",
+    "kind": "cited, not measured",
+    "seconds": 900,
+    "comparable_to_serial_module_elaboration": false,
+    "status": "cited-public-web-extract",
+    "section": "2.3 Installation, Building the system",
+    "retrieval": "public-web tool, 2026-11-08; shell proxy cannot reach host",
+    "excerpt": "This step can take about 15 minutes on a recent machine with a single core",
+    "boundary": "make all: proof checking plus extraction and OCaml compiler construction; current manual not pinned source or matched hardware",
+    "shell_fetch_error": "<urlopen error Tunnel connection failed: 403 Forbidden>"
+  }
+]

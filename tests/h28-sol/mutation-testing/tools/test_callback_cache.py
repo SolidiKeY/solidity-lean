@@ -73,3 +73,7 @@ class PinnedProducerDiagnosticControls(unittest.TestCase):
                               (base | {"Other.Unreviewed"}, {"roots": [extra], "ordered_modules": [extra]})]:
             with self.assertRaises(ValueError):
                 validate_imports(imports, data)
+
+
+if __name__ == "__main__":
+    unittest.main()

@@ -90,10 +90,14 @@ class SlowExamples(unittest.TestCase):
             gate.write_bytes((ROOT / "scripts/coord-tools/gate.sh").read_bytes())
             for name in ("scripts/check-trust.sh", "scripts/check-doc-paths.sh",
                          "scripts/check-private-paths.sh", "scripts/check-evidence-files.sh",
-                         "scripts/coord-tools/register.sh", "scripts/coord-tools/fragments.sh"):
+                         "scripts/coord-tools/register.sh", "scripts/coord-tools/fragments.sh",
+                         "scripts/ci/checks-fast.sh"):
                 file = root / name
                 file.parent.mkdir(parents=True, exist_ok=True)
                 file.write_text("#!/bin/bash\nexit 0\n")
+            p16 = root / "scripts/h62/item1/p16-generator/check.py"
+            p16.parent.mkdir(parents=True)
+            p16.write_text("raise SystemExit(0)\n")
             core = root / "Solidity/Syntax/Core.lean"
             slow = root / "Solidity/Examples/Tactics/OpenLoops.lean"
             core.parent.mkdir(parents=True)
@@ -150,7 +154,32 @@ class SlowExamples(unittest.TestCase):
     def test_slow_partition_and_reverse_imports(self):
         slow = set(imports(ROOT / "SoliditySlowExamples.lean"))
         regular = set(imports(ROOT / "SolidityExamples.lean"))
-        self.assertEqual(15, len(slow))
+        original_slow = {
+            "Solidity.Examples.DecisionAPF",
+            "Solidity.Examples.DecisionBlocks",
+            "Solidity.Examples.DecisionGapCore",
+            "Solidity.Examples.DecisionGapHashes",
+            "Solidity.Examples.DecisionGapKInt",
+            "Solidity.Examples.DecisionGaps",
+            "Solidity.Examples.DecisionLedger",
+            "Solidity.Examples.DecisionOperators",
+            "Solidity.Examples.DecisionRefutations",
+            "Solidity.Examples.DecisionResidue",
+            "Solidity.Examples.DecisionStorageArrays",
+            "Solidity.Examples.DecisionThreeKindCoverage",
+            "Solidity.Examples.Tactics.OpenLoops",
+            "Solidity.Examples.Tactics.OpenLoops.RowsNine",
+            "Solidity.Examples.Tactics.RevertData",
+        }
+        rowsnine_children = {
+            "Solidity.Examples.Tactics.OpenLoops.RowsNine.Checkpoint",
+            "Solidity.Examples.Tactics.OpenLoops.RowsNine.Finish",
+            "Solidity.Examples.Tactics.OpenLoops.RowsNine.Stage1",
+            "Solidity.Examples.Tactics.OpenLoops.RowsNine.Stage2",
+            "Solidity.Examples.Tactics.OpenLoops.RowsNine.Stage3",
+        }
+        self.assertEqual(15, len(slow - rowsnine_children))
+        self.assertEqual(original_slow | rowsnine_children, slow)
         self.assertFalse(slow & regular)
         with (ROOT / "lakefile.toml").open("rb") as file:
             roots = default_roots(tomllib.load(file))

@@ -149,6 +149,8 @@ becomes a list of missing lemmas.
 
 ### F3. The elaborator's lowering is unproved
 
+See the [lowering prior-art study](prior-art-lowering.md) for the comparison of actual-output association mechanisms and the existing bounded G19 proofs.
+
 Every calculus and compiler theorem quantifies over intrinsic `Stmt`/`Prog`.
 `Stmt` has no `break` (`Syntax/Scoped.lean:405-514`).
 

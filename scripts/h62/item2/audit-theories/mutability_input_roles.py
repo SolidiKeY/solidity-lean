@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """Ordered premise-role audit for all11 original Closer/Payable interfaces.
-Adds no witnesses and accepts no H69 disposition. The static packet remains
-ordinary-pending with a refutation, even while its roles are fully inventoried.
+Adds no witnesses. Explicit coordinator Q-STATIC-VALUE classifies the static
+packet as an intentional H69 boundary, without operational refusal coverage.
 """
 import argparse,json,subprocess
 from pathlib import Path
@@ -9,6 +9,7 @@ from census import ROOT,BASE,scan
 from input_roles import annotate,digest,SPECS as PREVIOUS_SPECS
 import verify_census as v
 from pending_impossibility import PENDING
+from audit_dispositions import ACCEPTED,accepted_fields
 
 SPECS={}
 def add(name,binders,config,premises,notes):
@@ -24,7 +25,7 @@ add("transact_nonpayable","C L α body world tx ctx hv","C L α",{"hv":"per-inpu
 add("ContractWorld.World.enter_nonpayable","K contracts w k self ctx st hv","K contracts",{"hv":"per-input-positive-value"},
     "World data is not a universal feasibility premise. Selected k/storage/address/context are coherent; fixture additionally has installed matching code and funds. Positive payable entry is a separate control.")
 add("ContractWorld.World.enter_static","K contracts w k self ctx st payable hs hv","K contracts",{"hs":"per-input-static-mode","hv":"per-input-positive-value"},
-    "The SAME Context cannot be static and have nonzero value under frozen Mode. Full telescope is refuted; ordinary joint-witness obligation stays pending Q-STATIC-VALUE, without H69 promotion or interface repair.")
+    "The SAME Context cannot be static and have nonzero value under frozen Mode. Full telescope is refuted. Coordinator Q-STATIC-VALUE option3 accepts this intentional H69 separation boundary; no operational refusal coverage or interface repair.")
 # Keep the full historical instance name: a typeclass binder is still an input.
 EQ="inst._@.Solidity.Theory.Mutability.Payable.2820293433._hygCtx._hyg.4"
 add("ContractWorld.World.callFrame_nonpayable",f"K {EQ} contracts w k α r entry ctx hp hv","K contracts α",{"hp":"per-input-entry-flag","hv":"per-input-positive-value"},
@@ -64,6 +65,9 @@ def main():
             item=PENDING[name];assert name not in v.WITNESSES and name not in v.IMPOSSIBLE
             report.update(status=item["status"],question=item["question"],accepted_H69=False,
               pending_impossibility_certificate=v.certificate(proof/"serial",item["module"],item["helper"]))
+        elif name in ACCEPTED:
+            item=ACCEPTED[name];assert name in v.IMPOSSIBLE and name not in v.WITNESSES
+            report.update(**accepted_fields(name),current_impossibility_certificate=v.certificate(proof/"serial",item["module"],item["helper"]))
         else:
             report.update(status="joint-witness-checked",current_joint_certificate=v.certificate(proof/"serial",*v.WITNESSES[name]))
         for b in report["binders"]:
@@ -86,9 +90,9 @@ def main():
     payload={"frozen_assignment_base":BASE,"current_head":subprocess.check_output(["git","rev-parse","HEAD"],cwd=ROOT,text=True).strip(),
       "historical_typed_snapshot_sha256":digest(source),"declarations":records,"reviewed_role_records":11,
       "previous_disjoint_Bridge_Outcome_roles":len(prior),"previous_role_report_sha256":digest(previous_path),"cumulative_original_roles":cumulative,"remaining_original_roles":500-cumulative,
-      "joint_certificates":10,"ordinary_pending_impossibility":1,"new_H69_dispositions":0,
+      "joint_certificates":10,"ordinary_pending_impossibility":0,"accepted_H69_dispositions":1,"new_H69_dispositions":0,
       "new_joint_witnesses_added_by_inventory":0,"generated_candidates_dispositioned":0,"full_assignment_acceptance":False,
       "boundary":"Historical frozen types plus byte-unchanged current files and current proof receipts; no whole-tree dependent-definition fidelity or compiler totality claim."}
     out.mkdir(parents=True,exist_ok=True);(out/"mutability-input-roles.json").write_text(json.dumps(payload,indent=2)+"\n")
-    print("MUTABILITY_INPUT_ROLES_PASS:11ordered records,10joint+1ordinarypending,28cumulative roles;full_acceptance=false")
+    print("MUTABILITY_INPUT_ROLES_PASS:11ordered records,10joint+1explicit-H69,28cumulative roles;full_acceptance=false")
 if __name__=="__main__":main()

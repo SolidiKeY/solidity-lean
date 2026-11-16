@@ -1,0 +1,25 @@
+{
+ "tests/h55/vectors-tables/LibraryTryControls.lean:Solidity.Source.errorStringBytes_of_decode": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "tests/h55/vectors-tables/LibraryTryControls.lean:Solidity.Source.errorStringBytes_wrongSelector": [
+  "propext"
+ ],
+ "tests/h55/vectors-tables/LibraryTryControls.lean:Solidity.Source.withLibraryCalldata_known": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "tests/h55/vectors-tables/LibraryTryControls.lean:Solidity.Source.withLibraryCalldata_noncalldata": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "tests/h55/vectors-tables/LibraryTryControls.lean:Solidity.Source.withLibraryCalldata_unavailable": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ]
+}

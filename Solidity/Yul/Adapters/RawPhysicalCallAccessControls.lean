@@ -32,28 +32,24 @@ theorem actual_run (pipeline : Pipeline) :
       some {RawPhysicalCallFrame.completed (stored pipeline) (output pipeline) entry
         (World.childContext entry.effects.execution parent .call (addr 3) (Source.toWord 0)
           (snapshot (stored pipeline) (input pipeline))) (answer pipeline) with
-        copiedMemory:=some (frameBytes (after pipeline))} := by
-  first | omega | decide | skip
-  exact execute_eq (stored pipeline) (input pipeline) (output pipeline) invoke entry parent .call
+        copiedMemory:=some (frameBytes (after pipeline))} :=
+  execute_eq (stored pipeline) (input pipeline) (output pipeline) invoke entry parent .call
     (addr 3) (Source.toWord 100) (Source.toWord 0) (answer pipeline) rfl
     (by change 161+2≤2^256;decide) (by change decide (161+3≤2^256)=true;decide) rfl
 
 theorem before_bytes (pipeline : Pipeline) : snapshot (stored pipeline) (input pipeline)=[0xa5,0xa5] := by
-  first | omega | decide | skip
   rw [frame_snapshot_read]
   cases pipeline <;> decide +kernel
 
 theorem after_bytes (pipeline : Pipeline) :
     Environment.readMemory (frameBytes (after pipeline)) 161 2=[17,0xa5] ∧
     frameBytes (after pipeline) 164=0xa5 := by
-  first | omega | decide | skip
   dsimp only [after]
   rw [image,RawPhysicalCallOutput.image,before_bytes]
   cases pipeline <;> decide +kernel
 
 theorem wrong_chronology (pipeline : Pipeline) :
     snapshot (stored pipeline) (input pipeline)≠Environment.readMemory (frameBytes (after pipeline)) 161 2 := by
-  first | omega | decide | skip
   rw [before_bytes,(after_bytes pipeline).1]
   decide
 
@@ -62,9 +58,8 @@ theorem whole (pipeline : Pipeline) :
       frameOf 33 (decode 33 clean (frameBytes (after pipeline))) (after pipeline) nextRoom=after pipeline ∧
       (decode 33 clean (frameBytes (after pipeline))).clean=clean.clean ∧
       (decode 33 clean (frameBytes (after pipeline))).world=clean.world ∧
-      (after pipeline).st=(stored pipeline).st ∧ (after pipeline).key=(stored pipeline).key := by
-  first | omega | decide | skip
-  exact transport 33 clean (stored pipeline) (room pipeline) (input pipeline) (output pipeline) _
+      (after pipeline).st=(stored pipeline).st ∧ (after pipeline).key=(stored pipeline).key :=
+  transport 33 clean (stored pipeline) (room pipeline) (input pipeline) (output pipeline) _
 
 def extended := RawPhysicalCallOutput.Controls.extended
 def highInput (pipeline : Pipeline) : ByteSpan (extended pipeline).capacity :=
@@ -77,7 +72,6 @@ theorem input_extent (pipeline : Pipeline) :
     (RawPhysicalCallOutput.copy (extended pipeline) (noOutput pipeline) []).highWaterWords=6 ∧
     (reached (extended pipeline) (highInput pipeline) (noOutput pipeline) []).highWaterWords=8 ∧
     frameBytes (reached (extended pipeline) (highInput pipeline) (noOutput pipeline) [])=frameBytes (extended pipeline) := by
-  first | omega | decide | skip
   refine ⟨rfl,?_,?_⟩
   · rw [high _ _ _ _ (by change (1:Nat)≠0;decide)]
     change max 6 ((224+1+31)/32)=8

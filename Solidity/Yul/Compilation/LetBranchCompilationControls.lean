@@ -1,3 +1,4 @@
+import Solidity.Yul.Compilation.LetBranchCompletion
 import Solidity.Yul.Compilation.LetBranchCompilation
 import Solidity.Yul.Compilation.LetSequenceCompilationControls
 /-! Actual conditional let-sequence lowering, with raw high-only conditions
@@ -17,15 +18,19 @@ def update (b : Scalar.Word) : Scalar.Word :=
 theorem source_done (b : Scalar.Word) :
  evalStmt 17 .nil True.intro source artifact.compiled.profile (sourceLocals #v[b]) =
  some ⟨sourceLocals #v[update b],.normal⟩ := by
- change (if b.toNat = 0 then some (⟨sourceLocals #v[b],.normal⟩ : Outcome root 1)
-   else evalStmt 16 .nil True.intro LetSequenceCompilation.Controls.source
-     LetSequenceCompilation.Controls.artifact.compiled.profile (sourceLocals #v[b])) = _
  by_cases zero : b = 0
- · have zn : b.toNat = 0 := congrArg BitVec.toNat zero
-   rw [if_pos zn,update,if_pos zero]
- · have nz : b.toNat ≠ 0 := fun h => zero (BitVec.eq_of_toNat_eq h)
-   rw [if_neg nz,update,if_neg zero]
-   exact LetSequenceCompilation.Controls.source_done b
+ · have short := LetBranchCompletion.source_false condition LetSequenceCompilation.Controls.artifact
+     #v[b] (by change b = 0; exact zero)
+   have completed := CompletionControls.completed_horizon
+     (fun fuel => evalStmt fuel .nil True.intro source artifact.compiled.profile (sourceLocals #v[b]))
+     (fun fuel extra => evalStmt_refines_add fuel extra .nil True.intro source artifact.compiled.profile
+       (sourceLocals #v[b]))
+     (show 12 ≤ 17 by omega) short
+   simpa only [update,if_pos zero] using completed
+ · simpa only [update,if_neg zero] using
+     LetBranchCompletion.source_true condition LetSequenceCompilation.Controls.artifact
+       16 #v[b] #v[LetSequenceCompilation.Controls.update (LetSequenceCompilation.Controls.update b)]
+       (by change b ≠ 0; exact zero) (LetSequenceCompilation.Controls.source_done b)
 
 theorem target_done (b : Scalar.Word) (m : Evm.Machine) (caller : List Evm.Word) :
  Evm.run artifact.code {m with stack := coreWord b::caller} =

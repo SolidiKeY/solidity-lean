@@ -1,3 +1,4 @@
+import Solidity.Backend.Selection.P20Consumer
 import Solidity.Yul.Compilation.P20InterfaceV2
 import Solidity.Yul.Compilation.P20InterfaceV1Controls
 import Solidity.Backend.Passes.AssignmentSubtractionControls
@@ -242,4 +243,29 @@ theorem not_revert : Evm.run compilation.code machine ≠ .revert := by
  Quot.sound] -/
 #guard_msgs in
 #print axioms Solidity.Yul.Compilation.P20.InterfaceV2.Controls.not_revert
+end Solidity.Yul.Compilation.P20.InterfaceV2.Controls
+
+namespace Solidity.Yul.Compilation.P20.InterfaceV2.Controls
+/-- Regression: the versioned consumer uses this actual memory-store producer,
+not a supplied target trace or a substituted V1 stack-only certificate. -/
+def consumerV2 : PendingRepresentedSuccess compilation statement yul.profile block
+    domain encode encodeOutput producer :=
+  Backend.Selection.p20RepresentedConsumerV2 compilation statement yul.profile block
+    domain encode encodeOutput producer
+
+/-- The consumer retains source execution, actual target execution, stack
+preservation and full represented memory state for the existing bounded input. -/
+theorem consumerV2_success :
+    ∃ (out : Solidity.Out C target.H Γ) (final : Evm.Machine),
+      program.run target = .ok out ∧
+      encodeOutput target out = encodeOutput target (output target) ∧
+      Evm.run compilation.code machine = .ok final 0 ∧ final.stack = machine.stack ∧
+      compilation.Rep (1 + Evm.Prog.pushes program) 64 bases target machine out.st final :=
+  consumerV2.success 1 64 bases target machine True.intro joint_input rfl 2
+    (encodeOutput target (output target)) (yul_run 0 target)
+
+/-- info: 'Solidity.Yul.Compilation.P20.InterfaceV2.Controls.consumerV2' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in #print axioms consumerV2
+/-- info: 'Solidity.Yul.Compilation.P20.InterfaceV2.Controls.consumerV2_success' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in #print axioms consumerV2_success
 end Solidity.Yul.Compilation.P20.InterfaceV2.Controls

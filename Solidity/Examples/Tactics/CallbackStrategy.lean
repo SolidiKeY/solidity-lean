@@ -142,7 +142,10 @@ theorem transferThenTry :
 /-- A gas-limited send under the diamond (`sendNoCallbackDiamond`'s goals,
 `ProvesC.sendDetD`). -/
 theorem sendEnds : ValidT .noCallback dl[Pinger]{ ⟨ bool ok = to.send(5); ⟩ true } := by
-  sol_prove
+  refine ProvesC.validT ?_
+  try simp only [TransferSem.inv, TransferSem.pay]
+  refine ProvesC.plain ?_ rfl
+  sol_prove (steps := 128)
 
 /-! Its replay enters the plain calculus, then runs `sol_prove` on the
 callback-free send. -/
@@ -175,7 +178,27 @@ calls back (`ProvesC.capture`, `Stmt.CapturesAs.ite`). -/
 theorem payIfPinged :
     ValidT .noCallback dl[Pinger]{ [ if (pings > 0) { (bool ok, ) = to.call{value: 1}(""); }; ]
       true } := by
-  sol_prove
+  refine ProvesC.validT ?_
+  try simp only [TransferSem.inv, TransferSem.pay]
+  apply ProvesC.allIntro
+  apply ProvesC.capture (.key .ifElseUnfold) .ite
+  apply ProvesC.bind (.key .localValueDeclInitDrop) rfl rfl
+  apply ProvesC.unfold (.key .binopUnfoldLeft) rfl rfl
+  apply ProvesC.bind (.key .localValueDeclInitDrop) rfl rfl
+  apply ProvesC.update (.key .storageRootReadSelect) rfl
+  apply ProvesC.update (.key .binopAssignment) rfl
+  apply ProvesC.updIntro
+  apply ProvesC.split (.key .ifElseSplit)
+  · apply ProvesC.update (.key .valueDeclSkip) rfl
+    apply ProvesC.send .sendWithCallbackBox
+    · refine ProvesC.plain ?_ rfl
+      sol_prove (steps := 128)
+    · refine ProvesC.plain ?_ rfl
+      sol_prove (steps := 128)
+    · refine ProvesC.plain ?_ rfl
+      sol_prove (steps := 128)
+  · refine ProvesC.plain ?_ rfl
+    sol_prove (steps := 128)
 
 /-- The same, the invariant kept across the callback. -/
 theorem payIfPingedInv :
@@ -285,7 +308,19 @@ theorem withdraw_withCallback :
     ValidC invariant[Bank] dl[Bank]{ balance + paidOut == deposited →
       [ uint amt = balance; balance = 0; paidOut += amt; to.transfer(amt); ]
         balance + paidOut == deposited } := by
-  sol_prove
+  apply ProvesC.fmlValid
+  apply ProvesC.allIntro
+  apply ProvesC.intro
+  apply ProvesC.bind (.key .localValueDeclInitDrop) rfl rfl
+  apply ProvesC.update (.key .storageRootReadSelect) rfl
+  apply ProvesC.update (.key .storageRootWriteStore) rfl
+  apply ProvesC.update (.key .storageRootOpAssign) rfl
+  apply ProvesC.callback .transferWithCallbackBox
+  · apply ProvesC.plain _ rfl
+    sol_leaf
+    sol_close
+  · apply ProvesC.plain _ rfl
+    exact Proves.assumeInv
 
 /-- **`withdraw`'s specification under callbacks**: its obligation
 (`spec[Bank]{withdraw}`, the invariant assumed on entry and owed on exit),
@@ -323,7 +358,27 @@ def Payer : Contract := contract!{
 /-- `uint y = f(x)` where `f` pays: the result survives the callback. -/
 theorem payOneReturns :
     ValidT .noCallback dl[Payer]{ [ uint y = payOne(to, 1); assert(y == 2); ] true } := by
-  sol_prove
+  refine ProvesC.validT ?_
+  try simp only [TransferSem.inv, TransferSem.pay]
+  apply ProvesC.allIntro
+  apply ProvesC.update (.key .valueDeclSkip) rfl
+  apply ProvesC.callVal
+  apply ProvesC.bind (.key .localValueDeclInitDrop) rfl rfl
+  apply ProvesC.update (.key .localValueAssign) rfl
+  apply ProvesC.bind (.key .localValueDeclInitDrop) rfl rfl
+  apply ProvesC.update (.key .localValueAssign) rfl
+  apply ProvesC.update (.key .valueDeclSkip) rfl
+  apply ProvesC.block
+  apply ProvesC.update (.key .valueDeclSkip) rfl
+  apply ProvesC.send .sendWithCallbackBox
+  · refine ProvesC.plain ?_ rfl
+    sol_prove (steps := 128)
+  · refine ProvesC.plain ?_ rfl
+    sol_prove (steps := 128)
+    sol_leaf
+    sol_close
+  · refine ProvesC.plain ?_ rfl
+    sol_prove (steps := 128)
 
 /-- A storage reference returned past a callback. -/
 theorem payXsReturns :
@@ -378,7 +433,33 @@ theorem pingN :
       /// @custom:key invariant i <= n
       while (i < n) { (bool ok, ) = to.call{value: 1}(""); i = i + 1; }; assert(i == n); ]
       true } := by
-  sol_prove
+  refine ProvesC.validT ?_
+  try simp only [TransferSem.inv, TransferSem.pay]
+  apply ProvesC.allIntro
+  apply ProvesC.bind (.key .localValueDeclInitDrop) rfl rfl
+  apply ProvesC.update (.key .storageRootReadSelect) rfl
+  apply ProvesC.bind (.key .localValueDeclInitDrop) rfl rfl
+  apply ProvesC.update (.key .localValueAssign) rfl
+  apply ProvesC.invBox rfl
+  · refine ProvesC.plain ?_ rfl
+    sol_prove (steps := 128)
+  · apply ProvesC.updIntro
+    apply ProvesC.update (.key .valueDeclSkip) rfl
+    apply ProvesC.send .sendWithCallbackBox
+    · refine ProvesC.plain ?_ rfl
+      sol_prove (steps := 128)
+    · refine ProvesC.plain ?_ rfl
+      sol_prove (steps := 128)
+      sol_leaf
+      sol_close
+    · refine ProvesC.plain ?_ rfl
+      sol_prove (steps := 128)
+      sol_leaf
+      sol_close
+  · refine ProvesC.plain ?_ rfl
+    sol_prove (steps := 128)
+    sol_leaf
+    sol_close
 
 /--
 info: Try this:

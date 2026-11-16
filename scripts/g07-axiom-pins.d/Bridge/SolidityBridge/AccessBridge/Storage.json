@@ -1,10 +1,5 @@
 {
- "Bridge/SolidityBridge/AccessBridge/Storage.lean:SolidityBridge.AccessBridge.Storage.read_charged": [
-  "Classical.choice",
-  "Quot.sound",
-  "propext"
- ],
- "Bridge/SolidityBridge/AccessBridge/Storage.lean:SolidityBridge.AccessBridge.Storage.write_charged": [
+ "Bridge/SolidityBridge/AccessBridge/Storage.lean:SolidityBridge.AccessBridge.Storage.certificate": [
   "Classical.choice",
   "Quot.sound",
   "propext"
@@ -14,7 +9,12 @@
   "Quot.sound",
   "propext"
  ],
- "Bridge/SolidityBridge/AccessBridge/Storage.lean:SolidityBridge.AccessBridge.Storage.certificate": [
+ "Bridge/SolidityBridge/AccessBridge/Storage.lean:SolidityBridge.AccessBridge.Storage.read_charged": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Bridge/SolidityBridge/AccessBridge/Storage.lean:SolidityBridge.AccessBridge.Storage.write_charged": [
   "Classical.choice",
   "Quot.sound",
   "propext"

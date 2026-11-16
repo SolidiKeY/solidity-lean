@@ -1,5 +1,6 @@
 import Solidity.Yul.Views.RecursiveDynamicReadControls
 import Solidity.Yul.Views.RecursiveRootLegacy
+import Solidity.Yul.Views.GenericFlow.FollowingLaws
 
 namespace Solidity.Yul.Views.Controls
 
@@ -48,18 +49,11 @@ theorem rc_dirty_none : finiteAccountWrite? (T := rcEnv.lay) account
   | some op => have bad := rc_dirty_false; rw [found] at bad; cases bad
 
 theorem rc_dirty_following : rcRegrowY.following? rfl 5 4 = none := by
+  have bad : finiteAccountWrite? (T := rcEnv.lay) account (rcLayout.snapshot rcFixed (saveSlot rcRegrowY.nextRaw 5 4)) (saveSlot rcRegrowY.nextRaw 5 4) = none := by
+    rw [rcRegrowY_next]
+    exact rc_dirty_none
   unfold RecursiveOwnershipPlan.following?
-  split
-  · have bad : finiteAccountWrite? (T := rcEnv.lay) account (rcLayout.snapshot rcFixed (saveSlot rcRegrowY.nextRaw 5 4)) (saveSlot rcRegrowY.nextRaw 5 4) = none := by
-      rw [rcRegrowY_next]
-      exact rc_dirty_none
-    dsimp only
-    split
-    · rfl
-    · rename_i op found
-      have impossible : none = some op := bad.symm.trans found
-      cases impossible
-  · rfl
+  exact GenericFlow.Following.none_of_write_none _ bad
 
 theorem rc_dirty_fresh : prepareRecursiveOwnership? packedStepFrame rcLayout rcFixed 5 4 rcRegrowY.step.1.2 rcRegrowY.step.2 = none :=
   (rcRegrowY.following_fresh rfl 5 4).symm.trans rc_dirty_following

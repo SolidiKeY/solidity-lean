@@ -1,0 +1,5917 @@
+{
+  "commit": "10eaa63d5da2f50b63d4359968f36542212f9f50",
+  "files": [
+    {
+      "path": "tests/__init__.py",
+      "sha256": "affd08ddffe79803937ac5a9c560cf50dd35980d0f19b4eb864b4867c740634f",
+      "templates": []
+    },
+    {
+      "path": "tests/amsterdam/__init__.py",
+      "sha256": "a926603fc754c42074dfbbd18960b14605bd303c4d3c4452b3f91e2738cefa09",
+      "templates": []
+    },
+    {
+      "path": "tests/amsterdam/eip7928_block_level_access_lists/__init__.py",
+      "sha256": "d0d0c6aa2360f02ee07e057a96390ef1e2ff236a6ff54ed6ac477d016fca47d1",
+      "templates": []
+    },
+    {
+      "path": "tests/amsterdam/eip7928_block_level_access_lists/spec.py",
+      "sha256": "004cfcdc8021ff4e1630261fb7e82b1782ba5ecb846a8ba5ce59a8a4b08286c0",
+      "templates": []
+    },
+    {
+      "path": "tests/amsterdam/eip7928_block_level_access_lists/test_block_access_lists.py",
+      "sha256": "9107aa50a4d9ebc3dde0eb65eb2c90508c7740f2f05be4993af05755f266ed58",
+      "templates": [
+        {
+          "line": 39,
+          "name": "test_bal_nonce_changes"
+        },
+        {
+          "line": 74,
+          "name": "test_bal_balance_changes"
+        },
+        {
+          "line": 133,
+          "name": "test_bal_code_changes"
+        },
+        {
+          "line": 211,
+          "name": "test_bal_self_destruct"
+        },
+        {
+          "line": 363,
+          "name": "test_bal_account_access_target"
+        },
+        {
+          "line": 395,
+          "name": "test_bal_call_with_value_transfer"
+        },
+        {
+          "line": 432,
+          "name": "test_bal_callcode_with_value_transfer"
+        },
+        {
+          "line": 485,
+          "name": "test_bal_delegated_storage_writes"
+        },
+        {
+          "line": 545,
+          "name": "test_bal_delegated_storage_reads"
+        },
+        {
+          "line": 589,
+          "name": "test_bal_block_rewards"
+        },
+        {
+          "line": 662,
+          "name": "test_bal_2930_account_listed_but_untouched"
+        },
+        {
+          "line": 702,
+          "name": "test_bal_2930_slot_listed_but_untouched"
+        },
+        {
+          "line": 755,
+          "name": "test_bal_2930_slot_listed_and_unlisted_writes"
+        },
+        {
+          "line": 820,
+          "name": "test_bal_2930_slot_listed_and_unlisted_reads"
+        },
+        {
+          "line": 877,
+          "name": "test_bal_self_transfer"
+        },
+        {
+          "line": 914,
+          "name": "test_bal_zero_value_transfer"
+        },
+        {
+          "line": 961,
+          "name": "test_bal_net_zero_balance_transfer"
+        },
+        {
+          "line": 1055,
+          "name": "test_bal_pure_contract_call"
+        },
+        {
+          "line": 1085,
+          "name": "test_bal_noop_storage_write"
+        },
+        {
+          "line": 1131,
+          "name": "test_bal_aborted_storage_access"
+        },
+        {
+          "line": 1191,
+          "name": "test_bal_aborted_account_access"
+        },
+        {
+          "line": 1228,
+          "name": "test_bal_fully_unmutated_account"
+        }
+      ]
+    },
+    {
+      "path": "tests/amsterdam/eip7928_block_level_access_lists/test_block_access_lists_eip7702.py",
+      "sha256": "c951cf9c9656fc6f0fd100ef31ec81e05c2a641bb5732213d877e778dbc4c080",
+      "templates": [
+        {
+          "line": 40,
+          "name": "test_bal_7702_delegation_create"
+        },
+        {
+          "line": 125,
+          "name": "test_bal_7702_delegation_update"
+        },
+        {
+          "line": 243,
+          "name": "test_bal_7702_delegation_clear"
+        },
+        {
+          "line": 352,
+          "name": "test_bal_7702_delegated_storage_access"
+        },
+        {
+          "line": 413,
+          "name": "test_bal_7702_invalid_nonce_authorization"
+        },
+        {
+          "line": 470,
+          "name": "test_bal_7702_invalid_chain_id_authorization"
+        },
+        {
+          "line": 534,
+          "name": "test_bal_7702_delegated_via_call_opcode"
+        }
+      ]
+    },
+    {
+      "path": "tests/amsterdam/eip7928_block_level_access_lists/test_block_access_lists_invalid.py",
+      "sha256": "2c545a0215a7d3b198421341c48d03416e4aa59e1567353d318c708afcbb7f6b",
+      "templates": [
+        {
+          "line": 51,
+          "name": "test_bal_invalid_missing_nonce"
+        },
+        {
+          "line": 93,
+          "name": "test_bal_invalid_nonce_value"
+        },
+        {
+          "line": 134,
+          "name": "test_bal_invalid_storage_value"
+        },
+        {
+          "line": 197,
+          "name": "test_bal_invalid_tx_order"
+        },
+        {
+          "line": 257,
+          "name": "test_bal_invalid_account"
+        },
+        {
+          "line": 308,
+          "name": "test_bal_invalid_duplicate_account"
+        },
+        {
+          "line": 353,
+          "name": "test_bal_invalid_account_order"
+        },
+        {
+          "line": 397,
+          "name": "test_bal_invalid_complex_corruption"
+        },
+        {
+          "line": 472,
+          "name": "test_bal_invalid_missing_account"
+        },
+        {
+          "line": 516,
+          "name": "test_bal_invalid_balance_value"
+        }
+      ]
+    },
+    {
+      "path": "tests/amsterdam/eip7928_block_level_access_lists/test_block_access_lists_opcodes.py",
+      "sha256": "1a38ea146d770993d229a3206e754b34246e2da5199bd0b0b05f9d90a8cc5e62",
+      "templates": [
+        {
+          "line": 69,
+          "name": "test_bal_sstore_and_oog"
+        },
+        {
+          "line": 164,
+          "name": "test_bal_sload_and_oog"
+        },
+        {
+          "line": 229,
+          "name": "test_bal_balance_and_oog"
+        },
+        {
+          "line": 294,
+          "name": "test_bal_extcodesize_and_oog"
+        },
+        {
+          "line": 365,
+          "name": "test_bal_call_and_oog"
+        },
+        {
+          "line": 435,
+          "name": "test_bal_delegatecall_and_oog"
+        },
+        {
+          "line": 514,
+          "name": "test_bal_extcodecopy_and_oog"
+        }
+      ]
+    },
+    {
+      "path": "tests/benchmark/__init__.py",
+      "sha256": "9cc39ef7677b7acf73775429d04fc737bac23888b1fc800328f599d7b79cef87",
+      "templates": []
+    },
+    {
+      "path": "tests/benchmark/conftest.py",
+      "sha256": "8b2911def4782fd9b8bbc3471ada02044cf7929ec62c1df665b249583f51bd03",
+      "templates": []
+    },
+    {
+      "path": "tests/benchmark/helpers.py",
+      "sha256": "8bf344343b6e933a52adf278edd5f38a56a679fce3d97c7d9b6c7ceab7e1a5c9",
+      "templates": []
+    },
+    {
+      "path": "tests/benchmark/stateful/__init__.py",
+      "sha256": "981a4317d88fbbd65c8e4a336bc692986e8b5809bfc4ce78a3682892b606c636",
+      "templates": []
+    },
+    {
+      "path": "tests/benchmark/stateful/bloatnet/__init__.py",
+      "sha256": "d8df43df6d4cf239acba62fad1916981f35952cbc662f2e56ee412a36fdf2130",
+      "templates": []
+    },
+    {
+      "path": "tests/benchmark/stateful/bloatnet/test_bloatnet.py",
+      "sha256": "6d526080e459437ca89123de647d7109a0361acd1005b69e6915ffe3f57e6853",
+      "templates": []
+    },
+    {
+      "path": "tests/benchmark/stateful/bloatnet/test_multi_opcode.py",
+      "sha256": "74c458d73dc0b737d836c37fc4c56083bc89caf0760b0ecbe743eb2aff4cf2f0",
+      "templates": [
+        {
+          "line": 59,
+          "name": "test_bloatnet_balance_extcodesize"
+        },
+        {
+          "line": 199,
+          "name": "test_bloatnet_balance_extcodecopy"
+        },
+        {
+          "line": 348,
+          "name": "test_bloatnet_balance_extcodehash"
+        },
+        {
+          "line": 486,
+          "name": "test_mixed_sload_sstore"
+        }
+      ]
+    },
+    {
+      "path": "tests/benchmark/stateful/bloatnet/test_single_opcode.py",
+      "sha256": "a235f73083742fdd4f6f79dc19d6e51fa20108a4a1ce44f8f4116866c3bae1a8",
+      "templates": [
+        {
+          "line": 81,
+          "name": "test_sload_empty_erc20_balanceof"
+        },
+        {
+          "line": 239,
+          "name": "test_sstore_erc20_approve"
+        }
+      ]
+    },
+    {
+      "path": "tests/benchmark/stateful/conftest.py",
+      "sha256": "7945beca276ecc0ab7750b8ffc5131ca2522d16ae735ea6772f18e3841b646f9",
+      "templates": []
+    },
+    {
+      "path": "tests/benchmark/test_worst_blocks.py",
+      "sha256": "835e15b553165f418a64d9db0affa0c27c90b7d86955bc9d84f0012879b32738",
+      "templates": [
+        {
+          "line": 116,
+          "name": "test_block_full_of_ether_transfers"
+        },
+        {
+          "line": 217,
+          "name": "test_block_full_data"
+        },
+        {
+          "line": 260,
+          "name": "test_block_full_access_list_and_data"
+        },
+        {
+          "line": 369,
+          "name": "test_worst_case_auth_block"
+        }
+      ]
+    },
+    {
+      "path": "tests/benchmark/test_worst_bytecode.py",
+      "sha256": "5a91b7d30eef4d1da86158b3d1408ac1a5b65bb7cbf13eb438d6ea35eeb43bc4",
+      "templates": [
+        {
+          "line": 46,
+          "name": "test_worst_bytecode_single_opcode"
+        },
+        {
+          "line": 246,
+          "name": "test_worst_initcode_jumpdest_analysis"
+        },
+        {
+          "line": 332,
+          "name": "test_worst_create"
+        },
+        {
+          "line": 424,
+          "name": "test_worst_creates_collisions"
+        }
+      ]
+    },
+    {
+      "path": "tests/benchmark/test_worst_compute.py",
+      "sha256": "8503266eb1cfc39c09619b6beb1f37dffe02ac830b2d54f9e87d200287d40362",
+      "templates": [
+        {
+          "line": 81,
+          "name": "test_worst_zero_param"
+        },
+        {
+          "line": 95,
+          "name": "test_worst_calldatasize"
+        },
+        {
+          "line": 110,
+          "name": "test_worst_callvalue"
+        },
+        {
+          "line": 164,
+          "name": "test_worst_returndatasize_nonzero"
+        },
+        {
+          "line": 198,
+          "name": "test_worst_returndatasize_zero"
+        },
+        {
+          "line": 209,
+          "name": "test_worst_msize"
+        },
+        {
+          "line": 227,
+          "name": "test_worst_keccak"
+        },
+        {
+          "line": 296,
+          "name": "test_worst_precompile_only_data_input"
+        },
+        {
+          "line": 703,
+          "name": "test_worst_modexp"
+        },
+        {
+          "line": 1147,
+          "name": "test_worst_precompile_fixed_cost"
+        },
+        {
+          "line": 1191,
+          "name": "test_worst_jumps"
+        },
+        {
+          "line": 1204,
+          "name": "test_worst_jumpi_fallthrough"
+        },
+        {
+          "line": 1213,
+          "name": "test_worst_jumpis"
+        },
+        {
+          "line": 1226,
+          "name": "test_worst_jumpdests"
+        },
+        {
+          "line": 1381,
+          "name": "test_worst_binop_simple"
+        },
+        {
+          "line": 1407,
+          "name": "test_worst_unop"
+        },
+        {
+          "line": 1425,
+          "name": "test_worst_tload"
+        },
+        {
+          "line": 1465,
+          "name": "test_worst_tstore"
+        },
+        {
+          "line": 1489,
+          "name": "test_worst_shifts"
+        },
+        {
+          "line": 1579,
+          "name": "test_worst_blobhash"
+        },
+        {
+          "line": 1605,
+          "name": "test_worst_mod"
+        },
+        {
+          "line": 1721,
+          "name": "test_worst_memory_access"
+        },
+        {
+          "line": 1745,
+          "name": "test_worst_modarith"
+        },
+        {
+          "line": 1848,
+          "name": "test_empty_block"
+        },
+        {
+          "line": 1858,
+          "name": "test_amortized_bn128_pairings"
+        },
+        {
+          "line": 1955,
+          "name": "test_worst_calldataload"
+        },
+        {
+          "line": 1990,
+          "name": "test_worst_swap"
+        },
+        {
+          "line": 2023,
+          "name": "test_worst_dup"
+        },
+        {
+          "line": 2081,
+          "name": "test_worst_push"
+        },
+        {
+          "line": 2107,
+          "name": "test_worst_return_revert"
+        },
+        {
+          "line": 2144,
+          "name": "test_worst_clz_same_input"
+        },
+        {
+          "line": 2153,
+          "name": "test_worst_clz_diff_input"
+        }
+      ]
+    },
+    {
+      "path": "tests/benchmark/test_worst_memory.py",
+      "sha256": "b80a62e02bda2231d8bbe1a6aa1ec22ebd9e49aec53bb6c4eb9a3d6bdc6f1556",
+      "templates": [
+        {
+          "line": 61,
+          "name": "test_worst_calldatacopy"
+        },
+        {
+          "line": 148,
+          "name": "test_worst_codecopy"
+        },
+        {
+          "line": 202,
+          "name": "test_worst_returndatacopy"
+        },
+        {
+          "line": 266,
+          "name": "test_worst_mcopy"
+        }
+      ]
+    },
+    {
+      "path": "tests/benchmark/test_worst_opcode.py",
+      "sha256": "09888eba74d077e14fc1f9d3844bd3cf818188fcb42af4a483680afd8849d711",
+      "templates": [
+        {
+          "line": 38,
+          "name": "test_worst_log_opcodes"
+        }
+      ]
+    },
+    {
+      "path": "tests/benchmark/test_worst_stateful_opcodes.py",
+      "sha256": "5df46805fb413619da1b56adea74c22daa19e69c02ab521d939dfced53d76d1c",
+      "templates": [
+        {
+          "line": 47,
+          "name": "test_worst_address_state_cold"
+        },
+        {
+          "line": 136,
+          "name": "test_worst_address_state_warm"
+        },
+        {
+          "line": 226,
+          "name": "test_worst_storage_access_cold"
+        },
+        {
+          "line": 369,
+          "name": "test_worst_storage_access_warm"
+        },
+        {
+          "line": 433,
+          "name": "test_worst_blockhash"
+        },
+        {
+          "line": 455,
+          "name": "test_worst_selfbalance"
+        },
+        {
+          "line": 476,
+          "name": "test_worst_extcodecopy_warm"
+        },
+        {
+          "line": 505,
+          "name": "test_worst_selfdestruct_existing"
+        },
+        {
+          "line": 648,
+          "name": "test_worst_selfdestruct_created"
+        },
+        {
+          "line": 747,
+          "name": "test_worst_selfdestruct_initcode"
+        }
+      ]
+    },
+    {
+      "path": "tests/berlin/__init__.py",
+      "sha256": "90dafeb10208710d770378747664522263cd1053728ff281bcccc0c2a18c4bcd",
+      "templates": []
+    },
+    {
+      "path": "tests/berlin/eip2929_gas_cost_increases/__init__.py",
+      "sha256": "1aacdeeb1efe92ac705921ab549adfe30c4bd1cd5adfb8d76779fa4aa72173d4",
+      "templates": []
+    },
+    {
+      "path": "tests/berlin/eip2929_gas_cost_increases/test_call.py",
+      "sha256": "27df028df657c6e9b67cf33ffeadb3a25d05cecc5689836169b5edc4db55349b",
+      "templates": [
+        {
+          "line": 21,
+          "name": "test_call_insufficient_balance"
+        }
+      ]
+    },
+    {
+      "path": "tests/berlin/eip2929_gas_cost_increases/test_precompile_warming.py",
+      "sha256": "94ce8303b38f9621328d480da6366929585a1436648076bb24d438e9a45edc9c",
+      "templates": [
+        {
+          "line": 83,
+          "name": "test_precompile_warming"
+        }
+      ]
+    },
+    {
+      "path": "tests/berlin/eip2930_access_list/__init__.py",
+      "sha256": "3331064c26eae394b41aef0b56dc0eb699e80e7635aaf7e43a7a1ca4ad7eed2f",
+      "templates": []
+    },
+    {
+      "path": "tests/berlin/eip2930_access_list/spec.py",
+      "sha256": "558f97a5ce35ab96624973c049c61ec57366e152b0a35b2c98a0a7d09a75837d",
+      "templates": []
+    },
+    {
+      "path": "tests/berlin/eip2930_access_list/test_acl.py",
+      "sha256": "879da9d30c13a5ff14e1eecd80c12b2416cbf7fd18f2a897cf39d4559ff8859c",
+      "templates": [
+        {
+          "line": 37,
+          "name": "test_account_storage_warm_cold_state"
+        },
+        {
+          "line": 201,
+          "name": "test_transaction_intrinsic_gas_cost"
+        },
+        {
+          "line": 258,
+          "name": "test_repeated_address_acl"
+        }
+      ]
+    },
+    {
+      "path": "tests/berlin/eip2930_access_list/test_tx_intrinsic_gas.py",
+      "sha256": "4a8aba1ea24b95966b455e092e5aebd5b56c3652b80245f95eead92ba3bbe730",
+      "templates": [
+        {
+          "line": 149,
+          "name": "test_tx_intrinsic_gas"
+        }
+      ]
+    },
+    {
+      "path": "tests/byzantium/__init__.py",
+      "sha256": "e2d1203d0b3fe45002675287170a1612d6f994beed685cb82ffdc4b2eae025bf",
+      "templates": []
+    },
+    {
+      "path": "tests/byzantium/eip198_modexp_precompile/__init__.py",
+      "sha256": "fe3d2da68d0336e6afe629d2778d551577e80d61cc0f6592c1cd15ffa785c983",
+      "templates": []
+    },
+    {
+      "path": "tests/byzantium/eip198_modexp_precompile/helpers.py",
+      "sha256": "f98ec7faa98f3e1d1524e13e887c1e393c2f84ea1425358becdd38d7862894ab",
+      "templates": []
+    },
+    {
+      "path": "tests/byzantium/eip198_modexp_precompile/test_modexp.py",
+      "sha256": "42f6bef7d6d9ed5f88bad281dc4dcc9e3d4e972cd22c7dbe8e0592b74b8f6dbd",
+      "templates": [
+        {
+          "line": 291,
+          "name": "test_modexp"
+        }
+      ]
+    },
+    {
+      "path": "tests/cancun/__init__.py",
+      "sha256": "3b2e0ce65d0b6327ed423d0ac94ad60543c395104d76807088e9a2619e913368",
+      "templates": []
+    },
+    {
+      "path": "tests/cancun/eip1153_tstore/__init__.py",
+      "sha256": "8f74700f08ea11ec52d0b476a5bea2c6481e9cbc5c6279109052baa15cbfb324",
+      "templates": []
+    },
+    {
+      "path": "tests/cancun/eip1153_tstore/spec.py",
+      "sha256": "13f1a8a8fc9080e2adcf0fb6e1468e27dee229b79a43bc546f03ed0f2cdfb369",
+      "templates": []
+    },
+    {
+      "path": "tests/cancun/eip1153_tstore/test_basic_tload.py",
+      "sha256": "06a9ce44cfad38f0bdaae8b17911a3abd77b5b720b6c49af3fc003b5bb154c5c",
+      "templates": [
+        {
+          "line": 26,
+          "name": "test_basic_tload_transaction_begin"
+        },
+        {
+          "line": 77,
+          "name": "test_basic_tload_works"
+        },
+        {
+          "line": 135,
+          "name": "test_basic_tload_other_after_tstore"
+        },
+        {
+          "line": 189,
+          "name": "test_basic_tload_gasprice"
+        },
+        {
+          "line": 273,
+          "name": "test_basic_tload_after_store"
+        }
+      ]
+    },
+    {
+      "path": "tests/cancun/eip1153_tstore/test_tload_calls.py",
+      "sha256": "0c97e7b714ccad45eab729c4132dd5d71de76caa4a31bd0528618bdf10169856",
+      "templates": [
+        {
+          "line": 24,
+          "name": "test_tload_calls"
+        }
+      ]
+    },
+    {
+      "path": "tests/cancun/eip1153_tstore/test_tload_reentrancy.py",
+      "sha256": "bbe044ca4fe4994d9d2fb743aac4dada4dd27180726c1aa2f0fb4c4104474ff5",
+      "templates": [
+        {
+          "line": 45,
+          "name": "test_tload_reentrancy"
+        }
+      ]
+    },
+    {
+      "path": "tests/cancun/eip1153_tstore/test_tstorage.py",
+      "sha256": "0618a5e6164b062703fb155c51cfc58af55a208e3431bc49968d670da4981621",
+      "templates": [
+        {
+          "line": 35,
+          "name": "test_transient_storage_unset_values"
+        },
+        {
+          "line": 72,
+          "name": "test_tload_after_tstore"
+        },
+        {
+          "line": 110,
+          "name": "test_tload_after_sstore"
+        },
+        {
+          "line": 156,
+          "name": "test_tload_after_tstore_is_zero"
+        },
+        {
+          "line": 236,
+          "name": "test_gas_usage"
+        },
+        {
+          "line": 292,
+          "name": "test_run_until_out_of_gas"
+        }
+      ]
+    },
+    {
+      "path": "tests/cancun/eip1153_tstore/test_tstorage_clear_after_tx.py",
+      "sha256": "d0cad57ecacda88b0baeb8eaa3eb8789510d917d0afcec4eb34c5f9d32d03673",
+      "templates": [
+        {
+          "line": 28,
+          "name": "test_tstore_clear_after_deployment_tx"
+        },
+        {
+          "line": 76,
+          "name": "test_tstore_clear_after_tx"
+        }
+      ]
+    },
+    {
+      "path": "tests/cancun/eip1153_tstore/test_tstorage_create_contexts.py",
+      "sha256": "ef932617679e8a6330c0b03ef44923f5160f22872b146996c42d9dd096be4207",
+      "templates": [
+        {
+          "line": 207,
+          "name": "test_contract_creation"
+        }
+      ]
+    },
+    {
+      "path": "tests/cancun/eip1153_tstore/test_tstorage_execution_contexts.py",
+      "sha256": "af84ae135474fb107ecf14b3afd808f7df2a703a8477d4650fae927f7094d53d",
+      "templates": [
+        {
+          "line": 330,
+          "name": "test_subcall"
+        }
+      ]
+    },
+    {
+      "path": "tests/cancun/eip1153_tstore/test_tstorage_reentrancy_contexts.py",
+      "sha256": "73a1dbabc54c2ed499325ac5508ef50a4c6f0d7dc21f2e437772d5a6d9083d5e",
+      "templates": [
+        {
+          "line": 318,
+          "name": "test_reentrant_call"
+        }
+      ]
+    },
+    {
+      "path": "tests/cancun/eip1153_tstore/test_tstorage_selfdestruct.py",
+      "sha256": "fa8c19e80b35549507f9ec09697327de3cda7277e54654292208962dd0dcbbd0",
+      "templates": [
+        {
+          "line": 224,
+          "name": "test_reentrant_selfdestructing_call"
+        }
+      ]
+    },
+    {
+      "path": "tests/cancun/eip1153_tstore/test_tstore_reentrancy.py",
+      "sha256": "8d25d614cfdb0346323738f92120e7f442dbb1800ef2d4267dfddcfe357c5a79",
+      "templates": [
+        {
+          "line": 49,
+          "name": "test_tstore_reentrancy"
+        }
+      ]
+    },
+    {
+      "path": "tests/cancun/eip4788_beacon_root/__init__.py",
+      "sha256": "6b6ccf966adf44d5c426998545a0ecf6469c0a6bf31d02fe4755411c28f9e864",
+      "templates": []
+    },
+    {
+      "path": "tests/cancun/eip4788_beacon_root/conftest.py",
+      "sha256": "96c5864afab935815cd40f83605c61b5c50f2f5e25b5aaaa2a180fa1c8c934c3",
+      "templates": []
+    },
+    {
+      "path": "tests/cancun/eip4788_beacon_root/spec.py",
+      "sha256": "7ea02b952ab3016f03ee969bcb7898127bd39194ff7321812ae71bee72348758",
+      "templates": []
+    },
+    {
+      "path": "tests/cancun/eip4788_beacon_root/test_beacon_root_contract.py",
+      "sha256": "f1303ce3730a8ddedb2d270f450717afc2680ced8c41a3903d8aac65c457efd4",
+      "templates": [
+        {
+          "line": 76,
+          "name": "test_beacon_root_contract_calls"
+        },
+        {
+          "line": 151,
+          "name": "test_beacon_root_contract_timestamps"
+        },
+        {
+          "line": 187,
+          "name": "test_calldata_lengths"
+        },
+        {
+          "line": 217,
+          "name": "test_beacon_root_equal_to_timestamp"
+        },
+        {
+          "line": 243,
+          "name": "test_tx_to_beacon_root_contract"
+        },
+        {
+          "line": 271,
+          "name": "test_invalid_beacon_root_calldata_value"
+        },
+        {
+          "line": 294,
+          "name": "test_beacon_root_selfdestruct"
+        },
+        {
+          "line": 380,
+          "name": "test_multi_block_beacon_root_timestamp_calls"
+        },
+        {
+          "line": 513,
+          "name": "test_beacon_root_transition"
+        },
+        {
+          "line": 640,
+          "name": "test_no_beacon_root_contract_at_transition"
+        },
+        {
+          "line": 720,
+          "name": "test_beacon_root_contract_deploy"
+        }
+      ]
+    },
+    {
+      "path": "tests/cancun/eip4844_blobs/__init__.py",
+      "sha256": "af248ff71091796c88bd0542157b9c47e92f4f68471f6caa6ef315b34fb755da",
+      "templates": []
+    },
+    {
+      "path": "tests/cancun/eip4844_blobs/common.py",
+      "sha256": "738bcff2cbecc703615079de7981b9db69e3e5f1fed40dd5247839b3795c7a6d",
+      "templates": []
+    },
+    {
+      "path": "tests/cancun/eip4844_blobs/conftest.py",
+      "sha256": "a56efbfdfcec99785be061b6bc865db311786f37f4e73d0461a1bf426f84f781",
+      "templates": []
+    },
+    {
+      "path": "tests/cancun/eip4844_blobs/point_evaluation_vectors/concat_kzg_vectors_to_json.py",
+      "sha256": "23da36d0d19c47569b6ff9b32a3752a3c913974a1f7e73dcd70a120c1912dcc7",
+      "templates": []
+    },
+    {
+      "path": "tests/cancun/eip4844_blobs/spec.py",
+      "sha256": "78b4bb5feb2df7aca42ac6322a35b8ccdf463a685f92a29f6292023e463fc6f1",
+      "templates": []
+    },
+    {
+      "path": "tests/cancun/eip4844_blobs/test_blob_txs.py",
+      "sha256": "d79b3b4d23fcea20c072f6df292277045e864cd9faadd519908d39983fa624cd",
+      "templates": [
+        {
+          "line": 382,
+          "name": "test_valid_blob_tx_combinations"
+        },
+        {
+          "line": 487,
+          "name": "test_invalid_tx_max_fee_per_blob_gas"
+        },
+        {
+          "line": 518,
+          "name": "test_invalid_tx_max_fee_per_blob_gas_state"
+        },
+        {
+          "line": 552,
+          "name": "test_invalid_normal_gas"
+        },
+        {
+          "line": 592,
+          "name": "test_invalid_block_blob_count"
+        },
+        {
+          "line": 633,
+          "name": "test_insufficient_balance_blob_tx"
+        },
+        {
+          "line": 682,
+          "name": "test_sufficient_balance_blob_tx"
+        },
+        {
+          "line": 731,
+          "name": "test_sufficient_balance_blob_tx_pre_fund_tx"
+        },
+        {
+          "line": 811,
+          "name": "test_blob_gas_subtraction_tx"
+        },
+        {
+          "line": 860,
+          "name": "test_insufficient_balance_blob_tx_combinations"
+        },
+        {
+          "line": 911,
+          "name": "test_invalid_tx_blob_count"
+        },
+        {
+          "line": 956,
+          "name": "test_invalid_blob_hash_versioning_single_tx"
+        },
+        {
+          "line": 1015,
+          "name": "test_invalid_blob_hash_versioning_multiple_txs"
+        },
+        {
+          "line": 1043,
+          "name": "test_invalid_blob_tx_contract_creation"
+        },
+        {
+          "line": 1149,
+          "name": "test_blob_tx_attribute_opcodes"
+        },
+        {
+          "line": 1203,
+          "name": "test_blob_tx_attribute_value_opcode"
+        },
+        {
+          "line": 1270,
+          "name": "test_blob_tx_attribute_calldata_opcodes"
+        },
+        {
+          "line": 1330,
+          "name": "test_blob_tx_attribute_gasprice_opcode"
+        },
+        {
+          "line": 1410,
+          "name": "test_blob_type_tx_pre_fork"
+        }
+      ]
+    },
+    {
+      "path": "tests/cancun/eip4844_blobs/test_blob_txs_full.py",
+      "sha256": "a7fe78d283a5710a28e7b5e539a76ecf2f817a1ea69027ef96b7aa0721cc5bc8",
+      "templates": [
+        {
+          "line": 281,
+          "name": "test_reject_valid_full_blob_in_block_rlp"
+        }
+      ]
+    },
+    {
+      "path": "tests/cancun/eip4844_blobs/test_blobhash_opcode.py",
+      "sha256": "cf34b578e6d721cde443c8725f51523602547c1662aca4c7faf5e41d880568b4",
+      "templates": [
+        {
+          "line": 164,
+          "name": "test_blobhash_gas_cost"
+        },
+        {
+          "line": 228,
+          "name": "test_blobhash_scenarios"
+        },
+        {
+          "line": 287,
+          "name": "test_blobhash_invalid_blob_index"
+        },
+        {
+          "line": 347,
+          "name": "test_blobhash_multiple_txs_in_block"
+        }
+      ]
+    },
+    {
+      "path": "tests/cancun/eip4844_blobs/test_blobhash_opcode_contexts.py",
+      "sha256": "43742b65382f5167b94ac363daca977827db2457fff1142fab16f4c2c5590a53",
+      "templates": [
+        {
+          "line": 169,
+          "name": "test_blobhash_opcode_contexts"
+        },
+        {
+          "line": 289,
+          "name": "test_blobhash_opcode_contexts_tx_types"
+        }
+      ]
+    },
+    {
+      "path": "tests/cancun/eip4844_blobs/test_excess_blob_gas.py",
+      "sha256": "03ec0f611c793d878799bd216415dd89303152b4eab35b2046b17a5f7b08b689",
+      "templates": [
+        {
+          "line": 304,
+          "name": "test_correct_excess_blob_gas_calculation"
+        },
+        {
+          "line": 367,
+          "name": "test_correct_increasing_blob_gas_costs"
+        },
+        {
+          "line": 404,
+          "name": "test_correct_decreasing_blob_gas_costs"
+        },
+        {
+          "line": 434,
+          "name": "test_invalid_zero_excess_blob_gas_in_header"
+        },
+        {
+          "line": 484,
+          "name": "test_invalid_blob_gas_used_in_header"
+        },
+        {
+          "line": 530,
+          "name": "test_invalid_excess_blob_gas_above_target_change"
+        },
+        {
+          "line": 577,
+          "name": "test_invalid_static_excess_blob_gas"
+        },
+        {
+          "line": 619,
+          "name": "test_invalid_excess_blob_gas_target_blobs_increase_from_zero"
+        },
+        {
+          "line": 661,
+          "name": "test_invalid_static_excess_blob_gas_from_zero_on_blobs_above_target"
+        },
+        {
+          "line": 711,
+          "name": "test_invalid_excess_blob_gas_change"
+        },
+        {
+          "line": 764,
+          "name": "test_invalid_negative_excess_blob_gas"
+        },
+        {
+          "line": 815,
+          "name": "test_invalid_non_multiple_excess_blob_gas"
+        }
+      ]
+    },
+    {
+      "path": "tests/cancun/eip4844_blobs/test_excess_blob_gas_fork_transition.py",
+      "sha256": "8ab492985d82ce250a50b61dddc5d584766ca5559ce47e7654dd2eb622e6b546",
+      "templates": [
+        {
+          "line": 325,
+          "name": "test_invalid_pre_fork_block_with_blob_fields"
+        },
+        {
+          "line": 371,
+          "name": "test_invalid_post_fork_block_without_blob_fields"
+        },
+        {
+          "line": 426,
+          "name": "test_fork_transition_excess_blob_gas_at_blob_genesis"
+        },
+        {
+          "line": 496,
+          "name": "test_fork_transition_excess_blob_gas_post_blob_genesis"
+        }
+      ]
+    },
+    {
+      "path": "tests/cancun/eip4844_blobs/test_point_evaluation_precompile.py",
+      "sha256": "c566e4f4f72968de96e98e32c70bd783bd20d002cc0f2beafb6b2d3f0ec5b06d",
+      "templates": [
+        {
+          "line": 286,
+          "name": "test_valid_inputs"
+        },
+        {
+          "line": 340,
+          "name": "test_invalid_inputs"
+        },
+        {
+          "line": 453,
+          "name": "test_external_vectors"
+        },
+        {
+          "line": 490,
+          "name": "test_call_opcode_types"
+        },
+        {
+          "line": 530,
+          "name": "test_tx_entry_point"
+        },
+        {
+          "line": 617,
+          "name": "test_precompile_before_fork"
+        },
+        {
+          "line": 671,
+          "name": "test_precompile_during_fork"
+        }
+      ]
+    },
+    {
+      "path": "tests/cancun/eip4844_blobs/test_point_evaluation_precompile_gas.py",
+      "sha256": "a88b3b9a377ac921076c324701784478e703ef92f0e53b85808abb84bb979988",
+      "templates": [
+        {
+          "line": 204,
+          "name": "test_point_evaluation_precompile_gas_usage"
+        }
+      ]
+    },
+    {
+      "path": "tests/cancun/eip5656_mcopy/__init__.py",
+      "sha256": "9e5a2a17675fa968a2544dbb5e081017c32a8ea185592b6869ac3a47e41caee4",
+      "templates": []
+    },
+    {
+      "path": "tests/cancun/eip5656_mcopy/common.py",
+      "sha256": "a6d3d5810e6058d0c55d50497da1f8ceb8afeccd7de20e2609f458b7f12bdd63",
+      "templates": []
+    },
+    {
+      "path": "tests/cancun/eip5656_mcopy/test_mcopy.py",
+      "sha256": "e31ae005cca27df2857d87b3464c61daea9f187f20165d36a6b6bbc2c7d00073",
+      "templates": [
+        {
+          "line": 181,
+          "name": "test_valid_mcopy_operations"
+        },
+        {
+          "line": 210,
+          "name": "test_mcopy_on_empty_memory"
+        }
+      ]
+    },
+    {
+      "path": "tests/cancun/eip5656_mcopy/test_mcopy_contexts.py",
+      "sha256": "4a465dad88fc1ca0add4ec5cb558541c296ba5eaafc2abda45af14a813f0d967",
+      "templates": [
+        {
+          "line": 168,
+          "name": "test_no_memory_corruption_on_upper_call_stack_levels"
+        },
+        {
+          "line": 194,
+          "name": "test_no_memory_corruption_on_upper_create_stack_levels"
+        }
+      ]
+    },
+    {
+      "path": "tests/cancun/eip5656_mcopy/test_mcopy_memory_expansion.py",
+      "sha256": "0b43e911a1c057038db77198fd638d4bdee9774c5e57f16f2d8302fe139d9975",
+      "templates": [
+        {
+          "line": 215,
+          "name": "test_mcopy_memory_expansion"
+        },
+        {
+          "line": 278,
+          "name": "test_mcopy_huge_memory_expansion"
+        }
+      ]
+    },
+    {
+      "path": "tests/cancun/eip6780_selfdestruct/__init__.py",
+      "sha256": "482eb1426a23bfb2da925b304f91e8e701affc7a84363fc60fb4b68219c3494b",
+      "templates": []
+    },
+    {
+      "path": "tests/cancun/eip6780_selfdestruct/conftest.py",
+      "sha256": "c37bb060a698f6d52948923516f90771d6f003ea4d690a0497c54ed48e430d24",
+      "templates": []
+    },
+    {
+      "path": "tests/cancun/eip6780_selfdestruct/test_dynamic_create2_selfdestruct_collision.py",
+      "sha256": "b6121ab5dd812363c1b8054272c16ee4fa38e368de9eaf95cffe8e35e0bdba0f",
+      "templates": [
+        {
+          "line": 43,
+          "name": "test_dynamic_create2_selfdestruct_collision"
+        },
+        {
+          "line": 227,
+          "name": "test_dynamic_create2_selfdestruct_collision_two_different_transactions"
+        },
+        {
+          "line": 471,
+          "name": "test_dynamic_create2_selfdestruct_collision_multi_tx"
+        }
+      ]
+    },
+    {
+      "path": "tests/cancun/eip6780_selfdestruct/test_reentrancy_selfdestruct_revert.py",
+      "sha256": "7039464b42d1ba39df9570cfbbb9a7a54530f628e6cfa34fe95f83f2a855e156",
+      "templates": [
+        {
+          "line": 128,
+          "name": "test_reentrancy_selfdestruct_revert"
+        }
+      ]
+    },
+    {
+      "path": "tests/cancun/eip6780_selfdestruct/test_selfdestruct.py",
+      "sha256": "5c68570364df3bdba36a5e7aaa70522b57d77dd477a090c0e564af6d34b7c046",
+      "templates": [
+        {
+          "line": 185,
+          "name": "test_create_selfdestruct_same_tx"
+        },
+        {
+          "line": 340,
+          "name": "test_self_destructing_initcode"
+        },
+        {
+          "line": 464,
+          "name": "test_self_destructing_initcode_create_tx"
+        },
+        {
+          "line": 524,
+          "name": "test_recreate_self_destructed_contract_different_txs"
+        },
+        {
+          "line": 673,
+          "name": "test_selfdestruct_pre_existing"
+        },
+        {
+          "line": 801,
+          "name": "test_selfdestruct_created_same_block_different_tx"
+        },
+        {
+          "line": 904,
+          "name": "test_calling_from_new_contract_to_pre_existing_contract"
+        },
+        {
+          "line": 1040,
+          "name": "test_calling_from_pre_existing_contract_to_new_contract"
+        },
+        {
+          "line": 1199,
+          "name": "test_create_selfdestruct_same_tx_increased_nonce"
+        }
+      ]
+    },
+    {
+      "path": "tests/cancun/eip6780_selfdestruct/test_selfdestruct_revert.py",
+      "sha256": "09ff0daecc1be4fbfbdc4347f44ac7c4bea25bb37e2d48f3814cc36805afb6f5",
+      "templates": [
+        {
+          "line": 331,
+          "name": "test_selfdestruct_created_in_same_tx_with_revert"
+        },
+        {
+          "line": 452,
+          "name": "test_selfdestruct_not_created_in_same_tx_with_revert"
+        }
+      ]
+    },
+    {
+      "path": "tests/cancun/eip7516_blobgasfee/__init__.py",
+      "sha256": "85ad7356c7d3a89b8803c4e7f97e849716d68af33bb70fef804245592b643027",
+      "templates": []
+    },
+    {
+      "path": "tests/cancun/eip7516_blobgasfee/test_blobgasfee_opcode.py",
+      "sha256": "6efa1b38ab838034f7e6e002a8a066ce09fbc2feaeaac3d202640be826dcad73",
+      "templates": [
+        {
+          "line": 98,
+          "name": "test_blobbasefee_stack_overflow"
+        },
+        {
+          "line": 134,
+          "name": "test_blobbasefee_out_of_gas"
+        },
+        {
+          "line": 161,
+          "name": "test_blobbasefee_before_fork"
+        },
+        {
+          "line": 201,
+          "name": "test_blobbasefee_during_fork"
+        }
+      ]
+    },
+    {
+      "path": "tests/constantinople/__init__.py",
+      "sha256": "05e51cb57908a28834551b52bfab86365f60229fdcdf4a899db407759f9be44c",
+      "templates": []
+    },
+    {
+      "path": "tests/constantinople/eip1014_create2/__init__.py",
+      "sha256": "75d4baac89eaf6f4c7894d3eefe032fbc91ee9ace78faa3bf89383bf173cd400",
+      "templates": []
+    },
+    {
+      "path": "tests/constantinople/eip1014_create2/spec.py",
+      "sha256": "2f426f39f1881efa1e7b7539376064305898c2fa4c3b010a5aa9fd5c0d2658a7",
+      "templates": []
+    },
+    {
+      "path": "tests/constantinople/eip1014_create2/test_create_returndata.py",
+      "sha256": "d4bafc40d82b200b2d237c1c83716946c93468a49ec403bc29b175be285059ee",
+      "templates": [
+        {
+          "line": 32,
+          "name": "test_create2_return_data"
+        }
+      ]
+    },
+    {
+      "path": "tests/constantinople/eip1014_create2/test_recreate.py",
+      "sha256": "0493a94c7dbd6953be87a64a185224bae4d06982a11a13a8fa5f434b9abd2ace",
+      "templates": [
+        {
+          "line": 26,
+          "name": "test_recreate"
+        }
+      ]
+    },
+    {
+      "path": "tests/constantinople/eip145_bitwise_shift/__init__.py",
+      "sha256": "194c3d826457659644edeb056f9d83b06bb942bc5e4a3c998a8bbdf1bf65231d",
+      "templates": []
+    },
+    {
+      "path": "tests/constantinople/eip145_bitwise_shift/spec.py",
+      "sha256": "64f3125654b7c055c9e0883bf0d1c60e4a93e7ca35edc7e300d2a07248379f0b",
+      "templates": []
+    },
+    {
+      "path": "tests/constantinople/eip145_bitwise_shift/test_shift_combinations.py",
+      "sha256": "dd1ef3aa83a5cd1bffebb43a87ba330a7d79b3c18012dfbeb8c473cca89d6093",
+      "templates": [
+        {
+          "line": 63,
+          "name": "test_combinations"
+        }
+      ]
+    },
+    {
+      "path": "tests/frontier/__init__.py",
+      "sha256": "3ad85a020ec0ce98209f48247a2d52970fdd78c9d5bee1d480b4edf0c88bd2b2",
+      "templates": []
+    },
+    {
+      "path": "tests/frontier/create/__init__.py",
+      "sha256": "ea49d8ca4fe83e2cea6de6d8ad02a2564356996fd53e0e32fdfdd7da242871d5",
+      "templates": []
+    },
+    {
+      "path": "tests/frontier/create/test_create_one_byte.py",
+      "sha256": "05bbf061a6acc5ff511dc13a5a0c0f98428bbb2963dcd5e48b205e6bd324c813",
+      "templates": [
+        {
+          "line": 35,
+          "name": "test_create_one_byte"
+        }
+      ]
+    },
+    {
+      "path": "tests/frontier/create/test_create_suicide_during_init.py",
+      "sha256": "ae2c1187f01c686794db2fb37c8c485da96e0323da0cea8b544d4c7934454058",
+      "templates": [
+        {
+          "line": 48,
+          "name": "test_create_suicide_during_transaction_create"
+        }
+      ]
+    },
+    {
+      "path": "tests/frontier/create/test_create_suicide_store.py",
+      "sha256": "b1fa7a16699d0530baba6c08df02c994697a56290612900de1a13b7a907f5020",
+      "templates": [
+        {
+          "line": 44,
+          "name": "test_create_suicide_store"
+        }
+      ]
+    },
+    {
+      "path": "tests/frontier/examples/__init__.py",
+      "sha256": "ea49d8ca4fe83e2cea6de6d8ad02a2564356996fd53e0e32fdfdd7da242871d5",
+      "templates": []
+    },
+    {
+      "path": "tests/frontier/examples/test_block_intermediate_state.py",
+      "sha256": "8b57f65648ef78d7826548d296619c5be5f82248e3575b58c1230afbb7ba4962",
+      "templates": [
+        {
+          "line": 17,
+          "name": "test_block_intermediate_state"
+        }
+      ]
+    },
+    {
+      "path": "tests/frontier/identity_precompile/__init__.py",
+      "sha256": "66114db38866774913633d22fdfb8b0795e5a5c75812ee56118fdad645569db9",
+      "templates": []
+    },
+    {
+      "path": "tests/frontier/identity_precompile/common.py",
+      "sha256": "6e59506af0e521800fcdb8a962d4219f51bfd813cd6858dec97c327b4959cb8a",
+      "templates": []
+    },
+    {
+      "path": "tests/frontier/identity_precompile/conftest.py",
+      "sha256": "a1eb92141cd58951f3aad77c325a6a6bf1dfd82634f8182e73ece8e7eab4545a",
+      "templates": []
+    },
+    {
+      "path": "tests/frontier/identity_precompile/test_identity.py",
+      "sha256": "71923430a585d96a15e255bd33022c80e60b1b8761d5148d98a812f3571690be",
+      "templates": [
+        {
+          "line": 111,
+          "name": "test_call_identity_precompile"
+        },
+        {
+          "line": 188,
+          "name": "test_call_identity_precompile_large_params"
+        }
+      ]
+    },
+    {
+      "path": "tests/frontier/identity_precompile/test_identity_returndatasize.py",
+      "sha256": "c508af21e1e38054d17deb68be8da4a4f28a329a6d61ecde5aec74c022ff2e46",
+      "templates": [
+        {
+          "line": 33,
+          "name": "test_identity_precompile_returndata"
+        }
+      ]
+    },
+    {
+      "path": "tests/frontier/opcodes/__init__.py",
+      "sha256": "23166ab97e3311757447c7573eb8c2270d5410aa53f7103360567e4a903c1162",
+      "templates": []
+    },
+    {
+      "path": "tests/frontier/opcodes/test_all_opcodes.py",
+      "sha256": "c5499c297c90f5e7f0c8aa62c227a245e5e4b21defd42736a2149cf9dd4a7d35",
+      "templates": [
+        {
+          "line": 57,
+          "name": "test_all_opcodes"
+        },
+        {
+          "line": 113,
+          "name": "test_cover_revert"
+        }
+      ]
+    },
+    {
+      "path": "tests/frontier/opcodes/test_blockhash.py",
+      "sha256": "62bd1e34ce96ac089566ffaa3d6cbe6984171b44b13f83c5b2d1fb8f5348e43a",
+      "templates": [
+        {
+          "line": 17,
+          "name": "test_genesis_hash_available"
+        }
+      ]
+    },
+    {
+      "path": "tests/frontier/opcodes/test_call.py",
+      "sha256": "ca5058389c42fde37236184606d2f43a8e2f006376440742cdbc3df2c9633602",
+      "templates": [
+        {
+          "line": 21,
+          "name": "test_call_large_offset_mstore"
+        },
+        {
+          "line": 88,
+          "name": "test_call_memory_expands_on_early_revert"
+        },
+        {
+          "line": 170,
+          "name": "test_call_large_args_offset_size_zero"
+        }
+      ]
+    },
+    {
+      "path": "tests/frontier/opcodes/test_call_and_callcode_gas_calculation.py",
+      "sha256": "135f3c79d2ee78cc8187461cfb0236f669256ed35fcfb0f263313bb8b84ffaf9",
+      "templates": [
+        {
+          "line": 157,
+          "name": "test_value_transfer_gas_calculation"
+        }
+      ]
+    },
+    {
+      "path": "tests/frontier/opcodes/test_calldatacopy.py",
+      "sha256": "b6c44eff480d58acf0c793f6218e5ba5aa90994c9e6e36aec2589a33ffd575d0",
+      "templates": [
+        {
+          "line": 139,
+          "name": "test_calldatacopy"
+        }
+      ]
+    },
+    {
+      "path": "tests/frontier/opcodes/test_calldataload.py",
+      "sha256": "b0eaafb0d40cf8fb5ea4f73942b562c9e6076f511f720f3b06b6c164ff466b8e",
+      "templates": [
+        {
+          "line": 43,
+          "name": "test_calldataload"
+        }
+      ]
+    },
+    {
+      "path": "tests/frontier/opcodes/test_calldatasize.py",
+      "sha256": "9b995328e9a884f6e15faf1a7869251e436fe145e4690e87d83e3fbb9b5efb47",
+      "templates": [
+        {
+          "line": 23,
+          "name": "test_calldatasize"
+        }
+      ]
+    },
+    {
+      "path": "tests/frontier/opcodes/test_dup.py",
+      "sha256": "6041e17bb051126f9856e3b53a8f8fcd41f31aed47778e332d0fcbf0053ea5d2",
+      "templates": [
+        {
+          "line": 33,
+          "name": "test_dup"
+        }
+      ]
+    },
+    {
+      "path": "tests/frontier/opcodes/test_push.py",
+      "sha256": "7bee9b642c6753bee8523022d4a065871eb6dd44b17928c3ddfb0b07ee19a16c",
+      "templates": [
+        {
+          "line": 42,
+          "name": "test_push"
+        },
+        {
+          "line": 95,
+          "name": "test_stack_overflow"
+        }
+      ]
+    },
+    {
+      "path": "tests/frontier/opcodes/test_selfdestruct.py",
+      "sha256": "e6e27470fbcfc1fa58dad8aff28eadff0f3494cde1217d426e269b5fbd0bfe6f",
+      "templates": [
+        {
+          "line": 11,
+          "name": "test_double_kill"
+        }
+      ]
+    },
+    {
+      "path": "tests/frontier/opcodes/test_swap.py",
+      "sha256": "4370c55444f47aee89dd10db55d0111364b75fdc0d6cdfa31dbc186bfca98377",
+      "templates": [
+        {
+          "line": 31,
+          "name": "test_swap"
+        },
+        {
+          "line": 100,
+          "name": "test_stack_underflow"
+        }
+      ]
+    },
+    {
+      "path": "tests/frontier/precompiles/__init__.py",
+      "sha256": "66114db38866774913633d22fdfb8b0795e5a5c75812ee56118fdad645569db9",
+      "templates": []
+    },
+    {
+      "path": "tests/frontier/precompiles/test_precompile_absence.py",
+      "sha256": "ca3178c78b9455bc22e0d0027bb4ad9df5f3c6c80b96f2c7104326d845482150",
+      "templates": [
+        {
+          "line": 30,
+          "name": "test_precompile_absence"
+        }
+      ]
+    },
+    {
+      "path": "tests/frontier/precompiles/test_precompiles.py",
+      "sha256": "09cd01d5aa076201bd96e51f26b7f7ae1532df9f94412a3e86c32f943de9b8ea",
+      "templates": [
+        {
+          "line": 58,
+          "name": "test_precompiles"
+        }
+      ]
+    },
+    {
+      "path": "tests/frontier/scenarios/__init__.py",
+      "sha256": "15bdf31b80003fb1cf6a73ff61261325672e77555586a429b3ac34a8fb6325d3",
+      "templates": []
+    },
+    {
+      "path": "tests/frontier/scenarios/common.py",
+      "sha256": "88d127daf9503d3d02f8093bdc720e076fff47ef6a29c69c04c9503c313d7c0d",
+      "templates": []
+    },
+    {
+      "path": "tests/frontier/scenarios/programs/__init__.py",
+      "sha256": "15bdf31b80003fb1cf6a73ff61261325672e77555586a429b3ac34a8fb6325d3",
+      "templates": []
+    },
+    {
+      "path": "tests/frontier/scenarios/programs/all_frontier_opcodes.py",
+      "sha256": "a65cf7709b1a6d73c66cdec5d41f6f2a3acb1b53a89c56f0f68c3ade8b64ef80",
+      "templates": []
+    },
+    {
+      "path": "tests/frontier/scenarios/programs/context_calls.py",
+      "sha256": "c06773e97630655eaf56661d2665fd68adec71619865d67d22943363b138b02e",
+      "templates": []
+    },
+    {
+      "path": "tests/frontier/scenarios/programs/invalid_opcodes.py",
+      "sha256": "0a234f263260dfbfe860c8d644226e9dce397d47f83c082587d105913cd19e24",
+      "templates": []
+    },
+    {
+      "path": "tests/frontier/scenarios/programs/static_violation.py",
+      "sha256": "b63e71806323c977798877b2b0d81c6e69a4a2685962021985e9040cf66a6a36",
+      "templates": []
+    },
+    {
+      "path": "tests/frontier/scenarios/scenarios/__init__.py",
+      "sha256": "15bdf31b80003fb1cf6a73ff61261325672e77555586a429b3ac34a8fb6325d3",
+      "templates": []
+    },
+    {
+      "path": "tests/frontier/scenarios/scenarios/call_combinations.py",
+      "sha256": "da0bfbef309c63296cd44511a4f9b459090b10805cb89ab8e6883e7fe8b9c86a",
+      "templates": []
+    },
+    {
+      "path": "tests/frontier/scenarios/scenarios/create_combinations.py",
+      "sha256": "c38b93f898903b149edd39e95b70b69812298159bf48a2c04fe0e177a11fb2d7",
+      "templates": []
+    },
+    {
+      "path": "tests/frontier/scenarios/scenarios/double_call_combinations.py",
+      "sha256": "2e00749554fda4a24cbb1fd3a18dfc8be85c956828d6708c4a90572715ac897a",
+      "templates": []
+    },
+    {
+      "path": "tests/frontier/scenarios/scenarios/revert_combinations.py",
+      "sha256": "1941020bec663951fab9f26c5757da8c45402b75bb96a4aa862e7e6bb2a88e7c",
+      "templates": []
+    },
+    {
+      "path": "tests/frontier/scenarios/test_scenarios.py",
+      "sha256": "2f2d6386a1295f8f720bd19ebff27b2651dddf073c3ac469d0d156d612a1882d",
+      "templates": [
+        {
+          "line": 180,
+          "name": "test_scenarios"
+        }
+      ]
+    },
+    {
+      "path": "tests/homestead/__init__.py",
+      "sha256": "03cb3674af8b8b853baa838ad02b307ffe35731b6f9b35bc612fb521df93f1fd",
+      "templates": []
+    },
+    {
+      "path": "tests/homestead/coverage/__init__.py",
+      "sha256": "107c44fa3168063f9c9339049c49e40c66aca3b8c312ebee6fab061e5cf89cba",
+      "templates": []
+    },
+    {
+      "path": "tests/homestead/coverage/test_coverage.py",
+      "sha256": "92ad1841efee25aa097edebdb8ecb9779f8a2c93463ff15220fbd8edfe4c24e4",
+      "templates": [
+        {
+          "line": 17,
+          "name": "test_coverage"
+        }
+      ]
+    },
+    {
+      "path": "tests/homestead/identity_precompile/__init__.py",
+      "sha256": "7a8298e21711d0a697337a10af49bd22d89f92b14cd0f5fe74be729ebd9341bc",
+      "templates": []
+    },
+    {
+      "path": "tests/homestead/identity_precompile/test_identity.py",
+      "sha256": "de532f0e75452998c9ec19fcdf6117a0939359c2966a71c71e9f9ce19ea922bc",
+      "templates": [
+        {
+          "line": 18,
+          "name": "test_identity_return_overwrite"
+        },
+        {
+          "line": 62,
+          "name": "test_identity_return_buffer_modify"
+        }
+      ]
+    },
+    {
+      "path": "tests/homestead/yul/__init__.py",
+      "sha256": "6ed1d94e6abd44d8b9adae477a282695d71a21d4ed9f38167e8eb09261b8a77d",
+      "templates": []
+    },
+    {
+      "path": "tests/istanbul/__init__.py",
+      "sha256": "b1614e555b70c74d85b20833a96a5e5b5bcd31c50b497a869691394ed38329ea",
+      "templates": []
+    },
+    {
+      "path": "tests/istanbul/eip1344_chainid/__init__.py",
+      "sha256": "d97200bb12f0ead19145279d19208639887bf923d3db4c92ec263c63eb5fc493",
+      "templates": []
+    },
+    {
+      "path": "tests/istanbul/eip1344_chainid/test_chainid.py",
+      "sha256": "3cc3389baad6e7f645a31184c8b866e1dedd421d02ea49293684365fcf207ceb",
+      "templates": [
+        {
+          "line": 22,
+          "name": "test_chainid"
+        }
+      ]
+    },
+    {
+      "path": "tests/istanbul/eip152_blake2/__init__.py",
+      "sha256": "c0701b46ffd47808b7522dc46549cb42cf46e306a342fadb88576c80393239f3",
+      "templates": []
+    },
+    {
+      "path": "tests/istanbul/eip152_blake2/common.py",
+      "sha256": "5de56464fbbe1739f3f077573489c81c57a91a57109ebf6afb45ff3407f07444",
+      "templates": []
+    },
+    {
+      "path": "tests/istanbul/eip152_blake2/conftest.py",
+      "sha256": "72bc72098611274a75bfe7cc20753877cd9e34b98bc2a6e9a9939d6c8ec51874",
+      "templates": []
+    },
+    {
+      "path": "tests/istanbul/eip152_blake2/spec.py",
+      "sha256": "b86746f21732ce9f484649759afd72b8b7d741007fa444f9d79a7de5ae4abd90",
+      "templates": []
+    },
+    {
+      "path": "tests/istanbul/eip152_blake2/test_blake2.py",
+      "sha256": "3fb3b6068860b76bb6248696b3cb3dd24545da4fb33aa32f8e79eb43e0a7f5a9",
+      "templates": [
+        {
+          "line": 393,
+          "name": "test_blake2b"
+        },
+        {
+          "line": 509,
+          "name": "test_blake2b_invalid_gas"
+        },
+        {
+          "line": 631,
+          "name": "test_blake2b_gas_limit"
+        },
+        {
+          "line": 758,
+          "name": "test_blake2b_large_gas_limit"
+        }
+      ]
+    },
+    {
+      "path": "tests/istanbul/eip152_blake2/test_blake2_delegatecall.py",
+      "sha256": "481b2c09a00d4d69285774891b1b78440adf9a62e18779cfc5b1fb91770ae0da",
+      "templates": [
+        {
+          "line": 25,
+          "name": "test_blake2_precompile_delegatecall"
+        }
+      ]
+    },
+    {
+      "path": "tests/osaka/__init__.py",
+      "sha256": "28e4327610fdc5aa1a192c89a66f2425c73fae9ea5281c8f7b4d19f1201445d0",
+      "templates": []
+    },
+    {
+      "path": "tests/osaka/eip7594_peerdas/__init__.py",
+      "sha256": "4eb374f3fed901137460a155aa89a36eb743245313705f3641e8ff6f05911cab",
+      "templates": []
+    },
+    {
+      "path": "tests/osaka/eip7594_peerdas/spec.py",
+      "sha256": "bd15d59a871a4b21ec4da4cd53ab3b1a68653b05d1c587027951faec70414055",
+      "templates": []
+    },
+    {
+      "path": "tests/osaka/eip7594_peerdas/test_get_blobs.py",
+      "sha256": "5dbf44d9953fac0692b7c114e294bdef9bc53d69d94835b68e9f6abdaf983595",
+      "templates": [
+        {
+          "line": 319,
+          "name": "test_get_blobs"
+        },
+        {
+          "line": 337,
+          "name": "test_get_blobs_nonexisting"
+        }
+      ]
+    },
+    {
+      "path": "tests/osaka/eip7594_peerdas/test_max_blob_per_tx.py",
+      "sha256": "c2873c02ded6345d2fdd8bcbcbec9109413784cecda07b365af9ce35e6fd5830",
+      "templates": [
+        {
+          "line": 86,
+          "name": "test_valid_max_blobs_per_tx"
+        },
+        {
+          "line": 116,
+          "name": "test_invalid_max_blobs_per_tx"
+        },
+        {
+          "line": 151,
+          "name": "test_max_blobs_per_tx_fork_transition"
+        }
+      ]
+    },
+    {
+      "path": "tests/osaka/eip7823_modexp_upper_bounds/__init__.py",
+      "sha256": "63b7bf0842f17682851a0bcb16ed127112ae5710dd4ff1d6ccd8cc61e8dc34f3",
+      "templates": []
+    },
+    {
+      "path": "tests/osaka/eip7823_modexp_upper_bounds/conftest.py",
+      "sha256": "e0f70f7b187ce8c7787d99f309cf1ce83bc32220a2170e8fb0fb4acc178b6f5e",
+      "templates": []
+    },
+    {
+      "path": "tests/osaka/eip7823_modexp_upper_bounds/spec.py",
+      "sha256": "8c7a3b4c8cc51e14fdbb23cd57b5b9aebc5d261d1a6f80bf6a36b2244f5e6849",
+      "templates": []
+    },
+    {
+      "path": "tests/osaka/eip7823_modexp_upper_bounds/test_modexp_upper_bounds.py",
+      "sha256": "fb897144ae680b5c603b9cb700a23396debfe9f1e12fc12fa90bde1c3d7abf3d",
+      "templates": [
+        {
+          "line": 259,
+          "name": "test_modexp_upper_bounds"
+        },
+        {
+          "line": 288,
+          "name": "test_modexp_upper_bounds_fork_transition"
+        }
+      ]
+    },
+    {
+      "path": "tests/osaka/eip7825_transaction_gas_limit_cap/__init__.py",
+      "sha256": "0edd261bc9b40ae4d02c9abf6a8afd2ddaf703bee96ec1edb8a7eaeefbc4968a",
+      "templates": []
+    },
+    {
+      "path": "tests/osaka/eip7825_transaction_gas_limit_cap/spec.py",
+      "sha256": "5cd6d2a15a459d1ffebaf75b357d0437d0f2402e6ea46688fdbc2a37ba7e4e59",
+      "templates": []
+    },
+    {
+      "path": "tests/osaka/eip7825_transaction_gas_limit_cap/test_tx_gas_limit.py",
+      "sha256": "d6b0436932f14303b0504ce5cd48b2ce3d260689d23256f91fb6d70780fcaa60",
+      "templates": [
+        {
+          "line": 67,
+          "name": "test_transaction_gas_limit_cap"
+        },
+        {
+          "line": 136,
+          "name": "test_tx_gas_limit_cap_subcall_context"
+        },
+        {
+          "line": 180,
+          "name": "test_tx_gas_larger_than_block_gas_limit"
+        },
+        {
+          "line": 220,
+          "name": "test_maximum_gas_refund"
+        },
+        {
+          "line": 292,
+          "name": "test_tx_gas_limit_cap_full_calldata"
+        },
+        {
+          "line": 367,
+          "name": "test_tx_gas_limit_cap_contract_creation"
+        },
+        {
+          "line": 428,
+          "name": "test_tx_gas_limit_cap_access_list_with_diff_keys"
+        },
+        {
+          "line": 507,
+          "name": "test_tx_gas_limit_cap_access_list_with_diff_addr"
+        },
+        {
+          "line": 583,
+          "name": "test_tx_gas_limit_cap_authorized_tx"
+        }
+      ]
+    },
+    {
+      "path": "tests/osaka/eip7825_transaction_gas_limit_cap/test_tx_gas_limit_transition_fork.py",
+      "sha256": "b91b9c9ac751b1e9e0987835681807f47fbc1aa09a506ee07b629c61a7edae9a",
+      "templates": [
+        {
+          "line": 40,
+          "name": "test_transaction_gas_limit_cap_at_transition"
+        }
+      ]
+    },
+    {
+      "path": "tests/osaka/eip7883_modexp_gas_increase/__init__.py",
+      "sha256": "2c8da221bf24cbcee0fcb1b23226ccbc588a8bdea5a7938957527f007d581361",
+      "templates": []
+    },
+    {
+      "path": "tests/osaka/eip7883_modexp_gas_increase/conftest.py",
+      "sha256": "6216b25653bc51e178d60ead42ba316f28fcb1aace0f0757a9a45e242170bd9b",
+      "templates": []
+    },
+    {
+      "path": "tests/osaka/eip7883_modexp_gas_increase/helpers.py",
+      "sha256": "d134f8db5cc1d47d62df52dd73bfed164b79dfbcc72f1e138b0b5000d2661694",
+      "templates": []
+    },
+    {
+      "path": "tests/osaka/eip7883_modexp_gas_increase/spec.py",
+      "sha256": "f1730dfd01cc8d775209e2794095c10ee1d9348912ec536d0bf263462f3492dd",
+      "templates": []
+    },
+    {
+      "path": "tests/osaka/eip7883_modexp_gas_increase/test_modexp_thresholds.py",
+      "sha256": "e6cd70aa65064ffbf7710b755e5b7bf97e7e7d0132fa9b19226a47eb74ba10c5",
+      "templates": [
+        {
+          "line": 43,
+          "name": "test_vectors_from_eip"
+        },
+        {
+          "line": 64,
+          "name": "test_vectors_from_legacy_tests"
+        },
+        {
+          "line": 106,
+          "name": "test_modexp_invalid_inputs"
+        },
+        {
+          "line": 170,
+          "name": "test_modexp_boundary_inputs"
+        },
+        {
+          "line": 204,
+          "name": "test_modexp_call_operations"
+        },
+        {
+          "line": 254,
+          "name": "test_modexp_gas_usage_contract_wrapper"
+        },
+        {
+          "line": 307,
+          "name": "test_modexp_used_in_transaction_entry_points"
+        },
+        {
+          "line": 341,
+          "name": "test_contract_creation_transaction"
+        },
+        {
+          "line": 404,
+          "name": "test_contract_initcode"
+        },
+        {
+          "line": 651,
+          "name": "test_modexp_variable_gas_cost"
+        },
+        {
+          "line": 678,
+          "name": "test_modexp_variable_gas_cost_exceed_tx_gas_cap"
+        }
+      ]
+    },
+    {
+      "path": "tests/osaka/eip7883_modexp_gas_increase/test_modexp_thresholds_transition.py",
+      "sha256": "64746e6bdeed28aad1f5aaaabde6d4702bc6f96cff1e2b8603c6569a2818bebb",
+      "templates": [
+        {
+          "line": 33,
+          "name": "test_modexp_fork_transition"
+        }
+      ]
+    },
+    {
+      "path": "tests/osaka/eip7918_blob_reserve_price/__init__.py",
+      "sha256": "b3451c9d6569bbc67b0ee60b7e4b32b864dceec24d538dc8b6ccc792c36b1a5e",
+      "templates": []
+    },
+    {
+      "path": "tests/osaka/eip7918_blob_reserve_price/conftest.py",
+      "sha256": "56c034173a862fc82b2371bfa8790b6adf815e65736cc958b630f48bb18f9bf3",
+      "templates": []
+    },
+    {
+      "path": "tests/osaka/eip7918_blob_reserve_price/spec.py",
+      "sha256": "aee366cde0f5fdf45610eef2e643f810eedc88c5add47f79a5dc7ee7a2e74c98",
+      "templates": []
+    },
+    {
+      "path": "tests/osaka/eip7918_blob_reserve_price/test_blob_base_fee.py",
+      "sha256": "add622cce06502702ebc7c063020c7b96b5a9de75b5bd2da17783c2e36226ac7",
+      "templates": [
+        {
+          "line": 142,
+          "name": "test_reserve_price_various_base_fee_scenarios"
+        },
+        {
+          "line": 168,
+          "name": "test_reserve_price_boundary"
+        }
+      ]
+    },
+    {
+      "path": "tests/osaka/eip7918_blob_reserve_price/test_blob_reserve_price_with_bpo.py",
+      "sha256": "9634e576b075bc7794481ce94543ab220be9e1591a51242e9a0644e3367e09b8",
+      "templates": [
+        {
+          "line": 25,
+          "name": "test_blob_base_fee_with_bpo_transition"
+        }
+      ]
+    },
+    {
+      "path": "tests/osaka/eip7918_blob_reserve_price/test_blob_reserve_price_with_bpo_transitions.py",
+      "sha256": "57a1c43920153b3cf0ac10425614014752418e77c75e69495ad4d2d5971754a1",
+      "templates": [
+        {
+          "line": 540,
+          "name": "test_reserve_price_at_transition"
+        }
+      ]
+    },
+    {
+      "path": "tests/osaka/eip7934_block_rlp_limit/__init__.py",
+      "sha256": "114f9d2a2a0a74c6f12d7ba719c3fbd9fd0e6d9fd7c5a38d742b14780778e675",
+      "templates": []
+    },
+    {
+      "path": "tests/osaka/eip7934_block_rlp_limit/conftest.py",
+      "sha256": "a889d7dfdfdd64bf14d62bdc66f056c246629953d8a8819c4116813b21a4f842",
+      "templates": []
+    },
+    {
+      "path": "tests/osaka/eip7934_block_rlp_limit/spec.py",
+      "sha256": "21b08f2757e5f9f6d3be31eb98acfa26f07c8e7694a0456156481b596bad88fc",
+      "templates": []
+    },
+    {
+      "path": "tests/osaka/eip7934_block_rlp_limit/test_max_block_rlp_size.py",
+      "sha256": "e5a5ec09a82379e5252842de4fdfac8300765d6a57a4d7de6cfe35956cd2fe77",
+      "templates": [
+        {
+          "line": 433,
+          "name": "test_block_at_rlp_size_limit_boundary"
+        },
+        {
+          "line": 488,
+          "name": "test_block_rlp_size_at_limit_with_all_typed_transactions"
+        },
+        {
+          "line": 528,
+          "name": "test_block_at_rlp_limit_with_logs"
+        },
+        {
+          "line": 571,
+          "name": "test_block_at_rlp_limit_with_withdrawals"
+        },
+        {
+          "line": 640,
+          "name": "test_fork_transition_block_rlp_limit"
+        }
+      ]
+    },
+    {
+      "path": "tests/osaka/eip7939_count_leading_zeros/__init__.py",
+      "sha256": "9a95b5d01f64591a5bc38c5203a74494cb6f94f1bb295fb0b56eb342339481fd",
+      "templates": []
+    },
+    {
+      "path": "tests/osaka/eip7939_count_leading_zeros/spec.py",
+      "sha256": "9aebf8a41f428647a66d5c0ff7eae8d56767c22f1989debe7c9c1b64d516422a",
+      "templates": []
+    },
+    {
+      "path": "tests/osaka/eip7939_count_leading_zeros/test_count_leading_zeros.py",
+      "sha256": "eedd36bb9d0d9865fb8b8f8ee63136e37999be3d681b8ae09f79207e0f41a81e",
+      "templates": [
+        {
+          "line": 88,
+          "name": "test_clz_opcode_scenarios"
+        },
+        {
+          "line": 125,
+          "name": "test_clz_gas_cost"
+        },
+        {
+          "line": 154,
+          "name": "test_clz_gas_cost_boundary"
+        },
+        {
+          "line": 188,
+          "name": "test_clz_stack_underflow"
+        },
+        {
+          "line": 216,
+          "name": "test_clz_stack_not_overflow"
+        },
+        {
+          "line": 242,
+          "name": "test_clz_push_operation_same_value"
+        },
+        {
+          "line": 276,
+          "name": "test_clz_fork_transition"
+        },
+        {
+          "line": 352,
+          "name": "test_clz_jump_operation"
+        },
+        {
+          "line": 406,
+          "name": "test_clz_from_set_code"
+        },
+        {
+          "line": 454,
+          "name": "test_clz_code_copy_operation"
+        },
+        {
+          "line": 504,
+          "name": "test_clz_with_memory_operation"
+        },
+        {
+          "line": 557,
+          "name": "test_clz_initcode_context"
+        },
+        {
+          "line": 588,
+          "name": "test_clz_initcode_create"
+        },
+        {
+          "line": 650,
+          "name": "test_clz_call_operation"
+        }
+      ]
+    },
+    {
+      "path": "tests/osaka/eip7951_p256verify_precompiles/__init__.py",
+      "sha256": "3706f2b572a58a5a609d8a28da925248925a42949620cccca71fe0ff96e35d26",
+      "templates": []
+    },
+    {
+      "path": "tests/osaka/eip7951_p256verify_precompiles/conftest.py",
+      "sha256": "99fcfe09dd546633c0637fae1189e3a8db23ec0aa8781a3829ee78b091560880",
+      "templates": []
+    },
+    {
+      "path": "tests/osaka/eip7951_p256verify_precompiles/helpers.py",
+      "sha256": "4432f6c9ad5ec0d83b962b66fcc704ebc388936d08a80c542e75937ede2bc46e",
+      "templates": []
+    },
+    {
+      "path": "tests/osaka/eip7951_p256verify_precompiles/spec.py",
+      "sha256": "2185f088485b3cf2b3f6d87ed4eec1596b28acd925777e37c5aea85a058a17af",
+      "templates": []
+    },
+    {
+      "path": "tests/osaka/eip7951_p256verify_precompiles/test_p256verify.py",
+      "sha256": "e648aa94b099dbd458af24ac583e596403c3fd1ebcd8264958527ef32d6207d0",
+      "templates": [
+        {
+          "line": 46,
+          "name": "test_wycheproof_valid"
+        },
+        {
+          "line": 66,
+          "name": "test_wycheproof_invalid"
+        },
+        {
+          "line": 88,
+          "name": "test_wycheproof_extra"
+        },
+        {
+          "line": 220,
+          "name": "test_valid"
+        },
+        {
+          "line": 687,
+          "name": "test_invalid"
+        },
+        {
+          "line": 728,
+          "name": "test_gas"
+        },
+        {
+          "line": 755,
+          "name": "test_call_types"
+        },
+        {
+          "line": 777,
+          "name": "test_precompile_as_tx_entry_point"
+        },
+        {
+          "line": 799,
+          "name": "test_precompile_will_return_success_with_tx_value"
+        },
+        {
+          "line": 900,
+          "name": "test_modular_comparison"
+        },
+        {
+          "line": 930,
+          "name": "test_contract_creation_transaction"
+        },
+        {
+          "line": 993,
+          "name": "test_contract_initcode"
+        }
+      ]
+    },
+    {
+      "path": "tests/osaka/eip7951_p256verify_precompiles/test_p256verify_before_fork.py",
+      "sha256": "06572f8d00f284c4774460c115b0d29d039f94e8bd5f0ddc42dccc9951c96b73",
+      "templates": [
+        {
+          "line": 53,
+          "name": "test_precompile_before_fork"
+        }
+      ]
+    },
+    {
+      "path": "tests/paris/__init__.py",
+      "sha256": "4db36f9dc1c7efd77942edf388350d085a33cf7388e205399efdf2f20c8e3ea3",
+      "templates": []
+    },
+    {
+      "path": "tests/paris/eip7610_create_collision/__init__.py",
+      "sha256": "62ae71ba9a87b614f57ebe95722d2ab15a26207c23d7a8b5a8eeaa9fd62041d9",
+      "templates": []
+    },
+    {
+      "path": "tests/paris/eip7610_create_collision/test_initcollision.py",
+      "sha256": "9ef8a27886c0396984ddf6999387ea745bb4da9a7d2cbc442c485dbff3d36346",
+      "templates": [
+        {
+          "line": 59,
+          "name": "test_init_collision_create_tx"
+        },
+        {
+          "line": 102,
+          "name": "test_init_collision_create_opcode"
+        }
+      ]
+    },
+    {
+      "path": "tests/paris/security/__init__.py",
+      "sha256": "d6f6e0016841d96c19e9c7b3c7fb20edba39296bd20e5ce75dedf1d5c39577b3",
+      "templates": []
+    },
+    {
+      "path": "tests/paris/security/test_selfdestruct_balance_bug.py",
+      "sha256": "9990d71241e02d812c4e84a1b7470cdfbcacd101b6d1f2eb4b32558e8cc5c75f",
+      "templates": [
+        {
+          "line": 32,
+          "name": "test_tx_selfdestruct_balance_bug"
+        }
+      ]
+    },
+    {
+      "path": "tests/prague/__init__.py",
+      "sha256": "da7c8e0d8286605a8ce1a0ec43597ccf5f7ae6410908d9925097b5c315a9a2e9",
+      "templates": []
+    },
+    {
+      "path": "tests/prague/eip2537_bls_12_381_precompiles/__init__.py",
+      "sha256": "fcdb01f52bab31ee1666fcdc0cd24fceb937c279124fd74ec48c5f2b89ce9886",
+      "templates": []
+    },
+    {
+      "path": "tests/prague/eip2537_bls_12_381_precompiles/conftest.py",
+      "sha256": "b673f6196eb36e42eb2d4c39ad5f3d627d9f64574e1e72588bcf81199da24d70",
+      "templates": []
+    },
+    {
+      "path": "tests/prague/eip2537_bls_12_381_precompiles/helpers.py",
+      "sha256": "f368e1780762b3008a06e9b799694a582b9ef9b6896779785195e44c4548901d",
+      "templates": []
+    },
+    {
+      "path": "tests/prague/eip2537_bls_12_381_precompiles/spec.py",
+      "sha256": "f416f052ba618089285df973841e632f656e6df32de8c7d93de64afbdcd74ac8",
+      "templates": []
+    },
+    {
+      "path": "tests/prague/eip2537_bls_12_381_precompiles/test_bls12_g1add.py",
+      "sha256": "f77d97f69a372ba393c43ff0ad059972b60e5f7a1b6553d182e830d9f191113f",
+      "templates": [
+        {
+          "line": 205,
+          "name": "test_valid"
+        },
+        {
+          "line": 390,
+          "name": "test_invalid"
+        },
+        {
+          "line": 422,
+          "name": "test_gas"
+        },
+        {
+          "line": 460,
+          "name": "test_call_types"
+        }
+      ]
+    },
+    {
+      "path": "tests/prague/eip2537_bls_12_381_precompiles/test_bls12_g1msm.py",
+      "sha256": "dcfa179bd050237d7046f518b46b0580ca71e4cbfb8afc1b8a18d335ab04dfd8",
+      "templates": [
+        {
+          "line": 91,
+          "name": "test_valid"
+        },
+        {
+          "line": 213,
+          "name": "test_invalid"
+        },
+        {
+          "line": 252,
+          "name": "test_call_types"
+        }
+      ]
+    },
+    {
+      "path": "tests/prague/eip2537_bls_12_381_precompiles/test_bls12_g1mul.py",
+      "sha256": "03c361def77d65902de69551ff639cc9f7165451e1aab6d42fe47d518fab71f6",
+      "templates": [
+        {
+          "line": 135,
+          "name": "test_valid"
+        },
+        {
+          "line": 347,
+          "name": "test_invalid"
+        },
+        {
+          "line": 379,
+          "name": "test_gas"
+        },
+        {
+          "line": 417,
+          "name": "test_call_types"
+        }
+      ]
+    },
+    {
+      "path": "tests/prague/eip2537_bls_12_381_precompiles/test_bls12_g2add.py",
+      "sha256": "483aa1daa4fd39b9d9c91a17687a27646b80b33a3096dcd9e193cfd98ba46d49",
+      "templates": [
+        {
+          "line": 205,
+          "name": "test_valid"
+        },
+        {
+          "line": 420,
+          "name": "test_invalid"
+        },
+        {
+          "line": 452,
+          "name": "test_gas"
+        },
+        {
+          "line": 490,
+          "name": "test_call_types"
+        }
+      ]
+    },
+    {
+      "path": "tests/prague/eip2537_bls_12_381_precompiles/test_bls12_g2msm.py",
+      "sha256": "554ff3d243d0f56eb2be001f022bb520c1561817e814f09f6f73bc8344077b8b",
+      "templates": [
+        {
+          "line": 93,
+          "name": "test_valid"
+        },
+        {
+          "line": 239,
+          "name": "test_invalid"
+        },
+        {
+          "line": 277,
+          "name": "test_call_types"
+        }
+      ]
+    },
+    {
+      "path": "tests/prague/eip2537_bls_12_381_precompiles/test_bls12_g2mul.py",
+      "sha256": "5988a0ea4b0af9686192f455cec5a0921cea80820c5a6336a74d99c4012477e3",
+      "templates": [
+        {
+          "line": 140,
+          "name": "test_valid"
+        },
+        {
+          "line": 363,
+          "name": "test_invalid"
+        },
+        {
+          "line": 395,
+          "name": "test_gas"
+        },
+        {
+          "line": 433,
+          "name": "test_call_types"
+        }
+      ]
+    },
+    {
+      "path": "tests/prague/eip2537_bls_12_381_precompiles/test_bls12_map_fp2_to_g2.py",
+      "sha256": "06c4a19dab7cbaeebcdae1084315c869b4fb7a7d87fdecf8bafad052f19fa79c",
+      "templates": [
+        {
+          "line": 76,
+          "name": "test_valid"
+        },
+        {
+          "line": 99,
+          "name": "test_isogeny_kernel_values"
+        },
+        {
+          "line": 160,
+          "name": "test_invalid"
+        },
+        {
+          "line": 192,
+          "name": "test_gas"
+        },
+        {
+          "line": 225,
+          "name": "test_call_types"
+        }
+      ]
+    },
+    {
+      "path": "tests/prague/eip2537_bls_12_381_precompiles/test_bls12_map_fp_to_g1.py",
+      "sha256": "2b4a9a1b029f9cdc623c86af8ed0a8fb26908f30fcf22eda1da1422a0f5c1d7c",
+      "templates": [
+        {
+          "line": 61,
+          "name": "test_valid"
+        },
+        {
+          "line": 84,
+          "name": "test_isogeny_kernel_values"
+        },
+        {
+          "line": 132,
+          "name": "test_invalid"
+        },
+        {
+          "line": 164,
+          "name": "test_gas"
+        },
+        {
+          "line": 197,
+          "name": "test_call_types"
+        }
+      ]
+    },
+    {
+      "path": "tests/prague/eip2537_bls_12_381_precompiles/test_bls12_pairing.py",
+      "sha256": "6683c36b1c9c3d98f6148a3b97150ce6f89beea19441e8c75ac6e7b9a00060ef",
+      "templates": [
+        {
+          "line": 125,
+          "name": "test_valid"
+        },
+        {
+          "line": 143,
+          "name": "test_valid_multi_inf"
+        },
+        {
+          "line": 325,
+          "name": "test_invalid"
+        },
+        {
+          "line": 343,
+          "name": "test_invalid_multi_inf"
+        },
+        {
+          "line": 409,
+          "name": "test_gas"
+        },
+        {
+          "line": 442,
+          "name": "test_call_types"
+        }
+      ]
+    },
+    {
+      "path": "tests/prague/eip2537_bls_12_381_precompiles/test_bls12_precompiles_before_fork.py",
+      "sha256": "7680097c4d38a5b85f18ded2a8d014bf015329e9b39185a9151330c26b438f42",
+      "templates": [
+        {
+          "line": 62,
+          "name": "test_precompile_before_fork"
+        }
+      ]
+    },
+    {
+      "path": "tests/prague/eip2537_bls_12_381_precompiles/test_bls12_variable_length_input_contracts.py",
+      "sha256": "ab0e6c094fe86135f641f90606d12544cf4ed97c5a1cd2f3a79f764dcabd143f",
+      "templates": [
+        {
+          "line": 258,
+          "name": "test_valid_gas_g1msm"
+        },
+        {
+          "line": 292,
+          "name": "test_invalid_zero_gas_g1msm"
+        },
+        {
+          "line": 317,
+          "name": "test_invalid_gas_g1msm"
+        },
+        {
+          "line": 351,
+          "name": "test_invalid_zero_length_g1msm"
+        },
+        {
+          "line": 382,
+          "name": "test_invalid_length_g1msm"
+        },
+        {
+          "line": 414,
+          "name": "test_valid_gas_g2msm"
+        },
+        {
+          "line": 448,
+          "name": "test_invalid_zero_gas_g2msm"
+        },
+        {
+          "line": 473,
+          "name": "test_invalid_gas_g2msm"
+        },
+        {
+          "line": 507,
+          "name": "test_invalid_zero_length_g2msm"
+        },
+        {
+          "line": 538,
+          "name": "test_invalid_length_g2msm"
+        },
+        {
+          "line": 568,
+          "name": "test_valid_gas_pairing"
+        },
+        {
+          "line": 601,
+          "name": "test_invalid_zero_gas_pairing"
+        },
+        {
+          "line": 624,
+          "name": "test_invalid_gas_pairing"
+        },
+        {
+          "line": 658,
+          "name": "test_invalid_zero_length_pairing"
+        },
+        {
+          "line": 689,
+          "name": "test_invalid_length_pairing"
+        }
+      ]
+    },
+    {
+      "path": "tests/prague/eip2537_bls_12_381_precompiles/test_eip_mainnet.py",
+      "sha256": "d876dcfe1009ec089ec53d1b18f2e4476c058cc1a7b260eed4eba01bf5eefa68",
+      "templates": [
+        {
+          "line": 79,
+          "name": "test_eip_2537"
+        }
+      ]
+    },
+    {
+      "path": "tests/prague/eip2935_historical_block_hashes_from_state/__init__.py",
+      "sha256": "915ff73d5a8f90de94176866f691d32971c2512af7eb1c5235e9e71e12155535",
+      "templates": []
+    },
+    {
+      "path": "tests/prague/eip2935_historical_block_hashes_from_state/spec.py",
+      "sha256": "ff7910c700c0620a98eb509dc85f2ab8f42fe55aff5ee7d01259a1362db8d9c8",
+      "templates": []
+    },
+    {
+      "path": "tests/prague/eip2935_historical_block_hashes_from_state/test_block_hashes.py",
+      "sha256": "499f2f1b0fd1affab540e545d484f4dce7db46545393d72d549f440cfddf5db5",
+      "templates": [
+        {
+          "line": 106,
+          "name": "test_block_hashes_history_at_transition"
+        },
+        {
+          "line": 226,
+          "name": "test_block_hashes_history"
+        },
+        {
+          "line": 324,
+          "name": "test_block_hashes_call_opcodes"
+        },
+        {
+          "line": 384,
+          "name": "test_invalid_history_contract_calls"
+        },
+        {
+          "line": 451,
+          "name": "test_invalid_history_contract_calls_input_size"
+        }
+      ]
+    },
+    {
+      "path": "tests/prague/eip2935_historical_block_hashes_from_state/test_contract_deployment.py",
+      "sha256": "86009c331b9aae1685363ea5d95c6528dc911a53fd8a99eca67c32b523ab632b",
+      "templates": [
+        {
+          "line": 38,
+          "name": "test_system_contract_deployment"
+        }
+      ]
+    },
+    {
+      "path": "tests/prague/eip2935_historical_block_hashes_from_state/test_eip_mainnet.py",
+      "sha256": "796288f50a5cdace13122d1798fdaf26e05c6d33889853db004b24e43fbe9b21",
+      "templates": [
+        {
+          "line": 19,
+          "name": "test_eip_2935"
+        }
+      ]
+    },
+    {
+      "path": "tests/prague/eip6110_deposits/__init__.py",
+      "sha256": "435088e9379bf0af72554c7b3a7809aaf3ad75c8047dd05aa5f407bd45946bb0",
+      "templates": []
+    },
+    {
+      "path": "tests/prague/eip6110_deposits/conftest.py",
+      "sha256": "6bfc5695469bddd06113efaa5a336e85a342cc664fb27d4abfeb93a294672d3f",
+      "templates": []
+    },
+    {
+      "path": "tests/prague/eip6110_deposits/helpers.py",
+      "sha256": "153283e57ef806d89244856d2df9e4ca2f1a24ca8c5dcf43b12959ceed390aa9",
+      "templates": []
+    },
+    {
+      "path": "tests/prague/eip6110_deposits/spec.py",
+      "sha256": "0bc7bc0306c12867b84132aacc89d8daf3d496378a2fc61b3d2c9e30ecaa7d9a",
+      "templates": []
+    },
+    {
+      "path": "tests/prague/eip6110_deposits/test_deposits.py",
+      "sha256": "8ffb7270390a96b3e535d2be9e82f2b19588e79077787565b2788a7c151a17ab",
+      "templates": [
+        {
+          "line": 921,
+          "name": "test_deposit"
+        },
+        {
+          "line": 1183,
+          "name": "test_deposit_negative"
+        }
+      ]
+    },
+    {
+      "path": "tests/prague/eip6110_deposits/test_eip_mainnet.py",
+      "sha256": "5c76e3b6592fbd31f1e0228f58f952c9a9d00cb2a99b40872a4b3efe15e330bd",
+      "templates": [
+        {
+          "line": 47,
+          "name": "test_eip_6110"
+        }
+      ]
+    },
+    {
+      "path": "tests/prague/eip6110_deposits/test_modified_contract.py",
+      "sha256": "d9946bf721c5ae2e21ee5629fee1f95a867e7d28449b4c13e772a0753cb9a9dc",
+      "templates": [
+        {
+          "line": 79,
+          "name": "test_extra_logs"
+        },
+        {
+          "line": 182,
+          "name": "test_invalid_layout"
+        },
+        {
+          "line": 245,
+          "name": "test_invalid_log_length"
+        }
+      ]
+    },
+    {
+      "path": "tests/prague/eip7002_el_triggerable_withdrawals/__init__.py",
+      "sha256": "74678c71f36e7960428a45d7795f8739a8020222fc945a9efbd7d09658dab4be",
+      "templates": []
+    },
+    {
+      "path": "tests/prague/eip7002_el_triggerable_withdrawals/conftest.py",
+      "sha256": "d6750c4c876779f85a651a534a0bf76eebc85f929e8e612dfe35577b5be596a6",
+      "templates": []
+    },
+    {
+      "path": "tests/prague/eip7002_el_triggerable_withdrawals/helpers.py",
+      "sha256": "25266cc17ee6e8faee1e8dc3a171da5258d78ffcb3ef18bb7686d50703015fe7",
+      "templates": []
+    },
+    {
+      "path": "tests/prague/eip7002_el_triggerable_withdrawals/spec.py",
+      "sha256": "7bd266089cfa49915fb01dee99eabbd2adf21a495e2b024ac035e8e065350aa9",
+      "templates": []
+    },
+    {
+      "path": "tests/prague/eip7002_el_triggerable_withdrawals/test_contract_deployment.py",
+      "sha256": "7e8867cb8c340d317fa9171049eb93a2ba095d8acf8400877c48f8d583347038",
+      "templates": [
+        {
+          "line": 38,
+          "name": "test_system_contract_deployment"
+        }
+      ]
+    },
+    {
+      "path": "tests/prague/eip7002_el_triggerable_withdrawals/test_eip_mainnet.py",
+      "sha256": "355576ecdac690a66695169b39e1879b06c4a04038271a099a4330c23f008d8e",
+      "templates": [
+        {
+          "line": 45,
+          "name": "test_eip_7002"
+        }
+      ]
+    },
+    {
+      "path": "tests/prague/eip7002_el_triggerable_withdrawals/test_modified_withdrawal_contract.py",
+      "sha256": "84df5fd3eaf35344a8aa4a7ff12df132a781d11cad391d1a4269cdb2878a059b",
+      "templates": [
+        {
+          "line": 87,
+          "name": "test_extra_withdrawals"
+        },
+        {
+          "line": 147,
+          "name": "test_system_contract_errors"
+        }
+      ]
+    },
+    {
+      "path": "tests/prague/eip7002_el_triggerable_withdrawals/test_withdrawal_requests.py",
+      "sha256": "6d1b7bd2c51f5998c2dae388c7c863e4bdfc74f08510ae37beb463c7434f46c1",
+      "templates": [
+        {
+          "line": 632,
+          "name": "test_withdrawal_requests"
+        },
+        {
+          "line": 808,
+          "name": "test_withdrawal_requests_negative"
+        }
+      ]
+    },
+    {
+      "path": "tests/prague/eip7002_el_triggerable_withdrawals/test_withdrawal_requests_during_fork.py",
+      "sha256": "972efba0eada87ba5f33c134776947e656c1d394c222d7c2188f7925597b4b9e",
+      "templates": [
+        {
+          "line": 88,
+          "name": "test_withdrawal_requests_during_fork"
+        }
+      ]
+    },
+    {
+      "path": "tests/prague/eip7251_consolidations/__init__.py",
+      "sha256": "123fa6ac960ffcd634fba21f9d29b8ccc636b9d6d6159abfe0289c9c403269dd",
+      "templates": []
+    },
+    {
+      "path": "tests/prague/eip7251_consolidations/conftest.py",
+      "sha256": "7b9400e4ce604c2935d2b97e56f0d8aa92b06d915e36f3799e5c30b372ad270d",
+      "templates": []
+    },
+    {
+      "path": "tests/prague/eip7251_consolidations/helpers.py",
+      "sha256": "72eaa49a703e066b290b41df1de94634c5302b8be4094a55134955475da3504b",
+      "templates": []
+    },
+    {
+      "path": "tests/prague/eip7251_consolidations/spec.py",
+      "sha256": "586445f5980e78bb5577c5e5a63e4cc655ac4025700fdba172b761de514df88e",
+      "templates": []
+    },
+    {
+      "path": "tests/prague/eip7251_consolidations/test_consolidations.py",
+      "sha256": "64bc299e029d7111ec26afe46f05cf2aee8327fcb3d3dc4f349410d4f12c5167",
+      "templates": [
+        {
+          "line": 660,
+          "name": "test_consolidation_requests"
+        },
+        {
+          "line": 858,
+          "name": "test_consolidation_requests_negative"
+        }
+      ]
+    },
+    {
+      "path": "tests/prague/eip7251_consolidations/test_consolidations_during_fork.py",
+      "sha256": "3692f6a5d4fafa20635075598d06481e1a388a86643208c44581ad080443c105",
+      "templates": [
+        {
+          "line": 88,
+          "name": "test_consolidation_requests_during_fork"
+        }
+      ]
+    },
+    {
+      "path": "tests/prague/eip7251_consolidations/test_contract_deployment.py",
+      "sha256": "dd45c963001ba6ca0b1a06b3c7985056a6e3e3ae7d5106a558be977cfb76554d",
+      "templates": [
+        {
+          "line": 38,
+          "name": "test_system_contract_deployment"
+        }
+      ]
+    },
+    {
+      "path": "tests/prague/eip7251_consolidations/test_eip_mainnet.py",
+      "sha256": "12d3a896bcd2f053b3c36523faaa5e75a14910a25b2e2f395325a72e8c9a71ba",
+      "templates": [
+        {
+          "line": 45,
+          "name": "test_eip_7251"
+        }
+      ]
+    },
+    {
+      "path": "tests/prague/eip7251_consolidations/test_modified_consolidation_contract.py",
+      "sha256": "68fbed4c3229020110f48663925e8a168c14be8c36923167c8df92b10ba99ac2",
+      "templates": [
+        {
+          "line": 87,
+          "name": "test_extra_consolidations"
+        },
+        {
+          "line": 146,
+          "name": "test_system_contract_errors"
+        }
+      ]
+    },
+    {
+      "path": "tests/prague/eip7623_increase_calldata_cost/__init__.py",
+      "sha256": "f399fb7f58cf112927b02d73a774e21ee7c227fb366a7e35f4e9d6f82cafee86",
+      "templates": []
+    },
+    {
+      "path": "tests/prague/eip7623_increase_calldata_cost/conftest.py",
+      "sha256": "672fb500f6381d2b112adaebd6d9727dbe863c2a4a549862cda23cd4e24d129f",
+      "templates": []
+    },
+    {
+      "path": "tests/prague/eip7623_increase_calldata_cost/helpers.py",
+      "sha256": "1d172dc499c1045f4b92d930b3d7f43bccf00485a29b2ee00efd9b35a03a217f",
+      "templates": []
+    },
+    {
+      "path": "tests/prague/eip7623_increase_calldata_cost/spec.py",
+      "sha256": "fb9d71c3b39c5ea2dfef240aa3c7ab6398746eda2504fbabdb809c96cd60d95c",
+      "templates": []
+    },
+    {
+      "path": "tests/prague/eip7623_increase_calldata_cost/test_eip_mainnet.py",
+      "sha256": "3a5d0c780d79be824698cc68d74ddd1a53c2b8f78c7507e1a268f3b929946612",
+      "templates": [
+        {
+          "line": 95,
+          "name": "test_eip_7623"
+        }
+      ]
+    },
+    {
+      "path": "tests/prague/eip7623_increase_calldata_cost/test_execution_gas.py",
+      "sha256": "4e950f9077516bfe16a7c68a3ed2b62dfa864658981f825bbc8a058d0250a4df",
+      "templates": [
+        {
+          "line": 80,
+          "name": "test_full_gas_consumption"
+        },
+        {
+          "line": 152,
+          "name": "test_gas_consumption_below_data_floor"
+        }
+      ]
+    },
+    {
+      "path": "tests/prague/eip7623_increase_calldata_cost/test_refunds.py",
+      "sha256": "692fa2c2688b6440e57794492cc1b4e1c311f3a48f5fafa42850c8d8480e137a",
+      "templates": [
+        {
+          "line": 270,
+          "name": "test_gas_refunds_from_data_floor"
+        }
+      ]
+    },
+    {
+      "path": "tests/prague/eip7623_increase_calldata_cost/test_transaction_validity.py",
+      "sha256": "e741025c38a49532c5336d99c64bcbbbc66e1bed692e0ed6d253f08a8d2f23b5",
+      "templates": [
+        {
+          "line": 79,
+          "name": "test_transaction_validity_type_0"
+        },
+        {
+          "line": 144,
+          "name": "test_transaction_validity_type_1_type_2"
+        },
+        {
+          "line": 222,
+          "name": "test_transaction_validity_type_3"
+        },
+        {
+          "line": 292,
+          "name": "test_transaction_validity_type_4"
+        }
+      ]
+    },
+    {
+      "path": "tests/prague/eip7685_general_purpose_el_requests/__init__.py",
+      "sha256": "2a2c5a9f3c8feb5433c0be802de42c99ced5d84e42399aa8e29a6286e0255535",
+      "templates": []
+    },
+    {
+      "path": "tests/prague/eip7685_general_purpose_el_requests/conftest.py",
+      "sha256": "1bfb344d28b54edee84c36d3af10ff9561700abfedd4c2c3e651dbfd26fad48f",
+      "templates": []
+    },
+    {
+      "path": "tests/prague/eip7685_general_purpose_el_requests/spec.py",
+      "sha256": "bd6527ae91e6eb20679a2091760c5b91959de179fbd156ffa83000bd6631d5ba",
+      "templates": []
+    },
+    {
+      "path": "tests/prague/eip7685_general_purpose_el_requests/test_multi_type_requests.py",
+      "sha256": "b94de7dff95a1cd863d8506a79843c30dea1ff65dbbfff757425a63f4833410d",
+      "templates": [
+        {
+          "line": 331,
+          "name": "test_valid_multi_type_requests"
+        },
+        {
+          "line": 352,
+          "name": "test_valid_multi_type_request_from_same_tx"
+        },
+        {
+          "line": 637,
+          "name": "test_invalid_multi_type_requests"
+        },
+        {
+          "line": 669,
+          "name": "test_invalid_multi_type_requests_engine"
+        }
+      ]
+    },
+    {
+      "path": "tests/prague/eip7702_set_code_tx/__init__.py",
+      "sha256": "b27af9b7f501e6a5139a386c918e58d60e33033fb8c46d6f32e26589a1b7bf1d",
+      "templates": []
+    },
+    {
+      "path": "tests/prague/eip7702_set_code_tx/helpers.py",
+      "sha256": "cadd5fc5d5947350fbae9649cfade323f029606f7e44b63d52193c54dd2f5f42",
+      "templates": []
+    },
+    {
+      "path": "tests/prague/eip7702_set_code_tx/spec.py",
+      "sha256": "0f224e0a6adf9b616d45aaa154e73c3ace5f18fc905ae18d56d420e77ff2148b",
+      "templates": []
+    },
+    {
+      "path": "tests/prague/eip7702_set_code_tx/test_calls.py",
+      "sha256": "7fa52c9cf6546f0d367e96cf53b25eb06916fbc385ec0c84c6ac1f1e2a8da7c4",
+      "templates": [
+        {
+          "line": 82,
+          "name": "test_delegate_call_targets"
+        }
+      ]
+    },
+    {
+      "path": "tests/prague/eip7702_set_code_tx/test_eip_mainnet.py",
+      "sha256": "160070f25af082740e201f7e9f69fad5d85d63a037c2bebe9a96a08352ef52f0",
+      "templates": [
+        {
+          "line": 26,
+          "name": "test_eip_7702"
+        }
+      ]
+    },
+    {
+      "path": "tests/prague/eip7702_set_code_tx/test_gas.py",
+      "sha256": "7f3e041360708f68ff09ce0fe4c498cae9a963b18de219546d69737c2cdab195",
+      "templates": [
+        {
+          "line": 757,
+          "name": "test_gas_cost"
+        },
+        {
+          "line": 860,
+          "name": "test_account_warming"
+        },
+        {
+          "line": 1022,
+          "name": "test_intrinsic_gas_cost"
+        },
+        {
+          "line": 1070,
+          "name": "test_self_set_code_cost"
+        },
+        {
+          "line": 1125,
+          "name": "test_call_to_pre_authorized_oog"
+        }
+      ]
+    },
+    {
+      "path": "tests/prague/eip7702_set_code_tx/test_invalid_tx.py",
+      "sha256": "86330dd2235e731feb6f3c5f03ddcea6b8af9cc4cad9bb63cf5ba12b256497bd",
+      "templates": [
+        {
+          "line": 63,
+          "name": "test_empty_authorization_list"
+        },
+        {
+          "line": 98,
+          "name": "test_invalid_auth_signature"
+        },
+        {
+          "line": 151,
+          "name": "test_invalid_tx_invalid_auth_chain_id"
+        },
+        {
+          "line": 194,
+          "name": "test_invalid_tx_invalid_auth_chain_id_encoding"
+        },
+        {
+          "line": 244,
+          "name": "test_invalid_tx_invalid_nonce"
+        },
+        {
+          "line": 292,
+          "name": "test_invalid_tx_invalid_nonce_as_list"
+        },
+        {
+          "line": 335,
+          "name": "test_invalid_tx_invalid_nonce_encoding"
+        },
+        {
+          "line": 392,
+          "name": "test_invalid_tx_invalid_address"
+        },
+        {
+          "line": 436,
+          "name": "test_invalid_tx_invalid_authorization_tuple_extra_element"
+        },
+        {
+          "line": 499,
+          "name": "test_invalid_tx_invalid_authorization_tuple_missing_element"
+        },
+        {
+          "line": 551,
+          "name": "test_invalid_tx_invalid_authorization_tuple_encoded_as_bytes"
+        },
+        {
+          "line": 601,
+          "name": "test_invalid_tx_invalid_rlp_encoding"
+        }
+      ]
+    },
+    {
+      "path": "tests/prague/eip7702_set_code_tx/test_set_code_txs.py",
+      "sha256": "fad8320b448edc7295c5114a223f1e54b539b0bcd56728818d4013936055dc53",
+      "templates": [
+        {
+          "line": 83,
+          "name": "test_self_sponsored_set_code"
+        },
+        {
+          "line": 165,
+          "name": "test_set_code_to_sstore"
+        },
+        {
+          "line": 224,
+          "name": "test_set_code_to_non_empty_storage_non_zero_nonce"
+        },
+        {
+          "line": 277,
+          "name": "test_set_code_to_sstore_then_sload"
+        },
+        {
+          "line": 366,
+          "name": "test_set_code_to_tstore_reentry"
+        },
+        {
+          "line": 424,
+          "name": "test_set_code_to_tstore_available_at_correct_address"
+        },
+        {
+          "line": 495,
+          "name": "test_set_code_to_self_destruct"
+        },
+        {
+          "line": 546,
+          "name": "test_set_code_to_contract_creator"
+        },
+        {
+          "line": 637,
+          "name": "test_set_code_to_self_caller"
+        },
+        {
+          "line": 703,
+          "name": "test_set_code_max_depth_call_stack"
+        },
+        {
+          "line": 768,
+          "name": "test_set_code_call_set_code"
+        },
+        {
+          "line": 855,
+          "name": "test_address_from_set_code"
+        },
+        {
+          "line": 895,
+          "name": "test_tx_into_self_delegating_set_code"
+        },
+        {
+          "line": 932,
+          "name": "test_tx_into_chain_delegating_set_code"
+        },
+        {
+          "line": 974,
+          "name": "test_call_into_self_delegating_set_code"
+        },
+        {
+          "line": 1024,
+          "name": "test_call_into_chain_delegating_set_code"
+        },
+        {
+          "line": 1092,
+          "name": "test_ext_code_on_set_code"
+        },
+        {
+          "line": 1185,
+          "name": "test_ext_code_on_self_set_code"
+        },
+        {
+          "line": 1252,
+          "name": "test_set_code_address_and_authority_warm_state"
+        },
+        {
+          "line": 1340,
+          "name": "test_set_code_address_and_authority_warm_state_call_types"
+        },
+        {
+          "line": 1409,
+          "name": "test_ext_code_on_self_delegating_set_code"
+        },
+        {
+          "line": 1474,
+          "name": "test_ext_code_on_chain_delegating_set_code"
+        },
+        {
+          "line": 1578,
+          "name": "test_self_code_on_set_code"
+        },
+        {
+          "line": 1635,
+          "name": "test_set_code_to_account_deployed_in_same_tx"
+        },
+        {
+          "line": 1753,
+          "name": "test_set_code_to_self_destructing_account_deployed_in_same_tx"
+        },
+        {
+          "line": 1855,
+          "name": "test_set_code_multiple_first_valid_authorization_tuples_same_signer"
+        },
+        {
+          "line": 1903,
+          "name": "test_set_code_multiple_valid_authorization_tuples_same_signer_increasing_nonce"
+        },
+        {
+          "line": 1952,
+          "name": "test_set_code_multiple_valid_authorization_tuples_same_signer_increasing_nonce_self_sponsored"
+        },
+        {
+          "line": 2001,
+          "name": "test_set_code_multiple_valid_authorization_tuples_first_invalid_same_signer"
+        },
+        {
+          "line": 2049,
+          "name": "test_set_code_all_invalid_authorization_tuples"
+        },
+        {
+          "line": 2089,
+          "name": "test_set_code_using_chain_specific_id"
+        },
+        {
+          "line": 2152,
+          "name": "test_set_code_using_valid_synthetic_signatures"
+        },
+        {
+          "line": 2237,
+          "name": "test_valid_tx_invalid_auth_signature"
+        },
+        {
+          "line": 2284,
+          "name": "test_signature_s_out_of_range"
+        },
+        {
+          "line": 2356,
+          "name": "test_valid_tx_invalid_chain_id"
+        },
+        {
+          "line": 2452,
+          "name": "test_nonce_validity"
+        },
+        {
+          "line": 2519,
+          "name": "test_nonce_overflow_after_first_authorization"
+        },
+        {
+          "line": 2596,
+          "name": "test_set_code_to_log"
+        },
+        {
+          "line": 2654,
+          "name": "test_set_code_to_precompile"
+        },
+        {
+          "line": 2713,
+          "name": "test_set_code_to_precompile_not_enough_gas_for_precompile_execution"
+        },
+        {
+          "line": 2776,
+          "name": "test_set_code_to_system_contract"
+        },
+        {
+          "line": 2937,
+          "name": "test_eoa_tx_after_set_code"
+        },
+        {
+          "line": 3067,
+          "name": "test_reset_code"
+        },
+        {
+          "line": 3137,
+          "name": "test_contract_create"
+        },
+        {
+          "line": 3165,
+          "name": "test_empty_authorization_list"
+        },
+        {
+          "line": 3201,
+          "name": "test_delegation_clearing"
+        },
+        {
+          "line": 3294,
+          "name": "test_delegation_clearing_tx_to"
+        },
+        {
+          "line": 3355,
+          "name": "test_delegation_clearing_and_set"
+        },
+        {
+          "line": 3422,
+          "name": "test_delegation_clearing_failing_tx"
+        },
+        {
+          "line": 3473,
+          "name": "test_deploying_delegation_designation_contract"
+        },
+        {
+          "line": 3521,
+          "name": "test_creating_delegation_designation_contract"
+        },
+        {
+          "line": 3587,
+          "name": "test_many_delegations"
+        },
+        {
+          "line": 3656,
+          "name": "test_invalid_transaction_after_authorization"
+        },
+        {
+          "line": 3705,
+          "name": "test_authorization_reusing_nonce"
+        },
+        {
+          "line": 3761,
+          "name": "test_set_code_from_account_with_non_delegating_code"
+        },
+        {
+          "line": 3850,
+          "name": "test_set_code_transaction_fee_validations"
+        }
+      ]
+    },
+    {
+      "path": "tests/prague/eip7702_set_code_tx/test_set_code_txs_2.py",
+      "sha256": "b545d34abeee3efd8d1cd51193974d34609a02e40154dd9dd5d493047ef41247",
+      "templates": [
+        {
+          "line": 41,
+          "name": "test_pointer_contract_pointer_loop"
+        },
+        {
+          "line": 97,
+          "name": "test_pointer_to_pointer"
+        },
+        {
+          "line": 141,
+          "name": "test_pointer_normal"
+        },
+        {
+          "line": 203,
+          "name": "test_pointer_measurements"
+        },
+        {
+          "line": 334,
+          "name": "test_call_to_precompile_in_pointer_context"
+        },
+        {
+          "line": 408,
+          "name": "test_pointer_to_precompile"
+        },
+        {
+          "line": 531,
+          "name": "test_gas_diff_pointer_vs_direct_call"
+        },
+        {
+          "line": 735,
+          "name": "test_pointer_call_followed_by_direct_call"
+        },
+        {
+          "line": 818,
+          "name": "test_pointer_to_static"
+        },
+        {
+          "line": 865,
+          "name": "test_static_to_pointer"
+        },
+        {
+          "line": 912,
+          "name": "test_pointer_to_eof"
+        },
+        {
+          "line": 958,
+          "name": "test_pointer_to_static_reentry"
+        },
+        {
+          "line": 1029,
+          "name": "test_contract_storage_to_pointer_with_storage"
+        },
+        {
+          "line": 1136,
+          "name": "test_pointer_reentry"
+        },
+        {
+          "line": 1243,
+          "name": "test_eoa_init_as_pointer"
+        },
+        {
+          "line": 1274,
+          "name": "test_call_pointer_to_created_from_create_after_oog_call_again"
+        },
+        {
+          "line": 1386,
+          "name": "test_pointer_reverts"
+        },
+        {
+          "line": 1484,
+          "name": "test_double_auth"
+        },
+        {
+          "line": 1574,
+          "name": "test_pointer_resets_an_empty_code_account_with_storage"
+        },
+        {
+          "line": 1745,
+          "name": "test_set_code_type_tx_pre_fork"
+        },
+        {
+          "line": 1802,
+          "name": "test_delegation_replacement_call_previous_contract"
+        }
+      ]
+    },
+    {
+      "path": "tests/shanghai/__init__.py",
+      "sha256": "c7a2c6858c31db7f4f4dcbf00bc69a494cf59f4c201138d931f16e1f7cd162b1",
+      "templates": []
+    },
+    {
+      "path": "tests/shanghai/eip3651_warm_coinbase/__init__.py",
+      "sha256": "d9478a6ac6a764056910d73cde9c3cd4eb132e4dc6d2c0a9c16138777cec14de",
+      "templates": []
+    },
+    {
+      "path": "tests/shanghai/eip3651_warm_coinbase/conftest.py",
+      "sha256": "55aa6928d8056eac98fd8635676a2b59febd24fa8112e282a0cb2d478a415bab",
+      "templates": []
+    },
+    {
+      "path": "tests/shanghai/eip3651_warm_coinbase/spec.py",
+      "sha256": "68962891634e13504df6b6af22bee92fe853316b0ab64dc99b18179f59b2676b",
+      "templates": []
+    },
+    {
+      "path": "tests/shanghai/eip3651_warm_coinbase/test_warm_coinbase.py",
+      "sha256": "ec31b655cce6ddf9c859c18489b64a175d1821e19056c86ad20bb31eab6c2240",
+      "templates": [
+        {
+          "line": 69,
+          "name": "test_warm_coinbase_call_out_of_gas"
+        },
+        {
+          "line": 207,
+          "name": "test_warm_coinbase_gas_usage"
+        }
+      ]
+    },
+    {
+      "path": "tests/shanghai/eip3855_push0/__init__.py",
+      "sha256": "b966e60d32a825476c305d86730eb7811d78119135014b951867ab923390ae49",
+      "templates": []
+    },
+    {
+      "path": "tests/shanghai/eip3855_push0/conftest.py",
+      "sha256": "2969d174a693daf7d3425e460d2926793487a0e511bf2b3a1c6fe749bbbe33c1",
+      "templates": []
+    },
+    {
+      "path": "tests/shanghai/eip3855_push0/spec.py",
+      "sha256": "1b65040d525fc7dd08529fb6888d40220fd3ffcb3533913b8394fc56c6f4e19d",
+      "templates": []
+    },
+    {
+      "path": "tests/shanghai/eip3855_push0/test_push0.py",
+      "sha256": "b8fc59f24d05b8ae0862c3daed86b29b0843d035f0be809889b571d3e2074dea",
+      "templates": [
+        {
+          "line": 76,
+          "name": "test_push0_contracts"
+        },
+        {
+          "line": 140,
+          "name": "test_push0_contract_during_call_contexts"
+        }
+      ]
+    },
+    {
+      "path": "tests/shanghai/eip3860_initcode/__init__.py",
+      "sha256": "65727d3fb9c7a8a8604ae15f15d59c92978b78777e355909772dad44719a57ca",
+      "templates": []
+    },
+    {
+      "path": "tests/shanghai/eip3860_initcode/conftest.py",
+      "sha256": "cdc1ceb944a8a94aee6301505de5bafe4af1687034fbcf9e2e65f81d47131791",
+      "templates": []
+    },
+    {
+      "path": "tests/shanghai/eip3860_initcode/helpers.py",
+      "sha256": "8ecbb5214eae94c7c1d409a9efcb23e3492f4d25b9e76c5f7ea763a3c3f1dd31",
+      "templates": []
+    },
+    {
+      "path": "tests/shanghai/eip3860_initcode/spec.py",
+      "sha256": "496276dba0a22830e5544aa935a5aec31698515eee093904b08dbdc1172acb7f",
+      "templates": []
+    },
+    {
+      "path": "tests/shanghai/eip3860_initcode/test_initcode.py",
+      "sha256": "099c05ac69924491d510c2a05d74e22be33e20f25c7f11013fc601d6bbbee77e",
+      "templates": [
+        {
+          "line": 126,
+          "name": "test_contract_creating_tx"
+        },
+        {
+          "line": 343,
+          "name": "test_gas_usage"
+        },
+        {
+          "line": 506,
+          "name": "test_create_opcode_initcode"
+        }
+      ]
+    },
+    {
+      "path": "tests/shanghai/eip3860_initcode/test_with_eof.py",
+      "sha256": "d82cc4c2406133e22e1c93ff40af62c0e8df974f84faba0eb25174c7931e9d87",
+      "templates": [
+        {
+          "line": 52,
+          "name": "test_legacy_create_edge_code_size"
+        }
+      ]
+    },
+    {
+      "path": "tests/shanghai/eip4895_withdrawals/__init__.py",
+      "sha256": "2a52a63c7b964a7d3662aaa70922c8dddf56a9934e3ceca7136362fbe8034c0c",
+      "templates": []
+    },
+    {
+      "path": "tests/shanghai/eip4895_withdrawals/conftest.py",
+      "sha256": "71eb064f9c5349ac31f20a5f82c5d671fec0e12a5ec1180462784796815829b5",
+      "templates": []
+    },
+    {
+      "path": "tests/shanghai/eip4895_withdrawals/spec.py",
+      "sha256": "1fc121c372063587037e30a834aebd3ee9fd420120d0641c6d50aed6410e08c3",
+      "templates": []
+    },
+    {
+      "path": "tests/shanghai/eip4895_withdrawals/test_withdrawals.py",
+      "sha256": "bdd5dec11b37e6730c68decf821ce19d554615fed310c82e5f5bb9ecf944a44d",
+      "templates": [
+        {
+          "line": 133,
+          "name": "test_use_value_in_contract"
+        },
+        {
+          "line": 188,
+          "name": "test_balance_within_block"
+        },
+        {
+          "line": 317,
+          "name": "test_many_withdrawals"
+        },
+        {
+          "line": 353,
+          "name": "test_self_destructing_account"
+        },
+        {
+          "line": 412,
+          "name": "test_newly_created_contract"
+        },
+        {
+          "line": 457,
+          "name": "test_no_evm_execution"
+        },
+        {
+          "line": 546,
+          "name": "test_zero_amount"
+        },
+        {
+          "line": 653,
+          "name": "test_large_amount"
+        },
+        {
+          "line": 697,
+          "name": "test_withdrawing_to_precompiles"
+        },
+        {
+          "line": 122,
+          "name": "test_use_value_in_tx"
+        },
+        {
+          "line": 295,
+          "name": "test_multiple_withdrawals_same_address"
+        }
+      ]
+    },
+    {
+      "path": "tests/static/__init__.py",
+      "sha256": "0b7043cc814eb23a59b9cc8c4abfd7116a1db4b5f3c6a2c6a9f6aeb6b6a19fab",
+      "templates": []
+    },
+    {
+      "path": "tests/static/state_tests/Cancun/__init__.py",
+      "sha256": "0b7043cc814eb23a59b9cc8c4abfd7116a1db4b5f3c6a2c6a9f6aeb6b6a19fab",
+      "templates": []
+    },
+    {
+      "path": "tests/static/state_tests/Cancun/stEIP1153_transientStorage/__init__.py",
+      "sha256": "0b7043cc814eb23a59b9cc8c4abfd7116a1db4b5f3c6a2c6a9f6aeb6b6a19fab",
+      "templates": []
+    },
+    {
+      "path": "tests/static/state_tests/Cancun/stEIP4844_blobtransactions/__init__.py",
+      "sha256": "0b7043cc814eb23a59b9cc8c4abfd7116a1db4b5f3c6a2c6a9f6aeb6b6a19fab",
+      "templates": []
+    },
+    {
+      "path": "tests/static/state_tests/Cancun/stEIP5656_MCOPY/__init__.py",
+      "sha256": "0b7043cc814eb23a59b9cc8c4abfd7116a1db4b5f3c6a2c6a9f6aeb6b6a19fab",
+      "templates": []
+    },
+    {
+      "path": "tests/static/state_tests/Shanghai/__init__.py",
+      "sha256": "0b7043cc814eb23a59b9cc8c4abfd7116a1db4b5f3c6a2c6a9f6aeb6b6a19fab",
+      "templates": []
+    },
+    {
+      "path": "tests/static/state_tests/Shanghai/stEIP3651_warmcoinbase/__init__.py",
+      "sha256": "0b7043cc814eb23a59b9cc8c4abfd7116a1db4b5f3c6a2c6a9f6aeb6b6a19fab",
+      "templates": []
+    },
+    {
+      "path": "tests/static/state_tests/Shanghai/stEIP3855_push0/__init__.py",
+      "sha256": "0b7043cc814eb23a59b9cc8c4abfd7116a1db4b5f3c6a2c6a9f6aeb6b6a19fab",
+      "templates": []
+    },
+    {
+      "path": "tests/static/state_tests/Shanghai/stEIP3860_limitmeterinitcode/__init__.py",
+      "sha256": "0b7043cc814eb23a59b9cc8c4abfd7116a1db4b5f3c6a2c6a9f6aeb6b6a19fab",
+      "templates": []
+    },
+    {
+      "path": "tests/static/state_tests/VMTests/__init__.py",
+      "sha256": "0b7043cc814eb23a59b9cc8c4abfd7116a1db4b5f3c6a2c6a9f6aeb6b6a19fab",
+      "templates": []
+    },
+    {
+      "path": "tests/static/state_tests/VMTests/vmArithmeticTest/__init__.py",
+      "sha256": "0b7043cc814eb23a59b9cc8c4abfd7116a1db4b5f3c6a2c6a9f6aeb6b6a19fab",
+      "templates": []
+    },
+    {
+      "path": "tests/static/state_tests/VMTests/vmBitwiseLogicOperation/__init__.py",
+      "sha256": "0b7043cc814eb23a59b9cc8c4abfd7116a1db4b5f3c6a2c6a9f6aeb6b6a19fab",
+      "templates": []
+    },
+    {
+      "path": "tests/static/state_tests/VMTests/vmIOandFlowOperations/__init__.py",
+      "sha256": "0b7043cc814eb23a59b9cc8c4abfd7116a1db4b5f3c6a2c6a9f6aeb6b6a19fab",
+      "templates": []
+    },
+    {
+      "path": "tests/static/state_tests/VMTests/vmLogTest/__init__.py",
+      "sha256": "0b7043cc814eb23a59b9cc8c4abfd7116a1db4b5f3c6a2c6a9f6aeb6b6a19fab",
+      "templates": []
+    },
+    {
+      "path": "tests/static/state_tests/VMTests/vmTests/__init__.py",
+      "sha256": "0b7043cc814eb23a59b9cc8c4abfd7116a1db4b5f3c6a2c6a9f6aeb6b6a19fab",
+      "templates": []
+    },
+    {
+      "path": "tests/static/state_tests/__init__.py",
+      "sha256": "0b7043cc814eb23a59b9cc8c4abfd7116a1db4b5f3c6a2c6a9f6aeb6b6a19fab",
+      "templates": []
+    },
+    {
+      "path": "tests/static/state_tests/stArgsZeroOneBalance/__init__.py",
+      "sha256": "0b7043cc814eb23a59b9cc8c4abfd7116a1db4b5f3c6a2c6a9f6aeb6b6a19fab",
+      "templates": []
+    },
+    {
+      "path": "tests/static/state_tests/stAttackTest/__init__.py",
+      "sha256": "0b7043cc814eb23a59b9cc8c4abfd7116a1db4b5f3c6a2c6a9f6aeb6b6a19fab",
+      "templates": []
+    },
+    {
+      "path": "tests/static/state_tests/stBadOpcode/__init__.py",
+      "sha256": "0b7043cc814eb23a59b9cc8c4abfd7116a1db4b5f3c6a2c6a9f6aeb6b6a19fab",
+      "templates": []
+    },
+    {
+      "path": "tests/static/state_tests/stBugs/__init__.py",
+      "sha256": "0b7043cc814eb23a59b9cc8c4abfd7116a1db4b5f3c6a2c6a9f6aeb6b6a19fab",
+      "templates": []
+    },
+    {
+      "path": "tests/static/state_tests/stCallCodes/__init__.py",
+      "sha256": "0b7043cc814eb23a59b9cc8c4abfd7116a1db4b5f3c6a2c6a9f6aeb6b6a19fab",
+      "templates": []
+    },
+    {
+      "path": "tests/static/state_tests/stCallCreateCallCodeTest/__init__.py",
+      "sha256": "0b7043cc814eb23a59b9cc8c4abfd7116a1db4b5f3c6a2c6a9f6aeb6b6a19fab",
+      "templates": []
+    },
+    {
+      "path": "tests/static/state_tests/stCallDelegateCodesCallCodeHomestead/__init__.py",
+      "sha256": "0b7043cc814eb23a59b9cc8c4abfd7116a1db4b5f3c6a2c6a9f6aeb6b6a19fab",
+      "templates": []
+    },
+    {
+      "path": "tests/static/state_tests/stCallDelegateCodesHomestead/__init__.py",
+      "sha256": "0b7043cc814eb23a59b9cc8c4abfd7116a1db4b5f3c6a2c6a9f6aeb6b6a19fab",
+      "templates": []
+    },
+    {
+      "path": "tests/static/state_tests/stChainId/__init__.py",
+      "sha256": "0b7043cc814eb23a59b9cc8c4abfd7116a1db4b5f3c6a2c6a9f6aeb6b6a19fab",
+      "templates": []
+    },
+    {
+      "path": "tests/static/state_tests/stCodeCopyTest/__init__.py",
+      "sha256": "0b7043cc814eb23a59b9cc8c4abfd7116a1db4b5f3c6a2c6a9f6aeb6b6a19fab",
+      "templates": []
+    },
+    {
+      "path": "tests/static/state_tests/stCodeSizeLimit/__init__.py",
+      "sha256": "0b7043cc814eb23a59b9cc8c4abfd7116a1db4b5f3c6a2c6a9f6aeb6b6a19fab",
+      "templates": []
+    },
+    {
+      "path": "tests/static/state_tests/stCreate2/__init__.py",
+      "sha256": "0b7043cc814eb23a59b9cc8c4abfd7116a1db4b5f3c6a2c6a9f6aeb6b6a19fab",
+      "templates": []
+    },
+    {
+      "path": "tests/static/state_tests/stCreateTest/__init__.py",
+      "sha256": "0b7043cc814eb23a59b9cc8c4abfd7116a1db4b5f3c6a2c6a9f6aeb6b6a19fab",
+      "templates": []
+    },
+    {
+      "path": "tests/static/state_tests/stDelegatecallTestHomestead/__init__.py",
+      "sha256": "0b7043cc814eb23a59b9cc8c4abfd7116a1db4b5f3c6a2c6a9f6aeb6b6a19fab",
+      "templates": []
+    },
+    {
+      "path": "tests/static/state_tests/stEIP150Specific/__init__.py",
+      "sha256": "0b7043cc814eb23a59b9cc8c4abfd7116a1db4b5f3c6a2c6a9f6aeb6b6a19fab",
+      "templates": []
+    },
+    {
+      "path": "tests/static/state_tests/stEIP150singleCodeGasPrices/__init__.py",
+      "sha256": "0b7043cc814eb23a59b9cc8c4abfd7116a1db4b5f3c6a2c6a9f6aeb6b6a19fab",
+      "templates": []
+    },
+    {
+      "path": "tests/static/state_tests/stEIP1559/__init__.py",
+      "sha256": "0b7043cc814eb23a59b9cc8c4abfd7116a1db4b5f3c6a2c6a9f6aeb6b6a19fab",
+      "templates": []
+    },
+    {
+      "path": "tests/static/state_tests/stEIP158Specific/__init__.py",
+      "sha256": "0b7043cc814eb23a59b9cc8c4abfd7116a1db4b5f3c6a2c6a9f6aeb6b6a19fab",
+      "templates": []
+    },
+    {
+      "path": "tests/static/state_tests/stEIP2930/__init__.py",
+      "sha256": "0b7043cc814eb23a59b9cc8c4abfd7116a1db4b5f3c6a2c6a9f6aeb6b6a19fab",
+      "templates": []
+    },
+    {
+      "path": "tests/static/state_tests/stEIP3607/__init__.py",
+      "sha256": "0b7043cc814eb23a59b9cc8c4abfd7116a1db4b5f3c6a2c6a9f6aeb6b6a19fab",
+      "templates": []
+    },
+    {
+      "path": "tests/static/state_tests/stExample/__init__.py",
+      "sha256": "0b7043cc814eb23a59b9cc8c4abfd7116a1db4b5f3c6a2c6a9f6aeb6b6a19fab",
+      "templates": []
+    },
+    {
+      "path": "tests/static/state_tests/stExtCodeHash/__init__.py",
+      "sha256": "0b7043cc814eb23a59b9cc8c4abfd7116a1db4b5f3c6a2c6a9f6aeb6b6a19fab",
+      "templates": []
+    },
+    {
+      "path": "tests/static/state_tests/stHomesteadSpecific/__init__.py",
+      "sha256": "0b7043cc814eb23a59b9cc8c4abfd7116a1db4b5f3c6a2c6a9f6aeb6b6a19fab",
+      "templates": []
+    },
+    {
+      "path": "tests/static/state_tests/stInitCodeTest/__init__.py",
+      "sha256": "0b7043cc814eb23a59b9cc8c4abfd7116a1db4b5f3c6a2c6a9f6aeb6b6a19fab",
+      "templates": []
+    },
+    {
+      "path": "tests/static/state_tests/stLogTests/__init__.py",
+      "sha256": "0b7043cc814eb23a59b9cc8c4abfd7116a1db4b5f3c6a2c6a9f6aeb6b6a19fab",
+      "templates": []
+    },
+    {
+      "path": "tests/static/state_tests/stMemExpandingEIP150Calls/__init__.py",
+      "sha256": "0b7043cc814eb23a59b9cc8c4abfd7116a1db4b5f3c6a2c6a9f6aeb6b6a19fab",
+      "templates": []
+    },
+    {
+      "path": "tests/static/state_tests/stMemoryStressTest/__init__.py",
+      "sha256": "0b7043cc814eb23a59b9cc8c4abfd7116a1db4b5f3c6a2c6a9f6aeb6b6a19fab",
+      "templates": []
+    },
+    {
+      "path": "tests/static/state_tests/stMemoryTest/__init__.py",
+      "sha256": "0b7043cc814eb23a59b9cc8c4abfd7116a1db4b5f3c6a2c6a9f6aeb6b6a19fab",
+      "templates": []
+    },
+    {
+      "path": "tests/static/state_tests/stNonZeroCallsTest/__init__.py",
+      "sha256": "0b7043cc814eb23a59b9cc8c4abfd7116a1db4b5f3c6a2c6a9f6aeb6b6a19fab",
+      "templates": []
+    },
+    {
+      "path": "tests/static/state_tests/stPreCompiledContracts/__init__.py",
+      "sha256": "0b7043cc814eb23a59b9cc8c4abfd7116a1db4b5f3c6a2c6a9f6aeb6b6a19fab",
+      "templates": []
+    },
+    {
+      "path": "tests/static/state_tests/stPreCompiledContracts2/__init__.py",
+      "sha256": "0b7043cc814eb23a59b9cc8c4abfd7116a1db4b5f3c6a2c6a9f6aeb6b6a19fab",
+      "templates": []
+    },
+    {
+      "path": "tests/static/state_tests/stQuadraticComplexityTest/__init__.py",
+      "sha256": "0b7043cc814eb23a59b9cc8c4abfd7116a1db4b5f3c6a2c6a9f6aeb6b6a19fab",
+      "templates": []
+    },
+    {
+      "path": "tests/static/state_tests/stRandom/__init__.py",
+      "sha256": "0b7043cc814eb23a59b9cc8c4abfd7116a1db4b5f3c6a2c6a9f6aeb6b6a19fab",
+      "templates": []
+    },
+    {
+      "path": "tests/static/state_tests/stRandom2/__init__.py",
+      "sha256": "0b7043cc814eb23a59b9cc8c4abfd7116a1db4b5f3c6a2c6a9f6aeb6b6a19fab",
+      "templates": []
+    },
+    {
+      "path": "tests/static/state_tests/stRecursiveCreate/__init__.py",
+      "sha256": "0b7043cc814eb23a59b9cc8c4abfd7116a1db4b5f3c6a2c6a9f6aeb6b6a19fab",
+      "templates": []
+    },
+    {
+      "path": "tests/static/state_tests/stRefundTest/__init__.py",
+      "sha256": "0b7043cc814eb23a59b9cc8c4abfd7116a1db4b5f3c6a2c6a9f6aeb6b6a19fab",
+      "templates": []
+    },
+    {
+      "path": "tests/static/state_tests/stReturnDataTest/__init__.py",
+      "sha256": "0b7043cc814eb23a59b9cc8c4abfd7116a1db4b5f3c6a2c6a9f6aeb6b6a19fab",
+      "templates": []
+    },
+    {
+      "path": "tests/static/state_tests/stRevertTest/__init__.py",
+      "sha256": "0b7043cc814eb23a59b9cc8c4abfd7116a1db4b5f3c6a2c6a9f6aeb6b6a19fab",
+      "templates": []
+    },
+    {
+      "path": "tests/static/state_tests/stSLoadTest/__init__.py",
+      "sha256": "0b7043cc814eb23a59b9cc8c4abfd7116a1db4b5f3c6a2c6a9f6aeb6b6a19fab",
+      "templates": []
+    },
+    {
+      "path": "tests/static/state_tests/stSStoreTest/__init__.py",
+      "sha256": "0b7043cc814eb23a59b9cc8c4abfd7116a1db4b5f3c6a2c6a9f6aeb6b6a19fab",
+      "templates": []
+    },
+    {
+      "path": "tests/static/state_tests/stSelfBalance/__init__.py",
+      "sha256": "0b7043cc814eb23a59b9cc8c4abfd7116a1db4b5f3c6a2c6a9f6aeb6b6a19fab",
+      "templates": []
+    },
+    {
+      "path": "tests/static/state_tests/stShift/__init__.py",
+      "sha256": "0b7043cc814eb23a59b9cc8c4abfd7116a1db4b5f3c6a2c6a9f6aeb6b6a19fab",
+      "templates": []
+    },
+    {
+      "path": "tests/static/state_tests/stSolidityTest/__init__.py",
+      "sha256": "0b7043cc814eb23a59b9cc8c4abfd7116a1db4b5f3c6a2c6a9f6aeb6b6a19fab",
+      "templates": []
+    },
+    {
+      "path": "tests/static/state_tests/stSpecialTest/__init__.py",
+      "sha256": "0b7043cc814eb23a59b9cc8c4abfd7116a1db4b5f3c6a2c6a9f6aeb6b6a19fab",
+      "templates": []
+    },
+    {
+      "path": "tests/static/state_tests/stStackTests/__init__.py",
+      "sha256": "0b7043cc814eb23a59b9cc8c4abfd7116a1db4b5f3c6a2c6a9f6aeb6b6a19fab",
+      "templates": []
+    },
+    {
+      "path": "tests/static/state_tests/stStaticCall/__init__.py",
+      "sha256": "0b7043cc814eb23a59b9cc8c4abfd7116a1db4b5f3c6a2c6a9f6aeb6b6a19fab",
+      "templates": []
+    },
+    {
+      "path": "tests/static/state_tests/stStaticFlagEnabled/__init__.py",
+      "sha256": "0b7043cc814eb23a59b9cc8c4abfd7116a1db4b5f3c6a2c6a9f6aeb6b6a19fab",
+      "templates": []
+    },
+    {
+      "path": "tests/static/state_tests/stSystemOperationsTest/__init__.py",
+      "sha256": "0b7043cc814eb23a59b9cc8c4abfd7116a1db4b5f3c6a2c6a9f6aeb6b6a19fab",
+      "templates": []
+    },
+    {
+      "path": "tests/static/state_tests/stTimeConsuming/__init__.py",
+      "sha256": "0b7043cc814eb23a59b9cc8c4abfd7116a1db4b5f3c6a2c6a9f6aeb6b6a19fab",
+      "templates": []
+    },
+    {
+      "path": "tests/static/state_tests/stTransactionTest/__init__.py",
+      "sha256": "0b7043cc814eb23a59b9cc8c4abfd7116a1db4b5f3c6a2c6a9f6aeb6b6a19fab",
+      "templates": []
+    },
+    {
+      "path": "tests/static/state_tests/stTransitionTest/__init__.py",
+      "sha256": "0b7043cc814eb23a59b9cc8c4abfd7116a1db4b5f3c6a2c6a9f6aeb6b6a19fab",
+      "templates": []
+    },
+    {
+      "path": "tests/static/state_tests/stWalletTest/__init__.py",
+      "sha256": "0b7043cc814eb23a59b9cc8c4abfd7116a1db4b5f3c6a2c6a9f6aeb6b6a19fab",
+      "templates": []
+    },
+    {
+      "path": "tests/static/state_tests/stZeroCallsRevert/__init__.py",
+      "sha256": "0b7043cc814eb23a59b9cc8c4abfd7116a1db4b5f3c6a2c6a9f6aeb6b6a19fab",
+      "templates": []
+    },
+    {
+      "path": "tests/static/state_tests/stZeroCallsTest/__init__.py",
+      "sha256": "0b7043cc814eb23a59b9cc8c4abfd7116a1db4b5f3c6a2c6a9f6aeb6b6a19fab",
+      "templates": []
+    },
+    {
+      "path": "tests/static/state_tests/stZeroKnowledge/__init__.py",
+      "sha256": "0b7043cc814eb23a59b9cc8c4abfd7116a1db4b5f3c6a2c6a9f6aeb6b6a19fab",
+      "templates": []
+    },
+    {
+      "path": "tests/static/state_tests/stZeroKnowledge2/__init__.py",
+      "sha256": "0b7043cc814eb23a59b9cc8c4abfd7116a1db4b5f3c6a2c6a9f6aeb6b6a19fab",
+      "templates": []
+    },
+    {
+      "path": "tests/unscheduled/__init__.py",
+      "sha256": "79ba2c9e879ce0120adc0723d929c77ca0a3b56551ebb997e7717c52e937dabc",
+      "templates": []
+    },
+    {
+      "path": "tests/unscheduled/eip7692_eof_v1/__init__.py",
+      "sha256": "1076790459caa4fb4995fa7789e823f502b13b777317fa0e771d47850090b3a0",
+      "templates": []
+    },
+    {
+      "path": "tests/unscheduled/eip7692_eof_v1/eip3540_eof_v1/__init__.py",
+      "sha256": "8e5ae7c0d1761aa15aaad56189ea259aff88824de2ab42c0c7551efc5b744c7f",
+      "templates": []
+    },
+    {
+      "path": "tests/unscheduled/eip7692_eof_v1/eip3540_eof_v1/opcodes.py",
+      "sha256": "91b93124fb5dd85f0fe54821621b0b001075bd7e64414595961729fc3d274b9b",
+      "templates": []
+    },
+    {
+      "path": "tests/unscheduled/eip7692_eof_v1/eip3540_eof_v1/spec.py",
+      "sha256": "1dda25a7543be09e178a38ff4633a599410dae56178a0c1cf9950a817e04c100",
+      "templates": []
+    },
+    {
+      "path": "tests/unscheduled/eip7692_eof_v1/eip3540_eof_v1/test_all_opcodes_in_container.py",
+      "sha256": "db3327bbf74ee8c748930846142e02951e33da2cd92bea07721ec7323a62d0be",
+      "templates": [
+        {
+          "line": 79,
+          "name": "test_all_opcodes_in_container"
+        },
+        {
+          "line": 138,
+          "name": "test_invalid_opcodes_after_stop"
+        },
+        {
+          "line": 186,
+          "name": "test_all_invalid_terminating_opcodes"
+        },
+        {
+          "line": 229,
+          "name": "test_all_unreachable_terminating_opcodes_after_stop"
+        },
+        {
+          "line": 280,
+          "name": "test_all_unreachable_terminating_opcodes_before_stop"
+        },
+        {
+          "line": 344,
+          "name": "test_all_opcodes_stack_overflow"
+        },
+        {
+          "line": 411,
+          "name": "test_truncated_data_portion_opcodes"
+        }
+      ]
+    },
+    {
+      "path": "tests/unscheduled/eip7692_eof_v1/eip3540_eof_v1/test_container_size.py",
+      "sha256": "bfa164965e66b841e15258703960b9a8bed00107db91b40543da35ef26a042ca",
+      "templates": [
+        {
+          "line": 25,
+          "name": "test_max_size"
+        },
+        {
+          "line": 52,
+          "name": "test_above_max_size_raw"
+        },
+        {
+          "line": 104,
+          "name": "test_section_after_end_of_container"
+        }
+      ]
+    },
+    {
+      "path": "tests/unscheduled/eip7692_eof_v1/eip3540_eof_v1/test_container_validation.py",
+      "sha256": "1503a963c8964aebe96a6884db9218554ba17a1a7cdeb36aaad12dc6fabba49a",
+      "templates": [
+        {
+          "line": 136,
+          "name": "test_valid_containers"
+        },
+        {
+          "line": 1175,
+          "name": "test_invalid_containers"
+        },
+        {
+          "line": 1192,
+          "name": "test_magic_validation"
+        },
+        {
+          "line": 1206,
+          "name": "test_version_validation"
+        },
+        {
+          "line": 1221,
+          "name": "test_single_code_section"
+        },
+        {
+          "line": 1252,
+          "name": "test_max_code_sections"
+        }
+      ]
+    },
+    {
+      "path": "tests/unscheduled/eip7692_eof_v1/eip3540_eof_v1/test_eof_example.py",
+      "sha256": "d9129b5f3ad1af67b24a20d03888c4a6a533823e216e77a15d3dd3b31c3935e1",
+      "templates": [
+        {
+          "line": 17,
+          "name": "test_eof_example"
+        },
+        {
+          "line": 68,
+          "name": "test_eof_example_custom_fields"
+        },
+        {
+          "line": 137,
+          "name": "test_eof_example_parameters"
+        }
+      ]
+    },
+    {
+      "path": "tests/unscheduled/eip7692_eof_v1/eip3540_eof_v1/test_execution.py",
+      "sha256": "07314fa2111ca8801de4b0edd42644d6a25d0ef85c60bef1bf022e17db7fed4a",
+      "templates": [
+        {
+          "line": 40,
+          "name": "test_eof_execution"
+        }
+      ]
+    },
+    {
+      "path": "tests/unscheduled/eip7692_eof_v1/eip3540_eof_v1/test_execution_function.py",
+      "sha256": "3882fced206e95b166cfaa63b0c3f0f0dd0bdb51184e3a2ad352a7be6dd3ab55",
+      "templates": [
+        {
+          "line": 302,
+          "name": "test_eof_functions_contract_call_succeed"
+        },
+        {
+          "line": 335,
+          "name": "test_eof_functions_contract_call_fail"
+        },
+        {
+          "line": 367,
+          "name": "test_eof_functions_contract_call_within_deep_nested"
+        }
+      ]
+    },
+    {
+      "path": "tests/unscheduled/eip7692_eof_v1/eip3540_eof_v1/test_extcode.py",
+      "sha256": "1579ad96a2acd8a6fef8d14a5035a5214b914af93de29296b63532c6c4611841",
+      "templates": [
+        {
+          "line": 25,
+          "name": "test_legacy_calls_eof_sstore"
+        }
+      ]
+    },
+    {
+      "path": "tests/unscheduled/eip7692_eof_v1/eip3540_eof_v1/test_migrated_valid_invalid.py",
+      "sha256": "52404ef2eb8f9e421482d6f8506e013858dc20202d0c594a569e8cd9e80413d6",
+      "templates": [
+        {
+          "line": 311,
+          "name": "test_migrated_valid_invalid"
+        }
+      ]
+    },
+    {
+      "path": "tests/unscheduled/eip7692_eof_v1/eip3540_eof_v1/test_opcodes_in_legacy.py",
+      "sha256": "188dd9424406cab075acdaf70202c10df002c184efb7832fb0a8f768643a5c12",
+      "templates": [
+        {
+          "line": 61,
+          "name": "test_opcodes_in_legacy"
+        },
+        {
+          "line": 99,
+          "name": "test_opcodes_in_create_tx"
+        },
+        {
+          "line": 138,
+          "name": "test_opcodes_in_create_operation"
+        },
+        {
+          "line": 186,
+          "name": "test_opcodes_in_eof_calling_legacy"
+        }
+      ]
+    },
+    {
+      "path": "tests/unscheduled/eip7692_eof_v1/eip3540_eof_v1/test_section_header_body_mismatch.py",
+      "sha256": "30d125ed1da842a140bb694e191cb78fdf9e6ff377b72954512035032c7b31fd",
+      "templates": [
+        {
+          "line": 109,
+          "name": "test_code_section_header_body_mismatch"
+        }
+      ]
+    },
+    {
+      "path": "tests/unscheduled/eip7692_eof_v1/eip3540_eof_v1/test_section_order.py",
+      "sha256": "f24e8ec1ab61bedcdb270bc54dd8c551920ff38f7301a5a91667d39a37abad13",
+      "templates": [
+        {
+          "line": 148,
+          "name": "test_section_order"
+        },
+        {
+          "line": 230,
+          "name": "test_container_section_order"
+        }
+      ]
+    },
+    {
+      "path": "tests/unscheduled/eip7692_eof_v1/eip3540_eof_v1/test_section_size.py",
+      "sha256": "7f5d982a103150c558ca847ea8bc66a7a8338030f4929b8d54a5d70c9e3cab26",
+      "templates": [
+        {
+          "line": 117,
+          "name": "test_section_size"
+        },
+        {
+          "line": 196,
+          "name": "test_truncated_container_without_data"
+        },
+        {
+          "line": 222,
+          "name": "test_truncated_container_with_data"
+        }
+      ]
+    },
+    {
+      "path": "tests/unscheduled/eip7692_eof_v1/eip4200_relative_jumps/__init__.py",
+      "sha256": "61a5a52c8860a8a3a7e474ce37414cded70f79f022c5b3a45fb23e942621aaad",
+      "templates": []
+    },
+    {
+      "path": "tests/unscheduled/eip7692_eof_v1/eip4200_relative_jumps/helpers.py",
+      "sha256": "1e72dae53c40f0702a7838fa372330e6a916140259624c7d27b4b257b302c62a",
+      "templates": []
+    },
+    {
+      "path": "tests/unscheduled/eip7692_eof_v1/eip4200_relative_jumps/test_rjump.py",
+      "sha256": "b920a90d59b2bc588879ca9d5ca76df763b2da06676c29bc384840deef6ca9c8",
+      "templates": [
+        {
+          "line": 22,
+          "name": "test_rjump_negative"
+        },
+        {
+          "line": 39,
+          "name": "test_rjump_positive_negative"
+        },
+        {
+          "line": 58,
+          "name": "test_rjump_zero"
+        },
+        {
+          "line": 70,
+          "name": "test_rjump_maxes"
+        },
+        {
+          "line": 91,
+          "name": "test_rjump_max_bytecode_size"
+        },
+        {
+          "line": 110,
+          "name": "test_rjump_truncated_rjump"
+        },
+        {
+          "line": 120,
+          "name": "test_rjump_truncated_rjump_2"
+        },
+        {
+          "line": 131,
+          "name": "test_rjump_into_header"
+        },
+        {
+          "line": 145,
+          "name": "test_rjump_before_header"
+        },
+        {
+          "line": 158,
+          "name": "test_rjump_into_data"
+        },
+        {
+          "line": 176,
+          "name": "test_rjump_outside_other_section_before"
+        },
+        {
+          "line": 194,
+          "name": "test_rjump_outside_other_section_after"
+        },
+        {
+          "line": 213,
+          "name": "test_rjump_after_container"
+        },
+        {
+          "line": 226,
+          "name": "test_rjump_to_code_end"
+        },
+        {
+          "line": 240,
+          "name": "test_rjump_into_self_data_portion"
+        },
+        {
+          "line": 254,
+          "name": "test_rjump_into_self_remaining_code"
+        },
+        {
+          "line": 268,
+          "name": "test_rjump_into_self"
+        },
+        {
+          "line": 283,
+          "name": "test_rjump_into_self_pre_code"
+        },
+        {
+          "line": 470,
+          "name": "test_rjump_valid_forward"
+        },
+        {
+          "line": 566,
+          "name": "test_rjump_valid_backward"
+        },
+        {
+          "line": 577,
+          "name": "test_rjump_into_stack_height_diff"
+        },
+        {
+          "line": 590,
+          "name": "test_rjump_into_stack_height_diff_2"
+        },
+        {
+          "line": 778,
+          "name": "test_rjump_backward_invalid_max_stack_height"
+        },
+        {
+          "line": 789,
+          "name": "test_rjump_into_stack_underflow"
+        },
+        {
+          "line": 809,
+          "name": "test_rjump_into_rjump"
+        },
+        {
+          "line": 822,
+          "name": "test_rjump_into_rjumpi"
+        },
+        {
+          "line": 836,
+          "name": "test_rjump_into_push_1"
+        },
+        {
+          "line": 892,
+          "name": "test_rjump_into_push_n"
+        },
+        {
+          "line": 921,
+          "name": "test_rjump_into_rjumpv"
+        },
+        {
+          "line": 949,
+          "name": "test_rjump_into_callf"
+        },
+        {
+          "line": 974,
+          "name": "test_rjump_into_dupn"
+        },
+        {
+          "line": 986,
+          "name": "test_rjump_into_swapn"
+        },
+        {
+          "line": 998,
+          "name": "test_rjump_into_exchange"
+        },
+        {
+          "line": 1016,
+          "name": "test_rjump_into_eofcreate"
+        },
+        {
+          "line": 1044,
+          "name": "test_rjump_into_returncode"
+        },
+        {
+          "line": 1080,
+          "name": "test_rjump_unreachable_code"
+        },
+        {
+          "line": 1095,
+          "name": "test_rjump_backwards_reference_only"
+        },
+        {
+          "line": 1108,
+          "name": "test_rjump_backwards_illegal_stack_height"
+        },
+        {
+          "line": 1128,
+          "name": "test_rjump_backwards_infinite_loop"
+        }
+      ]
+    },
+    {
+      "path": "tests/unscheduled/eip7692_eof_v1/eip4200_relative_jumps/test_rjumpi.py",
+      "sha256": "7dfae8d47d2856160ae2965f719af1028597ba57d6ffde2506db56c11f03fbec",
+      "templates": [
+        {
+          "line": 43,
+          "name": "test_rjumpi_condition_forwards"
+        },
+        {
+          "line": 84,
+          "name": "test_rjumpi_condition_backwards"
+        },
+        {
+          "line": 127,
+          "name": "test_rjumpi_condition_zero"
+        },
+        {
+          "line": 160,
+          "name": "test_rjumpi_forwards"
+        },
+        {
+          "line": 182,
+          "name": "test_rjumpi_backwards"
+        },
+        {
+          "line": 204,
+          "name": "test_rjumpi_zero"
+        },
+        {
+          "line": 223,
+          "name": "test_rjumpi_max_forward"
+        },
+        {
+          "line": 246,
+          "name": "test_rjumpi_max_backward"
+        },
+        {
+          "line": 733,
+          "name": "test_rjumpi_valid_forward"
+        },
+        {
+          "line": 902,
+          "name": "test_rjumpi_valid_backward"
+        },
+        {
+          "line": 913,
+          "name": "test_rjumpi_max_bytecode_size"
+        },
+        {
+          "line": 927,
+          "name": "test_rjumpi_truncated"
+        },
+        {
+          "line": 943,
+          "name": "test_rjumpi_truncated_2"
+        },
+        {
+          "line": 960,
+          "name": "test_rjumpi_into_header"
+        },
+        {
+          "line": 980,
+          "name": "test_rjumpi_jump_before_header"
+        },
+        {
+          "line": 999,
+          "name": "test_rjumpi_into_data"
+        },
+        {
+          "line": 1019,
+          "name": "test_rjumpi_after_container"
+        },
+        {
+          "line": 1038,
+          "name": "test_rjumpi_to_code_end"
+        },
+        {
+          "line": 1058,
+          "name": "test_rjumpi_into_self_data_portion"
+        },
+        {
+          "line": 1079,
+          "name": "test_rjumpi_into_self"
+        },
+        {
+          "line": 1104,
+          "name": "test_rjumpi_into_stack_height_diff"
+        },
+        {
+          "line": 1126,
+          "name": "test_rjumpi_into_stack_underflow"
+        },
+        {
+          "line": 1145,
+          "name": "test_rjumpi_skips_stack_underflow"
+        },
+        {
+          "line": 1162,
+          "name": "test_rjumpi_into_rjump"
+        },
+        {
+          "line": 1181,
+          "name": "test_rjumpi_into_rjumpi"
+        },
+        {
+          "line": 1206,
+          "name": "test_rjumpi_into_push_1"
+        },
+        {
+          "line": 1271,
+          "name": "test_rjumpi_into_push_n"
+        },
+        {
+          "line": 1304,
+          "name": "test_rjumpi_into_rjumpv"
+        },
+        {
+          "line": 1337,
+          "name": "test_rjumpi_into_callf"
+        },
+        {
+          "line": 1362,
+          "name": "test_rjumpi_into_dupn"
+        },
+        {
+          "line": 1384,
+          "name": "test_rjumpi_into_swapn"
+        },
+        {
+          "line": 1406,
+          "name": "test_rjumpi_into_exchange"
+        },
+        {
+          "line": 1429,
+          "name": "test_rjumpi_into_eofcreate"
+        },
+        {
+          "line": 1457,
+          "name": "test_rjumpi_into_returncode"
+        },
+        {
+          "line": 1485,
+          "name": "test_rjumpi_backwards_reference_only"
+        },
+        {
+          "line": 1504,
+          "name": "test_rjumpi_stack_validation"
+        },
+        {
+          "line": 1519,
+          "name": "test_rjumpi_at_the_end"
+        },
+        {
+          "line": 1540,
+          "name": "test_tangled_rjumpi"
+        },
+        {
+          "line": 1564,
+          "name": "test_rjumpi_backwards_onto_dup"
+        },
+        {
+          "line": 1577,
+          "name": "test_rjumpi_backwards_min_stack_wrong"
+        },
+        {
+          "line": 1599,
+          "name": "test_rjumpi_rjumpv_backwards_min_stack_wrong"
+        },
+        {
+          "line": 1621,
+          "name": "test_double_rjumpi_stack_underflow"
+        },
+        {
+          "line": 1643,
+          "name": "test_double_rjumpi_stack_height_mismatch"
+        },
+        {
+          "line": 1667,
+          "name": "test_double_rjumpi_invalid_max_stack_height"
+        },
+        {
+          "line": 1879,
+          "name": "test_rjumpi_backward_invalid_max_stack_height"
+        }
+      ]
+    },
+    {
+      "path": "tests/unscheduled/eip7692_eof_v1/eip4200_relative_jumps/test_rjumpv.py",
+      "sha256": "1df939fa5236f0dc0413f5b53edb116df29e919c5bd913085e790b7fa17ffaa6",
+      "templates": [
+        {
+          "line": 40,
+          "name": "test_rjumpv_condition"
+        },
+        {
+          "line": 80,
+          "name": "test_rjumpv_forwards"
+        },
+        {
+          "line": 102,
+          "name": "test_rjumpv_backwards"
+        },
+        {
+          "line": 124,
+          "name": "test_rjumpv_backwards_onto_dup"
+        },
+        {
+          "line": 138,
+          "name": "test_rjumpv_backwards_large_table"
+        },
+        {
+          "line": 154,
+          "name": "test_rjumpv_zero"
+        },
+        {
+          "line": 173,
+          "name": "test_rjumpv_size_3"
+        },
+        {
+          "line": 199,
+          "name": "test_rjumpv_full_table"
+        },
+        {
+          "line": 223,
+          "name": "test_rjumpv_max_forwards"
+        },
+        {
+          "line": 246,
+          "name": "test_rjumpv_truncated_empty"
+        },
+        {
+          "line": 273,
+          "name": "test_rjumpv_truncated"
+        },
+        {
+          "line": 296,
+          "name": "test_rjumpv_into_header"
+        },
+        {
+          "line": 329,
+          "name": "test_rjumpv_before_container"
+        },
+        {
+          "line": 362,
+          "name": "test_rjumpv_into_data"
+        },
+        {
+          "line": 395,
+          "name": "test_rjumpv_after_container"
+        },
+        {
+          "line": 427,
+          "name": "test_rjumpv_at_end"
+        },
+        {
+          "line": 464,
+          "name": "test_rjumpv_into_self_data_portion"
+        },
+        {
+          "line": 498,
+          "name": "test_rjumpv_into_self"
+        },
+        {
+          "line": 537,
+          "name": "test_rjumpv_into_stack_height_diff"
+        },
+        {
+          "line": 569,
+          "name": "test_rjumpv_into_stack_underflow"
+        },
+        {
+          "line": 597,
+          "name": "test_rjumpv_skips_stack_underflow"
+        },
+        {
+          "line": 629,
+          "name": "test_rjumpv_into_rjump"
+        },
+        {
+          "line": 672,
+          "name": "test_rjumpv_into_rjumpi"
+        },
+        {
+          "line": 716,
+          "name": "test_rjumpv_into_push_1"
+        },
+        {
+          "line": 802,
+          "name": "test_rjumpv_into_push_n"
+        },
+        {
+          "line": 859,
+          "name": "test_rjumpv_into_rjumpv"
+        },
+        {
+          "line": 904,
+          "name": "test_rjumpv_into_callf"
+        },
+        {
+          "line": 941,
+          "name": "test_rjumpv_into_dupn"
+        },
+        {
+          "line": 976,
+          "name": "test_rjumpv_into_swapn"
+        },
+        {
+          "line": 1011,
+          "name": "test_rjumpv_into_exchange"
+        },
+        {
+          "line": 1047,
+          "name": "test_rjumpv_into_eofcreate"
+        },
+        {
+          "line": 1088,
+          "name": "test_rjumpv_into_returncode"
+        },
+        {
+          "line": 1121,
+          "name": "test_rjumpv_backwards_reference_only"
+        },
+        {
+          "line": 1141,
+          "name": "test_rjumpv_at_the_end"
+        },
+        {
+          "line": 1161,
+          "name": "test_rjumpv_backwards_min_stack_wrong"
+        },
+        {
+          "line": 1183,
+          "name": "test_rjumpv_rjumpi_backwards_min_stack_wrong"
+        },
+        {
+          "line": 1205,
+          "name": "test_double_rjumpv"
+        },
+        {
+          "line": 1584,
+          "name": "test_rjumpv_valid_forward"
+        },
+        {
+          "line": 1723,
+          "name": "test_rjumpv_valid_backward"
+        },
+        {
+          "line": 1887,
+          "name": "test_rjumpv_backward_invalid_max_stack_height"
+        }
+      ]
+    },
+    {
+      "path": "tests/unscheduled/eip7692_eof_v1/eip4750_functions/__init__.py",
+      "sha256": "935cca24ddd12f338e975983f664faf241bef445bf82eba2b47daa10cc88a2b2",
+      "templates": []
+    },
+    {
+      "path": "tests/unscheduled/eip7692_eof_v1/eip4750_functions/helpers.py",
+      "sha256": "446e4b2a3fa3fd182a189d78324af9a80123c245272153eb0807e6057dad02dd",
+      "templates": []
+    },
+    {
+      "path": "tests/unscheduled/eip7692_eof_v1/eip4750_functions/test_callf_execution.py",
+      "sha256": "a52b5ee9e6e507de4c9d546fadcbc1f610deff29f22d9d6068a5ccc7717f0024",
+      "templates": [
+        {
+          "line": 36,
+          "name": "test_callf_factorial"
+        },
+        {
+          "line": 75,
+          "name": "test_callf_fibonacci"
+        },
+        {
+          "line": 191,
+          "name": "test_callf"
+        },
+        {
+          "line": 369,
+          "name": "test_callf_operand_stack_size_max"
+        },
+        {
+          "line": 439,
+          "name": "test_callf_operand_stack_overflow"
+        },
+        {
+          "line": 456,
+          "name": "test_callf_sneaky_stack_overflow"
+        },
+        {
+          "line": 557,
+          "name": "test_callf_max_stack"
+        },
+        {
+          "line": 635,
+          "name": "test_callf_retf_memory_context"
+        }
+      ]
+    },
+    {
+      "path": "tests/unscheduled/eip7692_eof_v1/eip4750_functions/test_code_validation.py",
+      "sha256": "dbb491ca1e8ba972d0fef4b19ca78515a115542417c74b14c4ab554055d56b06",
+      "templates": [
+        {
+          "line": 378,
+          "name": "test_eof_validity"
+        },
+        {
+          "line": 431,
+          "name": "test_callf_truncated_immediate"
+        },
+        {
+          "line": 477,
+          "name": "test_invalid_code_section_index"
+        },
+        {
+          "line": 640,
+          "name": "test_unreachable_code_sections"
+        },
+        {
+          "line": 652,
+          "name": "test_callf_stack_height_limit_exceeded"
+        },
+        {
+          "line": 677,
+          "name": "test_callf_stack_overflow"
+        },
+        {
+          "line": 699,
+          "name": "test_callf_stack_overflow_after_callf"
+        },
+        {
+          "line": 727,
+          "name": "test_callf_stack_overflow_variable_stack"
+        },
+        {
+          "line": 753,
+          "name": "test_callf_stack_overflow_variable_stack_2"
+        },
+        {
+          "line": 781,
+          "name": "test_callf_stack_overflow_variable_stack_3"
+        },
+        {
+          "line": 809,
+          "name": "test_callf_stack_overflow_variable_stack_4"
+        },
+        {
+          "line": 836,
+          "name": "test_callf_validate_outputs"
+        },
+        {
+          "line": 927,
+          "name": "test_callf_with_inputs_stack_overflow"
+        },
+        {
+          "line": 1052,
+          "name": "test_callf_with_inputs_stack_overflow_variable_stack"
+        },
+        {
+          "line": 1089,
+          "name": "test_callf_stack_overflow_by_outputs"
+        },
+        {
+          "line": 1120,
+          "name": "test_callf_stack_overflow_by_height"
+        },
+        {
+          "line": 1245,
+          "name": "test_callf_stack_underflow_examples"
+        },
+        {
+          "line": 1250,
+          "name": "test_returning_section_aborts"
+        }
+      ]
+    },
+    {
+      "path": "tests/unscheduled/eip7692_eof_v1/eip5450_stack/__init__.py",
+      "sha256": "f55d0f10e2809ef3abcb3bfdb990801271654442bb928f6582657a0ee0e80703",
+      "templates": []
+    },
+    {
+      "path": "tests/unscheduled/eip7692_eof_v1/eip5450_stack/test_code_validation.py",
+      "sha256": "073112b4859c401ff91907420eba69648f2901febe9434fb1dc8ce0b2117c1ab",
+      "templates": [
+        {
+          "line": 262,
+          "name": "test_rjumps_callf_retf"
+        },
+        {
+          "line": 379,
+          "name": "test_rjumps_jumpf_nonreturning"
+        },
+        {
+          "line": 477,
+          "name": "test_all_opcodes_stack_underflow"
+        },
+        {
+          "line": 596,
+          "name": "test_stack_underflow_examples"
+        },
+        {
+          "line": 606,
+          "name": "test_valid_non_constant_stack_examples"
+        },
+        {
+          "line": 649,
+          "name": "test_stack_range_maximally_broad"
+        }
+      ]
+    },
+    {
+      "path": "tests/unscheduled/eip7692_eof_v1/eip5450_stack/test_execution.py",
+      "sha256": "1fedea5d562cbd52a52bcea0084ca05e8f225f2815aff2429010771fd93f9099",
+      "templates": [
+        {
+          "line": 26,
+          "name": "test_execution_at_max_stack_height"
+        }
+      ]
+    },
+    {
+      "path": "tests/unscheduled/eip7692_eof_v1/eip6206_jumpf/__init__.py",
+      "sha256": "a6a2f810d29128f4801ae5b37d02f191373bfba716ad7b135623efb79f1f6d99",
+      "templates": []
+    },
+    {
+      "path": "tests/unscheduled/eip7692_eof_v1/eip6206_jumpf/helpers.py",
+      "sha256": "cfc782c3ab39791168fc4feacd30831dbd4a67c23d4dec0d6a2cf6ed9b709a5c",
+      "templates": []
+    },
+    {
+      "path": "tests/unscheduled/eip7692_eof_v1/eip6206_jumpf/spec.py",
+      "sha256": "1dda25a7543be09e178a38ff4633a599410dae56178a0c1cf9950a817e04c100",
+      "templates": []
+    },
+    {
+      "path": "tests/unscheduled/eip7692_eof_v1/eip6206_jumpf/test_jumpf_execution.py",
+      "sha256": "f3c6443ce3b99373aa6b0115ce0bcce9f074643ad3ff65269deb171f202030c8",
+      "templates": [
+        {
+          "line": 27,
+          "name": "test_jumpf_forward"
+        },
+        {
+          "line": 123,
+          "name": "test_jumpf_to_retf"
+        },
+        {
+          "line": 132,
+          "name": "test_jumpf_to_self"
+        },
+        {
+          "line": 259,
+          "name": "test_jumpf_and_retf"
+        },
+        {
+          "line": 267,
+          "name": "test_jumpf_too_large"
+        },
+        {
+          "line": 283,
+          "name": "test_jumpf_way_too_large"
+        },
+        {
+          "line": 299,
+          "name": "test_jumpf_to_nonexistent_section"
+        },
+        {
+          "line": 318,
+          "name": "test_callf_to_non_returning_section"
+        },
+        {
+          "line": 338,
+          "name": "test_jumpf_stack_size_1024"
+        },
+        {
+          "line": 361,
+          "name": "test_jumpf_with_inputs_stack_size_1024"
+        },
+        {
+          "line": 386,
+          "name": "test_jumpf_stack_size_1024_at_push"
+        },
+        {
+          "line": 435,
+          "name": "test_jumpf_stack_overflow"
+        },
+        {
+          "line": 495,
+          "name": "test_jumpf_with_inputs_stack_size_1024_at_push"
+        },
+        {
+          "line": 536,
+          "name": "test_jumpf_with_inputs_stack_overflow"
+        },
+        {
+          "line": 646,
+          "name": "test_jumpf_infinite_loop"
+        },
+        {
+          "line": 654,
+          "name": "test_jumpf_memory_context"
+        },
+        {
+          "line": 690,
+          "name": "test_callf_jumpf_retf_memory_context"
+        }
+      ]
+    },
+    {
+      "path": "tests/unscheduled/eip7692_eof_v1/eip6206_jumpf/test_jumpf_stack.py",
+      "sha256": "4449141bdb19d2cd709039856a03f0ac0c9e4652c4d2a87ead9c4fc0e53bc1ab",
+      "templates": [
+        {
+          "line": 30,
+          "name": "test_jumpf_stack_non_returning_rules"
+        },
+        {
+          "line": 85,
+          "name": "test_jumpf_stack_returning_rules"
+        },
+        {
+          "line": 154,
+          "name": "test_jumpf_incompatible_outputs"
+        },
+        {
+          "line": 200,
+          "name": "test_jumpf_diff_max_stack_height"
+        },
+        {
+          "line": 248,
+          "name": "test_jumpf_diff_min_stack_height"
+        },
+        {
+          "line": 281,
+          "name": "test_jumpf_self_variadic_stack_overflow"
+        },
+        {
+          "line": 297,
+          "name": "test_jumpf_variadic_stack_overflow"
+        },
+        {
+          "line": 324,
+          "name": "test_jumpf_with_inputs_stack_overflow"
+        },
+        {
+          "line": 349,
+          "name": "test_jumpf_with_inputs_stack_overflow_variable_stack"
+        }
+      ]
+    },
+    {
+      "path": "tests/unscheduled/eip7692_eof_v1/eip6206_jumpf/test_jumpf_target.py",
+      "sha256": "199f8377efaf4de58388022ff179da84e046afdc1a53682dd32cb8ef708167b3",
+      "templates": [
+        {
+          "line": 29,
+          "name": "test_jumpf_target_rules"
+        },
+        {
+          "line": 117,
+          "name": "test_jumpf_multi_target_rules"
+        }
+      ]
+    },
+    {
+      "path": "tests/unscheduled/eip7692_eof_v1/eip6206_jumpf/test_jumpf_validation.py",
+      "sha256": "eb8653cab9185287f39e449b8ff7b0529fcabe02abbf38f3d725b2d813ba5692",
+      "templates": [
+        {
+          "line": 66,
+          "name": "test_returning_jumpf"
+        },
+        {
+          "line": 110,
+          "name": "test_invalid_code_section_index"
+        },
+        {
+          "line": 120,
+          "name": "test_returning_section_aborts_jumpf"
+        },
+        {
+          "line": 145,
+          "name": "test_jumpf_self_stack_overflow"
+        },
+        {
+          "line": 167,
+          "name": "test_jumpf_other_stack_overflow"
+        },
+        {
+          "line": 195,
+          "name": "test_jumpf_to_non_returning"
+        },
+        {
+          "line": 214,
+          "name": "test_jumpf_to_non_returning_variable_stack"
+        },
+        {
+          "line": 237,
+          "name": "test_jumpf_to_returning"
+        },
+        {
+          "line": 276,
+          "name": "test_jumpf_to_returning_variable_stack_1"
+        },
+        {
+          "line": 318,
+          "name": "test_jumpf_to_returning_variable_stack_2"
+        },
+        {
+          "line": 357,
+          "name": "test_jumpf_to_returning_variable_stack_3"
+        },
+        {
+          "line": 485,
+          "name": "test_jumpf_stack_underflow_examples"
+        }
+      ]
+    },
+    {
+      "path": "tests/unscheduled/eip7692_eof_v1/eip6206_jumpf/test_nonreturning_validation.py",
+      "sha256": "52d2a52cff2bf4d83df4854eb96b01f757ab99e5832a0085ed796d65dc8807db",
+      "templates": [
+        {
+          "line": 33,
+          "name": "test_first_section_returning"
+        },
+        {
+          "line": 64,
+          "name": "test_first_section_with_inputs"
+        },
+        {
+          "line": 101,
+          "name": "test_returning_section_not_returning"
+        },
+        {
+          "line": 127,
+          "name": "test_returning_section_returncode"
+        },
+        {
+          "line": 158,
+          "name": "test_retf_in_nonreturning"
+        },
+        {
+          "line": 175,
+          "name": "test_jumpf_in_nonreturning"
+        },
+        {
+          "line": 262,
+          "name": "test_callf_to_nonreturning"
+        }
+      ]
+    },
+    {
+      "path": "tests/unscheduled/eip7692_eof_v1/eip663_dupn_swapn_exchange/__init__.py",
+      "sha256": "d7f13521c1fc1b58168ff6c2c8834e28d45c7055a70c53a84e92f4597a60645f",
+      "templates": []
+    },
+    {
+      "path": "tests/unscheduled/eip7692_eof_v1/eip663_dupn_swapn_exchange/test_dupn.py",
+      "sha256": "448a3556386008357483bbe0dfb326c9a4fdc61729f9a96284b43dd7b5bd08ac",
+      "templates": [
+        {
+          "line": 32,
+          "name": "test_dupn_all_valid_immediates"
+        },
+        {
+          "line": 67,
+          "name": "test_dupn_stack_underflow"
+        },
+        {
+          "line": 98,
+          "name": "test_dupn_stack_overflow"
+        },
+        {
+          "line": 124,
+          "name": "test_dupn_simple"
+        }
+      ]
+    },
+    {
+      "path": "tests/unscheduled/eip7692_eof_v1/eip663_dupn_swapn_exchange/test_exchange.py",
+      "sha256": "aa193fa06cc7c472b60100e5055c6ec2a95038593e36dfb6f15afef612f5b926",
+      "templates": [
+        {
+          "line": 29,
+          "name": "test_exchange_all_valid_immediates"
+        },
+        {
+          "line": 77,
+          "name": "test_exchange_stack_underflow"
+        },
+        {
+          "line": 106,
+          "name": "test_exchange_simple"
+        }
+      ]
+    },
+    {
+      "path": "tests/unscheduled/eip7692_eof_v1/eip663_dupn_swapn_exchange/test_swapn.py",
+      "sha256": "2387c2abb2a427e1ea0eec833ccc0869f8d720ef5f92cdeeac7f288a7e045da9",
+      "templates": [
+        {
+          "line": 28,
+          "name": "test_swapn_all_valid_immediates"
+        },
+        {
+          "line": 60,
+          "name": "test_swapn_on_max_stack"
+        },
+        {
+          "line": 88,
+          "name": "test_swapn_stack_underflow"
+        },
+        {
+          "line": 115,
+          "name": "test_swapn_simple"
+        }
+      ]
+    },
+    {
+      "path": "tests/unscheduled/eip7692_eof_v1/eip7069_extcall/__init__.py",
+      "sha256": "747d283e3acd2ae2f2e07d41397cbb7a50129b1c665d6cdeffdf07d7d4040c71",
+      "templates": []
+    },
+    {
+      "path": "tests/unscheduled/eip7692_eof_v1/eip7069_extcall/helpers.py",
+      "sha256": "770e7edddb616799166057ca70ba0e6d53a208430659d8a7b82437f904bb144a",
+      "templates": []
+    },
+    {
+      "path": "tests/unscheduled/eip7692_eof_v1/eip7069_extcall/spec.py",
+      "sha256": "cc4c46175740df7e66edb27b6cde9551189ecacd2a009c08140a88a5388f77d7",
+      "templates": []
+    },
+    {
+      "path": "tests/unscheduled/eip7692_eof_v1/eip7069_extcall/test_address_space_extension.py",
+      "sha256": "a435a190911dbae90029e79fad3d96dd038b0d1c5718dc6f838577b232bc03c1",
+      "templates": [
+        {
+          "line": 61,
+          "name": "test_address_space_extension"
+        }
+      ]
+    },
+    {
+      "path": "tests/unscheduled/eip7692_eof_v1/eip7069_extcall/test_calldata.py",
+      "sha256": "f76063dbdf9aba25d1d7da60c1ff8a639c08b983376badd8c33127414dab54bb",
+      "templates": [
+        {
+          "line": 54,
+          "name": "test_extcalls_inputdata"
+        },
+        {
+          "line": 142,
+          "name": "test_extdelegatecall_inputdata"
+        },
+        {
+          "line": 226,
+          "name": "test_extstaticcall_inputdata"
+        },
+        {
+          "line": 308,
+          "name": "test_calldata_remains_after_subcall"
+        },
+        {
+          "line": 487,
+          "name": "test_extcalls_input_offset"
+        }
+      ]
+    },
+    {
+      "path": "tests/unscheduled/eip7692_eof_v1/eip7069_extcall/test_calls.py",
+      "sha256": "6058eb9834ae6e275839fdc93a4c09edf8cd2f4b4a20feb06c845818e2b6939f",
+      "templates": [
+        {
+          "line": 125,
+          "name": "test_legacy_calls_eof_sstore"
+        },
+        {
+          "line": 186,
+          "name": "test_legacy_calls_eof_mstore"
+        },
+        {
+          "line": 247,
+          "name": "test_eof_calls_eof_sstore"
+        },
+        {
+          "line": 310,
+          "name": "test_eof_calls_eof_mstore"
+        },
+        {
+          "line": 392,
+          "name": "test_eof_calls_precompile"
+        },
+        {
+          "line": 448,
+          "name": "test_eof_calls_legacy_sstore"
+        },
+        {
+          "line": 511,
+          "name": "test_eof_calls_legacy_mstore"
+        },
+        {
+          "line": 589,
+          "name": "test_callee_fails"
+        },
+        {
+          "line": 655,
+          "name": "test_callee_context"
+        },
+        {
+          "line": 729,
+          "name": "test_eof_calls_eof_then_fails"
+        },
+        {
+          "line": 779,
+          "name": "test_eof_calls_clear_return_buffer"
+        },
+        {
+          "line": 840,
+          "name": "test_eof_calls_static_flag_with_value"
+        },
+        {
+          "line": 916,
+          "name": "test_eof_calls_min_callee_gas"
+        },
+        {
+          "line": 997,
+          "name": "test_eof_calls_with_value"
+        },
+        {
+          "line": 1052,
+          "name": "test_eof_calls_msg_depth"
+        },
+        {
+          "line": 1151,
+          "name": "test_extdelegate_call_targets"
+        }
+      ]
+    },
+    {
+      "path": "tests/unscheduled/eip7692_eof_v1/eip7069_extcall/test_gas.py",
+      "sha256": "ce02261e09e99996c9751d9c13ff3fdc91d765442773e9995b82909952eea754",
+      "templates": [
+        {
+          "line": 116,
+          "name": "test_ext_calls_gas"
+        },
+        {
+          "line": 153,
+          "name": "test_transfer_gas_is_cleared"
+        },
+        {
+          "line": 197,
+          "name": "test_late_account_create"
+        }
+      ]
+    },
+    {
+      "path": "tests/unscheduled/eip7692_eof_v1/eip7069_extcall/test_returndatacopy_memory_expansion.py",
+      "sha256": "903cc868606572825fa75fe7d93b5c764f0ae1fe725e26d3e3a30f2c3e59f3c0",
+      "templates": [
+        {
+          "line": 213,
+          "name": "test_returndatacopy_memory_expansion"
+        },
+        {
+          "line": 268,
+          "name": "test_returndatacopy_huge_memory_expansion"
+        }
+      ]
+    },
+    {
+      "path": "tests/unscheduled/eip7692_eof_v1/eip7069_extcall/test_returndataload.py",
+      "sha256": "f06e81b3503c13cffa6c8585a1d6df9d067eb568a65024890b967fb5b11e613c",
+      "templates": [
+        {
+          "line": 77,
+          "name": "test_returndatacopy_handling"
+        },
+        {
+          "line": 213,
+          "name": "test_returndataload_handling"
+        },
+        {
+          "line": 284,
+          "name": "test_returndatacopy_oob"
+        }
+      ]
+    },
+    {
+      "path": "tests/unscheduled/eip7692_eof_v1/eip7480_data_section/__init__.py",
+      "sha256": "6effcdb7186cdc580872363112e4165a345eefa2c5c4bff7d8751dd60f031198",
+      "templates": []
+    },
+    {
+      "path": "tests/unscheduled/eip7692_eof_v1/eip7480_data_section/spec.py",
+      "sha256": "1dda25a7543be09e178a38ff4633a599410dae56178a0c1cf9950a817e04c100",
+      "templates": []
+    },
+    {
+      "path": "tests/unscheduled/eip7692_eof_v1/eip7480_data_section/test_code_validation.py",
+      "sha256": "c2bbd7b114d6cc7804926b657a933977dab3ecd1684ea5c5b8d5fbb626d909aa",
+      "templates": [
+        {
+          "line": 109,
+          "name": "test_valid_containers_with_data_section"
+        },
+        {
+          "line": 230,
+          "name": "test_invalid_containers_with_data_section"
+        },
+        {
+          "line": 279,
+          "name": "test_dataloadn_truncated_immediate"
+        }
+      ]
+    },
+    {
+      "path": "tests/unscheduled/eip7692_eof_v1/eip7480_data_section/test_data_opcodes.py",
+      "sha256": "253554967266cfbc2902ee1a63d2dd3914421509019c00f62ad49e3db31406fc",
+      "templates": [
+        {
+          "line": 20,
+          "name": "test_dataloadn"
+        },
+        {
+          "line": 118,
+          "name": "test_data_section_succeed"
+        }
+      ]
+    },
+    {
+      "path": "tests/unscheduled/eip7692_eof_v1/eip7480_data_section/test_datacopy_memory_expansion.py",
+      "sha256": "93390619b155b847062498f0046b849e91dc1fc0760b06af27962286d976ebae",
+      "templates": [
+        {
+          "line": 223,
+          "name": "test_datacopy_memory_expansion"
+        },
+        {
+          "line": 288,
+          "name": "test_datacopy_huge_memory_expansion"
+        }
+      ]
+    },
+    {
+      "path": "tests/unscheduled/eip7692_eof_v1/eip7620_eof_create/__init__.py",
+      "sha256": "cd31fd0e81327f59e0916065373152097ffe707b7314cb61f71f17a8f3274f82",
+      "templates": []
+    },
+    {
+      "path": "tests/unscheduled/eip7692_eof_v1/eip7620_eof_create/helpers.py",
+      "sha256": "b9342b621356f3ba5940c1a6bbad289c33602c047fa8f5de4ecbd2de415329f9",
+      "templates": []
+    },
+    {
+      "path": "tests/unscheduled/eip7692_eof_v1/eip7620_eof_create/spec.py",
+      "sha256": "a6056170c484db0805f94b2e37f7be5949abf629a0b1576a4c217d9335984761",
+      "templates": []
+    },
+    {
+      "path": "tests/unscheduled/eip7692_eof_v1/eip7620_eof_create/test_eofcreate.py",
+      "sha256": "8a4a688cfa8b639f942cdc6cabc465b0a88e1da5d60900a54fa77fbbd96ec3e4",
+      "templates": [
+        {
+          "line": 45,
+          "name": "test_simple_eofcreate"
+        },
+        {
+          "line": 75,
+          "name": "test_eofcreate_then_dataload"
+        },
+        {
+          "line": 126,
+          "name": "test_eofcreate_then_call"
+        },
+        {
+          "line": 197,
+          "name": "test_auxdata_variations"
+        },
+        {
+          "line": 259,
+          "name": "test_calldata"
+        },
+        {
+          "line": 318,
+          "name": "test_eofcreate_in_initcode"
+        },
+        {
+          "line": 374,
+          "name": "test_eofcreate_in_initcode_reverts"
+        },
+        {
+          "line": 431,
+          "name": "test_return_data_cleared"
+        },
+        {
+          "line": 497,
+          "name": "test_address_collision"
+        },
+        {
+          "line": 554,
+          "name": "test_eofcreate_revert_eof_returndata"
+        },
+        {
+          "line": 615,
+          "name": "test_eofcreate_invalid_index"
+        },
+        {
+          "line": 630,
+          "name": "test_eofcreate_invalid_truncated_immediate"
+        },
+        {
+          "line": 654,
+          "name": "test_eofcreate_truncated_container"
+        },
+        {
+          "line": 692,
+          "name": "test_eofcreate_context"
+        },
+        {
+          "line": 767,
+          "name": "test_eofcreate_memory_context"
+        }
+      ]
+    },
+    {
+      "path": "tests/unscheduled/eip7692_eof_v1/eip7620_eof_create/test_eofcreate_failures.py",
+      "sha256": "01ab0b4f6216de16692ee7ec3f11ff4119c9ddf1e7a5b81dbd54de1527aa5955",
+      "templates": [
+        {
+          "line": 51,
+          "name": "test_initcode_revert"
+        },
+        {
+          "line": 104,
+          "name": "test_initcode_aborts"
+        },
+        {
+          "line": 170,
+          "name": "test_eofcreate_deploy_sizes"
+        },
+        {
+          "line": 261,
+          "name": "test_eofcreate_deploy_sizes_tx"
+        },
+        {
+          "line": 283,
+          "name": "test_auxdata_size_failures"
+        },
+        {
+          "line": 356,
+          "name": "test_eofcreate_insufficient_stipend"
+        },
+        {
+          "line": 404,
+          "name": "test_insufficient_initcode_gas"
+        },
+        {
+          "line": 467,
+          "name": "test_insufficient_gas_memory_expansion"
+        },
+        {
+          "line": 528,
+          "name": "test_insufficient_returncode_auxdata_gas"
+        },
+        {
+          "line": 612,
+          "name": "test_static_flag_eofcreate"
+        },
+        {
+          "line": 679,
+          "name": "test_eof_eofcreate_msg_depth"
+        },
+        {
+          "line": 792,
+          "name": "test_reentrant_eofcreate"
+        }
+      ]
+    },
+    {
+      "path": "tests/unscheduled/eip7692_eof_v1/eip7620_eof_create/test_gas.py",
+      "sha256": "bab8a8383afc7be417646cc5401bade264b924adef8c06996b04391354256a55",
+      "templates": [
+        {
+          "line": 111,
+          "name": "test_eofcreate_gas"
+        }
+      ]
+    },
+    {
+      "path": "tests/unscheduled/eip7692_eof_v1/eip7620_eof_create/test_legacy_eof_creates.py",
+      "sha256": "dd00cd6ef323c50e444877ae56af9b29a0e8fa99197ed7d9546746616852d95d",
+      "templates": [
+        {
+          "line": 53,
+          "name": "test_cross_version_creates_fail_light"
+        },
+        {
+          "line": 126,
+          "name": "test_cross_version_creates_fail_hard"
+        },
+        {
+          "line": 200,
+          "name": "test_legacy_initcode_eof_contract_fails"
+        }
+      ]
+    },
+    {
+      "path": "tests/unscheduled/eip7692_eof_v1/eip7620_eof_create/test_memory.py",
+      "sha256": "67fdafa26f15975586748c38b0780e7b2fbda7580f7e3ab398551c7ac9184f89",
+      "templates": [
+        {
+          "line": 55,
+          "name": "test_eofcreate_memory"
+        }
+      ]
+    },
+    {
+      "path": "tests/unscheduled/eip7692_eof_v1/eip7620_eof_create/test_returncode.py",
+      "sha256": "68c0124ce31d6c6dfa96c47421e1972c1ac2ae5416ae04596322fdc617aa2e3f",
+      "templates": [
+        {
+          "line": 26,
+          "name": "test_returncode_valid_index_0"
+        },
+        {
+          "line": 43,
+          "name": "test_returncode_valid_index_1"
+        },
+        {
+          "line": 62,
+          "name": "test_returncode_valid_index_255"
+        },
+        {
+          "line": 82,
+          "name": "test_returncode_invalid_truncated_immediate"
+        },
+        {
+          "line": 99,
+          "name": "test_returncode_invalid_index_0"
+        },
+        {
+          "line": 116,
+          "name": "test_returncode_invalid_index_1"
+        },
+        {
+          "line": 134,
+          "name": "test_returncode_invalid_index_255"
+        },
+        {
+          "line": 152,
+          "name": "test_returncode_terminating"
+        },
+        {
+          "line": 198,
+          "name": "test_returncode_memory_expansion"
+        }
+      ]
+    },
+    {
+      "path": "tests/unscheduled/eip7692_eof_v1/eip7620_eof_create/test_subcontainer_validation.py",
+      "sha256": "385105bf2f0f40c04d3a8f836f738b1f1f643f65155eda61b7d0e1b774aa541e",
+      "templates": [
+        {
+          "line": 45,
+          "name": "test_simple_create_from_deployed"
+        },
+        {
+          "line": 60,
+          "name": "test_simple_create_from_creation"
+        },
+        {
+          "line": 81,
+          "name": "test_reverting_container"
+        },
+        {
+          "line": 115,
+          "name": "test_orphan_container"
+        },
+        {
+          "line": 171,
+          "name": "test_container_combos_valid"
+        },
+        {
+          "line": 213,
+          "name": "test_container_combos_invalid"
+        },
+        {
+          "line": 262,
+          "name": "test_container_combos_deeply_nested_valid"
+        },
+        {
+          "line": 315,
+          "name": "test_container_combos_deeply_nested_invalid"
+        },
+        {
+          "line": 383,
+          "name": "test_container_combos_non_first_code_sections_valid"
+        },
+        {
+          "line": 425,
+          "name": "test_container_combos_non_first_code_sections_invalid"
+        },
+        {
+          "line": 445,
+          "name": "test_container_both_kinds_same_sub"
+        },
+        {
+          "line": 473,
+          "name": "test_container_ambiguous_kind"
+        },
+        {
+          "line": 500,
+          "name": "test_container_both_kinds_different_sub"
+        },
+        {
+          "line": 520,
+          "name": "test_container_multiple_eofcreate_references"
+        },
+        {
+          "line": 537,
+          "name": "test_container_multiple_returncode_references"
+        },
+        {
+          "line": 560,
+          "name": "test_subcontainer_wrong_eof_version"
+        },
+        {
+          "line": 583,
+          "name": "test_subcontainer_wrong_size"
+        },
+        {
+          "line": 628,
+          "name": "test_deep_container"
+        },
+        {
+          "line": 663,
+          "name": "test_deep_container_initcode"
+        },
+        {
+          "line": 728,
+          "name": "test_wide_container"
+        },
+        {
+          "line": 914,
+          "name": "test_migrated_eofcreate"
+        },
+        {
+          "line": 919,
+          "name": "test_dangling_initcode_subcontainer_bytes"
+        },
+        {
+          "line": 942,
+          "name": "test_dangling_runtime_subcontainer_bytes"
+        }
+      ]
+    },
+    {
+      "path": "tests/unscheduled/eip7692_eof_v1/eip7873_tx_create/__init__.py",
+      "sha256": "8e4f4fc36e259dd06038c10ebe517a6cb4eb378a013f110ddc776d27a1a11876",
+      "templates": []
+    },
+    {
+      "path": "tests/unscheduled/eip7692_eof_v1/eip7873_tx_create/spec.py",
+      "sha256": "b8042db34f92e257134a52be30ade724c9f30f9111541e598467b27c245a4222",
+      "templates": []
+    },
+    {
+      "path": "tests/unscheduled/eip7692_eof_v1/eip7873_tx_create/test_creation_tx.py",
+      "sha256": "c317ae15bf2ad3703bd0ca4e15d52fa29a07a1dbf49b88677a29f6d9817da5b9",
+      "templates": [
+        {
+          "line": 42,
+          "name": "test_legacy_create_tx_legacy_initcode_eof_bytecode"
+        },
+        {
+          "line": 95,
+          "name": "test_legacy_create_tx_prefix_initcode"
+        }
+      ]
+    },
+    {
+      "path": "tests/unscheduled/eip7692_eof_v1/eip7873_tx_create/test_txcreate.py",
+      "sha256": "614e6f8fdb74dc7c04bb0a45f2b3c2c6ed21e91ecabfb3e67231ef9c44822ef3",
+      "templates": [
+        {
+          "line": 46,
+          "name": "test_simple_txcreate"
+        },
+        {
+          "line": 66,
+          "name": "test_txcreate_then_dataload"
+        },
+        {
+          "line": 115,
+          "name": "test_txcreate_then_call"
+        },
+        {
+          "line": 182,
+          "name": "test_auxdata_variations"
+        },
+        {
+          "line": 242,
+          "name": "test_calldata"
+        },
+        {
+          "line": 300,
+          "name": "test_txcreate_in_initcode"
+        },
+        {
+          "line": 396,
+          "name": "test_return_data_cleared"
+        },
+        {
+          "line": 460,
+          "name": "test_address_collision"
+        },
+        {
+          "line": 511,
+          "name": "test_txcreate_revert_eof_returndata"
+        },
+        {
+          "line": 578,
+          "name": "test_txcreate_context"
+        },
+        {
+          "line": 655,
+          "name": "test_txcreate_memory_context"
+        },
+        {
+          "line": 704,
+          "name": "test_short_data_subcontainer"
+        }
+      ]
+    },
+    {
+      "path": "tests/unscheduled/eip7692_eof_v1/eip7873_tx_create/test_txcreate_failures.py",
+      "sha256": "9ff7d15905904c3f5c6162da629f394e5972429e6c6d31aa71cd69e8eb2f5411",
+      "templates": [
+        {
+          "line": 57,
+          "name": "test_initcode_revert"
+        },
+        {
+          "line": 114,
+          "name": "test_txcreate_invalid_hash"
+        },
+        {
+          "line": 146,
+          "name": "test_initcode_aborts"
+        },
+        {
+          "line": 194,
+          "name": "test_txcreate_deploy_sizes"
+        },
+        {
+          "line": 280,
+          "name": "test_auxdata_size_failures"
+        },
+        {
+          "line": 349,
+          "name": "test_txcreate_insufficient_stipend"
+        },
+        {
+          "line": 393,
+          "name": "test_insufficient_initcode_gas"
+        },
+        {
+          "line": 447,
+          "name": "test_insufficient_gas_memory_expansion"
+        },
+        {
+          "line": 503,
+          "name": "test_insufficient_returncode_auxdata_gas"
+        },
+        {
+          "line": 580,
+          "name": "test_static_flag_txcreate"
+        },
+        {
+          "line": 638,
+          "name": "test_eof_txcreate_msg_depth"
+        },
+        {
+          "line": 754,
+          "name": "test_reentrant_txcreate"
+        },
+        {
+          "line": 840,
+          "name": "test_invalid_container_deployment"
+        }
+      ]
+    },
+    {
+      "path": "tests/unscheduled/eip7692_eof_v1/eip7873_tx_create/test_txcreate_validates.py",
+      "sha256": "de0e13ea639aea2ec61c134a4435e23d677759b3ee537081883c6fc70334e622",
+      "templates": [
+        {
+          "line": 169,
+          "name": "test_txcreate_validates"
+        }
+      ]
+    },
+    {
+      "path": "tests/unscheduled/eip7692_eof_v1/gas_test.py",
+      "sha256": "7392196865fb16761b966fbfef77c8e00836665f10a500626b33ee925973bafd",
+      "templates": []
+    }
+  ],
+  "repository": "https://github.com/ethereum/execution-spec-tests",
+  "unit": "Python test_* function template; includes every fork and benchmark under tests/; not expanded fixtures"
+}

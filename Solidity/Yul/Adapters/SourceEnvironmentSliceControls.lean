@@ -24,7 +24,6 @@ theorem source_pair (n : Nat) :
 theorem ordered_values (memory : Backend.Environment.Memory) :
     (Backend.Environment.runSlice tiFrame magicCode ⟨[environmentWord 11,environmentWord 22],memory⟩).map
       (fun result => result.stack.map (fun value=>value.1.toNat))=some [highestUint.val,88,17,11,22] := by
-  first | omega | decide | skip
   rw [ordered_target]
   simp only [Option.map_some,List.map_cons,List.map_nil,environmentWord_nat]
   rfl
@@ -34,7 +33,6 @@ theorem wrong_sender_and_order (memory : Backend.Environment.Memory) :
       (fun result => result.stack.map (fun value=>value.1.toNat))≠some [highestUint.val,99,17] ∧
     (Backend.Environment.runSlice tiFrame magicCode ⟨[],memory⟩).map
       (fun result => result.stack.map (fun value=>value.1.toNat))≠some [17,88,highestUint.val] := by
-  first | omega | decide | skip
   rw [ordered_target]
   simp only [Option.map_some,List.map_cons,List.map_nil,environmentWord_nat]
   decide +kernel
@@ -48,9 +46,8 @@ theorem balance_snapshots (tail : List Backend.Environment.Word) (memory : Backe
         some (⟨environmentWord 9::tail,memory⟩ : Backend.Environment.Slice) ∧
     Backend.Environment.runSlice (sourceEnvironmentFrame sbGlob sbFrame (sourceObservedFunds sbGlob sbSystem)) [.op .BALANCE]
       ⟨environmentWord (addressInputWord sbAddress)::tail,memory⟩=
-        some (⟨environmentWord 77::tail,memory⟩ : Backend.Environment.Slice) := by
-  first | omega | decide | skip
-  exact ⟨balance_target sbGlob sbFrame sbExternal sbAddress tail memory,
+        some (⟨environmentWord 77::tail,memory⟩ : Backend.Environment.Slice) :=
+  ⟨balance_target sbGlob sbFrame sbExternal sbAddress tail memory,
     balance_target sbGlob sbFrame sbHistory sbAddress tail memory,
     balance_target sbGlob sbFrame sbSystem sbAddress tail memory⟩
 
@@ -82,7 +79,6 @@ theorem wrong_ledger (memory : Backend.Environment.Memory) :
     (Backend.Environment.runSlice (sourceEnvironmentFrame sbGlob sbFrame (fun _=>environmentWord 1)) [.op .BALANCE]
       ⟨[environmentWord (addressInputWord sbAddress)],memory⟩).map (fun result=>result.stack)≠
         some [environmentWord (sourceObservedBalance sbGlob sbHistory sbAddress)] := by
-  first | omega | decide | skip
   change some [environmentWord 1]≠some [environmentWord 9]
   decide +kernel
 

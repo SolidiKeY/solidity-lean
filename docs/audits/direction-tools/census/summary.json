@@ -1,0 +1,638 @@
+{
+  "direction_verdict": null,
+  "fastest_growing_areas_by_added_lines": [
+    {
+      "added_lines": 279224,
+      "area": "Backend",
+      "final_lines": 279224,
+      "goals_moved": null,
+      "growth_ratio": null,
+      "initial_lines": 0,
+      "what": "Solidity/Backend: lexical source area; goal closure unavailable; growth alone gives no direction verdict."
+    },
+    {
+      "added_lines": 197432,
+      "area": "Yul",
+      "final_lines": 197432,
+      "goals_moved": null,
+      "growth_ratio": null,
+      "initial_lines": 0,
+      "what": "Solidity/Yul: lexical source area; goal closure unavailable; growth alone gives no direction verdict."
+    },
+    {
+      "added_lines": 144067,
+      "area": "Calculus",
+      "final_lines": 169330,
+      "goals_moved": null,
+      "growth_ratio": 6.702687725131615,
+      "initial_lines": 25263,
+      "what": "Solidity/Calculus: lexical source area; goal closure unavailable; growth alone gives no direction verdict."
+    },
+    {
+      "added_lines": 102846,
+      "area": "Lowering",
+      "final_lines": 102846,
+      "goals_moved": null,
+      "growth_ratio": null,
+      "initial_lines": 0,
+      "what": "Solidity/Lowering: lexical source area; goal closure unavailable; growth alone gives no direction verdict."
+    },
+    {
+      "added_lines": 101589,
+      "area": "Frontend",
+      "final_lines": 101589,
+      "goals_moved": null,
+      "growth_ratio": null,
+      "initial_lines": 0,
+      "what": "Solidity/Frontend: lexical source area; goal closure unavailable; growth alone gives no direction verdict."
+    },
+    {
+      "added_lines": 50466,
+      "area": "Examples",
+      "final_lines": 61471,
+      "goals_moved": null,
+      "growth_ratio": 5.585733757383008,
+      "initial_lines": 11005,
+      "what": "Solidity/Examples: lexical source area; goal closure unavailable; growth alone gives no direction verdict."
+    },
+    {
+      "added_lines": 50041,
+      "area": "Source",
+      "final_lines": 50041,
+      "goals_moved": null,
+      "growth_ratio": null,
+      "initial_lines": 0,
+      "what": "Solidity/Source: lexical source area; goal closure unavailable; growth alone gives no direction verdict."
+    },
+    {
+      "added_lines": 40215,
+      "area": "Evm",
+      "final_lines": 45857,
+      "goals_moved": null,
+      "growth_ratio": 8.127791563275434,
+      "initial_lines": 5642,
+      "what": "Solidity/Evm: lexical source area; goal closure unavailable; growth alone gives no direction verdict."
+    },
+    {
+      "added_lines": 21853,
+      "area": "Semantics",
+      "final_lines": 25903,
+      "goals_moved": null,
+      "growth_ratio": 6.395802469135803,
+      "initial_lines": 4050,
+      "what": "Solidity/Semantics: lexical source area; goal closure unavailable; growth alone gives no direction verdict."
+    },
+    {
+      "added_lines": 11067,
+      "area": "Syntax",
+      "final_lines": 14617,
+      "goals_moved": null,
+      "growth_ratio": 4.117464788732394,
+      "initial_lines": 3550,
+      "what": "Solidity/Syntax: lexical source area; goal closure unavailable; growth alone gives no direction verdict."
+    },
+    {
+      "added_lines": 7626,
+      "area": "SolcValidation",
+      "final_lines": 7626,
+      "goals_moved": null,
+      "growth_ratio": null,
+      "initial_lines": 0,
+      "what": "Solidity/SolcValidation: lexical source area; goal closure unavailable; growth alone gives no direction verdict."
+    },
+    {
+      "added_lines": 6769,
+      "area": "Tools",
+      "final_lines": 8575,
+      "goals_moved": null,
+      "growth_ratio": 4.748062015503876,
+      "initial_lines": 1806,
+      "what": "Solidity/Tools: lexical source area; goal closure unavailable; growth alone gives no direction verdict."
+    },
+    {
+      "added_lines": 6658,
+      "area": "Optimizer",
+      "final_lines": 6658,
+      "goals_moved": null,
+      "growth_ratio": null,
+      "initial_lines": 0,
+      "what": "Solidity/Optimizer: lexical source area; goal closure unavailable; growth alone gives no direction verdict."
+    },
+    {
+      "added_lines": 5964,
+      "area": "Language",
+      "final_lines": 5964,
+      "goals_moved": null,
+      "growth_ratio": null,
+      "initial_lines": 0,
+      "what": "Solidity/Language: lexical source area; goal closure unavailable; growth alone gives no direction verdict."
+    },
+    {
+      "added_lines": 4728,
+      "area": "Roadmap",
+      "final_lines": 4728,
+      "goals_moved": null,
+      "growth_ratio": null,
+      "initial_lines": 0,
+      "what": "Solidity/Roadmap: lexical source area; goal closure unavailable; growth alone gives no direction verdict."
+    },
+    {
+      "added_lines": 4710,
+      "area": "TestSuite",
+      "final_lines": 4710,
+      "goals_moved": null,
+      "growth_ratio": null,
+      "initial_lines": 0,
+      "what": "Solidity/TestSuite: lexical source area; goal closure unavailable; growth alone gives no direction verdict."
+    },
+    {
+      "added_lines": 4049,
+      "area": "Storage",
+      "final_lines": 4049,
+      "goals_moved": null,
+      "growth_ratio": null,
+      "initial_lines": 0,
+      "what": "Solidity/Storage: lexical source area; goal closure unavailable; growth alone gives no direction verdict."
+    },
+    {
+      "added_lines": 3333,
+      "area": "Theory",
+      "final_lines": 8890,
+      "goals_moved": null,
+      "growth_ratio": 1.5997840561454022,
+      "initial_lines": 5557,
+      "what": "Solidity/Theory: lexical source area; goal closure unavailable; growth alone gives no direction verdict."
+    },
+    {
+      "added_lines": 2265,
+      "area": "Hash",
+      "final_lines": 2265,
+      "goals_moved": null,
+      "growth_ratio": null,
+      "initial_lines": 0,
+      "what": "Solidity/Hash: lexical source area; goal closure unavailable; growth alone gives no direction verdict."
+    },
+    {
+      "added_lines": 2072,
+      "area": "Precompiles",
+      "final_lines": 2072,
+      "goals_moved": null,
+      "growth_ratio": null,
+      "initial_lines": 0,
+      "what": "Solidity/Precompiles: lexical source area; goal closure unavailable; growth alone gives no direction verdict."
+    }
+  ],
+  "fastest_growing_areas_by_ratio": [
+    {
+      "added_lines": 40215,
+      "area": "Evm",
+      "final_lines": 45857,
+      "goals_moved": null,
+      "growth_ratio": 8.127791563275434,
+      "initial_lines": 5642,
+      "what": "Solidity/Evm: lexical source area; goal closure unavailable; growth alone gives no direction verdict."
+    },
+    {
+      "added_lines": 144067,
+      "area": "Calculus",
+      "final_lines": 169330,
+      "goals_moved": null,
+      "growth_ratio": 6.702687725131615,
+      "initial_lines": 25263,
+      "what": "Solidity/Calculus: lexical source area; goal closure unavailable; growth alone gives no direction verdict."
+    },
+    {
+      "added_lines": 21853,
+      "area": "Semantics",
+      "final_lines": 25903,
+      "goals_moved": null,
+      "growth_ratio": 6.395802469135803,
+      "initial_lines": 4050,
+      "what": "Solidity/Semantics: lexical source area; goal closure unavailable; growth alone gives no direction verdict."
+    },
+    {
+      "added_lines": 50466,
+      "area": "Examples",
+      "final_lines": 61471,
+      "goals_moved": null,
+      "growth_ratio": 5.585733757383008,
+      "initial_lines": 11005,
+      "what": "Solidity/Examples: lexical source area; goal closure unavailable; growth alone gives no direction verdict."
+    },
+    {
+      "added_lines": 6769,
+      "area": "Tools",
+      "final_lines": 8575,
+      "goals_moved": null,
+      "growth_ratio": 4.748062015503876,
+      "initial_lines": 1806,
+      "what": "Solidity/Tools: lexical source area; goal closure unavailable; growth alone gives no direction verdict."
+    },
+    {
+      "added_lines": 11067,
+      "area": "Syntax",
+      "final_lines": 14617,
+      "goals_moved": null,
+      "growth_ratio": 4.117464788732394,
+      "initial_lines": 3550,
+      "what": "Solidity/Syntax: lexical source area; goal closure unavailable; growth alone gives no direction verdict."
+    },
+    {
+      "added_lines": 571,
+      "area": "AST",
+      "final_lines": 1247,
+      "goals_moved": null,
+      "growth_ratio": 1.8446745562130178,
+      "initial_lines": 676,
+      "what": "Solidity/AST: lexical source area; goal closure unavailable; growth alone gives no direction verdict."
+    },
+    {
+      "added_lines": 135,
+      "area": "Theorems",
+      "final_lines": 360,
+      "goals_moved": null,
+      "growth_ratio": 1.6,
+      "initial_lines": 225,
+      "what": "Solidity/Theorems: lexical source area; goal closure unavailable; growth alone gives no direction verdict."
+    },
+    {
+      "added_lines": 3333,
+      "area": "Theory",
+      "final_lines": 8890,
+      "goals_moved": null,
+      "growth_ratio": 1.5997840561454022,
+      "initial_lines": 5557,
+      "what": "Solidity/Theory: lexical source area; goal closure unavailable; growth alone gives no direction verdict."
+    },
+    {
+      "added_lines": 20,
+      "area": "SpecSyntax",
+      "final_lines": 220,
+      "goals_moved": null,
+      "growth_ratio": 1.1,
+      "initial_lines": 200,
+      "what": "Solidity/SpecSyntax: lexical source area; goal closure unavailable; growth alone gives no direction verdict."
+    },
+    {
+      "added_lines": 0,
+      "area": "FreshNames",
+      "final_lines": 93,
+      "goals_moved": null,
+      "growth_ratio": 1.0,
+      "initial_lines": 93,
+      "what": "Solidity/FreshNames: lexical source area; goal closure unavailable; growth alone gives no direction verdict."
+    },
+    {
+      "added_lines": 0,
+      "area": "KeySort",
+      "final_lines": 271,
+      "goals_moved": null,
+      "growth_ratio": 1.0,
+      "initial_lines": 271,
+      "what": "Solidity/KeySort: lexical source area; goal closure unavailable; growth alone gives no direction verdict."
+    },
+    {
+      "added_lines": -89,
+      "area": "Corpus",
+      "final_lines": 4204,
+      "goals_moved": null,
+      "growth_ratio": 0.9792685767528535,
+      "initial_lines": 4293,
+      "what": "Solidity/Corpus: lexical source area; goal closure unavailable; growth alone gives no direction verdict."
+    },
+    {
+      "added_lines": -42,
+      "area": "Counterexamples",
+      "final_lines": 413,
+      "goals_moved": null,
+      "growth_ratio": 0.9076923076923077,
+      "initial_lines": 455,
+      "what": "Solidity/Counterexamples: lexical source area; goal closure unavailable; growth alone gives no direction verdict."
+    },
+    {
+      "added_lines": -259,
+      "area": "SortCheck",
+      "final_lines": 1281,
+      "goals_moved": null,
+      "growth_ratio": 0.8318181818181818,
+      "initial_lines": 1540,
+      "what": "Solidity/SortCheck: lexical source area; goal closure unavailable; growth alone gives no direction verdict."
+    },
+    {
+      "added_lines": -1722,
+      "area": "Typing",
+      "final_lines": 6832,
+      "goals_moved": null,
+      "growth_ratio": 0.7986906710310966,
+      "initial_lines": 8554,
+      "what": "Solidity/Typing: lexical source area; goal closure unavailable; growth alone gives no direction verdict."
+    },
+    {
+      "added_lines": -1095,
+      "area": "Update",
+      "final_lines": 58,
+      "goals_moved": null,
+      "growth_ratio": 0.05030355594102342,
+      "initial_lines": 1153,
+      "what": "Solidity/Update: lexical source area; goal closure unavailable; growth alone gives no direction verdict."
+    }
+  ],
+  "inventory": {
+    "docs/audits/architecture-tools/": [
+      "docs/audits/architecture-tools/core_closure.py",
+      "docs/audits/architecture-tools/doc_names.py",
+      "docs/audits/architecture-tools/dup_decls.py",
+      "docs/audits/architecture-tools/dup_general.py",
+      "docs/audits/architecture-tools/imports.py",
+      "docs/audits/architecture-tools/near_files.py",
+      "docs/audits/architecture-tools/olean_sizes.py",
+      "docs/audits/architecture-tools/timing-sample.tsv",
+      "docs/audits/architecture-tools/unreferenced.py"
+    ],
+    "docs/audits/build-speed": [
+      "docs/audits/build-speed-tools/churn.py",
+      "docs/audits/build-speed-tools/import_graph.py",
+      "docs/audits/build-speed-tools/measure.sh",
+      "docs/audits/build-speed-tools/pins.py",
+      "docs/audits/build-speed-tools/profile.sh",
+      "docs/audits/build-speed-tools/scan.py",
+      "docs/audits/build-speed.md"
+    ],
+    "docs/audits/proof-coverage-tools/": [
+      "docs/audits/proof-coverage-tools/statement-sample.txt",
+      "docs/audits/proof-coverage-tools/theorem_census.py"
+    ],
+    "scripts/bench/": [],
+    "scripts/build-measure": [
+      "scripts/build-measure-report.py",
+      "scripts/build-measure.py"
+    ],
+    "scripts/differential/": []
+  },
+  "largest_modules": [
+    {
+      "area": "Frontend",
+      "category": "axiom_pins",
+      "lines": 3905,
+      "path": "Solidity/Frontend/ExpressionUniqueness/AxiomPins.lean",
+      "what": "axiom_pins checks/imports in Solidity/Frontend/ExpressionUniqueness/AxiomPins.lean"
+    },
+    {
+      "area": "Backend",
+      "category": "unmarked",
+      "lines": 3777,
+      "path": "Solidity/Backend/StorageOps/TargetNestedArrayTransportControls.lean",
+      "what": "Declarations: forall_bounded_pair, w, w3"
+    },
+    {
+      "area": "Calculus",
+      "category": "unmarked",
+      "lines": 3142,
+      "path": "Solidity/Calculus/ArrayProperty.lean",
+      "what": "The array property fragment, instantiated (M7, step 5)"
+    },
+    {
+      "area": "Calculus",
+      "category": "unmarked",
+      "lines": 3081,
+      "path": "Solidity/Calculus/QuotientCut.lean",
+      "what": "Operators cut out of a leaf into fresh atoms"
+    },
+    {
+      "area": "Backend",
+      "category": "unmarked",
+      "lines": 3006,
+      "path": "Solidity/Backend/MemoryOps/SourceReferenceReadControls.lean",
+      "what": "Declarations: C, B, R"
+    },
+    {
+      "area": "Calculus",
+      "category": "unmarked",
+      "lines": 2846,
+      "path": "Solidity/Calculus/HashKinds.lean",
+      "what": "Strings hashed by two kinds (M7, plan step 7)"
+    },
+    {
+      "area": "Frontend",
+      "category": "unmarked",
+      "lines": 2687,
+      "path": "Solidity/Frontend/SolcJson/Body.lean",
+      "what": "solc's JSON: types, expressions and statements"
+    },
+    {
+      "area": "Corpus",
+      "category": "corpus",
+      "lines": 2624,
+      "path": "Solidity/Corpus/TestSuite.lean",
+      "what": "solkey `TestSuite.sol`, derived"
+    },
+    {
+      "area": "Backend",
+      "category": "unmarked",
+      "lines": 2456,
+      "path": "Solidity/Backend/MemoryOps/PhysicalStructChildControls.lean",
+      "what": "Declarations: C, S, B"
+    },
+    {
+      "area": "Frontend",
+      "category": "unmarked",
+      "lines": 2268,
+      "path": "Solidity/Frontend/SolcJson/Contract.lean",
+      "what": "solc's JSON: a contract"
+    },
+    {
+      "area": "Calculus",
+      "category": "unmarked",
+      "lines": 2238,
+      "path": "Solidity/Calculus/FlattenTotality.lean",
+      "what": "Read flattening never refuses its fragment"
+    },
+    {
+      "area": "Calculus",
+      "category": "unmarked",
+      "lines": 2183,
+      "path": "Solidity/Calculus/MemSwap.lean",
+      "what": "Fresh memory arrays read as words (M7, plan step 6)"
+    },
+    {
+      "area": "Syntax",
+      "category": "unmarked",
+      "lines": 2151,
+      "path": "Solidity/Syntax/Elab/Arms.lean",
+      "what": "The elaborator's arms"
+    },
+    {
+      "area": "Syntax",
+      "category": "unmarked",
+      "lines": 2142,
+      "path": "Solidity/Syntax/Elab/Values.lean",
+      "what": "The elaborator's values"
+    },
+    {
+      "area": "Calculus",
+      "category": "unmarked",
+      "lines": 2072,
+      "path": "Solidity/Calculus/Decision.lean",
+      "what": "The closer's decision, stated (M7)"
+    },
+    {
+      "area": "Calculus",
+      "category": "unmarked",
+      "lines": 2021,
+      "path": "Solidity/Calculus/ArrayCut.lean",
+      "what": "Array reads cut to fresh atoms (M7, step 6)"
+    },
+    {
+      "area": "Source",
+      "category": "unmarked",
+      "lines": 1980,
+      "path": "Solidity/Source/Unique.lean",
+      "what": "Uniqueness of meaning for constants (Q1)"
+    },
+    {
+      "area": "Backend",
+      "category": "unmarked",
+      "lines": 1915,
+      "path": "Solidity/Backend/MemoryOps/SourceUintReadAssignmentControls.lean",
+      "what": "Declarations: C, A, H"
+    },
+    {
+      "area": "Typing",
+      "category": "unmarked",
+      "lines": 1802,
+      "path": "Solidity/Typing/CleanTailRun.lean",
+      "what": "Clean tails, kept by a contract that exposes nothing"
+    },
+    {
+      "area": "Calculus",
+      "category": "unmarked",
+      "lines": 1773,
+      "path": "Solidity/Calculus/CloseScoped/Steps.lean",
+      "what": "Closing a scoped leaf: the steps"
+    }
+  ],
+  "limitations": [
+    "No matched real-world unit calibration is claimed by this census; whole-repository ratios to CompCert would not compare like with like.",
+    "Generated classification is a marker/path-based lower bound, unmarked includes possible generated code.",
+    "Monthly history samples only first-parent reachable commits; partial current month included; merge labels are not completed goals.",
+    "Timing sample predates base; matched module paths but changed line denominators possible; no current or area-total timing asserted."
+  ],
+  "over_3x_growth_candidates": [
+    {
+      "added_lines": 144067,
+      "area": "Calculus",
+      "final_lines": 169330,
+      "goals_moved": null,
+      "growth_ratio": 6.702687725131615,
+      "initial_lines": 25263,
+      "what": "Solidity/Calculus: lexical source area; goal closure unavailable; growth alone gives no direction verdict."
+    },
+    {
+      "added_lines": 40215,
+      "area": "Evm",
+      "final_lines": 45857,
+      "goals_moved": null,
+      "growth_ratio": 8.127791563275434,
+      "initial_lines": 5642,
+      "what": "Solidity/Evm: lexical source area; goal closure unavailable; growth alone gives no direction verdict."
+    },
+    {
+      "added_lines": 50466,
+      "area": "Examples",
+      "final_lines": 61471,
+      "goals_moved": null,
+      "growth_ratio": 5.585733757383008,
+      "initial_lines": 11005,
+      "what": "Solidity/Examples: lexical source area; goal closure unavailable; growth alone gives no direction verdict."
+    },
+    {
+      "added_lines": 21853,
+      "area": "Semantics",
+      "final_lines": 25903,
+      "goals_moved": null,
+      "growth_ratio": 6.395802469135803,
+      "initial_lines": 4050,
+      "what": "Solidity/Semantics: lexical source area; goal closure unavailable; growth alone gives no direction verdict."
+    },
+    {
+      "added_lines": 11067,
+      "area": "Syntax",
+      "final_lines": 14617,
+      "goals_moved": null,
+      "growth_ratio": 4.117464788732394,
+      "initial_lines": 3550,
+      "what": "Solidity/Syntax: lexical source area; goal closure unavailable; growth alone gives no direction verdict."
+    },
+    {
+      "added_lines": 6769,
+      "area": "Tools",
+      "final_lines": 8575,
+      "goals_moved": null,
+      "growth_ratio": 4.748062015503876,
+      "initial_lines": 1806,
+      "what": "Solidity/Tools: lexical source area; goal closure unavailable; growth alone gives no direction verdict."
+    }
+  ],
+  "over_3x_with_unchanged_goals": null,
+  "revision": "d4ad633a9624263a59b14fd2c520b9bc602f88f3",
+  "totals": {
+    "by_category": {
+      "axiom_pins": {
+        "files": 2,
+        "lines": 4054
+      },
+      "corpus": {
+        "files": 8,
+        "lines": 4079
+      },
+      "import_only_unknown": {
+        "files": 49,
+        "lines": 1452
+      },
+      "marked_generated": {
+        "files": 36,
+        "lines": 14749
+      },
+      "mixed_generated_blocks": {
+        "files": 2,
+        "lines": 996
+      },
+      "unmarked": {
+        "files": 6620,
+        "lines": 1095776
+      }
+    },
+    "code_lines": 878656,
+    "declarations": {
+      "abbrev": 2259,
+      "axiom": 0,
+      "def": 42903,
+      "inductive": 1035,
+      "instance": 177,
+      "lemma": 1,
+      "opaque": 3,
+      "structure": 1398,
+      "theorem": 65929
+    },
+    "definition_lines": 218914,
+    "definition_to_proof_line_ratio": 0.38000427021800676,
+    "files": 6717,
+    "generated_lines": 23502,
+    "generated_share": 0.02096322738438649,
+    "implemented_by": 176,
+    "imports_in": 21360,
+    "imports_out": 12763,
+    "lines": 1121106,
+    "maxHeartbeats_options": 16,
+    "native_decide": 0,
+    "presumed_handwritten_lines": 1096152,
+    "proof_lines": 576083,
+    "sorry": 0,
+    "unknown_import_only_lines": 1452
+  },
+  "trend_sample_policy": "Last first-parent commit per committer UTC month; all reachable history, final month partial.",
+  "waits": [
+    "Solidity/Goals.lean absent at pinned base and no history found; goals closed and lines/goal are unavailable, not zero.",
+    "scripts/differential/ and scripts/bench/ absent at pinned base; no corresponding outputs reused."
+  ]
+}

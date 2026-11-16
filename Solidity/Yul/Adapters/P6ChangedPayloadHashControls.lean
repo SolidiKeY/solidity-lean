@@ -161,8 +161,7 @@ theorem every_MemOK (H : Source.HeapTy) (ok : Source.MemOK NominalMemory.Control
 /-- Caller aliases still observe their unrelated nominal object, through the
 actual owner indexLoc/readLoc operations rather than only heap projections. -/
 theorem caller_aliases : NominalMemory.Controls.aliasRead state .here 1=some 32767 ∧
-    NominalMemory.Controls.aliasRead state (.there .here) 1=some 32767 := by
-  first | decide | rfl
+    NominalMemory.Controls.aliasRead state (.there .here) 1=some 32767 := by decide
 
 /-- info: ([7, 7, 0], false, true) -/
 #guard_msgs in #eval ((readBytes (frameBytes reached) 224 3).map UInt8.toNat,

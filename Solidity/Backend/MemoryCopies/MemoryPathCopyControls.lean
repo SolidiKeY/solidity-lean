@@ -28,35 +28,11 @@ private def machine (payloads : List (Fin W)) : Machine :=
     if address = 0 then w[256] else if address = 1 ∨ address = 2 then w[16]
     else if address = 7 then w[99] else if address = 16 then .val (wmod payloads.length)
     else if 17 ≤ address ∧ address < 17 + payloads.length then .val (payloads[address - 17]?.getD (wmod 0)) else w[0]}
-private theorem refs {Q : RefTy} (reference : HRef H Q) : Q = R ∧ HEq reference old := by
-  rcases reference with ⟨index,selected⟩
-  cases index with
-  | zero => cases selected; exact ⟨rfl,HEq.rfl⟩
-  | succ index => cases selected
+private theorem refs {Q : RefTy} (reference : HRef H Q) : Q = R ∧ HEq reference old :=
+  singleton_reference reference
 private theorem heap_repr (payloads : List (Fin W)) (bounded : payloads.length < 128) :
-    Objects.HeapRepr (heap payloads bounded) bases 8 (machine payloads) := by
-  refine ⟨⟨?_,?_,?_⟩,?_,?_,?_⟩
-  · intro Q reference
-    obtain ⟨rfl,equal⟩ := refs reference
-    cases equal
-    decide
-  · intro Q reference
-    obtain ⟨rfl,equal⟩ := refs reference
-    cases equal
-    have large : 256 < W := wide
-    with_unfolding_all change 16 + (1 + (values payloads).length) ≤ W
-    rw [values,List.length_map]
-    omega
-  · intro Q S left right different
-    obtain ⟨rfl,leftEq⟩ := refs left
-    obtain ⟨rfl,rightEq⟩ := refs right
-    cases leftEq
-    cases rightEq
-    exact (different rfl).elim
-  · intro A E shape reference
-    obtain ⟨rfl,equal⟩ := refs reference
-    cases equal
-    cases shape
+    Objects.HeapRepr (heap payloads bounded) bases 8 (machine payloads) :=
+  singleton_array_heap_repr .dyn (by decide) (by
     refine ⟨?_,?_,?_⟩
     · have large : 256 < W := wide
       with_unfolding_all change 16 + (1 + (values payloads).length) ≤ W
@@ -80,28 +56,20 @@ private theorem heap_repr (payloads : List (Fin W)) (bounded : payloads.length <
           if_neg (show 17 + index ≠ 7 by omega),if_neg (show 17 + index ≠ 16 by omega),
           if_pos (show 17 ≤ 17 + index ∧ 17 + index < 17 + payloads.length by omega),
           Nat.add_sub_cancel_left,chosen,Option.getD_some]
-        exact ReprV.uint_of rfl
-  · intro name reference
-    obtain ⟨different,_⟩ := refs reference
-    cases different
-  · intro name field Q reference fieldType
-    obtain ⟨different,_⟩ := refs reference
-    cases different
+        exact ReprV.uint_of rfl)
 private theorem allocator (payloads : List (Fin W)) (bounded : payloads.length < 128) :
-    Objects.AllocatorRepr (heap payloads bounded) bases 8 (wmod 256) (machine payloads) := by
-  refine ⟨heap_repr payloads bounded,⟨by decide,by decide,rfl,?_⟩,?_⟩
-  · intro address above
+    Objects.AllocatorRepr (heap payloads bounded) bases 8 (wmod 256) (machine payloads) :=
+  singleton_allocator_repr (heap_repr payloads bounded) ⟨by decide,by decide,rfl,by
+    intro address above
     change 256 ≤ address at above
     simp only [machine,if_neg (show address ≠ 0 by omega),
       if_neg (show ¬(address = 1 ∨ address = 2) by omega),if_neg (show address ≠ 7 by omega),
       if_neg (show address ≠ 16 by omega),
       if_neg (show ¬(17 ≤ address ∧ address < 17 + payloads.length) by omega)]
-  · intro Q reference
-    obtain ⟨rfl,equal⟩ := refs reference
-    cases equal
+  ⟩ (by
     with_unfolding_all change 16 + (1 + (values payloads).length) ≤ 256
     rw [values,List.length_map]
-    omega
+    omega)
 private def C : Contract := {vars := []}
 private abbrev Γ : Ctx := [.mem R,.mem R]
 private def state (payloads : List (Fin W)) (bounded : payloads.length < 128) : State C Γ :=

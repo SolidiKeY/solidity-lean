@@ -48,10 +48,12 @@ theorem model_to_source {c : Control} {n fuel : Nat} {stmt : Stmt [] [] c n}
      have started := evalStmt_stable (Nat.le_max_left hi hl) .nil True.intro pre initializer.compiled.profile (sourceLocals locals) initialSource
      have completed : evalLoop (max hi hl) .nil True.intro test condition.profile post step.compiled.profile
        body work.compiled.profile (sourceLocals mid) = some (⟨sourceLocals out,.normal⟩ : Outcome c n) := by
-       obtain ⟨extra,eq⟩ := Nat.exists_eq_add_of_le (Nat.le_max_right hi hl)
-       rw [eq]
-       exact evalLoop_refines_add hl extra .nil True.intro test condition.profile post step.compiled.profile
-         body work.compiled.profile (sourceLocals mid) _ loopSource
+       exact CompletionControls.completed_horizon
+         (fun fuel => evalLoop fuel .nil True.intro test condition.profile post step.compiled.profile
+           body work.compiled.profile (sourceLocals mid))
+         (fun fuel extra => evalLoop_refines_add fuel extra .nil True.intro test condition.profile
+           post step.compiled.profile body work.compiled.profile (sourceLocals mid))
+         (Nat.le_max_right hi hl) loopSource
      have source := ScopedForCompilation.source_for (c := c) (pre := pre) (test := test) (post := post) (body := body)
        initializer.compiled.profile condition.profile step.compiled.profile work.compiled.profile
        (max hi hl) locals mid out started completed

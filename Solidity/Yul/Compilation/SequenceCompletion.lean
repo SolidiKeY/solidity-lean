@@ -49,8 +49,16 @@ theorem model_to_source {c n fuel} {stmt : Stmt [] [] c n}
      rw [actual,retired,frame] at whole
      change Evm.run qb {m with stack := mid.toList.map coreWord++caller} = .ok final skip at whole
      obtain ⟨hi,out,last,done,finalFrame⟩ := ihRight b qb hb sb mid m final caller skip whole
-     have firstH := evalStmt_stable (Nat.le_max_left lo hi) .nil True.intro _ left.profile (sourceLocals locals) first
-     have lastH := evalStmt_stable (Nat.le_max_right lo hi) .nil True.intro _ right.profile (sourceLocals mid) last
+     have firstH : evalStmt (max lo hi) .nil True.intro _ left.profile (sourceLocals locals) =
+       some ⟨sourceLocals mid,.normal⟩ := CompletionControls.completed_horizon
+       (fun fuel => evalStmt fuel .nil True.intro _ left.profile (sourceLocals locals))
+       (fun fuel extra => evalStmt_refines_add fuel extra .nil True.intro _ left.profile (sourceLocals locals))
+       (Nat.le_max_left lo hi) first
+     have lastH : evalStmt (max lo hi) .nil True.intro _ right.profile (sourceLocals mid) =
+       some ⟨sourceLocals out,.normal⟩ := CompletionControls.completed_horizon
+       (fun fuel => evalStmt fuel .nil True.intro _ right.profile (sourceLocals mid))
+       (fun fuel extra => evalStmt_refines_add fuel extra .nil True.intro _ right.profile (sourceLocals mid))
+       (Nat.le_max_right lo hi) last
      have source := LoopControlCompilation.sequence_source _ _ left.profile right.profile (max lo hi)
        (sourceLocals locals) (sourceLocals mid) (sourceLocals out) firstH lastH
      exact ⟨max lo hi+1,out,source,done,finalFrame⟩

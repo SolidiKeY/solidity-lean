@@ -1,3 +1,4 @@
+import Solidity.Yul.Compilation.Artifact
 import Solidity.Yul.Compilation.InitializedLoopCompletion
 import Solidity.Yul.Compilation.SourceLoopInitializerControls
 /-! Concrete non-skip initializer recovery, arbitrary old counter/raw second
@@ -11,10 +12,20 @@ open SourceLoopInitializer.Controls
 initializer overwrites any old counter, before both actual body/post turns. -/
 theorem recovered (a b : Scalar.Word) (m : Evm.Machine) (caller : List Evm.Word) :
  ∃ fuel, evalStmt fuel .nil True.intro source profile (sourceLocals #v[a,b]) =
-   some ⟨sourceLocals #v[0,~~~(~~~b+3)+3],.normal⟩ :=
- (completion_iff (c := root) initial condition post body 0 block code
-   (Option.some_get (by rfl)).symm (Option.some_get (by rfl)).symm
-   #v[a,b] #v[0,~~~(~~~b+3)+3] #v[] m caller).mpr (target_done a b m caller)
+   some ⟨sourceLocals #v[0,~~~(~~~b+3)+3],.normal⟩ := by
+ have emitted : SourceLoopInitializer.emit (c := root) initial condition post body 0 = some block :=
+   (Option.some_get (by rfl)).symm
+ have selected : WordControl.blockCode block = some code :=
+   (Option.some_get (by rfl)).symm
+ let represented : Solidity.Yul.Compilation.Artifact 0 source :=
+   { profile := profile
+     code := code
+     source_to_model :=
+       SourceLoopInitializer.source_to_model (c := root) initial condition post body 0 block code emitted selected
+     model_to_source :=
+       InitializedLoopCompletion.model_to_source (c := root) initial condition post body 0 block code emitted selected }
+ exact (represented.completion_iff #v[a,b] #v[0,~~~(~~~b+3)+3] #v[] m caller).mpr
+   (target_done a b m caller)
 
 /-- Actual successful whole target execution determines source completion,
 normal final words, pending zero and every unchanged caller/machine field. -/

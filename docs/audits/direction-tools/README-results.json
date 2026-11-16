@@ -1,0 +1,1071 @@
+{
+  "area_pairs": {
+    "Backend": {
+      "reference": "backend-x86",
+      "unmarked_over_reference": 4.154503152206544
+    },
+    "Bridge": {
+      "reference": "bridge",
+      "unmarked_over_reference": 7.547033453782492
+    },
+    "Calculus": {
+      "reference": "calculus",
+      "unmarked_over_reference": 3.9595969131286433
+    },
+    "Evm": {
+      "reference": "evm",
+      "unmarked_over_reference": 16.96522382537921
+    },
+    "Examples": {
+      "reference": "examples",
+      "unmarked_over_reference": 1.3961479933680074
+    },
+    "Frontend": {
+      "reference": "frontend",
+      "unmarked_over_reference": 3.144780387494779
+    },
+    "Lowering": {
+      "reference": "lowering",
+      "unmarked_over_reference": 19.504052780395853
+    },
+    "Semantics": {
+      "reference": "semantics",
+      "unmarked_over_reference": 1.1286158155004158
+    },
+    "Source": {
+      "reference": "source",
+      "unmarked_over_reference": 1.5698675391505987
+    },
+    "Yul": {
+      "reference": "yul",
+      "unmarked_over_reference": 59.93203272498427
+    }
+  },
+  "base": "dfdfa238b5bf63955048999fefd291d9d55dbd56",
+  "data_diet": {
+    "input_bytes": 8952242,
+    "split_bytes": 6452407,
+    "split_files": 38
+  },
+  "input_base": "d4ad633a9624263a59b14fd2c520b9bc602f88f3",
+  "lean_drift_paths": [
+    "Solidity.lean",
+    "Solidity/Frontend/Admission/DeclarationOccurrences.lean",
+    "Solidity/Frontend/Admission/LocationFeatures.lean",
+    "Solidity/Frontend/Admission/StructuralFeatures.lean",
+    "Solidity/Lowering/G17/IndexCapture.lean",
+    "Solidity/Lowering/G17/IndexCaptureControls.lean",
+    "Solidity/Lowering/G17/OperandStore.lean",
+    "Solidity/Lowering/G17/ShortCircuit.lean",
+    "Solidity/Lowering/G17/ShortCircuitControls.lean",
+    "Solidity/Lowering/G17/ShortCircuitSource.lean",
+    "Solidity/Yul/Compilation/Artifact.lean",
+    "Solidity/Yul/Compilation/CompletionControls.lean",
+    "Solidity/Yul/Compilation/LetBranchCompilation.lean",
+    "Solidity/Yul/Compilation/LetControlCompilation.lean",
+    "Solidity/Yul/Compilation/LetScopeCompilation.lean",
+    "Solidity/Yul/Compilation/LetSequenceCompilation.lean",
+    "Solidity/Yul/Compilation/MultiSwitchCompletion.lean",
+    "Solidity/Yul/Compilation/ScopedControlCompilation.lean",
+    "Solidity/Yul/Compilation/ScopedForCompilation.lean",
+    "Solidity/Yul/Compilation/ScopedForCompletion.lean",
+    "Solidity/Yul/Compilation/ScopedLoopCompletion.lean",
+    "Solidity/Yul/Compilation/SourceLoopCompletion.lean",
+    "Solidity/Yul/Compilation/SourceLoopModelCompletion.lean",
+    "Solidity/Yul/Compilation/StructuredSequenceCompilation.lean",
+    "Solidity/Yul/Compilation/SwitchCompilation.lean",
+    "Solidity/Yul/Compilation/SwitchSequence.lean",
+    "Solidity/Yul/Compilation/ZeroControlCompilation.lean",
+    "Solidity/Yul/Views/Generic/Plan.lean",
+    "Solidity/Yul/Views/IntOwnershipPlan.lean",
+    "Solidity/Yul/Views/MemberOwnershipPlan.lean",
+    "Solidity/Yul/Views/OwnershipPlan.lean",
+    "Solidity/Yul/Views/PackedOwnershipPlan.lean",
+    "Solidity/Yul/Views/PrimitiveOwnershipPlan.lean",
+    "Solidity/Yul/Views/RecursiveOwnershipPlan.lean",
+    "Solidity/Yul/Views/ScalarOwnershipPlan.lean",
+    "Solidity/Yul/Views/SourceGraphEndpoints.lean",
+    "tests/h55/yul-artifact/LetCompletionFixtures.lean"
+  ],
+  "method": "Physical source lines; lexical declarations/theorems. Reference counters include supported source extensions, never Markdown prose. Generated flags are lower bounds, remaining source has untraced authorship. No elapsed-time or proof-strength inference from LOC.",
+  "references": {
+    "CakeML": {
+      "metrics": {
+        "declarations": 44983,
+        "declarations_status": "lexical markers only; not native declarations",
+        "definition_region_lines_estimate": 190969,
+        "files": 1174,
+        "generated_lines": 3199,
+        "handwritten_candidate_lines": 934775,
+        "lines": 937974,
+        "native_declarations": null,
+        "other_lines_estimate": 174470,
+        "proof_marker_lines": 47485,
+        "proof_region_lines_estimate": 572535,
+        "theorems": 28188,
+        "unclassified_lines": 934775,
+        "unsupported_native_files": 66
+      },
+      "pin": "b3e6ea34ca1aed91a57703a30549260ce6f6448e",
+      "url": "https://github.com/CakeML/cakeml/tree/b3e6ea34ca1aed91a57703a30549260ce6f6448e"
+    },
+    "Clear": {
+      "metrics": {
+        "declarations": 675,
+        "declarations_status": "lexical markers only; not native declarations",
+        "definition_region_lines_estimate": 4028,
+        "files": 54,
+        "generated_lines": 1036,
+        "handwritten_candidate_lines": 8579,
+        "lines": 9615,
+        "native_declarations": null,
+        "other_lines_estimate": 2840,
+        "proof_marker_lines": 404,
+        "proof_region_lines_estimate": 2747,
+        "theorems": 367,
+        "unclassified_lines": 8579,
+        "unsupported_native_files": 12
+      },
+      "pin": "6ef2e7eda01080e5d5fd7474354c1a71adab5071",
+      "url": "https://github.com/NethermindEth/Clear/tree/6ef2e7eda01080e5d5fd7474354c1a71adab5071"
+    },
+    "CompCert": {
+      "metrics": {
+        "declarations": 12492,
+        "declarations_status": "lexical markers only; not native declarations",
+        "definition_region_lines_estimate": 66773,
+        "files": 423,
+        "generated_lines": 2362,
+        "handwritten_candidate_lines": 248853,
+        "lines": 251215,
+        "native_declarations": null,
+        "other_lines_estimate": 63710,
+        "proof_marker_lines": 19195,
+        "proof_region_lines_estimate": 120732,
+        "theorems": 7144,
+        "unclassified_lines": 248853,
+        "unsupported_native_files": 153
+      },
+      "pin": "2685140bf72c959446981fb99b5e44a8975021bc",
+      "url": "https://github.com/AbsInt/CompCert/tree/2685140bf72c959446981fb99b5e44a8975021bc"
+    },
+    "EvmYul": {
+      "metrics": {
+        "declarations": 1113,
+        "declarations_status": "lexical markers only; not native declarations",
+        "definition_region_lines_estimate": 10249,
+        "files": 71,
+        "generated_lines": 0,
+        "handwritten_candidate_lines": 11602,
+        "lines": 11602,
+        "native_declarations": null,
+        "other_lines_estimate": 1123,
+        "proof_marker_lines": 59,
+        "proof_region_lines_estimate": 230,
+        "theorems": 39,
+        "unclassified_lines": 11602,
+        "unsupported_native_files": 1
+      },
+      "pin": "047f63070309f436b66c61e276ab3b6d1169265a",
+      "url": "https://github.com/NethermindEth/EVMYulLean/tree/047f63070309f436b66c61e276ab3b6d1169265a"
+    },
+    "Isabelle-Solidity": {
+      "metrics": {
+        "declarations": 1259,
+        "declarations_status": "lexical markers only; not native declarations",
+        "definition_region_lines_estimate": 3735,
+        "files": 25,
+        "generated_lines": 0,
+        "handwritten_candidate_lines": 19238,
+        "lines": 19238,
+        "native_declarations": null,
+        "other_lines_estimate": 2357,
+        "proof_marker_lines": 3588,
+        "proof_region_lines_estimate": 13146,
+        "theorems": 716,
+        "unclassified_lines": 19238,
+        "unsupported_native_files": 5
+      },
+      "pin": "f81741033ad5e782a0e0aba461b292ea1c860b3d",
+      "url": "https://github.com/isabelle-prover/mirror-afp-devel/tree/f81741033ad5e782a0e0aba461b292ea1c860b3d"
+    },
+    "KEVM": {
+      "metrics": {
+        "declarations": 5431,
+        "declarations_status": "lexical declaration headers, not kernel declarations",
+        "definition_region_lines_estimate": 58531,
+        "files": 334,
+        "generated_lines": 0,
+        "handwritten_candidate_lines": 58753,
+        "lines": 58753,
+        "native_declarations": 5431,
+        "other_lines_estimate": 222,
+        "proof_marker_lines": 52,
+        "proof_region_lines_estimate": 0,
+        "theorems": 0,
+        "unclassified_lines": 58753,
+        "unsupported_native_files": 0
+      },
+      "pin": "fbb2edbb8e84bb05b6ba7a255ce1f44f76051ad1",
+      "url": "https://github.com/runtimeverification/evm-semantics/tree/fbb2edbb8e84bb05b6ba7a255ce1f44f76051ad1"
+    },
+    "SolKey": {
+      "metrics": {
+        "declarations": 2879,
+        "declarations_status": "lexical markers only; not native declarations",
+        "definition_region_lines_estimate": 802703,
+        "files": 7024,
+        "generated_lines": 8655,
+        "handwritten_candidate_lines": 798311,
+        "lines": 806966,
+        "native_declarations": null,
+        "other_lines_estimate": 3545,
+        "proof_marker_lines": 17617,
+        "proof_region_lines_estimate": 718,
+        "theorems": 0,
+        "unclassified_lines": 798311,
+        "unsupported_native_files": 6907
+      },
+      "pin": "5c448df67f6fab14c5f9c1c5d0c63249b5fe78b8",
+      "url": "https://github.com/SolidiKeY/solkey/tree/5c448df67f6fab14c5f9c1c5d0c63249b5fe78b8"
+    },
+    "solc": {
+      "metrics": {
+        "declarations": 14643,
+        "declarations_status": "lexical markers only; not native declarations",
+        "definition_region_lines_estimate": 330272,
+        "files": 8232,
+        "generated_lines": 53,
+        "handwritten_candidate_lines": 367408,
+        "lines": 367461,
+        "native_declarations": null,
+        "other_lines_estimate": 37109,
+        "proof_marker_lines": 1983,
+        "proof_region_lines_estimate": 80,
+        "theorems": 0,
+        "unclassified_lines": 367408,
+        "unsupported_native_files": 840
+      },
+      "pin": "403c39f86c3c0c9d4779b97892a3661016b45455",
+      "url": "https://github.com/ethereum/solidity/tree/403c39f86c3c0c9d4779b97892a3661016b45455"
+    }
+  },
+  "repository": {
+    "by_category": {
+      "axiom_pins": {
+        "files": 2,
+        "lines": 4054
+      },
+      "corpus": {
+        "files": 8,
+        "lines": 4079
+      },
+      "generated_root": {
+        "files": 4,
+        "lines": 7202
+      },
+      "import_only_unknown": {
+        "files": 56,
+        "lines": 1502
+      },
+      "marked_generated": {
+        "files": 44,
+        "lines": 15838
+      },
+      "mixed_generated_blocks": {
+        "files": 2,
+        "lines": 996
+      },
+      "unmarked": {
+        "files": 8171,
+        "lines": 1276732
+      }
+    },
+    "code_lines": 1029312,
+    "declarations": {
+      "abbrev": 3158,
+      "axiom": 1,
+      "def": 49357,
+      "inductive": 1148,
+      "instance": 389,
+      "lemma": 194,
+      "opaque": 10,
+      "structure": 1548,
+      "theorem": 74889
+    },
+    "definition_lines": 254823,
+    "definition_to_proof_line_ratio": 0.3981142834824044,
+    "files": 8287,
+    "generated_lines": 31793,
+    "generated_share": 0.024262001842181375,
+    "implemented_by": 177,
+    "imports_in": 0,
+    "imports_out": 23865,
+    "lines": 1310403,
+    "maxHeartbeats_options": 16,
+    "native_decide": 0,
+    "presumed_handwritten_lines": 1277108,
+    "proof_lines": 640075,
+    "sorry": 0,
+    "unknown_import_only_lines": 1502
+  },
+  "root_imports": {
+    "Solidity.Backend.InternalFlow.": 300,
+    "Solidity.Frontend.SolcJson.": 55,
+    "Solidity.SolcValidation.": 30,
+    "Solidity.Yul.Views.": 882
+  },
+  "solidity": {
+    "by_category": {
+      "axiom_pins": {
+        "files": 2,
+        "lines": 4054
+      },
+      "corpus": {
+        "files": 8,
+        "lines": 4079
+      },
+      "import_only_unknown": {
+        "files": 49,
+        "lines": 1452
+      },
+      "marked_generated": {
+        "files": 36,
+        "lines": 14749
+      },
+      "mixed_generated_blocks": {
+        "files": 2,
+        "lines": 996
+      },
+      "unmarked": {
+        "files": 6629,
+        "lines": 1097304
+      }
+    },
+    "code_lines": 879851,
+    "declarations": {
+      "abbrev": 2448,
+      "axiom": 0,
+      "def": 42906,
+      "inductive": 1036,
+      "instance": 177,
+      "lemma": 1,
+      "opaque": 3,
+      "structure": 1393,
+      "theorem": 65983
+    },
+    "definition_lines": 219387,
+    "definition_to_proof_line_ratio": 0.3804693542736836,
+    "files": 6726,
+    "generated_lines": 23502,
+    "generated_share": 0.020934694655604588,
+    "implemented_by": 176,
+    "imports_in": 0,
+    "imports_out": 12799,
+    "lines": 1122634,
+    "maxHeartbeats_options": 16,
+    "native_decide": 0,
+    "presumed_handwritten_lines": 1097680,
+    "proof_lines": 576622,
+    "sorry": 0,
+    "unknown_import_only_lines": 1452
+  },
+  "subsystems": {
+    "backend": {
+      "metrics": {
+        "declarations": 6072,
+        "declarations_status": "lexical markers only; not native declarations",
+        "definition_region_lines_estimate": 38473,
+        "files": 214,
+        "generated_lines": 1807,
+        "handwritten_candidate_lines": 120330,
+        "lines": 122137,
+        "native_declarations": null,
+        "other_lines_estimate": 29782,
+        "proof_marker_lines": 8392,
+        "proof_region_lines_estimate": 53882,
+        "theorems": 3036,
+        "unclassified_lines": 120330,
+        "unsupported_native_files": 52
+      },
+      "prefixes": [
+        "backend/",
+        "x86/",
+        "x86_32/",
+        "x86_64/",
+        "aarch64/",
+        "arm/",
+        "riscV/",
+        "powerpc/"
+      ],
+      "project": "CompCert"
+    },
+    "backend-x86": {
+      "metrics": {
+        "declarations": 3674,
+        "declarations_status": "lexical markers only; not native declarations",
+        "definition_region_lines_estimate": 19534,
+        "files": 104,
+        "generated_lines": 794,
+        "handwritten_candidate_lines": 66620,
+        "lines": 67414,
+        "native_declarations": null,
+        "other_lines_estimate": 15445,
+        "proof_marker_lines": 5154,
+        "proof_region_lines_estimate": 32435,
+        "theorems": 1951,
+        "unclassified_lines": 66620,
+        "unsupported_native_files": 27
+      },
+      "prefixes": [
+        "backend/",
+        "x86/",
+        "x86_64/"
+      ],
+      "project": "CompCert"
+    },
+    "bridge": {
+      "metrics": {
+        "declarations": 675,
+        "declarations_status": "lexical markers only; not native declarations",
+        "definition_region_lines_estimate": 4028,
+        "files": 54,
+        "generated_lines": 1036,
+        "handwritten_candidate_lines": 8579,
+        "lines": 9615,
+        "native_declarations": null,
+        "other_lines_estimate": 2840,
+        "proof_marker_lines": 404,
+        "proof_region_lines_estimate": 2747,
+        "theorems": 367,
+        "unclassified_lines": 8579,
+        "unsupported_native_files": 12
+      },
+      "prefixes": [
+        ""
+      ],
+      "project": "Clear"
+    },
+    "cake-backend": {
+      "metrics": {
+        "declarations": 13923,
+        "declarations_status": "lexical declaration headers, not kernel declarations",
+        "definition_region_lines_estimate": 45990,
+        "files": 228,
+        "generated_lines": 0,
+        "handwritten_candidate_lines": 341002,
+        "lines": 341002,
+        "native_declarations": 13923,
+        "other_lines_estimate": 61877,
+        "proof_marker_lines": 19874,
+        "proof_region_lines_estimate": 233135,
+        "theorems": 10136,
+        "unclassified_lines": 341002,
+        "unsupported_native_files": 0
+      },
+      "prefixes": [
+        "compiler/backend/"
+      ],
+      "project": "CakeML"
+    },
+    "calculus": {
+      "metrics": {
+        "declarations": 1,
+        "declarations_status": "lexical markers only; not native declarations",
+        "definition_region_lines_estimate": 42645,
+        "files": 105,
+        "generated_lines": 272,
+        "handwritten_candidate_lines": 42373,
+        "lines": 42645,
+        "native_declarations": null,
+        "other_lines_estimate": 0,
+        "proof_marker_lines": 118,
+        "proof_region_lines_estimate": 0,
+        "theorems": 0,
+        "unclassified_lines": 42373,
+        "unsupported_native_files": 105
+      },
+      "prefixes": [
+        "keyext.solidity.core/src/main/resources/org/key_project/solidity/proof/rules/",
+        "key.core/src/main/resources/de/uka/ilkd/key/proof/rules/"
+      ],
+      "project": "SolKey"
+    },
+    "evm": {
+      "metrics": {
+        "declarations": 155,
+        "declarations_status": "lexical declaration headers, not kernel declarations",
+        "definition_region_lines_estimate": 2563,
+        "files": 9,
+        "generated_lines": 0,
+        "handwritten_candidate_lines": 2703,
+        "lines": 2703,
+        "native_declarations": 155,
+        "other_lines_estimate": 140,
+        "proof_marker_lines": 1,
+        "proof_region_lines_estimate": 0,
+        "theorems": 0,
+        "unclassified_lines": 2703,
+        "unsupported_native_files": 0
+      },
+      "prefixes": [
+        "EvmYul/EVM/"
+      ],
+      "project": "EvmYul"
+    },
+    "examples": {
+      "metrics": {
+        "declarations": 4447,
+        "declarations_status": "lexical declaration headers, not kernel declarations",
+        "definition_region_lines_estimate": 36347,
+        "files": 1701,
+        "generated_lines": 9,
+        "handwritten_candidate_lines": 44029,
+        "lines": 44038,
+        "native_declarations": 4447,
+        "other_lines_estimate": 7631,
+        "proof_marker_lines": 61,
+        "proof_region_lines_estimate": 60,
+        "theorems": 0,
+        "unclassified_lines": 44029,
+        "unsupported_native_files": 0
+      },
+      "prefixes": [
+        "test/libsolidity/semanticTests/"
+      ],
+      "project": "solc"
+    },
+    "frontend": {
+      "metrics": {
+        "declarations": 1449,
+        "declarations_status": "lexical markers only; not native declarations",
+        "definition_region_lines_estimate": 11090,
+        "files": 25,
+        "generated_lines": 0,
+        "handwritten_candidate_lines": 31123,
+        "lines": 31123,
+        "native_declarations": null,
+        "other_lines_estimate": 5385,
+        "proof_marker_lines": 1792,
+        "proof_region_lines_estimate": 14648,
+        "theorems": 688,
+        "unclassified_lines": 31123,
+        "unsupported_native_files": 4
+      },
+      "prefixes": [
+        "cfrontend/"
+      ],
+      "project": "CompCert"
+    },
+    "lowering": {
+      "metrics": {
+        "declarations": 262,
+        "declarations_status": "lexical declaration headers, not kernel declarations",
+        "definition_region_lines_estimate": 1365,
+        "files": 4,
+        "generated_lines": 0,
+        "handwritten_candidate_lines": 5305,
+        "lines": 5305,
+        "native_declarations": 262,
+        "other_lines_estimate": 614,
+        "proof_marker_lines": 394,
+        "proof_region_lines_estimate": 3326,
+        "theorems": 149,
+        "unclassified_lines": 5305,
+        "unsupported_native_files": 0
+      },
+      "prefixes": [
+        "cfrontend/Cshmgen",
+        "cfrontend/Cminorgen"
+      ],
+      "project": "CompCert"
+    },
+    "semantics": {
+      "metrics": {
+        "declarations": 1490,
+        "declarations_status": "lexical markers only; not native declarations",
+        "definition_region_lines_estimate": 5536,
+        "files": 21,
+        "generated_lines": 0,
+        "handwritten_candidate_lines": 22851,
+        "lines": 22851,
+        "native_declarations": null,
+        "other_lines_estimate": 4994,
+        "proof_marker_lines": 2442,
+        "proof_region_lines_estimate": 12321,
+        "theorems": 969,
+        "unclassified_lines": 22851,
+        "unsupported_native_files": 3
+      },
+      "prefixes": [
+        "common/"
+      ],
+      "project": "CompCert"
+    },
+    "source": {
+      "metrics": {
+        "declarations": 251,
+        "declarations_status": "lexical markers only; not native declarations",
+        "definition_region_lines_estimate": 31481,
+        "files": 68,
+        "generated_lines": 0,
+        "handwritten_candidate_lines": 31481,
+        "lines": 31481,
+        "native_declarations": null,
+        "other_lines_estimate": 0,
+        "proof_marker_lines": 165,
+        "proof_region_lines_estimate": 0,
+        "theorems": 0,
+        "unclassified_lines": 31481,
+        "unsupported_native_files": 68
+      },
+      "prefixes": [
+        "libsolidity/ast/",
+        "libsolidity/analysis/"
+      ],
+      "project": "solc"
+    },
+    "yul": {
+      "metrics": {
+        "declarations": 278,
+        "declarations_status": "lexical declaration headers, not kernel declarations",
+        "definition_region_lines_estimate": 2902,
+        "files": 15,
+        "generated_lines": 0,
+        "handwritten_candidate_lines": 3178,
+        "lines": 3178,
+        "native_declarations": 278,
+        "other_lines_estimate": 169,
+        "proof_marker_lines": 25,
+        "proof_region_lines_estimate": 107,
+        "theorems": 18,
+        "unclassified_lines": 3178,
+        "unsupported_native_files": 0
+      },
+      "prefixes": [
+        "EvmYul/Yul/"
+      ],
+      "project": "EvmYul"
+    }
+  },
+  "top_areas": {
+    "Backend": {
+      "by_category": {
+        "axiom_pins": {
+          "files": 1,
+          "lines": 149
+        },
+        "import_only_unknown": {
+          "files": 3,
+          "lines": 13
+        },
+        "marked_generated": {
+          "files": 14,
+          "lines": 2302
+        },
+        "unmarked": {
+          "files": 1997,
+          "lines": 276760
+        }
+      },
+      "code_lines": 225991,
+      "declarations": {
+        "abbrev": 1105,
+        "axiom": 0,
+        "def": 11323,
+        "inductive": 56,
+        "instance": 3,
+        "lemma": 0,
+        "opaque": 0,
+        "structure": 425,
+        "theorem": 15750
+      },
+      "definition_lines": 37184,
+      "definition_to_proof_line_ratio": 0.22387188055028748,
+      "files": 2015,
+      "generated_lines": 2451,
+      "generated_share": 0.008777898747958628,
+      "implemented_by": 0,
+      "imports_in": 0,
+      "imports_out": 3595,
+      "lines": 279224,
+      "maxHeartbeats_options": 0,
+      "native_decide": 0,
+      "presumed_handwritten_lines": 276760,
+      "proof_lines": 166095,
+      "sorry": 0,
+      "unknown_import_only_lines": 13
+    },
+    "Bridge": {
+      "by_category": {
+        "import_only_unknown": {
+          "files": 1,
+          "lines": 23
+        },
+        "unmarked": {
+          "files": 523,
+          "lines": 64723
+        }
+      },
+      "code_lines": 53759,
+      "declarations": {
+        "abbrev": 273,
+        "axiom": 0,
+        "def": 2008,
+        "inductive": 50,
+        "instance": 26,
+        "lemma": 0,
+        "opaque": 0,
+        "structure": 73,
+        "theorem": 3575
+      },
+      "definition_lines": 8952,
+      "definition_to_proof_line_ratio": 0.24351232250693652,
+      "files": 524,
+      "generated_lines": 0,
+      "generated_share": 0.0,
+      "implemented_by": 0,
+      "imports_in": 0,
+      "imports_out": 1035,
+      "lines": 64746,
+      "maxHeartbeats_options": 0,
+      "native_decide": 0,
+      "presumed_handwritten_lines": 64723,
+      "proof_lines": 36762,
+      "sorry": 0,
+      "unknown_import_only_lines": 23
+    },
+    "Calculus": {
+      "by_category": {
+        "import_only_unknown": {
+          "files": 9,
+          "lines": 427
+        },
+        "marked_generated": {
+          "files": 1,
+          "lines": 1550
+        },
+        "unmarked": {
+          "files": 378,
+          "lines": 167353
+        }
+      },
+      "code_lines": 130751,
+      "declarations": {
+        "abbrev": 145,
+        "axiom": 0,
+        "def": 4878,
+        "inductive": 173,
+        "instance": 50,
+        "lemma": 1,
+        "opaque": 2,
+        "structure": 217,
+        "theorem": 6279
+      },
+      "definition_lines": 43832,
+      "definition_to_proof_line_ratio": 0.5397963079272423,
+      "files": 388,
+      "generated_lines": 1550,
+      "generated_share": 0.009153723498494064,
+      "implemented_by": 110,
+      "imports_in": 0,
+      "imports_out": 824,
+      "lines": 169330,
+      "maxHeartbeats_options": 0,
+      "native_decide": 0,
+      "presumed_handwritten_lines": 167353,
+      "proof_lines": 81201,
+      "sorry": 0,
+      "unknown_import_only_lines": 427
+    },
+    "Evm": {
+      "by_category": {
+        "unmarked": {
+          "files": 279,
+          "lines": 45857
+        }
+      },
+      "code_lines": 37758,
+      "declarations": {
+        "abbrev": 33,
+        "axiom": 0,
+        "def": 1811,
+        "inductive": 73,
+        "instance": 6,
+        "lemma": 0,
+        "opaque": 0,
+        "structure": 78,
+        "theorem": 2395
+      },
+      "definition_lines": 9735,
+      "definition_to_proof_line_ratio": 0.3724177505738332,
+      "files": 279,
+      "generated_lines": 0,
+      "generated_share": 0.0,
+      "implemented_by": 11,
+      "imports_in": 0,
+      "imports_out": 476,
+      "lines": 45857,
+      "maxHeartbeats_options": 1,
+      "native_decide": 0,
+      "presumed_handwritten_lines": 45857,
+      "proof_lines": 26140,
+      "sorry": 0,
+      "unknown_import_only_lines": 0
+    },
+    "Examples": {
+      "by_category": {
+        "import_only_unknown": {
+          "files": 16,
+          "lines": 104
+        },
+        "unmarked": {
+          "files": 340,
+          "lines": 61367
+        }
+      },
+      "code_lines": 36441,
+      "declarations": {
+        "abbrev": 105,
+        "axiom": 0,
+        "def": 2654,
+        "inductive": 4,
+        "instance": 8,
+        "lemma": 0,
+        "opaque": 0,
+        "structure": 4,
+        "theorem": 3375
+      },
+      "definition_lines": 9860,
+      "definition_to_proof_line_ratio": 0.5574715893028778,
+      "files": 356,
+      "generated_lines": 0,
+      "generated_share": 0.0,
+      "implemented_by": 0,
+      "imports_in": 0,
+      "imports_out": 1078,
+      "lines": 61471,
+      "maxHeartbeats_options": 15,
+      "native_decide": 0,
+      "presumed_handwritten_lines": 61367,
+      "proof_lines": 17687,
+      "sorry": 0,
+      "unknown_import_only_lines": 104
+    },
+    "Frontend": {
+      "by_category": {
+        "axiom_pins": {
+          "files": 1,
+          "lines": 3905
+        },
+        "import_only_unknown": {
+          "files": 4,
+          "lines": 114
+        },
+        "marked_generated": {
+          "files": 2,
+          "lines": 455
+        },
+        "unmarked": {
+          "files": 505,
+          "lines": 97761
+        }
+      },
+      "code_lines": 82871,
+      "declarations": {
+        "abbrev": 48,
+        "axiom": 0,
+        "def": 2720,
+        "inductive": 167,
+        "instance": 10,
+        "lemma": 0,
+        "opaque": 0,
+        "structure": 129,
+        "theorem": 4889
+      },
+      "definition_lines": 23158,
+      "definition_to_proof_line_ratio": 0.4355299781840066,
+      "files": 512,
+      "generated_lines": 4360,
+      "generated_share": 0.04264684305766127,
+      "implemented_by": 2,
+      "imports_in": 0,
+      "imports_out": 995,
+      "lines": 102235,
+      "maxHeartbeats_options": 0,
+      "native_decide": 0,
+      "presumed_handwritten_lines": 97761,
+      "proof_lines": 53172,
+      "sorry": 0,
+      "unknown_import_only_lines": 114
+    },
+    "Lowering": {
+      "by_category": {
+        "import_only_unknown": {
+          "files": 1,
+          "lines": 6
+        },
+        "marked_generated": {
+          "files": 2,
+          "lines": 58
+        },
+        "unmarked": {
+          "files": 709,
+          "lines": 103463
+        }
+      },
+      "code_lines": 82614,
+      "declarations": {
+        "abbrev": 340,
+        "axiom": 0,
+        "def": 5431,
+        "inductive": 24,
+        "instance": 38,
+        "lemma": 0,
+        "opaque": 0,
+        "structure": 74,
+        "theorem": 5836
+      },
+      "definition_lines": 18185,
+      "definition_to_proof_line_ratio": 0.34873909291398986,
+      "files": 712,
+      "generated_lines": 58,
+      "generated_share": 0.0005602403237802699,
+      "implemented_by": 0,
+      "imports_in": 0,
+      "imports_out": 1357,
+      "lines": 103527,
+      "maxHeartbeats_options": 0,
+      "native_decide": 0,
+      "presumed_handwritten_lines": 103463,
+      "proof_lines": 52145,
+      "sorry": 0,
+      "unknown_import_only_lines": 6
+    },
+    "Semantics": {
+      "by_category": {
+        "import_only_unknown": {
+          "files": 2,
+          "lines": 55
+        },
+        "unmarked": {
+          "files": 80,
+          "lines": 25735
+        }
+      },
+      "code_lines": 19034,
+      "declarations": {
+        "abbrev": 32,
+        "axiom": 0,
+        "def": 795,
+        "inductive": 61,
+        "instance": 5,
+        "lemma": 0,
+        "opaque": 0,
+        "structure": 44,
+        "theorem": 1313
+      },
+      "definition_lines": 5439,
+      "definition_to_proof_line_ratio": 0.4316324101261805,
+      "files": 82,
+      "generated_lines": 0,
+      "generated_share": 0.0,
+      "implemented_by": 35,
+      "imports_in": 0,
+      "imports_out": 122,
+      "lines": 25790,
+      "maxHeartbeats_options": 0,
+      "native_decide": 0,
+      "presumed_handwritten_lines": 25735,
+      "proof_lines": 12601,
+      "sorry": 0,
+      "unknown_import_only_lines": 55
+    },
+    "Source": {
+      "by_category": {
+        "import_only_unknown": {
+          "files": 1,
+          "lines": 8
+        },
+        "mixed_generated_blocks": {
+          "files": 2,
+          "lines": 996
+        },
+        "unmarked": {
+          "files": 259,
+          "lines": 49037
+        }
+      },
+      "code_lines": 37844,
+      "declarations": {
+        "abbrev": 108,
+        "axiom": 0,
+        "def": 2003,
+        "inductive": 118,
+        "instance": 10,
+        "lemma": 0,
+        "opaque": 0,
+        "structure": 73,
+        "theorem": 3172
+      },
+      "definition_lines": 10892,
+      "definition_to_proof_line_ratio": 0.45959745136925606,
+      "files": 262,
+      "generated_lines": 620,
+      "generated_share": 0.012389840330928638,
+      "implemented_by": 0,
+      "imports_in": 0,
+      "imports_out": 440,
+      "lines": 50041,
+      "maxHeartbeats_options": 0,
+      "native_decide": 0,
+      "presumed_handwritten_lines": 49413,
+      "proof_lines": 23699,
+      "sorry": 0,
+      "unknown_import_only_lines": 8
+    },
+    "Yul": {
+      "by_category": {
+        "import_only_unknown": {
+          "files": 9,
+          "lines": 374
+        },
+        "marked_generated": {
+          "files": 9,
+          "lines": 6975
+        },
+        "unmarked": {
+          "files": 1809,
+          "lines": 190090
+        }
+      },
+      "code_lines": 164028,
+      "declarations": {
+        "abbrev": 382,
+        "axiom": 0,
+        "def": 8293,
+        "inductive": 172,
+        "instance": 5,
+        "lemma": 0,
+        "opaque": 0,
+        "structure": 205,
+        "theorem": 19185
+      },
+      "definition_lines": 34187,
+      "definition_to_proof_line_ratio": 0.3001123654686869,
+      "files": 1827,
+      "generated_lines": 6975,
+      "generated_share": 0.03532736693358455,
+      "implemented_by": 6,
+      "imports_in": 0,
+      "imports_out": 3177,
+      "lines": 197439,
+      "maxHeartbeats_options": 0,
+      "native_decide": 0,
+      "presumed_handwritten_lines": 190090,
+      "proof_lines": 113914,
+      "sorry": 0,
+      "unknown_import_only_lines": 374
+    }
+  }
+}

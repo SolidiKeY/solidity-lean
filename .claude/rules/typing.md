@@ -34,8 +34,7 @@ under `SVal.Fits`; implied under `FixedFits`,
 decisions 77 and 97 of `docs/intrinsic.md`), by a builder that reaches past
 an array's end through aliases `slot d` (`Build.fill`, `fill_ok`).
 
-The run is `Semantics/Run.lean`'s, over typed states; there is no untyped
-state (W10.5.6).  `Typing/CanonTest.lean` proves what the tests of
+The run is `Semantics/Run.lean`'s, over typed states.  `Typing/CanonTest.lean` proves what the tests of
 `wt(storage)` decide; the tests themselves are folds low in the stack
 (`Semantics/StorageWt.lean`), since the term `wt(storage)` runs them
 (`Storage.wtT`, `Signature.lean`) and the kernel evaluates them in

@@ -1,0 +1,313 @@
+{
+ "authority": "H90 Q3 / H82: CR applies H68 and re-pins shared-translator fixture sha256 values; owner verifies",
+ "pins": [
+  {
+   "file": "tests/directruntime-20261104/shared-translator/construct-reader-cases.json",
+   "fixture": "tests/solc/EntryPointsLeft.ast.json",
+   "oldSha256": "02ee1a9eb555930bab7025768b72f0aeb6d47aa136f24a93fdc351b601d140a6",
+   "newSha256": "266eb3c87bc7a3abfda8dd0278d657b8097ed2d0c75bade413d5029796e42850",
+   "occurrences": 37
+  },
+  {
+   "file": "tests/directruntime-20261104/shared-translator/construct-reader-cases.json",
+   "fixture": "tests/solc/Group07.ast.json",
+   "oldSha256": "79a5b86afd8baba0a5c9cea19febb94f7ecd5491658a2b98b5df5562cf410772",
+   "newSha256": "a25753556cf3e91b88c943c4f69c9100f445874ff937526e3ebdd7fc5ca61063",
+   "occurrences": 1
+  },
+  {
+   "file": "tests/directruntime-20261104/shared-translator/construct-reader-cases.json",
+   "fixture": "tests/solc/SliceReferenceCopies.ast.json",
+   "oldSha256": "b1a91f2715ad5f04e48dd902b8e2882ec715fd681c6ddf34f78734041ff4c729",
+   "newSha256": "b960c8c5e1bf9b60a1dedd29ea27e5734e06b9b1747c7fd13fecf9bb5fd7cc83",
+   "occurrences": 2
+  },
+  {
+   "file": "tests/directruntime-20261104/shared-translator/construct-reader-cases.json",
+   "fixture": "tests/solc/TransientSource.ast.json",
+   "oldSha256": "45c28bb62990895fdebfaeca808207853905864bdaf2b95e8f1427cb2303a504",
+   "newSha256": "96e23c1debf4aa351a90d529dc18236d762cc072e860762c66710eb344ac0b9d",
+   "occurrences": 1
+  },
+  {
+   "file": "tests/directruntime-20261104/shared-translator/coverage-inventory.json",
+   "fixture": "tests/solc/EntryPointsLeft.ast.json",
+   "oldSha256": "02ee1a9eb555930bab7025768b72f0aeb6d47aa136f24a93fdc351b601d140a6",
+   "newSha256": "266eb3c87bc7a3abfda8dd0278d657b8097ed2d0c75bade413d5029796e42850",
+   "occurrences": 74
+  },
+  {
+   "file": "tests/directruntime-20261104/shared-translator/coverage-inventory.json",
+   "fixture": "tests/solc/Group07.ast.json",
+   "oldSha256": "79a5b86afd8baba0a5c9cea19febb94f7ecd5491658a2b98b5df5562cf410772",
+   "newSha256": "a25753556cf3e91b88c943c4f69c9100f445874ff937526e3ebdd7fc5ca61063",
+   "occurrences": 2
+  },
+  {
+   "file": "tests/directruntime-20261104/shared-translator/coverage-inventory.json",
+   "fixture": "tests/solc/SliceReferenceCopies.ast.json",
+   "oldSha256": "b1a91f2715ad5f04e48dd902b8e2882ec715fd681c6ddf34f78734041ff4c729",
+   "newSha256": "b960c8c5e1bf9b60a1dedd29ea27e5734e06b9b1747c7fd13fecf9bb5fd7cc83",
+   "occurrences": 4
+  },
+  {
+   "file": "tests/directruntime-20261104/shared-translator/coverage-inventory.json",
+   "fixture": "tests/solc/TransientSource.ast.json",
+   "oldSha256": "45c28bb62990895fdebfaeca808207853905864bdaf2b95e8f1427cb2303a504",
+   "newSha256": "96e23c1debf4aa351a90d529dc18236d762cc072e860762c66710eb344ac0b9d",
+   "occurrences": 2
+  },
+  {
+   "file": "tests/directruntime-20261104/shared-translator/fixture-census.json",
+   "fixture": "tests/solc/EntryPointsLeft.ast.json",
+   "oldSha256": "02ee1a9eb555930bab7025768b72f0aeb6d47aa136f24a93fdc351b601d140a6",
+   "newSha256": "266eb3c87bc7a3abfda8dd0278d657b8097ed2d0c75bade413d5029796e42850",
+   "occurrences": 37
+  },
+  {
+   "file": "tests/directruntime-20261104/shared-translator/fixture-census.json",
+   "fixture": "tests/solc/Group07.ast.json",
+   "oldSha256": "79a5b86afd8baba0a5c9cea19febb94f7ecd5491658a2b98b5df5562cf410772",
+   "newSha256": "a25753556cf3e91b88c943c4f69c9100f445874ff937526e3ebdd7fc5ca61063",
+   "occurrences": 2
+  },
+  {
+   "file": "tests/directruntime-20261104/shared-translator/fixture-census.json",
+   "fixture": "tests/solc/SliceReferenceCopies.ast.json",
+   "oldSha256": "b1a91f2715ad5f04e48dd902b8e2882ec715fd681c6ddf34f78734041ff4c729",
+   "newSha256": "b960c8c5e1bf9b60a1dedd29ea27e5734e06b9b1747c7fd13fecf9bb5fd7cc83",
+   "occurrences": 6
+  },
+  {
+   "file": "tests/directruntime-20261104/shared-translator/fixture-census.json",
+   "fixture": "tests/solc/TransientSource.ast.json",
+   "oldSha256": "45c28bb62990895fdebfaeca808207853905864bdaf2b95e8f1427cb2303a504",
+   "newSha256": "96e23c1debf4aa351a90d529dc18236d762cc072e860762c66710eb344ac0b9d",
+   "occurrences": 1
+  },
+  {
+   "file": "tests/directruntime-20261104/shared-translator/fixture-variants.json",
+   "fixture": "tests/solc/CallExceptions.ast.json",
+   "oldSha256": "2e82ac2583ac95b8904ffb2bcf7b3ed1117419ce3346ec5f5eb41d88561b4b0e",
+   "newSha256": "fe5dee22fab93b93ad6b2d0ae09fed6ce1bbcff5e1ee8e632e3341f80d0fc291",
+   "occurrences": 123
+  },
+  {
+   "file": "tests/directruntime-20261104/shared-translator/fixture-variants.json",
+   "fixture": "tests/solc/CalldataValidation.ast.json",
+   "oldSha256": "bc3d58b78671619cee74bdbb0faf9427e5e6f5c2ba20d53d52bf61dbaef3b513",
+   "newSha256": "d10ec06ce7760f84d2667838fdaa59efe35399a07fb1f78220b2f6a883021b94",
+   "occurrences": 28
+  },
+  {
+   "file": "tests/directruntime-20261104/shared-translator/fixture-variants.json",
+   "fixture": "tests/solc/CloudIntegration.ast.json",
+   "oldSha256": "3faa735ba9e3d0f7b37b6181ade9b1a6b38d0e6caacd234058f650af2e92e564",
+   "newSha256": "b88b373984f2dee18eb8a11440fdac99afa439e479dc2c5a305516410d810449",
+   "occurrences": 5
+  },
+  {
+   "file": "tests/directruntime-20261104/shared-translator/fixture-variants.json",
+   "fixture": "tests/solc/CloudIntegrationIR.ast.json",
+   "oldSha256": "f2544be7124c073a932db75f81c73bc41dc704f93589bdbdf4d4acf8e40bc0b7",
+   "newSha256": "294715353e1601b68bba529c9a9718ae881d6e05e56d03666eb9dd25e8faa557",
+   "occurrences": 5
+  },
+  {
+   "file": "tests/directruntime-20261104/shared-translator/fixture-variants.json",
+   "fixture": "tests/solc/DeclarationMetadataAdmission.ast.json",
+   "oldSha256": "41a629bc3d0da7a79aa50b412e2788a9bbf9135485eb0f47e90a344ea530a92e",
+   "newSha256": "252f6d6a48834873cf4c26e9d9ab3e44e7e7913990fad8e1f6cafdd23b21a242",
+   "occurrences": 23
+  },
+  {
+   "file": "tests/directruntime-20261104/shared-translator/fixture-variants.json",
+   "fixture": "tests/solc/DeclarationsLowering.ast.json",
+   "oldSha256": "b3a39114c82e2d3158520c476967ef035a0f71c57d21afc281be804d104f71e0",
+   "newSha256": "be429fc6ef2d21b10521d61330e3df3152d5a38f34257ffa9839089e514d4b7e",
+   "occurrences": 43
+  },
+  {
+   "file": "tests/directruntime-20261104/shared-translator/fixture-variants.json",
+   "fixture": "tests/solc/DeclarationsLoweringIR.ast.json",
+   "oldSha256": "873c935f07a19e2f290712b25b1da911c25cab832787aea8e3b458add5ba72c6",
+   "newSha256": "0eea3285b5e9c356cb249a77ffa1f5dd2e1d04b2318183134efb4608e178cb5a",
+   "occurrences": 27
+  },
+  {
+   "file": "tests/directruntime-20261104/shared-translator/fixture-variants.json",
+   "fixture": "tests/solc/EntryPointsLeft.ast.json",
+   "oldSha256": "02ee1a9eb555930bab7025768b72f0aeb6d47aa136f24a93fdc351b601d140a6",
+   "newSha256": "266eb3c87bc7a3abfda8dd0278d657b8097ed2d0c75bade413d5029796e42850",
+   "occurrences": 55
+  },
+  {
+   "file": "tests/directruntime-20261104/shared-translator/fixture-variants.json",
+   "fixture": "tests/solc/EntryPointsLeft.viaIR.ast.json",
+   "oldSha256": "e603298dce3204a3490b6f0a76544425206bf415fd902f077069e408cfbcf440",
+   "newSha256": "91cadd1b7d98d29b53dd28cf71880de24f65039ee1c416551383e0cc36a01d32",
+   "occurrences": 25
+  },
+  {
+   "file": "tests/directruntime-20261104/shared-translator/fixture-variants.json",
+   "fixture": "tests/solc/EnumAbiRanges-viaIR.ast.json",
+   "oldSha256": "838da772ba5ec760da98fd1f61af815d3ec93b01ecf4e79bd553c08bede92b2a",
+   "newSha256": "398fcc0d43fa7f3b36dfd46603464d7ba2a03aca47abf781ef9a9ae8003e698a",
+   "occurrences": 2
+  },
+  {
+   "file": "tests/directruntime-20261104/shared-translator/fixture-variants.json",
+   "fixture": "tests/solc/EnumDeclarationBounds-viaIR.ast.json",
+   "oldSha256": "cbe08bd2a87c43d59b636038af32839858cb0cde4e7f304c98a31f608153c7be",
+   "newSha256": "dd4d3c45a5aaf68941cfebae2ad80be048f9d183a067d01f9c95330805eb677b",
+   "occurrences": 4
+  },
+  {
+   "file": "tests/directruntime-20261104/shared-translator/fixture-variants.json",
+   "fixture": "tests/solc/EnumDeclarationBounds.ast.json",
+   "oldSha256": "d7c0c932bdbf3af4ecd4d45488ce81c23811a087176316bf2817bacea544712b",
+   "newSha256": "4dcbf0849ff28a15e1c2339126994e022de8dfaebe4bded141a8a055797271cc",
+   "occurrences": 4
+  },
+  {
+   "file": "tests/directruntime-20261104/shared-translator/fixture-variants.json",
+   "fixture": "tests/solc/Group07.ast.json",
+   "oldSha256": "79a5b86afd8baba0a5c9cea19febb94f7ecd5491658a2b98b5df5562cf410772",
+   "newSha256": "a25753556cf3e91b88c943c4f69c9100f445874ff937526e3ebdd7fc5ca61063",
+   "occurrences": 23
+  },
+  {
+   "file": "tests/directruntime-20261104/shared-translator/fixture-variants.json",
+   "fixture": "tests/solc/Group07Mixed.ast.json",
+   "oldSha256": "1032f3b2289a015b9994805b23def487df963e584160a183a3c31b8a50419df6",
+   "newSha256": "6dbf8dd9a6e4049380fc3829ff0498d9d4fca523fa7eccfca53291d11e3db0a5",
+   "occurrences": 17
+  },
+  {
+   "file": "tests/directruntime-20261104/shared-translator/fixture-variants.json",
+   "fixture": "tests/solc/Group07MixedIR.ast.json",
+   "oldSha256": "4b870602e893ea94a450dc6691b6f3297d2946a088dfef16416bc3f4108c4321",
+   "newSha256": "47bfc83c901431024511c04e7e0e1f39822a28028b4e04b92c82cc68d81498a3",
+   "occurrences": 10
+  },
+  {
+   "file": "tests/directruntime-20261104/shared-translator/fixture-variants.json",
+   "fixture": "tests/solc/MappingAliases.ast.json",
+   "oldSha256": "392ac3b3051a18fdc7bd9a777e015a4ef7ada3902d26f5b0d271648b64b22f0b",
+   "newSha256": "52773a33eb48b2e5ba73d9f36d583fac3997aba9702a7c3603b5c4aedc40a821",
+   "occurrences": 9
+  },
+  {
+   "file": "tests/directruntime-20261104/shared-translator/fixture-variants.json",
+   "fixture": "tests/solc/MappingAliasesIR.ast.json",
+   "oldSha256": "ad00aa288fbf47a3db4b802518b5fec7a00c57ddfaba9a6de87770f48b0bfece",
+   "newSha256": "4978b52f5db9d0182bee5c5df78a4023ac5ec124ab887426a564596801e876d7",
+   "occurrences": 2
+  },
+  {
+   "file": "tests/directruntime-20261104/shared-translator/fixture-variants.json",
+   "fixture": "tests/solc/PublicGetters.ast.json",
+   "oldSha256": "653006d5c5fb993e58dee8a29c81b52c7e7a56b41dc09fdbbd6eb26702fd0e8c",
+   "newSha256": "5dd4f02f871d60a76cfeeea02bdce72ef09a571259f17be1aa2f7429647caab2",
+   "occurrences": 70
+  },
+  {
+   "file": "tests/directruntime-20261104/shared-translator/fixture-variants.json",
+   "fixture": "tests/solc/QuantifiedDiamond.ast.json",
+   "oldSha256": "223e4b07a8cbe02d59377fc727c026cf0ab4b91e0b7bd233a388b311b21ca432",
+   "newSha256": "3eca9812dc18a2a68c4d660fff2de6f07a4018206163db5aa8e1d5b338164f4a",
+   "occurrences": 3
+  },
+  {
+   "file": "tests/directruntime-20261104/shared-translator/fixture-variants.json",
+   "fixture": "tests/solc/QuantifiedDiamond.viaIR.ast.json",
+   "oldSha256": "9958ebbf9ad23c2ddb17188e67f84d4470d907747702d82187fff603ce8eacdf",
+   "newSha256": "faf833c46024c1c9e1ff3b1b6e1908677e603fde9629a17b10bfd2a0e63f2b56",
+   "occurrences": 1
+  },
+  {
+   "file": "tests/directruntime-20261104/shared-translator/fixture-variants.json",
+   "fixture": "tests/solc/RemainingDeclarations.ast.json",
+   "oldSha256": "70dcaa61d908e9afa297e0dfefe5895790fe3adb1bb05895eb1cf27f4657f422",
+   "newSha256": "46e2f540dcaacaae277fae44e37c8a46faf539feff8a7881844fd307c3f93cf1",
+   "occurrences": 38
+  },
+  {
+   "file": "tests/directruntime-20261104/shared-translator/fixture-variants.json",
+   "fixture": "tests/solc/RemainingDeclarationsIR.ast.json",
+   "oldSha256": "af6101c8076603f397a9164cf499b1cb2ac762b31ede0b9a0cb557616e1850c1",
+   "newSha256": "8c2c63b604fa13d526e8978ed82798162ceb9553b349aaa97889dfafa113aee7",
+   "occurrences": 20
+  },
+  {
+   "file": "tests/directruntime-20261104/shared-translator/fixture-variants.json",
+   "fixture": "tests/solc/SelfPowerData.legacy.ast.json",
+   "oldSha256": "4f377599d8364b9e5a848280faea2ad26c60227feb7533030c604c72545677d9",
+   "newSha256": "99447fd76fca2b8d70abdcefddd001e5910859d8a318da36880c8b2739115b71",
+   "occurrences": 45
+  },
+  {
+   "file": "tests/directruntime-20261104/shared-translator/fixture-variants.json",
+   "fixture": "tests/solc/SelfPowerData.viaIR.ast.json",
+   "oldSha256": "ae40eb9cc5893b1f7fd2311fbab2c17a05827cec9bd69ec29cc2a10019ff16d0",
+   "newSha256": "eb435329dca3464a60e7efb9e22594af34acdb94238bf02f68403d3099018917",
+   "occurrences": 23
+  },
+  {
+   "file": "tests/directruntime-20261104/shared-translator/fixture-variants.json",
+   "fixture": "tests/solc/SignedNumeric.ast.json",
+   "oldSha256": "6810df9826ab98ba94c6e4e4880eae323e6379addb3d070908ffa6ec5badde7c",
+   "newSha256": "048585bc4058313e3dd06ef154abbb886d92c4496c563bded08eff68dbf1b68d",
+   "occurrences": 31
+  },
+  {
+   "file": "tests/directruntime-20261104/shared-translator/fixture-variants.json",
+   "fixture": "tests/solc/SignedNumericIR.ast.json",
+   "oldSha256": "80432231216d153b965c6918acf824fa20fc92b45461851575088f69cc486553",
+   "newSha256": "2aa5bb47f927e124d9e51b883e7dcb867ee30e501ec7914cc508959ca47c7014",
+   "occurrences": 12
+  },
+  {
+   "file": "tests/directruntime-20261104/shared-translator/fixture-variants.json",
+   "fixture": "tests/solc/SliceReferenceCopies.ast.json",
+   "oldSha256": "b1a91f2715ad5f04e48dd902b8e2882ec715fd681c6ddf34f78734041ff4c729",
+   "newSha256": "b960c8c5e1bf9b60a1dedd29ea27e5734e06b9b1747c7fd13fecf9bb5fd7cc83",
+   "occurrences": 22
+  },
+  {
+   "file": "tests/directruntime-20261104/shared-translator/fixture-variants.json",
+   "fixture": "tests/solc/SliceReferenceCopies.viaIR.ast.json",
+   "oldSha256": "69b1c95db55641904c1aa7de193439d50ae21d2deb9d22f21f02d6739d1f487a",
+   "newSha256": "b7fd2fe73de1bce33c09987e1b5b48a740c8b2b00d4d84dd54936563b8eabc38",
+   "occurrences": 15
+  },
+  {
+   "file": "tests/directruntime-20261104/shared-translator/fixture-variants.json",
+   "fixture": "tests/solc/TransientFactory.ast.json",
+   "oldSha256": "71618f99fa4427bdb3fcce4b3fc6c50676181b826c313b555b6878dcd92833d9",
+   "newSha256": "04b89aee40aa7106f1b67ec007baa3049fc28abf91c4212d00abd771f9627835",
+   "occurrences": 3
+  },
+  {
+   "file": "tests/directruntime-20261104/shared-translator/fixture-variants.json",
+   "fixture": "tests/solc/TransientFactory.viaIR.ast.json",
+   "oldSha256": "b8d4751eb9b27184edda53b4f5dd9b5067b9704e3f265019764565a757486d6a",
+   "newSha256": "90e53a04d29281ff94311761e4c3ef9939837a4395f754e48df67adab57306de",
+   "occurrences": 1
+  },
+  {
+   "file": "tests/directruntime-20261104/shared-translator/fixture-variants.json",
+   "fixture": "tests/solc/TransientSource.ast.json",
+   "oldSha256": "45c28bb62990895fdebfaeca808207853905864bdaf2b95e8f1427cb2303a504",
+   "newSha256": "96e23c1debf4aa351a90d529dc18236d762cc072e860762c66710eb344ac0b9d",
+   "occurrences": 2
+  },
+  {
+   "file": "tests/directruntime-20261104/shared-translator/reader-comparison.json",
+   "fixture": "tests/solc/EntryPointsLeft.ast.json",
+   "oldSha256": "02ee1a9eb555930bab7025768b72f0aeb6d47aa136f24a93fdc351b601d140a6",
+   "newSha256": "266eb3c87bc7a3abfda8dd0278d657b8097ed2d0c75bade413d5029796e42850",
+   "occurrences": 1
+  }
+ ]
+}

@@ -97,25 +97,46 @@ else
   run_gate layers node scripts/check-layers.mjs
   run_gate private-paths bash scripts/check-private-paths.sh
   run_gate evidence-files bash scripts/check-evidence-files.sh
+  # CI's `checks` job runs this same script (.github/workflows/lean.yml), so a
+  # tree that passes the gate cannot turn `checks` red.
+  run_gate checks-fast bash scripts/ci/checks-fast.sh
+  # The workflow steps a merge adds or changes, run on the merged tree as CI would (Lean steps
+  # skipped); its changed tests and validators only print (scripts/hygiene/run_changed.py).
+  if [ "$mode" = touched ] && [ -f scripts/hygiene/run_changed.py ]; then
+    run_gate run-changed python3 -B scripts/hygiene/run_changed.py --block workflow --validators \
+      --base "$(git merge-base "${GATE_BASE:-origin/master}" HEAD)" --head HEAD
+  fi
   [ "$failed" -eq 0 ] || exit "$failed"
   run_gate build-touched build_touched
+  # Statement-level duplicates and changes (scripts/decl-index/decl_index.py), opt-in because
+  # a checkpoint indexes the whole library (about 4 min, 5 GB): the factory sets it.
+  if [ "${GATE_DECL_INDEX:-0}" = 1 ] && [ "$mode" = touched ] && [ "$failed" -eq 0 ]; then
+    run_gate decl-index python3 -B scripts/decl-index/decl_index.py gate touched
+  fi
   if [ "$mode" != touched ]; then
     if [ "$mode" = full ]; then
+      # H134: each slow example under its own 600 s one-core budget, as in CI
+      # (after the libraries it imports); run-lean.sh then finds them built.
+      run_gate library lake build Solidity SolidityExamples
+      if [ "${GATE_DECL_INDEX:-0}" = 1 ] && [ "$failed" -eq 0 ]; then
+        run_gate decl-index python3 -B scripts/decl-index/decl_index.py gate full
+      fi
+      run_gate slow-examples bash scripts/ci/build-slow-examples.sh
       run_gate run-lean bash run-lean.sh
     else
       # A checkpoint builds the library alone; a lane touching the core also
       # builds the examples and the TestSuite (`docs/contributing.md`).
       run_gate library lake build Solidity
+      if [ "${GATE_DECL_INDEX:-0}" = 1 ] && [ "$failed" -eq 0 ]; then
+        run_gate decl-index python3 -B scripts/decl-index/decl_index.py gate checkpoint
+      fi
       if [ -s "$logs/core" ] || [ "${GATE_EXAMPLES:-0}" = 1 ]; then
         run_gate examples lake build SolidityExamples SolkeyTestSuite
       fi
     fi
-    run_gate trust bash scripts/check-trust.sh
+    # trust, roots, fragments, doc-paths and axiom-pins ran in checks-fast.
     run_gate orphans node scripts/check-orphans.mjs
-    run_gate roots bash scripts/coord-tools/register.sh --check
-    run_gate fragments bash scripts/coord-tools/fragments.sh --check
-    run_gate doc-paths bash scripts/check-doc-paths.sh
-    run_gate axiom-pins node scripts/check-axiom-pins.mjs
+    run_gate p16-generated python3 -B scripts/h62/item1/p16-generator/check.py
   fi
   if [ "$mode" = full ]; then
     run_gate testsuite bash scripts/check-testsuite.sh

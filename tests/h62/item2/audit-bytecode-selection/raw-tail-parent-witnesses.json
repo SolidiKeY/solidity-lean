@@ -1,0 +1,6 @@
+{
+  "raw_tail_parent_joint_domain": {
+    "target": "Solidity.Backend.AbiEntry.Interface.RawTailGuardCertificate.toTailGuardCertificate",
+    "proof": "\u27e8TailGuard.code,RawTailGuard.certificate,True.intro\u27e9"
+  }
+}

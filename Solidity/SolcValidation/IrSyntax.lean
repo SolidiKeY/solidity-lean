@@ -47,10 +47,12 @@ structure Ctl where
   deriving DecidableEq, Repr
 
 /-- Literal spellings as the lexer delivers them: numbers carry their value
-(decimal and hexadecimal spellings coincide), strings their raw body. -/
+(decimal and hexadecimal spellings coincide), strings their raw body, and
+hex strings their exact bytes. -/
 inductive LitTok where
   | num (value : Nat)
   | str (raw : String)
+  | hex (bytes : List (Fin 256))
   | bool (value : Bool)
   deriving DecidableEq, Repr
 
@@ -120,6 +122,7 @@ def stringWord (bytes : List (Fin 256)) : Option Word :=
 def LitTok.decode : LitTok → Option Word
   | .num n => if h : n < 2 ^ 256 then some ⟨n, h⟩ else none
   | .str raw => decodeString raw.toList >>= stringWord
+  | .hex bytes => stringWord bytes
   | .bool b => some (if b then 1 else 0)
 
 /-- A literal with its decoded word; out-of-range numbers and strings longer
@@ -218,6 +221,7 @@ def names (xs : List String) : List Tok := commaSep (xs.map fun x => [Tok.ident 
 def LitTok.toks : LitTok → List Tok
   | .num n => [.num n]
   | .str raw => [.str raw]
+  | .hex bytes => [.hex bytes]
   | .bool b => [.ident (if b then "true" else "false")]
 
 def callToks (name : String) (args : List (List Tok)) : List Tok :=

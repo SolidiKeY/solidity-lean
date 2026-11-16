@@ -9,6 +9,16 @@ import {createHash} from 'node:crypto';import {resolve} from 'node:path';
 import {EngineXAllocations} from './engine_x_allocation.mjs';
 import {once} from 'node:events';import {hostResourceGuard} from './host_resource_guard.mjs';
 import {fileURLToPath,pathToFileURL} from 'node:url';
+/** Guarded regression: SDK construction failures must retain the exact payload
+ * position and parameter commitment without becoming native rejection evidence.
+ * Only errors caught at this constructor call receive these diagnostic facts;
+ * result-supplied properties and later worker failures cannot forge the stage.
+ */
+const payloadConstructionFailures=new WeakMap();
+export function engineConversionFailure(error) {
+ const facts=payloadConstructionFailures.get(error);
+ return facts===undefined?undefined:structuredClone(facts);
+}
 export async function convertEngineFixture(record,m) {
  const f=record.fixture;
  if(f?.network!=='Osaka'||f?._info?.['fixture-format']!=='blockchain_test_engine')return {status:'unsupported',reason:'engine-format-fork'};
@@ -20,13 +30,20 @@ export async function convertEngineFixture(record,m) {
  const genesis=m.createBlock({header,transactions:[],withdrawals:[]},{common});
  if(m.bytesToHex(genesis.hash())!==f.genesisBlockHeader.hash)throw new Error('Engine genesis hash conversion mismatch');
  const blocks=[];const hashes=[];
- for(const item of f.engineNewPayloads) {
+ for(const [payloadIndex,item] of f.engineNewPayloads.entries()) {
   const [payload,blobHashes,parentBeaconBlockRoot,requests]=item.params;
   if(!Array.isArray(blobHashes)||!Array.isArray(requests)||!/^0x[0-9a-f]{64}$/.test(parentBeaconBlockRoot))return {status:'engine_error',reason:'engine-parameter-shape'};
   let last=-1;const requestHashes=[];
   for(const request of requests){if(typeof request!=='string'||!/^0x(?:[0-9a-f]{2})+$/.test(request))return {status:'engine_error',reason:'engine-request-encoding'};const bytes=m.hexToBytes(request);if(bytes.length<2||bytes[0]>2||bytes[0]<=last)return {status:'engine_error',reason:'engine-request-order-or-empty'};last=bytes[0];requestHashes.push(createHash('sha256').update(bytes).digest());}
   const requestsHash='0x'+createHash('sha256').update(Buffer.concat(requestHashes)).digest('hex');
-  const block=await m.createBlockFromExecutionPayload({...payload,parentBeaconBlockRoot,requestsHash},{common});
+  const parameterCommitment=createHash('sha256').update(JSON.stringify(item.params)).digest('hex');
+  let block;
+  try {block=await m.createBlockFromExecutionPayload({...payload,parentBeaconBlockRoot,requestsHash},{common});}
+  catch(error) {
+   const diagnostic=String(error),failure=new Error('Engine payload construction failed: '+diagnostic,{cause:error});
+   payloadConstructionFailures.set(failure,{stage:'execution-payload-construction',payload_index:payloadIndex,parameter_encoding:'JSON.stringify(params)',parameters_sha256:parameterCommitment,sdk_diagnostic:diagnostic,native_execution_evidence:false});
+   throw failure;
+  }
   const actualBlobHashes=block.transactions.flatMap(tx=>(tx.blobVersionedHashes??[]));
   if(JSON.stringify(blobHashes)!==JSON.stringify(actualBlobHashes))return {status:'engine_error',reason:'engine-blob-parameter-disagreement'};
   hashes.push(m.bytesToHex(block.hash()));blocks.push({rlp:m.bytesToHex(block.serialize())});
@@ -65,9 +82,10 @@ export async function executeEngineFixture(record,m,execute) {
   if(converted.status!=='converted')return converted.status==='engine_error'?{...converted,retryable:true}:converted;
   const native=await execute(converted.record);
   if(!native||!['reference_match','reference_mismatch','unsupported','engine_error'].includes(native.status))return {status:'engine_error',retryable:true,reason:'native-worker-invalid-result',binding:converted.binding};
-  if(native.status==='unsupported')return {...native,status:'engine_error',retryable:true,reason:'native-execution-unsupported',native_reason:native.reason,binding:converted.binding};
-  return {...native,...(native.status==='engine_error'?{retryable:true}:{}),status:native.status==='reference_match'?'payload_reference_match':native.status==='reference_mismatch'?'payload_reference_mismatch':native.status,binding:converted.binding};
- } catch(error) { return {status:'engine_error',retryable:true,reason:'engine-conversion-validation-failed',conversion_error:String(error)}; }
+  const observed={...native};delete observed.conversion_failure;
+  if(native.status==='unsupported')return {...observed,status:'engine_error',retryable:true,reason:'native-execution-unsupported',native_reason:native.reason,binding:converted.binding};
+  return {...observed,...(native.status==='engine_error'?{retryable:true}:{}),status:native.status==='reference_match'?'payload_reference_match':native.status==='reference_mismatch'?'payload_reference_mismatch':native.status,binding:converted.binding};
+ } catch(error) { return {status:'engine_error',retryable:true,reason:'engine-conversion-validation-failed',conversion_error:String(error),...(engineConversionFailure(error)?{conversion_failure:engineConversionFailure(error)}:{})}; }
 }
 export function engineExitCode(counts) {return counts.payload_reference_mismatch||counts.engine_error?1:2;}
 async function digest(path){const hash=createHash('sha256');for await(const b of createReadStream(path))hash.update(b);return hash.digest('hex');}

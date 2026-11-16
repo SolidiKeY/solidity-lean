@@ -2,6 +2,7 @@ import Solidity.Lowering.Readonly.SourceStatementParts.Part1
 import Solidity.Lowering.Readonly.SourceStatementParts.Part2
 import Solidity.Lowering.Readonly.SourceStatementParts.Part3
 import Solidity.Lowering.Readonly.SourceStatementParts.Part4
+import Solidity.Lowering.Readonly.SourceKnownAllHistories
 
 namespace Solidity.Lowering.Readonly.SourceHistory
 open Solidity.Source
@@ -29,4 +30,5 @@ theorem execS_succ {E : Env} (G : Glob E) (F : Fr) (fuel : Nat) (_history : At G
   case «rethrow» => exact execS_rethrow_succ G F fuel _history nps ph _ _
   case «declTuple» => exact execS_declTuple_succ G F fuel _history nps ph _ _ _ _
   case «tryCall» => exact execS_tryCall_succ G F fuel _history nps ph _ _ _ _ _ _ _ _
+  case «tryLibrary» => exact (all_known_at G (fuel+1)).execS true F nps ph _ _
 end Solidity.Lowering.Readonly.SourceHistory

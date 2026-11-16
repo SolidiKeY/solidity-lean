@@ -18,22 +18,19 @@ theorem whole (pipeline : Pipeline) :
     ∃ nextRoom : 33+32*wordCellCount (localExternalTypes ctx)≤(reached pipeline).highWaterWords*32,
       frameOf 33 (updated pipeline) (reached pipeline) nextRoom=reached pipeline ∧
       (updated pipeline).clean=clean.clean ∧ (updated pipeline).world=clean.world ∧
-      (reached pipeline).st=(stored pipeline).st ∧ (reached pipeline).key=(stored pipeline).key := by
-  first | omega | decide | skip
-  exact transport 33 clean (stored pipeline) (room pipeline) (area pipeline) [17,255]
+      (reached pipeline).st=(stored pipeline).st ∧ (reached pipeline).key=(stored pipeline).key :=
+  transport 33 clean (stored pipeline) (room pipeline) (area pipeline) [17,255]
 
 theorem prefix_tail (pipeline : Pipeline) :
     frameBytes (reached pipeline) 161=17 ∧ frameBytes (reached pipeline) 162=255 ∧
     frameBytes (reached pipeline) 163=0xa5 ∧ frameBytes (reached pipeline) 176=0xa5 ∧
     frameBytes (reached pipeline) 177=0xa5 ∧ frameBytes (reached pipeline) 192=0 := by
-  first | omega | decide | skip
   dsimp only [reached]
   rw [RawPhysicalCallOutput.image]
   cases pipeline <;> decide +kernel
 
 theorem unchanged_cells (pipeline : Pipeline) :
     RawFrame.view (updated pipeline)=RawFrame.view dirty := by
-  first | omega | decide | skip
   have restored := (frame_roundtrip 33 dirty (RawPhysicalInventory.Controls.image pipeline) (room pipeline)).1
   funext cell
   change Source.toWord (Source.beValue (Environment.readMemory (frameBytes (reached pipeline)) (offset 33 cell) 32))=_
@@ -53,7 +50,6 @@ theorem unchanged_cells (pipeline : Pipeline) :
 /-- Empty returndata does not zero even the first byte of a nonempty output. -/
 theorem empty_keeps_bytes (pipeline : Pipeline) :
     frameBytes (copy (stored pipeline) (area pipeline) [])=frameBytes (stored pipeline) := by
-  first | omega | decide | skip
   rw [RawPhysicalCallOutput.image]
   rfl
 
@@ -74,7 +70,6 @@ theorem requested_extent (pipeline : Pipeline) :
     (written (extended pipeline) (wide pipeline) []).highWaterWords=6 ∧
     (copy (extended pipeline) (wide pipeline) []).highWaterWords=7 ∧
     frameBytes (copy (extended pipeline) (wide pipeline) [])=frameBytes (extended pipeline) := by
-  first | omega | decide | skip
   refine ⟨rfl,?_,?_⟩
   · rw [high _ _ _ (by change (32:Nat)≠0;decide)]
     change max 6 ((192+32+31)/32)=7
@@ -83,7 +78,6 @@ theorem requested_extent (pipeline : Pipeline) :
     rfl
 
 theorem no_zero_padding (pipeline : Pipeline) : frameBytes (reached pipeline) 163≠0 := by
-  first | omega | decide | skip
   rw [(prefix_tail pipeline).2.2.1]
   decide
 end Solidity.Yul.Adapters.RawPhysicalCallOutput.Controls

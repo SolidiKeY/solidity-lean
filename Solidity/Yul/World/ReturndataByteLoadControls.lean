@@ -15,7 +15,7 @@ def entry := {observed.effects with returndata := data}
 def after := Environment.writeBytes memory 64 (Semantics.wordBytes value.val)
 
 theorem window : returnWindow entry.returndata 3 32 = some (Semantics.wordBytes value.val) := by
-  first | decide | rfl | omega
+  decide
 
 theorem copied : copyReturndata TargetMemory.port entry memory (toWord 64) (toWord 3) (toWord 32) = some after := by
   rw [copyReturndata_exact _ _ _ _ _ _ _ window]
@@ -37,18 +37,18 @@ theorem outside (i : Nat) (h : i<64 ∨ 96≤i) : after i = memory i := by
 
 theorem exact_end_zero :
     copyReturndata TargetMemory.port entry memory (toWord 64) (toWord 36) (toWord 0) = some memory := by
-  first | decide | rfl | omega
+  rfl
 
 theorem out_of_source_zero :
     copyReturndata TargetMemory.port entry memory (toWord 64) (toWord 37) (toWord 0) = none := by
   apply copyReturndata_bounds
-  first | decide | rfl | omega
+  decide
 
 theorem truncated_word_refused :
     copyReturndata TargetMemory.port entry memory (toWord 64) (toWord 5) (toWord 32) = none := by
   apply copyReturndata_bounds
-  first | decide | rfl | omega
+  decide
 
 theorem wrong_word_refused : returnWindow entry.returndata 3 32 ≠ some (Semantics.wordBytes 0) := by
-  first | decide | rfl | omega
+  decide
 end Solidity.Yul.World.ReturndataByteLoadControls

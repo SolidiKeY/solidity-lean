@@ -1,16 +1,14 @@
 import Solidity.Frontend.Admission.NameResolutionRoots
 import Solidity.Frontend.Admission.ProgramObservationControls
 
-/-! Inhabited source resolver controls. The synthetic declaration roster is
-not a SourceSpec, Elaborated witness or solc import/correctness claim. -/
+/-! Inhabited source resolver controls. The synthetic declaration roster is not a SourceSpec, Elaborated witness or solc import/correctness claim. -/
 namespace Solidity.Frontend.Admission.NameResolutionControls
 open Solidity.Source ProgramControls
 
 def context : Ctx := {env := env, scope := some "C", locals := []}
 def shadowed : Ctx := context.push "run" (.int IntTy.u256)
 
-/-- Populated selection, local precedence, unknown-name refusal and rejection
-of a constant as a function all use the actual resolver. -/
+/-- Populated selection, local precedence, unknown-name refusal and rejection of a constant as a function all use the actual resolver. -/
 theorem resolver_controls :
     context.functions "run" = [functionDecl] ∧
     shadowed.resolve "run" = some (.loc 0) ∧

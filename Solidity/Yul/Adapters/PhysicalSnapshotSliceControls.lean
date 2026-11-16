@@ -27,13 +27,11 @@ physical update law or a new interpreter. -/
 theorem storeCode_run (F : Environment.Frame) (offset value : Roadmap.Word) (m : Environment.Slice) :
     Environment.runSlice F (storeCode offset value) m=
       some ⟨m.stack,mstore m.memory offset.val value⟩ := by
-  first
-  | solve | rfl
-  | rw [Environment.runSlice_crypto F _ _ (by rfl)]
-    simp only [storeCode,Environment.runCrypto,Environment.push256,Environment.cryptoStep_constant,Option.bind_some]
-    change some (Environment.Slice.mk m.stack
-      (Environment.writeBytes m.memory offset.val (Semantics.wordBytes value.val)))=_
-    rw [writeBytes_mstore]
+  rw [Environment.runSlice_crypto F _ _ (by rfl)]
+  simp only [storeCode,Environment.runCrypto,Environment.push256,Environment.cryptoStep_constant,Option.bind_some]
+  change some (Environment.Slice.mk m.stack
+    (Environment.writeBytes m.memory offset.val (Semantics.wordBytes value.val)))=_
+  rw [writeBytes_mstore]
 
 def shrinkCode := storeCode 128 0
 def growCode := storeCode 128 2

@@ -1,0 +1,18 @@
+{
+  "getter_lookup_joint_domain": {
+    "target": "Solidity.Backend.AbiEntry.Interface.GetterRoutesCertificate.lookup",
+    "proof": "\u27e8GetterRoutes.table,GetterRoutes.certificate,getterFixtureEnv,getterFixtureGlobal,getterFixtureFrame (wmod 0),getterFixtureLabels,getter_fixture_full (wmod 0),True.intro\u27e9"
+  },
+  "getter_executed_joint_domain": {
+    "target": "Solidity.Backend.AbiEntry.Interface.GetterRoutesCertificate.executed",
+    "proof": "\u27e8GetterRoutes.table,GetterRoutes.certificate,getterFixtureEnv,getterFixtureGlobal,getterFixtureFrame (wmod 0),getterFixtureLabels,getterFixtureContract,7,getterFixtureCompilation,getter_fixture_found (wmod 0),getterFixtureMachine (wmod 0),wmod 4,rfl,rfl,getter_fixture_size (wmod 0),True.intro\u27e9"
+  },
+  "dispatch_refusal_compiled_joint_domain": {
+    "target": "Solidity.Backend.AbiEntry.Interface.DispatchRefusalCertificate.compiled",
+    "proof": "\u27e8DispatchRefusal.certificate,getterFixtureEnv,getterFixtureGlobal,getterFixtureFrame (wmod 1),getterFixtureLabels,getterFixtureContract,7,getterFixtureCompilation,getter_fixture_found (wmod 1),getterFixtureMachine (wmod 1),wmod 4,rfl,rfl,getter_fixture_size (wmod 1),rfl,True.intro\u27e9"
+  },
+  "dispatch_refusal_source_joint_domain": {
+    "target": "Solidity.Backend.AbiEntry.Interface.DispatchRefusalCertificate.source",
+    "proof": "\u27e8DispatchRefusal.certificate,getterFixtureEnv,getterFixtureGlobal,getterFixtureFrame (wmod 1),0,getter_fixture_refuses_one,True.intro\u27e9"
+  }
+}

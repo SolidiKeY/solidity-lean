@@ -33,9 +33,12 @@ def tripleArtifact := (LetSequenceCompilation.lower 12 tripleSource).get (by rfl
 theorem triple_source (b : Scalar.Word) :
  evalStmt 17 .nil True.intro tripleSource tripleArtifact.compiled.profile (sourceLocals #v[b]) =
  some ⟨sourceLocals #v[update (update (update b))],.normal⟩ := by
- have last := evalStmt_stable (show 15 ≤ 16 by omega) .nil True.intro LetScopeCompilation.Controls.source
-   LetScopeCompilation.Controls.artifact.compiled.profile (sourceLocals #v[update (update b)])
-   (LetScopeCompilation.Controls.source_done (update (update b)))
+ have last := CompletionControls.completed_horizon
+   (fun fuel => evalStmt fuel .nil True.intro LetScopeCompilation.Controls.source
+     LetScopeCompilation.Controls.artifact.compiled.profile (sourceLocals #v[update (update b)]))
+   (fun fuel extra => evalStmt_refines_add fuel extra .nil True.intro LetScopeCompilation.Controls.source
+     LetScopeCompilation.Controls.artifact.compiled.profile (sourceLocals #v[update (update b)]))
+   (show 15 ≤ 16 by omega) (LetScopeCompilation.Controls.source_done (update (update b)))
  exact LoopControlCompilation.sequence_source source LetScopeCompilation.Controls.source artifact.compiled.profile
    LetScopeCompilation.Controls.artifact.compiled.profile 16 (sourceLocals #v[b])
    (sourceLocals #v[update (update b)]) (sourceLocals #v[update (update (update b))])

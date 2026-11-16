@@ -1,4 +1,5 @@
 import Solidity.Yul.Compilation.ScopedLoopExecution
+import Solidity.Yul.Compilation.CompletionControls
 /-! Original intrinsic for visitor using actual recursively scoped component
 artifacts. Existing compiler blocks and source/model executors are unchanged.
 This is forward normal-success transport, not logical Source/G24/native closure. -/
@@ -120,10 +121,10 @@ theorem Artifact.normal_to_model {c : Control} {n fuel : Nat} {stmt : Stmt [] []
    some ⟨sourceLocals out,.normal⟩) (m : Evm.Machine) (caller : List Evm.Word) :
  Evm.run artifact.code {m with stack := locals.toList.map coreWord++caller} =
  .ok {m with stack := out.toList.map coreWord++caller} 0 := by
- obtain ⟨actual,same,target⟩ := artifact.source_to_model horizon locals ⟨sourceLocals out,.normal⟩ ran m caller
- have equal : out = actual := SourceLoopCompletion.sourceLocals_injective (congrArg Outcome.vars same)
- cases equal
- exact target
+ exact CompletionControls.normal_output (c := c) out
+   (fun actual => Evm.run artifact.code {m with stack := locals.toList.map coreWord++caller} =
+     .ok {m with stack := actual.toList.map coreWord++caller} 0)
+   (artifact.source_to_model horizon locals ⟨sourceLocals out,.normal⟩ ran m caller)
 
 
 /-- info: 'Solidity.Yul.Compilation.ScopedForCompilation.source_for' depends on axioms: [propext, Quot.sound] -/

@@ -1,0 +1,2 @@
+| `Goals/Shrink.lean` | The two H517 shrink goals, open: `yulLayoutView` (one view recursive over `Shrink.Layout`, with laws, pinned geometry and per-shape instances) and `loweringBySimulation` (one simulation diagram over the actual production lowering on t0's fragment; its `Lowering`/`PassCorrect` lift is added after the intrinsic session semantics, H556). |
+| `Examples/Goals/Shrink.lean` | Pinned `#roadmap_goal` open checks for both shrink goals. |

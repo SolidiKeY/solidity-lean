@@ -1,0 +1,212 @@
+{
+  "base": "d6fd95f0886775d7c286813fa9b993a40ba7a777",
+  "boundaries": [
+    "The native identity census proves display-key injectivity only for these loaded constants/references and structurally keyed observations; module identities stay separate.",
+    "Each observed constant seeds the existing fixed FINAL compiled-module environment model. Earlier command environments, discarded anonymous proof bodies and complete check dependencies are not reconstructed.",
+    "Names absent from the compiled pool remain explicit model boundaries; counts are not executed-program liveness.",
+    "Selection covers19 syntax-census candidate-family files, not macro-only files, other consumers, all CI or runtime roots.",
+    "Line ranges are native LF spans, charged facade then additional checks then outside; unattributed physical lines remain separate.",
+    "Provenance is file-level path/marker classification; unmarked files are not certified handwritten.",
+    "Imported artifact bytes are externally trusted; native result receipts bind producers, module list, observations, graph, source and outputs."
+  ],
+  "classes": {
+    "facade": 11089,
+    "observed_check_additional": 1781,
+    "outside_measured_closures": 304952
+  },
+  "deletable_now_verified_lines": 0,
+  "facade_roots": 21,
+  "indexed_physical_lines": 1126116,
+  "matched_name_set_sha256": "f6298cbeaefb98dd2f07c2da7307926a2eb7576c897a7950f9a582e8a0019f70",
+  "missing_source_files": 1574,
+  "native_identity": {
+    "collisions": [],
+    "constant_records": 455138,
+    "loaded_modules": 8276,
+    "name_occurrences": 18311980,
+    "observation_rows": 336,
+    "unique_printed_names": 448073
+  },
+  "observed_check_loaded_union": 4621,
+  "observed_check_selected_union": 1781,
+  "provenance": {
+    "axiom_pins": {
+      "facade_native_range_lines": 0,
+      "observed_check_additional_native_range_lines": 0,
+      "outside_measured_closures_native_range_lines": 0,
+      "unattributed_physical_lines": 4054
+    },
+    "generated_root": {
+      "facade_native_range_lines": 0,
+      "observed_check_additional_native_range_lines": 0,
+      "outside_measured_closures_native_range_lines": 0,
+      "unattributed_physical_lines": 6663
+    },
+    "marked_generated": {
+      "facade_native_range_lines": 0,
+      "observed_check_additional_native_range_lines": 26,
+      "observed_check_additional_serialized_constants": 37,
+      "outside_measured_closures_native_range_lines": 12232,
+      "outside_measured_closures_serialized_constants": 17285,
+      "unattributed_physical_lines": 2071,
+      "without_native_source_range": 9288
+    },
+    "unresolved_chain_agreement": {
+      "facade_native_range_lines": 0,
+      "observed_check_additional_native_range_lines": 0,
+      "outside_measured_closures_native_range_lines": 15628,
+      "outside_measured_closures_serialized_constants": 3143,
+      "unattributed_physical_lines": 6067,
+      "without_native_source_range": 1737
+    },
+    "untraced": {
+      "facade_native_range_lines": 53330,
+      "facade_serialized_constants": 11089,
+      "observed_check_additional_native_range_lines": 3181,
+      "observed_check_additional_serialized_constants": 1744,
+      "outside_measured_closures_native_range_lines": 763021,
+      "outside_measured_closures_serialized_constants": 284524,
+      "unattributed_physical_lines": 259843,
+      "without_native_source_range": 176464
+    }
+  },
+  "selected_modules": 6717,
+  "selected_serialized_constants": 317822,
+  "source_contexts": [
+    {
+      "boundary": {},
+      "loaded_model_records": 2237,
+      "observed_constant_names": 14,
+      "path": "Solidity/Frontend/SolcJson/CallMetadataPathControls.lean",
+      "selected_model_records": 8
+    },
+    {
+      "boundary": {},
+      "loaded_model_records": 2335,
+      "observed_constant_names": 14,
+      "path": "Solidity/Yul/Views/CalldataHashBindingControls.lean",
+      "selected_model_records": 666
+    },
+    {
+      "boundary": {},
+      "loaded_model_records": 2479,
+      "observed_constant_names": 6,
+      "path": "Solidity/Yul/Views/ComputedAllocationControls.lean",
+      "selected_model_records": 725
+    },
+    {
+      "boundary": {},
+      "loaded_model_records": 3102,
+      "observed_constant_names": 3,
+      "path": "Solidity/Yul/Views/ComputedAllocationWriteControls.lean",
+      "selected_model_records": 1030
+    },
+    {
+      "boundary": {},
+      "loaded_model_records": 2388,
+      "observed_constant_names": 9,
+      "path": "Solidity/Yul/Views/ComputedPlacementControls.lean",
+      "selected_model_records": 635
+    },
+    {
+      "boundary": {},
+      "loaded_model_records": 3172,
+      "observed_constant_names": 22,
+      "path": "Solidity/Yul/Views/InventoryCandidateOrderControls.lean",
+      "selected_model_records": 1070
+    },
+    {
+      "boundary": {},
+      "loaded_model_records": 3142,
+      "observed_constant_names": 10,
+      "path": "Solidity/Yul/Views/InventoryDecodeOrderControls.lean",
+      "selected_model_records": 1042
+    },
+    {
+      "boundary": {},
+      "loaded_model_records": 3229,
+      "observed_constant_names": 16,
+      "path": "Solidity/Yul/Views/InventoryReplayControls.lean",
+      "selected_model_records": 1125
+    },
+    {
+      "boundary": {},
+      "loaded_model_records": 3540,
+      "observed_constant_names": 52,
+      "path": "Solidity/Yul/Views/InventorySnapshotHistoryControls.lean",
+      "selected_model_records": 1335
+    },
+    {
+      "boundary": {},
+      "loaded_model_records": 2992,
+      "observed_constant_names": 18,
+      "path": "Solidity/Yul/Views/MemoryImageOrderControls.lean",
+      "selected_model_records": 911
+    },
+    {
+      "boundary": {},
+      "loaded_model_records": 2897,
+      "observed_constant_names": 14,
+      "path": "Solidity/Yul/Views/MixedHeapOrderControls.lean",
+      "selected_model_records": 917
+    },
+    {
+      "boundary": {},
+      "loaded_model_records": 2493,
+      "observed_constant_names": 13,
+      "path": "Solidity/Yul/Views/NestedMappingLayout.lean",
+      "selected_model_records": 640
+    },
+    {
+      "boundary": {},
+      "loaded_model_records": 3308,
+      "observed_constant_names": 16,
+      "path": "Solidity/Yul/Views/NominalInventoryControls.lean",
+      "selected_model_records": 1178
+    },
+    {
+      "boundary": {},
+      "loaded_model_records": 3123,
+      "observed_constant_names": 22,
+      "path": "Solidity/Yul/Views/NominalInventoryDynamicControls.lean",
+      "selected_model_records": 1006
+    },
+    {
+      "boundary": {},
+      "loaded_model_records": 3211,
+      "observed_constant_names": 15,
+      "path": "Solidity/Yul/Views/NominalInventorySequentialControls.lean",
+      "selected_model_records": 1085
+    },
+    {
+      "boundary": {},
+      "loaded_model_records": 3385,
+      "observed_constant_names": 28,
+      "path": "Solidity/Yul/Views/NominalInventoryUnchangedControls.lean",
+      "selected_model_records": 1206
+    },
+    {
+      "boundary": {},
+      "loaded_model_records": 3064,
+      "observed_constant_names": 32,
+      "path": "Solidity/Yul/Views/NominalMemoryControls.lean",
+      "selected_model_records": 1021
+    },
+    {
+      "boundary": {},
+      "loaded_model_records": 3095,
+      "observed_constant_names": 29,
+      "path": "Solidity/Yul/Views/NominalRetainedControls.lean",
+      "selected_model_records": 1053
+    },
+    {
+      "boundary": {},
+      "loaded_model_records": 2929,
+      "observed_constant_names": 3,
+      "path": "Solidity/Yul/Views/SourceEnvironmentControls.lean",
+      "selected_model_records": 948
+    }
+  ],
+  "status": "partial",
+  "verdict": "The final-context model projects additional compiled bindings beyond the facade from observed check names. This does not show that the checks consumed those bodies. Outside these measured closures is not unused; no deletion is certified."
+}

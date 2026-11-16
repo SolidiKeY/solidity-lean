@@ -200,6 +200,35 @@ def tryRes {k : SCtx} (L : Locals) (c : Syn .expr) (f : String) (args : Syn (.li
     | _ => []
   | _ => []
 
+/-- Library/Error enumeration, using the same argument and body search as
+ordinary statement checking. Existing contract/plain/bytes rules are unchanged. -/
+def tryLibraryRes {k : SCtx} (L : Locals) (c : Syn .expr) (f : String) (args : Syn (.list .expr))
+    (rets : Syn (.list .param)) (bl : Syn (.block k)) (name : Option String)
+    (cb : Syn (.list (.item k))) (rok : (L₀ : Locals) → List (SRes C (.block k) bl L₀))
+    (rc : List (Σ L₂, ItemsD C ((name.getD "", .string .memory) :: L) cb L₂)) :
+    List (SRes C (.stmt k) (.tryStmt (.call (.member c f) (.positional args)) rets bl
+      (.catchSig (Option.some "Error") (.param (.elem .string) (Option.some .memory) name) .nil (.block cb)) .nil) L) :=
+  (argsOf (C.at L) (infer (C.at L) ((C.at L).libraryArgs c args))).flatMap fun pa =>
+  match ho : (C.at L).libraryOverloads c f pa.1 with
+  | [d] =>
+    match hs : d.fnSig C.env with
+    | Option.some (ps, rs) =>
+      if hf : argsFit C.isBase C.mapFree pa.1 ps = true then
+        if hb : libraryBoundary ps rs = true then
+          match ht : rets.tys C.env C.scope .memory with
+          | Option.some tys =>
+            if same : (tys.isEmpty || STy.sameList tys rs) = true then
+              (rok ((tryLocals rets.paramNames rs).reverse ++ L)).flatMap fun r =>
+              match r with
+              | .block success => rc.map fun q =>
+                .stmt (.tryLibrary pa.2 ho hs hf hb ht same success q.2)
+            else []
+          | Option.none => []
+        else []
+      else []
+    | Option.none => []
+  | _ => []
+
 /-- **Statement checking**: every derivation S01 gives the tree with the
 locals `L`, by rule. -/
 def inferS : {c : Cat} → (s : Syn c) → (L : Locals) → List (SRes C c s L)
@@ -284,6 +313,10 @@ def inferS : {c : Cat} → (s : Syn c) → (L : Locals) → List (SRes C c s L)
     tryRes C L c f args rets bl (.catchSig Option.none (.param (.elem .bytes) (Option.some .memory) x) .nil (.block cb))
       (Option.some (x.getD "")) cb (.bytes x cb) (fun L' => inferS bl L')
       (itemsOf C (inferS cb (catchLocals (Option.some (x.getD "")) L)))
+  | _, .tryStmt (.call (.member c f) (.positional args)) rets bl
+      (.catchSig (Option.some "Error") (.param (.elem .string) (Option.some .memory) name) .nil (.block cb)) .nil, L =>
+    tryLibraryRes C L c f args rets bl name cb (fun L₀ => inferS bl L₀)
+      (itemsOf C (inferS cb ((name.getD "", .string .memory) :: L)))
   | _, _, _ => []
 
 end

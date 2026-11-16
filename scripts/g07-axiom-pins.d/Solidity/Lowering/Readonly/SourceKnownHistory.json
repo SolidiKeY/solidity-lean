@@ -1,0 +1,52 @@
+{
+ "Solidity/Lowering/Readonly/SourceKnownHistory.lean:Solidity.Lowering.Readonly.SourceHistory.evalArgs_succ_known": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/Readonly/SourceKnownHistory.lean:Solidity.Lowering.Readonly.SourceHistory.evalArgsRev_succ_known": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/Readonly/SourceKnownHistory.lean:Solidity.Lowering.Readonly.SourceHistory.evalBuiltin_succ_known": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/Readonly/SourceKnownHistory.lean:Solidity.Lowering.Readonly.SourceHistory.evalConvArgs_succ_known": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/Readonly/SourceKnownHistory.lean:Solidity.Lowering.Readonly.SourceHistory.evalLoc_succ_known": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/Readonly/SourceKnownHistory.lean:Solidity.Lowering.Readonly.SourceHistory.evalPair_succ_known": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/Readonly/SourceKnownHistory.lean:Solidity.Lowering.Readonly.SourceHistory.known_at_zero": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/Readonly/SourceKnownHistory.lean:Solidity.Lowering.Readonly.SourceHistory.KnownAt.toAt": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/Readonly/SourceKnownHistory.lean:Solidity.Lowering.Readonly.SourceHistory.pay_succ_known": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/Readonly/SourceKnownHistory.lean:Solidity.Lowering.Readonly.SourceHistory.withLibraryCalldata_effect": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ]
+}

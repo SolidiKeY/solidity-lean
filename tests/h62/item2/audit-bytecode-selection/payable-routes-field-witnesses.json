@@ -1,0 +1,10 @@
+{
+  "payable_routes_selected_joint_domain": {
+    "target": "Solidity.Backend.AbiEntry.Interface.PayableRoutesCertificate.selected",
+    "proof": "\u27e8PayableRoutes.route,PayableRoutes.certificate,payableContract,3,payableTable,payableFallback,True.intro\u27e9"
+  },
+  "payable_routes_executed_joint_domain": {
+    "target": "Solidity.Backend.AbiEntry.Interface.PayableRoutesCertificate.executed",
+    "proof": "\u27e8PayableRoutes.route,PayableRoutes.certificate,payableContract,3,payableTable,payableFallback,payableCompilation,payable_found,payableMachine (wmod 5) (wmod 0),wmod 5,rfl,True.intro\u27e9"
+  }
+}

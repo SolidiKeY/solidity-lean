@@ -1,0 +1,3623 @@
+[
+  {
+    "abbrev": 76,
+    "areas": {
+      "AST": {
+        "by_category": {
+          "unmarked": {
+            "files": 1,
+            "lines": 676
+          }
+        },
+        "code_lines": 365,
+        "declarations": {
+          "abbrev": 5,
+          "axiom": 0,
+          "def": 51,
+          "inductive": 7,
+          "instance": 4,
+          "lemma": 0,
+          "opaque": 0,
+          "structure": 0,
+          "theorem": 7
+        },
+        "definition_lines": 303,
+        "definition_to_proof_line_ratio": 7.390243902439025,
+        "files": 1,
+        "generated_lines": 0,
+        "generated_share": 0.0,
+        "implemented_by": 0,
+        "imports_in": 4,
+        "imports_out": 2,
+        "lines": 676,
+        "maxHeartbeats_options": 0,
+        "native_decide": 0,
+        "presumed_handwritten_lines": 676,
+        "proof_lines": 41,
+        "sorry": 0,
+        "unknown_import_only_lines": 0
+      },
+      "Calculus": {
+        "by_category": {
+          "unmarked": {
+            "files": 33,
+            "lines": 25263
+          }
+        },
+        "code_lines": 17956,
+        "declarations": {
+          "abbrev": 2,
+          "axiom": 0,
+          "def": 672,
+          "inductive": 44,
+          "instance": 19,
+          "lemma": 0,
+          "opaque": 1,
+          "structure": 13,
+          "theorem": 921
+        },
+        "definition_lines": 8204,
+        "definition_to_proof_line_ratio": 0.9700839541208466,
+        "files": 33,
+        "generated_lines": 0,
+        "generated_share": 0.0,
+        "implemented_by": 1,
+        "imports_in": 130,
+        "imports_out": 57,
+        "lines": 25263,
+        "maxHeartbeats_options": 6,
+        "native_decide": 0,
+        "presumed_handwritten_lines": 25263,
+        "proof_lines": 8457,
+        "sorry": 0,
+        "unknown_import_only_lines": 0
+      },
+      "Corpus": {
+        "by_category": {
+          "corpus": {
+            "files": 7,
+            "lines": 4156
+          },
+          "unmarked": {
+            "files": 1,
+            "lines": 137
+          }
+        },
+        "code_lines": 2854,
+        "declarations": {
+          "abbrev": 1,
+          "axiom": 0,
+          "def": 3,
+          "inductive": 0,
+          "instance": 0,
+          "lemma": 0,
+          "opaque": 0,
+          "structure": 0,
+          "theorem": 229
+        },
+        "definition_lines": 19,
+        "definition_to_proof_line_ratio": 0.00903041825095057,
+        "files": 8,
+        "generated_lines": 4156,
+        "generated_share": 0.9680875844397857,
+        "implemented_by": 0,
+        "imports_in": 15,
+        "imports_out": 8,
+        "lines": 4293,
+        "maxHeartbeats_options": 7,
+        "native_decide": 0,
+        "presumed_handwritten_lines": 137,
+        "proof_lines": 2104,
+        "sorry": 0,
+        "unknown_import_only_lines": 0
+      },
+      "Counterexamples": {
+        "by_category": {
+          "unmarked": {
+            "files": 4,
+            "lines": 455
+          }
+        },
+        "code_lines": 195,
+        "declarations": {
+          "abbrev": 0,
+          "axiom": 0,
+          "def": 11,
+          "inductive": 0,
+          "instance": 0,
+          "lemma": 0,
+          "opaque": 0,
+          "structure": 0,
+          "theorem": 14
+        },
+        "definition_lines": 19,
+        "definition_to_proof_line_ratio": 0.14074074074074075,
+        "files": 4,
+        "generated_lines": 0,
+        "generated_share": 0.0,
+        "implemented_by": 0,
+        "imports_in": 4,
+        "imports_out": 4,
+        "lines": 455,
+        "maxHeartbeats_options": 0,
+        "native_decide": 0,
+        "presumed_handwritten_lines": 455,
+        "proof_lines": 135,
+        "sorry": 0,
+        "unknown_import_only_lines": 0
+      },
+      "Evm": {
+        "by_category": {
+          "unmarked": {
+            "files": 7,
+            "lines": 5642
+          }
+        },
+        "code_lines": 4241,
+        "declarations": {
+          "abbrev": 5,
+          "axiom": 0,
+          "def": 107,
+          "inductive": 10,
+          "instance": 3,
+          "lemma": 0,
+          "opaque": 0,
+          "structure": 2,
+          "theorem": 250
+        },
+        "definition_lines": 708,
+        "definition_to_proof_line_ratio": 0.20438799076212472,
+        "files": 7,
+        "generated_lines": 0,
+        "generated_share": 0.0,
+        "implemented_by": 0,
+        "imports_in": 12,
+        "imports_out": 10,
+        "lines": 5642,
+        "maxHeartbeats_options": 0,
+        "native_decide": 0,
+        "presumed_handwritten_lines": 5642,
+        "proof_lines": 3464,
+        "sorry": 0,
+        "unknown_import_only_lines": 0
+      },
+      "Examples": {
+        "by_category": {
+          "unmarked": {
+            "files": 38,
+            "lines": 11005
+          }
+        },
+        "code_lines": 5413,
+        "declarations": {
+          "abbrev": 23,
+          "axiom": 0,
+          "def": 113,
+          "inductive": 0,
+          "instance": 0,
+          "lemma": 0,
+          "opaque": 0,
+          "structure": 0,
+          "theorem": 431
+        },
+        "definition_lines": 1388,
+        "definition_to_proof_line_ratio": 0.44316730523627074,
+        "files": 38,
+        "generated_lines": 0,
+        "generated_share": 0.0,
+        "implemented_by": 0,
+        "imports_in": 40,
+        "imports_out": 55,
+        "lines": 11005,
+        "maxHeartbeats_options": 33,
+        "native_decide": 0,
+        "presumed_handwritten_lines": 11005,
+        "proof_lines": 3132,
+        "sorry": 0,
+        "unknown_import_only_lines": 0
+      },
+      "FreshNames": {
+        "by_category": {
+          "unmarked": {
+            "files": 1,
+            "lines": 93
+          }
+        },
+        "code_lines": 35,
+        "declarations": {
+          "abbrev": 1,
+          "axiom": 0,
+          "def": 3,
+          "inductive": 0,
+          "instance": 0,
+          "lemma": 0,
+          "opaque": 0,
+          "structure": 0,
+          "theorem": 0
+        },
+        "definition_lines": 31,
+        "definition_to_proof_line_ratio": null,
+        "files": 1,
+        "generated_lines": 0,
+        "generated_share": 0.0,
+        "implemented_by": 0,
+        "imports_in": 2,
+        "imports_out": 1,
+        "lines": 93,
+        "maxHeartbeats_options": 0,
+        "native_decide": 0,
+        "presumed_handwritten_lines": 93,
+        "proof_lines": 0,
+        "sorry": 0,
+        "unknown_import_only_lines": 0
+      },
+      "KeySort": {
+        "by_category": {
+          "unmarked": {
+            "files": 1,
+            "lines": 271
+          }
+        },
+        "code_lines": 153,
+        "declarations": {
+          "abbrev": 0,
+          "axiom": 0,
+          "def": 7,
+          "inductive": 1,
+          "instance": 0,
+          "lemma": 0,
+          "opaque": 0,
+          "structure": 0,
+          "theorem": 8
+        },
+        "definition_lines": 104,
+        "definition_to_proof_line_ratio": 2.311111111111111,
+        "files": 1,
+        "generated_lines": 0,
+        "generated_share": 0.0,
+        "implemented_by": 0,
+        "imports_in": 3,
+        "imports_out": 0,
+        "lines": 271,
+        "maxHeartbeats_options": 0,
+        "native_decide": 0,
+        "presumed_handwritten_lines": 271,
+        "proof_lines": 45,
+        "sorry": 0,
+        "unknown_import_only_lines": 0
+      },
+      "Semantics": {
+        "by_category": {
+          "unmarked": {
+            "files": 5,
+            "lines": 4050
+          }
+        },
+        "code_lines": 2934,
+        "declarations": {
+          "abbrev": 6,
+          "axiom": 0,
+          "def": 135,
+          "inductive": 12,
+          "instance": 1,
+          "lemma": 0,
+          "opaque": 0,
+          "structure": 4,
+          "theorem": 166
+        },
+        "definition_lines": 1151,
+        "definition_to_proof_line_ratio": 0.6946288473144236,
+        "files": 5,
+        "generated_lines": 0,
+        "generated_share": 0.0,
+        "implemented_by": 0,
+        "imports_in": 20,
+        "imports_out": 5,
+        "lines": 4050,
+        "maxHeartbeats_options": 0,
+        "native_decide": 0,
+        "presumed_handwritten_lines": 4050,
+        "proof_lines": 1657,
+        "sorry": 0,
+        "unknown_import_only_lines": 0
+      },
+      "SortCheck": {
+        "by_category": {
+          "unmarked": {
+            "files": 3,
+            "lines": 1540
+          }
+        },
+        "code_lines": 973,
+        "declarations": {
+          "abbrev": 0,
+          "axiom": 0,
+          "def": 66,
+          "inductive": 6,
+          "instance": 2,
+          "lemma": 0,
+          "opaque": 0,
+          "structure": 6,
+          "theorem": 46
+        },
+        "definition_lines": 556,
+        "definition_to_proof_line_ratio": 1.4111675126903553,
+        "files": 3,
+        "generated_lines": 0,
+        "generated_share": 0.0,
+        "implemented_by": 0,
+        "imports_in": 8,
+        "imports_out": 5,
+        "lines": 1540,
+        "maxHeartbeats_options": 0,
+        "native_decide": 6,
+        "presumed_handwritten_lines": 1540,
+        "proof_lines": 394,
+        "sorry": 0,
+        "unknown_import_only_lines": 0
+      },
+      "SpecSyntax": {
+        "by_category": {
+          "unmarked": {
+            "files": 1,
+            "lines": 200
+          }
+        },
+        "code_lines": 131,
+        "declarations": {
+          "abbrev": 0,
+          "axiom": 0,
+          "def": 6,
+          "inductive": 2,
+          "instance": 0,
+          "lemma": 0,
+          "opaque": 0,
+          "structure": 1,
+          "theorem": 0
+        },
+        "definition_lines": 122,
+        "definition_to_proof_line_ratio": null,
+        "files": 1,
+        "generated_lines": 0,
+        "generated_share": 0.0,
+        "implemented_by": 0,
+        "imports_in": 2,
+        "imports_out": 1,
+        "lines": 200,
+        "maxHeartbeats_options": 0,
+        "native_decide": 0,
+        "presumed_handwritten_lines": 200,
+        "proof_lines": 0,
+        "sorry": 0,
+        "unknown_import_only_lines": 0
+      },
+      "Syntax": {
+        "by_category": {
+          "unmarked": {
+            "files": 1,
+            "lines": 3550
+          }
+        },
+        "code_lines": 2384,
+        "declarations": {
+          "abbrev": 4,
+          "axiom": 0,
+          "def": 198,
+          "inductive": 22,
+          "instance": 0,
+          "lemma": 0,
+          "opaque": 0,
+          "structure": 4,
+          "theorem": 0
+        },
+        "definition_lines": 2059,
+        "definition_to_proof_line_ratio": null,
+        "files": 1,
+        "generated_lines": 0,
+        "generated_share": 0.0,
+        "implemented_by": 0,
+        "imports_in": 5,
+        "imports_out": 2,
+        "lines": 3550,
+        "maxHeartbeats_options": 0,
+        "native_decide": 0,
+        "presumed_handwritten_lines": 3550,
+        "proof_lines": 0,
+        "sorry": 0,
+        "unknown_import_only_lines": 0
+      },
+      "Theorems": {
+        "by_category": {
+          "unmarked": {
+            "files": 1,
+            "lines": 225
+          }
+        },
+        "code_lines": 97,
+        "declarations": {
+          "abbrev": 14,
+          "axiom": 0,
+          "def": 1,
+          "inductive": 0,
+          "instance": 3,
+          "lemma": 0,
+          "opaque": 0,
+          "structure": 0,
+          "theorem": 14
+        },
+        "definition_lines": 51,
+        "definition_to_proof_line_ratio": 1.5454545454545454,
+        "files": 1,
+        "generated_lines": 0,
+        "generated_share": 0.0,
+        "implemented_by": 0,
+        "imports_in": 1,
+        "imports_out": 5,
+        "lines": 225,
+        "maxHeartbeats_options": 0,
+        "native_decide": 0,
+        "presumed_handwritten_lines": 225,
+        "proof_lines": 33,
+        "sorry": 0,
+        "unknown_import_only_lines": 0
+      },
+      "Theory": {
+        "by_category": {
+          "unmarked": {
+            "files": 15,
+            "lines": 5557
+          }
+        },
+        "code_lines": 3410,
+        "declarations": {
+          "abbrev": 9,
+          "axiom": 0,
+          "def": 86,
+          "inductive": 11,
+          "instance": 0,
+          "lemma": 0,
+          "opaque": 0,
+          "structure": 0,
+          "theorem": 311
+        },
+        "definition_lines": 590,
+        "definition_to_proof_line_ratio": 0.22289384208537968,
+        "files": 15,
+        "generated_lines": 0,
+        "generated_share": 0.0,
+        "implemented_by": 0,
+        "imports_in": 44,
+        "imports_out": 24,
+        "lines": 5557,
+        "maxHeartbeats_options": 0,
+        "native_decide": 0,
+        "presumed_handwritten_lines": 5557,
+        "proof_lines": 2647,
+        "sorry": 0,
+        "unknown_import_only_lines": 0
+      },
+      "Tools": {
+        "by_category": {
+          "unmarked": {
+            "files": 7,
+            "lines": 1806
+          }
+        },
+        "code_lines": 1148,
+        "declarations": {
+          "abbrev": 1,
+          "axiom": 0,
+          "def": 114,
+          "inductive": 3,
+          "instance": 1,
+          "lemma": 0,
+          "opaque": 0,
+          "structure": 7,
+          "theorem": 5
+        },
+        "definition_lines": 972,
+        "definition_to_proof_line_ratio": 10.340425531914894,
+        "files": 7,
+        "generated_lines": 0,
+        "generated_share": 0.0,
+        "implemented_by": 0,
+        "imports_in": 17,
+        "imports_out": 16,
+        "lines": 1806,
+        "maxHeartbeats_options": 0,
+        "native_decide": 0,
+        "presumed_handwritten_lines": 1806,
+        "proof_lines": 94,
+        "sorry": 0,
+        "unknown_import_only_lines": 0
+      },
+      "Typing": {
+        "by_category": {
+          "unmarked": {
+            "files": 6,
+            "lines": 8554
+          }
+        },
+        "code_lines": 7066,
+        "declarations": {
+          "abbrev": 2,
+          "axiom": 0,
+          "def": 82,
+          "inductive": 1,
+          "instance": 0,
+          "lemma": 0,
+          "opaque": 0,
+          "structure": 7,
+          "theorem": 395
+        },
+        "definition_lines": 498,
+        "definition_to_proof_line_ratio": 0.07732919254658385,
+        "files": 6,
+        "generated_lines": 0,
+        "generated_share": 0.0,
+        "implemented_by": 0,
+        "imports_in": 14,
+        "imports_out": 7,
+        "lines": 8554,
+        "maxHeartbeats_options": 0,
+        "native_decide": 0,
+        "presumed_handwritten_lines": 8554,
+        "proof_lines": 6440,
+        "sorry": 0,
+        "unknown_import_only_lines": 0
+      },
+      "Update": {
+        "by_category": {
+          "unmarked": {
+            "files": 1,
+            "lines": 1153
+          }
+        },
+        "code_lines": 829,
+        "declarations": {
+          "abbrev": 3,
+          "axiom": 0,
+          "def": 45,
+          "inductive": 12,
+          "instance": 1,
+          "lemma": 0,
+          "opaque": 0,
+          "structure": 0,
+          "theorem": 31
+        },
+        "definition_lines": 449,
+        "definition_to_proof_line_ratio": 1.2472222222222222,
+        "files": 1,
+        "generated_lines": 0,
+        "generated_share": 0.0,
+        "implemented_by": 0,
+        "imports_in": 8,
+        "imports_out": 2,
+        "lines": 1153,
+        "maxHeartbeats_options": 0,
+        "native_decide": 0,
+        "presumed_handwritten_lines": 1153,
+        "proof_lines": 360,
+        "sorry": 0,
+        "unknown_import_only_lines": 0
+      }
+    },
+    "axiom": 0,
+    "axiom_pin_lines": 0,
+    "code_lines": 50184,
+    "def": 1700,
+    "definition_lines": 17224,
+    "definition_to_proof_line_ratio": 0.5938695996965832,
+    "files": 133,
+    "generated_lines": 4156,
+    "generated_share": 0.05591056462136602,
+    "goal_status": "unavailable: no authoritative goal-closure parser/counter; absent file is not zero goals",
+    "goals_closed": null,
+    "goals_file_present": false,
+    "implemented_by": 1,
+    "imports_in": 329,
+    "imports_out": 204,
+    "inductive": 131,
+    "instance": 34,
+    "lemma": 0,
+    "lines": 74333,
+    "lines_added_per_goal_closed": null,
+    "lines_delta": null,
+    "maxHeartbeats_options": 46,
+    "merged_plan_commits": [],
+    "merged_plan_steps_visible": 0,
+    "month": "2026-09",
+    "native_decide": 6,
+    "opaque": 1,
+    "presumed_handwritten_lines": 70177,
+    "proof_lines": 29003,
+    "revision": "609966231c8fa939467936431a80f693ad6d92fb",
+    "roadmap_command_files": [],
+    "sorry": 0,
+    "structure": 44,
+    "theorem": 2828,
+    "unknown_import_only_lines": 0
+  },
+  {
+    "abbrev": 362,
+    "areas": {
+      "AST": {
+        "by_category": {
+          "unmarked": {
+            "files": 1,
+            "lines": 1246
+          }
+        },
+        "code_lines": 736,
+        "declarations": {
+          "abbrev": 4,
+          "axiom": 0,
+          "def": 95,
+          "inductive": 11,
+          "instance": 4,
+          "lemma": 0,
+          "opaque": 0,
+          "structure": 0,
+          "theorem": 20
+        },
+        "definition_lines": 571,
+        "definition_to_proof_line_ratio": 4.13768115942029,
+        "files": 1,
+        "generated_lines": 0,
+        "generated_share": 0.0,
+        "implemented_by": 0,
+        "imports_in": 7,
+        "imports_out": 2,
+        "lines": 1246,
+        "maxHeartbeats_options": 0,
+        "native_decide": 0,
+        "presumed_handwritten_lines": 1246,
+        "proof_lines": 138,
+        "sorry": 0,
+        "unknown_import_only_lines": 0
+      },
+      "Backend": {
+        "by_category": {
+          "marked_generated": {
+            "files": 2,
+            "lines": 1495
+          },
+          "unmarked": {
+            "files": 83,
+            "lines": 11509
+          }
+        },
+        "code_lines": 10126,
+        "declarations": {
+          "abbrev": 16,
+          "axiom": 0,
+          "def": 440,
+          "inductive": 13,
+          "instance": 1,
+          "lemma": 0,
+          "opaque": 0,
+          "structure": 32,
+          "theorem": 649
+        },
+        "definition_lines": 3570,
+        "definition_to_proof_line_ratio": 0.6363636363636364,
+        "files": 85,
+        "generated_lines": 1495,
+        "generated_share": 0.11496462626884035,
+        "implemented_by": 0,
+        "imports_in": 260,
+        "imports_out": 176,
+        "lines": 13004,
+        "maxHeartbeats_options": 0,
+        "native_decide": 0,
+        "presumed_handwritten_lines": 11509,
+        "proof_lines": 5610,
+        "sorry": 0,
+        "unknown_import_only_lines": 0
+      },
+      "Calculus": {
+        "by_category": {
+          "import_only_unknown": {
+            "files": 10,
+            "lines": 442
+          },
+          "marked_generated": {
+            "files": 1,
+            "lines": 1550
+          },
+          "unmarked": {
+            "files": 279,
+            "lines": 151980
+          }
+        },
+        "code_lines": 119048,
+        "declarations": {
+          "abbrev": 134,
+          "axiom": 0,
+          "def": 4490,
+          "inductive": 149,
+          "instance": 29,
+          "lemma": 1,
+          "opaque": 2,
+          "structure": 185,
+          "theorem": 5514
+        },
+        "definition_lines": 40483,
+        "definition_to_proof_line_ratio": 0.5514268201321256,
+        "files": 290,
+        "generated_lines": 1550,
+        "generated_share": 0.010066765385914321,
+        "implemented_by": 104,
+        "imports_in": 1422,
+        "imports_out": 641,
+        "lines": 153972,
+        "maxHeartbeats_options": 0,
+        "native_decide": 0,
+        "presumed_handwritten_lines": 151980,
+        "proof_lines": 73415,
+        "sorry": 0,
+        "unknown_import_only_lines": 442
+      },
+      "Corpus": {
+        "by_category": {
+          "corpus": {
+            "files": 8,
+            "lines": 4079
+          },
+          "unmarked": {
+            "files": 1,
+            "lines": 125
+          }
+        },
+        "code_lines": 2406,
+        "declarations": {
+          "abbrev": 2,
+          "axiom": 0,
+          "def": 5,
+          "inductive": 0,
+          "instance": 0,
+          "lemma": 0,
+          "opaque": 0,
+          "structure": 0,
+          "theorem": 592
+        },
+        "definition_lines": 20,
+        "definition_to_proof_line_ratio": 0.008628127696289905,
+        "files": 9,
+        "generated_lines": 4079,
+        "generated_share": 0.9702664129400571,
+        "implemented_by": 0,
+        "imports_in": 18,
+        "imports_out": 16,
+        "lines": 4204,
+        "maxHeartbeats_options": 0,
+        "native_decide": 0,
+        "presumed_handwritten_lines": 125,
+        "proof_lines": 2318,
+        "sorry": 0,
+        "unknown_import_only_lines": 0
+      },
+      "Counterexamples": {
+        "by_category": {
+          "unmarked": {
+            "files": 4,
+            "lines": 413
+          }
+        },
+        "code_lines": 180,
+        "declarations": {
+          "abbrev": 0,
+          "axiom": 0,
+          "def": 4,
+          "inductive": 0,
+          "instance": 0,
+          "lemma": 0,
+          "opaque": 0,
+          "structure": 0,
+          "theorem": 14
+        },
+        "definition_lines": 7,
+        "definition_to_proof_line_ratio": 0.051094890510948905,
+        "files": 4,
+        "generated_lines": 0,
+        "generated_share": 0.0,
+        "implemented_by": 0,
+        "imports_in": 5,
+        "imports_out": 4,
+        "lines": 413,
+        "maxHeartbeats_options": 0,
+        "native_decide": 0,
+        "presumed_handwritten_lines": 413,
+        "proof_lines": 137,
+        "sorry": 0,
+        "unknown_import_only_lines": 0
+      },
+      "ERC7201": {
+        "by_category": {
+          "unmarked": {
+            "files": 1,
+            "lines": 38
+          }
+        },
+        "code_lines": 17,
+        "declarations": {
+          "abbrev": 0,
+          "axiom": 0,
+          "def": 3,
+          "inductive": 0,
+          "instance": 0,
+          "lemma": 0,
+          "opaque": 0,
+          "structure": 0,
+          "theorem": 2
+        },
+        "definition_lines": 9,
+        "definition_to_proof_line_ratio": 2.25,
+        "files": 1,
+        "generated_lines": 0,
+        "generated_share": 0.0,
+        "implemented_by": 0,
+        "imports_in": 3,
+        "imports_out": 2,
+        "lines": 38,
+        "maxHeartbeats_options": 0,
+        "native_decide": 0,
+        "presumed_handwritten_lines": 38,
+        "proof_lines": 4,
+        "sorry": 0,
+        "unknown_import_only_lines": 0
+      },
+      "Eqns": {
+        "by_category": {
+          "unmarked": {
+            "files": 1,
+            "lines": 45
+          }
+        },
+        "code_lines": 16,
+        "declarations": {
+          "abbrev": 0,
+          "axiom": 0,
+          "def": 0,
+          "inductive": 0,
+          "instance": 0,
+          "lemma": 0,
+          "opaque": 0,
+          "structure": 0,
+          "theorem": 0
+        },
+        "definition_lines": 0,
+        "definition_to_proof_line_ratio": null,
+        "files": 1,
+        "generated_lines": 0,
+        "generated_share": 0.0,
+        "implemented_by": 0,
+        "imports_in": 2,
+        "imports_out": 1,
+        "lines": 45,
+        "maxHeartbeats_options": 0,
+        "native_decide": 0,
+        "presumed_handwritten_lines": 45,
+        "proof_lines": 0,
+        "sorry": 0,
+        "unknown_import_only_lines": 0
+      },
+      "Evm": {
+        "by_category": {
+          "unmarked": {
+            "files": 122,
+            "lines": 30437
+          }
+        },
+        "code_lines": 24985,
+        "declarations": {
+          "abbrev": 19,
+          "axiom": 0,
+          "def": 1296,
+          "inductive": 42,
+          "instance": 5,
+          "lemma": 0,
+          "opaque": 0,
+          "structure": 52,
+          "theorem": 1617
+        },
+        "definition_lines": 6535,
+        "definition_to_proof_line_ratio": 0.3737275534713485,
+        "files": 122,
+        "generated_lines": 0,
+        "generated_share": 0.0,
+        "implemented_by": 5,
+        "imports_in": 311,
+        "imports_out": 213,
+        "lines": 30437,
+        "maxHeartbeats_options": 1,
+        "native_decide": 0,
+        "presumed_handwritten_lines": 30437,
+        "proof_lines": 17486,
+        "sorry": 0,
+        "unknown_import_only_lines": 0
+      },
+      "Examples": {
+        "by_category": {
+          "unmarked": {
+            "files": 231,
+            "lines": 49644
+          }
+        },
+        "code_lines": 28756,
+        "declarations": {
+          "abbrev": 50,
+          "axiom": 0,
+          "def": 1965,
+          "inductive": 2,
+          "instance": 3,
+          "lemma": 0,
+          "opaque": 0,
+          "structure": 4,
+          "theorem": 2169
+        },
+        "definition_lines": 7973,
+        "definition_to_proof_line_ratio": 0.6017358490566038,
+        "files": 231,
+        "generated_lines": 0,
+        "generated_share": 0.0,
+        "implemented_by": 0,
+        "imports_in": 312,
+        "imports_out": 804,
+        "lines": 49644,
+        "maxHeartbeats_options": 15,
+        "native_decide": 0,
+        "presumed_handwritten_lines": 49644,
+        "proof_lines": 13250,
+        "sorry": 0,
+        "unknown_import_only_lines": 0
+      },
+      "FreshNames": {
+        "by_category": {
+          "unmarked": {
+            "files": 1,
+            "lines": 93
+          }
+        },
+        "code_lines": 35,
+        "declarations": {
+          "abbrev": 1,
+          "axiom": 0,
+          "def": 3,
+          "inductive": 0,
+          "instance": 0,
+          "lemma": 0,
+          "opaque": 0,
+          "structure": 0,
+          "theorem": 0
+        },
+        "definition_lines": 31,
+        "definition_to_proof_line_ratio": null,
+        "files": 1,
+        "generated_lines": 0,
+        "generated_share": 0.0,
+        "implemented_by": 0,
+        "imports_in": 14,
+        "imports_out": 1,
+        "lines": 93,
+        "maxHeartbeats_options": 0,
+        "native_decide": 0,
+        "presumed_handwritten_lines": 93,
+        "proof_lines": 0,
+        "sorry": 0,
+        "unknown_import_only_lines": 0
+      },
+      "Frontend": {
+        "by_category": {
+          "import_only_unknown": {
+            "files": 1,
+            "lines": 96
+          },
+          "marked_generated": {
+            "files": 1,
+            "lines": 318
+          },
+          "unmarked": {
+            "files": 44,
+            "lines": 20067
+          }
+        },
+        "code_lines": 15817,
+        "declarations": {
+          "abbrev": 8,
+          "axiom": 0,
+          "def": 901,
+          "inductive": 29,
+          "instance": 3,
+          "lemma": 0,
+          "opaque": 0,
+          "structure": 34,
+          "theorem": 442
+        },
+        "definition_lines": 11645,
+        "definition_to_proof_line_ratio": 3.1219839142091153,
+        "files": 46,
+        "generated_lines": 318,
+        "generated_share": 0.015526585615936722,
+        "implemented_by": 0,
+        "imports_in": 165,
+        "imports_out": 102,
+        "lines": 20481,
+        "maxHeartbeats_options": 0,
+        "native_decide": 0,
+        "presumed_handwritten_lines": 20067,
+        "proof_lines": 3730,
+        "sorry": 0,
+        "unknown_import_only_lines": 96
+      },
+      "Hash": {
+        "by_category": {
+          "unmarked": {
+            "files": 2,
+            "lines": 1645
+          }
+        },
+        "code_lines": 1219,
+        "declarations": {
+          "abbrev": 0,
+          "axiom": 0,
+          "def": 24,
+          "inductive": 0,
+          "instance": 4,
+          "lemma": 0,
+          "opaque": 0,
+          "structure": 0,
+          "theorem": 97
+        },
+        "definition_lines": 71,
+        "definition_to_proof_line_ratio": 0.06431159420289854,
+        "files": 2,
+        "generated_lines": 0,
+        "generated_share": 0.0,
+        "implemented_by": 0,
+        "imports_in": 5,
+        "imports_out": 1,
+        "lines": 1645,
+        "maxHeartbeats_options": 0,
+        "native_decide": 0,
+        "presumed_handwritten_lines": 1645,
+        "proof_lines": 1104,
+        "sorry": 0,
+        "unknown_import_only_lines": 0
+      },
+      "Hashes": {
+        "by_category": {
+          "unmarked": {
+            "files": 1,
+            "lines": 199
+          }
+        },
+        "code_lines": 134,
+        "declarations": {
+          "abbrev": 0,
+          "axiom": 0,
+          "def": 29,
+          "inductive": 0,
+          "instance": 0,
+          "lemma": 0,
+          "opaque": 0,
+          "structure": 0,
+          "theorem": 0
+        },
+        "definition_lines": 123,
+        "definition_to_proof_line_ratio": null,
+        "files": 1,
+        "generated_lines": 0,
+        "generated_share": 0.0,
+        "implemented_by": 0,
+        "imports_in": 2,
+        "imports_out": 0,
+        "lines": 199,
+        "maxHeartbeats_options": 0,
+        "native_decide": 0,
+        "presumed_handwritten_lines": 199,
+        "proof_lines": 0,
+        "sorry": 0,
+        "unknown_import_only_lines": 0
+      },
+      "Keccak": {
+        "by_category": {
+          "unmarked": {
+            "files": 1,
+            "lines": 123
+          }
+        },
+        "code_lines": 70,
+        "declarations": {
+          "abbrev": 0,
+          "axiom": 0,
+          "def": 14,
+          "inductive": 0,
+          "instance": 0,
+          "lemma": 0,
+          "opaque": 0,
+          "structure": 0,
+          "theorem": 0
+        },
+        "definition_lines": 59,
+        "definition_to_proof_line_ratio": null,
+        "files": 1,
+        "generated_lines": 0,
+        "generated_share": 0.0,
+        "implemented_by": 0,
+        "imports_in": 7,
+        "imports_out": 0,
+        "lines": 123,
+        "maxHeartbeats_options": 0,
+        "native_decide": 0,
+        "presumed_handwritten_lines": 123,
+        "proof_lines": 0,
+        "sorry": 0,
+        "unknown_import_only_lines": 0
+      },
+      "KeySort": {
+        "by_category": {
+          "unmarked": {
+            "files": 1,
+            "lines": 271
+          }
+        },
+        "code_lines": 153,
+        "declarations": {
+          "abbrev": 0,
+          "axiom": 0,
+          "def": 7,
+          "inductive": 1,
+          "instance": 0,
+          "lemma": 0,
+          "opaque": 0,
+          "structure": 0,
+          "theorem": 8
+        },
+        "definition_lines": 104,
+        "definition_to_proof_line_ratio": 2.311111111111111,
+        "files": 1,
+        "generated_lines": 0,
+        "generated_share": 0.0,
+        "implemented_by": 0,
+        "imports_in": 3,
+        "imports_out": 0,
+        "lines": 271,
+        "maxHeartbeats_options": 0,
+        "native_decide": 0,
+        "presumed_handwritten_lines": 271,
+        "proof_lines": 45,
+        "sorry": 0,
+        "unknown_import_only_lines": 0
+      },
+      "Language": {
+        "by_category": {
+          "marked_generated": {
+            "files": 1,
+            "lines": 1943
+          },
+          "unmarked": {
+            "files": 6,
+            "lines": 3554
+          }
+        },
+        "code_lines": 4164,
+        "declarations": {
+          "abbrev": 2,
+          "axiom": 0,
+          "def": 122,
+          "inductive": 8,
+          "instance": 1,
+          "lemma": 0,
+          "opaque": 0,
+          "structure": 3,
+          "theorem": 205
+        },
+        "definition_lines": 2221,
+        "definition_to_proof_line_ratio": 1.2727793696275072,
+        "files": 7,
+        "generated_lines": 1943,
+        "generated_share": 0.3534655266509005,
+        "implemented_by": 0,
+        "imports_in": 15,
+        "imports_out": 7,
+        "lines": 5497,
+        "maxHeartbeats_options": 0,
+        "native_decide": 0,
+        "presumed_handwritten_lines": 3554,
+        "proof_lines": 1745,
+        "sorry": 0,
+        "unknown_import_only_lines": 0
+      },
+      "Precompiles": {
+        "by_category": {
+          "unmarked": {
+            "files": 11,
+            "lines": 2058
+          }
+        },
+        "code_lines": 1301,
+        "declarations": {
+          "abbrev": 9,
+          "axiom": 0,
+          "def": 162,
+          "inductive": 1,
+          "instance": 6,
+          "lemma": 0,
+          "opaque": 0,
+          "structure": 5,
+          "theorem": 53
+        },
+        "definition_lines": 730,
+        "definition_to_proof_line_ratio": 2.1407624633431084,
+        "files": 11,
+        "generated_lines": 0,
+        "generated_share": 0.0,
+        "implemented_by": 0,
+        "imports_in": 28,
+        "imports_out": 19,
+        "lines": 2058,
+        "maxHeartbeats_options": 0,
+        "native_decide": 0,
+        "presumed_handwritten_lines": 2058,
+        "proof_lines": 341,
+        "sorry": 0,
+        "unknown_import_only_lines": 0
+      },
+      "RevertBytes": {
+        "by_category": {
+          "unmarked": {
+            "files": 1,
+            "lines": 75
+          }
+        },
+        "code_lines": 31,
+        "declarations": {
+          "abbrev": 1,
+          "axiom": 0,
+          "def": 10,
+          "inductive": 0,
+          "instance": 0,
+          "lemma": 0,
+          "opaque": 0,
+          "structure": 0,
+          "theorem": 0
+        },
+        "definition_lines": 28,
+        "definition_to_proof_line_ratio": null,
+        "files": 1,
+        "generated_lines": 0,
+        "generated_share": 0.0,
+        "implemented_by": 0,
+        "imports_in": 10,
+        "imports_out": 1,
+        "lines": 75,
+        "maxHeartbeats_options": 0,
+        "native_decide": 0,
+        "presumed_handwritten_lines": 75,
+        "proof_lines": 0,
+        "sorry": 0,
+        "unknown_import_only_lines": 0
+      },
+      "Roadmap": {
+        "by_category": {
+          "unmarked": {
+            "files": 5,
+            "lines": 2843
+          }
+        },
+        "code_lines": 1570,
+        "declarations": {
+          "abbrev": 8,
+          "axiom": 0,
+          "def": 119,
+          "inductive": 13,
+          "instance": 3,
+          "lemma": 0,
+          "opaque": 0,
+          "structure": 42,
+          "theorem": 100
+        },
+        "definition_lines": 879,
+        "definition_to_proof_line_ratio": 1.4109149277688604,
+        "files": 5,
+        "generated_lines": 0,
+        "generated_share": 0.0,
+        "implemented_by": 0,
+        "imports_in": 17,
+        "imports_out": 8,
+        "lines": 2843,
+        "maxHeartbeats_options": 0,
+        "native_decide": 0,
+        "presumed_handwritten_lines": 2843,
+        "proof_lines": 623,
+        "sorry": 0,
+        "unknown_import_only_lines": 0
+      },
+      "Scope": {
+        "by_category": {
+          "unmarked": {
+            "files": 1,
+            "lines": 286
+          }
+        },
+        "code_lines": 174,
+        "declarations": {
+          "abbrev": 1,
+          "axiom": 0,
+          "def": 14,
+          "inductive": 6,
+          "instance": 2,
+          "lemma": 0,
+          "opaque": 0,
+          "structure": 0,
+          "theorem": 14
+        },
+        "definition_lines": 81,
+        "definition_to_proof_line_ratio": 0.9878048780487805,
+        "files": 1,
+        "generated_lines": 0,
+        "generated_share": 0.0,
+        "implemented_by": 0,
+        "imports_in": 2,
+        "imports_out": 1,
+        "lines": 286,
+        "maxHeartbeats_options": 0,
+        "native_decide": 0,
+        "presumed_handwritten_lines": 286,
+        "proof_lines": 82,
+        "sorry": 0,
+        "unknown_import_only_lines": 0
+      },
+      "Secp256k1": {
+        "by_category": {
+          "unmarked": {
+            "files": 1,
+            "lines": 130
+          }
+        },
+        "code_lines": 92,
+        "declarations": {
+          "abbrev": 2,
+          "axiom": 0,
+          "def": 12,
+          "inductive": 0,
+          "instance": 2,
+          "lemma": 0,
+          "opaque": 0,
+          "structure": 1,
+          "theorem": 0
+        },
+        "definition_lines": 89,
+        "definition_to_proof_line_ratio": null,
+        "files": 1,
+        "generated_lines": 0,
+        "generated_share": 0.0,
+        "implemented_by": 0,
+        "imports_in": 3,
+        "imports_out": 1,
+        "lines": 130,
+        "maxHeartbeats_options": 0,
+        "native_decide": 0,
+        "presumed_handwritten_lines": 130,
+        "proof_lines": 0,
+        "sorry": 0,
+        "unknown_import_only_lines": 0
+      },
+      "Semantics": {
+        "by_category": {
+          "import_only_unknown": {
+            "files": 2,
+            "lines": 55
+          },
+          "unmarked": {
+            "files": 55,
+            "lines": 19613
+          }
+        },
+        "code_lines": 15197,
+        "declarations": {
+          "abbrev": 22,
+          "axiom": 0,
+          "def": 568,
+          "inductive": 43,
+          "instance": 9,
+          "lemma": 0,
+          "opaque": 0,
+          "structure": 30,
+          "theorem": 1012
+        },
+        "definition_lines": 4090,
+        "definition_to_proof_line_ratio": 0.3924390711955479,
+        "files": 57,
+        "generated_lines": 0,
+        "generated_share": 0.0,
+        "implemented_by": 35,
+        "imports_in": 241,
+        "imports_out": 84,
+        "lines": 19668,
+        "maxHeartbeats_options": 0,
+        "native_decide": 0,
+        "presumed_handwritten_lines": 19613,
+        "proof_lines": 10422,
+        "sorry": 0,
+        "unknown_import_only_lines": 55
+      },
+      "Signature": {
+        "by_category": {
+          "unmarked": {
+            "files": 1,
+            "lines": 612
+          }
+        },
+        "code_lines": 399,
+        "declarations": {
+          "abbrev": 0,
+          "axiom": 0,
+          "def": 28,
+          "inductive": 6,
+          "instance": 0,
+          "lemma": 0,
+          "opaque": 0,
+          "structure": 0,
+          "theorem": 12
+        },
+        "definition_lines": 327,
+        "definition_to_proof_line_ratio": 5.7368421052631575,
+        "files": 1,
+        "generated_lines": 0,
+        "generated_share": 0.0,
+        "implemented_by": 5,
+        "imports_in": 6,
+        "imports_out": 4,
+        "lines": 612,
+        "maxHeartbeats_options": 0,
+        "native_decide": 0,
+        "presumed_handwritten_lines": 612,
+        "proof_lines": 57,
+        "sorry": 0,
+        "unknown_import_only_lines": 0
+      },
+      "Solkey": {
+        "by_category": {
+          "unmarked": {
+            "files": 5,
+            "lines": 266
+          }
+        },
+        "code_lines": 78,
+        "declarations": {
+          "abbrev": 0,
+          "axiom": 0,
+          "def": 2,
+          "inductive": 0,
+          "instance": 0,
+          "lemma": 0,
+          "opaque": 0,
+          "structure": 0,
+          "theorem": 3
+        },
+        "definition_lines": 3,
+        "definition_to_proof_line_ratio": 0.375,
+        "files": 5,
+        "generated_lines": 0,
+        "generated_share": 0.0,
+        "implemented_by": 0,
+        "imports_in": 8,
+        "imports_out": 12,
+        "lines": 266,
+        "maxHeartbeats_options": 0,
+        "native_decide": 0,
+        "presumed_handwritten_lines": 266,
+        "proof_lines": 8,
+        "sorry": 0,
+        "unknown_import_only_lines": 0
+      },
+      "SortCheck": {
+        "by_category": {
+          "unmarked": {
+            "files": 3,
+            "lines": 1281
+          }
+        },
+        "code_lines": 761,
+        "declarations": {
+          "abbrev": 0,
+          "axiom": 0,
+          "def": 66,
+          "inductive": 6,
+          "instance": 2,
+          "lemma": 0,
+          "opaque": 0,
+          "structure": 6,
+          "theorem": 5
+        },
+        "definition_lines": 558,
+        "definition_to_proof_line_ratio": 5.9361702127659575,
+        "files": 3,
+        "generated_lines": 0,
+        "generated_share": 0.0,
+        "implemented_by": 0,
+        "imports_in": 8,
+        "imports_out": 6,
+        "lines": 1281,
+        "maxHeartbeats_options": 0,
+        "native_decide": 0,
+        "presumed_handwritten_lines": 1281,
+        "proof_lines": 94,
+        "sorry": 0,
+        "unknown_import_only_lines": 0
+      },
+      "Source": {
+        "by_category": {
+          "mixed_generated_blocks": {
+            "files": 2,
+            "lines": 981
+          },
+          "unmarked": {
+            "files": 40,
+            "lines": 21302
+          }
+        },
+        "code_lines": 16035,
+        "declarations": {
+          "abbrev": 21,
+          "axiom": 0,
+          "def": 935,
+          "inductive": 84,
+          "instance": 4,
+          "lemma": 0,
+          "opaque": 0,
+          "structure": 57,
+          "theorem": 1000
+        },
+        "definition_lines": 7255,
+        "definition_to_proof_line_ratio": 0.8968970206453208,
+        "files": 42,
+        "generated_lines": 620,
+        "generated_share": 0.027823901629044565,
+        "implemented_by": 0,
+        "imports_in": 130,
+        "imports_out": 68,
+        "lines": 22283,
+        "maxHeartbeats_options": 0,
+        "native_decide": 0,
+        "presumed_handwritten_lines": 21663,
+        "proof_lines": 8089,
+        "sorry": 0,
+        "unknown_import_only_lines": 0
+      },
+      "SpecSyntax": {
+        "by_category": {
+          "unmarked": {
+            "files": 1,
+            "lines": 220
+          }
+        },
+        "code_lines": 144,
+        "declarations": {
+          "abbrev": 0,
+          "axiom": 0,
+          "def": 6,
+          "inductive": 2,
+          "instance": 0,
+          "lemma": 0,
+          "opaque": 0,
+          "structure": 1,
+          "theorem": 0
+        },
+        "definition_lines": 135,
+        "definition_to_proof_line_ratio": null,
+        "files": 1,
+        "generated_lines": 0,
+        "generated_share": 0.0,
+        "implemented_by": 0,
+        "imports_in": 2,
+        "imports_out": 1,
+        "lines": 220,
+        "maxHeartbeats_options": 0,
+        "native_decide": 0,
+        "presumed_handwritten_lines": 220,
+        "proof_lines": 0,
+        "sorry": 0,
+        "unknown_import_only_lines": 0
+      },
+      "Stipend": {
+        "by_category": {
+          "unmarked": {
+            "files": 1,
+            "lines": 274
+          }
+        },
+        "code_lines": 140,
+        "declarations": {
+          "abbrev": 0,
+          "axiom": 0,
+          "def": 16,
+          "inductive": 0,
+          "instance": 1,
+          "lemma": 0,
+          "opaque": 0,
+          "structure": 2,
+          "theorem": 12
+        },
+        "definition_lines": 74,
+        "definition_to_proof_line_ratio": 1.2982456140350878,
+        "files": 1,
+        "generated_lines": 0,
+        "generated_share": 0.0,
+        "implemented_by": 0,
+        "imports_in": 1,
+        "imports_out": 2,
+        "lines": 274,
+        "maxHeartbeats_options": 0,
+        "native_decide": 0,
+        "presumed_handwritten_lines": 274,
+        "proof_lines": 57,
+        "sorry": 0,
+        "unknown_import_only_lines": 0
+      },
+      "Storage": {
+        "by_category": {
+          "unmarked": {
+            "files": 21,
+            "lines": 4032
+          }
+        },
+        "code_lines": 3132,
+        "declarations": {
+          "abbrev": 3,
+          "axiom": 0,
+          "def": 101,
+          "inductive": 14,
+          "instance": 0,
+          "lemma": 0,
+          "opaque": 0,
+          "structure": 1,
+          "theorem": 241
+        },
+        "definition_lines": 376,
+        "definition_to_proof_line_ratio": 0.14710485133020346,
+        "files": 21,
+        "generated_lines": 0,
+        "generated_share": 0.0,
+        "implemented_by": 0,
+        "imports_in": 47,
+        "imports_out": 32,
+        "lines": 4032,
+        "maxHeartbeats_options": 0,
+        "native_decide": 0,
+        "presumed_handwritten_lines": 4032,
+        "proof_lines": 2556,
+        "sorry": 0,
+        "unknown_import_only_lines": 0
+      },
+      "Syntax": {
+        "by_category": {
+          "import_only_unknown": {
+            "files": 2,
+            "lines": 116
+          },
+          "unmarked": {
+            "files": 18,
+            "lines": 13695
+          }
+        },
+        "code_lines": 9721,
+        "declarations": {
+          "abbrev": 22,
+          "axiom": 0,
+          "def": 721,
+          "inductive": 43,
+          "instance": 5,
+          "lemma": 0,
+          "opaque": 1,
+          "structure": 18,
+          "theorem": 23
+        },
+        "definition_lines": 8919,
+        "definition_to_proof_line_ratio": 54.054545454545455,
+        "files": 20,
+        "generated_lines": 0,
+        "generated_share": 0.0,
+        "implemented_by": 5,
+        "imports_in": 118,
+        "imports_out": 39,
+        "lines": 13811,
+        "maxHeartbeats_options": 0,
+        "native_decide": 0,
+        "presumed_handwritten_lines": 13695,
+        "proof_lines": 165,
+        "sorry": 0,
+        "unknown_import_only_lines": 116
+      },
+      "TestSuite": {
+        "by_category": {
+          "unmarked": {
+            "files": 48,
+            "lines": 4468
+          }
+        },
+        "code_lines": 3438,
+        "declarations": {
+          "abbrev": 0,
+          "axiom": 0,
+          "def": 5,
+          "inductive": 0,
+          "instance": 0,
+          "lemma": 0,
+          "opaque": 0,
+          "structure": 0,
+          "theorem": 563
+        },
+        "definition_lines": 181,
+        "definition_to_proof_line_ratio": 0.14751426242868787,
+        "files": 48,
+        "generated_lines": 0,
+        "generated_share": 0.0,
+        "implemented_by": 0,
+        "imports_in": 73,
+        "imports_out": 77,
+        "lines": 4468,
+        "maxHeartbeats_options": 0,
+        "native_decide": 0,
+        "presumed_handwritten_lines": 4468,
+        "proof_lines": 1227,
+        "sorry": 0,
+        "unknown_import_only_lines": 0
+      },
+      "Theorems": {
+        "by_category": {
+          "unmarked": {
+            "files": 1,
+            "lines": 360
+          }
+        },
+        "code_lines": 155,
+        "declarations": {
+          "abbrev": 11,
+          "axiom": 0,
+          "def": 1,
+          "inductive": 0,
+          "instance": 0,
+          "lemma": 0,
+          "opaque": 0,
+          "structure": 0,
+          "theorem": 21
+        },
+        "definition_lines": 54,
+        "definition_to_proof_line_ratio": 0.7941176470588235,
+        "files": 1,
+        "generated_lines": 0,
+        "generated_share": 0.0,
+        "implemented_by": 0,
+        "imports_in": 3,
+        "imports_out": 7,
+        "lines": 360,
+        "maxHeartbeats_options": 0,
+        "native_decide": 0,
+        "presumed_handwritten_lines": 360,
+        "proof_lines": 68,
+        "sorry": 0,
+        "unknown_import_only_lines": 0
+      },
+      "Theory": {
+        "by_category": {
+          "import_only_unknown": {
+            "files": 1,
+            "lines": 41
+          },
+          "unmarked": {
+            "files": 8,
+            "lines": 5421
+          }
+        },
+        "code_lines": 4284,
+        "declarations": {
+          "abbrev": 6,
+          "axiom": 0,
+          "def": 71,
+          "inductive": 3,
+          "instance": 2,
+          "lemma": 0,
+          "opaque": 0,
+          "structure": 4,
+          "theorem": 322
+        },
+        "definition_lines": 422,
+        "definition_to_proof_line_ratio": 0.11271367521367522,
+        "files": 9,
+        "generated_lines": 0,
+        "generated_share": 0.0,
+        "implemented_by": 0,
+        "imports_in": 35,
+        "imports_out": 13,
+        "lines": 5462,
+        "maxHeartbeats_options": 0,
+        "native_decide": 0,
+        "presumed_handwritten_lines": 5421,
+        "proof_lines": 3744,
+        "sorry": 0,
+        "unknown_import_only_lines": 41
+      },
+      "Tools": {
+        "by_category": {
+          "unmarked": {
+            "files": 26,
+            "lines": 7201
+          }
+        },
+        "code_lines": 5108,
+        "declarations": {
+          "abbrev": 5,
+          "axiom": 0,
+          "def": 408,
+          "inductive": 11,
+          "instance": 4,
+          "lemma": 0,
+          "opaque": 0,
+          "structure": 14,
+          "theorem": 30
+        },
+        "definition_lines": 4532,
+        "definition_to_proof_line_ratio": 13.290322580645162,
+        "files": 26,
+        "generated_lines": 0,
+        "generated_share": 0.0,
+        "implemented_by": 2,
+        "imports_in": 194,
+        "imports_out": 71,
+        "lines": 7201,
+        "maxHeartbeats_options": 0,
+        "native_decide": 0,
+        "presumed_handwritten_lines": 7201,
+        "proof_lines": 341,
+        "sorry": 0,
+        "unknown_import_only_lines": 0
+      },
+      "TypeGraph": {
+        "by_category": {
+          "unmarked": {
+            "files": 1,
+            "lines": 147
+          }
+        },
+        "code_lines": 108,
+        "declarations": {
+          "abbrev": 2,
+          "axiom": 0,
+          "def": 5,
+          "inductive": 4,
+          "instance": 0,
+          "lemma": 0,
+          "opaque": 0,
+          "structure": 1,
+          "theorem": 9
+        },
+        "definition_lines": 55,
+        "definition_to_proof_line_ratio": 1.1,
+        "files": 1,
+        "generated_lines": 0,
+        "generated_share": 0.0,
+        "implemented_by": 0,
+        "imports_in": 2,
+        "imports_out": 1,
+        "lines": 147,
+        "maxHeartbeats_options": 0,
+        "native_decide": 0,
+        "presumed_handwritten_lines": 147,
+        "proof_lines": 50,
+        "sorry": 0,
+        "unknown_import_only_lines": 0
+      },
+      "Typing": {
+        "by_category": {
+          "unmarked": {
+            "files": 12,
+            "lines": 6816
+          }
+        },
+        "code_lines": 5341,
+        "declarations": {
+          "abbrev": 13,
+          "axiom": 0,
+          "def": 84,
+          "inductive": 1,
+          "instance": 0,
+          "lemma": 0,
+          "opaque": 0,
+          "structure": 6,
+          "theorem": 457
+        },
+        "definition_lines": 452,
+        "definition_to_proof_line_ratio": 0.09635472180771691,
+        "files": 12,
+        "generated_lines": 0,
+        "generated_share": 0.0,
+        "implemented_by": 0,
+        "imports_in": 36,
+        "imports_out": 16,
+        "lines": 6816,
+        "maxHeartbeats_options": 0,
+        "native_decide": 0,
+        "presumed_handwritten_lines": 6816,
+        "proof_lines": 4691,
+        "sorry": 0,
+        "unknown_import_only_lines": 0
+      },
+      "Update": {
+        "by_category": {
+          "unmarked": {
+            "files": 1,
+            "lines": 58
+          }
+        },
+        "code_lines": 20,
+        "declarations": {
+          "abbrev": 0,
+          "axiom": 0,
+          "def": 3,
+          "inductive": 2,
+          "instance": 0,
+          "lemma": 0,
+          "opaque": 0,
+          "structure": 0,
+          "theorem": 0
+        },
+        "definition_lines": 16,
+        "definition_to_proof_line_ratio": null,
+        "files": 1,
+        "generated_lines": 0,
+        "generated_share": 0.0,
+        "implemented_by": 0,
+        "imports_in": 4,
+        "imports_out": 1,
+        "lines": 58,
+        "maxHeartbeats_options": 0,
+        "native_decide": 0,
+        "presumed_handwritten_lines": 58,
+        "proof_lines": 0,
+        "sorry": 0,
+        "unknown_import_only_lines": 0
+      }
+    },
+    "axiom": 0,
+    "axiom_pin_lines": 0,
+    "code_lines": 275091,
+    "def": 12735,
+    "definition_lines": 102678,
+    "definition_to_proof_line_ratio": 0.6773089177226462,
+    "files": 1071,
+    "generated_lines": 10005,
+    "generated_share": 0.026775463452362154,
+    "goal_status": "unavailable: no authoritative goal-closure parser/counter; absent file is not zero goals",
+    "goals_closed": null,
+    "goals_file_present": false,
+    "implemented_by": 156,
+    "imports_in": 3519,
+    "imports_out": 2434,
+    "inductive": 494,
+    "instance": 90,
+    "lemma": 1,
+    "lines": 373663,
+    "lines_added_per_goal_closed": null,
+    "lines_delta": 299330,
+    "maxHeartbeats_options": 16,
+    "merged_plan_commits": [],
+    "merged_plan_steps_visible": 0,
+    "month": "2026-10",
+    "native_decide": 0,
+    "opaque": 3,
+    "presumed_handwritten_lines": 362908,
+    "proof_lines": 151597,
+    "revision": "22073f4445e7cab7560812a5ef4e081bf8ff5e87",
+    "roadmap_command_files": [],
+    "sorry": 0,
+    "structure": 498,
+    "theorem": 15206,
+    "unknown_import_only_lines": 750
+  },
+  {
+    "abbrev": 2259,
+    "areas": {
+      "AST": {
+        "by_category": {
+          "unmarked": {
+            "files": 1,
+            "lines": 1247
+          }
+        },
+        "code_lines": 737,
+        "declarations": {
+          "abbrev": 4,
+          "axiom": 0,
+          "def": 95,
+          "inductive": 11,
+          "instance": 4,
+          "lemma": 0,
+          "opaque": 0,
+          "structure": 0,
+          "theorem": 20
+        },
+        "definition_lines": 571,
+        "definition_to_proof_line_ratio": 4.13768115942029,
+        "files": 1,
+        "generated_lines": 0,
+        "generated_share": 0.0,
+        "implemented_by": 0,
+        "imports_in": 8,
+        "imports_out": 3,
+        "lines": 1247,
+        "maxHeartbeats_options": 0,
+        "native_decide": 0,
+        "presumed_handwritten_lines": 1247,
+        "proof_lines": 138,
+        "sorry": 0,
+        "unknown_import_only_lines": 0
+      },
+      "Automation": {
+        "by_category": {
+          "unmarked": {
+            "files": 3,
+            "lines": 84
+          }
+        },
+        "code_lines": 38,
+        "declarations": {
+          "abbrev": 0,
+          "axiom": 0,
+          "def": 1,
+          "inductive": 0,
+          "instance": 0,
+          "lemma": 0,
+          "opaque": 0,
+          "structure": 0,
+          "theorem": 2
+        },
+        "definition_lines": 2,
+        "definition_to_proof_line_ratio": 0.2,
+        "files": 3,
+        "generated_lines": 0,
+        "generated_share": 0.0,
+        "implemented_by": 0,
+        "imports_in": 16,
+        "imports_out": 7,
+        "lines": 84,
+        "maxHeartbeats_options": 0,
+        "native_decide": 0,
+        "presumed_handwritten_lines": 84,
+        "proof_lines": 10,
+        "sorry": 0,
+        "unknown_import_only_lines": 0
+      },
+      "Backend": {
+        "by_category": {
+          "axiom_pins": {
+            "files": 1,
+            "lines": 149
+          },
+          "import_only_unknown": {
+            "files": 3,
+            "lines": 13
+          },
+          "marked_generated": {
+            "files": 14,
+            "lines": 2302
+          },
+          "unmarked": {
+            "files": 1997,
+            "lines": 276760
+          }
+        },
+        "code_lines": 225991,
+        "declarations": {
+          "abbrev": 1105,
+          "axiom": 0,
+          "def": 11323,
+          "inductive": 56,
+          "instance": 3,
+          "lemma": 0,
+          "opaque": 0,
+          "structure": 425,
+          "theorem": 15750
+        },
+        "definition_lines": 37184,
+        "definition_to_proof_line_ratio": 0.22387188055028748,
+        "files": 2015,
+        "generated_lines": 2451,
+        "generated_share": 0.008777898747958628,
+        "implemented_by": 0,
+        "imports_in": 5577,
+        "imports_out": 3595,
+        "lines": 279224,
+        "maxHeartbeats_options": 0,
+        "native_decide": 0,
+        "presumed_handwritten_lines": 276760,
+        "proof_lines": 166095,
+        "sorry": 0,
+        "unknown_import_only_lines": 13
+      },
+      "Calculus": {
+        "by_category": {
+          "import_only_unknown": {
+            "files": 9,
+            "lines": 427
+          },
+          "marked_generated": {
+            "files": 1,
+            "lines": 1550
+          },
+          "unmarked": {
+            "files": 378,
+            "lines": 167353
+          }
+        },
+        "code_lines": 130751,
+        "declarations": {
+          "abbrev": 145,
+          "axiom": 0,
+          "def": 4878,
+          "inductive": 173,
+          "instance": 50,
+          "lemma": 1,
+          "opaque": 2,
+          "structure": 217,
+          "theorem": 6279
+        },
+        "definition_lines": 43832,
+        "definition_to_proof_line_ratio": 0.5397963079272423,
+        "files": 388,
+        "generated_lines": 1550,
+        "generated_share": 0.009153723498494064,
+        "implemented_by": 110,
+        "imports_in": 2021,
+        "imports_out": 824,
+        "lines": 169330,
+        "maxHeartbeats_options": 0,
+        "native_decide": 0,
+        "presumed_handwritten_lines": 167353,
+        "proof_lines": 81201,
+        "sorry": 0,
+        "unknown_import_only_lines": 427
+      },
+      "Corpus": {
+        "by_category": {
+          "corpus": {
+            "files": 8,
+            "lines": 4079
+          },
+          "unmarked": {
+            "files": 1,
+            "lines": 125
+          }
+        },
+        "code_lines": 2406,
+        "declarations": {
+          "abbrev": 2,
+          "axiom": 0,
+          "def": 5,
+          "inductive": 0,
+          "instance": 0,
+          "lemma": 0,
+          "opaque": 0,
+          "structure": 0,
+          "theorem": 592
+        },
+        "definition_lines": 20,
+        "definition_to_proof_line_ratio": 0.008628127696289905,
+        "files": 9,
+        "generated_lines": 4079,
+        "generated_share": 0.9702664129400571,
+        "implemented_by": 0,
+        "imports_in": 19,
+        "imports_out": 16,
+        "lines": 4204,
+        "maxHeartbeats_options": 0,
+        "native_decide": 0,
+        "presumed_handwritten_lines": 125,
+        "proof_lines": 2318,
+        "sorry": 0,
+        "unknown_import_only_lines": 0
+      },
+      "Counterexamples": {
+        "by_category": {
+          "unmarked": {
+            "files": 4,
+            "lines": 413
+          }
+        },
+        "code_lines": 180,
+        "declarations": {
+          "abbrev": 0,
+          "axiom": 0,
+          "def": 4,
+          "inductive": 0,
+          "instance": 0,
+          "lemma": 0,
+          "opaque": 0,
+          "structure": 0,
+          "theorem": 14
+        },
+        "definition_lines": 7,
+        "definition_to_proof_line_ratio": 0.051094890510948905,
+        "files": 4,
+        "generated_lines": 0,
+        "generated_share": 0.0,
+        "implemented_by": 0,
+        "imports_in": 11,
+        "imports_out": 4,
+        "lines": 413,
+        "maxHeartbeats_options": 0,
+        "native_decide": 0,
+        "presumed_handwritten_lines": 413,
+        "proof_lines": 137,
+        "sorry": 0,
+        "unknown_import_only_lines": 0
+      },
+      "ERC7201": {
+        "by_category": {
+          "unmarked": {
+            "files": 1,
+            "lines": 38
+          }
+        },
+        "code_lines": 17,
+        "declarations": {
+          "abbrev": 0,
+          "axiom": 0,
+          "def": 3,
+          "inductive": 0,
+          "instance": 0,
+          "lemma": 0,
+          "opaque": 0,
+          "structure": 0,
+          "theorem": 2
+        },
+        "definition_lines": 9,
+        "definition_to_proof_line_ratio": 2.25,
+        "files": 1,
+        "generated_lines": 0,
+        "generated_share": 0.0,
+        "implemented_by": 0,
+        "imports_in": 4,
+        "imports_out": 2,
+        "lines": 38,
+        "maxHeartbeats_options": 0,
+        "native_decide": 0,
+        "presumed_handwritten_lines": 38,
+        "proof_lines": 4,
+        "sorry": 0,
+        "unknown_import_only_lines": 0
+      },
+      "Eqns": {
+        "by_category": {
+          "unmarked": {
+            "files": 1,
+            "lines": 46
+          }
+        },
+        "code_lines": 17,
+        "declarations": {
+          "abbrev": 0,
+          "axiom": 0,
+          "def": 0,
+          "inductive": 0,
+          "instance": 0,
+          "lemma": 0,
+          "opaque": 0,
+          "structure": 0,
+          "theorem": 0
+        },
+        "definition_lines": 0,
+        "definition_to_proof_line_ratio": null,
+        "files": 1,
+        "generated_lines": 0,
+        "generated_share": 0.0,
+        "implemented_by": 0,
+        "imports_in": 2,
+        "imports_out": 2,
+        "lines": 46,
+        "maxHeartbeats_options": 0,
+        "native_decide": 0,
+        "presumed_handwritten_lines": 46,
+        "proof_lines": 0,
+        "sorry": 0,
+        "unknown_import_only_lines": 0
+      },
+      "Evm": {
+        "by_category": {
+          "unmarked": {
+            "files": 279,
+            "lines": 45857
+          }
+        },
+        "code_lines": 37758,
+        "declarations": {
+          "abbrev": 33,
+          "axiom": 0,
+          "def": 1811,
+          "inductive": 73,
+          "instance": 6,
+          "lemma": 0,
+          "opaque": 0,
+          "structure": 78,
+          "theorem": 2395
+        },
+        "definition_lines": 9735,
+        "definition_to_proof_line_ratio": 0.3724177505738332,
+        "files": 279,
+        "generated_lines": 0,
+        "generated_share": 0.0,
+        "implemented_by": 11,
+        "imports_in": 1058,
+        "imports_out": 476,
+        "lines": 45857,
+        "maxHeartbeats_options": 1,
+        "native_decide": 0,
+        "presumed_handwritten_lines": 45857,
+        "proof_lines": 26140,
+        "sorry": 0,
+        "unknown_import_only_lines": 0
+      },
+      "Examples": {
+        "by_category": {
+          "import_only_unknown": {
+            "files": 16,
+            "lines": 104
+          },
+          "unmarked": {
+            "files": 340,
+            "lines": 61367
+          }
+        },
+        "code_lines": 36441,
+        "declarations": {
+          "abbrev": 105,
+          "axiom": 0,
+          "def": 2654,
+          "inductive": 4,
+          "instance": 8,
+          "lemma": 0,
+          "opaque": 0,
+          "structure": 4,
+          "theorem": 3375
+        },
+        "definition_lines": 9860,
+        "definition_to_proof_line_ratio": 0.5574715893028778,
+        "files": 356,
+        "generated_lines": 0,
+        "generated_share": 0.0,
+        "implemented_by": 0,
+        "imports_in": 590,
+        "imports_out": 1078,
+        "lines": 61471,
+        "maxHeartbeats_options": 15,
+        "native_decide": 0,
+        "presumed_handwritten_lines": 61367,
+        "proof_lines": 17687,
+        "sorry": 0,
+        "unknown_import_only_lines": 104
+      },
+      "FreshNames": {
+        "by_category": {
+          "unmarked": {
+            "files": 1,
+            "lines": 93
+          }
+        },
+        "code_lines": 35,
+        "declarations": {
+          "abbrev": 1,
+          "axiom": 0,
+          "def": 3,
+          "inductive": 0,
+          "instance": 0,
+          "lemma": 0,
+          "opaque": 0,
+          "structure": 0,
+          "theorem": 0
+        },
+        "definition_lines": 31,
+        "definition_to_proof_line_ratio": null,
+        "files": 1,
+        "generated_lines": 0,
+        "generated_share": 0.0,
+        "implemented_by": 0,
+        "imports_in": 14,
+        "imports_out": 1,
+        "lines": 93,
+        "maxHeartbeats_options": 0,
+        "native_decide": 0,
+        "presumed_handwritten_lines": 93,
+        "proof_lines": 0,
+        "sorry": 0,
+        "unknown_import_only_lines": 0
+      },
+      "Frontend": {
+        "by_category": {
+          "axiom_pins": {
+            "files": 1,
+            "lines": 3905
+          },
+          "import_only_unknown": {
+            "files": 4,
+            "lines": 114
+          },
+          "marked_generated": {
+            "files": 2,
+            "lines": 455
+          },
+          "unmarked": {
+            "files": 503,
+            "lines": 97115
+          }
+        },
+        "code_lines": 82400,
+        "declarations": {
+          "abbrev": 48,
+          "axiom": 0,
+          "def": 2708,
+          "inductive": 166,
+          "instance": 10,
+          "lemma": 0,
+          "opaque": 0,
+          "structure": 129,
+          "theorem": 4863
+        },
+        "definition_lines": 22945,
+        "definition_to_proof_line_ratio": 0.43333333333333335,
+        "files": 510,
+        "generated_lines": 4360,
+        "generated_share": 0.04291803246414474,
+        "implemented_by": 2,
+        "imports_in": 1767,
+        "imports_out": 991,
+        "lines": 101589,
+        "maxHeartbeats_options": 0,
+        "native_decide": 0,
+        "presumed_handwritten_lines": 97115,
+        "proof_lines": 52950,
+        "sorry": 0,
+        "unknown_import_only_lines": 114
+      },
+      "Hash": {
+        "by_category": {
+          "unmarked": {
+            "files": 6,
+            "lines": 2265
+          }
+        },
+        "code_lines": 1649,
+        "declarations": {
+          "abbrev": 0,
+          "axiom": 0,
+          "def": 33,
+          "inductive": 0,
+          "instance": 5,
+          "lemma": 0,
+          "opaque": 0,
+          "structure": 0,
+          "theorem": 135
+        },
+        "definition_lines": 107,
+        "definition_to_proof_line_ratio": 0.0732375085557837,
+        "files": 6,
+        "generated_lines": 0,
+        "generated_share": 0.0,
+        "implemented_by": 0,
+        "imports_in": 15,
+        "imports_out": 8,
+        "lines": 2265,
+        "maxHeartbeats_options": 0,
+        "native_decide": 0,
+        "presumed_handwritten_lines": 2265,
+        "proof_lines": 1461,
+        "sorry": 0,
+        "unknown_import_only_lines": 0
+      },
+      "Hashes": {
+        "by_category": {
+          "unmarked": {
+            "files": 1,
+            "lines": 199
+          }
+        },
+        "code_lines": 134,
+        "declarations": {
+          "abbrev": 0,
+          "axiom": 0,
+          "def": 29,
+          "inductive": 0,
+          "instance": 0,
+          "lemma": 0,
+          "opaque": 0,
+          "structure": 0,
+          "theorem": 0
+        },
+        "definition_lines": 123,
+        "definition_to_proof_line_ratio": null,
+        "files": 1,
+        "generated_lines": 0,
+        "generated_share": 0.0,
+        "implemented_by": 0,
+        "imports_in": 4,
+        "imports_out": 0,
+        "lines": 199,
+        "maxHeartbeats_options": 0,
+        "native_decide": 0,
+        "presumed_handwritten_lines": 199,
+        "proof_lines": 0,
+        "sorry": 0,
+        "unknown_import_only_lines": 0
+      },
+      "Keccak": {
+        "by_category": {
+          "unmarked": {
+            "files": 1,
+            "lines": 123
+          }
+        },
+        "code_lines": 70,
+        "declarations": {
+          "abbrev": 0,
+          "axiom": 0,
+          "def": 14,
+          "inductive": 0,
+          "instance": 0,
+          "lemma": 0,
+          "opaque": 0,
+          "structure": 0,
+          "theorem": 0
+        },
+        "definition_lines": 59,
+        "definition_to_proof_line_ratio": null,
+        "files": 1,
+        "generated_lines": 0,
+        "generated_share": 0.0,
+        "implemented_by": 0,
+        "imports_in": 9,
+        "imports_out": 0,
+        "lines": 123,
+        "maxHeartbeats_options": 0,
+        "native_decide": 0,
+        "presumed_handwritten_lines": 123,
+        "proof_lines": 0,
+        "sorry": 0,
+        "unknown_import_only_lines": 0
+      },
+      "KeySort": {
+        "by_category": {
+          "unmarked": {
+            "files": 1,
+            "lines": 271
+          }
+        },
+        "code_lines": 153,
+        "declarations": {
+          "abbrev": 0,
+          "axiom": 0,
+          "def": 7,
+          "inductive": 1,
+          "instance": 0,
+          "lemma": 0,
+          "opaque": 0,
+          "structure": 0,
+          "theorem": 8
+        },
+        "definition_lines": 104,
+        "definition_to_proof_line_ratio": 2.311111111111111,
+        "files": 1,
+        "generated_lines": 0,
+        "generated_share": 0.0,
+        "implemented_by": 0,
+        "imports_in": 7,
+        "imports_out": 0,
+        "lines": 271,
+        "maxHeartbeats_options": 0,
+        "native_decide": 0,
+        "presumed_handwritten_lines": 271,
+        "proof_lines": 45,
+        "sorry": 0,
+        "unknown_import_only_lines": 0
+      },
+      "Language": {
+        "by_category": {
+          "marked_generated": {
+            "files": 2,
+            "lines": 2399
+          },
+          "unmarked": {
+            "files": 6,
+            "lines": 3565
+          }
+        },
+        "code_lines": 4608,
+        "declarations": {
+          "abbrev": 2,
+          "axiom": 0,
+          "def": 124,
+          "inductive": 8,
+          "instance": 1,
+          "lemma": 0,
+          "opaque": 0,
+          "structure": 3,
+          "theorem": 207
+        },
+        "definition_lines": 2648,
+        "definition_to_proof_line_ratio": 1.5054007959067652,
+        "files": 8,
+        "generated_lines": 2399,
+        "generated_share": 0.4022468142186452,
+        "implemented_by": 0,
+        "imports_in": 30,
+        "imports_out": 8,
+        "lines": 5964,
+        "maxHeartbeats_options": 0,
+        "native_decide": 0,
+        "presumed_handwritten_lines": 3565,
+        "proof_lines": 1759,
+        "sorry": 0,
+        "unknown_import_only_lines": 0
+      },
+      "Lowering": {
+        "by_category": {
+          "import_only_unknown": {
+            "files": 1,
+            "lines": 6
+          },
+          "marked_generated": {
+            "files": 2,
+            "lines": 58
+          },
+          "unmarked": {
+            "files": 703,
+            "lines": 102782
+          }
+        },
+        "code_lines": 82043,
+        "declarations": {
+          "abbrev": 337,
+          "axiom": 0,
+          "def": 5406,
+          "inductive": 24,
+          "instance": 38,
+          "lemma": 0,
+          "opaque": 0,
+          "structure": 74,
+          "theorem": 5817
+        },
+        "definition_lines": 18041,
+        "definition_to_proof_line_ratio": 0.34847021556053465,
+        "files": 706,
+        "generated_lines": 58,
+        "generated_share": 0.0005639499834704315,
+        "implemented_by": 0,
+        "imports_in": 2176,
+        "imports_out": 1346,
+        "lines": 102846,
+        "maxHeartbeats_options": 0,
+        "native_decide": 0,
+        "presumed_handwritten_lines": 102782,
+        "proof_lines": 51772,
+        "sorry": 0,
+        "unknown_import_only_lines": 6
+      },
+      "Optimizer": {
+        "by_category": {
+          "unmarked": {
+            "files": 16,
+            "lines": 6658
+          }
+        },
+        "code_lines": 5379,
+        "declarations": {
+          "abbrev": 7,
+          "axiom": 0,
+          "def": 160,
+          "inductive": 1,
+          "instance": 0,
+          "lemma": 0,
+          "opaque": 0,
+          "structure": 7,
+          "theorem": 270
+        },
+        "definition_lines": 1348,
+        "definition_to_proof_line_ratio": 0.3504029113595009,
+        "files": 16,
+        "generated_lines": 0,
+        "generated_share": 0.0,
+        "implemented_by": 0,
+        "imports_in": 62,
+        "imports_out": 37,
+        "lines": 6658,
+        "maxHeartbeats_options": 0,
+        "native_decide": 0,
+        "presumed_handwritten_lines": 6658,
+        "proof_lines": 3847,
+        "sorry": 0,
+        "unknown_import_only_lines": 0
+      },
+      "Precompiles": {
+        "by_category": {
+          "unmarked": {
+            "files": 11,
+            "lines": 2072
+          }
+        },
+        "code_lines": 1312,
+        "declarations": {
+          "abbrev": 9,
+          "axiom": 0,
+          "def": 163,
+          "inductive": 1,
+          "instance": 6,
+          "lemma": 0,
+          "opaque": 0,
+          "structure": 5,
+          "theorem": 54
+        },
+        "definition_lines": 733,
+        "definition_to_proof_line_ratio": 2.1002865329512894,
+        "files": 11,
+        "generated_lines": 0,
+        "generated_share": 0.0,
+        "implemented_by": 0,
+        "imports_in": 59,
+        "imports_out": 19,
+        "lines": 2072,
+        "maxHeartbeats_options": 0,
+        "native_decide": 0,
+        "presumed_handwritten_lines": 2072,
+        "proof_lines": 349,
+        "sorry": 0,
+        "unknown_import_only_lines": 0
+      },
+      "RevertBytes": {
+        "by_category": {
+          "unmarked": {
+            "files": 1,
+            "lines": 75
+          }
+        },
+        "code_lines": 31,
+        "declarations": {
+          "abbrev": 1,
+          "axiom": 0,
+          "def": 10,
+          "inductive": 0,
+          "instance": 0,
+          "lemma": 0,
+          "opaque": 0,
+          "structure": 0,
+          "theorem": 0
+        },
+        "definition_lines": 28,
+        "definition_to_proof_line_ratio": null,
+        "files": 1,
+        "generated_lines": 0,
+        "generated_share": 0.0,
+        "implemented_by": 0,
+        "imports_in": 12,
+        "imports_out": 1,
+        "lines": 75,
+        "maxHeartbeats_options": 0,
+        "native_decide": 0,
+        "presumed_handwritten_lines": 75,
+        "proof_lines": 0,
+        "sorry": 0,
+        "unknown_import_only_lines": 0
+      },
+      "Roadmap": {
+        "by_category": {
+          "marked_generated": {
+            "files": 1,
+            "lines": 38
+          },
+          "unmarked": {
+            "files": 19,
+            "lines": 4690
+          }
+        },
+        "code_lines": 2883,
+        "declarations": {
+          "abbrev": 25,
+          "axiom": 0,
+          "def": 171,
+          "inductive": 14,
+          "instance": 3,
+          "lemma": 0,
+          "opaque": 0,
+          "structure": 47,
+          "theorem": 186
+        },
+        "definition_lines": 1221,
+        "definition_to_proof_line_ratio": 0.8574438202247191,
+        "files": 20,
+        "generated_lines": 38,
+        "generated_share": 0.008037225042301184,
+        "implemented_by": 0,
+        "imports_in": 109,
+        "imports_out": 33,
+        "lines": 4728,
+        "maxHeartbeats_options": 0,
+        "native_decide": 0,
+        "presumed_handwritten_lines": 4690,
+        "proof_lines": 1424,
+        "sorry": 0,
+        "unknown_import_only_lines": 0
+      },
+      "Scope": {
+        "by_category": {
+          "unmarked": {
+            "files": 1,
+            "lines": 286
+          }
+        },
+        "code_lines": 174,
+        "declarations": {
+          "abbrev": 1,
+          "axiom": 0,
+          "def": 14,
+          "inductive": 6,
+          "instance": 2,
+          "lemma": 0,
+          "opaque": 0,
+          "structure": 0,
+          "theorem": 14
+        },
+        "definition_lines": 81,
+        "definition_to_proof_line_ratio": 0.9878048780487805,
+        "files": 1,
+        "generated_lines": 0,
+        "generated_share": 0.0,
+        "implemented_by": 0,
+        "imports_in": 4,
+        "imports_out": 1,
+        "lines": 286,
+        "maxHeartbeats_options": 0,
+        "native_decide": 0,
+        "presumed_handwritten_lines": 286,
+        "proof_lines": 82,
+        "sorry": 0,
+        "unknown_import_only_lines": 0
+      },
+      "Secp256k1": {
+        "by_category": {
+          "unmarked": {
+            "files": 1,
+            "lines": 130
+          }
+        },
+        "code_lines": 92,
+        "declarations": {
+          "abbrev": 2,
+          "axiom": 0,
+          "def": 12,
+          "inductive": 0,
+          "instance": 2,
+          "lemma": 0,
+          "opaque": 0,
+          "structure": 1,
+          "theorem": 0
+        },
+        "definition_lines": 89,
+        "definition_to_proof_line_ratio": null,
+        "files": 1,
+        "generated_lines": 0,
+        "generated_share": 0.0,
+        "implemented_by": 0,
+        "imports_in": 4,
+        "imports_out": 1,
+        "lines": 130,
+        "maxHeartbeats_options": 0,
+        "native_decide": 0,
+        "presumed_handwritten_lines": 130,
+        "proof_lines": 0,
+        "sorry": 0,
+        "unknown_import_only_lines": 0
+      },
+      "Semantics": {
+        "by_category": {
+          "import_only_unknown": {
+            "files": 2,
+            "lines": 55
+          },
+          "unmarked": {
+            "files": 81,
+            "lines": 25848
+          }
+        },
+        "code_lines": 19093,
+        "declarations": {
+          "abbrev": 33,
+          "axiom": 0,
+          "def": 798,
+          "inductive": 64,
+          "instance": 9,
+          "lemma": 0,
+          "opaque": 0,
+          "structure": 45,
+          "theorem": 1313
+        },
+        "definition_lines": 5490,
+        "definition_to_proof_line_ratio": 0.43567970795968575,
+        "files": 83,
+        "generated_lines": 0,
+        "generated_share": 0.0,
+        "implemented_by": 35,
+        "imports_in": 424,
+        "imports_out": 123,
+        "lines": 25903,
+        "maxHeartbeats_options": 0,
+        "native_decide": 0,
+        "presumed_handwritten_lines": 25848,
+        "proof_lines": 12601,
+        "sorry": 0,
+        "unknown_import_only_lines": 55
+      },
+      "Signature": {
+        "by_category": {
+          "unmarked": {
+            "files": 1,
+            "lines": 612
+          }
+        },
+        "code_lines": 399,
+        "declarations": {
+          "abbrev": 0,
+          "axiom": 0,
+          "def": 28,
+          "inductive": 6,
+          "instance": 0,
+          "lemma": 0,
+          "opaque": 0,
+          "structure": 0,
+          "theorem": 12
+        },
+        "definition_lines": 327,
+        "definition_to_proof_line_ratio": 5.7368421052631575,
+        "files": 1,
+        "generated_lines": 0,
+        "generated_share": 0.0,
+        "implemented_by": 5,
+        "imports_in": 6,
+        "imports_out": 4,
+        "lines": 612,
+        "maxHeartbeats_options": 0,
+        "native_decide": 0,
+        "presumed_handwritten_lines": 612,
+        "proof_lines": 57,
+        "sorry": 0,
+        "unknown_import_only_lines": 0
+      },
+      "SolcValidation": {
+        "by_category": {
+          "marked_generated": {
+            "files": 5,
+            "lines": 972
+          },
+          "unmarked": {
+            "files": 25,
+            "lines": 6654
+          }
+        },
+        "code_lines": 5576,
+        "declarations": {
+          "abbrev": 30,
+          "axiom": 0,
+          "def": 468,
+          "inductive": 32,
+          "instance": 1,
+          "lemma": 0,
+          "opaque": 0,
+          "structure": 13,
+          "theorem": 390
+        },
+        "definition_lines": 1965,
+        "definition_to_proof_line_ratio": 0.5834323040380047,
+        "files": 30,
+        "generated_lines": 972,
+        "generated_share": 0.12745869394177814,
+        "implemented_by": 0,
+        "imports_in": 98,
+        "imports_out": 61,
+        "lines": 7626,
+        "maxHeartbeats_options": 0,
+        "native_decide": 0,
+        "presumed_handwritten_lines": 6654,
+        "proof_lines": 3368,
+        "sorry": 0,
+        "unknown_import_only_lines": 0
+      },
+      "Solkey": {
+        "by_category": {
+          "unmarked": {
+            "files": 5,
+            "lines": 266
+          }
+        },
+        "code_lines": 78,
+        "declarations": {
+          "abbrev": 0,
+          "axiom": 0,
+          "def": 2,
+          "inductive": 0,
+          "instance": 0,
+          "lemma": 0,
+          "opaque": 0,
+          "structure": 0,
+          "theorem": 3
+        },
+        "definition_lines": 3,
+        "definition_to_proof_line_ratio": 0.375,
+        "files": 5,
+        "generated_lines": 0,
+        "generated_share": 0.0,
+        "implemented_by": 0,
+        "imports_in": 14,
+        "imports_out": 12,
+        "lines": 266,
+        "maxHeartbeats_options": 0,
+        "native_decide": 0,
+        "presumed_handwritten_lines": 266,
+        "proof_lines": 8,
+        "sorry": 0,
+        "unknown_import_only_lines": 0
+      },
+      "SortCheck": {
+        "by_category": {
+          "unmarked": {
+            "files": 3,
+            "lines": 1281
+          }
+        },
+        "code_lines": 761,
+        "declarations": {
+          "abbrev": 0,
+          "axiom": 0,
+          "def": 66,
+          "inductive": 6,
+          "instance": 2,
+          "lemma": 0,
+          "opaque": 0,
+          "structure": 6,
+          "theorem": 5
+        },
+        "definition_lines": 558,
+        "definition_to_proof_line_ratio": 5.9361702127659575,
+        "files": 3,
+        "generated_lines": 0,
+        "generated_share": 0.0,
+        "implemented_by": 0,
+        "imports_in": 14,
+        "imports_out": 6,
+        "lines": 1281,
+        "maxHeartbeats_options": 0,
+        "native_decide": 0,
+        "presumed_handwritten_lines": 1281,
+        "proof_lines": 94,
+        "sorry": 0,
+        "unknown_import_only_lines": 0
+      },
+      "Source": {
+        "by_category": {
+          "import_only_unknown": {
+            "files": 1,
+            "lines": 8
+          },
+          "mixed_generated_blocks": {
+            "files": 2,
+            "lines": 996
+          },
+          "unmarked": {
+            "files": 259,
+            "lines": 49037
+          }
+        },
+        "code_lines": 37844,
+        "declarations": {
+          "abbrev": 108,
+          "axiom": 0,
+          "def": 2003,
+          "inductive": 118,
+          "instance": 10,
+          "lemma": 0,
+          "opaque": 0,
+          "structure": 73,
+          "theorem": 3172
+        },
+        "definition_lines": 10892,
+        "definition_to_proof_line_ratio": 0.45959745136925606,
+        "files": 262,
+        "generated_lines": 620,
+        "generated_share": 0.012389840330928638,
+        "implemented_by": 0,
+        "imports_in": 1227,
+        "imports_out": 440,
+        "lines": 50041,
+        "maxHeartbeats_options": 0,
+        "native_decide": 0,
+        "presumed_handwritten_lines": 49413,
+        "proof_lines": 23699,
+        "sorry": 0,
+        "unknown_import_only_lines": 8
+      },
+      "SpecSyntax": {
+        "by_category": {
+          "unmarked": {
+            "files": 1,
+            "lines": 220
+          }
+        },
+        "code_lines": 144,
+        "declarations": {
+          "abbrev": 0,
+          "axiom": 0,
+          "def": 6,
+          "inductive": 2,
+          "instance": 0,
+          "lemma": 0,
+          "opaque": 0,
+          "structure": 1,
+          "theorem": 0
+        },
+        "definition_lines": 135,
+        "definition_to_proof_line_ratio": null,
+        "files": 1,
+        "generated_lines": 0,
+        "generated_share": 0.0,
+        "implemented_by": 0,
+        "imports_in": 3,
+        "imports_out": 1,
+        "lines": 220,
+        "maxHeartbeats_options": 0,
+        "native_decide": 0,
+        "presumed_handwritten_lines": 220,
+        "proof_lines": 0,
+        "sorry": 0,
+        "unknown_import_only_lines": 0
+      },
+      "Stipend": {
+        "by_category": {
+          "unmarked": {
+            "files": 1,
+            "lines": 274
+          }
+        },
+        "code_lines": 140,
+        "declarations": {
+          "abbrev": 0,
+          "axiom": 0,
+          "def": 16,
+          "inductive": 0,
+          "instance": 1,
+          "lemma": 0,
+          "opaque": 0,
+          "structure": 2,
+          "theorem": 12
+        },
+        "definition_lines": 74,
+        "definition_to_proof_line_ratio": 1.2982456140350878,
+        "files": 1,
+        "generated_lines": 0,
+        "generated_share": 0.0,
+        "implemented_by": 0,
+        "imports_in": 9,
+        "imports_out": 2,
+        "lines": 274,
+        "maxHeartbeats_options": 0,
+        "native_decide": 0,
+        "presumed_handwritten_lines": 274,
+        "proof_lines": 57,
+        "sorry": 0,
+        "unknown_import_only_lines": 0
+      },
+      "Storage": {
+        "by_category": {
+          "unmarked": {
+            "files": 21,
+            "lines": 4049
+          }
+        },
+        "code_lines": 3144,
+        "declarations": {
+          "abbrev": 3,
+          "axiom": 0,
+          "def": 101,
+          "inductive": 14,
+          "instance": 0,
+          "lemma": 0,
+          "opaque": 0,
+          "structure": 1,
+          "theorem": 243
+        },
+        "definition_lines": 376,
+        "definition_to_proof_line_ratio": 0.14641744548286603,
+        "files": 21,
+        "generated_lines": 0,
+        "generated_share": 0.0,
+        "implemented_by": 0,
+        "imports_in": 82,
+        "imports_out": 32,
+        "lines": 4049,
+        "maxHeartbeats_options": 0,
+        "native_decide": 0,
+        "presumed_handwritten_lines": 4049,
+        "proof_lines": 2568,
+        "sorry": 0,
+        "unknown_import_only_lines": 0
+      },
+      "Syntax": {
+        "by_category": {
+          "import_only_unknown": {
+            "files": 2,
+            "lines": 116
+          },
+          "unmarked": {
+            "files": 20,
+            "lines": 14501
+          }
+        },
+        "code_lines": 10248,
+        "declarations": {
+          "abbrev": 22,
+          "axiom": 0,
+          "def": 754,
+          "inductive": 46,
+          "instance": 5,
+          "lemma": 0,
+          "opaque": 1,
+          "structure": 19,
+          "theorem": 26
+        },
+        "definition_lines": 9423,
+        "definition_to_proof_line_ratio": 54.78488372093023,
+        "files": 22,
+        "generated_lines": 0,
+        "generated_share": 0.0,
+        "implemented_by": 5,
+        "imports_in": 153,
+        "imports_out": 44,
+        "lines": 14617,
+        "maxHeartbeats_options": 0,
+        "native_decide": 0,
+        "presumed_handwritten_lines": 14501,
+        "proof_lines": 172,
+        "sorry": 0,
+        "unknown_import_only_lines": 116
+      },
+      "TestSuite": {
+        "by_category": {
+          "unmarked": {
+            "files": 49,
+            "lines": 4710
+          }
+        },
+        "code_lines": 3673,
+        "declarations": {
+          "abbrev": 0,
+          "axiom": 0,
+          "def": 6,
+          "inductive": 0,
+          "instance": 0,
+          "lemma": 0,
+          "opaque": 0,
+          "structure": 0,
+          "theorem": 563
+        },
+        "definition_lines": 248,
+        "definition_to_proof_line_ratio": 0.20261437908496732,
+        "files": 49,
+        "generated_lines": 0,
+        "generated_share": 0.0,
+        "implemented_by": 0,
+        "imports_in": 75,
+        "imports_out": 79,
+        "lines": 4710,
+        "maxHeartbeats_options": 0,
+        "native_decide": 0,
+        "presumed_handwritten_lines": 4710,
+        "proof_lines": 1224,
+        "sorry": 0,
+        "unknown_import_only_lines": 0
+      },
+      "Theorems": {
+        "by_category": {
+          "unmarked": {
+            "files": 1,
+            "lines": 360
+          }
+        },
+        "code_lines": 155,
+        "declarations": {
+          "abbrev": 11,
+          "axiom": 0,
+          "def": 1,
+          "inductive": 0,
+          "instance": 0,
+          "lemma": 0,
+          "opaque": 0,
+          "structure": 0,
+          "theorem": 21
+        },
+        "definition_lines": 54,
+        "definition_to_proof_line_ratio": 0.7941176470588235,
+        "files": 1,
+        "generated_lines": 0,
+        "generated_share": 0.0,
+        "implemented_by": 0,
+        "imports_in": 9,
+        "imports_out": 7,
+        "lines": 360,
+        "maxHeartbeats_options": 0,
+        "native_decide": 0,
+        "presumed_handwritten_lines": 360,
+        "proof_lines": 68,
+        "sorry": 0,
+        "unknown_import_only_lines": 0
+      },
+      "Theory": {
+        "by_category": {
+          "import_only_unknown": {
+            "files": 1,
+            "lines": 41
+          },
+          "unmarked": {
+            "files": 24,
+            "lines": 8849
+          }
+        },
+        "code_lines": 6473,
+        "declarations": {
+          "abbrev": 8,
+          "axiom": 0,
+          "def": 120,
+          "inductive": 17,
+          "instance": 2,
+          "lemma": 0,
+          "opaque": 0,
+          "structure": 13,
+          "theorem": 500
+        },
+        "definition_lines": 689,
+        "definition_to_proof_line_ratio": 0.12461566286851149,
+        "files": 25,
+        "generated_lines": 0,
+        "generated_share": 0.0,
+        "implemented_by": 0,
+        "imports_in": 153,
+        "imports_out": 45,
+        "lines": 8890,
+        "maxHeartbeats_options": 0,
+        "native_decide": 0,
+        "presumed_handwritten_lines": 8849,
+        "proof_lines": 5529,
+        "sorry": 0,
+        "unknown_import_only_lines": 41
+      },
+      "Tools": {
+        "by_category": {
+          "unmarked": {
+            "files": 31,
+            "lines": 8575
+          }
+        },
+        "code_lines": 6082,
+        "declarations": {
+          "abbrev": 6,
+          "axiom": 0,
+          "def": 487,
+          "inductive": 13,
+          "instance": 4,
+          "lemma": 0,
+          "opaque": 0,
+          "structure": 18,
+          "theorem": 42
+        },
+        "definition_lines": 5308,
+        "definition_to_proof_line_ratio": 10.680080482897385,
+        "files": 31,
+        "generated_lines": 0,
+        "generated_share": 0.0,
+        "implemented_by": 2,
+        "imports_in": 270,
+        "imports_out": 88,
+        "lines": 8575,
+        "maxHeartbeats_options": 0,
+        "native_decide": 0,
+        "presumed_handwritten_lines": 8575,
+        "proof_lines": 497,
+        "sorry": 0,
+        "unknown_import_only_lines": 0
+      },
+      "TypeGraph": {
+        "by_category": {
+          "unmarked": {
+            "files": 1,
+            "lines": 147
+          }
+        },
+        "code_lines": 108,
+        "declarations": {
+          "abbrev": 2,
+          "axiom": 0,
+          "def": 5,
+          "inductive": 4,
+          "instance": 0,
+          "lemma": 0,
+          "opaque": 0,
+          "structure": 1,
+          "theorem": 9
+        },
+        "definition_lines": 55,
+        "definition_to_proof_line_ratio": 1.1,
+        "files": 1,
+        "generated_lines": 0,
+        "generated_share": 0.0,
+        "implemented_by": 0,
+        "imports_in": 3,
+        "imports_out": 1,
+        "lines": 147,
+        "maxHeartbeats_options": 0,
+        "native_decide": 0,
+        "presumed_handwritten_lines": 147,
+        "proof_lines": 50,
+        "sorry": 0,
+        "unknown_import_only_lines": 0
+      },
+      "Typing": {
+        "by_category": {
+          "unmarked": {
+            "files": 12,
+            "lines": 6832
+          }
+        },
+        "code_lines": 5352,
+        "declarations": {
+          "abbrev": 13,
+          "axiom": 0,
+          "def": 84,
+          "inductive": 1,
+          "instance": 0,
+          "lemma": 0,
+          "opaque": 0,
+          "structure": 6,
+          "theorem": 459
+        },
+        "definition_lines": 452,
+        "definition_to_proof_line_ratio": 0.09612930667800935,
+        "files": 12,
+        "generated_lines": 0,
+        "generated_share": 0.0,
+        "implemented_by": 0,
+        "imports_in": 44,
+        "imports_out": 16,
+        "lines": 6832,
+        "maxHeartbeats_options": 0,
+        "native_decide": 0,
+        "presumed_handwritten_lines": 6832,
+        "proof_lines": 4702,
+        "sorry": 0,
+        "unknown_import_only_lines": 0
+      },
+      "Update": {
+        "by_category": {
+          "unmarked": {
+            "files": 1,
+            "lines": 58
+          }
+        },
+        "code_lines": 20,
+        "declarations": {
+          "abbrev": 0,
+          "axiom": 0,
+          "def": 3,
+          "inductive": 2,
+          "instance": 0,
+          "lemma": 0,
+          "opaque": 0,
+          "structure": 0,
+          "theorem": 0
+        },
+        "definition_lines": 16,
+        "definition_to_proof_line_ratio": null,
+        "files": 1,
+        "generated_lines": 0,
+        "generated_share": 0.0,
+        "implemented_by": 0,
+        "imports_in": 5,
+        "imports_out": 1,
+        "lines": 58,
+        "maxHeartbeats_options": 0,
+        "native_decide": 0,
+        "presumed_handwritten_lines": 58,
+        "proof_lines": 0,
+        "sorry": 0,
+        "unknown_import_only_lines": 0
+      },
+      "Yul": {
+        "by_category": {
+          "import_only_unknown": {
+            "files": 10,
+            "lines": 568
+          },
+          "marked_generated": {
+            "files": 9,
+            "lines": 6975
+          },
+          "unmarked": {
+            "files": 1808,
+            "lines": 189889
+          }
+        },
+        "code_lines": 164067,
+        "declarations": {
+          "abbrev": 196,
+          "axiom": 0,
+          "def": 8327,
+          "inductive": 172,
+          "instance": 5,
+          "lemma": 0,
+          "opaque": 0,
+          "structure": 210,
+          "theorem": 19176
+        },
+        "definition_lines": 34071,
+        "definition_to_proof_line_ratio": 0.2989470913398263,
+        "files": 1827,
+        "generated_lines": 6975,
+        "generated_share": 0.03532861947404676,
+        "implemented_by": 6,
+        "imports_in": 5193,
+        "imports_out": 3348,
+        "lines": 197432,
+        "maxHeartbeats_options": 0,
+        "native_decide": 0,
+        "presumed_handwritten_lines": 189889,
+        "proof_lines": 113970,
+        "sorry": 0,
+        "unknown_import_only_lines": 568
+      }
+    },
+    "axiom": 0,
+    "axiom_pin_lines": 4054,
+    "code_lines": 878656,
+    "def": 42903,
+    "definition_lines": 218914,
+    "definition_to_proof_line_ratio": 0.38000427021800676,
+    "files": 6717,
+    "generated_lines": 23502,
+    "generated_share": 0.02096322738438649,
+    "goal_status": "unavailable: no authoritative goal-closure parser/counter; absent file is not zero goals",
+    "goals_closed": null,
+    "goals_file_present": false,
+    "implemented_by": 176,
+    "imports_in": 21360,
+    "imports_out": 12763,
+    "inductive": 1035,
+    "instance": 177,
+    "lemma": 1,
+    "lines": 1121106,
+    "lines_added_per_goal_closed": null,
+    "lines_delta": 747443,
+    "maxHeartbeats_options": 16,
+    "merged_plan_commits": [
+      "b42aaef7df1d4c2c592d618448864a5dc5790064 Merge t1-views-plan-frame-2f45dfca",
+      "3d7d38921143ffb7518b5f79d4daececed56a2a4 Merge t1-views-plan-frame-7533a713",
+      "8222968e4f4b1d159e858cbefc82fbb206c5da56 Merge t1-views-plan-frame-8db7fd87",
+      "42598337b6f7f92b4a00babb50379754a879a8b6 Merge t1-views-plan-frame-3d1567a7"
+    ],
+    "merged_plan_steps_visible": 4,
+    "month": "2026-11",
+    "native_decide": 0,
+    "opaque": 3,
+    "presumed_handwritten_lines": 1096152,
+    "proof_lines": 576083,
+    "revision": "d4ad633a9624263a59b14fd2c520b9bc602f88f3",
+    "roadmap_command_files": [],
+    "sorry": 0,
+    "structure": 1398,
+    "theorem": 65929,
+    "unknown_import_only_lines": 1452
+  }
+]

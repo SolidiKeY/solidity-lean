@@ -23,7 +23,6 @@ def extraWords (capacity required : Nat) : Nat := (required-capacity+31)/32
 /-- Arithmetic derives room without an input list of safety witnesses. -/
 theorem extent_room (requests : List (ResidualCopyRequest p)) (capacity : Nat)
     (fits : extent requests≤capacity) : ∀ r ∈ requests,CopyRoom capacity r := by
-  first | (simp only [CopyRoom]; done) | skip
   induction requests with
   | nil => intro r member;cases member
   | cons first rest ih =>
@@ -54,7 +53,6 @@ theorem reservation_least (capacity required words : Nat)
 theorem checked_complete (μ : FrameMem C Δ) (requests : List (ResidualCopyRequest p))
     (rooms : ∀ r ∈ requests,CopyRoom μ.capacity r) :
     (checkedCopies μ requests).pending=[] := by
-  first | (simp only [checkedCopies]; done) | skip
   induction requests generalizing μ with
   | nil => rfl
   | cons r rest ih =>

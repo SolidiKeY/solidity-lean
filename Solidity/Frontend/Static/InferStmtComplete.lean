@@ -247,6 +247,29 @@ theorem stmt_complete {C : Ctx} : {k : SCtx} → {L : Locals} → {s : Syn (.stm
           · rename_i hn; rw [ht] at hn; cases hn
         · rename_i hn; rw [hs] at hn; cases hn
       · rename_i hn; exact absurd ho (hn _)
+  | _, L, _, _, .tryLibrary da ho hs hf hb ht same success failure => by
+    obtain ⟨da₀, ha⟩ := exists_args (args_complete da)
+    obtain ⟨success₀, hok⟩ := exists_items (items_complete success)
+    obtain ⟨failure₀, hbad⟩ := exists_items (items_complete failure)
+    refine mem_stmts (d := .tryLibrary da₀ ho hs hf hb ht same success₀ failure₀) ?_
+    refine List.mem_flatMap.mpr ⟨⟨_, da₀⟩, ha, ?_⟩
+    split
+    · rename_i selected ho₀
+      have selectedEq := ho.symm.trans ho₀
+      cases selectedEq
+      split
+      · rename_i ps₀ rs₀ hs₀
+        rw [hs] at hs₀; cases hs₀
+        rw [dif_pos hf, dif_pos hb]
+        split
+        · rename_i tys₀ ht₀
+          rw [ht] at ht₀; cases ht₀
+          rw [dif_pos same]
+          exact List.mem_flatMap.mpr ⟨SRes.block success₀, List.mem_map.mpr ⟨_, hok, rfl⟩,
+            List.mem_map.mpr ⟨⟨_, failure₀⟩, hbad, rfl⟩⟩
+        · rename_i absent; rw [ht] at absent; cases absent
+      · rename_i absent; rw [hs] at absent; cases absent
+    · rename_i absent; exact absurd ho (absent _)
   | _, L, _, _, .rethrow (d := x) hb hr ht hp => by
     refine mem_stmts (d := .rethrow hb hr ht hp) ?_
     show _ ∈ rethrowRes C L _ _

@@ -1,0 +1,90 @@
+{
+  "base": "d6fd95f0886775d7c286813fa9b993a40ba7a777",
+  "boundaries": [
+    "This joins already validated corpora; replayed source files are disjoint and imported units deduplicate by module plus native structural-name hash.",
+    "A use elsewhere in a family does not mark a historical candidate; matching requires its original native key, kind and source binding.",
+    "A witness marks an entire historical unit, not necessity of every line. Stage2 range correspondence is not creation provenance.",
+    "Missing observations are not unusedness. Root, symbolic-name, attribute, reflective and runtime coverage remains incomplete.",
+    "Physical spans are historical raw LF units; changed historical files remain drift, never remapped. Provenance labels do not certify handwriting.",
+    "Per-file output replacement is not a batch transaction; interrupted outputs require successful --check or regeneration before use."
+  ],
+  "candidate_units": 3034,
+  "combined_imported_provenance": {
+    "marked_generated": 37,
+    "untraced": 2182
+  },
+  "combined_imported_units": 2219,
+  "combined_stage2_provenance": {
+    "untraced": 520
+  },
+  "combined_stage2_units": 520,
+  "deletable_now_verified_lines": 0,
+  "families": {
+    "Solidity/Backend/InternalFlow/": {
+      "no_observed_snapshot_witness_historical_masked_span_lines": 6100,
+      "no_observed_snapshot_witness_physical_span_lines": 6100,
+      "no_observed_snapshot_witness_units": 759
+    },
+    "Solidity/Frontend/SolcJson/": {
+      "no_observed_snapshot_witness_historical_masked_span_lines": 4440,
+      "no_observed_snapshot_witness_physical_span_lines": 4441,
+      "no_observed_snapshot_witness_units": 307
+    },
+    "Solidity/SolcValidation/": {
+      "no_observed_snapshot_witness_historical_masked_span_lines": 4878,
+      "no_observed_snapshot_witness_physical_span_lines": 4878,
+      "no_observed_snapshot_witness_units": 627
+    },
+    "Solidity/Yul/Views/": {
+      "historical_source_drift_historical_masked_span_lines": 11,
+      "historical_source_drift_physical_span_lines": 11,
+      "historical_source_drift_units": 2,
+      "no_observed_snapshot_witness_historical_masked_span_lines": 10135,
+      "no_observed_snapshot_witness_physical_span_lines": 10135,
+      "no_observed_snapshot_witness_units": 1339
+    }
+  },
+  "imported_symbols_bound_to_candidates": 0,
+  "observed_additional_source_files": 13,
+  "observed_dense_source_files": 19,
+  "provenance": {
+    "historical_source_drift": {
+      "historical_source_drift_physical_span_lines": 11,
+      "historical_source_drift_units": 2
+    },
+    "marked_generated": {
+      "no_observed_snapshot_witness_physical_span_lines": 919,
+      "no_observed_snapshot_witness_units": 201
+    },
+    "unresolved_chain_agreement": {
+      "no_observed_snapshot_witness_physical_span_lines": 130,
+      "no_observed_snapshot_witness_units": 14
+    },
+    "untraced": {
+      "no_observed_snapshot_witness_physical_span_lines": 24505,
+      "no_observed_snapshot_witness_units": 2817
+    }
+  },
+  "settling_measurement": "An isolated removal replay of the complete affected-root suite on an authorized valid baseline, recording native symbolic, macro and attribute dependencies.",
+  "stage2_correspondences_bound_to_candidates": 0,
+  "status": "partial",
+  "tables": [
+    "candidate-0000.tsv",
+    "candidate-0001.tsv",
+    "candidate-0002.tsv",
+    "candidate-0003.tsv",
+    "candidate-0004.tsv",
+    "candidate-0005.tsv",
+    "candidate-0006.tsv",
+    "candidate-0007.tsv",
+    "candidate-0008.tsv",
+    "candidate-0009.tsv",
+    "candidate-000a.tsv",
+    "candidate-000b.tsv",
+    "candidate-000c.tsv",
+    "candidate-000d.tsv",
+    "candidate-000e.tsv",
+    "candidate-000f.tsv"
+  ],
+  "verdict": "No historical candidate receives an imported snapshot dependency witness or exact stage2 range correspondence in this measured corpus. This does not certify unusedness or deletability; full-root liveness remains unresolved."
+}

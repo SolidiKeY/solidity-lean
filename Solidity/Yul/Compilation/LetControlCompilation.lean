@@ -1,5 +1,6 @@
 import Solidity.Yul.Compilation.LetScopeCompilation
 import Solidity.Yul.Compilation.FramedBranch
+import Solidity.Yul.Compilation.CompletionControls
 /-! Recursive original seq/if traversal around actual let-scope compiler
 artifacts. Existing intrinsic syntax, source profiles and target branch tails
 are reused; this is neither another source AST nor an admission change. -/
@@ -171,10 +172,8 @@ theorem Artifact.normal_to_model {c : Control} {n fuel : Nat} {stmt : Stmt [] []
    some ⟨sourceLocals out,.normal⟩) (m : Evm.Machine) (caller : List Evm.Word) :
  Evm.run artifact.code {m with stack := locals.toList.map coreWord++caller} =
  .ok {m with stack := out.toList.map coreWord++caller} 0 := by
- obtain ⟨actual,same,target⟩ := artifact.source_to_model horizon locals ⟨sourceLocals out,.normal⟩ ran m caller
- have equal : out = actual := SourceLoopCompletion.sourceLocals_injective (congrArg Outcome.vars same)
- cases equal
- exact target
+ exact CompletionControls.normal_output out _
+   (artifact.source_to_model horizon locals ⟨sourceLocals out,.normal⟩ ran m caller)
 
 /-- info: 'Solidity.Yul.Compilation.LetControlCompilation.source_to_model' depends on axioms: [propext,
  Classical.choice,

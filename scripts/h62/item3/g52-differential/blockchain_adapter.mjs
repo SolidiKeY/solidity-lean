@@ -1,3 +1,4 @@
+import {createHash} from 'node:crypto';
 /** Guarded regression: prepared blockchain inputs must never become matches by
  * skipping header validation, trusting generated roots, or swallowing block errors.
  * Exact-Osaka only; unknown rejection diagnostics stay unsupported.
@@ -15,6 +16,38 @@ export function transactionObservations(block, result, bytesToHex) {
     if(JSON.stringify(observedLogs)!==JSON.stringify(receiptLogs) || receipt.status!==(e.exceptionError?0:1)) throw new Error('native receipt/execution outcome disagreement');
     return {index,hash:bytesToHex(tx.hash()),type:tx.type,output:bytesToHex(e.returnValue),execution_exception:e.exceptionError?.error??null,logs:observedLogs,receipt_status:receipt.status,receipt_cumulative_gas_used:receipt.cumulativeBlockGasUsed.toString(),total_gas_spent:r.totalGasSpent.toString(),execution_gas_used:e.executionGasUsed.toString(),native_gas_refund_counter:r.gasRefund.toString(),gas_limit:tx.gasLimit.toString()};
   });
+}
+
+/** Guarded regression: a gas-cap decoder label alone cannot bind a rejection
+ * to an input transaction. Reproduce the first SDK transaction constructor
+ * refusal and derive canonical gas/type/index/digest from exact block RLP.
+ * This helper supplies facts only; callers still observe native root/head.
+ */
+export function gasLimitDecodeFacts(rlp,message,m,common) {
+ const diagnostic=/^Transaction gas limit (0|[1-9][0-9]*) exceeds the maximum allowed by EIP-7825 \((0|[1-9][0-9]*)\)$/.exec(message);
+ if(!diagnostic)return undefined;
+ const requireCondition=(ok,why)=>{if(!ok)throw new Error(why);};
+ requireCondition(common.isActivatedEIP(7825)&&!common.isActivatedEIP(8037),'gas-cap fork not active');
+ const txCommon=common.copy();txCommon.updateParams(m.paramsTx);
+ const cap=txCommon.param('maxTransactionGasLimit');
+ const bytes=m.hexToBytes(rlp),decoded=m.RLP.decode(bytes);
+ requireCondition(Array.isArray(decoded)&&Array.isArray(decoded[1])&&m.bytesToHex(m.RLP.encode(decoded))===rlp,'noncanonical decoder input block');
+ for(const [index,entry] of decoded[1].entries()) {
+  const raw=entry instanceof Uint8Array?entry:m.RLP.encode(entry);
+  let failure;
+  try {m.createTxFromRLP(raw,{common});}catch(error){failure=error;}
+  if(!failure)continue;
+  requireCondition(failure.message===message,'gas-cap error is not first input constructor refusal');
+  const typed=raw[0]<0x80,type=typed?raw[0]:0;
+  requireCondition([0,1,2,4].includes(type),'gas-cap raw type pending');
+  const encoded=typed?raw.slice(1):raw,fields=m.RLP.decode(encoded),gasIndex=type===0?2:type===1?3:4;
+  requireCondition(Array.isArray(fields)&&m.bytesToHex(m.RLP.encode(fields))===m.bytesToHex(encoded),'noncanonical gas-cap transaction');
+  const gasBytes=fields[gasIndex];requireCondition(gasBytes instanceof Uint8Array&&gasBytes.length<=8&&(gasBytes.length===0||gasBytes[0]!==0),'noncanonical gas-cap integer');
+  const gas=gasBytes.length?BigInt(m.bytesToHex(gasBytes)):0n;
+  requireCondition(gas>cap&&gas.toString()===diagnostic[1]&&cap.toString()===diagnostic[2],'gas-cap diagnostic differs from input/fork');
+  return {stage:'decode',transaction_index:index,transactionType:type,gasLimit:gas.toString(),maximumGasLimit:cap.toString(),transaction_sha256:createHash('sha256').update(raw).digest('hex')};
+ }
+ throw new Error('gas-cap diagnostic without an input constructor refusal');
 }
 
 export async function executeBlockchain(record, m, budget) {
@@ -68,7 +101,7 @@ export async function executeBlockchain(record, m, budget) {
       if(error.message.includes('H44_HOST_STEP_LIMIT')) throw error;
       const afterRoot=bytesToHex(await vm.stateManager.getStateRoot());
       const afterHead=bytesToHex((await chain.getCanonicalHeadHeader()).hash());
-      const facts={stage};
+      const facts=stage==='decode'?(gasLimitDecodeFacts(item.rlp,error.message,m,common)??{stage}):{stage};
       const errorTxIndex=/^invalid transactions: errors at tx ([0-9]+):/.exec(error.message);
       const diagnosticTx=errorTxIndex?block?.transactions[Number(errorTxIndex[1])]:currentTx;
       if(diagnosticTx) {

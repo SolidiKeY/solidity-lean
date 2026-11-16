@@ -33,7 +33,7 @@ theorem source_run {E : Source.Env} {srcΓ : Source.RCtx}
   have sub : (Source.EM.sub ls (Source.evalE G F (fuel+2)
       (.assign (.local i) (.local a)))).run (.nil,st) =
       (.ok (.val (.bool choice),ls.set i (.bool choice)),(.nil,st)) := by
-    have hr : Source.evalE (plan := none) G F (fuel+2) (.assign (.local i) (.local a)) (ls,st) =
+    have hr : Source.evalE (plan := none) (calldataKnown := true) G F (fuel+2) (.assign (.local i) (.local a)) (ls,st) =
         (.ok (.val (.bool choice)),(ls.set i (.bool choice),st)) :=
       source_assign_local_run G F fuel (ls,st) i a (.bool choice) read
     simp only [Source.EM.sub,ExceptT.run,ExceptT.mk,hr]

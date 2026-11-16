@@ -14,7 +14,7 @@ from conservation import BASE
 
 
 def git(root, *args):
-    return subprocess.run(["git", *args], cwd=root, capture_output=True, check=True).stdout
+    return subprocess.run(["git", "--no-replace-objects", *args], cwd=root, capture_output=True, check=True).stdout
 
 
 def collect_changes(root, base, head):

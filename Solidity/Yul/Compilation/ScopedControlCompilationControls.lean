@@ -44,14 +44,15 @@ theorem source_done (b c : Scalar.Word) :
     show (1 : Fin 6).val = 1 from rfl,Nat.reduceLT,Nat.reduceSub,dite_true,dite_false]
   simp only [literal_dirty]
   rfl
- have ran := reference.source #v[b,c]
- rw [same] at ran
- exact ran
+ simpa only [same] using reference.source #v[b,c]
 
 theorem target_done (b c : Scalar.Word) (m : Evm.Machine) (caller : List Evm.Word) :
  Evm.run artifact.code {m with stack := coreWord b::coreWord c::caller} =
- .ok {m with stack := coreWord (update b)::coreWord c::caller} 0 :=
- artifact.normal_to_model 10 #v[b,c] #v[update b,c] (source_done b c) m caller
+ .ok {m with stack := coreWord (update b)::coreWord c::caller} 0 := by
+ exact CompletionControls.normal_output (c := root) #v[update b,c]
+   (fun actual => Evm.run artifact.code {m with stack := coreWord b::coreWord c::caller} =
+     .ok {m with stack := actual.toList.map coreWord++caller} 0)
+   (artifact.source_to_model 10 #v[b,c] ⟨sourceLocals #v[update b,c],.normal⟩ (source_done b c) m caller)
 
 /-- A dynamic branch contains the whole recursively changing-context scope. -/
 def branchSource : Solidity.Yul.Stmt [] [] root 2 := .if_ (.local 1) source
@@ -98,9 +99,7 @@ theorem last_source (b : Scalar.Word) :
     Vector.getElem_append,Vector.getElem_singleton,Vector.getElem_replicate
     ]
   rfl
- have ran := lastReference.source #v[b]
- rw [same] at ran
- exact ran
+ simpa only [same] using lastReference.source #v[b]
 
 theorem last_target (b : Scalar.Word) (m : Evm.Machine) (caller : List Evm.Word) :
  Evm.run lastArtifact.code {m with stack := coreWord b::caller} =

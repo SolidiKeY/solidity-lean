@@ -1,3 +1,4 @@
+import Solidity.Yul.Compilation.Artifact
 import Solidity.Yul.Compilation.ScopedForCompletion
 import Solidity.Yul.Compilation.ScopedForCompilationControls
 /-! Exact success equivalence for genuine initialized scoped FOR outputs.
@@ -12,7 +13,11 @@ theorem success_iff (locals out : Vector Scalar.Word 2) (m : Evm.Machine) (calle
  (∃ horizon, evalStmt horizon .nil True.intro source artifact.compiled.profile (sourceLocals locals) =
  some ⟨sourceLocals out,.normal⟩) ↔
  Evm.run artifact.code {m with stack := locals.toList.map coreWord++caller} =
- .ok {m with stack := out.toList.map coreWord++caller} 0 := completion_iff artifact locals out m caller
+ .ok {m with stack := out.toList.map coreWord++caller} 0 := by
+ simpa only [Vector.toList_empty,List.nil_append] using
+   (Solidity.Yul.Compilation.Artifact.ofZero (stmt := source)
+     artifact.compiled.profile artifact.code artifact.source_to_model
+     (model_to_source artifact)).completion_iff locals out #v[] m caller
 
 theorem reflected (locals : Vector Scalar.Word 2) (m final : Evm.Machine) (caller : List Evm.Word) (skip : Nat)
  (ran : Evm.run artifact.code {m with stack := locals.toList.map coreWord++caller} = .ok final skip) :

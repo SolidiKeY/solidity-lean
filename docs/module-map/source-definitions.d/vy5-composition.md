@@ -47,16 +47,16 @@
 | `Source/FailureRequestHorizon.lean` | Actual requestScope event growth and fixed-plan horizon approximation with per-balance body premises; timeout cleanup rethrows without events. |
 | `Source/FailureRequestHorizonControls.lean` | Inhabited request horizon/full-state/wide-input/byte controls, cut/drop distinctions, caught-cut refusal and changed-plan counterexample. |
 
-| `Source/FailureEvaluatorGrow.lean` | Closed event-growth induction over all17 existing Source evaluator functions with an arbitrary enabled fixed plan; generated proof basis, no body-growth/NoFail/outcome premise. |
+| `Source/FailureEvaluatorGrow.lean` | Closed fixed-plan event-growth induction through the shared eighteen-operation HorizonAt schema, covering both calldata modes; the existing seventeen-field GrowAt API remains unchanged. |
 | `Source/FailureEvaluatorGrowControls.lean` | Actual entered-frame induction use, all-horizon prefix transport and changed-plan/event-erasure counterexamples; transitive standard axiom pins. |
 | `Source/FailureTransactionGrowth.lean` | Actual runTxWithPlan event growth from the closed induction and real root operations; no session/Approx/P8 claim. |
 
 | `Source/FailureScopeStability.lean` | Actual frame/request Below transport with genuine timeout rethrow; no blanket attempt transport. |
-| `Source/FailureEvaluatorStability.lean` | Closed enabled-plan BelowAt induction for all17 existing Source evaluator functions; exact-byte generated proof basis, no external execution premise. |
+| `Source/FailureEvaluatorStability.lean` | Closed fixed-plan equality-or-timeout induction through the shared eighteen-operation HorizonAt schema, covering both calldata modes and projecting to the unchanged legacy BelowAt API. |
 | `Source/FailureTransactionStability.lean` | Actual planned root Below and complete result/state stability after non-timeout completion at all larger fixed-plan horizons. |
 | `Source/FailureStabilityControls.lean` | Full frozen Source revert/panic/stuck/request-stop transport and timeout/attempt counterexamples; standard transitive axiom pins. |
 
-| `Source/FailureEvaluatorApprox.lean` | Closed fixed-plan event-prefix Approx induction for all17 actual Source evaluator functions; exact-byte generated proof basis, no NoFail/execution premise. |
+| `Source/FailureEvaluatorApprox.lean` | Closed fixed-plan event-prefix approximation through the shared eighteen-operation HorizonAt schema, with full completed-state equality and the unchanged legacy ApproxAt API. |
 | `Source/FailureTransactionApprox.lean` | Actual planned root approximation and event-prefix inclusion at every larger horizon, including timeouts; no session/deployment/P8 assertion. |
 | `Source/FailureApproxControls.lean` | Actual timeout-prefix/completed-cut controls and changed-plan/captured-timeout counterexamples; exact standard axiom pins. |
 

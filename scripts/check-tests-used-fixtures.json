@@ -1,0 +1,29 @@
+{
+  "schema_version": 2,
+  "records": [
+    {
+      "path": "tests/upstream/results/results.json",
+      "blob": "2084c30ae21fc5bc3ec05915564c79c9bbffb183",
+      "consumers": [
+        {
+          "path": "scripts/hygiene/check.py",
+          "blob": "6562d56b474e8bd02d5884a74740759398d810d7",
+          "anchors": [
+            "    \"tests/upstream/results/results.json\": \"2084c30ae21fc5bc3ec05915564c79c9bbffb183\","
+          ]
+        },
+        {
+          "path": "scripts/hygiene/test_check.py",
+          "blob": "c14c76063b290c036b9f29d6feee702dc7c195b0",
+          "anchors": [
+            "    def test_exact_path_and_blob_only(self):",
+            "            self.assertIn(\"exact pinned historical report exempted\", out)",
+            "            changed = bytes([data[0] ^ 1]) + data[1:]",
+            "            r.git(\"mv\", path, \"tests/upstream/results/other.json\")"
+          ]
+        }
+      ],
+      "reason": "Captured upstream results also supply the exact-byte positive exemption, byte mutation and rename controls in the hygiene regression test. Historical diagnostic reuse and the existing line-policy pin do not qualify a current inventory consumer. Reported statuses, source/compiler/archive/retry hashes and old execution claims remain unverified history, with no proof, policy, permission, budget, nonuse or deletion credit."
+    }
+  ]
+}

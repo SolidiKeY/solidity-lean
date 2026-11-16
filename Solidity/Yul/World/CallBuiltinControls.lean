@@ -28,34 +28,34 @@ def summary (result : CompletedCall Memory D₀ LW LW) :=
 
 theorem call_exact : (callBuiltin .call TargetMemory.port (fixture false) before caller callArgs).map summary =
     some (toWord 1,[17,34,51],callerTrace,some [17,34,255],some (toWord 1,[17,34,51])) := by
-  first | decide | rfl
+  rfl
 theorem staticcall_exact : (callBuiltin .staticcall TargetMemory.port (fixture false) before caller shortArgs).map summary =
     some (toWord 1,[17,34,51],callerTrace,some [17,34,255],some (toWord 1,[17,34,51])) := by
-  first | decide | rfl
+  rfl
 theorem delegatecall_revert_exact : (callBuiltin .delegatecall TargetMemory.port (fixture true) before caller shortArgs).map summary =
     some (toWord 0,[17,34,51],callerTrace,some [17,34,255],some (toWord 0,[17,34,51])) := by
-  first | decide | rfl
+  rfl
 
 def refuseStore : BytePort Memory := {TargetMemory.port with store := fun _ _ _ => none}
 theorem copy_refusal_retains_completion : (callBuiltin .call refuseStore (fixture false) before caller callArgs).map (fun result =>
     (result.outcome,result.observed.effects.returndata,result.copiedMemory.isNone,(callContinuation result).isNone)) =
       some (.success [17,34,51],[17,34,51],true,true) := by
-  first | decide | rfl
+  decide
 theorem dirty_target_low_bits : calleeAddress highTarget = addr 0x30 ∧ highTarget.val ≠ 0x30 := by
-  first | decide | exact ⟨rfl,by decide⟩
+  decide
 def unconditional : WorldPort D₀ LW LW := fun _ _ _ _ _ input => some ⟨[],[],.success input⟩
 def nonzeroArgs : Fin 7 → Word := fun i => if i = 2 then toWord 1 else callArgs i
 theorem static_value_unconfounded : callBuiltin .call TargetMemory.port unconditional before {caller with static:=true} nonzeroArgs = none ∧
-    (callBuiltin .call TargetMemory.port unconditional before caller nonzeroArgs).isSome = true := by
-  first | decide | exact ⟨rfl,rfl⟩
+    (callBuiltin .call TargetMemory.port unconditional before caller nonzeroArgs).isSome = true :=
+  ⟨callBuiltin_static_value _ _ _ _ _ rfl (by decide),rfl⟩
 def wrongInput : Fin 7 → Word := fun i => if i = 3 then toWord 8 else callArgs i
 theorem wrong_input_refused : callBuiltin .call TargetMemory.port (fixture false) before caller wrongInput = none := by
-  first | rfl | decide
+  rfl
 def staticDelegate : WorldPort D₀ LW LW := fun _ kind callee gas frame input =>
   if kind = .delegatecall ∧ callee = addr 0x30 ∧ gas = toWord 100000 ∧ input = [17,34,51] ∧
       frame.static = true ∧ frame.this = addr 0x20 ∧ frame.caller = addr 0x40 ∧ frame.value = toWord 9 then
     some ⟨[],[],.success input⟩ else none
 theorem delegate_parent_static : (callBuiltin .delegatecall TargetMemory.port staticDelegate before {caller with static:=true} shortArgs).map summary =
     some (toWord 1,[17,34,51],callerTrace,some [17,34,255],some (toWord 1,[17,34,51])) := by
-  first | decide | rfl
+  rfl
 end Solidity.Yul.World.CallBuiltinControls

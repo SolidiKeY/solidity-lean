@@ -1,3 +1,4 @@
+import Solidity.Backend.MemoryCopies.AliasBindingInterface
 import Solidity.Backend.MemoryCopies.FixedReferenceMemoryLoop
 import Solidity.Backend.MemoryCopies.StorageMemoryPipeline
 
@@ -314,11 +315,8 @@ private def emptySource : HRef EmptyH EmptyParent := ⟨0,rfl⟩
 private def emptyHeap : Heap EmptyH := (⟨[],rfl⟩,())
 private def emptyBase (_ : Nat) : Fin W := wmod 16
 private def emptyMachine : Machine := {Machine.init with stack := [w[77]], mem := fun address => if address = 0 then w[40] else w[0]}
-private theorem empty_refs {R : RefTy} (reference : HRef EmptyH R) : R = EmptyParent ∧ HEq reference emptySource := by
-  rcases reference with ⟨index,selected⟩
-  cases index with
-  | zero => cases selected; exact ⟨rfl,HEq.rfl⟩
-  | succ index => cases selected
+private theorem empty_refs {R : RefTy} (reference : HRef EmptyH R) : R = EmptyParent ∧ HEq reference emptySource :=
+  singleton_reference reference
 private theorem empty_allocator : Objects.AllocatorRepr emptyHeap emptyBase 8 (wmod 40) emptyMachine := by
   refine ⟨⟨⟨?_,?_,?_⟩,?_,?_,?_⟩,⟨by decide,by decide,rfl,?_⟩,?_⟩
   · intro R reference

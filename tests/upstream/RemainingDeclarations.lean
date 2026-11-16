@@ -1,23 +1,23 @@
 import Solidity.Tools.Upstream
 
-solc_import "../solc/RemainingDeclarations.ast.json" hash 0x5d429fa78f336311 as Imported.Remaining.StaticCodeConstants testing
-solc_import "../solc/RemainingDeclarations.ast.json" hash 0x5d429fa78f336311 as Imported.Remaining.EnumStructFields testing
-solc_import "../solc/RemainingDeclarations.ast.json" hash 0x5d429fa78f336311 as Imported.Remaining.MixedStorageResults testing
-solc_import "../solc/RemainingDeclarations.ast.json" hash 0x5d429fa78f336311 as Imported.Remaining.MixedReturnRefusal testing
-solc_import "../solc/RemainingDeclarationsIR.ast.json" hash 0xf689acee6521ec52 as Imported.RemainingIR.StaticCodeConstants testing
-solc_import "../solc/RemainingDeclarationsIR.ast.json" hash 0xf689acee6521ec52 as Imported.RemainingIR.EnumStructFields testing
-solc_import "../solc/RemainingDeclarationsIR.ast.json" hash 0xf689acee6521ec52 as Imported.RemainingIR.MixedStorageResults testing
-solc_import "../solc/RemainingDeclarationsIR.ast.json" hash 0xf689acee6521ec52 as Imported.RemainingIR.MixedReturnRefusal testing
+solc_import "../solc/RemainingDeclarations.ast.json" hash 0xb5d8d6dbd818c83d as Imported.Remaining.StaticCodeConstants testing
+solc_import "../solc/RemainingDeclarations.ast.json" hash 0xb5d8d6dbd818c83d as Imported.Remaining.EnumStructFields testing
+solc_import "../solc/RemainingDeclarations.ast.json" hash 0xb5d8d6dbd818c83d as Imported.Remaining.MixedStorageResults testing
+solc_import "../solc/RemainingDeclarations.ast.json" hash 0xb5d8d6dbd818c83d as Imported.Remaining.MixedReturnRefusal testing
+solc_import "../solc/RemainingDeclarationsIR.ast.json" hash 0x185cb9050a0faa74 as Imported.RemainingIR.StaticCodeConstants testing
+solc_import "../solc/RemainingDeclarationsIR.ast.json" hash 0x185cb9050a0faa74 as Imported.RemainingIR.EnumStructFields testing
+solc_import "../solc/RemainingDeclarationsIR.ast.json" hash 0x185cb9050a0faa74 as Imported.RemainingIR.MixedStorageResults testing
+solc_import "../solc/RemainingDeclarationsIR.ast.json" hash 0x185cb9050a0faa74 as Imported.RemainingIR.MixedReturnRefusal testing
 
-solc_import "../solc/RemainingDeclarations.ast.json" hash 0x5d429fa78f336311 as Imported.Remaining.EnumIdentity testing
-solc_import "../solc/RemainingDeclarationsIR.ast.json" hash 0xf689acee6521ec52 as Imported.RemainingIR.EnumIdentity testing
+solc_import "../solc/RemainingDeclarations.ast.json" hash 0xb5d8d6dbd818c83d as Imported.Remaining.EnumIdentity testing
+solc_import "../solc/RemainingDeclarationsIR.ast.json" hash 0x185cb9050a0faa74 as Imported.RemainingIR.EnumIdentity testing
 
-solc_import "../solc/RemainingDeclarations.ast.json" hash 0x5d429fa78f336311 as Imported.Remaining.EnumDecodeRefusal testing
-solc_import "../solc/RemainingDeclarationsIR.ast.json" hash 0xf689acee6521ec52 as Imported.RemainingIR.EnumDecodeRefusal testing
+solc_import "../solc/RemainingDeclarations.ast.json" hash 0xb5d8d6dbd818c83d as Imported.Remaining.EnumDecodeRefusal testing
+solc_import "../solc/RemainingDeclarationsIR.ast.json" hash 0x185cb9050a0faa74 as Imported.RemainingIR.EnumDecodeRefusal testing
 
-solc_import "../solc/RemainingDeclarations.ast.json" hash 0x5d429fa78f336311 as Imported.Remaining.EnumInputRefusal testing
+solc_import "../solc/RemainingDeclarations.ast.json" hash 0xb5d8d6dbd818c83d as Imported.Remaining.EnumInputRefusal testing
 
-solc_import "../solc/RemainingDeclarationsIR.ast.json" hash 0xf689acee6521ec52 as Imported.RemainingIR.EnumInputRefusal testing
+solc_import "../solc/RemainingDeclarationsIR.ast.json" hash 0x185cb9050a0faa74 as Imported.RemainingIR.EnumInputRefusal testing
 
 namespace Solidity.Upstream.RemainingDeclarations
 open Solidity Solidity.Frontend Lean

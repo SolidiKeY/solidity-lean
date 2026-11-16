@@ -61,9 +61,11 @@ theorem exhaustion_not_fault (b : Scalar.Word) (m : Evm.Machine) (caller : List 
 theorem pending_refused (locals : Vector Scalar.Word 2) (m final : Evm.Machine)
  (caller : List Evm.Word) (skip : Nat) :
  Evm.run code {m with stack := locals.toList.map coreWord++caller} ≠ .ok final (skip+1) := by
- intro ran
- obtain ⟨_,_,_,zero,_⟩ := arbitrary_model locals m final caller (skip+1) ran
- omega
+ exact CompletionControls.pending_refused (code := code)
+   (initial := {m with stack := locals.toList.map coreWord++caller})
+   (fun actual pending ran => by
+     obtain ⟨_,_,_,done,_⟩ := arbitrary_model locals m actual caller pending ran
+     exact done) final skip
 
 #guard (evalStmt 1 .nil True.intro source words (sourceLocals #v[2,dirty])).isNone
 #guard (SourceLoop.emit (c := root) condition post body 15).isNone

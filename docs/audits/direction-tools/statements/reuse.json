@@ -1,0 +1,185 @@
+{
+  "base": "d4ad633a9624263a59b14fd2c520b9bc602f88f3",
+  "completion_authorization": {
+    "H243": {
+      "question": "Q-STMT-REF-01",
+      "decision": "Find a theorem that looks similar. Before marking a row non-comparable, search for the nearest external compiler theorem. Use ratio=null with the exact reason only when none is similar."
+    },
+    "H244": {
+      "question": "Q-STMT-PROV-01",
+      "decision": "A: accept the frozen inventory; report confirmed-generated, explicitly-handwritten and untraced separately; no claim about historical handwriting totals."
+    }
+  },
+  "integrated_inputs_commit": "cf3baafd2202adf0107c5ae4d2879cd04ff0aec5",
+  "input_sha256": {
+    "docs/audits/direction-tools/census/census.json": "aabe0148297b2a00b9544c3c9234073a99fe50f50ca221e4a47637c20ac7b471",
+    "docs/audits/direction-tools/census/modules-00.json": "a84307d90de0734c04bbde888fab122998d76abeed3305723700b1ffba81766c",
+    "docs/audits/direction-tools/census/modules-01.json": "5789c489955ae98bd457410bf6365e522ea2ec57ca27f951aaa34f5c1f83e08e",
+    "docs/audits/direction-tools/census/modules-02.json": "db3b9a1aab27c1ffe7184152e8e5fbd6137f7cadf8906324988626d47a1342d9",
+    "docs/audits/direction-tools/census/modules-03.json": "6bee7340592dc6be72f9a314dbbf357abd86a892f3a507ba37419c9418df372e",
+    "docs/audits/direction-tools/census/modules-04.json": "69038ccc875e146047bd9a9430f611d82aaf44fa32b7f635aff18ab476645a8c",
+    "docs/audits/direction-tools/census/modules-05.json": "ee89f73900e07da15d952731dda3dde9a5603fc1b82bd3543cd98ee18dcfe212",
+    "docs/audits/direction-tools/census/modules-06.json": "9395cb2c6b5c2fde10d56758d959a73762811528bcf8b8a873c0c8e878aaf762",
+    "docs/audits/direction-tools/census/modules-07.json": "482296efdb211130ef12aa4236711ce3f1e09c525de41bfaa011cd84952e9608",
+    "docs/audits/direction-tools/census/modules-08.json": "b168df0dce43a8b48e6a81a471d65d4c44c16d3b35d01975b1ede71f8f122cb6",
+    "docs/audits/direction-tools/census/modules-09.json": "c74fd7c8919bb47c862b02240f156a178a9814bac4eb084eaecc6fb180daa306",
+    "docs/audits/direction-tools/census/modules-10.json": "863a5164f9e3e5c7a23513139d57d723f60665ea1a88d07a1ce1c26a437e991b",
+    "docs/audits/direction-tools/census/modules-11.json": "13656b471614c34e2a9414c14355638e4ef3c51688c547f71529bbace8a6b120",
+    "docs/audits/direction-tools/census/modules-12.json": "0944565b7147f09ff0f8f17aad4381fc8ded9156ec218730e3bfc7c90c7c2661",
+    "docs/audits/direction-tools/census/modules-13.json": "e40e764453e7d432f5681c83dcdbe3c1b8dcdec9f86712070308516ee5ea562e",
+    "docs/audits/direction-tools/census/modules-14.json": "9dfbb43ca6ddfd94175bd6df3ea30150d303518a23dfcbaafbb883f90083cf86",
+    "docs/audits/direction-tools/census/modules-15.json": "c1b283c302450dc90efacb82d7599190434f7d72501f36463d16c9441119892a",
+    "docs/audits/direction-tools/census/modules-16.json": "3621e8679b32675e822912d66e6187d9ca48e1894830a4f5ed075e9b6908d581",
+    "docs/audits/direction-tools/census/modules-17.json": "98c2b01a9aceaf1db0e7143d74c79d164377407c41540c212188f92c23e86691",
+    "docs/audits/direction-tools/census/modules-18.json": "6e8c7c8c8367358239120b41eadd3df1edcf90920ade84cbb8ede02069877495",
+    "docs/audits/direction-tools/census/modules-19.json": "4475a09c1cc0ac40fa6fb9557050ef89b1dd86284df71e570432f9ef19838a3b",
+    "docs/audits/direction-tools/census/modules-20.json": "85e550c6317906c76145b8b817a5e0a496e392118913ffd94577fa39ccd442bf",
+    "docs/audits/direction-tools/census/modules-21.json": "eda62823efcc13136a1cc45b51888e72336670e7d80112948eb4f897099a07d6",
+    "docs/audits/direction-tools/census/modules-22.json": "7eebc3760cd5a17de81d1288b8073a980f36d43a8324234e7da0b74b3dde8581",
+    "docs/audits/direction-tools/process/generated-paths.json": "edd2c5872a2bcb59206d0f76934bc916efc84c9e0cc3a4effa8fb3f0cf8d273b",
+    "docs/audits/direction-tools/references/boundaries.json": "13a43ff8e92a6c8f93be6d876384ed825d7d756e6e4350806cb30086974f6f88",
+    "docs/audits/direction-tools/references/pair-specs.json": "0eb64788fe6012c0692631447c3822178c1ec635b56f9d686fe747279728b8e6",
+    "docs/audits/direction-tools/references/pins.json": "5fdb343a3f15a008fb3cc6b813f21be71230d7fc49ca39c6540015bee27a1af8"
+  },
+  "method": "Reuse committed census/reference/process artifacts. Counts remain lexical; no new corpus, reference checkout, proof or timing run.",
+  "selected_module_census": [
+    {
+      "path": "Solidity/Calculus/Closers.lean",
+      "category": "unmarked",
+      "lines": 234,
+      "generated_lines": 0,
+      "imports_in": 109,
+      "declarations": {
+        "def": 8,
+        "theorem": 2
+      }
+    },
+    {
+      "path": "Solidity/Source/SemanticsExamples.lean",
+      "category": "unmarked",
+      "lines": 522,
+      "generated_lines": 0,
+      "imports_in": 69,
+      "declarations": {
+        "def": 78,
+        "theorem": 33
+      }
+    },
+    {
+      "path": "Solidity/Theorems.lean",
+      "category": "unmarked",
+      "lines": 360,
+      "generated_lines": 0,
+      "imports_in": 9,
+      "declarations": {
+        "abbrev": 11,
+        "def": 1,
+        "theorem": 21
+      }
+    }
+  ],
+  "untraced_reconciliation": {
+    "total": 157,
+    "within_census": 131,
+    "census_categories": {
+      "import_only_unknown": 1,
+      "unmarked": 130
+    },
+    "census_marked_generated_lines": 0,
+    "outside_census_count": 26,
+    "outside_census_paths": [
+      "Bridge/SolidityBridge/PrecompileAgreement/Bytes.lean",
+      "Bridge/SolidityBridge/PrecompileAgreement/Controls.lean",
+      "Bridge/SolidityBridge/PrecompileAgreement/Gas.lean",
+      "Bridge/SolidityBridge/PrecompileAgreement/Header.lean",
+      "Bridge/SolidityBridge/PrecompileAgreement/Identity.lean",
+      "Bridge/SolidityBridge/RoadmapV15/P10/CallInAgreement.lean",
+      "Bridge/SolidityBridge/RoadmapV15/P10/DecoderAgreement.lean",
+      "Bridge/SolidityBridge/RoadmapV15/P10/DecoderAgreementControls.lean",
+      "Bridge/SolidityBridge/RoadmapV15/P10/InstructionSelectionAgreement.lean",
+      "Bridge/SolidityBridge/RoadmapV15/P10/PushDecoderAgreement.lean",
+      "Bridge/SolidityBridge/RoadmapV15/P10/StackSelectionAgreement.lean",
+      "Bridge/tests/precompile-agreement/Acceptance.lean",
+      "Bridge/tests/precompile-agreement/ActualAxioms.lean",
+      "Bridge/tests/precompile-agreement/AllDeclarations.lean",
+      "Bridge/tests/precompile-agreement/Axioms.lean",
+      "Bridge/tests/precompile-agreement/BoundaryVectors.lean",
+      "Bridge/tests/precompile-agreement/CacheRequest.lean",
+      "Bridge/tests/precompile-agreement/H70BridgeProbe.lean",
+      "Bridge/tests/precompile-agreement/NativeModexpProbe.lean",
+      "Bridge/tests/precompile-agreement/TrustProbe.lean",
+      "tests/h28-sol/automation-benchmark/ChainControls.lean",
+      "tests/h28-sol/automation-benchmark/ChainRefusalBaseline.lean",
+      "tests/h28-sol/automation-benchmark/ChainRefusalCandidate.lean",
+      "tests/h55/v08-agreements/Agreements.lean",
+      "tests/h62/item1/infer-helpers/SharedAgreement.lean",
+      "tests/h62/item2/audit-g25-scalar-lowering/ScalarCastChainsWitnesses.lean"
+    ],
+    "boundary": "Census unmarked/import-only status supplies no historical origin certificate. Outside-census files are outside Solidity/, not omitted Solidity modules."
+  },
+  "reference_reconciliation": {
+    "pins": [
+      {
+        "reference": "CompCert",
+        "statement_pin": "2685140bf72c959446981fb99b5e44a8975021bc",
+        "merged_reference_pin": "2685140bf72c959446981fb99b5e44a8975021bc",
+        "same_revision": true
+      },
+      {
+        "reference": "CakeML",
+        "statement_pin": "58720ae1c69f86a79fec68749b0089ca6a3bb473",
+        "merged_reference_pin": "b3e6ea34ca1aed91a57703a30549260ce6f6448e",
+        "same_revision": false
+      },
+      {
+        "reference": "solc",
+        "statement_pin": "1835d247de183f23e7b0e2bc4a50732af525b77c",
+        "merged_reference_pin": "403c39f86c3c0c9d4779b97892a3661016b45455",
+        "same_revision": false
+      }
+    ],
+    "direct_selected_module_pairs": 0,
+    "pairs": [],
+    "missing_counterparts": [
+      {
+        "unit": "general solc compiler/lowering correctness proof",
+        "reason": "solc implements the compiler; selected production implementation files supply no correctness theorem counterpart.",
+        "searched": [
+          "libsolidity",
+          "libyul"
+        ]
+      },
+      {
+        "unit": "Solidity dynamic-logic soundness versus solc",
+        "reason": "Implementation compiler has no dynamic-logic soundness counterpart.",
+        "searched": [
+          "libsolidity"
+        ]
+      },
+      {
+        "unit": "WP facade",
+        "reason": "No like-for-like local WP component established; removed Sound.lean/WP.thy comparison.",
+        "searched": [
+          "Solidity/Calculus/Sound.lean",
+          "thys/Isabelle-Solidity/WP.thy"
+        ]
+      }
+    ],
+    "boundary": "File-level pairs are not theorem-level analogues. Different CakeML/solc revisions must not be pooled with statement-specific measurements. The other reference lanes H242 completion permission is not adopted as a scope waiver here."
+  },
+  "handwritten_exception_reconciliation": [
+    {
+      "path": "Solidity/Corpus/Basic.lean",
+      "statement_category": "handwritten_explicit_exception",
+      "process_category": "generated_corpus",
+      "resolution": "Retain the explicit handwritten exception documented by pinned scripts/check-corpus.sh; do not overwrite with a broader directory classification."
+    },
+    {
+      "path": "Solidity/Corpus/Imported.lean",
+      "statement_category": "handwritten_explicit_exception",
+      "process_category": "generated_corpus",
+      "resolution": "Retain the explicit handwritten exception documented by pinned scripts/check-corpus.sh; do not overwrite with a broader directory classification."
+    }
+  ],
+  "conclusion": "Integrated artifacts corroborate selected-module counts but supply no further direct selected-module pair or historical producer records. H243 authorizes explicit null ratios for unmatched units; H244 accepts separately reported generated, handwritten and untraced categories. Neither implies additional measurement or a historical origin certificate."
+}

@@ -15,8 +15,8 @@ def proc(pid):
   x=pathlib.Path('/proc/'+str(pid)+'/stat').read_text();f=x[x.rfind(')')+2:].split();return {'pid':pid,'ppid':int(f[1]),'birth':f[19],'rssBytes':int(f[21])*os.sysconf('SC_PAGE_SIZE'),'vsizeBytes':int(f[20]),'threads':int(f[17]),'name':x[x.find('(')+1:x.rfind(')')],'state':f[0]}
  except (FileNotFoundError,ProcessLookupError):return None
 initial=[r for p in pathlib.Path('/proc').iterdir() if p.name.isdigit() and (r:=proc(int(p.name))) and r['name'] in ['lean','lake','dafny','dotnet','code'] and r['state']!='Z']
-if initial:raise RuntimeError('Another Lean/Lake process already running; no competing build admitted: '+str(initial))
-admission={'time':time.time(),**memory_state()};admission['allowed']=resources_allowed(admission)
+admission={'time':time.time(),**memory_state()};admission['allowed']=resources_allowed(admission) and not initial
+if initial:admission['competingProcesses']=initial
 (out/'resource-preflight.json').write_text(json.dumps(admission,indent=2)+'\n')
 if not admission['allowed']:
  result={'command':['bash',str(args.script.resolve())],'exit':None,'supervisorExit':1,'admitted':False,'resourceStop':{'reason':'admission denied',**admission},'ownedSurvivors':[]}

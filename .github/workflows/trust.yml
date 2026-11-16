@@ -1,0 +1,68 @@
+name: trust
+
+on:
+  pull_request:
+  push:
+    branches: [master, main]
+  schedule:
+    # GitHub runs scheduled workflows only from the default branch.
+    - cron: '23 3 * * *'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: trust-${{ github.ref }}
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
+
+jobs:
+  public-surface:
+    runs-on: ubuntu-latest
+    timeout-minutes: 180
+    env:
+      LEAN_NUM_THREADS: '1'
+      LAKE_CACHE_DIR: ${{ github.workspace }}/.lake/refactor-cache/trust-cache
+    steps:
+      - uses: actions/checkout@v5
+        with:
+          fetch-depth: 0
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - uses: leanprover/lean-action@v1
+        with:
+          build: 'false'
+          use-github-cache: 'false'
+          use-mathlib-cache: 'false'
+          test: 'false'
+          lint: 'false'
+      - run: bash scripts/ci/fetch-lake-cache.sh
+      - name: Test trust-audit controls
+        run: node --test scripts/trust/trust-*.test.mjs
+      - name: Guard native proof reduction
+        run: bash scripts/check-trust.sh
+      - name: Measure and ratchet statement-type closure
+        env:
+          # origin/master already names the pushed commit on push events.
+          # Compare the actual event predecessor/PR target, never that same tip.
+          TRUST_BASE_REF: ${{ github.event_name == 'push' && github.event.before || github.event_name == 'pull_request' && github.event.pull_request.base.sha || '' }}
+        run: node scripts/trust/trust-closure.mjs --source-ceilings
+      - name: Require every compiled twin's logical equality link
+        run: node scripts/trust/trust-implemented-by.mjs
+      - name: Build axiom-audit imports serially
+        if: ${{ !cancelled() }}
+        run: lake build Solidity SolidityExamples SoliditySlowExamples
+      - name: Existing transitive axiom and pin audits
+        if: ${{ !cancelled() }}
+        run: |
+          lake lean scripts/AxiomAudit.lean -- --tstack=131072
+          node scripts/check-axiom-pins.mjs
+      - name: Fresh public kernel replay
+        if: ${{ !cancelled() && (github.event_name == 'schedule' || github.event_name == 'workflow_dispatch') }}
+        # The pinned checker is outside the core and uses the pinned Lean kernel.
+        # Installation is confined to this approved, revision-pinned integration;
+        # the runner verifies source revision and toolchain before building.
+        env:
+          TRUST_INSTALL_CHECKER: '1'
+        run: bash scripts/trust/trust-recheck.sh

@@ -9,7 +9,8 @@ The versioned pair (H57, H98) for `Main.compiler_correct` and
 under their premises, with the payment-revert outcome gone:
 `compiler_correct_v2`, `compiler_checked_v2`, and the migration lemmas
 `compiler_correct_of_v2`, `compiler_checked_of_v2` giving the frozen
-statements back. The frozen headlines are unchanged. This is the only module
+statements back. `compiler_correct` now carries V2; `compiler_checked` remains
+frozen. This is the only payments headline module
 that imports `Solidity.Theorems`; consumers outside `Main` should use
 `Backend/Payments/Versioned.lean` instead.
 -/
@@ -33,10 +34,10 @@ theorem compiler_correct_v2 {P : Prog C Γ Γ'} {F : Frag Γ} {F' : Frag Γ'} {�
       ((Prog.run σ P = .error .revert ∨
           (Prog.asserts P = true ∧ Prog.run σ P = .error .panic)) ∧ (⟦P⟧b, mc) ↯ₘ) ∨
       (Prog.run σ P = .error .diverge ∧ run (⟦P⟧b) mc = .fault) :=
-  (compile_correct_v2 hP hm hL).imp (fun ⟨o, mc', h, h', _, hs⟩ => ⟨o, mc', h, h', hs⟩) id
+  compiler_correct hP hm hL
 
 open Evm Evm in
-/-- Migration: the frozen `compiler_correct` statement, from V2. -/
+/-- Migration: the former four-outcome `compiler_correct` statement, from V2. -/
 theorem compiler_correct_of_v2 {P : Prog C Γ Γ'} {F : Frag Γ} {F' : Frag Γ'} {σ : State C Γ}
     {mc : Machine} {L b : Nat}
     (hP : F ⊩ P ⊣ F') (hm : σ ≈[C, L, b, F] mc) (hL : L + Prog.pushes P ≤ Lmax) :

@@ -15,7 +15,6 @@ theorem fits (pipeline : Pipeline) : MemoryAgreement.Fits (carrier pipeline) res
   intro k high
   exact if_neg (by change 2048≤k at high;omega)
 theorem reserved : ReservedOK residual mixedPlacement.free := by
-  first | omega | decide | skip
   constructor
   · have same := mload_congr residual mixedResidual 64 (fun i=>if_pos (by have small:=i.isLt;omega))
     exact (congrArg Fin.val same).trans mixed_reserved_initial.1
@@ -36,7 +35,6 @@ def bad (pipeline : Pipeline) := RawPhysicalCallAccess.reached (initial pipeline
 theorem source_unchanged (pipeline : Pipeline) :
     FrameHeap.writeback mixedState mixedPlacement mixedPlacement (retainInitial _ _) (bad pipeline)=
       .ok (some (.ok (),mixedState)) := by
-  first | omega | decide | skip
   exact (HeapCallOutput.residual_unchanged mixedHeap.ty mixedState mixedPlacement mixedPlacement (retainInitial _ _)
     residual mixed_actual_MemOK generated_mixed_types_supported (carrier pipeline) (fits pipeline) (room pipeline)
     (input pipeline) (badOutput pipeline) [1] (by
@@ -51,13 +49,11 @@ theorem source_unchanged (pipeline : Pipeline) :
       omega)).1
 
 theorem bad_byte (pipeline : Pipeline) : frameBytes (bad pipeline) 96=1 := by
-  first | omega | decide | skip
   dsimp only [bad]
   rw [RawPhysicalCallAccess.image,RawPhysicalCallOutput.image]
   exact Environment.writeBytes_at [1] 96 0 _ (by decide)
 
 theorem not_reserved (pipeline : Pipeline) : ¬ReservedOK (frameBytes (bad pipeline)) mixedPlacement.free := by
-  first | omega | decide | skip
   intro claimed
   have zero := claimed.2 ⟨0,by decide⟩
   change frameBytes (bad pipeline) 96=0 at zero
@@ -68,14 +64,12 @@ def goodOutput (pipeline : Pipeline) : ByteSpan (initial pipeline).capacity :=
   ⟨lenU 1800 (by decide),lenU 16 (by decide),Or.inr (by change 1800+16≤2048;decide)⟩
 theorem safe_preserves (pipeline : Pipeline) :
     ReservedOK (frameBytes (RawPhysicalCallAccess.reached (initial pipeline) (input pipeline) (goodOutput pipeline) [17,255]))
-      mixedPlacement.free := by
-  first | omega | decide | skip
-  exact preserve_interval _ _ _ _ _ (initial_reserved pipeline) (Or.inr (Or.inr (by change 128≤1800;decide)))
+      mixedPlacement.free :=
+  preserve_interval _ _ _ _ _ (initial_reserved pipeline) (Or.inr (Or.inr (by change 128≤1800;decide)))
 
 /-- The same requested bad span is harmless for empty returndata. -/
 theorem empty_preserves (pipeline : Pipeline) :
     ReservedOK (frameBytes (RawPhysicalCallAccess.reached (initial pipeline) (input pipeline) (badOutput pipeline) []))
-      mixedPlacement.free := by
-  first | omega | decide | skip
-  exact preserve_interval _ _ _ _ _ (initial_reserved pipeline) (Or.inl rfl)
+      mixedPlacement.free :=
+  preserve_interval _ _ _ _ _ (initial_reserved pipeline) (Or.inl rfl)
 end Solidity.Yul.Adapters.HeapOutputReserved.Controls

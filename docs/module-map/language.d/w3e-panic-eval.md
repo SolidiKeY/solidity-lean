@@ -1,0 +1,2 @@
+| `Semantics/Panic/Eval.lean` | Panic-carrying evaluation of typed intrinsic producers, arithmetic and bounds helpers, mutually recursive paths and expressions, and assignment sources; retained producer operands and origin proofs, exact site codes, and local V1 projection laws. |
+| `Examples/Panic/Eval.lean` | Kernel panic-evaluation boundary controls for all nine origin codes, signed overflow, short-circuiting, local V1 behavior, and the exported evaluator API. |

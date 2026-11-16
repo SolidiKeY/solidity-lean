@@ -1,0 +1,298 @@
+{
+  "base": "d6fd95f0886775d7c286813fa9b993a40ba7a777",
+  "prior_work": {
+    "docs/audits/architecture-tools/": {
+      "tracked_files": 9,
+      "files": [
+        "docs/audits/architecture-tools/core_closure.py",
+        "docs/audits/architecture-tools/doc_names.py",
+        "docs/audits/architecture-tools/dup_decls.py",
+        "docs/audits/architecture-tools/dup_general.py",
+        "docs/audits/architecture-tools/imports.py",
+        "docs/audits/architecture-tools/near_files.py",
+        "docs/audits/architecture-tools/olean_sizes.py",
+        "docs/audits/architecture-tools/timing-sample.tsv",
+        "docs/audits/architecture-tools/unreferenced.py"
+      ],
+      "boundary": "Presence only; historical outputs are not new execution results."
+    },
+    "docs/audits/proof-coverage-tools/": {
+      "tracked_files": 2,
+      "files": [
+        "docs/audits/proof-coverage-tools/statement-sample.txt",
+        "docs/audits/proof-coverage-tools/theorem_census.py"
+      ],
+      "boundary": "Presence only; historical outputs are not new execution results."
+    },
+    "docs/audits/build-speed": {
+      "tracked_files": 7,
+      "files": [
+        "docs/audits/build-speed-tools/churn.py",
+        "docs/audits/build-speed-tools/import_graph.py",
+        "docs/audits/build-speed-tools/measure.sh",
+        "docs/audits/build-speed-tools/pins.py",
+        "docs/audits/build-speed-tools/profile.sh",
+        "docs/audits/build-speed-tools/scan.py",
+        "docs/audits/build-speed.md"
+      ],
+      "boundary": "Presence only; historical outputs are not new execution results."
+    },
+    "scripts/build-measure": {
+      "tracked_files": 2,
+      "files": [
+        "scripts/build-measure-report.py",
+        "scripts/build-measure.py"
+      ],
+      "boundary": "Presence only; historical outputs are not new execution results."
+    },
+    "scripts/differential/": {
+      "tracked_files": 0,
+      "files": [],
+      "boundary": "Presence only; historical outputs are not new execution results."
+    },
+    "scripts/bench/": {
+      "tracked_files": 0,
+      "files": [],
+      "boundary": "Presence only; historical outputs are not new execution results."
+    },
+    "scripts/h62/item3/g52-differential/": {
+      "tracked_files": 20,
+      "files": [
+        "scripts/h62/item3/g52-differential/.gitignore",
+        "scripts/h62/item3/g52-differential/archive_census.py",
+        "scripts/h62/item3/g52-differential/blockchain_adapter.mjs",
+        "scripts/h62/item3/g52-differential/bootstrap.py",
+        "scripts/h62/item3/g52-differential/eest_export.py",
+        "scripts/h62/item3/g52-differential/eest_observation.mjs",
+        "scripts/h62/item3/g52-differential/eest_reference.mjs",
+        "scripts/h62/item3/g52-differential/eest_rejection.mjs",
+        "scripts/h62/item3/g52-differential/engine_execution_coverage.py",
+        "scripts/h62/item3/g52-differential/engine_input_transactions.mjs",
+        "scripts/h62/item3/g52-differential/engine_payload_reference.mjs",
+        "scripts/h62/item3/g52-differential/engine_protocol_inventory.py",
+        "scripts/h62/item3/g52-differential/engine_x_allocation.mjs",
+        "scripts/h62/item3/g52-differential/host_resource_guard.mjs",
+        "scripts/h62/item3/g52-differential/pipeline.py",
+        "scripts/h62/item3/g52-differential/reference.mjs",
+        "scripts/h62/item3/g52-differential/serial_semantics.py",
+        "scripts/h62/item3/g52-differential/system_request_reproducer.mjs",
+        "scripts/h62/item3/g52-differential/transaction_admission.mjs",
+        "scripts/h62/item3/g52-differential/typed.mjs"
+      ],
+      "boundary": "Presence only; historical outputs are not new execution results."
+    }
+  },
+  "candidate_drift": [
+    {
+      "id": "M01",
+      "path": "Solidity/Semantics/Ops.lean",
+      "line": 53,
+      "anchor_matches": true
+    },
+    {
+      "id": "M02",
+      "path": "Solidity/Semantics/Ops.lean",
+      "line": 54,
+      "anchor_matches": true
+    },
+    {
+      "id": "M03",
+      "path": "Solidity/Semantics/Ops.lean",
+      "line": 55,
+      "anchor_matches": true
+    },
+    {
+      "id": "M04",
+      "path": "Solidity/Semantics/Ops.lean",
+      "line": 56,
+      "anchor_matches": true
+    },
+    {
+      "id": "M05",
+      "path": "Solidity/Semantics/Ops.lean",
+      "line": 57,
+      "anchor_matches": true
+    },
+    {
+      "id": "M06",
+      "path": "Solidity/Semantics/Ops.lean",
+      "line": 58,
+      "anchor_matches": true
+    },
+    {
+      "id": "M07",
+      "path": "Solidity/Semantics/Ops.lean",
+      "line": 59,
+      "anchor_matches": true
+    },
+    {
+      "id": "M08",
+      "path": "Solidity/Semantics/Ops.lean",
+      "line": 60,
+      "anchor_matches": true
+    },
+    {
+      "id": "M09",
+      "path": "Solidity/Semantics/Ops.lean",
+      "line": 61,
+      "anchor_matches": true
+    },
+    {
+      "id": "M10",
+      "path": "Solidity/Semantics/Ops.lean",
+      "line": 62,
+      "anchor_matches": true
+    },
+    {
+      "id": "M11",
+      "path": "Solidity/Semantics/Ops.lean",
+      "line": 64,
+      "anchor_matches": true
+    },
+    {
+      "id": "M12",
+      "path": "Solidity/Semantics/Ops.lean",
+      "line": 64,
+      "anchor_matches": true
+    },
+    {
+      "id": "M13",
+      "path": "Solidity/Semantics/Ops.lean",
+      "line": 65,
+      "anchor_matches": true
+    },
+    {
+      "id": "M14",
+      "path": "Solidity/Semantics/Ops.lean",
+      "line": 66,
+      "anchor_matches": true
+    },
+    {
+      "id": "M15",
+      "path": "Solidity/Semantics/Ops.lean",
+      "line": 67,
+      "anchor_matches": true
+    },
+    {
+      "id": "M16",
+      "path": "Solidity/Semantics/Ops.lean",
+      "line": 68,
+      "anchor_matches": true
+    },
+    {
+      "id": "M17",
+      "path": "Solidity/Semantics/Ops.lean",
+      "line": 91,
+      "anchor_matches": true
+    },
+    {
+      "id": "M18",
+      "path": "Solidity/Semantics/Ops.lean",
+      "line": 92,
+      "anchor_matches": true
+    },
+    {
+      "id": "M19",
+      "path": "Solidity/Semantics/Ops.lean",
+      "line": 93,
+      "anchor_matches": true
+    },
+    {
+      "id": "M20",
+      "path": "Solidity/Semantics/Ops.lean",
+      "line": 94,
+      "anchor_matches": true
+    },
+    {
+      "id": "M21",
+      "path": "Solidity/Semantics/Ops.lean",
+      "line": 105,
+      "anchor_matches": true
+    },
+    {
+      "id": "M22",
+      "path": "Solidity/Semantics/Ops.lean",
+      "line": 106,
+      "anchor_matches": true
+    },
+    {
+      "id": "M23",
+      "path": "Solidity/Semantics/Ops.lean",
+      "line": 125,
+      "anchor_matches": true
+    },
+    {
+      "id": "M24",
+      "path": "Solidity/Semantics/Ops.lean",
+      "line": 126,
+      "anchor_matches": true
+    },
+    {
+      "id": "M25",
+      "path": "Solidity/Semantics/Ops.lean",
+      "line": 131,
+      "anchor_matches": true
+    },
+    {
+      "id": "M26",
+      "path": "Solidity/Semantics/Ops.lean",
+      "line": 140,
+      "anchor_matches": true
+    },
+    {
+      "id": "M27",
+      "path": "Solidity/Semantics/Ops.lean",
+      "line": 141,
+      "anchor_matches": true
+    },
+    {
+      "id": "M28",
+      "path": "Solidity/Semantics/Ops.lean",
+      "line": 142,
+      "anchor_matches": true
+    },
+    {
+      "id": "M29",
+      "path": "Solidity/Semantics/Ops.lean",
+      "line": 145,
+      "anchor_matches": true
+    },
+    {
+      "id": "M30",
+      "path": "Solidity/Semantics/Ops.lean",
+      "line": 147,
+      "anchor_matches": true
+    },
+    {
+      "id": "M31",
+      "path": "Solidity/Calculus/Closers.lean",
+      "line": 207,
+      "anchor_matches": true
+    },
+    {
+      "id": "M32",
+      "path": "Solidity/Calculus/Closers.lean",
+      "line": 213,
+      "anchor_matches": true
+    }
+  ],
+  "sources": [
+    {
+      "path": "docs/audits/direction.md",
+      "sha256": "df6b110530bbb332d4689f3be9ebc6bf3d09616a0a9085a5da8e4d3791d36a9f"
+    },
+    {
+      "path": "docs/audits/direction-tools/mutation/summary.json",
+      "sha256": "530b8cb4f30ec923eb3684ae477903cad76beadede89f2eebfd4b97394a15ffb"
+    },
+    {
+      "path": "docs/audits/architecture-tools/timing-sample.tsv",
+      "sha256": "3f8463128ba2f8d99d837ae55b8b73e3ae027be88edea390c0fa68622b96d796"
+    },
+    {
+      "path": "docs/feature-work/h62-3-g52-differential.md",
+      "sha256": "11ef44f57d9f36c850b5788d90693b81ebb4b725961ea7e02c36d45b37ce3619"
+    }
+  ],
+  "decision": "Reuse the existing static candidates only after exact anchor checks. Historical conformance/timings do not execute these Lean mutations and are excluded from mutation score."
+}

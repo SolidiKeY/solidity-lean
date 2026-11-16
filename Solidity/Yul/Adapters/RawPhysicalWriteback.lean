@@ -19,7 +19,6 @@ theorem list_unchanged (base : Nat) (state : RawFrame.State ctx)
     (cells : List (WordCell (localExternalTypes ctx))) (memory : Views.ByteView)
     (reads : ∀ cell∈cells,Environment.readMemory memory (offset base cell) 32=Source.wordBytes (RawFrame.view state cell)) :
     encodeList base state cells memory=memory := by
-  first | (simp only;done) | decide | omega | rfl | skip
   induction cells with
   | nil => rfl
   | cons cell rest ih =>
@@ -32,7 +31,6 @@ theorem list_unchanged (base : Nat) (state : RawFrame.State ctx)
 
 theorem idempotent (base : Nat) (state : RawFrame.State ctx) (memory : Views.ByteView) :
     encode base state (encode base state memory)=encode base state memory := by
-  first | (simp only;done) | decide | omega | rfl | skip
   apply list_unchanged
   intro cell member
   exact read_member base state _ memory cell (allWordCells_complete cell)
@@ -40,7 +38,6 @@ theorem idempotent (base : Nat) (state : RawFrame.State ctx) (memory : Views.Byt
 theorem encode_view_congr (base : Nat) (one two : RawFrame.State ctx)
     (same : RawFrame.view one=RawFrame.view two) (cells : List (WordCell (localExternalTypes ctx)))
     (memory : Views.ByteView) : encodeList base one cells memory=encodeList base two cells memory := by
-  first | (simp only;done) | decide | omega | rfl | skip
   induction cells generalizing memory with
   | nil => rfl
   | cons cell rest ih =>
@@ -51,7 +48,6 @@ theorem encode_view_congr (base : Nat) (one two : RawFrame.State ctx)
 padding bytes. No caller-supplied inverse, coverage or output view law. -/
 theorem unchanged (base : Nat) (state : RawFrame.State ctx) (memory : Views.ByteView) :
     encode base (decode base state (encode base state memory)) (encode base state memory)=encode base state memory := by
-  first | (simp only;done) | decide | omega | rfl | skip
   have same := view_roundtrip base state memory
   exact (encode_view_congr base _ state same _ _).trans (idempotent base state memory)
 
@@ -61,7 +57,6 @@ theorem frame_unchanged {C : Contract} {Γ : Ctx} (base : Nat) (state : RawFrame
     (image : FrameMem C Γ) (room : base+32*wordCellCount (localExternalTypes ctx)≤image.highWaterWords*32) :
     frameOf base (decode base state (frameBytes (frameOf base state image room)))
       (frameOf base state image room) room=frameOf base state image room := by
-  first | (simp only;done) | decide | omega | rfl | skip
   apply MemoryAgreement.unchanged
   rw [frame_bytes base state image room]
   exact unchanged base state (frameBytes image)

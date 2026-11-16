@@ -1,5 +1,6 @@
 import Solidity.Yul.Views.MemberDynamicReadControls
 import Solidity.Yul.Views.MemberStoragePaths
+import Solidity.Yul.Views.GenericFlow.FollowingLaws
 
 namespace Solidity.Yul.Views.Controls
 
@@ -56,19 +57,21 @@ theorem md_dirty_canonical_none : finiteAccountWrite? (T := mdEnv.lay) account
   | none => rfl
   | some op => have bad := md_dirty_canonical_false; rw [found] at bad; cases bad
 
-theorem md_dirty_prefix_none : mdDirty.following? rfl 4 4 = none := by
+/-- Specialize the shared decoder-failure law before supplying a concrete plan. -/
+private theorem member_following_none {E ds d active Γ F layout fixed written value s r}
+    (p : @MemberOwnershipPlan E ds d active Γ F layout fixed written value s r)
+    (static : F.static = false) (q v : Roadmap.Word)
+    (missing : finiteAccountWrite? (T := E.lay) F.this
+      (layout.snapshot fixed (saveSlot p.nextRaw q v)) (saveSlot p.nextRaw q v) = none) :
+    p.following? static q v = none := by
   unfold MemberOwnershipPlan.following?
-  split
-  · have bad : finiteAccountWrite? (T := mdEnv.lay) account (mdLayout.snapshot mdFixed (saveSlot mdDirty.nextRaw 4 4)) (saveSlot mdDirty.nextRaw 4 4) = none := by
-      rw [mdDirty_next]
-      exact md_dirty_canonical_none
-    dsimp only
-    split
-    · rfl
-    · rename_i op found
-      have impossible : none = some op := bad.symm.trans found
-      cases impossible
-  · rfl
+  exact GenericFlow.Following.none_of_write_none _ missing
+
+theorem md_dirty_prefix_none : mdDirty.following? rfl 4 4 = none := by
+  have bad : finiteAccountWrite? (T := mdEnv.lay) account (mdLayout.snapshot mdFixed (saveSlot mdDirty.nextRaw 4 4)) (saveSlot mdDirty.nextRaw 4 4) = none := by
+    rw [mdDirty_next]
+    exact md_dirty_canonical_none
+  exact member_following_none mdDirty rfl 4 4 bad
 
 theorem md_dirty_fresh_none : prepareMemberOwnership? packedStepFrame mdLayout mdFixed 4 4 mdDirty.step.1.2 mdDirty.step.2 = none :=
   (mdDirty.following_fresh rfl 4 4).symm.trans md_dirty_prefix_none

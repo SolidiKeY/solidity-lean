@@ -32,7 +32,6 @@ theorem raw_words (pipeline : Pipeline) :
     RawFrame.view (decode 33 dirty (frameBytes (reached pipeline))) flag=word (255*2^248+2) ∧
     RawFrame.view (decode 33 dirty (frameBytes (reached pipeline))) small=word 257 ∧
     RawFrame.view (decode 33 dirty (frameBytes (reached pipeline))) selector=word (2^255+85) := by
-  first | omega | decide | skip
   rw [(whole_and_target pipeline []).2.1]
   refine ⟨?_,rfl,rfl⟩
   exact (RawFrame.read_write dirty flag _).trans high_byte_numeric
@@ -40,7 +39,6 @@ theorem raw_words (pipeline : Pipeline) :
 theorem source_fields : updated.clean=dirty.clean ∧ updated.world=dirty.world := ⟨rfl,rfl⟩
 
 theorem raw_padding (pipeline : Pipeline) : frameBytes (reached pipeline) 191=0xa5 := by
-  first | omega | decide | skip
   dsimp only [reached]
   rw [P6ByteMemory.store8_view]
   change saveByte (frameBytes (stored pipeline)) 33 0xff 191=0xa5
@@ -49,8 +47,7 @@ theorem raw_padding (pipeline : Pipeline) : frameBytes (reached pipeline) 191=0x
 
 theorem endian_negative : wordAfter (word 2) index 0xff≠wordAfter (word 2) ⟨31,by decide⟩ 0xff := by decide
 
-theorem no_byte32 : ¬∃ i : Fin 32,i.val=32 := by
-  first | (simp only;done) | decide | omega | rfl
+theorem no_byte32 : ¬∃ i : Fin 32,i.val=32 := by decide
 
 /-- MSTORE8 input truncation does not replace the raw word with255. -/
 theorem no_word_cleaning : wordAfter (word 2) index 0xff≠word 255 := by decide

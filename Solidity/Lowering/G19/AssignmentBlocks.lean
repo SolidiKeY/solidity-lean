@@ -47,7 +47,7 @@ theorem source_items_run {E : Source.Env} {Γ : Source.RCtx}
   | nil => rfl
   | cons step rest ih =>
     rcases step with ⟨dest,donor⟩
-    have evalRun : Source.evalE G F (fuel+rest.length+2) (.assign (.local dest) (.local donor)) (plan := none) s =
+    have evalRun : Source.evalE G F (fuel+rest.length+2) (.assign (.local dest) (.local donor)) (plan := none) (calldataKnown := true) s =
         (.ok (.val (s.1.get donor)),(s.1.set dest (s.1.get donor),s.2)) :=
       source_assign_local_run G F (fuel+rest.length) s dest donor _ rfl
     have sub : (Source.EM.sub s.1 (Source.evalE G F (fuel+rest.length+2)

@@ -1,8 +1,6 @@
 import Solidity.Frontend.Admission.ProgramObservations
 
-/-! Typed roots of the actual carried Program fields. This inventories finite
-rosters, not dynamic dispatch or semantic reachability outside those rosters.
-No source program, frame, evaluator or profile is replaced. -/
+/-! Typed roots of the actual carried Program fields. This inventories finite rosters, not dynamic dispatch or semantic reachability outside those rosters. No source program, frame, evaluator or profile is replaced. -/
 namespace Solidity.Frontend.Admission
 open Solidity.Source
 
@@ -64,8 +62,7 @@ theorem programRoots_observations {E : Env} (P : Program E) :
   simp only [programRoots, programObservations, List.flatMap_append,
     List.flatMap_assoc, hd, hc]
 
-/-- Exact observation-admission proposition, proved below.
-This equivalence classifies observations, not all source features. -/
+/-- Exact observation-admission proposition, proved below. This equivalence classifies observations, not all source features. -/
 abbrev RootAdmissionEquivalence {E : Env} (P : Program E) : Prop :=
   (programObservations P).all ObservationSite.allowed = true ↔
     ∀ r : ProgramRoot P, r.Occurs → ∀ site ∈ r.observations, site.allowed = true

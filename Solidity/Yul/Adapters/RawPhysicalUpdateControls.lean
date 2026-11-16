@@ -28,14 +28,12 @@ theorem actual_word_bits (pipeline : Pipeline) :
     RawFrame.view (decode 33 dirty (frameBytes (reached pipeline))) flag=word 2 ∧
     RawFrame.view (decode 33 dirty (frameBytes (reached pipeline))) address=word (2^256-1) ∧
     RawFrame.view (decode 33 dirty (frameBytes (reached pipeline))) selector=word (2^255+85) := by
-  first | omega | decide | skip
   rw [(whole_and_target pipeline []).2.1]
   exact ⟨RawFrame.read_write dirty small value,rfl,rfl,rfl⟩
 
 theorem source_carriers : updated.clean=dirty.clean ∧ updated.world=dirty.world := ⟨rfl,rfl⟩
 
 theorem padding_kept (pipeline : Pipeline) : frameBytes (reached pipeline) 191=0xa5 := by
-  first | omega | decide | skip
   dsimp only [reached]
   rw [RawPhysical.store_image]
   have outside : 65+32≤191 := by decide
@@ -47,13 +45,12 @@ theorem padding_kept (pipeline : Pipeline) : frameBytes (reached pipeline) 191=0
 
 /-- Two fields of one external-function local have different actual regions. -/
 theorem function_fields_separate : offset 33 address+32≤offset 33 selector := by
-  first | (simp only;done) | decide | omega | rfl
+  decide
 
 def wrongArea (pipeline : Pipeline) : WordSpan (stored pipeline).capacity :=
   ⟨lenU 33 (by decide),by change 33+32≤192;decide⟩
 theorem wrong_coordinates (pipeline : Pipeline) :
     (wrongArea pipeline).offset.val.toNat≠offset 33 small := by
-  first | (simp only;done) | decide | omega | rfl | skip
   change (33 : Nat)≠65
   decide
 
@@ -61,5 +58,5 @@ theorem wrong_coordinates (pipeline : Pipeline) :
 independent function-selector overlay. No low-width cleaning is inserted. -/
 theorem repeated_same_cell : RawFrame.view (RawFrame.write updated small (word 257)) small=word 257 ∧
     RawFrame.view (RawFrame.write updated small (word 257)) selector=word (2^255+85) := by
-  first | omega | decide
+  decide
 end Solidity.Yul.Adapters.RawPhysicalUpdate.Controls

@@ -21,10 +21,9 @@ theorem compiler_panic_application :
       (Evm.Machine.init (fun _ => 0) ⟨0, by decide⟩) = .revert := by
   rcases Main.compiler_correct (panic_fragment C) (closed_simulation C)
     (by change 1 ≤ Evm.Lmax; decide) with
-    ⟨_, _, ho, _⟩ | ⟨_, hr⟩ | ⟨hp, _⟩ | ⟨hd, _⟩
+    ⟨_, _, ho, _⟩ | ⟨_, hr⟩ | ⟨hd, _⟩
   · simp only [Main.Runs, panic_source, reduceCtorEq] at ho
   · exact hr
-  · cases hp
   · rw [panic_source] at hd
     cases hd
 
@@ -46,6 +45,38 @@ theorem payment_simulation :
 
 theorem payment_source : Prog.run (paymentSource C) (paymentProgram C) =
     .ok ⟨(paymentSource C).pay ⟨9, rfl⟩ 5, List.prefix_refl _⟩ := rfl
+
+/-- The public headline forces success for `transfer(9, 5)` with enough funds. -/
+theorem payment_headline_success :
+    ∃ o mc', Prog.run (paymentSource C) (paymentProgram C) = .ok o ∧
+      Evm.run (Evm.compileProg 0 (paymentProgram C)) paymentMachine = .ok mc' 0 ∧
+      Evm.Sim C (1 + Evm.Prog.pushes (paymentProgram C)) 0 (Evm.Frag.init []) o.st mc' := by
+  rcases Main.compiler_correct (payment_fragment C) (payment_simulation C)
+    (by change 1 ≤ Evm.Lmax; decide) with h | ⟨hr | ⟨_, hr⟩, _⟩ | ⟨hd, _⟩
+  · exact h
+  · rw [payment_source] at hr
+    cases hr
+  · rw [payment_source] at hr
+    cases hr
+  · rw [payment_source] at hd
+    cases hd
+
+/-- A reverting or faulting replacement cannot satisfy the headline's exact
+three-outcome conclusion for this successful paying source. -/
+theorem payment_bad_machine_rejected (code : List Evm.Instr) (mc : Evm.Machine)
+    (hbad : Evm.run code mc = .revert ∨ Evm.run code mc = .fault) :
+    ¬ ((∃ o mc', Prog.run (paymentSource C) (paymentProgram C) = .ok o ∧
+        Evm.run code mc = .ok mc' 0 ∧
+        Evm.Sim C (1 + Evm.Prog.pushes (paymentProgram C)) 0 (Evm.Frag.init []) o.st mc') ∨
+      ((Prog.run (paymentSource C) (paymentProgram C) = .error .revert ∨
+          (Prog.asserts (paymentProgram C) = true ∧
+            Prog.run (paymentSource C) (paymentProgram C) = .error .panic)) ∧
+        Evm.run code mc = .revert) ∨
+      (Prog.run (paymentSource C) (paymentProgram C) = .error .diverge ∧
+        Evm.run code mc = .fault)) := by
+  rw [payment_source]
+  rcases hbad with hbad | hbad <;> simp only [hbad, reduceCtorEq, and_false, false_and,
+    or_self, exists_false, not_false_eq_true]
 
 theorem payment_target : Evm.run (Evm.compileProg 0 (paymentProgram C)) paymentMachine =
     .ok afterPaymentMachine 0 := rfl
@@ -98,6 +129,17 @@ theorem refused_simulation :
   rfl
 
 theorem refused_source : Prog.run (refusedSource C) (paymentProgram C) = .error .revert := rfl
+
+/-- Refused `transfer(9, 5)` forces the public headline's joint revert arm. -/
+theorem refused_headline_revert :
+    Prog.run (refusedSource C) (paymentProgram C) = .error .revert ∧
+      Evm.run (Evm.compileProg 0 (paymentProgram C)) (refusedMachine C) = .revert := by
+  rcases Main.compiler_correct (payment_fragment C) (refused_simulation C)
+    (by change 1 ≤ Evm.Lmax; decide) with ⟨_, _, ho, _⟩ | ⟨_, hr⟩ | ⟨hd, _⟩
+  · simp only [Main.Runs, refused_source, reduceCtorEq] at ho
+  · exact ⟨refused_source C, hr⟩
+  · rw [refused_source] at hd
+    cases hd
 
 theorem refused_target : Evm.run (Evm.compileProg 0 (paymentProgram C)) (refusedMachine C) = .revert := rfl
 
@@ -158,15 +200,13 @@ theorem compiler_divergence_application :
       (Evm.Machine.init (fun _ => 0) ⟨0, by decide⟩) = .fault := by
   rcases Main.compiler_correct (divergence_fragment C) (closed_simulation C)
     (by change 1 ≤ Evm.Lmax; decide) with
-    ⟨_, _, ho, _⟩ | ⟨hr, _⟩ | ⟨hp, _⟩ | ⟨_, ht | ⟨hp, _⟩⟩
+    ⟨_, _, ho, _⟩ | ⟨hr, _⟩ | ⟨_, ht⟩
   · simp only [Main.Runs, divergence_source, reduceCtorEq] at ho
   · rcases hr with hr | ⟨_, hp⟩
     · rw [divergence_source] at hr
       cases hr
     · rw [divergence_source] at hp
       cases hp
-  · cases hp
   · exact ht
-  · cases hp
 
 end Solidity.Assurance.NonVacuityH28

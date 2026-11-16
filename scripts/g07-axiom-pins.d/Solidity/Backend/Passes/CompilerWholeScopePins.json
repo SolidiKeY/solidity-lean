@@ -67,6 +67,11 @@
   "Quot.sound",
   "propext"
  ],
+ "Solidity/Backend/Passes/CompilerWholeScopePins.lean:Solidity.Backend.Passes.CompilerWholeScope.lmax_refused": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
  "Solidity/Backend/Passes/CompilerWholeScopePins.lean:Solidity.Backend.Passes.CompilerWholeScope.resources": [
   "Classical.choice",
   "Quot.sound",

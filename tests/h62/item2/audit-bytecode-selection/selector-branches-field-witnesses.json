@@ -1,0 +1,10 @@
+{
+  "selector_branches_selected_joint_domain": {
+    "target": "Solidity.Backend.AbiEntry.Interface.SelectorBranchesCertificate.selected",
+    "proof": "\u27e8SelectorBranches.program,SelectorBranches.certificate,dispatchContract,dispatchCtx,dispatchCtx,dispatchCtx,0,Frag.init dispatchCtx,(Idx.here),wmod 5,dispatchHit.program,dispatchFallback.program,dispatchHit.outFrag,dispatchFallback.outFrag,dispatchHit.admitted,dispatchFallback.admitted,True.intro\u27e9"
+  },
+  "selector_branches_executed_joint_domain": {
+    "target": "Solidity.Backend.AbiEntry.Interface.SelectorBranchesCertificate.executed",
+    "proof": "\u27e8SelectorBranches.program,SelectorBranches.certificate,dispatchContract,dispatchCtx,dispatchCtx,dispatchCtx,0,Frag.init dispatchCtx,(Idx.here),wmod 5,dispatchHit.program,dispatchFallback.program,dispatchHit.outFrag,dispatchFallback.outFrag,dispatchHit.admitted,dispatchFallback.admitted,selectorWhole (wmod 5),selectorLeft,selectorRight,selector_whole_found (wmod 5),selector_left_found,selector_right_found,dispatchMachine,wmod 5,rfl,True.intro\u27e9"
+  }
+}

@@ -1,0 +1,42 @@
+{
+  "rejected_pairs": [
+    {
+      "unit": "type checking",
+      "reason": "Taclet parser is not C typing; pair removed."
+    },
+    {
+      "unit": "Yul state",
+      "reason": "Compile-time environment is not runtime state; pair removed."
+    },
+    {
+      "unit": "weakest preconditions",
+      "reason": "Sound facade is not a WP implementation; no matched unit located."
+    }
+  ],
+  "missing_counterparts": [
+    {
+      "unit": "general solc compiler/lowering correctness proof",
+      "reason": "solc implements the compiler; selected production implementation files supply no correctness theorem counterpart.",
+      "searched": [
+        "libsolidity",
+        "libyul"
+      ]
+    },
+    {
+      "unit": "Solidity dynamic-logic soundness versus solc",
+      "reason": "Implementation compiler has no dynamic-logic soundness counterpart.",
+      "searched": [
+        "libsolidity"
+      ]
+    },
+    {
+      "unit": "WP facade",
+      "reason": "No like-for-like local WP component established; removed Sound.lean/WP.thy comparison.",
+      "searched": [
+        "Solidity/Calculus/Sound.lean",
+        "thys/Isabelle-Solidity/WP.thy"
+      ]
+    }
+  ],
+  "scope_note": "Missing means no counterpart established by this bounded component search, not proof of absence."
+}

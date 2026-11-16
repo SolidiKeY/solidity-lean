@@ -1,0 +1,918 @@
+{
+  "base": "d4ad633a9624263a59b14fd2c520b9bc602f88f3",
+  "completion_authorization": {
+    "H243": {
+      "question": "Q-STMT-REF-01",
+      "decision": "Find a theorem that looks similar. Before marking a row non-comparable, search for the nearest external compiler theorem. Use ratio=null with the exact reason only when none is similar."
+    },
+    "H244": {
+      "question": "Q-STMT-PROV-01",
+      "decision": "A: accept the frozen inventory; report confirmed-generated, explicitly-handwritten and untraced separately; no claim about historical handwriting totals."
+    }
+  },
+  "method": {
+    "command": "python3 -I docs/audits/direction-tools/statements/scan.py --check",
+    "source": "All source blobs, paths, inventory availability and timing sample read from Git objects at BASE, independent of current checkout or merged HEAD.",
+    "selection": "All @[goal] in tracked Lean; all theorem/lemma/abbrev/def in Solidity/Theorems.lean; top 30 public theorems by distinct direct importers of their defining module, ties path then line. This is module exposure, not declaration usage. Includes examples explicitly.",
+    "generated": "Roots, Corpus, AxiomPins, marked chain/agreement and other marked generation separated. Chain/agreement without markers is an explicit unresolved bucket, never called handwritten. Selected declaration files have no generation marker; no theorem strength verdict depends on generated counts. provenance.py traces known root/corpus/vector producers, including the explicit handwritten Basic/Imported corpus exceptions, and distinguishes chain-generator source uses from expanded proof terms. Historical authorship of untraced files remains unknown; no scale/effort verdict uses that unknown bucket.",
+    "parsing": "Source-level, not elaborated. Premises column is explicit binders; arrows remain in conclusion. Context preserves open/variable commands, including commands from earlier ended sections; consult source for exact scope. No proof rechecked.",
+    "ratios": "calibrate.py compares complete public compiler endpoint declaration code (statement plus proof) and matched finite scenario input counts in the pinned solc snapshot; it never measures headers alone or treats source size as transitive proof effort. The user clarification to H243 requires a nearest external compiler theorem search before non-comparability. similarity.py searches 11 pinned compiler/verification files, records inspected candidates, pairs similar propositions while stating differences, and retains null only with a row-specific reason. Declaration size never measures transitive proof effort."
+  },
+  "counts": {
+    "unmarked_other_files": 8057,
+    "unmarked_other_lines": 1252802,
+    "generated_roots_files": 3,
+    "generated_roots_lines": 7176,
+    "unresolved_chain_agreement_files": 157,
+    "unresolved_chain_agreement_lines": 25420,
+    "generated_marked_other_files": 39,
+    "generated_marked_other_lines": 8122,
+    "generated_axiom_pins_files": 2,
+    "generated_axiom_pins_lines": 4054,
+    "handwritten_explicit_exception_files": 2,
+    "handwritten_explicit_exception_lines": 265,
+    "generated_corpus_files": 8,
+    "generated_corpus_lines": 3957,
+    "generated_vector_table_files": 9,
+    "generated_vector_table_lines": 6975,
+    "tracked_lean_files": 8277,
+    "goal_attributes": 0,
+    "public_theorems": 62557,
+    "top_imported": 30,
+    "selected": 63,
+    "headline_theorems": 21,
+    "classifications": {
+      "strong": 49,
+      "trivial": 12,
+      "weaker than named": 2
+    },
+    "witnesses": {
+      "intentional incompatible hypotheses": 2,
+      "existing concrete source instance": 27,
+      "existing source witness": 22,
+      "not applicable (definition)": 12
+    },
+    "matched_units": 30,
+    "unmatched_units": 33
+  },
+  "goals": [],
+  "inventory_reuse": [
+    {
+      "path": "docs/audits/architecture-tools",
+      "present": true
+    },
+    {
+      "path": "docs/audits/proof-coverage-tools",
+      "present": true
+    },
+    {
+      "path": "docs/audits/build-speed-tools",
+      "present": true
+    },
+    {
+      "path": "docs/audits/build-speed.md",
+      "present": true
+    },
+    {
+      "path": "scripts/build-measure.py",
+      "present": true
+    },
+    {
+      "path": "scripts/build-measure-report.py",
+      "present": true
+    },
+    {
+      "path": "scripts/differential",
+      "present": false
+    },
+    {
+      "path": "scripts/bench",
+      "present": false
+    }
+  ],
+  "timings": {
+    "path": "docs/audits/architecture-tools/timing-sample.tsv",
+    "rows": 61,
+    "sha256": "3f8463128ba2f8d99d837ae55b8b73e3ae027be88edea390c0fa68622b96d796",
+    "use": "Existing sample only; no per-selected-theorem timing inferred"
+  },
+  "references": [
+    {
+      "id": "compcert",
+      "url": "https://raw.githubusercontent.com/AbsInt/CompCert/2685140bf72c959446981fb99b5e44a8975021bc/driver/Compiler.v",
+      "theorem": "transf_c_program_correct",
+      "line": 446,
+      "source_sha256": "1782a975c8df642a54d28c891405714145997c1cfe4d227f07a4c4d71ff525fb",
+      "statement": "Theorem transf_c_program_correct:\n  forall p tp,\n  transf_c_program p = OK tp ->\n  backward_simulation (Csem.semantics p) (Asm.semantics tp).",
+      "status": "measured pinned source excerpt; source not compiled",
+      "comparison": "Successful actual translation implies backward simulation of C to assembly; source undefined behaviour constrains guarantees. Intrinsic-model soundness is a different boundary.",
+      "theorem_source": "Theorem transf_c_program_correct:\n  forall p tp,\n  transf_c_program p = OK tp ->\n  backward_simulation (Csem.semantics p) (Asm.semantics tp).\nProof.\n  intros. apply c_semantic_preservation. apply transf_c_program_match; auto.\nQed."
+    },
+    {
+      "id": "cakeml",
+      "url": "https://raw.githubusercontent.com/CakeML/cakeml/58720ae1c69f86a79fec68749b0089ca6a3bb473/compiler/backend/proofs/source_to_flatProofScript.sml",
+      "theorem": "compile_semantics",
+      "line": 6393,
+      "source_sha256": "d313e00205920b4942a9c033b0ecf0dcda327c51f7973e5cc19d9fa5b33418f4",
+      "statement": "Theorem compile_semantics:\n   precondition interp s env cfg ec prog\n ⇒\n   ¬semantics_determ s env prog Fail ⇒\n   semantics_determ s env prog\n      (semantics ec s.ffi s.ptr_eq_oracle (SND (compile cfg prog)))",
+      "status": "measured pinned source excerpt; source not compiled",
+      "comparison": "A verified pass: non-Fail source semantics and explicit precondition imply equality of source and compiled flat semantics; not a Solidity or full-backend theorem.",
+      "theorem_source": "Theorem compile_semantics:\n   precondition interp s env cfg ec prog\n ⇒\n   ¬semantics_determ s env prog Fail ⇒\n   semantics_determ s env prog\n      (semantics ec s.ffi s.ptr_eq_oracle (SND (compile cfg prog)))\nProof\n  rw [compile_def]\n  \\\\ pairarg_tac \\\\ fs []\n  \\\\ fs [precondition_def]\n  \\\\ imp_res_tac compile_prog_semantics \\\\ rfs []\n  \\\\ ‘c'.pattern_cfg = cfg.pattern_cfg’\n    by (fs [compile_prog_def] \\\\ rpt (pairarg_tac \\\\ fs []) \\\\ rveq \\\\ fs [])\n  \\\\ ‘semantics ec1 s.ffi s.ptr_eq_oracle p' ≠ Fail’ by (strip_tac \\\\ fs [])\n  \\\\ drule_all compile_flat_correct\n  \\\\ disch_then (assume_tac o GSYM) \\\\ fs []\nQED"
+    }
+  ],
+  "reference_calibration": {
+    "base": "d4ad633a9624263a59b14fd2c520b9bc602f88f3",
+    "scope": "Similar external theorem declarations (with semantic differences stated), public compiler facades and matched finite operation scenarios. Nulls follow recorded nearest-theorem searches.",
+    "metric_boundary": "No check-time or transitive lemma-count measurement. Facade LOC is statement plus proof code, unlike the superseded header-only ratios. Finite-case counts compare selected operation scenarios, not language coverage or proof strength.",
+    "comparisons": [
+      {
+        "unit": "Solidity/Theorems.lean#compiler_correct",
+        "reference": "compcert#transf_c_program_correct",
+        "metric": "nonblank public theorem declaration lines including proof, excluding contextual imports/open/shared definitions",
+        "local": 11,
+        "reference_value": 7,
+        "ratio": 1.571429,
+        "outlier": false,
+        "verdict": null,
+        "reason": "Public correctness facades. The small checked facade compresses premises/conclusion into Input/Agrees and calls the certificate correctness theorem; CakeML exposes a pass composition. Both delegate. This compares declaration source only, not transitive proof cost or language coverage."
+      },
+      {
+        "unit": "Solidity/Theorems.lean#compiler_correct",
+        "reference": "cakeml#compile_semantics",
+        "metric": "nonblank public theorem declaration lines including proof, excluding contextual imports/open/shared definitions",
+        "local": 11,
+        "reference_value": 17,
+        "ratio": 0.647059,
+        "outlier": false,
+        "verdict": null,
+        "reason": "Public correctness facades. The small checked facade compresses premises/conclusion into Input/Agrees and calls the certificate correctness theorem; CakeML exposes a pass composition. Both delegate. This compares declaration source only, not transitive proof cost or language coverage."
+      },
+      {
+        "unit": "Solidity/Theorems.lean#compiler_checked",
+        "reference": "compcert#transf_c_program_correct",
+        "metric": "nonblank public theorem declaration lines including proof, excluding contextual imports/open/shared definitions",
+        "local": 5,
+        "reference_value": 7,
+        "ratio": 0.714286,
+        "outlier": false,
+        "verdict": null,
+        "reason": "Public correctness facades. The small checked facade compresses premises/conclusion into Input/Agrees and calls the certificate correctness theorem; CakeML exposes a pass composition. Both delegate. This compares declaration source only, not transitive proof cost or language coverage."
+      },
+      {
+        "unit": "Solidity/Theorems.lean#compiler_checked",
+        "reference": "cakeml#compile_semantics",
+        "metric": "nonblank public theorem declaration lines including proof, excluding contextual imports/open/shared definitions",
+        "local": 5,
+        "reference_value": 17,
+        "ratio": 0.294118,
+        "outlier": true,
+        "verdict": "justified",
+        "reason": "Public correctness facades. The small checked facade compresses premises/conclusion into Input/Agrees and calls the certificate correctness theorem; CakeML exposes a pass composition. Both delegate. This compares declaration source only, not transitive proof cost or language coverage."
+      },
+      {
+        "unit": "Solidity/Source/SemanticsExamples.lean#add_overflow_checked",
+        "reference": "solc#test/libsolidity/semanticTests/viaYul/detect_add_overflow.sol",
+        "metric": "distinct fixed input/output cases for matched operation",
+        "local": 1,
+        "local_case_evidence": "Closed theorem header with one explicit evalE invocation; counted and shape-checked by script",
+        "reference_value": 3,
+        "ratio": 0.333333,
+        "outlier": false,
+        "verdict": null,
+        "reason": "Checked uint8 addition: local overflow input versus upstream same-width valid/boundary/overflow inputs. This compares finite scenario coverage, not kernel proofs with runtime tests or whole suites. No solc run is claimed."
+      },
+      {
+        "unit": "Solidity/Source/SemanticsExamples.lean#div_by_zero",
+        "reference": "solc#test/libsolidity/semanticTests/arithmetics/unchecked_div_by_zero.sol",
+        "metric": "distinct fixed input/output cases for matched operation",
+        "local": 1,
+        "local_case_evidence": "Closed theorem header with one explicit evalE invocation; counted and shape-checked by script",
+        "reference_value": 2,
+        "ratio": 0.5,
+        "outlier": false,
+        "verdict": null,
+        "reason": "Unchecked unsigned division: local zero-divisor input versus upstream nonzero and zero divisors; local uint8 versus reference uint256 does not change the zero-divisor rule. This compares finite scenario coverage, not kernel proofs with runtime tests or whole suites. No solc run is claimed."
+      },
+      {
+        "unit": "Solidity/Source/SemanticsExamples.lean#short_circuit",
+        "reference": "solc#test/libsolidity/semanticTests/viaYul/short_circuit.sol",
+        "metric": "distinct fixed input/output cases for matched operation",
+        "local": 1,
+        "local_case_evidence": "Closed theorem header with one explicit evalE invocation; counted and shape-checked by script",
+        "reference_value": 2,
+        "ratio": 0.5,
+        "outlier": false,
+        "verdict": null,
+        "reason": "Short-circuit conjunction with a state-changing right operand; local false-left input versus upstream true/false-left inputs. This compares finite scenario coverage, not kernel proofs with runtime tests or whole suites. No solc run is claimed."
+      },
+      {
+        "unit": "Solidity/Source/SemanticsExamples.lean#add_overflow_checked",
+        "reference": "afp-wp#kdplus_safe_dest",
+        "metric": "nonblank public theorem declaration code lines including proof; comments and enclosing contexts excluded",
+        "local": 2,
+        "reference_value": 4,
+        "ratio": 0.5,
+        "outlier": false,
+        "verdict": null,
+        "reason": "Checked unsigned addition can succeed only within its representable range. Differences: Local closed uint8 evaluation proves a particular overflow panic payload; Isabelle's generic uint256 success inversion implies rejection out of range but does not prove that payload or exact evaluator outcome. Declaration size only: local facade delegation or fixed-case computation and the reference proof's inversions/automation differ; this is not transitive proof effort, semantic coverage or correctness equivalence."
+      },
+      {
+        "unit": "Solidity/Source/SemanticsExamples.lean#add_overflow_unchecked",
+        "reference": "cc-ints#add_unsigned",
+        "metric": "nonblank public theorem declaration code lines including proof; comments and enclosing contexts excluded",
+        "local": 2,
+        "reference_value": 3,
+        "ratio": 0.666667,
+        "outlier": false,
+        "verdict": null,
+        "reason": "Unsigned unchecked addition wraps modulo the word width. Differences: Local uint8 fixed input result versus a generic word arithmetic identity; CompCert is not a Solidity expression evaluator. Declaration size only: local facade delegation or fixed-case computation and the reference proof's inversions/automation differ; this is not transitive proof effort, semantic coverage or correctness equivalence."
+      },
+      {
+        "unit": "Solidity/Source/SemanticsExamples.lean#short_circuit",
+        "reference": "afp-solidity#execute_cond_monad_simp2",
+        "metric": "nonblank public theorem declaration code lines including proof; comments and enclosing contexts excluded",
+        "local": 1,
+        "reference_value": 4,
+        "ratio": 0.25,
+        "outlier": true,
+        "verdict": "justified",
+        "reason": "A false condition selects one branch without executing the other branch's effects. Differences: Local conjunction with a state-changing right operand versus a generic false conditional in Isabelle's monadic evaluator; not a theorem equating complete evaluators. Declaration size only: local facade delegation or fixed-case computation and the reference proof's inversions/automation differ; this is not transitive proof effort, semantic coverage or correctness equivalence."
+      },
+      {
+        "unit": "Solidity/Source/SemanticsExamples.lean#dX_ty",
+        "reference": "cc-typing#evar_sound",
+        "metric": "nonblank public theorem declaration code lines including proof; comments and enclosing contexts excluded",
+        "local": 1,
+        "reference_value": 5,
+        "ratio": 0.2,
+        "outlier": true,
+        "verdict": "justified",
+        "reason": "Variable metadata/lookup supplies the variable's typing evidence. Differences: Local fixed declaration lookup returns a uint type; CompCert generically converts successful variable lookup into wt_expr. These are analogous lookup/typing interfaces, not equal algorithms. Declaration size only: local facade delegation or fixed-case computation and the reference proof's inversions/automation differ; this is not transitive proof effort, semantic coverage or correctness equivalence."
+      },
+      {
+        "unit": "Solidity/Source/SemanticsExamples.lean#dT_ty",
+        "reference": "cc-typing#evar_sound",
+        "metric": "nonblank public theorem declaration code lines including proof; comments and enclosing contexts excluded",
+        "local": 1,
+        "reference_value": 5,
+        "ratio": 0.2,
+        "outlier": true,
+        "verdict": "justified",
+        "reason": "Variable metadata/lookup supplies the variable's typing evidence. Differences: Local fixed declaration lookup returns a uint type; CompCert generically converts successful variable lookup into wt_expr. These are analogous lookup/typing interfaces, not equal algorithms. Declaration size only: local facade delegation or fixed-case computation and the reference proof's inversions/automation differ; this is not transitive proof effort, semantic coverage or correctness equivalence."
+      },
+      {
+        "unit": "Solidity/Source/SemanticsExamples.lean#dPing_sig",
+        "reference": "cc-typing#ecall_sound",
+        "metric": "nonblank public theorem declaration code lines including proof; comments and enclosing contexts excluded",
+        "local": 1,
+        "reference_value": 7,
+        "ratio": 0.142857,
+        "outlier": true,
+        "verdict": "justified",
+        "reason": "Call-signature typing evidence supports an accepted function application. Differences: Local fixed zero-argument/zero-result signature lookup versus CompCert generic call well-typedness, with additional well-typed function/argument premises. Declaration size only: local facade delegation or fixed-case computation and the reference proof's inversions/automation differ; this is not transitive proof effort, semantic coverage or correctness equivalence."
+      },
+      {
+        "unit": "Solidity/Source/SemanticsExamples.lean#lit_ok",
+        "reference": "cc-typing#econst_int_sound",
+        "metric": "nonblank public theorem declaration code lines including proof; comments and enclosing contexts excluded",
+        "local": 3,
+        "reference_value": 5,
+        "ratio": 0.6,
+        "outlier": false,
+        "verdict": null,
+        "reason": "An integer literal is accepted at an appropriate integer type. Differences: Local rational-to-uint implicit conversion requires FitsInt and fixed uint metadata; CompCert starts from a bounded integer representation and proves expression well-typedness. Declaration size only: local facade delegation or fixed-case computation and the reference proof's inversions/automation differ; this is not transitive proof effort, semantic coverage or correctness equivalence."
+      },
+      {
+        "unit": "Solidity/Source/SemanticsExamples.lean#revert_rolls_back",
+        "reference": "afp-solidity#post_true",
+        "metric": "nonblank public theorem declaration code lines including proof; comments and enclosing contexts excluded",
+        "local": 3,
+        "reference_value": 9,
+        "ratio": 0.333333,
+        "outlier": false,
+        "verdict": null,
+        "reason": "An exceptional execution preserves predicates of the pre-call state by restoring it. Differences: Local closed transactions include storage, logs or transient-storage observations; Isabelle's exc wrapper restores its entire modeled state but has no EVM transient-storage feature or matching event/panic payload claim. Only the rollback principle is shared. Declaration size only: local facade delegation or fixed-case computation and the reference proof's inversions/automation differ; this is not transitive proof effort, semantic coverage or correctness equivalence."
+      },
+      {
+        "unit": "Solidity/Source/SemanticsExamples.lean#revert_rolls_back_transient",
+        "reference": "afp-solidity#post_true",
+        "metric": "nonblank public theorem declaration code lines including proof; comments and enclosing contexts excluded",
+        "local": 6,
+        "reference_value": 9,
+        "ratio": 0.666667,
+        "outlier": false,
+        "verdict": null,
+        "reason": "An exceptional execution preserves predicates of the pre-call state by restoring it. Differences: Local closed transactions include storage, logs or transient-storage observations; Isabelle's exc wrapper restores its entire modeled state but has no EVM transient-storage feature or matching event/panic payload claim. Only the rollback principle is shared. Declaration size only: local facade delegation or fixed-case computation and the reference proof's inversions/automation differ; this is not transitive proof effort, semantic coverage or correctness equivalence."
+      },
+      {
+        "unit": "Solidity/Source/SemanticsExamples.lean#commit_keeps_storage",
+        "reference": "afp-wp#storage_update_eq",
+        "metric": "nonblank public theorem declaration code lines including proof; comments and enclosing contexts excluded",
+        "local": 3,
+        "reference_value": 3,
+        "ratio": 1.0,
+        "outlier": false,
+        "verdict": null,
+        "reason": "A successful storage write is observed when that location is read. Differences: Local full transaction also checks a return value and committed storage; Isabelle proves one generic storage update/read identity in the Contract locale. Declaration size only: local facade delegation or fixed-case computation and the reference proof's inversions/automation differ; this is not transitive proof effort, semantic coverage or correctness equivalence."
+      },
+      {
+        "unit": "Solidity/Source/SemanticsExamples.lean#outside_revert_rolls_back",
+        "reference": "afp-solidity#post_true",
+        "metric": "nonblank public theorem declaration code lines including proof; comments and enclosing contexts excluded",
+        "local": 4,
+        "reference_value": 9,
+        "ratio": 0.444444,
+        "outlier": false,
+        "verdict": null,
+        "reason": "An exceptional execution preserves predicates of the pre-call state by restoring it. Differences: Local closed transactions include storage, logs or transient-storage observations; Isabelle's exc wrapper restores its entire modeled state but has no EVM transient-storage feature or matching event/panic payload claim. Only the rollback principle is shared. Declaration size only: local facade delegation or fixed-case computation and the reference proof's inversions/automation differ; this is not transitive proof effort, semantic coverage or correctness equivalence."
+      },
+      {
+        "unit": "Solidity/Source/SemanticsExamples.lean#dA_ty",
+        "reference": "cc-typing#evar_sound",
+        "metric": "nonblank public theorem declaration code lines including proof; comments and enclosing contexts excluded",
+        "local": 1,
+        "reference_value": 5,
+        "ratio": 0.2,
+        "outlier": true,
+        "verdict": "justified",
+        "reason": "Variable metadata/lookup supplies the variable's typing evidence. Differences: Local fixed declaration lookup returns a uint type; CompCert generically converts successful variable lookup into wt_expr. These are analogous lookup/typing interfaces, not equal algorithms. Declaration size only: local facade delegation or fixed-case computation and the reference proof's inversions/automation differ; this is not transitive proof effort, semantic coverage or correctness equivalence."
+      },
+      {
+        "unit": "Solidity/Source/SemanticsExamples.lean#dB_ty",
+        "reference": "cc-typing#evar_sound",
+        "metric": "nonblank public theorem declaration code lines including proof; comments and enclosing contexts excluded",
+        "local": 1,
+        "reference_value": 5,
+        "ratio": 0.2,
+        "outlier": true,
+        "verdict": "justified",
+        "reason": "Variable metadata/lookup supplies the variable's typing evidence. Differences: Local fixed declaration lookup returns a uint type; CompCert generically converts successful variable lookup into wt_expr. These are analogous lookup/typing interfaces, not equal algorithms. Declaration size only: local facade delegation or fixed-case computation and the reference proof's inversions/automation differ; this is not transitive proof effort, semantic coverage or correctness equivalence."
+      },
+      {
+        "unit": "Solidity/Theorems.lean#rule_sound",
+        "reference": "cc-exec#do_step_sound",
+        "metric": "nonblank public theorem declaration code lines including proof; comments and enclosing contexts excluded",
+        "local": 2,
+        "reference_value": 34,
+        "ratio": 0.058824,
+        "outlier": true,
+        "verdict": "justified",
+        "reason": "Executable one-step computation agrees with the relational semantics. Differences: Local deterministic statement rewriting versus nondeterministic C transitions, external-world crash alternative, and expression side effects; local theorem delegates to rule library. CompCert additionally assumes abstract external-function and inline-assembly implementations satisfy the enclosing soundness/completeness contracts; local intrinsic rewriting has no such external implementations. Declaration size only: local facade delegation or fixed-case computation and the reference proof's inversions/automation differ; this is not transitive proof effort, semantic coverage or correctness equivalence."
+      },
+      {
+        "unit": "Solidity/Theorems.lean#rule_unique",
+        "reference": "cc-smallstep#sd_determ_2",
+        "metric": "nonblank public theorem declaration code lines including proof; comments and enclosing contexts excluded",
+        "local": 2,
+        "reference_value": 6,
+        "ratio": 0.333333,
+        "outlier": false,
+        "verdict": null,
+        "reason": "Two one-step derivations with the same starting configuration yield the same result. Differences: CompCert fixes the trace and assumes determinate L; local intrinsic rewriting uniqueness has no external trace. Declaration size only: local facade delegation or fixed-case computation and the reference proof's inversions/automation differ; this is not transitive proof effort, semantic coverage or correctness equivalence."
+      },
+      {
+        "unit": "Solidity/Theorems.lean#rule_is_step",
+        "reference": "cc-exec#do_step_complete",
+        "metric": "nonblank public theorem declaration code lines including proof; comments and enclosing contexts excluded",
+        "local": 2,
+        "reference_value": 61,
+        "ratio": 0.032787,
+        "outlier": true,
+        "verdict": "justified",
+        "reason": "Relational one-step result is covered by the executable step mechanism. Differences: CompCert returns a list of transitions and requires a possible external-world trace; local rule conclusion is equality to one deterministic step. CompCert additionally assumes abstract external-function and inline-assembly implementations satisfy the enclosing soundness/completeness contracts; local intrinsic rewriting has no such external implementations. Declaration size only: local facade delegation or fixed-case computation and the reference proof's inversions/automation differ; this is not transitive proof effort, semantic coverage or correctness equivalence."
+      },
+      {
+        "unit": "Solidity/Theorems.lean#rule_exists",
+        "reference": "cc-strategy#progress",
+        "metric": "nonblank public theorem declaration code lines including proof; comments and enclosing contexts excluded",
+        "local": 2,
+        "reference_value": 18,
+        "ratio": 0.111111,
+        "outlier": true,
+        "verdict": "justified",
+        "reason": "A suitable starting state admits a next semantic step (or has finished). Differences: CompCert assumes safe operational execution and permits final states; local intrinsic statement rewriting unconditionally produces a residual proposition at each rule index and modality, not a runtime transition. Declaration size only: local facade delegation or fixed-case computation and the reference proof's inversions/automation differ; this is not transitive proof effort, semantic coverage or correctness equivalence."
+      },
+      {
+        "unit": "Solidity/Theorems.lean#rule_of_step",
+        "reference": "cc-exec#do_step_sound",
+        "metric": "nonblank public theorem declaration code lines including proof; comments and enclosing contexts excluded",
+        "local": 2,
+        "reference_value": 34,
+        "ratio": 0.058824,
+        "outlier": true,
+        "verdict": "justified",
+        "reason": "Executable one-step computation agrees with the relational semantics. Differences: Local deterministic statement rewriting versus nondeterministic C transitions, external-world crash alternative, and expression side effects; local theorem delegates to rule library. CompCert additionally assumes abstract external-function and inline-assembly implementations satisfy the enclosing soundness/completeness contracts; local intrinsic rewriting has no such external implementations. Declaration size only: local facade delegation or fixed-case computation and the reference proof's inversions/automation differ; this is not transitive proof effort, semantic coverage or correctness equivalence."
+      },
+      {
+        "unit": "Solidity/Theorems.lean#solkey_rule_exists",
+        "reference": "cc-strategy#progress",
+        "metric": "nonblank public theorem declaration code lines including proof; comments and enclosing contexts excluded",
+        "local": 2,
+        "reference_value": 18,
+        "ratio": 0.111111,
+        "outlier": true,
+        "verdict": "justified",
+        "reason": "A suitable starting state admits a next semantic step (or has finished). Differences: CompCert assumes safe operational execution and permits final states; local restricted rewriting requires inSolkey and a step-equality witness and yields a residual proposition, not a runtime transition. Declaration size only: local facade delegation or fixed-case computation and the reference proof's inversions/automation differ; this is not transitive proof effort, semantic coverage or correctness equivalence."
+      },
+      {
+        "unit": "Solidity/Theorems.lean#solkey_step_taclet",
+        "reference": "cc-strategy#step_simulation",
+        "metric": "nonblank public theorem declaration code lines including proof; comments and enclosing contexts excluded",
+        "local": 3,
+        "reference_value": 8,
+        "ratio": 0.375,
+        "outlier": false,
+        "verdict": null,
+        "reason": "A restricted stepping discipline embeds into the general semantic relation. Differences: CompCert relates strategy transitions to positive sequences of C steps; local theorem relates SolKey taclet rewriting to the calculus under its shape premise. Declaration size only: local facade delegation or fixed-case computation and the reference proof's inversions/automation differ; this is not transitive proof effort, semantic coverage or correctness equivalence."
+      },
+      {
+        "unit": "Solidity/Theorems.lean#soundness",
+        "reference": "afp-wp#post_wp",
+        "metric": "nonblank public theorem declaration code lines including proof; comments and enclosing contexts excluded",
+        "local": 2,
+        "reference_value": 5,
+        "ratio": 0.4,
+        "outlier": false,
+        "verdict": null,
+        "reason": "Verification evidence implies the semantic postcondition for an execution. Differences: The closest compiler candidate preserves specifications across compilation; the closer Solidity candidate assumes WP and an effect, whereas local theorems assume calculus derivability and quantify validity. Isabelle WP is partial correctness (NT allowed). Declaration size only: local facade delegation or fixed-case computation and the reference proof's inversions/automation differ; this is not transitive proof effort, semantic coverage or correctness equivalence."
+      },
+      {
+        "unit": "Solidity/Theorems.lean#soundness'",
+        "reference": "afp-wp#post_wp",
+        "metric": "nonblank public theorem declaration code lines including proof; comments and enclosing contexts excluded",
+        "local": 2,
+        "reference_value": 5,
+        "ratio": 0.4,
+        "outlier": false,
+        "verdict": null,
+        "reason": "Verification evidence implies the semantic postcondition for an execution. Differences: The closest compiler candidate preserves specifications across compilation; the closer Solidity candidate assumes WP and an effect, whereas local theorems assume calculus derivability and quantify validity. Isabelle WP is partial correctness (NT allowed). Declaration size only: local facade delegation or fixed-case computation and the reference proof's inversions/automation differ; this is not transitive proof effort, semantic coverage or correctness equivalence."
+      },
+      {
+        "unit": "Solidity/Theorems.lean#solkey_soundness",
+        "reference": "afp-wp#post_wp",
+        "metric": "nonblank public theorem declaration code lines including proof; comments and enclosing contexts excluded",
+        "local": 2,
+        "reference_value": 5,
+        "ratio": 0.4,
+        "outlier": false,
+        "verdict": null,
+        "reason": "Verification evidence implies the semantic postcondition for an execution. Differences: The closest compiler candidate preserves specifications across compilation; the closer Solidity candidate assumes WP and an effect, whereas local theorems assume calculus derivability and quantify validity. Isabelle WP is partial correctness (NT allowed). Declaration size only: local facade delegation or fixed-case computation and the reference proof's inversions/automation differ; this is not transitive proof effort, semantic coverage or correctness equivalence."
+      },
+      {
+        "unit": "Solidity/Theorems.lean#callback_soundness",
+        "reference": "afp-wp#inv_wp",
+        "metric": "nonblank public theorem declaration code lines including proof; comments and enclosing contexts excluded",
+        "local": 3,
+        "reference_value": 5,
+        "ratio": 0.6,
+        "outlier": false,
+        "verdict": null,
+        "reason": "Verification obligations imply invariant properties of semantic outcomes. Differences: Local derivability includes callback/no-callback invariant regimes; Isabelle assumes a WP over an effect and does not encode those same callback policies. This compares the invariant-soundness layer, not callback feature coverage. Declaration size only: local facade delegation or fixed-case computation and the reference proof's inversions/automation differ; this is not transitive proof effort, semantic coverage or correctness equivalence."
+      },
+      {
+        "unit": "Solidity/Theorems.lean#noCallback_soundness",
+        "reference": "afp-wp#inv_wp",
+        "metric": "nonblank public theorem declaration code lines including proof; comments and enclosing contexts excluded",
+        "local": 3,
+        "reference_value": 5,
+        "ratio": 0.6,
+        "outlier": false,
+        "verdict": null,
+        "reason": "Verification obligations imply invariant properties of semantic outcomes. Differences: Local derivability includes callback/no-callback invariant regimes; Isabelle assumes a WP over an effect and does not encode those same callback policies. This compares the invariant-soundness layer, not callback feature coverage. Declaration size only: local facade delegation or fixed-case computation and the reference proof's inversions/automation differ; this is not transitive proof effort, semantic coverage or correctness equivalence."
+      },
+      {
+        "unit": "Solidity/Theorems.lean#symex_sound",
+        "reference": "afp-wp#wpbind",
+        "metric": "nonblank public theorem declaration code lines including proof; comments and enclosing contexts excluded",
+        "local": 2,
+        "reference_value": 32,
+        "ratio": 0.0625,
+        "outlier": true,
+        "verdict": "justified",
+        "reason": "A backwards verification condition is sufficient for the composed program's postcondition. Differences: Local theorem is fuel-indexed symbolic formula transformation; Isabelle's rule handles one monadic bind and separate exception postconditions. Declaration size only: local facade delegation or fixed-case computation and the reference proof's inversions/automation differ; this is not transitive proof effort, semantic coverage or correctness equivalence."
+      },
+      {
+        "unit": "Solidity/Theorems.lean#compiler_net",
+        "reference": "cc-complements#transf_c_program_preservation",
+        "metric": "nonblank public theorem declaration code lines including proof; comments and enclosing contexts excluded",
+        "local": 8,
+        "reference_value": 9,
+        "ratio": 0.888889,
+        "outlier": false,
+        "verdict": null,
+        "reason": "A target execution has a corresponding source execution and a preserved observable. Differences: Local result is success-conditional and compares net account balances only; CompCert covers whole program behaviours with behavior_improves, including source undefined behaviour. Declaration size only: local facade delegation or fixed-case computation and the reference proof's inversions/automation differ; this is not transitive proof effort, semantic coverage or correctness equivalence."
+      }
+    ],
+    "solc_snapshot": {
+      "commit": "1835d247de183f23e7b0e2bc4a50732af525b77c",
+      "archiveSha256": "9200f2a26b08be5b77faf877c44f5cfbf5ea95f1bccc45dae559d2fbc7cefb2d",
+      "manifest": "tests/upstream/snapshot.json",
+      "excerpts": [
+        {
+          "path": "test/libsolidity/semanticTests/viaYul/detect_add_overflow.sol",
+          "url": "https://github.com/argotorg/solidity/blob/1835d247de183f23e7b0e2bc4a50732af525b77c/test/libsolidity/semanticTests/viaYul/detect_add_overflow.sol",
+          "sha256": "627ef6d7bf0f790f8273815ecd4f7ef800da218122904bb4751c8412d8a6aa05",
+          "selector": "g(uint8,uint8)",
+          "vectors": [
+            "// g(uint8,uint8): 128, 64 -> 192",
+            "// g(uint8,uint8): 128, 127 -> 255",
+            "// g(uint8,uint8): 128, 128 -> FAILURE, hex\"4e487b71\", 0x11"
+          ],
+          "source": "contract C {\n    function f(uint a, uint b) public pure returns (uint x) {\n        x = a + b;\n    }\n    function g(uint8 a, uint8 b) public pure returns (uint8 x) {\n        x = a + b;\n    }\n}\n// ----\n// f(uint256,uint256): 5, 6 -> 11\n// f(uint256,uint256): -2, 1 -> -1\n// f(uint256,uint256): -2, 2 -> FAILURE, hex\"4e487b71\", 0x11\n// f(uint256,uint256): 2, -2 -> FAILURE, hex\"4e487b71\", 0x11\n// g(uint8,uint8): 128, 64 -> 192\n// g(uint8,uint8): 128, 127 -> 255\n// g(uint8,uint8): 128, 128 -> FAILURE, hex\"4e487b71\", 0x11\n"
+        },
+        {
+          "path": "test/libsolidity/semanticTests/arithmetics/unchecked_div_by_zero.sol",
+          "url": "https://github.com/argotorg/solidity/blob/1835d247de183f23e7b0e2bc4a50732af525b77c/test/libsolidity/semanticTests/arithmetics/unchecked_div_by_zero.sol",
+          "sha256": "4c7868d649ed283ddb9309d43398ec8dc7dc34e10a08329d74c97d5a833a2090",
+          "selector": "div(uint256,uint256)",
+          "vectors": [
+            "// div(uint256,uint256): 7, 2 -> 3",
+            "// div(uint256,uint256): 7, 0 -> FAILURE, hex\"4e487b71\", 0x12 # throws #"
+          ],
+          "source": "contract C {\n    function div(uint256 a, uint256 b) public returns (uint256) {\n        // Does not disable div by zero check\n        unchecked {\n            return a / b;\n        }\n    }\n\n    function mod(uint256 a, uint256 b) public returns (uint256) {\n        // Does not disable div by zero check\n        unchecked {\n            return a % b;\n        }\n    }\n}\n// ----\n// div(uint256,uint256): 7, 2 -> 3\n// div(uint256,uint256): 7, 0 -> FAILURE, hex\"4e487b71\", 0x12 # throws #\n// mod(uint256,uint256): 7, 2 -> 1\n// mod(uint256,uint256): 7, 0 -> FAILURE, hex\"4e487b71\", 0x12 # throws #\n"
+        },
+        {
+          "path": "test/libsolidity/semanticTests/viaYul/short_circuit.sol",
+          "url": "https://github.com/argotorg/solidity/blob/1835d247de183f23e7b0e2bc4a50732af525b77c/test/libsolidity/semanticTests/viaYul/short_circuit.sol",
+          "sha256": "8d27de715ea5ca55d6cbf1a695a57f645314e80c5c849d2e9911bb4c8e242c19",
+          "selector": "and(uint256)",
+          "vectors": [
+            "// and(uint256): 0 -> true, 8",
+            "// and(uint256): 1 -> false, 1"
+          ],
+          "source": "contract C {\n    function or(uint x) public returns (bool t, uint y) {\n        t = (x == 0 || ((x = 8) > 0));\n        y = x;\n    }\n    function and(uint x) public returns (bool t, uint y) {\n        t = (x == 0 && ((x = 8) > 0));\n        y = x;\n    }\n}\n// ----\n// or(uint256): 0 -> true, 0\n// and(uint256): 0 -> true, 8\n// or(uint256): 1 -> true, 8\n// and(uint256): 1 -> false, 1\n"
+        }
+      ]
+    },
+    "counts": {
+      "comparisons": 34,
+      "matched_units": 30,
+      "outliers": 13
+    },
+    "conclusion": "The small checked compiler facade is an outlier against the CakeML facade because compact Input/Agrees contracts hide detail that the reference facade exposes; both sides delegate. The other original compiler-facade and solc finite-case ratios are within 3x. Additional similar-theorem ratios include small fixed local computations and delegating calculus facades versus general external theorems. Their recorded outliers reflect different generality or proof packaging, not measured transitive proof effort. Semantic compiler weaknesses are assessed from permitted behaviours, not inferred from these sizes."
+  },
+  "external_theorem_search": {
+    "sources": 11,
+    "theorem_headers": 1027,
+    "rows": 63,
+    "similar_theorem_rows": 27,
+    "remaining_null_rows": 33
+  },
+  "cross_lane_reuse": {
+    "base": "d4ad633a9624263a59b14fd2c520b9bc602f88f3",
+    "completion_authorization": {
+      "H243": {
+        "question": "Q-STMT-REF-01",
+        "decision": "Find a theorem that looks similar. Before marking a row non-comparable, search for the nearest external compiler theorem. Use ratio=null with the exact reason only when none is similar."
+      },
+      "H244": {
+        "question": "Q-STMT-PROV-01",
+        "decision": "A: accept the frozen inventory; report confirmed-generated, explicitly-handwritten and untraced separately; no claim about historical handwriting totals."
+      }
+    },
+    "integrated_inputs_commit": "cf3baafd2202adf0107c5ae4d2879cd04ff0aec5",
+    "input_sha256": {
+      "docs/audits/direction-tools/census/census.json": "aabe0148297b2a00b9544c3c9234073a99fe50f50ca221e4a47637c20ac7b471",
+      "docs/audits/direction-tools/census/modules-00.json": "a84307d90de0734c04bbde888fab122998d76abeed3305723700b1ffba81766c",
+      "docs/audits/direction-tools/census/modules-01.json": "5789c489955ae98bd457410bf6365e522ea2ec57ca27f951aaa34f5c1f83e08e",
+      "docs/audits/direction-tools/census/modules-02.json": "db3b9a1aab27c1ffe7184152e8e5fbd6137f7cadf8906324988626d47a1342d9",
+      "docs/audits/direction-tools/census/modules-03.json": "6bee7340592dc6be72f9a314dbbf357abd86a892f3a507ba37419c9418df372e",
+      "docs/audits/direction-tools/census/modules-04.json": "69038ccc875e146047bd9a9430f611d82aaf44fa32b7f635aff18ab476645a8c",
+      "docs/audits/direction-tools/census/modules-05.json": "ee89f73900e07da15d952731dda3dde9a5603fc1b82bd3543cd98ee18dcfe212",
+      "docs/audits/direction-tools/census/modules-06.json": "9395cb2c6b5c2fde10d56758d959a73762811528bcf8b8a873c0c8e878aaf762",
+      "docs/audits/direction-tools/census/modules-07.json": "482296efdb211130ef12aa4236711ce3f1e09c525de41bfaa011cd84952e9608",
+      "docs/audits/direction-tools/census/modules-08.json": "b168df0dce43a8b48e6a81a471d65d4c44c16d3b35d01975b1ede71f8f122cb6",
+      "docs/audits/direction-tools/census/modules-09.json": "c74fd7c8919bb47c862b02240f156a178a9814bac4eb084eaecc6fb180daa306",
+      "docs/audits/direction-tools/census/modules-10.json": "863a5164f9e3e5c7a23513139d57d723f60665ea1a88d07a1ce1c26a437e991b",
+      "docs/audits/direction-tools/census/modules-11.json": "13656b471614c34e2a9414c14355638e4ef3c51688c547f71529bbace8a6b120",
+      "docs/audits/direction-tools/census/modules-12.json": "0944565b7147f09ff0f8f17aad4381fc8ded9156ec218730e3bfc7c90c7c2661",
+      "docs/audits/direction-tools/census/modules-13.json": "e40e764453e7d432f5681c83dcdbe3c1b8dcdec9f86712070308516ee5ea562e",
+      "docs/audits/direction-tools/census/modules-14.json": "9dfbb43ca6ddfd94175bd6df3ea30150d303518a23dfcbaafbb883f90083cf86",
+      "docs/audits/direction-tools/census/modules-15.json": "c1b283c302450dc90efacb82d7599190434f7d72501f36463d16c9441119892a",
+      "docs/audits/direction-tools/census/modules-16.json": "3621e8679b32675e822912d66e6187d9ca48e1894830a4f5ed075e9b6908d581",
+      "docs/audits/direction-tools/census/modules-17.json": "98c2b01a9aceaf1db0e7143d74c79d164377407c41540c212188f92c23e86691",
+      "docs/audits/direction-tools/census/modules-18.json": "6e8c7c8c8367358239120b41eadd3df1edcf90920ade84cbb8ede02069877495",
+      "docs/audits/direction-tools/census/modules-19.json": "4475a09c1cc0ac40fa6fb9557050ef89b1dd86284df71e570432f9ef19838a3b",
+      "docs/audits/direction-tools/census/modules-20.json": "85e550c6317906c76145b8b817a5e0a496e392118913ffd94577fa39ccd442bf",
+      "docs/audits/direction-tools/census/modules-21.json": "eda62823efcc13136a1cc45b51888e72336670e7d80112948eb4f897099a07d6",
+      "docs/audits/direction-tools/census/modules-22.json": "7eebc3760cd5a17de81d1288b8073a980f36d43a8324234e7da0b74b3dde8581",
+      "docs/audits/direction-tools/process/generated-paths.json": "edd2c5872a2bcb59206d0f76934bc916efc84c9e0cc3a4effa8fb3f0cf8d273b",
+      "docs/audits/direction-tools/references/boundaries.json": "13a43ff8e92a6c8f93be6d876384ed825d7d756e6e4350806cb30086974f6f88",
+      "docs/audits/direction-tools/references/pair-specs.json": "0eb64788fe6012c0692631447c3822178c1ec635b56f9d686fe747279728b8e6",
+      "docs/audits/direction-tools/references/pins.json": "5fdb343a3f15a008fb3cc6b813f21be71230d7fc49ca39c6540015bee27a1af8"
+    },
+    "method": "Reuse committed census/reference/process artifacts. Counts remain lexical; no new corpus, reference checkout, proof or timing run.",
+    "selected_module_census": [
+      {
+        "path": "Solidity/Calculus/Closers.lean",
+        "category": "unmarked",
+        "lines": 234,
+        "generated_lines": 0,
+        "imports_in": 109,
+        "declarations": {
+          "def": 8,
+          "theorem": 2
+        }
+      },
+      {
+        "path": "Solidity/Source/SemanticsExamples.lean",
+        "category": "unmarked",
+        "lines": 522,
+        "generated_lines": 0,
+        "imports_in": 69,
+        "declarations": {
+          "def": 78,
+          "theorem": 33
+        }
+      },
+      {
+        "path": "Solidity/Theorems.lean",
+        "category": "unmarked",
+        "lines": 360,
+        "generated_lines": 0,
+        "imports_in": 9,
+        "declarations": {
+          "abbrev": 11,
+          "def": 1,
+          "theorem": 21
+        }
+      }
+    ],
+    "untraced_reconciliation": {
+      "total": 157,
+      "within_census": 131,
+      "census_categories": {
+        "import_only_unknown": 1,
+        "unmarked": 130
+      },
+      "census_marked_generated_lines": 0,
+      "outside_census_count": 26,
+      "outside_census_paths": [
+        "Bridge/SolidityBridge/PrecompileAgreement/Bytes.lean",
+        "Bridge/SolidityBridge/PrecompileAgreement/Controls.lean",
+        "Bridge/SolidityBridge/PrecompileAgreement/Gas.lean",
+        "Bridge/SolidityBridge/PrecompileAgreement/Header.lean",
+        "Bridge/SolidityBridge/PrecompileAgreement/Identity.lean",
+        "Bridge/SolidityBridge/RoadmapV15/P10/CallInAgreement.lean",
+        "Bridge/SolidityBridge/RoadmapV15/P10/DecoderAgreement.lean",
+        "Bridge/SolidityBridge/RoadmapV15/P10/DecoderAgreementControls.lean",
+        "Bridge/SolidityBridge/RoadmapV15/P10/InstructionSelectionAgreement.lean",
+        "Bridge/SolidityBridge/RoadmapV15/P10/PushDecoderAgreement.lean",
+        "Bridge/SolidityBridge/RoadmapV15/P10/StackSelectionAgreement.lean",
+        "Bridge/tests/precompile-agreement/Acceptance.lean",
+        "Bridge/tests/precompile-agreement/ActualAxioms.lean",
+        "Bridge/tests/precompile-agreement/AllDeclarations.lean",
+        "Bridge/tests/precompile-agreement/Axioms.lean",
+        "Bridge/tests/precompile-agreement/BoundaryVectors.lean",
+        "Bridge/tests/precompile-agreement/CacheRequest.lean",
+        "Bridge/tests/precompile-agreement/H70BridgeProbe.lean",
+        "Bridge/tests/precompile-agreement/NativeModexpProbe.lean",
+        "Bridge/tests/precompile-agreement/TrustProbe.lean",
+        "tests/h28-sol/automation-benchmark/ChainControls.lean",
+        "tests/h28-sol/automation-benchmark/ChainRefusalBaseline.lean",
+        "tests/h28-sol/automation-benchmark/ChainRefusalCandidate.lean",
+        "tests/h55/v08-agreements/Agreements.lean",
+        "tests/h62/item1/infer-helpers/SharedAgreement.lean",
+        "tests/h62/item2/audit-g25-scalar-lowering/ScalarCastChainsWitnesses.lean"
+      ],
+      "boundary": "Census unmarked/import-only status supplies no historical origin certificate. Outside-census files are outside Solidity/, not omitted Solidity modules."
+    },
+    "reference_reconciliation": {
+      "pins": [
+        {
+          "reference": "CompCert",
+          "statement_pin": "2685140bf72c959446981fb99b5e44a8975021bc",
+          "merged_reference_pin": "2685140bf72c959446981fb99b5e44a8975021bc",
+          "same_revision": true
+        },
+        {
+          "reference": "CakeML",
+          "statement_pin": "58720ae1c69f86a79fec68749b0089ca6a3bb473",
+          "merged_reference_pin": "b3e6ea34ca1aed91a57703a30549260ce6f6448e",
+          "same_revision": false
+        },
+        {
+          "reference": "solc",
+          "statement_pin": "1835d247de183f23e7b0e2bc4a50732af525b77c",
+          "merged_reference_pin": "403c39f86c3c0c9d4779b97892a3661016b45455",
+          "same_revision": false
+        }
+      ],
+      "direct_selected_module_pairs": 0,
+      "pairs": [],
+      "missing_counterparts": [
+        {
+          "unit": "general solc compiler/lowering correctness proof",
+          "reason": "solc implements the compiler; selected production implementation files supply no correctness theorem counterpart.",
+          "searched": [
+            "libsolidity",
+            "libyul"
+          ]
+        },
+        {
+          "unit": "Solidity dynamic-logic soundness versus solc",
+          "reason": "Implementation compiler has no dynamic-logic soundness counterpart.",
+          "searched": [
+            "libsolidity"
+          ]
+        },
+        {
+          "unit": "WP facade",
+          "reason": "No like-for-like local WP component established; removed Sound.lean/WP.thy comparison.",
+          "searched": [
+            "Solidity/Calculus/Sound.lean",
+            "thys/Isabelle-Solidity/WP.thy"
+          ]
+        }
+      ],
+      "boundary": "File-level pairs are not theorem-level analogues. Different CakeML/solc revisions must not be pooled with statement-specific measurements. The other reference lanes H242 completion permission is not adopted as a scope waiver here."
+    },
+    "handwritten_exception_reconciliation": [
+      {
+        "path": "Solidity/Corpus/Basic.lean",
+        "statement_category": "handwritten_explicit_exception",
+        "process_category": "generated_corpus",
+        "resolution": "Retain the explicit handwritten exception documented by pinned scripts/check-corpus.sh; do not overwrite with a broader directory classification."
+      },
+      {
+        "path": "Solidity/Corpus/Imported.lean",
+        "statement_category": "handwritten_explicit_exception",
+        "process_category": "generated_corpus",
+        "resolution": "Retain the explicit handwritten exception documented by pinned scripts/check-corpus.sh; do not overwrite with a broader directory classification."
+      }
+    ],
+    "conclusion": "Integrated artifacts corroborate selected-module counts but supply no further direct selected-module pair or historical producer records. H243 authorizes explicit null ratios for unmatched units; H244 accepts separately reported generated, handwritten and untraced categories. Neither implies additional measurement or a historical origin certificate."
+  },
+  "generation_provenance": {
+    "report": "provenance.json",
+    "counts": {
+      "generated_axiom_pins_files": 2,
+      "generated_axiom_pins_lines": 4054,
+      "generated_corpus_files": 8,
+      "generated_corpus_lines": 3957,
+      "generated_marked_other_files": 39,
+      "generated_marked_other_lines": 8122,
+      "generated_roots_files": 3,
+      "generated_roots_lines": 7176,
+      "generated_vector_table_files": 9,
+      "generated_vector_table_lines": 6975,
+      "handwritten_explicit_exception_files": 2,
+      "handwritten_explicit_exception_lines": 265,
+      "unmarked_other_files": 8057,
+      "unmarked_other_lines": 1252802,
+      "unresolved_chain_agreement_files": 157,
+      "unresolved_chain_agreement_lines": 25420
+    },
+    "boundary": "Only explicit check-corpus.sh exceptions are positively labelled handwritten. Unmarked source and filename candidates are not combined with confirmed handwriting; overall historical handwriting count is unknown.",
+    "categories": {
+      "confirmed_generated_by_inventory": {
+        "files": 59,
+        "lines": 26230
+      },
+      "explicitly_handwritten": {
+        "files": 2,
+        "lines": 265
+      },
+      "untraced": {
+        "files": 8214,
+        "lines": 1278222
+      },
+      "axiom_pins_separate": {
+        "files": 2,
+        "lines": 4054
+      }
+    }
+  },
+  "top_problems": [
+    {
+      "rank": 1,
+      "id": "payment-correct",
+      "category": "problem",
+      "finding": "compiler_correct permits target revert for a paying program whose typed run succeeds. This disjunction is weaker than behavioural refinement; it does not prove the actual compiler misbehaves.",
+      "source": "Solidity/Theorems.lean#theorem compiler_correct",
+      "action": "Report boundary; no premise, exclusion or theorem change authorized."
+    },
+    {
+      "rank": 2,
+      "id": "payment-checked",
+      "category": "problem",
+      "finding": "compiler_checked inherits the same refusal allowance through Agrees; certificate acceptance alone does not strengthen that relation.",
+      "source": "Solidity/Evm/Compiler.lean#def Agrees",
+      "action": "Report boundary; no premise, exclusion or theorem change authorized."
+    },
+    {
+      "rank": 3,
+      "id": "target-boundary",
+      "category": "boundary",
+      "finding": "Headline compiler target is the symbolic Evm machine; deployed-bytecode, physical hashes, forks and gas require separate relations.",
+      "source": "docs/compiler-verification.md",
+      "action": "Report boundary; no premise, exclusion or theorem change authorized."
+    },
+    {
+      "rank": 4,
+      "id": "divergence-fault",
+      "category": "boundary",
+      "finding": "compiler_correct allows abstract-machine fault for typed divergence; compare with observable-behaviour semantics before calling it divergence preservation.",
+      "source": "Solidity/Theorems.lean#theorem compiler_correct",
+      "action": "Report boundary; no premise, exclusion or theorem change authorized."
+    },
+    {
+      "rank": 5,
+      "id": "compiler-coverage",
+      "category": "boundary",
+      "finding": "Fragment and representation premises restrict the supported inputs; satisfiable witnesses do not demonstrate whole Solidity coverage. CompCert also conditions on successful translation.",
+      "source": "Solidity/Theorems.lean#theorem compiler_correct",
+      "action": "Report boundary; no premise, exclusion or theorem change authorized."
+    },
+    {
+      "rank": 6,
+      "id": "checked-paths",
+      "category": "boundary",
+      "finding": "Input is branch-specific and includes memory room/allocation premises. A core require witness does not establish each memory path inhabited.",
+      "source": "Solidity/Evm/Compiler.lean#def Input",
+      "action": "Report boundary; no premise, exclusion or theorem change authorized."
+    },
+    {
+      "rank": 7,
+      "id": "success-only-net",
+      "category": "boundary",
+      "finding": "compiler_net accounts for successful target runs only; it cannot rule out extra target failure. Its narrower name and docstring are accurate.",
+      "source": "Solidity/Theorems.lean#theorem compiler_net",
+      "action": "Report boundary; no premise, exclusion or theorem change authorized."
+    },
+    {
+      "rank": 8,
+      "id": "model-soundness",
+      "category": "boundary",
+      "finding": "Calculus soundness is strong for its intrinsic typed model, but no source elaborator or solc equivalence follows from that statement alone.",
+      "source": "Solidity/Theorems.lean#theorem soundness",
+      "action": "Report boundary; no premise, exclusion or theorem change authorized."
+    },
+    {
+      "rank": 9,
+      "id": "callback-policy",
+      "category": "boundary",
+      "finding": "Callback validity quantifies over the stated invariant-respecting callback semantics; it is not unqualified safety under arbitrary external Solidity code.",
+      "source": "Solidity/Theorems.lean#theorem callback_soundness",
+      "action": "Report boundary; no premise, exclusion or theorem change authorized."
+    },
+    {
+      "rank": 10,
+      "id": "noCallback-policy",
+      "category": "boundary",
+      "finding": "The noCallback theorem disables transfer/send callbacks in its model; the theorem does not certify the gas rationale for every fork.",
+      "source": "Solidity/Theorems.lean#theorem noCallback_soundness",
+      "action": "Report boundary; no premise, exclusion or theorem change authorized."
+    },
+    {
+      "rank": 11,
+      "id": "clean-tail",
+      "category": "boundary",
+      "finding": "cleanTail_holds assumes CleanTail; initial-state witness exists, but arbitrary dirty external states are outside that claim.",
+      "source": "Solidity/Theorems.lean#theorem cleanTail_holds",
+      "action": "Report boundary; no premise, exclusion or theorem change authorized."
+    },
+    {
+      "rank": 12,
+      "id": "symex-fuel",
+      "category": "boundary",
+      "finding": "symex_sound proves residual implication at arbitrary fuel; it does not assert solver completeness or symbolic execution termination without a supplied bound.",
+      "source": "Solidity/Theorems.lean#theorem symex_sound",
+      "action": "Report boundary; no premise, exclusion or theorem change authorized."
+    },
+    {
+      "rank": 13,
+      "id": "solkey-model",
+      "category": "boundary",
+      "finding": "Taclet-fragment equivalence is a relation between Lean rule sets, not an execution of the upstream Java SolKey prover.",
+      "source": "Solidity/Theorems.lean#theorem solkey_eq_calculus",
+      "action": "Report boundary; no premise, exclusion or theorem change authorized."
+    },
+    {
+      "rank": 14,
+      "id": "popular-examples",
+      "category": "measurement caveat",
+      "finding": "Most-imported-module ranking selects Source regression theorems. Fixed examples are useful checks but do not become general theorems because their module is popular.",
+      "source": "Solidity/Source/SemanticsExamples.lean",
+      "action": "Report boundary; no premise, exclusion or theorem change authorized."
+    },
+    {
+      "rank": 15,
+      "id": "contradiction-lemmas",
+      "category": "looks fine",
+      "finding": "The popular failure eliminators intentionally have incompatible joint hypotheses and conclude False. Counting them as vacuous headline proofs would be a method error.",
+      "source": "Solidity/Calculus/Closers.lean",
+      "action": "Report boundary; no premise, exclusion or theorem change authorized."
+    }
+  ],
+  "waits": [],
+  "limitations": [
+    "Source-level witness audit, not fresh Lean elaboration; no build or timing run performed.",
+    "scripts/differential and scripts/bench are absent at the pinned base; no results inferred.",
+    "Null ratios follow the recorded nearest-theorem search but do not prove global absence outside its pinned files. Similarity is a reviewed semantic judgement, not inferred from keyword hits.",
+    "H244 accepts the frozen generated/handwritten/untraced inventory without historical handwriting totals."
+  ],
+  "axioms_added": 0,
+  "sorry_added": 0,
+  "conclusion": "Headline calculus theorems match their stated intrinsic-model scope. Compiler statements retain payment/refusal and abstraction gaps against behavioural refinement. Source examples are useful fixed-case checks, not general semantic preservation. No evidence here justifies judging overall project size redundant."
+}

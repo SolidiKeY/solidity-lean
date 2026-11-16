@@ -54,7 +54,7 @@ theorem source_tail_items_run {E : Source.Env} {Γ : Source.RCtx} {σ : Source.S
       s.1).run (.nil,s.2) =
       (.ok (Source.Out.normal (s.1.set dest
         (s.1.get donor))),(.nil,s.2)) := by
-  have hr : Source.evalE G F (fuel+2) (.assign (.local dest) (.local donor)) (plan := none)
+  have hr : Source.evalE G F (fuel+2) (.assign (.local dest) (.local donor)) (plan := none) (calldataKnown := true)
       s =
       (.ok (.val (s.1.get donor)),
         (s.1.set dest (s.1.get donor),s.2)) :=

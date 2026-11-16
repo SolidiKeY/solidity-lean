@@ -37,7 +37,6 @@ theorem transport {E Γ} {origin : Source.Heap E.layout} (H : Source.HeapTy) (s 
       Solidity.Backend.Environment.cryptoStep (.op .MSTORE)
         ⟨sink.offset::lenU length.val length.isLt::stackTail,frameBytes image⟩=
         some ⟨stackTail,frameBytes reached⟩ ∧ reached.st=image.st ∧ reached.key=image.key := by
-  first | omega | decide | skip
   dsimp only
   have source := RetainedArrayHeader.whole H s allocated p prior ok supported root τ elementType n old found
     length values words encoded capacity (frameBytes image) oldReads tail reserved

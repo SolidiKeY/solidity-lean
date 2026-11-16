@@ -62,7 +62,7 @@ theorem same_slot (pipeline : Roadmap.Pipeline) (fuel : Nat) (condition : Source
 /-- This exact trailing condition has a real write if evaluated on the post-body locals. -/
 theorem condition_is_effectful :
     Source.evalE (MixedAssignmentControls.globals .legacy) F0 2
-      (.assign (.local .here) (.bool false)) (plan := none) P12Controls.sourcePost =
+      (.assign (.local .here) (.bool false)) (plan := none) (calldataKnown := true) P12Controls.sourcePost =
       (.ok (.val (.bool false)),P.source) := by rfl
 
 /-- Yet the actual loop keeps the body's true write, not that trailing false write. -/

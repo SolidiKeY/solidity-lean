@@ -70,6 +70,12 @@ theorem view_roundtrip (μ : FrameMem C Γ) (a : WordSpan μ.capacity)
     rw [load_view,read_store]
   · exact load_other _ _ _ _ _ same
 
+/-- Loading at the stored offset into any prior state reads the stored cell view. -/
+theorem load_store_view (μ : FrameMem C Γ) (a : WordSpan μ.capacity) (state prior : RawFrame.State ctx)
+    (cell : WordCell (localExternalTypes ctx)) (offset : Nat) (same : offset=a.offset.val.toNat) :
+    RawFrame.view (load (store μ a state cell) offset prior cell) cell=RawFrame.view state cell := by
+  rw [load_view,same,read_store]
+
 theorem store_image (μ : FrameMem C Γ) (a : WordSpan μ.capacity)
     (state : RawFrame.State ctx) (cell : WordCell (localExternalTypes ctx)) :
     frameBytes (store μ a state cell)=Environment.writeBytes (frameBytes μ)

@@ -3,7 +3,11 @@ import Solidity.Language.FeatureInfo
 import Solidity.KeySort
 import Solidity.Syntax.CheckedExact
 
-/-! Kernel-checked feasibility of the entire leading telescope of each named
+/-! Guarded regression: unsigned-subtraction feasibility must include both
+operands, and must not count the guard conclusion as a premise. Sort-lattice
+coverage must retain each named closure law rather than crediting transitivity
+as coverage of all lattice interfaces.
+Kernel-checked feasibility of the entire leading telescope of each named
 frozen theorem. The type is computed from the imported constant, so dropping
 an argument or a dependent hypothesis makes the witness fail to elaborate.
 This elaboration helper neither proves the original conclusions nor changes
@@ -60,11 +64,45 @@ theorem sort_name_full : hypotheses_of% KeySort.ofName_name := by
 theorem sort_trans_full : hypotheses_of% KeySort.le_trans := by
   exact ⟨.bool, .prim, .any, rfl, rfl, True.intro⟩
 
+
+theorem sort_refl_full : hypotheses_of% KeySort.le_refl := by
+  exact ⟨(.bool : KeySort), True.intro⟩
+#verify_hypotheses sort_refl_full for Solidity.KeySort.le_refl
+#print axioms sort_refl_full
+
+theorem sort_any_full : hypotheses_of% KeySort.le_any := by
+  exact ⟨(.bool : KeySort), True.intro⟩
+#verify_hypotheses sort_any_full for Solidity.KeySort.le_any
+#print axioms sort_any_full
+
+theorem sort_parents_full : hypotheses_of% KeySort.parents_sub_ancestors := by
+  exact ⟨(.bool : KeySort), True.intro⟩
+#verify_hypotheses sort_parents_full for Solidity.KeySort.parents_sub_ancestors
+#print axioms sort_parents_full
+
+theorem sort_closed_full : hypotheses_of% KeySort.ancestors_closed := by
+  exact ⟨(.bool : KeySort), True.intro⟩
+#verify_hypotheses sort_closed_full for Solidity.KeySort.ancestors_closed
+#print axioms sort_closed_full
+
+theorem sort_closure_full : hypotheses_of% KeySort.ancestors_eq_closure := by
+  exact ⟨(.bool : KeySort), True.intro⟩
+#verify_hypotheses sort_closure_full for Solidity.KeySort.ancestors_eq_closure
+#print axioms sort_closure_full
+
+theorem sort_irrefl_full : hypotheses_of% KeySort.ancestors_irrefl := by
+  exact ⟨(.bool : KeySort), True.intro⟩
+#verify_hypotheses sort_irrefl_full for Solidity.KeySort.ancestors_irrefl
+#print axioms sort_irrefl_full
+
 theorem emod_full : hypotheses_of% Checked.emod_of_ge := by
   exact ⟨130, 128, by decide, by decide, True.intro⟩
 
 theorem add_uint_full : hypotheses_of% Checked.add_uint_exact := by
   exact ⟨256, 250, 7, by decide, by decide, by decide, by decide, True.intro⟩
+
+theorem sub_uint_full : hypotheses_of% Checked.sub_uint_exact := by
+  exact ⟨7, 3, True.intro⟩
 
 theorem mul_uint_full : hypotheses_of% Checked.mul_uint_exact := by
   exact ⟨256, 17, 16, by decide, by decide, by decide, by decide, True.intro⟩
@@ -94,6 +132,7 @@ theorem mul_int_full : hypotheses_of% Checked.mul_int_exact := by
 #print axioms sort_trans_full
 #print axioms emod_full
 #print axioms add_uint_full
+#print axioms sub_uint_full
 #print axioms mul_uint_full
 #print axioms add_int_full
 #print axioms sub_int_full
@@ -106,6 +145,7 @@ theorem mul_int_full : hypotheses_of% Checked.mul_int_exact := by
 #verify_hypotheses Solidity.H62.AuditLanguage.sort_trans_full for Solidity.KeySort.le_trans
 #verify_hypotheses Solidity.H62.AuditLanguage.emod_full for Solidity.Checked.emod_of_ge
 #verify_hypotheses Solidity.H62.AuditLanguage.add_uint_full for Solidity.Checked.add_uint_exact
+#verify_hypotheses Solidity.H62.AuditLanguage.sub_uint_full for Solidity.Checked.sub_uint_exact
 #verify_hypotheses Solidity.H62.AuditLanguage.mul_uint_full for Solidity.Checked.mul_uint_exact
 #verify_hypotheses Solidity.H62.AuditLanguage.add_int_full for Solidity.Checked.add_int_exact
 #verify_hypotheses Solidity.H62.AuditLanguage.sub_int_full for Solidity.Checked.sub_int_exact

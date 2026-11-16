@@ -3,7 +3,7 @@ import Solidity.Semantics.Run
 
 /-! Kernel certificates for the programs emitted from pinned Group07 source.
 These certify emitted-program behavior, not a universal solc equivalence theorem. -/
-solc_import "../solc/Group07.ast.json" hash 0xe8d2f4010c7b455e as Group07 testing
+solc_import "../solc/Group07.ast.json" hash 0x2043794f78521fd5 as Group07 testing
 
 namespace Group07Checks
 open Solidity

@@ -1,0 +1,93 @@
+{
+  "closure_receipt": "resolved separately by pinned archived full-gate reuse; see closure_reuse",
+  "comparison_boundary": "Reference inventory includes multiple source languages and uses a different lexical proof-region classifier. Its line total must not replace the process audit .v denominator or turn a partial size calibration into a matched process-overhead verdict.",
+  "compcert_inventory_reused": {
+    "check_seconds": null,
+    "commit": "2685140bf72c959446981fb99b5e44a8975021bc",
+    "metrics": {
+      "declarations": 11970,
+      "declarations_status": "lexical markers only; not native declarations",
+      "definition_region_lines_estimate": 60488,
+      "files": 406,
+      "generated_lines": 2362,
+      "handwritten_candidate_lines": 242026,
+      "lines": 244388,
+      "native_declarations": null,
+      "other_lines_estimate": 63168,
+      "proof_marker_lines": 19183,
+      "proof_region_lines_estimate": 120732,
+      "theorems": 7144,
+      "unclassified_lines": 242026,
+      "unsupported_native_files": 153
+    },
+    "project": "CompCert",
+    "source_url": "https://github.com/AbsInt/CompCert/tree/2685140bf72c959446981fb99b5e44a8975021bc",
+    "timing_status": "not measured; published timing not yet located"
+  },
+  "decision": "H241 option A: existing archived receipts and matched calibration only; no new measurement",
+  "evidence_gap": {
+    "authority": "H151 disposition of H241 existing-data lookup",
+    "categorical_verdict": null,
+    "claim_status": "unproven/inconclusive",
+    "coordinator_state_receipt": "coordinator-20261108T165207Z/receipt.json",
+    "fresh_measurement_authorized": false,
+    "full_audit_completion_authorized": false,
+    "lookup_boundary": "No matching artifact located in relevant process/reference handoffs, recorded reference reuse or bounded archive filename search. This does not prove no artifact exists elsewhere.",
+    "matched_ratio": null,
+    "new_task_or_producer_interface_authorized": false,
+    "receipt_boundary": "Coordinator supplied this pointer and disposition; receipt bytes/hash were not supplied in this VM.",
+    "status": "UNVERIFIABLE",
+    "subject": "matched process-overhead calibration"
+  },
+  "missing_counterparts_reused": [
+    {
+      "reason": "solc implements the compiler; selected production implementation files supply no correctness theorem counterpart.",
+      "searched": [
+        "libsolidity",
+        "libyul"
+      ],
+      "unit": "general solc compiler/lowering correctness proof"
+    },
+    {
+      "reason": "Implementation compiler has no dynamic-logic soundness counterpart.",
+      "searched": [
+        "libsolidity"
+      ],
+      "unit": "Solidity dynamic-logic soundness versus solc"
+    },
+    {
+      "reason": "No like-for-like local WP component established; removed Sound.lean/WP.thy comparison.",
+      "searched": [
+        "Solidity/Calculus/Sound.lean",
+        "thys/Isabelle-Solidity/WP.thy"
+      ],
+      "unit": "WP facade"
+    }
+  ],
+  "process_overhead_calibration": "UNVERIFIABLE evidence gap under H151; no matched overhead numerator located in the bounded existing-data lookup",
+  "reference_waits_reused": [],
+  "source_inputs": {
+    "boundaries.json": {
+      "path": "docs/audits/direction-tools/references/boundaries.json",
+      "revision": "645f10caf083550552616229654e29fddd1ad767",
+      "sha256": "13a43ff8e92a6c8f93be6d876384ed825d7d756e6e4350806cb30086974f6f88"
+    },
+    "inventory.json": {
+      "path": "docs/audits/direction-tools/references/inventory.json",
+      "revision": "645f10caf083550552616229654e29fddd1ad767",
+      "sha256": "2daf1c939a72534f91de42cef59c5925e1ec25e5a0445fd2f49112ee1c753a34"
+    },
+    "pins.json": {
+      "path": "docs/audits/direction-tools/references/pins.json",
+      "revision": "645f10caf083550552616229654e29fddd1ad767",
+      "sha256": "5fdb343a3f15a008fb3cc6b813f21be71230d7fc49ca39c6540015bee27a1af8"
+    },
+    "summary.json": {
+      "path": "docs/audits/direction-tools/references/summary.json",
+      "revision": "645f10caf083550552616229654e29fddd1ad767",
+      "sha256": "bc762a51e099fc58ddd0c2abf5a45d488859451d6ebb2c905aa79b06d8131ff8"
+    }
+  },
+  "source_status": "done",
+  "status": "UNVERIFIABLE calibration evidence; audit incomplete, not waiting for an unchanged artifact"
+}

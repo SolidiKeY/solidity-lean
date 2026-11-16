@@ -1,0 +1,189 @@
+{
+  "base": "d4ad633a9624263a59b14fd2c520b9bc602f88f3",
+  "boundary": "Exact full Closers source from BASE elaborated against the supplied existing import cache; only selected-module mutation outcomes measured, not whole-project survivors or differential conformance",
+  "cache_receipt": {
+    "archive_sha256": "cf045686365b3f1dab6769dd022e91a296c08f4750291e46dbd5a8b2269961ad",
+    "manifest_sha256": "0cb1002b98cf15ef2dfda9654370d4e9f036cea78b56a485085925e98a5b567e",
+    "path": "/workspace/solidity-lean/docs/audits/direction-tools/mutation/cache-verification.json",
+    "sha256": "1ca49ed735a4f2378c37af71bc5ef9e33f5e76e931c94c4f790685db5f9cbd34"
+  },
+  "effective_lean_path": "/workspace/coordinator-inputs/qlean-cache-20261108/extracted/lib",
+  "keysort": {
+    "command": [
+      "prlimit",
+      "--as=12884901888",
+      "--",
+      "/workspace/.setup/tools/lean-4.24.0-linux/bin/lean",
+      "-j1",
+      "-M11000",
+      "--tstack=131072",
+      "--root=/workspace/da-mutation-lean-evidence",
+      "-o",
+      "/workspace/da-mutation-lean-evidence/KeySort.olean",
+      "/workspace/da-mutation-lean-evidence/KeySort.lean"
+    ],
+    "log": "/workspace/da-mutation-lean-evidence/KeySort.log",
+    "name": "KeySort",
+    "output": "",
+    "returncode": 0,
+    "source_sha256": "d47ce39b0149d9701ac32ac36a72b535200ba1a25e59571203a1f4fa6be9f3b0"
+  },
+  "memory_address_space_cap_bytes": 12884901888,
+  "original_module_baseline": {
+    "command": [
+      "prlimit",
+      "--as=12884901888",
+      "--",
+      "/workspace/.setup/tools/lean-4.24.0-linux/bin/lean",
+      "-j1",
+      "-M11000",
+      "--tstack=131072",
+      "--root=/workspace/da-mutation-whole-evidence",
+      "-o",
+      "/workspace/da-mutation-whole-evidence/Attempt6_ClosersOriginal.olean",
+      "/workspace/da-mutation-whole-evidence/Attempt6_ClosersOriginal.lean"
+    ],
+    "log": "/workspace/da-mutation-whole-evidence/Attempt6_ClosersOriginal.log",
+    "name": "ClosersOriginal",
+    "output": "",
+    "returncode": 0,
+    "source_path": "/workspace/da-mutation-whole-evidence/Attempt6_ClosersOriginal.lean",
+    "source_sha256": "92820e63eb62377e15269d9fae366a8003174e8c7b15ea0d3cf5b503891f9b89"
+  },
+  "policy": {
+    "commit": "1d35d15f5e585bee177aa841e28638f16d9a44f0",
+    "id": "H232",
+    "limitation": "no systemd scope on the cloud VM (H232)",
+    "path": "docs/refactoring-progress.md",
+    "sha256": "8dd05565f948f3e52df87979937844086c05285fc6ad6b7e3d7a501c364e888d"
+  },
+  "runtime_gate_pass": false,
+  "source_slice_bindings": [
+    {
+      "end": "/-- What a modality",
+      "line": 30,
+      "path": "Solidity/Update.lean",
+      "sha256": "d623408f06c8bda7ad2900d8da90b4a19fb6bcb04a2d8e37771d9216afccae00",
+      "start": "inductive Modality where"
+    },
+    {
+      "end": "/-- A revert with the data",
+      "line": 58,
+      "path": "Solidity/Semantics/Run.lean",
+      "sha256": "922191c55a274609a1903869b4a1ba0f55e68537ea942ae280cfa1a2221c6161",
+      "start": "inductive THalt where"
+    },
+    {
+      "path": "Solidity/Semantics/Run.lean",
+      "sha256": "ac29a050e48e0e6e218eb65735c173e86c55ff652c6ebb541efbd1a01c28d6d7",
+      "text": "abbrev TRes (\u03b1 : Type) := Except THalt \u03b1"
+    },
+    {
+      "end": "theorem tbind_ok_inv",
+      "line": 34,
+      "path": "Solidity/Semantics/RunFrame.lean",
+      "sha256": "cd678799efd11753c70673f93ba7c8713deed257d3e0c160b8d447c5fd31eb40",
+      "start": "def _root_.Solidity.Modality.onTHalt"
+    },
+    {
+      "end": "/-- The state a modality",
+      "line": 63,
+      "path": "Solidity/Calculus/Logic.lean",
+      "sha256": "ab7ffc95afed255cdf5e9d8d6b73ac5f5575e16ad3125bafa99359855ad03ebf",
+      "start": "def _root_.Solidity.Modality.afterRunTR"
+    },
+    {
+      "end": "end Solidity",
+      "line": 205,
+      "path": "Solidity/Calculus/Closers.lean",
+      "sha256": "9cb7daa238e4b4960f800d0cce90f84b5f77a8ceb7df615492bdc747ff33b7df",
+      "start": "/-- The typed outcome is a panic."
+    }
+  ],
+  "swap_total_kib": 0,
+  "total_elaborations": 8,
+  "versions": {
+    "lake": "Lake version 5.0.0-src+797c613 (Lean version 4.24.0)",
+    "lean": "Lean (version 4.24.0, x86_64-unknown-linux-gnu, commit 797c613eb9b6d4ec95db23e3e00af9ac6657f24b, Release)"
+  },
+  "whole_module_baseline": {
+    "command": [
+      "prlimit",
+      "--as=12884901888",
+      "--",
+      "/workspace/.setup/tools/lean-4.24.0-linux/bin/lean",
+      "-j1",
+      "-M11000",
+      "--tstack=131072",
+      "--root=/workspace/da-mutation-whole-evidence",
+      "-o",
+      "/workspace/da-mutation-whole-evidence/Attempt6_ClosersOriginal.olean",
+      "/workspace/da-mutation-whole-evidence/Attempt6_ClosersOriginal.lean"
+    ],
+    "log": "/workspace/da-mutation-whole-evidence/Attempt6_ClosersOriginal.log",
+    "name": "ClosersOriginal",
+    "output": "",
+    "returncode": 0,
+    "source_path": "/workspace/da-mutation-whole-evidence/Attempt6_ClosersOriginal.lean",
+    "source_sha256": "92820e63eb62377e15269d9fae366a8003174e8c7b15ea0d3cf5b503891f9b89"
+  },
+  "whole_module_counts": {
+    "inconclusive": 0,
+    "proof_failed": 1,
+    "survived": 1
+  },
+  "whole_module_mutants": [
+    {
+      "id": "M31",
+      "interpretation": "vacuous-premise: isPanic becomes always false, so hp cannot hold; no global panic-coverage conclusion",
+      "probe": {
+        "command": [
+          "prlimit",
+          "--as=12884901888",
+          "--",
+          "/workspace/.setup/tools/lean-4.24.0-linux/bin/lean",
+          "-j1",
+          "-M11000",
+          "--tstack=131072",
+          "--root=/workspace/da-mutation-whole-evidence",
+          "-o",
+          "/workspace/da-mutation-whole-evidence/Attempt7_ClosersM31.olean",
+          "/workspace/da-mutation-whole-evidence/Attempt7_ClosersM31.lean"
+        ],
+        "log": "/workspace/da-mutation-whole-evidence/Attempt7_ClosersM31.log",
+        "name": "ClosersM31",
+        "output": "",
+        "returncode": 0,
+        "source_path": "/workspace/da-mutation-whole-evidence/Attempt7_ClosersM31.lean",
+        "source_sha256": "25fe43a11071e1ba822f5e9a4eaac3abfbe28e3c7deb6fe940ce244f1c020f7d"
+      },
+      "status": "selected-whole-module-survived"
+    },
+    {
+      "id": "M32",
+      "interpretation": "local exhausted-case theorem constraint: changed isFail makes the copied theorem proof fail",
+      "probe": {
+        "command": [
+          "prlimit",
+          "--as=12884901888",
+          "--",
+          "/workspace/.setup/tools/lean-4.24.0-linux/bin/lean",
+          "-j1",
+          "-M11000",
+          "--tstack=131072",
+          "--root=/workspace/da-mutation-whole-evidence",
+          "-o",
+          "/workspace/da-mutation-whole-evidence/Attempt8_ClosersM32.olean",
+          "/workspace/da-mutation-whole-evidence/Attempt8_ClosersM32.lean"
+        ],
+        "log": "/workspace/da-mutation-whole-evidence/Attempt8_ClosersM32.log",
+        "name": "ClosersM32",
+        "output": "/workspace/da-mutation-whole-evidence/Attempt8_ClosersM32.lean:231:16: error: unsolved goals\ncase error.exhausted.refl\n\u03b1 : Type\np : \u03b1 \u2192 Prop\nh : Modality.diamond.afterRunTR p (Except.error THalt.exhausted)\n\u22a2 False\n",
+        "returncode": 1,
+        "source_path": "/workspace/da-mutation-whole-evidence/Attempt8_ClosersM32.lean",
+        "source_sha256": "f0b25ffa53071cc4e4e8cf0ebe2125cdf6c283e8bd998098e437175871303afc"
+      },
+      "status": "selected-whole-module-proof-failed"
+    }
+  ]
+}

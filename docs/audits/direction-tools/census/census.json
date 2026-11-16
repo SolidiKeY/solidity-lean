@@ -1,0 +1,2729 @@
+{
+  "areas": {
+    "AST": {
+      "by_category": {
+        "unmarked": {
+          "files": 1,
+          "lines": 1247
+        }
+      },
+      "code_lines": 737,
+      "declarations": {
+        "abbrev": 4,
+        "axiom": 0,
+        "def": 95,
+        "inductive": 11,
+        "instance": 4,
+        "lemma": 0,
+        "opaque": 0,
+        "structure": 0,
+        "theorem": 20
+      },
+      "definition_lines": 571,
+      "definition_to_proof_line_ratio": 4.13768115942029,
+      "files": 1,
+      "generated_lines": 0,
+      "generated_share": 0.0,
+      "implemented_by": 0,
+      "imports_in": 8,
+      "imports_out": 3,
+      "lines": 1247,
+      "maxHeartbeats_options": 0,
+      "native_decide": 0,
+      "presumed_handwritten_lines": 1247,
+      "proof_lines": 138,
+      "sorry": 0,
+      "timing": {
+        "body_seconds": 0,
+        "body_seconds_per_1k_lines": null,
+        "coverage": "no_data",
+        "full_seconds": 0,
+        "sample_files": 0,
+        "sample_lines_at_census_revision": 0
+      },
+      "unknown_import_only_lines": 0
+    },
+    "Automation": {
+      "by_category": {
+        "unmarked": {
+          "files": 3,
+          "lines": 84
+        }
+      },
+      "code_lines": 38,
+      "declarations": {
+        "abbrev": 0,
+        "axiom": 0,
+        "def": 1,
+        "inductive": 0,
+        "instance": 0,
+        "lemma": 0,
+        "opaque": 0,
+        "structure": 0,
+        "theorem": 2
+      },
+      "definition_lines": 2,
+      "definition_to_proof_line_ratio": 0.2,
+      "files": 3,
+      "generated_lines": 0,
+      "generated_share": 0.0,
+      "implemented_by": 0,
+      "imports_in": 16,
+      "imports_out": 7,
+      "lines": 84,
+      "maxHeartbeats_options": 0,
+      "native_decide": 0,
+      "presumed_handwritten_lines": 84,
+      "proof_lines": 10,
+      "sorry": 0,
+      "timing": {
+        "body_seconds": 0,
+        "body_seconds_per_1k_lines": null,
+        "coverage": "no_data",
+        "full_seconds": 0,
+        "sample_files": 0,
+        "sample_lines_at_census_revision": 0
+      },
+      "unknown_import_only_lines": 0
+    },
+    "Backend": {
+      "by_category": {
+        "axiom_pins": {
+          "files": 1,
+          "lines": 149
+        },
+        "import_only_unknown": {
+          "files": 3,
+          "lines": 13
+        },
+        "marked_generated": {
+          "files": 14,
+          "lines": 2302
+        },
+        "unmarked": {
+          "files": 1997,
+          "lines": 276760
+        }
+      },
+      "code_lines": 225991,
+      "declarations": {
+        "abbrev": 1105,
+        "axiom": 0,
+        "def": 11323,
+        "inductive": 56,
+        "instance": 3,
+        "lemma": 0,
+        "opaque": 0,
+        "structure": 425,
+        "theorem": 15750
+      },
+      "definition_lines": 37184,
+      "definition_to_proof_line_ratio": 0.22387188055028748,
+      "files": 2015,
+      "generated_lines": 2451,
+      "generated_share": 0.008777898747958628,
+      "implemented_by": 0,
+      "imports_in": 5577,
+      "imports_out": 3595,
+      "lines": 279224,
+      "maxHeartbeats_options": 0,
+      "native_decide": 0,
+      "presumed_handwritten_lines": 276760,
+      "proof_lines": 166095,
+      "sorry": 0,
+      "timing": {
+        "body_seconds": 21.095,
+        "body_seconds_per_1k_lines": 6.916393442622951,
+        "coverage": "historical_sample",
+        "full_seconds": 32.595,
+        "sample_files": 23,
+        "sample_lines_at_census_revision": 3050
+      },
+      "unknown_import_only_lines": 13
+    },
+    "Calculus": {
+      "by_category": {
+        "import_only_unknown": {
+          "files": 9,
+          "lines": 427
+        },
+        "marked_generated": {
+          "files": 1,
+          "lines": 1550
+        },
+        "unmarked": {
+          "files": 378,
+          "lines": 167353
+        }
+      },
+      "code_lines": 130751,
+      "declarations": {
+        "abbrev": 145,
+        "axiom": 0,
+        "def": 4878,
+        "inductive": 173,
+        "instance": 50,
+        "lemma": 1,
+        "opaque": 2,
+        "structure": 217,
+        "theorem": 6279
+      },
+      "definition_lines": 43832,
+      "definition_to_proof_line_ratio": 0.5397963079272423,
+      "files": 388,
+      "generated_lines": 1550,
+      "generated_share": 0.009153723498494064,
+      "implemented_by": 110,
+      "imports_in": 2021,
+      "imports_out": 824,
+      "lines": 169330,
+      "maxHeartbeats_options": 0,
+      "native_decide": 0,
+      "presumed_handwritten_lines": 167353,
+      "proof_lines": 81201,
+      "sorry": 0,
+      "timing": {
+        "body_seconds": 7.211,
+        "body_seconds_per_1k_lines": 4.47888198757764,
+        "coverage": "historical_sample",
+        "full_seconds": 9.572000000000001,
+        "sample_files": 5,
+        "sample_lines_at_census_revision": 1610
+      },
+      "unknown_import_only_lines": 427
+    },
+    "Corpus": {
+      "by_category": {
+        "corpus": {
+          "files": 8,
+          "lines": 4079
+        },
+        "unmarked": {
+          "files": 1,
+          "lines": 125
+        }
+      },
+      "code_lines": 2406,
+      "declarations": {
+        "abbrev": 2,
+        "axiom": 0,
+        "def": 5,
+        "inductive": 0,
+        "instance": 0,
+        "lemma": 0,
+        "opaque": 0,
+        "structure": 0,
+        "theorem": 592
+      },
+      "definition_lines": 20,
+      "definition_to_proof_line_ratio": 0.008628127696289905,
+      "files": 9,
+      "generated_lines": 4079,
+      "generated_share": 0.9702664129400571,
+      "implemented_by": 0,
+      "imports_in": 19,
+      "imports_out": 16,
+      "lines": 4204,
+      "maxHeartbeats_options": 0,
+      "native_decide": 0,
+      "presumed_handwritten_lines": 125,
+      "proof_lines": 2318,
+      "sorry": 0,
+      "timing": {
+        "body_seconds": 0,
+        "body_seconds_per_1k_lines": null,
+        "coverage": "no_data",
+        "full_seconds": 0,
+        "sample_files": 0,
+        "sample_lines_at_census_revision": 0
+      },
+      "unknown_import_only_lines": 0
+    },
+    "Counterexamples": {
+      "by_category": {
+        "unmarked": {
+          "files": 4,
+          "lines": 413
+        }
+      },
+      "code_lines": 180,
+      "declarations": {
+        "abbrev": 0,
+        "axiom": 0,
+        "def": 4,
+        "inductive": 0,
+        "instance": 0,
+        "lemma": 0,
+        "opaque": 0,
+        "structure": 0,
+        "theorem": 14
+      },
+      "definition_lines": 7,
+      "definition_to_proof_line_ratio": 0.051094890510948905,
+      "files": 4,
+      "generated_lines": 0,
+      "generated_share": 0.0,
+      "implemented_by": 0,
+      "imports_in": 11,
+      "imports_out": 4,
+      "lines": 413,
+      "maxHeartbeats_options": 0,
+      "native_decide": 0,
+      "presumed_handwritten_lines": 413,
+      "proof_lines": 137,
+      "sorry": 0,
+      "timing": {
+        "body_seconds": 0,
+        "body_seconds_per_1k_lines": null,
+        "coverage": "no_data",
+        "full_seconds": 0,
+        "sample_files": 0,
+        "sample_lines_at_census_revision": 0
+      },
+      "unknown_import_only_lines": 0
+    },
+    "ERC7201": {
+      "by_category": {
+        "unmarked": {
+          "files": 1,
+          "lines": 38
+        }
+      },
+      "code_lines": 17,
+      "declarations": {
+        "abbrev": 0,
+        "axiom": 0,
+        "def": 3,
+        "inductive": 0,
+        "instance": 0,
+        "lemma": 0,
+        "opaque": 0,
+        "structure": 0,
+        "theorem": 2
+      },
+      "definition_lines": 9,
+      "definition_to_proof_line_ratio": 2.25,
+      "files": 1,
+      "generated_lines": 0,
+      "generated_share": 0.0,
+      "implemented_by": 0,
+      "imports_in": 4,
+      "imports_out": 2,
+      "lines": 38,
+      "maxHeartbeats_options": 0,
+      "native_decide": 0,
+      "presumed_handwritten_lines": 38,
+      "proof_lines": 4,
+      "sorry": 0,
+      "timing": {
+        "body_seconds": 0,
+        "body_seconds_per_1k_lines": null,
+        "coverage": "no_data",
+        "full_seconds": 0,
+        "sample_files": 0,
+        "sample_lines_at_census_revision": 0
+      },
+      "unknown_import_only_lines": 0
+    },
+    "Eqns": {
+      "by_category": {
+        "unmarked": {
+          "files": 1,
+          "lines": 46
+        }
+      },
+      "code_lines": 17,
+      "declarations": {
+        "abbrev": 0,
+        "axiom": 0,
+        "def": 0,
+        "inductive": 0,
+        "instance": 0,
+        "lemma": 0,
+        "opaque": 0,
+        "structure": 0,
+        "theorem": 0
+      },
+      "definition_lines": 0,
+      "definition_to_proof_line_ratio": null,
+      "files": 1,
+      "generated_lines": 0,
+      "generated_share": 0.0,
+      "implemented_by": 0,
+      "imports_in": 2,
+      "imports_out": 2,
+      "lines": 46,
+      "maxHeartbeats_options": 0,
+      "native_decide": 0,
+      "presumed_handwritten_lines": 46,
+      "proof_lines": 0,
+      "sorry": 0,
+      "timing": {
+        "body_seconds": 0,
+        "body_seconds_per_1k_lines": null,
+        "coverage": "no_data",
+        "full_seconds": 0,
+        "sample_files": 0,
+        "sample_lines_at_census_revision": 0
+      },
+      "unknown_import_only_lines": 0
+    },
+    "Evm": {
+      "by_category": {
+        "unmarked": {
+          "files": 279,
+          "lines": 45857
+        }
+      },
+      "code_lines": 37758,
+      "declarations": {
+        "abbrev": 33,
+        "axiom": 0,
+        "def": 1811,
+        "inductive": 73,
+        "instance": 6,
+        "lemma": 0,
+        "opaque": 0,
+        "structure": 78,
+        "theorem": 2395
+      },
+      "definition_lines": 9735,
+      "definition_to_proof_line_ratio": 0.3724177505738332,
+      "files": 279,
+      "generated_lines": 0,
+      "generated_share": 0.0,
+      "implemented_by": 11,
+      "imports_in": 1058,
+      "imports_out": 476,
+      "lines": 45857,
+      "maxHeartbeats_options": 1,
+      "native_decide": 0,
+      "presumed_handwritten_lines": 45857,
+      "proof_lines": 26140,
+      "sorry": 0,
+      "timing": {
+        "body_seconds": 0.15100000000000002,
+        "body_seconds_per_1k_lines": 1.7356321839080464,
+        "coverage": "historical_sample",
+        "full_seconds": 1.179,
+        "sample_files": 2,
+        "sample_lines_at_census_revision": 87
+      },
+      "unknown_import_only_lines": 0
+    },
+    "Examples": {
+      "by_category": {
+        "import_only_unknown": {
+          "files": 16,
+          "lines": 104
+        },
+        "unmarked": {
+          "files": 340,
+          "lines": 61367
+        }
+      },
+      "code_lines": 36441,
+      "declarations": {
+        "abbrev": 105,
+        "axiom": 0,
+        "def": 2654,
+        "inductive": 4,
+        "instance": 8,
+        "lemma": 0,
+        "opaque": 0,
+        "structure": 4,
+        "theorem": 3375
+      },
+      "definition_lines": 9860,
+      "definition_to_proof_line_ratio": 0.5574715893028778,
+      "files": 356,
+      "generated_lines": 0,
+      "generated_share": 0.0,
+      "implemented_by": 0,
+      "imports_in": 590,
+      "imports_out": 1078,
+      "lines": 61471,
+      "maxHeartbeats_options": 15,
+      "native_decide": 0,
+      "presumed_handwritten_lines": 61367,
+      "proof_lines": 17687,
+      "sorry": 0,
+      "timing": {
+        "body_seconds": 0,
+        "body_seconds_per_1k_lines": null,
+        "coverage": "no_data",
+        "full_seconds": 0,
+        "sample_files": 0,
+        "sample_lines_at_census_revision": 0
+      },
+      "unknown_import_only_lines": 104
+    },
+    "FreshNames": {
+      "by_category": {
+        "unmarked": {
+          "files": 1,
+          "lines": 93
+        }
+      },
+      "code_lines": 35,
+      "declarations": {
+        "abbrev": 1,
+        "axiom": 0,
+        "def": 3,
+        "inductive": 0,
+        "instance": 0,
+        "lemma": 0,
+        "opaque": 0,
+        "structure": 0,
+        "theorem": 0
+      },
+      "definition_lines": 31,
+      "definition_to_proof_line_ratio": null,
+      "files": 1,
+      "generated_lines": 0,
+      "generated_share": 0.0,
+      "implemented_by": 0,
+      "imports_in": 14,
+      "imports_out": 1,
+      "lines": 93,
+      "maxHeartbeats_options": 0,
+      "native_decide": 0,
+      "presumed_handwritten_lines": 93,
+      "proof_lines": 0,
+      "sorry": 0,
+      "timing": {
+        "body_seconds": 0,
+        "body_seconds_per_1k_lines": null,
+        "coverage": "no_data",
+        "full_seconds": 0,
+        "sample_files": 0,
+        "sample_lines_at_census_revision": 0
+      },
+      "unknown_import_only_lines": 0
+    },
+    "Frontend": {
+      "by_category": {
+        "axiom_pins": {
+          "files": 1,
+          "lines": 3905
+        },
+        "import_only_unknown": {
+          "files": 4,
+          "lines": 114
+        },
+        "marked_generated": {
+          "files": 2,
+          "lines": 455
+        },
+        "unmarked": {
+          "files": 503,
+          "lines": 97115
+        }
+      },
+      "code_lines": 82400,
+      "declarations": {
+        "abbrev": 48,
+        "axiom": 0,
+        "def": 2708,
+        "inductive": 166,
+        "instance": 10,
+        "lemma": 0,
+        "opaque": 0,
+        "structure": 129,
+        "theorem": 4863
+      },
+      "definition_lines": 22945,
+      "definition_to_proof_line_ratio": 0.43333333333333335,
+      "files": 510,
+      "generated_lines": 4360,
+      "generated_share": 0.04291803246414474,
+      "implemented_by": 2,
+      "imports_in": 1767,
+      "imports_out": 991,
+      "lines": 101589,
+      "maxHeartbeats_options": 0,
+      "native_decide": 0,
+      "presumed_handwritten_lines": 97115,
+      "proof_lines": 52950,
+      "sorry": 0,
+      "timing": {
+        "body_seconds": 1.085,
+        "body_seconds_per_1k_lines": 2.368995633187773,
+        "coverage": "historical_sample",
+        "full_seconds": 1.849,
+        "sample_files": 3,
+        "sample_lines_at_census_revision": 458
+      },
+      "unknown_import_only_lines": 114
+    },
+    "Hash": {
+      "by_category": {
+        "unmarked": {
+          "files": 6,
+          "lines": 2265
+        }
+      },
+      "code_lines": 1649,
+      "declarations": {
+        "abbrev": 0,
+        "axiom": 0,
+        "def": 33,
+        "inductive": 0,
+        "instance": 5,
+        "lemma": 0,
+        "opaque": 0,
+        "structure": 0,
+        "theorem": 135
+      },
+      "definition_lines": 107,
+      "definition_to_proof_line_ratio": 0.0732375085557837,
+      "files": 6,
+      "generated_lines": 0,
+      "generated_share": 0.0,
+      "implemented_by": 0,
+      "imports_in": 15,
+      "imports_out": 8,
+      "lines": 2265,
+      "maxHeartbeats_options": 0,
+      "native_decide": 0,
+      "presumed_handwritten_lines": 2265,
+      "proof_lines": 1461,
+      "sorry": 0,
+      "timing": {
+        "body_seconds": 0,
+        "body_seconds_per_1k_lines": null,
+        "coverage": "no_data",
+        "full_seconds": 0,
+        "sample_files": 0,
+        "sample_lines_at_census_revision": 0
+      },
+      "unknown_import_only_lines": 0
+    },
+    "Hashes": {
+      "by_category": {
+        "unmarked": {
+          "files": 1,
+          "lines": 199
+        }
+      },
+      "code_lines": 134,
+      "declarations": {
+        "abbrev": 0,
+        "axiom": 0,
+        "def": 29,
+        "inductive": 0,
+        "instance": 0,
+        "lemma": 0,
+        "opaque": 0,
+        "structure": 0,
+        "theorem": 0
+      },
+      "definition_lines": 123,
+      "definition_to_proof_line_ratio": null,
+      "files": 1,
+      "generated_lines": 0,
+      "generated_share": 0.0,
+      "implemented_by": 0,
+      "imports_in": 4,
+      "imports_out": 0,
+      "lines": 199,
+      "maxHeartbeats_options": 0,
+      "native_decide": 0,
+      "presumed_handwritten_lines": 199,
+      "proof_lines": 0,
+      "sorry": 0,
+      "timing": {
+        "body_seconds": 0,
+        "body_seconds_per_1k_lines": null,
+        "coverage": "no_data",
+        "full_seconds": 0,
+        "sample_files": 0,
+        "sample_lines_at_census_revision": 0
+      },
+      "unknown_import_only_lines": 0
+    },
+    "Keccak": {
+      "by_category": {
+        "unmarked": {
+          "files": 1,
+          "lines": 123
+        }
+      },
+      "code_lines": 70,
+      "declarations": {
+        "abbrev": 0,
+        "axiom": 0,
+        "def": 14,
+        "inductive": 0,
+        "instance": 0,
+        "lemma": 0,
+        "opaque": 0,
+        "structure": 0,
+        "theorem": 0
+      },
+      "definition_lines": 59,
+      "definition_to_proof_line_ratio": null,
+      "files": 1,
+      "generated_lines": 0,
+      "generated_share": 0.0,
+      "implemented_by": 0,
+      "imports_in": 9,
+      "imports_out": 0,
+      "lines": 123,
+      "maxHeartbeats_options": 0,
+      "native_decide": 0,
+      "presumed_handwritten_lines": 123,
+      "proof_lines": 0,
+      "sorry": 0,
+      "timing": {
+        "body_seconds": 0,
+        "body_seconds_per_1k_lines": null,
+        "coverage": "no_data",
+        "full_seconds": 0,
+        "sample_files": 0,
+        "sample_lines_at_census_revision": 0
+      },
+      "unknown_import_only_lines": 0
+    },
+    "KeySort": {
+      "by_category": {
+        "unmarked": {
+          "files": 1,
+          "lines": 271
+        }
+      },
+      "code_lines": 153,
+      "declarations": {
+        "abbrev": 0,
+        "axiom": 0,
+        "def": 7,
+        "inductive": 1,
+        "instance": 0,
+        "lemma": 0,
+        "opaque": 0,
+        "structure": 0,
+        "theorem": 8
+      },
+      "definition_lines": 104,
+      "definition_to_proof_line_ratio": 2.311111111111111,
+      "files": 1,
+      "generated_lines": 0,
+      "generated_share": 0.0,
+      "implemented_by": 0,
+      "imports_in": 7,
+      "imports_out": 0,
+      "lines": 271,
+      "maxHeartbeats_options": 0,
+      "native_decide": 0,
+      "presumed_handwritten_lines": 271,
+      "proof_lines": 45,
+      "sorry": 0,
+      "timing": {
+        "body_seconds": 0,
+        "body_seconds_per_1k_lines": null,
+        "coverage": "no_data",
+        "full_seconds": 0,
+        "sample_files": 0,
+        "sample_lines_at_census_revision": 0
+      },
+      "unknown_import_only_lines": 0
+    },
+    "Language": {
+      "by_category": {
+        "marked_generated": {
+          "files": 2,
+          "lines": 2399
+        },
+        "unmarked": {
+          "files": 6,
+          "lines": 3565
+        }
+      },
+      "code_lines": 4608,
+      "declarations": {
+        "abbrev": 2,
+        "axiom": 0,
+        "def": 124,
+        "inductive": 8,
+        "instance": 1,
+        "lemma": 0,
+        "opaque": 0,
+        "structure": 3,
+        "theorem": 207
+      },
+      "definition_lines": 2648,
+      "definition_to_proof_line_ratio": 1.5054007959067652,
+      "files": 8,
+      "generated_lines": 2399,
+      "generated_share": 0.4022468142186452,
+      "implemented_by": 0,
+      "imports_in": 30,
+      "imports_out": 8,
+      "lines": 5964,
+      "maxHeartbeats_options": 0,
+      "native_decide": 0,
+      "presumed_handwritten_lines": 3565,
+      "proof_lines": 1759,
+      "sorry": 0,
+      "timing": {
+        "body_seconds": 0,
+        "body_seconds_per_1k_lines": null,
+        "coverage": "no_data",
+        "full_seconds": 0,
+        "sample_files": 0,
+        "sample_lines_at_census_revision": 0
+      },
+      "unknown_import_only_lines": 0
+    },
+    "Lowering": {
+      "by_category": {
+        "import_only_unknown": {
+          "files": 1,
+          "lines": 6
+        },
+        "marked_generated": {
+          "files": 2,
+          "lines": 58
+        },
+        "unmarked": {
+          "files": 703,
+          "lines": 102782
+        }
+      },
+      "code_lines": 82043,
+      "declarations": {
+        "abbrev": 337,
+        "axiom": 0,
+        "def": 5406,
+        "inductive": 24,
+        "instance": 38,
+        "lemma": 0,
+        "opaque": 0,
+        "structure": 74,
+        "theorem": 5817
+      },
+      "definition_lines": 18041,
+      "definition_to_proof_line_ratio": 0.34847021556053465,
+      "files": 706,
+      "generated_lines": 58,
+      "generated_share": 0.0005639499834704315,
+      "implemented_by": 0,
+      "imports_in": 2176,
+      "imports_out": 1346,
+      "lines": 102846,
+      "maxHeartbeats_options": 0,
+      "native_decide": 0,
+      "presumed_handwritten_lines": 102782,
+      "proof_lines": 51772,
+      "sorry": 0,
+      "timing": {
+        "body_seconds": 6.576999999999999,
+        "body_seconds_per_1k_lines": 9.920060331825036,
+        "coverage": "historical_sample",
+        "full_seconds": 8.731,
+        "sample_files": 5,
+        "sample_lines_at_census_revision": 663
+      },
+      "unknown_import_only_lines": 6
+    },
+    "Optimizer": {
+      "by_category": {
+        "unmarked": {
+          "files": 16,
+          "lines": 6658
+        }
+      },
+      "code_lines": 5379,
+      "declarations": {
+        "abbrev": 7,
+        "axiom": 0,
+        "def": 160,
+        "inductive": 1,
+        "instance": 0,
+        "lemma": 0,
+        "opaque": 0,
+        "structure": 7,
+        "theorem": 270
+      },
+      "definition_lines": 1348,
+      "definition_to_proof_line_ratio": 0.3504029113595009,
+      "files": 16,
+      "generated_lines": 0,
+      "generated_share": 0.0,
+      "implemented_by": 0,
+      "imports_in": 62,
+      "imports_out": 37,
+      "lines": 6658,
+      "maxHeartbeats_options": 0,
+      "native_decide": 0,
+      "presumed_handwritten_lines": 6658,
+      "proof_lines": 3847,
+      "sorry": 0,
+      "timing": {
+        "body_seconds": 0,
+        "body_seconds_per_1k_lines": null,
+        "coverage": "no_data",
+        "full_seconds": 0,
+        "sample_files": 0,
+        "sample_lines_at_census_revision": 0
+      },
+      "unknown_import_only_lines": 0
+    },
+    "Precompiles": {
+      "by_category": {
+        "unmarked": {
+          "files": 11,
+          "lines": 2072
+        }
+      },
+      "code_lines": 1312,
+      "declarations": {
+        "abbrev": 9,
+        "axiom": 0,
+        "def": 163,
+        "inductive": 1,
+        "instance": 6,
+        "lemma": 0,
+        "opaque": 0,
+        "structure": 5,
+        "theorem": 54
+      },
+      "definition_lines": 733,
+      "definition_to_proof_line_ratio": 2.1002865329512894,
+      "files": 11,
+      "generated_lines": 0,
+      "generated_share": 0.0,
+      "implemented_by": 0,
+      "imports_in": 59,
+      "imports_out": 19,
+      "lines": 2072,
+      "maxHeartbeats_options": 0,
+      "native_decide": 0,
+      "presumed_handwritten_lines": 2072,
+      "proof_lines": 349,
+      "sorry": 0,
+      "timing": {
+        "body_seconds": 0,
+        "body_seconds_per_1k_lines": null,
+        "coverage": "no_data",
+        "full_seconds": 0,
+        "sample_files": 0,
+        "sample_lines_at_census_revision": 0
+      },
+      "unknown_import_only_lines": 0
+    },
+    "RevertBytes": {
+      "by_category": {
+        "unmarked": {
+          "files": 1,
+          "lines": 75
+        }
+      },
+      "code_lines": 31,
+      "declarations": {
+        "abbrev": 1,
+        "axiom": 0,
+        "def": 10,
+        "inductive": 0,
+        "instance": 0,
+        "lemma": 0,
+        "opaque": 0,
+        "structure": 0,
+        "theorem": 0
+      },
+      "definition_lines": 28,
+      "definition_to_proof_line_ratio": null,
+      "files": 1,
+      "generated_lines": 0,
+      "generated_share": 0.0,
+      "implemented_by": 0,
+      "imports_in": 12,
+      "imports_out": 1,
+      "lines": 75,
+      "maxHeartbeats_options": 0,
+      "native_decide": 0,
+      "presumed_handwritten_lines": 75,
+      "proof_lines": 0,
+      "sorry": 0,
+      "timing": {
+        "body_seconds": 0,
+        "body_seconds_per_1k_lines": null,
+        "coverage": "no_data",
+        "full_seconds": 0,
+        "sample_files": 0,
+        "sample_lines_at_census_revision": 0
+      },
+      "unknown_import_only_lines": 0
+    },
+    "Roadmap": {
+      "by_category": {
+        "marked_generated": {
+          "files": 1,
+          "lines": 38
+        },
+        "unmarked": {
+          "files": 19,
+          "lines": 4690
+        }
+      },
+      "code_lines": 2883,
+      "declarations": {
+        "abbrev": 25,
+        "axiom": 0,
+        "def": 171,
+        "inductive": 14,
+        "instance": 3,
+        "lemma": 0,
+        "opaque": 0,
+        "structure": 47,
+        "theorem": 186
+      },
+      "definition_lines": 1221,
+      "definition_to_proof_line_ratio": 0.8574438202247191,
+      "files": 20,
+      "generated_lines": 38,
+      "generated_share": 0.008037225042301184,
+      "implemented_by": 0,
+      "imports_in": 109,
+      "imports_out": 33,
+      "lines": 4728,
+      "maxHeartbeats_options": 0,
+      "native_decide": 0,
+      "presumed_handwritten_lines": 4690,
+      "proof_lines": 1424,
+      "sorry": 0,
+      "timing": {
+        "body_seconds": 0,
+        "body_seconds_per_1k_lines": null,
+        "coverage": "no_data",
+        "full_seconds": 0,
+        "sample_files": 0,
+        "sample_lines_at_census_revision": 0
+      },
+      "unknown_import_only_lines": 0
+    },
+    "Scope": {
+      "by_category": {
+        "unmarked": {
+          "files": 1,
+          "lines": 286
+        }
+      },
+      "code_lines": 174,
+      "declarations": {
+        "abbrev": 1,
+        "axiom": 0,
+        "def": 14,
+        "inductive": 6,
+        "instance": 2,
+        "lemma": 0,
+        "opaque": 0,
+        "structure": 0,
+        "theorem": 14
+      },
+      "definition_lines": 81,
+      "definition_to_proof_line_ratio": 0.9878048780487805,
+      "files": 1,
+      "generated_lines": 0,
+      "generated_share": 0.0,
+      "implemented_by": 0,
+      "imports_in": 4,
+      "imports_out": 1,
+      "lines": 286,
+      "maxHeartbeats_options": 0,
+      "native_decide": 0,
+      "presumed_handwritten_lines": 286,
+      "proof_lines": 82,
+      "sorry": 0,
+      "timing": {
+        "body_seconds": 0,
+        "body_seconds_per_1k_lines": null,
+        "coverage": "no_data",
+        "full_seconds": 0,
+        "sample_files": 0,
+        "sample_lines_at_census_revision": 0
+      },
+      "unknown_import_only_lines": 0
+    },
+    "Secp256k1": {
+      "by_category": {
+        "unmarked": {
+          "files": 1,
+          "lines": 130
+        }
+      },
+      "code_lines": 92,
+      "declarations": {
+        "abbrev": 2,
+        "axiom": 0,
+        "def": 12,
+        "inductive": 0,
+        "instance": 2,
+        "lemma": 0,
+        "opaque": 0,
+        "structure": 1,
+        "theorem": 0
+      },
+      "definition_lines": 89,
+      "definition_to_proof_line_ratio": null,
+      "files": 1,
+      "generated_lines": 0,
+      "generated_share": 0.0,
+      "implemented_by": 0,
+      "imports_in": 4,
+      "imports_out": 1,
+      "lines": 130,
+      "maxHeartbeats_options": 0,
+      "native_decide": 0,
+      "presumed_handwritten_lines": 130,
+      "proof_lines": 0,
+      "sorry": 0,
+      "timing": {
+        "body_seconds": 0,
+        "body_seconds_per_1k_lines": null,
+        "coverage": "no_data",
+        "full_seconds": 0,
+        "sample_files": 0,
+        "sample_lines_at_census_revision": 0
+      },
+      "unknown_import_only_lines": 0
+    },
+    "Semantics": {
+      "by_category": {
+        "import_only_unknown": {
+          "files": 2,
+          "lines": 55
+        },
+        "unmarked": {
+          "files": 81,
+          "lines": 25848
+        }
+      },
+      "code_lines": 19093,
+      "declarations": {
+        "abbrev": 33,
+        "axiom": 0,
+        "def": 798,
+        "inductive": 64,
+        "instance": 9,
+        "lemma": 0,
+        "opaque": 0,
+        "structure": 45,
+        "theorem": 1313
+      },
+      "definition_lines": 5490,
+      "definition_to_proof_line_ratio": 0.43567970795968575,
+      "files": 83,
+      "generated_lines": 0,
+      "generated_share": 0.0,
+      "implemented_by": 35,
+      "imports_in": 424,
+      "imports_out": 123,
+      "lines": 25903,
+      "maxHeartbeats_options": 0,
+      "native_decide": 0,
+      "presumed_handwritten_lines": 25848,
+      "proof_lines": 12601,
+      "sorry": 0,
+      "timing": {
+        "body_seconds": 0.33499999999999996,
+        "body_seconds_per_1k_lines": 1.2689393939393938,
+        "coverage": "historical_sample",
+        "full_seconds": 0.838,
+        "sample_files": 1,
+        "sample_lines_at_census_revision": 264
+      },
+      "unknown_import_only_lines": 55
+    },
+    "Signature": {
+      "by_category": {
+        "unmarked": {
+          "files": 1,
+          "lines": 612
+        }
+      },
+      "code_lines": 399,
+      "declarations": {
+        "abbrev": 0,
+        "axiom": 0,
+        "def": 28,
+        "inductive": 6,
+        "instance": 0,
+        "lemma": 0,
+        "opaque": 0,
+        "structure": 0,
+        "theorem": 12
+      },
+      "definition_lines": 327,
+      "definition_to_proof_line_ratio": 5.7368421052631575,
+      "files": 1,
+      "generated_lines": 0,
+      "generated_share": 0.0,
+      "implemented_by": 5,
+      "imports_in": 6,
+      "imports_out": 4,
+      "lines": 612,
+      "maxHeartbeats_options": 0,
+      "native_decide": 0,
+      "presumed_handwritten_lines": 612,
+      "proof_lines": 57,
+      "sorry": 0,
+      "timing": {
+        "body_seconds": 0,
+        "body_seconds_per_1k_lines": null,
+        "coverage": "no_data",
+        "full_seconds": 0,
+        "sample_files": 0,
+        "sample_lines_at_census_revision": 0
+      },
+      "unknown_import_only_lines": 0
+    },
+    "SolcValidation": {
+      "by_category": {
+        "marked_generated": {
+          "files": 5,
+          "lines": 972
+        },
+        "unmarked": {
+          "files": 25,
+          "lines": 6654
+        }
+      },
+      "code_lines": 5576,
+      "declarations": {
+        "abbrev": 30,
+        "axiom": 0,
+        "def": 468,
+        "inductive": 32,
+        "instance": 1,
+        "lemma": 0,
+        "opaque": 0,
+        "structure": 13,
+        "theorem": 390
+      },
+      "definition_lines": 1965,
+      "definition_to_proof_line_ratio": 0.5834323040380047,
+      "files": 30,
+      "generated_lines": 972,
+      "generated_share": 0.12745869394177814,
+      "implemented_by": 0,
+      "imports_in": 98,
+      "imports_out": 61,
+      "lines": 7626,
+      "maxHeartbeats_options": 0,
+      "native_decide": 0,
+      "presumed_handwritten_lines": 6654,
+      "proof_lines": 3368,
+      "sorry": 0,
+      "timing": {
+        "body_seconds": 0,
+        "body_seconds_per_1k_lines": null,
+        "coverage": "no_data",
+        "full_seconds": 0,
+        "sample_files": 0,
+        "sample_lines_at_census_revision": 0
+      },
+      "unknown_import_only_lines": 0
+    },
+    "Solkey": {
+      "by_category": {
+        "unmarked": {
+          "files": 5,
+          "lines": 266
+        }
+      },
+      "code_lines": 78,
+      "declarations": {
+        "abbrev": 0,
+        "axiom": 0,
+        "def": 2,
+        "inductive": 0,
+        "instance": 0,
+        "lemma": 0,
+        "opaque": 0,
+        "structure": 0,
+        "theorem": 3
+      },
+      "definition_lines": 3,
+      "definition_to_proof_line_ratio": 0.375,
+      "files": 5,
+      "generated_lines": 0,
+      "generated_share": 0.0,
+      "implemented_by": 0,
+      "imports_in": 14,
+      "imports_out": 12,
+      "lines": 266,
+      "maxHeartbeats_options": 0,
+      "native_decide": 0,
+      "presumed_handwritten_lines": 266,
+      "proof_lines": 8,
+      "sorry": 0,
+      "timing": {
+        "body_seconds": 0,
+        "body_seconds_per_1k_lines": null,
+        "coverage": "no_data",
+        "full_seconds": 0,
+        "sample_files": 0,
+        "sample_lines_at_census_revision": 0
+      },
+      "unknown_import_only_lines": 0
+    },
+    "SortCheck": {
+      "by_category": {
+        "unmarked": {
+          "files": 3,
+          "lines": 1281
+        }
+      },
+      "code_lines": 761,
+      "declarations": {
+        "abbrev": 0,
+        "axiom": 0,
+        "def": 66,
+        "inductive": 6,
+        "instance": 2,
+        "lemma": 0,
+        "opaque": 0,
+        "structure": 6,
+        "theorem": 5
+      },
+      "definition_lines": 558,
+      "definition_to_proof_line_ratio": 5.9361702127659575,
+      "files": 3,
+      "generated_lines": 0,
+      "generated_share": 0.0,
+      "implemented_by": 0,
+      "imports_in": 14,
+      "imports_out": 6,
+      "lines": 1281,
+      "maxHeartbeats_options": 0,
+      "native_decide": 0,
+      "presumed_handwritten_lines": 1281,
+      "proof_lines": 94,
+      "sorry": 0,
+      "timing": {
+        "body_seconds": 0,
+        "body_seconds_per_1k_lines": null,
+        "coverage": "no_data",
+        "full_seconds": 0,
+        "sample_files": 0,
+        "sample_lines_at_census_revision": 0
+      },
+      "unknown_import_only_lines": 0
+    },
+    "Source": {
+      "by_category": {
+        "import_only_unknown": {
+          "files": 1,
+          "lines": 8
+        },
+        "mixed_generated_blocks": {
+          "files": 2,
+          "lines": 996
+        },
+        "unmarked": {
+          "files": 259,
+          "lines": 49037
+        }
+      },
+      "code_lines": 37844,
+      "declarations": {
+        "abbrev": 108,
+        "axiom": 0,
+        "def": 2003,
+        "inductive": 118,
+        "instance": 10,
+        "lemma": 0,
+        "opaque": 0,
+        "structure": 73,
+        "theorem": 3172
+      },
+      "definition_lines": 10892,
+      "definition_to_proof_line_ratio": 0.45959745136925606,
+      "files": 262,
+      "generated_lines": 620,
+      "generated_share": 0.012389840330928638,
+      "implemented_by": 0,
+      "imports_in": 1227,
+      "imports_out": 440,
+      "lines": 50041,
+      "maxHeartbeats_options": 0,
+      "native_decide": 0,
+      "presumed_handwritten_lines": 49413,
+      "proof_lines": 23699,
+      "sorry": 0,
+      "timing": {
+        "body_seconds": 0,
+        "body_seconds_per_1k_lines": null,
+        "coverage": "no_data",
+        "full_seconds": 0,
+        "sample_files": 0,
+        "sample_lines_at_census_revision": 0
+      },
+      "unknown_import_only_lines": 8
+    },
+    "SpecSyntax": {
+      "by_category": {
+        "unmarked": {
+          "files": 1,
+          "lines": 220
+        }
+      },
+      "code_lines": 144,
+      "declarations": {
+        "abbrev": 0,
+        "axiom": 0,
+        "def": 6,
+        "inductive": 2,
+        "instance": 0,
+        "lemma": 0,
+        "opaque": 0,
+        "structure": 1,
+        "theorem": 0
+      },
+      "definition_lines": 135,
+      "definition_to_proof_line_ratio": null,
+      "files": 1,
+      "generated_lines": 0,
+      "generated_share": 0.0,
+      "implemented_by": 0,
+      "imports_in": 3,
+      "imports_out": 1,
+      "lines": 220,
+      "maxHeartbeats_options": 0,
+      "native_decide": 0,
+      "presumed_handwritten_lines": 220,
+      "proof_lines": 0,
+      "sorry": 0,
+      "timing": {
+        "body_seconds": 0,
+        "body_seconds_per_1k_lines": null,
+        "coverage": "no_data",
+        "full_seconds": 0,
+        "sample_files": 0,
+        "sample_lines_at_census_revision": 0
+      },
+      "unknown_import_only_lines": 0
+    },
+    "Stipend": {
+      "by_category": {
+        "unmarked": {
+          "files": 1,
+          "lines": 274
+        }
+      },
+      "code_lines": 140,
+      "declarations": {
+        "abbrev": 0,
+        "axiom": 0,
+        "def": 16,
+        "inductive": 0,
+        "instance": 1,
+        "lemma": 0,
+        "opaque": 0,
+        "structure": 2,
+        "theorem": 12
+      },
+      "definition_lines": 74,
+      "definition_to_proof_line_ratio": 1.2982456140350878,
+      "files": 1,
+      "generated_lines": 0,
+      "generated_share": 0.0,
+      "implemented_by": 0,
+      "imports_in": 9,
+      "imports_out": 2,
+      "lines": 274,
+      "maxHeartbeats_options": 0,
+      "native_decide": 0,
+      "presumed_handwritten_lines": 274,
+      "proof_lines": 57,
+      "sorry": 0,
+      "timing": {
+        "body_seconds": 0,
+        "body_seconds_per_1k_lines": null,
+        "coverage": "no_data",
+        "full_seconds": 0,
+        "sample_files": 0,
+        "sample_lines_at_census_revision": 0
+      },
+      "unknown_import_only_lines": 0
+    },
+    "Storage": {
+      "by_category": {
+        "unmarked": {
+          "files": 21,
+          "lines": 4049
+        }
+      },
+      "code_lines": 3144,
+      "declarations": {
+        "abbrev": 3,
+        "axiom": 0,
+        "def": 101,
+        "inductive": 14,
+        "instance": 0,
+        "lemma": 0,
+        "opaque": 0,
+        "structure": 1,
+        "theorem": 243
+      },
+      "definition_lines": 376,
+      "definition_to_proof_line_ratio": 0.14641744548286603,
+      "files": 21,
+      "generated_lines": 0,
+      "generated_share": 0.0,
+      "implemented_by": 0,
+      "imports_in": 82,
+      "imports_out": 32,
+      "lines": 4049,
+      "maxHeartbeats_options": 0,
+      "native_decide": 0,
+      "presumed_handwritten_lines": 4049,
+      "proof_lines": 2568,
+      "sorry": 0,
+      "timing": {
+        "body_seconds": 0.31499999999999995,
+        "body_seconds_per_1k_lines": 1.4318181818181817,
+        "coverage": "historical_sample",
+        "full_seconds": 0.847,
+        "sample_files": 1,
+        "sample_lines_at_census_revision": 220
+      },
+      "unknown_import_only_lines": 0
+    },
+    "Syntax": {
+      "by_category": {
+        "import_only_unknown": {
+          "files": 2,
+          "lines": 116
+        },
+        "unmarked": {
+          "files": 20,
+          "lines": 14501
+        }
+      },
+      "code_lines": 10248,
+      "declarations": {
+        "abbrev": 22,
+        "axiom": 0,
+        "def": 754,
+        "inductive": 46,
+        "instance": 5,
+        "lemma": 0,
+        "opaque": 1,
+        "structure": 19,
+        "theorem": 26
+      },
+      "definition_lines": 9423,
+      "definition_to_proof_line_ratio": 54.78488372093023,
+      "files": 22,
+      "generated_lines": 0,
+      "generated_share": 0.0,
+      "implemented_by": 5,
+      "imports_in": 153,
+      "imports_out": 44,
+      "lines": 14617,
+      "maxHeartbeats_options": 0,
+      "native_decide": 0,
+      "presumed_handwritten_lines": 14501,
+      "proof_lines": 172,
+      "sorry": 0,
+      "timing": {
+        "body_seconds": 0,
+        "body_seconds_per_1k_lines": null,
+        "coverage": "no_data",
+        "full_seconds": 0,
+        "sample_files": 0,
+        "sample_lines_at_census_revision": 0
+      },
+      "unknown_import_only_lines": 116
+    },
+    "TestSuite": {
+      "by_category": {
+        "unmarked": {
+          "files": 49,
+          "lines": 4710
+        }
+      },
+      "code_lines": 3673,
+      "declarations": {
+        "abbrev": 0,
+        "axiom": 0,
+        "def": 6,
+        "inductive": 0,
+        "instance": 0,
+        "lemma": 0,
+        "opaque": 0,
+        "structure": 0,
+        "theorem": 563
+      },
+      "definition_lines": 248,
+      "definition_to_proof_line_ratio": 0.20261437908496732,
+      "files": 49,
+      "generated_lines": 0,
+      "generated_share": 0.0,
+      "implemented_by": 0,
+      "imports_in": 75,
+      "imports_out": 79,
+      "lines": 4710,
+      "maxHeartbeats_options": 0,
+      "native_decide": 0,
+      "presumed_handwritten_lines": 4710,
+      "proof_lines": 1224,
+      "sorry": 0,
+      "timing": {
+        "body_seconds": 0,
+        "body_seconds_per_1k_lines": null,
+        "coverage": "no_data",
+        "full_seconds": 0,
+        "sample_files": 0,
+        "sample_lines_at_census_revision": 0
+      },
+      "unknown_import_only_lines": 0
+    },
+    "Theorems": {
+      "by_category": {
+        "unmarked": {
+          "files": 1,
+          "lines": 360
+        }
+      },
+      "code_lines": 155,
+      "declarations": {
+        "abbrev": 11,
+        "axiom": 0,
+        "def": 1,
+        "inductive": 0,
+        "instance": 0,
+        "lemma": 0,
+        "opaque": 0,
+        "structure": 0,
+        "theorem": 21
+      },
+      "definition_lines": 54,
+      "definition_to_proof_line_ratio": 0.7941176470588235,
+      "files": 1,
+      "generated_lines": 0,
+      "generated_share": 0.0,
+      "implemented_by": 0,
+      "imports_in": 9,
+      "imports_out": 7,
+      "lines": 360,
+      "maxHeartbeats_options": 0,
+      "native_decide": 0,
+      "presumed_handwritten_lines": 360,
+      "proof_lines": 68,
+      "sorry": 0,
+      "timing": {
+        "body_seconds": 0,
+        "body_seconds_per_1k_lines": null,
+        "coverage": "no_data",
+        "full_seconds": 0,
+        "sample_files": 0,
+        "sample_lines_at_census_revision": 0
+      },
+      "unknown_import_only_lines": 0
+    },
+    "Theory": {
+      "by_category": {
+        "import_only_unknown": {
+          "files": 1,
+          "lines": 41
+        },
+        "unmarked": {
+          "files": 24,
+          "lines": 8849
+        }
+      },
+      "code_lines": 6473,
+      "declarations": {
+        "abbrev": 8,
+        "axiom": 0,
+        "def": 120,
+        "inductive": 17,
+        "instance": 2,
+        "lemma": 0,
+        "opaque": 0,
+        "structure": 13,
+        "theorem": 500
+      },
+      "definition_lines": 689,
+      "definition_to_proof_line_ratio": 0.12461566286851149,
+      "files": 25,
+      "generated_lines": 0,
+      "generated_share": 0.0,
+      "implemented_by": 0,
+      "imports_in": 153,
+      "imports_out": 45,
+      "lines": 8890,
+      "maxHeartbeats_options": 0,
+      "native_decide": 0,
+      "presumed_handwritten_lines": 8849,
+      "proof_lines": 5529,
+      "sorry": 0,
+      "timing": {
+        "body_seconds": 0,
+        "body_seconds_per_1k_lines": null,
+        "coverage": "no_data",
+        "full_seconds": 0,
+        "sample_files": 0,
+        "sample_lines_at_census_revision": 0
+      },
+      "unknown_import_only_lines": 41
+    },
+    "Tools": {
+      "by_category": {
+        "unmarked": {
+          "files": 31,
+          "lines": 8575
+        }
+      },
+      "code_lines": 6082,
+      "declarations": {
+        "abbrev": 6,
+        "axiom": 0,
+        "def": 487,
+        "inductive": 13,
+        "instance": 4,
+        "lemma": 0,
+        "opaque": 0,
+        "structure": 18,
+        "theorem": 42
+      },
+      "definition_lines": 5308,
+      "definition_to_proof_line_ratio": 10.680080482897385,
+      "files": 31,
+      "generated_lines": 0,
+      "generated_share": 0.0,
+      "implemented_by": 2,
+      "imports_in": 270,
+      "imports_out": 88,
+      "lines": 8575,
+      "maxHeartbeats_options": 0,
+      "native_decide": 0,
+      "presumed_handwritten_lines": 8575,
+      "proof_lines": 497,
+      "sorry": 0,
+      "timing": {
+        "body_seconds": 0,
+        "body_seconds_per_1k_lines": null,
+        "coverage": "no_data",
+        "full_seconds": 0,
+        "sample_files": 0,
+        "sample_lines_at_census_revision": 0
+      },
+      "unknown_import_only_lines": 0
+    },
+    "TypeGraph": {
+      "by_category": {
+        "unmarked": {
+          "files": 1,
+          "lines": 147
+        }
+      },
+      "code_lines": 108,
+      "declarations": {
+        "abbrev": 2,
+        "axiom": 0,
+        "def": 5,
+        "inductive": 4,
+        "instance": 0,
+        "lemma": 0,
+        "opaque": 0,
+        "structure": 1,
+        "theorem": 9
+      },
+      "definition_lines": 55,
+      "definition_to_proof_line_ratio": 1.1,
+      "files": 1,
+      "generated_lines": 0,
+      "generated_share": 0.0,
+      "implemented_by": 0,
+      "imports_in": 3,
+      "imports_out": 1,
+      "lines": 147,
+      "maxHeartbeats_options": 0,
+      "native_decide": 0,
+      "presumed_handwritten_lines": 147,
+      "proof_lines": 50,
+      "sorry": 0,
+      "timing": {
+        "body_seconds": 0,
+        "body_seconds_per_1k_lines": null,
+        "coverage": "no_data",
+        "full_seconds": 0,
+        "sample_files": 0,
+        "sample_lines_at_census_revision": 0
+      },
+      "unknown_import_only_lines": 0
+    },
+    "Typing": {
+      "by_category": {
+        "unmarked": {
+          "files": 12,
+          "lines": 6832
+        }
+      },
+      "code_lines": 5352,
+      "declarations": {
+        "abbrev": 13,
+        "axiom": 0,
+        "def": 84,
+        "inductive": 1,
+        "instance": 0,
+        "lemma": 0,
+        "opaque": 0,
+        "structure": 6,
+        "theorem": 459
+      },
+      "definition_lines": 452,
+      "definition_to_proof_line_ratio": 0.09612930667800935,
+      "files": 12,
+      "generated_lines": 0,
+      "generated_share": 0.0,
+      "implemented_by": 0,
+      "imports_in": 44,
+      "imports_out": 16,
+      "lines": 6832,
+      "maxHeartbeats_options": 0,
+      "native_decide": 0,
+      "presumed_handwritten_lines": 6832,
+      "proof_lines": 4702,
+      "sorry": 0,
+      "timing": {
+        "body_seconds": 0,
+        "body_seconds_per_1k_lines": null,
+        "coverage": "no_data",
+        "full_seconds": 0,
+        "sample_files": 0,
+        "sample_lines_at_census_revision": 0
+      },
+      "unknown_import_only_lines": 0
+    },
+    "Update": {
+      "by_category": {
+        "unmarked": {
+          "files": 1,
+          "lines": 58
+        }
+      },
+      "code_lines": 20,
+      "declarations": {
+        "abbrev": 0,
+        "axiom": 0,
+        "def": 3,
+        "inductive": 2,
+        "instance": 0,
+        "lemma": 0,
+        "opaque": 0,
+        "structure": 0,
+        "theorem": 0
+      },
+      "definition_lines": 16,
+      "definition_to_proof_line_ratio": null,
+      "files": 1,
+      "generated_lines": 0,
+      "generated_share": 0.0,
+      "implemented_by": 0,
+      "imports_in": 5,
+      "imports_out": 1,
+      "lines": 58,
+      "maxHeartbeats_options": 0,
+      "native_decide": 0,
+      "presumed_handwritten_lines": 58,
+      "proof_lines": 0,
+      "sorry": 0,
+      "timing": {
+        "body_seconds": 0,
+        "body_seconds_per_1k_lines": null,
+        "coverage": "no_data",
+        "full_seconds": 0,
+        "sample_files": 0,
+        "sample_lines_at_census_revision": 0
+      },
+      "unknown_import_only_lines": 0
+    },
+    "Yul": {
+      "by_category": {
+        "import_only_unknown": {
+          "files": 10,
+          "lines": 568
+        },
+        "marked_generated": {
+          "files": 9,
+          "lines": 6975
+        },
+        "unmarked": {
+          "files": 1808,
+          "lines": 189889
+        }
+      },
+      "code_lines": 164067,
+      "declarations": {
+        "abbrev": 196,
+        "axiom": 0,
+        "def": 8327,
+        "inductive": 172,
+        "instance": 5,
+        "lemma": 0,
+        "opaque": 0,
+        "structure": 210,
+        "theorem": 19176
+      },
+      "definition_lines": 34071,
+      "definition_to_proof_line_ratio": 0.2989470913398263,
+      "files": 1827,
+      "generated_lines": 6975,
+      "generated_share": 0.03532861947404676,
+      "implemented_by": 6,
+      "imports_in": 5193,
+      "imports_out": 3348,
+      "lines": 197432,
+      "maxHeartbeats_options": 0,
+      "native_decide": 0,
+      "presumed_handwritten_lines": 189889,
+      "proof_lines": 113970,
+      "sorry": 0,
+      "timing": {
+        "body_seconds": 19.346,
+        "body_seconds_per_1k_lines": 7.554080437329168,
+        "coverage": "historical_sample",
+        "full_seconds": 26.684,
+        "sample_files": 19,
+        "sample_lines_at_census_revision": 2561
+      },
+      "unknown_import_only_lines": 568
+    }
+  },
+  "inventory": {
+    "docs/audits/architecture-tools/": [
+      "docs/audits/architecture-tools/core_closure.py",
+      "docs/audits/architecture-tools/doc_names.py",
+      "docs/audits/architecture-tools/dup_decls.py",
+      "docs/audits/architecture-tools/dup_general.py",
+      "docs/audits/architecture-tools/imports.py",
+      "docs/audits/architecture-tools/near_files.py",
+      "docs/audits/architecture-tools/olean_sizes.py",
+      "docs/audits/architecture-tools/timing-sample.tsv",
+      "docs/audits/architecture-tools/unreferenced.py"
+    ],
+    "docs/audits/build-speed": [
+      "docs/audits/build-speed-tools/churn.py",
+      "docs/audits/build-speed-tools/import_graph.py",
+      "docs/audits/build-speed-tools/measure.sh",
+      "docs/audits/build-speed-tools/pins.py",
+      "docs/audits/build-speed-tools/profile.sh",
+      "docs/audits/build-speed-tools/scan.py",
+      "docs/audits/build-speed.md"
+    ],
+    "docs/audits/proof-coverage-tools/": [
+      "docs/audits/proof-coverage-tools/statement-sample.txt",
+      "docs/audits/proof-coverage-tools/theorem_census.py"
+    ],
+    "scripts/bench/": [],
+    "scripts/build-measure": [
+      "scripts/build-measure-report.py",
+      "scripts/build-measure.py"
+    ],
+    "scripts/differential/": []
+  },
+  "methodology": {
+    "counts": "Lexical, nested comments and strings removed; anchored declaration commands; no kernel/semantic claims. Physical lines include comments/blanks.",
+    "generated": "Corpus except handwritten Basic.lean, AxiomPins, proven generated registry roots, explicit source-generation header; other import-only modules are unknown; explicit BEGIN/END generator blocks counted separately excluding delimiters; unmarked is presumed handwritten, may contain unmarked generated code. Chain/agreement name alone is not a generation marker.",
+    "imports": "Direct syntactic edges, multiplicity preserved; incoming includes all tracked Lean modules. Not transitive closure.",
+    "line_ratio": "Nonblank lexical command spans for theorem/lemma versus other declaration kinds; instance proofs counted under definition. Approximation, not proof-term size.",
+    "references": "docs/audits/architecture.md section 3; reused committed timing, no Lean executed.",
+    "timing": "Historical CPU sample: column 3 full, column 4 import-only, difference body. Denominator uses census revision lines, not proven identical timed source. No area-wide estimate or current benchmark."
+  },
+  "module_chunks": [
+    "modules-00.json",
+    "modules-01.json",
+    "modules-02.json",
+    "modules-03.json",
+    "modules-04.json",
+    "modules-05.json",
+    "modules-06.json",
+    "modules-07.json",
+    "modules-08.json",
+    "modules-09.json",
+    "modules-10.json",
+    "modules-11.json",
+    "modules-12.json",
+    "modules-13.json",
+    "modules-14.json",
+    "modules-15.json",
+    "modules-16.json",
+    "modules-17.json",
+    "modules-18.json",
+    "modules-19.json",
+    "modules-20.json",
+    "modules-21.json",
+    "modules-22.json"
+  ],
+  "outside_solidity_totals": {
+    "by_category": {
+      "generated_root": {
+        "files": 4,
+        "lines": 7193
+      },
+      "import_only_unknown": {
+        "files": 7,
+        "lines": 50
+      },
+      "marked_generated": {
+        "files": 8,
+        "lines": 1089
+      },
+      "unmarked": {
+        "files": 1541,
+        "lines": 179333
+      }
+    },
+    "code_lines": 149375,
+    "declarations": {
+      "abbrev": 710,
+      "axiom": 1,
+      "def": 6450,
+      "inductive": 112,
+      "instance": 212,
+      "lemma": 193,
+      "opaque": 7,
+      "structure": 155,
+      "theorem": 8902
+    },
+    "definition_lines": 35410,
+    "definition_to_proof_line_ratio": 0.5583940454789164,
+    "files": 1560,
+    "generated_lines": 8282,
+    "generated_share": 0.04413183065568966,
+    "implemented_by": 1,
+    "imports_in": 4,
+    "imports_out": 11052,
+    "lines": 187665,
+    "maxHeartbeats_options": 0,
+    "native_decide": 0,
+    "presumed_handwritten_lines": 179333,
+    "proof_lines": 63414,
+    "sorry": 0,
+    "unknown_import_only_lines": 50
+  },
+  "repository_totals": {
+    "by_category": {
+      "axiom_pins": {
+        "files": 2,
+        "lines": 4054
+      },
+      "corpus": {
+        "files": 8,
+        "lines": 4079
+      },
+      "generated_root": {
+        "files": 4,
+        "lines": 7193
+      },
+      "import_only_unknown": {
+        "files": 56,
+        "lines": 1502
+      },
+      "marked_generated": {
+        "files": 44,
+        "lines": 15838
+      },
+      "mixed_generated_blocks": {
+        "files": 2,
+        "lines": 996
+      },
+      "unmarked": {
+        "files": 8161,
+        "lines": 1275109
+      }
+    },
+    "code_lines": 1028031,
+    "declarations": {
+      "abbrev": 2969,
+      "axiom": 1,
+      "def": 49353,
+      "inductive": 1147,
+      "instance": 389,
+      "lemma": 194,
+      "opaque": 10,
+      "structure": 1553,
+      "theorem": 74831
+    },
+    "definition_lines": 254324,
+    "definition_to_proof_line_ratio": 0.3976938124807466,
+    "files": 8277,
+    "generated_lines": 31784,
+    "generated_share": 0.02428537918398253,
+    "implemented_by": 177,
+    "imports_in": 21364,
+    "imports_out": 23815,
+    "lines": 1308771,
+    "maxHeartbeats_options": 16,
+    "native_decide": 0,
+    "presumed_handwritten_lines": 1275485,
+    "proof_lines": 639497,
+    "sorry": 0,
+    "unknown_import_only_lines": 1502
+  },
+  "revision": "d4ad633a9624263a59b14fd2c520b9bc602f88f3",
+  "scope": "Solidity/**/*.lean (tracked committed blobs); repository totals include all tracked .lean",
+  "solidity_totals": {
+    "by_category": {
+      "axiom_pins": {
+        "files": 2,
+        "lines": 4054
+      },
+      "corpus": {
+        "files": 8,
+        "lines": 4079
+      },
+      "import_only_unknown": {
+        "files": 49,
+        "lines": 1452
+      },
+      "marked_generated": {
+        "files": 36,
+        "lines": 14749
+      },
+      "mixed_generated_blocks": {
+        "files": 2,
+        "lines": 996
+      },
+      "unmarked": {
+        "files": 6620,
+        "lines": 1095776
+      }
+    },
+    "code_lines": 878656,
+    "declarations": {
+      "abbrev": 2259,
+      "axiom": 0,
+      "def": 42903,
+      "inductive": 1035,
+      "instance": 177,
+      "lemma": 1,
+      "opaque": 3,
+      "structure": 1398,
+      "theorem": 65929
+    },
+    "definition_lines": 218914,
+    "definition_to_proof_line_ratio": 0.38000427021800676,
+    "files": 6717,
+    "generated_lines": 23502,
+    "generated_share": 0.02096322738438649,
+    "implemented_by": 176,
+    "imports_in": 21360,
+    "imports_out": 12763,
+    "lines": 1121106,
+    "maxHeartbeats_options": 16,
+    "native_decide": 0,
+    "presumed_handwritten_lines": 1096152,
+    "proof_lines": 576083,
+    "sorry": 0,
+    "unknown_import_only_lines": 1452
+  },
+  "timing_rows": [
+    {
+      "area": "Yul",
+      "body_seconds": 0.575,
+      "full_seconds": 0.894,
+      "group": "C",
+      "import_seconds": 0.319,
+      "lines": 83,
+      "path": "Solidity/Yul/Views/RetainedGuardObserverControls.lean",
+      "status": "PASS"
+    },
+    {
+      "area": "Backend",
+      "body_seconds": 0.17000000000000004,
+      "full_seconds": 0.744,
+      "group": "C",
+      "import_seconds": 0.574,
+      "lines": 93,
+      "path": "Solidity/Backend/InternalFlow/RuntimeFrameV3AllocatingHeadViewsControls.lean",
+      "status": "PASS"
+    },
+    {
+      "area": "Backend",
+      "body_seconds": 2.3,
+      "full_seconds": 2.812,
+      "group": "C",
+      "import_seconds": 0.512,
+      "lines": 341,
+      "path": "Solidity/Backend/MemoryCopies/FixedPathCopyControls.lean",
+      "status": "PASS"
+    },
+    {
+      "area": "Backend",
+      "body_seconds": 3.026,
+      "full_seconds": 3.554,
+      "group": "C",
+      "import_seconds": 0.528,
+      "lines": 390,
+      "path": "Solidity/Backend/MemoryOps/SourceUintFixedDeclareAliasControls.lean",
+      "status": "PASS"
+    },
+    {
+      "area": "Backend",
+      "body_seconds": 0.698,
+      "full_seconds": 1.21,
+      "group": "C",
+      "import_seconds": 0.512,
+      "lines": 143,
+      "path": "Solidity/Backend/StructuredFlow/ConditionalReturnCompilerControls.lean",
+      "status": "PASS"
+    },
+    {
+      "area": "Backend",
+      "body_seconds": 3.473,
+      "full_seconds": 3.984,
+      "group": "C",
+      "import_seconds": 0.511,
+      "lines": 226,
+      "path": "Solidity/Backend/AbiEntry/SelectorGateBodyControls.lean",
+      "status": "PASS"
+    },
+    {
+      "area": "Yul",
+      "body_seconds": 1.223,
+      "full_seconds": 1.463,
+      "group": "C",
+      "import_seconds": 0.24,
+      "lines": 46,
+      "path": "Solidity/Yul/Views/PackedDynamicMixedControls.lean",
+      "status": "PASS"
+    },
+    {
+      "area": "Lowering",
+      "body_seconds": 2.683,
+      "full_seconds": 3.158,
+      "group": "C",
+      "import_seconds": 0.475,
+      "lines": 270,
+      "path": "Solidity/Lowering/StorageOps/SourceBoolFixedStorageCopyControls.lean",
+      "status": "PASS"
+    },
+    {
+      "area": "Lowering",
+      "body_seconds": 0.499,
+      "full_seconds": 0.995,
+      "group": "C",
+      "import_seconds": 0.496,
+      "lines": 113,
+      "path": "Solidity/Lowering/V08/MetadataControls.lean",
+      "status": "PASS"
+    },
+    {
+      "area": "Frontend",
+      "body_seconds": 0.514,
+      "full_seconds": 0.725,
+      "group": "C",
+      "import_seconds": 0.211,
+      "lines": 177,
+      "path": "Solidity/Frontend/ExpressionUniqueness/PostfixControls.lean",
+      "status": "PASS"
+    },
+    {
+      "area": "Yul",
+      "body_seconds": 0.254,
+      "full_seconds": 0.458,
+      "group": "C",
+      "import_seconds": 0.204,
+      "lines": 129,
+      "path": "Solidity/Yul/Views/ScalarWritebackControls.lean",
+      "status": "PASS"
+    },
+    {
+      "area": "Backend",
+      "body_seconds": 2.098,
+      "full_seconds": 2.628,
+      "group": "C",
+      "import_seconds": 0.53,
+      "lines": 133,
+      "path": "Solidity/Backend/AbiEntry/SizeBranchesControls.lean",
+      "status": "PASS"
+    },
+    {
+      "area": "Backend",
+      "body_seconds": 0.131,
+      "full_seconds": 0.649,
+      "group": "C",
+      "import_seconds": 0.518,
+      "lines": 60,
+      "path": "Solidity/Backend/Aggregates/G18Controls.lean",
+      "status": "PASS"
+    },
+    {
+      "area": "Backend",
+      "body_seconds": 1.2679999999999998,
+      "full_seconds": 1.823,
+      "group": "C",
+      "import_seconds": 0.555,
+      "lines": 108,
+      "path": "Solidity/Backend/MemoryCopies/SingletonCopyControls.lean",
+      "status": "PASS"
+    },
+    {
+      "area": "Backend",
+      "body_seconds": 0.8499999999999999,
+      "full_seconds": 1.38,
+      "group": "C",
+      "import_seconds": 0.53,
+      "lines": 190,
+      "path": "Solidity/Backend/StorageOps/PrimitiveSnapshotCommutationControls.lean",
+      "status": "PASS"
+    },
+    {
+      "area": "Frontend",
+      "body_seconds": 0.04300000000000001,
+      "full_seconds": 0.262,
+      "group": "C",
+      "import_seconds": 0.219,
+      "lines": 44,
+      "path": "Solidity/Frontend/Admission/SyntaxOccurrenceControls.lean",
+      "status": "PASS"
+    },
+    {
+      "area": "Backend",
+      "body_seconds": 0.972,
+      "full_seconds": 1.512,
+      "group": "C",
+      "import_seconds": 0.54,
+      "lines": 89,
+      "path": "Solidity/Backend/MemoryOps/StructDefaults/WordControls.lean",
+      "status": "PASS"
+    },
+    {
+      "area": "Backend",
+      "body_seconds": 0.8330000000000001,
+      "full_seconds": 1.038,
+      "group": "C",
+      "import_seconds": 0.205,
+      "lines": 80,
+      "path": "Solidity/Backend/Passes/SourceCallControls.lean",
+      "status": "PASS"
+    },
+    {
+      "area": "Lowering",
+      "body_seconds": 0.6969999999999998,
+      "full_seconds": 1.138,
+      "group": "C",
+      "import_seconds": 0.441,
+      "lines": 160,
+      "path": "Solidity/Lowering/Readonly/Controls.lean",
+      "status": "PASS"
+    },
+    {
+      "area": "Yul",
+      "body_seconds": 0.397,
+      "full_seconds": 0.609,
+      "group": "C",
+      "import_seconds": 0.212,
+      "lines": 90,
+      "path": "Solidity/Yul/Views/FixedNominalStructControls.lean",
+      "status": "PASS"
+    },
+    {
+      "area": "Lowering",
+      "body_seconds": 2.6849999999999996,
+      "full_seconds": 3.211,
+      "group": "C",
+      "import_seconds": 0.526,
+      "lines": 95,
+      "path": "Solidity/Lowering/StorageOps/SourceVaryingByteCaptureControls.lean",
+      "status": "PASS"
+    },
+    {
+      "area": "Yul",
+      "body_seconds": 0.612,
+      "full_seconds": 0.868,
+      "group": "C",
+      "import_seconds": 0.256,
+      "lines": 78,
+      "path": "Solidity/Yul/Views/StructWordHeapControls.lean",
+      "status": "PASS"
+    },
+    {
+      "area": "Backend",
+      "body_seconds": 2.176,
+      "full_seconds": 2.747,
+      "group": "C",
+      "import_seconds": 0.571,
+      "lines": 131,
+      "path": "Solidity/Backend/AbiEntry/DispatchRefusalControls.lean",
+      "status": "PASS"
+    },
+    {
+      "area": "Backend",
+      "body_seconds": 0.3580000000000001,
+      "full_seconds": 0.922,
+      "group": "C",
+      "import_seconds": 0.564,
+      "lines": 104,
+      "path": "Solidity/Backend/StructuredFlow/ReturnPairCompilerControls.lean",
+      "status": "PASS"
+    },
+    {
+      "area": "Yul",
+      "body_seconds": 1.254,
+      "full_seconds": 1.745,
+      "group": "C",
+      "import_seconds": 0.491,
+      "lines": 107,
+      "path": "Solidity/Yul/Compilation/LetControlCompilationControls.lean",
+      "status": "PASS"
+    },
+    {
+      "area": "Backend",
+      "body_seconds": 0.494,
+      "full_seconds": 0.991,
+      "group": "C",
+      "import_seconds": 0.497,
+      "lines": 79,
+      "path": "Solidity/Backend/AbiEntry/OffsetChecksControls.lean",
+      "status": "PASS"
+    },
+    {
+      "area": "Backend",
+      "body_seconds": 1.34,
+      "full_seconds": 1.826,
+      "group": "C",
+      "import_seconds": 0.486,
+      "lines": 258,
+      "path": "Solidity/Backend/MemoryCopies/BudgetedReferenceControls.lean",
+      "status": "PASS"
+    },
+    {
+      "area": "Yul",
+      "body_seconds": 0.088,
+      "full_seconds": 0.3,
+      "group": "C",
+      "import_seconds": 0.212,
+      "lines": 65,
+      "path": "Solidity/Yul/Views/FixedInventoryRejectionControls.lean",
+      "status": "PASS"
+    },
+    {
+      "area": "Yul",
+      "body_seconds": 0.864,
+      "full_seconds": 1.343,
+      "group": "C",
+      "import_seconds": 0.479,
+      "lines": 92,
+      "path": "Solidity/Yul/Compilation/GuardedForCompilationControls.lean",
+      "status": "PASS"
+    },
+    {
+      "area": "Yul",
+      "body_seconds": 1.496,
+      "full_seconds": 2.061,
+      "group": "C",
+      "import_seconds": 0.565,
+      "lines": 91,
+      "path": "Solidity/Yul/Adapters/P6ResidualSequenceControls.lean",
+      "status": "PASS"
+    },
+    {
+      "area": "Yul",
+      "body_seconds": 0.11899999999999997,
+      "full_seconds": 0.348,
+      "group": "L",
+      "import_seconds": 0.229,
+      "lines": 102,
+      "path": "Solidity/Yul/Views/MemoryImageOrder.lean",
+      "status": "PASS"
+    },
+    {
+      "area": "Evm",
+      "body_seconds": -0.01100000000000001,
+      "full_seconds": 0.506,
+      "group": "L",
+      "import_seconds": 0.517,
+      "lines": 33,
+      "path": "Solidity/Evm/MemoryLoopHorizonObjectOldHeaders.lean",
+      "status": "PASS"
+    },
+    {
+      "area": "Calculus",
+      "body_seconds": 4.010000000000001,
+      "full_seconds": 4.517,
+      "group": "L",
+      "import_seconds": 0.507,
+      "lines": 307,
+      "path": "Solidity/Calculus/LowerRun.lean",
+      "status": "PASS"
+    },
+    {
+      "area": "Backend",
+      "body_seconds": 0.04299999999999993,
+      "full_seconds": 0.576,
+      "group": "L",
+      "import_seconds": 0.533,
+      "lines": 120,
+      "path": "Solidity/Backend/MemoryCopies/NestedStoragePathInterface.lean",
+      "status": "PASS"
+    },
+    {
+      "area": "Semantics",
+      "body_seconds": 0.33499999999999996,
+      "full_seconds": 0.838,
+      "group": "L",
+      "import_seconds": 0.503,
+      "lines": 264,
+      "path": "Solidity/Semantics/Ends.lean",
+      "status": "PASS"
+    },
+    {
+      "area": "Yul",
+      "body_seconds": 2.269,
+      "full_seconds": 2.766,
+      "group": "L",
+      "import_seconds": 0.497,
+      "lines": 83,
+      "path": "Solidity/Yul/Checks/LocalBoolBinding.lean",
+      "status": "PASS"
+    },
+    {
+      "area": "Yul",
+      "body_seconds": 0.10899999999999999,
+      "full_seconds": 0.703,
+      "group": "L",
+      "import_seconds": 0.594,
+      "lines": 50,
+      "path": "Solidity/Yul/Views/RetainedLoopHeaderReadback.lean",
+      "status": "PASS"
+    },
+    {
+      "area": "Yul",
+      "body_seconds": 1.121,
+      "full_seconds": 1.65,
+      "group": "L",
+      "import_seconds": 0.529,
+      "lines": 79,
+      "path": "Solidity/Yul/Checks/RawDeclarationFrame.lean",
+      "status": "PASS"
+    },
+    {
+      "area": "Backend",
+      "body_seconds": 0.025000000000000022,
+      "full_seconds": 0.533,
+      "group": "L",
+      "import_seconds": 0.508,
+      "lines": 28,
+      "path": "Solidity/Backend/MemoryCopies/SourceFieldsInterface.lean",
+      "status": "PASS"
+    },
+    {
+      "area": "Backend",
+      "body_seconds": 0.18599999999999994,
+      "full_seconds": 0.695,
+      "group": "L",
+      "import_seconds": 0.509,
+      "lines": 134,
+      "path": "Solidity/Backend/StorageOps/PrimitiveSnapshotCommutation.lean",
+      "status": "PASS"
+    },
+    {
+      "area": "Yul",
+      "body_seconds": 2.831,
+      "full_seconds": 3.041,
+      "group": "L",
+      "import_seconds": 0.21,
+      "lines": 955,
+      "path": "Solidity/Yul/Checks/Bytes.lean",
+      "status": "PASS"
+    },
+    {
+      "area": "Backend",
+      "body_seconds": 0.241,
+      "full_seconds": 0.736,
+      "group": "L",
+      "import_seconds": 0.495,
+      "lines": 110,
+      "path": "Solidity/Backend/MemoryOps/SliceBounds.lean",
+      "status": "PASS"
+    },
+    {
+      "area": "Frontend",
+      "body_seconds": 0.528,
+      "full_seconds": 0.862,
+      "group": "L",
+      "import_seconds": 0.334,
+      "lines": 237,
+      "path": "Solidity/Frontend/SolcJson/CallMetadata.lean",
+      "status": "PASS"
+    },
+    {
+      "area": "Calculus",
+      "body_seconds": 0.05299999999999999,
+      "full_seconds": 0.38,
+      "group": "L",
+      "import_seconds": 0.327,
+      "lines": 49,
+      "path": "Solidity/Calculus/Budget.lean",
+      "status": "PASS"
+    },
+    {
+      "area": "Storage",
+      "body_seconds": 0.31499999999999995,
+      "full_seconds": 0.847,
+      "group": "L",
+      "import_seconds": 0.532,
+      "lines": 220,
+      "path": "Solidity/Storage/Representation/GraphFrames.lean",
+      "status": "PASS"
+    },
+    {
+      "area": "Yul",
+      "body_seconds": 2.622,
+      "full_seconds": 3.137,
+      "group": "L",
+      "import_seconds": 0.515,
+      "lines": 127,
+      "path": "Solidity/Yul/Checks/RawTypedScope.lean",
+      "status": "PASS"
+    },
+    {
+      "area": "Calculus",
+      "body_seconds": 0.03400000000000003,
+      "full_seconds": 0.543,
+      "group": "L",
+      "import_seconds": 0.509,
+      "lines": 43,
+      "path": "Solidity/Calculus/RefInputs.lean",
+      "status": "PASS"
+    },
+    {
+      "area": "Yul",
+      "body_seconds": 0.213,
+      "full_seconds": 0.44,
+      "group": "L",
+      "import_seconds": 0.227,
+      "lines": 93,
+      "path": "Solidity/Yul/Compilation/ShapeCapacity.lean",
+      "status": "PASS"
+    },
+    {
+      "area": "Evm",
+      "body_seconds": 0.16200000000000003,
+      "full_seconds": 0.673,
+      "group": "L",
+      "import_seconds": 0.511,
+      "lines": 54,
+      "path": "Solidity/Evm/MemoryLoopHorizonObjectNewSeparation.lean",
+      "status": "PASS"
+    },
+    {
+      "area": "Lowering",
+      "body_seconds": 0.013000000000000012,
+      "full_seconds": 0.229,
+      "group": "L",
+      "import_seconds": 0.216,
+      "lines": 25,
+      "path": "Solidity/Lowering/Readonly/EvalEffectsBase.lean",
+      "status": "PASS"
+    },
+    {
+      "area": "Backend",
+      "body_seconds": 0.05600000000000005,
+      "full_seconds": 0.551,
+      "group": "L",
+      "import_seconds": 0.495,
+      "lines": 34,
+      "path": "Solidity/Backend/MemoryCopies/CheckedCaptureInterface.lean",
+      "status": "PASS"
+    },
+    {
+      "area": "Calculus",
+      "body_seconds": 2.8,
+      "full_seconds": 3.312,
+      "group": "L",
+      "import_seconds": 0.512,
+      "lines": 1107,
+      "path": "Solidity/Calculus/RunFrameOwn.lean",
+      "status": "PASS"
+    },
+    {
+      "area": "Backend",
+      "body_seconds": 0.126,
+      "full_seconds": 0.698,
+      "group": "L",
+      "import_seconds": 0.572,
+      "lines": 67,
+      "path": "Solidity/Backend/InternalFlow/RuntimeFrameV3AllocatingCallViews.lean",
+      "status": "PASS"
+    },
+    {
+      "area": "Yul",
+      "body_seconds": 0.31599999999999995,
+      "full_seconds": 0.828,
+      "group": "L",
+      "import_seconds": 0.512,
+      "lines": 78,
+      "path": "Solidity/Yul/Compilation/ScopedForCompletion.lean",
+      "status": "PASS"
+    },
+    {
+      "area": "Yul",
+      "body_seconds": 0.07999999999999996,
+      "full_seconds": 0.603,
+      "group": "L",
+      "import_seconds": 0.523,
+      "lines": 78,
+      "path": "Solidity/Yul/Views/SourceBalanceInputs.lean",
+      "status": "PASS"
+    },
+    {
+      "area": "Backend",
+      "body_seconds": 0.10800000000000001,
+      "full_seconds": 0.324,
+      "group": "L",
+      "import_seconds": 0.216,
+      "lines": 84,
+      "path": "Solidity/Backend/LabelExec/Loops.lean",
+      "status": "PASS"
+    },
+    {
+      "area": "Backend",
+      "body_seconds": 0.123,
+      "full_seconds": 0.662,
+      "group": "L",
+      "import_seconds": 0.539,
+      "lines": 48,
+      "path": "Solidity/Backend/PrimitivePackets/UnsignedMul/Execution.lean",
+      "status": "PASS"
+    },
+    {
+      "area": "Calculus",
+      "body_seconds": 0.31399999999999995,
+      "full_seconds": 0.82,
+      "group": "L",
+      "import_seconds": 0.506,
+      "lines": 104,
+      "path": "Solidity/Calculus/FilteredMembership.lean",
+      "status": "PASS"
+    },
+    {
+      "area": "Semantics.lean",
+      "body_seconds": 0.32400000000000007,
+      "full_seconds": 0.797,
+      "group": "L",
+      "import_seconds": 0.473,
+      "lines": 113,
+      "path": "Solidity/Semantics.lean",
+      "status": "PASS"
+    },
+    {
+      "area": "Yul",
+      "body_seconds": 2.903,
+      "full_seconds": 3.427,
+      "group": "L",
+      "import_seconds": 0.524,
+      "lines": 135,
+      "path": "Solidity/Yul/Checks/RawCheckedControlDoWhile.lean",
+      "status": "PASS"
+    }
+  ],
+  "timing_source": "docs/audits/architecture-tools/timing-sample.tsv"
+}

@@ -30,14 +30,12 @@ theorem high (initial : FrameMem C Γ) (input output : ByteSpan initial.capacity
     (reached initial input output data).highWaterWords=
       max (RawPhysicalCallOutput.copy initial output data).highWaterWords
         ((input.offset.val.toNat+input.length.val.toNat+31)/32) := by
-  first | (simp only;done) | decide | omega | rfl | skip
   unfold reached P6ByteMemory.touch
   dsimp only [inputArea]
   rw [dif_neg nonempty]
 
 theorem high_mono (initial : FrameMem C Γ) (input output : ByteSpan initial.capacity)
     (data : Solidity.Roadmap.Bytes) : initial.highWaterWords≤(reached initial input output data).highWaterWords := by
-  first | (simp only;done) | decide | omega | rfl | skip
   have grows := RawPhysicalCallOutput.high_mono initial output data
   unfold reached P6ByteMemory.touch
   split
@@ -53,7 +51,6 @@ theorem transport (base : Nat) (state : RawFrame.State ctx) (initial : FrameMem 
     ∃ nextRoom : base+32*wordCellCount (localExternalTypes ctx)≤after.highWaterWords*32,
       frameOf base updated after nextRoom=after ∧
       updated.clean=state.clean ∧ updated.world=state.world ∧ after.st=initial.st ∧ after.key=initial.key := by
-  first | omega | decide | skip
   dsimp only
   have grows := high_mono initial input output data
   have nextRoom : base+32*wordCellCount (localExternalTypes ctx)≤(reached initial input output data).highWaterWords*32 := by omega
@@ -83,7 +80,6 @@ theorem execute_eq {D : Source.Layout} {L T : Solidity.Roadmap.Address → Sourc
       some {RawPhysicalCallFrame.completed initial output entry
         (World.childContext entry.effects.execution parent kind callee value (snapshot initial input)) answer with
         copiedMemory:=some (frameBytes (reached initial input output (World.returnData answer.outcome)))} := by
-  first | (simp only;done) | decide | omega | rfl | skip
   rw [RawPhysicalCallFrame.execute_eq initial input output invoke entry parent kind callee gas value answer
     preflight inputNonwrap accepted invoked,image]
   rfl

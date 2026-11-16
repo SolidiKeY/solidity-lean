@@ -1,4 +1,5 @@
 import Solidity.Yul.Views.ScalarFamilyMixedControls
+import Solidity.Yul.Views.GenericFlow.FollowingLaws
 
 namespace Solidity.Yul.Views.Controls
 
@@ -55,18 +56,11 @@ theorem sf_dirty_growth_decode_none : (finiteAccountWrite? (T := sfEnv.lay) acco
   | some op => rw [found] at bad; cases bad
 
 theorem sf_dirty_growth_preparation_none : sfZFill.following? rfl 0 35 = none := by
+  have bad : finiteAccountWrite? (T := sfEnv.lay) account (sfLayout.scalarFamilySnapshot sfFixed (saveSlot sfZFill.nextRaw 0 35)) (saveSlot sfZFill.nextRaw 0 35) = none := by
+    rw [sfzfill_next]
+    exact sf_dirty_growth_decode_none
   unfold ScalarOwnershipPlan.following?
-  split
-  · have bad : finiteAccountWrite? (T := sfEnv.lay) account (sfLayout.scalarFamilySnapshot sfFixed (saveSlot sfZFill.nextRaw 0 35)) (saveSlot sfZFill.nextRaw 0 35) = none := by
-      rw [sfzfill_next]
-      exact sf_dirty_growth_decode_none
-    dsimp only
-    split
-    · rfl
-    · rename_i op found
-      have impossible : none = some op := bad.symm.trans found
-      cases impossible
-  · rfl
+  exact GenericFlow.Following.none_of_write_none _ bad
 
 theorem sf_dirty_growth_fresh_none : prepareScalarOwnership? packedStepFrame sfLayout sfFixed 0 35 sfZFill.step.1.2 sfZFill.step.2 = none :=
   (sfZFill.following_fresh rfl 0 35).symm.trans sf_dirty_growth_preparation_none

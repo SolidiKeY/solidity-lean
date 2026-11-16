@@ -1386,3 +1386,10 @@ theorem Fml.Valid.of_mergeAtS {r : MergeNameS} {φ ψ : Fml C []} (hr : φ.merge
   fun σ => Fml.mergeAtS_sound φ hr σ (h σ)
 
 end Solidity
+
+namespace Solidity
+/-- Universal implementation equality for composing updates such as `{x := y}{y := 1}`. -/
+theorem Upd.graftF_eq_graftFM_universal : @Upd.graftF = @Upd.graftFM := by
+  funext C Γ Δ F U Δ₂ V
+  exact Upd.graftF_eq_graftFM F U V
+end Solidity

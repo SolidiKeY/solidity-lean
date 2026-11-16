@@ -20,22 +20,19 @@ theorem whole_roundtrip (pipeline : Pipeline) :
     ∃ nextRoom : 33+32*wordCellCount (localExternalTypes ctx)≤(copied pipeline).highWaterWords*32,
       frameOf 33 (updated pipeline) (copied pipeline) nextRoom=copied pipeline ∧
       (updated pipeline).clean=clean.clean ∧ (updated pipeline).world=clean.world := by
-  first | omega | decide | skip
-  have result := copy_transport 33 clean (stored pipeline) (room pipeline) (source pipeline) (destination pipeline) rfl
-  obtain ⟨nextRoom,identity,fields,world,_⟩ := result
+  obtain ⟨nextRoom,identity,fields,world,_⟩ :=
+    copy_transport 33 clean (stored pipeline) (room pipeline) (source pipeline) (destination pipeline) rfl
   exact ⟨nextRoom,identity,fields,world⟩
 
 theorem source_payload (pipeline : Pipeline) :
     Environment.readMemory (encode 33 dirty (frameBytes (image pipeline))) 33 33=
       List.replicate 31 0++[2,0] := by
-  first | omega | decide | skip
   cases pipeline <;> decide +kernel
 
 theorem raw_snapshot (pipeline : Pipeline) :
     frameBytes (copied pipeline)=Environment.writeBytes
       (encode 33 dirty (frameBytes (image pipeline))) 34
       (List.replicate 31 0++[2,0]) := by
-  first | omega | decide | skip
   have actual := P6ByteMemory.copy_image (stored pipeline) (source pipeline) (destination pipeline) rfl
   rw [show frameBytes (stored pipeline)=encode 33 dirty (frameBytes (image pipeline)) from frame_bytes _ _ _ _] at actual
   change frameBytes (copied pipeline)=Environment.writeBytes
@@ -48,7 +45,6 @@ theorem crossing_words (pipeline : Pipeline) :
     RawFrame.view (updated pipeline) flag=word 0 ∧
     RawFrame.view (updated pipeline) small=word (2*2^248+257) ∧
     RawFrame.view (updated pipeline) selector=word (2^255+85) := by
-  first | omega | decide | skip
   dsimp only [updated]
   rw [raw_snapshot]
   cases pipeline <;> decide +kernel
@@ -57,7 +53,6 @@ theorem observed_bytes (pipeline : Pipeline) :
     frameBytes (copied pipeline) 64=0 ∧ frameBytes (copied pipeline) 65=2 ∧
     frameBytes (copied pipeline) 66=0 ∧ frameBytes (copied pipeline) 191=0xa5 ∧
     frameBytes (copied pipeline) 192=0 := by
-  first | omega | decide | skip
   rw [raw_snapshot]
   cases pipeline <;> decide +kernel
 
@@ -66,7 +61,6 @@ def wrong (pipeline : Pipeline) : Views.ByteView :=
   let erased := Environment.writeByte (frameBytes (stored pipeline)) 64 0
   Environment.writeByte erased 65 (erased 64)
 theorem wrong_chronology (pipeline : Pipeline) : wrong pipeline 65≠frameBytes (copied pipeline) 65 := by
-  first | omega | decide | skip
   have right := (observed_bytes pipeline).2.1
   rw [right]
   change (0 : UInt8)≠2

@@ -19,3 +19,32 @@ Separation is local to the represented live ranges and demanded slot/hash preima
 <a id="joint-ordinary-memory-writeback-2026-10-31"></a>
 
 <a id="finite-owned-memory-inventory-2026-11-01"></a>
+
+
+### H171 accepted import cost and H189 Horizon disposition
+
+H171 accepts only the reviewed NestedMappingLayout import-cost increment,
+superseding H164 Option A for that increment. The recorded matched external
+candidate check gave median 0.38 s baseline versus 0.82 s (+115.8%), peak VmHWM
+458,176 versus 1,089,336 KiB, on serial Lean4.24 with 12 GiB/no swap and a
+300-second per-file bound. This is accepted cost, not speed neutrality.
+Production retains the isolated SourceGraphEndpoints module; its registration
+includes it in the full-library build. Ordinary integration gates remain required.
+
+H189 separately releases the H125 Horizon timing STOP only. It does not certify
+current Source checking, cache equivalence, any Lean/full gate or runtime result,
+and changes no existing budget. No separate VY2 Horizon failure is asserted here.
+Any concrete failure must retain its exact source/gate identity and validation
+hold; a missing historical receipt is not a current measurement or a new STOP.
+
+The endpoint proves slot identity only. Y04 physical adequacy and reached-state,
+memory agreement, Source/Yul/compiler composition and full affected validation
+remain open. H171 and H189 supply none of those obligations. All statements,
+imports, premises, exclusions, interfaces, axioms and budgets remain unchanged.
+
+Historical evidence stays private under H145. Missing historical h69 artifacts
+remain UNVERIFIABLE under H151; the 23 original frozen obligations receive zero
+original proof credit without checked original-type/premise correspondence.
+Both preserved commits remain in Git history; the historical narrative is not
+restored as current guidance. This reconciliation is comments/documentation only
+and is not a validation, producer-completion or integration receipt.

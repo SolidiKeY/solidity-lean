@@ -81,7 +81,7 @@ class WorkerPool {
     if(this.closed)return Promise.reject(failure('Worker pool closed'));
     if(signal?.aborted)return Promise.reject(failure('Request cancelled',-32800));
     return new Promise((resolve,reject)=>{
-      const entry={task,resolve,reject,signal,onProgress};
+      const entry={task,resolve,reject,signal,onProgress,requestDeadline:Date.now()+timeoutMs};
       entry.abort=()=>this.finish(entry,failure('Request cancelled',-32800),undefined,true);
       entry.timer=setTimeout(()=>this.finish(entry,failure('Verification timed out',-32800),undefined,true),timeoutMs);
       signal?.addEventListener('abort',entry.abort,{once:true});this.queue.push(entry);this.drain();
@@ -120,7 +120,7 @@ class WorkerPool {
       if(!worker){if(this.workers.length>=this.size)return;try{worker=this.spawn();}catch(error){this.fail(error);return;}}
       const entry=this.queue.shift();if(entry.done)continue;
       entry.id=++this.next;entry.worker=worker;worker.busy=entry;
-      worker.admission.then(()=>{if(entry.done||worker.retiring||this.closed)return;worker.child.send({...entry.task,id:entry.id,root:this.root,directory:worker.directory},error=>{if(error)this.finish(entry,error,undefined,true);});},error=>this.finish(entry,error,undefined,true));
+      worker.admission.then(()=>{if(entry.done||worker.retiring||this.closed)return;worker.child.send({...entry.task,id:entry.id,root:this.root,directory:worker.directory,requestDeadline:entry.requestDeadline},error=>{if(error)this.finish(entry,error,undefined,true);});},error=>this.finish(entry,error,undefined,true));
     }
   }
   finish(entry,error,result,kill=false){

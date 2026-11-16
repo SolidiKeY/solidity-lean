@@ -46,7 +46,7 @@ theorem wrong_return_flag_refused :
   decide
 
 theorem trailing_condition_writes :
-    Source.evalE (G0 .legacy) F0 2 (.assign (.local sci) (.bool false)) (plan := none)
+    Source.evalE (G0 .legacy) F0 2 (.assign (.local sci) (.bool false)) (plan := none) (calldataKnown := true)
       ((source true).1.set sci (.bool true),(source true).2) =
       (.ok (.val (.bool false)),((source true).1.set sci (.bool false),(source true).2)) := by rfl
 

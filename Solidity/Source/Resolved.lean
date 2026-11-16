@@ -458,6 +458,11 @@ inductive RStmt (E : Env) (R : List STy) (M : Bool) : SCtx → RCtx → RCtx →
       (d : Decl) (h : d.fnSig E = some (ps, rs)) (args : RConvArgs E Γ ps)
       (ok : RItems E R M k (rs.reverseAux Γ) Γ₁) (cbind : Bool) (cat : RItems E R M k (catchCtx cbind Γ) Γ₂) :
       RStmt E R M k Γ Γ
+  /-- Typed delegated library entry with a named Error(string) handler. -/
+  | tryLibrary {k : SCtx} {Γ Γ₁ Γ₂ : RCtx} {ps rs : List STy}
+      (d : Decl) (h : d.fnSig E = some (ps, rs)) (boundary : libraryBoundary ps rs = true)
+      (args : RConvArgs E Γ ps) (ok : RItems E R M k (rs.reverseAux Γ) Γ₁)
+      (cat : RItems E R M k (.string .memory :: Γ) Γ₂) : RStmt E R M k Γ Γ
 
 /-- Resolved blocks. -/
 inductive RItems (E : Env) (R : List STy) (M : Bool) : SCtx → RCtx → RCtx → Type where
@@ -508,6 +513,10 @@ def StmtD.toR {C : Ctx} {k : SCtx} {L L' : List (String × STy)} {s : Syn (.stmt
       x.isSome
       (cast (congrArg (fun Γ' => RItems C.env C.rets C.inModifier k Γ' (tysOf L₂)) (catchLocals_tys x L))
         dcb.toR)
+  | .tryLibrary (rs := rs) (rets := rets) (L := L) (L₁ := L₁) da _ hd hf hb _ _ success failure =>
+    .tryLibrary _ hd hb (RArgs.convert _ da.toR hf)
+      (cast (congrArg (fun Γ₀ => RItems C.env C.rets C.inModifier k Γ₀ (tysOf L₁))
+        (tryOk_tys rets.paramNames rs L)) success.toR) failure.toR
   | .ifThen dc _ ds => .ifThen dc.toR ds.toR
   | .ifElse dc _ _ ds dt => .ifElse dc.toR ds.toR dt.toR
   | .whileLoop dc _ ds => .whileLoop dc.toR ds.toR

@@ -1,0 +1,4990 @@
+{
+  "Solidity.Backend.InternalFlow.RuntimeFrameArgumentAgreement": [
+    {
+      "name": "Solidity.Backend.InternalFlow.RuntimeFrame.ArgumentAgreement.common_value",
+      "line": 9
+    },
+    {
+      "name": "Solidity.Backend.InternalFlow.RuntimeFrame.ArgumentAgreement.entry_suffix",
+      "line": 30
+    }
+  ],
+  "Solidity.Backend.InternalFlow.RuntimeFrameCodeAuthentication": [
+    {
+      "name": "Solidity.Backend.InternalFlow.RuntimeFrame.CodeAuthentication.code_self",
+      "line": 56
+    },
+    {
+      "name": "Solidity.Backend.InternalFlow.RuntimeFrame.CodeAuthentication.code_sound",
+      "line": 35
+    },
+    {
+      "name": "Solidity.Backend.InternalFlow.RuntimeFrame.CodeAuthentication.common_prefix",
+      "line": 67
+    },
+    {
+      "name": "Solidity.Backend.InternalFlow.RuntimeFrame.CodeAuthentication.instruction_self",
+      "line": 49
+    },
+    {
+      "name": "Solidity.Backend.InternalFlow.RuntimeFrame.CodeAuthentication.instruction_sound",
+      "line": 27
+    },
+    {
+      "name": "Solidity.Backend.InternalFlow.RuntimeFrame.CodeAuthentication.run_equal",
+      "line": 76
+    },
+    {
+      "name": "Solidity.Backend.InternalFlow.RuntimeFrame.CodeAuthentication.suffix_equal",
+      "line": 80
+    }
+  ],
+  "Solidity.Backend.InternalFlow.RuntimeFrameCodeAuthenticationControls": [
+    {
+      "name": "Solidity.Backend.InternalFlow.RuntimeFrame.CodeAuthentication.Client.caller_frame",
+      "line": 42
+    },
+    {
+      "name": "Solidity.Backend.InternalFlow.RuntimeFrame.CodeAuthentication.Client.complete_observations",
+      "line": 34
+    },
+    {
+      "name": "Solidity.Backend.InternalFlow.RuntimeFrame.CodeAuthentication.Client.construction",
+      "line": 18
+    },
+    {
+      "name": "Solidity.Backend.InternalFlow.RuntimeFrame.CodeAuthentication.Client.emitted_equality",
+      "line": 27
+    },
+    {
+      "name": "Solidity.Backend.InternalFlow.RuntimeFrame.CodeAuthentication.Client.inner_body_negative",
+      "line": 49
+    },
+    {
+      "name": "Solidity.Backend.InternalFlow.RuntimeFrame.CodeAuthentication.Client.inner_condition_negative",
+      "line": 53
+    },
+    {
+      "name": "Solidity.Backend.InternalFlow.RuntimeFrame.CodeAuthentication.Client.loop_order_negative",
+      "line": 57
+    },
+    {
+      "name": "Solidity.Backend.InternalFlow.RuntimeFrame.CodeAuthentication.Client.missing_instruction",
+      "line": 75
+    },
+    {
+      "name": "Solidity.Backend.InternalFlow.RuntimeFrame.CodeAuthentication.Client.nested_positive",
+      "line": 47
+    },
+    {
+      "name": "Solidity.Backend.InternalFlow.RuntimeFrame.CodeAuthentication.Client.selected_image",
+      "line": 23
+    },
+    {
+      "name": "Solidity.Backend.InternalFlow.RuntimeFrame.CodeAuthentication.Client.target",
+      "line": 30
+    },
+    {
+      "name": "Solidity.Backend.InternalFlow.RuntimeFrame.CodeAuthentication.Client.wrong_cursor",
+      "line": 68
+    },
+    {
+      "name": "Solidity.Backend.InternalFlow.RuntimeFrame.CodeAuthentication.Client.wrong_destination",
+      "line": 61
+    }
+  ],
+  "Solidity.Backend.InternalFlow.RuntimeFrameCodeEquality": [
+    {
+      "name": "Solidity.Backend.InternalFlow.RuntimeFrame.CodeEquality.code_sound",
+      "line": 66
+    },
+    {
+      "name": "Solidity.Backend.InternalFlow.RuntimeFrame.CodeEquality.instruction_sound",
+      "line": 55
+    }
+  ],
+  "Solidity.Backend.InternalFlow.RuntimeFrameP1Bridge": [
+    {
+      "name": "Solidity.Backend.InternalFlow.RuntimeFrame.P1Bridge.allowed_member",
+      "line": 124
+    },
+    {
+      "name": "Solidity.Backend.InternalFlow.RuntimeFrame.P1Bridge.call_ok",
+      "line": 35
+    },
+    {
+      "name": "Solidity.Backend.InternalFlow.RuntimeFrame.P1Bridge.consistent",
+      "line": 45
+    },
+    {
+      "name": "Solidity.Backend.InternalFlow.RuntimeFrame.P1Bridge.panic_observed",
+      "line": 128
+    },
+    {
+      "name": "Solidity.Backend.InternalFlow.RuntimeFrame.P1Bridge.pending_jump_unfinished",
+      "line": 132
+    },
+    {
+      "name": "Solidity.Backend.InternalFlow.RuntimeFrame.P1Bridge.prefix_succ",
+      "line": 40
+    },
+    {
+      "name": "Solidity.Backend.InternalFlow.RuntimeFrame.P1Bridge.prefix_zero",
+      "line": 37
+    },
+    {
+      "name": "Solidity.Backend.InternalFlow.RuntimeFrame.P1Bridge.refused_frame",
+      "line": 136
+    },
+    {
+      "name": "Solidity.Backend.InternalFlow.RuntimeFrame.P1Bridge.satisfiable",
+      "line": 116
+    },
+    {
+      "name": "Solidity.Backend.InternalFlow.RuntimeFrame.P1Bridge.source_unfinished_at_zero",
+      "line": 120
+    },
+    {
+      "name": "Solidity.Backend.InternalFlow.RuntimeFrame.P1Bridge.target_ok",
+      "line": 61
+    },
+    {
+      "name": "Solidity.Backend.InternalFlow.RuntimeFrame.P1Bridge.target_prefix",
+      "line": 69
+    }
+  ],
+  "Solidity.Backend.InternalFlow.RuntimeFrameReturnContinuation": [
+    {
+      "name": "Solidity.Backend.InternalFlow.RuntimeFrame.ReturnContinuation.after_return",
+      "line": 12
+    }
+  ],
+  "Solidity.Backend.InternalFlow.RuntimeFrameReturnReentry": [
+    {
+      "name": "Solidity.Backend.InternalFlow.RuntimeFrame.ReturnReentry.after_return",
+      "line": 43
+    },
+    {
+      "name": "Solidity.Backend.InternalFlow.RuntimeFrame.ReturnReentry.reached_entry",
+      "line": 9
+    }
+  ],
+  "Solidity.Backend.InternalFlow.RuntimeFrameSameGlobals": [
+    {
+      "name": "Solidity.Backend.InternalFlow.RuntimeFrame.SameGlobals.reframe",
+      "line": 10
+    }
+  ],
+  "Solidity.Backend.InternalFlow.RuntimeFrameScopedSource": [
+    {
+      "name": "Solidity.Backend.InternalFlow.RuntimeFrame.ScopedSource.call_run",
+      "line": 32
+    },
+    {
+      "name": "Solidity.Backend.InternalFlow.RuntimeFrame.ScopedSource.decorate_run",
+      "line": 14
+    }
+  ],
+  "Solidity.Backend.InternalFlow.RuntimeFrameV3AllocatingCallCoherence": [
+    {
+      "name": "Solidity.Backend.InternalFlow.RuntimeFrame.AllocatingCallCoherence.bodies",
+      "line": 31
+    },
+    {
+      "name": "Solidity.Backend.InternalFlow.RuntimeFrame.AllocatingCallCoherence.continuation_steps",
+      "line": 11
+    },
+    {
+      "name": "Solidity.Backend.InternalFlow.RuntimeFrame.AllocatingCallCoherence.source_coherence",
+      "line": 55
+    },
+    {
+      "name": "Solidity.Backend.InternalFlow.RuntimeFrame.AllocatingCallCoherence.successor_steps",
+      "line": 19
+    }
+  ],
+  "Solidity.Backend.InternalFlow.RuntimeFrameV3AllocatingCallCoherenceControls": [
+    {
+      "name": "Solidity.Backend.InternalFlow.RuntimeFrame.AllocatingCallCoherence.Controls.actual",
+      "line": 17
+    }
+  ],
+  "Solidity.Backend.InternalFlow.RuntimeFrameV3AllocatingCallLeaves": [
+    {
+      "name": "Solidity.Backend.InternalFlow.RuntimeFrame.AllocatingCallLeaves.AliasArgument.shape",
+      "line": 28
+    },
+    {
+      "name": "Solidity.Backend.InternalFlow.RuntimeFrame.AllocatingCallLeaves.Return.shape",
+      "line": 88
+    },
+    {
+      "name": "Solidity.Backend.InternalFlow.RuntimeFrame.AllocatingCallLeaves.UintArgument.shape",
+      "line": 13
+    },
+    {
+      "name": "Solidity.Backend.InternalFlow.RuntimeFrame.AllocatingCallLeaves.Variable.memoryFree",
+      "line": 41
+    },
+    {
+      "name": "Solidity.Backend.InternalFlow.RuntimeFrame.AllocatingCallLeaves.Variable.shape",
+      "line": 42
+    }
+  ],
+  "Solidity.Backend.InternalFlow.RuntimeFrameV3AllocatingCallViews": [
+    {
+      "name": "Solidity.Backend.InternalFlow.RuntimeFrame.AllocatingCallViews.MemoryArgument.output",
+      "line": 28
+    },
+    {
+      "name": "Solidity.Backend.InternalFlow.RuntimeFrame.AllocatingCallViews.MemoryArgument.shape",
+      "line": 29
+    },
+    {
+      "name": "Solidity.Backend.InternalFlow.RuntimeFrame.AllocatingCallViews.MemoryVariable.memoryFree",
+      "line": 45
+    },
+    {
+      "name": "Solidity.Backend.InternalFlow.RuntimeFrame.AllocatingCallViews.MemoryVariable.output",
+      "line": 46
+    },
+    {
+      "name": "Solidity.Backend.InternalFlow.RuntimeFrame.AllocatingCallViews.MemoryVariable.shape",
+      "line": 47
+    },
+    {
+      "name": "Solidity.Backend.InternalFlow.RuntimeFrame.AllocatingCallViews.PrimitiveArgument.output",
+      "line": 14
+    },
+    {
+      "name": "Solidity.Backend.InternalFlow.RuntimeFrame.AllocatingCallViews.PrimitiveArgument.shape",
+      "line": 15
+    },
+    {
+      "name": "Solidity.Backend.InternalFlow.RuntimeFrame.AllocatingCallViews.ValueReturn.output",
+      "line": 59
+    },
+    {
+      "name": "Solidity.Backend.InternalFlow.RuntimeFrame.AllocatingCallViews.ValueReturn.results",
+      "line": 58
+    },
+    {
+      "name": "Solidity.Backend.InternalFlow.RuntimeFrame.AllocatingCallViews.ValueReturn.shape",
+      "line": 60
+    }
+  ],
+  "Solidity.Backend.InternalFlow.RuntimeFrameV3AllocatingDeclarationCheck": [
+    {
+      "name": "Solidity.Backend.InternalFlow.RuntimeFrame.AllocatingDeclarationCheck.assemble",
+      "line": 14
+    }
+  ],
+  "Solidity.Backend.InternalFlow.RuntimeFrameV3AllocatingGuardedTurn": [
+    {
+      "name": "Solidity.Backend.InternalFlow.RuntimeFrame.AllocatingGuardedTurn.Head.shape",
+      "line": 12
+    }
+  ],
+  "Solidity.Backend.InternalFlow.RuntimeFrameV3AllocatingHeadViews": [
+    {
+      "name": "Solidity.Backend.InternalFlow.RuntimeFrame.AllocatingHeadViews.Block.output",
+      "line": 31
+    },
+    {
+      "name": "Solidity.Backend.InternalFlow.RuntimeFrame.AllocatingHeadViews.Block.shape",
+      "line": 32
+    },
+    {
+      "name": "Solidity.Backend.InternalFlow.RuntimeFrame.AllocatingHeadViews.Conditional.output",
+      "line": 15
+    },
+    {
+      "name": "Solidity.Backend.InternalFlow.RuntimeFrame.AllocatingHeadViews.Conditional.shape",
+      "line": 16
+    },
+    {
+      "name": "Solidity.Backend.InternalFlow.RuntimeFrame.AllocatingHeadViews.Literal.shape",
+      "line": 137
+    },
+    {
+      "name": "Solidity.Backend.InternalFlow.RuntimeFrame.AllocatingHeadViews.Literal.valid",
+      "line": 136
+    },
+    {
+      "name": "Solidity.Backend.InternalFlow.RuntimeFrame.AllocatingHeadViews.LocalAssignment.output",
+      "line": 47
+    },
+    {
+      "name": "Solidity.Backend.InternalFlow.RuntimeFrame.AllocatingHeadViews.LocalAssignment.shape",
+      "line": 48
+    },
+    {
+      "name": "Solidity.Backend.InternalFlow.RuntimeFrame.AllocatingHeadViews.MemoryDeclaration.defaultAllowed",
+      "line": 38
+    },
+    {
+      "name": "Solidity.Backend.InternalFlow.RuntimeFrame.AllocatingHeadViews.MemoryDeclaration.memoryFree",
+      "line": 39
+    },
+    {
+      "name": "Solidity.Backend.InternalFlow.RuntimeFrame.AllocatingHeadViews.MemoryDeclaration.output",
+      "line": 40
+    },
+    {
+      "name": "Solidity.Backend.InternalFlow.RuntimeFrame.AllocatingHeadViews.MemoryDeclaration.shape",
+      "line": 41
+    },
+    {
+      "name": "Solidity.Backend.InternalFlow.RuntimeFrame.AllocatingHeadViews.NewArray.allowed",
+      "line": 146
+    },
+    {
+      "name": "Solidity.Backend.InternalFlow.RuntimeFrame.AllocatingHeadViews.NewArray.shape",
+      "line": 147
+    },
+    {
+      "name": "Solidity.Backend.InternalFlow.RuntimeFrame.AllocatingHeadViews.NilView.output",
+      "line": 127
+    },
+    {
+      "name": "Solidity.Backend.InternalFlow.RuntimeFrame.AllocatingHeadViews.NilView.shape",
+      "line": 128
+    },
+    {
+      "name": "Solidity.Backend.InternalFlow.RuntimeFrame.AllocatingHeadViews.RecursiveCall.shape",
+      "line": 26
+    }
+  ],
+  "Solidity.Backend.InternalFlow.RuntimeFrameV3AllocatingHeadViewsControls": [
+    {
+      "name": "Solidity.Backend.InternalFlow.RuntimeFrame.AllocatingHeadViews.Controls.allocation_root",
+      "line": 26
+    },
+    {
+      "name": "Solidity.Backend.InternalFlow.RuntimeFrame.AllocatingHeadViews.Controls.compiler_link",
+      "line": 57
+    },
+    {
+      "name": "Solidity.Backend.InternalFlow.RuntimeFrame.AllocatingHeadViews.Controls.conditional_root",
+      "line": 10
+    },
+    {
+      "name": "Solidity.Backend.InternalFlow.RuntimeFrame.AllocatingHeadViews.Controls.extra_statement",
+      "line": 54
+    },
+    {
+      "name": "Solidity.Backend.InternalFlow.RuntimeFrame.AllocatingHeadViews.Controls.missing_initializer",
+      "line": 47
+    },
+    {
+      "name": "Solidity.Backend.InternalFlow.RuntimeFrame.AllocatingHeadViews.Controls.recursive_root",
+      "line": 19
+    },
+    {
+      "name": "Solidity.Backend.InternalFlow.RuntimeFrame.AllocatingHeadViews.Controls.unsupported_refused",
+      "line": 24
+    },
+    {
+      "name": "Solidity.Backend.InternalFlow.RuntimeFrame.AllocatingHeadViews.Controls.wrong_length",
+      "line": 32
+    },
+    {
+      "name": "Solidity.Backend.InternalFlow.RuntimeFrame.AllocatingHeadViews.Controls.wrong_name",
+      "line": 35
+    },
+    {
+      "name": "Solidity.Backend.InternalFlow.RuntimeFrame.AllocatingHeadViews.Controls.wrong_reference",
+      "line": 41
+    }
+  ],
+  "Solidity.Backend.InternalFlow.RuntimeFrameV3AllocatingOuterClaims": [
+    {
+      "name": "Solidity.Backend.InternalFlow.RuntimeFrame.AllocatingOuterClaims.bare_revert",
+      "line": 114
+    },
+    {
+      "name": "Solidity.Backend.InternalFlow.RuntimeFrame.AllocatingOuterClaims.decrement_zero",
+      "line": 10
+    },
+    {
+      "name": "Solidity.Backend.InternalFlow.RuntimeFrame.AllocatingOuterClaims.next_zero",
+      "line": 18
+    },
+    {
+      "name": "Solidity.Backend.InternalFlow.RuntimeFrame.AllocatingOuterClaims.returns",
+      "line": 56
+    },
+    {
+      "name": "Solidity.Backend.InternalFlow.RuntimeFrame.AllocatingOuterClaims.source_short",
+      "line": 38
+    },
+    {
+      "name": "Solidity.Backend.InternalFlow.RuntimeFrame.AllocatingOuterClaims.source_zero",
+      "line": 30
+    },
+    {
+      "name": "Solidity.Backend.InternalFlow.RuntimeFrame.AllocatingOuterClaims.target_zero",
+      "line": 83
+    }
+  ],
+  "Solidity.Backend.InternalFlow.RuntimeFrameV3AllocatingOuterClaimsControls": [
+    {
+      "name": "Solidity.Backend.InternalFlow.RuntimeFrame.AllocatingOuterClaims.Controls.entry",
+      "line": 21
+    },
+    {
+      "name": "Solidity.Backend.InternalFlow.RuntimeFrame.AllocatingOuterClaims.Controls.failure",
+      "line": 40
+    },
+    {
+      "name": "Solidity.Backend.InternalFlow.RuntimeFrame.AllocatingOuterClaims.Controls.success",
+      "line": 12
+    }
+  ],
+  "Solidity.Backend.InternalFlow.RuntimeFrameV3AllocatingOuterFamily": [
+    {
+      "name": "Solidity.Backend.InternalFlow.RuntimeFrame.AllocatingOuterFamily.dynamic_endpoint",
+      "line": 18
+    },
+    {
+      "name": "Solidity.Backend.InternalFlow.RuntimeFrame.AllocatingOuterFamily.endpoint",
+      "line": 163
+    },
+    {
+      "name": "Solidity.Backend.InternalFlow.RuntimeFrame.AllocatingOuterFamily.framed_endpoint",
+      "line": 141
+    }
+  ],
+  "Solidity.Backend.InternalFlow.RuntimeFrameV3AllocatingOuterFamilyControls": [
+    {
+      "name": "Solidity.Backend.InternalFlow.RuntimeFrame.AllocatingOuterFamily.Controls.dynamic_one",
+      "line": 99
+    },
+    {
+      "name": "Solidity.Backend.InternalFlow.RuntimeFrame.AllocatingOuterFamily.Controls.dynamic_zero",
+      "line": 75
+    },
+    {
+      "name": "Solidity.Backend.InternalFlow.RuntimeFrame.AllocatingOuterFamily.Controls.older_frame",
+      "line": 52
+    },
+    {
+      "name": "Solidity.Backend.InternalFlow.RuntimeFrame.AllocatingOuterFamily.Controls.one",
+      "line": 10
+    },
+    {
+      "name": "Solidity.Backend.InternalFlow.RuntimeFrame.AllocatingOuterFamily.Controls.zero",
+      "line": 30
+    }
+  ],
+  "Solidity.Backend.InternalFlow.RuntimeFrameV3AllocatingOuterPlan": [
+    {
+      "name": "Solidity.Backend.InternalFlow.RuntimeFrame.AllocatingOuterPlan.demand_value",
+      "line": 18
+    },
+    {
+      "name": "Solidity.Backend.InternalFlow.RuntimeFrame.AllocatingOuterPlan.return_from_entry",
+      "line": 26
+    }
+  ],
+  "Solidity.Backend.InternalFlow.RuntimeFrameV3AllocatingOuterPlanControls": [
+    {
+      "name": "Solidity.Backend.InternalFlow.RuntimeFrame.AllocatingOuterPlan.Controls.actual",
+      "line": 30
+    },
+    {
+      "name": "Solidity.Backend.InternalFlow.RuntimeFrame.AllocatingOuterPlan.Controls.entry",
+      "line": 11
+    },
+    {
+      "name": "Solidity.Backend.InternalFlow.RuntimeFrame.AllocatingOuterPlan.Controls.observations",
+      "line": 36
+    }
+  ],
+  "Solidity.Backend.InternalFlow.RuntimeFrameV3AllocatingOuterZero": [
+    {
+      "name": "Solidity.Backend.InternalFlow.RuntimeFrame.AllocatingOuterZero.all_counts",
+      "line": 173
+    },
+    {
+      "name": "Solidity.Backend.InternalFlow.RuntimeFrame.AllocatingOuterZero.endpoint",
+      "line": 10
+    },
+    {
+      "name": "Solidity.Backend.InternalFlow.RuntimeFrame.AllocatingOuterZero.return_from_entry",
+      "line": 149
+    }
+  ],
+  "Solidity.Backend.InternalFlow.RuntimeFrameV3AllocatingOuterZeroControls": [
+    {
+      "name": "Solidity.Backend.InternalFlow.RuntimeFrame.AllocatingOuterZero.Controls.actual",
+      "line": 44
+    },
+    {
+      "name": "Solidity.Backend.InternalFlow.RuntimeFrame.AllocatingOuterZero.Controls.entry",
+      "line": 30
+    },
+    {
+      "name": "Solidity.Backend.InternalFlow.RuntimeFrame.AllocatingOuterZero.Controls.no_allocator",
+      "line": 23
+    },
+    {
+      "name": "Solidity.Backend.InternalFlow.RuntimeFrame.AllocatingOuterZero.Controls.observations",
+      "line": 50
+    },
+    {
+      "name": "Solidity.Backend.InternalFlow.RuntimeFrame.AllocatingOuterZero.Controls.represented",
+      "line": 13
+    }
+  ],
+  "Solidity.Backend.InternalFlow.RuntimeFrameV3AllocatingRecursiveCheck": [
+    {
+      "name": "Solidity.Backend.InternalFlow.RuntimeFrame.AllocatingRecursiveCheck.ClosedCall.shape",
+      "line": 17
+    },
+    {
+      "name": "Solidity.Backend.InternalFlow.RuntimeFrame.AllocatingRecursiveCheck.Head.shape",
+      "line": 32
+    },
+    {
+      "name": "Solidity.Backend.InternalFlow.RuntimeFrame.AllocatingRecursiveCheck.source_run",
+      "line": 78
+    }
+  ],
+  "Solidity.Backend.InternalFlow.RuntimeFrameV3AllocatingRecursiveCheckControls": [
+    {
+      "name": "Solidity.Backend.InternalFlow.RuntimeFrame.AllocatingRecursiveCheck.Controls.actual_head",
+      "line": 51
+    },
+    {
+      "name": "Solidity.Backend.InternalFlow.RuntimeFrame.AllocatingRecursiveCheck.Controls.canonical_checked",
+      "line": 59
+    },
+    {
+      "name": "Solidity.Backend.InternalFlow.RuntimeFrame.AllocatingRecursiveCheck.Controls.guarded_continuation",
+      "line": 88
+    },
+    {
+      "name": "Solidity.Backend.InternalFlow.RuntimeFrame.AllocatingRecursiveCheck.Controls.malformed_base",
+      "line": 78
+    },
+    {
+      "name": "Solidity.Backend.InternalFlow.RuntimeFrame.AllocatingRecursiveCheck.Controls.missing_destination",
+      "line": 45
+    },
+    {
+      "name": "Solidity.Backend.InternalFlow.RuntimeFrame.AllocatingRecursiveCheck.Controls.next_checked",
+      "line": 12
+    },
+    {
+      "name": "Solidity.Backend.InternalFlow.RuntimeFrame.AllocatingRecursiveCheck.Controls.result_checked",
+      "line": 15
+    },
+    {
+      "name": "Solidity.Backend.InternalFlow.RuntimeFrame.AllocatingRecursiveCheck.Controls.wrong_alias_name",
+      "line": 24
+    },
+    {
+      "name": "Solidity.Backend.InternalFlow.RuntimeFrame.AllocatingRecursiveCheck.Controls.wrong_argument_literal",
+      "line": 38
+    },
+    {
+      "name": "Solidity.Backend.InternalFlow.RuntimeFrame.AllocatingRecursiveCheck.Controls.wrong_argument_operator",
+      "line": 34
+    },
+    {
+      "name": "Solidity.Backend.InternalFlow.RuntimeFrame.AllocatingRecursiveCheck.Controls.wrong_argument_slot",
+      "line": 30
+    },
+    {
+      "name": "Solidity.Backend.InternalFlow.RuntimeFrame.AllocatingRecursiveCheck.Controls.wrong_child",
+      "line": 73
+    },
+    {
+      "name": "Solidity.Backend.InternalFlow.RuntimeFrame.AllocatingRecursiveCheck.Controls.wrong_count_name",
+      "line": 27
+    },
+    {
+      "name": "Solidity.Backend.InternalFlow.RuntimeFrame.AllocatingRecursiveCheck.Controls.wrong_destination",
+      "line": 48
+    },
+    {
+      "name": "Solidity.Backend.InternalFlow.RuntimeFrame.AllocatingRecursiveCheck.Controls.wrong_function_name",
+      "line": 99
+    },
+    {
+      "name": "Solidity.Backend.InternalFlow.RuntimeFrame.AllocatingRecursiveCheck.Controls.wrong_index",
+      "line": 69
+    },
+    {
+      "name": "Solidity.Backend.InternalFlow.RuntimeFrame.AllocatingRecursiveCheck.Controls.wrong_result_name",
+      "line": 42
+    },
+    {
+      "name": "Solidity.Backend.InternalFlow.RuntimeFrame.AllocatingRecursiveCheck.Controls.wrong_signature",
+      "line": 86
+    }
+  ],
+  "Solidity.Backend.InternalFlow.RuntimeFrameV3AllocatingScalarControls": [
+    {
+      "name": "Solidity.Backend.InternalFlow.RuntimeFrame.AllocatingScalarSource.Controls.args_run",
+      "line": 31
+    },
+    {
+      "name": "Solidity.Backend.InternalFlow.RuntimeFrame.AllocatingScalarSource.Controls.bad_reference",
+      "line": 74
+    },
+    {
+      "name": "Solidity.Backend.InternalFlow.RuntimeFrame.AllocatingScalarSource.Controls.callee",
+      "line": 35
+    },
+    {
+      "name": "Solidity.Backend.InternalFlow.RuntimeFrame.AllocatingScalarSource.Controls.default_entry",
+      "line": 33
+    },
+    {
+      "name": "Solidity.Backend.InternalFlow.RuntimeFrame.AllocatingScalarSource.Controls.generic_witness",
+      "line": 41
+    },
+    {
+      "name": "Solidity.Backend.InternalFlow.RuntimeFrame.AllocatingScalarSource.Controls.heap_observations",
+      "line": 58
+    },
+    {
+      "name": "Solidity.Backend.InternalFlow.RuntimeFrame.AllocatingScalarSource.Controls.native",
+      "line": 38
+    },
+    {
+      "name": "Solidity.Backend.InternalFlow.RuntimeFrame.AllocatingScalarSource.Controls.observations",
+      "line": 48
+    },
+    {
+      "name": "Solidity.Backend.InternalFlow.RuntimeFrame.AllocatingScalarSource.Controls.shallow",
+      "line": 64
+    },
+    {
+      "name": "Solidity.Backend.InternalFlow.RuntimeFrame.AllocatingScalarSource.Controls.shallow_not_revert",
+      "line": 67
+    },
+    {
+      "name": "Solidity.Backend.InternalFlow.RuntimeFrame.AllocatingScalarSource.Controls.wrong_growth",
+      "line": 78
+    },
+    {
+      "name": "Solidity.Backend.InternalFlow.RuntimeFrame.AllocatingScalarSource.Controls.wrong_result",
+      "line": 76
+    }
+  ],
+  "Solidity.Backend.InternalFlow.RuntimeFrameV3AllocatingScalarEndpoint": [
+    {
+      "name": "Solidity.Backend.InternalFlow.RuntimeFrame.AllocatingScalarEndpoint.endpoint",
+      "line": 32
+    },
+    {
+      "name": "Solidity.Backend.InternalFlow.RuntimeFrame.AllocatingScalarEndpoint.native",
+      "line": 27
+    },
+    {
+      "name": "Solidity.Backend.InternalFlow.RuntimeFrame.AllocatingScalarEndpoint.native_state",
+      "line": 23
+    },
+    {
+      "name": "Solidity.Backend.InternalFlow.RuntimeFrame.AllocatingScalarEndpoint.zero_code",
+      "line": 21
+    },
+    {
+      "name": "Solidity.Backend.InternalFlow.RuntimeFrame.AllocatingScalarEndpoint.zero_selection",
+      "line": 19
+    }
+  ],
+  "Solidity.Backend.InternalFlow.RuntimeFrameV3AllocatingScalarEntry": [
+    {
+      "name": "Solidity.Backend.InternalFlow.RuntimeFrame.AllocatingScalarEntry.Checks.endpoint",
+      "line": 17
+    }
+  ],
+  "Solidity.Backend.InternalFlow.RuntimeFrameV3AllocatingScalarLeaves": [
+    {
+      "name": "Solidity.Backend.InternalFlow.RuntimeFrame.AllocatingScalarLeaves.Assignment.shape",
+      "line": 46
+    },
+    {
+      "name": "Solidity.Backend.InternalFlow.RuntimeFrame.AllocatingScalarLeaves.binary_eq",
+      "line": 25
+    }
+  ],
+  "Solidity.Backend.InternalFlow.RuntimeFrameV3AllocatingScalarLeavesControls": [
+    {
+      "name": "Solidity.Backend.InternalFlow.RuntimeFrame.AllocatingScalarLeaves.Controls.actual_root",
+      "line": 41
+    },
+    {
+      "name": "Solidity.Backend.InternalFlow.RuntimeFrame.AllocatingScalarLeaves.Controls.actual_tail",
+      "line": 45
+    },
+    {
+      "name": "Solidity.Backend.InternalFlow.RuntimeFrame.AllocatingScalarLeaves.Controls.extra_tail",
+      "line": 48
+    },
+    {
+      "name": "Solidity.Backend.InternalFlow.RuntimeFrame.AllocatingScalarLeaves.Controls.guard_checked",
+      "line": 9
+    },
+    {
+      "name": "Solidity.Backend.InternalFlow.RuntimeFrame.AllocatingScalarLeaves.Controls.increment_checked",
+      "line": 15
+    },
+    {
+      "name": "Solidity.Backend.InternalFlow.RuntimeFrame.AllocatingScalarLeaves.Controls.wrong_alternative",
+      "line": 51
+    },
+    {
+      "name": "Solidity.Backend.InternalFlow.RuntimeFrame.AllocatingScalarLeaves.Controls.wrong_destination",
+      "line": 30
+    },
+    {
+      "name": "Solidity.Backend.InternalFlow.RuntimeFrame.AllocatingScalarLeaves.Controls.wrong_guard_literal",
+      "line": 24
+    },
+    {
+      "name": "Solidity.Backend.InternalFlow.RuntimeFrame.AllocatingScalarLeaves.Controls.wrong_guard_operator",
+      "line": 18
+    },
+    {
+      "name": "Solidity.Backend.InternalFlow.RuntimeFrame.AllocatingScalarLeaves.Controls.wrong_guard_slot",
+      "line": 21
+    },
+    {
+      "name": "Solidity.Backend.InternalFlow.RuntimeFrame.AllocatingScalarLeaves.Controls.wrong_increment_operator",
+      "line": 33
+    },
+    {
+      "name": "Solidity.Backend.InternalFlow.RuntimeFrame.AllocatingScalarLeaves.Controls.wrong_increment_value",
+      "line": 37
+    },
+    {
+      "name": "Solidity.Backend.InternalFlow.RuntimeFrame.AllocatingScalarLeaves.Controls.wrong_zero_value",
+      "line": 27
+    },
+    {
+      "name": "Solidity.Backend.InternalFlow.RuntimeFrame.AllocatingScalarLeaves.Controls.zero_checked",
+      "line": 12
+    }
+  ],
+  "Solidity.Backend.InternalFlow.RuntimeFrameV3AllocatingScalarOutcomes": [
+    {
+      "name": "Solidity.Backend.InternalFlow.RuntimeFrame.AllocatingScalarSource.exhaustion",
+      "line": 9
+    },
+    {
+      "name": "Solidity.Backend.InternalFlow.RuntimeFrame.AllocatingScalarSource.success_iff",
+      "line": 46
+    }
+  ],
+  "Solidity.Backend.InternalFlow.RuntimeFrameV3AllocatingScalarReturn": [
+    {
+      "name": "Solidity.Backend.InternalFlow.RuntimeFrame.AllocatingScalarSource.one_return",
+      "line": 45
+    },
+    {
+      "name": "Solidity.Backend.InternalFlow.RuntimeFrame.AllocatingScalarSource.return_turn",
+      "line": 9
+    },
+    {
+      "name": "Solidity.Backend.InternalFlow.RuntimeFrame.AllocatingScalarSource.two_return",
+      "line": 63
+    }
+  ],
+  "Solidity.Backend.InternalFlow.RuntimeFrameV3AllocatingScalarSource": [
+    {
+      "name": "Solidity.Backend.InternalFlow.RuntimeFrame.AllocatingScalarSource.allocated_parameters",
+      "line": 35
+    },
+    {
+      "name": "Solidity.Backend.InternalFlow.RuntimeFrame.AllocatingScalarSource.scoped_allocation",
+      "line": 27
+    },
+    {
+      "name": "Solidity.Backend.InternalFlow.RuntimeFrame.AllocatingScalarSource.source_positive",
+      "line": 47
+    },
+    {
+      "name": "Solidity.Backend.InternalFlow.RuntimeFrame.AllocatingScalarSource.source_zero",
+      "line": 66
+    },
+    {
+      "name": "Solidity.Backend.InternalFlow.RuntimeFrame.AllocatingScalarSource.success",
+      "line": 78
+    }
+  ],
+  "Solidity.Backend.InternalFlow.RuntimeFrameV3AllocatingScalarTarget": [
+    {
+      "name": "Solidity.Backend.InternalFlow.RuntimeFrame.AllocatingScalarTarget.default_entry",
+      "line": 41
+    },
+    {
+      "name": "Solidity.Backend.InternalFlow.RuntimeFrame.AllocatingScalarTarget.endpoint",
+      "line": 54
+    },
+    {
+      "name": "Solidity.Backend.InternalFlow.RuntimeFrame.AllocatingScalarTarget.exact_cost",
+      "line": 44
+    },
+    {
+      "name": "Solidity.Backend.InternalFlow.RuntimeFrame.AllocatingScalarTarget.frame_room",
+      "line": 47
+    },
+    {
+      "name": "Solidity.Backend.InternalFlow.RuntimeFrame.AllocatingScalarTarget.native_entry",
+      "line": 26
+    },
+    {
+      "name": "Solidity.Backend.InternalFlow.RuntimeFrame.AllocatingScalarTarget.observations",
+      "line": 64
+    },
+    {
+      "name": "Solidity.Backend.InternalFlow.RuntimeFrame.AllocatingScalarTarget.ownership",
+      "line": 38
+    },
+    {
+      "name": "Solidity.Backend.InternalFlow.RuntimeFrame.AllocatingScalarTarget.public_selection",
+      "line": 21
+    },
+    {
+      "name": "Solidity.Backend.InternalFlow.RuntimeFrame.AllocatingScalarTarget.represented",
+      "line": 34
+    },
+    {
+      "name": "Solidity.Backend.InternalFlow.RuntimeFrame.AllocatingScalarTarget.source_endpoint",
+      "line": 50
+    },
+    {
+      "name": "Solidity.Backend.InternalFlow.RuntimeFrame.AllocatingScalarTarget.wrong_cursor",
+      "line": 71
+    },
+    {
+      "name": "Solidity.Backend.InternalFlow.RuntimeFrame.AllocatingScalarTarget.wrong_result",
+      "line": 74
+    }
+  ],
+  "Solidity.Backend.InternalFlow.RuntimeFrameV3AllocatingScalarTurn": [
+    {
+      "name": "Solidity.Backend.InternalFlow.RuntimeFrame.AllocatingScalarTurn.turn",
+      "line": 15
+    }
+  ],
+  "Solidity.Backend.InternalFlow.RuntimeFrameV3AllocatingScopeView": [
+    {
+      "name": "Solidity.Backend.InternalFlow.RuntimeFrame.AllocatingScopeView.ClosedBlock.output",
+      "line": 57
+    },
+    {
+      "name": "Solidity.Backend.InternalFlow.RuntimeFrame.AllocatingScopeView.ClosedBlock.shape",
+      "line": 58
+    },
+    {
+      "name": "Solidity.Backend.InternalFlow.RuntimeFrame.AllocatingScopeView.Declaration.output",
+      "line": 13
+    },
+    {
+      "name": "Solidity.Backend.InternalFlow.RuntimeFrame.AllocatingScopeView.Declaration.shape",
+      "line": 14
+    },
+    {
+      "name": "Solidity.Backend.InternalFlow.RuntimeFrame.AllocatingScopeView.Scope.shape",
+      "line": 71
+    }
+  ],
+  "Solidity.Backend.InternalFlow.RuntimeFrameV3AllocatingScopedCheck": [
+    {
+      "name": "Solidity.Backend.InternalFlow.RuntimeFrame.AllocatingScopedCheck.source_run",
+      "line": 28
+    }
+  ],
+  "Solidity.Backend.InternalFlow.RuntimeFrameV3AllocatingScopedCheckControls": [
+    {
+      "name": "Solidity.Backend.InternalFlow.RuntimeFrame.AllocatingScopedCheck.Controls.canonical_checked",
+      "line": 14
+    },
+    {
+      "name": "Solidity.Backend.InternalFlow.RuntimeFrame.AllocatingScopedCheck.Controls.decorated",
+      "line": 11
+    },
+    {
+      "name": "Solidity.Backend.InternalFlow.RuntimeFrame.AllocatingScopedCheck.Controls.decorated_base_refused",
+      "line": 53
+    },
+    {
+      "name": "Solidity.Backend.InternalFlow.RuntimeFrame.AllocatingScopedCheck.Controls.extra_root_refused",
+      "line": 34
+    },
+    {
+      "name": "Solidity.Backend.InternalFlow.RuntimeFrame.AllocatingScopedCheck.Controls.initialized_refused",
+      "line": 26
+    },
+    {
+      "name": "Solidity.Backend.InternalFlow.RuntimeFrame.AllocatingScopedCheck.Controls.open_inner_refused",
+      "line": 56
+    },
+    {
+      "name": "Solidity.Backend.InternalFlow.RuntimeFrame.AllocatingScopedCheck.Controls.reordered_refused",
+      "line": 30
+    },
+    {
+      "name": "Solidity.Backend.InternalFlow.RuntimeFrame.AllocatingScopedCheck.Controls.unscoped_turn_refused",
+      "line": 38
+    },
+    {
+      "name": "Solidity.Backend.InternalFlow.RuntimeFrame.AllocatingScopedCheck.Controls.wrong_child",
+      "line": 47
+    },
+    {
+      "name": "Solidity.Backend.InternalFlow.RuntimeFrame.AllocatingScopedCheck.Controls.wrong_index",
+      "line": 41
+    }
+  ],
+  "Solidity.Backend.InternalFlow.RuntimeFrameV3AllocatingScopedEndpoint": [
+    {
+      "name": "Solidity.Backend.InternalFlow.RuntimeFrame.AllocatingScopedEndpoint.accepted",
+      "line": 15
+    },
+    {
+      "name": "Solidity.Backend.InternalFlow.RuntimeFrame.AllocatingScopedEndpoint.actual",
+      "line": 32
+    },
+    {
+      "name": "Solidity.Backend.InternalFlow.RuntimeFrame.AllocatingScopedEndpoint.observations",
+      "line": 42
+    },
+    {
+      "name": "Solidity.Backend.InternalFlow.RuntimeFrame.AllocatingScopedEndpoint.zero_actual",
+      "line": 64
+    },
+    {
+      "name": "Solidity.Backend.InternalFlow.RuntimeFrame.AllocatingScopedEndpoint.zero_observations",
+      "line": 76
+    }
+  ],
+  "Solidity.Backend.InternalFlow.RuntimeFrameV3AllocatingScopedEndpointControls": [
+    {
+      "name": "Solidity.Backend.InternalFlow.RuntimeFrame.AllocatingScopedEndpoint.Controls.result_and_frame",
+      "line": 19
+    },
+    {
+      "name": "Solidity.Backend.InternalFlow.RuntimeFrame.AllocatingScopedEndpoint.Controls.three_uint",
+      "line": 14
+    },
+    {
+      "name": "Solidity.Backend.InternalFlow.RuntimeFrame.AllocatingScopedEndpoint.Controls.too_small_frame",
+      "line": 39
+    },
+    {
+      "name": "Solidity.Backend.InternalFlow.RuntimeFrame.AllocatingScopedEndpoint.Controls.two_bool",
+      "line": 9
+    },
+    {
+      "name": "Solidity.Backend.InternalFlow.RuntimeFrame.AllocatingScopedEndpoint.Controls.zero_without_owner",
+      "line": 43
+    }
+  ],
+  "Solidity.Backend.InternalFlow.RuntimeFrameV3AllocatingScopedTransport": [
+    {
+      "name": "Solidity.Backend.InternalFlow.RuntimeFrame.AllocatingScopedTransport.claims",
+      "line": 10
+    }
+  ],
+  "Solidity.Backend.InternalFlow.RuntimeFrameV3AllocatingScopedTransportControls": [
+    {
+      "name": "Solidity.Backend.InternalFlow.RuntimeFrame.AllocatingScopedTransport.Controls.at_two",
+      "line": 42
+    },
+    {
+      "name": "Solidity.Backend.InternalFlow.RuntimeFrame.AllocatingScopedTransport.Controls.failure",
+      "line": 13
+    }
+  ],
+  "Solidity.Backend.InternalFlow.RuntimeFrameV3AllocatingSourceCertificate": [
+    {
+      "name": "Solidity.Backend.InternalFlow.RuntimeFrame.AllocatingSourceCertificate.bare_revert",
+      "line": 83
+    },
+    {
+      "name": "Solidity.Backend.InternalFlow.RuntimeFrame.AllocatingSourceCertificate.call_run",
+      "line": 68
+    },
+    {
+      "name": "Solidity.Backend.InternalFlow.RuntimeFrame.AllocatingSourceCertificate.canonical",
+      "line": 46
+    },
+    {
+      "name": "Solidity.Backend.InternalFlow.RuntimeFrame.AllocatingSourceCertificate.returns",
+      "line": 76
+    },
+    {
+      "name": "Solidity.Backend.InternalFlow.RuntimeFrame.AllocatingSourceCertificate.scoped_certificate",
+      "line": 59
+    },
+    {
+      "name": "Solidity.Backend.InternalFlow.RuntimeFrame.AllocatingSourceCertificate.sound",
+      "line": 36
+    },
+    {
+      "name": "Solidity.Backend.InternalFlow.RuntimeFrame.AllocatingSourceCertificate.step_congr",
+      "line": 22
+    }
+  ],
+  "Solidity.Backend.InternalFlow.RuntimeFrameV3AllocatingSourceCertificateControls": [
+    {
+      "name": "Solidity.Backend.InternalFlow.RuntimeFrame.AllocatingSourceCertificate.Controls.certified",
+      "line": 15
+    },
+    {
+      "name": "Solidity.Backend.InternalFlow.RuntimeFrame.AllocatingSourceCertificate.Controls.failure",
+      "line": 25
+    },
+    {
+      "name": "Solidity.Backend.InternalFlow.RuntimeFrame.AllocatingSourceCertificate.Controls.nil_uncertifiable",
+      "line": 39
+    },
+    {
+      "name": "Solidity.Backend.InternalFlow.RuntimeFrame.AllocatingSourceCertificate.Controls.success",
+      "line": 18
+    },
+    {
+      "name": "Solidity.Backend.InternalFlow.RuntimeFrame.AllocatingSourceCertificate.Controls.wrong_index_uncertifiable",
+      "line": 45
+    }
+  ],
+  "Solidity.Backend.InternalFlow.RuntimeFrameV3AllocatingSourceViews": [
+    {
+      "name": "Solidity.Backend.InternalFlow.RuntimeFrame.AllocatingSourceViews.ClosedCons.shape",
+      "line": 77
+    },
+    {
+      "name": "Solidity.Backend.InternalFlow.RuntimeFrame.AllocatingSourceViews.ConsView.shape",
+      "line": 14
+    },
+    {
+      "name": "Solidity.Backend.InternalFlow.RuntimeFrame.AllocatingSourceViews.context_eq",
+      "line": 65
+    }
+  ],
+  "Solidity.Backend.InternalFlow.RuntimeFrameV3AllocatingSourceViewsControls": [
+    {
+      "name": "Solidity.Backend.InternalFlow.RuntimeFrame.AllocatingSourceViews.Controls.actual_exhaustion",
+      "line": 37
+    },
+    {
+      "name": "Solidity.Backend.InternalFlow.RuntimeFrame.AllocatingSourceViews.Controls.actual_failure",
+      "line": 26
+    },
+    {
+      "name": "Solidity.Backend.InternalFlow.RuntimeFrame.AllocatingSourceViews.Controls.base_root",
+      "line": 10
+    },
+    {
+      "name": "Solidity.Backend.InternalFlow.RuntimeFrame.AllocatingSourceViews.Controls.certificate_root",
+      "line": 12
+    },
+    {
+      "name": "Solidity.Backend.InternalFlow.RuntimeFrame.AllocatingSourceViews.Controls.extra_refused",
+      "line": 19
+    },
+    {
+      "name": "Solidity.Backend.InternalFlow.RuntimeFrame.AllocatingSourceViews.Controls.nil_refused",
+      "line": 15
+    },
+    {
+      "name": "Solidity.Backend.InternalFlow.RuntimeFrame.AllocatingSourceViews.Controls.revert_refused",
+      "line": 17
+    }
+  ],
+  "Solidity.Backend.InternalFlow.RuntimeFrameV3AllocatingTurnViews": [
+    {
+      "name": "Solidity.Backend.InternalFlow.RuntimeFrame.AllocatingTurnViews.ClosedConditional.shape",
+      "line": 14
+    },
+    {
+      "name": "Solidity.Backend.InternalFlow.RuntimeFrame.AllocatingTurnViews.Turn.shape",
+      "line": 38
+    }
+  ],
+  "Solidity.Backend.InternalFlow.RuntimeFrameV3AllocatingTurnViewsControls": [
+    {
+      "name": "Solidity.Backend.InternalFlow.RuntimeFrame.AllocatingTurnViews.Controls.actual_turn",
+      "line": 9
+    },
+    {
+      "name": "Solidity.Backend.InternalFlow.RuntimeFrame.AllocatingTurnViews.Controls.continuation_preserved",
+      "line": 33
+    },
+    {
+      "name": "Solidity.Backend.InternalFlow.RuntimeFrame.AllocatingTurnViews.Controls.empty_positive_refused",
+      "line": 29
+    },
+    {
+      "name": "Solidity.Backend.InternalFlow.RuntimeFrame.AllocatingTurnViews.Controls.extended_branch_refused",
+      "line": 39
+    },
+    {
+      "name": "Solidity.Backend.InternalFlow.RuntimeFrame.AllocatingTurnViews.Controls.extra_root_refused",
+      "line": 19
+    },
+    {
+      "name": "Solidity.Backend.InternalFlow.RuntimeFrame.AllocatingTurnViews.Controls.missing_allocation_refused",
+      "line": 25
+    },
+    {
+      "name": "Solidity.Backend.InternalFlow.RuntimeFrame.AllocatingTurnViews.Controls.nil_refused",
+      "line": 14
+    },
+    {
+      "name": "Solidity.Backend.InternalFlow.RuntimeFrame.AllocatingTurnViews.Controls.nonconditional_refused",
+      "line": 16
+    }
+  ],
+  "Solidity.Backend.InternalFlow.RuntimeFrameV3AllocatingValueViews": [
+    {
+      "name": "Solidity.Backend.InternalFlow.RuntimeFrame.AllocatingValueViews.BinaryView.accepted",
+      "line": 32
+    },
+    {
+      "name": "Solidity.Backend.InternalFlow.RuntimeFrame.AllocatingValueViews.BinaryView.output",
+      "line": 33
+    },
+    {
+      "name": "Solidity.Backend.InternalFlow.RuntimeFrame.AllocatingValueViews.BinaryView.shape",
+      "line": 36
+    },
+    {
+      "name": "Solidity.Backend.InternalFlow.RuntimeFrame.AllocatingValueViews.LocalView.shape",
+      "line": 22
+    },
+    {
+      "name": "Solidity.Backend.InternalFlow.RuntimeFrame.AllocatingValueViews.SimpleView.shape",
+      "line": 10
+    },
+    {
+      "name": "Solidity.Backend.InternalFlow.RuntimeFrame.AllocatingValueViews.UintBinary.accepted",
+      "line": 48
+    },
+    {
+      "name": "Solidity.Backend.InternalFlow.RuntimeFrame.AllocatingValueViews.UintBinary.output",
+      "line": 49
+    },
+    {
+      "name": "Solidity.Backend.InternalFlow.RuntimeFrame.AllocatingValueViews.UintBinary.shape",
+      "line": 52
+    }
+  ],
+  "Solidity.Backend.InternalFlow.RuntimeFrameV3AllocationInventory": [
+    {
+      "name": "Solidity.Backend.InternalFlow.RuntimeFrame.ScalarAllocationInventory.covers",
+      "line": 17
+    },
+    {
+      "name": "Solidity.Backend.InternalFlow.RuntimeFrame.ScalarAllocationInventory.distinct",
+      "line": 35
+    },
+    {
+      "name": "Solidity.Backend.InternalFlow.RuntimeFrame.ScalarAllocationInventory.observe",
+      "line": 48
+    }
+  ],
+  "Solidity.Backend.InternalFlow.RuntimeFrameV3AllocationInventoryControls": [
+    {
+      "name": "Solidity.Backend.InternalFlow.RuntimeFrame.ScalarAllocationInventory.Controls.prefixes",
+      "line": 8
+    }
+  ],
+  "Solidity.Backend.InternalFlow.RuntimeFrameV3CallerStorageFrame": [
+    {
+      "name": "Solidity.Backend.InternalFlow.RuntimeFrame.CallerStorageFrame.reframe",
+      "line": 10
+    }
+  ],
+  "Solidity.Backend.InternalFlow.RuntimeFrameV3CallerStorageFrameControls": [
+    {
+      "name": "Solidity.Backend.InternalFlow.RuntimeFrame.CallerStorageFrame.Controls.allocated_live",
+      "line": 79
+    },
+    {
+      "name": "Solidity.Backend.InternalFlow.RuntimeFrame.CallerStorageFrame.Controls.allocated_repr",
+      "line": 76
+    },
+    {
+      "name": "Solidity.Backend.InternalFlow.RuntimeFrame.CallerStorageFrame.Controls.allocator",
+      "line": 53
+    },
+    {
+      "name": "Solidity.Backend.InternalFlow.RuntimeFrame.CallerStorageFrame.Controls.call_source",
+      "line": 115
+    },
+    {
+      "name": "Solidity.Backend.InternalFlow.RuntimeFrame.CallerStorageFrame.Controls.caller_words",
+      "line": 106
+    },
+    {
+      "name": "Solidity.Backend.InternalFlow.RuntimeFrame.CallerStorageFrame.Controls.child_initial",
+      "line": 47
+    },
+    {
+      "name": "Solidity.Backend.InternalFlow.RuntimeFrame.CallerStorageFrame.Controls.code_eq",
+      "line": 87
+    },
+    {
+      "name": "Solidity.Backend.InternalFlow.RuntimeFrame.CallerStorageFrame.Controls.extended",
+      "line": 104
+    },
+    {
+      "name": "Solidity.Backend.InternalFlow.RuntimeFrame.CallerStorageFrame.Controls.fragile_observed",
+      "line": 121
+    },
+    {
+      "name": "Solidity.Backend.InternalFlow.RuntimeFrame.CallerStorageFrame.Controls.initial",
+      "line": 29
+    },
+    {
+      "name": "Solidity.Backend.InternalFlow.RuntimeFrame.CallerStorageFrame.Controls.live",
+      "line": 19
+    },
+    {
+      "name": "Solidity.Backend.InternalFlow.RuntimeFrame.CallerStorageFrame.Controls.no_ref",
+      "line": 26
+    },
+    {
+      "name": "Solidity.Backend.InternalFlow.RuntimeFrame.CallerStorageFrame.Controls.observations",
+      "line": 125
+    },
+    {
+      "name": "Solidity.Backend.InternalFlow.RuntimeFrame.CallerStorageFrame.Controls.path",
+      "line": 18
+    },
+    {
+      "name": "Solidity.Backend.InternalFlow.RuntimeFrame.CallerStorageFrame.Controls.public_root",
+      "line": 74
+    },
+    {
+      "name": "Solidity.Backend.InternalFlow.RuntimeFrame.CallerStorageFrame.Controls.reached",
+      "line": 81
+    },
+    {
+      "name": "Solidity.Backend.InternalFlow.RuntimeFrame.CallerStorageFrame.Controls.restored",
+      "line": 118
+    },
+    {
+      "name": "Solidity.Backend.InternalFlow.RuntimeFrame.CallerStorageFrame.Controls.source",
+      "line": 100
+    },
+    {
+      "name": "Solidity.Backend.InternalFlow.RuntimeFrame.CallerStorageFrame.Controls.storage",
+      "line": 102
+    },
+    {
+      "name": "Solidity.Backend.InternalFlow.RuntimeFrame.CallerStorageFrame.Controls.target",
+      "line": 89
+    },
+    {
+      "name": "Solidity.Backend.InternalFlow.RuntimeFrame.CallerStorageFrame.Controls.wrong_alias",
+      "line": 132
+    },
+    {
+      "name": "Solidity.Backend.InternalFlow.RuntimeFrame.CallerStorageFrame.Controls.wrong_liveness",
+      "line": 130
+    }
+  ],
+  "Solidity.Backend.InternalFlow.RuntimeFrameV3DisjointScalarControls": [
+    {
+      "name": "Solidity.Backend.InternalFlow.RuntimeFrame.DisjointScalarReturn.Client.argument_failure_not_exhausted",
+      "line": 189
+    },
+    {
+      "name": "Solidity.Backend.InternalFlow.RuntimeFrame.DisjointScalarReturn.Client.available",
+      "line": 26
+    },
+    {
+      "name": "Solidity.Backend.InternalFlow.RuntimeFrame.DisjointScalarReturn.Client.bad_arguments",
+      "line": 171
+    },
+    {
+      "name": "Solidity.Backend.InternalFlow.RuntimeFrame.DisjointScalarReturn.Client.bad_call",
+      "line": 178
+    },
+    {
+      "name": "Solidity.Backend.InternalFlow.RuntimeFrame.DisjointScalarReturn.Client.bad_eval",
+      "line": 168
+    },
+    {
+      "name": "Solidity.Backend.InternalFlow.RuntimeFrame.DisjointScalarReturn.Client.bad_prefix",
+      "line": 174
+    },
+    {
+      "name": "Solidity.Backend.InternalFlow.RuntimeFrame.DisjointScalarReturn.Client.bad_selected",
+      "line": 166
+    },
+    {
+      "name": "Solidity.Backend.InternalFlow.RuntimeFrame.DisjointScalarReturn.Client.bad_target",
+      "line": 186
+    },
+    {
+      "name": "Solidity.Backend.InternalFlow.RuntimeFrame.DisjointScalarReturn.Client.changed_destination",
+      "line": 121
+    },
+    {
+      "name": "Solidity.Backend.InternalFlow.RuntimeFrame.DisjointScalarReturn.Client.distinct_slots",
+      "line": 128
+    },
+    {
+      "name": "Solidity.Backend.InternalFlow.RuntimeFrame.DisjointScalarReturn.Client.entry_contrast",
+      "line": 62
+    },
+    {
+      "name": "Solidity.Backend.InternalFlow.RuntimeFrame.DisjointScalarReturn.Client.initial",
+      "line": 20
+    },
+    {
+      "name": "Solidity.Backend.InternalFlow.RuntimeFrame.DisjointScalarReturn.Client.initial_owner",
+      "line": 57
+    },
+    {
+      "name": "Solidity.Backend.InternalFlow.RuntimeFrame.DisjointScalarReturn.Client.native_and_target",
+      "line": 113
+    },
+    {
+      "name": "Solidity.Backend.InternalFlow.RuntimeFrame.DisjointScalarReturn.Client.not_revert",
+      "line": 148
+    },
+    {
+      "name": "Solidity.Backend.InternalFlow.RuntimeFrame.DisjointScalarReturn.Client.old_caller_words",
+      "line": 71
+    },
+    {
+      "name": "Solidity.Backend.InternalFlow.RuntimeFrame.DisjointScalarReturn.Client.owner",
+      "line": 78
+    },
+    {
+      "name": "Solidity.Backend.InternalFlow.RuntimeFrame.DisjointScalarReturn.Client.selected",
+      "line": 18
+    },
+    {
+      "name": "Solidity.Backend.InternalFlow.RuntimeFrame.DisjointScalarReturn.Client.shallow",
+      "line": 144
+    },
+    {
+      "name": "Solidity.Backend.InternalFlow.RuntimeFrame.DisjointScalarReturn.Client.snapshot",
+      "line": 82
+    },
+    {
+      "name": "Solidity.Backend.InternalFlow.RuntimeFrame.DisjointScalarReturn.Client.source_bindings",
+      "line": 105
+    },
+    {
+      "name": "Solidity.Backend.InternalFlow.RuntimeFrame.DisjointScalarReturn.Client.source_heap",
+      "line": 153
+    },
+    {
+      "name": "Solidity.Backend.InternalFlow.RuntimeFrame.DisjointScalarReturn.Client.source_identity",
+      "line": 23
+    },
+    {
+      "name": "Solidity.Backend.InternalFlow.RuntimeFrame.DisjointScalarReturn.Client.specification",
+      "line": 44
+    },
+    {
+      "name": "Solidity.Backend.InternalFlow.RuntimeFrame.DisjointScalarReturn.Client.wrong_alias",
+      "line": 135
+    },
+    {
+      "name": "Solidity.Backend.InternalFlow.RuntimeFrame.DisjointScalarReturn.Client.wrong_heap_cursor",
+      "line": 140
+    },
+    {
+      "name": "Solidity.Backend.InternalFlow.RuntimeFrame.DisjointScalarReturn.Client.wrong_typed_slot",
+      "line": 130
+    }
+  ],
+  "Solidity.Backend.InternalFlow.RuntimeFrameV3DisjointScalarEntry": [
+    {
+      "name": "Solidity.Backend.InternalFlow.RuntimeFrame.DisjointScalarEntry.entered",
+      "line": 20
+    },
+    {
+      "name": "Solidity.Backend.InternalFlow.RuntimeFrame.DisjointScalarEntry.revert",
+      "line": 105
+    }
+  ],
+  "Solidity.Backend.InternalFlow.RuntimeFrameV3DisjointScalarReturn": [
+    {
+      "name": "Solidity.Backend.InternalFlow.RuntimeFrame.DisjointScalarReturn.endpoint",
+      "line": 25
+    }
+  ],
+  "Solidity.Backend.InternalFlow.RuntimeFrameV3DistinctParentControls": [
+    {
+      "name": "Solidity.Backend.InternalFlow.RuntimeFrame.DistinctParentRestore.Controls.actual_different",
+      "line": 59
+    },
+    {
+      "name": "Solidity.Backend.InternalFlow.RuntimeFrame.DistinctParentRestore.Controls.after_repr",
+      "line": 46
+    },
+    {
+      "name": "Solidity.Backend.InternalFlow.RuntimeFrame.DistinctParentRestore.Controls.capture_exists",
+      "line": 17
+    },
+    {
+      "name": "Solidity.Backend.InternalFlow.RuntimeFrame.DistinctParentRestore.Controls.capture_run",
+      "line": 40
+    },
+    {
+      "name": "Solidity.Backend.InternalFlow.RuntimeFrame.DistinctParentRestore.Controls.capture_spec",
+      "line": 28
+    },
+    {
+      "name": "Solidity.Backend.InternalFlow.RuntimeFrame.DistinctParentRestore.Controls.captured_repr",
+      "line": 42
+    },
+    {
+      "name": "Solidity.Backend.InternalFlow.RuntimeFrame.DistinctParentRestore.Controls.completed",
+      "line": 96
+    },
+    {
+      "name": "Solidity.Backend.InternalFlow.RuntimeFrame.DistinctParentRestore.Controls.endpoint",
+      "line": 64
+    },
+    {
+      "name": "Solidity.Backend.InternalFlow.RuntimeFrame.DistinctParentRestore.Controls.entry_run",
+      "line": 44
+    },
+    {
+      "name": "Solidity.Backend.InternalFlow.RuntimeFrame.DistinctParentRestore.Controls.not_revert",
+      "line": 117
+    },
+    {
+      "name": "Solidity.Backend.InternalFlow.RuntimeFrame.DistinctParentRestore.Controls.parent_repr",
+      "line": 13
+    },
+    {
+      "name": "Solidity.Backend.InternalFlow.RuntimeFrame.DistinctParentRestore.Controls.payload",
+      "line": 50
+    },
+    {
+      "name": "Solidity.Backend.InternalFlow.RuntimeFrame.DistinctParentRestore.Controls.wrong_active",
+      "line": 84
+    },
+    {
+      "name": "Solidity.Backend.InternalFlow.RuntimeFrame.DistinctParentRestore.Controls.wrong_counter",
+      "line": 109
+    },
+    {
+      "name": "Solidity.Backend.InternalFlow.RuntimeFrame.DistinctParentRestore.Controls.wrong_cursor",
+      "line": 113
+    },
+    {
+      "name": "Solidity.Backend.InternalFlow.RuntimeFrame.DistinctParentRestore.Controls.wrong_result",
+      "line": 105
+    }
+  ],
+  "Solidity.Backend.InternalFlow.RuntimeFrameV3DistinctParentRestore": [
+    {
+      "name": "Solidity.Backend.InternalFlow.RuntimeFrame.DistinctParentRestore.restore",
+      "line": 12
+    }
+  ],
+  "Solidity.Backend.InternalFlow.RuntimeFrameV3DistinctScalarControls": [
+    {
+      "name": "Solidity.Backend.InternalFlow.RuntimeFrame.DistinctScalarUnwind.Controls.completed",
+      "line": 41
+    },
+    {
+      "name": "Solidity.Backend.InternalFlow.RuntimeFrame.DistinctScalarUnwind.Controls.endpoint",
+      "line": 49
+    },
+    {
+      "name": "Solidity.Backend.InternalFlow.RuntimeFrame.DistinctScalarUnwind.Controls.not_child_reference",
+      "line": 67
+    },
+    {
+      "name": "Solidity.Backend.InternalFlow.RuntimeFrame.DistinctScalarUnwind.Controls.not_old_result",
+      "line": 72
+    },
+    {
+      "name": "Solidity.Backend.InternalFlow.RuntimeFrame.DistinctScalarUnwind.Controls.not_result_counter",
+      "line": 77
+    },
+    {
+      "name": "Solidity.Backend.InternalFlow.RuntimeFrame.DistinctScalarUnwind.Controls.not_revert",
+      "line": 82
+    },
+    {
+      "name": "Solidity.Backend.InternalFlow.RuntimeFrame.DistinctScalarUnwind.Controls.source_advance",
+      "line": 27
+    },
+    {
+      "name": "Solidity.Backend.InternalFlow.RuntimeFrame.DistinctScalarUnwind.Controls.source_bindings",
+      "line": 61
+    },
+    {
+      "name": "Solidity.Backend.InternalFlow.RuntimeFrame.DistinctScalarUnwind.Controls.specification",
+      "line": 30
+    },
+    {
+      "name": "Solidity.Backend.InternalFlow.RuntimeFrame.DistinctScalarUnwind.Controls.words",
+      "line": 51
+    }
+  ],
+  "Solidity.Backend.InternalFlow.RuntimeFrameV3DistinctScalarExport": [
+    {
+      "name": "Solidity.Backend.InternalFlow.RuntimeFrame.DistinctScalarExport.allocator",
+      "line": 67
+    },
+    {
+      "name": "Solidity.Backend.InternalFlow.RuntimeFrame.DistinctScalarExport.completed",
+      "line": 34
+    },
+    {
+      "name": "Solidity.Backend.InternalFlow.RuntimeFrame.DistinctScalarExport.counter_before",
+      "line": 51
+    },
+    {
+      "name": "Solidity.Backend.InternalFlow.RuntimeFrame.DistinctScalarExport.exact_code",
+      "line": 38
+    },
+    {
+      "name": "Solidity.Backend.InternalFlow.RuntimeFrame.DistinctScalarExport.exported",
+      "line": 27
+    },
+    {
+      "name": "Solidity.Backend.InternalFlow.RuntimeFrame.DistinctScalarExport.exterior",
+      "line": 54
+    },
+    {
+      "name": "Solidity.Backend.InternalFlow.RuntimeFrame.DistinctScalarExport.not_child_reference",
+      "line": 78
+    },
+    {
+      "name": "Solidity.Backend.InternalFlow.RuntimeFrame.DistinctScalarExport.not_erased_private",
+      "line": 83
+    },
+    {
+      "name": "Solidity.Backend.InternalFlow.RuntimeFrame.DistinctScalarExport.not_noop",
+      "line": 70
+    },
+    {
+      "name": "Solidity.Backend.InternalFlow.RuntimeFrame.DistinctScalarExport.not_revert",
+      "line": 88
+    },
+    {
+      "name": "Solidity.Backend.InternalFlow.RuntimeFrame.DistinctScalarExport.reference_word",
+      "line": 48
+    },
+    {
+      "name": "Solidity.Backend.InternalFlow.RuntimeFrame.DistinctScalarExport.result_word",
+      "line": 45
+    },
+    {
+      "name": "Solidity.Backend.InternalFlow.RuntimeFrame.DistinctScalarExport.source_bindings",
+      "line": 40
+    },
+    {
+      "name": "Solidity.Backend.InternalFlow.RuntimeFrame.DistinctScalarExport.source_exit",
+      "line": 31
+    },
+    {
+      "name": "Solidity.Backend.InternalFlow.RuntimeFrame.DistinctScalarExport.words",
+      "line": 57
+    }
+  ],
+  "Solidity.Backend.InternalFlow.RuntimeFrameV3DistinctScalarUnwind": [
+    {
+      "name": "Solidity.Backend.InternalFlow.RuntimeFrame.DistinctScalarUnwind.step",
+      "line": 11
+    }
+  ],
+  "Solidity.Backend.InternalFlow.RuntimeFrameV3EffectfulRuntime": [
+    {
+      "name": "Solidity.Backend.InternalFlow.RuntimeFrame.EffectfulRuntime.bare_revert",
+      "line": 117
+    },
+    {
+      "name": "Solidity.Backend.InternalFlow.RuntimeFrame.EffectfulRuntime.capacity",
+      "line": 18
+    },
+    {
+      "name": "Solidity.Backend.InternalFlow.RuntimeFrame.EffectfulRuntime.returned_of_eval",
+      "line": 36
+    },
+    {
+      "name": "Solidity.Backend.InternalFlow.RuntimeFrame.EffectfulRuntime.returns",
+      "line": 33
+    }
+  ],
+  "Solidity.Backend.InternalFlow.RuntimeFrameV3EffectfulRuntimeControls": [
+    {
+      "name": "Solidity.Backend.InternalFlow.RuntimeFrame.EffectfulRuntime.Controls.argument_arena",
+      "line": 102
+    },
+    {
+      "name": "Solidity.Backend.InternalFlow.RuntimeFrame.EffectfulRuntime.Controls.argument_entry",
+      "line": 107
+    },
+    {
+      "name": "Solidity.Backend.InternalFlow.RuntimeFrame.EffectfulRuntime.Controls.argument_revert",
+      "line": 127
+    },
+    {
+      "name": "Solidity.Backend.InternalFlow.RuntimeFrame.EffectfulRuntime.Controls.argument_reverting_entry",
+      "line": 122
+    },
+    {
+      "name": "Solidity.Backend.InternalFlow.RuntimeFrame.EffectfulRuntime.Controls.callee_arena",
+      "line": 72
+    },
+    {
+      "name": "Solidity.Backend.InternalFlow.RuntimeFrame.EffectfulRuntime.Controls.callee_entry",
+      "line": 77
+    },
+    {
+      "name": "Solidity.Backend.InternalFlow.RuntimeFrame.EffectfulRuntime.Controls.callee_revert",
+      "line": 97
+    },
+    {
+      "name": "Solidity.Backend.InternalFlow.RuntimeFrame.EffectfulRuntime.Controls.callee_reverting_entry",
+      "line": 92
+    },
+    {
+      "name": "Solidity.Backend.InternalFlow.RuntimeFrame.EffectfulRuntime.Controls.good_arena",
+      "line": 19
+    },
+    {
+      "name": "Solidity.Backend.InternalFlow.RuntimeFrame.EffectfulRuntime.Controls.good_entry",
+      "line": 25
+    },
+    {
+      "name": "Solidity.Backend.InternalFlow.RuntimeFrame.EffectfulRuntime.Controls.named_target",
+      "line": 60
+    },
+    {
+      "name": "Solidity.Backend.InternalFlow.RuntimeFrame.EffectfulRuntime.Controls.nonfragile",
+      "line": 12
+    },
+    {
+      "name": "Solidity.Backend.InternalFlow.RuntimeFrame.EffectfulRuntime.Controls.returned",
+      "line": 44
+    },
+    {
+      "name": "Solidity.Backend.InternalFlow.RuntimeFrame.EffectfulRuntime.Controls.successful_entry",
+      "line": 53
+    },
+    {
+      "name": "Solidity.Backend.InternalFlow.RuntimeFrame.EffectfulRuntime.Controls.wrong_captured_count",
+      "line": 132
+    },
+    {
+      "name": "Solidity.Backend.InternalFlow.RuntimeFrame.EffectfulRuntime.Controls.wrong_halt",
+      "line": 137
+    }
+  ],
+  "Solidity.Backend.InternalFlow.RuntimeFrameV3EffectfulScalarCall": [
+    {
+      "name": "Solidity.Backend.InternalFlow.RuntimeFrame.EffectfulScalarCall.available",
+      "line": 34
+    },
+    {
+      "name": "Solidity.Backend.InternalFlow.RuntimeFrame.EffectfulScalarCall.changed_destination",
+      "line": 147
+    },
+    {
+      "name": "Solidity.Backend.InternalFlow.RuntimeFrame.EffectfulScalarCall.entry_contrast",
+      "line": 69
+    },
+    {
+      "name": "Solidity.Backend.InternalFlow.RuntimeFrame.EffectfulScalarCall.exhaustion_boundary",
+      "line": 159
+    },
+    {
+      "name": "Solidity.Backend.InternalFlow.RuntimeFrame.EffectfulScalarCall.initial",
+      "line": 32
+    },
+    {
+      "name": "Solidity.Backend.InternalFlow.RuntimeFrame.EffectfulScalarCall.initial_owner",
+      "line": 65
+    },
+    {
+      "name": "Solidity.Backend.InternalFlow.RuntimeFrame.EffectfulScalarCall.native",
+      "line": 117
+    },
+    {
+      "name": "Solidity.Backend.InternalFlow.RuntimeFrame.EffectfulScalarCall.native_and_target",
+      "line": 125
+    },
+    {
+      "name": "Solidity.Backend.InternalFlow.RuntimeFrame.EffectfulScalarCall.not_keeps",
+      "line": 150
+    },
+    {
+      "name": "Solidity.Backend.InternalFlow.RuntimeFrame.EffectfulScalarCall.old_caller_words",
+      "line": 78
+    },
+    {
+      "name": "Solidity.Backend.InternalFlow.RuntimeFrame.EffectfulScalarCall.old_cell",
+      "line": 139
+    },
+    {
+      "name": "Solidity.Backend.InternalFlow.RuntimeFrame.EffectfulScalarCall.owner",
+      "line": 85
+    },
+    {
+      "name": "Solidity.Backend.InternalFlow.RuntimeFrame.EffectfulScalarCall.snapshot",
+      "line": 89
+    },
+    {
+      "name": "Solidity.Backend.InternalFlow.RuntimeFrame.EffectfulScalarCall.specification",
+      "line": 52
+    },
+    {
+      "name": "Solidity.Backend.InternalFlow.RuntimeFrame.EffectfulScalarCall.target",
+      "line": 122
+    },
+    {
+      "name": "Solidity.Backend.InternalFlow.RuntimeFrame.EffectfulScalarCall.whole_growth",
+      "line": 131
+    },
+    {
+      "name": "Solidity.Backend.InternalFlow.RuntimeFrame.EffectfulScalarCall.write_addr",
+      "line": 28
+    },
+    {
+      "name": "Solidity.Backend.InternalFlow.RuntimeFrame.EffectfulScalarCall.write_facts",
+      "line": 19
+    },
+    {
+      "name": "Solidity.Backend.InternalFlow.RuntimeFrame.EffectfulScalarCall.wrong_old_contents",
+      "line": 143
+    }
+  ],
+  "Solidity.Backend.InternalFlow.RuntimeFrameV3EffectfulScalarFailure": [
+    {
+      "name": "Solidity.Backend.InternalFlow.RuntimeFrame.EffectfulScalarFailure.Client.actual_write_failure",
+      "line": 83
+    },
+    {
+      "name": "Solidity.Backend.InternalFlow.RuntimeFrame.EffectfulScalarFailure.Client.arguments",
+      "line": 80
+    },
+    {
+      "name": "Solidity.Backend.InternalFlow.RuntimeFrame.EffectfulScalarFailure.Client.arguments_not_failure",
+      "line": 112
+    },
+    {
+      "name": "Solidity.Backend.InternalFlow.RuntimeFrame.EffectfulScalarFailure.Client.source",
+      "line": 87
+    },
+    {
+      "name": "Solidity.Backend.InternalFlow.RuntimeFrame.EffectfulScalarFailure.Client.source_not_exhausted",
+      "line": 115
+    },
+    {
+      "name": "Solidity.Backend.InternalFlow.RuntimeFrame.EffectfulScalarFailure.Client.target",
+      "line": 93
+    },
+    {
+      "name": "Solidity.Backend.InternalFlow.RuntimeFrame.EffectfulScalarFailure.Client.target_not_fault",
+      "line": 130
+    },
+    {
+      "name": "Solidity.Backend.InternalFlow.RuntimeFrame.EffectfulScalarFailure.Client.target_not_ok",
+      "line": 124
+    },
+    {
+      "name": "Solidity.Backend.InternalFlow.RuntimeFrame.EffectfulScalarFailure.Client.whole_source",
+      "line": 103
+    },
+    {
+      "name": "Solidity.Backend.InternalFlow.RuntimeFrame.EffectfulScalarFailure.Client.whole_target",
+      "line": 108
+    },
+    {
+      "name": "Solidity.Backend.InternalFlow.RuntimeFrame.EffectfulScalarFailure.Client.write_code",
+      "line": 91
+    },
+    {
+      "name": "Solidity.Backend.InternalFlow.RuntimeFrame.EffectfulScalarFailure.Client.zero_control",
+      "line": 137
+    },
+    {
+      "name": "Solidity.Backend.InternalFlow.RuntimeFrame.EffectfulScalarFailure.call_failure",
+      "line": 31
+    },
+    {
+      "name": "Solidity.Backend.InternalFlow.RuntimeFrame.EffectfulScalarFailure.public_root",
+      "line": 59
+    },
+    {
+      "name": "Solidity.Backend.InternalFlow.RuntimeFrame.EffectfulScalarFailure.target_suffix",
+      "line": 64
+    },
+    {
+      "name": "Solidity.Backend.InternalFlow.RuntimeFrame.EffectfulScalarFailure.write_failure",
+      "line": 15
+    }
+  ],
+  "Solidity.Backend.InternalFlow.RuntimeFrameV3EffectfulScalarSource": [
+    {
+      "name": "Solidity.Backend.InternalFlow.RuntimeFrame.EffectfulScalarSource.all_horizons",
+      "line": 36
+    },
+    {
+      "name": "Solidity.Backend.InternalFlow.RuntimeFrame.EffectfulScalarSource.write_source",
+      "line": 19
+    }
+  ],
+  "Solidity.Backend.InternalFlow.RuntimeFrameV3EffectfulSourceCheck": [
+    {
+      "name": "Solidity.Backend.InternalFlow.RuntimeFrame.EffectfulSourceCheck.checked_cons",
+      "line": 47
+    },
+    {
+      "name": "Solidity.Backend.InternalFlow.RuntimeFrame.EffectfulSourceCheck.complete",
+      "line": 40
+    },
+    {
+      "name": "Solidity.Backend.InternalFlow.RuntimeFrame.EffectfulSourceCheck.write_complete",
+      "line": 35
+    }
+  ],
+  "Solidity.Backend.InternalFlow.RuntimeFrameV3EffectfulSourceCheckControls": [
+    {
+      "name": "Solidity.Backend.InternalFlow.RuntimeFrame.EffectfulSourceCheck.Controls.actual_failure",
+      "line": 52
+    },
+    {
+      "name": "Solidity.Backend.InternalFlow.RuntimeFrame.EffectfulSourceCheck.Controls.actual_success",
+      "line": 36
+    },
+    {
+      "name": "Solidity.Backend.InternalFlow.RuntimeFrame.EffectfulSourceCheck.Controls.deep_child_rejected",
+      "line": 24
+    },
+    {
+      "name": "Solidity.Backend.InternalFlow.RuntimeFrame.EffectfulSourceCheck.Controls.missing_effect",
+      "line": 26
+    },
+    {
+      "name": "Solidity.Backend.InternalFlow.RuntimeFrame.EffectfulSourceCheck.Controls.outer_tail_matches",
+      "line": 22
+    },
+    {
+      "name": "Solidity.Backend.InternalFlow.RuntimeFrame.EffectfulSourceCheck.Controls.wrong_depth",
+      "line": 28
+    },
+    {
+      "name": "Solidity.Backend.InternalFlow.RuntimeFrame.EffectfulSourceCheck.Controls.wrong_effect",
+      "line": 30
+    },
+    {
+      "name": "Solidity.Backend.InternalFlow.RuntimeFrame.EffectfulSourceCheck.Controls.wrong_index",
+      "line": 15
+    },
+    {
+      "name": "Solidity.Backend.InternalFlow.RuntimeFrame.EffectfulSourceCheck.Controls.wrong_value",
+      "line": 17
+    },
+    {
+      "name": "Solidity.Backend.InternalFlow.RuntimeFrame.EffectfulSourceCheck.Controls.zero_recognized",
+      "line": 34
+    }
+  ],
+  "Solidity.Backend.InternalFlow.RuntimeFrameV3EffectfulSourceSelection": [
+    {
+      "name": "Solidity.Backend.InternalFlow.RuntimeFrame.EffectfulSourceSelection.Selected.argument_failure",
+      "line": 137
+    },
+    {
+      "name": "Solidity.Backend.InternalFlow.RuntimeFrame.EffectfulSourceSelection.Selected.body_eq",
+      "line": 32
+    },
+    {
+      "name": "Solidity.Backend.InternalFlow.RuntimeFrame.EffectfulSourceSelection.Selected.callee_failure",
+      "line": 122
+    },
+    {
+      "name": "Solidity.Backend.InternalFlow.RuntimeFrame.EffectfulSourceSelection.Selected.callee_root",
+      "line": 117
+    },
+    {
+      "name": "Solidity.Backend.InternalFlow.RuntimeFrame.EffectfulSourceSelection.Selected.checked",
+      "line": 33
+    },
+    {
+      "name": "Solidity.Backend.InternalFlow.RuntimeFrame.EffectfulSourceSelection.Selected.head",
+      "line": 31
+    },
+    {
+      "name": "Solidity.Backend.InternalFlow.RuntimeFrame.EffectfulSourceSelection.Selected.source_run",
+      "line": 100
+    },
+    {
+      "name": "Solidity.Backend.InternalFlow.RuntimeFrame.EffectfulSourceSelection.Selected.value_root",
+      "line": 35
+    },
+    {
+      "name": "Solidity.Backend.InternalFlow.RuntimeFrame.EffectfulSourceSelection.compile_call",
+      "line": 69
+    }
+  ],
+  "Solidity.Backend.InternalFlow.RuntimeFrameV3EffectfulSourceSelectionControls": [
+    {
+      "name": "Solidity.Backend.InternalFlow.RuntimeFrame.EffectfulSourceSelection.Controls.argument_failure",
+      "line": 58
+    },
+    {
+      "name": "Solidity.Backend.InternalFlow.RuntimeFrame.EffectfulSourceSelection.Controls.bad_callee_root",
+      "line": 48
+    },
+    {
+      "name": "Solidity.Backend.InternalFlow.RuntimeFrame.EffectfulSourceSelection.Controls.callee_failure",
+      "line": 51
+    },
+    {
+      "name": "Solidity.Backend.InternalFlow.RuntimeFrame.EffectfulSourceSelection.Controls.deep_child_rejected",
+      "line": 75
+    },
+    {
+      "name": "Solidity.Backend.InternalFlow.RuntimeFrame.EffectfulSourceSelection.Controls.exhausted_boundary",
+      "line": 83
+    },
+    {
+      "name": "Solidity.Backend.InternalFlow.RuntimeFrame.EffectfulSourceSelection.Controls.good_root",
+      "line": 31
+    },
+    {
+      "name": "Solidity.Backend.InternalFlow.RuntimeFrame.EffectfulSourceSelection.Controls.ordinary_call_refused",
+      "line": 77
+    },
+    {
+      "name": "Solidity.Backend.InternalFlow.RuntimeFrame.EffectfulSourceSelection.Controls.root",
+      "line": 22
+    },
+    {
+      "name": "Solidity.Backend.InternalFlow.RuntimeFrame.EffectfulSourceSelection.Controls.same_image",
+      "line": 43
+    },
+    {
+      "name": "Solidity.Backend.InternalFlow.RuntimeFrame.EffectfulSourceSelection.Controls.success",
+      "line": 34
+    },
+    {
+      "name": "Solidity.Backend.InternalFlow.RuntimeFrame.EffectfulSourceSelection.Controls.wrong_effect_rejected",
+      "line": 69
+    }
+  ],
+  "Solidity.Backend.InternalFlow.RuntimeFrameV3EffectfulStorageRuntime": [
+    {
+      "name": "Solidity.Backend.InternalFlow.RuntimeFrame.EffectfulStorageRuntime.bare_revert",
+      "line": 92
+    },
+    {
+      "name": "Solidity.Backend.InternalFlow.RuntimeFrame.EffectfulStorageRuntime.returned_of_eval",
+      "line": 12
+    },
+    {
+      "name": "Solidity.Backend.InternalFlow.RuntimeFrame.EffectfulStorageRuntime.returns",
+      "line": 47
+    }
+  ],
+  "Solidity.Backend.InternalFlow.RuntimeFrameV3EffectfulStorageRuntimeControls": [
+    {
+      "name": "Solidity.Backend.InternalFlow.RuntimeFrame.EffectfulStorageRuntime.Controls.arena",
+      "line": 28
+    },
+    {
+      "name": "Solidity.Backend.InternalFlow.RuntimeFrame.EffectfulStorageRuntime.Controls.bad_arena",
+      "line": 83
+    },
+    {
+      "name": "Solidity.Backend.InternalFlow.RuntimeFrame.EffectfulStorageRuntime.Controls.bad_entry",
+      "line": 88
+    },
+    {
+      "name": "Solidity.Backend.InternalFlow.RuntimeFrame.EffectfulStorageRuntime.Controls.bad_eval",
+      "line": 81
+    },
+    {
+      "name": "Solidity.Backend.InternalFlow.RuntimeFrame.EffectfulStorageRuntime.Controls.bad_root",
+      "line": 76
+    },
+    {
+      "name": "Solidity.Backend.InternalFlow.RuntimeFrame.EffectfulStorageRuntime.Controls.bad_source",
+      "line": 100
+    },
+    {
+      "name": "Solidity.Backend.InternalFlow.RuntimeFrame.EffectfulStorageRuntime.Controls.bad_target",
+      "line": 108
+    },
+    {
+      "name": "Solidity.Backend.InternalFlow.RuntimeFrame.EffectfulStorageRuntime.Controls.entry",
+      "line": 33
+    },
+    {
+      "name": "Solidity.Backend.InternalFlow.RuntimeFrame.EffectfulStorageRuntime.Controls.named_target",
+      "line": 59
+    },
+    {
+      "name": "Solidity.Backend.InternalFlow.RuntimeFrame.EffectfulStorageRuntime.Controls.returned",
+      "line": 51
+    },
+    {
+      "name": "Solidity.Backend.InternalFlow.RuntimeFrame.EffectfulStorageRuntime.Controls.reverting_entry",
+      "line": 104
+    },
+    {
+      "name": "Solidity.Backend.InternalFlow.RuntimeFrame.EffectfulStorageRuntime.Controls.root",
+      "line": 23
+    },
+    {
+      "name": "Solidity.Backend.InternalFlow.RuntimeFrame.EffectfulStorageRuntime.Controls.source",
+      "line": 47
+    },
+    {
+      "name": "Solidity.Backend.InternalFlow.RuntimeFrame.EffectfulStorageRuntime.Controls.successful_entry",
+      "line": 55
+    },
+    {
+      "name": "Solidity.Backend.InternalFlow.RuntimeFrame.EffectfulStorageRuntime.Controls.violates_old_condition",
+      "line": 69
+    }
+  ],
+  "Solidity.Backend.InternalFlow.RuntimeFrameV3FreshAllocationContents": [
+    {
+      "name": "Solidity.Backend.InternalFlow.RuntimeFrame.FreshAllocationContents.reached",
+      "line": 12
+    }
+  ],
+  "Solidity.Backend.InternalFlow.RuntimeFrameV3FreshAllocationContentsControls": [
+    {
+      "name": "Solidity.Backend.InternalFlow.RuntimeFrame.FreshAllocationContents.Controls.prefixes",
+      "line": 9
+    }
+  ],
+  "Solidity.Backend.InternalFlow.RuntimeFrameV3FrozenScopeClient": [
+    {
+      "name": "Solidity.Backend.InternalFlow.RuntimeFrame.FrozenScopeClient.bad_entry",
+      "line": 54
+    },
+    {
+      "name": "Solidity.Backend.InternalFlow.RuntimeFrame.FrozenScopeClient.bad_source",
+      "line": 57
+    },
+    {
+      "name": "Solidity.Backend.InternalFlow.RuntimeFrame.FrozenScopeClient.bad_target",
+      "line": 60
+    },
+    {
+      "name": "Solidity.Backend.InternalFlow.RuntimeFrame.FrozenScopeClient.coherence",
+      "line": 32
+    },
+    {
+      "name": "Solidity.Backend.InternalFlow.RuntimeFrame.FrozenScopeClient.complete_observations",
+      "line": 78
+    },
+    {
+      "name": "Solidity.Backend.InternalFlow.RuntimeFrame.FrozenScopeClient.exhaustion_boundary",
+      "line": 89
+    },
+    {
+      "name": "Solidity.Backend.InternalFlow.RuntimeFrame.FrozenScopeClient.good_entry",
+      "line": 38
+    },
+    {
+      "name": "Solidity.Backend.InternalFlow.RuntimeFrame.FrozenScopeClient.good_return",
+      "line": 45
+    },
+    {
+      "name": "Solidity.Backend.InternalFlow.RuntimeFrame.FrozenScopeClient.good_source",
+      "line": 41
+    },
+    {
+      "name": "Solidity.Backend.InternalFlow.RuntimeFrame.FrozenScopeClient.good_target",
+      "line": 51
+    },
+    {
+      "name": "Solidity.Backend.InternalFlow.RuntimeFrame.FrozenScopeClient.native_default_root",
+      "line": 85
+    },
+    {
+      "name": "Solidity.Backend.InternalFlow.RuntimeFrame.FrozenScopeClient.not_fault",
+      "line": 93
+    },
+    {
+      "name": "Solidity.Backend.InternalFlow.RuntimeFrame.FrozenScopeClient.original_base",
+      "line": 75
+    },
+    {
+      "name": "Solidity.Backend.InternalFlow.RuntimeFrame.FrozenScopeClient.plan_eq",
+      "line": 22
+    },
+    {
+      "name": "Solidity.Backend.InternalFlow.RuntimeFrame.FrozenScopeClient.reverting_entry",
+      "line": 72
+    },
+    {
+      "name": "Solidity.Backend.InternalFlow.RuntimeFrame.FrozenScopeClient.root",
+      "line": 18
+    },
+    {
+      "name": "Solidity.Backend.InternalFlow.RuntimeFrame.FrozenScopeClient.same_image",
+      "line": 24
+    },
+    {
+      "name": "Solidity.Backend.InternalFlow.RuntimeFrame.FrozenScopeClient.source_eq",
+      "line": 28
+    },
+    {
+      "name": "Solidity.Backend.InternalFlow.RuntimeFrame.FrozenScopeClient.successful_entry",
+      "line": 68
+    },
+    {
+      "name": "Solidity.Backend.InternalFlow.RuntimeFrame.FrozenScopeClient.whole_bad_target",
+      "line": 64
+    }
+  ],
+  "Solidity.Backend.InternalFlow.RuntimeFrameV3FrozenScopeCompiler": [
+    {
+      "name": "Solidity.Backend.InternalFlow.RuntimeFrame.FrozenScopeCompiler.bare_revert",
+      "line": 58
+    },
+    {
+      "name": "Solidity.Backend.InternalFlow.RuntimeFrame.FrozenScopeCompiler.plan_eq",
+      "line": 42
+    },
+    {
+      "name": "Solidity.Backend.InternalFlow.RuntimeFrame.FrozenScopeCompiler.returns",
+      "line": 49
+    },
+    {
+      "name": "Solidity.Backend.InternalFlow.RuntimeFrame.FrozenScopeCompiler.selected_root",
+      "line": 26
+    }
+  ],
+  "Solidity.Backend.InternalFlow.RuntimeFrameV3FrozenScopeCoverage": [
+    {
+      "name": "Solidity.Backend.InternalFlow.RuntimeFrame.FrozenScopeCoverage.bad_member",
+      "line": 23
+    },
+    {
+      "name": "Solidity.Backend.InternalFlow.RuntimeFrame.FrozenScopeCoverage.coverage",
+      "line": 16
+    },
+    {
+      "name": "Solidity.Backend.InternalFlow.RuntimeFrame.FrozenScopeCoverage.exhausted_is_covered",
+      "line": 52
+    },
+    {
+      "name": "Solidity.Backend.InternalFlow.RuntimeFrame.FrozenScopeCoverage.good_member",
+      "line": 19
+    },
+    {
+      "name": "Solidity.Backend.InternalFlow.RuntimeFrame.FrozenScopeCoverage.no_index_filter",
+      "line": 48
+    },
+    {
+      "name": "Solidity.Backend.InternalFlow.RuntimeFrame.FrozenScopeCoverage.wrong_frame",
+      "line": 57
+    }
+  ],
+  "Solidity.Backend.InternalFlow.RuntimeFrameV3FrozenScopeFamily": [
+    {
+      "name": "Solidity.Backend.InternalFlow.RuntimeFrame.FrozenScopeFamily.body_run",
+      "line": 18
+    },
+    {
+      "name": "Solidity.Backend.InternalFlow.RuntimeFrame.FrozenScopeFamily.recognized",
+      "line": 28
+    },
+    {
+      "name": "Solidity.Backend.InternalFlow.RuntimeFrame.FrozenScopeFamily.source_coherence",
+      "line": 53
+    },
+    {
+      "name": "Solidity.Backend.InternalFlow.RuntimeFrame.FrozenScopeFamily.source_run",
+      "line": 43
+    }
+  ],
+  "Solidity.Backend.InternalFlow.RuntimeFrameV3FrozenScopeHorizons": [
+    {
+      "name": "Solidity.Backend.InternalFlow.RuntimeFrame.FrozenScopeHorizons.exhausted_boundary",
+      "line": 58
+    },
+    {
+      "name": "Solidity.Backend.InternalFlow.RuntimeFrame.FrozenScopeHorizons.populated_entry",
+      "line": 34
+    },
+    {
+      "name": "Solidity.Backend.InternalFlow.RuntimeFrame.FrozenScopeHorizons.populated_return",
+      "line": 41
+    },
+    {
+      "name": "Solidity.Backend.InternalFlow.RuntimeFrame.FrozenScopeHorizons.populated_source",
+      "line": 28
+    },
+    {
+      "name": "Solidity.Backend.InternalFlow.RuntimeFrame.FrozenScopeHorizons.source_value",
+      "line": 12
+    },
+    {
+      "name": "Solidity.Backend.InternalFlow.RuntimeFrame.FrozenScopeHorizons.successful_entry",
+      "line": 49
+    }
+  ],
+  "Solidity.Backend.InternalFlow.RuntimeFrameV3FrozenScopeRuntime": [
+    {
+      "name": "Solidity.Backend.InternalFlow.RuntimeFrame.FrozenScopeRuntime.reverting_entry",
+      "line": 23
+    }
+  ],
+  "Solidity.Backend.InternalFlow.RuntimeFrameV3FullScalarLoop": [
+    {
+      "name": "Solidity.Backend.InternalFlow.RuntimeFrame.FullScalarLoop.iter",
+      "line": 54
+    },
+    {
+      "name": "Solidity.Backend.InternalFlow.RuntimeFrame.FullScalarLoop.returned_succ",
+      "line": 18
+    },
+    {
+      "name": "Solidity.Backend.InternalFlow.RuntimeFrame.FullScalarLoop.run_of_stopped",
+      "line": 112
+    },
+    {
+      "name": "Solidity.Backend.InternalFlow.RuntimeFrame.FullScalarLoop.turn_done",
+      "line": 46
+    },
+    {
+      "name": "Solidity.Backend.InternalFlow.RuntimeFrame.FullScalarLoop.turn_more",
+      "line": 34
+    }
+  ],
+  "Solidity.Backend.InternalFlow.RuntimeFrameV3FullScalarLoopControls": [
+    {
+      "name": "Solidity.Backend.InternalFlow.RuntimeFrame.FullScalarLoop.Controls.endpoint",
+      "line": 15
+    },
+    {
+      "name": "Solidity.Backend.InternalFlow.RuntimeFrame.FullScalarLoop.Controls.native_state",
+      "line": 13
+    }
+  ],
+  "Solidity.Backend.InternalFlow.RuntimeFrameV3FullScalarPrefixControls": [
+    {
+      "name": "Solidity.Backend.InternalFlow.RuntimeFrame.FullScalarPrefixes.Controls.endpoint",
+      "line": 13
+    }
+  ],
+  "Solidity.Backend.InternalFlow.RuntimeFrameV3FullScalarPrefixes": [
+    {
+      "name": "Solidity.Backend.InternalFlow.RuntimeFrame.FullScalarPrefixes.at_horizon",
+      "line": 17
+    },
+    {
+      "name": "Solidity.Backend.InternalFlow.RuntimeFrame.FullScalarPrefixes.returned_value",
+      "line": 9
+    }
+  ],
+  "Solidity.Backend.InternalFlow.RuntimeFrameV3FullScalarUnwind": [
+    {
+      "name": "Solidity.Backend.InternalFlow.RuntimeFrame.FullScalarUnwind.skip_run",
+      "line": 15
+    },
+    {
+      "name": "Solidity.Backend.InternalFlow.RuntimeFrame.FullScalarUnwind.step",
+      "line": 26
+    }
+  ],
+  "Solidity.Backend.InternalFlow.RuntimeFrameV3GeneralBoundary": [
+    {
+      "name": "Solidity.Backend.InternalFlow.RuntimeFrame.V3GeneralBoundary.bare_revert_of_call",
+      "line": 47
+    },
+    {
+      "name": "Solidity.Backend.InternalFlow.RuntimeFrame.V3GeneralBoundary.callRec_run",
+      "line": 32
+    },
+    {
+      "name": "Solidity.Backend.InternalFlow.RuntimeFrame.V3GeneralBoundary.no_call_producer",
+      "line": 153
+    },
+    {
+      "name": "Solidity.Backend.InternalFlow.RuntimeFrame.V3GeneralBoundary.no_fixed_producer",
+      "line": 163
+    },
+    {
+      "name": "Solidity.Backend.InternalFlow.RuntimeFrame.V3GeneralBoundary.no_recursive_producer",
+      "line": 170
+    },
+    {
+      "name": "Solidity.Backend.InternalFlow.RuntimeFrame.V3GeneralBoundary.no_reverting_entry",
+      "line": 148
+    },
+    {
+      "name": "Solidity.Backend.InternalFlow.RuntimeFrame.V3GeneralBoundary.no_unrestricted_closure",
+      "line": 196
+    },
+    {
+      "name": "Solidity.Backend.InternalFlow.RuntimeFrame.V3GeneralBoundary.return_of_call",
+      "line": 38
+    },
+    {
+      "name": "Solidity.Backend.InternalFlow.RuntimeFrame.V3GeneralBoundary.reverting_of_call",
+      "line": 67
+    },
+    {
+      "name": "Solidity.Backend.InternalFlow.RuntimeFrame.V3GeneralBoundary.successful_of_call",
+      "line": 57
+    },
+    {
+      "name": "Solidity.Backend.InternalFlow.RuntimeFrame.V3GeneralBoundary.trivial_never_reverts",
+      "line": 185
+    },
+    {
+      "name": "Solidity.Backend.InternalFlow.RuntimeFrame.V3GeneralBoundary.unrolled_returns",
+      "line": 114
+    }
+  ],
+  "Solidity.Backend.InternalFlow.RuntimeFrameV3GeneralBoundaryControls": [
+    {
+      "name": "Solidity.Backend.InternalFlow.RuntimeFrame.V3GeneralBoundaryControls.rebuilt_plan",
+      "line": 31
+    },
+    {
+      "name": "Solidity.Backend.InternalFlow.RuntimeFrame.V3GeneralBoundaryControls.trivial_empty",
+      "line": 38
+    },
+    {
+      "name": "Solidity.Backend.InternalFlow.RuntimeFrame.V3GeneralBoundaryControls.trivial_exhausts",
+      "line": 50
+    },
+    {
+      "name": "Solidity.Backend.InternalFlow.RuntimeFrame.V3GeneralBoundaryControls.trivial_succeeds",
+      "line": 45
+    }
+  ],
+  "Solidity.Backend.InternalFlow.RuntimeFrameV3NativeAllocationCoherence": [
+    {
+      "name": "Solidity.Backend.InternalFlow.RuntimeFrame.NativeAllocationCoherence.common_output",
+      "line": 41
+    },
+    {
+      "name": "Solidity.Backend.InternalFlow.RuntimeFrame.NativeAllocationCoherence.stable",
+      "line": 10
+    }
+  ],
+  "Solidity.Backend.InternalFlow.RuntimeFrameV3NativeAllocationCoherenceControls": [
+    {
+      "name": "Solidity.Backend.InternalFlow.RuntimeFrame.NativeAllocationCoherence.Controls.exact_heap",
+      "line": 16
+    }
+  ],
+  "Solidity.Backend.InternalFlow.RuntimeFrameV3NativeDescentHeap": [
+    {
+      "name": "Solidity.Backend.InternalFlow.RuntimeFrame.NativeDescentHeap.heap_matches",
+      "line": 10
+    }
+  ],
+  "Solidity.Backend.InternalFlow.RuntimeFrameV3NativeDescentHeapControls": [
+    {
+      "name": "Solidity.Backend.InternalFlow.RuntimeFrame.NativeDescentHeap.Controls.actual",
+      "line": 9
+    }
+  ],
+  "Solidity.Backend.InternalFlow.RuntimeFrameV3NativeHeapProfile": [
+    {
+      "name": "Solidity.Backend.InternalFlow.RuntimeFrame.NativeHeapProfile.success",
+      "line": 59
+    },
+    {
+      "name": "Solidity.Backend.InternalFlow.RuntimeFrame.NativeHeapProfile.success_with_context",
+      "line": 11
+    }
+  ],
+  "Solidity.Backend.InternalFlow.RuntimeFrameV3NativeReturnRepresentation": [
+    {
+      "name": "Solidity.Backend.InternalFlow.RuntimeFrame.NativeReturnRepresentation.canonical_env_heq",
+      "line": 12
+    },
+    {
+      "name": "Solidity.Backend.InternalFlow.RuntimeFrame.NativeReturnRepresentation.endpoint",
+      "line": 19
+    }
+  ],
+  "Solidity.Backend.InternalFlow.RuntimeFrameV3NativeReturnRepresentationControls": [
+    {
+      "name": "Solidity.Backend.InternalFlow.RuntimeFrame.NativeReturnRepresentation.Controls.complete",
+      "line": 10
+    }
+  ],
+  "Solidity.Backend.InternalFlow.RuntimeFrameV3NativeScalarAgreement": [
+    {
+      "name": "Solidity.Backend.InternalFlow.RuntimeFrame.NativeScalarAgreement.agreement",
+      "line": 11
+    }
+  ],
+  "Solidity.Backend.InternalFlow.RuntimeFrameV3NativeScalarAgreementControls": [
+    {
+      "name": "Solidity.Backend.InternalFlow.RuntimeFrame.NativeScalarAgreement.Controls.coupled",
+      "line": 9
+    }
+  ],
+  "Solidity.Backend.InternalFlow.RuntimeFrameV3OrderedArgumentFailure": [
+    {
+      "name": "Solidity.Backend.InternalFlow.RuntimeFrame.OrderedArgumentFailure.Client.checked_failure",
+      "line": 45
+    },
+    {
+      "name": "Solidity.Backend.InternalFlow.RuntimeFrame.OrderedArgumentFailure.Client.failure_stages",
+      "line": 82
+    },
+    {
+      "name": "Solidity.Backend.InternalFlow.RuntimeFrame.OrderedArgumentFailure.Client.source",
+      "line": 56
+    },
+    {
+      "name": "Solidity.Backend.InternalFlow.RuntimeFrame.OrderedArgumentFailure.Client.source_not_exhausted",
+      "line": 88
+    },
+    {
+      "name": "Solidity.Backend.InternalFlow.RuntimeFrame.OrderedArgumentFailure.Client.target",
+      "line": 63
+    },
+    {
+      "name": "Solidity.Backend.InternalFlow.RuntimeFrame.OrderedArgumentFailure.Client.target_not_fault",
+      "line": 100
+    },
+    {
+      "name": "Solidity.Backend.InternalFlow.RuntimeFrame.OrderedArgumentFailure.Client.target_not_ok",
+      "line": 94
+    },
+    {
+      "name": "Solidity.Backend.InternalFlow.RuntimeFrame.OrderedArgumentFailure.Client.target_suffix",
+      "line": 60
+    },
+    {
+      "name": "Solidity.Backend.InternalFlow.RuntimeFrame.OrderedArgumentFailure.Client.whole_source",
+      "line": 70
+    },
+    {
+      "name": "Solidity.Backend.InternalFlow.RuntimeFrame.OrderedArgumentFailure.Client.whole_target",
+      "line": 77
+    },
+    {
+      "name": "Solidity.Backend.InternalFlow.RuntimeFrame.OrderedArgumentFailure.Client.zero_control",
+      "line": 105
+    },
+    {
+      "name": "Solidity.Backend.InternalFlow.RuntimeFrame.OrderedArgumentFailure.source_halt",
+      "line": 9
+    },
+    {
+      "name": "Solidity.Backend.InternalFlow.RuntimeFrame.OrderedArgumentFailure.transport",
+      "line": 20
+    }
+  ],
+  "Solidity.Backend.InternalFlow.RuntimeFrameV3OrderedCalleeFailure": [
+    {
+      "name": "Solidity.Backend.InternalFlow.RuntimeFrame.OrderedCalleeFailure.Client.arguments",
+      "line": 115
+    },
+    {
+      "name": "Solidity.Backend.InternalFlow.RuntimeFrame.OrderedCalleeFailure.Client.checked",
+      "line": 80
+    },
+    {
+      "name": "Solidity.Backend.InternalFlow.RuntimeFrame.OrderedCalleeFailure.Client.entry_snapshot",
+      "line": 163
+    },
+    {
+      "name": "Solidity.Backend.InternalFlow.RuntimeFrame.OrderedCalleeFailure.Client.entry_specification",
+      "line": 100
+    },
+    {
+      "name": "Solidity.Backend.InternalFlow.RuntimeFrame.OrderedCalleeFailure.Client.evaluated",
+      "line": 72
+    },
+    {
+      "name": "Solidity.Backend.InternalFlow.RuntimeFrame.OrderedCalleeFailure.Client.failure_stages",
+      "line": 145
+    },
+    {
+      "name": "Solidity.Backend.InternalFlow.RuntimeFrame.OrderedCalleeFailure.Client.not_exhausted",
+      "line": 151
+    },
+    {
+      "name": "Solidity.Backend.InternalFlow.RuntimeFrame.OrderedCalleeFailure.Client.not_success",
+      "line": 157
+    },
+    {
+      "name": "Solidity.Backend.InternalFlow.RuntimeFrame.OrderedCalleeFailure.Client.public_value_root",
+      "line": 70
+    },
+    {
+      "name": "Solidity.Backend.InternalFlow.RuntimeFrame.OrderedCalleeFailure.Client.source",
+      "line": 117
+    },
+    {
+      "name": "Solidity.Backend.InternalFlow.RuntimeFrame.OrderedCalleeFailure.Client.target",
+      "line": 126
+    },
+    {
+      "name": "Solidity.Backend.InternalFlow.RuntimeFrame.OrderedCalleeFailure.Client.target_suffix",
+      "line": 123
+    },
+    {
+      "name": "Solidity.Backend.InternalFlow.RuntimeFrame.OrderedCalleeFailure.Client.whole_source",
+      "line": 133
+    },
+    {
+      "name": "Solidity.Backend.InternalFlow.RuntimeFrame.OrderedCalleeFailure.Client.whole_target",
+      "line": 140
+    },
+    {
+      "name": "Solidity.Backend.InternalFlow.RuntimeFrame.OrderedCalleeFailure.transport",
+      "line": 10
+    }
+  ],
+  "Solidity.Backend.InternalFlow.RuntimeFrameV3OrderedEffectfulClient": [
+    {
+      "name": "Solidity.Backend.InternalFlow.RuntimeFrame.OrderedEffectfulScalar.Client.available",
+      "line": 37
+    },
+    {
+      "name": "Solidity.Backend.InternalFlow.RuntimeFrame.OrderedEffectfulScalar.Client.binding",
+      "line": 27
+    },
+    {
+      "name": "Solidity.Backend.InternalFlow.RuntimeFrame.OrderedEffectfulScalar.Client.changed_count",
+      "line": 80
+    },
+    {
+      "name": "Solidity.Backend.InternalFlow.RuntimeFrame.OrderedEffectfulScalar.Client.current",
+      "line": 34
+    },
+    {
+      "name": "Solidity.Backend.InternalFlow.RuntimeFrame.OrderedEffectfulScalar.Client.evaluated",
+      "line": 23
+    },
+    {
+      "name": "Solidity.Backend.InternalFlow.RuntimeFrame.OrderedEffectfulScalar.Client.initial",
+      "line": 20
+    },
+    {
+      "name": "Solidity.Backend.InternalFlow.RuntimeFrame.OrderedEffectfulScalar.Client.initial_owner",
+      "line": 73
+    },
+    {
+      "name": "Solidity.Backend.InternalFlow.RuntimeFrame.OrderedEffectfulScalar.Client.input_stack",
+      "line": 93
+    },
+    {
+      "name": "Solidity.Backend.InternalFlow.RuntimeFrame.OrderedEffectfulScalar.Client.late_argument_does_not_fit",
+      "line": 142
+    },
+    {
+      "name": "Solidity.Backend.InternalFlow.RuntimeFrame.OrderedEffectfulScalar.Client.live",
+      "line": 29
+    },
+    {
+      "name": "Solidity.Backend.InternalFlow.RuntimeFrame.OrderedEffectfulScalar.Client.native_and_target",
+      "line": 83
+    },
+    {
+      "name": "Solidity.Backend.InternalFlow.RuntimeFrame.OrderedEffectfulScalar.Client.not_keeps",
+      "line": 146
+    },
+    {
+      "name": "Solidity.Backend.InternalFlow.RuntimeFrame.OrderedEffectfulScalar.Client.owner",
+      "line": 76
+    },
+    {
+      "name": "Solidity.Backend.InternalFlow.RuntimeFrame.OrderedEffectfulScalar.Client.private_base",
+      "line": 90
+    },
+    {
+      "name": "Solidity.Backend.InternalFlow.RuntimeFrame.OrderedEffectfulScalar.Client.ref_base",
+      "line": 31
+    },
+    {
+      "name": "Solidity.Backend.InternalFlow.RuntimeFrame.OrderedEffectfulScalar.Client.result_not_late",
+      "line": 137
+    },
+    {
+      "name": "Solidity.Backend.InternalFlow.RuntimeFrame.OrderedEffectfulScalar.Client.shallow_boundary",
+      "line": 155
+    },
+    {
+      "name": "Solidity.Backend.InternalFlow.RuntimeFrame.OrderedEffectfulScalar.Client.snapshot",
+      "line": 96
+    },
+    {
+      "name": "Solidity.Backend.InternalFlow.RuntimeFrame.OrderedEffectfulScalar.Client.specification",
+      "line": 59
+    }
+  ],
+  "Solidity.Backend.InternalFlow.RuntimeFrameV3OrderedEffectfulScalar": [
+    {
+      "name": "Solidity.Backend.InternalFlow.RuntimeFrame.OrderedEffectfulScalar.callee_public_root",
+      "line": 28
+    },
+    {
+      "name": "Solidity.Backend.InternalFlow.RuntimeFrame.OrderedEffectfulScalar.endpoint",
+      "line": 39
+    },
+    {
+      "name": "Solidity.Backend.InternalFlow.RuntimeFrame.OrderedEffectfulScalar.write_addr",
+      "line": 14
+    }
+  ],
+  "Solidity.Backend.InternalFlow.RuntimeFrameV3OrderedEffectfulStorage": [
+    {
+      "name": "Solidity.Backend.InternalFlow.RuntimeFrame.OrderedEffectfulStorage.endpoint",
+      "line": 11
+    }
+  ],
+  "Solidity.Backend.InternalFlow.RuntimeFrameV3OrderedEffectfulStorageControls": [
+    {
+      "name": "Solidity.Backend.InternalFlow.RuntimeFrame.OrderedEffectfulStorage.Controls.available",
+      "line": 77
+    },
+    {
+      "name": "Solidity.Backend.InternalFlow.RuntimeFrame.OrderedEffectfulStorage.Controls.before_observations",
+      "line": 126
+    },
+    {
+      "name": "Solidity.Backend.InternalFlow.RuntimeFrame.OrderedEffectfulStorage.Controls.binding",
+      "line": 69
+    },
+    {
+      "name": "Solidity.Backend.InternalFlow.RuntimeFrame.OrderedEffectfulStorage.Controls.changed_count",
+      "line": 166
+    },
+    {
+      "name": "Solidity.Backend.InternalFlow.RuntimeFrame.OrderedEffectfulStorage.Controls.complete_observations",
+      "line": 130
+    },
+    {
+      "name": "Solidity.Backend.InternalFlow.RuntimeFrame.OrderedEffectfulStorage.Controls.current",
+      "line": 75
+    },
+    {
+      "name": "Solidity.Backend.InternalFlow.RuntimeFrame.OrderedEffectfulStorage.Controls.evaluated",
+      "line": 67
+    },
+    {
+      "name": "Solidity.Backend.InternalFlow.RuntimeFrame.OrderedEffectfulStorage.Controls.fragile_observed",
+      "line": 118
+    },
+    {
+      "name": "Solidity.Backend.InternalFlow.RuntimeFrame.OrderedEffectfulStorage.Controls.initial",
+      "line": 33
+    },
+    {
+      "name": "Solidity.Backend.InternalFlow.RuntimeFrame.OrderedEffectfulStorage.Controls.live",
+      "line": 71
+    },
+    {
+      "name": "Solidity.Backend.InternalFlow.RuntimeFrame.OrderedEffectfulStorage.Controls.no_struct",
+      "line": 28
+    },
+    {
+      "name": "Solidity.Backend.InternalFlow.RuntimeFrame.OrderedEffectfulStorage.Controls.not_keeps",
+      "line": 168
+    },
+    {
+      "name": "Solidity.Backend.InternalFlow.RuntimeFrame.OrderedEffectfulStorage.Controls.outside_old_condition",
+      "line": 114
+    },
+    {
+      "name": "Solidity.Backend.InternalFlow.RuntimeFrame.OrderedEffectfulStorage.Controls.public_root",
+      "line": 65
+    },
+    {
+      "name": "Solidity.Backend.InternalFlow.RuntimeFrame.OrderedEffectfulStorage.Controls.ref_base",
+      "line": 73
+    },
+    {
+      "name": "Solidity.Backend.InternalFlow.RuntimeFrame.OrderedEffectfulStorage.Controls.shallow_boundary",
+      "line": 177
+    },
+    {
+      "name": "Solidity.Backend.InternalFlow.RuntimeFrame.OrderedEffectfulStorage.Controls.specification",
+      "line": 99
+    }
+  ],
+  "Solidity.Backend.InternalFlow.RuntimeFrameV3OuterAllocatingCall": [
+    {
+      "name": "Solidity.Backend.InternalFlow.RuntimeFrame.OuterAllocatingCall.complete",
+      "line": 21
+    }
+  ],
+  "Solidity.Backend.InternalFlow.RuntimeFrameV3OuterScalarRestore": [
+    {
+      "name": "Solidity.Backend.InternalFlow.RuntimeFrame.OuterScalarRestore.step",
+      "line": 12
+    }
+  ],
+  "Solidity.Backend.InternalFlow.RuntimeFrameV3PrimitiveCallerControls": [
+    {
+      "name": "Solidity.Backend.InternalFlow.RuntimeFrame.PrimitiveCallerFrame.Controls.bad_arguments",
+      "line": 87
+    },
+    {
+      "name": "Solidity.Backend.InternalFlow.RuntimeFrame.PrimitiveCallerFrame.Controls.discarded_frame",
+      "line": 45
+    },
+    {
+      "name": "Solidity.Backend.InternalFlow.RuntimeFrame.PrimitiveCallerFrame.Controls.discarded_result",
+      "line": 70
+    },
+    {
+      "name": "Solidity.Backend.InternalFlow.RuntimeFrame.PrimitiveCallerFrame.Controls.heap_observations",
+      "line": 79
+    },
+    {
+      "name": "Solidity.Backend.InternalFlow.RuntimeFrame.PrimitiveCallerFrame.Controls.native",
+      "line": 33
+    },
+    {
+      "name": "Solidity.Backend.InternalFlow.RuntimeFrame.PrimitiveCallerFrame.Controls.native_discarded",
+      "line": 35
+    },
+    {
+      "name": "Solidity.Backend.InternalFlow.RuntimeFrame.PrimitiveCallerFrame.Controls.not_keeps",
+      "line": 62
+    },
+    {
+      "name": "Solidity.Backend.InternalFlow.RuntimeFrame.PrimitiveCallerFrame.Controls.not_revert",
+      "line": 72
+    },
+    {
+      "name": "Solidity.Backend.InternalFlow.RuntimeFrame.PrimitiveCallerFrame.Controls.observations",
+      "line": 48
+    },
+    {
+      "name": "Solidity.Backend.InternalFlow.RuntimeFrame.PrimitiveCallerFrame.Controls.private_not_escaped",
+      "line": 59
+    },
+    {
+      "name": "Solidity.Backend.InternalFlow.RuntimeFrame.PrimitiveCallerFrame.Controls.retained_reference",
+      "line": 41
+    },
+    {
+      "name": "Solidity.Backend.InternalFlow.RuntimeFrame.PrimitiveCallerFrame.Controls.retained_scalar",
+      "line": 37
+    },
+    {
+      "name": "Solidity.Backend.InternalFlow.RuntimeFrame.PrimitiveCallerFrame.Controls.wrong_destination",
+      "line": 89
+    },
+    {
+      "name": "Solidity.Backend.InternalFlow.RuntimeFrame.PrimitiveCallerFrame.Controls.wrong_scalar",
+      "line": 57
+    }
+  ],
+  "Solidity.Backend.InternalFlow.RuntimeFrameV3PrimitiveCallerFrame": [
+    {
+      "name": "Solidity.Backend.InternalFlow.RuntimeFrame.PrimitiveCallerFrame.assigned_env",
+      "line": 9
+    },
+    {
+      "name": "Solidity.Backend.InternalFlow.RuntimeFrame.PrimitiveCallerFrame.assigned_slot",
+      "line": 19
+    },
+    {
+      "name": "Solidity.Backend.InternalFlow.RuntimeFrame.PrimitiveCallerFrame.discarded_env",
+      "line": 30
+    },
+    {
+      "name": "Solidity.Backend.InternalFlow.RuntimeFrame.PrimitiveCallerFrame.discarded_slot",
+      "line": 38
+    }
+  ],
+  "Solidity.Backend.InternalFlow.RuntimeFrameV3RecursiveScopeCheck": [
+    {
+      "name": "Solidity.Backend.InternalFlow.RuntimeFrame.RecursiveScopes.Stripped.same",
+      "line": 26
+    },
+    {
+      "name": "Solidity.Backend.InternalFlow.RuntimeFrame.RecursiveScopes.step_congr",
+      "line": 12
+    }
+  ],
+  "Solidity.Backend.InternalFlow.RuntimeFrameV3RecursiveScopeClient": [
+    {
+      "name": "Solidity.Backend.InternalFlow.RuntimeFrame.RecursiveScopeCompiler.Client.bad_not_fault",
+      "line": 99
+    },
+    {
+      "name": "Solidity.Backend.InternalFlow.RuntimeFrame.RecursiveScopeCompiler.Client.bad_root",
+      "line": 85
+    },
+    {
+      "name": "Solidity.Backend.InternalFlow.RuntimeFrame.RecursiveScopeCompiler.Client.bad_source",
+      "line": 92
+    },
+    {
+      "name": "Solidity.Backend.InternalFlow.RuntimeFrame.RecursiveScopeCompiler.Client.bad_target",
+      "line": 95
+    },
+    {
+      "name": "Solidity.Backend.InternalFlow.RuntimeFrame.RecursiveScopeCompiler.Client.complete_observations",
+      "line": 52
+    },
+    {
+      "name": "Solidity.Backend.InternalFlow.RuntimeFrame.RecursiveScopeCompiler.Client.exhausted_source",
+      "line": 70
+    },
+    {
+      "name": "Solidity.Backend.InternalFlow.RuntimeFrame.RecursiveScopeCompiler.Client.native_default_returned",
+      "line": 65
+    },
+    {
+      "name": "Solidity.Backend.InternalFlow.RuntimeFrame.RecursiveScopeCompiler.Client.native_default_root",
+      "line": 62
+    },
+    {
+      "name": "Solidity.Backend.InternalFlow.RuntimeFrame.RecursiveScopeCompiler.Client.returned",
+      "line": 40
+    },
+    {
+      "name": "Solidity.Backend.InternalFlow.RuntimeFrame.RecursiveScopeCompiler.Client.root",
+      "line": 24
+    },
+    {
+      "name": "Solidity.Backend.InternalFlow.RuntimeFrame.RecursiveScopeCompiler.Client.same_image",
+      "line": 32
+    },
+    {
+      "name": "Solidity.Backend.InternalFlow.RuntimeFrame.RecursiveScopeCompiler.Client.source",
+      "line": 35
+    },
+    {
+      "name": "Solidity.Backend.InternalFlow.RuntimeFrame.RecursiveScopeCompiler.Client.target",
+      "line": 48
+    }
+  ],
+  "Solidity.Backend.InternalFlow.RuntimeFrameV3RecursiveScopeCompiler": [
+    {
+      "name": "Solidity.Backend.InternalFlow.RuntimeFrame.RecursiveScopeCompiler.Selected.bare_revert",
+      "line": 138
+    },
+    {
+      "name": "Solidity.Backend.InternalFlow.RuntimeFrame.RecursiveScopeCompiler.Selected.body_run",
+      "line": 30
+    },
+    {
+      "name": "Solidity.Backend.InternalFlow.RuntimeFrame.RecursiveScopeCompiler.Selected.checked",
+      "line": 31
+    },
+    {
+      "name": "Solidity.Backend.InternalFlow.RuntimeFrame.RecursiveScopeCompiler.Selected.emitted_root",
+      "line": 33
+    },
+    {
+      "name": "Solidity.Backend.InternalFlow.RuntimeFrame.RecursiveScopeCompiler.Selected.head",
+      "line": 29
+    },
+    {
+      "name": "Solidity.Backend.InternalFlow.RuntimeFrame.RecursiveScopeCompiler.Selected.memoryFree",
+      "line": 19
+    },
+    {
+      "name": "Solidity.Backend.InternalFlow.RuntimeFrame.RecursiveScopeCompiler.Selected.returns",
+      "line": 130
+    },
+    {
+      "name": "Solidity.Backend.InternalFlow.RuntimeFrame.RecursiveScopeCompiler.Selected.source_run",
+      "line": 108
+    },
+    {
+      "name": "Solidity.Backend.InternalFlow.RuntimeFrame.RecursiveScopeCompiler.Selected.value_root",
+      "line": 125
+    },
+    {
+      "name": "Solidity.Backend.InternalFlow.RuntimeFrame.RecursiveScopeCompiler.compile_call",
+      "line": 72
+    }
+  ],
+  "Solidity.Backend.InternalFlow.RuntimeFrameV3RecursiveScopeControls": [
+    {
+      "name": "Solidity.Backend.InternalFlow.RuntimeFrame.RecursiveScopeCompiler.Controls.deep_child_refused",
+      "line": 30
+    },
+    {
+      "name": "Solidity.Backend.InternalFlow.RuntimeFrame.RecursiveScopeCompiler.Controls.deep_root_refused",
+      "line": 36
+    },
+    {
+      "name": "Solidity.Backend.InternalFlow.RuntimeFrame.RecursiveScopeCompiler.Controls.double_wrapper_refused",
+      "line": 50
+    },
+    {
+      "name": "Solidity.Backend.InternalFlow.RuntimeFrame.RecursiveScopeCompiler.Controls.exhausted_boundary",
+      "line": 61
+    },
+    {
+      "name": "Solidity.Backend.InternalFlow.RuntimeFrame.RecursiveScopeCompiler.Controls.extra_context_refused",
+      "line": 58
+    },
+    {
+      "name": "Solidity.Backend.InternalFlow.RuntimeFrame.RecursiveScopeCompiler.Controls.initialized_refused",
+      "line": 54
+    },
+    {
+      "name": "Solidity.Backend.InternalFlow.RuntimeFrame.RecursiveScopeCompiler.Controls.mixed_checked",
+      "line": 17
+    },
+    {
+      "name": "Solidity.Backend.InternalFlow.RuntimeFrame.RecursiveScopeCompiler.Controls.old_exact_refuses",
+      "line": 19
+    },
+    {
+      "name": "Solidity.Backend.InternalFlow.RuntimeFrame.RecursiveScopeCompiler.Controls.old_outer_only_refuses",
+      "line": 22
+    },
+    {
+      "name": "Solidity.Backend.InternalFlow.RuntimeFrame.RecursiveScopeCompiler.Controls.protected_write_refused",
+      "line": 56
+    },
+    {
+      "name": "Solidity.Backend.InternalFlow.RuntimeFrame.RecursiveScopeCompiler.Controls.source_difference",
+      "line": 40
+    },
+    {
+      "name": "Solidity.Backend.InternalFlow.RuntimeFrame.RecursiveScopeCompiler.Controls.wrong_index_refused",
+      "line": 47
+    }
+  ],
+  "Solidity.Backend.InternalFlow.RuntimeFrameV3RecursiveScopeLaws": [
+    {
+      "name": "Solidity.Backend.InternalFlow.RuntimeFrame.RecursiveScopes.complete",
+      "line": 20
+    },
+    {
+      "name": "Solidity.Backend.InternalFlow.RuntimeFrame.RecursiveScopes.scoped_run",
+      "line": 15
+    },
+    {
+      "name": "Solidity.Backend.InternalFlow.RuntimeFrame.RecursiveScopes.strip_decorate",
+      "line": 8
+    }
+  ],
+  "Solidity.Backend.InternalFlow.RuntimeFrameV3SameCallControls": [
+    {
+      "name": "Solidity.Backend.InternalFlow.RuntimeFrame.SameCallControls.different_callers",
+      "line": 36
+    },
+    {
+      "name": "Solidity.Backend.InternalFlow.RuntimeFrame.SameCallControls.not_fault",
+      "line": 87
+    },
+    {
+      "name": "Solidity.Backend.InternalFlow.RuntimeFrame.SameCallControls.snapshot",
+      "line": 32
+    },
+    {
+      "name": "Solidity.Backend.InternalFlow.RuntimeFrame.SameCallControls.source_locals",
+      "line": 15
+    },
+    {
+      "name": "Solidity.Backend.InternalFlow.RuntimeFrame.SameCallControls.source_objects",
+      "line": 23
+    },
+    {
+      "name": "Solidity.Backend.InternalFlow.RuntimeFrame.SameCallControls.wrong_alias",
+      "line": 81
+    },
+    {
+      "name": "Solidity.Backend.InternalFlow.RuntimeFrame.SameCallControls.wrong_cost",
+      "line": 71
+    },
+    {
+      "name": "Solidity.Backend.InternalFlow.RuntimeFrame.SameCallControls.wrong_frontier",
+      "line": 75
+    }
+  ],
+  "Solidity.Backend.InternalFlow.RuntimeFrameV3SameCallDual": [
+    {
+      "name": "Solidity.Backend.InternalFlow.RuntimeFrame.SameCallDual.dual",
+      "line": 58
+    },
+    {
+      "name": "Solidity.Backend.InternalFlow.RuntimeFrame.SameCallDual.entry",
+      "line": 18
+    },
+    {
+      "name": "Solidity.Backend.InternalFlow.RuntimeFrame.SameCallDual.good_return",
+      "line": 51
+    },
+    {
+      "name": "Solidity.Backend.InternalFlow.RuntimeFrame.SameCallDual.reverting_entry",
+      "line": 75
+    },
+    {
+      "name": "Solidity.Backend.InternalFlow.RuntimeFrame.SameCallDual.root",
+      "line": 15
+    },
+    {
+      "name": "Solidity.Backend.InternalFlow.RuntimeFrame.SameCallDual.source_revert",
+      "line": 32
+    },
+    {
+      "name": "Solidity.Backend.InternalFlow.RuntimeFrame.SameCallDual.successful_entry",
+      "line": 71
+    },
+    {
+      "name": "Solidity.Backend.InternalFlow.RuntimeFrame.SameCallDual.target_revert",
+      "line": 36
+    },
+    {
+      "name": "Solidity.Backend.InternalFlow.RuntimeFrame.SameCallDual.whole_source_revert",
+      "line": 46
+    },
+    {
+      "name": "Solidity.Backend.InternalFlow.RuntimeFrame.SameCallDual.whole_target_revert",
+      "line": 39
+    }
+  ],
+  "Solidity.Backend.InternalFlow.RuntimeFrameV3SameCallInputs": [
+    {
+      "name": "Solidity.Backend.InternalFlow.RuntimeFrame.SameCallInputs.bases_preserved",
+      "line": 48
+    },
+    {
+      "name": "Solidity.Backend.InternalFlow.RuntimeFrame.SameCallInputs.capacity",
+      "line": 41
+    },
+    {
+      "name": "Solidity.Backend.InternalFlow.RuntimeFrame.SameCallInputs.checked_execution",
+      "line": 44
+    },
+    {
+      "name": "Solidity.Backend.InternalFlow.RuntimeFrame.SameCallInputs.code",
+      "line": 22
+    },
+    {
+      "name": "Solidity.Backend.InternalFlow.RuntimeFrame.SameCallInputs.count_fails",
+      "line": 58
+    },
+    {
+      "name": "Solidity.Backend.InternalFlow.RuntimeFrame.SameCallInputs.cursor",
+      "line": 61
+    },
+    {
+      "name": "Solidity.Backend.InternalFlow.RuntimeFrame.SameCallInputs.exact_cost",
+      "line": 39
+    },
+    {
+      "name": "Solidity.Backend.InternalFlow.RuntimeFrame.SameCallInputs.growth",
+      "line": 51
+    },
+    {
+      "name": "Solidity.Backend.InternalFlow.RuntimeFrame.SameCallInputs.reached",
+      "line": 32
+    },
+    {
+      "name": "Solidity.Backend.InternalFlow.RuntimeFrame.SameCallInputs.root",
+      "line": 21
+    }
+  ],
+  "Solidity.Backend.InternalFlow.RuntimeFrameV3SameSelectedRevert": [
+    {
+      "name": "Solidity.Backend.InternalFlow.RuntimeFrame.SameSelectedRevert.arena",
+      "line": 60
+    },
+    {
+      "name": "Solidity.Backend.InternalFlow.RuntimeFrame.SameSelectedRevert.code_eq",
+      "line": 43
+    },
+    {
+      "name": "Solidity.Backend.InternalFlow.RuntimeFrame.SameSelectedRevert.count_fails",
+      "line": 58
+    },
+    {
+      "name": "Solidity.Backend.InternalFlow.RuntimeFrame.SameSelectedRevert.cursor",
+      "line": 65
+    },
+    {
+      "name": "Solidity.Backend.InternalFlow.RuntimeFrame.SameSelectedRevert.different_callers",
+      "line": 126
+    },
+    {
+      "name": "Solidity.Backend.InternalFlow.RuntimeFrame.SameSelectedRevert.entry",
+      "line": 68
+    },
+    {
+      "name": "Solidity.Backend.InternalFlow.RuntimeFrame.SameSelectedRevert.exact_cost",
+      "line": 53
+    },
+    {
+      "name": "Solidity.Backend.InternalFlow.RuntimeFrame.SameSelectedRevert.fragile_retained",
+      "line": 121
+    },
+    {
+      "name": "Solidity.Backend.InternalFlow.RuntimeFrame.SameSelectedRevert.free_tail",
+      "line": 13
+    },
+    {
+      "name": "Solidity.Backend.InternalFlow.RuntimeFrame.SameSelectedRevert.initial_owner",
+      "line": 21
+    },
+    {
+      "name": "Solidity.Backend.InternalFlow.RuntimeFrame.SameSelectedRevert.preparation_capacity",
+      "line": 55
+    },
+    {
+      "name": "Solidity.Backend.InternalFlow.RuntimeFrame.SameSelectedRevert.preparation_observations",
+      "line": 107
+    },
+    {
+      "name": "Solidity.Backend.InternalFlow.RuntimeFrame.SameSelectedRevert.public_root",
+      "line": 41
+    },
+    {
+      "name": "Solidity.Backend.InternalFlow.RuntimeFrame.SameSelectedRevert.reached",
+      "line": 45
+    },
+    {
+      "name": "Solidity.Backend.InternalFlow.RuntimeFrame.SameSelectedRevert.same_plan_entries",
+      "line": 89
+    },
+    {
+      "name": "Solidity.Backend.InternalFlow.RuntimeFrame.SameSelectedRevert.source_failure",
+      "line": 80
+    },
+    {
+      "name": "Solidity.Backend.InternalFlow.RuntimeFrame.SameSelectedRevert.source_observations",
+      "line": 111
+    },
+    {
+      "name": "Solidity.Backend.InternalFlow.RuntimeFrame.SameSelectedRevert.storage_unchanged",
+      "line": 119
+    },
+    {
+      "name": "Solidity.Backend.InternalFlow.RuntimeFrame.SameSelectedRevert.target_failure",
+      "line": 84
+    },
+    {
+      "name": "Solidity.Backend.InternalFlow.RuntimeFrame.SameSelectedRevert.whole_source",
+      "line": 97
+    },
+    {
+      "name": "Solidity.Backend.InternalFlow.RuntimeFrame.SameSelectedRevert.whole_target",
+      "line": 102
+    },
+    {
+      "name": "Solidity.Backend.InternalFlow.RuntimeFrame.SameSelectedRevert.wrong_frontier",
+      "line": 132
+    }
+  ],
+  "Solidity.Backend.InternalFlow.RuntimeFrameV3ScalarAllocatingDescent": [
+    {
+      "name": "Solidity.Backend.InternalFlow.RuntimeFrame.ScalarAllocatingDescent.guard_run",
+      "line": 19
+    },
+    {
+      "name": "Solidity.Backend.InternalFlow.RuntimeFrame.ScalarAllocatingDescent.positive_turn",
+      "line": 32
+    },
+    {
+      "name": "Solidity.Backend.InternalFlow.RuntimeFrame.ScalarAllocatingDescent.public_guard",
+      "line": 17
+    },
+    {
+      "name": "Solidity.Backend.InternalFlow.RuntimeFrame.ScalarAllocatingDescent.running",
+      "line": 209
+    },
+    {
+      "name": "Solidity.Backend.InternalFlow.RuntimeFrame.ScalarAllocatingDescent.running_with_context",
+      "line": 53
+    },
+    {
+      "name": "Solidity.Backend.InternalFlow.RuntimeFrame.ScalarAllocatingDescent.running_with_inventory",
+      "line": 181
+    },
+    {
+      "name": "Solidity.Backend.InternalFlow.RuntimeFrame.ScalarAllocatingDescent.zero_turn",
+      "line": 44
+    }
+  ],
+  "Solidity.Backend.InternalFlow.RuntimeFrameV3ScalarCallReturn": [
+    {
+      "name": "Solidity.Backend.InternalFlow.RuntimeFrame.ScalarCallReturn.arguments",
+      "line": 23
+    },
+    {
+      "name": "Solidity.Backend.InternalFlow.RuntimeFrame.ScalarCallReturn.endpoint",
+      "line": 44
+    },
+    {
+      "name": "Solidity.Backend.InternalFlow.RuntimeFrame.ScalarCallReturn.export_distinct",
+      "line": 50
+    },
+    {
+      "name": "Solidity.Backend.InternalFlow.RuntimeFrame.ScalarCallReturn.source",
+      "line": 31
+    }
+  ],
+  "Solidity.Backend.InternalFlow.RuntimeFrameV3ScalarCallerControls": [
+    {
+      "name": "Solidity.Backend.InternalFlow.RuntimeFrame.ScalarCallerReturn.Controls.growth",
+      "line": 83
+    },
+    {
+      "name": "Solidity.Backend.InternalFlow.RuntimeFrame.ScalarCallerReturn.Controls.native_and_target",
+      "line": 39
+    },
+    {
+      "name": "Solidity.Backend.InternalFlow.RuntimeFrame.ScalarCallerReturn.Controls.not_revert",
+      "line": 62
+    },
+    {
+      "name": "Solidity.Backend.InternalFlow.RuntimeFrame.ScalarCallerReturn.Controls.shallow",
+      "line": 67
+    },
+    {
+      "name": "Solidity.Backend.InternalFlow.RuntimeFrame.ScalarCallerReturn.Controls.shallow_not_revert",
+      "line": 75
+    },
+    {
+      "name": "Solidity.Backend.InternalFlow.RuntimeFrame.ScalarCallerReturn.Controls.snapshot",
+      "line": 21
+    },
+    {
+      "name": "Solidity.Backend.InternalFlow.RuntimeFrame.ScalarCallerReturn.Controls.specification",
+      "line": 10
+    },
+    {
+      "name": "Solidity.Backend.InternalFlow.RuntimeFrame.ScalarCallerReturn.Controls.wrong_alias",
+      "line": 49
+    },
+    {
+      "name": "Solidity.Backend.InternalFlow.RuntimeFrame.ScalarCallerReturn.Controls.wrong_cursor",
+      "line": 57
+    },
+    {
+      "name": "Solidity.Backend.InternalFlow.RuntimeFrame.ScalarCallerReturn.Controls.wrong_order",
+      "line": 53
+    },
+    {
+      "name": "Solidity.Backend.InternalFlow.RuntimeFrame.ScalarCallerReturn.Controls.wrong_result",
+      "line": 45
+    },
+    {
+      "name": "Solidity.Backend.InternalFlow.RuntimeFrame.ScalarCallerReturn.Controls.wrong_stack",
+      "line": 71
+    }
+  ],
+  "Solidity.Backend.InternalFlow.RuntimeFrameV3ScalarCallerReturn": [
+    {
+      "name": "Solidity.Backend.InternalFlow.RuntimeFrame.ScalarCallerReturn.arguments",
+      "line": 26
+    },
+    {
+      "name": "Solidity.Backend.InternalFlow.RuntimeFrame.ScalarCallerReturn.endpoint",
+      "line": 52
+    },
+    {
+      "name": "Solidity.Backend.InternalFlow.RuntimeFrame.ScalarCallerReturn.entered",
+      "line": 32
+    },
+    {
+      "name": "Solidity.Backend.InternalFlow.RuntimeFrame.ScalarCallerReturn.initial",
+      "line": 22
+    },
+    {
+      "name": "Solidity.Backend.InternalFlow.RuntimeFrame.ScalarCallerReturn.source",
+      "line": 28
+    }
+  ],
+  "Solidity.Backend.InternalFlow.RuntimeFrameV3ScalarChildEntry": [
+    {
+      "name": "Solidity.Backend.InternalFlow.RuntimeFrame.AllocatingScalarEntry.decrement_eval",
+      "line": 33
+    },
+    {
+      "name": "Solidity.Backend.InternalFlow.RuntimeFrame.AllocatingScalarEntry.entry",
+      "line": 50
+    },
+    {
+      "name": "Solidity.Backend.InternalFlow.RuntimeFrame.AllocatingScalarEntry.entry_state",
+      "line": 25
+    },
+    {
+      "name": "Solidity.Backend.InternalFlow.RuntimeFrame.AllocatingScalarEntry.public_selection",
+      "line": 15
+    }
+  ],
+  "Solidity.Backend.InternalFlow.RuntimeFrameV3ScalarClaims": [
+    {
+      "name": "Solidity.Backend.InternalFlow.RuntimeFrame.ScalarClaims.bare_revert",
+      "line": 66
+    },
+    {
+      "name": "Solidity.Backend.InternalFlow.RuntimeFrame.ScalarClaims.returns",
+      "line": 41
+    },
+    {
+      "name": "Solidity.Backend.InternalFlow.RuntimeFrame.ScalarClaims.source_revert",
+      "line": 10
+    },
+    {
+      "name": "Solidity.Backend.InternalFlow.RuntimeFrame.ScalarClaims.source_value",
+      "line": 23
+    }
+  ],
+  "Solidity.Backend.InternalFlow.RuntimeFrameV3ScalarClaimsControls": [
+    {
+      "name": "Solidity.Backend.InternalFlow.RuntimeFrame.ScalarClaims.Client.actual_revert",
+      "line": 57
+    },
+    {
+      "name": "Solidity.Backend.InternalFlow.RuntimeFrame.ScalarClaims.Client.chosen_execution",
+      "line": 31
+    },
+    {
+      "name": "Solidity.Backend.InternalFlow.RuntimeFrame.ScalarClaims.Client.chosen_frame",
+      "line": 36
+    },
+    {
+      "name": "Solidity.Backend.InternalFlow.RuntimeFrame.ScalarClaims.Client.complete_observations",
+      "line": 39
+    },
+    {
+      "name": "Solidity.Backend.InternalFlow.RuntimeFrame.ScalarClaims.Client.exhaustion_not_revert",
+      "line": 66
+    },
+    {
+      "name": "Solidity.Backend.InternalFlow.RuntimeFrame.ScalarClaims.Client.failing_claim",
+      "line": 17
+    },
+    {
+      "name": "Solidity.Backend.InternalFlow.RuntimeFrame.ScalarClaims.Client.failure_not_success",
+      "line": 60
+    },
+    {
+      "name": "Solidity.Backend.InternalFlow.RuntimeFrame.ScalarClaims.Client.good_claim",
+      "line": 12
+    },
+    {
+      "name": "Solidity.Backend.InternalFlow.RuntimeFrame.ScalarClaims.Client.returned_via_claim",
+      "line": 22
+    },
+    {
+      "name": "Solidity.Backend.InternalFlow.RuntimeFrame.ScalarClaims.Client.same_endpoint",
+      "line": 34
+    },
+    {
+      "name": "Solidity.Backend.InternalFlow.RuntimeFrame.ScalarClaims.Client.wrong_alias",
+      "line": 49
+    },
+    {
+      "name": "Solidity.Backend.InternalFlow.RuntimeFrame.ScalarClaims.Client.wrong_cursor",
+      "line": 53
+    }
+  ],
+  "Solidity.Backend.InternalFlow.RuntimeFrameV3ScalarContinuation": [
+    {
+      "name": "Solidity.Backend.InternalFlow.RuntimeFrame.ScalarContinuation.allocation_facts",
+      "line": 86
+    },
+    {
+      "name": "Solidity.Backend.InternalFlow.RuntimeFrame.ScalarContinuation.bases_preserved",
+      "line": 125
+    },
+    {
+      "name": "Solidity.Backend.InternalFlow.RuntimeFrame.ScalarContinuation.capacity",
+      "line": 69
+    },
+    {
+      "name": "Solidity.Backend.InternalFlow.RuntimeFrame.ScalarContinuation.code",
+      "line": 26
+    },
+    {
+      "name": "Solidity.Backend.InternalFlow.RuntimeFrame.ScalarContinuation.endpoint",
+      "line": 129
+    },
+    {
+      "name": "Solidity.Backend.InternalFlow.RuntimeFrame.ScalarContinuation.exact_cost",
+      "line": 67
+    },
+    {
+      "name": "Solidity.Backend.InternalFlow.RuntimeFrame.ScalarContinuation.growth",
+      "line": 113
+    },
+    {
+      "name": "Solidity.Backend.InternalFlow.RuntimeFrame.ScalarContinuation.matched",
+      "line": 75
+    },
+    {
+      "name": "Solidity.Backend.InternalFlow.RuntimeFrame.ScalarContinuation.old_length",
+      "line": 39
+    },
+    {
+      "name": "Solidity.Backend.InternalFlow.RuntimeFrame.ScalarContinuation.private_source",
+      "line": 52
+    },
+    {
+      "name": "Solidity.Backend.InternalFlow.RuntimeFrame.ScalarContinuation.selected",
+      "line": 24
+    },
+    {
+      "name": "Solidity.Backend.InternalFlow.RuntimeFrame.ScalarContinuation.source_program",
+      "line": 108
+    },
+    {
+      "name": "Solidity.Backend.InternalFlow.RuntimeFrame.ScalarContinuation.source_suffix",
+      "line": 59
+    },
+    {
+      "name": "Solidity.Backend.InternalFlow.RuntimeFrame.ScalarContinuation.suffix_target",
+      "line": 101
+    },
+    {
+      "name": "Solidity.Backend.InternalFlow.RuntimeFrame.ScalarContinuation.target_execution",
+      "line": 105
+    },
+    {
+      "name": "Solidity.Backend.InternalFlow.RuntimeFrame.ScalarContinuation.write_facts",
+      "line": 42
+    }
+  ],
+  "Solidity.Backend.InternalFlow.RuntimeFrameV3ScalarContinuationControls": [
+    {
+      "name": "Solidity.Backend.InternalFlow.RuntimeFrame.ScalarContinuation.Controls.allocation_uses_returned_length",
+      "line": 66
+    },
+    {
+      "name": "Solidity.Backend.InternalFlow.RuntimeFrame.ScalarContinuation.Controls.complete_observations",
+      "line": 10
+    },
+    {
+      "name": "Solidity.Backend.InternalFlow.RuntimeFrame.ScalarContinuation.Controls.distinct_private_identity",
+      "line": 78
+    },
+    {
+      "name": "Solidity.Backend.InternalFlow.RuntimeFrame.ScalarContinuation.Controls.failure_absorbs_suffix",
+      "line": 85
+    },
+    {
+      "name": "Solidity.Backend.InternalFlow.RuntimeFrame.ScalarContinuation.Controls.shallow_source",
+      "line": 96
+    },
+    {
+      "name": "Solidity.Backend.InternalFlow.RuntimeFrame.ScalarContinuation.Controls.source_bindings",
+      "line": 39
+    },
+    {
+      "name": "Solidity.Backend.InternalFlow.RuntimeFrame.ScalarContinuation.Controls.source_objects",
+      "line": 47
+    },
+    {
+      "name": "Solidity.Backend.InternalFlow.RuntimeFrame.ScalarContinuation.Controls.target_not_revert",
+      "line": 104
+    },
+    {
+      "name": "Solidity.Backend.InternalFlow.RuntimeFrame.ScalarContinuation.Controls.writes_returned_value",
+      "line": 63
+    },
+    {
+      "name": "Solidity.Backend.InternalFlow.RuntimeFrame.ScalarContinuation.Controls.wrong_old_frontier",
+      "line": 73
+    },
+    {
+      "name": "Solidity.Backend.InternalFlow.RuntimeFrame.ScalarContinuation.Controls.wrong_old_scalar",
+      "line": 69
+    }
+  ],
+  "Solidity.Backend.InternalFlow.RuntimeFrameV3ScalarContinuationRevert": [
+    {
+      "name": "Solidity.Backend.InternalFlow.RuntimeFrame.ScalarContinuation.Revert.actual_index",
+      "line": 18
+    },
+    {
+      "name": "Solidity.Backend.InternalFlow.RuntimeFrame.ScalarContinuation.Revert.exact_cost",
+      "line": 27
+    },
+    {
+      "name": "Solidity.Backend.InternalFlow.RuntimeFrame.ScalarContinuation.Revert.invalid_index",
+      "line": 20
+    },
+    {
+      "name": "Solidity.Backend.InternalFlow.RuntimeFrame.ScalarContinuation.Revert.matched",
+      "line": 36
+    },
+    {
+      "name": "Solidity.Backend.InternalFlow.RuntimeFrame.ScalarContinuation.Revert.not_fault",
+      "line": 63
+    },
+    {
+      "name": "Solidity.Backend.InternalFlow.RuntimeFrame.ScalarContinuation.Revert.not_success",
+      "line": 68
+    },
+    {
+      "name": "Solidity.Backend.InternalFlow.RuntimeFrame.ScalarContinuation.Revert.returned_then_reverted",
+      "line": 58
+    },
+    {
+      "name": "Solidity.Backend.InternalFlow.RuntimeFrame.ScalarContinuation.Revert.selected",
+      "line": 16
+    },
+    {
+      "name": "Solidity.Backend.InternalFlow.RuntimeFrame.ScalarContinuation.Revert.source_program",
+      "line": 32
+    },
+    {
+      "name": "Solidity.Backend.InternalFlow.RuntimeFrame.ScalarContinuation.Revert.source_suffix",
+      "line": 24
+    },
+    {
+      "name": "Solidity.Backend.InternalFlow.RuntimeFrame.ScalarContinuation.Revert.suffix_target",
+      "line": 46
+    },
+    {
+      "name": "Solidity.Backend.InternalFlow.RuntimeFrame.ScalarContinuation.Revert.target_revert",
+      "line": 53
+    }
+  ],
+  "Solidity.Backend.InternalFlow.RuntimeFrameV3ScalarDemand": [
+    {
+      "name": "Solidity.Backend.InternalFlow.RuntimeFrame.ScalarDemand.failure_entry",
+      "line": 48
+    },
+    {
+      "name": "Solidity.Backend.InternalFlow.RuntimeFrame.ScalarDemand.reserve_error",
+      "line": 18
+    },
+    {
+      "name": "Solidity.Backend.InternalFlow.RuntimeFrame.ScalarDemand.reserve_value",
+      "line": 13
+    },
+    {
+      "name": "Solidity.Backend.InternalFlow.RuntimeFrame.ScalarDemand.success_entry",
+      "line": 32
+    }
+  ],
+  "Solidity.Backend.InternalFlow.RuntimeFrameV3ScalarDemandClaims": [
+    {
+      "name": "Solidity.Backend.InternalFlow.RuntimeFrame.ScalarDemand.bare_revert",
+      "line": 36
+    },
+    {
+      "name": "Solidity.Backend.InternalFlow.RuntimeFrame.ScalarDemand.returns",
+      "line": 10
+    }
+  ],
+  "Solidity.Backend.InternalFlow.RuntimeFrameV3ScalarDemandDual": [
+    {
+      "name": "Solidity.Backend.InternalFlow.RuntimeFrame.ScalarDemandDual.bad_entry",
+      "line": 37
+    },
+    {
+      "name": "Solidity.Backend.InternalFlow.RuntimeFrame.ScalarDemandDual.bad_execution",
+      "line": 89
+    },
+    {
+      "name": "Solidity.Backend.InternalFlow.RuntimeFrame.ScalarDemandDual.bad_reserve",
+      "line": 18
+    },
+    {
+      "name": "Solidity.Backend.InternalFlow.RuntimeFrame.ScalarDemandDual.complete_observations",
+      "line": 110
+    },
+    {
+      "name": "Solidity.Backend.InternalFlow.RuntimeFrame.ScalarDemandDual.failure_control_floor",
+      "line": 103
+    },
+    {
+      "name": "Solidity.Backend.InternalFlow.RuntimeFrame.ScalarDemandDual.good_entry",
+      "line": 22
+    },
+    {
+      "name": "Solidity.Backend.InternalFlow.RuntimeFrame.ScalarDemandDual.good_execution",
+      "line": 87
+    },
+    {
+      "name": "Solidity.Backend.InternalFlow.RuntimeFrame.ScalarDemandDual.good_reserve",
+      "line": 14
+    },
+    {
+      "name": "Solidity.Backend.InternalFlow.RuntimeFrame.ScalarDemandDual.insufficient_actual_demand",
+      "line": 96
+    },
+    {
+      "name": "Solidity.Backend.InternalFlow.RuntimeFrame.ScalarDemandDual.repaired_index_five",
+      "line": 91
+    },
+    {
+      "name": "Solidity.Backend.InternalFlow.RuntimeFrame.ScalarDemandDual.reverting_entry",
+      "line": 62
+    },
+    {
+      "name": "Solidity.Backend.InternalFlow.RuntimeFrame.ScalarDemandDual.unchanged_code",
+      "line": 85
+    }
+  ],
+  "Solidity.Backend.InternalFlow.RuntimeFrameV3ScalarDescent": [
+    {
+      "name": "Solidity.Backend.InternalFlow.RuntimeFrame.ScalarDescent.reached",
+      "line": 16
+    }
+  ],
+  "Solidity.Backend.InternalFlow.RuntimeFrameV3ScalarDescentControls": [
+    {
+      "name": "Solidity.Backend.InternalFlow.RuntimeFrame.ScalarAllocatingDescent.Controls.available",
+      "line": 15
+    },
+    {
+      "name": "Solidity.Backend.InternalFlow.RuntimeFrame.ScalarAllocatingDescent.Controls.complete",
+      "line": 95
+    }
+  ],
+  "Solidity.Backend.InternalFlow.RuntimeFrameV3ScalarDescentInterfaceV1": [
+    {
+      "name": "Solidity.Backend.InternalFlow.RuntimeFrame.ScalarDescentInterfaceV1.Producer.guard_run",
+      "line": 19
+    },
+    {
+      "name": "Solidity.Backend.InternalFlow.RuntimeFrame.ScalarDescentInterfaceV1.Producer.positive_turn",
+      "line": 24
+    },
+    {
+      "name": "Solidity.Backend.InternalFlow.RuntimeFrame.ScalarDescentInterfaceV1.Producer.public_guard",
+      "line": 17
+    },
+    {
+      "name": "Solidity.Backend.InternalFlow.RuntimeFrame.ScalarDescentInterfaceV1.Producer.running",
+      "line": 35
+    },
+    {
+      "name": "Solidity.Backend.InternalFlow.RuntimeFrame.ScalarDescentInterfaceV1.Producer.zero_turn",
+      "line": 30
+    }
+  ],
+  "Solidity.Backend.InternalFlow.RuntimeFrameV3ScalarDual": [
+    {
+      "name": "Solidity.Backend.InternalFlow.RuntimeFrame.ScalarDual.bad_entry",
+      "line": 51
+    },
+    {
+      "name": "Solidity.Backend.InternalFlow.RuntimeFrame.ScalarDual.bad_eval",
+      "line": 30
+    },
+    {
+      "name": "Solidity.Backend.InternalFlow.RuntimeFrame.ScalarDual.bad_execution",
+      "line": 97
+    },
+    {
+      "name": "Solidity.Backend.InternalFlow.RuntimeFrame.ScalarDual.bad_source",
+      "line": 71
+    },
+    {
+      "name": "Solidity.Backend.InternalFlow.RuntimeFrame.ScalarDual.good_entry",
+      "line": 36
+    },
+    {
+      "name": "Solidity.Backend.InternalFlow.RuntimeFrame.ScalarDual.good_eval",
+      "line": 27
+    },
+    {
+      "name": "Solidity.Backend.InternalFlow.RuntimeFrame.ScalarDual.good_execution",
+      "line": 89
+    },
+    {
+      "name": "Solidity.Backend.InternalFlow.RuntimeFrame.ScalarDual.good_source",
+      "line": 66
+    },
+    {
+      "name": "Solidity.Backend.InternalFlow.RuntimeFrame.ScalarDual.rejected_repr",
+      "line": 33
+    },
+    {
+      "name": "Solidity.Backend.InternalFlow.RuntimeFrame.ScalarDual.reverting_entry",
+      "line": 77
+    },
+    {
+      "name": "Solidity.Backend.InternalFlow.RuntimeFrame.ScalarDual.selected",
+      "line": 25
+    },
+    {
+      "name": "Solidity.Backend.InternalFlow.RuntimeFrame.ScalarDual.successful_entry",
+      "line": 74
+    }
+  ],
+  "Solidity.Backend.InternalFlow.RuntimeFrameV3ScalarDualControls": [
+    {
+      "name": "Solidity.Backend.InternalFlow.RuntimeFrame.ScalarDual.Controls.bad_branch_reached",
+      "line": 19
+    },
+    {
+      "name": "Solidity.Backend.InternalFlow.RuntimeFrame.ScalarDual.Controls.bad_guard",
+      "line": 14
+    },
+    {
+      "name": "Solidity.Backend.InternalFlow.RuntimeFrame.ScalarDual.Controls.changed_result",
+      "line": 50
+    },
+    {
+      "name": "Solidity.Backend.InternalFlow.RuntimeFrame.ScalarDual.Controls.complete_observations",
+      "line": 29
+    },
+    {
+      "name": "Solidity.Backend.InternalFlow.RuntimeFrame.ScalarDual.Controls.failure_not_fault",
+      "line": 61
+    },
+    {
+      "name": "Solidity.Backend.InternalFlow.RuntimeFrame.ScalarDual.Controls.failure_not_success",
+      "line": 56
+    },
+    {
+      "name": "Solidity.Backend.InternalFlow.RuntimeFrame.ScalarDual.Controls.good_guard",
+      "line": 12
+    },
+    {
+      "name": "Solidity.Backend.InternalFlow.RuntimeFrame.ScalarDual.Controls.index_five_not_entry",
+      "line": 84
+    },
+    {
+      "name": "Solidity.Backend.InternalFlow.RuntimeFrame.ScalarDual.Controls.index_five_source",
+      "line": 77
+    },
+    {
+      "name": "Solidity.Backend.InternalFlow.RuntimeFrame.ScalarDual.Controls.index_five_target",
+      "line": 82
+    },
+    {
+      "name": "Solidity.Backend.InternalFlow.RuntimeFrame.ScalarDual.Controls.one_image",
+      "line": 10
+    },
+    {
+      "name": "Solidity.Backend.InternalFlow.RuntimeFrame.ScalarDual.Controls.protected_failure_input",
+      "line": 40
+    },
+    {
+      "name": "Solidity.Backend.InternalFlow.RuntimeFrame.ScalarDual.Controls.rejected_allocator",
+      "line": 47
+    },
+    {
+      "name": "Solidity.Backend.InternalFlow.RuntimeFrame.ScalarDual.Controls.rejected_reference",
+      "line": 16
+    },
+    {
+      "name": "Solidity.Backend.InternalFlow.RuntimeFrame.ScalarDual.Controls.skipped_bad_branch",
+      "line": 22
+    },
+    {
+      "name": "Solidity.Backend.InternalFlow.RuntimeFrame.ScalarDual.Controls.source_input_difference",
+      "line": 25
+    },
+    {
+      "name": "Solidity.Backend.InternalFlow.RuntimeFrame.ScalarDual.Controls.target_frame",
+      "line": 37
+    },
+    {
+      "name": "Solidity.Backend.InternalFlow.RuntimeFrame.ScalarDual.Controls.wrong_alias",
+      "line": 52
+    },
+    {
+      "name": "Solidity.Backend.InternalFlow.RuntimeFrame.ScalarDual.Controls.wrong_cursor",
+      "line": 54
+    },
+    {
+      "name": "Solidity.Backend.InternalFlow.RuntimeFrame.ScalarDual.Controls.wrong_success_caller",
+      "line": 66
+    }
+  ],
+  "Solidity.Backend.InternalFlow.RuntimeFrameV3ScalarEmitter": [
+    {
+      "name": "Solidity.Backend.InternalFlow.RuntimeFrame.ScalarEmitter.Emission.geometry",
+      "line": 21
+    },
+    {
+      "name": "Solidity.Backend.InternalFlow.RuntimeFrame.ScalarEmitter.refused_geometry",
+      "line": 42
+    },
+    {
+      "name": "Solidity.Backend.InternalFlow.RuntimeFrame.ScalarEmitter.refused_value",
+      "line": 47
+    },
+    {
+      "name": "Solidity.Backend.InternalFlow.RuntimeFrame.ScalarEmitter.selected",
+      "line": 35
+    },
+    {
+      "name": "Solidity.Backend.InternalFlow.RuntimeFrame.ScalarEmitter.selected_value",
+      "line": 55
+    }
+  ],
+  "Solidity.Backend.InternalFlow.RuntimeFrameV3ScalarEmitterControls": [
+    {
+      "name": "Solidity.Backend.InternalFlow.RuntimeFrame.ScalarEmitter.Client.available",
+      "line": 21
+    },
+    {
+      "name": "Solidity.Backend.InternalFlow.RuntimeFrame.ScalarEmitter.Client.bad_code",
+      "line": 66
+    },
+    {
+      "name": "Solidity.Backend.InternalFlow.RuntimeFrame.ScalarEmitter.Client.bad_not_success",
+      "line": 73
+    },
+    {
+      "name": "Solidity.Backend.InternalFlow.RuntimeFrame.ScalarEmitter.Client.bad_selected",
+      "line": 64
+    },
+    {
+      "name": "Solidity.Backend.InternalFlow.RuntimeFrame.ScalarEmitter.Client.bad_target",
+      "line": 69
+    },
+    {
+      "name": "Solidity.Backend.InternalFlow.RuntimeFrame.ScalarEmitter.Client.complete_observations",
+      "line": 39
+    },
+    {
+      "name": "Solidity.Backend.InternalFlow.RuntimeFrame.ScalarEmitter.Client.refuse_control_overlap",
+      "line": 58
+    },
+    {
+      "name": "Solidity.Backend.InternalFlow.RuntimeFrame.ScalarEmitter.Client.refuse_frame",
+      "line": 60
+    },
+    {
+      "name": "Solidity.Backend.InternalFlow.RuntimeFrame.ScalarEmitter.Client.refuse_overlap",
+      "line": 56
+    },
+    {
+      "name": "Solidity.Backend.InternalFlow.RuntimeFrame.ScalarEmitter.Client.restored_caller",
+      "line": 47
+    },
+    {
+      "name": "Solidity.Backend.InternalFlow.RuntimeFrame.ScalarEmitter.Client.selected_argument",
+      "line": 16
+    },
+    {
+      "name": "Solidity.Backend.InternalFlow.RuntimeFrame.ScalarEmitter.Client.selected_code",
+      "line": 18
+    },
+    {
+      "name": "Solidity.Backend.InternalFlow.RuntimeFrame.ScalarEmitter.Client.selected_root",
+      "line": 14
+    },
+    {
+      "name": "Solidity.Backend.InternalFlow.RuntimeFrame.ScalarEmitter.Client.target",
+      "line": 35
+    },
+    {
+      "name": "Solidity.Backend.InternalFlow.RuntimeFrame.ScalarEmitter.Client.wrong_alias",
+      "line": 52
+    },
+    {
+      "name": "Solidity.Backend.InternalFlow.RuntimeFrame.ScalarEmitter.Client.wrong_cursor",
+      "line": 54
+    },
+    {
+      "name": "Solidity.Backend.InternalFlow.RuntimeFrame.ScalarEmitter.Client.wrong_protected_destination",
+      "line": 50
+    }
+  ],
+  "Solidity.Backend.InternalFlow.RuntimeFrameV3ScalarEmitterSound": [
+    {
+      "name": "Solidity.Backend.InternalFlow.RuntimeFrame.ScalarEmitter.argument_revert",
+      "line": 39
+    },
+    {
+      "name": "Solidity.Backend.InternalFlow.RuntimeFrame.ScalarEmitter.endpoint",
+      "line": 10
+    }
+  ],
+  "Solidity.Backend.InternalFlow.RuntimeFrameV3ScalarPairedExecution": [
+    {
+      "name": "Solidity.Backend.InternalFlow.RuntimeFrame.ScalarPairedExecution.complete",
+      "line": 14
+    }
+  ],
+  "Solidity.Backend.InternalFlow.RuntimeFrameV3ScalarPairedTransport": [
+    {
+      "name": "Solidity.Backend.InternalFlow.RuntimeFrame.ScalarPairedTransport.complete",
+      "line": 14
+    }
+  ],
+  "Solidity.Backend.InternalFlow.RuntimeFrameV3ScalarPairedTransportControls": [
+    {
+      "name": "Solidity.Backend.InternalFlow.RuntimeFrame.ScalarPairedTransport.Controls.inhabited",
+      "line": 9
+    }
+  ],
+  "Solidity.Backend.InternalFlow.RuntimeFrameV3ScalarParentRestore": [
+    {
+      "name": "Solidity.Backend.InternalFlow.RuntimeFrame.ScalarParentRestore.restore",
+      "line": 13
+    }
+  ],
+  "Solidity.Backend.InternalFlow.RuntimeFrameV3ScalarPhysicalInputs": [
+    {
+      "name": "Solidity.Backend.InternalFlow.RuntimeFrame.ScalarPhysicalInputs.Input.cursor",
+      "line": 22
+    },
+    {
+      "name": "Solidity.Backend.InternalFlow.RuntimeFrame.ScalarPhysicalInputs.Input.locals",
+      "line": 15
+    },
+    {
+      "name": "Solidity.Backend.InternalFlow.RuntimeFrame.ScalarPhysicalInputs.Input.noWrap",
+      "line": 21
+    },
+    {
+      "name": "Solidity.Backend.InternalFlow.RuntimeFrame.ScalarPhysicalInputs.Input.payloadAbove",
+      "line": 18
+    },
+    {
+      "name": "Solidity.Backend.InternalFlow.RuntimeFrame.ScalarPhysicalInputs.Input.pointerBelow",
+      "line": 17
+    },
+    {
+      "name": "Solidity.Backend.InternalFlow.RuntimeFrame.ScalarPhysicalInputs.Input.represented",
+      "line": 14
+    },
+    {
+      "name": "Solidity.Backend.InternalFlow.RuntimeFrame.ScalarPhysicalInputs.Input.reserve",
+      "line": 19
+    },
+    {
+      "name": "Solidity.Backend.InternalFlow.RuntimeFrame.ScalarPhysicalInputs.Input.separate",
+      "line": 20
+    },
+    {
+      "name": "Solidity.Backend.InternalFlow.RuntimeFrame.ScalarPhysicalInputs.Input.workspace",
+      "line": 16
+    },
+    {
+      "name": "Solidity.Backend.InternalFlow.RuntimeFrame.ScalarPhysicalInputs.coverage",
+      "line": 30
+    },
+    {
+      "name": "Solidity.Backend.InternalFlow.RuntimeFrame.ScalarPhysicalInputs.of_entry",
+      "line": 42
+    }
+  ],
+  "Solidity.Backend.InternalFlow.RuntimeFrameV3ScalarPlan": [
+    {
+      "name": "Solidity.Backend.InternalFlow.RuntimeFrame.ScalarPlan.entered_capacity",
+      "line": 17
+    },
+    {
+      "name": "Solidity.Backend.InternalFlow.RuntimeFrame.ScalarPlan.returned_of_eval",
+      "line": 38
+    }
+  ],
+  "Solidity.Backend.InternalFlow.RuntimeFrameV3ScalarPlanControls": [
+    {
+      "name": "Solidity.Backend.InternalFlow.RuntimeFrame.ScalarPlan.Client.bad_entry",
+      "line": 53
+    },
+    {
+      "name": "Solidity.Backend.InternalFlow.RuntimeFrame.ScalarPlan.Client.bare_target",
+      "line": 72
+    },
+    {
+      "name": "Solidity.Backend.InternalFlow.RuntimeFrame.ScalarPlan.Client.complete_observations",
+      "line": 45
+    },
+    {
+      "name": "Solidity.Backend.InternalFlow.RuntimeFrame.ScalarPlan.Client.entry",
+      "line": 15
+    },
+    {
+      "name": "Solidity.Backend.InternalFlow.RuntimeFrame.ScalarPlan.Client.insufficient_frame",
+      "line": 75
+    },
+    {
+      "name": "Solidity.Backend.InternalFlow.RuntimeFrame.ScalarPlan.Client.omitted_control_space",
+      "line": 81
+    },
+    {
+      "name": "Solidity.Backend.InternalFlow.RuntimeFrame.ScalarPlan.Client.returned",
+      "line": 30
+    },
+    {
+      "name": "Solidity.Backend.InternalFlow.RuntimeFrame.ScalarPlan.Client.reverting_entry",
+      "line": 68
+    },
+    {
+      "name": "Solidity.Backend.InternalFlow.RuntimeFrame.ScalarPlan.Client.same_actual_endpoint",
+      "line": 39
+    },
+    {
+      "name": "Solidity.Backend.InternalFlow.RuntimeFrame.ScalarPlan.Client.successful_entry",
+      "line": 34
+    },
+    {
+      "name": "Solidity.Backend.InternalFlow.RuntimeFrame.ScalarPlan.Client.wrong_cursor",
+      "line": 87
+    }
+  ],
+  "Solidity.Backend.InternalFlow.RuntimeFrameV3ScalarPrefixControls": [
+    {
+      "name": "Solidity.Backend.InternalFlow.RuntimeFrame.ScalarPrefixes.Client.completed",
+      "line": 86
+    },
+    {
+      "name": "Solidity.Backend.InternalFlow.RuntimeFrame.ScalarPrefixes.Client.completed_snapshot",
+      "line": 171
+    },
+    {
+      "name": "Solidity.Backend.InternalFlow.RuntimeFrame.ScalarPrefixes.Client.completion",
+      "line": 101
+    },
+    {
+      "name": "Solidity.Backend.InternalFlow.RuntimeFrame.ScalarPrefixes.Client.native_and_target",
+      "line": 120
+    },
+    {
+      "name": "Solidity.Backend.InternalFlow.RuntimeFrame.ScalarPrefixes.Client.not_fault",
+      "line": 187
+    },
+    {
+      "name": "Solidity.Backend.InternalFlow.RuntimeFrame.ScalarPrefixes.Client.not_revert",
+      "line": 156
+    },
+    {
+      "name": "Solidity.Backend.InternalFlow.RuntimeFrame.ScalarPrefixes.Client.ownership_at",
+      "line": 181
+    },
+    {
+      "name": "Solidity.Backend.InternalFlow.RuntimeFrame.ScalarPrefixes.Client.returned_is_last",
+      "line": 163
+    },
+    {
+      "name": "Solidity.Backend.InternalFlow.RuntimeFrame.ScalarPrefixes.Client.scalar_words",
+      "line": 22
+    },
+    {
+      "name": "Solidity.Backend.InternalFlow.RuntimeFrame.ScalarPrefixes.Client.snapshot",
+      "line": 34
+    },
+    {
+      "name": "Solidity.Backend.InternalFlow.RuntimeFrame.ScalarPrefixes.Client.specification",
+      "line": 11
+    },
+    {
+      "name": "Solidity.Backend.InternalFlow.RuntimeFrame.ScalarPrefixes.Client.whole_target",
+      "line": 114
+    },
+    {
+      "name": "Solidity.Backend.InternalFlow.RuntimeFrame.ScalarPrefixes.Client.wrong_alias",
+      "line": 139
+    },
+    {
+      "name": "Solidity.Backend.InternalFlow.RuntimeFrame.ScalarPrefixes.Client.wrong_cursor",
+      "line": 152
+    },
+    {
+      "name": "Solidity.Backend.InternalFlow.RuntimeFrame.ScalarPrefixes.Client.wrong_horizon",
+      "line": 135
+    },
+    {
+      "name": "Solidity.Backend.InternalFlow.RuntimeFrame.ScalarPrefixes.Client.wrong_scalar",
+      "line": 143
+    },
+    {
+      "name": "Solidity.Backend.InternalFlow.RuntimeFrame.ScalarPrefixes.Client.wrong_stopped",
+      "line": 128
+    }
+  ],
+  "Solidity.Backend.InternalFlow.RuntimeFrameV3ScalarPrefixFacts": [
+    {
+      "name": "Solidity.Backend.InternalFlow.RuntimeFrame.ScalarPrefixes.Client.current",
+      "line": 35
+    },
+    {
+      "name": "Solidity.Backend.InternalFlow.RuntimeFrame.ScalarPrefixes.Client.horizon",
+      "line": 45
+    },
+    {
+      "name": "Solidity.Backend.InternalFlow.RuntimeFrame.ScalarPrefixes.Client.initial",
+      "line": 29
+    },
+    {
+      "name": "Solidity.Backend.InternalFlow.RuntimeFrame.ScalarPrefixes.Client.initialization",
+      "line": 27
+    },
+    {
+      "name": "Solidity.Backend.InternalFlow.RuntimeFrame.ScalarPrefixes.Client.owner",
+      "line": 32
+    },
+    {
+      "name": "Solidity.Backend.InternalFlow.RuntimeFrame.ScalarPrefixes.Client.preparation",
+      "line": 14
+    },
+    {
+      "name": "Solidity.Backend.InternalFlow.RuntimeFrame.ScalarPrefixes.Client.reference",
+      "line": 37
+    },
+    {
+      "name": "Solidity.Backend.InternalFlow.RuntimeFrame.ScalarPrefixes.Client.saved",
+      "line": 39
+    }
+  ],
+  "Solidity.Backend.InternalFlow.RuntimeFrameV3ScalarPrefixes": [
+    {
+      "name": "Solidity.Backend.InternalFlow.RuntimeFrame.ScalarPrefixes.running_prefix",
+      "line": 42
+    },
+    {
+      "name": "Solidity.Backend.InternalFlow.RuntimeFrame.ScalarPrefixes.turn_done",
+      "line": 30
+    },
+    {
+      "name": "Solidity.Backend.InternalFlow.RuntimeFrame.ScalarPrefixes.turn_more",
+      "line": 16
+    }
+  ],
+  "Solidity.Backend.InternalFlow.RuntimeFrameV3ScalarRecursiveAgreement": [
+    {
+      "name": "Solidity.Backend.InternalFlow.RuntimeFrame.ScalarRecursiveSource.arm_steps",
+      "line": 10
+    },
+    {
+      "name": "Solidity.Backend.InternalFlow.RuntimeFrame.ScalarRecursiveSource.bodies",
+      "line": 20
+    },
+    {
+      "name": "Solidity.Backend.InternalFlow.RuntimeFrame.ScalarRecursiveSource.source_coherence",
+      "line": 46
+    }
+  ],
+  "Solidity.Backend.InternalFlow.RuntimeFrameV3ScalarRecursiveCall": [
+    {
+      "name": "Solidity.Backend.InternalFlow.RuntimeFrame.ScalarRecursiveSource.call_all_horizons",
+      "line": 10
+    }
+  ],
+  "Solidity.Backend.InternalFlow.RuntimeFrameV3ScalarRecursiveControls": [
+    {
+      "name": "Solidity.Backend.InternalFlow.RuntimeFrame.ScalarRecursiveSource.Controls.alternate_all",
+      "line": 24
+    },
+    {
+      "name": "Solidity.Backend.InternalFlow.RuntimeFrame.ScalarRecursiveSource.Controls.arguments",
+      "line": 16
+    },
+    {
+      "name": "Solidity.Backend.InternalFlow.RuntimeFrame.ScalarRecursiveSource.Controls.missing_argument",
+      "line": 90
+    },
+    {
+      "name": "Solidity.Backend.InternalFlow.RuntimeFrame.ScalarRecursiveSource.Controls.not_default",
+      "line": 62
+    },
+    {
+      "name": "Solidity.Backend.InternalFlow.RuntimeFrame.ScalarRecursiveSource.Controls.ordered_bindings",
+      "line": 36
+    },
+    {
+      "name": "Solidity.Backend.InternalFlow.RuntimeFrame.ScalarRecursiveSource.Controls.ordered_heap",
+      "line": 44
+    },
+    {
+      "name": "Solidity.Backend.InternalFlow.RuntimeFrame.ScalarRecursiveSource.Controls.other_fields",
+      "line": 52
+    },
+    {
+      "name": "Solidity.Backend.InternalFlow.RuntimeFrame.ScalarRecursiveSource.Controls.private_default",
+      "line": 31
+    },
+    {
+      "name": "Solidity.Backend.InternalFlow.RuntimeFrame.ScalarRecursiveSource.Controls.private_result",
+      "line": 33
+    },
+    {
+      "name": "Solidity.Backend.InternalFlow.RuntimeFrame.ScalarRecursiveSource.Controls.shallow",
+      "line": 79
+    },
+    {
+      "name": "Solidity.Backend.InternalFlow.RuntimeFrame.ScalarRecursiveSource.Controls.shallow_not_revert",
+      "line": 83
+    },
+    {
+      "name": "Solidity.Backend.InternalFlow.RuntimeFrame.ScalarRecursiveSource.Controls.source_all",
+      "line": 21
+    },
+    {
+      "name": "Solidity.Backend.InternalFlow.RuntimeFrame.ScalarRecursiveSource.Controls.swapped_destination",
+      "line": 54
+    },
+    {
+      "name": "Solidity.Backend.InternalFlow.RuntimeFrame.ScalarRecursiveSource.Controls.wrong_alias",
+      "line": 70
+    }
+  ],
+  "Solidity.Backend.InternalFlow.RuntimeFrameV3ScalarRecursiveSource": [
+    {
+      "name": "Solidity.Backend.InternalFlow.RuntimeFrame.ScalarRecursiveSource.all_horizons",
+      "line": 7
+    }
+  ],
+  "Solidity.Backend.InternalFlow.RuntimeFrameV3ScalarRecursiveStep": [
+    {
+      "name": "Solidity.Backend.InternalFlow.RuntimeFrame.ScalarRecursiveSource.guard_eval",
+      "line": 32
+    },
+    {
+      "name": "Solidity.Backend.InternalFlow.RuntimeFrame.ScalarRecursiveSource.increment_run",
+      "line": 61
+    },
+    {
+      "name": "Solidity.Backend.InternalFlow.RuntimeFrame.ScalarRecursiveSource.next_eval",
+      "line": 40
+    },
+    {
+      "name": "Solidity.Backend.InternalFlow.RuntimeFrame.ScalarRecursiveSource.successor_ofInt",
+      "line": 54
+    },
+    {
+      "name": "Solidity.Backend.InternalFlow.RuntimeFrame.ScalarRecursiveSource.successor_run",
+      "line": 75
+    }
+  ],
+  "Solidity.Backend.InternalFlow.RuntimeFrameV3ScalarRecursiveTurn": [
+    {
+      "name": "Solidity.Backend.InternalFlow.RuntimeFrame.ScalarRecursiveSource.arm_result",
+      "line": 43
+    },
+    {
+      "name": "Solidity.Backend.InternalFlow.RuntimeFrame.ScalarRecursiveSource.call_result",
+      "line": 20
+    },
+    {
+      "name": "Solidity.Backend.InternalFlow.RuntimeFrame.ScalarRecursiveSource.turn_result",
+      "line": 64
+    },
+    {
+      "name": "Solidity.Backend.InternalFlow.RuntimeFrame.ScalarRecursiveSource.zero_return",
+      "line": 11
+    }
+  ],
+  "Solidity.Backend.InternalFlow.RuntimeFrameV3ScalarReentry": [
+    {
+      "name": "Solidity.Backend.InternalFlow.RuntimeFrame.ScalarReentry.actual_count",
+      "line": 46
+    },
+    {
+      "name": "Solidity.Backend.InternalFlow.RuntimeFrame.ScalarReentry.arena",
+      "line": 49
+    },
+    {
+      "name": "Solidity.Backend.InternalFlow.RuntimeFrame.ScalarReentry.entry",
+      "line": 54
+    },
+    {
+      "name": "Solidity.Backend.InternalFlow.RuntimeFrame.ScalarReentry.prefix_cursor",
+      "line": 20
+    },
+    {
+      "name": "Solidity.Backend.InternalFlow.RuntimeFrame.ScalarReentry.prefix_entry",
+      "line": 14
+    },
+    {
+      "name": "Solidity.Backend.InternalFlow.RuntimeFrame.ScalarReentry.prefix_returned",
+      "line": 32
+    },
+    {
+      "name": "Solidity.Backend.InternalFlow.RuntimeFrame.ScalarReentry.prefix_words",
+      "line": 23
+    },
+    {
+      "name": "Solidity.Backend.InternalFlow.RuntimeFrame.ScalarReentry.returned",
+      "line": 77
+    },
+    {
+      "name": "Solidity.Backend.InternalFlow.RuntimeFrame.ScalarReentry.selected",
+      "line": 44
+    },
+    {
+      "name": "Solidity.Backend.InternalFlow.RuntimeFrame.ScalarReentry.source",
+      "line": 69
+    }
+  ],
+  "Solidity.Backend.InternalFlow.RuntimeFrameV3ScalarReentryControls": [
+    {
+      "name": "Solidity.Backend.InternalFlow.RuntimeFrame.ScalarReentry.Controls.complete_observations",
+      "line": 12
+    },
+    {
+      "name": "Solidity.Backend.InternalFlow.RuntimeFrame.ScalarReentry.Controls.not_fault",
+      "line": 109
+    },
+    {
+      "name": "Solidity.Backend.InternalFlow.RuntimeFrame.ScalarReentry.Controls.not_revert",
+      "line": 114
+    },
+    {
+      "name": "Solidity.Backend.InternalFlow.RuntimeFrame.ScalarReentry.Controls.retained_new_identity",
+      "line": 103
+    },
+    {
+      "name": "Solidity.Backend.InternalFlow.RuntimeFrame.ScalarReentry.Controls.shallow_source",
+      "line": 106
+    },
+    {
+      "name": "Solidity.Backend.InternalFlow.RuntimeFrame.ScalarReentry.Controls.source_objects",
+      "line": 81
+    },
+    {
+      "name": "Solidity.Backend.InternalFlow.RuntimeFrame.ScalarReentry.Controls.source_state",
+      "line": 78
+    },
+    {
+      "name": "Solidity.Backend.InternalFlow.RuntimeFrame.ScalarReentry.Controls.wrong_frontier",
+      "line": 99
+    },
+    {
+      "name": "Solidity.Backend.InternalFlow.RuntimeFrame.ScalarReentry.Controls.wrong_old_count",
+      "line": 97
+    }
+  ],
+  "Solidity.Backend.InternalFlow.RuntimeFrameV3ScalarReentryEndpoint": [
+    {
+      "name": "Solidity.Backend.InternalFlow.RuntimeFrame.ScalarReentry.Endpoint.available",
+      "line": 14
+    },
+    {
+      "name": "Solidity.Backend.InternalFlow.RuntimeFrame.ScalarReentry.Endpoint.block_source",
+      "line": 71
+    },
+    {
+      "name": "Solidity.Backend.InternalFlow.RuntimeFrame.ScalarReentry.Endpoint.endpoint",
+      "line": 89
+    },
+    {
+      "name": "Solidity.Backend.InternalFlow.RuntimeFrame.ScalarReentry.Endpoint.new_object_base",
+      "line": 53
+    },
+    {
+      "name": "Solidity.Backend.InternalFlow.RuntimeFrame.ScalarReentry.Endpoint.old_state_count",
+      "line": 56
+    },
+    {
+      "name": "Solidity.Backend.InternalFlow.RuntimeFrame.ScalarReentry.Endpoint.ownership",
+      "line": 44
+    },
+    {
+      "name": "Solidity.Backend.InternalFlow.RuntimeFrame.ScalarReentry.Endpoint.rejects_stale_count",
+      "line": 59
+    },
+    {
+      "name": "Solidity.Backend.InternalFlow.RuntimeFrame.ScalarReentry.Endpoint.specification",
+      "line": 33
+    },
+    {
+      "name": "Solidity.Backend.InternalFlow.RuntimeFrame.ScalarReentry.Endpoint.whole_source",
+      "line": 82
+    },
+    {
+      "name": "Solidity.Backend.InternalFlow.RuntimeFrame.ScalarReentry.Endpoint.whole_target",
+      "line": 48
+    }
+  ],
+  "Solidity.Backend.InternalFlow.RuntimeFrameV3ScalarReturn": [
+    {
+      "name": "Solidity.Backend.InternalFlow.RuntimeFrame.ScalarReturn.endpoint",
+      "line": 14
+    }
+  ],
+  "Solidity.Backend.InternalFlow.RuntimeFrameV3ScalarReturnControls": [
+    {
+      "name": "Solidity.Backend.InternalFlow.RuntimeFrame.ScalarCallReturn.Client.available",
+      "line": 25
+    },
+    {
+      "name": "Solidity.Backend.InternalFlow.RuntimeFrame.ScalarCallReturn.Client.encoded",
+      "line": 13
+    },
+    {
+      "name": "Solidity.Backend.InternalFlow.RuntimeFrame.ScalarCallReturn.Client.initial",
+      "line": 18
+    },
+    {
+      "name": "Solidity.Backend.InternalFlow.RuntimeFrame.ScalarCallReturn.Client.initial_owner",
+      "line": 21
+    },
+    {
+      "name": "Solidity.Backend.InternalFlow.RuntimeFrame.ScalarCallReturn.Client.native_and_target",
+      "line": 105
+    },
+    {
+      "name": "Solidity.Backend.InternalFlow.RuntimeFrame.ScalarCallReturn.Client.not_fault",
+      "line": 155
+    },
+    {
+      "name": "Solidity.Backend.InternalFlow.RuntimeFrame.ScalarCallReturn.Client.not_revert",
+      "line": 149
+    },
+    {
+      "name": "Solidity.Backend.InternalFlow.RuntimeFrame.ScalarCallReturn.Client.payload_words",
+      "line": 63
+    },
+    {
+      "name": "Solidity.Backend.InternalFlow.RuntimeFrame.ScalarCallReturn.Client.shallow",
+      "line": 138
+    },
+    {
+      "name": "Solidity.Backend.InternalFlow.RuntimeFrame.ScalarCallReturn.Client.shallow_not_revert",
+      "line": 143
+    },
+    {
+      "name": "Solidity.Backend.InternalFlow.RuntimeFrame.ScalarCallReturn.Client.snapshot",
+      "line": 76
+    },
+    {
+      "name": "Solidity.Backend.InternalFlow.RuntimeFrame.ScalarCallReturn.Client.specification",
+      "line": 50
+    },
+    {
+      "name": "Solidity.Backend.InternalFlow.RuntimeFrame.ScalarCallReturn.Client.wrong_alias",
+      "line": 114
+    },
+    {
+      "name": "Solidity.Backend.InternalFlow.RuntimeFrame.ScalarCallReturn.Client.wrong_heap_cursor",
+      "line": 133
+    },
+    {
+      "name": "Solidity.Backend.InternalFlow.RuntimeFrame.ScalarCallReturn.Client.wrong_private",
+      "line": 119
+    },
+    {
+      "name": "Solidity.Backend.InternalFlow.RuntimeFrame.ScalarCallReturn.Client.wrong_runtime_cursor",
+      "line": 128
+    }
+  ],
+  "Solidity.Backend.InternalFlow.RuntimeFrameV3ScalarSourceCheck": [
+    {
+      "name": "Solidity.Backend.InternalFlow.RuntimeFrame.ScalarSourceCheck.Head.shape",
+      "line": 57
+    },
+    {
+      "name": "Solidity.Backend.InternalFlow.RuntimeFrame.ScalarSourceCheck.step_eq",
+      "line": 86
+    }
+  ],
+  "Solidity.Backend.InternalFlow.RuntimeFrameV3ScalarSourceCheckLaws": [
+    {
+      "name": "Solidity.Backend.InternalFlow.RuntimeFrame.ScalarSourceCheck.complete",
+      "line": 16
+    },
+    {
+      "name": "Solidity.Backend.InternalFlow.RuntimeFrame.ScalarSourceCheck.read_step",
+      "line": 12
+    }
+  ],
+  "Solidity.Backend.InternalFlow.RuntimeFrameV3ScalarSourceCompiler": [
+    {
+      "name": "Solidity.Backend.InternalFlow.RuntimeFrame.ScalarSourceCompiler.Selected.bare_revert",
+      "line": 142
+    },
+    {
+      "name": "Solidity.Backend.InternalFlow.RuntimeFrame.ScalarSourceCompiler.Selected.body_eq",
+      "line": 35
+    },
+    {
+      "name": "Solidity.Backend.InternalFlow.RuntimeFrame.ScalarSourceCompiler.Selected.checked",
+      "line": 36
+    },
+    {
+      "name": "Solidity.Backend.InternalFlow.RuntimeFrame.ScalarSourceCompiler.Selected.emitted_root",
+      "line": 38
+    },
+    {
+      "name": "Solidity.Backend.InternalFlow.RuntimeFrame.ScalarSourceCompiler.Selected.head",
+      "line": 34
+    },
+    {
+      "name": "Solidity.Backend.InternalFlow.RuntimeFrame.ScalarSourceCompiler.Selected.memoryFree",
+      "line": 24
+    },
+    {
+      "name": "Solidity.Backend.InternalFlow.RuntimeFrame.ScalarSourceCompiler.Selected.returns",
+      "line": 134
+    },
+    {
+      "name": "Solidity.Backend.InternalFlow.RuntimeFrame.ScalarSourceCompiler.Selected.source_run",
+      "line": 113
+    },
+    {
+      "name": "Solidity.Backend.InternalFlow.RuntimeFrame.ScalarSourceCompiler.Selected.value_root",
+      "line": 129
+    },
+    {
+      "name": "Solidity.Backend.InternalFlow.RuntimeFrame.ScalarSourceCompiler.compile_call",
+      "line": 77
+    }
+  ],
+  "Solidity.Backend.InternalFlow.RuntimeFrameV3ScalarSourceCompilerClient": [
+    {
+      "name": "Solidity.Backend.InternalFlow.RuntimeFrame.ScalarSourceCompiler.Client.actual_source",
+      "line": 37
+    },
+    {
+      "name": "Solidity.Backend.InternalFlow.RuntimeFrame.ScalarSourceCompiler.Client.complete_observations",
+      "line": 58
+    },
+    {
+      "name": "Solidity.Backend.InternalFlow.RuntimeFrame.ScalarSourceCompiler.Client.entered",
+      "line": 32
+    },
+    {
+      "name": "Solidity.Backend.InternalFlow.RuntimeFrame.ScalarSourceCompiler.Client.native_default_returned",
+      "line": 77
+    },
+    {
+      "name": "Solidity.Backend.InternalFlow.RuntimeFrame.ScalarSourceCompiler.Client.native_default_root",
+      "line": 75
+    },
+    {
+      "name": "Solidity.Backend.InternalFlow.RuntimeFrame.ScalarSourceCompiler.Client.plan_eq",
+      "line": 25
+    },
+    {
+      "name": "Solidity.Backend.InternalFlow.RuntimeFrame.ScalarSourceCompiler.Client.returned",
+      "line": 41
+    },
+    {
+      "name": "Solidity.Backend.InternalFlow.RuntimeFrame.ScalarSourceCompiler.Client.root",
+      "line": 19
+    },
+    {
+      "name": "Solidity.Backend.InternalFlow.RuntimeFrame.ScalarSourceCompiler.Client.same_image",
+      "line": 29
+    },
+    {
+      "name": "Solidity.Backend.InternalFlow.RuntimeFrame.ScalarSourceCompiler.Client.target",
+      "line": 47
+    },
+    {
+      "name": "Solidity.Backend.InternalFlow.RuntimeFrame.ScalarSourceCompiler.Client.whole_source",
+      "line": 55
+    },
+    {
+      "name": "Solidity.Backend.InternalFlow.RuntimeFrame.ScalarSourceCompiler.Client.whole_target",
+      "line": 51
+    }
+  ],
+  "Solidity.Backend.InternalFlow.RuntimeFrameV3ScalarSourceCompilerControls": [
+    {
+      "name": "Solidity.Backend.InternalFlow.RuntimeFrame.ScalarSourceCompiler.Controls.altered_root_rejected",
+      "line": 23
+    },
+    {
+      "name": "Solidity.Backend.InternalFlow.RuntimeFrame.ScalarSourceCompiler.Controls.bad_entry",
+      "line": 81
+    },
+    {
+      "name": "Solidity.Backend.InternalFlow.RuntimeFrame.ScalarSourceCompiler.Controls.bad_eval",
+      "line": 74
+    },
+    {
+      "name": "Solidity.Backend.InternalFlow.RuntimeFrame.ScalarSourceCompiler.Controls.bad_not_fault",
+      "line": 100
+    },
+    {
+      "name": "Solidity.Backend.InternalFlow.RuntimeFrame.ScalarSourceCompiler.Controls.bad_root",
+      "line": 69
+    },
+    {
+      "name": "Solidity.Backend.InternalFlow.RuntimeFrame.ScalarSourceCompiler.Controls.bad_source",
+      "line": 77
+    },
+    {
+      "name": "Solidity.Backend.InternalFlow.RuntimeFrame.ScalarSourceCompiler.Controls.bad_target",
+      "line": 96
+    },
+    {
+      "name": "Solidity.Backend.InternalFlow.RuntimeFrame.ScalarSourceCompiler.Controls.deeper_child_rejected",
+      "line": 18
+    },
+    {
+      "name": "Solidity.Backend.InternalFlow.RuntimeFrame.ScalarSourceCompiler.Controls.exhausted_boundary",
+      "line": 51
+    },
+    {
+      "name": "Solidity.Backend.InternalFlow.RuntimeFrame.ScalarSourceCompiler.Controls.index_rejected",
+      "line": 33
+    },
+    {
+      "name": "Solidity.Backend.InternalFlow.RuntimeFrame.ScalarSourceCompiler.Controls.ordinary_call_refused",
+      "line": 45
+    },
+    {
+      "name": "Solidity.Backend.InternalFlow.RuntimeFrame.ScalarSourceCompiler.Controls.outer_layer_matches",
+      "line": 16
+    },
+    {
+      "name": "Solidity.Backend.InternalFlow.RuntimeFrame.ScalarSourceCompiler.Controls.source_difference",
+      "line": 25
+    },
+    {
+      "name": "Solidity.Backend.InternalFlow.RuntimeFrame.ScalarSourceCompiler.Controls.wrong_base_rejected",
+      "line": 35
+    },
+    {
+      "name": "Solidity.Backend.InternalFlow.RuntimeFrame.ScalarSourceCompiler.Controls.wrong_guard_rejected",
+      "line": 37
+    },
+    {
+      "name": "Solidity.Backend.InternalFlow.RuntimeFrame.ScalarSourceCompiler.Controls.wrong_increment_rejected",
+      "line": 39
+    },
+    {
+      "name": "Solidity.Backend.InternalFlow.RuntimeFrame.ScalarSourceCompiler.Controls.wrong_result_rejected",
+      "line": 42
+    }
+  ],
+  "Solidity.Backend.InternalFlow.RuntimeFrameV3ScalarStop": [
+    {
+      "name": "Solidity.Backend.InternalFlow.RuntimeFrame.ScalarPrefixes.complete",
+      "line": 40
+    },
+    {
+      "name": "Solidity.Backend.InternalFlow.RuntimeFrame.ScalarPrefixes.run_of_stopped",
+      "line": 28
+    },
+    {
+      "name": "Solidity.Backend.InternalFlow.RuntimeFrame.ScalarPrefixes.stop_after_running",
+      "line": 9
+    }
+  ],
+  "Solidity.Backend.InternalFlow.RuntimeFrameV3ScalarUnwind": [
+    {
+      "name": "Solidity.Backend.InternalFlow.RuntimeFrame.ScalarUnwind.advance",
+      "line": 19
+    },
+    {
+      "name": "Solidity.Backend.InternalFlow.RuntimeFrame.ScalarUnwind.selected",
+      "line": 16
+    },
+    {
+      "name": "Solidity.Backend.InternalFlow.RuntimeFrame.ScalarUnwind.step",
+      "line": 56
+    }
+  ],
+  "Solidity.Backend.InternalFlow.RuntimeFrameV3ScalarUnwindEndpoint": [
+    {
+      "name": "Solidity.Backend.InternalFlow.RuntimeFrame.ScalarUnwind.Client.endpoint",
+      "line": 13
+    }
+  ],
+  "Solidity.Backend.InternalFlow.RuntimeFrameV3ScalarUnwindFacts": [
+    {
+      "name": "Solidity.Backend.InternalFlow.RuntimeFrame.ScalarUnwind.Client.available",
+      "line": 29
+    },
+    {
+      "name": "Solidity.Backend.InternalFlow.RuntimeFrame.ScalarUnwind.Client.entry_repr",
+      "line": 24
+    },
+    {
+      "name": "Solidity.Backend.InternalFlow.RuntimeFrame.ScalarUnwind.Client.entry_run",
+      "line": 27
+    },
+    {
+      "name": "Solidity.Backend.InternalFlow.RuntimeFrame.ScalarUnwind.Client.initial",
+      "line": 19
+    },
+    {
+      "name": "Solidity.Backend.InternalFlow.RuntimeFrame.ScalarUnwind.Client.scalar_entry",
+      "line": 22
+    }
+  ],
+  "Solidity.Backend.InternalFlow.RuntimeFrameV3ScopedScalarClient": [
+    {
+      "name": "Solidity.Backend.InternalFlow.RuntimeFrame.ScopedScalarCompiler.Client.bad_not_fault",
+      "line": 94
+    },
+    {
+      "name": "Solidity.Backend.InternalFlow.RuntimeFrame.ScopedScalarCompiler.Client.bad_root",
+      "line": 81
+    },
+    {
+      "name": "Solidity.Backend.InternalFlow.RuntimeFrame.ScopedScalarCompiler.Client.bad_source",
+      "line": 87
+    },
+    {
+      "name": "Solidity.Backend.InternalFlow.RuntimeFrame.ScopedScalarCompiler.Client.bad_target",
+      "line": 90
+    },
+    {
+      "name": "Solidity.Backend.InternalFlow.RuntimeFrame.ScopedScalarCompiler.Client.complete_observations",
+      "line": 51
+    },
+    {
+      "name": "Solidity.Backend.InternalFlow.RuntimeFrame.ScopedScalarCompiler.Client.exhausted_source",
+      "line": 66
+    },
+    {
+      "name": "Solidity.Backend.InternalFlow.RuntimeFrame.ScopedScalarCompiler.Client.native_default_root",
+      "line": 63
+    },
+    {
+      "name": "Solidity.Backend.InternalFlow.RuntimeFrame.ScopedScalarCompiler.Client.returned",
+      "line": 39
+    },
+    {
+      "name": "Solidity.Backend.InternalFlow.RuntimeFrame.ScopedScalarCompiler.Client.root",
+      "line": 24
+    },
+    {
+      "name": "Solidity.Backend.InternalFlow.RuntimeFrame.ScopedScalarCompiler.Client.same_image",
+      "line": 31
+    },
+    {
+      "name": "Solidity.Backend.InternalFlow.RuntimeFrame.ScopedScalarCompiler.Client.source",
+      "line": 34
+    },
+    {
+      "name": "Solidity.Backend.InternalFlow.RuntimeFrame.ScopedScalarCompiler.Client.target",
+      "line": 47
+    }
+  ],
+  "Solidity.Backend.InternalFlow.RuntimeFrameV3ScopedScalarCompiler": [
+    {
+      "name": "Solidity.Backend.InternalFlow.RuntimeFrame.ScopedScalarCompiler.Selected.bare_revert",
+      "line": 138
+    },
+    {
+      "name": "Solidity.Backend.InternalFlow.RuntimeFrame.ScopedScalarCompiler.Selected.returns",
+      "line": 131
+    },
+    {
+      "name": "Solidity.Backend.InternalFlow.RuntimeFrame.ScopedScalarCompiler.Selected.shape",
+      "line": 25
+    },
+    {
+      "name": "Solidity.Backend.InternalFlow.RuntimeFrame.ScopedScalarCompiler.Selected.source_run",
+      "line": 120
+    },
+    {
+      "name": "Solidity.Backend.InternalFlow.RuntimeFrame.ScopedScalarCompiler.compile_decorated",
+      "line": 84
+    }
+  ],
+  "Solidity.Backend.InternalFlow.RuntimeFrameV3ScopedScalarControls": [
+    {
+      "name": "Solidity.Backend.InternalFlow.RuntimeFrame.ScopedScalarCompiler.Controls.extra_inner_context_refused",
+      "line": 31
+    },
+    {
+      "name": "Solidity.Backend.InternalFlow.RuntimeFrame.ScopedScalarCompiler.Controls.initialized_refused",
+      "line": 19
+    },
+    {
+      "name": "Solidity.Backend.InternalFlow.RuntimeFrame.ScopedScalarCompiler.Controls.noncanonical_body_refused",
+      "line": 33
+    },
+    {
+      "name": "Solidity.Backend.InternalFlow.RuntimeFrame.ScopedScalarCompiler.Controls.panic_preserved",
+      "line": 38
+    },
+    {
+      "name": "Solidity.Backend.InternalFlow.RuntimeFrame.ScopedScalarCompiler.Controls.payload_preserved",
+      "line": 45
+    },
+    {
+      "name": "Solidity.Backend.InternalFlow.RuntimeFrame.ScopedScalarCompiler.Controls.protected_write_refused",
+      "line": 25
+    },
+    {
+      "name": "Solidity.Backend.InternalFlow.RuntimeFrame.ScopedScalarCompiler.Controls.wrong_frontier",
+      "line": 52
+    }
+  ],
+  "Solidity.Backend.InternalFlow.RuntimeFrameV3SecondAllocatingEntry": [
+    {
+      "name": "Solidity.Backend.InternalFlow.RuntimeFrame.SecondAllocatingEntry.endpoint",
+      "line": 18
+    }
+  ],
+  "Solidity.Backend.InternalFlow.RuntimeFrameV3StateShell": [
+    {
+      "name": "Solidity.Backend.InternalFlow.RuntimeFrame.StateShell.refl",
+      "line": 11
+    },
+    {
+      "name": "Solidity.Backend.InternalFlow.RuntimeFrame.StateShell.state_eq",
+      "line": 18
+    },
+    {
+      "name": "Solidity.Backend.InternalFlow.RuntimeFrame.StateShell.symm",
+      "line": 12
+    },
+    {
+      "name": "Solidity.Backend.InternalFlow.RuntimeFrame.StateShell.trans",
+      "line": 14
+    }
+  ],
+  "Solidity.Backend.InternalFlow.RuntimeFrameV3TypedHeapExtensionality": [
+    {
+      "name": "Solidity.Backend.InternalFlow.RuntimeFrame.TypedHeapExtensionality.default_unique",
+      "line": 52
+    },
+    {
+      "name": "Solidity.Backend.InternalFlow.RuntimeFrame.TypedHeapExtensionality.heap_ext",
+      "line": 19
+    },
+    {
+      "name": "Solidity.Backend.InternalFlow.RuntimeFrame.TypedHeapExtensionality.objects_ext",
+      "line": 9
+    },
+    {
+      "name": "Solidity.Backend.InternalFlow.RuntimeFrame.TypedHeapExtensionality.of_inventory",
+      "line": 29
+    },
+    {
+      "name": "Solidity.Backend.InternalFlow.RuntimeFrame.TypedHeapExtensionality.prefix_unique",
+      "line": 37
+    },
+    {
+      "name": "Solidity.Backend.InternalFlow.RuntimeFrame.TypedHeapExtensionality.prepend_defaults",
+      "line": 99
+    },
+    {
+      "name": "Solidity.Backend.InternalFlow.RuntimeFrame.TypedHeapExtensionality.profiles_heq",
+      "line": 86
+    },
+    {
+      "name": "Solidity.Backend.InternalFlow.RuntimeFrame.TypedHeapExtensionality.typing_shape",
+      "line": 64
+    }
+  ],
+  "Solidity.Backend.InternalFlow.RuntimeFrameV3TypedHeapExtensionalityControls": [
+    {
+      "name": "Solidity.Backend.InternalFlow.RuntimeFrame.TypedHeapExtensionality.Controls.old_keeps_insufficient",
+      "line": 14
+    }
+  ],
+  "Solidity.Backend.InternalFlow.RuntimeFrameV4Migration": [
+    {
+      "name": "Solidity.Backend.InternalFlow.RuntimeFrame.V4Migration.coherence",
+      "line": 143
+    },
+    {
+      "name": "Solidity.Backend.InternalFlow.RuntimeFrame.V4Migration.exhausting_empty",
+      "line": 177
+    },
+    {
+      "name": "Solidity.Backend.InternalFlow.RuntimeFrame.V4Migration.exhausting_never_succeeds",
+      "line": 168
+    },
+    {
+      "name": "Solidity.Backend.InternalFlow.RuntimeFrame.V4Migration.exhausting_unroll",
+      "line": 162
+    },
+    {
+      "name": "Solidity.Backend.InternalFlow.RuntimeFrame.V4Migration.no_incoherent_producer",
+      "line": 151
+    },
+    {
+      "name": "Solidity.Backend.InternalFlow.RuntimeFrame.V4Migration.no_success_producer",
+      "line": 132
+    },
+    {
+      "name": "Solidity.Backend.InternalFlow.RuntimeFrame.V4Migration.recursive_round_trip",
+      "line": 80
+    },
+    {
+      "name": "Solidity.Backend.InternalFlow.RuntimeFrame.V4Migration.recursive_round_trip'",
+      "line": 88
+    }
+  ],
+  "Solidity.Backend.InternalFlow.RuntimeFrameV4MigrationControls": [
+    {
+      "name": "Solidity.Backend.InternalFlow.RuntimeFrame.V4MigrationControls.round_trip",
+      "line": 25
+    },
+    {
+      "name": "Solidity.Backend.InternalFlow.RuntimeFrame.V4MigrationControls.same_plan",
+      "line": 20
+    }
+  ],
+  "Solidity.Backend.InternalFlow.RuntimeFrameV4TrivialFamily": [
+    {
+      "name": "Solidity.Backend.InternalFlow.RuntimeFrame.V4TrivialFamily.bare_revert",
+      "line": 81
+    },
+    {
+      "name": "Solidity.Backend.InternalFlow.RuntimeFrame.V4TrivialFamily.coherent",
+      "line": 97
+    },
+    {
+      "name": "Solidity.Backend.InternalFlow.RuntimeFrame.V4TrivialFamily.coverage",
+      "line": 77
+    },
+    {
+      "name": "Solidity.Backend.InternalFlow.RuntimeFrame.V4TrivialFamily.exhausted_is_covered",
+      "line": 156
+    },
+    {
+      "name": "Solidity.Backend.InternalFlow.RuntimeFrame.V4TrivialFamily.exhausting_empty",
+      "line": 150
+    },
+    {
+      "name": "Solidity.Backend.InternalFlow.RuntimeFrame.V4TrivialFamily.member",
+      "line": 111
+    },
+    {
+      "name": "Solidity.Backend.InternalFlow.RuntimeFrame.V4TrivialFamily.no_index_filter",
+      "line": 68
+    },
+    {
+      "name": "Solidity.Backend.InternalFlow.RuntimeFrame.V4TrivialFamily.nonallocating",
+      "line": 52
+    },
+    {
+      "name": "Solidity.Backend.InternalFlow.RuntimeFrame.V4TrivialFamily.plan_at",
+      "line": 62
+    },
+    {
+      "name": "Solidity.Backend.InternalFlow.RuntimeFrame.V4TrivialFamily.returns",
+      "line": 80
+    },
+    {
+      "name": "Solidity.Backend.InternalFlow.RuntimeFrame.V4TrivialFamily.room",
+      "line": 49
+    },
+    {
+      "name": "Solidity.Backend.InternalFlow.RuntimeFrame.V4TrivialFamily.satisfiable",
+      "line": 135
+    },
+    {
+      "name": "Solidity.Backend.InternalFlow.RuntimeFrame.V4TrivialFamily.source_one",
+      "line": 115
+    },
+    {
+      "name": "Solidity.Backend.InternalFlow.RuntimeFrame.V4TrivialFamily.source_succ",
+      "line": 73
+    },
+    {
+      "name": "Solidity.Backend.InternalFlow.RuntimeFrame.V4TrivialFamily.source_zero",
+      "line": 75
+    },
+    {
+      "name": "Solidity.Backend.InternalFlow.RuntimeFrame.V4TrivialFamily.successful",
+      "line": 117
+    },
+    {
+      "name": "Solidity.Backend.InternalFlow.RuntimeFrame.V4TrivialFamily.v3_empty",
+      "line": 143
+    },
+    {
+      "name": "Solidity.Backend.InternalFlow.RuntimeFrame.V4TrivialFamily.wrong_frame",
+      "line": 164
+    }
+  ]
+}

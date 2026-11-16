@@ -3,7 +3,7 @@ import tests.h62.item2.«audit-theories».CloserWitnesses
 
 /-!
 Six ordinary Payable input packets, plus a checked empty-input certificate for
-World.enter_static (scope question Q-STATIC-VALUE; NOT H69-classified here).
+World.enter_static (explicit Q-STATIC-VALUE option3 intentional H69 boundary).
 World fixtures have installed code and funds, not merely dangling handles.
 Positive controls separately require success of System.run, World.enter and
 World.callFrame; no broader physical-EVM/payment-settlement guarantee is claimed.
@@ -85,8 +85,9 @@ theorem payable_call_joint_witness :
   ⟨Unit, inferInstance, payableCatalog, payableWorld, (), Unit, ⟨payableSelf⟩,
     ContractWorld.Entry.unit .nil false, payableContext, rfl, by decide, rfl⟩
 
-/-- All inputs of the ordinary static-entry interface have no simultaneous
-    instance. Pending Q-STATIC-VALUE; this is not an ordinary joint witness. -/
+/-- All inputs of static entry have no simultaneous instance. Coordinator
+    Q-STATIC-VALUE accepts this intentional H69 boundary, with no operational
+    refusal coverage. This certificate is not a joint-satisfiability witness. -/
 theorem payable_static_inputs_impossible :
     ¬ ∃ (K : Type) (contracts : K → Contract) (_w : ContractWorld.World contracts)
       (k : K) (_self : ContractWorld.Address) (ctx : ContractWorld.Context)

@@ -14,11 +14,11 @@ theorem loaded_full_word : (transientSlotLoad ts callerCore account 0,
     Transient.callbackObserved account false (Transient.loadCode 0)
       (Transient.write target account 0 rawA)) =
       (some rawA, (.ok (Transient.write target account 0 rawA), some (.val rawA))) := by
-  first | simp only [caller_full_readback.1, Transient.callbackObserved_load, Transient.write, Transient.put_same] | decide | omega | rfl
+  simp only [caller_full_readback.1, Transient.callbackObserved_load, Transient.write, Transient.put_same]
 
 theorem executed_store : store (ps:=ps) (ts:=ts) frame 0 rawB caller.1.2 caller.2 target =
     some (completed, .ok (Transient.write target account 0 rawB)) := by
-  first | decide | rfl
+  rfl
 
 theorem typed_complement_and_journals : (completed.1.2.2.ex.transient.cells account).read (rootPath "temp") =
     some (.int 0xabcd (by decide)) ∧
@@ -28,19 +28,19 @@ theorem typed_complement_and_journals : (completed.1.2.2.ex.transient.cells acco
 
 theorem static_both_carriers : store (ps:=ps) (ts:=ts) {frame with static:=true} 0 rawB caller.1.2 caller.2 target =
     some (((.error (.revert []),caller.1.2),caller.2), .error .staticWrite target) := by
-  first | simp only [store_static _ _ _ _ _ _ rfl (by decide)] | decide | rfl
+  exact store_static (ps:=ps) (ts:=ts) {frame with static:=true} 0 rawB caller.1.2 caller.2 target rfl (by decide)
 
 theorem dirty_padding_required : transientSlotLoad ts callerCore account 0 ≠ some ⟨0x1234, by decide⟩ := by
-  first | decide | rfl
+  decide
 
 theorem other_target_preserved : (Transient.write target account 0 rawB).bank 2 99 = rawMax := by
-  first | decide | rfl
+  decide
 
 theorem reset_unowned_slot : transientSlotLoad ts (companionEndTx childCore) account 99 =
     some ((Transient.endTx target).bank account 99) := by
   exact reset_readback_zero ts childCore target actual_zero_defaults account 99
 theorem initially_mismatched_view : transientSlotLoad ts callerCore account 0 ≠ some (target.bank account 0) := by
-  first | decide | rfl
+  decide
 theorem actual_stored_load : (transientSlotLoad ts ⟨completed.1.2.2.ex,completed.2⟩ account 0,
     Transient.callbackObserved account false (Transient.loadCode 0)
       (Transient.write target account 0 rawB)) =

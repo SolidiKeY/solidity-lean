@@ -87,8 +87,7 @@ both typed aliases; retaining the initial Source state would fail this law. -/
 theorem aliases :
     NominalMemory.Controls.aliasRead state .here 1=some (⟨2^256-1,by decide⟩ : Roadmap.Word) ∧
     NominalMemory.Controls.aliasRead state (.there .here) 1=some (⟨2^256-1,by decide⟩ : Roadmap.Word) ∧
-    NominalMemory.Controls.aliasRead UnchangedControls.state .here 1=some 32767 := by
-  first | decide | rfl
+    NominalMemory.Controls.aliasRead UnchangedControls.state .here 1=some 32767 := by decide
 
 /-- info: (true, true, true) -/
 #guard_msgs in #eval (decide (NominalMemory.Controls.aliasRead state .here 1=some (⟨2^256-1,by decide⟩ : Roadmap.Word)),

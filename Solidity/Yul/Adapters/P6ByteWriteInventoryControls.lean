@@ -75,8 +75,7 @@ theorem missing_entry : ¬ CoversMixedHeap
 theorem stale_images : encodeMixedHeap placement entries (frameBytes reached)≠frameBytes reached := by
   intro same
   have atByte := congrFun same 320
-  have stale : encodeMixedHeap placement entries (frameBytes reached) 320=0x61 := by
-    first | decide | rfl
+  have stale : encodeMixedHeap placement entries (frameBytes reached) 320=0x61 := by decide
   have wrong : (0x61:UInt8)=255 := stale.symm.trans (atByte.trans P6ByteReferenceWrite.Controls.physical_bytes.1)
   exact (by decide : (0x61:UInt8)≠255) wrong
 end Solidity.Yul.Adapters.P6ByteWriteInventory.Controls

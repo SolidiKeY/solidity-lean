@@ -1,4 +1,5 @@
 import Solidity.Backend.StructuredFlow.ConditionalSourceCompiler
+import Solidity.Backend.StructuredFlow.ReturnTailCompiler
 import Solidity.Backend.StructuredFlow.MappedConditionControls
 import Solidity.Source.SemanticsExamples
 
@@ -79,22 +80,14 @@ theorem no_canary_store : codeStoresCell 5 emitted = false := by decide
 theorem observed (flag : Bool) :
     ∃ final, run emitted (machine flag) = .ok final 0 ∧
       final.mem 0 = .val (bword flag) ∧ final.mem 1 = .val (bword false) ∧
-      final.mem 2 = .val (bword false) ∧ final.mem 5 = w[99] ∧ final.stack = [w[77]] := by
-  rcases checked flag with ⟨o,final,sourceRun,targetRun,stack,_,repr⟩ |
-    ⟨sourceRun,_⟩ | ⟨assertion,_⟩ | ⟨payment,_⟩ | ⟨sourceRun,_⟩
-  · rw [typed_run flag] at sourceRun
-    cases sourceRun
-    refine ⟨final,targetRun,?_,?_,?_,?_,stack⟩
-    · cases flag <;> exact repr.vals (.there (.there .here))
-    · cases flag <;> exact repr.vals (.there .here)
-    · cases flag <;> exact repr.vals .here
-    · exact exec_mem no_canary_store targetRun
-  · rw [typed_run flag] at sourceRun
-    cases sourceRun
-  · cases assertion
-  · cases payment
-  · rw [typed_run flag] at sourceRun
-    cases sourceRun
+      final.mem 2 = .val (bword false) ∧ final.mem 5 = w[99] ∧ final.stack = [w[77]] :=
+  Exists.elim (ReturnTailCompiler.normal_of_ok ((typed_run flag) ▸ checked flag))
+    (fun final ⟨targetRun,stack,repr⟩ => by
+      refine ⟨final,targetRun,?_,?_,?_,?_,stack⟩
+      · cases flag <;> exact repr.vals (.there (.there .here))
+      · cases flag <;> exact repr.vals (.there .here)
+      · cases flag <;> exact repr.vals .here
+      · exact exec_mem no_canary_store targetRun)
 
 def badCore : Prog C TargetCtx TargetCtx := ConditionalStatement.code tci tci tci .here tca tci
 def badEmitted : List Instr := emit (C := C) 0 tci tci tci .here tca tci
@@ -108,18 +101,9 @@ theorem typed_bad : badCore.run (caller true) =
   ConditionalStatement.target_run (caller true) tci tci false tci .here tca tci rfl
 
 theorem observed_bad : ∃ final, run badEmitted (machine true) = .ok final 0 ∧
-    final.mem 0 = .val (bword false) := by
-  rcases checked_bad with ⟨o,final,sourceRun,targetRun,_,_,repr⟩ |
-    ⟨sourceRun,_⟩ | ⟨assertion,_⟩ | ⟨payment,_⟩ | ⟨sourceRun,_⟩
-  · rw [typed_bad] at sourceRun
-    cases sourceRun
-    exact ⟨final,targetRun,repr.vals (.there (.there .here))⟩
-  · rw [typed_bad] at sourceRun
-    cases sourceRun
-  · cases assertion
-  · cases payment
-  · rw [typed_bad] at sourceRun
-    cases sourceRun
+    final.mem 0 = .val (bword false) :=
+  Exists.elim (ReturnTailCompiler.normal_of_ok (typed_bad ▸ checked_bad))
+    (fun final ⟨targetRun,_,repr⟩ => ⟨final,targetRun,repr.vals (.there (.there .here))⟩)
 
 theorem stale_condition_refused : run badEmitted (machine true) ≠ run emitted (machine true) := by
   rcases observed true with ⟨good,goodRun,goodValue,_⟩

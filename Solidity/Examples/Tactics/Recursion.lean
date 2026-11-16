@@ -293,10 +293,15 @@ theorem addSum : ⊨ᶠ dl!{ x <= 1000 → y <= 1000 → [ z = add(x, y); ] z ==
   case pre => sol_symex; sol_close
   case post => sol_symex; sol_close
 
+/-- Shared automatic countdown proof for the plain and callback-free readings. -/
+private theorem countdownValid : ⊨ᶠ dl!{ [ countdown(); ] true } := by
+  rec_auto
+
 /-- **The countdown, automatically** (`rec_auto`, what the solc import's
 runner does): the box's own contract, `true`/`true`, at `nonpayable`, by
 induction over the frames; the same proof as `countdownNoPanic`. -/
-theorem countdownAuto : ⊨ᶠ dl!{ [ countdown(); ] true } := by rec_auto
+theorem countdownAuto : ⊨ᶠ dl!{ [ countdown(); ] true } := by
+  exact countdownValid
 
 /-- **The countdown ends**, from any `a`, the diamond: below `recDepth`
 frames its run ends normally, above them it is exhausted (the EVM's stack
@@ -312,8 +317,13 @@ theorem countdownEnds : ⊨ᶠ dl!{ ⟨ countdown(); ⟩ true } := by rec_auto
 `/// @custom:key` ones), each by induction over the frames; a call of the
 frame below by the induction's hypothesis. -/
 
+/-- Shared source-contract proof for the sum call and its stopping-strategy control. -/
+private theorem sumSevenValid : ⊨ᶠ dl!{ [ uint z = sum(3, 4); ] z == 7 } := by
+  rec_auto
+
 /-- `sum(3, 4)` is `7`: the call by `sum`'s contract. -/
-theorem sumSeven : ⊨ᶠ dl!{ [ uint z = sum(3, 4); ] z == 7 } := by rec_auto
+theorem sumSeven : ⊨ᶠ dl!{ [ uint z = sum(3, 4); ] z == 7 } := by
+  exact sumSevenValid
 
 /-- `sum`'s own obligation (`spec!{sum}`): its call by its contract. -/
 theorem sumSpec : ⊨ᶠ spec!{sum} := by rec_auto
@@ -330,7 +340,7 @@ theorem divmodSeven : ⊨ᶠ dl!{ [ uint q; uint r; (q, r) = divmod(7, 2); ] r <
 /-- The strategy stops at a recursive call: `sol_symex` says so. -/
 example : ⊨ᶠ dl!{ [ uint z = sum(3, 4); ] z == 7 } := by
   fail_if_success sol_symex
-  rec_auto
+  exact sumSevenValid
 
 /-! ## Under the callback reading
 
@@ -354,7 +364,7 @@ example : Fml.callsBack true dl!{ [ uint z = add(3, 4); bool e = even(z); ] true
 reading is the plain one. -/
 theorem countdownT : ValidT .noCallback dl!{ [ countdown(); ] true } := by
   rw [validT_noCallback_iff (by sol_no_callback)]
-  rec_auto
+  exact countdownValid
 
 /-- **A value call, then the countdown** (`tests/solc/Recursion.sol`'s
 `callThenCount`): the callee may call back, the countdown after it does

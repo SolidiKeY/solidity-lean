@@ -3,24 +3,25 @@ import Solidity.Backend.StorageOps.ProducerInterface
 
 /-! Typed endpoint bridge for ordinary Source recursive uint256-key mappings.
 
-Regression boundary: a checked Source path must reach the symbolic slot of the
-existing public graph path. This module supplies slot identity only, not Source
-value adequacy, selected-code provenance or a reached execution. It instantiates
-the existing graph/producer interface without a second state or path syntax.
+Checked Source declaration/path metadata determines the existing public graph
+slot endpoint. This supplies neither Source value adequacy, selected-code
+provenance nor a reached execution. It reuses the graph/producer interface;
+there is no second state or path syntax. NestedMappingLayout retains its imports.
+Solidity.lean includes this separate module in the default full-library build.
 
-The bridge is isolated: NestedMappingLayout retains its original imports.
-Lean 4.24.0, serial LEAN_NUM_THREADS=1 on the existing 12 GiB/no-swap VM:
-three import-only checks have median 0.54 s, peak VmHWM 1,050,020 KiB.
-The existing layout-only import has median 0.18 s (423,856 KiB peak): this
-separate producer dependency costs 0.36 s and is not a speed-neutral replacement.
-NestedMappingLayout itself is byte-identical; its checks remain 0.40 s median
-versus the pre-extraction 0.43 s sample. Its earlier import-expansion STOP is
-retained; NestedMappingLayout gains no bridge import. Solidity.lean registers
-this module in the default full-library build: isolation protects the layout's
-import closure, not default-build membership. The import-only comparison does
-not measure the full-build delta.
-Raw measurements are H44 external VM artifacts at
-/workspace/vy2-evidence/source-graph-production/, not repository files.
+H171 accepts the reviewed import cost only, superseding H164 Option A for that
+increment. Its recorded fresh bounded matched check used Lean 4.24.0, one thread,
+12 GiB/no swap and 300 seconds per file: median 0.38 s baseline versus 0.82 s
+candidate (+115.8%), peak VmHWM 458,176 versus 1,089,336 KiB. This is accepted
+cost, not speed neutrality or a full-build timing result. Ordinary validation
+and integration gates, existing budgets and every adequacy obligation remain.
+
+H189 separately releases the H125 Horizon timing STOP only. It supplies no
+successful Source, cache, per-file or full-build validation receipt and changes
+no proof/resource budget. No distinct VY2 Horizon failure is asserted here;
+any new failure requires its exact source head, command and bounded receipt.
+Historical measurement evidence stays private under H145; missing historical
+artifacts remain UNVERIFIABLE under H151 and receive no proof credit.
 -/
 namespace Solidity.Yul.Views
 

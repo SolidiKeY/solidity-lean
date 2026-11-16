@@ -1,0 +1,75 @@
+[
+  {
+    "project": "CompCert",
+    "url": "https://github.com/AbsInt/CompCert/blob/2685140bf72c959446981fb99b5e44a8975021bc/README.md",
+    "searched": "README.md",
+    "excerpts": [],
+    "check_seconds": null,
+    "note": "qualitative test duration is not proof check time; no comparable numeric check time established"
+  },
+  {
+    "project": "CakeML",
+    "url": "https://github.com/CakeML/cakeml/blob/b3e6ea34ca1aed91a57703a30549260ce6f6448e/README.md",
+    "searched": "README.md",
+    "excerpts": [],
+    "check_seconds": null,
+    "note": "qualitative test duration is not proof check time; no comparable numeric check time established"
+  },
+  {
+    "project": "EvmYul",
+    "url": "https://github.com/NethermindEth/EVMYulLean/blob/047f63070309f436b66c61e276ab3b6d1169265a/README.md",
+    "searched": "README.md",
+    "excerpts": [],
+    "check_seconds": null,
+    "note": "qualitative test duration is not proof check time; no comparable numeric check time established"
+  },
+  {
+    "project": "Clear",
+    "url": "https://github.com/NethermindEth/Clear/blob/6ef2e7eda01080e5d5fd7474354c1a71adab5071/README.md",
+    "searched": "README.md",
+    "excerpts": [],
+    "check_seconds": null,
+    "note": "qualitative test duration is not proof check time; no comparable numeric check time established"
+  },
+  {
+    "project": "KEVM",
+    "url": "https://github.com/runtimeverification/evm-semantics/blob/fbb2edbb8e84bb05b6ba7a255ce1f44f76051ad1/README.md",
+    "searched": "README.md",
+    "excerpts": [],
+    "check_seconds": null,
+    "note": "qualitative test duration is not proof check time; no comparable numeric check time established"
+  },
+  {
+    "project": "Isabelle-Solidity",
+    "url": "https://github.com/isabelle-prover/mirror-afp-devel/blob/f81741033ad5e782a0e0aba461b292ea1c860b3d/README.md",
+    "searched": "README.md",
+    "excerpts": [],
+    "check_seconds": null,
+    "note": "qualitative test duration is not proof check time; no comparable numeric check time established"
+  },
+  {
+    "project": "SolKey",
+    "url": "https://github.com/SolidiKeY/solkey/blob/5c448df67f6fab14c5f9c1c5d0c63249b5fe78b8/README.md",
+    "searched": "README.md",
+    "excerpts": [
+      {
+        "line": 59,
+        "text": "3. Test your installation with `./gradlew test`. Be aware that this will usually take multiple hours to complete."
+      },
+      {
+        "line": 60,
+        "text": "   With `./gradlew testFast`, you can run a more lightweight test suite that should complete in a few minutes."
+      }
+    ],
+    "check_seconds": null,
+    "note": "qualitative test duration is not proof check time; no comparable numeric check time established"
+  },
+  {
+    "project": "solc",
+    "url": "https://github.com/ethereum/solidity/blob/403c39f86c3c0c9d4779b97892a3661016b45455/README.md",
+    "searched": "README.md",
+    "excerpts": [],
+    "check_seconds": null,
+    "note": "qualitative test duration is not proof check time; no comparable numeric check time established"
+  }
+]

@@ -1,0 +1,183 @@
+import Solidity.Frontend.Import
+open Solidity Solidity.Frontend
+
+solc_import "../../tests/solc/CallExceptions.ast.json" hash 0x13163372312c84bc as Old0_0.CallExceptions testing
+solc_import "h68/CallExceptions.ast.json" hash 0xbce4593be5a370f8 as New0_0.CallExceptions testing
+#eval show IO Unit from do
+  unless toString (repr Old0_0.CallExceptions.report) == toString (repr New0_0.CallExceptions.report) do throw (IO.userError "CallExceptions.ast.json/CallExceptions: rows differ")
+  IO.println s!"CallExceptions.ast.json/CallExceptions: {Old0_0.CallExceptions.report.length} identical rows"
+
+solc_import "../../tests/solc/DeclarationsLowering.ast.json" hash 0xf1c9786256bb1433 as Old9_0.DeclarationsLowering testing
+solc_import "h68/DeclarationsLowering.ast.json" hash 0xd73315a11be846f3 as New9_0.DeclarationsLowering testing
+#eval show IO Unit from do
+  unless toString (repr Old9_0.DeclarationsLowering.report) == toString (repr New9_0.DeclarationsLowering.report) do throw (IO.userError "DeclarationsLowering.ast.json/DeclarationsLowering: rows differ")
+  IO.println s!"DeclarationsLowering.ast.json/DeclarationsLowering: {Old9_0.DeclarationsLowering.report.length} identical rows"
+
+solc_import "../../tests/solc/DeclarationsLowering.ast.json" hash 0xf1c9786256bb1433 as Old9_4.ModifierAdmission testing
+solc_import "h68/DeclarationsLowering.ast.json" hash 0xd73315a11be846f3 as New9_4.ModifierAdmission testing
+#eval show IO Unit from do
+  unless toString (repr Old9_4.ModifierAdmission.report) == toString (repr New9_4.ModifierAdmission.report) do throw (IO.userError "DeclarationsLowering.ast.json/ModifierAdmission: rows differ")
+  IO.println s!"DeclarationsLowering.ast.json/ModifierAdmission: {Old9_4.ModifierAdmission.report.length} identical rows"
+
+solc_import "../../tests/solc/DeclarationsLowering.ast.json" hash 0xf1c9786256bb1433 as Old9_8.IndirectForwardImmutable testing
+solc_import "h68/DeclarationsLowering.ast.json" hash 0xd73315a11be846f3 as New9_8.IndirectForwardImmutable testing
+#eval show IO Unit from do
+  unless toString (repr Old9_8.IndirectForwardImmutable.report) == toString (repr New9_8.IndirectForwardImmutable.report) do throw (IO.userError "DeclarationsLowering.ast.json/IndirectForwardImmutable: rows differ")
+  IO.println s!"DeclarationsLowering.ast.json/IndirectForwardImmutable: {Old9_8.IndirectForwardImmutable.report.length} identical rows"
+
+solc_import "../../tests/solc/DeclarationsLowering.ast.json" hash 0xf1c9786256bb1433 as Old9_12.EffectfulForwardDerived testing
+solc_import "h68/DeclarationsLowering.ast.json" hash 0xd73315a11be846f3 as New9_12.EffectfulForwardDerived testing
+#eval show IO Unit from do
+  unless toString (repr Old9_12.EffectfulForwardDerived.report) == toString (repr New9_12.EffectfulForwardDerived.report) do throw (IO.userError "DeclarationsLowering.ast.json/EffectfulForwardDerived: rows differ")
+  IO.println s!"DeclarationsLowering.ast.json/EffectfulForwardDerived: {Old9_12.EffectfulForwardDerived.report.length} identical rows"
+
+solc_import "../../tests/solc/DeclarationsLowering.ast.json" hash 0xf1c9786256bb1433 as Old9_16.ImplicitUnsupportedInitialization testing
+solc_import "h68/DeclarationsLowering.ast.json" hash 0xd73315a11be846f3 as New9_16.ImplicitUnsupportedInitialization testing
+#eval show IO Unit from do
+  unless toString (repr Old9_16.ImplicitUnsupportedInitialization.report) == toString (repr New9_16.ImplicitUnsupportedInitialization.report) do throw (IO.userError "DeclarationsLowering.ast.json/ImplicitUnsupportedInitialization: rows differ")
+  IO.println s!"DeclarationsLowering.ast.json/ImplicitUnsupportedInitialization: {Old9_16.ImplicitUnsupportedInitialization.report.length} identical rows"
+
+solc_import "../../tests/solc/DeclarationsLoweringIR.ast.json" hash 0x93167cd6ec08cde8 as Old10_3.ExcludedImmutable testing
+solc_import "h68/DeclarationsLoweringIR.ast.json" hash 0x777e43854b507af0 as New10_3.ExcludedImmutable testing
+#eval show IO Unit from do
+  unless toString (repr Old10_3.ExcludedImmutable.report) == toString (repr New10_3.ExcludedImmutable.report) do throw (IO.userError "DeclarationsLoweringIR.ast.json/ExcludedImmutable: rows differ")
+  IO.println s!"DeclarationsLoweringIR.ast.json/ExcludedImmutable: {Old10_3.ExcludedImmutable.report.length} identical rows"
+
+solc_import "../../tests/solc/DeclarationsLoweringIR.ast.json" hash 0x93167cd6ec08cde8 as Old10_7.ForwardDerived testing
+solc_import "h68/DeclarationsLoweringIR.ast.json" hash 0x777e43854b507af0 as New10_7.ForwardDerived testing
+#eval show IO Unit from do
+  unless toString (repr Old10_7.ForwardDerived.report) == toString (repr New10_7.ForwardDerived.report) do throw (IO.userError "DeclarationsLoweringIR.ast.json/ForwardDerived: rows differ")
+  IO.println s!"DeclarationsLoweringIR.ast.json/ForwardDerived: {Old10_7.ForwardDerived.report.length} identical rows"
+
+solc_import "../../tests/solc/DeclarationsLoweringIR.ast.json" hash 0x93167cd6ec08cde8 as Old10_11.ImplicitPhaseDerived testing
+solc_import "h68/DeclarationsLoweringIR.ast.json" hash 0x777e43854b507af0 as New10_11.ImplicitPhaseDerived testing
+#eval show IO Unit from do
+  unless toString (repr Old10_11.ImplicitPhaseDerived.report) == toString (repr New10_11.ImplicitPhaseDerived.report) do throw (IO.userError "DeclarationsLoweringIR.ast.json/ImplicitPhaseDerived: rows differ")
+  IO.println s!"DeclarationsLoweringIR.ast.json/ImplicitPhaseDerived: {Old10_11.ImplicitPhaseDerived.report.length} identical rows"
+
+solc_import "../../tests/solc/EntryPointsLeft.ast.json" hash 0xd3109a3bea2a97ae as Old11_1.ExternalOverloadCollisionRefusal testing
+solc_import "h68/EntryPointsLeft.ast.json" hash 0x94251ac28b23bc5c as New11_1.ExternalOverloadCollisionRefusal testing
+#eval show IO Unit from do
+  unless toString (repr Old11_1.ExternalOverloadCollisionRefusal.report) == toString (repr New11_1.ExternalOverloadCollisionRefusal.report) do throw (IO.userError "EntryPointsLeft.ast.json/ExternalOverloadCollisionRefusal: rows differ")
+  IO.println s!"EntryPointsLeft.ast.json/ExternalOverloadCollisionRefusal: {Old11_1.ExternalOverloadCollisionRefusal.report.length} identical rows"
+
+solc_import "../../tests/solc/EntryPointsLeft.ast.json" hash 0xd3109a3bea2a97ae as Old11_5.InheritedFallback testing
+solc_import "h68/EntryPointsLeft.ast.json" hash 0x94251ac28b23bc5c as New11_5.InheritedFallback testing
+#eval show IO Unit from do
+  unless toString (repr Old11_5.InheritedFallback.report) == toString (repr New11_5.InheritedFallback.report) do throw (IO.userError "EntryPointsLeft.ast.json/InheritedFallback: rows differ")
+  IO.println s!"EntryPointsLeft.ast.json/InheritedFallback: {Old11_5.InheritedFallback.report.length} identical rows"
+
+solc_import "../../tests/solc/EntryPointsLeft.ast.json" hash 0xd3109a3bea2a97ae as Old11_9.InheritedRollback testing
+solc_import "h68/EntryPointsLeft.ast.json" hash 0x94251ac28b23bc5c as New11_9.InheritedRollback testing
+#eval show IO Unit from do
+  unless toString (repr Old11_9.InheritedRollback.report) == toString (repr New11_9.InheritedRollback.report) do throw (IO.userError "EntryPointsLeft.ast.json/InheritedRollback: rows differ")
+  IO.println s!"EntryPointsLeft.ast.json/InheritedRollback: {Old11_9.InheritedRollback.report.length} identical rows"
+
+solc_import "../../tests/solc/EntryPointsLeft.ast.json" hash 0xd3109a3bea2a97ae as Old11_13.NominalKeyDispatchRefusal testing
+solc_import "h68/EntryPointsLeft.ast.json" hash 0x94251ac28b23bc5c as New11_13.NominalKeyDispatchRefusal testing
+#eval show IO Unit from do
+  unless toString (repr Old11_13.NominalKeyDispatchRefusal.report) == toString (repr New11_13.NominalKeyDispatchRefusal.report) do throw (IO.userError "EntryPointsLeft.ast.json/NominalKeyDispatchRefusal: rows differ")
+  IO.println s!"EntryPointsLeft.ast.json/NominalKeyDispatchRefusal: {Old11_13.NominalKeyDispatchRefusal.report.length} identical rows"
+
+solc_import "../../tests/solc/EntryPointsLeft.ast.json" hash 0xd3109a3bea2a97ae as Old11_17.ReceivePriority testing
+solc_import "h68/EntryPointsLeft.ast.json" hash 0x94251ac28b23bc5c as New11_17.ReceivePriority testing
+#eval show IO Unit from do
+  unless toString (repr Old11_17.ReceivePriority.report) == toString (repr New11_17.ReceivePriority.report) do throw (IO.userError "EntryPointsLeft.ast.json/ReceivePriority: rows differ")
+  IO.println s!"EntryPointsLeft.ast.json/ReceivePriority: {Old11_17.ReceivePriority.report.length} identical rows"
+
+solc_import "../../tests/solc/EntryPointsLeft.viaIR.ast.json" hash 0xd282805b1d3ea697 as Old12_0.ByteFallbackRefusal testing
+solc_import "h68/EntryPointsLeft.viaIR.ast.json" hash 0xefc28c2e20cfd5c9 as New12_0.ByteFallbackRefusal testing
+#eval show IO Unit from do
+  unless toString (repr Old12_0.ByteFallbackRefusal.report) == toString (repr New12_0.ByteFallbackRefusal.report) do throw (IO.userError "EntryPointsLeft.viaIR.ast.json/ByteFallbackRefusal: rows differ")
+  IO.println s!"EntryPointsLeft.viaIR.ast.json/ByteFallbackRefusal: {Old12_0.ByteFallbackRefusal.report.length} identical rows"
+
+solc_import "../../tests/solc/EntryPointsLeft.viaIR.ast.json" hash 0xd282805b1d3ea697 as Old12_4.HelperReceiverRefusal testing
+solc_import "h68/EntryPointsLeft.viaIR.ast.json" hash 0xefc28c2e20cfd5c9 as New12_4.HelperReceiverRefusal testing
+#eval show IO Unit from do
+  unless toString (repr Old12_4.HelperReceiverRefusal.report) == toString (repr New12_4.HelperReceiverRefusal.report) do throw (IO.userError "EntryPointsLeft.viaIR.ast.json/HelperReceiverRefusal: rows differ")
+  IO.println s!"EntryPointsLeft.viaIR.ast.json/HelperReceiverRefusal: {Old12_4.HelperReceiverRefusal.report.length} identical rows"
+
+solc_import "../../tests/solc/EntryPointsLeft.viaIR.ast.json" hash 0xd282805b1d3ea697 as Old12_8.InheritedReceiver testing
+solc_import "h68/EntryPointsLeft.viaIR.ast.json" hash 0xefc28c2e20cfd5c9 as New12_8.InheritedReceiver testing
+#eval show IO Unit from do
+  unless toString (repr Old12_8.InheritedReceiver.report) == toString (repr New12_8.InheritedReceiver.report) do throw (IO.userError "EntryPointsLeft.viaIR.ast.json/InheritedReceiver: rows differ")
+  IO.println s!"EntryPointsLeft.viaIR.ast.json/InheritedReceiver: {Old12_8.InheritedReceiver.report.length} identical rows"
+
+solc_import "../../tests/solc/EntryPointsLeft.viaIR.ast.json" hash 0xd282805b1d3ea697 as Old12_12.NominalGetters testing
+solc_import "h68/EntryPointsLeft.viaIR.ast.json" hash 0xefc28c2e20cfd5c9 as New12_12.NominalGetters testing
+#eval show IO Unit from do
+  unless toString (repr Old12_12.NominalGetters.report) == toString (repr New12_12.NominalGetters.report) do throw (IO.userError "EntryPointsLeft.viaIR.ast.json/NominalGetters: rows differ")
+  IO.println s!"EntryPointsLeft.viaIR.ast.json/NominalGetters: {Old12_12.NominalGetters.report.length} identical rows"
+
+solc_import "../../tests/solc/EntryPointsLeft.viaIR.ast.json" hash 0xd282805b1d3ea697 as Old12_16.ReceiveOverride testing
+solc_import "h68/EntryPointsLeft.viaIR.ast.json" hash 0xefc28c2e20cfd5c9 as New12_16.ReceiveOverride testing
+#eval show IO Unit from do
+  unless toString (repr Old12_16.ReceiveOverride.report) == toString (repr New12_16.ReceiveOverride.report) do throw (IO.userError "EntryPointsLeft.viaIR.ast.json/ReceiveOverride: rows differ")
+  IO.println s!"EntryPointsLeft.viaIR.ast.json/ReceiveOverride: {Old12_16.ReceiveOverride.report.length} identical rows"
+
+solc_import "../../tests/solc/EntryPointsLeft.viaIR.ast.json" hash 0xd282805b1d3ea697 as Old12_20.ContractKeyGetter testing
+solc_import "h68/EntryPointsLeft.viaIR.ast.json" hash 0xefc28c2e20cfd5c9 as New12_20.ContractKeyGetter testing
+#eval show IO Unit from do
+  unless toString (repr Old12_20.ContractKeyGetter.report) == toString (repr New12_20.ContractKeyGetter.report) do throw (IO.userError "EntryPointsLeft.viaIR.ast.json/ContractKeyGetter: rows differ")
+  IO.println s!"EntryPointsLeft.viaIR.ast.json/ContractKeyGetter: {Old12_20.ContractKeyGetter.report.length} identical rows"
+
+solc_import "../../tests/solc/EnumAbiRanges.ast.json" hash 0xf6bd45346389f6b1 as Old16_1.EnumAbiCtorRanges testing
+solc_import "h68/EnumAbiRanges.ast.json" hash 0x1fcddd13a2bf758a as New16_1.EnumAbiCtorRanges testing
+#eval show IO Unit from do
+  unless toString (repr Old16_1.EnumAbiCtorRanges.report) == toString (repr New16_1.EnumAbiCtorRanges.report) do throw (IO.userError "EnumAbiRanges.ast.json/EnumAbiCtorRanges: rows differ")
+  IO.println s!"EnumAbiRanges.ast.json/EnumAbiCtorRanges: {Old16_1.EnumAbiCtorRanges.report.length} identical rows"
+
+solc_import "../../tests/solc/Group07Mixed.ast.json" hash 0xfea5f10915fc5cd7 as Old20_0.Group07Mixed testing
+solc_import "h68/Group07Mixed.ast.json" hash 0xc4fc214a1cdcace0 as New20_0.Group07Mixed testing
+#eval show IO Unit from do
+  unless toString (repr Old20_0.Group07Mixed.report) == toString (repr New20_0.Group07Mixed.report) do throw (IO.userError "Group07Mixed.ast.json/Group07Mixed: rows differ")
+  IO.println s!"Group07Mixed.ast.json/Group07Mixed: {Old20_0.Group07Mixed.report.length} identical rows"
+
+solc_import "../../tests/solc/PublicGetters.ast.json" hash 0x968ad03a36798cc3 as Old26_0.PublicGetters testing
+solc_import "h68/PublicGetters.ast.json" hash 0x6a499756be427a70 as New26_0.PublicGetters testing
+#eval show IO Unit from do
+  unless toString (repr Old26_0.PublicGetters.report) == toString (repr New26_0.PublicGetters.report) do throw (IO.userError "PublicGetters.ast.json/PublicGetters: rows differ")
+  IO.println s!"PublicGetters.ast.json/PublicGetters: {Old26_0.PublicGetters.report.length} identical rows"
+
+solc_import "../../tests/solc/PublicGetters.ast.json" hash 0x968ad03a36798cc3 as Old26_4.GetterFunctionSlot testing
+solc_import "h68/PublicGetters.ast.json" hash 0x6a499756be427a70 as New26_4.GetterFunctionSlot testing
+#eval show IO Unit from do
+  unless toString (repr Old26_4.GetterFunctionSlot.report) == toString (repr New26_4.GetterFunctionSlot.report) do throw (IO.userError "PublicGetters.ast.json/GetterFunctionSlot: rows differ")
+  IO.println s!"PublicGetters.ast.json/GetterFunctionSlot: {Old26_4.GetterFunctionSlot.report.length} identical rows"
+
+solc_import "../../tests/solc/RemainingDeclarations.ast.json" hash 0x5d429fa78f336311 as Old29_0.StaticCodeConstants testing
+solc_import "h68/RemainingDeclarations.ast.json" hash 0xb5d8d6dbd818c83d as New29_0.StaticCodeConstants testing
+#eval show IO Unit from do
+  unless toString (repr Old29_0.StaticCodeConstants.report) == toString (repr New29_0.StaticCodeConstants.report) do throw (IO.userError "RemainingDeclarations.ast.json/StaticCodeConstants: rows differ")
+  IO.println s!"RemainingDeclarations.ast.json/StaticCodeConstants: {Old29_0.StaticCodeConstants.report.length} identical rows"
+
+solc_import "../../tests/solc/RemainingDeclarations.ast.json" hash 0x5d429fa78f336311 as Old29_4.EnumIdentity testing
+solc_import "h68/RemainingDeclarations.ast.json" hash 0xb5d8d6dbd818c83d as New29_4.EnumIdentity testing
+#eval show IO Unit from do
+  unless toString (repr Old29_4.EnumIdentity.report) == toString (repr New29_4.EnumIdentity.report) do throw (IO.userError "RemainingDeclarations.ast.json/EnumIdentity: rows differ")
+  IO.println s!"RemainingDeclarations.ast.json/EnumIdentity: {Old29_4.EnumIdentity.report.length} identical rows"
+
+solc_import "../../tests/solc/RemainingDeclarationsIR.ast.json" hash 0xf689acee6521ec52 as Old30_1.EnumStructFields testing
+solc_import "h68/RemainingDeclarationsIR.ast.json" hash 0x185cb9050a0faa74 as New30_1.EnumStructFields testing
+#eval show IO Unit from do
+  unless toString (repr Old30_1.EnumStructFields.report) == toString (repr New30_1.EnumStructFields.report) do throw (IO.userError "RemainingDeclarationsIR.ast.json/EnumStructFields: rows differ")
+  IO.println s!"RemainingDeclarationsIR.ast.json/EnumStructFields: {Old30_1.EnumStructFields.report.length} identical rows"
+
+solc_import "../../tests/solc/RemainingDeclarationsIR.ast.json" hash 0xf689acee6521ec52 as Old30_5.EnumDecodeRefusal testing
+solc_import "h68/RemainingDeclarationsIR.ast.json" hash 0x185cb9050a0faa74 as New30_5.EnumDecodeRefusal testing
+#eval show IO Unit from do
+  unless toString (repr Old30_5.EnumDecodeRefusal.report) == toString (repr New30_5.EnumDecodeRefusal.report) do throw (IO.userError "RemainingDeclarationsIR.ast.json/EnumDecodeRefusal: rows differ")
+  IO.println s!"RemainingDeclarationsIR.ast.json/EnumDecodeRefusal: {Old30_5.EnumDecodeRefusal.report.length} identical rows"
+
+solc_import "../../tests/solc/SignedNumeric.ast.json" hash 0x48bd22f40f0bcb26 as Old33_0.SignedNumeric testing
+solc_import "h68/SignedNumeric.ast.json" hash 0x5edd80c07dc467a3 as New33_0.SignedNumeric testing
+#eval show IO Unit from do
+  unless toString (repr Old33_0.SignedNumeric.report) == toString (repr New33_0.SignedNumeric.report) do throw (IO.userError "SignedNumeric.ast.json/SignedNumeric: rows differ")
+  IO.println s!"SignedNumeric.ast.json/SignedNumeric: {Old33_0.SignedNumeric.report.length} identical rows"
+
+solc_import "../../tests/solc/TransientSource.ast.json" hash 0xaddcbeb9d907ef4d as Old45_0.TransientSource testing
+solc_import "h68/TransientSource.ast.json" hash 0x9c06fbbddde3efe7 as New45_0.TransientSource testing
+#eval show IO Unit from do
+  unless toString (repr Old45_0.TransientSource.report) == toString (repr New45_0.TransientSource.report) do throw (IO.userError "TransientSource.ast.json/TransientSource: rows differ")
+  IO.println s!"TransientSource.ast.json/TransientSource: {Old45_0.TransientSource.report.length} identical rows"
+

@@ -1,0 +1,85 @@
+/-! Guards replacing per-row payability with a global gate, retrying a later
+collision after a rejecting match, and incompatible route compiler witnesses.
+Instantiate the existing payable routing interface. Source payability authority,
+fallback-body execution, native/physical loading and gas remain separate. -/
+open Solidity Solidity.Evm Solidity.Backend.AbiEntry
+open Solidity.Backend.AbiEntry.Interface
+
+def payableContract : Contract := {vars := []}
+def payableTable : PayableRouteTable := [(wmod 5,wmod 22,false),(wmod 5,wmod 77,true),(wmod 6,wmod 33,true)]
+def payableFallback : Fin W := wmod 99
+def payableCompilation := PayableRoutes.compiled payableContract 3 payableTable payableFallback
+
+def payableMachine (selector value : Fin W) : Machine :=
+  {Machine.init with
+    mem := fun address => if address=3 then .val selector else .val (wmod 71)
+    stack := [.val (wmod 17),.val (wmod 29)]
+    callvalue := value}
+def payableWritten (selector value label : Fin W) : Machine :=
+  {payableMachine selector value with mem := upd (payableMachine selector value).mem 4 (.val label)}
+
+theorem payable_found : Compiler.compile 3 (Frag.init RouteCtx)
+    (PayableRoutes.route payableContract payableTable payableFallback)=some payableCompilation :=
+  PayableRoutes.selected payableContract 3 payableTable payableFallback
+
+theorem payable_actual (selector value : Fin W) : run payableCompilation.code (payableMachine selector value)=
+    payableRouteOutcome 3 payableTable payableFallback selector (payableMachine selector value) :=
+  PayableRoutes.executed payableContract 3 payableTable payableFallback payableCompilation payable_found
+    (payableMachine selector value) selector rfl
+
+theorem payable_first_row : payableRouteResult payableTable payableFallback (wmod 5)=(wmod 22,false) := by decide
+
+theorem payable_zero_first_match : run payableCompilation.code (payableMachine (wmod 5) (wmod 0))=
+    .ok (payableWritten (wmod 5) (wmod 0) (wmod 22)) 0 := by
+  have reached : run payableCompilation.code (payableMachine (wmod 5) (wmod 0))=
+      payableRouteOutcome 3 payableTable payableFallback (wmod 5) (payableMachine (wmod 5) (wmod 0)) :=
+    payable_actual (wmod 5) (wmod 0)
+  rw [payableRouteOutcome,payable_first_row] at reached
+  exact reached
+
+theorem payable_nonzero_first_refused (value : Fin W) (nonzero : value.val≠0) :
+    run payableCompilation.code (payableMachine (wmod 5) value)=.revert := by
+  have reached : run payableCompilation.code (payableMachine (wmod 5) value)=
+      payableRouteOutcome 3 payableTable payableFallback (wmod 5) (payableMachine (wmod 5) value) :=
+    payable_actual (wmod 5) value
+  rw [payableRouteOutcome,payable_first_row] at reached
+  have observed : (payableMachine (wmod 5) value).callvalue.val≠0 := nonzero
+  simpa only [Bool.false_or,decide_eq_false observed,Bool.false_eq_true,if_false] using reached
+
+theorem payable_later_accepts_value (value : Fin W) : run payableCompilation.code (payableMachine (wmod 6) value)=
+    .ok (payableWritten (wmod 6) value (wmod 33)) 0 := by
+  have reached : run payableCompilation.code (payableMachine (wmod 6) value)=
+      payableRouteOutcome 3 payableTable payableFallback (wmod 6) (payableMachine (wmod 6) value) :=
+    payable_actual (wmod 6) value
+  rw [payableRouteOutcome,show payableRouteResult payableTable payableFallback (wmod 6)=(wmod 33,true) from by decide] at reached
+  exact reached
+
+theorem payable_no_match_label (value : Fin W) : run payableCompilation.code (payableMachine (wmod 7) value)=
+    .ok (payableWritten (wmod 7) value payableFallback) 0 := by
+  have reached : run payableCompilation.code (payableMachine (wmod 7) value)=
+      payableRouteOutcome 3 payableTable payableFallback (wmod 7) (payableMachine (wmod 7) value) :=
+    payable_actual (wmod 7) value
+  rw [payableRouteOutcome,show payableRouteResult payableTable payableFallback (wmod 7)=(payableFallback,true) from by decide] at reached
+  exact reached
+
+theorem payable_no_collision_retry (value : Fin W) (nonzero : value.val≠0) :
+    run payableCompilation.code (payableMachine (wmod 5) value)≠.ok (payableWritten (wmod 5) value (wmod 77)) 0 := by
+  rw [payable_nonzero_first_refused value nonzero]
+  intro impossible
+  cases impossible
+
+theorem payable_preserves_caller (selector value label : Fin W) :
+    (payableWritten selector value label).mem 3=.val selector ∧
+    (payableWritten selector value label).mem 5=.val (wmod 71) ∧
+    (payableWritten selector value label).stack=[.val (wmod 17),.val (wmod 29)] ∧
+    (payableWritten selector value label).callvalue=value := ⟨rfl,rfl,rfl,rfl⟩
+
+#print axioms payable_found
+#print axioms payable_actual
+#print axioms payable_first_row
+#print axioms payable_zero_first_match
+#print axioms payable_nonzero_first_refused
+#print axioms payable_later_accepts_value
+#print axioms payable_no_match_label
+#print axioms payable_no_collision_retry
+#print axioms payable_preserves_caller

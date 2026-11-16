@@ -74,7 +74,7 @@ def main():
         import_lines = ["import " + (generate.HERE / "imports" / n).read_bytes().decode("utf-8").strip() for n in sorted(inventory["imports"])]
         body_parts = [(generate.HERE / "body" / n).read_bytes().decode("utf-8") for n in sorted(inventory["body"])]
         expected = "\n".join(import_lines) + "\n\n" + "\n".join(body_parts)
-        observed = subprocess.run(["git", "show", "c6f550e281a7e5affa9a99bc2cdaed556dec00e4:" + generate.NAME], cwd=generate.ROOT, capture_output=True, check=True).stdout.decode("utf-8")
+        observed = subprocess.run(["git", "--no-replace-objects", "show", "c6f550e281a7e5affa9a99bc2cdaed556dec00e4:" + generate.NAME], cwd=generate.ROOT, capture_output=True, check=True).stdout.decode("utf-8")
     else:
         observed = args.target.read_bytes().decode("utf-8")
     imports, docs = parse(expected)

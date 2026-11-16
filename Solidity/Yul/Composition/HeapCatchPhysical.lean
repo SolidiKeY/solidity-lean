@@ -206,12 +206,8 @@ theorem no_clean_resume (action : Source.EM originEnv ctx.tys Unit) :
     LocalState.runClean action completed.state = none := LocalState.runClean_refuses action _ raw_not_clean
 
 theorem completed_unique (fuel : Nat) (result : LocalBlockOutcome ctx ⟨false,false⟩)
-    (done : runLocalBlock ctx (AttemptPhysical.continuationCode [0xde,0xad]) (AttemptPhysical.continuationPolicy [0xde,0xad]) fuel (allocated [0xde,0xad]).2 = some result) : result=completed := by
-  rcases Nat.le_total fuel 32 with lower | upper
-  · have stable := runLocalBlock_stable ctx _ _ _ lower done
-    exact Option.some.inj (stable.symm.trans (Option.some_get completes).symm)
-  · have stable := runLocalBlock_stable ctx _ _ _ upper (Option.some_get completes).symm
-    exact Option.some.inj (done.symm.trans stable)
+    (done : runLocalBlock ctx (AttemptPhysical.continuationCode [0xde,0xad]) (AttemptPhysical.continuationPolicy [0xde,0xad]) fuel (allocated [0xde,0xad]).2 = some result) : result=completed :=
+  LocalBlockLogic.completed_unique _ _ _ done (Option.some_get completes).symm
 
 /-- Actual allocRef rejects non-memory type AFTER allocating; no fake rollback. -/
 def badAllocation := AttemptPhysical.companion

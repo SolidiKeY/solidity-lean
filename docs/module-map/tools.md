@@ -28,3 +28,12 @@ Commands for people; they prove nothing beyond the certificates they check.
 | `Automation/H28/Prove.lean` | Bounded automation-benchmark checkpoint; typed scope and retained obligations are stated in the module. |
 | `Tools/VerifierMetadata.lean` | Additive kernel facts tying each reported `postFails` index to the exact typed false postcondition clause and final run state; no source span, original-obligation or candidate association is inferred. |
 | `Tools/ExecutableGoalBindingV2.lean` | Exact executable-goal failure at a proved same candidate; retains distinct source-values equality obligations and makes no importer transport or source-authentication claim. |
+| `Solidity/Docs/ProseCalibrated/Classification.lean` | Calibrated prose classification, exclusion, locality and lexical padding laws over the frozen model. |
+
+| `**/*Controls.lean` | Every `*Controls` module is in `Solidity`. `scripts/coord-tools/controls-classify.py` lists those no library module imports (candidates for a future controls library, not moved). |
+
+| `Tools/FastMode/Engine.lean` | Compiled JSON verdicts over exact frontend obligations, proved rule/closer execution, native open-sequent diagnostics and `#fast_export` executable definitions; no result theorem. |
+| `Tools/FastMode/Meta.lean` | Compiled extended-reading tactics over exact frontend targets; detached candidate audit/discard, native open-goal diagnostics and per-function reading discovery; no final result theorem. |
+| `Automation/SummaryCache.lean` | Proof-carrying verdict cache with exact semantic-input keys. |
+| `Automation/SummaryContracts.lean` | Reusable typed function specifications and callee certificates. |
+| `Automation/SummaryTests.lean` | Regression tests for cache collision, invalidation, retry and typed summary reuse. |

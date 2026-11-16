@@ -1,0 +1,17 @@
+{
+ "Solidity/Lowering/Readonly/LibraryFrameEffects.lean:Solidity.Lowering.Readonly.SourceHistory.libraryFrame": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/Readonly/LibraryFrameEffects.lean:Solidity.Lowering.Readonly.SourceHistory.libraryFrame_effect": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/Readonly/LibraryFrameEffects.lean:Solidity.Lowering.Readonly.SourceHistory.libraryFrame_then": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ]
+}

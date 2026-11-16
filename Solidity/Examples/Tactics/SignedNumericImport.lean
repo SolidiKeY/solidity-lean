@@ -3,8 +3,8 @@ import Solidity.Semantics.NumericLowering
 
 /-! Source controls for signed shifts, powers, contextual widths and collision-free
 local identities. Large exponent checks below are runtime observations. -/
-solc_import "../../../tests/solc/SignedNumeric.ast.json" hash 0x48bd22f40f0bcb26 as Imported.SignedNumeric testing
-solc_import "../../../tests/solc/SignedNumericIR.ast.json" hash 0x8ade83b0b9f5e2d3 as Imported.IR.SignedNumeric testing
+solc_import "../../../tests/solc/SignedNumeric.ast.json" hash 0x5edd80c07dc467a3 as Imported.SignedNumeric testing
+solc_import "../../../tests/solc/SignedNumericIR.ast.json" hash 0x3417bc8000b62192 as Imported.IR.SignedNumeric testing
 
 namespace Solidity.Examples.Tactics.SignedNumericImport
 open Lean Solidity.Frontend

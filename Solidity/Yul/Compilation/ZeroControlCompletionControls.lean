@@ -1,3 +1,4 @@
+import Solidity.Yul.Compilation.Artifact
 import Solidity.Yul.Compilation.ZeroControlCompletion
 import Solidity.Yul.Compilation.ZeroControlCompilationControls
 /-! Exact reflection over actual zero/control compiler outputs. Controls
@@ -12,7 +13,11 @@ theorem success_iff (locals out : Vector Scalar.Word 1) (m : Evm.Machine) (calle
  (∃ horizon, evalStmt horizon .nil True.intro source artifact.compiled.profile (sourceLocals locals) =
  some ⟨sourceLocals out,.normal⟩) ↔
  Evm.run artifact.code {m with stack := locals.toList.map coreWord++caller} =
- .ok {m with stack := out.toList.map coreWord++caller} 0 := completion_iff artifact locals out m caller
+ .ok {m with stack := out.toList.map coreWord++caller} 0 := by
+ exact
+   (Solidity.Yul.Compilation.Artifact.ofZero (stmt := source)
+     artifact.compiled.profile artifact.code artifact.source_to_model
+     (model_to_source artifact)).completion_iff locals out #v[] m caller
 
 theorem recovered (b : Scalar.Word) (m : Evm.Machine) (caller : List Evm.Word) :
  ∃ horizon, evalStmt horizon .nil True.intro source artifact.compiled.profile (sourceLocals #v[b]) =

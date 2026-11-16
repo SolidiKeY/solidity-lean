@@ -50,12 +50,8 @@ theorem loop_physical_word :
   exact physical_checked.2.2
 
 theorem loop_all_completed (fuel : Nat) (result : LocalBlockOutcome ctx ⟨false,false⟩)
-    (done : run 3 0 fuel = some result) : result=completed := by
-  rcases Nat.le_total fuel 32 with lower | upper
-  · have stable := runLocalBlock_stable ctx (code 3 0) (policy 3 0) _ lower done
-    exact Option.some.inj (stable.symm.trans (Option.some_get loop_completes).symm)
-  · have stable := runLocalBlock_stable ctx (code 3 0) (policy 3 0) _ upper (Option.some_get loop_completes).symm
-    exact Option.some.inj (done.symm.trans stable)
+    (done : run 3 0 fuel = some result) : result=completed :=
+  LocalBlockLogic.completed_unique (code 3 0) (policy 3 0) _ done (Option.some_get loop_completes).symm
 
 /-- CONTINUE runs the post and next test; BREAK runs neither and is consumed. -/
 theorem transfer_runs_complete : (run 3 1 32).isSome ∧ (run 3 2 32).isSome := by decide +kernel

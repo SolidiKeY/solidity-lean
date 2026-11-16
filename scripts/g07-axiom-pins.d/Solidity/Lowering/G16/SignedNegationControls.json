@@ -1,0 +1,7 @@
+{
+ "Solidity/Lowering/G16/SignedNegationControls.lean:Solidity.Lowering.G16.SignedNegationControls.wrong_minimum_negation_rejected": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ]
+}

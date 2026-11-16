@@ -1,0 +1,10 @@
+{
+  "CompCert": "2685140bf72c959446981fb99b5e44a8975021bc",
+  "CakeML": "b3e6ea34ca1aed91a57703a30549260ce6f6448e",
+  "EvmYul": "047f63070309f436b66c61e276ab3b6d1169265a",
+  "Clear": "6ef2e7eda01080e5d5fd7474354c1a71adab5071",
+  "KEVM": "fbb2edbb8e84bb05b6ba7a255ce1f44f76051ad1",
+  "Isabelle-Solidity": "f81741033ad5e782a0e0aba461b292ea1c860b3d",
+  "SolKey": "5c448df67f6fab14c5f9c1c5d0c63249b5fe78b8",
+  "solc": "403c39f86c3c0c9d4779b97892a3661016b45455"
+}

@@ -67,13 +67,11 @@ theorem string_view : ∃ r : InventoryRealization placement,
 
 /-- Actual owner bytes observation supports strings without relabeling Data. -/
 theorem actual_string_read : (Source.heapBytes (E:=heapByteEnv) (Γ:=[.bytes .memory,.string .memory]) 1).run
-    updated=(.ok payload,updated) := by
-  first | rfl | decide
+    updated=(.ok payload,updated) := rfl
 
 /-- The heap retains its genuine string type after the physical copy. -/
 theorem string_type : updated.2.heap.ty 1=some (.string .memory) ∧
-    updated.2.heap.ty 1≠some (.bytes .memory) := by
-  first | decide | rfl
+    updated.2.heap.ty 1≠some (.bytes .memory) := by decide
 
 /-- info: (true, 33, 165, 165) -/
 #guard_msgs in #eval (decide (payload=0x61::List.replicate 32 165),

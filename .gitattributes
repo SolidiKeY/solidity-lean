@@ -1,5 +1,6 @@
 Solidity.lean merge=union
 SolidityExamples.lean merge=union
+Solidity/Goals.lean merge=union
 Bridge/SolidityBridge.lean merge=union
 docs/module-map.md merge=union
 docs/module-map/*.md merge=union

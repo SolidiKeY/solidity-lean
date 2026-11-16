@@ -13,19 +13,18 @@ def emptyLog : Log := ⟨parent.this,⟨0,by decide⟩,#v[],[]⟩
 
 theorem empty_log_emitted : logBuiltin .log0 TargetMemory.port decorated memory parent emptyArgs =
     some (emitObserved decorated emptyLog) := by
-  first | exact log0_binding _ _ _ _ _ _ rfl (by decide) | rfl
+  exact log0_binding _ _ _ _ _ _ rfl (by decide)
 
 theorem empty_log_observable : logBuiltin .log0 TargetMemory.port decorated memory parent emptyArgs ≠ some decorated := by
-  first | exact logBuiltin_not_identity _ _ _ _ _ _ | decide | rfl
+  exact logBuiltin_not_identity _ _ _ _ _ _
 
 theorem full_caller_frame : (emitObserved decorated emptyLog).effects.execution = decorated.effects.execution ∧
     (emitObserved decorated emptyLog).effects.returndata = [0xfa,0,0xbc] ∧
     (emitObserved decorated emptyLog).trace = observed.trace ++ [.log emptyLog] := by
-  first | decide | exact ⟨rfl,rfl,rfl⟩
+  exact ⟨rfl,rfl,rfl⟩
 
-theorem missing_zero_window : logBuiltin .log0 missing decorated memory parent emptyArgs = none := by
-  first | rfl | decide
+theorem missing_zero_window : logBuiltin .log0 missing decorated memory parent emptyArgs = none := rfl
 
 theorem static_empty_refused : logBuiltin .log0 TargetMemory.port decorated memory {parent with static:=true} emptyArgs = none := by
-  first | exact logBuiltin_static _ _ _ _ _ _ | rfl
+  exact logBuiltin_static _ _ _ _ _ _
 end Solidity.Yul.World.LogSuccessControls

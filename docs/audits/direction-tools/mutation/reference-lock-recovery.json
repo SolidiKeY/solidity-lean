@@ -1,0 +1,29 @@
+{
+  "boundary": "Exact Git blob hash matches captured report pin. No lock reconstruction, dependency installation, compiler/EVM execution or timing experiment performed.",
+  "bytes": 14997,
+  "candidates": [
+    {
+      "bytes": 15732,
+      "git_blob": "7c8245cadd41b90572f2592d00bf6a6646e45d9a",
+      "sha256": "39b1ce55d3978f318323dfbcf1c094b734507d1483e92c586d5e58c8d0e304f4"
+    },
+    {
+      "bytes": 14997,
+      "git_blob": "bed119b29135f7c4a27c53337c7106fc6a78f962",
+      "sha256": "e42c4cf3acece9d74a08ecbd41171b3c7b7c5494c39a87debcefecda9beff397"
+    },
+    {
+      "bytes": 12773,
+      "git_blob": "efde8ca859ce1d0e23abf092070c1604ce25af50",
+      "sha256": "c9356aa4f1c318001d49b80a72586c6691a064515af24a770556c02efdf6b6b7"
+    }
+  ],
+  "citation": "https://github.com/SolidiKeY/solidity-lean/blob/9ef06bbbef4f19018c05eccb8477b5d5156619a4/tests/h62/item3/g52-differential/package-lock.json",
+  "environment_reproduction": "NOT_REPLAYED",
+  "git_blob": "bed119b29135f7c4a27c53337c7106fc6a78f962",
+  "historical_path": "tests/h62/item3/g52-differential/package-lock.json",
+  "history_base": "d4ad633a9624263a59b14fd2c520b9bc602f88f3",
+  "sha256": "e42c4cf3acece9d74a08ecbd41171b3c7b7c5494c39a87debcefecda9beff397",
+  "source_commit": "9ef06bbbef4f19018c05eccb8477b5d5156619a4",
+  "status": "exact-archived-bytes-recovered"
+}

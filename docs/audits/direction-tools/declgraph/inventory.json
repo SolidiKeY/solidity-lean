@@ -1,0 +1,145 @@
+{
+  "base": "d6fd95f0886775d7c286813fa9b993a40ba7a777",
+  "boundaries": [
+    "Physical lines include blanks and comments; candidate spans are older lexical results, not current deletion totals.",
+    "Generated roots, Corpus and AxiomPins are separated. Marker classification is not historical authorship proof.",
+    "Chain/agreement filenames without producer evidence remain unresolved, never presumed handwritten.",
+    "Prior architecture/reachability counters are lexical/import inventories and cannot settle declaration liveness."
+  ],
+  "families": {
+    "Solidity/Backend/InternalFlow/": {
+      "files": 300,
+      "physical_lines": 38105,
+      "previous_candidate_span_lines": 6100,
+      "provenance": {
+        "marked_generated": {
+          "files": 1,
+          "physical_lines": 62
+        },
+        "unresolved_chain_agreement": {
+          "files": 12,
+          "physical_lines": 766
+        },
+        "untraced": {
+          "files": 287,
+          "physical_lines": 37277
+        }
+      }
+    },
+    "Solidity/Frontend/SolcJson/": {
+      "files": 55,
+      "physical_lines": 13688,
+      "previous_candidate_span_lines": 4440,
+      "provenance": {
+        "marked_generated": {
+          "files": 1,
+          "physical_lines": 137
+        },
+        "untraced": {
+          "files": 54,
+          "physical_lines": 13551
+        }
+      }
+    },
+    "Solidity/SolcValidation/": {
+      "files": 30,
+      "physical_lines": 7626,
+      "previous_candidate_span_lines": 4878,
+      "provenance": {
+        "marked_generated": {
+          "files": 6,
+          "physical_lines": 1031
+        },
+        "untraced": {
+          "files": 24,
+          "physical_lines": 6595
+        }
+      }
+    },
+    "Solidity/Yul/Views/": {
+      "files": 882,
+      "physical_lines": 74635,
+      "previous_candidate_span_lines": 10146,
+      "provenance": {
+        "unresolved_chain_agreement": {
+          "files": 3,
+          "physical_lines": 237
+        },
+        "untraced": {
+          "files": 879,
+          "physical_lines": 74398
+        }
+      }
+    }
+  },
+  "physical_lines": 1311130,
+  "provenance": {
+    "axiom_pins": {
+      "files": 2,
+      "physical_lines": 4054
+    },
+    "explicit_handwritten_corpus_exception": {
+      "files": 2,
+      "physical_lines": 265
+    },
+    "generated_corpus": {
+      "files": 8,
+      "physical_lines": 3957
+    },
+    "generated_root": {
+      "files": 4,
+      "physical_lines": 7206
+    },
+    "marked_generated": {
+      "files": 53,
+      "physical_lines": 16249
+    },
+    "unresolved_chain_agreement": {
+      "files": 157,
+      "physical_lines": 25420
+    },
+    "untraced": {
+      "files": 8065,
+      "physical_lines": 1253979
+    }
+  },
+  "reused": [
+    {
+      "path": "docs/audits/direction.md",
+      "sha256": "df6b110530bbb332d4689f3be9ebc6bf3d09616a0a9085a5da8e4d3791d36a9f"
+    },
+    {
+      "path": "docs/audits/architecture-tools/unreferenced.py",
+      "sha256": "88c378f52e668e8f137a213a8d205bb087a08fcb1bdd577eed8d61ef487d052e"
+    },
+    {
+      "path": "docs/audits/architecture-tools/imports.py",
+      "sha256": "4961ba53ae9bd764b754cb72050cf462fb01ba81e761cfc22b41aabd0bcf0ac5"
+    },
+    {
+      "path": "docs/audits/proof-coverage-tools/theorem_census.py",
+      "sha256": "d753ca35fa7cc5550fe26340dbdea04bcbf3deab47a51e931b7beca46bab2f95"
+    },
+    {
+      "path": "docs/audits/build-speed.md",
+      "sha256": "1916a8903369d0f05c28897641dd3eacaad2d38c86ef5b4ccf04182091a3b39e"
+    },
+    {
+      "path": "docs/audits/build-speed-tools/import_graph.py",
+      "sha256": "246e69e8bc90b558f943404d0e49bbd1e729a7133acdbd9cf3debe156f47199f"
+    },
+    {
+      "path": "docs/audits/direction-tools/reachability/reach.py",
+      "sha256": "faa9662c986e620c8c882d287eaf74ffb6bdeb7ee39ddefe07a14ff04e61db90"
+    },
+    {
+      "path": "docs/audits/direction-tools/statements/provenance.py",
+      "sha256": "3e64946501a6107b5b0f589ced1f10798788bc5843c99f7c897507217c2e5335"
+    }
+  ],
+  "tracked_lean_files": 8291,
+  "unavailable_at_base": [
+    "scripts/differential/",
+    "scripts/bench/"
+  ]
+}

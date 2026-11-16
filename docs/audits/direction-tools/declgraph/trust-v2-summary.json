@@ -1,0 +1,33 @@
+{
+  "adopted_for_deletion_verification": false,
+  "audit_exit_code": 1,
+  "base": "d6fd95f0886775d7c286813fa9b993a40ba7a777",
+  "boundaries": [
+    "V2 is exactly one child import inserted after its original parent; removing it recovers every frozen v1 byte.",
+    "The original v1 failure remains a finding; v1 is never repaired or repinned here.",
+    "Failed dependency checks or missing artifacts cannot count as a successful audit.",
+    "Owner review and complete affected-root checks remain required before adoption or deletion certification.",
+    "Derived cache contents are externally trusted; this result does not attest source-to-artifact provenance."
+  ],
+  "deletable_now_verified_lines": 0,
+  "dependency_attempts": [
+    {
+      "exit_code": 124,
+      "synchronous": false,
+      "timeout_seconds": 600
+    },
+    {
+      "exit_code": 124,
+      "synchronous": true,
+      "timeout_seconds": 600
+    }
+  ],
+  "missing_dependency_artifact": true,
+  "original_import_order_preserved": true,
+  "owner_review": "pending",
+  "source": "v2/TrustAuditV2.lean",
+  "status": "blocked",
+  "v1_byte_projection_preserved": true,
+  "v1_modified": false,
+  "version": "additive-v2"
+}
