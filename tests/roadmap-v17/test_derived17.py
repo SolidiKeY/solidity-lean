@@ -123,3 +123,7 @@ class ActualFailureControls(unittest.TestCase):
     self.assertTrue((out/'inputs-after.json').is_file());self.assertEqual(json.loads((out/'post-input-observation.json').read_text())['postInputExit'],0);raise ValueError('missing runtime peak')
    with patch.object(d.e,'snapshot',return_value={}),patch.object(d,'inputs',return_value=bound),patch.object(d.p,'collect',side_effect=collect),patch.object(d.p,'validate',side_effect=reject):
     with self.assertRaises(ValueError):d.run(Path('/unused'),out)
+
+
+if __name__ == "__main__":
+    unittest.main()
