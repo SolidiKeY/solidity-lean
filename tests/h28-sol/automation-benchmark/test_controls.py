@@ -25,3 +25,7 @@ class DiagnosticTests(unittest.TestCase):
         reason = "sol_prove: steps must be between 1 and 20000"
         log = ("tested.lean:2:0: error: " + reason + " unexpected suffix\n") * 2
         self.assertIn("wrong refusal class/location/count", check_log(self.source, log, 1, reason, False, source_path="tested.lean")["errors"])
+
+
+if __name__ == "__main__":
+    unittest.main()

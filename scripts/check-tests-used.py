@@ -53,6 +53,7 @@ import tempfile
 import tarfile
 import shlex
 import importlib.util
+import itertools
 from pathlib import Path, PurePosixPath
 
 SCOPE = ('tests/', 'scripts/h55/', 'scripts/h62/')
@@ -109,6 +110,24 @@ def unique_json_object(pairs):
         if key in result: raise ValueError('duplicate JSON object key: ' + key)
         result[key] = value
     return result
+
+
+fragment_directory = Path(__file__).with_name('check-tests-used.d')
+fragment_helper = fragment_directory / 'fragments.py'
+if fragment_helper.is_file():
+    fragment_spec = importlib.util.spec_from_file_location('tests_used_fragments', fragment_helper)
+    fragment_rules = importlib.util.module_from_spec(fragment_spec); fragment_spec.loader.exec_module(fragment_rules)
+    FRAGMENT_SECTIONS = fragment_rules.FRAGMENT_SECTIONS
+    read_fragments = fragment_rules.read_fragments
+    merge_fragment_entries = fragment_rules.merge_fragment_entries
+else:
+    # Historical standalone drivers copy only check-tests-used*.py files.
+    FRAGMENT_SECTIONS = ('standalone', 'generators', 'reads', 'orphans', 'module_entries')
+    def read_fragments(directory):
+        if directory.exists(): raise ValueError('missing fragment helper')
+        return {key: [] for key in FRAGMENT_SECTIONS + ('roles', 'fixtures')}
+    def merge_fragment_entries(*args):
+        raise ValueError('missing fragment helper')
 
 
 def excluded(p):
@@ -594,7 +613,7 @@ def validated_module_entries(graph, entries):
             graph.observed.append((callee['path'], chain))
 
 
-def validated_routes(graph, catalog):
+def validated_routes(graph, catalog, extra_reads=()):
     """Reviewed validation definitions; raw run receipts live outside the branch.
 
     A passing-validation definition is bound to an exact input revision, command and source blob.
@@ -773,7 +792,7 @@ def validated_routes(graph, catalog):
                 purpose = 'Fixture roles not reviewed; passing test status and IO alone do not establish data eligibility.'
             graph.roots['validated:' + p].update({'purpose': purpose, 'data_use_scope': scopes, 'other_reads': other})
         if entry['kind'] == 'manual-reproducer': graph.roots['validated:' + p]['documentation'] = entry['documentation']
-    for route in read_routes(catalog):
+    for route in itertools.chain(read_routes(catalog), extra_reads):
         if set(route) != {'runner', 'input_revision', 'frames', 'target', 'target_blob', 'operation'}:
             raise ValueError('invalid validated read route')
         if route['input_revision'] != repo.ref: continue
@@ -1363,7 +1382,7 @@ def reviewed_historical_archive(repo, path):
 
 
 
-def reviewed_historical_notes(repo, definitions=None):
+def reviewed_historical_notes(repo, definitions=None, additions=()):
     """Per-file reviewed captured records, never a Markdown/directory rule.
 
     Exact blobs and literal anchors revoke role claims when content changes.
@@ -1374,7 +1393,9 @@ def reviewed_historical_notes(repo, definitions=None):
     if definitions is None:
         path = Path(__file__).with_name('check-tests-used-roles.json')
         if not path.exists(): return {}
-        definitions = json.loads(path.read_bytes())
+        definitions = json.loads(path.read_bytes(), object_pairs_hook=unique_json_object)
+    if additions:
+        definitions = dict(definitions, records=merge_fragment_entries('roles', definitions['records'], additions))
     if (not isinstance(definitions, dict) or set(definitions) != {'schema_version', 'records'}
             or type(definitions['schema_version']) is not int or definitions['schema_version'] != 1
             or not isinstance(definitions['records'], list)): raise ValueError('invalid historical note definitions')
@@ -1690,8 +1711,31 @@ def inventory(repo, catalog=None):
     if catalog is None:
         definitions = Path(__file__).with_name('check-tests-used-routes.json')
         catalog = json.loads(definitions.read_bytes()) if definitions.exists() else {'schema_version': 1, 'standalone': [], 'generators': [], 'reads': [], 'orphans': []}
+    fragments = read_fragments(Path(__file__).with_name('check-tests-used.d'))
+    extra_reads = []
+    if any(fragments[key] for key in FRAGMENT_SECTIONS):
+        # Check both frozen extension formats without implicitly enabling either.
+        extension_spec = importlib.util.spec_from_file_location('fragment_extension_check', Path(__file__).with_name('check-tests-used-catalog-extension.py'))
+        extension = importlib.util.module_from_spec(extension_spec); extension_spec.loader.exec_module(extension)
+        template_spec = importlib.util.spec_from_file_location('fragment_template_check', Path(__file__).with_name('check-tests-used-catalog-templates.py'))
+        template = importlib.util.module_from_spec(template_spec); template_spec.loader.exec_module(template)
+        for existing_catalog in (extension.load_catalog(), template.load_catalog()):
+            for section in FRAGMENT_SECTIONS:
+                if fragments[section]:
+                    existing = list(read_routes(existing_catalog)) if section == 'reads' else existing_catalog.get(section, [])
+                    merge_fragment_entries(section, existing, fragments[section])
+        catalog = dict(catalog)
+        for section in FRAGMENT_SECTIONS:
+            additions = fragments[section]
+            if not additions: continue
+            if section == 'reads':
+                existing = list(read_routes(catalog))
+                extra_reads = merge_fragment_entries(section, existing, additions)[len(existing):]
+            else:
+                if section not in catalog: raise ValueError('fragment section requires catalog schema 3: ' + section)
+                catalog[section] = merge_fragment_entries(section, catalog[section], additions)
     add_roots(graph); reviewed_routes(graph); add_lean(graph)
-    generated = validated_routes(graph, catalog)
+    generated = validated_routes(graph, catalog, extra_reads)
     add_declared_test_runners(graph)
     ci_spec = importlib.util.spec_from_file_location('tests_used_ci', Path(__file__).with_name('check-tests-used-ci.py'))
     ci_rules = importlib.util.module_from_spec(ci_spec); ci_spec.loader.exec_module(ci_rules)
@@ -1713,7 +1757,7 @@ def inventory(repo, catalog=None):
         orphan_reviews[p] = entry
     pins = repo.pins()
     historical = historical_outputs(repo)
-    historical.update(reviewed_historical_notes(repo))
+    historical.update(reviewed_historical_notes(repo, additions=fragments['roles']) if fragments['roles'] else reviewed_historical_notes(repo))
     # Search coverage is explicitly broader than the certified use graph. A
     # textual hit is negative-evidence context, not a consumer certification.
     names = collections.defaultdict(list)
@@ -1801,7 +1845,7 @@ def inventory(repo, catalog=None):
                                              'entry_points_reviewed': sorted(k for k, v in graph.roots.items() if 'derived_from' not in v)} if classification == 'orphan' else None),
                         'unresolved': unresolved})
     counts = {c: sum(r['class'] == c for r in records) for c in CLASSES}
-    return {'schema_version': SCHEMA, 'goal_decl': None, 'measured_revision': repo.ref,
+    output = {'schema_version': SCHEMA, 'goal_decl': None, 'measured_revision': repo.ref,
             'entry_points': {k: v for k, v in sorted(graph.roots.items()) if 'derived_from' not in v},
             'universe': list(SCOPE), 'policy_scans': graph.policy_scans, 'analysis_gaps': sorted(set(graph.notes)), 'totals': {**counts, 'paths': len(records),
                                               'unresolved': sum(bool(r['unresolved']) for r in records)},
@@ -1812,6 +1856,13 @@ def inventory(repo, catalog=None):
                                                 'No orphan or regenerable classification inferred from an absent static edge.',
                                                 'Recovery: topological first matching authored change or combined-diff merge resolution; no rename following.']},
             'records': records}
+    if fragments['fixtures']:
+        spec = importlib.util.spec_from_file_location('tests_used_fixtures', Path(__file__).with_name('check-tests-used-fixtures.py'))
+        fixtures = importlib.util.module_from_spec(spec); spec.loader.exec_module(fixtures)
+        data = json.loads(fixtures.DATA.read_bytes(), object_pairs_hook=unique_json_object)
+        data['records'] = merge_fragment_entries('fixtures', data['records'], fragments['fixtures'])
+        output = fixtures.refuse_evidence(repo, output, data)
+    return output
 
 
 def verify(actual, expected, require_complete=True):
@@ -2124,6 +2175,9 @@ def module_entry_schema_controls():
 
 
 def self_test():
+    spec = importlib.util.spec_from_file_location('fragment_controls', Path(__file__).with_name('check-tests-used.d') / 'fragments.py')
+    if spec.origin and Path(spec.origin).exists():
+        controls = importlib.util.module_from_spec(spec); spec.loader.exec_module(controls); controls.fragment_controls(globals())
     # Formatting must preserve nested provenance and awkward path/string bytes.
     payload = {'records': [{'path': 'tests/\u03b1\n".py', 'class': None,
                             'reason': 'braces{},comma,\nline', 'pins': {'b': [True, 0], 'a': {}}},

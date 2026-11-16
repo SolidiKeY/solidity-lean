@@ -77,11 +77,6 @@ theorem RepresentedOwnershipPlan.endTx_reencode {E ds d active Γ F layout fixed
       ((companionEndTx p.after).source.world.accounts F.this).storage
       (fun q => (companionEndTx p.after).residual.cells (complementKey false F.this q))=some p.nextRaw := by
   rw [representedRegistry_endTx_persistent]
-  have same : (fun q => (companionEndTx p.after).residual.cells (complementKey false F.this q))=
-      (fun q => p.step.1.2.cells (complementKey false F.this q)) := by
-    funext q
-    exact residualEndTx_persistent _ _ rfl
-  rw [same]
   exact p.reencode_current static
 
 end Solidity.Yul.Views

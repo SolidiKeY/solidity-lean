@@ -66,3 +66,7 @@ class ArchiveInputControls(unittest.TestCase):
                         self.assertEqual(bulk_inputs.read(repo, mirror), mirror.read_bytes())
                 with self.assertRaises(ValueError):
                     verify_bulk.verify_snapshot_files(repo, manifest, entries)
+
+
+if __name__ == "__main__":
+    unittest.main()
