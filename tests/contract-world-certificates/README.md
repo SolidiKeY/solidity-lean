@@ -10,7 +10,7 @@ funded reachability from an actual successful operation and explicit admission.
 It does not add dynamic source arguments, general library results, or a
 world-aware ordinary importer. The feature statuses remain partial.
 
-[validation.json](validation.json) records versions, hashes, commands,
+[validation.json](https://github.com/SolidiKeY/solidity-lean-coord/blob/31351403baef6c2ce1e047fc093d9fdd5b7b67e7/evidence/plan-x1e-classify-rest-1116/x1e-classify-rest/tests/contract-world-certificates/validation.json) records versions, hashes, commands,
 per-fixture before/after outcomes, axioms, resource measurements, shared edits,
 reviews and exact remaining refusals. The existing real Solidity fixture and
 all its expected observations are unchanged. Both legacy and viaIR analysis
@@ -20,18 +20,18 @@ proofs, not a compiler/EVM equivalence theorem.
 The full combined gate passed: 686 default jobs, 259 TestSuite jobs, and the
 frozen 377-taclet / 131-annotation sort comparison. It took 145m34.609s under a
 single CPU, explicit Lean `-j1`, and a hard 12 GiB/no-swap cgroup. The recorded
-peak equalled that cap. Earlier focused artifacts were retained; this is not
+peak equalled that cap. [Earlier focused output](https://github.com/SolidiKeY/solidity-lean-coord/blob/31351403baef6c2ce1e047fc093d9fdd5b7b67e7/evidence/plan-x1e-classify-rest-1116/x1e-classify-rest/tests/contract-world-certificates/world-focused-final.log) is archived; this is not
 a clean-checkout cold benchmark. The complete raw log is preserved in
-[run-lean.log.gz](run-lean.log.gz); the original interrupted output stream is
-retained separately. Docker wait recorded terminal exit 0.
+[run-lean.log.gz](https://github.com/SolidiKeY/solidity-lean-coord/blob/31351403baef6c2ce1e047fc093d9fdd5b7b67e7/evidence/plan-x1e-classify-rest-1116/x1e-classify-rest/tests/contract-world-certificates/run-lean.log.gz); the [original interrupted output stream](https://github.com/SolidiKeY/solidity-lean-coord/blob/31351403baef6c2ce1e047fc093d9fdd5b7b67e7/evidence/plan-x1e-classify-rest-1116/x1e-classify-rest/tests/contract-world-certificates/run-lean-original-partial.log.gz) is
+archived separately. Docker wait recorded terminal exit 0.
 
 The three selected upstream cases are all **blocked**, in both required
 legacy/viaIR pipelines, by the unchanged cross-contract host-adapter boundary.
-[Original fixture text and expectations](upstream/fixture-observations.json)
-are retained in full, including gas rows. No runtime or EVM agreement is claimed.
-Per-filter runner reports remain in the adjacent directories; their large
-all-snapshot coverage inventories are retained byte-for-byte as gzip files,
-with compressed and uncompressed hashes recorded in validation.json.
+[Original fixture text and expectations](https://github.com/SolidiKeY/solidity-lean-coord/blob/c733074aa2a0ff46f54ea629cf9ad9a4c87c6362/evidence/plan-x1e-classify-rest-1116/x1e-classify-rest/tests/contract-world-certificates/upstream/fixture-observations.json)
+are retained in full in the private archive, including gas rows. No runtime or EVM agreement is claimed.
+Per-filter runner reports and their large all-snapshot coverage inventories
+are retained byte-for-byte in the [immutable private archive](https://github.com/SolidiKeY/solidity-lean-coord/tree/c733074aa2a0ff46f54ea629cf9ad9a4c87c6362/evidence/plan-x1e-classify-rest-1116/x1e-classify-rest/tests/contract-world-certificates/). Compressed
+and uncompressed hashes are recorded in the archived validation.json.
 
 The command scripts are exact records for this saved managed environment:
 source the setup activation, copy `bounded-lakefile.toml` to the repository
@@ -44,9 +44,9 @@ bash tests/contract-world-certificates/bounded-check-command.sh 'time ./run-lean
 ```
  Pipeline
 replay copies the entire existing control file and regenerates hash-checked
-fixtures. For a fresh upstream replay, change `--out` to a new directory so the
-retained reports remain intact. The initial malformed replay invocation ran no
-fixtures; its log is retained and was not counted as evidence.
+fixtures. For a fresh upstream replay, change `--out` to a new external evidence directory.
+Prior reports remain immutable in the private archive. The initial malformed replay invocation ran no
+fixtures; its [log is archived](https://github.com/SolidiKeY/solidity-lean-coord/blob/31351403baef6c2ce1e047fc093d9fdd5b7b67e7/evidence/plan-x1e-classify-rest-1116/x1e-classify-rest/tests/contract-world-certificates/upstream-invocation-failed.log) and was not counted as evidence.
 
 Trust, orphan, layer, strict automation, inventory consistency and the affected
 Node test pass. The prose-path audit retains 20 existing missing references in
