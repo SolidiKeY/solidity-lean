@@ -100,6 +100,9 @@ theorem endpoint_refusal : Compiler.compile 1 F program = none := by
     rw [refused] at accepted
     cases accepted
 
+example : program.run (ArrayControls.caller (wmod 0)) = .ok result ∧
+ Compiler.compile 1 F program = none := ⟨program_source,endpoint_refusal⟩
+
 /-- info: 'Solidity.Backend.Passes.TupleReturnConsumer.expanded_public' depends on axioms: [propext, Classical.choice, Quot.sound] -/
 #guard_msgs (whitespace := lax) in
 #print axioms expanded_public

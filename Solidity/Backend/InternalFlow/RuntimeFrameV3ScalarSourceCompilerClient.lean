@@ -98,4 +98,8 @@ theorem selected_but_endpoint_refused (depth : Nat) :
  Evm.Compiler.compile 1 F (.cons (Client.input depth) .nil)=none :=
  ⟨Client.root depth, endpoint_refused depth⟩
 
+example : ∃ out, (Client.input 4).run ScalarContinuation.final=.ok out ∧
+ Evm.Compiler.compile 1 F (.cons (Client.input 4) .nil)=none :=
+ ⟨_,Client.actual_source 4 (by decide),(selected_but_endpoint_refused 4).2⟩
+
 end Solidity.Backend.InternalFlow.RuntimeFrame.ScalarSourceCompiler.Controls
