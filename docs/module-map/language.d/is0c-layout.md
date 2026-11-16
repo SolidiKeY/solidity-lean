@@ -1,0 +1,1 @@
+| `Solidity/Semantics/IntrinsicStorage/Layout.lean` | Typed full-word locations for dependent storage paths, nested hash ancestry, bounded keys and lossless byte encoding of preimages; reuses the shared type layout. |
