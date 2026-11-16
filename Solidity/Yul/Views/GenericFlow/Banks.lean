@@ -41,12 +41,8 @@ theorem same_word_store
     (actual : writeback p.nextRaw = some (((after p).source.world.accounts F.this).storage,
       fun q => (after p).residual.cells (complementKey false F.this q))) :
     ((after p).source.world.accounts F.this).storage = (s.2.ex.world.accounts F.this).storage := by
-  have rawSame : p.nextRaw = p.raw := by
-    funext q
-    by_cases same : q = written
-    · subst q
-      exact (find_saveSlot p.raw written value).trans sameWord.symm
-    · exact find_saveSlot_other p.raw written q value same
+  have rawSame : p.nextRaw = p.raw :=
+    (congrArg (saveSlot p.raw written) sameWord.symm).trans (saveSlot_unchanged p.raw written)
   rw [rawSame] at actual
   exact congrArg Prod.fst (Option.some.inj (actual.symm.trans unchanged))
 

@@ -106,12 +106,11 @@ node scripts/solkey-migration.mjs summary /tmp/proofs.json
   source-derived expectation policy must tell the two apart, not whitelist
   observed statuses.
 
-The last uniform audit (`tests/migration/proof-2026-10-16.json`, its
-`.summary.json`, `.implementation.json` and `comparison-2026-10-16.json`)
-ran at `048a74de51`, before the binding, negation and `473da8944c` changes;
-it fails strict comparison and does not describe the current tree. No
-uniform audit has run at `473da8944c`. The other JSON files in
-`tests/migration/` are older checkpoints.
+The last uniform audit ([report](https://github.com/SolidiKeY/solidity-lean-coord/blob/cad9fabd21219b03878986b12c7656fae1897ec5/evidence/plan-x1e-classify-rest-1116/x1e-classify-rest/tests/migration/proof-2026-10-16.json), [summary](https://github.com/SolidiKeY/solidity-lean-coord/blob/cad9fabd21219b03878986b12c7656fae1897ec5/evidence/plan-x1e-classify-rest-1116/x1e-classify-rest/tests/migration/proof-2026-10-16.summary.json), [implementation](https://github.com/SolidiKeY/solidity-lean-coord/blob/cad9fabd21219b03878986b12c7656fae1897ec5/evidence/plan-x1e-classify-rest-1116/x1e-classify-rest/tests/migration/proof-2026-10-16.implementation.json) and [comparison](https://github.com/SolidiKeY/solidity-lean-coord/blob/cad9fabd21219b03878986b12c7656fae1897ec5/evidence/plan-x1e-classify-rest-1116/x1e-classify-rest/tests/migration/comparison-2026-10-16.json))
+is retained in the private archive. It ran at `048a74de51`, before the binding,
+negation and `473da8944c` changes; it fails strict comparison and does not
+describe the current tree. No uniform audit has run at `473da8944c`. Other
+historical audit checkpoints are retained in the same private archive.
 
 ## Decisions in force
 

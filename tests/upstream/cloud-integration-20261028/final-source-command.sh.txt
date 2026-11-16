@@ -1,8 +1,0 @@
-#!/usr/bin/env bash
-set -euo pipefail
-cd $REPO
-export LEAN_NUM_THREADS=1
-export LAKE_CACHE_DIR="$PWD/.lake/refactor-cache/cloud-integration-20261028"
-~/.elan/bin/lake -f .cloud-integration.toml lean Solidity/Solkey/QuantifiedDiamond.lean -- --tstack=131072 -j1
-~/.elan/bin/lake -f .cloud-integration.toml --rehash build
-~/.elan/bin/lake -f .cloud-integration.toml --rehash --no-build build SolkeyTestSuite
