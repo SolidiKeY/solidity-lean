@@ -1,0 +1,7 @@
+{
+ "Solidity/Examples/Goals/PanicRun.lean:Solidity.Correctness.Panic.run_outcomes": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ]
+}

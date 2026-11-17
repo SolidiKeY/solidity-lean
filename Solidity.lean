@@ -2435,6 +2435,7 @@ import Solidity.Calculus.UpdateRules
 import Solidity.Calculus.VisitedSet
 import Solidity.Calculus.WalkSyntax
 import Solidity.Calculus.WkOver
+import Solidity.Correctness.IntrinsicSession.Run
 import Solidity.Correctness.IntrinsicSession.Step
 import Solidity.Correctness.Lowering.Checker.Contract
 import Solidity.Correctness.Lowering.Checker.IntrinsicProbe
@@ -2456,6 +2457,8 @@ import Solidity.Correctness.Lowering.Loops.Statement
 import Solidity.Correctness.Lowering.Loops.WhileBreak
 import Solidity.Correctness.Lowering.Loops.WhileContinue
 import Solidity.Correctness.Lowering.Loops.WhileReset
+import Solidity.Correctness.Lowering.Sim.Session.Target
+import Solidity.Correctness.Lowering.Sim.Session.Target.Machine
 import Solidity.Correctness.Lowering.Total.Contract
 import Solidity.Correctness.Lowering.Total.Coverage
 import Solidity.Correctness.Lowering.Total.Coverage.Checks
@@ -2484,6 +2487,7 @@ import Solidity.Correctness.Lowering.Unchecked.WordOne
 import Solidity.Correctness.Lowering.Unchecked.WordProgram
 import Solidity.Correctness.Lowering.Unchecked.WordUpdateWitness
 import Solidity.Correctness.Lowering.Unchecked.WrappingArithmetic
+import Solidity.Correctness.Panic.Guards.Arith
 import Solidity.Correctness.Panic.Provenance.Eval
 import Solidity.Correctness.Sim.Examples
 import Solidity.Correctness.Sim.Lang
@@ -2778,6 +2782,7 @@ import Solidity.Evm.TryPanicSourceDeterminism
 import Solidity.Evm.TryPanicSourceExecution
 import Solidity.Evm.TryPanicSourceFrame
 import Solidity.Evm.TryPanicSourcePlan
+import Solidity.Finish.Assembly
 import Solidity.FreshNames
 import Solidity.Frontend.Admission.CanonicalReaderContract
 import Solidity.Frontend.Admission.Controls
@@ -3295,14 +3300,18 @@ import Solidity.Frontend.Yul.ScopedParse
 import Solidity.Frontend.Yul.WordParse
 import Solidity.Goals
 import Solidity.Goals.AuditData
+import Solidity.Goals.ElabTotal
 import Solidity.Goals.Endpoint
 import Solidity.Goals.Finish
 import Solidity.Goals.GoalPinsSpec
 import Solidity.Goals.Hash
 import Solidity.Goals.Headline
 import Solidity.Goals.IntrinsicSession
+import Solidity.Goals.IntrinsicStorage
 import Solidity.Goals.Loops
 import Solidity.Goals.Panic
+import Solidity.Goals.PanicProvenance
+import Solidity.Goals.PanicRun
 import Solidity.Goals.Plan
 import Solidity.Goals.ProseCalibrated
 import Solidity.Goals.Shrink
@@ -4151,6 +4160,8 @@ import Solidity.Semantics.ExternalReturnBytes
 import Solidity.Semantics.ExternalTryWitness
 import Solidity.Semantics.Heap
 import Solidity.Semantics.IntrinsicStorage.Layout
+import Solidity.Semantics.IntrinsicStorage.Preimages.Calls
+import Solidity.Semantics.IntrinsicStorage.Preimages.Calls.Checks
 import Solidity.Semantics.IntrinsicStorage.Preimages.Frames
 import Solidity.Semantics.IntrinsicStorage.Preimages.Ops
 import Solidity.Semantics.IntrinsicStorage.Preimages.Run
