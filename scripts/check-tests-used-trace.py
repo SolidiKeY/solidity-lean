@@ -352,10 +352,15 @@ def _observed_routes(receipt, scratch, manifest, runner, nonpassing=False, modul
     target of symlink(TARGET, LINK): TARGET is a committed file or directory
     named by an exact absolute normalized path, and LINK an absolute normalized
     path outside the scratch tree, not nested with another live audited link.
-    While the link lives, path names at or below LINK taint the committed path
-    they denote, and names enclosing LINK (moves of an ancestor) or unresolved
-    relative names taint TARGET. Only unlink/unlinkat(flags 0) of exactly LINK
-    ends it without taint; a link never removed taints TARGET as before.
+    While a link lives, a path-name mutation leaves TARGET clean only in the
+    confined rmtree shape: unlinkat/renameat/renameat2 whose directory fds are
+    kernel-resolved absolute annotations and whose names are single components,
+    none of them naming LINK or an ancestor. Any other path-name mutation
+    (absolute or relative names, '..', '//', /proc, symlinkat, link, truncate,
+    creat) may reach the committed side through the link and taints TARGET.
+    Only unlink of exactly LINK, or unlinkat(flags 0) of it in the confined
+    shape, ends it without taint; a link never removed taints TARGET as before.
+    A symlink or removal split by unfinished syscalls of any thread is refused.
     Descriptor-based writes already resolve through the link to TARGET.
     """
     if receipt['timeout'] or (receipt['exit'] and not nonpassing): return []
@@ -378,13 +383,6 @@ def _observed_routes(receipt, scratch, manifest, runner, nonpassing=False, modul
         return value == base or value.startswith(base.rstrip('/') + '/')
     def taint(value):
         value = posixpath.normpath(value)
-        for link, target in list(aliases.items()):
-            # A name through, at or enclosing the link mutates or moves the alias.
-            if not value.startswith('/'): continue
-            if inside(link, value): committed_taint(target)
-            elif inside(value, link): committed_taint(target + value[len(link):])
-        committed_taint(value)
-    def committed_taint(value):
         rel = relative(value)
         if value == scratch: dirty.update(files); return
         if rel is not None:
@@ -408,26 +406,38 @@ def _observed_routes(receipt, scratch, manifest, runner, nonpassing=False, modul
     def path_argument(value, directory=None):
         path = resolve(value, directory)
         if path is None: dirty.update(files); return
-        if not path.startswith('/'):
-            # An unresolved relative name may denote, move or reach a live link.
-            for target in aliases.values(): committed_taint(target)
         taint(path)
     def audited_symlink(args):
         # Only the exact shape documented above; anything else keeps the old taint.
         if len(args) != 2: return None
         target, link = resolve(args[0]), resolve(args[1])
-        if not all(isinstance(v, str) and v.startswith('/') and posixpath.normpath(v) == v for v in (target, link)): return None
+        if not all(isinstance(v, str) and v.startswith('/') and not v.startswith('//') and posixpath.normpath(v) == v
+                   for v in (target, link)): return None
         rel = relative(target)
         if rel not in files and rel not in directories: return None
         if inside(link, scratch) or inside(scratch, link): return None
         if any(inside(link, other) or inside(other, link) for other in aliases): return None
         return target, link
+    def confined_names(name, args):
+        # Joined paths of an rmtree-shaped call, or None for any other form.
+        shape = {'unlinkat': 3, 'renameat': 4, 'renameat2': 5}.get(name)
+        if shape is None or len(args) != shape or (name == 'unlinkat' and args[2] not in ('0', 'AT_REMOVEDIR')): return None
+        joined = []
+        for directory, value in ((args[0], args[1]),) + (((args[2], args[3]),) if name != 'unlinkat' else ()):
+            base = re.fullmatch(r'(?:[0-9]+|AT_FDCWD)<(/[^<>]*)>', directory)
+            try: component = ast.literal_eval(value)
+            except (SyntaxError, ValueError): return None
+            if (base is None or base[1].startswith('//') or posixpath.normpath(base[1]) != base[1]
+                    or not isinstance(component, str) or component in ('', '.', '..') or '/' in component): return None
+            joined.append(posixpath.join(base[1], component))
+        return joined
     def link_cleanup(name, args):
-        if name == 'unlink' and len(args) == 1: path = resolve(args[0])
-        elif name == 'unlinkat' and len(args) == 3 and args[2] == '0': path = resolve(args[1], args[0])
-        else: return False
-        if path not in aliases: return False
-        del aliases[path]; return True
+        if name == 'unlink' and len(args) == 1:
+            try: path = ast.literal_eval(args[0])
+            except (SyntaxError, ValueError): return None
+        elif name == 'unlinkat' and len(args) == 3 and args[2] == '0' and (joined := confined_names(name, args)): path = joined[0]
+        else: return None
+        return path if path in aliases else None
     syscall_path = str(receipt['events']).removesuffix('.events.jsonl') + '.syscalls'
     for original in Path(syscall_path).read_text(errors='replace').splitlines():
         match = re.match(r'^(\d+)\s+(.*)', original)
@@ -534,10 +544,22 @@ def _observed_routes(receipt, scratch, manifest, runner, nonpassing=False, modul
         if path_change:
             name = line.split('(', 1)[0]; args = arguments(line)
             if not args: dirty.update(files); continue
-            audited = audited_symlink(args) if readonly_symlinks and name == 'symlink' else None
-            if audited:
-                path_argument(args[1]); aliases[audited[1]] = audited[0]
-            elif readonly_symlinks and link_cleanup(name, args):
+            handled = False
+            if readonly_symlinks:
+                # A split record may interleave with another thread's path change.
+                split = bool(resumed) or bool(unfinished)
+                ended = link_cleanup(name, args)
+                if ended is not None:
+                    target = aliases.pop(ended); handled = True
+                    if split: taint(target)
+                elif aliases and name != 'ftruncate':
+                    joined = confined_names(name, args)
+                    for link, target in aliases.items():
+                        if joined is None or any(inside(link, p) for p in joined): taint(target)
+                audited = audited_symlink(args) if name == 'symlink' and not split and not handled else None
+                if audited:
+                    path_argument(args[1]); aliases[audited[1]] = audited[0]; handled = True
+            if handled:
                 pass
             elif name in ('renameat', 'renameat2', 'linkat') and len(args) >= 4:
                 path_argument(args[1], args[0]); path_argument(args[3], args[2])
@@ -550,7 +572,7 @@ def _observed_routes(receipt, scratch, manifest, runner, nonpassing=False, modul
             elif name != 'ftruncate':
                 path_argument(args[0])
     if unfinished: dirty.update(files)
-    for target in aliases.values(): committed_taint(target)
+    for target in aliases.values(): taint(target)
     routes = {}
     for event_id in sorted(entries if module_entries else reads):
         event = events[event_id]; target = event['target']
@@ -852,7 +874,7 @@ def readonly_symlink_controls():
         base = Path(directory); root = base / 'repo'; root.mkdir()
         head = ('import os, shutil, tempfile\nfrom pathlib import Path\nroot = Path(__file__).resolve().parents[1]\n'
                 'tmp = Path(tempfile.mkdtemp(dir=root.parent)); (tmp / "sub").mkdir(); link = tmp / "sub" / "base"\n'
-                'link.symlink_to(root / "tests/base", target_is_directory=True)\n'
+                'link.symlink_to(root / "tests/base", target_is_directory=True); (tmp / "sub" / "aside.txt").write_text("x")\n'
                 'assert (link / "data.txt").read_text() == "measured\\n"\n')
         bodies = {
             'positive': '',
@@ -896,11 +918,13 @@ def readonly_symlink_controls():
         target, link = ast.literal_eval(strace_arguments(created)[0]), ast.literal_eval(strace_arguments(created)[1])
         cleanup = next(i for i, line in enumerate(lines) if i > made and re.search(r'unlinkat\(\d+<' + re.escape(posixpath.dirname(link)) + r'>, "base", 0\) = 0', line))
         tmp = posixpath.dirname(posixpath.dirname(link))
-        def variant(label, inject=(), drop=(), replace=None):
+        def variant(label, inject=(), drop=(), replace=None, after_cleanup=()):
+            # Injected lines run as the tracee's thread unless they name another.
             changed = list(lines)
             if replace: changed[made] = changed[made].replace(*replace)
+            for line in reversed(after_cleanup): changed.insert(cleanup + 1, line if line[0].isdigit() else tid + '  ' + line)
             for index in sorted(drop, reverse=True): del changed[index]
-            for line in reversed(inject): changed.insert(made + 1, tid + '  ' + line)
+            for line in reversed(inject): changed.insert(made + 1, line if line[0].isdigit() else tid + '  ' + line)
             stem = base / 'variants' / label; stem.parent.mkdir(exist_ok=True)
             Path(str(stem) + '.syscalls').write_text('\n'.join(changed) + '\n')
             shutil.copyfile(receipt['events'], str(stem) + '.events.jsonl')
@@ -908,6 +932,8 @@ def readonly_symlink_controls():
         def certified(forged):
             return 'tests/base/data.txt' in {r['target'] for r in observed_routes(forged, root, manifest, runner, readonly_symlinks=True)}
         assert certified(variant('identity'))
+        aside = 'unlinkat(AT_FDCWD<' + tmp + '/sub>, "aside2", 0) = 0'
+        assert certified(variant('confined-sibling', inject=[aside, 'renameat2(AT_FDCWD<' + tmp + '>, "a", 7<' + tmp + '/sub>, "b", RENAME_NOREPLACE) = 0']))
         refusals = {
             'mutation-unlink-through-link': {'inject': ['unlink(' + json.dumps(link + '/data.txt') + ') = 0']},
             'mutation-truncate-through-link': {'inject': ['truncate(' + json.dumps(link + '/data.txt') + ', 0) = 0']},
@@ -920,6 +946,16 @@ def readonly_symlink_controls():
             'cleanup-leftover-link': {'drop': [cleanup]},
             'cleanup-through-link': {'inject': ['unlinkat(AT_FDCWD<' + tmp + '>, ' + json.dumps('sub/base/data.txt') + ', 0) = 0']},
             'cleanup-removedir-flag': {'drop': [cleanup], 'inject': ['unlinkat(AT_FDCWD<' + tmp + '>, "sub/base", AT_REMOVEDIR) = 0']},
+            'mutation-lexical-dotdot': {'inject': ['unlink(' + json.dumps(link + '/../base/data.txt') + ') = 0']},
+            'mutation-double-slash': {'inject': ['truncate(' + json.dumps('/' + link + '/data.txt') + ', 0) = 0']},
+            'mutation-proc-root': {'inject': ['unlink(' + json.dumps('/proc/self/root' + link + '/data.txt') + ') = 0']},
+            'mutation-unrelated-absolute': {'inject': ['unlink(' + json.dumps(tmp + '/elsewhere/data.txt') + ') = 0']},
+            'mutation-dirfd-dotdot': {'inject': ['unlinkat(AT_FDCWD<' + tmp + '/sub>, "..", AT_REMOVEDIR) = 0']},
+            'alias-symlinkat-chain': {'inject': ['symlinkat(' + json.dumps(link) + ', AT_FDCWD<' + tmp + '>, "chain") = 0']},
+            'race-split-symlink': {'replace': (') = 0', ' <unfinished ...>'), 'inject': [
+                '99999  unlink(' + json.dumps(link + '/data.txt') + ') = 0', '<... symlink resumed>) = 0']},
+            'race-unfinished-at-cleanup': {'inject': ['99999  truncate(' + json.dumps(link + '/data.txt') + ', 0 <unfinished ...>'],
+                                           'after_cleanup': ['99999  <... truncate resumed>) = 0']},
             'shape-scratch-root-target': {'replace': (json.dumps(target), json.dumps(str(root)))},
             'shape-unnormalized-target': {'replace': (json.dumps(target), json.dumps(target.replace('/tests/base', '/tests/./base')))},
             'shape-link-inside-scratch': {'replace': (json.dumps(link), json.dumps(str(root / 'tests/linked')))},
