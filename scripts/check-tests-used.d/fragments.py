@@ -944,7 +944,8 @@ def node_mode_root(classifier, graph, catalog, entry, reviewed=None):
 # Reviewed (path, source blob, introducing commit) tables: an @COMMIT line,
 # then one `path blob` row per file it introduced; each path starts with an
 # abbreviation from _REVIEW_DIRECTORIES.
-_REVIEW_DIRECTORIES = {'N:': 'tests/directruntime-20261104/native-browser/', 'D:': 'tests/directruntime-20261104/', 'U:': 'tests/upstream/'}
+_REVIEW_DIRECTORIES = {'N:': 'tests/directruntime-20261104/native-browser/', 'D:': 'tests/directruntime-20261104/', 'U:': 'tests/upstream/',
+                       'T:': 'tests/'}
 
 
 def _review_table(text):
@@ -2224,9 +2225,10 @@ def successor_controls(classifier):
         # commit that anchors nothing and credits no read, helper or output.
         global REVIEWED_NONPY_ENTRIES
         reviewed_nonpy = REVIEWED_NONPY_ENTRIES
-        assert len(reviewed_nonpy) == 115 and len({p for p, _, _ in reviewed_nonpy}) == 115
-        assert all(p.startswith(('tests/directruntime-20261104/', 'tests/upstream/')) and posixpath.splitext(p)[1] in NONPY_SHEBANGS
+        assert len(reviewed_nonpy) == 176 and len({p for p, _, _ in reviewed_nonpy}) == 176  # H997 115, H1025 61
+        assert all(p.startswith('tests/') and posixpath.splitext(p)[1] in NONPY_SHEBANGS
                    and '.test.' not in p and classifier['hex_pin'](b, 40) and classifier['hex_pin'](c, 40) for p, b, c in reviewed_nonpy)
+        assert all(p.startswith(('tests/directruntime-20261104/', 'tests/upstream/')) for p, _, _ in reviewed_nonpy - REVIEWED_NONPY_ENTRIES_H1025)
         witnesses = {'tests/directruntime-20261104/shared-translator/bounded.sh', 'tests/directruntime-20261104/native-browser/readbounds/module-gates.sh',
                      'tests/directruntime-20261104/memory-references/native-source-controls.mjs'}
         assert witnesses <= {p for p, _, _ in reviewed_nonpy}
@@ -2341,6 +2343,7 @@ def successor_controls(classifier):
             assert 'nonpy-entry:tests/drive.sh' not in model['entry_points'] and rows['tests/drive.sh']['class'] != 'keep'
             rejected(sh_edited, 'source mismatch', standalone=[dict(sh_role, input_revision=sh_edited.ref)])
         finally: REVIEWED_NONPY_ENTRIES = reviewed_nonpy
+        nonpy_roleset_controls(locals())  # H1025, in roles.py
 
         # (4) H979 persisted entered-module claims.
         assert run(first)[1]['tests/helper.py']['class'] == 'keep'
