@@ -2235,6 +2235,47 @@
           "tests/primitive-packets-1105/Constants/h57-conversion-transport.json"
         ],
         "other_reads": "unresolved"
+      },
+      {
+        "path": "tests/fullscope-20261104/vt1/gen-helper-modules.py",
+        "input_revision": "3799f46a504e48d718c7d66fd1eccceac041ec76",
+        "source_blob": "2d32807415e8849ca788dfd00f9b473c1a4c01f2",
+        "command": [
+          "python3",
+          "-B",
+          "tests/fullscope-20261104/vt1/gen-helper-modules.py"
+        ],
+        "kind": "runnable-entrypoint",
+        "entry_line": 129,
+        "purpose": "Passing source-module generator consumes these exact immutable saved Yul text/tree fixtures. Paired runs occurred only in a disposable checkout; generated Lean outputs, including later readback, were excluded from input credit and all restored to committed bytes. No compiler authenticity, generated-output validation, Lean elaboration, certificate, theorem, kernel or runtime credit. Other reads unresolved.",
+        "input_scope": [
+          "tests/fullscope-20261104/vt1/fixtures/abi-helpers.term",
+          "tests/fullscope-20261104/vt1/fixtures/abi-helpers.yul",
+          "tests/fullscope-20261104/vt1/fixtures/exp-helpers.term",
+          "tests/fullscope-20261104/vt1/fixtures/exp-helpers.yul",
+          "tests/fullscope-20261104/vt1/fixtures/push-helpers.term",
+          "tests/fullscope-20261104/vt1/fixtures/push-helpers.yul"
+        ],
+        "other_reads": "unresolved"
+      },
+      {
+        "path": "tests/fullscope-20261104/vt1/gen-census-modules.py",
+        "input_revision": "3799f46a504e48d718c7d66fd1eccceac041ec76",
+        "source_blob": "98286e1e324d013d63e2a075e57b3bd38094256f",
+        "command": [
+          "python3",
+          "-B",
+          "tests/fullscope-20261104/vt1/gen-census-modules.py"
+        ],
+        "kind": "runnable-entrypoint",
+        "entry_line": 253,
+        "purpose": "Passing source-module generator consumes these exact immutable saved Yul text/tree fixtures. Paired runs occurred only in a disposable checkout; generated Lean outputs, including later readback, were excluded from input credit and all restored to committed bytes. No compiler authenticity, generated-output validation, Lean elaboration, certificate, theorem, kernel or runtime credit. Other reads unresolved.",
+        "input_scope": [
+          "tests/fullscope-20261104/vt1/fixtures/Census.unoptimized.yul",
+          "tests/fullscope-20261104/vt1/fixtures/LinkedMath.unoptimized.yul",
+          "tests/fullscope-20261104/vt1/fixtures/census-tree.txt"
+        ],
+        "other_reads": "unresolved"
       }
     ],
     "module_entries": [
@@ -3043,6 +3084,177 @@
         ],
         "target": "tests/primitive-packets-1105/Constants/H57ConversionTransport.lean",
         "target_blob": "5f1a1ca97b075183d82d9317b5a0e16380365124",
+        "operation": "validated Python read of measured bytes"
+      },
+      {
+        "runner": "validated:tests/fullscope-20261104/vt1/gen-helper-modules.py",
+        "input_revision": "3799f46a504e48d718c7d66fd1eccceac041ec76",
+        "frames": [
+          {
+            "path": "tests/fullscope-20261104/vt1/gen-helper-modules.py",
+            "blob": "2d32807415e8849ca788dfd00f9b473c1a4c01f2",
+            "line": 130
+          },
+          {
+            "path": "tests/fullscope-20261104/vt1/gen-helper-modules.py",
+            "blob": "2d32807415e8849ca788dfd00f9b473c1a4c01f2",
+            "line": 33
+          }
+        ],
+        "target": "tests/fullscope-20261104/vt1/fixtures/abi-helpers.yul",
+        "target_blob": "4e133fdc60a67a77603a89970683730b81f6695f",
+        "operation": "validated Python read of measured bytes"
+      },
+      {
+        "runner": "validated:tests/fullscope-20261104/vt1/gen-helper-modules.py",
+        "input_revision": "3799f46a504e48d718c7d66fd1eccceac041ec76",
+        "frames": [
+          {
+            "path": "tests/fullscope-20261104/vt1/gen-helper-modules.py",
+            "blob": "2d32807415e8849ca788dfd00f9b473c1a4c01f2",
+            "line": 130
+          },
+          {
+            "path": "tests/fullscope-20261104/vt1/gen-helper-modules.py",
+            "blob": "2d32807415e8849ca788dfd00f9b473c1a4c01f2",
+            "line": 33
+          }
+        ],
+        "target": "tests/fullscope-20261104/vt1/fixtures/exp-helpers.yul",
+        "target_blob": "bc17e3aae470e06756d38b2458d7ed5243f575ba",
+        "operation": "validated Python read of measured bytes"
+      },
+      {
+        "runner": "validated:tests/fullscope-20261104/vt1/gen-helper-modules.py",
+        "input_revision": "3799f46a504e48d718c7d66fd1eccceac041ec76",
+        "frames": [
+          {
+            "path": "tests/fullscope-20261104/vt1/gen-helper-modules.py",
+            "blob": "2d32807415e8849ca788dfd00f9b473c1a4c01f2",
+            "line": 130
+          },
+          {
+            "path": "tests/fullscope-20261104/vt1/gen-helper-modules.py",
+            "blob": "2d32807415e8849ca788dfd00f9b473c1a4c01f2",
+            "line": 33
+          }
+        ],
+        "target": "tests/fullscope-20261104/vt1/fixtures/push-helpers.yul",
+        "target_blob": "f1b6cfb4d5c8e4f0ac673e36a9ddfa80dcb8bc16",
+        "operation": "validated Python read of measured bytes"
+      },
+      {
+        "runner": "validated:tests/fullscope-20261104/vt1/gen-helper-modules.py",
+        "input_revision": "3799f46a504e48d718c7d66fd1eccceac041ec76",
+        "frames": [
+          {
+            "path": "tests/fullscope-20261104/vt1/gen-helper-modules.py",
+            "blob": "2d32807415e8849ca788dfd00f9b473c1a4c01f2",
+            "line": 130
+          },
+          {
+            "path": "tests/fullscope-20261104/vt1/gen-helper-modules.py",
+            "blob": "2d32807415e8849ca788dfd00f9b473c1a4c01f2",
+            "line": 34
+          }
+        ],
+        "target": "tests/fullscope-20261104/vt1/fixtures/abi-helpers.term",
+        "target_blob": "4df722a6337acf6e2690fd377383f46422ae4056",
+        "operation": "validated Python read of measured bytes"
+      },
+      {
+        "runner": "validated:tests/fullscope-20261104/vt1/gen-helper-modules.py",
+        "input_revision": "3799f46a504e48d718c7d66fd1eccceac041ec76",
+        "frames": [
+          {
+            "path": "tests/fullscope-20261104/vt1/gen-helper-modules.py",
+            "blob": "2d32807415e8849ca788dfd00f9b473c1a4c01f2",
+            "line": 130
+          },
+          {
+            "path": "tests/fullscope-20261104/vt1/gen-helper-modules.py",
+            "blob": "2d32807415e8849ca788dfd00f9b473c1a4c01f2",
+            "line": 34
+          }
+        ],
+        "target": "tests/fullscope-20261104/vt1/fixtures/exp-helpers.term",
+        "target_blob": "eee5d47c4c0391359d9ee32db0e05b03e9e0d89d",
+        "operation": "validated Python read of measured bytes"
+      },
+      {
+        "runner": "validated:tests/fullscope-20261104/vt1/gen-helper-modules.py",
+        "input_revision": "3799f46a504e48d718c7d66fd1eccceac041ec76",
+        "frames": [
+          {
+            "path": "tests/fullscope-20261104/vt1/gen-helper-modules.py",
+            "blob": "2d32807415e8849ca788dfd00f9b473c1a4c01f2",
+            "line": 130
+          },
+          {
+            "path": "tests/fullscope-20261104/vt1/gen-helper-modules.py",
+            "blob": "2d32807415e8849ca788dfd00f9b473c1a4c01f2",
+            "line": 34
+          }
+        ],
+        "target": "tests/fullscope-20261104/vt1/fixtures/push-helpers.term",
+        "target_blob": "21ddb43b9a061133ab9341ffbeab0dfc9c97e846",
+        "operation": "validated Python read of measured bytes"
+      },
+      {
+        "runner": "validated:tests/fullscope-20261104/vt1/gen-census-modules.py",
+        "input_revision": "3799f46a504e48d718c7d66fd1eccceac041ec76",
+        "frames": [
+          {
+            "path": "tests/fullscope-20261104/vt1/gen-census-modules.py",
+            "blob": "98286e1e324d013d63e2a075e57b3bd38094256f",
+            "line": 242
+          },
+          {
+            "path": "tests/fullscope-20261104/vt1/gen-census-modules.py",
+            "blob": "98286e1e324d013d63e2a075e57b3bd38094256f",
+            "line": 25
+          }
+        ],
+        "target": "tests/fullscope-20261104/vt1/fixtures/census-tree.txt",
+        "target_blob": "aa029ba335a8f0360750d82b99dfc79e420f24fb",
+        "operation": "validated Python read of measured bytes"
+      },
+      {
+        "runner": "validated:tests/fullscope-20261104/vt1/gen-census-modules.py",
+        "input_revision": "3799f46a504e48d718c7d66fd1eccceac041ec76",
+        "frames": [
+          {
+            "path": "tests/fullscope-20261104/vt1/gen-census-modules.py",
+            "blob": "98286e1e324d013d63e2a075e57b3bd38094256f",
+            "line": 249
+          },
+          {
+            "path": "tests/fullscope-20261104/vt1/gen-census-modules.py",
+            "blob": "98286e1e324d013d63e2a075e57b3bd38094256f",
+            "line": 101
+          }
+        ],
+        "target": "tests/fullscope-20261104/vt1/fixtures/Census.unoptimized.yul",
+        "target_blob": "119893c2ad1cb0a4a022e44055834e956bdf29ac",
+        "operation": "validated Python read of measured bytes"
+      },
+      {
+        "runner": "validated:tests/fullscope-20261104/vt1/gen-census-modules.py",
+        "input_revision": "3799f46a504e48d718c7d66fd1eccceac041ec76",
+        "frames": [
+          {
+            "path": "tests/fullscope-20261104/vt1/gen-census-modules.py",
+            "blob": "98286e1e324d013d63e2a075e57b3bd38094256f",
+            "line": 249
+          },
+          {
+            "path": "tests/fullscope-20261104/vt1/gen-census-modules.py",
+            "blob": "98286e1e324d013d63e2a075e57b3bd38094256f",
+            "line": 102
+          }
+        ],
+        "target": "tests/fullscope-20261104/vt1/fixtures/LinkedMath.unoptimized.yul",
+        "target_blob": "5447ec607e00bf08aa8ec49020cd2bb955c646ef",
         "operation": "validated Python read of measured bytes"
       }
     ],
