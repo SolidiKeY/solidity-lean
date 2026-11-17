@@ -1166,19 +1166,6 @@
         "purpose": "Declared standalone program: Guard OT-PAGES-IDE: pinned container config reaches the strict WASM builder. Explicit source role only; default invocation is unvalidated. No read anchor, helper/fixture/child, output, proof or runtime credit."
       },
       {
-        "path": "tests/directruntime-20261104/native-browser/prepare-image-cache.py",
-        "input_revision": "c63043dc56335f6984a0e6303445f5ac6b9078dd",
-        "source_blob": "c9695f1c0bf66b40be1f138f3da7e1ebc147ffde",
-        "command": [
-          "python3",
-          "-B",
-          "tests/directruntime-20261104/native-browser/prepare-image-cache.py"
-        ],
-        "kind": "source-only-program",
-        "entry_line": 4,
-        "purpose": "Declared standalone program: Drop clean cache pages for this private SDK container and its public Lean libraries. Explicit source role only; default invocation is unvalidated. No read anchor, helper/fixture/child, output, proof or runtime credit."
-      },
-      {
         "path": "tests/directruntime-20261104/native-browser/primitive-return/native-negatives.py",
         "input_revision": "c63043dc56335f6984a0e6303445f5ac6b9078dd",
         "source_blob": "b9741645006241628513a37935e6a923841dae9a",
