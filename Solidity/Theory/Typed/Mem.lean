@@ -1,5 +1,6 @@
 import Solidity.Calculus.StateFacts
 import Solidity.Typing.Values
+import Solidity.Semantics.AllocBytes
 
 /-!
 # The Theory of memory, typed
@@ -273,14 +274,12 @@ theorem Objs.get_snoc_lt {H : HTy} {R R₂ : RefTy} (o : MObj H R) : (Rs : List 
 
 theorem Objs.get_snoc_last {H : HTy} {R : RefTy} (o : MObj H R) : (Rs : List RefTy) →
     (os : Objs H Rs) → (h : (Rs ++ [R])[Rs.length]? = some R) →
-    Objs.get (Rs ++ [R]) (Objs.snoc o Rs os) Rs.length h = o
-  | [], _, _ => rfl
-  | _ :: Rs, os, _ => Objs.get_snoc_last o Rs os.2 _
+    Objs.get (Rs ++ [R]) (Objs.snoc o Rs os) Rs.length h = o := Solidity.Objs.get_snoc_top o
 
 /-- The object allocated is the one given. -/
 theorem Heap.get_alloc {H : HTy} {R : RefTy} (hp : Heap H) (o : MObj H R) :
     (hp.alloc o).1.get (hp.alloc o).2 = MObj.wk (List.prefix_append H [R]) R o :=
-  Objs.get_snoc_last _ H _ _
+  Solidity.Heap.get_alloc_self hp o
 
 theorem Heap.Keeps.refl {H : HTy} (hp : Heap H) : Heap.Keeps (List.prefix_refl H) hp hp :=
   fun r => (MObj.wk_refl _ (hp.get r)).symm

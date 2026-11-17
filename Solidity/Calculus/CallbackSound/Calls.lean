@@ -1,4 +1,5 @@
 import Solidity.Calculus.CallbackSound.Payments
+import Solidity.Semantics.RunAccel
 
 /-!
 # Callback soundness: calls, loops, the theorem
@@ -173,10 +174,6 @@ theorem Args.execP_declsThen_halt {Γ Δ : Ctx} : {ps : Ctx} → (as : Args C Γ
         subst ha
         refine Args.execP_declsThen as _ σ a'' ha' (.halt (ExecS.det_err rfl ?_))
         rw [Stmt.runSt_declMem, MPath.mvalT_unders, hv]; rfl
-
-/-- Two outcomes over a heap end alike when their states do. -/
-theorem Out.eq_of_st {H : HTy} {Γ : Ctx} {a b : Out C H Γ} (h : a.st = b.st) : a = b := by
-  cases a; cases b; cases h; rfl
 
 /-- `TEnv.put_atop` at a frame read as `[] ++ ps`, a call's with no return
 variable. -/

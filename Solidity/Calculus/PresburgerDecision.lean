@@ -1,4 +1,5 @@
 import Solidity.Calculus.LinearCountermodel
+import Solidity.AST
 
 /-!
 # Quantified linear arithmetic over naturals, decided (M7, step 4)
@@ -967,10 +968,7 @@ theorem depth_le_depthL {s : QFml} : ∀ {ss : List QFml}, s ∈ ss → s.depth 
     · exact Nat.le_trans (depth_le_depthL h) (Nat.le_max_right _ _)
 
 theorem lex_lt {a a' b b' : Nat} (h1 : a ≤ a') (h2 : b < b') :
-    Prod.Lex (· < ·) (· < ·) (a, b) (a', b') := by
-  rcases Nat.lt_or_eq_of_le h1 with h | rfl
-  · exact .left _ _ h
-  · exact .right _ h2
+    Prod.Lex (· < ·) (· < ·) (a, b) (a', b') := Solidity.Semantics.lex_le_lt h1 h2
 
 /-- **The formula at zero**: `∃ xᵢ. ⋁ S` holds with every other variable
 `0` when some formula `S` reaches so holds at zero. -/
