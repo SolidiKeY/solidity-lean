@@ -282,6 +282,16 @@ example (E : Source.Env) (C : Contract) (H : HTy) (v : Source.Val E.layout .bool
     (x : PrimTy.uint.Denote) : ¬ (loopRel E C).val H .bool (.val .uint) v x :=
   fun ⟨h, _⟩ => nomatch h
 
+/-- H1033: the Source policy allows exactly the admitted executions, and an
+execution with a failure plan is not one. -/
+example (s : SourceProgram) (e : SourceExecution s) :
+    (Observe.source s).allowed e ↔
+      e.plan = none ∧ e.calldataKnown = true ∧ e.frame.static = false ∧ e.frame.checked = true :=
+  Iff.rfl
+example (s : SourceProgram) (e : SourceExecution s) (points : e.plan.isSome = true) :
+    ¬ (Observe.source s).allowed e :=
+  fun admitted => by rw [admitted.1] at points; cases points
+
 end Decoder
 
 end Solidity.Goals

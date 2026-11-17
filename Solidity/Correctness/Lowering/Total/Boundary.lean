@@ -25,7 +25,8 @@ The concrete boundary is begun here, not finished:
 * `loopBoundary_fullDomain` and `loopResidual_iff` state what is left once
   admission and association are fixed.
 * `Observe.source`/`Observe.target` are the observation policies (H1021): no
-  events, the kind of the outcome at the first completing horizon.
+  events, the kind of the outcome at the first completing horizon, on the
+  admitted Source executions only (`Observe.Admitted`, H1033).
 * `Simulation.Simulates rel` is `relates` (H1022): one general simulation,
   which the e1 endpoints imply (`of_endpoint`, `of_retEndpoint`).
   It is relative to a state relation `rel`.
@@ -40,7 +41,8 @@ The concrete boundary is begun here, not finished:
   boundary at it, a closed term, with `loopResidualStage1_iff`.
 
 Each of the three choices has known defects, listed at its section: the
-policies observe the outcome kind only and allow every environment, the
+policies observe the outcome kind only and cannot tie `PassCorrect` to the
+state relation, the
 simulation can hold vacuously, and the allocation trace is incomplete. The
 boundary is therefore not ready to carry the goal.
 
@@ -68,13 +70,16 @@ revert data is compared only in `Simulation.Final`. Event and journal
 faithfulness is stated by no proposition in this file: it is dropped by these
 policies, not yet exposed as an obligation.
 
-Known defects of this choice, open: every environment is allowed, including
-Source executions with a failure plan, while the simulation speaks of the
-default plan only; a stuck Source run observes like a diverging model run; an
-escaping `break` or `continue` observes as success; and `PassCorrect` at these
-policies needs a surjection from model states onto Source executions that is
-tied to no state relation, so it may be false for reasons unrelated to
-lowering, or say very little. -/
+The Source policy allows the admitted executions only (`Admitted`, H1033), the
+same ones the simulation speaks of; every model state is allowed.
+
+Known defects of this choice, open: a stuck Source run observes like a
+diverging model run; an escaping `break` or `continue` observes as success;
+and `PassCorrect` still needs a surjection from model states onto the admitted
+Source executions. The frozen `PassCorrect` lets its prover choose that map,
+and nothing here can tie it to the state relation, so the refinement conjunct
+may be false for reasons unrelated to lowering (the admitted executions still
+range over every Source global), or say little where true. -/
 namespace Observe
 
 open Solidity.Roadmap
@@ -122,10 +127,22 @@ theorem first_consistent (f : Nat → Option Outcome) :
   | none => exact .inl (by simp only [silent, e])
   | some o => exact .inr (by simp only [silent, e, first_mono h e])
 
-/-- The Source policy: the first completing horizon of the actual run. -/
+/-- **The admitted Source executions** (H1033): those an execution of the
+model can stand for. No failure plan and known calldata (the model has
+neither), and a frame that may write and checks arithmetic (the model always
+does). This is the part of "image of a model state" that can be said of a
+Source execution alone: the policy of a Source program does not see the model
+contract, context or state, so the abstraction itself is the state relation
+of the simulation (`Simulation.Simulates`), which is stated over exactly
+these executions. -/
+def Admitted {s : SourceProgram} (e : SourceExecution s) : Prop :=
+  e.plan = none ∧ e.calldataKnown = true ∧ e.frame.static = false ∧ e.frame.checked = true
+
+/-- The Source policy: the first completing horizon of the actual run, on the
+admitted executions. -/
 def source (s : SourceProgram) :
     ObservationPolicy (fun e n => @SourceExecution.result s e n) where
-  allowed _ := True
+  allowed := Admitted
   admissible _ := True
   forward _ _ := True
   guard _ _ := True
@@ -203,7 +220,7 @@ the e1 endpoints by cases. The e1 endpoints imply it (`of_endpoint`,
 `of_retEndpoint`); they are stronger and are not recovered from it. It is
 relative to a state relation `rel` (values and globals; `loopRel` below is the
 stage-1 one). It speaks of
-runs with no failure plan and known calldata only.
+the admitted executions only (`Observe.Admitted`).
 
 Known defects, open. `Simulates` can hold vacuously: its context maps are
 chosen existentially and are tied to no names, so a map between unrelatable
@@ -249,7 +266,7 @@ def Simulates (rel : (E : Source.Env) → (C : Contract) → StateRelation E C)
     (s : SourceProgram) {C : Contract} {Γ : Ctx} (p : Blk C Γ) : Prop :=
   ∃ (m : Lowering.V07.ContextMap s.before Γ) (m' : Lowering.V07.ContextMap s.after p.1)
     (emb : Thin Γ p.1),
-    ∀ (e : SourceExecution s) (tgt : State C Γ), e.plan = none → e.calldataKnown = true →
+    ∀ (e : SourceExecution s) (tgt : State C Γ), Observe.Admitted e →
       m.Related ((rel s.env C).val tgt.H) e.initial.1 tgt.env →
       (rel s.env C).glob e.glob e.frame e.initial.2 tgt.glob →
       ∃ N, ∀ n,
@@ -284,7 +301,8 @@ theorem of_endpoint
     {m : Lowering.V07.ContextMap srcΓ Γ} {program : Prog C Γ Δ} {emb : Thin Γ Δ}
     (h : Loops.Endpoint statement offset m program emb) :
     Simulates rel (SourceProgram.ofStmt statement) (⟨Δ, program⟩ : Blk C Γ) := by
-  refine ⟨m, m.wk emb, emb, fun e tgt plan known related glob => ⟨offset + 1, fun n => ?_⟩⟩
+  refine ⟨m, m.wk emb, emb, fun e tgt admitted related glob => ⟨offset + 1, fun n => ?_⟩⟩
+  obtain ⟨plan, known, -, -⟩ := admitted
   obtain ⟨G, F, nps, ph, initial, plan', known'⟩ := e
   cases plan
   cases known
@@ -307,7 +325,8 @@ theorem of_retEndpoint
     {witness : Idx Δ (.val .bool)}
     (h : Loops.RetEndpoint statement offset m program emb witness) :
     Simulates rel (SourceProgram.ofStmt statement) (⟨Δ, program⟩ : Blk C Γ) := by
-  refine ⟨m, m.wk emb, emb, fun e tgt plan known related glob => ⟨offset + 1, fun n => ?_⟩⟩
+  refine ⟨m, m.wk emb, emb, fun e tgt admitted related glob => ⟨offset + 1, fun n => ?_⟩⟩
+  obtain ⟨plan, known, -, -⟩ := admitted
   obtain ⟨G, F, nps, ph, initial, plan', known'⟩ := e
   cases plan
   cases known
@@ -324,7 +343,7 @@ out a degenerate `rel`; non-emptiness is a separate obligation, not yet stated. 
 theorem vacuous (empty : ∀ E C G F st σ, ¬ (rel E C).glob G F st σ) {s : SourceProgram}
     {C : Contract} {Γ : Ctx} (p : Blk C Γ) (m : Lowering.V07.ContextMap s.before Γ)
     (m' : Lowering.V07.ContextMap s.after p.1) (emb : Thin Γ p.1) : Simulates rel s p :=
-  ⟨m, m', emb, fun _ _ _ _ _ glob => absurd glob (empty _ _ _ _ _ _)⟩
+  ⟨m, m', emb, fun _ _ _ _ glob => absurd glob (empty _ _ _ _ _ _)⟩
 
 end Simulation
 
