@@ -10,12 +10,8 @@ stated here, proved by et3-elab-knot-total.  Written against the public names
 only, so it reads the same over the `partial` knot of today and over its
 totalization.  Outputs are not part of it: the totalization keeps them.
 
-1. `ElabKernelFix` and `ElabKernelNames`: the knot satisfies its defining
-   equations, and each field of `elabRec C ()` is the block's function.
-2. `ElabKernelInduction`: a predicate on successful runs that the arms
-   preserve, given it for the record's callbacks, holds of the knot.
-3. `ElabKernelHelpers`: the defining equations of the `partial` helpers the
-   arms reach (so far `renameStmts`, `lowerReturns`, `RawExpr.mapM`).
+Clauses: `ElabKernelFix`/`ElabKernelNames` (equations), `ElabKernelInduction`
+(successful runs), `ElabKernelHelpers` (the reached `partial` helpers).
 -/
 
 namespace Solidity.Goals
@@ -26,8 +22,7 @@ section Elab
 
 variable [FreshNames] (C : Contract)
 
-/-- `x`, from scope `sc` and state `st`, succeeds with `b` and state `st'`
-(at some call memo). -/
+/-- `x`, from `sc` and `st`, succeeds with `b` and state `st'` (any memo). -/
 def ElabRan {β : Type} (x : ElabM β) (sc : ElabScope) (st : ECtx × Nat) (b : β)
     (st' : ECtx × Nat) : Prop :=
   ∃ m m', ((x.run sc).run st).run m = .ok ((b, st'), m')
