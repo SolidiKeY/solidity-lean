@@ -2228,6 +2228,7 @@ def successor_controls(classifier):
         assert len(reviewed_nonpy) == 176 and len({p for p, _, _ in reviewed_nonpy}) == 176  # H997 115, H1025 61
         assert all(p.startswith('tests/') and posixpath.splitext(p)[1] in NONPY_SHEBANGS
                    and '.test.' not in p and classifier['hex_pin'](b, 40) and classifier['hex_pin'](c, 40) for p, b, c in reviewed_nonpy)
+        assert all(p.startswith(('tests/directruntime-20261104/', 'tests/upstream/')) for p, _, _ in reviewed_nonpy - REVIEWED_NONPY_ENTRIES_H1025)
         witnesses = {'tests/directruntime-20261104/shared-translator/bounded.sh', 'tests/directruntime-20261104/native-browser/readbounds/module-gates.sh',
                      'tests/directruntime-20261104/memory-references/native-source-controls.mjs'}
         assert witnesses <= {p for p, _, _ in reviewed_nonpy}
