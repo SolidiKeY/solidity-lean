@@ -1,2 +1,0 @@
-| `Frontend/ExecutableAst/Shared/ObligationCaptureV2.lean` | Additive exact-output capture of the actual obligation callbacks and arguments, with unchanged error and forget equality; no source adequacy. |
-| `Frontend/ExecutableCounterexampleMetadataV2.lean` | Internal first-invocation retention, literal reification and no-search lookup with durable tokens and synchronous kernel checks. No source/session/candidate certification. |
