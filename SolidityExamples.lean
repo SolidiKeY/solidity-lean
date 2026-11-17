@@ -158,6 +158,7 @@ import Solidity.Examples.Goals.Taclets
 import Solidity.Examples.Goals.Total
 import Solidity.Examples.InputReduction
 import Solidity.Examples.IntrinsicSession.Run
+import Solidity.Examples.IntrinsicSession.Spec
 import Solidity.Examples.IntrinsicSession.Step
 import Solidity.Examples.IntrinsicStorage.Preimages.Frames
 import Solidity.Examples.IntrinsicStorage.Preimages.Ops
@@ -177,6 +178,7 @@ import Solidity.Examples.Notation
 import Solidity.Examples.Panic.Eval
 import Solidity.Examples.Panic.GuardsArith
 import Solidity.Examples.Panic.Origins
+import Solidity.Examples.Panic.ProvenanceControl
 import Solidity.Examples.Panic.ProvenanceEval
 import Solidity.Examples.Panic.Result
 import Solidity.Examples.Panic.Source
