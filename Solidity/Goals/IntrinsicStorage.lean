@@ -79,8 +79,9 @@ structure StorageLaws (F : Fixed) (I : IntrinsicSpec) (V : View I) : Prop where
     Ends run → ∀ r out, Good I r →
       h ++ [Event.tx q.sender q.target q.value q.timestamp q.input out] <+:
         (I.lang.sem p en r).events →
-      ∃ fuel, let a := Solidity.Semantics.IntrinsicStorage.Frame.call fuel w ref entry
-          (requestContext q [])
+      ∃ fuel,
+        let a :=
+          Solidity.Semantics.IntrinsicStorage.Frame.call fuel w ref entry (requestContext q [])
         a.result = run ∧ FrameInputs I p en r a.inputs
   /-- The same concrete obligation for the selected constructor, before
   transaction rollback discards its attempted writes and payments. -/
@@ -103,8 +104,9 @@ structure StorageLaws (F : Fixed) (I : IntrinsicSpec) (V : View I) : Prop where
     Ends run → ∀ r out address, Good I r →
       [Event.deploy e.deployer e.deployValue e.deployArgs out address] <+:
         (I.lang.sem p en r).events →
-      ∃ fuel, let a := Solidity.Semantics.IntrinsicStorage.Frame.create fuel w k
-          (liftAddress this) body ctx
+      ∃ fuel,
+        let a :=
+          Solidity.Semantics.IntrinsicStorage.Frame.create fuel w k (liftAddress this) body ctx
         a.result = run ∧ FrameInputs I p en r a.inputs
 
 end IntrinsicSession
@@ -117,6 +119,7 @@ Whole-session hash equality remains deferred to the session implementation (H720
 @[goal Solidity.Semantics.IntrinsicSession.storage_accounting_correct "is0-intrinsic-session"]
 def intrinsicStorageAccounting : Prop :=
   ∀ F : Solidity.Roadmap.Fixed, ∃ (I : Solidity.Roadmap.IntrinsicSpec)
-    (V : IntrinsicSession.View I), IntrinsicSession.Laws F I V ∧ IntrinsicSession.StorageLaws F I V
+    (V : IntrinsicSession.View I),
+    IntrinsicSession.Laws F I V ∧ IntrinsicSession.StorageLaws F I V
 
 end Solidity.Goals
