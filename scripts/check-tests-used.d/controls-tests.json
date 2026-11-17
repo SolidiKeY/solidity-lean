@@ -465,6 +465,52 @@
         "kind": "source-only-program",
         "entry_line": 11,
         "purpose": "Existing Python program with a genuine default top-level entry and required positional input. The entry prefix does not supply that input and is not certified to pass. Source declaration only: no read anchor, fixture, helper, child, generated output, current validation, native or proof credit."
+      },
+      {
+        "path": "tests/h62/item2/audit-v09-passes/test_signature_boundaries.py",
+        "input_revision": "734bf9dffbfc882a0fedd5faf2484b61fcab76e6",
+        "source_blob": "8197c24e965db18f3157c5a62bd70601d0a851ee",
+        "command": [
+          "python3",
+          "-B",
+          "tests/h62/item2/audit-v09-passes/test_signature_boundaries.py"
+        ],
+        "kind": "unittest",
+        "purpose": "Existing signature-boundary regression suite passed ordinary and instrumented execution. Only the listed exact witness-map JSON inputs receive positive data-use credit; other reads remain unresolved. This does not establish Lean elaboration, premise satisfaction, compiler refinement or external EVM proof.",
+        "input_scope": [
+          "tests/h62/item2/audit-v09-passes/allocated-reference-read-witness-map.json",
+          "tests/h62/item2/audit-v09-passes/boundary-witness-map.json",
+          "tests/h62/item2/audit-v09-passes/compiler-call-scope-witness-map.json",
+          "tests/h62/item2/audit-v09-passes/core-boundary-witness-map.json",
+          "tests/h62/item2/audit-v09-passes/heap-boundary-witness-map.json",
+          "tests/h62/item2/audit-v09-passes/join-cost-witness-map.json",
+          "tests/h62/item2/audit-v09-passes/join-frame-witness-map.json",
+          "tests/h62/item2/audit-v09-passes/joined-allocation-witness-map.json",
+          "tests/h62/item2/audit-v09-passes/joined-memory-witness-map.json",
+          "tests/h62/item2/audit-v09-passes/loop-call-witness-map.json",
+          "tests/h62/item2/audit-v09-passes/loop-prefix-witness-map.json",
+          "tests/h62/item2/audit-v09-passes/loop-reframed-failure-witness-map.json",
+          "tests/h62/item2/audit-v09-passes/loop-scope-witness-map.json",
+          "tests/h62/item2/audit-v09-passes/memory-association-witness-map.json",
+          "tests/h62/item2/audit-v09-passes/memory-call-scope-witness-map.json",
+          "tests/h62/item2/audit-v09-passes/memory-call-witness-map.json",
+          "tests/h62/item2/audit-v09-passes/positive-allocation-failure-witness-map.json",
+          "tests/h62/item2/audit-v09-passes/preserved-allocator-witness-map.json",
+          "tests/h62/item2/audit-v09-passes/private-stack-witness-map.json",
+          "tests/h62/item2/audit-v09-passes/reference-call-capture-failure-witness-map.json",
+          "tests/h62/item2/audit-v09-passes/reference-call-readback-witness-map.json",
+          "tests/h62/item2/audit-v09-passes/reframed-triple-witness-map.json",
+          "tests/h62/item2/audit-v09-passes/reframed-witness-map.json",
+          "tests/h62/item2/audit-v09-passes/returned-memory-capture-witness-map.json",
+          "tests/h62/item2/audit-v09-passes/runtime-return-capture-witness-map.json",
+          "tests/h62/item2/audit-v09-passes/runtime-void-capture-witness-map.json",
+          "tests/h62/item2/audit-v09-passes/sequence-witness-map.json",
+          "tests/h62/item2/audit-v09-passes/shift-capture-witness-map.json",
+          "tests/h62/item2/audit-v09-passes/stack-witness-map.json",
+          "tests/h62/item2/audit-v09-passes/stateful-capture-witness-map.json",
+          "tests/h62/item2/audit-v09-passes/triple-admission-witness-map.json"
+        ],
+        "other_reads": "unresolved"
       }
     ]
   },
@@ -1599,6 +1645,715 @@
         ],
         "target": "tests/h62/item2/audit-bytecode-selection/selection-field-witnesses.json",
         "target_blob": "85938cf49908b76bc8f684ae4f010490b9ee09dc",
+        "operation": "validated Python read of measured bytes"
+      },
+      {
+        "runner": "validated:tests/h62/item2/audit-v09-passes/test_signature_boundaries.py",
+        "input_revision": "734bf9dffbfc882a0fedd5faf2484b61fcab76e6",
+        "frames": [
+          {
+            "path": "tests/h62/item2/audit-v09-passes/test_signature_boundaries.py",
+            "blob": "8197c24e965db18f3157c5a62bd70601d0a851ee",
+            "line": 307
+          },
+          {
+            "path": "tests/h62/item2/audit-v09-passes/test_signature_boundaries.py",
+            "blob": "8197c24e965db18f3157c5a62bd70601d0a851ee",
+            "line": 191
+          },
+          {
+            "path": "tests/h62/item2/audit-v09-passes/test_signature_boundaries.py",
+            "blob": "8197c24e965db18f3157c5a62bd70601d0a851ee",
+            "line": 156
+          }
+        ],
+        "target": "tests/h62/item2/audit-v09-passes/allocated-reference-read-witness-map.json",
+        "target_blob": "f57e99d4d4d1216f05ef082e495ea1cade7b9f25",
+        "operation": "validated Python read of measured bytes"
+      },
+      {
+        "runner": "validated:tests/h62/item2/audit-v09-passes/test_signature_boundaries.py",
+        "input_revision": "734bf9dffbfc882a0fedd5faf2484b61fcab76e6",
+        "frames": [
+          {
+            "path": "tests/h62/item2/audit-v09-passes/test_signature_boundaries.py",
+            "blob": "8197c24e965db18f3157c5a62bd70601d0a851ee",
+            "line": 307
+          },
+          {
+            "path": "tests/h62/item2/audit-v09-passes/test_signature_boundaries.py",
+            "blob": "8197c24e965db18f3157c5a62bd70601d0a851ee",
+            "line": 90
+          }
+        ],
+        "target": "tests/h62/item2/audit-v09-passes/boundary-witness-map.json",
+        "target_blob": "caadbc0fa4f58a2f3a8db8be2fcba3740f9f4d08",
+        "operation": "validated Python read of measured bytes"
+      },
+      {
+        "runner": "validated:tests/h62/item2/audit-v09-passes/test_signature_boundaries.py",
+        "input_revision": "734bf9dffbfc882a0fedd5faf2484b61fcab76e6",
+        "frames": [
+          {
+            "path": "tests/h62/item2/audit-v09-passes/test_signature_boundaries.py",
+            "blob": "8197c24e965db18f3157c5a62bd70601d0a851ee",
+            "line": 307
+          },
+          {
+            "path": "tests/h62/item2/audit-v09-passes/test_signature_boundaries.py",
+            "blob": "8197c24e965db18f3157c5a62bd70601d0a851ee",
+            "line": 191
+          },
+          {
+            "path": "tests/h62/item2/audit-v09-passes/test_signature_boundaries.py",
+            "blob": "8197c24e965db18f3157c5a62bd70601d0a851ee",
+            "line": 156
+          }
+        ],
+        "target": "tests/h62/item2/audit-v09-passes/compiler-call-scope-witness-map.json",
+        "target_blob": "2c6a1167ee4bf10d33ddf64cb8b9e831287c392e",
+        "operation": "validated Python read of measured bytes"
+      },
+      {
+        "runner": "validated:tests/h62/item2/audit-v09-passes/test_signature_boundaries.py",
+        "input_revision": "734bf9dffbfc882a0fedd5faf2484b61fcab76e6",
+        "frames": [
+          {
+            "path": "tests/h62/item2/audit-v09-passes/test_signature_boundaries.py",
+            "blob": "8197c24e965db18f3157c5a62bd70601d0a851ee",
+            "line": 307
+          },
+          {
+            "path": "tests/h62/item2/audit-v09-passes/test_signature_boundaries.py",
+            "blob": "8197c24e965db18f3157c5a62bd70601d0a851ee",
+            "line": 90
+          }
+        ],
+        "target": "tests/h62/item2/audit-v09-passes/core-boundary-witness-map.json",
+        "target_blob": "68737501baa2ba9e81f7424316d9115f0a7b87fd",
+        "operation": "validated Python read of measured bytes"
+      },
+      {
+        "runner": "validated:tests/h62/item2/audit-v09-passes/test_signature_boundaries.py",
+        "input_revision": "734bf9dffbfc882a0fedd5faf2484b61fcab76e6",
+        "frames": [
+          {
+            "path": "tests/h62/item2/audit-v09-passes/test_signature_boundaries.py",
+            "blob": "8197c24e965db18f3157c5a62bd70601d0a851ee",
+            "line": 307
+          },
+          {
+            "path": "tests/h62/item2/audit-v09-passes/test_signature_boundaries.py",
+            "blob": "8197c24e965db18f3157c5a62bd70601d0a851ee",
+            "line": 191
+          },
+          {
+            "path": "tests/h62/item2/audit-v09-passes/test_signature_boundaries.py",
+            "blob": "8197c24e965db18f3157c5a62bd70601d0a851ee",
+            "line": 156
+          }
+        ],
+        "target": "tests/h62/item2/audit-v09-passes/heap-boundary-witness-map.json",
+        "target_blob": "2e1fc041689934a95f4a52ff7780071d7a072b01",
+        "operation": "validated Python read of measured bytes"
+      },
+      {
+        "runner": "validated:tests/h62/item2/audit-v09-passes/test_signature_boundaries.py",
+        "input_revision": "734bf9dffbfc882a0fedd5faf2484b61fcab76e6",
+        "frames": [
+          {
+            "path": "tests/h62/item2/audit-v09-passes/test_signature_boundaries.py",
+            "blob": "8197c24e965db18f3157c5a62bd70601d0a851ee",
+            "line": 307
+          },
+          {
+            "path": "tests/h62/item2/audit-v09-passes/test_signature_boundaries.py",
+            "blob": "8197c24e965db18f3157c5a62bd70601d0a851ee",
+            "line": 191
+          },
+          {
+            "path": "tests/h62/item2/audit-v09-passes/test_signature_boundaries.py",
+            "blob": "8197c24e965db18f3157c5a62bd70601d0a851ee",
+            "line": 156
+          }
+        ],
+        "target": "tests/h62/item2/audit-v09-passes/join-cost-witness-map.json",
+        "target_blob": "6fec4e187c64c8dea98ba295c8aa995bd6e3c6e8",
+        "operation": "validated Python read of measured bytes"
+      },
+      {
+        "runner": "validated:tests/h62/item2/audit-v09-passes/test_signature_boundaries.py",
+        "input_revision": "734bf9dffbfc882a0fedd5faf2484b61fcab76e6",
+        "frames": [
+          {
+            "path": "tests/h62/item2/audit-v09-passes/test_signature_boundaries.py",
+            "blob": "8197c24e965db18f3157c5a62bd70601d0a851ee",
+            "line": 307
+          },
+          {
+            "path": "tests/h62/item2/audit-v09-passes/test_signature_boundaries.py",
+            "blob": "8197c24e965db18f3157c5a62bd70601d0a851ee",
+            "line": 191
+          },
+          {
+            "path": "tests/h62/item2/audit-v09-passes/test_signature_boundaries.py",
+            "blob": "8197c24e965db18f3157c5a62bd70601d0a851ee",
+            "line": 156
+          }
+        ],
+        "target": "tests/h62/item2/audit-v09-passes/join-frame-witness-map.json",
+        "target_blob": "dd64d31099aab31ba7975ed62ee8d95c90b0ad77",
+        "operation": "validated Python read of measured bytes"
+      },
+      {
+        "runner": "validated:tests/h62/item2/audit-v09-passes/test_signature_boundaries.py",
+        "input_revision": "734bf9dffbfc882a0fedd5faf2484b61fcab76e6",
+        "frames": [
+          {
+            "path": "tests/h62/item2/audit-v09-passes/test_signature_boundaries.py",
+            "blob": "8197c24e965db18f3157c5a62bd70601d0a851ee",
+            "line": 307
+          },
+          {
+            "path": "tests/h62/item2/audit-v09-passes/test_signature_boundaries.py",
+            "blob": "8197c24e965db18f3157c5a62bd70601d0a851ee",
+            "line": 118
+          }
+        ],
+        "target": "tests/h62/item2/audit-v09-passes/joined-allocation-witness-map.json",
+        "target_blob": "3c5110f59285bf1c599755c9e9b274f1e2f3a3e6",
+        "operation": "validated Python read of measured bytes"
+      },
+      {
+        "runner": "validated:tests/h62/item2/audit-v09-passes/test_signature_boundaries.py",
+        "input_revision": "734bf9dffbfc882a0fedd5faf2484b61fcab76e6",
+        "frames": [
+          {
+            "path": "tests/h62/item2/audit-v09-passes/test_signature_boundaries.py",
+            "blob": "8197c24e965db18f3157c5a62bd70601d0a851ee",
+            "line": 307
+          },
+          {
+            "path": "tests/h62/item2/audit-v09-passes/test_signature_boundaries.py",
+            "blob": "8197c24e965db18f3157c5a62bd70601d0a851ee",
+            "line": 118
+          }
+        ],
+        "target": "tests/h62/item2/audit-v09-passes/joined-memory-witness-map.json",
+        "target_blob": "62a940a6d51926b0611a6aea78bacbbd2d25e056",
+        "operation": "validated Python read of measured bytes"
+      },
+      {
+        "runner": "validated:tests/h62/item2/audit-v09-passes/test_signature_boundaries.py",
+        "input_revision": "734bf9dffbfc882a0fedd5faf2484b61fcab76e6",
+        "frames": [
+          {
+            "path": "tests/h62/item2/audit-v09-passes/test_signature_boundaries.py",
+            "blob": "8197c24e965db18f3157c5a62bd70601d0a851ee",
+            "line": 307
+          },
+          {
+            "path": "tests/h62/item2/audit-v09-passes/test_signature_boundaries.py",
+            "blob": "8197c24e965db18f3157c5a62bd70601d0a851ee",
+            "line": 191
+          },
+          {
+            "path": "tests/h62/item2/audit-v09-passes/test_signature_boundaries.py",
+            "blob": "8197c24e965db18f3157c5a62bd70601d0a851ee",
+            "line": 156
+          }
+        ],
+        "target": "tests/h62/item2/audit-v09-passes/loop-call-witness-map.json",
+        "target_blob": "548f95de521d13a06184478663b65918d5f2d19d",
+        "operation": "validated Python read of measured bytes"
+      },
+      {
+        "runner": "validated:tests/h62/item2/audit-v09-passes/test_signature_boundaries.py",
+        "input_revision": "734bf9dffbfc882a0fedd5faf2484b61fcab76e6",
+        "frames": [
+          {
+            "path": "tests/h62/item2/audit-v09-passes/test_signature_boundaries.py",
+            "blob": "8197c24e965db18f3157c5a62bd70601d0a851ee",
+            "line": 307
+          },
+          {
+            "path": "tests/h62/item2/audit-v09-passes/test_signature_boundaries.py",
+            "blob": "8197c24e965db18f3157c5a62bd70601d0a851ee",
+            "line": 191
+          },
+          {
+            "path": "tests/h62/item2/audit-v09-passes/test_signature_boundaries.py",
+            "blob": "8197c24e965db18f3157c5a62bd70601d0a851ee",
+            "line": 156
+          }
+        ],
+        "target": "tests/h62/item2/audit-v09-passes/loop-prefix-witness-map.json",
+        "target_blob": "3b53dfb9eccf24a3905e159d7a90b74c4e190c7e",
+        "operation": "validated Python read of measured bytes"
+      },
+      {
+        "runner": "validated:tests/h62/item2/audit-v09-passes/test_signature_boundaries.py",
+        "input_revision": "734bf9dffbfc882a0fedd5faf2484b61fcab76e6",
+        "frames": [
+          {
+            "path": "tests/h62/item2/audit-v09-passes/test_signature_boundaries.py",
+            "blob": "8197c24e965db18f3157c5a62bd70601d0a851ee",
+            "line": 307
+          },
+          {
+            "path": "tests/h62/item2/audit-v09-passes/test_signature_boundaries.py",
+            "blob": "8197c24e965db18f3157c5a62bd70601d0a851ee",
+            "line": 191
+          },
+          {
+            "path": "tests/h62/item2/audit-v09-passes/test_signature_boundaries.py",
+            "blob": "8197c24e965db18f3157c5a62bd70601d0a851ee",
+            "line": 156
+          }
+        ],
+        "target": "tests/h62/item2/audit-v09-passes/loop-reframed-failure-witness-map.json",
+        "target_blob": "aaebb94819f2d3ff8c207503639ffaef2ec9b701",
+        "operation": "validated Python read of measured bytes"
+      },
+      {
+        "runner": "validated:tests/h62/item2/audit-v09-passes/test_signature_boundaries.py",
+        "input_revision": "734bf9dffbfc882a0fedd5faf2484b61fcab76e6",
+        "frames": [
+          {
+            "path": "tests/h62/item2/audit-v09-passes/test_signature_boundaries.py",
+            "blob": "8197c24e965db18f3157c5a62bd70601d0a851ee",
+            "line": 307
+          },
+          {
+            "path": "tests/h62/item2/audit-v09-passes/test_signature_boundaries.py",
+            "blob": "8197c24e965db18f3157c5a62bd70601d0a851ee",
+            "line": 191
+          },
+          {
+            "path": "tests/h62/item2/audit-v09-passes/test_signature_boundaries.py",
+            "blob": "8197c24e965db18f3157c5a62bd70601d0a851ee",
+            "line": 156
+          }
+        ],
+        "target": "tests/h62/item2/audit-v09-passes/loop-scope-witness-map.json",
+        "target_blob": "29a301d93f9027549a76a84e568260ff151472f1",
+        "operation": "validated Python read of measured bytes"
+      },
+      {
+        "runner": "validated:tests/h62/item2/audit-v09-passes/test_signature_boundaries.py",
+        "input_revision": "734bf9dffbfc882a0fedd5faf2484b61fcab76e6",
+        "frames": [
+          {
+            "path": "tests/h62/item2/audit-v09-passes/test_signature_boundaries.py",
+            "blob": "8197c24e965db18f3157c5a62bd70601d0a851ee",
+            "line": 307
+          },
+          {
+            "path": "tests/h62/item2/audit-v09-passes/test_signature_boundaries.py",
+            "blob": "8197c24e965db18f3157c5a62bd70601d0a851ee",
+            "line": 191
+          },
+          {
+            "path": "tests/h62/item2/audit-v09-passes/test_signature_boundaries.py",
+            "blob": "8197c24e965db18f3157c5a62bd70601d0a851ee",
+            "line": 156
+          }
+        ],
+        "target": "tests/h62/item2/audit-v09-passes/memory-association-witness-map.json",
+        "target_blob": "2c6c8a4b4b63ea410f58ae361bb7d7c96e3e90e2",
+        "operation": "validated Python read of measured bytes"
+      },
+      {
+        "runner": "validated:tests/h62/item2/audit-v09-passes/test_signature_boundaries.py",
+        "input_revision": "734bf9dffbfc882a0fedd5faf2484b61fcab76e6",
+        "frames": [
+          {
+            "path": "tests/h62/item2/audit-v09-passes/test_signature_boundaries.py",
+            "blob": "8197c24e965db18f3157c5a62bd70601d0a851ee",
+            "line": 307
+          },
+          {
+            "path": "tests/h62/item2/audit-v09-passes/test_signature_boundaries.py",
+            "blob": "8197c24e965db18f3157c5a62bd70601d0a851ee",
+            "line": 191
+          },
+          {
+            "path": "tests/h62/item2/audit-v09-passes/test_signature_boundaries.py",
+            "blob": "8197c24e965db18f3157c5a62bd70601d0a851ee",
+            "line": 156
+          }
+        ],
+        "target": "tests/h62/item2/audit-v09-passes/memory-call-scope-witness-map.json",
+        "target_blob": "6b9513f0612b2bf34aab9d9b7518e32a9a46dafd",
+        "operation": "validated Python read of measured bytes"
+      },
+      {
+        "runner": "validated:tests/h62/item2/audit-v09-passes/test_signature_boundaries.py",
+        "input_revision": "734bf9dffbfc882a0fedd5faf2484b61fcab76e6",
+        "frames": [
+          {
+            "path": "tests/h62/item2/audit-v09-passes/test_signature_boundaries.py",
+            "blob": "8197c24e965db18f3157c5a62bd70601d0a851ee",
+            "line": 307
+          },
+          {
+            "path": "tests/h62/item2/audit-v09-passes/test_signature_boundaries.py",
+            "blob": "8197c24e965db18f3157c5a62bd70601d0a851ee",
+            "line": 191
+          },
+          {
+            "path": "tests/h62/item2/audit-v09-passes/test_signature_boundaries.py",
+            "blob": "8197c24e965db18f3157c5a62bd70601d0a851ee",
+            "line": 156
+          }
+        ],
+        "target": "tests/h62/item2/audit-v09-passes/memory-call-witness-map.json",
+        "target_blob": "44791e305c7450e758001ae597d40fd1a57b2a8c",
+        "operation": "validated Python read of measured bytes"
+      },
+      {
+        "runner": "validated:tests/h62/item2/audit-v09-passes/test_signature_boundaries.py",
+        "input_revision": "734bf9dffbfc882a0fedd5faf2484b61fcab76e6",
+        "frames": [
+          {
+            "path": "tests/h62/item2/audit-v09-passes/test_signature_boundaries.py",
+            "blob": "8197c24e965db18f3157c5a62bd70601d0a851ee",
+            "line": 307
+          },
+          {
+            "path": "tests/h62/item2/audit-v09-passes/test_signature_boundaries.py",
+            "blob": "8197c24e965db18f3157c5a62bd70601d0a851ee",
+            "line": 191
+          },
+          {
+            "path": "tests/h62/item2/audit-v09-passes/test_signature_boundaries.py",
+            "blob": "8197c24e965db18f3157c5a62bd70601d0a851ee",
+            "line": 156
+          }
+        ],
+        "target": "tests/h62/item2/audit-v09-passes/positive-allocation-failure-witness-map.json",
+        "target_blob": "81bd24db3c5ea0cbdf008b1a28467ef0f9040b0b",
+        "operation": "validated Python read of measured bytes"
+      },
+      {
+        "runner": "validated:tests/h62/item2/audit-v09-passes/test_signature_boundaries.py",
+        "input_revision": "734bf9dffbfc882a0fedd5faf2484b61fcab76e6",
+        "frames": [
+          {
+            "path": "tests/h62/item2/audit-v09-passes/test_signature_boundaries.py",
+            "blob": "8197c24e965db18f3157c5a62bd70601d0a851ee",
+            "line": 307
+          },
+          {
+            "path": "tests/h62/item2/audit-v09-passes/test_signature_boundaries.py",
+            "blob": "8197c24e965db18f3157c5a62bd70601d0a851ee",
+            "line": 191
+          },
+          {
+            "path": "tests/h62/item2/audit-v09-passes/test_signature_boundaries.py",
+            "blob": "8197c24e965db18f3157c5a62bd70601d0a851ee",
+            "line": 156
+          }
+        ],
+        "target": "tests/h62/item2/audit-v09-passes/preserved-allocator-witness-map.json",
+        "target_blob": "18b2a220e750f167ffd7ebd490356d50e95f9a50",
+        "operation": "validated Python read of measured bytes"
+      },
+      {
+        "runner": "validated:tests/h62/item2/audit-v09-passes/test_signature_boundaries.py",
+        "input_revision": "734bf9dffbfc882a0fedd5faf2484b61fcab76e6",
+        "frames": [
+          {
+            "path": "tests/h62/item2/audit-v09-passes/test_signature_boundaries.py",
+            "blob": "8197c24e965db18f3157c5a62bd70601d0a851ee",
+            "line": 307
+          },
+          {
+            "path": "tests/h62/item2/audit-v09-passes/test_signature_boundaries.py",
+            "blob": "8197c24e965db18f3157c5a62bd70601d0a851ee",
+            "line": 90
+          }
+        ],
+        "target": "tests/h62/item2/audit-v09-passes/private-stack-witness-map.json",
+        "target_blob": "f0b6ce8b32f5a67b977a934755534078ef1c4e41",
+        "operation": "validated Python read of measured bytes"
+      },
+      {
+        "runner": "validated:tests/h62/item2/audit-v09-passes/test_signature_boundaries.py",
+        "input_revision": "734bf9dffbfc882a0fedd5faf2484b61fcab76e6",
+        "frames": [
+          {
+            "path": "tests/h62/item2/audit-v09-passes/test_signature_boundaries.py",
+            "blob": "8197c24e965db18f3157c5a62bd70601d0a851ee",
+            "line": 307
+          },
+          {
+            "path": "tests/h62/item2/audit-v09-passes/test_signature_boundaries.py",
+            "blob": "8197c24e965db18f3157c5a62bd70601d0a851ee",
+            "line": 191
+          },
+          {
+            "path": "tests/h62/item2/audit-v09-passes/test_signature_boundaries.py",
+            "blob": "8197c24e965db18f3157c5a62bd70601d0a851ee",
+            "line": 156
+          }
+        ],
+        "target": "tests/h62/item2/audit-v09-passes/reference-call-capture-failure-witness-map.json",
+        "target_blob": "768304e6eb738617ae654cf1e5247d2df60344fa",
+        "operation": "validated Python read of measured bytes"
+      },
+      {
+        "runner": "validated:tests/h62/item2/audit-v09-passes/test_signature_boundaries.py",
+        "input_revision": "734bf9dffbfc882a0fedd5faf2484b61fcab76e6",
+        "frames": [
+          {
+            "path": "tests/h62/item2/audit-v09-passes/test_signature_boundaries.py",
+            "blob": "8197c24e965db18f3157c5a62bd70601d0a851ee",
+            "line": 307
+          },
+          {
+            "path": "tests/h62/item2/audit-v09-passes/test_signature_boundaries.py",
+            "blob": "8197c24e965db18f3157c5a62bd70601d0a851ee",
+            "line": 191
+          },
+          {
+            "path": "tests/h62/item2/audit-v09-passes/test_signature_boundaries.py",
+            "blob": "8197c24e965db18f3157c5a62bd70601d0a851ee",
+            "line": 156
+          }
+        ],
+        "target": "tests/h62/item2/audit-v09-passes/reference-call-readback-witness-map.json",
+        "target_blob": "f937c0c93612188936e82d686bf5a2cbdca09cb8",
+        "operation": "validated Python read of measured bytes"
+      },
+      {
+        "runner": "validated:tests/h62/item2/audit-v09-passes/test_signature_boundaries.py",
+        "input_revision": "734bf9dffbfc882a0fedd5faf2484b61fcab76e6",
+        "frames": [
+          {
+            "path": "tests/h62/item2/audit-v09-passes/test_signature_boundaries.py",
+            "blob": "8197c24e965db18f3157c5a62bd70601d0a851ee",
+            "line": 307
+          },
+          {
+            "path": "tests/h62/item2/audit-v09-passes/test_signature_boundaries.py",
+            "blob": "8197c24e965db18f3157c5a62bd70601d0a851ee",
+            "line": 191
+          },
+          {
+            "path": "tests/h62/item2/audit-v09-passes/test_signature_boundaries.py",
+            "blob": "8197c24e965db18f3157c5a62bd70601d0a851ee",
+            "line": 156
+          }
+        ],
+        "target": "tests/h62/item2/audit-v09-passes/reframed-triple-witness-map.json",
+        "target_blob": "d23a2b76073b25efb4a0835d9cab20d5de72b376",
+        "operation": "validated Python read of measured bytes"
+      },
+      {
+        "runner": "validated:tests/h62/item2/audit-v09-passes/test_signature_boundaries.py",
+        "input_revision": "734bf9dffbfc882a0fedd5faf2484b61fcab76e6",
+        "frames": [
+          {
+            "path": "tests/h62/item2/audit-v09-passes/test_signature_boundaries.py",
+            "blob": "8197c24e965db18f3157c5a62bd70601d0a851ee",
+            "line": 307
+          },
+          {
+            "path": "tests/h62/item2/audit-v09-passes/test_signature_boundaries.py",
+            "blob": "8197c24e965db18f3157c5a62bd70601d0a851ee",
+            "line": 191
+          },
+          {
+            "path": "tests/h62/item2/audit-v09-passes/test_signature_boundaries.py",
+            "blob": "8197c24e965db18f3157c5a62bd70601d0a851ee",
+            "line": 156
+          }
+        ],
+        "target": "tests/h62/item2/audit-v09-passes/reframed-witness-map.json",
+        "target_blob": "9d5ab82d3af5a43acecca34247d00f3ffd211e6b",
+        "operation": "validated Python read of measured bytes"
+      },
+      {
+        "runner": "validated:tests/h62/item2/audit-v09-passes/test_signature_boundaries.py",
+        "input_revision": "734bf9dffbfc882a0fedd5faf2484b61fcab76e6",
+        "frames": [
+          {
+            "path": "tests/h62/item2/audit-v09-passes/test_signature_boundaries.py",
+            "blob": "8197c24e965db18f3157c5a62bd70601d0a851ee",
+            "line": 307
+          },
+          {
+            "path": "tests/h62/item2/audit-v09-passes/test_signature_boundaries.py",
+            "blob": "8197c24e965db18f3157c5a62bd70601d0a851ee",
+            "line": 191
+          },
+          {
+            "path": "tests/h62/item2/audit-v09-passes/test_signature_boundaries.py",
+            "blob": "8197c24e965db18f3157c5a62bd70601d0a851ee",
+            "line": 156
+          }
+        ],
+        "target": "tests/h62/item2/audit-v09-passes/returned-memory-capture-witness-map.json",
+        "target_blob": "2fce0d60f31f3a7c3f486e0afba02229eae0a2de",
+        "operation": "validated Python read of measured bytes"
+      },
+      {
+        "runner": "validated:tests/h62/item2/audit-v09-passes/test_signature_boundaries.py",
+        "input_revision": "734bf9dffbfc882a0fedd5faf2484b61fcab76e6",
+        "frames": [
+          {
+            "path": "tests/h62/item2/audit-v09-passes/test_signature_boundaries.py",
+            "blob": "8197c24e965db18f3157c5a62bd70601d0a851ee",
+            "line": 307
+          },
+          {
+            "path": "tests/h62/item2/audit-v09-passes/test_signature_boundaries.py",
+            "blob": "8197c24e965db18f3157c5a62bd70601d0a851ee",
+            "line": 191
+          },
+          {
+            "path": "tests/h62/item2/audit-v09-passes/test_signature_boundaries.py",
+            "blob": "8197c24e965db18f3157c5a62bd70601d0a851ee",
+            "line": 156
+          }
+        ],
+        "target": "tests/h62/item2/audit-v09-passes/runtime-return-capture-witness-map.json",
+        "target_blob": "82df03dd3e31bec92269c29663a4381125296f7a",
+        "operation": "validated Python read of measured bytes"
+      },
+      {
+        "runner": "validated:tests/h62/item2/audit-v09-passes/test_signature_boundaries.py",
+        "input_revision": "734bf9dffbfc882a0fedd5faf2484b61fcab76e6",
+        "frames": [
+          {
+            "path": "tests/h62/item2/audit-v09-passes/test_signature_boundaries.py",
+            "blob": "8197c24e965db18f3157c5a62bd70601d0a851ee",
+            "line": 307
+          },
+          {
+            "path": "tests/h62/item2/audit-v09-passes/test_signature_boundaries.py",
+            "blob": "8197c24e965db18f3157c5a62bd70601d0a851ee",
+            "line": 191
+          },
+          {
+            "path": "tests/h62/item2/audit-v09-passes/test_signature_boundaries.py",
+            "blob": "8197c24e965db18f3157c5a62bd70601d0a851ee",
+            "line": 156
+          }
+        ],
+        "target": "tests/h62/item2/audit-v09-passes/runtime-void-capture-witness-map.json",
+        "target_blob": "07866687f6bbb8eaa10a63b75482f1150353d35e",
+        "operation": "validated Python read of measured bytes"
+      },
+      {
+        "runner": "validated:tests/h62/item2/audit-v09-passes/test_signature_boundaries.py",
+        "input_revision": "734bf9dffbfc882a0fedd5faf2484b61fcab76e6",
+        "frames": [
+          {
+            "path": "tests/h62/item2/audit-v09-passes/test_signature_boundaries.py",
+            "blob": "8197c24e965db18f3157c5a62bd70601d0a851ee",
+            "line": 307
+          },
+          {
+            "path": "tests/h62/item2/audit-v09-passes/test_signature_boundaries.py",
+            "blob": "8197c24e965db18f3157c5a62bd70601d0a851ee",
+            "line": 90
+          }
+        ],
+        "target": "tests/h62/item2/audit-v09-passes/sequence-witness-map.json",
+        "target_blob": "ae3b419fdec6425ffdbf348006a0e3eb7127bbb1",
+        "operation": "validated Python read of measured bytes"
+      },
+      {
+        "runner": "validated:tests/h62/item2/audit-v09-passes/test_signature_boundaries.py",
+        "input_revision": "734bf9dffbfc882a0fedd5faf2484b61fcab76e6",
+        "frames": [
+          {
+            "path": "tests/h62/item2/audit-v09-passes/test_signature_boundaries.py",
+            "blob": "8197c24e965db18f3157c5a62bd70601d0a851ee",
+            "line": 307
+          },
+          {
+            "path": "tests/h62/item2/audit-v09-passes/test_signature_boundaries.py",
+            "blob": "8197c24e965db18f3157c5a62bd70601d0a851ee",
+            "line": 191
+          },
+          {
+            "path": "tests/h62/item2/audit-v09-passes/test_signature_boundaries.py",
+            "blob": "8197c24e965db18f3157c5a62bd70601d0a851ee",
+            "line": 156
+          }
+        ],
+        "target": "tests/h62/item2/audit-v09-passes/shift-capture-witness-map.json",
+        "target_blob": "7d0f541aedfcc0139b96b23380498c32b24fb891",
+        "operation": "validated Python read of measured bytes"
+      },
+      {
+        "runner": "validated:tests/h62/item2/audit-v09-passes/test_signature_boundaries.py",
+        "input_revision": "734bf9dffbfc882a0fedd5faf2484b61fcab76e6",
+        "frames": [
+          {
+            "path": "tests/h62/item2/audit-v09-passes/test_signature_boundaries.py",
+            "blob": "8197c24e965db18f3157c5a62bd70601d0a851ee",
+            "line": 307
+          },
+          {
+            "path": "tests/h62/item2/audit-v09-passes/test_signature_boundaries.py",
+            "blob": "8197c24e965db18f3157c5a62bd70601d0a851ee",
+            "line": 90
+          }
+        ],
+        "target": "tests/h62/item2/audit-v09-passes/stack-witness-map.json",
+        "target_blob": "50d5f6775fbdf2b0d4dc20872b8b2c026a5b46bc",
+        "operation": "validated Python read of measured bytes"
+      },
+      {
+        "runner": "validated:tests/h62/item2/audit-v09-passes/test_signature_boundaries.py",
+        "input_revision": "734bf9dffbfc882a0fedd5faf2484b61fcab76e6",
+        "frames": [
+          {
+            "path": "tests/h62/item2/audit-v09-passes/test_signature_boundaries.py",
+            "blob": "8197c24e965db18f3157c5a62bd70601d0a851ee",
+            "line": 307
+          },
+          {
+            "path": "tests/h62/item2/audit-v09-passes/test_signature_boundaries.py",
+            "blob": "8197c24e965db18f3157c5a62bd70601d0a851ee",
+            "line": 191
+          },
+          {
+            "path": "tests/h62/item2/audit-v09-passes/test_signature_boundaries.py",
+            "blob": "8197c24e965db18f3157c5a62bd70601d0a851ee",
+            "line": 156
+          }
+        ],
+        "target": "tests/h62/item2/audit-v09-passes/stateful-capture-witness-map.json",
+        "target_blob": "2e5e57653c49a2613b63dcdf28ff006f60c03b7b",
+        "operation": "validated Python read of measured bytes"
+      },
+      {
+        "runner": "validated:tests/h62/item2/audit-v09-passes/test_signature_boundaries.py",
+        "input_revision": "734bf9dffbfc882a0fedd5faf2484b61fcab76e6",
+        "frames": [
+          {
+            "path": "tests/h62/item2/audit-v09-passes/test_signature_boundaries.py",
+            "blob": "8197c24e965db18f3157c5a62bd70601d0a851ee",
+            "line": 307
+          },
+          {
+            "path": "tests/h62/item2/audit-v09-passes/test_signature_boundaries.py",
+            "blob": "8197c24e965db18f3157c5a62bd70601d0a851ee",
+            "line": 191
+          },
+          {
+            "path": "tests/h62/item2/audit-v09-passes/test_signature_boundaries.py",
+            "blob": "8197c24e965db18f3157c5a62bd70601d0a851ee",
+            "line": 156
+          }
+        ],
+        "target": "tests/h62/item2/audit-v09-passes/triple-admission-witness-map.json",
+        "target_blob": "ca98bcc3f4bf2f775e0ac8057eb8b4029da7b844",
         "operation": "validated Python read of measured bytes"
       }
     ]
