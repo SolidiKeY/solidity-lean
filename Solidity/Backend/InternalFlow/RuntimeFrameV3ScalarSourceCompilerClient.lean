@@ -102,4 +102,21 @@ example : ∃ out, (Client.input 4).run ScalarContinuation.final=.ok out ∧
  Evm.Compiler.compile 1 F (.cons (Client.input 4) .nil)=none :=
  ⟨_,Client.actual_source 4 (by decide),(selected_but_endpoint_refused 4).2⟩
 
+/-- Recognition does not claim that an exhausted source quotation is a full
+source-to-target failure correspondence. The actual image is index-independent. -/
+theorem exhausted_boundary : (Client.input 0).run ScalarContinuation.final=.error .exhausted ∧
+ run (Client.selected 0).plan.code ScalarContinuation.target=.ok ScalarReentry.Endpoint.machine 0 := by
+ constructor
+ · simpa only [if_neg (show ¬(3:Nat)<0 from by decide)] using ScalarReentry.source 0
+ · rw [Client.same_image 0 4]
+   exact Client.target
+
+
+-- H949: the exhausted legacy quotation remains outside b1 accepted coverage.
+example :
+ ((Client.input 0).run ScalarContinuation.final=.error .exhausted ∧
+  run (Client.selected 0).plan.code ScalarContinuation.target=.ok ScalarReentry.Endpoint.machine 0) ∧
+ Evm.Compiler.compile 1 F (.cons (Client.input 0) .nil)=none :=
+ ⟨exhausted_boundary,endpoint_refused 0⟩
+
 end Solidity.Backend.InternalFlow.RuntimeFrame.ScalarSourceCompiler.Controls

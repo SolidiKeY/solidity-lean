@@ -46,15 +46,6 @@ theorem ordinary_call_refused : compile 1 5 16 9 8 F
  (.call "scalarCountdown" (DisjointScalarEntry.args rfl reference ScalarReentry.count)
  (.val .uint (.user "result") (some (.here : Idx Γ (.val .uint)))) (body A rfl 4))=none := rfl
 
-/-- Recognition does not claim that an exhausted source quotation is a full
-source-to-target failure correspondence. The actual image is index-independent. -/
-theorem exhausted_boundary : (Client.input 0).run ScalarContinuation.final=.error .exhausted ∧
- run (Client.selected 0).plan.code ScalarContinuation.target=.ok ScalarReentry.Endpoint.machine 0 := by
- constructor
- · simpa only [if_neg (show ¬(3:Nat)<0 from by decide)] using ScalarReentry.source 0
- · rw [Client.same_image 0 4]
-   exact Client.target
-
 def badCount : Val C Γ .uint :=
  .readMem (.index .dyn (.var reference rfl) (.simple (.lit 3 rfl)))
 def badEmitted : ScalarEmitter.Emission 1 5 16 9 8 F badCount :=
@@ -101,12 +92,5 @@ theorem bad_not_fault : run badSelected.plan.code ScalarContinuation.target≠.f
  rw [bad_target]
  intro wrong
  cases wrong
-
--- H949: the exhausted legacy quotation remains outside b1 accepted coverage.
-example :
- ((Client.input 0).run ScalarContinuation.final=.error .exhausted ∧
-  run (Client.selected 0).plan.code ScalarContinuation.target=.ok ScalarReentry.Endpoint.machine 0) ∧
- Evm.Compiler.compile 1 F (.cons (Client.input 0) .nil)=none :=
- ⟨exhausted_boundary,endpoint_refused 0⟩
 
 end Solidity.Backend.InternalFlow.RuntimeFrame.ScalarSourceCompiler.Controls
