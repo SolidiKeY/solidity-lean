@@ -19,6 +19,454 @@
         "path": "scripts/h62/item1/p16-generator/census.py",
         "purpose": "Paired ordinary and native-read-instrumented execution passed at this exact historical snapshot. Only the baseline manifest and 72 existing raw fragments are enrolled by separately observed persisted byte-read routes. No current passing-run, module execution, producer completeness, Lean, semantic, compatibility or proof credit.",
         "source_blob": "64b665aab18181183048551b41c6d217ba397df0"
+      },
+      {
+        "command": [
+          "python3",
+          "-B",
+          "scripts/h62/item2/audit-abi-world/accept_runtime.py"
+        ],
+        "imports": [
+          {
+            "importer": "scripts/h62/item2/audit-abi-world/accept_runtime.py",
+            "importer_blob": "5a0df8230341bd078680f542be8921e23c208c92",
+            "importer_commit": "38aef082f5b0e96e257fb91b62d8e432e8eec48d",
+            "line": 6
+          },
+          {
+            "importer": "scripts/h62/item2/audit-abi-world/coverage.py",
+            "importer_blob": "c2c8b01802fa3500b1cdc15fe00f870487c83605",
+            "importer_commit": "38aef082f5b0e96e257fb91b62d8e432e8eec48d",
+            "line": 39
+          },
+          {
+            "importer": "scripts/h62/item2/audit-abi-world/extract_vectors.py",
+            "importer_blob": "ce6483f9dae3fe02dbe716cee03436ed401f777a",
+            "importer_commit": "38aef082f5b0e96e257fb91b62d8e432e8eec48d",
+            "line": 6
+          }
+        ],
+        "input_revision": "a27ec14a756b2011bd864609ada2c4dbd65addc0",
+        "interface": {
+          "module": "receipts",
+          "names": [
+            "checked_receipt"
+          ]
+        },
+        "kind": "python-import-source-role",
+        "path": "scripts/h62/item2/audit-abi-world/receipts.py",
+        "provenance": {
+          "blob": "f863fce768398bc7b8cf6f74c8998a746d454a16",
+          "commit": "8a1794652d299cd042c815441a426e7efb642522",
+          "path": "scripts/h62/item2/audit-abi-world/receipts.py"
+        },
+        "purpose": "Reviewed exact Python import dependency of the named kept entry sources. Source consumption only: no invocation, passing-run, entered-module, data-read, fixture, child, runtime, compatibility or proof credit.",
+        "source_blob": "f863fce768398bc7b8cf6f74c8998a746d454a16"
+      },
+      {
+        "command": [
+          "python3",
+          "-B",
+          "scripts/h62/item2/audit-abi-world/resume_accept.py"
+        ],
+        "imports": [
+          {
+            "importer": "scripts/h62/item2/audit-abi-world/resume_accept.py",
+            "importer_blob": "57cdfd9506bb1573432358e179b8d060c9612d92",
+            "importer_commit": "a37430cd3673749dee65c301a069792efd1bccab",
+            "line": 12
+          },
+          {
+            "importer": "scripts/h62/item2/audit-abi-world/resume_mcp_call.py",
+            "importer_blob": "68a3a88a246c7da9a75e247c890bedb87206a28e",
+            "importer_commit": "8e3023d10b62574b7be84630c064b53b8dcfbb09",
+            "line": 39
+          }
+        ],
+        "input_revision": "a27ec14a756b2011bd864609ada2c4dbd65addc0",
+        "interface": {
+          "module": "resume_sources",
+          "names": [
+            "snapshot"
+          ]
+        },
+        "kind": "python-import-source-role",
+        "path": "scripts/h62/item2/audit-abi-world/resume_sources.py",
+        "provenance": {
+          "blob": "714d79517abf92322b312a25223adcb55ba82050",
+          "commit": "8e3023d10b62574b7be84630c064b53b8dcfbb09",
+          "path": "scripts/h62/item2/audit-abi-world/resume_sources.py"
+        },
+        "purpose": "Reviewed exact Python import dependency of the named kept entry sources. Source consumption only: no invocation, passing-run, entered-module, data-read, fixture, child, runtime, compatibility or proof credit.",
+        "source_blob": "714d79517abf92322b312a25223adcb55ba82050"
+      },
+      {
+        "command": [
+          "python3",
+          "-B",
+          "scripts/h62/item2/audit-calculus/acceptance.py"
+        ],
+        "imports": [
+          {
+            "importer": "scripts/h62/item2/audit-calculus/acceptance.py",
+            "importer_blob": "675133d51e0202e01e5cf4532a26996debb4371e",
+            "importer_commit": "c361178f68f34c276a02b15691cd726aaa85a51e",
+            "line": 11
+          }
+        ],
+        "input_revision": "a27ec14a756b2011bd864609ada2c4dbd65addc0",
+        "interface": {
+          "module": "owners",
+          "names": [
+            "inventory"
+          ]
+        },
+        "kind": "python-import-source-role",
+        "path": "scripts/h62/item2/audit-calculus/owners.py",
+        "provenance": {
+          "blob": "c471b8400bc553a8bd554c3b335bb6074bfc9a33",
+          "commit": "c1384ed9310f9c5402d521036d0c75cacf79fc99",
+          "path": "scripts/h62/item2/audit-calculus/owners.py"
+        },
+        "purpose": "Reviewed exact Python import dependency of the named kept entry sources. Source consumption only: no invocation, passing-run, entered-module, data-read, fixture, child, runtime, compatibility or proof credit.",
+        "source_blob": "c471b8400bc553a8bd554c3b335bb6074bfc9a33"
+      },
+      {
+        "command": [
+          "python3",
+          "-B",
+          "scripts/h62/item2/audit-language/check.py"
+        ],
+        "imports": [
+          {
+            "importer": "scripts/h62/item2/audit-language/check.py",
+            "importer_blob": "367616d8d65dd2bd6abb1e5fac7138050f2acc78",
+            "importer_commit": "16e98ad46223e6fe4a97dadb8187497537f57dce",
+            "line": 56
+          },
+          {
+            "importer": "scripts/h62/item2/audit-language/retire_export.py",
+            "importer_blob": "4748376ef83284136230125977bd0725e39fe43a",
+            "importer_commit": "16e98ad46223e6fe4a97dadb8187497537f57dce",
+            "line": 34
+          },
+          {
+            "importer": "scripts/h62/item2/audit-language/verify.py",
+            "importer_blob": "9f433a190b2e3da5ef46fbc977741621c6b807ba",
+            "importer_commit": "16e98ad46223e6fe4a97dadb8187497537f57dce",
+            "line": 22
+          }
+        ],
+        "input_revision": "a27ec14a756b2011bd864609ada2c4dbd65addc0",
+        "interface": {
+          "module": "gate_repair",
+          "names": [
+            "approved_revisions"
+          ]
+        },
+        "kind": "python-import-source-role",
+        "path": "scripts/h62/item2/audit-language/gate_repair.py",
+        "provenance": {
+          "blob": "84db13d263f185022e5e24b65c2f1ae7eaa37c63",
+          "commit": "febcbe09fe79e890c66baf4f266490beb674a357",
+          "path": "scripts/h62/item2/audit-language/gate_repair.py"
+        },
+        "purpose": "Reviewed exact Python import dependency of the named kept entry sources. Source consumption only: no invocation, passing-run, entered-module, data-read, fixture, child, runtime, compatibility or proof credit.",
+        "source_blob": "84db13d263f185022e5e24b65c2f1ae7eaa37c63"
+      },
+      {
+        "command": [
+          "python3",
+          "-B",
+          "scripts/h62/item2/audit-theories/coverage_ledger.py"
+        ],
+        "imports": [
+          {
+            "importer": "scripts/h62/item2/audit-theories/coverage_ledger.py",
+            "importer_blob": "c459994e09c06ade984aabd8af6483287f5f215a",
+            "importer_commit": "107cb28c032e3bff522ff6db0fdf0be54b2bbefd",
+            "line": 12
+          },
+          {
+            "importer": "scripts/h62/item2/audit-theories/mutability_input_roles.py",
+            "importer_blob": "c67019762b0c5dfb9d489b756866d5fa353131ca",
+            "importer_commit": "107cb28c032e3bff522ff6db0fdf0be54b2bbefd",
+            "line": 11
+          },
+          {
+            "importer": "scripts/h62/item2/audit-theories/verify_acceptance_snapshot.py",
+            "importer_blob": "c805842b75bc519260d857f9730671c78421cbe1",
+            "importer_commit": "107cb28c032e3bff522ff6db0fdf0be54b2bbefd",
+            "line": 15
+          }
+        ],
+        "input_revision": "a27ec14a756b2011bd864609ada2c4dbd65addc0",
+        "interface": {
+          "module": "pending_impossibility",
+          "names": [
+            "PENDING"
+          ]
+        },
+        "kind": "python-import-source-role",
+        "path": "scripts/h62/item2/audit-theories/pending_impossibility.py",
+        "provenance": {
+          "blob": "2bf62f1f7376305a6e152d1d7f3db2ba6da6de3f",
+          "commit": "107cb28c032e3bff522ff6db0fdf0be54b2bbefd",
+          "path": "scripts/h62/item2/audit-theories/pending_impossibility.py"
+        },
+        "purpose": "Reviewed exact Python import dependency of the named kept entry sources. Source consumption only: no invocation, passing-run, entered-module, data-read, fixture, child, runtime, compatibility or proof credit.",
+        "source_blob": "2bf62f1f7376305a6e152d1d7f3db2ba6da6de3f"
+      },
+      {
+        "command": [
+          "python3",
+          "-B",
+          "scripts/h62/item4/generic-primitive-packets/check.py"
+        ],
+        "imports": [
+          {
+            "importer": "scripts/h62/item4/generic-primitive-packets/check.py",
+            "importer_blob": "c4be638c1f7ecb46ffcb3d6ff1cafa95c1ea3a54",
+            "importer_commit": "0a34d9c508ca24f6a914553953a0bc4abf5863dc",
+            "line": 18
+          },
+          {
+            "importer": "scripts/h62/item4/generic-primitive-packets/measure.py",
+            "importer_blob": "b108aa52de426ccb7058056ebd39ce1ea18f9b50",
+            "importer_commit": "0a34d9c508ca24f6a914553953a0bc4abf5863dc",
+            "line": 17
+          }
+        ],
+        "input_revision": "a27ec14a756b2011bd864609ada2c4dbd65addc0",
+        "interface": {
+          "module": "runtime",
+          "names": [
+            "bound",
+            "compiler",
+            "fingerprint",
+            "guard",
+            "memory_cap",
+            "sha"
+          ]
+        },
+        "kind": "python-import-source-role",
+        "path": "scripts/h62/item4/generic-primitive-packets/runtime.py",
+        "provenance": {
+          "blob": "015e64e5fac885e6962e5bd90fe284b9c1ae2820",
+          "commit": "56a137f709aa737d2e3886aca2daf9f52b40261c",
+          "path": "scripts/h62/item4/generic-primitive-packets/runtime.py"
+        },
+        "purpose": "Reviewed exact Python import dependency of the named kept entry sources. Source consumption only: no invocation, passing-run, entered-module, data-read, fixture, child, runtime, compatibility or proof credit.",
+        "source_blob": "015e64e5fac885e6962e5bd90fe284b9c1ae2820"
+      },
+      {
+        "command": [
+          "python3",
+          "-B",
+          "scripts/h62/item6/migrate-hash/census.py"
+        ],
+        "imports": [
+          {
+            "importer": "scripts/h62/item6/migrate-hash/census.py",
+            "importer_blob": "0ddef2ed5405c2bbcd8ff199c43097a7a847147a",
+            "importer_commit": "df554535e9c8d308276a99ea23611c7d63ae5919",
+            "line": 13
+          },
+          {
+            "importer": "scripts/h62/item6/migrate-hash/full_measure.py",
+            "importer_blob": "cae845b44b6c50bd6ea69065b113099fe40eb73d",
+            "importer_commit": "df554535e9c8d308276a99ea23611c7d63ae5919",
+            "line": 9
+          }
+        ],
+        "input_revision": "a27ec14a756b2011bd864609ada2c4dbd65addc0",
+        "interface": {
+          "module": "lean_lex",
+          "names": [
+            "strip_comments"
+          ]
+        },
+        "kind": "python-import-source-role",
+        "path": "scripts/h62/item6/migrate-hash/lean_lex.py",
+        "provenance": {
+          "blob": "98e527e654c4ed29919d56c4d343a72e75fca3fa",
+          "commit": "df554535e9c8d308276a99ea23611c7d63ae5919",
+          "path": "scripts/h62/item6/migrate-hash/lean_lex.py"
+        },
+        "purpose": "Reviewed exact Python import dependency of the named kept entry sources. Source consumption only: no invocation, passing-run, entered-module, data-read, fixture, child, runtime, compatibility or proof credit.",
+        "source_blob": "98e527e654c4ed29919d56c4d343a72e75fca3fa"
+      },
+      {
+        "command": [
+          "python3",
+          "-B",
+          "scripts/h62/item6/migrate-lowering/bounded.py"
+        ],
+        "imports": [
+          {
+            "importer": "scripts/h62/item6/migrate-lowering/bounded.py",
+            "importer_blob": "b4c9edefa18f3c1b3dd7f11f8ffa46c61aaf31bd",
+            "importer_commit": "aa07794d3f1084a560f308c2b469198a577ee1a5",
+            "line": 6
+          },
+          {
+            "importer": "scripts/h62/item6/migrate-lowering/supervise.py",
+            "importer_blob": "38d19f87951efbbb531a321d9e0d48604ca4a78e",
+            "importer_commit": "aa07794d3f1084a560f308c2b469198a577ee1a5",
+            "line": 4
+          }
+        ],
+        "input_revision": "a27ec14a756b2011bd864609ada2c4dbd65addc0",
+        "interface": {
+          "module": "process_group",
+          "names": [
+            "members",
+            "stop_owned"
+          ]
+        },
+        "kind": "python-import-source-role",
+        "path": "scripts/h62/item6/migrate-lowering/process_group.py",
+        "provenance": {
+          "blob": "31d1dba2b8ff9c33da3c25758b83227a7bebe5e3",
+          "commit": "d48bc8cb306d50626864c00c53cdd5c585438ec0",
+          "path": "scripts/h62/item6/migrate-lowering/process_group.py"
+        },
+        "purpose": "Reviewed exact Python import dependency of the named kept entry sources. Source consumption only: no invocation, passing-run, entered-module, data-read, fixture, child, runtime, compatibility or proof credit.",
+        "source_blob": "31d1dba2b8ff9c33da3c25758b83227a7bebe5e3"
+      },
+      {
+        "command": [
+          "python3",
+          "-B",
+          "scripts/h62/item6/migrate-precompiles/census.py"
+        ],
+        "imports": [
+          {
+            "importer": "scripts/h62/item6/migrate-precompiles/census.py",
+            "importer_blob": "634868cff19058fe2d32bbfc691c2c2694c23b3b",
+            "importer_commit": "d393a60b76120dfab477e62c569f11cf34cdcfcb",
+            "line": 7
+          }
+        ],
+        "input_revision": "a27ec14a756b2011bd864609ada2c4dbd65addc0",
+        "interface": {
+          "module": "contract",
+          "names": [
+            "expected"
+          ]
+        },
+        "kind": "python-import-source-role",
+        "path": "scripts/h62/item6/migrate-precompiles/contract.py",
+        "provenance": {
+          "blob": "292e032d3602f997b88830c25d51bca1cc95f883",
+          "commit": "4e7929f0bf488c8c23c7b42f6a186121c6951a4c",
+          "path": "scripts/h62/item6/migrate-precompiles/contract.py"
+        },
+        "purpose": "Reviewed exact Python import dependency of the named kept entry sources. Source consumption only: no invocation, passing-run, entered-module, data-read, fixture, child, runtime, compatibility or proof credit.",
+        "source_blob": "292e032d3602f997b88830c25d51bca1cc95f883"
+      },
+      {
+        "command": [
+          "python3",
+          "-B",
+          "scripts/h62/item6/migrate-root-gate/cache-roundtrip.py"
+        ],
+        "imports": [
+          {
+            "importer": "scripts/h62/item6/migrate-root-gate/cache-roundtrip.py",
+            "importer_blob": "ff642bece78b93da3e6cd534cdb66de4e73506b0",
+            "importer_commit": "df554535e9c8d308276a99ea23611c7d63ae5919",
+            "line": 19
+          }
+        ],
+        "input_revision": "a27ec14a756b2011bd864609ada2c4dbd65addc0",
+        "interface": {
+          "module": "release_integrity",
+          "names": [
+            "verify_release"
+          ]
+        },
+        "kind": "python-import-source-role",
+        "path": "scripts/h62/item6/migrate-root-gate/release_integrity.py",
+        "provenance": {
+          "blob": "49a4e4707d6bfdcedef222b66a2f2af9df73c536",
+          "commit": "df554535e9c8d308276a99ea23611c7d63ae5919",
+          "path": "scripts/h62/item6/migrate-root-gate/release_integrity.py"
+        },
+        "purpose": "Reviewed exact Python import dependency of the named kept entry sources. Source consumption only: no invocation, passing-run, entered-module, data-read, fixture, child, runtime, compatibility or proof credit.",
+        "source_blob": "49a4e4707d6bfdcedef222b66a2f2af9df73c536"
+      },
+      {
+        "command": [
+          "python3",
+          "-B",
+          "scripts/h62/item6/migrate-semantics/api_evidence.py"
+        ],
+        "imports": [
+          {
+            "importer": "scripts/h62/item6/migrate-semantics/api_evidence.py",
+            "importer_blob": "4cb5c110945cbeffa15ea2f48bb8a05d2fb29a9b",
+            "importer_commit": "40be303ce78a6d6bcad5d4c4b8c7285cc1732767",
+            "line": 5
+          },
+          {
+            "importer": "scripts/h62/item6/migrate-semantics/cgroup_controls.py",
+            "importer_blob": "ec85416b5b4134dc11fa801c4cb596109edfaa0a",
+            "importer_commit": "40be303ce78a6d6bcad5d4c4b8c7285cc1732767",
+            "line": 5
+          },
+          {
+            "importer": "scripts/h62/item6/migrate-semantics/cgroup_prerequisite.py",
+            "importer_blob": "eeb10340cfd2da86bc9f5839ef69dd3ad15f7fef",
+            "importer_commit": "40be303ce78a6d6bcad5d4c4b8c7285cc1732767",
+            "line": 5
+          },
+          {
+            "importer": "scripts/h62/item6/migrate-semantics/compare_samples.py",
+            "importer_blob": "c3fbd043c55091388a581dafe6cc6cdfc6a0e4ed",
+            "importer_commit": "40be303ce78a6d6bcad5d4c4b8c7285cc1732767",
+            "line": 5
+          },
+          {
+            "importer": "scripts/h62/item6/migrate-semantics/measure.py",
+            "importer_blob": "2875c98d5b0ddb2fb825542114452b838a6f9bea",
+            "importer_commit": "40be303ce78a6d6bcad5d4c4b8c7285cc1732767",
+            "line": 6
+          },
+          {
+            "importer": "scripts/h62/item6/migrate-semantics/owner_hash_fixture.py",
+            "importer_blob": "3e65a61636afff9d97f7f5bc9facd0425b8b7b94",
+            "importer_commit": "40be303ce78a6d6bcad5d4c4b8c7285cc1732767",
+            "line": 5
+          },
+          {
+            "importer": "scripts/h62/item6/migrate-semantics/probe.py",
+            "importer_blob": "d99f64b94069c8ef9d83c5f0be79c8fb99d61a28",
+            "importer_commit": "40be303ce78a6d6bcad5d4c4b8c7285cc1732767",
+            "line": 6
+          }
+        ],
+        "input_revision": "a27ec14a756b2011bd864609ada2c4dbd65addc0",
+        "interface": {
+          "module": "bounded",
+          "names": [
+            "available",
+            "cap_kind",
+            "controller_mount",
+            "passed",
+            "run",
+            "settings"
+          ]
+        },
+        "kind": "python-import-source-role",
+        "path": "scripts/h62/item6/migrate-semantics/bounded.py",
+        "provenance": {
+          "blob": "921f0c36065a3d5ba781b7fd46f324a5bf1c07a3",
+          "commit": "40be303ce78a6d6bcad5d4c4b8c7285cc1732767",
+          "path": "scripts/h62/item6/migrate-semantics/bounded.py"
+        },
+        "purpose": "Reviewed exact Python import dependency of the named kept entry sources. Source consumption only: no invocation, passing-run, entered-module, data-read, fixture, child, runtime, compatibility or proof credit.",
+        "source_blob": "921f0c36065a3d5ba781b7fd46f324a5bf1c07a3"
       }
     ]
   },
