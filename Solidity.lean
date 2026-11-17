@@ -3305,6 +3305,8 @@ import Solidity.Goals.Headline
 import Solidity.Goals.IntrinsicSession
 import Solidity.Goals.Loops
 import Solidity.Goals.Panic
+import Solidity.Goals.PanicProvenance
+import Solidity.Goals.PanicRun
 import Solidity.Goals.Plan
 import Solidity.Goals.ProseCalibrated
 import Solidity.Goals.Shrink
