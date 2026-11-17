@@ -606,6 +606,15 @@ def _import_table(text):
 PY_IMPORT_HELPERS, PY_IMPORT_IMPORTS = _import_table(_PY_IMPORT_ROWS)
 
 
+def _import_shadowed(helper, tree):
+    """A package, another M.* file or a cached M.* beside the helper M.py."""
+    directory, name = posixpath.split(helper)
+    base = directory + '/' if directory else ''
+    prefix = base + name[:-3]
+    return any(p.startswith(prefix + '/') or p.startswith(prefix + '.') and p != helper
+               or p.startswith(base + '__pycache__/' + name[:-3] + '.') for p in tree)
+
+
 def python_import_statement(text, importer, line, helper, tree):
     """The names one static import binds from the sibling helper, or None.
 
@@ -618,30 +627,35 @@ def python_import_statement(text, importer, line, helper, tree):
     extension modules), any use of importlib, imp, runpy, pkgutil, zipimport,
     site, builtins, __import__, exec, eval or chdir, any sys.path, sys.modules,
     meta_path, path_hooks, path_importer_cache or sys.flags access, an aliased
-    sys, a `from sys import` of import state, or getattr/setattr/delattr/vars
-    on sys. The interpreter environment (PYTHONPATH, PYTHONSAFEPATH, site
-    customisation) is not audited: consumption credit only.
+    sys, sys reached through another object (`.sys`, `__dict__`, `from os
+    import sys`) or used other than as `sys.ATTR`, a `from sys import` of
+    import state, getattr/setattr/delattr/vars on sys, a dunder stem or a
+    `__pycache__/M.*` file. Not audited (consumption credit only): what the
+    importer's earlier sibling imports do at run time, whether the statement
+    is reached, and the interpreter environment (PYTHONPATH, PYTHONSAFEPATH,
+    site customisation).
     """
     import keyword, sys as interpreter
     directory, name = posixpath.split(helper)
     module = name[:-3] if name.endswith('.py') else ''
-    if (posixpath.dirname(importer) != directory or not module.isidentifier() or keyword.iskeyword(module)
+    if (posixpath.dirname(importer) != directory or not module.isidentifier() or keyword.iskeyword(module) or module.startswith('__')
             or module in interpreter.stdlib_module_names or module in interpreter.builtin_module_names):
         return None
-    prefix = (directory + '/' if directory else '') + module
-    if any(p.startswith(prefix + '/') or p.startswith(prefix + '.') and p != helper for p in tree): return None
+    if _import_shadowed(helper, tree): return None
     try: parsed = ast.parse(text)
     except (SyntaxError, ValueError, RecursionError): return None
+    parents = {child: node for node in ast.walk(parsed) for child in ast.iter_child_nodes(node)}
     found = []
     for n in ast.walk(parsed):
         if isinstance(n, ast.Name) and n.id in _IMPORT_SHADOWS: return None
-        if isinstance(n, ast.Attribute) and (n.attr in ('chdir', 'fchdir', '__import__')
+        if isinstance(n, ast.Name) and n.id == 'sys' and not (isinstance(parents.get(n), ast.Attribute) and parents[n].value is n): return None
+        if isinstance(n, ast.Attribute) and (n.attr in ('chdir', 'fchdir', '__import__', 'sys', '__dict__')
                                              or n.attr in _SYS_IMPORT_STATE and isinstance(n.value, ast.Name) and n.value.id == 'sys'): return None
         if isinstance(n, ast.Import):
             for a in n.names:
                 if a.name.split('.')[0] in _IMPORT_SHADOWS or a.name == 'sys' and a.asname not in (None, 'sys'): return None
         if isinstance(n, ast.ImportFrom):
-            if (n.module or '').split('.')[0] in _IMPORT_SHADOWS or any(a.name in _IMPORT_SHADOWS for a in n.names): return None
+            if (n.module or '').split('.')[0] in _IMPORT_SHADOWS or any(a.name in _IMPORT_SHADOWS or a.name == 'sys' for a in n.names): return None
             if n.module == 'sys' and any(a.name in _SYS_IMPORT_STATE or a.name == '*' for a in n.names): return None
         if (isinstance(n, ast.Call) and isinstance(n.func, ast.Name) and n.func.id in ('getattr', 'setattr', 'delattr', 'vars')
                 and n.args and isinstance(n.args[0], ast.Name) and n.args[0].id == 'sys'): return None
@@ -662,7 +676,7 @@ def python_import_bindings(text):
     names = set()
     for n in parsed.body:
         if isinstance(n, (ast.FunctionDef, ast.AsyncFunctionDef, ast.ClassDef)): names.add(n.name)
-        elif isinstance(n, (ast.Assign, ast.AnnAssign, ast.AugAssign)):
+        elif isinstance(n, (ast.Assign, ast.AnnAssign)):
             for t in (n.targets if isinstance(n, ast.Assign) else [n.target]):
                 names.update(e.id for e in ast.walk(t) if isinstance(e, ast.Name))
         elif isinstance(n, (ast.Import, ast.ImportFrom)):
@@ -705,9 +719,10 @@ def python_import_root(classifier, graph, catalog, entry, reviewed=None, imports
     if not _introduced(classifier, repo, doc['commit'], p, blob): raise ValueError(role + ' lacks its introducing provenance: ' + p)
     if not all(_introduced(classifier, repo, c['importer_commit'], c['importer'], c['importer_blob']) for c in calls):
         raise ValueError(role + ' importer lacks its introducing provenance: ' + p)
-    directory, module = posixpath.dirname(p), posixpath.basename(p)[:-3]
-    prefix = (directory + '/' if directory else '') + module
-    if any(q.startswith(prefix + '/') or q.startswith(prefix + '.') and q != p for q in repo.tree): return  # shadowed: stale
+    module = posixpath.basename(p)[:-3]
+    if _import_shadowed(p, repo.tree):
+        if revision == repo.ref: raise ValueError(role + ' helper is shadowed: ' + p)
+        return  # shadowed later: stale
     bound = python_import_bindings(repo.texts[p])
     if bound is None: raise ValueError(role + ' helper does not parse: ' + p)
     names = set()
@@ -762,14 +777,17 @@ def python_import_controls(env):
                        ('import sys as s\nfrom util import f\n', 2), ('from sys import path\nfrom util import f\n', 2),
                        ('import sys\nsys.modules["util"] = 1\nfrom util import f\n', 3), ('import sys\ngetattr(sys, "path")\nfrom util import f\n', 3),
                        ('exec("x")\nfrom util import f\n', 2), ('import runpy\nfrom util import f\n', 2), ('from util import f\n', 2),
-                       ('from util import f; import util\n', 1), ('from other import f\n', 1), ('from util import f\n(', 1)):
+                       ('from util import f; import util\n', 1), ('from other import f\n', 1), ('from util import f\n(', 1),
+                       ('import os\nos.sys.path.insert(0, "x")\nfrom util import f\n', 3), ('import sys\nsys.__dict__["path"]\nfrom util import f\n', 3),
+                       ('from os import sys\nfrom util import f\n', 2), ('import sys\ndef g(s): pass\ng(sys)\nfrom util import f\n', 4)):
         assert python_import_statement(text, I, line, H, tree) is None, text
     assert python_import_statement(ok, 'tests/other/run.py', 1, H, tree) is None  # not a sibling
-    for shadow in ('tests/pi/util/__init__.py', 'tests/pi/util.cpython-312-x86_64-linux-gnu.so', 'tests/pi/util.pyc', 'tests/pi/util/x.txt'):
+    for shadow in ('tests/pi/util/__init__.py', 'tests/pi/util.cpython-312-x86_64-linux-gnu.so', 'tests/pi/util.pyc', 'tests/pi/util/x.txt',
+                   'tests/pi/__pycache__/util.cpython-312.pyc'):
         assert python_import_statement(ok, I, 1, H, dict(tree, **{shadow: 0})) is None, shadow
-    for name in ('json', 'sys', 'class', 'my-mod'):  # standard library, built-in, keyword, not an identifier
+    for name in ('json', 'sys', 'class', 'my-mod', '__main__'):  # standard library, built-in, keyword, not an identifier, dunder
         assert python_import_statement('import ' + name + '\n', 'tests/pi/r.py', 1, 'tests/pi/' + name + '.py', {}) is None, name
-    assert python_import_bindings('import os.path as p, json\nfrom x import y\nA, (B, C) = 1, (2, 3)\nD: int = 4\ndef f(): pass\nclass K: pass\nif 1:\n    Z = 1\n') == {
+    assert python_import_bindings('import os.path as p, json\nfrom x import y\nA, (B, C) = 1, (2, 3)\nD: int = 4\ndef f(): pass\nclass K: pass\nif 1:\n    Z = 1\nE += 1\n') == {
         'p', 'json', 'y', 'A', 'B', 'C', 'D', 'f', 'K'}
     assert python_import_bindings('def (\n') is None
     # The role on a synthetic repository.
@@ -838,12 +856,15 @@ def python_import_controls(env):
         PY_IMPORT_HELPERS = saved[0]  # the audited set admits no other helper
         rejected(pi, 'unreviewed Python import role', standalone=[role] + roots)
         PY_IMPORT_HELPERS = frozenset({(H, blob(pi, H), P)})
-        # A changed helper or importer, then a shadowing extension module or package (added
-        # last: control commits cannot delete), drops the root later; a current claim on changed bytes is refused.
-        for changes in ({H: helper}, {I: '# edited\n' + ok}, {'tests/pi/util.abi3.so': 'x'}, {'tests/pi/util/__init__.py': ''}):
+        # A changed helper or importer, a shadowing extension module, package or cached
+        # module drops the root later; a current claim on changed or shadowed bytes is refused.
+        for changes in ({H: helper}, {I: '# edited\n' + ok}, {'tests/pi/util.abi3.so': 'x'}, {'tests/pi/util/__init__.py': ''},
+                       {'tests/pi/__pycache__/util.cpython-312.pyc': 'x'}):
             edited = commit(changes, 'edited')
             model, rows = run(edited, standalone=[role, roots[1], importer(I, edited)])
             assert PY_IMPORT_PREFIX + H not in model['entry_points'] and rows[H]['class'] != 'keep', changes
-            if H in changes or I in changes: rejected(edited, 'source mismatch', standalone=[dict(role, input_revision=edited.ref), roots[1], importer(I, edited)])
-            if H in changes or I in changes: commit({H: add[H], I: ok}, 'restored')
+            current = dict(role, input_revision=edited.ref)
+            rejected(edited, 'source mismatch' if H in changes or I in changes else 'helper is shadowed', standalone=[current, roots[1], importer(I, edited)])
+            for path in changes: (env['root'] / path).unlink()
+            commit({H: add[H], I: ok, 'tests/unrelated.txt': 'restored %d\n' % len(path)}, 'restored')
     finally: PY_IMPORT_HELPERS, PY_IMPORT_IMPORTS = saved
