@@ -33,7 +33,7 @@ info: proved Solidity.Goals.loweringKernelTotal ← Solidity.lowerKernel_total p
 
 /-! ### The loop contract (e2b-loops-producer)
 
-`lowerLoopsCorrect` stays unstated: no concrete boundary is bound. These pin
+`lowerLoopsCorrect` stays unstated: the concrete boundary is not complete. These pin
 what is proved about the contract at every boundary. -/
 
 section Contract
@@ -76,5 +76,78 @@ example (b : SemanticBoundary) (decode : Request → Option SourceProgram)
   h.associated_unique e a a'
 
 end Contract
+
+/-! ### The decoder on the e1 sample
+
+The decoder alone, from the raw input of the actual `while (i = a) break;`
+probe, yields the Source statement the e1 endpoint is proved against. -/
+
+section Decoder
+
+open Solidity.Correctness.Lowering Solidity.Correctness.Lowering.Total
+open Solidity.Correctness.Lowering.Checker
+
+/-- The decoder reads neither the fresh-name scheme nor the counter. -/
+def sampleNames : FreshNames := ⟨fun s n => s ++ toString n, fun _ => none⟩
+
+def sampleRequest (raw : List RawStmt) : Request :=
+  ⟨IntrinsicProbe.C, ⟨sampleNames, none, raw, RawProbe.scope, ⟨(RawProbe.inputLocals, 1), {}⟩⟩,
+    none⟩
+
+/-- The canonical unit of the sample contract: one empty contract. -/
+def sampleEnv : Source.Env :=
+  (Source.Syn.unit (.cons (.contract false Decode.contractName .none .nil .nil) .nil)).env
+
+example : Decode.decode (sampleRequest RawProbe.input) =
+    some (SourceProgram.ofStmt (SourceAssociation.resolved sampleEnv)) := rfl
+
+/-- The same for the other e1 samples: each raw input decodes to the resolved
+Source statement of its hand-written typing derivation. -/
+example : Decode.decode (sampleRequest Loops.Capture.forBreakInput) =
+    some (SourceProgram.ofStmt (Loops.Coverage.forBreakTyping sampleEnv).toR) := rfl
+example : Decode.decode (sampleRequest Loops.Capture.forBreakUpdateInput) =
+    some (SourceProgram.ofStmt (Loops.Coverage.forBreakUpdateTyping sampleEnv).toR) := rfl
+example : Decode.decode (sampleRequest Loops.Capture.whileContinueInput) =
+    some (SourceProgram.ofStmt (Loops.Coverage.whileContinueTyping sampleEnv).toR) := rfl
+example : Decode.decode (sampleRequest Loops.Capture.doBreakInput) =
+    some (SourceProgram.ofStmt (Loops.Coverage.doBreakTyping sampleEnv).toR) := rfl
+example : Decode.decode (sampleRequest Loops.Capture.whileResetInput) =
+    some (SourceProgram.ofStmt (Loops.Coverage.whileResetTyping sampleEnv).toR) := rfl
+example : Decode.decode (sampleRequest Loops.Capture.doContinueInput) =
+    some (SourceProgram.ofStmt (Loops.Coverage.doContinueTyping sampleEnv).toR) := rfl
+example : Decode.decode (sampleRequest Loops.Capture.whileReturnBody) =
+    some (SourceProgram.ofStmt (Loops.Coverage.whileReturnTyping sampleEnv).toR) := rfl
+example : Decode.decode (sampleRequest Loops.Capture.doReturnBody) =
+    some (SourceProgram.ofStmt (Loops.Coverage.doReturnTyping sampleEnv).toR) := rfl
+example : Decode.decode (sampleRequest Loops.Capture.returnFlagBody) =
+    some (SourceProgram.ofStmt (Loops.Coverage.returnFlagTyping sampleEnv).toR) := rfl
+
+/-- Negative controls: an unbound name is refused by Source typing; `break`
+outside a loop and a statement outside the covered syntax have no spelling. -/
+example : Decode.decode (sampleRequest [.assign (.name "i") (.name "z")]) = none := rfl
+example : Decode.decode (sampleRequest [.brk]) = none := rfl
+example : Decode.decode (sampleRequest [.eval []]) = none := rfl
+
+/-- The concrete admission excludes nothing, and at it the contract is the
+five listed obligations. -/
+example {source target relates allocations} :
+    FullDomain (loopBoundary source target relates allocations) := loopBoundary_fullDomain
+
+example {source target relates allocations} :
+    LowerLoopsCorrectContract (loopBoundary source target relates allocations)
+        (loopReference source target) Decode.decode ↔
+      (∀ r : Request, r.Succeeds → ∃ s, Decode.decode r = some s) ∧
+      (∀ (r : Request) o after parts program, r.pipeline o after parts program →
+        ∃ scopes, allocations r o after parts program scopes ∧
+          ∀ scope ∈ scopes, SafeSpellings r.input.names scope.protectedNames scope.generated) ∧
+      (∀ (r : Request) o after parts program s, Decode.decode r = some s →
+        r.pipeline o after parts program →
+        relates s program ∧ Nonempty (Solidity.Roadmap.G49Final.PassCorrect
+          (source s).behaviour (target program).behaviour)) ∧
+      RelatesNormalFamily (loopBoundary source target relates allocations) ∧
+      RelatesReturnFamily (loopBoundary source target relates allocations) :=
+  (contract_reference_iff _ _).trans loopResidual_iff
+
+end Decoder
 
 end Solidity.Goals
