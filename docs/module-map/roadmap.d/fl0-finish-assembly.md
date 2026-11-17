@@ -1,0 +1,2 @@
+| `Finish/Assembly.lean` | `project_finished_of_open`: `projectFinished` from the two open components (`lowerLoopsCorrect`, `runCarriesPanicCodes`) and the five proved ones; not the finish claim (H798). |
+| `Examples/Finish/Assembly.lean` | Axiom pin of `project_finished_of_open`; audit of the finish contract: `compilerTotal` on `ProgOk []`, the endpoint's refusals and world premises, the `Evm.run` boundary. |

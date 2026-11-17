@@ -1,0 +1,2 @@
+| `Goals/IntrinsicStorage.lean` | The storage/preimage strengthening `intrinsicStorageAccounting` (`is0-intrinsic-session`) of the intrinsic-session goal: `IntrinsicSession.Laws` plus `StorageLaws` (concrete `View.stored`, `FrameInputs`, `call_inputs`, `create_inputs` over `IntrinsicStorage.Preimages`). |
+| `Examples/Goals/IntrinsicStorage.lean` | The pinned open `#roadmap_goal` check for `intrinsicStorageAccounting`, with storage layout and preimage controls. |
