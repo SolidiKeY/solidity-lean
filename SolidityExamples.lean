@@ -149,6 +149,7 @@ import Solidity.Examples.Goals.Taclets
 import Solidity.Examples.Goals.Total
 import Solidity.Examples.InputReduction
 import Solidity.Examples.IntrinsicStorage.Preimages.Frames
+import Solidity.Examples.IntrinsicStorage.Preimages.Ops
 import Solidity.Examples.LexDiamond
 import Solidity.Examples.LexMetrics
 import Solidity.Examples.LexRuleSyntax
