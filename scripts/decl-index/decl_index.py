@@ -61,45 +61,81 @@ def root():
 # ---- Index ------------------------------------------------------------------------------------
 
 def artifacts():
-    cache = os.environ.get("LAKE_CACHE_DIR")
-    if not cache:
-        r = subprocess.run(["elan", "which", "lean"], capture_output=True, text=True)
-        if r.returncode: return None
-        cache = str(pathlib.Path(r.stdout.strip()).parent.parent / "lake/cache")
-    art = pathlib.Path(cache) / "artifacts"
-    return art if art.is_dir() else None
+    """Every Lake artifact cache directory that may hold this toolchain's oleans. Lake's cache
+    location depends on the host (LAKE_CACHE_DIR, the XDG cache, ~/.cache/lake or the elan
+    toolchain), so all existing candidates are searched rather than one guess: on the
+    coordinator host the guess missed the cache Lake had built into, nothing was linked for a
+    module new on the lane, and Lean failed on the missing MemoryStructDefaultPlan.olean."""
+    cands = []
+    if os.environ.get("LAKE_CACHE_DIR"): cands.append(pathlib.Path(os.environ["LAKE_CACHE_DIR"]))
+    xdg = os.environ.get("XDG_CACHE_HOME")
+    if xdg: cands.append(pathlib.Path(xdg) / "lake")
+    cands.append(pathlib.Path.home() / ".cache/lake")
+    try: r = subprocess.run(["elan", "which", "lean"], capture_output=True, text=True)
+    except OSError: r = None
+    if r is not None and not r.returncode and r.stdout.strip():
+        cands.append(pathlib.Path(r.stdout.strip()).parent.parent / "lake/cache")
+    out = []
+    for c in cands:
+        a = (c / "artifacts").resolve()
+        if a.is_dir() and a not in out: out.append(a)
+    return out
 
 
-def link_build(top, lib):
+def link_build(top, lib, need=()):
     """A LEAN_PATH directory of the oleans the traces name. With enableArtifactCache a fetched
     module's olean is only in Lake's cache, and a stale .lake/build olean can outlive a later
     fetch (restore-lake-artifacts never overwrites), so the trace decides; a module whose
-    artifact is not cached falls back to its .lake/build file."""
+    artifact is not cached falls back to its .lake/build file. Only existing files are linked
+    (a dangling link shadows Lake's own path), and a module of `need` left without an olean is a
+    setup error naming the searched caches: an unlinked module under lib/Solidity is reported
+    by Lean as a missing object file."""
     build = top / ".lake/build/lib/lean"
     if not build.is_dir(): raise SetupError(f"{build}: no build (run lake build first)")
-    art = artifacts()
+    arts = artifacts() or []
     names = defaultdict(list)
-    if art:
-        for n in os.listdir(art): names[n.split(".", 1)[0]].append(n)
-    linked = 0
+    for art in arts:
+        for n in os.listdir(art): names[n.split(".", 1)[0]].append((art, n))
+    linked, done = 0, set()
     for t in build.rglob("*.trace"):
         stem = t.with_suffix(""); rel = stem.relative_to(build)
         try: o = json.loads(t.read_text()).get("outputs", {}).get("o")
         except (OSError, ValueError, AttributeError): o = None
-        srcs = []
+        srcs, exts = [], set()
         for h in (o if isinstance(o, list) else [o] if o else []):
-            srcs += [(art / n, n.split(".", 1)[1]) for n in names.get(str(h), []) if n.split(".", 1)[1].startswith("olean")]
-        if not srcs:
-            srcs = [(p, p.name[len(stem.name) + 1:]) for p in stem.parent.glob(stem.name + ".olean*")]
+            for art, n in names.get(str(h), []):
+                ext = n.split(".", 1)[1]
+                if ext.startswith("olean") and ext not in exts and (art / n).is_file():
+                    srcs.append((art / n, ext)); exts.add(ext)
+        if "olean" not in exts:
+            srcs += [(p, p.name[len(stem.name) + 1:]) for p in stem.parent.glob(stem.name + ".olean*")
+                     if p.is_file() and p.name[len(stem.name) + 1:] not in exts]
         for src, ext in srcs:
             dst = lib / rel.parent / f"{stem.name}.{ext}"
             dst.parent.mkdir(parents=True, exist_ok=True)
             os.symlink(src, dst); linked += 1
+        if any(e == "olean" for _, e in srcs): done.add(".".join(rel.parts))
     if not linked: raise SetupError(f"{build}: no oleans found")
+    missing = sorted(set(need) - done)
+    if missing:
+        raise SetupError("no olean for %s in %s or caches %s (set LAKE_CACHE_DIR to Lake's cache)"
+                         % (", ".join(missing), build, [str(a) for a in arts] or "none found"))
+
+
+def lake_build(top, modules):
+    """Build `modules` and their import closure at the checked-out tree, so the traces
+    link_build reads name the oleans of this commit. Without it a touched module's index came
+    from whatever an earlier build or a coordinator overlay left, and a declaration new on the
+    lane (MemoryStructDefaultPlan at b2) was missing."""
+    r = subprocess.run(["lake", "build", *modules], cwd=top, capture_output=True, text=True)
+    if r.returncode:
+        raise SetupError("lake build %s failed (exit %d): %s"
+                         % (" ".join(modules), r.returncode, (r.stdout + r.stderr).strip()[-1500:]))
 
 
 def dump(out, modules):
-    """Index `modules` (imported together) into `out`; SetupError unless Lean finished."""
+    """Index `modules` (imported together) into `out`; SetupError unless Lake built them and
+    Lean finished."""
     top = root()
     text = SCRIPT.read_text()
     if text.count("\nimport Solidity\n") != 1: raise SetupError(f"{SCRIPT}: no single `import Solidity` line")
@@ -109,7 +145,8 @@ def dump(out, modules):
     with tempfile.TemporaryDirectory(prefix="decl-index.") as d:
         src, part = pathlib.Path(d) / "DeclIndexRun.lean", out.with_name(out.name + f".{os.getpid()}.part")
         src.write_text(text)
-        lib = pathlib.Path(d) / "lib"; link_build(top, lib)
+        lake_build(top, modules)
+        lib = pathlib.Path(d) / "lib"; link_build(top, lib, [m for m in modules if m != "Solidity"])
         env = dict(os.environ, DECLINDEX_OUT=str(part), LEAN_NUM_THREADS="1", DECLINDEX_LIB=str(lib))
         env.pop("DECLINDEX_LOCAL", None)
         r = subprocess.run(["lake", "env", "sh", "-c", 'LEAN_PATH="$DECLINDEX_LIB:$LEAN_PATH" exec lean --tstack=131072 "$1"',

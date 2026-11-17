@@ -50,6 +50,8 @@ FRAGMENT_SECTIONS = ('standalone', 'generators', 'reads', 'orphans', 'module_ent
 #   or Node program as a source-only role that anchors nothing.
 # H999 (x1k): standalone kind lean-check-source-role, a reviewed live non-root
 #   Lean check source bound to its blob and drivers; anchors nothing.
+# H1015 (x1o): standalone kind lean-fixture-source-role, the H999 rules for a
+#   reviewed Lean fixture source (roles.py); consumption only, anchors nothing.
 # persistent_module_entries (H979): exact routes.module_entries claims that
 #   persist while every recorded object is unchanged.
 CONSUMER_SECTIONS = ('persistent_reads', 'static_routes', 'git_policies', 'persistent_module_entries')
@@ -525,7 +527,8 @@ def git_policies(classifier, graph, rows):
             if not _current(repo, writer['path'], writer['blob']): stale = True; break
             if posixpath.basename(writer['path']) == '.gitignore' or not any(
                     r['path'] == writer['path'] and 'derived_from' not in r and not k.startswith('git-policy:')
-                    and not r.get('python_argument_role') and not r.get('nonpython_entry_role') and not r.get('lean_check_role') for k, r in graph.roots.items()):
+                    and not r.get('python_argument_role') and not r.get('nonpython_entry_role') and not r.get('lean_check_role')
+                    and not r.get('lean_fixture_role') for k, r in graph.roots.items()):
                 raise ValueError('Git policy writer is not an entry point source')
             if full in repo.tree or any(p.startswith(full + '/') for p in repo.tree):
                 raise ValueError('Git policy output is tracked: ' + full)
@@ -941,7 +944,8 @@ def node_mode_root(classifier, graph, catalog, entry, reviewed=None):
 # Reviewed (path, source blob, introducing commit) tables: an @COMMIT line,
 # then one `path blob` row per file it introduced; each path starts with an
 # abbreviation from _REVIEW_DIRECTORIES.
-_REVIEW_DIRECTORIES = {'N:': 'tests/directruntime-20261104/native-browser/', 'D:': 'tests/directruntime-20261104/', 'U:': 'tests/upstream/'}
+_REVIEW_DIRECTORIES = {'N:': 'tests/directruntime-20261104/native-browser/', 'D:': 'tests/directruntime-20261104/', 'U:': 'tests/upstream/',
+                       'T:': 'tests/'}
 
 
 def _review_table(text):
@@ -1403,168 +1407,14 @@ def nonpython_entry_root(classifier, graph, catalog, entry, reviewed=None):
             'reason': 'Reviewed live shell or Node program; the command is the bare interpreter prefix, which may need arguments, and no argument is recorded. Source role only, never run or certified to pass. No read anchor, fixture, helper, child, generated-output, proof or runtime credit.'}})
 
 
-LEAN_CHECK_KIND = 'lean-check-source-role'
-LEAN_CHECK_PREFIX = 'lean-check:'
-# H999 (gh#1334, X1E-LEAN-CHECK-ROLE): the driver line and the gate.sh
-# per-file branch that forms the one command.
-LEAN_CHECK_GATE = 'scripts/coord-tools/gate.sh'
-LEAN_CHECK_DRIVER_LINE = 'bash scripts/coord-tools/gate.sh per-file "${files[@]}"'
-LEAN_CHECK_GATE_BRANCH = 'if [ "$mode" = per-file ]; then'
-LEAN_CHECK_GATE_LINE = '  for file in "${files[@]}"; do run_gate "lean:$file" lake lean "$file" -- --tstack=131072; done'
-lean_check_command = lambda path: ['lake', 'lean', path, '--', '--tstack=131072']
-# Reviewed sources (path, blob, introducing commit) and invocations (path,
-# blob, driver, driver blob, gate line); each driver is a reviewed H997 entry.
-# read-bounds-validate.sh is not reviewed: a top-level exec hands its gate line
-# to validation-admission.py's recipe runner, which this audit does not follow.
-REVIEWED_LEAN_CHECKS = frozenset({
-    ('tests/directruntime-20261104/control-tuples/ProofAudit.lean', 'c60ce39b40db0e4a797d0afa4c1a8f14c40df466', 'e6849d3bdf516099d20c33d3581d523449764018'),
-})
-REVIEWED_LEAN_CHECK_INVOCATIONS = frozenset(
-    ('tests/directruntime-20261104/control-tuples/ProofAudit.lean', 'c60ce39b40db0e4a797d0afa4c1a8f14c40df466', 'tests/directruntime-20261104/shared-translator/' + d, b, n)
-    for d, b, n in (('address-validate.sh', '6f9014aa569e25b415aba09f7ef1c37f4a4dd3ea', 20),
-                    ('environment-validate.sh', '9460e5febcad1c954204902e5b7a505c5a5f79da', 21),
-                    ('fixed-byte-validate.sh', 'b4d495f62a04cab7ec344489563d20f63f832f33', 17),
-                    ('h90-validate.sh', 'a67ec66c28490d60be84f27466897389d27dc82c', 17),
-                    ('primitive-return-validate.sh', '074e6d15f01d4bfd67c2bd0af103663f96231923', 17)))
-_LEAN_NAME = r"[A-Za-z_][\w']*(?:\.[A-Za-z_][\w']*)*"
+_roles = Path(__file__).with_name('roles.py')  # H999 and H1015 Lean gate source roles
+exec(compile(_roles.read_bytes(), str(_roles), 'exec'))
 
-
-def lean_check_interface(lean_code, path, text):
-    """Header imports and the lines of `#check [@]NAME` and `#print axioms NAME`,
-    or None. Every other line is blank or comment only: any other command or
-    declaration (#eval, run_cmd, set_option, open, def, ...), a term that is
-    not one identifier, an indented or continued line, a late import, a
-    double quote, ambiguous line breaks, NUL or no check command gives None."""
-    if not path.endswith('.lean') or not isinstance(text, str) or not _plain_lines(text) or '\0' in text: return None
-    code = lean_code(text)
-    if code.count('\n') != text.count('\n'): return None
-    imports, checks, axioms = [], [], []
-    for n, (line, raw) in enumerate(zip(code.split('\n'), text.split('\n')), 1):
-        line = line.rstrip()
-        if '"' in raw: return None
-        if not line: continue
-        match = re.fullmatch(r'import((?:[ \t]+' + _LEAN_NAME + r')+)', line)
-        if not raw.startswith(line) or match and (checks or axioms): return None
-        if match: imports.extend(match[1].split())
-        elif re.fullmatch(r'#check[ \t]+@?' + _LEAN_NAME, line): checks.append(n)
-        elif re.fullmatch(r'#print[ \t]+axioms[ \t]+' + _LEAN_NAME, line): axioms.append(n)
-        else: return None
-    return {'imports': imports, 'check_lines': checks, 'axiom_lines': axioms} if checks or axioms else None
-
-
-def lean_check_invocation(text, path, line):
-    """The driver reaches its column-0 LEAN_CHECK_DRIVER_LINE with path listed.
-
-    Before it: balanced quotes per line; no continuation, here-document, exec,
-    cd, PATH change, function, other builtin listed below, or compound command
-    but column-0 `for ...; do`/`done`; `files` only as a whole-line files=(...)
-    or files+=(...) without ; # ( ), reset only at column 0, path an unquoted
-    word of a later column-0 assignment. Lexical; the review set gates."""
-    if not isinstance(text, str) or not _plain_lines(text) or '\0' in text: return False
-    lines = text.split('\n')
-    if type(line) is not int or not 1 <= line <= len(lines) or lines[line - 1] != LEAN_CHECK_DRIVER_LINE: return False
-    depth = 0; named = None
-    for n, raw in enumerate(lines[:line - 1], 1):
-        if n == 1 and raw.startswith('#!') or not raw.strip() or raw.strip().startswith('#'): continue
-        try: shlex.split(raw, comments=True)
-        except ValueError: return False
-        if '<<' in raw or '`' in raw or raw.rstrip().endswith('\\') or '$(' in raw and re.search(r'(?<![\w$-])files\b', raw): return False
-        if re.search(r'(?<![\w$-])(?:exec|exit|return|source|eval|trap|alias|hash|kill|declare|typeset|local|readonly|unset|builtin|command|enable|cd|pushd|popd|function|if|then|else|elif|fi|while|until|case|esac|select|shift)(?![\w-])'
-                     r'|^\s*\.\s|(?<![\w$])PATH\+?=|\w\s*\(\s*\)|[{}]|&&|\|\||;\s*$|(?:^|[;&|]\s*)\(', raw): return False
-        if re.match(r'for\s', raw):
-            if depth or not re.search(r';\s*do\s*$', raw): return False
-            depth = 1; continue
-        if re.fullmatch(r'done\s*', raw):
-            if not depth: return False
-            depth = 0; continue
-        if re.search(r'(?<![\w$-])do(?![\w-])', raw): return False
-        if not re.search(r'(?<![\w$/-])files(?![\w./-])', raw): continue
-        match = re.fullmatch(r'(\s*)files(\+?)=\(([^;#()]*)\)\s*', raw)
-        if match is None or not match[2] and match[1] or not match[1] and re.search('["\'$]', match[3]): return False
-        try: words = shlex.split(match[3])
-        except ValueError: return False
-        if not match[2]: named = False
-        if not match[1] and not depth and path in words: named = True
-    return depth == 0 and named is True
-
-
-def lean_check_root(classifier, graph, catalog, entry, reviewed=None, invocations=None):
-    """H999: a reviewed live non-root Lean check source as a source-only role.
-
-    Binds lean_check_command(P), the blob, its interface, the reviewed
-    introducing commit and each invocation: a reviewed H997 driver (blob,
-    commit) whose gate line runs P. P is under tests/; a Lake package, root
-    library, importer or changed gate.sh per-file line makes it stale. Never a
-    validated runner; anchors nothing. Kept later while source and drivers are
-    unchanged; a current definition of the path supersedes it."""
-    repo = graph.repo
-    reviewed = REVIEWED_LEAN_CHECKS if reviewed is None else reviewed
-    invocations = REVIEWED_LEAN_CHECK_INVOCATIONS if invocations is None else invocations
-    required = {'path', 'input_revision', 'source_blob', 'command', 'kind', 'interface', 'provenance', 'invocations', 'purpose'}
-    _role_schema(classifier, catalog, entry, required, 'Lean check role'); calls = entry['invocations']
-    if (not isinstance(calls, list) or not calls or any(not isinstance(c, dict) or set(c) != {'driver', 'driver_blob', 'driver_commit', 'line'} or type(c['line']) is not int
-                   or not all(isinstance(c[k], str) for k in ('driver', 'driver_blob', 'driver_commit')) for c in calls)
-            or len({canonical(c) for c in calls}) != len(calls)):
-        raise ValueError('invalid Lean check role definition')
-    p = entry['path']; revision = entry['input_revision']; doc = entry['provenance']; blob = entry['source_blob']
-    if entry['command'] != lean_check_command(p) or not p.endswith('.lean') or not p.startswith('tests/') or _clean(p) != p:
-        raise ValueError('unsupported Lean check role invocation: ' + p)
-    if doc['path'] != p or doc['blob'] != blob or (p, blob, doc['commit']) not in reviewed: raise ValueError('unreviewed Lean check role: ' + p)
-    if any((p, blob, c['driver'], c['driver_blob'], c['line']) not in invocations or not c['driver'].endswith('.sh')
-           or (c['driver'], c['driver_blob'], c['driver_commit']) not in REVIEWED_NONPY_ENTRIES for c in calls):
-        raise ValueError('unreviewed Lean check role invocation: ' + p)
-    pins = [(p, blob)] + [(c['driver'], c['driver_blob']) for c in calls]
-    if not _role_current(classifier, repo, catalog, entry, pins): return
-    if repo.tree[p][0] != '100644' or p not in repo.texts or any(repo.tree[c['driver']][0] not in ('100644', '100755') for c in calls):
-        raise ValueError('unsupported Lean check role invocation: ' + p)
-    if not _introduced(classifier, repo, doc['commit'], p, blob): raise ValueError('Lean check role lacks its introducing provenance: ' + p)
-    if not all(_introduced(classifier, repo, c['driver_commit'], c['driver'], c['driver_blob']) for c in calls):
-        raise ValueError('Lean check role driver lacks its introducing provenance: ' + p)
-    # Lake packages, root libraries and importers are not pinned: they make the role stale.
-    parts = p.split('/')
-    if (any('/'.join(parts[:k]) + '/' + name in repo.tree for k in range(1, len(parts)) for name in ('lakefile.toml', 'lakefile.lean'))
-            or 'lakefile.lean' in repo.tree or not _outside_root_libraries(repo, p)
-            or any(e['target'] == p and e['operation'] == 'Lean import' for edges in graph.edges.values() for e in edges)): return
-    interface = lean_check_interface(classifier['lean_code'], p, repo.texts[p])
-    if interface is None: raise ValueError('Lean check role lacks an audited check-only interface: ' + p)
-    if canonical(interface) != canonical(entry['interface']): raise ValueError('Lean check role interface mismatch: ' + p)
-    for c in calls:
-        if c['driver'] not in repo.texts or nonpython_entry_interface(c['driver'], repo.texts[c['driver']]) is None:
-            raise ValueError('Lean check role driver lacks an audited entry interface: ' + c['driver'])
-        if not lean_check_invocation(repo.texts[c['driver']], p, c['line']): raise ValueError('Lean check role driver does not run the source: ' + c['driver'])
-    if '\n' + LEAN_CHECK_GATE_BRANCH + '\n' + LEAN_CHECK_GATE_LINE + '\n' not in repo.texts.get(LEAN_CHECK_GATE, ''): return
-    identity = LEAN_CHECK_PREFIX + p
-    graph.root(p, 'source-only Lean check source', shlex.join(entry['command']), calls[0]['driver'], calls[0]['line'], root_id=identity)
-    if identity not in graph.roots: return
-    graph.roots[identity].update({'source_only': True, 'lean_check_role': True, 'source_blob': blob, 'purpose': entry['purpose'],
-        'interface': interface, 'provenance': doc, 'invocations': calls, 'source_declaration_revision': revision,
-        'validation_at_measured_revision': {'status': 'unavailable', 'command': entry['command'],
-            'reason': 'Reviewed Lean check source run by reviewed drivers via gate.sh per-file; never run or certified to elaborate or pass. No execution, read, fixture, helper, import-dependency, output, proof or runtime credit.'}})
-
-
-def _outside_root_libraries(repo, path):
-    """No root lakefile*.toml library or executable can name path's module."""
-    import tomllib
-    top = path.split('/')[0]
-    for name in sorted(n for n in repo.texts if '/' not in n and re.fullmatch(r'lakefile.*\.toml', n)):
-        try: config = tomllib.loads(repo.texts[name])
-        except ValueError: return False
-        for target in config.get('lean_lib', []) + config.get('lean_exe', []):
-            source = target.get('srcDir', '.') if isinstance(target, dict) else None
-            if not isinstance(source, str): return False
-            source = posixpath.normpath(source)
-            if source != '.':
-                if path.startswith(source + '/') or source.startswith(('..', '/')): return False
-                continue
-            lists = [target.get(k, []) for k in ('roots', 'globs')]
-            if any(not isinstance(x, list) for x in lists): return False
-            names = [target.get('name'), target.get('root')] + lists[0] + lists[1]
-            if any(not isinstance(n, str) or n.split('.')[0] in (top, '*', '+') for n in names if n is not None): return False
-    return True
 
 
 SOURCE_ROLE_KINDS = {SOURCE_ONLY_KIND: source_only_program, NODE_MODE_KIND: node_mode_root, PYTHON_ARGS_KIND: python_argument_root,
-                     NONPY_ENTRY_KIND: nonpython_entry_root, LEAN_CHECK_KIND: lean_check_root}
+                     NONPY_ENTRY_KIND: nonpython_entry_root, LEAN_CHECK_KIND: lean_check_root,
+                     LEAN_FIXTURE_KIND: lean_fixture_root}
 
 
 def persisted_module_entries(classifier, graph, catalog, rows):
@@ -2375,9 +2225,10 @@ def successor_controls(classifier):
         # commit that anchors nothing and credits no read, helper or output.
         global REVIEWED_NONPY_ENTRIES
         reviewed_nonpy = REVIEWED_NONPY_ENTRIES
-        assert len(reviewed_nonpy) == 115 and len({p for p, _, _ in reviewed_nonpy}) == 115
-        assert all(p.startswith(('tests/directruntime-20261104/', 'tests/upstream/')) and posixpath.splitext(p)[1] in NONPY_SHEBANGS
+        assert len(reviewed_nonpy) == 176 and len({p for p, _, _ in reviewed_nonpy}) == 176  # H997 115, H1025 61
+        assert all(p.startswith('tests/') and posixpath.splitext(p)[1] in NONPY_SHEBANGS
                    and '.test.' not in p and classifier['hex_pin'](b, 40) and classifier['hex_pin'](c, 40) for p, b, c in reviewed_nonpy)
+        assert all(p.startswith(('tests/directruntime-20261104/', 'tests/upstream/')) for p, _, _ in reviewed_nonpy - REVIEWED_NONPY_ENTRIES_H1025)
         witnesses = {'tests/directruntime-20261104/shared-translator/bounded.sh', 'tests/directruntime-20261104/native-browser/readbounds/module-gates.sh',
                      'tests/directruntime-20261104/memory-references/native-source-controls.mjs'}
         assert witnesses <= {p for p, _, _ in reviewed_nonpy}
@@ -2492,6 +2343,7 @@ def successor_controls(classifier):
             assert 'nonpy-entry:tests/drive.sh' not in model['entry_points'] and rows['tests/drive.sh']['class'] != 'keep'
             rejected(sh_edited, 'source mismatch', standalone=[dict(sh_role, input_revision=sh_edited.ref)])
         finally: REVIEWED_NONPY_ENTRIES = reviewed_nonpy
+        nonpy_roleset_controls(locals())  # H1025, in roles.py
 
         # (4) H979 persisted entered-module claims.
         assert run(first)[1]['tests/helper.py']['class'] == 'keep'
@@ -2640,3 +2492,4 @@ def successor_controls(classifier):
             REVIEWED_LEAN_CHECKS = frozenset()
             rejected(lf, 'unreviewed Lean check role', standalone=[role])
         finally: REVIEWED_LEAN_CHECKS, REVIEWED_LEAN_CHECK_INVOCATIONS, REVIEWED_NONPY_ENTRIES = saved
+        lean_fixture_controls(locals())  # (9) H1015, in roles.py
