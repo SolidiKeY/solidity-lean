@@ -92,9 +92,32 @@ while IFS=$'\t' read -r m deps; do
   elif [ "$write" = 0 ] && lake build --no-build "$m" >/dev/null 2>&1 </dev/null; then
     echo "PASS $m cached (heartbeats unchanged)"; continue
   else
-    # Imports outside the slow set (and slow imports built above) must be current.
+    # The collector needs current imports: build the direct imports first (a no-op for
+    # slow imports built above and for anything already built or cached).
     one=$(mktemp "${TMPDIR:-/tmp}/slow-hb1.XXXXXX") || exit 2
-    timeout --kill-after=10s "${budget}s" scripts/heartbeats/collect.sh "$m" >"$one" </dev/null; st=$?
+    read -ra imps <<<"$(sed -nE 's/^[[:space:]]*((public|private|meta)[[:space:]]+)*import([[:space:]]+all)?[[:space:]]+([^-]*).*/\4/p' "${m//.//}.lean" | tr ' ' '\n' | grep -E '^(Solidity|Tools)' | tr '\n' ' ')"
+    st=0
+    [ ${#imps[@]} -eq 0 ] || { LEAN_NUM_THREADS=1 timeout --kill-after=10s "${budget}s" lake build "${imps[@]}" >/dev/null </dev/null; st=$?; }
+    left=$(( budget - ($(date +%s) - start) )); [ "$left" -ge 1 ] || left=1
+    # With enableArtifactCache, Lake keeps .olean files in its cache and records them in
+    # each .trace; the collector reads LEAN_PATH (.lake/build/lib/lean), so link them there.
+    [ "$st" -ne 0 ] || python3 - "$(lake env printenv LAKE_CACHE_DIR 2>/dev/null)" <<'PY' || st=2
+import json, os, pathlib, sys
+cache = pathlib.Path(sys.argv[1] or "") / "artifacts"
+for tr in pathlib.Path(".lake/build/lib/lean").rglob("*.trace"):
+    ol = tr.with_suffix(".olean")
+    if ol.exists():
+        continue
+    try:
+        o = json.loads(tr.read_text()).get("outputs", {}).get("o")
+    except (ValueError, OSError):
+        continue
+    for h in (o if isinstance(o, list) else [o])[:1]:
+        src = cache / f"{h}.olean"
+        if h and src.is_file():
+            os.symlink(src, ol)
+PY
+    [ "$st" -ne 0 ] || { timeout --kill-after=10s "${left}s" scripts/heartbeats/collect.sh "$m" >"$one" </dev/null; st=$?; }
     if [ "$st" -eq 0 ]; then
       cat "$one" >>"$runs"
       python3 -c 'import json,sys; r=json.loads(open(sys.argv[1]).readline()); print(f"heartbeats {r[\"module\"]} {r[\"heartbeats\"]:.3f}")' "$one"
