@@ -1499,22 +1499,6 @@
      "invocation": "node scripts/parse-corpus.mjs prepare"
     },
     "purpose": "Exact H992 reviewed prepare entry and literal source-walker root. Source consumption only; no current or historical passing command, parser acceptance, compiler authenticity, child execution, generated-output provenance, proof or runtime credit."
-   },
-   {
-    "path": "scripts/solidity-baseline-cache-audit.py",
-    "input_revision": "2b2d4bad770a9b80900e5ba53931cfacec8286e5",
-    "source_blob": "a2ec503447fc4f6ef38399ce61cf8a2b3f0647ae",
-    "command": [
-     "python3",
-     "-B",
-     "scripts/solidity-baseline-cache-audit.py"
-    ],
-    "kind": "committed-cli",
-    "entry_line": 70,
-    "required_options": [
-     "--out"
-    ],
-    "purpose": "Configured cache-descriptor audit producer with required output-directory option. Source role and entry prefix only, not a successful bare invocation or cache execution check; no read anchor, fixture/helper/output, proof or runtime credit."
    }
   ]
  },
@@ -3502,23 +3486,6 @@
        "blob": "353e128e8b60441541640b27f42f87bf53ca14b7",
        "line": 3,
        "literal": "runtime"
-      }
-     }
-    ]
-   },
-   {
-    "path": "tests/upstream/baseline-20261028/native-cache/.gitignore",
-    "blob": "07f6a49e4af5af4aa94723a32e35ec73fbfad2a5",
-    "purpose": "Git exclusion policy for audit.json under this native-cache directory. The existing configured cache-audit producer writes that literal filename under its selected --out directory. Conditional writer/policy relationship only; no configured invocation, output bytes, valid cache, test, proof or runtime acceptance is certified.",
-    "matches": [
-     {
-      "line": 1,
-      "output": "audit.json",
-      "writer": {
-       "path": "scripts/solidity-baseline-cache-audit.py",
-       "blob": "a2ec503447fc4f6ef38399ce61cf8a2b3f0647ae",
-       "line": 65,
-       "literal": "audit.json"
       }
      }
     ]
