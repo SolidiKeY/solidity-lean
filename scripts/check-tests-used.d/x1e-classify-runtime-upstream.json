@@ -919,71 +919,6 @@
         "kind": "source-only-program"
       },
       {
-        "path": "tests/directruntime-20261104/control-tuples/measure-native.py",
-        "input_revision": "c63043dc56335f6984a0e6303445f5ac6b9078dd",
-        "source_blob": "c24f1113690cc7a6611d8f8d412ce5f8e77b5b1e",
-        "command": [
-          "python3",
-          "-B",
-          "tests/directruntime-20261104/control-tuples/measure-native.py"
-        ],
-        "kind": "source-only-program",
-        "entry_line": 17,
-        "purpose": "Declared standalone program: Measure a single native external test; no Lean environment is created. Explicit source role only; default invocation is unvalidated. No read anchor, helper/fixture/child, output, proof or runtime credit."
-      },
-      {
-        "path": "tests/directruntime-20261104/control-tuples/run-bounded.py",
-        "input_revision": "c63043dc56335f6984a0e6303445f5ac6b9078dd",
-        "source_blob": "629db80c898eb6a19b1dc58a7bf1153bf65214dd",
-        "command": [
-          "python3",
-          "-B",
-          "tests/directruntime-20261104/control-tuples/run-bounded.py"
-        ],
-        "kind": "source-only-program",
-        "entry_line": 15,
-        "purpose": "Declared standalone program: Serial Docker check runner with an outer-cgroup 4 GiB reserve guard. Explicit source role only; default invocation is unvalidated. No read anchor, helper/fixture/child, output, proof or runtime credit."
-      },
-      {
-        "path": "tests/directruntime-20261104/memory-references/bounded-check.py",
-        "input_revision": "c63043dc56335f6984a0e6303445f5ac6b9078dd",
-        "source_blob": "d9f1b14c51c9011736f0fb484f4fcf96d55cd615",
-        "command": [
-          "python3",
-          "-B",
-          "tests/directruntime-20261104/memory-references/bounded-check.py"
-        ],
-        "kind": "source-only-program",
-        "entry_line": 4,
-        "purpose": "Declared standalone program: Serial development-check observer; never produces a verifier verdict. Explicit source role only; default invocation is unvalidated. No read anchor, helper/fixture/child, output, proof or runtime credit."
-      },
-      {
-        "path": "tests/directruntime-20261104/memory-references/browser-result-intake.py",
-        "input_revision": "c63043dc56335f6984a0e6303445f5ac6b9078dd",
-        "source_blob": "fbb3489b8a38e1e8a8e96fa37d95fbea09d88903",
-        "command": [
-          "python3",
-          "-B",
-          "tests/directruntime-20261104/memory-references/browser-result-intake.py"
-        ],
-        "kind": "source-only-program",
-        "entry_line": 13,
-        "purpose": "Declared standalone program: Guard regression: normalized replay or revalidation is not fresh-build proof. Explicit source role only; default invocation is unvalidated. No read anchor, helper/fixture/child, output, proof or runtime credit."
-      },
-      {
-        "path": "tests/directruntime-20261104/memory-references/census-controls.py",
-        "input_revision": "c63043dc56335f6984a0e6303445f5ac6b9078dd",
-        "source_blob": "08e1714023fc1f8e49ca09a8601d899ed54155f8",
-        "command": [
-          "python3",
-          "-B",
-          "tests/directruntime-20261104/memory-references/census-controls.py"
-        ],
-        "kind": "source-only-program",
-        "entry_line": 18,
-        "purpose": "Declared standalone program: Guard regression: tampered or truncated provenance must not pass the census. Explicit source role only; default invocation is unvalidated. No read anchor, helper/fixture/child, output, proof or runtime credit."
-      },
-      {
         "path": "tests/directruntime-20261104/memory-references/generate-kernel-matrix.py",
         "input_revision": "c63043dc56335f6984a0e6303445f5ac6b9078dd",
         "source_blob": "d5da920b1769983a5c60a430014ab8d127f4ec6c",
@@ -997,97 +932,6 @@
         "purpose": "Declared standalone program: Generate development theorem statements from the exact fixture source bodies. Explicit source role only; default invocation is unvalidated. No read anchor, helper/fixture/child, output, proof or runtime credit."
       },
       {
-        "path": "tests/directruntime-20261104/memory-references/inspect-browser-evidence.py",
-        "input_revision": "c63043dc56335f6984a0e6303445f5ac6b9078dd",
-        "source_blob": "6f747cfa705fc346a6aedfb162e4e84df8978565",
-        "command": [
-          "python3",
-          "-B",
-          "tests/directruntime-20261104/memory-references/inspect-browser-evidence.py"
-        ],
-        "kind": "source-only-program",
-        "entry_line": 19,
-        "purpose": "Declared standalone program: Guard regression: exact raw replay evidence must not be replaced by metadata. Explicit source role only; default invocation is unvalidated. No read anchor, helper/fixture/child, output, proof or runtime credit."
-      },
-      {
-        "path": "tests/directruntime-20261104/memory-references/linker-attribution-controls.py",
-        "input_revision": "c63043dc56335f6984a0e6303445f5ac6b9078dd",
-        "source_blob": "06166345217a40838f67fc52998333cfafd4bbbd",
-        "command": [
-          "python3",
-          "-B",
-          "tests/directruntime-20261104/memory-references/linker-attribution-controls.py"
-        ],
-        "kind": "source-only-program",
-        "entry_line": 17,
-        "purpose": "Declared standalone program: Guard regression: missing/overlapping link ranges or tampered provenance fail. Explicit source role only; default invocation is unvalidated. No read anchor, helper/fixture/child, output, proof or runtime credit."
-      },
-      {
-        "path": "tests/directruntime-20261104/memory-references/linker-attribution.py",
-        "input_revision": "c63043dc56335f6984a0e6303445f5ac6b9078dd",
-        "source_blob": "3b487c691ab3b1710149a25eef37d14301bcd563",
-        "command": [
-          "python3",
-          "-B",
-          "tests/directruntime-20261104/memory-references/linker-attribution.py"
-        ],
-        "kind": "source-only-program",
-        "entry_line": 135,
-        "purpose": "Declared standalone program: Guard regression: name-candidate origins are not exact linker attribution. Explicit source role only; default invocation is unvalidated. No read anchor, helper/fixture/child, output, proof or runtime credit."
-      },
-      {
-        "path": "tests/directruntime-20261104/memory-references/native-boundary-audit.py",
-        "input_revision": "c63043dc56335f6984a0e6303445f5ac6b9078dd",
-        "source_blob": "8c0601e110ec1c779e759456d05d64ca045a6232",
-        "command": [
-          "python3",
-          "-B",
-          "tests/directruntime-20261104/memory-references/native-boundary-audit.py"
-        ],
-        "kind": "source-only-program",
-        "entry_line": 3,
-        "purpose": "Declared standalone program: External binary observations only; not an exhaustive absence theorem. Explicit source role only; default invocation is unvalidated. No read anchor, helper/fixture/child, output, proof or runtime credit."
-      },
-      {
-        "path": "tests/directruntime-20261104/memory-references/native-closure-evidence.py",
-        "input_revision": "c63043dc56335f6984a0e6303445f5ac6b9078dd",
-        "source_blob": "1872f7842f78468b9d617f000e3469a7781a7fe2",
-        "command": [
-          "python3",
-          "-B",
-          "tests/directruntime-20261104/memory-references/native-closure-evidence.py"
-        ],
-        "kind": "source-only-program",
-        "entry_line": 3,
-        "purpose": "Declared standalone program: Replay the unchanged producer extractor and bind candidate bodies to compiled objects. Explicit source role only; default invocation is unvalidated. No read anchor, helper/fixture/child, output, proof or runtime credit."
-      },
-      {
-        "path": "tests/directruntime-20261104/memory-references/native-refusal-controls.py",
-        "input_revision": "c63043dc56335f6984a0e6303445f5ac6b9078dd",
-        "source_blob": "c2f89053088d9f5f615c75f408b6711c5f7b99dd",
-        "command": [
-          "python3",
-          "-B",
-          "tests/directruntime-20261104/memory-references/native-refusal-controls.py"
-        ],
-        "kind": "source-only-program",
-        "entry_line": 3,
-        "purpose": "Declared standalone program: Controlled malformed-AST/type-error API refusals; not fresh valid Solidity cases. Explicit source role only; default invocation is unvalidated. No read anchor, helper/fixture/child, output, proof or runtime credit."
-      },
-      {
-        "path": "tests/directruntime-20261104/memory-references/pack-cache.py",
-        "input_revision": "c63043dc56335f6984a0e6303445f5ac6b9078dd",
-        "source_blob": "c10c9d9b34044d11582ab507e76bf017a9034449",
-        "command": [
-          "python3",
-          "-B",
-          "tests/directruntime-20261104/memory-references/pack-cache.py"
-        ],
-        "kind": "source-only-program",
-        "entry_line": 6,
-        "purpose": "Declared standalone program: Prepare and verify an H41 pickup packet; never sends data or edits cache mappings. Explicit source role only; default invocation is unvalidated. No read anchor, helper/fixture/child, output, proof or runtime credit."
-      },
-      {
         "path": "tests/directruntime-20261104/memory-references/prepare-checks.py",
         "input_revision": "c63043dc56335f6984a0e6303445f5ac6b9078dd",
         "source_blob": "353e128e8b60441541640b27f42f87bf53ca14b7",
@@ -1099,19 +943,6 @@
         "kind": "source-only-program",
         "entry_line": 3,
         "purpose": "Declared standalone program: Prepare this VM's owned single-thread Lake configuration; no shared edits. Explicit source role only; default invocation is unvalidated. No read anchor, helper/fixture/child, output, proof or runtime credit."
-      },
-      {
-        "path": "tests/directruntime-20261104/memory-references/runtime-boundary-census.py",
-        "input_revision": "c63043dc56335f6984a0e6303445f5ac6b9078dd",
-        "source_blob": "526851b6c2b502a149b80d2f7f1f0c8ae87b1113",
-        "command": [
-          "python3",
-          "-B",
-          "tests/directruntime-20261104/memory-references/runtime-boundary-census.py"
-        ],
-        "kind": "source-only-program",
-        "entry_line": 16,
-        "purpose": "Declared standalone program: Guard regression: a 14-candidate audit must not stand in for a full census. Explicit source role only; default invocation is unvalidated. No read anchor, helper/fixture/child, output, proof or runtime credit."
       },
       {
         "path": "tests/directruntime-20261104/native-browser/address/check-candidate-exclusion.py",
@@ -1153,19 +984,6 @@
         "purpose": "Declared standalone program: External binary/trace evidence for the native baseline; not a kernel proof. Explicit source role only; default invocation is unvalidated. No read anchor, helper/fixture/child, output, proof or runtime credit."
       },
       {
-        "path": "tests/directruntime-20261104/native-browser/bounded-command.py",
-        "input_revision": "c63043dc56335f6984a0e6303445f5ac6b9078dd",
-        "source_blob": "3c9e6eb7c60bf7906c7f605bdf0fa58f65f6a3df",
-        "command": [
-          "python3",
-          "-B",
-          "tests/directruntime-20261104/native-browser/bounded-command.py"
-        ],
-        "kind": "source-only-program",
-        "entry_line": 14,
-        "purpose": "Declared standalone program: Execute one serial gate inside the coordinator's exact bounded container. Explicit source role only; default invocation is unvalidated. No read anchor, helper/fixture/child, output, proof or runtime credit."
-      },
-      {
         "path": "tests/directruntime-20261104/native-browser/check-root-hardening.py",
         "input_revision": "c63043dc56335f6984a0e6303445f5ac6b9078dd",
         "source_blob": "3ca394c63920e26f3df8d704c3dbd3a7533a4ab0",
@@ -1177,19 +995,6 @@
         "kind": "source-only-program",
         "entry_line": 6,
         "purpose": "Declared standalone program: Check hardened extraction against the exact saved pre-change native closure. Explicit source role only; default invocation is unvalidated. No read anchor, helper/fixture/child, output, proof or runtime credit."
-      },
-      {
-        "path": "tests/directruntime-20261104/native-browser/environment/known-stack-continuation.py",
-        "input_revision": "c63043dc56335f6984a0e6303445f5ac6b9078dd",
-        "source_blob": "7898e125b8addd4b3badbb0d80e7001481c15741",
-        "command": [
-          "python3",
-          "-B",
-          "tests/directruntime-20261104/native-browser/environment/known-stack-continuation.py"
-        ],
-        "kind": "source-only-program",
-        "entry_line": 116,
-        "purpose": "Declared standalone program: Guard continuation after only the retained invariantCountsToBound stack failure. Explicit source role only; default invocation is unvalidated. No read anchor, helper/fixture/child, output, proof or runtime credit."
       },
       {
         "path": "tests/directruntime-20261104/native-browser/environment/scripts/builds.py",
@@ -1268,32 +1073,6 @@
         "kind": "source-only-program",
         "entry_line": 3,
         "purpose": "Declared standalone program: writes environment-wrapper handoff metadata. Explicit source role only; default invocation is unvalidated. No read anchor, helper/fixture/child, output, proof or runtime credit."
-      },
-      {
-        "path": "tests/directruntime-20261104/native-browser/environment/test-known-stack-continuation.py",
-        "input_revision": "c63043dc56335f6984a0e6303445f5ac6b9078dd",
-        "source_blob": "0224c0f28316d02a1489016c0e13c0fa20e6e80c",
-        "command": [
-          "python3",
-          "-B",
-          "tests/directruntime-20261104/native-browser/environment/test-known-stack-continuation.py"
-        ],
-        "kind": "source-only-program",
-        "entry_line": 93,
-        "purpose": "Declared standalone program: Guard against hiding unrelated browser failures behind the known stack STOP. Explicit source role only; default invocation is unvalidated. No read anchor, helper/fixture/child, output, proof or runtime credit."
-      },
-      {
-        "path": "tests/directruntime-20261104/native-browser/h109/docker-probe.py",
-        "input_revision": "c63043dc56335f6984a0e6303445f5ac6b9078dd",
-        "source_blob": "2c67207ea5ce6c3d55e59f3ee2341b764028aedf",
-        "command": [
-          "python3",
-          "-B",
-          "tests/directruntime-20261104/native-browser/h109/docker-probe.py"
-        ],
-        "kind": "source-only-program",
-        "entry_line": 557,
-        "purpose": "Declared standalone program: Guard H127 cleanup against name-only kills and launcher-exit false success. Explicit source role only; default invocation is unvalidated. No read anchor, helper/fixture/child, output, proof or runtime credit."
       },
       {
         "path": "tests/directruntime-20261104/native-browser/h35-verify-cache.py",
@@ -1543,45 +1322,6 @@
         "purpose": "Declared standalone program: Guard OT-STACK-SYMBOLS: names require exact historical WASM index/body identity. Explicit source role only; default invocation is unvalidated. No read anchor, helper/fixture/child, output, proof or runtime credit."
       },
       {
-        "path": "tests/directruntime-20261104/native-browser/validation-admission.py",
-        "input_revision": "c63043dc56335f6984a0e6303445f5ac6b9078dd",
-        "source_blob": "1d56a3dc820b8ae3e503fedfbd4151ff530539bd",
-        "command": [
-          "python3",
-          "-B",
-          "tests/directruntime-20261104/native-browser/validation-admission.py"
-        ],
-        "kind": "source-only-program",
-        "entry_line": 110,
-        "purpose": "Declared standalone program: Guard fixed validation entry points against unlocked and unbounded builds. Explicit source role only; default invocation is unvalidated. No read anchor, helper/fixture/child, output, proof or runtime credit."
-      },
-      {
-        "path": "tests/directruntime-20261104/shared-translator/measure.py",
-        "input_revision": "c63043dc56335f6984a0e6303445f5ac6b9078dd",
-        "source_blob": "57c6a2f51633f72cf79c063740eff1f6ade3a26b",
-        "command": [
-          "python3",
-          "-B",
-          "tests/directruntime-20261104/shared-translator/measure.py"
-        ],
-        "kind": "source-only-program",
-        "entry_line": 3,
-        "purpose": "Declared standalone program: Serial command measurement. The enclosing Docker scope supplies hard limits. Explicit source role only; default invocation is unvalidated. No read anchor, helper/fixture/child, output, proof or runtime credit."
-      },
-      {
-        "path": "tests/directruntime-20261104/shared-translator/outer_guard.py",
-        "input_revision": "c63043dc56335f6984a0e6303445f5ac6b9078dd",
-        "source_blob": "e33bbf7efee05de73e793c8f872e2e821d8c6421",
-        "command": [
-          "python3",
-          "-B",
-          "tests/directruntime-20261104/shared-translator/outer_guard.py"
-        ],
-        "kind": "source-only-program",
-        "entry_line": 17,
-        "purpose": "Declared standalone program: Guard the VM's outer cgroup while the owned bounded container runs. Explicit source role only; default invocation is unvalidated. No read anchor, helper/fixture/child, output, proof or runtime credit."
-      },
-      {
         "path": "tests/upstream/baseline-20261028/attribution/validate.py",
         "input_revision": "c63043dc56335f6984a0e6303445f5ac6b9078dd",
         "source_blob": "1e17e7dcff9b8e612b23c60b509ce421dc59edab",
@@ -1593,32 +1333,6 @@
         "kind": "source-only-program",
         "entry_line": 71,
         "purpose": "Declared standalone program: Run sequential read-only diagnostic gates; archive exact exit/log/rusage. Explicit source role only; default invocation is unvalidated. No read anchor, helper/fixture/child, output, proof or runtime credit."
-      },
-      {
-        "path": "tests/upstream/baseline-20261028/invocations/bulk/timed.py",
-        "input_revision": "c63043dc56335f6984a0e6303445f5ac6b9078dd",
-        "source_blob": "c543b7aef3f458d0765b11b19741406a7ff78415",
-        "command": [
-          "python3",
-          "-B",
-          "tests/upstream/baseline-20261028/invocations/bulk/timed.py"
-        ],
-        "kind": "source-only-program",
-        "entry_line": 3,
-        "purpose": "Declared standalone program: observes a configured serial command and records exit, elapsed time and child usage. Explicit source role only; default invocation is unvalidated. No read anchor, helper/fixture/child, output, proof or runtime credit."
-      },
-      {
-        "path": "tests/upstream/baseline-20261028/invocations/retries/selector.py",
-        "input_revision": "c63043dc56335f6984a0e6303445f5ac6b9078dd",
-        "source_blob": "5b7a49f863f7c6fad8231d17d68628623948a00e",
-        "command": [
-          "python3",
-          "-B",
-          "tests/upstream/baseline-20261028/invocations/retries/selector.py"
-        ],
-        "kind": "source-only-program",
-        "entry_line": 146,
-        "purpose": "Declared standalone program: Select uncheckpointed followers for one isolated replay; never retry in a loop. Explicit source role only; default invocation is unvalidated. No read anchor, helper/fixture/child, output, proof or runtime credit."
       },
       {
         "path": "tests/upstream/baseline-20261028/native-cache/validate.py",
