@@ -139,7 +139,7 @@
         ],
         "kind": "runnable-entrypoint",
         "entry_line": 8,
-        "purpose": "Compare saved reader-configuration observation rows and current source hash anchors; observed both 57-row suites. Saved decoder metadata comparison only, not a new reader execution or semantic equivalence. Ordinary and instrumented default invocations completed at the measured revision. Observed process completion only; no generated-output provenance, fixture/helper/child execution, Lean/compiler, proof or runtime credit is certified.",
+        "purpose": "Compare saved reader-configuration observation rows and current fixture hash anchors; observed both 57-row suites. Saved decoder metadata comparison only, not a new reader execution or semantic equivalence. Ordinary and instrumented default invocations completed at the measured revision. Observed process completion only; no generated-output provenance, fixture/helper/child execution, Lean/compiler, proof or runtime credit is certified.",
         "input_scope": [],
         "other_reads": "unresolved"
       },
