@@ -1,0 +1,2 @@
+| `Correctness/Panic/Provenance/Updates.lean` | Panic code provenance, update leaves: `StepCoded` (every failure of a step is coded), `ErrCoded` for the checked helpers (`compound`, `bump`, `memoryWrite`) and the update helpers of `Run/Updates.lean` (`arhs`, `mrhs`, `opStore` … `opLocBump`, `Run.clear`), and one `Run.*_coded` leaf per update step. |
+| `Examples/Panic/ProvenanceUpdates.lean` | Checks of the update leaves: a compound-assignment overflow `x += 1` (code 0x11) and a `pop()` on an empty array (code 0x31), each read off the retained failed site. |
