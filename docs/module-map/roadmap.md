@@ -29,6 +29,8 @@
 | `Bridge/SolidityBridge/RoadmapV15/P10/InvocationEnvironmentControls.lean` | Bounded v15-evm-agreement checkpoint; typed scope and retained obligations are stated in the module. |
 | `Bridge/SolidityBridge/RoadmapV15/P10/PublishedShifts.lean` | Bounded v15-evm-agreement checkpoint; typed scope and retained obligations are stated in the module. |
 | `Bridge/SolidityBridge/RoadmapV15/P10/PublishedShiftsControls.lean` | Bounded v15-evm-agreement checkpoint; typed scope and retained obligations are stated in the module. |
+| `Goals/ElabTotal.lean` | The elaborator-kernel totalization goal `elabKernelTotal` (et3-elab-knot-total), open: the knot of `Syntax/Elab/Stmt.lean` satisfies its defining equations (`ElabKernelFix`, `ElabKernelNames`), admits induction over its successful runs (`ElabKernelInduction`), and the helpers it reaches keep theirs (`ElabKernelHelpers`). |
+| `Examples/Goals/ElabTotal.lean` | Pinned `#roadmap_goal` open check for `elabKernelTotal`, with failing-knot controls. |
 | `Goals/{Headline,Endpoint,Loops,Hash,Panic,Taclets,Total}.lean` | One finish-line component goal per module, each owned by the lane that states or proves it. |
 | `Goals/Plan.lean`, `Goals/Finish.lean` | The plan goals outside the finish line, and `projectFinished`, the conjunction of the seven components. |
 | `Examples/Goals/*` | One pinned `#roadmap_goal` status check per goal module; `Finish.lean` checks the finish line's structure instead of its shrinking `blocked by` list. |

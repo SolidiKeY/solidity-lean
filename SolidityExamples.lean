@@ -136,6 +136,7 @@ import Solidity.Examples.FixedArrayFloor
 import Solidity.Examples.FixedArrayRoot
 import Solidity.Examples.Goals
 import Solidity.Examples.Goals.AuditData
+import Solidity.Examples.Goals.ElabTotal
 import Solidity.Examples.Goals.Endpoint
 import Solidity.Examples.Goals.Finish
 import Solidity.Examples.Goals.GoalPinsSpec
