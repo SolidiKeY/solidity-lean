@@ -14,14 +14,15 @@ FLOOR = 1.0  # units; below this a growth is noise (H1076: 1k raw out of 973M)
 
 def entries(row, min_units):
     """Commands keyed by declared name, else `kind#n` (n-th unnamed of that kind)."""
-    out, seen = {}, {}
+    out, seen, keys = {}, {}, set()
     for c in row["commands"]:
         key = c["name"]
         if key is None:
             seen[c["kind"]] = seen.get(c["kind"], 0) + 1
             key = f'{c["kind"]}#{seen[c["kind"]]}'
-        while key in out:
+        while key in keys:
             key += "'"
+        keys.add(key)
         if c["heartbeats"] >= min_units:
             out[key] = {"heartbeats": c["heartbeats"], "line": c["line"]}
     return out
@@ -35,9 +36,11 @@ def main():
     p.add_argument("--tolerance", type=float, default=1.0)
     p.add_argument("--min", type=float, default=None)
     a = p.parse_args()
-    rows = [json.loads(l) for l in open(a.run) if l.strip()]
+    with open(a.run) as f:
+        rows = [json.loads(l) for l in f if l.strip()]
     try:
-        base = json.load(open(a.baseline))
+        with open(a.baseline) as f:
+            base = json.load(f)
     except FileNotFoundError:
         if a.mode == "check":
             sys.exit(f"ratchet: no baseline {a.baseline}; create it with --write")
