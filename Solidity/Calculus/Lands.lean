@@ -149,6 +149,10 @@ def eval (σ₀ : State C Γ) {t : LTy} (r : Rhs C Γ t) : Option (t.VDen C) :=
     (some [])
     (fun x => x.eval σ₀)
 
+/-- A value's right-hand side is the value its term reads. -/
+theorem eval_val (σ₀ : State C Γ) {p : PrimTy} (t : Tm C Γ (.val p)) :
+    eval σ₀ (.val t) = t.eval σ₀ := rfl
+
 theorem eval_eq_evalM (σ₀ : State C Γ) {t : LTy} (r : Rhs C Γ t) : r.eval σ₀ = r.evalM σ₀ := by
   cases r <;> rfl
 

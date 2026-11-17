@@ -50,7 +50,7 @@ theorem newArray_decl {Γ : Ctx} (σ : State C Γ) (p : PrimTy)
     bind, Except.bind, pure, Except.pure]
   with_unfolding_all exact State.adopt_push_alloc σ _ _ he _ _
 
-private theorem adopt_rebind_alloc {Γ : Ctx} {R : RefTy} (σ : State C Γ)
+theorem adopt_rebind_alloc {Γ : Ctx} {R : RefTy} (σ : State C Γ)
     (dst : Idx Γ (.mem R)) (o : MObj σ.H R) (g : Grown σ.H (MVal · (.ref R)))
     (hg : g = Grown.alloc ⟨List.prefix_refl _, σ.heap, o⟩)
     (e : σ.H <+: (σ.adopt g).1.H) :

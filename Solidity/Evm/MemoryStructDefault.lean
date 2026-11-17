@@ -126,15 +126,6 @@ theorem StateRepr.allocateStruct {L b frame : Nat} {Γ : Ctx} {F : Frag Γ}
 def declareStructCode {Γ : Ctx} (b : Nat) (s : Name) : List Instr :=
   allocateStructCode (structAllocationSize s) ++ [.mstore (cell (b + Γ.length))]
 
-private theorem adopt_delete_alloc {Γ : Ctx} {R : RefTy} (σ : State C Γ)
-    (dst : Idx Γ (.mem R)) (o : MObj σ.H R) (g : Grown σ.H (MVal · (.ref R)))
-    (hg : g = Grown.alloc ⟨List.prefix_refl _, σ.heap, o⟩)
-    (e : σ.H <+: (σ.adopt g).1.H) :
-    (Except.ok ⟨(σ.adopt g).1.setLocal dst (some g.val), e⟩ : TRes (Solidity.Out C σ.H Γ)) =
-      .ok ⟨(σ.alloc o).1.setLocal dst (some (σ.alloc o).2), List.prefix_append _ _⟩ := by
-  subst hg
-  rfl
-
 /-- Whole-local deletion adopts a fresh default object; older aliases keep theirs. -/
 theorem defaultStruct_delete {Γ : Ctx} (σ : State C Γ) {s : Name}
     (dst : Idx Γ (.mem (.struct s)))
@@ -145,7 +136,7 @@ theorem defaultStruct_delete {Γ : Ctx} (σ : State C Γ) {s : Name}
         List.prefix_append _ _⟩ := by
   have he := defaultStruct_alloc σ.heap hp hm
   simp only [TRun.deleteMem, State.allocDefaultG, State.grow, pure, Except.pure]
-  with_unfolding_all exact adopt_delete_alloc σ dst _ _ he _
+  with_unfolding_all exact adopt_rebind_alloc σ dst _ _ he _
 
 def deleteStructCode {Γ : Ctx} {s : Name} (b : Nat)
     (dst : Idx Γ (.mem (.struct s))) : List Instr :=

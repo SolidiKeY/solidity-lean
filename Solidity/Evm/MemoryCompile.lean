@@ -858,7 +858,7 @@ theorem ProgFrag.pushes_zero {b : Nat} {Γ Δ : Ctx} {F : Frag Γ} {G : Frag Δ}
     rw [ihs, ihp]
   all_goals rfl
 
-private theorem run_cons_revert {Γ Δ Ξ : Ctx} {σ : State C Γ}
+theorem run_cons_revert {Γ Δ Ξ : Ctx} {σ : State C Γ}
     {s : Stmt C Γ Δ} {P : Prog C Δ Ξ} (h : s.run σ = .error .revert) :
     (Prog.cons s P).run σ = .error .revert := by
   show TRun.seq s.runR P.runR σ = _
@@ -877,7 +877,7 @@ private def ProgSound (L b frame : Nat) {Γ Δ : Ctx} (F : Frag Γ) (G : Frag Δ
     b + frameNeedProg P ≤ frame → AllocationInput b frame (allocationCostProg P σ) σ base m →
       GrowingResult L b frame (allocationCostProg P σ) G σ base m (P.run σ) (run code m)
 
-private theorem statementEndCap {Γ Δ : Ctx} {s : Stmt C Γ Δ} {b frame : Nat}
+theorem statementEndCap {Γ Δ : Ctx} {s : Stmt C Γ Δ} {b frame : Nat}
     (h : b + frameNeedStmt s ≤ frame) : b + Δ.length ≤ frame :=
   Nat.le_trans (Nat.add_le_add_left (frameNeedStmt_end s) b) h
 

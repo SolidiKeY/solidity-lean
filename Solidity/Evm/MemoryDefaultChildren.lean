@@ -1,5 +1,6 @@
 import Solidity.Evm.MemoryDefaultBuilder
 import Solidity.Evm.MemoryObjectChildLoop
+import Solidity.Evm.MemoryObjectChildrenCopy
 
 /-! Generic typed child-default copying and target pointer stores. -/
 namespace Solidity.Evm.Memory.Objects
@@ -48,16 +49,6 @@ theorem defaultStoreMachine_eq (m : Machine) (parent index child : Fin W) (offse
   congr 1
   change parent.val + index.val + offset = parent.val + offset + index.val
   omega
-
-private theorem loopTurn_true (rc rb : Machine → Out) (m m' : Machine)
-    (hc : rc m = .ok (m.push w[1]) 0) (hb : rb m = .ok m' 0) :
-    loopTurn rc rb m = .inl m' := by
-  rw [loopTurn, hc]
-  change (match rb m with
-    | .ok m₂ 0 => Sum.inl m₂
-    | .ok _ (_ + 1) => Sum.inr Out.fault
-    | r => .inr r) = _
-  rw [hb]
 
 theorem defaultTurn_more {m m' : Machine} {parent total index : Fin W}
     {offset : Nat} {childCode : List Instr} (hi : index.val < total.val)

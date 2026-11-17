@@ -851,21 +851,8 @@ theorem Leaf.diverges_map {T : Ty} (l : Leaf T) (hl : l.2.direct = true) {K : Pr
 /-- Two member lists with distinct names are equal where every member is. -/
 theorem SFields.ext_nodup : {fs : List (Name × Ty)} → nodupKeysB fs = true →
     (a b : SFields fs) →
-    (∀ (f : Name) (T : Ty) (h : lookupBy f fs = some T), a.get h = b.get h) → a = b
-  | [], _, .nil, .nil, _ => rfl
-  | (f, T) :: fs, hn, .cons va ra, .cons vb rb, h => by
-    simp only [nodupKeysB, Bool.and_eq_true, Option.isNone_iff_eq_none] at hn
-    have h0 : lookupBy f ((f, T) :: fs) = some T := by simp only [lookupBy, ↓reduceIte]
-    have e0 := h f T h0
-    simp only [SFields.get_cons, dite_true] at e0
-    have er : ra = rb := SFields.ext_nodup hn.2 ra rb fun g U hg => by
-      have hgf : g ≠ f := fun e => by subst e; rw [hn.1] at hg; cases hg
-      have hg' : lookupBy g ((f, T) :: fs) = some U := by
-        simp only [lookupBy, hgf, ↓reduceIte]; exact hg
-      have e := h g U hg'
-      simp only [SFields.get_cons, hgf, dite_false] at e
-      exact e
-    rw [e0, er]
+    (∀ (f : Name) (T : Ty) (h : lookupBy f fs = some T), a.get h = b.get h) → a = b :=
+  Solidity.SFields.ext_get
 
 /-- **A value of a finite shape is its leaves and its mappings.** -/
 theorem SVal.ext_finite {T : Ty} (hT : T.Finite) : (x z : SVal T) →
