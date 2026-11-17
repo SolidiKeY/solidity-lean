@@ -258,6 +258,25 @@ class HostCache(unittest.TestCase):
         d.link_build(self.top, self.lib, [self.M])
         self.assertTrue((self.lib / "Solidity/Evm/MemoryStructDefaultPlan.olean").is_file())
 
+    def test_olean_where_lake_fetched_it_is_linked(self):
+        """H1071: Lake fetched the module into a cache only `lake env` names; the trace has no
+        outputs and the hash is in the `.olean.hash` file Lake wrote next to the build path."""
+        u = self.touched_importer()
+        (self.build / "MemoryStructDefaultPlan.trace").write_text("{}")
+        (self.build / "MemoryStructDefaultPlan.olean.hash").write_text("feedface00000001")
+        fetched = self.top.parent / "fetched"; (fetched / "artifacts").mkdir(parents=True)
+        (fetched / "artifacts/feedface00000001.olean").write_text("MemoryStructDefaultPlan")
+        def run(cmd, **kw):
+            if cmd[:2] == ["lake", "env"]:
+                return subprocess.CompletedProcess(cmd, 0, "LAKE_CACHE_DIR=%s\nPATH=/x\n" % fetched, "")
+            return subprocess.CompletedProcess(cmd, 1, "", "")
+        d.subprocess.run = run
+        d.link_build(self.top, self.lib, [u])
+        self.assertEqual((self.lib / "Solidity/Evm/MemoryStructDefaultPlan.olean").read_text(),
+                         "MemoryStructDefaultPlan")
+        d.subprocess.run = lambda cmd, **kw: subprocess.CompletedProcess(cmd, 1, "", "")
+        with self.assertRaises(d.SetupError): d.link_build(self.top, self.top.parent / "lib2", [u])
+
 
 if __name__ == "__main__":
     unittest.main()

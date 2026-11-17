@@ -248,6 +248,7 @@ and open obligations. Test proposals remain proposals until applied.
 - [docs/loops.md](loops.md)
 - [docs/module-map.md](module-map.md)
 - [docs/options.md](options.md)
+- [docs/p16-extension-registration.md](p16-extension-registration.md)
 - [docs/parallelism.md](parallelism.md)
 - [docs/refactoring-progress.md](refactoring-progress.md)
 - [docs/rule-repair.md](rule-repair.md)

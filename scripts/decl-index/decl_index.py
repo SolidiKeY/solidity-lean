@@ -82,6 +82,49 @@ def artifacts():
     return out
 
 
+def lake_cache_dirs(top=None):
+    """The cache directories Lake itself reports: `lake env` exports the cache it uses
+    (LAKE_CACHE_DIR, or the artifact cache of this workspace), so a fetch into a cache none of
+    the fixed guesses names is still found (H1071: the coordinator host fetched four Evm modules
+    into such a cache). The workspace-local `.lake/cache` is included too."""
+    top = top or _top()
+    out = []
+    if top is not None: out.append(top / ".lake/cache")
+    try:
+        r = subprocess.run(["lake", "env", "env"], cwd=top, capture_output=True, text=True, timeout=60)
+    except Exception: return out  # a probe: no Lake or an odd host leaves the fixed guesses
+    if getattr(r, "returncode", 1) or not isinstance(getattr(r, "stdout", None), str): return out
+    for line in r.stdout.splitlines():
+        k, _, v = line.partition("=")
+        if v and k.startswith("LAKE") and "CACHE" in k:
+            out.append(pathlib.Path(v))
+            if k != "LAKE_CACHE_DIR": out.append(pathlib.Path(v).parent)
+    return out
+
+
+def _top():
+    try: return root()
+    except Exception: return None
+
+
+def hash_file_hashes(stem):
+    """The artifact hashes Lake recorded next to a module's build path (`X.olean.hash`,
+    `X.hash`): a fetched module can have these without a trace naming its outputs."""
+    out = []
+    for f in (stem.parent / (stem.name + ".olean.hash"), stem.parent / (stem.name + ".hash")):
+        try: t = f.read_text().strip()
+        except OSError: continue
+        if t: out.append(hex_hash(t))
+    return out
+
+
+def hex_hash(h):
+    """Lake's artifact file stem for a hash: traces may store it as a decimal number."""
+    if isinstance(h, int) or (isinstance(h, str) and h.isdigit() and len(h) != 16):
+        return "%016x" % int(h)
+    return str(h).split(".", 1)[0]
+
+
 def import_closure(top, modules):
     """`modules` and every module of this package they import, transitively, read from the
     `import` lines of the sources under `top` (modules without a source here, such as Lean's
@@ -138,27 +181,22 @@ def trace_hashes(o):
     """Every artifact hash in a trace's `outputs`: a string, a list, or a dict of them, with
     any `.olean`-style extension dropped (Lake versions differ in the shape)."""
     if isinstance(o, str): return [o.split(".", 1)[0]]
+    if isinstance(o, int) and not isinstance(o, bool): return [hex_hash(o)]
     if isinstance(o, dict): o = list(o.values())
     if isinstance(o, list): return [h for x in o for h in trace_hashes(x)]
     return []
 
 
-def link_build(top, lib, need=()):
-    """A LEAN_PATH directory of the oleans the traces name. With enableArtifactCache a fetched
-    module's olean is only in Lake's cache, and a stale .lake/build olean can outlive a later
-    fetch (restore-lake-artifacts never overwrites), so the trace decides; a module whose
-    artifact is not cached falls back to its .lake/build file. Only existing files are linked
-    (a dangling link shadows Lake's own path), and a module of `need` left without an olean is a
-    setup error naming the searched caches: an unlinked module under lib/Solidity is reported
-    by Lean as a missing object file."""
-    build = top / ".lake/build/lib/lean"
-    if not build.is_dir(): raise SetupError(f"{build}: no build (run lake build first)")
-    arts = artifacts() or []
+def _link_pass(build, lib, arts, done):
+    """Link into `lib` every module's olean found via its trace or `.hash` file in `arts`, or
+    its .lake/build file; returns the links made and the modules with an olean."""
+    done = set(done)
     names = defaultdict(list)
     for art in arts:
         for n in os.listdir(art): names[n.split(".", 1)[0]].append((art, n))
-    linked, done = 0, set()
-    for t in build.rglob("*.trace"):
+    linked = 0
+    marks = list(build.rglob("*.trace")) + list(build.rglob("*.hash"))
+    for t in marks:
         stem = t.with_suffix("")
         if stem.suffix in (".olean", ".ilean", ".c"): stem = stem.with_suffix("")
         rel = stem.relative_to(build)
@@ -168,7 +206,7 @@ def link_build(top, lib, need=()):
             o = outs.get("o", outs) if isinstance(outs, dict) else outs
         except (OSError, ValueError, AttributeError): o = None
         srcs, exts = [], set()
-        for h in trace_hashes(o):
+        for h in trace_hashes(o) + hash_file_hashes(stem):
             for art, n in names.get(h, []):
                 ext = n.split(".", 1)[1]
                 if ext.startswith("olean") and ext not in exts and (art / n).is_file():
@@ -182,9 +220,33 @@ def link_build(top, lib, need=()):
             if os.path.lexists(dst): continue
             os.symlink(src, dst); linked += 1
         if any(e == "olean" for _, e in srcs): done.add(".".join(rel.parts))
+    return linked, done
+
+
+def link_build(top, lib, need=()):
+    """A LEAN_PATH directory of the oleans the traces name. With enableArtifactCache a fetched
+    module's olean is only in Lake's cache, and a stale .lake/build olean can outlive a later
+    fetch (restore-lake-artifacts never overwrites), so the trace decides; a module whose
+    artifact is not cached falls back to its .lake/build file. Only existing files are linked
+    (a dangling link shadows Lake's own path), and a module of `need` left without an olean is a
+    setup error naming the searched caches: an unlinked module under lib/Solidity is reported
+    by Lean as a missing object file."""
+    build = top / ".lake/build/lib/lean"
+    if not build.is_dir(): raise SetupError(f"{build}: no build (run lake build first)")
+    arts = list(artifacts() or [])
+    linked, done = _link_pass(build, lib, arts, set())
+    need_all = sorted(import_closure(top, need) | set(need)) if need else []
+    if any(m not in done for m in need_all):
+        extra = []  # ask Lake where it fetched (H1071), only when the fixed guesses fall short
+        for c in lake_cache_dirs(top):
+            a = (c / "artifacts").resolve()
+            if a.is_dir() and a not in arts and a not in extra: extra.append(a)
+        if extra:
+            arts += extra
+            more, done = _link_pass(build, lib, arts, done)
+            linked += more
     if not linked: raise SetupError(f"{build}: no oleans found")
-    missing = sorted(import_closure(top, need) | set(need)) if need else []
-    missing = [m for m in missing if m not in done]
+    missing = [m for m in need_all if m not in done]
     if missing:
         raise SetupError("no olean for %s in %s or caches %s (set LAKE_CACHE_DIR to Lake's cache)"
                          % (", ".join(missing), build, [str(a) for a in arts] or "none found"))
