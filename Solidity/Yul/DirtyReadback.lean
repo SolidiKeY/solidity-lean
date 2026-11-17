@@ -6,7 +6,7 @@ import Solidity.Yul.CleanFunctions
 An assembly block may leave a dirty word (high bits set) in a narrow integer
 or `bool` Solidity local. Every Solidity-level read of the local afterwards
 sees it cleaned, the same way in both pinned pipelines (solc 0.8.38,
-optimizer off; `tests/evm-reference/dirty-locals.json`, produced by
+optimizer off; [`tests/evm-reference/dirty-locals.json`](https://github.com/SolidiKeY/solidity-lean-coord/blob/b439c8cb656bec288415675d92884626ef965492/evidence/plan-x1e-classify-rest-1116/x1e-classify-rest/tests/evm-reference/dirty-locals.json), produced by
 `scripts/evm-reference/dirty-locals.mjs`, 33 probes):
 
 - `uintN`: the low `N` bits (`u8_eq`, `u8_checked_add` (`0x1fe + 1` is
