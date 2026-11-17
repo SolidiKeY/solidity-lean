@@ -120,7 +120,7 @@ PY
     [ "$st" -ne 0 ] || { timeout --kill-after=10s "${left}s" scripts/heartbeats/collect.sh "$m" >"$one" </dev/null; st=$?; }
     if [ "$st" -eq 0 ]; then
       cat "$one" >>"$runs"
-      python3 -c 'import json,sys; r=json.loads(open(sys.argv[1]).readline()); print(f"heartbeats {r[\"module\"]} {r[\"heartbeats\"]:.3f}")' "$one"
+      python3 -c 'import json,sys; r=json.loads(open(sys.argv[1]).readline()); print("heartbeats", r["module"], "%.3f" % r["heartbeats"], "collector %ss" % r["wall_s"])' "$one"
       case "$needed" in *",$m,"*)
         left=$(( budget - ($(date +%s) - start) )); [ "$left" -ge 1 ] || left=1
         LEAN_NUM_THREADS=1 timeout --kill-after=10s "${left}s" lake build "$m" >/dev/null </dev/null; st=$?;;
