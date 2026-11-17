@@ -238,6 +238,14 @@ commands; it never enters the core import graph.
 | `Solidity/Semantics/IntrinsicStorage/Layout.lean` | Typed full-word locations for dependent storage paths, nested hash ancestry, bounded keys and lossless byte encoding of preimages; reuses the shared type layout. |
 | `Solidity/Semantics/IntrinsicStorage/Preimages/Frames.lean` | Structural storage cells and descendants, actual-world stored hash inputs, and aggregate value input coverage. |
 | `Solidity/Examples/IntrinsicStorage/Preimages/Frames.lean` | Coverage regressions for nested live/shadow arrays, overwritten mapping entries, arbitrary defaults and installed account array fields. |
+| `Solidity/Semantics/IntrinsicStorage/Preimages/Ops.lean` | Audited storage operations; result preservation and slot-input retention, including failures. |
+| `Solidity/Examples/IntrinsicStorage/Preimages/Ops.lean` | Failed-read and retained old/new aggregate-input regressions through audited composition. |
+
+These modules also provide audited expression observers and regressions for their
+composition, error propagation, argument order, and returned storage and heaps.
+
+| `Solidity/Semantics/IntrinsicStorage/Preimages/Run.lean` | Observed straight-line statement steps (assignments, declarations, op-assign, inc/dec, push/pop, transfer/send, memory moves, delete, new, require/assert); each result is the actual typed run result. |
+| `Solidity/Semantics/IntrinsicStorage/Preimages/Run/Checks.lean` | Sequencing regressions for the observed straight-line steps: continuations see the actual typed result; failed steps keep their observed inputs. |
 The diagnostic generators `scripts/h62/item2/audit-v08-adapters/generate_mapped_census.py`
 and `scripts/h62/item2/audit-v08-adapters/generate_calldata_census.py` accept
 `--stream` to omit the global imported-constant sort. This still materializes
