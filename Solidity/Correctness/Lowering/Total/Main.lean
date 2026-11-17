@@ -1272,6 +1272,14 @@ theorem of_retEndpoint
   rw [show n + (offset + 1) = n + offset + 1 from rfl, step, target]
   cases returned <;> exact ⟨post, same ▸ glob⟩
 
+/-- Negative control: a state relation whose globals are never related makes
+every pair with some context maps simulate. So `Simulates` alone does not rule
+out a degenerate `rel`; non-emptiness is a separate obligation, not yet stated. -/
+theorem vacuous (empty : ∀ E C st σ, ¬ (rel E C).glob st σ) {s : SourceProgram}
+    {C : Contract} {Γ : Ctx} (p : Blk C Γ) (m : Lowering.V07.ContextMap s.before Γ)
+    (m' : Lowering.V07.ContextMap s.after p.1) (emb : Thin Γ p.1) : Simulates rel s p :=
+  ⟨m, m', emb, fun _ _ _ _ _ glob => absurd glob (empty _ _ _ _)⟩
+
 end Simulation
 
 /-! ## The concrete boundary, as far as the decoder fixes it

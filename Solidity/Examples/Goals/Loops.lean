@@ -248,6 +248,15 @@ example : Spells.Items .body RawProbe.input
     (.cons (.stmtItem (.whileStmt (.assign .assign (.ident "i") (.ident "a")) .breakStmt)) .nil) :=
   .stmt (.whileLoop {} (.assign (.name "i") (.name "a")) (.stmt .brk .nil)) .nil
 
+/-- Negative control: with globals never related, any pair with context maps
+simulates. The simulation conjunct needs a non-degenerate state relation. -/
+example {rel : (E : Source.Env) → (C : Contract) → Simulation.StateRelation E C}
+    (empty : ∀ E C st σ, ¬ (rel E C).glob st σ) {s : SourceProgram} {C : Contract} {Γ : Ctx}
+    (p : Blk C Γ) (m : Solidity.Lowering.V07.ContextMap s.before Γ)
+    (m' : Solidity.Lowering.V07.ContextMap s.after p.1) (emb : Thin Γ p.1) :
+    Simulation.Simulates rel s p :=
+  Simulation.vacuous empty p m m' emb
+
 end Decoder
 
 end Solidity.Goals
