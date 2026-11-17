@@ -6,7 +6,8 @@ import Solidity.Correctness.Panic.Capture
 An enum conversion of a compound operand `a + 1`: the elaborator's own
 output is the capture and the check of the captured local, and its run fails
 with code 0x21 for the operand's value, not for a separately supplied one.
-Then two-guard statements where the first failing guard decides the code.
+Then two-guard statements where the first failing guard decides the code,
+and the emitted order of each producer with more than one guard.
 -/
 
 namespace Solidity.Examples.Panic.Capture
@@ -212,6 +213,125 @@ example (σ : State C (.alias (.array (.prim .uint)) :: Γ))
   rw [withPanics_source_cons, guards]
   exact guards_first_failure _ _ σ 0 (by simp) (fun j before => absurd before (Nat.not_lt_zero j))
     (uint_divisor_guard_eval σ _ ⟨0, by decide⟩ rfl)
+
+private theorem lt_halt (σ : State C Γ) (a b : Val C Γ .uint) (x : PrimTy.uint.Denote)
+    (halt : THalt) (left : a.evalT σ = .ok x) (right : b.evalT σ = .error halt) :
+    (cmpU .lt rfl rfl a b).evalT σ = .error halt := by
+  simp [cmpU, Val.evalT, left, right, BinOp.shortT, bind, Except.bind]
+
+/-- Where reading the array's length itself reverts (an unset alias), the
+index guard halts with that bare revert: it is not relabelled 0x32, and the
+failing divisor guard behind it is not reached. -/
+example (σ : State C (.alias (.array (.prim .uint)) :: Γ))
+    (tail : Prog C (.alias (.array (.prim .uint)) :: Γ) Γ')
+    (unset : (Val.len values rfl).evalT σ = .error .revert) :
+    (Prog.cons (.require (quotient 5 0 (by decide) (by decide))) tail).withPanics.runR σ =
+      .error .revert := by
+  rw [withPanics_source_cons, quotient_guards]
+  exact guards_first_halt _ _ σ 0 (by simp) .revert
+    (fun j before => absurd before (Nat.not_lt_zero j))
+    (lt_halt σ _ _ ⟨5, by decide⟩ .revert rfl unset)
+
+/-- `require(values[1] / 1 == 0);` passes both guards: the statement and the
+tail run in the unchanged state. -/
+example (σ : State C (.alias (.array (.prim .uint)) :: Γ))
+    (tail : Prog C (.alias (.array (.prim .uint)) :: Γ) Γ')
+    (length : (Val.len values rfl).evalT σ = .ok two) :
+    (Prog.cons (.require (quotient 1 1 (by decide) (by decide))) tail).withPanics.runR σ =
+      (Prog.cons (Stmt.require (quotient 1 1 (by decide) (by decide))).withPanics
+        tail.withPanics).runR σ := by
+  rw [withPanics_source_cons, quotient_guards]
+  refine guards_all_pass _ _ σ fun j inside => ?_
+  have cases : j = 0 ∨ j = 1 := by simp at inside; omega
+  rcases cases with rfl | rfl
+  · exact lt_eval σ _ _ ⟨1, by decide⟩ two rfl length
+  · exact uint_divisor_guard_eval σ _ ⟨1, by decide⟩ rfl
+
+/-! ### Emitted order, by producer
+
+Each operand's guards are given as one guard; the equations place them. -/
+
+variable {Δ : Ctx} (ga gb gc : Nat × Val C Δ .bool)
+
+/-- `a / b`: the dividend's guard, then the zero-divisor check. -/
+example (a b : Val C Δ .uint) (ha : a.panics = [ga]) (hb : b.panics = []) :
+    (Val.binop .div rfl rfl a b).panics =
+      [ga, (0x12, cmpU .neB rfl rfl b (litU 0 (by decide)))] := by
+  rw [binop_panics_order _ _ _ _ _ ⟨by decide, by decide⟩, ha, hb]
+  rfl
+
+/-- `a && b`: `b`'s guard only where `a` holds, after `a`'s. -/
+example (a b : Val C Δ .bool) (ha : a.panics = [ga]) (hb : b.panics = [gb]) :
+    (Val.binop .and rfl rfl a b).panics = [ga, (gb.1, orB (notB a) gb.2)] := by
+  rw [and_panics_order, ha, hb]
+  rfl
+
+/-- `a || b`: `b`'s guard only where `a` fails, after `a`'s. -/
+example (a b : Val C Δ .bool) (ha : a.panics = [ga]) (hb : b.panics = [gb]) :
+    (Val.binop .or rfl rfl a b).panics = [ga, (gb.1, orB (notB (notB a)) gb.2)] := by
+  rw [or_panics_order, ha, hb]
+  rfl
+
+/-- `c ? a : b`: the condition's guard, then each branch's under its case. -/
+example (c : Val C Δ .bool) (a b : Val C Δ .uint) (hc : c.panics = [gc])
+    (ha : a.panics = [ga]) (hb : b.panics = [gb]) :
+    (Val.ternary c a b).panics =
+      [gc, (ga.1, orB (notB c) ga.2), (gb.1, orB (notB (notB c)) gb.2)] := by
+  rw [ternary_panics_order, hc, ha, hb]
+  rfl
+
+/-- `addmod(a, b, k)`: the operands in order, the zero modulus last. -/
+example (a b k : Val C Δ .uint) (ha : a.panics = [ga]) (hb : b.panics = [gb])
+    (hk : k.panics = [gc]) :
+    (Val.modular .addmod a b k).panics =
+      [ga, gb, gc, (0x12, cmpU .neB rfl rfl k (litU 0 (by decide)))] := by
+  rw [modular_panics_order, ha, hb, hk]
+  rfl
+
+/-- `base[i]` on a dynamic storage array: base, index, then the bound. -/
+example (base : SPath C Δ (.array (.prim .uint))) (i : Val C Δ .uint)
+    (hbase : base.panics = [ga]) (hi : i.panics = [gb]) :
+    (SPath.loc (.index (.arr .dyn) base i)).panics =
+      [ga, gb, (0x32, cmpU .lt rfl rfl i (.len base rfl))] := by
+  rw [index_panics_order, hbase, hi]
+  rfl
+
+/-- The same on a dynamic memory array. -/
+example (base : MPath C Δ (.array (.prim .uint))) (i : Val C Δ .uint)
+    (hbase : base.panics = [ga]) (hi : i.panics = [gb]) :
+    (MPath.loc (.index .dyn base i)).panics =
+      [ga, gb, (0x32, cmpU .lt rfl rfl i (.mlen base rfl))] := by
+  rw [mindex_panics_order, hbase, hi]
+  rfl
+
+/-- `x /= r` on a local: the right-hand side's guard before the divisor's. -/
+example (x : Idx Δ (.val .uint)) (r : Val C Δ .uint) (hr : r.panics = [ga]) :
+    (Stmt.opAssign .div rfl rfl (.local x) r).panics =
+      [ga, (0x12, cmpU .neB rfl rfl r (litU 0 (by decide)))] := by
+  rw [opAssign_panics_order, hr]
+  rfl
+
+/-- `base.pop()`: the base's guard before the emptiness check. -/
+example (base : SPath C Δ (.array (.prim .uint))) (hbase : base.panics = [ga]) :
+    (Stmt.pop base).panics =
+      [ga, (0x31, cmpU .gt rfl rfl (.len base rfl) (litU 0 (by decide)))] := by
+  rw [pop_panics_order, hbase]
+  rfl
+
+/-- `x++` on a local has only the range check of `x + 1`. -/
+example (x : Idx Δ (.val .uint)) :
+    (Stmt.incDec (C := C) .postInc rfl (.local x)).panics =
+      pg 0x11 (bumpRange .postInc .uint (.simple (.local x))) := by
+  rw [incDec_panics_order]
+  rfl
+
+/-- `base.push() /= r`: the right-hand side, the base, then the divisor. -/
+example (base : SPath C Δ (.array (.prim .uint))) (r : Val C Δ .uint)
+    (hr : r.panics = [ga]) (hbase : base.panics = [gb]) :
+    (Stmt.pushOpAssign .div rfl rfl base r).panics =
+      [ga, gb, (0x12, cmpU .neB rfl rfl r (litU 0 (by decide)))] := by
+  rw [pushOpAssign_panics_order, hr, hbase]
+  rfl
 
 end Order
 
