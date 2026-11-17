@@ -187,10 +187,10 @@ def trace_hashes(o):
     return []
 
 
-def build_olean_matches(stem, trace, hashes):
+def build_olean_matches(stem, hashes):
     """Whether the real .lake/build olean of `stem` is the one its trace names (H1086): its
-    `.olean.hash` is one of the trace's `hashes`, or, without a hash file, it is not older
-    than the trace (Lake writes the trace after the olean). A stale olean left behind after
+    `.olean.hash` (rewritten by Lake when it restores an artifact) is one of the trace's
+    `hashes`; without a hash file (a local build clears it) the olean is accepted. A stale olean left behind after
     Lake moved the module to its artifact cache shadowed the current one, and Lean saw a
     declaration twice (Solidity.Evm.Instr.step.eq_43)."""
     olean = stem.parent / (stem.name + ".olean")
@@ -198,9 +198,7 @@ def build_olean_matches(stem, trace, hashes):
     if not hashes: return True
     hf = stem.parent / (stem.name + ".olean.hash")
     try: return hex_hash(hf.read_text().strip()) in hashes
-    except OSError: pass
-    try: return olean.stat().st_mtime >= trace.stat().st_mtime
-    except OSError: return False
+    except OSError: return True  # a local build clears .olean.hash; mtime cannot tell stale apart
 
 
 def _link_pass(build, lib, arts, done, stale=None):
@@ -232,7 +230,7 @@ def _link_pass(build, lib, arts, done, stale=None):
                 ext = n.split(".", 1)[1]
                 if ext.startswith("olean") and ext not in exts and (art / n).is_file():
                     srcs.append((art / n, ext)); exts.add(ext)
-        if "olean" not in exts and named and not build_olean_matches(stem, t, set(named)):
+        if "olean" not in exts and named and not build_olean_matches(stem, set(named)):
             stale.setdefault(".".join(rel.parts), named)
             continue
         if "olean" not in exts:

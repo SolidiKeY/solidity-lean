@@ -299,14 +299,14 @@ class HostCache(unittest.TestCase):
         d.link_build(self.top, self.top.parent / "lib2", [u])
         self.assertEqual((self.top.parent / "lib2/Solidity/Evm/MemoryStructDefaultPlan.olean").read_text(), "current")
 
-    def test_stale_build_olean_by_mtime(self):
+    def test_local_build_olean_without_hash_file_is_linked(self):
+        """Lake writes the trace after the olean and clears .olean.hash on a local build:
+        such an olean is current whatever the mtimes say."""
         u = self.touched_importer()
-        stale = self.build / "MemoryStructDefaultPlan.olean"; stale.write_text("old")
-        os.utime(stale, (1, 1))
-        with self.assertRaises(d.SetupError): d.link_build(self.top, self.lib, [u])
-        os.utime(stale, None); os.utime(self.build / "MemoryStructDefaultPlan.trace", (1, 1))
-        d.link_build(self.top, self.top.parent / "lib2", [u])
-        self.assertEqual((self.top.parent / "lib2/Solidity/Evm/MemoryStructDefaultPlan.olean").read_text(), "old")
+        olean = self.build / "MemoryStructDefaultPlan.olean"; olean.write_text("local")
+        os.utime(olean, (1, 1))
+        d.link_build(self.top, self.lib, [u])
+        self.assertEqual((self.lib / "Solidity/Evm/MemoryStructDefaultPlan.olean").read_text(), "local")
 
     def test_whole_library_closure_is_checked(self):
         """The `import Solidity` run checks the root's closure too (failure 1 was reached there)."""
