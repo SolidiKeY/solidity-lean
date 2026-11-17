@@ -141,6 +141,7 @@ import Solidity.Examples.Goals.GoalPinsSpec
 import Solidity.Examples.Goals.Hash
 import Solidity.Examples.Goals.Headline
 import Solidity.Examples.Goals.IntrinsicSession
+import Solidity.Examples.Goals.IntrinsicStorage
 import Solidity.Examples.Goals.Loops
 import Solidity.Examples.Goals.LoopsProducer
 import Solidity.Examples.Goals.OpcodeEval
