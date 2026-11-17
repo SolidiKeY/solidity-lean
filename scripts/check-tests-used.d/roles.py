@@ -1,5 +1,6 @@
-"""Reviewed source roles: H999 Lean check sources, H1015 Lean fixture sources
-and the H1025 widening of the H997 non-Python entry review set.
+"""Reviewed source roles: H999 Lean check sources, H1015 Lean fixture sources,
+the H1025 widening of the H997 non-Python entry review set and H1051 Python
+helper sources imported by kept entry roots.
 
 Executed by fragments.py in its own namespace (helpers, review tables and the
 self-test rebinding of REVIEWED_* names are shared). Classifier path: excluded
@@ -516,3 +517,333 @@ def nonpy_roleset_controls(env):
         assert rs['tests/drive.sh']['class'] == 'keep' and model['entry_points']['nonpy-entry:tests/drive.sh']['source_only']
         rejected(first, 'unreviewed non-Python entry role', standalone=[dict(sh_role, provenance=dict(sh_role['provenance'], commit='0' * 40))])
     finally: REVIEWED_NONPY_ENTRIES = saved
+
+
+PY_IMPORT_KIND = 'python-import-source-role'
+PY_IMPORT_PREFIX = 'py-import:'
+# H1051 (gh#1373, H62-PYTHON-HELPER-ROUTES, Option A): an opt-in Python helper
+# source imported by kept `python3 -B IMPORTER` entry roots through exact
+# sibling-module resolution (sys.path[0] is the importer's directory). Helpers
+# (path, blob, introducing commit) and imports (helper, helper blob, importer,
+# importer blob, importer introducing commit, import line), reviewed one by one
+# from x1e-classify-h62-scripts' list. Refused, left unresolved: any import that
+# fails python_import_statement (after-baseline.py's sys.path.insert and
+# candidate.py's importlib use are refused importers; their helpers keep their
+# other reviewed importer). Source/consumption only: no execution, import,
+# pass, read, fixture, child, output, proof or runtime credit.
+_PY_IMPORT_ROWS = '''
+@8a1794652d299cd042c815441a426e7efb642522
+H:item2/audit-abi-world/receipts.py f863fce768398bc7b8cf6f74c8998a746d454a16
+ H:item2/audit-abi-world/accept_runtime.py 5a0df8230341bd078680f542be8921e23c208c92 38aef082f5b0e96e257fb91b62d8e432e8eec48d 6
+ H:item2/audit-abi-world/coverage.py c2c8b01802fa3500b1cdc15fe00f870487c83605 38aef082f5b0e96e257fb91b62d8e432e8eec48d 39
+ H:item2/audit-abi-world/extract_vectors.py ce6483f9dae3fe02dbe716cee03436ed401f777a 38aef082f5b0e96e257fb91b62d8e432e8eec48d 6
+@8e3023d10b62574b7be84630c064b53b8dcfbb09
+H:item2/audit-abi-world/resume_sources.py 714d79517abf92322b312a25223adcb55ba82050
+ H:item2/audit-abi-world/resume_accept.py 57cdfd9506bb1573432358e179b8d060c9612d92 a37430cd3673749dee65c301a069792efd1bccab 12
+ H:item2/audit-abi-world/resume_mcp_call.py 68a3a88a246c7da9a75e247c890bedb87206a28e 8e3023d10b62574b7be84630c064b53b8dcfbb09 39
+@c1384ed9310f9c5402d521036d0c75cacf79fc99
+H:item2/audit-calculus/owners.py c471b8400bc553a8bd554c3b335bb6074bfc9a33
+ H:item2/audit-calculus/acceptance.py 675133d51e0202e01e5cf4532a26996debb4371e c361178f68f34c276a02b15691cd726aaa85a51e 11
+@febcbe09fe79e890c66baf4f266490beb674a357
+H:item2/audit-language/gate_repair.py 84db13d263f185022e5e24b65c2f1ae7eaa37c63
+ H:item2/audit-language/check.py 367616d8d65dd2bd6abb1e5fac7138050f2acc78 16e98ad46223e6fe4a97dadb8187497537f57dce 56
+ H:item2/audit-language/retire_export.py 4748376ef83284136230125977bd0725e39fe43a 16e98ad46223e6fe4a97dadb8187497537f57dce 34
+ H:item2/audit-language/verify.py 9f433a190b2e3da5ef46fbc977741621c6b807ba 16e98ad46223e6fe4a97dadb8187497537f57dce 22
+@107cb28c032e3bff522ff6db0fdf0be54b2bbefd
+H:item2/audit-theories/pending_impossibility.py 2bf62f1f7376305a6e152d1d7f3db2ba6da6de3f
+ H:item2/audit-theories/coverage_ledger.py c459994e09c06ade984aabd8af6483287f5f215a 107cb28c032e3bff522ff6db0fdf0be54b2bbefd 12
+ H:item2/audit-theories/mutability_input_roles.py c67019762b0c5dfb9d489b756866d5fa353131ca 107cb28c032e3bff522ff6db0fdf0be54b2bbefd 11
+ H:item2/audit-theories/verify_acceptance_snapshot.py c805842b75bc519260d857f9730671c78421cbe1 107cb28c032e3bff522ff6db0fdf0be54b2bbefd 15
+@56a137f709aa737d2e3886aca2daf9f52b40261c
+H:item4/generic-primitive-packets/runtime.py 015e64e5fac885e6962e5bd90fe284b9c1ae2820
+ H:item4/generic-primitive-packets/check.py c4be638c1f7ecb46ffcb3d6ff1cafa95c1ea3a54 0a34d9c508ca24f6a914553953a0bc4abf5863dc 18
+ H:item4/generic-primitive-packets/measure.py b108aa52de426ccb7058056ebd39ce1ea18f9b50 0a34d9c508ca24f6a914553953a0bc4abf5863dc 17
+@df554535e9c8d308276a99ea23611c7d63ae5919
+H:item6/migrate-hash/lean_lex.py 98e527e654c4ed29919d56c4d343a72e75fca3fa
+ H:item6/migrate-hash/census.py 0ddef2ed5405c2bbcd8ff199c43097a7a847147a df554535e9c8d308276a99ea23611c7d63ae5919 13
+ H:item6/migrate-hash/full_measure.py cae845b44b6c50bd6ea69065b113099fe40eb73d df554535e9c8d308276a99ea23611c7d63ae5919 9
+@d48bc8cb306d50626864c00c53cdd5c585438ec0
+H:item6/migrate-lowering/process_group.py 31d1dba2b8ff9c33da3c25758b83227a7bebe5e3
+ H:item6/migrate-lowering/bounded.py b4c9edefa18f3c1b3dd7f11f8ffa46c61aaf31bd aa07794d3f1084a560f308c2b469198a577ee1a5 6
+ H:item6/migrate-lowering/supervise.py 38d19f87951efbbb531a321d9e0d48604ca4a78e aa07794d3f1084a560f308c2b469198a577ee1a5 4
+@4e7929f0bf488c8c23c7b42f6a186121c6951a4c
+H:item6/migrate-precompiles/contract.py 292e032d3602f997b88830c25d51bca1cc95f883
+ H:item6/migrate-precompiles/census.py 634868cff19058fe2d32bbfc691c2c2694c23b3b d393a60b76120dfab477e62c569f11cf34cdcfcb 7
+@df554535e9c8d308276a99ea23611c7d63ae5919
+H:item6/migrate-root-gate/release_integrity.py 49a4e4707d6bfdcedef222b66a2f2af9df73c536
+ H:item6/migrate-root-gate/cache-roundtrip.py ff642bece78b93da3e6cd534cdb66de4e73506b0 df554535e9c8d308276a99ea23611c7d63ae5919 19
+@40be303ce78a6d6bcad5d4c4b8c7285cc1732767
+H:item6/migrate-semantics/bounded.py 921f0c36065a3d5ba781b7fd46f324a5bf1c07a3
+ H:item6/migrate-semantics/api_evidence.py 4cb5c110945cbeffa15ea2f48bb8a05d2fb29a9b 40be303ce78a6d6bcad5d4c4b8c7285cc1732767 5
+ H:item6/migrate-semantics/cgroup_controls.py ec85416b5b4134dc11fa801c4cb596109edfaa0a 40be303ce78a6d6bcad5d4c4b8c7285cc1732767 5
+ H:item6/migrate-semantics/cgroup_prerequisite.py eeb10340cfd2da86bc9f5839ef69dd3ad15f7fef 40be303ce78a6d6bcad5d4c4b8c7285cc1732767 5
+ H:item6/migrate-semantics/compare_samples.py c3fbd043c55091388a581dafe6cc6cdfc6a0e4ed 40be303ce78a6d6bcad5d4c4b8c7285cc1732767 5
+ H:item6/migrate-semantics/measure.py 2875c98d5b0ddb2fb825542114452b838a6f9bea 40be303ce78a6d6bcad5d4c4b8c7285cc1732767 6
+ H:item6/migrate-semantics/owner_hash_fixture.py 3e65a61636afff9d97f7f5bc9facd0425b8b7b94 40be303ce78a6d6bcad5d4c4b8c7285cc1732767 5
+ H:item6/migrate-semantics/probe.py d99f64b94069c8ef9d83c5f0be79c8fb99d61a28 40be303ce78a6d6bcad5d4c4b8c7285cc1732767 6
+'''
+_IMPORT_SHADOWS = frozenset({'importlib', 'imp', 'runpy', 'pkgutil', 'zipimport', 'site', 'builtins', '__builtins__',
+                             '__import__', 'exec', 'eval', 'chdir', 'fchdir'})
+_SYS_IMPORT_STATE = frozenset({'path', 'modules', 'meta_path', 'path_hooks', 'path_importer_cache', 'flags'})
+
+
+def _import_table(text):
+    """`@COMMIT` then `H:helper blob` rows, each followed by indented
+    `importer blob commit line` rows (paths relative to _REVIEW_DIRECTORIES)."""
+    helpers, imports, commit, helper = set(), set(), None, None
+    for line in filter(str.strip, text.split('\n')):
+        if line.startswith('@'): commit = line[1:]; helper = None; continue
+        words = line.split()
+        if line.startswith(' '):
+            if helper is None or len(words) != 4: raise ValueError('invalid import review table')
+            imports.add(helper + (_REVIEW_DIRECTORIES[words[0][:2]] + words[0][2:], words[1], words[2], int(words[3])))
+            continue
+        if commit is None or len(words) != 2: raise ValueError('invalid import review table')
+        helper = (_REVIEW_DIRECTORIES[words[0][:2]] + words[0][2:], words[1]); helpers.add(helper + (commit,))
+    return frozenset(helpers), frozenset(imports)
+
+
+PY_IMPORT_HELPERS, PY_IMPORT_IMPORTS = _import_table(_PY_IMPORT_ROWS)
+
+
+def python_import_statement(text, importer, line, helper, tree):
+    """The names one static import binds from the sibling helper, or None.
+
+    The statement at `line` of the importer is the only import node there:
+    `import M` (one alias) or `from M import n, ...` (absolute, no `*`), M the
+    helper's basename stem, a plain non-keyword identifier outside the
+    standard library and built-in module names, and the helper in the
+    importer's directory. Not audited, giving None: a package directory or any
+    other `M.*` file beside the helper (FileFinder prefers packages and
+    extension modules), any use of importlib, imp, runpy, pkgutil, zipimport,
+    site, builtins, __import__, exec, eval or chdir, any sys.path, sys.modules,
+    meta_path, path_hooks, path_importer_cache or sys.flags access, an aliased
+    sys, a `from sys import` of import state, or getattr/setattr/delattr/vars
+    on sys. The interpreter environment (PYTHONPATH, PYTHONSAFEPATH, site
+    customisation) is not audited: consumption credit only.
+    """
+    import keyword, sys as interpreter
+    directory, name = posixpath.split(helper)
+    module = name[:-3] if name.endswith('.py') else ''
+    if (posixpath.dirname(importer) != directory or not module.isidentifier() or keyword.iskeyword(module)
+            or module in interpreter.stdlib_module_names or module in interpreter.builtin_module_names):
+        return None
+    prefix = (directory + '/' if directory else '') + module
+    if any(p.startswith(prefix + '/') or p.startswith(prefix + '.') and p != helper for p in tree): return None
+    try: parsed = ast.parse(text)
+    except (SyntaxError, ValueError, RecursionError): return None
+    found = []
+    for n in ast.walk(parsed):
+        if isinstance(n, ast.Name) and n.id in _IMPORT_SHADOWS: return None
+        if isinstance(n, ast.Attribute) and (n.attr in ('chdir', 'fchdir', '__import__')
+                                             or n.attr in _SYS_IMPORT_STATE and isinstance(n.value, ast.Name) and n.value.id == 'sys'): return None
+        if isinstance(n, ast.Import):
+            for a in n.names:
+                if a.name.split('.')[0] in _IMPORT_SHADOWS or a.name == 'sys' and a.asname not in (None, 'sys'): return None
+        if isinstance(n, ast.ImportFrom):
+            if (n.module or '').split('.')[0] in _IMPORT_SHADOWS or any(a.name in _IMPORT_SHADOWS for a in n.names): return None
+            if n.module == 'sys' and any(a.name in _SYS_IMPORT_STATE or a.name == '*' for a in n.names): return None
+        if (isinstance(n, ast.Call) and isinstance(n.func, ast.Name) and n.func.id in ('getattr', 'setattr', 'delattr', 'vars')
+                and n.args and isinstance(n.args[0], ast.Name) and n.args[0].id == 'sys'): return None
+        if isinstance(n, (ast.Import, ast.ImportFrom)) and n.lineno == line: found.append(n)
+    if len(found) != 1: return None
+    n = found[0]
+    if isinstance(n, ast.Import):
+        return [] if len(n.names) == 1 and n.names[0].name == module else None
+    if n.level != 0 or n.module != module or any(a.name == '*' for a in n.names): return None
+    return sorted({a.name for a in n.names})
+
+
+def python_import_bindings(text):
+    """Names a helper binds at module top level (definitions, plain assignment
+    targets and import aliases), or None when it does not parse."""
+    try: parsed = ast.parse(text)
+    except (SyntaxError, ValueError, RecursionError): return None
+    names = set()
+    for n in parsed.body:
+        if isinstance(n, (ast.FunctionDef, ast.AsyncFunctionDef, ast.ClassDef)): names.add(n.name)
+        elif isinstance(n, (ast.Assign, ast.AnnAssign, ast.AugAssign)):
+            for t in (n.targets if isinstance(n, ast.Assign) else [n.target]):
+                names.update(e.id for e in ast.walk(t) if isinstance(e, ast.Name))
+        elif isinstance(n, (ast.Import, ast.ImportFrom)):
+            names.update((a.asname or a.name).split('.')[0] for a in n.names if a.name != '*')
+    return names
+
+
+def python_import_root(classifier, graph, catalog, entry, reviewed=None, imports=None):
+    """H1051: a reviewed Python helper imported by kept entry roots, as a source-only role.
+
+    Run after every other standalone definition (LATE_SOURCE_ROLE_KINDS) so
+    the importers' roots exist. Binds the helper (path, blob, introducing
+    commit, interface {'module', 'names'}) and each import (importer, blob,
+    introducing commit, line): every importer is a current root whose command
+    is exactly `python3 -B IMPORTER`, the statement passes
+    python_import_statement and every imported name is a top-level binding of
+    the helper. A shadowing package or `M.*` file, or a missing importer root
+    at a later revision, makes it stale. Never a validated runner; anchors
+    nothing. Kept later while helper and importers are unchanged; a current
+    definition of the path supersedes it."""
+    repo = graph.repo; role = 'Python import role'
+    reviewed = PY_IMPORT_HELPERS if reviewed is None else reviewed
+    imports = PY_IMPORT_IMPORTS if imports is None else imports
+    required = {'path', 'input_revision', 'source_blob', 'command', 'kind', 'interface', 'provenance', 'imports', 'purpose'}
+    _role_schema(classifier, catalog, entry, required, role); calls = entry['imports']
+    if (not isinstance(calls, list) or not calls or any(not isinstance(c, dict) or set(c) != {'importer', 'importer_blob', 'importer_commit', 'line'}
+                   or type(c['line']) is not int or not all(isinstance(c[k], str) for k in ('importer', 'importer_blob', 'importer_commit')) for c in calls)
+            or len({canonical(c) for c in calls}) != len(calls)):
+        raise ValueError('invalid ' + role + ' definition')
+    p = entry['path']; revision = entry['input_revision']; doc = entry['provenance']; blob = entry['source_blob']
+    if not p.endswith('.py') or _clean(p) != p or entry['command'] != ['python3', '-B', calls[0]['importer']]:
+        raise ValueError('unsupported ' + role + ' invocation: ' + p)
+    if doc['path'] != p or doc['blob'] != blob or (p, blob, doc['commit']) not in reviewed: raise ValueError('unreviewed ' + role + ': ' + p)
+    if any((p, blob, c['importer'], c['importer_blob'], c['importer_commit'], c['line']) not in imports for c in calls):
+        raise ValueError('unreviewed ' + role + ' import: ' + p)
+    pins = [(p, blob)] + [(c['importer'], c['importer_blob']) for c in calls]
+    if not _role_current(classifier, repo, catalog, entry, pins): return
+    if any(repo.tree[q][0] not in ('100644', '100755') or q not in repo.texts for q, _ in pins):
+        raise ValueError('unsupported ' + role + ' invocation: ' + p)
+    if not _introduced(classifier, repo, doc['commit'], p, blob): raise ValueError(role + ' lacks its introducing provenance: ' + p)
+    if not all(_introduced(classifier, repo, c['importer_commit'], c['importer'], c['importer_blob']) for c in calls):
+        raise ValueError(role + ' importer lacks its introducing provenance: ' + p)
+    directory, module = posixpath.dirname(p), posixpath.basename(p)[:-3]
+    prefix = (directory + '/' if directory else '') + module
+    if any(q.startswith(prefix + '/') or q.startswith(prefix + '.') and q != p for q in repo.tree): return  # shadowed: stale
+    bound = python_import_bindings(repo.texts[p])
+    if bound is None: raise ValueError(role + ' helper does not parse: ' + p)
+    names = set()
+    for c in calls:
+        found = python_import_statement(repo.texts[c['importer']], c['importer'], c['line'], p, repo.tree)
+        if found is None: raise ValueError(role + ' import is not an exact sibling import: ' + c['importer'])
+        if not set(found) <= bound: raise ValueError(role + ' imports an unbound helper name: ' + c['importer'])
+        names.update(found)
+        command = shlex.join(['python3', '-B', c['importer']])
+        if not any(r['path'] == c['importer'] and r['command'] == command and not r.get('python_import_role')
+                   and r.get('source_blob', c['importer_blob']) == c['importer_blob'] for r in graph.roots.values()):
+            if revision == repo.ref: raise ValueError(role + ' importer is not a python3 -B entry root: ' + c['importer'])
+            return
+    interface = {'module': module, 'names': sorted(names)}
+    if canonical(interface) != canonical(entry['interface']): raise ValueError(role + ' interface mismatch: ' + p)
+    identity = PY_IMPORT_PREFIX + p
+    graph.root(p, 'source-only Python import dependency', shlex.join(entry['command']), calls[0]['importer'], calls[0]['line'], root_id=identity)
+    if identity not in graph.roots: return
+    graph.roots[identity].update({'source_only': True, 'python_import_role': True, 'source_blob': blob, 'purpose': entry['purpose'],
+        'interface': interface, 'provenance': doc, 'imports': calls, 'source_declaration_revision': revision,
+        'validation_at_measured_revision': {'status': 'unavailable', 'command': entry['command'],
+            'reason': 'Reviewed Python helper imported by reviewed python3 -B entry roots through exact sibling-module resolution; never run or certified to import or pass, and the interpreter environment is not audited. Source/consumption role only: no execution, read, fixture, child, generated-output, proof or runtime credit.'}})
+
+
+def python_import_controls(env):
+    """(10) H1051 controls, run by successor_controls with its helpers: the
+    reviewed witnesses, the import guards, the role and its negative controls."""
+    global PY_IMPORT_HELPERS, PY_IMPORT_IMPORTS
+    commit, run, rejected, blob, program = (env[k] for k in ('commit', 'run', 'rejected', 'blob', 'program'))
+    # The audited witnesses: 11 H62 helpers, one row per path, 27 imports from sibling importers.
+    helpers = {p for p, _, _ in PY_IMPORT_HELPERS}
+    assert len(PY_IMPORT_HELPERS) == len(helpers) == 11 and len(PY_IMPORT_IMPORTS) == 27
+    assert all(p.startswith('scripts/h62/') and p.endswith('.py') for p in helpers)
+    assert {(p, b) for p, b, _ in PY_IMPORT_HELPERS} == {(p, b) for p, b, _, _, _, _ in PY_IMPORT_IMPORTS}
+    assert all(posixpath.dirname(i) == posixpath.dirname(p) for p, _, i, _, _, _ in PY_IMPORT_IMPORTS)
+    # Refused importers stay out: sys.path.insert and importlib use.
+    assert not {i for _, _, i, _, _, _ in PY_IMPORT_IMPORTS} & {'scripts/h62/item6/migrate-root-gate/after-baseline.py',
+                                                              'scripts/h62/item6/migrate-precompiles/candidate.py'}
+    for text in ('@X\nH:a.py b\n  H:c.py d e\n', ' H:c.py d e 1\n', '@X\nH:a.py\n', '@X\nQ:a.py b\n'):
+        try: _import_table(text); raise AssertionError(text)
+        except (ValueError, KeyError): pass
+    # The import guards on synthetic sources.
+    H, I = 'tests/pi/util.py', 'tests/pi/run.py'
+    tree = {H: 0, I: 0}
+    ok = 'from util import VALUE, f\ndef main():\n    print(f())\nmain()\n'
+    assert python_import_statement(ok, I, 1, H, tree) == ['VALUE', 'f']
+    assert python_import_statement('import util\nimport sys\nprint(sys.argv, util.VALUE)\n', I, 1, H, tree) == []
+    assert python_import_statement('import os\ndef g():\n    from util import f\n    return os.path.join(f())\n', I, 3, H, tree) == ['f']
+    for text, line in (('import sys\nsys.path.insert(0, "x")\nfrom util import f\n', 3), ('import importlib\nfrom util import f\n', 2),
+                       ('from util import *\n', 1), ('import util as u, os\n', 1), ('import util.sub\n', 1), ('from .util import f\n', 1),
+                       ('import os\nos.chdir("x")\nfrom util import f\n', 3), ('from util import f\n__import__("util")\n', 1),
+                       ('import sys as s\nfrom util import f\n', 2), ('from sys import path\nfrom util import f\n', 2),
+                       ('import sys\nsys.modules["util"] = 1\nfrom util import f\n', 3), ('import sys\ngetattr(sys, "path")\nfrom util import f\n', 3),
+                       ('exec("x")\nfrom util import f\n', 2), ('import runpy\nfrom util import f\n', 2), ('from util import f\n', 2),
+                       ('from util import f; import util\n', 1), ('from other import f\n', 1), ('from util import f\n(', 1)):
+        assert python_import_statement(text, I, line, H, tree) is None, text
+    assert python_import_statement(ok, 'tests/other/run.py', 1, H, tree) is None  # not a sibling
+    for shadow in ('tests/pi/util/__init__.py', 'tests/pi/util.cpython-312-x86_64-linux-gnu.so', 'tests/pi/util.pyc', 'tests/pi/util/x.txt'):
+        assert python_import_statement(ok, I, 1, H, dict(tree, **{shadow: 0})) is None, shadow
+    for name in ('json', 'sys', 'class', 'my-mod'):  # standard library, built-in, keyword, not an identifier
+        assert python_import_statement('import ' + name + '\n', 'tests/pi/r.py', 1, 'tests/pi/' + name + '.py', {}) is None, name
+    assert python_import_bindings('import os.path as p, json\nfrom x import y\nA, (B, C) = 1, (2, 3)\nD: int = 4\ndef f(): pass\nclass K: pass\nif 1:\n    Z = 1\n') == {
+        'p', 'json', 'y', 'A', 'B', 'C', 'D', 'f', 'K'}
+    assert python_import_bindings('def (\n') is None
+    # The role on a synthetic repository.
+    helper = 'VALUE = 1\ndef f():\n    return VALUE\n'
+    bad = {'tests/pi/path.py': 'import sys\nsys.path.insert(0, "x")\nfrom util import VALUE\ndef main():\n    print(VALUE)\nmain()\n',
+           'tests/pi/lib.py': 'import importlib\nfrom util import VALUE\ndef main():\n    print(VALUE)\nmain()\n',
+           'tests/pi/unbound.py': 'from util import missing\ndef main():\n    print(missing)\nmain()\n',
+           'tests/pi/deep.py': 'X = 1\n'}
+    add = {H: helper + 'from deep import X\n', I: ok, 'tests/pi/run2.py': 'import util\ndef main():\n    print(util.f())\nmain()\n', **bad,
+           'tests/pj/json.py': 'X = 1\n', 'tests/pj/run.py': 'import json\ndef main():\n    print(json.X)\nmain()\n'}
+    pi = commit(add, 'Python imports'); P = pi.ref; pl = commit({'tests/unrelated.txt': 'P\n'}, 'Python imports later')
+    importer = lambda p, repo=pi: dict(program, path=p, input_revision=repo.ref, source_blob=blob(repo, p), command=['python3', '-B', p], entry_line=len(repo.texts[p].splitlines()))
+    roots = [importer(I), importer('tests/pi/run2.py')]
+    call = lambda i=I, line=1, **k: dict({'importer': i, 'importer_blob': blob(pi, i), 'importer_commit': P, 'line': line}, **k)
+    face = {'module': 'util', 'names': ['VALUE', 'f']}
+    mk = lambda p=H, calls=None, interface=face: {
+        'path': p, 'input_revision': P, 'source_blob': blob(pi, p), 'kind': PY_IMPORT_KIND, 'command': ['python3', '-B', (calls or [call()])[0]['importer']],
+        'interface': interface, 'provenance': {'commit': P, 'path': p, 'blob': blob(pi, p)}, 'imports': calls or [call(), call('tests/pi/run2.py')],
+        'purpose': 'Synthetic helper.'}
+    role = mk(); base_model, base = run(pl, standalone=roots)
+    assert base[H]['class'] != 'keep' and base[I]['class'] == 'keep'
+    saved = PY_IMPORT_HELPERS, PY_IMPORT_IMPORTS
+    PY_IMPORT_HELPERS = frozenset({(p, blob(pi, p), P) for p in (H, 'tests/pi/deep.py', 'tests/pj/json.py')})
+    PY_IMPORT_IMPORTS = frozenset({(H, blob(pi, H), i, blob(pi, i), P, n) for i, n in ((I, 1), ('tests/pi/run2.py', 1), ('tests/pi/path.py', 3),
+                                   ('tests/pi/lib.py', 2), ('tests/pi/unbound.py', 1))}
+                                  | {('tests/pi/deep.py', blob(pi, 'tests/pi/deep.py'), H, blob(pi, H), P, 4),
+                                     ('tests/pj/json.py', blob(pi, 'tests/pj/json.py'), 'tests/pj/run.py', blob(pi, 'tests/pj/run.py'), P, 1)})
+    try:
+        for repo in (pi, pl):
+            for order in (1, -1):  # dispatched after every other definition, in either order
+                model, rows = run(repo, standalone=([role] + roots)[::order]); entry = model['entry_points'][PY_IMPORT_PREFIX + H]
+                assert rows[H]['class'] == 'keep' and entry['source_only'] and entry['python_import_role'] and entry['interface'] == face
+                assert entry['validation_at_measured_revision']['status'] == 'unavailable' and entry['location'] == I + ':1'
+                assert entry['command'] == 'python3 -B ' + I and entry['imports'] == role['imports'] and entry['provenance'] == role['provenance']
+            if repo is pl:  # no import, execution, read, child or runtime credit beyond the helper itself
+                assert rows['tests/pi/deep.py']['class'] != 'keep'
+                assert all(canonical(r) == canonical(base[p]) for p, r in rows.items() if p != H)
+                assert set(model['entry_points']) == set(base_model['entry_points']) | {PY_IMPORT_PREFIX + H}
+        Z = '0' * 40
+        for change, text in (({'extra': 1}, 'invalid Python import'), ({'purpose': ' '}, 'invalid Python import'), ({'imports': []}, 'invalid Python import'),
+                             ({'imports': [call(), call()]}, 'invalid Python import'), ({'imports': [call(line='1')]}, 'invalid Python import'),
+                             ({'imports': [call(extra=1)]}, 'invalid Python import'), ({'provenance': {'commit': P}}, 'invalid Python import'),
+                             ({'input_revision': 'HEAD'}, 'full commit revision'), ({'command': ['python3', I]}, 'unsupported Python import role invocation'),
+                             ({'command': ['python3', '-B', H]}, 'unsupported Python import role invocation'),
+                             ({'source_blob': Z}, 'unreviewed Python import role'), ({'provenance': dict(role['provenance'], commit=Z)}, 'unreviewed Python import role'),
+                             ({'imports': [call(line=2)]}, 'unreviewed Python import role import'), ({'imports': [call(importer_blob=Z)]}, 'role import'),
+                             ({'imports': [call(importer_commit=Z)]}, 'role import'), ({'interface': dict(face, names=['f'])}, 'Python import role interface mismatch'),
+                             ({'interface': {'module': 'util', 'names': ['VALUE', 'f'], 'x': 1}}, 'interface mismatch'), ({'input_revision': Z}, 'unverifiable historical')):
+            rejected(pi, text, standalone=[dict(role, **change)] + roots)
+        rejected(pi, 'conflicting standalone', standalone=[role, dict(role, purpose='Other.')] + roots)
+        for i, n, text in (('tests/pi/path.py', 3, 'not an exact sibling import'), ('tests/pi/lib.py', 2, 'not an exact sibling import'),
+                           ('tests/pi/unbound.py', 1, 'imports an unbound helper name')):
+            rejected(pi, text, standalone=[mk(calls=[call(i, n)])] + roots + [importer(i)])
+        rejected(pi, 'not an exact sibling import', standalone=[mk('tests/pj/json.py', [call('tests/pj/run.py')], {'module': 'json', 'names': []}),
+                                                                importer('tests/pj/run.py')])
+        # Importers must be current python3 -B entry roots, never another import role.
+        rejected(pi, 'not a python3 -B entry root', standalone=[role])
+        rejected(pi, 'not a python3 -B entry root', standalone=[role, roots[0]])
+        rejected(pi, 'not a python3 -B entry root', standalone=[role, mk('tests/pi/deep.py', [call(H, 4)], {'module': 'deep', 'names': ['X']})] + roots)
+        assert PY_IMPORT_PREFIX + H not in run(pl, standalone=[role])[0]['entry_points']  # later: missing importer root is stale
+        PY_IMPORT_IMPORTS = PY_IMPORT_IMPORTS | {(H, blob(pi, H), I, blob(pi, I), env['A'], 1)}
+        rejected(pi, 'importer lacks its introducing provenance', standalone=[mk(calls=[call(importer_commit=env['A'])])] + roots)
+        for order in (1, -1):  # a current definition supersedes
+            model, _ = run(pl, standalone=[dict(role, input_revision=pl.ref, purpose='Now.'), role][::order] + roots)
+            assert model['entry_points'][PY_IMPORT_PREFIX + H]['purpose'] == 'Now.'
+        PY_IMPORT_HELPERS = saved[0]  # the audited set admits no other helper
+        rejected(pi, 'unreviewed Python import role', standalone=[role] + roots)
+        PY_IMPORT_HELPERS = frozenset({(H, blob(pi, H), P)})
+        # A changed helper or importer, then a shadowing extension module or package (added
+        # last: control commits cannot delete), drops the root later; a current claim on changed bytes is refused.
+        for changes in ({H: helper}, {I: '# edited\n' + ok}, {'tests/pi/util.abi3.so': 'x'}, {'tests/pi/util/__init__.py': ''}):
+            edited = commit(changes, 'edited')
+            model, rows = run(edited, standalone=[role, roots[1], importer(I, edited)])
+            assert PY_IMPORT_PREFIX + H not in model['entry_points'] and rows[H]['class'] != 'keep', changes
+            if H in changes or I in changes: rejected(edited, 'source mismatch', standalone=[dict(role, input_revision=edited.ref), roots[1], importer(I, edited)])
+            if H in changes or I in changes: commit({H: add[H], I: ok}, 'restored')
+    finally: PY_IMPORT_HELPERS, PY_IMPORT_IMPORTS = saved
