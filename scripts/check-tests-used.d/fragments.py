@@ -158,13 +158,19 @@ def _check_lines(repo, frames):
             raise ValueError('consumer route location mismatch')
 
 
-def _anchor_root(graph, runner, frames):
+def _anchor_root(graph, runner, frames, walk=False):
     """A current non-source-only root, or a demonstrated passing committed runner.
 
     A runner named validated:P or committed:P resolves to whichever of the two
     exists at the measured revision. Any other root (undemonstrated committed
-    source, CLI/policy source role, derived claim) anchors nothing.
+    source, CLI/policy source role, derived claim) anchors nothing, except that
+    a reviewed Node mode entry (H992) anchors the walker form alone (walk).
     """
+    if runner.startswith(NODE_MODE_PREFIX):
+        root = graph.roots.get(runner) if walk else None
+        if root is None or 'derived_from' in root or not root.get('node_mode_root'): return None, None
+        if root['path'] != frames[0]['path']: raise ValueError('consumer route does not start at its runner')
+        return runner, root
     if runner.startswith(('validated:', 'committed:')):
         path = runner.split(':', 1)[1]
         runner = 'validated:' + path if 'validated:' + path in graph.roots else 'committed:' + path
@@ -390,7 +396,7 @@ def static_routes(classifier, graph, rows):
         frames = row['frames']; target = row['target']; form = row['form']
         if not _frames_current(repo, frames, [(target, row['target_blob'])]): continue
         _check_lines(repo, frames)
-        original, root = _anchor_root(graph, row['runner'], frames)
+        original, root = _anchor_root(graph, row['runner'], frames, form == 'node-readFileSync-walk')
         if root is None: continue
         if root.get('source_only') and root.get('source_blob') != frames[0]['blob']: continue
         language = 'lean' if form.startswith('lean') else 'node'
@@ -854,6 +860,78 @@ def source_only_program(classifier, graph, catalog, entry):
         'program_role': SOURCE_ONLY_KIND, 'source_declaration_revision': revision,
         'validation_at_measured_revision': {'status': 'unavailable', 'command': command,
             'reason': 'Default invocation is not certified to pass and matches no configured CLI form; revision-independent source role only. No read anchor, fixture, helper, child, generated-output, proof or runtime credit.'}})
+
+
+
+NODE_MODE_KIND = 'node-mode-source-root'
+NODE_MODE_PREFIX = 'node-mode:'
+# H992 (gh coord#1319): each reviewed argument-bearing Node entry, bound to
+# (path, source blob, mode, provenance line in that same blob). Nothing else
+# is promoted: another file, blob, mode, argument or documentation line fails.
+REVIEWED_NODE_MODES = frozenset({('scripts/parse-corpus.mjs', 'dd1093f6fe8bfe00ae772e0b8b4a0bc0dd4b265a', 'prepare', 17)})
+
+
+def node_mode_root(classifier, graph, catalog, entry, reviewed=None):
+    """H992: a reviewed `node P MODE` command as a source-only entry root.
+
+    The definition binds the exact command ['node', P, MODE], the source blob,
+    and its provenance: a whole-line // comment of that same blob that starts
+    with the verbatim command. P has a top-level `const M = process.argv[2];`
+    and a top-level `if (M === "MODE") {`. The root is never a validated or
+    passing runner and carries no execution, fixture, proof or runtime credit;
+    it anchors only node-readFileSync-walk routes, whose own checks still bind
+    every frame and target to their objects at the recorded revision. A later
+    revision keeps it while the blob is unchanged and the recorded commit
+    holds it.
+    """
+    repo = graph.repo
+    reviewed = REVIEWED_NODE_MODES if reviewed is None else reviewed
+    required = {'path', 'input_revision', 'source_blob', 'command', 'kind', 'provenance', 'purpose'}
+    if (set(entry) != required or not isinstance(entry['path'], str) or not isinstance(entry['source_blob'], str)
+            or not isinstance(entry['purpose'], str) or not entry['purpose'].strip()
+            or not isinstance(entry['provenance'], dict) or set(entry['provenance']) != {'path', 'blob', 'line', 'invocation'}):
+        raise ValueError('invalid Node mode root definition')
+    p = entry['path']; revision = entry['input_revision']; command = entry['command']; doc = entry['provenance']
+    if not isinstance(revision, str) or not classifier['hex_pin'](revision, 40): raise ValueError('Node mode root requires a full commit revision')
+    if any(e.get('path') == p and e.get('input_revision') == revision and e is not entry for e in catalog['standalone']):
+        raise ValueError('conflicting standalone definitions: ' + p)
+    if (not isinstance(command, list) or len(command) != 3 or command[:2] != ['node', p] or not isinstance(command[2], str)
+            or not re.fullmatch(r'[a-z][\w-]*', command[2]) or not p.endswith(NODE_SUFFIXES)):
+        raise ValueError('unsupported Node mode root invocation: ' + str(p))
+    mode = command[2]
+    if (doc['path'] != p or doc['blob'] != entry['source_blob'] or doc['invocation'] != shlex.join(command)
+            or (p, entry['source_blob'], mode, doc['line']) not in reviewed):
+        raise ValueError('unreviewed Node mode root: ' + p)
+    if revision != repo.ref:
+        if any(e.get('path') == p and e.get('input_revision') == repo.ref for e in catalog['standalone']): return
+        if not _current(repo, p, entry['source_blob']): return
+        if not _historical_objects(classifier, repo, revision, [(p, entry['source_blob'])]):
+            raise ValueError('unverifiable historical runner demonstration: ' + revision + ':' + p)
+    elif not _current(repo, p, entry['source_blob']): raise ValueError('standalone definition source mismatch: ' + p)
+    text = repo.texts.get(p)
+    if text is None or repo.tree[p][0] not in ('100644', '100755') or not _plain_lines(text):
+        raise ValueError('unsupported Node mode root invocation: ' + p)
+    code, _ = _js_mask(text, True); lines = text.splitlines(); line = doc['line']
+    # Provenance: a comment-only line of the measured blob, command first.
+    if (type(line) is not int or not 1 <= line <= len(lines) or _js_line(text, line, True)[1].strip()
+            or not re.match(r'\s*//\s*' + re.escape(doc['invocation']) + r'(?:\s|$)', lines[line - 1])):
+        raise ValueError('Node mode root lacks its verbatim source provenance: ' + p)
+    branches = [m for m in (_js_match(text, n, r'if\s*\(\s*([\w$]+)\s*===\s*(["\'])' + re.escape(mode) + r'\2\s*\)\s*\{')
+                            for n in range(1, len(lines) + 1) if mode in lines[n - 1]) if m and not m.string[:1].isspace()]
+    if (len(branches) != 1 or _js_destructured(code, branches[0][1])
+            or _js_unique(text, code, branches[0][1], r'const\s+' + re.escape(branches[0][1]) + r'\s*=\s*process\.argv\[2\]\s*;?') is None):
+        raise ValueError('Node mode root lacks its top-level argv mode branch: ' + p)
+    entry_line = next(n for n in range(1, len(lines) + 1) if not lines[n - 1][:1].isspace() and _js_match(text, n, re.escape(branches[0].group(0))))
+    identity = NODE_MODE_PREFIX + p
+    graph.root(p, 'source-only Node mode entry', shlex.join(command), p, entry_line, root_id=identity)
+    if identity not in graph.roots: return
+    graph.roots[identity].update({'source_only': True, 'node_mode_root': True, 'source_blob': entry['source_blob'],
+        'purpose': entry['purpose'], 'node_mode': mode, 'provenance': doc, 'source_demonstration_revision': revision,
+        'validation_at_measured_revision': {'status': 'unavailable', 'command': command,
+            'reason': 'Reviewed argument-bearing entry command; source role only, never run or certified to pass. Anchors only literal walker reads in its mode; no execution, helper, child, generated-output, proof or runtime credit.'}})
+
+
+SOURCE_ROLE_KINDS = {SOURCE_ONLY_KIND: source_only_program, NODE_MODE_KIND: node_mode_root}
 
 
 def persisted_module_entries(classifier, graph, catalog, rows):
@@ -1339,6 +1417,8 @@ def successor_controls(classifier):
         '.github/workflows/lean.yml': 'jobs:\n  t:\n    steps:\n      - run: lean tests/R.lean\n',
         'tests/walk.mjs': walk, 'tests/walk-bad.mjs': walk.replace('    if (statSync(p).isDirectory()) walk(p, out);\n', '    if (statSync(p).isDirectory()) return out;\n'),
         'tests/walk.test.mjs': walk,
+        'tests/mode.mjs': '//   node tests/mode.mjs prepare   synthetic step\n// node tests/mode.mjs other\n' + walk,
+        'tests/mode-flat.mjs': '// node tests/mode-flat.mjs prepare\n' + walk.replace('if (mode === "prepare") {', 'if (true) {'),
         'tests/corpus/a.sol': 'contract A {}\n', 'tests/corpus/sub/b.sol': 'contract B {}\n', 'tests/corpus/c.txt': 'c\n',
         'tests/corpus/skip/d.sol': 'contract D {}\n', 'tests/data.txt': 'data\n',
         'tests/README.md': 'Run `node tests/walk.mjs prepare`.\nRun `node tests/walk-bad.mjs prepare`.\nRun `node tests/walk.mjs other`.\n',
@@ -1467,6 +1547,73 @@ def successor_controls(classifier):
         rewritten = commit({'tests/prog.py': files['tests/prog.py'] + '# changed\n'}, 'changed program')
         model, rows = run(rewritten, standalone=[program])
         assert 'source-only:tests/prog.py' not in model['entry_points'] and rows['tests/prog.py']['class'] != 'keep'
+
+        # (5) H992 reviewed argument-bearing Node mode root: anchors the walker
+        # form only, as a source-only role with no passing-runner credit.
+        global REVIEWED_NODE_MODES
+        reviewed = REVIEWED_NODE_MODES
+        assert ('scripts/parse-corpus.mjs', 'dd1093f6fe8bfe00ae772e0b8b4a0bc0dd4b265a', 'prepare', 17) in reviewed and len(reviewed) == 1
+        mode_root = {'path': 'tests/mode.mjs', 'input_revision': A, 'source_blob': blob(first, 'tests/mode.mjs'), 'kind': NODE_MODE_KIND,
+                     'command': ['node', 'tests/mode.mjs', 'prepare'], 'purpose': 'Synthetic reviewed prepare step.',
+                     'provenance': {'path': 'tests/mode.mjs', 'blob': blob(first, 'tests/mode.mjs'), 'line': 1, 'invocation': 'node tests/mode.mjs prepare'}}
+        walked = lambda target, marker='POSITIVE', form='node-readFileSync-walk', runner='node-mode:tests/mode.mjs': route(
+            first, runner, form, [frame(first, 'tests/mode.mjs', line_of('tests/mode.mjs', marker))], target)
+        walks = {'static_routes': [walked('tests/corpus/a.sol'), walked('tests/corpus/sub/b.sol')]}
+        REVIEWED_NODE_MODES = frozenset({('tests/mode.mjs', blob(first, 'tests/mode.mjs'), 'prepare', 1),
+                                         ('tests/mode.mjs', blob(first, 'tests/mode.mjs'), 'other', 2),
+                                         ('tests/mode.mjs', blob(first, 'tests/mode.mjs'), 'prepare', 3),
+                                         ('tests/mode-flat.mjs', blob(first, 'tests/mode-flat.mjs'), 'prepare', 1)})
+        try:
+            assert run(first, walks)[1]['tests/corpus/a.sol']['class'] != 'keep'  # no root, no anchor
+            for repo in (first, later):
+                model, rows = run(repo, walks, standalone=[mode_root])
+                assert rows['tests/corpus/a.sol']['class'] == 'keep' and rows['tests/corpus/sub/b.sol']['class'] == 'keep'
+                assert rows['tests/corpus/skip/d.sol']['class'] != 'keep' and rows['tests/corpus/c.txt']['class'] != 'keep'
+                entry = model['entry_points']['node-mode:tests/mode.mjs']
+                assert entry['source_only'] and entry['validation_at_measured_revision']['status'] == 'unavailable'
+                assert entry['command'] == 'node tests/mode.mjs prepare' and entry['location'] == 'tests/mode.mjs:' + str(line_of('tests/mode.mjs', 'if (mode'))
+                assert not any(k.endswith(':tests/mode.mjs') and not k.startswith('node-mode:') for k in model['entry_points'])
+                assert rows['tests/corpus/a.sol']['runner_chain']['entry']['derived_from'] == 'node-mode:tests/mode.mjs'
+            # Without new rows the root adds nothing to the reads.
+            assert canonical(run(later, standalone=[mode_root])[1]['tests/corpus/a.sol']) == canonical(baseline['tests/corpus/a.sol'])
+            # The root anchors no other form, mode or reader line.
+            _, rows = run(first, {'static_routes': [walked('tests/corpus/c.txt', 'POSITIVE', 'node-readFileSync')]}, standalone=[mode_root])
+            assert rows['tests/corpus/c.txt']['class'] != 'keep'
+            for target, marker in (('tests/corpus/a.sol', 'OTHER-MODE'), ('tests/corpus/skip/d.sol', 'POSITIVE'), ('tests/corpus/a.sol', 'COMMENT')):
+                rejected(first, 'literal node-readFileSync-walk', {'static_routes': [walked(target, marker)]}, standalone=[mode_root])
+            other = dict(mode_root, command=['node', 'tests/mode.mjs', 'other'], provenance=dict(mode_root['provenance'], line=2, invocation='node tests/mode.mjs other'))
+            rejected(first, 'argv mode branch', walks, standalone=[other])  # an else-if mode is not a top-level branch
+            # Negative controls on the binding: schema, revision, command, provenance, review set, source, branch.
+            for change, text in (({'extra': 1}, 'invalid Node mode root'), ({'purpose': ' '}, 'invalid Node mode root'),
+                                 ({'input_revision': 'HEAD'}, 'full commit revision'),
+                                 ({'command': ['node', 'tests/mode.mjs']}, 'unsupported Node mode root'),
+                                 ({'command': ['node', 'tests/mode.mjs', 'prepare', '--x']}, 'unsupported Node mode root'),
+                                 ({'command': ['node', 'tests/mode.mjs', '--prepare']}, 'unsupported Node mode root'),
+                                 ({'command': ['node', '--test', 'tests/mode.mjs']}, 'unsupported Node mode root'),
+                                 ({'command': ['node', 'tests/mode.mjs', 'report']}, 'unreviewed Node mode root'),
+                                 ({'source_blob': '0' * 40}, 'unreviewed Node mode root'),
+                                 ({'provenance': dict(mode_root['provenance'], line=2)}, 'unreviewed Node mode root'),
+                                 ({'provenance': dict(mode_root['provenance'], line=3)}, 'verbatim source provenance'),
+                                 ({'provenance': dict(mode_root['provenance'], invocation='node tests/mode.mjs  prepare')}, 'unreviewed Node mode root'),
+                                 ({'provenance': dict(mode_root['provenance'], path='tests/README.md')}, 'unreviewed Node mode root'),
+                                 ({'provenance': {'path': 'tests/mode.mjs'}}, 'invalid Node mode root')):
+                rejected(first, text, walks, standalone=[dict(mode_root, **change)])
+            rejected(first, 'unverifiable historical runner demonstration', walks, standalone=[dict(mode_root, input_revision='0' * 40)])
+            rejected(first, 'conflicting standalone', walks, standalone=[mode_root, manual('tests/walk.mjs', 'prepare', 1) | {'path': 'tests/mode.mjs'}])
+            flat = {'path': 'tests/mode-flat.mjs', 'input_revision': A, 'source_blob': blob(first, 'tests/mode-flat.mjs'), 'kind': NODE_MODE_KIND,
+                    'command': ['node', 'tests/mode-flat.mjs', 'prepare'], 'purpose': 'No mode branch.',
+                    'provenance': {'path': 'tests/mode-flat.mjs', 'blob': blob(first, 'tests/mode-flat.mjs'), 'line': 1, 'invocation': 'node tests/mode-flat.mjs prepare'}}
+            rejected(first, 'argv mode branch', standalone=[flat])
+            REVIEWED_NODE_MODES = frozenset()
+            rejected(first, 'unreviewed Node mode root', walks, standalone=[mode_root])
+        finally: REVIEWED_NODE_MODES = reviewed
+        # A changed source drops the root and its reads.
+        edited = commit({'tests/mode.mjs': files['tests/mode.mjs'] + '// changed\n'}, 'changed mode root')
+        REVIEWED_NODE_MODES = reviewed | {('tests/mode.mjs', blob(first, 'tests/mode.mjs'), 'prepare', 1)}
+        try:
+            model, rows = run(edited, walks, standalone=[mode_root])
+            assert 'node-mode:tests/mode.mjs' not in model['entry_points'] and rows['tests/corpus/a.sol']['class'] != 'keep'
+        finally: REVIEWED_NODE_MODES = reviewed
 
         # (4) H979 persisted entered-module claims.
         assert run(first)[1]['tests/helper.py']['class'] == 'keep'

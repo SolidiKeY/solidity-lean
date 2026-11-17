@@ -124,7 +124,9 @@ if fragment_helper.is_file():
     CONSUMER_SECTIONS = fragment_rules.CONSUMER_SECTIONS
     declared_module_cli = fragment_rules.declared_module_cli
     validated_module_entries = lambda graph, entries: fragment_rules.validated_module_entries(globals(), graph, entries)
+    SOURCE_ROLE_KINDS = fragment_rules.SOURCE_ROLE_KINDS
 else:
+    SOURCE_ROLE_KINDS = {}
     # Historical standalone drivers copy only check-tests-used*.py files.
     FRAGMENT_SECTIONS = ('standalone', 'generators', 'reads', 'orphans', 'module_entries')
     CONSUMER_SECTIONS = ()
@@ -603,7 +605,7 @@ def validated_routes(graph, catalog, extra_reads=()):
             if len(fields) != 3 or fields[0].decode() != expected_oid or fields[1] != expected_type:
                 raise ValueError('unverifiable historical runner demonstration: ' + request)
     for entry in catalog['standalone']:
-        if entry.get('kind') == 'source-only-program': fragment_rules.source_only_program(globals(), graph, catalog, entry); continue
+        if entry.get('kind') in SOURCE_ROLE_KINDS: SOURCE_ROLE_KINDS[entry['kind']](globals(), graph, catalog, entry); continue
         required = {'path', 'input_revision', 'source_blob', 'command', 'kind'}
         if entry.get('kind') == 'manual-reproducer': required.add('documentation')
         if entry.get('kind') == 'runnable-entrypoint': required.update(('entry_line', 'purpose', 'input_scope', 'other_reads'))
