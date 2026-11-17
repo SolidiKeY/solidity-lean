@@ -1022,6 +1022,72 @@
           "tests/h62/item2/audit-v08-adapters/P8StatementCensus.lean"
         ],
         "other_reads": "unresolved"
+      },
+      {
+        "path": "scripts/h62/item2/audit-theories/test_pair_sources.py",
+        "input_revision": "94161546a752fcb026af328f174507fcd94c6246",
+        "source_blob": "425ce6d432ce3b45b8a92d05d5db79007d63e33d",
+        "command": [
+          "python3",
+          "-B",
+          "scripts/h62/item2/audit-theories/test_pair_sources.py"
+        ],
+        "kind": "unittest",
+        "purpose": "Existing source/generator or lexical acceptance regression checks exact reproduction, original declaration preservation, case-map integrity or corruption refusal. Ordinary and instrumented executions passed in the recorded context. Only these exact primary source/template/metadata reads receive data-use credit; no native Lean, ownership, theorem, compiler or EVM proof acceptance.",
+        "input_scope": [
+          "tests/h62/item2/audit-theories/ElaboratedCensus.lean"
+        ],
+        "other_reads": "unresolved"
+      },
+      {
+        "path": "scripts/h62/item4/generic-source-frontend/test_generate.py",
+        "input_revision": "94161546a752fcb026af328f174507fcd94c6246",
+        "source_blob": "819edbaae633806e1344a641def3a6bc2baaa558",
+        "command": [
+          "python3",
+          "-B",
+          "scripts/h62/item4/generic-source-frontend/test_generate.py"
+        ],
+        "kind": "unittest",
+        "purpose": "Existing source/generator or lexical acceptance regression checks exact reproduction, original declaration preservation, case-map integrity or corruption refusal. Ordinary and instrumented executions passed in the recorded context. Only these exact primary source/template/metadata reads receive data-use credit; no native Lean, ownership, theorem, compiler or EVM proof acceptance.",
+        "input_scope": [
+          "tests/h62/item4/generic-source-frontend/FixtureTable.lean",
+          "tests/h62/item4/generic-source-frontend/owner-migration-proposal.json"
+        ],
+        "other_reads": "unresolved"
+      },
+      {
+        "path": "tests/h62/item4/generic-passes/test_acceptance.py",
+        "input_revision": "94161546a752fcb026af328f174507fcd94c6246",
+        "source_blob": "df9dee1caffc2b2823d62a43cf4a2960edf60ac4",
+        "command": [
+          "python3",
+          "-B",
+          "tests/h62/item4/generic-passes/test_acceptance.py"
+        ],
+        "kind": "unittest",
+        "purpose": "Existing source/generator or lexical acceptance regression checks exact reproduction, original declaration preservation, case-map integrity or corruption refusal. Ordinary and instrumented executions passed in the recorded context. Only these exact primary source/template/metadata reads receive data-use credit; no native Lean, ownership, theorem, compiler or EVM proof acceptance.",
+        "input_scope": [
+          "tests/h62/item4/generic-passes/Correspondence.lean",
+          "tests/h62/item4/generic-passes/Instances.lean"
+        ],
+        "other_reads": "unresolved"
+      },
+      {
+        "path": "tests/h62/item4/generic-internalflow/test_prefix.py",
+        "input_revision": "94161546a752fcb026af328f174507fcd94c6246",
+        "source_blob": "fe3fee9f7df83f47e01dd9cc8d5155412d9a7671",
+        "command": [
+          "python3",
+          "-B",
+          "tests/h62/item4/generic-internalflow/test_prefix.py"
+        ],
+        "kind": "unittest",
+        "purpose": "Existing source/generator or lexical acceptance regression checks exact reproduction, original declaration preservation, case-map integrity or corruption refusal. Ordinary and instrumented executions passed in the recorded context. Only these exact primary source/template/metadata reads receive data-use credit; no native Lean, ownership, theorem, compiler or EVM proof acceptance.",
+        "input_scope": [
+          "tests/h62/item4/generic-internalflow/prefix-cases.txt"
+        ],
+        "other_reads": "unresolved"
       }
     ]
   },
@@ -2118,6 +2184,17 @@
         "operation": "validated Python read of measured bytes"
       },
       {
+        "runner": "validated:scripts/h62/item2/audit-theories/test_pair_sources.py",
+        "input_revision": "94161546a752fcb026af328f174507fcd94c6246",
+        "frames": [
+          {"path": "scripts/h62/item2/audit-theories/test_pair_sources.py", "blob": "425ce6d432ce3b45b8a92d05d5db79007d63e33d", "line": 15},
+          {"path": "scripts/h62/item2/audit-theories/test_pair_sources.py", "blob": "425ce6d432ce3b45b8a92d05d5db79007d63e33d", "line": 11}
+        ],
+        "target": "tests/h62/item2/audit-theories/ElaboratedCensus.lean",
+        "target_blob": "2ecc1479b59032768876001bc272efc61a2b6f77",
+        "operation": "validated Python read of measured bytes"
+      },
+      {
         "runner": "validated:tests/h62/item2/audit-v08-adapters/test_generate_calldata_census.py",
         "input_revision": "b6d4061febc1fb281cf1c30ffb277e1b6762f8e9",
         "frames": [
@@ -2922,6 +2999,61 @@
         ],
         "target": "tests/h62/item2/audit-v10-storage/touched-joint-witness-map.json",
         "target_blob": "712d2eeeb7ea9ba29cded3615e445c0dd9f7466c",
+        "operation": "validated Python read of measured bytes"
+      },
+      {
+        "runner": "validated:tests/h62/item4/generic-internalflow/test_prefix.py",
+        "input_revision": "94161546a752fcb026af328f174507fcd94c6246",
+        "frames": [
+          {"path": "tests/h62/item4/generic-internalflow/test_prefix.py", "blob": "fe3fee9f7df83f47e01dd9cc8d5155412d9a7671", "line": 31},
+          {"path": "tests/h62/item4/generic-internalflow/test_prefix.py", "blob": "fe3fee9f7df83f47e01dd9cc8d5155412d9a7671", "line": 11}
+        ],
+        "target": "tests/h62/item4/generic-internalflow/prefix-cases.txt",
+        "target_blob": "41a7a0f7a52f1e3d05bad6848170b324ce443dfa",
+        "operation": "validated Python read of measured bytes"
+      },
+      {
+        "runner": "validated:tests/h62/item4/generic-passes/test_acceptance.py",
+        "input_revision": "94161546a752fcb026af328f174507fcd94c6246",
+        "frames": [
+          {"path": "tests/h62/item4/generic-passes/test_acceptance.py", "blob": "df9dee1caffc2b2823d62a43cf4a2960edf60ac4", "line": 126},
+          {"path": "tests/h62/item4/generic-passes/test_acceptance.py", "blob": "df9dee1caffc2b2823d62a43cf4a2960edf60ac4", "line": 20}
+        ],
+        "target": "tests/h62/item4/generic-passes/Correspondence.lean",
+        "target_blob": "579d1d98ab9076f389ad1cc2202b2fb0ae4f25f5",
+        "operation": "validated Python read of measured bytes"
+      },
+      {
+        "runner": "validated:tests/h62/item4/generic-passes/test_acceptance.py",
+        "input_revision": "94161546a752fcb026af328f174507fcd94c6246",
+        "frames": [
+          {"path": "tests/h62/item4/generic-passes/test_acceptance.py", "blob": "df9dee1caffc2b2823d62a43cf4a2960edf60ac4", "line": 126},
+          {"path": "tests/h62/item4/generic-passes/test_acceptance.py", "blob": "df9dee1caffc2b2823d62a43cf4a2960edf60ac4", "line": 20}
+        ],
+        "target": "tests/h62/item4/generic-passes/Instances.lean",
+        "target_blob": "852ec69b871926a924b638a3a97f3837e0361480",
+        "operation": "validated Python read of measured bytes"
+      },
+      {
+        "runner": "validated:scripts/h62/item4/generic-source-frontend/test_generate.py",
+        "input_revision": "94161546a752fcb026af328f174507fcd94c6246",
+        "frames": [
+          {"path": "scripts/h62/item4/generic-source-frontend/test_generate.py", "blob": "819edbaae633806e1344a641def3a6bc2baaa558", "line": 35},
+          {"path": "scripts/h62/item4/generic-source-frontend/test_generate.py", "blob": "819edbaae633806e1344a641def3a6bc2baaa558", "line": 12}
+        ],
+        "target": "tests/h62/item4/generic-source-frontend/FixtureTable.lean",
+        "target_blob": "6136a98d7b8a2d935084b40dd18d825ba5ec77df",
+        "operation": "validated Python read of measured bytes"
+      },
+      {
+        "runner": "validated:scripts/h62/item4/generic-source-frontend/test_generate.py",
+        "input_revision": "94161546a752fcb026af328f174507fcd94c6246",
+        "frames": [
+          {"path": "scripts/h62/item4/generic-source-frontend/test_generate.py", "blob": "819edbaae633806e1344a641def3a6bc2baaa558", "line": 35},
+          {"path": "scripts/h62/item4/generic-source-frontend/test_generate.py", "blob": "819edbaae633806e1344a641def3a6bc2baaa558", "line": 12}
+        ],
+        "target": "tests/h62/item4/generic-source-frontend/owner-migration-proposal.json",
+        "target_blob": "fa1599a109b15a01b711f2ab1df4a8d1b626ec7a",
         "operation": "validated Python read of measured bytes"
       },
       {
