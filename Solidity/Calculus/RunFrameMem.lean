@@ -105,14 +105,11 @@ namespace LTy
 
 theorem TDenote.wk_wk {H H₁ H₂ : HTy} (e₁ : H <+: H₁) (e₂ : H₁ <+: H₂) :
     (t : LTy) → (v : t.TDenote C H) →
-      TDenote.wk e₂ t (TDenote.wk e₁ t v) = TDenote.wk (e₁.trans e₂) t v
-  | .val _, _ | .alias _, _ | .old, _ | .oldNet, _ | .kint, _ => rfl
-  | .mem _, v => by cases v <;> rfl
+      TDenote.wk e₂ t (TDenote.wk e₁ t v) = TDenote.wk (e₁.trans e₂) t v :=
+  Solidity.LTy.TDenote.wk_trans e₁ e₂
 
 theorem TDenote.wk_refl {H : HTy} (e : H <+: H) : (t : LTy) → (v : t.TDenote C H) →
-    TDenote.wk e t v = v
-  | .val _, _ | .alias _, _ | .old, _ | .oldNet, _ | .kint, _ => rfl
-  | .mem _, v => by cases v <;> rfl
+    TDenote.wk e t v = v := Solidity.LTy.TDenote.wk_self e
 
 end LTy
 

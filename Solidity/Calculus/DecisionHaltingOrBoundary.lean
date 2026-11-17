@@ -9,12 +9,8 @@ namespace Solidity.Decide.ResidueReason
 namespace PartialOrRoots
 variable {C : Contract}
 
-theorem scalar_ne_mapping (sp : PartialOrRoots C) : sp.scalar ≠ sp.mapping := by
-  intro h
-  have hs : C.rootType sp.mapping = some (.prim .uint) := h ▸ sp.scalarType
-  have ht : (Ty.prim .uint) = .ref (.mapping .uint (.prim .uint)) :=
-    Option.some.inj (hs.symm.trans sp.mappingType)
-  cases ht
+theorem scalar_ne_mapping (sp : PartialOrRoots C) : sp.scalar ≠ sp.mapping :=
+  Solidity.Decide.ResidueReason.PartialOrRoots.roots_ne sp
 
 def roots (sp : PartialOrRoots C) : ARoots := ⟨[sp.mapping], false⟩
 

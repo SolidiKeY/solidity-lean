@@ -94,15 +94,6 @@ def finiteDefaultCellsAt : Nat → Ty → Option Nat
   | _, .ref (.array (.ref _)) | _, .ref (.fixed _ _) | _, .ref (.mapping _ _) => none
 termination_by structural depth => depth
 
-private theorem member_rank {fs : List (Name × Ty)} {ft : Name × Ty} (h : ft ∈ fs) :
-    tyRank ft.2 ≤ fieldsRank fs := by
-  induction fs with
-  | nil => cases h
-  | cons a fs ih =>
-    rcases List.mem_cons.mp h with he | ht
-    · subst ft; exact Nat.le_max_left _ _
-    · exact Nat.le_trans (ih ht) (Nat.le_max_right _ _)
-
 private theorem fieldCellsWith_eq (fs : List (Name × Ty)) (child : Ty → Option Nat)
     (hh : ∀ ft ∈ fs, child ft.2 = finiteDefaultCells ft.2) :
     fieldCellsWith child fs = finiteDefaultFieldCells fs := by
@@ -138,7 +129,7 @@ theorem finiteDefaultCellsAt_eq (depth : Nat) (T : Ty) (hr : tyRank T ≤ depth)
           fieldCellsWith_eq (structDef s) _ (by
             intro ft hft
             apply ih ft.2
-            have hm := member_rank hft
+            have hm := Solidity.Evm.tyRank_le_of_mem hft
             have hs := structDef_rank_lt s
             change structRank s ≤ depth + 1 at hr
             omega)]
