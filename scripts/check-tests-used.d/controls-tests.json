@@ -578,6 +578,263 @@
           "tests/h62/item2/audit-v10-storage/touched-joint-witness-map.json"
         ],
         "other_reads": "unresolved"
+      },
+      {
+        "path": "scripts/h62/item2/audit-readonly-calls/test_source_void_world.py",
+        "input_revision": "f28827678848922d0212b606b0b1ade752878090",
+        "source_blob": "cc4657a44f86b31a54727cb8a3070175de4ed4f3",
+        "command": [
+          "python3",
+          "-B",
+          "scripts/h62/item2/audit-readonly-calls/test_source_void_world.py"
+        ],
+        "kind": "unittest",
+        "purpose": "Existing readonly regression checks exact declaration/import inventory and rejects source, name, helper or evidence substitutions. Ordinary and instrumented executions passed at the recorded Git context. Only these exact unchanged primary source-data reads receive credit; no native Lean elaboration, premise validity, transport, compiler or EVM proof credit.",
+        "input_scope": [
+          "tests/h62/item2/audit-readonly-calls/SourceVoidWorld.lean"
+        ],
+        "other_reads": "unresolved"
+      },
+      {
+        "path": "scripts/h62/item2/audit-readonly-calls/test_source_void_callable.py",
+        "input_revision": "f28827678848922d0212b606b0b1ade752878090",
+        "source_blob": "377eb9ca6728b599f5a93a3c3ccb93996dfabc09",
+        "command": [
+          "python3",
+          "-B",
+          "scripts/h62/item2/audit-readonly-calls/test_source_void_callable.py"
+        ],
+        "kind": "unittest",
+        "purpose": "Existing readonly regression checks exact declaration/import inventory and rejects source, name, helper or evidence substitutions. Ordinary and instrumented executions passed at the recorded Git context. Only these exact unchanged primary source-data reads receive credit; no native Lean elaboration, premise validity, transport, compiler or EVM proof credit.",
+        "input_scope": [
+          "tests/h62/item2/audit-readonly-calls/SourceVoidCallable.lean"
+        ],
+        "other_reads": "unresolved"
+      },
+      {
+        "path": "scripts/h62/item2/audit-readonly-calls/test_source_void.py",
+        "input_revision": "f28827678848922d0212b606b0b1ade752878090",
+        "source_blob": "c49d4bf6a8344f9fd7ebb0e58f3ea3dbb4e877e9",
+        "command": [
+          "python3",
+          "-B",
+          "scripts/h62/item2/audit-readonly-calls/test_source_void.py"
+        ],
+        "kind": "unittest",
+        "purpose": "Existing readonly regression checks exact declaration/import inventory and rejects source, name, helper or evidence substitutions. Ordinary and instrumented executions passed at the recorded Git context. Only these exact unchanged primary source-data reads receive credit; no native Lean elaboration, premise validity, transport, compiler or EVM proof credit.",
+        "input_scope": [
+          "tests/h62/item2/audit-readonly-calls/SourceVoidSelection.lean"
+        ],
+        "other_reads": "unresolved"
+      },
+      {
+        "path": "scripts/h62/item2/audit-readonly-calls/test_native_frame.py",
+        "input_revision": "f28827678848922d0212b606b0b1ade752878090",
+        "source_blob": "2be2c79fd15638ac50d36476718430c9921f5d11",
+        "command": [
+          "python3",
+          "-B",
+          "scripts/h62/item2/audit-readonly-calls/test_native_frame.py"
+        ],
+        "kind": "unittest",
+        "purpose": "Existing readonly regression checks exact declaration/import inventory and rejects source, name, helper or evidence substitutions. Ordinary and instrumented executions passed at the recorded Git context. Only these exact unchanged primary source-data reads receive credit; no native Lean elaboration, premise validity, transport, compiler or EVM proof credit.",
+        "input_scope": [
+          "tests/h62/item2/audit-readonly-calls/NativeFrameTransport.lean"
+        ],
+        "other_reads": "unresolved"
+      },
+      {
+        "path": "scripts/h62/item2/audit-readonly-calls/test_private_bind.py",
+        "input_revision": "f28827678848922d0212b606b0b1ade752878090",
+        "source_blob": "7c5e542d60ec37840c8cc9a53c95b08f55edf739",
+        "command": [
+          "python3",
+          "-B",
+          "scripts/h62/item2/audit-readonly-calls/test_private_bind.py"
+        ],
+        "kind": "unittest",
+        "purpose": "Existing readonly regression checks exact declaration/import inventory and rejects source, name, helper or evidence substitutions. Ordinary and instrumented executions passed at the recorded Git context. Only these exact unchanged primary source-data reads receive credit; no native Lean elaboration, premise validity, transport, compiler or EVM proof credit.",
+        "input_scope": [
+          "tests/h62/item2/audit-readonly-calls/PrivateBindWitnesses.lean"
+        ],
+        "other_reads": "unresolved"
+      },
+      {
+        "path": "scripts/h62/item2/audit-readonly-calls/test_private_transport.py",
+        "input_revision": "f28827678848922d0212b606b0b1ade752878090",
+        "source_blob": "f40ea3fec1a598da76f0839606c50736ea2aaf79",
+        "command": [
+          "python3",
+          "-B",
+          "scripts/h62/item2/audit-readonly-calls/test_private_transport.py"
+        ],
+        "kind": "unittest",
+        "purpose": "Existing readonly regression checks exact declaration/import inventory and rejects source, name, helper or evidence substitutions. Ordinary and instrumented executions passed at the recorded Git context. Only these exact unchanged primary source-data reads receive credit; no native Lean elaboration, premise validity, transport, compiler or EVM proof credit.",
+        "input_scope": [
+          "tests/h62/item2/audit-readonly-calls/PrivateTransportWitnesses.lean"
+        ],
+        "other_reads": "unresolved"
+      },
+      {
+        "path": "scripts/h62/item2/audit-readonly-calls/test_primitive_transport.py",
+        "input_revision": "f28827678848922d0212b606b0b1ade752878090",
+        "source_blob": "159ef45dc53ee5362a651f229aaee2ecbc930998",
+        "command": [
+          "python3",
+          "-B",
+          "scripts/h62/item2/audit-readonly-calls/test_primitive_transport.py"
+        ],
+        "kind": "unittest",
+        "purpose": "Existing readonly regression checks exact declaration/import inventory and rejects source, name, helper or evidence substitutions. Ordinary and instrumented executions passed at the recorded Git context. Only these exact unchanged primary source-data reads receive credit; no native Lean elaboration, premise validity, transport, compiler or EVM proof credit.",
+        "input_scope": [
+          "tests/h62/item2/audit-readonly-calls/PrimitiveTransportWitnesses.lean"
+        ],
+        "other_reads": "unresolved"
+      },
+      {
+        "path": "scripts/h62/item2/audit-readonly-calls/test_effect_rules.py",
+        "input_revision": "f28827678848922d0212b606b0b1ade752878090",
+        "source_blob": "804a0d2a445da2027111974765bbdfccf81c68f0",
+        "command": [
+          "python3",
+          "-B",
+          "scripts/h62/item2/audit-readonly-calls/test_effect_rules.py"
+        ],
+        "kind": "unittest",
+        "purpose": "Existing readonly regression checks exact declaration/import inventory and rejects source, name, helper or evidence substitutions. Ordinary and instrumented executions passed at the recorded Git context. Only these exact unchanged primary source-data reads receive credit; no native Lean elaboration, premise validity, transport, compiler or EVM proof credit.",
+        "input_scope": [
+          "tests/h62/item2/audit-readonly-calls/EffectRuleWitnesses.lean"
+        ],
+        "other_reads": "unresolved"
+      },
+      {
+        "path": "scripts/h62/item2/audit-readonly-calls/test_initialization.py",
+        "input_revision": "f28827678848922d0212b606b0b1ade752878090",
+        "source_blob": "b1e1fde85a684ac854b60276997598983aa8dcd9",
+        "command": [
+          "python3",
+          "-B",
+          "scripts/h62/item2/audit-readonly-calls/test_initialization.py"
+        ],
+        "kind": "unittest",
+        "purpose": "Existing readonly regression checks exact declaration/import inventory and rejects source, name, helper or evidence substitutions. Ordinary and instrumented executions passed at the recorded Git context. Only these exact unchanged primary source-data reads receive credit; no native Lean elaboration, premise validity, transport, compiler or EVM proof credit.",
+        "input_scope": [
+          "tests/h62/item2/audit-readonly-calls/InitializationWitnesses.lean"
+        ],
+        "other_reads": "unresolved"
+      },
+      {
+        "path": "scripts/h62/item2/audit-readonly-calls/test_journal_witnesses.py",
+        "input_revision": "f28827678848922d0212b606b0b1ade752878090",
+        "source_blob": "cf467269fe78543be96c1d77572f8eb557c42a59",
+        "command": [
+          "python3",
+          "-B",
+          "scripts/h62/item2/audit-readonly-calls/test_journal_witnesses.py"
+        ],
+        "kind": "unittest",
+        "purpose": "Existing readonly regression checks exact declaration/import inventory and rejects source, name, helper or evidence substitutions. Ordinary and instrumented executions passed at the recorded Git context. Only these exact unchanged primary source-data reads receive credit; no native Lean elaboration, premise validity, transport, compiler or EVM proof credit.",
+        "input_scope": [
+          "tests/h62/item2/audit-readonly-calls/JournalWitnesses.lean"
+        ],
+        "other_reads": "unresolved"
+      },
+      {
+        "path": "scripts/h62/item2/audit-readonly-calls/test_invocation_modes.py",
+        "input_revision": "f28827678848922d0212b606b0b1ade752878090",
+        "source_blob": "c6340e121526e1eea64ddc3a2720752b4630025c",
+        "command": [
+          "python3",
+          "-B",
+          "scripts/h62/item2/audit-readonly-calls/test_invocation_modes.py"
+        ],
+        "kind": "unittest",
+        "purpose": "Existing readonly regression checks exact declaration/import inventory and rejects source, name, helper or evidence substitutions. Ordinary and instrumented executions passed at the recorded Git context. Only these exact unchanged primary source-data reads receive credit; no native Lean elaboration, premise validity, transport, compiler or EVM proof credit.",
+        "input_scope": [
+          "tests/h62/item2/audit-readonly-calls/InvocationModeWitnesses.lean"
+        ],
+        "other_reads": "unresolved"
+      },
+      {
+        "path": "scripts/h62/item2/audit-readonly-calls/test_captured_values.py",
+        "input_revision": "f28827678848922d0212b606b0b1ade752878090",
+        "source_blob": "3742052061735b0fbe5bba498103217b8121f5e9",
+        "command": [
+          "python3",
+          "-B",
+          "scripts/h62/item2/audit-readonly-calls/test_captured_values.py"
+        ],
+        "kind": "unittest",
+        "purpose": "Existing readonly regression checks exact declaration/import inventory and rejects source, name, helper or evidence substitutions. Ordinary and instrumented executions passed at the recorded Git context. Only these exact unchanged primary source-data reads receive credit; no native Lean elaboration, premise validity, transport, compiler or EVM proof credit.",
+        "input_scope": [
+          "tests/h62/item2/audit-readonly-calls/CapturedValueWitnesses.lean"
+        ],
+        "other_reads": "unresolved"
+      },
+      {
+        "path": "scripts/h62/item2/audit-readonly-calls/test_caller_storage.py",
+        "input_revision": "f28827678848922d0212b606b0b1ade752878090",
+        "source_blob": "6a00a8047f3c1f5870fcf7ee0a6088318a5798dd",
+        "command": [
+          "python3",
+          "-B",
+          "scripts/h62/item2/audit-readonly-calls/test_caller_storage.py"
+        ],
+        "kind": "unittest",
+        "purpose": "Existing readonly regression checks exact declaration/import inventory and rejects source, name, helper or evidence substitutions. Ordinary and instrumented executions passed at the recorded Git context. Only these exact unchanged primary source-data reads receive credit; no native Lean elaboration, premise validity, transport, compiler or EVM proof credit.",
+        "input_scope": [
+          "tests/h62/item2/audit-readonly-calls/CallerStorageWitnesses.lean"
+        ],
+        "other_reads": "unresolved"
+      },
+      {
+        "path": "scripts/h62/item2/audit-readonly-calls/test_call_boundaries.py",
+        "input_revision": "f28827678848922d0212b606b0b1ade752878090",
+        "source_blob": "ac72ee18604b3de51ca507538565614b2a5139a6",
+        "command": [
+          "python3",
+          "-B",
+          "scripts/h62/item2/audit-readonly-calls/test_call_boundaries.py"
+        ],
+        "kind": "unittest",
+        "purpose": "Existing readonly regression checks exact declaration/import inventory and rejects source, name, helper or evidence substitutions. Ordinary and instrumented executions passed at the recorded Git context. Only these exact unchanged primary source-data reads receive credit; no native Lean elaboration, premise validity, transport, compiler or EVM proof credit.",
+        "input_scope": [
+          "tests/h62/item2/audit-readonly-calls/CallBoundaryWitnesses.lean"
+        ],
+        "other_reads": "unresolved"
+      },
+      {
+        "path": "tests/h62/item2/audit-readonly-calls/test_execution_call.py",
+        "input_revision": "f28827678848922d0212b606b0b1ade752878090",
+        "source_blob": "01db2114c687fe742c38c3bbaecc9e9427ddf278",
+        "command": [
+          "python3",
+          "-B",
+          "tests/h62/item2/audit-readonly-calls/test_execution_call.py"
+        ],
+        "kind": "unittest",
+        "purpose": "Existing readonly regression checks exact declaration/import inventory and rejects source, name, helper or evidence substitutions. Ordinary and instrumented executions passed at the recorded Git context. Only these exact unchanged primary source-data reads receive credit; no native Lean elaboration, premise validity, transport, compiler or EVM proof credit.",
+        "input_scope": [
+          "tests/h62/item2/audit-readonly-calls/CheckedExecutionCall.lean",
+          "tests/h62/item2/audit-readonly-calls/ExecutionCall.lean"
+        ],
+        "other_reads": "unresolved"
+      },
+      {
+        "path": "tests/h62/item2/audit-readonly-calls/test_execution_replies.py",
+        "input_revision": "f28827678848922d0212b606b0b1ade752878090",
+        "source_blob": "42cfcc13e6b3ac564fafe96fafa8cf34a73d337c",
+        "command": [
+          "python3",
+          "-B",
+          "tests/h62/item2/audit-readonly-calls/test_execution_replies.py"
+        ],
+        "kind": "unittest",
+        "purpose": "Existing readonly regression checks exact declaration/import inventory and rejects source, name, helper or evidence substitutions. Ordinary and instrumented executions passed at the recorded Git context. Only these exact unchanged primary source-data reads receive credit; no native Lean elaboration, premise validity, transport, compiler or EVM proof credit.",
+        "input_scope": [
+          "tests/h62/item2/audit-readonly-calls/ExecutionReplies.lean"
+        ],
+        "other_reads": "unresolved"
       }
     ]
   },
@@ -1712,6 +1969,329 @@
         ],
         "target": "tests/h62/item2/audit-bytecode-selection/selection-field-witnesses.json",
         "target_blob": "85938cf49908b76bc8f684ae4f010490b9ee09dc",
+        "operation": "validated Python read of measured bytes"
+      },
+      {
+        "runner": "validated:scripts/h62/item2/audit-readonly-calls/test_call_boundaries.py",
+        "input_revision": "f28827678848922d0212b606b0b1ade752878090",
+        "frames": [
+          {
+            "path": "scripts/h62/item2/audit-readonly-calls/test_call_boundaries.py",
+            "blob": "ac72ee18604b3de51ca507538565614b2a5139a6",
+            "line": 25
+          },
+          {
+            "path": "scripts/h62/item2/audit-readonly-calls/test_call_boundaries.py",
+            "blob": "ac72ee18604b3de51ca507538565614b2a5139a6",
+            "line": 10
+          }
+        ],
+        "target": "tests/h62/item2/audit-readonly-calls/CallBoundaryWitnesses.lean",
+        "target_blob": "edca1b6e51020974025b2aeefa5b7cf83fd34cea",
+        "operation": "validated Python read of measured bytes"
+      },
+      {
+        "runner": "validated:scripts/h62/item2/audit-readonly-calls/test_caller_storage.py",
+        "input_revision": "f28827678848922d0212b606b0b1ade752878090",
+        "frames": [
+          {
+            "path": "scripts/h62/item2/audit-readonly-calls/test_caller_storage.py",
+            "blob": "6a00a8047f3c1f5870fcf7ee0a6088318a5798dd",
+            "line": 24
+          },
+          {
+            "path": "scripts/h62/item2/audit-readonly-calls/test_caller_storage.py",
+            "blob": "6a00a8047f3c1f5870fcf7ee0a6088318a5798dd",
+            "line": 10
+          }
+        ],
+        "target": "tests/h62/item2/audit-readonly-calls/CallerStorageWitnesses.lean",
+        "target_blob": "1b1ae92a4f80c360e9d3b812639571e8434450f8",
+        "operation": "validated Python read of measured bytes"
+      },
+      {
+        "runner": "validated:scripts/h62/item2/audit-readonly-calls/test_captured_values.py",
+        "input_revision": "f28827678848922d0212b606b0b1ade752878090",
+        "frames": [
+          {
+            "path": "scripts/h62/item2/audit-readonly-calls/test_captured_values.py",
+            "blob": "3742052061735b0fbe5bba498103217b8121f5e9",
+            "line": 23
+          },
+          {
+            "path": "scripts/h62/item2/audit-readonly-calls/test_captured_values.py",
+            "blob": "3742052061735b0fbe5bba498103217b8121f5e9",
+            "line": 10
+          }
+        ],
+        "target": "tests/h62/item2/audit-readonly-calls/CapturedValueWitnesses.lean",
+        "target_blob": "05a8d5052d8fa50f88a70d4e67482993e557dbe9",
+        "operation": "validated Python read of measured bytes"
+      },
+      {
+        "runner": "validated:tests/h62/item2/audit-readonly-calls/test_execution_call.py",
+        "input_revision": "f28827678848922d0212b606b0b1ade752878090",
+        "frames": [
+          {
+            "path": "tests/h62/item2/audit-readonly-calls/test_execution_call.py",
+            "blob": "01db2114c687fe742c38c3bbaecc9e9427ddf278",
+            "line": 90
+          },
+          {
+            "path": "tests/h62/item2/audit-readonly-calls/test_execution_call.py",
+            "blob": "01db2114c687fe742c38c3bbaecc9e9427ddf278",
+            "line": 22
+          }
+        ],
+        "target": "tests/h62/item2/audit-readonly-calls/CheckedExecutionCall.lean",
+        "target_blob": "90fc0d62f6abaf4fe8feab9db0165e46fe693831",
+        "operation": "validated Python read of measured bytes"
+      },
+      {
+        "runner": "validated:scripts/h62/item2/audit-readonly-calls/test_effect_rules.py",
+        "input_revision": "f28827678848922d0212b606b0b1ade752878090",
+        "frames": [
+          {
+            "path": "scripts/h62/item2/audit-readonly-calls/test_effect_rules.py",
+            "blob": "804a0d2a445da2027111974765bbdfccf81c68f0",
+            "line": 58
+          },
+          {
+            "path": "scripts/h62/item2/audit-readonly-calls/test_effect_rules.py",
+            "blob": "804a0d2a445da2027111974765bbdfccf81c68f0",
+            "line": 15
+          }
+        ],
+        "target": "tests/h62/item2/audit-readonly-calls/EffectRuleWitnesses.lean",
+        "target_blob": "b942850b7bd76c4c02d782e4894100dbb26adf5c",
+        "operation": "validated Python read of measured bytes"
+      },
+      {
+        "runner": "validated:tests/h62/item2/audit-readonly-calls/test_execution_call.py",
+        "input_revision": "f28827678848922d0212b606b0b1ade752878090",
+        "frames": [
+          {
+            "path": "tests/h62/item2/audit-readonly-calls/test_execution_call.py",
+            "blob": "01db2114c687fe742c38c3bbaecc9e9427ddf278",
+            "line": 90
+          },
+          {
+            "path": "tests/h62/item2/audit-readonly-calls/test_execution_call.py",
+            "blob": "01db2114c687fe742c38c3bbaecc9e9427ddf278",
+            "line": 22
+          }
+        ],
+        "target": "tests/h62/item2/audit-readonly-calls/ExecutionCall.lean",
+        "target_blob": "49f94f1ceb9bb47d48bca3203609aee0a472b2a3",
+        "operation": "validated Python read of measured bytes"
+      },
+      {
+        "runner": "validated:tests/h62/item2/audit-readonly-calls/test_execution_replies.py",
+        "input_revision": "f28827678848922d0212b606b0b1ade752878090",
+        "frames": [
+          {
+            "path": "tests/h62/item2/audit-readonly-calls/test_execution_replies.py",
+            "blob": "42cfcc13e6b3ac564fafe96fafa8cf34a73d337c",
+            "line": 61
+          },
+          {
+            "path": "tests/h62/item2/audit-readonly-calls/test_execution_replies.py",
+            "blob": "42cfcc13e6b3ac564fafe96fafa8cf34a73d337c",
+            "line": 19
+          }
+        ],
+        "target": "tests/h62/item2/audit-readonly-calls/ExecutionReplies.lean",
+        "target_blob": "61f52615015a4decadfca34ae1cccb0ebd9c371c",
+        "operation": "validated Python read of measured bytes"
+      },
+      {
+        "runner": "validated:scripts/h62/item2/audit-readonly-calls/test_initialization.py",
+        "input_revision": "f28827678848922d0212b606b0b1ade752878090",
+        "frames": [
+          {
+            "path": "scripts/h62/item2/audit-readonly-calls/test_initialization.py",
+            "blob": "b1e1fde85a684ac854b60276997598983aa8dcd9",
+            "line": 61
+          },
+          {
+            "path": "scripts/h62/item2/audit-readonly-calls/test_initialization.py",
+            "blob": "b1e1fde85a684ac854b60276997598983aa8dcd9",
+            "line": 15
+          }
+        ],
+        "target": "tests/h62/item2/audit-readonly-calls/InitializationWitnesses.lean",
+        "target_blob": "e5fd5857cc6f59c279b201bf16b36f921d9a379b",
+        "operation": "validated Python read of measured bytes"
+      },
+      {
+        "runner": "validated:scripts/h62/item2/audit-readonly-calls/test_invocation_modes.py",
+        "input_revision": "f28827678848922d0212b606b0b1ade752878090",
+        "frames": [
+          {
+            "path": "scripts/h62/item2/audit-readonly-calls/test_invocation_modes.py",
+            "blob": "c6340e121526e1eea64ddc3a2720752b4630025c",
+            "line": 21
+          },
+          {
+            "path": "scripts/h62/item2/audit-readonly-calls/test_invocation_modes.py",
+            "blob": "c6340e121526e1eea64ddc3a2720752b4630025c",
+            "line": 10
+          }
+        ],
+        "target": "tests/h62/item2/audit-readonly-calls/InvocationModeWitnesses.lean",
+        "target_blob": "c1eaef71e848f5256147442d989dc365c0b1b29b",
+        "operation": "validated Python read of measured bytes"
+      },
+      {
+        "runner": "validated:scripts/h62/item2/audit-readonly-calls/test_journal_witnesses.py",
+        "input_revision": "f28827678848922d0212b606b0b1ade752878090",
+        "frames": [
+          {
+            "path": "scripts/h62/item2/audit-readonly-calls/test_journal_witnesses.py",
+            "blob": "cf467269fe78543be96c1d77572f8eb557c42a59",
+            "line": 22
+          },
+          {
+            "path": "scripts/h62/item2/audit-readonly-calls/test_journal_witnesses.py",
+            "blob": "cf467269fe78543be96c1d77572f8eb557c42a59",
+            "line": 10
+          }
+        ],
+        "target": "tests/h62/item2/audit-readonly-calls/JournalWitnesses.lean",
+        "target_blob": "8a76980387c47db57976c5baf2d21715cc21a531",
+        "operation": "validated Python read of measured bytes"
+      },
+      {
+        "runner": "validated:scripts/h62/item2/audit-readonly-calls/test_native_frame.py",
+        "input_revision": "f28827678848922d0212b606b0b1ade752878090",
+        "frames": [
+          {
+            "path": "scripts/h62/item2/audit-readonly-calls/test_native_frame.py",
+            "blob": "2be2c79fd15638ac50d36476718430c9921f5d11",
+            "line": 46
+          },
+          {
+            "path": "scripts/h62/item2/audit-readonly-calls/test_native_frame.py",
+            "blob": "2be2c79fd15638ac50d36476718430c9921f5d11",
+            "line": 42
+          }
+        ],
+        "target": "tests/h62/item2/audit-readonly-calls/NativeFrameTransport.lean",
+        "target_blob": "3633ae8a9e3bd4d941dfddf544ec0d9adce284b4",
+        "operation": "validated Python read of measured bytes"
+      },
+      {
+        "runner": "validated:scripts/h62/item2/audit-readonly-calls/test_primitive_transport.py",
+        "input_revision": "f28827678848922d0212b606b0b1ade752878090",
+        "frames": [
+          {
+            "path": "scripts/h62/item2/audit-readonly-calls/test_primitive_transport.py",
+            "blob": "159ef45dc53ee5362a651f229aaee2ecbc930998",
+            "line": 46
+          },
+          {
+            "path": "scripts/h62/item2/audit-readonly-calls/test_primitive_transport.py",
+            "blob": "159ef45dc53ee5362a651f229aaee2ecbc930998",
+            "line": 13
+          }
+        ],
+        "target": "tests/h62/item2/audit-readonly-calls/PrimitiveTransportWitnesses.lean",
+        "target_blob": "dc74bad65cd6fe5b08b73ed7ddd491d97f610a1f",
+        "operation": "validated Python read of measured bytes"
+      },
+      {
+        "runner": "validated:scripts/h62/item2/audit-readonly-calls/test_private_bind.py",
+        "input_revision": "f28827678848922d0212b606b0b1ade752878090",
+        "frames": [
+          {
+            "path": "scripts/h62/item2/audit-readonly-calls/test_private_bind.py",
+            "blob": "7c5e542d60ec37840c8cc9a53c95b08f55edf739",
+            "line": 41
+          },
+          {
+            "path": "scripts/h62/item2/audit-readonly-calls/test_private_bind.py",
+            "blob": "7c5e542d60ec37840c8cc9a53c95b08f55edf739",
+            "line": 14
+          }
+        ],
+        "target": "tests/h62/item2/audit-readonly-calls/PrivateBindWitnesses.lean",
+        "target_blob": "406d7c7794c3dff159f0ac6b92b532102dd91b84",
+        "operation": "validated Python read of measured bytes"
+      },
+      {
+        "runner": "validated:scripts/h62/item2/audit-readonly-calls/test_private_transport.py",
+        "input_revision": "f28827678848922d0212b606b0b1ade752878090",
+        "frames": [
+          {
+            "path": "scripts/h62/item2/audit-readonly-calls/test_private_transport.py",
+            "blob": "f40ea3fec1a598da76f0839606c50736ea2aaf79",
+            "line": 28
+          },
+          {
+            "path": "scripts/h62/item2/audit-readonly-calls/test_private_transport.py",
+            "blob": "f40ea3fec1a598da76f0839606c50736ea2aaf79",
+            "line": 10
+          }
+        ],
+        "target": "tests/h62/item2/audit-readonly-calls/PrivateTransportWitnesses.lean",
+        "target_blob": "6b4d9bef52d93d35f14ef20abf53cc03043d06d8",
+        "operation": "validated Python read of measured bytes"
+      },
+      {
+        "runner": "validated:scripts/h62/item2/audit-readonly-calls/test_source_void_callable.py",
+        "input_revision": "f28827678848922d0212b606b0b1ade752878090",
+        "frames": [
+          {
+            "path": "scripts/h62/item2/audit-readonly-calls/test_source_void_callable.py",
+            "blob": "377eb9ca6728b599f5a93a3c3ccb93996dfabc09",
+            "line": 33
+          },
+          {
+            "path": "scripts/h62/item2/audit-readonly-calls/test_source_void_callable.py",
+            "blob": "377eb9ca6728b599f5a93a3c3ccb93996dfabc09",
+            "line": 13
+          }
+        ],
+        "target": "tests/h62/item2/audit-readonly-calls/SourceVoidCallable.lean",
+        "target_blob": "26381356b17178a2c329f694339b1fb7154765e7",
+        "operation": "validated Python read of measured bytes"
+      },
+      {
+        "runner": "validated:scripts/h62/item2/audit-readonly-calls/test_source_void.py",
+        "input_revision": "f28827678848922d0212b606b0b1ade752878090",
+        "frames": [
+          {
+            "path": "scripts/h62/item2/audit-readonly-calls/test_source_void.py",
+            "blob": "c49d4bf6a8344f9fd7ebb0e58f3ea3dbb4e877e9",
+            "line": 58
+          },
+          {
+            "path": "scripts/h62/item2/audit-readonly-calls/test_source_void.py",
+            "blob": "c49d4bf6a8344f9fd7ebb0e58f3ea3dbb4e877e9",
+            "line": 12
+          }
+        ],
+        "target": "tests/h62/item2/audit-readonly-calls/SourceVoidSelection.lean",
+        "target_blob": "fb59190ea506469b1bcdbd53cd8ee8a7038c52cc",
+        "operation": "validated Python read of measured bytes"
+      },
+      {
+        "runner": "validated:scripts/h62/item2/audit-readonly-calls/test_source_void_world.py",
+        "input_revision": "f28827678848922d0212b606b0b1ade752878090",
+        "frames": [
+          {
+            "path": "scripts/h62/item2/audit-readonly-calls/test_source_void_world.py",
+            "blob": "cc4657a44f86b31a54727cb8a3070175de4ed4f3",
+            "line": 33
+          },
+          {
+            "path": "scripts/h62/item2/audit-readonly-calls/test_source_void_world.py",
+            "blob": "cc4657a44f86b31a54727cb8a3070175de4ed4f3",
+            "line": 10
+          }
+        ],
+        "target": "tests/h62/item2/audit-readonly-calls/SourceVoidWorld.lean",
+        "target_blob": "867dc86565b92187b67aef9e2038421dc3da4198",
         "operation": "validated Python read of measured bytes"
       },
       {
