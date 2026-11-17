@@ -408,13 +408,7 @@ theorem Path.keyFree_index_arr {R : RefTy} {E : Ty} (a : ArrTy R E) (i : PrimTy.
 
 /-- The live length the observations show is a `uint`. -/
 theorem Storage.obs_len_lt {st : Storage C} {E : Ty} (r : SRef C (.ref (.array E))) :
-    st.obs.len (.ref r) < 2 ^ 256 := by
-  show SVal.lenOf ((st.get r.hroot).findM r.path) < 2 ^ 256
-  cases (st.get r.hroot).findM r.path with
-  | none => show 0 < 2 ^ 256; decide
-  | some w =>
-    cases w with
-    | array e sh hn => exact hn
+    st.obs.len (.ref r) < 2 ^ 256 := Solidity.Decide.obs_len_lt ..
 
 
 theorem LTm.dropSeq_eval {s : Srt} (t : LTm C s) :

@@ -478,7 +478,6 @@ import Solidity.Backend.InternalFlow.RuntimeFrameV3AllocatingZero
 import Solidity.Backend.InternalFlow.RuntimeFrameV3AllocationInventory
 import Solidity.Backend.InternalFlow.RuntimeFrameV3AllocationInventoryControls
 import Solidity.Backend.InternalFlow.RuntimeFrameV3AllocatorReturn
-import Solidity.Backend.InternalFlow.RuntimeFrameV3ApprovedProfile
 import Solidity.Backend.InternalFlow.RuntimeFrameV3ArgumentCall
 import Solidity.Backend.InternalFlow.RuntimeFrameV3ArgumentCalleeFailure
 import Solidity.Backend.InternalFlow.RuntimeFrameV3ArgumentEntry

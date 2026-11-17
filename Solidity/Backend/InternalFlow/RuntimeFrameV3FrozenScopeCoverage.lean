@@ -26,7 +26,7 @@ theorem bad_member (depth : Nat) : inputs depth 1 16 SameCallInputs.caller
 
 /-- All runtime-side V3 fields are proved. The remaining agreement is an
 explicit external duty, never chosen as reflexivity or an approved := inputs
-alias. ApprovedProfile's original-source provenance duty remains separate. -/
+alias. Original-source provenance and resource linkage remain separate duties. -/
 def with_profile (approved : Nat → InterfaceV3.Admission SameCallInputs.C Γ)
  (agreement : InterfaceV3.FamilyAdmissionAgreement approved inputs) :
  InterfaceV3.PendingRecursiveReturns 1 F approved inputs "scalarCountdown"

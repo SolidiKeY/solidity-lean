@@ -75,11 +75,11 @@ theorem primitiveArray_snapshot {H : HTy} {p : PrimTy} (hp : Heap H)
         (by rw [List.length_map]; exact hp.len_dyn_lt r) := by
   simp only [MVal.copyMToSt, MVal.copyBelow, MVal.copyAt, MVal.copyRefAt, MObj.elems_dyn]
 
-private theorem primitiveStrip {p : PrimTy} : {n : Nat} → (xs : SVec (.prim p) n) → xs.strip = xs
+theorem primitiveStrip {p : PrimTy} : {n : Nat} → (xs : SVec (.prim p) n) → xs.strip = xs
   | _, .nil => by rw [SVec.strip_nil]
   | _, .cons (.prim v) rest => by rw [SVec.strip_cons, SVal.strip_prim, primitiveStrip rest]
 
-private theorem primitiveOverlay {p : PrimTy} : {n : Nat} → (xs : SVec (.prim p) n) →
+theorem primitiveOverlay {p : PrimTy} : {n : Nat} → (xs : SVec (.prim p) n) →
     ∀ old, SVec.overlayOn old xs = xs
   | _, .nil, old => by rw [SVec.overlayOn_nil]
   | _, .cons (.prim v) rest, [] => by

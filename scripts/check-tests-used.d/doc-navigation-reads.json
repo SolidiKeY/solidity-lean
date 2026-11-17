@@ -1,0 +1,347 @@
+{
+  "schema_version": 1,
+  "routes": {
+    "standalone": [
+      {
+        "path": "scripts/check-doc-navigation.py",
+        "input_revision": "951d6ccc77a3de40bff0776ba83ef603abecfc21",
+        "source_blob": "956ac0e78a2ce9622e1f205887a852dfa27b2b92",
+        "command": [
+          "python3",
+          "-B",
+          "scripts/check-doc-navigation.py"
+        ],
+        "kind": "runnable-entrypoint",
+        "entry_line": 158,
+        "purpose": "Passing documentation link/text checker; no validation of documented examples/artifacts, Lean/kernel/proof or runtime credit.",
+        "input_scope": [
+          "tests/automation/README.md",
+          "tests/calldata-packets-1105/RawUintN/README.md",
+          "tests/contract-world-certificates/README.md",
+          "tests/creation-artifacts/README.md",
+          "tests/editor-parity/README.md",
+          "tests/editor-parity/compiler-project-baseline.md",
+          "tests/editor-parity/lsp-baseline.md",
+          "tests/failure-emission/README.md",
+          "tests/source-immutables/README.md",
+          "tests/terra-20261103/audit-selection/README.md",
+          "tests/terra-20261103/disk/README.md",
+          "tests/terra-20261103/gate/README.md",
+          "tests/terra-20261103/mcp/README.md",
+          "tests/terra-20261103/seal/README.md",
+          "tests/terra-20261103/tactics/README.md",
+          "tests/yul-composition/held/README.md"
+        ],
+        "other_reads": "unresolved"
+      }
+    ]
+  },
+  "consumer_routes": {
+    "persistent_reads": [
+      {
+        "runner": "validated:scripts/check-doc-navigation.py",
+        "input_revision": "951d6ccc77a3de40bff0776ba83ef603abecfc21",
+        "frames": [
+          {
+            "path": "scripts/check-doc-navigation.py",
+            "blob": "956ac0e78a2ce9622e1f205887a852dfa27b2b92",
+            "line": 159
+          },
+          {
+            "path": "scripts/check-doc-navigation.py",
+            "blob": "956ac0e78a2ce9622e1f205887a852dfa27b2b92",
+            "line": 138
+          }
+        ],
+        "target": "tests/automation/README.md",
+        "target_blob": "de76e00f38a91c3f66e68da0094907a8f27f39cf",
+        "operation": "validated Python read of measured bytes"
+      },
+      {
+        "runner": "validated:scripts/check-doc-navigation.py",
+        "input_revision": "951d6ccc77a3de40bff0776ba83ef603abecfc21",
+        "frames": [
+          {
+            "path": "scripts/check-doc-navigation.py",
+            "blob": "956ac0e78a2ce9622e1f205887a852dfa27b2b92",
+            "line": 159
+          },
+          {
+            "path": "scripts/check-doc-navigation.py",
+            "blob": "956ac0e78a2ce9622e1f205887a852dfa27b2b92",
+            "line": 138
+          }
+        ],
+        "target": "tests/calldata-packets-1105/RawUintN/README.md",
+        "target_blob": "a5fe05507be277fa97f02c2a5447811ee5c28e26",
+        "operation": "validated Python read of measured bytes"
+      },
+      {
+        "runner": "validated:scripts/check-doc-navigation.py",
+        "input_revision": "951d6ccc77a3de40bff0776ba83ef603abecfc21",
+        "frames": [
+          {
+            "path": "scripts/check-doc-navigation.py",
+            "blob": "956ac0e78a2ce9622e1f205887a852dfa27b2b92",
+            "line": 159
+          },
+          {
+            "path": "scripts/check-doc-navigation.py",
+            "blob": "956ac0e78a2ce9622e1f205887a852dfa27b2b92",
+            "line": 138
+          }
+        ],
+        "target": "tests/contract-world-certificates/README.md",
+        "target_blob": "56c8b61ba5ee29d6e72d2c25f700ddb2273e1c96",
+        "operation": "validated Python read of measured bytes"
+      },
+      {
+        "runner": "validated:scripts/check-doc-navigation.py",
+        "input_revision": "951d6ccc77a3de40bff0776ba83ef603abecfc21",
+        "frames": [
+          {
+            "path": "scripts/check-doc-navigation.py",
+            "blob": "956ac0e78a2ce9622e1f205887a852dfa27b2b92",
+            "line": 159
+          },
+          {
+            "path": "scripts/check-doc-navigation.py",
+            "blob": "956ac0e78a2ce9622e1f205887a852dfa27b2b92",
+            "line": 138
+          }
+        ],
+        "target": "tests/creation-artifacts/README.md",
+        "target_blob": "4888979134c0af15fe4f4c6e1380d2ab8077efa3",
+        "operation": "validated Python read of measured bytes"
+      },
+      {
+        "runner": "validated:scripts/check-doc-navigation.py",
+        "input_revision": "951d6ccc77a3de40bff0776ba83ef603abecfc21",
+        "frames": [
+          {
+            "path": "scripts/check-doc-navigation.py",
+            "blob": "956ac0e78a2ce9622e1f205887a852dfa27b2b92",
+            "line": 159
+          },
+          {
+            "path": "scripts/check-doc-navigation.py",
+            "blob": "956ac0e78a2ce9622e1f205887a852dfa27b2b92",
+            "line": 138
+          }
+        ],
+        "target": "tests/editor-parity/README.md",
+        "target_blob": "9946cc35497ed10cc9d2568cc2367d2e999c9474",
+        "operation": "validated Python read of measured bytes"
+      },
+      {
+        "runner": "validated:scripts/check-doc-navigation.py",
+        "input_revision": "951d6ccc77a3de40bff0776ba83ef603abecfc21",
+        "frames": [
+          {
+            "path": "scripts/check-doc-navigation.py",
+            "blob": "956ac0e78a2ce9622e1f205887a852dfa27b2b92",
+            "line": 159
+          },
+          {
+            "path": "scripts/check-doc-navigation.py",
+            "blob": "956ac0e78a2ce9622e1f205887a852dfa27b2b92",
+            "line": 138
+          }
+        ],
+        "target": "tests/editor-parity/compiler-project-baseline.md",
+        "target_blob": "40600991822a6c879a28df2a1fc8675b5916ab42",
+        "operation": "validated Python read of measured bytes"
+      },
+      {
+        "runner": "validated:scripts/check-doc-navigation.py",
+        "input_revision": "951d6ccc77a3de40bff0776ba83ef603abecfc21",
+        "frames": [
+          {
+            "path": "scripts/check-doc-navigation.py",
+            "blob": "956ac0e78a2ce9622e1f205887a852dfa27b2b92",
+            "line": 159
+          },
+          {
+            "path": "scripts/check-doc-navigation.py",
+            "blob": "956ac0e78a2ce9622e1f205887a852dfa27b2b92",
+            "line": 138
+          }
+        ],
+        "target": "tests/editor-parity/lsp-baseline.md",
+        "target_blob": "40600991822a6c879a28df2a1fc8675b5916ab42",
+        "operation": "validated Python read of measured bytes"
+      },
+      {
+        "runner": "validated:scripts/check-doc-navigation.py",
+        "input_revision": "951d6ccc77a3de40bff0776ba83ef603abecfc21",
+        "frames": [
+          {
+            "path": "scripts/check-doc-navigation.py",
+            "blob": "956ac0e78a2ce9622e1f205887a852dfa27b2b92",
+            "line": 159
+          },
+          {
+            "path": "scripts/check-doc-navigation.py",
+            "blob": "956ac0e78a2ce9622e1f205887a852dfa27b2b92",
+            "line": 138
+          }
+        ],
+        "target": "tests/failure-emission/README.md",
+        "target_blob": "3257f5ca5671b0a4dbac88dc93d02fb98a3dbf3f",
+        "operation": "validated Python read of measured bytes"
+      },
+      {
+        "runner": "validated:scripts/check-doc-navigation.py",
+        "input_revision": "951d6ccc77a3de40bff0776ba83ef603abecfc21",
+        "frames": [
+          {
+            "path": "scripts/check-doc-navigation.py",
+            "blob": "956ac0e78a2ce9622e1f205887a852dfa27b2b92",
+            "line": 159
+          },
+          {
+            "path": "scripts/check-doc-navigation.py",
+            "blob": "956ac0e78a2ce9622e1f205887a852dfa27b2b92",
+            "line": 138
+          }
+        ],
+        "target": "tests/source-immutables/README.md",
+        "target_blob": "1a49dd4a876d7b48fea3bf68f1e5b81bc9204dce",
+        "operation": "validated Python read of measured bytes"
+      },
+      {
+        "runner": "validated:scripts/check-doc-navigation.py",
+        "input_revision": "951d6ccc77a3de40bff0776ba83ef603abecfc21",
+        "frames": [
+          {
+            "path": "scripts/check-doc-navigation.py",
+            "blob": "956ac0e78a2ce9622e1f205887a852dfa27b2b92",
+            "line": 159
+          },
+          {
+            "path": "scripts/check-doc-navigation.py",
+            "blob": "956ac0e78a2ce9622e1f205887a852dfa27b2b92",
+            "line": 138
+          }
+        ],
+        "target": "tests/terra-20261103/audit-selection/README.md",
+        "target_blob": "17ea4b1b1e33d56b86cf215fb5616fca031b78fa",
+        "operation": "validated Python read of measured bytes"
+      },
+      {
+        "runner": "validated:scripts/check-doc-navigation.py",
+        "input_revision": "951d6ccc77a3de40bff0776ba83ef603abecfc21",
+        "frames": [
+          {
+            "path": "scripts/check-doc-navigation.py",
+            "blob": "956ac0e78a2ce9622e1f205887a852dfa27b2b92",
+            "line": 159
+          },
+          {
+            "path": "scripts/check-doc-navigation.py",
+            "blob": "956ac0e78a2ce9622e1f205887a852dfa27b2b92",
+            "line": 138
+          }
+        ],
+        "target": "tests/terra-20261103/disk/README.md",
+        "target_blob": "4d1e87dcd75790d86a4dc25af2a08e539c1a5a92",
+        "operation": "validated Python read of measured bytes"
+      },
+      {
+        "runner": "validated:scripts/check-doc-navigation.py",
+        "input_revision": "951d6ccc77a3de40bff0776ba83ef603abecfc21",
+        "frames": [
+          {
+            "path": "scripts/check-doc-navigation.py",
+            "blob": "956ac0e78a2ce9622e1f205887a852dfa27b2b92",
+            "line": 159
+          },
+          {
+            "path": "scripts/check-doc-navigation.py",
+            "blob": "956ac0e78a2ce9622e1f205887a852dfa27b2b92",
+            "line": 138
+          }
+        ],
+        "target": "tests/terra-20261103/gate/README.md",
+        "target_blob": "6ec32037c5c0ef7fe2135603ff10f89fea748c5c",
+        "operation": "validated Python read of measured bytes"
+      },
+      {
+        "runner": "validated:scripts/check-doc-navigation.py",
+        "input_revision": "951d6ccc77a3de40bff0776ba83ef603abecfc21",
+        "frames": [
+          {
+            "path": "scripts/check-doc-navigation.py",
+            "blob": "956ac0e78a2ce9622e1f205887a852dfa27b2b92",
+            "line": 159
+          },
+          {
+            "path": "scripts/check-doc-navigation.py",
+            "blob": "956ac0e78a2ce9622e1f205887a852dfa27b2b92",
+            "line": 138
+          }
+        ],
+        "target": "tests/terra-20261103/mcp/README.md",
+        "target_blob": "a8c78126b7714bab377524aa06d06eb5312e7fad",
+        "operation": "validated Python read of measured bytes"
+      },
+      {
+        "runner": "validated:scripts/check-doc-navigation.py",
+        "input_revision": "951d6ccc77a3de40bff0776ba83ef603abecfc21",
+        "frames": [
+          {
+            "path": "scripts/check-doc-navigation.py",
+            "blob": "956ac0e78a2ce9622e1f205887a852dfa27b2b92",
+            "line": 159
+          },
+          {
+            "path": "scripts/check-doc-navigation.py",
+            "blob": "956ac0e78a2ce9622e1f205887a852dfa27b2b92",
+            "line": 138
+          }
+        ],
+        "target": "tests/terra-20261103/seal/README.md",
+        "target_blob": "28187038ab523731d93603ee7033c23091e39d70",
+        "operation": "validated Python read of measured bytes"
+      },
+      {
+        "runner": "validated:scripts/check-doc-navigation.py",
+        "input_revision": "951d6ccc77a3de40bff0776ba83ef603abecfc21",
+        "frames": [
+          {
+            "path": "scripts/check-doc-navigation.py",
+            "blob": "956ac0e78a2ce9622e1f205887a852dfa27b2b92",
+            "line": 159
+          },
+          {
+            "path": "scripts/check-doc-navigation.py",
+            "blob": "956ac0e78a2ce9622e1f205887a852dfa27b2b92",
+            "line": 138
+          }
+        ],
+        "target": "tests/terra-20261103/tactics/README.md",
+        "target_blob": "51118b50189606e7c6b225e346bfc64fc5d96fbb",
+        "operation": "validated Python read of measured bytes"
+      },
+      {
+        "runner": "validated:scripts/check-doc-navigation.py",
+        "input_revision": "951d6ccc77a3de40bff0776ba83ef603abecfc21",
+        "frames": [
+          {
+            "path": "scripts/check-doc-navigation.py",
+            "blob": "956ac0e78a2ce9622e1f205887a852dfa27b2b92",
+            "line": 159
+          },
+          {
+            "path": "scripts/check-doc-navigation.py",
+            "blob": "956ac0e78a2ce9622e1f205887a852dfa27b2b92",
+            "line": 138
+          }
+        ],
+        "target": "tests/yul-composition/held/README.md",
+        "target_blob": "d791badaba15aff272a277114fbfff75a624a525",
+        "operation": "validated Python read of measured bytes"
+      }
+    ]
+  }
+}

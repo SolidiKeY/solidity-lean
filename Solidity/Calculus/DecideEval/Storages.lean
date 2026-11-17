@@ -336,8 +336,8 @@ theorem Storage.delete_isSome {U : Ty} (st : Storage C) (r : SRef C U) :
   | some cur => simp only [Option.bind_eq_bind, Option.bind_some, Storage.save_isSome, hf]
 
 theorem len_obs {E : Ty} (st : Storage C) (r : SRef C (.ref (.array E))) {e : SVal _}
-    (hf : st.find r = some e) : st.obs.len (.ref r) = (SVal.view e : ArrView E).n := by
-  rw [Storage.obs_len_ref, SVal.obs_len, ← sto_find_findM, hf]; rfl
+    (hf : st.find r = some e) : st.obs.len (.ref r) = (SVal.view e : ArrView E).n :=
+  Solidity.Storage.obs_len_ref_some hf
 
 theorem Storage.push_isSome {E : Ty} (st : Storage C) (r : SRef C (.ref (.array E)))
     (f : SVal E → Option (SVal E)) (hf : ∀ x, (f x).isSome) :
