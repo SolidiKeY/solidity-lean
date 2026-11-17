@@ -68,6 +68,20 @@ example (σ : State C []) (tail : Prog C [.val .uint, .val .uint] [.val .uint, .
   ⟨capture_guard_panic_run _ .uint _ next three 0x11 _ tail (next_reads_three σ) rfl,
     uint_narrow_capture_origin ((σ.push (t := .val .uint) two)) three 1 (by decide) (by decide) rfl⟩
 
+/-- A capture whose operand itself halts (`1 / 0`) halts there with the
+operand's bare revert: the enum check behind it is never reached. -/
+example (σ : State C []) :
+    (Stmt.declLocal .uint (.fresh "se" 0)
+      (some (.binop .div rfl rfl (litU 1 (by decide)) (litU 0 (by decide))))).runR σ =
+      .error .revert :=
+  capture_decl_halt σ .uint _ _ .revert rfl
+
+/-- A signed narrowing capture holding `128` at `int8`: the failed range check
+of the captured local is the narrow overflow of that value. -/
+example (σ : State C []) :
+    OriginV2 (.narrowing (.signed 8 ⟨128, by decide⟩)) .arithmetic :=
+  int_narrow_capture_origin σ ⟨128, by decide⟩ 8 (by decide) (by decide) (by decide) rfl
+
 section Elaborated
 
 variable [FreshNames]
@@ -94,6 +108,32 @@ example (free : checkFresh C [("a", .val .uint)] (toString (Var.fresh "se" 0)) =
         .name (toString (Var.fresh "se" 0))),
       ([(toString (Var.fresh "se" 0), .val .uint), ("a", .val .uint)], 1)) :=
   enumCapture_linked 3 _ _ _ 0 next next_checked free (by decide)
+
+/-- `narrowCapture` on a `uint8` operation `a + 1`, in a data-retaining frame
+with no overflow mode: the capture, then `Panic(0x11)` unless the captured
+local is at most `255`. -/
+example (operation : checkedNarrow? C [("a", .val .uint)] (.binop .add (.name "a") (.num 1)) =
+      some (.uint, 8))
+    (free : checkFresh C [("a", .val .uint)] (toString (Var.fresh "se" 0)) = .ok ()) :
+    (narrowCapture C (.binop .add (.name "a") (.num 1))).runFrom
+      { funs := [], retainFailureData := true } ([("a", .val .uint)], 0) =
+    .ok (([.of (ECtx.toNCtx [("a", .val .uint)])
+            (.declLocal .uint (.fresh "se" 0) (some next)),
+          .of (ECtx.toNCtx [(toString (Var.fresh "se" 0), .val .uint 8), ("a", .val .uint)])
+            (panicStmt 0x11
+              (cmpU .le rfl rfl (.simple (.local Idx.here)) (litU 255 (by decide))))],
+        .name (toString (Var.fresh "se" 0))),
+      ([(toString (Var.fresh "se" 0), .val .uint 8), ("a", .val .uint)], 1)) :=
+  narrowCapture_uint_linked _ 8 _ _ 0 next operation (by decide) next_checked free (by decide)
+
+/-- At `int8` the elaborated check of a captured local `se` is the lower
+bound `-128 <= se`, then the upper bound `se <= 127`. -/
+example (Γ : NCtx) :
+    check C ((Var.ofName "se", .val .int) :: Γ) .bool (inTyCond .int 8 (.name "se")) =
+      .ok (andB
+        (cmpI .le rfl rfl (litI (-128) (by decide)) (.simple (.local Idx.here)))
+        (cmpI .le rfl rfl (.simple (.local Idx.here)) (litI 127 (by decide)))) :=
+  int_narrow_condition_check Γ "se" 8 (by decide) (by decide)
 
 end Elaborated
 
