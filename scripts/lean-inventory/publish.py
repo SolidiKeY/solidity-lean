@@ -264,6 +264,8 @@ def main(argv=None):
     ap.add_argument('--verify-pins', metavar='REPO',
                     help='with --consistent: also check the recovery pin from Git objects')
     a = ap.parse_args(argv)
+    if a.verify_pins and not a.consistent:
+        ap.error('--verify-pins requires --consistent')
     if a.consistent:
         pub = json.loads(Path(a.output).read_text())
         problems = consistent(pub) + (verify_pins(a.verify_pins, pub) if a.verify_pins else [])

@@ -120,6 +120,8 @@ class PublishTest(unittest.TestCase):
             self.assertEqual(P.main(['--census', str(c), '--output', str(o)]), 0)
             self.assertEqual(P.main(['--census', str(c), '--output', str(o), '--check']), 0)
             self.assertEqual(P.main(['--output', str(o), '--consistent']), 0)
+            with self.assertRaises(SystemExit):
+                P.main(['--output', str(o), '--verify-pins', d])
             c.write_bytes(raw(census(tree='t2')))
             self.assertEqual(P.main(['--census', str(c), '--output', str(o), '--check']), 1)
 
