@@ -89,6 +89,12 @@ class PublishTest(unittest.TestCase):
         t = copy.deepcopy(pub)
         t['families'].reverse()
         cases.append(t)
+        t = copy.deepcopy(pub)
+        t['authorization']['census_options'] = {'reviewed_blanket': ['x']}
+        cases.append(t)
+        t = copy.deepcopy(pub)
+        del t['totals']
+        cases.append(t)
         for i, c in enumerate(cases):
             self.assertNotEqual(P.consistent(c), [], f'tamper case {i} accepted')
 
@@ -126,20 +132,30 @@ class PublishTest(unittest.TestCase):
             git('init', '-q')
             Path(d, 'Solidity/Yul/B').mkdir(parents=True)
             Path(d, 'Solidity/Yul/B/A.lean').write_text('def x := 1\n' * 10)
+            Path(d, 'Solidity/Yul/C').mkdir(parents=True)
+            Path(d, 'Solidity/Yul/C/U.lean').write_text('import Solidity.Yul.B.A\n')
             git('add', '-A')
             git('-c', 'user.name=t', '-c', 'user.email=t@t', 'commit', '-qm', 'c')
             rev = git('rev-parse', 'HEAD')
             tree = S.lean_tree_id(S.tracked(d, rev))
             pub = json.loads(P.publish(raw(census(rev=rev, tree=tree)), 'c.json'))
+            # U.lean imports the orphan family but the census claims it standalone.
+            self.assertEqual(len(P.verify_pins(d, pub)), 1)
+            self.assertIn('not a listed dependent', P.verify_pins(d, pub)[0])
+            pub['orphans'][0]['dependents'] = {
+                'lean': [['Solidity/Yul/C/U.lean', True, 0, 0]], 'files': [], 'standalone': False}
             self.assertEqual(P.verify_pins(d, pub), [])
+            dropped = copy.deepcopy(pub)
+            dropped['orphans'][0]['members'] = []
+            self.assertIn('members differ', P.verify_pins(d, dropped)[0])
             pub['orphans'][0]['members'][0][2] = 11
             self.assertEqual(len(P.verify_pins(d, pub)), 1)
             pub['orphans'][0]['members'][0][0] = 'Solidity/Yul/B/Gone.lean'
-            self.assertIn('absent', P.verify_pins(d, pub)[0])
+            self.assertTrue(any('absent' in x for x in P.verify_pins(d, pub)))
             pub['census']['lean_tree_id'] = 'other'
             self.assertIn('differs', P.verify_pins(d, pub)[0])
             pub['recovery']['revision'] = 'c' * 40
-            self.assertIn('unknown', P.verify_pins(d, pub)[0])
+            self.assertIn('cannot be read', P.verify_pins(d, pub)[0])
 
     def test_rejects_non_census(self):
         with self.assertRaises(SystemExit):

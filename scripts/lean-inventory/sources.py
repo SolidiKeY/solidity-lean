@@ -20,6 +20,11 @@ LIB_ROOTS = ('Solidity', 'SolidityExamples', 'SoliditySlowExamples', 'SolkeyTest
 TEST_ROOTS = ('SolidityExamples', 'SoliditySlowExamples', 'SolkeyTestSuite', 'SolidityCorpus')
 EXE_ROOTS = {'SolkeyCheck': 'solkeycheck', 'SolCases': 'solcases', 'SolidityLean': 'solidity-lean'}
 GENERATED_ROOTS = ('Solidity.lean', 'SolidityExamples.lean', 'Bridge/SolidityBridge.lean')
+BLANKET_RUNNERS = {
+    # Read: its header says it audits the axioms of every constant the library roots reach.
+    'scripts/AxiomAudit.lean': 'whole-library axiom audit (header lines 1-20): a scan of '
+                               'every constant, not a use of any one',
+}
 # Whole-library scans and fixture text that k1 had no instance of (added to master after
 # feb98975). Each was read; none uses a declaration. Off by default: they are blanket only
 # with `inventory.py --reviewed-blanket`, which records the option in the census.

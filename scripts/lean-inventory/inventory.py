@@ -39,11 +39,7 @@ SCHEMA = 'solidity-lean/lean-inventory'
 VERSION = 1
 SHARDS = 8
 CACHE_ROOT = '.lake/lean-inventory'
-BLANKET_RUNNERS = {
-    # Read: its header says it audits the axioms of every constant the library roots reach.
-    'scripts/AxiomAudit.lean': 'whole-library axiom audit (header lines 1-20): a scan of '
-                               'every constant, not a use of any one',
-}
+BLANKET_RUNNERS = S.BLANKET_RUNNERS
 LIMITATIONS = [
     'The kernel theorem Solidity.LeanInventory.inventory_sound certifies only the abstract '
     'certificate reasoning of Solidity.Goals.Inventory; it does not certify this Python '

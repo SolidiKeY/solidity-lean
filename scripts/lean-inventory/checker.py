@@ -258,10 +258,14 @@ def check(repo, inv):
                 attributed.add(n)
     built = S.closure(imports, list(S.LIB_ROOTS) + list(S.EXE_ROOTS))
     blanket = {b['path'] for b in inv['roots']['blanket']}
-    opted = (inv.get('options') or {}).get('reviewed_blanket')
+    options = inv.get('options')
+    if options is not None and not isinstance(options, dict):
+        bad('options is not an object')
+        options = None
+    opted = (options or {}).get('reviewed_blanket')
     if opted is not None and opted != sorted(S.REVIEWED_BLANKET):
         bad('options.reviewed_blanket is not sources.REVIEWED_BLANKET')
-    allowed = {'scripts/AxiomAudit.lean', *S.GENERATED_ROOTS} | (set(S.REVIEWED_BLANKET) if opted else set())
+    allowed = {*S.BLANKET_RUNNERS, *S.GENERATED_ROOTS} | (set(S.REVIEWED_BLANKET) if opted else set())
     if blanket - allowed:
         bad('blanket paths outside the reviewed registry: ' + ', '.join(sorted(blanket - allowed)))
     reached = set()

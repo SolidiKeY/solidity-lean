@@ -61,7 +61,8 @@ def binding(raw, census, path):
             'revision': census['revision'], 'lean_tree_id': census['lean_tree_id'],
             'toolchain': census['toolchain'],
             'extractor_blob': census['extraction']['extractor_blob'],
-            'graph_sha256': census['extraction']['graph_sha256']}
+            'graph_sha256': census['extraction']['graph_sha256'],
+            'options': census.get('options')}
 
 
 def family_row(f):
@@ -126,7 +127,7 @@ def publish(raw, census_path, base_raw=None, base_path=None):
             'limitations': census['limitations'],
         },
         'recovery': census['recovery'],
-        'authorization': AUTHORIZATION,
+        'authorization': dict(AUTHORIZATION, census_options=census.get('options')),
         'totals': census['totals'],
         'areas': census['areas'],
         'revalidation': (revalidation(json.loads(base_raw), census)
@@ -147,7 +148,16 @@ def render(out):
 
 
 def consistent(pub):
-    """Problems in a published file, checked without the census."""
+    """Problems in a published file, checked without the census. It cannot see a coordinated
+    rewrite of a whole entry (rows, totals and dependents together): that needs `--check`
+    against the census bytes, or `--verify-pins` against Git."""
+    try:
+        return _consistent(pub)
+    except (KeyError, TypeError, ValueError, AttributeError) as e:
+        return [f'malformed classification: {type(e).__name__}: {e}']
+
+
+def _consistent(pub):
     p = []
     fields = pub['family_fields']
     rows = [dict(zip(fields, r)) for r in pub['families']]
@@ -183,6 +193,11 @@ def consistent(pub):
             p.append(f"{o['family']}: standalone flag disagrees with its dependents")
         if o['recovery'] != pub['recovery']['revision']:
             p.append(f"{o['family']}: recovery pin differs from the census revision")
+    opts = pub['census']['options']
+    if opts is not None and not isinstance(opts, dict):
+        p.append('census options is not an object')
+    if pub['authorization'].get('census_options') != opts:
+        p.append('authorization does not state the census options it relies on')
     if pub['recovery']['revision'] != pub['census']['revision']:
         p.append('recovery pin is not the census revision')
     rv = pub.get('revalidation')
@@ -194,27 +209,45 @@ def consistent(pub):
 
 def verify_pins(repo, pub):
     """Problems with the recovery pin, from Git objects only: the pin resolves, its Lean tree is
-    the census's, and every orphan member exists there with its recorded line count."""
+    the census's, each orphan's members are exactly its family at the pin (grouping rule of
+    sources.family_of) with their recorded line counts, and every Lean file outside the family
+    whose header imports a member is listed among its Lean dependents."""
     import sources as S
     rev = pub['recovery']['revision']
     try:
         if S.resolve(repo, rev) != rev:
             return [f'recovery pin {rev} does not resolve to itself']
-    except Exception:
-        return [f'recovery pin {rev} is unknown to the repository (fetch it)']
+    except Exception as e:  # noqa: BLE001 - any Git failure means the pin cannot be read
+        return [f'recovery pin {rev} cannot be read ({type(e).__name__}); fetch it']
     files = S.tracked(repo, rev)
     p = []
     if S.lean_tree_id(files) != pub['census']['lean_tree_id']:
         p.append('Lean tree at the recovery pin differs from the census')
     blob = dict(files)
-    paths = [m[0] for o in pub['orphans'] for m in o['members']]
-    missing = [x for x in paths if x not in blob]
-    p += [f'{x}: absent at the recovery pin' for x in missing]
-    texts = S.blobs(repo, [blob[x] for x in paths if x in blob])
+    lean_paths = [x for x, _ in files if x.endswith('.lean')]
+    in_scope = {x for x in lean_paths if S.area_of(x)}
+    texts = S.blobs(repo, [blob[x] for x in lean_paths])
+    importers = {}
+    for x in lean_paths:
+        for m in S.header_imports(texts[blob[x]]):
+            importers.setdefault(m, set()).add(x)
     for o in pub['orphans']:
+        listed = [m[0] for m in o['members']]
+        actual = sorted(x for x in in_scope if S.family_of(x, in_scope)[0] == o['family'])
+        if sorted(listed) != actual:
+            p.append(f"{o['family']}: members differ from the family at the pin "
+                     f"(missing {sorted(set(actual) - set(listed))}, "
+                     f"extra {sorted(set(listed) - set(actual))})")
         for path, _, lines in o['members']:
-            if path in blob and S.line_count(texts[blob[path]]) != lines:
+            if path not in blob:
+                p.append(f'{path}: absent at the recovery pin')
+            elif S.line_count(texts[blob[path]]) != lines:
                 p.append(f'{path}: {lines} lines recorded, not the pinned blob')
+        dep = {row[0] for row in o['dependents']['lean']}
+        for path in listed:
+            for imp in sorted(importers.get(S.module_name(path), set()) - set(listed)):
+                if imp not in dep and imp not in S.GENERATED_ROOTS:
+                    p.append(f"{o['family']}: {imp} imports {path} but is not a listed dependent")
     return p
 
 
