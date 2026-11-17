@@ -98,6 +98,23 @@ class PublishTest(unittest.TestCase):
         for i, c in enumerate(cases):
             self.assertNotEqual(P.consistent(c), [], f'tamper case {i} accepted')
 
+    def test_registry_limits_credit(self):
+        plain = json.loads(P.publish(raw(census()), 'c.json'))
+        self.assertIsNone(plain['authorization']['registry'])
+        self.assertEqual(plain['orphans'][0]['deletion_credit'], 'H721')
+        c = census()
+        c['options'] = {'reviewed_blanket': ['x']}
+        pub = json.loads(P.publish(raw(c), 'c.json'))
+        self.assertEqual(pub['authorization']['registry']['decision'], 'H990')
+        self.assertEqual(pub['orphans'][0]['deletion_credit'], 'pending-review')
+        self.assertEqual(P.consistent(pub), [])
+        t = copy.deepcopy(pub)
+        t['orphans'][0]['deletion_credit'] = 'H721'
+        self.assertNotEqual(P.consistent(t), [])
+        t = copy.deepcopy(pub)
+        t['authorization']['registry'] = None
+        self.assertNotEqual(P.consistent(t), [])
+
     def test_revalidation(self):
         old = census(rev='b' * 40, tree='t0')
         new_fams = [fam('dir:Solidity/Yul/A/', 'keep', [1, 0, 1, 0]),

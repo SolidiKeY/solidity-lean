@@ -102,6 +102,12 @@
     "scripts/decl-index/decl_index.py",
     "scripts/hygiene/test_review_checks.py"
    ]
+  },
+  "registry": {
+   "decision": "H990",
+   "applies": "the census relies on the reviewed-blanket registry (census_options not null)",
+   "deletion_credit": "none",
+   "condition": "H721 covers a family in `orphans` only after an independent finder and skeptic review of that family, recorded by the pruning step; until then it is a candidate, not deletable."
   }
  },
  "totals": {
@@ -348,7 +354,8 @@
     ],
     "standalone": false
    },
-   "recovery": "869819299a4ecab7daecacde662634fec93f2cad"
+   "recovery": "869819299a4ecab7daecacde662634fec93f2cad",
+   "deletion_credit": "pending-review"
   },
   {
    "family": "dir:Solidity/Frontend/Yul/",
@@ -482,7 +489,8 @@
     ],
     "standalone": false
    },
-   "recovery": "869819299a4ecab7daecacde662634fec93f2cad"
+   "recovery": "869819299a4ecab7daecacde662634fec93f2cad",
+   "deletion_credit": "pending-review"
   },
   {
    "family": "dir:Solidity/Frontend/Yul/Checks/",
@@ -549,7 +557,8 @@
     ],
     "standalone": false
    },
-   "recovery": "869819299a4ecab7daecacde662634fec93f2cad"
+   "recovery": "869819299a4ecab7daecacde662634fec93f2cad",
+   "deletion_credit": "pending-review"
   },
   {
    "family": "dir:Solidity/Yul/Checks/Arithmetic/",
@@ -590,7 +599,8 @@
     ],
     "standalone": false
    },
-   "recovery": "869819299a4ecab7daecacde662634fec93f2cad"
+   "recovery": "869819299a4ecab7daecacde662634fec93f2cad",
+   "deletion_credit": "pending-review"
   },
   {
    "family": "dir:Solidity/Yul/Checks/Shifts/",
@@ -636,7 +646,8 @@
     ],
     "standalone": false
    },
-   "recovery": "869819299a4ecab7daecacde662634fec93f2cad"
+   "recovery": "869819299a4ecab7daecacde662634fec93f2cad",
+   "deletion_credit": "pending-review"
   },
   {
    "family": "dir:Solidity/Yul/Layout/",
@@ -656,7 +667,8 @@
     "files": [],
     "standalone": true
    },
-   "recovery": "869819299a4ecab7daecacde662634fec93f2cad"
+   "recovery": "869819299a4ecab7daecacde662634fec93f2cad",
+   "deletion_credit": "pending-review"
   }
  ],
  "family_fields": [

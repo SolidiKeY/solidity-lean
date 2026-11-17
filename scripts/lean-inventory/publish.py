@@ -9,7 +9,8 @@ The census (`inventory.py` output, about 1.3 MB) is over the repository's 200 KB
 size and sha256. The published file is derived from the census bytes alone: the family
 verdicts under the unchanged criteria of `classify.py`, the recovery pin, the orphan
 families with their members and deletion dependents, the scope of the standing orphan
-deletion authorization (H721), and a re-validation against a baseline census (verdict
+deletion authorization (H721, limited by H990 when the census relies on the reviewed-blanket
+registry), and a re-validation against a baseline census (verdict
 changes per family). `--check` regenerates it in memory and fails on any difference;
 `consistent()` checks the published file alone (no census needed).
 """
@@ -49,6 +50,23 @@ AUTHORIZATION = {
         'evidence: the kernel theorem certifies only the abstract certificate reasoning.',
     ],
 }
+
+# H990 (Q-K1R-1): the reviewed-blanket registry is accepted, but orphans certified with it earn
+# no deletion credit: each family is pruned only after its own independent review.
+REGISTRY_DECISION = {
+    'decision': 'H990',
+    'applies': 'the census relies on the reviewed-blanket registry (census_options not null)',
+    'deletion_credit': 'none',
+    'condition': 'H721 covers a family in `orphans` only after an independent finder and '
+                 'skeptic review of that family, recorded by the pruning step; until then '
+                 'it is a candidate, not deletable.',
+}
+
+
+def deletion_credit(options):
+    """Per-orphan credit: 'H721' for a census on the default rules, 'pending-review' (H990)
+    for one relying on the reviewed-blanket registry."""
+    return 'pending-review' if options else 'H721'
 
 
 def sha256_bytes(b):
@@ -109,7 +127,8 @@ def publish(raw, census_path, base_raw=None, base_path=None):
                         'decls': f['decls'], 'pseudo': f['pseudo'],
                         'members': [[m[0], m[1], m[2]] for m in f['members']],
                         'dependents': f['dependents'],
-                        'recovery': census['recovery']['revision']})
+                        'recovery': census['recovery']['revision'],
+                        'deletion_credit': deletion_credit(census.get('options'))})
     out = {
         'schema': SCHEMA, 'version': VERSION,
         'census': binding(raw, census, census_path) | {
@@ -127,7 +146,8 @@ def publish(raw, census_path, base_raw=None, base_path=None):
             'limitations': census['limitations'],
         },
         'recovery': census['recovery'],
-        'authorization': dict(AUTHORIZATION, census_options=census.get('options')),
+        'authorization': dict(AUTHORIZATION, census_options=census.get('options'),
+                              registry=REGISTRY_DECISION if census.get('options') else None),
         'totals': census['totals'],
         'areas': census['areas'],
         'revalidation': (revalidation(json.loads(base_raw), census)
@@ -193,7 +213,11 @@ def _consistent(pub):
             p.append(f"{o['family']}: standalone flag disagrees with its dependents")
         if o['recovery'] != pub['recovery']['revision']:
             p.append(f"{o['family']}: recovery pin differs from the census revision")
+        if o.get('deletion_credit') != deletion_credit(pub['census']['options']):
+            p.append(f"{o['family']}: deletion credit disagrees with the census options")
     opts = pub['census']['options']
+    if pub['authorization'].get('registry') != (REGISTRY_DECISION if opts else None):
+        p.append('authorization does not state the H990 registry limit')
     if opts is not None and not isinstance(opts, dict):
         p.append('census options is not an object')
     if pub['authorization'].get('census_options') != opts:
