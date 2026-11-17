@@ -74,7 +74,8 @@ unsafe def main (args : List String) : IO UInt32 := do
   let (file, modName, setup?) ← match lean?, args with
     | some (_, { file := some file, setup := some setup, .. }), _ =>
       let setup ← ModuleSetup.load setup
-      pure (file, setup.name.toString, some setup)
+      -- Lake passes an absolute path; elaborate under the name the plain run uses.
+      pure (← relToCwd file, setup.name.toString, some setup)
     | none, [file, modName] => pure (file, modName, none)
     | _, _ =>
       IO.eprintln "usage: hbcollect [--async] FILE MODULE | hbcollect --lean REPORT FILE --setup SETUP.json [-o OLEAN] [-i ILEAN] [-c C] [--json]"
@@ -136,7 +137,7 @@ unsafe def main (args : List String) : IO UInt32 := do
     let name := match r.name with | some n => jsonStr n.toString | none => "null"
     s!"\{\"line\":{r.line},\"kind\":{jsonStr r.kind},\"name\":{name},\"heartbeats\":{units r.raw}}"
   let report := "{" ++ ", ".intercalate [
-    s!"\"module\":{jsonStr modName}", s!"\"file\":{jsonStr (← relToCwd file)}",
+    s!"\"module\":{jsonStr modName}", s!"\"file\":{jsonStr file}",
     s!"\"heartbeats\":{units total}", s!"\"wall_s\":{secs t1 t2}",
     s!"\"import_heartbeats\":{units hImport}", s!"\"import_wall_s\":{secs t0 t1}",
     s!"\"errors\":{errors}", s!"\"commands\":[{",".intercalate cmds}]"] ++ "}"

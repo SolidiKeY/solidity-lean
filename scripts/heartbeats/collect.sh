@@ -64,7 +64,8 @@ for arg in "$@"; do
   [ -f "$file" ] || { echo "collect.sh: no file $file for $mod" >&2; status=2; continue; }
   if [ "$lake" = 1 ]; then
     one=$fake/report; : >"$one"
-    cmd=(lake build "$mod")
+    # -q: warnings and errors only, not one line per fetched import.
+    cmd=(lake -q build "$mod")
     [ -z "$timeout_s" ] || cmd=(timeout --kill-after=10s "$timeout_s" "${cmd[@]}")
     HBCOLLECT_FILE=$root/$file HBCOLLECT_REPORT=$one LAKE_OVERRIDE_LEAN=true LEAN_SYSROOT=$fake \
       "${cmd[@]}" >&2 </dev/null

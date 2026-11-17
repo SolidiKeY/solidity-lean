@@ -157,7 +157,6 @@ class LakeBuild(unittest.TestCase):
         row, = rows
         self.assertEqual((row["module"], row["file"], row["errors"]), ("Fix.A", "Fix/A.lean", 0))
         self.assertEqual((row["heartbeats"], row["commands"]), (plain[0]["heartbeats"], plain[0]["commands"]))
-        self.assertIn("Built Fix.A", err)
 
         # Lake, with the real `lean`, takes the module as current ...
         p = self.lake("build", "--no-build", "Fix.A")
