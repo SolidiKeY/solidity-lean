@@ -1,5 +1,6 @@
 import Solidity.Correctness.Lowering.Total.Main
 import Solidity.Correctness.Lowering.Total.Spells
+import Solidity.Source.Agreement.Locals
 
 /-!
 # Loop lowering: the concrete boundary (e2b-loops-producer)
@@ -422,7 +423,8 @@ map under which every admitted Source execution has a related model state.
 For `loopRel` the one component that can fail for a reason unrelated to
 lowering is storage: the Source cell at each state variable's path must have
 the declared type. That is not proved; the model contract's `vars_nodup` rules
-out the one known way it fails, two state variables of one name. -/
+out the one known way it fails, two state variables of one name. The locals
+part is proved for every decoded request (`decode_locals_matching`). -/
 def InitialMatching (rel : (E : Source.Env) → (C : Contract) → StateRelation E C)
     (decode : Request → Option SourceProgram) : Prop :=
   ∀ (r : Request) (s : SourceProgram), r.Succeeds → decode r = some s →
@@ -523,6 +525,102 @@ theorem loopRel_reflect (E : Source.Env) (C : Contract) (H : HTy)
 theorem loopRel_false (E : Source.Env) (C : Contract) (H : HTy) :
     (loopRel E C).val H .bool (.val .bool) (.bool false) false :=
   ⟨rfl, .bool false⟩
+
+/-! ## The locals half of total initial matching
+
+A decoded request has the positional map, and under it every Source locals has
+related model locals: the part of `Simulation.InitialMatching` that concerns
+locals, proved for every decoded request. The globals part (storage cell
+types, `msg.value`, the timestamp) stays open. -/
+namespace Simulation
+
+/-- The positional map of a list of primitive locals. -/
+def primitiveMap : (ps : List PrimTy) → Lowering.V07.ContextMap (Source.Agreement.sourceContext ps) (Source.Agreement.modelContext ps)
+  | [] => .empty
+  | p :: ps => (primitiveMap ps).cons (Source.Agreement.sourceTy p) (.val p)
+
+theorem primitiveMap_positional : (ps : List PrimTy) → Positional (primitiveMap ps)
+  | [] => fun i => nomatch i
+  | p :: ps => fun i => by
+      cases i with
+      | here => rfl
+      | there j => exact congrArg (· + 1) (primitiveMap_positional ps j)
+
+/-- Every Source value of a primitive's type is the image of a model value. -/
+theorem val_onto (E : Source.Env) (C : Contract) (H : HTy) :
+    (p : PrimTy) → (v : Source.Val E.layout (Source.Agreement.sourceTy p)) →
+      ∃ x : p.Denote, Relation.val E C H (Source.Agreement.sourceTy p) (.val p) v x
+  | .bool, .bool b => ⟨b, rfl, .bool b⟩
+  | .uint, .int n h => ⟨⟨n, (Source.Agreement.uint_range n).mpr h⟩, rfl,
+      Source.Agreement.PrimitiveRel.uint ⟨n, (Source.Agreement.uint_range n).mpr h⟩ h⟩
+  | .int, .int n h => ⟨⟨n, (Source.Agreement.int_range n).mpr h⟩, rfl,
+      Source.Agreement.PrimitiveRel.int ⟨n, (Source.Agreement.int_range n).mpr h⟩ h⟩
+
+/-- Every Source locals of primitive types has related model locals. -/
+theorem locals_onto (E : Source.Env) (C : Contract) (H : HTy) :
+    (ps : List PrimTy) → (ls : Source.Locals E.layout (Source.Agreement.sourceContext ps)) →
+      ∃ env : TEnv C H (Source.Agreement.modelContext ps),
+        (primitiveMap ps).Related (Relation.val E C H) ls env
+  | [], .nil => ⟨(), fun i => nomatch i⟩
+  | p :: ps, .cons v rest => by
+      obtain ⟨x, hx⟩ := val_onto E C H p v
+      obtain ⟨env, henv⟩ := locals_onto E C H ps rest
+      exact ⟨(x, env), Lowering.V07.ContextMap.related_cons _ _ _ _ henv _ _ _ _ hx⟩
+
+/-- A decoded local is a model primitive at the corresponding Source type. -/
+theorem localTy_some {t : LocalTy} {τ : Source.STy} (h : Decode.localTy t = some τ) :
+    ∃ p : PrimTy, t.toLTy = .val p ∧ τ = Source.Agreement.sourceTy p := by
+  cases t with
+  | val p bits shape =>
+    refine ⟨p, rfl, ?_⟩
+    unfold Decode.localTy at h
+    split at h <;> simp_all
+  | _ => simp [Decode.localTy] at h
+
+/-- The decoder's locals are primitive, position by position, on both sides. -/
+theorem locals_primitive : (Γ : ECtx) → (L : List (String × Source.STy)) →
+    Decode.locals Γ = some L →
+    ∃ ps : List PrimTy, Source.tysOf L = Source.Agreement.sourceContext ps ∧
+      ∀ names : FreshNames, (@ECtx.toNCtx names Γ).ctx = Source.Agreement.modelContext ps
+  | [], L, h => by
+      cases h
+      exact ⟨[], rfl, fun _ => rfl⟩
+  | (x, t) :: Γ, L, h => by
+      simp only [Decode.locals, Option.bind_eq_bind, Option.pure_def, Option.bind_eq_some_iff,
+        Option.some.injEq] at h
+      obtain ⟨τ, hτ, L', hL, rfl⟩ := h
+      obtain ⟨ps, hs, hm⟩ := locals_primitive Γ L' hL
+      obtain ⟨p, ht, rfl⟩ := localTy_some hτ
+      exact ⟨p :: ps, congrArg (Source.Agreement.sourceTy p :: ·) hs, fun names => by
+        change t.toLTy :: (@ECtx.toNCtx names Γ).ctx = _
+        rw [ht, hm names]
+        rfl⟩
+
+/-- **The locals half of total initial matching.** A decoded request has a
+positional map under which every Source locals has related model locals. -/
+theorem decode_locals_matching {r : Request} {s : SourceProgram}
+    (h : Decode.decode r = some s) :
+    ∃ m : Lowering.V07.ContextMap s.before r.context.ctx, Positional m ∧
+      ∀ (H : HTy) (ls : Source.Locals s.env.layout s.before),
+        ∃ env : TEnv r.contract H r.context.ctx,
+          m.Related (Relation.val s.env r.contract H) ls env := by
+  obtain ⟨plain, C, L, b, L', d, _, hL, _, rfl⟩ := decode_spells h
+  obtain ⟨contract, input, callee⟩ := r
+  have none : callee = none := by
+    simp only [Decode.plain, Bool.and_eq_true, Option.isNone_iff_eq_none] at plain
+    exact plain.1.1.1
+  subst none
+  obtain ⟨ps, hs, hm⟩ := locals_primitive _ _ hL
+  have key : ∀ {srcΓ : Source.RCtx} {Γ : Ctx}, srcΓ = Source.Agreement.sourceContext ps → Γ = Source.Agreement.modelContext ps →
+      ∃ m : Lowering.V07.ContextMap srcΓ Γ, Positional m ∧
+        ∀ (H : HTy) (ls : Source.Locals C.env.layout srcΓ),
+          ∃ env : TEnv contract H Γ, m.Related (Relation.val C.env contract H) ls env := by
+    intro srcΓ Γ e e'
+    subst e e'
+    exact ⟨primitiveMap ps, primitiveMap_positional ps, fun H ls => locals_onto _ _ H ps ls⟩
+  exact key hs (hm input.names)
+
+end Simulation
 
 /-! ## The concrete boundary, as far as the decoder fixes it
 

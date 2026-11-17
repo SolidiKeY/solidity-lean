@@ -325,6 +325,15 @@ example :
       Simulation.InitialMatching loopRel Decode.decode ∧ Simulation.Bound loopRel Decode.decode :=
   fun h => (loopContractV2Stage1_iff.mp h).2.2.2.2
 
+/-- The locals half of total initial matching is a theorem: a decoded request
+has a positional map under which every Source locals has related model locals. -/
+example {r : Request} {s : SourceProgram} (h : Decode.decode r = some s) :
+    ∃ m : Solidity.Lowering.V07.ContextMap s.before r.context.ctx, Simulation.Positional m ∧
+      ∀ (H : HTy) (ls : Source.Locals s.env.layout s.before),
+        ∃ env : TEnv r.contract H r.context.ctx,
+          m.Related ((loopRel s.env r.contract).val H) ls env :=
+  Simulation.decode_locals_matching h
+
 end Decoder
 
 end Solidity.Goals
