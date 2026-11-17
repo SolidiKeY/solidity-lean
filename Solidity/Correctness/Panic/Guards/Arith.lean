@@ -214,4 +214,124 @@ theorem uint_add_source (σ : State C Γ) (a b : Val C Γ .uint)
       BinOp.arithInt, PrimTy.ofInt?, PrimTy.inRange, TRes.ofOpt, bind, Except.bind]
     rw [dif_neg (by omega)]
 
+/-- Unsigned `-`: the guard `b <= a` failed exactly on underflow. -/
+theorem uint_sub_source (σ : State C Γ) (a b : Val C Γ .uint)
+    (x y : PrimTy.uint.Denote) (left : a.evalT σ = .ok x) (right : b.evalT σ = .ok y)
+    (failed : (cmpU .le rfl rfl b a).evalT σ = .ok false) :
+    pg Panic.Site.arithmetic.code (range .sub .uint a b) =
+      [(Panic.Site.arithmetic.code, cmpU .le rfl rfl b a)] ∧
+    Panic.Origin (.binary .sub .uint rfl x y) .arithmetic ∧
+    (Val.binop .sub rfl rfl a b).evalT σ = .error .revert ∧
+    (panicStmt Panic.Site.arithmetic.code (cmpU .le rfl rfl b a)).runR σ =
+        .error (THalt.ofData (encodePanic Panic.Site.arithmetic.code)) := by
+  have guard := failed
+  simp [cmpU, Val.evalT, left, right, BinOp.shortT, BinOp.evalT, BinOp.evalNum,
+    TRes.ofOpt, bind, Except.bind] at guard
+  have under := of_decide_eq_false guard
+  refine ⟨rfl, ?_, ?_, panic_guard_source_failure σ _ failed _⟩
+  · apply Panic.binary_origin
+    · simp [Panic.Checked.op, BinOp.evalT, BinOp.evalNum, BinOp.arithInt, PrimTy.ofInt?, PrimTy.inRange]
+      omega
+    · rfl
+  · simp [Val.evalT, left, right, BinOp.shortT, BinOp.evalT, BinOp.evalNum,
+      BinOp.arithInt, PrimTy.ofInt?, PrimTy.inRange, TRes.ofOpt, bind, Except.bind]
+    rw [dif_neg (by omega)]
+
+/-- Unsigned `*`: the guard `a == 0 || (a *% b) / a == b` failed exactly on
+overflow. -/
+theorem uint_mul_source (σ : State C Γ) (a b : Val C Γ .uint)
+    (x y : PrimTy.uint.Denote) (left : a.evalT σ = .ok x) (right : b.evalT σ = .ok y)
+    (failed : (orB (cmpU .eqB rfl rfl a (litU 0 (by decide)))
+      (cmpU .eqB rfl rfl (arU .div rfl rfl (arU .mulW rfl rfl a b) a) b)).evalT σ =
+        .ok false) :
+    pg Panic.Site.arithmetic.code (range .mul .uint a b) =
+      [(Panic.Site.arithmetic.code, orB (cmpU .eqB rfl rfl a (litU 0 (by decide)))
+        (cmpU .eqB rfl rfl (arU .div rfl rfl (arU .mulW rfl rfl a b) a) b))] ∧
+    Panic.Origin (.binary .mul .uint rfl x y) .arithmetic ∧
+    (Val.binop .mul rfl rfl a b).evalT σ = .error .revert ∧
+    (panicStmt Panic.Site.arithmetic.code (orB (cmpU .eqB rfl rfl a (litU 0 (by decide)))
+      (cmpU .eqB rfl rfl (arU .div rfl rfl (arU .mulW rfl rfl a b) a) b))).runR σ =
+        .error (THalt.ofData (encodePanic Panic.Site.arithmetic.code)) := by
+  have guard := failed
+  have hx := x.2; have hy := y.2
+  simp [PrimTy.inRange] at hx hy
+  by_cases zero : x.val = 0
+  · simp [orB, cmpU, litU, Val.evalT, left, BinOp.shortT, Simple.evalT, PrimTy.ofLit,
+      BinOp.evalT, BinOp.evalNum, TRes.ofOpt, bind, Except.bind, pure, Except.pure, zero] at guard
+  simp [orB, cmpU, arU, litU, Val.evalT, left, right, BinOp.shortT, Simple.evalT,
+    PrimTy.ofLit, BinOp.evalT, BinOp.evalNum, BinOp.arithInt, PrimTy.ofInt?, PrimTy.inRange,
+    Semantics.uintBound, TRes.ofOpt, bind, Except.bind, zero, BinOp.evalBool] at guard
+  have m0 : 0 ≤ x.val * y.val % 115792089237316195423570985008687907853269984665640564039457584007913129639936 :=
+    Int.emod_nonneg _ (by decide)
+  have q0 := Int.tdiv_nonneg m0 hx.1
+  have q1 := Int.tdiv_le_self x.val m0
+  rw [dif_pos (by omega)] at guard
+  simp at guard
+  rw [dif_pos (by omega)] at guard
+  simp at guard
+  have over : ¬ x.val * y.val < 115792089237316195423570985008687907853269984665640564039457584007913129639936 := by
+    intro h
+    have ne := of_decide_eq_false guard
+    rw [Int.emod_eq_of_lt (Int.mul_nonneg hx.1 hy.1) h, Int.mul_tdiv_cancel_left _ zero] at ne
+    exact ne rfl
+  refine ⟨rfl, ?_, ?_, panic_guard_source_failure σ _ failed _⟩
+  · apply Panic.binary_origin
+    · simp [Panic.Checked.op, BinOp.evalT, BinOp.evalNum, BinOp.arithInt, PrimTy.ofInt?, PrimTy.inRange]
+      omega
+    · rfl
+  · simp [Val.evalT, left, right, BinOp.shortT, BinOp.evalT, BinOp.evalNum,
+      BinOp.arithInt, PrimTy.ofInt?, PrimTy.inRange, TRes.ofOpt, bind, Except.bind]
+    rw [dif_neg (by omega)]
+
+/-- Signed `/`: the guard `!(a == MIN && b == -1)` failed exactly at the one
+overflowing quotient (the zero divisor is `int_div_zero_source`'s). -/
+theorem int_div_overflow_source (σ : State C Γ) (a b : Val C Γ .int)
+    (x y : PrimTy.int.Denote) (left : a.evalT σ = .ok x) (right : b.evalT σ = .ok y)
+    (failed : (notB (andB (cmpI .eqB rfl rfl a (litI minI (by decide)))
+      (cmpI .eqB rfl rfl b (litI (-1) (by decide))))).evalT σ = .ok false) :
+    pg Panic.Site.arithmetic.code (range .div .int a b) =
+      [(Panic.Site.arithmetic.code, notB (andB (cmpI .eqB rfl rfl a (litI minI (by decide)))
+        (cmpI .eqB rfl rfl b (litI (-1) (by decide)))))] ∧
+    Panic.Origin (.binary .div .int rfl x y) .arithmetic ∧
+    (Val.binop .div rfl rfl a b).evalT σ = .error .revert ∧
+    (panicStmt Panic.Site.arithmetic.code (notB (andB (cmpI .eqB rfl rfl a (litI minI (by decide)))
+      (cmpI .eqB rfl rfl b (litI (-1) (by decide)))))).runR σ =
+        .error (THalt.ofData (encodePanic Panic.Site.arithmetic.code)) := by
+  have guard := failed
+  have hx : x.val = minI ∧ y.val = -1 := by
+    by_cases hx : x.val = minI <;> by_cases hy : y.val = -1 <;>
+      simp_all [notB, andB, cmpI, litI, Val.evalT, BinOp.shortT, Simple.evalT, PrimTy.ofLit,
+        BinOp.evalT, BinOp.evalNum, BinOp.evalBool, UnOp.evalT, TRes.ofOpt, bind, Except.bind,
+        pure, Except.pure]
+  refine ⟨rfl, ?_, ?_, panic_guard_source_failure σ _ failed _⟩
+  · apply Panic.binary_origin
+    · simp [Panic.Checked.op, BinOp.evalT, BinOp.evalNum, BinOp.arithInt, PrimTy.ofInt?, PrimTy.inRange,
+        hx.1, hx.2, minI]
+    · simp [Panic.Checked.failure, PrimTy.key, hx.2]
+  · simp [Val.evalT, left, right, BinOp.shortT, BinOp.evalT, BinOp.evalNum,
+      BinOp.arithInt, PrimTy.ofInt?, PrimTy.inRange, TRes.ofOpt, bind, Except.bind, hx.1, hx.2, minI]
+
+/-- Signed `-a`: the guard `a != MIN` failed exactly at the one overflowing
+negation. -/
+theorem int_neg_source (σ : State C Γ) (a : Val C Γ .int) (x : PrimTy.int.Denote)
+    (read : a.evalT σ = .ok x)
+    (failed : (cmpI .neB rfl rfl a (litI minI (by decide))).evalT σ = .ok false) :
+    pg Panic.Site.arithmetic.code (negRange .int a) =
+      [(Panic.Site.arithmetic.code, cmpI .neB rfl rfl a (litI minI (by decide)))] ∧
+    Panic.Origin (.neg x) .arithmetic ∧
+    (Val.unop .neg rfl rfl a).evalT σ = .error .revert ∧
+    (panicStmt Panic.Site.arithmetic.code (cmpI .neB rfl rfl a (litI minI (by decide)))).runR σ =
+        .error (THalt.ofData (encodePanic Panic.Site.arithmetic.code)) := by
+  have guard := failed
+  simp [cmpI, litI, Val.evalT, read, BinOp.shortT, Simple.evalT, PrimTy.ofLit,
+    BinOp.evalT, BinOp.evalNum, TRes.ofOpt, bind, Except.bind] at guard
+  replace guard : x.val = minI := by
+    by_cases h : x.val = minI
+    · exact h
+    · simp [h] at guard
+  refine ⟨rfl, Panic.neg_origin x ?_, ?_, panic_guard_source_failure σ _ failed _⟩
+  · simp [UnOp.evalT, PrimTy.ofInt?, PrimTy.inRange, guard, minI]
+  · simp [Val.evalT, read, UnOp.evalT, PrimTy.ofInt?, PrimTy.inRange, guard, minI, TRes.ofOpt, bind,
+      Except.bind]
+
 end Solidity.Correctness.Panic
