@@ -2,7 +2,7 @@ import Solidity.Yul.DirtyReadback
 import Solidity.Yul.Checks.LocalBlock
 
 /-! Controls of `Solidity.Yul.DirtyReadback` (user decision H109). Each
-word-level positive is a probe of `tests/evm-reference/dirty-locals.json`
+word-level positive is a probe of [`tests/evm-reference/dirty-locals.json`](https://github.com/SolidiKeY/solidity-lean-coord/blob/b439c8cb656bec288415675d92884626ef965492/evidence/plan-x1e-classify-rest-1116/x1e-classify-rest/tests/evm-reference/dirty-locals.json)
 (pinned solc 0.8.38, optimizer off), in both pipelines, cited by probe name;
 the frame-level
 ones reuse `Checks.LocalBlock`'s mixed frame (a `bool`, two external function
@@ -24,7 +24,7 @@ def i16 : Solidity.Source.STy := .int ⟨true, 16, by decide⟩
 def key? (ty : Solidity.Source.STy) (p : DirtyReadback.Pipeline) (w : Nat) : Option (Option Int) :=
   (cleanWord (D := D) p ty (word w)).map Solidity.Source.Val.key
 
-/-! ## Words, per type family and pipeline (`dirty-locals.json`) -/
+/-! ## Words, per type family and pipeline ([archived `dirty-locals.json`](https://github.com/SolidiKeY/solidity-lean-coord/blob/b439c8cb656bec288415675d92884626ef965492/evidence/plan-x1e-classify-rest-1116/x1e-classify-rest/tests/evm-reference/dirty-locals.json)) -/
 
 /-- `uintN`: the low bits (`u8_eq`, `u8_checked_add`, `u16_widen`, `u32_widen`). -/
 theorem uint_masked :

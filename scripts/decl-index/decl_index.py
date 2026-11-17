@@ -188,6 +188,19 @@ def ratchet(index, update=False, top=8):
     return 1
 
 
+# Keep in sync with the exclusions for Solidity.lean in register.sh. These modules
+# belong to other libraries (or no library), so the Solidity build need not build them.
+def indexed_module(path):
+    if not path.startswith("Solidity/") or not path.endswith(".lean"):
+        return None
+    module = path[:-5].replace("/", ".")
+    excluded = ("Solidity.Scratch", "Solidity.Corpus", "Solidity.TestSuite",
+                "Solidity.Solkey.TestSuite", "Solidity.Examples")
+    if any(module == prefix or module.startswith(prefix + ".") for prefix in excluded):
+        return None
+    return module
+
+
 # ---- Base/head comparison ---------------------------------------------------------------------
 
 def touched_modules(base, head="HEAD"):
@@ -196,8 +209,8 @@ def touched_modules(base, head="HEAD"):
     out = git("diff", "--name-only", "--diff-filter=AMR", merge, head, "--")
     mods = []
     for p in out.splitlines():
-        if p.startswith("Solidity/") and p.endswith(".lean") and not p.startswith("Solidity/Scratch/"):
-            mods.append(p[:-5].replace("/", "."))
+        m = indexed_module(p)
+        if m: mods.append(m)
     return merge, sorted(mods)
 
 
@@ -275,8 +288,8 @@ def changed_modules(old, new):
     for line in out.splitlines():
         status, path = line.split("\t", 1)
         if path in ("lean-toolchain", "lakefile.toml", "lake-manifest.json"): return None
-        if path.startswith("Solidity/") and path.endswith(".lean") and not path.startswith("Solidity/Scratch/"):
-            m = path[:-5].replace("/", ".")
+        m = indexed_module(path)
+        if m:
             all_.add(m)
             if status != "D": exist.add(m)
     return sorted(exist), all_

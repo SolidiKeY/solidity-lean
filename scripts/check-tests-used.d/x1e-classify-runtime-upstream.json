@@ -99,242 +99,77 @@
         "other_reads": "unresolved"
       },
       {
-        "path": "tests/directruntime-20261104/shared-translator/audit-baseline-controls.py",
-        "input_revision": "c7f33cfc9e1b3c8d0e634f0b267971aa2671688d",
-        "source_blob": "9bfb7ee5aeec53e99ee61a670a5e91bdc2182257",
+        "path": "tests/directruntime-20261104/shared-translator/fixture-census.py",
+        "input_revision": "864791951adeda9b9e8c16f24df8777f1ce8a097",
+        "source_blob": "ae5bd56d0c1142a6122356a6b94d75506e164901",
         "command": [
           "python3",
           "-B",
-          "tests/directruntime-20261104/shared-translator/audit-baseline-controls.py"
+          "tests/directruntime-20261104/shared-translator/fixture-census.py"
         ],
         "kind": "runnable-entrypoint",
         "entry_line": 11,
-        "purpose": "Synthetic disposable Git controls compare pinned ownership audit and historical moving-publication audit on healthy and committed out-of-scope fixtures. Observed current ordinary run FAILED because the callee requires unavailable historical fcdddfcc446b5004860875f772ff6033e60c745f; exact origin fetch was rejected. No historical successful execution asserted. Historical unchanged source and default entry only; validation unavailable at the measured head, no historical pass asserted and no fixture/helper/child execution, proof or runtime credit.",
+        "purpose": "Enumerate committed compiler fixtures and selected source/header-hash-anchored node witnesses; default ordinary and instrumented invocations completed at the measured revision and reported78 fixtures/57 modern kinds with witnesses. This is finite fixture inventory generation, not authenticated compilation, source/AST equivalence, admission or semantic proof. Observed process completion only; input_scope is empty, other reads unresolved, and no generated-output, fixture/helper/child execution, proof or runtime credit is certified.",
         "input_scope": [],
         "other_reads": "unresolved"
       },
       {
-        "path": "tests/directruntime-20261104/shared-translator/verify-bulk.py",
-        "input_revision": "c7f33cfc9e1b3c8d0e634f0b267971aa2671688d",
-        "source_blob": "865255510475c4c365b3ac39a7d3605928e795c1",
+        "path": "tests/directruntime-20261104/shared-translator/fixture-variants.py",
+        "input_revision": "864791951adeda9b9e8c16f24df8777f1ce8a097",
+        "source_blob": "eb382e93c9b1955d5440ec09bb2b2c23a4940eeb",
         "command": [
           "python3",
           "-B",
-          "tests/directruntime-20261104/shared-translator/verify-bulk.py"
+          "tests/directruntime-20261104/shared-translator/fixture-variants.py"
         ],
         "kind": "runnable-entrypoint",
-        "entry_line": 16,
-        "purpose": "Check retained H44 archive identity and complete extracted-file path, size and SHA256 inventory before using saved controls. Historical unchanged source and default entry only; validation unavailable at the measured head, no historical pass asserted and no fixture/helper/child execution, proof or runtime credit.",
+        "entry_line": 21,
+        "purpose": "Enumerate observed field subvariants and witnesses from committed compiler fixtures; default ordinary and instrumented invocations completed at the measured revision and reported806 variants. An empty generated-output directory was created for the observation. No semantic support, compiler authenticity, admission, intrinsic or backend proof follows. Observed process completion only; input_scope is empty, other reads unresolved, and no generated-output, fixture/helper/child execution, proof or runtime credit is certified.",
         "input_scope": [],
         "other_reads": "unresolved"
       },
       {
-        "path": "tests/directruntime-20261104/shared-translator/verify-corpus-inventory.py",
-        "input_revision": "c7f33cfc9e1b3c8d0e634f0b267971aa2671688d",
-        "source_blob": "66b905d02d3d81779edafffbdf764bfdb37bb2cb",
+        "path": "tests/directruntime-20261104/shared-translator/compare-readers.py",
+        "input_revision": "30d5dc77485a2d0e32bad8417e7aed9e935f08ba",
+        "source_blob": "c54d51a33a16c5cad8295d6abc7723af73f66787",
         "command": [
           "python3",
           "-B",
-          "tests/directruntime-20261104/shared-translator/verify-corpus-inventory.py"
-        ],
-        "kind": "runnable-entrypoint",
-        "entry_line": 25,
-        "purpose": "Independently reconstruct enumerated compiler-input occurrences, immediate-field forms and explicit identity/reference slot counts against the retained census manifest; no lexical, overload or semantic adequacy inference. Historical unchanged source and default entry only; validation unavailable at the measured head, no historical pass asserted and no fixture/helper/child execution, proof or runtime credit.",
-        "input_scope": [],
-        "other_reads": "unresolved"
-      },
-      {
-        "path": "tests/directruntime-20261104/shared-translator/verify-corpus-readers.py",
-        "input_revision": "c7f33cfc9e1b3c8d0e634f0b267971aa2671688d",
-        "source_blob": "7c06cf130cfd54f3b74e922d41339c4de495cc37",
-        "command": [
-          "python3",
-          "-B",
-          "tests/directruntime-20261104/shared-translator/verify-corpus-readers.py"
-        ],
-        "kind": "runnable-entrypoint",
-        "entry_line": 14,
-        "purpose": "Bind retained structural-form reader observations to source witnesses and compare published case, refusal, pairing and field-presence totals; no source preservation or semantic-support inference. Historical unchanged source and default entry only; validation unavailable at the measured head, no historical pass asserted and no fixture/helper/child execution, proof or runtime credit.",
-        "input_scope": [],
-        "other_reads": "unresolved"
-      },
-      {
-        "path": "tests/directruntime-20261104/shared-translator/verify-occurrence-readers.py",
-        "input_revision": "c7f33cfc9e1b3c8d0e634f0b267971aa2671688d",
-        "source_blob": "dc19c33f7c34546dbb66c836477b959ae1f2c0ed",
-        "command": [
-          "python3",
-          "-B",
-          "tests/directruntime-20261104/shared-translator/verify-occurrence-readers.py"
-        ],
-        "kind": "runnable-entrypoint",
-        "entry_line": 13,
-        "purpose": "Check enumerated occurrence witnesses, pinned corpus bytes and retained default/composed reader matrices against frozen summary counts; no compiler authenticity or semantic-preservation inference. Historical unchanged source and default entry only; validation unavailable at the measured head, no historical pass asserted and no fixture/helper/child execution, proof or runtime credit.",
-        "input_scope": [],
-        "other_reads": "unresolved"
-      },
-      {
-        "path": "tests/directruntime-20261104/shared-translator/verify-handoff-metadata.py",
-        "input_revision": "c7f33cfc9e1b3c8d0e634f0b267971aa2671688d",
-        "source_blob": "faf27eab4a62304c9bb7d8ad9ff34792ca655618",
-        "command": [
-          "python3",
-          "-B",
-          "tests/directruntime-20261104/shared-translator/verify-handoff-metadata.py"
-        ],
-        "kind": "runnable-entrypoint",
-        "entry_line": 107,
-        "purpose": "Check pinned address16 handoff/manifest consistency and two historical Git source identities. Archive locators and declared STOPs remain metadata; payloads, actual source closure, binaries and parity are not inspected by this checker. Historical unchanged source and default entry only; validation unavailable at the measured head, no historical pass asserted and no fixture/helper/child execution, proof or runtime credit.",
-        "input_scope": [],
-        "other_reads": "unresolved"
-      },
-      {
-        "path": "tests/directruntime-20261104/shared-translator/verify-h68-intake.py",
-        "input_revision": "c7f33cfc9e1b3c8d0e634f0b267971aa2671688d",
-        "source_blob": "74def14c596b1f035785140e828f352de7571945",
-        "command": [
-          "python3",
-          "-B",
-          "tests/directruntime-20261104/shared-translator/verify-h68-intake.py"
-        ],
-        "kind": "runnable-entrypoint",
-        "entry_line": 76,
-        "purpose": "Check historical H68 metadata-only fixture migration and exact shared fixture/hash repins using Git objects; no compiler replay, Lean checking or current importer/admission acceptance. Historical unchanged source and default entry only; validation unavailable at the measured head, no historical pass asserted and no fixture/helper/child execution, proof or runtime credit.",
-        "input_scope": [],
-        "other_reads": "unresolved"
-      },
-      {
-        "path": "tests/directruntime-20261104/shared-translator/verify-h90-census.py",
-        "input_revision": "c7f33cfc9e1b3c8d0e634f0b267971aa2671688d",
-        "source_blob": "103b1485cc96caf825309eba3be9bfa8a9a1149e",
-        "command": [
-          "python3",
-          "-B",
-          "tests/directruntime-20261104/shared-translator/verify-h90-census.py"
-        ],
-        "kind": "runnable-entrypoint",
-        "entry_line": 10,
-        "purpose": "Check matched retained H90 reader/census documents, occurrence identities, finite outcome transitions and exact archive provenance. No fresh reader execution or source/semantic equivalence proof. Historical unchanged source and default entry only; validation unavailable at the measured head, no historical pass asserted and no fixture/helper/child execution, proof or runtime credit.",
-        "input_scope": [],
-        "other_reads": "unresolved"
-      },
-      {
-        "path": "tests/directruntime-20261104/shared-translator/verify-h90-reader-profile.py",
-        "input_revision": "c7f33cfc9e1b3c8d0e634f0b267971aa2671688d",
-        "source_blob": "9432fb5910c734dfff99c2d61299764367bb443e",
-        "command": [
-          "python3",
-          "-B",
-          "tests/directruntime-20261104/shared-translator/verify-h90-reader-profile.py"
-        ],
-        "kind": "runnable-entrypoint",
-        "entry_line": 35,
-        "purpose": "Compare retained H90 narrow/fixed-byte/address local profiles with immutable prior observation snapshots and authenticated source witnesses; finite diagnostic transitions only. Historical unchanged source and default entry only; validation unavailable at the measured head, no historical pass asserted and no fixture/helper/child execution, proof or runtime credit.",
-        "input_scope": [],
-        "other_reads": "unresolved"
-      },
-      {
-        "path": "tests/directruntime-20261104/shared-translator/verify-fixed-byte-transition.py",
-        "input_revision": "c7f33cfc9e1b3c8d0e634f0b267971aa2671688d",
-        "source_blob": "61223d6c55be9a07e354f378a7c9862de1d72400",
-        "command": [
-          "python3",
-          "-B",
-          "tests/directruntime-20261104/shared-translator/verify-fixed-byte-transition.py"
-        ],
-        "kind": "runnable-entrypoint",
-        "entry_line": 110,
-        "purpose": "Check retained local fixed-byte/address/environment observation transitions, source identities and earlier admissions against authenticated historical packets; default family is fixed-byte. No decoded-term equivalence, causal semantic or source-adequacy proof. Historical unchanged source and default entry only; validation unavailable at the measured head, no historical pass asserted and no fixture/helper/child execution, proof or runtime credit.",
-        "input_scope": [],
-        "other_reads": "unresolved"
-      },
-      {
-        "path": "tests/directruntime-20261104/shared-translator/verify-native-intake.py",
-        "input_revision": "c7f33cfc9e1b3c8d0e634f0b267971aa2671688d",
-        "source_blob": "0ba829281eb61a50140089a287f5db597bc109c1",
-        "command": [
-          "python3",
-          "-B",
-          "tests/directruntime-20261104/shared-translator/verify-native-intake.py"
-        ],
-        "kind": "runnable-entrypoint",
-        "entry_line": 58,
-        "purpose": "Inspect pinned historical native/WASM archive member identities, sizes and safe data-only extraction rules. Default invocation verifies without extraction; no delivered-code execution, H90 freshness, compiler preservation or benchmark acceptance. Historical unchanged source and default entry only; validation unavailable at the measured head, no historical pass asserted and no fixture/helper/child execution, proof or runtime credit.",
-        "input_scope": [],
-        "other_reads": "unresolved"
-      },
-      {
-        "path": "tests/directruntime-20261104/shared-translator/verify-sourcebuild-intake.py",
-        "input_revision": "c7f33cfc9e1b3c8d0e634f0b267971aa2671688d",
-        "source_blob": "9822427e5640f5926022691a84dd705d9bf8ba39",
-        "command": [
-          "python3",
-          "-B",
-          "tests/directruntime-20261104/shared-translator/verify-sourcebuild-intake.py"
-        ],
-        "kind": "runnable-entrypoint",
-        "entry_line": 67,
-        "purpose": "Inspect historical sourceBuild1e8 archive/index and saved binary bindings plus recorded native/WASM source-array consistency; no Git source identity verification, payload execution, causal diagnosis or performance acceptance. Historical unchanged source and default entry only; validation unavailable at the measured head, no historical pass asserted and no fixture/helper/child execution, proof or runtime credit.",
-        "input_scope": [],
-        "other_reads": "unresolved"
-      },
-      {
-        "path": "tests/directruntime-20261104/shared-translator/verify-fixed-byte-intake.py",
-        "input_revision": "c7f33cfc9e1b3c8d0e634f0b267971aa2671688d",
-        "source_blob": "ef8e628ded72721ecbaa47fdca65d27ee191f022",
-        "command": [
-          "python3",
-          "-B",
-          "tests/directruntime-20261104/shared-translator/verify-fixed-byte-intake.py"
-        ],
-        "kind": "runnable-entrypoint",
-        "entry_line": 108,
-        "purpose": "Inspect historical H77 fixed-byte delivery archive/index/Git-source/binary-manifest and saved request/result consistency; no receiver rerun, object-code verification, universal closure, address qualification, repair or performance acceptance. Historical unchanged source and default entry only; validation unavailable at the measured head, no historical pass asserted and no fixture/helper/child execution, proof or runtime credit.",
-        "input_scope": [],
-        "other_reads": "unresolved"
-      },
-      {
-        "path": "tests/directruntime-20261104/shared-translator/verify-environment-intake.py",
-        "input_revision": "c7f33cfc9e1b3c8d0e634f0b267971aa2671688d",
-        "source_blob": "876a3bfd1250ddbba0e0d88458152aab32039caf",
-        "command": [
-          "python3",
-          "-B",
-          "tests/directruntime-20261104/shared-translator/verify-environment-intake.py"
-        ],
-        "kind": "runnable-entrypoint",
-        "entry_line": 126,
-        "purpose": "Inspect pinned historical environment delivery metadata, archive identities and request/result/STOP consistency; no fresh build, browser/native execution, measured repair or current runtime acceptance. Historical unchanged source and default entry only; validation unavailable at the measured head, no historical pass asserted and no fixture/helper/child execution, proof or runtime credit.",
-        "input_scope": [],
-        "other_reads": "unresolved"
-      },
-      {
-        "path": "tests/directruntime-20261104/shared-translator/verify-stack-symbols.py",
-        "input_revision": "c7f33cfc9e1b3c8d0e634f0b267971aa2671688d",
-        "source_blob": "aec23560594991070ce5c5304db313973ec14205",
-        "command": [
-          "python3",
-          "-B",
-          "tests/directruntime-20261104/shared-translator/verify-stack-symbols.py"
-        ],
-        "kind": "runnable-entrypoint",
-        "entry_line": 46,
-        "purpose": "Inspect exact historical WASM/map/source pins and saved stack-frame attribution, retaining producer-reported relink/receipt boundaries; no local relink, causal repair or fresh binary acceptance. Historical unchanged source and default entry only; validation unavailable at the measured head, no historical pass asserted and no fixture/helper/child execution, proof or runtime credit.",
-        "input_scope": [],
-        "other_reads": "unresolved"
-      },
-      {
-        "path": "tests/directruntime-20261104/shared-translator/verify-h35-cache.py",
-        "input_revision": "c7f33cfc9e1b3c8d0e634f0b267971aa2671688d",
-        "source_blob": "83068293058673bd6de147317eb291050bf624fb",
-        "command": [
-          "python3",
-          "-B",
-          "tests/directruntime-20261104/shared-translator/verify-h35-cache.py"
+          "tests/directruntime-20261104/shared-translator/compare-readers.py"
         ],
         "kind": "runnable-entrypoint",
         "entry_line": 8,
-        "purpose": "Inspect local cache-pack artifact size/SHA256 inventory, mapping references and four owned source-trace mappings without extraction; retain recorded failed shipment and distinguish local pack integrity from remote delivery. Historical unchanged source and default entry only; validation unavailable at the measured head, no historical pass asserted and no fixture/helper/child execution, proof or runtime credit.",
+        "purpose": "Compare saved reader-configuration observation rows and current fixture hash anchors; observed both 57-row suites. Saved decoder metadata comparison only, not a new reader execution or semantic equivalence. Ordinary and instrumented default invocations completed at the measured revision. Observed process completion only; no generated-output provenance, fixture/helper/child execution, Lean/compiler, proof or runtime credit is certified.",
+        "input_scope": [],
+        "other_reads": "unresolved"
+      },
+      {
+        "path": "tests/directruntime-20261104/shared-translator/construct-reader-cases.py",
+        "input_revision": "30d5dc77485a2d0e32bad8417e7aed9e935f08ba",
+        "source_blob": "af43cb50bd456b79f54de1974fa23ee2aafc3a49",
+        "command": [
+          "python3",
+          "-B",
+          "tests/directruntime-20261104/shared-translator/construct-reader-cases.py"
+        ],
+        "kind": "runnable-entrypoint",
+        "entry_line": 13,
+        "purpose": "Generate two 57-case witness indexes from retained census and raw AST fixtures, checking current source hash anchors. No fresh compilation was performed; historical compiler labels are input metadata, not newly authenticated facts. Ordinary and instrumented default invocations completed at the measured revision. Observed process completion only; no generated-output provenance, fixture/helper/child execution, Lean/compiler, proof or runtime credit is certified.",
+        "input_scope": [],
+        "other_reads": "unresolved"
+      },
+      {
+        "path": "tests/directruntime-20261104/shared-translator/raw-elaboration-ledger.py",
+        "input_revision": "30d5dc77485a2d0e32bad8417e7aed9e935f08ba",
+        "source_blob": "2cfe3be0ff9429fb982cc564b170efbac1ddfca7",
+        "command": [
+          "python3",
+          "-B",
+          "tests/directruntime-20261104/shared-translator/raw-elaboration-ledger.py"
+        ],
+        "kind": "runnable-entrypoint",
+        "entry_line": 9,
+        "purpose": "Build a syntactic index of 59 Raw constructors and 8 theorem declaration starts from committed source text. Regex arm hits and declaration names do not establish elaboration correctness, theorem checking or axiom signatures. Ordinary and instrumented default invocations completed at the measured revision. Observed process completion only; no generated-output provenance, fixture/helper/child execution, Lean/compiler, proof or runtime credit is certified.",
         "input_scope": [],
         "other_reads": "unresolved"
       }
