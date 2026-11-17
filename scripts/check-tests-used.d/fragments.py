@@ -56,8 +56,17 @@ FRAGMENT_SECTIONS = ('standalone', 'generators', 'reads', 'orphans', 'module_ent
 #   imported by kept python3 -B entry roots (roles.py); consumption only.
 # H1050 (x1q): standalone kind documentation-reference-role, a reviewed Markdown
 #   document read by the documentation navigation check (roles.py); reference only.
+# H1070 (x1s): lean-library-readFile also accepts a top-level run_cmd reader,
+#   with its own operation text; consumption credit only, no elaboration/proof.
+# H1072 (x1s): standalone kind program-form-source-role, a reviewed extensionless
+#   Bash wrapper, `lean --run` program or C program with interpreter, entry and
+#   driver identity (roles.py); source-only, anchors nothing.
+# H1074 (x1s): standalone kind source-dependency-role, a reviewed non-program
+#   input bound to its exact operation in a kept python3 -B consumer (roles.py).
 # persistent_module_entries (H979): exact routes.module_entries claims that
 #   persist while every recorded object is unchanged.
+# H1009 (x1r): persistent_reads may carry a reviewed nonpassing read (roles.py);
+#   source-only failed-run root, the named in-scope read only, no pass credit.
 CONSUMER_SECTIONS = ('persistent_reads', 'static_routes', 'git_policies', 'persistent_module_entries')
 
 
@@ -145,6 +154,10 @@ STATIC_FORMS = {
     'lean-library-readFile': ('Lean IO.FS.readFile of literal cwd-relative path in a top-level #eval/run_elab elaborated by a library build', 'consumes'),
     'node-readFileSync-walk': ('Node readFileSync of each file a local recursive suffix walker yields', 'consumes'),
 }
+# H1070 (gh#1380/#1379, QX1E-RUNCMD, Option A): a lean-library-readFile row whose
+# reader is a top-level run_cmd records this operation; #eval/run_elab rows keep
+# theirs byte for byte. Consumption only: no elaboration, pass or proof credit.
+LEAN_RUN_CMD_OPERATION = 'Lean IO.FS.readFile of literal cwd-relative path in a top-level run_cmd elaborated by a library build'
 # Demonstrated passing runner kinds whose committed source may anchor a route.
 DEMONSTRATED_KINDS = ('unittest', 'node-test', 'runnable-entrypoint')
 NODE_SUFFIXES = ('.mjs', '.js', '.cjs')
@@ -240,6 +253,7 @@ def persisted_reads(classifier, graph, catalog, rows):
         if not isinstance(row, dict) or set(row) != {'runner', 'input_revision', 'frames', 'target', 'target_blob', 'operation'}:
             raise ValueError('invalid persisted read route')
         if row['input_revision'] == repo.ref: continue
+        if row['operation'] == NONPASS_READ_OPERATION: persisted_nonpassing_read(classifier, graph, catalog, row); continue  # H1009, roles.py
         if row['operation'] != 'validated Python read of measured bytes': raise ValueError('unsupported persisted read operation')
         runner = row['runner']
         if not isinstance(runner, str) or not runner.startswith('validated:'): raise ValueError('persisted read needs a validated runner')
@@ -360,6 +374,12 @@ def _node_read(source, text, number, cwd):
     return None
 
 
+def _lean_command(classifier, repo, source, number):
+    """The column-0 command line that the line belongs to (comments and literals blanked)."""
+    lines = classifier['lean_lex'](repo.texts[source])[0].splitlines()
+    return next((lines[k] for k in range(number - 1, -1, -1) if lines[k][:1].strip()), '')
+
+
 def _lean_read(classifier, repo, source, number, cwd, commands=r'#eval'):
     """One literal read inside a top-level #eval command of this file.
 
@@ -370,8 +390,7 @@ def _lean_read(classifier, repo, source, number, cwd, commands=r'#eval'):
     """
     code, literals = classifier['lean_lex'](repo.texts[source])
     starts = [0] + [m.end() for m in re.finditer('\n', code)]
-    lines = code.splitlines()
-    command = next((lines[k] for k in range(number - 1, -1, -1) if lines[k][:1].strip()), '')
+    command = _lean_command(classifier, repo, source, number)
     if not re.match(r'(?:' + commands + r')\b', command): return None
     found = []; positions = dict(literals)
     for match in re.finditer(r'(?<![\w.])IO\.FS\.(?:readFile|readBinFile)(?![\w.!?\'])', code):
@@ -433,7 +452,7 @@ def static_routes(classifier, graph, rows):
         if form == 'node-import': resolved = _node_import(reader['path'], repo.texts[reader['path']], reader['line'])
         elif form == 'node-readFileSync': resolved = _node_read(reader['path'], repo.texts[reader['path']], reader['line'], cwd)
         elif form == 'node-readFileSync-walk': resolved = _node_walk_read(reader['path'], repo, reader['line'], target, root, frames[0]['path'])
-        elif library: resolved = _lean_read(classifier, repo, reader['path'], reader['line'], cwd, r'#eval|run_elab')
+        elif library: resolved = _lean_read(classifier, repo, reader['path'], reader['line'], cwd, r'#eval|run_elab|run_cmd')
         else: resolved = _lean_read(classifier, repo, reader['path'], reader['line'], cwd)
         if resolved is None or resolved != target: raise ValueError('static route target is not the literal ' + form + ' operand')
         if form == 'node-import' and not target.endswith(NODE_SUFFIXES): raise ValueError('Node import target is not a module')
@@ -442,6 +461,7 @@ def static_routes(classifier, graph, rows):
         if root.get('source_only') and not _historical_objects(classifier, repo, root['source_demonstration_revision'],
                 sorted({(f['path'], f['blob']) for f in frames} | {(target, row['target_blob'])})): continue
         operation, kind = STATIC_FORMS[form]
+        if library and re.match(r'run_cmd\b', _lean_command(classifier, repo, reader['path'], reader['line'])): operation = LEAN_RUN_CMD_OPERATION
         hop = 'Lean header import elaborated by the library build' if library else 'Node static import'
         _observe(graph, original, row, frames, target, operation, kind, hop,
                  {'kind': 'static-' + form, 'purpose': row['purpose']})
@@ -532,7 +552,8 @@ def git_policies(classifier, graph, rows):
             if posixpath.basename(writer['path']) == '.gitignore' or not any(
                     r['path'] == writer['path'] and 'derived_from' not in r and not k.startswith('git-policy:')
                     and not r.get('python_argument_role') and not r.get('nonpython_entry_role') and not r.get('lean_check_role')
-                    and not r.get('lean_fixture_role') for k, r in graph.roots.items()):
+                    and not r.get('lean_fixture_role') and not r.get('program_form_role') and not r.get('source_dependency_role')
+                    for k, r in graph.roots.items()):
                 raise ValueError('Git policy writer is not an entry point source')
             if full in repo.tree or any(p.startswith(full + '/') for p in repo.tree):
                 raise ValueError('Git policy output is tracked: ' + full)
@@ -1421,7 +1442,7 @@ SOURCE_ROLE_KINDS = {SOURCE_ONLY_KIND: source_only_program, NODE_MODE_KIND: node
                      LEAN_FIXTURE_KIND: lean_fixture_root, DOC_REF_KIND: documentation_reference_root}
 # Kinds dispatched after every other standalone definition, so they can bind
 # the roots those definitions create (H1051 importers).
-LATE_SOURCE_ROLE_KINDS = {PY_IMPORT_KIND: python_import_root}
+LATE_SOURCE_ROLE_KINDS = {PY_IMPORT_KIND: python_import_root, PROGRAM_FORM_KIND: program_form_root, SOURCE_DEP_KIND: source_dependency_root}
 
 
 def persisted_module_entries(classifier, graph, catalog, rows):
@@ -2232,10 +2253,10 @@ def successor_controls(classifier):
         # commit that anchors nothing and credits no read, helper or output.
         global REVIEWED_NONPY_ENTRIES
         reviewed_nonpy = REVIEWED_NONPY_ENTRIES
-        assert len(reviewed_nonpy) == 178 and len({p for p, _, _ in reviewed_nonpy}) == 178  # H997 115, H1025 61, H1004 2
-        assert all(p.startswith('tests/') and posixpath.splitext(p)[1] in NONPY_SHEBANGS
+        assert len(reviewed_nonpy) == 201 and len({p for p, _, _ in reviewed_nonpy}) == 201  # H997 115, H1025 61, H1004 2, H1032/H1067 23
+        assert all(p.startswith(('tests/', 'scripts/h62/')) and posixpath.splitext(p)[1] in NONPY_SHEBANGS
                    and '.test.' not in p and classifier['hex_pin'](b, 40) and classifier['hex_pin'](c, 40) for p, b, c in reviewed_nonpy)
-        assert all(p.startswith(('tests/directruntime-20261104/', 'tests/upstream/')) for p, _, _ in reviewed_nonpy - REVIEWED_NONPY_ENTRIES_H1025 - REVIEWED_NONPY_ENTRIES_H1004)
+        assert all(p.startswith(('tests/directruntime-20261104/', 'tests/upstream/')) for p, _, _ in reviewed_nonpy - REVIEWED_NONPY_ENTRIES_H1025 - REVIEWED_NONPY_ENTRIES_H1004 - REVIEWED_NONPY_ENTRIES_H1032)
         witnesses = {'tests/directruntime-20261104/shared-translator/bounded.sh', 'tests/directruntime-20261104/native-browser/readbounds/module-gates.sh',
                      'tests/directruntime-20261104/memory-references/native-source-controls.mjs'}
         assert witnesses <= {p for p, _, _ in reviewed_nonpy}
@@ -2502,3 +2523,7 @@ def successor_controls(classifier):
         lean_fixture_controls(locals())  # (9) H1015, in roles.py
         python_import_controls(locals())  # (10) H1051, in roles.py
         documentation_reference_controls(locals())  # (11) H1050, in roles.py
+        nonpassing_persistence_controls(locals())  # (12) H1009, in roles.py
+        run_cmd_read_controls(locals())  # (13) H1070, in roles.py
+        program_form_controls(locals())  # (14) H1072, in roles.py
+        source_dependency_controls(locals())  # (15) H1074, in roles.py

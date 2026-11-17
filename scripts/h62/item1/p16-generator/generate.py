@@ -34,7 +34,13 @@ def registered_fragments():
         expected[kind] = set(entries)
     ids = set()
     directory = HERE / "registrations"
-    files = sorted(directory.iterdir())
+    try:
+        files = sorted(directory.iterdir())
+    except FileNotFoundError:
+        # Git does not retain an empty registration directory.
+        if directory.is_symlink():
+            raise
+        files = []
     for registration in files:
         if registration.name == "README.md" and registration.is_file() and not registration.is_symlink():
             continue

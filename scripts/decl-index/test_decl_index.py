@@ -277,6 +277,46 @@ class HostCache(unittest.TestCase):
         d.subprocess.run = lambda cmd, **kw: subprocess.CompletedProcess(cmd, 1, "", "")
         with self.assertRaises(d.SetupError): d.link_build(self.top, self.top.parent / "lib2", [u])
 
+    def test_trace_output_absent_everywhere_names_module_and_hash(self):
+        """H1086 (1): a synthetic trace names o=7035471506278441810, absent from the build dir
+        and every cache: a setup error naming the module and hash, not Lean's missing object."""
+        u = self.touched_importer()
+        (self.build / "MemoryStructDefaultPlan.trace").write_text(json.dumps({"outputs": {"o": 7035471506278441810}}))
+        with self.assertRaises(d.SetupError) as e: d.link_build(self.top, self.lib, [u])
+        msg = str(e.exception)
+        self.assertIn(self.M, msg); self.assertIn("%016x" % 7035471506278441810, msg)
+        self.assertIn("setup", msg)
+
+    def test_stale_build_olean_is_not_linked(self):
+        """H1086 (2): .lake/build holds an old real olean while the trace names a newer one."""
+        u = self.touched_importer()
+        stale = self.build / "MemoryStructDefaultPlan.olean"; stale.write_text("old")
+        (self.build / "MemoryStructDefaultPlan.olean.hash").write_text("0000000000000old")
+        with self.assertRaises(d.SetupError) as e: d.link_build(self.top, self.lib, [u])
+        self.assertIn(self.M, str(e.exception))
+        self.assertFalse(os.path.lexists(self.lib / "Solidity/Evm/MemoryStructDefaultPlan.olean"))
+        (self.xdg / "lake/artifacts/abc123.olean").write_text("current")
+        d.link_build(self.top, self.top.parent / "lib2", [u])
+        self.assertEqual((self.top.parent / "lib2/Solidity/Evm/MemoryStructDefaultPlan.olean").read_text(), "current")
+
+    def test_local_build_olean_without_hash_file_is_linked(self):
+        """Lake writes the trace after the olean and clears .olean.hash on a local build:
+        such an olean is current whatever the mtimes say."""
+        u = self.touched_importer()
+        olean = self.build / "MemoryStructDefaultPlan.olean"; olean.write_text("local")
+        os.utime(olean, (1, 1))
+        d.link_build(self.top, self.lib, [u])
+        self.assertEqual((self.lib / "Solidity/Evm/MemoryStructDefaultPlan.olean").read_text(), "local")
+
+    def test_whole_library_closure_is_checked(self):
+        """The `import Solidity` run checks the root's closure too (failure 1 was reached there)."""
+        self.touched_importer()
+        (self.top / "Solidity.lean").write_text("import Solidity.Evm.User\n")
+        (self.build.parent.parent / "Solidity.olean").write_text("root")
+        (self.build.parent.parent / "Solidity.trace").write_text("{}")
+        with self.assertRaises(d.SetupError) as e: d.link_build(self.top, self.lib, ["Solidity"])
+        self.assertIn(self.M, str(e.exception))
+
 
 if __name__ == "__main__":
     unittest.main()

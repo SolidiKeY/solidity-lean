@@ -1,7 +1,9 @@
 """Reviewed source roles: H999 Lean check sources, H1015 Lean fixture sources,
-the H1025 and H1004 widenings of the H997 non-Python entry review set, H1051
-Python helper sources imported by kept entry roots and H1050 documentation
-references read by the documentation navigation check.
+the H1025, H1004 and H1032/H1067 widenings of the H997 non-Python entry review
+set, H1051 Python helper sources imported by kept entry roots, H1050
+documentation references read by the documentation navigation check, H1072
+program forms (Bash wrappers, `lean --run`, C) with driver identity and H1074
+source dependencies of kept programs; plus the H1070 run_cmd read controls.
 
 Executed by fragments.py in its own namespace (helpers, review tables and the
 self-test rebinding of REVIEWED_* names are shared). Classifier path: excluded
@@ -140,6 +142,66 @@ T:h28-sol/type-grammar/run_solc.mjs cb05eeac7078737564180bdc3d7f030520c35065
 T:h28-sol/literal-grammar/solc-fixtures.mjs 56774afb5f8d6355c2e8fca81557371364b2b08d
 ''')
 REVIEWED_NONPY_ENTRIES = REVIEWED_NONPY_ENTRIES | REVIEWED_NONPY_ENTRIES_H1004
+# H1032 (gh#1410, H62-ADDITIONAL-NONPY-PINS, Option B) and H1067 (gh#1419,
+# Q-FAILEMIT, Option A): the scripts/h62 shell and Node programs and the two
+# tests/failure-emission Node programs that match the H997 interface, reviewed
+# case by case under the unchanged H997 rules; same (path, blob, introducing
+# commit) form. All 23 candidates found on the base pass review (21 under
+# scripts/h62, 2 under tests/failure-emission). For the two blobs introduced
+# twice (run_serial_closure.sh dd5422d7/2f4477eb, bounded-check.sh
+# dee26790/e13a151f) the earlier commit is recorded and the other is refused as
+# unreviewed. Not admitted: transaction_admission.mjs (an exporting module, no
+# H997 interface; see H1074). Membership only: no execution, pass, read,
+# helper, child, output, proof or runtime credit.
+REVIEWED_NONPY_ENTRIES_H1032 = _review_table('''
+@24f0937d7e61cbc8f9ee02d6c7fe235829a51c0b
+T:failure-emission/replay.mjs 2cf3d61510aa3df0b6b9f797678f5bc4c6659502
+@2d3ec4d32e449fb20f745c6e4c3662aab400ce89
+H:item1/packet-panic/run_overlay_consumer.sh 3966568cfddd69f256e3342db59c29e1c2d12dcb
+@38aef082f5b0e96e257fb91b62d8e432e8eec48d
+H:item2/audit-abi-world/replay.mjs b9624c2c243789f070eb2b0375016537bf4696f5
+@4255f8873cb7af3b2d5c9a50e87fbdda0f5a28bd
+H:item6/migrate-testsuite/run-bounded.sh 7c1f46ffda3384ad3683536020638753cc763d73
+@43a4378789b5200792bb0cd1862b7fcbd7b37305
+H:item2/audit-g25-scalar-lowering/reference-boundaries.mjs 0f70488fd1d9ef171e6b2ad0a31a31a0aa144694
+@43e72020157130cf982e5158a5e992f5416ab392
+T:failure-emission/check-imports.mjs 5bad7a34d78ec23658d1bedaba7db33d0e213940
+@67d5543b4a567d74a44fd1c2b369451150637efa
+H:item6/migrate-evm/run-inventory.sh cbbfa6a6e1b489373931174db48bc7e04651ae38
+@6a68fe831eaa6b4a9132499e243c3a7a80732dcf
+H:item3/g52-differential/typed.mjs 072c1f80666313aab973f66f92084b387943d781
+@7ca224b4f7976aa26da556c10cbd4c95aabe6cd8
+H:item1/packet-panic/run_current_consumer.sh cfd83c59a0cf71da6179928e9480ef22dae3f1d8
+@8ad1dffb4c731046a343120e557e9981e745e2cf
+H:item2/audit-v10-storage/validate.sh 2cd98549345e3103c0b4ccf3f393e93450d405ad
+@999ec1a2fb080c40d4ac0f69b760ad395146540b
+H:item3/g52-differential/engine_input_transactions.mjs eb052fbebfcca36cedd0699a5a54d76302a3e46a
+@a8e256c0c577ba5d2a5781b6cf1bf791db9bc967
+H:item6/migrate-examples/measure.sh 2faff69f66fb140611b873df43ebb042c354cabf
+@aa5b22c028e90fd652c6c8e454b0d7cce8a39d7e
+H:item1/duplication-scanner/check_signature_fixture.sh 008a7a6a13c68c0d1ae30d6654c4c579da64ec27
+@bd5a97dbe229552632375967a27215e91bd9ccd7
+H:item3/g52-differential/reference.mjs 2126871f49fedcacff3e5523ba48a90724ee550c
+@c388d3209661b33ddd6d0fc6301039332d5085ee
+H:item2/audit-abi-world/propose_pin_sync.mjs 189949019347ca7300e1d2009d5fb83dae9e66a0
+@c98a7d018f528c9b049d32ee82baa40ea4aa7f6d
+H:item4/generic-internalflow/acceptance.sh 39764e90676bc39cf4573733a428f3daceb33715
+@c9df585f9c78134adc2f14ff383925d207502679
+H:item6/migrate-evm/run-bounded.sh 707492d31651425496b52520baf30fb4b220084f
+@d8240996977999ccc01a431a46957f50de29a1e9
+H:item4/generic-v08/check-width-v2.sh 90a299b755dd97002da0e4b96b5698f91b6c90a9
+@dd5422d715cba78da3394bc6d9b3a0d38be97209
+H:item1/packet-panic/run_serial_closure.sh 0463a95129f8454789ebd21e75892cd6fb5df8aa
+@dee26790869de6ace73aa7cfd8c72a666c6f34ea
+H:item2/audit-exact-verification/bounded-check.sh fabdbb74f741952b7ddf419e8ef8c321fc349c01
+@e8746b88a8a81c1f4e017d986ba3c15f2022ec88
+H:item5/statement-graph/reproduce_core_baseline.mjs 0af6bf35eeffa24073600f593a5fe64d7a784d50
+@edcf2535758d57d1fb708488f5f9601b5222e707
+H:item1/packet-panic/run_mcp_diagnostic.sh 6de05d52d827a614e76f233d86f30535473c9a1c
+@f53f026ac5ebe95273913dc837c23cc9baca3c08
+H:item3/g52-differential/system_request_reproducer.mjs 727c99747e5362d3654f223400a3f73960314740
+''')
+REVIEWED_NONPY_ENTRIES = REVIEWED_NONPY_ENTRIES | REVIEWED_NONPY_ENTRIES_H1032
 
 LEAN_CHECK_KIND = 'lean-check-source-role'
 LEAN_CHECK_PREFIX = 'lean-check:'
@@ -502,7 +564,7 @@ def nonpy_roleset_controls(env):
     run, rejected, blob, first, A, sh_role = (env[k] for k in ('run', 'rejected', 'blob', 'first', 'A', 'sh_role'))
     rows = REVIEWED_NONPY_ENTRIES_H1025; paths = {p for p, _, _ in rows}
     # 61 rows, one per path, disjoint from H997 and outside x1e-classify-runtime-upstream's directories.
-    assert len(rows) == len(paths) == 61 and rows <= REVIEWED_NONPY_ENTRIES and len(REVIEWED_NONPY_ENTRIES) == 178
+    assert len(rows) == len(paths) == 61 and rows <= REVIEWED_NONPY_ENTRIES and len(REVIEWED_NONPY_ENTRIES) == 178 + 23  # + H1032/H1067
     assert not paths & {p for p, _, _ in REVIEWED_NONPY_ENTRIES - rows}
     # H1004 form (1): two H28 Node programs, one row per path, disjoint from the rest.
     h1004 = REVIEWED_NONPY_ENTRIES_H1004
@@ -1121,3 +1183,825 @@ def documentation_reference_controls(env):
             if D in changes: rejected(edited, 'source mismatch', standalone=[dict(role, input_revision=edited.ref)])
             commit({k: add[k] for k in changes}, 'restored')
     finally: REVIEWED_DOC_REFERENCES, REVIEWED_DOC_READERS = saved
+
+
+# H1009 (gh#1350, X1E-NONPASSING-READ-PERSISTENCE, Option B): the persistence
+# form of nonpassing reads (QX1E-NONPASS uses the same rule). A
+# consumer_routes.persistent_reads row may carry an ordinary nonpassing read
+# (runner nonpassing:P, NONPASS_READ_OPERATION, frames with code identity)
+# recorded at the revision of P's nonpassing-unittest definition. At a later
+# --ref it credits that one read while P's definition blob, every frame and the
+# target are the same blobs now and at that revision, P is a declared unittest
+# runner and a frame of P lies in an entered test or setup context. Runners are
+# reviewed case by case (path, blob, commit that introduced that blob at P).
+# The run failed: the root is source-only, never validated or passing, and
+# anchors nothing; only the named in-scope target is credited (consumption):
+# recorded helper frames are provenance only, never credited.
+# Reviewed: the 11 nonpassing-unittest runners of check-tests-used-routes.json
+# whose recorded blob is live at 6ace6ff4. Refused, left unresolved:
+# tests/h62/item1/pin-fragments/probe.py (blob 65bb252c changed to 4479dfaa).
+NONPASS_READ_OPERATION = 'Observed fixture read during nonpassing unittest'
+PERSISTED_NONPASS_OPERATION = 'blob-bound persisted fixture read observed during a failed unittest run'
+NONPASS_PERSIST_PREFIX = 'nonpassing-persisted:'
+REVIEWED_NONPASS_PERSISTENCE = _review_table('''
+@99252640c3531e36b5de3eac0aac4ee71fa50a32
+H:item1/packet-panic/test_mul_proposal.py c15efd3896a87de0264cb94adaa906a713f70f34
+@77913ac1cff1147d1129caea943c881b4aa61ec7
+D:shared-translator/validation-input-controls.py a351764a4447049ec8a2d52e6e73993753d89b2e
+@6ebe96b19a37cc1de816b7322d8aa4638568e1ee
+T:h55/vectors-tables/test_fixture_controls.py 05d3cf96943793d1961afafc3b5d16dac82fd362
+@880f5fb630eedf12f582aa2b8ba9ba92250c636f
+T:h55/vectors-tables/test_table_proposals.py 0991231c4b170fadd64029edcba4a71284a04a74
+@b632012265807642cf690e15aed0d3dc753b96d8
+T:h62/item2/audit-bytecode-selection/test_inventory_report.py 05f260b9f57a57caff8fb2250e87dcc2bc4f74d8
+@49b10df66755e2501962470b69f744ea291f54e6
+T:h62/item4/generic-memorycopies/test_semantic_groups.py 6337febfe539ddbb97480f9f60499209a3102abf
+@c9df585f9c78134adc2f14ff383925d207502679
+T:h62/item6/migrate-evm/test_census.py 9f93078e0455433b5b6fccd327ed3a4b3b1b83df
+@03024461482e758b24f0c2376c6b166513a71665
+T:roadmap-v15-bounded-observe.py 4453c7b8e54ae381b397803a703172753c078108
+@f18f3815ea0c718dc06b5381149802596eb14c9f
+T:roadmap-v17/test_evidence.py 1afb5c3f29e957ed58a9defc7952b8b21687c7be
+@036114cb851f637298cf1ed8410a0ba0f7333389
+T:roadmap-v17/test_verify_compacted.py 28c0268375f47d7cec8be2582ad327b48e7280a1
+@d92c074c0c90f2bf4936b5c63f3bc439d6116812
+T:yul-composition/plan-approx-generator-test.py edb153f609028cf4f9193c9fc680e3788a227e1f
+''')
+
+
+def persisted_nonpassing_read(classifier, graph, catalog, row, reviewed=None):
+    """H1009: one persisted nonpassing read (see the comment above). A changed or
+    missing object or a superseding current definition of P grants nothing; a
+    row whose objects match but whose form does not hold is rejected."""
+    repo = graph.repo
+    reviewed = REVIEWED_NONPASS_PERSISTENCE if reviewed is None else reviewed
+    runner, revision, target, frames = row['runner'], row['input_revision'], row['target'], row['frames']
+    if not isinstance(runner, str) or not runner.startswith('nonpassing:'): raise ValueError('persisted nonpassing read needs a nonpassing runner')
+    p = runner[len('nonpassing:'):]
+    definitions = [e for e in catalog['standalone'] if e.get('path') == p and e.get('input_revision') == revision]
+    definition = definitions[0] if len(definitions) == 1 else {}
+    scopes = definition.get('input_scope')
+    if (definition.get('kind') != 'nonpassing-unittest' or definition.get('command') != ['python3', '-B', p]
+            or not isinstance(definition.get('source_blob'), str) or not isinstance(definition.get('purpose'), str)
+            or not definition['purpose'].strip() or not isinstance(scopes, list) or not all(isinstance(s, str) for s in scopes)):
+        raise ValueError('persisted nonpassing read lacks its nonpassing runner definition')
+    blob = definition['source_blob']
+    commits = sorted(c for q, b, c in reviewed if q == p and b == blob)
+    if len(commits) != 1: raise ValueError('unreviewed nonpassing read persistence: ' + p)
+    if not isinstance(target, str) or not isinstance(row['target_blob'], str): raise ValueError('invalid persisted read target')
+    if not isinstance(frames, list) or not frames or any(
+            not isinstance(f, dict) or set(f) != {'path', 'blob', 'line', 'code_qualname', 'code_firstlineno'}
+            or not isinstance(f['path'], str) or not isinstance(f['blob'], str) or type(f['line']) is not int
+            or not isinstance(f['code_qualname'], str) or type(f['code_firstlineno']) is not int or f['code_firstlineno'] < 1 for f in frames):
+        raise ValueError('invalid persisted nonpassing frame')
+    if frames[0]['path'] != p: raise ValueError('persisted read does not start at its runner')
+    if any(e.get('path') == p and e.get('input_revision') == repo.ref for e in catalog['standalone']): return
+    pins = sorted({(f['path'], f['blob']) for f in frames} | {(p, blob), (target, row['target_blob'])})
+    if not all(_current(repo, q, b) for q, b in pins): return
+    _check_lines(repo, frames)
+    if not _historical_objects(classifier, repo, revision, pins):
+        raise ValueError('persisted route objects differ at recorded revision ' + revision)
+    if not _introduced(classifier, repo, commits[0], p, blob): raise ValueError('persisted nonpassing runner lacks its introducing provenance: ' + p)
+    declaration = classifier['declared_unittest'](repo, p)
+    if declaration is None: raise ValueError('nonpassing source is not a declared unittest runner')
+    if not any(f['path'] == p and any(c['first'] <= f['line'] <= c['last'] and c['qualname'] == f['code_qualname']
+               and c['code_firstlineno'] == f['code_firstlineno'] for c in declaration['test_contexts']) for f in frames):
+        raise ValueError('nonpassing read lacks an entered test or setup context')
+    if not all(v not in classifier['SCOPE'] and (v in repo.tree or v.endswith('/') and any(q.startswith(v) for q in repo.tree)) for v in scopes):
+        raise ValueError('nonpassing test lacks reviewed fixture scope')
+    if classifier['excluded'](target) or any(classifier['excluded'](f['path']) for f in frames): return
+    identity = NONPASS_PERSIST_PREFIX + p
+    if not any(target == s or s.endswith('/') and target.startswith(s) for s in scopes):
+        graph.uncertain_reads[target].add(identity); return
+    graph.root(p, 'persisted nonpassing unittest runner source', shlex.join(['python3', '-B', p]), p, declaration['main_line'], root_id=identity)
+    if identity not in graph.roots: return
+    graph.roots[identity].update({'source_only': True, 'source_blob': blob, 'role_provenance': declaration, 'other_reads': 'unresolved',
+        'provenance': {'commit': commits[0], 'path': p, 'blob': blob},
+        'validation_at_measured_revision': {'status': 'unavailable', 'command': ['python3', '-B', p],
+            'reason': 'Normal run failed at each recorded revision and is not run here. Persisted test-context reads only; no execution, pass, helper, child, output, proof or runtime credit.'}})
+    details = {'kind': 'persisted-nonpassing-read', 'observed_revision': revision, 'validation_at_observed_revision': 'failed',
+               'runner_definition_blob': blob, 'purpose': definition['purpose']}
+    # Only the named target is credited: the recorded frames stay in the chain
+    # as provenance but no frame (helper or data) is observed or credited.
+    derived = identity + ':' + details['kind'] + ':' + hashlib.sha256(canonical(row)).hexdigest()
+    graph.roots[derived] = {**graph.roots[identity], 'derived_from': identity, 'observed_target': target, 'consumer_route': details}
+    edges = [{'source': a['path'], 'target': b['path'], 'line': a['line'], 'operation': 'Recorded nonpassing unittest call stack (persisted; no credit)',
+              'kind': 'executes', 'validated_for': derived} for a, b in zip(frames, frames[1:])]
+    edges.append({'source': frames[-1]['path'], 'target': target, 'line': frames[-1]['line'], 'operation': PERSISTED_NONPASS_OPERATION,
+                  'kind': 'consumes', 'validated_for': derived})
+    graph.observed.append((target, {'root': derived, 'entry': graph.roots[derived], 'edges': edges}))
+
+
+def nonpassing_persistence_controls(env):
+    """(12) H1009 controls, run by successor_controls with its helpers."""
+    global REVIEWED_NONPASS_PERSISTENCE
+    commit, run, rejected, blob, route = (env[k] for k in ('commit', 'run', 'rejected', 'blob', 'route'))
+    paths = {p for p, _, _ in REVIEWED_NONPASS_PERSISTENCE}
+    assert len(REVIEWED_NONPASS_PERSISTENCE) == len(paths) == 11 and 'tests/h62/item1/pin-fragments/probe.py' not in paths
+    P = 'tests/np_test.py'; D = 'tests/np-data.txt'; O = 'tests/np-other.txt'
+    text = ("import unittest\nclass T(unittest.TestCase):\n def test_it(self):\n  open('tests/np-data.txt').read()\n"
+            "  open('tests/np-other.txt').read()\n  self.fail('nonpassing')\nif __name__ == '__main__': unittest.main()\n")
+    H = 'tests/np_helper.py'
+    add = {P: text, D: 'np data\n', O: 'np other\n', H: 'def load(p):\n    return open(p).read()\n'}
+    nc = commit(add, 'nonpassing'); N = nc.ref; nl = commit({'tests/unrelated.txt': 'N\n'}, 'nonpassing later')
+    defn = {'path': P, 'input_revision': N, 'source_blob': blob(nc, P), 'command': ['python3', '-B', P], 'kind': 'nonpassing-unittest',
+            'purpose': 'Synthetic failing test.', 'input_scope': [D]}
+    fr = lambda line=4, qual='T.test_it', first=3, repo=nc: {'path': P, 'blob': blob(repo, P), 'line': line, 'code_qualname': qual, 'code_firstlineno': first}
+    row = lambda target=D, frames=None, **k: dict({'runner': 'nonpassing:' + P, 'input_revision': N, 'frames': frames or [fr(7, '<module>', 1), fr()],
+        'target': target, 'target_blob': blob(nc, target), 'operation': NONPASS_READ_OPERATION}, **k)
+    reads = lambda *rows: {'persistent_reads': list(rows)}
+    base_model, base = run(nl, standalone=[defn])
+    assert base[D]['class'] != 'keep' and NONPASS_PERSIST_PREFIX + P not in base_model['entry_points']
+    saved = REVIEWED_NONPASS_PERSISTENCE
+    REVIEWED_NONPASS_PERSISTENCE = frozenset({(P, blob(nc, P), N)})
+    try:
+        model, rows = run(nl, reads(row()), standalone=[defn]); entry = model['entry_points'][NONPASS_PERSIST_PREFIX + P]
+        chain = rows[D]['runner_chain']
+        assert rows[D]['class'] == 'keep' and chain['entry']['consumer_route']['kind'] == 'persisted-nonpassing-read'
+        assert chain['entry']['consumer_route']['validation_at_observed_revision'] == 'failed' and chain['edges'][-1]['operation'] == PERSISTED_NONPASS_OPERATION
+        assert entry['source_only'] and entry['validation_at_measured_revision']['status'] == 'unavailable'
+        assert 'validated:' + P not in model['entry_points'] and 'nonpassing:' + P not in model['entry_points']
+        assert all(canonical(r) == canonical(base[p]) for p, r in rows.items() if p not in (D, P))  # one read, no other credit
+        # At its own revision the row is the ordinary failed-run read.
+        model, rows = run(nc, reads(row()), standalone=[defn])
+        assert rows[D]['class'] == 'keep' and rows[D]['runner_chain']['entry']['validation_at_measured_revision']['status'] == 'failed'
+        # Out of the reviewed scope: an unreviewed read, never keep, and no root.
+        model, rows = run(nl, reads(row(O, [fr(7, '<module>', 1), fr(5)])), standalone=[defn])
+        assert rows[O]['class'] is None and 'unreviewed_readers' in rows[O]['secondary']
+        assert NONPASS_PERSIST_PREFIX + P not in model['entry_points']
+        # Recorded helper or data frames are provenance only: never credited.
+        for extra in ({'path': H, 'blob': blob(nc, H), 'line': 2, 'code_qualname': 'load', 'code_firstlineno': 1},
+                      {'path': O, 'blob': blob(nc, O), 'line': 1, 'code_qualname': 'x', 'code_firstlineno': 1}):
+            _, rows = run(nl, reads(row(frames=[fr(7, '<module>', 1), fr(), extra])), standalone=[defn])
+            assert rows[D]['class'] == 'keep' and canonical(rows[extra['path']]) == canonical(base[extra['path']]), extra['path']
+        # A broad or missing scope in the historical definition is refused.
+        for scope in (['tests/'], ['tests/missing.txt']):
+            rejected(nl, 'reviewed fixture scope', reads(row(O, [fr(7, '<module>', 1), fr(5)])), standalone=[dict(defn, input_scope=scope)])
+        # The failed-run root anchors nothing.
+        anchored = route(nc, NONPASS_PERSIST_PREFIX + P, 'node-readFileSync', [{'path': P, 'blob': blob(nc, P), 'line': 4}], O)
+        assert run(nl, dict(reads(row()), static_routes=[anchored]), standalone=[defn])[1][O]['class'] != 'keep'
+        Z = '0' * 40
+        for bad, message in ((row(operation='validated Python read of measured bytes'), 'needs a validated runner'),
+                             (row(runner='validated:' + P, operation=NONPASS_READ_OPERATION), 'needs a nonpassing runner'),
+                             (row(input_revision=Z), 'lacks its nonpassing runner definition'),
+                             (row(frames=[{k: v for k, v in fr().items() if k != 'code_qualname'}]), 'invalid persisted nonpassing frame'),
+                             (row(frames=[fr(first=0)]), 'invalid persisted nonpassing frame'),
+                             (row(frames=[fr(7, '<module>', 1)]), 'entered test or setup context'),
+                             (row(frames=[fr(qual='T.test_other')]), 'entered test or setup context'),
+                             (row(frames=[fr(first=2)]), 'entered test or setup context'),
+                             (row(frames=[fr(99)]), 'location mismatch'),
+                             (row(frames=[dict(fr(), path='tests/unrelated.txt', blob=blob(nl, 'tests/unrelated.txt'))]), 'does not start at its runner'),
+                             (row(target_blob=None), 'invalid persisted read target')):
+            rejected(nl, message, reads(bad), standalone=[defn])
+        for change, message in (({'kind': 'unittest', 'other_reads': 'unresolved'}, 'nonpassing runner definition'), ({'command': ['python3', P]}, 'nonpassing runner definition'),
+                                ({'purpose': ' '}, 'nonpassing runner definition'), ({'input_scope': None}, 'nonpassing runner definition')):
+            rejected(nl, message, reads(row()), standalone=[dict(defn, **change)])
+        # A row naming objects that were never together at the recorded revision.
+        later_data = commit({D: 'np changed\n'}, 'changed data')
+        forged = dict(row(), target_blob=blob(later_data, D))
+        rejected(later_data, 'objects differ at recorded revision', reads(forged), standalone=[defn])
+        restored = commit({D: add[D]}, 'restored data')
+        REVIEWED_NONPASS_PERSISTENCE = frozenset({(P, blob(nc, P), nl.ref)})
+        rejected(restored, 'introducing provenance', reads(row()), standalone=[defn])
+        REVIEWED_NONPASS_PERSISTENCE = frozenset({(P, Z, N)})
+        rejected(restored, 'unreviewed nonpassing read persistence', reads(row()), standalone=[defn])
+        REVIEWED_NONPASS_PERSISTENCE = saved
+        rejected(restored, 'unreviewed nonpassing read persistence', reads(row()), standalone=[defn])
+        REVIEWED_NONPASS_PERSISTENCE = frozenset({(P, blob(nc, P), N)})
+        assert run(restored, reads(row()), standalone=[defn])[1][D]['class'] == 'keep'
+        # Stale objects grant nothing; a current definition of P supersedes.
+        for changes in ({D: 'np changed\n'}, {P: text + '# changed\n'}):
+            edited = commit(changes, 'edited')
+            model, rows = run(edited, reads(row()), standalone=[defn])
+            assert rows[D]['class'] != 'keep' and NONPASS_PERSIST_PREFIX + P not in model['entry_points'], changes
+            commit({k: add[k] for k in changes}, 'restored')
+        current = dict(defn, input_revision=restored.ref)
+        model, rows = run(restored, reads(row()), standalone=[defn, current])
+        assert rows[D]['class'] != 'keep' and NONPASS_PERSIST_PREFIX + P not in model['entry_points']
+    finally: REVIEWED_NONPASS_PERSISTENCE = saved
+
+
+# ---------------------------------------------------------------------------
+# H1072 (gh#1423, H62-REMAINING-PROGRAM-FORMS, Option A): an opt-in source-only
+# role for a reviewed program in a form the H997/H999 roles do not cover: an
+# extensionless Bash wrapper (exec bit, `#!/usr/bin/env bash`, H997 shell
+# entry rules), a `lean --run` program outside every root library (one
+# column-0 `def main`) or a C program (one column-0 `int main(`). Bound to
+# (path, blob, introducing commit) and to its committed drivers, each a
+# python3 -B entry root naming the program on one reviewed line: the exact
+# path (`lean --run` needs a '--run' literal on that line), or for a wrapper
+# the directory placed on PATH (a "PATH" literal on the line; repository path
+# or a `with_name` sibling). A program with no committed driver records none.
+# Refused, left unresolved: the /evidence/wait-usage binary of
+# migrate-optimizer/measure.py (compiled off-Git, not a source consumer) is no
+# driver of wait-usage.c; audit-precompiles/serial.toml (bin/lake reads it only
+# through $H62_AUDIT_CONFIG, no exact binding). Closed.lean's blob was
+# introduced twice (6fa35bb9, 3e9a0f88): the earlier is recorded. Source role only: no execution,
+# compile, pass, read anchor, fixture, helper, child, output, proof or runtime credit.
+PROGRAM_FORM_KIND = 'program-form-source-role'
+PROGRAM_FORM_PREFIX = 'program-form:'
+REVIEWED_PROGRAM_FORMS = _review_table('''
+@edcf2535758d57d1fb708488f5f9601b5222e707
+H:item1/packet-panic/bin/lake ee601ac456cd001e848299f770e5332550bae9c5
+@b97125425c8eadbe2174b07fcda96c99c9088469
+H:item2/audit-abi-world/bin/lake cb9d075c879d9a3ae9d8b9f65bf436bdad0038c8
+@8e3023d10b62574b7be84630c064b53b8dcfbb09
+H:item2/audit-abi-world/resume-bin/lake ad3f0e60d81934cfcd60b40a5eea6a171d4f5c62
+@a118d00ca45bd18acca3e0181d0594f15fea66d0
+H:item2/audit-precompiles/bin/lake 2fe5606eaa15dc5836668a91b4853445d40007b4
+@6fa35bb9e28fb82d79877f79a6eab1bca3cca233
+H:item2/audit-evm-compiler/Closed.lean d2599fcbce28c22bf73f70539f37a5865a16dcbc
+@defea88d6c4f5d2b352517c337dd0707da536725
+H:item2/audit-evm-compiler/Inspect.lean 190737f188a3fdd9d01f33639313261e99470a17
+@42fdfedd31394b44c383586c9364e647128d090d
+H:item6/migrate-optimizer/wait-usage.c 8ba1a568a8ae4d52d3104c61fcec1673df9d8213
+''')
+_H62 = 'scripts/h62/'
+# (program, driver, driver blob, line, literal), each read on the driver bytes.
+REVIEWED_PROGRAM_DRIVERS = frozenset({
+    (_H62 + 'item1/packet-panic/bin/lake', _H62 + 'item1/packet-panic/mcp_diagnostics.py', '5202ea886d34a151c75409f211c34a75492530cc', 22, _H62 + 'item1/packet-panic/bin'),
+    (_H62 + 'item1/packet-panic/bin/lake', _H62 + 'item1/packet-panic/mcp_serial_diagnostic.py', '105adcb31443cb82afdb5e9cb8797278c733a248', 54, _H62 + 'item1/packet-panic/bin'),
+    (_H62 + 'item2/audit-abi-world/bin/lake', _H62 + 'item2/audit-abi-world/mcp_call.py', '2ca1426faff254135184084f149b45ddfbd0397a', 17, 'bin'),
+    (_H62 + 'item2/audit-abi-world/resume-bin/lake', _H62 + 'item2/audit-abi-world/resume_mcp_call.py', '68a3a88a246c7da9a75e247c890bedb87206a28e', 22, 'resume-bin'),
+    (_H62 + 'item2/audit-evm-compiler/Closed.lean', _H62 + 'item2/audit-evm-compiler/closed_census.py', '3798c99de0c5773d733ed69ef2a9af0c422f94a3', 28, _H62 + 'item2/audit-evm-compiler/Closed.lean'),
+    (_H62 + 'item2/audit-evm-compiler/Inspect.lean', _H62 + 'item2/audit-evm-compiler/inspect.py', '3884ee420a9a9cfccd9d76388e6a06f243d551ce', 16, _H62 + 'item2/audit-evm-compiler/Inspect.lean'),
+    (_H62 + 'item2/audit-evm-compiler/Inspect.lean', _H62 + 'item2/audit-evm-compiler/inspect_bridge.py', '12276aaf30cbd92d243a1e4d9e9b905e986e3d63', 20, _H62 + 'item2/audit-evm-compiler/Inspect.lean'),
+})
+PROGRAM_FORM_COMMANDS = {'bash-wrapper': lambda p: [p], 'lean-run': lambda p: ['lean', '--run', p], 'c-program': lambda p: ['cc', p]}
+
+
+def _c_code(text):
+    """C source with comments, string and character literals blanked (newlines kept)."""
+    return re.sub(r'/\*.*?\*/|//[^\n]*|"(?:\\.|[^"\\\n])*"|\'(?:\\.|[^\'\\\n])*\'',
+                  lambda m: re.sub(r'[^\n]', ' ', m[0]), text, flags=re.S)
+
+
+def program_form_interface(lean_code, path, text, mode):
+    """The audited form of a program source, or None.
+
+    bash-wrapper: no suffix, mode 100755, the H997 shell rules (bash shebang
+    required, no top-level return, a top-level statement). lean-run: `.lean`,
+    exactly one column-0 `def main` outside comments and strings, no #exit.
+    c-program: `.c`, exactly one column-0 `int main(` outside comments and
+    literals. Anything else (other suffixes, ambiguous line breaks, NUL) is None.
+    """
+    if not isinstance(text, str) or '\0' in text or not _plain_lines(text): return None
+    name = posixpath.basename(path)
+    if '.' not in name:
+        face = nonpython_entry_interface(path + '.sh', text) if mode == '100755' else None
+        if face is None: return None
+        return {'form': 'bash-wrapper', 'interpreter': 'bash', 'shebang': face['shebang'], 'entry_line': face['entry_line']}
+    if name.endswith('.lean'):
+        code = lean_code(text)
+        if re.search(r'(?m)^#exit\b', code): return None
+        found = [n for n, line in enumerate(code.split('\n'), 1) if re.match(r'def\s+main\b', line)]
+        return {'form': 'lean-run', 'interpreter': 'lean --run', 'entry_line': found[0]} if len(found) == 1 else None
+    if name.endswith('.c'):
+        found = [n for n, line in enumerate(_c_code(text).split('\n'), 1) if re.match(r'int\s+main\s*\(', line)]
+        return {'form': 'c-program', 'interpreter': 'cc', 'entry_line': found[0]} if len(found) == 1 else None
+    return None
+
+
+def _python_strings(text, number):
+    """(value, token text) of each string literal starting on that line, or None."""
+    import io, tokenize
+    try: tokens = list(tokenize.generate_tokens(io.StringIO(text).readline))
+    except (tokenize.TokenError, SyntaxError, IndentationError): return None
+    found = []
+    for t in tokens:
+        if t.type == tokenize.STRING and t.start[0] == number:
+            try: value = ast.literal_eval(t.string)
+            except (ValueError, SyntaxError): continue
+            if isinstance(value, str): found.append((value, t.string))
+    return found
+
+
+def program_driver_names(text, driver, number, literal, program, form):
+    """The driver line names the program by one exact string literal."""
+    strings = _python_strings(text, number)
+    if strings is None or literal not in [v for v, _ in strings]: return False
+    line = text.split('\n')[number - 1]
+    if form == 'lean-run': return literal == program and '--run' in [v for v, _ in strings]
+    if form != 'bash-wrapper' or 'PATH' not in [v for v, _ in strings]: return False
+    if literal == posixpath.dirname(program): return True
+    return (any(('with_name(' + token) in line for v, token in strings if v == literal)
+            and '/' not in literal and posixpath.join(posixpath.dirname(driver), literal) == posixpath.dirname(program))
+
+
+def _entry_root(graph, path, blob):
+    """A current python3 -B entry root of exactly that source, not a derived or dependency role."""
+    command = shlex.join(['python3', '-B', path])
+    return any(r['path'] == path and r['command'] == command and 'derived_from' not in r and r.get('source_blob', blob) == blob
+               and not any(r.get(k) for k in ('python_import_role', 'program_form_role', 'source_dependency_role', 'documentation_reference_role'))
+               for r in graph.roots.values())
+
+
+def program_form_root(classifier, graph, catalog, entry, reviewed=None, drivers=None):
+    """H1072: a reviewed program source with interpreter, entry and driver identity.
+
+    Run after every other standalone definition (LATE_SOURCE_ROLE_KINDS) so the
+    drivers' roots exist. Binds (path, blob, introducing commit), the
+    interface program_form_interface records, the form's bare command and each
+    driver (path, blob, line, literal; all reviewed): the driver is a current
+    python3 -B entry root and its line names the program as
+    program_driver_names requires. A `lean --run` program must lie outside
+    every root library. A changed program or driver, or a missing driver root
+    later, makes it stale. Never a validated runner; anchors nothing.
+    """
+    repo = graph.repo; role = 'program form role'
+    reviewed = REVIEWED_PROGRAM_FORMS if reviewed is None else reviewed
+    drivers = REVIEWED_PROGRAM_DRIVERS if drivers is None else drivers
+    required = {'path', 'input_revision', 'source_blob', 'command', 'kind', 'interface', 'provenance', 'drivers', 'purpose'}
+    _role_schema(classifier, catalog, entry, required, role); calls = entry['drivers']
+    if (not isinstance(calls, list) or any(not isinstance(c, dict) or set(c) != {'path', 'blob', 'line', 'literal'} or type(c['line']) is not int
+                   or not all(isinstance(c[k], str) for k in ('path', 'blob', 'literal')) for c in calls)
+            or len({canonical(c) for c in calls}) != len(calls)):
+        raise ValueError('invalid ' + role + ' definition')
+    p = entry['path']; revision = entry['input_revision']; doc = entry['provenance']; blob = entry['source_blob']
+    form = entry['interface'].get('form')
+    if not isinstance(form, str) or form not in PROGRAM_FORM_COMMANDS or entry['command'] != PROGRAM_FORM_COMMANDS[form](p) or _clean(p) != p:
+        raise ValueError('unsupported ' + role + ' invocation: ' + p)
+    if doc['path'] != p or doc['blob'] != blob or (p, blob, doc['commit']) not in reviewed: raise ValueError('unreviewed ' + role + ': ' + p)
+    if any((p, c['path'], c['blob'], c['line'], c['literal']) not in drivers for c in calls): raise ValueError('unreviewed ' + role + ' driver: ' + p)
+    pins = [(p, blob)] + [(c['path'], c['blob']) for c in calls]
+    if not _role_current(classifier, repo, catalog, entry, pins): return
+    if any(q not in repo.texts for q, _ in pins) or any(not c['path'].endswith('.py') for c in calls):
+        raise ValueError('unsupported ' + role + ' invocation: ' + p)
+    if not _introduced(classifier, repo, doc['commit'], p, blob): raise ValueError(role + ' lacks its introducing provenance: ' + p)
+    interface = program_form_interface(classifier['lean_code'], p, repo.texts[p], repo.tree[p][0])
+    if interface is None: raise ValueError(role + ' lacks an audited program form: ' + p)
+    if canonical(interface) != canonical(entry['interface']): raise ValueError(role + ' interface mismatch: ' + p)
+    if form == 'lean-run' and not _outside_root_libraries(repo, p): raise ValueError(role + ' Lean program is in a root library: ' + p)
+    for c in calls:
+        if not 1 <= c['line'] <= len(repo.texts[c['path']].split('\n')) or not program_driver_names(
+                repo.texts[c['path']], c['path'], c['line'], c['literal'], p, form):
+            raise ValueError(role + ' driver does not name the program: ' + c['path'])
+        if not _entry_root(graph, c['path'], c['blob']):
+            if revision == repo.ref: raise ValueError(role + ' driver is not a python3 -B entry root: ' + c['path'])
+            return
+    identity = PROGRAM_FORM_PREFIX + p
+    graph.root(p, 'source-only program form', shlex.join(entry['command']), p, interface['entry_line'], root_id=identity)
+    if identity not in graph.roots: return
+    graph.roots[identity].update({'source_only': True, 'program_form_role': True, 'source_blob': blob, 'purpose': entry['purpose'],
+        'interface': interface, 'provenance': doc, 'drivers': calls, 'source_declaration_revision': revision,
+        'validation_at_measured_revision': {'status': 'unavailable', 'command': entry['command'],
+            'reason': 'Reviewed program source with its interpreter, entry and committed drivers; never run, compiled or certified to pass. Source role only: no execution, read anchor, fixture, helper, child, generated-output, proof or runtime credit.'}})
+
+
+# ---------------------------------------------------------------------------
+# H1074 (gh#1426, H62-REMAINING-CONSUMER-ROUTES, Option A): an opt-in
+# source-dependency/native-input role for a reviewed non-program input that a
+# kept python3 -B entry root hands to an exact operation, re-derived from the
+# consumer's syntax tree: patch-input (a module-level NAME bound to the
+# literal path, passed as str(NAME) in a ['patch', ...] argument list),
+# lake-config (a lake argument list with '-f', PATH, ... 'build') and
+# check-read (a module-level dict NAME keyed by root/PATH whose loop reads
+# each key with .read_text() under an `if <args>.check:` branch). Bound to the
+# input (path, blob, introducing commit) and the consumer (path, blob, literal
+# line, operation line, operation), all reviewed. Reviewed one by one:
+# migration.patch, pinned-lakefile.toml, ReservedNames.proposed.patch pass.
+# transaction_admission.mjs needs no new role: its node-test importer is a
+# demonstrated committed runner, so the existing static node-import route
+# applies. Refused, left unresolved: migrate-root-gate/bulk-manifest.json (its
+# reader public-api-inventory.py is no entry root, only a module a test
+# enters, and its main path needs the unavailable H44 archive). Unavailable
+# runtime data (H44 archive, B05 snapshots, G52_BULK) grants nothing.
+# ReservedNames.proposed.patch is also the consumer's own output without
+# --check: only the check-mode read is credited, never generation. Not
+# audited (blob pins and review are the gate): dead code, and whether the
+# consumer or driver line is reached at run time.
+# Source/consumption credit only: no execution, pass, read anchor, output,
+# proof or runtime credit.
+SOURCE_DEP_KIND = 'source-dependency-role'
+SOURCE_DEP_PREFIX = 'source-dep:'
+REVIEWED_SOURCE_DEPENDENCIES = _review_table('''
+@2ce3562fecd65f68d7e5a0f17464322a42068f4c
+H:item1/trust-fragments/migration.patch 677c556e219ddcb3e40bfaa7251e07c433e06b52
+@8ad1dffb4c731046a343120e557e9981e745e2cf
+H:item2/audit-v10-storage/pinned-lakefile.toml b9d804415273c3bcb9509ca3a813fb3f6c3f9ff4
+@da45db4c43577480bc14ee23e1dd9ad8b527a34e
+H:item6/migrate-yul/ReservedNames.proposed.patch dad642373f549afefaff18069c39932b9eee8e00
+''')
+# (input, consumer, consumer blob, literal line, operation line, operation)
+REVIEWED_DEPENDENCY_CONSUMERS = frozenset({
+    (_H62 + 'item1/trust-fragments/migration.patch', _H62 + 'item1/trust-fragments/accept_migration.py',
+     '889014ac49aee6edcae261cf9b812f9ccd790d07', 19, 63, 'patch-input'),
+    (_H62 + 'item2/audit-v10-storage/pinned-lakefile.toml', _H62 + 'item2/audit-v10-storage/validate.py',
+     'a5304d017e8ca3986e2dc974904d7dd1bf6df7eb', 80, 80, 'lake-config'),
+    (_H62 + 'item6/migrate-yul/ReservedNames.proposed.patch', _H62 + 'item6/migrate-yul/generate-reserved-fixture.py',
+     'e0435909f3ec2b9846680db836bc4bd27d78c5cf', 18, 21, 'check-read'),
+})
+DEPENDENCY_OPERATIONS = {
+    'patch-input': 'native patch(1) input file of a reviewed python3 -B entry program',
+    'lake-config': 'native lake -f configuration of a reviewed python3 -B entry program',
+    'check-read': 'check-mode read_text comparison of a reviewed python3 -B entry program',
+}
+
+
+def _module_name(tree, name, line):
+    """The one module-level single-name assignment to name, on that line, never rebound."""
+    nodes = [n for n in tree.body if isinstance(n, ast.Assign) and len(n.targets) == 1 and isinstance(n.targets[0], ast.Name)
+             and n.targets[0].id == name]
+    stores = [n for n in ast.walk(tree) if isinstance(n, ast.Name) and n.id == name and not isinstance(n.ctx, ast.Load)]
+    stores += [n for n in ast.walk(tree) if isinstance(n, (ast.FunctionDef, ast.AsyncFunctionDef, ast.ClassDef, ast.alias))
+               and (getattr(n, 'name', None) == name or getattr(n, 'asname', None) == name)]
+    stores += [n for n in ast.walk(tree) if isinstance(n, ast.arg) and n.arg == name or isinstance(n, ast.ExceptHandler) and n.name == name
+               or isinstance(n, (ast.Global, ast.Nonlocal)) and name in n.names]
+    return nodes[0] if len(nodes) == 1 and len(stores) == 1 and nodes[0].lineno == line else None
+
+
+def _rooted(node, path):
+    """node is the literal path or `<root> / path` with the literal on the right."""
+    if isinstance(node, ast.Constant): return node.value == path and node
+    return (isinstance(node, ast.BinOp) and isinstance(node.op, ast.Div) and isinstance(node.left, (ast.Name, ast.Attribute))
+            and isinstance(node.right, ast.Constant) and node.right.value == path and node.right)
+
+
+def dependency_operation(text, path, literal_line, operation_line, operation):
+    """True iff the consumer's syntax tree performs the operation on the literal input."""
+    try: tree = ast.parse(text)
+    except (SyntaxError, ValueError, RecursionError): return False
+    if operation == 'patch-input':
+        names = [n for n in tree.body if isinstance(n, ast.Assign) and len(n.targets) == 1 and isinstance(n.targets[0], ast.Name)
+                 and n.lineno == n.end_lineno == literal_line and _rooted(n.value, path)]
+        if len(names) != 1 or _module_name(tree, names[0].targets[0].id, literal_line) is None: return False
+        name = names[0].targets[0].id
+        for call in ast.walk(tree):
+            if (not isinstance(call, ast.Call) or not call.args or not isinstance(call.args[0], ast.List) or not isinstance(call.func, ast.Attribute)
+                    or call.func.attr not in ('run', 'call', 'check_call', 'check_output', 'Popen')
+                    or not isinstance(call.func.value, ast.Name) or call.func.value.id != 'subprocess'): continue
+            items = call.args[0].elts
+            if not items or not isinstance(items[0], ast.Constant) or items[0].value != 'patch': continue
+            if any(isinstance(e, ast.Call) and isinstance(e.func, ast.Name) and e.func.id == 'str' and len(e.args) == 1 and not e.keywords
+                   and isinstance(e.args[0], ast.Name) and e.args[0].id == name and e.args[0].lineno == operation_line for e in items):
+                return True
+        return False
+    if operation == 'lake-config':
+        if literal_line != operation_line: return False
+        for node in ast.walk(tree):
+            if not isinstance(node, ast.List): continue
+            items = node.elts
+            for k in range(1, len(items) - 1):
+                if (isinstance(items[k], ast.Constant) and items[k].value == '-f' and isinstance(items[k + 1], ast.Constant)
+                        and items[k + 1].value == path and items[k + 1].lineno == literal_line
+                        and (isinstance(items[0], ast.Constant) and items[0].value == 'lake' or isinstance(items[0], ast.Call)
+                             and isinstance(items[0].func, ast.Name) and items[0].func.id == 'str' and len(items[0].args) == 1
+                             and isinstance(items[0].args[0], ast.BinOp) and isinstance(items[0].args[0].op, ast.Div)
+                             and isinstance(items[0].args[0].right, ast.Constant) and items[0].args[0].right.value == 'lake')
+                        and any(isinstance(e, ast.Constant) and e.value == 'build' for e in items[k + 2:])):
+                    return True
+        return False
+    if operation == 'check-read':
+        for assign in tree.body:
+            if (not isinstance(assign, ast.Assign) or len(assign.targets) != 1 or not isinstance(assign.targets[0], ast.Name)
+                    or not isinstance(assign.value, ast.Dict)): continue
+            name = assign.targets[0].id
+            keys = [k for k in assign.value.keys if k is not None and isinstance(k, ast.BinOp) and _rooted(k, path)]
+            if len(keys) != 1 or keys[0].right.lineno != literal_line or _module_name(tree, name, assign.lineno) is None: continue
+            for loop in tree.body:
+                if (not isinstance(loop, ast.For) or not isinstance(loop.iter, ast.Call) or loop.iter.args
+                        or not isinstance(loop.iter.func, ast.Attribute) or loop.iter.func.attr != 'items'
+                        or not isinstance(loop.iter.func.value, ast.Name) or loop.iter.func.value.id != name
+                        or not isinstance(loop.target, ast.Tuple) or not loop.target.elts or not isinstance(loop.target.elts[0], ast.Name)):
+                    continue
+                key = loop.target.elts[0].id
+                for branch in loop.body:
+                    if (not isinstance(branch, ast.If) or not isinstance(branch.test, ast.Attribute) or branch.test.attr != 'check'
+                            or not isinstance(branch.test.value, ast.Name)): continue
+                    for read in (n for b in branch.body for n in ast.walk(b)):
+                        if (isinstance(read, ast.Call) and isinstance(read.func, ast.Attribute) and read.func.attr == 'read_text'
+                                and not read.args and isinstance(read.func.value, ast.Name) and read.func.value.id == key
+                                and read.lineno == operation_line):
+                            return True
+        return False
+    return False
+
+
+def source_dependency_root(classifier, graph, catalog, entry, reviewed=None, consumers=None):
+    """H1074: a reviewed non-program input bound to an exact operation of a kept consumer.
+
+    Run after every other standalone definition (LATE_SOURCE_ROLE_KINDS) so the
+    consumer's root exists. Binds the input (path, blob, introducing commit),
+    the interface {'operation'} and the consumer (path, blob, literal line,
+    operation line; all reviewed): the consumer is a current python3 -B entry
+    root and dependency_operation holds on its bytes. A changed input or
+    consumer, or a missing consumer root later, makes it stale. Never a
+    validated runner; anchors nothing.
+    """
+    repo = graph.repo; role = 'source dependency role'
+    reviewed = REVIEWED_SOURCE_DEPENDENCIES if reviewed is None else reviewed
+    consumers = REVIEWED_DEPENDENCY_CONSUMERS if consumers is None else consumers
+    required = {'path', 'input_revision', 'source_blob', 'command', 'kind', 'interface', 'provenance', 'consumer', 'purpose'}
+    _role_schema(classifier, catalog, entry, required, role); c = entry['consumer']
+    if (not isinstance(c, dict) or set(c) != {'path', 'blob', 'literal_line', 'operation_line'} or not all(isinstance(c[k], str) for k in ('path', 'blob'))
+            or type(c['literal_line']) is not int or type(c['operation_line']) is not int or set(entry['interface']) != {'operation'}):
+        raise ValueError('invalid ' + role + ' definition')
+    p = entry['path']; revision = entry['input_revision']; doc = entry['provenance']; blob = entry['source_blob']
+    operation = entry['interface']['operation']
+    if (not isinstance(operation, str) or operation not in DEPENDENCY_OPERATIONS or entry['command'] != ['python3', '-B', c['path']] or _clean(p) != p
+            or not c['path'].endswith('.py') or p.endswith(('.py', '.sh', '.mjs', '.cjs', '.js', '.lean'))):
+        raise ValueError('unsupported ' + role + ' invocation: ' + p)
+    if doc['path'] != p or doc['blob'] != blob or (p, blob, doc['commit']) not in reviewed: raise ValueError('unreviewed ' + role + ': ' + p)
+    if (p, c['path'], c['blob'], c['literal_line'], c['operation_line'], operation) not in consumers:
+        raise ValueError('unreviewed ' + role + ' consumer: ' + p)
+    if not _role_current(classifier, repo, catalog, entry, [(p, blob), (c['path'], c['blob'])]): return
+    if c['path'] not in repo.texts: raise ValueError('unsupported ' + role + ' invocation: ' + p)
+    if not _introduced(classifier, repo, doc['commit'], p, blob): raise ValueError(role + ' lacks its introducing provenance: ' + p)
+    if not dependency_operation(repo.texts[c['path']], p, c['literal_line'], c['operation_line'], operation):
+        raise ValueError(role + ' consumer does not perform its operation: ' + c['path'])
+    if not _entry_root(graph, c['path'], c['blob']):
+        if revision == repo.ref: raise ValueError(role + ' consumer is not a python3 -B entry root: ' + c['path'])
+        return
+    identity = SOURCE_DEP_PREFIX + p
+    graph.root(p, 'source dependency of a kept program', shlex.join(entry['command']), c['path'], c['operation_line'], root_id=identity)
+    if identity not in graph.roots: return
+    graph.roots[identity].update({'source_only': True, 'source_dependency_role': True, 'source_blob': blob, 'purpose': entry['purpose'],
+        'interface': {'operation': operation, 'description': DEPENDENCY_OPERATIONS[operation]}, 'provenance': doc, 'consumer': c,
+        'source_declaration_revision': revision,
+        'validation_at_measured_revision': {'status': 'unavailable', 'command': entry['command'],
+            'reason': 'Reviewed input that a kept program hands to the recorded operation; the program is never run or certified to pass here. Source/consumption role only: no execution, read anchor, fixture, output, proof or runtime credit.'}})
+
+
+def run_cmd_read_controls(env):
+    """(13) H1070 controls, run by successor_controls with its helpers: a
+    top-level run_cmd literal read through Lean header imports is credited
+    with its own operation; comments, defs, interpolation, #exit and
+    non-library runners are refused; #eval/run_elab rows keep their text."""
+    commit, run, rejected, route, frame, files = (env[k] for k in ('commit', 'run', 'rejected', 'route', 'frame', 'files'))
+    cmd = ('import Lean\nopen Lean\nrun_cmd do\n  let s ← IO.FS.readFile "tests/lib-data.txt"\n  logInfo s\n'
+           'run_cmd Lean.Elab.Command.liftTermElabM do\n  let t ← IO.FS.readFile\n    "tests/lib-eval.txt"\n  logInfo t\n'
+           '-- run_cmd IO.FS.readFile "tests/lib-data.txt"\ndef helper : IO String := IO.FS.readFile "tests/lib-data.txt"\n'
+           'run_cmd do\n  let u ← IO.FS.readFile s!"tests/{"lib-data"}.txt"\n  logInfo u\n'
+           'run_cmd do\n  let v ← IO.FS.readFile ("tests/" ++ "lib-data.txt")\n  logInfo v\n')
+    late = 'import Lean\n#exit\nrun_cmd do\n  let s ← IO.FS.readFile "tests/lib-data.txt"\n'
+    rc = commit({'Lib/Cmd.lean': cmd, 'Lib/CmdLate.lean': late, 'Lib.lean': '/-! library root -/\nimport Lib.Mod Lib.Late Lib.Cmd Lib.CmdLate\n-- import Lib.Mod\n'}, 'run_cmd reads')
+    lib = lambda line, target='tests/lib-data.txt', reader='Lib/Cmd.lean', runner='Lib.lean', first=2: route(
+        rc, runner, 'lean-library-readFile', [frame(rc, runner, first), frame(rc, reader, line)], target)
+    try:
+        base_model, base = run(rc)
+        assert base['tests/lib-data.txt']['class'] != 'keep' and base['tests/lib-eval.txt']['class'] != 'keep'
+        for line, target in ((4, 'tests/lib-data.txt'), (7, 'tests/lib-eval.txt')):
+            model, rows = run(rc, {'static_routes': [lib(line, target)]})
+            edges = rows[target]['runner_chain']['edges']
+            assert rows[target]['class'] == 'keep' and edges[-1]['operation'] == LEAN_RUN_CMD_OPERATION and edges[-1]['kind'] == 'consumes'
+            assert edges[0]['operation'] == 'Lean header import elaborated by the library build'
+            # Consumption only: no other record changes and no root beyond the derived chain.
+            assert all(canonical(r) == canonical(base[p]) for p, r in rows.items() if p != target)
+            assert {k for k in model['entry_points'] if 'derived_from' not in model['entry_points'][k]} == \
+                {k for k in base_model['entry_points'] if 'derived_from' not in base_model['entry_points'][k]}
+        # #eval and run_elab rows keep their recorded operation text byte for byte.
+        _, rows = run(rc, {'static_routes': [route(rc, 'Lib.lean', 'lean-library-readFile', [frame(rc, 'Lib.lean', 2), frame(rc, 'Lib/Mod.lean', 5)], 'tests/lib-data.txt')]})
+        assert rows['tests/lib-data.txt']['runner_chain']['edges'][-1]['operation'] == STATIC_FORMS['lean-library-readFile'][0]
+        for line in (5, 8, 10, 11, 13, 16):  # body line, literal line, comment, def, interpolation, computed path
+            rejected(rc, 'literal lean-library-readFile', {'static_routes': [lib(line)]})
+        rejected(rc, 'follows #exit', {'static_routes': [lib(4, reader='Lib/CmdLate.lean')]})
+        rejected(rc, 'not a Lean header import', {'static_routes': [lib(4, first=3)]})
+        rejected(rc, 'repository Lean library root', {'static_routes': [lib(4, runner='Extra.lean', first=1)]})
+        # The single-file form keeps refusing run_cmd: only #eval of the runner file itself.
+        rejected(rc, 'elaborated runner file', {'static_routes': [route(rc, 'tests/R.lean', 'lean-readFile', [frame(rc, 'tests/R.lean', 1), frame(rc, 'Lib/Cmd.lean', 4)], 'tests/lib-data.txt')]})
+        # A changed reader grants nothing later.
+        moved = commit({'Lib/Cmd.lean': cmd + '-- changed\n'}, 'changed run_cmd reader')
+        _, rows = run(moved, {'static_routes': [lib(4)]})
+        assert rows['tests/lib-data.txt']['class'] != 'keep'
+    finally: commit({'Lib.lean': files['Lib.lean']}, 'restored library root')
+
+
+def program_form_controls(env):
+    """(14) H1072 controls, run by successor_controls with its helpers: the
+    reviewed witnesses, the three forms, driver bindings and negative controls."""
+    global REVIEWED_PROGRAM_FORMS, REVIEWED_PROGRAM_DRIVERS
+    import os
+    commit, run, rejected, blob, route, frame, root, classifier = (env[k] for k in ('commit', 'run', 'rejected', 'blob', 'route', 'frame', 'root', 'classifier'))
+    # The audited witnesses: 4 wrappers, 2 `lean --run` programs, 1 C program; 7 drivers.
+    progs = {p for p, _, _ in REVIEWED_PROGRAM_FORMS}
+    assert len(REVIEWED_PROGRAM_FORMS) == len(progs) == 7 and len(REVIEWED_PROGRAM_DRIVERS) == 7 and all(p.startswith('scripts/h62/') for p in progs)
+    assert len([p for p in progs if posixpath.basename(p) == 'lake']) == 4 and {q for q, *_ in REVIEWED_PROGRAM_DRIVERS} <= progs
+    assert not any(p.endswith('wait-usage.c') or p.endswith('audit-precompiles/bin/lake') for p, *_ in REVIEWED_PROGRAM_DRIVERS)
+    assert not any(d.endswith('migrate-optimizer/measure.py') for _, d, *_ in REVIEWED_PROGRAM_DRIVERS)
+    assert not any(p.endswith('serial.toml') for p in progs)
+    D = 'scripts/h62/pf/'; W = D + 'bin/lake'; L = D + 'Run.lean'; C = D + 'tool.c'; V = D + 'drive.py'
+    wrapper = '#!/usr/bin/env bash\nset -euo pipefail\nexec /opt/lake "$@"\n'
+    run_lean = 'import Lean\n/-- def main : IO Unit := pure () -/\ndef helper : Nat := 1\ndef main (args : List String) : IO Unit := do\n  IO.println args\n'
+    tool = '/* int main(void) { return 1; } */\n#include <stdio.h>\nstatic const char *s = "int main(";\nint main(int argc, char **argv) {\n  return argc > 1;\n}\n'
+    driver = ('import os, subprocess\nfrom pathlib import Path\nroot = Path(__file__).resolve().parents[3]\nenv = dict(os.environ)\n'
+              'env.update({"PATH": str(root / "scripts/h62/pf/bin") + ":" + env.get("PATH", "")})\n'
+              'env["PATH"] = str(Path(__file__).with_name("bin").resolve()) + ":" + env["PATH"]\n'
+              'cmd = ["lean", "--run", str(root / "scripts/h62/pf/Run.lean")]\nnote = "scripts/h62/pf/Run.lean"\n'
+              'other = ["lake", str(root / "scripts/h62/pf/bin")]\nsibling = Path(__file__).with_name("bin")\n'
+              'gcc = ["cc", "scripts/h62/pf/tool.c"]\nsubprocess.run(cmd, env=env)\n')
+    add = {W: wrapper, D + 'bin2/lake': wrapper, D + 'nolib/lake': '#!/usr/bin/env bash\nhelper() {\n  return 0\n}\n', L: run_lean, C: tool, V: driver,
+           D + 'Two.lean': run_lean + 'def main : IO Unit := pure ()\n', D + 'commented.c': '/* int main(void) */\nstatic int x;\n',
+           'Lib/Prog.lean': run_lean, D + 'run.sh': wrapper, D + 'gen/.gitignore': 'out.json\n'}
+    for p in (W, D + 'nolib/lake', D + 'run.sh'):  # exec bit in the introducing commit
+        (root / p).parent.mkdir(parents=True, exist_ok=True); (root / p).write_text(add[p]); os.chmod(root / p, 0o755)
+    pf = commit(add, 'program forms'); R = pf.ref
+    pl = commit({'tests/unrelated-pf.txt': 'P\n'}, 'program forms later')
+    entry = max(classifier['entrypoint_lines'](driver.encode()))
+    drive = {'path': V, 'input_revision': R, 'source_blob': blob(pf, V), 'command': ['python3', '-B', V], 'kind': SOURCE_ONLY_KIND,
+             'entry_line': entry, 'purpose': 'Synthetic driver.'}
+    d = lambda line, literal, path=V, repo=pf: {'path': path, 'blob': blob(repo, path), 'line': line, 'literal': literal}
+    faces = {W: {'form': 'bash-wrapper', 'interpreter': 'bash', 'shebang': '#!/usr/bin/env bash', 'entry_line': 2},
+             L: {'form': 'lean-run', 'interpreter': 'lean --run', 'entry_line': 4}, C: {'form': 'c-program', 'interpreter': 'cc', 'entry_line': 4}}
+    drivers = {W: [d(5, D + 'bin'), d(6, 'bin')], L: [d(7, L)], C: []}
+    mk = lambda p, **k: dict({'path': p, 'input_revision': R, 'source_blob': blob(pf, p), 'kind': PROGRAM_FORM_KIND,
+        'command': PROGRAM_FORM_COMMANDS[faces[p]['form']](p), 'interface': faces[p], 'provenance': {'commit': R, 'path': p, 'blob': blob(pf, p)},
+        'drivers': drivers[p], 'purpose': 'Synthetic program form.'}, **k)
+    roles = [mk(p) for p in (W, L, C)]
+    for p, text in ((W, wrapper), (L, run_lean), (C, tool)):  # the interface parser on the measured bytes
+        assert program_form_interface(classifier['lean_code'], p, text, pf.tree[p][0]) == faces[p], p
+    assert pf.tree[W][0] == '100755' and pf.tree[D + 'bin2/lake'][0] == '100644'
+    saved = REVIEWED_PROGRAM_FORMS, REVIEWED_PROGRAM_DRIVERS
+    allp = (W, L, C, D + 'bin2/lake', D + 'nolib/lake', D + 'Two.lean', D + 'commented.c', 'Lib/Prog.lean', D + 'run.sh')
+    REVIEWED_PROGRAM_FORMS = frozenset({(p, blob(pf, p), R) for p in allp})
+    REVIEWED_PROGRAM_DRIVERS = frozenset({(q, V, blob(pf, V), n, lit) for q, n, lit in (
+        (W, 5, D + 'bin'), (W, 6, 'bin'), (L, 7, L), (L, 8, L), (W, 9, D + 'bin'), (W, 10, 'bin'), (C, 11, C), (W, 7, L))})
+    try:
+        base_model, base = run(pl, standalone=[drive])
+        assert all(base[p]['class'] != 'keep' for p in (W, L, C))
+        for repo in (pf, pl):
+            model, rows = run(repo, standalone=[drive] + roles)
+            for r in roles:
+                p = r['path']; e = model['entry_points'][PROGRAM_FORM_PREFIX + p]
+                assert rows[p]['class'] == 'keep' and e['source_only'] and e['program_form_role'] and e['interface'] == faces[p] and e['drivers'] == drivers[p]
+                assert e['validation_at_measured_revision']['status'] == 'unavailable' and e['location'] == p + ':%d' % faces[p]['entry_line']
+                assert e['command'] == shlex.join(r['command'])
+            if repo is pl:  # no execution, read, helper, child or output credit
+                assert all(canonical(x) == canonical(base[p]) for p, x in rows.items() if p not in (W, L, C))
+                assert set(model['entry_points']) == set(base_model['entry_points']) | {PROGRAM_FORM_PREFIX + p for p in (W, L, C)}
+        # The role anchors no route.
+        _, rows = run(pl, {'static_routes': [route(pf, PROGRAM_FORM_PREFIX + L, 'lean-readFile', [frame(pf, L, 5)], 'tests/data.txt')]}, standalone=[drive] + roles)
+        assert rows['tests/data.txt']['class'] != 'keep'
+        Z = '0' * 40; w = roles[0]
+        for change, text in (({'extra': 1}, 'invalid program form'), ({'purpose': ' '}, 'invalid program form'),
+                             ({'drivers': {}}, 'invalid program form'), ({'drivers': [d(5, D + 'bin')] * 2}, 'invalid program form'),
+                             ({'drivers': [dict(d(5, D + 'bin'), line='5')]}, 'invalid program form'),
+                             ({'input_revision': 'HEAD'}, 'full commit revision'), ({'command': ['bash', W]}, 'unsupported program form'),
+                             ({'command': [W, '--x']}, 'unsupported program form'), ({'interface': dict(faces[W], form='script')}, 'unsupported program form'),
+                             ({'interface': dict(faces[W], form=['bash-wrapper'])}, 'unsupported program form'),
+                             ({'source_blob': Z}, 'unreviewed program form role'), ({'provenance': dict(w['provenance'], commit=Z)}, 'unreviewed program form role'),
+                             ({'drivers': [d(4, D + 'bin')]}, 'unreviewed program form role driver'),
+                             ({'drivers': [dict(d(5, D + 'bin'), literal='bin')]}, 'unreviewed program form role driver'),
+                             ({'drivers': [d(9, D + 'bin')]}, 'driver does not name'),  # no PATH literal
+                             ({'drivers': [d(10, 'bin')]}, 'driver does not name'),  # with_name, but no PATH
+                             ({'interface': dict(faces[W], entry_line=3)}, 'interface mismatch'),
+                             ({'provenance': dict(w['provenance'], commit=pl.ref)}, 'unreviewed program form role'),
+                             ({'input_revision': Z}, 'unverifiable historical')):
+            rejected(pf, text, standalone=[drive, dict(w, **change)])
+        rejected(pf, 'unsupported program form', standalone=[drive, mk(L, command=['lean', L])])
+        rejected(pf, 'unsupported program form', standalone=[drive, mk(C, command=['gcc', C])])
+        rejected(pf, 'driver does not name', standalone=[drive, mk(L, drivers=[d(8, L)])])  # no '--run' literal on the line
+        rejected(pf, 'driver does not name', standalone=[drive, mk(C, drivers=[d(11, C)])])  # a C program has no named-driver form
+        rejected(pf, 'driver does not name', standalone=[drive, mk(W, drivers=[d(7, L)])])
+        REVIEWED_PROGRAM_FORMS = REVIEWED_PROGRAM_FORMS | {(W, blob(pf, W), pl.ref)}
+        rejected(pf, 'introducing provenance', standalone=[drive, mk(W, provenance=dict(w['provenance'], commit=pl.ref))])
+        # No exec bit, a sourced library, two mains, a commented main or a suffixed shell file has no program form.
+        for p, face in ((D + 'bin2/lake', faces[W]), (D + 'nolib/lake', faces[W]), (D + 'Two.lean', faces[L]), (D + 'commented.c', faces[C]),
+                        (D + 'run.sh', faces[W])):
+            rejected(pf, 'audited program form',
+                     standalone=[drive, dict(mk(W), path=p, source_blob=blob(pf, p), command=PROGRAM_FORM_COMMANDS[face['form']](p),
+                                             interface=face, provenance={'commit': R, 'path': p, 'blob': blob(pf, p)}, drivers=[])])
+        rejected(pf, 'root library', standalone=[drive, dict(mk(L), path='Lib/Prog.lean', source_blob=blob(pf, 'Lib/Prog.lean'),
+                 command=['lean', '--run', 'Lib/Prog.lean'], provenance={'commit': R, 'path': 'Lib/Prog.lean', 'blob': blob(pf, 'Lib/Prog.lean')}, drivers=[])])
+        # A driver without its python3 -B entry root is refused now and stale later.
+        rejected(pf, 'not a python3 -B entry root', standalone=roles)
+        model, rows = run(pl, standalone=roles)
+        assert PROGRAM_FORM_PREFIX + W not in model['entry_points'] and PROGRAM_FORM_PREFIX + C in model['entry_points']
+        rejected(pf, 'conflicting standalone', standalone=[drive, w, dict(w, purpose='Other.')])
+        # A program form is no Git policy writer: it credits no generated output.
+        policy = {'path': D + 'gen/.gitignore', 'blob': blob(pf, D + 'gen/.gitignore'), 'purpose': 'Synthetic output policy.',
+                  'matches': [{'line': 1, 'output': 'out.json', 'writer': {'path': W, 'blob': blob(pf, W), 'line': 3, 'literal': 'out.json'}}]}
+        rejected(pf, 'not an entry point source', {'git_policies': [policy]}, standalone=[drive, w])
+        for order in (1, -1):  # a current definition supersedes
+            model, _ = run(pl, standalone=[drive, dict(w, input_revision=pl.ref, purpose='Now.'), w][::order])
+            assert model['entry_points'][PROGRAM_FORM_PREFIX + W]['purpose'] == 'Now.'
+        # A changed program or driver drops the root later; a current claim on changed bytes is refused.
+        for changes in ({W: wrapper + '# changed\n'}, {V: driver + '# changed\n'}, {C: tool + '/* changed */\n'}):
+            edited = commit(changes, 'edited')
+            model, rows = run(edited, standalone=[dict(drive, input_revision=edited.ref, source_blob=blob(edited, V))] + roles)
+            for p in changes:
+                if p != V: assert PROGRAM_FORM_PREFIX + p not in model['entry_points'] and rows[p]['class'] != 'keep', p
+            if V in changes: assert PROGRAM_FORM_PREFIX + W not in model['entry_points'] and PROGRAM_FORM_PREFIX + C in model['entry_points']
+            commit({k: add[k] for k in changes}, 'restored')
+        REVIEWED_PROGRAM_FORMS = saved[0]
+        rejected(pf, 'unreviewed program form role', standalone=[drive, w])
+    finally: REVIEWED_PROGRAM_FORMS, REVIEWED_PROGRAM_DRIVERS = saved
+
+
+def source_dependency_controls(env):
+    """(15) H1074 controls, run by successor_controls with its helpers: the
+    reviewed witnesses, the three operations on consumer syntax, the consumer
+    root binding and negative/adversarial controls."""
+    global REVIEWED_SOURCE_DEPENDENCIES, REVIEWED_DEPENDENCY_CONSUMERS
+    commit, run, rejected, blob, route, frame, classifier = (env[k] for k in ('commit', 'run', 'rejected', 'blob', 'route', 'frame', 'classifier'))
+    # The audited witnesses: three inputs, one reviewed operation each; the refused paths stay out.
+    inputs = {p for p, _, _ in REVIEWED_SOURCE_DEPENDENCIES}
+    assert len(REVIEWED_SOURCE_DEPENDENCIES) == len(inputs) == 3 == len(REVIEWED_DEPENDENCY_CONSUMERS)
+    assert inputs == {r[0] for r in REVIEWED_DEPENDENCY_CONSUMERS} and {r[5] for r in REVIEWED_DEPENDENCY_CONSUMERS} == set(DEPENDENCY_OPERATIONS)
+    assert not any(p.endswith(('bulk-manifest.json', 'serial.toml', 'transaction_admission.mjs')) for p in inputs)
+    D = 'scripts/h62/sd/'; P = D + 'migration.patch'; T = D + 'pinned.toml'; O = D + 'out.patch'; U = D + 'unused.patch'
+    A = D + 'accept.py'; G = D + 'gen.py'; B = D + 'gen_bad.py'
+    accept = ("import subprocess\nfrom pathlib import Path\nROOT = Path(__file__).resolve().parents[3]\n"
+              "PATCH = ROOT / 'scripts/h62/sd/migration.patch'\nOTHER = ROOT / 'scripts/h62/sd/unused.patch'\n"
+              "LATER = ROOT / 'scripts/h62/sd/unused.patch'\nLATER = None\n"
+              "subprocess.run(['patch', '--silent', '--output', 'x',\n                'source', str(PATCH)], check=True)\n"
+              "subprocess.run(['echo', str(OTHER)])\n"
+              "subprocess.run([str(ROOT / 'lake'), '-f', 'scripts/h62/sd/pinned.toml', 'build', 'X'])\n"
+              "subprocess.run([str(ROOT / 'lake'), '-f', 'scripts/h62/sd/unused.patch', 'env'])\n"
+              "subprocess.run(['patch', str(LATER)])\n# PATCH = ROOT / 'scripts/h62/sd/unused.patch'\n")
+    gen = ("import argparse, pathlib\np=argparse.ArgumentParser();p.add_argument('--check',action='store_true');a=p.parse_args()\n"
+           "r=pathlib.Path(__file__).resolve().parents[3]\noutputs={r/'scripts/h62/sd/out.patch':'x\\n',\n"
+           "r/'scripts/h62/sd/unused.patch':'y\\n'}\nfor path,text in outputs.items():\n    if a.check:\n"
+           "        assert path.read_text()==text, str(path)\n    else:path.write_text(text)\n")
+    bad = gen.replace("    if a.check:\n        assert path.read_text()==text, str(path)\n    else:path.write_text(text)\n",
+                      "    if a.check:\n        path.write_text(text)\n    else:assert path.read_text()==text\n")
+    add = {P: '--- a\n+++ b\n', T: 'name = "x"\n', O: 'x\n', U: 'y\n', A: accept, G: gen, B: bad}
+    sd = commit(add, 'source dependencies'); R = sd.ref; sl = commit({'tests/unrelated-sd.txt': 'S\n'}, 'source dependencies later')
+    program = lambda path, repo=sd: {'path': path, 'input_revision': R, 'source_blob': blob(repo, path), 'command': ['python3', '-B', path],
+        'kind': SOURCE_ONLY_KIND, 'entry_line': min(classifier['entrypoint_lines'](add[path].encode())), 'purpose': 'Synthetic consumer.'}
+    ops = {P: (A, 4, 9, 'patch-input'), T: (A, 11, 11, 'lake-config'), O: (G, 4, 8, 'check-read')}
+    mk = lambda p, consumer=None, **k: dict({'path': p, 'input_revision': R, 'source_blob': blob(sd, p), 'kind': SOURCE_DEP_KIND,
+        'command': ['python3', '-B', (consumer or ops[p])[0]], 'interface': {'operation': (consumer or ops[p])[3]},
+        'provenance': {'commit': R, 'path': p, 'blob': blob(sd, p)},
+        'consumer': {'path': (consumer or ops[p])[0], 'blob': blob(sd, (consumer or ops[p])[0]), 'literal_line': (consumer or ops[p])[1],
+                     'operation_line': (consumer or ops[p])[2]}, 'purpose': 'Synthetic input.'}, **k)
+    roles = [mk(p) for p in (P, T, O)]; consumers = [program(A), program(G), program(B)]
+    for p, (c, ll, ol, op) in ops.items():  # the operation parser on the measured bytes, and its adversarial twins
+        assert dependency_operation(add[c], p, ll, ol, op) and not dependency_operation(add[c], p, ll, ol + 1, op), p
+        assert not any(dependency_operation(add[c], p, ll, ol, other) for other in DEPENDENCY_OPERATIONS if other != op), p
+    for args in ((U, 5, 10, 'patch-input'),   # bound name never patched (echo only)
+                 (U, 6, 13, 'patch-input'),   # rebound name
+                 (U, 12, 12, 'lake-config'),  # -f without build
+                 (P, 4, 9, 'lake-config'), (T, 11, 11, 'check-read')):
+        assert not dependency_operation(accept, *args), args
+    assert not dependency_operation(bad, O, 4, 8, 'check-read') and not dependency_operation(bad, O, 4, 9, 'check-read')
+    assert not dependency_operation('def broken(:\n', P, 1, 1, 'patch-input')
+    head = "import subprocess\nfrom pathlib import Path\nROOT = Path('.')\nPATCH = ROOT / 'scripts/h62/sd/migration.patch'\n"
+    assert dependency_operation(head + "subprocess.run(['patch', str(PATCH)])\n", P, 4, 5, 'patch-input')
+    for tail in ("def f(PATCH): subprocess.run(['patch', str(PATCH)])\n", "try: pass\nexcept Exception as PATCH:\n subprocess.run(['patch', str(PATCH)])\n",
+                 "print(['patch', str(PATCH)])\n", "def g():\n global PATCH\n PATCH = 1\nsubprocess.run(['patch', str(PATCH)])\n"):
+        n = len((head + tail).split('\n')) - 1
+        assert not dependency_operation(head + tail, P, 4, n, 'patch-input'), tail
+    assert not dependency_operation(head.replace("ROOT / ", "Path('/tmp') / ") + "subprocess.run(['patch', str(PATCH)])\n", P, 4, 5, 'patch-input')
+    assert not dependency_operation("x = [f('lake') and 'rm', '-f', 'scripts/h62/sd/pinned.toml', 'build']\n", T, 1, 1, 'lake-config')
+    assert dependency_operation("x = ['lake', '-f', 'scripts/h62/sd/pinned.toml', 'build']\n", T, 1, 1, 'lake-config')
+    saved = REVIEWED_SOURCE_DEPENDENCIES, REVIEWED_DEPENDENCY_CONSUMERS
+    REVIEWED_SOURCE_DEPENDENCIES = frozenset({(p, blob(sd, p), R) for p in (P, T, O, U)})
+    REVIEWED_DEPENDENCY_CONSUMERS = frozenset({(p, c, blob(sd, c), ll, ol, op) for p, (c, ll, ol, op) in ops.items()}
+        | {(U, A, blob(sd, A), 5, 10, 'patch-input'), (U, A, blob(sd, A), 12, 12, 'lake-config'), (O, B, blob(sd, B), 4, 9, 'check-read'),
+           (U, A, blob(sd, A), 6, 13, 'patch-input')})
+    try:
+        base_model, base = run(sl, standalone=consumers)
+        assert all(base[p]['class'] != 'keep' for p in (P, T, O)) and all(base[c]['class'] == 'keep' for c in (A, G))
+        for repo in (sd, sl):
+            model, rows = run(repo, standalone=consumers + roles)
+            for r in roles:
+                p = r['path']; e = model['entry_points'][SOURCE_DEP_PREFIX + p]
+                assert rows[p]['class'] == 'keep' and e['source_only'] and e['source_dependency_role'] and e['consumer'] == r['consumer']
+                assert e['interface'] == {'operation': ops[p][3], 'description': DEPENDENCY_OPERATIONS[ops[p][3]]}
+                assert e['validation_at_measured_revision']['status'] == 'unavailable' and e['location'] == '%s:%d' % (ops[p][0], ops[p][2])
+            if repo is sl:  # the consumers' records and every other record are unchanged
+                assert all(canonical(x) == canonical(base[p]) for p, x in rows.items() if p not in (P, T, O))
+                assert set(model['entry_points']) == set(base_model['entry_points']) | {SOURCE_DEP_PREFIX + p for p in (P, T, O)}
+        # The role anchors no route.
+        _, rows = run(sl, {'static_routes': [route(sd, SOURCE_DEP_PREFIX + P, 'node-import', [frame(sd, P, 1)], 'tests/data.txt')]}, standalone=consumers + roles)
+        assert rows['tests/data.txt']['class'] != 'keep'
+        Z = '0' * 40; m = roles[0]
+        for change, text in (({'extra': 1}, 'invalid source dependency'), ({'purpose': ' '}, 'invalid source dependency'),
+                             ({'consumer': dict(m['consumer'], extra=1)}, 'invalid source dependency'),
+                             ({'consumer': dict(m['consumer'], literal_line='4')}, 'invalid source dependency'),
+                             ({'interface': {'operation': 'patch-input', 'x': 1}}, 'invalid source dependency'),
+                             ({'input_revision': 'HEAD'}, 'full commit revision'), ({'interface': {'operation': 'read'}}, 'unsupported source dependency'),
+                             ({'interface': {'operation': ['patch-input']}}, 'unsupported source dependency'),
+                             ({'command': ['python3', A]}, 'unsupported source dependency'),
+                             ({'source_blob': Z}, 'unreviewed source dependency role'), ({'provenance': dict(m['provenance'], commit=Z)}, 'unreviewed source dependency role'),
+                             ({'consumer': dict(m['consumer'], operation_line=10)}, 'unreviewed source dependency role consumer'),
+                             ({'consumer': dict(m['consumer'], blob=Z)}, 'unreviewed source dependency role consumer'),
+                             ({'interface': {'operation': 'lake-config'}}, 'unreviewed source dependency role consumer'),
+                             ({'input_revision': Z}, 'unverifiable historical')):
+            rejected(sd, text, standalone=consumers + [dict(m, **change)])
+        # Reviewed rows whose consumer does not perform the operation are refused on the bytes.
+        for row in (mk(U, (A, 5, 10, 'patch-input')), mk(U, (A, 12, 12, 'lake-config')), mk(U, (A, 6, 13, 'patch-input')), mk(O, (B, 4, 9, 'check-read'))):
+            rejected(sd, 'does not perform its operation', standalone=consumers + [row])
+        # Programs are refused as inputs; a consumer that is no python3 -B entry root is refused now and stale later.
+        rejected(sd, 'unsupported source dependency', standalone=[dict(mk(P), path=A, source_blob=blob(sd, A), provenance={'commit': R, 'path': A, 'blob': blob(sd, A)})])
+        rejected(sd, 'not a python3 -B entry root', standalone=roles)
+        model, rows = run(sl, standalone=roles)
+        assert not any(k.startswith(SOURCE_DEP_PREFIX) for k in model['entry_points']) and rows[P]['class'] != 'keep'
+        REVIEWED_SOURCE_DEPENDENCIES = REVIEWED_SOURCE_DEPENDENCIES | {(P, blob(sd, P), sl.ref)}
+        rejected(sd, 'introducing provenance', standalone=consumers + [mk(P, provenance=dict(m['provenance'], commit=sl.ref))])
+        rejected(sd, 'conflicting standalone', standalone=consumers + [m, dict(m, purpose='Other.')])
+        for order in (1, -1):  # a current definition supersedes
+            model, _ = run(sl, standalone=consumers + [dict(m, input_revision=sl.ref, purpose='Now.'), m][::order])
+            assert model['entry_points'][SOURCE_DEP_PREFIX + P]['purpose'] == 'Now.'
+        rejected(sd, 'invalid source dependency', standalone=consumers + [dict(m, consumer=None)])
+        # A changed input or consumer drops the root later; a current claim on changed bytes is refused.
+        for changes in ({P: '--- c\n+++ d\n'}, {A: accept + '# changed\n'}):
+            edited = commit(changes, 'edited')
+            cur = [dict(c, input_revision=edited.ref, source_blob=blob(edited, c['path'])) for c in consumers]
+            model, rows = run(edited, standalone=cur + [m])
+            assert SOURCE_DEP_PREFIX + P not in model['entry_points'] and rows[P]['class'] != 'keep', changes
+            if P in changes: rejected(edited, 'source mismatch', standalone=cur + [dict(m, input_revision=edited.ref)])
+            commit({k: add[k] for k in changes}, 'restored')
+        REVIEWED_SOURCE_DEPENDENCIES = saved[0]
+        rejected(sd, 'unreviewed source dependency role', standalone=consumers + [m])
+    finally: REVIEWED_SOURCE_DEPENDENCIES, REVIEWED_DEPENDENCY_CONSUMERS = saved
