@@ -200,6 +200,37 @@ example {source target relates allocations} :
       RelatesReturnFamily (loopBoundary source target relates allocations) :=
   (contract_reference_iff _ _).trans loopResidual_iff
 
+/-- With the policies (H1021), the simulation (H1022) and the allocation
+trace (H1023) fixed, and for a state relation that reflects Booleans and
+relates `false` to `false`, the contract is three obligations: the two e1
+family obligations are theorems. -/
+example {rel : (E : Source.Env) → (C : Contract) → Simulation.StateRelation E C}
+    (reflect : ∀ E C H (v : Source.Val E.layout .bool) (b : Bool),
+      (rel E C).val H .bool (.val .bool) v b → v = .bool b)
+    (falseRel : ∀ E C H, (rel E C).val H .bool (.val .bool) (.bool false) false) :
+    LowerLoopsCorrectContract (loopBoundaryAt rel) (loopBoundaryAt rel).reference Decode.decode ↔
+      (∀ r : Request, r.Succeeds → ∃ s, Decode.decode r = some s) ∧
+      (∀ (r : Request) o after parts program, r.pipeline o after parts program →
+        SafeSpellings r.input.names (Allocation.scope r o after).protectedNames
+          (Allocation.scope r o after).generated) ∧
+      (∀ (r : Request) o after parts program s, Decode.decode r = some s →
+        r.pipeline o after parts program →
+        Simulation.Simulates rel s program ∧
+          Nonempty (Solidity.Roadmap.G49Final.PassCorrect (Observe.source s).behaviour
+            (Observe.target program).behaviour)) :=
+  (contract_reference_iff _ _).trans (loopResidualAt_iff reflect falseRel)
+
+/-- The first-completion observation keeps an outcome once seen, and sees
+nothing before it. -/
+example : Observe.first (fun n => if n = 2 then some (.success []) else none) 1 = none := rfl
+example : Observe.first (fun n => if n = 2 then some (.success []) else none) 5 =
+    some (.success []) := rfl
+
+/-- The generated identifiers are those in the counter interval only. -/
+example : Allocation.generated ⟨fun s n => s ++ toString n,
+      fun s => if s = "brk1" then some ("brk", 1) else if s = "se7" then some ("se", 7) else none⟩
+    1 3 ["i", "brk1", "se7"] = [("brk", 1)] := by decide
+
 end Decoder
 
 end Solidity.Goals

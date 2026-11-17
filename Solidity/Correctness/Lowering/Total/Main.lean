@@ -45,8 +45,14 @@ The concrete boundary is begun below, not finished:
   review and on the `pipeline` field, once `relates` and the policies exist.
 * `loopBoundary_fullDomain` and `loopResidual_iff` state what is left once
   admission and association are fixed.
-* The observation policies, `relates` and the allocation trace are arguments
-  of `loopBoundary`: no concrete one is chosen here.
+* `Observe.source`/`Observe.target` are the observation policies (H1021): no
+  events, the kind of the outcome at the first completing horizon.
+* `Simulation.Simulates rel` is `relates` (H1022): one general simulation,
+  from which the e1 endpoints are derived (`of_endpoint`, `of_retEndpoint`).
+  It is relative to a state relation `rel`; no concrete one exists yet.
+* `Allocation.trace` is the allocation trace (H1023): one scope per run.
+* `loopBoundaryAt rel` assembles them, and `loopResidualAt_iff` gives the three
+  obligations left; both family obligations are theorems there.
 
 Not proved, and partly not provable yet: the fields `allocation` and `pipeline`
 take as hypothesis a successful run of `elabStmtsP` and, for a callee, of
@@ -613,6 +619,117 @@ def trace (r : Request) (o : ProductionOutput) (after : Checker.Snapshot)
 
 end Allocation
 
+/-! ## The general simulation (H1022)
+
+One relation for every decoded program and its elaborated block, in place of
+the e1 endpoints by cases; the endpoints are derived from it below. It is
+relative to a state relation `rel` (values and globals): no concrete Source to
+model global-state relation exists yet, so none is chosen here. It speaks of
+runs under the default execution plan only. -/
+namespace Simulation
+
+/-- A Source/model state relation: values at each heap typing, and the
+globals (the model state without its locals). -/
+structure StateRelation (E : Source.Env) (C : Contract) where
+  val : (H : HTy) → (τ : Source.STy) → (u : LTy) → Source.Val E.layout τ → u.TDenote C H → Prop
+  glob : Source.St E → State C [] → Prop
+
+/-- Final matching of a Source result and a model result. Normal completion
+relates the final locals through `m'`; a `return` relates the entry locals
+through the block's context extension; both relate the globals. A revert keeps
+its data, a panic only its kind (the intrinsic halt has no code). A Source
+timeout matches model divergence. Nothing else matches: an escaping `break` or
+`continue`, a stuck Source run, model exhaustion. -/
+def Final {s : SourceProgram} {C : Contract} {Γ Δ : Ctx} {H : HTy}
+    (rel : StateRelation s.env C) (m : Lowering.V07.ContextMap s.before Γ)
+    (m' : Lowering.V07.ContextMap s.after Δ) (emb : Thin Γ Δ)
+    (src : SourceResult s) (tgt : TRes (Out C H Δ)) : Prop :=
+  match src.1, tgt with
+  | .ok (.normal ls), .ok o => m'.Related (rel.val o.st.H) ls o.st.env ∧ rel.glob src.2.2 o.st.glob
+  | .ok (.ret ls), .ok o =>
+    (m.wk emb).Related (rel.val o.st.H) ls o.st.env ∧ rel.glob src.2.2 o.st.glob
+  | .error (.revert d), .error h => h = THalt.ofData d ∨ (h = .panic ∧ ∃ c, d = Source.panicData c)
+  | .error .timeout, .error .diverge => True
+  | _, _ => False
+
+/-- **The simulation.** From related states, at every horizon from some point
+on, the Source result matches the model's one result. A Source run that times
+out at every horizon is matched only by a diverging model run, so this is both
+directions at once. -/
+def Simulates (rel : (E : Source.Env) → (C : Contract) → StateRelation E C)
+    (s : SourceProgram) {C : Contract} {Γ : Ctx} (p : Blk C Γ) : Prop :=
+  ∃ (m : Lowering.V07.ContextMap s.before Γ) (m' : Lowering.V07.ContextMap s.after p.1)
+    (emb : Thin Γ p.1),
+    ∀ (e : SourceExecution s) (tgt : State C Γ), e.plan = none → e.calldataKnown = true →
+      m.Related ((rel s.env C).val tgt.H) e.initial.1 tgt.env →
+      (rel s.env C).glob e.initial.2 tgt.glob →
+      ∃ N, ∀ n, Final (rel s.env C) m m' emb (e.result (n + N)) (p.2.run tgt)
+
+/-- A block of one statement runs as the statement, one horizon later. -/
+theorem execItems_single {E : Source.Env} (G : Source.Glob E) (F : Source.Fr) (n nps : Nat)
+    (ph : Option (Source.Ph E)) {R : List Source.STy} {M : Bool} {k : Source.SCtx}
+    {Γ Γ' : Source.RCtx} (s : Source.RStmt E R M k Γ Γ') (l : Source.Locals E.layout Γ)
+    (σ σ' : Source.Locals E.layout [] × Source.St E) (o : Source.Out E.layout Γ Γ')
+    (h : (Source.execS G F n nps ph s l).run σ = (.ok o, σ')) :
+    (Source.execItems G F (n + 1) nps ph (.stmt s .nil) l).run σ = (.ok o, σ') := by
+  cases n with
+  | zero => simp [Source.execS, Source.EM.halt] at h; cases h
+  | succ n =>
+    rw [Source.execItems]
+    simp only [bind, ExceptT.bind, ExceptT.mk, ExceptT.run, StateT.bind, ExceptT.bindCont] at h ⊢
+    rw [h]
+    cases o <;> rfl
+
+variable {rel : (E : Source.Env) → (C : Contract) → StateRelation E C}
+
+/-- The e1 normal endpoint is an instance of the simulation, for every state
+relation that reflects Booleans and relates `false` to `false`. -/
+theorem of_endpoint
+    (reflect : ∀ E C H (v : Source.Val E.layout .bool) (b : Bool),
+      (rel E C).val H .bool (.val .bool) v b → v = .bool b)
+    (falseRel : ∀ E C H, (rel E C).val H .bool (.val .bool) (.bool false) false)
+    {E : Source.Env} {srcΓ : Source.RCtx} {returns : List Source.STy} {M : Bool}
+    {k : Source.SCtx} {C : Contract} {Γ Δ : Ctx}
+    {statement : Source.RStmt E returns M k srcΓ srcΓ} {offset : Nat}
+    {m : Lowering.V07.ContextMap srcΓ Γ} {program : Prog C Γ Δ} {emb : Thin Γ Δ}
+    (h : Loops.Endpoint statement offset m program emb) :
+    Simulates rel (SourceProgram.ofStmt statement) (⟨Δ, program⟩ : Blk C Γ) := by
+  refine ⟨m, m.wk emb, emb, fun e tgt plan known related glob => ⟨offset + 1, fun n => ?_⟩⟩
+  obtain ⟨G, F, nps, ph, initial, plan', known'⟩ := e
+  cases plan
+  cases known
+  obtain ⟨ls, out, run, target, post, same⟩ :=
+    h G F n nps ph initial tgt (rel E C).val related (reflect E C) (falseRel E C)
+  have step := execItems_single G F (n + offset) nps ph statement initial.1 _ _ _ run
+  simp only [Final, SourceExecution.result, SourceProgram.ofStmt]
+  rw [show n + (offset + 1) = n + offset + 1 from rfl, step, target]
+  exact ⟨post, same ▸ glob⟩
+
+/-- The e1 return endpoint is an instance of the simulation as well: the
+returned flag only selects which of its two matching cases applies. -/
+theorem of_retEndpoint
+    (reflect : ∀ E C H (v : Source.Val E.layout .bool) (b : Bool),
+      (rel E C).val H .bool (.val .bool) v b → v = .bool b)
+    (falseRel : ∀ E C H, (rel E C).val H .bool (.val .bool) (.bool false) false)
+    {E : Source.Env} {srcΓ : Source.RCtx} {M : Bool} {k : Source.SCtx} {C : Contract}
+    {Γ Δ : Ctx} {statement : Source.RStmt E [] M k srcΓ srcΓ} {offset : Nat}
+    {m : Lowering.V07.ContextMap srcΓ Γ} {program : Prog C Γ Δ} {emb : Thin Γ Δ}
+    {witness : Idx Δ (.val .bool)}
+    (h : Loops.RetEndpoint statement offset m program emb witness) :
+    Simulates rel (SourceProgram.ofStmt statement) (⟨Δ, program⟩ : Blk C Γ) := by
+  refine ⟨m, m.wk emb, emb, fun e tgt plan known related glob => ⟨offset + 1, fun n => ?_⟩⟩
+  obtain ⟨G, F, nps, ph, initial, plan', known'⟩ := e
+  cases plan
+  cases known
+  obtain ⟨ls, returned, out, run, target, _, post, same⟩ :=
+    h G F n nps ph initial tgt (rel E C).val related (reflect E C) (falseRel E C)
+  have step := execItems_single G F (n + offset) nps ph statement initial.1 _ _ _ run
+  simp only [Final, SourceExecution.result, SourceProgram.ofStmt]
+  rw [show n + (offset + 1) = n + offset + 1 from rfl, step, target]
+  cases returned <;> exact ⟨post, same ▸ glob⟩
+
+end Simulation
+
 /-! ## The concrete boundary, as far as the decoder fixes it
 
 Admission and association are fixed here: every request whose whole pipeline
@@ -679,5 +796,70 @@ theorem loopResidual_iff {source target relates allocations} :
       fun r o after parts program _ run => allocation r o after parts program run,
       fun r o after parts program s _ d run => pipeline r o after parts program s d run,
       normal, returns⟩
+
+/-! ## The boundary at a state relation
+
+Policies (H1021), simulation (H1022) and allocation trace (H1023) are now
+fixed; only the state relation `rel` is still an argument. -/
+
+/-- The concrete boundary at a state relation. -/
+def loopBoundaryAt (rel : (E : Source.Env) → (C : Contract) → Simulation.StateRelation E C) :
+    SemanticBoundary :=
+  loopBoundary Observe.source (fun p => Observe.target p)
+    (fun s _ _ p => Simulation.Simulates rel s p) Allocation.trace
+
+variable {rel : (E : Source.Env) → (C : Contract) → Simulation.StateRelation E C}
+
+/-- The e1 normal family is related: derived from its endpoint theorem. -/
+theorem loopBoundaryAt_normal
+    (reflect : ∀ E C H (v : Source.Val E.layout .bool) (b : Bool),
+      (rel E C).val H .bool (.val .bool) v b → v = .bool b)
+    (falseRel : ∀ E C H, (rel E C).val H .bool (.val .bool) (.bool false) false) :
+    RelatesNormalFamily (loopBoundaryAt rel) := by
+  intro k E srcΓ returns M l u C Γ m pair extra names
+  obtain ⟨embedding, endpoint⟩ := normalFamily_correct k (returns := returns) (M := M)
+    (l := l) (u := u) m pair extra names (k.lowered pair extra names) rfl
+  exact Simulation.of_endpoint reflect falseRel endpoint
+
+/-- The e1 return family is related: derived from its endpoint theorem. -/
+theorem loopBoundaryAt_returns
+    (reflect : ∀ E C H (v : Source.Val E.layout .bool) (b : Bool),
+      (rel E C).val H .bool (.val .bool) v b → v = .bool b)
+    (falseRel : ∀ E C H, (rel E C).val H .bool (.val .bool) (.bool false) false) :
+    RelatesReturnFamily (loopBoundaryAt rel) := by
+  intro k E srcΓ M l u C Γ m pair extra names
+  exact Simulation.of_retEndpoint reflect falseRel
+    (returnFamily_correct k (M := M) (l := l) (u := u) m pair extra names)
+
+/-- **What is left at the boundary**, for a state relation that reflects
+Booleans and relates `false` to `false`: the decoder is defined on every
+successful request; the run's one allocation scope is safe; and each
+successful pipeline simulates its decoded program and refines it under the
+policies. The two family obligations are discharged. -/
+theorem loopResidualAt_iff
+    (reflect : ∀ E C H (v : Source.Val E.layout .bool) (b : Bool),
+      (rel E C).val H .bool (.val .bool) v b → v = .bool b)
+    (falseRel : ∀ E C H, (rel E C).val H .bool (.val .bool) (.bool false) false) :
+    Residual (loopBoundaryAt rel) Decode.decode ↔
+      (∀ r : Request, r.Succeeds → ∃ s, Decode.decode r = some s) ∧
+      (∀ (r : Request) o after parts program, r.pipeline o after parts program →
+        SafeSpellings r.input.names (Allocation.scope r o after).protectedNames
+          (Allocation.scope r o after).generated) ∧
+      (∀ (r : Request) o after parts program s, Decode.decode r = some s →
+        r.pipeline o after parts program →
+        Simulation.Simulates rel s program ∧
+          Nonempty (PassCorrect (Observe.source s).behaviour
+            (Observe.target program).behaviour)) := by
+  refine loopResidual_iff.trans ⟨fun ⟨covered, allocation, pipeline, _, _⟩ =>
+    ⟨covered, fun r o after parts program run => ?_, pipeline⟩,
+    fun ⟨covered, allocation, pipeline⟩ =>
+      ⟨covered, fun r o after parts program run =>
+        ⟨_, rfl, fun scope member => ?_⟩, pipeline,
+        loopBoundaryAt_normal reflect falseRel, loopBoundaryAt_returns reflect falseRel⟩⟩
+  · obtain ⟨scopes, trace, safe⟩ := allocation r o after parts program run
+    cases trace
+    exact safe _ (List.mem_singleton.mpr rfl)
+  · cases List.mem_singleton.mp member
+    exact allocation r o after parts program run
 
 end Solidity.Correctness.Lowering.Total
