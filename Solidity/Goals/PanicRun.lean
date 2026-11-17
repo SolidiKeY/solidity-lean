@@ -8,14 +8,12 @@ A component of finish-line goal 5 (`runCarriesPanicCodes`): what the actual
 runner `Panic.Run.program` / `Panic.Run.stmt` returns, for every contract,
 context, state and program. No conjunct restricts the admitted programs.
 
-This component is already proved: every conjunct is a theorem of
-`Run/Contracts.lean`, `Run/Loop.lean`, `Run/Calls.lean` or `Eval.lean`, and
-`run_outcomes` below assembles them by name, so the two cannot drift apart.
+Already proved: `run_outcomes` below assembles the existing runner lemmas by
+name, so statement and lemmas cannot drift apart.
 
 Not claimed: whole-program erasure of this runner to the V1 run. It is false:
 self-catch binds the executed callee's code (1 for a false assertion) where
-V1 binds the oracle's (e.g. 17). Only the local projections of expressions,
-paths, sources and arguments are stated (`erase`, the last conjuncts).
+V1 binds the oracle's (e.g. 17). Only local projections are stated (`erase`).
 -/
 
 namespace Solidity.Goals
