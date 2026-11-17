@@ -85,11 +85,8 @@ theorem inputs_hashed (done : ∃ n, (s.observed n).result ≠ .error .diverge) 
       (∀ b ∈ (s.observed n).inputs.hashed, b ∈ hashed F s.start e r) ∧
       ∀ b ∈ (s.observed n).inputs.slots, b ∈ slotHashed F s.start e r := by
   obtain ⟨n, result, inputs⟩ := Frame.inputs_call done
-  refine ⟨n, result, fun b mem => frame_hashed s.ran ?_, fun b mem => frame_slotHashed s.ran ?_⟩
-  · rw [show s.frame.inputs = (s.observed n).inputs from inputs]
-    exact mem
-  · rw [show s.frame.inputs = (s.observed n).inputs from inputs]
-    exact mem
+  exact ⟨n, result, fun b mem => frame_hashed s.ran (inputs ▸ mem),
+    fun b mem => frame_slotHashed s.ran (inputs ▸ mem)⟩
 
 /-- **A reverting transaction keeps its inputs**: when the frame reverts, the
 actual call reverts and what the frame hashed before is accounted for. -/
@@ -103,15 +100,12 @@ example {n : Nat} (reverts : (s.observed n).result = .error .revert) :
   exact ⟨m, actual.symm.trans reverts, result.trans (actual.symm.trans reverts), mem⟩
 
 /-- **`slotHashed` contains `stored` of the resumed world**, at every bound,
-the empty one included, and so does `hashed`. -/
-example (r' : Bound) (b : Bytes) (mem : b ∈ IntrinsicStorage.stored w) :
-    b ∈ slotHashed F s.start e r' ∧ b ∈ hashed F s.start e r' :=
-  ⟨stored_slotHashed mem, slotHashed_sub (stored_slotHashed mem)⟩
-
-/-- The same through the spec and its view. -/
+the empty one included, and so does `hashed`; the same through the view. -/
 example (r' : Bound) (b : Bytes) (mem : b ∈ (view F).stored ⟨code, w⟩) :
-    b ∈ (spec F).slotHashed ((spec F).ofWorld ((view F).resume ⟨code, w⟩)) e r' :=
-  stored_resume F ⟨code, w⟩ e r' mem
+    b ∈ (spec F).slotHashed ((spec F).ofWorld ((view F).resume ⟨code, w⟩)) e r' ∧
+      b ∈ slotHashed F s.start e r' ∧ b ∈ hashed F s.start e r' :=
+  have slot := stored_resume F ⟨code, w⟩ e r' mem
+  ⟨slot, slot, slotHashed_sub slot⟩
 
 /-- **The session is not event-free**: a frame that returns `d` shows the
 transaction with `success d`. -/
@@ -145,8 +139,7 @@ example {h : List Event} {t : TypedWorld} (other : (view F).Boundary s.start e h
     (view F).Boundary s.start e [] 0 ⟨code, w⟩ ∧ h = [] ∧ t = ⟨code, w⟩ ∧
       t.code = code ∧ (view F).typed ((view F).resume t) = t ∧ (spec F).fixed = F :=
   have here := Boundary.resume F ⟨code, w⟩ e
-  ⟨here, (other.unique here).1, (other.unique here).2, other.code, Start.typed_resume t,
-    spec_fixed F⟩
+  ⟨here, (other.unique here).1, (other.unique here).2, other.code, Start.typed_resume t, rfl⟩
 
 /-- A larger bound extends the preimages, the slot preimages and the listed
 worlds. -/

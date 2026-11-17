@@ -213,8 +213,6 @@ noncomputable def spec (F : Fixed) : IntrinsicSpec where
   forward_iff _ _ _ := Iff.rfl
   guard_iff _ _ _ := Iff.rfl
 
-theorem spec_fixed (F : Fixed) : (spec F).fixed = F := rfl
-
 /-- A larger bound extends the listed worlds. -/
 theorem worlds_consistent (le : r ≤ r') : (spec F).worlds x e r <+: (spec F).worlds x e r' :=
   (worlds_mono _ _ _ _ F wire x.world e le).map _
