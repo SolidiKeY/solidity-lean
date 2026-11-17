@@ -99,7 +99,7 @@ private partial def evalEqsE (goal : Bool) (φ : Expr) : MetaM Expr := do
     let tot ← mkAppM ``Bool.or #[← mkAppM ``Tm.totB #[a], ← mkAppM ``Tm.totB #[b]]
     let rflT := mkApp2 (mkConst ``Eq.refl [1]) (mkConst ``Bool) (mkConst ``Bool.true)
     -- an equation of atoms, which the closer reads by value as it stands
-    -- (`CloseS.holds_eq`, `CloseS.denote_pvV`, …); a capture's own is marked
+    -- (`holds_eq`, `CloseS.denote_pvV`, …); a capture's own is marked
     -- (`Fml.eqCap`, `CloseS.holds_eqAtom`)
     if (← atomE? a).isSome && (← atomE? b).isSome then return φ
     if ← evalBoolE ag then
@@ -314,7 +314,7 @@ elab "sol_close_save_write" : tactic => withMainContext do
       CloseS.havoc_storage, CloseS.Landed.storage_eq, CloseS.glob_storage,
       CloseS.withStorage_storage, CloseS.globG_val, State.locV_push, CloseS.push_here,
       CloseS.vden_val, Option.some.injEq, Path.index_dyn, Path.index_fixed, Path.index_map,
-      CloseS.app_ref]))
+      SLoc.app_ref]))
   let (_, g) ← (← getMainGoal).introNP fs.size
   let mut g := g
   let mut writes := 0

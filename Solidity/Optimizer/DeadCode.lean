@@ -77,11 +77,6 @@ def Prog.cut {Γ : Ctx} : {Δ : Ctx} → Prog C Γ Δ → (Δ' : Ctx) × Prog C 
 abbrev scopeRun {Γ Δ : Ctx} (P : Prog C Γ Δ) (σ : State C Γ) : TRes (Out C σ.H Γ) :=
   (Prog.runC P σ).map fun o => ⟨o.st.drop P.ext, o.ext⟩
 
-private theorem drop_trans {H : HTy} {Γ Δ : Ctx} (a : Ext Γ Δ) : {Ε : Ctx} → (b : Ext Δ Ε) →
-    (e : TEnv C H Ε) → TEnv.drop (a.trans b) e = TEnv.drop a (TEnv.drop b e)
-  | _, .refl, _ => rfl
-  | _, .push b, e => drop_trans a b e.2
-
 theorem scopeRun_cons {Γ Γ₁ Δ : Ctx} (s : Stmt C Γ Γ₁) (P : Prog C Γ₁ Δ) (σ : State C Γ) :
     scopeRun (.cons s P) σ =
       match Stmt.runC s σ with

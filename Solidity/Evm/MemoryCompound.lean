@@ -14,18 +14,10 @@ namespace Solidity.Evm.Memory
 
 variable {C : Contract} {Γ : Ctx}
 
-private theorem compound_accepts {op : BinOp} (hop : op.hasCompoundAssign = true)
-    {p : PrimTy} (hp : p.isNumeric = true) : op.accepts p = true := by
-  cases op <;> first | exact absurd hop (by decide) | exact hp
-
-private theorem compound_ret {op : BinOp} (hop : op.hasCompoundAssign = true)
-    (p : PrimTy) : op.ret p = p := by
-  cases op <;> first | exact absurd hop (by decide) | rfl
-
 /-- A numeric compound operator in the existing value language. -/
 def compoundValue {p : PrimTy} (op : BinOp) (hop : op.hasCompoundAssign = true)
     (hp : p.isNumeric = true) (x y : Val C Γ p) : Val C Γ p :=
-  .binop op (compound_accepts hop hp) (compound_ret hop p) x y
+  .binop op (BinOp.compound_accepts hop hp) (BinOp.compound_ret hop p) x y
 
 theorem compoundValue_eval {p : PrimTy} (σ : State C Γ) (op : BinOp)
     (hop : op.hasCompoundAssign = true) (hp : p.isNumeric = true) (x y : Val C Γ p) :
@@ -105,8 +97,8 @@ def incrementOne {p : PrimTy} (hp : p.isNumeric = true) : Val C Γ p :=
   .simple (.lit 1 (by cases p <;> first | rfl | cases hp))
 
 /-- Both bump directions have an existing compound-assignment certificate. -/
-theorem increment_compound (op : IncDec) : op.binOp.hasCompoundAssign = true := by
-  cases op <;> rfl
+theorem increment_compound (op : IncDec) : op.binOp.hasCompoundAssign = true :=
+  Solidity.IncDec.binOp_compound ..
 
 /-- Range checking is identical to checked addition or subtraction by one. -/
 theorem bumpT_compound (op : IncDec) (p : PrimTy) (v : Int) :
