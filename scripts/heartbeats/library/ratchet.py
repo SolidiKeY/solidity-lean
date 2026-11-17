@@ -16,10 +16,12 @@ Baselines: Solidity.tsv and SolidityExamples.tsv beside this file, one line
 `module<TAB>units` per module of that library root (units as in `maxHeartbeats`:
 raw / 1000, rounded). Generated; never edit them by hand.
 
-`build` is the gate's own `lake build` with two more weak arguments
-(`-DElab.async=false`, so kernel checking counts, and `--plugin` HeartbeatLinter),
+`build` is the gate's own `lake build` with three more weak arguments (`-j1` and
+`-DElab.async=false`, so kernel checking counts, and `--plugin` HeartbeatLinter),
 given through a copy of lakefile.toml; they change neither a build hash nor the
-`.olean` that the same arguments without the plugin produce. Each module Lean
+`.olean` that the same arguments without the plugin produce. A module that fails this
+way (a pinned `maxHeartbeats` proof can, since kernel checking now counts) is
+built as the plain gate builds it and gets no record. Each module Lean
 compiles writes DIR/records/<Module>.tsv: `first line, last line, raw heartbeats,
 kind and name` per command. Records are also kept by Lake input hash, so a module
 that a later build takes from Lake's cache still has its count. A target with no
@@ -68,7 +70,7 @@ class Tools:
                 leanc = os.path.join(os.path.dirname(self.lean), "leanc")
                 subprocess.check_call([leanc, "-shared", "-DLEAN_EXPORTING", "-o", so, c])
                 os.replace(so, self.plugin)
-        self.args = ["-DElab.async=false", f"--plugin={self.plugin}"]
+        self.args = ["-j1", "-DElab.async=false", f"--plugin={self.plugin}"]
 
     def stored(self, module):
         """Where the record for the module's current Lake input hash is kept."""
@@ -106,14 +108,38 @@ def build(directory, targets):
     if not count:
         sys.exit("heartbeats: lakefile.toml has no weakLeanArgs to extend")
     (directory / "lakefile.toml").write_text(lakefile)
-    status = subprocess.call(["lake", "-f", str(directory / "lakefile.toml"), "build", *targets], cwd=ROOT,
-                             env={**os.environ, "HEARTBEATS_DIR": str(records)})
+    env = {**os.environ, "HEARTBEATS_DIR": str(records)}
+    while True:
+        status, failed = lake(["-f", str(directory / "lakefile.toml"), "build", *targets], env)
+        if status == 0 or not failed:
+            break
+        # A proof with a pinned maxHeartbeats can fail only with Elab.async=false:
+        # build what failed as the plain gate does, then go on with the rest.
+        print(f"heartbeats: plain build of {' '.join(failed)}", flush=True)
+        if subprocess.call(["lake", "build", *failed], cwd=ROOT) != 0:
+            break
+    if status != 0:
+        status = subprocess.call(["lake", "build", *targets], cwd=ROOT)
     if status == 0:
         for record in records.glob("*.tsv"):
             kept = tools.stored(record.stem)
             if kept:
                 shutil.copyfile(record, kept)
     return status
+
+
+def lake(args, env):
+    """Run lake, pass its output on, and name the modules whose build failed."""
+    failed = []
+    with subprocess.Popen(["lake", *args], cwd=ROOT, env=env, stdout=subprocess.PIPE, stderr=subprocess.STDOUT,
+                          encoding="utf-8", errors="replace") as process:
+        for line in process.stdout:
+            sys.stdout.write(line)
+            found = re.match(r"✖ \[\d+/\d+\] Building (\S+)", line)
+            if found:
+                failed.append(found.group(1))
+    sys.stdout.flush()
+    return process.returncode, failed
 
 
 def measure(tools, module, records):
@@ -145,7 +171,8 @@ def collect(directory, modules, fresh_only=False):
             out[module] = read_record(record)
     if missing:
         print(f"heartbeats: compiling {len(missing)} module(s) that have no record", file=sys.stderr)
-        with concurrent.futures.ThreadPoolExecutor(os.cpu_count() or 1) as pool:
+        # one at a time, as the gate builds; HEARTBEATS_JOBS=N for a full `write`
+        with concurrent.futures.ThreadPoolExecutor(int(os.environ.get("HEARTBEATS_JOBS") or 1)) as pool:
             for module, ok in zip(missing, pool.map(lambda m: measure(tools, m, records), missing)):
                 record = records / f"{module}.tsv"
                 if ok and record.exists():
