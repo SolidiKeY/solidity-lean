@@ -1,0 +1,170 @@
+{
+  "schema_version": 1,
+  "routes": {
+    "standalone": [
+      {
+        "path": "scripts/h62/item2/audit-precompiles/generate_identity.py",
+        "input_revision": "23b2e4edc5cadf462cb089706faecbd784d12c26",
+        "source_blob": "5b320eb4b7983fe219cb4031224db74cc171c517",
+        "command": [
+          "python3",
+          "-B",
+          "scripts/h62/item2/audit-precompiles/generate_identity.py"
+        ],
+        "kind": "runnable-entrypoint",
+        "entry_line": 8,
+        "purpose": "Historical source generation consumes exact authored axiom pins. DATA use only; no current native, cryptographic, migration or proof credit.",
+        "input_scope": [
+          "tests/h62/item2/audit-precompiles/successor-identity-pins.json"
+        ],
+        "other_reads": "unresolved"
+      },
+      {
+        "path": "scripts/h62/item2/audit-precompiles/generate_bytes_gas.py",
+        "input_revision": "23b2e4edc5cadf462cb089706faecbd784d12c26",
+        "source_blob": "ba69f1a75941d5e9a854a618602ad20f64aa4617",
+        "command": [
+          "python3",
+          "-B",
+          "scripts/h62/item2/audit-precompiles/generate_bytes_gas.py"
+        ],
+        "kind": "runnable-entrypoint",
+        "entry_line": 62,
+        "purpose": "Historical source generation consumes exact authored axiom pins. DATA use only; no current native, cryptographic, migration or proof credit.",
+        "input_scope": [
+          "tests/h62/item2/audit-precompiles/bytes-gas-pins.json"
+        ],
+        "other_reads": "unresolved"
+      },
+      {
+        "path": "scripts/h62/item2/audit-precompiles/generate_header.py",
+        "input_revision": "23b2e4edc5cadf462cb089706faecbd784d12c26",
+        "source_blob": "2ac47bc4ff51934396ef48c77ced673b3bffaa52",
+        "command": [
+          "python3",
+          "-B",
+          "scripts/h62/item2/audit-precompiles/generate_header.py"
+        ],
+        "kind": "runnable-entrypoint",
+        "entry_line": 78,
+        "purpose": "Historical source generation consumes exact authored axiom pins. DATA use only; no current native, cryptographic, migration or proof credit.",
+        "input_scope": [
+          "tests/h62/item2/audit-precompiles/header-pin-messages.json",
+          "tests/h62/item2/audit-precompiles/header-pins.json"
+        ],
+        "other_reads": "unresolved"
+      },
+      {
+        "path": "scripts/h62/item2/audit-precompiles/generate_bls.py",
+        "input_revision": "23b2e4edc5cadf462cb089706faecbd784d12c26",
+        "source_blob": "77c9cfca1bad77b4f6e6278b962005a7aa59df7f",
+        "command": [
+          "python3",
+          "-B",
+          "scripts/h62/item2/audit-precompiles/generate_bls.py"
+        ],
+        "kind": "runnable-entrypoint",
+        "entry_line": 64,
+        "purpose": "Historical source generation consumes exact authored axiom pins. DATA use only; no current native, cryptographic, migration or proof credit.",
+        "input_scope": [
+          "tests/h62/item2/audit-precompiles/bls-pin-messages.json"
+        ],
+        "other_reads": "unresolved"
+      }
+    ]
+  },
+  "consumer_routes": {
+    "persistent_reads": [
+      {
+        "runner": "validated:scripts/h62/item2/audit-precompiles/generate_identity.py",
+        "input_revision": "23b2e4edc5cadf462cb089706faecbd784d12c26",
+        "frames": [
+          {
+            "path": "scripts/h62/item2/audit-precompiles/generate_identity.py",
+            "blob": "5b320eb4b7983fe219cb4031224db74cc171c517",
+            "line": 81
+          }
+        ],
+        "target": "tests/h62/item2/audit-precompiles/successor-identity-pins.json",
+        "target_blob": "381d7a119b0b0afcdc0fc350303fe984342f6327",
+        "operation": "validated Python read of measured bytes"
+      },
+      {
+        "runner": "validated:scripts/h62/item2/audit-precompiles/generate_bytes_gas.py",
+        "input_revision": "23b2e4edc5cadf462cb089706faecbd784d12c26",
+        "frames": [
+          {
+            "path": "scripts/h62/item2/audit-precompiles/generate_bytes_gas.py",
+            "blob": "ba69f1a75941d5e9a854a618602ad20f64aa4617",
+            "line": 63
+          },
+          {
+            "path": "scripts/h62/item2/audit-precompiles/generate_bytes_gas.py",
+            "blob": "ba69f1a75941d5e9a854a618602ad20f64aa4617",
+            "line": 54
+          }
+        ],
+        "target": "tests/h62/item2/audit-precompiles/bytes-gas-pins.json",
+        "target_blob": "287f78d2118e8682fdfed82e832c6f79c2bed631",
+        "operation": "validated Python read of measured bytes"
+      },
+      {
+        "runner": "validated:scripts/h62/item2/audit-precompiles/generate_header.py",
+        "input_revision": "23b2e4edc5cadf462cb089706faecbd784d12c26",
+        "frames": [
+          {
+            "path": "scripts/h62/item2/audit-precompiles/generate_header.py",
+            "blob": "2ac47bc4ff51934396ef48c77ced673b3bffaa52",
+            "line": 79
+          },
+          {
+            "path": "scripts/h62/item2/audit-precompiles/generate_header.py",
+            "blob": "2ac47bc4ff51934396ef48c77ced673b3bffaa52",
+            "line": 70
+          }
+        ],
+        "target": "tests/h62/item2/audit-precompiles/header-pins.json",
+        "target_blob": "e2940204ce1330d303c647af99274f934700ff25",
+        "operation": "validated Python read of measured bytes"
+      },
+      {
+        "runner": "validated:scripts/h62/item2/audit-precompiles/generate_header.py",
+        "input_revision": "23b2e4edc5cadf462cb089706faecbd784d12c26",
+        "frames": [
+          {
+            "path": "scripts/h62/item2/audit-precompiles/generate_header.py",
+            "blob": "2ac47bc4ff51934396ef48c77ced673b3bffaa52",
+            "line": 79
+          },
+          {
+            "path": "scripts/h62/item2/audit-precompiles/generate_header.py",
+            "blob": "2ac47bc4ff51934396ef48c77ced673b3bffaa52",
+            "line": 71
+          }
+        ],
+        "target": "tests/h62/item2/audit-precompiles/header-pin-messages.json",
+        "target_blob": "f1a1d32693a0534e281dfcefadcc1bad3f09e7ad",
+        "operation": "validated Python read of measured bytes"
+      },
+      {
+        "runner": "validated:scripts/h62/item2/audit-precompiles/generate_bls.py",
+        "input_revision": "23b2e4edc5cadf462cb089706faecbd784d12c26",
+        "frames": [
+          {
+            "path": "scripts/h62/item2/audit-precompiles/generate_bls.py",
+            "blob": "77c9cfca1bad77b4f6e6278b962005a7aa59df7f",
+            "line": 65
+          },
+          {
+            "path": "scripts/h62/item2/audit-precompiles/generate_bls.py",
+            "blob": "77c9cfca1bad77b4f6e6278b962005a7aa59df7f",
+            "line": 57
+          }
+        ],
+        "target": "tests/h62/item2/audit-precompiles/bls-pin-messages.json",
+        "target_blob": "63e791cfe6e05b9ba12945193c1aa5b5ab39d428",
+        "operation": "validated Python read of measured bytes"
+      }
+    ]
+  }
+}
