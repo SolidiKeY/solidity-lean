@@ -145,6 +145,25 @@ theorem assert_elab_source (rc : ElabRec C) (c : RawExpr) :
           (.cons (.revertData [.bytes (Semantics.encodePanic 1)]) .nil))]
       pure [.of Γ (.assert (← checkIn C Γ .bool c))]) := rfl
 
+/-- The data-retaining mode emits `panicStmt` at the assertion site's code. -/
+theorem assert_elab_data (rc : ElabRec C) (c : RawExpr) (scope : ElabScope)
+    (data : (scope.selfFrame || scope.retainFailureData) = true) :
+    elabStmt1With C rc (.assert c) scope = (do
+      let Γ ← nctx
+      pure [.of Γ (.ite (← checkIn C Γ .bool c) .nil
+        (.cons (.revertData [.bytes (Semantics.encodePanic 1)]) .nil))] : ElabM _) scope := by
+  rcases scope with ⟨_, _, _, _, _, _, self, retain, _, _⟩
+  cases self <;> cases retain <;> first | rfl | simp at data
+
+/-- Otherwise the arm keeps V1's `assert`. -/
+theorem assert_elab_legacy (rc : ElabRec C) (c : RawExpr) (scope : ElabScope)
+    (legacy : (scope.selfFrame || scope.retainFailureData) = false) :
+    elabStmt1With C rc (.assert c) scope = (do
+      let Γ ← nctx
+      pure [.of Γ (.assert (← checkIn C Γ .bool c))] : ElabM _) scope := by
+  rcases scope with ⟨_, _, _, _, _, _, self, retain, _, _⟩
+  cases self <;> cases retain <;> first | rfl | simp at legacy
+
 end
 
 /-- A false assertion condition: the assertion producer's origin, V1's
@@ -157,5 +176,42 @@ theorem assert_source (σ : State C Γ) (c : Val C Γ .bool)
       .error (THalt.ofData (encodePanic Panic.Site.assertion.code)) :=
   ⟨Panic.assertion_origin, Panic.assertion_v1 σ c failed,
     panic_guard_source_failure σ c failed _⟩
+
+/-! ## Range guards (`0x11`)
+
+`Checked.range` at `+`, `-` (both types) and signed `/`, and
+`Checked.negRange`. `bumpRange` (`x++`, `x--`) is `rangeU`/`rangeI` at the
+literal `1`, and the compound and push forms apply `range` to the target's
+value or the default `0`: they are instances of these theorems. -/
+
+/-- Unsigned `+`: the wrapping-sum guard failed exactly on overflow. -/
+theorem uint_add_source (σ : State C Γ) (a b : Val C Γ .uint)
+    (x y : PrimTy.uint.Denote) (left : a.evalT σ = .ok x) (right : b.evalT σ = .ok y)
+    (failed : (cmpU .le rfl rfl a (arU .addW rfl rfl a b)).evalT σ = .ok false) :
+    pg Panic.Site.arithmetic.code (range .add .uint a b) =
+      [(Panic.Site.arithmetic.code, cmpU .le rfl rfl a (arU .addW rfl rfl a b))] ∧
+    Panic.Origin (.binary .add .uint rfl x y) .arithmetic ∧
+    (Val.binop .add rfl rfl a b).evalT σ = .error .revert ∧
+    (panicStmt Panic.Site.arithmetic.code
+      (cmpU .le rfl rfl a (arU .addW rfl rfl a b))).runR σ =
+        .error (THalt.ofData (encodePanic Panic.Site.arithmetic.code)) := by
+  have guard := failed
+  have hx := x.2; have hy := y.2
+  simp [PrimTy.inRange] at hx hy
+  simp [cmpU, arU, Val.evalT, left, right, BinOp.shortT, BinOp.evalT, BinOp.evalNum,
+    BinOp.arithInt, PrimTy.ofInt?, PrimTy.inRange, Semantics.uintBound, TRes.ofOpt,
+    bind, Except.bind] at guard
+  rw [dif_pos (by omega)] at guard
+  simp at guard
+  have over := of_decide_eq_false guard
+  refine ⟨rfl, ?_, ?_, panic_guard_source_failure σ _ failed _⟩
+  · apply Panic.binary_origin
+    · simp [Panic.Checked.op, BinOp.evalT, BinOp.evalNum, BinOp.arithInt, PrimTy.ofInt?,
+        PrimTy.inRange]
+      omega
+    · rfl
+  · simp [Val.evalT, left, right, BinOp.shortT, BinOp.evalT, BinOp.evalNum,
+      BinOp.arithInt, PrimTy.ofInt?, PrimTy.inRange, TRes.ofOpt, bind, Except.bind]
+    rw [dif_neg (by omega)]
 
 end Solidity.Correctness.Panic
