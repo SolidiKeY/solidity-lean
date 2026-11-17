@@ -6,14 +6,14 @@
 # list never needs editing here. Run after `lake build Solidity SolidityExamples`: a slow
 # module's budget then covers only itself (and any not-yet-built import outside those).
 #
-# Heartbeat ratchet (H1076): a module that must be rebuilt is first elaborated by the hb0
-# collector (hbcollect as scripts/heartbeats/collect.sh runs it: one thread, Elab.async=false) under the same
-# timeout; that run is its check and its heartbeats are compared with
+# Heartbeat ratchet (H1076): a module that must be rebuilt is elaborated once, by the hb0
+# collector under the same timeout (`scripts/heartbeats/collect.sh --lake`: one thread,
+# Elab.async=false); that run is its check and its heartbeats are compared with
 # scripts/heartbeats/slow/baseline.json (per module, plus per declaration of at least
 # min_units). A module that is already up to date (fetched from the Lake cache or built
-# before) is skipped as unchanged. The collector writes no .olean, so a rebuilt module is
-# then built by `lake build` under its own budget, including leaves, so the final
-# library step can reuse every slow module artifact.
+# before) is skipped as unchanged. The collector run is the module's `lake build` (H1088):
+# Lake starts the collector in place of `lean` and records the .olean/.ilean/.c it writes,
+# so later slow modules and the final library step reuse them without a second elaboration.
 #
 # Usage: scripts/ci/build-slow-examples.sh [--list | --write]
 #   --list   print the modules in build order and exit
@@ -102,22 +102,28 @@ while IFS=$'\t' read -r m deps; do
     st=0
     [ ${#imps[@]} -eq 0 ] || { LEAN_NUM_THREADS=1 timeout --kill-after=10s "${budget}s" lake build "${imps[@]}" >/dev/null </dev/null; st=$?; }
     left=$(( budget - ($(date +%s) - start) )); [ "$left" -ge 1 ] || left=1
+    if [ "$st" -ne 0 ]; then :
+    elif ! lake build --no-build "$m" >/dev/null 2>&1 </dev/null; then
+      # One elaboration: counted by the collector and recorded by Lake as the module's build.
+      bash "$root/scripts/heartbeats/collect.sh" --lake --timeout "${left}s" "$m" >"$one" </dev/null; st=$?
+      [ "$st" -ne 0 ] || [ -s "$one" ] || { echo "build-slow-examples: no heartbeats for $m" >&2; st=2; }
+    else
+    # --write on a module that is up to date: Lake would not run anything, so count it
+    # with the plain collector and leave its artifacts alone.
     # With enableArtifactCache a fetched .olean lives only in Lake's cache; the collector
     # reads LEAN_PATH, so link the imports' oleans into a scratch lib with decl_index.link_build.
     rm -rf "$lib"; mkdir -p "$lib"
-    [ "$st" -ne 0 ] || python3 -B -c 'import pathlib, sys; sys.path.insert(0, "scripts/decl-index"); import decl_index as d
+    python3 -B -c 'import pathlib, sys; sys.path.insert(0, "scripts/decl-index"); import decl_index as d
 try: d.link_build(pathlib.Path.cwd(), pathlib.Path(sys.argv[1]), sys.argv[2:])
 except d.SetupError as e: sys.exit("build-slow-examples: %s" % e)' "$lib" "${imps[@]}" || st=2
     # The hb0 driver, run as collect.sh runs it (one thread, 128 MiB stack) but on LEAN_PATH
     # = that lib: `lake env` would put .lake/build first and hide the linked oleans.
     [ "$st" -ne 0 ] || { ( ulimit -s 131072 && LEAN_PATH="$lib:$sysroot/lib/lean" LEAN_NUM_THREADS=1 \
       timeout --kill-after=10s "${left}s" "$root/.lake/build/bin/hbcollect" "${m//.//}.lean" "$m" ) >"$one" </dev/null; st=$?; }
+    fi
     if [ "$st" -eq 0 ]; then
       cat "$one" >>"$runs"
       python3 -c 'import json,sys; r=json.loads(open(sys.argv[1]).readline()); print("heartbeats", r["module"], "%.3f" % r["heartbeats"], "collector %ss" % r["wall_s"])' "$one"
-      # The library step must reuse artifacts for leaves as well as slow imports.
-      # H1088: this second elaboration has its own H134 per-module budget.
-      LEAN_NUM_THREADS=1 timeout --kill-after=10s "${budget}s" lake build "$m" >/dev/null </dev/null; st=$?
     fi
     rm -f "$one"
   fi

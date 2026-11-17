@@ -140,6 +140,7 @@ import Solidity.Examples.Goals.Finish
 import Solidity.Examples.Goals.GoalPinsSpec
 import Solidity.Examples.Goals.Hash
 import Solidity.Examples.Goals.Headline
+import Solidity.Examples.Goals.IntrinsicSession
 import Solidity.Examples.Goals.Loops
 import Solidity.Examples.Goals.LoopsProducer
 import Solidity.Examples.Goals.OpcodeEval
@@ -150,6 +151,8 @@ import Solidity.Examples.Goals.Shrink
 import Solidity.Examples.Goals.Taclets
 import Solidity.Examples.Goals.Total
 import Solidity.Examples.InputReduction
+import Solidity.Examples.IntrinsicSession.Run
+import Solidity.Examples.IntrinsicSession.Step
 import Solidity.Examples.IntrinsicStorage.Preimages.Frames
 import Solidity.Examples.IntrinsicStorage.Preimages.Ops
 import Solidity.Examples.LexDiamond
@@ -165,7 +168,9 @@ import Solidity.Examples.MemoryNegativeDecision
 import Solidity.Examples.MemoryStructWitness
 import Solidity.Examples.Notation
 import Solidity.Examples.Panic.Eval
+import Solidity.Examples.Panic.GuardsArith
 import Solidity.Examples.Panic.Origins
+import Solidity.Examples.Panic.ProvenanceEval
 import Solidity.Examples.Panic.Result
 import Solidity.Examples.Panic.Source
 import Solidity.Examples.ParameterReduction

@@ -2431,6 +2431,8 @@ import Solidity.Calculus.UpdateRules
 import Solidity.Calculus.VisitedSet
 import Solidity.Calculus.WalkSyntax
 import Solidity.Calculus.WkOver
+import Solidity.Correctness.IntrinsicSession.Run
+import Solidity.Correctness.IntrinsicSession.Step
 import Solidity.Correctness.Lowering.Checker.Contract
 import Solidity.Correctness.Lowering.Checker.IntrinsicProbe
 import Solidity.Correctness.Lowering.Checker.MeasuredPilot
@@ -2483,6 +2485,8 @@ import Solidity.Correctness.Lowering.Unchecked.WordOne
 import Solidity.Correctness.Lowering.Unchecked.WordProgram
 import Solidity.Correctness.Lowering.Unchecked.WordUpdateWitness
 import Solidity.Correctness.Lowering.Unchecked.WrappingArithmetic
+import Solidity.Correctness.Panic.Guards.Arith
+import Solidity.Correctness.Panic.Provenance.Eval
 import Solidity.Correctness.Sim.Examples
 import Solidity.Correctness.Sim.Lang
 import Solidity.Correctness.Sim.Observation
@@ -3298,6 +3302,7 @@ import Solidity.Goals.Finish
 import Solidity.Goals.GoalPinsSpec
 import Solidity.Goals.Hash
 import Solidity.Goals.Headline
+import Solidity.Goals.IntrinsicSession
 import Solidity.Goals.Loops
 import Solidity.Goals.Panic
 import Solidity.Goals.Plan
@@ -4152,6 +4157,8 @@ import Solidity.Semantics.IntrinsicStorage.Preimages.Frames
 import Solidity.Semantics.IntrinsicStorage.Preimages.Ops
 import Solidity.Semantics.IntrinsicStorage.Preimages.Run
 import Solidity.Semantics.IntrinsicStorage.Preimages.Run.Checks
+import Solidity.Semantics.IntrinsicStorage.Preimages.Run.Control
+import Solidity.Semantics.IntrinsicStorage.Preimages.Run.Control.Checks
 import Solidity.Semantics.LexMetrics
 import Solidity.Semantics.LibraryTryFrame
 import Solidity.Semantics.Lifetime
