@@ -2101,6 +2101,176 @@
           "tests/sol-expression-uniqueness/source-pins.json"
         ],
         "other_reads": "unresolved"
+      },
+      {
+        "path": "tests/terra-20261103/disk/accept.py",
+        "input_revision": "3799f46a504e48d718c7d66fd1eccceac041ec76",
+        "source_blob": "e0e5aec706aea7080cc964db26fa72c18515dc26",
+        "command": [
+          "python3",
+          "-B",
+          "tests/terra-20261103/disk/accept.py"
+        ],
+        "kind": "runnable-entrypoint",
+        "entry_line": 32,
+        "purpose": "Passing frozen Terra host controls entered the exact unchanged test_cases Python module. Positive module execution coverage only; mocked tools do not establish real Lean elaboration, kernel proof, resource enforcement, cleanup on a real host, compiler or EVM correctness. Fixture reads remain unresolved.",
+        "input_scope": [],
+        "other_reads": "unresolved"
+      },
+      {
+        "path": "tests/terra-20261103/mcp/accept.py",
+        "input_revision": "3799f46a504e48d718c7d66fd1eccceac041ec76",
+        "source_blob": "6a4292f642baf9f2d863df65b1f7860cc81c540b",
+        "command": [
+          "python3",
+          "-B",
+          "tests/terra-20261103/mcp/accept.py"
+        ],
+        "kind": "runnable-entrypoint",
+        "entry_line": 32,
+        "purpose": "Passing frozen Terra host controls entered the exact unchanged test_cases Python module. Positive module execution coverage only; mocked tools do not establish real Lean elaboration, kernel proof, resource enforcement, cleanup on a real host, compiler or EVM correctness. Fixture reads remain unresolved.",
+        "input_scope": [],
+        "other_reads": "unresolved"
+      },
+      {
+        "path": "tests/terra-20261103/seal/accept.py",
+        "input_revision": "3799f46a504e48d718c7d66fd1eccceac041ec76",
+        "source_blob": "c9d5f30b67a8b659e0d4eb71445661d456595b4f",
+        "command": [
+          "python3",
+          "-B",
+          "tests/terra-20261103/seal/accept.py"
+        ],
+        "kind": "runnable-entrypoint",
+        "entry_line": 32,
+        "purpose": "Passing frozen Terra host controls entered the exact unchanged test_cases Python module. Positive module execution coverage only; mocked tools do not establish real Lean elaboration, kernel proof, resource enforcement, cleanup on a real host, compiler or EVM correctness. Fixture reads remain unresolved.",
+        "input_scope": [],
+        "other_reads": "unresolved"
+      },
+      {
+        "path": "tests/terra-20261103/tactics/accept.py",
+        "input_revision": "3799f46a504e48d718c7d66fd1eccceac041ec76",
+        "source_blob": "3882757d2580f04db32611dd13edd3c7cfd7f6b3",
+        "command": [
+          "python3",
+          "-B",
+          "tests/terra-20261103/tactics/accept.py"
+        ],
+        "kind": "runnable-entrypoint",
+        "entry_line": 32,
+        "purpose": "Passing frozen Terra host controls entered the exact unchanged test_cases Python module. Positive module execution coverage only; mocked tools do not establish real Lean elaboration, kernel proof, resource enforcement, cleanup on a real host, compiler or EVM correctness. Fixture reads remain unresolved.",
+        "input_scope": [],
+        "other_reads": "unresolved"
+      }
+    ],
+    "module_entries": [
+      {
+        "runner": "validated:tests/terra-20261103/disk/accept.py",
+        "input_revision": "3799f46a504e48d718c7d66fd1eccceac041ec76",
+        "frames": [
+          {
+            "path": "tests/terra-20261103/disk/accept.py",
+            "blob": "e0e5aec706aea7080cc964db26fa72c18515dc26",
+            "line": 32
+          },
+          {
+            "path": "tests/terra-20261103/disk/accept.py",
+            "blob": "e0e5aec706aea7080cc964db26fa72c18515dc26",
+            "line": 19
+          }
+        ],
+        "target": "tests/terra-20261103/disk/test_cases.py",
+        "target_blob": "a605994b75c298dfc48bc7a3ebea729cf9201394",
+        "operation": "entered measured Python module; no fixture consumption credit",
+        "module_code_sha256": "40dd3b247f4378bfb0ba6ca3e3215643a90c4356f1da094791945643ce7784dc",
+        "python": [
+          3,
+          12,
+          14
+        ],
+        "module_frame_line": 0,
+        "collector_sha256": "f01d503a7acdfd5e19ae3ee71d6b128deb0bfcc979569e2adf45fe5976115dd7"
+      },
+      {
+        "runner": "validated:tests/terra-20261103/mcp/accept.py",
+        "input_revision": "3799f46a504e48d718c7d66fd1eccceac041ec76",
+        "frames": [
+          {
+            "path": "tests/terra-20261103/mcp/accept.py",
+            "blob": "6a4292f642baf9f2d863df65b1f7860cc81c540b",
+            "line": 32
+          },
+          {
+            "path": "tests/terra-20261103/mcp/accept.py",
+            "blob": "6a4292f642baf9f2d863df65b1f7860cc81c540b",
+            "line": 19
+          }
+        ],
+        "target": "tests/terra-20261103/mcp/test_cases.py",
+        "target_blob": "5f00497de47dabe3134c808e9a50803d66f9b637",
+        "operation": "entered measured Python module; no fixture consumption credit",
+        "module_code_sha256": "406a5f68b26accbab7a892871bca37addbb39058e8427adfc69065044f17e6e8",
+        "python": [
+          3,
+          12,
+          14
+        ],
+        "module_frame_line": 0,
+        "collector_sha256": "f01d503a7acdfd5e19ae3ee71d6b128deb0bfcc979569e2adf45fe5976115dd7"
+      },
+      {
+        "runner": "validated:tests/terra-20261103/seal/accept.py",
+        "input_revision": "3799f46a504e48d718c7d66fd1eccceac041ec76",
+        "frames": [
+          {
+            "path": "tests/terra-20261103/seal/accept.py",
+            "blob": "c9d5f30b67a8b659e0d4eb71445661d456595b4f",
+            "line": 32
+          },
+          {
+            "path": "tests/terra-20261103/seal/accept.py",
+            "blob": "c9d5f30b67a8b659e0d4eb71445661d456595b4f",
+            "line": 19
+          }
+        ],
+        "target": "tests/terra-20261103/seal/test_cases.py",
+        "target_blob": "6c46dd00f5e80e8426edf7e0cc747271252ab3f2",
+        "operation": "entered measured Python module; no fixture consumption credit",
+        "module_code_sha256": "fe7ea930fb32d2c214876684bf5d43a4a089c15398db35155f699d72e9b1c324",
+        "python": [
+          3,
+          12,
+          14
+        ],
+        "module_frame_line": 0,
+        "collector_sha256": "f01d503a7acdfd5e19ae3ee71d6b128deb0bfcc979569e2adf45fe5976115dd7"
+      },
+      {
+        "runner": "validated:tests/terra-20261103/tactics/accept.py",
+        "input_revision": "3799f46a504e48d718c7d66fd1eccceac041ec76",
+        "frames": [
+          {
+            "path": "tests/terra-20261103/tactics/accept.py",
+            "blob": "3882757d2580f04db32611dd13edd3c7cfd7f6b3",
+            "line": 32
+          },
+          {
+            "path": "tests/terra-20261103/tactics/accept.py",
+            "blob": "3882757d2580f04db32611dd13edd3c7cfd7f6b3",
+            "line": 19
+          }
+        ],
+        "target": "tests/terra-20261103/tactics/test_cases.py",
+        "target_blob": "c814d739ac6add54ec5046867cc74933dd4473a3",
+        "operation": "entered measured Python module; no fixture consumption credit",
+        "module_code_sha256": "f9ab2025736ff31e71358de96de438786be02187950865f86420ea51a20fa7a6",
+        "python": [
+          3,
+          12,
+          14
+        ],
+        "module_frame_line": 0,
+        "collector_sha256": "f01d503a7acdfd5e19ae3ee71d6b128deb0bfcc979569e2adf45fe5976115dd7"
       }
     ]
   },
@@ -2675,6 +2845,116 @@
         "target": "tests/fullscope-20261104/vt1/control-spec.mjs",
         "target_blob": "4739cb2fd17a447f97ef65eb1580551f318de27b",
         "purpose": "Exact literal Node import from the unchanged historically passing provenance test at 65359b4b. Current default fails an extra-fixture inventory check; no assertion or fixture changed. Static module source consumption only, no current passing-test, fixture data, child/generator, Lean/kernel, compiler or EVM credit."
+      }
+    ],
+    "persistent_module_entries": [
+      {
+        "runner": "validated:tests/terra-20261103/disk/accept.py",
+        "input_revision": "3799f46a504e48d718c7d66fd1eccceac041ec76",
+        "frames": [
+          {
+            "path": "tests/terra-20261103/disk/accept.py",
+            "blob": "e0e5aec706aea7080cc964db26fa72c18515dc26",
+            "line": 32
+          },
+          {
+            "path": "tests/terra-20261103/disk/accept.py",
+            "blob": "e0e5aec706aea7080cc964db26fa72c18515dc26",
+            "line": 19
+          }
+        ],
+        "target": "tests/terra-20261103/disk/test_cases.py",
+        "target_blob": "a605994b75c298dfc48bc7a3ebea729cf9201394",
+        "operation": "entered measured Python module; no fixture consumption credit",
+        "module_code_sha256": "40dd3b247f4378bfb0ba6ca3e3215643a90c4356f1da094791945643ce7784dc",
+        "python": [
+          3,
+          12,
+          14
+        ],
+        "module_frame_line": 0,
+        "collector_sha256": "f01d503a7acdfd5e19ae3ee71d6b128deb0bfcc979569e2adf45fe5976115dd7"
+      },
+      {
+        "runner": "validated:tests/terra-20261103/mcp/accept.py",
+        "input_revision": "3799f46a504e48d718c7d66fd1eccceac041ec76",
+        "frames": [
+          {
+            "path": "tests/terra-20261103/mcp/accept.py",
+            "blob": "6a4292f642baf9f2d863df65b1f7860cc81c540b",
+            "line": 32
+          },
+          {
+            "path": "tests/terra-20261103/mcp/accept.py",
+            "blob": "6a4292f642baf9f2d863df65b1f7860cc81c540b",
+            "line": 19
+          }
+        ],
+        "target": "tests/terra-20261103/mcp/test_cases.py",
+        "target_blob": "5f00497de47dabe3134c808e9a50803d66f9b637",
+        "operation": "entered measured Python module; no fixture consumption credit",
+        "module_code_sha256": "406a5f68b26accbab7a892871bca37addbb39058e8427adfc69065044f17e6e8",
+        "python": [
+          3,
+          12,
+          14
+        ],
+        "module_frame_line": 0,
+        "collector_sha256": "f01d503a7acdfd5e19ae3ee71d6b128deb0bfcc979569e2adf45fe5976115dd7"
+      },
+      {
+        "runner": "validated:tests/terra-20261103/seal/accept.py",
+        "input_revision": "3799f46a504e48d718c7d66fd1eccceac041ec76",
+        "frames": [
+          {
+            "path": "tests/terra-20261103/seal/accept.py",
+            "blob": "c9d5f30b67a8b659e0d4eb71445661d456595b4f",
+            "line": 32
+          },
+          {
+            "path": "tests/terra-20261103/seal/accept.py",
+            "blob": "c9d5f30b67a8b659e0d4eb71445661d456595b4f",
+            "line": 19
+          }
+        ],
+        "target": "tests/terra-20261103/seal/test_cases.py",
+        "target_blob": "6c46dd00f5e80e8426edf7e0cc747271252ab3f2",
+        "operation": "entered measured Python module; no fixture consumption credit",
+        "module_code_sha256": "fe7ea930fb32d2c214876684bf5d43a4a089c15398db35155f699d72e9b1c324",
+        "python": [
+          3,
+          12,
+          14
+        ],
+        "module_frame_line": 0,
+        "collector_sha256": "f01d503a7acdfd5e19ae3ee71d6b128deb0bfcc979569e2adf45fe5976115dd7"
+      },
+      {
+        "runner": "validated:tests/terra-20261103/tactics/accept.py",
+        "input_revision": "3799f46a504e48d718c7d66fd1eccceac041ec76",
+        "frames": [
+          {
+            "path": "tests/terra-20261103/tactics/accept.py",
+            "blob": "3882757d2580f04db32611dd13edd3c7cfd7f6b3",
+            "line": 32
+          },
+          {
+            "path": "tests/terra-20261103/tactics/accept.py",
+            "blob": "3882757d2580f04db32611dd13edd3c7cfd7f6b3",
+            "line": 19
+          }
+        ],
+        "target": "tests/terra-20261103/tactics/test_cases.py",
+        "target_blob": "c814d739ac6add54ec5046867cc74933dd4473a3",
+        "operation": "entered measured Python module; no fixture consumption credit",
+        "module_code_sha256": "f9ab2025736ff31e71358de96de438786be02187950865f86420ea51a20fa7a6",
+        "python": [
+          3,
+          12,
+          14
+        ],
+        "module_frame_line": 0,
+        "collector_sha256": "f01d503a7acdfd5e19ae3ee71d6b128deb0bfcc979569e2adf45fe5976115dd7"
       }
     ]
   }
