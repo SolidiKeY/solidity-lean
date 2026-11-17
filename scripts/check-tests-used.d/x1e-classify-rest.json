@@ -3460,6 +3460,40 @@
             }
           }
         ]
+      },
+      {
+        "path": "tests/fullscope-20261104/vt1/ImportFollowup/.gitignore",
+        "blob": "02b168670fb6a3506337dae3f4b1306ede16526c",
+        "purpose": "Git exclude-standard policy for this existing auditor's fixed evidence/axioms.json output path. The auditor is not run and no historical axiom inventory, Lean/kernel success, regenerated output, proof or runtime claim is authenticated. This is only the current ignore policy role for untracked output bytes.",
+        "matches": [
+          {
+            "line": 1,
+            "output": "evidence/axioms.json",
+            "writer": {
+              "path": "tests/fullscope-20261104/vt1/ImportFollowup/audit.py",
+              "blob": "c9790375db52d5b2b65c2955627cf26ff3551a24",
+              "line": 20,
+              "literal": "axioms.json"
+            }
+          }
+        ]
+      },
+      {
+        "path": "tests/calldata-packets-1105/RawBool/.gitignore",
+        "blob": "02b168670fb6a3506337dae3f4b1306ede16526c",
+        "purpose": "Git exclude-standard policy for this existing auditor's fixed evidence/axioms.json output path. The auditor is not run and no historical axiom inventory, Lean/kernel success, regenerated output, proof or runtime claim is authenticated. This is only the current ignore policy role for untracked output bytes.",
+        "matches": [
+          {
+            "line": 1,
+            "output": "evidence/axioms.json",
+            "writer": {
+              "path": "tests/calldata-packets-1105/RawBool/audit.py",
+              "blob": "8337ca82d58b0d8196b7e366891365acacbf5292",
+              "line": 16,
+              "literal": "evidence/axioms.json"
+            }
+          }
+        ]
       }
     ]
   }
