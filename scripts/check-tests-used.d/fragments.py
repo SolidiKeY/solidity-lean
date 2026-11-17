@@ -52,6 +52,10 @@ FRAGMENT_SECTIONS = ('standalone', 'generators', 'reads', 'orphans', 'module_ent
 #   Lean check source bound to its blob and drivers; anchors nothing.
 # H1015 (x1o): standalone kind lean-fixture-source-role, the H999 rules for a
 #   reviewed Lean fixture source (roles.py); consumption only, anchors nothing.
+# H1051 (x1q): standalone kind python-import-source-role, a reviewed Python helper
+#   imported by kept python3 -B entry roots (roles.py); consumption only.
+# H1050 (x1q): standalone kind documentation-reference-role, a reviewed Markdown
+#   document read by the documentation navigation check (roles.py); reference only.
 # persistent_module_entries (H979): exact routes.module_entries claims that
 #   persist while every recorded object is unchanged.
 CONSUMER_SECTIONS = ('persistent_reads', 'static_routes', 'git_policies', 'persistent_module_entries')
@@ -945,7 +949,7 @@ def node_mode_root(classifier, graph, catalog, entry, reviewed=None):
 # then one `path blob` row per file it introduced; each path starts with an
 # abbreviation from _REVIEW_DIRECTORIES.
 _REVIEW_DIRECTORIES = {'N:': 'tests/directruntime-20261104/native-browser/', 'D:': 'tests/directruntime-20261104/', 'U:': 'tests/upstream/',
-                       'T:': 'tests/'}
+                       'T:': 'tests/', 'H:': 'scripts/h62/'}
 
 
 def _review_table(text):
@@ -1407,14 +1411,17 @@ def nonpython_entry_root(classifier, graph, catalog, entry, reviewed=None):
             'reason': 'Reviewed live shell or Node program; the command is the bare interpreter prefix, which may need arguments, and no argument is recorded. Source role only, never run or certified to pass. No read anchor, fixture, helper, child, generated-output, proof or runtime credit.'}})
 
 
-_roles = Path(__file__).with_name('roles.py')  # H999 and H1015 Lean gate source roles
+_roles = Path(__file__).with_name('roles.py')  # H999/H1015 Lean gate and H1051 Python import source roles
 exec(compile(_roles.read_bytes(), str(_roles), 'exec'))
 
 
 
 SOURCE_ROLE_KINDS = {SOURCE_ONLY_KIND: source_only_program, NODE_MODE_KIND: node_mode_root, PYTHON_ARGS_KIND: python_argument_root,
                      NONPY_ENTRY_KIND: nonpython_entry_root, LEAN_CHECK_KIND: lean_check_root,
-                     LEAN_FIXTURE_KIND: lean_fixture_root}
+                     LEAN_FIXTURE_KIND: lean_fixture_root, DOC_REF_KIND: documentation_reference_root}
+# Kinds dispatched after every other standalone definition, so they can bind
+# the roots those definitions create (H1051 importers).
+LATE_SOURCE_ROLE_KINDS = {PY_IMPORT_KIND: python_import_root}
 
 
 def persisted_module_entries(classifier, graph, catalog, rows):
@@ -2225,10 +2232,10 @@ def successor_controls(classifier):
         # commit that anchors nothing and credits no read, helper or output.
         global REVIEWED_NONPY_ENTRIES
         reviewed_nonpy = REVIEWED_NONPY_ENTRIES
-        assert len(reviewed_nonpy) == 176 and len({p for p, _, _ in reviewed_nonpy}) == 176  # H997 115, H1025 61
+        assert len(reviewed_nonpy) == 178 and len({p for p, _, _ in reviewed_nonpy}) == 178  # H997 115, H1025 61, H1004 2
         assert all(p.startswith('tests/') and posixpath.splitext(p)[1] in NONPY_SHEBANGS
                    and '.test.' not in p and classifier['hex_pin'](b, 40) and classifier['hex_pin'](c, 40) for p, b, c in reviewed_nonpy)
-        assert all(p.startswith(('tests/directruntime-20261104/', 'tests/upstream/')) for p, _, _ in reviewed_nonpy - REVIEWED_NONPY_ENTRIES_H1025)
+        assert all(p.startswith(('tests/directruntime-20261104/', 'tests/upstream/')) for p, _, _ in reviewed_nonpy - REVIEWED_NONPY_ENTRIES_H1025 - REVIEWED_NONPY_ENTRIES_H1004)
         witnesses = {'tests/directruntime-20261104/shared-translator/bounded.sh', 'tests/directruntime-20261104/native-browser/readbounds/module-gates.sh',
                      'tests/directruntime-20261104/memory-references/native-source-controls.mjs'}
         assert witnesses <= {p for p, _, _ in reviewed_nonpy}
@@ -2493,3 +2500,5 @@ def successor_controls(classifier):
             rejected(lf, 'unreviewed Lean check role', standalone=[role])
         finally: REVIEWED_LEAN_CHECKS, REVIEWED_LEAN_CHECK_INVOCATIONS, REVIEWED_NONPY_ENTRIES = saved
         lean_fixture_controls(locals())  # (9) H1015, in roles.py
+        python_import_controls(locals())  # (10) H1051, in roles.py
+        documentation_reference_controls(locals())  # (11) H1050, in roles.py
