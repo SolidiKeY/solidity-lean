@@ -1,5 +1,7 @@
-"""Reviewed source roles: H999 Lean check sources, H1015 Lean fixture sources
-and the H1025 widening of the H997 non-Python entry review set.
+"""Reviewed source roles: H999 Lean check sources, H1015 Lean fixture sources,
+the H1025 and H1004 widenings of the H997 non-Python entry review set, H1051
+Python helper sources imported by kept entry roots and H1050 documentation
+references read by the documentation navigation check.
 
 Executed by fragments.py in its own namespace (helpers, review tables and the
 self-test rebinding of REVIEWED_* names are shared). Classifier path: excluded
@@ -127,6 +129,17 @@ T:yul-views/inherited-sequence-run.mjs adeb09dc75c286b40aff496db08e67b20f597ceb
 T:backend-environment/ownership.mjs c7e75bcd68c0b2347212973ffdfeba0c285362f9
 ''')
 REVIEWED_NONPY_ENTRIES = REVIEWED_NONPY_ENTRIES | REVIEWED_NONPY_ENTRIES_H1025
+# H1004 (gh#1340, X1E-SOURCE-PROGRAM-ROLES, Option B), form (1): the two Node
+# CLI programs of x1e-classify-h28-h55 that match the H997 interface, reviewed
+# under the unchanged H997 rules; same (path, blob, introducing commit) form.
+# Membership only: no execution, pass, read, helper, output or runtime credit.
+REVIEWED_NONPY_ENTRIES_H1004 = _review_table('''
+@05b3f3f3a0bbb708eb00e86025811aee3eee15b3
+T:h28-sol/type-grammar/run_solc.mjs cb05eeac7078737564180bdc3d7f030520c35065
+@3b327d00fd2262cfb27ccecdc911e9c5d2e7d4f1
+T:h28-sol/literal-grammar/solc-fixtures.mjs 56774afb5f8d6355c2e8fca81557371364b2b08d
+''')
+REVIEWED_NONPY_ENTRIES = REVIEWED_NONPY_ENTRIES | REVIEWED_NONPY_ENTRIES_H1004
 
 LEAN_CHECK_KIND = 'lean-check-source-role'
 LEAN_CHECK_PREFIX = 'lean-check:'
@@ -489,8 +502,13 @@ def nonpy_roleset_controls(env):
     run, rejected, blob, first, A, sh_role = (env[k] for k in ('run', 'rejected', 'blob', 'first', 'A', 'sh_role'))
     rows = REVIEWED_NONPY_ENTRIES_H1025; paths = {p for p, _, _ in rows}
     # 61 rows, one per path, disjoint from H997 and outside x1e-classify-runtime-upstream's directories.
-    assert len(rows) == len(paths) == 61 and rows <= REVIEWED_NONPY_ENTRIES and len(REVIEWED_NONPY_ENTRIES) == 176
+    assert len(rows) == len(paths) == 61 and rows <= REVIEWED_NONPY_ENTRIES and len(REVIEWED_NONPY_ENTRIES) == 178
     assert not paths & {p for p, _, _ in REVIEWED_NONPY_ENTRIES - rows}
+    # H1004 form (1): two H28 Node programs, one row per path, disjoint from the rest.
+    h1004 = REVIEWED_NONPY_ENTRIES_H1004
+    assert len(h1004) == len({p for p, _, _ in h1004}) == 2 and h1004 <= REVIEWED_NONPY_ENTRIES and not h1004 & rows
+    assert {p for p, _, _ in h1004} == {'tests/h28-sol/type-grammar/run_solc.mjs', 'tests/h28-sol/literal-grammar/solc-fixtures.mjs'}
+    assert not {p for p, _, _ in h1004} & {p for p, _, _ in REVIEWED_NONPY_ENTRIES - h1004}
     assert all(p.startswith('tests/') and not p.startswith(('tests/directruntime-20261104/', 'tests/upstream/'))
                and posixpath.splitext(p)[1] in NONPY_SHEBANGS and '.test.' not in posixpath.basename(p) for p in paths)
     for row in (('tests/backend-environment/ownership.mjs', 'c7e75bcd68c0b2347212973ffdfeba0c285362f9', 'fd67008ed20590639e04345fbb12a9dfa645a95f'),
@@ -516,3 +534,590 @@ def nonpy_roleset_controls(env):
         assert rs['tests/drive.sh']['class'] == 'keep' and model['entry_points']['nonpy-entry:tests/drive.sh']['source_only']
         rejected(first, 'unreviewed non-Python entry role', standalone=[dict(sh_role, provenance=dict(sh_role['provenance'], commit='0' * 40))])
     finally: REVIEWED_NONPY_ENTRIES = saved
+
+
+PY_IMPORT_KIND = 'python-import-source-role'
+PY_IMPORT_PREFIX = 'py-import:'
+# H1051 (gh#1373, H62-PYTHON-HELPER-ROUTES, Option A): an opt-in Python helper
+# source imported by kept `python3 -B IMPORTER` entry roots through exact
+# sibling-module resolution (sys.path[0] is the importer's directory). Helpers
+# (path, blob, introducing commit) and imports (helper, helper blob, importer,
+# importer blob, importer introducing commit, import line), reviewed one by one
+# from x1e-classify-h62-scripts' list. Refused, left unresolved: any import that
+# fails python_import_statement (after-baseline.py's sys.path.insert and
+# candidate.py's importlib use are refused importers; their helpers keep their
+# other reviewed importer). H1004 form (3) adds the three H28 helpers of
+# x1e-classify-h28-h55; workers.py is imported by run.py through its one exact
+# sys.path.insert of its runtime/ subdirectory. Source/consumption only: no
+# execution, import, pass, read, fixture, child, output, proof or runtime credit.
+_PY_IMPORT_ROWS = '''
+@8a1794652d299cd042c815441a426e7efb642522
+H:item2/audit-abi-world/receipts.py f863fce768398bc7b8cf6f74c8998a746d454a16
+ H:item2/audit-abi-world/accept_runtime.py 5a0df8230341bd078680f542be8921e23c208c92 38aef082f5b0e96e257fb91b62d8e432e8eec48d 6
+ H:item2/audit-abi-world/coverage.py c2c8b01802fa3500b1cdc15fe00f870487c83605 38aef082f5b0e96e257fb91b62d8e432e8eec48d 39
+ H:item2/audit-abi-world/extract_vectors.py ce6483f9dae3fe02dbe716cee03436ed401f777a 38aef082f5b0e96e257fb91b62d8e432e8eec48d 6
+@8e3023d10b62574b7be84630c064b53b8dcfbb09
+H:item2/audit-abi-world/resume_sources.py 714d79517abf92322b312a25223adcb55ba82050
+ H:item2/audit-abi-world/resume_accept.py 57cdfd9506bb1573432358e179b8d060c9612d92 a37430cd3673749dee65c301a069792efd1bccab 12
+ H:item2/audit-abi-world/resume_mcp_call.py 68a3a88a246c7da9a75e247c890bedb87206a28e 8e3023d10b62574b7be84630c064b53b8dcfbb09 39
+@c1384ed9310f9c5402d521036d0c75cacf79fc99
+H:item2/audit-calculus/owners.py c471b8400bc553a8bd554c3b335bb6074bfc9a33
+ H:item2/audit-calculus/acceptance.py 675133d51e0202e01e5cf4532a26996debb4371e c361178f68f34c276a02b15691cd726aaa85a51e 11
+@febcbe09fe79e890c66baf4f266490beb674a357
+H:item2/audit-language/gate_repair.py 84db13d263f185022e5e24b65c2f1ae7eaa37c63
+ H:item2/audit-language/check.py 367616d8d65dd2bd6abb1e5fac7138050f2acc78 16e98ad46223e6fe4a97dadb8187497537f57dce 56
+ H:item2/audit-language/retire_export.py 4748376ef83284136230125977bd0725e39fe43a 16e98ad46223e6fe4a97dadb8187497537f57dce 34
+ H:item2/audit-language/verify.py 9f433a190b2e3da5ef46fbc977741621c6b807ba 16e98ad46223e6fe4a97dadb8187497537f57dce 22
+@107cb28c032e3bff522ff6db0fdf0be54b2bbefd
+H:item2/audit-theories/pending_impossibility.py 2bf62f1f7376305a6e152d1d7f3db2ba6da6de3f
+ H:item2/audit-theories/coverage_ledger.py c459994e09c06ade984aabd8af6483287f5f215a 107cb28c032e3bff522ff6db0fdf0be54b2bbefd 12
+ H:item2/audit-theories/mutability_input_roles.py c67019762b0c5dfb9d489b756866d5fa353131ca 107cb28c032e3bff522ff6db0fdf0be54b2bbefd 11
+ H:item2/audit-theories/verify_acceptance_snapshot.py c805842b75bc519260d857f9730671c78421cbe1 107cb28c032e3bff522ff6db0fdf0be54b2bbefd 15
+@56a137f709aa737d2e3886aca2daf9f52b40261c
+H:item4/generic-primitive-packets/runtime.py 015e64e5fac885e6962e5bd90fe284b9c1ae2820
+ H:item4/generic-primitive-packets/check.py c4be638c1f7ecb46ffcb3d6ff1cafa95c1ea3a54 0a34d9c508ca24f6a914553953a0bc4abf5863dc 18
+ H:item4/generic-primitive-packets/measure.py b108aa52de426ccb7058056ebd39ce1ea18f9b50 0a34d9c508ca24f6a914553953a0bc4abf5863dc 17
+@df554535e9c8d308276a99ea23611c7d63ae5919
+H:item6/migrate-hash/lean_lex.py 98e527e654c4ed29919d56c4d343a72e75fca3fa
+ H:item6/migrate-hash/census.py 0ddef2ed5405c2bbcd8ff199c43097a7a847147a df554535e9c8d308276a99ea23611c7d63ae5919 13
+ H:item6/migrate-hash/full_measure.py cae845b44b6c50bd6ea69065b113099fe40eb73d df554535e9c8d308276a99ea23611c7d63ae5919 9
+@d48bc8cb306d50626864c00c53cdd5c585438ec0
+H:item6/migrate-lowering/process_group.py 31d1dba2b8ff9c33da3c25758b83227a7bebe5e3
+ H:item6/migrate-lowering/bounded.py b4c9edefa18f3c1b3dd7f11f8ffa46c61aaf31bd aa07794d3f1084a560f308c2b469198a577ee1a5 6
+ H:item6/migrate-lowering/supervise.py 38d19f87951efbbb531a321d9e0d48604ca4a78e aa07794d3f1084a560f308c2b469198a577ee1a5 4
+@4e7929f0bf488c8c23c7b42f6a186121c6951a4c
+H:item6/migrate-precompiles/contract.py 292e032d3602f997b88830c25d51bca1cc95f883
+ H:item6/migrate-precompiles/census.py 634868cff19058fe2d32bbfc691c2c2694c23b3b d393a60b76120dfab477e62c569f11cf34cdcfcb 7
+@df554535e9c8d308276a99ea23611c7d63ae5919
+H:item6/migrate-root-gate/release_integrity.py 49a4e4707d6bfdcedef222b66a2f2af9df73c536
+ H:item6/migrate-root-gate/cache-roundtrip.py ff642bece78b93da3e6cd534cdb66de4e73506b0 df554535e9c8d308276a99ea23611c7d63ae5919 19
+@40be303ce78a6d6bcad5d4c4b8c7285cc1732767
+H:item6/migrate-semantics/bounded.py 921f0c36065a3d5ba781b7fd46f324a5bf1c07a3
+ H:item6/migrate-semantics/api_evidence.py 4cb5c110945cbeffa15ea2f48bb8a05d2fb29a9b 40be303ce78a6d6bcad5d4c4b8c7285cc1732767 5
+ H:item6/migrate-semantics/cgroup_controls.py ec85416b5b4134dc11fa801c4cb596109edfaa0a 40be303ce78a6d6bcad5d4c4b8c7285cc1732767 5
+ H:item6/migrate-semantics/cgroup_prerequisite.py eeb10340cfd2da86bc9f5839ef69dd3ad15f7fef 40be303ce78a6d6bcad5d4c4b8c7285cc1732767 5
+ H:item6/migrate-semantics/compare_samples.py c3fbd043c55091388a581dafe6cc6cdfc6a0e4ed 40be303ce78a6d6bcad5d4c4b8c7285cc1732767 5
+ H:item6/migrate-semantics/measure.py 2875c98d5b0ddb2fb825542114452b838a6f9bea 40be303ce78a6d6bcad5d4c4b8c7285cc1732767 6
+ H:item6/migrate-semantics/owner_hash_fixture.py 3e65a61636afff9d97f7f5bc9facd0425b8b7b94 40be303ce78a6d6bcad5d4c4b8c7285cc1732767 5
+ H:item6/migrate-semantics/probe.py d99f64b94069c8ef9d83c5f0be79c8fb99d61a28 40be303ce78a6d6bcad5d4c4b8c7285cc1732767 6
+@22e91b98298078b2f7b43d0a9bd5e1553b7eb17d
+T:h28-sol/automation-benchmark/scope_policy.py d4dc3f8b3abf74db4759b03dbb84b8e1bdfc9bbe
+ T:h28-sol/automation-benchmark/test_scope_policy.py 01146f6d8222a26bc34a89beab21211c5cf3b440 bf64bc529d40d2dfc63d34f26b262c70f77a19de 2
+@50a5679e38aeaf468850d8f46645bdf5e71aa706
+T:h28-sol/mutation-testing/tools/selected_accounting.py 585c80fd909f44f89c526c3c9b9d999457374b82
+ T:h28-sol/mutation-testing/tools/check_selected_controls.py fb128da9f4fc433f60f35560c05d5af7d4523888 50a5679e38aeaf468850d8f46645bdf5e71aa706 12
+ T:h28-sol/mutation-testing/tools/verify_combined.py 521bd933f52e0bb6acd24d3864e506ac3a44a847 50a5679e38aeaf468850d8f46645bdf5e71aa706 106
+@de1d76d922d7ff42d3a07bc020b740f8ec9f0105
+T:h28-sol/non-vacuity/runtime/workers.py e375ec6f6126d4e3f6046fdfa5e9f421ef7e21f4
+ T:h28-sol/non-vacuity/run.py f81c3d2a7b8a650b9a9e6d7f62c1e2083025586a de1d76d922d7ff42d3a07bc020b740f8ec9f0105 5
+'''
+_IMPORT_SHADOWS = frozenset({'importlib', 'imp', 'runpy', 'pkgutil', 'zipimport', 'site', 'builtins', '__builtins__',
+                             '__import__', 'exec', 'eval', 'chdir', 'fchdir'})
+_SYS_IMPORT_STATE = frozenset({'path', 'modules', 'meta_path', 'path_hooks', 'path_importer_cache', 'flags'})
+
+
+def _import_table(text):
+    """`@COMMIT` then `H:helper blob` rows, each followed by indented
+    `importer blob commit line` rows (paths relative to _REVIEW_DIRECTORIES)."""
+    helpers, imports, commit, helper = set(), set(), None, None
+    for line in filter(str.strip, text.split('\n')):
+        if line.startswith('@'): commit = line[1:]; helper = None; continue
+        words = line.split()
+        if line.startswith(' '):
+            if helper is None or len(words) != 4: raise ValueError('invalid import review table')
+            imports.add(helper + (_REVIEW_DIRECTORIES[words[0][:2]] + words[0][2:], words[1], words[2], int(words[3])))
+            continue
+        if commit is None or len(words) != 2: raise ValueError('invalid import review table')
+        helper = (_REVIEW_DIRECTORIES[words[0][:2]] + words[0][2:], words[1]); helpers.add(helper + (commit,))
+    return frozenset(helpers), frozenset(imports)
+
+
+PY_IMPORT_HELPERS, PY_IMPORT_IMPORTS = _import_table(_PY_IMPORT_ROWS)
+
+
+def _import_shadowed(helper, tree):
+    """A package, another M.* file or a cached M.* beside the helper M.py."""
+    directory, name = posixpath.split(helper)
+    base = directory + '/' if directory else ''
+    prefix = base + name[:-3]
+    return any(p.startswith(prefix + '/') or p.startswith(prefix + '.') and p != helper
+               or p.startswith(base + '__pycache__/' + name[:-3] + '.') for p in tree)
+
+
+def python_import_statement(text, importer, line, helper, tree):
+    """The names one static import binds from the sibling helper, or None.
+
+    The statement at `line` of the importer is the only import node there:
+    `import M` (one alias) or `from M import n, ...` (absolute, no `*`), M the
+    helper's basename stem, a plain non-keyword identifier outside the
+    standard library and built-in module names, and the helper in the
+    importer's directory. Not audited, giving None: a package directory or any
+    other `M.*` file beside the helper (FileFinder prefers packages and
+    extension modules), any use of importlib, imp, runpy, pkgutil, zipimport,
+    site, builtins, __import__, exec, eval or chdir, any sys.path, sys.modules,
+    meta_path, path_hooks, path_importer_cache or sys.flags access, an aliased
+    sys, sys reached through another object (`.sys`, `__dict__`, `from os
+    import sys`) or used other than as `sys.ATTR`, a `from sys import` of
+    import state, getattr/setattr/delattr/vars on sys, a dunder stem or a
+    `__pycache__/M.*` file. Not audited (consumption credit only): what the
+    importer's earlier sibling imports do at run time, whether the statement
+    is reached, and the interpreter environment (PYTHONPATH, PYTHONSAFEPATH,
+    site customisation).
+
+    H1004 form (3) adds one exact path form: the helper is in the importer's
+    subdirectory D when the module body has exactly one statement
+    `sys.path.insert(0, str(pathlib.Path(__file__).resolve().parent/'D'))`
+    (D a plain name), after top-level plain `import pathlib` and `import sys`
+    and before a top-level import statement at `line`; sys, pathlib, str and
+    __file__ are never rebound (assignment, attribute store, argument,
+    definition, except or match capture, import alias or star import) and no
+    `M.py`, `M.*` or `M/` sits in the importer's own directory. That statement
+    is the only sys.path access allowed.
+    """
+    import keyword, sys as interpreter
+    directory, name = posixpath.split(helper)
+    module = name[:-3] if name.endswith('.py') else ''
+    if (not module.isidentifier() or keyword.iskeyword(module) or module.startswith('__')
+            or module in interpreter.stdlib_module_names or module in interpreter.builtin_module_names):
+        return None
+    if _import_shadowed(helper, tree): return None
+    try: parsed = ast.parse(text)
+    except (SyntaxError, ValueError, RecursionError): return None
+    home = posixpath.dirname(importer); skip = set()
+    if home != directory:
+        sub = posixpath.basename(directory)
+        if posixpath.dirname(directory) != home or sub in ('', '.', '..') or '\\' in sub: return None
+        template = ast.dump(ast.parse('sys.path.insert(0, str(pathlib.Path(__file__).resolve().parent/' + repr(sub) + '))').body[0])
+        inserts = [k for k, n in enumerate(parsed.body) if ast.dump(n) == template]
+        if len(inserts) != 1: return None  # any other sys.path access is refused by the walk below
+        at = inserts[0]
+        for want in ('pathlib', 'sys'):
+            if not any(isinstance(n, ast.Import) and any(a.name == want and a.asname is None for a in n.names) for n in parsed.body[:at]): return None
+        stem = posixpath.join(home, module)
+        if any(q == stem + '.py' or q.startswith(stem + '/') or q.startswith(stem + '.') for q in tree): return None  # no script-directory candidate
+        if not any(isinstance(n, (ast.Import, ast.ImportFrom)) and n.lineno == line for n in parsed.body[at + 1:]): return None
+        fixed = {'sys', 'pathlib', 'str', '__file__'}
+        for n in ast.walk(parsed):
+            if (isinstance(n, ast.Name) and n.id in fixed and not isinstance(n.ctx, ast.Load) or isinstance(n, ast.arg) and n.arg in fixed
+                    or isinstance(n, (ast.FunctionDef, ast.AsyncFunctionDef, ast.ClassDef)) and n.name in fixed
+                    or isinstance(n, (ast.Global, ast.Nonlocal)) and set(n.names) & fixed
+                    or isinstance(n, ast.alias) and ((n.asname or '') in fixed or n.name in ('str', '__file__'))
+                    or isinstance(n, ast.ImportFrom) and any(a.name in fixed or a.name == '*' for a in n.names)
+                    or isinstance(n, ast.ExceptHandler) and n.name in fixed
+                    or isinstance(n, (ast.MatchAs, ast.MatchStar)) and n.name in fixed
+                    or isinstance(n, ast.Attribute) and not isinstance(n.ctx, ast.Load) and isinstance(n.value, ast.Name) and n.value.id in fixed): return None
+        skip = {id(n) for n in ast.walk(parsed.body[at])}
+    parents = {child: node for node in ast.walk(parsed) for child in ast.iter_child_nodes(node)}
+    found = []
+    for n in ast.walk(parsed):
+        if id(n) in skip: continue
+        if isinstance(n, ast.Name) and n.id in _IMPORT_SHADOWS: return None
+        if isinstance(n, ast.Name) and n.id == 'sys' and not (isinstance(parents.get(n), ast.Attribute) and parents[n].value is n): return None
+        if isinstance(n, ast.Attribute) and (n.attr in ('chdir', 'fchdir', '__import__', 'sys', '__dict__')
+                                             or n.attr in _SYS_IMPORT_STATE and isinstance(n.value, ast.Name) and n.value.id == 'sys'): return None
+        if isinstance(n, ast.Import):
+            for a in n.names:
+                if a.name.split('.')[0] in _IMPORT_SHADOWS or a.name == 'sys' and a.asname not in (None, 'sys'): return None
+        if isinstance(n, ast.ImportFrom):
+            if (n.module or '').split('.')[0] in _IMPORT_SHADOWS or any(a.name in _IMPORT_SHADOWS or a.name == 'sys' for a in n.names): return None
+            if n.module == 'sys' and any(a.name in _SYS_IMPORT_STATE or a.name == '*' for a in n.names): return None
+        if (isinstance(n, ast.Call) and isinstance(n.func, ast.Name) and n.func.id in ('getattr', 'setattr', 'delattr', 'vars')
+                and n.args and isinstance(n.args[0], ast.Name) and n.args[0].id == 'sys'): return None
+        if isinstance(n, (ast.Import, ast.ImportFrom)) and n.lineno == line: found.append(n)
+    if len(found) != 1: return None
+    n = found[0]
+    if isinstance(n, ast.Import):
+        return [] if len(n.names) == 1 and n.names[0].name == module else None
+    if n.level != 0 or n.module != module or any(a.name == '*' for a in n.names): return None
+    return sorted({a.name for a in n.names})
+
+
+def python_import_bindings(text):
+    """Names a helper binds at module top level (definitions, plain assignment
+    targets and import aliases), or None when it does not parse."""
+    try: parsed = ast.parse(text)
+    except (SyntaxError, ValueError, RecursionError): return None
+    names = set()
+    for n in parsed.body:
+        if isinstance(n, (ast.FunctionDef, ast.AsyncFunctionDef, ast.ClassDef)): names.add(n.name)
+        elif isinstance(n, (ast.Assign, ast.AnnAssign)):
+            for t in (n.targets if isinstance(n, ast.Assign) else [n.target]):
+                names.update(e.id for e in ast.walk(t) if isinstance(e, ast.Name))
+        elif isinstance(n, (ast.Import, ast.ImportFrom)):
+            names.update((a.asname or a.name).split('.')[0] for a in n.names if a.name != '*')
+    return names
+
+
+def python_import_root(classifier, graph, catalog, entry, reviewed=None, imports=None):
+    """H1051: a reviewed Python helper imported by kept entry roots, as a source-only role.
+
+    Run after every other standalone definition (LATE_SOURCE_ROLE_KINDS) so
+    the importers' roots exist. Binds the helper (path, blob, introducing
+    commit, interface {'module', 'names'}) and each import (importer, blob,
+    introducing commit, line): every importer is a current root whose command
+    is exactly `python3 -B IMPORTER`, the statement passes
+    python_import_statement and every imported name is a top-level binding of
+    the helper. A shadowing package or `M.*` file, or a missing importer root
+    at a later revision, makes it stale. Never a validated runner; anchors
+    nothing. Kept later while helper and importers are unchanged; a current
+    definition of the path supersedes it."""
+    repo = graph.repo; role = 'Python import role'
+    reviewed = PY_IMPORT_HELPERS if reviewed is None else reviewed
+    imports = PY_IMPORT_IMPORTS if imports is None else imports
+    required = {'path', 'input_revision', 'source_blob', 'command', 'kind', 'interface', 'provenance', 'imports', 'purpose'}
+    _role_schema(classifier, catalog, entry, required, role); calls = entry['imports']
+    if (not isinstance(calls, list) or not calls or any(not isinstance(c, dict) or set(c) != {'importer', 'importer_blob', 'importer_commit', 'line'}
+                   or type(c['line']) is not int or not all(isinstance(c[k], str) for k in ('importer', 'importer_blob', 'importer_commit')) for c in calls)
+            or len({canonical(c) for c in calls}) != len(calls)):
+        raise ValueError('invalid ' + role + ' definition')
+    p = entry['path']; revision = entry['input_revision']; doc = entry['provenance']; blob = entry['source_blob']
+    if not p.endswith('.py') or _clean(p) != p or entry['command'] != ['python3', '-B', calls[0]['importer']]:
+        raise ValueError('unsupported ' + role + ' invocation: ' + p)
+    if doc['path'] != p or doc['blob'] != blob or (p, blob, doc['commit']) not in reviewed: raise ValueError('unreviewed ' + role + ': ' + p)
+    if any((p, blob, c['importer'], c['importer_blob'], c['importer_commit'], c['line']) not in imports for c in calls):
+        raise ValueError('unreviewed ' + role + ' import: ' + p)
+    pins = [(p, blob)] + [(c['importer'], c['importer_blob']) for c in calls]
+    if not _role_current(classifier, repo, catalog, entry, pins): return
+    if any(repo.tree[q][0] not in ('100644', '100755') or q not in repo.texts for q, _ in pins):
+        raise ValueError('unsupported ' + role + ' invocation: ' + p)
+    if not _introduced(classifier, repo, doc['commit'], p, blob): raise ValueError(role + ' lacks its introducing provenance: ' + p)
+    if not all(_introduced(classifier, repo, c['importer_commit'], c['importer'], c['importer_blob']) for c in calls):
+        raise ValueError(role + ' importer lacks its introducing provenance: ' + p)
+    module = posixpath.basename(p)[:-3]
+    if _import_shadowed(p, repo.tree):
+        if revision == repo.ref: raise ValueError(role + ' helper is shadowed: ' + p)
+        return  # shadowed later: stale
+    bound = python_import_bindings(repo.texts[p])
+    if bound is None: raise ValueError(role + ' helper does not parse: ' + p)
+    names = set()
+    for c in calls:
+        found = python_import_statement(repo.texts[c['importer']], c['importer'], c['line'], p, repo.tree)
+        if found is None: raise ValueError(role + ' import is not an exact sibling import: ' + c['importer'])
+        if not set(found) <= bound: raise ValueError(role + ' imports an unbound helper name: ' + c['importer'])
+        names.update(found)
+        command = shlex.join(['python3', '-B', c['importer']])
+        if not any(r['path'] == c['importer'] and r['command'] == command and not r.get('python_import_role')
+                   and r.get('source_blob', c['importer_blob']) == c['importer_blob'] for r in graph.roots.values()):
+            if revision == repo.ref: raise ValueError(role + ' importer is not a python3 -B entry root: ' + c['importer'])
+            return
+    interface = {'module': module, 'names': sorted(names)}
+    if canonical(interface) != canonical(entry['interface']): raise ValueError(role + ' interface mismatch: ' + p)
+    identity = PY_IMPORT_PREFIX + p
+    graph.root(p, 'source-only Python import dependency', shlex.join(entry['command']), calls[0]['importer'], calls[0]['line'], root_id=identity)
+    if identity not in graph.roots: return
+    graph.roots[identity].update({'source_only': True, 'python_import_role': True, 'source_blob': blob, 'purpose': entry['purpose'],
+        'interface': interface, 'provenance': doc, 'imports': calls, 'source_declaration_revision': revision,
+        'validation_at_measured_revision': {'status': 'unavailable', 'command': entry['command'],
+            'reason': 'Reviewed Python helper imported by reviewed python3 -B entry roots through exact sibling-module resolution; never run or certified to import or pass, and the interpreter environment is not audited. Source/consumption role only: no execution, read, fixture, child, generated-output, proof or runtime credit.'}})
+
+
+def python_import_controls(env):
+    """(10) H1051 controls, run by successor_controls with its helpers: the
+    reviewed witnesses, the import guards, the role and its negative controls."""
+    global PY_IMPORT_HELPERS, PY_IMPORT_IMPORTS
+    commit, run, rejected, blob, program = (env[k] for k in ('commit', 'run', 'rejected', 'blob', 'program'))
+    # The audited witnesses: 11 H62 helpers (27 sibling imports) and 3 H28 helpers (4 imports,
+    # one through run.py's runtime/ path insert); one row per path.
+    helpers = {p for p, _, _ in PY_IMPORT_HELPERS}
+    assert len(PY_IMPORT_HELPERS) == len(helpers) == 14 and len(PY_IMPORT_IMPORTS) == 31
+    assert len([p for p in helpers if p.startswith('scripts/h62/')]) == 11 and len([p for p in helpers if p.startswith('tests/h28-sol/')]) == 3
+    assert all(p.endswith('.py') for p in helpers)
+    assert {(p, b) for p, b, _ in PY_IMPORT_HELPERS} == {(p, b) for p, b, _, _, _, _ in PY_IMPORT_IMPORTS}
+    assert all(posixpath.dirname(i) == posixpath.dirname(p) or (p, i) == ('tests/h28-sol/non-vacuity/runtime/workers.py', 'tests/h28-sol/non-vacuity/run.py')
+               for p, _, i, _, _, _ in PY_IMPORT_IMPORTS)
+    # Refused importers stay out: sys.path.insert and importlib use.
+    assert not {i for _, _, i, _, _, _ in PY_IMPORT_IMPORTS} & {'scripts/h62/item6/migrate-root-gate/after-baseline.py',
+                                                              'scripts/h62/item6/migrate-precompiles/candidate.py'}
+    for text in ('@X\nH:a.py b\n  H:c.py d e\n', ' H:c.py d e 1\n', '@X\nH:a.py\n', '@X\nQ:a.py b\n'):
+        try: _import_table(text); raise AssertionError(text)
+        except (ValueError, KeyError): pass
+    # The import guards on synthetic sources.
+    H, I = 'tests/pi/util.py', 'tests/pi/run.py'
+    tree = {H: 0, I: 0}
+    ok = 'from util import VALUE, f\ndef main():\n    print(f())\nmain()\n'
+    assert python_import_statement(ok, I, 1, H, tree) == ['VALUE', 'f']
+    assert python_import_statement('import util\nimport sys\nprint(sys.argv, util.VALUE)\n', I, 1, H, tree) == []
+    assert python_import_statement('import os\ndef g():\n    from util import f\n    return os.path.join(f())\n', I, 3, H, tree) == ['f']
+    for text, line in (('import sys\nsys.path.insert(0, "x")\nfrom util import f\n', 3), ('import importlib\nfrom util import f\n', 2),
+                       ('from util import *\n', 1), ('import util as u, os\n', 1), ('import util.sub\n', 1), ('from .util import f\n', 1),
+                       ('import os\nos.chdir("x")\nfrom util import f\n', 3), ('from util import f\n__import__("util")\n', 1),
+                       ('import sys as s\nfrom util import f\n', 2), ('from sys import path\nfrom util import f\n', 2),
+                       ('import sys\nsys.modules["util"] = 1\nfrom util import f\n', 3), ('import sys\ngetattr(sys, "path")\nfrom util import f\n', 3),
+                       ('exec("x")\nfrom util import f\n', 2), ('import runpy\nfrom util import f\n', 2), ('from util import f\n', 2),
+                       ('from util import f; import util\n', 1), ('from other import f\n', 1), ('from util import f\n(', 1),
+                       ('import os\nos.sys.path.insert(0, "x")\nfrom util import f\n', 3), ('import sys\nsys.__dict__["path"]\nfrom util import f\n', 3),
+                       ('from os import sys\nfrom util import f\n', 2), ('import sys\ndef g(s): pass\ng(sys)\nfrom util import f\n', 4)):
+        assert python_import_statement(text, I, line, H, tree) is None, text
+    assert python_import_statement(ok, 'tests/other/run.py', 1, H, tree) is None  # not a sibling
+    # H1004 form (3): the one exact runtime/ path insert, and its near misses.
+    R, W = 'tests/nv/run.py', 'tests/nv/runtime/workers.py'
+    ins = "import pathlib,sys\nsys.path.insert(0,str(pathlib.Path(__file__).resolve().parent/'runtime'))\nfrom workers import lean_workers\n"
+    assert python_import_statement(ins, R, 3, W, {R: 0, W: 0}) == ['lean_workers']
+    for text, line in ((ins.replace("'runtime'", "'other'"), 3), (ins.replace('resolve().', ''), 3), (ins.replace('(0,', '(1,'), 3),
+                       (ins.replace('insert(0,', 'append('), 3), (ins + 'sys.path.pop(0)\n', 3),
+                       (ins.replace('import pathlib,sys\n', 'import sys\nfrom pathlib import Path as pathlib\n'), 4),
+                       (ins.replace('import pathlib,sys\n', 'import sys\n') + 'import pathlib\n', 3), (ins + 'str = repr\n', 3),
+                       (ins.replace('import pathlib,sys\n', 'import pathlib\n'), 3), (ins + 'try:\n    pass\nexcept E as pathlib:\n    pass\n', 3),
+                       (ins + 'match 1:\n    case sys:\n        pass\n', 3), ('from x import *\n' + ins, 4), (ins + 'pathlib.Path = None\n', 3),
+                       ('import pathlib,sys\nfrom workers import lean_workers\n' + ins.split('\n', 1)[1], 2),
+                       (ins.replace('from workers', 'if 1:\n    from workers'), 4), (ins.replace("sys.path.insert(0,str(pathlib.Path(__file__).resolve().parent/'runtime'))", "if 1:\n    sys.path.insert(0,str(pathlib.Path(__file__).resolve().parent/'runtime'))"), 4),
+                       (ins.replace('\nfrom', "\nsys.path.insert(0,str(pathlib.Path(__file__).resolve().parent/'runtime'))\nfrom"), 4),
+                       (ins + 'def f(__file__): pass\n', 3), (ins.replace('import pathlib,sys', 'import pathlib,sys,importlib'), 3)):
+        assert python_import_statement(text, R, line, W, {R: 0, W: 0}) is None, text
+    assert python_import_statement(ins, R, 3, W, {R: 0, W: 0, 'tests/nv/runtime/workers/__init__.py': 0}) is None
+    assert python_import_statement(ins, R, 3, W, {R: 0, W: 0, 'tests/nv/workers.py': 0}) is None  # script-directory candidate
+    assert python_import_statement(ins, 'tests/run.py', 3, W, {W: 0}) is None and python_import_statement(ins, R, 3, 'tests/nv/runtime/x/workers.py', {}) is None
+    for shadow in ('tests/pi/util/__init__.py', 'tests/pi/util.cpython-312-x86_64-linux-gnu.so', 'tests/pi/util.pyc', 'tests/pi/util/x.txt',
+                   'tests/pi/__pycache__/util.cpython-312.pyc'):
+        assert python_import_statement(ok, I, 1, H, dict(tree, **{shadow: 0})) is None, shadow
+    for name in ('json', 'sys', 'class', 'my-mod', '__main__'):  # standard library, built-in, keyword, not an identifier, dunder
+        assert python_import_statement('import ' + name + '\n', 'tests/pi/r.py', 1, 'tests/pi/' + name + '.py', {}) is None, name
+    assert python_import_bindings('import os.path as p, json\nfrom x import y\nA, (B, C) = 1, (2, 3)\nD: int = 4\ndef f(): pass\nclass K: pass\nif 1:\n    Z = 1\nE += 1\n') == {
+        'p', 'json', 'y', 'A', 'B', 'C', 'D', 'f', 'K'}
+    assert python_import_bindings('def (\n') is None
+    # The role on a synthetic repository.
+    helper = 'VALUE = 1\ndef f():\n    return VALUE\n'
+    bad = {'tests/pi/path.py': 'import sys\nsys.path.insert(0, "x")\nfrom util import VALUE\ndef main():\n    print(VALUE)\nmain()\n',
+           'tests/pi/lib.py': 'import importlib\nfrom util import VALUE\ndef main():\n    print(VALUE)\nmain()\n',
+           'tests/pi/unbound.py': 'from util import missing\ndef main():\n    print(missing)\nmain()\n',
+           'tests/pi/deep.py': 'X = 1\n'}
+    add = {H: helper + 'from deep import X\n', I: ok, 'tests/pi/run2.py': 'import util\ndef main():\n    print(util.f())\nmain()\n', **bad,
+           'tests/pj/json.py': 'X = 1\n', 'tests/pj/run.py': 'import json\ndef main():\n    print(json.X)\nmain()\n'}
+    pi = commit(add, 'Python imports'); P = pi.ref; pl = commit({'tests/unrelated.txt': 'P\n'}, 'Python imports later')
+    importer = lambda p, repo=pi: dict(program, path=p, input_revision=repo.ref, source_blob=blob(repo, p), command=['python3', '-B', p], entry_line=len(repo.texts[p].splitlines()))
+    roots = [importer(I), importer('tests/pi/run2.py')]
+    call = lambda i=I, line=1, **k: dict({'importer': i, 'importer_blob': blob(pi, i), 'importer_commit': P, 'line': line}, **k)
+    face = {'module': 'util', 'names': ['VALUE', 'f']}
+    mk = lambda p=H, calls=None, interface=face: {
+        'path': p, 'input_revision': P, 'source_blob': blob(pi, p), 'kind': PY_IMPORT_KIND, 'command': ['python3', '-B', (calls or [call()])[0]['importer']],
+        'interface': interface, 'provenance': {'commit': P, 'path': p, 'blob': blob(pi, p)}, 'imports': calls or [call(), call('tests/pi/run2.py')],
+        'purpose': 'Synthetic helper.'}
+    role = mk(); base_model, base = run(pl, standalone=roots)
+    assert base[H]['class'] != 'keep' and base[I]['class'] == 'keep'
+    saved = PY_IMPORT_HELPERS, PY_IMPORT_IMPORTS
+    PY_IMPORT_HELPERS = frozenset({(p, blob(pi, p), P) for p in (H, 'tests/pi/deep.py', 'tests/pj/json.py')})
+    PY_IMPORT_IMPORTS = frozenset({(H, blob(pi, H), i, blob(pi, i), P, n) for i, n in ((I, 1), ('tests/pi/run2.py', 1), ('tests/pi/path.py', 3),
+                                   ('tests/pi/lib.py', 2), ('tests/pi/unbound.py', 1))}
+                                  | {('tests/pi/deep.py', blob(pi, 'tests/pi/deep.py'), H, blob(pi, H), P, 4),
+                                     ('tests/pj/json.py', blob(pi, 'tests/pj/json.py'), 'tests/pj/run.py', blob(pi, 'tests/pj/run.py'), P, 1)})
+    try:
+        for repo in (pi, pl):
+            for order in (1, -1):  # dispatched after every other definition, in either order
+                model, rows = run(repo, standalone=([role] + roots)[::order]); entry = model['entry_points'][PY_IMPORT_PREFIX + H]
+                assert rows[H]['class'] == 'keep' and entry['source_only'] and entry['python_import_role'] and entry['interface'] == face
+                assert entry['validation_at_measured_revision']['status'] == 'unavailable' and entry['location'] == I + ':1'
+                assert entry['command'] == 'python3 -B ' + I and entry['imports'] == role['imports'] and entry['provenance'] == role['provenance']
+            if repo is pl:  # no import, execution, read, child or runtime credit beyond the helper itself
+                assert rows['tests/pi/deep.py']['class'] != 'keep'
+                assert all(canonical(r) == canonical(base[p]) for p, r in rows.items() if p != H)
+                assert set(model['entry_points']) == set(base_model['entry_points']) | {PY_IMPORT_PREFIX + H}
+        Z = '0' * 40
+        for change, text in (({'extra': 1}, 'invalid Python import'), ({'purpose': ' '}, 'invalid Python import'), ({'imports': []}, 'invalid Python import'),
+                             ({'imports': [call(), call()]}, 'invalid Python import'), ({'imports': [call(line='1')]}, 'invalid Python import'),
+                             ({'imports': [call(extra=1)]}, 'invalid Python import'), ({'provenance': {'commit': P}}, 'invalid Python import'),
+                             ({'input_revision': 'HEAD'}, 'full commit revision'), ({'command': ['python3', I]}, 'unsupported Python import role invocation'),
+                             ({'command': ['python3', '-B', H]}, 'unsupported Python import role invocation'),
+                             ({'source_blob': Z}, 'unreviewed Python import role'), ({'provenance': dict(role['provenance'], commit=Z)}, 'unreviewed Python import role'),
+                             ({'imports': [call(line=2)]}, 'unreviewed Python import role import'), ({'imports': [call(importer_blob=Z)]}, 'role import'),
+                             ({'imports': [call(importer_commit=Z)]}, 'role import'), ({'interface': dict(face, names=['f'])}, 'Python import role interface mismatch'),
+                             ({'interface': {'module': 'util', 'names': ['VALUE', 'f'], 'x': 1}}, 'interface mismatch'), ({'input_revision': Z}, 'unverifiable historical')):
+            rejected(pi, text, standalone=[dict(role, **change)] + roots)
+        rejected(pi, 'conflicting standalone', standalone=[role, dict(role, purpose='Other.')] + roots)
+        for i, n, text in (('tests/pi/path.py', 3, 'not an exact sibling import'), ('tests/pi/lib.py', 2, 'not an exact sibling import'),
+                           ('tests/pi/unbound.py', 1, 'imports an unbound helper name')):
+            rejected(pi, text, standalone=[mk(calls=[call(i, n)])] + roots + [importer(i)])
+        rejected(pi, 'not an exact sibling import', standalone=[mk('tests/pj/json.py', [call('tests/pj/run.py')], {'module': 'json', 'names': []}),
+                                                                importer('tests/pj/run.py')])
+        # Importers must be current python3 -B entry roots, never another import role.
+        rejected(pi, 'not a python3 -B entry root', standalone=[role])
+        rejected(pi, 'not a python3 -B entry root', standalone=[role, roots[0]])
+        rejected(pi, 'not a python3 -B entry root', standalone=[role, mk('tests/pi/deep.py', [call(H, 4)], {'module': 'deep', 'names': ['X']})] + roots)
+        assert PY_IMPORT_PREFIX + H not in run(pl, standalone=[role])[0]['entry_points']  # later: missing importer root is stale
+        PY_IMPORT_IMPORTS = PY_IMPORT_IMPORTS | {(H, blob(pi, H), I, blob(pi, I), env['A'], 1)}
+        rejected(pi, 'importer lacks its introducing provenance', standalone=[mk(calls=[call(importer_commit=env['A'])])] + roots)
+        for order in (1, -1):  # a current definition supersedes
+            model, _ = run(pl, standalone=[dict(role, input_revision=pl.ref, purpose='Now.'), role][::order] + roots)
+            assert model['entry_points'][PY_IMPORT_PREFIX + H]['purpose'] == 'Now.'
+        PY_IMPORT_HELPERS = saved[0]  # the audited set admits no other helper
+        rejected(pi, 'unreviewed Python import role', standalone=[role] + roots)
+        PY_IMPORT_HELPERS = frozenset({(H, blob(pi, H), P)})
+        # A changed helper or importer, a shadowing extension module, package or cached
+        # module drops the root later; a current claim on changed or shadowed bytes is refused.
+        for changes in ({H: helper}, {I: '# edited\n' + ok}, {'tests/pi/util.abi3.so': 'x'}, {'tests/pi/util/__init__.py': ''},
+                       {'tests/pi/__pycache__/util.cpython-312.pyc': 'x'}):
+            edited = commit(changes, 'edited')
+            model, rows = run(edited, standalone=[role, roots[1], importer(I, edited)])
+            assert PY_IMPORT_PREFIX + H not in model['entry_points'] and rows[H]['class'] != 'keep', changes
+            current = dict(role, input_revision=edited.ref)
+            rejected(edited, 'source mismatch' if H in changes or I in changes else 'helper is shadowed', standalone=[current, roots[1], importer(I, edited)])
+            for path in changes: (env['root'] / path).unlink()
+            commit({H: add[H], I: ok, 'tests/unrelated.txt': 'restored %d\n' % len(path)}, 'restored')
+    finally: PY_IMPORT_HELPERS, PY_IMPORT_IMPORTS = saved
+
+
+DOC_REF_KIND = 'documentation-reference-role'
+DOC_REF_PREFIX = 'doc-ref:'
+# H1050 (gh#1365, X1E-REFERENCE-POLICY-OWNER, Option A), H966 reference role:
+# a tracked Markdown document read by the documentation navigation check,
+# which the fast checks table runs and gate.sh invokes. Documents (path, blob,
+# introducing commit) and readers (path, blob, read line), reviewed one by one
+# from x1e-classify-h28-h55's list. Refused, left unresolved:
+# tests/h28-sol/mutation-testing/inventory.extended.errata.json (no reader on
+# master). Reference role only: no test, fixture, proof or runtime credit.
+REVIEWED_DOC_REFERENCES = _review_table('''
+@05b3f3f3a0bbb708eb00e86025811aee3eee15b3
+T:h28-sol/type-grammar/README.md e1a46f542832fa31f92f635162c480c2d39f4467
+@5cf5fe5fe942a8a867a8c1d5c858d9360d782560
+T:h28-terra/drift-reports/README.md 8c54e1c7e52a83c7adcaa030fafb025dc1584ca4
+@67715897e4bdb8b83331bba8f2079d35a5a8e04c
+T:h28-sol/automation-benchmark/README.md 563c3d605d8a16c89f7d5575940d8f4d88a488e6
+@db525b4aac99bbd4449fb21bd232b5039f78606f
+T:h28-sol/mutation-testing/tools/README.md 27e517d407f7d486547d742dee384b071a1ee0de
+''')
+REVIEWED_DOC_READERS = frozenset({('scripts/check-doc-navigation.py', '956ac0e78a2ce9622e1f205887a852dfa27b2b92', 138)})
+DOC_NAV_COMMAND = ['python3', 'scripts/check-doc-navigation.py']
+DOC_NAV_READ = '    graph = {p: set(links(p, (ROOT / p).read_text(), paths)) for p in paths}'
+DOC_NAV_DOCUMENTS = ("    output = subprocess.check_output(\n        ['git', 'ls-files', '-z', '--', '*.md'], cwd=ROOT\n    ).decode()\n"
+                     "    return {p for p in output.split('\\0') if p and (ROOT / p).is_file()} | {CATALOG}\n")
+DOC_NAV_CATALOG = 'docs/document-index.md'
+DOC_NAV_TABLE = ('scripts/ci/checks-fast.sh', "checks=$(cat <<'EOF'", 'EOF', 'doc-navigation\tpython3 scripts/check-doc-navigation.py',
+                 "while IFS=$'\\t' read -r name cmd; do")
+DOC_NAV_GATE = ('scripts/coord-tools/gate.sh', '  run_gate checks-fast bash scripts/ci/checks-fast.sh')
+
+
+def doc_navigation_invoked(repo):
+    """gate.sh runs the fast checks, whose name<TAB>command table names the
+    navigation check on one exact row inside its here-document."""
+    path, start, end, row, loop = DOC_NAV_TABLE
+    lines = repo.texts.get(path, '').splitlines()
+    if start not in lines or loop not in lines or DOC_NAV_GATE[1] not in repo.texts.get(DOC_NAV_GATE[0], '').splitlines(): return False
+    body = lines[lines.index(start) + 1:]
+    if end not in body: return False
+    return body[:body.index(end)].count(row) == 1
+
+
+def documentation_reference_root(classifier, graph, catalog, entry, reviewed=None, readers=None):
+    """H1050/H966: a reviewed tracked Markdown document read by the documentation navigation check.
+
+    Binds the document (path, blob, introducing commit), the reader (path,
+    blob, read line, all reviewed) and DOC_NAV_COMMAND. At the measured
+    revision the reader enumerates `git ls-files -- '*.md'` and reads each
+    file on its exact read line, the catalog links the document, and gate.sh runs the
+    fast checks table whose row runs the reader. A changed reader or a missing
+    link or invocation makes it stale. Never a validated runner; anchors
+    nothing. Reference credit only: no test, fixture, proof or runtime credit.
+    Not audited: the reader reaches its read line only when the whole catalog
+    equals its own render of the tree; this role checks the document's link
+    line, not catalog freshness (the gate runs the reader on every merge).
+    """
+    repo = graph.repo; role = 'documentation reference role'
+    reviewed = REVIEWED_DOC_REFERENCES if reviewed is None else reviewed
+    readers = REVIEWED_DOC_READERS if readers is None else readers
+    required = {'path', 'input_revision', 'source_blob', 'command', 'kind', 'interface', 'provenance', 'reader', 'purpose'}
+    _role_schema(classifier, catalog, entry, required, role); reader = entry['reader']
+    if (not isinstance(reader, dict) or set(reader) != {'path', 'blob', 'line'} or type(reader['line']) is not int
+            or not all(isinstance(reader[k], str) for k in ('path', 'blob'))):
+        raise ValueError('invalid ' + role + ' definition')
+    p = entry['path']; revision = entry['input_revision']; doc = entry['provenance']; blob = entry['source_blob']
+    if not p.endswith('.md') or _clean(p) != p or entry['command'] != DOC_NAV_COMMAND or entry['interface'] != {'catalog': DOC_NAV_CATALOG}:
+        raise ValueError('unsupported ' + role + ' invocation: ' + p)
+    if doc['path'] != p or doc['blob'] != blob or (p, blob, doc['commit']) not in reviewed: raise ValueError('unreviewed ' + role + ': ' + p)
+    if (reader['path'], reader['blob'], reader['line']) not in readers: raise ValueError('unreviewed ' + role + ' reader: ' + p)
+    if not _role_current(classifier, repo, catalog, entry, [(p, blob)]): return
+    if repo.tree[p][0] != '100644' or p not in repo.texts: raise ValueError('unsupported ' + role + ' invocation: ' + p)
+    if not _introduced(classifier, repo, doc['commit'], p, blob): raise ValueError(role + ' lacks its introducing provenance: ' + p)
+    text = repo.texts.get(reader['path']) if _current(repo, reader['path'], reader['blob']) else None
+    if text is None or reader['line'] > len(text.splitlines()) or text.splitlines()[reader['line'] - 1] != DOC_NAV_READ: return
+    if DOC_NAV_DOCUMENTS not in text or "CATALOG = '" + DOC_NAV_CATALOG + "'" not in text.splitlines(): return
+    link = '- [' + p + '](../' + p + ')'
+    if link not in repo.texts.get(DOC_NAV_CATALOG, '').splitlines() or not doc_navigation_invoked(repo): return
+    identity = DOC_REF_PREFIX + p
+    graph.root(p, 'documentation reference', shlex.join(DOC_NAV_COMMAND), reader['path'], reader['line'], root_id=identity)
+    if identity not in graph.roots: return
+    graph.roots[identity].update({'source_only': True, 'documentation_reference_role': True, 'source_blob': blob, 'purpose': entry['purpose'],
+        'interface': entry['interface'], 'provenance': doc, 'reader': reader, 'source_declaration_revision': revision,
+        'validation_at_measured_revision': {'status': 'unavailable', 'command': DOC_NAV_COMMAND,
+            'reason': 'Reviewed Markdown document read by the documentation navigation check that the fast checks run; the check is not run or certified to pass here. Reference role only: no test, fixture, proof or runtime credit.'}})
+
+
+def documentation_reference_controls(env):
+    """(11) H1050 controls, run by successor_controls with its helpers: the
+    reviewed documents, the reader and invocation bindings, the role and its
+    negative controls."""
+    global REVIEWED_DOC_REFERENCES, REVIEWED_DOC_READERS
+    commit, run, rejected, blob, gate = (env[k] for k in ('commit', 'run', 'rejected', 'blob', 'gate'))
+    # The audited witnesses: four H28 READMEs; the errata JSON (no reader) is refused.
+    paths = {p for p, _, _ in REVIEWED_DOC_REFERENCES}
+    assert len(REVIEWED_DOC_REFERENCES) == len(paths) == 4 and all(p.startswith('tests/h28-') and p.endswith('/README.md') for p in paths)
+    assert 'tests/h28-sol/mutation-testing/inventory.extended.errata.json' not in paths and len(REVIEWED_DOC_READERS) == 1
+    D = 'tests/doc/README.md'; N = 'scripts/check-doc-navigation.py'
+    reader = ("import subprocess\nfrom pathlib import Path\nROOT = Path(__file__).resolve().parent.parent\nCATALOG = 'docs/document-index.md'\n\n\n"
+              "def documents():\n" + DOC_NAV_DOCUMENTS + "\n\ndef main():\n    paths = documents()\n" + DOC_NAV_READ + "\n")
+    rl = reader.splitlines().index(DOC_NAV_READ) + 1
+    table = ("#!/usr/bin/env bash\nchecks=$(cat <<'EOF'\nother\tpython3 x.py\n" + DOC_NAV_TABLE[3] + "\nEOF\n)\n"
+             + DOC_NAV_TABLE[4] + "\n  bash -c \"$cmd\"\ndone <<< \"$checks\"\n")
+    catalog = '# Catalog\n- [' + D + '](../' + D + ')\n'
+    add = {D: '# Doc\n', 'tests/doc/other.md': '# Other\n', N: reader, DOC_NAV_TABLE[0]: table, DOC_NAV_CATALOG: catalog,
+           DOC_NAV_GATE[0]: gate + DOC_NAV_GATE[1] + '\n'}
+    dr = commit(add, 'documentation references'); R = dr.ref; dl = commit({'tests/unrelated.txt': 'D\n'}, 'documentation later')
+    mk = lambda p=D, **k: dict({'path': p, 'input_revision': R, 'source_blob': blob(dr, p), 'kind': DOC_REF_KIND, 'command': DOC_NAV_COMMAND,
+        'interface': {'catalog': DOC_NAV_CATALOG}, 'provenance': {'commit': R, 'path': p, 'blob': blob(dr, p)},
+        'reader': {'path': N, 'blob': blob(dr, N), 'line': rl}, 'purpose': 'Synthetic document.'}, **k)
+    role = mk(); base_model, base = run(dl, standalone=[])
+    assert base[D]['class'] != 'keep'
+    saved = REVIEWED_DOC_REFERENCES, REVIEWED_DOC_READERS
+    REVIEWED_DOC_REFERENCES = frozenset({(p, blob(dr, p), R) for p in (D, 'tests/doc/other.md')})
+    REVIEWED_DOC_READERS = frozenset({(N, blob(dr, N), rl)})
+    try:
+        for repo in (dr, dl):
+            model, rows = run(repo, standalone=[role]); entry = model['entry_points'][DOC_REF_PREFIX + D]
+            assert rows[D]['class'] == 'keep' and entry['source_only'] and entry['documentation_reference_role'] and entry['reader'] == role['reader']
+            assert entry['validation_at_measured_revision']['status'] == 'unavailable' and entry['location'] == N + ':%d' % rl
+            if repo is dl:  # no test, fixture, reader, proof or runtime credit
+                assert all(canonical(r) == canonical(base[p]) for p, r in rows.items() if p != D)
+                assert set(model['entry_points']) == set(base_model['entry_points']) | {DOC_REF_PREFIX + D}
+        Z = '0' * 40
+        for change, text in (({'extra': 1}, 'invalid documentation reference'), ({'purpose': ' '}, 'invalid documentation reference'),
+                             ({'reader': dict(role['reader'], line=str(rl))}, 'invalid documentation reference'),
+                             ({'reader': dict(role['reader'], extra=1)}, 'invalid documentation reference'),
+                             ({'input_revision': 'HEAD'}, 'full commit revision'), ({'command': ['python3', '-B', N]}, 'unsupported documentation reference'),
+                             ({'interface': {'catalog': 'docs/README.md'}}, 'unsupported documentation reference'),
+                             ({'source_blob': Z}, 'unreviewed documentation reference role'),
+                             ({'provenance': dict(role['provenance'], commit=Z)}, 'unreviewed documentation reference role'),
+                             ({'reader': dict(role['reader'], line=rl - 1)}, 'role reader'), ({'reader': dict(role['reader'], blob=Z)}, 'role reader'),
+                             ({'input_revision': Z}, 'unverifiable historical')):
+            rejected(dr, text, standalone=[dict(role, **change)])
+        rejected(dr, 'conflicting standalone', standalone=[role, dict(role, purpose='Other.')])
+        rejected(dr, 'unsupported documentation reference', standalone=[mk(N)])  # not Markdown
+        # Reviewed but not linked from the catalog: no root.
+        assert DOC_REF_PREFIX + 'tests/doc/other.md' not in run(dr, standalone=[mk('tests/doc/other.md')])[0]['entry_points']
+        REVIEWED_DOC_REFERENCES = saved[0]
+        rejected(dr, 'unreviewed documentation reference role', standalone=[role])
+        REVIEWED_DOC_REFERENCES = frozenset({(D, blob(dr, D), R)})
+        for order in (1, -1):  # a current definition supersedes
+            model, _ = run(dl, standalone=[dict(role, input_revision=dl.ref, purpose='Now.'), role][::order])
+            assert model['entry_points'][DOC_REF_PREFIX + D]['purpose'] == 'Now.'
+        # A changed reader, enumeration, catalog, table row, table position, loop or gate line drops the root.
+        stale = ({N: reader.replace('(ROOT / p).read_text()', '""')}, {N: reader.replace("'*.md'", "'docs/*.md'")},
+                 {DOC_NAV_CATALOG: '# Catalog\n'}, {DOC_NAV_TABLE[0]: table.replace(DOC_NAV_TABLE[3] + '\n', '')},
+                 {DOC_NAV_TABLE[0]: table.replace(DOC_NAV_TABLE[3] + '\nEOF\n', 'EOF\n' + DOC_NAV_TABLE[3] + '\n')},
+                 {DOC_NAV_TABLE[0]: table.replace(DOC_NAV_TABLE[3], '# ' + DOC_NAV_TABLE[3])},
+                 {DOC_NAV_TABLE[0]: table.replace(DOC_NAV_TABLE[3], DOC_NAV_TABLE[3] + '\n' + DOC_NAV_TABLE[3])},
+                 {DOC_NAV_TABLE[0]: table.replace(DOC_NAV_TABLE[4], 'while read -r name cmd; do')},
+                 {DOC_NAV_GATE[0]: gate}, {D: '# Changed\n'})
+        # Even a reviewed reader blob grants nothing without the exact read line, enumeration and catalog name.
+        for variant in (reader.replace('(ROOT / p).read_text()', '""'), reader.replace("'*.md'", "'docs/*.md'"),
+                        reader.replace("CATALOG = 'docs/document-index.md'", "CATALOG = 'docs/index.md'")):
+            edited = commit({N: variant}, 'reviewed variant')
+            REVIEWED_DOC_READERS = frozenset({(N, blob(edited, N), rl)})
+            model, rows = run(edited, standalone=[dict(role, reader=dict(role['reader'], blob=blob(edited, N)))])
+            assert DOC_REF_PREFIX + D not in model['entry_points'] and rows[D]['class'] != 'keep', variant
+            commit({N: reader}, 'restored')
+        REVIEWED_DOC_READERS = frozenset({(N, blob(dr, N), rl)})
+        for changes in stale:
+            edited = commit(changes, 'edited')
+            model, rows = run(edited, standalone=[role])
+            assert DOC_REF_PREFIX + D not in model['entry_points'] and rows[D]['class'] != 'keep', changes
+            if D in changes: rejected(edited, 'source mismatch', standalone=[dict(role, input_revision=edited.ref)])
+            commit({k: add[k] for k in changes}, 'restored')
+    finally: REVIEWED_DOC_REFERENCES, REVIEWED_DOC_READERS = saved
