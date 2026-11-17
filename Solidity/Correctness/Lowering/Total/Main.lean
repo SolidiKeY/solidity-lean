@@ -9,23 +9,31 @@ exist: the production theorem `universalProducerCorrect` (e2d) and the family
 theorem `lowerLoopsFamily_correct` (e1). Both hold at every boundary, so:
 
 * `contract_iff_coverage`: the contract is exactly its coverage conjunct.
-* `contract_iff`: the interpretation `i` adds nothing beyond its four
-  faithfulness equations; what remains is `Residual b decode`, stated against
-  the boundary's own reference interpretation.
+* `contract_iff`: the interpretation `i` adds nothing beyond `Faithful b i`
+  (its four agreement fields); what remains is `Residual b decode`, stated
+  against the boundary's own reference interpretation.
 * `normalCompatibility_iff`, `returnCompatibility_iff`: the e1 endpoints are
   theorems, so the two compatibility fields say only that `relates` holds of
   every family pair.
-* `production_correct`: the consumer with no admission premise. It needs
-  `FullDomain b`: the boundary admits every request whose pipeline succeeds.
-  `Residual.of_empty` shows why: a boundary admitting nothing satisfies the
-  residual, so the contract alone does not rule out input exclusion.
+* `production_correct`: the consumer whose only premise on the request is its
+  successful pipeline; admission comes from `FullDomain b` (the boundary
+  admits every request whose pipeline succeeds). The raw `LowersTo` conjunct
+  is for top-level requests only: nothing is stated of the `lowerLoops` run
+  inside `calleeBody`.
+* `Residual.of_empty`: a boundary admitting nothing, whose `relates` holds of
+  the e1 families, satisfies the residual. So the contract alone does not rule
+  out input exclusion, and `FullDomain` is a separate obligation.
 
-Not here: a concrete boundary, a decoder, and a proof of `Residual`. The fields
-`allocation` and `pipeline` take a successful run of `elabStmtsP` (and, for a
-callee, of `calleeBody`, which runs `lowerReturns`) as their hypothesis. Both
-are `partial`, so opaque to the kernel: the hypothesis says nothing about the
-elaborated program, and `Request.Succeeds` cannot be proved of any request.
-`Solidity.Goals.lowerLoopsCorrect` stays unstated.
+Not here, and blocked rather than pending: a concrete boundary, a decoder and a
+proof of `Residual`. The fields `allocation` and `pipeline` take as hypothesis
+a successful run of `elabStmtsP` and, for a callee, of `calleeBody`, which runs
+`renameStmts`, `lowerReturns` and `wrapMods`. All four are `partial`, so opaque
+to the kernel: the hypothesis says nothing about the elaborated program, and no
+request's `Request.Succeeds` can be derived or refuted. While that holds, `Residual` can
+only be proved of a boundary whose admission is empty or whose `relates`,
+`allocations` and policies ignore the program, and `production_correct` cannot
+be applied to a concrete run. `Solidity.Goals.lowerLoopsCorrect` stays
+unstated.
 -/
 namespace Solidity.Correctness.Lowering.Total
 
@@ -114,7 +122,9 @@ theorem coverage_iff (b : SemanticBoundary) (i : RawSourceInterpretation)
     · intro r o after parts program e run
       exact h.allocation r o after parts program ((h.admitted r).mpr e) run
     · intro r o after parts program s e d run
-      have p := h.pipeline r o after parts program s ((h.admitted r).mpr e) d run
+      have p : b.relates s program ∧
+          Nonempty (PassCorrect (i.source s).behaviour (i.target program).behaviour) :=
+        h.pipeline r o after parts program s ((h.admitted r).mpr e) d run
       exact ⟨p.1, h.sourceFaithful s ▸ h.targetFaithful program ▸ p.2⟩
   · intro ⟨f, h⟩
     refine ⟨f.admitted, f.association, f.source, f.target, ?_, ?_, ?_, ?_,
@@ -127,7 +137,9 @@ theorem coverage_iff (b : SemanticBoundary) (i : RawSourceInterpretation)
     · intro r s e
       exact (h.decoder r s ((f.admitted r).mp e)).trans (f.association r s).symm
     · intro r o after parts program s e d run
-      have p := h.pipeline r o after parts program s ((f.admitted r).mp e) d run
+      have p : b.relates s program ∧ Nonempty (PassCorrect (b.reference.source s).behaviour
+          (b.reference.target program).behaviour) :=
+        h.pipeline r o after parts program s ((f.admitted r).mp e) d run
       exact ⟨p.1, (f.source s).symm ▸ (f.target program).symm ▸ p.2⟩
 
 /-- **The contract, composed with e2d and e1**: at every boundary,
@@ -167,8 +179,11 @@ theorem Request.lowers (r : Request) (o : ProductionOutput) (top : r.callee = no
   cases top
   exact universalProducerCorrect input o run
 
-/-- **Production correctness from the residual**, on the whole successful
-domain: the only premises on the request are its own successful pipeline. -/
+/-- **Production correctness from the residual and `FullDomain`**: the only
+premise on the request is its own successful pipeline. The `LowersTo` conjunct
+is for top-level requests; for a callee only the semantic conjuncts are stated.
+The pipeline premise runs the `partial` elaborator, so this cannot yet be
+applied to a concrete run. -/
 theorem production_correct {b : SemanticBoundary} {decode : Request → Option SourceProgram}
     (h : Residual b decode) (full : FullDomain b) (r : Request) (o : ProductionOutput)
     (after : Checker.Snapshot) (parts : SProg r.contract) (program : Blk r.contract r.context.ctx)
