@@ -2161,6 +2161,80 @@
         "purpose": "Passing frozen Terra host controls entered the exact unchanged test_cases Python module. Positive module execution coverage only; mocked tools do not establish real Lean elaboration, kernel proof, resource enforcement, cleanup on a real host, compiler or EVM correctness. Fixture reads remain unresolved.",
         "input_scope": [],
         "other_reads": "unresolved"
+      },
+      {
+        "path": "tests/primitive-packets-1105/Constants/test-vm-only-inputs.py",
+        "input_revision": "3799f46a504e48d718c7d66fd1eccceac041ec76",
+        "source_blob": "21830dd82c6944f04eb8c0a715d801af8d952e13",
+        "command": [
+          "python3",
+          "-B",
+          "tests/primitive-packets-1105/Constants/test-vm-only-inputs.py"
+        ],
+        "kind": "runnable-entrypoint",
+        "entry_line": 7,
+        "purpose": "Passing required-input refusal controls read the H44 manifest and copy these source bytes into isolated temporary harnesses; actual missing-input children fail as expected. Source-text/data consumption only, without claiming original helper execution, external artifact delivery, actual bulk validation, Lean/kernel or EVM correctness. Other reads unresolved.",
+        "input_scope": [
+          "tests/primitive-packets-1105/Constants/h44-bulk-manifest.json",
+          "tests/primitive-packets-1105/Constants/h44-storage-check.py",
+          "tests/primitive-packets-1105/Constants/registration-plan.py",
+          "tests/primitive-packets-1105/Constants/validate-fresh.py",
+          "tests/sol-numeric-literals/packetlib.py"
+        ],
+        "other_reads": "unresolved"
+      },
+      {
+        "path": "tests/fullscope-20261104/vt1/generate-artifacts.py",
+        "input_revision": "3799f46a504e48d718c7d66fd1eccceac041ec76",
+        "source_blob": "983908338270e281a620c8e24a5b97c528878bd3",
+        "command": [
+          "python3",
+          "-B",
+          "tests/fullscope-20261104/vt1/generate-artifacts.py"
+        ],
+        "kind": "runnable-entrypoint",
+        "entry_line": 43,
+        "purpose": "Passing saved-artifact derivation reads only these exact immutable inputs. Ordinary and instrumented runs wrote only disposable lane-owned outputs; written outputs were excluded from read credit and restored afterward. No compiler invocation/authentication, generated-output reproducibility, Lean certificate, kernel or EVM correctness credit. Other reads unresolved.",
+        "input_scope": [
+          "tests/fullscope-20261104/vt1/fixtures/output.json"
+        ],
+        "other_reads": "unresolved"
+      },
+      {
+        "path": "tests/fullscope-20261104/vt1/extract-helpers.py",
+        "input_revision": "3799f46a504e48d718c7d66fd1eccceac041ec76",
+        "source_blob": "4301124002d7f04fe34ed7809f4d691b09689a2d",
+        "command": [
+          "python3",
+          "-B",
+          "tests/fullscope-20261104/vt1/extract-helpers.py"
+        ],
+        "kind": "runnable-entrypoint",
+        "entry_line": 52,
+        "purpose": "Passing saved-artifact derivation reads only these exact immutable inputs. Ordinary and instrumented runs wrote only disposable lane-owned outputs; written outputs were excluded from read credit and restored afterward. No compiler invocation/authentication, generated-output reproducibility, Lean certificate, kernel or EVM correctness credit. Other reads unresolved.",
+        "input_scope": [
+          "tests/fullscope-20261104/vt1/fixtures/Census.unoptimized.yul",
+          "tests/fullscope-20261104/vt1/fixtures/LinkedMath.unoptimized.yul"
+        ],
+        "other_reads": "unresolved"
+      },
+      {
+        "path": "tests/primitive-packets-1105/Constants/h57-check-transport.py",
+        "input_revision": "3799f46a504e48d718c7d66fd1eccceac041ec76",
+        "source_blob": "e2c5f5be0b679ec7644ef0c163989037061c00e5",
+        "command": [
+          "python3",
+          "-B",
+          "tests/primitive-packets-1105/Constants/h57-check-transport.py"
+        ],
+        "kind": "runnable-entrypoint",
+        "entry_line": 82,
+        "purpose": "Passing H57 source-fidelity guard and three in-memory mutation controls consume exact transport metadata and source text. Frozen refusal domain and strict original failure remain unchanged; source/dependency/header checks only, not kernel transport, successful original inventory, full acceptance or EVM correctness. Other reads unresolved.",
+        "input_scope": [
+          "tests/primitive-packets-1105/Constants/H57ConversionTransport.lean",
+          "tests/primitive-packets-1105/Constants/h57-conversion-transport.json"
+        ],
+        "other_reads": "unresolved"
       }
     ],
     "module_entries": [
@@ -2810,6 +2884,166 @@
         "target": "tests/sol-expression-uniqueness/gate.sh",
         "target_blob": "3c98a65a02f53475179bf79bea443c7553e1397e",
         "operation": "validated Python read of measured bytes"
+      },
+      {
+        "runner": "validated:tests/primitive-packets-1105/Constants/test-vm-only-inputs.py",
+        "input_revision": "3799f46a504e48d718c7d66fd1eccceac041ec76",
+        "frames": [
+          {
+            "path": "tests/primitive-packets-1105/Constants/test-vm-only-inputs.py",
+            "blob": "21830dd82c6944f04eb8c0a715d801af8d952e13",
+            "line": 24
+          }
+        ],
+        "target": "tests/primitive-packets-1105/Constants/h44-bulk-manifest.json",
+        "target_blob": "0b1911ee08df52df74c621fe69a63e9cc32a309e",
+        "operation": "validated Python read of measured bytes"
+      },
+      {
+        "runner": "validated:tests/primitive-packets-1105/Constants/test-vm-only-inputs.py",
+        "input_revision": "3799f46a504e48d718c7d66fd1eccceac041ec76",
+        "frames": [
+          {
+            "path": "tests/primitive-packets-1105/Constants/test-vm-only-inputs.py",
+            "blob": "21830dd82c6944f04eb8c0a715d801af8d952e13",
+            "line": 24
+          }
+        ],
+        "target": "tests/primitive-packets-1105/Constants/h44-storage-check.py",
+        "target_blob": "679d996917c95674a56ea7d235664babebab4657",
+        "operation": "validated Python read of measured bytes"
+      },
+      {
+        "runner": "validated:tests/primitive-packets-1105/Constants/test-vm-only-inputs.py",
+        "input_revision": "3799f46a504e48d718c7d66fd1eccceac041ec76",
+        "frames": [
+          {
+            "path": "tests/primitive-packets-1105/Constants/test-vm-only-inputs.py",
+            "blob": "21830dd82c6944f04eb8c0a715d801af8d952e13",
+            "line": 24
+          }
+        ],
+        "target": "tests/primitive-packets-1105/Constants/registration-plan.py",
+        "target_blob": "7cd773c99afbb2456a801b931d9ffd741bff7000",
+        "operation": "validated Python read of measured bytes"
+      },
+      {
+        "runner": "validated:tests/primitive-packets-1105/Constants/test-vm-only-inputs.py",
+        "input_revision": "3799f46a504e48d718c7d66fd1eccceac041ec76",
+        "frames": [
+          {
+            "path": "tests/primitive-packets-1105/Constants/test-vm-only-inputs.py",
+            "blob": "21830dd82c6944f04eb8c0a715d801af8d952e13",
+            "line": 24
+          }
+        ],
+        "target": "tests/primitive-packets-1105/Constants/validate-fresh.py",
+        "target_blob": "37b4324ea7f8d25e7861c5893c981ff5618c404d",
+        "operation": "validated Python read of measured bytes"
+      },
+      {
+        "runner": "validated:tests/primitive-packets-1105/Constants/test-vm-only-inputs.py",
+        "input_revision": "3799f46a504e48d718c7d66fd1eccceac041ec76",
+        "frames": [
+          {
+            "path": "tests/primitive-packets-1105/Constants/test-vm-only-inputs.py",
+            "blob": "21830dd82c6944f04eb8c0a715d801af8d952e13",
+            "line": 24
+          }
+        ],
+        "target": "tests/sol-numeric-literals/packetlib.py",
+        "target_blob": "e80a4777ab25237ab2093dca233b73d6bc271cb9",
+        "operation": "validated Python read of measured bytes"
+      },
+      {
+        "runner": "validated:tests/fullscope-20261104/vt1/generate-artifacts.py",
+        "input_revision": "3799f46a504e48d718c7d66fd1eccceac041ec76",
+        "frames": [
+          {
+            "path": "tests/fullscope-20261104/vt1/generate-artifacts.py",
+            "blob": "983908338270e281a620c8e24a5b97c528878bd3",
+            "line": 17
+          }
+        ],
+        "target": "tests/fullscope-20261104/vt1/fixtures/output.json",
+        "target_blob": "a34a4888ecd41c955a726e3befdfbe4aa0da1956",
+        "operation": "validated Python read of measured bytes"
+      },
+      {
+        "runner": "validated:tests/fullscope-20261104/vt1/extract-helpers.py",
+        "input_revision": "3799f46a504e48d718c7d66fd1eccceac041ec76",
+        "frames": [
+          {
+            "path": "tests/fullscope-20261104/vt1/extract-helpers.py",
+            "blob": "4301124002d7f04fe34ed7809f4d691b09689a2d",
+            "line": 48
+          },
+          {
+            "path": "tests/fullscope-20261104/vt1/extract-helpers.py",
+            "blob": "4301124002d7f04fe34ed7809f4d691b09689a2d",
+            "line": 41
+          }
+        ],
+        "target": "tests/fullscope-20261104/vt1/fixtures/Census.unoptimized.yul",
+        "target_blob": "119893c2ad1cb0a4a022e44055834e956bdf29ac",
+        "operation": "validated Python read of measured bytes"
+      },
+      {
+        "runner": "validated:tests/fullscope-20261104/vt1/extract-helpers.py",
+        "input_revision": "3799f46a504e48d718c7d66fd1eccceac041ec76",
+        "frames": [
+          {
+            "path": "tests/fullscope-20261104/vt1/extract-helpers.py",
+            "blob": "4301124002d7f04fe34ed7809f4d691b09689a2d",
+            "line": 48
+          },
+          {
+            "path": "tests/fullscope-20261104/vt1/extract-helpers.py",
+            "blob": "4301124002d7f04fe34ed7809f4d691b09689a2d",
+            "line": 41
+          }
+        ],
+        "target": "tests/fullscope-20261104/vt1/fixtures/LinkedMath.unoptimized.yul",
+        "target_blob": "5447ec607e00bf08aa8ec49020cd2bb955c646ef",
+        "operation": "validated Python read of measured bytes"
+      },
+      {
+        "runner": "validated:tests/primitive-packets-1105/Constants/h57-check-transport.py",
+        "input_revision": "3799f46a504e48d718c7d66fd1eccceac041ec76",
+        "frames": [
+          {
+            "path": "tests/primitive-packets-1105/Constants/h57-check-transport.py",
+            "blob": "e2c5f5be0b679ec7644ef0c163989037061c00e5",
+            "line": 82
+          },
+          {
+            "path": "tests/primitive-packets-1105/Constants/h57-check-transport.py",
+            "blob": "e2c5f5be0b679ec7644ef0c163989037061c00e5",
+            "line": 63
+          }
+        ],
+        "target": "tests/primitive-packets-1105/Constants/h57-conversion-transport.json",
+        "target_blob": "a0f3e762c714d7d98db40720df479f2a684b549e",
+        "operation": "validated Python read of measured bytes"
+      },
+      {
+        "runner": "validated:tests/primitive-packets-1105/Constants/h57-check-transport.py",
+        "input_revision": "3799f46a504e48d718c7d66fd1eccceac041ec76",
+        "frames": [
+          {
+            "path": "tests/primitive-packets-1105/Constants/h57-check-transport.py",
+            "blob": "e2c5f5be0b679ec7644ef0c163989037061c00e5",
+            "line": 82
+          },
+          {
+            "path": "tests/primitive-packets-1105/Constants/h57-check-transport.py",
+            "blob": "e2c5f5be0b679ec7644ef0c163989037061c00e5",
+            "line": 64
+          }
+        ],
+        "target": "tests/primitive-packets-1105/Constants/H57ConversionTransport.lean",
+        "target_blob": "5f1a1ca97b075183d82d9317b5a0e16380365124",
+        "operation": "validated Python read of measured bytes"
       }
     ],
     "static_routes": [
@@ -2955,6 +3189,25 @@
         ],
         "module_frame_line": 0,
         "collector_sha256": "f01d503a7acdfd5e19ae3ee71d6b128deb0bfcc979569e2adf45fe5976115dd7"
+      }
+    ],
+    "git_policies": [
+      {
+        "path": "tests/sol-c3-exactness/.gitignore",
+        "blob": "9543993ef6d7ec1c13fe5df3ea16a039e4730fe7",
+        "purpose": "Git exclude-standard policy for the exact .artifacts/lake-serial.lock path opened by the configured owned-cache source. Policy-only consumption; no cache advice or release operation is run or authorized, and no configured validation, fixture, helper, containment, ownership, proof or runtime credit.",
+        "matches": [
+          {
+            "line": 1,
+            "output": ".artifacts/lake-serial.lock",
+            "writer": {
+              "path": "tests/sol-c3-exactness/release-owned-file-cache.py",
+              "blob": "e40c84716e0a1ac3542d20608c94e596225f236c",
+              "line": 19,
+              "literal": ".artifacts/lake-serial.lock"
+            }
+          }
+        ]
       }
     ]
   }
