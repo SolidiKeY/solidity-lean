@@ -2276,6 +2276,22 @@
           "tests/fullscope-20261104/vt1/fixtures/census-tree.txt"
         ],
         "other_reads": "unresolved"
+      },
+      {
+        "path": "tests/roadmap-v17/test_evidence.py",
+        "input_revision": "3799f46a504e48d718c7d66fd1eccceac041ec76",
+        "source_blob": "1afb5c3f29e957ed58a9defc7952b8b21687c7be",
+        "command": [
+          "python3",
+          "-B",
+          "tests/roadmap-v17/test_evidence.py"
+        ],
+        "kind": "unittest",
+        "purpose": "Passing host evidence-envelope, refusal and published-comparator retention controls consume this exact historical generated report as test/reference input. Original saved observations remain historical: no same-revision compiler run, native/EVM execution, observation authenticity, Lean/kernel or semantic-equivalence credit. Locked Node dependencies were installed outside the pristine disposable checkout; source and assertions unchanged. Other reads unresolved.",
+        "input_scope": [
+          "tests/generated/seed-0.json"
+        ],
+        "other_reads": "unresolved"
       }
     ],
     "module_entries": [
@@ -3255,6 +3271,30 @@
         ],
         "target": "tests/fullscope-20261104/vt1/fixtures/LinkedMath.unoptimized.yul",
         "target_blob": "5447ec607e00bf08aa8ec49020cd2bb955c646ef",
+        "operation": "validated Python read of measured bytes"
+      },
+      {
+        "runner": "validated:tests/roadmap-v17/test_evidence.py",
+        "input_revision": "3799f46a504e48d718c7d66fd1eccceac041ec76",
+        "frames": [
+          {
+            "path": "tests/roadmap-v17/test_evidence.py",
+            "blob": "1afb5c3f29e957ed58a9defc7952b8b21687c7be",
+            "line": 261
+          },
+          {
+            "path": "tests/roadmap-v17/test_evidence.py",
+            "blob": "1afb5c3f29e957ed58a9defc7952b8b21687c7be",
+            "line": 238
+          },
+          {
+            "path": "scripts/roadmap-v17-evidence.py",
+            "blob": "0d13b90532cc997ab8aad5bdbbdbbe575498f252",
+            "line": 62
+          }
+        ],
+        "target": "tests/generated/seed-0.json",
+        "target_blob": "e0d09c3b3f15a59d81889b54c3e80294b239ab69",
         "operation": "validated Python read of measured bytes"
       }
     ],
