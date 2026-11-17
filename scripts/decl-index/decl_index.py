@@ -98,8 +98,20 @@ def link_build(top, lib):
     if not linked: raise SetupError(f"{build}: no oleans found")
 
 
+def lake_build(top, modules):
+    """Build `modules` and their import closure at the checked-out tree, so the traces
+    link_build reads name the oleans of this commit. Without it a touched module's index came
+    from whatever an earlier build or a coordinator overlay left, and a declaration new on the
+    lane (MemoryStructDefaultPlan at b2) was missing."""
+    r = subprocess.run(["lake", "build", *modules], cwd=top, capture_output=True, text=True)
+    if r.returncode:
+        raise SetupError("lake build %s failed (exit %d): %s"
+                         % (" ".join(modules), r.returncode, (r.stdout + r.stderr).strip()[-1500:]))
+
+
 def dump(out, modules):
-    """Index `modules` (imported together) into `out`; SetupError unless Lean finished."""
+    """Index `modules` (imported together) into `out`; SetupError unless Lake built them and
+    Lean finished."""
     top = root()
     text = SCRIPT.read_text()
     if text.count("\nimport Solidity\n") != 1: raise SetupError(f"{SCRIPT}: no single `import Solidity` line")
@@ -109,6 +121,7 @@ def dump(out, modules):
     with tempfile.TemporaryDirectory(prefix="decl-index.") as d:
         src, part = pathlib.Path(d) / "DeclIndexRun.lean", out.with_name(out.name + f".{os.getpid()}.part")
         src.write_text(text)
+        lake_build(top, modules)
         lib = pathlib.Path(d) / "lib"; link_build(top, lib)
         env = dict(os.environ, DECLINDEX_OUT=str(part), LEAN_NUM_THREADS="1", DECLINDEX_LIB=str(lib))
         env.pop("DECLINDEX_LOCAL", None)
