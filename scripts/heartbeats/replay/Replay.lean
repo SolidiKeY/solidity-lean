@@ -60,11 +60,19 @@ unsafe def main (args : List String) : IO UInt32 := do
     { commandState := { Command.mkState env messages opts with infoState.enabled := false }
       parserState, cmdPos := parserState.pos }
   let mut rows : Array Row := #[]
+  let mut errors := 0
+  let stdout ← IO.getStdout
   repeat
     let hb ← IO.getNumHeartbeats
     let (done, st') ← (processCommand { inputCtx }).run st
     let raw := (← IO.getNumHeartbeats) - hb
-    st := st'
+    -- print as `lean` does, so a killed run keeps its log; outside the counted window
+    let msgs := st'.commandState.messages
+    for m in msgs.toList do
+      stdout.putStr (← m.toString (includeEndPos := false))
+    stdout.flush
+    if msgs.hasErrors then errors := errors + max 1 (msgs.toList.filter (·.severity == .error)).length
+    st := { st' with commandState.messages := {} }
     let some stx := st.commands.back? | break
     unless stx.getKind == ``Lean.Parser.Command.eoi do
       let ns := st.commandState.scopes.head!.currNamespace
@@ -72,10 +80,6 @@ unsafe def main (args : List String) : IO UInt32 := do
       rows := rows.push { line, kind := kindOf stx, name := declName? ns stx, raw }
     if done then break
   let t2 ← IO.monoNanosNow
-  let msgs := st.commandState.messages
-  for m in msgs.toList do
-    IO.print (← m.toString (includeEndPos := false))
-  let errors := msgs.toList.filter (·.severity == .error) |>.length
   let total := rows.foldl (· + ·.raw) 0
   let secs (a b : Nat) : String := toString (Float.ofNat (b - a) / 1e9)
   let cmds := rows.toList.map fun r =>
