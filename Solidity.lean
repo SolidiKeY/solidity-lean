@@ -2778,6 +2778,7 @@ import Solidity.Evm.TryPanicSourceDeterminism
 import Solidity.Evm.TryPanicSourceExecution
 import Solidity.Evm.TryPanicSourceFrame
 import Solidity.Evm.TryPanicSourcePlan
+import Solidity.Finish.Assembly
 import Solidity.FreshNames
 import Solidity.Frontend.Admission.CanonicalReaderContract
 import Solidity.Frontend.Admission.Controls

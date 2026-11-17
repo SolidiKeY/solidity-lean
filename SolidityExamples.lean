@@ -131,6 +131,7 @@ import Solidity.Examples.Docs.ProseCalibrated.Allowance
 import Solidity.Examples.ExactReduction
 import Solidity.Examples.ExactUpdates
 import Solidity.Examples.ExampleNames
+import Solidity.Examples.Finish.Assembly
 import Solidity.Examples.FixedArrayFloor
 import Solidity.Examples.FixedArrayRoot
 import Solidity.Examples.Goals
