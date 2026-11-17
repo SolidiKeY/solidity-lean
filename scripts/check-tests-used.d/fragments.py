@@ -2273,11 +2273,10 @@ def successor_controls(classifier):
                                                 for p, _, _ in reviewed_args)
         assert ('tests/upstream/baseline-20261028/invocations/retries/selector.py', '5b7a49f863f7c6fad8231d17d68628623948a00e',
                 '2207c1bba286538fd63e4a0ff4960ed4a593a8ab') in reviewed_args
-        # H1006: exactly the 23 H996 witness files; the 4 extras x1e routes otherwise stay out.
-        assert ('tests/directruntime-20261104/native-browser/prepare-image-cache.py', 'c9695f1c0bf66b40be1f138f3da7e1ebc147ffde',
-                'ca73d1a4e1aecbcbc566acaa1aa7392cad472b3d') in reviewed_args
-        assert not {p for p, _, _ in reviewed_args} & {'tests/directruntime-20261104/native-browser/' + p for p in (
-            'h109/input-inventory.py', 'h109/source-snapshot.py', 'hardening-native-audit.py', 'readbounds/serial-build.py')}
+        nb = 'tests/directruntime-20261104/native-browser/'  # H1006
+        assert (nb + 'prepare-image-cache.py', 'c9695f1c0bf66b40be1f138f3da7e1ebc147ffde', 'ca73d1a4e1aecbcbc566acaa1aa7392cad472b3d') in reviewed_args
+        assert not {p for p, _, _ in reviewed_args} & {nb + p for p in ('h109/input-inventory.py', 'h109/source-snapshot.py',
+                                                                      'hardening-native-audit.py', 'readbounds/serial-build.py')}
         args_interface = {'argv_lines': [2], 'argv_tail_lines': [2], 'positionals': [], 'subcommands': []}
         assert python_argument_interface(files['tests/args.py']) == args_interface
         assert python_argument_interface(files['tests/args_sub.py']) == {'argv_lines': [], 'argv_tail_lines': [], 'positionals': [[6, 'results']], 'subcommands': [[5, 'pick']]}
