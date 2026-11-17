@@ -128,6 +128,17 @@ T:yul-views/inherited-sequence-run.mjs adeb09dc75c286b40aff496db08e67b20f597ceb
 T:backend-environment/ownership.mjs c7e75bcd68c0b2347212973ffdfeba0c285362f9
 ''')
 REVIEWED_NONPY_ENTRIES = REVIEWED_NONPY_ENTRIES | REVIEWED_NONPY_ENTRIES_H1025
+# H1004 (gh#1340, X1E-SOURCE-PROGRAM-ROLES, Option B), form (1): the two Node
+# CLI programs of x1e-classify-h28-h55 that match the H997 interface, reviewed
+# under the unchanged H997 rules; same (path, blob, introducing commit) form.
+# Membership only: no execution, pass, read, helper, output or runtime credit.
+REVIEWED_NONPY_ENTRIES_H1004 = _review_table('''
+@05b3f3f3a0bbb708eb00e86025811aee3eee15b3
+T:h28-sol/type-grammar/run_solc.mjs cb05eeac7078737564180bdc3d7f030520c35065
+@3b327d00fd2262cfb27ccecdc911e9c5d2e7d4f1
+T:h28-sol/literal-grammar/solc-fixtures.mjs 56774afb5f8d6355c2e8fca81557371364b2b08d
+''')
+REVIEWED_NONPY_ENTRIES = REVIEWED_NONPY_ENTRIES | REVIEWED_NONPY_ENTRIES_H1004
 
 LEAN_CHECK_KIND = 'lean-check-source-role'
 LEAN_CHECK_PREFIX = 'lean-check:'
@@ -490,8 +501,13 @@ def nonpy_roleset_controls(env):
     run, rejected, blob, first, A, sh_role = (env[k] for k in ('run', 'rejected', 'blob', 'first', 'A', 'sh_role'))
     rows = REVIEWED_NONPY_ENTRIES_H1025; paths = {p for p, _, _ in rows}
     # 61 rows, one per path, disjoint from H997 and outside x1e-classify-runtime-upstream's directories.
-    assert len(rows) == len(paths) == 61 and rows <= REVIEWED_NONPY_ENTRIES and len(REVIEWED_NONPY_ENTRIES) == 176
+    assert len(rows) == len(paths) == 61 and rows <= REVIEWED_NONPY_ENTRIES and len(REVIEWED_NONPY_ENTRIES) == 178
     assert not paths & {p for p, _, _ in REVIEWED_NONPY_ENTRIES - rows}
+    # H1004 form (1): two H28 Node programs, one row per path, disjoint from the rest.
+    h1004 = REVIEWED_NONPY_ENTRIES_H1004
+    assert len(h1004) == len({p for p, _, _ in h1004}) == 2 and h1004 <= REVIEWED_NONPY_ENTRIES and not h1004 & rows
+    assert {p for p, _, _ in h1004} == {'tests/h28-sol/type-grammar/run_solc.mjs', 'tests/h28-sol/literal-grammar/solc-fixtures.mjs'}
+    assert not {p for p, _, _ in h1004} & {p for p, _, _ in REVIEWED_NONPY_ENTRIES - h1004}
     assert all(p.startswith('tests/') and not p.startswith(('tests/directruntime-20261104/', 'tests/upstream/'))
                and posixpath.splitext(p)[1] in NONPY_SHEBANGS and '.test.' not in posixpath.basename(p) for p in paths)
     for row in (('tests/backend-environment/ownership.mjs', 'c7e75bcd68c0b2347212973ffdfeba0c285362f9', 'fd67008ed20590639e04345fbb12a9dfa645a95f'),
@@ -529,8 +545,10 @@ PY_IMPORT_PREFIX = 'py-import:'
 # from x1e-classify-h62-scripts' list. Refused, left unresolved: any import that
 # fails python_import_statement (after-baseline.py's sys.path.insert and
 # candidate.py's importlib use are refused importers; their helpers keep their
-# other reviewed importer). Source/consumption only: no execution, import,
-# pass, read, fixture, child, output, proof or runtime credit.
+# other reviewed importer). H1004 form (3) adds the three H28 helpers of
+# x1e-classify-h28-h55; workers.py is imported by run.py through its one exact
+# sys.path.insert of its runtime/ subdirectory. Source/consumption only: no
+# execution, import, pass, read, fixture, child, output, proof or runtime credit.
 _PY_IMPORT_ROWS = '''
 @8a1794652d299cd042c815441a426e7efb642522
 H:item2/audit-abi-world/receipts.py f863fce768398bc7b8cf6f74c8998a746d454a16
@@ -581,6 +599,16 @@ H:item6/migrate-semantics/bounded.py 921f0c36065a3d5ba781b7fd46f324a5bf1c07a3
  H:item6/migrate-semantics/measure.py 2875c98d5b0ddb2fb825542114452b838a6f9bea 40be303ce78a6d6bcad5d4c4b8c7285cc1732767 6
  H:item6/migrate-semantics/owner_hash_fixture.py 3e65a61636afff9d97f7f5bc9facd0425b8b7b94 40be303ce78a6d6bcad5d4c4b8c7285cc1732767 5
  H:item6/migrate-semantics/probe.py d99f64b94069c8ef9d83c5f0be79c8fb99d61a28 40be303ce78a6d6bcad5d4c4b8c7285cc1732767 6
+@22e91b98298078b2f7b43d0a9bd5e1553b7eb17d
+T:h28-sol/automation-benchmark/scope_policy.py d4dc3f8b3abf74db4759b03dbb84b8e1bdfc9bbe
+ T:h28-sol/automation-benchmark/test_scope_policy.py 01146f6d8222a26bc34a89beab21211c5cf3b440 bf64bc529d40d2dfc63d34f26b262c70f77a19de 2
+@50a5679e38aeaf468850d8f46645bdf5e71aa706
+T:h28-sol/mutation-testing/tools/selected_accounting.py 585c80fd909f44f89c526c3c9b9d999457374b82
+ T:h28-sol/mutation-testing/tools/check_selected_controls.py fb128da9f4fc433f60f35560c05d5af7d4523888 50a5679e38aeaf468850d8f46645bdf5e71aa706 12
+ T:h28-sol/mutation-testing/tools/verify_combined.py 521bd933f52e0bb6acd24d3864e506ac3a44a847 50a5679e38aeaf468850d8f46645bdf5e71aa706 106
+@de1d76d922d7ff42d3a07bc020b740f8ec9f0105
+T:h28-sol/non-vacuity/runtime/workers.py e375ec6f6126d4e3f6046fdfa5e9f421ef7e21f4
+ T:h28-sol/non-vacuity/run.py f81c3d2a7b8a650b9a9e6d7f62c1e2083025586a de1d76d922d7ff42d3a07bc020b740f8ec9f0105 5
 '''
 _IMPORT_SHADOWS = frozenset({'importlib', 'imp', 'runpy', 'pkgutil', 'zipimport', 'site', 'builtins', '__builtins__',
                              '__import__', 'exec', 'eval', 'chdir', 'fchdir'})
@@ -634,19 +662,46 @@ def python_import_statement(text, importer, line, helper, tree):
     importer's earlier sibling imports do at run time, whether the statement
     is reached, and the interpreter environment (PYTHONPATH, PYTHONSAFEPATH,
     site customisation).
+
+    H1004 form (3) adds one exact path form: the helper is in the importer's
+    subdirectory D when the module body has exactly one statement
+    `sys.path.insert(0, str(pathlib.Path(__file__).resolve().parent/'D'))`
+    (D a plain name), after a top-level plain `import pathlib` and before a
+    top-level import statement at `line`; sys, pathlib, str and __file__ are
+    never rebound. That statement is the only sys.path access allowed.
     """
     import keyword, sys as interpreter
     directory, name = posixpath.split(helper)
     module = name[:-3] if name.endswith('.py') else ''
-    if (posixpath.dirname(importer) != directory or not module.isidentifier() or keyword.iskeyword(module) or module.startswith('__')
+    if (not module.isidentifier() or keyword.iskeyword(module) or module.startswith('__')
             or module in interpreter.stdlib_module_names or module in interpreter.builtin_module_names):
         return None
     if _import_shadowed(helper, tree): return None
     try: parsed = ast.parse(text)
     except (SyntaxError, ValueError, RecursionError): return None
+    home = posixpath.dirname(importer); skip = set()
+    if home != directory:
+        sub = posixpath.basename(directory)
+        if posixpath.dirname(directory) != home or sub in ('', '.', '..') or '\\' in sub: return None
+        template = ast.dump(ast.parse('sys.path.insert(0, str(pathlib.Path(__file__).resolve().parent/' + repr(sub) + '))').body[0])
+        inserts = [k for k, n in enumerate(parsed.body) if ast.dump(n) == template]
+        loose = [n for n in ast.walk(parsed) if isinstance(n, ast.Attribute) and n.attr == 'path' and isinstance(n.value, ast.Name) and n.value.id == 'sys']
+        if len(inserts) != 1 or len(loose) != 1: return None
+        at = inserts[0]
+        if not any(isinstance(n, ast.Import) and any(a.name == 'pathlib' and a.asname is None for a in n.names) for n in parsed.body[:at]): return None
+        if not any(isinstance(n, (ast.Import, ast.ImportFrom)) and n.lineno == line for n in parsed.body[at + 1:]): return None
+        fixed = {'sys', 'pathlib', 'str', '__file__'}
+        for n in ast.walk(parsed):
+            if (isinstance(n, ast.Name) and n.id in fixed and not isinstance(n.ctx, ast.Load) or isinstance(n, ast.arg) and n.arg in fixed
+                    or isinstance(n, (ast.FunctionDef, ast.AsyncFunctionDef, ast.ClassDef)) and n.name in fixed
+                    or isinstance(n, (ast.Global, ast.Nonlocal)) and set(n.names) & fixed
+                    or isinstance(n, ast.alias) and ((n.asname or '') in fixed or n.name in ('str', '__file__'))
+                    or isinstance(n, ast.ImportFrom) and any(a.name in fixed for a in n.names)): return None
+        skip = {id(n) for n in ast.walk(parsed.body[at])}
     parents = {child: node for node in ast.walk(parsed) for child in ast.iter_child_nodes(node)}
     found = []
     for n in ast.walk(parsed):
+        if id(n) in skip: continue
         if isinstance(n, ast.Name) and n.id in _IMPORT_SHADOWS: return None
         if isinstance(n, ast.Name) and n.id == 'sys' and not (isinstance(parents.get(n), ast.Attribute) and parents[n].value is n): return None
         if isinstance(n, ast.Attribute) and (n.attr in ('chdir', 'fchdir', '__import__', 'sys', '__dict__')
@@ -752,12 +807,15 @@ def python_import_controls(env):
     reviewed witnesses, the import guards, the role and its negative controls."""
     global PY_IMPORT_HELPERS, PY_IMPORT_IMPORTS
     commit, run, rejected, blob, program = (env[k] for k in ('commit', 'run', 'rejected', 'blob', 'program'))
-    # The audited witnesses: 11 H62 helpers, one row per path, 27 imports from sibling importers.
+    # The audited witnesses: 11 H62 helpers (27 sibling imports) and 3 H28 helpers (4 imports,
+    # one through run.py's runtime/ path insert); one row per path.
     helpers = {p for p, _, _ in PY_IMPORT_HELPERS}
-    assert len(PY_IMPORT_HELPERS) == len(helpers) == 11 and len(PY_IMPORT_IMPORTS) == 27
-    assert all(p.startswith('scripts/h62/') and p.endswith('.py') for p in helpers)
+    assert len(PY_IMPORT_HELPERS) == len(helpers) == 14 and len(PY_IMPORT_IMPORTS) == 31
+    assert len([p for p in helpers if p.startswith('scripts/h62/')]) == 11 and len([p for p in helpers if p.startswith('tests/h28-sol/')]) == 3
+    assert all(p.endswith('.py') for p in helpers)
     assert {(p, b) for p, b, _ in PY_IMPORT_HELPERS} == {(p, b) for p, b, _, _, _, _ in PY_IMPORT_IMPORTS}
-    assert all(posixpath.dirname(i) == posixpath.dirname(p) for p, _, i, _, _, _ in PY_IMPORT_IMPORTS)
+    assert all(posixpath.dirname(i) == posixpath.dirname(p) or (p, i) == ('tests/h28-sol/non-vacuity/runtime/workers.py', 'tests/h28-sol/non-vacuity/run.py')
+               for p, _, i, _, _, _ in PY_IMPORT_IMPORTS)
     # Refused importers stay out: sys.path.insert and importlib use.
     assert not {i for _, _, i, _, _, _ in PY_IMPORT_IMPORTS} & {'scripts/h62/item6/migrate-root-gate/after-baseline.py',
                                                               'scripts/h62/item6/migrate-precompiles/candidate.py'}
@@ -782,6 +840,21 @@ def python_import_controls(env):
                        ('from os import sys\nfrom util import f\n', 2), ('import sys\ndef g(s): pass\ng(sys)\nfrom util import f\n', 4)):
         assert python_import_statement(text, I, line, H, tree) is None, text
     assert python_import_statement(ok, 'tests/other/run.py', 1, H, tree) is None  # not a sibling
+    # H1004 form (3): the one exact runtime/ path insert, and its near misses.
+    R, W = 'tests/nv/run.py', 'tests/nv/runtime/workers.py'
+    ins = "import pathlib,sys\nsys.path.insert(0,str(pathlib.Path(__file__).resolve().parent/'runtime'))\nfrom workers import lean_workers\n"
+    assert python_import_statement(ins, R, 3, W, {R: 0, W: 0}) == ['lean_workers']
+    for text, line in ((ins.replace("'runtime'", "'other'"), 3), (ins.replace('resolve().', ''), 3), (ins.replace('(0,', '(1,'), 3),
+                       (ins.replace('append' if False else 'insert(0,', 'append('), 3), (ins + 'sys.path.pop(0)\n', 3),
+                       (ins.replace('import pathlib,sys\n', 'import sys\nfrom pathlib import Path as pathlib\n'), 4),
+                       (ins.replace('import pathlib,sys\n', 'import sys\n') + 'import pathlib\n', 2), (ins + 'str = repr\n', 3),
+                       ('import pathlib,sys\nfrom workers import lean_workers\n' + ins.split('\n', 1)[1], 2),
+                       (ins.replace('from workers', 'if 1:\n    from workers'), 4), (ins.replace("sys.path.insert(0,str(pathlib.Path(__file__).resolve().parent/'runtime'))", "if 1:\n    sys.path.insert(0,str(pathlib.Path(__file__).resolve().parent/'runtime'))"), 4),
+                       (ins.replace('\nfrom', "\nsys.path.insert(0,str(pathlib.Path(__file__).resolve().parent/'runtime'))\nfrom"), 4),
+                       (ins + 'def f(__file__): pass\n', 3), (ins.replace('import pathlib,sys', 'import pathlib,sys,importlib'), 3)):
+        assert python_import_statement(text, R, line, W, {R: 0, W: 0}) is None, text
+    assert python_import_statement(ins, R, 3, W, {R: 0, W: 0, 'tests/nv/runtime/workers/__init__.py': 0}) is None
+    assert python_import_statement(ins, 'tests/run.py', 3, W, {W: 0}) is None and python_import_statement(ins, R, 3, 'tests/nv/runtime/x/workers.py', {}) is None
     for shadow in ('tests/pi/util/__init__.py', 'tests/pi/util.cpython-312-x86_64-linux-gnu.so', 'tests/pi/util.pyc', 'tests/pi/util/x.txt',
                    'tests/pi/__pycache__/util.cpython-312.pyc'):
         assert python_import_statement(ok, I, 1, H, dict(tree, **{shadow: 0})) is None, shadow
