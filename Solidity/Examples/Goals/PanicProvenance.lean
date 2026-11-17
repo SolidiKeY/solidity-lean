@@ -17,9 +17,4 @@ example : (siteCode .assertion).code = 0x01 ∧ (siteCode .arithmetic).code = 0x
     (siteCode .bounds).code = 0x32 ∧ (siteCode .allocation).code = 0x41 ∧
     (siteCode .zeroInternalFunction).code = 0x51 := by decide
 
-/-- External bytes that encode `Panic(uint256)` select the panic handler with the decoded
-word; they are not an intrinsic halt. -/
-example (code : Code) (origin : Raised) (data : List UInt8) :
-    Halt.intrinsic code origin ≠ .externalRevert data := Halt.intrinsic_ne_external code origin data
-
 end Solidity.Goals

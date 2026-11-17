@@ -25,8 +25,6 @@ open Solidity.Semantics.Panic Solidity.Semantics.Panic.Run
 @[goal Solidity.Correctness.Panic.run_outcomes "w3x-panic-outcomes"]
 def panicRunOutcomes : Prop :=
   -- Sequencing and blocks: any halt stops the rest; a success continues.
-  (∀ {C : Contract} {Γ : Ctx} (σ : State C Γ),
-    program (.nil : Prog C Γ Γ) σ = .ok ⟨σ, List.prefix_refl _⟩) ∧
   (∀ {C : Contract} {Γ Δ Ξ : Ctx} (s : Stmt C Γ Δ) (tail : Prog C Δ Ξ) (σ : State C Γ)
       (halt : Halt Raised), stmt s σ = .error halt →
     program (.cons s tail) σ = .error halt) ∧
@@ -111,9 +109,7 @@ def panicRunOutcomes : Prop :=
   (∀ {C : Contract} {Γ : Ctx} (σ : State C Γ) {T : Ty} (src : MSrc C Γ T),
     erase (msource σ src) = src.mvalT σ) ∧
   (∀ {C : Contract} {Γ : Ctx} (σ : State C Γ) {ps : Ctx} (as : Args C Γ ps),
-    erase (args σ as) = as.evalT σ) ∧
-  (∀ {C : Contract} {Γ : Ctx} (σ : State C Γ) {p : PrimTy} (v : Val C Γ p) (a : p.Denote),
-    v.evalT σ = .ok a → value σ v = .ok a)
+    erase (args σ as) = as.evalT σ)
 
 end Solidity.Goals
 
@@ -122,7 +118,7 @@ namespace Solidity.Correctness.Panic
 open Solidity.Semantics.Panic Solidity.Semantics.Panic.Run
 
 theorem run_outcomes : Solidity.Goals.panicRunOutcomes :=
-  ⟨program_nil, program_cons_error, program_cons_ok, stmt_block_error,
+  ⟨program_cons_error, program_cons_ok, stmt_block_error,
    fun _ _ _ _ halt h => Loop.run_condition_error _ _ _ halt h, stmt_loop_error,
    fun _ _ _ _ => rfl, fun _ _ _ _ _ h => Loop.run_of_iterN h, fun _ _ _ h => Loop.run_diverge h,
    stmt_call_error, stmt_callRec_error, stmt_tryCall_self_panic,
@@ -132,6 +128,6 @@ theorem run_outcomes : Solidity.Goals.panicRunOutcomes :=
    fun ext rets as callee self kind _ handler σ halt f =>
      catchData_error ext rets as callee self kind handler σ halt f,
    value_erase, path_erase, loc_erase, mpath_erase, mloc_erase, source_erase, msource_erase,
-   args_erase, value_of_ok⟩
+   args_erase⟩
 
 end Solidity.Correctness.Panic

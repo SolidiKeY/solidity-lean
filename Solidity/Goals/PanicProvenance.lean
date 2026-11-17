@@ -13,7 +13,7 @@ and no premise on the program.
 This is also what keeps an external revert payload from becoming an intrinsic
 halt: an origin (`Raised`) holds a producer and the proof that it failed at
 its site, so bytes that encode `Panic(uint256)` cannot supply one. The nine
-site codes and the constructor facts are checked in the pin module.
+site codes are checked in the pin module.
 -/
 
 namespace Solidity.Goals
