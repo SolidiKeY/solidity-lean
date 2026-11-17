@@ -1,0 +1,130 @@
+import Solidity.Correctness.IntrinsicSession.Laws.Frames.Steps
+
+/-!
+# The intrinsic session laws: the determined frames
+
+The fields `transacts` and `resumes` of `Solidity.Goals.IntrinsicSession.Laws` at
+`spec F` and `view F` (step `is0p-session-laws`, lane frames), from the boundary lemmas of
+`Laws/Common.lean` and the unfolded steps of `Frames/Steps.lean`. The response table of `spec`
+is empty, so the frame of a law at `ext := []` is the step's own frame; the premises on
+`callsBack`, on the response tables and on the sender's funds are not used.
+-/
+
+namespace Solidity.Semantics.IntrinsicSession
+
+open Solidity.Roadmap
+open Solidity.Goals.IntrinsicSession (Code Good Observed Ends Matches RevertMatches IsTx)
+open Solidity.ContractWorld (World Handle)
+open Solidity.Lowering.V08.EnvironmentProjection (liftWord liftAddress requestContext)
+
+/-- **A transaction that never leaves its contract is the actual frame.** -/
+theorem Laws.transacts (F : Fixed) : ∀ x en h n (code : Code)
+      (cw : ContractWorld.World code.catalog)
+      (q : Request) (k : Fin code.contracts.length) (st : Storage (code.catalog k))
+      (entry : ContractWorld.Entry (code.catalog k) Bytes),
+    (spec F).lang.Allowed en → (view F).Boundary x en h n ⟨code, cw⟩ →
+    ((spec F).session en).requests h n = some (.request q) →
+    Solidity.Goals.IntrinsicSession.Funded F ((spec F).session en) h q →
+    cw.accounts (liftAddress q.target) = some ⟨k, st⟩ → code.entry k q.input = some entry →
+    Prog.callsBack true entry.body = false →
+    (liftWord q.value).1 ≤ (cw.funds (liftAddress q.sender)).1 →
+    let p := (spec F).ofWorld x
+    let frame := fun ext => (cw.atTime (liftWord q.timestamp)).transact fun w =>
+      w.call (⟨liftAddress q.target⟩ : ContractWorld.Handle k) entry (requestContext q ext)
+    let res := frame []
+    (∀ ext, frame ext = res) →
+    (Ends res.2 → ∃ out, Observed (spec F) p en
+      (h ++ [Event.tx q.sender q.target q.value q.timestamp q.input out])) ∧
+    (∀ r, Good (spec F) r → h <+: ((spec F).lang.sem p en r).events →
+      ((spec F).lang.sem p en r).events = h ∨ ∃ out,
+        let done := Event.tx q.sender q.target q.value q.timestamp q.input out
+        h ++ [done] <+: ((spec F).lang.sem p en r).events ∧ Matches res.2 out ∧
+        ∃ ω ∈ (spec F).worlds p en r, ((view F).typed ω).Shows code res.1 ∧
+          (view F).Boundary x en (h ++ [done]) (n + 1) ((view F).typed ω)) ∧
+    ∀ r, (spec F).lang.Admissible r → h = [] → ∀ out,
+      [Event.tx q.sender q.target q.value q.timestamp q.input out] <+:
+        ((spec F).lang.sem p en r).events →
+      Matches res.2 out ∨ out = .revert [] := by
+  intro x en h n code cw q k st entry _ b next funded installed resolved _ _
+  obtain ⟨w, eq, -⟩ := id b
+  cases eq
+  intro p frame res _
+  have below {r} (good : Good (spec F) r) (pre : h <+: ((spec F).lang.sem x en r).events)
+      (ge : ¬ n < r.horizon) : ((spec F).lang.sem x en r).events = h :=
+    have short := Boundary.below b good (by omega)
+    short.eq_of_length (Nat.le_antisymm short.length_le pre.length_le)
+  have first : ∀ r, (spec F).lang.Admissible r → h = [] → ∀ out,
+      [Event.tx q.sender q.target q.value q.timestamp q.input out] <+:
+        ((spec F).lang.sem x en r).events → Matches res.2 out ∨ out = .revert [] := by
+    rintro r - rfl out pre
+    exact (first_tx b next funded installed resolved r pre).imp_left matches_of
+  cases o : outcomeOf res.2 with
+  | none =>
+    have stops : (act F x en h n w (.request q)).stops = true :=
+      request_halts (e := en) (r := Bound.upto 0) (n := n) funded installed resolved rfl o
+    refine ⟨fun ends => ?_, fun r good pre => .inl ?_, first⟩
+    · obtain ⟨out, eq⟩ := ends_of ends
+      exact nomatch o.symm.trans eq
+    · by_cases lt : n < r.horizon
+      · exact Boundary.stops b next stops good (Nat.le_of_lt lt)
+      · exact below good pre lt
+  | some out =>
+    obtain ⟨evs, wd, completes⟩ := request_done (e := en) (r := Bound.upto 0) (n := n) funded installed resolved rfl o
+    have nb := Boundary.next b next completes
+    have shown := fun {r} => Boundary.next_events (r := r) b next completes
+    dsimp only [act] at nb shown
+    rw [evs] at nb shown
+    rw [wd] at nb
+    refine ⟨fun _ => ⟨out, Boundary.observed nb⟩, fun r good pre => ?_, first⟩
+    by_cases lt : n < r.horizon
+    · obtain ⟨ω, mem, ty⟩ := Boundary.listed nb good lt
+      exact .inr ⟨out, shown good lt, matches_of o, ω, mem, ty ▸ ⟨_, rfl, rfl, rfl, rfl⟩, ty ▸ nb⟩
+    · exact .inl (below good pre lt)
+
+/-- **Every completed transaction of an affordable request is that request's.** -/
+theorem Laws.resumes (F : Fixed) : ∀ x en h n t (q : Request), (spec F).lang.Allowed en →
+    (view F).Boundary x en h n t →
+    ((spec F).session en).requests h n = some (.request q) →
+    Solidity.Goals.IntrinsicSession.Funded F ((spec F).session en) h q →
+    let p := (spec F).ofWorld x
+    ∀ r, Good (spec F) r → ∀ (seg : List Event) (ev : Event), IsTx ev →
+      (∀ y ∈ seg, ¬ IsTx y) → h ++ seg ++ [ev] <+: ((spec F).lang.sem p en r).events →
+      (∃ out, ev = Event.tx q.sender q.target q.value q.timestamp q.input out) ∧
+      ∃ ω ∈ (spec F).worlds p en r,
+        (view F).Boundary x en (h ++ seg ++ [ev]) (n + 1) ((view F).typed ω) := by
+  intro x en h n t q _ b next funded p r good seg ev _ quiet pre
+  have pre : h ++ seg ++ [ev] <+: ((spec F).lang.sem x en r).events := pre
+  obtain ⟨w, rfl, st⟩ := b
+  have b : (view F).Boundary x en h n ⟨x.code, w⟩ := ⟨w, rfl, st⟩
+  have long : h.length < ((spec F).lang.sem x en r).events.length := by
+    have := pre.length_le
+    simp only [List.length_append, List.length_cons, List.length_nil] at this
+    omega
+  have lt : n < r.horizon := Nat.lt_of_not_le fun le => by
+    have := (Boundary.below b good le).length_le
+    omega
+  cases stop : (act F x en h n w (.request q)).stops with
+  | true =>
+    rw [Boundary.stops b next stop good (Nat.le_of_lt lt)] at long
+    exact absurd long (Nat.lt_irrefl _)
+  | false =>
+    obtain ⟨out, evs⟩ := request_events (e := en) funded stop
+    have shown := Boundary.next_events b next stop good lt
+    have nb := Boundary.next b next stop
+    rw [evs] at shown nb
+    obtain ⟨u, hu⟩ := shown
+    obtain ⟨v, hv⟩ := pre
+    have same := hu.trans hv.symm
+    simp only [List.append_assoc, List.append_cancel_left_eq, List.cons_append,
+      List.nil_append] at same
+    cases seg with
+    | nil =>
+      cases (List.cons.inj same).1
+      obtain ⟨ω, mem, ty⟩ := Boundary.listed nb good lt
+      rw [List.append_nil]
+      exact ⟨⟨out, rfl⟩, ω, mem, ty ▸ nb⟩
+    | cons y seg =>
+      cases (List.cons.inj same).1
+      exact absurd trivial (quiet _ List.mem_cons_self)
+
+end Solidity.Semantics.IntrinsicSession
