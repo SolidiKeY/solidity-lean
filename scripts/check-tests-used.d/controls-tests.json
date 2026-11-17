@@ -320,6 +320,310 @@
         "purpose": "Historical Python overlay provenance/postimage and unchanged-production negative controls, demonstrated by an actual default invocation at the recorded committed source revision using the existing strictly guarded private-fixture producer. Original checkout, patch/postimage pins, proof-budget guards and checks remain unchanged. Fixture reproduction grants no live Hash edit, ownership authority or proof acceptance; historical source role only, with no fixture/child/current passing-validation, Lean or EVM credit.",
         "input_scope": [],
         "other_reads": "unresolved"
+      },
+      {
+        "path": "tests/h62/item2/audit-bytecode-selection/test_exact_domains.py",
+        "input_revision": "6bdd1511df45f0a7fd4a8ac594813e1444b07b5d",
+        "source_blob": "ccd3b4d3846d9f82c201997aa8763f99b32c93e6",
+        "command": [
+          "python3",
+          "-B",
+          "tests/h62/item2/audit-bytecode-selection/test_exact_domains.py"
+        ],
+        "kind": "unittest",
+        "purpose": "Existing bytecode regression suite passed ordinary and instrumented Python runs. Only the exact observed primary fixtures listed here receive persisted data-use routes; all other reads remain unresolved. No native Lean or external EVM proof acceptance.",
+        "input_scope": [
+          "tests/h62/item2/audit-bytecode-selection/HypothesisDomains.lean",
+          "tests/h62/item2/audit-bytecode-selection/exact-gate-domains.txt"
+        ],
+        "other_reads": "unresolved"
+      },
+      {
+        "path": "tests/h62/item2/audit-bytecode-selection/test_field_domains.py",
+        "input_revision": "6bdd1511df45f0a7fd4a8ac594813e1444b07b5d",
+        "source_blob": "076b28dd0bb72484ca55b25bbc20416864c2b1be",
+        "command": [
+          "python3",
+          "-B",
+          "tests/h62/item2/audit-bytecode-selection/test_field_domains.py"
+        ],
+        "kind": "unittest",
+        "purpose": "Existing bytecode regression suite passed ordinary and instrumented Python runs. Only the exact observed primary fixtures listed here receive persisted data-use routes; all other reads remain unresolved. No native Lean or external EVM proof acceptance.",
+        "input_scope": [
+          "tests/h62/item2/audit-bytecode-selection/compiler-field-witnesses.json",
+          "tests/h62/item2/audit-bytecode-selection/composition-field-support.lean.txt",
+          "tests/h62/item2/audit-bytecode-selection/composition-field-witnesses.json",
+          "tests/h62/item2/audit-bytecode-selection/controls-domain-witnesses.json",
+          "tests/h62/item2/audit-bytecode-selection/decoder-field-support.lean.txt",
+          "tests/h62/item2/audit-bytecode-selection/decoder-field-witnesses.json",
+          "tests/h62/item2/audit-bytecode-selection/runtime-consumer-support.lean.txt",
+          "tests/h62/item2/audit-bytecode-selection/runtime-consumer-witnesses.json",
+          "tests/h62/item2/audit-bytecode-selection/runtime-control-support.lean.txt",
+          "tests/h62/item2/audit-bytecode-selection/runtime-control-witness.json",
+          "tests/h62/item2/audit-bytecode-selection/selection-field-witnesses.json"
+        ],
+        "other_reads": "unresolved"
+      }
+    ]
+  },
+  "consumer_routes": {
+    "persistent_reads": [
+      {
+        "runner": "validated:tests/h62/item2/audit-bytecode-selection/test_exact_domains.py",
+        "input_revision": "6bdd1511df45f0a7fd4a8ac594813e1444b07b5d",
+        "frames": [
+          {
+            "path": "tests/h62/item2/audit-bytecode-selection/test_exact_domains.py",
+            "blob": "ccd3b4d3846d9f82c201997aa8763f99b32c93e6",
+            "line": 231
+          },
+          {
+            "path": "tests/h62/item2/audit-bytecode-selection/test_exact_domains.py",
+            "blob": "ccd3b4d3846d9f82c201997aa8763f99b32c93e6",
+            "line": 19
+          }
+        ],
+        "target": "tests/h62/item2/audit-bytecode-selection/HypothesisDomains.lean",
+        "target_blob": "810f4b6f1be2b1fffc06f92985fe1c89e9a10403",
+        "operation": "validated Python read of measured bytes"
+      },
+      {
+        "runner": "validated:tests/h62/item2/audit-bytecode-selection/test_field_domains.py",
+        "input_revision": "6bdd1511df45f0a7fd4a8ac594813e1444b07b5d",
+        "frames": [
+          {
+            "path": "tests/h62/item2/audit-bytecode-selection/test_field_domains.py",
+            "blob": "076b28dd0bb72484ca55b25bbc20416864c2b1be",
+            "line": 160
+          },
+          {
+            "path": "tests/h62/item2/audit-bytecode-selection/test_field_domains.py",
+            "blob": "076b28dd0bb72484ca55b25bbc20416864c2b1be",
+            "line": 55
+          }
+        ],
+        "target": "tests/h62/item2/audit-bytecode-selection/compiler-field-witnesses.json",
+        "target_blob": "96302f39ad35273e8c9628adfd5e36de96f09cef",
+        "operation": "validated Python read of measured bytes"
+      },
+      {
+        "runner": "validated:tests/h62/item2/audit-bytecode-selection/test_field_domains.py",
+        "input_revision": "6bdd1511df45f0a7fd4a8ac594813e1444b07b5d",
+        "frames": [
+          {
+            "path": "tests/h62/item2/audit-bytecode-selection/test_field_domains.py",
+            "blob": "076b28dd0bb72484ca55b25bbc20416864c2b1be",
+            "line": 160
+          },
+          {
+            "path": "tests/h62/item2/audit-bytecode-selection/test_field_domains.py",
+            "blob": "076b28dd0bb72484ca55b25bbc20416864c2b1be",
+            "line": 155
+          },
+          {
+            "path": "tests/h62/item2/audit-bytecode-selection/test_field_domains.py",
+            "blob": "076b28dd0bb72484ca55b25bbc20416864c2b1be",
+            "line": 155
+          }
+        ],
+        "target": "tests/h62/item2/audit-bytecode-selection/composition-field-support.lean.txt",
+        "target_blob": "2aefde04ad9f78d22e9d35854c47b51706570354",
+        "operation": "validated Python read of measured bytes"
+      },
+      {
+        "runner": "validated:tests/h62/item2/audit-bytecode-selection/test_field_domains.py",
+        "input_revision": "6bdd1511df45f0a7fd4a8ac594813e1444b07b5d",
+        "frames": [
+          {
+            "path": "tests/h62/item2/audit-bytecode-selection/test_field_domains.py",
+            "blob": "076b28dd0bb72484ca55b25bbc20416864c2b1be",
+            "line": 160
+          },
+          {
+            "path": "tests/h62/item2/audit-bytecode-selection/test_field_domains.py",
+            "blob": "076b28dd0bb72484ca55b25bbc20416864c2b1be",
+            "line": 143
+          }
+        ],
+        "target": "tests/h62/item2/audit-bytecode-selection/composition-field-witnesses.json",
+        "target_blob": "3621467b17a294361dda62487b11021f8325b222",
+        "operation": "validated Python read of measured bytes"
+      },
+      {
+        "runner": "validated:tests/h62/item2/audit-bytecode-selection/test_field_domains.py",
+        "input_revision": "6bdd1511df45f0a7fd4a8ac594813e1444b07b5d",
+        "frames": [
+          {
+            "path": "tests/h62/item2/audit-bytecode-selection/test_field_domains.py",
+            "blob": "076b28dd0bb72484ca55b25bbc20416864c2b1be",
+            "line": 160
+          },
+          {
+            "path": "tests/h62/item2/audit-bytecode-selection/test_field_domains.py",
+            "blob": "076b28dd0bb72484ca55b25bbc20416864c2b1be",
+            "line": 105
+          }
+        ],
+        "target": "tests/h62/item2/audit-bytecode-selection/controls-domain-witnesses.json",
+        "target_blob": "0be7be2ce013506e9ab19bbea05823a59fd03bab",
+        "operation": "validated Python read of measured bytes"
+      },
+      {
+        "runner": "validated:tests/h62/item2/audit-bytecode-selection/test_field_domains.py",
+        "input_revision": "6bdd1511df45f0a7fd4a8ac594813e1444b07b5d",
+        "frames": [
+          {
+            "path": "tests/h62/item2/audit-bytecode-selection/test_field_domains.py",
+            "blob": "076b28dd0bb72484ca55b25bbc20416864c2b1be",
+            "line": 160
+          },
+          {
+            "path": "tests/h62/item2/audit-bytecode-selection/test_field_domains.py",
+            "blob": "076b28dd0bb72484ca55b25bbc20416864c2b1be",
+            "line": 69
+          }
+        ],
+        "target": "tests/h62/item2/audit-bytecode-selection/decoder-field-support.lean.txt",
+        "target_blob": "2c26a5c114d00934b90df1ed2118477e4ee96fda",
+        "operation": "validated Python read of measured bytes"
+      },
+      {
+        "runner": "validated:tests/h62/item2/audit-bytecode-selection/test_field_domains.py",
+        "input_revision": "6bdd1511df45f0a7fd4a8ac594813e1444b07b5d",
+        "frames": [
+          {
+            "path": "tests/h62/item2/audit-bytecode-selection/test_field_domains.py",
+            "blob": "076b28dd0bb72484ca55b25bbc20416864c2b1be",
+            "line": 160
+          },
+          {
+            "path": "tests/h62/item2/audit-bytecode-selection/test_field_domains.py",
+            "blob": "076b28dd0bb72484ca55b25bbc20416864c2b1be",
+            "line": 80
+          }
+        ],
+        "target": "tests/h62/item2/audit-bytecode-selection/decoder-field-witnesses.json",
+        "target_blob": "dca6d66dbc93db5e28c5ad9c04aff790f279dfa8",
+        "operation": "validated Python read of measured bytes"
+      },
+      {
+        "runner": "validated:tests/h62/item2/audit-bytecode-selection/test_exact_domains.py",
+        "input_revision": "6bdd1511df45f0a7fd4a8ac594813e1444b07b5d",
+        "frames": [
+          {
+            "path": "tests/h62/item2/audit-bytecode-selection/test_exact_domains.py",
+            "blob": "ccd3b4d3846d9f82c201997aa8763f99b32c93e6",
+            "line": 231
+          },
+          {
+            "path": "tests/h62/item2/audit-bytecode-selection/test_exact_domains.py",
+            "blob": "ccd3b4d3846d9f82c201997aa8763f99b32c93e6",
+            "line": 20
+          }
+        ],
+        "target": "tests/h62/item2/audit-bytecode-selection/exact-gate-domains.txt",
+        "target_blob": "33c94d08186c313f5e5e0cad0ce58c277fe62cfe",
+        "operation": "validated Python read of measured bytes"
+      },
+      {
+        "runner": "validated:tests/h62/item2/audit-bytecode-selection/test_field_domains.py",
+        "input_revision": "6bdd1511df45f0a7fd4a8ac594813e1444b07b5d",
+        "frames": [
+          {
+            "path": "tests/h62/item2/audit-bytecode-selection/test_field_domains.py",
+            "blob": "076b28dd0bb72484ca55b25bbc20416864c2b1be",
+            "line": 160
+          },
+          {
+            "path": "tests/h62/item2/audit-bytecode-selection/test_field_domains.py",
+            "blob": "076b28dd0bb72484ca55b25bbc20416864c2b1be",
+            "line": 136
+          },
+          {
+            "path": "tests/h62/item2/audit-bytecode-selection/test_field_domains.py",
+            "blob": "076b28dd0bb72484ca55b25bbc20416864c2b1be",
+            "line": 136
+          }
+        ],
+        "target": "tests/h62/item2/audit-bytecode-selection/runtime-consumer-support.lean.txt",
+        "target_blob": "398ec3aedde209d2408a34cfdfccac93b7b07700",
+        "operation": "validated Python read of measured bytes"
+      },
+      {
+        "runner": "validated:tests/h62/item2/audit-bytecode-selection/test_field_domains.py",
+        "input_revision": "6bdd1511df45f0a7fd4a8ac594813e1444b07b5d",
+        "frames": [
+          {
+            "path": "tests/h62/item2/audit-bytecode-selection/test_field_domains.py",
+            "blob": "076b28dd0bb72484ca55b25bbc20416864c2b1be",
+            "line": 160
+          },
+          {
+            "path": "tests/h62/item2/audit-bytecode-selection/test_field_domains.py",
+            "blob": "076b28dd0bb72484ca55b25bbc20416864c2b1be",
+            "line": 128
+          }
+        ],
+        "target": "tests/h62/item2/audit-bytecode-selection/runtime-consumer-witnesses.json",
+        "target_blob": "364003c196b34fb05b29887571f4fe70da5e5bd0",
+        "operation": "validated Python read of measured bytes"
+      },
+      {
+        "runner": "validated:tests/h62/item2/audit-bytecode-selection/test_field_domains.py",
+        "input_revision": "6bdd1511df45f0a7fd4a8ac594813e1444b07b5d",
+        "frames": [
+          {
+            "path": "tests/h62/item2/audit-bytecode-selection/test_field_domains.py",
+            "blob": "076b28dd0bb72484ca55b25bbc20416864c2b1be",
+            "line": 160
+          },
+          {
+            "path": "tests/h62/item2/audit-bytecode-selection/test_field_domains.py",
+            "blob": "076b28dd0bb72484ca55b25bbc20416864c2b1be",
+            "line": 120
+          }
+        ],
+        "target": "tests/h62/item2/audit-bytecode-selection/runtime-control-support.lean.txt",
+        "target_blob": "60d86eea38a32e336fbe29f3e957bfd4cd01b21d",
+        "operation": "validated Python read of measured bytes"
+      },
+      {
+        "runner": "validated:tests/h62/item2/audit-bytecode-selection/test_field_domains.py",
+        "input_revision": "6bdd1511df45f0a7fd4a8ac594813e1444b07b5d",
+        "frames": [
+          {
+            "path": "tests/h62/item2/audit-bytecode-selection/test_field_domains.py",
+            "blob": "076b28dd0bb72484ca55b25bbc20416864c2b1be",
+            "line": 160
+          },
+          {
+            "path": "tests/h62/item2/audit-bytecode-selection/test_field_domains.py",
+            "blob": "076b28dd0bb72484ca55b25bbc20416864c2b1be",
+            "line": 115
+          }
+        ],
+        "target": "tests/h62/item2/audit-bytecode-selection/runtime-control-witness.json",
+        "target_blob": "6c56e1c02f152eecb1f48e00ff10d118df2d5c7c",
+        "operation": "validated Python read of measured bytes"
+      },
+      {
+        "runner": "validated:tests/h62/item2/audit-bytecode-selection/test_field_domains.py",
+        "input_revision": "6bdd1511df45f0a7fd4a8ac594813e1444b07b5d",
+        "frames": [
+          {
+            "path": "tests/h62/item2/audit-bytecode-selection/test_field_domains.py",
+            "blob": "076b28dd0bb72484ca55b25bbc20416864c2b1be",
+            "line": 160
+          },
+          {
+            "path": "tests/h62/item2/audit-bytecode-selection/test_field_domains.py",
+            "blob": "076b28dd0bb72484ca55b25bbc20416864c2b1be",
+            "line": 152
+          }
+        ],
+        "target": "tests/h62/item2/audit-bytecode-selection/selection-field-witnesses.json",
+        "target_blob": "85938cf49908b76bc8f684ae4f010490b9ee09dc",
+        "operation": "validated Python read of measured bytes"
       }
     ]
   }
