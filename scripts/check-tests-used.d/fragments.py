@@ -44,6 +44,8 @@ FRAGMENT_SECTIONS = ('standalone', 'generators', 'reads', 'orphans', 'module_ent
 # Standalone kind committed-module-cli (main script) is the H955 argparse role.
 # H978 (x1g): static forms lean-library-readFile and node-readFileSync-walk, and
 #   standalone kind source-only-program (revision-independent no-pass role).
+# H996 (x1i): standalone kind python-argument-source-role, a reviewed
+#   argument-bearing Python program as a source-only role that anchors nothing.
 # persistent_module_entries (H979): exact routes.module_entries claims that
 #   persist while every recorded object is unchanged.
 CONSUMER_SECTIONS = ('persistent_reads', 'static_routes', 'git_policies', 'persistent_module_entries')
@@ -931,7 +933,152 @@ def node_mode_root(classifier, graph, catalog, entry, reviewed=None):
             'reason': 'Reviewed argument-bearing entry command; source role only, never run or certified to pass. Anchors only literal walker reads in its mode; no execution, helper, child, generated-output, proof or runtime credit.'}})
 
 
-SOURCE_ROLE_KINDS = {SOURCE_ONLY_KIND: source_only_program, NODE_MODE_KIND: node_mode_root}
+PYTHON_ARGS_KIND = 'python-argument-source-role'
+PYTHON_ARGS_PREFIX = 'py-args:'
+# H996 (gh coord#1329, X1E-CONFIGURED-ROLE): each reviewed live Python program
+# that needs positional arguments, a forwarded command or a subcommand, bound to
+# (path, source blob, commit that introduced that blob at that path). Nothing
+# else is promoted: another file, blob or provenance commit fails, and no
+# argument, read, helper or output is ever recorded or credited.
+REVIEWED_PYTHON_ARGS = frozenset({
+    ('tests/directruntime-20261104/control-tuples/measure-native.py', 'c24f1113690cc7a6611d8f8d412ce5f8e77b5b1e', 'e6849d3bdf516099d20c33d3581d523449764018'),
+    ('tests/directruntime-20261104/control-tuples/run-bounded.py', '629db80c898eb6a19b1dc58a7bf1153bf65214dd', 'e6849d3bdf516099d20c33d3581d523449764018'),
+    ('tests/directruntime-20261104/memory-references/bounded-check.py', 'd9f1b14c51c9011736f0fb484f4fcf96d55cd615', '17f2902cdc6ab848317fc82e31a90ad2d7c4fba8'),
+    ('tests/directruntime-20261104/memory-references/browser-result-intake.py', 'fbb3489b8a38e1e8a8e96fa37d95fbea09d88903', '3bdd5ea4f35abb365b6bb57da56db7c23b645ac5'),
+    ('tests/directruntime-20261104/memory-references/census-controls.py', '08e1714023fc1f8e49ca09a8601d899ed54155f8', '44fa1c785b3168551c9f9589da56b5314b4ef740'),
+    ('tests/directruntime-20261104/memory-references/inspect-browser-evidence.py', '6f747cfa705fc346a6aedfb162e4e84df8978565', '9be4ce0a089f0888ac165ff770ac90e3879ece0d'),
+    ('tests/directruntime-20261104/memory-references/linker-attribution-controls.py', '06166345217a40838f67fc52998333cfafd4bbbd', '4d4407dbbd3e5fed9ed20fe8f76dde8bc0577e89'),
+    ('tests/directruntime-20261104/memory-references/linker-attribution.py', '3b487c691ab3b1710149a25eef37d14301bcd563', '4d4407dbbd3e5fed9ed20fe8f76dde8bc0577e89'),
+    ('tests/directruntime-20261104/memory-references/native-boundary-audit.py', '8c0601e110ec1c779e759456d05d64ca045a6232', 'c9230cc9692a5974728959907afa1f60733409ad'),
+    ('tests/directruntime-20261104/memory-references/native-closure-evidence.py', '1872f7842f78468b9d617f000e3469a7781a7fe2', '6479617481ce020d41f7061d9dcf4dbfe9bd1ab8'),
+    ('tests/directruntime-20261104/memory-references/native-refusal-controls.py', 'c2f89053088d9f5f615c75f408b6711c5f7b99dd', 'c9230cc9692a5974728959907afa1f60733409ad'),
+    ('tests/directruntime-20261104/memory-references/pack-cache.py', 'c10c9d9b34044d11582ab507e76bf017a9034449', '3c3346709988f245ee64b8ffc606dfec56e6c6e1'),
+    ('tests/directruntime-20261104/memory-references/runtime-boundary-census.py', '526851b6c2b502a149b80d2f7f1f0c8ae87b1113', '44fa1c785b3168551c9f9589da56b5314b4ef740'),
+    ('tests/directruntime-20261104/native-browser/bounded-command.py', '3c9e6eb7c60bf7906c7f605bdf0fa58f65f6a3df', 'ae8062cfb0f028667485e6f1a621ff69e62724fd'),
+    ('tests/directruntime-20261104/native-browser/environment/known-stack-continuation.py', '7898e125b8addd4b3badbb0d80e7001481c15741', 'e49c71436470851e0a3b295fa56b3b6c749e09b1'),
+    ('tests/directruntime-20261104/native-browser/h109/docker-probe.py', '2c67207ea5ce6c3d55e59f3ee2341b764028aedf', 'f11ae9a9025990629aaed70012fc71ebb0ba295d'),
+    ('tests/directruntime-20261104/native-browser/h109/input-inventory.py', '2bbde0bd62a3cb448e752e521d7761937d80a240', '937167b745b8a2d41d3a138581d7a9931ae039e3'),
+    ('tests/directruntime-20261104/native-browser/h109/source-snapshot.py', '32870f0d2fde915a2dfff0177fdb9d8b7acb1489', 'f8329bf24319a8056b0c95927d35444a11c3e84b'),
+    ('tests/directruntime-20261104/native-browser/hardening-native-audit.py', '36dd7768f98e954babdb111a2dd780a4b09877a6', '23a42307b1b336e5477c0bb5c8d8bfe6415b6ea6'),
+    ('tests/directruntime-20261104/native-browser/readbounds/serial-build.py', '071755cc6574cfb9c5f97ad5703072486ffc9249', 'c3a7094cc0c1f8b625a5a7a6a9eae61ec64444d0'),
+    ('tests/directruntime-20261104/native-browser/validation-admission.py', '1d56a3dc820b8ae3e503fedfbd4151ff530539bd', '15302eb51e3df48b9d8d46eaf50348dd1deddfb2'),
+    ('tests/directruntime-20261104/shared-translator/measure.py', '57c6a2f51633f72cf79c063740eff1f6ade3a26b', '5a2afc72aca1a35cf555fa1b462b9de4c2ef79b7'),
+    ('tests/directruntime-20261104/shared-translator/outer_guard.py', 'e33bbf7efee05de73e793c8f872e2e821d8c6421', '5a2afc72aca1a35cf555fa1b462b9de4c2ef79b7'),
+    ('tests/upstream/baseline-20261028/invocations/bulk/timed.py', 'c543b7aef3f458d0765b11b19741406a7ff78415', '2207c1bba286538fd63e4a0ff4960ed4a593a8ab'),
+    ('tests/upstream/baseline-20261028/invocations/retries/selector.py', '5b7a49f863f7c6fad8231d17d68628623948a00e', '2207c1bba286538fd63e4a0ff4960ed4a593a8ab'),
+})
+
+
+def python_argument_interface(text):
+    """The argument-bearing interface of a Python program, or None.
+
+    Recorded from the AST: lines that load `sys.argv` (through `import sys`
+    only), lines among them that take an open argv tail `sys.argv[k:]`
+    (variadic or forwarded command), literal positional `add_argument` names
+    and literal `add_parser` subcommand names. A store to or rebinding of argv,
+    `from sys import argv`, an argv attribute of anything but the sys module, or
+    a computed subcommand name is not audited and gives None, as does a program
+    with none of these forms (a default program is source-only-program's role).
+    """
+    try: tree = ast.parse(text)
+    except (SyntaxError, ValueError, RecursionError): return None
+    modules = {a.asname or a.name for n in ast.walk(tree) if isinstance(n, ast.Import) for a in n.names if a.name == 'sys'}
+    argv, tails, positionals, subcommands = set(), set(), set(), set()
+    for n in ast.walk(tree):
+        if isinstance(n, ast.ImportFrom) and n.module == 'sys' and any(a.name in ('argv', '*') for a in n.names): return None
+        if isinstance(n, ast.Attribute) and n.attr == 'argv':
+            if not (isinstance(n.value, ast.Name) and n.value.id in modules and isinstance(n.ctx, ast.Load)): return None
+            argv.add(n.lineno)
+        if isinstance(n, (ast.Global, ast.Nonlocal)) and set(n.names) & modules: return None
+        if isinstance(n, ast.Name) and n.id in modules and not isinstance(n.ctx, ast.Load): return None
+        if (isinstance(n, ast.Subscript) and isinstance(n.value, ast.Attribute) and n.value.attr == 'argv'
+                and isinstance(n.slice, ast.Slice) and n.slice.upper is None and n.slice.step is None):
+            tails.add(n.lineno)
+        if isinstance(n, ast.Call) and isinstance(n.func, ast.Attribute) and n.func.attr in ('add_argument', 'add_parser'):
+            first = n.args[0] if n.args else None
+            literal = isinstance(first, ast.Constant) and isinstance(first.value, str)
+            if n.func.attr == 'add_parser':
+                if not literal: return None
+                subcommands.add((n.lineno, first.value))
+            elif literal and not first.value.startswith('-'): positionals.add((n.lineno, first.value))
+    if not (argv or positionals or subcommands): return None
+    return {'argv_lines': sorted(argv), 'argv_tail_lines': sorted(tails),
+            'positionals': [list(x) for x in sorted(positionals)], 'subcommands': [list(x) for x in sorted(subcommands)]}
+
+
+def _introduced(classifier, repo, commit, path, blob):
+    """True iff commit holds blob at path and none of its parents does."""
+    if not classifier['hex_pin'](commit, 40): return False
+    try: parents = classifier['git'](repo.root, 'rev-list', '--parents', '-n', '1', commit, '--').decode().split()
+    except ValueError: return False
+    if not parents or parents[0] != commit: return False
+    requests = [commit + ':' + path] + [p + ':' + path for p in parents[1:]]
+    raw = classifier['git'](repo.root, 'cat-file', '--batch-check', '-Z',
+                            data=b''.join(r.encode('utf-8', 'surrogateescape') + b'\0' for r in requests))
+    lines = raw.rstrip(b'\0').split(b'\0')
+    if len(lines) != len(requests): raise ValueError('Python argument role provenance batch mismatch')
+    held = [line.split()[0].decode() == blob and line.split()[1:2] == [b'blob'] if len(line.split()) == 3 else False for line in lines]
+    return held[0] and not any(held[1:])
+
+
+def python_argument_root(classifier, graph, catalog, entry, reviewed=None):
+    """H996: a reviewed argument-bearing Python program as a source-only role.
+
+    The definition binds the bare entry prefix ['python3', '-B', P] (never a
+    concrete argument), the source blob, its genuine top-level entry line, the
+    interface python_argument_interface records for that blob, and provenance:
+    the commit that introduced that blob at P, which must be in the reviewed
+    set. The configured CLI, module CLI and unittest guards are unchanged: a
+    program matching one is refused here. The root is never a validated or
+    passing runner and anchors nothing: no execution, pass, read-anchor,
+    fixture, helper, child, generated-output, proof or runtime credit. A later
+    revision keeps it while the blob is unchanged and the recorded commit holds
+    it; a current definition of the same path supersedes it.
+    """
+    repo = graph.repo
+    reviewed = REVIEWED_PYTHON_ARGS if reviewed is None else reviewed
+    required = {'path', 'input_revision', 'source_blob', 'command', 'kind', 'entry_line', 'interface', 'provenance', 'purpose'}
+    if (set(entry) != required or not isinstance(entry['path'], str) or not isinstance(entry['source_blob'], str)
+            or not isinstance(entry['purpose'], str) or not entry['purpose'].strip() or not isinstance(entry['interface'], dict)
+            or not isinstance(entry['provenance'], dict) or set(entry['provenance']) != {'commit', 'path', 'blob'}):
+        raise ValueError('invalid Python argument role definition')
+    p = entry['path']; revision = entry['input_revision']; doc = entry['provenance']
+    if not isinstance(revision, str) or not classifier['hex_pin'](revision, 40): raise ValueError('Python argument role requires a full commit revision')
+    if any(e.get('path') == p and e.get('input_revision') == revision and e is not entry for e in catalog['standalone']):
+        raise ValueError('conflicting standalone definitions: ' + p)
+    if entry['command'] != ['python3', '-B', p] or not p.endswith('.py'):
+        raise ValueError('unsupported Python argument role invocation: ' + p)
+    if doc['path'] != p or doc['blob'] != entry['source_blob'] or (p, entry['source_blob'], doc['commit']) not in reviewed:
+        raise ValueError('unreviewed Python argument role: ' + p)
+    if revision != repo.ref:
+        if any(e.get('path') == p and e.get('input_revision') == repo.ref for e in catalog['standalone']): return
+        if not _current(repo, p, entry['source_blob']): return
+        if not _historical_objects(classifier, repo, revision, [(p, entry['source_blob'])]):
+            raise ValueError('unverifiable historical runner demonstration: ' + revision + ':' + p)
+    elif not _current(repo, p, entry['source_blob']): raise ValueError('standalone definition source mismatch: ' + p)
+    if repo.tree[p][0] not in ('100644', '100755') or p not in repo.texts:
+        raise ValueError('unsupported Python argument role invocation: ' + p)
+    if not _introduced(classifier, repo, doc['commit'], p, entry['source_blob']):
+        raise ValueError('Python argument role lacks its introducing provenance: ' + p)
+    try: lines = classifier['entrypoint_lines'](repo.bytes(p))
+    except (SyntaxError, ValueError, RecursionError): lines = set()
+    if type(entry['entry_line']) is not int or entry['entry_line'] not in lines:
+        raise ValueError('Python argument role lacks its top-level entry: ' + p)
+    if any(classifier[f](repo, p) is not None for f in ('declared_configured_cli', 'declared_module_cli', 'declared_unittest')):
+        raise ValueError('Python argument role matches a configured CLI or unittest form: ' + p)
+    interface = python_argument_interface(repo.texts[p])
+    if interface is None: raise ValueError('Python argument role lacks an audited argument interface: ' + p)
+    if canonical(interface) != canonical(entry['interface']): raise ValueError('Python argument role interface mismatch: ' + p)
+    identity = PYTHON_ARGS_PREFIX + p
+    graph.root(p, 'source-only Python argument entry', shlex.join(entry['command']), p, entry['entry_line'], root_id=identity)
+    if identity not in graph.roots: return
+    graph.roots[identity].update({'source_only': True, 'python_argument_role': True, 'source_blob': entry['source_blob'],
+        'purpose': entry['purpose'], 'interface': interface, 'provenance': doc, 'source_declaration_revision': revision,
+        'validation_at_measured_revision': {'status': 'unavailable', 'command': entry['command'],
+            'reason': 'Reviewed argument-bearing Python entry; the bare prefix needs arguments and no argument is recorded. Source role only, never run or certified to pass. No read anchor, fixture, helper, child, generated-output, proof or runtime credit.'}})
+
+
+SOURCE_ROLE_KINDS = {SOURCE_ONLY_KIND: source_only_program, NODE_MODE_KIND: node_mode_root, PYTHON_ARGS_KIND: python_argument_root}
 
 
 def persisted_module_entries(classifier, graph, catalog, rows):
@@ -1426,6 +1573,12 @@ def successor_controls(classifier):
         'tests/prog_test.py': 'import unittest\nclass T(unittest.TestCase):\n def test_it(self): pass\nif __name__ == "__main__": unittest.main()\n',
         'tests/prog_cli.py': "import argparse\nparser = argparse.ArgumentParser()\nparser.add_argument('--input', required=True)\nargs = parser.parse_args()\nprint(args.input)\n",
         'tests/helper.py': 'VALUE = 3\n',
+        'tests/args.py': 'import sys\nlabel, *command = sys.argv[1:]\nif not command:\n    raise SystemExit("usage: args.py LABEL COMMAND")\nprint(label, command)\n',
+        'tests/args_sub.py': ("import argparse\ndef main():\n    parser = argparse.ArgumentParser()\n    sub = parser.add_subparsers(dest='mode', required=True)\n"
+                              "    pick = sub.add_parser('pick')\n    pick.add_argument('results')\n    pick.add_argument('--out', required=True)\n"
+                              "    return parser.parse_args()\nif __name__ == '__main__':\n    main()\n"),
+        'tests/args_alias.py': 'from sys import argv\nprint(argv[1])\n',
+        'tests/args_rebind.py': 'import sys\nsys.argv = ["x", "y"]\nprint(sys.argv[1])\n',
         'tests/test_entry.py': 'import unittest\nclass T(unittest.TestCase):\n def test_import(self):\n  import helper\n  self.assertEqual(helper.VALUE, 3)\nif __name__ == "__main__": unittest.main()\n',
     }
     with tempfile.TemporaryDirectory() as tmp:
@@ -1614,6 +1767,90 @@ def successor_controls(classifier):
             model, rows = run(edited, walks, standalone=[mode_root])
             assert 'node-mode:tests/mode.mjs' not in model['entry_points'] and rows['tests/corpus/a.sol']['class'] != 'keep'
         finally: REVIEWED_NODE_MODES = reviewed
+
+        # (6) H996 reviewed argument-bearing Python source role: a source-only
+        # root bound to blob, recorded interface and introducing commit that
+        # anchors nothing and credits no read, argument, helper or output.
+        global REVIEWED_PYTHON_ARGS
+        reviewed_args = REVIEWED_PYTHON_ARGS
+        assert len(reviewed_args) == 25 and all(p.startswith(('tests/directruntime-20261104/', 'tests/upstream/')) and p.endswith('.py')
+                                                for p, _, _ in reviewed_args)
+        assert ('tests/upstream/baseline-20261028/invocations/retries/selector.py', '5b7a49f863f7c6fad8231d17d68628623948a00e',
+                '2207c1bba286538fd63e4a0ff4960ed4a593a8ab') in reviewed_args
+        args_interface = {'argv_lines': [2], 'argv_tail_lines': [2], 'positionals': [], 'subcommands': []}
+        assert python_argument_interface(files['tests/args.py']) == args_interface
+        assert python_argument_interface(files['tests/args_sub.py']) == {'argv_lines': [], 'argv_tail_lines': [], 'positionals': [[6, 'results']], 'subcommands': [[5, 'pick']]}
+        for path in ('tests/prog.py', 'tests/helper.py', 'tests/args_alias.py', 'tests/args_rebind.py'):
+            assert python_argument_interface(files[path]) is None, path
+        assert python_argument_interface('import sys as s\nprint(s.argv[1:])\n') == {'argv_lines': [2], 'argv_tail_lines': [2], 'positionals': [], 'subcommands': []}
+        assert python_argument_interface('import sys\nclass O: argv = 1\nprint(O().argv)\n') is None
+        assert python_argument_interface('import argparse\np = argparse.ArgumentParser()\ns = p.add_subparsers()\ns.add_parser(NAME)\n') is None
+        py_role = lambda path, line, interface, repo=first, commit=A: {
+            'path': path, 'input_revision': repo.ref, 'source_blob': blob(repo, path), 'kind': PYTHON_ARGS_KIND,
+            'command': ['python3', '-B', path], 'entry_line': line, 'interface': interface,
+            'provenance': {'commit': commit, 'path': path, 'blob': blob(repo, path)}, 'purpose': 'Synthetic reviewed argument-bearing program.'}
+        args_role = py_role('tests/args.py', 3, args_interface)
+        sub_role = py_role('tests/args_sub.py', 9, python_argument_interface(files['tests/args_sub.py']))
+        assert baseline['tests/args.py']['class'] != 'keep' and baseline['tests/args_sub.py']['class'] != 'keep'
+        REVIEWED_PYTHON_ARGS = frozenset({(p, blob(first, p), A) for p in ('tests/args.py', 'tests/args_sub.py', 'tests/args_alias.py',
+                                                                            'tests/args_rebind.py', 'tests/prog.py', 'tests/prog_cli.py', 'tests/prog_test.py')}
+                                         | {('tests/args.py', blob(first, 'tests/args.py'), later.ref)})
+        try:
+            for repo in (first, later):
+                model, rows = run(repo, standalone=[args_role, sub_role])
+                for path, role, line in (('tests/args.py', args_role, 3), ('tests/args_sub.py', sub_role, 9)):
+                    assert rows[path]['class'] == 'keep', path
+                    entry = model['entry_points']['py-args:' + path]
+                    assert entry['source_only'] and entry['python_argument_role'] and entry['validation_at_measured_revision']['status'] == 'unavailable'
+                    assert entry['command'] == 'python3 -B ' + path and entry['location'] == path + ':' + str(line)
+                    assert entry['interface'] == role['interface'] and entry['provenance'] == role['provenance']
+                    assert not any(k.endswith(':' + path) and not k.startswith('py-args:') for k in model['entry_points'])
+                # Nothing else changes: no read, helper, child or output credit.
+                assert all(canonical(r) == canonical(baseline[p]) for p, r in rows.items() if p not in ('tests/args.py', 'tests/args_sub.py')
+                           and p in baseline and repo is later)
+            # The role anchors no route: the malformed row is never even inspected.
+            _, rows = run(later, {'static_routes': [route(first, 'py-args:tests/args.py', 'node-import', [frame(first, 'tests/args.py', 2)], 'tests/corpus/c.txt')]},
+                          standalone=[args_role])
+            assert rows['tests/corpus/c.txt']['class'] != 'keep'
+            # Negative controls: schema, revision, command, review set, provenance, source, entry, interface.
+            for change, text in (({'extra': 1}, 'invalid Python argument role'), ({'purpose': ' '}, 'invalid Python argument role'),
+                                 ({'interface': []}, 'invalid Python argument role'),
+                                 ({'provenance': {'commit': A, 'path': 'tests/args.py'}}, 'invalid Python argument role'),
+                                 ({'input_revision': 'HEAD'}, 'full commit revision'),
+                                 ({'command': ['python3', '-B', 'tests/args.py', 'label', 'true']}, 'unsupported Python argument role'),
+                                 ({'command': ['python3', 'tests/args.py']}, 'unsupported Python argument role'),
+                                 ({'command': ['python3', '-m', 'unittest', 'tests/args.py']}, 'unsupported Python argument role'),
+                                 ({'source_blob': '0' * 40}, 'unreviewed Python argument role'),
+                                 ({'provenance': dict(args_role['provenance'], commit='0' * 40)}, 'unreviewed Python argument role'),
+                                 ({'provenance': dict(args_role['provenance'], path='tests/args_sub.py')}, 'unreviewed Python argument role'),
+                                 ({'provenance': dict(args_role['provenance'], commit=later.ref)}, 'introducing provenance'),
+                                 ({'entry_line': 2}, 'top-level entry'), ({'entry_line': True}, 'top-level entry'),
+                                 ({'interface': dict(args_interface, argv_lines=[3])}, 'interface mismatch'),
+                                 ({'interface': dict(args_interface, positionals=[[2, 'label']])}, 'interface mismatch')):
+                rejected(first, text, standalone=[dict(args_role, **change)])
+            rejected(first, 'unverifiable historical runner demonstration', standalone=[dict(args_role, input_revision='0' * 40)])
+            # The configured CLI, module CLI and unittest guards are unchanged and refuse the role.
+            for path, line in (('tests/prog_test.py', 4), ('tests/prog_cli.py', 5)):
+                rejected(first, 'matches a configured CLI or unittest form', standalone=[py_role(path, line, {})])
+            # A default program or an unaudited argv form has no argument interface.
+            for path, line in (('tests/prog.py', 4), ('tests/args_alias.py', 2), ('tests/args_rebind.py', 3)):
+                rejected(first, 'audited argument interface', standalone=[py_role(path, line, {})])
+            # No promotion beside another role for the same path and revision.
+            rejected(first, 'conflicting standalone', standalone=[args_role, dict(program, path='tests/args.py', source_blob=blob(first, 'tests/args.py'),
+                     command=['python3', '-B', 'tests/args.py'], entry_line=3)])
+            rejected(first, 'conflicting standalone', standalone=[dict(program, path='tests/args.py', source_blob=blob(first, 'tests/args.py'),
+                     command=['python3', '-B', 'tests/args.py'], entry_line=3), args_role])
+            REVIEWED_PYTHON_ARGS = frozenset()
+            rejected(first, 'unreviewed Python argument role', standalone=[args_role])
+        finally: REVIEWED_PYTHON_ARGS = reviewed_args
+        # A changed source drops the root at a later revision.
+        args_edited = commit({'tests/args.py': files['tests/args.py'] + '# changed\n'}, 'changed argument program')
+        REVIEWED_PYTHON_ARGS = reviewed_args | {('tests/args.py', blob(first, 'tests/args.py'), A)}
+        try:
+            model, rows = run(args_edited, standalone=[args_role])
+            assert 'py-args:tests/args.py' not in model['entry_points'] and rows['tests/args.py']['class'] != 'keep'
+            rejected(args_edited, 'source mismatch', standalone=[dict(args_role, input_revision=args_edited.ref)])
+        finally: REVIEWED_PYTHON_ARGS = reviewed_args
 
         # (4) H979 persisted entered-module claims.
         assert run(first)[1]['tests/helper.py']['class'] == 'keep'
