@@ -555,6 +555,9 @@ def reviewed_module_collector(repo, pin, current):
     reviewed = {
         '42027e7c42dac3912c1f8ef468a6d99bddb8075172c545b6a587692b039cff32':
             'e6d215dff997377f70e17ce50d04b8eb12284b16',
+        # H1007/H1010: collector before x1l's H1001 change; persisted claims pin it.
+        '74a8ac05edadf4a4a1cf901134a8c23b24a844284ee8fe2a5f4e6fba274d251c':
+            'd76458a00eef321c6f34cc5f7f76e0dd02ff31b9',
     }
     if not isinstance(pin, str) or pin not in reviewed: return False
     try: source = git(repo.root, 'show', reviewed[pin] + ':scripts/check-tests-used-trace.py')
@@ -2105,7 +2108,8 @@ def module_entry_schema_controls():
         rows={r['path']:r for r in inventory(repo,catalog)['records']}
         assert rows[target]['class']=='keep' and rows['tests/data.txt']['class'] is None
         assert all(e['kind']=='executes' for e in rows[target]['runner_chain']['edges'])
-        mutations=[('collector_sha256','42027e7c42dac3912c1f8ef468a6d99bddb8075172c545b6a587692b039cff32'),('collector_sha256','0'*64),('module_code_sha256','0'*64),('target_blob','0'*40),
+        mutations=[('collector_sha256','42027e7c42dac3912c1f8ef468a6d99bddb8075172c545b6a587692b039cff32'),
+                   ('collector_sha256','74a8ac05edadf4a4a1cf901134a8c23b24a844284ee8fe2a5f4e6fba274d251c'),('collector_sha256','0'*64),('module_code_sha256','0'*64),('target_blob','0'*40),
                    ('python',[0,0,0]),('module_frame_line',True),('operation','validated Python read of measured bytes'),('runner','nonpassing:'+runner)]
         for key,value in mutations:
             invalid=copy.deepcopy(catalog);invalid['module_entries'][0][key]=value
