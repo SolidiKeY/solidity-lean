@@ -1,0 +1,2 @@
+| `Goals/PanicRun.lean` | `panicRunOutcomes`, proved in the module by `Correctness.Panic.run_outcomes` from the existing runner lemmas: the outcome contract of the panic-carrying runner `Panic.Run.program` / `Run.stmt` (sequencing, blocks, loops, internal calls, self-catch, assertion, revert and catch data, the local V1 projections); a component of `runCarriesPanicCodes`. |
+| `Goals/PanicProvenance.lean` | `panicCodeProvenance`, open: every intrinsic halt of `Panic.Run.program` / `Run.stmt` carries `siteCode origin.site`; a component of `runCarriesPanicCodes`. |
