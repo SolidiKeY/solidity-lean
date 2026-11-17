@@ -1,6 +1,7 @@
 import Solidity.Calculus.ArrayProperty
 import Solidity.Calculus.QuantExpand
 import Solidity.Calculus.DependentReduction
+import Solidity.Calculus.LeafTotality
 
 /-!
 # Leaves with Presburger quantifiers, decided (M7, step 4)
@@ -72,13 +73,8 @@ theorem Inputs.observe_setAll (es : List EnvKey) (ps : List Parameter) (rs : Lis
       Inputs.observe_setAll es ps rs g ν f qs fun q' hq' => h q' (List.mem_cons_of_mem _ hq')]
 
 theorem Inputs.types_length' (ps : List Parameter) (rs : List (Ref C)) :
-    ∀ es : List EnvKey, (Inputs.types es ps rs).length = es.length + (ps.length + rs.length)
-  | [] => by
-    simp only [Inputs.types, Parameters.types, Layout.types, List.length_append, List.length_map,
-      List.length_nil, Nat.zero_add]
-  | _ :: es => by
-    simp only [Inputs.types, List.length_cons, Inputs.types_length' ps rs es]
-    omega
+    ∀ es : List EnvKey, (Inputs.types es ps rs).length = es.length + (ps.length + rs.length) :=
+  Solidity.Decide.Inputs.length_types ps rs
 
 theorem Inputs.codes_param (es : List EnvKey) (ps : List Parameter) (rs : List (Ref C))
     (g : State C []) (ν : AEnv) (q : Parameter) (h : q ∈ ps) :

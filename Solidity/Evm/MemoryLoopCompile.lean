@@ -135,12 +135,6 @@ theorem source_cons_halt {Γ Δ Ξ : Ctx} {σ : State C Γ} {s : Stmt C Γ Δ}
   simp only [TRun.seq, Solidity.Stmt.run] at h ⊢
   rw [h]
 
-private theorem target_append_fault {head tail : List Instr} {m : Machine}
-    (h : run head m = .fault) : run (head ++ tail) m = .fault := by
-  simp only [run] at h ⊢
-  rw [exec_append, h]
-  rfl
-
 /-- Checked sequence simulation with source-prefix capacity and exact cost. -/
 theorem ProgCert.correct {b L frame Γ Δ F G P code}
     (hp : ProgCert (C := C) b (Γ := Γ) (Δ := Δ) F G P code)
@@ -170,7 +164,7 @@ theorem ProgCert.correct {b L frame Γ Δ F G P code}
       · exact .inr (.inr ⟨by rw [Solidity.Prog.run_cons_ok ho, ho']; rfl,
           by rw [run_append_ok ht]; exact ht'⟩)
     · exact .inr (.inl ⟨source_cons_halt ho, run_append_revert ht⟩)
-    · exact .inr (.inr ⟨source_cons_halt ho, target_append_fault ht⟩)
+    · exact .inr (.inr ⟨source_cons_halt ho, run_append_fault ht⟩)
 
 structure CompiledStmt (b : Nat) {Γ Δ : Ctx} (F : Frag Γ) (s : Stmt C Γ Δ) where
   frag : Frag Δ

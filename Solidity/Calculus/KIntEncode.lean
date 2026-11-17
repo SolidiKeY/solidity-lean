@@ -1,6 +1,7 @@
 import Solidity.Calculus.KIntBinder
 import Solidity.Calculus.MemHoist
 import Solidity.Calculus.KIntTwoAnchors
+import Solidity.Calculus.RunFrameOwn
 
 /-!
 # Binders of KeY's `int` read over two words (M7, features 30 and 31)
@@ -575,12 +576,8 @@ end Symbols
 /-! ### Terms -/
 
 /-- Two positions of one type at one depth are one. -/
-theorem Idx.eq_of_toNat_eq {t : LTy} : {Γ : Ctx} → (i j : Idx Γ t) → i.toNat = j.toNat → i = j
-  | _, .here, .here, _ => rfl
-  | _, .here, .there j, h => absurd h (by simp only [Idx.toNat]; omega)
-  | _, .there i, .here, h => absurd h (by simp only [Idx.toNat]; omega)
-  | _, .there i, .there j, h => by
-    rw [Idx.eq_of_toNat_eq i j (by simpa only [Idx.toNat, Nat.add_right_cancel_iff] using h)]
+theorem Idx.eq_of_toNat_eq {t : LTy} : {Γ : Ctx} → (i j : Idx Γ t) → i.toNat = j.toNat → i = j :=
+  Solidity.Idx.eq_of_toNat
 
 /-- A local of another type than `zi`'s is not set by setting `zi`. -/
 theorem TEnv.get_setLocal_ne {H : HTy} {Γ : Ctx} {t : LTy} (zi : Idx Γ .kint) (i : Idx Γ t)

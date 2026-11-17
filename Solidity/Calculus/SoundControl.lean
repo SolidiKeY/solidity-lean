@@ -167,9 +167,6 @@ theorem LocsV.set_getV {t : LTy} (i : Idx Γ t) : σ.locV.set i (σ.getV i) = σ
     exact LocsV.set_same _ _ _
   · exact LocsV.set_ne _ i j h _
 
-/-- `v := t` sets `v` to what `t` reads. -/
-theorem Rhs.eval_val {p : PrimTy} (t : Tm C Γ (.val p)) : Rhs.eval σ (.val t) = t.eval σ := rfl
-
 /-- `c ? t : e` read where `c` is `bv`: `true ? 1 : x` is `1`. -/
 theorem Tm.eval_ite {p : PrimTy} (c : Tm C Γ (.val .bool)) (t e : Tm C Γ (.val p)) {bv : Bool}
     (hc : c.eval σ = some bv) :

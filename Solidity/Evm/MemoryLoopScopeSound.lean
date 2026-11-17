@@ -39,12 +39,6 @@ private theorem base_sound {b L frame Γ Δ F G s code}
   · exact .inr (.inr ⟨by simpa only [run_singleton] using ho,
       by simpa only [List.append_nil] using ht⟩)
 
-private theorem target_append_fault {head tail : List Instr} {m : Machine}
-    (h : run head m = .fault) : run (head ++ tail) m = .fault := by
-  simp only [run] at h ⊢
-  rw [exec_append, h]
-  rfl
-
 private theorem nil_sound {b L frame Γ} (F : Frag Γ) :
     ProgSound (ProgCert.nil (C := C) (b := b) F) L frame := by
   intro σ base m hr cap room
@@ -75,7 +69,7 @@ private theorem cons_sound {b L frame Γ Δ Ξ F G K s P head tail}
     · exact .inr (.inr ⟨by rw [Prog.run_cons_ok ho, ho']; rfl,
         by rw [run_append_ok ht]; exact ht'⟩)
   · exact .inr (.inl ⟨Loops.source_cons_halt ho, run_append_revert ht⟩)
-  · exact .inr (.inr ⟨Loops.source_cons_halt ho, target_append_fault ht⟩)
+  · exact .inr (.inr ⟨Loops.source_cons_halt ho, run_append_fault ht⟩)
 
 private theorem block_sound {b L frame Γ Δ F G body code}
     (hp : ProgCert (C := C) b (Γ := Γ) (Δ := Δ) F G body code)
@@ -155,7 +149,7 @@ private theorem ite_sound {b L frame Γ Δ Ξ F G K c thn els cond left right}
         change (thn.run σ).map _ = _
         rw [ho]
         rfl
-      · refine .inr (.inr ⟨?_, target_append_fault htgt⟩)
+      · refine .inr (.inr ⟨?_, run_append_fault htgt⟩)
         change (thn.run σ).map _ = _
         rw [ho]
         rfl

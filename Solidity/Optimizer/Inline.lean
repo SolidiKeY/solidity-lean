@@ -1,5 +1,6 @@
 import Solidity.Optimizer.StmtFold
 import Solidity.Semantics.RunWk
+import Solidity.Optimizer.UnusedVar
 
 /-!
 # O03 inlining of internal function calls
@@ -202,11 +203,6 @@ theorem bindArgs_runC {Γ Δ : Ctx} (σ : State C Γ) : {ps : Ctx} → (as : Arg
 
 /-! ## The inlined call -/
 
-private theorem drop_trans' {H : HTy} {Γ Δ : Ctx} (a : Ext Γ Δ) : {Ε : Ctx} → (b : Ext Δ Ε) →
-    (e : TEnv C H Ε) → TEnv.drop (a.trans b) e = TEnv.drop a (TEnv.drop b e)
-  | _, .refl, _ => rfl
-  | _, .push b, e => drop_trans' a b e.2
-
 /-- A void call with value arguments, as a block of the caller. -/
 def inlineBlock {Γ ps Γf : Ctx} (args : Args C Γ ps) (body : Prog C ps Γf) : Stmt C Γ Γ :=
   .block (bindArgs args (body.wk (thinTop Γ ps)).2.2)
@@ -260,7 +256,7 @@ theorem inlineBlock_runC {Γ ps Γf : Ctx} (f : Name) (args : Args C Γ ps)
             TEnv.off_wk]
         have e1 : State.drop ((Ext.append Γ ps).trans Pw.ext) b.st =
             State.drop (Ext.append Γ ps) (State.drop Pw.ext b.st) := by
-          simp only [State.drop, State.withEnv, drop_trans']
+          simp only [State.drop, State.withEnv, drop_trans]
         show Except.ok (⟨State.drop ((Ext.append Γ ps).trans Pw.ext) b.st, _⟩ : Out C σ.H Γ) =
           Except.ok ⟨o.st.withEnv (TEnv.wk o.ext Γ σ.env), _⟩
         simp only [Except.ok.injEq, Out.mk.injEq]

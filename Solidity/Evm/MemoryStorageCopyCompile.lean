@@ -719,13 +719,6 @@ theorem ProgFrag.pushes_zero {b : Nat} {Γ Δ : Ctx} {F : Frag Γ} {G : Frag Δ}
     rw [ihs, ihp]
   all_goals rfl
 
-private theorem run_cons_revert {Γ Δ Ξ : Ctx} {σ : State C Γ}
-    {s : Stmt C Γ Δ} {P : Prog C Δ Ξ} (h : s.run σ = .error .revert) :
-    (Prog.cons s P).run σ = .error .revert := by
-  show TRun.seq s.runR P.runR σ = _
-  simp only [TRun.seq, Solidity.Stmt.run] at h ⊢
-  rw [h]
-
 private def StmtSound (L b frame : Nat) {Γ Δ : Ctx} (F : Frag Γ) (G : Frag Δ)
     (s : Stmt C Γ Δ) (code : List Instr) : Prop :=
   ∀ {σ : State C Γ} {base : Nat → Fin W} {m : Machine}, StateRepr L b frame F σ base m →

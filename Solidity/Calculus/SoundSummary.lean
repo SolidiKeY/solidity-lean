@@ -1,6 +1,7 @@
 import Solidity.Calculus.SoundArms
 import Solidity.Calculus.Graft
 import Solidity.Calculus.CallSummary
+import Solidity.Calculus.LeafShare
 
 /-!
 # A call's summary is its run (`internalCallSummary`)
@@ -190,28 +191,6 @@ theorem Tm.eval_substE_val {E : SEnv C Γ₀ Δ} {τ : State C Δ} (hg : σ₀.g
 
 theorem Op1.eval_none (g : State C []) {a s : Srt} (o : Op1 C a s) : o.eval g none = none := by
   cases o <;> rfl
-
-theorem BinOp.shortT_of_lazyB {op : BinOp} (h : op.lazyB = false) {p : PrimTy} (a : p.Denote) :
-    op.shortT a = none := by
-  cases op <;> first | (cases p <;> rfl) | (simp only [BinOp.lazyB, Bool.true_eq_false] at h)
-
-theorem Op2.eval_none_of_strictB (g : State C []) {a b s : Srt} {o : Op2 C a b s}
-    (ho : o.strictB = true) (x : Option (a.Den C g.H)) (y : Option (b.Den C g.H))
-    (h : x = none ∨ y = none) : o.eval g x y = none := by
-  cases o with
-  | binop op hop =>
-    have hl : op.lazyB = false := by simpa only [Op2.strictB, Bool.not_eq_true'] using ho
-    show x.bind (fun a => binopT op hop a y) = none
-    rcases h with rfl | rfl
-    · rfl
-    · cases x with
-      | none => rfl
-      | some a =>
-        show binopT op hop a none = none
-        unfold binopT
-        rw [BinOp.shortT_of_lazyB hl]
-        rfl
-  | _ => exact absurd ho Bool.false_ne_true
 
 /-- **A term that reads a local wherever it is read**: where the term, read
 through a frame, returns, so does the local's term. -/
@@ -965,7 +944,7 @@ theorem Args.sym_PF {E : SEnv C Γ₀ Δ} (hE : E.PF) : {ps : Ctx} → (args : A
   | _, .snocStorage .., _, h | _, .snocMemory .., _, h => nomatch h
 
 theorem Rhs.eval_val_sum {Γ : Ctx} (σ : State C Γ) {p : PrimTy} (t : Tm C Γ (.val p)) :
-    Rhs.eval σ (.val t) = t.eval σ := rfl
+    Rhs.eval σ (.val t) = t.eval σ := Solidity.Rhs.eval_val σ t
 
 /-- **The summary's update agrees with the call's run**: it fails exactly
 where the call reverts, and leaves its target the value the call does. -/

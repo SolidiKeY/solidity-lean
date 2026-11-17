@@ -237,19 +237,6 @@ end Load
 
 /-! ## Loads under local changes -/
 
-private theorem get_set_ne {H : HTy} {Γ : Ctx} {t u : LTy} : (i : Idx Γ t) → (j : Idx Γ u) →
-    (v : t.TDenote C H) → (e : TEnv C H Γ) → i.toNat ≠ j.toNat →
-      TEnv.get j (TEnv.set i v e) = TEnv.get j e
-  | .here, .here, _, _, h => absurd rfl h
-  | .here, .there _, _, _, _ => rfl
-  | .there _, .here, _, _, _ => rfl
-  | .there i, .there j, v, e, h => get_set_ne i j v e.2 fun h' => h (congrArg (· + 1) h')
-
-private theorem get_set {H : HTy} {Γ : Ctx} {t : LTy} : (i : Idx Γ t) → (v : t.TDenote C H) →
-    (e : TEnv C H Γ) → TEnv.get i (TEnv.set i v e) = v
-  | .here, _, _ => rfl
-  | .there i, v, e => get_set i v e.2
-
 /-- A memory local's object, without the state-indexed matcher. -/
 theorem mvalT_var {R : RefTy} (σ : State C Γ) (i : Idx Γ (.mem R))
     (hm : (Ty.ref R).mapFree = true) :

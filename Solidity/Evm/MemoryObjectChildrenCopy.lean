@@ -38,7 +38,7 @@ theorem childrenCopy_ids {H : HTy} (hp : Heap H) (E : Ty)
     rw [ih, List.range'_succ]
     simp only [List.length_append, List.length_singleton]
 
-private theorem loopTurn_true (rc rb : Machine → Out) (m m' : Machine)
+theorem loopTurn_true (rc rb : Machine → Out) (m m' : Machine)
     (hc : rc m = .ok (m.push w[1]) 0) (hb : rb m = .ok m' 0) :
     loopTurn rc rb m = .inl m' := by
   rw [loopTurn, hc]

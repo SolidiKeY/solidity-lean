@@ -1,4 +1,5 @@
 import Solidity.Calculus.SoundKit
+import Solidity.Theory.Typed.Leaves
 
 /-!
 # Soundness of the update arms
@@ -206,7 +207,7 @@ theorem TRes.ofOpt_none_bind {α β : Type} (f : α → TRes β) :
 
 /-- A storage write of a word is its save. -/
 theorem Storage.write_prim {p : PrimTy} (st : Storage C) (r : SRef C (.prim p)) (x : p.Denote) :
-    st.write r (.prim x) = st.save r (.prim x) := rfl
+    st.write r (.prim x) = st.save r (.prim x) := Solidity.Storage.write_word st r x
 
 end Updates
 

@@ -142,13 +142,6 @@ private def ProgSound (L b frame : Nat) {Γ Δ : Ctx} (F : Frag Γ) (G : Frag Δ
   ∀ {σ : State C Γ} {base : Nat → Fin W} {m : Machine}, FixedStateRepr L b frame F σ base m →
     copyBoundProg P σ ≤ L → FixedResult L b frame G σ base m (P.run σ) (run code m)
 
-private theorem run_cons_revert {Γ Δ Ξ : Ctx} {σ : State C Γ}
-    {s : Stmt C Γ Δ} {P : Prog C Δ Ξ} (h : s.run σ = .error .revert) :
-    (Prog.cons s P).run σ = .error .revert := by
-  show TRun.seq s.runR P.runR σ = _
-  simp only [TRun.seq, Solidity.Stmt.run] at h ⊢
-  rw [h]
-
 private theorem cons_sound {L b frame : Nat} {Γ Δ Ξ : Ctx} {F : Frag Γ} {G : Frag Δ} {K : Frag Ξ}
     {s : Stmt C Γ Δ} {P : Prog C Δ Ξ} {head tail : List Instr}
     (ihs : StmtSound L b frame F G s head) (ihp : ProgSound L b frame G K P tail) :

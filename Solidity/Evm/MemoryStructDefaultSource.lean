@@ -1,4 +1,5 @@
 import Solidity.Evm.MemoryStructDefaultPlan
+import Solidity.Evm.MemoryCapture
 
 /-! # Scoped declarations using certified finite default construction -/
 namespace Solidity.Evm.Memory
@@ -31,14 +32,6 @@ theorem DefaultPlan.declare_correct {C : Contract} {R : RefTy} (plan : DefaultPl
       have he : c = cursor := Word.val.inj (hc.arrays.free.cell.symm.trans hal.arrays.free.cell)
       subst c
       exact halloc.localWrite (b + Γ.length) (by omega) (by omega) (.val (base' g.val.id))
-
-/-- The representation does not constrain the evaluation stack. -/
-theorem StateRepr.stack {C : Contract} {L b frame : Nat} {Γ : Ctx} {F : Frag Γ}
-    {σ : State C Γ} {base : Nat → Fin W} {m : Machine}
-    (h : StateRepr L b frame F σ base m) (st : List Word) :
-    StateRepr L b frame F σ base {m with stack := st} :=
-  ⟨h.core.stack st, ⟨fun r => (h.heap.arrays r).stack st, h.heap.above, h.heap.separated⟩,
-    h.pointers, h.locals, h.structs.stack st, h.separated, RefFieldsRepr.mem_eq h.refs rfl⟩
 
 /-- Rebinding a whole local to its finite fresh default keeps old aliases intact. -/
 theorem DefaultPlan.deleteLocal_correct {C : Contract} {R : RefTy} (plan : DefaultPlan R)

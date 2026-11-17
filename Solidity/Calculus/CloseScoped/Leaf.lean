@@ -3,6 +3,7 @@ import Solidity.Calculus.SeqRewrite
 import Solidity.Theory.Typed.Mem
 import Solidity.Calculus.EvalEqs
 import Solidity.Calculus.TermAgree
+import Solidity.Calculus.RunFrameOwn
 
 /-!
 # Closing a scoped leaf: the lemmas and the set
@@ -254,7 +255,6 @@ section Updates
 
 variable {Γ Δ : Ctx} (σ₀ : State C Γ)
 
-theorem rhs_val {p : PrimTy} (t : Tm C Γ (.val p)) : (Rhs.val t).eval σ₀ = t.eval σ₀ := rfl
 theorem rhs_path {R : RefTy} (p : Tm C Γ (.path (.ref R))) :
     (Rhs.path p).eval σ₀ = (p.eval σ₀).map some := by
   show (p.eval σ₀).bind _ = _
@@ -447,7 +447,6 @@ theorem drop_apply {Δ' : Ctx} {t : LTy} (h : Ext Δ' Δ) (ℓ : LocsV C Δ) (i 
     ℓ.drop h t i = ℓ t (i.ext h) := rfl
 theorem thin_apply {Δ' : Ctx} {t : LTy} (h : Thin Δ' Δ) (ℓ : LocsV C Δ) (i : Idx Δ' t) :
     ℓ.thin h t i = ℓ t (i.wk h) := rfl
-theorem ext_refl {t : LTy} (i : Idx Δ t) : i.ext .refl = i := rfl
 theorem ext_push {Δ' : Ctx} {t u : LTy} (i : Idx Δ' t) (h : Ext Δ' Δ) :
     i.ext (Ext.push (t := u) h) = .there (i.ext h) := rfl
 theorem wk_refl {t : LTy} (i : Idx Δ t) : i.wk .refl = i := rfl
@@ -1188,9 +1187,9 @@ attribute [close_rw_s]
   CloseS.withBalance_selfBalance CloseS.withBalance_tx CloseS.globG_val
   CloseS.push_here CloseS.push_there CloseS.set_here_here CloseS.set_here_there
   CloseS.set_there_here CloseS.set_there_there CloseS.drop_apply CloseS.thin_apply
-  CloseS.ext_refl CloseS.ext_push CloseS.wk_refl CloseS.wk_keep_here
+  Idx.ext_refl_eq CloseS.ext_push CloseS.wk_refl CloseS.wk_keep_here
   CloseS.wk_keep_there CloseS.wk_drop
-  CloseS.rhs_val CloseS.rhs_path CloseS.rhs_unset CloseS.rhs_mref CloseS.rhs_store
+  Rhs.eval_val CloseS.rhs_path CloseS.rhs_unset CloseS.rhs_mref CloseS.rhs_store
   CloseS.rhs_saveNet CloseS.rhs_saveNetMt CloseS.rhs_zint IntOp.apply
   -- terms
   CloseS.eval_pvV CloseS.eval_pvP CloseS.eval_pvS CloseS.eval_pvI CloseS.eval_netOf
