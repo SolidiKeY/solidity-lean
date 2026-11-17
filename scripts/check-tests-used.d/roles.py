@@ -1,9 +1,132 @@
-"""Reviewed Lean gate source roles: H999 check sources and H1015 fixture sources.
+"""Reviewed source roles: H999 Lean check sources, H1015 Lean fixture sources
+and the H1025 widening of the H997 non-Python entry review set.
 
 Executed by fragments.py in its own namespace (helpers, review tables and the
 self-test rebinding of REVIEWED_* names are shared). Classifier path: excluded
 from candidate discovery like the rest of scripts/check-tests-used*."""
 
+
+# H1025 (gh#1384, QX1E-ROLESET, Option A): x1e-classify-rest's 62 shell/Node
+# programs that match the H997 interface, reviewed case by case under the
+# unchanged H997 rules (nonpython_entry_root); same (path, blob, introducing
+# commit) form. 61 pass. Refused, left unresolved: tests/fullscope-20261104/
+# vo1/mcp-check.sh (removed from the tree, so no current blob to bind). For
+# sol-expression-uniqueness/compiler-controls.mjs the blob was introduced twice
+# (1058aa95df, then the squash 9e74823267): the earlier one is recorded and
+# the other is refused as unreviewed. Membership is the only change: no
+# execution, pass, read, helper, child, output, proof or runtime credit.
+REVIEWED_NONPY_ENTRIES_H1025 = _review_table('''
+@06f1aece06fb62e9654698a51e301c493610aa1f
+T:yul-views/aggregate-dynamic-run.mjs ee89db0d218a203fa97a824d7177ce52e5d770e3
+@0916c0099177fb89cfcac87f2c8e497a29f2180a
+T:yul-views/abi-input-run.mjs 4b22c8071c7302a5446457b2fd815830d75d69f6
+@0bdc978f23f06c70ea776ba2304245fcfe877bdc
+T:yul-views/residual-memory-run.mjs 54010edc6ca89b449edb6b2f0aa68c20e2fa2b1a
+@1058aa95dfe0fccdbcd468fe8b52555168a730e9
+T:sol-expression-uniqueness/compiler-controls.mjs 195438b74253dc632524ed0cc0a1348d54a30968
+T:sol-expression-uniqueness/runtime-mcp.sh 33e47c42458f23c12080c4d66ef8f2a935686a70
+@1b133944b611b777a83f84beb06e1b22d81f613f
+T:yul-views/signed-dynamic-run.mjs c003d203b16027472e71c55ce70d5f454c2a8de3
+@1b695516b853974ceb57be3a2ae82682c405fde5
+T:primitive-packets-1104/UnsignedMul/run.sh b4f27c0a8fd5d3cf2cf60a3e88f8de12eb17b54e
+@1e37a2256e277ef24b04284ad0de9f822feaca8c
+T:contract-world-certificates/replay-pipelines.mjs ebd450f4236a09675a247e2a0bae8d5b9581a718
+@1ef94159af54611d70b10e213d59ca31309b8428
+T:yul-views/owned-bool-dynamic-run.mjs 4afb8df7af20428f4c456061ff945148e2dd168e
+@278633cfeedcf831b3131c370b5c810b55ef8939
+T:yul-views/nested-mapping-run.mjs 2674898570297688e634bb2fde1fecc908aeffda
+@2ad8438ad86d88e29a46188dfd45aa909bbaa165
+T:yul-views/recursive-dynamic-run.mjs 0c216831b6d78e10d7de01167af753213376787c
+@2bb7bb20852e986f81a44aaaadfda104cac9c3f4
+T:yul-views/owned-bool-run.mjs 4cadb8c2f86c8dd9bbe8c3948f799440cc8e9f11
+@3dad6f089d7c218d9ff9b1418aeb57689d0afa14
+T:source-immutables/check-source.mjs 659d6cd4bf7d11f2ed36f0f44df5a0cf5f2a5b27
+T:source-immutables/probe.mjs 726646550589a4e82acc58c827833e058c85577e
+@3f920bba44c7c441ea4c329ca2c740b222537193
+T:yul-views/residual-mcopy-run.mjs b1d0527430d3c9887d18a0fa91327c5693a061cc
+@40337e715392c517a73f3bc1eefd85a036c2feb3
+T:yul-views/dynamic-storage-run.mjs ab8ff5d41b90db3cd6a9992d67c5c1a96ba25cbd
+@4131f468b7417ddf46c32d188d10ac6d85e03ef8
+T:fullscope-20261104/vt1/check-data.sh 3202285954d3b54c59db4db8f814d0d30234ed44
+T:fullscope-20261104/vt1/check-import.sh f19154f4bbaf658425c551490e9061f70e44ca63
+@43b668aa45967d09c385133ff3afbdf3c834c4b0
+T:sol-override-validation/compiler.mjs f4c64c57950ef2b52b2663c2ebeafcd6c75317df
+T:sol-override-validation/getter-pipelines/check.mjs 27000ad76c48c9c0c278edb5119fa40ca138380c
+@4704d9e7cfb8484e9eef4011cea5e01846b862fb
+T:yul-views/physical-reference.mjs 37d2270025ea6fd3c5819cc708b6a0608d5ffeb7
+@4d45820cc26824ca2ba1da8177be755655f820f5
+T:calldata-packets-1105/RawBool/run.sh 55360017e55cefeb16029be0097366c7a4169d5d
+T:calldata-packets-1105/RawBool/server.sh 7ab03f3d14d5b9bfbd601f0bcce7b03567d4d1b5
+@52ed583076b758e5c0640f10732d1cf5e8e8de1e
+T:fullscope-20261104/vt1/check-ir.sh e77e7c4f73af6e78a198368013743915e8b40afb
+@57afdc4c9647c92cebed547c05b80d69beddf125
+T:yul-views/scalar-dynamic-run.mjs 1b1f8a73ba3d0773c80db3643c99acfa3d1b3d3a
+@5817182ebbb3a42057211abb0689b3e762e821f6
+T:yul-views/root-sequence-run.mjs 016e337b66c0e916e460681d45c9474319061753
+@5f7fcdb942232c3805a15a404a6faf836a170bc1
+T:yul-views/mapping-transient-run.mjs 73d6aee6681fb36cf23b48239b0a7117a1fee24d
+@65359b4b0e79c0441c231eb9c84cb2cc33419f9f
+T:fullscope-20261104/vt1/check-dialect.sh 6dd326a113bc7b1350e78166942e742eafe7c30d
+T:fullscope-20261104/vt1/generate-fixtures.mjs f7e1127f75b828e7d23018e1a2599e046152becd
+@6d1cd27d58bb6d6c75511adf37fafb86c96a4b0c
+T:calldata-packets-1105/RawBool/PinFollowup/audit-pins.mjs ce8ab0ba15cb60740529e6b12281a20ba9273314
+T:calldata-packets-1105/RawBool/PinFollowup/run.sh 0e803749a863a0797ddacf341dd31ef7a548e755
+T:calldata-packets-1105/RawBool/PinFollowup/server.sh 919f053f7babb9bd9c09ac49a523af89776e4a47
+@6ea22a6e18d6bba57577a1e9e6c41d355538104b
+T:sol-expression-uniqueness/gate.sh 3c98a65a02f53475179bf79bea443c7553e1397e
+@759d34118b492d798447727e1af9631b68791ed7
+T:yul-views/frame-calldata-run.mjs 69cb25895b3cdf4da7d66f743aafeb4a41204f05
+@7787384b6f4be4a2402327de2b344baa4851a3f6
+T:yul-views/object-allocation-run.mjs 52ebd53ad9fd8b7b2a92d352134c669c25464f7a
+@781938cf63a9308e0e244d0d1dbd0b586dd3dafa
+T:v14-help/calldata-aggregates-probe.mjs 1ef1b4511f45a89a7f268f65d18b444b4a565ca4
+@7b0fc88517223bae9e98ddee11941af50834f691
+T:primitive-packets-1105/CheckedSub/run.sh 8e529c0bcc5ba9c28793683ad758b0ce0f7501c3
+@88bf2c0e533e87e020ae3535b6fcd67a185dbd75
+T:sol-qualified-units/h27-location-probe.mjs 7188abddec388e859f494418b2b9be71916c9e12
+T:sol-qualified-units/resolution-barrier-probe.mjs fefa276437365430438c29d5b7a7881d392355a6
+T:sol-qualified-units/solc-fixtures.mjs 3a4813473c605d262ebca054f874d8cde845106f
+@8cca58a669de87d58a05d5931c0b2144ff295df8
+T:storage-values/final-gates.sh 771946e2497017da7135f16614ba595889f086b9
+@93e97b28e61f1466eafeb6163baed9da1f9e8240
+T:backend-environment/vectors.mjs fe53605c002ad8edc73f883377ce04d6f777a3ee
+@94fc5bb6cf7c1f0c7c5d2d034df4d8c8a201f6ae
+T:sol-numeric-literals/run-fixtures.mjs b71ff94f50a6d3a23aba41434a2df2470b440e06
+@9b0b5b4cfa1b2bbe0e79b175ebe6c3b57cebabe2
+T:yul-views/nested-dynamic-run.mjs 57c3988954535d54768901541d28a093aab35364
+@a10e1609a00015e77bdda47e1be53be1f8c4ec21
+T:yul-views/retained-allocation-run.mjs 0591d8961cd80012bb7499ce6c2edca2a9bdd35a
+@b9dc71b38fa597d7b38a0ee4f2f32ce4c6dcf9ea
+T:yul-views/recursive-declaration-run.mjs c04e5d19fe5643fd08f35ad1dfc99332b1b59bed
+@bd475d424c4326521a40a6cb5a2d7d4a12b0563d
+T:sol-c3-exactness/check-fixtures.mjs ff083fc2f349a9613dfab35036e32309c5d76d58
+@bedad5225f2481e5821e7b1b30a487ed7d1bf2ae
+T:yul-views/primitive-dynamic-run.mjs 505ec55065a3a7aa254196a35c5a88d0c9139440
+@c1ff5dcb0913b287d03e62ec8ba64d9328124659
+T:yul-views/tuple-storage-run.mjs 1f534002f391064b7807a5449b70bc6b99e0e967
+@c360d104012547a94a6c55fa3575a9b3bef54d2f
+T:storage-values/check-local-layers.mjs adaa5296d1a08994996902a8e52e362ae16d6302
+@c4284f7201cc0b69fbb5c399985c86c34237c315
+T:yul-views/packed-dynamic-run.mjs eef4c99a065e5e9573bb02df31dd87b854597ee7
+@c5e92c6623c6308ea1936cb3f294d9a34a3ba7c5
+T:fullscope-20261104/vt1/check-resolution.sh 4c40b106a1610dc9c7e330c37f5cb4525bf9a83f
+T:fullscope-20261104/vt1/generate-object-data.mjs 61133720c0666849e45a4452f17431f9ad6b37e1
+@d0dc0b421c46e103b32b851e42be8d451ff285ad
+T:yul-views/declaration-packing-run.mjs 4f447384e2999763af5e94db74beefe737c19d84
+@e26852e8d26663d1faeda40f39898dd1534c1596
+T:fullscope-20261104/vt1/ImportFollowup/run.sh ef289e5e21f3f2c8495987ed4f9a951fd2d5261b
+T:fullscope-20261104/vt1/ImportFollowup/server.sh 9326c2dfa644fd96c37d25c8f205d8f850c523fc
+@eeaf2c03028196200fcfa464cb081579e1542e47
+T:yul-views/retained-storage-run.mjs 52f24436bf6e614dfc30293a65b6b4381954c420
+@f44d7c523159b07e0b0b4975ec9c035de94737cc
+T:yul-views/origin-constants.mjs c26640b7807d3595183aa2dfabc3b3ac7c5573fd
+T:yul-views/origin-sequence-run.mjs e64c39bda9f1a74f4792de38103e4159ba8996fe
+@fb2382d2759199e774b5a175d7a804d3d45d5a86
+T:yul-views/inherited-sequence-run.mjs adeb09dc75c286b40aff496db08e67b20f597ceb
+@fd67008ed20590639e04345fbb12a9dfa645a95f
+T:backend-environment/ownership.mjs c7e75bcd68c0b2347212973ffdfeba0c285362f9
+''')
+REVIEWED_NONPY_ENTRIES = REVIEWED_NONPY_ENTRIES | REVIEWED_NONPY_ENTRIES_H1025
 
 LEAN_CHECK_KIND = 'lean-check-source-role'
 LEAN_CHECK_PREFIX = 'lean-check:'
@@ -357,3 +480,39 @@ def lean_fixture_controls(env):
         REVIEWED_LEAN_FIXTURES = frozenset()
         rejected(lf, 'unreviewed Lean fixture role', standalone=[role])
     finally: REVIEWED_LEAN_FIXTURES, REVIEWED_LEAN_FIXTURE_INVOCATIONS, REVIEWED_NONPY_ENTRIES = saved
+
+
+def nonpy_roleset_controls(env):
+    """H1025 controls, run by the H997 self-test section (7) with its helpers:
+    the reviewed widening, its T: table form and negative controls."""
+    global REVIEWED_NONPY_ENTRIES
+    run, rejected, blob, first, A, sh_role = (env[k] for k in ('run', 'rejected', 'blob', 'first', 'A', 'sh_role'))
+    rows = REVIEWED_NONPY_ENTRIES_H1025; paths = {p for p, _, _ in rows}
+    # 61 rows, one per path, disjoint from H997 and outside x1e-classify-runtime-upstream's directories.
+    assert len(rows) == len(paths) == 61 and rows <= REVIEWED_NONPY_ENTRIES and len(REVIEWED_NONPY_ENTRIES) == 176
+    assert not paths & {p for p, _, _ in REVIEWED_NONPY_ENTRIES - rows}
+    assert all(p.startswith('tests/') and not p.startswith(('tests/directruntime-20261104/', 'tests/upstream/'))
+               and posixpath.splitext(p)[1] in NONPY_SHEBANGS and '.test.' not in posixpath.basename(p) for p in paths)
+    for row in (('tests/backend-environment/ownership.mjs', 'c7e75bcd68c0b2347212973ffdfeba0c285362f9', 'fd67008ed20590639e04345fbb12a9dfa645a95f'),
+                ('tests/calldata-packets-1105/RawBool/run.sh', '55360017e55cefeb16029be0097366c7a4169d5d', '4d45820cc26824ca2ba1da8177be755655f820f5'),
+                ('tests/fullscope-20261104/vt1/check-data.sh', '3202285954d3b54c59db4db8f814d0d30234ed44', '4131f468b7417ddf46c32d188d10ac6d85e03ef8')):
+        assert row in rows, row
+    # Refused rows stay out: the removed program and the later cherry-pick provenance.
+    assert 'tests/fullscope-20261104/vo1/mcp-check.sh' not in {p for p, _, _ in REVIEWED_NONPY_ENTRIES}
+    cc = 'tests/sol-expression-uniqueness/compiler-controls.mjs', '195438b74253dc632524ed0cc0a1348d54a30968'
+    assert [c for p, b, c in REVIEWED_NONPY_ENTRIES if (p, b) == cc] == ['1058aa95dfe0fccdbcd468fe8b52555168a730e9']
+    assert not any(c == '9e74823267a4b646cc0fb8acbb14cedb24366d75' for _, _, c in REVIEWED_NONPY_ENTRIES)
+    # The T: form expands to tests/; an unbound row or unknown abbreviation is refused.
+    b = blob(first, 'tests/drive.sh'); t = _review_table('@' + A + '\nT:drive.sh ' + b + '\n')
+    assert t == {('tests/drive.sh', b, A)}
+    for text in ('T:drive.sh ' + b, '@' + A + '\nX:drive.sh ' + b, '@' + A + '\nT:drive.sh'):
+        try: _review_table(text); raise AssertionError(text)
+        except (ValueError, KeyError): pass
+    # The widened set admits no other program; a T: row admits it exactly as an H997 row does.
+    rejected(first, 'unreviewed non-Python entry role', standalone=[sh_role])
+    saved = REVIEWED_NONPY_ENTRIES; REVIEWED_NONPY_ENTRIES = saved | t
+    try:
+        model, rs = run(first, standalone=[sh_role])
+        assert rs['tests/drive.sh']['class'] == 'keep' and model['entry_points']['nonpy-entry:tests/drive.sh']['source_only']
+        rejected(first, 'unreviewed non-Python entry role', standalone=[dict(sh_role, provenance=dict(sh_role['provenance'], commit='0' * 40))])
+    finally: REVIEWED_NONPY_ENTRIES = saved
