@@ -1,12 +1,13 @@
 import Solidity.Correctness.Panic.Capture
 
 /-!
-# Capture linkage and guard order: checks
+# Capture linkage: checks
 
 An enum conversion of a compound operand `a + 1`: the elaborator's own
 output is the capture and the check of the captured local, and its run fails
 with code 0x21 for the operand's value, not for a separately supplied one.
-Then two-guard statements where the first failing guard decides the code.
+Likewise a narrowing capture, a capture whose operand halts, and the
+elaborated signed range condition. Each run has one check after its capture.
 -/
 
 namespace Solidity.Examples.Panic.Capture

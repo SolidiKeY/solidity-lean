@@ -1,24 +1,18 @@
 import Solidity.Syntax.Elab.Panic
 
 /-!
-# Capture linkage and guard order of source panics
+# Capture linkage of source panics
 
-Two local facts about the generated panic checks, each stated on existing
-public names only.
+A capture `p se = value;` evaluates its operand once; the local it declares
+then reads that same value, so a check of the local is a check of the
+operand's value. For `enumCapture` this ties the failed membership check to
+`Panic.Source.OriginV2` at the operand's own value, in the data-retaining
+mode (`panicStmt`) and in the legacy one (`.assert`); for `narrowCapture` it
+ties the failed range check to the narrow overflow of that value. The
+elaborated conditions and the producers' outputs are equations on existing
+public names.
 
-* **Capture linkage.** A capture `p se = value;` evaluates its operand once;
-  the local it declares then reads that same value, so a check of the local is
-  a check of the operand's value. For `enumCapture` this ties the failed
-  membership check to `Panic.Source.OriginV2` at the operand's own value, in
-  the data-retaining mode (`panicStmt`) and in the legacy one (`.assert`).
-* **Guard order.** In the statement list `Prog.withPanics` emits, the first
-  guard that reads `false` decides the panic code, and a guard that halts
-  before it decides the halt. The list equations give the emitted order of
-  every producer with more than one guard.
-
-Nothing here relates the emitted order to the order in which the unguarded
-statement reads its operands; that needs the statement of the module's last
-section, which is not proved.
+The order of several generated guards is not treated here.
 -/
 
 namespace Solidity.Correctness.Panic
