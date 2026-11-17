@@ -2486,6 +2486,7 @@ import Solidity.Counterexamples.DeleteFamilyGenericOverlap
 import Solidity.Counterexamples.DiamondTry
 import Solidity.Counterexamples.PreFixSortAnnotations
 import Solidity.Counterexamples.StaticRuntimeSort
+import Solidity.Docs.ProseCalibrated.Allowance
 import Solidity.Docs.ProseCalibrated.Classification
 import Solidity.ERC7201
 import Solidity.Eqns
