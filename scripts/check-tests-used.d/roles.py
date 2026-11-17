@@ -667,9 +667,12 @@ def python_import_statement(text, importer, line, helper, tree):
     H1004 form (3) adds one exact path form: the helper is in the importer's
     subdirectory D when the module body has exactly one statement
     `sys.path.insert(0, str(pathlib.Path(__file__).resolve().parent/'D'))`
-    (D a plain name), after a top-level plain `import pathlib` and before a
-    top-level import statement at `line`; sys, pathlib, str and __file__ are
-    never rebound. That statement is the only sys.path access allowed.
+    (D a plain name), after top-level plain `import pathlib` and `import sys`
+    and before a top-level import statement at `line`; sys, pathlib, str and
+    __file__ are never rebound (assignment, attribute store, argument,
+    definition, except or match capture, import alias or star import) and no
+    `M.py`, `M.*` or `M/` sits in the importer's own directory. That statement
+    is the only sys.path access allowed.
     """
     import keyword, sys as interpreter
     directory, name = posixpath.split(helper)
@@ -688,7 +691,10 @@ def python_import_statement(text, importer, line, helper, tree):
         inserts = [k for k, n in enumerate(parsed.body) if ast.dump(n) == template]
         if len(inserts) != 1: return None  # any other sys.path access is refused by the walk below
         at = inserts[0]
-        if not any(isinstance(n, ast.Import) and any(a.name == 'pathlib' and a.asname is None for a in n.names) for n in parsed.body[:at]): return None
+        for want in ('pathlib', 'sys'):
+            if not any(isinstance(n, ast.Import) and any(a.name == want and a.asname is None for a in n.names) for n in parsed.body[:at]): return None
+        stem = posixpath.join(home, module)
+        if any(q == stem + '.py' or q.startswith(stem + '/') or q.startswith(stem + '.') for q in tree): return None  # no script-directory candidate
         if not any(isinstance(n, (ast.Import, ast.ImportFrom)) and n.lineno == line for n in parsed.body[at + 1:]): return None
         fixed = {'sys', 'pathlib', 'str', '__file__'}
         for n in ast.walk(parsed):
@@ -696,7 +702,10 @@ def python_import_statement(text, importer, line, helper, tree):
                     or isinstance(n, (ast.FunctionDef, ast.AsyncFunctionDef, ast.ClassDef)) and n.name in fixed
                     or isinstance(n, (ast.Global, ast.Nonlocal)) and set(n.names) & fixed
                     or isinstance(n, ast.alias) and ((n.asname or '') in fixed or n.name in ('str', '__file__'))
-                    or isinstance(n, ast.ImportFrom) and any(a.name in fixed for a in n.names)): return None
+                    or isinstance(n, ast.ImportFrom) and any(a.name in fixed or a.name == '*' for a in n.names)
+                    or isinstance(n, ast.ExceptHandler) and n.name in fixed
+                    or isinstance(n, (ast.MatchAs, ast.MatchStar)) and n.name in fixed
+                    or isinstance(n, ast.Attribute) and not isinstance(n.ctx, ast.Load) and isinstance(n.value, ast.Name) and n.value.id in fixed): return None
         skip = {id(n) for n in ast.walk(parsed.body[at])}
     parents = {child: node for node in ast.walk(parsed) for child in ast.iter_child_nodes(node)}
     found = []
@@ -845,15 +854,18 @@ def python_import_controls(env):
     ins = "import pathlib,sys\nsys.path.insert(0,str(pathlib.Path(__file__).resolve().parent/'runtime'))\nfrom workers import lean_workers\n"
     assert python_import_statement(ins, R, 3, W, {R: 0, W: 0}) == ['lean_workers']
     for text, line in ((ins.replace("'runtime'", "'other'"), 3), (ins.replace('resolve().', ''), 3), (ins.replace('(0,', '(1,'), 3),
-                       (ins.replace('append' if False else 'insert(0,', 'append('), 3), (ins + 'sys.path.pop(0)\n', 3),
+                       (ins.replace('insert(0,', 'append('), 3), (ins + 'sys.path.pop(0)\n', 3),
                        (ins.replace('import pathlib,sys\n', 'import sys\nfrom pathlib import Path as pathlib\n'), 4),
-                       (ins.replace('import pathlib,sys\n', 'import sys\n') + 'import pathlib\n', 2), (ins + 'str = repr\n', 3),
+                       (ins.replace('import pathlib,sys\n', 'import sys\n') + 'import pathlib\n', 3), (ins + 'str = repr\n', 3),
+                       (ins.replace('import pathlib,sys\n', 'import pathlib\n'), 3), (ins + 'try:\n    pass\nexcept E as pathlib:\n    pass\n', 3),
+                       (ins + 'match 1:\n    case sys:\n        pass\n', 3), ('from x import *\n' + ins, 4), (ins + 'pathlib.Path = None\n', 3),
                        ('import pathlib,sys\nfrom workers import lean_workers\n' + ins.split('\n', 1)[1], 2),
                        (ins.replace('from workers', 'if 1:\n    from workers'), 4), (ins.replace("sys.path.insert(0,str(pathlib.Path(__file__).resolve().parent/'runtime'))", "if 1:\n    sys.path.insert(0,str(pathlib.Path(__file__).resolve().parent/'runtime'))"), 4),
                        (ins.replace('\nfrom', "\nsys.path.insert(0,str(pathlib.Path(__file__).resolve().parent/'runtime'))\nfrom"), 4),
                        (ins + 'def f(__file__): pass\n', 3), (ins.replace('import pathlib,sys', 'import pathlib,sys,importlib'), 3)):
         assert python_import_statement(text, R, line, W, {R: 0, W: 0}) is None, text
     assert python_import_statement(ins, R, 3, W, {R: 0, W: 0, 'tests/nv/runtime/workers/__init__.py': 0}) is None
+    assert python_import_statement(ins, R, 3, W, {R: 0, W: 0, 'tests/nv/workers.py': 0}) is None  # script-directory candidate
     assert python_import_statement(ins, 'tests/run.py', 3, W, {W: 0}) is None and python_import_statement(ins, R, 3, 'tests/nv/runtime/x/workers.py', {}) is None
     for shadow in ('tests/pi/util/__init__.py', 'tests/pi/util.cpython-312-x86_64-linux-gnu.so', 'tests/pi/util.pyc', 'tests/pi/util/x.txt',
                    'tests/pi/__pycache__/util.cpython-312.pyc'):
@@ -990,11 +1002,13 @@ def documentation_reference_root(classifier, graph, catalog, entry, reviewed=Non
     Binds the document (path, blob, introducing commit), the reader (path,
     blob, read line, all reviewed) and DOC_NAV_COMMAND. At the measured
     revision the reader enumerates `git ls-files -- '*.md'` and reads each
-    file on its exact read line, the catalog links the document (the reader
-    stops before reading when the catalog is stale), and gate.sh runs the
+    file on its exact read line, the catalog links the document, and gate.sh runs the
     fast checks table whose row runs the reader. A changed reader or a missing
     link or invocation makes it stale. Never a validated runner; anchors
     nothing. Reference credit only: no test, fixture, proof or runtime credit.
+    Not audited: the reader reaches its read line only when the whole catalog
+    equals its own render of the tree; this role checks the document's link
+    line, not catalog freshness (the gate runs the reader on every merge).
     """
     repo = graph.repo; role = 'documentation reference role'
     reviewed = REVIEWED_DOC_REFERENCES if reviewed is None else reviewed
@@ -1075,7 +1089,7 @@ def documentation_reference_controls(env):
             rejected(dr, text, standalone=[dict(role, **change)])
         rejected(dr, 'conflicting standalone', standalone=[role, dict(role, purpose='Other.')])
         rejected(dr, 'unsupported documentation reference', standalone=[mk(N)])  # not Markdown
-        # Reviewed but not linked from the catalog: never read (the reader stops first), so no root.
+        # Reviewed but not linked from the catalog: no root.
         assert DOC_REF_PREFIX + 'tests/doc/other.md' not in run(dr, standalone=[mk('tests/doc/other.md')])[0]['entry_points']
         REVIEWED_DOC_REFERENCES = saved[0]
         rejected(dr, 'unreviewed documentation reference role', standalone=[role])
