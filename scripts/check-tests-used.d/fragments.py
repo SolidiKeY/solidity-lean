@@ -969,8 +969,6 @@ D:memory-references/bounded-check.py d9f1b14c51c9011736f0fb484f4fcf96d55cd615
 @2207c1bba286538fd63e4a0ff4960ed4a593a8ab
 U:baseline-20261028/invocations/bulk/timed.py c543b7aef3f458d0765b11b19741406a7ff78415
 U:baseline-20261028/invocations/retries/selector.py 5b7a49f863f7c6fad8231d17d68628623948a00e
-@23a42307b1b336e5477c0bb5c8d8bfe6415b6ea6
-N:hardening-native-audit.py 36dd7768f98e954babdb111a2dd780a4b09877a6
 @3bdd5ea4f35abb365b6bb57da56db7c23b645ac5
 D:memory-references/browser-result-intake.py fbb3489b8a38e1e8a8e96fa37d95fbea09d88903
 @3c3346709988f245ee64b8ffc606dfec56e6c6e1
@@ -986,14 +984,13 @@ D:shared-translator/measure.py 57c6a2f51633f72cf79c063740eff1f6ade3a26b
 D:shared-translator/outer_guard.py e33bbf7efee05de73e793c8f872e2e821d8c6421
 @6479617481ce020d41f7061d9dcf4dbfe9bd1ab8
 D:memory-references/native-closure-evidence.py 1872f7842f78468b9d617f000e3469a7781a7fe2
-@937167b745b8a2d41d3a138581d7a9931ae039e3
-N:h109/input-inventory.py 2bbde0bd62a3cb448e752e521d7761937d80a240
 @9be4ce0a089f0888ac165ff770ac90e3879ece0d
 D:memory-references/inspect-browser-evidence.py 6f747cfa705fc346a6aedfb162e4e84df8978565
+@ca73d1a4e1aecbcbc566acaa1aa7392cad472b3d
+N:environment/test-known-stack-continuation.py 0224c0f28316d02a1489016c0e13c0fa20e6e80c
+N:prepare-image-cache.py c9695f1c0bf66b40be1f138f3da7e1ebc147ffde
 @ae8062cfb0f028667485e6f1a621ff69e62724fd
 N:bounded-command.py 3c9e6eb7c60bf7906c7f605bdf0fa58f65f6a3df
-@c3a7094cc0c1f8b625a5a7a6a9eae61ec64444d0
-N:readbounds/serial-build.py 071755cc6574cfb9c5f97ad5703072486ffc9249
 @c9230cc9692a5974728959907afa1f60733409ad
 D:memory-references/native-boundary-audit.py 8c0601e110ec1c779e759456d05d64ca045a6232
 D:memory-references/native-refusal-controls.py c2f89053088d9f5f615c75f408b6711c5f7b99dd
@@ -1004,8 +1001,6 @@ D:control-tuples/measure-native.py c24f1113690cc7a6611d8f8d412ce5f8e77b5b1e
 D:control-tuples/run-bounded.py 629db80c898eb6a19b1dc58a7bf1153bf65214dd
 @f11ae9a9025990629aaed70012fc71ebb0ba295d
 N:h109/docker-probe.py 2c67207ea5ce6c3d55e59f3ee2341b764028aedf
-@f8329bf24319a8056b0c95927d35444a11c3e84b
-N:h109/source-snapshot.py 32870f0d2fde915a2dfff0177fdb9d8b7acb1489
 ''')
 
 
@@ -2274,10 +2269,15 @@ def successor_controls(classifier):
         # anchors nothing and credits no read, argument, helper or output.
         global REVIEWED_PYTHON_ARGS
         reviewed_args = REVIEWED_PYTHON_ARGS
-        assert len(reviewed_args) == 25 and all(p.startswith(('tests/directruntime-20261104/', 'tests/upstream/')) and p.endswith('.py')
+        assert len(reviewed_args) == 23 and all(p.startswith(('tests/directruntime-20261104/', 'tests/upstream/')) and p.endswith('.py')
                                                 for p, _, _ in reviewed_args)
         assert ('tests/upstream/baseline-20261028/invocations/retries/selector.py', '5b7a49f863f7c6fad8231d17d68628623948a00e',
                 '2207c1bba286538fd63e4a0ff4960ed4a593a8ab') in reviewed_args
+        # H1006: exactly the 23 H996 witness files; the 4 extras x1e routes otherwise stay out.
+        assert ('tests/directruntime-20261104/native-browser/prepare-image-cache.py', 'c9695f1c0bf66b40be1f138f3da7e1ebc147ffde',
+                'ca73d1a4e1aecbcbc566acaa1aa7392cad472b3d') in reviewed_args
+        assert not {p for p, _, _ in reviewed_args} & {'tests/directruntime-20261104/native-browser/' + p for p in (
+            'h109/input-inventory.py', 'h109/source-snapshot.py', 'hardening-native-audit.py', 'readbounds/serial-build.py')}
         args_interface = {'argv_lines': [2], 'argv_tail_lines': [2], 'positionals': [], 'subcommands': []}
         assert python_argument_interface(files['tests/args.py']) == args_interface
         assert python_argument_interface(files['tests/args_sub.py']) == {'argv_lines': [], 'argv_tail_lines': [], 'positionals': [[6, 'results']], 'subcommands': [[5, 'pick']]}
