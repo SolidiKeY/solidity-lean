@@ -54,6 +54,8 @@ FRAGMENT_SECTIONS = ('standalone', 'generators', 'reads', 'orphans', 'module_ent
 #   reviewed Lean fixture source (roles.py); consumption only, anchors nothing.
 # H1051 (x1q): standalone kind python-import-source-role, a reviewed Python helper
 #   imported by kept python3 -B entry roots (roles.py); consumption only.
+# H1050 (x1q): standalone kind documentation-reference-role, a reviewed Markdown
+#   document read by the documentation navigation check (roles.py); reference only.
 # persistent_module_entries (H979): exact routes.module_entries claims that
 #   persist while every recorded object is unchanged.
 CONSUMER_SECTIONS = ('persistent_reads', 'static_routes', 'git_policies', 'persistent_module_entries')
@@ -1416,7 +1418,7 @@ exec(compile(_roles.read_bytes(), str(_roles), 'exec'))
 
 SOURCE_ROLE_KINDS = {SOURCE_ONLY_KIND: source_only_program, NODE_MODE_KIND: node_mode_root, PYTHON_ARGS_KIND: python_argument_root,
                      NONPY_ENTRY_KIND: nonpython_entry_root, LEAN_CHECK_KIND: lean_check_root,
-                     LEAN_FIXTURE_KIND: lean_fixture_root}
+                     LEAN_FIXTURE_KIND: lean_fixture_root, DOC_REF_KIND: documentation_reference_root}
 # Kinds dispatched after every other standalone definition, so they can bind
 # the roots those definitions create (H1051 importers).
 LATE_SOURCE_ROLE_KINDS = {PY_IMPORT_KIND: python_import_root}
@@ -2499,3 +2501,4 @@ def successor_controls(classifier):
         finally: REVIEWED_LEAN_CHECKS, REVIEWED_LEAN_CHECK_INVOCATIONS, REVIEWED_NONPY_ENTRIES = saved
         lean_fixture_controls(locals())  # (9) H1015, in roles.py
         python_import_controls(locals())  # (10) H1051, in roles.py
+        documentation_reference_controls(locals())  # (11) H1050, in roles.py

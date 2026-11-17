@@ -1,6 +1,7 @@
 """Reviewed source roles: H999 Lean check sources, H1015 Lean fixture sources,
-the H1025 widening of the H997 non-Python entry review set and H1051 Python
-helper sources imported by kept entry roots.
+the H1025 and H1004 widenings of the H997 non-Python entry review set, H1051
+Python helper sources imported by kept entry roots and H1050 documentation
+references read by the documentation navigation check.
 
 Executed by fragments.py in its own namespace (helpers, review tables and the
 self-test rebinding of REVIEWED_* names are shared). Classifier path: excluded
@@ -685,8 +686,7 @@ def python_import_statement(text, importer, line, helper, tree):
         if posixpath.dirname(directory) != home or sub in ('', '.', '..') or '\\' in sub: return None
         template = ast.dump(ast.parse('sys.path.insert(0, str(pathlib.Path(__file__).resolve().parent/' + repr(sub) + '))').body[0])
         inserts = [k for k, n in enumerate(parsed.body) if ast.dump(n) == template]
-        loose = [n for n in ast.walk(parsed) if isinstance(n, ast.Attribute) and n.attr == 'path' and isinstance(n.value, ast.Name) and n.value.id == 'sys']
-        if len(inserts) != 1 or len(loose) != 1: return None
+        if len(inserts) != 1: return None  # any other sys.path access is refused by the walk below
         at = inserts[0]
         if not any(isinstance(n, ast.Import) and any(a.name == 'pathlib' and a.asname is None for a in n.names) for n in parsed.body[:at]): return None
         if not any(isinstance(n, (ast.Import, ast.ImportFrom)) and n.lineno == line for n in parsed.body[at + 1:]): return None
@@ -941,3 +941,169 @@ def python_import_controls(env):
             for path in changes: (env['root'] / path).unlink()
             commit({H: add[H], I: ok, 'tests/unrelated.txt': 'restored %d\n' % len(path)}, 'restored')
     finally: PY_IMPORT_HELPERS, PY_IMPORT_IMPORTS = saved
+
+
+DOC_REF_KIND = 'documentation-reference-role'
+DOC_REF_PREFIX = 'doc-ref:'
+# H1050 (gh#1365, X1E-REFERENCE-POLICY-OWNER, Option A), H966 reference role:
+# a tracked Markdown document read by the documentation navigation check,
+# which the fast checks table runs and gate.sh invokes. Documents (path, blob,
+# introducing commit) and readers (path, blob, read line), reviewed one by one
+# from x1e-classify-h28-h55's list. Refused, left unresolved:
+# tests/h28-sol/mutation-testing/inventory.extended.errata.json (no reader on
+# master). Reference role only: no test, fixture, proof or runtime credit.
+REVIEWED_DOC_REFERENCES = _review_table('''
+@05b3f3f3a0bbb708eb00e86025811aee3eee15b3
+T:h28-sol/type-grammar/README.md e1a46f542832fa31f92f635162c480c2d39f4467
+@5cf5fe5fe942a8a867a8c1d5c858d9360d782560
+T:h28-terra/drift-reports/README.md 8c54e1c7e52a83c7adcaa030fafb025dc1584ca4
+@67715897e4bdb8b83331bba8f2079d35a5a8e04c
+T:h28-sol/automation-benchmark/README.md 563c3d605d8a16c89f7d5575940d8f4d88a488e6
+@db525b4aac99bbd4449fb21bd232b5039f78606f
+T:h28-sol/mutation-testing/tools/README.md 27e517d407f7d486547d742dee384b071a1ee0de
+''')
+REVIEWED_DOC_READERS = frozenset({('scripts/check-doc-navigation.py', '956ac0e78a2ce9622e1f205887a852dfa27b2b92', 138)})
+DOC_NAV_COMMAND = ['python3', 'scripts/check-doc-navigation.py']
+DOC_NAV_READ = '    graph = {p: set(links(p, (ROOT / p).read_text(), paths)) for p in paths}'
+DOC_NAV_DOCUMENTS = ("    output = subprocess.check_output(\n        ['git', 'ls-files', '-z', '--', '*.md'], cwd=ROOT\n    ).decode()\n"
+                     "    return {p for p in output.split('\\0') if p and (ROOT / p).is_file()} | {CATALOG}\n")
+DOC_NAV_CATALOG = 'docs/document-index.md'
+DOC_NAV_TABLE = ('scripts/ci/checks-fast.sh', "checks=$(cat <<'EOF'", 'EOF', 'doc-navigation\tpython3 scripts/check-doc-navigation.py',
+                 "while IFS=$'\\t' read -r name cmd; do")
+DOC_NAV_GATE = ('scripts/coord-tools/gate.sh', '  run_gate checks-fast bash scripts/ci/checks-fast.sh')
+
+
+def doc_navigation_invoked(repo):
+    """gate.sh runs the fast checks, whose name<TAB>command table names the
+    navigation check on one exact row inside its here-document."""
+    path, start, end, row, loop = DOC_NAV_TABLE
+    lines = repo.texts.get(path, '').splitlines()
+    if start not in lines or loop not in lines or DOC_NAV_GATE[1] not in repo.texts.get(DOC_NAV_GATE[0], '').splitlines(): return False
+    body = lines[lines.index(start) + 1:]
+    if end not in body: return False
+    return body[:body.index(end)].count(row) == 1
+
+
+def documentation_reference_root(classifier, graph, catalog, entry, reviewed=None, readers=None):
+    """H1050/H966: a reviewed tracked Markdown document read by the documentation navigation check.
+
+    Binds the document (path, blob, introducing commit), the reader (path,
+    blob, read line, all reviewed) and DOC_NAV_COMMAND. At the measured
+    revision the reader enumerates `git ls-files -- '*.md'` and reads each
+    file on its exact read line, the catalog links the document (the reader
+    stops before reading when the catalog is stale), and gate.sh runs the
+    fast checks table whose row runs the reader. A changed reader or a missing
+    link or invocation makes it stale. Never a validated runner; anchors
+    nothing. Reference credit only: no test, fixture, proof or runtime credit.
+    """
+    repo = graph.repo; role = 'documentation reference role'
+    reviewed = REVIEWED_DOC_REFERENCES if reviewed is None else reviewed
+    readers = REVIEWED_DOC_READERS if readers is None else readers
+    required = {'path', 'input_revision', 'source_blob', 'command', 'kind', 'interface', 'provenance', 'reader', 'purpose'}
+    _role_schema(classifier, catalog, entry, required, role); reader = entry['reader']
+    if (not isinstance(reader, dict) or set(reader) != {'path', 'blob', 'line'} or type(reader['line']) is not int
+            or not all(isinstance(reader[k], str) for k in ('path', 'blob'))):
+        raise ValueError('invalid ' + role + ' definition')
+    p = entry['path']; revision = entry['input_revision']; doc = entry['provenance']; blob = entry['source_blob']
+    if not p.endswith('.md') or _clean(p) != p or entry['command'] != DOC_NAV_COMMAND or entry['interface'] != {'catalog': DOC_NAV_CATALOG}:
+        raise ValueError('unsupported ' + role + ' invocation: ' + p)
+    if doc['path'] != p or doc['blob'] != blob or (p, blob, doc['commit']) not in reviewed: raise ValueError('unreviewed ' + role + ': ' + p)
+    if (reader['path'], reader['blob'], reader['line']) not in readers: raise ValueError('unreviewed ' + role + ' reader: ' + p)
+    if not _role_current(classifier, repo, catalog, entry, [(p, blob)]): return
+    if repo.tree[p][0] != '100644' or p not in repo.texts: raise ValueError('unsupported ' + role + ' invocation: ' + p)
+    if not _introduced(classifier, repo, doc['commit'], p, blob): raise ValueError(role + ' lacks its introducing provenance: ' + p)
+    text = repo.texts.get(reader['path']) if _current(repo, reader['path'], reader['blob']) else None
+    if text is None or reader['line'] > len(text.splitlines()) or text.splitlines()[reader['line'] - 1] != DOC_NAV_READ: return
+    if DOC_NAV_DOCUMENTS not in text or "CATALOG = '" + DOC_NAV_CATALOG + "'" not in text.splitlines(): return
+    link = '- [' + p + '](../' + p + ')'
+    if link not in repo.texts.get(DOC_NAV_CATALOG, '').splitlines() or not doc_navigation_invoked(repo): return
+    identity = DOC_REF_PREFIX + p
+    graph.root(p, 'documentation reference', shlex.join(DOC_NAV_COMMAND), reader['path'], reader['line'], root_id=identity)
+    if identity not in graph.roots: return
+    graph.roots[identity].update({'source_only': True, 'documentation_reference_role': True, 'source_blob': blob, 'purpose': entry['purpose'],
+        'interface': entry['interface'], 'provenance': doc, 'reader': reader, 'source_declaration_revision': revision,
+        'validation_at_measured_revision': {'status': 'unavailable', 'command': DOC_NAV_COMMAND,
+            'reason': 'Reviewed Markdown document read by the documentation navigation check that the fast checks run; the check is not run or certified to pass here. Reference role only: no test, fixture, proof or runtime credit.'}})
+
+
+def documentation_reference_controls(env):
+    """(11) H1050 controls, run by successor_controls with its helpers: the
+    reviewed documents, the reader and invocation bindings, the role and its
+    negative controls."""
+    global REVIEWED_DOC_REFERENCES, REVIEWED_DOC_READERS
+    commit, run, rejected, blob, gate = (env[k] for k in ('commit', 'run', 'rejected', 'blob', 'gate'))
+    # The audited witnesses: four H28 READMEs; the errata JSON (no reader) is refused.
+    paths = {p for p, _, _ in REVIEWED_DOC_REFERENCES}
+    assert len(REVIEWED_DOC_REFERENCES) == len(paths) == 4 and all(p.startswith('tests/h28-') and p.endswith('/README.md') for p in paths)
+    assert 'tests/h28-sol/mutation-testing/inventory.extended.errata.json' not in paths and len(REVIEWED_DOC_READERS) == 1
+    D = 'tests/doc/README.md'; N = 'scripts/check-doc-navigation.py'
+    reader = ("import subprocess\nfrom pathlib import Path\nROOT = Path(__file__).resolve().parent.parent\nCATALOG = 'docs/document-index.md'\n\n\n"
+              "def documents():\n" + DOC_NAV_DOCUMENTS + "\n\ndef main():\n    paths = documents()\n" + DOC_NAV_READ + "\n")
+    rl = reader.splitlines().index(DOC_NAV_READ) + 1
+    table = ("#!/usr/bin/env bash\nchecks=$(cat <<'EOF'\nother\tpython3 x.py\n" + DOC_NAV_TABLE[3] + "\nEOF\n)\n"
+             + DOC_NAV_TABLE[4] + "\n  bash -c \"$cmd\"\ndone <<< \"$checks\"\n")
+    catalog = '# Catalog\n- [' + D + '](../' + D + ')\n'
+    add = {D: '# Doc\n', 'tests/doc/other.md': '# Other\n', N: reader, DOC_NAV_TABLE[0]: table, DOC_NAV_CATALOG: catalog,
+           DOC_NAV_GATE[0]: gate + DOC_NAV_GATE[1] + '\n'}
+    dr = commit(add, 'documentation references'); R = dr.ref; dl = commit({'tests/unrelated.txt': 'D\n'}, 'documentation later')
+    mk = lambda p=D, **k: dict({'path': p, 'input_revision': R, 'source_blob': blob(dr, p), 'kind': DOC_REF_KIND, 'command': DOC_NAV_COMMAND,
+        'interface': {'catalog': DOC_NAV_CATALOG}, 'provenance': {'commit': R, 'path': p, 'blob': blob(dr, p)},
+        'reader': {'path': N, 'blob': blob(dr, N), 'line': rl}, 'purpose': 'Synthetic document.'}, **k)
+    role = mk(); base_model, base = run(dl, standalone=[])
+    assert base[D]['class'] != 'keep'
+    saved = REVIEWED_DOC_REFERENCES, REVIEWED_DOC_READERS
+    REVIEWED_DOC_REFERENCES = frozenset({(p, blob(dr, p), R) for p in (D, 'tests/doc/other.md')})
+    REVIEWED_DOC_READERS = frozenset({(N, blob(dr, N), rl)})
+    try:
+        for repo in (dr, dl):
+            model, rows = run(repo, standalone=[role]); entry = model['entry_points'][DOC_REF_PREFIX + D]
+            assert rows[D]['class'] == 'keep' and entry['source_only'] and entry['documentation_reference_role'] and entry['reader'] == role['reader']
+            assert entry['validation_at_measured_revision']['status'] == 'unavailable' and entry['location'] == N + ':%d' % rl
+            if repo is dl:  # no test, fixture, reader, proof or runtime credit
+                assert all(canonical(r) == canonical(base[p]) for p, r in rows.items() if p != D)
+                assert set(model['entry_points']) == set(base_model['entry_points']) | {DOC_REF_PREFIX + D}
+        Z = '0' * 40
+        for change, text in (({'extra': 1}, 'invalid documentation reference'), ({'purpose': ' '}, 'invalid documentation reference'),
+                             ({'reader': dict(role['reader'], line=str(rl))}, 'invalid documentation reference'),
+                             ({'reader': dict(role['reader'], extra=1)}, 'invalid documentation reference'),
+                             ({'input_revision': 'HEAD'}, 'full commit revision'), ({'command': ['python3', '-B', N]}, 'unsupported documentation reference'),
+                             ({'interface': {'catalog': 'docs/README.md'}}, 'unsupported documentation reference'),
+                             ({'source_blob': Z}, 'unreviewed documentation reference role'),
+                             ({'provenance': dict(role['provenance'], commit=Z)}, 'unreviewed documentation reference role'),
+                             ({'reader': dict(role['reader'], line=rl - 1)}, 'role reader'), ({'reader': dict(role['reader'], blob=Z)}, 'role reader'),
+                             ({'input_revision': Z}, 'unverifiable historical')):
+            rejected(dr, text, standalone=[dict(role, **change)])
+        rejected(dr, 'conflicting standalone', standalone=[role, dict(role, purpose='Other.')])
+        rejected(dr, 'unsupported documentation reference', standalone=[mk(N)])  # not Markdown
+        # Reviewed but not linked from the catalog: never read (the reader stops first), so no root.
+        assert DOC_REF_PREFIX + 'tests/doc/other.md' not in run(dr, standalone=[mk('tests/doc/other.md')])[0]['entry_points']
+        REVIEWED_DOC_REFERENCES = saved[0]
+        rejected(dr, 'unreviewed documentation reference role', standalone=[role])
+        REVIEWED_DOC_REFERENCES = frozenset({(D, blob(dr, D), R)})
+        for order in (1, -1):  # a current definition supersedes
+            model, _ = run(dl, standalone=[dict(role, input_revision=dl.ref, purpose='Now.'), role][::order])
+            assert model['entry_points'][DOC_REF_PREFIX + D]['purpose'] == 'Now.'
+        # A changed reader, enumeration, catalog, table row, table position, loop or gate line drops the root.
+        stale = ({N: reader.replace('(ROOT / p).read_text()', '""')}, {N: reader.replace("'*.md'", "'docs/*.md'")},
+                 {DOC_NAV_CATALOG: '# Catalog\n'}, {DOC_NAV_TABLE[0]: table.replace(DOC_NAV_TABLE[3] + '\n', '')},
+                 {DOC_NAV_TABLE[0]: table.replace(DOC_NAV_TABLE[3] + '\nEOF\n', 'EOF\n' + DOC_NAV_TABLE[3] + '\n')},
+                 {DOC_NAV_TABLE[0]: table.replace(DOC_NAV_TABLE[3], '# ' + DOC_NAV_TABLE[3])},
+                 {DOC_NAV_TABLE[0]: table.replace(DOC_NAV_TABLE[3], DOC_NAV_TABLE[3] + '\n' + DOC_NAV_TABLE[3])},
+                 {DOC_NAV_TABLE[0]: table.replace(DOC_NAV_TABLE[4], 'while read -r name cmd; do')},
+                 {DOC_NAV_GATE[0]: gate}, {D: '# Changed\n'})
+        # Even a reviewed reader blob grants nothing without the exact read line, enumeration and catalog name.
+        for variant in (reader.replace('(ROOT / p).read_text()', '""'), reader.replace("'*.md'", "'docs/*.md'"),
+                        reader.replace("CATALOG = 'docs/document-index.md'", "CATALOG = 'docs/index.md'")):
+            edited = commit({N: variant}, 'reviewed variant')
+            REVIEWED_DOC_READERS = frozenset({(N, blob(edited, N), rl)})
+            model, rows = run(edited, standalone=[dict(role, reader=dict(role['reader'], blob=blob(edited, N)))])
+            assert DOC_REF_PREFIX + D not in model['entry_points'] and rows[D]['class'] != 'keep', variant
+            commit({N: reader}, 'restored')
+        REVIEWED_DOC_READERS = frozenset({(N, blob(dr, N), rl)})
+        for changes in stale:
+            edited = commit(changes, 'edited')
+            model, rows = run(edited, standalone=[role])
+            assert DOC_REF_PREFIX + D not in model['entry_points'] and rows[D]['class'] != 'keep', changes
+            if D in changes: rejected(edited, 'source mismatch', standalone=[dict(role, input_revision=edited.ref)])
+            commit({k: add[k] for k in changes}, 'restored')
+    finally: REVIEWED_DOC_REFERENCES, REVIEWED_DOC_READERS = saved
