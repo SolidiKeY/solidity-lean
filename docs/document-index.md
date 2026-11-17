@@ -56,6 +56,10 @@ and open obligations. Test proposals remain proposals until applied.
 - [docs/feature-work/h62-6-migrate-tools.md](feature-work/h62-6-migrate-tools.md)
 - [docs/feature-work/h62-6-migrate-typing.md](feature-work/h62-6-migrate-typing.md)
 - [docs/feature-work/h62-6-migrate-yul.md](feature-work/h62-6-migrate-yul.md)
+- [docs/feature-work/h62-calculus-bulk-inputs.md](feature-work/h62-calculus-bulk-inputs.md)
+- [docs/feature-work/h62-calculus-packet-verification.md](feature-work/h62-calculus-packet-verification.md)
+- [docs/feature-work/h62-hash-migration-reproduction.md](feature-work/h62-hash-migration-reproduction.md)
+- [docs/feature-work/h62-statement-graph-reproduction.md](feature-work/h62-statement-graph-reproduction.md)
 
 ## Feature support and interfaces
 
