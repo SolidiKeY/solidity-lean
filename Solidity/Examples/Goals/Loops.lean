@@ -297,7 +297,15 @@ example (s : SourceProgram) (e : SourceExecution s) (points : e.plan.isSome = tr
 /-- H1036: the round-trip law is part of the allocation obligation; a scheme
 that never reads a name back does not satisfy it. -/
 example : ¬ Allocation.RoundTrip ⟨fun s n => s ++ toString n, fun _ => none⟩ :=
-  fun law => nomatch law "se" 0
+  fun law => nomatch law "se" (by decide) 0
+/-! The default scheme reads back the allocated bases (sampled, not proved for
+every index; evaluated, not kernel-checked). -/
+#guard Allocation.bases.all fun base => [0, 1, 7, 42].all fun k =>
+  (FreshNames.ofPrefixes "se" "sp" "ie" "mv").parse
+    ((FreshNames.ofPrefixes "se" "sp" "ie" "mv").name base k) == some (base, k)
+/-- There is at most one positional map. -/
+example {srcΓ : Source.RCtx} {Γ : Ctx} {m n : Solidity.Lowering.V07.ContextMap srcΓ Γ}
+    (hm : Simulation.Positional m) (hn : Simulation.Positional n) : m = n := hm.unique hn
 
 /-- H1035: the bound simulation gives the `relates` half of the pipeline
 obligation; it is an obligation beside the contract, not part of it. -/

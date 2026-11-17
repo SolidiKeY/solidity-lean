@@ -40,6 +40,11 @@ The concrete boundary is begun here, not finished:
   timestamp; the rest of the state is unrelated. `loopBoundaryStage1` is the
   boundary at it, a closed term, with `loopResidualStage1_iff`.
 
+`Simulation.Bound` and `Simulation.InitialMatching` (H1035) bind the
+simulation to the request's positional map and ask total matching, beside the
+contract; `LowerLoopsCorrectContractV2` is version 1 with both. The allocation
+trace carries the fresh-name round-trip law `Allocation.RoundTrip` (H1036).
+
 Each of the three choices has known defects, listed at its section: the
 policies observe the outcome kind only and cannot tie `PassCorrect` to the
 state relation, the
@@ -127,11 +132,14 @@ theorem first_consistent (f : Nat → Option Outcome) :
   | none => exact .inl (by simp only [silent, e])
   | some o => exact .inr (by simp only [silent, e, first_mono h e])
 
-/-- **The admitted Source executions** (H1033): those an execution of the
-model can stand for. No failure plan and known calldata (the model has
-neither), and a frame that may write and checks arithmetic (the model always
-does). This is the part of "image of a model state" that can be said of a
-Source execution alone: the policy of a Source program does not see the model
+/-- **The admitted Source executions** (H1033): necessary conditions for a
+model execution to stand for one. No failure plan and known calldata (the
+model has neither), and a frame that may write and checks arithmetic (the
+model always does). Static frames are thereby left out, also for programs
+that write nothing: an exclusion of view executions, forced by the state
+relation. An admitted execution may still have no related model state; that
+is `Simulation.InitialMatching`. This is the part of "image of a model state"
+that can be said of a Source execution alone: the policy of a Source program does not see the model
 contract, context or state, so the abstraction itself is the state relation
 of the simulation (`Simulation.Simulates`), which is stated over exactly
 these executions. -/
@@ -204,12 +212,19 @@ def scope (r : Request) (o : ProductionOutput) (after : Checker.Snapshot) : Allo
   ⟨protectedNames r, generated r.input.names r.input.before.locals.2 after.locals.2
     (o.raw.flatMap RawStmt.names ++ after.locals.1.map Prod.fst)⟩
 
-/-- **The round-trip law** (H1036): every fresh identifier is read back from
-its own spelling. `FreshNames` carries no such law; without it the spelling
-based trace can be empty or wrong. It is an obligation of every run, part of
-the trace below, not an assumption. -/
+/-- The bases the lowering and the elaborator allocate fresh names under. -/
+def bases : List String := ["se", "sp", "ie", "mv", "cnt", "brk", "first", "ret"]
+
+/-- **The round-trip law** (H1036): a fresh identifier of an allocated base is
+read back from its own spelling. `FreshNames` carries no such law; without it
+the spelling based trace can be empty or wrong. It is an obligation of every
+run, part of the trace below, not an assumption. It is stated for the
+allocated bases only: no scheme in the repository reads back a name of an
+arbitrary base. A request may carry any scheme, and admission does not look at
+it, so for a successful request whose scheme breaks the law the allocation
+obligation is false. -/
 def RoundTrip (names : FreshNames) : Prop :=
-  ∀ base index, names.parse (names.name base index) = some (base, index)
+  ∀ base ∈ bases, ∀ index, names.parse (names.name base index) = some (base, index)
 
 /-- The trace of a run is its one scope, under a fresh-name scheme that
 round-trips. -/
@@ -232,8 +247,9 @@ the admitted executions only (`Observe.Admitted`).
 Known defects, open. `Simulates` alone can hold vacuously: its context maps
 are chosen existentially, so a map between unrelatable types makes the premise
 unsatisfiable, and a `glob` that is never true satisfies it. `Positional`,
-`InitialMatching` and `Bound` (H1035) state the binding and the totality that
-rule this out, as obligations beside the contract. Unlike the diagram of
+`InitialMatching` and `Bound` (H1035) state the entry-map binding and the
+initial totality that rule this out (with `Positional.unique`), as obligations
+beside the contract; the final-context map stays free. Unlike the diagram of
 `Goals/Shrink.lean` there is no integer reflection and no freshness clause. The return witness of the e1 return endpoint is not
 kept: a Source `return` and a normal completion match the same model results. -/
 namespace Simulation
@@ -354,7 +370,8 @@ theorem of_retEndpoint
 
 /-- Negative control: a state relation whose globals are never related makes
 every pair with some context maps simulate. So `Simulates` alone does not rule
-out a degenerate `rel`; non-emptiness is a separate obligation, not yet stated. -/
+out a degenerate `rel`; non-emptiness is the separate obligation
+`InitialMatching` below. -/
 theorem vacuous (empty : ∀ E C G F st σ, ¬ (rel E C).glob G F st σ) {s : SourceProgram}
     {C : Contract} {Γ : Ctx} (p : Blk C Γ) (m : Lowering.V07.ContextMap s.before Γ)
     (m' : Lowering.V07.ContextMap s.after p.1) (emb : Thin Γ p.1) : Simulates rel s p :=
@@ -369,18 +386,43 @@ that every admitted Source execution has a related model state. They are
 stated beside the contract, not inside `relates`: the frozen compatibility
 fields quantify `relates` over every context map and every Source context of
 the e1 families, including maps that are not positional and contexts with
-unrelatable types, so putting either requirement inside `relates` would make
-those fields false. Neither is implied by the contract. -/
+unrelatable types. Total matching inside `relates` would make those fields
+false; a positional map inside it would leave them underivable from the e1
+theorems. Only the entry map is bound: the final-context map and the context
+extension stay existential and are not tied to it. Positional identity also
+assumes that Source lookup by spelling and model lookup by variable agree,
+which is not stated here. That neither obligation follows from the contract
+is not proved. -/
 
 /-- The map sends each Source local to the model local at its position. -/
 def Positional {srcΓ : Source.RCtx} {Γ : Ctx} (m : Lowering.V07.ContextMap srcΓ Γ) : Prop :=
   ∀ {τ : Source.STy} (i : Source.Idx srcΓ τ), (m.slot i).2.toNat = i.toNat
 
-/-- **Total initial matching**: a decoded request has a positional map under
-which every admitted Source execution has a related model state. -/
+/-- A position determines the model local and its type. -/
+theorem slot_eq_of_toNat : {Γ : Ctx} → {u v : LTy} → (i : Idx Γ u) → (j : Idx Γ v) →
+    i.toNat = j.toNat → (⟨u, i⟩ : (u : LTy) × Idx Γ u) = ⟨v, j⟩
+  | _, _, _, .here, .here, _ => rfl
+  | _, _, _, .here, .there _, h => by cases h
+  | _, _, _, .there _, .here, h => by cases h
+  | _, _, _, .there i, .there j, h => by
+      cases slot_eq_of_toNat i j (Nat.succ.inj h)
+      rfl
+
+/-- There is at most one positional map, so `InitialMatching` and `Bound`
+speak of the same one. -/
+theorem Positional.unique {srcΓ : Source.RCtx} {Γ : Ctx} {m n : Lowering.V07.ContextMap srcΓ Γ}
+    (hm : Positional m) (hn : Positional n) : m = n :=
+  Lowering.V07.ContextMap.ext m n fun i =>
+    slot_eq_of_toNat (m.slot i).2 (n.slot i).2 ((hm i).trans (hn i).symm)
+
+/-- **Total initial matching**: a successful decoded request has a positional
+map under which every admitted Source execution has a related model state.
+For `loopRel` the one component that can fail for a reason unrelated to
+lowering is storage: the Source cell at each state variable's path must have
+the declared type (not proved; it fails if two state variables share a name). -/
 def InitialMatching (rel : (E : Source.Env) → (C : Contract) → StateRelation E C)
     (decode : Request → Option SourceProgram) : Prop :=
-  ∀ (r : Request) (s : SourceProgram), decode r = some s →
+  ∀ (r : Request) (s : SourceProgram), r.Succeeds → decode r = some s →
     ∃ m : Lowering.V07.ContextMap s.before r.context.ctx, Positional m ∧
       ∀ e : SourceExecution s, Observe.Admitted e → ∃ tgt : State r.contract r.context.ctx,
         m.Related ((rel s.env r.contract).val tgt.H) e.initial.1 tgt.env ∧
@@ -388,7 +430,7 @@ def InitialMatching (rel : (E : Source.Env) → (C : Contract) → StateRelation
 
 /-- **The bound simulation**: every successful pipeline of a decoded request
 simulates at a positional map. It implies the `relates` half of the pipeline
-obligation (`Bound.simulates`); the converse does not hold. -/
+obligation (`Bound.simulates`); no converse is proved. -/
 def Bound (rel : (E : Source.Env) → (C : Contract) → StateRelation E C)
     (decode : Request → Option SourceProgram) : Prop :=
   ∀ (r : Request) o after parts (program : Blk r.contract r.context.ctx) s, decode r = some s →
@@ -420,9 +462,8 @@ Not related, so unconstrained: memory heaps; the ledger, balances and
 transient storage; other accounts; the Source journal, events, logs, function
 locals and resource metadata; the frame's contract, depth and calldata; and
 all of the Source globals but the timestamp. No related pair is exhibited and
-no total initial matching is proved: that the cell type at each path equals
-the declared type, and that every Source state of a decoded program has a
-related model state, are obligations not yet stated. -/
+no total initial matching is proved: `Simulation.InitialMatching` states it,
+and it needs the cell type at each path to equal the declared type. -/
 namespace Relation
 
 open Source.Agreement (sourceTy PrimitiveRel)
@@ -653,7 +694,9 @@ two obligations it cannot carry: the request-bound simulation and total initial
 matching. Version 1 is unchanged and is a conjunct of version 2. -/
 
 /-- **Version 2 of the loop contract** at a state relation: version 1, and the
-simulation bound to each request's positional map, and total initial matching. -/
+simulation bound to each request's positional map, and total initial matching.
+Meant at `b := loopBoundaryAt rel`: for another boundary the two added
+conjuncts speak of a relation that `b.relates` need not be. -/
 def LowerLoopsCorrectContractV2
     (rel : (E : Source.Env) → (C : Contract) → Simulation.StateRelation E C)
     (b : SemanticBoundary) (i : RawSourceInterpretation)
