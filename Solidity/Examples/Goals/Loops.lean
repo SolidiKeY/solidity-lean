@@ -138,6 +138,37 @@ example : (Decode.decode { sampleRequest [.assign (.name "s") (.name "a")] with
 example : Decode.decode { sampleRequest [.assign (.name "s") (.num 1)] with
     contract := { vars := [("s", .prim .uint)], widths := [("s", 8)] } } = none := rfl
 
+/-- Spellings no e1 sample exercises, over `uint x`, `int y`, `bool a`: each is
+typed by Source inference (that it means what the model gives it is open). -/
+def wordRequest (raw : List RawStmt) : Request :=
+  ⟨IntrinsicProbe.C, ⟨sampleNames, none, raw, RawProbe.scope,
+    ⟨([("x", .val .uint), ("y", .val .int), ("a", .val .bool)], 1), {}⟩⟩, none⟩
+
+example : (Decode.decode (wordRequest
+    [.unchecked [.opAssign .add (.name "x") (.num 1)], .incDec .postInc (.name "x")])).isSome =
+    true := rfl
+example : (Decode.decode (wordRequest
+    [.forLoop {} [.decl (.named "uint") "k" (some (.num 0))] (some (.binop .lt (.name "k") (.name "x")))
+      [.incDec .preInc (.name "k")] [.ite (.name "a") [.cont] [.brk]]])).isSome = true := rfl
+example : (Decode.decode (wordRequest
+    [.assign (.name "y") (.unop .toInt (.name "x")),
+     .assign (.name "x") (.modular .addmod (.name "x") (.num 2) (.num 3)),
+     .assign (.name "x") (.binop .shr (.name "x") (.num 1)),
+     .assign (.name "x") (.ternary (.name "a") (.env .msgValue) (.env .timestamp))])).isSome =
+    true := rfl
+example : (Decode.decode (wordRequest
+    [.loop {} (.name "a") [.assign (.name "a") (.bool false)], .require (.name "a"),
+     .assert (.unop .not (.name "a")), .revert])).isSome = true := rfl
+/-- Further gaps: a wrapping operator, a cast written as a call, nested
+`unchecked`, a narrow local. -/
+example : Decode.decode (wordRequest [.assign (.name "x") (.binop .addW (.name "x") (.num 1))]) =
+    none := rfl
+example : Decode.decode (wordRequest [.assign (.name "x") (.call "uint" [.name "y"])]) = none := rfl
+example : Decode.decode (wordRequest [.unchecked [.unchecked []]]) = none := rfl
+example : Decode.decode { wordRequest [] with
+    input := { (wordRequest []).input with before := ⟨([("n", .val .uint 8)], 1), {}⟩ } } =
+    none := rfl
+
 /-- The decoder reads only plain requests: a callee body, return slots or an
 `unchecked` scope is a gap, not a guess. -/
 example : Decode.decode { sampleRequest RawProbe.input with
