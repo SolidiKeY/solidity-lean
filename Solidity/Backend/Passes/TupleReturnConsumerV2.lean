@@ -103,6 +103,13 @@ theorem literal_revert_refused :
       (.cons .revert .nil : Prog C (rs ++ [.mem A, .val .uint]) (rs ++ [.mem A, .val .uint])))
       .nil : Prog C Γ (rs ++ Γ))).isNone = true := by decide +kernel
 
+/-- The tuple call followed by an ordinary call with an empty callee. -/
+def mixed : Prog C Γ (rs ++ Γ) := .cons call (.cons (.call "noop" .nil .none .nil) .nil)
+
+/-- v1 refuses the mixed program; v2 accepts it automatically. -/
+theorem mixed_accepted : (Compiler.compile 1 F mixed).isNone = true ∧
+    (CompilerV2.compile 1 F mixed).isSome = true := by decide +kernel
+
 end Solidity.Backend.Passes.TupleReturnConsumer.V2
 
 #print axioms Solidity.Backend.Passes.TupleReturnConsumer.V2.accepted
@@ -110,3 +117,4 @@ end Solidity.Backend.Passes.TupleReturnConsumer.V2
 #print axioms Solidity.Backend.Passes.TupleReturnConsumer.V2.endpoint_success
 #print axioms Solidity.Backend.Passes.TupleReturnConsumer.V2.endpoint_revert
 #print axioms Solidity.Backend.Passes.TupleReturnConsumer.V2.literal_revert_refused
+#print axioms Solidity.Backend.Passes.TupleReturnConsumer.V2.mixed_accepted

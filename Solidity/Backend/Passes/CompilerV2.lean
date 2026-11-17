@@ -10,10 +10,11 @@ Where v1 refuses a push-free program, it selects the program statement by
 statement at top level: each statement is taken by the structural selector
 `Composition.compileStatement`, or is a call with tuple return binders whose
 frame expansion that selector takes, emitted by the published `Tuple.emit`.
-So v2 adds every push-free sequence of such statements that v1 refuses, not
-only single tuple calls. It adds nothing else: ordinary calls stay with v1's
-`Calls.compile`, and a tuple call inside a block, a branch or a callee is
-refused. The result is the existing `Compilation.memoryCalls` constructor, so
+An ordinary call (no result, a value or a memory result) beside them is
+taken by the published `Composition.compileCall` (Q-B3-3). So v2 adds every
+push-free sequence of such statements that v1 refuses, not only single tuple
+calls. It adds nothing else: a tuple call inside a block, a branch or a
+callee is refused. The result is the existing `Compilation.memoryCalls` constructor, so
 `Compilation.correct_exact` applies unchanged; no certificate is supplied by
 hand.
 
@@ -37,14 +38,24 @@ def tupleStatement (b : Nat) {Γ Δ : Ctx} (F : Frag Γ) :
     (Composition.compileProgram b F (Tuple.expand args bs body)).map (Tuple.emit f args bs body)
   | _ => none
 
-/-- One statement: the structural selector first, then a tuple-return call. -/
+/-- An ordinary call, selected by the published `Composition.compileCall`. -/
+def callStatement (b : Nat) {Γ Δ : Ctx} (F : Frag Γ) :
+    (s : Stmt C Γ Δ) → Option (Composition.Statement b F s)
+  | .call f args ret body => Composition.compileCall b F f args ret body
+  | _ => none
+
+/-- One statement: the structural selector first, then a tuple-return call,
+then an ordinary call. -/
 def statement (b : Nat) {Γ Δ : Ctx} (F : Frag Γ) (s : Stmt C Γ Δ) :
     Option (Composition.Statement b F s) :=
   match Composition.compileStatement b F s with
   | some selected => some selected
-  | none => tupleStatement b F s
+  | none => match tupleStatement b F s with
+    | some selected => some selected
+    | none => callStatement b F s
 
-/-- A program of structurally selected statements and tuple-return calls. -/
+/-- A program of structurally selected statements, tuple-return calls and
+ordinary calls. -/
 def program (b : Nat) {Γ Δ : Ctx} (F : Frag Γ) :
     (P : Prog C Γ Δ) → Option (Composition.Program b F P)
   | .nil => some (Composition.nil b F)
