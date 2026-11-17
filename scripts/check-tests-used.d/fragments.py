@@ -67,12 +67,14 @@ FRAGMENT_SECTIONS = ('standalone', 'generators', 'reads', 'orphans', 'module_ent
 #   persist while every recorded object is unchanged.
 # H1009 (x1r): persistent_reads may carry a reviewed nonpassing read (roles.py);
 #   source-only failed-run root, the named in-scope read only, no pass credit.
-CONSUMER_SECTIONS = ('persistent_reads', 'static_routes', 'git_policies', 'persistent_module_entries')
+# cache_policies (H1053, x1t): {path, blob, purpose, provenance, matches: [{line,
+#   output, producer}]}, the implicit CPython cache policy role (roles.py).
+CONSUMER_SECTIONS = ('persistent_reads', 'static_routes', 'git_policies', 'persistent_module_entries', 'cache_policies')
 
 
 def fragment_identity(section, row):
     if not isinstance(row, dict): raise ValueError('fragment entry must be an object')
-    if section in ('roles', 'fixtures', 'git_policies'):
+    if section in ('roles', 'fixtures', 'git_policies', 'cache_policies'):
         keys = ('path',)
     elif section in ('standalone', 'generators', 'orphans'):
         keys = ('path', 'input_revision')
@@ -1588,6 +1590,7 @@ def add_consumer_routes(classifier, graph, catalog, fragments):
     static_routes(classifier, graph, fragments['static_routes'])
     git_policies(classifier, graph, fragments['git_policies'])
     persisted_module_entries(classifier, graph, catalog, fragments['persistent_module_entries'])
+    cache_policies(classifier, graph, fragments['cache_policies'])
 
 
 def _control_repository(classifier, root):
