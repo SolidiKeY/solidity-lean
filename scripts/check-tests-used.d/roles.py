@@ -2215,3 +2215,153 @@ def cache_policies(classifier, graph, rows, reviewed=None):
         graph.roots[identity].update({'source_only': True, 'cache_policy_role': True, 'source_blob': row['blob'], 'purpose': row['purpose'],
             'policy_role': CACHE_POLICY_ROLE, 'provenance': doc, 'policy_matches': verified,
             'validation_at_measured_revision': {'status': 'policy', 'reason': 'git check-ignore of this exact blob in isolation for the cache directory of a reviewed bytecode-enabled import; the launch, the import and the interpreter environment are not run or audited. Source-policy credit only: no execution, pass, helper, output, proof or runtime credit.'}})
+
+
+def cache_policy_controls(env):
+    """(16) H1053 controls, run by successor_controls with its helpers: the
+    reviewed witnesses, the three producer forms and negative controls."""
+    global REVIEWED_CACHE_POLICIES
+    commit, run, rejected, blob, classifier = (env[k] for k in ('commit', 'run', 'rejected', 'blob', 'classifier'))
+    # The audited witnesses: 2 of the 14 scripts/h62 policies; 12 stay unresolved.
+    assert sorted(REVIEWED_CACHE_POLICIES) == ['scripts/h62/item2/audit-precompiles/.gitignore', 'scripts/h62/item3/g52-differential/.gitignore']
+    assert all(len(m) == 1 and m[0]['output'] == '__pycache__/' for _, _, m in REVIEWED_CACHE_POLICIES.values())
+    D = 'scripts/h62/cp/'; G = D + '.gitignore'
+    files = {
+        G: '# CPython cache\n__pycache__/\n*.py[cod]\n',
+        D + 'mod.py': 'VALUE = 1\n',
+        D + 'prog.py': 'import argparse\nfrom mod import VALUE\nprint(VALUE)\n',
+        D + 'off.py': 'import sys\nsys.dont_write_bytecode = True\nfrom mod import VALUE\n',
+        D + 'dyn.py': 'import importlib\nmod = importlib.import_module("mod")\nfrom mod import VALUE\n',
+        D + 'drv.py': ('import os, subprocess, sys\nPROG = "scripts/h62/cp/prog.py"\ndef go():\n'
+                       '    subprocess.run([sys.executable, "scripts/h62/cp/prog.py", "--x"], check=True)\n'
+                       '    subprocess.run([sys.executable, "-B", "scripts/h62/cp/prog.py"], check=True)\n'
+                       '    subprocess.run([sys.executable, PROG], check=True)\n'
+                       '    subprocess.run(["python3", "prog.py"], check=True)\n'
+                       '    subprocess.run([sys.executable, "scripts/h62/cp/off.py"], check=True)\n'
+                       '    subprocess.run([sys.executable, "scripts/h62/cp/dyn.py"], check=True)\n'
+                       '    subprocess.run(["python3", "-c", "scripts/h62/cp/prog.py"], check=True)\n'),
+        D + 'drv_env.py': 'import os, subprocess, sys\nos.environ["PYTHONDONTWRITEBYTECODE"] = "1"\nsubprocess.run([sys.executable, "scripts/h62/cp/prog.py"])\n',
+        D + 'root_test.py': 'import drv\ndrv.go()\n',
+        D + 'self.py': 'import os, subprocess, sys\nfrom mod import VALUE\nif not os.environ.get("CHILD"):\n    subprocess.run([sys.executable, __file__], check=True, env=dict(os.environ, CHILD="1"))\n',
+        D + 'ndrv.mjs': ("import { spawnSync } from 'node:child_process';\nimport { fileURLToPath } from 'node:url';\n"
+                         "export function go() { return spawnSync('python3', [fileURLToPath(new URL('./prog.py', import.meta.url)), '--x']); }\n"
+                         "// spawnSync('python3', [fileURLToPath(new URL('./prog.py', import.meta.url))]);\n"),
+        D + 'n.test.mjs': "import { go } from './ndrv.mjs';\nimport test from 'node:test';\ntest('go', () => { go(); });\n",
+        D + 'x/.gitignore': '__pycache__/\n*.olean\n',
+        D + 'neg/.gitignore': '__pycache__/\n!keep.pyc\n',
+        D + 'anchored/.gitignore': '/__pycache__/\n',
+        D + 'anchored/sub/mod.py': 'VALUE = 2\n',
+        D + 'anchored/sub/prog.py': 'from mod import VALUE\n',
+        D + 'anchored/sub/drv.py': 'import subprocess, sys\nsubprocess.run([sys.executable, "scripts/h62/cp/anchored/sub/prog.py"])\n',
+        D + 'tracked/.gitignore': '__pycache__/\n',
+        D + 'tracked/__pycache__/note.txt': 'tracked\n',
+        D + 'tracked/mod.py': 'VALUE = 3\n',
+        D + 'tracked/prog.py': 'from mod import VALUE\n',
+        D + 'tracked/drv.py': 'import subprocess, sys\nsubprocess.run([sys.executable, "scripts/h62/cp/tracked/prog.py"])\n',
+    }
+    cp = commit(files, 'cache policies'); R = cp.ref
+    cl = commit({'tests/unrelated-cp.txt': 'C\n'}, 'cache policies later')
+    def source_root(path, repo=cp):
+        return {'path': path, 'input_revision': repo.ref, 'source_blob': blob(repo, path), 'command': ['python3', '-B', path], 'kind': SOURCE_ONLY_KIND,
+                'entry_line': max(classifier['entrypoint_lines'](files[path].encode())), 'purpose': 'Synthetic kept root.'}
+    node_root = {'path': D + 'n.test.mjs', 'input_revision': R, 'source_blob': blob(cp, D + 'n.test.mjs'),
+                 'command': ['node', '--test', D + 'n.test.mjs'], 'kind': 'node-test'}
+    roots = [source_root(D + 'root_test.py'), source_root(D + 'self.py'), node_root] + [source_root(D + d) for d in (
+        'drv_env.py', 'anchored/sub/drv.py', 'tracked/drv.py')]
+    def producer(root, root_line, driver, driver_line, literal, program, import_line=None, module=D + 'mod.py', repo=cp):
+        if import_line is None: import_line = 2 if program.endswith(('prog.py', 'self.py')) and posixpath.dirname(program) + '/' == D else 1
+        return {'root': root, 'root_blob': blob(repo, root), 'root_line': root_line, 'driver': driver, 'driver_blob': blob(repo, driver),
+                'driver_line': driver_line, 'literal': literal, 'program': program, 'program_blob': blob(repo, program),
+                'import_line': import_line, 'module': module, 'module_blob': blob(repo, module)}
+    match = lambda q, line=2, output='__pycache__/': {'line': line, 'output': output, 'producer': q}
+    py = producer(D + 'root_test.py', 1, D + 'drv.py', 4, D + 'prog.py', D + 'prog.py')
+    me = producer(D + 'self.py', 0, D + 'self.py', 4, None, D + 'self.py')
+    nd = producer(D + 'n.test.mjs', 1, D + 'ndrv.mjs', 3, 'prog.py', D + 'prog.py')
+    policy = lambda matches, path=G, repo=cp, commit_=None: {
+        'path': path, 'blob': blob(repo, path), 'purpose': 'Synthetic cache policy.',
+        'provenance': {'commit': commit_ or R, 'path': path, 'blob': blob(repo, path)}, 'matches': matches}
+    good = [policy([match(q)]) for q in (py, me, nd)]
+    saved = REVIEWED_CACHE_POLICIES
+    def review(*rows):
+        table = {}
+        for row in rows:
+            entry = table.setdefault(row['path'], (row['blob'], row['provenance']['commit'], []))
+            entry[2].extend(row['matches'])
+        return table
+    try:
+        REVIEWED_CACHE_POLICIES = review(*good)
+        base_model, base = run(cl, standalone=roots)
+        assert base[G]['class'] != 'keep'
+        for row in good:  # each producer form on its own, at the policy's revision and later
+            for repo in (cp, cl):
+                model, rows = run(repo, {'cache_policies': [row]}, standalone=roots)
+                e = model['entry_points'][CACHE_POLICY_PREFIX + G]
+                assert rows[G]['class'] == 'keep' and e['source_only'] and e['cache_policy_role'] and e['validation_at_measured_revision']['status'] == 'policy'
+                assert e['policy_matches'] == [{'line': 2, 'output': D + '__pycache__/', 'producer': row['matches'][0]['producer']}]
+                if repo is cl:  # source-policy credit only: nothing else changes
+                    assert all(canonical(x) == canonical(base[p]) for p, x in rows.items() if p != G), row
+                    assert set(model['entry_points']) == set(base_model['entry_points']) | {CACHE_POLICY_PREFIX + G}
+        # Absent rows leave the model unchanged; repeated identical rows are harmless.
+        assert canonical(run(cl, {'cache_policies': []}, standalone=roots)[0]) == canonical(base_model)
+        run(cl, {'cache_policies': [good[0], good[0]]}, standalone=roots)
+        rejected(cp, 'conflicting cache_policies', {'cache_policies': [good[0], dict(good[0], purpose='Other.')]}, standalone=roots)
+        Z = '0' * 40; row = good[0]
+        for change, text in (({'extra': 1}, 'invalid cache policy role'), ({'purpose': ' '}, 'invalid cache policy role'),
+                             ({'matches': []}, 'invalid cache policy role'), ({'matches': [match(py)] * 2}, 'invalid cache policy role'),
+                             ({'provenance': {'commit': R}}, 'invalid cache policy role'),
+                             ({'matches': [dict(match(py), extra=1)]}, 'invalid cache policy match'),
+                             ({'matches': [match(dict(py, root_line='2'))]}, 'invalid cache policy match'),
+                             ({'matches': [match({k: v for k, v in py.items() if k != 'literal'})]}, 'invalid cache policy match'),
+                             ({'matches': [match(dict(py, literal=['x']))]}, 'invalid cache policy match'),
+                             ({'provenance': dict(row['provenance'], commit=Z)}, 'unreviewed cache policy role'),
+                             ({'matches': [match(dict(py, driver_line=5))]}, 'unreviewed cache policy role'),
+                             ({'matches': [match(py, line=3)]}, 'unreviewed cache policy role')):
+            rejected(cp, text, {'cache_policies': [dict(row, **change)]}, standalone=roots)
+        rejected(cp, 'requires a .gitignore', {'cache_policies': [dict(row, path=D + 'mod.py')]}, standalone=roots)
+        # Reviewed claims that do not hold on the bytes are refused.
+        bad = [(policy([match(producer(D + 'root_test.py', 1, D + 'drv.py', n, lit, prog, import_line=k))]), text) for n, lit, prog, k, text in (
+                   (5, D + 'prog.py', D + 'prog.py', 2, 'no bytecode-enabled launch'),  # -B
+                   (6, D + 'prog.py', D + 'prog.py', 2, 'no bytecode-enabled launch'),  # program through a variable
+                   (11, D + 'prog.py', D + 'prog.py', 2, 'no bytecode-enabled launch'),  # -c
+                   (4, 'prog.py', D + 'prog.py', 2, 'no bytecode-enabled launch'),  # a path literal is no basename
+                   (8, D + 'off.py', D + 'prog.py', 2, 'no bytecode-enabled launch'),  # the line launches another program
+                   (8, D + 'off.py', D + 'off.py', 3, 'switches bytecode off'),
+                   (9, D + 'dyn.py', D + 'dyn.py', 3, 'no exact sibling import'))]
+        bad += [(policy([match(producer(D + 'drv_env.py', 0, D + 'drv_env.py', 3, D + 'prog.py', D + 'prog.py'))]), 'switches bytecode off'),
+                (policy([match(producer(D + 'root_test.py', 2, D + 'drv.py', 4, D + 'prog.py', D + 'prog.py'))]), 'not reached from a kept root'),
+                (policy([match(producer(D + 'drv.py', 0, D + 'drv.py', 4, D + 'prog.py', D + 'prog.py'))]), 'not reached from a kept root'),
+                (policy([match(producer(D + 'self.py', 0, D + 'self.py', 4, None, D + 'prog.py'))]), 'no bytecode-enabled launch'),
+                (policy([match(producer(D + 'n.test.mjs', 1, D + 'ndrv.mjs', 4, 'prog.py', D + 'prog.py'))]), 'no bytecode-enabled launch'),  # comment
+                (policy([match(producer(D + 'n.test.mjs', 2, D + 'ndrv.mjs', 3, 'prog.py', D + 'prog.py'))]), 'not reached from a kept root'),
+                (policy([match(py, line=3)]), 'names no cache directory rule'),
+                (policy([match(py, output='x/__pycache__/')]), 'invalid cache policy output'),
+                (policy([match(producer(D + 'root_test.py', 1, D + 'drv.py', 4, D + 'prog.py', D + 'prog.py', import_line=1))]), 'no exact sibling import'),
+                (policy([match(py, line=1)], path=D + 'x/.gitignore'), 'outside the CPython cache rules'),
+                (policy([match(py, line=1)], path=D + 'neg/.gitignore'), 'outside the CPython cache rules'),
+                (policy([match(producer(D + 'anchored/sub/drv.py', 0, D + 'anchored/sub/drv.py', 2, D + 'anchored/sub/prog.py', D + 'anchored/sub/prog.py',
+                                        module=D + 'anchored/sub/mod.py'), line=1, output='sub/__pycache__/')], path=D + 'anchored/.gitignore'),
+                 'does not ignore the cache directory'),
+                (policy([match(producer(D + 'tracked/drv.py', 0, D + 'tracked/drv.py', 2, D + 'tracked/prog.py', D + 'tracked/prog.py',
+                                        module=D + 'tracked/mod.py'), line=1)], path=D + 'tracked/.gitignore'), 'output is tracked')]
+        for row_, text in bad:
+            REVIEWED_CACHE_POLICIES = review(row_)
+            rejected(cp, text, {'cache_policies': [row_]}, standalone=roots)
+        # The x/.gitignore module is not below the policy: its output is refused before the rules.
+        REVIEWED_CACHE_POLICIES = review(*good)
+        # A reviewed blob whose commit did not introduce it is refused.
+        later = policy([match(py)], commit_=cl.ref)
+        REVIEWED_CACHE_POLICIES = review(later)
+        rejected(cp, 'introducing provenance', {'cache_policies': [later]}, standalone=roots)
+        # Without the root (no kept producer) the claim is refused.
+        REVIEWED_CACHE_POLICIES = review(*good)
+        rejected(cp, 'not reached from a kept root', {'cache_policies': [good[0]]}, standalone=roots[1:])
+        # A changed policy, program, module or driver makes the row stale: nothing credited, no error.
+        for path in (G, D + 'prog.py', D + 'mod.py', D + 'drv.py', D + 'root_test.py'):
+            edited = commit({path: files[path] + '\n'}, 'edited')
+            current = [dict(r, input_revision=edited.ref, source_blob=blob(edited, r['path'])) for r in roots]
+            model, rows = run(edited, {'cache_policies': [good[0]]}, standalone=current)
+            assert CACHE_POLICY_PREFIX + G not in model['entry_points'] and rows[G]['class'] != 'keep', path
+            commit({path: files[path]}, 'restored')
+        REVIEWED_CACHE_POLICIES = {}
+        rejected(cp, 'unreviewed cache policy role', {'cache_policies': [good[0]]}, standalone=roots)
+    finally: REVIEWED_CACHE_POLICIES = saved

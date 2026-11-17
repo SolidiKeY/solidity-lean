@@ -2530,3 +2530,4 @@ def successor_controls(classifier):
         run_cmd_read_controls(locals())  # (13) H1070, in roles.py
         program_form_controls(locals())  # (14) H1072, in roles.py
         source_dependency_controls(locals())  # (15) H1074, in roles.py
+        cache_policy_controls(locals())  # (16) H1053, in roles.py
