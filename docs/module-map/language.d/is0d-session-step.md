@@ -1,0 +1,2 @@
+| `Solidity/Correctness/IntrinsicSession/Step.lean` | The intrinsic session's resource bound (order, admissibility, no failure), executed-frame record, strategy response table and one-action step: deployment and affordable requests as `World.transact` of the actual `World.create` / `World.call`, dropped requests, credits. |
+| `Solidity/Examples/IntrinsicSession/Step.lean` | One-contract checks: an affordable request shows the outcome of `World.transact (World.call …)` with one call frame; a dropped request changes nothing; the deployment records one create frame. |
