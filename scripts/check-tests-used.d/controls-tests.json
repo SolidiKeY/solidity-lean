@@ -695,6 +695,55 @@
         "purpose": "Scanner acceptance:122modules/560declarations,independent token counts,lexical/map corruption,timing/context refusal. Paired default runs pass at pinned snapshot. Source data only;no current map,native Lean,premise/proof credit.",
         "input_scope": ["tests/h62/item2/audit-compiler-transport/frozen-modules.json"],
         "other_reads": "unresolved"
+      },
+      {
+        "path": "tests/h62/item3/g52-differential/blockchain_header_integration.test.mjs",
+        "input_revision": "3bc0fcbbfb07b34ca6c835a4ee204938f2ccf04a",
+        "source_blob": "06b36f62d5bbc4c7ff944c54a4dc6619182114a7",
+        "command": ["node", "--test", "tests/h62/item3/g52-differential/blockchain_header_integration.test.mjs"],
+        "kind": "node-test"
+      },
+      {
+        "path": "tests/h62/item3/g52-differential/blockchain_size_integration.test.mjs",
+        "input_revision": "3bc0fcbbfb07b34ca6c835a4ee204938f2ccf04a",
+        "source_blob": "b34b3416aea80cad1a09cbeffa1fb57429e0dfe3",
+        "command": ["node", "--test", "tests/h62/item3/g52-differential/blockchain_size_integration.test.mjs"],
+        "kind": "node-test"
+      },
+      {
+        "path": "tests/h62/item3/g52-differential/engine_gas_decode.test.mjs",
+        "input_revision": "3bc0fcbbfb07b34ca6c835a4ee204938f2ccf04a",
+        "source_blob": "e85b950018e8f57ef6a2705ed5b222ee4071681c",
+        "command": ["node", "--test", "tests/h62/item3/g52-differential/engine_gas_decode.test.mjs"],
+        "kind": "node-test"
+      },
+      {
+        "path": "tests/h62/item3/g52-differential/engine_payload_encoding.test.mjs",
+        "input_revision": "3bc0fcbbfb07b34ca6c835a4ee204938f2ccf04a",
+        "source_blob": "e8ffdff7d4433261ff203c3cfe960ca609cbd91f",
+        "command": ["node", "--test", "tests/h62/item3/g52-differential/engine_payload_encoding.test.mjs"],
+        "kind": "node-test"
+      },
+      {
+        "path": "tests/h62/item3/g52-differential/engine_payload_reference.test.mjs",
+        "input_revision": "3bc0fcbbfb07b34ca6c835a4ee204938f2ccf04a",
+        "source_blob": "f9121994098a2a7c7186bdda5f813f31d35bc1a0",
+        "command": ["node", "--test", "tests/h62/item3/g52-differential/engine_payload_reference.test.mjs"],
+        "kind": "node-test"
+      },
+      {
+        "path": "tests/h62/item3/g52-differential/engine_x_allocation.test.mjs",
+        "input_revision": "3bc0fcbbfb07b34ca6c835a4ee204938f2ccf04a",
+        "source_blob": "2170e5987cf6f1eeec2c88527ccf6ab72d03584e",
+        "command": ["node", "--test", "tests/h62/item3/g52-differential/engine_x_allocation.test.mjs"],
+        "kind": "node-test"
+      },
+      {
+        "path": "tests/h62/item3/g52-differential/transaction_admission.test.mjs",
+        "input_revision": "3bc0fcbbfb07b34ca6c835a4ee204938f2ccf04a",
+        "source_blob": "bf981bc5d2219f6a4a6131ecbcfc771f61af9fa2",
+        "command": ["node", "--test", "tests/h62/item3/g52-differential/transaction_admission.test.mjs"],
+        "kind": "node-test"
       }
     ]
   },
@@ -710,9 +759,7 @@
           {"path": "scripts/h62/item1/duplication-scanner/bind_signature_fixture.py", "blob": "7959500d77df619f6db0805b973193d2b473b84b", "line": 49},
           {"path": "scripts/h62/item1/duplication-scanner/observe_signature_environment.py", "blob": "0e6fd6f8f0ac05011f37651807733930fd52d257", "line": 117}
         ],
-        "target": "tests/h62/item1/duplication-scanner/ASTSourceBinding.lean",
-        "target_blob": "3a09c148736c221286ee514335b3fb717751410e",
-        "operation": "validated Python read of measured bytes"
+        "target": "tests/h62/item1/duplication-scanner/ASTSourceBinding.lean", "target_blob": "3a09c148736c221286ee514335b3fb717751410e", "operation": "validated Python read of measured bytes"
       },
       {
         "runner": "validated:tests/h62/item1/duplication-scanner/test_project_leaf.py",
@@ -724,9 +771,7 @@
           {"path": "scripts/h62/item1/duplication-scanner/bind_signature_fixture.py", "blob": "7959500d77df619f6db0805b973193d2b473b84b", "line": 49},
           {"path": "scripts/h62/item1/duplication-scanner/observe_signature_environment.py", "blob": "0e6fd6f8f0ac05011f37651807733930fd52d257", "line": 117}
         ],
-        "target": "tests/h62/item1/duplication-scanner/KeySortSourceBinding.lean",
-        "target_blob": "78e1403e95525dfa274639d29f44317f1c10b4a9",
-        "operation": "validated Python read of measured bytes"
+        "target": "tests/h62/item1/duplication-scanner/KeySortSourceBinding.lean", "target_blob": "78e1403e95525dfa274639d29f44317f1c10b4a9", "operation": "validated Python read of measured bytes"
       },
       {
         "runner": "validated:tests/h62/item1/duplication-scanner/test_metadata_observations.py",
@@ -736,9 +781,7 @@
           {"path": "tests/h62/item1/duplication-scanner/test_metadata_observations.py", "blob": "840d7ef1751f04bdf107585d0e5f78cabfc0f340", "line": 83},
           {"path": "scripts/h62/item1/duplication-scanner/observe_metadata_types.py", "blob": "278cb4d198463a55bc01df85d415968eff96554c", "line": 28}
         ],
-        "target": "tests/h62/item1/duplication-scanner/MetadataFingerprintV2.lean",
-        "target_blob": "6449e3bda4944a27e4c183e805c13a3890820a01",
-        "operation": "validated Python read of measured bytes"
+        "target": "tests/h62/item1/duplication-scanner/MetadataFingerprintV2.lean", "target_blob": "6449e3bda4944a27e4c183e805c13a3890820a01", "operation": "validated Python read of measured bytes"
       },
       {
         "runner": "validated:tests/h62/item1/duplication-scanner/test_metadata_observations.py",
@@ -748,9 +791,7 @@
           {"path": "tests/h62/item1/duplication-scanner/test_metadata_observations.py", "blob": "840d7ef1751f04bdf107585d0e5f78cabfc0f340", "line": 83},
           {"path": "scripts/h62/item1/duplication-scanner/observe_metadata_types.py", "blob": "278cb4d198463a55bc01df85d415968eff96554c", "line": 28}
         ],
-        "target": "tests/h62/item1/duplication-scanner/ScopeMetadataObservation.lean",
-        "target_blob": "7053f059f3c24039c485cf2a30ede3e030f4fceb",
-        "operation": "validated Python read of measured bytes"
+        "target": "tests/h62/item1/duplication-scanner/ScopeMetadataObservation.lean", "target_blob": "7053f059f3c24039c485cf2a30ede3e030f4fceb", "operation": "validated Python read of measured bytes"
       },
       {
         "runner": "validated:tests/h62/item1/duplication-scanner/test_scope_binding.py",
@@ -762,9 +803,7 @@
           {"path": "scripts/h62/item1/duplication-scanner/bind_signature_fixture.py", "blob": "7959500d77df619f6db0805b973193d2b473b84b", "line": 49},
           {"path": "scripts/h62/item1/duplication-scanner/observe_signature_environment.py", "blob": "0e6fd6f8f0ac05011f37651807733930fd52d257", "line": 117}
         ],
-        "target": "tests/h62/item1/duplication-scanner/ScopeSourceBinding.lean",
-        "target_blob": "8e2463cf1b669e71265c9c26cfe269e439e88490",
-        "operation": "validated Python read of measured bytes"
+        "target": "tests/h62/item1/duplication-scanner/ScopeSourceBinding.lean", "target_blob": "8e2463cf1b669e71265c9c26cfe269e439e88490", "operation": "validated Python read of measured bytes"
       },
       {
         "runner": "validated:tests/h62/item1/duplication-scanner/test_local_rebuild.py",
@@ -774,9 +813,7 @@
           {"path": "tests/h62/item1/duplication-scanner/test_local_rebuild.py", "blob": "e09087d4d3a0529fc05c3be8c4c13e36b64ac96b", "line": 108},
           {"path": "scripts/h62/item1/duplication-scanner/bind_signature_fixture.py", "blob": "7959500d77df619f6db0805b973193d2b473b84b", "line": 228}
         ],
-        "target": "tests/h62/item1/duplication-scanner/SignatureEnvironment.lean",
-        "target_blob": "13e91e16244b1a2498e1cd74f1a36d0ab0480cf1",
-        "operation": "validated Python read of measured bytes"
+        "target": "tests/h62/item1/duplication-scanner/SignatureEnvironment.lean", "target_blob": "13e91e16244b1a2498e1cd74f1a36d0ab0480cf1", "operation": "validated Python read of measured bytes"
       },
       {
         "runner": "validated:tests/h62/item1/duplication-scanner/test_local_rebuild.py",
@@ -786,9 +823,7 @@
           {"path": "tests/h62/item1/duplication-scanner/test_local_rebuild.py", "blob": "e09087d4d3a0529fc05c3be8c4c13e36b64ac96b", "line": 108},
           {"path": "scripts/h62/item1/duplication-scanner/bind_signature_fixture.py", "blob": "7959500d77df619f6db0805b973193d2b473b84b", "line": 228}
         ],
-        "target": "tests/h62/item1/duplication-scanner/SignatureEnvironmentProbe.lean",
-        "target_blob": "2a71875bde836d09e42daa05f62081d88188475e",
-        "operation": "validated Python read of measured bytes"
+        "target": "tests/h62/item1/duplication-scanner/SignatureEnvironmentProbe.lean", "target_blob": "2a71875bde836d09e42daa05f62081d88188475e", "operation": "validated Python read of measured bytes"
       },
       {
         "runner": "validated:tests/h62/item1/duplication-scanner/test_checked_logs.py",
@@ -798,9 +833,7 @@
           {"path": "tests/h62/item1/duplication-scanner/test_checked_logs.py", "blob": "6b882d590086fa4509e56686fc6e10b36b8b57ad", "line": 96},
           {"path": "scripts/h62/item1/duplication-scanner/bind_source_locations.py", "blob": "58bf4293737b5e55de253be3e5d360f4a0f1cf6c", "line": 174}
         ],
-        "target": "tests/h62/item1/duplication-scanner/SignatureFingerprint.lean",
-        "target_blob": "d8ddd0d0c0a13486e3aa725ee2e4e08d24ffd54b",
-        "operation": "validated Python read of measured bytes"
+        "target": "tests/h62/item1/duplication-scanner/SignatureFingerprint.lean", "target_blob": "d8ddd0d0c0a13486e3aa725ee2e4e08d24ffd54b", "operation": "validated Python read of measured bytes"
       },
       {
         "runner": "validated:tests/h62/item1/duplication-scanner/test_kernel_census.py",
@@ -812,9 +845,7 @@
           {"path": "scripts/h62/item1/duplication-scanner/bind_signature_fixture.py", "blob": "7959500d77df619f6db0805b973193d2b473b84b", "line": 49},
           {"path": "scripts/h62/item1/duplication-scanner/observe_signature_environment.py", "blob": "0e6fd6f8f0ac05011f37651807733930fd52d257", "line": 117}
         ],
-        "target": "tests/h62/item1/duplication-scanner/SignatureKernelCensus.lean",
-        "target_blob": "32c3b651e685f9d0dc628637fe730a630c8ced5f",
-        "operation": "validated Python read of measured bytes"
+        "target": "tests/h62/item1/duplication-scanner/SignatureKernelCensus.lean", "target_blob": "32c3b651e685f9d0dc628637fe730a630c8ced5f", "operation": "validated Python read of measured bytes"
       },
       {
         "runner": "validated:tests/h62/item1/duplication-scanner/test_local_rebuild.py",
@@ -824,9 +855,7 @@
           {"path": "tests/h62/item1/duplication-scanner/test_local_rebuild.py", "blob": "e09087d4d3a0529fc05c3be8c4c13e36b64ac96b", "line": 108},
           {"path": "scripts/h62/item1/duplication-scanner/bind_signature_fixture.py", "blob": "7959500d77df619f6db0805b973193d2b473b84b", "line": 228}
         ],
-        "target": "tests/h62/item1/duplication-scanner/SignatureObservedConsumer.lean",
-        "target_blob": "9ae9fb35de8fbfa7f08229fcd56305d599bb78ba",
-        "operation": "validated Python read of measured bytes"
+        "target": "tests/h62/item1/duplication-scanner/SignatureObservedConsumer.lean", "target_blob": "9ae9fb35de8fbfa7f08229fcd56305d599bb78ba", "operation": "validated Python read of measured bytes"
       },
       {
         "runner": "validated:tests/h62/item1/duplication-scanner/test_checked_logs.py",
@@ -836,9 +865,7 @@
           {"path": "tests/h62/item1/duplication-scanner/test_checked_logs.py", "blob": "6b882d590086fa4509e56686fc6e10b36b8b57ad", "line": 96},
           {"path": "scripts/h62/item1/duplication-scanner/bind_source_locations.py", "blob": "58bf4293737b5e55de253be3e5d360f4a0f1cf6c", "line": 158}
         ],
-        "target": "tests/h62/item1/duplication-scanner/SignatureSourceLocations.lean",
-        "target_blob": "ba515578d1ba37e94f6f53edcd4ea6f8d53ca76b",
-        "operation": "validated Python read of measured bytes"
+        "target": "tests/h62/item1/duplication-scanner/SignatureSourceLocations.lean", "target_blob": "ba515578d1ba37e94f6f53edcd4ea6f8d53ca76b", "operation": "validated Python read of measured bytes"
       },
       {
         "runner": "validated:tests/h62/item1/duplication-scanner/test_index.py",
@@ -847,9 +874,7 @@
           {"path": "tests/h62/item1/duplication-scanner/test_index.py", "blob": "4cc6f8a9c905c8ed827805cee1c0baba12e1e268", "line": 30},
           {"path": "tests/h62/item1/duplication-scanner/test_index.py", "blob": "4cc6f8a9c905c8ed827805cee1c0baba12e1e268", "line": 21}
         ],
-        "target": "tests/h62/item1/duplication-scanner/audit-index.json",
-        "target_blob": "d7077497b9569479333012c79dd7d78294220dd6",
-        "operation": "validated Python read of measured bytes"
+        "target": "tests/h62/item1/duplication-scanner/audit-index.json", "target_blob": "d7077497b9569479333012c79dd7d78294220dd6", "operation": "validated Python read of measured bytes"
       },
       {
         "runner": "validated:tests/h62/item1/duplication-scanner/test_kernel_census.py",
@@ -859,9 +884,7 @@
           {"path": "tests/h62/item1/duplication-scanner/test_kernel_census.py", "blob": "72fa929ff560585bcd8bb9a48937c377f879dbf0", "line": 72},
           {"path": "scripts/h62/item1/duplication-scanner/census_fixture_kernel.py", "blob": "cfdf3ac215d0429eb5bf6b423145373e8a97f3e1", "line": 111}
         ],
-        "target": "tests/h62/item1/duplication-scanner/kernel-census-pins.json",
-        "target_blob": "912b07db2adb12fcea2b88920ea5219c3333a003",
-        "operation": "validated Python read of measured bytes"
+        "target": "tests/h62/item1/duplication-scanner/kernel-census-pins.json", "target_blob": "912b07db2adb12fcea2b88920ea5219c3333a003", "operation": "validated Python read of measured bytes"
       },
       {
         "runner": "validated:tests/h62/item1/duplication-scanner/test_local_rebuild.py",
@@ -870,9 +893,7 @@
           {"path": "tests/h62/item1/duplication-scanner/test_local_rebuild.py", "blob": "e09087d4d3a0529fc05c3be8c4c13e36b64ac96b", "line": 190},
           {"path": "tests/h62/item1/duplication-scanner/test_local_rebuild.py", "blob": "e09087d4d3a0529fc05c3be8c4c13e36b64ac96b", "line": 20}
         ],
-        "target": "tests/h62/item1/duplication-scanner/local-rebuild-pins.json",
-        "target_blob": "2d4716a2c00ab1a7c6f2d31e1ea902fb1f71393b",
-        "operation": "validated Python read of measured bytes"
+        "target": "tests/h62/item1/duplication-scanner/local-rebuild-pins.json", "target_blob": "2d4716a2c00ab1a7c6f2d31e1ea902fb1f71393b", "operation": "validated Python read of measured bytes"
       },
       {
         "runner": "validated:tests/h62/item1/duplication-scanner/test_metadata_observations.py",
@@ -881,9 +902,7 @@
           {"path": "tests/h62/item1/duplication-scanner/test_metadata_observations.py", "blob": "840d7ef1751f04bdf107585d0e5f78cabfc0f340", "line": 90},
           {"path": "tests/h62/item1/duplication-scanner/test_metadata_observations.py", "blob": "840d7ef1751f04bdf107585d0e5f78cabfc0f340", "line": 83}
         ],
-        "target": "tests/h62/item1/duplication-scanner/metadata-observation-pins.json",
-        "target_blob": "e7ebc7524aaebad7895fac074a198be0d6fc1acc",
-        "operation": "validated Python read of measured bytes"
+        "target": "tests/h62/item1/duplication-scanner/metadata-observation-pins.json", "target_blob": "e7ebc7524aaebad7895fac074a198be0d6fc1acc", "operation": "validated Python read of measured bytes"
       },
       {
         "runner": "validated:tests/h62/item1/duplication-scanner/test_project_closure.py",
@@ -892,9 +911,7 @@
           {"path": "tests/h62/item1/duplication-scanner/test_project_closure.py", "blob": "2120a783b3c1d6f84d56ac3f4c16fafad2688aea", "line": 86},
           {"path": "tests/h62/item1/duplication-scanner/test_project_closure.py", "blob": "2120a783b3c1d6f84d56ac3f4c16fafad2688aea", "line": 25}
         ],
-        "target": "tests/h62/item1/duplication-scanner/project-closure-pins.json",
-        "target_blob": "4d3f2d7d382bb0173d0f2adc7b53228b72cca7c2",
-        "operation": "validated Python read of measured bytes"
+        "target": "tests/h62/item1/duplication-scanner/project-closure-pins.json", "target_blob": "4d3f2d7d382bb0173d0f2adc7b53228b72cca7c2", "operation": "validated Python read of measured bytes"
       },
       {
         "runner": "validated:tests/h62/item1/duplication-scanner/test_project_leaf.py",
@@ -903,9 +920,7 @@
           {"path": "tests/h62/item1/duplication-scanner/test_project_leaf.py", "blob": "02cc9229ddf436ef0214fa307161b1a47ec4737b", "line": 77},
           {"path": "tests/h62/item1/duplication-scanner/test_project_leaf.py", "blob": "02cc9229ddf436ef0214fa307161b1a47ec4737b", "line": 29}
         ],
-        "target": "tests/h62/item1/duplication-scanner/project-leaf-pins.json",
-        "target_blob": "38c68576438bac9ac7948af38c65f6cfdfea4585",
-        "operation": "validated Python read of measured bytes"
+        "target": "tests/h62/item1/duplication-scanner/project-leaf-pins.json", "target_blob": "38c68576438bac9ac7948af38c65f6cfdfea4585", "operation": "validated Python read of measured bytes"
       },
       {
         "runner": "validated:tests/h62/item1/duplication-scanner/test_scope_binding.py",
@@ -914,9 +929,7 @@
           {"path": "tests/h62/item1/duplication-scanner/test_scope_binding.py", "blob": "17976f791cf313785f54ea3cd225787979b74529", "line": 75},
           {"path": "tests/h62/item1/duplication-scanner/test_scope_binding.py", "blob": "17976f791cf313785f54ea3cd225787979b74529", "line": 22}
         ],
-        "target": "tests/h62/item1/duplication-scanner/scope-closure-pins.json",
-        "target_blob": "e50baeee8408adef9f6cd3b7e4955f3387789317",
-        "operation": "validated Python read of measured bytes"
+        "target": "tests/h62/item1/duplication-scanner/scope-closure-pins.json", "target_blob": "e50baeee8408adef9f6cd3b7e4955f3387789317", "operation": "validated Python read of measured bytes"
       },
       {
         "runner": "validated:tests/h62/item1/duplication-scanner/test_environment_snapshot.py",
@@ -925,9 +938,7 @@
           {"path": "tests/h62/item1/duplication-scanner/test_environment_snapshot.py", "blob": "a4719eb8e078d3767885dad1cbe094ddddbbac5f", "line": 200},
           {"path": "tests/h62/item1/duplication-scanner/test_environment_snapshot.py", "blob": "a4719eb8e078d3767885dad1cbe094ddddbbac5f", "line": 162}
         ],
-        "target": "tests/h62/item1/duplication-scanner/signature-records.expected.jsonl",
-        "target_blob": "0a1b88e626a11738959375b416f56954f6760d60",
-        "operation": "validated Python read of measured bytes"
+        "target": "tests/h62/item1/duplication-scanner/signature-records.expected.jsonl", "target_blob": "0a1b88e626a11738959375b416f56954f6760d60", "operation": "validated Python read of measured bytes"
       },
       {
         "runner": "validated:tests/h62/item1/duplication-scanner/test_checked_logs.py",
@@ -937,9 +948,7 @@
           {"path": "tests/h62/item1/duplication-scanner/test_checked_logs.py", "blob": "6b882d590086fa4509e56686fc6e10b36b8b57ad", "line": 96},
           {"path": "scripts/h62/item1/duplication-scanner/bind_source_locations.py", "blob": "58bf4293737b5e55de253be3e5d360f4a0f1cf6c", "line": 134}
         ],
-        "target": "tests/h62/item1/duplication-scanner/source-location-pins.json",
-        "target_blob": "7e84f2ddc5f01e3ef8edeaf2ffe6660b34e4a206",
-        "operation": "validated Python read of measured bytes"
+        "target": "tests/h62/item1/duplication-scanner/source-location-pins.json", "target_blob": "7e84f2ddc5f01e3ef8edeaf2ffe6660b34e4a206", "operation": "validated Python read of measured bytes"
       },
       {
         "runner": "validated:tests/h62/item1/p16-generator/test_generator.py",
@@ -948,9 +957,7 @@
           {"path": "tests/h62/item1/p16-generator/test_generator.py", "blob": "8be945d886ec0ad8aefe4930d5ec1eb19fc78e3c", "line": 551},
           {"path": "tests/h62/item1/p16-generator/test_generator.py", "blob": "8be945d886ec0ad8aefe4930d5ec1eb19fc78e3c", "line": 461}
         ],
-        "target": "tests/h62/item1/p16-generator/proposed-gate.patch",
-        "target_blob": "bfa74302374c0ebb08af9ae347dfc9e801646a0a",
-        "operation": "validated Python read of measured bytes"
+        "target": "tests/h62/item1/p16-generator/proposed-gate.patch", "target_blob": "bfa74302374c0ebb08af9ae347dfc9e801646a0a", "operation": "validated Python read of measured bytes"
       },
       {
         "runner": "validated:tests/h62/item1/p16-generator/test_generator.py",
@@ -959,9 +966,7 @@
           {"path": "tests/h62/item1/p16-generator/test_generator.py", "blob": "8be945d886ec0ad8aefe4930d5ec1eb19fc78e3c", "line": 551},
           {"path": "tests/h62/item1/p16-generator/test_generator.py", "blob": "8be945d886ec0ad8aefe4930d5ec1eb19fc78e3c", "line": 108}
         ],
-        "target": "tests/h62/item1/p16-generator/proposed-owner-p16.patch",
-        "target_blob": "d58c609aad3c633d8ee8831db0288c4a5ca0155f",
-        "operation": "validated Python read of measured bytes"
+        "target": "tests/h62/item1/p16-generator/proposed-owner-p16.patch", "target_blob": "d58c609aad3c633d8ee8831db0288c4a5ca0155f", "operation": "validated Python read of measured bytes"
       },
       {
         "runner": "validated:tests/h62/item1/trust-fragments/test_collector.py",
@@ -970,9 +975,7 @@
           {"path": "tests/h62/item1/trust-fragments/test_collector.py", "blob": "34487bdd6a4f7e1c0c55a0427baded2953ab2131", "line": 444},
           {"path": "tests/h62/item1/trust-fragments/test_collector.py", "blob": "34487bdd6a4f7e1c0c55a0427baded2953ab2131", "line": 409}
         ],
-        "target": "tests/h62/item1/trust-fragments/fragments/000-audit.leanfrag",
-        "target_blob": "b789a4ea2b7d84b86bd598328776b7c172dcb8d6",
-        "operation": "validated Python read of measured bytes"
+        "target": "tests/h62/item1/trust-fragments/fragments/000-audit.leanfrag", "target_blob": "b789a4ea2b7d84b86bd598328776b7c172dcb8d6", "operation": "validated Python read of measured bytes"
       },
       {
         "runner": "validated:tests/h62/item1/trust-fragments/test_collector.py",
@@ -981,9 +984,7 @@
           {"path": "tests/h62/item1/trust-fragments/test_collector.py", "blob": "34487bdd6a4f7e1c0c55a0427baded2953ab2131", "line": 444},
           {"path": "tests/h62/item1/trust-fragments/test_collector.py", "blob": "34487bdd6a4f7e1c0c55a0427baded2953ab2131", "line": 409}
         ],
-        "target": "tests/h62/item1/trust-fragments/fragments/001-audit.leanfrag",
-        "target_blob": "16139ed551d0b9af974e3f5d67ea58c21ea7a48f",
-        "operation": "validated Python read of measured bytes"
+        "target": "tests/h62/item1/trust-fragments/fragments/001-audit.leanfrag", "target_blob": "16139ed551d0b9af974e3f5d67ea58c21ea7a48f", "operation": "validated Python read of measured bytes"
       },
       {
         "runner": "validated:tests/h62/item1/trust-fragments/test_collector.py",
@@ -992,9 +993,7 @@
           {"path": "tests/h62/item1/trust-fragments/test_collector.py", "blob": "34487bdd6a4f7e1c0c55a0427baded2953ab2131", "line": 444},
           {"path": "tests/h62/item1/trust-fragments/test_collector.py", "blob": "34487bdd6a4f7e1c0c55a0427baded2953ab2131", "line": 409}
         ],
-        "target": "tests/h62/item1/trust-fragments/fragments/002-audit.leanfrag",
-        "target_blob": "89df340a69557fc39a6368f3541ce91577287c30",
-        "operation": "validated Python read of measured bytes"
+        "target": "tests/h62/item1/trust-fragments/fragments/002-audit.leanfrag", "target_blob": "89df340a69557fc39a6368f3541ce91577287c30", "operation": "validated Python read of measured bytes"
       },
       {
         "runner": "validated:tests/h62/item1/trust-fragments/test_collector.py",
@@ -1003,9 +1002,7 @@
           {"path": "tests/h62/item1/trust-fragments/test_collector.py", "blob": "34487bdd6a4f7e1c0c55a0427baded2953ab2131", "line": 444},
           {"path": "tests/h62/item1/trust-fragments/test_collector.py", "blob": "34487bdd6a4f7e1c0c55a0427baded2953ab2131", "line": 409}
         ],
-        "target": "tests/h62/item1/trust-fragments/fragments/003-audit.leanfrag",
-        "target_blob": "221b9acd01ca3da7f92f3f00f9063e8a3aa584af",
-        "operation": "validated Python read of measured bytes"
+        "target": "tests/h62/item1/trust-fragments/fragments/003-audit.leanfrag", "target_blob": "221b9acd01ca3da7f92f3f00f9063e8a3aa584af", "operation": "validated Python read of measured bytes"
       },
       {
         "runner": "validated:tests/h62/item1/trust-fragments/test_collector.py",
@@ -1014,9 +1011,7 @@
           {"path": "tests/h62/item1/trust-fragments/test_collector.py", "blob": "34487bdd6a4f7e1c0c55a0427baded2953ab2131", "line": 444},
           {"path": "tests/h62/item1/trust-fragments/test_collector.py", "blob": "34487bdd6a4f7e1c0c55a0427baded2953ab2131", "line": 409}
         ],
-        "target": "tests/h62/item1/trust-fragments/fragments/004-audit.leanfrag",
-        "target_blob": "04174a9219c5b8b488bb1d57e43fc4690167613a",
-        "operation": "validated Python read of measured bytes"
+        "target": "tests/h62/item1/trust-fragments/fragments/004-audit.leanfrag", "target_blob": "04174a9219c5b8b488bb1d57e43fc4690167613a", "operation": "validated Python read of measured bytes"
       },
       {
         "runner": "validated:tests/h62/item1/trust-fragments/test_collector.py",
@@ -1025,9 +1020,7 @@
           {"path": "tests/h62/item1/trust-fragments/test_collector.py", "blob": "34487bdd6a4f7e1c0c55a0427baded2953ab2131", "line": 444},
           {"path": "tests/h62/item1/trust-fragments/test_collector.py", "blob": "34487bdd6a4f7e1c0c55a0427baded2953ab2131", "line": 409}
         ],
-        "target": "tests/h62/item1/trust-fragments/fragments/005-audit.leanfrag",
-        "target_blob": "7485aa42fac115e445b671522c90a3fbd8cfbecf",
-        "operation": "validated Python read of measured bytes"
+        "target": "tests/h62/item1/trust-fragments/fragments/005-audit.leanfrag", "target_blob": "7485aa42fac115e445b671522c90a3fbd8cfbecf", "operation": "validated Python read of measured bytes"
       },
       {
         "runner": "validated:tests/h62/item1/trust-fragments/test_collector.py",
@@ -1036,9 +1029,7 @@
           {"path": "tests/h62/item1/trust-fragments/test_collector.py", "blob": "34487bdd6a4f7e1c0c55a0427baded2953ab2131", "line": 444},
           {"path": "tests/h62/item1/trust-fragments/test_collector.py", "blob": "34487bdd6a4f7e1c0c55a0427baded2953ab2131", "line": 409}
         ],
-        "target": "tests/h62/item1/trust-fragments/fragments/006-audit.leanfrag",
-        "target_blob": "694b4a1deeacd563857790beb0e30600c04eee53",
-        "operation": "validated Python read of measured bytes"
+        "target": "tests/h62/item1/trust-fragments/fragments/006-audit.leanfrag", "target_blob": "694b4a1deeacd563857790beb0e30600c04eee53", "operation": "validated Python read of measured bytes"
       },
       {
         "runner": "validated:tests/h62/item1/trust-fragments/test_collector.py",
@@ -1047,9 +1038,7 @@
           {"path": "tests/h62/item1/trust-fragments/test_collector.py", "blob": "34487bdd6a4f7e1c0c55a0427baded2953ab2131", "line": 444},
           {"path": "tests/h62/item1/trust-fragments/test_collector.py", "blob": "34487bdd6a4f7e1c0c55a0427baded2953ab2131", "line": 409}
         ],
-        "target": "tests/h62/item1/trust-fragments/fragments/007-audit.leanfrag",
-        "target_blob": "241038fec2fecda2f297826df4877a951a597f32",
-        "operation": "validated Python read of measured bytes"
+        "target": "tests/h62/item1/trust-fragments/fragments/007-audit.leanfrag", "target_blob": "241038fec2fecda2f297826df4877a951a597f32", "operation": "validated Python read of measured bytes"
       },
       {
         "runner": "validated:tests/h62/item1/trust-fragments/test_collector.py",
@@ -1058,9 +1047,7 @@
           {"path": "tests/h62/item1/trust-fragments/test_collector.py", "blob": "34487bdd6a4f7e1c0c55a0427baded2953ab2131", "line": 444},
           {"path": "tests/h62/item1/trust-fragments/test_collector.py", "blob": "34487bdd6a4f7e1c0c55a0427baded2953ab2131", "line": 409}
         ],
-        "target": "tests/h62/item1/trust-fragments/fragments/008-audit.leanfrag",
-        "target_blob": "322af5959e3595ff80e0674f6344f2e094f7340e",
-        "operation": "validated Python read of measured bytes"
+        "target": "tests/h62/item1/trust-fragments/fragments/008-audit.leanfrag", "target_blob": "322af5959e3595ff80e0674f6344f2e094f7340e", "operation": "validated Python read of measured bytes"
       },
       {
         "runner": "validated:tests/h62/item1/trust-fragments/test_collector.py",
@@ -1069,9 +1056,7 @@
           {"path": "tests/h62/item1/trust-fragments/test_collector.py", "blob": "34487bdd6a4f7e1c0c55a0427baded2953ab2131", "line": 444},
           {"path": "tests/h62/item1/trust-fragments/test_collector.py", "blob": "34487bdd6a4f7e1c0c55a0427baded2953ab2131", "line": 409}
         ],
-        "target": "tests/h62/item1/trust-fragments/fragments/009-audit.leanfrag",
-        "target_blob": "cbf7dbf1a9dcb7ff902531750b60f2fcfd4a3ba9",
-        "operation": "validated Python read of measured bytes"
+        "target": "tests/h62/item1/trust-fragments/fragments/009-audit.leanfrag", "target_blob": "cbf7dbf1a9dcb7ff902531750b60f2fcfd4a3ba9", "operation": "validated Python read of measured bytes"
       },
       {
         "runner": "validated:tests/h62/item1/trust-fragments/test_collector.py",
@@ -1080,9 +1065,7 @@
           {"path": "tests/h62/item1/trust-fragments/test_collector.py", "blob": "34487bdd6a4f7e1c0c55a0427baded2953ab2131", "line": 444},
           {"path": "tests/h62/item1/trust-fragments/test_collector.py", "blob": "34487bdd6a4f7e1c0c55a0427baded2953ab2131", "line": 409}
         ],
-        "target": "tests/h62/item1/trust-fragments/fragments/010-audit.leanfrag",
-        "target_blob": "b94dd200f61d07a454e295c6abf10f46e5499925",
-        "operation": "validated Python read of measured bytes"
+        "target": "tests/h62/item1/trust-fragments/fragments/010-audit.leanfrag", "target_blob": "b94dd200f61d07a454e295c6abf10f46e5499925", "operation": "validated Python read of measured bytes"
       },
       {
         "runner": "validated:tests/h62/item1/trust-fragments/test_collector.py",
@@ -1091,9 +1074,7 @@
           {"path": "tests/h62/item1/trust-fragments/test_collector.py", "blob": "34487bdd6a4f7e1c0c55a0427baded2953ab2131", "line": 444},
           {"path": "tests/h62/item1/trust-fragments/test_collector.py", "blob": "34487bdd6a4f7e1c0c55a0427baded2953ab2131", "line": 409}
         ],
-        "target": "tests/h62/item1/trust-fragments/fragments/011-audit.leanfrag",
-        "target_blob": "1eb436a36526db69ba5ca12978a4f7ad115138b0",
-        "operation": "validated Python read of measured bytes"
+        "target": "tests/h62/item1/trust-fragments/fragments/011-audit.leanfrag", "target_blob": "1eb436a36526db69ba5ca12978a4f7ad115138b0", "operation": "validated Python read of measured bytes"
       },
       {
         "runner": "validated:tests/h62/item1/trust-fragments/test_collector.py",
@@ -1102,9 +1083,7 @@
           {"path": "tests/h62/item1/trust-fragments/test_collector.py", "blob": "34487bdd6a4f7e1c0c55a0427baded2953ab2131", "line": 444},
           {"path": "tests/h62/item1/trust-fragments/test_collector.py", "blob": "34487bdd6a4f7e1c0c55a0427baded2953ab2131", "line": 409}
         ],
-        "target": "tests/h62/item1/trust-fragments/fragments/012-audit.leanfrag",
-        "target_blob": "ddafec3bbf137e6593e0831f2a0d45c19f950cce",
-        "operation": "validated Python read of measured bytes"
+        "target": "tests/h62/item1/trust-fragments/fragments/012-audit.leanfrag", "target_blob": "ddafec3bbf137e6593e0831f2a0d45c19f950cce", "operation": "validated Python read of measured bytes"
       },
       {
         "runner": "validated:tests/h62/item1/trust-fragments/test_collector.py",
@@ -1113,9 +1092,7 @@
           {"path": "tests/h62/item1/trust-fragments/test_collector.py", "blob": "34487bdd6a4f7e1c0c55a0427baded2953ab2131", "line": 444},
           {"path": "tests/h62/item1/trust-fragments/test_collector.py", "blob": "34487bdd6a4f7e1c0c55a0427baded2953ab2131", "line": 409}
         ],
-        "target": "tests/h62/item1/trust-fragments/fragments/013-audit.leanfrag",
-        "target_blob": "8bcc9c85004ba20df2bc2d3ec98f3068af87d8dc",
-        "operation": "validated Python read of measured bytes"
+        "target": "tests/h62/item1/trust-fragments/fragments/013-audit.leanfrag", "target_blob": "8bcc9c85004ba20df2bc2d3ec98f3068af87d8dc", "operation": "validated Python read of measured bytes"
       },
       {
         "runner": "validated:tests/h62/item1/trust-fragments/test_collector.py",
@@ -1124,9 +1101,7 @@
           {"path": "tests/h62/item1/trust-fragments/test_collector.py", "blob": "34487bdd6a4f7e1c0c55a0427baded2953ab2131", "line": 444},
           {"path": "tests/h62/item1/trust-fragments/test_collector.py", "blob": "34487bdd6a4f7e1c0c55a0427baded2953ab2131", "line": 409}
         ],
-        "target": "tests/h62/item1/trust-fragments/fragments/014-audit.leanfrag",
-        "target_blob": "142fbf5bafa366ac77dae68bfca00d777c4fcf23",
-        "operation": "validated Python read of measured bytes"
+        "target": "tests/h62/item1/trust-fragments/fragments/014-audit.leanfrag", "target_blob": "142fbf5bafa366ac77dae68bfca00d777c4fcf23", "operation": "validated Python read of measured bytes"
       },
       {
         "runner": "validated:tests/h62/item1/trust-fragments/test_collector.py",
@@ -1135,9 +1110,7 @@
           {"path": "tests/h62/item1/trust-fragments/test_collector.py", "blob": "34487bdd6a4f7e1c0c55a0427baded2953ab2131", "line": 444},
           {"path": "tests/h62/item1/trust-fragments/test_collector.py", "blob": "34487bdd6a4f7e1c0c55a0427baded2953ab2131", "line": 409}
         ],
-        "target": "tests/h62/item1/trust-fragments/fragments/015-audit.leanfrag",
-        "target_blob": "5b17b3bb114464dee48e9007f80ec511373eb9cb",
-        "operation": "validated Python read of measured bytes"
+        "target": "tests/h62/item1/trust-fragments/fragments/015-audit.leanfrag", "target_blob": "5b17b3bb114464dee48e9007f80ec511373eb9cb", "operation": "validated Python read of measured bytes"
       },
       {
         "runner": "validated:tests/h62/item1/trust-fragments/test_collector.py",
@@ -1146,9 +1119,7 @@
           {"path": "tests/h62/item1/trust-fragments/test_collector.py", "blob": "34487bdd6a4f7e1c0c55a0427baded2953ab2131", "line": 444},
           {"path": "tests/h62/item1/trust-fragments/test_collector.py", "blob": "34487bdd6a4f7e1c0c55a0427baded2953ab2131", "line": 409}
         ],
-        "target": "tests/h62/item1/trust-fragments/fragments/016-audit.leanfrag",
-        "target_blob": "2c493be60eb7e2f1ba0780be3a0d6fe821ddfe60",
-        "operation": "validated Python read of measured bytes"
+        "target": "tests/h62/item1/trust-fragments/fragments/016-audit.leanfrag", "target_blob": "2c493be60eb7e2f1ba0780be3a0d6fe821ddfe60", "operation": "validated Python read of measured bytes"
       },
       {
         "runner": "validated:tests/h62/item1/trust-fragments/test_collector.py",
@@ -1157,9 +1128,7 @@
           {"path": "tests/h62/item1/trust-fragments/test_collector.py", "blob": "34487bdd6a4f7e1c0c55a0427baded2953ab2131", "line": 444},
           {"path": "tests/h62/item1/trust-fragments/test_collector.py", "blob": "34487bdd6a4f7e1c0c55a0427baded2953ab2131", "line": 409}
         ],
-        "target": "tests/h62/item1/trust-fragments/fragments/017-audit.leanfrag",
-        "target_blob": "f49d5b153704139785d84b2563f7d002a1b23f45",
-        "operation": "validated Python read of measured bytes"
+        "target": "tests/h62/item1/trust-fragments/fragments/017-audit.leanfrag", "target_blob": "f49d5b153704139785d84b2563f7d002a1b23f45", "operation": "validated Python read of measured bytes"
       },
       {
         "runner": "validated:tests/h62/item1/trust-fragments/test_collector.py",
@@ -1168,9 +1137,7 @@
           {"path": "tests/h62/item1/trust-fragments/test_collector.py", "blob": "34487bdd6a4f7e1c0c55a0427baded2953ab2131", "line": 444},
           {"path": "tests/h62/item1/trust-fragments/test_collector.py", "blob": "34487bdd6a4f7e1c0c55a0427baded2953ab2131", "line": 409}
         ],
-        "target": "tests/h62/item1/trust-fragments/fragments/018-audit.leanfrag",
-        "target_blob": "7dd5bf9ccb398140ea3b1367f42eb5cc33f22e5d",
-        "operation": "validated Python read of measured bytes"
+        "target": "tests/h62/item1/trust-fragments/fragments/018-audit.leanfrag", "target_blob": "7dd5bf9ccb398140ea3b1367f42eb5cc33f22e5d", "operation": "validated Python read of measured bytes"
       },
       {
         "runner": "validated:tests/h62/item1/trust-fragments/test_collector.py",
@@ -1179,9 +1146,7 @@
           {"path": "tests/h62/item1/trust-fragments/test_collector.py", "blob": "34487bdd6a4f7e1c0c55a0427baded2953ab2131", "line": 444},
           {"path": "tests/h62/item1/trust-fragments/test_collector.py", "blob": "34487bdd6a4f7e1c0c55a0427baded2953ab2131", "line": 409}
         ],
-        "target": "tests/h62/item1/trust-fragments/fragments/019-audit.leanfrag",
-        "target_blob": "8e3c9799fc34ff730cdc836d8491f2f53c042da3",
-        "operation": "validated Python read of measured bytes"
+        "target": "tests/h62/item1/trust-fragments/fragments/019-audit.leanfrag", "target_blob": "8e3c9799fc34ff730cdc836d8491f2f53c042da3", "operation": "validated Python read of measured bytes"
       },
       {
         "runner": "validated:tests/h62/item1/trust-fragments/test_collector.py",
@@ -1190,9 +1155,7 @@
           {"path": "tests/h62/item1/trust-fragments/test_collector.py", "blob": "34487bdd6a4f7e1c0c55a0427baded2953ab2131", "line": 444},
           {"path": "tests/h62/item1/trust-fragments/test_collector.py", "blob": "34487bdd6a4f7e1c0c55a0427baded2953ab2131", "line": 409}
         ],
-        "target": "tests/h62/item1/trust-fragments/fragments/020-audit.leanfrag",
-        "target_blob": "6b44757ff7087bd457eafee009c4c12d10bc8f99",
-        "operation": "validated Python read of measured bytes"
+        "target": "tests/h62/item1/trust-fragments/fragments/020-audit.leanfrag", "target_blob": "6b44757ff7087bd457eafee009c4c12d10bc8f99", "operation": "validated Python read of measured bytes"
       },
       {
         "runner": "validated:tests/h62/item1/trust-fragments/test_collector.py",
@@ -1201,9 +1164,7 @@
           {"path": "tests/h62/item1/trust-fragments/test_collector.py", "blob": "34487bdd6a4f7e1c0c55a0427baded2953ab2131", "line": 444},
           {"path": "tests/h62/item1/trust-fragments/test_collector.py", "blob": "34487bdd6a4f7e1c0c55a0427baded2953ab2131", "line": 409}
         ],
-        "target": "tests/h62/item1/trust-fragments/fragments/021-audit.leanfrag",
-        "target_blob": "26882bbbad327d2970c05fe469c21a8e79576529",
-        "operation": "validated Python read of measured bytes"
+        "target": "tests/h62/item1/trust-fragments/fragments/021-audit.leanfrag", "target_blob": "26882bbbad327d2970c05fe469c21a8e79576529", "operation": "validated Python read of measured bytes"
       },
       {
         "runner": "validated:tests/h62/item1/trust-fragments/test_collector.py",
@@ -1212,9 +1173,7 @@
           {"path": "tests/h62/item1/trust-fragments/test_collector.py", "blob": "34487bdd6a4f7e1c0c55a0427baded2953ab2131", "line": 444},
           {"path": "tests/h62/item1/trust-fragments/test_collector.py", "blob": "34487bdd6a4f7e1c0c55a0427baded2953ab2131", "line": 409}
         ],
-        "target": "tests/h62/item1/trust-fragments/fragments/022-audit.leanfrag",
-        "target_blob": "fad3a58dfdf32236e4fd7fab0fa1196a57caf334",
-        "operation": "validated Python read of measured bytes"
+        "target": "tests/h62/item1/trust-fragments/fragments/022-audit.leanfrag", "target_blob": "fad3a58dfdf32236e4fd7fab0fa1196a57caf334", "operation": "validated Python read of measured bytes"
       },
       {
         "runner": "validated:tests/h62/item1/trust-fragments/test_collector.py",
@@ -1223,9 +1182,7 @@
           {"path": "tests/h62/item1/trust-fragments/test_collector.py", "blob": "34487bdd6a4f7e1c0c55a0427baded2953ab2131", "line": 444},
           {"path": "tests/h62/item1/trust-fragments/test_collector.py", "blob": "34487bdd6a4f7e1c0c55a0427baded2953ab2131", "line": 409}
         ],
-        "target": "tests/h62/item1/trust-fragments/fragments/023-audit.leanfrag",
-        "target_blob": "697fb9a67e9fd6044a68be0a11a9bab1011ea736",
-        "operation": "validated Python read of measured bytes"
+        "target": "tests/h62/item1/trust-fragments/fragments/023-audit.leanfrag", "target_blob": "697fb9a67e9fd6044a68be0a11a9bab1011ea736", "operation": "validated Python read of measured bytes"
       },
       {
         "runner": "validated:tests/h62/item1/trust-fragments/test_collector.py",
@@ -1234,9 +1191,7 @@
           {"path": "tests/h62/item1/trust-fragments/test_collector.py", "blob": "34487bdd6a4f7e1c0c55a0427baded2953ab2131", "line": 444},
           {"path": "tests/h62/item1/trust-fragments/test_collector.py", "blob": "34487bdd6a4f7e1c0c55a0427baded2953ab2131", "line": 409}
         ],
-        "target": "tests/h62/item1/trust-fragments/fragments/024-audit.leanfrag",
-        "target_blob": "8a697942c95bc514cff4a1a69d28a27d84082d59",
-        "operation": "validated Python read of measured bytes"
+        "target": "tests/h62/item1/trust-fragments/fragments/024-audit.leanfrag", "target_blob": "8a697942c95bc514cff4a1a69d28a27d84082d59", "operation": "validated Python read of measured bytes"
       },
       {
         "runner": "validated:tests/h62/item1/trust-fragments/test_collector.py",
@@ -1245,9 +1200,7 @@
           {"path": "tests/h62/item1/trust-fragments/test_collector.py", "blob": "34487bdd6a4f7e1c0c55a0427baded2953ab2131", "line": 444},
           {"path": "tests/h62/item1/trust-fragments/test_collector.py", "blob": "34487bdd6a4f7e1c0c55a0427baded2953ab2131", "line": 409}
         ],
-        "target": "tests/h62/item1/trust-fragments/fragments/025-audit.leanfrag",
-        "target_blob": "a2d73507b2841051b8550c35b906e389f965a4b0",
-        "operation": "validated Python read of measured bytes"
+        "target": "tests/h62/item1/trust-fragments/fragments/025-audit.leanfrag", "target_blob": "a2d73507b2841051b8550c35b906e389f965a4b0", "operation": "validated Python read of measured bytes"
       },
       {
         "runner": "validated:tests/h62/item1/trust-fragments/test_collector.py",
@@ -1256,9 +1209,7 @@
           {"path": "tests/h62/item1/trust-fragments/test_collector.py", "blob": "34487bdd6a4f7e1c0c55a0427baded2953ab2131", "line": 444},
           {"path": "tests/h62/item1/trust-fragments/test_collector.py", "blob": "34487bdd6a4f7e1c0c55a0427baded2953ab2131", "line": 409}
         ],
-        "target": "tests/h62/item1/trust-fragments/fragments/026-audit.leanfrag",
-        "target_blob": "d2baf56bf43fe3537293687ac48d2661acf2a5b8",
-        "operation": "validated Python read of measured bytes"
+        "target": "tests/h62/item1/trust-fragments/fragments/026-audit.leanfrag", "target_blob": "d2baf56bf43fe3537293687ac48d2661acf2a5b8", "operation": "validated Python read of measured bytes"
       },
       {
         "runner": "validated:tests/h62/item1/trust-fragments/test_collector.py",
@@ -1267,9 +1218,7 @@
           {"path": "tests/h62/item1/trust-fragments/test_collector.py", "blob": "34487bdd6a4f7e1c0c55a0427baded2953ab2131", "line": 444},
           {"path": "tests/h62/item1/trust-fragments/test_collector.py", "blob": "34487bdd6a4f7e1c0c55a0427baded2953ab2131", "line": 409}
         ],
-        "target": "tests/h62/item1/trust-fragments/fragments/027-audit.leanfrag",
-        "target_blob": "6316c52ba1d70df0751194ece71a8f40cb416a73",
-        "operation": "validated Python read of measured bytes"
+        "target": "tests/h62/item1/trust-fragments/fragments/027-audit.leanfrag", "target_blob": "6316c52ba1d70df0751194ece71a8f40cb416a73", "operation": "validated Python read of measured bytes"
       },
       {
         "runner": "validated:tests/h62/item1/trust-fragments/test_collector.py",
@@ -1278,9 +1227,7 @@
           {"path": "tests/h62/item1/trust-fragments/test_collector.py", "blob": "34487bdd6a4f7e1c0c55a0427baded2953ab2131", "line": 444},
           {"path": "tests/h62/item1/trust-fragments/test_collector.py", "blob": "34487bdd6a4f7e1c0c55a0427baded2953ab2131", "line": 409}
         ],
-        "target": "tests/h62/item1/trust-fragments/fragments/028-audit.leanfrag",
-        "target_blob": "758ed53793f2cfd95772c0af01d6c63ccf0687f9",
-        "operation": "validated Python read of measured bytes"
+        "target": "tests/h62/item1/trust-fragments/fragments/028-audit.leanfrag", "target_blob": "758ed53793f2cfd95772c0af01d6c63ccf0687f9", "operation": "validated Python read of measured bytes"
       },
       {
         "runner": "validated:tests/h62/item1/trust-fragments/test_collector.py",
@@ -1289,9 +1236,7 @@
           {"path": "tests/h62/item1/trust-fragments/test_collector.py", "blob": "34487bdd6a4f7e1c0c55a0427baded2953ab2131", "line": 444},
           {"path": "tests/h62/item1/trust-fragments/test_collector.py", "blob": "34487bdd6a4f7e1c0c55a0427baded2953ab2131", "line": 409}
         ],
-        "target": "tests/h62/item1/trust-fragments/fragments/029-audit.leanfrag",
-        "target_blob": "279af862273cb27678db3945b69fafa8a52f250b",
-        "operation": "validated Python read of measured bytes"
+        "target": "tests/h62/item1/trust-fragments/fragments/029-audit.leanfrag", "target_blob": "279af862273cb27678db3945b69fafa8a52f250b", "operation": "validated Python read of measured bytes"
       },
       {
         "runner": "validated:tests/h62/item1/trust-fragments/test_collector.py",
@@ -1300,9 +1245,7 @@
           {"path": "tests/h62/item1/trust-fragments/test_collector.py", "blob": "34487bdd6a4f7e1c0c55a0427baded2953ab2131", "line": 444},
           {"path": "tests/h62/item1/trust-fragments/test_collector.py", "blob": "34487bdd6a4f7e1c0c55a0427baded2953ab2131", "line": 409}
         ],
-        "target": "tests/h62/item1/trust-fragments/fragments/030-audit.leanfrag",
-        "target_blob": "4207837b247a2bfdcfd1bd41e74dd689b49ec4e9",
-        "operation": "validated Python read of measured bytes"
+        "target": "tests/h62/item1/trust-fragments/fragments/030-audit.leanfrag", "target_blob": "4207837b247a2bfdcfd1bd41e74dd689b49ec4e9", "operation": "validated Python read of measured bytes"
       },
       {
         "runner": "validated:tests/h62/item1/trust-fragments/test_collector.py",
@@ -1311,9 +1254,7 @@
           {"path": "tests/h62/item1/trust-fragments/test_collector.py", "blob": "34487bdd6a4f7e1c0c55a0427baded2953ab2131", "line": 444},
           {"path": "tests/h62/item1/trust-fragments/test_collector.py", "blob": "34487bdd6a4f7e1c0c55a0427baded2953ab2131", "line": 409}
         ],
-        "target": "tests/h62/item1/trust-fragments/fragments/031-audit.leanfrag",
-        "target_blob": "c84d1715d849331137d27aacec624579383af052",
-        "operation": "validated Python read of measured bytes"
+        "target": "tests/h62/item1/trust-fragments/fragments/031-audit.leanfrag", "target_blob": "c84d1715d849331137d27aacec624579383af052", "operation": "validated Python read of measured bytes"
       },
       {
         "runner": "validated:tests/h62/item1/trust-fragments/test_collector.py",
@@ -1322,9 +1263,7 @@
           {"path": "tests/h62/item1/trust-fragments/test_collector.py", "blob": "34487bdd6a4f7e1c0c55a0427baded2953ab2131", "line": 444},
           {"path": "tests/h62/item1/trust-fragments/test_collector.py", "blob": "34487bdd6a4f7e1c0c55a0427baded2953ab2131", "line": 409}
         ],
-        "target": "tests/h62/item1/trust-fragments/fragments/032-audit.leanfrag",
-        "target_blob": "a4dfefbc4beb4096ab1226e663108a8e2caf78d7",
-        "operation": "validated Python read of measured bytes"
+        "target": "tests/h62/item1/trust-fragments/fragments/032-audit.leanfrag", "target_blob": "a4dfefbc4beb4096ab1226e663108a8e2caf78d7", "operation": "validated Python read of measured bytes"
       },
       {
         "runner": "validated:tests/h62/item1/trust-fragments/test_collector.py",
@@ -1333,9 +1272,7 @@
           {"path": "tests/h62/item1/trust-fragments/test_collector.py", "blob": "34487bdd6a4f7e1c0c55a0427baded2953ab2131", "line": 444},
           {"path": "tests/h62/item1/trust-fragments/test_collector.py", "blob": "34487bdd6a4f7e1c0c55a0427baded2953ab2131", "line": 409}
         ],
-        "target": "tests/h62/item1/trust-fragments/fragments/033-audit.leanfrag",
-        "target_blob": "969fabdb9312fea0a3ea4602e871aa964e76e656",
-        "operation": "validated Python read of measured bytes"
+        "target": "tests/h62/item1/trust-fragments/fragments/033-audit.leanfrag", "target_blob": "969fabdb9312fea0a3ea4602e871aa964e76e656", "operation": "validated Python read of measured bytes"
       },
       {
         "runner": "validated:tests/h62/item1/trust-fragments/test_collector.py",
@@ -1344,9 +1281,7 @@
           {"path": "tests/h62/item1/trust-fragments/test_collector.py", "blob": "34487bdd6a4f7e1c0c55a0427baded2953ab2131", "line": 444},
           {"path": "tests/h62/item1/trust-fragments/test_collector.py", "blob": "34487bdd6a4f7e1c0c55a0427baded2953ab2131", "line": 409}
         ],
-        "target": "tests/h62/item1/trust-fragments/fragments/034-audit.leanfrag",
-        "target_blob": "ee6aed4d03074a5df3927c446e72cb211c276f5f",
-        "operation": "validated Python read of measured bytes"
+        "target": "tests/h62/item1/trust-fragments/fragments/034-audit.leanfrag", "target_blob": "ee6aed4d03074a5df3927c446e72cb211c276f5f", "operation": "validated Python read of measured bytes"
       },
       {
         "runner": "validated:tests/h62/item1/trust-fragments/test_collector.py",
@@ -1355,9 +1290,7 @@
           {"path": "tests/h62/item1/trust-fragments/test_collector.py", "blob": "34487bdd6a4f7e1c0c55a0427baded2953ab2131", "line": 444},
           {"path": "tests/h62/item1/trust-fragments/test_collector.py", "blob": "34487bdd6a4f7e1c0c55a0427baded2953ab2131", "line": 409}
         ],
-        "target": "tests/h62/item1/trust-fragments/fragments/035-audit.leanfrag",
-        "target_blob": "61f149b2c9800005adda2d734b4f35f1e7abf071",
-        "operation": "validated Python read of measured bytes"
+        "target": "tests/h62/item1/trust-fragments/fragments/035-audit.leanfrag", "target_blob": "61f149b2c9800005adda2d734b4f35f1e7abf071", "operation": "validated Python read of measured bytes"
       },
       {
         "runner": "validated:tests/h62/item1/trust-fragments/test_collector.py",
@@ -1366,9 +1299,7 @@
           {"path": "tests/h62/item1/trust-fragments/test_collector.py", "blob": "34487bdd6a4f7e1c0c55a0427baded2953ab2131", "line": 444},
           {"path": "tests/h62/item1/trust-fragments/test_collector.py", "blob": "34487bdd6a4f7e1c0c55a0427baded2953ab2131", "line": 409}
         ],
-        "target": "tests/h62/item1/trust-fragments/fragments/036-audit.leanfrag",
-        "target_blob": "b94d1fee3c13cfec21b12cf7f5ddcc0e593dd757",
-        "operation": "validated Python read of measured bytes"
+        "target": "tests/h62/item1/trust-fragments/fragments/036-audit.leanfrag", "target_blob": "b94d1fee3c13cfec21b12cf7f5ddcc0e593dd757", "operation": "validated Python read of measured bytes"
       },
       {
         "runner": "validated:tests/h62/item1/trust-fragments/test_collector.py",
@@ -1377,9 +1308,7 @@
           {"path": "tests/h62/item1/trust-fragments/test_collector.py", "blob": "34487bdd6a4f7e1c0c55a0427baded2953ab2131", "line": 444},
           {"path": "tests/h62/item1/trust-fragments/test_collector.py", "blob": "34487bdd6a4f7e1c0c55a0427baded2953ab2131", "line": 409}
         ],
-        "target": "tests/h62/item1/trust-fragments/fragments/037-audit.leanfrag",
-        "target_blob": "aca6b8c692545326b7a59d626df3083d5f5fc8de",
-        "operation": "validated Python read of measured bytes"
+        "target": "tests/h62/item1/trust-fragments/fragments/037-audit.leanfrag", "target_blob": "aca6b8c692545326b7a59d626df3083d5f5fc8de", "operation": "validated Python read of measured bytes"
       },
       {
         "runner": "validated:tests/h62/item1/trust-fragments/test_collector.py",
@@ -1388,9 +1317,7 @@
           {"path": "tests/h62/item1/trust-fragments/test_collector.py", "blob": "34487bdd6a4f7e1c0c55a0427baded2953ab2131", "line": 444},
           {"path": "tests/h62/item1/trust-fragments/test_collector.py", "blob": "34487bdd6a4f7e1c0c55a0427baded2953ab2131", "line": 409}
         ],
-        "target": "tests/h62/item1/trust-fragments/fragments/038-audit.leanfrag",
-        "target_blob": "73b90b3b8e9061a83148b94637258b37785036d6",
-        "operation": "validated Python read of measured bytes"
+        "target": "tests/h62/item1/trust-fragments/fragments/038-audit.leanfrag", "target_blob": "73b90b3b8e9061a83148b94637258b37785036d6", "operation": "validated Python read of measured bytes"
       },
       {
         "runner": "validated:tests/h62/item1/trust-fragments/test_collector.py",
@@ -1399,9 +1326,7 @@
           {"path": "tests/h62/item1/trust-fragments/test_collector.py", "blob": "34487bdd6a4f7e1c0c55a0427baded2953ab2131", "line": 444},
           {"path": "tests/h62/item1/trust-fragments/test_collector.py", "blob": "34487bdd6a4f7e1c0c55a0427baded2953ab2131", "line": 409}
         ],
-        "target": "tests/h62/item1/trust-fragments/fragments/039-audit.leanfrag",
-        "target_blob": "b559a550de15d87249c5c4d6004b73b4d3ef4840",
-        "operation": "validated Python read of measured bytes"
+        "target": "tests/h62/item1/trust-fragments/fragments/039-audit.leanfrag", "target_blob": "b559a550de15d87249c5c4d6004b73b4d3ef4840", "operation": "validated Python read of measured bytes"
       },
       {
         "runner": "validated:tests/h62/item1/trust-fragments/test_collector.py",
@@ -1410,9 +1335,7 @@
           {"path": "tests/h62/item1/trust-fragments/test_collector.py", "blob": "34487bdd6a4f7e1c0c55a0427baded2953ab2131", "line": 444},
           {"path": "tests/h62/item1/trust-fragments/test_collector.py", "blob": "34487bdd6a4f7e1c0c55a0427baded2953ab2131", "line": 409}
         ],
-        "target": "tests/h62/item1/trust-fragments/fragments/040-audit.leanfrag",
-        "target_blob": "129b69da6424ec1d418b931170c1779792cad99f",
-        "operation": "validated Python read of measured bytes"
+        "target": "tests/h62/item1/trust-fragments/fragments/040-audit.leanfrag", "target_blob": "129b69da6424ec1d418b931170c1779792cad99f", "operation": "validated Python read of measured bytes"
       },
       {
         "runner": "validated:tests/h62/item1/trust-fragments/test_collector.py",
@@ -1421,9 +1344,7 @@
           {"path": "tests/h62/item1/trust-fragments/test_collector.py", "blob": "34487bdd6a4f7e1c0c55a0427baded2953ab2131", "line": 444},
           {"path": "tests/h62/item1/trust-fragments/test_collector.py", "blob": "34487bdd6a4f7e1c0c55a0427baded2953ab2131", "line": 409}
         ],
-        "target": "tests/h62/item1/trust-fragments/fragments/041-audit.leanfrag",
-        "target_blob": "b52cc2d4bf7008981ab5e6e8d9db0bc7ff8eb346",
-        "operation": "validated Python read of measured bytes"
+        "target": "tests/h62/item1/trust-fragments/fragments/041-audit.leanfrag", "target_blob": "b52cc2d4bf7008981ab5e6e8d9db0bc7ff8eb346", "operation": "validated Python read of measured bytes"
       },
       {
         "runner": "validated:tests/h62/item1/trust-fragments/test_collector.py",
@@ -1432,9 +1353,7 @@
           {"path": "tests/h62/item1/trust-fragments/test_collector.py", "blob": "34487bdd6a4f7e1c0c55a0427baded2953ab2131", "line": 444},
           {"path": "tests/h62/item1/trust-fragments/test_collector.py", "blob": "34487bdd6a4f7e1c0c55a0427baded2953ab2131", "line": 409}
         ],
-        "target": "tests/h62/item1/trust-fragments/fragments/042-audit.leanfrag",
-        "target_blob": "7c937edc8ab29003649ace83843ce502e07bce0b",
-        "operation": "validated Python read of measured bytes"
+        "target": "tests/h62/item1/trust-fragments/fragments/042-audit.leanfrag", "target_blob": "7c937edc8ab29003649ace83843ce502e07bce0b", "operation": "validated Python read of measured bytes"
       },
       {
         "runner": "validated:tests/h62/item1/trust-fragments/test_collector.py",
@@ -1443,9 +1362,7 @@
           {"path": "tests/h62/item1/trust-fragments/test_collector.py", "blob": "34487bdd6a4f7e1c0c55a0427baded2953ab2131", "line": 444},
           {"path": "tests/h62/item1/trust-fragments/test_collector.py", "blob": "34487bdd6a4f7e1c0c55a0427baded2953ab2131", "line": 409}
         ],
-        "target": "tests/h62/item1/trust-fragments/fragments/043-audit.leanfrag",
-        "target_blob": "5a6425a5a46153bd5d2a999d12c91c6b427a61fd",
-        "operation": "validated Python read of measured bytes"
+        "target": "tests/h62/item1/trust-fragments/fragments/043-audit.leanfrag", "target_blob": "5a6425a5a46153bd5d2a999d12c91c6b427a61fd", "operation": "validated Python read of measured bytes"
       },
       {
         "runner": "validated:tests/h62/item2/audit-bytecode-selection/test_exact_domains.py",
@@ -1454,9 +1371,7 @@
           {"path": "tests/h62/item2/audit-bytecode-selection/test_exact_domains.py", "blob": "ccd3b4d3846d9f82c201997aa8763f99b32c93e6", "line": 231},
           {"path": "tests/h62/item2/audit-bytecode-selection/test_exact_domains.py", "blob": "ccd3b4d3846d9f82c201997aa8763f99b32c93e6", "line": 19}
         ],
-        "target": "tests/h62/item2/audit-bytecode-selection/HypothesisDomains.lean",
-        "target_blob": "810f4b6f1be2b1fffc06f92985fe1c89e9a10403",
-        "operation": "validated Python read of measured bytes"
+        "target": "tests/h62/item2/audit-bytecode-selection/HypothesisDomains.lean", "target_blob": "810f4b6f1be2b1fffc06f92985fe1c89e9a10403", "operation": "validated Python read of measured bytes"
       },
       {
         "runner": "validated:tests/h62/item2/audit-bytecode-selection/test_field_domains.py",
@@ -1465,9 +1380,7 @@
           {"path": "tests/h62/item2/audit-bytecode-selection/test_field_domains.py", "blob": "076b28dd0bb72484ca55b25bbc20416864c2b1be", "line": 160},
           {"path": "tests/h62/item2/audit-bytecode-selection/test_field_domains.py", "blob": "076b28dd0bb72484ca55b25bbc20416864c2b1be", "line": 55}
         ],
-        "target": "tests/h62/item2/audit-bytecode-selection/compiler-field-witnesses.json",
-        "target_blob": "96302f39ad35273e8c9628adfd5e36de96f09cef",
-        "operation": "validated Python read of measured bytes"
+        "target": "tests/h62/item2/audit-bytecode-selection/compiler-field-witnesses.json", "target_blob": "96302f39ad35273e8c9628adfd5e36de96f09cef", "operation": "validated Python read of measured bytes"
       },
       {
         "runner": "validated:tests/h62/item2/audit-bytecode-selection/test_field_domains.py",
@@ -1477,9 +1390,7 @@
           {"path": "tests/h62/item2/audit-bytecode-selection/test_field_domains.py", "blob": "076b28dd0bb72484ca55b25bbc20416864c2b1be", "line": 155},
           {"path": "tests/h62/item2/audit-bytecode-selection/test_field_domains.py", "blob": "076b28dd0bb72484ca55b25bbc20416864c2b1be", "line": 155}
         ],
-        "target": "tests/h62/item2/audit-bytecode-selection/composition-field-support.lean.txt",
-        "target_blob": "2aefde04ad9f78d22e9d35854c47b51706570354",
-        "operation": "validated Python read of measured bytes"
+        "target": "tests/h62/item2/audit-bytecode-selection/composition-field-support.lean.txt", "target_blob": "2aefde04ad9f78d22e9d35854c47b51706570354", "operation": "validated Python read of measured bytes"
       },
       {
         "runner": "validated:tests/h62/item2/audit-bytecode-selection/test_field_domains.py",
@@ -1488,9 +1399,7 @@
           {"path": "tests/h62/item2/audit-bytecode-selection/test_field_domains.py", "blob": "076b28dd0bb72484ca55b25bbc20416864c2b1be", "line": 160},
           {"path": "tests/h62/item2/audit-bytecode-selection/test_field_domains.py", "blob": "076b28dd0bb72484ca55b25bbc20416864c2b1be", "line": 143}
         ],
-        "target": "tests/h62/item2/audit-bytecode-selection/composition-field-witnesses.json",
-        "target_blob": "3621467b17a294361dda62487b11021f8325b222",
-        "operation": "validated Python read of measured bytes"
+        "target": "tests/h62/item2/audit-bytecode-selection/composition-field-witnesses.json", "target_blob": "3621467b17a294361dda62487b11021f8325b222", "operation": "validated Python read of measured bytes"
       },
       {
         "runner": "validated:tests/h62/item2/audit-bytecode-selection/test_field_domains.py",
@@ -1499,9 +1408,7 @@
           {"path": "tests/h62/item2/audit-bytecode-selection/test_field_domains.py", "blob": "076b28dd0bb72484ca55b25bbc20416864c2b1be", "line": 160},
           {"path": "tests/h62/item2/audit-bytecode-selection/test_field_domains.py", "blob": "076b28dd0bb72484ca55b25bbc20416864c2b1be", "line": 105}
         ],
-        "target": "tests/h62/item2/audit-bytecode-selection/controls-domain-witnesses.json",
-        "target_blob": "0be7be2ce013506e9ab19bbea05823a59fd03bab",
-        "operation": "validated Python read of measured bytes"
+        "target": "tests/h62/item2/audit-bytecode-selection/controls-domain-witnesses.json", "target_blob": "0be7be2ce013506e9ab19bbea05823a59fd03bab", "operation": "validated Python read of measured bytes"
       },
       {
         "runner": "validated:tests/h62/item2/audit-bytecode-selection/test_field_domains.py",
@@ -1510,9 +1417,7 @@
           {"path": "tests/h62/item2/audit-bytecode-selection/test_field_domains.py", "blob": "076b28dd0bb72484ca55b25bbc20416864c2b1be", "line": 160},
           {"path": "tests/h62/item2/audit-bytecode-selection/test_field_domains.py", "blob": "076b28dd0bb72484ca55b25bbc20416864c2b1be", "line": 69}
         ],
-        "target": "tests/h62/item2/audit-bytecode-selection/decoder-field-support.lean.txt",
-        "target_blob": "2c26a5c114d00934b90df1ed2118477e4ee96fda",
-        "operation": "validated Python read of measured bytes"
+        "target": "tests/h62/item2/audit-bytecode-selection/decoder-field-support.lean.txt", "target_blob": "2c26a5c114d00934b90df1ed2118477e4ee96fda", "operation": "validated Python read of measured bytes"
       },
       {
         "runner": "validated:tests/h62/item2/audit-bytecode-selection/test_field_domains.py",
@@ -1521,9 +1426,7 @@
           {"path": "tests/h62/item2/audit-bytecode-selection/test_field_domains.py", "blob": "076b28dd0bb72484ca55b25bbc20416864c2b1be", "line": 160},
           {"path": "tests/h62/item2/audit-bytecode-selection/test_field_domains.py", "blob": "076b28dd0bb72484ca55b25bbc20416864c2b1be", "line": 80}
         ],
-        "target": "tests/h62/item2/audit-bytecode-selection/decoder-field-witnesses.json",
-        "target_blob": "dca6d66dbc93db5e28c5ad9c04aff790f279dfa8",
-        "operation": "validated Python read of measured bytes"
+        "target": "tests/h62/item2/audit-bytecode-selection/decoder-field-witnesses.json", "target_blob": "dca6d66dbc93db5e28c5ad9c04aff790f279dfa8", "operation": "validated Python read of measured bytes"
       },
       {
         "runner": "validated:tests/h62/item2/audit-bytecode-selection/test_exact_domains.py",
@@ -1532,9 +1435,7 @@
           {"path": "tests/h62/item2/audit-bytecode-selection/test_exact_domains.py", "blob": "ccd3b4d3846d9f82c201997aa8763f99b32c93e6", "line": 231},
           {"path": "tests/h62/item2/audit-bytecode-selection/test_exact_domains.py", "blob": "ccd3b4d3846d9f82c201997aa8763f99b32c93e6", "line": 20}
         ],
-        "target": "tests/h62/item2/audit-bytecode-selection/exact-gate-domains.txt",
-        "target_blob": "33c94d08186c313f5e5e0cad0ce58c277fe62cfe",
-        "operation": "validated Python read of measured bytes"
+        "target": "tests/h62/item2/audit-bytecode-selection/exact-gate-domains.txt", "target_blob": "33c94d08186c313f5e5e0cad0ce58c277fe62cfe", "operation": "validated Python read of measured bytes"
       },
       {
         "runner": "validated:tests/h62/item2/audit-bytecode-selection/test_field_domains.py",
@@ -1544,9 +1445,7 @@
           {"path": "tests/h62/item2/audit-bytecode-selection/test_field_domains.py", "blob": "076b28dd0bb72484ca55b25bbc20416864c2b1be", "line": 136},
           {"path": "tests/h62/item2/audit-bytecode-selection/test_field_domains.py", "blob": "076b28dd0bb72484ca55b25bbc20416864c2b1be", "line": 136}
         ],
-        "target": "tests/h62/item2/audit-bytecode-selection/runtime-consumer-support.lean.txt",
-        "target_blob": "398ec3aedde209d2408a34cfdfccac93b7b07700",
-        "operation": "validated Python read of measured bytes"
+        "target": "tests/h62/item2/audit-bytecode-selection/runtime-consumer-support.lean.txt", "target_blob": "398ec3aedde209d2408a34cfdfccac93b7b07700", "operation": "validated Python read of measured bytes"
       },
       {
         "runner": "validated:tests/h62/item2/audit-bytecode-selection/test_field_domains.py",
@@ -1555,9 +1454,7 @@
           {"path": "tests/h62/item2/audit-bytecode-selection/test_field_domains.py", "blob": "076b28dd0bb72484ca55b25bbc20416864c2b1be", "line": 160},
           {"path": "tests/h62/item2/audit-bytecode-selection/test_field_domains.py", "blob": "076b28dd0bb72484ca55b25bbc20416864c2b1be", "line": 128}
         ],
-        "target": "tests/h62/item2/audit-bytecode-selection/runtime-consumer-witnesses.json",
-        "target_blob": "364003c196b34fb05b29887571f4fe70da5e5bd0",
-        "operation": "validated Python read of measured bytes"
+        "target": "tests/h62/item2/audit-bytecode-selection/runtime-consumer-witnesses.json", "target_blob": "364003c196b34fb05b29887571f4fe70da5e5bd0", "operation": "validated Python read of measured bytes"
       },
       {
         "runner": "validated:tests/h62/item2/audit-bytecode-selection/test_field_domains.py",
@@ -1566,9 +1463,7 @@
           {"path": "tests/h62/item2/audit-bytecode-selection/test_field_domains.py", "blob": "076b28dd0bb72484ca55b25bbc20416864c2b1be", "line": 160},
           {"path": "tests/h62/item2/audit-bytecode-selection/test_field_domains.py", "blob": "076b28dd0bb72484ca55b25bbc20416864c2b1be", "line": 120}
         ],
-        "target": "tests/h62/item2/audit-bytecode-selection/runtime-control-support.lean.txt",
-        "target_blob": "60d86eea38a32e336fbe29f3e957bfd4cd01b21d",
-        "operation": "validated Python read of measured bytes"
+        "target": "tests/h62/item2/audit-bytecode-selection/runtime-control-support.lean.txt", "target_blob": "60d86eea38a32e336fbe29f3e957bfd4cd01b21d", "operation": "validated Python read of measured bytes"
       },
       {
         "runner": "validated:tests/h62/item2/audit-bytecode-selection/test_field_domains.py",
@@ -1577,9 +1472,7 @@
           {"path": "tests/h62/item2/audit-bytecode-selection/test_field_domains.py", "blob": "076b28dd0bb72484ca55b25bbc20416864c2b1be", "line": 160},
           {"path": "tests/h62/item2/audit-bytecode-selection/test_field_domains.py", "blob": "076b28dd0bb72484ca55b25bbc20416864c2b1be", "line": 115}
         ],
-        "target": "tests/h62/item2/audit-bytecode-selection/runtime-control-witness.json",
-        "target_blob": "6c56e1c02f152eecb1f48e00ff10d118df2d5c7c",
-        "operation": "validated Python read of measured bytes"
+        "target": "tests/h62/item2/audit-bytecode-selection/runtime-control-witness.json", "target_blob": "6c56e1c02f152eecb1f48e00ff10d118df2d5c7c", "operation": "validated Python read of measured bytes"
       },
       {
         "runner": "validated:tests/h62/item2/audit-bytecode-selection/test_field_domains.py",
@@ -1588,9 +1481,7 @@
           {"path": "tests/h62/item2/audit-bytecode-selection/test_field_domains.py", "blob": "076b28dd0bb72484ca55b25bbc20416864c2b1be", "line": 160},
           {"path": "tests/h62/item2/audit-bytecode-selection/test_field_domains.py", "blob": "076b28dd0bb72484ca55b25bbc20416864c2b1be", "line": 152}
         ],
-        "target": "tests/h62/item2/audit-bytecode-selection/selection-field-witnesses.json",
-        "target_blob": "85938cf49908b76bc8f684ae4f010490b9ee09dc",
-        "operation": "validated Python read of measured bytes"
+        "target": "tests/h62/item2/audit-bytecode-selection/selection-field-witnesses.json", "target_blob": "85938cf49908b76bc8f684ae4f010490b9ee09dc", "operation": "validated Python read of measured bytes"
       },
       {
         "runner": "validated:scripts/h62/item2/audit-readonly-calls/test_call_boundaries.py",
@@ -1599,9 +1490,7 @@
           {"path": "scripts/h62/item2/audit-readonly-calls/test_call_boundaries.py", "blob": "ac72ee18604b3de51ca507538565614b2a5139a6", "line": 25},
           {"path": "scripts/h62/item2/audit-readonly-calls/test_call_boundaries.py", "blob": "ac72ee18604b3de51ca507538565614b2a5139a6", "line": 10}
         ],
-        "target": "tests/h62/item2/audit-readonly-calls/CallBoundaryWitnesses.lean",
-        "target_blob": "edca1b6e51020974025b2aeefa5b7cf83fd34cea",
-        "operation": "validated Python read of measured bytes"
+        "target": "tests/h62/item2/audit-readonly-calls/CallBoundaryWitnesses.lean", "target_blob": "edca1b6e51020974025b2aeefa5b7cf83fd34cea", "operation": "validated Python read of measured bytes"
       },
       {
         "runner": "validated:scripts/h62/item2/audit-readonly-calls/test_caller_storage.py",
@@ -1610,9 +1499,7 @@
           {"path": "scripts/h62/item2/audit-readonly-calls/test_caller_storage.py", "blob": "6a00a8047f3c1f5870fcf7ee0a6088318a5798dd", "line": 24},
           {"path": "scripts/h62/item2/audit-readonly-calls/test_caller_storage.py", "blob": "6a00a8047f3c1f5870fcf7ee0a6088318a5798dd", "line": 10}
         ],
-        "target": "tests/h62/item2/audit-readonly-calls/CallerStorageWitnesses.lean",
-        "target_blob": "1b1ae92a4f80c360e9d3b812639571e8434450f8",
-        "operation": "validated Python read of measured bytes"
+        "target": "tests/h62/item2/audit-readonly-calls/CallerStorageWitnesses.lean", "target_blob": "1b1ae92a4f80c360e9d3b812639571e8434450f8", "operation": "validated Python read of measured bytes"
       },
       {
         "runner": "validated:scripts/h62/item2/audit-readonly-calls/test_captured_values.py",
@@ -1621,9 +1508,7 @@
           {"path": "scripts/h62/item2/audit-readonly-calls/test_captured_values.py", "blob": "3742052061735b0fbe5bba498103217b8121f5e9", "line": 23},
           {"path": "scripts/h62/item2/audit-readonly-calls/test_captured_values.py", "blob": "3742052061735b0fbe5bba498103217b8121f5e9", "line": 10}
         ],
-        "target": "tests/h62/item2/audit-readonly-calls/CapturedValueWitnesses.lean",
-        "target_blob": "05a8d5052d8fa50f88a70d4e67482993e557dbe9",
-        "operation": "validated Python read of measured bytes"
+        "target": "tests/h62/item2/audit-readonly-calls/CapturedValueWitnesses.lean", "target_blob": "05a8d5052d8fa50f88a70d4e67482993e557dbe9", "operation": "validated Python read of measured bytes"
       },
       {
         "runner": "validated:tests/h62/item2/audit-readonly-calls/test_execution_call.py",
@@ -1632,9 +1517,7 @@
           {"path": "tests/h62/item2/audit-readonly-calls/test_execution_call.py", "blob": "01db2114c687fe742c38c3bbaecc9e9427ddf278", "line": 90},
           {"path": "tests/h62/item2/audit-readonly-calls/test_execution_call.py", "blob": "01db2114c687fe742c38c3bbaecc9e9427ddf278", "line": 22}
         ],
-        "target": "tests/h62/item2/audit-readonly-calls/CheckedExecutionCall.lean",
-        "target_blob": "90fc0d62f6abaf4fe8feab9db0165e46fe693831",
-        "operation": "validated Python read of measured bytes"
+        "target": "tests/h62/item2/audit-readonly-calls/CheckedExecutionCall.lean", "target_blob": "90fc0d62f6abaf4fe8feab9db0165e46fe693831", "operation": "validated Python read of measured bytes"
       },
       {
         "runner": "validated:scripts/h62/item2/audit-readonly-calls/test_effect_rules.py",
@@ -1643,9 +1526,7 @@
           {"path": "scripts/h62/item2/audit-readonly-calls/test_effect_rules.py", "blob": "804a0d2a445da2027111974765bbdfccf81c68f0", "line": 58},
           {"path": "scripts/h62/item2/audit-readonly-calls/test_effect_rules.py", "blob": "804a0d2a445da2027111974765bbdfccf81c68f0", "line": 15}
         ],
-        "target": "tests/h62/item2/audit-readonly-calls/EffectRuleWitnesses.lean",
-        "target_blob": "b942850b7bd76c4c02d782e4894100dbb26adf5c",
-        "operation": "validated Python read of measured bytes"
+        "target": "tests/h62/item2/audit-readonly-calls/EffectRuleWitnesses.lean", "target_blob": "b942850b7bd76c4c02d782e4894100dbb26adf5c", "operation": "validated Python read of measured bytes"
       },
       {
         "runner": "validated:tests/h62/item2/audit-readonly-calls/test_execution_call.py",
@@ -1654,9 +1535,7 @@
           {"path": "tests/h62/item2/audit-readonly-calls/test_execution_call.py", "blob": "01db2114c687fe742c38c3bbaecc9e9427ddf278", "line": 90},
           {"path": "tests/h62/item2/audit-readonly-calls/test_execution_call.py", "blob": "01db2114c687fe742c38c3bbaecc9e9427ddf278", "line": 22}
         ],
-        "target": "tests/h62/item2/audit-readonly-calls/ExecutionCall.lean",
-        "target_blob": "49f94f1ceb9bb47d48bca3203609aee0a472b2a3",
-        "operation": "validated Python read of measured bytes"
+        "target": "tests/h62/item2/audit-readonly-calls/ExecutionCall.lean", "target_blob": "49f94f1ceb9bb47d48bca3203609aee0a472b2a3", "operation": "validated Python read of measured bytes"
       },
       {
         "runner": "validated:tests/h62/item2/audit-readonly-calls/test_execution_replies.py",
@@ -1665,9 +1544,7 @@
           {"path": "tests/h62/item2/audit-readonly-calls/test_execution_replies.py", "blob": "42cfcc13e6b3ac564fafe96fafa8cf34a73d337c", "line": 61},
           {"path": "tests/h62/item2/audit-readonly-calls/test_execution_replies.py", "blob": "42cfcc13e6b3ac564fafe96fafa8cf34a73d337c", "line": 19}
         ],
-        "target": "tests/h62/item2/audit-readonly-calls/ExecutionReplies.lean",
-        "target_blob": "61f52615015a4decadfca34ae1cccb0ebd9c371c",
-        "operation": "validated Python read of measured bytes"
+        "target": "tests/h62/item2/audit-readonly-calls/ExecutionReplies.lean", "target_blob": "61f52615015a4decadfca34ae1cccb0ebd9c371c", "operation": "validated Python read of measured bytes"
       },
       {
         "runner": "validated:scripts/h62/item2/audit-readonly-calls/test_initialization.py",
@@ -1676,9 +1553,7 @@
           {"path": "scripts/h62/item2/audit-readonly-calls/test_initialization.py", "blob": "b1e1fde85a684ac854b60276997598983aa8dcd9", "line": 61},
           {"path": "scripts/h62/item2/audit-readonly-calls/test_initialization.py", "blob": "b1e1fde85a684ac854b60276997598983aa8dcd9", "line": 15}
         ],
-        "target": "tests/h62/item2/audit-readonly-calls/InitializationWitnesses.lean",
-        "target_blob": "e5fd5857cc6f59c279b201bf16b36f921d9a379b",
-        "operation": "validated Python read of measured bytes"
+        "target": "tests/h62/item2/audit-readonly-calls/InitializationWitnesses.lean", "target_blob": "e5fd5857cc6f59c279b201bf16b36f921d9a379b", "operation": "validated Python read of measured bytes"
       },
       {
         "runner": "validated:scripts/h62/item2/audit-readonly-calls/test_invocation_modes.py",
@@ -1687,9 +1562,7 @@
           {"path": "scripts/h62/item2/audit-readonly-calls/test_invocation_modes.py", "blob": "c6340e121526e1eea64ddc3a2720752b4630025c", "line": 21},
           {"path": "scripts/h62/item2/audit-readonly-calls/test_invocation_modes.py", "blob": "c6340e121526e1eea64ddc3a2720752b4630025c", "line": 10}
         ],
-        "target": "tests/h62/item2/audit-readonly-calls/InvocationModeWitnesses.lean",
-        "target_blob": "c1eaef71e848f5256147442d989dc365c0b1b29b",
-        "operation": "validated Python read of measured bytes"
+        "target": "tests/h62/item2/audit-readonly-calls/InvocationModeWitnesses.lean", "target_blob": "c1eaef71e848f5256147442d989dc365c0b1b29b", "operation": "validated Python read of measured bytes"
       },
       {
         "runner": "validated:scripts/h62/item2/audit-readonly-calls/test_journal_witnesses.py",
@@ -1698,9 +1571,7 @@
           {"path": "scripts/h62/item2/audit-readonly-calls/test_journal_witnesses.py", "blob": "cf467269fe78543be96c1d77572f8eb557c42a59", "line": 22},
           {"path": "scripts/h62/item2/audit-readonly-calls/test_journal_witnesses.py", "blob": "cf467269fe78543be96c1d77572f8eb557c42a59", "line": 10}
         ],
-        "target": "tests/h62/item2/audit-readonly-calls/JournalWitnesses.lean",
-        "target_blob": "8a76980387c47db57976c5baf2d21715cc21a531",
-        "operation": "validated Python read of measured bytes"
+        "target": "tests/h62/item2/audit-readonly-calls/JournalWitnesses.lean", "target_blob": "8a76980387c47db57976c5baf2d21715cc21a531", "operation": "validated Python read of measured bytes"
       },
       {
         "runner": "validated:scripts/h62/item2/audit-readonly-calls/test_native_frame.py",
@@ -1709,9 +1580,7 @@
           {"path": "scripts/h62/item2/audit-readonly-calls/test_native_frame.py", "blob": "2be2c79fd15638ac50d36476718430c9921f5d11", "line": 46},
           {"path": "scripts/h62/item2/audit-readonly-calls/test_native_frame.py", "blob": "2be2c79fd15638ac50d36476718430c9921f5d11", "line": 42}
         ],
-        "target": "tests/h62/item2/audit-readonly-calls/NativeFrameTransport.lean",
-        "target_blob": "3633ae8a9e3bd4d941dfddf544ec0d9adce284b4",
-        "operation": "validated Python read of measured bytes"
+        "target": "tests/h62/item2/audit-readonly-calls/NativeFrameTransport.lean", "target_blob": "3633ae8a9e3bd4d941dfddf544ec0d9adce284b4", "operation": "validated Python read of measured bytes"
       },
       {
         "runner": "validated:scripts/h62/item2/audit-readonly-calls/test_primitive_transport.py",
@@ -1720,9 +1589,7 @@
           {"path": "scripts/h62/item2/audit-readonly-calls/test_primitive_transport.py", "blob": "159ef45dc53ee5362a651f229aaee2ecbc930998", "line": 46},
           {"path": "scripts/h62/item2/audit-readonly-calls/test_primitive_transport.py", "blob": "159ef45dc53ee5362a651f229aaee2ecbc930998", "line": 13}
         ],
-        "target": "tests/h62/item2/audit-readonly-calls/PrimitiveTransportWitnesses.lean",
-        "target_blob": "dc74bad65cd6fe5b08b73ed7ddd491d97f610a1f",
-        "operation": "validated Python read of measured bytes"
+        "target": "tests/h62/item2/audit-readonly-calls/PrimitiveTransportWitnesses.lean", "target_blob": "dc74bad65cd6fe5b08b73ed7ddd491d97f610a1f", "operation": "validated Python read of measured bytes"
       },
       {
         "runner": "validated:scripts/h62/item2/audit-readonly-calls/test_private_bind.py",
@@ -1731,9 +1598,7 @@
           {"path": "scripts/h62/item2/audit-readonly-calls/test_private_bind.py", "blob": "7c5e542d60ec37840c8cc9a53c95b08f55edf739", "line": 41},
           {"path": "scripts/h62/item2/audit-readonly-calls/test_private_bind.py", "blob": "7c5e542d60ec37840c8cc9a53c95b08f55edf739", "line": 14}
         ],
-        "target": "tests/h62/item2/audit-readonly-calls/PrivateBindWitnesses.lean",
-        "target_blob": "406d7c7794c3dff159f0ac6b92b532102dd91b84",
-        "operation": "validated Python read of measured bytes"
+        "target": "tests/h62/item2/audit-readonly-calls/PrivateBindWitnesses.lean", "target_blob": "406d7c7794c3dff159f0ac6b92b532102dd91b84", "operation": "validated Python read of measured bytes"
       },
       {
         "runner": "validated:scripts/h62/item2/audit-readonly-calls/test_private_transport.py",
@@ -1742,9 +1607,7 @@
           {"path": "scripts/h62/item2/audit-readonly-calls/test_private_transport.py", "blob": "f40ea3fec1a598da76f0839606c50736ea2aaf79", "line": 28},
           {"path": "scripts/h62/item2/audit-readonly-calls/test_private_transport.py", "blob": "f40ea3fec1a598da76f0839606c50736ea2aaf79", "line": 10}
         ],
-        "target": "tests/h62/item2/audit-readonly-calls/PrivateTransportWitnesses.lean",
-        "target_blob": "6b4d9bef52d93d35f14ef20abf53cc03043d06d8",
-        "operation": "validated Python read of measured bytes"
+        "target": "tests/h62/item2/audit-readonly-calls/PrivateTransportWitnesses.lean", "target_blob": "6b4d9bef52d93d35f14ef20abf53cc03043d06d8", "operation": "validated Python read of measured bytes"
       },
       {
         "runner": "validated:scripts/h62/item2/audit-readonly-calls/test_source_void_callable.py",
@@ -1753,9 +1616,7 @@
           {"path": "scripts/h62/item2/audit-readonly-calls/test_source_void_callable.py", "blob": "377eb9ca6728b599f5a93a3c3ccb93996dfabc09", "line": 33},
           {"path": "scripts/h62/item2/audit-readonly-calls/test_source_void_callable.py", "blob": "377eb9ca6728b599f5a93a3c3ccb93996dfabc09", "line": 13}
         ],
-        "target": "tests/h62/item2/audit-readonly-calls/SourceVoidCallable.lean",
-        "target_blob": "26381356b17178a2c329f694339b1fb7154765e7",
-        "operation": "validated Python read of measured bytes"
+        "target": "tests/h62/item2/audit-readonly-calls/SourceVoidCallable.lean", "target_blob": "26381356b17178a2c329f694339b1fb7154765e7", "operation": "validated Python read of measured bytes"
       },
       {
         "runner": "validated:scripts/h62/item2/audit-readonly-calls/test_source_void.py",
@@ -1764,9 +1625,7 @@
           {"path": "scripts/h62/item2/audit-readonly-calls/test_source_void.py", "blob": "c49d4bf6a8344f9fd7ebb0e58f3ea3dbb4e877e9", "line": 58},
           {"path": "scripts/h62/item2/audit-readonly-calls/test_source_void.py", "blob": "c49d4bf6a8344f9fd7ebb0e58f3ea3dbb4e877e9", "line": 12}
         ],
-        "target": "tests/h62/item2/audit-readonly-calls/SourceVoidSelection.lean",
-        "target_blob": "fb59190ea506469b1bcdbd53cd8ee8a7038c52cc",
-        "operation": "validated Python read of measured bytes"
+        "target": "tests/h62/item2/audit-readonly-calls/SourceVoidSelection.lean", "target_blob": "fb59190ea506469b1bcdbd53cd8ee8a7038c52cc", "operation": "validated Python read of measured bytes"
       },
       {
         "runner": "validated:scripts/h62/item2/audit-readonly-calls/test_source_void_world.py",
@@ -1775,9 +1634,7 @@
           {"path": "scripts/h62/item2/audit-readonly-calls/test_source_void_world.py", "blob": "cc4657a44f86b31a54727cb8a3070175de4ed4f3", "line": 33},
           {"path": "scripts/h62/item2/audit-readonly-calls/test_source_void_world.py", "blob": "cc4657a44f86b31a54727cb8a3070175de4ed4f3", "line": 10}
         ],
-        "target": "tests/h62/item2/audit-readonly-calls/SourceVoidWorld.lean",
-        "target_blob": "867dc86565b92187b67aef9e2038421dc3da4198",
-        "operation": "validated Python read of measured bytes"
+        "target": "tests/h62/item2/audit-readonly-calls/SourceVoidWorld.lean", "target_blob": "867dc86565b92187b67aef9e2038421dc3da4198", "operation": "validated Python read of measured bytes"
       },
       {
         "runner": "validated:tests/h62/item2/audit-v10-storage/test_transport_pairs.py",
@@ -1786,9 +1643,7 @@
           {"path": "tests/h62/item2/audit-v10-storage/test_transport_pairs.py", "blob": "4a048711ca1ad4e04f7184f4d6942002de1ea509", "line": 46},
           {"path": "tests/h62/item2/audit-v10-storage/test_transport_pairs.py", "blob": "4a048711ca1ad4e04f7184f4d6942002de1ea509", "line": 13}
         ],
-        "target": "tests/h62/item2/audit-readonly-calls/signature-drift-pins.json",
-        "target_blob": "acb96022f660ca488ba181f2b8436f07239a37df",
-        "operation": "validated Python read of measured bytes"
+        "target": "tests/h62/item2/audit-readonly-calls/signature-drift-pins.json", "target_blob": "acb96022f660ca488ba181f2b8436f07239a37df", "operation": "validated Python read of measured bytes"
       },
       {
         "runner": "validated:scripts/h62/item2/audit-theories/test_pair_sources.py",
@@ -1797,9 +1652,7 @@
           {"path": "scripts/h62/item2/audit-theories/test_pair_sources.py", "blob": "425ce6d432ce3b45b8a92d05d5db79007d63e33d", "line": 15},
           {"path": "scripts/h62/item2/audit-theories/test_pair_sources.py", "blob": "425ce6d432ce3b45b8a92d05d5db79007d63e33d", "line": 11}
         ],
-        "target": "tests/h62/item2/audit-theories/ElaboratedCensus.lean",
-        "target_blob": "2ecc1479b59032768876001bc272efc61a2b6f77",
-        "operation": "validated Python read of measured bytes"
+        "target": "tests/h62/item2/audit-theories/ElaboratedCensus.lean", "target_blob": "2ecc1479b59032768876001bc272efc61a2b6f77", "operation": "validated Python read of measured bytes"
       },
       {
         "runner": "validated:tests/h62/item2/audit-v08-adapters/test_generate_calldata_census.py",
@@ -1807,9 +1660,7 @@
         "frames": [
           {"path": "tests/h62/item2/audit-v08-adapters/test_generate_calldata_census.py", "blob": "15614749c5902e6817ce772a72f548f491bdabfe", "line": 19}
         ],
-        "target": "tests/h62/item2/audit-v08-adapters/P8StatementCensus.lean",
-        "target_blob": "230ae09442bfa6102f9218930b6992104de57f6b",
-        "operation": "validated Python read of measured bytes"
+        "target": "tests/h62/item2/audit-v08-adapters/P8StatementCensus.lean", "target_blob": "230ae09442bfa6102f9218930b6992104de57f6b", "operation": "validated Python read of measured bytes"
       },
       {
         "runner": "validated:tests/h62/item2/audit-v09-passes/test_signature_boundaries.py",
@@ -1819,9 +1670,7 @@
           {"path": "tests/h62/item2/audit-v09-passes/test_signature_boundaries.py", "blob": "8197c24e965db18f3157c5a62bd70601d0a851ee", "line": 191},
           {"path": "tests/h62/item2/audit-v09-passes/test_signature_boundaries.py", "blob": "8197c24e965db18f3157c5a62bd70601d0a851ee", "line": 156}
         ],
-        "target": "tests/h62/item2/audit-v09-passes/allocated-reference-read-witness-map.json",
-        "target_blob": "f57e99d4d4d1216f05ef082e495ea1cade7b9f25",
-        "operation": "validated Python read of measured bytes"
+        "target": "tests/h62/item2/audit-v09-passes/allocated-reference-read-witness-map.json", "target_blob": "f57e99d4d4d1216f05ef082e495ea1cade7b9f25", "operation": "validated Python read of measured bytes"
       },
       {
         "runner": "validated:tests/h62/item2/audit-v09-passes/test_signature_boundaries.py",
@@ -1830,9 +1679,7 @@
           {"path": "tests/h62/item2/audit-v09-passes/test_signature_boundaries.py", "blob": "8197c24e965db18f3157c5a62bd70601d0a851ee", "line": 307},
           {"path": "tests/h62/item2/audit-v09-passes/test_signature_boundaries.py", "blob": "8197c24e965db18f3157c5a62bd70601d0a851ee", "line": 90}
         ],
-        "target": "tests/h62/item2/audit-v09-passes/boundary-witness-map.json",
-        "target_blob": "caadbc0fa4f58a2f3a8db8be2fcba3740f9f4d08",
-        "operation": "validated Python read of measured bytes"
+        "target": "tests/h62/item2/audit-v09-passes/boundary-witness-map.json", "target_blob": "caadbc0fa4f58a2f3a8db8be2fcba3740f9f4d08", "operation": "validated Python read of measured bytes"
       },
       {
         "runner": "validated:tests/h62/item2/audit-v09-passes/test_signature_boundaries.py",
@@ -1842,9 +1689,7 @@
           {"path": "tests/h62/item2/audit-v09-passes/test_signature_boundaries.py", "blob": "8197c24e965db18f3157c5a62bd70601d0a851ee", "line": 191},
           {"path": "tests/h62/item2/audit-v09-passes/test_signature_boundaries.py", "blob": "8197c24e965db18f3157c5a62bd70601d0a851ee", "line": 156}
         ],
-        "target": "tests/h62/item2/audit-v09-passes/compiler-call-scope-witness-map.json",
-        "target_blob": "2c6a1167ee4bf10d33ddf64cb8b9e831287c392e",
-        "operation": "validated Python read of measured bytes"
+        "target": "tests/h62/item2/audit-v09-passes/compiler-call-scope-witness-map.json", "target_blob": "2c6a1167ee4bf10d33ddf64cb8b9e831287c392e", "operation": "validated Python read of measured bytes"
       },
       {
         "runner": "validated:tests/h62/item2/audit-v09-passes/test_signature_boundaries.py",
@@ -1853,9 +1698,7 @@
           {"path": "tests/h62/item2/audit-v09-passes/test_signature_boundaries.py", "blob": "8197c24e965db18f3157c5a62bd70601d0a851ee", "line": 307},
           {"path": "tests/h62/item2/audit-v09-passes/test_signature_boundaries.py", "blob": "8197c24e965db18f3157c5a62bd70601d0a851ee", "line": 90}
         ],
-        "target": "tests/h62/item2/audit-v09-passes/core-boundary-witness-map.json",
-        "target_blob": "68737501baa2ba9e81f7424316d9115f0a7b87fd",
-        "operation": "validated Python read of measured bytes"
+        "target": "tests/h62/item2/audit-v09-passes/core-boundary-witness-map.json", "target_blob": "68737501baa2ba9e81f7424316d9115f0a7b87fd", "operation": "validated Python read of measured bytes"
       },
       {
         "runner": "validated:tests/h62/item2/audit-v09-passes/test_signature_boundaries.py",
@@ -1865,9 +1708,7 @@
           {"path": "tests/h62/item2/audit-v09-passes/test_signature_boundaries.py", "blob": "8197c24e965db18f3157c5a62bd70601d0a851ee", "line": 191},
           {"path": "tests/h62/item2/audit-v09-passes/test_signature_boundaries.py", "blob": "8197c24e965db18f3157c5a62bd70601d0a851ee", "line": 156}
         ],
-        "target": "tests/h62/item2/audit-v09-passes/heap-boundary-witness-map.json",
-        "target_blob": "2e1fc041689934a95f4a52ff7780071d7a072b01",
-        "operation": "validated Python read of measured bytes"
+        "target": "tests/h62/item2/audit-v09-passes/heap-boundary-witness-map.json", "target_blob": "2e1fc041689934a95f4a52ff7780071d7a072b01", "operation": "validated Python read of measured bytes"
       },
       {
         "runner": "validated:tests/h62/item2/audit-v09-passes/test_signature_boundaries.py",
@@ -1877,9 +1718,7 @@
           {"path": "tests/h62/item2/audit-v09-passes/test_signature_boundaries.py", "blob": "8197c24e965db18f3157c5a62bd70601d0a851ee", "line": 191},
           {"path": "tests/h62/item2/audit-v09-passes/test_signature_boundaries.py", "blob": "8197c24e965db18f3157c5a62bd70601d0a851ee", "line": 156}
         ],
-        "target": "tests/h62/item2/audit-v09-passes/join-cost-witness-map.json",
-        "target_blob": "6fec4e187c64c8dea98ba295c8aa995bd6e3c6e8",
-        "operation": "validated Python read of measured bytes"
+        "target": "tests/h62/item2/audit-v09-passes/join-cost-witness-map.json", "target_blob": "6fec4e187c64c8dea98ba295c8aa995bd6e3c6e8", "operation": "validated Python read of measured bytes"
       },
       {
         "runner": "validated:tests/h62/item2/audit-v09-passes/test_signature_boundaries.py",
@@ -1889,9 +1728,7 @@
           {"path": "tests/h62/item2/audit-v09-passes/test_signature_boundaries.py", "blob": "8197c24e965db18f3157c5a62bd70601d0a851ee", "line": 191},
           {"path": "tests/h62/item2/audit-v09-passes/test_signature_boundaries.py", "blob": "8197c24e965db18f3157c5a62bd70601d0a851ee", "line": 156}
         ],
-        "target": "tests/h62/item2/audit-v09-passes/join-frame-witness-map.json",
-        "target_blob": "dd64d31099aab31ba7975ed62ee8d95c90b0ad77",
-        "operation": "validated Python read of measured bytes"
+        "target": "tests/h62/item2/audit-v09-passes/join-frame-witness-map.json", "target_blob": "dd64d31099aab31ba7975ed62ee8d95c90b0ad77", "operation": "validated Python read of measured bytes"
       },
       {
         "runner": "validated:tests/h62/item2/audit-v09-passes/test_signature_boundaries.py",
@@ -1900,9 +1737,7 @@
           {"path": "tests/h62/item2/audit-v09-passes/test_signature_boundaries.py", "blob": "8197c24e965db18f3157c5a62bd70601d0a851ee", "line": 307},
           {"path": "tests/h62/item2/audit-v09-passes/test_signature_boundaries.py", "blob": "8197c24e965db18f3157c5a62bd70601d0a851ee", "line": 118}
         ],
-        "target": "tests/h62/item2/audit-v09-passes/joined-allocation-witness-map.json",
-        "target_blob": "3c5110f59285bf1c599755c9e9b274f1e2f3a3e6",
-        "operation": "validated Python read of measured bytes"
+        "target": "tests/h62/item2/audit-v09-passes/joined-allocation-witness-map.json", "target_blob": "3c5110f59285bf1c599755c9e9b274f1e2f3a3e6", "operation": "validated Python read of measured bytes"
       },
       {
         "runner": "validated:tests/h62/item2/audit-v09-passes/test_signature_boundaries.py",
@@ -1911,9 +1746,7 @@
           {"path": "tests/h62/item2/audit-v09-passes/test_signature_boundaries.py", "blob": "8197c24e965db18f3157c5a62bd70601d0a851ee", "line": 307},
           {"path": "tests/h62/item2/audit-v09-passes/test_signature_boundaries.py", "blob": "8197c24e965db18f3157c5a62bd70601d0a851ee", "line": 118}
         ],
-        "target": "tests/h62/item2/audit-v09-passes/joined-memory-witness-map.json",
-        "target_blob": "62a940a6d51926b0611a6aea78bacbbd2d25e056",
-        "operation": "validated Python read of measured bytes"
+        "target": "tests/h62/item2/audit-v09-passes/joined-memory-witness-map.json", "target_blob": "62a940a6d51926b0611a6aea78bacbbd2d25e056", "operation": "validated Python read of measured bytes"
       },
       {
         "runner": "validated:tests/h62/item2/audit-v09-passes/test_signature_boundaries.py",
@@ -1923,9 +1756,7 @@
           {"path": "tests/h62/item2/audit-v09-passes/test_signature_boundaries.py", "blob": "8197c24e965db18f3157c5a62bd70601d0a851ee", "line": 191},
           {"path": "tests/h62/item2/audit-v09-passes/test_signature_boundaries.py", "blob": "8197c24e965db18f3157c5a62bd70601d0a851ee", "line": 156}
         ],
-        "target": "tests/h62/item2/audit-v09-passes/loop-call-witness-map.json",
-        "target_blob": "548f95de521d13a06184478663b65918d5f2d19d",
-        "operation": "validated Python read of measured bytes"
+        "target": "tests/h62/item2/audit-v09-passes/loop-call-witness-map.json", "target_blob": "548f95de521d13a06184478663b65918d5f2d19d", "operation": "validated Python read of measured bytes"
       },
       {
         "runner": "validated:tests/h62/item2/audit-v09-passes/test_signature_boundaries.py",
@@ -1935,9 +1766,7 @@
           {"path": "tests/h62/item2/audit-v09-passes/test_signature_boundaries.py", "blob": "8197c24e965db18f3157c5a62bd70601d0a851ee", "line": 191},
           {"path": "tests/h62/item2/audit-v09-passes/test_signature_boundaries.py", "blob": "8197c24e965db18f3157c5a62bd70601d0a851ee", "line": 156}
         ],
-        "target": "tests/h62/item2/audit-v09-passes/loop-prefix-witness-map.json",
-        "target_blob": "3b53dfb9eccf24a3905e159d7a90b74c4e190c7e",
-        "operation": "validated Python read of measured bytes"
+        "target": "tests/h62/item2/audit-v09-passes/loop-prefix-witness-map.json", "target_blob": "3b53dfb9eccf24a3905e159d7a90b74c4e190c7e", "operation": "validated Python read of measured bytes"
       },
       {
         "runner": "validated:tests/h62/item2/audit-v09-passes/test_signature_boundaries.py",
@@ -1947,9 +1776,7 @@
           {"path": "tests/h62/item2/audit-v09-passes/test_signature_boundaries.py", "blob": "8197c24e965db18f3157c5a62bd70601d0a851ee", "line": 191},
           {"path": "tests/h62/item2/audit-v09-passes/test_signature_boundaries.py", "blob": "8197c24e965db18f3157c5a62bd70601d0a851ee", "line": 156}
         ],
-        "target": "tests/h62/item2/audit-v09-passes/loop-reframed-failure-witness-map.json",
-        "target_blob": "aaebb94819f2d3ff8c207503639ffaef2ec9b701",
-        "operation": "validated Python read of measured bytes"
+        "target": "tests/h62/item2/audit-v09-passes/loop-reframed-failure-witness-map.json", "target_blob": "aaebb94819f2d3ff8c207503639ffaef2ec9b701", "operation": "validated Python read of measured bytes"
       },
       {
         "runner": "validated:tests/h62/item2/audit-v09-passes/test_signature_boundaries.py",
@@ -1959,9 +1786,7 @@
           {"path": "tests/h62/item2/audit-v09-passes/test_signature_boundaries.py", "blob": "8197c24e965db18f3157c5a62bd70601d0a851ee", "line": 191},
           {"path": "tests/h62/item2/audit-v09-passes/test_signature_boundaries.py", "blob": "8197c24e965db18f3157c5a62bd70601d0a851ee", "line": 156}
         ],
-        "target": "tests/h62/item2/audit-v09-passes/loop-scope-witness-map.json",
-        "target_blob": "29a301d93f9027549a76a84e568260ff151472f1",
-        "operation": "validated Python read of measured bytes"
+        "target": "tests/h62/item2/audit-v09-passes/loop-scope-witness-map.json", "target_blob": "29a301d93f9027549a76a84e568260ff151472f1", "operation": "validated Python read of measured bytes"
       },
       {
         "runner": "validated:tests/h62/item2/audit-v09-passes/test_signature_boundaries.py",
@@ -1971,9 +1796,7 @@
           {"path": "tests/h62/item2/audit-v09-passes/test_signature_boundaries.py", "blob": "8197c24e965db18f3157c5a62bd70601d0a851ee", "line": 191},
           {"path": "tests/h62/item2/audit-v09-passes/test_signature_boundaries.py", "blob": "8197c24e965db18f3157c5a62bd70601d0a851ee", "line": 156}
         ],
-        "target": "tests/h62/item2/audit-v09-passes/memory-association-witness-map.json",
-        "target_blob": "2c6c8a4b4b63ea410f58ae361bb7d7c96e3e90e2",
-        "operation": "validated Python read of measured bytes"
+        "target": "tests/h62/item2/audit-v09-passes/memory-association-witness-map.json", "target_blob": "2c6c8a4b4b63ea410f58ae361bb7d7c96e3e90e2", "operation": "validated Python read of measured bytes"
       },
       {
         "runner": "validated:tests/h62/item2/audit-v09-passes/test_signature_boundaries.py",
@@ -1983,9 +1806,7 @@
           {"path": "tests/h62/item2/audit-v09-passes/test_signature_boundaries.py", "blob": "8197c24e965db18f3157c5a62bd70601d0a851ee", "line": 191},
           {"path": "tests/h62/item2/audit-v09-passes/test_signature_boundaries.py", "blob": "8197c24e965db18f3157c5a62bd70601d0a851ee", "line": 156}
         ],
-        "target": "tests/h62/item2/audit-v09-passes/memory-call-scope-witness-map.json",
-        "target_blob": "6b9513f0612b2bf34aab9d9b7518e32a9a46dafd",
-        "operation": "validated Python read of measured bytes"
+        "target": "tests/h62/item2/audit-v09-passes/memory-call-scope-witness-map.json", "target_blob": "6b9513f0612b2bf34aab9d9b7518e32a9a46dafd", "operation": "validated Python read of measured bytes"
       },
       {
         "runner": "validated:tests/h62/item2/audit-v09-passes/test_signature_boundaries.py",
@@ -1995,9 +1816,7 @@
           {"path": "tests/h62/item2/audit-v09-passes/test_signature_boundaries.py", "blob": "8197c24e965db18f3157c5a62bd70601d0a851ee", "line": 191},
           {"path": "tests/h62/item2/audit-v09-passes/test_signature_boundaries.py", "blob": "8197c24e965db18f3157c5a62bd70601d0a851ee", "line": 156}
         ],
-        "target": "tests/h62/item2/audit-v09-passes/memory-call-witness-map.json",
-        "target_blob": "44791e305c7450e758001ae597d40fd1a57b2a8c",
-        "operation": "validated Python read of measured bytes"
+        "target": "tests/h62/item2/audit-v09-passes/memory-call-witness-map.json", "target_blob": "44791e305c7450e758001ae597d40fd1a57b2a8c", "operation": "validated Python read of measured bytes"
       },
       {
         "runner": "validated:tests/h62/item2/audit-v09-passes/test_signature_boundaries.py",
@@ -2007,9 +1826,7 @@
           {"path": "tests/h62/item2/audit-v09-passes/test_signature_boundaries.py", "blob": "8197c24e965db18f3157c5a62bd70601d0a851ee", "line": 191},
           {"path": "tests/h62/item2/audit-v09-passes/test_signature_boundaries.py", "blob": "8197c24e965db18f3157c5a62bd70601d0a851ee", "line": 156}
         ],
-        "target": "tests/h62/item2/audit-v09-passes/positive-allocation-failure-witness-map.json",
-        "target_blob": "81bd24db3c5ea0cbdf008b1a28467ef0f9040b0b",
-        "operation": "validated Python read of measured bytes"
+        "target": "tests/h62/item2/audit-v09-passes/positive-allocation-failure-witness-map.json", "target_blob": "81bd24db3c5ea0cbdf008b1a28467ef0f9040b0b", "operation": "validated Python read of measured bytes"
       },
       {
         "runner": "validated:tests/h62/item2/audit-v09-passes/test_signature_boundaries.py",
@@ -2019,9 +1836,7 @@
           {"path": "tests/h62/item2/audit-v09-passes/test_signature_boundaries.py", "blob": "8197c24e965db18f3157c5a62bd70601d0a851ee", "line": 191},
           {"path": "tests/h62/item2/audit-v09-passes/test_signature_boundaries.py", "blob": "8197c24e965db18f3157c5a62bd70601d0a851ee", "line": 156}
         ],
-        "target": "tests/h62/item2/audit-v09-passes/preserved-allocator-witness-map.json",
-        "target_blob": "18b2a220e750f167ffd7ebd490356d50e95f9a50",
-        "operation": "validated Python read of measured bytes"
+        "target": "tests/h62/item2/audit-v09-passes/preserved-allocator-witness-map.json", "target_blob": "18b2a220e750f167ffd7ebd490356d50e95f9a50", "operation": "validated Python read of measured bytes"
       },
       {
         "runner": "validated:tests/h62/item2/audit-v09-passes/test_signature_boundaries.py",
@@ -2030,9 +1845,7 @@
           {"path": "tests/h62/item2/audit-v09-passes/test_signature_boundaries.py", "blob": "8197c24e965db18f3157c5a62bd70601d0a851ee", "line": 307},
           {"path": "tests/h62/item2/audit-v09-passes/test_signature_boundaries.py", "blob": "8197c24e965db18f3157c5a62bd70601d0a851ee", "line": 90}
         ],
-        "target": "tests/h62/item2/audit-v09-passes/private-stack-witness-map.json",
-        "target_blob": "f0b6ce8b32f5a67b977a934755534078ef1c4e41",
-        "operation": "validated Python read of measured bytes"
+        "target": "tests/h62/item2/audit-v09-passes/private-stack-witness-map.json", "target_blob": "f0b6ce8b32f5a67b977a934755534078ef1c4e41", "operation": "validated Python read of measured bytes"
       },
       {
         "runner": "validated:tests/h62/item2/audit-v09-passes/test_signature_boundaries.py",
@@ -2042,9 +1855,7 @@
           {"path": "tests/h62/item2/audit-v09-passes/test_signature_boundaries.py", "blob": "8197c24e965db18f3157c5a62bd70601d0a851ee", "line": 191},
           {"path": "tests/h62/item2/audit-v09-passes/test_signature_boundaries.py", "blob": "8197c24e965db18f3157c5a62bd70601d0a851ee", "line": 156}
         ],
-        "target": "tests/h62/item2/audit-v09-passes/reference-call-capture-failure-witness-map.json",
-        "target_blob": "768304e6eb738617ae654cf1e5247d2df60344fa",
-        "operation": "validated Python read of measured bytes"
+        "target": "tests/h62/item2/audit-v09-passes/reference-call-capture-failure-witness-map.json", "target_blob": "768304e6eb738617ae654cf1e5247d2df60344fa", "operation": "validated Python read of measured bytes"
       },
       {
         "runner": "validated:tests/h62/item2/audit-v09-passes/test_signature_boundaries.py",
@@ -2054,9 +1865,7 @@
           {"path": "tests/h62/item2/audit-v09-passes/test_signature_boundaries.py", "blob": "8197c24e965db18f3157c5a62bd70601d0a851ee", "line": 191},
           {"path": "tests/h62/item2/audit-v09-passes/test_signature_boundaries.py", "blob": "8197c24e965db18f3157c5a62bd70601d0a851ee", "line": 156}
         ],
-        "target": "tests/h62/item2/audit-v09-passes/reference-call-readback-witness-map.json",
-        "target_blob": "f937c0c93612188936e82d686bf5a2cbdca09cb8",
-        "operation": "validated Python read of measured bytes"
+        "target": "tests/h62/item2/audit-v09-passes/reference-call-readback-witness-map.json", "target_blob": "f937c0c93612188936e82d686bf5a2cbdca09cb8", "operation": "validated Python read of measured bytes"
       },
       {
         "runner": "validated:tests/h62/item2/audit-v09-passes/test_signature_boundaries.py",
@@ -2066,9 +1875,7 @@
           {"path": "tests/h62/item2/audit-v09-passes/test_signature_boundaries.py", "blob": "8197c24e965db18f3157c5a62bd70601d0a851ee", "line": 191},
           {"path": "tests/h62/item2/audit-v09-passes/test_signature_boundaries.py", "blob": "8197c24e965db18f3157c5a62bd70601d0a851ee", "line": 156}
         ],
-        "target": "tests/h62/item2/audit-v09-passes/reframed-triple-witness-map.json",
-        "target_blob": "d23a2b76073b25efb4a0835d9cab20d5de72b376",
-        "operation": "validated Python read of measured bytes"
+        "target": "tests/h62/item2/audit-v09-passes/reframed-triple-witness-map.json", "target_blob": "d23a2b76073b25efb4a0835d9cab20d5de72b376", "operation": "validated Python read of measured bytes"
       },
       {
         "runner": "validated:tests/h62/item2/audit-v09-passes/test_signature_boundaries.py",
@@ -2078,9 +1885,7 @@
           {"path": "tests/h62/item2/audit-v09-passes/test_signature_boundaries.py", "blob": "8197c24e965db18f3157c5a62bd70601d0a851ee", "line": 191},
           {"path": "tests/h62/item2/audit-v09-passes/test_signature_boundaries.py", "blob": "8197c24e965db18f3157c5a62bd70601d0a851ee", "line": 156}
         ],
-        "target": "tests/h62/item2/audit-v09-passes/reframed-witness-map.json",
-        "target_blob": "9d5ab82d3af5a43acecca34247d00f3ffd211e6b",
-        "operation": "validated Python read of measured bytes"
+        "target": "tests/h62/item2/audit-v09-passes/reframed-witness-map.json", "target_blob": "9d5ab82d3af5a43acecca34247d00f3ffd211e6b", "operation": "validated Python read of measured bytes"
       },
       {
         "runner": "validated:tests/h62/item2/audit-v09-passes/test_signature_boundaries.py",
@@ -2090,9 +1895,7 @@
           {"path": "tests/h62/item2/audit-v09-passes/test_signature_boundaries.py", "blob": "8197c24e965db18f3157c5a62bd70601d0a851ee", "line": 191},
           {"path": "tests/h62/item2/audit-v09-passes/test_signature_boundaries.py", "blob": "8197c24e965db18f3157c5a62bd70601d0a851ee", "line": 156}
         ],
-        "target": "tests/h62/item2/audit-v09-passes/returned-memory-capture-witness-map.json",
-        "target_blob": "2fce0d60f31f3a7c3f486e0afba02229eae0a2de",
-        "operation": "validated Python read of measured bytes"
+        "target": "tests/h62/item2/audit-v09-passes/returned-memory-capture-witness-map.json", "target_blob": "2fce0d60f31f3a7c3f486e0afba02229eae0a2de", "operation": "validated Python read of measured bytes"
       },
       {
         "runner": "validated:tests/h62/item2/audit-v09-passes/test_signature_boundaries.py",
@@ -2102,9 +1905,7 @@
           {"path": "tests/h62/item2/audit-v09-passes/test_signature_boundaries.py", "blob": "8197c24e965db18f3157c5a62bd70601d0a851ee", "line": 191},
           {"path": "tests/h62/item2/audit-v09-passes/test_signature_boundaries.py", "blob": "8197c24e965db18f3157c5a62bd70601d0a851ee", "line": 156}
         ],
-        "target": "tests/h62/item2/audit-v09-passes/runtime-return-capture-witness-map.json",
-        "target_blob": "82df03dd3e31bec92269c29663a4381125296f7a",
-        "operation": "validated Python read of measured bytes"
+        "target": "tests/h62/item2/audit-v09-passes/runtime-return-capture-witness-map.json", "target_blob": "82df03dd3e31bec92269c29663a4381125296f7a", "operation": "validated Python read of measured bytes"
       },
       {
         "runner": "validated:tests/h62/item2/audit-v09-passes/test_signature_boundaries.py",
@@ -2114,9 +1915,7 @@
           {"path": "tests/h62/item2/audit-v09-passes/test_signature_boundaries.py", "blob": "8197c24e965db18f3157c5a62bd70601d0a851ee", "line": 191},
           {"path": "tests/h62/item2/audit-v09-passes/test_signature_boundaries.py", "blob": "8197c24e965db18f3157c5a62bd70601d0a851ee", "line": 156}
         ],
-        "target": "tests/h62/item2/audit-v09-passes/runtime-void-capture-witness-map.json",
-        "target_blob": "07866687f6bbb8eaa10a63b75482f1150353d35e",
-        "operation": "validated Python read of measured bytes"
+        "target": "tests/h62/item2/audit-v09-passes/runtime-void-capture-witness-map.json", "target_blob": "07866687f6bbb8eaa10a63b75482f1150353d35e", "operation": "validated Python read of measured bytes"
       },
       {
         "runner": "validated:tests/h62/item2/audit-v09-passes/test_signature_boundaries.py",
@@ -2125,9 +1924,7 @@
           {"path": "tests/h62/item2/audit-v09-passes/test_signature_boundaries.py", "blob": "8197c24e965db18f3157c5a62bd70601d0a851ee", "line": 307},
           {"path": "tests/h62/item2/audit-v09-passes/test_signature_boundaries.py", "blob": "8197c24e965db18f3157c5a62bd70601d0a851ee", "line": 90}
         ],
-        "target": "tests/h62/item2/audit-v09-passes/sequence-witness-map.json",
-        "target_blob": "ae3b419fdec6425ffdbf348006a0e3eb7127bbb1",
-        "operation": "validated Python read of measured bytes"
+        "target": "tests/h62/item2/audit-v09-passes/sequence-witness-map.json", "target_blob": "ae3b419fdec6425ffdbf348006a0e3eb7127bbb1", "operation": "validated Python read of measured bytes"
       },
       {
         "runner": "validated:tests/h62/item2/audit-v09-passes/test_signature_boundaries.py",
@@ -2137,9 +1934,7 @@
           {"path": "tests/h62/item2/audit-v09-passes/test_signature_boundaries.py", "blob": "8197c24e965db18f3157c5a62bd70601d0a851ee", "line": 191},
           {"path": "tests/h62/item2/audit-v09-passes/test_signature_boundaries.py", "blob": "8197c24e965db18f3157c5a62bd70601d0a851ee", "line": 156}
         ],
-        "target": "tests/h62/item2/audit-v09-passes/shift-capture-witness-map.json",
-        "target_blob": "7d0f541aedfcc0139b96b23380498c32b24fb891",
-        "operation": "validated Python read of measured bytes"
+        "target": "tests/h62/item2/audit-v09-passes/shift-capture-witness-map.json", "target_blob": "7d0f541aedfcc0139b96b23380498c32b24fb891", "operation": "validated Python read of measured bytes"
       },
       {
         "runner": "validated:tests/h62/item2/audit-v09-passes/test_signature_boundaries.py",
@@ -2148,9 +1943,7 @@
           {"path": "tests/h62/item2/audit-v09-passes/test_signature_boundaries.py", "blob": "8197c24e965db18f3157c5a62bd70601d0a851ee", "line": 307},
           {"path": "tests/h62/item2/audit-v09-passes/test_signature_boundaries.py", "blob": "8197c24e965db18f3157c5a62bd70601d0a851ee", "line": 90}
         ],
-        "target": "tests/h62/item2/audit-v09-passes/stack-witness-map.json",
-        "target_blob": "50d5f6775fbdf2b0d4dc20872b8b2c026a5b46bc",
-        "operation": "validated Python read of measured bytes"
+        "target": "tests/h62/item2/audit-v09-passes/stack-witness-map.json", "target_blob": "50d5f6775fbdf2b0d4dc20872b8b2c026a5b46bc", "operation": "validated Python read of measured bytes"
       },
       {
         "runner": "validated:tests/h62/item2/audit-v09-passes/test_signature_boundaries.py",
@@ -2160,9 +1953,7 @@
           {"path": "tests/h62/item2/audit-v09-passes/test_signature_boundaries.py", "blob": "8197c24e965db18f3157c5a62bd70601d0a851ee", "line": 191},
           {"path": "tests/h62/item2/audit-v09-passes/test_signature_boundaries.py", "blob": "8197c24e965db18f3157c5a62bd70601d0a851ee", "line": 156}
         ],
-        "target": "tests/h62/item2/audit-v09-passes/stateful-capture-witness-map.json",
-        "target_blob": "2e5e57653c49a2613b63dcdf28ff006f60c03b7b",
-        "operation": "validated Python read of measured bytes"
+        "target": "tests/h62/item2/audit-v09-passes/stateful-capture-witness-map.json", "target_blob": "2e5e57653c49a2613b63dcdf28ff006f60c03b7b", "operation": "validated Python read of measured bytes"
       },
       {
         "runner": "validated:tests/h62/item2/audit-v09-passes/test_signature_boundaries.py",
@@ -2172,9 +1963,7 @@
           {"path": "tests/h62/item2/audit-v09-passes/test_signature_boundaries.py", "blob": "8197c24e965db18f3157c5a62bd70601d0a851ee", "line": 191},
           {"path": "tests/h62/item2/audit-v09-passes/test_signature_boundaries.py", "blob": "8197c24e965db18f3157c5a62bd70601d0a851ee", "line": 156}
         ],
-        "target": "tests/h62/item2/audit-v09-passes/triple-admission-witness-map.json",
-        "target_blob": "ca98bcc3f4bf2f775e0ac8057eb8b4029da7b844",
-        "operation": "validated Python read of measured bytes"
+        "target": "tests/h62/item2/audit-v09-passes/triple-admission-witness-map.json", "target_blob": "ca98bcc3f4bf2f775e0ac8057eb8b4029da7b844", "operation": "validated Python read of measured bytes"
       },
       {
         "runner": "validated:scripts/h62/item2/audit-v10-storage/test_witness_registry.py",
@@ -2184,9 +1973,7 @@
           {"path": "scripts/h62/item2/audit-v10-storage/test_witness_registry.py", "blob": "722c52386a86d525e5d3bee66ad1a47dc8380dbf", "line": 34},
           {"path": "scripts/h62/item2/audit-v10-storage/witness_registry.py", "blob": "75ecaeaa3b590a3931a59bf6d718d5c1193b55d2", "line": 81}
         ],
-        "target": "tests/h62/item2/audit-v10-storage/ArrayAccessWitnesses.lean",
-        "target_blob": "9d206393c05da5b9d2483c43c2bc17bf07197e0c",
-        "operation": "validated Python read of measured bytes"
+        "target": "tests/h62/item2/audit-v10-storage/ArrayAccessWitnesses.lean", "target_blob": "9d206393c05da5b9d2483c43c2bc17bf07197e0c", "operation": "validated Python read of measured bytes"
       },
       {
         "runner": "validated:scripts/h62/item2/audit-v10-storage/test_witness_registry.py",
@@ -2196,9 +1983,7 @@
           {"path": "scripts/h62/item2/audit-v10-storage/test_witness_registry.py", "blob": "722c52386a86d525e5d3bee66ad1a47dc8380dbf", "line": 34},
           {"path": "scripts/h62/item2/audit-v10-storage/witness_registry.py", "blob": "75ecaeaa3b590a3931a59bf6d718d5c1193b55d2", "line": 81}
         ],
-        "target": "tests/h62/item2/audit-v10-storage/GeneratedFamilyWitnesses.lean",
-        "target_blob": "347b23e581d91d0f2ed9fd2ea648e55cece04767",
-        "operation": "validated Python read of measured bytes"
+        "target": "tests/h62/item2/audit-v10-storage/GeneratedFamilyWitnesses.lean", "target_blob": "347b23e581d91d0f2ed9fd2ea648e55cece04767", "operation": "validated Python read of measured bytes"
       },
       {
         "runner": "validated:scripts/h62/item2/audit-v10-storage/test_witness_registry.py",
@@ -2208,9 +1993,7 @@
           {"path": "scripts/h62/item2/audit-v10-storage/test_witness_registry.py", "blob": "722c52386a86d525e5d3bee66ad1a47dc8380dbf", "line": 34},
           {"path": "scripts/h62/item2/audit-v10-storage/witness_registry.py", "blob": "75ecaeaa3b590a3931a59bf6d718d5c1193b55d2", "line": 81}
         ],
-        "target": "tests/h62/item2/audit-v10-storage/KeyBoundsWitnesses.lean",
-        "target_blob": "ca489f4b72dd9af8926213866cb69bee62b38689",
-        "operation": "validated Python read of measured bytes"
+        "target": "tests/h62/item2/audit-v10-storage/KeyBoundsWitnesses.lean", "target_blob": "ca489f4b72dd9af8926213866cb69bee62b38689", "operation": "validated Python read of measured bytes"
       },
       {
         "runner": "validated:scripts/h62/item2/audit-v10-storage/test_witness_registry.py",
@@ -2220,9 +2003,7 @@
           {"path": "scripts/h62/item2/audit-v10-storage/test_witness_registry.py", "blob": "722c52386a86d525e5d3bee66ad1a47dc8380dbf", "line": 34},
           {"path": "scripts/h62/item2/audit-v10-storage/witness_registry.py", "blob": "75ecaeaa3b590a3931a59bf6d718d5c1193b55d2", "line": 81}
         ],
-        "target": "tests/h62/item2/audit-v10-storage/LayoutWitnesses.lean",
-        "target_blob": "9a0e505684ec5dcfd0061d363446e5af1e493323",
-        "operation": "validated Python read of measured bytes"
+        "target": "tests/h62/item2/audit-v10-storage/LayoutWitnesses.lean", "target_blob": "9a0e505684ec5dcfd0061d363446e5af1e493323", "operation": "validated Python read of measured bytes"
       },
       {
         "runner": "validated:scripts/h62/item2/audit-v10-storage/test_witness_registry.py",
@@ -2232,9 +2013,7 @@
           {"path": "scripts/h62/item2/audit-v10-storage/test_witness_registry.py", "blob": "722c52386a86d525e5d3bee66ad1a47dc8380dbf", "line": 34},
           {"path": "scripts/h62/item2/audit-v10-storage/witness_registry.py", "blob": "75ecaeaa3b590a3931a59bf6d718d5c1193b55d2", "line": 81}
         ],
-        "target": "tests/h62/item2/audit-v10-storage/LoopWitnesses.lean",
-        "target_blob": "7e99b4707fdf38fd2521cf1d618b6902678d5bda",
-        "operation": "validated Python read of measured bytes"
+        "target": "tests/h62/item2/audit-v10-storage/LoopWitnesses.lean", "target_blob": "7e99b4707fdf38fd2521cf1d618b6902678d5bda", "operation": "validated Python read of measured bytes"
       },
       {
         "runner": "validated:scripts/h62/item2/audit-v10-storage/test_witness_registry.py",
@@ -2244,9 +2023,7 @@
           {"path": "scripts/h62/item2/audit-v10-storage/test_witness_registry.py", "blob": "722c52386a86d525e5d3bee66ad1a47dc8380dbf", "line": 34},
           {"path": "scripts/h62/item2/audit-v10-storage/witness_registry.py", "blob": "75ecaeaa3b590a3931a59bf6d718d5c1193b55d2", "line": 81}
         ],
-        "target": "tests/h62/item2/audit-v10-storage/PushWitnesses.lean",
-        "target_blob": "8e81fa781eff14e3839720713844b737e656e2cc",
-        "operation": "validated Python read of measured bytes"
+        "target": "tests/h62/item2/audit-v10-storage/PushWitnesses.lean", "target_blob": "8e81fa781eff14e3839720713844b737e656e2cc", "operation": "validated Python read of measured bytes"
       },
       {
         "runner": "validated:scripts/h62/item2/audit-v10-storage/test_witness_registry.py",
@@ -2256,9 +2033,7 @@
           {"path": "scripts/h62/item2/audit-v10-storage/test_witness_registry.py", "blob": "722c52386a86d525e5d3bee66ad1a47dc8380dbf", "line": 34},
           {"path": "scripts/h62/item2/audit-v10-storage/witness_registry.py", "blob": "75ecaeaa3b590a3931a59bf6d718d5c1193b55d2", "line": 81}
         ],
-        "target": "tests/h62/item2/audit-v10-storage/RepresentedWitnesses.lean",
-        "target_blob": "1103dd25e9bd38317c614f1ec03dce92fa850be2",
-        "operation": "validated Python read of measured bytes"
+        "target": "tests/h62/item2/audit-v10-storage/RepresentedWitnesses.lean", "target_blob": "1103dd25e9bd38317c614f1ec03dce92fa850be2", "operation": "validated Python read of measured bytes"
       },
       {
         "runner": "validated:scripts/h62/item2/audit-v10-storage/test_witness_registry.py",
@@ -2268,9 +2043,7 @@
           {"path": "scripts/h62/item2/audit-v10-storage/test_witness_registry.py", "blob": "722c52386a86d525e5d3bee66ad1a47dc8380dbf", "line": 34},
           {"path": "scripts/h62/item2/audit-v10-storage/witness_registry.py", "blob": "75ecaeaa3b590a3931a59bf6d718d5c1193b55d2", "line": 81}
         ],
-        "target": "tests/h62/item2/audit-v10-storage/SourceReadWitnesses.lean",
-        "target_blob": "67053f29a31751830b906d2d12a6e7d5c05f8cd0",
-        "operation": "validated Python read of measured bytes"
+        "target": "tests/h62/item2/audit-v10-storage/SourceReadWitnesses.lean", "target_blob": "67053f29a31751830b906d2d12a6e7d5c05f8cd0", "operation": "validated Python read of measured bytes"
       },
       {
         "runner": "validated:scripts/h62/item2/audit-v10-storage/test_witness_registry.py",
@@ -2280,9 +2053,7 @@
           {"path": "scripts/h62/item2/audit-v10-storage/test_witness_registry.py", "blob": "722c52386a86d525e5d3bee66ad1a47dc8380dbf", "line": 34},
           {"path": "scripts/h62/item2/audit-v10-storage/witness_registry.py", "blob": "75ecaeaa3b590a3931a59bf6d718d5c1193b55d2", "line": 81}
         ],
-        "target": "tests/h62/item2/audit-v10-storage/SourceWriteWitnesses.lean",
-        "target_blob": "80ef068053781620503fcd609091321502e7e0e1",
-        "operation": "validated Python read of measured bytes"
+        "target": "tests/h62/item2/audit-v10-storage/SourceWriteWitnesses.lean", "target_blob": "80ef068053781620503fcd609091321502e7e0e1", "operation": "validated Python read of measured bytes"
       },
       {
         "runner": "validated:scripts/h62/item2/audit-v10-storage/test_witness_registry.py",
@@ -2292,9 +2063,7 @@
           {"path": "scripts/h62/item2/audit-v10-storage/test_witness_registry.py", "blob": "722c52386a86d525e5d3bee66ad1a47dc8380dbf", "line": 34},
           {"path": "scripts/h62/item2/audit-v10-storage/witness_registry.py", "blob": "75ecaeaa3b590a3931a59bf6d718d5c1193b55d2", "line": 81}
         ],
-        "target": "tests/h62/item2/audit-v10-storage/TargetInputWitnesses.lean",
-        "target_blob": "e17b3bb5c6c4a021cb445190514ca3fcfbd912a3",
-        "operation": "validated Python read of measured bytes"
+        "target": "tests/h62/item2/audit-v10-storage/TargetInputWitnesses.lean", "target_blob": "e17b3bb5c6c4a021cb445190514ca3fcfbd912a3", "operation": "validated Python read of measured bytes"
       },
       {
         "runner": "validated:scripts/h62/item2/audit-v10-storage/test_witness_registry.py",
@@ -2304,9 +2073,7 @@
           {"path": "scripts/h62/item2/audit-v10-storage/test_witness_registry.py", "blob": "722c52386a86d525e5d3bee66ad1a47dc8380dbf", "line": 34},
           {"path": "scripts/h62/item2/audit-v10-storage/witness_registry.py", "blob": "75ecaeaa3b590a3931a59bf6d718d5c1193b55d2", "line": 81}
         ],
-        "target": "tests/h62/item2/audit-v10-storage/TargetReuseWitnesses.lean",
-        "target_blob": "e2ecab242625cfa9bcbdb0399d72bcff75b28167",
-        "operation": "validated Python read of measured bytes"
+        "target": "tests/h62/item2/audit-v10-storage/TargetReuseWitnesses.lean", "target_blob": "e2ecab242625cfa9bcbdb0399d72bcff75b28167", "operation": "validated Python read of measured bytes"
       },
       {
         "runner": "validated:scripts/h62/item2/audit-v10-storage/test_witness_registry.py",
@@ -2316,9 +2083,7 @@
           {"path": "scripts/h62/item2/audit-v10-storage/test_witness_registry.py", "blob": "722c52386a86d525e5d3bee66ad1a47dc8380dbf", "line": 34},
           {"path": "scripts/h62/item2/audit-v10-storage/witness_registry.py", "blob": "75ecaeaa3b590a3931a59bf6d718d5c1193b55d2", "line": 81}
         ],
-        "target": "tests/h62/item2/audit-v10-storage/TargetTotality.lean",
-        "target_blob": "7f42249e813d13f423e88820a51f0783c145f6e9",
-        "operation": "validated Python read of measured bytes"
+        "target": "tests/h62/item2/audit-v10-storage/TargetTotality.lean", "target_blob": "7f42249e813d13f423e88820a51f0783c145f6e9", "operation": "validated Python read of measured bytes"
       },
       {
         "runner": "validated:scripts/h62/item2/audit-v10-storage/test_witness_registry.py",
@@ -2328,9 +2093,7 @@
           {"path": "scripts/h62/item2/audit-v10-storage/test_witness_registry.py", "blob": "722c52386a86d525e5d3bee66ad1a47dc8380dbf", "line": 34},
           {"path": "scripts/h62/item2/audit-v10-storage/witness_registry.py", "blob": "75ecaeaa3b590a3931a59bf6d718d5c1193b55d2", "line": 81}
         ],
-        "target": "tests/h62/item2/audit-v10-storage/TargetWriteSequenceWitnesses.lean",
-        "target_blob": "ad502eccb2675c57a7251cb03266156d8ea822cc",
-        "operation": "validated Python read of measured bytes"
+        "target": "tests/h62/item2/audit-v10-storage/TargetWriteSequenceWitnesses.lean", "target_blob": "ad502eccb2675c57a7251cb03266156d8ea822cc", "operation": "validated Python read of measured bytes"
       },
       {
         "runner": "validated:scripts/h62/item2/audit-v10-storage/test_witness_registry.py",
@@ -2340,9 +2103,7 @@
           {"path": "scripts/h62/item2/audit-v10-storage/test_witness_registry.py", "blob": "722c52386a86d525e5d3bee66ad1a47dc8380dbf", "line": 34},
           {"path": "scripts/h62/item2/audit-v10-storage/witness_registry.py", "blob": "75ecaeaa3b590a3931a59bf6d718d5c1193b55d2", "line": 52}
         ],
-        "target": "tests/h62/item2/audit-v10-storage/array-logical-read-data-witness-map.json",
-        "target_blob": "a9315b023f67c761a629db5d7acb4b0a2ba71804",
-        "operation": "validated Python read of measured bytes"
+        "target": "tests/h62/item2/audit-v10-storage/array-logical-read-data-witness-map.json", "target_blob": "a9315b023f67c761a629db5d7acb4b0a2ba71804", "operation": "validated Python read of measured bytes"
       },
       {
         "runner": "validated:scripts/h62/item2/audit-v10-storage/test_witness_registry.py",
@@ -2352,9 +2113,7 @@
           {"path": "scripts/h62/item2/audit-v10-storage/test_witness_registry.py", "blob": "722c52386a86d525e5d3bee66ad1a47dc8380dbf", "line": 34},
           {"path": "scripts/h62/item2/audit-v10-storage/witness_registry.py", "blob": "75ecaeaa3b590a3931a59bf6d718d5c1193b55d2", "line": 52}
         ],
-        "target": "tests/h62/item2/audit-v10-storage/array-logical-write-data-witness-map.json",
-        "target_blob": "12f889a06b8cbfeb0fe59ab006dab7e7cce12c61",
-        "operation": "validated Python read of measured bytes"
+        "target": "tests/h62/item2/audit-v10-storage/array-logical-write-data-witness-map.json", "target_blob": "12f889a06b8cbfeb0fe59ab006dab7e7cce12c61", "operation": "validated Python read of measured bytes"
       },
       {
         "runner": "validated:scripts/h62/item2/audit-v10-storage/test_witness_registry.py",
@@ -2364,9 +2123,7 @@
           {"path": "scripts/h62/item2/audit-v10-storage/test_witness_registry.py", "blob": "722c52386a86d525e5d3bee66ad1a47dc8380dbf", "line": 34},
           {"path": "scripts/h62/item2/audit-v10-storage/witness_registry.py", "blob": "75ecaeaa3b590a3931a59bf6d718d5c1193b55d2", "line": 52}
         ],
-        "target": "tests/h62/item2/audit-v10-storage/array-read-witness-map.json",
-        "target_blob": "86de0a0908a842b4efd7e21deabcaa0c8b4617a6",
-        "operation": "validated Python read of measured bytes"
+        "target": "tests/h62/item2/audit-v10-storage/array-read-witness-map.json", "target_blob": "86de0a0908a842b4efd7e21deabcaa0c8b4617a6", "operation": "validated Python read of measured bytes"
       },
       {
         "runner": "validated:scripts/h62/item2/audit-v10-storage/test_witness_registry.py",
@@ -2376,9 +2133,7 @@
           {"path": "scripts/h62/item2/audit-v10-storage/test_witness_registry.py", "blob": "722c52386a86d525e5d3bee66ad1a47dc8380dbf", "line": 34},
           {"path": "scripts/h62/item2/audit-v10-storage/witness_registry.py", "blob": "75ecaeaa3b590a3931a59bf6d718d5c1193b55d2", "line": 52}
         ],
-        "target": "tests/h62/item2/audit-v10-storage/array-write-witness-map.json",
-        "target_blob": "8ac2dde77d92ead1a51cdaccef93edebfec29b1e",
-        "operation": "validated Python read of measured bytes"
+        "target": "tests/h62/item2/audit-v10-storage/array-write-witness-map.json", "target_blob": "8ac2dde77d92ead1a51cdaccef93edebfec29b1e", "operation": "validated Python read of measured bytes"
       },
       {
         "runner": "validated:scripts/h62/item2/audit-v10-storage/test_witness_registry.py",
@@ -2388,9 +2143,7 @@
           {"path": "scripts/h62/item2/audit-v10-storage/test_witness_registry.py", "blob": "722c52386a86d525e5d3bee66ad1a47dc8380dbf", "line": 34},
           {"path": "scripts/h62/item2/audit-v10-storage/witness_registry.py", "blob": "75ecaeaa3b590a3931a59bf6d718d5c1193b55d2", "line": 52}
         ],
-        "target": "tests/h62/item2/audit-v10-storage/default-complete-witness-map.json",
-        "target_blob": "9f6baf6668595bfac2704db10519092b1ea1f01d",
-        "operation": "validated Python read of measured bytes"
+        "target": "tests/h62/item2/audit-v10-storage/default-complete-witness-map.json", "target_blob": "9f6baf6668595bfac2704db10519092b1ea1f01d", "operation": "validated Python read of measured bytes"
       },
       {
         "runner": "validated:scripts/h62/item2/audit-v10-storage/test_witness_registry.py",
@@ -2400,9 +2153,7 @@
           {"path": "scripts/h62/item2/audit-v10-storage/test_witness_registry.py", "blob": "722c52386a86d525e5d3bee66ad1a47dc8380dbf", "line": 34},
           {"path": "scripts/h62/item2/audit-v10-storage/witness_registry.py", "blob": "75ecaeaa3b590a3931a59bf6d718d5c1193b55d2", "line": 52}
         ],
-        "target": "tests/h62/item2/audit-v10-storage/default-owner-witness-map.json",
-        "target_blob": "d6deb8b51ae2b331fc45f6e3b094aa8806893f15",
-        "operation": "validated Python read of measured bytes"
+        "target": "tests/h62/item2/audit-v10-storage/default-owner-witness-map.json", "target_blob": "d6deb8b51ae2b331fc45f6e3b094aa8806893f15", "operation": "validated Python read of measured bytes"
       },
       {
         "runner": "validated:scripts/h62/item2/audit-v10-storage/test_witness_registry.py",
@@ -2412,9 +2163,7 @@
           {"path": "scripts/h62/item2/audit-v10-storage/test_witness_registry.py", "blob": "722c52386a86d525e5d3bee66ad1a47dc8380dbf", "line": 34},
           {"path": "scripts/h62/item2/audit-v10-storage/witness_registry.py", "blob": "75ecaeaa3b590a3931a59bf6d718d5c1193b55d2", "line": 52}
         ],
-        "target": "tests/h62/item2/audit-v10-storage/generated-family-witness-map.json",
-        "target_blob": "fb2eda2d03b5f84ee57f6c409f9f97b248e12909",
-        "operation": "validated Python read of measured bytes"
+        "target": "tests/h62/item2/audit-v10-storage/generated-family-witness-map.json", "target_blob": "fb2eda2d03b5f84ee57f6c409f9f97b248e12909", "operation": "validated Python read of measured bytes"
       },
       {
         "runner": "validated:scripts/h62/item2/audit-v10-storage/test_witness_registry.py",
@@ -2424,9 +2173,7 @@
           {"path": "scripts/h62/item2/audit-v10-storage/test_witness_registry.py", "blob": "722c52386a86d525e5d3bee66ad1a47dc8380dbf", "line": 34},
           {"path": "scripts/h62/item2/audit-v10-storage/witness_registry.py", "blob": "75ecaeaa3b590a3931a59bf6d718d5c1193b55d2", "line": 52}
         ],
-        "target": "tests/h62/item2/audit-v10-storage/key-bounds-witness-map.json",
-        "target_blob": "75b1dfaf838b1e94a9871abc12dfafecf16064b8",
-        "operation": "validated Python read of measured bytes"
+        "target": "tests/h62/item2/audit-v10-storage/key-bounds-witness-map.json", "target_blob": "75b1dfaf838b1e94a9871abc12dfafecf16064b8", "operation": "validated Python read of measured bytes"
       },
       {
         "runner": "validated:scripts/h62/item2/audit-v10-storage/test_witness_registry.py",
@@ -2436,9 +2183,7 @@
           {"path": "scripts/h62/item2/audit-v10-storage/test_witness_registry.py", "blob": "722c52386a86d525e5d3bee66ad1a47dc8380dbf", "line": 34},
           {"path": "scripts/h62/item2/audit-v10-storage/witness_registry.py", "blob": "75ecaeaa3b590a3931a59bf6d718d5c1193b55d2", "line": 52}
         ],
-        "target": "tests/h62/item2/audit-v10-storage/layout-witness-map.json",
-        "target_blob": "155fd69312f5a2fc5913d11b76645858cd374c04",
-        "operation": "validated Python read of measured bytes"
+        "target": "tests/h62/item2/audit-v10-storage/layout-witness-map.json", "target_blob": "155fd69312f5a2fc5913d11b76645858cd374c04", "operation": "validated Python read of measured bytes"
       },
       {
         "runner": "validated:scripts/h62/item2/audit-v10-storage/test_witness_registry.py",
@@ -2448,9 +2193,7 @@
           {"path": "scripts/h62/item2/audit-v10-storage/test_witness_registry.py", "blob": "722c52386a86d525e5d3bee66ad1a47dc8380dbf", "line": 34},
           {"path": "scripts/h62/item2/audit-v10-storage/witness_registry.py", "blob": "75ecaeaa3b590a3931a59bf6d718d5c1193b55d2", "line": 52}
         ],
-        "target": "tests/h62/item2/audit-v10-storage/lifecycle-data-witness-map.json",
-        "target_blob": "7144e9496c207504ec399b8019932943875f086f",
-        "operation": "validated Python read of measured bytes"
+        "target": "tests/h62/item2/audit-v10-storage/lifecycle-data-witness-map.json", "target_blob": "7144e9496c207504ec399b8019932943875f086f", "operation": "validated Python read of measured bytes"
       },
       {
         "runner": "validated:scripts/h62/item2/audit-v10-storage/test_witness_registry.py",
@@ -2460,9 +2203,7 @@
           {"path": "scripts/h62/item2/audit-v10-storage/test_witness_registry.py", "blob": "722c52386a86d525e5d3bee66ad1a47dc8380dbf", "line": 34},
           {"path": "scripts/h62/item2/audit-v10-storage/witness_registry.py", "blob": "75ecaeaa3b590a3931a59bf6d718d5c1193b55d2", "line": 52}
         ],
-        "target": "tests/h62/item2/audit-v10-storage/lifecycle-joint-witness-map.json",
-        "target_blob": "89890ce69d6dd0921d47d3550c2e822537fa7ad0",
-        "operation": "validated Python read of measured bytes"
+        "target": "tests/h62/item2/audit-v10-storage/lifecycle-joint-witness-map.json", "target_blob": "89890ce69d6dd0921d47d3550c2e822537fa7ad0", "operation": "validated Python read of measured bytes"
       },
       {
         "runner": "validated:scripts/h62/item2/audit-v10-storage/test_witness_registry.py",
@@ -2472,9 +2213,7 @@
           {"path": "scripts/h62/item2/audit-v10-storage/test_witness_registry.py", "blob": "722c52386a86d525e5d3bee66ad1a47dc8380dbf", "line": 34},
           {"path": "scripts/h62/item2/audit-v10-storage/witness_registry.py", "blob": "75ecaeaa3b590a3931a59bf6d718d5c1193b55d2", "line": 52}
         ],
-        "target": "tests/h62/item2/audit-v10-storage/loop-witness-map.json",
-        "target_blob": "4971bfc240c1ecd22b6734cea9bdeb11a0c9fd61",
-        "operation": "validated Python read of measured bytes"
+        "target": "tests/h62/item2/audit-v10-storage/loop-witness-map.json", "target_blob": "4971bfc240c1ecd22b6734cea9bdeb11a0c9fd61", "operation": "validated Python read of measured bytes"
       },
       {
         "runner": "validated:scripts/h62/item2/audit-v10-storage/test_witness_registry.py",
@@ -2484,9 +2223,7 @@
           {"path": "scripts/h62/item2/audit-v10-storage/test_witness_registry.py", "blob": "722c52386a86d525e5d3bee66ad1a47dc8380dbf", "line": 34},
           {"path": "scripts/h62/item2/audit-v10-storage/witness_registry.py", "blob": "75ecaeaa3b590a3931a59bf6d718d5c1193b55d2", "line": 52}
         ],
-        "target": "tests/h62/item2/audit-v10-storage/push-data-witness-map.json",
-        "target_blob": "84f308658af9ef88dba7fd2d408279bf00016a9d",
-        "operation": "validated Python read of measured bytes"
+        "target": "tests/h62/item2/audit-v10-storage/push-data-witness-map.json", "target_blob": "84f308658af9ef88dba7fd2d408279bf00016a9d", "operation": "validated Python read of measured bytes"
       },
       {
         "runner": "validated:scripts/h62/item2/audit-v10-storage/test_witness_registry.py",
@@ -2496,9 +2233,7 @@
           {"path": "scripts/h62/item2/audit-v10-storage/test_witness_registry.py", "blob": "722c52386a86d525e5d3bee66ad1a47dc8380dbf", "line": 34},
           {"path": "scripts/h62/item2/audit-v10-storage/witness_registry.py", "blob": "75ecaeaa3b590a3931a59bf6d718d5c1193b55d2", "line": 52}
         ],
-        "target": "tests/h62/item2/audit-v10-storage/push-joint-witness-map.json",
-        "target_blob": "f4e63a6052c32154e3b71dcc8e8588d84c1435eb",
-        "operation": "validated Python read of measured bytes"
+        "target": "tests/h62/item2/audit-v10-storage/push-joint-witness-map.json", "target_blob": "f4e63a6052c32154e3b71dcc8e8588d84c1435eb", "operation": "validated Python read of measured bytes"
       },
       {
         "runner": "validated:scripts/h62/item2/audit-v10-storage/test_witness_registry.py",
@@ -2508,9 +2243,7 @@
           {"path": "scripts/h62/item2/audit-v10-storage/test_witness_registry.py", "blob": "722c52386a86d525e5d3bee66ad1a47dc8380dbf", "line": 34},
           {"path": "scripts/h62/item2/audit-v10-storage/witness_registry.py", "blob": "75ecaeaa3b590a3931a59bf6d718d5c1193b55d2", "line": 52}
         ],
-        "target": "tests/h62/item2/audit-v10-storage/represented-witness-map.json",
-        "target_blob": "2ab2c233e90f6984f7e75573edd2265442ee1043",
-        "operation": "validated Python read of measured bytes"
+        "target": "tests/h62/item2/audit-v10-storage/represented-witness-map.json", "target_blob": "2ab2c233e90f6984f7e75573edd2265442ee1043", "operation": "validated Python read of measured bytes"
       },
       {
         "runner": "validated:scripts/h62/item2/audit-v10-storage/test_witness_registry.py",
@@ -2520,9 +2253,7 @@
           {"path": "scripts/h62/item2/audit-v10-storage/test_witness_registry.py", "blob": "722c52386a86d525e5d3bee66ad1a47dc8380dbf", "line": 34},
           {"path": "scripts/h62/item2/audit-v10-storage/witness_registry.py", "blob": "75ecaeaa3b590a3931a59bf6d718d5c1193b55d2", "line": 52}
         ],
-        "target": "tests/h62/item2/audit-v10-storage/source-read-witness-map.json",
-        "target_blob": "a7ab41cace70af5769d4dd35af71facc18c1ccb2",
-        "operation": "validated Python read of measured bytes"
+        "target": "tests/h62/item2/audit-v10-storage/source-read-witness-map.json", "target_blob": "a7ab41cace70af5769d4dd35af71facc18c1ccb2", "operation": "validated Python read of measured bytes"
       },
       {
         "runner": "validated:scripts/h62/item2/audit-v10-storage/test_witness_registry.py",
@@ -2532,9 +2263,7 @@
           {"path": "scripts/h62/item2/audit-v10-storage/test_witness_registry.py", "blob": "722c52386a86d525e5d3bee66ad1a47dc8380dbf", "line": 34},
           {"path": "scripts/h62/item2/audit-v10-storage/witness_registry.py", "blob": "75ecaeaa3b590a3931a59bf6d718d5c1193b55d2", "line": 52}
         ],
-        "target": "tests/h62/item2/audit-v10-storage/source-write-witness-map.json",
-        "target_blob": "049d179007d459b10a21ff599bf92074934e696e",
-        "operation": "validated Python read of measured bytes"
+        "target": "tests/h62/item2/audit-v10-storage/source-write-witness-map.json", "target_blob": "049d179007d459b10a21ff599bf92074934e696e", "operation": "validated Python read of measured bytes"
       },
       {
         "runner": "validated:scripts/h62/item2/audit-v10-storage/test_witness_registry.py",
@@ -2544,9 +2273,7 @@
           {"path": "scripts/h62/item2/audit-v10-storage/test_witness_registry.py", "blob": "722c52386a86d525e5d3bee66ad1a47dc8380dbf", "line": 34},
           {"path": "scripts/h62/item2/audit-v10-storage/witness_registry.py", "blob": "75ecaeaa3b590a3931a59bf6d718d5c1193b55d2", "line": 52}
         ],
-        "target": "tests/h62/item2/audit-v10-storage/target-input-witness-map.json",
-        "target_blob": "134b3bb7a32b2b9cdd66bff334dda4b51d327a81",
-        "operation": "validated Python read of measured bytes"
+        "target": "tests/h62/item2/audit-v10-storage/target-input-witness-map.json", "target_blob": "134b3bb7a32b2b9cdd66bff334dda4b51d327a81", "operation": "validated Python read of measured bytes"
       },
       {
         "runner": "validated:scripts/h62/item2/audit-v10-storage/test_witness_registry.py",
@@ -2556,9 +2283,7 @@
           {"path": "scripts/h62/item2/audit-v10-storage/test_witness_registry.py", "blob": "722c52386a86d525e5d3bee66ad1a47dc8380dbf", "line": 34},
           {"path": "scripts/h62/item2/audit-v10-storage/witness_registry.py", "blob": "75ecaeaa3b590a3931a59bf6d718d5c1193b55d2", "line": 52}
         ],
-        "target": "tests/h62/item2/audit-v10-storage/target-reuse-data-witness-map.json",
-        "target_blob": "27be3561f9a4fb59c60a0f9d4e4c2107b44a2277",
-        "operation": "validated Python read of measured bytes"
+        "target": "tests/h62/item2/audit-v10-storage/target-reuse-data-witness-map.json", "target_blob": "27be3561f9a4fb59c60a0f9d4e4c2107b44a2277", "operation": "validated Python read of measured bytes"
       },
       {
         "runner": "validated:scripts/h62/item2/audit-v10-storage/test_witness_registry.py",
@@ -2568,9 +2293,7 @@
           {"path": "scripts/h62/item2/audit-v10-storage/test_witness_registry.py", "blob": "722c52386a86d525e5d3bee66ad1a47dc8380dbf", "line": 34},
           {"path": "scripts/h62/item2/audit-v10-storage/witness_registry.py", "blob": "75ecaeaa3b590a3931a59bf6d718d5c1193b55d2", "line": 52}
         ],
-        "target": "tests/h62/item2/audit-v10-storage/target-reuse-joint-witness-map.json",
-        "target_blob": "6b27d308d3cae0b94b661aeec359a0890d0e2d33",
-        "operation": "validated Python read of measured bytes"
+        "target": "tests/h62/item2/audit-v10-storage/target-reuse-joint-witness-map.json", "target_blob": "6b27d308d3cae0b94b661aeec359a0890d0e2d33", "operation": "validated Python read of measured bytes"
       },
       {
         "runner": "validated:scripts/h62/item2/audit-v10-storage/test_witness_registry.py",
@@ -2580,9 +2303,7 @@
           {"path": "scripts/h62/item2/audit-v10-storage/test_witness_registry.py", "blob": "722c52386a86d525e5d3bee66ad1a47dc8380dbf", "line": 34},
           {"path": "scripts/h62/item2/audit-v10-storage/witness_registry.py", "blob": "75ecaeaa3b590a3931a59bf6d718d5c1193b55d2", "line": 52}
         ],
-        "target": "tests/h62/item2/audit-v10-storage/target-write-sequence-witness-map.json",
-        "target_blob": "c3e811b39ab250792410de5c06adf18c6f0c6163",
-        "operation": "validated Python read of measured bytes"
+        "target": "tests/h62/item2/audit-v10-storage/target-write-sequence-witness-map.json", "target_blob": "c3e811b39ab250792410de5c06adf18c6f0c6163", "operation": "validated Python read of measured bytes"
       },
       {
         "runner": "validated:scripts/h62/item2/audit-v10-storage/test_witness_registry.py",
@@ -2592,9 +2313,7 @@
           {"path": "scripts/h62/item2/audit-v10-storage/test_witness_registry.py", "blob": "722c52386a86d525e5d3bee66ad1a47dc8380dbf", "line": 34},
           {"path": "scripts/h62/item2/audit-v10-storage/witness_registry.py", "blob": "75ecaeaa3b590a3931a59bf6d718d5c1193b55d2", "line": 52}
         ],
-        "target": "tests/h62/item2/audit-v10-storage/touched-data-witness-map.json",
-        "target_blob": "2a1d819c9194711248b66cd508ff1209f097251a",
-        "operation": "validated Python read of measured bytes"
+        "target": "tests/h62/item2/audit-v10-storage/touched-data-witness-map.json", "target_blob": "2a1d819c9194711248b66cd508ff1209f097251a", "operation": "validated Python read of measured bytes"
       },
       {
         "runner": "validated:scripts/h62/item2/audit-v10-storage/test_witness_registry.py",
@@ -2604,9 +2323,7 @@
           {"path": "scripts/h62/item2/audit-v10-storage/test_witness_registry.py", "blob": "722c52386a86d525e5d3bee66ad1a47dc8380dbf", "line": 34},
           {"path": "scripts/h62/item2/audit-v10-storage/witness_registry.py", "blob": "75ecaeaa3b590a3931a59bf6d718d5c1193b55d2", "line": 52}
         ],
-        "target": "tests/h62/item2/audit-v10-storage/touched-joint-witness-map.json",
-        "target_blob": "712d2eeeb7ea9ba29cded3615e445c0dd9f7466c",
-        "operation": "validated Python read of measured bytes"
+        "target": "tests/h62/item2/audit-v10-storage/touched-joint-witness-map.json", "target_blob": "712d2eeeb7ea9ba29cded3615e445c0dd9f7466c", "operation": "validated Python read of measured bytes"
       },
       {
         "runner": "validated:tests/h62/item4/generic-internalflow/test_embedded.py",
@@ -2615,9 +2332,7 @@
           {"path": "tests/h62/item4/generic-internalflow/test_embedded.py", "blob": "0e13edb2a7feed9dc14aa947d062dba28570edb8", "line": 34},
           {"path": "tests/h62/item4/generic-internalflow/test_embedded.py", "blob": "0e13edb2a7feed9dc14aa947d062dba28570edb8", "line": 11}
         ],
-        "target": "tests/h62/item4/generic-internalflow/embedded-cases.txt",
-        "target_blob": "41baf3c18067877c613d7ec794423d3923604562",
-        "operation": "validated Python read of measured bytes"
+        "target": "tests/h62/item4/generic-internalflow/embedded-cases.txt", "target_blob": "41baf3c18067877c613d7ec794423d3923604562", "operation": "validated Python read of measured bytes"
       },
       {
         "runner": "validated:tests/h62/item4/generic-internalflow/test_prefix.py",
@@ -2626,9 +2341,7 @@
           {"path": "tests/h62/item4/generic-internalflow/test_prefix.py", "blob": "fe3fee9f7df83f47e01dd9cc8d5155412d9a7671", "line": 31},
           {"path": "tests/h62/item4/generic-internalflow/test_prefix.py", "blob": "fe3fee9f7df83f47e01dd9cc8d5155412d9a7671", "line": 11}
         ],
-        "target": "tests/h62/item4/generic-internalflow/prefix-cases.txt",
-        "target_blob": "41a7a0f7a52f1e3d05bad6848170b324ce443dfa",
-        "operation": "validated Python read of measured bytes"
+        "target": "tests/h62/item4/generic-internalflow/prefix-cases.txt", "target_blob": "41a7a0f7a52f1e3d05bad6848170b324ce443dfa", "operation": "validated Python read of measured bytes"
       },
       {
         "runner": "validated:tests/h62/item4/generic-internalflow/test_classification.py",
@@ -2637,9 +2350,7 @@
           {"path": "tests/h62/item4/generic-internalflow/test_classification.py", "blob": "63b762e0398b86326aed7f6d7e3e388c938ae733", "line": 91},
           {"path": "tests/h62/item4/generic-internalflow/test_classification.py", "blob": "63b762e0398b86326aed7f6d7e3e388c938ae733", "line": 18}
         ],
-        "target": "tests/h62/item4/generic-internalflow/semantic-cases.txt",
-        "target_blob": "789ed117878f40aa0ee77305bf3332cf79361846",
-        "operation": "validated Python read of measured bytes"
+        "target": "tests/h62/item4/generic-internalflow/semantic-cases.txt", "target_blob": "789ed117878f40aa0ee77305bf3332cf79361846", "operation": "validated Python read of measured bytes"
       },
       {
         "runner": "validated:tests/h62/item4/generic-passes/test_acceptance.py",
@@ -2648,9 +2359,7 @@
           {"path": "tests/h62/item4/generic-passes/test_acceptance.py", "blob": "df9dee1caffc2b2823d62a43cf4a2960edf60ac4", "line": 126},
           {"path": "tests/h62/item4/generic-passes/test_acceptance.py", "blob": "df9dee1caffc2b2823d62a43cf4a2960edf60ac4", "line": 20}
         ],
-        "target": "tests/h62/item4/generic-passes/Correspondence.lean",
-        "target_blob": "579d1d98ab9076f389ad1cc2202b2fb0ae4f25f5",
-        "operation": "validated Python read of measured bytes"
+        "target": "tests/h62/item4/generic-passes/Correspondence.lean", "target_blob": "579d1d98ab9076f389ad1cc2202b2fb0ae4f25f5", "operation": "validated Python read of measured bytes"
       },
       {
         "runner": "validated:tests/h62/item4/generic-passes/test_acceptance.py",
@@ -2659,9 +2368,7 @@
           {"path": "tests/h62/item4/generic-passes/test_acceptance.py", "blob": "df9dee1caffc2b2823d62a43cf4a2960edf60ac4", "line": 126},
           {"path": "tests/h62/item4/generic-passes/test_acceptance.py", "blob": "df9dee1caffc2b2823d62a43cf4a2960edf60ac4", "line": 20}
         ],
-        "target": "tests/h62/item4/generic-passes/Instances.lean",
-        "target_blob": "852ec69b871926a924b638a3a97f3837e0361480",
-        "operation": "validated Python read of measured bytes"
+        "target": "tests/h62/item4/generic-passes/Instances.lean", "target_blob": "852ec69b871926a924b638a3a97f3837e0361480", "operation": "validated Python read of measured bytes"
       },
       {
         "runner": "validated:scripts/h62/item4/generic-source-frontend/test_generate.py",
@@ -2670,9 +2377,7 @@
           {"path": "scripts/h62/item4/generic-source-frontend/test_generate.py", "blob": "819edbaae633806e1344a641def3a6bc2baaa558", "line": 35},
           {"path": "scripts/h62/item4/generic-source-frontend/test_generate.py", "blob": "819edbaae633806e1344a641def3a6bc2baaa558", "line": 12}
         ],
-        "target": "tests/h62/item4/generic-source-frontend/FixtureTable.lean",
-        "target_blob": "6136a98d7b8a2d935084b40dd18d825ba5ec77df",
-        "operation": "validated Python read of measured bytes"
+        "target": "tests/h62/item4/generic-source-frontend/FixtureTable.lean", "target_blob": "6136a98d7b8a2d935084b40dd18d825ba5ec77df", "operation": "validated Python read of measured bytes"
       },
       {
         "runner": "validated:scripts/h62/item4/generic-source-frontend/test_generate.py",
@@ -2681,9 +2386,7 @@
           {"path": "scripts/h62/item4/generic-source-frontend/test_generate.py", "blob": "819edbaae633806e1344a641def3a6bc2baaa558", "line": 35},
           {"path": "scripts/h62/item4/generic-source-frontend/test_generate.py", "blob": "819edbaae633806e1344a641def3a6bc2baaa558", "line": 12}
         ],
-        "target": "tests/h62/item4/generic-source-frontend/owner-migration-proposal.json",
-        "target_blob": "fa1599a109b15a01b711f2ab1df4a8d1b626ec7a",
-        "operation": "validated Python read of measured bytes"
+        "target": "tests/h62/item4/generic-source-frontend/owner-migration-proposal.json", "target_blob": "fa1599a109b15a01b711f2ab1df4a8d1b626ec7a", "operation": "validated Python read of measured bytes"
       },
       {
         "runner": "validated:scripts/h62/item4/generic-storageops/test_fixture_plan.py",
@@ -2693,9 +2396,7 @@
           {"path": "scripts/h62/item4/generic-storageops/test_fixture_plan.py", "blob": "45c3b68ccc0816a13d5c6e52fa6f89a4f018c05e", "line": 35},
           {"path": "scripts/h62/item4/generic-storageops/classify.py", "blob": "7116e793c6272010254e5c4b1ae58c7a687fbbed", "line": 213}
         ],
-        "target": "tests/h62/item4/generic-storageops/inventory-manifest.json",
-        "target_blob": "43e21907e46703231a57805f46bf01a88e2d5734",
-        "operation": "validated Python read of measured bytes"
+        "target": "tests/h62/item4/generic-storageops/inventory-manifest.json", "target_blob": "43e21907e46703231a57805f46bf01a88e2d5734", "operation": "validated Python read of measured bytes"
       },
       {
         "runner": "validated:scripts/h62/item4/generic-storageops/test_fixture_plan.py",
@@ -2705,9 +2406,7 @@
           {"path": "scripts/h62/item4/generic-storageops/test_fixture_plan.py", "blob": "45c3b68ccc0816a13d5c6e52fa6f89a4f018c05e", "line": 35},
           {"path": "scripts/h62/item4/generic-storageops/classify.py", "blob": "7116e793c6272010254e5c4b1ae58c7a687fbbed", "line": 215}
         ],
-        "target": "tests/h62/item4/generic-storageops/semantic-domains.json",
-        "target_blob": "ba1961fcfbfcebaa5000eefc822c410306906fd9",
-        "operation": "validated Python read of measured bytes"
+        "target": "tests/h62/item4/generic-storageops/semantic-domains.json", "target_blob": "ba1961fcfbfcebaa5000eefc822c410306906fd9", "operation": "validated Python read of measured bytes"
       },
       {
         "runner": "validated:scripts/h62/item4/generic-structuredflow/test_census.py",
@@ -2716,9 +2415,7 @@
           {"path": "scripts/h62/item4/generic-structuredflow/test_census.py", "blob": "f7e4bb8a3cedab90251aadfcf35540c61b8b622a", "line": 87},
           {"path": "scripts/h62/item4/generic-structuredflow/test_census.py", "blob": "f7e4bb8a3cedab90251aadfcf35540c61b8b622a", "line": 19}
         ],
-        "target": "tests/h62/item4/generic-structuredflow/frozen.json",
-        "target_blob": "b2d3c4b0c1475a113330584a9c51b23c0f4e7fec",
-        "operation": "validated Python read of measured bytes"
+        "target": "tests/h62/item4/generic-structuredflow/frozen.json", "target_blob": "b2d3c4b0c1475a113330584a9c51b23c0f4e7fec", "operation": "validated Python read of measured bytes"
       },
       {
         "runner": "validated:scripts/h62/item2/audit-readonly-calls/test_private_evidence.py",
@@ -2728,9 +2425,7 @@
           {"path": "scripts/h62/item2/audit-readonly-calls/test_private_evidence.py", "blob": "b4ace0ec8a0086aa8661394903567c2527dace6b", "line": 167},
           {"path": "scripts/h62/item6/migrate-solkey/verify-portable-evidence.py", "blob": "6629603a3fda78d7526eef8273d333a67d1f6d8c", "line": 28}
         ],
-        "target": "tests/h62/item6/migrate-solkey/portable-evidence/catalog.json",
-        "target_blob": "765995c6e2c77fab444cae0696cabc3d640e4006",
-        "operation": "validated Python read of measured bytes"
+        "target": "tests/h62/item6/migrate-solkey/portable-evidence/catalog.json", "target_blob": "765995c6e2c77fab444cae0696cabc3d640e4006", "operation": "validated Python read of measured bytes"
       },
       {
         "runner": "validated:tests/h62/item1/duplication-scanner/test_scan.py",
@@ -2740,9 +2435,7 @@
           {"path": "tests/h62/item1/duplication-scanner/test_scan.py", "blob": "abf12e204cbc8c19fffad34625c9f394112c6791", "line": 240},
           {"path": "scripts/h62/item1/duplication-scanner/scan.py", "blob": "366f753500d82dc138fd59a2659e476c7321a382", "line": 290}
         ],
-        "target": "tests/h62/item6/migrate-yul/DeclarationMetadataFixture.lean",
-        "target_blob": "8904c7246dc1f06f7f733f31d04fa1b4e47acd69",
-        "operation": "validated Python read of measured bytes"
+        "target": "tests/h62/item6/migrate-yul/DeclarationMetadataFixture.lean", "target_blob": "8904c7246dc1f06f7f733f31d04fa1b4e47acd69", "operation": "validated Python read of measured bytes"
       },
       {
         "runner": "validated:scripts/h62/item2/audit-compiler-transport/acceptance.py",
@@ -2751,9 +2444,7 @@
           {"path": "scripts/h62/item2/audit-compiler-transport/acceptance.py", "blob": "7afc5db01e97d953bf5c074b446e67979ce95b60", "line": 90},
           {"path": "scripts/h62/item2/audit-compiler-transport/acceptance.py", "blob": "7afc5db01e97d953bf5c074b446e67979ce95b60", "line": 34}
         ],
-        "target": "tests/h62/item2/audit-compiler-transport/frozen-modules.json",
-        "target_blob": "ea5bc57804965c1fb4d95195edfd1bb4a4b7a098",
-        "operation": "validated Python read of measured bytes"
+        "target": "tests/h62/item2/audit-compiler-transport/frozen-modules.json", "target_blob": "ea5bc57804965c1fb4d95195edfd1bb4a4b7a098", "operation": "validated Python read of measured bytes"
       }
     ],
     "git_policies": [
