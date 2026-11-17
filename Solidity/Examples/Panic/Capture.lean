@@ -66,7 +66,8 @@ example (σ : State C []) (tail : Prog C [.val .uint, .val .uint] [.val .uint, .
       (σ.push (t := .val .uint) two) = .error (THalt.ofData (encodePanic 0x11)) ∧
     OriginV2 (.narrowing (.unsigned 1 three)) .arithmetic :=
   ⟨capture_guard_panic_run _ .uint _ next three 0x11 _ tail (next_reads_three σ) rfl,
-    uint_narrow_capture_origin ((σ.push (t := .val .uint) two)) three 1 (by decide) (by decide) rfl⟩
+    uint_narrow_capture_origin (σ.push (t := .val .uint) two) three 1 (by decide) (by decide)
+      rfl⟩
 
 /-- A capture whose operand itself halts (`1 / 0`) halts there with the
 operand's bare revert: the enum check behind it is never reached. -/
@@ -136,5 +137,82 @@ example (Γ : NCtx) :
   int_narrow_condition_check Γ "se" 8 (by decide) (by decide)
 
 end Elaborated
+
+/-! ## The first failing guard decides -/
+
+section Order
+
+variable {Γ : Ctx} {Γ' : Ctx}
+
+/-- `values`, a storage array held by the innermost alias. -/
+private def values : SPath C (.alias (.array (.prim .uint)) :: Γ) (.array (.prim .uint)) :=
+  .alias Idx.here
+
+/-- `values[i] / d == 0`. -/
+private def quotient (i d : Int) (hi : PrimTy.uint.inRange i = true)
+    (hd : PrimTy.uint.inRange d = true) :
+    Val C (.alias (.array (.prim .uint)) :: Γ) .bool :=
+  .binop .eqB rfl rfl
+    (.binop .div rfl rfl (.read (.index (.arr .dyn) values (litU i hi))) (litU d hd))
+    (litU 0 (by decide))
+
+private theorem quotient_guards (i d : Int) (hi : PrimTy.uint.inRange i = true)
+    (hd : PrimTy.uint.inRange d = true) :
+    (Stmt.require (quotient (C := C) (Γ := Γ) i d hi hd)).panics =
+      [(0x32, cmpU .lt rfl rfl (litU i hi) (.len values rfl)),
+       (0x12, cmpU .neB rfl rfl (litU d hd) (litU 0 (by decide)))] := by
+  simp [Stmt.panics, quotient, Val.panics, Loc.panics, SPath.panics, values, idxPG, divPG, pg,
+    range, rangeU, litU, Val.mayHalt, BinOp.isArith]
+
+private theorem lt_eval (σ : State C Γ) (a b : Val C Γ .uint) (x y : PrimTy.uint.Denote)
+    (left : a.evalT σ = .ok x) (right : b.evalT σ = .ok y) :
+    (cmpU .lt rfl rfl a b).evalT σ = .ok (decide (x.val < y.val)) := by
+  simp [cmpU, Val.evalT, left, right, BinOp.shortT, BinOp.evalT, BinOp.evalNum, TRes.ofOpt,
+    bind, Except.bind]
+
+/-- `require(values[5] / 0 == 0);` on a two-element array, instrumented: the
+index guard is emitted before the divisor guard and both would fail; the run
+halts with the index code 0x32, not the divisor's 0x12. -/
+example (σ : State C (.alias (.array (.prim .uint)) :: Γ))
+    (tail : Prog C (.alias (.array (.prim .uint)) :: Γ) Γ')
+    (length : (Val.len values rfl).evalT σ = .ok two) :
+    (Prog.cons (.require (quotient 5 0 (by decide) (by decide))) tail).withPanics.runR σ =
+      .error (THalt.ofData (encodePanic 0x32)) := by
+  rw [withPanics_source_cons, quotient_guards]
+  exact guards_first_failure _ _ σ 0 (by simp) (fun j before => absurd before (Nat.not_lt_zero j))
+    (lt_eval σ _ _ ⟨5, by decide⟩ two rfl length)
+
+/-- With the index in range, `require(values[1] / 0 == 0);` passes the first
+guard and fails the second: now the divisor's code 0x12 is the data. -/
+example (σ : State C (.alias (.array (.prim .uint)) :: Γ))
+    (tail : Prog C (.alias (.array (.prim .uint)) :: Γ) Γ')
+    (length : (Val.len values rfl).evalT σ = .ok two) :
+    (Prog.cons (.require (quotient 1 0 (by decide) (by decide))) tail).withPanics.runR σ =
+      .error (THalt.ofData (encodePanic 0x12)) := by
+  rw [withPanics_source_cons, quotient_guards]
+  refine guards_first_failure _ _ σ 1 (by simp) (fun j before => ?_)
+    (uint_divisor_guard_eval σ _ ⟨0, by decide⟩ rfl)
+  obtain rfl : j = 0 := by omega
+  exact lt_eval σ _ _ ⟨1, by decide⟩ two rfl length
+
+/-- The reverse order: `values[5] = 1 / 0;` emits its right-hand side's
+divisor guard before its target's index guard, so the same two failures halt
+with 0x12. -/
+example (σ : State C (.alias (.array (.prim .uint)) :: Γ))
+    (tail : Prog C (.alias (.array (.prim .uint)) :: Γ) Γ') :
+    (Prog.cons (.assign (.index (.arr .dyn) values (litU 5 (by decide)))
+      (.val (.binop .div rfl rfl (litU 1 (by decide)) (litU 0 (by decide))))) tail).withPanics.runR
+      σ = .error (THalt.ofData (encodePanic 0x12)) := by
+  have guards : (Stmt.assign (C := C) (.index (.arr .dyn) (values (Γ := Γ)) (litU 5 (by decide)))
+      (.val (.binop .div rfl rfl (litU 1 (by decide)) (litU 0 (by decide))))).panics =
+      [(0x12, cmpU .neB rfl rfl (litU 0 (by decide)) (litU 0 (by decide))),
+       (0x32, cmpU .lt rfl rfl (litU 5 (by decide)) (.len values rfl))] := by
+    simp [assign_panics_order, Src.panics, Val.panics, Loc.panics, SPath.panics, values, idxPG,
+      divPG, pg, range, rangeU, litU, Val.mayHalt, BinOp.isArith]
+  rw [withPanics_source_cons, guards]
+  exact guards_first_failure _ _ σ 0 (by simp) (fun j before => absurd before (Nat.not_lt_zero j))
+    (uint_divisor_guard_eval σ _ ⟨0, by decide⟩ rfl)
+
+end Order
 
 end Solidity.Examples.Panic.Capture
