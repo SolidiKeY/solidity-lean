@@ -112,6 +112,18 @@ D:control-tuples/ObligationControls.lean 4195775c23abafdc47ec3ebabe1a6e011e3777c
 D:shared-translator/PrimitiveReturnControls.lean 73cb82f3ed73ec1ba4e0e69fb591f347fd6c3d0d
 @b44f0de87c2ab845b79c9d84004dcb7c91babded
 D:shared-translator/H90Census.lean e41529cb06d93c593259cb2714d02c51fd96a022
+@0bdac88bfacec822c7157b7d5a3e713894571888
+N:primitive-return/FiniteControls.lean b05e60df2a805d814f29e745990ff6c4b7338965
+@17f2902cdc6ab848317fc82e31a90ad2d7c4fba8
+D:memory-references/KernelControls.lean 4814aadd49ceaa76564a6e6564ecb6cb1093db25
+@4234b74778787f681ebb50f2890355d99f37731a
+N:address/MarkerIdentityControls.lean 83b03faacdba2782a670aa428520abf7fc760413
+@4d7285b80e89741e9da8cb49ce7ab8b62a828a72
+N:environment/MetadataControls.lean 970ded15d40473c5605348fb5d93ac112273a582
+@b35ed6a63ad9767f9cb63c4d748b52dc1a287218
+D:shared-translator/ReadBoundsStackControls.lean 75383e5889553439e949ae17338253d39f0d4635
+@df6565c9a168d72395ce6aeea34a79782e31275f
+N:fixed-byte/MarkerControls.lean 794ead752a929293a52ae0acac24aadae9dcd594
 ''')
 # The H999 driver lines (address 20, environment 21, others 17); each driver
 # lists the source in a column-0 files+=(...) word before its gate line.
@@ -121,7 +133,21 @@ REVIEWED_LEAN_FIXTURE_INVOCATIONS = frozenset(
     for p, b, _ in REVIEWED_LEAN_FIXTURES for d in {
         'ObligationControls': 'address environment fixed-byte h90 primitive-return', 'ProductionControls': 'address environment fixed-byte h90 primitive-return',
         'AddressLocalControls': 'address environment', 'EnvironmentMemberControls': 'environment', 'FixedByteLocalControls': 'address environment fixed-byte',
-        'H90Census': 'address environment', 'PrimitiveReturnControls': 'address environment fixed-byte primitive-return'}[posixpath.basename(p)[:-5]].split())
+        'H90Census': 'address environment', 'PrimitiveReturnControls': 'address environment fixed-byte primitive-return'}.get(posixpath.basename(p)[:-5], '').split()
+) | frozenset(  # H1019: literal `gate.sh per-file <path>` driver lines (lean_literal_invocation).
+    (p, b, 'tests/directruntime-20261104/' + d, db, n) for p, b, _ in REVIEWED_LEAN_FIXTURES for q, d, db, n in (
+        ('memory-references/KernelControls', 'native-browser/environment/scripts/B-kernel-controls.sh', '971e181a0d2b877229eeefb48306e9e6fa86f62d', 9),
+        ('native-browser/address/MarkerIdentityControls', 'native-browser/environment/scripts/address-marker-gate.sh', 'a3fd70679b39c94289498f6900b24ad6495dc517', 9),
+        ('native-browser/environment/MetadataControls', 'native-browser/environment/scripts/marker-gate.sh', '1f6e42cf641de1003b3d9dca483f4aa47af9ff7d', 9),
+        ('native-browser/fixed-byte/MarkerControls', 'native-browser/environment/scripts/fixed-byte-gate.sh', 'd4197132f138040fc277bd006f6393e0455ec9b9', 9),
+        ('native-browser/primitive-return/FiniteControls', 'native-browser/environment/scripts/finite-gate.sh', '78e4b5909d6dd81671cedb28178437804072e407', 9),
+        ('shared-translator/ReadBoundsStackControls', 'native-browser/readbounds/axiom-gates.sh', '6d77f69e2a86fa3d1ab1121b4cc9408aeb19fabd', 15),
+        ('shared-translator/ReadBoundsStackControls', 'native-browser/readbounds/scripts/axiom-gates-post-rebase.sh', 'bdffe31da9f3c37864b74b8bf0f349654409db64', 15),
+        ('shared-translator/AddressLocalControls', 'shared-translator/environment-decoder-validate.sh', 'c9e849741ec9f96867766ecf7346f02c4d2389cf', 48),
+        ('shared-translator/AddressLocalControls', 'shared-translator/environment-proof-validate.sh', 'db00b98f108dd43cbe5e9d46c01f405ae22f4a18', 27),
+        ('shared-translator/EnvironmentMemberControls', 'shared-translator/environment-decoder-validate.sh', 'c9e849741ec9f96867766ecf7346f02c4d2389cf', 48),
+        ('shared-translator/EnvironmentMemberControls', 'shared-translator/environment-proof-validate.sh', 'db00b98f108dd43cbe5e9d46c01f405ae22f4a18', 27))
+    if p == 'tests/directruntime-20261104/' + q + '.lean')
 
 
 # Column-0 commands that make a body a fixture (declaration, evaluation, elaboration).
@@ -156,10 +182,50 @@ def lean_fixture_interface(lean_code, path, text):
     return {'imports': imports, 'body_line': body} if imports and body and command else None
 
 
+LEAN_LITERAL_LINE = r'bash scripts/coord-tools/gate\.sh per-file((?: [A-Za-z0-9_][\w./+-]*)+)'
+
+
+def lean_literal_invocation(text, path, line):
+    """H1019 (Q-X1O-1, Option B): the driver reaches its column-0 line
+    `bash scripts/coord-tools/gate.sh per-file W...` (plain words, path one
+    of them) at top level. Before it: here-document bodies are skipped to
+    their exact terminator; other lines have balanced quotes, no backquote or
+    continuation, no cd/pushd/popd/alias/eval/function definition, no exit or
+    return, no exec but a pure redirection, and every for/while/until/if/case/
+    select/{ is closed. Lexical; the review set gates. The environment
+    (source, PATH) is not audited: it only bounds consumption credit."""
+    if not isinstance(text, str) or not _plain_lines(text) or '\0' in text: return False
+    lines = text.split('\n')
+    if type(line) is not int or not 1 <= line <= len(lines): return False
+    match = re.fullmatch(LEAN_LITERAL_LINE, lines[line - 1])
+    if match is None or path not in match[1].split() or any(_clean(w) != w for w in match[1].split()): return False
+    depth = 0; heredoc = None
+    for n, raw in enumerate(lines[:line - 1], 1):
+        if heredoc is not None:
+            if (raw.lstrip('\t') if heredoc[0] else raw) == heredoc[1]: heredoc = None
+            continue
+        if n == 1 and raw.startswith('#!') or not raw.strip() or raw.strip().startswith('#'): continue
+        try: words = shlex.split(raw, comments=True)
+        except ValueError: return False
+        if '`' in raw or raw.rstrip().endswith('\\') or re.search(r'\w\s*\(\s*\)', raw): return False
+        if re.search(r'(?<![\w$./-])(?:cd|pushd|popd|alias|eval|function|exit|return|unalias|enable|builtin|hash)(?![\w-])', raw): return False
+        if re.search(r'(?<![\w$./-])exec(?![\w-])', raw) and not re.fullmatch(r'exec(?:[ \t]+\d*[<>]&?[^\s;&|]+)+[ \t]*', raw): return False
+        here = re.findall(r'(?<!<)<<(-?)[ \t]*([\'"]?)([A-Za-z_]\w*)\2', raw)
+        if len(here) > 1: return False
+        for word in words:
+            depth += word in ('for', 'while', 'until', 'if', 'case', 'select', '{') or 0
+            depth -= word in ('done', 'fi', 'esac', '}') or 0
+            if depth < 0: return False
+        if here: heredoc = (here[0][0] == '-', here[0][2])
+    return depth == 0 and heredoc is None
+
+
 LEAN_CHECK_FORM = {'role': 'Lean check role', 'shape': 'check-only', 'interface': lean_check_interface, 'prefix': LEAN_CHECK_PREFIX,
+    'invocation': lean_check_invocation,
     'flag': 'lean_check_role', 'source': 'Lean check source',
     'reason': 'Reviewed Lean check source run by reviewed drivers via gate.sh per-file; never run or certified to elaborate or pass. No execution, read, fixture, helper, import-dependency, output, proof or runtime credit.'}
 LEAN_FIXTURE_FORM = {'role': 'Lean fixture role', 'shape': 'fixture', 'interface': lean_fixture_interface, 'prefix': LEAN_FIXTURE_PREFIX,
+    'invocation': lambda t, p, n: lean_check_invocation(t, p, n) or lean_literal_invocation(t, p, n),
     'flag': 'lean_fixture_role', 'source': 'Lean fixture source',
     'reason': 'Reviewed Lean fixture source (definitions, #eval, examples, run_elab or main) consumed by reviewed drivers via gate.sh per-file; never run or certified to elaborate or pass. Consumption role only: no execution, read, fixture-read, helper, import-dependency, output, proof or runtime credit.'}
 
@@ -205,7 +271,7 @@ def _lean_gate_root(classifier, graph, catalog, entry, reviewed, invocations, fo
     for c in calls:
         if c['driver'] not in repo.texts or nonpython_entry_interface(c['driver'], repo.texts[c['driver']]) is None:
             raise ValueError(role + ' driver lacks an audited entry interface: ' + c['driver'])
-        if not lean_check_invocation(repo.texts[c['driver']], p, c['line']): raise ValueError(role + ' driver does not run the source: ' + c['driver'])
+        if not form['invocation'](repo.texts[c['driver']], p, c['line']): raise ValueError(role + ' driver does not run the source: ' + c['driver'])
     if '\n' + LEAN_CHECK_GATE_BRANCH + '\n' + LEAN_CHECK_GATE_LINE + '\n' not in repo.texts.get(LEAN_CHECK_GATE, ''): return
     identity = form['prefix'] + p
     graph.root(p, 'source-only ' + form['source'], shlex.join(entry['command']), calls[0]['driver'], calls[0]['line'], root_id=identity)
@@ -259,11 +325,32 @@ def lean_fixture_controls(env):
         'commit', 'run', 'rejected', 'blob', 'route', 'frame', 'gate', 'reviewed_nonpy', 'files'))
     code = env['classifier']['lean_code']
     # The audited witnesses: 7 sources, 22 driver lines, all reviewed H997 drivers, disjoint from H999.
-    assert len(REVIEWED_LEAN_FIXTURES) == 7 and len(REVIEWED_LEAN_FIXTURE_INVOCATIONS) == 22
+    # 7 by gate-list drivers (H1015) and 6 by literal gate.sh per-file lines (H1019); 33 driver lines.
+    assert len(REVIEWED_LEAN_FIXTURES) == 13 and len(REVIEWED_LEAN_FIXTURE_INVOCATIONS) == 33
     assert {(p, b) for p, b, _ in REVIEWED_LEAN_FIXTURES} == {(p, b) for p, b, _, _, _ in REVIEWED_LEAN_FIXTURE_INVOCATIONS}
     assert not {p for p, _, _ in REVIEWED_LEAN_FIXTURES} & {p for p, _, _ in REVIEWED_LEAN_CHECKS}
-    assert all((d, db) in {(q, b) for q, b, _ in reviewed_nonpy} and (d, db, n) in {(d, b, n) for _, _, d, b, n in REVIEWED_LEAN_CHECK_INVOCATIONS}
-               for _, _, d, db, n in REVIEWED_LEAN_FIXTURE_INVOCATIONS)
+    assert all((d, db) in {(q, b) for q, b, _ in reviewed_nonpy} and d.startswith('tests/directruntime-20261104/') and d.endswith('.sh')
+               and not d.endswith('/read-bounds-validate.sh') for _, _, d, db, n in REVIEWED_LEAN_FIXTURE_INVOCATIONS)
+    assert not {p for p, *_ in REVIEWED_LEAN_FIXTURES} & {'tests/directruntime-20261104/shared-translator/' + n + '.lean' for n in ('ApiSignatures', 'AxiomInventory')}
+    # H1019 literal form: top-level `gate.sh per-file <words>` after an unaudited environment prefix.
+    L1 = 'bash scripts/coord-tools/gate.sh per-file Lib/M.lean tests/f/F.lean'
+    lit = ('#!/usr/bin/env bash\nset -euo pipefail\n[[ ${GATE:-} == 1 ]]\nsource /setup/activate.sh\nexport PATH="$PWD/b:$PATH"\n'
+           'exec 9>/tmp/w.lock\nflock 9\ntrap \'echo stop\' EXIT\npython3 - <<\'PY\'\nimport os\nos.chdir("x")  # cd; exit; f() {\nPY\n'
+           'for t in A B; do\n  lake build "$t"\ndone\nif true; then echo; fi\n' + L1 + '\n')
+    ll1 = lit.count('\n')
+    assert lean_literal_invocation(lit, 'tests/f/F.lean', ll1) and lean_literal_invocation(lit, 'Lib/M.lean', ll1)
+    assert not lean_literal_invocation(lit, 'tests/f/G.lean', ll1) and not lean_literal_invocation(lit, 'tests/f/F.lean', ll1 - 1)
+    assert not lean_check_invocation(lit, 'tests/f/F.lean', ll1)
+    pre = lit[:-len(L1) - 1]
+    for t in ('cd tests', 'pushd x', 'exec bash x.sh', 'exit 0', 'true || exit 1', 'return 0', 'f() { :; }', 'function f { :; }', 'alias bash=true',
+              'eval "$x"', 'echo `x`', 'echo \\', ": '", 'for x in a; do', 'if true; then', 'while true; do', '{', 'case x in', 'echo done\nfor x in a; do',
+              'cat <<EOF\nx', 'cat <<A <<B\nA\nB', 'hash -p /bin/true bash', 'builtin cd x', 'enable -n echo'):
+        assert not lean_literal_invocation(pre + t + '\n' + L1 + '\n', 'tests/f/F.lean', ll1 + t.count('\n') + 1), t
+    for t in (L1 + ' && true', L1 + ' # c', ' ' + L1, L1.replace('F.lean', '"F.lean"').replace('tests/f/"F.lean"', '"tests/f/F.lean"'), L1 + ' $X',
+              L1.replace('Lib/M.lean', '../M.lean'), L1.replace('per-file', 'touched'), 'bash scripts/coord-tools/gate.sh per-file "${files[@]}" tests/f/F.lean',
+              L1.replace('bash ', 'sh '), L1 + ' > log', L1 + '\r'):
+        assert not lean_literal_invocation(pre + t + '\n', 'tests/f/F.lean', ll1), t
+    assert not lean_literal_invocation(pre + L1 + '\0\n', 'tests/f/F.lean', ll1) and not lean_literal_invocation(None, 'tests/f/F.lean', 1)
     assert ('tests/directruntime-20261104/control-tuples/ProductionControls.lean', 'ca25c4ca010fa72c0512c2b7523fabcccbbad7e7',
             '2366c57f099b27d4673dda504d258ba77ff3fcaf') in REVIEWED_LEAN_FIXTURES
     G, X = LEAN_CHECK_DRIVER_LINE, 'tests/f/F.lean'
@@ -283,6 +370,7 @@ def lean_fixture_controls(env):
     head = '#!/usr/bin/env bash\nset -euo pipefail\nfiles=(tests/f/F.lean tests/f/C.lean tests/f/I.lean tests/f/X.lean tests/fpkg/F.lean)\n'
     driver = head + G + '\n'; gl = 4
     add = {'scripts/coord-tools/gate.sh': gate, 'tests/f/run.sh': driver, 'tests/f/exec.sh': driver.replace('set -euo pipefail\n', 'exec true\n'),
+           'tests/f/lit.sh': lit, 'tests/f/lit-cd.sh': pre + 'cd tests\n' + L1 + '\n',
            X: fixture, 'tests/f/Dep.lean': 'def Dep.v : Nat := 1\n', 'tests/f/C.lean': check, 'tests/f/I.lean': fixture, 'tests/f/J.lean': 'import tests.f.I\n',
            'tests/f/X.lean': fixture + '#exit\n', 'tests/fpkg/lakefile.toml': 'name = "fpkg"\n', 'tests/fpkg/F.lean': fixture}
     lf = commit(add, 'Lean fixtures'); L = lf.ref; ll = commit({'tests/unrelated.txt': 'F\n'}, 'Lean fixtures later')
@@ -294,10 +382,11 @@ def lean_fixture_controls(env):
     role = mk(); base_model, base = run(ll, entries=[])
     assert base[X]['class'] != 'keep' and base['tests/f/Dep.lean']['class'] != 'keep'
     srcs = (X, 'tests/f/C.lean', 'tests/f/I.lean', 'tests/f/X.lean', 'tests/fpkg/F.lean')
-    drivers = {(d, blob(lf, d), L) for d in ('tests/f/run.sh', 'tests/f/exec.sh')}
+    drivers = {(d, blob(lf, d), L) for d in ('tests/f/run.sh', 'tests/f/exec.sh', 'tests/f/lit.sh', 'tests/f/lit-cd.sh')}
     saved = REVIEWED_LEAN_FIXTURES, REVIEWED_LEAN_FIXTURE_INVOCATIONS, REVIEWED_NONPY_ENTRIES
     REVIEWED_LEAN_FIXTURES = frozenset({(p, blob(lf, p), L) for p in srcs})
-    REVIEWED_LEAN_FIXTURE_INVOCATIONS = frozenset({(p, blob(lf, p), d, blob(lf, d), gl) for p in srcs for d in ('tests/f/run.sh', 'tests/f/exec.sh')})
+    REVIEWED_LEAN_FIXTURE_INVOCATIONS = frozenset({(p, blob(lf, p), d, blob(lf, d), gl) for p in srcs for d in ('tests/f/run.sh', 'tests/f/exec.sh')}
+                                                  | {(X, blob(lf, X), d, blob(lf, d), n) for d, n in (('tests/f/lit.sh', ll1), ('tests/f/lit-cd.sh', ll1 + 1))})
     REVIEWED_NONPY_ENTRIES = reviewed_nonpy | drivers
     try:
         for repo in (lf, ll):
@@ -332,6 +421,14 @@ def lean_fixture_controls(env):
         rejected(lf, 'audited fixture interface', standalone=[mk('tests/f/C.lean')])
         rejected(lf, 'audited fixture interface', standalone=[mk('tests/f/X.lean')])
         rejected(lf, 'unreviewed Lean check role', standalone=[mk(kind=LEAN_CHECK_KIND)])
+        # H1019: a reviewed literal driver line alone, or with the gate-list line, keeps the role; cd before it is refused.
+        lcall = call('tests/f/lit.sh', line=ll1)
+        for calls in ([lcall], [call(), lcall]):
+            model, rows = run(ll, standalone=[dict(role, invocations=calls)])
+            assert rows[X]['class'] == 'keep' and model['entry_points']['lean-fixture:' + X]['invocations'] == calls
+        assert model['entry_points']['lean-fixture:' + X]['location'] == 'tests/f/run.sh:%d' % gl
+        rejected(lf, 'Lean fixture role driver does not run the source', standalone=[dict(role, invocations=[call('tests/f/lit-cd.sh', line=ll1 + 1)])])
+        rejected(lf, 'role invocation', standalone=[dict(role, invocations=[call('tests/f/lit.sh', line=ll1 - 1)])])
         for path in ('tests/f/I.lean', 'tests/fpkg/F.lean'):  # importer, Lake package: stale
             assert 'lean-fixture:' + path not in run(lf, standalone=[mk(path)])[0]['entry_points']
         REVIEWED_NONPY_ENTRIES = reviewed_nonpy
