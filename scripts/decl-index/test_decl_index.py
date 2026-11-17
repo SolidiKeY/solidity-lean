@@ -137,5 +137,46 @@ class Git(unittest.TestCase):
                 os.chdir(cwd)
 
 
+class LakeImports(unittest.TestCase):
+    """dump builds the touched modules with Lake before linking oleans, so a declaration new on
+    the lane is indexed even when .lake/build still holds an older olean (b2 pre-gate,
+    MemoryStructDefaultPlan). Lake and Lean are faked: lean sees what the linked olean holds."""
+
+    def dump_stale(self, build=True):
+        with tempfile.TemporaryDirectory() as t:
+            top = pathlib.Path(t); lib = top / ".lake/build/lib/lean/Solidity"; lib.mkdir(parents=True)
+            (lib / "M.olean").write_text("Old\n"); (lib / "M.trace").write_text("{}")
+            calls = []
+
+            def run(cmd, cwd=None, env=None, **kw):
+                calls.append(cmd[:2])
+                if cmd[:2] == ["lake", "build"]:
+                    (lib / "M.olean").write_text("Old\nMemoryStructDefaultPlan\n")
+                elif cmd[:2] == ["lake", "env"]:
+                    names = (pathlib.Path(env["DECLINDEX_LIB"]) / "Solidity/M.olean").read_text().split()
+                    pathlib.Path(env["DECLINDEX_OUT"]).write_text(
+                        "".join(json.dumps(row(n, i, "Solidity.M")) + "\n" for i, n in enumerate(names)))
+                    return subprocess.CompletedProcess(cmd, 0, f"decls={len(names)}\n", "")
+                return subprocess.CompletedProcess(cmd, 0, "", "")
+
+            saved = d.root, d.artifacts, d.subprocess.run, d.lake_build
+            d.root, d.artifacts, d.subprocess.run = (lambda: top), (lambda: None), run
+            if not build: d.lake_build = lambda top, modules: None
+            try:
+                out = top / "i.jsonl"; d.dump(out, ["Solidity.M"])
+                return calls, [r["name"] for r in d.load(out)]
+            finally:
+                d.root, d.artifacts, d.subprocess.run, d.lake_build = saved
+
+    def test_lake_build_runs_first(self):
+        calls, names = self.dump_stale()
+        self.assertEqual(calls, [["lake", "build"], ["lake", "env"]])
+        self.assertIn("MemoryStructDefaultPlan", names)
+
+    def test_old_invocation_misses_the_declaration(self):
+        _, names = self.dump_stale(build=False)
+        self.assertNotIn("MemoryStructDefaultPlan", names)
+
+
 if __name__ == "__main__":
     unittest.main()
