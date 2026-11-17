@@ -2,7 +2,7 @@ import Solidity.Correctness.Lowering.Total.Production
 import Solidity.Correctness.Lowering.Loops.Correct
 import Solidity.Source.Infer
 import Solidity.Source.Unique
-import Solidity.Source.Agreement.PrimitiveTypes
+import Solidity.Source.Agreement.Primitive
 
 /-!
 # Loop lowering: what the contract still asks (e2b-loops-producer)
@@ -56,7 +56,11 @@ The concrete boundary is begun below, not finished:
 * `loopBoundaryAt rel` assembles them with `rel` unbound. For a `rel` that
   reflects Booleans and relates `false` to `false`, `loopResidualAt_iff` gives
   the four obligations left and the two family obligations follow. No such
-  `rel` is defined, and these two hypotheses do not rule out a degenerate one.
+  `rel` is required to be non-degenerate by these two hypotheses.
+* `loopRel` is the stage-1 state relation (Q-9 answer): primitive values,
+  primitive state variables of the running account, `msg.value` and the
+  timestamp; the rest of the state is unrelated. `loopBoundaryStage1` is the
+  boundary at it, a closed term, with `loopResidualStage1_iff`.
 
 Each of the three choices has known defects, listed at its section: the
 policies observe the outcome kind only and allow every environment, the
@@ -1174,7 +1178,7 @@ namespace Simulation
 globals (the model state without its locals). -/
 structure StateRelation (E : Source.Env) (C : Contract) where
   val : (H : HTy) → (τ : Source.STy) → (u : LTy) → Source.Val E.layout τ → u.TDenote C H → Prop
-  glob : Source.St E → State C [] → Prop
+  glob : Source.Glob E → Source.Fr → Source.St E → State C [] → Prop
 
 /-- Final matching of a Source result and a model result. Normal completion
 relates the final locals through `m'`; a `return` relates the entry locals
@@ -1184,12 +1188,13 @@ timeout matches model divergence. Nothing else matches: an escaping `break` or
 `continue`, a stuck Source run, model exhaustion. -/
 def Final {s : SourceProgram} {C : Contract} {Γ Δ : Ctx} {H : HTy}
     (rel : StateRelation s.env C) (m : Lowering.V07.ContextMap s.before Γ)
-    (m' : Lowering.V07.ContextMap s.after Δ) (emb : Thin Γ Δ)
-    (src : SourceResult s) (tgt : TRes (Out C H Δ)) : Prop :=
+    (m' : Lowering.V07.ContextMap s.after Δ) (emb : Thin Γ Δ) (G : Source.Glob s.env)
+    (F : Source.Fr) (src : SourceResult s) (tgt : TRes (Out C H Δ)) : Prop :=
   match src.1, tgt with
-  | .ok (.normal ls), .ok o => m'.Related (rel.val o.st.H) ls o.st.env ∧ rel.glob src.2.2 o.st.glob
+  | .ok (.normal ls), .ok o =>
+    m'.Related (rel.val o.st.H) ls o.st.env ∧ rel.glob G F src.2.2 o.st.glob
   | .ok (.ret ls), .ok o =>
-    (m.wk emb).Related (rel.val o.st.H) ls o.st.env ∧ rel.glob src.2.2 o.st.glob
+    (m.wk emb).Related (rel.val o.st.H) ls o.st.env ∧ rel.glob G F src.2.2 o.st.glob
   | .error (.revert d), .error h => h = THalt.ofData d ∨ (h = .panic ∧ ∃ c, d = Source.panicData c)
   | .error .timeout, .error .diverge => True
   | _, _ => False
@@ -1206,8 +1211,9 @@ def Simulates (rel : (E : Source.Env) → (C : Contract) → StateRelation E C)
     (emb : Thin Γ p.1),
     ∀ (e : SourceExecution s) (tgt : State C Γ), e.plan = none → e.calldataKnown = true →
       m.Related ((rel s.env C).val tgt.H) e.initial.1 tgt.env →
-      (rel s.env C).glob e.initial.2 tgt.glob →
-      ∃ N, ∀ n, Final (rel s.env C) m m' emb (e.result (n + N)) (p.2.run tgt)
+      (rel s.env C).glob e.glob e.frame e.initial.2 tgt.glob →
+      ∃ N, ∀ n,
+        Final (rel s.env C) m m' emb e.glob e.frame (e.result (n + N)) (p.2.run tgt)
 
 /-- A block of one statement runs as the statement, one horizon later. -/
 theorem execItems_single {E : Source.Env} (G : Source.Glob E) (F : Source.Fr) (n nps : Nat)
@@ -1275,12 +1281,82 @@ theorem of_retEndpoint
 /-- Negative control: a state relation whose globals are never related makes
 every pair with some context maps simulate. So `Simulates` alone does not rule
 out a degenerate `rel`; non-emptiness is a separate obligation, not yet stated. -/
-theorem vacuous (empty : ∀ E C st σ, ¬ (rel E C).glob st σ) {s : SourceProgram}
+theorem vacuous (empty : ∀ E C G F st σ, ¬ (rel E C).glob G F st σ) {s : SourceProgram}
     {C : Contract} {Γ : Ctx} (p : Blk C Γ) (m : Lowering.V07.ContextMap s.before Γ)
     (m' : Lowering.V07.ContextMap s.after p.1) (emb : Thin Γ p.1) : Simulates rel s p :=
-  ⟨m, m', emb, fun _ _ _ _ _ glob => absurd glob (empty _ _ _ _)⟩
+  ⟨m, m', emb, fun _ _ _ _ _ glob => absurd glob (empty _ _ _ _ _ _)⟩
 
 end Simulation
+
+/-! ## The concrete state relation (stage 1)
+
+The state relation of the fragment the stage-1 decoder covers. Values: a
+primitive model value and the Source value of the corresponding type, by
+`Source.Agreement.PrimitiveRel`; no other pair of types is related. Globals:
+each primitive state variable holds related values in the model storage and
+in the storage of the running Source account, at the canonical unit's path;
+`msg.value` and the block timestamp agree. A contract with a state variable of
+any other type has no related globals, as the decoder has no unit for it.
+
+Not related, so unconstrained and open: memory heaps, the ledger and balances,
+the caller and own address (the model has erased their type), transient
+storage, the Source journal, events and logs, and resource metadata. No total
+initial matching is proved: that every Source state of a decoded program has a
+related model state is an obligation not yet stated. -/
+namespace Relation
+
+open Source.Agreement (sourceTy PrimitiveRel)
+
+/-- Values: primitives at corresponding types. -/
+def val (E : Source.Env) (C : Contract) (H : HTy) (τ : Source.STy) :
+    (u : LTy) → Source.Val E.layout τ → u.TDenote C H → Prop
+  | .val p, v, x => ∃ h : τ = sourceTy p, PrimitiveRel E.layout p (h ▸ v) x
+  | _, _, _ => False
+
+/-- One state variable: a primitive holds related values at its path. -/
+def field {D : Source.Layout} (read : Source.SPath → Option ((τ : Source.STy) × Source.Val D τ))
+    (x : Name) : {T : Ty} → SVal T → Prop
+  | _, .prim (p := p) w =>
+    ∃ v, read ⟨⟨some Decode.contractName, x⟩, []⟩ = some ⟨sourceTy p, v⟩ ∧ PrimitiveRel D p v w
+  | _, _ => False
+
+/-- Every state variable, in declaration order. -/
+def fields {D : Source.Layout} (read : Source.SPath → Option ((τ : Source.STy) × Source.Val D τ)) :
+    {fs : List (Name × Ty)} → SFields fs → Prop
+  | _, .nil => True
+  | _, .cons (f := x) v rest => field read x v ∧ fields read rest
+
+/-- Globals: storage of the running account, `msg.value`, the timestamp. -/
+def glob (E : Source.Env) (C : Contract) (G : Source.Glob E) (F : Source.Fr) (st : Source.St E)
+    (σ : State C []) : Prop :=
+  fields (fun p => ((st.ex.world.accounts F.this).storage.read p).map fun v => ⟨_, v⟩) σ.storage ∧
+  σ.tx.msgValue.1 = (F.value.val : Int) ∧ σ.tx.timestamp.1 = (G.timestamp.val : Int)
+
+end Relation
+
+/-- The value relation is total on primitives: every model primitive has a
+related Source value. (Nothing of the kind is proved for globals.) -/
+theorem Relation.val_total (E : Source.Env) (C : Contract) (H : HTy) (p : PrimTy)
+    (x : p.Denote) :
+    ∃ v, Relation.val E C H (Source.Agreement.sourceTy p) (.val p) v x :=
+  ⟨Source.Agreement.ofModel E.layout p x, rfl, Source.Agreement.ofModel_related E.layout p x⟩
+
+/-- The stage-1 state relation. -/
+def loopRel (E : Source.Env) (C : Contract) : Simulation.StateRelation E C :=
+  ⟨Relation.val E C, Relation.glob E C⟩
+
+/-- It reflects Booleans. -/
+theorem loopRel_reflect (E : Source.Env) (C : Contract) (H : HTy)
+    (v : Source.Val E.layout .bool) (b : Bool)
+    (h : (loopRel E C).val H .bool (.val .bool) v b) : v = .bool b := by
+  obtain ⟨_, r⟩ := h
+  cases r
+  rfl
+
+/-- It relates `false` to `false`. -/
+theorem loopRel_false (E : Source.Env) (C : Contract) (H : HTy) :
+    (loopRel E C).val H .bool (.val .bool) (.bool false) false :=
+  ⟨rfl, .bool false⟩
 
 /-! ## The concrete boundary, as far as the decoder fixes it
 
@@ -1419,5 +1495,31 @@ theorem loopResidualAt_iff
     exact safe _ (List.mem_singleton.mpr rfl)
   · cases List.mem_singleton.mp member
     exact allocation r o after parts program run
+
+/-! ## The boundary at the stage-1 state relation
+
+Every part is now a closed term. It is still not fit to carry the goal: the
+defects listed at the policies, the simulation and the allocation trace
+stand, the state relation leaves most of the state unrelated, and the decoder
+has gaps. -/
+
+/-- The stage-1 boundary. -/
+def loopBoundaryStage1 : SemanticBoundary := loopBoundaryAt loopRel
+
+/-- At the stage-1 boundary both family obligations are theorems, and four
+obligations are left. -/
+theorem loopResidualStage1_iff :
+    Residual loopBoundaryStage1 Decode.decode ↔
+      (∀ r : Request, r.Succeeds → ∃ s, Decode.decode r = some s) ∧
+      (∀ (r : Request) s, r.Succeeds → Spells r s → Decode.decode r = some s) ∧
+      (∀ (r : Request) o after parts program, r.pipeline o after parts program →
+        SafeSpellings r.input.names (Allocation.scope r o after).protectedNames
+          (Allocation.scope r o after).generated) ∧
+      (∀ (r : Request) o after parts program s, Decode.decode r = some s →
+        r.pipeline o after parts program →
+        Simulation.Simulates loopRel s program ∧
+          Nonempty (PassCorrect (Observe.source s).behaviour
+            (Observe.target program).behaviour)) :=
+  loopResidualAt_iff loopRel_reflect loopRel_false
 
 end Solidity.Correctness.Lowering.Total

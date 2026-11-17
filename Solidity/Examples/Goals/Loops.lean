@@ -251,11 +251,36 @@ example : Spells.Items .body RawProbe.input
 /-- Negative control: with globals never related, any pair with context maps
 simulates. The simulation conjunct needs a non-degenerate state relation. -/
 example {rel : (E : Source.Env) → (C : Contract) → Simulation.StateRelation E C}
-    (empty : ∀ E C st σ, ¬ (rel E C).glob st σ) {s : SourceProgram} {C : Contract} {Γ : Ctx}
+    (empty : ∀ E C G F st σ, ¬ (rel E C).glob G F st σ) {s : SourceProgram} {C : Contract} {Γ : Ctx}
     (p : Blk C Γ) (m : Solidity.Lowering.V07.ContextMap s.before Γ)
     (m' : Solidity.Lowering.V07.ContextMap s.after p.1) (emb : Thin Γ p.1) :
     Simulation.Simulates rel s p :=
   Simulation.vacuous empty p m m' emb
+
+/-- The stage-1 boundary is a closed term; at it the contract is four
+obligations with no hypothesis left on the state relation. -/
+example :
+    LowerLoopsCorrectContract loopBoundaryStage1 loopBoundaryStage1.reference Decode.decode ↔
+      (∀ r : Request, r.Succeeds → ∃ s, Decode.decode r = some s) ∧
+      (∀ (r : Request) s, r.Succeeds → Spells r s → Decode.decode r = some s) ∧
+      (∀ (r : Request) o after parts program, r.pipeline o after parts program →
+        SafeSpellings r.input.names (Allocation.scope r o after).protectedNames
+          (Allocation.scope r o after).generated) ∧
+      (∀ (r : Request) o after parts program s, Decode.decode r = some s →
+        r.pipeline o after parts program →
+        Simulation.Simulates loopRel s program ∧
+          Nonempty (Solidity.Roadmap.G49Final.PassCorrect (Observe.source s).behaviour
+            (Observe.target program).behaviour)) :=
+  (contract_reference_iff _ _).trans loopResidualStage1_iff
+
+/-- The stage-1 value relation: a model `uint` and the Source `uint256` of the
+same number are related; a `uint` and a `bool` are not. -/
+example (E : Source.Env) (C : Contract) (H : HTy) (x : PrimTy.uint.Denote) :
+    ∃ v, (loopRel E C).val H (.int Source.IntTy.u256) (.val .uint) v x :=
+  Relation.val_total E C H .uint x
+example (E : Source.Env) (C : Contract) (H : HTy) (v : Source.Val E.layout .bool)
+    (x : PrimTy.uint.Denote) : ¬ (loopRel E C).val H .bool (.val .uint) v x :=
+  fun ⟨h, _⟩ => nomatch h
 
 end Decoder
 
