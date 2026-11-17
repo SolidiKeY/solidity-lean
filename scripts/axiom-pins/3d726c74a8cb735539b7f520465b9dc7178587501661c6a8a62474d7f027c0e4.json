@@ -1,0 +1,7 @@
+{
+ "Solidity/Examples/Goals/PanicProvenance.lean:Solidity.Correctness.Panic.code_provenance": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ]
+}

@@ -1,0 +1,2 @@
+| `Goals/ElabTotal.lean` | The elaborator-kernel totalization goal `elabKernelTotal` (et3-elab-knot-total), open: the knot of `Syntax/Elab/Stmt.lean` satisfies its defining equations (`ElabKernelFix`, `ElabKernelNames`), admits induction over its successful runs (`ElabKernelInduction`), and the helpers it reaches keep theirs (`ElabKernelHelpers`). |
+| `Examples/Goals/ElabTotal.lean` | Pinned `#roadmap_goal` open check for `elabKernelTotal`, with failing-knot controls. |
