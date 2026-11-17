@@ -12,7 +12,8 @@
 # scripts/heartbeats/slow/baseline.json (per module, plus per declaration of at least
 # min_units). A module that is already up to date (fetched from the Lake cache or built
 # before) is skipped as unchanged. The collector writes no .olean, so a rebuilt module is
-# then built by `lake build` only when a later slow module imports it.
+# then built by `lake build` under its own budget, including leaves, so the final
+# library step can reuse every slow module artifact.
 #
 # Usage: scripts/ci/build-slow-examples.sh [--list | --write]
 #   --list   print the modules in build order and exit
@@ -74,8 +75,6 @@ print("\n".join(m + "\t" + ",".join(deps[m]) for m in order))
 PY
 ) || exit 2
 if [ "$list" = 1 ]; then cut -f1 <<<"$order"; exit 0; fi
-# Slow modules imported by another slow module: they need an .olean.
-needed=",$(cut -f2 <<<"$order" | tr ',' '\n' | sort -u | tr '\n' ','),"
 runs=$(mktemp "${TMPDIR:-/tmp}/slow-hb.XXXXXX") || exit 2
 lib=$(mktemp -d "${TMPDIR:-/tmp}/slow-hb-lib.XXXXXX") || exit 2
 trap 'rm -rf "$runs" "$lib"' EXIT
@@ -116,10 +115,9 @@ except d.SetupError as e: sys.exit("build-slow-examples: %s" % e)' "$lib" "${imp
     if [ "$st" -eq 0 ]; then
       cat "$one" >>"$runs"
       python3 -c 'import json,sys; r=json.loads(open(sys.argv[1]).readline()); print("heartbeats", r["module"], "%.3f" % r["heartbeats"], "collector %ss" % r["wall_s"])' "$one"
-      case "$needed" in *",$m,"*)
-        # H1088: the .olean build is a second elaboration with its own H134 budget.
-        LEAN_NUM_THREADS=1 timeout --kill-after=10s "${budget}s" lake build "$m" >/dev/null </dev/null; st=$?;;
-      esac
+      # The library step must reuse artifacts for leaves as well as slow imports.
+      # H1088: this second elaboration has its own H134 per-module budget.
+      LEAN_NUM_THREADS=1 timeout --kill-after=10s "${budget}s" lake build "$m" >/dev/null </dev/null; st=$?
     fi
     rm -f "$one"
   fi
