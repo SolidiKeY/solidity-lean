@@ -32,15 +32,20 @@ without outputs; that is the only cost over the build.
 
 `check` fails when a module exceeds its baseline by more than the tolerance
 (GATE_HEARTBEATS_TOLERANCE percent, default TOLERANCE) and by more than FLOOR
-units. In a module whose source the branch changed, new and edited commands are
-set aside (they only print) and the others together are held to the baseline.
-A decrease, a new module and a module without a record only print.
+units. In a module whose source the branch changed (against the merge base with
+GATE_BASE, default origin/master), new and edited commands are set aside (they
+only print) and the others together are held to the baseline. A decrease in an
+unchanged module, a new module and a module without a record only print; so
+does every target outside the two roots (TestSuite, corpus, slow examples).
+A full `write` compiles what has no record one module at a time; HEARTBEATS_JOBS=N
+runs N at once.
 """
 import concurrent.futures, hashlib, json, os, pathlib, re, shutil, subprocess, sys, tempfile
 
-# Import drift, measured (hb3 result): 1290 modules rebuilt with unchanged source under
-# six merges moved by at most 0.7 units, and by at most 0.01% above 100 units.
-TOLERANCE = 1.0  # percent
+# Import drift, measured (hb3 result): 1290 modules rebuilt with unchanged source under six
+# leaf merges moved by at most 0.7 units; under a merge that changed 72 widely imported
+# files, 2 of 3200 rebuilt modules grew by more than 1% (1.5% and 1.7%), none by 2%.
+TOLERANCE = 2.0  # percent
 FLOOR = 10  # units; a growth below this never fails
 HERE = pathlib.Path(__file__).resolve().parent
 ROOT = HERE.parent.parent.parent
@@ -89,7 +94,8 @@ class Tools:
             for module, path in zip(part, paths):
                 side = pathlib.Path(path + ".hash")
                 key = side.read_text().strip() if side.exists() else pathlib.Path(path).stem
-                out[module] = self.store / f"{module}.{key}.tsv"
+                if key.isdigit():  # a content hash: the cache names artifacts by it
+                    out[module] = self.store / f"{module}.{key}.tsv"
         return out
 
 
@@ -98,11 +104,22 @@ def source(module):
 
 
 def read_record(path):
+    """Rows (first line, last line, raw heartbeats, label); None when unreadable."""
     rows = []
-    for line in pathlib.Path(path).read_text().splitlines():
-        first, last, raw, label = line.split("\t", 3)
-        rows.append((int(first), int(last), int(raw), label))
+    try:
+        for line in pathlib.Path(path).read_text().splitlines():
+            first, last, raw, label = line.split("\t", 3)
+            rows.append((int(first), int(last), int(raw), label))
+    except (OSError, ValueError):
+        return None
     return rows
+
+
+def keep(record, kept):
+    """Copy a record into the store; other checkouts read it, so replace it whole."""
+    part = kept.with_name(f"{kept.name}.{os.getpid()}")
+    shutil.copyfile(record, part)
+    os.replace(part, kept)
 
 
 def build(directory, targets):
@@ -123,21 +140,26 @@ def build(directory, targets):
         sys.exit("heartbeats: lakefile.toml has no weakLeanArgs to extend")
     (directory / "lakefile.toml").write_text(lakefile)
     env = {**os.environ, "HEARTBEATS_DIR": str(records)}
+    plain = set()
     while True:
         status, failed = lake(["-f", str(directory / "lakefile.toml"), "build", *targets], env)
-        if status == 0 or not failed:
+        for module in failed:  # written before Lean failed
+            (records / f"{module}.tsv").unlink(missing_ok=True)
+        if status == 0 or not failed or set(failed) <= plain:
             break
         # A proof with a pinned maxHeartbeats can fail only with Elab.async=false:
         # build what failed as the plain gate does, then go on with the rest.
+        plain.update(failed)
         print(f"heartbeats: plain build of {' '.join(failed)}", flush=True)
         if subprocess.call(["lake", "build", *failed], cwd=ROOT) != 0:
             break
     if status != 0:
         status = subprocess.call(["lake", "build", *targets], cwd=ROOT)
+    (directory / "plain").write_text("".join(m + "\n" for m in sorted(plain)))
     if status == 0:
         fresh = sorted(record.stem for record in records.glob("*.tsv"))
         for module, kept in tools.kept(fresh).items():
-            shutil.copyfile(records / f"{module}.tsv", kept)
+            keep(records / f"{module}.tsv", kept)
     return status
 
 
@@ -161,20 +183,25 @@ def measure(tools, module, records):
     done = subprocess.run(["lake", "lean", source(module), "--", *weak, *tools.args], cwd=ROOT,
                           env={**os.environ, "HEARTBEATS_DIR": str(records)},
                           stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
-    return done.returncode == 0 and (records / f"{module}.tsv").exists()
+    if done.returncode != 0:
+        (records / f"{module}.tsv").unlink(missing_ok=True)
+    return (records / f"{module}.tsv").exists()
 
 
 def collect(directory, modules, fresh_only=False):
     """module -> rows, from this build's records, else the kept ones, else a compile."""
-    records = pathlib.Path(directory) / "records"
+    directory = pathlib.Path(directory)
+    records = directory / "records"
     records.mkdir(parents=True, exist_ok=True)
-    missing = [m for m in modules if not (records / f"{m}.tsv").exists() and (ROOT / source(m)).is_file()]
+    plain = set((directory / "plain").read_text().split()) if (directory / "plain").exists() else set()
+    missing = [m for m in modules if not (records / f"{m}.tsv").exists() and m not in plain
+               and (ROOT / source(m)).is_file()]
     if missing and not fresh_only:
         tools = Tools()
         kept = tools.kept(missing)
         compile_ = []
         for module in missing:
-            if module in kept and kept[module].exists():
+            if module in kept and read_record(kept[module]) is not None:
                 shutil.copyfile(kept[module], records / f"{module}.tsv")
             else:
                 compile_.append(module)
@@ -184,8 +211,9 @@ def collect(directory, modules, fresh_only=False):
             with concurrent.futures.ThreadPoolExecutor(int(os.environ.get("HEARTBEATS_JOBS") or 1)) as pool:
                 for module, ok in zip(compile_, pool.map(lambda m: measure(tools, m, records), compile_)):
                     if ok and module in kept:
-                        shutil.copyfile(records / f"{module}.tsv", kept[module])
-    return {m: read_record(records / f"{m}.tsv") for m in modules if (records / f"{m}.tsv").exists()}
+                        keep(records / f"{module}.tsv", kept[module])
+    out = {m: read_record(records / f"{m}.tsv") for m in modules if (records / f"{m}.tsv").exists()}
+    return {m: rows for m, rows in out.items() if rows is not None}
 
 
 def library_modules():
@@ -222,8 +250,8 @@ def added_lines(merge, path):
         return None
     ranges = []
     for start, count in re.findall(r"(?m)^@@ -\S+ \+(\d+)(?:,(\d+))? @@", diff):
-        if count != "0":
-            ranges.append((int(start), int(start) + int(count or 1) - 1))
+        # a pure deletion sits between lines start and start + 1
+        ranges.append((int(start), int(start) + (int(count or 1) - 1 if count != "0" else 1)))
     return ranges
 
 
@@ -231,7 +259,11 @@ def check(directory):
     tolerance = float(os.environ.get("GATE_HEARTBEATS_TOLERANCE") or TOLERANCE)
     targets_file = pathlib.Path(directory) / "targets"
     targets = targets_file.read_text().split() if targets_file.exists() else []
-    rows = collect(directory, targets)
+    try:
+        rows = collect(directory, targets)
+    except (OSError, subprocess.CalledProcessError, KeyError) as error:
+        print(f"heartbeats: cannot record ({error})")
+        return 1
     base = read_baselines()
     merge = git("merge-base", os.environ.get("GATE_BASE", "origin/master"), "HEAD").strip()
     fails = 0
@@ -267,8 +299,7 @@ def write(directory):
         with tempfile.TemporaryDirectory() as tmp:
             rows = collect(tmp, [m for modules in libraries.values() for m in modules])
         for module in (m for modules in libraries.values() for m in modules if m not in rows):
-            print(f"no record {module}")
-        base = {}
+            print(f"no record {module}" + (" (baseline kept)" if module in base else ""))
     else:
         rows = collect(directory, [p.stem for p in (pathlib.Path(directory) / "records").glob("*.tsv")], fresh_only=True)
     for module, record in rows.items():

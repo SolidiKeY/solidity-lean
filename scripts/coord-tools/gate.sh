@@ -115,6 +115,7 @@ else
       --base "$(git merge-base "${GATE_BASE:-origin/master}" HEAD)" --head HEAD
   fi
   [ "$failed" -eq 0 ] || exit "$failed"
+  [ "$heartbeats" != 1 ] || rm -rf "$logs/heartbeats"  # a reused GATE_LOGS: no old records
   run_gate build-touched build_touched
   # Checking-speed ratchet (scripts/heartbeats/library/ratchet.py), opt-in: the factory sets
   # it. Fails when a rebuilt module exceeds its heartbeat baseline by more than the tolerance.

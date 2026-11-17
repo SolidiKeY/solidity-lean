@@ -2,7 +2,8 @@
 Heartbeat recorder for the library ratchet (`ratchet.py` beside this file). A
 Lean plugin, compiled on demand and loaded with `lean --plugin`: it leaves the
 `.olean` unchanged and writes, for the module being compiled, the heartbeats of
-every command to `$HEARTBEATS_DIR/<Module>.tsv`. Counts need `-DElab.async=false`
+every command to `$HEARTBEATS_DIR/<Module>.tsv` (also when Lean then exits with
+an error: the caller drops that record). Counts need `-DElab.async=false`
 (one thread; kernel checking counted). Outside the core: imports only Lean.
 -/
 import Lean
@@ -10,10 +11,6 @@ open Lean Elab Command
 
 /-- Heartbeats at the end of the previous command (at first: of the header) and the rows so far. -/
 initialize hbState : IO.Ref (Nat × Array String) ← IO.mkRef (0, #[])
-
-/-- Whether a command logged an error: such a module gets no record. A proof with
-a pinned `maxHeartbeats` can fail only here, where kernel checking counts. -/
-initialize hbFailed : IO.Ref Bool ← IO.mkRef false
 
 /-- Marks the end of the header. Extensions that imported modules register come
 after this one, so its first call appends it again to run last; the linter
@@ -45,12 +42,11 @@ def hbLinter : Linter where
     let name := (stx.find? (·.isOfKind ``Parser.Command.declId)).map fun id => s!" {ns ++ id[0].getId}"
     let rows := rows.push s!"{line stx.getPos?}\t{line stx.getTailPos?}\t{now - last}\t{kind}{name.getD ""}"
     hbState.set (now, rows)
-    if (← get).messages.hasErrors then hbFailed.set true
     if Parser.isTerminalCommand stx then
       persistentEnvExtensionsRef.modify (·.filter (·.name != `hbExt))
       let some dir ← IO.getEnv "HEARTBEATS_DIR" | return
       -- rows[0] is the header marker: without it the header was not seen
-      if rows[0]? != some "" || Elab.async.get (← getOptions) || (← hbFailed.get) then return
+      if rows[0]? != some "" || Elab.async.get (← getOptions) then return
       IO.FS.writeFile (System.FilePath.mk dir / s!"{← getMainModule}.tsv")
         ("\n".intercalate (rows.toList.drop 1) ++ "\n")
 

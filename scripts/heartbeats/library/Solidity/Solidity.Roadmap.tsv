@@ -13,10 +13,10 @@ V16.CreationLibrarySpec	8144
 V16.CreationReturnConsumer	11124
 V16.H24Input	305
 V16.HashHistory	352
-V16.NativeParentConsumer	71983
-V16.NativeRevertConsumer	45770
+V16.NativeParentConsumer	71922
+V16.NativeRevertConsumer	45693
 V16.Relational	596
-V16.RelationalGuardSpec	78883
+V16.RelationalGuardSpec	78842
 V16.SSCP2.NewAllocation	8040
 V16.SSCP2.NewAllocationControls	16411
 V16.SourceSizeControls	21374

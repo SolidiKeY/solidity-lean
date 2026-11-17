@@ -250,7 +250,7 @@ Readonly.TupleCopyEffects	3720
 Readonly.ZeroControls	737
 Readonly.ZeroEffects	1360
 StorageOps.SourceArrayDeleteNumeric	46379
-StorageOps.SourceArrayDeleteTarget	62832
+StorageOps.SourceArrayDeleteTarget	62833
 StorageOps.SourceArrayIndex	6431
 StorageOps.SourceArrayIndexControls	13756
 StorageOps.SourceArrayWrite	4267
@@ -290,12 +290,12 @@ StorageOps.SourceCapturedByteTimeoutControls	64807
 StorageOps.SourceCapturedByteWriteTimeout	12627
 StorageOps.SourceCapturedByteWriteTimeoutControls	43342
 StorageOps.SourceCopyCommutation	4868
-StorageOps.SourceCopyCommutationControls	45630
+StorageOps.SourceCopyCommutationControls	45631
 StorageOps.SourceCopyFrames	14056
 StorageOps.SourceCopyFramesControls	37935
 StorageOps.SourceCopyReadbacks	9234
 StorageOps.SourceCopyRepeat	8619
-StorageOps.SourceCopyRepeatControls	40578
+StorageOps.SourceCopyRepeatControls	40579
 StorageOps.SourceFixedStorageCopy	13103
 StorageOps.SourceFixedStorageCopyControls	53078
 StorageOps.SourceFixedStorageCopyTarget	2165
@@ -526,7 +526,7 @@ V08.ConditionalCallable	36895
 V08.ConstructorContinuations	18307
 V08.ConstructorScalarTransport	31649
 V08.Controls	20834
-V08.CreationPremises	36154
+V08.CreationPremises	36155
 V08.CreationSuccessControls	55376
 V08.CryptoControls	100500
 V08.CryptoObservations	5233

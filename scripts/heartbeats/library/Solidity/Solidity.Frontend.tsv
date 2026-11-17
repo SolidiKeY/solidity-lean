@@ -74,7 +74,7 @@ CounterexampleMetadataV1	48854
 CreationTryImport	21716
 ExecutableAst.ControlTuple.Adapter	5449
 ExecutableAst.ControlTuple.AdmissionControls	11924
-ExecutableAst.ControlTuple.IntrinsicControls	123818
+ExecutableAst.ControlTuple.IntrinsicControls	123830
 ExecutableAst.Memory.Reader	6942
 ExecutableAst.Shared.Boundary	181
 ExecutableAst.Shared.Compose	912
