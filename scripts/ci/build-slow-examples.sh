@@ -18,6 +18,8 @@
 #   --list   print the modules in build order and exit
 #   --write  collect every module (cached or not) and rewrite the baseline; run on the
 #            merged head (or the merge base) and check the file in
+#            (after `lake build Solidity SolidityExamples`, one module at a time; the
+#            baseline is generator output only, never hand-edited: H313)
 # Environment: SLOW_EXAMPLE_BUDGET_S (default 600; only 1..600 accepted),
 #   SLOW_EXAMPLE_HB_TOLERANCE (percent, default 2), SLOW_EXAMPLE_HB_BASELINE (default
 #   scripts/heartbeats/slow/baseline.json), SLOW_EXAMPLE_HB=0 disables the ratchet
