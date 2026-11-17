@@ -181,7 +181,7 @@ example : Decode.decode { sampleRequest RawProbe.input with
       scope := { RawProbe.scope with unchecked := true } } } = none := rfl
 
 /-- The concrete admission is every request whose whole pipeline succeeds, and
-at it the contract is the five listed obligations. -/
+at it the contract is the six listed obligations. -/
 example {source target relates allocations} :
     FullDomain (loopBoundary source target relates allocations) := loopBoundary_fullDomain
 
@@ -189,6 +189,7 @@ example {source target relates allocations} :
     LowerLoopsCorrectContract (loopBoundary source target relates allocations)
         (loopReference source target) Decode.decode ↔
       (∀ r : Request, r.Succeeds → ∃ s, Decode.decode r = some s) ∧
+      (∀ (r : Request) s, r.Succeeds → Spells r s → Decode.decode r = some s) ∧
       (∀ (r : Request) o after parts program, r.pipeline o after parts program →
         ∃ scopes, allocations r o after parts program scopes ∧
           ∀ scope ∈ scopes, SafeSpellings r.input.names scope.protectedNames scope.generated) ∧
@@ -202,7 +203,7 @@ example {source target relates allocations} :
 
 /-- With the policies (H1021), the simulation (H1022) and the allocation
 trace (H1023) fixed, and for a state relation that reflects Booleans and
-relates `false` to `false`, the contract is three obligations: the two e1
+relates `false` to `false`, the contract is four obligations: the two e1
 family obligations are theorems. -/
 example {rel : (E : Source.Env) → (C : Contract) → Simulation.StateRelation E C}
     (reflect : ∀ E C H (v : Source.Val E.layout .bool) (b : Bool),
@@ -210,6 +211,7 @@ example {rel : (E : Source.Env) → (C : Contract) → Simulation.StateRelation 
     (falseRel : ∀ E C H, (rel E C).val H .bool (.val .bool) (.bool false) false) :
     LowerLoopsCorrectContract (loopBoundaryAt rel) (loopBoundaryAt rel).reference Decode.decode ↔
       (∀ r : Request, r.Succeeds → ∃ s, Decode.decode r = some s) ∧
+      (∀ (r : Request) s, r.Succeeds → Spells r s → Decode.decode r = some s) ∧
       (∀ (r : Request) o after parts program, r.pipeline o after parts program →
         SafeSpellings r.input.names (Allocation.scope r o after).protectedNames
           (Allocation.scope r o after).generated) ∧
@@ -230,6 +232,21 @@ example : Observe.first (fun n => if n = 2 then some (.success []) else none) 5 
 example : Allocation.generated ⟨fun s n => s ++ toString n,
       fun s => if s = "brk1" then some ("brk", 1) else if s = "se7" then some ("se", 7) else none⟩
     1 3 ["i", "brk1", "se7"] = [("brk", 1)] := by decide
+
+/-- The decoder against the independent spelling relation (H1024): sound
+outright, complete if Source inference is, and a request spells one program. -/
+example {r : Request} {s : SourceProgram} (h : Decode.decode r = some s) : Spells r s :=
+  decode_spells h
+example (complete : InferComplete) {r : Request} {s : SourceProgram} :
+    Decode.decode r = some s ↔ Spells r s :=
+  ⟨decode_spells, Spells.decode complete⟩
+example {r : Request} {s s' : SourceProgram} (h : Spells r s) (h' : Spells r s') : s = s' :=
+  h.unique h'
+/-- The relation is not the decoder's graph by definition: a spelling is
+built here by its rules. -/
+example : Spells.Items .body RawProbe.input
+    (.cons (.stmtItem (.whileStmt (.assign .assign (.ident "i") (.ident "a")) .breakStmt)) .nil) :=
+  .stmt (.whileLoop {} (.assign (.name "i") (.name "a")) (.stmt .brk .nil)) .nil
 
 end Decoder
 
