@@ -5,6 +5,8 @@ usage() { echo "usage: gate.sh per-file FILE... | touched | checkpoint | full" >
 mode=$1; shift
 case "$mode" in per-file) [ $# -gt 0 ] || usage;; touched|checkpoint|full) [ $# -eq 0 ] || usage;; *) usage;; esac
 root=$(git rev-parse --show-toplevel) || exit 2
+# Opt-in heartbeat ratchet (H1076); unset so the test gates of checks-fast do not inherit it.
+heartbeats=${GATE_HEARTBEATS:-0}; unset GATE_HEARTBEATS
 logs=${GATE_LOGS:-$(mktemp -d "${TMPDIR:-/tmp}/coord-gates.XXXXXXXX")}; mkdir -p "$logs" || exit 2
 logs=$(cd "$logs" && pwd); : > "$logs/gates.tsv"
 git rev-parse HEAD > "$logs/HEAD" || exit 2
@@ -88,7 +90,13 @@ open(os.environ["GATE_CORE_FILE"],"w").write("core" if core else "")
 PY
 ) || return 1
   echo "targets: ${targets:-none}"
-  [ -z "$targets" ] || LEAN_NUM_THREADS=1 lake build $targets
+  [ -n "$targets" ] || return 0
+  if [ "$heartbeats" = 1 ] && [ "$mode" = touched ]; then
+    # The same build; each module Lean compiles also records its heartbeats.
+    LEAN_NUM_THREADS=1 python3 -B scripts/heartbeats/library/ratchet.py build "$logs/heartbeats" $targets
+  else
+    LEAN_NUM_THREADS=1 lake build $targets
+  fi
 }
 if [ "$mode" = per-file ]; then
   for file in "${files[@]}"; do run_gate "lean:$file" lake lean "$file" -- --tstack=131072; done
@@ -108,6 +116,11 @@ else
   fi
   [ "$failed" -eq 0 ] || exit "$failed"
   run_gate build-touched build_touched
+  # Checking-speed ratchet (scripts/heartbeats/library/ratchet.py), opt-in: the factory sets
+  # it. Fails when a rebuilt module exceeds its heartbeat baseline by more than the tolerance.
+  if [ "$heartbeats" = 1 ] && [ "$mode" = touched ] && [ "$failed" -eq 0 ]; then
+    run_gate heartbeats python3 -B scripts/heartbeats/library/ratchet.py check "$logs/heartbeats"
+  fi
   # Statement-level duplicates and changes (scripts/decl-index/decl_index.py), opt-in because
   # a checkpoint indexes the whole library (about 4 min, 5 GB): the factory sets it.
   if [ "${GATE_DECL_INDEX:-0}" = 1 ] && [ "$mode" = touched ] && [ "$failed" -eq 0 ]; then
