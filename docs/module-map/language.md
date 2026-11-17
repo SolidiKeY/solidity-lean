@@ -244,8 +244,12 @@ commands; it never enters the core import graph.
 These modules also provide audited expression observers and regressions for their
 composition, error propagation, argument order, and returned storage and heaps.
 
+| `Solidity/Semantics/IntrinsicStorage/Preimages/Run/Control.lean` | Observed control-flow steps (conditionals, internal calls, receiver operations and pushes, `try`/catch data, loops, blocks, sequencing, revert data); each result is the actual typed run result. |
+| `Solidity/Semantics/IntrinsicStorage/Preimages/Run/Control/Checks.lean` | Sequencing regressions for the observed control-flow steps: continuations see the actual typed result; failed steps keep their observed inputs. |
 | `Solidity/Semantics/IntrinsicStorage/Preimages/Run.lean` | Observed straight-line statement steps (assignments, declarations, op-assign, inc/dec, push/pop, transfer/send, memory moves, delete, new, require/assert); each result is the actual typed run result. |
 | `Solidity/Semantics/IntrinsicStorage/Preimages/Run/Checks.lean` | Sequencing regressions for the observed straight-line steps: continuations see the actual typed result; failed steps keep their observed inputs. |
+| `Solidity/Correctness/IntrinsicSession/Step.lean` | The intrinsic session's resource bound (order, admissibility, no failure), executed-frame record, strategy response table and one-action step: deployment and affordable requests as `World.transact` of the actual `World.create` / `World.call`, dropped requests, credits. |
+| `Solidity/Examples/IntrinsicSession/Step.lean` | One-contract checks: an affordable request shows the outcome of `World.transact (World.call …)` with one call frame; a dropped request changes nothing; the deployment records one create frame. |
 The diagnostic generators `scripts/h62/item2/audit-v08-adapters/generate_mapped_census.py`
 and `scripts/h62/item2/audit-v08-adapters/generate_calldata_census.py` accept
 `--stream` to omit the global imported-constant sort. This still materializes
