@@ -1,5 +1,5 @@
 import Solidity.Goals.Loops
-import Solidity.Correctness.Lowering.Total.Main
+import Solidity.Correctness.Lowering.Total.Boundary
 
 namespace Solidity.Goals
 
