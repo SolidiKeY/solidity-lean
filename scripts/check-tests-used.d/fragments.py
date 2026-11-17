@@ -46,6 +46,8 @@ FRAGMENT_SECTIONS = ('standalone', 'generators', 'reads', 'orphans', 'module_ent
 #   standalone kind source-only-program (revision-independent no-pass role).
 # H996 (x1i): standalone kind python-argument-source-role, a reviewed
 #   argument-bearing Python program as a source-only role that anchors nothing.
+# H997 (x1j): standalone kind nonpython-entry-source-role, a reviewed live shell
+#   or Node program as a source-only role that anchors nothing.
 # persistent_module_entries (H979): exact routes.module_entries claims that
 #   persist while every recorded object is unchanged.
 CONSUMER_SECTIONS = ('persistent_reads', 'static_routes', 'git_policies', 'persistent_module_entries')
@@ -521,7 +523,7 @@ def git_policies(classifier, graph, rows):
             if not _current(repo, writer['path'], writer['blob']): stale = True; break
             if posixpath.basename(writer['path']) == '.gitignore' or not any(
                     r['path'] == writer['path'] and 'derived_from' not in r and not k.startswith('git-policy:')
-                    and not r.get('python_argument_role') for k, r in graph.roots.items()):
+                    and not r.get('python_argument_role') and not r.get('nonpython_entry_role') for k, r in graph.roots.items()):
                 raise ValueError('Git policy writer is not an entry point source')
             if full in repo.tree or any(p.startswith(full + '/') for p in repo.tree):
                 raise ValueError('Git policy output is tracked: ' + full)
@@ -1096,7 +1098,244 @@ def python_argument_root(classifier, graph, catalog, entry, reviewed=None):
             'reason': 'Reviewed argument-bearing Python entry; the bare prefix needs arguments and no argument is recorded. Source role only, never run or certified to pass. No read anchor, fixture, helper, child, generated-output, proof or runtime credit.'}})
 
 
-SOURCE_ROLE_KINDS = {SOURCE_ONLY_KIND: source_only_program, NODE_MODE_KIND: node_mode_root, PYTHON_ARGS_KIND: python_argument_root}
+NONPY_ENTRY_KIND = 'nonpython-entry-source-role'
+NONPY_ENTRY_PREFIX = 'nonpy-entry:'
+# H997 (gh coord#1331, X1E-NONPY-ROLE): the one shebang each interpreter is
+# accepted with; the command names that interpreter explicitly.
+NONPY_SHEBANGS = {'.sh': ('bash', '#!/usr/bin/env bash', True), '.mjs': ('node', '#!/usr/bin/env node', False),
+                  '.cjs': ('node', '#!/usr/bin/env node', False)}
+# Each reviewed live shell or Node program, bound to (path, source blob, one
+# commit that introduced that blob at that path; where cherry-picks introduce
+# the same blob twice, the earlier one, and the other is refused as unreviewed). Nothing else is
+# promoted: another file, blob or provenance commit fails, and no argument,
+# read, helper, child or output is ever recorded or credited.
+REVIEWED_NONPY_ENTRIES = frozenset({
+    ('tests/directruntime-20261104/memory-references/fixtures.cjs', '903cd31f868d6af169e7e743519131eb0e63131e', '17f2902cdc6ab848317fc82e31a90ad2d7c4fba8'),
+    ('tests/directruntime-20261104/memory-references/native-source-controls.mjs', '3e46b94bea4cff0efe8f108ffd61d99838d79c63', 'c9230cc9692a5974728959907afa1f60733409ad'),
+    ('tests/directruntime-20261104/memory-references/prepare-admission.cjs', '50a6ff09bbe39b55d8914427ea1f242db898c554', '17f2902cdc6ab848317fc82e31a90ad2d7c4fba8'),
+    ('tests/directruntime-20261104/memory-references/source-transport.mjs', '880d9e38ef8476e5543075ee1fc4c703b6917880', '17f2902cdc6ab848317fc82e31a90ad2d7c4fba8'),
+    ('tests/directruntime-20261104/native-browser/address/state-refusal-controls.mjs', 'd65587568f7e0fe0cb3b5b15b19b76d386eb2152', 'c21364ef94c9f9102065b51edd00dd1cb904661d'),
+    ('tests/directruntime-20261104/native-browser/bounded-keys.sh', 'c530a67b2b5ef6283bbfe9113d88c39e655f21c6', 'ae8062cfb0f028667485e6f1a621ff69e62724fd'),
+    ('tests/directruntime-20261104/native-browser/browser-baseline-checks.sh', 'b12fe571b40579d911cbe4b4103446524e7597a9', '18df52507a1cb6136e1340aee565964cdf6f012b'),
+    ('tests/directruntime-20261104/native-browser/browser-control-completion.cjs', '82ecd2d5a0e038c2cf8ef4949a72837a335ff9cf', '3ff9a2ea968af583d54f83defa62f537b28c235b'),
+    ('tests/directruntime-20261104/native-browser/browser-edit-controls.sh', 'c941f40a9ea94ecef7b1855f33872426349baeec', '18df52507a1cb6136e1340aee565964cdf6f012b'),
+    ('tests/directruntime-20261104/native-browser/browser-smoke-checks.sh', '1e6b7d76f5cc553ab1aa64f0147408bad52057f5', '18df52507a1cb6136e1340aee565964cdf6f012b'),
+    ('tests/directruntime-20261104/native-browser/browser-wire-audit.cjs', '4c0ac946c684d5b825ab2c5d3b839b370522c832', '18df52507a1cb6136e1340aee565964cdf6f012b'),
+    ('tests/directruntime-20261104/native-browser/build-browser-baseline.sh', '6945c2448ded7e30723144a1e71607f21b68847c', '18df52507a1cb6136e1340aee565964cdf6f012b'),
+    ('tests/directruntime-20261104/native-browser/build-native-baseline.sh', 'a9b7a2401b3bafae04de86bcb707eecd60e44e26', 'ae8062cfb0f028667485e6f1a621ff69e62724fd'),
+    ('tests/directruntime-20261104/native-browser/build-wasm-baseline.sh', '579f45953b9ad98e4a5e8934aad0f54009d4dea5', 'a1729b9c6283b199d3249b11c6224165798a00bb'),
+    ('tests/directruntime-20261104/native-browser/compact-runtime-cache.sh', '05e0333828e32952e0ff2af01265d7dd7b4ef324', 'e01ff4a52ffa532e47d3cb163bb97245f436e3b2'),
+    ('tests/directruntime-20261104/native-browser/environment/scripts/B-kernel-controls.sh', '971e181a0d2b877229eeefb48306e9e6fa86f62d', '5a21cb291a6d2f0bd2e1aa6574c14e895453c78b'),
+    ('tests/directruntime-20261104/native-browser/environment/scripts/address-marker-gate.sh', 'a3fd70679b39c94289498f6900b24ad6495dc517', '5a21cb291a6d2f0bd2e1aa6574c14e895453c78b'),
+    ('tests/directruntime-20261104/native-browser/environment/scripts/browser-build.sh', '9a4017546027af0c77eef544ea3ba29f8198cde4', '5a21cb291a6d2f0bd2e1aa6574c14e895453c78b'),
+    ('tests/directruntime-20261104/native-browser/environment/scripts/checks.sh', '63f4e50b51509f7a6273aa53fec3c9357c880ecc', 'e49c71436470851e0a3b295fa56b3b6c749e09b1'),
+    ('tests/directruntime-20261104/native-browser/environment/scripts/compile-producer-args.mjs', 'e60007cd18e4f58d829c5cd85da0f5766cf34c6d', '5a21cb291a6d2f0bd2e1aa6574c14e895453c78b'),
+    ('tests/directruntime-20261104/native-browser/environment/scripts/finite-gate.sh', '78e4b5909d6dd81671cedb28178437804072e407', '5a21cb291a6d2f0bd2e1aa6574c14e895453c78b'),
+    ('tests/directruntime-20261104/native-browser/environment/scripts/fixed-byte-gate.sh', 'd4197132f138040fc277bd006f6393e0455ec9b9', '5a21cb291a6d2f0bd2e1aa6574c14e895453c78b'),
+    ('tests/directruntime-20261104/native-browser/environment/scripts/historical/checks.sh', '0887f3a28631e1853e860a9355d69580fcb5f615', 'e49c71436470851e0a3b295fa56b3b6c749e09b1'),
+    ('tests/directruntime-20261104/native-browser/environment/scripts/historical/remaining-checks.sh', 'c37ac7de446ea7c9f83c6fde04013ce82801695b', 'e49c71436470851e0a3b295fa56b3b6c749e09b1'),
+    ('tests/directruntime-20261104/native-browser/environment/scripts/lake-prefix.sh', '2f2f8473b56c00259bcd400d6770c373bfea38cb', '5a21cb291a6d2f0bd2e1aa6574c14e895453c78b'),
+    ('tests/directruntime-20261104/native-browser/environment/scripts/marker-gate.sh', '1f6e42cf641de1003b3d9dca483f4aa47af9ff7d', '5a21cb291a6d2f0bd2e1aa6574c14e895453c78b'),
+    ('tests/directruntime-20261104/native-browser/environment/scripts/mcp.sh', '72cf3794cda2352c1fba6fc5bfbc02295b8a9b73', '5a21cb291a6d2f0bd2e1aa6574c14e895453c78b'),
+    ('tests/directruntime-20261104/native-browser/environment/scripts/remaining-checks.sh', '83e197d395972de024ac087aad4ebb3203a14732', 'e49c71436470851e0a3b295fa56b3b6c749e09b1'),
+    ('tests/directruntime-20261104/native-browser/environment/scripts/state-refusal-controls.mjs', 'd65587568f7e0fe0cb3b5b15b19b76d386eb2152', '5a21cb291a6d2f0bd2e1aa6574c14e895453c78b'),
+    ('tests/directruntime-20261104/native-browser/environment/scripts/wasm-build.sh', '3450e74ddad66d1deaf08e1c93f82023ce75cd85', '5a21cb291a6d2f0bd2e1aa6574c14e895453c78b'),
+    ('tests/directruntime-20261104/native-browser/fresh-spec-controls.mjs', '667daf209b2060a60c0c3079502c320f138b05b0', 'ae8062cfb0f028667485e6f1a621ff69e62724fd'),
+    ('tests/directruntime-20261104/native-browser/gmp-serial.sh', 'c6defb5a7ac2f5e6cf98a114d8d6bfe69884280c', 'e01ff4a52ffa532e47d3cb163bb97245f436e3b2'),
+    ('tests/directruntime-20261104/native-browser/h109/scripts/registration-lake.sh', '9ac8f8bece17c2d01dd2653578f24f97de1dd24e', 'e6865a2c7347df62db74bfc8b30aa00dce409c74'),
+    ('tests/directruntime-20261104/native-browser/h109/scripts/registration-parent-checks.sh', '63e8cc7662f430c985a20d7147a4dd404b043a5c', '15302eb51e3df48b9d8d46eaf50348dd1deddfb2'),
+    ('tests/directruntime-20261104/native-browser/h35-gates.sh', 'bb70b12b4b5552bf525c128602c9ba61301aec46', '369739e39533161cdd077a06bf6842bf71d1baa3'),
+    ('tests/directruntime-20261104/native-browser/h40-corpus-check.sh', '2e9202333efe8ddc8d9ad0fc20f67af1c11ee11e', '9465af2e2b24c438d98bc46b1dfaf890fb9adcb3'),
+    ('tests/directruntime-20261104/native-browser/h40-full-gates.sh', 'ee21b4e3f0534d4282108db2d6ef38148527b3a8', '9465af2e2b24c438d98bc46b1dfaf890fb9adcb3'),
+    ('tests/directruntime-20261104/native-browser/h40-mcp-checks.sh', 'd2250ce009385237b7836fb88730724eeeffb295', '9465af2e2b24c438d98bc46b1dfaf890fb9adcb3'),
+    ('tests/directruntime-20261104/native-browser/h40-policy-checks.sh', 'ee410e7d961e8e65077e722eaa676df651265329', '9465af2e2b24c438d98bc46b1dfaf890fb9adcb3'),
+    ('tests/directruntime-20261104/native-browser/h40-testsuite-check.sh', '5e37e8524625eb35d21f977c842e4f5084799070', '9465af2e2b24c438d98bc46b1dfaf890fb9adcb3'),
+    ('tests/directruntime-20261104/native-browser/h81-memory-controls.mjs', 'f923767bff5e51583c3a445950cc22e978bd6505', '0bdac88bfacec822c7157b7d5a3e713894571888'),
+    ('tests/directruntime-20261104/native-browser/hardening-browser-build.sh', '6fd0f7517a5046993958792bd08f0df7a66a8315', '3ff9a2ea968af583d54f83defa62f537b28c235b'),
+    ('tests/directruntime-20261104/native-browser/hardening-browser-checks.sh', 'a3fda3aa57ad433c25f74c987902dc428d99bf89', '3ff9a2ea968af583d54f83defa62f537b28c235b'),
+    ('tests/directruntime-20261104/native-browser/hardening-browser-controls.sh', '53265ee586aa6620934ef84749c37aab62f9521c', '3ff9a2ea968af583d54f83defa62f537b28c235b'),
+    ('tests/directruntime-20261104/native-browser/hardening-browser-edit.sh', 'ce5cd598f667ab741c3dfd68fbe3412fab7cdb0b', '3ff9a2ea968af583d54f83defa62f537b28c235b'),
+    ('tests/directruntime-20261104/native-browser/hardening-browser-smoke.sh', '478ac8cd2e128af109dd094abf148a59498bf881', '3ff9a2ea968af583d54f83defa62f537b28c235b'),
+    ('tests/directruntime-20261104/native-browser/hardening-native-build.sh', '5f516e8b52f5a3bdc1fd7b151c75ed48fec2b7bd', '3ff9a2ea968af583d54f83defa62f537b28c235b'),
+    ('tests/directruntime-20261104/native-browser/hardening-native-checks.mjs', '2f13d3d616921e271ae7cb1f2dfe99ee0454c382', '3ff9a2ea968af583d54f83defa62f537b28c235b'),
+    ('tests/directruntime-20261104/native-browser/hardening-native-checks.sh', 'ab70817d323bfa5c25dbba5b80aae363e1d1a699', '3ff9a2ea968af583d54f83defa62f537b28c235b'),
+    ('tests/directruntime-20261104/native-browser/hardening-validation.sh', '169e84907b0e34ec25750b0a70d3ffe97509865f', '3ff9a2ea968af583d54f83defa62f537b28c235b'),
+    ('tests/directruntime-20261104/native-browser/hardening-wasm-build.sh', '8c614bf7504ee59a1da79326f8408b4dec94e095', '85f39a01073565da7edef0a778abec2b7df9b1d7'),
+    ('tests/directruntime-20261104/native-browser/link-symbol-diagnostic.sh', '5e5c708c97d011052ae1e98cdddde9689a84e913', '18df52507a1cb6136e1340aee565964cdf6f012b'),
+    ('tests/directruntime-20261104/native-browser/mcp-baseline-checks.sh', '26574e91841f4e49d3125f56ca287688aaeb93b8', '18df52507a1cb6136e1340aee565964cdf6f012b'),
+    ('tests/directruntime-20261104/native-browser/native-baseline-checks.sh', '63a3811ce26da1c4bcfd5435781e65f9ea9c6d07', 'ae8062cfb0f028667485e6f1a621ff69e62724fd'),
+    ('tests/directruntime-20261104/native-browser/native-lsp-baseline.sh', 'f3991cada4632b3bedc72fcd09b105b84a93386b', '18df52507a1cb6136e1340aee565964cdf6f012b'),
+    ('tests/directruntime-20261104/native-browser/prepare-baseline.mjs', '086f041b6ffd9ecb7451479bf7d0c20e8799d33e', 'ae8062cfb0f028667485e6f1a621ff69e62724fd'),
+    ('tests/directruntime-20261104/native-browser/primitive-return/functional83.mjs', '017a361b9d7ba28570a1ea323ff2da2f11e35530', '0bdac88bfacec822c7157b7d5a3e713894571888'),
+    ('tests/directruntime-20261104/native-browser/published-8495-api.sh', '9022e73f1b542446eae3c5e61ebd6197d0a2262a', 'dc3f0ffc0431f87441e7bc3b8f263b38d02d229b'),
+    ('tests/directruntime-20261104/native-browser/published-8495-controls.mjs', 'c1e0b5e9be554992cdfa67ec097ceeb9b43ce322', '252be5a095f50a75c91e7b9ae55650eb4f6d7463'),
+    ('tests/directruntime-20261104/native-browser/published-8495-controls.sh', '74b1ebf5ffd8efc6b6ee01c8c24d398071eb42d0', 'dc3f0ffc0431f87441e7bc3b8f263b38d02d229b'),
+    ('tests/directruntime-20261104/native-browser/published-9584-api.sh', '8d95e992c635c46c4971fa65dbcf5befe646e7c3', '40bcc364c4f0caf313ebe8c65e1da66d2ad75b1b'),
+    ('tests/directruntime-20261104/native-browser/published-9584-mcp.sh', '8b0f45ccbe12441d761f7b9bdd3bbfb5ce0d32c1', '40bcc364c4f0caf313ebe8c65e1da66d2ad75b1b'),
+    ('tests/directruntime-20261104/native-browser/published-b86a-api.sh', '807d5d2b9437c62910b0dfda56e95e241b3a5f97', '354dadf752721c3caffeaf916c3ccf07a243c449'),
+    ('tests/directruntime-20261104/native-browser/published-b86a-mcp.sh', 'd1b955a0bc0ebdcc8d5de0ad2f8071d164cb534e', '354dadf752721c3caffeaf916c3ccf07a243c449'),
+    ('tests/directruntime-20261104/native-browser/published-f77-browser-build.sh', 'b5361e73f7027cab3d7393477ab97f9239ac00cc', '23a42307b1b336e5477c0bb5c8d8bfe6415b6ea6'),
+    ('tests/directruntime-20261104/native-browser/published-f77-browser-checks.sh', 'a310340cbbd46a253914122b15fa58c10b505230', '23a42307b1b336e5477c0bb5c8d8bfe6415b6ea6'),
+    ('tests/directruntime-20261104/native-browser/published-f77-browser-edit.sh', '71f5edd301dd1fd34b38d4e837fc688c20a7e8a1', '23a42307b1b336e5477c0bb5c8d8bfe6415b6ea6'),
+    ('tests/directruntime-20261104/native-browser/published-f77-browser-extras.sh', '416c6c9d7a3719ed67920b64c8542162c7c1628d', '23a42307b1b336e5477c0bb5c8d8bfe6415b6ea6'),
+    ('tests/directruntime-20261104/native-browser/published-f77-browser-smoke.sh', 'cf153c3b1865aa6895202676bf29c0882980c959', '23a42307b1b336e5477c0bb5c8d8bfe6415b6ea6'),
+    ('tests/directruntime-20261104/native-browser/published-f77-mcp.sh', 'f3f3c9ece70022adeb854c9532df41f3b6337d93', '23a42307b1b336e5477c0bb5c8d8bfe6415b6ea6'),
+    ('tests/directruntime-20261104/native-browser/published-f77-native-build.sh', 'a0d99da1154b1e1bde0e38b63ffc7cd543c04bd0', '23a42307b1b336e5477c0bb5c8d8bfe6415b6ea6'),
+    ('tests/directruntime-20261104/native-browser/published-f77-native-lsp.sh', '08d725fe11cf9be46012e40d0f5f8c538adb680b', '23a42307b1b336e5477c0bb5c8d8bfe6415b6ea6'),
+    ('tests/directruntime-20261104/native-browser/published-f77-validation.sh', '515fd0bb1a379970d49bd411c7cfba586534758d', '23a42307b1b336e5477c0bb5c8d8bfe6415b6ea6'),
+    ('tests/directruntime-20261104/native-browser/published-f77-wasm-build.sh', '31c07b3799d6cd108bf29e5593bfdf2dad655386', '23a42307b1b336e5477c0bb5c8d8bfe6415b6ea6'),
+    ('tests/directruntime-20261104/native-browser/readbounds/axiom-gates.sh', '6d77f69e2a86fa3d1ab1121b4cc9408aeb19fabd', 'eef016814a3deddf5e9ea85a97fadfc0ec73a114'),
+    ('tests/directruntime-20261104/native-browser/readbounds/module-gates.sh', 'bd84543e2eab25c0fc8db0de1d7cff7cf27718f8', 'eef016814a3deddf5e9ea85a97fadfc0ec73a114'),
+    ('tests/directruntime-20261104/native-browser/readbounds/proof-gates.sh', 'd1c49af7756b40057993698f72fb3394367d0b37', 'eef016814a3deddf5e9ea85a97fadfc0ec73a114'),
+    ('tests/directruntime-20261104/native-browser/readbounds/scripts/additional-functional.sh', '54fddfe266f4d61562dc867195421d1819ba6419', '4f5e84d8d3f90919c78e904697e5779fd3d0ce66'),
+    ('tests/directruntime-20261104/native-browser/readbounds/scripts/axiom-gates-post-rebase.sh', 'bdffe31da9f3c37864b74b8bf0f349654409db64', '4f5e84d8d3f90919c78e904697e5779fd3d0ce66'),
+    ('tests/directruntime-20261104/native-browser/readbounds/scripts/capture-gate.sh', 'da4a38d9db9a361b9f304a5f2adeafdde9b44d95', '4f5e84d8d3f90919c78e904697e5779fd3d0ce66'),
+    ('tests/directruntime-20261104/native-browser/readbounds/scripts/dependency-gate.sh', '1727e98a8e6d2b3bb0f4b79dc84cc5739746754f', '4f5e84d8d3f90919c78e904697e5779fd3d0ce66'),
+    ('tests/directruntime-20261104/native-browser/readbounds/scripts/functional-checks-recovered.sh', 'bbad552d675f721adb47df555ac86b85916b8606', '4f5e84d8d3f90919c78e904697e5779fd3d0ce66'),
+    ('tests/directruntime-20261104/native-browser/readbounds/scripts/functional-checks.sh', '46ac712e7df5083892b5634418b3aa9c2b874589', '4f5e84d8d3f90919c78e904697e5779fd3d0ce66'),
+    ('tests/directruntime-20261104/native-browser/readbounds/scripts/native-build.sh', 'dfa96b4d7f60f7dd4f78ed60a44114a93de21fdf', '4f5e84d8d3f90919c78e904697e5779fd3d0ce66'),
+    ('tests/directruntime-20261104/native-browser/readbounds/scripts/proof-gates-post-rebase.sh', '05160602dbedd46107efa412c8838bf14c0787d1', '4f5e84d8d3f90919c78e904697e5779fd3d0ce66'),
+    ('tests/directruntime-20261104/native-browser/request-identity/selector-negatives.mjs', 'f79858cb61bf4a126b71dcd7cebeea2fa55dfc02', '252be5a095f50a75c91e7b9ae55650eb4f6d7463'),
+    ('tests/directruntime-20261104/native-browser/sort-conformance.sh', 'a66c463a355476c8c906e4ba46807881f96bbac1', '3ff9a2ea968af583d54f83defa62f537b28c235b'),
+    ('tests/directruntime-20261104/native-browser/startup-investigation.mjs', 'a918cd39a422c15d82869a7f4b587dc2ab7d9d83', '3ff9a2ea968af583d54f83defa62f537b28c235b'),
+    ('tests/directruntime-20261104/native-browser/wasm-inside.sh', 'c7400f29384cfd151e157ff709a4707545d731a2', 'e01ff4a52ffa532e47d3cb163bb97245f436e3b2'),
+    ('tests/directruntime-20261104/shared-translator/address-fixture.mjs', '7b43c79b13a92043dc9c6576fd1b45c6a574026d', '0834bc67b042a63a8c804162781802245ae59c98'),
+    ('tests/directruntime-20261104/shared-translator/address-validate.sh', '6f9014aa569e25b415aba09f7ef1c37f4a4dd3ea', '0834bc67b042a63a8c804162781802245ae59c98'),
+    ('tests/directruntime-20261104/shared-translator/bounded.sh', 'a6686039c6dec3b35d2f06a2b8403be31ff9dd42', 'b44f0de87c2ab845b79c9d84004dcb7c91babded'),
+    ('tests/directruntime-20261104/shared-translator/compatibility-fixtures.mjs', '7eb7688e61d8f342b8549078635414d79f577e82', 'e778f14e03877c102aaaf739c60ecaccc9a989e5'),
+    ('tests/directruntime-20261104/shared-translator/compiler-coverage-fixtures.mjs', 'dda8193f85512314ae76a2b7740d8591990f26dd', 'e778f14e03877c102aaaf739c60ecaccc9a989e5'),
+    ('tests/directruntime-20261104/shared-translator/composed-fixture.mjs', 'b0af1badf585f4023819027bb1d8c6b3f85ba1cd', 'e778f14e03877c102aaaf739c60ecaccc9a989e5'),
+    ('tests/directruntime-20261104/shared-translator/dynamic-bytes-fixture.mjs', 'e823ea06bac4e522d24ff13eac1ffaff3342066f', '6842e804ce6a3605e31274d1746483b65eddeb09'),
+    ('tests/directruntime-20261104/shared-translator/environment-decoder-validate.sh', 'c9e849741ec9f96867766ecf7346f02c4d2389cf', '77913ac1cff1147d1129caea943c881b4aa61ec7'),
+    ('tests/directruntime-20261104/shared-translator/environment-fixture.mjs', '03b2c7c55004a710a0d7a053df0550e48eeeaf40', '44d89439afd8fe7aca251cd5693b5b7ea36cf603'),
+    ('tests/directruntime-20261104/shared-translator/environment-proof-validate.sh', 'db00b98f108dd43cbe5e9d46c01f405ae22f4a18', 'd74b24de8dd2560366ed47ec8a5d96e3351e9378'),
+    ('tests/directruntime-20261104/shared-translator/environment-validate.sh', '9460e5febcad1c954204902e5b7a505c5a5f79da', '44d89439afd8fe7aca251cd5693b5b7ea36cf603'),
+    ('tests/directruntime-20261104/shared-translator/fixed-byte-fixture.mjs', '207f8ff6474cfed3a6443223eac989976bb3d9bb', '4a66db87c8ed848aef4c2ac1732b1df326c6fa97'),
+    ('tests/directruntime-20261104/shared-translator/fixed-byte-validate.sh', 'b4d495f62a04cab7ec344489563d20f63f832f33', '4a66db87c8ed848aef4c2ac1732b1df326c6fa97'),
+    ('tests/directruntime-20261104/shared-translator/fresh-construct-fixtures.mjs', 'f6731c57f457a2b2b0fbbe57d6e67dbbafde9f40', 'bc4cb33ff40e97e88c04787419aaa0a16b618026'),
+    ('tests/directruntime-20261104/shared-translator/h90-base-census.sh', '299ca2604fb7206c03d98bd084ca2b714158e078', 'b44f0de87c2ab845b79c9d84004dcb7c91babded'),
+    ('tests/directruntime-20261104/shared-translator/h90-census-command.sh', '1004774e354dd25b941d6331ec0c52d92a2c86f6', 'b44f0de87c2ab845b79c9d84004dcb7c91babded'),
+    ('tests/directruntime-20261104/shared-translator/h90-validate.sh', 'a67ec66c28490d60be84f27466897389d27dc82c', 'b44f0de87c2ab845b79c9d84004dcb7c91babded'),
+    ('tests/directruntime-20261104/shared-translator/modality-fixture.mjs', '1e2484febd93269030f7d7956e7f9958dd448b21', 'e778f14e03877c102aaaf739c60ecaccc9a989e5'),
+    ('tests/directruntime-20261104/shared-translator/narrow-local-fixture.mjs', '8fb3e82889a9bef284ecd92f2c9cf71be89b2a25', 'b44f0de87c2ab845b79c9d84004dcb7c91babded'),
+    ('tests/directruntime-20261104/shared-translator/primitive-return-control-tuple-fixture.mjs', 'a756a8e23bf3b19577268e44e960782928fe23b9', '957e5defaa3c2e32df1e692d8781e0d89fed5199'),
+    ('tests/directruntime-20261104/shared-translator/primitive-return-fixture.mjs', '20f5d5f88b83ddfda3de8cc8168c69908a71d0dd', '957e5defaa3c2e32df1e692d8781e0d89fed5199'),
+    ('tests/directruntime-20261104/shared-translator/primitive-return-validate.sh', '074e6d15f01d4bfd67c2bd0af103663f96231923', '957e5defaa3c2e32df1e692d8781e0d89fed5199'),
+    ('tests/directruntime-20261104/shared-translator/read-bounds-validate.sh', '05994407de7956849db17f9c7188b90376a3556d', '15302eb51e3df48b9d8d46eaf50348dd1deddfb2'),
+    ('tests/upstream/baseline-20261028/invocations/retries/harness.sh', '67db42718e4d578b56d910e7e82fac1b732c23e0', '2207c1bba286538fd63e4a0ff4960ed4a593a8ab'),
+    ('tests/upstream/repairs/group02-commands.sh', 'af739fcdacb228adf9160e09b2b6c15918f77234', '7ce3c2a5ba098b705fca1c39c01fef467477fe6c'),
+    ('tests/upstream/repairs/group02-init-commands.sh', 'fafe6ea30e62fdd93d33fefb3218567a66724617', '6fceb880a8696cedecd6f2a55801c853e193ce2d'),
+})
+
+
+def nonpython_entry_interface(path, text):
+    """The audited entry interface of a shell or Node program, or None.
+
+    Recorded: the interpreter, the shebang line (required for bash, optional
+    for Node) and the first top-level statement line (column 0; for Node the
+    first one that is not an import declaration). Not audited, giving None:
+    another suffix (`.js` depends on a package type), a `.test.` name (the
+    node-test kind keeps that naming), any other shebang, ambiguous line
+    breaks, a NUL byte, a column-0 shell line with a `return` command (a
+    sourced library), a shell file whose column-0 lines are all function
+    definitions, assignments or set/shopt, any Node `export` declaration,
+    in a `.cjs` file any bare `exports` reference, `module.exports` or
+    `module[...]` access or Object.assign/defineProperty on module (a CommonJS
+    library), or no top-level statement. The shell check is lexical: an
+    indented `return` is not distinguished from one in a function body, so
+    the review set, not this parser, is the gate.
+    """
+    suffix = posixpath.splitext(path)[1]
+    if suffix not in NONPY_SHEBANGS or '.test.' in posixpath.basename(path): return None
+    if not isinstance(text, str) or not _plain_lines(text) or '\0' in text: return None
+    interpreter, shebang, required = NONPY_SHEBANGS[suffix]
+    lines = text.split('\n'); first = lines[0]
+    if first.startswith('#!'):
+        if first != shebang: return None
+    elif required: return None
+    else: shebang = None
+    if interpreter == 'bash':
+        top, until = [], None  # column-0 lines outside here-document bodies
+        for n, line in enumerate(lines[1:], 2):
+            if until is not None:
+                if line.lstrip('\t') == until: until = None
+                continue
+            if line[:1] not in ('', '#', ' ', '\t'): top.append((n, line))
+            heredoc = re.search(r'<<-?\s*(["\']?)(\w+)\1', line)
+            if heredoc and '<<<' not in line: until = heredoc[2]
+        if until is not None: return None
+        if any(re.search(r'(?<![\w$-])return\b', line) for _, line in top): return None
+        definition = r'(?:function\s+[\w-]+|[\w-]+\s*\(\s*\))\s*\{?\s*$|\}\s*$|(?:export\s+|readonly\s+|declare\s+(?:-\w+\s+)*)?\w+=|(?:set|shopt)\s'
+        entry = top[0][0] if any(not re.match(definition, line) for _, line in top) else None
+    else:
+        masked = (' ' * len(first) + text[len(first):]) if shebang else text
+        code = _js_mask(masked, True)[0]
+        if re.search(r'(?<![\w$.])export\b', code): return None
+        if suffix == '.cjs' and re.search(r'(?<![\w$.])exports\b(?!\s*:)|(?<![\w$.])module\s*(?:\.\s*exports\b|\[)'
+                                         r'|\bObject\s*\.\s*(?:assign|defineProperty|defineProperties)\s*\(\s*module\b', code): return None
+        imports = {code.count('\n', 0, m.start()) + 1 + k for m in re.finditer(r'(?m)^import\b(?!\s*[(.])(?:[^{};\n]*\{[^}]*\}[^;\n]*|[^{};\n]*)', code)
+                   for k in range(m.group(0).count('\n') + 1)}
+        entry = next((n for n, line in enumerate(code.split('\n'), 1) if line[:1] not in ('', ' ', '\t') and n not in imports), None)
+    if entry is None: return None
+    return {'interpreter': interpreter, 'shebang': shebang, 'entry_line': entry}
+
+
+def nonpython_entry_root(classifier, graph, catalog, entry, reviewed=None):
+    """H997: a reviewed live shell or Node program as a source-only role.
+
+    The definition binds the exact command [interpreter, P] (never an
+    argument), the source blob, the interface nonpython_entry_interface
+    records for that blob (interpreter, shebang, top-level entry line) and
+    provenance: the commit that introduced that blob at P, which must be in
+    the reviewed set. Python programs keep source-only-program and the H996
+    role, `.test.` Node files keep node-test, manual reproducers are
+    unchanged. The root is never a validated or passing runner and anchors
+    nothing: no execution, pass, read-anchor, fixture, helper, child,
+    generated-output, proof or runtime credit. A later revision keeps it while
+    the blob is unchanged and the recorded commit holds it; a current
+    definition of the same path supersedes it.
+    """
+    repo = graph.repo
+    reviewed = REVIEWED_NONPY_ENTRIES if reviewed is None else reviewed
+    required = {'path', 'input_revision', 'source_blob', 'command', 'kind', 'interface', 'provenance', 'purpose'}
+    if (set(entry) != required or not isinstance(entry['path'], str) or not isinstance(entry['source_blob'], str)
+            or not isinstance(entry['purpose'], str) or not entry['purpose'].strip() or not isinstance(entry['interface'], dict)
+            or not isinstance(entry['provenance'], dict) or set(entry['provenance']) != {'commit', 'path', 'blob'}
+            or not all(isinstance(v, str) for v in entry['provenance'].values())):
+        raise ValueError('invalid non-Python entry role definition')
+    p = entry['path']; revision = entry['input_revision']; doc = entry['provenance']
+    if not isinstance(revision, str) or not classifier['hex_pin'](revision, 40): raise ValueError('non-Python entry role requires a full commit revision')
+    if any(e.get('path') == p and e.get('input_revision') == revision and e is not entry for e in catalog['standalone']):
+        raise ValueError('conflicting standalone definitions: ' + p)
+    shape = NONPY_SHEBANGS.get(posixpath.splitext(p)[1])
+    if shape is None or entry['command'] != [shape[0], p] or '.test.' in posixpath.basename(p):
+        raise ValueError('unsupported non-Python entry role invocation: ' + p)
+    if doc['path'] != p or doc['blob'] != entry['source_blob'] or (p, entry['source_blob'], doc['commit']) not in reviewed:
+        raise ValueError('unreviewed non-Python entry role: ' + p)
+    if revision != repo.ref:
+        if any(e.get('path') == p and e.get('input_revision') == repo.ref for e in catalog['standalone']): return
+        if not _current(repo, p, entry['source_blob']): return
+        if not _historical_objects(classifier, repo, revision, [(p, entry['source_blob'])]):
+            raise ValueError('unverifiable historical runner demonstration: ' + revision + ':' + p)
+    elif not _current(repo, p, entry['source_blob']): raise ValueError('standalone definition source mismatch: ' + p)
+    if repo.tree[p][0] not in ('100644', '100755') or p not in repo.texts:
+        raise ValueError('unsupported non-Python entry role invocation: ' + p)
+    if not _introduced(classifier, repo, doc['commit'], p, entry['source_blob']):
+        raise ValueError('non-Python entry role lacks its introducing provenance: ' + p)
+    interface = nonpython_entry_interface(p, repo.texts[p])
+    if interface is None: raise ValueError('non-Python entry role lacks an audited entry interface: ' + p)
+    if canonical(interface) != canonical(entry['interface']): raise ValueError('non-Python entry role interface mismatch: ' + p)
+    identity = NONPY_ENTRY_PREFIX + p
+    graph.root(p, 'source-only non-Python entry', shlex.join(entry['command']), p, interface['entry_line'], root_id=identity)
+    if identity not in graph.roots: return
+    graph.roots[identity].update({'source_only': True, 'nonpython_entry_role': True, 'source_blob': entry['source_blob'],
+        'purpose': entry['purpose'], 'interface': interface, 'provenance': doc, 'source_declaration_revision': revision,
+        'validation_at_measured_revision': {'status': 'unavailable', 'command': entry['command'],
+            'reason': 'Reviewed live shell or Node program; the command is the bare interpreter prefix, which may need arguments, and no argument is recorded. Source role only, never run or certified to pass. No read anchor, fixture, helper, child, generated-output, proof or runtime credit.'}})
+
+
+SOURCE_ROLE_KINDS = {SOURCE_ONLY_KIND: source_only_program, NODE_MODE_KIND: node_mode_root, PYTHON_ARGS_KIND: python_argument_root,
+                     NONPY_ENTRY_KIND: nonpython_entry_root}
 
 
 def persisted_module_entries(classifier, graph, catalog, rows):
@@ -1598,6 +1837,15 @@ def successor_controls(classifier):
         'tests/args_alias.py': 'from sys import argv\nprint(argv[1])\n',
         'tests/args_rebind.py': 'import sys\nsys.argv = ["x", "y"]\nprint(sys.argv[1])\n',
         'tests/gen/.gitignore': 'out.json\n',
+        'tests/drive.sh': '#!/usr/bin/env bash\nset -euo pipefail\npython3 tests/helper.py "$@" > tests/gen/out.json\n',
+        'tests/drive-sh.sh': '#!/bin/sh\necho drive\n',
+        'tests/lib.sh': '#!/usr/bin/env bash\nhelper() {\n  echo helper\n}\nreturn 0\n',
+        'tests/drive.mjs': "import { readFileSync } from 'node:fs';\nconst [input] = process.argv.slice(2);\nconsole.log(readFileSync(input, 'utf8'));\n",
+        'tests/drive.cjs': "#!/usr/bin/env node\n// drive\nconst fs = require('node:fs');\nconsole.log(fs.readFileSync('tests/helper.py', 'utf8'));\n",
+        'tests/drive.test.mjs': "import { readFileSync } from 'node:fs';\nconsole.log(readFileSync('tests/helper.py', 'utf8'));\n",
+        'tests/drive.js': "console.log('drive');\n",
+        'tests/lib.mjs': 'export const value = 1;\n',
+        'tests/lib.cjs': 'module.exports = { value: 1 };\n',
         'tests/test_entry.py': 'import unittest\nclass T(unittest.TestCase):\n def test_import(self):\n  import helper\n  self.assertEqual(helper.VALUE, 3)\nif __name__ == "__main__": unittest.main()\n',
     }
     with tempfile.TemporaryDirectory() as tmp:
@@ -1888,6 +2136,129 @@ def successor_controls(classifier):
             assert 'py-args:tests/args.py' not in model['entry_points'] and rows['tests/args.py']['class'] != 'keep'
             rejected(args_edited, 'source mismatch', standalone=[dict(args_role, input_revision=args_edited.ref)])
         finally: REVIEWED_PYTHON_ARGS = reviewed_args
+
+        # (7) H997 reviewed live shell/Node entry-source role: a source-only
+        # root bound to blob, interpreter, recorded interface and introducing
+        # commit that anchors nothing and credits no read, helper or output.
+        global REVIEWED_NONPY_ENTRIES
+        reviewed_nonpy = REVIEWED_NONPY_ENTRIES
+        assert len(reviewed_nonpy) == 115 and len({p for p, _, _ in reviewed_nonpy}) == 115
+        assert all(p.startswith(('tests/directruntime-20261104/', 'tests/upstream/')) and posixpath.splitext(p)[1] in NONPY_SHEBANGS
+                   and '.test.' not in p and classifier['hex_pin'](b, 40) and classifier['hex_pin'](c, 40) for p, b, c in reviewed_nonpy)
+        witnesses = {'tests/directruntime-20261104/shared-translator/bounded.sh', 'tests/directruntime-20261104/native-browser/readbounds/module-gates.sh',
+                     'tests/directruntime-20261104/memory-references/native-source-controls.mjs'}
+        assert witnesses <= {p for p, _, _ in reviewed_nonpy}
+        assert ('tests/directruntime-20261104/shared-translator/bounded.sh', 'a6686039c6dec3b35d2f06a2b8403be31ff9dd42',
+                'b44f0de87c2ab845b79c9d84004dcb7c91babded') in reviewed_nonpy
+        sh_interface = {'interpreter': 'bash', 'shebang': '#!/usr/bin/env bash', 'entry_line': 2}
+        mjs_interface = {'interpreter': 'node', 'shebang': None, 'entry_line': 2}
+        cjs_interface = {'interpreter': 'node', 'shebang': '#!/usr/bin/env node', 'entry_line': 3}
+        assert nonpython_entry_interface('tests/drive.sh', files['tests/drive.sh']) == sh_interface
+        assert nonpython_entry_interface('tests/drive.mjs', files['tests/drive.mjs']) == mjs_interface
+        assert nonpython_entry_interface('tests/drive.cjs', files['tests/drive.cjs']) == cjs_interface
+        for path in ('tests/lib.sh', 'tests/drive-sh.sh', 'tests/lib.mjs', 'tests/lib.cjs', 'tests/drive.test.mjs', 'tests/drive.js', 'tests/prog.py'):
+            assert nonpython_entry_interface(path, files[path]) is None, path
+        for path, text in (('x.mjs', "import 'node:fs';\n// only imports\n"), ('x.mjs', 'const a = 1;\nexport { a };\n'),
+                           ('x.mjs', 'const a = 1;\nexport default a;\n'), ('x.cjs', 'const a = 1;\nexports.a = a;\n'),
+                           ('x.cjs', 'const a = 1;\nmodule .exports = a;\n'), ('x.mjs', '#!/usr/bin/node\nconsole.log(1);\n'),
+                           ('x.sh', '#!/usr/bin/env bash\n# only comments\n  indented\n'), ('x.sh', '#!/usr/bin/env bash\necho a\r\n'),
+                           ('x.sh', '#!/usr/bin/env  bash\necho a\n'), ('x.sh', '#!/usr/bin/env bash\nf() { :; }\nreturn 0 2>/dev/null\n'),
+                           ('x.test.cjs', 'console.log(1);\n'), ('x.py', 'print(1)\n'), ('x.mjs', 'console.log(1);\0\n'),
+                           ('x.sh', '#!/usr/bin/env bash\nf() {\n  echo f\n}\nfunction g {\n  :\n}\nX=1\nexport Y=2\nset -e\n'),
+                           ('x.sh', '#!/usr/bin/env bash\n[[ -n ${X:-} ]] && return 0\necho a\n'), ('x.sh', '#!/usr/bin/env bash\ncat <<EOF\nunterminated\n'), ('x.sh', '#!/usr/bin/env bash\necho a; return\n'),
+                           ('x.cjs', 'Object.assign(exports, { a: 1 });\n'), ('x.cjs', "module['exports'] = 1;\n"),
+                           ('x.cjs', "Object.defineProperty(module, 'exports', { value: 1 });\n"), ('x.cjs', 'const e = exports;\ne.a = 1;\n')):
+            assert nonpython_entry_interface(path, text) is None, text
+        # Commented or quoted keywords are not declarations; a dynamic import is code.
+        assert nonpython_entry_interface('x.mjs', '// export const a = 1;\nconsole.log("export", `module.exports`);\n')['entry_line'] == 2
+        assert nonpython_entry_interface('x.mjs', "import a from './a.mjs';\nimport('./b.mjs');\n")['entry_line'] == 2
+        assert nonpython_entry_interface('x.mjs', "import {\n  a,\n  b,\n} from './a.mjs';\nconsole.log(a, b);\n")['entry_line'] == 5
+        assert nonpython_entry_interface('x.cjs', 'const report = { exports: 1 };\nconst module = 2;\nconsole.log(module, report);\n')['entry_line'] == 1
+        assert nonpython_entry_interface('x.sh', '#!/usr/bin/env bash\nset -e\nf() {\n  return 0\n}\nX=1\nf\n')['entry_line'] == 2
+        assert nonpython_entry_interface('x.sh', "#!/usr/bin/env bash\ncat > m.c <<'EOF'\nint main(void){return 0;}\nEOF\ncc m.c\n")['entry_line'] == 2
+        nonpy = lambda path, interface, command=None, repo=first, commit=A: {
+            'path': path, 'input_revision': repo.ref, 'source_blob': blob(repo, path), 'kind': NONPY_ENTRY_KIND,
+            'command': command or [interface['interpreter'], path], 'interface': interface,
+            'provenance': {'commit': commit, 'path': path, 'blob': blob(repo, path)}, 'purpose': 'Synthetic reviewed live program.'}
+        sh_role = nonpy('tests/drive.sh', sh_interface); mjs_role = nonpy('tests/drive.mjs', mjs_interface); cjs_role = nonpy('tests/drive.cjs', cjs_interface)
+        roles = (('tests/drive.sh', sh_role, 2), ('tests/drive.mjs', mjs_role, 2), ('tests/drive.cjs', cjs_role, 3))
+        assert all(baseline[path]['class'] != 'keep' for path, _, _ in roles)
+        REVIEWED_NONPY_ENTRIES = frozenset({(p, blob(first, p), A) for p in ('tests/drive.sh', 'tests/drive.mjs', 'tests/drive.cjs', 'tests/lib.sh',
+                                                                              'tests/drive-sh.sh', 'tests/lib.mjs', 'tests/drive.js', 'tests/walk.mjs')}
+                                           | {('tests/drive.sh', blob(first, 'tests/drive.sh'), later.ref)})
+        try:
+            for repo in (first, later):
+                model, rows = run(repo, standalone=[role for _, role, _ in roles])
+                for path, role, line in roles:
+                    assert rows[path]['class'] == 'keep', path
+                    entry = model['entry_points']['nonpy-entry:' + path]
+                    assert entry['source_only'] and entry['nonpython_entry_role'] and entry['validation_at_measured_revision']['status'] == 'unavailable'
+                    assert entry['command'] == role['command'][0] + ' ' + path and entry['location'] == path + ':' + str(line)
+                    assert entry['interface'] == role['interface'] and entry['provenance'] == role['provenance']
+                    assert not any(k.endswith(':' + path) and not k.startswith('nonpy-entry:') for k in model['entry_points'])
+                # Nothing else changes: no read, helper, child or output credit.
+                assert all(canonical(r) == canonical(baseline[p]) for p, r in rows.items() if p not in [p for p, _, _ in roles]
+                           and p in baseline and repo is later)
+            # The role anchors no route: the malformed row is never even inspected.
+            _, rows = run(later, {'static_routes': [route(first, 'nonpy-entry:tests/drive.mjs', 'node-import', [frame(first, 'tests/drive.mjs', 2)], 'tests/corpus/c.txt')]},
+                          standalone=[mjs_role])
+            assert rows['tests/corpus/c.txt']['class'] != 'keep'
+            # Negative controls: schema, revision, interpreter, review set, provenance, source, interface.
+            for change, text in (({'extra': 1}, 'invalid non-Python entry role'), ({'purpose': ' '}, 'invalid non-Python entry role'),
+                                 ({'interface': []}, 'invalid non-Python entry role'),
+                                 ({'provenance': {'commit': A, 'path': 'tests/drive.sh'}}, 'invalid non-Python entry role'),
+                                 ({'provenance': dict(sh_role['provenance'], commit=[A])}, 'invalid non-Python entry role'),
+                                 ({'input_revision': 'HEAD'}, 'full commit revision'),
+                                 ({'command': ['bash', 'tests/drive.sh', 'arg']}, 'unsupported non-Python entry role'),
+                                 ({'command': ['bash', '-x', 'tests/drive.sh']}, 'unsupported non-Python entry role'),
+                                 ({'command': ['sh', 'tests/drive.sh']}, 'unsupported non-Python entry role'),
+                                 ({'command': ['node', 'tests/drive.sh']}, 'unsupported non-Python entry role'),
+                                 ({'command': ['tests/drive.sh']}, 'unsupported non-Python entry role'),
+                                 ({'source_blob': '0' * 40}, 'unreviewed non-Python entry role'),
+                                 ({'provenance': dict(sh_role['provenance'], commit='0' * 40)}, 'unreviewed non-Python entry role'),
+                                 ({'provenance': dict(sh_role['provenance'], path='tests/drive.mjs')}, 'unreviewed non-Python entry role'),
+                                 ({'provenance': dict(sh_role['provenance'], commit=later.ref)}, 'introducing provenance'),
+                                 ({'interface': dict(sh_interface, entry_line=3)}, 'interface mismatch'),
+                                 ({'interface': dict(sh_interface, shebang=None)}, 'interface mismatch'),
+                                 ({'interface': dict(sh_interface, interpreter='sh')}, 'interface mismatch')):
+                rejected(first, text, standalone=[dict(sh_role, **change)])
+            rejected(first, 'unverifiable historical runner demonstration', standalone=[dict(sh_role, input_revision='0' * 40)])
+            for change in ({'command': ['node', '--test', 'tests/drive.mjs']}, {'command': ['node', 'tests/drive.mjs', 'prepare']},
+                           {'command': ['bash', 'tests/drive.mjs']}):
+                rejected(first, 'unsupported non-Python entry role', standalone=[dict(mjs_role, **change)])
+            # Other suffixes, Python and the node-test naming are refused before review.
+            for path, interpreter in (('tests/drive.js', 'node'), ('tests/drive.test.mjs', 'node'), ('tests/prog.py', 'python3')):
+                rejected(first, 'unsupported non-Python entry role', standalone=[nonpy(path, dict(mjs_interface, interpreter=interpreter))])
+            # A library or an unaudited shebang has no entry interface, even when reviewed.
+            for path in ('tests/lib.sh', 'tests/drive-sh.sh', 'tests/lib.mjs'):
+                rejected(first, 'audited entry interface', standalone=[nonpy(path, sh_interface, [NONPY_SHEBANGS[posixpath.splitext(path)[1]][0], path])])
+            # source-only-program and the H996 role stay Python-only.
+            rejected(first, 'unsupported source-only program', standalone=[dict(program, path='tests/drive.sh', source_blob=blob(first, 'tests/drive.sh'),
+                     command=['bash', 'tests/drive.sh'], entry_line=2)])
+            rejected(first, 'unsupported Python argument role', standalone=[dict(sh_role, kind=PYTHON_ARGS_KIND, entry_line=2)])
+            # No promotion beside another role for the same path and revision; a manual reproducer stays as it is.
+            rejected(first, 'conflicting standalone', standalone=[nonpy('tests/walk.mjs', {'interpreter': 'node', 'shebang': None, 'entry_line': 1})])
+            # A current definition of the same path supersedes the role at a later revision.
+            for order in (1, -1):
+                model, _ = run(later, standalone=[dict(sh_role, input_revision=later.ref, purpose='Current definition.'), sh_role][::order])
+                assert model['entry_points']['nonpy-entry:tests/drive.sh']['source_declaration_revision'] == later.ref
+                assert model['entry_points']['nonpy-entry:tests/drive.sh']['purpose'] == 'Current definition.'
+            # The role is no Git policy writer: it credits no generated output.
+            writer = {'path': 'tests/drive.sh', 'blob': blob(first, 'tests/drive.sh'), 'line': 3, 'literal': 'out.json'}
+            policy = {'path': 'tests/gen/.gitignore', 'blob': blob(first, 'tests/gen/.gitignore'), 'purpose': 'Synthetic output policy.',
+                      'matches': [{'line': 1, 'output': 'out.json', 'writer': writer}]}
+            rejected(first, 'not an entry point source', {'git_policies': [policy]}, standalone=[sh_role])
+            REVIEWED_NONPY_ENTRIES = frozenset()
+            rejected(first, 'unreviewed non-Python entry role', standalone=[sh_role])
+        finally: REVIEWED_NONPY_ENTRIES = reviewed_nonpy
+        # A changed source drops the root at a later revision.
+        sh_edited = commit({'tests/drive.sh': files['tests/drive.sh'] + '# changed\n'}, 'changed shell program')
+        REVIEWED_NONPY_ENTRIES = reviewed_nonpy | {('tests/drive.sh', blob(first, 'tests/drive.sh'), A)}
+        try:
+            model, rows = run(sh_edited, standalone=[sh_role])
+            assert 'nonpy-entry:tests/drive.sh' not in model['entry_points'] and rows['tests/drive.sh']['class'] != 'keep'
+            rejected(sh_edited, 'source mismatch', standalone=[dict(sh_role, input_revision=sh_edited.ref)])
+        finally: REVIEWED_NONPY_ENTRIES = reviewed_nonpy
 
         # (4) H979 persisted entered-module claims.
         assert run(first)[1]['tests/helper.py']['class'] == 'keep'
