@@ -93,12 +93,11 @@ def ElabKernelInduction (rc : ElabRec C) : Prop :=
 
 end Elab
 
-/-- **The helpers' defining equations**, as `Syntax/Elab` states them.
-`RawExpr.mapM` rewrites the node, then the children of what it returned, so
-its equation has no solution for a callback that grows its argument
-(`fun x => pure (.unop .neg x)`); it is stated in `Except String` (as
-`RawExpr.orderNamed` and `RawExpr.uncheck` run it) for a callback whose
-successful results are no larger (`sizeOf`) than its argument. -/
+/-- **The helpers' defining equations**.  `RawExpr.mapM` rewrites a node, then
+the children of the result: for a growing callback (`pure (.unop .neg ·)`) the
+unfolding never ends, only throwing functions satisfy it, and no well-founded
+totalization computes one.  So it is stated in `Except String` (as `orderNamed`
+and `uncheck` run it) for callbacks whose results are no larger (`sizeOf`). -/
 def ElabKernelHelpers : Prop :=
   (∀ (f : RawExpr → Except String RawExpr),
     (∀ e e', f e = .ok e' → sizeOf e' ≤ sizeOf e) →

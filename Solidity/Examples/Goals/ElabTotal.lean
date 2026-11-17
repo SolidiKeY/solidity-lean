@@ -46,8 +46,8 @@ example (h : elabKernelTotal) :
 
 end Controls
 
-/-- The `RawExpr.mapM` side condition is needed: a callback that wraps its
-argument has no fixpoint (`x = .unop .neg x` has no solution). -/
+/-- Why `RawExpr.mapM` has a side condition: a wrapping callback admits no
+successful result (`x = .unop .neg x` has no solution), only a throw. -/
 example : ∀ x : RawExpr, x ≠ .unop .neg x := by
   intro x h; have := congrArg sizeOf h; simp at this
 
