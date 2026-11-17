@@ -2453,6 +2453,8 @@ import Solidity.Correctness.Lowering.Loops.WhileBreak
 import Solidity.Correctness.Lowering.Loops.WhileContinue
 import Solidity.Correctness.Lowering.Loops.WhileReset
 import Solidity.Correctness.Lowering.Total.Contract
+import Solidity.Correctness.Lowering.Total.Coverage
+import Solidity.Correctness.Lowering.Total.Coverage.Checks
 import Solidity.Correctness.Lowering.Total.Production
 import Solidity.Correctness.Lowering.Total.Relation
 import Solidity.Correctness.Lowering.Unchecked.CallWitness
@@ -2486,6 +2488,7 @@ import Solidity.Counterexamples.DeleteFamilyGenericOverlap
 import Solidity.Counterexamples.DiamondTry
 import Solidity.Counterexamples.PreFixSortAnnotations
 import Solidity.Counterexamples.StaticRuntimeSort
+import Solidity.Docs.ProseCalibrated.Allowance
 import Solidity.Docs.ProseCalibrated.Classification
 import Solidity.ERC7201
 import Solidity.Eqns
@@ -4141,6 +4144,7 @@ import Solidity.Semantics.ExternalTryWitness
 import Solidity.Semantics.Heap
 import Solidity.Semantics.IntrinsicStorage.Layout
 import Solidity.Semantics.IntrinsicStorage.Preimages.Frames
+import Solidity.Semantics.IntrinsicStorage.Preimages.Ops
 import Solidity.Semantics.LexMetrics
 import Solidity.Semantics.LibraryTryFrame
 import Solidity.Semantics.Lifetime

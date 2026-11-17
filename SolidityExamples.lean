@@ -127,6 +127,7 @@ import Solidity.Examples.DecisionVerdictData
 import Solidity.Examples.DecisionWrittenMemory
 import Solidity.Examples.DeclarationReduction
 import Solidity.Examples.DependentReduction
+import Solidity.Examples.Docs.ProseCalibrated.Allowance
 import Solidity.Examples.ExactReduction
 import Solidity.Examples.ExactUpdates
 import Solidity.Examples.ExampleNames
@@ -149,6 +150,7 @@ import Solidity.Examples.Goals.Taclets
 import Solidity.Examples.Goals.Total
 import Solidity.Examples.InputReduction
 import Solidity.Examples.IntrinsicStorage.Preimages.Frames
+import Solidity.Examples.IntrinsicStorage.Preimages.Ops
 import Solidity.Examples.LexDiamond
 import Solidity.Examples.LexMetrics
 import Solidity.Examples.LexRuleSyntax
