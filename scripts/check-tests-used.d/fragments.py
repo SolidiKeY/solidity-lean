@@ -1104,8 +1104,9 @@ NONPY_ENTRY_PREFIX = 'nonpy-entry:'
 # accepted with; the command names that interpreter explicitly.
 NONPY_SHEBANGS = {'.sh': ('bash', '#!/usr/bin/env bash', True), '.mjs': ('node', '#!/usr/bin/env node', False),
                   '.cjs': ('node', '#!/usr/bin/env node', False)}
-# Each reviewed live shell or Node program, bound to (path, source blob, the
-# oldest commit that introduced that blob at that path). Nothing else is
+# Each reviewed live shell or Node program, bound to (path, source blob, one
+# commit that introduced that blob at that path; where cherry-picks introduce
+# the same blob twice, the earlier one, and the other is refused as unreviewed). Nothing else is
 # promoted: another file, blob or provenance commit fails, and no argument,
 # read, helper, child or output is ever recorded or credited.
 REVIEWED_NONPY_ENTRIES = frozenset({
@@ -1235,9 +1236,14 @@ def nonpython_entry_interface(path, text):
     first one that is not an import declaration). Not audited, giving None:
     another suffix (`.js` depends on a package type), a `.test.` name (the
     node-test kind keeps that naming), any other shebang, ambiguous line
-    breaks, a NUL byte, a top-level shell `return` (a sourced library), any
-    Node `export` declaration or `module.exports`/`exports.` binding (a
-    library), or no top-level statement.
+    breaks, a NUL byte, a column-0 shell line with a `return` command (a
+    sourced library), a shell file whose column-0 lines are all function
+    definitions, assignments or set/shopt, any Node `export` declaration,
+    in a `.cjs` file any bare `exports` reference, `module.exports` or
+    `module[...]` access or Object.assign/defineProperty on module (a CommonJS
+    library), or no top-level statement. The shell check is lexical: an
+    indented `return` is not distinguished from one in a function body, so
+    the review set, not this parser, is the gate.
     """
     suffix = posixpath.splitext(path)[1]
     if suffix not in NONPY_SHEBANGS or '.test.' in posixpath.basename(path): return None
@@ -1249,14 +1255,27 @@ def nonpython_entry_interface(path, text):
     elif required: return None
     else: shebang = None
     if interpreter == 'bash':
-        if any(re.match(r'return\b', line) for line in lines): return None
-        entry = next((n for n, line in enumerate(lines, 1) if n > 1 and line[:1] not in ('', '#', ' ', '\t')), None)
+        top, until = [], None  # column-0 lines outside here-document bodies
+        for n, line in enumerate(lines[1:], 2):
+            if until is not None:
+                if line.lstrip('\t') == until: until = None
+                continue
+            if line[:1] not in ('', '#', ' ', '\t'): top.append((n, line))
+            heredoc = re.search(r'<<-?\s*(["\']?)(\w+)\1', line)
+            if heredoc and '<<<' not in line: until = heredoc[2]
+        if until is not None: return None
+        if any(re.search(r'(?<![\w$-])return\b', line) for _, line in top): return None
+        definition = r'(?:function\s+[\w-]+|[\w-]+\s*\(\s*\))\s*\{?\s*$|\}\s*$|(?:export\s+|readonly\s+|declare\s+(?:-\w+\s+)*)?\w+=|(?:set|shopt)\s'
+        entry = top[0][0] if any(not re.match(definition, line) for _, line in top) else None
     else:
         masked = (' ' * len(first) + text[len(first):]) if shebang else text
         code = _js_mask(masked, True)[0]
-        if re.search(r'(?<![\w$.])export\b|(?<![\w$.])module\s*\.\s*exports\b|(?<![\w$.])exports\s*(?:\.|\[)', code): return None
-        entry = next((n for n, line in enumerate(code.split('\n'), 1)
-                      if line[:1] not in ('', ' ', '\t') and not re.match(r'import\b(?!\s*[(.])', line)), None)
+        if re.search(r'(?<![\w$.])export\b', code): return None
+        if suffix == '.cjs' and re.search(r'(?<![\w$.])exports\b(?!\s*:)|(?<![\w$.])module\s*(?:\.\s*exports\b|\[)'
+                                         r'|\bObject\s*\.\s*(?:assign|defineProperty|defineProperties)\s*\(\s*module\b', code): return None
+        imports = {code.count('\n', 0, m.start()) + 1 + k for m in re.finditer(r'(?m)^import\b(?!\s*[(.])(?:[^{};\n]*\{[^}]*\}[^;\n]*|[^{};\n]*)', code)
+                   for k in range(m.group(0).count('\n') + 1)}
+        entry = next((n for n, line in enumerate(code.split('\n'), 1) if line[:1] not in ('', ' ', '\t') and n not in imports), None)
     if entry is None: return None
     return {'interpreter': interpreter, 'shebang': shebang, 'entry_line': entry}
 
@@ -1312,7 +1331,7 @@ def nonpython_entry_root(classifier, graph, catalog, entry, reviewed=None):
     graph.roots[identity].update({'source_only': True, 'nonpython_entry_role': True, 'source_blob': entry['source_blob'],
         'purpose': entry['purpose'], 'interface': interface, 'provenance': doc, 'source_declaration_revision': revision,
         'validation_at_measured_revision': {'status': 'unavailable', 'command': entry['command'],
-            'reason': 'Reviewed live shell or Node program; source role only, never run or certified to pass, and no argument is recorded. No read anchor, fixture, helper, child, generated-output, proof or runtime credit.'}})
+            'reason': 'Reviewed live shell or Node program; the command is the bare interpreter prefix, which may need arguments, and no argument is recorded. Source role only, never run or certified to pass. No read anchor, fixture, helper, child, generated-output, proof or runtime credit.'}})
 
 
 SOURCE_ROLE_KINDS = {SOURCE_ONLY_KIND: source_only_program, NODE_MODE_KIND: node_mode_root, PYTHON_ARGS_KIND: python_argument_root,
@@ -2144,11 +2163,19 @@ def successor_controls(classifier):
                            ('x.cjs', 'const a = 1;\nmodule .exports = a;\n'), ('x.mjs', '#!/usr/bin/node\nconsole.log(1);\n'),
                            ('x.sh', '#!/usr/bin/env bash\n# only comments\n  indented\n'), ('x.sh', '#!/usr/bin/env bash\necho a\r\n'),
                            ('x.sh', '#!/usr/bin/env  bash\necho a\n'), ('x.sh', '#!/usr/bin/env bash\nf() { :; }\nreturn 0 2>/dev/null\n'),
-                           ('x.test.cjs', 'console.log(1);\n'), ('x.py', 'print(1)\n'), ('x.mjs', 'console.log(1);\0\n')):
+                           ('x.test.cjs', 'console.log(1);\n'), ('x.py', 'print(1)\n'), ('x.mjs', 'console.log(1);\0\n'),
+                           ('x.sh', '#!/usr/bin/env bash\nf() {\n  echo f\n}\nfunction g {\n  :\n}\nX=1\nexport Y=2\nset -e\n'),
+                           ('x.sh', '#!/usr/bin/env bash\n[[ -n ${X:-} ]] && return 0\necho a\n'), ('x.sh', '#!/usr/bin/env bash\ncat <<EOF\nunterminated\n'), ('x.sh', '#!/usr/bin/env bash\necho a; return\n'),
+                           ('x.cjs', 'Object.assign(exports, { a: 1 });\n'), ('x.cjs', "module['exports'] = 1;\n"),
+                           ('x.cjs', "Object.defineProperty(module, 'exports', { value: 1 });\n"), ('x.cjs', 'const e = exports;\ne.a = 1;\n')):
             assert nonpython_entry_interface(path, text) is None, text
         # Commented or quoted keywords are not declarations; a dynamic import is code.
         assert nonpython_entry_interface('x.mjs', '// export const a = 1;\nconsole.log("export", `module.exports`);\n')['entry_line'] == 2
         assert nonpython_entry_interface('x.mjs', "import a from './a.mjs';\nimport('./b.mjs');\n")['entry_line'] == 2
+        assert nonpython_entry_interface('x.mjs', "import {\n  a,\n  b,\n} from './a.mjs';\nconsole.log(a, b);\n")['entry_line'] == 5
+        assert nonpython_entry_interface('x.cjs', 'const report = { exports: 1 };\nconst module = 2;\nconsole.log(module, report);\n')['entry_line'] == 1
+        assert nonpython_entry_interface('x.sh', '#!/usr/bin/env bash\nset -e\nf() {\n  return 0\n}\nX=1\nf\n')['entry_line'] == 2
+        assert nonpython_entry_interface('x.sh', "#!/usr/bin/env bash\ncat > m.c <<'EOF'\nint main(void){return 0;}\nEOF\ncc m.c\n")['entry_line'] == 2
         nonpy = lambda path, interface, command=None, repo=first, commit=A: {
             'path': path, 'input_revision': repo.ref, 'source_blob': blob(repo, path), 'kind': NONPY_ENTRY_KIND,
             'command': command or [interface['interpreter'], path], 'interface': interface,
@@ -2212,8 +2239,10 @@ def successor_controls(classifier):
             # No promotion beside another role for the same path and revision; a manual reproducer stays as it is.
             rejected(first, 'conflicting standalone', standalone=[nonpy('tests/walk.mjs', {'interpreter': 'node', 'shebang': None, 'entry_line': 1})])
             # A current definition of the same path supersedes the role at a later revision.
-            model, _ = run(later, standalone=[sh_role, dict(sh_role, input_revision=later.ref, provenance=dict(sh_role['provenance'], commit=A))])
-            assert model['entry_points']['nonpy-entry:tests/drive.sh']['source_declaration_revision'] == later.ref
+            for order in (1, -1):
+                model, _ = run(later, standalone=[dict(sh_role, input_revision=later.ref, purpose='Current definition.'), sh_role][::order])
+                assert model['entry_points']['nonpy-entry:tests/drive.sh']['source_declaration_revision'] == later.ref
+                assert model['entry_points']['nonpy-entry:tests/drive.sh']['purpose'] == 'Current definition.'
             # The role is no Git policy writer: it credits no generated output.
             writer = {'path': 'tests/drive.sh', 'blob': blob(first, 'tests/drive.sh'), 'line': 3, 'literal': 'out.json'}
             policy = {'path': 'tests/gen/.gitignore', 'blob': blob(first, 'tests/gen/.gitignore'), 'purpose': 'Synthetic output policy.',
