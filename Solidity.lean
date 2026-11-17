@@ -2431,6 +2431,7 @@ import Solidity.Calculus.UpdateRules
 import Solidity.Calculus.VisitedSet
 import Solidity.Calculus.WalkSyntax
 import Solidity.Calculus.WkOver
+import Solidity.Correctness.IntrinsicSession.Run
 import Solidity.Correctness.IntrinsicSession.Step
 import Solidity.Correctness.Lowering.Checker.Contract
 import Solidity.Correctness.Lowering.Checker.IntrinsicProbe
