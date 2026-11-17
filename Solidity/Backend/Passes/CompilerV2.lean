@@ -7,11 +7,15 @@ import Solidity.Backend.InternalFlow.RuntimeFrameV3CallProducerRefTupleCall
 `CompilerV2.compile` is an additive entry beside the frozen v1 entry
 `Evm.Compiler.compile` (H314). It returns the v1 result whenever v1 accepts.
 Where v1 refuses a push-free program, it selects the program statement by
-statement: the structural selector `Composition.compileStatement`, or, for a
-call with tuple return binders, the published checked emitter `Tuple.emit`
-over the selected frame expansion. The result is the existing
-`Compilation.memoryCalls` constructor, so `Compilation.correct_exact` applies
-to it unchanged; no certificate is supplied by hand.
+statement at top level: each statement is taken by the structural selector
+`Composition.compileStatement`, or is a call with tuple return binders whose
+frame expansion that selector takes, emitted by the published `Tuple.emit`.
+So v2 adds every push-free sequence of such statements that v1 refuses, not
+only single tuple calls. It adds nothing else: ordinary calls stay with v1's
+`Calls.compile`, and a tuple call inside a block, a branch or a callee is
+refused. The result is the existing `Compilation.memoryCalls` constructor, so
+`Compilation.correct_exact` applies unchanged; no certificate is supplied by
+hand.
 
 v1 is untouched: `compile_of_v1` and `v1_none_of_none` state that v2 only
 adds acceptance.
@@ -50,7 +54,7 @@ def program (b : Nat) {Γ Δ : Ctx} (F : Frag Γ) :
     pure (Composition.cons first rest)
 
 /-- **The v2 checked entry.** v1 first; where v1 refuses a push-free program,
-the tuple-return selection through the existing `memoryCalls` branch. -/
+the top-level selection `program` through the existing `memoryCalls` branch. -/
 def compile (b : Nat) {Γ Δ : Ctx} (F : Frag Γ) (P : Prog C Γ Δ) :
     Option (Compilation b F P) :=
   match Compiler.compile b F P with
@@ -73,7 +77,7 @@ theorem v1_none_of_none {b : Nat} {Γ Δ : Ctx} {F : Frag Γ} {P : Prog C Γ Δ}
   | none => rfl
   | some result => rw [compile_of_v1 v1] at refused; cases refused
 
-/-- Where v1 refuses, v2 is exactly the tuple-return selection. -/
+/-- Where v1 refuses a push-free program, v2 is exactly the selection `program`. -/
 theorem compile_of_selected {b : Nat} {Γ Δ : Ctx} {F : Frag Γ} {P : Prog C Γ Δ}
     {selected : Composition.Program b F P} (v1 : Compiler.compile b F P = none)
     (pushFree : Evm.Prog.pushes P = 0) (chosen : program b F P = some selected) :

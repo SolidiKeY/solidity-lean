@@ -96,11 +96,6 @@ theorem endpoint_revert :
   · exact ran
   · rw [failed] at diverged; cases diverged
 
-/-- Both entries on the same program: v1 refuses (R1), v2 accepts. -/
-theorem v1_refuses_v2_accepts :
-    Compiler.compile 1 F program = none ∧ CompilerV2.compile 1 F program = some compiled :=
-  ⟨endpoint_refusal, accepted⟩
-
 /-- The v2 entry still refuses a body the structural selector does not take:
 a literal `revert` in the tuple callee. -/
 theorem literal_revert_refused :

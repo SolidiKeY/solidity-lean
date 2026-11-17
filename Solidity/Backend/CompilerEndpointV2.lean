@@ -13,7 +13,13 @@ The frozen v1 statement is its instance at `Evm.Compiler.compile`
 `Compilation.correct_exact`, the R2 stage the same `static_stage`.
 
 `compiler_endpoint_correct`, `CompilerEndpoint` and the v1 entry are unchanged
-(H937); v2 is additive (H314) and `endpoint_v2_of_v1` relates the two.
+(H937); v2 is additive (H314), and `CompilerV2.compile_of_v1` gives a
+v1-accepted program the same result at the v2 entry.
+
+The endpoint statement holds for every entry, also one that refuses
+everything: what an entry accepts is stated by its own lemmas
+(`CompilerV2.compile_of_selected`) and by witnesses
+(`Passes.TupleReturnConsumer.V2`), not by the endpoint theorem.
 
 `not_input_of_exhausted` records what no `Compilation`-valued entry can do:
 a world whose typed run is `exhausted` is never an `Input`, because
@@ -68,14 +74,6 @@ def CompilerEndpointV2 : Prop :=
 theorem compiler_endpoint_v2_correct : CompilerEndpointV2 :=
   compiler_endpoint_for_stages Passes.CompilerV2.compile Passes.WholeProgram.staticRefused
     static_stage
-
-/-- A program v1 accepts takes the same result, hence the same worlds and the
-same agreement, at the v2 endpoint. -/
-theorem endpoint_v2_of_v1 {C : Contract} {Γ Δ : Ctx} {b : Nat} {F : Frag Γ}
-    {P : Solidity.Prog C Γ Δ} {r : Compilation b F P}
-    (accepted : Compiler.compile b F P = some r) :
-    Passes.CompilerV2.compile b F P = some r :=
-  Passes.CompilerV2.compile_of_v1 accepted
 
 /-- No `Compilation` has an `Input` world whose typed run is exhausted:
 `AgreesExact` has no exhaustion case. So no `Compilation`-valued entry, v1 or
