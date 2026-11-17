@@ -351,6 +351,106 @@
           "tests/directruntime-20261104/native-browser/readbounds/wasm-build.sh"
         ],
         "other_reads": "unresolved"
+      },
+      {
+        "path": "tests/directruntime-20261104/native-browser/h109/test-cache-pair.py",
+        "input_revision": "1c4cebc10f5024c822481dbcc176cda55a1eda20",
+        "source_blob": "a2d5b6ca0b251bfbda2fa56010483565a8e393c7",
+        "command": [
+          "python3",
+          "-B",
+          "tests/directruntime-20261104/native-browser/h109/test-cache-pair.py"
+        ],
+        "kind": "unittest",
+        "purpose": "Five inert temporary cache-copy/pair metadata controls; no real Lean cache initialization or physical cache-equivalence authentication. Ordinary and instrumented invocations completed at the recorded revision. Only listed committed source bytes receive exact observed source-read routes. These edges certify source consumption, not target-module/child execution, current passing validation, output provenance, semantic equivalence, proof or production runtime/resource acceptance.",
+        "input_scope": [
+          "tests/directruntime-20261104/native-browser/h109/cache-pair.py",
+          "tests/directruntime-20261104/native-browser/h109/input-copy.py",
+          "tests/directruntime-20261104/native-browser/h109/input-inventory.py"
+        ],
+        "other_reads": "unresolved"
+      },
+      {
+        "path": "tests/directruntime-20261104/native-browser/h109/test-source-snapshot.py",
+        "input_revision": "1c4cebc10f5024c822481dbcc176cda55a1eda20",
+        "source_blob": "55af7eafc462270775883363e5d99ae76d15438a",
+        "command": [
+          "python3",
+          "-B",
+          "tests/directruntime-20261104/native-browser/h109/test-source-snapshot.py"
+        ],
+        "kind": "unittest",
+        "purpose": "Nine tiny temporary Git source-snapshot controls for raw bytes, modes, unsafe paths, exact pins and substitutions; Git is exercised, but no Lean, worker or production source snapshot is run. Ordinary and instrumented invocations completed at the recorded revision. Only listed committed source bytes receive exact observed source-read routes. These edges certify source consumption, not target-module/child execution, current passing validation, output provenance, semantic equivalence, proof or production runtime/resource acceptance.",
+        "input_scope": [
+          "tests/directruntime-20261104/native-browser/h109/source-snapshot.py"
+        ],
+        "other_reads": "unresolved"
+      },
+      {
+        "path": "tests/directruntime-20261104/native-browser/h109/test-kernel-resources.py",
+        "input_revision": "1c4cebc10f5024c822481dbcc176cda55a1eda20",
+        "source_blob": "73f6a70f96eca05fc085ac8ce1e253cace2b9836",
+        "command": [
+          "python3",
+          "-B",
+          "tests/directruntime-20261104/native-browser/h109/test-kernel-resources.py"
+        ],
+        "kind": "unittest",
+        "purpose": "Fifteen synthetic regular-file resource-parser, PID-mapping and descriptor controls; no cgroup modification, process kill, kernel-resource or worker authentication. Ordinary and instrumented invocations completed at the recorded revision. Only listed committed source bytes receive exact observed source-read routes. These edges certify source consumption, not target-module/child execution, current passing validation, output provenance, semantic equivalence, proof or production runtime/resource acceptance.",
+        "input_scope": [
+          "tests/directruntime-20261104/native-browser/h109/kernel-resources.py"
+        ],
+        "other_reads": "unresolved"
+      },
+      {
+        "path": "tests/directruntime-20261104/native-browser/h109/test-cgroup-retirement.py",
+        "input_revision": "1c4cebc10f5024c822481dbcc176cda55a1eda20",
+        "source_blob": "efe0e7a8df4be2c9f8254c50f5b3c6c66e677f7c",
+        "command": [
+          "python3",
+          "-B",
+          "tests/directruntime-20261104/native-browser/h109/test-cgroup-retirement.py"
+        ],
+        "kind": "unittest",
+        "purpose": "Twelve synthetic regular-file cgroup-drain observer controls; neither actual kernel deactivation, Docker cleanup nor release acceptance. Ordinary and instrumented invocations completed at the recorded revision. Only listed committed source bytes receive exact observed source-read routes. These edges certify source consumption, not target-module/child execution, current passing validation, output provenance, semantic equivalence, proof or production runtime/resource acceptance.",
+        "input_scope": [
+          "tests/directruntime-20261104/native-browser/h109/cgroup-retirement.py",
+          "tests/directruntime-20261104/native-browser/h109/kernel-resources.py"
+        ],
+        "other_reads": "unresolved"
+      },
+      {
+        "path": "tests/directruntime-20261104/native-browser/h109/test-precreate-controller.py",
+        "input_revision": "1c4cebc10f5024c822481dbcc176cda55a1eda20",
+        "source_blob": "56655562d0cdd0a0cc120bb4d28635a394867c7c",
+        "command": [
+          "python3",
+          "-B",
+          "tests/directruntime-20261104/native-browser/h109/test-precreate-controller.py"
+        ],
+        "kind": "unittest",
+        "purpose": "Eight temporary private writer/journal lease controls with a harmless contender process. Production writer/reservation constants are replaced by fixture paths; no container, worker, Lean or measurement command is run. Ordinary and instrumented invocations completed at the recorded revision. Only listed committed source bytes receive exact observed source-read routes. These edges certify source consumption, not target-module/child execution, current passing validation, output provenance, semantic equivalence, proof or production runtime/resource acceptance.",
+        "input_scope": [
+          "tests/directruntime-20261104/native-browser/h109/lifecycle-journal.py",
+          "tests/directruntime-20261104/native-browser/h109/precreate-controller.py"
+        ],
+        "other_reads": "unresolved"
+      },
+      {
+        "path": "tests/upstream/test_historical_inputs.py",
+        "input_revision": "1c4cebc10f5024c822481dbcc176cda55a1eda20",
+        "source_blob": "8cceb1b8f96d5db28ffa0883dc13b0fae8bc00ed",
+        "command": [
+          "python3",
+          "-B",
+          "tests/upstream/test_historical_inputs.py"
+        ],
+        "kind": "unittest",
+        "purpose": "Four selected historical-input recovery controls compare exact immutable Git blobs, reject altered bytes and prefer an existing temporary working file. Missing archived inputs are not promoted to current fixtures; no compiler, Lean, proof or runtime acceptance. Ordinary and instrumented invocations completed at the recorded revision. Only listed committed source bytes receive exact observed source-read routes. These edges certify source consumption, not target-module/child execution, current passing validation, output provenance, semantic equivalence, proof or production runtime/resource acceptance.",
+        "input_scope": [
+          "tests/upstream/historical_inputs.py"
+        ],
+        "other_reads": "unresolved"
       }
     ]
   },
@@ -1594,6 +1694,171 @@
         ],
         "target": "tests/directruntime-20261104/native-browser/readbounds/invocation-deadline.py",
         "target_blob": "dfe7616f9ed0dd2bc57add8cfdc652cf908a4a19",
+        "operation": "validated Python read of measured bytes"
+      },
+      {
+        "runner": "validated:tests/directruntime-20261104/native-browser/h109/test-cache-pair.py",
+        "input_revision": "1c4cebc10f5024c822481dbcc176cda55a1eda20",
+        "frames": [
+          {
+            "path": "tests/directruntime-20261104/native-browser/h109/test-cache-pair.py",
+            "blob": "a2d5b6ca0b251bfbda2fa56010483565a8e393c7",
+            "line": 12
+          },
+          {
+            "path": "tests/directruntime-20261104/native-browser/h109/cache-pair.py",
+            "blob": "1b2799065e6a2aa4233384ae0124cd60093ac822",
+            "line": 15
+          },
+          {
+            "path": "tests/directruntime-20261104/native-browser/h109/input-copy.py",
+            "blob": "227f4945e274de15625f21fdf789b718bd614ef5",
+            "line": 18
+          }
+        ],
+        "target": "tests/directruntime-20261104/native-browser/h109/input-inventory.py",
+        "target_blob": "2bbde0bd62a3cb448e752e521d7761937d80a240",
+        "operation": "validated Python read of measured bytes"
+      },
+      {
+        "runner": "validated:tests/directruntime-20261104/native-browser/h109/test-cache-pair.py",
+        "input_revision": "1c4cebc10f5024c822481dbcc176cda55a1eda20",
+        "frames": [
+          {
+            "path": "tests/directruntime-20261104/native-browser/h109/test-cache-pair.py",
+            "blob": "a2d5b6ca0b251bfbda2fa56010483565a8e393c7",
+            "line": 12
+          },
+          {
+            "path": "tests/directruntime-20261104/native-browser/h109/cache-pair.py",
+            "blob": "1b2799065e6a2aa4233384ae0124cd60093ac822",
+            "line": 15
+          }
+        ],
+        "target": "tests/directruntime-20261104/native-browser/h109/input-copy.py",
+        "target_blob": "227f4945e274de15625f21fdf789b718bd614ef5",
+        "operation": "validated Python read of measured bytes"
+      },
+      {
+        "runner": "validated:tests/directruntime-20261104/native-browser/h109/test-cache-pair.py",
+        "input_revision": "1c4cebc10f5024c822481dbcc176cda55a1eda20",
+        "frames": [
+          {
+            "path": "tests/directruntime-20261104/native-browser/h109/test-cache-pair.py",
+            "blob": "a2d5b6ca0b251bfbda2fa56010483565a8e393c7",
+            "line": 12
+          }
+        ],
+        "target": "tests/directruntime-20261104/native-browser/h109/cache-pair.py",
+        "target_blob": "1b2799065e6a2aa4233384ae0124cd60093ac822",
+        "operation": "validated Python read of measured bytes"
+      },
+      {
+        "runner": "validated:tests/directruntime-20261104/native-browser/h109/test-source-snapshot.py",
+        "input_revision": "1c4cebc10f5024c822481dbcc176cda55a1eda20",
+        "frames": [
+          {
+            "path": "tests/directruntime-20261104/native-browser/h109/test-source-snapshot.py",
+            "blob": "55af7eafc462270775883363e5d99ae76d15438a",
+            "line": 12
+          }
+        ],
+        "target": "tests/directruntime-20261104/native-browser/h109/source-snapshot.py",
+        "target_blob": "32870f0d2fde915a2dfff0177fdb9d8b7acb1489",
+        "operation": "validated Python read of measured bytes"
+      },
+      {
+        "runner": "validated:tests/directruntime-20261104/native-browser/h109/test-kernel-resources.py",
+        "input_revision": "1c4cebc10f5024c822481dbcc176cda55a1eda20",
+        "frames": [
+          {
+            "path": "tests/directruntime-20261104/native-browser/h109/test-kernel-resources.py",
+            "blob": "73f6a70f96eca05fc085ac8ce1e253cace2b9836",
+            "line": 15
+          }
+        ],
+        "target": "tests/directruntime-20261104/native-browser/h109/kernel-resources.py",
+        "target_blob": "79acb804247761a9bd73f0fa5e79e4a852ec30fc",
+        "operation": "validated Python read of measured bytes"
+      },
+      {
+        "runner": "validated:tests/directruntime-20261104/native-browser/h109/test-cgroup-retirement.py",
+        "input_revision": "1c4cebc10f5024c822481dbcc176cda55a1eda20",
+        "frames": [
+          {
+            "path": "tests/directruntime-20261104/native-browser/h109/test-cgroup-retirement.py",
+            "blob": "efe0e7a8df4be2c9f8254c50f5b3c6c66e677f7c",
+            "line": 17
+          },
+          {
+            "path": "tests/directruntime-20261104/native-browser/h109/cgroup-retirement.py",
+            "blob": "4c118c65f529cbe091cbd4a37fb276ee5d06f4d7",
+            "line": 23
+          }
+        ],
+        "target": "tests/directruntime-20261104/native-browser/h109/kernel-resources.py",
+        "target_blob": "79acb804247761a9bd73f0fa5e79e4a852ec30fc",
+        "operation": "validated Python read of measured bytes"
+      },
+      {
+        "runner": "validated:tests/directruntime-20261104/native-browser/h109/test-cgroup-retirement.py",
+        "input_revision": "1c4cebc10f5024c822481dbcc176cda55a1eda20",
+        "frames": [
+          {
+            "path": "tests/directruntime-20261104/native-browser/h109/test-cgroup-retirement.py",
+            "blob": "efe0e7a8df4be2c9f8254c50f5b3c6c66e677f7c",
+            "line": 17
+          }
+        ],
+        "target": "tests/directruntime-20261104/native-browser/h109/cgroup-retirement.py",
+        "target_blob": "4c118c65f529cbe091cbd4a37fb276ee5d06f4d7",
+        "operation": "validated Python read of measured bytes"
+      },
+      {
+        "runner": "validated:tests/directruntime-20261104/native-browser/h109/test-precreate-controller.py",
+        "input_revision": "1c4cebc10f5024c822481dbcc176cda55a1eda20",
+        "frames": [
+          {
+            "path": "tests/directruntime-20261104/native-browser/h109/test-precreate-controller.py",
+            "blob": "56655562d0cdd0a0cc120bb4d28635a394867c7c",
+            "line": 17
+          },
+          {
+            "path": "tests/directruntime-20261104/native-browser/h109/precreate-controller.py",
+            "blob": "da1bddc60eeca24e984cac7f23864c6f6ccdad1e",
+            "line": 19
+          }
+        ],
+        "target": "tests/directruntime-20261104/native-browser/h109/lifecycle-journal.py",
+        "target_blob": "168467feddc8f0409119194713dbd55bccdb84a6",
+        "operation": "validated Python read of measured bytes"
+      },
+      {
+        "runner": "validated:tests/directruntime-20261104/native-browser/h109/test-precreate-controller.py",
+        "input_revision": "1c4cebc10f5024c822481dbcc176cda55a1eda20",
+        "frames": [
+          {
+            "path": "tests/directruntime-20261104/native-browser/h109/test-precreate-controller.py",
+            "blob": "56655562d0cdd0a0cc120bb4d28635a394867c7c",
+            "line": 17
+          }
+        ],
+        "target": "tests/directruntime-20261104/native-browser/h109/precreate-controller.py",
+        "target_blob": "da1bddc60eeca24e984cac7f23864c6f6ccdad1e",
+        "operation": "validated Python read of measured bytes"
+      },
+      {
+        "runner": "validated:tests/upstream/test_historical_inputs.py",
+        "input_revision": "1c4cebc10f5024c822481dbcc176cda55a1eda20",
+        "frames": [
+          {
+            "path": "tests/upstream/test_historical_inputs.py",
+            "blob": "8cceb1b8f96d5db28ffa0883dc13b0fae8bc00ed",
+            "line": 9
+          }
+        ],
+        "target": "tests/upstream/historical_inputs.py",
+        "target_blob": "445bbc2ca70ec0d2e3b5f7a53912970c1979ef27",
         "operation": "validated Python read of measured bytes"
       }
     ],
