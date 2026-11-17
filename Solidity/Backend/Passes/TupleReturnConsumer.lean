@@ -1,10 +1,15 @@
+import Solidity.Backend.CompilerEndpoint
 import Solidity.Backend.InternalFlow.RuntimeFrameV3CallProducerRefTupleControls
 import Solidity.Backend.Passes.MappedTail
 import Solidity.Backend.Passes.CapturedValueStability
 
 /-! Consume the published checked mixed-tuple emitter through the existing
 Compilation.memoryCalls constructor and its ACTUAL returned map. This does not
-claim the automatic whole-call recognizer accepts tuple returns. -/
+claim the automatic whole-call recognizer accepts tuple returns.
+
+Legacy/manual-certificate owners: `shared` and `reached_revert` retain the
+actual emitted tuple execution tests. `endpoint_refusal` owns their b1 R1
+boundary; these executions are outside b1 accepted coverage (H949). -/
 namespace Solidity.Backend.Passes.TupleReturnConsumer
 open Evm Evm.Memory Evm.Compiler
 open Backend.InternalFlow.RuntimeFrame
@@ -85,6 +90,18 @@ theorem reached_revert (tail : List Word) :
 
 /-- Keep automatic selection separate from the actual checked emission. -/
 theorem automatic_refused : (Compiler.compile 1 F program).isNone = true := by decide +kernel
+
+/-- The b1 endpoint takes R1 here. The manual certificate above remains a
+separate execution test, not automatic compiler acceptance. -/
+theorem endpoint_refusal : Compiler.compile 1 F program = none := by
+  rcases compiler_endpoint_correct 1 F program with refused | ⟨r,accepted,_⟩
+  · exact refused
+  · have refused := Option.isNone_iff_eq_none.mp automatic_refused
+    rw [refused] at accepted
+    cases accepted
+
+example : program.run (ArrayControls.caller (wmod 0)) = .ok result ∧
+ Compiler.compile 1 F program = none := ⟨program_source,endpoint_refusal⟩
 
 /-- info: 'Solidity.Backend.Passes.TupleReturnConsumer.expanded_public' depends on axioms: [propext, Classical.choice, Quot.sound] -/
 #guard_msgs (whitespace := lax) in
