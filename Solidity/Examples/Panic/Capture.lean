@@ -110,22 +110,26 @@ example (free : checkFresh C [("a", .val .uint)] (toString (Var.fresh "se" 0)) =
       ([(toString (Var.fresh "se" 0), .val .uint), ("a", .val .uint)], 1)) :=
   enumCapture_linked 3 _ _ _ 0 next next_checked free (by decide)
 
-/-- `narrowCapture` on a `uint8` operation `a + 1`, in a data-retaining frame
-with no overflow mode: the capture, then `Panic(0x11)` unless the captured
-local is at most `255`. -/
-example (operation : checkedNarrow? C [("a", .val .uint)] (.binop .add (.name "a") (.num 1)) =
-      some (.uint, 8))
-    (free : checkFresh C [("a", .val .uint)] (toString (Var.fresh "se" 0)) = .ok ()) :
+/-- With `a` declared `uint8`, `a + 1` is a narrow checked operation. -/
+private theorem next_narrow :
+    checkedNarrow? C [("a", .val .uint 8)] (.binop .add (.name "a") (.num 1)) =
+      some (.uint, 8) := rfl
+
+/-- `narrowCapture` on `a + 1` with `a` a `uint8` local, in a data-retaining
+frame with no overflow mode: the capture, then `Panic(0x11)` unless the
+captured local is at most `255`. -/
+example (free : checkFresh C [("a", .val .uint 8)] (toString (Var.fresh "se" 0)) = .ok ()) :
     (narrowCapture C (.binop .add (.name "a") (.num 1))).runFrom
-      { funs := [], retainFailureData := true } ([("a", .val .uint)], 0) =
-    .ok (([.of (ECtx.toNCtx [("a", .val .uint)])
+      { funs := [], retainFailureData := true } ([("a", .val .uint 8)], 0) =
+    .ok (([.of (ECtx.toNCtx [("a", .val .uint 8)])
             (.declLocal .uint (.fresh "se" 0) (some next)),
-          .of (ECtx.toNCtx [(toString (Var.fresh "se" 0), .val .uint 8), ("a", .val .uint)])
+          .of (ECtx.toNCtx [(toString (Var.fresh "se" 0), .val .uint 8), ("a", .val .uint 8)])
             (panicStmt 0x11
               (cmpU .le rfl rfl (.simple (.local Idx.here)) (litU 255 (by decide))))],
         .name (toString (Var.fresh "se" 0))),
-      ([(toString (Var.fresh "se" 0), .val .uint 8), ("a", .val .uint)], 1)) :=
-  narrowCapture_uint_linked _ 8 _ _ 0 next operation (by decide) next_checked free (by decide)
+      ([(toString (Var.fresh "se" 0), .val .uint 8), ("a", .val .uint 8)], 1)) :=
+  narrowCapture_uint_linked _ 8 _ _ 0 next next_narrow (by decide) next_checked free
+    (by decide)
 
 /-- At `int8` the elaborated check of a captured local `se` is the lower
 bound `-128 <= se`, then the upper bound `se <= 127`. -/
