@@ -185,7 +185,7 @@ def _observe(graph, original, row, frames, target, operation, kind, hop, details
 
 
 def _historical_objects(classifier, repo, revision, pins):
-    """Bind declared objects to the recorded revision's own tree."""
+    """True iff every (path, blob) is that path's object in the revision's tree."""
     if not isinstance(revision, str) or not classifier['hex_pin'](revision, 40):
         raise ValueError('persisted route requires a full commit revision')
     requests = [revision] + [revision + ':' + p for p, _ in pins]
@@ -196,8 +196,8 @@ def _historical_objects(classifier, repo, revision, pins):
     expected = [(revision, b'commit')] + [(b, b'blob') for _, b in pins]
     for (oid, kind), line in zip(expected, lines):
         fields = line.split()
-        if len(fields) != 3 or fields[0].decode() != oid or fields[1] != kind:
-            raise ValueError('persisted route objects differ at recorded revision ' + revision)
+        if len(fields) != 3 or fields[0].decode() != oid or fields[1] != kind: return False
+    return True
 
 
 def persisted_reads(classifier, graph, catalog, rows):
@@ -219,7 +219,8 @@ def persisted_reads(classifier, graph, catalog, rows):
         if not isinstance(runner, str) or not runner.startswith('validated:'): raise ValueError('persisted read needs a validated runner')
         path = runner[len('validated:'):]
         definitions = [e for e in catalog['standalone'] if e.get('path') == path and e.get('input_revision') == row['input_revision']]
-        if len(definitions) != 1 or definitions[0].get('kind') not in DEMONSTRATED_KINDS + ('manual-reproducer',):
+        if (len(definitions) != 1 or definitions[0].get('kind') not in DEMONSTRATED_KINDS
+                or not isinstance(definitions[0].get('source_blob'), str)):
             raise ValueError('persisted read lacks its passing runner definition')
         definition = definitions[0]
         target = row['target']
@@ -228,11 +229,13 @@ def persisted_reads(classifier, graph, catalog, rows):
             continue
         frames = row['frames']
         _check_lines(repo, frames)
-        _historical_objects(classifier, repo, row['input_revision'],
-                            sorted({(f['path'], f['blob']) for f in frames} | {(path, definition['source_blob']), (target, row['target_blob'])}))
+        if not _historical_objects(classifier, repo, row['input_revision'],
+                sorted({(f['path'], f['blob']) for f in frames} | {(path, definition['source_blob']), (target, row['target_blob'])})):
+            raise ValueError('persisted route objects differ at recorded revision ' + row['input_revision'])
         original = 'validated:' + path if 'validated:' + path in graph.roots else 'committed:' + path
         root = graph.roots.get(original)
-        if root is None or root['path'] != frames[0]['path']: raise ValueError('persisted read does not start at its runner')
+        if root is None: continue
+        if root['path'] != frames[0]['path']: raise ValueError('persisted read does not start at its runner')
         if classifier['excluded'](target) or any(classifier['excluded'](f['path']) for f in frames): continue
         if 'input_scope' in definition: scopes, other = definition['input_scope'], definition['other_reads'] if 'other_reads' in definition else 'unresolved'
         elif definition['kind'] in ('unittest', 'node-test'): scopes, other = [], 'unresolved'
@@ -245,46 +248,94 @@ def persisted_reads(classifier, graph, catalog, rows):
                  {'kind': 'persisted-read', 'validated_revision': row['input_revision'], 'runner_definition_blob': definition['source_blob']})
 
 
-_NODE_IMPORT = re.compile(r'''^\s*(?:import\s+(?:[\w$*{}\s,]+?\s+from\s+)?|export\s+[\w$*{}\s,]+?\s+from\s+|(?:const|let|var)\s+[\w${}\s,:]+=\s*require\(\s*)(["'])(\.{1,2}/[^"'\\]+)\1\s*\)?\s*;?\s*$''')
-_NODE_FS = re.compile(r'''(?:\bimport\s*\{[^}]*\breadFileSync\b[^}]*\}\s*from\s*|\bconst\s*\{[^}]*\breadFileSync\b[^}]*\}\s*=\s*require\(\s*)["'](?:node:)?fs["']''')
+_NODE_IMPORT = re.compile(r"""^\s*(?:import\s+(?:[\w$*{}\s,]+?\s+from\s+)?|export\s+[\w$*{}\s,]+?\s+from\s+|(?:const|let|var)\s+[\w${}\s,:]+=\s*require\(\s*)(["'])(\.{1,2}/[^"'\\]+)\1\s*(\))?\s*;?\s*$""")
+_NODE_FS = re.compile(r"""(?:\bimport\s*\{[^}]*\breadFileSync\b[^}]*\}\s*from\s*|\bconst\s*\{[^}]*\breadFileSync\b[^}]*\}\s*=\s*require\(\s*)(["'])(?:node:)?fs\1""")
 
 
-def _node_line(text, number):
-    line = text.splitlines()[number - 1]
-    stripped = line.lstrip()
-    if stripped.startswith(('//', '*', '/*')): return None
-    return line
+def _js_mask(text):
+    """Blank JS comments, templates and quoted strings; keep string literal spans.
+
+    Regular-expression literals are not modelled; a line is only usable when
+    every blanked character on it belongs to a complete quoted literal.
+    """
+    out = []; literals = {}; at = 0; n = len(text)
+    while at < n:
+        c = text[at]
+        if text.startswith('//', at):
+            end = text.find('\n', at); end = n if end < 0 else end
+        elif text.startswith('/*', at):
+            end = text.find('*/', at + 2); end = n if end < 0 else end + 2
+        elif c in '"\'`':
+            end = at + 1
+            while end < n and text[end] != c and (c == '`' or text[end] != '\n'):
+                end += 2 if text[end] == '\\' else 1
+            end = min(end + 1, n)
+            if c != '`': literals[at] = text[at:end]
+        else:
+            out.append(c); at += 1; continue
+        out.append(re.sub(r'[^\n]', ' ', text[at:end])); at = end
+    return ''.join(out), literals
+
+
+def _js_line(text, number):
+    """The line, its masked code and literal starts, or None if anything else is masked."""
+    code, literals = _js_mask(text)
+    starts = [0] + [m.end() for m in re.finditer('\n', text)]
+    begin = starts[number - 1]; line = text.splitlines()[number - 1]; masked = code[begin:begin + len(line)]
+    spans = {start - begin: len(token) for start, token in literals.items() if begin <= start < begin + len(line)}
+    at = 0
+    while at < len(line):
+        if masked[at] == line[at]: at += 1
+        elif at in spans: at += spans[at]
+        else: return None
+    return line, masked, spans, code, literals
 
 
 def _node_import(source, text, number):
-    line = _node_line(text, number)
-    match = _NODE_IMPORT.match(line) if line is not None else None
-    if not match or ('require(' in line) != line.rstrip().rstrip(';').rstrip().endswith(')'): return None
+    found = _js_line(text, number)
+    if found is None: return None
+    line, masked, spans, _, _ = found
+    match = _NODE_IMPORT.match(line)
+    if not match or match.start(1) not in spans or ('require(' in line) != bool(match[3]): return None
+    if 'require(' in line and not source.endswith(('.cjs', '.js')): return None
     return _clean(posixpath.join(posixpath.dirname(source), match[2]))
 
 
 def _node_read(source, text, number, cwd):
-    line = _node_line(text, number)
-    if line is None or line.count('readFileSync(') != 1 or not _NODE_FS.search(text): return None
-    argument = line[line.index('readFileSync(') + len('readFileSync('):]
-    forms = ((r'''new URL\(\s*(["'])([^"'\\]+)\1\s*,\s*import\.meta\.url\s*\)''', True),
-             (r'''(?:path\.)?(?:join|resolve)\(\s*__dirname\s*,\s*(["'])([^"'\\/][^"'\\]*)\1\s*\)''', True),
-             (r'''(["'])([^"'\\/][^"'\\]*)\1''', False))
+    found = _js_line(text, number)
+    if found is None: return None
+    line, masked, spans, code, literals = found
+    calls = [m for m in re.finditer(r'readFileSync\(', masked)]
+    if len(calls) != 1 or calls[0].start() and re.match(r'[\w$.]', masked[calls[0].start() - 1]): return None
+    if re.search(r'\b(?:function|const|let|var|class)\s+readFileSync\b|\breadFileSync\s*=', code): return None
+    if not any(code[m.start()] == text[m.start()] and m.start(1) in literals for m in _NODE_FS.finditer(text)): return None
+    offset = calls[0].end(); argument = line[offset:]
+    forms = ((r"""new URL\(\s*(["'])([^"'\\]+)\1\s*,\s*import\.meta\.url\s*\)""", True),
+             (r"""(?:path\.)?(?:join|resolve)\(\s*__dirname\s*,\s*(["'])([^"'\\/][^"'\\]*)\1\s*\)""", True),
+             (r"""(["'])([^"'\\/][^"'\\]*)\1""", False))
     for pattern, relative in forms:
         match = re.match(r'\s*' + pattern + r'\s*[,)]', argument)
-        if match:
+        if match and offset + match.start(1) in spans:
             base = posixpath.dirname(source) if relative else cwd
             return _clean(posixpath.join(base, match[2]))
     return None
 
 
 def _lean_read(classifier, repo, source, number, cwd):
+    """One literal read inside a top-level #eval command of this file.
+
+    Only the elaborated runner file itself is accepted: an imported module's
+    #eval does not run when its importer runs, and a def runs only if called.
+    """
     code, literals = classifier['lean_lex'](repo.texts[source])
     starts = [0] + [m.end() for m in re.finditer('\n', code)]
-    found = []
+    lines = code.splitlines()
+    command = next((lines[k] for k in range(number - 1, -1, -1) if lines[k][:1].strip()), '')
+    if not re.match(r'#eval\b', command): return None
+    found = []; positions = dict(literals)
     for match in re.finditer(r'(?<![\w.])IO\.FS\.(?:readFile|readBinFile)(?![\w.!?\'])', code):
         if bisect.bisect_right(starts, match.start()) != number: continue
-        at = match.end(); positions = dict(literals)
+        at = match.end()
         # Literals are blanked in code, so stop at the first literal start.
         while at < len(code) and at not in positions and code[at] in ' \t\n': at += 1
         literal = positions.get(at)
@@ -300,10 +351,12 @@ def static_routes(classifier, graph, rows):
     """H951/H955: exact Node import/readFileSync and Lean IO.FS.readFile routes.
 
     Each hop is re-derived from the measured bytes: frames[i] statically imports
-    frames[i+1] (a literal relative Node import, or a recorded Lean import edge)
-    and the last frame names the target with one literal in the claimed form.
-    The root is a current entry point or a demonstrated passing committed runner
-    (blob-bound to its source); computed paths are never resolved.
+    frames[i+1] (a literal relative Node import in code, never a comment, string
+    or template) and the last frame names the target with one literal in the
+    claimed form. A Lean read is a single frame: a literal IO.FS.readFile inside
+    a top-level #eval of the elaborated runner file. The root is a current entry
+    point or a demonstrated passing committed runner; for the latter every frame
+    and target object must be the one at its demonstration revision.
     """
     repo = graph.repo
     for row in rows:
@@ -318,13 +371,11 @@ def static_routes(classifier, graph, rows):
         if root is None: continue
         if root.get('source_only') and root.get('source_blob') != frames[0]['blob']: continue
         language = 'lean' if form.startswith('lean') else 'node'
+        if language == 'lean' and len(frames) != 1: raise ValueError('Lean read must be in the elaborated runner file')
         suffixes = ('.lean',) if language == 'lean' else NODE_SUFFIXES
         if any(not f['path'].endswith(suffixes) for f in frames): raise ValueError('static route frame language mismatch')
         for caller, callee in zip(frames, frames[1:]):
-            if language == 'node': ok = _node_import(caller['path'], repo.texts[caller['path']], caller['line']) == callee['path']
-            else: ok = any(e['target'] == callee['path'] and e['line'] == caller['line'] and e['operation'] == 'Lean import'
-                           for e in graph.edges[caller['path']])
-            if not ok: raise ValueError('static route hop is not a literal import')
+            if _node_import(caller['path'], repo.texts[caller['path']], caller['line']) != callee['path']: raise ValueError('static route hop is not a literal import')
         reader = frames[-1]; cwd = root.get('cwd', '.')
         if form == 'node-import': resolved = _node_import(reader['path'], repo.texts[reader['path']], reader['line'])
         elif form == 'node-readFileSync': resolved = _node_read(reader['path'], repo.texts[reader['path']], reader['line'], cwd)
@@ -332,39 +383,70 @@ def static_routes(classifier, graph, rows):
         if resolved is None or resolved != target: raise ValueError('static route target is not the literal ' + form + ' operand')
         if form == 'node-import' and not target.endswith(NODE_SUFFIXES): raise ValueError('Node import target is not a module')
         if classifier['excluded'](target) or any(classifier['excluded'](f['path']) for f in frames): continue
+        # A historical runner demonstrated these exact objects, or nothing.
+        if root.get('source_only') and not _historical_objects(classifier, repo, root['source_demonstration_revision'],
+                sorted({(f['path'], f['blob']) for f in frames} | {(target, row['target_blob'])})): continue
         operation, kind = STATIC_FORMS[form]
-        hop = 'Node static import' if language == 'node' else 'Lean import'
+        hop = 'Node static import'
         _observe(graph, original, row, frames, target, operation, kind, hop,
                  {'kind': 'static-' + form, 'purpose': row['purpose']})
 
 
-def _ignored_by(classifier, data, directory, output):
-    """git check-ignore against this one .gitignore in an empty repository."""
+def _ignored_by(repo, directory, output):
+    """git check-ignore with this tree's ancestor .gitignore blobs only.
+
+    Returns (source, line, pattern) for the output, or None; the policy file's
+    own directory must not itself be ignored, or git never reads the file.
+    """
+    import subprocess
     with tempfile.TemporaryDirectory() as tmp:
         root = Path(tmp)
-        classifier['git'](root, 'init', '-q')
-        base = root / directory if directory else root
-        base.mkdir(parents=True, exist_ok=True)
-        (base / '.gitignore').write_bytes(data)
-        try:
-            target = posixpath.join(directory, output) if directory else output
-            raw = classifier['git'](root, '-c', 'core.excludesFile=/dev/null', 'check-ignore', '-v', '-z', '--no-index', '--stdin',
-                                    data=target.encode('utf-8', 'surrogateescape') + b'\0')
-        except ValueError:
-            return None
-    fields = raw.split(b'\0')
-    if len(fields) < 4 or fields[0] != ((directory + '/' if directory else '') + '.gitignore').encode(): return None
-    return int(fields[1]), fields[2].decode('utf-8', 'surrogateescape')
+        subprocess.run(['git', 'init', '-q', str(root)], check=True)
+        parts = directory.split('/') if directory else []
+        for k in range(len(parts) + 1):
+            name = '/'.join(parts[:k] + ['.gitignore'])
+            if name in repo.tree and repo.tree[name][1] == 'blob':
+                (root / name).parent.mkdir(parents=True, exist_ok=True); (root / name).write_bytes(repo.bytes(name))
+        def check(path):
+            run = subprocess.run(['git', '--no-replace-objects', '-C', str(root), '-c', 'core.excludesFile=/dev/null', 'check-ignore',
+                                  '-v', '-z', '--no-index', '--stdin'], input=path.encode('utf-8', 'surrogateescape') + b'\0',
+                                 stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+            if run.returncode not in (0, 1): raise ValueError('git check-ignore failed')
+            fields = run.stdout.split(b'\0')
+            # Verbose output also lists negated (not ignored) matches.
+            if run.returncode or len(fields) < 4 or fields[2].startswith(b'!'): return None
+            return fields[0].decode('utf-8', 'surrogateescape'), int(fields[1]), fields[2].decode('utf-8', 'surrogateescape')
+        for k in range(1, len(parts) + 1):
+            if check('/'.join(parts[:k]) + '/'): return None
+        return check(posixpath.join(directory, output) if directory else output)
+
+
+def _writer_names(repo, path, number, literal):
+    """The literal occurs inside a string literal on that code line."""
+    text = repo.texts[path]; line = text.splitlines()[number - 1]
+    if path.endswith('.py'):
+        import io, tokenize
+        try: tokens = list(tokenize.generate_tokens(io.StringIO(text).readline))
+        except (tokenize.TokenError, SyntaxError, IndentationError): return False
+        return any(t.type == tokenize.STRING and t.start[0] == number and literal in t.string for t in tokens)
+    if path.endswith(NODE_SUFFIXES):
+        found = _js_line(text, number)
+        return found is not None and any(literal in found[0][at:at + size] for at, size in found[2].items())
+    if path.endswith('.sh'):
+        code = line.split(' #', 1)[0]
+        return not line.lstrip().startswith('#') and literal in code
+    return False
 
 
 def git_policies(classifier, graph, rows):
     """H954: an exact in-use .gitignore is a Git policy consumer role.
 
     Each match names an ignore line, an uncommitted output below the file's
-    directory that git (excluding every other ignore source) ignores by exactly
-    that line, and an exact writer source line naming that output. A
+    directory that git, with only this tree's ancestor .gitignore files, ignores
+    by exactly that line (the directory itself not ignored), and a string
+    literal naming the output on an exact line of an entry-point source. A
     negated or unmatched rule, a tracked output, or a changed writer grants
-    nothing. This root is source-only policy: no fixture, child or test credit.
+    nothing. Whether the writer line executes is a reviewed claim. This root is source-only policy: no fixture, child or test credit.
     """
     repo = graph.repo
     for row in rows:
@@ -384,20 +466,26 @@ def git_policies(classifier, graph, rows):
                     or set(match['writer']) != {'path', 'blob', 'line', 'literal'}):
                 raise ValueError('invalid Git policy match')
             writer = match['writer']; output = match['output']
+            if (not isinstance(writer['path'], str) or not isinstance(writer['blob'], str) or type(writer['line']) is not int
+                    or not isinstance(writer['literal'], str) or not writer['literal'] or re.search(r'[*?\[\]!\\]', output + writer['literal'])):
+                raise ValueError('invalid Git policy match')
             full = _clean(posixpath.join(directory, output)) if directory else _clean(output)
             if (full is None or (directory and not full.startswith(directory + '/')) or full != (directory + '/' + output if directory else output)
                     or not 1 <= match['line'] <= len(lines) or lines[match['line'] - 1].lstrip().startswith(('#', '!'))):
                 raise ValueError('invalid Git policy output or line')
-            if not _current(repo, writer['path'], writer['blob']) or type(writer['line']) is not int: stale = True; break
+            if not _current(repo, writer['path'], writer['blob']): stale = True; break
+            if posixpath.basename(writer['path']) == '.gitignore' or not any(
+                    r['path'] == writer['path'] and 'derived_from' not in r and not k.startswith('git-policy:') for k, r in graph.roots.items()):
+                raise ValueError('Git policy writer is not an entry point source')
             if full in repo.tree or any(p.startswith(full + '/') for p in repo.tree):
                 raise ValueError('Git policy output is tracked: ' + full)
             literal = writer['literal']
-            if (not isinstance(literal, str) or not literal or writer['path'] not in repo.texts
+            if (writer['path'] not in repo.texts
                     or not 1 <= writer['line'] <= len(repo.texts[writer['path']].splitlines())
-                    or literal not in repo.texts[writer['path']].splitlines()[writer['line'] - 1]
+                    or not _writer_names(repo, writer['path'], writer['line'], literal)
                     or not (output == literal or output.endswith('/' + literal) or output.startswith(literal.rstrip('/') + '/'))):
                 raise ValueError('Git policy writer does not name the output')
-            if _ignored_by(classifier, repo.bytes(path), directory, output) != (match['line'], lines[match['line'] - 1].strip()):
+            if _ignored_by(repo, directory, output) != (path, match['line'], lines[match['line'] - 1].strip()):
                 raise ValueError('Git policy line does not ignore the output')
             verified.append({'line': match['line'], 'output': full, 'writer': writer})
         if stale or classifier['excluded'](path): continue
@@ -426,6 +514,9 @@ def declared_module_cli(repo, path):
     modules = {alias.asname or 'argparse' for node in tree.body if isinstance(node, ast.Import)
                for alias in node.names if alias.name == 'argparse'}
     if not modules: return None
+    # Any argv access may pre-configure parse_args; the role is then refused.
+    if any(isinstance(n, ast.Name) and n.id == 'argv' or isinstance(n, ast.Attribute) and n.attr == 'argv'
+           or isinstance(n, ast.alias) and (n.asname or n.name) == 'argv' for n in ast.walk(tree)): return None
     def exits(node):
         return any(isinstance(n, ast.Call) and (isinstance(n.func, ast.Name) and n.func.id in ('exit', 'quit')
                    or isinstance(n.func, ast.Attribute) and n.func.attr in ('exit', '_exit', 'abort')) for n in ast.walk(node))
@@ -437,7 +528,10 @@ def declared_module_cli(repo, path):
                 and isinstance(node.value.func.value, ast.Name) and node.value.func.value.id in modules
                 and node.value.func.attr == 'ArgumentParser'): break
         if isinstance(node, ast.Expr) and isinstance(node.value, ast.Constant) and isinstance(node.value.value, str) and index == 0: pass
-        elif isinstance(node, (ast.Import, ast.FunctionDef, ast.AsyncFunctionDef, ast.ClassDef)): pass
+        elif isinstance(node, ast.Import): pass
+        elif isinstance(node, (ast.FunctionDef, ast.AsyncFunctionDef)) and not any(
+                exits(d) for d in node.decorator_list + node.args.defaults + node.args.kw_defaults if d is not None): pass
+        elif isinstance(node, ast.ClassDef) and not exits(node): pass
         elif isinstance(node, ast.ImportFrom) and all(a.name != '*' for a in node.names): pass
         elif isinstance(node, (ast.Assign, ast.AnnAssign)) and not exits(node): pass
         else: return None
@@ -609,20 +703,28 @@ def consumer_route_controls(classifier):
     original = classifier['read_fragments']
     unittest_source = ("import unittest\nOUT = 'tests/gen/result.json'\nclass T(unittest.TestCase):\n"
                        " def test_it(self):\n  open('tests/data.txt').read()\n  open('tests/other.txt').read()\n"
-                       "if __name__ == '__main__': unittest.main()\n")
+                       "if __name__ == '__main__': unittest.main()\n# tests/gen/result.json\nOUT2 = 'tests/gen2/result.json'\n")
     files = {
         'tests/run_test.py': unittest_source,
         'tests/data.txt': 'fixture\n', 'tests/other.txt': 'other\n', 'tests/unrelated.txt': 'one\n',
-        'tests/n.test.mjs': "import { helper } from './helper.mjs';\n// readFileSync(new URL('./fixture.json', import.meta.url))\nhelper();\n",
-        'tests/helper.mjs': "import { readFileSync } from 'node:fs';\nexport function helper() {\n  return readFileSync(new URL('./fixture.json', import.meta.url), 'utf8');\n}\nconst x = readFileSync(computed());\n",
+        'tests/n.test.mjs': ("import { helper } from './helper.mjs';\n// readFileSync(new URL('./fixture.json', import.meta.url))\nhelper();\n"
+                             "/*\nimport { helper } from './helper.mjs';\n*/\nconst h = require('./helper.mjs');\n"
+                             "const t = `\nimport './helper.mjs';\n`;\n"),
+        'tests/helper.mjs': ("import { readFileSync } from 'node:fs';\nexport function helper() {\n  return readFileSync(new URL('./fixture.json', import.meta.url), 'utf8');\n}\n"
+                             "const x = readFileSync(computed());\n"
+                             "foo(); // readFileSync(new URL('./fixture.json', import.meta.url))\n"
+                             "console.log(\"readFileSync('tests/fixture.json')\");\n/*\n readFileSync('tests/fixture.json');\n*/\n"
+                             "const t = `\n readFileSync('tests/fixture.json');\n`;\nmock.readFileSync('tests/fixture.json');\n"),
         'tests/fixture.json': '{}\n',
-        'tests/R.lean': 'import tests.LeanHelper\n-- IO.FS.readFile "tests/lean-data.txt"\n#eval show IO Unit from do\n  let s ← IO.FS.readFile "tests/lean-data.txt"\n  IO.println s\n',
+        'tests/R.lean': ('import tests.LeanHelper\n-- IO.FS.readFile "tests/lean-data.txt"\n#eval show IO Unit from do\n  let s ← IO.FS.readFile "tests/lean-data.txt"\n  IO.println s\n'
+                         'def unused : IO String := IO.FS.readFile "tests/lean-data.txt"\n'),
         'tests/LeanHelper.lean': 'def root := "tests/"\ndef load : IO String := IO.FS.readFile\n  "tests/lean-helper.txt"\ndef bad : IO String := IO.FS.readFile (root ++ "x")\n',
         'tests/lean-data.txt': 'lean\n', 'tests/lean-helper.txt': 'helper\n',
         '.github/workflows/lean.yml': 'jobs:\n  t:\n    steps:\n      - run: lean tests/R.lean\n',
         'tests/cli.py': "import argparse\nparser = argparse.ArgumentParser()\nparser.add_argument('--input', required=True)\nparser.add_argument('--quiet', action='store_true')\nargs = parser.parse_args()\nprint(args.input)\n",
         'tests/gen/.gitignore': '# outputs\n*.json\n!keep.json\nkept.txt\n',
         'tests/gen/kept.txt': 'tracked\n',
+        '.gitignore': 'tests/gen2/\n', 'tests/gen2/.gitignore': '*.json\n',
     }
     variants = {  # module CLI shapes that must stay outside the role
         'positional': "import argparse\nparser = argparse.ArgumentParser()\nparser.add_argument('input')\nparser.add_argument('--x', required=True)\nargs = parser.parse_args()\n",
@@ -630,6 +732,8 @@ def consumer_route_controls(classifier):
         'exit-first': "import argparse, sys\nsys.exit(0)\nparser = argparse.ArgumentParser()\nparser.add_argument('--x', required=True)\nargs = parser.parse_args()\n",
         'rebound': "import argparse\nparser = argparse.ArgumentParser()\nparser.add_argument('--x', required=True)\nargs = parser.parse_args()\nparser = None\n",
         'mutated': "import argparse\nparser = argparse.ArgumentParser()\nparser.set_defaults(x=1)\nparser.add_argument('--x', required=True)\nargs = parser.parse_args()\n",
+        'argv': "import argparse, sys\nsys.argv[1:] = ['--x', 'y']\nparser = argparse.ArgumentParser()\nparser.add_argument('--x', required=True)\nargs = parser.parse_args()\n",
+        'class-body': "import argparse, sys\nclass C:\n    sys.exit(0)\nparser = argparse.ArgumentParser()\nparser.add_argument('--x', required=True)\nargs = parser.parse_args()\n",
         'star': "from os import *\nimport argparse\nparser = argparse.ArgumentParser()\nparser.add_argument('--x', required=True)\nargs = parser.parse_args()\n",
     }
     for name, text in variants.items(): files['tests/cli-' + name + '.py'] = text
@@ -684,8 +788,7 @@ def consumer_route_controls(classifier):
                 'static_routes': [node(first, 'node-import', 'tests/helper.mjs', [frame(first, 'tests/n.test.mjs', 1)]),
                                   node(first, 'node-readFileSync', 'tests/fixture.json',
                                        [frame(first, 'tests/n.test.mjs', 1), frame(first, 'tests/helper.mjs', 3)]),
-                                  lean(first, [frame(first, 'tests/R.lean', 4)], 'tests/lean-data.txt'),
-                                  lean(first, [frame(first, 'tests/R.lean', 1), frame(first, 'tests/LeanHelper.lean', 2)], 'tests/lean-helper.txt')],
+                                  lean(first, [frame(first, 'tests/R.lean', 4)], 'tests/lean-data.txt')],
                 'git_policies': [policy]}
         def rejected(repo, consumers, text):
             try: run(repo, consumers)
@@ -693,18 +796,19 @@ def consumer_route_controls(classifier):
             else: raise AssertionError('accepted: ' + text)
         assert canonical(run(later, {key: [] for key in CONSUMER_SECTIONS})) == canonical(baseline)
         before = {r['path']: r for r in baseline['records']}
-        for path in ('tests/data.txt', 'tests/helper.mjs', 'tests/fixture.json', 'tests/lean-data.txt', 'tests/lean-helper.txt', 'tests/gen/.gitignore'):
+        for path in ('tests/data.txt', 'tests/helper.mjs', 'tests/fixture.json', 'tests/lean-data.txt', 'tests/gen/.gitignore'):
             assert before[path]['class'] != 'keep', path
         assert 'committed-cli:tests/cli.py' in baseline['entry_points']
         assert baseline['entry_points']['committed-cli:tests/cli.py']['role_provenance']['kind'] == 'curated module-level argparse entry'
         model = run(later, good); rows = {r['path']: r for r in model['records']}
-        for path in ('tests/data.txt', 'tests/helper.mjs', 'tests/fixture.json', 'tests/lean-data.txt', 'tests/lean-helper.txt', 'tests/gen/.gitignore'):
+        for path in ('tests/data.txt', 'tests/helper.mjs', 'tests/fixture.json', 'tests/lean-data.txt', 'tests/gen/.gitignore'):
             assert rows[path]['class'] == 'keep', path
         assert rows['tests/data.txt']['runner_chain']['entry']['consumer_route']['validated_revision'] == A
         assert rows['tests/helper.mjs']['runner_chain']['edges'][-1]['kind'] == 'executes'
         # Out-of-scope persisted read stays an unreviewed read, never keep.
         assert rows['tests/other.txt']['class'] is None and 'unreviewed_readers' in rows['tests/other.txt']['secondary']
         assert model['entry_points']['git-policy:tests/gen/.gitignore']['source_only']
+        assert rows['tests/lean-helper.txt']['class'] != 'keep'
         # The same rows at the validated revision are ordinary reads/routes.
         assert {r['path']: r for r in run(first, good)['records']}['tests/data.txt']['class'] == 'keep'
         # Negative controls: malformed forms are rejected.
@@ -719,18 +823,35 @@ def consumer_route_controls(classifier):
                  [frame(first, 'tests/n.test.mjs', 3), frame(first, 'tests/helper.mjs', 3)])]}, 'not a literal import')
         rejected(later, {'static_routes': [node(first, 'node-import', 'tests/helper.mjs', [frame(first, 'tests/n.test.mjs', 1)], purpose=' ')]}, 'invalid static')
         rejected(later, {'static_routes': [lean(first, [frame(first, 'tests/R.lean', 2)], 'tests/lean-data.txt')]}, 'literal lean-readFile')
-        rejected(later, {'static_routes': [lean(first, [frame(first, 'tests/R.lean', 1), frame(first, 'tests/LeanHelper.lean', 4)], 'tests/lean-helper.txt')]}, 'literal lean-readFile')
-        rejected(later, {'static_routes': [lean(first, [frame(first, 'tests/R.lean', 3), frame(first, 'tests/LeanHelper.lean', 2)], 'tests/lean-helper.txt')]}, 'not a literal import')
+        rejected(later, {'static_routes': [lean(first, [frame(first, 'tests/R.lean', 6)], 'tests/lean-data.txt')]}, 'literal lean-readFile')
+        # An imported module's defs and #evals do not run when the runner runs.
+        rejected(later, {'static_routes': [lean(first, [frame(first, 'tests/R.lean', 1), frame(first, 'tests/LeanHelper.lean', 2)], 'tests/lean-helper.txt')]}, 'elaborated runner file')
+        # Comments, strings, templates, receivers and require in ESM never count.
+        for line in (6, 7, 9, 12, 14):
+            rejected(later, {'static_routes': [node(first, 'node-readFileSync', 'tests/fixture.json',
+                     [frame(first, 'tests/n.test.mjs', 1), frame(first, 'tests/helper.mjs', line)])]}, 'literal node-readFileSync')
+        for line in (5, 7, 9):
+            rejected(later, {'static_routes': [node(first, 'node-import', 'tests/helper.mjs', [frame(first, 'tests/n.test.mjs', line)])]}, 'literal node-import')
         for line, text in ((1, 'invalid Git policy output or line'), (3, 'invalid Git policy output or line'), (4, 'does not ignore')):
             rejected(later, {'git_policies': [dict(policy, matches=[{'line': line, 'output': 'result.json', 'writer': writer}])]}, text)
         rejected(later, {'git_policies': [dict(policy, matches=[{'line': 4, 'output': 'kept.txt', 'writer': dict(writer, literal='kept.txt')}])]}, 'tracked')
         rejected(later, {'git_policies': [dict(policy, matches=[{'line': 2, 'output': 'result.json', 'writer': dict(writer, literal='other.json')}])]}, 'does not name')
         rejected(later, {'git_policies': [dict(policy, matches=[{'line': 2, 'output': '../x.json', 'writer': writer}])]}, 'invalid Git policy output')
+        rejected(later, {'git_policies': [dict(policy, matches=[{'line': 2, 'output': '*.json', 'writer': dict(writer, literal='*.json')}])]}, 'invalid Git policy match')
+        self_writer = {'path': 'tests/gen/.gitignore', 'blob': policy['blob'], 'line': 2, 'literal': 'result.json'}
+        rejected(later, {'git_policies': [dict(policy, matches=[{'line': 2, 'output': 'result.json', 'writer': self_writer}])]}, 'not an entry point source')
+        rejected(later, {'git_policies': [dict(policy, matches=[{'line': 2, 'output': 'result.json', 'writer': dict(writer, line=8)}])]}, 'does not name')
+        rejected(later, {'git_policies': [dict(policy, matches=[{'line': 2, 'output': 'result.json', 'writer': dict(writer, path=['x'])}])]}, 'invalid Git policy match')
+        # git never reads a .gitignore inside an ignored directory.
+        rejected(later, {'git_policies': [{'path': 'tests/gen2/.gitignore', 'blob': blob(first, 'tests/gen2/.gitignore'), 'purpose': 'Ignored.',
+                 'matches': [{'line': 1, 'output': 'result.json', 'writer': dict(writer, line=9)}]}]}, 'does not ignore')
         rejected(later, {'static_routes': good['static_routes'] + [dict(good['static_routes'][0], purpose='changed')]}, 'conflicting')
         # Unreviewed or undemonstrated anchors grant nothing.
         unanchored = dict(good['static_routes'][0], runner='committed:tests/missing.mjs')
         assert {r['path']: r for r in run(later, {'static_routes': [unanchored]})['records']}['tests/helper.mjs']['class'] != 'keep'
-        cli_anchor = dict(read(first, 'tests/data.txt'))
+        # A source-only CLI role anchors nothing.
+        cli_anchor = dict(good['static_routes'][0], runner='committed-cli:tests/cli.py', frames=[frame(first, 'tests/cli.py', 1)])
+        assert {r['path']: r for r in run(later, {'static_routes': [cli_anchor]})['records']}['tests/helper.mjs']['class'] != 'keep'
         # Stale objects (blob-bound) grant nothing at a later revision.
         changed = commit({'tests/data.txt': 'changed\n', 'tests/fixture.json': '[]\n', 'tests/lean-data.txt': 'changed\n',
                           'tests/run_test.py': unittest_source + '# changed\n'}, 'changed inputs')
@@ -743,4 +864,12 @@ def consumer_route_controls(classifier):
         forged['frames'] = [frame(first, 'tests/run_test.py', 5)]
         reverted = commit({'tests/run_test.py': unittest_source}, 'revert runner')
         rejected(reverted, {'persistent_reads': [forged]}, 'objects differ at recorded revision')
-        del cli_anchor
+        # A helper rewritten after the demonstration is not credited from it.
+        helper = files['tests/helper.mjs'].replace("'./fixture.json', import.meta.url), 'utf8')", "'./fixture2.json', import.meta.url), 'utf8')")
+        rewritten = commit({'tests/helper.mjs': helper, 'tests/fixture2.json': '{}\n', 'tests/gen/.gitignore': '# outputs changed\n*.json\n'}, 'rewrite helper')
+        late = node(rewritten, 'node-readFileSync', 'tests/fixture2.json',
+                    [frame(rewritten, 'tests/n.test.mjs', 1), frame(rewritten, 'tests/helper.mjs', 3)])
+        rows = {r['path']: r for r in run(rewritten, {'static_routes': [late], 'git_policies': [policy]})['records']}
+        assert rows['tests/fixture2.json']['class'] != 'keep'
+        # A changed .gitignore blob is stale: the policy role is gone.
+        assert rows['tests/gen/.gitignore']['class'] != 'keep'
