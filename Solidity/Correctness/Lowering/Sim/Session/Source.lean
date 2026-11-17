@@ -90,7 +90,7 @@ def sourceMachine (P : SrcProg E) (env : SessionEnv) : Solidity.Correctness.Sim.
 theorem deployStep_result (P : SrcProg E) (env : SessionEnv) (n : Nat) :
     (deployStep P env n).result P env = sessionAtEvents P env n := by
   unfold deployStep sessionAtEvents sessionFromEvents
-  split <;> rfl
+  split <;> (rename_i h; simp only [h]; rfl)
 
 theorem actStep_result (P : SrcProg E) (env : SessionEnv) (n k i : Nat) (s : St E)
     (last : Outcome) :
@@ -98,10 +98,11 @@ theorem actStep_result (P : SrcProg E) (env : SessionEnv) (n k i : Nat) (s : St 
   unfold actStep
   simp only [sessionGoEvents]
   split
-  · rfl
-  · rfl
-  · split
-    · split <;> rfl
+  · rename_i h; simp only [h]; rfl
+  · rename_i h; simp only [h]; rfl
+  · rename_i h; simp only [h]
+    split
+    · split <;> (rename_i h'; simp only [h']; rfl)
     · rfl
 
 /-- An action keeps the horizon and spends one unit of budget, or ends. -/
@@ -119,13 +120,6 @@ theorem actStep_shape (P : SrcProg E) (env : SessionEnv) (n k i : Nat) (s : St E
       · exact .inr ⟨_, rfl⟩
       · exact .inr ⟨_, rfl⟩
     · exact .inl ⟨_, _, _, rfl⟩
-
-/-- Steps preserve the prefix the session reaches. -/
-theorem SourceStep.result {P : SrcProg E} {env : SessionEnv} {s t : SourceState E}
-    (h : SourceStep P env s t) (hs : s ≠ .start) : t.result P env = s.result P env := by
-  cases h with
-  | deploy => exact absurd rfl hs
-  | act n k i s last => exact actStep_result P env n k i s last
 
 /-- From a running state, the remaining actions reach a state observing the
 prefix the session reaches. -/
@@ -150,13 +144,11 @@ theorem sourceMachine_reaches (P : SrcProg E) (env : SessionEnv) (r : Nat) :
   have edge := SourceStep.deploy (P := P) (env := env) r
   have hres := deployStep_result P env r
   show ∃ s, Solidity.Correctness.Sim.Star (SourceStep P env) .start s ∧ s.observe = _
-  generalize hd : deployStep P env r = d at edge hres
-  cases d with
-  | start => cases hres
-  | done p => exact ⟨_, .single edge, hres⟩
-  | run n k i s last =>
-    obtain ⟨t, path, obs⟩ := run_reaches P env n k i s last
+  rcases hd : deployStep P env r with _ | ⟨n, k, i, s, last⟩ | p <;> rw [hd] at edge hres
+  · exact ⟨_, .refl _, hres⟩
+  · obtain ⟨t, path, obs⟩ := run_reaches P env n k i s last
     exact ⟨t, (Solidity.Correctness.Sim.Star.single edge).trans path, obs.trans hres⟩
+  · exact ⟨_, .single edge, hres⟩
 
 /-- `Covers` for the source behaviour of `P`, whatever selection of bounds. -/
 theorem sourceMachine_covers (P : SrcProg E)
@@ -171,7 +163,7 @@ theorem observe_le_result (P : SrcProg E) (env : SessionEnv) :
     ∀ s : SourceState E, s.observe.Le (s.result P env)
   | .start => Prefix.Le.refl _
   | .run n k i s last => ⟨sessionGoEvents_extends P env n k i s last, .inl rfl⟩
-  | .done p => Prefix.Le.refl _
+  | .done _ => Prefix.Le.refl _
 
 /-- Every reachable state past the start reaches the session's prefix at its
 chosen bound. -/
@@ -181,12 +173,12 @@ theorem reachable_result (P : SrcProg E) (env : SessionEnv) {s : SourceState E}
   induction h with
   | refl => exact .inl rfl
   | tail _ edge ih =>
-    rcases ih with rfl | ⟨r, hr⟩
-    · cases edge with
-      | deploy n => exact .inr ⟨n, deployStep_result P env n⟩
-    · rename_i t _
-      have hs : t ≠ .start := by rintro rfl; cases hr
-      exact .inr ⟨r, (SourceStep.result edge hs).trans hr⟩
+    cases edge with
+    | deploy n => exact .inr ⟨n, deployStep_result P env n⟩
+    | act n k i s last =>
+      rcases ih with h | ⟨r, hr⟩
+      · cases h
+      · exact .inr ⟨r, (actStep_result P env n k i s last).trans hr⟩
 
 /-- **Realization**: every reachable state's observation is below the
 session's prefix at an admissible bound, which also meets the language's
@@ -197,7 +189,10 @@ theorem sourceMachine_realized (P : SrcProg E) (env : SessionEnv) {s : SourceSta
       (sourceLangEvents E).Guard P env r ∧
       ((sourceMachine P env).observe s).Le ((sourceLangEvents E).sem P env r) := by
   rcases reachable_result P env h with rfl | ⟨r, hr⟩
-  · exact ⟨0, trivial, trivial, trivial, List.nil_prefix, .inl rfl⟩
-  · exact ⟨r, trivial, trivial, trivial, hr ▸ observe_le_result P env s⟩
+  · exact ⟨(0 : Nat), trivial, trivial, trivial, List.nil_prefix, .inl rfl⟩
+  · refine ⟨r, trivial, trivial, trivial, ?_⟩
+    show s.observe.Le (sessionAtEvents P env r)
+    rw [← hr]
+    exact observe_le_result P env s
 
 end Solidity.Correctness.Lowering.Sim.Session
