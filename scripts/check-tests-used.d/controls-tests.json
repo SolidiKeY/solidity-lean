@@ -1104,6 +1104,38 @@
           "tests/h62/item4/generic-structuredflow/frozen.json"
         ],
         "other_reads": "unresolved"
+      },
+      {
+        "path": "tests/h62/item4/generic-internalflow/test_embedded.py",
+        "input_revision": "abcb4485b6ca0bfb28e1045f23d0b9734d0aac13",
+        "source_blob": "0e13edb2a7feed9dc14aa947d062dba28570edb8",
+        "command": [
+          "python3",
+          "-B",
+          "tests/h62/item4/generic-internalflow/test_embedded.py"
+        ],
+        "kind": "unittest",
+        "purpose": "Existing case-map conservation and corruption checks preserve full frozen declaration records, distinguish premise/capability roles and reject omissions or duplicates. Exact primary data use only; no native Lean, ownership, theorem or proof acceptance.",
+        "input_scope": [
+          "tests/h62/item4/generic-internalflow/embedded-cases.txt"
+        ],
+        "other_reads": "unresolved"
+      },
+      {
+        "path": "tests/h62/item4/generic-internalflow/test_classification.py",
+        "input_revision": "abcb4485b6ca0bfb28e1045f23d0b9734d0aac13",
+        "source_blob": "63b762e0398b86326aed7f6d7e3e388c938ae733",
+        "command": [
+          "python3",
+          "-B",
+          "tests/h62/item4/generic-internalflow/test_classification.py"
+        ],
+        "kind": "unittest",
+        "purpose": "Existing case-map conservation and corruption checks preserve full frozen declaration records, distinguish premise/capability roles and reject omissions or duplicates. Exact primary data use only; no native Lean, ownership, theorem or proof acceptance.",
+        "input_scope": [
+          "tests/h62/item4/generic-internalflow/semantic-cases.txt"
+        ],
+        "other_reads": "unresolved"
       }
     ]
   },
@@ -3018,6 +3050,17 @@
         "operation": "validated Python read of measured bytes"
       },
       {
+        "runner": "validated:tests/h62/item4/generic-internalflow/test_embedded.py",
+        "input_revision": "abcb4485b6ca0bfb28e1045f23d0b9734d0aac13",
+        "frames": [
+          {"path": "tests/h62/item4/generic-internalflow/test_embedded.py", "blob": "0e13edb2a7feed9dc14aa947d062dba28570edb8", "line": 34},
+          {"path": "tests/h62/item4/generic-internalflow/test_embedded.py", "blob": "0e13edb2a7feed9dc14aa947d062dba28570edb8", "line": 11}
+        ],
+        "target": "tests/h62/item4/generic-internalflow/embedded-cases.txt",
+        "target_blob": "41baf3c18067877c613d7ec794423d3923604562",
+        "operation": "validated Python read of measured bytes"
+      },
+      {
         "runner": "validated:tests/h62/item4/generic-internalflow/test_prefix.py",
         "input_revision": "94161546a752fcb026af328f174507fcd94c6246",
         "frames": [
@@ -3026,6 +3069,17 @@
         ],
         "target": "tests/h62/item4/generic-internalflow/prefix-cases.txt",
         "target_blob": "41a7a0f7a52f1e3d05bad6848170b324ce443dfa",
+        "operation": "validated Python read of measured bytes"
+      },
+      {
+        "runner": "validated:tests/h62/item4/generic-internalflow/test_classification.py",
+        "input_revision": "abcb4485b6ca0bfb28e1045f23d0b9734d0aac13",
+        "frames": [
+          {"path": "tests/h62/item4/generic-internalflow/test_classification.py", "blob": "63b762e0398b86326aed7f6d7e3e388c938ae733", "line": 91},
+          {"path": "tests/h62/item4/generic-internalflow/test_classification.py", "blob": "63b762e0398b86326aed7f6d7e3e388c938ae733", "line": 18}
+        ],
+        "target": "tests/h62/item4/generic-internalflow/semantic-cases.txt",
+        "target_blob": "789ed117878f40aa0ee77305bf3332cf79361846",
         "operation": "validated Python read of measured bytes"
       },
       {
