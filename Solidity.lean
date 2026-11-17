@@ -2432,6 +2432,7 @@ import Solidity.Calculus.VisitedSet
 import Solidity.Calculus.WalkSyntax
 import Solidity.Calculus.WkOver
 import Solidity.Correctness.IntrinsicSession.Laws.Common
+import Solidity.Correctness.IntrinsicSession.Laws.Structure
 import Solidity.Correctness.IntrinsicSession.Run
 import Solidity.Correctness.IntrinsicSession.Spec
 import Solidity.Correctness.IntrinsicSession.Step
