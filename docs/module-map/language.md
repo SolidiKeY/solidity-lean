@@ -248,6 +248,8 @@ composition, error propagation, argument order, and returned storage and heaps.
 | `Solidity/Semantics/IntrinsicStorage/Preimages/Run/Control/Checks.lean` | Sequencing regressions for the observed control-flow steps: continuations see the actual typed result; failed steps keep their observed inputs. |
 | `Solidity/Semantics/IntrinsicStorage/Preimages/Run.lean` | Observed straight-line statement steps (assignments, declarations, op-assign, inc/dec, push/pop, transfer/send, memory moves, delete, new, require/assert); each result is the actual typed run result. |
 | `Solidity/Semantics/IntrinsicStorage/Preimages/Run/Checks.lean` | Sequencing regressions for the observed straight-line steps: continuations see the actual typed result; failed steps keep their observed inputs. |
+| `Solidity/Correctness/IntrinsicSession/Step.lean` | The intrinsic session's resource bound (order, admissibility, no failure), executed-frame record, strategy response table and one-action step: deployment and affordable requests as `World.transact` of the actual `World.create` / `World.call`, dropped requests, credits. |
+| `Solidity/Examples/IntrinsicSession/Step.lean` | One-contract checks: an affordable request shows the outcome of `World.transact (World.call …)` with one call frame; a dropped request changes nothing; the deployment records one create frame. |
 The diagnostic generators `scripts/h62/item2/audit-v08-adapters/generate_mapped_census.py`
 and `scripts/h62/item2/audit-v08-adapters/generate_calldata_census.py` accept
 `--stream` to omit the global imported-constant sort. This still materializes
@@ -341,3 +343,5 @@ same option to its monitor fixtures; no environment fallback enables it.
 | `Semantics/Panic/Run/Data.lean` | Rich revert-data evaluation, byte literals and actual-outcome catch-data execution. |
 | `Semantics/Panic/Run/Contracts.lean` | Full-run failure propagation, actual assertion origins and self-catch code/resource contracts. |
 | `Semantics/Panic/Run/RunTests.lean` | End-to-end self/oracle code distinction, external calls, resource failures, loops and catch-data regressions. |
+| `Correctness/Panic/Provenance/Eval.lean` | Panic code provenance, evaluator leaves: `Coded` (an intrinsic halt's code is its retained site's code), `ErrCoded` with its closure laws (ok, bind, map, ofOpt, non-intrinsic errors, `evalProducer`), and one leaf per panic evaluator, paths and expressions by mutual induction. |
+| `Examples/Panic/ProvenanceEval.lean` | Checks of the provenance leaves: a checked addition overflow, a zero divisor and an out-of-range index, each code read off the retained failed site. |

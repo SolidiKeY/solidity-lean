@@ -2431,6 +2431,7 @@ import Solidity.Calculus.UpdateRules
 import Solidity.Calculus.VisitedSet
 import Solidity.Calculus.WalkSyntax
 import Solidity.Calculus.WkOver
+import Solidity.Correctness.IntrinsicSession.Step
 import Solidity.Correctness.Lowering.Checker.Contract
 import Solidity.Correctness.Lowering.Checker.IntrinsicProbe
 import Solidity.Correctness.Lowering.Checker.MeasuredPilot
@@ -2479,6 +2480,7 @@ import Solidity.Correctness.Lowering.Unchecked.WordOne
 import Solidity.Correctness.Lowering.Unchecked.WordProgram
 import Solidity.Correctness.Lowering.Unchecked.WordUpdateWitness
 import Solidity.Correctness.Lowering.Unchecked.WrappingArithmetic
+import Solidity.Correctness.Panic.Provenance.Eval
 import Solidity.Correctness.Sim.Examples
 import Solidity.Correctness.Sim.Lang
 import Solidity.Correctness.Sim.Observation
