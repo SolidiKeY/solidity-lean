@@ -7,7 +7,7 @@
 # module's budget then covers only itself (and any not-yet-built import outside those).
 #
 # Heartbeat ratchet (H1076): a module that must be rebuilt is first elaborated by the hb0
-# collector (scripts/heartbeats/collect.sh: one thread, Elab.async=false) under the same
+# collector (hbcollect as scripts/heartbeats/collect.sh runs it: one thread, Elab.async=false) under the same
 # timeout; that run is its check and its heartbeats are compared with
 # scripts/heartbeats/slow/baseline.json (per module, plus per declaration of at least
 # min_units). A module that is already up to date (fetched from the Lake cache or built
@@ -77,9 +77,11 @@ if [ "$list" = 1 ]; then cut -f1 <<<"$order"; exit 0; fi
 # Slow modules imported by another slow module: they need an .olean.
 needed=",$(cut -f2 <<<"$order" | tr ',' '\n' | sort -u | tr '\n' ','),"
 runs=$(mktemp "${TMPDIR:-/tmp}/slow-hb.XXXXXX") || exit 2
-trap 'rm -f "$runs"' EXIT
+lib=$(mktemp -d "${TMPDIR:-/tmp}/slow-hb-lib.XXXXXX") || exit 2
+trap 'rm -rf "$runs" "$lib"' EXIT
 if [ "$hb" != 0 ]; then
   lake build hbcollect >/dev/null </dev/null || { echo "build-slow-examples: cannot build hbcollect" >&2; exit 2; }
+  sysroot=$(lean --print-prefix) || exit 2
 fi
 failed=0; bad=","
 while IFS=$'\t' read -r m deps; do
@@ -101,25 +103,16 @@ while IFS=$'\t' read -r m deps; do
     st=0
     [ ${#imps[@]} -eq 0 ] || { LEAN_NUM_THREADS=1 timeout --kill-after=10s "${budget}s" lake build "${imps[@]}" >/dev/null </dev/null; st=$?; }
     left=$(( budget - ($(date +%s) - start) )); [ "$left" -ge 1 ] || left=1
-    # With enableArtifactCache, Lake keeps .olean files in its cache and records them in
-    # each .trace; the collector reads LEAN_PATH (.lake/build/lib/lean), so link them there.
-    [ "$st" -ne 0 ] || python3 - "$(lake env printenv LAKE_CACHE_DIR 2>/dev/null)" <<'PY' || st=2
-import json, os, pathlib, sys
-cache = pathlib.Path(sys.argv[1] or "") / "artifacts"
-for tr in pathlib.Path(".lake/build/lib/lean").rglob("*.trace"):
-    ol = tr.with_suffix(".olean")
-    if ol.exists():
-        continue
-    try:
-        o = json.loads(tr.read_text()).get("outputs", {}).get("o")
-    except (ValueError, OSError):
-        continue
-    for h in (o if isinstance(o, list) else [o])[:1]:
-        src = cache / f"{h}.olean"
-        if h and src.is_file():
-            os.symlink(src, ol)
-PY
-    [ "$st" -ne 0 ] || { timeout --kill-after=10s "${left}s" scripts/heartbeats/collect.sh "$m" >"$one" </dev/null; st=$?; }
+    # With enableArtifactCache a fetched .olean lives only in Lake's cache; the collector
+    # reads LEAN_PATH, so link the imports' oleans into a scratch lib with decl_index.link_build.
+    rm -rf "$lib"; mkdir -p "$lib"
+    [ "$st" -ne 0 ] || python3 -B -c 'import pathlib, sys; sys.path.insert(0, "scripts/decl-index"); import decl_index as d
+try: d.link_build(pathlib.Path.cwd(), pathlib.Path(sys.argv[1]), sys.argv[2:])
+except d.SetupError as e: sys.exit("build-slow-examples: %s" % e)' "$lib" "${imps[@]}" || st=2
+    # The hb0 driver, run as collect.sh runs it (one thread, 128 MiB stack) but on LEAN_PATH
+    # = that lib: `lake env` would put .lake/build first and hide the linked oleans.
+    [ "$st" -ne 0 ] || { ( ulimit -s 131072 && LEAN_PATH="$lib:$sysroot/lib/lean" LEAN_NUM_THREADS=1 \
+      timeout --kill-after=10s "${left}s" "$root/.lake/build/bin/hbcollect" "${m//.//}.lean" "$m" ) >"$one" </dev/null; st=$?; }
     if [ "$st" -eq 0 ]; then
       cat "$one" >>"$runs"
       python3 -c 'import json,sys; r=json.loads(open(sys.argv[1]).readline()); print("heartbeats", r["module"], "%.3f" % r["heartbeats"], "collector %ss" % r["wall_s"])' "$one"
