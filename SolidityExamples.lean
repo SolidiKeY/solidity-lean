@@ -127,6 +127,7 @@ import Solidity.Examples.DecisionVerdictData
 import Solidity.Examples.DecisionWrittenMemory
 import Solidity.Examples.DeclarationReduction
 import Solidity.Examples.DependentReduction
+import Solidity.Examples.Docs.ProseCalibrated.Allowance
 import Solidity.Examples.ExactReduction
 import Solidity.Examples.ExactUpdates
 import Solidity.Examples.ExampleNames
