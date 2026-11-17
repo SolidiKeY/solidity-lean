@@ -1,14 +1,22 @@
-import Solidity.Goals.PanicProvenance
+import Solidity.Correctness.Panic.Provenance
 
 namespace Solidity.Goals
 
 open Solidity.Panic Solidity.Semantics.Panic
 
 /--
-info: open Solidity.Goals.panicCodeProvenance ← Solidity.Correctness.Panic.code_provenance plan w3y-panic-provenance
+info: proved Solidity.Goals.panicCodeProvenance ← Solidity.Correctness.Panic.code_provenance plan w3y-panic-provenance
 -/
 #guard_msgs in
 #roadmap_goal panicCodeProvenance
+
+example : Solidity.Goals.panicCodeProvenance := Solidity.Correctness.Panic.code_provenance
+
+/--
+info: 'Solidity.Correctness.Panic.code_provenance' depends on axioms: [propext, Classical.choice, Quot.sound]
+-/
+#guard_msgs in
+#print axioms Solidity.Correctness.Panic.code_provenance
 
 /-- The nine original sites carry the nine solc `Panic(uint256)` codes. -/
 example : (siteCode .assertion).code = 0x01 ∧ (siteCode .arithmetic).code = 0x11 ∧
