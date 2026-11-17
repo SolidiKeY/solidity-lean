@@ -422,9 +422,10 @@ theorem Positional.unique {srcΓ : Source.RCtx} {Γ : Ctx} {m n : Lowering.V07.C
 map under which every admitted Source execution has a related model state.
 For `loopRel` the one component that can fail for a reason unrelated to
 lowering is storage: the Source cell at each state variable's path must have
-the declared type. That is not proved; the model contract's `vars_nodup` rules
-out the one known way it fails, two state variables of one name. The locals
-part is proved for every decoded request (`decode_locals_matching`). -/
+the declared type; that equation is proved (`Decode.unit_cellTy`). The locals
+part is proved for every decoded request (`decode_locals_matching`). Not
+proved: that a model state with related storage, `msg.value` and timestamp
+exists for every admitted Source execution. -/
 def InitialMatching (rel : (E : Source.Env) → (C : Contract) → StateRelation E C)
     (decode : Request → Option SourceProgram) : Prop :=
   ∀ (r : Request) (s : SourceProgram), r.Succeeds → decode r = some s →
@@ -525,6 +526,66 @@ theorem loopRel_reflect (E : Source.Env) (C : Contract) (H : HTy)
 theorem loopRel_false (E : Source.Env) (C : Contract) (H : HTy) :
     (loopRel E C).val H .bool (.val .bool) (.bool false) false :=
   ⟨rfl, .bool false⟩
+
+/-! ## The storage cell types of the canonical unit
+
+For the globals half of total initial matching: in the decoder's canonical
+unit, the Source cell at the path of the state variable the model reads under
+a name has the Source type of that primitive. This is the type equation the
+storage clause of `loopRel` needs; it does not yet give a related pair of
+states. -/
+namespace Decode
+
+/-- The declaration of a primitive state variable in the canonical unit. -/
+def varDecl (x : Name) (T : Source.Syn .typeName) : Source.Decl :=
+  ⟨.stateVar, x, some contractName, false, .stateVar T none none none false x .none⟩
+
+/-- The canonical unit's declaration of the state variable the model reads
+under the name `x`. -/
+theorem stateVars_find (x : Name) (p : PrimTy) : (vars : List (Name × Ty)) →
+    (parts : Source.Syn (.list (.part false))) → stateVars vars = some parts →
+    Semantics.lookupBy x vars = some (.prim p) →
+    ∃ T, stateTy (.prim p) = some T ∧
+      (parts.collect (some contractName)).find?
+        (fun d => d.kind == .stateVar && d.scope == some contractName && d.name == x) =
+        some (varDecl x T)
+  | [], _, _, hx => by cases hx
+  | (y, U) :: rest, parts, h, hx => by
+      simp only [stateVars, Option.bind_eq_bind, Option.pure_def, Option.bind_eq_some_iff,
+        Option.some.injEq] at h
+      obtain ⟨T', hT, parts', hp, rfl⟩ := h
+      simp only [Semantics.lookupBy] at hx
+      by_cases e : x = y
+      · subst e
+        simp only [if_true, Option.some.injEq] at hx
+        subst hx
+        exact ⟨T', hT, by simp [Source.Syn.collect, varDecl]⟩
+      · simp only [if_neg e] at hx
+        obtain ⟨T, hT', found⟩ := stateVars_find x p rest parts' hp hx
+        refine ⟨T, hT', ?_⟩
+        have ne : (y == x) = false := by simpa using fun h => e h.symm
+        simp [Source.Syn.collect, ne, found]
+
+/-- **The cell type of a primitive state variable** in the canonical unit is
+the Source type of the model primitive: the equation the state relation's
+storage clause needs. -/
+theorem unit_cellTy {C : Contract} {u : Source.Syn .unit} (h : unit C = some u) {x : Name}
+    {p : PrimTy} (hx : Semantics.lookupBy x C.vars = some (.prim p)) :
+    u.env.cellTy ⟨⟨some contractName, x⟩, []⟩ = Source.Agreement.sourceTy p := by
+  unfold unit at h
+  split at h
+  · simp only [Option.map_eq_some_iff] at h
+    obtain ⟨parts, hp, rfl⟩ := h
+    obtain ⟨T, hT, found⟩ := stateVars_find x p C.vars parts hp hx
+    have decl : (Source.Syn.unit (.cons (.contract false contractName .none .nil parts) .nil)).env.declOf
+        .stateVar ⟨some contractName, x⟩ = some (varDecl x T) := by
+      simp [Source.Env.declOf, Source.Syn.env, Source.Syn.decls, Source.Syn.collect, found]
+    simp only [Source.Env.cellTy, Source.Env.pathTy, List.foldl_nil, Source.Env.rootTy, decl,
+      Option.bind_some]
+    cases p <;> (cases hT; rfl)
+  · cases h
+
+end Decode
 
 /-! ## The locals half of total initial matching
 

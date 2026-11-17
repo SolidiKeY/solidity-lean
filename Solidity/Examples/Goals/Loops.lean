@@ -337,7 +337,7 @@ example {r : Request} {s : SourceProgram} (h : Decode.decode r = some s) :
 /-- Positive control for the globals half, on one contract with a state
 variable of each primitive type: the Source cell at each variable's path in
 the canonical unit has the type the state relation asks for. The general
-statement is not proved. -/
+statement is `Decode.unit_cellTy`, pinned after these. -/
 def cellContract : Contract :=
   { vars := [("s", .prim .bool), ("n", .prim .uint), ("k", .prim .int)] }
 def cellEnv : Source.Env := ((Decode.unit cellContract).map (·.env)).getD ⟨[]⟩
@@ -348,6 +348,13 @@ example : cellEnv.cellTy ⟨⟨some Decode.contractName, "n"⟩, []⟩ =
     Source.Agreement.sourceTy .uint := rfl
 example : cellEnv.cellTy ⟨⟨some Decode.contractName, "k"⟩, []⟩ =
     Source.Agreement.sourceTy .int := rfl
+
+/-- The general cell-type equation: in the canonical unit, the cell of the
+state variable the model reads under a name has that primitive's Source type. -/
+example {C : Contract} {u : Source.Syn .unit} (h : Decode.unit C = some u) {x : Name}
+    {p : PrimTy} (hx : Semantics.lookupBy x C.vars = some (.prim p)) :
+    u.env.cellTy ⟨⟨some Decode.contractName, x⟩, []⟩ = Source.Agreement.sourceTy p :=
+  Decode.unit_cellTy h hx
 
 end Decoder
 
