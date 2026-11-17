@@ -122,8 +122,8 @@ PY
       cat "$one" >>"$runs"
       python3 -c 'import json,sys; r=json.loads(open(sys.argv[1]).readline()); print("heartbeats", r["module"], "%.3f" % r["heartbeats"], "collector %ss" % r["wall_s"])' "$one"
       case "$needed" in *",$m,"*)
-        left=$(( budget - ($(date +%s) - start) )); [ "$left" -ge 1 ] || left=1
-        LEAN_NUM_THREADS=1 timeout --kill-after=10s "${left}s" lake build "$m" >/dev/null </dev/null; st=$?;;
+        # H1088: the .olean build is a second elaboration with its own H134 budget.
+        LEAN_NUM_THREADS=1 timeout --kill-after=10s "${budget}s" lake build "$m" >/dev/null </dev/null; st=$?;;
       esac
     fi
     rm -f "$one"
