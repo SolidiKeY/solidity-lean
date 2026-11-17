@@ -1519,10 +1519,8 @@ theorem Tm.size_substE {Γ₀ Δ : Ctx} {E : SEnv C Γ₀ Δ}
   | _, .pvP _, _, h | _, .pvS _, _, h | _, .pvI _, _, h | _, .netOf _ _, _, h
   | _, .pvZ _, _, h => nomatch h
 
-theorem Simple.lower_size_one {p : PrimTy} (s : Simple C Γ p) : s.lower.size = 1 := by
-  cases s with
-  | env k hp => simp only [Simple.lower, Tm.size_castV]; rfl
-  | _ => rfl
+theorem Simple.lower_size_one {p : PrimTy} (s : Simple C Γ p) : s.lower.size = 1 :=
+  Solidity.Simple.lower_size ..
 
 /-- The arguments of a call read at the call: one node each. -/
 theorem Args.sym_id_size : {ps : Ctx} → (args : Args C Γ ps) → {θ : SEnv C Γ ps} →

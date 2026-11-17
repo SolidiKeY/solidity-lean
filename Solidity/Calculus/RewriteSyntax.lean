@@ -179,7 +179,7 @@ section TheoryS
 variable {C : Contract} {Γ : Ctx}
 
 theorem Tm.denote_litS (σ : State C Γ) {p : PrimTy} (v : p.Denote) :
-    (Tm.app0 (.lit v) : Tm C Γ (.val p)).denote σ = some v := rfl
+    (Tm.app0 (.lit v) : Tm C Γ (.val p)).denote σ = some v := Solidity.CloseS.denote_lit ..
 theorem Tm.denote_findS (σ : State C Γ) {p : PrimTy} (s : Tm C Γ .st)
     (q : Tm C Γ (.path (.prim p))) :
     (Tm.app2 .find s q).denote σ = some ((s.denote σ).word (q.denote σ)) := rfl
@@ -198,7 +198,8 @@ theorem Tm.denote_svalS (σ : State C Γ) {p : PrimTy} (t : Tm C Γ (.val p)) :
 theorem Tm.denote_sfindS (σ : State C Γ) {T : Ty} (s : Tm C Γ .st) (q : Tm C Γ (.path T)) :
     (Tm.app2 .sfind s q).denote σ = (s.denote σ).find (q.denote σ) := rfl
 theorem Tm.denote_rootS (σ : State C Γ) (r : Name) {T : Ty} (h : C.rootType r = some T) :
-    (Tm.app0 (.root r h) : Tm C Γ (.path T)).denote σ = .ref (SRef.ofRoot r h) := rfl
+    (Tm.app0 (.root r h) : Tm C Γ (.path T)).denote σ = .ref (SRef.ofRoot r h) :=
+  Solidity.CloseS.denote_root ..
 theorem Tm.denote_fieldS (σ : State C Γ) {s f : Name} {T : Ty} (h : C.fieldType s f = some T)
     (q : Tm C Γ (.path (.ref (.struct s)))) :
     (Tm.app1 (.field h) q).denote σ = ObsLoc.app (q.denote σ) (.field h .nil) := rfl

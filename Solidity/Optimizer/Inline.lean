@@ -87,9 +87,7 @@ theorem off_top (Γ : Ctx) : (ps : Ctx) → (d : TEnv C H (ps ++ Γ)) →
   | _ :: ps, d => off_top Γ ps d.2
 
 theorem drop_append_append {Γ : Ctx} : (ps : Ctx) → (a : TEnv C H ps) → (e : TEnv C H Γ) →
-    TEnv.drop (Ext.append Γ ps) (TEnv.append ps a e) = e
-  | [], _, _ => rfl
-  | _ :: ps, a, e => drop_append_append ps a.2 e
+    TEnv.drop (Ext.append Γ ps) (TEnv.append ps a e) = e := Solidity.TEnv.drop_append
 
 /-- An environment is determined by the list of all its values. -/
 theorem off_bot_inj : (Γ : Ctx) → (x y : TEnv C H Γ) →

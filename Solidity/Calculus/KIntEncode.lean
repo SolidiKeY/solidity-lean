@@ -1032,10 +1032,7 @@ def Fml.sb? : {Γ Δ : Ctx} → Sb C Γ Δ → Fml C Γ → Option (Fml C Δ)
 
 /-- A pushed state read one binder out is the state. -/
 theorem State.pull_up {Δ : Ctx} (σ : State C Δ) {u : LTy} (w : u.TDenote C σ.H) :
-    (σ.push w).pull (Ren.up u) = σ := by
-  show σ.withEnv (Decide.TEnv.pull (Δ := u :: Δ) ⟨fun j => .there ((Ren.id Δ).f j)⟩ (w, σ.env)) = σ
-  rw [Decide.TEnv.pull_there, Decide.TEnv.pull_id]
-  rfl
+    (σ.push w).pull (Ren.up u) = σ := Solidity.State.pull_up_push ..
 
 theorem SbT.val_up {Δ : Ctx} (σ : State C Δ) {u : LTy} (w : u.TDenote C σ.H) {t : LTy}
     (x : SbT C Δ t) : (x.up u).val (σ.push w) = x.val σ := by

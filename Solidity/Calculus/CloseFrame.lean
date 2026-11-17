@@ -328,7 +328,8 @@ theorem Landed.memT_readId {Δ : Ctx} {g : State C []} {ℓ : LocsV C Δ} (x : L
   subst e
   rfl
 theorem push_memT_readId {Γ : Ctx} {t : LTy} (σ : State C Γ) (v : t.TDenote C σ.H) {T : Ty}
-    (a : MAddrT T) : (σ.push v).glob.memT.readId a = σ.glob.memT.readId a := rfl
+    (a : MAddrT T) : (σ.push v).glob.memT.readId a = σ.glob.memT.readId a :=
+  Solidity.CloseS.push_readId ..
 
 theorem Landed.memT_lenId {Δ : Ctx} {g : State C []} {ℓ : LocsV C Δ} (x : Landed g ℓ)
     (E : Ty) (id : Nat) : x.val.glob.memT.lenId E id = g.memT.lenId E id := by
@@ -338,7 +339,8 @@ theorem Landed.memT_lenId {Δ : Ctx} {g : State C []} {ℓ : LocsV C Δ} (x : La
   rfl
 
 theorem push_memT_lenId {Γ : Ctx} {t : LTy} (σ : State C Γ) (v : t.TDenote C σ.H)
-    (E : Ty) (id : Nat) : (σ.push v).glob.memT.lenId E id = σ.glob.memT.lenId E id := rfl
+    (E : Ty) (id : Nat) : (σ.push v).glob.memT.lenId E id = σ.glob.memT.lenId E id :=
+  Solidity.CloseS.push_lenId ..
 theorem withMem_memT_readId {H : HTy} (g : GlobT C H) (μ : Grown H (fun _ => Unit)) {T : Ty}
     (a : MAddrT T) : (g.withMem μ).1.memT.readId a = μ.readId a := rfl
 

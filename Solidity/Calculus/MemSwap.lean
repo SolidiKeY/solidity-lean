@@ -1070,10 +1070,7 @@ def mxBndV {R : RefTy} {q : PrimTy} (n : PrimTy.uint.Denote) : ArrTy R (.prim q)
   | .dyn => n
   | @ArrTy.fixed _ N => uintOfNat N
 
-theorem mxUint_nonneg (x : PrimTy.uint.Denote) : 0 ≤ x.1 := by
-  have h := x.2
-  simp only [PrimTy.inRange, decide_eq_true_eq] at h
-  exact h.1
+theorem mxUint_nonneg (x : PrimTy.uint.Denote) : 0 ≤ x.1 := Solidity.PrimTy.uint_nonneg ..
 
 theorem mxLenU_toNat (n : PrimTy.uint.Denote) (h : n.1.toNat < 2 ^ 256) : lenU n.1.toNat h = n :=
   Subtype.ext (by show ((n.1.toNat : Nat) : Int) = n.1; exact Int.toNat_of_nonneg (mxUint_nonneg n))
@@ -1440,8 +1437,7 @@ end Realize
 theorem mxArrTy_eq {R : RefTy} {E E' : Ty} (a : ArrTy R E) (a' : ArrTy R E') : E = E' := by
   cases a <;> cases a' <;> rfl
 
-theorem mxArrTy_heq {R : RefTy} {E : Ty} (a a' : ArrTy R E) : a = a' := by
-  cases a <;> cases a' <;> rfl
+theorem mxArrTy_heq {R : RefTy} {E : Ty} (a a' : ArrTy R E) : a = a' := Solidity.ArrTy.eq ..
 
 /-- A write of a word at an array element lands exactly where the element
 reads. -/
@@ -2019,9 +2015,8 @@ theorem MxRel.wrs (hr : MxRel θ τ ρ) {ws : List (MxW θ)} {θ' : MxMap C Γ �
     exact hr.apart i j h
 
 theorem mxVDen_wk {H H' : HTy} (e : H <+: H') :
-    (t : LTy) → (v : t.TDenote C H) → LTy.VDen.ofT t (LTy.TDenote.wk e t v) = LTy.VDen.ofT t v
-  | .val _, _ | .alias _, _ | .mem _, none | .mem _, some _ | .old, _ | .oldNet, _
-  | .kint, _ => rfl
+    (t : LTy) → (v : t.TDenote C H) → LTy.VDen.ofT t (LTy.TDenote.wk e t v) = LTy.VDen.ofT t v :=
+  Solidity.LTy.VDen.ofT_wk e
 
 /-- **A memory update of writes, cut.** -/
 theorem mx_updMem {m : Modality} {M : Tm C Γ .mem} {φ : Fml C Γ}

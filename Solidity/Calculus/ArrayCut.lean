@@ -373,8 +373,7 @@ def ArrDescribes (g : State C []) (st : Storage C) (ν : AEnv) (N : Nat) (rs : L
 def ArrFrames (g : State C []) (st : Storage C) (ν : AEnv) : Prop :=
   ∀ {s : Srt} (t : LTm C s), t.aFree = true → t.eval (g.withStorage st) ν = t.eval g ν
 
-theorem ArrTy.subsingleton {R : RefTy} {E : Ty} (a b : ArrTy R E) : a = b := by
-  cases a <;> cases b <;> rfl
+theorem ArrTy.subsingleton {R : RefTy} {E : Ty} (a b : ArrTy R E) : a = b := Solidity.ArrTy.eq ..
 
 theorem ArrTy.elem_eq {R : RefTy} {e e' : PrimTy} (a : ArrTy R (.prim e)) (b : ArrTy R (.prim e')) :
     e = e' := by

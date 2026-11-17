@@ -145,10 +145,7 @@ theorem eval_uop (op : BinOp) (hp : op.accepts .uint = true) (hs : ∀ a : PrimT
 theorem uint_ofInt?_ival (v : PrimTy.uint.Denote) : PrimTy.uint.ofInt? v.1 = some v :=
   ofInt?_ival_self rfl v
 
-theorem uint_nonneg (v : PrimTy.uint.Denote) : 0 ≤ v.1 := by
-  have h := v.2
-  simp only [PrimTy.inRange, decide_eq_true_eq] at h
-  exact h.1
+theorem uint_nonneg (v : PrimTy.uint.Denote) : 0 ≤ v.1 := Solidity.PrimTy.uint_nonneg ..
 
 theorem uint_lt (v : PrimTy.uint.Denote) : v.1 < 2 ^ 256 := by
   have h := v.2

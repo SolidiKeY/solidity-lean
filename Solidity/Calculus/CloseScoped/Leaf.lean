@@ -118,7 +118,8 @@ Each a symbol's equation on the global part (`Calculus/CloseLemmas.lean`'s
 position.  An argument is an `Option`: `none` reverts.  Not stated: the
 symbols under a `select` (`member`, `selectIn`, `fieldIn`, `findIn`,
 `sfindIn`, `delAtIn`, `saveIn`, `atIn`), which no leaf of the strategy
-reads. -/
+reads.  Those `Calculus/SoundArms.lean` states already (`Tm.eval_lit`,
+`Tm.eval_save`, …) the set below names there. -/
 
 section Terms
 
@@ -136,13 +137,10 @@ theorem eval_netOf (i : Idx Γ .oldNet) (a : Tm C Γ (.val .uint)) :
 theorem eval_pvZ (i : Idx Γ .kint) : (Tm.pvZ i : Tm C Γ .kint).eval σ = some (σ.locV _ i) := rfl
 theorem eval_zlit (n : Int) : (Tm.app0 (.zlit n) : Tm C Γ .kint).eval σ = some n := rfl
 
-theorem eval_lit {p : PrimTy} (v : p.Denote) :
-    (Tm.app0 (.lit v) : Tm C Γ (.val p)).eval σ = some v := rfl
 theorem eval_env (k : EnvKey) :
     (Tm.app0 (.env k) : Tm C Γ (.val .uint)).eval σ = some (σ.envVal k) := rfl
 theorem eval_root (r : Name) {T : Ty} (h : C.rootType r = some T) :
     (Tm.app0 (.root r h) : Tm C Γ (.path T)).eval σ = some (SRef.ofRoot r h) := rfl
-theorem eval_storage : (Tm.app0 .storage : Tm C Γ .st).eval σ = some σ.storage := rfl
 theorem eval_mtSt : (Tm.app0 .mtSt : Tm C Γ .st).eval σ = some (Storage.init C) := rfl
 
 theorem eval_unop (op : UnOp) {p : PrimTy} (h : op.accepts p = true) (a : Tm C Γ (.val p)) :
@@ -154,8 +152,6 @@ theorem eval_delValue {p : PrimTy} (a : Tm C Γ (.val p)) :
 theorem eval_field {s f : Name} {T : Ty} (h : C.fieldType s f = some T)
     (q : Tm C Γ (.path (.ref (.struct s)))) :
     (Tm.app1 (.field h) q).eval σ = (q.eval σ).map (·.field h) := rfl
-theorem eval_next {E : Ty} (q : Tm C Γ (.path (.ref (.array E)))) :
-    (Tm.app1 .next q).eval σ = (q.eval σ).bind σ.storage.nextT := rfl
 theorem eval_sval {p : PrimTy} (t : Tm C Γ (.val p)) :
     (Tm.app1 .sval t).eval σ = (t.eval σ).map .prim := rfl
 theorem eval_newArr {R : RefTy} (h : R.newArrOk = true) (t : Tm C Γ (.val .uint)) :
@@ -163,10 +159,6 @@ theorem eval_newArr {R : RefTy} (h : R.newArrOk = true) (t : Tm C Γ (.val .uint
 theorem eval_mfield {s f : Name} {T : Ty} (h : C.fieldType s f = some T)
     (i : Tm C Γ (.ident (.struct s))) :
     (Tm.app1 (.mfield h) i).eval σ = (i.eval σ).map fun id => .field id h := rfl
-theorem eval_mval {p : PrimTy} (t : Tm C Γ (.val p)) :
-    (Tm.app1 .mval t).eval σ = t.eval σ := rfl
-theorem eval_ref {R : RefTy} (i : Tm C Γ (.ident R)) :
-    (Tm.app1 (.ref (R := R)) i).eval σ = i.eval σ := rfl
 theorem eval_wt (s : Tm C Γ .st) : (Tm.app1 .wt s).eval σ = (s.eval σ).bind Storage.wtT := rfl
 theorem eval_cleanTail (s : Tm C Γ .st) :
     (Tm.app1 .cleanTail s).eval σ = (s.eval σ).bind Storage.cleanTailT := rfl
@@ -182,18 +174,6 @@ theorem eval_zcmp (op : BinOp) (h : op.zCmp = true) (a b : Tm C Γ .kint) :
     (Tm.app2 (.zcmp op h) a b).eval σ =
       (a.eval σ).bind fun x => (b.eval σ).bind fun y => some (op.cmpZ x y) := rfl
 
-theorem eval_binop (op : BinOp) {p : PrimTy} (h : op.accepts p = true) (a b : Tm C Γ (.val p)) :
-    (Tm.app2 (.binop op h) a b).eval σ = (a.eval σ).bind fun x => binopT op h x (b.eval σ) := rfl
-theorem eval_find {p : PrimTy} (s : Tm C Γ .st) (q : Tm C Γ (.path (.prim p))) :
-    (Tm.app2 .find s q).eval σ =
-      (s.eval σ).bind fun st => (q.eval σ).bind fun r => (st.find r).bind fun v => some v.view :=
-  rfl
-theorem eval_sfind {T : Ty} (s : Tm C Γ .st) (q : Tm C Γ (.path T)) :
-    (Tm.app2 .sfind s q).eval σ = (s.eval σ).bind fun st => (q.eval σ).bind fun r => st.find r :=
-  rfl
-theorem eval_delAt {T : Ty} (s : Tm C Γ .st) (q : Tm C Γ (.path T)) :
-    (Tm.app2 .delAt s q).eval σ =
-      (s.eval σ).bind fun st => (q.eval σ).bind fun r => st.delete r := rfl
 theorem eval_at {R : RefTy} {k : PrimTy} {V : Ty} (it : IndexTy R k V)
     (q : Tm C Γ (.path (.ref R))) (i : Tm C Γ (.val k)) :
     (Tm.app2 (.at it) q i).eval σ =
@@ -201,15 +181,6 @@ theorem eval_at {R : RefTy} {k : PrimTy} {V : Ty} (it : IndexTy R k V)
 theorem eval_len {E : Ty} (s : Tm C Γ .st) (q : Tm C Γ (.path (.ref (.array E)))) :
     (Tm.app2 .len s q).eval σ = (s.eval σ).bind fun st => (q.eval σ).bind fun r => st.len r :=
   rfl
-theorem eval_pushSlot {E : Ty} (s : Tm C Γ .st) (q : Tm C Γ (.path (.ref (.array E)))) :
-    (Tm.app2 .pushSlot s q).eval σ =
-      (s.eval σ).bind fun st => (q.eval σ).bind fun r => st.push r some := rfl
-theorem eval_pop {E : Ty} (s : Tm C Γ .st) (q : Tm C Γ (.path (.ref (.array E)))) :
-    (Tm.app2 .pop s q).eval σ =
-      (s.eval σ).bind fun st => (q.eval σ).bind fun r => st.pop false r := rfl
-theorem eval_shrink {E : Ty} (s : Tm C Γ .st) (q : Tm C Γ (.path (.ref (.array E)))) :
-    (Tm.app2 .shrink s q).eval σ =
-      (s.eval σ).bind fun st => (q.eval σ).bind fun r => st.pop true r := rfl
 theorem eval_extend {E : Ty} (s : Tm C Γ .st) (q : Tm C Γ (.path (.ref (.array E)))) :
     (Tm.app2 .extend s q).eval σ = (s.eval σ).bind fun st => (q.eval σ).bind fun r =>
       (st.pushPlace r).bind fun x => some x.1 := rfl
@@ -222,15 +193,11 @@ theorem eval_mat {R : RefTy} {E : Ty} (a : ArrTy R E) (i : Tm C Γ (.ident R))
 
 /-! The memory symbols, on the memory a term reads (`Grown σ.H`). -/
 
-theorem eval_memory : (Tm.app0 .memory : Tm C Γ .mem).eval σ = some σ.glob.memT := rfl
 theorem eval_alloc (R : RefTy) (h : (Ty.ref R).mapFree = true) (m : Tm C Γ .mem) :
     (Tm.app1 (.alloc R h) m).eval σ = (m.eval σ).map fun g => (g.heap.allocDefault R h).val.id :=
   rfl
 theorem eval_addM (R : RefTy) (h : (Ty.ref R).mapFree = true) (m : Tm C Γ .mem) :
     (Tm.app1 (.addM R h) m).eval σ = (m.eval σ).map fun g => g.then (g.heap.allocDefault R h) :=
-  rfl
-theorem eval_read {p : PrimTy} (m : Tm C Γ .mem) (a : Tm C Γ (.addr (.prim p))) :
-    (Tm.app2 .read m a).eval σ = (m.eval σ).bind fun g => (a.eval σ).bind fun ad => g.readT ad :=
   rfl
 theorem eval_mlen {E : Ty} (m : Tm C Γ .mem) (i : Tm C Γ (.ident (.array E))) :
     (Tm.app2 .mlen m i).eval σ = (m.eval σ).bind fun g => (i.eval σ).bind fun id =>
@@ -238,9 +205,6 @@ theorem eval_mlen {E : Ty} (m : Tm C Γ .mem) (i : Tm C Γ (.ident (.array E))) 
 theorem eval_hash {k : HashKind} {R : RefTy} (m : Tm C Γ .mem) (i : Tm C Γ (.ident R)) :
     (Tm.app2 (.hash k) m i).eval σ = (m.eval σ).bind fun g => (i.eval σ).bind fun id =>
       some (g.hashId k R id) := rfl
-theorem eval_copyMem {R : RefTy} (m : Tm C Γ .mem) (i : Tm C Γ (.ident R)) :
-    (Tm.app2 .copyMem m i).eval σ = (m.eval σ).bind fun g => (i.eval σ).bind fun id =>
-      (HRef.ofId? g.H' R id).bind fun r => some (MVal.copyMToSt g.heap (T := .ref R) r) := rfl
 theorem eval_iread {R : RefTy} (m : Tm C Γ .mem) (a : Tm C Γ (.addr (.ref R))) :
     (Tm.app2 .iread m a).eval σ = (m.eval σ).bind fun g => (a.eval σ).bind fun ad =>
       (g.readT ad).bind fun (r : HRef _ R) => some r.id := rfl
@@ -253,21 +217,12 @@ theorem eval_copySt {T : Ty} (h : T.mapFree = true) (m : Tm C Γ .mem) (v : Tm C
 
 theorem eval_ite {p : PrimTy} (c : Tm C Γ (.val .bool)) (a b : Tm C Γ (.val p)) :
     (Tm.app3 .ite c a b).eval σ = (c.eval σ).bind fun cv => cond cv (a.eval σ) (b.eval σ) := rfl
-theorem eval_save {T : Ty} (s : Tm C Γ .st) (q : Tm C Γ (.path T)) (v : Tm C Γ (.sv T)) :
-    (Tm.app3 .save s q v).eval σ = (s.eval σ).bind fun st => (q.eval σ).bind fun r =>
-      (v.eval σ).bind fun w => st.write r w := rfl
 /-- `anon(s, L, s')`: the roots `L` names from `s'` (KeY's anonymising
 update of a loop body's frame, `Fml.anonHavoc`); a read of it is
 `Storage.find_anon`'s. -/
 theorem eval_anon (L : List Name) (s s' : Tm C Γ .st) :
     (Tm.app2 (.anon L) s s').eval σ =
       (s.eval σ).bind fun a => (s'.eval σ).bind fun b => some (Storage.anon L a b) := rfl
-theorem eval_push {E : Ty} (s : Tm C Γ .st) (q : Tm C Γ (.path (.ref (.array E))))
-    (v : Tm C Γ (.sv E)) : (Tm.app3 .push s q v).eval σ = (s.eval σ).bind fun st =>
-      (q.eval σ).bind fun r => st.push r fun _ => (v.eval σ).map SVal.strip := rfl
-theorem eval_write {T : Ty} (m : Tm C Γ .mem) (a : Tm C Γ (.addr T)) (v : Tm C Γ (.mv T)) :
-    (Tm.app3 .write m a v).eval σ = (m.eval σ).bind fun g => (a.eval σ).bind fun ad =>
-      (v.eval σ).bind fun w => g.writeT ad w := rfl
 
 theorem denote_lit {p : PrimTy} (v : p.Denote) :
     (Tm.app0 (.lit v) : Tm C Γ (.val p)).denote σ = some v := rfl
@@ -399,7 +354,6 @@ theorem withBalance_tx {H : HTy} (g : GlobT C H) (b : PrimTy.uint.Denote) :
     (g.withBalance b).1.tx = g.1.tx := rfl
 theorem globG_val {Γ : Ctx} (σ : State C Γ) : σ.globG.1 = σ.glob := rfl
 
-theorem applyV_nil : (Upd.nil : Upd C Γ Γ).applyV σ₀ = some (σ₀.globG, σ₀.locV) := rfl
 theorem applyV_snoc (U : Upd C Γ Δ) (e : UpdElem C Γ Δ) :
     (U.snoc e).applyV σ₀ = (U.applyV σ₀).bind fun p => e.applyV σ₀ p.1 p.2 := rfl
 theorem applyV_decl {t : LTy} (U : Upd C Γ Δ) (x : Var) (r : Rhs C Γ t) :
@@ -773,8 +727,6 @@ theorem holds_and (σ : State C Γ) (φ ψ : Fml C Γ) :
     holds σ (.and φ ψ) ↔ holds σ φ ∧ holds σ ψ := Iff.rfl
 theorem holds_imp (σ : State C Γ) (φ ψ : Fml C Γ) :
     holds σ (.imp φ ψ) ↔ (holds σ φ → holds σ ψ) := Iff.rfl
-theorem holds_eq {p : PrimTy} (σ : State C Γ) (a b : Tm C Γ (.val p)) :
-    holds σ (.eq a b) ↔ a.denote σ = b.denote σ := Iff.rfl
 /-- An equation of two values the Theory reads as the interpreter does
 (`Tm.agreeB`, `Calculus/TermAgree.lean`), marked so by `sol_close_unwrap`
 (`Fml.eqA`, `Calculus/EvalEqs.lean`): both return one value, or both halt. -/
@@ -1062,9 +1014,6 @@ theorem copyTo_word_ite {L : Ty → Type} [ObsLoc L] (o : Obs L) {P : PrimTy}
     simp only [hr, Option.isSome_some, if_true, TVal.overlay_prim]
   · rename_i hr
     simp only [hr, Option.isSome_none, Bool.false_eq_true, if_false]
-/-- A read's location below a state variable, as the reference it reads. -/
-theorem app_ref {U W : Ty} (r : SRef C U) (q : Path U W) :
-    ObsLoc.app (SLoc.ref r) q = SLoc.ref (r.append q) := rfl
 /-- The write's location and the read's, compared from their common root
 (`SRef.strip?_append_append`). -/
 theorem strip?_ref_append {U V W : Ty} (r : SRef C U) (p : Path U V) (q : Path U W) :
@@ -1186,7 +1135,7 @@ attribute [close_rw_s high] CloseS.holds_eqAtom CloseS.holds_eqT CloseS.holds_eq
 
 attribute [close_rw_s]
   -- formulas
-  Fml.Atom.tm CloseS.holds_tt CloseS.holds_not CloseS.holds_and CloseS.holds_imp CloseS.holds_eq
+  Fml.Atom.tm CloseS.holds_tt CloseS.holds_not CloseS.holds_and CloseS.holds_imp holds_eq
   CloseS.holds_wellFormed CloseS.holds_upd CloseS.holds_havoc CloseS.holds_all
   CloseS.exh_pushFree Upd.pushFree UpdElem.pushFree Rhs.pushFree Tm.pushFree Op2.pushFree
   Op3.pushFree Bool.false_eq_true and_false
@@ -1226,7 +1175,7 @@ attribute [close_rw_s]
   CloseS.vden_kint
   CloseS.optRes_some CloseS.optRes_none CloseS.optRes_bind CloseS.optRes_map
   -- updates
-  CloseS.applyV_nil CloseS.applyV_snoc CloseS.applyV_decl CloseS.applyV_pop CloseS.applyV_drop
+  applyV_nil CloseS.applyV_snoc CloseS.applyV_decl CloseS.applyV_pop CloseS.applyV_drop
   CloseS.elem_local CloseS.elem_storage CloseS.elem_memory CloseS.elem_selfBalance
   CloseS.elem_net CloseS.elem_pay CloseS.elem_netMt CloseS.elem_setBalance
   CloseS.glob_storageE CloseS.glob_memoryE CloseS.glob_selfBalanceE
@@ -1246,18 +1195,18 @@ attribute [close_rw_s]
   -- terms
   CloseS.eval_pvV CloseS.eval_pvP CloseS.eval_pvS CloseS.eval_pvI CloseS.eval_netOf
   CloseS.eval_pvZ CloseS.eval_zlit CloseS.eval_zbin CloseS.eval_zcmp BinOp.evalZ BinOp.cmpZ
-  CloseS.eval_lit CloseS.eval_env CloseS.eval_root CloseS.eval_storage CloseS.eval_mtSt
-  CloseS.eval_unop CloseS.eval_net CloseS.eval_delValue CloseS.eval_field CloseS.eval_next
-  CloseS.eval_sval CloseS.eval_newArr CloseS.eval_mfield CloseS.eval_mval CloseS.eval_ref
+  Tm.eval_lit CloseS.eval_env CloseS.eval_root Tm.eval_storage CloseS.eval_mtSt
+  CloseS.eval_unop CloseS.eval_net CloseS.eval_delValue CloseS.eval_field Tm.eval_next
+  CloseS.eval_sval CloseS.eval_newArr CloseS.eval_mfield Tm.eval_mval Tm.eval_ref
   CloseS.eval_wt CloseS.eval_select CloseS.eval_toInt
-  CloseS.eval_binop CloseS.eval_find CloseS.eval_sfind CloseS.eval_delAt CloseS.eval_at
-  CloseS.eval_len CloseS.eval_pushSlot CloseS.eval_pop CloseS.eval_shrink CloseS.eval_extend
+  Tm.eval_binop Tm.eval_find Tm.eval_sfind Tm.eval_delAt CloseS.eval_at
+  CloseS.eval_len Tm.eval_pushSlot Tm.eval_pop Tm.eval_shrink CloseS.eval_extend
   CloseS.eval_nextIn CloseS.eval_mat
-  CloseS.eval_ite CloseS.eval_save CloseS.eval_push CloseS.eval_anon Storage.find_anon
+  CloseS.eval_ite Tm.eval_save Tm.eval_push CloseS.eval_anon Storage.find_anon
   List.mem_cons List.not_mem_nil
-  CloseS.eval_memory CloseS.eval_alloc CloseS.eval_addM CloseS.eval_read CloseS.eval_mlen
+  Tm.eval_memory CloseS.eval_alloc CloseS.eval_addM Tm.eval_read CloseS.eval_mlen
   CloseS.eval_hash
-  CloseS.eval_copyMem CloseS.eval_iread CloseS.eval_copy CloseS.eval_copySt CloseS.eval_write
+  Tm.eval_copyMem CloseS.eval_iread CloseS.eval_copy CloseS.eval_copySt Tm.eval_write
   SVal.view_prim
   -- runs
   Modality.wp_ok Modality.wp_pure Modality.wp_error Modality.wp_bind Modality.wp_ite
