@@ -222,7 +222,9 @@ run, part of the trace below, not an assumption. It is stated for the
 allocated bases only: no scheme in the repository reads back a name of an
 arbitrary base. A request may carry any scheme, and admission does not look at
 it, so for a successful request whose scheme breaks the law the allocation
-obligation is false. -/
+obligation is false. This is kept as it is (H1066): the obligation stays
+universal and cannot be discharged here for such schemes; a later step is to
+make `FreshNames` carry the law. -/
 def RoundTrip (names : FreshNames) : Prop :=
   ∀ base ∈ bases, ∀ index, names.parse (names.name base index) = some (base, index)
 
