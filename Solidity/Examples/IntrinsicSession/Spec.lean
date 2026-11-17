@@ -120,8 +120,9 @@ example (d : Bytes) (returns : ((w.atTime (liftWord s.q.timestamp)).transact fun
     [Event.tx s.q.sender s.q.target s.q.value s.q.timestamp s.q.input (.success d)] <+:
       ((spec F).lang.sem s.start e r).events := by
   obtain ⟨k, hk⟩ : ∃ k, r.horizon = k + 1 := ⟨r.horizon - 1, by have := s.room; omega⟩
-  have events : (step code.entry F wire r e [] 0 w (.request s.q)).events =
-      [Event.tx s.q.sender s.q.target s.q.value s.q.timestamp s.q.input (.success d)] := by
+  have done : (step code.entry F wire r e [] 0 w (.request s.q)).events =
+      [Event.tx s.q.sender s.q.target s.q.value s.q.timestamp s.q.input (.success d)] ∧
+      (step code.entry F wire r e [] 0 w (.request s.q)).stops = false := by
     dsimp only [step, request]
     rw [if_neg (not_not_intro s.funded)]
     split
@@ -132,25 +133,40 @@ example (d : Bytes) (returns : ((w.atTime (liftWord s.q.timestamp)).transact fun
       rw [s.installed] at hk
       cases hk
       rw [s.resolved]
-      simp only [s.enough, Bool.false_eq_true, if_false, responses_wire, returns, outcomeOf]
-  have stops : (step code.entry F wire r e [] 0 w (.request s.q)).stops = false := by
-    dsimp only [step, request]
-    rw [if_neg (not_not_intro s.funded)]
-    split
-    · rfl
-    · rename_i k' st' hk
-      rw [s.installed] at hk
-      cases hk
-      rw [s.resolved]
-      simp only [s.enough, Bool.false_eq_true, if_false, responses_wire, returns, outcomeOf]
+      simp only [s.enough, Bool.false_eq_true, if_false, responses_wire, returns, outcomeOf,
+        and_self]
   show _ <+: (go code.entry F wire r e [] 0 w r.horizon).pfx.events
-  rw [hk, go_step s.next stops]
-  exact events ▸ go_extends k _ _ _
+  rw [hk, go_step s.next done.2]
+  exact done.1 ▸ go_extends k _ _ _
 
-/-- The boundary the session starts at, and the fixed parameters of the spec. -/
-example : (view F).Boundary s.start e [] 0 ⟨code, w⟩ ∧ (spec F).fixed = F :=
-  ⟨Boundary.resume F ⟨code, w⟩ e, rfl⟩
+/-- The session starts at the boundary of the resumed world, in its code, and
+no other history or world stands there; the spec has the fixed parameters. -/
+example {h : List Event} {t : TypedWorld} (other : (view F).Boundary s.start e h 0 t) :
+    (view F).Boundary s.start e [] 0 ⟨code, w⟩ ∧ h = [] ∧ t = ⟨code, w⟩ ∧
+      t.code = code ∧ (view F).typed ((view F).resume t) = t ∧ (spec F).fixed = F :=
+  have here := Boundary.resume F ⟨code, w⟩ e
+  ⟨here, (other.unique here).1, (other.unique here).2, other.code, Start.typed_resume t,
+    spec_fixed F⟩
+
+/-- A larger bound extends the preimages, the slot preimages and the listed
+worlds. -/
+example {r' : Bound} (le : r ≤ r') :
+    hashed F s.start e r <+: hashed F s.start e r' ∧
+      slotHashed F s.start e r <+: slotHashed F s.start e r' ∧
+      (spec F).worlds s.start e r <+: (spec F).worlds s.start e r' :=
+  ⟨hashed_mono le, slotHashed_mono le, worlds_consistent le⟩
 
 end OneRequest
+
+/-- A create frame some fuel completes has the inputs of an observation whose
+result is the actual `World.create`: the deployment's accounting. -/
+example {code : Code} (v : World code.catalog) (k : Fin code.contracts.length)
+    (self : ContractWorld.Address) (body : Prog code.contracts[k] [] [])
+    (ctx : ContractWorld.Context) {n : Nat}
+    (done : (IntrinsicStorage.Frame.create n v k self body ctx).result ≠ .error .diverge) :
+    ∃ m, (IntrinsicStorage.Frame.create m v k self body ctx).result = v.create k self body ctx ∧
+      (⟨v, .create k self body, ctx⟩ : Frame (catalog code.contracts)).inputs =
+        (IntrinsicStorage.Frame.create m v k self body ctx).inputs :=
+  Frame.inputs_create ⟨n, done⟩
 
 end Solidity.Examples.IntrinsicSession.Spec
