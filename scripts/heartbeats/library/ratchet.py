@@ -12,9 +12,10 @@ baselines are regenerated from the merged head and checked in:
   GATE_HEARTBEATS=1 GATE_LOGS=LOGS bash scripts/coord-tools/gate.sh touched
   python3 -B scripts/heartbeats/library/ratchet.py write LOGS/heartbeats
 
-Baselines: Solidity.tsv and SolidityExamples.tsv beside this file, one line
-`module<TAB>units` per module of that library root (units as in `maxHeartbeats`:
-raw / 1000, rounded). Generated; never edit them by hand.
+Baselines: Solidity/ and SolidityExamples/ beside this file, one line per module
+of that library root: `Solidity/Solidity.Backend.tsv` holds `A.B<TAB>units` for
+Solidity.Backend.A.B (units as in `maxHeartbeats`: raw / 1000, rounded; a file
+per area keeps each under the 200 KB hygiene limit). Generated; never edit them.
 
 `build` is the gate's own `lake build` with three more weak arguments (`-j1` and
 `-DElab.async=false`, so kernel checking counts, and `--plugin` HeartbeatLinter),
@@ -36,8 +37,10 @@ A decrease, a new module and a module without a record only print.
 """
 import concurrent.futures, hashlib, json, os, pathlib, re, shutil, subprocess, sys, tempfile
 
-TOLERANCE = 2.0  # percent; from the import-drift samples in the hb3 result
-FLOOR = 50  # units; below this absolute growth a small module's drift is noise
+# Import drift, measured (hb3 result): 1290 modules rebuilt with unchanged source under
+# six merges moved by at most 0.7 units, and by at most 0.01% above 100 units.
+TOLERANCE = 1.0  # percent
+FLOOR = 10  # units; a growth below this never fails
 HERE = pathlib.Path(__file__).resolve().parent
 ROOT = HERE.parent.parent.parent
 ROOTS = ("Solidity", "SolidityExamples")
@@ -187,15 +190,20 @@ def library_modules():
                    if line.startswith("import ") and len(line.split()) > 1] for root in ROOTS}
 
 
+def area(module):
+    """The baseline file of a module is named after its first two name components."""
+    parts = module.split(".")
+    return ".".join(parts[:2]) if len(parts) > 2 else parts[0]
+
+
 def read_baselines():
     base = {}
     for root in ROOTS:
-        path = HERE / f"{root}.tsv"
-        if path.exists():
+        for path in (HERE / root).glob("*.tsv"):
             for line in path.read_text().splitlines():
                 if line and not line.startswith("#"):
-                    module, units = line.split("\t")
-                    base[module] = int(units)
+                    name, units = line.split("\t")
+                    base[f"{path.stem}.{name}"] = int(units)
     return base
 
 
@@ -254,10 +262,10 @@ def write(directory):
     if directory is None:
         with tempfile.TemporaryDirectory() as tmp:
             rows = collect(tmp, [m for modules in libraries.values() for m in modules])
-        lacking = [m for modules in libraries.values() for m in modules if m not in rows]
-        if lacking:
-            sys.exit(f"heartbeats: no record for {len(lacking)} module(s), e.g. {lacking[0]}; "
-                     "run `lake build Solidity SolidityExamples` first")
+        for module in (m for modules in libraries.values() for m in modules if m not in rows):
+            if not (ROOT / ".lake/build/lib/lean" / (module.replace(".", "/") + ".trace")).exists():
+                sys.exit(f"heartbeats: {module} is not built; run `lake build Solidity SolidityExamples` first")
+            print(f"no record {module}")
         base = {}
     else:
         rows = collect(directory, [p.stem for p in (pathlib.Path(directory) / "records").glob("*.tsv")], fresh_only=True)
@@ -265,9 +273,16 @@ def write(directory):
         base[module] = round(sum(r[2] for r in record) / 1000)
     seen = set()
     for root in ROOTS:
-        modules = sorted(m for m in set(libraries[root]) - seen if m in base)
+        files = {}
+        for module in sorted(m for m in set(libraries[root]) - seen if m in base):
+            files.setdefault(area(module), []).append(f"{module[len(area(module)) + 1:]}\t{base[module]}\n")
         seen.update(libraries[root])
-        (HERE / f"{root}.tsv").write_text(HEADER + "".join(f"{m}\t{base[m]}\n" for m in modules))
+        (HERE / root).mkdir(exist_ok=True)
+        for path in (HERE / root).glob("*.tsv"):
+            if path.stem not in files:
+                path.unlink()
+        for name, lines in files.items():
+            (HERE / root / f"{name}.tsv").write_text(HEADER + "".join(lines))
     print(f"heartbeats: wrote {len(rows)} module(s)", file=sys.stderr)
     return 0
 
