@@ -6,4 +6,5 @@
 `tests/upstream/`). Their SHA-256 hashes are G00's pins in
 `docs/solidity-features.json` (`upstream.sources`).
 `scripts/check-source-grammar.mjs` checks the hashes and the S00 mapping
-(`Solidity/Source/Upstream.lean`) against these files.
+(`Solidity/Source/Upstream.lean`) against these files in
+`tests/upstream/grammar-0.8.38/`.

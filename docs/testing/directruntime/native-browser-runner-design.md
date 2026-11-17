@@ -1,5 +1,8 @@
 # H127 serial slow-example runner: pre-use contract
 
+Unqualified script, test and JSON names below are files in
+`tests/directruntime-20261104/native-browser/h109/`.
+
 Status: design and source-plan preparation, **not an executable measurement
 runner or acceptance result**. The exact module-times intake at b3fb97985860dc154e377a959f6c1d9778be8cf9
 has now arrived in the hash-pinned coordinator archive. It includes both
@@ -164,7 +167,7 @@ Every pin/check is retained. A runner design review grants no relocation window.
 
 ## Implemented runtime rebuild helper (not the H127 runner)
 
-The reviewed readbounds/serial-build.py component authenticates its current
+The reviewed tests/directruntime-20261104/native-browser/readbounds/serial-build.py component authenticates its current
 Lean dependency inventory against Git and pins the explicit Lake shim, serial
 configuration, lakefile, toolchain selection and actual Lean/Lake executables.
 It handles canonical leading import headers, refuses the specified unsupported

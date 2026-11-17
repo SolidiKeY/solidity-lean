@@ -1,6 +1,6 @@
 # ReadBounds consumer wrappers
 
-The scripts in this directory retain reviewable build, closure, axiom and
+The scripts in `tests/directruntime-20261104/native-browser/readbounds/` retain reviewable build, closure, axiom and
 functional-check commands for the native/browser ReadBounds consumer. They use
 external pinned source, toolchain, cache and request inputs; inspect each script
 before use. Historical absolute paths describe its original execution layout.
@@ -19,7 +19,7 @@ unchanged stopped rerun or establish whole-assignment acceptance.
 
 
 The closure audit takes `--baseline-evidence-dir /absolute/private/directory`.
-For `scripts/remaining-checks.sh`, set `NATIVE_BROWSER_BASELINE_EVIDENCE` to that
+For `tests/directruntime-20261104/native-browser/readbounds/scripts/remaining-checks.sh`, set `NATIVE_BROWSER_BASELINE_EVIDENCE` to that
 same directory. It must contain the original `native-audit.json`,
 `native-input-identities.json` and `native-stub-classification.json` receipts;
 `baseline-inputs.py` checks their existing exact reference hashes before use.
