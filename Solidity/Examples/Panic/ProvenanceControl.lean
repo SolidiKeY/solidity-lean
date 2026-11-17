@@ -1,4 +1,5 @@
 import Solidity.Correctness.Panic.Provenance.Control
+import Solidity.Examples.Panic.ProvenanceEval
 
 /-!
 # Checks: step leaves of panic code provenance
@@ -11,31 +12,12 @@ self-catch hands its panic handler the word of that site's code.
 
 namespace Solidity.Examples.Panic.ProvenanceControl
 open Solidity.Panic Solidity.Semantics.Panic Solidity.Correctness.Panic
+open Solidity.Examples.Panic.ProvenanceEval (code? site? code_of_site)
 
 variable {C : Contract} {Γ : Ctx}
 
 /-- `assert(false)`. -/
 def fail : Val C Γ .bool := .simple (.bool false)
-
-/-- The emitted solc code of an intrinsic failure. -/
-def code? {α : Type} : EvalResult α → Option Nat
-  | .error (.intrinsic code _) => some code.code
-  | _ => none
-
-/-- The failed site retained by an intrinsic failure. -/
-def site? {α : Type} : EvalResult α → Option Site
-  | .error (.intrinsic _ origin) => some origin.site
-  | _ => none
-
-/-- On a coded result the emitted code is determined by the retained site. -/
-theorem code_of_site {α : Type} {r : EvalResult α} (hr : ErrCoded r) :
-    code? r = (site? r).map Site.code := by
-  match r, hr with
-  | .ok _, _ => rfl
-  | .error (.intrinsic code origin), hr =>
-    simp only [code?, site?, Option.map_some, hr.intrinsic rfl, siteCode_code]
-  | .error .revert, _ | .error .exhausted, _ | .error .diverge, _
-  | .error (.externalRevert _), _ | .error (.revertWith _), _ => rfl
 
 /-! ## A failing assertion inside a loop -/
 
