@@ -30,6 +30,8 @@ Commands for people; they prove nothing beyond the certificates they check.
 | `Docs/ProseCalibrated/Allowance.lean` | Exact allowance arithmetic: rational order, componentwise minimum, numerator antitonicity, floor/boundary evaluation, equivalence invariance, and zero calibration laws over `Goals.ProseCalibrated`. |
 | `Examples/Docs/ProseCalibrated/Allowance.lean` | Checks the complete public types of the seven allowance arithmetic laws and four helpers against their proved constants. |
 | `Solidity/Docs/ProseCalibrated/Classification.lean` | Calibrated prose classification, exclusion, locality and lexical padding laws over the frozen model. |
+| `Solidity/Docs/ProseCalibrated/Policy.lean` | Calibrated prose policy laws: acceptance decides the declarative order, rejection, unseen keys, fail-closed unavailable measurements, and the shrink, tighten and no-replacement laws. |
+| `Solidity/Docs/ProseCalibrated.lean` | Assembles `prose_calibrated_ratio_rule_sound` from the allowance, classification and policy laws; checker correspondence stays a separate obligation. |
 
 | `**/*Controls.lean` | Every `*Controls` module is in `Solidity`. `scripts/coord-tools/controls-classify.py` lists those no library module imports (candidates for a future controls library, not moved). |
 
