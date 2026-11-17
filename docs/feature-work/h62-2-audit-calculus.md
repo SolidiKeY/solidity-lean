@@ -2,9 +2,9 @@
 
 ## External evidence and coordinator intake
 
-Historical exact V123/V124 payload publication: evidence: bbfdd31172bf0ab028bd4967e50d63e7f8a91357 evidence/solidity-h28-sol-20261104/automation-benchmark/. Those manifests remain private; the current loader pin and exact packet are specified in tests/h62/item2/audit-calculus/BULK-INPUTS.md. Earlier preparation/pending-publication wording below is historical and superseded for these exact payloads; unrelated bulk retrieval and semantic acceptance remain pending.
+Historical exact V123/V124 payload publication: evidence: bbfdd31172bf0ab028bd4967e50d63e7f8a91357 evidence/solidity-h28-sol-20261104/automation-benchmark/. Those manifests remain private; the current loader pin and exact packet are specified in docs/feature-work/calculus-bulk-inputs.md. Earlier preparation/pending-publication wording below is historical and superseded for these exact payloads; unrelated bulk retrieval and semantic acceptance remain pending.
 
-Under H145, lane evidence indexes are archived in the [private coordination repository](https://github.com/SolidiKeY/solidity-lean-coord/tree/de649e9c9648443622f3fc35b24999c15ecfb27a/evidence/solidity-h28-sol-20261104/automation-benchmark/h145-code-evidence). The archive preserves 110 removed index files byte-for-byte, the current classification dataset and frozen census, and the prior sealed handoff. The default checker now reads its checksum manifest and exact payloads from immutable private Git objects as documented in tests/h62/item2/audit-calculus/BULK-INPUTS.md; historical verifier fixtures remain intact. Other bulk bytes referenced by those indexes stay on the VM and are not claimed privately retrieved. Historical statements below about committed evidence manifests describe earlier checkpoints; their indexes now live in the private archive.
+Under H145, lane evidence indexes are archived in the [private coordination repository](https://github.com/SolidiKeY/solidity-lean-coord/tree/de649e9c9648443622f3fc35b24999c15ecfb27a/evidence/solidity-h28-sol-20261104/automation-benchmark/h145-code-evidence). The archive preserves 110 removed index files byte-for-byte, the current classification dataset and frozen census, and the prior sealed handoff. The default checker now reads its checksum manifest and exact payloads from immutable private Git objects as documented in docs/feature-work/calculus-bulk-inputs.md; historical verifier fixtures remain intact. Other bulk bytes referenced by those indexes stay on the VM and are not claimed privately retrieved. Historical statements below about committed evidence manifests describe earlier checkpoints; their indexes now live in the private archive.
 
 For coordinator-side review, census claims are bound by hash only until the coordinator pulls the referenced bytes and verifies the privately archived manifests. Classification inputs and bulk evidence remain off Git on this VM under H44, with absolute paths, sizes and SHA256 identities. Local accounting/tests and local finder/skeptic review do not establish coordinator delivery, independent semantic acceptance or proof validation. Delivery remains coordinator-pending; the checkpoint evidence includes the actual local retention/hash audit. Regenerated or transcribed material does not establish identity with unavailable historical bytes.
 
@@ -30,7 +30,7 @@ coordinator must pause the existing goal externally.
 The original prompt, queues, steering and retirement notes are retained under
 scripts/h62/item2/audit-calculus/h28-inherited-handoff/. The exact361-path scope inventory
 is external under H44; its absolute path, size and SHA256 are in
-tests/h62/item2/audit-calculus/BULK-INPUTS.md. Other bulk and unimplemented drafts
+docs/feature-work/calculus-bulk-inputs.md. Other bulk and unimplemented drafts
 remain off Git in the authenticated evidence archive. Coordinator-local paths
 are provenance, not assumed successor access. H71 push permission was not
 available, so no push was attempted. No new proof implementation occurred after
@@ -2055,7 +2055,7 @@ This is proof-side finite-plan interpretation, not a new source statement, admit
 
 ## H145 pinned private input route
 
-The held V123 and current V124 exact payloads and checksum manifests are published privately: evidence: bbfdd31172bf0ab028bd4967e50d63e7f8a91357 evidence/solidity-h28-sol-20261104/automation-benchmark/. The default loader uses this immutable private Git packet through tests/h62/item2/audit-calculus/BULK-INPUTS.md, without VM-local fallback. This transport repair adds no witness or proof acceptance.
+The held V123 and current V124 exact payloads and checksum manifests are published privately: evidence: bbfdd31172bf0ab028bd4967e50d63e7f8a91357 evidence/solidity-h28-sol-20261104/automation-benchmark/. The default loader uses this immutable private Git packet through docs/feature-work/calculus-bulk-inputs.md, without VM-local fallback. This transport repair adds no witness or proof acceptance.
 
 ## Runtime array-copy roles (V127)
 
@@ -2071,7 +2071,7 @@ Store laws distinguish length n<W, live prefix i<n, discarded tail n<=i<old leng
 
 The final representation theorem needs full ArrayRepr (space, actual header and per-element representation) jointly with heap length<L, then represents the snapshot overlaid on any supplied old destination. This is conditional symbolic execution/representation, not a producer of whole compiler success, gas/fork/world or physical storage adequacy.
 
-No source/statements/definitions/interfaces/budgets/axioms/exclusions/toolchain changed; no fresh Lean/kernel/replay acceptance. H28 pauses and all STOPs remain. Exact H145 input publication: evidence: 109856958e6df7a445c12b518c7da2d60a1d74af evidence/solidity-h28-sol-20261104/automation-benchmark/. Historical checkpoint V127 pinned array-copy-inputs-v127 at this commit. The current loader pin is identified in tests/h62/item2/audit-calculus/BULK-INPUTS.md; exact historical reproduction is documented in tests/h62/item2/audit-calculus/PACKET-VERIFICATION.md. Historical unavailable bytes remain UNVERIFIABLE; exact archive-backed duplicate evictions remain restorable.
+No source/statements/definitions/interfaces/budgets/axioms/exclusions/toolchain changed; no fresh Lean/kernel/replay acceptance. H28 pauses and all STOPs remain. Exact H145 input publication: evidence: 109856958e6df7a445c12b518c7da2d60a1d74af evidence/solidity-h28-sol-20261104/automation-benchmark/. Historical checkpoint V127 pinned array-copy-inputs-v127 at this commit. The current loader pin is identified in docs/feature-work/calculus-bulk-inputs.md; exact historical reproduction is documented in docs/feature-work/calculus-packet-verification.md. Historical unavailable bytes remain UNVERIFIABLE; exact archive-backed duplicate evictions remain restorable.
 
 ## Typed byte-capture roles (V128)
 
@@ -2085,7 +2085,7 @@ bytesHalt sequences that existing capture with existing raw memory-revert semant
 
 Fresh capture cannot alias an old typed reference because old ids are below the old heap length. A boolean-array HRef in the extended heap cannot name the appended bytes object because its indexed heap type disagrees. Neither fact establishes physical memory-address separation outside this intrinsic model.
 
-No source/statements/definitions/interfaces/budgets/axioms/exclusions/toolchain changed; no fresh Lean/kernel/replay acceptance. H28 pauses and all STOPs remain. Exact H145 input publication: evidence: 4f8722f12dae4f516332d892b025def2ca09fec9 evidence/solidity-h28-sol-20261104/automation-benchmark/. Historical checkpoint V128 pinned byte-capture-inputs-v128 at this commit. The current loader pin is identified in tests/h62/item2/audit-calculus/BULK-INPUTS.md; exact historical reproduction is documented in tests/h62/item2/audit-calculus/PACKET-VERIFICATION.md. Historical unavailable bytes remain UNVERIFIABLE; exact archive-backed duplicate evictions remain restorable.
+No source/statements/definitions/interfaces/budgets/axioms/exclusions/toolchain changed; no fresh Lean/kernel/replay acceptance. H28 pauses and all STOPs remain. Exact H145 input publication: evidence: 4f8722f12dae4f516332d892b025def2ca09fec9 evidence/solidity-h28-sol-20261104/automation-benchmark/. Historical checkpoint V128 pinned byte-capture-inputs-v128 at this commit. The current loader pin is identified in docs/feature-work/calculus-bulk-inputs.md; exact historical reproduction is documented in docs/feature-work/calculus-packet-verification.md. Historical unavailable bytes remain UNVERIFIABLE; exact archive-backed duplicate evictions remain restorable.
 
 ## Finite byte-image roles (V129)
 
@@ -2099,11 +2099,11 @@ WordSpan retains a natural offset+32<=capacity bound. store32 selects exactly th
 
 expandZero preserves every old bounded cell, not just the resident prefix, and zeros new capacity. Reserving representation capacity does not grow the resident high-water mark. snapshot copies in increasing address order without physical expansion or gas simulation. ByteSpan permits length0 independently of offset; nonempty slices retain the full natural range bound. snapshot_get requires a strict index bound; snapshot_empty reads and validates no offset.
 
-No source/statements/definitions/interfaces/budgets/axioms/exclusions/toolchain changes; no fresh Lean/kernel/replay acceptance. H28 pauses and all STOPs remain. Exact H145 input publication: evidence: 2e12be5dd064c423ea37c77418d0efcd587d802a evidence/solidity-h28-sol-20261104/automation-benchmark/. Checkpoint V129 pinned byte-image-inputs-v129 at this commit. The current loader pin is identified in tests/h62/item2/audit-calculus/BULK-INPUTS.md; historical packet reproduction is documented in tests/h62/item2/audit-calculus/PACKET-VERIFICATION.md. Historical unavailable bytes remain UNVERIFIABLE; exact archive-backed duplicate evictions remain restorable.
+No source/statements/definitions/interfaces/budgets/axioms/exclusions/toolchain changes; no fresh Lean/kernel/replay acceptance. H28 pauses and all STOPs remain. Exact H145 input publication: evidence: 2e12be5dd064c423ea37c77418d0efcd587d802a evidence/solidity-h28-sol-20261104/automation-benchmark/. Checkpoint V129 pinned byte-image-inputs-v129 at this commit. The current loader pin is identified in docs/feature-work/calculus-bulk-inputs.md; historical packet reproduction is documented in docs/feature-work/calculus-packet-verification.md. Historical unavailable bytes remain UNVERIFIABLE; exact archive-backed duplicate evictions remain restorable.
 
 ## Actual historical packet verification (V130)
 
-Historical V127 and V128 loader references are checkpoint-specific; the current pin remains in tests/h62/item2/audit-calculus/BULK-INPUTS.md. The exact immutable manifests/payloads and a portable Git object proof pack are published privately: evidence: da3782f4f3a8d69f3c1a64ae59407a746c38a0cb evidence/solidity-h28-sol-20261104/automation-benchmark/. Use tests/h62/item2/audit-calculus/PACKET-VERIFICATION.md for no-remote reproduction. Actual comparisons establish V127 to V128 adds11 and V128 to V129 adds9 with all prior records, owners, frozen scope and stated provenance unchanged. This is packet continuity, not new semantic/witness/kernel acceptance.
+Historical V127 and V128 loader references are checkpoint-specific; the current pin remains in docs/feature-work/calculus-bulk-inputs.md. The exact immutable manifests/payloads and a portable Git object proof pack are published privately: evidence: da3782f4f3a8d69f3c1a64ae59407a746c38a0cb evidence/solidity-h28-sol-20261104/automation-benchmark/. Use docs/feature-work/calculus-packet-verification.md for no-remote reproduction. Actual comparisons establish V127 to V128 adds11 and V128 to V129 adds9 with all prior records, owners, frozen scope and stated provenance unchanged. This is packet continuity, not new semantic/witness/kernel acceptance.
 
 ## Constructed panic-carrier roles (V132)
 
@@ -2119,7 +2119,7 @@ The forall Pipeline theorem carries a label unused by the execution term; it is 
 
 Raw catch-data transport retains the exact supplied Ext and body, reuses actual bytes allocation/drop semantics, composes the scoped drop and preserves the body outcome's heap extension. The body may halt; successful completion is not assumed. Arbitrary caller heaps remain allowed.
 
-No source/statements/definitions/interfaces/budgets/axioms/exclusions/toolchain changes; no fresh Lean/kernel/replay acceptance. H28 pauses and all STOPs remain. At checkpoint V132 the exact H145 input publication is evidence: d13a6771c3ef25f596fa7b25e03230c08782f845 evidence/solidity-h28-sol-20261104/automation-benchmark/, directory panic-carrier-inputs-v132. The current loader pin is identified in tests/h62/item2/audit-calculus/BULK-INPUTS.md; actual old-to-new packet verification and a portable Git proof pack accompany the private validation handoff. Historical unavailable bytes remain UNVERIFIABLE; exact archive-backed duplicate evictions remain restorable.
+No source/statements/definitions/interfaces/budgets/axioms/exclusions/toolchain changes; no fresh Lean/kernel/replay acceptance. H28 pauses and all STOPs remain. At checkpoint V132 the exact H145 input publication is evidence: d13a6771c3ef25f596fa7b25e03230c08782f845 evidence/solidity-h28-sol-20261104/automation-benchmark/, directory panic-carrier-inputs-v132. The current loader pin is identified in docs/feature-work/calculus-bulk-inputs.md; actual old-to-new packet verification and a portable Git proof pack accompany the private validation handoff. Historical unavailable bytes remain UNVERIFIABLE; exact archive-backed duplicate evictions remain restorable.
 
 ## Finite-entry and source-determinism roles (V133)
 
@@ -2135,7 +2135,7 @@ completed_exact inverts an actual derivation to obtain the store/range bounds, e
 
 Completed bytes bounds follow the actual terminal local evaluation. Initialized inversion requires initialization and completion at the same frame. The local36 specialization and materialization use bytes from that derivation, not independent return-buffer or desired-halt equations. evaluated_literal_unique constructs the existing finite literal client and quantifies every other completion at that same entry. Source-call/deployment/resource association remains separate.
 
-No source/statements/definitions/interfaces/budgets/axioms/exclusions/toolchain changes; no fresh Lean/kernel/replay acceptance. H28 pauses and all STOPs remain. At checkpoint V133 the corrected exact H145 input publication is evidence: 115158f9d7021f36c68ac85b75665749762c079c evidence/solidity-h28-sol-20261104/automation-benchmark/, directory source-determinism-inputs-v133. The current loader pin is identified in tests/h62/item2/audit-calculus/BULK-INPUTS.md; actual packet comparison and portable Git proof accompany the private validation handoff. Historical unavailable bytes remain UNVERIFIABLE; exact archive-backed duplicate evictions remain restorable.
+No source/statements/definitions/interfaces/budgets/axioms/exclusions/toolchain changes; no fresh Lean/kernel/replay acceptance. H28 pauses and all STOPs remain. At checkpoint V133 the corrected exact H145 input publication is evidence: 115158f9d7021f36c68ac85b75665749762c079c evidence/solidity-h28-sol-20261104/automation-benchmark/, directory source-determinism-inputs-v133. The current loader pin is identified in docs/feature-work/calculus-bulk-inputs.md; actual packet comparison and portable Git proof accompany the private validation handoff. Historical unavailable bytes remain UNVERIFIABLE; exact archive-backed duplicate evictions remain restorable.
 
 ## Frozen EVM try owner confirmation (V135)
 

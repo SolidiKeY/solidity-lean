@@ -1121,3 +1121,199 @@ def documentation_reference_controls(env):
             if D in changes: rejected(edited, 'source mismatch', standalone=[dict(role, input_revision=edited.ref)])
             commit({k: add[k] for k in changes}, 'restored')
     finally: REVIEWED_DOC_REFERENCES, REVIEWED_DOC_READERS = saved
+
+
+# H1009 (gh#1350, X1E-NONPASSING-READ-PERSISTENCE, Option B): the persistence
+# form of nonpassing reads (QX1E-NONPASS uses the same rule). A
+# consumer_routes.persistent_reads row may carry an ordinary nonpassing read
+# (runner nonpassing:P, NONPASS_READ_OPERATION, frames with code identity)
+# recorded at the revision of P's nonpassing-unittest definition. At a later
+# --ref it credits that one read while P's definition blob, every frame and the
+# target are the same blobs now and at that revision, P is a declared unittest
+# runner and a frame of P lies in an entered test or setup context. Runners are
+# reviewed case by case (path, blob, commit that introduced that blob at P).
+# The run failed: the root is source-only, never validated or passing, and
+# anchors nothing; only the named in-scope target is credited (consumption):
+# recorded helper frames are provenance only, never credited.
+# Reviewed: the 11 nonpassing-unittest runners of check-tests-used-routes.json
+# whose recorded blob is live at 6ace6ff4. Refused, left unresolved:
+# tests/h62/item1/pin-fragments/probe.py (blob 65bb252c changed to 4479dfaa).
+NONPASS_READ_OPERATION = 'Observed fixture read during nonpassing unittest'
+PERSISTED_NONPASS_OPERATION = 'blob-bound persisted fixture read observed during a failed unittest run'
+NONPASS_PERSIST_PREFIX = 'nonpassing-persisted:'
+REVIEWED_NONPASS_PERSISTENCE = _review_table('''
+@99252640c3531e36b5de3eac0aac4ee71fa50a32
+H:item1/packet-panic/test_mul_proposal.py c15efd3896a87de0264cb94adaa906a713f70f34
+@77913ac1cff1147d1129caea943c881b4aa61ec7
+D:shared-translator/validation-input-controls.py a351764a4447049ec8a2d52e6e73993753d89b2e
+@6ebe96b19a37cc1de816b7322d8aa4638568e1ee
+T:h55/vectors-tables/test_fixture_controls.py 05d3cf96943793d1961afafc3b5d16dac82fd362
+@880f5fb630eedf12f582aa2b8ba9ba92250c636f
+T:h55/vectors-tables/test_table_proposals.py 0991231c4b170fadd64029edcba4a71284a04a74
+@b632012265807642cf690e15aed0d3dc753b96d8
+T:h62/item2/audit-bytecode-selection/test_inventory_report.py 05f260b9f57a57caff8fb2250e87dcc2bc4f74d8
+@49b10df66755e2501962470b69f744ea291f54e6
+T:h62/item4/generic-memorycopies/test_semantic_groups.py 6337febfe539ddbb97480f9f60499209a3102abf
+@c9df585f9c78134adc2f14ff383925d207502679
+T:h62/item6/migrate-evm/test_census.py 9f93078e0455433b5b6fccd327ed3a4b3b1b83df
+@03024461482e758b24f0c2376c6b166513a71665
+T:roadmap-v15-bounded-observe.py 4453c7b8e54ae381b397803a703172753c078108
+@f18f3815ea0c718dc06b5381149802596eb14c9f
+T:roadmap-v17/test_evidence.py 1afb5c3f29e957ed58a9defc7952b8b21687c7be
+@036114cb851f637298cf1ed8410a0ba0f7333389
+T:roadmap-v17/test_verify_compacted.py 28c0268375f47d7cec8be2582ad327b48e7280a1
+@d92c074c0c90f2bf4936b5c63f3bc439d6116812
+T:yul-composition/plan-approx-generator-test.py edb153f609028cf4f9193c9fc680e3788a227e1f
+''')
+
+
+def persisted_nonpassing_read(classifier, graph, catalog, row, reviewed=None):
+    """H1009: one persisted nonpassing read (see the comment above). A changed or
+    missing object or a superseding current definition of P grants nothing; a
+    row whose objects match but whose form does not hold is rejected."""
+    repo = graph.repo
+    reviewed = REVIEWED_NONPASS_PERSISTENCE if reviewed is None else reviewed
+    runner, revision, target, frames = row['runner'], row['input_revision'], row['target'], row['frames']
+    if not isinstance(runner, str) or not runner.startswith('nonpassing:'): raise ValueError('persisted nonpassing read needs a nonpassing runner')
+    p = runner[len('nonpassing:'):]
+    definitions = [e for e in catalog['standalone'] if e.get('path') == p and e.get('input_revision') == revision]
+    definition = definitions[0] if len(definitions) == 1 else {}
+    scopes = definition.get('input_scope')
+    if (definition.get('kind') != 'nonpassing-unittest' or definition.get('command') != ['python3', '-B', p]
+            or not isinstance(definition.get('source_blob'), str) or not isinstance(definition.get('purpose'), str)
+            or not definition['purpose'].strip() or not isinstance(scopes, list) or not all(isinstance(s, str) for s in scopes)):
+        raise ValueError('persisted nonpassing read lacks its nonpassing runner definition')
+    blob = definition['source_blob']
+    commits = sorted(c for q, b, c in reviewed if q == p and b == blob)
+    if len(commits) != 1: raise ValueError('unreviewed nonpassing read persistence: ' + p)
+    if not isinstance(target, str) or not isinstance(row['target_blob'], str): raise ValueError('invalid persisted read target')
+    if not isinstance(frames, list) or not frames or any(
+            not isinstance(f, dict) or set(f) != {'path', 'blob', 'line', 'code_qualname', 'code_firstlineno'}
+            or not isinstance(f['path'], str) or not isinstance(f['blob'], str) or type(f['line']) is not int
+            or not isinstance(f['code_qualname'], str) or type(f['code_firstlineno']) is not int or f['code_firstlineno'] < 1 for f in frames):
+        raise ValueError('invalid persisted nonpassing frame')
+    if frames[0]['path'] != p: raise ValueError('persisted read does not start at its runner')
+    if any(e.get('path') == p and e.get('input_revision') == repo.ref for e in catalog['standalone']): return
+    pins = sorted({(f['path'], f['blob']) for f in frames} | {(p, blob), (target, row['target_blob'])})
+    if not all(_current(repo, q, b) for q, b in pins): return
+    _check_lines(repo, frames)
+    if not _historical_objects(classifier, repo, revision, pins):
+        raise ValueError('persisted route objects differ at recorded revision ' + revision)
+    if not _introduced(classifier, repo, commits[0], p, blob): raise ValueError('persisted nonpassing runner lacks its introducing provenance: ' + p)
+    declaration = classifier['declared_unittest'](repo, p)
+    if declaration is None: raise ValueError('nonpassing source is not a declared unittest runner')
+    if not any(f['path'] == p and any(c['first'] <= f['line'] <= c['last'] and c['qualname'] == f['code_qualname']
+               and c['code_firstlineno'] == f['code_firstlineno'] for c in declaration['test_contexts']) for f in frames):
+        raise ValueError('nonpassing read lacks an entered test or setup context')
+    if not all(v not in classifier['SCOPE'] and (v in repo.tree or v.endswith('/') and any(q.startswith(v) for q in repo.tree)) for v in scopes):
+        raise ValueError('nonpassing test lacks reviewed fixture scope')
+    if classifier['excluded'](target) or any(classifier['excluded'](f['path']) for f in frames): return
+    identity = NONPASS_PERSIST_PREFIX + p
+    if not any(target == s or s.endswith('/') and target.startswith(s) for s in scopes):
+        graph.uncertain_reads[target].add(identity); return
+    graph.root(p, 'persisted nonpassing unittest runner source', shlex.join(['python3', '-B', p]), p, declaration['main_line'], root_id=identity)
+    if identity not in graph.roots: return
+    graph.roots[identity].update({'source_only': True, 'source_blob': blob, 'role_provenance': declaration, 'other_reads': 'unresolved',
+        'provenance': {'commit': commits[0], 'path': p, 'blob': blob},
+        'validation_at_measured_revision': {'status': 'unavailable', 'command': ['python3', '-B', p],
+            'reason': 'Normal run failed at each recorded revision and is not run here. Persisted test-context reads only; no execution, pass, helper, child, output, proof or runtime credit.'}})
+    details = {'kind': 'persisted-nonpassing-read', 'observed_revision': revision, 'validation_at_observed_revision': 'failed',
+               'runner_definition_blob': blob, 'purpose': definition['purpose']}
+    # Only the named target is credited: the recorded frames stay in the chain
+    # as provenance but no frame (helper or data) is observed or credited.
+    derived = identity + ':' + details['kind'] + ':' + hashlib.sha256(canonical(row)).hexdigest()
+    graph.roots[derived] = {**graph.roots[identity], 'derived_from': identity, 'observed_target': target, 'consumer_route': details}
+    edges = [{'source': a['path'], 'target': b['path'], 'line': a['line'], 'operation': 'Recorded nonpassing unittest call stack (persisted; no credit)',
+              'kind': 'executes', 'validated_for': derived} for a, b in zip(frames, frames[1:])]
+    edges.append({'source': frames[-1]['path'], 'target': target, 'line': frames[-1]['line'], 'operation': PERSISTED_NONPASS_OPERATION,
+                  'kind': 'consumes', 'validated_for': derived})
+    graph.observed.append((target, {'root': derived, 'entry': graph.roots[derived], 'edges': edges}))
+
+
+def nonpassing_persistence_controls(env):
+    """(12) H1009 controls, run by successor_controls with its helpers."""
+    global REVIEWED_NONPASS_PERSISTENCE
+    commit, run, rejected, blob, route = (env[k] for k in ('commit', 'run', 'rejected', 'blob', 'route'))
+    paths = {p for p, _, _ in REVIEWED_NONPASS_PERSISTENCE}
+    assert len(REVIEWED_NONPASS_PERSISTENCE) == len(paths) == 11 and 'tests/h62/item1/pin-fragments/probe.py' not in paths
+    P = 'tests/np_test.py'; D = 'tests/np-data.txt'; O = 'tests/np-other.txt'
+    text = ("import unittest\nclass T(unittest.TestCase):\n def test_it(self):\n  open('tests/np-data.txt').read()\n"
+            "  open('tests/np-other.txt').read()\n  self.fail('nonpassing')\nif __name__ == '__main__': unittest.main()\n")
+    H = 'tests/np_helper.py'
+    add = {P: text, D: 'np data\n', O: 'np other\n', H: 'def load(p):\n    return open(p).read()\n'}
+    nc = commit(add, 'nonpassing'); N = nc.ref; nl = commit({'tests/unrelated.txt': 'N\n'}, 'nonpassing later')
+    defn = {'path': P, 'input_revision': N, 'source_blob': blob(nc, P), 'command': ['python3', '-B', P], 'kind': 'nonpassing-unittest',
+            'purpose': 'Synthetic failing test.', 'input_scope': [D]}
+    fr = lambda line=4, qual='T.test_it', first=3, repo=nc: {'path': P, 'blob': blob(repo, P), 'line': line, 'code_qualname': qual, 'code_firstlineno': first}
+    row = lambda target=D, frames=None, **k: dict({'runner': 'nonpassing:' + P, 'input_revision': N, 'frames': frames or [fr(7, '<module>', 1), fr()],
+        'target': target, 'target_blob': blob(nc, target), 'operation': NONPASS_READ_OPERATION}, **k)
+    reads = lambda *rows: {'persistent_reads': list(rows)}
+    base_model, base = run(nl, standalone=[defn])
+    assert base[D]['class'] != 'keep' and NONPASS_PERSIST_PREFIX + P not in base_model['entry_points']
+    saved = REVIEWED_NONPASS_PERSISTENCE
+    REVIEWED_NONPASS_PERSISTENCE = frozenset({(P, blob(nc, P), N)})
+    try:
+        model, rows = run(nl, reads(row()), standalone=[defn]); entry = model['entry_points'][NONPASS_PERSIST_PREFIX + P]
+        chain = rows[D]['runner_chain']
+        assert rows[D]['class'] == 'keep' and chain['entry']['consumer_route']['kind'] == 'persisted-nonpassing-read'
+        assert chain['entry']['consumer_route']['validation_at_observed_revision'] == 'failed' and chain['edges'][-1]['operation'] == PERSISTED_NONPASS_OPERATION
+        assert entry['source_only'] and entry['validation_at_measured_revision']['status'] == 'unavailable'
+        assert 'validated:' + P not in model['entry_points'] and 'nonpassing:' + P not in model['entry_points']
+        assert all(canonical(r) == canonical(base[p]) for p, r in rows.items() if p not in (D, P))  # one read, no other credit
+        # At its own revision the row is the ordinary failed-run read.
+        model, rows = run(nc, reads(row()), standalone=[defn])
+        assert rows[D]['class'] == 'keep' and rows[D]['runner_chain']['entry']['validation_at_measured_revision']['status'] == 'failed'
+        # Out of the reviewed scope: an unreviewed read, never keep, and no root.
+        model, rows = run(nl, reads(row(O, [fr(7, '<module>', 1), fr(5)])), standalone=[defn])
+        assert rows[O]['class'] is None and 'unreviewed_readers' in rows[O]['secondary']
+        assert NONPASS_PERSIST_PREFIX + P not in model['entry_points']
+        # Recorded helper or data frames are provenance only: never credited.
+        for extra in ({'path': H, 'blob': blob(nc, H), 'line': 2, 'code_qualname': 'load', 'code_firstlineno': 1},
+                      {'path': O, 'blob': blob(nc, O), 'line': 1, 'code_qualname': 'x', 'code_firstlineno': 1}):
+            _, rows = run(nl, reads(row(frames=[fr(7, '<module>', 1), fr(), extra])), standalone=[defn])
+            assert rows[D]['class'] == 'keep' and canonical(rows[extra['path']]) == canonical(base[extra['path']]), extra['path']
+        # A broad or missing scope in the historical definition is refused.
+        for scope in (['tests/'], ['tests/missing.txt']):
+            rejected(nl, 'reviewed fixture scope', reads(row(O, [fr(7, '<module>', 1), fr(5)])), standalone=[dict(defn, input_scope=scope)])
+        # The failed-run root anchors nothing.
+        anchored = route(nc, NONPASS_PERSIST_PREFIX + P, 'node-readFileSync', [{'path': P, 'blob': blob(nc, P), 'line': 4}], O)
+        assert run(nl, dict(reads(row()), static_routes=[anchored]), standalone=[defn])[1][O]['class'] != 'keep'
+        Z = '0' * 40
+        for bad, message in ((row(operation='validated Python read of measured bytes'), 'needs a validated runner'),
+                             (row(runner='validated:' + P, operation=NONPASS_READ_OPERATION), 'needs a nonpassing runner'),
+                             (row(input_revision=Z), 'lacks its nonpassing runner definition'),
+                             (row(frames=[{k: v for k, v in fr().items() if k != 'code_qualname'}]), 'invalid persisted nonpassing frame'),
+                             (row(frames=[fr(first=0)]), 'invalid persisted nonpassing frame'),
+                             (row(frames=[fr(7, '<module>', 1)]), 'entered test or setup context'),
+                             (row(frames=[fr(qual='T.test_other')]), 'entered test or setup context'),
+                             (row(frames=[fr(first=2)]), 'entered test or setup context'),
+                             (row(frames=[fr(99)]), 'location mismatch'),
+                             (row(frames=[dict(fr(), path='tests/unrelated.txt', blob=blob(nl, 'tests/unrelated.txt'))]), 'does not start at its runner'),
+                             (row(target_blob=None), 'invalid persisted read target')):
+            rejected(nl, message, reads(bad), standalone=[defn])
+        for change, message in (({'kind': 'unittest', 'other_reads': 'unresolved'}, 'nonpassing runner definition'), ({'command': ['python3', P]}, 'nonpassing runner definition'),
+                                ({'purpose': ' '}, 'nonpassing runner definition'), ({'input_scope': None}, 'nonpassing runner definition')):
+            rejected(nl, message, reads(row()), standalone=[dict(defn, **change)])
+        # A row naming objects that were never together at the recorded revision.
+        later_data = commit({D: 'np changed\n'}, 'changed data')
+        forged = dict(row(), target_blob=blob(later_data, D))
+        rejected(later_data, 'objects differ at recorded revision', reads(forged), standalone=[defn])
+        restored = commit({D: add[D]}, 'restored data')
+        REVIEWED_NONPASS_PERSISTENCE = frozenset({(P, blob(nc, P), nl.ref)})
+        rejected(restored, 'introducing provenance', reads(row()), standalone=[defn])
+        REVIEWED_NONPASS_PERSISTENCE = frozenset({(P, Z, N)})
+        rejected(restored, 'unreviewed nonpassing read persistence', reads(row()), standalone=[defn])
+        REVIEWED_NONPASS_PERSISTENCE = saved
+        rejected(restored, 'unreviewed nonpassing read persistence', reads(row()), standalone=[defn])
+        REVIEWED_NONPASS_PERSISTENCE = frozenset({(P, blob(nc, P), N)})
+        assert run(restored, reads(row()), standalone=[defn])[1][D]['class'] == 'keep'
+        # Stale objects grant nothing; a current definition of P supersedes.
+        for changes in ({D: 'np changed\n'}, {P: text + '# changed\n'}):
+            edited = commit(changes, 'edited')
+            model, rows = run(edited, reads(row()), standalone=[defn])
+            assert rows[D]['class'] != 'keep' and NONPASS_PERSIST_PREFIX + P not in model['entry_points'], changes
+            commit({k: add[k] for k in changes}, 'restored')
+        current = dict(defn, input_revision=restored.ref)
+        model, rows = run(restored, reads(row()), standalone=[defn, current])
+        assert rows[D]['class'] != 'keep' and NONPASS_PERSIST_PREFIX + P not in model['entry_points']
+    finally: REVIEWED_NONPASS_PERSISTENCE = saved
