@@ -12,4 +12,4 @@ Explicit caller-supplied manifests remain supported for genuine checker fixtures
 
 Current census:1709 reviewed/3574 pending of5283;3901 confirmed semantic owners/1382 unresolved. Zero fresh joint witnesses. This transport repair supplies no Lean, kernel, replay, compiler-totality or performance acceptance and clears no H28 pause or STOP. Historical unavailable exact bytes remain UNVERIFIABLE.
 
-For exact historical V127/V128 reproduction and actual old-to-new preservation checks without private HTTPS access, use docs/feature-work/h62-calculus-packet-verification.md. This route leaves the current default pin unchanged.
+For exact historical V127/V128 reproduction and actual old-to-new preservation checks without private HTTPS access, use docs/feature-work/calculus-packet-verification.md. This route leaves the current default pin unchanged.

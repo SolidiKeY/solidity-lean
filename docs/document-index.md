@@ -56,10 +56,6 @@ and open obligations. Test proposals remain proposals until applied.
 - [docs/feature-work/h62-6-migrate-tools.md](feature-work/h62-6-migrate-tools.md)
 - [docs/feature-work/h62-6-migrate-typing.md](feature-work/h62-6-migrate-typing.md)
 - [docs/feature-work/h62-6-migrate-yul.md](feature-work/h62-6-migrate-yul.md)
-- [docs/feature-work/h62-calculus-bulk-inputs.md](feature-work/h62-calculus-bulk-inputs.md)
-- [docs/feature-work/h62-calculus-packet-verification.md](feature-work/h62-calculus-packet-verification.md)
-- [docs/feature-work/h62-hash-migration-reproduction.md](feature-work/h62-hash-migration-reproduction.md)
-- [docs/feature-work/h62-statement-graph-reproduction.md](feature-work/h62-statement-graph-reproduction.md)
 
 ## Feature support and interfaces
 
@@ -79,7 +75,9 @@ and open obligations. Test proposals remain proposals until applied.
 - [docs/feature-work/backend-scalar-lowering.md](feature-work/backend-scalar-lowering.md)
 - [docs/feature-work/balances-fit.md](feature-work/balances-fit.md)
 - [docs/feature-work/c3-exactness.md](feature-work/c3-exactness.md)
+- [docs/feature-work/calculus-bulk-inputs.md](feature-work/calculus-bulk-inputs.md)
 - [docs/feature-work/calculus-modes.md](feature-work/calculus-modes.md)
+- [docs/feature-work/calculus-packet-verification.md](feature-work/calculus-packet-verification.md)
 - [docs/feature-work/calldata-packets-1104-RawUint.md](feature-work/calldata-packets-1104-RawUint.md)
 - [docs/feature-work/calldata-packets-1105-RawBool.md](feature-work/calldata-packets-1105-RawBool.md)
 - [docs/feature-work/calldata-packets-1105-RawInt.md](feature-work/calldata-packets-1105-RawInt.md)
@@ -137,6 +135,7 @@ and open obligations. Test proposals remain proposals until applied.
 - [docs/feature-work/g42-world-call-consumers.md](feature-work/g42-world-call-consumers.md)
 - [docs/feature-work/hash-collision-bound.md](feature-work/hash-collision-bound.md)
 - [docs/feature-work/hash-direct-prefix.md](feature-work/hash-direct-prefix.md)
+- [docs/feature-work/hash-migration-reproduction.md](feature-work/hash-migration-reproduction.md)
 - [docs/feature-work/inline-assembly-vy1.md](feature-work/inline-assembly-vy1.md)
 - [docs/feature-work/inline-assembly-vy2.md](feature-work/inline-assembly-vy2.md)
 - [docs/feature-work/inline-assembly-vy3.md](feature-work/inline-assembly-vy3.md)
@@ -199,6 +198,7 @@ and open obligations. Test proposals remain proposals until applied.
 - [docs/feature-work/source-s04-state.md](feature-work/source-s04-state.md)
 - [docs/feature-work/source-s05.md](feature-work/source-s05.md)
 - [docs/feature-work/source-soundness.md](feature-work/source-soundness.md)
+- [docs/feature-work/statement-graph-reproduction.md](feature-work/statement-graph-reproduction.md)
 - [docs/feature-work/stipend-cost-rule.md](feature-work/stipend-cost-rule.md)
 - [docs/feature-work/storage-hashed-layout.md](feature-work/storage-hashed-layout.md)
 - [docs/feature-work/storage-value-representation.md](feature-work/storage-value-representation.md)
