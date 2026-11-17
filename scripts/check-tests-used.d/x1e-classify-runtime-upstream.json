@@ -1424,6 +1424,22 @@
         "kind": "source-only-program",
         "entry_line": 5,
         "purpose": "Declared standalone program: orchestrates retained transient-world remaining validation commands. Explicit source role only; default invocation is unvalidated. No read anchor, helper/fixture/child, output, proof or runtime credit."
+      },
+      {
+        "path": "tests/directruntime-20261104/native-browser/h109/test-readonly-inputs.py",
+        "input_revision": "1c4cebc10f5024c822481dbcc176cda55a1eda20",
+        "source_blob": "99f22b5856c4ee9f9931964cb80769e30ed53ce0",
+        "command": [
+          "python3",
+          "-B",
+          "tests/directruntime-20261104/native-browser/h109/test-readonly-inputs.py"
+        ],
+        "kind": "unittest",
+        "purpose": "Eight existing read-only input-mount controls, using synthetic mount tables and bounded local negative observations. Ordinary and instrumented runs passed at recorded revision. Exact source consumption only; no real sealed worker, mount setup, default helper execution, current validation, proof or runtime credit.",
+        "input_scope": [
+          "tests/directruntime-20261104/native-browser/h109/readonly-inputs.py"
+        ],
+        "other_reads": "unresolved"
       }
     ]
   },
@@ -2922,6 +2938,20 @@
         ],
         "target": "tests/directruntime-20261104/shared-translator/verify-fixed-byte-transition.py",
         "target_blob": "61223d6c55be9a07e354f378a7c9862de1d72400",
+        "operation": "validated Python read of measured bytes"
+      },
+      {
+        "runner": "validated:tests/directruntime-20261104/native-browser/h109/test-readonly-inputs.py",
+        "input_revision": "1c4cebc10f5024c822481dbcc176cda55a1eda20",
+        "frames": [
+          {
+            "path": "tests/directruntime-20261104/native-browser/h109/test-readonly-inputs.py",
+            "blob": "99f22b5856c4ee9f9931964cb80769e30ed53ce0",
+            "line": 16
+          }
+        ],
+        "target": "tests/directruntime-20261104/native-browser/h109/readonly-inputs.py",
+        "target_blob": "2cf66269c0c80f93accc30581aef013dd12762f5",
         "operation": "validated Python read of measured bytes"
       }
     ],
