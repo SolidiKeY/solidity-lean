@@ -622,8 +622,7 @@
     "path": "tests/h62/item2/audit-label-execution/test_census.py", "input_revision": "5e41c7b74bfdcd00a6bb03ad28dd669d1909d394", "source_blob": "245d01428dd7af1a17367464e6a2e4e7241f3000",
     "command": ["python3", "-B", "tests/h62/item2/audit-label-execution/test_census.py"],
     "kind": "unittest",
-    "entry_line": 231,
-    "purpose": "Frozen 147-module/656-declaration scanner, exact historical ownership reconciliation and source-bound reviews; preserves missing reservations and pending witnesses. Historical input use only, no current ownership, native or proof approval.",
+      "purpose": "Frozen 147-module/656-declaration scanner, exact historical ownership reconciliation and source-bound reviews; preserves missing reservations and pending witnesses. Historical input use only, no current ownership, native or proof approval.",
     "input_scope": ["tests/h62/item2/audit-label-execution/owner-reconciliation.json", "tests/h62/item2/audit-label-execution/source-bundle-reviews.json"],
     "other_reads": "unresolved"
    }
