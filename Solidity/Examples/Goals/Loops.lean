@@ -334,6 +334,21 @@ example {r : Request} {s : SourceProgram} (h : Decode.decode r = some s) :
           m.Related ((loopRel s.env r.contract).val H) ls env :=
   Simulation.decode_locals_matching h
 
+/-- Positive control for the globals half, on one contract with a state
+variable of each primitive type: the Source cell at each variable's path in
+the canonical unit has the type the state relation asks for. The general
+statement is not proved. -/
+def cellContract : Contract :=
+  { vars := [("s", .prim .bool), ("n", .prim .uint), ("k", .prim .int)] }
+def cellEnv : Source.Env := ((Decode.unit cellContract).map (·.env)).getD ⟨[]⟩
+example : (Decode.unit cellContract).isSome = true := rfl
+example : cellEnv.cellTy ⟨⟨some Decode.contractName, "s"⟩, []⟩ =
+    Source.Agreement.sourceTy .bool := rfl
+example : cellEnv.cellTy ⟨⟨some Decode.contractName, "n"⟩, []⟩ =
+    Source.Agreement.sourceTy .uint := rfl
+example : cellEnv.cellTy ⟨⟨some Decode.contractName, "k"⟩, []⟩ =
+    Source.Agreement.sourceTy .int := rfl
+
 end Decoder
 
 end Solidity.Goals
