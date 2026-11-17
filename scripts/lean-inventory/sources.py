@@ -20,6 +20,20 @@ LIB_ROOTS = ('Solidity', 'SolidityExamples', 'SoliditySlowExamples', 'SolkeyTest
 TEST_ROOTS = ('SolidityExamples', 'SoliditySlowExamples', 'SolkeyTestSuite', 'SolidityCorpus')
 EXE_ROOTS = {'SolkeyCheck': 'solkeycheck', 'SolCases': 'solcases', 'SolidityLean': 'solidity-lean'}
 GENERATED_ROOTS = ('Solidity.lean', 'SolidityExamples.lean', 'Bridge/SolidityBridge.lean')
+# Whole-library scans and fixture text that k1 had no instance of (added to master after
+# feb98975). Each was read; none uses a declaration. Off by default: they are blanket only
+# with `inventory.py --reviewed-blanket`, which records the option in the census.
+REVIEWED_BLANKET = {
+    'scripts/decl-index/DeclIndex.lean':
+        'whole-library declaration index (header lines 4-16): hashes the statement of every '
+        'declaration of the imported Solidity modules; a scan of every constant, not a use',
+    'scripts/decl-index/decl_index.py':
+        'runner of DeclIndex.lean (lines 99-106): substitutes the modules to index for its '
+        'single `import Solidity` line; a scan of every constant, not a use',
+    'scripts/hygiene/test_review_checks.py':
+        'unit test whose `import Solidity` and `lake build Solidity` strings are fixture text '
+        'committed to a temporary repository (lines 17-26), never run against this library',
+}
 
 
 def git(repo, *args, data=None):

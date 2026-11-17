@@ -205,9 +205,9 @@ BUILD_LOG = ('✔ [1/3] Built Solidity.Backend.A (1.5s)\n✔ [2/3] Fetched Solid
              '✔ [3/3] Built Solidity.Optimizer.G (850ms)\n')
 
 
-def make_fixture(root):
+def make_fixture(root, extra=None):
     root = Path(root)
-    for p, t in FILES.items():
+    for p, t in dict(FILES, **(extra or {})).items():
         (root / p).parent.mkdir(parents=True, exist_ok=True)
         (root / p).write_text(t)
     env = dict(os.environ, GIT_AUTHOR_NAME='t', GIT_AUTHOR_EMAIL='t@t', GIT_COMMITTER_NAME='t',
@@ -244,6 +244,46 @@ def make_fixture(root):
         ident[key] = INV.sha256_file(cdir / name)
     (cdir / 'identity.json').write_text(json.dumps(ident))
     return rev
+
+
+class ReviewedBlanketTests(unittest.TestCase):
+    """`--reviewed-blanket` is opt-in: off, a reviewed scan is an unextracted consumer."""
+    EXTRA = {'scripts/decl-index/DeclIndex.lean': 'import Solidity.Optimizer.G\n',
+             'scripts/decl-index/decl_index.py': "subprocess.run(['lake', 'env', 'lean'])\n"
+                                                 "TEXT = 'import Solidity.Lowering.C'\n"}
+
+    @classmethod
+    def setUpClass(cls):
+        cls.tmp = tempfile.mkdtemp()
+        cls.rev = make_fixture(cls.tmp, cls.EXTRA)
+
+    @classmethod
+    def tearDownClass(cls):
+        shutil.rmtree(cls.tmp)
+
+    def gen(self, on):
+        return json.loads(INV.render(INV.build(INV.Inputs(self.tmp, self.rev), on)))
+
+    def test_default_off_and_opt_in(self):
+        off, on = self.gen(False), self.gen(True)
+        v = lambda inv: {f['family']: f['verdict'] for f in inv['families']}
+        self.assertNotIn('options', off)
+        self.assertEqual(v(off)['dir:Solidity/Optimizer/'], 'unresolved')
+        self.assertEqual(v(off)['dir:Solidity/Lowering/'], 'unresolved')
+        self.assertEqual(v(on)['dir:Solidity/Optimizer/'], 'orphan')
+        self.assertEqual(v(on)['dir:Solidity/Lowering/'], 'orphan')
+        self.assertEqual(on['options'], {'reviewed_blanket': sorted(S.REVIEWED_BLANKET)})
+        self.assertTrue(on['regenerate'][-1].endswith(' --reviewed-blanket'))
+        self.assertEqual(CH.check(Path(self.tmp), off), [])
+        self.assertEqual(CH.check(Path(self.tmp), on), [])
+
+    def test_blanket_outside_the_registry_is_rejected(self):
+        on = self.gen(True)
+        del on['options']  # claims the reviewed scans as blanket without opting in
+        self.assertNotEqual(CH.check(Path(self.tmp), on), [])
+        on = self.gen(True)
+        on['options']['reviewed_blanket'] = ['scripts/other.py']
+        self.assertNotEqual(CH.check(Path(self.tmp), on), [])
 
 
 class FixtureTests(unittest.TestCase):

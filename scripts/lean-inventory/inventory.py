@@ -317,8 +317,9 @@ def fold_map(consts):
     return fold
 
 
-def build(inp):
+def build(inp, reviewed_blanket=False):
     """All facts, the certificate, and the summary JSON."""
+    blanket_runners = dict(BLANKET_RUNNERS, **(S.REVIEWED_BLANKET if reviewed_blanket else {}))
     module_paths = {S.module_name(p): p for p in inp.lean_paths}
     in_scope = sorted(p for p in inp.lean_paths if S.area_of(p))
     siblings = set(in_scope)
@@ -491,8 +492,8 @@ def build(inp):
         m = S.module_name(p)
         if m in built or S.area_of(p):
             continue
-        if p in BLANKET_RUNNERS:
-            blanket[p] = BLANKET_RUNNERS[p]
+        if p in blanket_runners:
+            blanket[p] = blanket_runners[p]
             continue
         if p in S.GENERATED_ROOTS:
             continue  # imports only; listed as blanket below, its imports are checked as files
@@ -517,6 +518,9 @@ def build(inp):
     texts = S.blobs(inp.repo, [b for _, b in script_blobs])
     for p, b in script_blobs:
         t = texts[b]
+        if p in blanket_runners:
+            blanket[p] = blanket_runners[p]
+            continue
         if not S.LEAN_INVOCATION.search(t):
             continue
         names = set()
@@ -547,6 +551,7 @@ def build(inp):
         'runner_modules': runner_modules, 'inline_counts': inline_counts,
         'unclassified': unclassified, 'consts': consts, 'loaded': loaded,
         'fold': fold, 'node_module': node_module, 'imports': imports,
+        'reviewed_blanket': reviewed_blanket,
     }
 
 
@@ -773,7 +778,8 @@ def render(state):
             'export LEAN_NUM_THREADS=1',
             f'python3 -B scripts/lean-inventory/inventory.py --repo . --revision {inp.rev} --extract',
             f'python3 -B scripts/lean-inventory/inventory.py --repo . --revision {inp.rev} '
-            '--output scripts/lean-inventory.json --check'],
+            '--output scripts/lean-inventory.json --check'
+            + (' --reviewed-blanket' if state['reviewed_blanket'] else '')],
         'limitations': LIMITATIONS,
         'scope': {'areas': list(S.AREAS), 'rule': 'tracked .lean files under Solidity/<Area>/',
                   'grouping_rule': S.GROUPING_RULE,
@@ -814,6 +820,8 @@ def render(state):
         'certified_orphan_families': orphans,
         'families': families,
     }
+    if state['reviewed_blanket']:  # absent by default, so default output bytes are unchanged
+        out['options'] = {'reviewed_blanket': sorted(S.REVIEWED_BLANKET)}
     return json.dumps(out, indent=None, separators=(',', ':'), sort_keys=False) + '\n'
 
 
@@ -824,6 +832,9 @@ def main(argv=None):
     ap.add_argument('--output')
     ap.add_argument('--check', action='store_true')
     ap.add_argument('--extract', action='store_true')
+    ap.add_argument('--reviewed-blanket', action='store_true',
+                    help='opt-in, off by default: also treat sources.REVIEWED_BLANKET as blanket '
+                         '(whole-library scans and fixture text, not uses)')
     a = ap.parse_args(argv)
     rev = S.resolve(a.repo, a.revision)
     if a.extract:
@@ -832,7 +843,7 @@ def main(argv=None):
     if not a.output:
         ap.error('--output is required')
     inp = Inputs(a.repo, rev)
-    text = render(build(inp))
+    text = render(build(inp, a.reviewed_blanket))
     if a.check:
         import checker
         old = Path(a.output).read_text() if Path(a.output).exists() else None

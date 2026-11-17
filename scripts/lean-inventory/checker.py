@@ -258,6 +258,12 @@ def check(repo, inv):
                 attributed.add(n)
     built = S.closure(imports, list(S.LIB_ROOTS) + list(S.EXE_ROOTS))
     blanket = {b['path'] for b in inv['roots']['blanket']}
+    opted = (inv.get('options') or {}).get('reviewed_blanket')
+    if opted is not None and opted != sorted(S.REVIEWED_BLANKET):
+        bad('options.reviewed_blanket is not sources.REVIEWED_BLANKET')
+    allowed = {'scripts/AxiomAudit.lean', *S.GENERATED_ROOTS} | (set(S.REVIEWED_BLANKET) if opted else set())
+    if blanket - allowed:
+        bad('blanket paths outside the reviewed registry: ' + ', '.join(sorted(blanket - allowed)))
     reached = set()
     for p in lean_paths:
         m = mod_of_path[p]
@@ -272,7 +278,7 @@ def check(repo, inv):
     stexts = S.blobs(repo, [b for _, b in scripts])
     mods = set(mod_of_path.values())
     for p, b in scripts:
-        if not S.LEAN_INVOCATION.search(stexts[b]):
+        if p in blanket or not S.LEAN_INVOCATION.search(stexts[b]):
             continue
         named = set()
         for nm in S.template_imports(stexts[b]):
