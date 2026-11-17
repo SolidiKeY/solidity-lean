@@ -50,20 +50,28 @@ The concrete boundary is begun below, not finished:
 * `Observe.source`/`Observe.target` are the observation policies (H1021): no
   events, the kind of the outcome at the first completing horizon.
 * `Simulation.Simulates rel` is `relates` (H1022): one general simulation,
-  from which the e1 endpoints are derived (`of_endpoint`, `of_retEndpoint`).
+  which the e1 endpoints imply (`of_endpoint`, `of_retEndpoint`).
   It is relative to a state relation `rel`; no concrete one exists yet.
 * `Allocation.trace` is the allocation trace (H1023): one scope per run.
-* `loopBoundaryAt rel` assembles them, and `loopResidualAt_iff` gives the three
-  obligations left; both family obligations are theorems there.
+* `loopBoundaryAt rel` assembles them with `rel` unbound. For a `rel` that
+  reflects Booleans and relates `false` to `false`, `loopResidualAt_iff` gives
+  the four obligations left and the two family obligations follow. No such
+  `rel` is defined, and these two hypotheses do not rule out a degenerate one.
+
+Each of the three choices has known defects, listed at its section: the
+policies observe the outcome kind only and allow every environment, the
+simulation can hold vacuously, and the allocation trace is incomplete. The
+boundary is therefore not ready to carry the goal.
 
 Not proved, and partly not provable yet: the fields `allocation` and `pipeline`
 take as hypothesis a successful run of `elabStmtsP` and, for a callee, of
 `calleeBody`, which runs `renameStmts`, `lowerReturns` and `wrapMods`. All four
 are `partial`, so opaque to the kernel: the hypothesis says nothing about the
-elaborated program, and no request's `Request.Succeeds` can be derived or
-refuted. For the same reason the decoder's coverage obligation can be neither
-proved nor refuted today; once the elaborator is total it fails on the first
-successful request in a listed gap. `Solidity.Goals.lowerLoopsCorrect`
+elaborated program, and no request's `Request.Succeeds` can be derived (it can
+be refuted where top-level lowering, which is total, fails). So the decoder's
+coverage obligation cannot be proved today; once the elaborator is total it
+fails on the first successful request in a listed gap. Also not proved:
+`InferComplete`, and anything about a concrete state relation. `Solidity.Goals.lowerLoopsCorrect`
 stays unstated until the boundary is complete.
 -/
 namespace Solidity.Correctness.Lowering.Total
@@ -511,8 +519,9 @@ decoder's functions, and `Spells` on requests, written with Source typing
 derivations instead of the inference function. The decoder is proved sound for
 it (`decode_spells`) and, if Source inference is complete, complete
 (`Spells.decode`). It shares the decoder's operator, type and environment
-tables, its `unbrace`, and its reading of the request's unit and locals, so it
-is an independent check of the recursion and of inference, not of those. -/
+tables, its `unbrace`, its `plain` test and its reading of the request's unit
+and locals, and its constructors repeat the decoder's spelling choices. So it
+is an independent check of the recursion and of inference, not of the choices. -/
 namespace Spells
 open Source (Syn SCtx STy)
 open Decode (num uintElem intElem unbrace)
@@ -962,11 +971,14 @@ def Spells (r : Request) (s : SourceProgram) : Prop :=
     Spells.Items .body r.input.raw b ∧
     s = ⟨C.env, C.rets, C.inModifier, .body, Source.tysOf L, Source.tysOf L', d.toR⟩
 
-/-- Source inference finds a derivation whenever one exists. Not proved in the
-Source front end; the decoder is complete for `Spells` exactly under it. -/
+/-- Source inference finds a derivation whenever one exists, on the decoder's
+image only: a request's canonical context and a block its raw input spells.
+Not proved in the Source front end, whose inference is documented as possibly
+incomplete in general; the decoder is complete for `Spells` under it. -/
 def InferComplete : Prop :=
-  ∀ (C : Source.Ctx) (L : List (String × Source.STy)) (b : Source.Syn (.list (.item .body)))
-    (L' : List (String × Source.STy)), Source.ItemsD C L b L' →
+  ∀ (r : Request) (C : Source.Ctx) (L : List (String × Source.STy))
+    (b : Source.Syn (.list (.item .body))) (L' : List (String × Source.STy)),
+    Decode.context r = some C → Spells.Items .body r.input.raw b → Source.ItemsD C L b L' →
     (Source.ItemsD.infer C L b).isSome = true
 
 /-- The decoder is sound for the relation: what it returns is spelled. -/
@@ -997,7 +1009,7 @@ theorem Spells.decode (complete : InferComplete) {r : Request} {s : SourceProgra
     (h : Spells r s) : Decode.decode r = some s := by
   have h₀ := h
   obtain ⟨p, C, L, b, L', d, hC, hL, hb, _⟩ := h₀
-  obtain ⟨⟨L'', d'⟩, found⟩ := Option.isSome_iff_exists.mp (complete C L b L' d)
+  obtain ⟨⟨L'', d'⟩, found⟩ := Option.isSome_iff_exists.mp (complete r C L b L' hC hb d)
   have decoded : Decode.decode r =
       some ⟨C.env, C.rets, C.inModifier, .body, Source.tysOf L, Source.tysOf L'', d'.toR⟩ := by
     simp [Decode.decode, p, hC, hL, hb.decode, found]
@@ -1006,10 +1018,19 @@ theorem Spells.decode (complete : InferComplete) {r : Request} {s : SourceProgra
 /-! ## The observation policies (H1021)
 
 No events; the outcome at the first horizon that completes. Only the kind of an
-outcome is observed (success or failure, with no data): the intrinsic halt
-keeps no panic code, so data cannot be compared at this level, and it is left
-to `relates`. Journal and event faithfulness is an exposed obligation that
-these policies do not discharge. Every environment and horizon is allowed. -/
+outcome is observed (success or failure): no data, no events, no journal, no
+state. Panic data cannot be compared (the intrinsic halt keeps no code); other
+revert data is compared only in `Simulation.Final`. Event and journal
+faithfulness is stated by no proposition in this file: it is dropped by these
+policies, not yet exposed as an obligation.
+
+Known defects of this choice, open: every environment is allowed, including
+Source executions with a failure plan, while the simulation speaks of the
+default plan only; a stuck Source run observes like a diverging model run; an
+escaping `break` or `continue` observes as success; and `PassCorrect` at these
+policies needs a surjection from model states onto Source executions that is
+tied to no state relation, so it may be false for reasons unrelated to
+lowering, or say very little. -/
 namespace Observe
 
 open Solidity.Roadmap
@@ -1082,21 +1103,32 @@ end Observe
 
 /-! ## The allocation trace (H1023)
 
-One scope per request: every name in scope is protected, and the generated
-identifiers are the fresh-shaped spellings of the run whose index lies in the
-run's fresh-counter interval. This over-approximates: callee-local rebinding
-and memo reuse are not given scopes of their own. It reads the lowered raw
-output and the locals after elaboration; a temporary that occurs only inside
-the intrinsic program is not listed, so the trace is not yet complete. -/
+One scope per request: the names listed by `protectedNames`, and as generated
+the fresh-shaped spellings of the run whose index lies in the run's
+fresh-counter interval. Callee-local rebinding and memo reuse get no scope of
+their own. The trace is not complete, and both lists under-approximate:
+
+* protected: binders the raw input declares but never reads, quantified
+  invariant binders, a callee's parameters and modifiers unless in its
+  locals, recursion and memo entries are missing;
+* generated: only names read in the lowered output or live after elaboration
+  are seen, so a temporary declared and never read, one that occurs only in
+  the intrinsic program, and a memo-reused callee name below the interval
+  are missing; with a `FreshNames` whose `parse` never succeeds the list is
+  empty and the obligation trivial. No round-trip law on `FreshNames` is
+  assumed or stated. -/
 namespace Allocation
 
-/-- Every name in scope of the request: caller and callee locals, state
-variables, functions, names the scope marks as user-supplied, and the names
-the raw input reads. -/
+/-- Names in scope of the request: caller and callee locals, return slots,
+state variables, enums, functions, a callee's renaming, names the scope marks
+as user-supplied, and the names the raw input reads. -/
 def protectedNames (r : Request) : List String :=
   r.input.before.locals.1.map Prod.fst ++
-    (r.callee.map fun c => c.locals.map Prod.fst).getD [] ++
-    r.contract.vars.map Prod.fst ++ r.contract.funs.map Prod.fst ++
+    (r.callee.map fun c => c.locals.map Prod.fst ++ c.names.map Prod.fst ++
+      c.names.map Prod.snd ++ c.scope.map Prod.fst).getD [] ++
+    r.input.returnSlots.getD [] ++
+    r.contract.vars.map Prod.fst ++ r.contract.enums.map Prod.fst ++
+    r.contract.funs.map Prod.fst ++
     r.input.scope.funs.map Prod.fst ++ r.input.scope.mutableFreshNames ++
     r.input.raw.flatMap RawStmt.names
 
@@ -1123,10 +1155,19 @@ end Allocation
 /-! ## The general simulation (H1022)
 
 One relation for every decoded program and its elaborated block, in place of
-the e1 endpoints by cases; the endpoints are derived from it below. It is
+the e1 endpoints by cases. The e1 endpoints imply it (`of_endpoint`,
+`of_retEndpoint`); they are stronger and are not recovered from it. It is
 relative to a state relation `rel` (values and globals): no concrete Source to
 model global-state relation exists yet, so none is chosen here. It speaks of
-runs under the default execution plan only. -/
+runs with no failure plan and known calldata only.
+
+Known defects, open. `Simulates` can hold vacuously: its context maps are
+chosen existentially and are tied to no names, so a map between unrelatable
+types makes the premise unsatisfiable; and nothing asks `rel` to be non-empty
+or total (a `glob` that is never true satisfies it). Unlike the diagram of
+`Goals/Shrink.lean` it has no total initial matching, no integer reflection
+and no freshness clause. The return witness of the e1 return endpoint is not
+kept: a Source `return` and a normal completion match the same model results. -/
 namespace Simulation
 
 /-- A Source/model state relation: values at each heap typing, and the
@@ -1156,7 +1197,9 @@ def Final {s : SourceProgram} {C : Contract} {Γ Δ : Ctx} {H : HTy}
 /-- **The simulation.** From related states, at every horizon from some point
 on, the Source result matches the model's one result. A Source run that times
 out at every horizon is matched only by a diverging model run, so this is both
-directions at once. -/
+directions on related pairs only; it is not the backward half of `PassCorrect`.
+Since model exhaustion, a stuck Source run and an escaping jump match nothing,
+proving it means proving they do not occur from related states. -/
 def Simulates (rel : (E : Source.Env) → (C : Contract) → StateRelation E C)
     (s : SourceProgram) {C : Contract} {Γ : Ctx} (p : Blk C Γ) : Prop :=
   ∃ (m : Lowering.V07.ContextMap s.before Γ) (m' : Lowering.V07.ContextMap s.after p.1)
@@ -1183,7 +1226,7 @@ theorem execItems_single {E : Source.Env} (G : Source.Glob E) (F : Source.Fr) (n
 
 variable {rel : (E : Source.Env) → (C : Contract) → StateRelation E C}
 
-/-- The e1 normal endpoint is an instance of the simulation, for every state
+/-- The e1 normal endpoint implies the simulation, for every state
 relation that reflects Booleans and relates `false` to `false`. -/
 theorem of_endpoint
     (reflect : ∀ E C H (v : Source.Val E.layout .bool) (b : Bool),
@@ -1206,8 +1249,8 @@ theorem of_endpoint
   rw [show n + (offset + 1) = n + offset + 1 from rfl, step, target]
   exact ⟨post, same ▸ glob⟩
 
-/-- The e1 return endpoint is an instance of the simulation as well: the
-returned flag only selects which of its two matching cases applies. -/
+/-- The e1 return endpoint implies the simulation as well. The returned flag
+selects which matching case applies; its link to the model witness is dropped. -/
 theorem of_retEndpoint
     (reflect : ∀ E C H (v : Source.Val E.layout .bool) (b : Bool),
       (rel E C).val H .bool (.val .bool) v b → v = .bool b)
@@ -1236,10 +1279,9 @@ end Simulation
 Admission and association are fixed here: every request whose whole pipeline
 succeeds is admitted (`loopEntry`), and a request is associated with the
 programs it spells (`Spells`), so the `decoder` field is a real obligation:
-soundness is `decode_spells`, completeness is left. The observation policies, the
-state relation `relates` and the allocation trace are not chosen here: each is
-a separate semantic choice that needs its own decision, so `loopBoundary` takes
-them as arguments and `loopResidual_iff` lists what is then left to prove. -/
+soundness is `decode_spells`, completeness is left. `loopBoundary` takes the
+policies, `relates` and the allocation trace as arguments, and
+`loopResidual_iff` lists what is left for any choice of them. -/
 
 /-- Admission: every request whose whole pipeline succeeds. -/
 def loopEntry (r : Request) : Prop := r.Succeeds
@@ -1304,10 +1346,11 @@ theorem loopResidual_iff {source target relates allocations} :
 
 /-! ## The boundary at a state relation
 
-Policies (H1021), simulation (H1022) and allocation trace (H1023) are now
-fixed; only the state relation `rel` is still an argument. -/
+The policies (H1021), the simulation (H1022) and the allocation trace (H1023)
+as chosen above, each with its listed defects; the state relation `rel` is
+still an argument, so this is not yet a concrete boundary. -/
 
-/-- The concrete boundary at a state relation. -/
+/-- The boundary with the state relation unbound. -/
 def loopBoundaryAt (rel : (E : Source.Env) → (C : Contract) → Simulation.StateRelation E C) :
     SemanticBoundary :=
   loopBoundary Observe.source (fun p => Observe.target p)
@@ -1340,7 +1383,8 @@ theorem loopBoundaryAt_returns
 Booleans and relates `false` to `false`: the decoder is defined on every
 successful request and complete for `Spells` there; the run's one allocation
 scope is safe; and each successful pipeline simulates its decoded program and
-refines it under the policies. The two family obligations are discharged. -/
+refines it under the policies. The two family obligations follow from the two
+hypotheses on `rel`; for a future concrete `rel` those are owed. -/
 theorem loopResidualAt_iff
     (reflect : ∀ E C H (v : Source.Val E.layout .bool) (b : Bool),
       (rel E C).val H .bool (.val .bool) v b → v = .bool b)

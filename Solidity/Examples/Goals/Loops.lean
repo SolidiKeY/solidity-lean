@@ -203,8 +203,8 @@ example {source target relates allocations} :
 
 /-- With the policies (H1021), the simulation (H1022) and the allocation
 trace (H1023) fixed, and for a state relation that reflects Booleans and
-relates `false` to `false`, the contract is four obligations: the two e1
-family obligations are theorems. -/
+relates `false` to `false`, the contract is four obligations; the two e1
+family obligations follow from those hypotheses. No such relation is defined. -/
 example {rel : (E : Source.Env) → (C : Contract) → Simulation.StateRelation E C}
     (reflect : ∀ E C H (v : Source.Val E.layout .bool) (b : Bool),
       (rel E C).val H .bool (.val .bool) v b → v = .bool b)
