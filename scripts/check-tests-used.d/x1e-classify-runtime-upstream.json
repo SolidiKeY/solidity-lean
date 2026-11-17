@@ -127,6 +127,51 @@
         "purpose": "Enumerate observed field subvariants and witnesses from committed compiler fixtures; default ordinary and instrumented invocations completed at the measured revision and reported806 variants. An empty generated-output directory was created for the observation. No semantic support, compiler authenticity, admission, intrinsic or backend proof follows. Observed process completion only; input_scope is empty, other reads unresolved, and no generated-output, fixture/helper/child execution, proof or runtime credit is certified.",
         "input_scope": [],
         "other_reads": "unresolved"
+      },
+      {
+        "path": "tests/directruntime-20261104/shared-translator/compare-readers.py",
+        "input_revision": "30d5dc77485a2d0e32bad8417e7aed9e935f08ba",
+        "source_blob": "c54d51a33a16c5cad8295d6abc7723af73f66787",
+        "command": [
+          "python3",
+          "-B",
+          "tests/directruntime-20261104/shared-translator/compare-readers.py"
+        ],
+        "kind": "runnable-entrypoint",
+        "entry_line": 8,
+        "purpose": "Compare saved reader-configuration observation rows and current source hash anchors; observed both 57-row suites. Saved decoder metadata comparison only, not a new reader execution or semantic equivalence. Ordinary and instrumented default invocations completed at the measured revision. Observed process completion only; no generated-output provenance, fixture/helper/child execution, Lean/compiler, proof or runtime credit is certified.",
+        "input_scope": [],
+        "other_reads": "unresolved"
+      },
+      {
+        "path": "tests/directruntime-20261104/shared-translator/construct-reader-cases.py",
+        "input_revision": "30d5dc77485a2d0e32bad8417e7aed9e935f08ba",
+        "source_blob": "af43cb50bd456b79f54de1974fa23ee2aafc3a49",
+        "command": [
+          "python3",
+          "-B",
+          "tests/directruntime-20261104/shared-translator/construct-reader-cases.py"
+        ],
+        "kind": "runnable-entrypoint",
+        "entry_line": 13,
+        "purpose": "Generate two 57-case witness indexes from retained census and raw AST fixtures, checking current source hash anchors. No fresh compilation was performed; historical compiler labels are input metadata, not newly authenticated facts. Ordinary and instrumented default invocations completed at the measured revision. Observed process completion only; no generated-output provenance, fixture/helper/child execution, Lean/compiler, proof or runtime credit is certified.",
+        "input_scope": [],
+        "other_reads": "unresolved"
+      },
+      {
+        "path": "tests/directruntime-20261104/shared-translator/raw-elaboration-ledger.py",
+        "input_revision": "30d5dc77485a2d0e32bad8417e7aed9e935f08ba",
+        "source_blob": "2cfe3be0ff9429fb982cc564b170efbac1ddfca7",
+        "command": [
+          "python3",
+          "-B",
+          "tests/directruntime-20261104/shared-translator/raw-elaboration-ledger.py"
+        ],
+        "kind": "runnable-entrypoint",
+        "entry_line": 9,
+        "purpose": "Build a syntactic index of 59 Raw constructors and 8 theorem declaration starts from committed source text. Regex arm hits and declaration names do not establish elaboration correctness, theorem checking or axiom signatures. Ordinary and instrumented default invocations completed at the measured revision. Observed process completion only; no generated-output provenance, fixture/helper/child execution, Lean/compiler, proof or runtime credit is certified.",
+        "input_scope": [],
+        "other_reads": "unresolved"
       }
     ]
   }
