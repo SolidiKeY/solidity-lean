@@ -1,18 +1,30 @@
 import Solidity.Syntax.Elab.Panic
 
 /-!
-# Capture linkage of source panics
+# Capture linkage and guard order of source panics
 
-A capture `p se = value;` evaluates its operand once; the local it declares
-then reads that same value, so a check of the local is a check of the
-operand's value. For `enumCapture` this ties the failed membership check to
-`Panic.Source.OriginV2` at the operand's own value, in the data-retaining
-mode (`panicStmt`) and in the legacy one (`.assert`); for `narrowCapture` it
-ties the failed range check to the narrow overflow of that value. The
-elaborated conditions and the producers' outputs are equations on existing
-public names.
+Two local facts about the generated panic checks, each stated on existing
+public names only.
 
-The order of several generated guards is not treated here.
+* **Capture linkage.** A capture `p se = value;` evaluates its operand once;
+  the local it declares then reads that same value, so a check of the local is
+  a check of the operand's value. For `enumCapture` this ties the failed
+  membership check to `Panic.Source.OriginV2` at the operand's own value, in
+  the data-retaining mode (`panicStmt`) and in the legacy one (`.assert`); for
+  `narrowCapture` it ties the failed range check to that value's narrow
+  overflow. The elaborated conditions and the producers' outputs are equations.
+* **Guard order.** In the statement list `Prog.withPanics` emits, the first
+  guard that reads `false` decides the panic code, and a guard that halts
+  before it decides the halt. The list equations give the emitted order of
+  every producer with more than one guard.
+
+The order equations do not by themselves relate the emitted order to the
+order in which the unguarded value or statement reads its operands. That
+needs, for every `v : Val C Γ p` (and likewise `SPath`, `Stmt`), state `σ` and
+position `i` whose earlier guards of `v.panics` read `.ok true`:
+`(v.panics[i]).2.evalT σ = .ok false → v.evalT σ = .error .revert` and
+`(v.panics[i]).2.evalT σ = .error h → v.evalT σ = .error h`. Neither is
+proved, or claimed, here.
 -/
 
 namespace Solidity.Correctness.Panic
@@ -330,5 +342,148 @@ theorem narrowCapture_uint_linked (e : RawExpr) (width : Nat) (scope : ElabScope
   first | rfl | (split <;> rfl)
 
 end Elaborated
+
+/-! ## Guard order -/
+
+/-- A guard that reads `true` is passed: the state is unchanged. -/
+theorem panic_guard_pass (σ : State C Γ) (condition : Val C Γ .bool) (code : Nat)
+    (passed : condition.evalT σ = .ok true) :
+    (panicStmt code condition).runR σ = .ok ⟨σ, List.prefix_refl _⟩ := by
+  simp [panicStmt, Stmt.runR, TRun.ite, passed, boolT, TRun.nil, Except.map, bind, Except.bind]
+  rfl
+
+/-- Guards that read `true` are skipped: the run goes on at the first guard
+not known to pass, in the same state. -/
+theorem guards_prefix_run (gs : PGuards C Γ) (tail : Prog C Γ Γ') (σ : State C Γ) (i : Nat)
+    (passed : ∀ j (inside : j < gs.length), j < i → (gs[j]).2.evalT σ = .ok true) :
+    (gs.foldr (fun (code, g) rest => Prog.cons (panicStmt code g) rest) tail).runR σ =
+      ((gs.drop i).foldr (fun (code, g) rest => Prog.cons (panicStmt code g) rest)
+        tail).runR σ := by
+  induction gs generalizing i with
+  | nil => simp
+  | cons head rest ih =>
+    cases i with
+    | zero => rfl
+    | succ i =>
+      obtain ⟨code, g⟩ := head
+      have first := passed 0 (Nat.succ_pos _) (Nat.succ_pos _)
+      have later := ih i fun j inside before =>
+        passed (j + 1) (Nat.succ_lt_succ inside) (Nat.succ_lt_succ before)
+      simp only [List.foldr_cons, List.drop_succ_cons, cons_run, TRun.seq,
+        panic_guard_pass σ g code first] at later ⊢
+      rw [later]
+      cases (List.foldr _ tail (List.drop i rest)).runR σ <;> rfl
+
+/-- **The first failing guard decides the code.** Every guard before position
+`i` reads `true` and guard `i` reads `false`: the instrumented statement list
+halts with guard `i`'s panic data, whatever the later guards and the tail. -/
+theorem guards_first_failure (gs : PGuards C Γ) (tail : Prog C Γ Γ') (σ : State C Γ) (i : Nat)
+    (inside : i < gs.length)
+    (passed : ∀ j (before : j < i), (gs[j]'(Nat.lt_trans before inside)).2.evalT σ = .ok true)
+    (failed : (gs[i]).2.evalT σ = .ok false) :
+    (gs.foldr (fun (code, g) rest => Prog.cons (panicStmt code g) rest) tail).runR σ =
+      .error (THalt.ofData (encodePanic (gs[i]).1)) := by
+  rw [guards_prefix_run gs tail σ i fun j _ before => passed j before,
+    List.drop_eq_getElem_cons inside]
+  simp only [List.foldr_cons, cons_run, TRun.seq, panic_guard_source_failure σ _ failed]
+
+/-- A guard whose own reads halt, behind guards that pass, halts the run
+there: that halt is not the guard's code. -/
+theorem guards_first_halt (gs : PGuards C Γ) (tail : Prog C Γ Γ') (σ : State C Γ) (i : Nat)
+    (inside : i < gs.length) (halt : THalt)
+    (passed : ∀ j (before : j < i), (gs[j]'(Nat.lt_trans before inside)).2.evalT σ = .ok true)
+    (failed : (gs[i]).2.evalT σ = .error halt) :
+    (gs.foldr (fun (code, g) rest => Prog.cons (panicStmt code g) rest) tail).runR σ =
+      .error halt := by
+  rw [guards_prefix_run gs tail σ i fun j _ before => passed j before,
+    List.drop_eq_getElem_cons inside]
+  simp only [List.foldr_cons, cons_run, TRun.seq, panic_guard_source_halt σ _ halt failed]
+
+/-- Guards that all read `true` leave the tail to run in the same state. -/
+theorem guards_all_pass (gs : PGuards C Γ) (tail : Prog C Γ Γ') (σ : State C Γ)
+    (passed : ∀ j (inside : j < gs.length), (gs[j]).2.evalT σ = .ok true) :
+    (gs.foldr (fun (code, g) rest => Prog.cons (panicStmt code g) rest) tail).runR σ =
+      tail.runR σ := by
+  rw [guards_prefix_run gs tail σ gs.length fun j inside _ => passed j inside]
+  simp
+
+/-! ## Emitted order
+
+One equation per producer with more than one guard: the operands' guards, in
+their order, then the operation's own. A right-hand side comes before its
+target, as the run reads them. -/
+
+/-- A binary operation that is not `&&` or `||`: the left operand's guards
+(and its `touch` where a right guard would otherwise run before a left halt),
+the right operand's, the divisor's, then the operation's range. -/
+theorem binop_panics_order {p q : PrimTy} (op : BinOp) (h : op.accepts p = true)
+    (hq : op.ret p = q) (a b : Val C Γ p) (strict : op ≠ .and ∧ op ≠ .or) :
+    (Val.binop op h hq a b).panics =
+      (if !b.panics.isEmpty && a.mayHalt then a.panics ++ [(0x11, touch _ a)] else a.panics) ++
+        b.panics ++ divPG op _ b ++ (if op.isArith then pg 0x11 (range op _ a b) else []) := by
+  cases op <;> first | exact absurd rfl strict.1 | exact absurd rfl strict.2 | simp [Val.panics]
+
+/-- `a && b`: the left guards, then the right ones only where `a` holds. -/
+theorem and_panics_order (h : BinOp.and.accepts .bool = true) (hq : BinOp.and.ret .bool = .bool)
+    (a b : Val C Γ .bool) :
+    (Val.binop .and h hq a b).panics = a.panics ++ pgUnder a b.panics := by
+  simp [Val.panics]
+
+/-- `a || b`: the left guards, then the right ones only where `a` fails. -/
+theorem or_panics_order (h : BinOp.or.accepts .bool = true) (hq : BinOp.or.ret .bool = .bool)
+    (a b : Val C Γ .bool) :
+    (Val.binop .or h hq a b).panics = a.panics ++ pgUnder (notB a) b.panics := by
+  simp [Val.panics]
+
+/-- `c ? a : b`: the condition's guards, then each branch's under its case. -/
+theorem ternary_panics_order {p : PrimTy} (c : Val C Γ .bool) (a b : Val C Γ p) :
+    (Val.ternary c a b).panics =
+      c.panics ++ pgUnder c a.panics ++ pgUnder (notB c) b.panics := by
+  simp [Val.panics]
+
+/-- `addmod`/`mulmod`: the three operands in order, then the zero modulus. -/
+theorem modular_panics_order (op : ModOp) (a b k : Val C Γ .uint) :
+    (Val.modular op a b k).panics = a.panics ++ b.panics ++ k.panics ++
+      [(0x12, cmpU .neB rfl rfl k (litU 0 (by decide)))] := by
+  simp [Val.panics]
+
+/-- A storage index: the base's guards, the index's, then the bound. -/
+theorem index_panics_order {R : RefTy} {k : PrimTy} {V : Ty} (it : IndexTy R k V)
+    (b : SPath C Γ (.ref R)) (i : Val C Γ k) :
+    (SPath.loc (.index it b i)).panics = b.panics ++ i.panics ++ idxPG it b i := by
+  simp [SPath.panics, Loc.panics]
+
+/-- A memory index, likewise. -/
+theorem mindex_panics_order {R : RefTy} {E : Ty} (a : ArrTy R E) (b : MPath C Γ (.ref R))
+    (i : Val C Γ .uint) :
+    (MPath.loc (.index a b i)).panics = b.panics ++ i.panics ++ mIdxPG a b i := by
+  simp [MPath.panics, MLoc.panics]
+
+/-- `l op= r`: the right-hand side, the target, the divisor, the range. -/
+theorem opAssign_panics_order {p : PrimTy} (op : BinOp) (hop : op.hasCompoundAssign = true)
+    (hp : p.isNumeric = true) (l : OpLoc C Γ p) (r : Val C Γ p) :
+    (Stmt.opAssign op hop hp l r).panics =
+      r.panics ++ l.panics ++ divPG op _ r ++ pg 0x11 (range op _ l.val r) := rfl
+
+/-- `b.pop()`: the base's guards, then the emptiness check. -/
+theorem pop_panics_order {E : Ty} (b : SPath C Γ (.array E)) :
+    (Stmt.pop b).panics =
+      b.panics ++ [(0x31, cmpU .gt rfl rfl (.len b rfl) (litU 0 (by decide)))] := rfl
+
+/-- `l = r`: the right-hand side before the target. -/
+theorem assign_panics_order {T : Ty} (l : Loc C Γ T) (r : Src C Γ T) :
+    (Stmt.assign l r).panics = r.panics ++ l.panics := rfl
+
+/-- `l++`: the target, then the range. -/
+theorem incDec_panics_order {p : PrimTy} (op : IncDec) (hp : p.isNumeric = true)
+    (l : OpLoc C Γ p) :
+    (Stmt.incDec op hp l).panics = l.panics ++ pg 0x11 (bumpRange op _ l.val) := rfl
+
+/-- `b.push() op= r`: the right-hand side, the base, the divisor, the range. -/
+theorem pushOpAssign_panics_order {p : PrimTy} (op : BinOp)
+    (hop : op.hasCompoundAssign = true) (hp : p.isNumeric = true)
+    (b : SPath C Γ (.array (.prim p))) (r : Val C Γ p) :
+    (Stmt.pushOpAssign op hop hp b r).panics =
+      r.panics ++ b.panics ++ divPG op _ r ++ pg 0x11 (range op _ (zero _) r) := rfl
 
 end Solidity.Correctness.Panic
