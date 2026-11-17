@@ -1,7 +1,8 @@
 #!/usr/bin/env python3
 """Self-test of scripts/heartbeats/collect.sh: kernel work is counted, repeated
-runs agree, and the ratchet fails only on growth beyond its tolerance."""
-import json, os, subprocess, tempfile, unittest
+runs agree, the ratchet fails only on growth beyond its tolerance, and `--lake`
+makes the counted elaboration the module's Lake build."""
+import hashlib, json, os, shutil, subprocess, tempfile, unittest
 
 ROOT = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", ".."))
 COLLECT = os.path.join(ROOT, "scripts", "heartbeats", "collect.sh")
@@ -22,8 +23,8 @@ example : True := trivial
 """
 
 
-def collect(*args):
-    p = subprocess.run(["bash", COLLECT, *args], cwd=ROOT, capture_output=True, text=True)
+def collect(*args, script=COLLECT, cwd=ROOT, env=None):
+    p = subprocess.run(["bash", script, *args], cwd=cwd, capture_output=True, text=True, env=env)
     return p.returncode, [json.loads(l) for l in p.stdout.splitlines() if l.strip()], p.stderr
 
 
@@ -78,6 +79,118 @@ class Collector(unittest.TestCase):
             self.assertIn("heavy", modules["Fixture"]["commands"])
             rc, _, err = collect("--check", base, self.fixture)
             self.assertEqual(rc, 0, err)
+
+
+# A Lake project of its own for `--lake` (written to a temporary directory): the
+# checkout's collector and driver by link, a library whose `Fix.B` imports `Fix.A`, and
+# the artifact cache switched on as in the checkout's lakefile.
+LAKEFILE = """\
+name = "fix"
+enableArtifactCache = true
+
+[[lean_lib]]
+name = "Fix"
+weakLeanArgs = ["--tstack=131072"]
+
+[[lean_exe]]
+name = "hbcollect"
+root = "Tools.Heartbeats.Main"
+supportInterpreter = true
+"""
+DEPENDENT_SOURCE = """\
+import Fix.A
+
+theorem uses : sumTo 4 + 0 = 6 := light
+
+def twice (n : Nat) : Nat := 2 * sumTo n
+"""
+BAD_SOURCE = "theorem bad : 1 = 2 := rfl\n"
+
+
+def digest(path):
+    with open(path, "rb") as f:
+        return hashlib.sha256(f.read()).hexdigest()
+
+
+class LakeBuild(unittest.TestCase):
+    @classmethod
+    def setUpClass(cls):
+        cls.tmp = tempfile.TemporaryDirectory()
+        cls.proj = proj = os.path.join(cls.tmp.name, "proj")
+        os.makedirs(os.path.join(proj, "Fix"))
+        os.makedirs(os.path.join(proj, "Tools", "Heartbeats"))
+        os.makedirs(os.path.join(proj, "scripts"))
+        os.symlink(os.path.join(ROOT, "scripts", "heartbeats"), os.path.join(proj, "scripts", "heartbeats"))
+        os.symlink(os.path.join(ROOT, "Tools", "Heartbeats", "Main.lean"),
+                   os.path.join(proj, "Tools", "Heartbeats", "Main.lean"))
+        shutil.copy(os.path.join(ROOT, "lean-toolchain"), proj)
+        for name, text in [("lakefile.toml", LAKEFILE), ("Fix/A.lean", FIXTURE_SOURCE),
+                           ("Fix/B.lean", DEPENDENT_SOURCE), ("Fix/Bad.lean", BAD_SOURCE)]:
+            with open(os.path.join(proj, name), "w") as f:
+                f.write(text)
+        # A cache of its own: the fixture's artifacts stay out of the checkout's Lake cache.
+        cls.env = dict(os.environ, LAKE_CACHE_DIR=os.path.join(cls.tmp.name, "cache"))
+        cls.script = os.path.join(proj, "scripts", "heartbeats", "collect.sh")
+
+    @classmethod
+    def tearDownClass(cls):
+        cls.tmp.cleanup()
+
+    def collect(self, *args):
+        return collect(*args, script=self.script, cwd=self.proj, env=self.env)
+
+    def lake(self, *args):
+        return subprocess.run(["lake", *args], cwd=self.proj, capture_output=True, text=True,
+                              env=self.env, timeout=600)
+
+    def test_one_elaboration_is_the_lake_build(self):
+        lib = os.path.join(self.proj, ".lake", "build", "lib", "lean", "Fix")
+        olean = os.path.join(lib, "A.olean")
+        rc, plain, err = self.collect("Fix/A.lean")
+        self.assertEqual(rc, 0, err)
+        self.assertFalse(os.path.exists(olean))  # the plain collector writes no artifact
+        self.assertNotEqual(self.lake("build", "--no-build", "Fix.A").returncode, 0)
+
+        # One run: the same counts as the plain collector, and Lake's artifacts.
+        rc, rows, err = self.collect("--lake", "Fix.A")
+        self.assertEqual(rc, 0, err)
+        row, = rows
+        self.assertEqual((row["module"], row["file"], row["errors"]), ("Fix.A", "Fix/A.lean", 0))
+        self.assertEqual((row["heartbeats"], row["commands"]), (plain[0]["heartbeats"], plain[0]["commands"]))
+        self.assertIn("Built Fix.A", err)
+
+        # Lake, with the real `lean`, takes the module as current ...
+        p = self.lake("build", "--no-build", "Fix.A")
+        self.assertEqual(p.returncode, 0, p.stdout + p.stderr)
+        # ... and the .olean is byte for byte what `lean` writes when it elaborates synchronously.
+        ref = os.path.join(self.tmp.name, "ref.olean")
+        p = subprocess.run(["lean", "--tstack=131072", "-DElab.async=false", "Fix/A.lean", "-o", ref],
+                           cwd=self.proj, capture_output=True, text=True, env=self.env, timeout=300)
+        self.assertEqual(p.returncode, 0, p.stdout + p.stderr)
+        before = (digest(olean), os.stat(olean).st_mtime_ns)
+        self.assertEqual(before[0], digest(ref))
+
+        # A dependent module builds against it without elaborating it again.
+        p = self.lake("build", "Fix.B")
+        self.assertEqual(p.returncode, 0, p.stdout + p.stderr)
+        self.assertIn("Built Fix.B", p.stdout)
+        self.assertNotIn("Built Fix.A", p.stdout)
+        self.assertEqual((digest(olean), os.stat(olean).st_mtime_ns), before)
+        self.assertTrue(os.path.exists(os.path.join(lib, "B.olean")))
+
+        # Up to date: Lake runs nothing, so there is no line, and that is not a failure.
+        rc, rows, err = self.collect("--lake", "Fix.A")
+        self.assertEqual((rc, rows), (0, []), err)
+        self.assertIn("not elaborated", err)
+
+    def test_errors_leave_no_artifact(self):
+        rc, rows, err = self.collect("--lake", "Fix.Bad")
+        self.assertEqual(rc, 1, err)
+        row, = rows
+        self.assertGreater(row["errors"], 0)
+        self.assertIn("Fix/Bad.lean:1", err)  # Lake prints the driver's messages
+        self.assertFalse(os.path.exists(os.path.join(self.proj, ".lake", "build", "lib", "lean", "Fix", "Bad.olean")))
+        self.assertNotEqual(self.lake("build", "--no-build", "Fix.Bad").returncode, 0)
 
 
 def ratchet(mode, base, rows, *extra):
