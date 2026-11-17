@@ -1136,6 +1136,22 @@
           "tests/h62/item4/generic-internalflow/semantic-cases.txt"
         ],
         "other_reads": "unresolved"
+      },
+      {
+        "path": "scripts/h62/item2/audit-readonly-calls/test_private_evidence.py",
+        "input_revision": "3abcdf7eca293114a06fb7eccb540762f04c6e98",
+        "source_blob": "b4ace0ec8a0086aa8661394903567c2527dace6b",
+        "command": [
+          "python3",
+          "-B",
+          "scripts/h62/item2/audit-readonly-calls/test_private_evidence.py"
+        ],
+        "kind": "unittest",
+        "purpose": "Existing private-evidence v2 checksum and membership corruption controls parse this public catalog. Only its exact data use is credited; missing bulk and compatibility/native/proof acceptance remain unavailable or false.",
+        "input_scope": [
+          "tests/h62/item6/migrate-solkey/portable-evidence/catalog.json"
+        ],
+        "other_reads": "unresolved"
       }
     ]
   },
@@ -3135,6 +3151,18 @@
         ],
         "target": "tests/h62/item4/generic-structuredflow/frozen.json",
         "target_blob": "b2d3c4b0c1475a113330584a9c51b23c0f4e7fec",
+        "operation": "validated Python read of measured bytes"
+      },
+      {
+        "runner": "validated:scripts/h62/item2/audit-readonly-calls/test_private_evidence.py",
+        "input_revision": "3abcdf7eca293114a06fb7eccb540762f04c6e98",
+        "frames": [
+          {"path": "scripts/h62/item2/audit-readonly-calls/test_private_evidence.py", "blob": "b4ace0ec8a0086aa8661394903567c2527dace6b", "line": 217},
+          {"path": "scripts/h62/item2/audit-readonly-calls/test_private_evidence.py", "blob": "b4ace0ec8a0086aa8661394903567c2527dace6b", "line": 167},
+          {"path": "scripts/h62/item6/migrate-solkey/verify-portable-evidence.py", "blob": "6629603a3fda78d7526eef8273d333a67d1f6d8c", "line": 28}
+        ],
+        "target": "tests/h62/item6/migrate-solkey/portable-evidence/catalog.json",
+        "target_blob": "765995c6e2c77fab444cae0696cabc3d640e4006",
         "operation": "validated Python read of measured bytes"
       },
       {
