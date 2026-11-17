@@ -1,7 +1,7 @@
 import Solidity.Semantics.IntrinsicStorage.Preimages.Frames
 import Solidity.Semantics.RunFuel
 
-/-! Audited storage operations and observers preserve actual results, including failures. -/
+/-! Audited storage operations preserve actual results, including failures. -/
 namespace Solidity.Semantics.IntrinsicStorage
 
 open Solidity.Storage

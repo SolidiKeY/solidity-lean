@@ -33,14 +33,14 @@ example {C : Contract} {T : Ty} (st : Solidity.Storage C) (r : SRef C T)
   · exact Inputs.slot_hashed _ (Audit.bind_slots_left _ _ (Audit.write_value st r v hq))
 
 -- A successful read followed by a write includes the write destination preimages.
-example {C : Contract} {T : Ty} (st : Solidity.Storage C) (r : SRef C T)
-    {v : SVal T} (hv : st.find r = some v) {p : Pre}
-    (hp : ValueInput v (reference r) p) :
-    encoded p ∈ (Audit.read st r >>= fun x => Audit.write st r x).inputs.hashed := by
+example {C : Contract} {T : Ty} (st : Solidity.Storage C) (src dst : SRef C T)
+    {v : SVal T} (hv : st.find src = some v) {p : Pre}
+    (hp : ValueInput v (reference dst) p) :
+    encoded p ∈ (Audit.read st src >>= fun x => Audit.write st dst x).inputs.hashed := by
   apply Inputs.slot_hashed
   apply Audit.bind_slots_right (x := v)
   · rw [Audit.result_read, hv]
     rfl
-  · exact Audit.write_value st r v hp
+  · exact Audit.write_value st dst v hp
 
 end Solidity.Examples.IntrinsicStorage.Preimages.Ops
