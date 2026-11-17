@@ -62,6 +62,7 @@ SCHEMA = 1
 sys.dont_write_bytecode = True
 CLASSES = ('keep', 'regenerable', 'evidence', 'orphan')
 EXCLUDED = ('scripts/check-tests-used', OUTPUT)
+CLI_KINDS = ('committed-cli', 'committed-module-cli')
 
 
 def git(root, *args, data=None):
@@ -120,9 +121,13 @@ if fragment_helper.is_file():
     FRAGMENT_SECTIONS = fragment_rules.FRAGMENT_SECTIONS
     read_fragments = fragment_rules.read_fragments
     merge_fragment_entries = fragment_rules.merge_fragment_entries
+    CONSUMER_SECTIONS = fragment_rules.CONSUMER_SECTIONS
+    declared_module_cli = fragment_rules.declared_module_cli
 else:
     # Historical standalone drivers copy only check-tests-used*.py files.
     FRAGMENT_SECTIONS = ('standalone', 'generators', 'reads', 'orphans', 'module_entries')
+    CONSUMER_SECTIONS = ()
+    declared_module_cli = lambda *_: None
     def read_fragments(directory):
         if directory.exists(): raise ValueError('missing fragment helper')
         return {key: [] for key in FRAGMENT_SECTIONS + ('roles', 'fixtures')}
@@ -636,7 +641,7 @@ def validated_routes(graph, catalog, extra_reads=()):
     historical_revisions = set()
     for entry in catalog['standalone']:
         p = entry.get('path')
-        if (entry.get('input_revision') == repo.ref or entry.get('kind') not in ('unittest', 'node-test', 'runnable-entrypoint', 'committed-cli')
+        if (entry.get('input_revision') == repo.ref or entry.get('kind') not in ('unittest', 'node-test', 'runnable-entrypoint') + CLI_KINDS
                 or p in current_runner_paths or p not in repo.tree or repo.tree[p][2] != entry.get('source_blob')): continue
         revision = entry.get('input_revision')
         if not hex_pin(revision, 40): raise ValueError('historical runner demonstration requires full commit revision')
@@ -659,13 +664,13 @@ def validated_routes(graph, catalog, extra_reads=()):
         if entry.get('kind') == 'runnable-entrypoint': required.update(('entry_line', 'purpose', 'input_scope', 'other_reads'))
         if entry.get('kind') == 'nonpassing-unittest': required.update(('purpose', 'input_scope'))
         if entry.get('kind') == 'skipped-unittest': required.add('purpose')
-        if entry.get('kind') == 'committed-cli': required.update(('purpose', 'entry_line', 'required_options'))
+        if entry.get('kind') in CLI_KINDS: required.update(('purpose', 'entry_line', 'required_options'))
         allowed = (required, required | {'purpose', 'input_scope', 'other_reads'}) if entry.get('kind') in ('unittest', 'node-test') else (required,)
         if set(entry) not in allowed:
             raise ValueError('invalid standalone definition')
         p = entry['path']
         historical_runner = entry['input_revision'] != repo.ref
-        if historical_runner and (entry['kind'] not in ('unittest', 'node-test', 'runnable-entrypoint', 'committed-cli')
+        if historical_runner and (entry['kind'] not in ('unittest', 'node-test', 'runnable-entrypoint') + CLI_KINDS
                 or p in current_runner_paths or p not in repo.tree or repo.tree[p][2] != entry['source_blob']):
             continue
         if p not in repo.tree or repo.tree[p][2] != entry['source_blob']:
@@ -673,10 +678,10 @@ def validated_routes(graph, catalog, extra_reads=()):
         command = entry['command']
         if entry['kind'] != 'manual-reproducer' and command not in (['python3', '-B', p], ['node', '--test', p]):
             raise ValueError('unsupported standalone invocation: ' + p)
-        if entry['kind'] not in ('unittest', 'node-test', 'manual-reproducer', 'runnable-entrypoint', 'nonpassing-unittest', 'skipped-unittest', 'committed-cli'):
+        if entry['kind'] not in ('unittest', 'node-test', 'manual-reproducer', 'runnable-entrypoint', 'nonpassing-unittest', 'skipped-unittest') + CLI_KINDS:
             raise ValueError('unsupported standalone kind')
-        if entry['kind'] == 'committed-cli':
-            declaration = declared_configured_cli(repo, p)
+        if entry['kind'] in CLI_KINDS:
+            declaration = (declared_configured_cli if entry['kind'] == 'committed-cli' else declared_module_cli)(repo, p)
             if (declaration is None or command != ['python3', '-B', p]
                     or type(entry['entry_line']) is not int or entry['entry_line'] != declaration['main_line']
                     or entry['required_options'] != declaration['required_options']
@@ -1712,6 +1717,8 @@ def inventory(repo, catalog=None):
         definitions = Path(__file__).with_name('check-tests-used-routes.json')
         catalog = json.loads(definitions.read_bytes()) if definitions.exists() else {'schema_version': 1, 'standalone': [], 'generators': [], 'reads': [], 'orphans': []}
     fragments = read_fragments(Path(__file__).with_name('check-tests-used.d'))
+    consumers = any(fragments.get(key) for key in CONSUMER_SECTIONS)
+    if consumers: fragment_rules.same_revision_reads(repo.ref, fragments)
     extra_reads = []
     if any(fragments[key] for key in FRAGMENT_SECTIONS):
         # Check both frozen extension formats without implicitly enabling either.
@@ -1743,6 +1750,7 @@ def inventory(repo, catalog=None):
     lake_spec = importlib.util.spec_from_file_location('tests_used_lake', Path(__file__).with_name('check-tests-used-lake.py'))
     lake_rules = importlib.util.module_from_spec(lake_spec); lake_spec.loader.exec_module(lake_rules)
     lake_rules.add(graph, lean_lex)
+    if consumers: fragment_rules.add_consumer_routes(globals(), graph, catalog, fragments)
     chains = graph.chains()
     orphan_reviews = {}
     for entry in catalog['orphans']:
@@ -2175,9 +2183,13 @@ def module_entry_schema_controls():
 
 
 def self_test():
-    spec = importlib.util.spec_from_file_location('fragment_controls', Path(__file__).with_name('check-tests-used.d') / 'fragments.py')
-    if spec.origin and Path(spec.origin).exists():
-        controls = importlib.util.module_from_spec(spec); spec.loader.exec_module(controls); controls.fragment_controls(globals())
+    if fragment_helper.is_file():
+        for control in (fragment_rules.fragment_controls, fragment_rules.consumer_route_controls): control(globals())
+        fragment_rules.isolated(globals(), self_test_controls)
+    else: self_test_controls()
+
+
+def self_test_controls():
     # Formatting must preserve nested provenance and awkward path/string bytes.
     payload = {'records': [{'path': 'tests/\u03b1\n".py', 'class': None,
                             'reason': 'braces{},comma,\nline', 'pins': {'b': [True, 0], 'a': {}}},
