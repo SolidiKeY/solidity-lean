@@ -1596,6 +1596,25 @@
         "target_blob": "dfe7616f9ed0dd2bc57add8cfdc652cf908a4a19",
         "operation": "validated Python read of measured bytes"
       }
+    ],
+    "git_policies": [
+      {
+        "path": "tests/directruntime-20261104/shared-translator/.gitignore",
+        "blob": "37beecae3371bb0679e5f7b7a23f798a15ea9b9f",
+        "purpose": "Git exclude-standard policy for the fixture-variant producer output artifacts/h68-bulk/fixture-variants.json. The existing producer has paired successful observations at its recorded revision; Git independently attributes this untracked output to the exact ignore line. Source-only Git policy use, with no fixture, child, current test, output provenance, proof or runtime credit.",
+        "matches": [
+          {
+            "line": 1,
+            "output": "artifacts/h68-bulk/fixture-variants.json",
+            "writer": {
+              "path": "tests/directruntime-20261104/shared-translator/fixture-variants.py",
+              "blob": "eb382e93c9b1955d5440ec09bb2b2c23a4940eeb",
+              "line": 39,
+              "literal": "fixture-variants.json"
+            }
+          }
+        ]
+      }
     ]
   }
 }
