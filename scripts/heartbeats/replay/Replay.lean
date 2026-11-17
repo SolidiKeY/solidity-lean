@@ -1,11 +1,11 @@
 /-
-Heartbeat replay driver for `scripts/check-memory-loop-timing.py`
-(`scripts/heartbeats/replay/README.md`). It does what
+Heartbeat replay driver for `scripts/check-memory-loop-timing.py` (see its
+docstring). It does what
 `lean --setup SETUP SOURCE -o OLEAN -c C` does, synchronously
 (`Elab.async=false`, so kernel checking is counted), and reads
 `IO.getNumHeartbeats` around each command as `Tools/Heartbeats/Main.lean`
 does. It writes one JSON object in the collector's shape to JSON.
-Run by `lean --run`; imports only Lean.
+The script compiles it once with `lean -c` and `leanc -rdynamic`; imports only Lean.
 -/
 import Lean
 open Lean Elab Frontend

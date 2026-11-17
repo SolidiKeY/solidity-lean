@@ -2,13 +2,30 @@
 """Freshly check the entire original Derived17 workload. Wrap in a 300s guard.
 Existing prerequisite Lake setups are required; group outputs never reused.
 
-Each module is checked by the heartbeat replay driver (scripts/heartbeats/replay/
-Replay.lean: `lean --setup … -o … -c …` with Elab.async=false), which also counts
-heartbeats per command. The module and workload totals are ratcheted against
-scripts/heartbeats/replay/baseline.json (default tolerance 2%); the seconds budget
-stays as a backstop. Regenerate the baseline on the merged head with
+Speed budget: heartbeats, the same count on every machine (H1076). Each module is
+checked by scripts/heartbeats/replay/Replay.lean, which does what
+`lean --setup SETUP SOURCE -o OLEAN -c C` did, with Elab.async=false (kernel
+checking is counted), one thread and a 128 MiB stack, and counts heartbeats per
+command like scripts/heartbeats/collect.sh; its wall time matches `lean`. It is
+compiled once per source and toolchain into .lake/build/heartbeats-replay/
+(about 15 s, before the timed workload starts).
+
+Ratchet: scripts/heartbeats/replay/baseline.json holds every module's total, its
+commands of at least 100 units, and the workload total as the entry
+`workload:fresh-original-Derived17`; scripts/heartbeats/collect.d/ratchet.py
+compares them. An entry fails when it grows by more than --tolerance percent
+(default 2) and by more than 1 unit; a decrease, a new or a removed entry only
+prints. A ratchet failure, like the seconds backstop (--budget: 300 locally, CI
+passes 600, H116), makes the exit status and the results' exit_code 1.
+Regenerate the baseline on the merged head (or the merge base) and check it in:
   python3 scripts/check-memory-loop-timing.py --write --output DIR --results FILE
-(scripts/heartbeats/replay/README.md).
+--write replaces the file, only when every module checked without errors.
+
+--results keeps every earlier field. New: per check `heartbeats`,
+`importHeartbeats`, `heartbeatsFile` (DIR/MODULE.heartbeats.json, the collector's
+shape); at the top `heartbeats` (workload total), `heartbeatBaseline`,
+`heartbeatTolerancePercent` and `heartbeatRatchet` (mode, exit_code, failures,
+report). Heartbeats are in maxHeartbeats units (raw / 1000).
 """
 import argparse, pathlib, subprocess, json, time, hashlib, os, resource, shutil, sys, tempfile
 r=pathlib.Path(__file__).resolve().parent.parent;hb=r/'scripts/heartbeats'
@@ -18,7 +35,7 @@ p.add_argument('--tolerance',type=float,default=2.0,help='percent a module, reco
 p.add_argument('--write',action='store_true',help='regenerate --baseline from this run instead of comparing (on the merged head)');a=p.parse_args()
 d=pathlib.Path(a.output);d.mkdir(exist_ok=False)
 modules=['Solidity.Calculus.MemoryLoopReplay']+['Solidity.TestSuite.MemoryLoopReplay.'+kind+f'{i:02}' for kind in ['Discover','Assemble'] for i in range(10)]+['Solidity.TestSuite.Derived17MemoryLoop','Solidity.TestSuite.MemoryLoopReplay.Refusals','Solidity.TestSuite.Derived17']
-WORKLOAD='workload:fresh-original-Derived17'
+WORKLOAD='workload:fresh-original-Derived17';MIN_UNITS=100  # smaller commands count only in their module's total
 
 def driver():
  """Compile the replay driver once per (source, toolchain) into .lake/build; not part of the timed workload."""
@@ -71,7 +88,7 @@ with run.open('w') as f:
  f.write(json.dumps(dict(module=WORKLOAD,heartbeats=round(sum(x['heartbeats'] for x in hbs.values()),3),errors=0,commands=[]))+'\n')
 rt=str(hb/'collect.d/ratchet.py')
 if a.write:
- new=d/'baseline.json'
+ new=d/'baseline.json';new.write_text(json.dumps(dict(min_units=MIN_UNITS,modules={})))
  rc=subprocess.run([sys.executable,rt,'write',str(new),str(run)]).returncode
  if rc==0:shutil.copyfile(new,a.baseline)
  ratchet=dict(mode='write',exit_code=rc,failures=[])
