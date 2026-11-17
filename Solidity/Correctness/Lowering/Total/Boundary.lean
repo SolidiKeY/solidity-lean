@@ -421,7 +421,8 @@ theorem Positional.unique {srcΓ : Source.RCtx} {Γ : Ctx} {m n : Lowering.V07.C
 map under which every admitted Source execution has a related model state.
 For `loopRel` the one component that can fail for a reason unrelated to
 lowering is storage: the Source cell at each state variable's path must have
-the declared type (not proved; it fails if two state variables share a name). -/
+the declared type. That is not proved; the model contract's `vars_nodup` rules
+out the one known way it fails, two state variables of one name. -/
 def InitialMatching (rel : (E : Source.Env) → (C : Contract) → StateRelation E C)
     (decode : Request → Option SourceProgram) : Prop :=
   ∀ (r : Request) (s : SourceProgram), r.Succeeds → decode r = some s →
