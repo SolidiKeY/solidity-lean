@@ -93,6 +93,29 @@ class Compare(unittest.TestCase):
 
 
 class Git(unittest.TestCase):
+    def test_library_boundary_for_changed_and_touched_modules(self):
+        with tempfile.TemporaryDirectory() as t:
+            g = lambda *a: subprocess.run(["git", *a], cwd=t, env=ENV, check=True, capture_output=True, text=True).stdout.strip()
+            g("init", "-q", "-b", "main")
+            paths = ["Solidity/A.lean", "Solidity/Deleted.lean", "Solidity/Examples/E.lean",
+                     "Solidity/Corpus/C.lean", "Solidity/TestSuite/T.lean",
+                     "Solidity/Solkey/TestSuite.lean", "Solidity/Scratch/S.lean",
+                     "Solidity/ExamplesExtra.lean"]
+            for p in paths:
+                f = pathlib.Path(t, p); f.parent.mkdir(parents=True, exist_ok=True); f.write_text("old\n")
+            g("add", "-A"); g("commit", "-qm", "base"); g("branch", "base")
+            for p in paths: pathlib.Path(t, p).write_text("new\n")
+            pathlib.Path(t, "Solidity/Deleted.lean").unlink()
+            g("add", "-A"); g("commit", "-qm", "change")
+            cwd = os.getcwd(); os.chdir(t)
+            try:
+                self.assertEqual(d.touched_modules("base")[1], ["Solidity.A", "Solidity.ExamplesExtra"])
+                self.assertEqual(d.changed_modules("base", "HEAD"),
+                                 (["Solidity.A", "Solidity.ExamplesExtra"],
+                                  {"Solidity.A", "Solidity.Deleted", "Solidity.ExamplesExtra"}))
+            finally:
+                os.chdir(cwd)
+
     def test_touched_modules_and_waivers(self):
         with tempfile.TemporaryDirectory() as t:
             g = lambda *a: subprocess.run(["git", *a], cwd=t, env=ENV, check=True, capture_output=True, text=True).stdout
