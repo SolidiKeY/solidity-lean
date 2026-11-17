@@ -151,6 +151,7 @@ import Solidity.Examples.Goals.Shrink
 import Solidity.Examples.Goals.Taclets
 import Solidity.Examples.Goals.Total
 import Solidity.Examples.InputReduction
+import Solidity.Examples.IntrinsicSession.Run
 import Solidity.Examples.IntrinsicSession.Step
 import Solidity.Examples.IntrinsicStorage.Preimages.Frames
 import Solidity.Examples.IntrinsicStorage.Preimages.Ops
