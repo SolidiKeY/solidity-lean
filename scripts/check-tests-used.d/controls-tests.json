@@ -835,11 +835,683 @@
           "tests/h62/item2/audit-readonly-calls/ExecutionReplies.lean"
         ],
         "other_reads": "unresolved"
+      },
+      {
+        "path": "tests/h62/item1/duplication-scanner/test_checked_logs.py",
+        "input_revision": "b6d4061febc1fb281cf1c30ffb277e1b6762f8e9",
+        "source_blob": "6b882d590086fa4509e56686fc6e10b36b8b57ad",
+        "command": [
+          "python3",
+          "-B",
+          "tests/h62/item1/duplication-scanner/test_checked_logs.py"
+        ],
+        "kind": "unittest",
+        "purpose": "Existing scanner or V08 regression verifies exact fixture/source identities, declaration observations, pinned dependency closures, corruption refusal or generator-template preservation. Ordinary and instrumented executions passed in the recorded context. Only these exact primary input reads receive data-use credit; no native Lean, ownership, theorem validity, compiler or EVM acceptance.",
+        "input_scope": [
+          "tests/h62/item1/duplication-scanner/SignatureFingerprint.lean",
+          "tests/h62/item1/duplication-scanner/SignatureSourceLocations.lean",
+          "tests/h62/item1/duplication-scanner/source-location-pins.json"
+        ],
+        "other_reads": "unresolved"
+      },
+      {
+        "path": "tests/h62/item1/duplication-scanner/test_environment_snapshot.py",
+        "input_revision": "b6d4061febc1fb281cf1c30ffb277e1b6762f8e9",
+        "source_blob": "a4719eb8e078d3767885dad1cbe094ddddbbac5f",
+        "command": [
+          "python3",
+          "-B",
+          "tests/h62/item1/duplication-scanner/test_environment_snapshot.py"
+        ],
+        "kind": "unittest",
+        "purpose": "Existing scanner or V08 regression verifies exact fixture/source identities, declaration observations, pinned dependency closures, corruption refusal or generator-template preservation. Ordinary and instrumented executions passed in the recorded context. Only these exact primary input reads receive data-use credit; no native Lean, ownership, theorem validity, compiler or EVM acceptance.",
+        "input_scope": [
+          "tests/h62/item1/duplication-scanner/signature-records.expected.jsonl"
+        ],
+        "other_reads": "unresolved"
+      },
+      {
+        "path": "tests/h62/item1/duplication-scanner/test_index.py",
+        "input_revision": "b6d4061febc1fb281cf1c30ffb277e1b6762f8e9",
+        "source_blob": "4cc6f8a9c905c8ed827805cee1c0baba12e1e268",
+        "command": [
+          "python3",
+          "-B",
+          "tests/h62/item1/duplication-scanner/test_index.py"
+        ],
+        "kind": "unittest",
+        "purpose": "Existing scanner or V08 regression verifies exact fixture/source identities, declaration observations, pinned dependency closures, corruption refusal or generator-template preservation. Ordinary and instrumented executions passed in the recorded context. Only these exact primary input reads receive data-use credit; no native Lean, ownership, theorem validity, compiler or EVM acceptance.",
+        "input_scope": [
+          "tests/h62/item1/duplication-scanner/audit-index.json"
+        ],
+        "other_reads": "unresolved"
+      },
+      {
+        "path": "tests/h62/item1/duplication-scanner/test_kernel_census.py",
+        "input_revision": "b6d4061febc1fb281cf1c30ffb277e1b6762f8e9",
+        "source_blob": "72fa929ff560585bcd8bb9a48937c377f879dbf0",
+        "command": [
+          "python3",
+          "-B",
+          "tests/h62/item1/duplication-scanner/test_kernel_census.py"
+        ],
+        "kind": "unittest",
+        "purpose": "Existing scanner or V08 regression verifies exact fixture/source identities, declaration observations, pinned dependency closures, corruption refusal or generator-template preservation. Ordinary and instrumented executions passed in the recorded context. Only these exact primary input reads receive data-use credit; no native Lean, ownership, theorem validity, compiler or EVM acceptance.",
+        "input_scope": [
+          "tests/h62/item1/duplication-scanner/SignatureKernelCensus.lean",
+          "tests/h62/item1/duplication-scanner/kernel-census-pins.json"
+        ],
+        "other_reads": "unresolved"
+      },
+      {
+        "path": "tests/h62/item1/duplication-scanner/test_local_rebuild.py",
+        "input_revision": "b6d4061febc1fb281cf1c30ffb277e1b6762f8e9",
+        "source_blob": "e09087d4d3a0529fc05c3be8c4c13e36b64ac96b",
+        "command": [
+          "python3",
+          "-B",
+          "tests/h62/item1/duplication-scanner/test_local_rebuild.py"
+        ],
+        "kind": "unittest",
+        "purpose": "Existing scanner or V08 regression verifies exact fixture/source identities, declaration observations, pinned dependency closures, corruption refusal or generator-template preservation. Ordinary and instrumented executions passed in the recorded context. Only these exact primary input reads receive data-use credit; no native Lean, ownership, theorem validity, compiler or EVM acceptance.",
+        "input_scope": [
+          "tests/h62/item1/duplication-scanner/SignatureEnvironment.lean",
+          "tests/h62/item1/duplication-scanner/SignatureEnvironmentProbe.lean",
+          "tests/h62/item1/duplication-scanner/SignatureObservedConsumer.lean",
+          "tests/h62/item1/duplication-scanner/local-rebuild-pins.json"
+        ],
+        "other_reads": "unresolved"
+      },
+      {
+        "path": "tests/h62/item1/duplication-scanner/test_metadata_observations.py",
+        "input_revision": "b6d4061febc1fb281cf1c30ffb277e1b6762f8e9",
+        "source_blob": "840d7ef1751f04bdf107585d0e5f78cabfc0f340",
+        "command": [
+          "python3",
+          "-B",
+          "tests/h62/item1/duplication-scanner/test_metadata_observations.py"
+        ],
+        "kind": "unittest",
+        "purpose": "Existing scanner or V08 regression verifies exact fixture/source identities, declaration observations, pinned dependency closures, corruption refusal or generator-template preservation. Ordinary and instrumented executions passed in the recorded context. Only these exact primary input reads receive data-use credit; no native Lean, ownership, theorem validity, compiler or EVM acceptance.",
+        "input_scope": [
+          "tests/h62/item1/duplication-scanner/MetadataFingerprintV2.lean",
+          "tests/h62/item1/duplication-scanner/ScopeMetadataObservation.lean",
+          "tests/h62/item1/duplication-scanner/metadata-observation-pins.json"
+        ],
+        "other_reads": "unresolved"
+      },
+      {
+        "path": "tests/h62/item1/duplication-scanner/test_project_closure.py",
+        "input_revision": "b6d4061febc1fb281cf1c30ffb277e1b6762f8e9",
+        "source_blob": "2120a783b3c1d6f84d56ac3f4c16fafad2688aea",
+        "command": [
+          "python3",
+          "-B",
+          "tests/h62/item1/duplication-scanner/test_project_closure.py"
+        ],
+        "kind": "unittest",
+        "purpose": "Existing scanner or V08 regression verifies exact fixture/source identities, declaration observations, pinned dependency closures, corruption refusal or generator-template preservation. Ordinary and instrumented executions passed in the recorded context. Only these exact primary input reads receive data-use credit; no native Lean, ownership, theorem validity, compiler or EVM acceptance.",
+        "input_scope": [
+          "tests/h62/item1/duplication-scanner/ASTSourceBinding.lean",
+          "tests/h62/item1/duplication-scanner/project-closure-pins.json"
+        ],
+        "other_reads": "unresolved"
+      },
+      {
+        "path": "tests/h62/item1/duplication-scanner/test_project_leaf.py",
+        "input_revision": "b6d4061febc1fb281cf1c30ffb277e1b6762f8e9",
+        "source_blob": "02cc9229ddf436ef0214fa307161b1a47ec4737b",
+        "command": [
+          "python3",
+          "-B",
+          "tests/h62/item1/duplication-scanner/test_project_leaf.py"
+        ],
+        "kind": "unittest",
+        "purpose": "Existing scanner or V08 regression verifies exact fixture/source identities, declaration observations, pinned dependency closures, corruption refusal or generator-template preservation. Ordinary and instrumented executions passed in the recorded context. Only these exact primary input reads receive data-use credit; no native Lean, ownership, theorem validity, compiler or EVM acceptance.",
+        "input_scope": [
+          "tests/h62/item1/duplication-scanner/KeySortSourceBinding.lean",
+          "tests/h62/item1/duplication-scanner/project-leaf-pins.json"
+        ],
+        "other_reads": "unresolved"
+      },
+      {
+        "path": "tests/h62/item1/duplication-scanner/test_scan.py",
+        "input_revision": "b6d4061febc1fb281cf1c30ffb277e1b6762f8e9",
+        "source_blob": "abf12e204cbc8c19fffad34625c9f394112c6791",
+        "command": [
+          "python3",
+          "-B",
+          "tests/h62/item1/duplication-scanner/test_scan.py"
+        ],
+        "kind": "unittest",
+        "purpose": "Existing scanner or V08 regression verifies exact fixture/source identities, declaration observations, pinned dependency closures, corruption refusal or generator-template preservation. Ordinary and instrumented executions passed in the recorded context. Only these exact primary input reads receive data-use credit; no native Lean, ownership, theorem validity, compiler or EVM acceptance.",
+        "input_scope": [
+          "tests/h62/item6/migrate-yul/DeclarationMetadataFixture.lean"
+        ],
+        "other_reads": "unresolved"
+      },
+      {
+        "path": "tests/h62/item1/duplication-scanner/test_scope_binding.py",
+        "input_revision": "b6d4061febc1fb281cf1c30ffb277e1b6762f8e9",
+        "source_blob": "17976f791cf313785f54ea3cd225787979b74529",
+        "command": [
+          "python3",
+          "-B",
+          "tests/h62/item1/duplication-scanner/test_scope_binding.py"
+        ],
+        "kind": "unittest",
+        "purpose": "Existing scanner or V08 regression verifies exact fixture/source identities, declaration observations, pinned dependency closures, corruption refusal or generator-template preservation. Ordinary and instrumented executions passed in the recorded context. Only these exact primary input reads receive data-use credit; no native Lean, ownership, theorem validity, compiler or EVM acceptance.",
+        "input_scope": [
+          "tests/h62/item1/duplication-scanner/ScopeSourceBinding.lean",
+          "tests/h62/item1/duplication-scanner/scope-closure-pins.json"
+        ],
+        "other_reads": "unresolved"
+      },
+      {
+        "path": "tests/h62/item2/audit-v08-adapters/test_generate_calldata_census.py",
+        "input_revision": "b6d4061febc1fb281cf1c30ffb277e1b6762f8e9",
+        "source_blob": "15614749c5902e6817ce772a72f548f491bdabfe",
+        "command": [
+          "python3",
+          "-B",
+          "tests/h62/item2/audit-v08-adapters/test_generate_calldata_census.py"
+        ],
+        "kind": "unittest",
+        "purpose": "Existing scanner or V08 regression verifies exact fixture/source identities, declaration observations, pinned dependency closures, corruption refusal or generator-template preservation. Ordinary and instrumented executions passed in the recorded context. Only these exact primary input reads receive data-use credit; no native Lean, ownership, theorem validity, compiler or EVM acceptance.",
+        "input_scope": [
+          "tests/h62/item2/audit-v08-adapters/P8StatementCensus.lean"
+        ],
+        "other_reads": "unresolved"
       }
     ]
   },
   "consumer_routes": {
     "persistent_reads": [
+      {
+        "runner": "validated:tests/h62/item1/duplication-scanner/test_project_closure.py",
+        "input_revision": "b6d4061febc1fb281cf1c30ffb277e1b6762f8e9",
+        "frames": [
+          {
+            "path": "tests/h62/item1/duplication-scanner/test_project_closure.py",
+            "blob": "2120a783b3c1d6f84d56ac3f4c16fafad2688aea",
+            "line": 86
+          },
+          {
+            "path": "tests/h62/item1/duplication-scanner/test_project_closure.py",
+            "blob": "2120a783b3c1d6f84d56ac3f4c16fafad2688aea",
+            "line": 30
+          },
+          {
+            "path": "scripts/h62/item1/duplication-scanner/bind_project_closure.py",
+            "blob": "f2d762436dc7f5a1374b79c0173721a254435281",
+            "line": 48
+          },
+          {
+            "path": "scripts/h62/item1/duplication-scanner/bind_signature_fixture.py",
+            "blob": "7959500d77df619f6db0805b973193d2b473b84b",
+            "line": 49
+          },
+          {
+            "path": "scripts/h62/item1/duplication-scanner/observe_signature_environment.py",
+            "blob": "0e6fd6f8f0ac05011f37651807733930fd52d257",
+            "line": 117
+          }
+        ],
+        "target": "tests/h62/item1/duplication-scanner/ASTSourceBinding.lean",
+        "target_blob": "3a09c148736c221286ee514335b3fb717751410e",
+        "operation": "validated Python read of measured bytes"
+      },
+      {
+        "runner": "validated:tests/h62/item1/duplication-scanner/test_project_leaf.py",
+        "input_revision": "b6d4061febc1fb281cf1c30ffb277e1b6762f8e9",
+        "frames": [
+          {
+            "path": "tests/h62/item1/duplication-scanner/test_project_leaf.py",
+            "blob": "02cc9229ddf436ef0214fa307161b1a47ec4737b",
+            "line": 77
+          },
+          {
+            "path": "tests/h62/item1/duplication-scanner/test_project_leaf.py",
+            "blob": "02cc9229ddf436ef0214fa307161b1a47ec4737b",
+            "line": 31
+          },
+          {
+            "path": "scripts/h62/item1/duplication-scanner/bind_project_leaf.py",
+            "blob": "7fdfd46cdaab29a7e2f2514cceeaf2dc67242f5e",
+            "line": 29
+          },
+          {
+            "path": "scripts/h62/item1/duplication-scanner/bind_signature_fixture.py",
+            "blob": "7959500d77df619f6db0805b973193d2b473b84b",
+            "line": 49
+          },
+          {
+            "path": "scripts/h62/item1/duplication-scanner/observe_signature_environment.py",
+            "blob": "0e6fd6f8f0ac05011f37651807733930fd52d257",
+            "line": 117
+          }
+        ],
+        "target": "tests/h62/item1/duplication-scanner/KeySortSourceBinding.lean",
+        "target_blob": "78e1403e95525dfa274639d29f44317f1c10b4a9",
+        "operation": "validated Python read of measured bytes"
+      },
+      {
+        "runner": "validated:tests/h62/item1/duplication-scanner/test_metadata_observations.py",
+        "input_revision": "b6d4061febc1fb281cf1c30ffb277e1b6762f8e9",
+        "frames": [
+          {
+            "path": "tests/h62/item1/duplication-scanner/test_metadata_observations.py",
+            "blob": "840d7ef1751f04bdf107585d0e5f78cabfc0f340",
+            "line": 90
+          },
+          {
+            "path": "tests/h62/item1/duplication-scanner/test_metadata_observations.py",
+            "blob": "840d7ef1751f04bdf107585d0e5f78cabfc0f340",
+            "line": 83
+          },
+          {
+            "path": "scripts/h62/item1/duplication-scanner/observe_metadata_types.py",
+            "blob": "278cb4d198463a55bc01df85d415968eff96554c",
+            "line": 28
+          }
+        ],
+        "target": "tests/h62/item1/duplication-scanner/MetadataFingerprintV2.lean",
+        "target_blob": "6449e3bda4944a27e4c183e805c13a3890820a01",
+        "operation": "validated Python read of measured bytes"
+      },
+      {
+        "runner": "validated:tests/h62/item1/duplication-scanner/test_metadata_observations.py",
+        "input_revision": "b6d4061febc1fb281cf1c30ffb277e1b6762f8e9",
+        "frames": [
+          {
+            "path": "tests/h62/item1/duplication-scanner/test_metadata_observations.py",
+            "blob": "840d7ef1751f04bdf107585d0e5f78cabfc0f340",
+            "line": 90
+          },
+          {
+            "path": "tests/h62/item1/duplication-scanner/test_metadata_observations.py",
+            "blob": "840d7ef1751f04bdf107585d0e5f78cabfc0f340",
+            "line": 83
+          },
+          {
+            "path": "scripts/h62/item1/duplication-scanner/observe_metadata_types.py",
+            "blob": "278cb4d198463a55bc01df85d415968eff96554c",
+            "line": 28
+          }
+        ],
+        "target": "tests/h62/item1/duplication-scanner/ScopeMetadataObservation.lean",
+        "target_blob": "7053f059f3c24039c485cf2a30ede3e030f4fceb",
+        "operation": "validated Python read of measured bytes"
+      },
+      {
+        "runner": "validated:tests/h62/item1/duplication-scanner/test_scope_binding.py",
+        "input_revision": "b6d4061febc1fb281cf1c30ffb277e1b6762f8e9",
+        "frames": [
+          {
+            "path": "tests/h62/item1/duplication-scanner/test_scope_binding.py",
+            "blob": "17976f791cf313785f54ea3cd225787979b74529",
+            "line": 75
+          },
+          {
+            "path": "tests/h62/item1/duplication-scanner/test_scope_binding.py",
+            "blob": "17976f791cf313785f54ea3cd225787979b74529",
+            "line": 28
+          },
+          {
+            "path": "scripts/h62/item1/duplication-scanner/bind_project_closure.py",
+            "blob": "f2d762436dc7f5a1374b79c0173721a254435281",
+            "line": 48
+          },
+          {
+            "path": "scripts/h62/item1/duplication-scanner/bind_signature_fixture.py",
+            "blob": "7959500d77df619f6db0805b973193d2b473b84b",
+            "line": 49
+          },
+          {
+            "path": "scripts/h62/item1/duplication-scanner/observe_signature_environment.py",
+            "blob": "0e6fd6f8f0ac05011f37651807733930fd52d257",
+            "line": 117
+          }
+        ],
+        "target": "tests/h62/item1/duplication-scanner/ScopeSourceBinding.lean",
+        "target_blob": "8e2463cf1b669e71265c9c26cfe269e439e88490",
+        "operation": "validated Python read of measured bytes"
+      },
+      {
+        "runner": "validated:tests/h62/item1/duplication-scanner/test_local_rebuild.py",
+        "input_revision": "b6d4061febc1fb281cf1c30ffb277e1b6762f8e9",
+        "frames": [
+          {
+            "path": "tests/h62/item1/duplication-scanner/test_local_rebuild.py",
+            "blob": "e09087d4d3a0529fc05c3be8c4c13e36b64ac96b",
+            "line": 190
+          },
+          {
+            "path": "tests/h62/item1/duplication-scanner/test_local_rebuild.py",
+            "blob": "e09087d4d3a0529fc05c3be8c4c13e36b64ac96b",
+            "line": 108
+          },
+          {
+            "path": "scripts/h62/item1/duplication-scanner/bind_signature_fixture.py",
+            "blob": "7959500d77df619f6db0805b973193d2b473b84b",
+            "line": 228
+          }
+        ],
+        "target": "tests/h62/item1/duplication-scanner/SignatureEnvironment.lean",
+        "target_blob": "13e91e16244b1a2498e1cd74f1a36d0ab0480cf1",
+        "operation": "validated Python read of measured bytes"
+      },
+      {
+        "runner": "validated:tests/h62/item1/duplication-scanner/test_local_rebuild.py",
+        "input_revision": "b6d4061febc1fb281cf1c30ffb277e1b6762f8e9",
+        "frames": [
+          {
+            "path": "tests/h62/item1/duplication-scanner/test_local_rebuild.py",
+            "blob": "e09087d4d3a0529fc05c3be8c4c13e36b64ac96b",
+            "line": 190
+          },
+          {
+            "path": "tests/h62/item1/duplication-scanner/test_local_rebuild.py",
+            "blob": "e09087d4d3a0529fc05c3be8c4c13e36b64ac96b",
+            "line": 108
+          },
+          {
+            "path": "scripts/h62/item1/duplication-scanner/bind_signature_fixture.py",
+            "blob": "7959500d77df619f6db0805b973193d2b473b84b",
+            "line": 228
+          }
+        ],
+        "target": "tests/h62/item1/duplication-scanner/SignatureEnvironmentProbe.lean",
+        "target_blob": "2a71875bde836d09e42daa05f62081d88188475e",
+        "operation": "validated Python read of measured bytes"
+      },
+      {
+        "runner": "validated:tests/h62/item1/duplication-scanner/test_checked_logs.py",
+        "input_revision": "b6d4061febc1fb281cf1c30ffb277e1b6762f8e9",
+        "frames": [
+          {
+            "path": "tests/h62/item1/duplication-scanner/test_checked_logs.py",
+            "blob": "6b882d590086fa4509e56686fc6e10b36b8b57ad",
+            "line": 112
+          },
+          {
+            "path": "tests/h62/item1/duplication-scanner/test_checked_logs.py",
+            "blob": "6b882d590086fa4509e56686fc6e10b36b8b57ad",
+            "line": 96
+          },
+          {
+            "path": "scripts/h62/item1/duplication-scanner/bind_source_locations.py",
+            "blob": "58bf4293737b5e55de253be3e5d360f4a0f1cf6c",
+            "line": 174
+          }
+        ],
+        "target": "tests/h62/item1/duplication-scanner/SignatureFingerprint.lean",
+        "target_blob": "d8ddd0d0c0a13486e3aa725ee2e4e08d24ffd54b",
+        "operation": "validated Python read of measured bytes"
+      },
+      {
+        "runner": "validated:tests/h62/item1/duplication-scanner/test_kernel_census.py",
+        "input_revision": "b6d4061febc1fb281cf1c30ffb277e1b6762f8e9",
+        "frames": [
+          {
+            "path": "tests/h62/item1/duplication-scanner/test_kernel_census.py",
+            "blob": "72fa929ff560585bcd8bb9a48937c377f879dbf0",
+            "line": 91
+          },
+          {
+            "path": "tests/h62/item1/duplication-scanner/test_kernel_census.py",
+            "blob": "72fa929ff560585bcd8bb9a48937c377f879dbf0",
+            "line": 72
+          },
+          {
+            "path": "scripts/h62/item1/duplication-scanner/census_fixture_kernel.py",
+            "blob": "cfdf3ac215d0429eb5bf6b423145373e8a97f3e1",
+            "line": 113
+          },
+          {
+            "path": "scripts/h62/item1/duplication-scanner/bind_signature_fixture.py",
+            "blob": "7959500d77df619f6db0805b973193d2b473b84b",
+            "line": 49
+          },
+          {
+            "path": "scripts/h62/item1/duplication-scanner/observe_signature_environment.py",
+            "blob": "0e6fd6f8f0ac05011f37651807733930fd52d257",
+            "line": 117
+          }
+        ],
+        "target": "tests/h62/item1/duplication-scanner/SignatureKernelCensus.lean",
+        "target_blob": "32c3b651e685f9d0dc628637fe730a630c8ced5f",
+        "operation": "validated Python read of measured bytes"
+      },
+      {
+        "runner": "validated:tests/h62/item1/duplication-scanner/test_local_rebuild.py",
+        "input_revision": "b6d4061febc1fb281cf1c30ffb277e1b6762f8e9",
+        "frames": [
+          {
+            "path": "tests/h62/item1/duplication-scanner/test_local_rebuild.py",
+            "blob": "e09087d4d3a0529fc05c3be8c4c13e36b64ac96b",
+            "line": 190
+          },
+          {
+            "path": "tests/h62/item1/duplication-scanner/test_local_rebuild.py",
+            "blob": "e09087d4d3a0529fc05c3be8c4c13e36b64ac96b",
+            "line": 108
+          },
+          {
+            "path": "scripts/h62/item1/duplication-scanner/bind_signature_fixture.py",
+            "blob": "7959500d77df619f6db0805b973193d2b473b84b",
+            "line": 228
+          }
+        ],
+        "target": "tests/h62/item1/duplication-scanner/SignatureObservedConsumer.lean",
+        "target_blob": "9ae9fb35de8fbfa7f08229fcd56305d599bb78ba",
+        "operation": "validated Python read of measured bytes"
+      },
+      {
+        "runner": "validated:tests/h62/item1/duplication-scanner/test_checked_logs.py",
+        "input_revision": "b6d4061febc1fb281cf1c30ffb277e1b6762f8e9",
+        "frames": [
+          {
+            "path": "tests/h62/item1/duplication-scanner/test_checked_logs.py",
+            "blob": "6b882d590086fa4509e56686fc6e10b36b8b57ad",
+            "line": 112
+          },
+          {
+            "path": "tests/h62/item1/duplication-scanner/test_checked_logs.py",
+            "blob": "6b882d590086fa4509e56686fc6e10b36b8b57ad",
+            "line": 96
+          },
+          {
+            "path": "scripts/h62/item1/duplication-scanner/bind_source_locations.py",
+            "blob": "58bf4293737b5e55de253be3e5d360f4a0f1cf6c",
+            "line": 158
+          }
+        ],
+        "target": "tests/h62/item1/duplication-scanner/SignatureSourceLocations.lean",
+        "target_blob": "ba515578d1ba37e94f6f53edcd4ea6f8d53ca76b",
+        "operation": "validated Python read of measured bytes"
+      },
+      {
+        "runner": "validated:tests/h62/item1/duplication-scanner/test_index.py",
+        "input_revision": "b6d4061febc1fb281cf1c30ffb277e1b6762f8e9",
+        "frames": [
+          {
+            "path": "tests/h62/item1/duplication-scanner/test_index.py",
+            "blob": "4cc6f8a9c905c8ed827805cee1c0baba12e1e268",
+            "line": 30
+          },
+          {
+            "path": "tests/h62/item1/duplication-scanner/test_index.py",
+            "blob": "4cc6f8a9c905c8ed827805cee1c0baba12e1e268",
+            "line": 21
+          }
+        ],
+        "target": "tests/h62/item1/duplication-scanner/audit-index.json",
+        "target_blob": "d7077497b9569479333012c79dd7d78294220dd6",
+        "operation": "validated Python read of measured bytes"
+      },
+      {
+        "runner": "validated:tests/h62/item1/duplication-scanner/test_kernel_census.py",
+        "input_revision": "b6d4061febc1fb281cf1c30ffb277e1b6762f8e9",
+        "frames": [
+          {
+            "path": "tests/h62/item1/duplication-scanner/test_kernel_census.py",
+            "blob": "72fa929ff560585bcd8bb9a48937c377f879dbf0",
+            "line": 91
+          },
+          {
+            "path": "tests/h62/item1/duplication-scanner/test_kernel_census.py",
+            "blob": "72fa929ff560585bcd8bb9a48937c377f879dbf0",
+            "line": 72
+          },
+          {
+            "path": "scripts/h62/item1/duplication-scanner/census_fixture_kernel.py",
+            "blob": "cfdf3ac215d0429eb5bf6b423145373e8a97f3e1",
+            "line": 111
+          }
+        ],
+        "target": "tests/h62/item1/duplication-scanner/kernel-census-pins.json",
+        "target_blob": "912b07db2adb12fcea2b88920ea5219c3333a003",
+        "operation": "validated Python read of measured bytes"
+      },
+      {
+        "runner": "validated:tests/h62/item1/duplication-scanner/test_local_rebuild.py",
+        "input_revision": "b6d4061febc1fb281cf1c30ffb277e1b6762f8e9",
+        "frames": [
+          {
+            "path": "tests/h62/item1/duplication-scanner/test_local_rebuild.py",
+            "blob": "e09087d4d3a0529fc05c3be8c4c13e36b64ac96b",
+            "line": 190
+          },
+          {
+            "path": "tests/h62/item1/duplication-scanner/test_local_rebuild.py",
+            "blob": "e09087d4d3a0529fc05c3be8c4c13e36b64ac96b",
+            "line": 20
+          }
+        ],
+        "target": "tests/h62/item1/duplication-scanner/local-rebuild-pins.json",
+        "target_blob": "2d4716a2c00ab1a7c6f2d31e1ea902fb1f71393b",
+        "operation": "validated Python read of measured bytes"
+      },
+      {
+        "runner": "validated:tests/h62/item1/duplication-scanner/test_metadata_observations.py",
+        "input_revision": "b6d4061febc1fb281cf1c30ffb277e1b6762f8e9",
+        "frames": [
+          {
+            "path": "tests/h62/item1/duplication-scanner/test_metadata_observations.py",
+            "blob": "840d7ef1751f04bdf107585d0e5f78cabfc0f340",
+            "line": 90
+          },
+          {
+            "path": "tests/h62/item1/duplication-scanner/test_metadata_observations.py",
+            "blob": "840d7ef1751f04bdf107585d0e5f78cabfc0f340",
+            "line": 83
+          }
+        ],
+        "target": "tests/h62/item1/duplication-scanner/metadata-observation-pins.json",
+        "target_blob": "e7ebc7524aaebad7895fac074a198be0d6fc1acc",
+        "operation": "validated Python read of measured bytes"
+      },
+      {
+        "runner": "validated:tests/h62/item1/duplication-scanner/test_project_closure.py",
+        "input_revision": "b6d4061febc1fb281cf1c30ffb277e1b6762f8e9",
+        "frames": [
+          {
+            "path": "tests/h62/item1/duplication-scanner/test_project_closure.py",
+            "blob": "2120a783b3c1d6f84d56ac3f4c16fafad2688aea",
+            "line": 86
+          },
+          {
+            "path": "tests/h62/item1/duplication-scanner/test_project_closure.py",
+            "blob": "2120a783b3c1d6f84d56ac3f4c16fafad2688aea",
+            "line": 25
+          }
+        ],
+        "target": "tests/h62/item1/duplication-scanner/project-closure-pins.json",
+        "target_blob": "4d3f2d7d382bb0173d0f2adc7b53228b72cca7c2",
+        "operation": "validated Python read of measured bytes"
+      },
+      {
+        "runner": "validated:tests/h62/item1/duplication-scanner/test_project_leaf.py",
+        "input_revision": "b6d4061febc1fb281cf1c30ffb277e1b6762f8e9",
+        "frames": [
+          {
+            "path": "tests/h62/item1/duplication-scanner/test_project_leaf.py",
+            "blob": "02cc9229ddf436ef0214fa307161b1a47ec4737b",
+            "line": 77
+          },
+          {
+            "path": "tests/h62/item1/duplication-scanner/test_project_leaf.py",
+            "blob": "02cc9229ddf436ef0214fa307161b1a47ec4737b",
+            "line": 29
+          }
+        ],
+        "target": "tests/h62/item1/duplication-scanner/project-leaf-pins.json",
+        "target_blob": "38c68576438bac9ac7948af38c65f6cfdfea4585",
+        "operation": "validated Python read of measured bytes"
+      },
+      {
+        "runner": "validated:tests/h62/item1/duplication-scanner/test_scope_binding.py",
+        "input_revision": "b6d4061febc1fb281cf1c30ffb277e1b6762f8e9",
+        "frames": [
+          {
+            "path": "tests/h62/item1/duplication-scanner/test_scope_binding.py",
+            "blob": "17976f791cf313785f54ea3cd225787979b74529",
+            "line": 75
+          },
+          {
+            "path": "tests/h62/item1/duplication-scanner/test_scope_binding.py",
+            "blob": "17976f791cf313785f54ea3cd225787979b74529",
+            "line": 22
+          }
+        ],
+        "target": "tests/h62/item1/duplication-scanner/scope-closure-pins.json",
+        "target_blob": "e50baeee8408adef9f6cd3b7e4955f3387789317",
+        "operation": "validated Python read of measured bytes"
+      },
+      {
+        "runner": "validated:tests/h62/item1/duplication-scanner/test_environment_snapshot.py",
+        "input_revision": "b6d4061febc1fb281cf1c30ffb277e1b6762f8e9",
+        "frames": [
+          {
+            "path": "tests/h62/item1/duplication-scanner/test_environment_snapshot.py",
+            "blob": "a4719eb8e078d3767885dad1cbe094ddddbbac5f",
+            "line": 200
+          },
+          {
+            "path": "tests/h62/item1/duplication-scanner/test_environment_snapshot.py",
+            "blob": "a4719eb8e078d3767885dad1cbe094ddddbbac5f",
+            "line": 162
+          }
+        ],
+        "target": "tests/h62/item1/duplication-scanner/signature-records.expected.jsonl",
+        "target_blob": "0a1b88e626a11738959375b416f56954f6760d60",
+        "operation": "validated Python read of measured bytes"
+      },
+      {
+        "runner": "validated:tests/h62/item1/duplication-scanner/test_checked_logs.py",
+        "input_revision": "b6d4061febc1fb281cf1c30ffb277e1b6762f8e9",
+        "frames": [
+          {
+            "path": "tests/h62/item1/duplication-scanner/test_checked_logs.py",
+            "blob": "6b882d590086fa4509e56686fc6e10b36b8b57ad",
+            "line": 112
+          },
+          {
+            "path": "tests/h62/item1/duplication-scanner/test_checked_logs.py",
+            "blob": "6b882d590086fa4509e56686fc6e10b36b8b57ad",
+            "line": 96
+          },
+          {
+            "path": "scripts/h62/item1/duplication-scanner/bind_source_locations.py",
+            "blob": "58bf4293737b5e55de253be3e5d360f4a0f1cf6c",
+            "line": 134
+          }
+        ],
+        "target": "tests/h62/item1/duplication-scanner/source-location-pins.json",
+        "target_blob": "7e84f2ddc5f01e3ef8edeaf2ffe6660b34e4a206",
+        "operation": "validated Python read of measured bytes"
+      },
       {
         "runner": "validated:tests/h62/item1/p16-generator/test_generator.py",
         "input_revision": "56cd04f351e8b07f96878891a5f6a89765ba6299",
@@ -2311,6 +2983,20 @@
         ],
         "target": "tests/h62/item2/audit-readonly-calls/signature-drift-pins.json",
         "target_blob": "acb96022f660ca488ba181f2b8436f07239a37df",
+        "operation": "validated Python read of measured bytes"
+      },
+      {
+        "runner": "validated:tests/h62/item2/audit-v08-adapters/test_generate_calldata_census.py",
+        "input_revision": "b6d4061febc1fb281cf1c30ffb277e1b6762f8e9",
+        "frames": [
+          {
+            "path": "tests/h62/item2/audit-v08-adapters/test_generate_calldata_census.py",
+            "blob": "15614749c5902e6817ce772a72f548f491bdabfe",
+            "line": 19
+          }
+        ],
+        "target": "tests/h62/item2/audit-v08-adapters/P8StatementCensus.lean",
+        "target_blob": "230ae09442bfa6102f9218930b6992104de57f6b",
         "operation": "validated Python read of measured bytes"
       },
       {
@@ -3884,6 +4570,30 @@
         ],
         "target": "tests/h62/item2/audit-v10-storage/touched-joint-witness-map.json",
         "target_blob": "712d2eeeb7ea9ba29cded3615e445c0dd9f7466c",
+        "operation": "validated Python read of measured bytes"
+      },
+      {
+        "runner": "validated:tests/h62/item1/duplication-scanner/test_scan.py",
+        "input_revision": "b6d4061febc1fb281cf1c30ffb277e1b6762f8e9",
+        "frames": [
+          {
+            "path": "tests/h62/item1/duplication-scanner/test_scan.py",
+            "blob": "abf12e204cbc8c19fffad34625c9f394112c6791",
+            "line": 1104
+          },
+          {
+            "path": "tests/h62/item1/duplication-scanner/test_scan.py",
+            "blob": "abf12e204cbc8c19fffad34625c9f394112c6791",
+            "line": 240
+          },
+          {
+            "path": "scripts/h62/item1/duplication-scanner/scan.py",
+            "blob": "366f753500d82dc138fd59a2659e476c7321a382",
+            "line": 290
+          }
+        ],
+        "target": "tests/h62/item6/migrate-yul/DeclarationMetadataFixture.lean",
+        "target_blob": "8904c7246dc1f06f7f733f31d04fa1b4e47acd69",
         "operation": "validated Python read of measured bytes"
       }
     ]
