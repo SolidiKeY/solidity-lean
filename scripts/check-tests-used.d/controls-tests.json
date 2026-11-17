@@ -290,6 +290,36 @@
           "--lean"
         ],
         "purpose": "Source contract for the existing header-inventory CLI requiring historical evidence and an explicit Lean path. All fixed counts, private prerequisites, malformed-input rejection and zero-proof-credit checks remain unchanged; configured validation is unavailable here. The bare prefix lacks required configuration; source role only, with no helper/fixture, current passing-reproducer, Lean or EVM proof credit."
+      },
+      {
+        "path": "tests/h62/item2/audit-memory-operations/check-reconcile.py",
+        "input_revision": "0c3a5d41c3d8e0ad683f86dd5bdffa8a1d1db3a2",
+        "source_blob": "ab6f970cb991e55de3ee7056954f44c5c74682f8",
+        "command": [
+          "python3",
+          "-B",
+          "tests/h62/item2/audit-memory-operations/check-reconcile.py"
+        ],
+        "kind": "runnable-entrypoint",
+        "entry_line": 18,
+        "purpose": "Historical Python source-premise reconciliation and fail-closed metadata controls, demonstrated by an actual default invocation at the recorded committed source revision with checksum-matched producer census and authenticated documentary snapshots. Documentary inputs are not live ownership authority. Current missing-input/frozen-source checks remain unchanged; historical source role only, with no fixture, child, current passing-validation, Lean or EVM proof credit.",
+        "input_scope": [],
+        "other_reads": "unresolved"
+      },
+      {
+        "path": "tests/h62/item6/migrate-storage/overlay-acceptance.py",
+        "input_revision": "abddffb473dec55619a0c7f848c8688068658198",
+        "source_blob": "f9fffee1e6629bb2421a2dc535b8b1806061b3af",
+        "command": [
+          "python3",
+          "-B",
+          "tests/h62/item6/migrate-storage/overlay-acceptance.py"
+        ],
+        "kind": "runnable-entrypoint",
+        "entry_line": 11,
+        "purpose": "Historical Python overlay provenance/postimage and unchanged-production negative controls, demonstrated by an actual default invocation at the recorded committed source revision using the existing strictly guarded private-fixture producer. Original checkout, patch/postimage pins, proof-budget guards and checks remain unchanged. Fixture reproduction grants no live Hash edit, ownership authority or proof acceptance; historical source role only, with no fixture/child/current passing-validation, Lean or EVM credit.",
+        "input_scope": [],
+        "other_reads": "unresolved"
       }
     ]
   }
