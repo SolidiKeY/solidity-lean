@@ -75,7 +75,7 @@ for the four fixtures that record `unknown`.
 
 - **OT-CR-1 (shared translator, A).** An in-place `--apply` changes 34 fixture
   byte strings that A's frozen packet pins
-  (`tests/directruntime-20261104/shared-translator/fixture-variants.json`, 31;
+  ([tests/directruntime-20261104/shared-translator/fixture-variants.json](https://github.com/SolidiKeY/solidity-lean-coord/blob/66f1eadd350d9480559de7155cb378e1ee66b5a1/evidence/plan-x1e-classify-runtime-upstrea-1116/x1e-classify-runtime-upstream/tests/directruntime-20261104/shared-translator/fixture-variants.json), 31;
   `fixture-census.json`, `coverage-inventory.json`, `construct-reader-cases.json`,
   4 each). A's `preflight-construct-cases.py` asserts those sha256 values against the live fixtures and would fail. `preflight-variants.py` also checks hashes, but it reads `artifacts/h68-bulk/`, which is external (H44). Needed from A: either A re-pins its
   packet after CR applies, or A keeps frozen copies and CR applies. Also needed:
