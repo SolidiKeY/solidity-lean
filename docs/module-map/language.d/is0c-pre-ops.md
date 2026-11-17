@@ -1,2 +1,2 @@
-| `Solidity/Semantics/IntrinsicStorage/Preimages/Ops.lean` | Audited storage operations and expression observers; result preservation and slot-input retention, including failures. |
-| `Solidity/Examples/IntrinsicStorage/Preimages/Ops.lean` | Failure-result and retained aggregate-input regressions for audited sources and error-producing continuations. |
+| `Solidity/Semantics/IntrinsicStorage/Preimages/Ops.lean` | Audited storage operations; result preservation and slot-input retention, including failures. |
+| `Solidity/Examples/IntrinsicStorage/Preimages/Ops.lean` | Failed-read and retained old/new aggregate-input regressions through audited composition. |
