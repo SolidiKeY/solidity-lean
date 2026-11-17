@@ -244,10 +244,7 @@
         "command": ["python3", "-B", "tests/h62/item2/audit-bytecode-selection/test_exact_domains.py"],
         "kind": "unittest",
         "purpose": "Existing bytecode regression suite passed ordinary and instrumented Python runs. Only the exact observed primary fixtures listed here receive persisted data-use routes; all other reads remain unresolved. No native Lean or external EVM proof acceptance.",
-        "input_scope": [
-          "tests/h62/item2/audit-bytecode-selection/HypothesisDomains.lean",
-          "tests/h62/item2/audit-bytecode-selection/exact-gate-domains.txt"
-        ],
+        "input_scope": ["tests/h62/item2/audit-bytecode-selection/HypothesisDomains.lean", "tests/h62/item2/audit-bytecode-selection/exact-gate-domains.txt"],
         "other_reads": "unresolved"
       },
       {
@@ -334,10 +331,7 @@
         "command": ["python3", "-B", "tests/h62/item1/p16-generator/test_generator.py"],
         "kind": "unittest",
         "purpose": "Historical unchanged-source regression suite passed ordinary and instrumented execution in its exact recorded Git context. Current default execution fails because the live audit/gate baseline has drifted; that failure is preserved. Only the listed exact primary data reads are certified; no current passing-validation, native Lean or proof credit. Tests use disposable fixtures and synthetic gate/tool controls.",
-        "input_scope": [
-          "tests/h62/item1/p16-generator/proposed-gate.patch",
-          "tests/h62/item1/p16-generator/proposed-owner-p16.patch"
-        ],
+        "input_scope": ["tests/h62/item1/p16-generator/proposed-gate.patch", "tests/h62/item1/p16-generator/proposed-owner-p16.patch"],
         "other_reads": "unresolved"
       },
       {
@@ -407,9 +401,7 @@
         "command": ["python3", "-B", "tests/h62/item2/audit-v10-storage/test_transport_pairs.py"],
         "kind": "unittest",
         "purpose": "Existing metadata/reference-accounting regression consumer passed ordinary and instrumented execution at the recorded exact Git context. Only these unchanged primary inputs receive data-use credit. Historical registry validation does not make the live frozen-interface failure pass; no Lean elaboration, represented obligation, transport, compiler or EVM proof credit.",
-        "input_scope": [
-          "tests/h62/item2/audit-readonly-calls/signature-drift-pins.json"
-        ],
+        "input_scope": ["tests/h62/item2/audit-readonly-calls/signature-drift-pins.json"],
         "other_reads": "unresolved"
       },
       {
@@ -466,9 +458,7 @@
         "command": ["python3", "-B", "scripts/h62/item2/audit-readonly-calls/test_source_void_world.py"],
         "kind": "unittest",
         "purpose": "Existing readonly regression checks exact declaration/import inventory and rejects source, name, helper or evidence substitutions. Ordinary and instrumented executions passed at the recorded Git context. Only these exact unchanged primary source-data reads receive credit; no native Lean elaboration, premise validity, transport, compiler or EVM proof credit.",
-        "input_scope": [
-          "tests/h62/item2/audit-readonly-calls/SourceVoidWorld.lean"
-        ],
+        "input_scope": ["tests/h62/item2/audit-readonly-calls/SourceVoidWorld.lean"],
         "other_reads": "unresolved"
       },
       {
@@ -478,9 +468,7 @@
         "command": ["python3", "-B", "scripts/h62/item2/audit-readonly-calls/test_source_void_callable.py"],
         "kind": "unittest",
         "purpose": "Existing readonly regression checks exact declaration/import inventory and rejects source, name, helper or evidence substitutions. Ordinary and instrumented executions passed at the recorded Git context. Only these exact unchanged primary source-data reads receive credit; no native Lean elaboration, premise validity, transport, compiler or EVM proof credit.",
-        "input_scope": [
-          "tests/h62/item2/audit-readonly-calls/SourceVoidCallable.lean"
-        ],
+        "input_scope": ["tests/h62/item2/audit-readonly-calls/SourceVoidCallable.lean"],
         "other_reads": "unresolved"
       },
       {
@@ -490,9 +478,7 @@
         "command": ["python3", "-B", "scripts/h62/item2/audit-readonly-calls/test_source_void.py"],
         "kind": "unittest",
         "purpose": "Existing readonly regression checks exact declaration/import inventory and rejects source, name, helper or evidence substitutions. Ordinary and instrumented executions passed at the recorded Git context. Only these exact unchanged primary source-data reads receive credit; no native Lean elaboration, premise validity, transport, compiler or EVM proof credit.",
-        "input_scope": [
-          "tests/h62/item2/audit-readonly-calls/SourceVoidSelection.lean"
-        ],
+        "input_scope": ["tests/h62/item2/audit-readonly-calls/SourceVoidSelection.lean"],
         "other_reads": "unresolved"
       },
       {
@@ -502,9 +488,7 @@
         "command": ["python3", "-B", "scripts/h62/item2/audit-readonly-calls/test_native_frame.py"],
         "kind": "unittest",
         "purpose": "Existing readonly regression checks exact declaration/import inventory and rejects source, name, helper or evidence substitutions. Ordinary and instrumented executions passed at the recorded Git context. Only these exact unchanged primary source-data reads receive credit; no native Lean elaboration, premise validity, transport, compiler or EVM proof credit.",
-        "input_scope": [
-          "tests/h62/item2/audit-readonly-calls/NativeFrameTransport.lean"
-        ],
+        "input_scope": ["tests/h62/item2/audit-readonly-calls/NativeFrameTransport.lean"],
         "other_reads": "unresolved"
       },
       {
@@ -514,9 +498,7 @@
         "command": ["python3", "-B", "scripts/h62/item2/audit-readonly-calls/test_private_bind.py"],
         "kind": "unittest",
         "purpose": "Existing readonly regression checks exact declaration/import inventory and rejects source, name, helper or evidence substitutions. Ordinary and instrumented executions passed at the recorded Git context. Only these exact unchanged primary source-data reads receive credit; no native Lean elaboration, premise validity, transport, compiler or EVM proof credit.",
-        "input_scope": [
-          "tests/h62/item2/audit-readonly-calls/PrivateBindWitnesses.lean"
-        ],
+        "input_scope": ["tests/h62/item2/audit-readonly-calls/PrivateBindWitnesses.lean"],
         "other_reads": "unresolved"
       },
       {
@@ -526,9 +508,7 @@
         "command": ["python3", "-B", "scripts/h62/item2/audit-readonly-calls/test_private_transport.py"],
         "kind": "unittest",
         "purpose": "Existing readonly regression checks exact declaration/import inventory and rejects source, name, helper or evidence substitutions. Ordinary and instrumented executions passed at the recorded Git context. Only these exact unchanged primary source-data reads receive credit; no native Lean elaboration, premise validity, transport, compiler or EVM proof credit.",
-        "input_scope": [
-          "tests/h62/item2/audit-readonly-calls/PrivateTransportWitnesses.lean"
-        ],
+        "input_scope": ["tests/h62/item2/audit-readonly-calls/PrivateTransportWitnesses.lean"],
         "other_reads": "unresolved"
       },
       {
@@ -538,9 +518,7 @@
         "command": ["python3", "-B", "scripts/h62/item2/audit-readonly-calls/test_primitive_transport.py"],
         "kind": "unittest",
         "purpose": "Existing readonly regression checks exact declaration/import inventory and rejects source, name, helper or evidence substitutions. Ordinary and instrumented executions passed at the recorded Git context. Only these exact unchanged primary source-data reads receive credit; no native Lean elaboration, premise validity, transport, compiler or EVM proof credit.",
-        "input_scope": [
-          "tests/h62/item2/audit-readonly-calls/PrimitiveTransportWitnesses.lean"
-        ],
+        "input_scope": ["tests/h62/item2/audit-readonly-calls/PrimitiveTransportWitnesses.lean"],
         "other_reads": "unresolved"
       },
       {
@@ -550,9 +528,7 @@
         "command": ["python3", "-B", "scripts/h62/item2/audit-readonly-calls/test_effect_rules.py"],
         "kind": "unittest",
         "purpose": "Existing readonly regression checks exact declaration/import inventory and rejects source, name, helper or evidence substitutions. Ordinary and instrumented executions passed at the recorded Git context. Only these exact unchanged primary source-data reads receive credit; no native Lean elaboration, premise validity, transport, compiler or EVM proof credit.",
-        "input_scope": [
-          "tests/h62/item2/audit-readonly-calls/EffectRuleWitnesses.lean"
-        ],
+        "input_scope": ["tests/h62/item2/audit-readonly-calls/EffectRuleWitnesses.lean"],
         "other_reads": "unresolved"
       },
       {
@@ -562,9 +538,7 @@
         "command": ["python3", "-B", "scripts/h62/item2/audit-readonly-calls/test_initialization.py"],
         "kind": "unittest",
         "purpose": "Existing readonly regression checks exact declaration/import inventory and rejects source, name, helper or evidence substitutions. Ordinary and instrumented executions passed at the recorded Git context. Only these exact unchanged primary source-data reads receive credit; no native Lean elaboration, premise validity, transport, compiler or EVM proof credit.",
-        "input_scope": [
-          "tests/h62/item2/audit-readonly-calls/InitializationWitnesses.lean"
-        ],
+        "input_scope": ["tests/h62/item2/audit-readonly-calls/InitializationWitnesses.lean"],
         "other_reads": "unresolved"
       },
       {
@@ -574,9 +548,7 @@
         "command": ["python3", "-B", "scripts/h62/item2/audit-readonly-calls/test_journal_witnesses.py"],
         "kind": "unittest",
         "purpose": "Existing readonly regression checks exact declaration/import inventory and rejects source, name, helper or evidence substitutions. Ordinary and instrumented executions passed at the recorded Git context. Only these exact unchanged primary source-data reads receive credit; no native Lean elaboration, premise validity, transport, compiler or EVM proof credit.",
-        "input_scope": [
-          "tests/h62/item2/audit-readonly-calls/JournalWitnesses.lean"
-        ],
+        "input_scope": ["tests/h62/item2/audit-readonly-calls/JournalWitnesses.lean"],
         "other_reads": "unresolved"
       },
       {
@@ -586,9 +558,7 @@
         "command": ["python3", "-B", "scripts/h62/item2/audit-readonly-calls/test_invocation_modes.py"],
         "kind": "unittest",
         "purpose": "Existing readonly regression checks exact declaration/import inventory and rejects source, name, helper or evidence substitutions. Ordinary and instrumented executions passed at the recorded Git context. Only these exact unchanged primary source-data reads receive credit; no native Lean elaboration, premise validity, transport, compiler or EVM proof credit.",
-        "input_scope": [
-          "tests/h62/item2/audit-readonly-calls/InvocationModeWitnesses.lean"
-        ],
+        "input_scope": ["tests/h62/item2/audit-readonly-calls/InvocationModeWitnesses.lean"],
         "other_reads": "unresolved"
       },
       {
@@ -598,9 +568,7 @@
         "command": ["python3", "-B", "scripts/h62/item2/audit-readonly-calls/test_captured_values.py"],
         "kind": "unittest",
         "purpose": "Existing readonly regression checks exact declaration/import inventory and rejects source, name, helper or evidence substitutions. Ordinary and instrumented executions passed at the recorded Git context. Only these exact unchanged primary source-data reads receive credit; no native Lean elaboration, premise validity, transport, compiler or EVM proof credit.",
-        "input_scope": [
-          "tests/h62/item2/audit-readonly-calls/CapturedValueWitnesses.lean"
-        ],
+        "input_scope": ["tests/h62/item2/audit-readonly-calls/CapturedValueWitnesses.lean"],
         "other_reads": "unresolved"
       },
       {
@@ -610,9 +578,7 @@
         "command": ["python3", "-B", "scripts/h62/item2/audit-readonly-calls/test_caller_storage.py"],
         "kind": "unittest",
         "purpose": "Existing readonly regression checks exact declaration/import inventory and rejects source, name, helper or evidence substitutions. Ordinary and instrumented executions passed at the recorded Git context. Only these exact unchanged primary source-data reads receive credit; no native Lean elaboration, premise validity, transport, compiler or EVM proof credit.",
-        "input_scope": [
-          "tests/h62/item2/audit-readonly-calls/CallerStorageWitnesses.lean"
-        ],
+        "input_scope": ["tests/h62/item2/audit-readonly-calls/CallerStorageWitnesses.lean"],
         "other_reads": "unresolved"
       },
       {
@@ -622,9 +588,7 @@
         "command": ["python3", "-B", "scripts/h62/item2/audit-readonly-calls/test_call_boundaries.py"],
         "kind": "unittest",
         "purpose": "Existing readonly regression checks exact declaration/import inventory and rejects source, name, helper or evidence substitutions. Ordinary and instrumented executions passed at the recorded Git context. Only these exact unchanged primary source-data reads receive credit; no native Lean elaboration, premise validity, transport, compiler or EVM proof credit.",
-        "input_scope": [
-          "tests/h62/item2/audit-readonly-calls/CallBoundaryWitnesses.lean"
-        ],
+        "input_scope": ["tests/h62/item2/audit-readonly-calls/CallBoundaryWitnesses.lean"],
         "other_reads": "unresolved"
       },
       {
@@ -634,10 +598,7 @@
         "command": ["python3", "-B", "tests/h62/item2/audit-readonly-calls/test_execution_call.py"],
         "kind": "unittest",
         "purpose": "Existing readonly regression checks exact declaration/import inventory and rejects source, name, helper or evidence substitutions. Ordinary and instrumented executions passed at the recorded Git context. Only these exact unchanged primary source-data reads receive credit; no native Lean elaboration, premise validity, transport, compiler or EVM proof credit.",
-        "input_scope": [
-          "tests/h62/item2/audit-readonly-calls/CheckedExecutionCall.lean",
-          "tests/h62/item2/audit-readonly-calls/ExecutionCall.lean"
-        ],
+        "input_scope": ["tests/h62/item2/audit-readonly-calls/CheckedExecutionCall.lean", "tests/h62/item2/audit-readonly-calls/ExecutionCall.lean"],
         "other_reads": "unresolved"
       },
       {
@@ -647,9 +608,7 @@
         "command": ["python3", "-B", "tests/h62/item2/audit-readonly-calls/test_execution_replies.py"],
         "kind": "unittest",
         "purpose": "Existing readonly regression checks exact declaration/import inventory and rejects source, name, helper or evidence substitutions. Ordinary and instrumented executions passed at the recorded Git context. Only these exact unchanged primary source-data reads receive credit; no native Lean elaboration, premise validity, transport, compiler or EVM proof credit.",
-        "input_scope": [
-          "tests/h62/item2/audit-readonly-calls/ExecutionReplies.lean"
-        ],
+        "input_scope": ["tests/h62/item2/audit-readonly-calls/ExecutionReplies.lean"],
         "other_reads": "unresolved"
       },
       {
@@ -659,11 +618,7 @@
         "command": ["python3", "-B", "tests/h62/item1/duplication-scanner/test_checked_logs.py"],
         "kind": "unittest",
         "purpose": "Existing scanner or V08 regression verifies exact fixture/source identities, declaration observations, pinned dependency closures, corruption refusal or generator-template preservation. Ordinary and instrumented executions passed in the recorded context. Only these exact primary input reads receive data-use credit; no native Lean, ownership, theorem validity, compiler or EVM acceptance.",
-        "input_scope": [
-          "tests/h62/item1/duplication-scanner/SignatureFingerprint.lean",
-          "tests/h62/item1/duplication-scanner/SignatureSourceLocations.lean",
-          "tests/h62/item1/duplication-scanner/source-location-pins.json"
-        ],
+        "input_scope": ["tests/h62/item1/duplication-scanner/SignatureFingerprint.lean", "tests/h62/item1/duplication-scanner/SignatureSourceLocations.lean", "tests/h62/item1/duplication-scanner/source-location-pins.json"],
         "other_reads": "unresolved"
       },
       {
@@ -673,9 +628,7 @@
         "command": ["python3", "-B", "tests/h62/item1/duplication-scanner/test_environment_snapshot.py"],
         "kind": "unittest",
         "purpose": "Existing scanner or V08 regression verifies exact fixture/source identities, declaration observations, pinned dependency closures, corruption refusal or generator-template preservation. Ordinary and instrumented executions passed in the recorded context. Only these exact primary input reads receive data-use credit; no native Lean, ownership, theorem validity, compiler or EVM acceptance.",
-        "input_scope": [
-          "tests/h62/item1/duplication-scanner/signature-records.expected.jsonl"
-        ],
+        "input_scope": ["tests/h62/item1/duplication-scanner/signature-records.expected.jsonl"],
         "other_reads": "unresolved"
       },
       {
@@ -685,9 +638,7 @@
         "command": ["python3", "-B", "tests/h62/item1/duplication-scanner/test_index.py"],
         "kind": "unittest",
         "purpose": "Existing scanner or V08 regression verifies exact fixture/source identities, declaration observations, pinned dependency closures, corruption refusal or generator-template preservation. Ordinary and instrumented executions passed in the recorded context. Only these exact primary input reads receive data-use credit; no native Lean, ownership, theorem validity, compiler or EVM acceptance.",
-        "input_scope": [
-          "tests/h62/item1/duplication-scanner/audit-index.json"
-        ],
+        "input_scope": ["tests/h62/item1/duplication-scanner/audit-index.json"],
         "other_reads": "unresolved"
       },
       {
@@ -697,10 +648,7 @@
         "command": ["python3", "-B", "tests/h62/item1/duplication-scanner/test_kernel_census.py"],
         "kind": "unittest",
         "purpose": "Existing scanner or V08 regression verifies exact fixture/source identities, declaration observations, pinned dependency closures, corruption refusal or generator-template preservation. Ordinary and instrumented executions passed in the recorded context. Only these exact primary input reads receive data-use credit; no native Lean, ownership, theorem validity, compiler or EVM acceptance.",
-        "input_scope": [
-          "tests/h62/item1/duplication-scanner/SignatureKernelCensus.lean",
-          "tests/h62/item1/duplication-scanner/kernel-census-pins.json"
-        ],
+        "input_scope": ["tests/h62/item1/duplication-scanner/SignatureKernelCensus.lean", "tests/h62/item1/duplication-scanner/kernel-census-pins.json"],
         "other_reads": "unresolved"
       },
       {
@@ -725,11 +673,7 @@
         "command": ["python3", "-B", "tests/h62/item1/duplication-scanner/test_metadata_observations.py"],
         "kind": "unittest",
         "purpose": "Existing scanner or V08 regression verifies exact fixture/source identities, declaration observations, pinned dependency closures, corruption refusal or generator-template preservation. Ordinary and instrumented executions passed in the recorded context. Only these exact primary input reads receive data-use credit; no native Lean, ownership, theorem validity, compiler or EVM acceptance.",
-        "input_scope": [
-          "tests/h62/item1/duplication-scanner/MetadataFingerprintV2.lean",
-          "tests/h62/item1/duplication-scanner/ScopeMetadataObservation.lean",
-          "tests/h62/item1/duplication-scanner/metadata-observation-pins.json"
-        ],
+        "input_scope": ["tests/h62/item1/duplication-scanner/MetadataFingerprintV2.lean", "tests/h62/item1/duplication-scanner/ScopeMetadataObservation.lean", "tests/h62/item1/duplication-scanner/metadata-observation-pins.json"],
         "other_reads": "unresolved"
       },
       {
@@ -739,10 +683,7 @@
         "command": ["python3", "-B", "tests/h62/item1/duplication-scanner/test_project_closure.py"],
         "kind": "unittest",
         "purpose": "Existing scanner or V08 regression verifies exact fixture/source identities, declaration observations, pinned dependency closures, corruption refusal or generator-template preservation. Ordinary and instrumented executions passed in the recorded context. Only these exact primary input reads receive data-use credit; no native Lean, ownership, theorem validity, compiler or EVM acceptance.",
-        "input_scope": [
-          "tests/h62/item1/duplication-scanner/ASTSourceBinding.lean",
-          "tests/h62/item1/duplication-scanner/project-closure-pins.json"
-        ],
+        "input_scope": ["tests/h62/item1/duplication-scanner/ASTSourceBinding.lean", "tests/h62/item1/duplication-scanner/project-closure-pins.json"],
         "other_reads": "unresolved"
       },
       {
@@ -752,10 +693,7 @@
         "command": ["python3", "-B", "tests/h62/item1/duplication-scanner/test_project_leaf.py"],
         "kind": "unittest",
         "purpose": "Existing scanner or V08 regression verifies exact fixture/source identities, declaration observations, pinned dependency closures, corruption refusal or generator-template preservation. Ordinary and instrumented executions passed in the recorded context. Only these exact primary input reads receive data-use credit; no native Lean, ownership, theorem validity, compiler or EVM acceptance.",
-        "input_scope": [
-          "tests/h62/item1/duplication-scanner/KeySortSourceBinding.lean",
-          "tests/h62/item1/duplication-scanner/project-leaf-pins.json"
-        ],
+        "input_scope": ["tests/h62/item1/duplication-scanner/KeySortSourceBinding.lean", "tests/h62/item1/duplication-scanner/project-leaf-pins.json"],
         "other_reads": "unresolved"
       },
       {
@@ -765,9 +703,7 @@
         "command": ["python3", "-B", "tests/h62/item1/duplication-scanner/test_scan.py"],
         "kind": "unittest",
         "purpose": "Existing scanner or V08 regression verifies exact fixture/source identities, declaration observations, pinned dependency closures, corruption refusal or generator-template preservation. Ordinary and instrumented executions passed in the recorded context. Only these exact primary input reads receive data-use credit; no native Lean, ownership, theorem validity, compiler or EVM acceptance.",
-        "input_scope": [
-          "tests/h62/item6/migrate-yul/DeclarationMetadataFixture.lean"
-        ],
+        "input_scope": ["tests/h62/item6/migrate-yul/DeclarationMetadataFixture.lean"],
         "other_reads": "unresolved"
       },
       {
@@ -777,10 +713,7 @@
         "command": ["python3", "-B", "tests/h62/item1/duplication-scanner/test_scope_binding.py"],
         "kind": "unittest",
         "purpose": "Existing scanner or V08 regression verifies exact fixture/source identities, declaration observations, pinned dependency closures, corruption refusal or generator-template preservation. Ordinary and instrumented executions passed in the recorded context. Only these exact primary input reads receive data-use credit; no native Lean, ownership, theorem validity, compiler or EVM acceptance.",
-        "input_scope": [
-          "tests/h62/item1/duplication-scanner/ScopeSourceBinding.lean",
-          "tests/h62/item1/duplication-scanner/scope-closure-pins.json"
-        ],
+        "input_scope": ["tests/h62/item1/duplication-scanner/ScopeSourceBinding.lean", "tests/h62/item1/duplication-scanner/scope-closure-pins.json"],
         "other_reads": "unresolved"
       },
       {
@@ -790,9 +723,7 @@
         "command": ["python3", "-B", "tests/h62/item2/audit-v08-adapters/test_generate_calldata_census.py"],
         "kind": "unittest",
         "purpose": "Existing scanner or V08 regression verifies exact fixture/source identities, declaration observations, pinned dependency closures, corruption refusal or generator-template preservation. Ordinary and instrumented executions passed in the recorded context. Only these exact primary input reads receive data-use credit; no native Lean, ownership, theorem validity, compiler or EVM acceptance.",
-        "input_scope": [
-          "tests/h62/item2/audit-v08-adapters/P8StatementCensus.lean"
-        ],
+        "input_scope": ["tests/h62/item2/audit-v08-adapters/P8StatementCensus.lean"],
         "other_reads": "unresolved"
       },
       {
@@ -802,9 +733,7 @@
         "command": ["python3", "-B", "scripts/h62/item2/audit-theories/test_pair_sources.py"],
         "kind": "unittest",
         "purpose": "Existing source/generator or lexical acceptance regression checks exact reproduction, original declaration preservation, case-map integrity or corruption refusal. Ordinary and instrumented executions passed in the recorded context. Only these exact primary source/template/metadata reads receive data-use credit; no native Lean, ownership, theorem, compiler or EVM proof acceptance.",
-        "input_scope": [
-          "tests/h62/item2/audit-theories/ElaboratedCensus.lean"
-        ],
+        "input_scope": ["tests/h62/item2/audit-theories/ElaboratedCensus.lean"],
         "other_reads": "unresolved"
       },
       {
@@ -814,10 +743,7 @@
         "command": ["python3", "-B", "scripts/h62/item4/generic-source-frontend/test_generate.py"],
         "kind": "unittest",
         "purpose": "Existing source/generator or lexical acceptance regression checks exact reproduction, original declaration preservation, case-map integrity or corruption refusal. Ordinary and instrumented executions passed in the recorded context. Only these exact primary source/template/metadata reads receive data-use credit; no native Lean, ownership, theorem, compiler or EVM proof acceptance.",
-        "input_scope": [
-          "tests/h62/item4/generic-source-frontend/FixtureTable.lean",
-          "tests/h62/item4/generic-source-frontend/owner-migration-proposal.json"
-        ],
+        "input_scope": ["tests/h62/item4/generic-source-frontend/FixtureTable.lean", "tests/h62/item4/generic-source-frontend/owner-migration-proposal.json"],
         "other_reads": "unresolved"
       },
       {
@@ -827,10 +753,7 @@
         "command": ["python3", "-B", "tests/h62/item4/generic-passes/test_acceptance.py"],
         "kind": "unittest",
         "purpose": "Existing source/generator or lexical acceptance regression checks exact reproduction, original declaration preservation, case-map integrity or corruption refusal. Ordinary and instrumented executions passed in the recorded context. Only these exact primary source/template/metadata reads receive data-use credit; no native Lean, ownership, theorem, compiler or EVM proof acceptance.",
-        "input_scope": [
-          "tests/h62/item4/generic-passes/Correspondence.lean",
-          "tests/h62/item4/generic-passes/Instances.lean"
-        ],
+        "input_scope": ["tests/h62/item4/generic-passes/Correspondence.lean", "tests/h62/item4/generic-passes/Instances.lean"],
         "other_reads": "unresolved"
       },
       {
@@ -840,9 +763,7 @@
         "command": ["python3", "-B", "tests/h62/item4/generic-internalflow/test_prefix.py"],
         "kind": "unittest",
         "purpose": "Existing source/generator or lexical acceptance regression checks exact reproduction, original declaration preservation, case-map integrity or corruption refusal. Ordinary and instrumented executions passed in the recorded context. Only these exact primary source/template/metadata reads receive data-use credit; no native Lean, ownership, theorem, compiler or EVM proof acceptance.",
-        "input_scope": [
-          "tests/h62/item4/generic-internalflow/prefix-cases.txt"
-        ],
+        "input_scope": ["tests/h62/item4/generic-internalflow/prefix-cases.txt"],
         "other_reads": "unresolved"
       },
       {
@@ -852,9 +773,7 @@
         "command": ["python3", "-B", "scripts/h62/item4/generic-structuredflow/test_census.py"],
         "kind": "unittest",
         "purpose": "Existing frozen census golden-input regression passed in the exact historical source context. Root, helper, frame and golden-input blobs are unchanged now; current live source drift failures remain unmodified. This certifies golden-data use only, not a current passing suite, native Lean, theorem, compiler or EVM acceptance.",
-        "input_scope": [
-          "tests/h62/item4/generic-structuredflow/frozen.json"
-        ],
+        "input_scope": ["tests/h62/item4/generic-structuredflow/frozen.json"],
         "other_reads": "unresolved"
       },
       {
@@ -864,9 +783,7 @@
         "command": ["python3", "-B", "tests/h62/item4/generic-internalflow/test_embedded.py"],
         "kind": "unittest",
         "purpose": "Existing case-map conservation and corruption checks preserve full frozen declaration records, distinguish premise/capability roles and reject omissions or duplicates. Exact primary data use only; no native Lean, ownership, theorem or proof acceptance.",
-        "input_scope": [
-          "tests/h62/item4/generic-internalflow/embedded-cases.txt"
-        ],
+        "input_scope": ["tests/h62/item4/generic-internalflow/embedded-cases.txt"],
         "other_reads": "unresolved"
       },
       {
@@ -876,9 +793,7 @@
         "command": ["python3", "-B", "tests/h62/item4/generic-internalflow/test_classification.py"],
         "kind": "unittest",
         "purpose": "Existing case-map conservation and corruption checks preserve full frozen declaration records, distinguish premise/capability roles and reject omissions or duplicates. Exact primary data use only; no native Lean, ownership, theorem or proof acceptance.",
-        "input_scope": [
-          "tests/h62/item4/generic-internalflow/semantic-cases.txt"
-        ],
+        "input_scope": ["tests/h62/item4/generic-internalflow/semantic-cases.txt"],
         "other_reads": "unresolved"
       },
       {
@@ -888,9 +803,7 @@
         "command": ["python3", "-B", "scripts/h62/item2/audit-readonly-calls/test_private_evidence.py"],
         "kind": "unittest",
         "purpose": "Existing private-evidence v2 checksum and membership corruption controls parse this public catalog. Only its exact data use is credited; missing bulk and compatibility/native/proof acceptance remain unavailable or false.",
-        "input_scope": [
-          "tests/h62/item6/migrate-solkey/portable-evidence/catalog.json"
-        ],
+        "input_scope": ["tests/h62/item6/migrate-solkey/portable-evidence/catalog.json"],
         "other_reads": "unresolved"
       },
       {
@@ -900,10 +813,18 @@
         "command": ["python3", "-B", "scripts/h62/item4/generic-storageops/test_fixture_plan.py"],
         "kind": "unittest",
         "purpose": "Existing frozen fixture-plan tests parse inventory pins and semantic domains, conserve1623declaration contracts/84packets and reject omissions,duplicates or false proof labels. Exact primary data use only; live drift remains refused,no Lean or proof credit.",
-        "input_scope": [
-          "tests/h62/item4/generic-storageops/inventory-manifest.json",
-          "tests/h62/item4/generic-storageops/semantic-domains.json"
-        ],
+        "input_scope": ["tests/h62/item4/generic-storageops/inventory-manifest.json", "tests/h62/item4/generic-storageops/semantic-domains.json"],
+        "other_reads": "unresolved"
+      },
+      {
+        "path": "scripts/h62/item2/audit-compiler-transport/acceptance.py",
+        "input_revision": "178edc0f843f24332f9a2c0cef62dab6812fbf12",
+        "source_blob": "7afc5db01e97d953bf5c074b446e67979ce95b60",
+        "command": ["python3", "-B", "scripts/h62/item2/audit-compiler-transport/acceptance.py"],
+        "kind": "runnable-entrypoint",
+        "entry_line": 90,
+        "purpose": "Scanner acceptance:122modules/560declarations,independent token counts,lexical/map corruption,timing/context refusal. Paired default runs pass at pinned snapshot. Source data only;no current map,native Lean,premise/proof credit.",
+        "input_scope": ["tests/h62/item2/audit-compiler-transport/frozen-modules.json"],
         "other_reads": "unresolved"
       }
     ]
@@ -2952,6 +2873,17 @@
         ],
         "target": "tests/h62/item6/migrate-yul/DeclarationMetadataFixture.lean",
         "target_blob": "8904c7246dc1f06f7f733f31d04fa1b4e47acd69",
+        "operation": "validated Python read of measured bytes"
+      },
+      {
+        "runner": "validated:scripts/h62/item2/audit-compiler-transport/acceptance.py",
+        "input_revision": "178edc0f843f24332f9a2c0cef62dab6812fbf12",
+        "frames": [
+          {"path": "scripts/h62/item2/audit-compiler-transport/acceptance.py", "blob": "7afc5db01e97d953bf5c074b446e67979ce95b60", "line": 90},
+          {"path": "scripts/h62/item2/audit-compiler-transport/acceptance.py", "blob": "7afc5db01e97d953bf5c074b446e67979ce95b60", "line": 34}
+        ],
+        "target": "tests/h62/item2/audit-compiler-transport/frozen-modules.json",
+        "target_blob": "ea5bc57804965c1fb4d95195edfd1bb4a4b7a098",
         "operation": "validated Python read of measured bytes"
       }
     ]
