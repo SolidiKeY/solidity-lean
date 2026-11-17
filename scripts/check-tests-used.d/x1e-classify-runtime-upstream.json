@@ -451,6 +451,56 @@
           "tests/upstream/historical_inputs.py"
         ],
         "other_reads": "unresolved"
+      },
+      {
+        "path": "tests/directruntime-20261104/shared-translator/sourcebuild-intake-controls.py",
+        "input_revision": "1c4cebc10f5024c822481dbcc176cda55a1eda20",
+        "source_blob": "637187acf16f581e5a8403c10533b8a96b449466",
+        "command": [
+          "python3",
+          "-B",
+          "tests/directruntime-20261104/shared-translator/sourcebuild-intake-controls.py"
+        ],
+        "kind": "unittest",
+        "purpose": "Three synthetic tar-member/path/duplicate/link and altered-outer-archive refusal controls for the source-build intake verifier. Ordinary and instrumented invocations completed at the recorded revision; an empty artifact parent was created only for the tests temporary fixtures. Exact listed Python source reads certify dependency consumption. No real payload is restored or authenticated by these synthetic tests, no data-dependent default verifier invocation is certified, and no target-module execution, current passing validation, output provenance, Lean/compiler, source/semantic equivalence, production resource, proof or runtime acceptance follows.",
+        "input_scope": [
+          "tests/directruntime-20261104/shared-translator/verify-sourcebuild-intake.py"
+        ],
+        "other_reads": "unresolved"
+      },
+      {
+        "path": "tests/directruntime-20261104/shared-translator/fixed-byte-intake-controls.py",
+        "input_revision": "1c4cebc10f5024c822481dbcc176cda55a1eda20",
+        "source_blob": "83315f2b7d0f14be05d5600e77f9263744856f58",
+        "command": [
+          "python3",
+          "-B",
+          "tests/directruntime-20261104/shared-translator/fixed-byte-intake-controls.py"
+        ],
+        "kind": "unittest",
+        "purpose": "Four synthetic parity/identity drift and temporary archive/index/member integrity controls for fixed-byte evidence intake. Ordinary and instrumented invocations completed at the recorded revision; an empty artifact parent was created only for the tests temporary fixtures. Exact listed Python source reads certify dependency consumption. No real payload is restored or authenticated by these synthetic tests, no data-dependent default verifier invocation is certified, and no target-module execution, current passing validation, output provenance, Lean/compiler, source/semantic equivalence, production resource, proof or runtime acceptance follows.",
+        "input_scope": [
+          "tests/directruntime-20261104/shared-translator/diagnose-native-evidence.py",
+          "tests/directruntime-20261104/shared-translator/verify-fixed-byte-intake.py",
+          "tests/directruntime-20261104/shared-translator/verify-sourcebuild-intake.py"
+        ],
+        "other_reads": "unresolved"
+      },
+      {
+        "path": "tests/directruntime-20261104/shared-translator/fixed-byte-transition-controls.py",
+        "input_revision": "1c4cebc10f5024c822481dbcc176cda55a1eda20",
+        "source_blob": "3951a6250e684f4187df5e1290f00042098df20c",
+        "command": [
+          "python3",
+          "-B",
+          "tests/directruntime-20261104/shared-translator/fixed-byte-transition-controls.py"
+        ],
+        "kind": "unittest",
+        "purpose": "Four temporary archive/member/case/source-hash and saved-decoder-transition controls, including address-witness metadata checks. Ordinary and instrumented invocations completed at the recorded revision; an empty artifact parent was created only for the tests temporary fixtures. Exact listed Python source reads certify dependency consumption. No real payload is restored or authenticated by these synthetic tests, no data-dependent default verifier invocation is certified, and no target-module execution, current passing validation, output provenance, Lean/compiler, source/semantic equivalence, production resource, proof or runtime acceptance follows.",
+        "input_scope": [
+          "tests/directruntime-20261104/shared-translator/verify-fixed-byte-transition.py"
+        ],
+        "other_reads": "unresolved"
       }
     ]
   },
@@ -1859,6 +1909,96 @@
         ],
         "target": "tests/upstream/historical_inputs.py",
         "target_blob": "445bbc2ca70ec0d2e3b5f7a53912970c1979ef27",
+        "operation": "validated Python read of measured bytes"
+      },
+      {
+        "runner": "validated:tests/directruntime-20261104/shared-translator/sourcebuild-intake-controls.py",
+        "input_revision": "1c4cebc10f5024c822481dbcc176cda55a1eda20",
+        "frames": [
+          {
+            "path": "tests/directruntime-20261104/shared-translator/sourcebuild-intake-controls.py",
+            "blob": "637187acf16f581e5a8403c10533b8a96b449466",
+            "line": 8
+          }
+        ],
+        "target": "tests/directruntime-20261104/shared-translator/verify-sourcebuild-intake.py",
+        "target_blob": "9822427e5640f5926022691a84dd705d9bf8ba39",
+        "operation": "validated Python read of measured bytes"
+      },
+      {
+        "runner": "validated:tests/directruntime-20261104/shared-translator/fixed-byte-intake-controls.py",
+        "input_revision": "1c4cebc10f5024c822481dbcc176cda55a1eda20",
+        "frames": [
+          {
+            "path": "tests/directruntime-20261104/shared-translator/fixed-byte-intake-controls.py",
+            "blob": "83315f2b7d0f14be05d5600e77f9263744856f58",
+            "line": 8
+          },
+          {
+            "path": "tests/directruntime-20261104/shared-translator/verify-fixed-byte-intake.py",
+            "blob": "ef8e628ded72721ecbaa47fdca65d27ee191f022",
+            "line": 22
+          },
+          {
+            "path": "tests/directruntime-20261104/shared-translator/verify-fixed-byte-intake.py",
+            "blob": "ef8e628ded72721ecbaa47fdca65d27ee191f022",
+            "line": 21
+          }
+        ],
+        "target": "tests/directruntime-20261104/shared-translator/verify-sourcebuild-intake.py",
+        "target_blob": "9822427e5640f5926022691a84dd705d9bf8ba39",
+        "operation": "validated Python read of measured bytes"
+      },
+      {
+        "runner": "validated:tests/directruntime-20261104/shared-translator/fixed-byte-intake-controls.py",
+        "input_revision": "1c4cebc10f5024c822481dbcc176cda55a1eda20",
+        "frames": [
+          {
+            "path": "tests/directruntime-20261104/shared-translator/fixed-byte-intake-controls.py",
+            "blob": "83315f2b7d0f14be05d5600e77f9263744856f58",
+            "line": 8
+          },
+          {
+            "path": "tests/directruntime-20261104/shared-translator/verify-fixed-byte-intake.py",
+            "blob": "ef8e628ded72721ecbaa47fdca65d27ee191f022",
+            "line": 23
+          },
+          {
+            "path": "tests/directruntime-20261104/shared-translator/verify-fixed-byte-intake.py",
+            "blob": "ef8e628ded72721ecbaa47fdca65d27ee191f022",
+            "line": 21
+          }
+        ],
+        "target": "tests/directruntime-20261104/shared-translator/diagnose-native-evidence.py",
+        "target_blob": "08f4c6838c0cf215b660853b3b6b0ed2b1f8d833",
+        "operation": "validated Python read of measured bytes"
+      },
+      {
+        "runner": "validated:tests/directruntime-20261104/shared-translator/fixed-byte-intake-controls.py",
+        "input_revision": "1c4cebc10f5024c822481dbcc176cda55a1eda20",
+        "frames": [
+          {
+            "path": "tests/directruntime-20261104/shared-translator/fixed-byte-intake-controls.py",
+            "blob": "83315f2b7d0f14be05d5600e77f9263744856f58",
+            "line": 8
+          }
+        ],
+        "target": "tests/directruntime-20261104/shared-translator/verify-fixed-byte-intake.py",
+        "target_blob": "ef8e628ded72721ecbaa47fdca65d27ee191f022",
+        "operation": "validated Python read of measured bytes"
+      },
+      {
+        "runner": "validated:tests/directruntime-20261104/shared-translator/fixed-byte-transition-controls.py",
+        "input_revision": "1c4cebc10f5024c822481dbcc176cda55a1eda20",
+        "frames": [
+          {
+            "path": "tests/directruntime-20261104/shared-translator/fixed-byte-transition-controls.py",
+            "blob": "3951a6250e684f4187df5e1290f00042098df20c",
+            "line": 7
+          }
+        ],
+        "target": "tests/directruntime-20261104/shared-translator/verify-fixed-byte-transition.py",
+        "target_blob": "61223d6c55be9a07e354f378a7c9862de1d72400",
         "operation": "validated Python read of measured bytes"
       }
     ],
