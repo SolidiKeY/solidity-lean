@@ -2484,6 +2484,7 @@ import Solidity.Correctness.Lowering.Unchecked.WordProgram
 import Solidity.Correctness.Lowering.Unchecked.WordUpdateWitness
 import Solidity.Correctness.Lowering.Unchecked.WrappingArithmetic
 import Solidity.Correctness.Panic.Guards.Arith
+import Solidity.Correctness.Panic.Provenance.Control
 import Solidity.Correctness.Panic.Provenance.Eval
 import Solidity.Correctness.Sim.Examples
 import Solidity.Correctness.Sim.Lang
