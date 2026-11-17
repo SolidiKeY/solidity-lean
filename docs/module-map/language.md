@@ -240,6 +240,10 @@ commands; it never enters the core import graph.
 | `Solidity/Examples/IntrinsicStorage/Preimages/Frames.lean` | Coverage regressions for nested live/shadow arrays, overwritten mapping entries, arbitrary defaults and installed account array fields. |
 | `Solidity/Semantics/IntrinsicStorage/Preimages/Ops.lean` | Audited storage operations; result preservation and slot-input retention, including failures. |
 | `Solidity/Examples/IntrinsicStorage/Preimages/Ops.lean` | Failed-read and retained old/new aggregate-input regressions through audited composition. |
+
+These modules also provide audited expression observers and regressions for their
+composition, error propagation, argument order, and returned storage and heaps.
+
 The diagnostic generators `scripts/h62/item2/audit-v08-adapters/generate_mapped_census.py`
 and `scripts/h62/item2/audit-v08-adapters/generate_calldata_census.py` accept
 `--stream` to omit the global imported-constant sort. This still materializes
