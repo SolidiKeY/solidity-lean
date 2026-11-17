@@ -61,3 +61,10 @@ srcDir = "vendor/LeanTeX"
 [[lean_exe]]
 name = "solcases"
 root = "SolCases"
+
+# Heartbeat collector driver (`scripts/heartbeats/README.md`). Not a default
+# target; `scripts/heartbeats/collect.sh` builds it on demand.
+[[lean_exe]]
+name = "hbcollect"
+root = "Tools.Heartbeats.Main"
+supportInterpreter = true
