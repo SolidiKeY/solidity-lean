@@ -356,6 +356,10 @@ example {C : Contract} {u : Source.Syn .unit} (h : Decode.unit C = some u) {x : 
     u.env.cellTy ⟨⟨some Decode.contractName, x⟩, []⟩ = Source.Agreement.sourceTy p :=
   Decode.unit_cellTy h hx
 
+/-- Total initial matching is a theorem for the stage-1 relation: the state
+relation is not degenerate on decoded requests. -/
+example : Simulation.InitialMatching loopRel Decode.decode := Simulation.initialMatching_loopRel
+
 end Decoder
 
 end Solidity.Goals

@@ -422,10 +422,8 @@ theorem Positional.unique {srcΓ : Source.RCtx} {Γ : Ctx} {m n : Lowering.V07.C
 map under which every admitted Source execution has a related model state.
 For `loopRel` the one component that can fail for a reason unrelated to
 lowering is storage: the Source cell at each state variable's path must have
-the declared type; that equation is proved (`Decode.unit_cellTy`). The locals
-part is proved for every decoded request (`decode_locals_matching`). Not
-proved: that a model state with related storage, `msg.value` and timestamp
-exists for every admitted Source execution. -/
+the declared type; that equation is proved (`Decode.unit_cellTy`), and so is
+the whole obligation for `loopRel` (`initialMatching_loopRel`). -/
 def InitialMatching (rel : (E : Source.Env) → (C : Contract) → StateRelation E C)
     (decode : Request → Option SourceProgram) : Prop :=
   ∀ (r : Request) (s : SourceProgram), r.Succeeds → decode r = some s →
@@ -683,6 +681,127 @@ theorem decode_locals_matching {r : Request} {s : SourceProgram}
 
 end Simulation
 
+/-! ## Total initial matching, proved for the stage-1 relation
+
+The globals half: a model storage related to the Source cells exists, because
+every state variable of a decodable contract is primitive, its cell has the
+primitive's Source type (`Decode.unit_cellTy`) and always reads a value. With
+the locals half this proves `InitialMatching loopRel Decode.decode`. -/
+namespace Simulation
+
+/-- Every Source value of a primitive's type is the image of a model value. -/
+theorem prim_onto (D : Source.Layout) : (p : PrimTy) → (v : Source.Val D (Source.Agreement.sourceTy p)) →
+    ∃ w : p.Denote, Source.Agreement.PrimitiveRel D p v w
+  | .bool, .bool b => ⟨b, .bool b⟩
+  | .uint, .int n h => ⟨⟨n, (Source.Agreement.uint_range n).mpr h⟩,
+      Source.Agreement.PrimitiveRel.uint ⟨n, (Source.Agreement.uint_range n).mpr h⟩ h⟩
+  | .int, .int n h => ⟨⟨n, (Source.Agreement.int_range n).mpr h⟩,
+      Source.Agreement.PrimitiveRel.int ⟨n, (Source.Agreement.int_range n).mpr h⟩ h⟩
+
+/-- A model storage related to given Source reads exists when every state
+variable is primitive and its cell reads at the primitive's Source type. -/
+theorem fields_onto {D : Source.Layout}
+    (read : Source.SPath → Option ((τ : Source.STy) × Source.Val D τ)) :
+    (fs : List (Name × Ty)) →
+    (∀ x T, (x, T) ∈ fs → ∃ p, T = .prim p ∧ ∃ v : Source.Val D (Source.Agreement.sourceTy p),
+      read ⟨⟨some Decode.contractName, x⟩, []⟩ = some ⟨Source.Agreement.sourceTy p, v⟩) →
+    ∃ st : SFields fs, Relation.fields read st
+  | [], _ => ⟨.nil, trivial⟩
+  | (x, T) :: fs, h => by
+      obtain ⟨p, rfl, v, hv⟩ := h x T (List.mem_cons_self ..)
+      obtain ⟨w, hw⟩ := prim_onto D p v
+      obtain ⟨rest, hrest⟩ := fields_onto read fs fun y U m => h y U (List.mem_cons_of_mem _ m)
+      exact ⟨.cons (.prim w) rest, ⟨v, hv, hw⟩, hrest⟩
+
+/-- A binding of a list with distinct keys is the one its lookup finds. -/
+theorem lookup_of_mem {α : Type} : (l : List (Name × α)) → Semantics.nodupKeysB l = true →
+    ∀ x a, (x, a) ∈ l → Semantics.lookupBy x l = some a
+  | [], _, _, _, m => nomatch m
+  | (y, b) :: l, nd, x, a, m => by
+      simp only [Semantics.nodupKeysB, Bool.and_eq_true, Option.isNone_iff_eq_none] at nd
+      simp only [Semantics.lookupBy]
+      rcases List.mem_cons.mp m with e | m'
+      · cases e; simp
+      · have := lookup_of_mem l nd.2 x a m'
+        by_cases e : x = y
+        · subst e; rw [nd.1] at this; cases this
+        · simp [e, this]
+
+/-- The decoder gives a unit only to contracts whose state variables are all
+primitive. -/
+theorem stateVars_prim : (vars : List (Name × Ty)) → (parts : Source.Syn (.list (.part false))) →
+    Decode.stateVars vars = some parts → ∀ x T, (x, T) ∈ vars → ∃ p, T = .prim p
+  | [], _, _, _, _, m => nomatch m
+  | (y, U) :: rest, parts, h, x, T, m => by
+      simp only [Decode.stateVars, Option.bind_eq_bind, Option.pure_def, Option.bind_eq_some_iff,
+        Option.some.injEq] at h
+      obtain ⟨T', hT, parts', hp, _⟩ := h
+      rcases List.mem_cons.mp m with e | m'
+      · cases e
+        unfold Decode.stateTy at hT
+        split at hT <;> first | exact ⟨_, rfl⟩ | cases hT
+      · exact stateVars_prim rest parts' hp x T m'
+
+/-- A cell of a primitive's Source type always reads a value of that type. -/
+theorem read_prim {D : Source.Layout} {L : Source.SPath → Source.STy} (s : Source.Storage D L)
+    (path : Source.SPath) (p : PrimTy) (h : L path = Source.Agreement.sourceTy p) :
+    ∃ v : Source.Val D (Source.Agreement.sourceTy p),
+      ((s.read path).map fun v => (⟨_, v⟩ : (τ : Source.STy) × Source.Val D τ)) =
+        some (⟨Source.Agreement.sourceTy p, v⟩ : (τ : Source.STy) × Source.Val D τ) := by
+  have dflt : ∀ τ : Source.STy, τ = Source.Agreement.sourceTy p → (Source.Val.default D τ).isSome = true := by
+    intro τ e
+    subst e
+    cases p <;> rfl
+  have present : (s.read path).isSome = true := by
+    unfold Source.Storage.read
+    split
+    · rfl
+    · exact dflt _ h
+  have key : ∀ (τ : Source.STy) (o : Option (Source.Val D τ)), τ = Source.Agreement.sourceTy p → o.isSome = true →
+      ∃ v : Source.Val D (Source.Agreement.sourceTy p),
+        (o.map fun v => (⟨τ, v⟩ : (τ : Source.STy) × Source.Val D τ)) = some (⟨Source.Agreement.sourceTy p, v⟩ : (τ : Source.STy) × Source.Val D τ) := by
+    intro τ o e ok
+    subst e
+    obtain ⟨v, rfl⟩ := Option.isSome_iff_exists.mp ok
+    exact ⟨v, rfl⟩
+  exact key _ _ h present
+
+/-- A `Word` as a model `uint`. -/
+def wordDenote (w : Roadmap.Word) : PrimTy.uint.Denote :=
+  ⟨w.val, by
+    simp only [PrimTy.inRange, decide_eq_true_eq]
+    exact ⟨Int.natCast_nonneg _, Int.ofNat_lt.mpr w.isLt⟩⟩
+
+/-- **Total initial matching holds for the stage-1 state relation**: every
+admitted Source execution of a successful decoded request has a related model
+state under the positional map. So `loopRel` is not degenerate on decoded
+requests, and the simulation premise is never vacuous there. -/
+theorem initialMatching_loopRel : InitialMatching loopRel Decode.decode := by
+  intro r s _ decoded
+  obtain ⟨m, positional, locals⟩ := decode_locals_matching decoded
+  refine ⟨m, positional, fun e admitted => ?_⟩
+  obtain ⟨env, related⟩ := locals [] e.initial.1
+  obtain ⟨plain, C, L, b, L', d, hC, _, _, rfl⟩ := decode_spells decoded
+  simp only [Decode.context, Option.map_eq_some_iff] at hC
+  obtain ⟨u, hu, rfl⟩ := hC
+  have hu' := hu
+  unfold Decode.unit at hu'
+  split at hu'
+  · simp only [Option.map_eq_some_iff] at hu'
+    obtain ⟨parts, hparts, _⟩ := hu'
+    obtain ⟨storage, hstorage⟩ := fields_onto
+      (fun p => ((e.initial.2.ex.world.accounts e.frame.this).storage.read p).map fun v => ⟨_, v⟩)
+      r.contract.vars fun x T mem => by
+        obtain ⟨p, rfl⟩ := stateVars_prim _ _ hparts x T mem
+        exact ⟨p, rfl, read_prim _ _ p
+          (Decode.unit_cellTy hu (lookup_of_mem _ r.contract.vars_nodup x _ mem))⟩
+    exact ⟨⟨storage, [], Heap.empty, env, [], PrimTy.dflt .uint,
+        { msgValue := wordDenote e.frame.value, timestamp := wordDenote e.glob.timestamp }⟩,
+      related, hstorage, rfl, rfl, admitted.2.2.1, admitted.2.2.2⟩
+  · cases hu'
+
+end Simulation
+
 /-! ## The concrete boundary, as far as the decoder fixes it
 
 Admission and association are fixed here: every request whose whole pipeline
@@ -896,5 +1015,26 @@ theorem loopContractV2Stage1_iff :
     fun ⟨covered, complete, allocation, refines, matching, bound⟩ =>
       ⟨⟨covered, complete, allocation, fun r o after parts program s d run =>
         ⟨bound.simulates d run, refines r o after parts program s d run⟩⟩, matching, bound⟩⟩
+
+/-- Version 2 at the stage-1 boundary with total initial matching discharged:
+five obligations are left. -/
+theorem loopContractV2Stage1_iff_open :
+    LowerLoopsCorrectContractV2 loopRel loopBoundaryStage1 loopBoundaryStage1.reference
+        Decode.decode ↔
+      (∀ r : Request, r.Succeeds → ∃ s, Decode.decode r = some s) ∧
+      (∀ (r : Request) s, r.Succeeds → Spells r s → Decode.decode r = some s) ∧
+      (∀ (r : Request) o after parts program, r.pipeline o after parts program →
+        Allocation.RoundTrip r.input.names ∧
+        SafeSpellings r.input.names (Allocation.scope r o after).protectedNames
+          (Allocation.scope r o after).generated) ∧
+      (∀ (r : Request) o after parts program s, Decode.decode r = some s →
+        r.pipeline o after parts program →
+        Nonempty (PassCorrect (Observe.source s).behaviour (Observe.target program).behaviour)) ∧
+      Simulation.Bound loopRel Decode.decode :=
+  loopContractV2Stage1_iff.trans
+    ⟨fun ⟨covered, complete, allocation, refines, _, bound⟩ =>
+        ⟨covered, complete, allocation, refines, bound⟩,
+      fun ⟨covered, complete, allocation, refines, bound⟩ =>
+        ⟨covered, complete, allocation, refines, Simulation.initialMatching_loopRel, bound⟩⟩
 
 end Solidity.Correctness.Lowering.Total
