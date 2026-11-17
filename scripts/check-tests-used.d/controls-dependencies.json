@@ -1,0 +1,26 @@
+{
+  "routes": {
+    "standalone": [
+      {
+        "command": [
+          "python3",
+          "-B",
+          "scripts/h62/item1/p16-generator/census.py"
+        ],
+        "entry_line": 93,
+        "input_revision": "803a7cd24d6eeec56b059d67f974e341330b4490",
+        "input_scope": [
+          "scripts/h62/item1/p16-generator/baseline-inventory.json",
+          "scripts/h62/item1/p16-generator/body/",
+          "scripts/h62/item1/p16-generator/imports/"
+        ],
+        "kind": "runnable-entrypoint",
+        "other_reads": "unresolved",
+        "path": "scripts/h62/item1/p16-generator/census.py",
+        "purpose": "Paired ordinary and native-read-instrumented execution passed at this exact historical snapshot. Only the baseline manifest and 72 existing raw fragments are enrolled by separately observed persisted byte-read routes. No current passing-run, module execution, producer completeness, Lean, semantic, compatibility or proof credit.",
+        "source_blob": "64b665aab18181183048551b41c6d217ba397df0"
+      }
+    ]
+  },
+  "schema_version": 1
+}
