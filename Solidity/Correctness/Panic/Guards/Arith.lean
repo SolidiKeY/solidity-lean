@@ -334,4 +334,68 @@ theorem int_neg_source (σ : State C Γ) (a : Val C Γ .int) (x : PrimTy.int.Den
   · simp [Val.evalT, read, UnOp.evalT, PrimTy.ofInt?, PrimTy.inRange, guard, minI, TRes.ofOpt, bind,
       Except.bind]
 
+/-- Signed `+`: the generated guard (`b >= 0 ? … : …`, `Checked.rangeI`)
+failed exactly on overflow. -/
+theorem int_add_source (σ : State C Γ) (a b : Val C Γ .int)
+    (x y : PrimTy.int.Denote) (left : a.evalT σ = .ok x) (right : b.evalT σ = .ok y)
+    (g : Val C Γ .bool) (gen : range .add .int a b = some g)
+    (failed : g.evalT σ = .ok false) :
+    pg Panic.Site.arithmetic.code (range .add .int a b) = [(Panic.Site.arithmetic.code, g)] ∧
+    Panic.Origin (.binary .add .int rfl x y) .arithmetic ∧
+    (Val.binop .add rfl rfl a b).evalT σ = .error .revert ∧
+    (panicStmt Panic.Site.arithmetic.code g).runR σ =
+        .error (THalt.ofData (encodePanic Panic.Site.arithmetic.code)) := by
+  refine ⟨by rw [gen]; rfl, ?_, ?_, panic_guard_source_failure σ g failed _⟩ <;>
+  · have hx := x.2; have hy := y.2
+    simp [PrimTy.inRange] at hx hy
+    have over : ¬(-57896044618658097711785492504343953926634992332820282019728792003956564819968 ≤
+        x.val + y.val ∧
+        x.val + y.val < 57896044618658097711785492504343953926634992332820282019728792003956564819968) := by
+      simp only [range, rangeI, Option.some.injEq] at gen
+      subst gen
+      by_cases hy0 : 0 ≤ y.val <;>
+        simp [cmpI, arI, litI, Val.evalT, left, right, BinOp.shortT, Simple.evalT, PrimTy.ofLit,
+          BinOp.evalT, BinOp.evalNum, BinOp.arithInt, PrimTy.ofInt?, PrimTy.inRange, maxI, minI,
+          TRes.ofOpt, bind, Except.bind, hy0] at failed <;>
+        rw [dif_pos (by omega)] at failed <;>
+        simp at failed <;>
+        (have := of_decide_eq_false failed; omega)
+    simp [Panic.Origin, Panic.Producer.run, Panic.checked, Panic.Checked.op, Val.evalT, left,
+      right, BinOp.shortT, BinOp.evalT, BinOp.evalNum, BinOp.arithInt, PrimTy.ofInt?,
+      PrimTy.inRange, TRes.ofOpt, bind, Except.bind]
+    rw [dif_neg over]
+    try rfl
+
+/-- Signed `-`: the generated guard (`b >= 0 ? … : …`, `Checked.rangeI`)
+failed exactly on overflow. -/
+theorem int_sub_source (σ : State C Γ) (a b : Val C Γ .int)
+    (x y : PrimTy.int.Denote) (left : a.evalT σ = .ok x) (right : b.evalT σ = .ok y)
+    (g : Val C Γ .bool) (gen : range .sub .int a b = some g)
+    (failed : g.evalT σ = .ok false) :
+    pg Panic.Site.arithmetic.code (range .sub .int a b) = [(Panic.Site.arithmetic.code, g)] ∧
+    Panic.Origin (.binary .sub .int rfl x y) .arithmetic ∧
+    (Val.binop .sub rfl rfl a b).evalT σ = .error .revert ∧
+    (panicStmt Panic.Site.arithmetic.code g).runR σ =
+        .error (THalt.ofData (encodePanic Panic.Site.arithmetic.code)) := by
+  refine ⟨by rw [gen]; rfl, ?_, ?_, panic_guard_source_failure σ g failed _⟩ <;>
+  · have hx := x.2; have hy := y.2
+    simp [PrimTy.inRange] at hx hy
+    have over : ¬(-57896044618658097711785492504343953926634992332820282019728792003956564819968 ≤
+        x.val - y.val ∧
+        x.val - y.val < 57896044618658097711785492504343953926634992332820282019728792003956564819968) := by
+      simp only [range, rangeI, Option.some.injEq] at gen
+      subst gen
+      by_cases hy0 : 0 ≤ y.val <;>
+        simp [cmpI, arI, litI, Val.evalT, left, right, BinOp.shortT, Simple.evalT, PrimTy.ofLit,
+          BinOp.evalT, BinOp.evalNum, BinOp.arithInt, PrimTy.ofInt?, PrimTy.inRange, maxI, minI,
+          TRes.ofOpt, bind, Except.bind, hy0] at failed <;>
+        rw [dif_pos (by omega)] at failed <;>
+        simp at failed <;>
+        (have := of_decide_eq_false failed; omega)
+    simp [Panic.Origin, Panic.Producer.run, Panic.checked, Panic.Checked.op, Val.evalT, left,
+      right, BinOp.shortT, BinOp.evalT, BinOp.evalNum, BinOp.arithInt, PrimTy.ofInt?,
+      PrimTy.inRange, TRes.ofOpt, bind, Except.bind]
+    rw [dif_neg over]
+    try rfl
+
 end Solidity.Correctness.Panic
