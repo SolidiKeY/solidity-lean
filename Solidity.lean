@@ -4566,6 +4566,7 @@ import Solidity.Syntax.Elab
 import Solidity.Syntax.Elab.Arms
 import Solidity.Syntax.Elab.Context
 import Solidity.Syntax.Elab.Lower
+import Solidity.Syntax.Elab.Measure
 import Solidity.Syntax.Elab.Panic
 import Solidity.Syntax.Elab.SliceCopy
 import Solidity.Syntax.Elab.Stmt

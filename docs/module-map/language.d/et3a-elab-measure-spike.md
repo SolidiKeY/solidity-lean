@@ -1,0 +1,2 @@
+| `Syntax/Elab/Measure.lean` | The elaborator knot's decrease vocabulary: `ElabMeasure` (a measure per recursive field), `cut` (a record below a level), the guarded arm shape `Stable`, `stmtsArm_stable`. |
+| `Examples/ElabTotal/Measure.lean` | Clause 2 of `elabKernelTotal` from the arms' guarded decrease (`elabKernelInduction_of_stable`); the unguarded counterexample cycle `elabStmtP → elabStmt1 → elabStmtsP`, `#guard`ed. |
