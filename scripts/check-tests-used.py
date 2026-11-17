@@ -62,6 +62,7 @@ SCHEMA = 1
 sys.dont_write_bytecode = True
 CLASSES = ('keep', 'regenerable', 'evidence', 'orphan')
 EXCLUDED = ('scripts/check-tests-used', OUTPUT)
+CLI_KINDS = ('committed-cli', 'committed-module-cli')
 
 
 def git(root, *args, data=None):
@@ -120,9 +121,19 @@ if fragment_helper.is_file():
     FRAGMENT_SECTIONS = fragment_rules.FRAGMENT_SECTIONS
     read_fragments = fragment_rules.read_fragments
     merge_fragment_entries = fragment_rules.merge_fragment_entries
+    CONSUMER_SECTIONS = fragment_rules.CONSUMER_SECTIONS
+    declared_module_cli = fragment_rules.declared_module_cli
+    validated_module_entries = lambda graph, entries: fragment_rules.validated_module_entries(globals(), graph, entries)
+    SOURCE_ROLE_KINDS = fragment_rules.SOURCE_ROLE_KINDS
 else:
+    SOURCE_ROLE_KINDS = {}
     # Historical standalone drivers copy only check-tests-used*.py files.
     FRAGMENT_SECTIONS = ('standalone', 'generators', 'reads', 'orphans', 'module_entries')
+    CONSUMER_SECTIONS = ()
+    declared_module_cli = lambda *_: None
+    def validated_module_entries(graph, entries):
+        if not isinstance(entries, list): raise ValueError('invalid module entry definitions')
+        if entries: raise ValueError('missing fragment helper')
     def read_fragments(directory):
         if directory.exists(): raise ValueError('missing fragment helper')
         return {key: [] for key in FRAGMENT_SECTIONS + ('roles', 'fixtures')}
@@ -538,79 +549,30 @@ def read_routes(catalog):
             yield {**base, 'target': row['path'], 'target_blob': row['blob']}
 
 
-def reviewed_module_collector(repo, pin, current):
+# Audited historical trace collectors, each bound to the exact commit holding
+# it. 74a8ac05 (d76458a00) -> current f01d503a (8d11968d4) adds only the
+# off-by-default readonly_symlinks audit (H1001): module-entry observation never
+# enables it, the lifted strace argument splitter and path resolution are
+# byte-for-byte equivalent, and source_code_hashes/code_fingerprint are
+# unchanged, so claims recorded under 74a8ac05 keep their meaning (H1010).
+REVIEWED_MODULE_COLLECTORS = {
+    '42027e7c42dac3912c1f8ef468a6d99bddb8075172c545b6a587692b039cff32':
+        'e6d215dff997377f70e17ce50d04b8eb12284b16',
+    '74a8ac05edadf4a4a1cf901134a8c23b24a844284ee8fe2a5f4e6fba274d251c':
+        'd76458a00eef321c6f34cc5f7f76e0dd02ff31b9',
+}
+
+
+def reviewed_module_collector(repo, pin, current, reviewed=None):
     """Keep already reviewed historical claims verifiable after collector fixes."""
     if pin == current: return True
-    reviewed = {
-        '42027e7c42dac3912c1f8ef468a6d99bddb8075172c545b6a587692b039cff32':
-            'e6d215dff997377f70e17ce50d04b8eb12284b16',
-    }
+    reviewed = REVIEWED_MODULE_COLLECTORS if reviewed is None else reviewed
     if not isinstance(pin, str) or pin not in reviewed: return False
     try: source = git(repo.root, 'show', reviewed[pin] + ':scripts/check-tests-used-trace.py')
     except ValueError as error:
         raise ValueError('UNVERIFIABLE reviewed module collector source: ' + pin) from error
     if hashlib.sha256(source).hexdigest() != pin: raise ValueError('reviewed module collector source mismatch')
     return True
-
-
-def validated_module_entries(graph, entries):
-    """Reviewed positive execution claims, never static imports or data edges.
-
-    Exact entered module code, native reads preceding entry, successful paired
-    runs and collector provenance are validated deliberately outside inventory.
-    These deterministic definitions retain source/code/interpreter bindings;
-    ordinary inventory only compiles bytes to compare code, never executes them.
-    """
-    if not isinstance(entries, list): raise ValueError('invalid module entry definitions')
-    if not entries: return
-    repo = graph.repo
-    helper = Path(__file__).with_name('check-tests-used-trace.py')
-    spec = importlib.util.spec_from_file_location('tests_used_module_identity', helper)
-    observer = importlib.util.module_from_spec(spec); spec.loader.exec_module(observer)
-    collector = hashlib.sha256(helper.read_bytes()).hexdigest()
-    seen = set()
-    required = {'runner', 'input_revision', 'frames', 'target', 'target_blob', 'operation',
-                'module_code_sha256', 'module_frame_line', 'python', 'collector_sha256'}
-    for entry in entries:
-        if not isinstance(entry, dict) or set(entry) != required: raise ValueError('invalid entered module claim')
-        key = canonical(entry)
-        if key in seen: raise ValueError('duplicate entered module claim')
-        seen.add(key)
-        if entry['input_revision'] != repo.ref: continue
-        root = graph.roots.get(entry['runner'])
-        if root is None or root['kind'] != 'validated standalone runner' or root.get('source_only'):
-            raise ValueError('entered module requires passing current runner')
-        target = entry['target']
-        if target not in repo.tree or not target.endswith('.py') or repo.tree[target][2] != entry['target_blob']:
-            raise ValueError('entered module source pin mismatch')
-        if not reviewed_module_collector(repo, entry['collector_sha256'], collector): raise ValueError('unreviewed module entry collector')
-        if (entry['python'] != list(sys.version_info[:3]) or any(type(n) is not int for n in entry['python'])
-                or sys.implementation.name != 'cpython'):
-            raise ValueError('UNVERIFIABLE module code identity: exact CPython version required')
-        if entry['operation'] != 'entered measured Python module; no fixture consumption credit':
-            raise ValueError('unsupported module entry operation')
-        if type(entry['module_frame_line']) is not int or not 0 <= entry['module_frame_line'] <= len(repo.texts[target].splitlines()):
-            raise ValueError('invalid entered module frame location')
-        fingerprints = observer.source_code_hashes(repo.texts[target].encode('utf-8', 'surrogateescape'), '<measured>')
-        if entry['module_code_sha256'] not in fingerprints['module_code_hashes']:
-            raise ValueError('entered module code mismatch')
-        frames = entry['frames']
-        if not isinstance(frames, list) or not frames or not isinstance(frames[0], dict) or frames[0].get('path') != root['path']:
-            raise ValueError('entered module chain lacks root')
-        for frame in frames:
-            if (not isinstance(frame, dict) or set(frame) != {'path', 'blob', 'line'}
-                    or frame['path'] not in repo.tree or repo.tree[frame['path']][2] != frame['blob']
-                    or type(frame['line']) is not int or not 1 <= frame['line'] <= len(repo.texts.get(frame['path'], '').splitlines())):
-                raise ValueError('invalid entered module caller')
-        if excluded(target) or any(excluded(f['path']) for f in frames): continue
-        identity = entry['runner'] + ':module:' + hashlib.sha256(key).hexdigest()
-        graph.roots[identity] = {**root, 'derived_from': entry['runner'], 'entered_module': target,
-            'module_entry': {k: entry[k] for k in ('module_code_sha256', 'module_frame_line', 'python', 'collector_sha256')}}
-        chain = {'root': identity, 'entry': graph.roots[identity], 'edges': []}
-        for caller, callee in zip(frames, frames[1:] + [{'path': target}]):
-            chain = {**chain, 'edges': chain['edges'] + [{'source': caller['path'], 'target': callee['path'],
-                'line': caller['line'], 'operation': entry['operation'], 'kind': 'executes', 'validated_for': identity}]}
-            graph.observed.append((callee['path'], chain))
 
 
 def validated_routes(graph, catalog, extra_reads=()):
@@ -636,7 +598,7 @@ def validated_routes(graph, catalog, extra_reads=()):
     historical_revisions = set()
     for entry in catalog['standalone']:
         p = entry.get('path')
-        if (entry.get('input_revision') == repo.ref or entry.get('kind') not in ('unittest', 'node-test', 'runnable-entrypoint', 'committed-cli')
+        if (entry.get('input_revision') == repo.ref or entry.get('kind') not in ('unittest', 'node-test', 'runnable-entrypoint') + CLI_KINDS
                 or p in current_runner_paths or p not in repo.tree or repo.tree[p][2] != entry.get('source_blob')): continue
         revision = entry.get('input_revision')
         if not hex_pin(revision, 40): raise ValueError('historical runner demonstration requires full commit revision')
@@ -654,18 +616,19 @@ def validated_routes(graph, catalog, extra_reads=()):
             if len(fields) != 3 or fields[0].decode() != expected_oid or fields[1] != expected_type:
                 raise ValueError('unverifiable historical runner demonstration: ' + request)
     for entry in catalog['standalone']:
+        if entry.get('kind') in SOURCE_ROLE_KINDS: SOURCE_ROLE_KINDS[entry['kind']](globals(), graph, catalog, entry); continue
         required = {'path', 'input_revision', 'source_blob', 'command', 'kind'}
         if entry.get('kind') == 'manual-reproducer': required.add('documentation')
         if entry.get('kind') == 'runnable-entrypoint': required.update(('entry_line', 'purpose', 'input_scope', 'other_reads'))
         if entry.get('kind') == 'nonpassing-unittest': required.update(('purpose', 'input_scope'))
         if entry.get('kind') == 'skipped-unittest': required.add('purpose')
-        if entry.get('kind') == 'committed-cli': required.update(('purpose', 'entry_line', 'required_options'))
+        if entry.get('kind') in CLI_KINDS: required.update(('purpose', 'entry_line', 'required_options'))
         allowed = (required, required | {'purpose', 'input_scope', 'other_reads'}) if entry.get('kind') in ('unittest', 'node-test') else (required,)
         if set(entry) not in allowed:
             raise ValueError('invalid standalone definition')
         p = entry['path']
         historical_runner = entry['input_revision'] != repo.ref
-        if historical_runner and (entry['kind'] not in ('unittest', 'node-test', 'runnable-entrypoint', 'committed-cli')
+        if historical_runner and (entry['kind'] not in ('unittest', 'node-test', 'runnable-entrypoint') + CLI_KINDS
                 or p in current_runner_paths or p not in repo.tree or repo.tree[p][2] != entry['source_blob']):
             continue
         if p not in repo.tree or repo.tree[p][2] != entry['source_blob']:
@@ -673,10 +636,10 @@ def validated_routes(graph, catalog, extra_reads=()):
         command = entry['command']
         if entry['kind'] != 'manual-reproducer' and command not in (['python3', '-B', p], ['node', '--test', p]):
             raise ValueError('unsupported standalone invocation: ' + p)
-        if entry['kind'] not in ('unittest', 'node-test', 'manual-reproducer', 'runnable-entrypoint', 'nonpassing-unittest', 'skipped-unittest', 'committed-cli'):
+        if entry['kind'] not in ('unittest', 'node-test', 'manual-reproducer', 'runnable-entrypoint', 'nonpassing-unittest', 'skipped-unittest') + CLI_KINDS:
             raise ValueError('unsupported standalone kind')
-        if entry['kind'] == 'committed-cli':
-            declaration = declared_configured_cli(repo, p)
+        if entry['kind'] in CLI_KINDS:
+            declaration = (declared_configured_cli if entry['kind'] == 'committed-cli' else declared_module_cli)(repo, p)
             if (declaration is None or command != ['python3', '-B', p]
                     or type(entry['entry_line']) is not int or entry['entry_line'] != declaration['main_line']
                     or entry['required_options'] != declaration['required_options']
@@ -1712,6 +1675,8 @@ def inventory(repo, catalog=None):
         definitions = Path(__file__).with_name('check-tests-used-routes.json')
         catalog = json.loads(definitions.read_bytes()) if definitions.exists() else {'schema_version': 1, 'standalone': [], 'generators': [], 'reads': [], 'orphans': []}
     fragments = read_fragments(Path(__file__).with_name('check-tests-used.d'))
+    consumers = any(fragments.get(key) for key in CONSUMER_SECTIONS)
+    if consumers: fragment_rules.same_revision_reads(repo.ref, fragments)
     extra_reads = []
     if any(fragments[key] for key in FRAGMENT_SECTIONS):
         # Check both frozen extension formats without implicitly enabling either.
@@ -1743,6 +1708,7 @@ def inventory(repo, catalog=None):
     lake_spec = importlib.util.spec_from_file_location('tests_used_lake', Path(__file__).with_name('check-tests-used-lake.py'))
     lake_rules = importlib.util.module_from_spec(lake_spec); lake_spec.loader.exec_module(lake_rules)
     lake_rules.add(graph, lean_lex)
+    if consumers: fragment_rules.add_consumer_routes(globals(), graph, catalog, fragments)
     chains = graph.chains()
     orphan_reviews = {}
     for entry in catalog['orphans']:
@@ -1772,8 +1738,8 @@ def inventory(repo, catalog=None):
                 if spelling != base: names[spelling].append(p)
     candidates = collections.defaultdict(list)
     candidate_sources = collections.defaultdict(set)  # eligibility is never display-capped
-    # Single indexed scan rather than one repository scan per inventoried file.
     token_re = re.compile(r'[A-Za-z0-9_.+@/-]+')
+    # Single indexed scan rather than one repository scan per inventoried file.
     for source, text in sorted(repo.texts.items()):
         for n, line in enumerate(text.splitlines(), 1):
             for token in dict.fromkeys(token_re.findall(line)):
@@ -2172,12 +2138,34 @@ def module_entry_schema_controls():
         try: inventory(repo,bad)
         except ValueError: pass
         else: raise AssertionError('invalid entered module source line accepted')
+        # Historical collector pins: each audited blob only at its exact commit.
+        current=hashlib.sha256(helper.read_bytes()).hexdigest()
+        assert reviewed_module_collector(repo,current,current) and not reviewed_module_collector(repo,'0'*64,current)
+        assert not reviewed_module_collector(repo,['74a8ac05edadf4a4a1cf901134a8c23b24a844284ee8fe2a5f4e6fba274d251c'],current)
+        assert len(REVIEWED_MODULE_COLLECTORS)==2 and all(re.fullmatch('[0-9a-f]{64}',k) and re.fullmatch('[0-9a-f]{40}',v) for k,v in REVIEWED_MODULE_COLLECTORS.items())
+        for pin in REVIEWED_MODULE_COLLECTORS:  # the synthetic repository lacks the commits
+            try: reviewed_module_collector(repo,pin,current)
+            except ValueError as error: assert 'UNVERIFIABLE reviewed module collector source' in str(error)
+            else: raise AssertionError('unverifiable reviewed collector accepted')
+        home=type('Home',(),{'root':Path(__file__).resolve().parents[1]})()
+        held=[pin for pin,commit in REVIEWED_MODULE_COLLECTORS.items()
+              if subprocess.run(['git','-C',str(home.root),'cat-file','-e',commit+':scripts/check-tests-used-trace.py'],capture_output=True).returncode==0]
+        for pin in held:  # full clones: the real pins verify, and a pin bound to another commit is refused
+            assert reviewed_module_collector(home,pin,current)
+            swapped={pin:next(c for p,c in REVIEWED_MODULE_COLLECTORS.items() if p!=pin)}
+            try: reviewed_module_collector(home,pin,current,swapped)
+            except ValueError as error: assert 'reviewed module collector source mismatch' in str(error)
+            else: raise AssertionError('collector pin bound to another commit accepted')
 
 
 def self_test():
-    spec = importlib.util.spec_from_file_location('fragment_controls', Path(__file__).with_name('check-tests-used.d') / 'fragments.py')
-    if spec.origin and Path(spec.origin).exists():
-        controls = importlib.util.module_from_spec(spec); spec.loader.exec_module(controls); controls.fragment_controls(globals())
+    if fragment_helper.is_file():
+        for control in (fragment_rules.fragment_controls, fragment_rules.consumer_route_controls): control(globals())
+        fragment_rules.isolated(globals(), self_test_controls)
+    else: self_test_controls()
+
+
+def self_test_controls():
     # Formatting must preserve nested provenance and awkward path/string bytes.
     payload = {'records': [{'path': 'tests/\u03b1\n".py', 'class': None,
                             'reason': 'braces{},comma,\nline', 'pins': {'b': [True, 0], 'a': {}}},
