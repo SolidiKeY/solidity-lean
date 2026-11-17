@@ -3296,6 +3296,7 @@ import Solidity.Goals.Finish
 import Solidity.Goals.GoalPinsSpec
 import Solidity.Goals.Hash
 import Solidity.Goals.Headline
+import Solidity.Goals.IntrinsicSession
 import Solidity.Goals.Loops
 import Solidity.Goals.Panic
 import Solidity.Goals.PanicProvenance
