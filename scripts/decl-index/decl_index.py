@@ -187,10 +187,29 @@ def trace_hashes(o):
     return []
 
 
-def _link_pass(build, lib, arts, done):
+def build_olean_matches(stem, trace, hashes):
+    """Whether the real .lake/build olean of `stem` is the one its trace names (H1086): its
+    `.olean.hash` is one of the trace's `hashes`, or, without a hash file, it is not older
+    than the trace (Lake writes the trace after the olean). A stale olean left behind after
+    Lake moved the module to its artifact cache shadowed the current one, and Lean saw a
+    declaration twice (Solidity.Evm.Instr.step.eq_43)."""
+    olean = stem.parent / (stem.name + ".olean")
+    if not olean.is_file(): return False
+    if not hashes: return True
+    hf = stem.parent / (stem.name + ".olean.hash")
+    try: return hex_hash(hf.read_text().strip()) in hashes
+    except OSError: pass
+    try: return olean.stat().st_mtime >= trace.stat().st_mtime
+    except OSError: return False
+
+
+def _link_pass(build, lib, arts, done, stale=None):
     """Link into `lib` every module's olean found via its trace or `.hash` file in `arts`, or
-    its .lake/build file; returns the links made and the modules with an olean."""
+    its .lake/build file when that is the olean the trace names; returns the links made and
+    the modules with an olean. A module whose trace names an olean found nowhere goes to
+    `stale` with the missing hashes."""
     done = set(done)
+    if stale is None: stale = {}
     names = defaultdict(list)
     for art in arts:
         for n in os.listdir(art): names[n.split(".", 1)[0]].append((art, n))
@@ -201,16 +220,21 @@ def _link_pass(build, lib, arts, done):
         if stem.suffix in (".olean", ".ilean", ".c"): stem = stem.with_suffix("")
         rel = stem.relative_to(build)
         if ".".join(rel.parts) in done: continue
+        t = stem.parent / (stem.name + ".trace") if (stem.parent / (stem.name + ".trace")).is_file() else t
         try:
-            outs = json.loads(t.read_text()).get("outputs", {})
+            outs = json.loads(t.read_text()).get("outputs", {}) if t.suffix == ".trace" else {}
             o = outs.get("o", outs) if isinstance(outs, dict) else outs
         except (OSError, ValueError, AttributeError): o = None
         srcs, exts = [], set()
-        for h in trace_hashes(o) + hash_file_hashes(stem):
+        named = trace_hashes(o) if t.suffix == ".trace" else []
+        for h in named + hash_file_hashes(stem):
             for art, n in names.get(h, []):
                 ext = n.split(".", 1)[1]
                 if ext.startswith("olean") and ext not in exts and (art / n).is_file():
                     srcs.append((art / n, ext)); exts.add(ext)
+        if "olean" not in exts and named and not build_olean_matches(stem, t, set(named)):
+            stale.setdefault(".".join(rel.parts), named)
+            continue
         if "olean" not in exts:
             srcs += [(p, p.name[len(stem.name) + 1:]) for p in stem.parent.glob(stem.name + ".olean*")
                      if p.is_file() and p.name[len(stem.name) + 1:] not in exts]
@@ -219,7 +243,8 @@ def _link_pass(build, lib, arts, done):
             dst.parent.mkdir(parents=True, exist_ok=True)
             if os.path.lexists(dst): continue
             os.symlink(src, dst); linked += 1
-        if any(e == "olean" for _, e in srcs): done.add(".".join(rel.parts))
+        if any(e == "olean" for _, e in srcs):
+            done.add(".".join(rel.parts)); stale.pop(".".join(rel.parts), None)
     return linked, done
 
 
@@ -234,7 +259,8 @@ def link_build(top, lib, need=()):
     build = top / ".lake/build/lib/lean"
     if not build.is_dir(): raise SetupError(f"{build}: no build (run lake build first)")
     arts = list(artifacts() or [])
-    linked, done = _link_pass(build, lib, arts, set())
+    stale = {}
+    linked, done = _link_pass(build, lib, arts, set(), stale)
     need_all = sorted(import_closure(top, need) | set(need)) if need else []
     if any(m not in done for m in need_all):
         extra = []  # ask Lake where it fetched (H1071), only when the fixed guesses fall short
@@ -243,9 +269,16 @@ def link_build(top, lib, need=()):
             if a.is_dir() and a not in arts and a not in extra: extra.append(a)
         if extra:
             arts += extra
-            more, done = _link_pass(build, lib, arts, done)
+            more, done = _link_pass(build, lib, arts, done, stale)
             linked += more
     if not linked: raise SetupError(f"{build}: no oleans found")
+    bad = [m for m in need_all if m not in done and m in stale]
+    if bad:
+        raise SetupError("host build dir disagrees with Lake (setup, not an index finding): %s "
+                         "(searched %s and caches %s); rebuild with `rm <module>.trace && lake build "
+                         "<module>` or restore the artifact"
+                         % ("; ".join("%s trace names output %s, absent or stale" % (m, "/".join(stale[m]))
+                                      for m in bad), build, [str(a) for a in arts] or "none found"))
     missing = [m for m in need_all if m not in done]
     if missing:
         raise SetupError("no olean for %s in %s or caches %s (set LAKE_CACHE_DIR to Lake's cache)"
@@ -276,7 +309,7 @@ def dump(out, modules):
         src, part = pathlib.Path(d) / "DeclIndexRun.lean", out.with_name(out.name + f".{os.getpid()}.part")
         src.write_text(text)
         lake_build(top, modules)
-        lib = pathlib.Path(d) / "lib"; link_build(top, lib, [m for m in modules if m != "Solidity"])
+        lib = pathlib.Path(d) / "lib"; link_build(top, lib, list(modules))
         env = dict(os.environ, DECLINDEX_OUT=str(part), LEAN_NUM_THREADS="1", DECLINDEX_LIB=str(lib))
         env.pop("DECLINDEX_LOCAL", None)
         r = subprocess.run(["lake", "env", "sh", "-c", 'LEAN_PATH="$DECLINDEX_LIB:$LEAN_PATH" exec lean --tstack=131072 "$1"',
