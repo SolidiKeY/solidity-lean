@@ -318,4 +318,20 @@ theorem pop_source {E : Ty} (σ : State C Γ) (b : SPath C Γ (.array E))
   ⟨rfl, (pop_guard_origin σ b ref keep base failed).1,
     (pop_guard_origin σ b ref keep base failed).2, panic_guard_source_failure σ _ failed _⟩
 
+/-! ## Guards under a condition (`Checked.pgUnder`) -/
+
+/-- A guard of a short-circuited or selected operand is `!c || g`
+(`Checked.pgUnder`). It fails only where the condition was read as `true`
+and the guard itself failed: the family theorems above then apply to `g`. -/
+theorem guard_under_failed (σ : State C Γ) (c g : Val C Γ .bool)
+    (failed : (Checked.orB (Checked.notB c) g).evalT σ = .ok false) :
+    c.evalT σ = .ok true ∧ g.evalT σ = .ok false := by
+  cases condition : c.evalT σ with
+  | error halt =>
+    simp [Checked.orB, Checked.notB, Val.evalT, condition, bind, Except.bind] at failed
+  | ok x =>
+    cases x <;> cases guard : g.evalT σ <;>
+      simp_all [Checked.orB, Checked.notB, Val.evalT, BinOp.shortT, UnOp.evalT, BinOp.evalT,
+        BinOp.evalBool, TRes.ofOpt, bind, Except.bind, pure, Except.pure]
+
 end Solidity.Correctness.Panic

@@ -69,6 +69,14 @@ theorem pop_empty :
       (Checked.litU 0 (by decide)))).runR σ₀ = .error (THalt.ofData (encodePanic 0x31)) :=
   pop_source σ₀ values (.ofRoot "values" rfl) _ rfl rfl
 
+/-- `true && values[0] == 0`: the index guard is emitted under the left
+operand, and its failure is the bare guard's, so the same origin follows. -/
+example (failed : (Checked.orB (Checked.notB Checked.tt)
+      (Checked.cmpU .lt rfl rfl (lit 0) (.len values rfl))).evalT σ₀ = .ok false) :
+    Panic.Origin (.storageIndex σ₀.storage (.ofRoot "values" rfl) .dyn (u 0)) .bounds :=
+  (storage_dyn_index_guard_origin σ₀ values (lit 0) (.ofRoot "values" rfl) (u 0) rfl rfl
+    (guard_under_failed σ₀ _ _ failed).2).1
+
 private abbrev A : RefTy := .array (.prim .uint)
 private abbrev F : RefTy := .fixed (.prim .uint) 2
 private def dynObj : MObj [] A := ⟨[u 7], by decide⟩
