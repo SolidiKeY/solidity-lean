@@ -65,6 +65,12 @@ theorem compiler_endpoint_for_stages (entry : CheckedEntry) (refused : StaticChe
     · exact .inr ⟨check, fun base σ m h => r.correct_exact h⟩
     · exact .inl ⟨check, fun base σ m => stage r L frame base σ m check⟩
 
+/-- The goal statement `CompilerEndpoint` is the v1 instance of the lemma for
+any entry: the same proof serves the b1 goal and v2. -/
+example : CompilerEndpoint :=
+  (endpoint_for_v1 Passes.WholeProgram.staticRefused).mp
+    (compiler_endpoint_for_stages Compiler.compile Passes.WholeProgram.staticRefused static_stage)
+
 /-- **The v2 compiler endpoint**: the endpoint over `CompilerV2.compile`, with
 the same static check as v1. -/
 def CompilerEndpointV2 : Prop :=
