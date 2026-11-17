@@ -2097,7 +2097,6 @@ def _python_launch(text, driver, line, literal, program):
             or isinstance(head, ast.Constant) and head.value == 'python3'):
         return False
     if any(isinstance(n, ast.Starred) for n in ast.walk(arg)): return False
-    strings = [n.value for n in ast.walk(arg) if isinstance(n, ast.Constant) and isinstance(n.value, str)]
     if literal is None:
         return isinstance(arg, ast.Name) and arg.id == '__file__' and program == driver
     if literal != program: return False
