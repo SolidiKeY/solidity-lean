@@ -1,5 +1,6 @@
 import Solidity.Calculus.OrLift
 import Solidity.Calculus.QuotientCut
+import Solidity.Theory.Typed.Leaves
 
 /-!
 # Array reads cut to fresh atoms (M7, step 6)
@@ -373,8 +374,7 @@ def ArrDescribes (g : State C []) (st : Storage C) (ν : AEnv) (N : Nat) (rs : L
 def ArrFrames (g : State C []) (st : Storage C) (ν : AEnv) : Prop :=
   ∀ {s : Srt} (t : LTm C s), t.aFree = true → t.eval (g.withStorage st) ν = t.eval g ν
 
-theorem ArrTy.subsingleton {R : RefTy} {E : Ty} (a b : ArrTy R E) : a = b := by
-  cases a <;> cases b <;> rfl
+theorem ArrTy.subsingleton {R : RefTy} {E : Ty} (a b : ArrTy R E) : a = b := Solidity.ArrTy.eq a b
 
 theorem ArrTy.elem_eq {R : RefTy} {e e' : PrimTy} (a : ArrTy R (.prim e)) (b : ArrTy R (.prim e')) :
     e = e' := by
@@ -1380,13 +1380,8 @@ theorem has_false_slots (hC : (ARead.cons N rs).holds g ν) {j : Nat} {r : ARead
         exact hne this
     · exact Nat.zero_le _
 
-theorem uintOfNat_toNatA (i : PrimTy.uint.Denote) : uintOfNat i.1.toNat = i := by
-  have hlt := uint_toNat_lt i
-  have h0 := uint_nonneg i
-  rw [uintOfNat_eq_lenU hlt]
-  apply Subtype.ext
-  show ((i.1.toNat : Nat) : Int) = i.1
-  omega
+theorem uintOfNat_toNatA (i : PrimTy.uint.Denote) : uintOfNat i.1.toNat = i :=
+  Solidity.uintOfNat_toNat i
 
 theorem fixed_lt_bound {a : Name} {e : PrimTy} {n : Nat}
     (h : C.rootType a = some (.ref (.fixed (.prim e) n))) (ha : C.isArrRoot a = true) :

@@ -1,5 +1,6 @@
 import Solidity.Calculus.Logic
 import Solidity.Calculus.Lower
+import Solidity.Theory.Typed.Mem
 
 /-!
 # A lowered expression evaluates as the typed run evaluates
@@ -82,9 +83,8 @@ def MAddr.toT {H : HTy} {T : Ty} : MAddr H T → MAddrT T
   | .field r h => .field r.id h
   | .index r a i => .index r.id a i
 
-theorem HRef.ofId?_id {H : HTy} {R : RefTy} (r : HRef H R) : HRef.ofId? H R r.id = some r := by
-  unfold HRef.ofId?
-  rw [dif_pos r.get?]
+theorem HRef.ofId?_id {H : HTy} {R : RefTy} (r : HRef H R) : HRef.ofId? H R r.id = some r :=
+  Solidity.HRef.ofId?_self r
 
 /-- A bare address resolves back in its heap typing. -/
 theorem MAddr.resolve_toT {H : HTy} {T : Ty} (a : MAddr H T) : a.toT.resolve H = some a := by

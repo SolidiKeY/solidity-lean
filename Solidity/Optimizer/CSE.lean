@@ -333,19 +333,6 @@ def Avail.decl {p : PrimTy} (A : List (Avail C Γ)) :
   | none => Avail.push A
   | some e => ⟨p, .here, e.wk (.drop .refl)⟩ :: Avail.push A
 
-private theorem get_set_ne' {H : HTy} {Γ : Ctx} {t u : LTy} : (i : Idx Γ t) → (j : Idx Γ u) →
-    (v : t.TDenote C H) → (e : TEnv C H Γ) → i.toNat ≠ j.toNat →
-      TEnv.get j (TEnv.set i v e) = TEnv.get j e
-  | .here, .here, _, _, h => absurd rfl h
-  | .here, .there _, _, _, _ => rfl
-  | .there _, .here, _, _, _ => rfl
-  | .there i, .there j, v, e, h => get_set_ne' i j v e.2 fun h' => h (congrArg (· + 1) h')
-
-private theorem get_set' {H : HTy} {Γ : Ctx} {t : LTy} : (i : Idx Γ t) → (v : t.TDenote C H) →
-    (e : TEnv C H Γ) → TEnv.get i (TEnv.set i v e) = v
-  | .here, _, _ => rfl
-  | .there i, v, e => get_set' i v e.2
-
 theorem Avail.holds_set {A : List (Avail C Γ)} {σ : State C Γ} (hA : Avail.Holds A σ)
     {p : PrimTy} (i : Idx Γ (.val p)) (r : Val C Γ p) (v : p.Denote) (hv : r.evalT σ = .ok v) :
     Avail.Holds (Avail.set A i r) (σ.setLocal i v) := by
@@ -356,14 +343,14 @@ theorem Avail.holds_set {A : List (Avail C Γ)} {σ : State C Γ} (hA : Avail.Ho
     simp only [Bool.and_eq_true, bne_iff_ne] at hk
     rw [Val.evalT_setLocal_indep σ i v a.e hk.2, hA a hmem]
     show Except.ok (TEnv.get a.j σ.env) = Except.ok (TEnv.get a.j (TEnv.set i v σ.env))
-    rw [get_set_ne' i a.j v σ.env (Ne.symm hk.1)]
+    rw [get_set_ne i a.j v σ.env (Ne.symm hk.1)]
   unfold Avail.set
   split
   · next hr =>
     intro a ha
     rcases List.mem_cons.mp ha with rfl | ha
     · show r.evalT (σ.setLocal i v) = .ok (TEnv.get i (TEnv.set i v σ.env))
-      rw [Val.evalT_setLocal_indep σ i v r hr, hv, get_set']
+      rw [Val.evalT_setLocal_indep σ i v r hr, hv, get_set]
     · exact hkept a ha
   · exact hkept
 

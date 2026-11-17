@@ -115,20 +115,6 @@ theorem RefFieldsRepr.readField {H : HTy} {hp : Heap H} {base : Nat → Fin W}
   simp only [run, Machine.push, exec_cons_zero, Instr.step, Machine.next,
     wmod_of_lt hb, Out.ok_bind, exec_nil, h r hf]
 
-private theorem allocRef_cases {H : HTy} {T R : RefTy} (hp : Heap H) (o : MObj H T)
-    (r : HRef (H ++ [T]) R) :
-    (∃ q : HRef H R, q.wk (List.prefix_append H [T]) = r) ∨
-      (R = T ∧ HEq r (hp.alloc o).2) := by
-  by_cases hi : r.id < H.length
-  · let q : HRef H R := ⟨r.id, by simpa only [List.getElem?_append_left hi] using r.get?⟩
-    have he : q.wk (List.prefix_append H [T]) = r := by cases r; rfl
-    exact .inl ⟨q, he⟩
-  · have hr : r.id = H.length := by
-      have hl : r.id < (H ++ [T]).length := r.id_lt
-      simp only [List.length_append, List.length_singleton] at hl
-      omega
-    exact .inr (HRef.heq_of_id r (hp.alloc o).2 hr)
-
 /-- Growing by an object without reference fields retains all older pointer words. -/
 theorem RefFieldsRepr.alloc {H : HTy} {hp : Heap H} {base : Nat → Fin W}
     {m m' : Machine} (h : RefFieldsRepr hp base m) {T : RefTy} (o : MObj H T)
@@ -141,7 +127,7 @@ theorem RefFieldsRepr.alloc {H : HTy} {hp : Heap H} {base : Nat → Fin W}
       lookupBy f (structDef s) = some (.ref R) → False) :
     RefFieldsRepr (hp.alloc o).1 (upd base H.length cursor) m' := by
   intro s f R r hf
-  rcases allocRef_cases hp o r with ⟨q, rfl⟩ | ⟨ht, _⟩
+  rcases allocRef_split hp o r with ⟨q, rfl⟩ | ⟨ht, _⟩
   · have he : (hp.alloc o).1.field (q.wk (List.prefix_append H [T])) hf =
         (hp.field q hf).wk (List.prefix_append H [T]) := by
       simp only [Heap.field, Heap.keeps_alloc hp o q, MObj.wk, MFields.get_wk]

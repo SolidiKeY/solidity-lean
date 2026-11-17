@@ -88,16 +88,7 @@ structure QArith (φ : LFml C) (pos : Parameter → Nat) (start : Nat) where
 /-! ## Equations -/
 
 theorem Parameters.index_lt_of_mem {q : Parameter} {ps : List Parameter} (h : q ∈ ps) :
-    Parameters.index q ps < ps.length := by
-  induction ps with
-  | nil => cases h
-  | cons x ps ih =>
-    unfold Parameters.index
-    by_cases he : q = x
-    · simp only [he, if_true, List.length_cons]; omega
-    · simp only [he, if_false, List.length_cons]
-      have := ih ((List.mem_cons.mp h).resolve_left he)
-      omega
+    Parameters.index q ps < ps.length := Solidity.Decide.Parameters.index_lt h
 
 theorem Parameters.getElem_index {q : Parameter} : ∀ {ps : List Parameter} (h : q ∈ ps),
     ps[Parameters.index q ps]'(Parameters.index_lt_of_mem h) = q

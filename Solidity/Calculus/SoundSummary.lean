@@ -965,7 +965,7 @@ theorem Args.sym_PF {E : SEnv C Γ₀ Δ} (hE : E.PF) : {ps : Ctx} → (args : A
   | _, .snocStorage .., _, h | _, .snocMemory .., _, h => nomatch h
 
 theorem Rhs.eval_val_sum {Γ : Ctx} (σ : State C Γ) {p : PrimTy} (t : Tm C Γ (.val p)) :
-    Rhs.eval σ (.val t) = t.eval σ := rfl
+    Rhs.eval σ (.val t) = t.eval σ := Solidity.Rhs.eval_val σ t
 
 /-- **The summary's update agrees with the call's run**: it fails exactly
 where the call reverts, and leaves its target the value the call does. -/

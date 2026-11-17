@@ -649,6 +649,12 @@ theorem exec_append (c₁ c₂ : List Instr) (k : Nat) (m : Machine) :
       simp only [List.cons_append, exec_cons_zero, Out.bind_assoc]
       congr 1; funext m' k'; exact ih k' m'
 
+/-- A fault in the first piece of code faults the whole: a loop that never
+ends, then the rest. -/
+theorem run_append_fault {c₁ c₂ : List Instr} {m : Machine} (h : run c₁ m = .fault) :
+    run (c₁ ++ c₂) m = .fault := by
+  simp only [run] at h ⊢; rw [exec_append, h]; rfl
+
 /-- Skipping as many instructions as the code has jumps over all of it.
 
 Example: in `if (c) { total = 3; } else { age = 4; }` the `JUMP` at the end of
