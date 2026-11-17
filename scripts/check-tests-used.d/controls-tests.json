@@ -1088,6 +1088,22 @@
           "tests/h62/item4/generic-internalflow/prefix-cases.txt"
         ],
         "other_reads": "unresolved"
+      },
+      {
+        "path": "scripts/h62/item4/generic-structuredflow/test_census.py",
+        "input_revision": "960f12c0b7ac5758608866dbb7acbb48fe427c42",
+        "source_blob": "f7e4bb8a3cedab90251aadfcf35540c61b8b622a",
+        "command": [
+          "python3",
+          "-B",
+          "scripts/h62/item4/generic-structuredflow/test_census.py"
+        ],
+        "kind": "unittest",
+        "purpose": "Existing frozen census golden-input regression passed in the exact historical source context. Root, helper, frame and golden-input blobs are unchanged now; current live source drift failures remain unmodified. This certifies golden-data use only, not a current passing suite, native Lean, theorem, compiler or EVM acceptance.",
+        "input_scope": [
+          "tests/h62/item4/generic-structuredflow/frozen.json"
+        ],
+        "other_reads": "unresolved"
       }
     ]
   },
@@ -3054,6 +3070,17 @@
         ],
         "target": "tests/h62/item4/generic-source-frontend/owner-migration-proposal.json",
         "target_blob": "fa1599a109b15a01b711f2ab1df4a8d1b626ec7a",
+        "operation": "validated Python read of measured bytes"
+      },
+      {
+        "runner": "validated:scripts/h62/item4/generic-structuredflow/test_census.py",
+        "input_revision": "960f12c0b7ac5758608866dbb7acbb48fe427c42",
+        "frames": [
+          {"path": "scripts/h62/item4/generic-structuredflow/test_census.py", "blob": "f7e4bb8a3cedab90251aadfcf35540c61b8b622a", "line": 87},
+          {"path": "scripts/h62/item4/generic-structuredflow/test_census.py", "blob": "f7e4bb8a3cedab90251aadfcf35540c61b8b622a", "line": 19}
+        ],
+        "target": "tests/h62/item4/generic-structuredflow/frozen.json",
+        "target_blob": "b2d3c4b0c1475a113330584a9c51b23c0f4e7fec",
         "operation": "validated Python read of measured bytes"
       },
       {
