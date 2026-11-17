@@ -1040,7 +1040,8 @@ def python_argument_root(classifier, graph, catalog, entry, reviewed=None):
     required = {'path', 'input_revision', 'source_blob', 'command', 'kind', 'entry_line', 'interface', 'provenance', 'purpose'}
     if (set(entry) != required or not isinstance(entry['path'], str) or not isinstance(entry['source_blob'], str)
             or not isinstance(entry['purpose'], str) or not entry['purpose'].strip() or not isinstance(entry['interface'], dict)
-            or not isinstance(entry['provenance'], dict) or set(entry['provenance']) != {'commit', 'path', 'blob'}):
+            or not isinstance(entry['provenance'], dict) or set(entry['provenance']) != {'commit', 'path', 'blob'}
+            or not all(isinstance(v, str) for v in entry['provenance'].values())):
         raise ValueError('invalid Python argument role definition')
     p = entry['path']; revision = entry['input_revision']; doc = entry['provenance']
     if not isinstance(revision, str) or not classifier['hex_pin'](revision, 40): raise ValueError('Python argument role requires a full commit revision')
@@ -1816,6 +1817,7 @@ def successor_controls(classifier):
             for change, text in (({'extra': 1}, 'invalid Python argument role'), ({'purpose': ' '}, 'invalid Python argument role'),
                                  ({'interface': []}, 'invalid Python argument role'),
                                  ({'provenance': {'commit': A, 'path': 'tests/args.py'}}, 'invalid Python argument role'),
+                                 ({'provenance': dict(args_role['provenance'], commit=[A])}, 'invalid Python argument role'),
                                  ({'input_revision': 'HEAD'}, 'full commit revision'),
                                  ({'command': ['python3', '-B', 'tests/args.py', 'label', 'true']}, 'unsupported Python argument role'),
                                  ({'command': ['python3', 'tests/args.py']}, 'unsupported Python argument role'),
