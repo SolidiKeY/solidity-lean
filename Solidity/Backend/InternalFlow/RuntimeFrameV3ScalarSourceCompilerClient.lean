@@ -1,3 +1,4 @@
+import Solidity.Backend.CompilerEndpoint
 import Solidity.Backend.InternalFlow.RuntimeFrameV3ScalarSourceCompiler
 import Solidity.Backend.InternalFlow.RuntimeFrameV3ScalarReentryControls
 
@@ -79,3 +80,43 @@ theorem native_default_returned : InterfaceV1.Returned (selected recDepth).plan 
  ⟨ScalarReentry.Endpoint.resultState,List.prefix_refl _⟩ := returned recDepth (by decide)
 
 end Solidity.Backend.InternalFlow.RuntimeFrame.ScalarSourceCompiler.Client
+
+/-! Legacy owners: `Client.returned`, Controls `bad_target`/`exhausted_boundary`.
+The b1 R1 tests below keep these executions outside accepted coverage (H949). -/
+namespace Solidity.Backend.InternalFlow.RuntimeFrame.ScalarSourceCompiler.Controls
+open Evm Evm.Memory ScalarRecursiveSource
+open DisjointScalarReturn.Client (Γ F caller before reference)
+
+/-- R1 of b1 refuses this scalar fixture at every depth; local selector
+acceptance remains a separate claim. -/
+theorem endpoint_refused (depth : Nat) :
+ Evm.Compiler.compile 1 F (.cons (Client.input depth) .nil)=none := rfl
+
+/-- A successful local selector and R1 of the public endpoint coexist. -/
+theorem selected_but_endpoint_refused (depth : Nat) :
+ compile 1 5 16 9 8 F (Client.input depth)=some (Client.selected depth) ∧
+ Evm.Compiler.compile 1 F (.cons (Client.input depth) .nil)=none :=
+ ⟨Client.root depth, endpoint_refused depth⟩
+
+example : ∃ out, (Client.input 4).run ScalarContinuation.final=.ok out ∧
+ Evm.Compiler.compile 1 F (.cons (Client.input 4) .nil)=none :=
+ ⟨_,Client.actual_source 4 (by decide),(selected_but_endpoint_refused 4).2⟩
+
+/-- Recognition does not claim that an exhausted source quotation is a full
+source-to-target failure correspondence. The actual image is index-independent. -/
+theorem exhausted_boundary : (Client.input 0).run ScalarContinuation.final=.error .exhausted ∧
+ run (Client.selected 0).plan.code ScalarContinuation.target=.ok ScalarReentry.Endpoint.machine 0 := by
+ constructor
+ · simpa only [if_neg (show ¬(3:Nat)<0 from by decide)] using ScalarReentry.source 0
+ · rw [Client.same_image 0 4]
+   exact Client.target
+
+
+-- H949: the exhausted legacy quotation remains outside b1 accepted coverage.
+example :
+ ((Client.input 0).run ScalarContinuation.final=.error .exhausted ∧
+  run (Client.selected 0).plan.code ScalarContinuation.target=.ok ScalarReentry.Endpoint.machine 0) ∧
+ Evm.Compiler.compile 1 F (.cons (Client.input 0) .nil)=none :=
+ ⟨exhausted_boundary,endpoint_refused 0⟩
+
+end Solidity.Backend.InternalFlow.RuntimeFrame.ScalarSourceCompiler.Controls
