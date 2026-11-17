@@ -82,6 +82,147 @@ def artifacts():
     return out
 
 
+def lake_cache_dirs(top=None):
+    """The cache directories Lake itself reports: `lake env` exports the cache it uses
+    (LAKE_CACHE_DIR, or the artifact cache of this workspace), so a fetch into a cache none of
+    the fixed guesses names is still found (H1071: the coordinator host fetched four Evm modules
+    into such a cache). The workspace-local `.lake/cache` is included too."""
+    top = top or _top()
+    out = []
+    if top is not None: out.append(top / ".lake/cache")
+    try:
+        r = subprocess.run(["lake", "env", "env"], cwd=top, capture_output=True, text=True, timeout=60)
+    except Exception: return out  # a probe: no Lake or an odd host leaves the fixed guesses
+    if getattr(r, "returncode", 1) or not isinstance(getattr(r, "stdout", None), str): return out
+    for line in r.stdout.splitlines():
+        k, _, v = line.partition("=")
+        if v and k.startswith("LAKE") and "CACHE" in k:
+            out.append(pathlib.Path(v))
+            if k != "LAKE_CACHE_DIR": out.append(pathlib.Path(v).parent)
+    return out
+
+
+def _top():
+    try: return root()
+    except Exception: return None
+
+
+def hash_file_hashes(stem):
+    """The artifact hashes Lake recorded next to a module's build path (`X.olean.hash`,
+    `X.hash`): a fetched module can have these without a trace naming its outputs."""
+    out = []
+    for f in (stem.parent / (stem.name + ".olean.hash"), stem.parent / (stem.name + ".hash")):
+        try: t = f.read_text().strip()
+        except OSError: continue
+        if t: out.append(hex_hash(t))
+    return out
+
+
+def hex_hash(h):
+    """Lake's artifact file stem for a hash: traces may store it as a decimal number."""
+    if isinstance(h, int) or (isinstance(h, str) and h.isdigit() and len(h) != 16):
+        return "%016x" % int(h)
+    return str(h).split(".", 1)[0]
+
+
+def import_closure(top, modules):
+    """`modules` and every module of this package they import, transitively, read from the
+    `import` lines of the sources under `top` (modules without a source here, such as Lean's
+    own, are left out). Checking only the touched modules let an unlinked transitive import
+    surface as Lean's missing object file instead of a setup error."""
+    seen, todo = set(), list(modules)
+    while todo:
+        m = todo.pop()
+        if m in seen: continue
+        f = top / (m.replace(".", "/") + ".lean")
+        if not f.is_file(): continue
+        seen.add(m)
+        try: text = f.read_text()
+        except OSError: continue
+        todo.extend(header_imports(text))
+    return seen
+
+
+def header_imports(text):
+    """The modules a Lean file's header imports: comments (`--` and nested `/- -/`, doc
+    comments included) are skipped, `module`/`prelude` and `public`/`meta` prefixes and `all`
+    are allowed, and the header ends at the first other token."""
+    out, i, n, words = [], 0, len(text), []
+    while i < n:  # tokenize header, dropping comments
+        if text.startswith("--", i):
+            j = text.find("\n", i); i = n if j < 0 else j
+        elif text.startswith("/-", i):
+            depth, i = 1, i + 2
+            while i < n and depth:
+                if text.startswith("/-", i): depth += 1; i += 2
+                elif text.startswith("-/", i): depth -= 1; i += 2
+                else: i += 1
+        elif text[i].isspace(): i += 1
+        else:
+            j = i
+            while j < n and not text[j].isspace() and not text.startswith("--", j) and not text.startswith("/-", j): j += 1
+            words.append(text[i:j]); i = j
+            if len(words) > 1 and words[-2] not in ("import", "public", "meta", "all", "module", "prelude") \
+                    and words[-1] not in ("import", "public", "meta"):
+                break
+    k = 0
+    while k < len(words):
+        w = words[k]
+        if w in ("module", "prelude", "public", "meta", "all"): k += 1; continue
+        if w == "import" and k + 1 < len(words):
+            m = words[k + 1]
+            if m == "all" and k + 2 < len(words): m = words[k + 2]; k += 1
+            out.append(m); k += 2; continue
+        break
+    return out
+
+
+def trace_hashes(o):
+    """Every artifact hash in a trace's `outputs`: a string, a list, or a dict of them, with
+    any `.olean`-style extension dropped (Lake versions differ in the shape)."""
+    if isinstance(o, str): return [o.split(".", 1)[0]]
+    if isinstance(o, int) and not isinstance(o, bool): return [hex_hash(o)]
+    if isinstance(o, dict): o = list(o.values())
+    if isinstance(o, list): return [h for x in o for h in trace_hashes(x)]
+    return []
+
+
+def _link_pass(build, lib, arts, done):
+    """Link into `lib` every module's olean found via its trace or `.hash` file in `arts`, or
+    its .lake/build file; returns the links made and the modules with an olean."""
+    done = set(done)
+    names = defaultdict(list)
+    for art in arts:
+        for n in os.listdir(art): names[n.split(".", 1)[0]].append((art, n))
+    linked = 0
+    marks = list(build.rglob("*.trace")) + list(build.rglob("*.hash"))
+    for t in marks:
+        stem = t.with_suffix("")
+        if stem.suffix in (".olean", ".ilean", ".c"): stem = stem.with_suffix("")
+        rel = stem.relative_to(build)
+        if ".".join(rel.parts) in done: continue
+        try:
+            outs = json.loads(t.read_text()).get("outputs", {})
+            o = outs.get("o", outs) if isinstance(outs, dict) else outs
+        except (OSError, ValueError, AttributeError): o = None
+        srcs, exts = [], set()
+        for h in trace_hashes(o) + hash_file_hashes(stem):
+            for art, n in names.get(h, []):
+                ext = n.split(".", 1)[1]
+                if ext.startswith("olean") and ext not in exts and (art / n).is_file():
+                    srcs.append((art / n, ext)); exts.add(ext)
+        if "olean" not in exts:
+            srcs += [(p, p.name[len(stem.name) + 1:]) for p in stem.parent.glob(stem.name + ".olean*")
+                     if p.is_file() and p.name[len(stem.name) + 1:] not in exts]
+        for src, ext in srcs:
+            dst = lib / rel.parent / f"{stem.name}.{ext}"
+            dst.parent.mkdir(parents=True, exist_ok=True)
+            if os.path.lexists(dst): continue
+            os.symlink(src, dst); linked += 1
+        if any(e == "olean" for _, e in srcs): done.add(".".join(rel.parts))
+    return linked, done
+
+
 def link_build(top, lib, need=()):
     """A LEAN_PATH directory of the oleans the traces name. With enableArtifactCache a fetched
     module's olean is only in Lake's cache, and a stale .lake/build olean can outlive a later
@@ -92,31 +233,20 @@ def link_build(top, lib, need=()):
     by Lean as a missing object file."""
     build = top / ".lake/build/lib/lean"
     if not build.is_dir(): raise SetupError(f"{build}: no build (run lake build first)")
-    arts = artifacts() or []
-    names = defaultdict(list)
-    for art in arts:
-        for n in os.listdir(art): names[n.split(".", 1)[0]].append((art, n))
-    linked, done = 0, set()
-    for t in build.rglob("*.trace"):
-        stem = t.with_suffix(""); rel = stem.relative_to(build)
-        try: o = json.loads(t.read_text()).get("outputs", {}).get("o")
-        except (OSError, ValueError, AttributeError): o = None
-        srcs, exts = [], set()
-        for h in (o if isinstance(o, list) else [o] if o else []):
-            for art, n in names.get(str(h), []):
-                ext = n.split(".", 1)[1]
-                if ext.startswith("olean") and ext not in exts and (art / n).is_file():
-                    srcs.append((art / n, ext)); exts.add(ext)
-        if "olean" not in exts:
-            srcs += [(p, p.name[len(stem.name) + 1:]) for p in stem.parent.glob(stem.name + ".olean*")
-                     if p.is_file() and p.name[len(stem.name) + 1:] not in exts]
-        for src, ext in srcs:
-            dst = lib / rel.parent / f"{stem.name}.{ext}"
-            dst.parent.mkdir(parents=True, exist_ok=True)
-            os.symlink(src, dst); linked += 1
-        if any(e == "olean" for _, e in srcs): done.add(".".join(rel.parts))
+    arts = list(artifacts() or [])
+    linked, done = _link_pass(build, lib, arts, set())
+    need_all = sorted(import_closure(top, need) | set(need)) if need else []
+    if any(m not in done for m in need_all):
+        extra = []  # ask Lake where it fetched (H1071), only when the fixed guesses fall short
+        for c in lake_cache_dirs(top):
+            a = (c / "artifacts").resolve()
+            if a.is_dir() and a not in arts and a not in extra: extra.append(a)
+        if extra:
+            arts += extra
+            more, done = _link_pass(build, lib, arts, done)
+            linked += more
     if not linked: raise SetupError(f"{build}: no oleans found")
-    missing = sorted(set(need) - done)
+    missing = [m for m in need_all if m not in done]
     if missing:
         raise SetupError("no olean for %s in %s or caches %s (set LAKE_CACHE_DIR to Lake's cache)"
                          % (", ".join(missing), build, [str(a) for a in arts] or "none found"))
