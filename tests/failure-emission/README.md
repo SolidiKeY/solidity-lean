@@ -21,7 +21,9 @@ RETURN/REVERT/stack-overflow separately, every after marker and the before marke
 retained stack value and maximum intermediate height. Finite vectors are
 emission agreement, not generic ABI coverage or a kernel bridge theorem.
 
-osaka-report.json records exact results and dependency/input/runner hashes.
+The [archived historical Osaka replay report](https://github.com/SolidiKeY/solidity-lean-coord/blob/0689f6effcd257eaa56684bb47dbd81811c7ed7e/evidence/plan-x1e-classify-rest-1116/x1e-classify-rest/tests/failure-emission/osaka-report.json) records exact results and dependency/input/runner hashes.
+Its original bytes are also recoverable with
+`git show 24f0937d7e61cbc8f9ee02d6c7fe235829a51c0b:tests/failure-emission/osaka-report.json`.
 provenance.json pins source files, actual toolchain and source parent. The owning
 document is docs/feature-work/backend-failure-emission.md. The original worker
 VM evidence and resource runner are saved at
