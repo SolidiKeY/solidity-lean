@@ -2116,6 +2116,12 @@ def module_entry_schema_controls():
             try: inventory(repo,invalid)
             except ValueError: pass
             else: raise AssertionError('unsupported entered module claim accepted: '+key)
+        # A reviewed pin verifies only through its commit, absent from this history-less repository.
+        for pin in ('42027e7c42dac3912c1f8ef468a6d99bddb8075172c545b6a587692b039cff32','74a8ac05edadf4a4a1cf901134a8c23b24a844284ee8fe2a5f4e6fba274d251c'):
+            invalid=copy.deepcopy(catalog);invalid['module_entries'][0]['collector_sha256']=pin
+            try: inventory(repo,invalid)
+            except ValueError as error: assert 'UNVERIFIABLE reviewed module collector source' in str(error), str(error)
+            else: raise AssertionError('unverifiable reviewed collector pin accepted')
         for malformed in (None, 'bad'):
             invalid=copy.deepcopy(catalog);invalid['module_entries'][0]['frames']=[malformed]
             try: inventory(repo,invalid)
