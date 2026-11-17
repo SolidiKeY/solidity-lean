@@ -321,6 +321,9 @@
     ],
     "persistent_module_entries": [
       {"collector_sha256":"f01d503a7acdfd5e19ae3ee71d6b128deb0bfcc979569e2adf45fe5976115dd7","frames":[{"blob":"34487bdd6a4f7e1c0c55a0427baded2953ab2131","line":22,"path":"tests/h62/item1/trust-fragments/test_collector.py"}],"input_revision":"27ae97235a41f609e147d2307a8d162f4957cca6","module_code_sha256":"d15e174343d66ba46c7c59f1671e01c97a2aab825cb88d4fd21e906fbddbad7c","module_frame_line":0,"operation":"entered measured Python module; no fixture consumption credit","python":[3,12,14],"runner":"validated:tests/h62/item1/trust-fragments/test_collector.py","target":"scripts/h62/item1/trust-fragments/lane_history.py","target_blob":"2576d40751bd54b1a5f1e6c25152ec7cbdc61c42"}
+    ],
+    "static_routes": [
+      {"form":"node-import","frames":[{"blob":"5642dcbd759b3c1dc92d1152f5e306756ea18b43","line":6,"path":"tests/h62/item3/g52-differential/engine_rejection_evidence.test.mjs"}],"purpose":"Existing synthetic validator-regression test imports this exact module. Runner and target match its recorded passing snapshot; source dependency only. No current pass, private corpus, native engine, fixture use, semantic conformance or proof credit.","runner":"committed:tests/h62/item3/g52-differential/engine_rejection_evidence.test.mjs","target":"scripts/h62/item3/g52-differential/engine_rejection_evidence.mjs","target_blob":"40ab45793d03c3c0e606557a142c5f0f7795cfc6"}
     ]
   }
 }
