@@ -8,7 +8,7 @@ namespace Solidity.Goals
 info: open Solidity.Goals.intrinsicStorageAccounting ← Solidity.Semantics.IntrinsicSession.storage_accounting_correct plan is0-intrinsic-session
 -/
 #guard_msgs in
--- Concrete storage/frame accounting is specified; session implementation remains OPEN (H720).
+-- Concrete storage/frame accounting is specified; the session implementation remains open.
 #roadmap_goal intrinsicStorageAccounting
 
 /-! Layout controls for the storage prerequisite: ideal slot terms (`Storage.Loc`,
@@ -77,9 +77,11 @@ frame observers of the landed `IntrinsicStorage.Preimages` modules. -/
 namespace IntrinsicSession
 open Solidity.Roadmap Solidity.Storage Solidity.Semantics Solidity.Semantics.IntrinsicStorage
 
-/-- No empty or toy accounting: every slot preimage of an actual typed read in
-an account of a typed world is among the world's stored keys, and so (by
-`Laws.stored_hashed`) among the slot preimages of a run resumed there. -/
+/-- Accounting is not empty: every slot preimage of an actual typed read in an
+account of a typed world is among the world's stored keys, and so (by
+`Laws.stored_hashed`) among the slot preimages of a run resumed there. (The
+stored keys also cover every mapping default, so this accounting is not small
+either: see the goal module's note on `Forward`.) -/
 example (F : Fixed) (I : IntrinsicSpec) (V : View I) (laws : Laws F I V)
     (storage : StorageLaws F I V) (t : TypedWorld) (a : ContractWorld.Address)
     (k : Fin t.code.contracts.length) (st : Solidity.Storage (t.code.catalog k))

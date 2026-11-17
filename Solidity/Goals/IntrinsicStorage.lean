@@ -5,7 +5,7 @@ import Solidity.Semantics.IntrinsicStorage.Preimages.Run
 import Solidity.Semantics.IntrinsicStorage.Preimages.Calls
 
 /-! The concrete storage and preimage strengthening of the intrinsic-session goal
-(`is0-intrinsic-session`), one module per goal (H666).
+(`is0-intrinsic-session`), in its own module rather than the shared plan file.
 
 `intrinsicStorageAccounting` keeps `IntrinsicSession.Laws` unchanged and adds
 the storage and preimage accounting it leaves open:
@@ -13,7 +13,8 @@ the storage and preimage accounting it leaves open:
 * the slot preimages a typed world stores are the concrete ones,
   `IntrinsicStorage.stored` of its contract world: every account, shadows and
   every mapping default, a mathematical list never enumerated. `View` is
-  read only, so `View.stored` is pinned by a conjunct instead of a definition;
+  read only, so `View.stored` is pinned by a conjunct instead of a definition.
+  This pins `Forward` (see *What this pins about `Forward`* below);
 * a completed transaction of a determined body (the premises of `Laws.transacts`)
   accounts for the inputs its actual typed callee frame hashes:
   `IntrinsicStorage.Frame.call` at some fuel gives the actual frame result together
@@ -24,9 +25,30 @@ the storage and preimage accounting it leaves open:
 Ideal slot terms (`Storage.Loc`, `Pre`) and concrete preimages (`encoded`, byte
 lists) stay separate: the laws speak of encoded inputs only, and nothing assumes
 keccak injectivity, a correspondence between terms and hashes, a toy store or a
-chosen trace. Whole-session hash equality and the reachability of interacting
-frames from the session strategy and history stay the session implementation's
-obligation (H720). -/
+chosen trace. Two things stay the session implementation's obligation, not this
+goal's: that the preimages a whole session hashes equal those of its frames, and
+that the frames of bodies which call out are reached from the session strategy
+and history.
+
+*What this pins about `Forward`.* `IntrinsicStorage.stored` follows the
+`fallback` edge of `IntrinsicStorage.Child` for every key a mapping does not
+hold explicitly, so for a typed world with an account whose storage holds a
+mapping it contains one encoded `Pre.entry` per value of the key type, kept
+distinct by `encoded_inj`: `2 ^ 160` for `address` keys, `2 ^ 256` for `uint256`
+or `bytes32` keys, more than `2 ^ 128` for any key type wider than 128 bits. Call
+such a world wide-keyed. Through `Laws.stored_hashed`, `slotHashed_sub` and
+`listed_resumes`, all of them are in `I.hashed` of every run resumed at a
+wide-keyed world, and of every listed world whose typed world is one, at every
+bound. `IntrinsicSpec.forward_iff` reads
+`Forward` as `distinctCount (hashed p e r) < hashBound = 2 ^ 128`, so `Forward`
+is false at every bound for those programs, and a `Forward`-premised refinement
+(`Cert.need_ok`, `RefinesUnder`) of them holds vacuously. `stored_hashed` does
+not constrain runs started at `View.initial`. The parent
+goal left `View.stored` unpinned so that it pinned `Forward` only by definition;
+this goal deliberately pins it to the full default-covering storage of the plan
+(no finite-support or zero-default assumption). A strengthening that keeps
+`Forward` meaningful for resumed runs would pin `View.stored` to the inputs
+explicitly stored or reached instead. -/
 
 namespace Solidity.Goals
 
@@ -52,14 +74,17 @@ def FrameInputs (I : IntrinsicSpec) (p : I.lang.Prog) (en : I.lang.Env) (r : I.l
 structure StorageLaws (F : Fixed) (I : IntrinsicSpec) (V : View I) : Prop where
   /-- Concrete account-function storage, including shadows and all mapping
   defaults. The finite list is a mathematical specification, never an enumerated
-  test domain. Full default coverage can exceed `Forward`'s unchanged hash bound;
-  no finite-support or zero-default assumption is imposed. -/
+  test domain. No finite-support or zero-default assumption is imposed. Default
+  coverage exceeds `Forward`'s hash bound `2 ^ 128` once the world stores a
+  mapping with a key type wider than 128 bits, so `Forward` fails for runs
+  resumed there (module docstring). -/
   stored : ∀ t : TypedWorld, V.stored t = Solidity.Semantics.IntrinsicStorage.stored t.world
   /-- A completed determined transaction accounts for a completed observation
   of its actual typed callee frame, including inputs before a caught or uncaught
   revert. Fuel is witnessed together with equality to the actual frame result;
-  an insufficient prefix cannot stand in for a completed frame. H720 defers
-  whole-session equality and interacting-frame reachability to is0. -/
+  an insufficient prefix cannot stand in for a completed frame. Whole-session
+  equality and the reachability of interacting frames are left to the session
+  implementation. -/
   call_inputs : ∀ x en h n (code : Code) (cw : ContractWorld.World code.catalog)
       (q : Request) (k : Fin code.contracts.length) (st : Storage (code.catalog k))
       (entry : ContractWorld.Entry (code.catalog k) Bytes),
@@ -115,7 +140,8 @@ end IntrinsicSession
 satisfying `IntrinsicSession.Laws` whose stored slot preimages are the concrete
 ones of its typed worlds and whose completed determined frames account for the
 inputs their actual typed observation hashes (`IntrinsicSession.StorageLaws`).
-Whole-session hash equality remains deferred to the session implementation (H720). -/
+Whole-session hash equality is left to the session implementation, and `Forward`
+fails for runs resumed at worlds holding a wide-keyed mapping (module docstring). -/
 @[goal Solidity.Semantics.IntrinsicSession.storage_accounting_correct "is0-intrinsic-session"]
 def intrinsicStorageAccounting : Prop :=
   ∀ F : Solidity.Roadmap.Fixed, ∃ (I : Solidity.Roadmap.IntrinsicSpec)
