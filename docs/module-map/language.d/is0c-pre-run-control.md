@@ -1,0 +1,2 @@
+| `Solidity/Semantics/IntrinsicStorage/Preimages/Run/Control.lean` | Observed control-flow steps (conditionals, internal calls, receiver operations and pushes, `try`/catch data, loops, blocks, sequencing, revert data); each result is the actual typed run result. |
+| `Solidity/Semantics/IntrinsicStorage/Preimages/Run/Control/Checks.lean` | Sequencing regressions for the observed control-flow steps: continuations see the actual typed result; failed steps keep their observed inputs. |
