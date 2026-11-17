@@ -234,6 +234,8 @@ commands; it never enters the core import graph.
 | `Hash/CollisionBridgeControls.lean` | Concrete admitted, compiled quiet success using HashPremise.nil. |
 | `Hash/CompilerCorrect.lean` | Operational producers and encoding facts for the frozen E4A contract. |
 | `Hash/CompilerCorrect/Prefix.lean` | Finite-prefix transport and divergence-safe composition for the frozen E4A contract. |
+| `Syntax/Elab/Measure.lean` | The elaborator knot's decrease vocabulary: `ElabMeasure` (a measure per recursive field), `cut` (a record below a level), the guarded arm shape `Stable`, `stmtsArm_stable`. |
+| `Examples/ElabTotal/Measure.lean` | Clause 2 of `elabKernelTotal` from the arms' guarded decrease (`elabKernelInduction_of_stable`); the unguarded cycle `elabStmtP → elabStmt1 → elabStmtsP` (`rel_cycle_forT_blk`; one decrease proved from `Stable`, two `#guard`ed). |
 | `Solidity/Semantics/Storage/TypeLayout.lean` | AST-only full-word sizes, member offsets and bounds; preserves the established `Solidity.Evm` definitions and equation lemmas. |
 | `Solidity/Semantics/IntrinsicStorage/Layout.lean` | Typed full-word locations for dependent storage paths, nested hash ancestry, bounded keys and lossless byte encoding of preimages; reuses the shared type layout. |
 | `Solidity/Semantics/IntrinsicStorage/Preimages/Calls.lean` | The observed run with fuel of typed programs (`Observe.program`; its result is the actual fuelled typed run) and the completed typed-frame observers `Frame.call` and `Frame.create`: each finite observation approximates the actual frame result and keeps the inputs it hashed, also before a caught or uncaught revert. |
