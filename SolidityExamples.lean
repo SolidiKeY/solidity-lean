@@ -157,6 +157,7 @@ import Solidity.Examples.Goals.Shrink
 import Solidity.Examples.Goals.Taclets
 import Solidity.Examples.Goals.Total
 import Solidity.Examples.InputReduction
+import Solidity.Examples.IntrinsicSession.Laws.Boundary
 import Solidity.Examples.IntrinsicSession.Laws.Common
 import Solidity.Examples.IntrinsicSession.Laws.Frames
 import Solidity.Examples.IntrinsicSession.Laws.Structure
