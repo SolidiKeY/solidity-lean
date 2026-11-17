@@ -97,6 +97,15 @@ example (c : Val C Γ .bool) (body : Step C Γ Γ) (d : List (RevPart C Γ)) :
     (revertData d σ >>= f).result = (TRun.revertData d σ >>= fun o => (f o).result) := by
   simp only [Audit.result_bind, revertData_result, and_true]; rfl
 
+-- A receiver operation alone, and the catch bytes a reverting `try` hands its clause.
+example {ρ ps Γf : Ctx} {T : Ty} (op : ReceiverOp C Γ T) (b : SPath C Γ (.array T))
+    (ec : ExtCall C Γ) (rets : Binders ρ) (sargs : Args C Γ ps) (hs : Ext (ρ ++ ps) Γf)
+    (sbody : Step C (ρ ++ ps) Γf) (self : Bool) (g : List UInt8 → Audit β) :
+    (receiverOp op b σ >>= f).result = (TRun.receiverOp op b σ >>= fun o => (f o).result) ∧
+    (catchBytes ec rets sargs hs sbody self σ >>= g).result =
+      (TRun.catchBytes ec rets sargs hs (project sbody) self σ >>= fun d => (g d).result) := by
+  simp only [Audit.result_bind, receiverOp_result, catchBytes_result, and_self]
+
 end Continuation
 
 -- Literal revert bytes are written in order before the catch body runs.
