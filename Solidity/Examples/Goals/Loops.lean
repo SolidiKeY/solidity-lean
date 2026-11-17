@@ -80,7 +80,10 @@ end Contract
 /-! ### The decoder on the e1 sample
 
 The decoder alone, from the raw input of the actual `while (i = a) break;`
-probe, yields the Source statement the e1 endpoint is proved against. -/
+probe as a top-level request, yields the Source statement the e1 endpoint is
+proved against, at the decoder's canonical environment. The right-hand sides
+are e1's hand-written typing derivations. Only Boolean locals, empty loop
+specifications and the empty contract are exercised. -/
 
 section Decoder
 
@@ -128,8 +131,26 @@ example : Decode.decode (sampleRequest [.assign (.name "i") (.name "z")]) = none
 example : Decode.decode (sampleRequest [.brk]) = none := rfl
 example : Decode.decode (sampleRequest [.eval []]) = none := rfl
 
-/-- The concrete admission excludes nothing, and at it the contract is the
-five listed obligations. -/
+/-- A primitive state variable resolves in the canonical unit; a narrow one
+is a gap. -/
+example : (Decode.decode { sampleRequest [.assign (.name "s") (.name "a")] with
+    contract := { vars := [("s", .prim .bool)] } }).isSome = true := rfl
+example : Decode.decode { sampleRequest [.assign (.name "s") (.num 1)] with
+    contract := { vars := [("s", .prim .uint)], widths := [("s", 8)] } } = none := rfl
+
+/-- The decoder reads only plain requests: a callee body, return slots or an
+`unchecked` scope is a gap, not a guess. -/
+example : Decode.decode { sampleRequest RawProbe.input with
+    callee := some ⟨{ params := [], body := RawProbe.input }, [], false, false, [], [], 0⟩ } =
+    none := rfl
+example : Decode.decode { sampleRequest RawProbe.input with
+    input := { (sampleRequest RawProbe.input).input with returnSlots := some [] } } = none := rfl
+example : Decode.decode { sampleRequest RawProbe.input with
+    input := { (sampleRequest RawProbe.input).input with
+      scope := { RawProbe.scope with unchecked := true } } } = none := rfl
+
+/-- The concrete admission is every request whose whole pipeline succeeds, and
+at it the contract is the five listed obligations. -/
 example {source target relates allocations} :
     FullDomain (loopBoundary source target relates allocations) := loopBoundary_fullDomain
 

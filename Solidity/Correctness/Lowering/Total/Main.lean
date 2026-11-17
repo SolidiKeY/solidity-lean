@@ -29,13 +29,22 @@ theorem `lowerLoopsFamily_correct` (e1). Both hold at every boundary, so:
 The concrete boundary is begun below, not finished:
 
 * `Decode.decode` is the raw-to-Source decoder (stage 1): canonical Source
-  spelling, then the existing Source inference and resolution. It covers
-  primitive full-width locals and state variables, expressions, simple
-  statements, branches, blocks, `unchecked` and the loops; every other input
-  decodes to `none`, which is a coverage gap and never an exclusion.
-* `loopEntry` admits every request whose pipeline succeeds, and
-  `loopAssociated` is the decoder's graph. `loopBoundary_fullDomain` and
-  `loopResidual_iff` state what is left once these two are fixed.
+  spelling, then the existing Source inference and resolution. It is defined
+  on top-level requests outside `unchecked`/`checked` scopes, over primitive
+  full-width locals and state variables: expressions, simple statements,
+  branches, blocks, `unchecked` and the loops. Elsewhere it is `none`, a
+  coverage gap. Its spellings are choices; none is proved to agree with the
+  model elaborator.
+* `loopEntry` admits every request whose lowering, elaboration and placement
+  all succeed. A request whose lowering succeeds but whose elaboration or
+  placement fails is not admitted: at top level it still has `LowersTo`
+  (`Request.lowers`), as a callee nothing is stated of it.
+* `loopAssociated` is the decoder's graph. So the `decoder` field and
+  `Faithful` hold by definition and certify nothing about the decoder: its
+  faithfulness is not checked against an independent association. It rests on
+  review and on the `pipeline` field, once `relates` and the policies exist.
+* `loopBoundary_fullDomain` and `loopResidual_iff` state what is left once
+  admission and association are fixed.
 * The observation policies, `relates` and the allocation trace are arguments
   of `loopBoundary`: no concrete one is chosen here.
 
@@ -44,8 +53,9 @@ take as hypothesis a successful run of `elabStmtsP` and, for a callee, of
 `calleeBody`, which runs `renameStmts`, `lowerReturns` and `wrapMods`. All four
 are `partial`, so opaque to the kernel: the hypothesis says nothing about the
 elaborated program, and no request's `Request.Succeeds` can be derived or
-refuted. The decoder's coverage obligation is false as soon as one successful
-request uses a construct in a listed gap. `Solidity.Goals.lowerLoopsCorrect`
+refuted. For the same reason the decoder's coverage obligation can be neither
+proved nor refuted today; once the elaborator is total it fails on the first
+successful request in a listed gap. `Solidity.Goals.lowerLoopsCorrect`
 stays unstated until the boundary is complete.
 -/
 namespace Solidity.Correctness.Lowering.Total
@@ -179,7 +189,8 @@ body pass) and then intrinsic elaboration and placement. -/
 def Request.Succeeds (r : Request) : Prop :=
   ∃ o after parts program, r.pipeline o after parts program
 
-/-- No input exclusion: every request whose pipeline succeeds is admitted. -/
+/-- Every request whose whole pipeline succeeds is admitted. A lowering whose
+elaboration or placement then fails is outside this statement. -/
 def FullDomain (b : SemanticBoundary) : Prop :=
   ∀ r, r.Succeeds → b.reference.entry r
 
@@ -226,15 +237,20 @@ theorem Residual.of_empty (b : SemanticBoundary) (decode : Request → Option So
 
 /-! ## The concrete raw-to-Source decoder (stage 1)
 
-`decode` reads a request's raw input as Source: the canonical Source spelling
-of the raw statements (`Spelling`), typed by the existing Source inference
+`decode` reads a request's raw input as Source: a chosen Source syntax tree
+for the raw statements (`Spelling`), typed by the existing Source inference
 (`Source.ItemsD.infer`) and resolved by `ItemsD.toR`, in the Source unit whose
 one contract declares the model contract's primitive state variables. Nothing
 is checked against the lowered output: the decoder sees only the request.
 
-Every `none` is a coverage gap, not an exclusion: with admission fixed to every
-successful request (`loopEntry`), a gap on a successful request refutes the
-`total` obligation. The gaps are listed at each definition. -/
+A `none` is a coverage gap, not an exclusion: admission is fixed separately
+(`loopEntry`), so a successful request in a gap leaves the coverage obligation
+of `loopResidual_iff` open. The main gaps are listed at each definition; the
+lists are not exhaustive (a cast written as a call, `msg.sender` used as a
+`uint`, a braced single declaration read unbraced, nested `unchecked`, a `for`
+with several initializers or updates are further ones). Each
+`some` is a chosen spelling; that it agrees with the model's reading of the
+same raw construct is part of the `pipeline` obligation, not shown here. -/
 namespace Decode
 
 open Source (Syn SCtx STy)
@@ -249,7 +265,7 @@ def uintElem : Source.Elem := .int false 256 (by decide)
 def intElem : Source.Elem := .int true 256 (by decide)
 
 /-- Binary operators. The wrapping forms (`addW` …) have no Source operator:
-Source wraps by an enclosing `unchecked` block. Model `>>` is Source `sar`. -/
+Source wraps by an enclosing `unchecked` block. Model `>>` is spelled `sar`. -/
 def binop : BinOp → Option (Syn .expr → Syn .expr → Syn .expr)
   | .add => some (.addSub .add) | .sub => some (.addSub .sub)
   | .mul => some (.mulDivMod .mul) | .div => some (.mulDivMod .div)
@@ -327,7 +343,8 @@ def typeName : RawTy → Option (Syn .typeName)
   | _ => none
 
 /-- Simple statements: a declaration, an assignment, an update, a builtin
-call. `require`, `assert` and `revert()` are calls of the Source builtins. -/
+call. `require`, `assert` and `revert()` are spelled as calls of the Source
+builtins. The modifier hole is a gap: the context is never a modifier's. -/
 def simple : RawStmt → Option (Syn .simple)
   | .assign l r => do pure (.exprStmt (.assign .assign (← expr l) (← expr r)))
   | .decl T x none => (typeName T).map fun T => .declVar (.varDecl T none x) .none
@@ -339,7 +356,6 @@ def simple : RawStmt → Option (Syn .simple)
   | .assert c => (expr c).map fun c =>
       .exprStmt (.call (.ident "assert") (.positional (.cons c .nil)))
   | .revert => some (.exprStmt (.call (.ident "revert") (.positional .nil)))
-  | .hole => some (.exprStmt (.ident "_"))
   | _ => none
 
 /-- A `for` update: one expression statement. -/
@@ -376,7 +392,7 @@ mutual
 /-- Statements in control context `k`. Bodies and branches are read by
 `unbrace`; an empty `else` is read as absent. Loop specifications are
 annotations with no Source syntax and are not read. A lowered `loop` is
-spelled as the `while` it is. Gaps: every statement not listed here or in
+spelled as a `while`. Gaps: every statement not listed here or in
 `simple` (storage and memory declarations, `delete`, pushes, calls as
 statements, tuples, `try`, sends, reverts with data, `eval`, `checked`,
 `assumeFalse`). -/
@@ -411,10 +427,11 @@ def items (k : SCtx) : List RawStmt → Option (Syn (.list (.item k)))
   | s :: rest => do pure (.cons (.stmtItem (← stmt k s)) (← items k rest))
 end
 
-/-- Source type of a model local: a full-width primitive. Narrow locals,
-references and formula locals are gaps. -/
+/-- Source type of a model local: a full-width primitive with no shape rows.
+Narrow locals, locals carrying a shape (the marker of an erased `address`,
+`bytes32`, enum or function type), references and formula locals are gaps. -/
 def localTy : LocalTy → Option STy
-  | .val p 256 _ => some (Source.Agreement.sourceTy p)
+  | .val p 256 [] => some (Source.Agreement.sourceTy p)
   | _ => none
 
 /-- The Source locals of a model context, innermost first, by name. -/
@@ -422,7 +439,9 @@ def locals : ECtx → Option (List (String × STy))
   | [] => some []
   | (x, t) :: Γ => do pure ((x, ← localTy t) :: (← locals Γ))
 
-/-- State variable types: primitive only (references are gaps). -/
+/-- State variable types: primitive only (references are gaps). A model `uint`
+is spelled `uint256` even where the original declared `address` or an enum:
+the model has erased that, and `relates` must absorb it. -/
 def stateTy : Ty → Option (Syn .typeName)
   | .prim .bool => some (.elem .bool)
   | .prim .uint => some (.elem uintElem)
@@ -436,46 +455,52 @@ def stateVars : List (Name × Ty) → Option (Syn (.list (.part false)))
       pure (.cons (.stateVar (← stateTy T) none none none false x .none) (← stateVars rest))
 
 /-- The canonical Source unit of a model contract: one contract with its
-state variables. Functions, enums and the constructor are not declared, so a
-request that calls a function, or whose contract has any of them, is a gap. -/
+state variables. Functions, enums, the constructor, initializers and narrow
+widths are not spelled, so a request that calls a function, or whose contract
+has any of them, is a gap. -/
 def unit (C : Contract) : Option (Syn .unit) :=
-  if C.transientRoots.isEmpty && C.funs.isEmpty && C.enums.isEmpty && C.ctor.isNone then
+  if C.transientRoots.isEmpty && C.funs.isEmpty && C.enums.isEmpty && C.ctor.isNone &&
+      C.widths.isEmpty && C.inits.isEmpty then
     (stateVars C.vars).map fun parts =>
       .unit (.cons (.contract false contractName .none .nil parts) .nil)
   else none
 
-/-- Return types of the enclosing function: a callee's declared primitive
-returns; none at top level. -/
-def returns : Option CalleeRequest → Option (List STy)
-  | none => some []
-  | some c => c.declaration.rets.mapM fun (_, T) =>
-      match T with
-      | .prim p => some (Source.Agreement.sourceTy p)
-      | _ => none
+/-- The request parts the decoder cannot read yet. It reads the contract,
+the raw input and the caller's locals only, so a request whose meaning depends
+on anything else is a gap, never a guess: a callee body (renaming, modifiers,
+constructor initializers, self frame, declared returns), return slots, and a
+scope inside `unchecked`, `checked` or `ignoringOverflow`. -/
+def plain (r : Request) : Bool :=
+  r.callee.isNone && r.input.returnSlots.isNone && !r.input.scope.unchecked &&
+    r.input.scope.overflow.isNone
 
-/-- The Source typing context of a request, with no locals yet. -/
-def context (r : Request) : Option Source.Ctx := do
-  let u ← unit r.contract
-  let rets ← returns r.callee
-  pure { env := u.env, scope := some contractName, locals := [], rets := rets }
+/-- The Source typing context of a request, with no locals yet: the canonical
+unit, inside its contract, in a function that returns nothing. -/
+def context (r : Request) : Option Source.Ctx :=
+  (unit r.contract).map fun u =>
+    { env := u.env, scope := some contractName, locals := [], rets := [] }
 
-/-- **The decoder.** The request's raw input in its canonical Source
-spelling, typed and resolved by the Source front end in the request's own
-context: the callee's locals for a callee body, the caller's otherwise. -/
-def decode (r : Request) : Option SourceProgram := do
-  let C ← context r
-  let L ← locals (r.callee.map (·.locals) |>.getD r.input.before.locals.1)
-  let b ← items .body r.input.raw
-  let ⟨L', d⟩ ← Source.ItemsD.infer C L b
-  pure ⟨C.env, C.rets, C.inModifier, .body, Source.tysOf L, Source.tysOf L', d.toR⟩
+/-- **The decoder (stage 1).** A plain request's raw input in its canonical
+Source spelling, typed and resolved by the Source front end against the
+caller's locals. The result is the decoder's choice of Source program: that it
+means what the model elaborator gives the same raw input is not proved here;
+it is the `pipeline` obligation, once `relates` and the policies are fixed. -/
+def decode (r : Request) : Option SourceProgram :=
+  if plain r then do
+    let C ← context r
+    let L ← locals r.input.before.locals.1
+    let b ← items .body r.input.raw
+    let ⟨L', d⟩ ← Source.ItemsD.infer C L b
+    pure ⟨C.env, C.rets, C.inModifier, .body, Source.tysOf L, Source.tysOf L', d.toR⟩
+  else none
 
 end Decode
 
 /-! ## The concrete boundary, as far as the decoder fixes it
 
-Admission and association are fixed here: every request whose pipeline
-succeeds is admitted (`loopEntry`: no input is excluded), and a request is
-associated with exactly its decoded program. The observation policies, the
+Admission and association are fixed here: every request whose whole pipeline
+succeeds is admitted (`loopEntry`), and a request is associated with exactly
+its decoded program, so the association is no independent check of the decoder. The observation policies, the
 state relation `relates` and the allocation trace are not chosen here: each is
 a separate semantic choice that needs its own decision, so `loopBoundary` takes
 them as arguments and `loopResidual_iff` lists what is then left to prove. -/
@@ -504,14 +529,15 @@ def loopBoundary
       Blk r.contract r.context.ctx → List AllocationScope → Prop) : SemanticBoundary :=
   ⟨loopReference source target, relates, allocations⟩
 
-/-- The boundary excludes no successful request, whatever its other parts. -/
+/-- The boundary admits every request whose whole pipeline succeeds. -/
 theorem loopBoundary_fullDomain {source target relates allocations} :
     FullDomain (loopBoundary source target relates allocations) := fun _ h => h
 
 /-- **What is left at the concrete admission and decoder.** The `decoder`
-field holds by definition. Left: the decoder covers every successful request
-(`covered`); each successful pipeline has a safe allocation trace, is related
-to its decoded program and refines it; and `relates` holds of the e1 families. -/
+field holds by definition and is no evidence for the decoder. Left: the decoder
+is defined on every successful request (not provable for stage 1, which has
+gaps); each successful pipeline has a safe allocation trace, is related to its
+decoded program and refines it; and `relates` holds of the e1 families. -/
 theorem loopResidual_iff {source target relates allocations} :
     Residual (loopBoundary source target relates allocations) Decode.decode ↔
       (∀ r : Request, r.Succeeds → ∃ s, Decode.decode r = some s) ∧
