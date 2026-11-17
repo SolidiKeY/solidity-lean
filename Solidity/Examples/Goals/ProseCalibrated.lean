@@ -7,6 +7,8 @@ info: proved Solidity.Goals.proseCalibratedRatioRuleSound ← Solidity.Docs.pros
 -/
 #guard_msgs in
 #roadmap_goal proseCalibratedRatioRuleSound
+
+example : proseCalibratedRatioRuleSound := Solidity.Docs.prose_calibrated_ratio_rule_sound
 end Solidity.Goals
 
 namespace Solidity.Examples.Goals.ProseCalibrated
