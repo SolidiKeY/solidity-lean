@@ -41,12 +41,12 @@ theorem lookup_absent (es : Entries) (key : RepoPath × Category)
 theorem zero_le (x : Rational) : Rational.zero.le x := by
   simp only [Solidity.Goals.ProseRatio.Ratio.le, Rational.zero, Nat.zero_mul, Nat.zero_le]
 
-/-- The acceptance loop is the universal per-area, per-category fit. -/
-theorem accepts_iff (p : Policy) (t : Tree) : accepts p t = true ↔
-    ∀ a k, enforced a = true →
-      (lookup p.entries (a,k)).fits (numerator p.scope t a k) (denominator p.scope t a) = true := by
+/-- The acceptance loop is the universal per-area, per-category order. -/
+theorem decides : ∀ (p : Policy) (t : Tree), accepts p t = true ↔ Within p t := by
+  intro p t
   constructor
   · intro h a k he
+    apply (exact _ _ _).mp
     by_cases ha : a ∈ areas p t
     · have hk : k ∈ Category.all := by cases k <;> simp [Category.all]
       have hall := (List.all_eq_true.mp h) a ha
@@ -65,14 +65,8 @@ theorem accepts_iff (p : Policy) (t : Tree) : accepts p t = true ↔
     intro a _
     by_cases he : enforced a = true
     · simp only [he, Bool.not_true, Bool.false_or]
-      exact List.all_eq_true.mpr (fun k _ => h a k he)
+      exact List.all_eq_true.mpr (fun k _ => (exact _ _ _).mpr (h a k he))
     · simp only [he, Bool.not_false, Bool.true_or]
-
-theorem decides : ∀ (p : Policy) (t : Tree), accepts p t = true ↔ Within p t := by
-  intro p t
-  rw [accepts_iff]
-  exact ⟨fun h a k he => (exact _ _ _).mp (h a k he),
-    fun h a k he => (exact _ _ _).mpr (h a k he)⟩
 
 theorem rejects : ∀ (p : Policy) (t : Tree) (a : RepoPath) (k : Category), enforced a = true →
     ¬(lookup p.entries (a,k)).Within (numerator p.scope t a k) (denominator p.scope t a) →
@@ -86,7 +80,7 @@ theorem unseen : ∀ (p : Policy) (t : Tree) (a : RepoPath) (k : Category),
     (∀ w, ((a,k),w) ∉ p.entries) → enforced a = true →
     accepts p t = true → numerator p.scope t a k = 0 := by
   intro p t a k hk he h
-  have hf := (accepts_iff p t).mp h a k he
+  have hf := (exact _ _ _).mpr ((decides p t).mp h a k he)
   rw [lookup_absent _ _ hk] at hf
   simp only [Allowance.fits, Allowance.zero, Rational.zero, Nat.mul_one, Nat.zero_mul,
     Nat.add_zero, decide_eq_true_eq] at hf
@@ -161,11 +155,11 @@ theorem tighten : ∀ (p q : Policy) (t : Tree), q.scope = p.scope →
     (∀ key, (lookup q.entries key).le (lookup p.entries key)) →
     accepts q t = true → accepts p t = true := by
   intro p q t hs hle h
-  apply (accepts_iff p t).mpr
+  apply (decides p t).mpr
   intro a k he
-  have hq := (accepts_iff q t).mp h a k he
+  have hq := (exact _ _ _).mpr ((decides q t).mp h a k he)
   rw [hs] at hq
-  exact fits_mono _ _ (hle (a, k)) _ _ hq
+  exact (exact _ _ _).mp (fits_mono _ _ (hle (a, k)) _ _ hq)
 
 theorem noReplacement : ∀ (p : Policy) (q : Entries) (t : Tree),
     accepts (p.shrink q) t = true → accepts p t = true := fun p q t =>
