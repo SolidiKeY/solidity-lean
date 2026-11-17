@@ -8,11 +8,11 @@ Local association for the guards the elaborator generates beside the
 unsigned `/` divisor of `Syntax/Elab/Panic.lean`: the remaining divisors of
 `Checked.divPG`, the modulus of `addmod`/`mulmod`, the `assert` arm of
 `elabStmt1With`, and the `0x11` range guards of `Checked.range`,
-`Checked.negRange` and `Checked.bumpRange`. Each family gives the guard
+`Checked.negRange` and `Checked.bumpRange`, except signed `*` (`rangeI .mul`,
+not covered here). Each family gives the guard
 list's equation, the origin of its `Panic/Origins` producer at the evaluated
 operands, the unguarded V1 failure, and the emitted panic bytes. Operand
-reads are explicit hypotheses; no whole-program instrumentation equivalence
-is claimed.
+reads are explicit hypotheses; no whole-program instrumentation claim.
 -/
 
 namespace Solidity.Correctness.Panic
@@ -179,8 +179,8 @@ theorem assert_source (σ : State C Γ) (c : Val C Γ .bool)
 
 /-! ## Range guards (`0x11`)
 
-`Checked.range` at `+`, `-` (both types) and signed `/`, and
-`Checked.negRange`. `bumpRange` (`x++`, `x--`) is `rangeU`/`rangeI` at the
+`Checked.range` at `+`, `-` (both types), unsigned `*` and signed `/`, and
+`Checked.negRange`; not signed `*` (`rangeI .mul`), which has no theorem here. `bumpRange` (`x++`, `x--`) is `rangeU`/`rangeI` at the
 literal `1`, and the compound and push forms apply `range` to the target's
 value or the default `0`: they are instances of these theorems. -/
 
