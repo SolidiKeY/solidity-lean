@@ -145,6 +145,8 @@ import Solidity.Examples.Goals.Loops
 import Solidity.Examples.Goals.LoopsProducer
 import Solidity.Examples.Goals.OpcodeEval
 import Solidity.Examples.Goals.Panic
+import Solidity.Examples.Goals.PanicProvenance
+import Solidity.Examples.Goals.PanicRun
 import Solidity.Examples.Goals.Plan
 import Solidity.Examples.Goals.ProseCalibrated
 import Solidity.Examples.Goals.Shrink
@@ -168,6 +170,7 @@ import Solidity.Examples.MemoryNegativeDecision
 import Solidity.Examples.MemoryStructWitness
 import Solidity.Examples.Notation
 import Solidity.Examples.Panic.Eval
+import Solidity.Examples.Panic.GuardsArith
 import Solidity.Examples.Panic.Origins
 import Solidity.Examples.Panic.ProvenanceEval
 import Solidity.Examples.Panic.Result
