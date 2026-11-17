@@ -6,9 +6,22 @@
 # list never needs editing here. Run after `lake build Solidity SolidityExamples`: a slow
 # module's budget then covers only itself (and any not-yet-built import outside those).
 #
-# Usage: scripts/ci/build-slow-examples.sh [--list]
-#   --list  print the modules in build order and exit
-# Environment: SLOW_EXAMPLE_BUDGET_S (default 600; only 1..600 accepted).
+# Heartbeat ratchet (H1076): a module that must be rebuilt is first elaborated by the hb0
+# collector (scripts/heartbeats/collect.sh: one thread, Elab.async=false) under the same
+# timeout; that run is its check and its heartbeats are compared with
+# scripts/heartbeats/slow/baseline.json (per module, plus per declaration of at least
+# min_units). A module that is already up to date (fetched from the Lake cache or built
+# before) is skipped as unchanged. The collector writes no .olean, so a rebuilt module is
+# then built by `lake build` only when a later slow module imports it.
+#
+# Usage: scripts/ci/build-slow-examples.sh [--list | --write]
+#   --list   print the modules in build order and exit
+#   --write  collect every module (cached or not) and rewrite the baseline; run on the
+#            merged head (or the merge base) and check the file in
+# Environment: SLOW_EXAMPLE_BUDGET_S (default 600; only 1..600 accepted),
+#   SLOW_EXAMPLE_HB_TOLERANCE (percent, default 2), SLOW_EXAMPLE_HB_BASELINE (default
+#   scripts/heartbeats/slow/baseline.json), SLOW_EXAMPLE_HB=0 disables the ratchet
+#   (plain `lake build` per module, as before).
 # Prints "PASS|FAIL|TIMEOUT <module> <seconds>s" per module, or SKIP for a module whose
 # slow import failed (it would only rebuild that import under its own budget); exit 0 all passed, 1 a build
 # failed or timed out, 2 usage error.
@@ -22,12 +35,19 @@ case "$budget" in ''|*[!0-9]*) echo "build-slow-examples: bad budget" >&2; exit 
 budget=$((10#$budget))
 [ "$budget" -ge 1 ] || { echo "build-slow-examples: budget must be at least 1 s (0 disables timeout)" >&2; exit 2; }
 [ "$budget" -le 600 ] || { echo "build-slow-examples: budget $budget s exceeds 600 s (H134); ESCALATE instead" >&2; exit 2; }
-list=0
+list=0 write=0
 case "${1:-}" in
-  --list) list=1; [ $# -eq 1 ] || { echo "usage: build-slow-examples.sh [--list]" >&2; exit 2; };;
+  --list) list=1;;
+  --write) write=1;;
   "") ;;
-  *) echo "usage: build-slow-examples.sh [--list]" >&2; exit 2;;
+  *) echo "usage: build-slow-examples.sh [--list | --write]" >&2; exit 2;;
 esac
+[ $# -le 1 ] || { echo "usage: build-slow-examples.sh [--list | --write]" >&2; exit 2; }
+hb=${SLOW_EXAMPLE_HB:-1}
+tol=${SLOW_EXAMPLE_HB_TOLERANCE:-2}
+baseline=${SLOW_EXAMPLE_HB_BASELINE:-$root/scripts/heartbeats/slow/baseline.json}
+case "$tol" in ''|*[!0-9.]*) echo "build-slow-examples: bad SLOW_EXAMPLE_HB_TOLERANCE" >&2; exit 2;; esac
+[ "$write" = 0 ] || [ "$hb" != 0 ] || { echo "build-slow-examples: --write needs the ratchet" >&2; exit 2; }
 order=$(python3 - <<'PY'
 import pathlib, re, sys
 imp = re.compile(r"^\s*(?:(?:public|private|meta)\s+)*import(?:\s+all)?\s+(.+)$")
@@ -52,6 +72,13 @@ print("\n".join(m + "\t" + ",".join(deps[m]) for m in order))
 PY
 ) || exit 2
 if [ "$list" = 1 ]; then cut -f1 <<<"$order"; exit 0; fi
+# Slow modules imported by another slow module: they need an .olean.
+needed=",$(cut -f2 <<<"$order" | tr ',' '\n' | sort -u | tr '\n' ','),"
+runs=$(mktemp "${TMPDIR:-/tmp}/slow-hb.XXXXXX") || exit 2
+trap 'rm -f "$runs"' EXIT
+if [ "$hb" != 0 ]; then
+  lake build hbcollect >/dev/null </dev/null || { echo "build-slow-examples: cannot build hbcollect" >&2; exit 2; }
+fi
 failed=0; bad=","
 while IFS=$'\t' read -r m deps; do
   [ -n "$m" ] || continue
@@ -60,7 +87,24 @@ while IFS=$'\t' read -r m deps; do
   for d in "${ds[@]}"; do case "$bad" in *",$d,"*) skip=$d;; esac; done
   if [ -n "$skip" ]; then failed=1; bad="$bad$m,"; echo "SKIP $m (imports failed $skip)"; continue; fi
   start=$(date +%s)
-  LEAN_NUM_THREADS=1 timeout --kill-after=10s "${budget}s" lake build "$m" </dev/null; st=$?
+  if [ "$hb" = 0 ]; then
+    LEAN_NUM_THREADS=1 timeout --kill-after=10s "${budget}s" lake build "$m" </dev/null; st=$?
+  elif [ "$write" = 0 ] && lake build --no-build "$m" >/dev/null 2>&1 </dev/null; then
+    echo "PASS $m cached (heartbeats unchanged)"; continue
+  else
+    # Imports outside the slow set (and slow imports built above) must be current.
+    one=$(mktemp "${TMPDIR:-/tmp}/slow-hb1.XXXXXX") || exit 2
+    timeout --kill-after=10s "${budget}s" scripts/heartbeats/collect.sh "$m" >"$one" </dev/null; st=$?
+    if [ "$st" -eq 0 ]; then
+      cat "$one" >>"$runs"
+      python3 -c 'import json,sys; r=json.loads(open(sys.argv[1]).readline()); print(f"heartbeats {r[\"module\"]} {r[\"heartbeats\"]:.3f}")' "$one"
+      case "$needed" in *",$m,"*)
+        left=$(( budget - ($(date +%s) - start) )); [ "$left" -ge 1 ] || left=1
+        LEAN_NUM_THREADS=1 timeout --kill-after=10s "${left}s" lake build "$m" >/dev/null </dev/null; st=$?;;
+      esac
+    fi
+    rm -f "$one"
+  fi
   secs=$(( $(date +%s) - start ))
   if [ "$st" -eq 0 ]; then echo "PASS $m ${secs}s"
   else
@@ -69,4 +113,16 @@ while IFS=$'\t' read -r m deps; do
     else echo "FAIL $m ${secs}s (exit $st)"; fi
   fi
 done <<<"$order"
+if [ "$hb" != 0 ] && [ -s "$runs" ]; then
+  if [ "$write" = 1 ]; then
+    [ "$failed" = 0 ] || { echo "build-slow-examples: not writing a baseline after failures" >&2; exit 1; }
+    mkdir -p "$(dirname "$baseline")"
+    rm -f "$baseline"
+    python3 "$root/scripts/heartbeats/collect.d/ratchet.py" write "$baseline" "$runs" || exit 1
+  elif [ ! -f "$baseline" ]; then
+    echo "build-slow-examples: no heartbeat baseline $baseline; every module is new (create it with --write)"
+  else
+    python3 "$root/scripts/heartbeats/collect.d/ratchet.py" check "$baseline" "$runs" --tolerance "$tol" || failed=1
+  fi
+fi
 exit "$failed"
