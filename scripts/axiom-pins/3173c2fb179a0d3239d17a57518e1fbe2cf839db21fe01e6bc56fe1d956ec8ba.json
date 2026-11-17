@@ -1,0 +1,7 @@
+{
+ "Solidity/Examples/Finish/Assembly.lean:Solidity.Finish.project_finished_of_open": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ]
+}
