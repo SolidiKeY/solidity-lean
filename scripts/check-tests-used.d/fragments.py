@@ -261,16 +261,31 @@ _NODE_FS = re.compile(r"""(?:\bimport\s*\{[^}]*\breadFileSync\b[^}]*\}\s*from\s*
 
 
 @lru_cache(maxsize=16)
-def _js_mask(text):
+def _js_mask(text, regex=False):
     """Blank JS comments, templates and quoted strings; keep string literal spans.
 
-    Regular-expression literals are not modelled. Callers locate keywords in
-    the masked code and accept an operand only at a recorded literal start, so
-    commented, quoted or templated text never yields a route.
+    Regular-expression literals are not modelled unless regex: then a slash
+    where an operand starts opens a single-line literal, blanked like a
+    comment (the walker form needs exact brace and comment structure).
+    Callers locate keywords in the masked code and accept an operand only at
+    a recorded literal start, so commented, quoted or templated text never
+    yields a route.
     """
-    out = []; literals = {}; at = 0; n = len(text)
+    out = []; literals = {}; at = 0; n = len(text); last = ''
     while at < n:
         c = text[at]
+        if regex and c == '/' and not text.startswith(('//', '/*'), at) and (not last or last in '(,=:[!&|?{};+-*%<>~^'):
+            end = at + 1; within = False
+            while end < n and text[end] != '\n' and (within or text[end] != '/'):
+                if text[end] == '\\': end += 1
+                elif text[end] == '[': within = True
+                elif text[end] == ']': within = False
+                end += 1
+            if end >= n or text[end] != '/':
+                out.append(c); last = c; at += 1; continue
+            end += 1
+            while end < n and text[end].isalpha(): end += 1
+            out.append(re.sub(r'[^\n]', ' ', text[at:end])); at = end; last = 'x'; continue
         if text.startswith('//', at):
             end = text.find('\n', at); end = n if end < 0 else end
         elif text.startswith('/*', at):
@@ -281,15 +296,18 @@ def _js_mask(text):
                 end += 2 if text[end] == '\\' else 1
             end = min(end + 1, n)
             if c != '`': literals[at] = text[at:end]
+            last = 'x'
         else:
-            out.append(c); at += 1; continue
+            out.append(c); at += 1
+            if not c.isspace(): last = c
+            continue
         out.append(re.sub(r'[^\n]', ' ', text[at:end])); at = end
     return ''.join(out), literals
 
 
-def _js_line(text, number):
+def _js_line(text, number, regex=False):
     """The line, its masked code, line-relative literal spans, and whole-file mask."""
-    code, literals = _js_mask(text)
+    code, literals = _js_mask(text, regex)
     starts = [0] + [m.end() for m in re.finditer('\n', text)]
     begin = starts[number - 1]; line = text.splitlines()[number - 1]; masked = code[begin:begin + len(line)]
     spans = {start - begin: len(token) for start, token in literals.items() if begin <= start < begin + len(line)}
@@ -380,8 +398,12 @@ def static_routes(classifier, graph, rows):
         if form == 'lean-readFile' and len(frames) != 1: raise ValueError('Lean read must be in the elaborated runner file')
         # A library build elaborates its root's import closure; nothing else does.
         if library and (root.get('kind') != 'Lean root' or root.get('source_only') or root.get('lake_package')
-                        or root.get('cwd', '.') != '.'):
+                        or root.get('cwd', '.') != '.' or not _default_library(repo, root, frames[0]['path'])):
             raise ValueError('Lean library read requires a repository Lean library root')
+        reader_text = repo.texts[frames[-1]['path']]
+        if library and (any(not _plain_lines(repo.texts[f['path']]) for f in frames)
+                        or re.search(r'(?m)^#exit\b', classifier['lean_code'](reader_text)[:_offset(reader_text, frames[-1]['line'])])):
+            raise ValueError('Lean library read follows #exit or ambiguous line breaks')
         suffixes = ('.lean',) if language == 'lean' else NODE_SUFFIXES
         if any(not f['path'].endswith(suffixes) for f in frames): raise ValueError('static route frame language mismatch')
         for caller, callee in zip(frames, frames[1:]):
@@ -599,6 +621,23 @@ MODULE_ENTRY_KEYS = frozenset({'runner', 'input_revision', 'frames', 'target', '
 MODULE_ENTRY_OPERATION = 'entered measured Python module; no fixture consumption credit'
 
 
+def _offset(text, number):
+    return sum(len(line) + 1 for line in text.split('\n')[:number - 1])
+
+
+def _default_library(repo, root, path):
+    """A default lean_lib of the repository lakefile, sources at the root."""
+    import tomllib
+    match = re.fullmatch(r'lake build (\S+)', root.get('command', ''))
+    if match is None or root.get('location', '').split(':')[0] != 'lakefile.toml' or 'lakefile.toml' not in repo.texts: return False
+    try: config = tomllib.loads(repo.texts['lakefile.toml'])
+    except ValueError: return False
+    entries = [e for e in config.get('lean_lib', []) if isinstance(e, dict) and e.get('name') == match[1]]
+    if len(entries) != 1 or match[1] not in config.get('defaultTargets', []) or entries[0].get('srcDir', '.') not in ('.', './'): return False
+    names = entries[0].get('roots', [entries[0].get('root', match[1])])
+    return isinstance(names, list) and path in [n.replace('.', '/') + '.lean' for n in names if isinstance(n, str)]
+
+
 def _lean_header_imports(classifier, repo, source, number):
     """Module paths named by a header import line: only imports precede it."""
     lines = classifier['lean_code'](repo.texts[source]).splitlines()
@@ -614,7 +653,7 @@ def _lean_header_imports(classifier, repo, source, number):
 def _js_code(text, number):
     """(code, literal spans): the line is code and string literals, optionally
     followed by one trailing // comment, which is cut off."""
-    line, masked, spans, _, _ = _js_line(text, number)
+    line, masked, spans, _, _ = _js_line(text, number, True)
     inside = {at for start, size in spans.items() for at in range(start, start + size)}
     bad = [at for at, c in enumerate(line) if masked[at] != c and at not in inside]
     if bad:
@@ -634,6 +673,18 @@ def _js_match(text, number, pattern):
     return match
 
 
+def _plain_lines(text):
+    """Newline is the only line separator, so splitlines and offsets agree."""
+    return not re.search('[\r\x0b\x0c\x1c\x1d\x1e\x85\u2028\u2029]', text)
+
+
+def _js_destructured(code, name):
+    """name is bound by a destructuring pattern or a parameter list."""
+    n = r'(?<![\w$.])' + re.escape(name) + r'(?![\w$])'
+    return bool(re.search(r'[{\[][^{}\[\];]*' + n + r'[^{}\[\];]*[}\]]\s*=(?![=>])', code)
+                or re.search(r'(?:\bfunction\b[^(]*|\bcatch\s*)\([^()]*' + n + r'[^()]*\)|\([^()]*' + n + r'[^()]*\)\s*=>|' + n + r'\s*=>', code))
+
+
 def _js_unique(text, code, name, pattern):
     """The match of the one top-level line defining name; never rebound."""
     lines = text.splitlines()
@@ -647,7 +698,7 @@ def _js_unique(text, code, name, pattern):
 def _js_imported(text, code, names, module):
     """Every name comes from one literal import of node:<module>, never rebound."""
     for match in re.finditer(r'\bimport\s*\{([^}]*)\}\s*from\s*(["\'])(?:node:)?' + module + r'\2', text):
-        if code[match.start()] != text[match.start()] or match.start(2) not in _js_mask(text)[1]: continue
+        if code[match.start()] != text[match.start()] or match.start(2) not in _js_mask(text, True)[1]: continue
         imported = {n.strip() for n in match[1].split(',')}
         if not set(names) <= imported: continue
         return not any(re.search(r'\b(?:function|const|let|var|class)\s+' + re.escape(n) + r'\b|(?<![\w$.])' + re.escape(n) + r'\s*=(?!=)', code)
@@ -671,7 +722,9 @@ def _node_walk_read(source, repo, number, target, root, entry):
     the root command passes that literal. The target is one tracked regular
     file below dir with the suffix; nothing else is credited.
     """
-    text = repo.texts[source]; code, _ = _js_mask(text); lines = text.splitlines()
+    text = repo.texts[source]
+    if not _plain_lines(text): return None
+    code, _ = _js_mask(text, True); lines = text.splitlines()
     if not (_js_imported(text, code, ('readFileSync', 'readdirSync', 'statSync'), 'fs')
             and _js_imported(text, code, ('resolve', 'dirname', 'join'), 'path')
             and _js_imported(text, code, ('fileURLToPath',), 'url')):
@@ -679,21 +732,42 @@ def _node_walk_read(source, repo, number, target, root, entry):
     read = _js_match(text, number, r'(?:(?:const|let|var)\s+[\w$]+\s*=\s*)?readFileSync\(\s*([\w$]+)\s*(?:,\s*(["\'])[\w-]+\2\s*)?\)[\s,;)]*')
     if read is None: return None
     variable = read[1]
-    # Brace stack over code before the read: (line, depth after opening).
+    # Brace stack over code before the read: the line of each open brace.
     starts = [0] + [m.end() for m in re.finditer('\n', text)]
     stack = []
     for at in range(starts[number - 1]):
         if code[at] == '{': stack.append(bisect.bisect_right(starts, at))
-        elif code[at] == '}' and stack: stack.pop()
+        elif code[at] == '}':
+            if not stack: return None
+            stack.pop()
     if not stack: return None
     loop_line = stack[-1]
     loop = _js_match(text, loop_line, r'for\s*\(\s*const\s+([\w$]+)\s+of\s+([\w$]+)\(\s*resolve\(\s*([\w$]+)\s*,\s*(["\'])([^"\'\\]+)\4\s*\)\s*\)(?:\.sort\(\))?\s*\)\s*\{')
     if loop is None or loop[1] != variable: return None
     walker, base_name, directory = loop[2], loop[3], loop[5]
     code_line = lambda n: code[starts[n - 1]:starts[n - 1] + len(lines[n - 1])]
-    # The read is not the operand of a conditional continued from a prior line.
-    previous = next((code_line(n).rstrip() for n in range(number - 1, loop_line - 1, -1) if code_line(n).strip()), '')
-    if previous.endswith(('?', ':', '&&', '||', '??')): return None
+    def statement_start(n):
+        """The previous code line ends a statement or opens a block (no braceless if/else/arrow)."""
+        previous = next((code_line(k).rstrip() for k in range(n - 1, 0, -1) if code_line(k).strip()), ';')
+        return previous.endswith((';', '{', '}'))
+    # The read is a statement or a direct argument of the call that starts its statement.
+    k = number - 1
+    while k > loop_line and code_line(k).strip() and not code_line(k).rstrip().endswith((';', '{', '}')): k -= 1
+    if k > loop_line and not code_line(k).strip(): return None
+    prefix = ''.join(code_line(n) + '\n' for n in range(k + 1, number))
+    if prefix.strip():
+        call = re.match(r'\s*(?!(?:if|while|for|switch|catch|with|return|else|do|throw|typeof|await|yield|new)\b)[\w$.]+\(', prefix)
+        if call is None or re.search(r'=>|\bfunction\b', prefix) or prefix.rstrip()[-1:] not in (',', '('): return None
+        depth = 0
+        for at, c in enumerate(prefix):
+            if c in '([{': depth += 1
+            elif c in ')]}': depth -= 1
+            if at >= call.end() - 1 and depth < 1: return None
+        if depth != 1: return None
+    elif not statement_start(number): return None
+    if not all(statement_start(n) for n in stack): return None
+    protected = (variable, walker, base_name, 'readFileSync', 'readdirSync', 'statSync', 'resolve', 'dirname', 'join', 'fileURLToPath')
+    if any(_js_destructured(code, name) for name in protected): return None
     rel = _js_unique(text, code, base_name, r'const\s+' + re.escape(base_name) + r'\s*=\s*resolve\(\s*dirname\(\s*fileURLToPath\(\s*import\.meta\.url\s*\)\s*\)\s*,\s*(["\'])([^"\'\\]+)\1\s*\)\s*;?')
     if rel is None: return None
     base_dir = _clean(posixpath.join(posixpath.dirname(source), rel[2]))
@@ -703,7 +777,7 @@ def _node_walk_read(source, repo, number, target, root, entry):
     if len(definitions) != 1 or re.search(r'(?<![\w$.])' + re.escape(walker) + r'\s*=(?!=)', code): return None
     head = definitions[0]
     header = _js_match(text, head, r'function\s+' + re.escape(walker) + r'\s*\(\s*([\w$]+)\s*,\s*([\w$]+)\s*=\s*\[\s*\]\s*\)\s*\{')
-    if header is None or lines[head - 1][:1].isspace() or head + 7 > len(lines): return None
+    if header is None or lines[head - 1][:1].isspace() or head + 7 > len(lines) or not statement_start(head): return None
     d, out = map(re.escape, (header[1], header[2])); w = re.escape(walker)
     body = [r'for\s*\(\s*const\s+([\w$]+)\s+of\s+readdirSync\(\s*' + d + r'\s*\)\s*\)\s*\{',
             r'const\s+([\w$]+)\s*=\s*join\(\s*' + d + r'\s*,\s*([\w$]+)\s*\)\s*;?',
@@ -721,16 +795,17 @@ def _node_walk_read(source, repo, number, target, root, entry):
     for n in range(loop_line + 1, number):
         if not re.search(r'\b(?:continue|break|return|throw|exit|yield|await)\b', code_line(n)): continue
         guard = _js_match(text, n, r'if\s*\(\s*' + re.escape(variable) + r'\.startsWith\(\s*([\w$]+)\s*\)\s*\)\s*continue\s*;?')
-        if guard is None: return None
+        if guard is None or _js_destructured(code, guard[1]): return None
         at = _js_unique(text, code, guard[1], r'const\s+' + re.escape(guard[1]) + r'\s*=\s*resolve\(\s*' + re.escape(base_name) + r'\s*,\s*(["\'])([^"\'\\]+)\1\s*\)\s*;?')
         if at is None: return None
         # JavaScript startsWith is a string prefix test on resolved paths.
         skipped = _clean(posixpath.join(base_dir, at[2]))
         if skipped is None or target.startswith(skipped): return None
-    # Enclosing blocks: only argv mode branches satisfied by the root command.
+    # Enclosing blocks: only plain (never else) argv mode branches satisfied by the root command.
     for opener in stack[:-1]:
-        branch = _js_match(text, opener, r'(?:\}\s*else\s+)?if\s*\(\s*([\w$]+)\s*===\s*(["\'])([^"\'\\]+)\2\s*\)\s*\{')
-        if branch is None or _js_unique(text, code, branch[1], r'const\s+' + re.escape(branch[1]) + r'\s*=\s*process\.argv\[2\]\s*;?') is None: return None
+        branch = _js_match(text, opener, r'if\s*\(\s*([\w$]+)\s*===\s*(["\'])([^"\'\\]+)\2\s*\)\s*\{')
+        if (branch is None or _js_destructured(code, branch[1])
+                or _js_unique(text, code, branch[1], r'const\s+' + re.escape(branch[1]) + r'\s*=\s*process\.argv\[2\]\s*;?') is None): return None
         try: words = shlex.split(root['command'])
         except ValueError: return None
         if words[:2] != ['node', entry] or len(words) < 3 or words[2] != branch[3]: return None
@@ -1179,9 +1254,26 @@ def successor_controls(classifier):
             '    if (p.length > 3) {\n      readFileSync(p, "latin1"); // NESTED\n    }\n    if (p.endsWith("x.sol")) break;\n'
             '    readFileSync(p); // AFTER-BREAK\n    const s = p.length > 3 ?\n      readFileSync(p) : ""; // CONDITIONAL\n  }\n'
             '} else if (mode === "other") {\n  for (const p of walk(resolve(root, "tests/corpus"))) {\n    readFileSync(p); // OTHER-MODE\n  }\n}\n')
+    head = walk[:walk.index('if (mode === "prepare") {')]
+    loop = '  for (const p of walk(resolve(root, "tests/corpus"))) {\n'
+    adversarial = {  # each body places a read marked READ that must not be credited
+        'else-if': 'if (mode === "prepare") {\n} else if (mode === "prepare") {\n' + loop + '    readFileSync(p); // READ\n  }\n}\n',
+        'braceless-if': 'if (mode === "prepare") {\n' + loop + '    if (false)\n      readFileSync(p); // READ\n  }\n}\n',
+        'arrow': 'if (mode === "prepare") {\n' + loop + '    const f = () =>\n      readFileSync(p); // READ\n  }\n}\n',
+        'braceless-loop': 'if (mode === "prepare") {\n  if (false)\n' + loop + '    readFileSync(p); // READ\n  }\n}\n',
+        'regex-brace': 'if (mode === "other") {\n  "x".replace(/}/, "");\n' + loop + '    readFileSync(p); // READ\n  }\n}\n',
+        'regex-backtick': 'if (mode === "other") {\n  "x".replace(/`/, "");\n' + loop + '    readFileSync(p); // READ\n  }\n  "y".replace(/`/, "");\n}\n',
+        'destructured': 'if (mode === "prepare") {\n  const { readFileSync } = { readFileSync: () => "" };\n' + loop + '    readFileSync(p); // READ\n  }\n}\n',
+        'function': 'function never() {\n' + loop + '    readFileSync(p); // READ\n  }\n}\n',
+        'conditional': 'if (mode === "prepare") {\n' + loop + '    const s = p.length > 3 ?\n      readFileSync(p) : ""; // READ\n  }\n}\n',
+        'form-feed': 'if (mode === "prepare") {\n' + loop + '    readFileSync(p); // READ\n  }\n}\f\n',
+    }
+    plain = 'if (mode === "prepare") {\n' + loop + '    readFileSync(p); // READ\n  }\n}\n'
     files = {
-        'lakefile.toml': '[[lean_lib]]\nname = "Lib"\n',
-        'Lib.lean': '/-! library root -/\nimport Lib.Mod\n-- import Lib.Mod\n',
+        **{'tests/adv-' + name + '.mjs': head + body for name, body in adversarial.items()}, 'tests/adv-plain.mjs': head + plain,
+        'lakefile.toml': 'defaultTargets = ["Lib"]\n[[lean_lib]]\nname = "Lib"\n[[lean_lib]]\nname = "Extra"\n[[lean_lib]]\nname = "Src"\nsrcDir = "src"\n',
+        'Lib.lean': '/-! library root -/\nimport Lib.Mod Lib.Late\n-- import Lib.Mod\n', 'Extra.lean': 'import Lib.Mod\n',
+        'src/Src.lean': 'import Lib.Mod\n', 'Lib/Late.lean': 'import Lean\n#exit\n#eval IO.FS.readFile "tests/lib-eval.txt"\n',
         'Lib/Mod.lean': ('import Lean\nopen Lean\n-- IO.FS.readFile "tests/lib-data.txt"\nrun_elab do\n  let s ← IO.FS.readFile\n    "tests/lib-data.txt"\n'
                          '  logInfo s\ndef unused : IO String := IO.FS.readFile "tests/lib-data.txt"\n#eval IO.FS.readFile "tests/lib-eval.txt"\n'),
         'tests/lib-data.txt': 'lib\n', 'tests/lib-eval.txt': 'eval\n',
@@ -1246,7 +1338,10 @@ def successor_controls(classifier):
                     'target_blob': blob(repo, target), 'purpose': 'Synthetic successor route.'}
         later = commit({'tests/unrelated.txt': 'later\n'}, 'later')
         baseline_model, baseline = run(later, entries=[])
-        assert canonical(run(later, {key: [] for key in CONSUMER_SECTIONS}, entries=[])[0]) == canonical(baseline_model)
+        # Fragments of the earlier shape (no persistent_module_entries key) give the same model.
+        classifier['read_fragments'] = lambda _: {key: [] for key in FRAGMENT_SECTIONS + ('roles', 'fixtures') + CONSUMER_SECTIONS[:3]}
+        try: assert canonical(inventory(later, dict(catalog, module_entries=[]))) == canonical(baseline_model)
+        finally: classifier['read_fragments'] = original
         for path in ('tests/lib-data.txt', 'tests/corpus/a.sol', 'tests/corpus/sub/b.sol', 'tests/prog.py', 'tests/helper.py'):
             assert baseline[path]['class'] != 'keep', path
         assert 'Lib.lean' in baseline_model['entry_points'] and baseline_model['entry_points']['Lib.lean']['kind'] == 'Lean root'
@@ -1264,6 +1359,10 @@ def successor_controls(classifier):
         for n in (3, 6, 8):  # comment, literal line, def body
             rejected(later, 'literal lean-library-readFile', {'static_routes': [lib([frame(first, 'Lib.lean', 2), frame(first, 'Lib/Mod.lean', n)])]})
         rejected(later, 'repository Lean library root', {'static_routes': [lib([frame(first, 'tests/R.lean', 1), frame(first, 'Lib/Mod.lean', 5)], runner='tests/R.lean')]})
+        # Only a default lean_lib with root-relative sources is built by the default build.
+        rejected(later, 'repository Lean library root', {'static_routes': [lib([frame(first, 'Extra.lean', 1), frame(first, 'Lib/Mod.lean', 5)], runner='Extra.lean')]})
+        rejected(later, 'repository Lean library root', {'static_routes': [lib([frame(first, 'src/Src.lean', 1), frame(first, 'Lib/Mod.lean', 5)], runner='src/Src.lean')]})
+        rejected(later, 'follows #exit', {'static_routes': [lib([frame(first, 'Lib.lean', 2), frame(first, 'Lib/Late.lean', 3)], 'tests/lib-eval.txt')]})
         # The single-file form still refuses an imported module.
         rejected(later, 'elaborated runner file', {'static_routes': [route(first, 'tests/R.lean', 'lean-readFile',
                  [frame(first, 'tests/R.lean', 1), frame(first, 'Lib/Mod.lean', 9)], 'tests/lib-eval.txt')]})
@@ -1282,6 +1381,10 @@ def successor_controls(classifier):
         rejected(first, 'literal node-readFileSync-walk', {'static_routes': [node('tests/corpus/a.sol', 'POSITIVE', 'tests/walk-bad.mjs', 'validated:tests/walk-bad.mjs')]})
         # A Node test root passes no prepare mode argument.
         rejected(first, 'literal node-readFileSync-walk', {'static_routes': [node('tests/corpus/a.sol', 'POSITIVE', 'tests/walk.test.mjs', 'validated:tests/walk.test.mjs')]})
+        for name in ['plain'] + list(adversarial):
+            path = 'tests/adv-' + name + '.mjs'
+            got = _node_walk_read(path, first, line_of(path, '// READ'), 'tests/corpus/a.sol', {'command': 'node ' + path + ' prepare'}, path)
+            assert got == ('tests/corpus/a.sol' if name == 'plain' else None), name
         moved = commit({'tests/corpus/a.sol': 'contract A2 {}\n'}, 'changed corpus')
         _, rows = run(moved, {'static_routes': [node('tests/corpus/a.sol', 'POSITIVE'), node('tests/corpus/sub/b.sol', 'POSITIVE')]},
                       standalone=[manual('tests/walk.mjs', 'prepare', 1, moved)])
