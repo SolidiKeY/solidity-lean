@@ -254,19 +254,7 @@
         "command": ["python3", "-B", "tests/h62/item2/audit-bytecode-selection/test_field_domains.py"],
         "kind": "unittest",
         "purpose": "Existing bytecode regression suite passed ordinary and instrumented Python runs. Only the exact observed primary fixtures listed here receive persisted data-use routes; all other reads remain unresolved. No native Lean or external EVM proof acceptance.",
-        "input_scope": [
-          "tests/h62/item2/audit-bytecode-selection/compiler-field-witnesses.json",
-          "tests/h62/item2/audit-bytecode-selection/composition-field-support.lean.txt",
-          "tests/h62/item2/audit-bytecode-selection/composition-field-witnesses.json",
-          "tests/h62/item2/audit-bytecode-selection/controls-domain-witnesses.json",
-          "tests/h62/item2/audit-bytecode-selection/decoder-field-support.lean.txt",
-          "tests/h62/item2/audit-bytecode-selection/decoder-field-witnesses.json",
-          "tests/h62/item2/audit-bytecode-selection/runtime-consumer-support.lean.txt",
-          "tests/h62/item2/audit-bytecode-selection/runtime-consumer-witnesses.json",
-          "tests/h62/item2/audit-bytecode-selection/runtime-control-support.lean.txt",
-          "tests/h62/item2/audit-bytecode-selection/runtime-control-witness.json",
-          "tests/h62/item2/audit-bytecode-selection/selection-field-witnesses.json"
-        ],
+        "input_scope": ["tests/h62/item2/audit-bytecode-selection/compiler-field-witnesses.json", "tests/h62/item2/audit-bytecode-selection/composition-field-support.lean.txt", "tests/h62/item2/audit-bytecode-selection/composition-field-witnesses.json", "tests/h62/item2/audit-bytecode-selection/controls-domain-witnesses.json", "tests/h62/item2/audit-bytecode-selection/decoder-field-support.lean.txt", "tests/h62/item2/audit-bytecode-selection/decoder-field-witnesses.json", "tests/h62/item2/audit-bytecode-selection/runtime-consumer-support.lean.txt", "tests/h62/item2/audit-bytecode-selection/runtime-consumer-witnesses.json", "tests/h62/item2/audit-bytecode-selection/runtime-control-support.lean.txt", "tests/h62/item2/audit-bytecode-selection/runtime-control-witness.json", "tests/h62/item2/audit-bytecode-selection/selection-field-witnesses.json"],
         "other_reads": "unresolved"
       },
       {
@@ -276,52 +264,7 @@
         "command": ["python3", "-B", "tests/h62/item1/trust-fragments/test_collector.py"],
         "kind": "unittest",
         "purpose": "Historical unchanged-source regression suite passed ordinary and instrumented execution in its exact recorded Git context. Current default execution fails because the live audit/gate baseline has drifted; that failure is preserved. Only the listed exact primary data reads are certified; no current passing-validation, native Lean or proof credit. Tests use disposable fixtures and synthetic gate/tool controls.",
-        "input_scope": [
-          "tests/h62/item1/trust-fragments/fragments/000-audit.leanfrag",
-          "tests/h62/item1/trust-fragments/fragments/001-audit.leanfrag",
-          "tests/h62/item1/trust-fragments/fragments/002-audit.leanfrag",
-          "tests/h62/item1/trust-fragments/fragments/003-audit.leanfrag",
-          "tests/h62/item1/trust-fragments/fragments/004-audit.leanfrag",
-          "tests/h62/item1/trust-fragments/fragments/005-audit.leanfrag",
-          "tests/h62/item1/trust-fragments/fragments/006-audit.leanfrag",
-          "tests/h62/item1/trust-fragments/fragments/007-audit.leanfrag",
-          "tests/h62/item1/trust-fragments/fragments/008-audit.leanfrag",
-          "tests/h62/item1/trust-fragments/fragments/009-audit.leanfrag",
-          "tests/h62/item1/trust-fragments/fragments/010-audit.leanfrag",
-          "tests/h62/item1/trust-fragments/fragments/011-audit.leanfrag",
-          "tests/h62/item1/trust-fragments/fragments/012-audit.leanfrag",
-          "tests/h62/item1/trust-fragments/fragments/013-audit.leanfrag",
-          "tests/h62/item1/trust-fragments/fragments/014-audit.leanfrag",
-          "tests/h62/item1/trust-fragments/fragments/015-audit.leanfrag",
-          "tests/h62/item1/trust-fragments/fragments/016-audit.leanfrag",
-          "tests/h62/item1/trust-fragments/fragments/017-audit.leanfrag",
-          "tests/h62/item1/trust-fragments/fragments/018-audit.leanfrag",
-          "tests/h62/item1/trust-fragments/fragments/019-audit.leanfrag",
-          "tests/h62/item1/trust-fragments/fragments/020-audit.leanfrag",
-          "tests/h62/item1/trust-fragments/fragments/021-audit.leanfrag",
-          "tests/h62/item1/trust-fragments/fragments/022-audit.leanfrag",
-          "tests/h62/item1/trust-fragments/fragments/023-audit.leanfrag",
-          "tests/h62/item1/trust-fragments/fragments/024-audit.leanfrag",
-          "tests/h62/item1/trust-fragments/fragments/025-audit.leanfrag",
-          "tests/h62/item1/trust-fragments/fragments/026-audit.leanfrag",
-          "tests/h62/item1/trust-fragments/fragments/027-audit.leanfrag",
-          "tests/h62/item1/trust-fragments/fragments/028-audit.leanfrag",
-          "tests/h62/item1/trust-fragments/fragments/029-audit.leanfrag",
-          "tests/h62/item1/trust-fragments/fragments/030-audit.leanfrag",
-          "tests/h62/item1/trust-fragments/fragments/031-audit.leanfrag",
-          "tests/h62/item1/trust-fragments/fragments/032-audit.leanfrag",
-          "tests/h62/item1/trust-fragments/fragments/033-audit.leanfrag",
-          "tests/h62/item1/trust-fragments/fragments/034-audit.leanfrag",
-          "tests/h62/item1/trust-fragments/fragments/035-audit.leanfrag",
-          "tests/h62/item1/trust-fragments/fragments/036-audit.leanfrag",
-          "tests/h62/item1/trust-fragments/fragments/037-audit.leanfrag",
-          "tests/h62/item1/trust-fragments/fragments/038-audit.leanfrag",
-          "tests/h62/item1/trust-fragments/fragments/039-audit.leanfrag",
-          "tests/h62/item1/trust-fragments/fragments/040-audit.leanfrag",
-          "tests/h62/item1/trust-fragments/fragments/041-audit.leanfrag",
-          "tests/h62/item1/trust-fragments/fragments/042-audit.leanfrag",
-          "tests/h62/item1/trust-fragments/fragments/043-audit.leanfrag"
-        ],
+        "input_scope": ["tests/h62/item1/trust-fragments/fragments/000-audit.leanfrag", "tests/h62/item1/trust-fragments/fragments/001-audit.leanfrag", "tests/h62/item1/trust-fragments/fragments/002-audit.leanfrag", "tests/h62/item1/trust-fragments/fragments/003-audit.leanfrag", "tests/h62/item1/trust-fragments/fragments/004-audit.leanfrag", "tests/h62/item1/trust-fragments/fragments/005-audit.leanfrag", "tests/h62/item1/trust-fragments/fragments/006-audit.leanfrag", "tests/h62/item1/trust-fragments/fragments/007-audit.leanfrag", "tests/h62/item1/trust-fragments/fragments/008-audit.leanfrag", "tests/h62/item1/trust-fragments/fragments/009-audit.leanfrag", "tests/h62/item1/trust-fragments/fragments/010-audit.leanfrag", "tests/h62/item1/trust-fragments/fragments/011-audit.leanfrag", "tests/h62/item1/trust-fragments/fragments/012-audit.leanfrag", "tests/h62/item1/trust-fragments/fragments/013-audit.leanfrag", "tests/h62/item1/trust-fragments/fragments/014-audit.leanfrag", "tests/h62/item1/trust-fragments/fragments/015-audit.leanfrag", "tests/h62/item1/trust-fragments/fragments/016-audit.leanfrag", "tests/h62/item1/trust-fragments/fragments/017-audit.leanfrag", "tests/h62/item1/trust-fragments/fragments/018-audit.leanfrag", "tests/h62/item1/trust-fragments/fragments/019-audit.leanfrag", "tests/h62/item1/trust-fragments/fragments/020-audit.leanfrag", "tests/h62/item1/trust-fragments/fragments/021-audit.leanfrag", "tests/h62/item1/trust-fragments/fragments/022-audit.leanfrag", "tests/h62/item1/trust-fragments/fragments/023-audit.leanfrag", "tests/h62/item1/trust-fragments/fragments/024-audit.leanfrag", "tests/h62/item1/trust-fragments/fragments/025-audit.leanfrag", "tests/h62/item1/trust-fragments/fragments/026-audit.leanfrag", "tests/h62/item1/trust-fragments/fragments/027-audit.leanfrag", "tests/h62/item1/trust-fragments/fragments/028-audit.leanfrag", "tests/h62/item1/trust-fragments/fragments/029-audit.leanfrag", "tests/h62/item1/trust-fragments/fragments/030-audit.leanfrag", "tests/h62/item1/trust-fragments/fragments/031-audit.leanfrag", "tests/h62/item1/trust-fragments/fragments/032-audit.leanfrag", "tests/h62/item1/trust-fragments/fragments/033-audit.leanfrag", "tests/h62/item1/trust-fragments/fragments/034-audit.leanfrag", "tests/h62/item1/trust-fragments/fragments/035-audit.leanfrag", "tests/h62/item1/trust-fragments/fragments/036-audit.leanfrag", "tests/h62/item1/trust-fragments/fragments/037-audit.leanfrag", "tests/h62/item1/trust-fragments/fragments/038-audit.leanfrag", "tests/h62/item1/trust-fragments/fragments/039-audit.leanfrag", "tests/h62/item1/trust-fragments/fragments/040-audit.leanfrag", "tests/h62/item1/trust-fragments/fragments/041-audit.leanfrag", "tests/h62/item1/trust-fragments/fragments/042-audit.leanfrag", "tests/h62/item1/trust-fragments/fragments/043-audit.leanfrag"],
         "other_reads": "unresolved"
       },
       {
@@ -359,39 +302,7 @@
         "command": ["python3", "-B", "tests/h62/item2/audit-v09-passes/test_signature_boundaries.py"],
         "kind": "unittest",
         "purpose": "Existing signature-boundary regression suite passed ordinary and instrumented execution. Only the listed exact witness-map JSON inputs receive positive data-use credit; other reads remain unresolved. This does not establish Lean elaboration, premise satisfaction, compiler refinement or external EVM proof.",
-        "input_scope": [
-          "tests/h62/item2/audit-v09-passes/allocated-reference-read-witness-map.json",
-          "tests/h62/item2/audit-v09-passes/boundary-witness-map.json",
-          "tests/h62/item2/audit-v09-passes/compiler-call-scope-witness-map.json",
-          "tests/h62/item2/audit-v09-passes/core-boundary-witness-map.json",
-          "tests/h62/item2/audit-v09-passes/heap-boundary-witness-map.json",
-          "tests/h62/item2/audit-v09-passes/join-cost-witness-map.json",
-          "tests/h62/item2/audit-v09-passes/join-frame-witness-map.json",
-          "tests/h62/item2/audit-v09-passes/joined-allocation-witness-map.json",
-          "tests/h62/item2/audit-v09-passes/joined-memory-witness-map.json",
-          "tests/h62/item2/audit-v09-passes/loop-call-witness-map.json",
-          "tests/h62/item2/audit-v09-passes/loop-prefix-witness-map.json",
-          "tests/h62/item2/audit-v09-passes/loop-reframed-failure-witness-map.json",
-          "tests/h62/item2/audit-v09-passes/loop-scope-witness-map.json",
-          "tests/h62/item2/audit-v09-passes/memory-association-witness-map.json",
-          "tests/h62/item2/audit-v09-passes/memory-call-scope-witness-map.json",
-          "tests/h62/item2/audit-v09-passes/memory-call-witness-map.json",
-          "tests/h62/item2/audit-v09-passes/positive-allocation-failure-witness-map.json",
-          "tests/h62/item2/audit-v09-passes/preserved-allocator-witness-map.json",
-          "tests/h62/item2/audit-v09-passes/private-stack-witness-map.json",
-          "tests/h62/item2/audit-v09-passes/reference-call-capture-failure-witness-map.json",
-          "tests/h62/item2/audit-v09-passes/reference-call-readback-witness-map.json",
-          "tests/h62/item2/audit-v09-passes/reframed-triple-witness-map.json",
-          "tests/h62/item2/audit-v09-passes/reframed-witness-map.json",
-          "tests/h62/item2/audit-v09-passes/returned-memory-capture-witness-map.json",
-          "tests/h62/item2/audit-v09-passes/runtime-return-capture-witness-map.json",
-          "tests/h62/item2/audit-v09-passes/runtime-void-capture-witness-map.json",
-          "tests/h62/item2/audit-v09-passes/sequence-witness-map.json",
-          "tests/h62/item2/audit-v09-passes/shift-capture-witness-map.json",
-          "tests/h62/item2/audit-v09-passes/stack-witness-map.json",
-          "tests/h62/item2/audit-v09-passes/stateful-capture-witness-map.json",
-          "tests/h62/item2/audit-v09-passes/triple-admission-witness-map.json"
-        ],
+        "input_scope": ["tests/h62/item2/audit-v09-passes/allocated-reference-read-witness-map.json", "tests/h62/item2/audit-v09-passes/boundary-witness-map.json", "tests/h62/item2/audit-v09-passes/compiler-call-scope-witness-map.json", "tests/h62/item2/audit-v09-passes/core-boundary-witness-map.json", "tests/h62/item2/audit-v09-passes/heap-boundary-witness-map.json", "tests/h62/item2/audit-v09-passes/join-cost-witness-map.json", "tests/h62/item2/audit-v09-passes/join-frame-witness-map.json", "tests/h62/item2/audit-v09-passes/joined-allocation-witness-map.json", "tests/h62/item2/audit-v09-passes/joined-memory-witness-map.json", "tests/h62/item2/audit-v09-passes/loop-call-witness-map.json", "tests/h62/item2/audit-v09-passes/loop-prefix-witness-map.json", "tests/h62/item2/audit-v09-passes/loop-reframed-failure-witness-map.json", "tests/h62/item2/audit-v09-passes/loop-scope-witness-map.json", "tests/h62/item2/audit-v09-passes/memory-association-witness-map.json", "tests/h62/item2/audit-v09-passes/memory-call-scope-witness-map.json", "tests/h62/item2/audit-v09-passes/memory-call-witness-map.json", "tests/h62/item2/audit-v09-passes/positive-allocation-failure-witness-map.json", "tests/h62/item2/audit-v09-passes/preserved-allocator-witness-map.json", "tests/h62/item2/audit-v09-passes/private-stack-witness-map.json", "tests/h62/item2/audit-v09-passes/reference-call-capture-failure-witness-map.json", "tests/h62/item2/audit-v09-passes/reference-call-readback-witness-map.json", "tests/h62/item2/audit-v09-passes/reframed-triple-witness-map.json", "tests/h62/item2/audit-v09-passes/reframed-witness-map.json", "tests/h62/item2/audit-v09-passes/returned-memory-capture-witness-map.json", "tests/h62/item2/audit-v09-passes/runtime-return-capture-witness-map.json", "tests/h62/item2/audit-v09-passes/runtime-void-capture-witness-map.json", "tests/h62/item2/audit-v09-passes/sequence-witness-map.json", "tests/h62/item2/audit-v09-passes/shift-capture-witness-map.json", "tests/h62/item2/audit-v09-passes/stack-witness-map.json", "tests/h62/item2/audit-v09-passes/stateful-capture-witness-map.json", "tests/h62/item2/audit-v09-passes/triple-admission-witness-map.json"],
         "other_reads": "unresolved"
       },
       {
@@ -411,44 +322,7 @@
         "command": ["python3", "-B", "scripts/h62/item2/audit-v10-storage/test_witness_registry.py"],
         "kind": "unittest",
         "purpose": "Existing metadata/reference-accounting regression consumer passed ordinary and instrumented execution at the recorded exact Git context. Only these unchanged primary inputs receive data-use credit. Historical registry validation does not make the live frozen-interface failure pass; no Lean elaboration, represented obligation, transport, compiler or EVM proof credit.",
-        "input_scope": [
-          "tests/h62/item2/audit-v10-storage/ArrayAccessWitnesses.lean",
-          "tests/h62/item2/audit-v10-storage/GeneratedFamilyWitnesses.lean",
-          "tests/h62/item2/audit-v10-storage/KeyBoundsWitnesses.lean",
-          "tests/h62/item2/audit-v10-storage/LayoutWitnesses.lean",
-          "tests/h62/item2/audit-v10-storage/LoopWitnesses.lean",
-          "tests/h62/item2/audit-v10-storage/PushWitnesses.lean",
-          "tests/h62/item2/audit-v10-storage/RepresentedWitnesses.lean",
-          "tests/h62/item2/audit-v10-storage/SourceReadWitnesses.lean",
-          "tests/h62/item2/audit-v10-storage/SourceWriteWitnesses.lean",
-          "tests/h62/item2/audit-v10-storage/TargetInputWitnesses.lean",
-          "tests/h62/item2/audit-v10-storage/TargetReuseWitnesses.lean",
-          "tests/h62/item2/audit-v10-storage/TargetTotality.lean",
-          "tests/h62/item2/audit-v10-storage/TargetWriteSequenceWitnesses.lean",
-          "tests/h62/item2/audit-v10-storage/array-logical-read-data-witness-map.json",
-          "tests/h62/item2/audit-v10-storage/array-logical-write-data-witness-map.json",
-          "tests/h62/item2/audit-v10-storage/array-read-witness-map.json",
-          "tests/h62/item2/audit-v10-storage/array-write-witness-map.json",
-          "tests/h62/item2/audit-v10-storage/default-complete-witness-map.json",
-          "tests/h62/item2/audit-v10-storage/default-owner-witness-map.json",
-          "tests/h62/item2/audit-v10-storage/generated-family-witness-map.json",
-          "tests/h62/item2/audit-v10-storage/key-bounds-witness-map.json",
-          "tests/h62/item2/audit-v10-storage/layout-witness-map.json",
-          "tests/h62/item2/audit-v10-storage/lifecycle-data-witness-map.json",
-          "tests/h62/item2/audit-v10-storage/lifecycle-joint-witness-map.json",
-          "tests/h62/item2/audit-v10-storage/loop-witness-map.json",
-          "tests/h62/item2/audit-v10-storage/push-data-witness-map.json",
-          "tests/h62/item2/audit-v10-storage/push-joint-witness-map.json",
-          "tests/h62/item2/audit-v10-storage/represented-witness-map.json",
-          "tests/h62/item2/audit-v10-storage/source-read-witness-map.json",
-          "tests/h62/item2/audit-v10-storage/source-write-witness-map.json",
-          "tests/h62/item2/audit-v10-storage/target-input-witness-map.json",
-          "tests/h62/item2/audit-v10-storage/target-reuse-data-witness-map.json",
-          "tests/h62/item2/audit-v10-storage/target-reuse-joint-witness-map.json",
-          "tests/h62/item2/audit-v10-storage/target-write-sequence-witness-map.json",
-          "tests/h62/item2/audit-v10-storage/touched-data-witness-map.json",
-          "tests/h62/item2/audit-v10-storage/touched-joint-witness-map.json"
-        ],
+        "input_scope": ["tests/h62/item2/audit-v10-storage/ArrayAccessWitnesses.lean", "tests/h62/item2/audit-v10-storage/GeneratedFamilyWitnesses.lean", "tests/h62/item2/audit-v10-storage/KeyBoundsWitnesses.lean", "tests/h62/item2/audit-v10-storage/LayoutWitnesses.lean", "tests/h62/item2/audit-v10-storage/LoopWitnesses.lean", "tests/h62/item2/audit-v10-storage/PushWitnesses.lean", "tests/h62/item2/audit-v10-storage/RepresentedWitnesses.lean", "tests/h62/item2/audit-v10-storage/SourceReadWitnesses.lean", "tests/h62/item2/audit-v10-storage/SourceWriteWitnesses.lean", "tests/h62/item2/audit-v10-storage/TargetInputWitnesses.lean", "tests/h62/item2/audit-v10-storage/TargetReuseWitnesses.lean", "tests/h62/item2/audit-v10-storage/TargetTotality.lean", "tests/h62/item2/audit-v10-storage/TargetWriteSequenceWitnesses.lean", "tests/h62/item2/audit-v10-storage/array-logical-read-data-witness-map.json", "tests/h62/item2/audit-v10-storage/array-logical-write-data-witness-map.json", "tests/h62/item2/audit-v10-storage/array-read-witness-map.json", "tests/h62/item2/audit-v10-storage/array-write-witness-map.json", "tests/h62/item2/audit-v10-storage/default-complete-witness-map.json", "tests/h62/item2/audit-v10-storage/default-owner-witness-map.json", "tests/h62/item2/audit-v10-storage/generated-family-witness-map.json", "tests/h62/item2/audit-v10-storage/key-bounds-witness-map.json", "tests/h62/item2/audit-v10-storage/layout-witness-map.json", "tests/h62/item2/audit-v10-storage/lifecycle-data-witness-map.json", "tests/h62/item2/audit-v10-storage/lifecycle-joint-witness-map.json", "tests/h62/item2/audit-v10-storage/loop-witness-map.json", "tests/h62/item2/audit-v10-storage/push-data-witness-map.json", "tests/h62/item2/audit-v10-storage/push-joint-witness-map.json", "tests/h62/item2/audit-v10-storage/represented-witness-map.json", "tests/h62/item2/audit-v10-storage/source-read-witness-map.json", "tests/h62/item2/audit-v10-storage/source-write-witness-map.json", "tests/h62/item2/audit-v10-storage/target-input-witness-map.json", "tests/h62/item2/audit-v10-storage/target-reuse-data-witness-map.json", "tests/h62/item2/audit-v10-storage/target-reuse-joint-witness-map.json", "tests/h62/item2/audit-v10-storage/target-write-sequence-witness-map.json", "tests/h62/item2/audit-v10-storage/touched-data-witness-map.json", "tests/h62/item2/audit-v10-storage/touched-joint-witness-map.json"],
         "other_reads": "unresolved"
       },
       {
@@ -658,12 +532,7 @@
         "command": ["python3", "-B", "tests/h62/item1/duplication-scanner/test_local_rebuild.py"],
         "kind": "unittest",
         "purpose": "Existing scanner or V08 regression verifies exact fixture/source identities, declaration observations, pinned dependency closures, corruption refusal or generator-template preservation. Ordinary and instrumented executions passed in the recorded context. Only these exact primary input reads receive data-use credit; no native Lean, ownership, theorem validity, compiler or EVM acceptance.",
-        "input_scope": [
-          "tests/h62/item1/duplication-scanner/SignatureEnvironment.lean",
-          "tests/h62/item1/duplication-scanner/SignatureEnvironmentProbe.lean",
-          "tests/h62/item1/duplication-scanner/SignatureObservedConsumer.lean",
-          "tests/h62/item1/duplication-scanner/local-rebuild-pins.json"
-        ],
+        "input_scope": ["tests/h62/item1/duplication-scanner/SignatureEnvironment.lean", "tests/h62/item1/duplication-scanner/SignatureEnvironmentProbe.lean", "tests/h62/item1/duplication-scanner/SignatureObservedConsumer.lean", "tests/h62/item1/duplication-scanner/local-rebuild-pins.json"],
         "other_reads": "unresolved"
       },
       {
@@ -2885,6 +2754,25 @@
         "target": "tests/h62/item2/audit-compiler-transport/frozen-modules.json",
         "target_blob": "ea5bc57804965c1fb4d95195edfd1bb4a4b7a098",
         "operation": "validated Python read of measured bytes"
+      }
+    ],
+    "git_policies": [
+      {
+        "path": "tests/h62/item6/migrate-hash/.gitignore",
+        "blob": "65e91fe288becab1987e320d5426a39351309c7e",
+        "purpose": "Git excludes the real hash-census ProductionInventory.lean output. Source-only policy role;no generated-source validation,execution,pass or proof credit.",
+        "matches": [
+          {
+            "line": 5,
+            "output": "ProductionInventory.lean",
+            "writer": {
+              "path": "scripts/h62/item6/migrate-hash/census.py",
+              "blob": "0ddef2ed5405c2bbcd8ff199c43097a7a847147a",
+              "line": 67,
+              "literal": "ProductionInventory.lean"
+            }
+          }
+        ]
       }
     ]
   }
