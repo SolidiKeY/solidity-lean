@@ -1,4 +1,68 @@
 {
+  "consumer_routes": {
+    "cache_policies": [
+      {
+        "blob": "c18dd8d83ceed1806b50b0aaa46beb7e335fff13",
+        "matches": [
+          {
+            "line": 1,
+            "output": "__pycache__/",
+            "producer": {
+              "driver": "scripts/h62/item2/audit-precompiles/successor_acceptance.py",
+              "driver_blob": "d3c1b15e0e63f6455fea83b6bf6bccfe8637d09d",
+              "driver_line": 66,
+              "import_line": 4,
+              "literal": "scripts/h62/item2/audit-precompiles/coverage.py",
+              "module": "scripts/h62/item2/audit-precompiles/census.py",
+              "module_blob": "f85a629ef472f0557fd1231a3f0b9aafe0a29de6",
+              "program": "scripts/h62/item2/audit-precompiles/coverage.py",
+              "program_blob": "488a124a7e71e222067d5e27b2efc9aa5a3ea015",
+              "root": "scripts/h62/item2/audit-precompiles/test_successor_acceptance.py",
+              "root_blob": "a44c21052e9734018f922ff4dc7d9c68f4dafa87",
+              "root_line": 4
+            }
+          }
+        ],
+        "path": "scripts/h62/item2/audit-precompiles/.gitignore",
+        "provenance": {
+          "blob": "c18dd8d83ceed1806b50b0aaa46beb7e335fff13",
+          "commit": "c552a7f12fb45f663f761dd58f253657e939c8b4",
+          "path": "scripts/h62/item2/audit-precompiles/.gitignore"
+        },
+        "purpose": "Exact Git ignore policy for the implicit CPython cache of the reviewed bytecode-enabled child launch and sibling import. Source-policy credit only; launch/import reachability and external interpreter environment are not execution or pass claims. No helper, output, proof or runtime credit."
+      },
+      {
+        "blob": "43ae0e2a6c6d8fca34872506ca0f2e64194fec7c",
+        "matches": [
+          {
+            "line": 1,
+            "output": "__pycache__/",
+            "producer": {
+              "driver": "scripts/h62/item3/g52-differential/engine_payload_reference.mjs",
+              "driver_blob": "5cefcbe5dc1ef8082ac17636ec788f20d3ebea93",
+              "driver_line": 107,
+              "import_line": 12,
+              "literal": "eest_export.py",
+              "module": "scripts/h62/item3/g52-differential/pipeline.py",
+              "module_blob": "31e3aae81e884d111cb4b14aa2502b71559ccc16",
+              "program": "scripts/h62/item3/g52-differential/eest_export.py",
+              "program_blob": "ad0353db5e76003b5b825364bac84c16ec7cd341",
+              "root": "tests/h62/item3/g52-differential/engine_conversion_failure.test.mjs",
+              "root_blob": "72c9386ed126b2f75919c1cfce98a071a22dbfe7",
+              "root_line": 8
+            }
+          }
+        ],
+        "path": "scripts/h62/item3/g52-differential/.gitignore",
+        "provenance": {
+          "blob": "43ae0e2a6c6d8fca34872506ca0f2e64194fec7c",
+          "commit": "d448d0f7658bec8e4a41e0d35b00dea98154c580",
+          "path": "scripts/h62/item3/g52-differential/.gitignore"
+        },
+        "purpose": "Exact Git ignore policy for the implicit CPython cache of the reviewed bytecode-enabled child launch and sibling import. Source-policy credit only; launch/import reachability and external interpreter environment are not execution or pass claims. No helper, output, proof or runtime credit."
+      }
+    ]
+  },
   "routes": {
     "standalone": [
       {
