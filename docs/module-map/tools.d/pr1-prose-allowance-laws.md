@@ -1,0 +1,2 @@
+| `Docs/ProseCalibrated/Allowance.lean` | Exact allowance arithmetic: rational order, componentwise minimum, numerator antitonicity, floor/boundary evaluation, equivalence invariance, and zero calibration laws over `Goals.ProseCalibrated`. |
+| `Examples/Docs/ProseCalibrated/Allowance.lean` | Checks the complete public types of the seven allowance arithmetic laws and four helpers against their proved constants. |
