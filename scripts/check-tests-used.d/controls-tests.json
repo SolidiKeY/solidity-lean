@@ -744,6 +744,13 @@
         "source_blob": "bf981bc5d2219f6a4a6131ecbcfc771f61af9fa2",
         "command": ["node", "--test", "tests/h62/item3/g52-differential/transaction_admission.test.mjs"],
         "kind": "node-test"
+      },
+      {
+        "path": "tests/h62/item3/g52-differential/eest_rejection_integration.test.mjs",
+        "input_revision": "43fff0f6ffab4af18a40aceb8226b1166bffc6b0",
+        "source_blob": "ca3e68c73da0b0352f6f3112ca592bc2fa905438",
+        "command": ["node", "--test", "tests/h62/item3/g52-differential/eest_rejection_integration.test.mjs"],
+        "kind": "node-test"
       }
     ]
   },
