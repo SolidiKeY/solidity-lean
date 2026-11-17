@@ -496,6 +496,123 @@ def decode (r : Request) : Option SourceProgram :=
 
 end Decode
 
+/-! ## The observation policies (H1021)
+
+No events; the outcome at the first horizon that completes. Only the kind of an
+outcome is observed (success or failure, with no data): the intrinsic halt
+keeps no panic code, so data cannot be compared at this level, and it is left
+to `relates`. Journal and event faithfulness is an exposed obligation that
+these policies do not discharge. Every environment and horizon is allowed. -/
+namespace Observe
+
+open Solidity.Roadmap
+
+/-- A Source result's outcome. A timeout has not completed; a stuck run (a
+run-time type mismatch) never counts as completed. -/
+def sourceOutcome {α : Type} : Source.R α → Option Outcome
+  | .ok _ => some (.success [])
+  | .error (.revert _) => some (.revert [])
+  | .error (.stuck _) | .error .timeout => none
+
+/-- A target result's outcome. Divergence and exhaustion do not complete. -/
+def targetOutcome {α : Type} : TRes α → Option Outcome
+  | .ok _ => some (.success [])
+  | .error .revert | .error .panic | .error (.revertWith _) => some (.revert [])
+  | .error .diverge | .error .exhausted => none
+
+/-- The outcome at the first completing horizon up to `n`. -/
+def first (f : Nat → Option Outcome) : Nat → Option Outcome
+  | 0 => f 0
+  | n + 1 => match first f n with
+    | some o => some o
+    | none => f (n + 1)
+
+theorem first_succ_of_some {f : Nat → Option Outcome} {n : Nat} {o : Outcome}
+    (e : first f n = some o) : first f (n + 1) = some o := by
+  simp only [first, e]
+
+theorem first_mono {f : Nat → Option Outcome} {n n' : Nat} {o : Outcome} (h : n ≤ n')
+    (e : first f n = some o) : first f n' = some o := by
+  induction h with
+  | refl => exact e
+  | step _ ih => exact first_succ_of_some ih
+
+/-- A prefix with no events. -/
+def silent (o : Option Outcome) : Prefix Event Outcome := ⟨[], o⟩
+
+/-- First-completion observation is consistent with no fact about the
+evaluator: once an outcome is seen it is kept. -/
+theorem first_consistent (f : Nat → Option Outcome) :
+    Prefixes.Consistent (fun n => silent (first f n)) := by
+  intro n n' h
+  refine ⟨List.prefix_refl _, ?_⟩
+  cases e : first f n with
+  | none => exact .inl (by simp only [silent, e])
+  | some o => exact .inr (by simp only [silent, e, first_mono h e])
+
+/-- The Source policy: the first completing horizon of the actual run. -/
+def source (s : SourceProgram) :
+    ObservationPolicy (fun e n => @SourceExecution.result s e n) where
+  allowed _ := True
+  admissible _ := True
+  forward _ _ := True
+  guard _ _ := True
+  observe _ n run := silent (first (fun m => sourceOutcome (run m).1) n)
+  consistent _ := first_consistent _
+
+/-- The target policy: the model run has no horizon, so every bound observes
+its one result. -/
+def target {C : Contract} {Γ : Ctx} (p : Blk C Γ) :
+    ObservationPolicy (fun (e : State C Γ) (_ : Nat) => p.2.run e) where
+  allowed _ := True
+  admissible _ := True
+  forward _ _ := True
+  guard _ _ := True
+  observe _ n run := silent (targetOutcome (run n))
+  consistent _ := fun _ _ _ => Prefix.Le.refl _
+
+end Observe
+
+/-! ## The allocation trace (H1023)
+
+One scope per request: every name in scope is protected, and the generated
+identifiers are the fresh-shaped spellings of the run whose index lies in the
+run's fresh-counter interval. This over-approximates: callee-local rebinding
+and memo reuse are not given scopes of their own. It reads the lowered raw
+output and the locals after elaboration; a temporary that occurs only inside
+the intrinsic program is not listed, so the trace is not yet complete. -/
+namespace Allocation
+
+/-- Every name in scope of the request: caller and callee locals, state
+variables, functions, names the scope marks as user-supplied, and the names
+the raw input reads. -/
+def protectedNames (r : Request) : List String :=
+  r.input.before.locals.1.map Prod.fst ++
+    (r.callee.map fun c => c.locals.map Prod.fst).getD [] ++
+    r.contract.vars.map Prod.fst ++ r.contract.funs.map Prod.fst ++
+    r.input.scope.funs.map Prod.fst ++ r.input.scope.mutableFreshNames ++
+    r.input.raw.flatMap RawStmt.names
+
+/-- The fresh identifiers among `spellings` with index in `[lo, hi)`. -/
+def generated (names : FreshNames) (lo hi : Nat) (spellings : List String) :
+    List (String × Nat) :=
+  spellings.filterMap fun s =>
+    (names.parse s).filter fun id => decide (lo ≤ id.2) && decide (id.2 < hi)
+
+/-- The one scope of a run, from the counter before lowering to the counter
+after elaboration. -/
+def scope (r : Request) (o : ProductionOutput) (after : Checker.Snapshot) : AllocationScope :=
+  ⟨protectedNames r, generated r.input.names r.input.before.locals.2 after.locals.2
+    (o.raw.flatMap RawStmt.names ++ after.locals.1.map Prod.fst)⟩
+
+/-- The trace of a run is its one scope. -/
+def trace (r : Request) (o : ProductionOutput) (after : Checker.Snapshot)
+    (_ : SProg r.contract) (_ : Blk r.contract r.context.ctx)
+    (scopes : List AllocationScope) : Prop :=
+  scopes = [scope r o after]
+
+end Allocation
+
 /-! ## The concrete boundary, as far as the decoder fixes it
 
 Admission and association are fixed here: every request whose whole pipeline
