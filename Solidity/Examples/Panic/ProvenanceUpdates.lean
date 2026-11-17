@@ -125,6 +125,94 @@ example (σ : State C Γ) (l : MLoc C Γ (.prim .uint)) {R : RefTy} (ref : HRef 
   rw [Run.clear_prim_error σ _ _ (by rw [memoryRead, evalProducer_origin _ _ origin])]
   exact congrArg some (Raised.ofOrigin_site _ _ _)
 
+/-! A storage receiver indexed at `1 / 0` fails at the zero-divisor site, code 0x12. -/
+
+section DivIndex
+variable {R : RefTy} {V : Ty} (σ : State C Γ) (it : IndexTy R .uint V)
+  (b : SPath C Γ (.ref R)) (ref : SRef C (.ref R)) (hr : path σ b = .ok ref)
+
+/-- `b[1 / 0]` in storage. -/
+def divLoc : Loc C Γ V := .index it b divZero
+
+include hr in
+theorem divLoc_site : site? (loc σ (divLoc it b)) = some .zeroDivisor := by
+  simp only [divLoc, loc, hr]
+  exact site_ok_bind rfl
+
+include hr in
+/-- `delete b[1 / 0];` -/
+example : code? (Run.delete (divLoc it b) σ) = some 0x12 :=
+  code_eq .zeroDivisor (Run.delete_coded _ σ) (site_bind (divLoc_site σ it b ref hr))
+
+include hr in
+/-- `p = b[1 / 0];` for a storage pointer `p`. -/
+example {R' : RefTy} (it : IndexTy R .uint (.ref R')) (p : Idx Γ (.alias R')) :
+    code? (Run.rebind p (.path (.loc (divLoc it b))) σ) = some 0x12 :=
+  code_eq .zeroDivisor (Run.rebind_coded p _ σ)
+    (site_bind (site_bind (divLoc_site σ it b ref hr)))
+
+include hr in
+/-- `T storage p = b[1 / 0];` -/
+example {R' : RefTy} (it : IndexTy R .uint (.ref R')) :
+    code? (Run.declStorage R' (some (.path (.loc (divLoc it b)))) σ) = some 0x12 :=
+  code_eq .zeroDivisor (Run.declStorage_coded R' _ σ)
+    (site_bind (site_bind (divLoc_site σ it b ref hr)))
+
+include hr in
+/-- `m = b[1 / 0];` for a memory local `m`: the copy reads the failing receiver. -/
+example {R' : RefTy} (it : IndexTy R .uint (.ref R')) (m : Idx Γ (.mem R'))
+    (hm : (Ty.ref R').mapFree = true) :
+    code? (Run.rebindMem m (.copy (.loc (divLoc it b)) hm) σ) = some 0x12 :=
+  code_eq .zeroDivisor (Run.rebindMem_coded m _ σ)
+    (site_bind (site_bind (divLoc_site σ it b ref hr)))
+
+include hr in
+/-- `T memory m = b[1 / 0];` -/
+example {R' : RefTy} (it : IndexTy R .uint (.ref R')) (hm : (Ty.ref R').mapFree = true) :
+    code? (Run.declMem R' (some (.copy (.loc (divLoc it b)) hm)) hm σ) = some 0x12 :=
+  code_eq .zeroDivisor (Run.declMem_coded R' _ hm σ)
+    (site_bind (site_bind (divLoc_site σ it b ref hr)))
+
+include hr in
+/-- `b[1 / 0] = m;` from a memory object `m`. -/
+example {R' : RefTy} (it : IndexTy R .uint (.ref R')) (m : MPath C Γ (.ref R'))
+    (obj : MVal σ.H (.ref R')) (hm : mpath σ m = .ok obj) :
+    code? (Run.assignFromMem (divLoc it b) m σ) = some 0x12 :=
+  code_eq .zeroDivisor (Run.assignFromMem_coded _ m σ) <| by
+    simp only [Run.assignFromMem, hm]
+    exact site_ok_bind (site_bind (divLoc_site σ it b ref hr))
+
+include hr in
+/-- `y = b[1 / 0].push();` -/
+example {p : PrimTy} (it : IndexTy R .uint (.array (.prim p))) (y : Idx Γ (.val p)) :
+    code? (Run.assignLocalPush y (.loc (divLoc it b)) σ) = some 0x12 :=
+  code_eq .zeroDivisor (Run.assignLocalPush_coded y _ σ)
+    (site_bind (site_bind (divLoc_site σ it b ref hr)))
+
+include hr in
+/-- `b[1 / 0].push()++;` -/
+example {p : PrimTy} (it : IndexTy R .uint (.array (.prim p))) (hp : p.isNumeric = true) :
+    code? (Run.pushIncDec .postInc hp (.loc (divLoc it b)) σ) = some 0x12 :=
+  code_eq .zeroDivisor (Run.pushIncDec_coded .postInc hp _ σ)
+    (site_bind (divLoc_site σ it b ref hr))
+
+include hr in
+/-- `b[1 / 0].push() += 1;`: the right-hand side `1` first, then the receiver. -/
+example (it : IndexTy R .uint (.array (.prim .uint))) :
+    code? (Run.pushOpAssign .add rfl (.loc (divLoc it b)) lit1 σ) = some 0x12 :=
+  code_eq .zeroDivisor (Run.pushOpAssign_coded .add rfl _ lit1 σ)
+    (site_ok_bind (site_bind (divLoc_site σ it b ref hr)))
+
+end DivIndex
+
+/-- `b[1 / 0] = new uint[](n);`: the array is allocated, then the receiver fails. -/
+example {R R' : RefTy} (σ : State C Γ) (it : IndexTy R .uint (.ref R')) (b : SPath C Γ (.ref R))
+    (n : Simple C Γ .uint) (h : R'.newArrOk = true) (ref : SRef C (.ref R))
+    (hr : path (σ.copyStToMG (newArrT R' (n.evalT σ) h) (RefTy.mapFree_of_newArrOk h)).st b =
+      .ok ref) :
+    code? (Run.assignNew (.store (divLoc it b)) n h σ) = some 0x12 :=
+  code_eq .zeroDivisor (Run.assignNew_coded _ n h σ) (site_bind (divLoc_site _ it b ref hr))
+
 /-! `pop()` on an empty array: the empty-pop site, code 0x31. -/
 
 /-- `values.pop()` on an empty array retains the empty-pop site, hence code 0x31. -/
