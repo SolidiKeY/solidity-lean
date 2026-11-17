@@ -9,6 +9,7 @@ time is reported as well, but it is informational only.
 scripts/heartbeats/collect.sh [--timeout S] MODULE|PATH.lean...
 scripts/heartbeats/collect.sh --write BASELINE.json MODULE...
 scripts/heartbeats/collect.sh --check BASELINE.json [--tolerance PCT] [--min UNITS] MODULE...
+scripts/heartbeats/collect.sh --lake [the options above] MODULE...
 ```
 
 Imports must already be built (`lake build`, or `lake build` of the module's
@@ -34,6 +35,35 @@ anonymous `instance`, …). Exit status: 0 = success, 1 = elaboration
 errors or ratchet failure, 2 = usage or build error, 124 = `--timeout` expired.
 `--timeout` is only a backstop against hangs and is off by default.
 
+## One elaboration (`--lake`)
+
+Without `--lake` the collector writes no build product, so a module that is counted
+and then built is elaborated twice. With `--lake` the counted run is the module's
+`lake build` (H1088): `collect.sh` runs `lake build MODULE` with `LEAN_SYSROOT` set to
+a temporary copy of the toolchain made of links, whose `bin/lean` starts
+`hbcollect --lean` for that one module and the real `lean` for anything else. The
+driver takes the arguments Lake gives `lean` (`-o`, `-i`, `-c`, `--setup`, `--json`),
+reads the imports Lake resolved, writes the `.olean`, `.ilean` and `.c`, and prints its
+messages as `lean --json` does. Lake hashes the files and writes the trace itself, and
+a trace names the toolchain by `lean --githash`, so Lake with the real `lean` then
+takes the module as up to date and builds its importers against it. The JSON line and
+the counts are the same as without `--lake`.
+
+- A module that is already up to date is not elaborated: no line, a note on stderr,
+  exit status unchanged. `--timeout` covers the whole `lake build`, imports included.
+- The `.olean` is byte for byte the one `lean -DElab.async=false` writes. It can differ
+  from the default (asynchronous) `lean`'s in the order of its constants, so an
+  importer built against the other one is rebuilt once.
+- The `.ilean` lists the imports but no references: info trees stay off, because
+  recording them changes the counts. Editor "find references" for such a module needs a
+  normal rebuild of it.
+- Files with a `module` header, plugins, dynlibs, `leanOptions` and other `lean`
+  arguments are refused (exit 2) rather than built differently, and so is a `.lean`
+  path outside the checkout.
+- `--check` and `--write` see only the modules that were elaborated.
+
+`scripts/ci/build-slow-examples.sh` uses this for every slow module it has to rebuild.
+
 ## Ratchet
 
 Baselines are JSON (`collect.d/ratchet.py`). `--write` records each module's total,
@@ -49,4 +79,6 @@ the merge base) and check them in; consumers (hb1–hb3) own their baseline file
 Self-test: `python3 -B tests/heartbeats/test_collect.py`. It writes its fixture
 (no new Lean lines under `tests/`) to a temporary file and checks that the
 fixture's `decide +kernel` proof is counted, that repeated runs agree and that
-the ratchet behaves as described.
+the ratchet behaves as described. For `--lake` it sets up a small Lake project in a
+temporary directory and checks that the counts equal the plain collector's, that Lake
+takes the module as up to date, and that an importer builds without elaborating it again.
