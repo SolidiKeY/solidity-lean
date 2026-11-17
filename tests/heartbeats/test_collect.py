@@ -177,6 +177,16 @@ class LakeBuild(unittest.TestCase):
         self.assertEqual((digest(olean), os.stat(olean).st_mtime_ns), before)
         self.assertTrue(os.path.exists(os.path.join(lib, "B.olean")))
 
+        # The collector itself reads the imports Lake resolved: count a changed `Fix.B`.
+        with open(os.path.join(self.proj, "Fix", "B.lean"), "a") as f:
+            f.write("\ntheorem again : twice 2 = 2 := by decide\n")
+        rc, rows, err = self.collect("--lake", "Fix.B")
+        self.assertEqual(rc, 0, err)
+        row, = rows
+        self.assertEqual([c["name"] for c in row["commands"]], ["uses", "twice", "again"])
+        self.assertEqual((digest(olean), os.stat(olean).st_mtime_ns), before)
+        self.assertEqual(self.lake("build", "--no-build", "Fix.B").returncode, 0)
+
         # Up to date: Lake runs nothing, so there is no line, and that is not a failure.
         rc, rows, err = self.collect("--lake", "Fix.A")
         self.assertEqual((rc, rows), (0, []), err)

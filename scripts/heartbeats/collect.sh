@@ -63,11 +63,13 @@ for arg in "$@"; do
   esac
   [ -f "$file" ] || { echo "collect.sh: no file $file for $mod" >&2; status=2; continue; }
   if [ "$lake" = 1 ]; then
+    case "$file" in /*) echo "collect.sh: --lake needs a module of this package, not $file" >&2; status=2; continue;; esac
     one=$fake/report; : >"$one"
     # -q: warnings and errors only, not one line per fetched import.
     cmd=(lake -q build "$mod")
     [ -z "$timeout_s" ] || cmd=(timeout --kill-after=10s "$timeout_s" "${cmd[@]}")
-    HBCOLLECT_FILE=$root/$file HBCOLLECT_REPORT=$one LAKE_OVERRIDE_LEAN=true LEAN_SYSROOT=$fake \
+    # Lake names the file by its physical path.
+    HBCOLLECT_FILE=$(realpath -- "$root/$file") HBCOLLECT_REPORT=$one LAKE_OVERRIDE_LEAN=true LEAN_SYSROOT=$fake \
       "${cmd[@]}" >&2 </dev/null
     rc=$?; [ "$rc" -ne 137 ] || rc=124
     # Lake does not run `lean` for a module that is already up to date: no line then.

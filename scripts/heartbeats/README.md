@@ -57,8 +57,10 @@ the counts are the same as without `--lake`.
 - The `.ilean` lists the imports but no references: info trees stay off, because
   recording them changes the counts. Editor "find references" for such a module needs a
   normal rebuild of it.
-- Files with a `module` header, plugins, dynlibs and other `lean` arguments are
-  refused (exit 2) rather than built differently.
+- Files with a `module` header, plugins, dynlibs, `leanOptions` and other `lean`
+  arguments are refused (exit 2) rather than built differently, and so is a `.lean`
+  path outside the checkout.
+- `--check` and `--write` see only the modules that were elaborated.
 
 `scripts/ci/build-slow-examples.sh` uses this for every slow module it has to rebuild.
 

@@ -81,8 +81,10 @@ unsafe def main (args : List String) : IO UInt32 := do
       IO.eprintln "usage: hbcollect [--async] FILE MODULE | hbcollect --lean REPORT FILE --setup SETUP.json [-o OLEAN] [-i ILEAN] [-c C] [--json]"
       return 2
   if let some setup := setup? then
-    unless setup.dynlibs.isEmpty && setup.plugins.isEmpty && !setup.isModule do
-      IO.eprintln "hbcollect: --lean does not support dynlibs, plugins or module-system files"
+    -- Options too: `lean` reparses them after the imports (`weak.` prefixes, typed values).
+    unless setup.dynlibs.isEmpty && setup.plugins.isEmpty && !setup.isModule
+        && setup.options.values.isEmpty do
+      IO.eprintln "hbcollect: --lean does not support dynlibs, plugins, options or module-system files"
       return 2
   initSearchPath (← findSysroot)
   enableInitializersExecution
@@ -91,9 +93,6 @@ unsafe def main (args : List String) : IO UInt32 := do
   let opts : Options := ({} : Options)
     |>.set `Elab.async async
     |>.set `internal.cmdlineSnapshots true
-  let opts := match setup? with
-    | some setup => opts.mergeBy (fun _ _ o => o) setup.options.toOptions
-    | none => opts
   let inputCtx := Parser.mkInputContext input file
   let t0 ← IO.monoNanosNow
   let h0 ← IO.getNumHeartbeats
