@@ -13,7 +13,7 @@ namespace Solidity.Evm.Memory
 open Semantics
 
 /-- Every identity after one typed allocation is either old or its fresh one. -/
-private theorem allocRef_split {H : HTy} {R T : RefTy} (hp : Heap H) (o : MObj H R)
+theorem allocRef_split {H : HTy} {R T : RefTy} (hp : Heap H) (o : MObj H R)
     (r : HRef (H ++ [R]) T) :
     (∃ q : HRef H T, q.wk (List.prefix_append H [R]) = r) ∨
       (T = R ∧ HEq r (hp.alloc o).2) := by

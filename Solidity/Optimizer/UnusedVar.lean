@@ -327,7 +327,7 @@ theorem declLocal_ok {p : PrimTy} (init : Option (Val C Γ p)) (hi : initSafe in
     | read | binop | unop | ternary | readMem | len | mlen | modular | hash =>
       simp only [initSafe, Val.isSimple, Bool.false_eq_true] at hi
 
-private theorem drop_trans {H : HTy} {Γ Δ : Ctx} (a : Ext Γ Δ) : {Ε : Ctx} → (b : Ext Δ Ε) →
+theorem drop_trans {H : HTy} {Γ Δ : Ctx} (a : Ext Γ Δ) : {Ε : Ctx} → (b : Ext Δ Ε) →
     (e : TEnv C H Ε) → TEnv.drop (a.trans b) e = TEnv.drop a (TEnv.drop b e)
   | _, .refl, _ => rfl
   | _, .push b, e => drop_trans a b e.2

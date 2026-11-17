@@ -2,6 +2,7 @@ import Solidity.Evm.Repr
 import Solidity.Evm.Signed
 import Solidity.Evm.Exp
 import Solidity.Semantics.Run
+import Solidity.Theory.Typed.Leaves
 
 /-!
 # The machine lemmas of the simulation
@@ -919,8 +920,7 @@ theorem zero_prim_repr {st : WordStore} {p : PrimTy} {x : Slot}
 
 /-- The slot a `push` of a primitive lands on: its default. -/
 theorem pushSlot_prim (p : PrimTy) (l : List (SVal (.prim p))) :
-    (pushSlot (.prim p) l).1 = SVal.dflt (.prim p) := by
-  cases l <;> rfl
+    (pushSlot (.prim p) l).1 = SVal.dflt (.prim p) := Solidity.Storage.pushSlot_fst_prim l
 
 /-- **A `push` in bounds**: the array not full, and the push its save. -/
 theorem push_eq {E : Ty} {stor : Solidity.Storage C} {r : SRef C (.ref (.array E))} {k : Nat}

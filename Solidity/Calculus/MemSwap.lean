@@ -1,6 +1,8 @@
 import Solidity.Calculus.HashSwap
 import Solidity.Calculus.RewritePast.Scope
 import Solidity.Semantics.AllocBytes
+import Solidity.Theory.Typed.Leaves
+import Solidity.Calculus.HashKinds
 
 /-!
 # Fresh memory arrays read as words (M7, plan step 6)
@@ -1070,10 +1072,7 @@ def mxBndV {R : RefTy} {q : PrimTy} (n : PrimTy.uint.Denote) : ArrTy R (.prim q)
   | .dyn => n
   | @ArrTy.fixed _ N => uintOfNat N
 
-theorem mxUint_nonneg (x : PrimTy.uint.Denote) : 0 ≤ x.1 := by
-  have h := x.2
-  simp only [PrimTy.inRange, decide_eq_true_eq] at h
-  exact h.1
+theorem mxUint_nonneg (x : PrimTy.uint.Denote) : 0 ≤ x.1 := Solidity.PrimTy.uint_nonneg x
 
 theorem mxLenU_toNat (n : PrimTy.uint.Denote) (h : n.1.toNat < 2 ^ 256) : lenU n.1.toNat h = n :=
   Subtype.ext (by show ((n.1.toNat : Nat) : Int) = n.1; exact Int.toNat_of_nonneg (mxUint_nonneg n))
@@ -1302,12 +1301,8 @@ theorem _root_.Solidity.RefTy.mxArr?_ok : (R : RefTy) → {x : (q : PrimTy) × A
   | .array (.ref _), _, h | .fixed (.ref _) _, _, h | .struct _, _, h | .mapping _ _, _, h => by
     simp only [RefTy.mxArr?, reduceCtorEq] at h
 
-theorem mxUintOfNat_toNat (k : PrimTy.uint.Denote) : uintOfNat k.1.toNat = k := by
-  have h := k.2
-  simp only [PrimTy.inRange, decide_eq_true_eq] at h
-  have hl : k.1.toNat < 2 ^ 256 := by omega
-  rw [uintOfNat_eq_lenU hl]
-  exact mxLenU_toNat k hl
+theorem mxUintOfNat_toNat (k : PrimTy.uint.Denote) : uintOfNat k.1.toNat = k :=
+  Solidity.uintOfNat_toNat k
 
 theorem mxBndV_lt {R : RefTy} {q : PrimTy} (n : PrimTy.uint.Denote) (a : ArrTy R (.prim q)) :
     (mxBndV n a).1.toNat < 2 ^ 256 := by
@@ -1331,7 +1326,7 @@ theorem mxElems_mk {H : HTy} {R : RefTy} {q : PrimTy} (n : PrimTy.uint.Denote) (
   | fixed => rw [MObj.elems_fixed]; rfl
 
 theorem mxMem_finRange {n : Nat} (j : Fin n) : j ∈ List.finRange n :=
-  List.mem_iff_getElem.2 ⟨j.val, by simp, by simp⟩
+  Solidity.Decide.mem_finRange' j
 
 section Realize
 
@@ -1440,8 +1435,7 @@ end Realize
 theorem mxArrTy_eq {R : RefTy} {E E' : Ty} (a : ArrTy R E) (a' : ArrTy R E') : E = E' := by
   cases a <;> cases a' <;> rfl
 
-theorem mxArrTy_heq {R : RefTy} {E : Ty} (a a' : ArrTy R E) : a = a' := by
-  cases a <;> cases a' <;> rfl
+theorem mxArrTy_heq {R : RefTy} {E : Ty} (a a' : ArrTy R E) : a = a' := Solidity.ArrTy.eq a a'
 
 /-- A write of a word at an array element lands exactly where the element
 reads. -/
@@ -2019,9 +2013,8 @@ theorem MxRel.wrs (hr : MxRel θ τ ρ) {ws : List (MxW θ)} {θ' : MxMap C Γ �
     exact hr.apart i j h
 
 theorem mxVDen_wk {H H' : HTy} (e : H <+: H') :
-    (t : LTy) → (v : t.TDenote C H) → LTy.VDen.ofT t (LTy.TDenote.wk e t v) = LTy.VDen.ofT t v
-  | .val _, _ | .alias _, _ | .mem _, none | .mem _, some _ | .old, _ | .oldNet, _
-  | .kint, _ => rfl
+    (t : LTy) → (v : t.TDenote C H) → LTy.VDen.ofT t (LTy.TDenote.wk e t v) = LTy.VDen.ofT t v :=
+  Solidity.LTy.VDen.ofT_wk e
 
 /-- **A memory update of writes, cut.** -/
 theorem mx_updMem {m : Modality} {M : Tm C Γ .mem} {φ : Fml C Γ}

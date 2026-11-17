@@ -125,8 +125,9 @@ if fragment_helper.is_file():
     declared_module_cli = fragment_rules.declared_module_cli
     validated_module_entries = lambda graph, entries: fragment_rules.validated_module_entries(globals(), graph, entries)
     SOURCE_ROLE_KINDS = fragment_rules.SOURCE_ROLE_KINDS
+    LATE_SOURCE_ROLE_KINDS = fragment_rules.LATE_SOURCE_ROLE_KINDS
 else:
-    SOURCE_ROLE_KINDS = {}
+    SOURCE_ROLE_KINDS = LATE_SOURCE_ROLE_KINDS = {}
     # Historical standalone drivers copy only check-tests-used*.py files.
     FRAGMENT_SECTIONS = ('standalone', 'generators', 'reads', 'orphans', 'module_entries')
     CONSUMER_SECTIONS = ()
@@ -617,6 +618,7 @@ def validated_routes(graph, catalog, extra_reads=()):
                 raise ValueError('unverifiable historical runner demonstration: ' + request)
     for entry in catalog['standalone']:
         if entry.get('kind') in SOURCE_ROLE_KINDS: SOURCE_ROLE_KINDS[entry['kind']](globals(), graph, catalog, entry); continue
+        if entry.get('kind') in LATE_SOURCE_ROLE_KINDS: continue
         required = {'path', 'input_revision', 'source_blob', 'command', 'kind'}
         if entry.get('kind') == 'manual-reproducer': required.add('documentation')
         if entry.get('kind') == 'runnable-entrypoint': required.update(('entry_line', 'purpose', 'input_scope', 'other_reads'))
@@ -755,6 +757,8 @@ def validated_routes(graph, catalog, extra_reads=()):
                 purpose = 'Fixture roles not reviewed; passing test status and IO alone do not establish data eligibility.'
             graph.roots['validated:' + p].update({'purpose': purpose, 'data_use_scope': scopes, 'other_reads': other})
         if entry['kind'] == 'manual-reproducer': graph.roots['validated:' + p]['documentation'] = entry['documentation']
+    for entry in catalog['standalone']:
+        if entry.get('kind') in LATE_SOURCE_ROLE_KINDS: LATE_SOURCE_ROLE_KINDS[entry['kind']](globals(), graph, catalog, entry)
     for route in itertools.chain(read_routes(catalog), extra_reads):
         if set(route) != {'runner', 'input_revision', 'frames', 'target', 'target_blob', 'operation'}:
             raise ValueError('invalid validated read route')

@@ -1,0 +1,823 @@
+{
+ "min_units": 100,
+ "modules": {
+  "Solidity.Calculus.MemoryLoopReplay": {
+   "commands": {
+    "Solidity.Seq.MemoryReplay.Hint": {
+     "heartbeats": 520.252,
+     "line": 211
+    },
+    "Solidity.Seq.MemoryReplay.Input": {
+     "heartbeats": 165.504,
+     "line": 205
+    },
+    "Solidity.Seq.MemoryReplay.Job": {
+     "heartbeats": 272.739,
+     "line": 222
+    },
+    "Solidity.Seq.MemoryReplay.LayerCandidate": {
+     "heartbeats": 177.874,
+     "line": 266
+    },
+    "Solidity.Seq.MemoryReplay.Snapshot": {
+     "heartbeats": 252.358,
+     "line": 231
+    },
+    "Solidity.Seq.MemoryReplay.Visit": {
+     "heartbeats": 489.943,
+     "line": 168
+    },
+    "Solidity.Seq.MemoryReplay.abstractFirstExact": {
+     "heartbeats": 842.665,
+     "line": 372
+    },
+    "Solidity.Seq.MemoryReplay.assemble": {
+     "heartbeats": 2043.224,
+     "line": 799
+    },
+    "Solidity.Seq.MemoryReplay.assignInput": {
+     "heartbeats": 1119.134,
+     "line": 362
+    },
+    "Solidity.Seq.MemoryReplay.canonicalContext": {
+     "heartbeats": 991.443,
+     "line": 255
+    },
+    "Solidity.Seq.MemoryReplay.checkLayerConjunction": {
+     "heartbeats": 400.144,
+     "line": 290
+    },
+    "Solidity.Seq.MemoryReplay.checkedFallbackPair": {
+     "heartbeats": 1555.896,
+     "line": 470
+    },
+    "Solidity.Seq.MemoryReplay.checkedGuard": {
+     "heartbeats": 3809.933,
+     "line": 524
+    },
+    "Solidity.Seq.MemoryReplay.checkedRigidFunction": {
+     "heartbeats": 4873.073,
+     "line": 425
+    },
+    "Solidity.Seq.MemoryReplay.checkedRigidPair": {
+     "heartbeats": 2146.83,
+     "line": 493
+    },
+    "Solidity.Seq.MemoryReplay.defineChecked": {
+     "heartbeats": 3922.779,
+     "line": 307
+    },
+    "Solidity.Seq.MemoryReplay.discover": {
+     "heartbeats": 25327.306,
+     "line": 603
+    },
+    "Solidity.Seq.MemoryReplay.discoverNext": {
+     "heartbeats": 1057.946,
+     "line": 855
+    },
+    "Solidity.Seq.MemoryReplay.expected": {
+     "heartbeats": 851.92,
+     "line": 346
+    },
+    "Solidity.Seq.MemoryReplay.flushLayers": {
+     "heartbeats": 1500.178,
+     "line": 786
+    },
+    "Solidity.Seq.MemoryReplay.gather": {
+     "heartbeats": 1057.903,
+     "line": 180
+    },
+    "Solidity.Seq.MemoryReplay.instantiateCertificateType": {
+     "heartbeats": 781.104,
+     "line": 416
+    },
+    "Solidity.Seq.MemoryReplay.layer": {
+     "heartbeats": 2310.712,
+     "line": 565
+    },
+    "Solidity.Seq.MemoryReplay.layerComponent": {
+     "heartbeats": 918.813,
+     "line": 281
+    },
+    "Solidity.Seq.MemoryReplay.layerConjunction": {
+     "heartbeats": 805.98,
+     "line": 272
+    },
+    "Solidity.Seq.MemoryReplay.layerTrans": {
+     "heartbeats": 136.692,
+     "line": 406
+    },
+    "Solidity.Seq.MemoryReplay.propose": {
+     "heartbeats": 291.619,
+     "line": 200
+    },
+    "Solidity.Seq.MemoryReplay.requireKernelChecking": {
+     "heartbeats": 226.454,
+     "line": 246
+    },
+    "Solidity.Seq.MemoryReplay.runExpr": {
+     "heartbeats": 151.429,
+     "line": 357
+    },
+    "Solidity.Seq.MemoryReplay.saveCheckpoint": {
+     "heartbeats": 2344.229,
+     "line": 889
+    },
+    "Solidity.Seq.MemoryReplay.timedMeta": {
+     "heartbeats": 459.048,
+     "line": 300
+    },
+    "Solidity.Seq.memoryReplayAll": {
+     "heartbeats": 110.053,
+     "line": 48
+    },
+    "Solidity.Seq.memoryReplayAllocAll": {
+     "heartbeats": 110.009,
+     "line": 56
+    },
+    "Solidity.Seq.memoryReplayBind": {
+     "heartbeats": 110.919,
+     "line": 52
+    },
+    "Solidity.Seq.memoryReplayLayer": {
+     "heartbeats": 902.018,
+     "line": 9
+    },
+    "Solidity.Seq.memoryReplayLayer_congr": {
+     "heartbeats": 146.22,
+     "line": 61
+    },
+    "Solidity.Seq.memoryReplayModalConsAt": {
+     "heartbeats": 255.652,
+     "line": 66
+    },
+    "Solidity.Seq.memoryReplayRigidUpdEq": {
+     "heartbeats": 163.333,
+     "line": 119
+    },
+    "Solidity.Seq.memoryReplaySplitBoth": {
+     "heartbeats": 180.405,
+     "line": 94
+    },
+    "Solidity.Seq.memoryReplaySplitLeft": {
+     "heartbeats": 143.215,
+     "line": 86
+    },
+    "Solidity.Seq.memoryReplaySplitRight": {
+     "heartbeats": 152.595,
+     "line": 90
+    },
+    "Solidity.Seq.memoryReplayUpd": {
+     "heartbeats": 109.549,
+     "line": 44
+    },
+    "Solidity.Seq.runK_memoryReplayLayer": {
+     "heartbeats": 242.424,
+     "line": 156
+    },
+    "elab#1": {
+     "heartbeats": 4101.682,
+     "line": 825
+    },
+    "elab#2": {
+     "heartbeats": 179.375,
+     "line": 870
+    },
+    "elab#3": {
+     "heartbeats": 1657.934,
+     "line": 873
+    },
+    "elab#4": {
+     "heartbeats": 179.379,
+     "line": 907
+    },
+    "elab#5": {
+     "heartbeats": 1895.502,
+     "line": 910
+    },
+    "elab#6": {
+     "heartbeats": 7505.016,
+     "line": 925
+    },
+    "initialize#1": {
+     "heartbeats": 186.894,
+     "line": 240
+    },
+    "initialize#3": {
+     "heartbeats": 165.648,
+     "line": 251
+    },
+    "initialize#5": {
+     "heartbeats": 156.128,
+     "line": 299
+    },
+    "initialize#6": {
+     "heartbeats": 467.277,
+     "line": 410
+    },
+    "initialize#8": {
+     "heartbeats": 123.058,
+     "line": 601
+    },
+    "instance#1": {
+     "heartbeats": 112.877,
+     "line": 179
+    }
+   },
+   "heartbeats": 82401.98
+  },
+  "Solidity.TestSuite.Derived17": {
+   "commands": {
+    "Solkey.TestSuite.doWhileRunsBodyFirst.proved": {
+     "heartbeats": 4932.873,
+     "line": 40
+    },
+    "Solkey.TestSuite.forBreakKeepsCounter.proved": {
+     "heartbeats": 25711.653,
+     "line": 35
+    },
+    "Solkey.TestSuite.forContinueStillUpdates.proved": {
+     "heartbeats": 20951.383,
+     "line": 30
+    },
+    "Solkey.TestSuite.forWritesStorageArray.proved": {
+     "heartbeats": 46624.417,
+     "line": 45
+    },
+    "Solkey.TestSuite.invariantForCountsArrayLength.proved": {
+     "heartbeats": 191696.221,
+     "line": 50
+    },
+    "Solkey.TestSuite.whileBodyDeclaresLocal.proved": {
+     "heartbeats": 8269.831,
+     "line": 15
+    },
+    "Solkey.TestSuite.whileBreakLeavesLoop.proved": {
+     "heartbeats": 34874.686,
+     "line": 20
+    },
+    "Solkey.TestSuite.whileContinueSkipsRest.proved": {
+     "heartbeats": 21100.483,
+     "line": 25
+    },
+    "Solkey.TestSuite.whileCountsUp.proved": {
+     "heartbeats": 6163.094,
+     "line": 11
+    }
+   },
+   "heartbeats": 360327.904
+  },
+  "Solidity.TestSuite.Derived17MemoryLoop": {
+   "commands": {
+    "example#2": {
+     "heartbeats": 227.935,
+     "line": 8
+    }
+   },
+   "heartbeats": 286.284
+  },
+  "Solidity.TestSuite.MemoryLoopReplay.Assemble00": {
+   "commands": {},
+   "heartbeats": 2192.876
+  },
+  "Solidity.TestSuite.MemoryLoopReplay.Assemble01": {
+   "commands": {},
+   "heartbeats": 2281.732
+  },
+  "Solidity.TestSuite.MemoryLoopReplay.Assemble02": {
+   "commands": {},
+   "heartbeats": 2415.692
+  },
+  "Solidity.TestSuite.MemoryLoopReplay.Assemble03": {
+   "commands": {},
+   "heartbeats": 2270.288
+  },
+  "Solidity.TestSuite.MemoryLoopReplay.Assemble04": {
+   "commands": {},
+   "heartbeats": 2339.035
+  },
+  "Solidity.TestSuite.MemoryLoopReplay.Assemble05": {
+   "commands": {},
+   "heartbeats": 2345.404
+  },
+  "Solidity.TestSuite.MemoryLoopReplay.Assemble06": {
+   "commands": {},
+   "heartbeats": 3026.442
+  },
+  "Solidity.TestSuite.MemoryLoopReplay.Assemble07": {
+   "commands": {},
+   "heartbeats": 2601.362
+  },
+  "Solidity.TestSuite.MemoryLoopReplay.Assemble08": {
+   "commands": {},
+   "heartbeats": 2870.832
+  },
+  "Solidity.TestSuite.MemoryLoopReplay.Assemble09": {
+   "commands": {},
+   "heartbeats": 2281.706
+  },
+  "Solidity.TestSuite.MemoryLoopReplay.Discover00": {
+   "commands": {
+    "Solidity.Seq.MemoryReplay.commandDiscover_memory_replay#20": {
+     "heartbeats": 915.843,
+     "line": 24
+    },
+    "Solidity.Seq.MemoryReplay.commandDiscover_memory_replay#26": {
+     "heartbeats": 1374.876,
+     "line": 30
+    },
+    "Solidity.Seq.MemoryReplay.commandDiscover_memory_replay#37": {
+     "heartbeats": 1139.084,
+     "line": 41
+    },
+    "Solidity.Seq.MemoryReplay.commandDiscover_memory_replay#43": {
+     "heartbeats": 1468.376,
+     "line": 47
+    },
+    "Solidity.Seq.MemoryReplay.commandDiscover_memory_replay#68": {
+     "heartbeats": 3193.862,
+     "line": 72
+    },
+    "Solidity.Seq.MemoryReplay.commandDiscover_memory_replay#80": {
+     "heartbeats": 3727.517,
+     "line": 84
+    },
+    "Solidity.Seq.MemoryReplay.commandDiscover_memory_replay#86": {
+     "heartbeats": 3827.185,
+     "line": 90
+    },
+    "Solidity.Seq.MemoryReplay.commandPrepare_memory_replay_#1": {
+     "heartbeats": 313504.92,
+     "line": 4
+    },
+    "Solidity.Seq.MemoryReplay.commandSave_memory_replay#1": {
+     "heartbeats": 7353.262,
+     "line": 105
+    }
+   },
+   "heartbeats": 341507.524
+  },
+  "Solidity.TestSuite.MemoryLoopReplay.Discover01": {
+   "commands": {
+    "Solidity.Seq.MemoryReplay.commandDiscover_memory_replay#100": {
+     "heartbeats": 10044.004,
+     "line": 103
+    },
+    "Solidity.Seq.MemoryReplay.commandDiscover_memory_replay#11": {
+     "heartbeats": 5128.919,
+     "line": 14
+    },
+    "Solidity.Seq.MemoryReplay.commandDiscover_memory_replay#23": {
+     "heartbeats": 5702.575,
+     "line": 26
+    },
+    "Solidity.Seq.MemoryReplay.commandDiscover_memory_replay#29": {
+     "heartbeats": 5619.726,
+     "line": 32
+    },
+    "Solidity.Seq.MemoryReplay.commandDiscover_memory_replay#54": {
+     "heartbeats": 7252.402,
+     "line": 57
+    },
+    "Solidity.Seq.MemoryReplay.commandDiscover_memory_replay#66": {
+     "heartbeats": 7872.882,
+     "line": 69
+    },
+    "Solidity.Seq.MemoryReplay.commandDiscover_memory_replay#72": {
+     "heartbeats": 5629.322,
+     "line": 75
+    },
+    "Solidity.Seq.MemoryReplay.commandDiscover_memory_replay#88": {
+     "heartbeats": 9425.966,
+     "line": 91
+    },
+    "Solidity.Seq.MemoryReplay.commandSave_memory_replay#1": {
+     "heartbeats": 5711.696,
+     "line": 104
+    }
+   },
+   "heartbeats": 67293.994
+  },
+  "Solidity.TestSuite.MemoryLoopReplay.Discover02": {
+   "commands": {
+    "Solidity.Seq.MemoryReplay.commandDiscover_memory_replay#17": {
+     "heartbeats": 10918.701,
+     "line": 20
+    },
+    "Solidity.Seq.MemoryReplay.commandDiscover_memory_replay#23": {
+     "heartbeats": 4509.419,
+     "line": 26
+    },
+    "Solidity.Seq.MemoryReplay.commandDiscover_memory_replay#48": {
+     "heartbeats": 12595.796,
+     "line": 51
+    },
+    "Solidity.Seq.MemoryReplay.commandDiscover_memory_replay#6": {
+     "heartbeats": 8375.347,
+     "line": 9
+    },
+    "Solidity.Seq.MemoryReplay.commandDiscover_memory_replay#60": {
+     "heartbeats": 13280.166,
+     "line": 63
+    },
+    "Solidity.Seq.MemoryReplay.commandDiscover_memory_replay#66": {
+     "heartbeats": 6594.583,
+     "line": 69
+    },
+    "Solidity.Seq.MemoryReplay.commandDiscover_memory_replay#91": {
+     "heartbeats": 15163.503,
+     "line": 94
+    },
+    "Solidity.Seq.MemoryReplay.commandSave_memory_replay#1": {
+     "heartbeats": 5858.574,
+     "line": 104
+    }
+   },
+   "heartbeats": 82343.37
+  },
+  "Solidity.TestSuite.MemoryLoopReplay.Discover03": {
+   "commands": {
+    "Solidity.Seq.MemoryReplay.commandDiscover_memory_replay#3": {
+     "heartbeats": 15894.192,
+     "line": 6
+    },
+    "Solidity.Seq.MemoryReplay.commandDiscover_memory_replay#34": {
+     "heartbeats": 15171.544,
+     "line": 37
+    },
+    "Solidity.Seq.MemoryReplay.commandDiscover_memory_replay#45": {
+     "heartbeats": 15769.404,
+     "line": 48
+    },
+    "Solidity.Seq.MemoryReplay.commandDiscover_memory_replay#50": {
+     "heartbeats": 3230.747,
+     "line": 53
+    },
+    "Solidity.Seq.MemoryReplay.commandDiscover_memory_replay#66": {
+     "heartbeats": 17090.809,
+     "line": 69
+    },
+    "Solidity.Seq.MemoryReplay.commandDiscover_memory_replay#77": {
+     "heartbeats": 17633.014,
+     "line": 80
+    },
+    "Solidity.Seq.MemoryReplay.commandDiscover_memory_replay#82": {
+     "heartbeats": 3178.909,
+     "line": 85
+    },
+    "Solidity.Seq.MemoryReplay.commandDiscover_memory_replay#9": {
+     "heartbeats": 9029.496,
+     "line": 12
+    },
+    "Solidity.Seq.MemoryReplay.commandSave_memory_replay#1": {
+     "heartbeats": 5246.854,
+     "line": 104
+    }
+   },
+   "heartbeats": 106869.197
+  },
+  "Solidity.TestSuite.MemoryLoopReplay.Discover04": {
+   "commands": {
+    "Solidity.Seq.MemoryReplay.commandDiscover_memory_replay#17": {
+     "heartbeats": 5941.43,
+     "line": 20
+    },
+    "Solidity.Seq.MemoryReplay.commandDiscover_memory_replay#23": {
+     "heartbeats": 7470.812,
+     "line": 26
+    },
+    "Solidity.Seq.MemoryReplay.commandDiscover_memory_replay#34": {
+     "heartbeats": 5928.644,
+     "line": 37
+    },
+    "Solidity.Seq.MemoryReplay.commandDiscover_memory_replay#40": {
+     "heartbeats": 7178.353,
+     "line": 43
+    },
+    "Solidity.Seq.MemoryReplay.commandDiscover_memory_replay#65": {
+     "heartbeats": 27125.784,
+     "line": 68
+    },
+    "Solidity.Seq.MemoryReplay.commandDiscover_memory_replay#77": {
+     "heartbeats": 27933.015,
+     "line": 80
+    },
+    "Solidity.Seq.MemoryReplay.commandDiscover_memory_replay#83": {
+     "heartbeats": 10059.568,
+     "line": 86
+    },
+    "Solidity.Seq.MemoryReplay.commandSave_memory_replay#1": {
+     "heartbeats": 6274.868,
+     "line": 104
+    }
+   },
+   "heartbeats": 101942.513
+  },
+  "Solidity.TestSuite.MemoryLoopReplay.Discover05": {
+   "commands": {
+    "Solidity.Seq.MemoryReplay.commandDiscover_memory_replay#20": {
+     "heartbeats": 31055.028,
+     "line": 23
+    },
+    "Solidity.Seq.MemoryReplay.commandDiscover_memory_replay#26": {
+     "heartbeats": 12259.345,
+     "line": 29
+    },
+    "Solidity.Seq.MemoryReplay.commandDiscover_memory_replay#51": {
+     "heartbeats": 33462.902,
+     "line": 54
+    },
+    "Solidity.Seq.MemoryReplay.commandDiscover_memory_replay#63": {
+     "heartbeats": 34367.033,
+     "line": 66
+    },
+    "Solidity.Seq.MemoryReplay.commandDiscover_memory_replay#69": {
+     "heartbeats": 11214.927,
+     "line": 72
+    },
+    "Solidity.Seq.MemoryReplay.commandDiscover_memory_replay#8": {
+     "heartbeats": 30203.832,
+     "line": 11
+    },
+    "Solidity.Seq.MemoryReplay.commandDiscover_memory_replay#85": {
+     "heartbeats": 36858.051,
+     "line": 88
+    },
+    "Solidity.Seq.MemoryReplay.commandDiscover_memory_replay#97": {
+     "heartbeats": 37761.817,
+     "line": 100
+    },
+    "Solidity.Seq.MemoryReplay.commandSave_memory_replay#1": {
+     "heartbeats": 5337.456,
+     "line": 104
+    }
+   },
+   "heartbeats": 236336.347
+  },
+  "Solidity.TestSuite.MemoryLoopReplay.Discover06": {
+   "commands": {
+    "Solidity.Seq.MemoryReplay.commandDiscover_memory_replay#100": {
+     "heartbeats": 46383.622,
+     "line": 103
+    },
+    "Solidity.Seq.MemoryReplay.commandDiscover_memory_replay#14": {
+     "heartbeats": 39089.396,
+     "line": 17
+    },
+    "Solidity.Seq.MemoryReplay.commandDiscover_memory_replay#20": {
+     "heartbeats": 7755.767,
+     "line": 23
+    },
+    "Solidity.Seq.MemoryReplay.commandDiscover_memory_replay#3": {
+     "heartbeats": 14512.016,
+     "line": 6
+    },
+    "Solidity.Seq.MemoryReplay.commandDiscover_memory_replay#45": {
+     "heartbeats": 41612.544,
+     "line": 48
+    },
+    "Solidity.Seq.MemoryReplay.commandDiscover_memory_replay#57": {
+     "heartbeats": 42585.882,
+     "line": 60
+    },
+    "Solidity.Seq.MemoryReplay.commandDiscover_memory_replay#63": {
+     "heartbeats": 10036.642,
+     "line": 66
+    },
+    "Solidity.Seq.MemoryReplay.commandDiscover_memory_replay#88": {
+     "heartbeats": 45366.59,
+     "line": 91
+    },
+    "Solidity.Seq.MemoryReplay.commandSave_memory_replay#1": {
+     "heartbeats": 5466.216,
+     "line": 104
+    }
+   },
+   "heartbeats": 256840.186
+  },
+  "Solidity.TestSuite.MemoryLoopReplay.Discover07": {
+   "commands": {
+    "Solidity.Seq.MemoryReplay.commandDiscover_memory_replay#100": {
+     "heartbeats": 8313.696,
+     "line": 103
+    },
+    "Solidity.Seq.MemoryReplay.commandDiscover_memory_replay#31": {
+     "heartbeats": 49301.415,
+     "line": 34
+    },
+    "Solidity.Seq.MemoryReplay.commandDiscover_memory_replay#43": {
+     "heartbeats": 50374.541,
+     "line": 46
+    },
+    "Solidity.Seq.MemoryReplay.commandDiscover_memory_replay#49": {
+     "heartbeats": 11445.526,
+     "line": 52
+    },
+    "Solidity.Seq.MemoryReplay.commandDiscover_memory_replay#6": {
+     "heartbeats": 12577.585,
+     "line": 9
+    },
+    "Solidity.Seq.MemoryReplay.commandDiscover_memory_replay#65": {
+     "heartbeats": 53363.617,
+     "line": 68
+    },
+    "Solidity.Seq.MemoryReplay.commandDiscover_memory_replay#77": {
+     "heartbeats": 54444.252,
+     "line": 80
+    },
+    "Solidity.Seq.MemoryReplay.commandDiscover_memory_replay#83": {
+     "heartbeats": 21429.703,
+     "line": 86
+    },
+    "Solidity.Seq.MemoryReplay.commandDiscover_memory_replay#94": {
+     "heartbeats": 56058.995,
+     "line": 97
+    },
+    "Solidity.Seq.MemoryReplay.commandSave_memory_replay#1": {
+     "heartbeats": 5405.74,
+     "line": 104
+    }
+   },
+   "heartbeats": 326478.923
+  },
+  "Solidity.TestSuite.MemoryLoopReplay.Discover08": {
+   "commands": {
+    "Solidity.Seq.MemoryReplay.commandDiscover_memory_replay#25": {
+     "heartbeats": 59239.491,
+     "line": 28
+    },
+    "Solidity.Seq.MemoryReplay.commandDiscover_memory_replay#37": {
+     "heartbeats": 60397.081,
+     "line": 40
+    },
+    "Solidity.Seq.MemoryReplay.commandDiscover_memory_replay#43": {
+     "heartbeats": 11168.391,
+     "line": 46
+    },
+    "Solidity.Seq.MemoryReplay.commandDiscover_memory_replay#68": {
+     "heartbeats": 63788.297,
+     "line": 71
+    },
+    "Solidity.Seq.MemoryReplay.commandDiscover_memory_replay#80": {
+     "heartbeats": 64992.419,
+     "line": 83
+    },
+    "Solidity.Seq.MemoryReplay.commandDiscover_memory_replay#86": {
+     "heartbeats": 13488.59,
+     "line": 89
+    },
+    "Solidity.Seq.MemoryReplay.commandSave_memory_replay#1": {
+     "heartbeats": 5559.604,
+     "line": 104
+    }
+   },
+   "heartbeats": 282897.16
+  },
+  "Solidity.TestSuite.MemoryLoopReplay.Discover09": {
+   "commands": {
+    "Solidity.Seq.MemoryReplay.commandDiscover_memory_replay#11": {
+     "heartbeats": 68522.972,
+     "line": 14
+    },
+    "Solidity.Seq.MemoryReplay.commandDiscover_memory_replay#23": {
+     "heartbeats": 69773.193,
+     "line": 26
+    },
+    "Solidity.Seq.MemoryReplay.commandDiscover_memory_replay#29": {
+     "heartbeats": 12237.443,
+     "line": 32
+    },
+    "Solidity.Seq.MemoryReplay.commandDiscover_memory_replay#45": {
+     "heartbeats": 73254.879,
+     "line": 48
+    },
+    "Solidity.Seq.MemoryReplay.commandDiscover_memory_replay#57": {
+     "heartbeats": 74515.175,
+     "line": 60
+    },
+    "Solidity.Seq.MemoryReplay.commandDiscover_memory_replay#63": {
+     "heartbeats": 23181.422,
+     "line": 66
+    },
+    "Solidity.Seq.MemoryReplay.commandDiscover_memory_replay#85": {
+     "heartbeats": 56994.686,
+     "line": 88
+    },
+    "Solidity.Seq.MemoryReplay.commandDiscover_memory_replay#86": {
+     "heartbeats": 56870.592,
+     "line": 89
+    },
+    "Solidity.Seq.MemoryReplay.commandDiscover_memory_replay#87": {
+     "heartbeats": 18073.149,
+     "line": 90
+    },
+    "Solidity.Seq.MemoryReplay.commandSave_memory_replay#1": {
+     "heartbeats": 83376.233,
+     "line": 91
+    }
+   },
+   "heartbeats": 539485.508
+  },
+  "Solidity.TestSuite.MemoryLoopReplay.Refusals": {
+   "commands": {
+    "Lean.runElab#1": {
+     "heartbeats": 3795.052,
+     "line": 11
+    },
+    "Lean.runElab#10": {
+     "heartbeats": 3632.682,
+     "line": 235
+    },
+    "Lean.runElab#11": {
+     "heartbeats": 8327.958,
+     "line": 240
+    },
+    "Lean.runElab#2": {
+     "heartbeats": 5718.307,
+     "line": 34
+    },
+    "Lean.runElab#3": {
+     "heartbeats": 8794.288,
+     "line": 62
+    },
+    "Lean.runElab#4": {
+     "heartbeats": 3276.025,
+     "line": 119
+    },
+    "Lean.runElab#5": {
+     "heartbeats": 3219.016,
+     "line": 121
+    },
+    "Lean.runElab#6": {
+     "heartbeats": 7143.489,
+     "line": 162
+    },
+    "Lean.runElab#7": {
+     "heartbeats": 3620.864,
+     "line": 215
+    },
+    "Lean.runElab#8": {
+     "heartbeats": 3877.473,
+     "line": 217
+    },
+    "Lean.runElab#9": {
+     "heartbeats": 4003.257,
+     "line": 219
+    },
+    "Solidity.Seq.MemoryReplay.commandPrepare_memory_replay_#1": {
+     "heartbeats": 248.106,
+     "line": 118
+    },
+    "Solidity.Seq.MemoryReplay.commandPrepare_memory_replay_#2": {
+     "heartbeats": 145.297,
+     "line": 120
+    },
+    "Solidity.Seq.MemoryReplay.commandPrepare_memory_replay_#3": {
+     "heartbeats": 145.319,
+     "line": 124
+    },
+    "example#3": {
+     "heartbeats": 102.479,
+     "line": 138
+    },
+    "example#4": {
+     "heartbeats": 109.969,
+     "line": 139
+    },
+    "example#5": {
+     "heartbeats": 101.788,
+     "line": 140
+    },
+    "kernelTypingRefusal": {
+     "heartbeats": 1124.72,
+     "line": 25
+    },
+    "largeUpdate": {
+     "heartbeats": 127.507,
+     "line": 142
+    },
+    "largeUpdate_size": {
+     "heartbeats": 327.973,
+     "line": 145
+    },
+    "oversizedUpdateRefused": {
+     "heartbeats": 222.363,
+     "line": 153
+    },
+    "rejectFlatHint": {
+     "heartbeats": 2296.534,
+     "line": 98
+    },
+    "rejectSelectedGuard": {
+     "heartbeats": 3658.051,
+     "line": 187
+    }
+   },
+   "heartbeats": 64317.292
+  },
+  "workload:fresh-original-Derived17": {
+   "commands": {},
+   "heartbeats": 2873953.551
+  }
+ }
+}

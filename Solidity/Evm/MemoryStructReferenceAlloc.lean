@@ -12,31 +12,6 @@ namespace Solidity.Evm.Memory
 open Semantics
 variable {C : Contract}
 
-private theorem freshOrOld {H : HTy} {R T : RefTy} (hp : Heap H) (o : MObj H R)
-    (r : HRef (H ++ [R]) T) :
-    (∃ q : HRef H T, q.wk (List.prefix_append H [R]) = r) ∨
-      (T = R ∧ HEq r (hp.alloc o).2) := by
-  by_cases hi : r.id < H.length
-  · let q : HRef H T := ⟨r.id, by simpa only [List.getElem?_append_left hi] using r.get?⟩
-    exact .inl ⟨q, by cases r; rfl⟩
-  · have hr : r.id = H.length := by
-      have hl := r.id_lt
-      simp only [List.length_append, List.length_singleton] at hl
-      omega
-    exact .inr (HRef.heq_of_id r (hp.alloc o).2 hr)
-
-private theorem allocatedArray {H : HTy} {s : Name} {p : PrimTy} (hp : Heap H)
-    (o : MObj H (.struct s)) (r : HRef (H ++ [.struct s]) (.array (.prim p))) :
-    ∃ q : HRef H (.array (.prim p)), q.wk (List.prefix_append H [.struct s]) = r := by
-  rcases freshOrOld hp o r with h | ⟨ht, _⟩
-  · exact h
-  · cases ht
-
-private theorem oldLength {H : HTy} {s : Name} {p : PrimTy} (hp : Heap H)
-    (o : MObj H (.struct s)) (a : HRef H (.array (.prim p))) :
-    (hp.alloc o).1.len (a.wk (List.prefix_append H [.struct s])) .dyn = hp.len a .dyn := by
-  simp only [Heap.len, Heap.keeps_alloc hp o a, MObj.elems_dyn, MObj.wk, List.length_map]
-
 /-- A fresh parent may contain references to any already represented children.
 The new object's pointer words must be initialized before the full relation holds. -/
 theorem RefFieldsRepr.allocInitialized {H : HTy} {hp : Heap H}
@@ -52,7 +27,7 @@ theorem RefFieldsRepr.allocInitialized {H : HTy} {hp : Heap H}
         .val (base (MFields.get (structDef s) o hf).id)) :
     RefFieldsRepr (hp.alloc o).1 (upd base H.length cursor) m' := by
   intro t f R r hf
-  rcases freshOrOld hp o r with ⟨q, rfl⟩ | ⟨ht, he⟩
+  rcases allocRef_split hp o r with ⟨q, rfl⟩ | ⟨ht, he⟩
   · have he : (hp.alloc o).1.field (q.wk (List.prefix_append H [.struct s])) hf =
         (hp.field q hf).wk (List.prefix_append H [.struct s]) := by
       simp only [Heap.field, Heap.keeps_alloc hp o q, MObj.wk, MFields.get_wk]
@@ -124,7 +99,7 @@ theorem StateRepr.reserveInitializedStruct {L b frame : Nat} {Γ : Ctx} {F : Fra
   have hs' : StructHeapRepr (σ.heap.alloc o).1 (upd base σ.H.length cursor) frame {m with mem := mem} := by
     refine ⟨?_, ?_, ?_⟩
     · intro t r
-      rcases freshOrOld σ.heap o r with ⟨r, rfl⟩ | ⟨ht, he⟩
+      rcases allocRef_split σ.heap o r with ⟨r, rfl⟩ | ⟨ht, he⟩
       · simp only [HRef.wk, allocationBase_old base cursor r]
         refine StructRepr.keeps (hp := σ.heap) ?_ (List.prefix_append σ.H [.struct s])
           (Heap.keeps_alloc σ.heap o)
@@ -140,19 +115,19 @@ theorem StateRepr.reserveInitializedStruct {L b frame : Nat} {Γ : Ctx} {F : Fra
         cases he
         simpa only [Heap.alloc, upd_same] using hfresh
     · intro t r
-      rcases freshOrOld σ.heap o r with ⟨r, rfl⟩ | ⟨ht, he⟩
+      rcases allocRef_split σ.heap o r with ⟨r, rfl⟩ | ⟨ht, he⟩
       · simpa only [HRef.wk, allocationBase_old base cursor r] using ha.structs.above r
       · cases ht; cases he
         simpa only [Heap.alloc, upd_same] using hc
     · intro t u r q hne
-      rcases freshOrOld σ.heap o r with ⟨r, rfl⟩ | ⟨ht, he⟩
-      · rcases freshOrOld σ.heap o q with ⟨q, rfl⟩ | ⟨ht, he⟩
+      rcases allocRef_split σ.heap o r with ⟨r, rfl⟩ | ⟨ht, he⟩
+      · rcases allocRef_split σ.heap o q with ⟨q, rfl⟩ | ⟨ht, he⟩
         · simpa only [HRef.wk, allocationBase_old base cursor r, allocationBase_old base cursor q]
             using ha.structs.separated r q hne
         · cases ht; cases he
           exact .inl (by simpa only [HRef.wk, Heap.alloc, allocationBase_old base cursor r, upd_same] using ha.live r)
       · cases ht; cases he
-        rcases freshOrOld σ.heap o q with ⟨q, rfl⟩ | ⟨ht, he⟩
+        rcases allocRef_split σ.heap o q with ⟨q, rfl⟩ | ⟨ht, he⟩
         · exact .inr (by simpa only [HRef.wk, Heap.alloc, allocationBase_old base cursor q, upd_same] using ha.live q)
         · cases ht; cases he; exact (hne rfl).elim
   have hx : StructArraySeparated (σ.heap.alloc o).1 (upd base σ.H.length cursor) :=
@@ -191,7 +166,7 @@ theorem StateRepr.reserveInitializedStruct {L b frame : Nat} {Γ : Ctx} {F : Fra
     simp only [HRef.wk, allocationBase_old base cursor a]
     exact Nat.le_trans (ha.arrays.live a) (by omega)
   · intro t r
-    rcases freshOrOld σ.heap o r with ⟨r, rfl⟩ | ⟨ht, he⟩
+    rcases allocRef_split σ.heap o r with ⟨r, rfl⟩ | ⟨ht, he⟩
     · simp only [HRef.wk, allocationBase_old base cursor r]
       exact Nat.le_trans (ha.live r) (by omega)
     · cases ht; cases he

@@ -1,0 +1,603 @@
+{
+ "min_units": 10,
+ "modules": {
+  "Solidity.Examples.DecisionAPF": {
+   "commands": {},
+   "heartbeats": 0.421
+  },
+  "Solidity.Examples.DecisionBlocks": {
+   "commands": {},
+   "heartbeats": 0.421
+  },
+  "Solidity.Examples.DecisionGapCore": {
+   "commands": {},
+   "heartbeats": 0.421
+  },
+  "Solidity.Examples.DecisionGapHashes": {
+   "commands": {},
+   "heartbeats": 0.421
+  },
+  "Solidity.Examples.DecisionGapKInt": {
+   "commands": {},
+   "heartbeats": 0.421
+  },
+  "Solidity.Examples.DecisionGaps": {
+   "commands": {
+    "Lean.guardMsgsCmd#1": {
+     "heartbeats": 28712.508,
+     "line": 23
+    },
+    "Lean.guardMsgsCmd#2": {
+     "heartbeats": 27675.09,
+     "line": 27
+    },
+    "Lean.guardMsgsCmd#3": {
+     "heartbeats": 28087.91,
+     "line": 46
+    },
+    "Lean.guardMsgsCmd#4": {
+     "heartbeats": 27986.875,
+     "line": 49
+    },
+    "Lean.guardMsgsCmd#5": {
+     "heartbeats": 28074.872,
+     "line": 57
+    },
+    "Lean.guardMsgsCmd#6": {
+     "heartbeats": 28194.77,
+     "line": 60
+    },
+    "Lean.guardMsgsCmd#7": {
+     "heartbeats": 16972.448,
+     "line": 92
+    },
+    "Solidity.Examples.Decision.gapIntKeyed_answers": {
+     "heartbeats": 172.161,
+     "line": 70
+    },
+    "Solidity.Examples.Decision.gapIntKeyed_covered": {
+     "heartbeats": 3408.653,
+     "line": 65
+    },
+    "Solidity.Examples.Decision.gapLedgerBlock_covered": {
+     "heartbeats": 2872.523,
+     "line": 66
+    },
+    "Solidity.Examples.Decision.gapLedgerBlock_iff": {
+     "heartbeats": 15.651,
+     "line": 71
+    },
+    "Solidity.Examples.Decision.gapManyReads_answers": {
+     "heartbeats": 1846.613,
+     "line": 106
+    },
+    "Solidity.Examples.Decision.gapManyReads_covered": {
+     "heartbeats": 17535.085,
+     "line": 104
+    },
+    "Solidity.Examples.Decision.gapPartialGuard_iff": {
+     "heartbeats": 15.681,
+     "line": 98
+    },
+    "Solidity.Examples.Decision.ibalEntries": {
+     "heartbeats": 440.476,
+     "line": 52
+    },
+    "Solidity.Examples.Decision.intKeyedBad_covered": {
+     "heartbeats": 3019.29,
+     "line": 67
+    },
+    "Solidity.Examples.Decision.intTwoSides_answers": {
+     "heartbeats": 233.05,
+     "line": 89
+    },
+    "Solidity.Examples.Decision.intTwoSides_covered": {
+     "heartbeats": 4455.233,
+     "line": 86
+    },
+    "Solidity.Examples.Decision.intTwoSides_inTarget": {
+     "heartbeats": 506.393,
+     "line": 84
+    },
+    "Solidity.Examples.Decision.ledgerBlockBad_covered": {
+     "heartbeats": 5664.709,
+     "line": 68
+    },
+    "Solidity.Examples.Decision.ledgerFar_answers": {
+     "heartbeats": 151.27,
+     "line": 90
+    },
+    "Solidity.Examples.Decision.ledgerFar_covered": {
+     "heartbeats": 5666.259,
+     "line": 87
+    },
+    "Solidity.Examples.Decision.ledgerFar_inTarget": {
+     "heartbeats": 294.073,
+     "line": 85
+    }
+   },
+   "heartbeats": 232011.538
+  },
+  "Solidity.Examples.DecisionLedger": {
+   "commands": {},
+   "heartbeats": 0.421
+  },
+  "Solidity.Examples.DecisionOperators": {
+   "commands": {},
+   "heartbeats": 0.421
+  },
+  "Solidity.Examples.DecisionRefutations": {
+   "commands": {},
+   "heartbeats": 0.421
+  },
+  "Solidity.Examples.DecisionResidue": {
+   "commands": {
+    "Lean.guardMsgsCmd#1": {
+     "heartbeats": 25942.8,
+     "line": 280
+    },
+    "Lean.guardMsgsCmd#10": {
+     "heartbeats": 25899.159,
+     "line": 307
+    },
+    "Lean.guardMsgsCmd#11": {
+     "heartbeats": 25898.613,
+     "line": 310
+    },
+    "Lean.guardMsgsCmd#12": {
+     "heartbeats": 25898.982,
+     "line": 313
+    },
+    "Lean.guardMsgsCmd#13": {
+     "heartbeats": 25861.481,
+     "line": 316
+    },
+    "Lean.guardMsgsCmd#14": {
+     "heartbeats": 25814.22,
+     "line": 319
+    },
+    "Lean.guardMsgsCmd#15": {
+     "heartbeats": 25814.218,
+     "line": 322
+    },
+    "Lean.guardMsgsCmd#16": {
+     "heartbeats": 25813.493,
+     "line": 325
+    },
+    "Lean.guardMsgsCmd#17": {
+     "heartbeats": 25641.125,
+     "line": 328
+    },
+    "Lean.guardMsgsCmd#18": {
+     "heartbeats": 25814.559,
+     "line": 331
+    },
+    "Lean.guardMsgsCmd#19": {
+     "heartbeats": 25710.667,
+     "line": 334
+    },
+    "Lean.guardMsgsCmd#2": {
+     "heartbeats": 25900.134,
+     "line": 283
+    },
+    "Lean.guardMsgsCmd#20": {
+     "heartbeats": 25813.845,
+     "line": 341
+    },
+    "Lean.guardMsgsCmd#3": {
+     "heartbeats": 25899.395,
+     "line": 286
+    },
+    "Lean.guardMsgsCmd#4": {
+     "heartbeats": 25910.103,
+     "line": 289
+    },
+    "Lean.guardMsgsCmd#5": {
+     "heartbeats": 25911.127,
+     "line": 292
+    },
+    "Lean.guardMsgsCmd#6": {
+     "heartbeats": 25902.272,
+     "line": 295
+    },
+    "Lean.guardMsgsCmd#7": {
+     "heartbeats": 25899.405,
+     "line": 298
+    },
+    "Lean.guardMsgsCmd#8": {
+     "heartbeats": 25903.474,
+     "line": 301
+    },
+    "Lean.guardMsgsCmd#9": {
+     "heartbeats": 25898.8,
+     "line": 304
+    },
+    "Solidity.Examples.DecisionResidue.Answered": {
+     "heartbeats": 39.85,
+     "line": 46
+    },
+    "Solidity.Examples.DecisionResidue.apf_residue": {
+     "heartbeats": 8816.018,
+     "line": 123
+    },
+    "Solidity.Examples.DecisionResidue.apf_routeRefusals": {
+     "heartbeats": 8304.019,
+     "line": 127
+    },
+    "Solidity.Examples.DecisionResidue.arrayBlock_witness": {
+     "heartbeats": 23.672,
+     "line": 210
+    },
+    "Solidity.Examples.DecisionResidue.dependent_witnesses": {
+     "heartbeats": 119.235,
+     "line": 197
+    },
+    "Solidity.Examples.DecisionResidue.doubled": {
+     "heartbeats": 95.584,
+     "line": 169
+    },
+    "Solidity.Examples.DecisionResidue.exhausted_residue": {
+     "heartbeats": 36374.238,
+     "line": 144
+    },
+    "Solidity.Examples.DecisionResidue.exhausted_sourceReasons": {
+     "heartbeats": 275.564,
+     "line": 148
+    },
+    "Solidity.Examples.DecisionResidue.fixedArray_witnesses": {
+     "heartbeats": 126.969,
+     "line": 215
+    },
+    "Solidity.Examples.DecisionResidue.floorOneCertificate": {
+     "heartbeats": 447.304,
+     "line": 66
+    },
+    "Solidity.Examples.DecisionResidue.floorRoots": {
+     "heartbeats": 190.269,
+     "line": 73
+    },
+    "Solidity.Examples.DecisionResidue.floor_family_answers": {
+     "heartbeats": 437.226,
+     "line": 81
+    },
+    "Solidity.Examples.DecisionResidue.floor_family_countermodel": {
+     "heartbeats": 168.339,
+     "line": 75
+    },
+    "Solidity.Examples.DecisionResidue.floor_family_valid": {
+     "heartbeats": 452.234,
+     "line": 69
+    },
+    "Solidity.Examples.DecisionResidue.hashAtom": {
+     "heartbeats": 151.147,
+     "line": 165
+    },
+    "Solidity.Examples.DecisionResidue.hashBudget": {
+     "heartbeats": 81.218,
+     "line": 174
+    },
+    "Solidity.Examples.DecisionResidue.hashBudget_residue": {
+     "heartbeats": 70892.803,
+     "line": 182
+    },
+    "Solidity.Examples.DecisionResidue.hash_witness": {
+     "heartbeats": 281.32,
+     "line": 243
+    },
+    "Solidity.Examples.DecisionResidue.kenc_witness": {
+     "heartbeats": 56.319,
+     "line": 233
+    },
+    "Solidity.Examples.DecisionResidue.kintBad_residue": {
+     "heartbeats": 723.172,
+     "line": 114
+    },
+    "Solidity.Examples.DecisionResidue.kintValid_residue": {
+     "heartbeats": 723.022,
+     "line": 110
+    },
+    "Solidity.Examples.DecisionResidue.kint_witness": {
+     "heartbeats": 23.677,
+     "line": 247
+    },
+    "Solidity.Examples.DecisionResidue.ledgerBlock_witness": {
+     "heartbeats": 126.228,
+     "line": 257
+    },
+    "Solidity.Examples.DecisionResidue.ledger_witness": {
+     "heartbeats": 23.684,
+     "line": 252
+    },
+    "Solidity.Examples.DecisionResidue.mapping_composed_answer": {
+     "heartbeats": 36.996,
+     "line": 98
+    },
+    "Solidity.Examples.DecisionResidue.mapping_family_answer": {
+     "heartbeats": 72.901,
+     "line": 93
+    },
+    "Solidity.Examples.DecisionResidue.mapping_family_valid": {
+     "heartbeats": 82.037,
+     "line": 88
+    },
+    "Solidity.Examples.DecisionResidue.mapping_sourceReason": {
+     "heartbeats": 356.039,
+     "line": 135
+    },
+    "Solidity.Examples.DecisionResidue.memory_witnesses": {
+     "heartbeats": 114.469,
+     "line": 225
+    },
+    "Solidity.Examples.DecisionResidue.not_answered_of_residue": {
+     "heartbeats": 74.972,
+     "line": 54
+    },
+    "Solidity.Examples.DecisionResidue.not_residue_of_ne": {
+     "heartbeats": 25.096,
+     "line": 51
+    },
+    "Solidity.Examples.DecisionResidue.quantLedger_witness": {
+     "heartbeats": 84.548,
+     "line": 238
+    },
+    "Solidity.Examples.DecisionResidue.quant_witness": {
+     "heartbeats": 267.3,
+     "line": 205
+    },
+    "Solidity.Examples.DecisionResidue.residue_not_claimed": {
+     "heartbeats": 52.314,
+     "line": 271
+    },
+    "Solidity.Examples.DecisionResidue.sibling_residue_without_reason": {
+     "heartbeats": 68920.841,
+     "line": 153
+    },
+    "Solidity.Examples.DecisionResidue.storageArray_witness": {
+     "heartbeats": 23.741,
+     "line": 262
+    }
+   },
+   "heartbeats": 716248.017
+  },
+  "Solidity.Examples.DecisionStorageArrays": {
+   "commands": {},
+   "heartbeats": 0.421
+  },
+  "Solidity.Examples.DecisionThreeKindCoverage": {
+   "commands": {},
+   "heartbeats": 0.421
+  },
+  "Solidity.Examples.Tactics.OpenLoops": {
+   "commands": {
+    "Lean.guardMsgsCmd#1": {
+     "heartbeats": 1611.816,
+     "line": 24
+    },
+    "Solidity.Examples.Tactics.OpenLoops.binomialFaithfulRowsSmall": {
+     "heartbeats": 50067.564,
+     "line": 31
+    },
+    "Solidity.Frontend.solcImport#1": {
+     "heartbeats": 5572.252,
+     "line": 23
+    }
+   },
+   "heartbeats": 57261.676
+  },
+  "Solidity.Examples.Tactics.OpenLoops.RowsNine": {
+   "commands": {
+    "Solidity.Examples.Tactics.OpenLoops.binomialRowsNine": {
+     "heartbeats": 23.189,
+     "line": 15
+    }
+   },
+   "heartbeats": 33.205
+  },
+  "Solidity.Examples.Tactics.OpenLoops.RowsNine.Checkpoint": {
+   "commands": {
+    "Solidity.Examples.Tactics.OpenLoops.RowsNine.Checkpoint.walkPrefix": {
+     "heartbeats": 1623.445,
+     "line": 14
+    },
+    "elab#1": {
+     "heartbeats": 2561.513,
+     "line": 35
+    },
+    "elab#2": {
+     "heartbeats": 950.734,
+     "line": 68
+    }
+   },
+   "heartbeats": 5153.699
+  },
+  "Solidity.Examples.Tactics.OpenLoops.RowsNine.Finish": {
+   "commands": {
+    "Solidity.Examples.Tactics.OpenLoops.RowsNine.Finish.finish": {
+     "heartbeats": 1269128.951,
+     "line": 6
+    }
+   },
+   "heartbeats": 1269140.913
+  },
+  "Solidity.Examples.Tactics.OpenLoops.RowsNine.Stage1": {
+   "commands": {
+    "Solidity.Examples.Tactics.OpenLoops.RowsNine.Checkpoint.\u00abcommand#rows_nine_checkpoint_:_\u00bb#1": {
+     "heartbeats": 151766.532,
+     "line": 8
+    }
+   },
+   "heartbeats": 151780.148
+  },
+  "Solidity.Examples.Tactics.OpenLoops.RowsNine.Stage2": {
+   "commands": {
+    "Solidity.Examples.Tactics.OpenLoops.RowsNine.Checkpoint.\u00abcommand#rows_nine_checkpoint_:_\u00bb#1": {
+     "heartbeats": 403711.413,
+     "line": 8
+    }
+   },
+   "heartbeats": 403725.028
+  },
+  "Solidity.Examples.Tactics.OpenLoops.RowsNine.Stage3": {
+   "commands": {
+    "Solidity.Examples.Tactics.OpenLoops.RowsNine.Checkpoint.\u00abcommand#rows_nine_checkpoint_:_\u00bb#1": {
+     "heartbeats": 638261.138,
+     "line": 8
+    }
+   },
+   "heartbeats": 638274.754
+  },
+  "Solidity.Examples.Tactics.RevertData": {
+   "commands": {
+    "Lean.guardMsgsCmd#1": {
+     "heartbeats": 2258.185,
+     "line": 49
+    },
+    "Lean.guardMsgsCmd#10": {
+     "heartbeats": 4306.272,
+     "line": 251
+    },
+    "Lean.guardMsgsCmd#11": {
+     "heartbeats": 4336.582,
+     "line": 256
+    },
+    "Lean.guardMsgsCmd#12": {
+     "heartbeats": 4304.854,
+     "line": 261
+    },
+    "Lean.guardMsgsCmd#2": {
+     "heartbeats": 3535.804,
+     "line": 58
+    },
+    "Lean.guardMsgsCmd#3": {
+     "heartbeats": 4414.186,
+     "line": 79
+    },
+    "Lean.guardMsgsCmd#4": {
+     "heartbeats": 4506.805,
+     "line": 84
+    },
+    "Lean.guardMsgsCmd#5": {
+     "heartbeats": 65.24,
+     "line": 94
+    },
+    "Lean.guardMsgsCmd#6": {
+     "heartbeats": 4301.973,
+     "line": 156
+    },
+    "Lean.guardMsgsCmd#7": {
+     "heartbeats": 4425.693,
+     "line": 162
+    },
+    "Lean.guardMsgsCmd#8": {
+     "heartbeats": 4284.768,
+     "line": 240
+    },
+    "Lean.guardMsgsCmd#9": {
+     "heartbeats": 4314.809,
+     "line": 245
+    },
+    "Solidity.Examples.Tactics.RevertData.Custom": {
+     "heartbeats": 612.367,
+     "line": 141
+    },
+    "Solidity.Examples.Tactics.RevertData.Panics.Pan": {
+     "heartbeats": 855.362,
+     "line": 226
+    },
+    "Solidity.Examples.Tactics.RevertData.Panics.assertCode": {
+     "heartbeats": 20439.659,
+     "line": 267
+    },
+    "Solidity.Examples.Tactics.RevertData.Panics.divideCode": {
+     "heartbeats": 28515.113,
+     "line": 281
+    },
+    "Solidity.Examples.Tactics.RevertData.Panics.indexCode": {
+     "heartbeats": 39830.4,
+     "line": 287
+    },
+    "Solidity.Examples.Tactics.RevertData.Panics.overflowCode": {
+     "heartbeats": 78721.577,
+     "line": 275
+    },
+    "Solidity.Examples.Tactics.RevertData.Panics.panicSelector": {
+     "heartbeats": 192197.897,
+     "line": 299
+    },
+    "Solidity.Examples.Tactics.RevertData.Panics.plainOverflowCode": {
+     "heartbeats": 34535.772,
+     "line": 293
+    },
+    "Solidity.Examples.Tactics.RevertData.Panics.\u03c3\u2087": {
+     "heartbeats": 98.097,
+     "line": 238
+    },
+    "Solidity.Examples.Tactics.RevertData.Reverter": {
+     "heartbeats": 675.233,
+     "line": 29
+    },
+    "Solidity.Examples.Tactics.RevertData.boomReason": {
+     "heartbeats": 23036.84,
+     "line": 105
+    },
+    "Solidity.Examples.Tactics.RevertData.checkReason": {
+     "heartbeats": 15830.846,
+     "line": 113
+    },
+    "Solidity.Examples.Tactics.RevertData.customData": {
+     "heartbeats": 274551.387,
+     "line": 168
+    },
+    "Solidity.Examples.Tactics.RevertData.externalReason": {
+     "heartbeats": 72426.962,
+     "line": 206
+    },
+    "Solidity.Examples.Tactics.RevertData.mixedReason": {
+     "heartbeats": 19640.361,
+     "line": 176
+    },
+    "Solidity.Examples.Tactics.RevertData.plainData": {
+     "heartbeats": 20683.697,
+     "line": 126
+    },
+    "Solidity.Examples.Tactics.RevertData.symbolicCustom": {
+     "heartbeats": 83261.733,
+     "line": 184
+    },
+    "Solidity.Examples.Tactics.RevertData.twoReasons": {
+     "heartbeats": 21624.067,
+     "line": 119
+    },
+    "Solidity.Examples.Tactics.RevertData.\u03c3\u2087": {
+     "heartbeats": 125.437,
+     "line": 77
+    },
+    "example#1": {
+     "heartbeats": 871.279,
+     "line": 47
+    },
+    "example#2": {
+     "heartbeats": 1677.762,
+     "line": 65
+    },
+    "guardCmd#1": {
+     "heartbeats": 54.002,
+     "line": 150
+    },
+    "instance#1": {
+     "heartbeats": 13.264,
+     "line": 38
+    },
+    "instance#2": {
+     "heartbeats": 13.086,
+     "line": 154
+    },
+    "instance#3": {
+     "heartbeats": 13.902,
+     "line": 236
+    }
+   },
+   "heartbeats": 975381.362
+  }
+ }
+}
