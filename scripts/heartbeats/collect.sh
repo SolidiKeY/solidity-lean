@@ -30,7 +30,10 @@ trap 'rm -f "$out"' EXIT
 status=0
 for arg in "$@"; do
   case "$arg" in
-    *.lean) file=$(realpath -m --relative-to="$root" -- "$(cd "$here" && realpath -m -- "$arg")"); mod=${file%.lean}; mod=${mod//\//.};;
+    *.lean) # a file outside the checkout is named by its basename
+      file=$(realpath -m --relative-to="$root" -- "$(cd "$here" && realpath -m -- "$arg")")
+      case "$file" in ../*) file=$(cd "$here" && realpath -m -- "$arg"); mod=$(basename "$file" .lean);;
+        *) mod=${file%.lean}; mod=${mod//\//.};; esac;;
     *) mod=$arg; file=${arg//.//}.lean;;
   esac
   [ -f "$file" ] || { echo "collect.sh: no file $file for $mod" >&2; status=2; continue; }

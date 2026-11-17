@@ -28,7 +28,7 @@ units (raw / 1000, three exact decimals). `heartbeats` is the sum of
  "import_wall_s":0.2, "errors":0, "commands":[{"line":7,"kind":"theorem","name":"heavy","heartbeats":235.348}, …]}
 ```
 
-`name` is the declared name under the current namespace, or `null` (`example`,
+A `FILE.lean` outside the checkout is named by its basename. `name` is the declared name under the current namespace, or `null` (`example`,
 `#eval`, anonymous `instance`, …). Exit status: 0 = success, 1 = elaboration
 errors or ratchet failure, 2 = usage or build error, 124 = `--timeout` expired.
 `--timeout` is only a backstop against hangs and is off by default.
@@ -45,6 +45,7 @@ per module and per declaration, never one global number: milliseconds per heartb
 vary 2.5× across modules. Regenerate them with `--write` on the merged head (or
 the merge base) and check them in; consumers (hb1–hb3) own their baseline files.
 
-Self-test: `python3 -B tests/heartbeats/test_collect.py`. It checks that the
+Self-test: `python3 -B tests/heartbeats/test_collect.py`. It writes its fixture
+(no new Lean lines under `tests/`) to a temporary file and checks that the
 fixture's `decide +kernel` proof is counted, that repeated runs agree and that
 the ratchet behaves as described.

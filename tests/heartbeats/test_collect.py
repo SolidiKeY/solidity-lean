@@ -6,7 +6,20 @@ import json, os, subprocess, tempfile, unittest
 ROOT = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", ".."))
 COLLECT = os.path.join(ROOT, "scripts", "heartbeats", "collect.sh")
 RATCHET = os.path.join(ROOT, "scripts", "heartbeats", "collect.d", "ratchet.py")
-FIXTURE = "tests/heartbeats/Fixture.lean"
+# The fixture is written to a temporary directory (tests/ takes no new Lean lines).
+# The `decide +kernel` proofs are checked by the kernel alone, so they are counted
+# only when elaboration is synchronous (`Elab.async=false`).
+FIXTURE_SOURCE = """\
+-- heartbeat collector fixture
+
+def sumTo (n : Nat) : Nat := (List.range n).foldl (· + ·) 0
+
+theorem heavy : sumTo 400 = 79800 := by decide +kernel
+
+theorem light : sumTo 4 = 6 := by decide +kernel
+
+example : True := trivial
+"""
 
 
 def collect(*args):
@@ -21,7 +34,15 @@ def cmds(row):
 class Collector(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
-        cls.runs = [collect(FIXTURE) for _ in range(2)]
+        cls.tmp = tempfile.TemporaryDirectory()
+        cls.fixture = os.path.join(cls.tmp.name, "Fixture.lean")
+        with open(cls.fixture, "w") as f:
+            f.write(FIXTURE_SOURCE)
+        cls.runs = [collect(cls.fixture) for _ in range(2)]
+
+    @classmethod
+    def tearDownClass(cls):
+        cls.tmp.cleanup()
 
     def test_kernel_counted(self):
         rc, rows, err = self.runs[0]
@@ -29,14 +50,14 @@ class Collector(unittest.TestCase):
         row, = rows
         c = cmds(row)
         self.assertEqual(list(c), ["sumTo", "heavy", "light", "example"])
-        self.assertEqual([x["line"] for x in row["commands"]], [5, 7, 9, 11])
+        self.assertEqual([x["line"] for x in row["commands"]], [3, 5, 7, 9])
         # `heavy` is mostly kernel work: far above `light`, which has the same shape.
         self.assertGreater(c["heavy"], 5 * c["light"])
         self.assertAlmostEqual(row["heartbeats"], sum(c.values()), places=2)
         # The asynchronous elaborator moves the proof off the counting thread.
         exe = os.path.join(ROOT, ".lake", "build", "bin", "hbcollect")
         env = {k: v for k, v in os.environ.items() if k != "LEAN_NUM_THREADS"}
-        p = subprocess.run(["lake", "env", exe, "--async", FIXTURE, "tests.heartbeats.Fixture"],
+        p = subprocess.run(["lake", "env", exe, "--async", self.fixture, "Fixture"],
                            cwd=ROOT, capture_output=True, text=True, env=env, timeout=300)
         self.assertEqual(p.returncode, 0, p.stderr)
         self.assertLess(cmds(json.loads(p.stdout))["heavy"], c["heavy"] / 5)
@@ -50,12 +71,12 @@ class Collector(unittest.TestCase):
     def test_ratchet_roundtrip(self):
         with tempfile.TemporaryDirectory() as d:
             base = os.path.join(d, "base.json")
-            rc, _, err = collect("--write", base, FIXTURE)
+            rc, _, err = collect("--write", base, self.fixture)
             self.assertEqual(rc, 0, err)
             with open(base) as f:
                 modules = json.load(f)["modules"]
-            self.assertIn("heavy", modules["tests.heartbeats.Fixture"]["commands"])
-            rc, _, err = collect("--check", base, FIXTURE)
+            self.assertIn("heavy", modules["Fixture"]["commands"])
+            rc, _, err = collect("--check", base, self.fixture)
             self.assertEqual(rc, 0, err)
 
 
