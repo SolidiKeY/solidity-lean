@@ -307,6 +307,16 @@ example {decode : Request → Option SourceProgram} (h : Simulation.Bound loopRe
     Simulation.Simulates loopRel s program :=
   h.simulates d run
 
+/-- Version 2 of the contract (H1035, additive): version 1 is a conjunct, and
+at the stage-1 boundary it is six obligations. -/
+example {rel b i decode} (h : LowerLoopsCorrectContractV2 rel b i decode) :
+    LowerLoopsCorrectContract b i decode := h.v1
+example :
+    LowerLoopsCorrectContractV2 loopRel loopBoundaryStage1 loopBoundaryStage1.reference
+        Decode.decode →
+      Simulation.InitialMatching loopRel Decode.decode ∧ Simulation.Bound loopRel Decode.decode :=
+  fun h => (loopContractV2Stage1_iff.mp h).2.2.2.2
+
 end Decoder
 
 end Solidity.Goals

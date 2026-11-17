@@ -646,4 +646,50 @@ theorem loopResidualStage1_iff :
             (Observe.target program).behaviour)) :=
   loopResidualAt_iff loopRel_reflect loopRel_false
 
+/-! ## The contract, version 2 (H1035, additive)
+
+The frozen contract (`LowerLoopsCorrectContract`, version 1) together with the
+two obligations it cannot carry: the request-bound simulation and total initial
+matching. Version 1 is unchanged and is a conjunct of version 2. -/
+
+/-- **Version 2 of the loop contract** at a state relation: version 1, and the
+simulation bound to each request's positional map, and total initial matching. -/
+def LowerLoopsCorrectContractV2
+    (rel : (E : Source.Env) → (C : Contract) → Simulation.StateRelation E C)
+    (b : SemanticBoundary) (i : RawSourceInterpretation)
+    (decode : Request → Option SourceProgram) : Prop :=
+  LowerLoopsCorrectContract b i decode ∧ Simulation.InitialMatching rel decode ∧
+    Simulation.Bound rel decode
+
+/-- Version 2 gives version 1. -/
+theorem LowerLoopsCorrectContractV2.v1 {b : SemanticBoundary} {i : RawSourceInterpretation}
+    {decode : Request → Option SourceProgram} (h : LowerLoopsCorrectContractV2 rel b i decode) :
+    LowerLoopsCorrectContract b i decode := h.1
+
+/-- **What version 2 asks at the stage-1 boundary.** The bound simulation
+replaces the unbound one, so the pipeline obligation keeps only the refinement. -/
+theorem loopContractV2Stage1_iff :
+    LowerLoopsCorrectContractV2 loopRel loopBoundaryStage1 loopBoundaryStage1.reference
+        Decode.decode ↔
+      (∀ r : Request, r.Succeeds → ∃ s, Decode.decode r = some s) ∧
+      (∀ (r : Request) s, r.Succeeds → Spells r s → Decode.decode r = some s) ∧
+      (∀ (r : Request) o after parts program, r.pipeline o after parts program →
+        Allocation.RoundTrip r.input.names ∧
+        SafeSpellings r.input.names (Allocation.scope r o after).protectedNames
+          (Allocation.scope r o after).generated) ∧
+      (∀ (r : Request) o after parts program s, Decode.decode r = some s →
+        r.pipeline o after parts program →
+        Nonempty (PassCorrect (Observe.source s).behaviour (Observe.target program).behaviour)) ∧
+      Simulation.InitialMatching loopRel Decode.decode ∧
+      Simulation.Bound loopRel Decode.decode := by
+  unfold LowerLoopsCorrectContractV2
+  rw [contract_reference_iff, loopResidualStage1_iff]
+  exact ⟨fun ⟨⟨covered, complete, allocation, pipeline⟩, matching, bound⟩ =>
+      ⟨covered, complete, allocation,
+        fun r o after parts program s d run => (pipeline r o after parts program s d run).2,
+        matching, bound⟩,
+    fun ⟨covered, complete, allocation, refines, matching, bound⟩ =>
+      ⟨⟨covered, complete, allocation, fun r o after parts program s d run =>
+        ⟨bound.simulates d run, refines r o after parts program s d run⟩⟩, matching, bound⟩⟩
+
 end Solidity.Correctness.Lowering.Total
