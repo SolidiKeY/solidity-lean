@@ -1,0 +1,1 @@
+| `Correctness/Lowering/Total/Main.lean` | The loop contract composed with the production and family theorems: it is interpretation faithfulness and `Residual`; `production_correct` on the whole successful domain. |
