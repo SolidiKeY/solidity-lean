@@ -4,7 +4,7 @@
   ratchet.py build DIR TARGET...   lake build TARGET... and record heartbeats in DIR
   ratchet.py check DIR             compare what `build DIR` built with the baselines
   ratchet.py write DIR             update the baselines of the modules `build DIR` built
-  ratchet.py write                 regenerate every baseline (library must be built)
+  ratchet.py write                 regenerate every baseline (builds what is not built)
 
 `gate.sh touched` runs build and check when GATE_HEARTBEATS=1. After a merge, the
 baselines are regenerated from the merged head and checked in:
@@ -24,10 +24,11 @@ given through a copy of lakefile.toml; they change neither a build hash nor the
 way (a pinned `maxHeartbeats` proof can, since kernel checking now counts) is
 built as the plain gate builds it and gets no record. Each module Lean
 compiles writes DIR/records/<Module>.tsv: `first line, last line, raw heartbeats,
-kind and name` per command. Records are also kept by Lake input hash, so a module
-that a later build takes from Lake's cache still has its count. A target with no
-record at all (built earlier without this step) is compiled once more, without
-outputs; that is the only cost over the build.
+kind and name` per command. Records are also kept under the hash of the `.olean`
+(beside Lake's artifact cache, or $HEARTBEATS_STORE), so a module that a later
+build takes from the cache still has its count. A target with no record at all
+(built earlier without this step) is compiled once more with `lake lean`,
+without outputs; that is the only cost over the build.
 
 `check` fails when a module exceeds its baseline by more than the tolerance
 (GATE_HEARTBEATS_TOLERANCE percent, default TOLERANCE) and by more than FLOOR
@@ -75,13 +76,21 @@ class Tools:
                 os.replace(so, self.plugin)
         self.args = ["-j1", "-DElab.async=false", f"--plugin={self.plugin}"]
 
-    def stored(self, module):
-        """Where the record for the module's current Lake input hash is kept."""
-        try:
-            trace = json.loads((ROOT / ".lake/build/lib/lean" / (module.replace(".", "/") + ".trace")).read_text())
-            return self.store / f"{trace['depHash']}.tsv"
-        except (OSError, ValueError, KeyError):
-            return None
+    def kept(self, modules):
+        """module -> where its record is kept, named after the hash of its current `.olean`."""
+        out = {}
+        for start in range(0, len(modules), 1000):
+            part = modules[start:start + 1000]
+            done = subprocess.run(["lake", "query", *(f"+{m}:olean" for m in part)], cwd=ROOT, text=True,
+                                  stdout=subprocess.PIPE, stderr=subprocess.DEVNULL)
+            paths = [line for line in done.stdout.splitlines() if line.endswith(".olean")]
+            if done.returncode != 0 or len(paths) != len(part):
+                continue
+            for module, path in zip(part, paths):
+                side = pathlib.Path(path + ".hash")
+                key = side.read_text().strip() if side.exists() else pathlib.Path(path).stem
+                out[module] = self.store / f"{module}.{key}.tsv"
+        return out
 
 
 def source(module):
@@ -100,6 +109,8 @@ def build(directory, targets):
     directory = pathlib.Path(directory).resolve()
     records = directory / "records"
     records.mkdir(parents=True, exist_ok=True)
+    for stale in records.glob("*.tsv"):
+        stale.unlink()
     (directory / "targets").write_text("".join(t + "\n" for t in targets))
     try:
         tools = Tools()
@@ -124,10 +135,9 @@ def build(directory, targets):
     if status != 0:
         status = subprocess.call(["lake", "build", *targets], cwd=ROOT)
     if status == 0:
-        for record in records.glob("*.tsv"):
-            kept = tools.stored(record.stem)
-            if kept:
-                shutil.copyfile(record, kept)
+        fresh = sorted(record.stem for record in records.glob("*.tsv"))
+        for module, kept in tools.kept(fresh).items():
+            shutil.copyfile(records / f"{module}.tsv", kept)
     return status
 
 
@@ -147,41 +157,35 @@ def lake(args, env):
 
 def measure(tools, module, records):
     """Compile one built module again, without outputs, for its record."""
-    setup = ROOT / ".lake/build/ir" / (module.replace(".", "/") + ".setup.json")
     weak = json.loads(re.search(r"(?m)^weakLeanArgs = (\[.*\])$", (ROOT / "lakefile.toml").read_text()).group(1))
-    cmd = [tools.lean, *weak, *tools.args, source(module)] + (["--setup", str(setup)] if setup.exists() else [])
-    env = {**os.environ, **tools.env, "HEARTBEATS_DIR": str(records), "LEAN_NUM_THREADS": "1"}
-    done = subprocess.run(cmd, cwd=ROOT, env=env, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
-    return done.returncode == 0
+    done = subprocess.run(["lake", "lean", source(module), "--", *weak, *tools.args], cwd=ROOT,
+                          env={**os.environ, "HEARTBEATS_DIR": str(records)},
+                          stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
+    return done.returncode == 0 and (records / f"{module}.tsv").exists()
 
 
 def collect(directory, modules, fresh_only=False):
-    """module -> rows, from this build's records, else the store, else a compile."""
+    """module -> rows, from this build's records, else the kept ones, else a compile."""
     records = pathlib.Path(directory) / "records"
     records.mkdir(parents=True, exist_ok=True)
-    out, missing = {}, []
-    tools = None
-    for module in modules:
-        record = records / f"{module}.tsv"
-        if not record.exists() and not fresh_only:
-            tools = tools or Tools()
-            kept = tools.stored(module)
-            if kept and kept.exists():
-                shutil.copyfile(kept, record)
-            elif kept and (ROOT / source(module)).is_file():
-                missing.append(module)
-        if record.exists():
-            out[module] = read_record(record)
-    if missing:
-        print(f"heartbeats: compiling {len(missing)} module(s) that have no record", file=sys.stderr)
-        # one at a time, as the gate builds; HEARTBEATS_JOBS=N for a full `write`
-        with concurrent.futures.ThreadPoolExecutor(int(os.environ.get("HEARTBEATS_JOBS") or 1)) as pool:
-            for module, ok in zip(missing, pool.map(lambda m: measure(tools, m, records), missing)):
-                record = records / f"{module}.tsv"
-                if ok and record.exists():
-                    shutil.copyfile(record, tools.stored(module))
-                    out[module] = read_record(record)
-    return out
+    missing = [m for m in modules if not (records / f"{m}.tsv").exists() and (ROOT / source(m)).is_file()]
+    if missing and not fresh_only:
+        tools = Tools()
+        kept = tools.kept(missing)
+        compile_ = []
+        for module in missing:
+            if module in kept and kept[module].exists():
+                shutil.copyfile(kept[module], records / f"{module}.tsv")
+            else:
+                compile_.append(module)
+        if compile_:
+            print(f"heartbeats: compiling {len(compile_)} module(s) that have no record", file=sys.stderr)
+            # one at a time, as the gate builds; HEARTBEATS_JOBS=N for a full `write`
+            with concurrent.futures.ThreadPoolExecutor(int(os.environ.get("HEARTBEATS_JOBS") or 1)) as pool:
+                for module, ok in zip(compile_, pool.map(lambda m: measure(tools, m, records), compile_)):
+                    if ok and module in kept:
+                        shutil.copyfile(records / f"{module}.tsv", kept[module])
+    return {m: read_record(records / f"{m}.tsv") for m in modules if (records / f"{m}.tsv").exists()}
 
 
 def library_modules():
@@ -263,8 +267,6 @@ def write(directory):
         with tempfile.TemporaryDirectory() as tmp:
             rows = collect(tmp, [m for modules in libraries.values() for m in modules])
         for module in (m for modules in libraries.values() for m in modules if m not in rows):
-            if not (ROOT / ".lake/build/lib/lean" / (module.replace(".", "/") + ".trace")).exists():
-                sys.exit(f"heartbeats: {module} is not built; run `lake build Solidity SolidityExamples` first")
             print(f"no record {module}")
         base = {}
     else:

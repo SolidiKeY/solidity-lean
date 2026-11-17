@@ -25,7 +25,7 @@ AbiEntry.DispatchRefusal	17856
 AbiEntry.DispatchRefusalControls	38205
 AbiEntry.DispatchRefusalInterface	484
 AbiEntry.EntryComposition	3899
-AbiEntry.EntryRoutes	25696
+AbiEntry.EntryRoutes	25697
 AbiEntry.EntryRoutesControls	50381
 AbiEntry.EntryRoutesInterface	336
 AbiEntry.EntryTransport	5082
@@ -672,7 +672,7 @@ LabelExec.ScalarTransfer	2794
 LabelExec.Step	1681
 MemoryCopies.AliasBinding	3561
 MemoryCopies.AliasBindingControls	27295
-MemoryCopies.AliasBindingInterface	1094
+MemoryCopies.AliasBindingInterface	1271
 MemoryCopies.AllocationPanic	12412
 MemoryCopies.AllocationPanicInterface	229
 MemoryCopies.BudgetedDefault	8388

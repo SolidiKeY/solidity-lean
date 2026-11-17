@@ -162,7 +162,7 @@ Checks.ExtractDivergence	15212
 Checks.GlobalExternal	2154
 Checks.Headers	7934
 Checks.Horizons	12074
-Checks.LocalBlock	822011
+Checks.LocalBlock	822010
 Checks.LocalBlockDivergence	4338
 Checks.LocalBlockLogic	220073
 Checks.LocalBoolBinding	128935
@@ -172,7 +172,7 @@ Checks.LocalBoolDivergence	40941
 Checks.LocalBoolDoDivergence	8011
 Checks.LocalBoolDoWhile	167794
 Checks.LocalBoolExpr	54010
-Checks.LocalBoolFailure	40481
+Checks.LocalBoolFailure	40480
 Checks.LocalBoolFor	148869
 Checks.LocalBoolForNoGuard	342983
 Checks.LocalBoolForPost	238886
@@ -200,7 +200,7 @@ Checks.LocalDefaultDoWhile	298545
 Checks.LocalDefaultHorizon	15534
 Checks.LocalDefaultIfElse	174106
 Checks.LocalDefaultItems	121470
-Checks.LocalDefaultNoGuard	276087
+Checks.LocalDefaultNoGuard	276086
 Checks.LocalDefaultPostIter	483169
 Checks.LocalDefaultPostRepresentation	16583
 Checks.LocalDefaultRepresentation	18566
@@ -240,7 +240,7 @@ Checks.OpenRun	474943
 Checks.Parsing	1
 Checks.Placement	17862
 Checks.Powers	11029
-Checks.RawAdapterLoopHorizon	517260
+Checks.RawAdapterLoopHorizon	517259
 Checks.RawAdapterSequenceLoopHorizon	461799
 Checks.RawBoolFailure	75341
 Checks.RawCheckedAdapter	53169
@@ -289,7 +289,7 @@ Checks.RawGrowingSequence	168274
 Checks.RawInitializedForHorizon	514545
 Checks.RawInitializedForPostHorizon	480802
 Checks.RawIntegerBlock	199082
-Checks.RawIntegerInitialization	72703
+Checks.RawIntegerInitialization	72702
 Checks.RawIntegerScope	23126
 Checks.RawIntegerSequence	117184
 Checks.RawLiteralInitialization	6552
@@ -307,7 +307,7 @@ Checks.RawPureInitPrefix	698135
 Checks.RawPureInitTimeout	196523
 Checks.RawSequenceDoWhileHorizon	293034
 Checks.RawSequenceHorizon	382758
-Checks.RawSequenceWhileHorizon	506510
+Checks.RawSequenceWhileHorizon	506509
 Checks.RawSourceLoopTimeout	31045
 Checks.RawSourceReturnControl	18422
 Checks.RawSourceVoidReturn	10158
@@ -875,7 +875,7 @@ TypingLeaves	12446
 TypingSites	21843
 TypingStatements	3229
 TypingTargetPaths	409
-Views.AbiCalldataAgreement	2114
+Views.AbiCalldataAgreement	2077
 Views.AbiDecodeSequence	625
 Views.AbiUintArrayBoundaryControls	30175
 Views.AbiUintArrayControls	39360
