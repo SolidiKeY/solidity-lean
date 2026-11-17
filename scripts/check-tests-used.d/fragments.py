@@ -1,4 +1,5 @@
 """Deterministic additive census classification fragments."""
+import ast
 import bisect
 import hashlib
 import json
@@ -408,10 +409,88 @@ def git_policies(classifier, graph, rows):
             'validation_at_measured_revision': {'status': 'policy', 'reason': 'git check-ignore of this exact blob in isolation; no test, fixture or proof credit.'}})
 
 
+def declared_module_cli(repo, path):
+    """H955 module-level argparse role: the other curated CLI shape.
+
+    The parser is built at module top level: only imports, definitions and
+    assignments without exit calls precede `P = argparse.ArgumentParser(...)`,
+    which is followed solely by literal `P.add_argument(...)` statements and
+    `A = P.parse_args()`. At least one long option is required=True, so the bare
+    command is an entry prefix, never a configured run. Positional, computed or
+    duplicate options, star imports and rebinding argparse/P are refused.
+    """
+    if path not in repo.texts or not path.endswith('.py') or repo.tree[path][0] not in ('100644', '100755'): return None
+    try:
+        tree = ast.parse(repo.texts[path]); compile(repo.texts[path], path, 'exec', dont_inherit=True)
+    except (SyntaxError, ValueError, RecursionError): return None
+    modules = {alias.asname or 'argparse' for node in tree.body if isinstance(node, ast.Import)
+               for alias in node.names if alias.name == 'argparse'}
+    if not modules: return None
+    def exits(node):
+        return any(isinstance(n, ast.Call) and (isinstance(n.func, ast.Name) and n.func.id in ('exit', 'quit')
+                   or isinstance(n.func, ast.Attribute) and n.func.attr in ('exit', '_exit', 'abort')) for n in ast.walk(node))
+    index = 0; body = tree.body
+    while index < len(body):
+        node = body[index]
+        if (isinstance(node, ast.Assign) and len(node.targets) == 1 and isinstance(node.targets[0], ast.Name)
+                and isinstance(node.value, ast.Call) and isinstance(node.value.func, ast.Attribute)
+                and isinstance(node.value.func.value, ast.Name) and node.value.func.value.id in modules
+                and node.value.func.attr == 'ArgumentParser'): break
+        if isinstance(node, ast.Expr) and isinstance(node.value, ast.Constant) and isinstance(node.value.value, str) and index == 0: pass
+        elif isinstance(node, (ast.Import, ast.FunctionDef, ast.AsyncFunctionDef, ast.ClassDef)): pass
+        elif isinstance(node, ast.ImportFrom) and all(a.name != '*' for a in node.names): pass
+        elif isinstance(node, (ast.Assign, ast.AnnAssign)) and not exits(node): pass
+        else: return None
+        index += 1
+    if index == len(body): return None
+    parser_node = body[index]; parser = parser_node.targets[0].id
+    protected = modules | {parser}
+    for node in ast.walk(tree):
+        if isinstance(node, (ast.FunctionDef, ast.AsyncFunctionDef, ast.ClassDef)) and node.name in protected: return None
+        if isinstance(node, ast.Name) and isinstance(node.ctx, (ast.Store, ast.Del)) and node.id in protected and node is not parser_node.targets[0]: return None
+        if isinstance(node, ast.ImportFrom) and any(a.name == '*' or (a.asname or a.name) in protected for a in node.names): return None
+        if isinstance(node, ast.Import) and any((a.asname or a.name.split('.')[0]) in protected and not (a.name == 'argparse' and (a.asname or 'argparse') in modules) for a in node.names): return None
+        if isinstance(node, (ast.Global, ast.Nonlocal)) and set(node.names) & protected: return None
+        if isinstance(node, ast.Attribute) and isinstance(node.ctx, (ast.Store, ast.Del)) and isinstance(node.value, ast.Name) and node.value.id in protected: return None
+    required = set(); declared = set()
+    for node in body[index + 1:]:
+        if (isinstance(node, ast.Assign) and len(node.targets) == 1 and isinstance(node.targets[0], ast.Name)
+                and isinstance(node.value, ast.Call) and isinstance(node.value.func, ast.Attribute)
+                and isinstance(node.value.func.value, ast.Name) and node.value.func.value.id == parser
+                and node.value.func.attr == 'parse_args' and not node.value.args and not node.value.keywords):
+            if not required: return None
+            return {'kind': 'curated module-level argparse entry', 'revision': repo.ref, 'parser_line': parser_node.lineno,
+                    'main_line': node.lineno, 'parse_args_line': node.lineno, 'required_options': sorted(required)}
+        if not (isinstance(node, ast.Expr) and isinstance(node.value, ast.Call) and isinstance(node.value.func, ast.Attribute)
+                and isinstance(node.value.func.value, ast.Name) and node.value.func.value.id == parser
+                and node.value.func.attr == 'add_argument'): return None
+        call = node.value
+        if not call.args or any(not isinstance(a, ast.Constant) or not isinstance(a.value, str)
+                                or not re.fullmatch(r'--?[A-Za-z][A-Za-z0-9-]*', a.value) for a in call.args): return None
+        options = [a.value for a in call.args]
+        if len(set(options)) != len(options) or set(options) & declared: return None
+        declared.update(options)
+        if any(k.arg is None for k in call.keywords): return None
+        flags = [k.value for k in call.keywords if k.arg == 'required']
+        if flags and not (len(flags) == 1 and isinstance(flags[0], ast.Constant) and type(flags[0].value) is bool): return None
+        if flags and flags[0].value is True:
+            if len(options) != 1 or not options[0].startswith('--'): return None
+            required.add(options[0])
+    return None
+
 def same_revision_reads(ref, fragments):
-    """Persisted reads recorded at the measured revision are ordinary reads."""
+    """Persisted reads recorded at the measured revision join the ordinary reads."""
     for section in CONSUMER_SECTIONS: merge_fragment_entries(section, [], fragments[section])
-    return [row for row in fragments['persistent_reads'] if isinstance(row, dict) and row.get('input_revision') == ref]
+    fragments['reads'] = fragments['reads'] + [row for row in fragments['persistent_reads']
+                                               if isinstance(row, dict) and row.get('input_revision') == ref]
+
+
+def isolated(classifier, controls):
+    """Synthetic controls supply their own catalogs, never committed fragments."""
+    committed = classifier['read_fragments']
+    classifier['read_fragments'] = lambda _: {key: [] for key in FRAGMENT_SECTIONS + ('roles', 'fixtures') + CONSUMER_SECTIONS}
+    try: controls()
+    finally: classifier['read_fragments'] = committed
 
 
 def add_consumer_routes(classifier, graph, catalog, fragments):

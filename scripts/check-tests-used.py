@@ -62,6 +62,7 @@ SCHEMA = 1
 sys.dont_write_bytecode = True
 CLASSES = ('keep', 'regenerable', 'evidence', 'orphan')
 EXCLUDED = ('scripts/check-tests-used', OUTPUT)
+CLI_KINDS = ('committed-cli', 'committed-module-cli')
 
 
 def git(root, *args, data=None):
@@ -121,10 +122,12 @@ if fragment_helper.is_file():
     read_fragments = fragment_rules.read_fragments
     merge_fragment_entries = fragment_rules.merge_fragment_entries
     CONSUMER_SECTIONS = fragment_rules.CONSUMER_SECTIONS
+    declared_module_cli = fragment_rules.declared_module_cli
 else:
     # Historical standalone drivers copy only check-tests-used*.py files.
     FRAGMENT_SECTIONS = ('standalone', 'generators', 'reads', 'orphans', 'module_entries')
     CONSUMER_SECTIONS = ()
+    declared_module_cli = lambda *_: None
     def read_fragments(directory):
         if directory.exists(): raise ValueError('missing fragment helper')
         return {key: [] for key in FRAGMENT_SECTIONS + ('roles', 'fixtures')}
@@ -638,7 +641,7 @@ def validated_routes(graph, catalog, extra_reads=()):
     historical_revisions = set()
     for entry in catalog['standalone']:
         p = entry.get('path')
-        if (entry.get('input_revision') == repo.ref or entry.get('kind') not in ('unittest', 'node-test', 'runnable-entrypoint', 'committed-cli', 'committed-module-cli')
+        if (entry.get('input_revision') == repo.ref or entry.get('kind') not in ('unittest', 'node-test', 'runnable-entrypoint') + CLI_KINDS
                 or p in current_runner_paths or p not in repo.tree or repo.tree[p][2] != entry.get('source_blob')): continue
         revision = entry.get('input_revision')
         if not hex_pin(revision, 40): raise ValueError('historical runner demonstration requires full commit revision')
@@ -661,13 +664,13 @@ def validated_routes(graph, catalog, extra_reads=()):
         if entry.get('kind') == 'runnable-entrypoint': required.update(('entry_line', 'purpose', 'input_scope', 'other_reads'))
         if entry.get('kind') == 'nonpassing-unittest': required.update(('purpose', 'input_scope'))
         if entry.get('kind') == 'skipped-unittest': required.add('purpose')
-        if entry.get('kind') in ('committed-cli', 'committed-module-cli'): required.update(('purpose', 'entry_line', 'required_options'))
+        if entry.get('kind') in CLI_KINDS: required.update(('purpose', 'entry_line', 'required_options'))
         allowed = (required, required | {'purpose', 'input_scope', 'other_reads'}) if entry.get('kind') in ('unittest', 'node-test') else (required,)
         if set(entry) not in allowed:
             raise ValueError('invalid standalone definition')
         p = entry['path']
         historical_runner = entry['input_revision'] != repo.ref
-        if historical_runner and (entry['kind'] not in ('unittest', 'node-test', 'runnable-entrypoint', 'committed-cli', 'committed-module-cli')
+        if historical_runner and (entry['kind'] not in ('unittest', 'node-test', 'runnable-entrypoint') + CLI_KINDS
                 or p in current_runner_paths or p not in repo.tree or repo.tree[p][2] != entry['source_blob']):
             continue
         if p not in repo.tree or repo.tree[p][2] != entry['source_blob']:
@@ -675,9 +678,9 @@ def validated_routes(graph, catalog, extra_reads=()):
         command = entry['command']
         if entry['kind'] != 'manual-reproducer' and command not in (['python3', '-B', p], ['node', '--test', p]):
             raise ValueError('unsupported standalone invocation: ' + p)
-        if entry['kind'] not in ('unittest', 'node-test', 'manual-reproducer', 'runnable-entrypoint', 'nonpassing-unittest', 'skipped-unittest', 'committed-cli', 'committed-module-cli'):
+        if entry['kind'] not in ('unittest', 'node-test', 'manual-reproducer', 'runnable-entrypoint', 'nonpassing-unittest', 'skipped-unittest') + CLI_KINDS:
             raise ValueError('unsupported standalone kind')
-        if entry['kind'] in ('committed-cli', 'committed-module-cli'):
+        if entry['kind'] in CLI_KINDS:
             declaration = (declared_configured_cli if entry['kind'] == 'committed-cli' else declared_module_cli)(repo, p)
             if (declaration is None or command != ['python3', '-B', p]
                     or type(entry['entry_line']) is not int or entry['entry_line'] != declaration['main_line']
@@ -1549,75 +1552,6 @@ def declared_configured_cli(repo, path):
     return None
 
 
-def declared_module_cli(repo, path):
-    """H955 module-level argparse role: the other curated CLI shape.
-
-    The parser is built at module top level: only imports, definitions and
-    assignments without exit calls precede `P = argparse.ArgumentParser(...)`,
-    which is followed solely by literal `P.add_argument(...)` statements and
-    `A = P.parse_args()`. At least one long option is required=True, so the bare
-    command is an entry prefix, never a configured run. Positional, computed or
-    duplicate options, star imports and rebinding argparse/P are refused.
-    """
-    if path not in repo.texts or not path.endswith('.py') or repo.tree[path][0] not in ('100644', '100755'): return None
-    try:
-        tree = ast.parse(repo.texts[path]); compile(repo.texts[path], path, 'exec', dont_inherit=True)
-    except (SyntaxError, ValueError, RecursionError): return None
-    modules = {alias.asname or 'argparse' for node in tree.body if isinstance(node, ast.Import)
-               for alias in node.names if alias.name == 'argparse'}
-    if not modules: return None
-    def exits(node):
-        return any(isinstance(n, ast.Call) and (isinstance(n.func, ast.Name) and n.func.id in ('exit', 'quit')
-                   or isinstance(n.func, ast.Attribute) and n.func.attr in ('exit', '_exit', 'abort')) for n in ast.walk(node))
-    index = 0; body = tree.body
-    while index < len(body):
-        node = body[index]
-        if (isinstance(node, ast.Assign) and len(node.targets) == 1 and isinstance(node.targets[0], ast.Name)
-                and isinstance(node.value, ast.Call) and isinstance(node.value.func, ast.Attribute)
-                and isinstance(node.value.func.value, ast.Name) and node.value.func.value.id in modules
-                and node.value.func.attr == 'ArgumentParser'): break
-        if isinstance(node, ast.Expr) and isinstance(node.value, ast.Constant) and isinstance(node.value.value, str) and index == 0: pass
-        elif isinstance(node, (ast.Import, ast.FunctionDef, ast.AsyncFunctionDef, ast.ClassDef)): pass
-        elif isinstance(node, ast.ImportFrom) and all(a.name != '*' for a in node.names): pass
-        elif isinstance(node, (ast.Assign, ast.AnnAssign)) and not exits(node): pass
-        else: return None
-        index += 1
-    if index == len(body): return None
-    parser_node = body[index]; parser = parser_node.targets[0].id
-    protected = modules | {parser}
-    for node in ast.walk(tree):
-        if isinstance(node, (ast.FunctionDef, ast.AsyncFunctionDef, ast.ClassDef)) and node.name in protected: return None
-        if isinstance(node, ast.Name) and isinstance(node.ctx, (ast.Store, ast.Del)) and node.id in protected and node is not parser_node.targets[0]: return None
-        if isinstance(node, ast.ImportFrom) and any(a.name == '*' or (a.asname or a.name) in protected for a in node.names): return None
-        if isinstance(node, ast.Import) and any((a.asname or a.name.split('.')[0]) in protected and not (a.name == 'argparse' and (a.asname or 'argparse') in modules) for a in node.names): return None
-        if isinstance(node, (ast.Global, ast.Nonlocal)) and set(node.names) & protected: return None
-        if isinstance(node, ast.Attribute) and isinstance(node.ctx, (ast.Store, ast.Del)) and isinstance(node.value, ast.Name) and node.value.id in protected: return None
-    required = set(); declared = set()
-    for node in body[index + 1:]:
-        if (isinstance(node, ast.Assign) and len(node.targets) == 1 and isinstance(node.targets[0], ast.Name)
-                and isinstance(node.value, ast.Call) and isinstance(node.value.func, ast.Attribute)
-                and isinstance(node.value.func.value, ast.Name) and node.value.func.value.id == parser
-                and node.value.func.attr == 'parse_args' and not node.value.args and not node.value.keywords):
-            if not required: return None
-            return {'kind': 'curated module-level argparse entry', 'revision': repo.ref, 'parser_line': parser_node.lineno,
-                    'main_line': node.lineno, 'parse_args_line': node.lineno, 'required_options': sorted(required)}
-        if not (isinstance(node, ast.Expr) and isinstance(node.value, ast.Call) and isinstance(node.value.func, ast.Attribute)
-                and isinstance(node.value.func.value, ast.Name) and node.value.func.value.id == parser
-                and node.value.func.attr == 'add_argument'): return None
-        call = node.value
-        if not call.args or any(not isinstance(a, ast.Constant) or not isinstance(a.value, str)
-                                or not re.fullmatch(r'--?[A-Za-z][A-Za-z0-9-]*', a.value) for a in call.args): return None
-        options = [a.value for a in call.args]
-        if len(set(options)) != len(options) or set(options) & declared: return None
-        declared.update(options)
-        if any(k.arg is None for k in call.keywords): return None
-        flags = [k.value for k in call.keywords if k.arg == 'required']
-        if flags and not (len(flags) == 1 and isinstance(flags[0], ast.Constant) and type(flags[0].value) is bool): return None
-        if flags and flags[0].value is True:
-            if len(options) != 1 or not options[0].startswith('--'): return None
-            required.add(options[0])
-    return None
-
 def reviewed_unittest_wildcard(repo, path, node):
     """One reviewed import, bound to BOTH exact committed source objects.
 
@@ -1783,6 +1717,8 @@ def inventory(repo, catalog=None):
         definitions = Path(__file__).with_name('check-tests-used-routes.json')
         catalog = json.loads(definitions.read_bytes()) if definitions.exists() else {'schema_version': 1, 'standalone': [], 'generators': [], 'reads': [], 'orphans': []}
     fragments = read_fragments(Path(__file__).with_name('check-tests-used.d'))
+    consumers = any(fragments.get(key) for key in CONSUMER_SECTIONS)
+    if consumers: fragment_rules.same_revision_reads(repo.ref, fragments)
     extra_reads = []
     if any(fragments[key] for key in FRAGMENT_SECTIONS):
         # Check both frozen extension formats without implicitly enabling either.
@@ -1805,13 +1741,6 @@ def inventory(repo, catalog=None):
             else:
                 if section not in catalog: raise ValueError('fragment section requires catalog schema 3: ' + section)
                 catalog[section] = merge_fragment_entries(section, catalog[section], additions)
-    consumers = any(fragments.get(key) for key in CONSUMER_SECTIONS)
-    if consumers:
-        # Opt-in H938/H951/H954/H955 routes; absent, nothing below changes.
-        same = fragment_rules.same_revision_reads(repo.ref, fragments)
-        if same:
-            existing = list(read_routes(catalog)) + extra_reads
-            extra_reads = extra_reads + merge_fragment_entries('reads', existing, same)[len(existing):]
     add_roots(graph); reviewed_routes(graph); add_lean(graph)
     generated = validated_routes(graph, catalog, extra_reads)
     add_declared_test_runners(graph)
@@ -2254,16 +2183,10 @@ def module_entry_schema_controls():
 
 
 def self_test():
-    spec = importlib.util.spec_from_file_location('fragment_controls', Path(__file__).with_name('check-tests-used.d') / 'fragments.py')
-    if spec.origin and Path(spec.origin).exists():
-        controls = importlib.util.module_from_spec(spec); spec.loader.exec_module(controls); controls.fragment_controls(globals())
-        controls.consumer_route_controls(globals())
-    # Synthetic controls supply their own catalogs; committed fragments are
-    # measured by --write/--check, not mixed into isolated control models.
-    committed_fragments = globals()['read_fragments']
-    globals()['read_fragments'] = lambda _: {key: [] for key in FRAGMENT_SECTIONS + ('roles', 'fixtures') + CONSUMER_SECTIONS}
-    try: self_test_controls()
-    finally: globals()['read_fragments'] = committed_fragments
+    if fragment_helper.is_file():
+        for control in (fragment_rules.fragment_controls, fragment_rules.consumer_route_controls): control(globals())
+        fragment_rules.isolated(globals(), self_test_controls)
+    else: self_test_controls()
 
 
 def self_test_controls():
