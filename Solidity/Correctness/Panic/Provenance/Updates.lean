@@ -1,4 +1,4 @@
-import Solidity.Correctness.Panic.Provenance.Eval
+import Solidity.Correctness.Panic.Provenance.Control
 import Solidity.Semantics.Panic.Run.Updates
 
 /-!
@@ -8,15 +8,12 @@ Every update helper of `Semantics/Panic/Run/Checked.lean` and
 `Semantics/Panic/Run/Updates.lean`, and every update step, fails only with a
 coded halt: its intrinsic halts come from the evaluator leaves or from
 `evalProducer` (checked compound arithmetic, increment and decrement, `pop`).
+A step is coded in the sense of `Provenance/Control.lean` (`StepCoded`).
 -/
 
 namespace Solidity.Correctness.Panic
 
 open Solidity.Semantics.Panic
-
-/-- Every failure of the step, from any state, is coded. -/
-def StepCoded {C : Contract} {Γ Δ : Ctx} (s : Step C Γ Δ) : Prop :=
-  ∀ σ, ErrCoded (s σ)
 
 open ErrCoded
 
