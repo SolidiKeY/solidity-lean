@@ -58,6 +58,8 @@ FRAGMENT_SECTIONS = ('standalone', 'generators', 'reads', 'orphans', 'module_ent
 #   document read by the documentation navigation check (roles.py); reference only.
 # persistent_module_entries (H979): exact routes.module_entries claims that
 #   persist while every recorded object is unchanged.
+# H1009 (x1r): persistent_reads may carry a reviewed nonpassing read (roles.py);
+#   source-only failed-run root, the named in-scope read only, no pass credit.
 CONSUMER_SECTIONS = ('persistent_reads', 'static_routes', 'git_policies', 'persistent_module_entries')
 
 
@@ -240,6 +242,7 @@ def persisted_reads(classifier, graph, catalog, rows):
         if not isinstance(row, dict) or set(row) != {'runner', 'input_revision', 'frames', 'target', 'target_blob', 'operation'}:
             raise ValueError('invalid persisted read route')
         if row['input_revision'] == repo.ref: continue
+        if row['operation'] == NONPASS_READ_OPERATION: persisted_nonpassing_read(classifier, graph, catalog, row); continue  # H1009, roles.py
         if row['operation'] != 'validated Python read of measured bytes': raise ValueError('unsupported persisted read operation')
         runner = row['runner']
         if not isinstance(runner, str) or not runner.startswith('validated:'): raise ValueError('persisted read needs a validated runner')
@@ -2502,3 +2505,4 @@ def successor_controls(classifier):
         lean_fixture_controls(locals())  # (9) H1015, in roles.py
         python_import_controls(locals())  # (10) H1051, in roles.py
         documentation_reference_controls(locals())  # (11) H1050, in roles.py
+        nonpassing_persistence_controls(locals())  # (12) H1009, in roles.py
