@@ -1119,7 +1119,7 @@ def fragment_controls(classifier):
 
 def consumer_route_controls(classifier):
     """Positive and negative controls for every opt-in consumer route."""
-    git = classifier['git']; Repository = classifier['Repository']; inventory = classifier['inventory']
+    inventory = classifier['inventory']
     original = classifier['read_fragments']
     unittest_source = ("import unittest\nOUT = 'tests/gen/result.json'\nclass T(unittest.TestCase):\n"
                        " def test_it(self):\n  open('tests/data.txt').read()\n  open('tests/other.txt').read()\n"
@@ -1296,7 +1296,7 @@ def consumer_route_controls(classifier):
 def successor_controls(classifier):
     """x1g positive and negative controls: library Lean reads, Node walker
     reads, source-only programs and persisted module entries."""
-    git = classifier['git']; Repository = classifier['Repository']; inventory = classifier['inventory']
+    inventory = classifier['inventory']
     original = classifier['read_fragments']; sys = classifier['sys']
     helper = Path(classifier['__file__']).with_name('check-tests-used-trace.py')
     spec = classifier['importlib'].util.spec_from_file_location('successor_control_observer', helper)
