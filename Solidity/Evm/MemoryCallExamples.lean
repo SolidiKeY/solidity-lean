@@ -44,6 +44,8 @@ private def machine : Machine :=
   {Machine.init with stack := [w[77]], mem := fun a =>
     if a = 0 then w[256] else if a = 127 then w[99] else w[0]}
 
+private theorem noRef {R : RefTy} (r : HRef [] R) : False := by cases r.get?
+
 /-- The public state and allocator inputs have the same concrete witness. -/
 theorem initial_repr : StateRepr 1 1 128 (Frag.init []) initial bases machine ∧
     StructAllocatorRepr initial.heap bases 128 (wmod 256) machine := by

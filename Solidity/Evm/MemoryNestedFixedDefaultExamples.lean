@@ -11,9 +11,11 @@ private def base : Nat → Fin W := fun _ => wmod 0
 private def machine : Machine := {Machine.init with stack := [w[77]], mem := fun a =>
   if a = 0 then w[16] else if a = 15 then w[99] else w[0]}
 private def state := State.init C
+private theorem noRefs {R : RefTy} (r : HRef [] R) : False := by
+  simpa only [List.getElem?_nil, reduceCtorEq] using r.get?
 private theorem heap_repr : Objects.HeapRepr state.heap base 8 machine := by
-  exact ⟨⟨fun r => (noRef r).elim, fun r => (noRef r).elim, fun r _ _ => (noRef r).elim⟩,
-    (fun _ r => (noRef r).elim), (fun r => (noRef r).elim), (fun r _ => (noRef r).elim)⟩
+  exact ⟨⟨fun r => (noRefs r).elim, fun r => (noRefs r).elim, fun r _ _ => (noRefs r).elim⟩,
+    (fun _ r => (noRefs r).elim), (fun r => (noRefs r).elim), (fun r _ => (noRefs r).elim)⟩
 
 theorem initial_repr : Objects.StateRepr 1 1 8 (Frag.init []) state base machine := by
   have hc := Sim.init C 0 W_pos (fun _ => 0) ⟨0, W_pos⟩ rfl
@@ -22,7 +24,7 @@ theorem initial_repr : Objects.StateRepr 1 1 8 (Frag.init []) state base machine
   all_goals intro p i; nomatch i
 
 theorem initial_allocator : Objects.AllocatorRepr state.heap base 8 ⟨16, by decide⟩ machine := by
-  refine ⟨heap_repr, ⟨by decide, by decide, rfl, ?_⟩, fun r => (noRef r).elim⟩
+  refine ⟨heap_repr, ⟨by decide, by decide, rfl, ?_⟩, fun r => (noRefs r).elim⟩
   intro addr ha
   change 16 ≤ addr at ha
   simp only [machine, if_neg (show addr ≠ 0 by omega), if_neg (show addr ≠ 15 by omega)]

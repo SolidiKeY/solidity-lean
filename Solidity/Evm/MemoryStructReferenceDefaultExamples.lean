@@ -16,6 +16,8 @@ def machine : Machine :=
   {Machine.init with stack := [w[77]], mem := fun a =>
     if a = 0 then w[128] else if a = 63 then w[99] else w[0]}
 
+private theorem noRef {R : RefTy} (r : HRef [] R) : False := by cases r.get?
+
 /-- Source and machine input premises share an actual empty heap and free tail. -/
 theorem initial_repr : StateRepr 1 1 64 (Frag.init []) initial bases machine ∧
     StructAllocatorRepr initial.heap bases 64 (wmod 128) machine := by

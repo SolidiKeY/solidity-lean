@@ -12,9 +12,6 @@ reference member cells; source-level recursive construction remains separate.
 namespace Solidity.Evm.Memory
 open Semantics
 
-/-- The empty heap has no references. -/
-theorem noRef {R : RefTy} (r : HRef [] R) : False := by cases r.get?
-
 /-- Every identity after one typed allocation is either old or its fresh one. -/
 theorem allocRef_split {H : HTy} {R T : RefTy} (hp : Heap H) (o : MObj H R)
     (r : HRef (H ++ [R]) T) :

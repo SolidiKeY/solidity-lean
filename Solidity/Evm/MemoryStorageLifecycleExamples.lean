@@ -38,9 +38,11 @@ private def state : State C [] := State.init C
 private def bases : Nat → Fin W := fun _ => wmod 0
 private def machine : Machine := {Machine.init with stack := [w[77]], mem := fun a =>
   if a = 0 then w[128] else if a = 63 then w[99] else w[0]}
+private theorem noRefs {R : RefTy} (r : HRef [] R) : False := by
+  simpa only [List.getElem?_nil, reduceCtorEq] using r.get?
 private theorem heap_repr : Objects.HeapRepr state.heap bases 64 machine :=
-  ⟨⟨fun r => (noRef r).elim, fun r => (noRef r).elim, fun r _ _ => (noRef r).elim⟩,
-    (fun _ r => (noRef r).elim), (fun r => (noRef r).elim), (fun r _ => (noRef r).elim)⟩
+  ⟨⟨fun r => (noRefs r).elim, fun r => (noRefs r).elim, fun r _ _ => (noRefs r).elim⟩,
+    (fun _ r => (noRefs r).elim), (fun r => (noRefs r).elim), (fun r _ => (noRefs r).elim)⟩
 private theorem initial_at (L : Nat) (hp : 1 ≤ L) (hL : L ≤ Lmax) :
     Objects.StateRepr L 1 64 (Frag.init []) state bases machine := by
   have hc := (Sim.init C 0 W_pos (fun _ => 0) ⟨0, W_pos⟩ rfl).mono hp hL
@@ -51,7 +53,7 @@ private theorem initial_at (L : Nat) (hp : 1 ≤ L) (hL : L ≤ Lmax) :
 theorem initial_repr : Objects.StateRepr 4 1 64 (Frag.init []) state bases machine :=
   initial_at 4 (by decide) (by decide)
 theorem initial_allocator : Objects.AllocatorRepr state.heap bases 64 (wmod 128) machine := by
-  refine ⟨heap_repr, ⟨by decide, by decide, rfl, ?_⟩, fun r => (noRef r).elim⟩
+  refine ⟨heap_repr, ⟨by decide, by decide, rfl, ?_⟩, fun r => (noRefs r).elim⟩
   intro addr ha
   change 128 ≤ addr at ha
   simp only [machine, if_neg (show addr ≠ 0 by omega), if_neg (show addr ≠ 63 by omega)]
