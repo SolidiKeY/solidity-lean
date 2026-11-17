@@ -343,3 +343,5 @@ same option to its monitor fixtures; no environment fallback enables it.
 | `Semantics/Panic/Run/Data.lean` | Rich revert-data evaluation, byte literals and actual-outcome catch-data execution. |
 | `Semantics/Panic/Run/Contracts.lean` | Full-run failure propagation, actual assertion origins and self-catch code/resource contracts. |
 | `Semantics/Panic/Run/RunTests.lean` | End-to-end self/oracle code distinction, external calls, resource failures, loops and catch-data regressions. |
+| `Correctness/Panic/Provenance/Eval.lean` | Panic code provenance, evaluator leaves: `Coded` (an intrinsic halt's code is its retained site's code), `ErrCoded` with its closure laws (ok, bind, map, ofOpt, non-intrinsic errors, `evalProducer`), and one leaf per panic evaluator, paths and expressions by mutual induction. |
+| `Examples/Panic/ProvenanceEval.lean` | Checks of the provenance leaves: a checked addition overflow, a zero divisor and an out-of-range index, each code read off the retained failed site. |
