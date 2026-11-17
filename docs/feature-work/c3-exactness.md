@@ -277,7 +277,7 @@ Fetched origin/master and verified published b419c3cf4f642ae519b66bebc26cdf2f7cf
 without moving the owned branch. All six producer pins remain byte-identical.
 Published Trace matches the owned proof; published Controls matches reviewed
 dc6b974c and still needs the three additive backfill controls. Seven other new
-modules remain for coordinator integration. `integration-manifest.json` records
+modules remain for coordinator integration. [`integration-manifest.json`](https://github.com/SolidiKeY/solidity-lean-coord/blob/22dbf311332804f230db33147b0ac49d18964ce9/evidence/plan-x1e-classify-rest-1116/x1e-classify-rest/tests/sol-c3-exactness/integration-manifest.json) records
 the exact remaining scoped patch and hash. The external master gate receipt
 is coordinator evidence for partial publication, not this lane's final gate.
 
