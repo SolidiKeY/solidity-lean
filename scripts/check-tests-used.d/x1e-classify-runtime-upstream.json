@@ -109,8 +109,10 @@
         ],
         "kind": "runnable-entrypoint",
         "entry_line": 11,
-        "purpose": "Enumerate committed compiler fixtures and selected source/header-hash-anchored node witnesses; default ordinary and instrumented invocations completed at the measured revision and reported78 fixtures/57 modern kinds with witnesses. This is finite fixture inventory generation, not authenticated compilation, source/AST equivalence, admission or semantic proof. Observed process completion only; input_scope is empty, other reads unresolved, and no generated-output, fixture/helper/child execution, proof or runtime credit is certified.",
-        "input_scope": [],
+        "purpose": "Enumerate committed compiler fixtures and selected source/header-hash-anchored node witnesses; default ordinary and instrumented invocations completed at the measured revision and reported78 fixtures/57 modern kinds with witnesses. This is finite fixture inventory generation, not authenticated compilation, source/AST equivalence, admission or semantic proof. Only the listed committed metadata/AST inputs have exact observed read routes. Saved reader results and compiler labels remain historical input data; neither authenticated fresh compilation, output provenance, semantic/source equivalence, current passing validation, Lean/proof nor runtime acceptance follows. Other reads remain unresolved.",
+        "input_scope": [
+          "tests/directruntime-20261104/shared-translator/coverage-inventory.json"
+        ],
         "other_reads": "unresolved"
       },
       {
@@ -139,8 +141,23 @@
         ],
         "kind": "runnable-entrypoint",
         "entry_line": 8,
-        "purpose": "Compare saved reader-configuration observation rows and current fixture hash anchors; observed both 57-row suites. Saved decoder metadata comparison only, not a new reader execution or semantic equivalence. Ordinary and instrumented default invocations completed at the measured revision. Observed process completion only; no generated-output provenance, fixture/helper/child execution, Lean/compiler, proof or runtime credit is certified.",
-        "input_scope": [],
+        "purpose": "Compare saved reader-configuration observation rows and current fixture hash anchors; observed both 57-row suites. Saved decoder metadata comparison only, not a new reader execution or semantic equivalence. Ordinary and instrumented default invocations completed at the measured revision. Only the listed committed metadata/AST inputs have exact observed read routes. Saved reader results and compiler labels remain historical input data; neither authenticated fresh compilation, output provenance, semantic/source equivalence, current passing validation, Lean/proof nor runtime acceptance follows. Other reads remain unresolved.",
+        "input_scope": [
+          "tests/directruntime-20261104/shared-translator/composed-construct-reader-matrix.json",
+          "tests/directruntime-20261104/shared-translator/composed-fresh-construct-reader-matrix.json",
+          "tests/directruntime-20261104/shared-translator/construct-reader-cases.json",
+          "tests/directruntime-20261104/shared-translator/construct-reader-matrix.json",
+          "tests/directruntime-20261104/shared-translator/fresh-construct-reader-cases.json",
+          "tests/directruntime-20261104/shared-translator/fresh-construct-reader-matrix.json",
+          "tests/directruntime-20261104/shared-translator/fresh/ContractWorld.raw.json",
+          "tests/directruntime-20261104/shared-translator/fresh/EntryPointsLeft.raw.json",
+          "tests/directruntime-20261104/shared-translator/fresh/Group07.raw.json",
+          "tests/directruntime-20261104/shared-translator/fresh/Loops.raw.json",
+          "tests/directruntime-20261104/shared-translator/fresh/SliceReferenceCopies.raw.json",
+          "tests/directruntime-20261104/shared-translator/fresh/SourceAdmission.raw.json",
+          "tests/directruntime-20261104/shared-translator/fresh/SourceUnits.raw.json",
+          "tests/directruntime-20261104/shared-translator/fresh/TransientSource.raw.json"
+        ],
         "other_reads": "unresolved"
       },
       {
@@ -154,8 +171,18 @@
         ],
         "kind": "runnable-entrypoint",
         "entry_line": 13,
-        "purpose": "Generate two 57-case witness indexes from retained census and raw AST fixtures, checking current source hash anchors. No fresh compilation was performed; historical compiler labels are input metadata, not newly authenticated facts. Ordinary and instrumented default invocations completed at the measured revision. Observed process completion only; no generated-output provenance, fixture/helper/child execution, Lean/compiler, proof or runtime credit is certified.",
-        "input_scope": [],
+        "purpose": "Generate two 57-case witness indexes from retained census and raw AST fixtures, checking current source hash anchors. No fresh compilation was performed; historical compiler labels are input metadata, not newly authenticated facts. Ordinary and instrumented default invocations completed at the measured revision. Only the listed committed metadata/AST inputs have exact observed read routes. Saved reader results and compiler labels remain historical input data; neither authenticated fresh compilation, output provenance, semantic/source equivalence, current passing validation, Lean/proof nor runtime acceptance follows. Other reads remain unresolved.",
+        "input_scope": [
+          "tests/directruntime-20261104/shared-translator/fixture-census.json",
+          "tests/directruntime-20261104/shared-translator/fresh/ContractWorld.raw.json",
+          "tests/directruntime-20261104/shared-translator/fresh/EntryPointsLeft.raw.json",
+          "tests/directruntime-20261104/shared-translator/fresh/Group07.raw.json",
+          "tests/directruntime-20261104/shared-translator/fresh/Loops.raw.json",
+          "tests/directruntime-20261104/shared-translator/fresh/SliceReferenceCopies.raw.json",
+          "tests/directruntime-20261104/shared-translator/fresh/SourceAdmission.raw.json",
+          "tests/directruntime-20261104/shared-translator/fresh/SourceUnits.raw.json",
+          "tests/directruntime-20261104/shared-translator/fresh/TransientSource.raw.json"
+        ],
         "other_reads": "unresolved"
       },
       {
@@ -169,9 +196,1405 @@
         ],
         "kind": "runnable-entrypoint",
         "entry_line": 9,
-        "purpose": "Build a syntactic index of 59 Raw constructors and 8 theorem declaration starts from committed source text. Regex arm hits and declaration names do not establish elaboration correctness, theorem checking or axiom signatures. Ordinary and instrumented default invocations completed at the measured revision. Observed process completion only; no generated-output provenance, fixture/helper/child execution, Lean/compiler, proof or runtime credit is certified.",
-        "input_scope": [],
+        "purpose": "Build a syntactic index of 59 Raw constructors and 8 theorem declaration starts from committed source text. Regex arm hits and declaration names do not establish elaboration correctness, theorem checking or axiom signatures. Ordinary and instrumented default invocations completed at the measured revision. Only the listed committed metadata/AST inputs have exact observed read routes. Saved reader results and compiler labels remain historical input data; neither authenticated fresh compilation, output provenance, semantic/source equivalence, current passing validation, Lean/proof nor runtime acceptance follows. Other reads remain unresolved.",
+        "input_scope": [
+          "tests/directruntime-20261104/shared-translator/coverage-inventory.json"
+        ],
         "other_reads": "unresolved"
+      },
+      {
+        "path": "tests/directruntime-20261104/native-browser/h109/test-measurement-clock.py",
+        "input_revision": "88bd8ab66f8f2542f69ca706deb99d161c47931c",
+        "source_blob": "4d221d933532eb9a979f77f6067fb765ac0a9bf0",
+        "command": [
+          "python3",
+          "-B",
+          "tests/directruntime-20261104/native-browser/h109/test-measurement-clock.py"
+        ],
+        "kind": "unittest",
+        "purpose": "Five finite synthetic clock arithmetic/capture controls. Ordinary and module-profiled invocations passed at the recorded revision. Listed helper Python source bytes are exact observed source-read dependencies, with separate positive module-entry evidence retained externally. No production worker/Lean/Lake/Docker/CI execution, current passing validation, resource authentication, fixture equivalence, generated-output, proof or runtime credit.",
+        "input_scope": [
+          "tests/directruntime-20261104/native-browser/h109/measurement-clock.py"
+        ],
+        "other_reads": "unresolved"
+      },
+      {
+        "path": "tests/directruntime-20261104/native-browser/h109/test-stage-timing.py",
+        "input_revision": "88bd8ab66f8f2542f69ca706deb99d161c47931c",
+        "source_blob": "9db1d041ec4e9969c35cea782244efce45ebdf32",
+        "command": [
+          "python3",
+          "-B",
+          "tests/directruntime-20261104/native-browser/h109/test-stage-timing.py"
+        ],
+        "kind": "unittest",
+        "purpose": "Seven finite synthetic timing-policy controls. Ordinary and module-profiled invocations passed at the recorded revision. Listed helper Python source bytes are exact observed source-read dependencies, with separate positive module-entry evidence retained externally. No production worker/Lean/Lake/Docker/CI execution, current passing validation, resource authentication, fixture equivalence, generated-output, proof or runtime credit.",
+        "input_scope": [
+          "tests/directruntime-20261104/native-browser/h109/measurement-clock.py",
+          "tests/directruntime-20261104/native-browser/h109/prepare-plan.py",
+          "tests/directruntime-20261104/native-browser/h109/stage-timing.py"
+        ],
+        "other_reads": "unresolved"
+      },
+      {
+        "path": "tests/directruntime-20261104/native-browser/h109/test-worker-recipe.py",
+        "input_revision": "88bd8ab66f8f2542f69ca706deb99d161c47931c",
+        "source_blob": "4232e4c55e1dfaae6e6ffb280434aaf578ee1cf6",
+        "command": [
+          "python3",
+          "-B",
+          "tests/directruntime-20261104/native-browser/h109/test-worker-recipe.py"
+        ],
+        "kind": "unittest",
+        "purpose": "Five finite synthetic fixed-recipe/input-plan controls. Ordinary and module-profiled invocations passed at the recorded revision. Listed helper Python source bytes are exact observed source-read dependencies, with separate positive module-entry evidence retained externally. No production worker/Lean/Lake/Docker/CI execution, current passing validation, resource authentication, fixture equivalence, generated-output, proof or runtime credit.",
+        "input_scope": [
+          "tests/directruntime-20261104/native-browser/h109/input-copy.py",
+          "tests/directruntime-20261104/native-browser/h109/input-inventory.py",
+          "tests/directruntime-20261104/native-browser/h109/input-set.py",
+          "tests/directruntime-20261104/native-browser/h109/measurement-clock.py",
+          "tests/directruntime-20261104/native-browser/h109/prepare-plan.py",
+          "tests/directruntime-20261104/native-browser/h109/stage-timing.py",
+          "tests/directruntime-20261104/native-browser/h109/worker-recipe.py"
+        ],
+        "other_reads": "unresolved"
+      },
+      {
+        "path": "tests/directruntime-20261104/control-tuples/prepare-cache.py",
+        "input_revision": "c7f33cfc9e1b3c8d0e634f0b267971aa2671688d",
+        "source_blob": "b6b5c725a1286801d426ebfc88cec7f31c5ff5b1",
+        "command": [
+          "python3",
+          "-B",
+          "tests/directruntime-20261104/control-tuples/prepare-cache.py"
+        ],
+        "kind": "committed-module-cli",
+        "entry_line": 19,
+        "required_options": [
+          "--archive",
+          "--receipt",
+          "--validation"
+        ],
+        "purpose": "Configured module-level CLI prepares a cache pack for three named ControlTuple modules from supplied validation and exact cache mappings, with exclusive output creation and archive member byte checks. Entry prefix only; required options are not supplied and no configured invocation is certified. No cache installation, delivery, dependency-closure completeness, current passing, helper/fixture, proof or runtime credit."
+      },
+      {
+        "path": "tests/directruntime-20261104/native-browser/readbounds/test-negative-inventory.py",
+        "input_revision": "d9170b725fbb836fdbdc0d731fc9a2dbc4dec3ec",
+        "source_blob": "7f5af7043b3ecb4f61834318b84ccab86c49c461",
+        "command": [
+          "python3",
+          "-B",
+          "tests/directruntime-20261104/native-browser/readbounds/test-negative-inventory.py"
+        ],
+        "kind": "unittest",
+        "purpose": "Four synthetic negative-wire/expectation mutation and retained-journal pin controls; no native/browser replay. Ordinary and instrumented invocations completed at the measured revision. Only listed committed source bytes have exact observed source-read routes; this certifies source consumption, not module/child execution, current passing validation, production timing/resources, fixture equivalence, generated-output provenance, proof or runtime acceptance.",
+        "input_scope": [
+          "tests/directruntime-20261104/native-browser/readbounds/negative-inventory.py"
+        ],
+        "other_reads": "unresolved"
+      },
+      {
+        "path": "tests/directruntime-20261104/native-browser/readbounds/test-retained-transfers.py",
+        "input_revision": "d9170b725fbb836fdbdc0d731fc9a2dbc4dec3ec",
+        "source_blob": "84ccb8c9604c05ae0d90f50998d51dd5f102a9bb",
+        "command": [
+          "python3",
+          "-B",
+          "tests/directruntime-20261104/native-browser/readbounds/test-retained-transfers.py"
+        ],
+        "kind": "unittest",
+        "purpose": "Five finite transfer-text classification and invalid-file/binary-pin refusal controls; no retained executable or native tool is run. Ordinary and instrumented invocations completed at the measured revision. Only listed committed source bytes have exact observed source-read routes; this certifies source consumption, not module/child execution, current passing validation, production timing/resources, fixture equivalence, generated-output provenance, proof or runtime acceptance.",
+        "input_scope": [
+          "tests/directruntime-20261104/native-browser/h109/input-copy.py",
+          "tests/directruntime-20261104/native-browser/h109/input-inventory.py",
+          "tests/directruntime-20261104/native-browser/readbounds/baseline-inputs.py",
+          "tests/directruntime-20261104/native-browser/readbounds/retained-transfers.py",
+          "tests/directruntime-20261104/native-browser/readbounds/scripts/closure-audit.py"
+        ],
+        "other_reads": "unresolved"
+      },
+      {
+        "path": "tests/directruntime-20261104/native-browser/readbounds/test-serial-build.py",
+        "input_revision": "d9170b725fbb836fdbdc0d731fc9a2dbc4dec3ec",
+        "source_blob": "a0849a330d93e2c1e7f009c8f792e2d887696182",
+        "command": [
+          "python3",
+          "-B",
+          "tests/directruntime-20261104/native-browser/readbounds/test-serial-build.py"
+        ],
+        "kind": "unittest",
+        "purpose": "Eight synthetic source-plan ordering, source-pin and inert fixture-runner controls; no Lean/Lake build is performed. Ordinary and instrumented invocations completed at the measured revision. Only listed committed source bytes have exact observed source-read routes; this certifies source consumption, not module/child execution, current passing validation, production timing/resources, fixture equivalence, generated-output provenance, proof or runtime acceptance.",
+        "input_scope": [
+          "tests/directruntime-20261104/native-browser/readbounds/serial-build.py"
+        ],
+        "other_reads": "unresolved"
+      },
+      {
+        "path": "tests/directruntime-20261104/native-browser/readbounds/test-held-scripts.py",
+        "input_revision": "d9170b725fbb836fdbdc0d731fc9a2dbc4dec3ec",
+        "source_blob": "8cbba0ce16c645fff2613047691e385fd039e772",
+        "command": [
+          "python3",
+          "-B",
+          "tests/directruntime-20261104/native-browser/readbounds/test-held-scripts.py"
+        ],
+        "kind": "unittest",
+        "purpose": "Fourteen synthetic file/process controls for held-script parameters, source delegates, deadlines, owned-process cleanup, result publication and lock ordering. Temporary rewritten fixture wrappers use an inert builder; no production wrapper build, Lean, Docker, native checker, WASM or stopped benchmark is run. Ordinary and instrumented invocations completed at the measured revision. Only listed committed source bytes have exact observed source-read routes; this certifies source consumption, not module/child execution, current passing validation, production timing/resources, fixture equivalence, generated-output provenance, proof or runtime acceptance.",
+        "input_scope": [
+          "tests/directruntime-20261104/native-browser/readbounds/baseline-inputs.py",
+          "tests/directruntime-20261104/native-browser/readbounds/invocation-deadline.py",
+          "tests/directruntime-20261104/native-browser/readbounds/scripts/closure-audit.py",
+          "tests/directruntime-20261104/native-browser/readbounds/scripts/native-negatives.py",
+          "tests/directruntime-20261104/native-browser/readbounds/scripts/proof-final.sh",
+          "tests/directruntime-20261104/native-browser/readbounds/scripts/remaining-checks.sh",
+          "tests/directruntime-20261104/native-browser/readbounds/scripts/symbol-gate.sh",
+          "tests/directruntime-20261104/native-browser/readbounds/scripts/wasm-build.sh",
+          "tests/directruntime-20261104/native-browser/readbounds/wasm-build.sh"
+        ],
+        "other_reads": "unresolved"
+      }
+    ]
+  },
+  "consumer_routes": {
+    "persistent_reads": [
+      {
+        "runner": "validated:tests/directruntime-20261104/shared-translator/fixture-census.py",
+        "input_revision": "864791951adeda9b9e8c16f24df8777f1ce8a097",
+        "frames": [
+          {
+            "path": "tests/directruntime-20261104/shared-translator/fixture-census.py",
+            "blob": "ae5bd56d0c1142a6122356a6b94d75506e164901",
+            "line": 6
+          }
+        ],
+        "target": "tests/directruntime-20261104/shared-translator/coverage-inventory.json",
+        "target_blob": "c0ce5d12ccb9f14d20600e5d8d09f67b21e6387c",
+        "operation": "validated Python read of measured bytes"
+      },
+      {
+        "runner": "validated:tests/directruntime-20261104/shared-translator/compare-readers.py",
+        "input_revision": "30d5dc77485a2d0e32bad8417e7aed9e935f08ba",
+        "frames": [
+          {
+            "path": "tests/directruntime-20261104/shared-translator/compare-readers.py",
+            "blob": "c54d51a33a16c5cad8295d6abc7723af73f66787",
+            "line": 10
+          }
+        ],
+        "target": "tests/directruntime-20261104/shared-translator/composed-construct-reader-matrix.json",
+        "target_blob": "3c7c852eee319fd1ed7d9c5915394d818318725e",
+        "operation": "validated Python read of measured bytes"
+      },
+      {
+        "runner": "validated:tests/directruntime-20261104/shared-translator/compare-readers.py",
+        "input_revision": "30d5dc77485a2d0e32bad8417e7aed9e935f08ba",
+        "frames": [
+          {
+            "path": "tests/directruntime-20261104/shared-translator/compare-readers.py",
+            "blob": "c54d51a33a16c5cad8295d6abc7723af73f66787",
+            "line": 10
+          }
+        ],
+        "target": "tests/directruntime-20261104/shared-translator/composed-fresh-construct-reader-matrix.json",
+        "target_blob": "2a0c4e4fb7eea7c3a819c2c986680a050513f656",
+        "operation": "validated Python read of measured bytes"
+      },
+      {
+        "runner": "validated:tests/directruntime-20261104/shared-translator/compare-readers.py",
+        "input_revision": "30d5dc77485a2d0e32bad8417e7aed9e935f08ba",
+        "frames": [
+          {
+            "path": "tests/directruntime-20261104/shared-translator/compare-readers.py",
+            "blob": "c54d51a33a16c5cad8295d6abc7723af73f66787",
+            "line": 10
+          }
+        ],
+        "target": "tests/directruntime-20261104/shared-translator/construct-reader-cases.json",
+        "target_blob": "34e01ce561eb055d8c42bbffdba871328f8fe2b3",
+        "operation": "validated Python read of measured bytes"
+      },
+      {
+        "runner": "validated:tests/directruntime-20261104/shared-translator/compare-readers.py",
+        "input_revision": "30d5dc77485a2d0e32bad8417e7aed9e935f08ba",
+        "frames": [
+          {
+            "path": "tests/directruntime-20261104/shared-translator/compare-readers.py",
+            "blob": "c54d51a33a16c5cad8295d6abc7723af73f66787",
+            "line": 10
+          }
+        ],
+        "target": "tests/directruntime-20261104/shared-translator/construct-reader-matrix.json",
+        "target_blob": "431aa6e5248f2aecb100b6969bedc2c375cb47ad",
+        "operation": "validated Python read of measured bytes"
+      },
+      {
+        "runner": "validated:tests/directruntime-20261104/shared-translator/compare-readers.py",
+        "input_revision": "30d5dc77485a2d0e32bad8417e7aed9e935f08ba",
+        "frames": [
+          {
+            "path": "tests/directruntime-20261104/shared-translator/compare-readers.py",
+            "blob": "c54d51a33a16c5cad8295d6abc7723af73f66787",
+            "line": 10
+          }
+        ],
+        "target": "tests/directruntime-20261104/shared-translator/fresh-construct-reader-cases.json",
+        "target_blob": "b3c0fb02f9f2023bc4a3bedffd6606d7ddff52f4",
+        "operation": "validated Python read of measured bytes"
+      },
+      {
+        "runner": "validated:tests/directruntime-20261104/shared-translator/compare-readers.py",
+        "input_revision": "30d5dc77485a2d0e32bad8417e7aed9e935f08ba",
+        "frames": [
+          {
+            "path": "tests/directruntime-20261104/shared-translator/compare-readers.py",
+            "blob": "c54d51a33a16c5cad8295d6abc7723af73f66787",
+            "line": 10
+          }
+        ],
+        "target": "tests/directruntime-20261104/shared-translator/fresh-construct-reader-matrix.json",
+        "target_blob": "801a922217cb5af1d3391fcd9476841f8776e2b2",
+        "operation": "validated Python read of measured bytes"
+      },
+      {
+        "runner": "validated:tests/directruntime-20261104/shared-translator/compare-readers.py",
+        "input_revision": "30d5dc77485a2d0e32bad8417e7aed9e935f08ba",
+        "frames": [
+          {
+            "path": "tests/directruntime-20261104/shared-translator/compare-readers.py",
+            "blob": "c54d51a33a16c5cad8295d6abc7723af73f66787",
+            "line": 18
+          },
+          {
+            "path": "tests/directruntime-20261104/shared-translator/compare-readers.py",
+            "blob": "c54d51a33a16c5cad8295d6abc7723af73f66787",
+            "line": 6
+          }
+        ],
+        "target": "tests/directruntime-20261104/shared-translator/fresh/ContractWorld.raw.json",
+        "target_blob": "b1c23cf6bc9344e3dd659c56826aa88352340a5b",
+        "operation": "validated Python read of measured bytes"
+      },
+      {
+        "runner": "validated:tests/directruntime-20261104/shared-translator/compare-readers.py",
+        "input_revision": "30d5dc77485a2d0e32bad8417e7aed9e935f08ba",
+        "frames": [
+          {
+            "path": "tests/directruntime-20261104/shared-translator/compare-readers.py",
+            "blob": "c54d51a33a16c5cad8295d6abc7723af73f66787",
+            "line": 18
+          },
+          {
+            "path": "tests/directruntime-20261104/shared-translator/compare-readers.py",
+            "blob": "c54d51a33a16c5cad8295d6abc7723af73f66787",
+            "line": 6
+          }
+        ],
+        "target": "tests/directruntime-20261104/shared-translator/fresh/EntryPointsLeft.raw.json",
+        "target_blob": "3e357d378de6cb14ec264f5d9aea5f9446134890",
+        "operation": "validated Python read of measured bytes"
+      },
+      {
+        "runner": "validated:tests/directruntime-20261104/shared-translator/compare-readers.py",
+        "input_revision": "30d5dc77485a2d0e32bad8417e7aed9e935f08ba",
+        "frames": [
+          {
+            "path": "tests/directruntime-20261104/shared-translator/compare-readers.py",
+            "blob": "c54d51a33a16c5cad8295d6abc7723af73f66787",
+            "line": 18
+          },
+          {
+            "path": "tests/directruntime-20261104/shared-translator/compare-readers.py",
+            "blob": "c54d51a33a16c5cad8295d6abc7723af73f66787",
+            "line": 6
+          }
+        ],
+        "target": "tests/directruntime-20261104/shared-translator/fresh/Group07.raw.json",
+        "target_blob": "b7d8cd9b9aced634000af35a82d46104ef8072a1",
+        "operation": "validated Python read of measured bytes"
+      },
+      {
+        "runner": "validated:tests/directruntime-20261104/shared-translator/compare-readers.py",
+        "input_revision": "30d5dc77485a2d0e32bad8417e7aed9e935f08ba",
+        "frames": [
+          {
+            "path": "tests/directruntime-20261104/shared-translator/compare-readers.py",
+            "blob": "c54d51a33a16c5cad8295d6abc7723af73f66787",
+            "line": 18
+          },
+          {
+            "path": "tests/directruntime-20261104/shared-translator/compare-readers.py",
+            "blob": "c54d51a33a16c5cad8295d6abc7723af73f66787",
+            "line": 6
+          }
+        ],
+        "target": "tests/directruntime-20261104/shared-translator/fresh/Loops.raw.json",
+        "target_blob": "3ab6ae9b5a079bd5c888f3cdb8c71219f2959dcf",
+        "operation": "validated Python read of measured bytes"
+      },
+      {
+        "runner": "validated:tests/directruntime-20261104/shared-translator/compare-readers.py",
+        "input_revision": "30d5dc77485a2d0e32bad8417e7aed9e935f08ba",
+        "frames": [
+          {
+            "path": "tests/directruntime-20261104/shared-translator/compare-readers.py",
+            "blob": "c54d51a33a16c5cad8295d6abc7723af73f66787",
+            "line": 18
+          },
+          {
+            "path": "tests/directruntime-20261104/shared-translator/compare-readers.py",
+            "blob": "c54d51a33a16c5cad8295d6abc7723af73f66787",
+            "line": 6
+          }
+        ],
+        "target": "tests/directruntime-20261104/shared-translator/fresh/SliceReferenceCopies.raw.json",
+        "target_blob": "027e87f63bc0b97507377aa6078700a0a4859643",
+        "operation": "validated Python read of measured bytes"
+      },
+      {
+        "runner": "validated:tests/directruntime-20261104/shared-translator/compare-readers.py",
+        "input_revision": "30d5dc77485a2d0e32bad8417e7aed9e935f08ba",
+        "frames": [
+          {
+            "path": "tests/directruntime-20261104/shared-translator/compare-readers.py",
+            "blob": "c54d51a33a16c5cad8295d6abc7723af73f66787",
+            "line": 18
+          },
+          {
+            "path": "tests/directruntime-20261104/shared-translator/compare-readers.py",
+            "blob": "c54d51a33a16c5cad8295d6abc7723af73f66787",
+            "line": 6
+          }
+        ],
+        "target": "tests/directruntime-20261104/shared-translator/fresh/SourceAdmission.raw.json",
+        "target_blob": "e619665e28030a0af2a3350b21d04e0f08c690f3",
+        "operation": "validated Python read of measured bytes"
+      },
+      {
+        "runner": "validated:tests/directruntime-20261104/shared-translator/compare-readers.py",
+        "input_revision": "30d5dc77485a2d0e32bad8417e7aed9e935f08ba",
+        "frames": [
+          {
+            "path": "tests/directruntime-20261104/shared-translator/compare-readers.py",
+            "blob": "c54d51a33a16c5cad8295d6abc7723af73f66787",
+            "line": 18
+          },
+          {
+            "path": "tests/directruntime-20261104/shared-translator/compare-readers.py",
+            "blob": "c54d51a33a16c5cad8295d6abc7723af73f66787",
+            "line": 6
+          }
+        ],
+        "target": "tests/directruntime-20261104/shared-translator/fresh/SourceUnits.raw.json",
+        "target_blob": "9b5de2116e947061a673079377b10da09d44cddf",
+        "operation": "validated Python read of measured bytes"
+      },
+      {
+        "runner": "validated:tests/directruntime-20261104/shared-translator/compare-readers.py",
+        "input_revision": "30d5dc77485a2d0e32bad8417e7aed9e935f08ba",
+        "frames": [
+          {
+            "path": "tests/directruntime-20261104/shared-translator/compare-readers.py",
+            "blob": "c54d51a33a16c5cad8295d6abc7723af73f66787",
+            "line": 18
+          },
+          {
+            "path": "tests/directruntime-20261104/shared-translator/compare-readers.py",
+            "blob": "c54d51a33a16c5cad8295d6abc7723af73f66787",
+            "line": 6
+          }
+        ],
+        "target": "tests/directruntime-20261104/shared-translator/fresh/TransientSource.raw.json",
+        "target_blob": "e09d1a144fe1cb8bcd783d1d04835f8eb0a52023",
+        "operation": "validated Python read of measured bytes"
+      },
+      {
+        "runner": "validated:tests/directruntime-20261104/shared-translator/compare-readers.py",
+        "input_revision": "30d5dc77485a2d0e32bad8417e7aed9e935f08ba",
+        "frames": [
+          {
+            "path": "tests/directruntime-20261104/shared-translator/compare-readers.py",
+            "blob": "c54d51a33a16c5cad8295d6abc7723af73f66787",
+            "line": 23
+          },
+          {
+            "path": "tests/directruntime-20261104/shared-translator/compare-readers.py",
+            "blob": "c54d51a33a16c5cad8295d6abc7723af73f66787",
+            "line": 6
+          }
+        ],
+        "target": "tests/directruntime-20261104/shared-translator/composed-construct-reader-matrix.json",
+        "target_blob": "3c7c852eee319fd1ed7d9c5915394d818318725e",
+        "operation": "validated Python read of measured bytes"
+      },
+      {
+        "runner": "validated:tests/directruntime-20261104/shared-translator/compare-readers.py",
+        "input_revision": "30d5dc77485a2d0e32bad8417e7aed9e935f08ba",
+        "frames": [
+          {
+            "path": "tests/directruntime-20261104/shared-translator/compare-readers.py",
+            "blob": "c54d51a33a16c5cad8295d6abc7723af73f66787",
+            "line": 23
+          },
+          {
+            "path": "tests/directruntime-20261104/shared-translator/compare-readers.py",
+            "blob": "c54d51a33a16c5cad8295d6abc7723af73f66787",
+            "line": 6
+          }
+        ],
+        "target": "tests/directruntime-20261104/shared-translator/composed-fresh-construct-reader-matrix.json",
+        "target_blob": "2a0c4e4fb7eea7c3a819c2c986680a050513f656",
+        "operation": "validated Python read of measured bytes"
+      },
+      {
+        "runner": "validated:tests/directruntime-20261104/shared-translator/compare-readers.py",
+        "input_revision": "30d5dc77485a2d0e32bad8417e7aed9e935f08ba",
+        "frames": [
+          {
+            "path": "tests/directruntime-20261104/shared-translator/compare-readers.py",
+            "blob": "c54d51a33a16c5cad8295d6abc7723af73f66787",
+            "line": 23
+          },
+          {
+            "path": "tests/directruntime-20261104/shared-translator/compare-readers.py",
+            "blob": "c54d51a33a16c5cad8295d6abc7723af73f66787",
+            "line": 6
+          }
+        ],
+        "target": "tests/directruntime-20261104/shared-translator/construct-reader-cases.json",
+        "target_blob": "34e01ce561eb055d8c42bbffdba871328f8fe2b3",
+        "operation": "validated Python read of measured bytes"
+      },
+      {
+        "runner": "validated:tests/directruntime-20261104/shared-translator/compare-readers.py",
+        "input_revision": "30d5dc77485a2d0e32bad8417e7aed9e935f08ba",
+        "frames": [
+          {
+            "path": "tests/directruntime-20261104/shared-translator/compare-readers.py",
+            "blob": "c54d51a33a16c5cad8295d6abc7723af73f66787",
+            "line": 23
+          },
+          {
+            "path": "tests/directruntime-20261104/shared-translator/compare-readers.py",
+            "blob": "c54d51a33a16c5cad8295d6abc7723af73f66787",
+            "line": 6
+          }
+        ],
+        "target": "tests/directruntime-20261104/shared-translator/construct-reader-matrix.json",
+        "target_blob": "431aa6e5248f2aecb100b6969bedc2c375cb47ad",
+        "operation": "validated Python read of measured bytes"
+      },
+      {
+        "runner": "validated:tests/directruntime-20261104/shared-translator/compare-readers.py",
+        "input_revision": "30d5dc77485a2d0e32bad8417e7aed9e935f08ba",
+        "frames": [
+          {
+            "path": "tests/directruntime-20261104/shared-translator/compare-readers.py",
+            "blob": "c54d51a33a16c5cad8295d6abc7723af73f66787",
+            "line": 23
+          },
+          {
+            "path": "tests/directruntime-20261104/shared-translator/compare-readers.py",
+            "blob": "c54d51a33a16c5cad8295d6abc7723af73f66787",
+            "line": 6
+          }
+        ],
+        "target": "tests/directruntime-20261104/shared-translator/fresh-construct-reader-cases.json",
+        "target_blob": "b3c0fb02f9f2023bc4a3bedffd6606d7ddff52f4",
+        "operation": "validated Python read of measured bytes"
+      },
+      {
+        "runner": "validated:tests/directruntime-20261104/shared-translator/compare-readers.py",
+        "input_revision": "30d5dc77485a2d0e32bad8417e7aed9e935f08ba",
+        "frames": [
+          {
+            "path": "tests/directruntime-20261104/shared-translator/compare-readers.py",
+            "blob": "c54d51a33a16c5cad8295d6abc7723af73f66787",
+            "line": 23
+          },
+          {
+            "path": "tests/directruntime-20261104/shared-translator/compare-readers.py",
+            "blob": "c54d51a33a16c5cad8295d6abc7723af73f66787",
+            "line": 6
+          }
+        ],
+        "target": "tests/directruntime-20261104/shared-translator/fresh-construct-reader-matrix.json",
+        "target_blob": "801a922217cb5af1d3391fcd9476841f8776e2b2",
+        "operation": "validated Python read of measured bytes"
+      },
+      {
+        "runner": "validated:tests/directruntime-20261104/shared-translator/construct-reader-cases.py",
+        "input_revision": "30d5dc77485a2d0e32bad8417e7aed9e935f08ba",
+        "frames": [
+          {
+            "path": "tests/directruntime-20261104/shared-translator/construct-reader-cases.py",
+            "blob": "af43cb50bd456b79f54de1974fa23ee2aafc3a49",
+            "line": 13
+          }
+        ],
+        "target": "tests/directruntime-20261104/shared-translator/fixture-census.json",
+        "target_blob": "2215a5e9fb494a80afd648ccc2ff7dac615a32f4",
+        "operation": "validated Python read of measured bytes"
+      },
+      {
+        "runner": "validated:tests/directruntime-20261104/shared-translator/construct-reader-cases.py",
+        "input_revision": "30d5dc77485a2d0e32bad8417e7aed9e935f08ba",
+        "frames": [
+          {
+            "path": "tests/directruntime-20261104/shared-translator/construct-reader-cases.py",
+            "blob": "af43cb50bd456b79f54de1974fa23ee2aafc3a49",
+            "line": 27
+          }
+        ],
+        "target": "tests/directruntime-20261104/shared-translator/fixture-census.json",
+        "target_blob": "2215a5e9fb494a80afd648ccc2ff7dac615a32f4",
+        "operation": "validated Python read of measured bytes"
+      },
+      {
+        "runner": "validated:tests/directruntime-20261104/shared-translator/construct-reader-cases.py",
+        "input_revision": "30d5dc77485a2d0e32bad8417e7aed9e935f08ba",
+        "frames": [
+          {
+            "path": "tests/directruntime-20261104/shared-translator/construct-reader-cases.py",
+            "blob": "af43cb50bd456b79f54de1974fa23ee2aafc3a49",
+            "line": 30
+          }
+        ],
+        "target": "tests/directruntime-20261104/shared-translator/fresh/ContractWorld.raw.json",
+        "target_blob": "b1c23cf6bc9344e3dd659c56826aa88352340a5b",
+        "operation": "validated Python read of measured bytes"
+      },
+      {
+        "runner": "validated:tests/directruntime-20261104/shared-translator/construct-reader-cases.py",
+        "input_revision": "30d5dc77485a2d0e32bad8417e7aed9e935f08ba",
+        "frames": [
+          {
+            "path": "tests/directruntime-20261104/shared-translator/construct-reader-cases.py",
+            "blob": "af43cb50bd456b79f54de1974fa23ee2aafc3a49",
+            "line": 30
+          }
+        ],
+        "target": "tests/directruntime-20261104/shared-translator/fresh/EntryPointsLeft.raw.json",
+        "target_blob": "3e357d378de6cb14ec264f5d9aea5f9446134890",
+        "operation": "validated Python read of measured bytes"
+      },
+      {
+        "runner": "validated:tests/directruntime-20261104/shared-translator/construct-reader-cases.py",
+        "input_revision": "30d5dc77485a2d0e32bad8417e7aed9e935f08ba",
+        "frames": [
+          {
+            "path": "tests/directruntime-20261104/shared-translator/construct-reader-cases.py",
+            "blob": "af43cb50bd456b79f54de1974fa23ee2aafc3a49",
+            "line": 30
+          }
+        ],
+        "target": "tests/directruntime-20261104/shared-translator/fresh/Group07.raw.json",
+        "target_blob": "b7d8cd9b9aced634000af35a82d46104ef8072a1",
+        "operation": "validated Python read of measured bytes"
+      },
+      {
+        "runner": "validated:tests/directruntime-20261104/shared-translator/construct-reader-cases.py",
+        "input_revision": "30d5dc77485a2d0e32bad8417e7aed9e935f08ba",
+        "frames": [
+          {
+            "path": "tests/directruntime-20261104/shared-translator/construct-reader-cases.py",
+            "blob": "af43cb50bd456b79f54de1974fa23ee2aafc3a49",
+            "line": 30
+          }
+        ],
+        "target": "tests/directruntime-20261104/shared-translator/fresh/Loops.raw.json",
+        "target_blob": "3ab6ae9b5a079bd5c888f3cdb8c71219f2959dcf",
+        "operation": "validated Python read of measured bytes"
+      },
+      {
+        "runner": "validated:tests/directruntime-20261104/shared-translator/construct-reader-cases.py",
+        "input_revision": "30d5dc77485a2d0e32bad8417e7aed9e935f08ba",
+        "frames": [
+          {
+            "path": "tests/directruntime-20261104/shared-translator/construct-reader-cases.py",
+            "blob": "af43cb50bd456b79f54de1974fa23ee2aafc3a49",
+            "line": 30
+          }
+        ],
+        "target": "tests/directruntime-20261104/shared-translator/fresh/SliceReferenceCopies.raw.json",
+        "target_blob": "027e87f63bc0b97507377aa6078700a0a4859643",
+        "operation": "validated Python read of measured bytes"
+      },
+      {
+        "runner": "validated:tests/directruntime-20261104/shared-translator/construct-reader-cases.py",
+        "input_revision": "30d5dc77485a2d0e32bad8417e7aed9e935f08ba",
+        "frames": [
+          {
+            "path": "tests/directruntime-20261104/shared-translator/construct-reader-cases.py",
+            "blob": "af43cb50bd456b79f54de1974fa23ee2aafc3a49",
+            "line": 30
+          }
+        ],
+        "target": "tests/directruntime-20261104/shared-translator/fresh/SourceAdmission.raw.json",
+        "target_blob": "e619665e28030a0af2a3350b21d04e0f08c690f3",
+        "operation": "validated Python read of measured bytes"
+      },
+      {
+        "runner": "validated:tests/directruntime-20261104/shared-translator/construct-reader-cases.py",
+        "input_revision": "30d5dc77485a2d0e32bad8417e7aed9e935f08ba",
+        "frames": [
+          {
+            "path": "tests/directruntime-20261104/shared-translator/construct-reader-cases.py",
+            "blob": "af43cb50bd456b79f54de1974fa23ee2aafc3a49",
+            "line": 30
+          }
+        ],
+        "target": "tests/directruntime-20261104/shared-translator/fresh/SourceUnits.raw.json",
+        "target_blob": "9b5de2116e947061a673079377b10da09d44cddf",
+        "operation": "validated Python read of measured bytes"
+      },
+      {
+        "runner": "validated:tests/directruntime-20261104/shared-translator/construct-reader-cases.py",
+        "input_revision": "30d5dc77485a2d0e32bad8417e7aed9e935f08ba",
+        "frames": [
+          {
+            "path": "tests/directruntime-20261104/shared-translator/construct-reader-cases.py",
+            "blob": "af43cb50bd456b79f54de1974fa23ee2aafc3a49",
+            "line": 30
+          }
+        ],
+        "target": "tests/directruntime-20261104/shared-translator/fresh/TransientSource.raw.json",
+        "target_blob": "e09d1a144fe1cb8bcd783d1d04835f8eb0a52023",
+        "operation": "validated Python read of measured bytes"
+      },
+      {
+        "runner": "validated:tests/directruntime-20261104/shared-translator/raw-elaboration-ledger.py",
+        "input_revision": "30d5dc77485a2d0e32bad8417e7aed9e935f08ba",
+        "frames": [
+          {
+            "path": "tests/directruntime-20261104/shared-translator/raw-elaboration-ledger.py",
+            "blob": "2cfe3be0ff9429fb982cc564b170efbac1ddfca7",
+            "line": 6
+          }
+        ],
+        "target": "tests/directruntime-20261104/shared-translator/coverage-inventory.json",
+        "target_blob": "c0ce5d12ccb9f14d20600e5d8d09f67b21e6387c",
+        "operation": "validated Python read of measured bytes"
+      },
+      {
+        "runner": "validated:tests/directruntime-20261104/native-browser/h109/test-measurement-clock.py",
+        "input_revision": "88bd8ab66f8f2542f69ca706deb99d161c47931c",
+        "frames": [
+          {
+            "path": "tests/directruntime-20261104/native-browser/h109/test-measurement-clock.py",
+            "blob": "4d221d933532eb9a979f77f6067fb765ac0a9bf0",
+            "line": 9
+          }
+        ],
+        "target": "tests/directruntime-20261104/native-browser/h109/measurement-clock.py",
+        "target_blob": "bf682d04ebe47401a404c41c74d53390ab122e60",
+        "operation": "validated Python read of measured bytes"
+      },
+      {
+        "runner": "validated:tests/directruntime-20261104/native-browser/h109/test-stage-timing.py",
+        "input_revision": "88bd8ab66f8f2542f69ca706deb99d161c47931c",
+        "frames": [
+          {
+            "path": "tests/directruntime-20261104/native-browser/h109/test-stage-timing.py",
+            "blob": "9db1d041ec4e9969c35cea782244efce45ebdf32",
+            "line": 7
+          },
+          {
+            "path": "tests/directruntime-20261104/native-browser/h109/stage-timing.py",
+            "blob": "f459290fa9ffc19ef50085aba63ed8cd14044241",
+            "line": 20
+          },
+          {
+            "path": "tests/directruntime-20261104/native-browser/h109/stage-timing.py",
+            "blob": "f459290fa9ffc19ef50085aba63ed8cd14044241",
+            "line": 18
+          }
+        ],
+        "target": "tests/directruntime-20261104/native-browser/h109/measurement-clock.py",
+        "target_blob": "bf682d04ebe47401a404c41c74d53390ab122e60",
+        "operation": "validated Python read of measured bytes"
+      },
+      {
+        "runner": "validated:tests/directruntime-20261104/native-browser/h109/test-stage-timing.py",
+        "input_revision": "88bd8ab66f8f2542f69ca706deb99d161c47931c",
+        "frames": [
+          {
+            "path": "tests/directruntime-20261104/native-browser/h109/test-stage-timing.py",
+            "blob": "9db1d041ec4e9969c35cea782244efce45ebdf32",
+            "line": 7
+          },
+          {
+            "path": "tests/directruntime-20261104/native-browser/h109/stage-timing.py",
+            "blob": "f459290fa9ffc19ef50085aba63ed8cd14044241",
+            "line": 21
+          },
+          {
+            "path": "tests/directruntime-20261104/native-browser/h109/stage-timing.py",
+            "blob": "f459290fa9ffc19ef50085aba63ed8cd14044241",
+            "line": 18
+          }
+        ],
+        "target": "tests/directruntime-20261104/native-browser/h109/prepare-plan.py",
+        "target_blob": "324bb314b53f9075ecbff3b2329127ebbe6a207b",
+        "operation": "validated Python read of measured bytes"
+      },
+      {
+        "runner": "validated:tests/directruntime-20261104/native-browser/h109/test-stage-timing.py",
+        "input_revision": "88bd8ab66f8f2542f69ca706deb99d161c47931c",
+        "frames": [
+          {
+            "path": "tests/directruntime-20261104/native-browser/h109/test-stage-timing.py",
+            "blob": "9db1d041ec4e9969c35cea782244efce45ebdf32",
+            "line": 7
+          }
+        ],
+        "target": "tests/directruntime-20261104/native-browser/h109/stage-timing.py",
+        "target_blob": "f459290fa9ffc19ef50085aba63ed8cd14044241",
+        "operation": "validated Python read of measured bytes"
+      },
+      {
+        "runner": "validated:tests/directruntime-20261104/native-browser/h109/test-worker-recipe.py",
+        "input_revision": "88bd8ab66f8f2542f69ca706deb99d161c47931c",
+        "frames": [
+          {
+            "path": "tests/directruntime-20261104/native-browser/h109/test-worker-recipe.py",
+            "blob": "4232e4c55e1dfaae6e6ffb280434aaf578ee1cf6",
+            "line": 17
+          },
+          {
+            "path": "tests/directruntime-20261104/native-browser/h109/worker-recipe.py",
+            "blob": "b0b7c794fcb608c8b7694edb9c758d2c62cec86e",
+            "line": 22
+          },
+          {
+            "path": "tests/directruntime-20261104/native-browser/h109/worker-recipe.py",
+            "blob": "b0b7c794fcb608c8b7694edb9c758d2c62cec86e",
+            "line": 18
+          },
+          {
+            "path": "tests/directruntime-20261104/native-browser/h109/input-set.py",
+            "blob": "81b1809a11d6527266a9da40196e9aed1689dcc8",
+            "line": 22
+          },
+          {
+            "path": "tests/directruntime-20261104/native-browser/h109/input-set.py",
+            "blob": "81b1809a11d6527266a9da40196e9aed1689dcc8",
+            "line": 20
+          },
+          {
+            "path": "tests/directruntime-20261104/native-browser/h109/input-copy.py",
+            "blob": "227f4945e274de15625f21fdf789b718bd614ef5",
+            "line": 18
+          }
+        ],
+        "target": "tests/directruntime-20261104/native-browser/h109/input-inventory.py",
+        "target_blob": "2bbde0bd62a3cb448e752e521d7761937d80a240",
+        "operation": "validated Python read of measured bytes"
+      },
+      {
+        "runner": "validated:tests/directruntime-20261104/native-browser/h109/test-worker-recipe.py",
+        "input_revision": "88bd8ab66f8f2542f69ca706deb99d161c47931c",
+        "frames": [
+          {
+            "path": "tests/directruntime-20261104/native-browser/h109/test-worker-recipe.py",
+            "blob": "4232e4c55e1dfaae6e6ffb280434aaf578ee1cf6",
+            "line": 17
+          },
+          {
+            "path": "tests/directruntime-20261104/native-browser/h109/worker-recipe.py",
+            "blob": "b0b7c794fcb608c8b7694edb9c758d2c62cec86e",
+            "line": 22
+          },
+          {
+            "path": "tests/directruntime-20261104/native-browser/h109/worker-recipe.py",
+            "blob": "b0b7c794fcb608c8b7694edb9c758d2c62cec86e",
+            "line": 18
+          },
+          {
+            "path": "tests/directruntime-20261104/native-browser/h109/input-set.py",
+            "blob": "81b1809a11d6527266a9da40196e9aed1689dcc8",
+            "line": 22
+          },
+          {
+            "path": "tests/directruntime-20261104/native-browser/h109/input-set.py",
+            "blob": "81b1809a11d6527266a9da40196e9aed1689dcc8",
+            "line": 20
+          }
+        ],
+        "target": "tests/directruntime-20261104/native-browser/h109/input-copy.py",
+        "target_blob": "227f4945e274de15625f21fdf789b718bd614ef5",
+        "operation": "validated Python read of measured bytes"
+      },
+      {
+        "runner": "validated:tests/directruntime-20261104/native-browser/h109/test-worker-recipe.py",
+        "input_revision": "88bd8ab66f8f2542f69ca706deb99d161c47931c",
+        "frames": [
+          {
+            "path": "tests/directruntime-20261104/native-browser/h109/test-worker-recipe.py",
+            "blob": "4232e4c55e1dfaae6e6ffb280434aaf578ee1cf6",
+            "line": 17
+          },
+          {
+            "path": "tests/directruntime-20261104/native-browser/h109/worker-recipe.py",
+            "blob": "b0b7c794fcb608c8b7694edb9c758d2c62cec86e",
+            "line": 22
+          },
+          {
+            "path": "tests/directruntime-20261104/native-browser/h109/worker-recipe.py",
+            "blob": "b0b7c794fcb608c8b7694edb9c758d2c62cec86e",
+            "line": 18
+          },
+          {
+            "path": "tests/directruntime-20261104/native-browser/h109/input-set.py",
+            "blob": "81b1809a11d6527266a9da40196e9aed1689dcc8",
+            "line": 23
+          },
+          {
+            "path": "tests/directruntime-20261104/native-browser/h109/input-set.py",
+            "blob": "81b1809a11d6527266a9da40196e9aed1689dcc8",
+            "line": 20
+          }
+        ],
+        "target": "tests/directruntime-20261104/native-browser/h109/prepare-plan.py",
+        "target_blob": "324bb314b53f9075ecbff3b2329127ebbe6a207b",
+        "operation": "validated Python read of measured bytes"
+      },
+      {
+        "runner": "validated:tests/directruntime-20261104/native-browser/h109/test-worker-recipe.py",
+        "input_revision": "88bd8ab66f8f2542f69ca706deb99d161c47931c",
+        "frames": [
+          {
+            "path": "tests/directruntime-20261104/native-browser/h109/test-worker-recipe.py",
+            "blob": "4232e4c55e1dfaae6e6ffb280434aaf578ee1cf6",
+            "line": 17
+          },
+          {
+            "path": "tests/directruntime-20261104/native-browser/h109/worker-recipe.py",
+            "blob": "b0b7c794fcb608c8b7694edb9c758d2c62cec86e",
+            "line": 22
+          },
+          {
+            "path": "tests/directruntime-20261104/native-browser/h109/worker-recipe.py",
+            "blob": "b0b7c794fcb608c8b7694edb9c758d2c62cec86e",
+            "line": 18
+          }
+        ],
+        "target": "tests/directruntime-20261104/native-browser/h109/input-set.py",
+        "target_blob": "81b1809a11d6527266a9da40196e9aed1689dcc8",
+        "operation": "validated Python read of measured bytes"
+      },
+      {
+        "runner": "validated:tests/directruntime-20261104/native-browser/h109/test-worker-recipe.py",
+        "input_revision": "88bd8ab66f8f2542f69ca706deb99d161c47931c",
+        "frames": [
+          {
+            "path": "tests/directruntime-20261104/native-browser/h109/test-worker-recipe.py",
+            "blob": "4232e4c55e1dfaae6e6ffb280434aaf578ee1cf6",
+            "line": 17
+          },
+          {
+            "path": "tests/directruntime-20261104/native-browser/h109/worker-recipe.py",
+            "blob": "b0b7c794fcb608c8b7694edb9c758d2c62cec86e",
+            "line": 23
+          },
+          {
+            "path": "tests/directruntime-20261104/native-browser/h109/worker-recipe.py",
+            "blob": "b0b7c794fcb608c8b7694edb9c758d2c62cec86e",
+            "line": 18
+          },
+          {
+            "path": "tests/directruntime-20261104/native-browser/h109/stage-timing.py",
+            "blob": "f459290fa9ffc19ef50085aba63ed8cd14044241",
+            "line": 20
+          },
+          {
+            "path": "tests/directruntime-20261104/native-browser/h109/stage-timing.py",
+            "blob": "f459290fa9ffc19ef50085aba63ed8cd14044241",
+            "line": 18
+          }
+        ],
+        "target": "tests/directruntime-20261104/native-browser/h109/measurement-clock.py",
+        "target_blob": "bf682d04ebe47401a404c41c74d53390ab122e60",
+        "operation": "validated Python read of measured bytes"
+      },
+      {
+        "runner": "validated:tests/directruntime-20261104/native-browser/h109/test-worker-recipe.py",
+        "input_revision": "88bd8ab66f8f2542f69ca706deb99d161c47931c",
+        "frames": [
+          {
+            "path": "tests/directruntime-20261104/native-browser/h109/test-worker-recipe.py",
+            "blob": "4232e4c55e1dfaae6e6ffb280434aaf578ee1cf6",
+            "line": 17
+          },
+          {
+            "path": "tests/directruntime-20261104/native-browser/h109/worker-recipe.py",
+            "blob": "b0b7c794fcb608c8b7694edb9c758d2c62cec86e",
+            "line": 23
+          },
+          {
+            "path": "tests/directruntime-20261104/native-browser/h109/worker-recipe.py",
+            "blob": "b0b7c794fcb608c8b7694edb9c758d2c62cec86e",
+            "line": 18
+          },
+          {
+            "path": "tests/directruntime-20261104/native-browser/h109/stage-timing.py",
+            "blob": "f459290fa9ffc19ef50085aba63ed8cd14044241",
+            "line": 21
+          },
+          {
+            "path": "tests/directruntime-20261104/native-browser/h109/stage-timing.py",
+            "blob": "f459290fa9ffc19ef50085aba63ed8cd14044241",
+            "line": 18
+          }
+        ],
+        "target": "tests/directruntime-20261104/native-browser/h109/prepare-plan.py",
+        "target_blob": "324bb314b53f9075ecbff3b2329127ebbe6a207b",
+        "operation": "validated Python read of measured bytes"
+      },
+      {
+        "runner": "validated:tests/directruntime-20261104/native-browser/h109/test-worker-recipe.py",
+        "input_revision": "88bd8ab66f8f2542f69ca706deb99d161c47931c",
+        "frames": [
+          {
+            "path": "tests/directruntime-20261104/native-browser/h109/test-worker-recipe.py",
+            "blob": "4232e4c55e1dfaae6e6ffb280434aaf578ee1cf6",
+            "line": 17
+          },
+          {
+            "path": "tests/directruntime-20261104/native-browser/h109/worker-recipe.py",
+            "blob": "b0b7c794fcb608c8b7694edb9c758d2c62cec86e",
+            "line": 23
+          },
+          {
+            "path": "tests/directruntime-20261104/native-browser/h109/worker-recipe.py",
+            "blob": "b0b7c794fcb608c8b7694edb9c758d2c62cec86e",
+            "line": 18
+          }
+        ],
+        "target": "tests/directruntime-20261104/native-browser/h109/stage-timing.py",
+        "target_blob": "f459290fa9ffc19ef50085aba63ed8cd14044241",
+        "operation": "validated Python read of measured bytes"
+      },
+      {
+        "runner": "validated:tests/directruntime-20261104/native-browser/h109/test-worker-recipe.py",
+        "input_revision": "88bd8ab66f8f2542f69ca706deb99d161c47931c",
+        "frames": [
+          {
+            "path": "tests/directruntime-20261104/native-browser/h109/test-worker-recipe.py",
+            "blob": "4232e4c55e1dfaae6e6ffb280434aaf578ee1cf6",
+            "line": 17
+          }
+        ],
+        "target": "tests/directruntime-20261104/native-browser/h109/worker-recipe.py",
+        "target_blob": "b0b7c794fcb608c8b7694edb9c758d2c62cec86e",
+        "operation": "validated Python read of measured bytes"
+      },
+      {
+        "runner": "validated:tests/directruntime-20261104/native-browser/readbounds/test-negative-inventory.py",
+        "input_revision": "d9170b725fbb836fdbdc0d731fc9a2dbc4dec3ec",
+        "frames": [
+          {
+            "path": "tests/directruntime-20261104/native-browser/readbounds/test-negative-inventory.py",
+            "blob": "7f5af7043b3ecb4f61834318b84ccab86c49c461",
+            "line": 16
+          }
+        ],
+        "target": "tests/directruntime-20261104/native-browser/readbounds/negative-inventory.py",
+        "target_blob": "a3c7aab3b365fcf7fb11c0622c05e6c3de49deb7",
+        "operation": "validated Python read of measured bytes"
+      },
+      {
+        "runner": "validated:tests/directruntime-20261104/native-browser/readbounds/test-retained-transfers.py",
+        "input_revision": "d9170b725fbb836fdbdc0d731fc9a2dbc4dec3ec",
+        "frames": [
+          {
+            "path": "tests/directruntime-20261104/native-browser/readbounds/test-retained-transfers.py",
+            "blob": "84ccb8c9604c05ae0d90f50998d51dd5f102a9bb",
+            "line": 48
+          },
+          {
+            "path": "tests/directruntime-20261104/native-browser/readbounds/test-retained-transfers.py",
+            "blob": "84ccb8c9604c05ae0d90f50998d51dd5f102a9bb",
+            "line": 13
+          },
+          {
+            "path": "tests/directruntime-20261104/native-browser/readbounds/retained-transfers.py",
+            "blob": "f72eb00b20eb6347eb0b04a3dd168f8ee3fc7ea7",
+            "line": 47
+          }
+        ],
+        "target": "tests/directruntime-20261104/native-browser/readbounds/scripts/closure-audit.py",
+        "target_blob": "e5938c178ae2dc19f0f3e01b99701c290558f26a",
+        "operation": "validated Python read of measured bytes"
+      },
+      {
+        "runner": "validated:tests/directruntime-20261104/native-browser/readbounds/test-retained-transfers.py",
+        "input_revision": "d9170b725fbb836fdbdc0d731fc9a2dbc4dec3ec",
+        "frames": [
+          {
+            "path": "tests/directruntime-20261104/native-browser/readbounds/test-retained-transfers.py",
+            "blob": "84ccb8c9604c05ae0d90f50998d51dd5f102a9bb",
+            "line": 9
+          },
+          {
+            "path": "tests/directruntime-20261104/native-browser/readbounds/retained-transfers.py",
+            "blob": "f72eb00b20eb6347eb0b04a3dd168f8ee3fc7ea7",
+            "line": 33
+          },
+          {
+            "path": "tests/directruntime-20261104/native-browser/readbounds/retained-transfers.py",
+            "blob": "f72eb00b20eb6347eb0b04a3dd168f8ee3fc7ea7",
+            "line": 31
+          }
+        ],
+        "target": "tests/directruntime-20261104/native-browser/readbounds/baseline-inputs.py",
+        "target_blob": "db17288cf9a2f1df460333528ba9d707296f6f2d",
+        "operation": "validated Python read of measured bytes"
+      },
+      {
+        "runner": "validated:tests/directruntime-20261104/native-browser/readbounds/test-retained-transfers.py",
+        "input_revision": "d9170b725fbb836fdbdc0d731fc9a2dbc4dec3ec",
+        "frames": [
+          {
+            "path": "tests/directruntime-20261104/native-browser/readbounds/test-retained-transfers.py",
+            "blob": "84ccb8c9604c05ae0d90f50998d51dd5f102a9bb",
+            "line": 9
+          },
+          {
+            "path": "tests/directruntime-20261104/native-browser/readbounds/retained-transfers.py",
+            "blob": "f72eb00b20eb6347eb0b04a3dd168f8ee3fc7ea7",
+            "line": 34
+          },
+          {
+            "path": "tests/directruntime-20261104/native-browser/readbounds/retained-transfers.py",
+            "blob": "f72eb00b20eb6347eb0b04a3dd168f8ee3fc7ea7",
+            "line": 31
+          },
+          {
+            "path": "tests/directruntime-20261104/native-browser/h109/input-copy.py",
+            "blob": "227f4945e274de15625f21fdf789b718bd614ef5",
+            "line": 18
+          }
+        ],
+        "target": "tests/directruntime-20261104/native-browser/h109/input-inventory.py",
+        "target_blob": "2bbde0bd62a3cb448e752e521d7761937d80a240",
+        "operation": "validated Python read of measured bytes"
+      },
+      {
+        "runner": "validated:tests/directruntime-20261104/native-browser/readbounds/test-retained-transfers.py",
+        "input_revision": "d9170b725fbb836fdbdc0d731fc9a2dbc4dec3ec",
+        "frames": [
+          {
+            "path": "tests/directruntime-20261104/native-browser/readbounds/test-retained-transfers.py",
+            "blob": "84ccb8c9604c05ae0d90f50998d51dd5f102a9bb",
+            "line": 9
+          },
+          {
+            "path": "tests/directruntime-20261104/native-browser/readbounds/retained-transfers.py",
+            "blob": "f72eb00b20eb6347eb0b04a3dd168f8ee3fc7ea7",
+            "line": 34
+          },
+          {
+            "path": "tests/directruntime-20261104/native-browser/readbounds/retained-transfers.py",
+            "blob": "f72eb00b20eb6347eb0b04a3dd168f8ee3fc7ea7",
+            "line": 31
+          }
+        ],
+        "target": "tests/directruntime-20261104/native-browser/h109/input-copy.py",
+        "target_blob": "227f4945e274de15625f21fdf789b718bd614ef5",
+        "operation": "validated Python read of measured bytes"
+      },
+      {
+        "runner": "validated:tests/directruntime-20261104/native-browser/readbounds/test-retained-transfers.py",
+        "input_revision": "d9170b725fbb836fdbdc0d731fc9a2dbc4dec3ec",
+        "frames": [
+          {
+            "path": "tests/directruntime-20261104/native-browser/readbounds/test-retained-transfers.py",
+            "blob": "84ccb8c9604c05ae0d90f50998d51dd5f102a9bb",
+            "line": 9
+          }
+        ],
+        "target": "tests/directruntime-20261104/native-browser/readbounds/retained-transfers.py",
+        "target_blob": "f72eb00b20eb6347eb0b04a3dd168f8ee3fc7ea7",
+        "operation": "validated Python read of measured bytes"
+      },
+      {
+        "runner": "validated:tests/directruntime-20261104/native-browser/readbounds/test-serial-build.py",
+        "input_revision": "d9170b725fbb836fdbdc0d731fc9a2dbc4dec3ec",
+        "frames": [
+          {
+            "path": "tests/directruntime-20261104/native-browser/readbounds/test-serial-build.py",
+            "blob": "a0849a330d93e2c1e7f009c8f792e2d887696182",
+            "line": 8
+          }
+        ],
+        "target": "tests/directruntime-20261104/native-browser/readbounds/serial-build.py",
+        "target_blob": "071755cc6574cfb9c5f97ad5703072486ffc9249",
+        "operation": "validated Python read of measured bytes"
+      },
+      {
+        "runner": "validated:tests/directruntime-20261104/native-browser/readbounds/test-held-scripts.py",
+        "input_revision": "d9170b725fbb836fdbdc0d731fc9a2dbc4dec3ec",
+        "frames": [
+          {
+            "path": "tests/directruntime-20261104/native-browser/readbounds/test-held-scripts.py",
+            "blob": "8cbba0ce16c645fff2613047691e385fd039e772",
+            "line": 265
+          },
+          {
+            "path": "tests/directruntime-20261104/native-browser/readbounds/test-held-scripts.py",
+            "blob": "8cbba0ce16c645fff2613047691e385fd039e772",
+            "line": 164
+          }
+        ],
+        "target": "tests/directruntime-20261104/native-browser/readbounds/scripts/native-negatives.py",
+        "target_blob": "8ea13eeffc7e01272d3f176b7c5e98a2015ed427",
+        "operation": "validated Python read of measured bytes"
+      },
+      {
+        "runner": "validated:tests/directruntime-20261104/native-browser/readbounds/test-held-scripts.py",
+        "input_revision": "d9170b725fbb836fdbdc0d731fc9a2dbc4dec3ec",
+        "frames": [
+          {
+            "path": "tests/directruntime-20261104/native-browser/readbounds/test-held-scripts.py",
+            "blob": "8cbba0ce16c645fff2613047691e385fd039e772",
+            "line": 265
+          },
+          {
+            "path": "tests/directruntime-20261104/native-browser/readbounds/test-held-scripts.py",
+            "blob": "8cbba0ce16c645fff2613047691e385fd039e772",
+            "line": 183
+          }
+        ],
+        "target": "tests/directruntime-20261104/native-browser/readbounds/scripts/native-negatives.py",
+        "target_blob": "8ea13eeffc7e01272d3f176b7c5e98a2015ed427",
+        "operation": "validated Python read of measured bytes"
+      },
+      {
+        "runner": "validated:tests/directruntime-20261104/native-browser/readbounds/test-held-scripts.py",
+        "input_revision": "d9170b725fbb836fdbdc0d731fc9a2dbc4dec3ec",
+        "frames": [
+          {
+            "path": "tests/directruntime-20261104/native-browser/readbounds/test-held-scripts.py",
+            "blob": "8cbba0ce16c645fff2613047691e385fd039e772",
+            "line": 265
+          },
+          {
+            "path": "tests/directruntime-20261104/native-browser/readbounds/test-held-scripts.py",
+            "blob": "8cbba0ce16c645fff2613047691e385fd039e772",
+            "line": 204
+          }
+        ],
+        "target": "tests/directruntime-20261104/native-browser/readbounds/scripts/native-negatives.py",
+        "target_blob": "8ea13eeffc7e01272d3f176b7c5e98a2015ed427",
+        "operation": "validated Python read of measured bytes"
+      },
+      {
+        "runner": "validated:tests/directruntime-20261104/native-browser/readbounds/test-held-scripts.py",
+        "input_revision": "d9170b725fbb836fdbdc0d731fc9a2dbc4dec3ec",
+        "frames": [
+          {
+            "path": "tests/directruntime-20261104/native-browser/readbounds/test-held-scripts.py",
+            "blob": "8cbba0ce16c645fff2613047691e385fd039e772",
+            "line": 265
+          },
+          {
+            "path": "tests/directruntime-20261104/native-browser/readbounds/test-held-scripts.py",
+            "blob": "8cbba0ce16c645fff2613047691e385fd039e772",
+            "line": 230
+          }
+        ],
+        "target": "tests/directruntime-20261104/native-browser/readbounds/scripts/proof-final.sh",
+        "target_blob": "96cc1f799cd12e83117b208000d5c0ed7c9dac2b",
+        "operation": "validated Python read of measured bytes"
+      },
+      {
+        "runner": "validated:tests/directruntime-20261104/native-browser/readbounds/test-held-scripts.py",
+        "input_revision": "d9170b725fbb836fdbdc0d731fc9a2dbc4dec3ec",
+        "frames": [
+          {
+            "path": "tests/directruntime-20261104/native-browser/readbounds/test-held-scripts.py",
+            "blob": "8cbba0ce16c645fff2613047691e385fd039e772",
+            "line": 265
+          },
+          {
+            "path": "tests/directruntime-20261104/native-browser/readbounds/test-held-scripts.py",
+            "blob": "8cbba0ce16c645fff2613047691e385fd039e772",
+            "line": 230
+          }
+        ],
+        "target": "tests/directruntime-20261104/native-browser/readbounds/scripts/remaining-checks.sh",
+        "target_blob": "8c7bbfea916e37c7763c65b9782a1d6fa64df997",
+        "operation": "validated Python read of measured bytes"
+      },
+      {
+        "runner": "validated:tests/directruntime-20261104/native-browser/readbounds/test-held-scripts.py",
+        "input_revision": "d9170b725fbb836fdbdc0d731fc9a2dbc4dec3ec",
+        "frames": [
+          {
+            "path": "tests/directruntime-20261104/native-browser/readbounds/test-held-scripts.py",
+            "blob": "8cbba0ce16c645fff2613047691e385fd039e772",
+            "line": 265
+          },
+          {
+            "path": "tests/directruntime-20261104/native-browser/readbounds/test-held-scripts.py",
+            "blob": "8cbba0ce16c645fff2613047691e385fd039e772",
+            "line": 230
+          }
+        ],
+        "target": "tests/directruntime-20261104/native-browser/readbounds/scripts/symbol-gate.sh",
+        "target_blob": "cffd7c254fe20a63c5996df835744783e1697554",
+        "operation": "validated Python read of measured bytes"
+      },
+      {
+        "runner": "validated:tests/directruntime-20261104/native-browser/readbounds/test-held-scripts.py",
+        "input_revision": "d9170b725fbb836fdbdc0d731fc9a2dbc4dec3ec",
+        "frames": [
+          {
+            "path": "tests/directruntime-20261104/native-browser/readbounds/test-held-scripts.py",
+            "blob": "8cbba0ce16c645fff2613047691e385fd039e772",
+            "line": 265
+          },
+          {
+            "path": "tests/directruntime-20261104/native-browser/readbounds/test-held-scripts.py",
+            "blob": "8cbba0ce16c645fff2613047691e385fd039e772",
+            "line": 234
+          }
+        ],
+        "target": "tests/directruntime-20261104/native-browser/readbounds/scripts/remaining-checks.sh",
+        "target_blob": "8c7bbfea916e37c7763c65b9782a1d6fa64df997",
+        "operation": "validated Python read of measured bytes"
+      },
+      {
+        "runner": "validated:tests/directruntime-20261104/native-browser/readbounds/test-held-scripts.py",
+        "input_revision": "d9170b725fbb836fdbdc0d731fc9a2dbc4dec3ec",
+        "frames": [
+          {
+            "path": "tests/directruntime-20261104/native-browser/readbounds/test-held-scripts.py",
+            "blob": "8cbba0ce16c645fff2613047691e385fd039e772",
+            "line": 265
+          },
+          {
+            "path": "tests/directruntime-20261104/native-browser/readbounds/test-held-scripts.py",
+            "blob": "8cbba0ce16c645fff2613047691e385fd039e772",
+            "line": 235
+          }
+        ],
+        "target": "tests/directruntime-20261104/native-browser/readbounds/scripts/remaining-checks.sh",
+        "target_blob": "8c7bbfea916e37c7763c65b9782a1d6fa64df997",
+        "operation": "validated Python read of measured bytes"
+      },
+      {
+        "runner": "validated:tests/directruntime-20261104/native-browser/readbounds/test-held-scripts.py",
+        "input_revision": "d9170b725fbb836fdbdc0d731fc9a2dbc4dec3ec",
+        "frames": [
+          {
+            "path": "tests/directruntime-20261104/native-browser/readbounds/test-held-scripts.py",
+            "blob": "8cbba0ce16c645fff2613047691e385fd039e772",
+            "line": 265
+          },
+          {
+            "path": "tests/directruntime-20261104/native-browser/readbounds/test-held-scripts.py",
+            "blob": "8cbba0ce16c645fff2613047691e385fd039e772",
+            "line": 238
+          }
+        ],
+        "target": "tests/directruntime-20261104/native-browser/readbounds/scripts/wasm-build.sh",
+        "target_blob": "daeeeaca2ac6bdb5321d5b0ce1e7b744642b229d",
+        "operation": "validated Python read of measured bytes"
+      },
+      {
+        "runner": "validated:tests/directruntime-20261104/native-browser/readbounds/test-held-scripts.py",
+        "input_revision": "d9170b725fbb836fdbdc0d731fc9a2dbc4dec3ec",
+        "frames": [
+          {
+            "path": "tests/directruntime-20261104/native-browser/readbounds/test-held-scripts.py",
+            "blob": "8cbba0ce16c645fff2613047691e385fd039e772",
+            "line": 265
+          },
+          {
+            "path": "tests/directruntime-20261104/native-browser/readbounds/test-held-scripts.py",
+            "blob": "8cbba0ce16c645fff2613047691e385fd039e772",
+            "line": 238
+          }
+        ],
+        "target": "tests/directruntime-20261104/native-browser/readbounds/wasm-build.sh",
+        "target_blob": "4259d9a7561806e9c31735b9e8655aa1a212a6e5",
+        "operation": "validated Python read of measured bytes"
+      },
+      {
+        "runner": "validated:tests/directruntime-20261104/native-browser/readbounds/test-held-scripts.py",
+        "input_revision": "d9170b725fbb836fdbdc0d731fc9a2dbc4dec3ec",
+        "frames": [
+          {
+            "path": "tests/directruntime-20261104/native-browser/readbounds/test-held-scripts.py",
+            "blob": "8cbba0ce16c645fff2613047691e385fd039e772",
+            "line": 265
+          },
+          {
+            "path": "tests/directruntime-20261104/native-browser/readbounds/test-held-scripts.py",
+            "blob": "8cbba0ce16c645fff2613047691e385fd039e772",
+            "line": 59
+          }
+        ],
+        "target": "tests/directruntime-20261104/native-browser/readbounds/scripts/closure-audit.py",
+        "target_blob": "e5938c178ae2dc19f0f3e01b99701c290558f26a",
+        "operation": "validated Python read of measured bytes"
+      },
+      {
+        "runner": "validated:tests/directruntime-20261104/native-browser/readbounds/test-held-scripts.py",
+        "input_revision": "d9170b725fbb836fdbdc0d731fc9a2dbc4dec3ec",
+        "frames": [
+          {
+            "path": "tests/directruntime-20261104/native-browser/readbounds/test-held-scripts.py",
+            "blob": "8cbba0ce16c645fff2613047691e385fd039e772",
+            "line": 265
+          },
+          {
+            "path": "tests/directruntime-20261104/native-browser/readbounds/test-held-scripts.py",
+            "blob": "8cbba0ce16c645fff2613047691e385fd039e772",
+            "line": 63
+          }
+        ],
+        "target": "tests/directruntime-20261104/native-browser/readbounds/scripts/native-negatives.py",
+        "target_blob": "8ea13eeffc7e01272d3f176b7c5e98a2015ed427",
+        "operation": "validated Python read of measured bytes"
+      },
+      {
+        "runner": "validated:tests/directruntime-20261104/native-browser/readbounds/test-held-scripts.py",
+        "input_revision": "d9170b725fbb836fdbdc0d731fc9a2dbc4dec3ec",
+        "frames": [
+          {
+            "path": "tests/directruntime-20261104/native-browser/readbounds/test-held-scripts.py",
+            "blob": "8cbba0ce16c645fff2613047691e385fd039e772",
+            "line": 30
+          },
+          {
+            "path": "tests/directruntime-20261104/native-browser/readbounds/test-held-scripts.py",
+            "blob": "8cbba0ce16c645fff2613047691e385fd039e772",
+            "line": 28
+          }
+        ],
+        "target": "tests/directruntime-20261104/native-browser/readbounds/baseline-inputs.py",
+        "target_blob": "db17288cf9a2f1df460333528ba9d707296f6f2d",
+        "operation": "validated Python read of measured bytes"
+      },
+      {
+        "runner": "validated:tests/directruntime-20261104/native-browser/readbounds/test-held-scripts.py",
+        "input_revision": "d9170b725fbb836fdbdc0d731fc9a2dbc4dec3ec",
+        "frames": [
+          {
+            "path": "tests/directruntime-20261104/native-browser/readbounds/test-held-scripts.py",
+            "blob": "8cbba0ce16c645fff2613047691e385fd039e772",
+            "line": 30
+          },
+          {
+            "path": "tests/directruntime-20261104/native-browser/readbounds/test-held-scripts.py",
+            "blob": "8cbba0ce16c645fff2613047691e385fd039e772",
+            "line": 28
+          }
+        ],
+        "target": "tests/directruntime-20261104/native-browser/readbounds/invocation-deadline.py",
+        "target_blob": "dfe7616f9ed0dd2bc57add8cfdc652cf908a4a19",
+        "operation": "validated Python read of measured bytes"
       }
     ]
   }
