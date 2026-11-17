@@ -102,4 +102,11 @@ theorem bad_not_fault : run badSelected.plan.code ScalarContinuation.target≠.f
  intro wrong
  cases wrong
 
+-- H949: the exhausted legacy quotation remains outside b1 accepted coverage.
+example :
+ ((Client.input 0).run ScalarContinuation.final=.error .exhausted ∧
+  run (Client.selected 0).plan.code ScalarContinuation.target=.ok ScalarReentry.Endpoint.machine 0) ∧
+ Evm.Compiler.compile 1 F (.cons (Client.input 0) .nil)=none :=
+ ⟨exhausted_boundary,endpoint_refused 0⟩
+
 end Solidity.Backend.InternalFlow.RuntimeFrame.ScalarSourceCompiler.Controls
