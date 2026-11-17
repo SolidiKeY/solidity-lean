@@ -275,6 +275,82 @@
           "--validation"
         ],
         "purpose": "Configured module-level CLI prepares a cache pack for three named ControlTuple modules from supplied validation and exact cache mappings, with exclusive output creation and archive member byte checks. Entry prefix only; required options are not supplied and no configured invocation is certified. No cache installation, delivery, dependency-closure completeness, current passing, helper/fixture, proof or runtime credit."
+      },
+      {
+        "path": "tests/directruntime-20261104/native-browser/readbounds/test-negative-inventory.py",
+        "input_revision": "d9170b725fbb836fdbdc0d731fc9a2dbc4dec3ec",
+        "source_blob": "7f5af7043b3ecb4f61834318b84ccab86c49c461",
+        "command": [
+          "python3",
+          "-B",
+          "tests/directruntime-20261104/native-browser/readbounds/test-negative-inventory.py"
+        ],
+        "kind": "unittest",
+        "purpose": "Four synthetic negative-wire/expectation mutation and retained-journal pin controls; no native/browser replay. Ordinary and instrumented invocations completed at the measured revision. Only listed committed source bytes have exact observed source-read routes; this certifies source consumption, not module/child execution, current passing validation, production timing/resources, fixture equivalence, generated-output provenance, proof or runtime acceptance.",
+        "input_scope": [
+          "tests/directruntime-20261104/native-browser/readbounds/negative-inventory.py"
+        ],
+        "other_reads": "unresolved"
+      },
+      {
+        "path": "tests/directruntime-20261104/native-browser/readbounds/test-retained-transfers.py",
+        "input_revision": "d9170b725fbb836fdbdc0d731fc9a2dbc4dec3ec",
+        "source_blob": "84ccb8c9604c05ae0d90f50998d51dd5f102a9bb",
+        "command": [
+          "python3",
+          "-B",
+          "tests/directruntime-20261104/native-browser/readbounds/test-retained-transfers.py"
+        ],
+        "kind": "unittest",
+        "purpose": "Five finite transfer-text classification and invalid-file/binary-pin refusal controls; no retained executable or native tool is run. Ordinary and instrumented invocations completed at the measured revision. Only listed committed source bytes have exact observed source-read routes; this certifies source consumption, not module/child execution, current passing validation, production timing/resources, fixture equivalence, generated-output provenance, proof or runtime acceptance.",
+        "input_scope": [
+          "tests/directruntime-20261104/native-browser/h109/input-copy.py",
+          "tests/directruntime-20261104/native-browser/h109/input-inventory.py",
+          "tests/directruntime-20261104/native-browser/readbounds/baseline-inputs.py",
+          "tests/directruntime-20261104/native-browser/readbounds/retained-transfers.py",
+          "tests/directruntime-20261104/native-browser/readbounds/scripts/closure-audit.py"
+        ],
+        "other_reads": "unresolved"
+      },
+      {
+        "path": "tests/directruntime-20261104/native-browser/readbounds/test-serial-build.py",
+        "input_revision": "d9170b725fbb836fdbdc0d731fc9a2dbc4dec3ec",
+        "source_blob": "a0849a330d93e2c1e7f009c8f792e2d887696182",
+        "command": [
+          "python3",
+          "-B",
+          "tests/directruntime-20261104/native-browser/readbounds/test-serial-build.py"
+        ],
+        "kind": "unittest",
+        "purpose": "Eight synthetic source-plan ordering, source-pin and inert fixture-runner controls; no Lean/Lake build is performed. Ordinary and instrumented invocations completed at the measured revision. Only listed committed source bytes have exact observed source-read routes; this certifies source consumption, not module/child execution, current passing validation, production timing/resources, fixture equivalence, generated-output provenance, proof or runtime acceptance.",
+        "input_scope": [
+          "tests/directruntime-20261104/native-browser/readbounds/serial-build.py"
+        ],
+        "other_reads": "unresolved"
+      },
+      {
+        "path": "tests/directruntime-20261104/native-browser/readbounds/test-held-scripts.py",
+        "input_revision": "d9170b725fbb836fdbdc0d731fc9a2dbc4dec3ec",
+        "source_blob": "8cbba0ce16c645fff2613047691e385fd039e772",
+        "command": [
+          "python3",
+          "-B",
+          "tests/directruntime-20261104/native-browser/readbounds/test-held-scripts.py"
+        ],
+        "kind": "unittest",
+        "purpose": "Fourteen synthetic file/process controls for held-script parameters, source delegates, deadlines, owned-process cleanup, result publication and lock ordering. Temporary rewritten fixture wrappers use an inert builder; no production wrapper build, Lean, Docker, native checker, WASM or stopped benchmark is run. Ordinary and instrumented invocations completed at the measured revision. Only listed committed source bytes have exact observed source-read routes; this certifies source consumption, not module/child execution, current passing validation, production timing/resources, fixture equivalence, generated-output provenance, proof or runtime acceptance.",
+        "input_scope": [
+          "tests/directruntime-20261104/native-browser/readbounds/baseline-inputs.py",
+          "tests/directruntime-20261104/native-browser/readbounds/invocation-deadline.py",
+          "tests/directruntime-20261104/native-browser/readbounds/scripts/closure-audit.py",
+          "tests/directruntime-20261104/native-browser/readbounds/scripts/native-negatives.py",
+          "tests/directruntime-20261104/native-browser/readbounds/scripts/proof-final.sh",
+          "tests/directruntime-20261104/native-browser/readbounds/scripts/remaining-checks.sh",
+          "tests/directruntime-20261104/native-browser/readbounds/scripts/symbol-gate.sh",
+          "tests/directruntime-20261104/native-browser/readbounds/scripts/wasm-build.sh",
+          "tests/directruntime-20261104/native-browser/readbounds/wasm-build.sh"
+        ],
+        "other_reads": "unresolved"
       }
     ]
   },
@@ -1109,6 +1185,415 @@
         ],
         "target": "tests/directruntime-20261104/native-browser/h109/worker-recipe.py",
         "target_blob": "b0b7c794fcb608c8b7694edb9c758d2c62cec86e",
+        "operation": "validated Python read of measured bytes"
+      },
+      {
+        "runner": "validated:tests/directruntime-20261104/native-browser/readbounds/test-negative-inventory.py",
+        "input_revision": "d9170b725fbb836fdbdc0d731fc9a2dbc4dec3ec",
+        "frames": [
+          {
+            "path": "tests/directruntime-20261104/native-browser/readbounds/test-negative-inventory.py",
+            "blob": "7f5af7043b3ecb4f61834318b84ccab86c49c461",
+            "line": 16
+          }
+        ],
+        "target": "tests/directruntime-20261104/native-browser/readbounds/negative-inventory.py",
+        "target_blob": "a3c7aab3b365fcf7fb11c0622c05e6c3de49deb7",
+        "operation": "validated Python read of measured bytes"
+      },
+      {
+        "runner": "validated:tests/directruntime-20261104/native-browser/readbounds/test-retained-transfers.py",
+        "input_revision": "d9170b725fbb836fdbdc0d731fc9a2dbc4dec3ec",
+        "frames": [
+          {
+            "path": "tests/directruntime-20261104/native-browser/readbounds/test-retained-transfers.py",
+            "blob": "84ccb8c9604c05ae0d90f50998d51dd5f102a9bb",
+            "line": 48
+          },
+          {
+            "path": "tests/directruntime-20261104/native-browser/readbounds/test-retained-transfers.py",
+            "blob": "84ccb8c9604c05ae0d90f50998d51dd5f102a9bb",
+            "line": 13
+          },
+          {
+            "path": "tests/directruntime-20261104/native-browser/readbounds/retained-transfers.py",
+            "blob": "f72eb00b20eb6347eb0b04a3dd168f8ee3fc7ea7",
+            "line": 47
+          }
+        ],
+        "target": "tests/directruntime-20261104/native-browser/readbounds/scripts/closure-audit.py",
+        "target_blob": "e5938c178ae2dc19f0f3e01b99701c290558f26a",
+        "operation": "validated Python read of measured bytes"
+      },
+      {
+        "runner": "validated:tests/directruntime-20261104/native-browser/readbounds/test-retained-transfers.py",
+        "input_revision": "d9170b725fbb836fdbdc0d731fc9a2dbc4dec3ec",
+        "frames": [
+          {
+            "path": "tests/directruntime-20261104/native-browser/readbounds/test-retained-transfers.py",
+            "blob": "84ccb8c9604c05ae0d90f50998d51dd5f102a9bb",
+            "line": 9
+          },
+          {
+            "path": "tests/directruntime-20261104/native-browser/readbounds/retained-transfers.py",
+            "blob": "f72eb00b20eb6347eb0b04a3dd168f8ee3fc7ea7",
+            "line": 33
+          },
+          {
+            "path": "tests/directruntime-20261104/native-browser/readbounds/retained-transfers.py",
+            "blob": "f72eb00b20eb6347eb0b04a3dd168f8ee3fc7ea7",
+            "line": 31
+          }
+        ],
+        "target": "tests/directruntime-20261104/native-browser/readbounds/baseline-inputs.py",
+        "target_blob": "db17288cf9a2f1df460333528ba9d707296f6f2d",
+        "operation": "validated Python read of measured bytes"
+      },
+      {
+        "runner": "validated:tests/directruntime-20261104/native-browser/readbounds/test-retained-transfers.py",
+        "input_revision": "d9170b725fbb836fdbdc0d731fc9a2dbc4dec3ec",
+        "frames": [
+          {
+            "path": "tests/directruntime-20261104/native-browser/readbounds/test-retained-transfers.py",
+            "blob": "84ccb8c9604c05ae0d90f50998d51dd5f102a9bb",
+            "line": 9
+          },
+          {
+            "path": "tests/directruntime-20261104/native-browser/readbounds/retained-transfers.py",
+            "blob": "f72eb00b20eb6347eb0b04a3dd168f8ee3fc7ea7",
+            "line": 34
+          },
+          {
+            "path": "tests/directruntime-20261104/native-browser/readbounds/retained-transfers.py",
+            "blob": "f72eb00b20eb6347eb0b04a3dd168f8ee3fc7ea7",
+            "line": 31
+          },
+          {
+            "path": "tests/directruntime-20261104/native-browser/h109/input-copy.py",
+            "blob": "227f4945e274de15625f21fdf789b718bd614ef5",
+            "line": 18
+          }
+        ],
+        "target": "tests/directruntime-20261104/native-browser/h109/input-inventory.py",
+        "target_blob": "2bbde0bd62a3cb448e752e521d7761937d80a240",
+        "operation": "validated Python read of measured bytes"
+      },
+      {
+        "runner": "validated:tests/directruntime-20261104/native-browser/readbounds/test-retained-transfers.py",
+        "input_revision": "d9170b725fbb836fdbdc0d731fc9a2dbc4dec3ec",
+        "frames": [
+          {
+            "path": "tests/directruntime-20261104/native-browser/readbounds/test-retained-transfers.py",
+            "blob": "84ccb8c9604c05ae0d90f50998d51dd5f102a9bb",
+            "line": 9
+          },
+          {
+            "path": "tests/directruntime-20261104/native-browser/readbounds/retained-transfers.py",
+            "blob": "f72eb00b20eb6347eb0b04a3dd168f8ee3fc7ea7",
+            "line": 34
+          },
+          {
+            "path": "tests/directruntime-20261104/native-browser/readbounds/retained-transfers.py",
+            "blob": "f72eb00b20eb6347eb0b04a3dd168f8ee3fc7ea7",
+            "line": 31
+          }
+        ],
+        "target": "tests/directruntime-20261104/native-browser/h109/input-copy.py",
+        "target_blob": "227f4945e274de15625f21fdf789b718bd614ef5",
+        "operation": "validated Python read of measured bytes"
+      },
+      {
+        "runner": "validated:tests/directruntime-20261104/native-browser/readbounds/test-retained-transfers.py",
+        "input_revision": "d9170b725fbb836fdbdc0d731fc9a2dbc4dec3ec",
+        "frames": [
+          {
+            "path": "tests/directruntime-20261104/native-browser/readbounds/test-retained-transfers.py",
+            "blob": "84ccb8c9604c05ae0d90f50998d51dd5f102a9bb",
+            "line": 9
+          }
+        ],
+        "target": "tests/directruntime-20261104/native-browser/readbounds/retained-transfers.py",
+        "target_blob": "f72eb00b20eb6347eb0b04a3dd168f8ee3fc7ea7",
+        "operation": "validated Python read of measured bytes"
+      },
+      {
+        "runner": "validated:tests/directruntime-20261104/native-browser/readbounds/test-serial-build.py",
+        "input_revision": "d9170b725fbb836fdbdc0d731fc9a2dbc4dec3ec",
+        "frames": [
+          {
+            "path": "tests/directruntime-20261104/native-browser/readbounds/test-serial-build.py",
+            "blob": "a0849a330d93e2c1e7f009c8f792e2d887696182",
+            "line": 8
+          }
+        ],
+        "target": "tests/directruntime-20261104/native-browser/readbounds/serial-build.py",
+        "target_blob": "071755cc6574cfb9c5f97ad5703072486ffc9249",
+        "operation": "validated Python read of measured bytes"
+      },
+      {
+        "runner": "validated:tests/directruntime-20261104/native-browser/readbounds/test-held-scripts.py",
+        "input_revision": "d9170b725fbb836fdbdc0d731fc9a2dbc4dec3ec",
+        "frames": [
+          {
+            "path": "tests/directruntime-20261104/native-browser/readbounds/test-held-scripts.py",
+            "blob": "8cbba0ce16c645fff2613047691e385fd039e772",
+            "line": 265
+          },
+          {
+            "path": "tests/directruntime-20261104/native-browser/readbounds/test-held-scripts.py",
+            "blob": "8cbba0ce16c645fff2613047691e385fd039e772",
+            "line": 164
+          }
+        ],
+        "target": "tests/directruntime-20261104/native-browser/readbounds/scripts/native-negatives.py",
+        "target_blob": "8ea13eeffc7e01272d3f176b7c5e98a2015ed427",
+        "operation": "validated Python read of measured bytes"
+      },
+      {
+        "runner": "validated:tests/directruntime-20261104/native-browser/readbounds/test-held-scripts.py",
+        "input_revision": "d9170b725fbb836fdbdc0d731fc9a2dbc4dec3ec",
+        "frames": [
+          {
+            "path": "tests/directruntime-20261104/native-browser/readbounds/test-held-scripts.py",
+            "blob": "8cbba0ce16c645fff2613047691e385fd039e772",
+            "line": 265
+          },
+          {
+            "path": "tests/directruntime-20261104/native-browser/readbounds/test-held-scripts.py",
+            "blob": "8cbba0ce16c645fff2613047691e385fd039e772",
+            "line": 183
+          }
+        ],
+        "target": "tests/directruntime-20261104/native-browser/readbounds/scripts/native-negatives.py",
+        "target_blob": "8ea13eeffc7e01272d3f176b7c5e98a2015ed427",
+        "operation": "validated Python read of measured bytes"
+      },
+      {
+        "runner": "validated:tests/directruntime-20261104/native-browser/readbounds/test-held-scripts.py",
+        "input_revision": "d9170b725fbb836fdbdc0d731fc9a2dbc4dec3ec",
+        "frames": [
+          {
+            "path": "tests/directruntime-20261104/native-browser/readbounds/test-held-scripts.py",
+            "blob": "8cbba0ce16c645fff2613047691e385fd039e772",
+            "line": 265
+          },
+          {
+            "path": "tests/directruntime-20261104/native-browser/readbounds/test-held-scripts.py",
+            "blob": "8cbba0ce16c645fff2613047691e385fd039e772",
+            "line": 204
+          }
+        ],
+        "target": "tests/directruntime-20261104/native-browser/readbounds/scripts/native-negatives.py",
+        "target_blob": "8ea13eeffc7e01272d3f176b7c5e98a2015ed427",
+        "operation": "validated Python read of measured bytes"
+      },
+      {
+        "runner": "validated:tests/directruntime-20261104/native-browser/readbounds/test-held-scripts.py",
+        "input_revision": "d9170b725fbb836fdbdc0d731fc9a2dbc4dec3ec",
+        "frames": [
+          {
+            "path": "tests/directruntime-20261104/native-browser/readbounds/test-held-scripts.py",
+            "blob": "8cbba0ce16c645fff2613047691e385fd039e772",
+            "line": 265
+          },
+          {
+            "path": "tests/directruntime-20261104/native-browser/readbounds/test-held-scripts.py",
+            "blob": "8cbba0ce16c645fff2613047691e385fd039e772",
+            "line": 230
+          }
+        ],
+        "target": "tests/directruntime-20261104/native-browser/readbounds/scripts/proof-final.sh",
+        "target_blob": "96cc1f799cd12e83117b208000d5c0ed7c9dac2b",
+        "operation": "validated Python read of measured bytes"
+      },
+      {
+        "runner": "validated:tests/directruntime-20261104/native-browser/readbounds/test-held-scripts.py",
+        "input_revision": "d9170b725fbb836fdbdc0d731fc9a2dbc4dec3ec",
+        "frames": [
+          {
+            "path": "tests/directruntime-20261104/native-browser/readbounds/test-held-scripts.py",
+            "blob": "8cbba0ce16c645fff2613047691e385fd039e772",
+            "line": 265
+          },
+          {
+            "path": "tests/directruntime-20261104/native-browser/readbounds/test-held-scripts.py",
+            "blob": "8cbba0ce16c645fff2613047691e385fd039e772",
+            "line": 230
+          }
+        ],
+        "target": "tests/directruntime-20261104/native-browser/readbounds/scripts/remaining-checks.sh",
+        "target_blob": "8c7bbfea916e37c7763c65b9782a1d6fa64df997",
+        "operation": "validated Python read of measured bytes"
+      },
+      {
+        "runner": "validated:tests/directruntime-20261104/native-browser/readbounds/test-held-scripts.py",
+        "input_revision": "d9170b725fbb836fdbdc0d731fc9a2dbc4dec3ec",
+        "frames": [
+          {
+            "path": "tests/directruntime-20261104/native-browser/readbounds/test-held-scripts.py",
+            "blob": "8cbba0ce16c645fff2613047691e385fd039e772",
+            "line": 265
+          },
+          {
+            "path": "tests/directruntime-20261104/native-browser/readbounds/test-held-scripts.py",
+            "blob": "8cbba0ce16c645fff2613047691e385fd039e772",
+            "line": 230
+          }
+        ],
+        "target": "tests/directruntime-20261104/native-browser/readbounds/scripts/symbol-gate.sh",
+        "target_blob": "cffd7c254fe20a63c5996df835744783e1697554",
+        "operation": "validated Python read of measured bytes"
+      },
+      {
+        "runner": "validated:tests/directruntime-20261104/native-browser/readbounds/test-held-scripts.py",
+        "input_revision": "d9170b725fbb836fdbdc0d731fc9a2dbc4dec3ec",
+        "frames": [
+          {
+            "path": "tests/directruntime-20261104/native-browser/readbounds/test-held-scripts.py",
+            "blob": "8cbba0ce16c645fff2613047691e385fd039e772",
+            "line": 265
+          },
+          {
+            "path": "tests/directruntime-20261104/native-browser/readbounds/test-held-scripts.py",
+            "blob": "8cbba0ce16c645fff2613047691e385fd039e772",
+            "line": 234
+          }
+        ],
+        "target": "tests/directruntime-20261104/native-browser/readbounds/scripts/remaining-checks.sh",
+        "target_blob": "8c7bbfea916e37c7763c65b9782a1d6fa64df997",
+        "operation": "validated Python read of measured bytes"
+      },
+      {
+        "runner": "validated:tests/directruntime-20261104/native-browser/readbounds/test-held-scripts.py",
+        "input_revision": "d9170b725fbb836fdbdc0d731fc9a2dbc4dec3ec",
+        "frames": [
+          {
+            "path": "tests/directruntime-20261104/native-browser/readbounds/test-held-scripts.py",
+            "blob": "8cbba0ce16c645fff2613047691e385fd039e772",
+            "line": 265
+          },
+          {
+            "path": "tests/directruntime-20261104/native-browser/readbounds/test-held-scripts.py",
+            "blob": "8cbba0ce16c645fff2613047691e385fd039e772",
+            "line": 235
+          }
+        ],
+        "target": "tests/directruntime-20261104/native-browser/readbounds/scripts/remaining-checks.sh",
+        "target_blob": "8c7bbfea916e37c7763c65b9782a1d6fa64df997",
+        "operation": "validated Python read of measured bytes"
+      },
+      {
+        "runner": "validated:tests/directruntime-20261104/native-browser/readbounds/test-held-scripts.py",
+        "input_revision": "d9170b725fbb836fdbdc0d731fc9a2dbc4dec3ec",
+        "frames": [
+          {
+            "path": "tests/directruntime-20261104/native-browser/readbounds/test-held-scripts.py",
+            "blob": "8cbba0ce16c645fff2613047691e385fd039e772",
+            "line": 265
+          },
+          {
+            "path": "tests/directruntime-20261104/native-browser/readbounds/test-held-scripts.py",
+            "blob": "8cbba0ce16c645fff2613047691e385fd039e772",
+            "line": 238
+          }
+        ],
+        "target": "tests/directruntime-20261104/native-browser/readbounds/scripts/wasm-build.sh",
+        "target_blob": "daeeeaca2ac6bdb5321d5b0ce1e7b744642b229d",
+        "operation": "validated Python read of measured bytes"
+      },
+      {
+        "runner": "validated:tests/directruntime-20261104/native-browser/readbounds/test-held-scripts.py",
+        "input_revision": "d9170b725fbb836fdbdc0d731fc9a2dbc4dec3ec",
+        "frames": [
+          {
+            "path": "tests/directruntime-20261104/native-browser/readbounds/test-held-scripts.py",
+            "blob": "8cbba0ce16c645fff2613047691e385fd039e772",
+            "line": 265
+          },
+          {
+            "path": "tests/directruntime-20261104/native-browser/readbounds/test-held-scripts.py",
+            "blob": "8cbba0ce16c645fff2613047691e385fd039e772",
+            "line": 238
+          }
+        ],
+        "target": "tests/directruntime-20261104/native-browser/readbounds/wasm-build.sh",
+        "target_blob": "4259d9a7561806e9c31735b9e8655aa1a212a6e5",
+        "operation": "validated Python read of measured bytes"
+      },
+      {
+        "runner": "validated:tests/directruntime-20261104/native-browser/readbounds/test-held-scripts.py",
+        "input_revision": "d9170b725fbb836fdbdc0d731fc9a2dbc4dec3ec",
+        "frames": [
+          {
+            "path": "tests/directruntime-20261104/native-browser/readbounds/test-held-scripts.py",
+            "blob": "8cbba0ce16c645fff2613047691e385fd039e772",
+            "line": 265
+          },
+          {
+            "path": "tests/directruntime-20261104/native-browser/readbounds/test-held-scripts.py",
+            "blob": "8cbba0ce16c645fff2613047691e385fd039e772",
+            "line": 59
+          }
+        ],
+        "target": "tests/directruntime-20261104/native-browser/readbounds/scripts/closure-audit.py",
+        "target_blob": "e5938c178ae2dc19f0f3e01b99701c290558f26a",
+        "operation": "validated Python read of measured bytes"
+      },
+      {
+        "runner": "validated:tests/directruntime-20261104/native-browser/readbounds/test-held-scripts.py",
+        "input_revision": "d9170b725fbb836fdbdc0d731fc9a2dbc4dec3ec",
+        "frames": [
+          {
+            "path": "tests/directruntime-20261104/native-browser/readbounds/test-held-scripts.py",
+            "blob": "8cbba0ce16c645fff2613047691e385fd039e772",
+            "line": 265
+          },
+          {
+            "path": "tests/directruntime-20261104/native-browser/readbounds/test-held-scripts.py",
+            "blob": "8cbba0ce16c645fff2613047691e385fd039e772",
+            "line": 63
+          }
+        ],
+        "target": "tests/directruntime-20261104/native-browser/readbounds/scripts/native-negatives.py",
+        "target_blob": "8ea13eeffc7e01272d3f176b7c5e98a2015ed427",
+        "operation": "validated Python read of measured bytes"
+      },
+      {
+        "runner": "validated:tests/directruntime-20261104/native-browser/readbounds/test-held-scripts.py",
+        "input_revision": "d9170b725fbb836fdbdc0d731fc9a2dbc4dec3ec",
+        "frames": [
+          {
+            "path": "tests/directruntime-20261104/native-browser/readbounds/test-held-scripts.py",
+            "blob": "8cbba0ce16c645fff2613047691e385fd039e772",
+            "line": 30
+          },
+          {
+            "path": "tests/directruntime-20261104/native-browser/readbounds/test-held-scripts.py",
+            "blob": "8cbba0ce16c645fff2613047691e385fd039e772",
+            "line": 28
+          }
+        ],
+        "target": "tests/directruntime-20261104/native-browser/readbounds/baseline-inputs.py",
+        "target_blob": "db17288cf9a2f1df460333528ba9d707296f6f2d",
+        "operation": "validated Python read of measured bytes"
+      },
+      {
+        "runner": "validated:tests/directruntime-20261104/native-browser/readbounds/test-held-scripts.py",
+        "input_revision": "d9170b725fbb836fdbdc0d731fc9a2dbc4dec3ec",
+        "frames": [
+          {
+            "path": "tests/directruntime-20261104/native-browser/readbounds/test-held-scripts.py",
+            "blob": "8cbba0ce16c645fff2613047691e385fd039e772",
+            "line": 30
+          },
+          {
+            "path": "tests/directruntime-20261104/native-browser/readbounds/test-held-scripts.py",
+            "blob": "8cbba0ce16c645fff2613047691e385fd039e772",
+            "line": 28
+          }
+        ],
+        "target": "tests/directruntime-20261104/native-browser/readbounds/invocation-deadline.py",
+        "target_blob": "dfe7616f9ed0dd2bc57add8cfdc652cf908a4a19",
         "operation": "validated Python read of measured bytes"
       }
     ]
