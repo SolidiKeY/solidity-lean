@@ -1,0 +1,103 @@
+{
+  "schema_version": 1,
+  "routes": {
+    "standalone": [
+      {
+        "path": "tests/directruntime-20261104/native-browser/h109/offline-journal.py",
+        "input_revision": "c7f33cfc9e1b3c8d0e634f0b267971aa2671688d",
+        "source_blob": "2080eafd39fcb873fe8aa06bf6aa924447f594ac",
+        "command": [
+          "python3",
+          "-B",
+          "tests/directruntime-20261104/native-browser/h109/offline-journal.py"
+        ],
+        "kind": "committed-cli",
+        "entry_line": 101,
+        "required_options": [
+          "--sha256"
+        ],
+        "purpose": "Inspect bounded externally SHA256-pinned canonical lifecycle journal structure. No verification of recorded execution facts, live lease, cleanup, resources, measurement or barrier release; configured source role only, no fixture/helper execution credit."
+      },
+      {
+        "path": "tests/directruntime-20261104/native-browser/h109/offline-stage.py",
+        "input_revision": "c7f33cfc9e1b3c8d0e634f0b267971aa2671688d",
+        "source_blob": "ddf52579b2df16f203c541f2812b5fca22246dba",
+        "command": [
+          "python3",
+          "-B",
+          "tests/directruntime-20261104/native-browser/h109/offline-stage.py"
+        ],
+        "kind": "committed-cli",
+        "entry_line": 76,
+        "required_options": [
+          "--journal",
+          "--journal-sha256",
+          "--sha256"
+        ],
+        "purpose": "Inspect bounded externally pinned stage and lifecycle journal records for canonical envelope, identity and declared timing consistency. No execution, resource, measurement, cleanup or barrier-release acceptance; configured source role only, no fixture/helper execution credit."
+      },
+      {
+        "path": "tests/directruntime-20261104/native-browser/reconcile-b-journal.py",
+        "input_revision": "c7f33cfc9e1b3c8d0e634f0b267971aa2671688d",
+        "source_blob": "45b920804005f33928f40fbf8419ddeb57106099",
+        "command": [
+          "python3",
+          "-B",
+          "tests/directruntime-20261104/native-browser/reconcile-b-journal.py"
+        ],
+        "kind": "committed-cli",
+        "entry_line": 117,
+        "required_options": [
+          "--output"
+        ],
+        "purpose": "Reconcile exact delivered original84 request journal with saved case/source/compiler/wire identities and check selector/value drift refusals. Saved observation comparison only; no backend execution or semantic equivalence proof, and no fixture/helper execution credit."
+      },
+      {
+        "path": "tests/upstream/baseline-20261028/value-entry/audit-driver-first.py",
+        "input_revision": "c7f33cfc9e1b3c8d0e634f0b267971aa2671688d",
+        "source_blob": "59475b0d02a26c0f9ff7ac9cdc2a04e1a80a1fa5",
+        "command": [
+          "python3",
+          "-B",
+          "tests/upstream/baseline-20261028/value-entry/audit-driver-first.py"
+        ],
+        "kind": "committed-cli",
+        "entry_line": 74,
+        "required_options": [
+          "--out"
+        ],
+        "purpose": "Diagnose saved value-entry cache descriptors against current source/import and saved artifact identities, with synthetic missing/changed descriptor controls. No Lean invocation, typed execution, nonzero-payment runtime validation or semantic verdict; configured source role only, no fixture/helper execution credit. Its current ROOT resolves under baseline-20261028 and the top-level cache-audit helper import is missing there; configured execution is unavailable in this checkout."
+      },
+      {
+        "path": "tests/directruntime-20261104/shared-translator/corpus-identity-controls.py",
+        "input_revision": "dcb7fb402ed4e07d5e9aaae8620c80a7300a052b",
+        "source_blob": "3759b6478f37544a5d705838847930510931692c",
+        "command": [
+          "python3",
+          "-B",
+          "tests/directruntime-20261104/shared-translator/corpus-identity-controls.py"
+        ],
+        "kind": "runnable-entrypoint",
+        "entry_line": 15,
+        "purpose": "In-memory compiler-document ID classification and observation-identity mutation controls. Tests structural resolution statuses, document-world separation and refusal of changed kind/route/case identities. No lexical/type/overload correctness, translator adequacy, source preservation, fixture/helper execution or proof credit.",
+        "input_scope": [],
+        "other_reads": "unresolved"
+      },
+      {
+        "path": "tests/directruntime-20261104/shared-translator/verify-read-bounds-preservation.py",
+        "input_revision": "dcb7fb402ed4e07d5e9aaae8620c80a7300a052b",
+        "source_blob": "0a45c2d4b0f66856d3ae826305b100c6badcf92f",
+        "command": [
+          "python3",
+          "-B",
+          "tests/directruntime-20261104/shared-translator/verify-read-bounds-preservation.py"
+        ],
+        "kind": "runnable-entrypoint",
+        "entry_line": 14,
+        "purpose": "Compare current ReadBounds source with an immutable Git source after removing only the authorized import and compiled-twin attributes; scan the two implementation/proof source files for listed trust shortcuts. Source/specification preservation guard only, not Lean kernel checking, equality-proof validation, native/WASM execution or performance acceptance; no fixture/helper credit.",
+        "input_scope": [],
+        "other_reads": "unresolved"
+      }
+    ]
+  }
+}
