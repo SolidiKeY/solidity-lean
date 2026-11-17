@@ -511,6 +511,73 @@
           "tests/h62/item2/audit-v09-passes/triple-admission-witness-map.json"
         ],
         "other_reads": "unresolved"
+      },
+      {
+        "path": "tests/h62/item2/audit-v10-storage/test_transport_pairs.py",
+        "input_revision": "b7133048dd9325e41f39e0f9843a46caa6f72be7",
+        "source_blob": "4a048711ca1ad4e04f7184f4d6942002de1ea509",
+        "command": [
+          "python3",
+          "-B",
+          "tests/h62/item2/audit-v10-storage/test_transport_pairs.py"
+        ],
+        "kind": "unittest",
+        "purpose": "Existing metadata/reference-accounting regression consumer passed ordinary and instrumented execution at the recorded exact Git context. Only these unchanged primary inputs receive data-use credit. Historical registry validation does not make the live frozen-interface failure pass; no Lean elaboration, represented obligation, transport, compiler or EVM proof credit.",
+        "input_scope": [
+          "tests/h62/item2/audit-readonly-calls/signature-drift-pins.json"
+        ],
+        "other_reads": "unresolved"
+      },
+      {
+        "path": "scripts/h62/item2/audit-v10-storage/test_witness_registry.py",
+        "input_revision": "ccf6bece18dfd017ab94943f66e196988b02b449",
+        "source_blob": "722c52386a86d525e5d3bee66ad1a47dc8380dbf",
+        "command": [
+          "python3",
+          "-B",
+          "scripts/h62/item2/audit-v10-storage/test_witness_registry.py"
+        ],
+        "kind": "unittest",
+        "purpose": "Existing metadata/reference-accounting regression consumer passed ordinary and instrumented execution at the recorded exact Git context. Only these unchanged primary inputs receive data-use credit. Historical registry validation does not make the live frozen-interface failure pass; no Lean elaboration, represented obligation, transport, compiler or EVM proof credit.",
+        "input_scope": [
+          "tests/h62/item2/audit-v10-storage/ArrayAccessWitnesses.lean",
+          "tests/h62/item2/audit-v10-storage/GeneratedFamilyWitnesses.lean",
+          "tests/h62/item2/audit-v10-storage/KeyBoundsWitnesses.lean",
+          "tests/h62/item2/audit-v10-storage/LayoutWitnesses.lean",
+          "tests/h62/item2/audit-v10-storage/LoopWitnesses.lean",
+          "tests/h62/item2/audit-v10-storage/PushWitnesses.lean",
+          "tests/h62/item2/audit-v10-storage/RepresentedWitnesses.lean",
+          "tests/h62/item2/audit-v10-storage/SourceReadWitnesses.lean",
+          "tests/h62/item2/audit-v10-storage/SourceWriteWitnesses.lean",
+          "tests/h62/item2/audit-v10-storage/TargetInputWitnesses.lean",
+          "tests/h62/item2/audit-v10-storage/TargetReuseWitnesses.lean",
+          "tests/h62/item2/audit-v10-storage/TargetTotality.lean",
+          "tests/h62/item2/audit-v10-storage/TargetWriteSequenceWitnesses.lean",
+          "tests/h62/item2/audit-v10-storage/array-logical-read-data-witness-map.json",
+          "tests/h62/item2/audit-v10-storage/array-logical-write-data-witness-map.json",
+          "tests/h62/item2/audit-v10-storage/array-read-witness-map.json",
+          "tests/h62/item2/audit-v10-storage/array-write-witness-map.json",
+          "tests/h62/item2/audit-v10-storage/default-complete-witness-map.json",
+          "tests/h62/item2/audit-v10-storage/default-owner-witness-map.json",
+          "tests/h62/item2/audit-v10-storage/generated-family-witness-map.json",
+          "tests/h62/item2/audit-v10-storage/key-bounds-witness-map.json",
+          "tests/h62/item2/audit-v10-storage/layout-witness-map.json",
+          "tests/h62/item2/audit-v10-storage/lifecycle-data-witness-map.json",
+          "tests/h62/item2/audit-v10-storage/lifecycle-joint-witness-map.json",
+          "tests/h62/item2/audit-v10-storage/loop-witness-map.json",
+          "tests/h62/item2/audit-v10-storage/push-data-witness-map.json",
+          "tests/h62/item2/audit-v10-storage/push-joint-witness-map.json",
+          "tests/h62/item2/audit-v10-storage/represented-witness-map.json",
+          "tests/h62/item2/audit-v10-storage/source-read-witness-map.json",
+          "tests/h62/item2/audit-v10-storage/source-write-witness-map.json",
+          "tests/h62/item2/audit-v10-storage/target-input-witness-map.json",
+          "tests/h62/item2/audit-v10-storage/target-reuse-data-witness-map.json",
+          "tests/h62/item2/audit-v10-storage/target-reuse-joint-witness-map.json",
+          "tests/h62/item2/audit-v10-storage/target-write-sequence-witness-map.json",
+          "tests/h62/item2/audit-v10-storage/touched-data-witness-map.json",
+          "tests/h62/item2/audit-v10-storage/touched-joint-witness-map.json"
+        ],
+        "other_reads": "unresolved"
       }
     ]
   },
@@ -1648,6 +1715,25 @@
         "operation": "validated Python read of measured bytes"
       },
       {
+        "runner": "validated:tests/h62/item2/audit-v10-storage/test_transport_pairs.py",
+        "input_revision": "b7133048dd9325e41f39e0f9843a46caa6f72be7",
+        "frames": [
+          {
+            "path": "tests/h62/item2/audit-v10-storage/test_transport_pairs.py",
+            "blob": "4a048711ca1ad4e04f7184f4d6942002de1ea509",
+            "line": 46
+          },
+          {
+            "path": "tests/h62/item2/audit-v10-storage/test_transport_pairs.py",
+            "blob": "4a048711ca1ad4e04f7184f4d6942002de1ea509",
+            "line": 13
+          }
+        ],
+        "target": "tests/h62/item2/audit-readonly-calls/signature-drift-pins.json",
+        "target_blob": "acb96022f660ca488ba181f2b8436f07239a37df",
+        "operation": "validated Python read of measured bytes"
+      },
+      {
         "runner": "validated:tests/h62/item2/audit-v09-passes/test_signature_boundaries.py",
         "input_revision": "734bf9dffbfc882a0fedd5faf2484b61fcab76e6",
         "frames": [
@@ -2354,6 +2440,870 @@
         ],
         "target": "tests/h62/item2/audit-v09-passes/triple-admission-witness-map.json",
         "target_blob": "ca98bcc3f4bf2f775e0ac8057eb8b4029da7b844",
+        "operation": "validated Python read of measured bytes"
+      },
+      {
+        "runner": "validated:scripts/h62/item2/audit-v10-storage/test_witness_registry.py",
+        "input_revision": "ccf6bece18dfd017ab94943f66e196988b02b449",
+        "frames": [
+          {
+            "path": "scripts/h62/item2/audit-v10-storage/test_witness_registry.py",
+            "blob": "722c52386a86d525e5d3bee66ad1a47dc8380dbf",
+            "line": 77
+          },
+          {
+            "path": "scripts/h62/item2/audit-v10-storage/test_witness_registry.py",
+            "blob": "722c52386a86d525e5d3bee66ad1a47dc8380dbf",
+            "line": 34
+          },
+          {
+            "path": "scripts/h62/item2/audit-v10-storage/witness_registry.py",
+            "blob": "75ecaeaa3b590a3931a59bf6d718d5c1193b55d2",
+            "line": 81
+          }
+        ],
+        "target": "tests/h62/item2/audit-v10-storage/ArrayAccessWitnesses.lean",
+        "target_blob": "9d206393c05da5b9d2483c43c2bc17bf07197e0c",
+        "operation": "validated Python read of measured bytes"
+      },
+      {
+        "runner": "validated:scripts/h62/item2/audit-v10-storage/test_witness_registry.py",
+        "input_revision": "ccf6bece18dfd017ab94943f66e196988b02b449",
+        "frames": [
+          {
+            "path": "scripts/h62/item2/audit-v10-storage/test_witness_registry.py",
+            "blob": "722c52386a86d525e5d3bee66ad1a47dc8380dbf",
+            "line": 77
+          },
+          {
+            "path": "scripts/h62/item2/audit-v10-storage/test_witness_registry.py",
+            "blob": "722c52386a86d525e5d3bee66ad1a47dc8380dbf",
+            "line": 34
+          },
+          {
+            "path": "scripts/h62/item2/audit-v10-storage/witness_registry.py",
+            "blob": "75ecaeaa3b590a3931a59bf6d718d5c1193b55d2",
+            "line": 81
+          }
+        ],
+        "target": "tests/h62/item2/audit-v10-storage/GeneratedFamilyWitnesses.lean",
+        "target_blob": "347b23e581d91d0f2ed9fd2ea648e55cece04767",
+        "operation": "validated Python read of measured bytes"
+      },
+      {
+        "runner": "validated:scripts/h62/item2/audit-v10-storage/test_witness_registry.py",
+        "input_revision": "ccf6bece18dfd017ab94943f66e196988b02b449",
+        "frames": [
+          {
+            "path": "scripts/h62/item2/audit-v10-storage/test_witness_registry.py",
+            "blob": "722c52386a86d525e5d3bee66ad1a47dc8380dbf",
+            "line": 77
+          },
+          {
+            "path": "scripts/h62/item2/audit-v10-storage/test_witness_registry.py",
+            "blob": "722c52386a86d525e5d3bee66ad1a47dc8380dbf",
+            "line": 34
+          },
+          {
+            "path": "scripts/h62/item2/audit-v10-storage/witness_registry.py",
+            "blob": "75ecaeaa3b590a3931a59bf6d718d5c1193b55d2",
+            "line": 81
+          }
+        ],
+        "target": "tests/h62/item2/audit-v10-storage/KeyBoundsWitnesses.lean",
+        "target_blob": "ca489f4b72dd9af8926213866cb69bee62b38689",
+        "operation": "validated Python read of measured bytes"
+      },
+      {
+        "runner": "validated:scripts/h62/item2/audit-v10-storage/test_witness_registry.py",
+        "input_revision": "ccf6bece18dfd017ab94943f66e196988b02b449",
+        "frames": [
+          {
+            "path": "scripts/h62/item2/audit-v10-storage/test_witness_registry.py",
+            "blob": "722c52386a86d525e5d3bee66ad1a47dc8380dbf",
+            "line": 77
+          },
+          {
+            "path": "scripts/h62/item2/audit-v10-storage/test_witness_registry.py",
+            "blob": "722c52386a86d525e5d3bee66ad1a47dc8380dbf",
+            "line": 34
+          },
+          {
+            "path": "scripts/h62/item2/audit-v10-storage/witness_registry.py",
+            "blob": "75ecaeaa3b590a3931a59bf6d718d5c1193b55d2",
+            "line": 81
+          }
+        ],
+        "target": "tests/h62/item2/audit-v10-storage/LayoutWitnesses.lean",
+        "target_blob": "9a0e505684ec5dcfd0061d363446e5af1e493323",
+        "operation": "validated Python read of measured bytes"
+      },
+      {
+        "runner": "validated:scripts/h62/item2/audit-v10-storage/test_witness_registry.py",
+        "input_revision": "ccf6bece18dfd017ab94943f66e196988b02b449",
+        "frames": [
+          {
+            "path": "scripts/h62/item2/audit-v10-storage/test_witness_registry.py",
+            "blob": "722c52386a86d525e5d3bee66ad1a47dc8380dbf",
+            "line": 77
+          },
+          {
+            "path": "scripts/h62/item2/audit-v10-storage/test_witness_registry.py",
+            "blob": "722c52386a86d525e5d3bee66ad1a47dc8380dbf",
+            "line": 34
+          },
+          {
+            "path": "scripts/h62/item2/audit-v10-storage/witness_registry.py",
+            "blob": "75ecaeaa3b590a3931a59bf6d718d5c1193b55d2",
+            "line": 81
+          }
+        ],
+        "target": "tests/h62/item2/audit-v10-storage/LoopWitnesses.lean",
+        "target_blob": "7e99b4707fdf38fd2521cf1d618b6902678d5bda",
+        "operation": "validated Python read of measured bytes"
+      },
+      {
+        "runner": "validated:scripts/h62/item2/audit-v10-storage/test_witness_registry.py",
+        "input_revision": "ccf6bece18dfd017ab94943f66e196988b02b449",
+        "frames": [
+          {
+            "path": "scripts/h62/item2/audit-v10-storage/test_witness_registry.py",
+            "blob": "722c52386a86d525e5d3bee66ad1a47dc8380dbf",
+            "line": 77
+          },
+          {
+            "path": "scripts/h62/item2/audit-v10-storage/test_witness_registry.py",
+            "blob": "722c52386a86d525e5d3bee66ad1a47dc8380dbf",
+            "line": 34
+          },
+          {
+            "path": "scripts/h62/item2/audit-v10-storage/witness_registry.py",
+            "blob": "75ecaeaa3b590a3931a59bf6d718d5c1193b55d2",
+            "line": 81
+          }
+        ],
+        "target": "tests/h62/item2/audit-v10-storage/PushWitnesses.lean",
+        "target_blob": "8e81fa781eff14e3839720713844b737e656e2cc",
+        "operation": "validated Python read of measured bytes"
+      },
+      {
+        "runner": "validated:scripts/h62/item2/audit-v10-storage/test_witness_registry.py",
+        "input_revision": "ccf6bece18dfd017ab94943f66e196988b02b449",
+        "frames": [
+          {
+            "path": "scripts/h62/item2/audit-v10-storage/test_witness_registry.py",
+            "blob": "722c52386a86d525e5d3bee66ad1a47dc8380dbf",
+            "line": 77
+          },
+          {
+            "path": "scripts/h62/item2/audit-v10-storage/test_witness_registry.py",
+            "blob": "722c52386a86d525e5d3bee66ad1a47dc8380dbf",
+            "line": 34
+          },
+          {
+            "path": "scripts/h62/item2/audit-v10-storage/witness_registry.py",
+            "blob": "75ecaeaa3b590a3931a59bf6d718d5c1193b55d2",
+            "line": 81
+          }
+        ],
+        "target": "tests/h62/item2/audit-v10-storage/RepresentedWitnesses.lean",
+        "target_blob": "1103dd25e9bd38317c614f1ec03dce92fa850be2",
+        "operation": "validated Python read of measured bytes"
+      },
+      {
+        "runner": "validated:scripts/h62/item2/audit-v10-storage/test_witness_registry.py",
+        "input_revision": "ccf6bece18dfd017ab94943f66e196988b02b449",
+        "frames": [
+          {
+            "path": "scripts/h62/item2/audit-v10-storage/test_witness_registry.py",
+            "blob": "722c52386a86d525e5d3bee66ad1a47dc8380dbf",
+            "line": 77
+          },
+          {
+            "path": "scripts/h62/item2/audit-v10-storage/test_witness_registry.py",
+            "blob": "722c52386a86d525e5d3bee66ad1a47dc8380dbf",
+            "line": 34
+          },
+          {
+            "path": "scripts/h62/item2/audit-v10-storage/witness_registry.py",
+            "blob": "75ecaeaa3b590a3931a59bf6d718d5c1193b55d2",
+            "line": 81
+          }
+        ],
+        "target": "tests/h62/item2/audit-v10-storage/SourceReadWitnesses.lean",
+        "target_blob": "67053f29a31751830b906d2d12a6e7d5c05f8cd0",
+        "operation": "validated Python read of measured bytes"
+      },
+      {
+        "runner": "validated:scripts/h62/item2/audit-v10-storage/test_witness_registry.py",
+        "input_revision": "ccf6bece18dfd017ab94943f66e196988b02b449",
+        "frames": [
+          {
+            "path": "scripts/h62/item2/audit-v10-storage/test_witness_registry.py",
+            "blob": "722c52386a86d525e5d3bee66ad1a47dc8380dbf",
+            "line": 77
+          },
+          {
+            "path": "scripts/h62/item2/audit-v10-storage/test_witness_registry.py",
+            "blob": "722c52386a86d525e5d3bee66ad1a47dc8380dbf",
+            "line": 34
+          },
+          {
+            "path": "scripts/h62/item2/audit-v10-storage/witness_registry.py",
+            "blob": "75ecaeaa3b590a3931a59bf6d718d5c1193b55d2",
+            "line": 81
+          }
+        ],
+        "target": "tests/h62/item2/audit-v10-storage/SourceWriteWitnesses.lean",
+        "target_blob": "80ef068053781620503fcd609091321502e7e0e1",
+        "operation": "validated Python read of measured bytes"
+      },
+      {
+        "runner": "validated:scripts/h62/item2/audit-v10-storage/test_witness_registry.py",
+        "input_revision": "ccf6bece18dfd017ab94943f66e196988b02b449",
+        "frames": [
+          {
+            "path": "scripts/h62/item2/audit-v10-storage/test_witness_registry.py",
+            "blob": "722c52386a86d525e5d3bee66ad1a47dc8380dbf",
+            "line": 77
+          },
+          {
+            "path": "scripts/h62/item2/audit-v10-storage/test_witness_registry.py",
+            "blob": "722c52386a86d525e5d3bee66ad1a47dc8380dbf",
+            "line": 34
+          },
+          {
+            "path": "scripts/h62/item2/audit-v10-storage/witness_registry.py",
+            "blob": "75ecaeaa3b590a3931a59bf6d718d5c1193b55d2",
+            "line": 81
+          }
+        ],
+        "target": "tests/h62/item2/audit-v10-storage/TargetInputWitnesses.lean",
+        "target_blob": "e17b3bb5c6c4a021cb445190514ca3fcfbd912a3",
+        "operation": "validated Python read of measured bytes"
+      },
+      {
+        "runner": "validated:scripts/h62/item2/audit-v10-storage/test_witness_registry.py",
+        "input_revision": "ccf6bece18dfd017ab94943f66e196988b02b449",
+        "frames": [
+          {
+            "path": "scripts/h62/item2/audit-v10-storage/test_witness_registry.py",
+            "blob": "722c52386a86d525e5d3bee66ad1a47dc8380dbf",
+            "line": 77
+          },
+          {
+            "path": "scripts/h62/item2/audit-v10-storage/test_witness_registry.py",
+            "blob": "722c52386a86d525e5d3bee66ad1a47dc8380dbf",
+            "line": 34
+          },
+          {
+            "path": "scripts/h62/item2/audit-v10-storage/witness_registry.py",
+            "blob": "75ecaeaa3b590a3931a59bf6d718d5c1193b55d2",
+            "line": 81
+          }
+        ],
+        "target": "tests/h62/item2/audit-v10-storage/TargetReuseWitnesses.lean",
+        "target_blob": "e2ecab242625cfa9bcbdb0399d72bcff75b28167",
+        "operation": "validated Python read of measured bytes"
+      },
+      {
+        "runner": "validated:scripts/h62/item2/audit-v10-storage/test_witness_registry.py",
+        "input_revision": "ccf6bece18dfd017ab94943f66e196988b02b449",
+        "frames": [
+          {
+            "path": "scripts/h62/item2/audit-v10-storage/test_witness_registry.py",
+            "blob": "722c52386a86d525e5d3bee66ad1a47dc8380dbf",
+            "line": 77
+          },
+          {
+            "path": "scripts/h62/item2/audit-v10-storage/test_witness_registry.py",
+            "blob": "722c52386a86d525e5d3bee66ad1a47dc8380dbf",
+            "line": 34
+          },
+          {
+            "path": "scripts/h62/item2/audit-v10-storage/witness_registry.py",
+            "blob": "75ecaeaa3b590a3931a59bf6d718d5c1193b55d2",
+            "line": 81
+          }
+        ],
+        "target": "tests/h62/item2/audit-v10-storage/TargetTotality.lean",
+        "target_blob": "7f42249e813d13f423e88820a51f0783c145f6e9",
+        "operation": "validated Python read of measured bytes"
+      },
+      {
+        "runner": "validated:scripts/h62/item2/audit-v10-storage/test_witness_registry.py",
+        "input_revision": "ccf6bece18dfd017ab94943f66e196988b02b449",
+        "frames": [
+          {
+            "path": "scripts/h62/item2/audit-v10-storage/test_witness_registry.py",
+            "blob": "722c52386a86d525e5d3bee66ad1a47dc8380dbf",
+            "line": 77
+          },
+          {
+            "path": "scripts/h62/item2/audit-v10-storage/test_witness_registry.py",
+            "blob": "722c52386a86d525e5d3bee66ad1a47dc8380dbf",
+            "line": 34
+          },
+          {
+            "path": "scripts/h62/item2/audit-v10-storage/witness_registry.py",
+            "blob": "75ecaeaa3b590a3931a59bf6d718d5c1193b55d2",
+            "line": 81
+          }
+        ],
+        "target": "tests/h62/item2/audit-v10-storage/TargetWriteSequenceWitnesses.lean",
+        "target_blob": "ad502eccb2675c57a7251cb03266156d8ea822cc",
+        "operation": "validated Python read of measured bytes"
+      },
+      {
+        "runner": "validated:scripts/h62/item2/audit-v10-storage/test_witness_registry.py",
+        "input_revision": "ccf6bece18dfd017ab94943f66e196988b02b449",
+        "frames": [
+          {
+            "path": "scripts/h62/item2/audit-v10-storage/test_witness_registry.py",
+            "blob": "722c52386a86d525e5d3bee66ad1a47dc8380dbf",
+            "line": 77
+          },
+          {
+            "path": "scripts/h62/item2/audit-v10-storage/test_witness_registry.py",
+            "blob": "722c52386a86d525e5d3bee66ad1a47dc8380dbf",
+            "line": 34
+          },
+          {
+            "path": "scripts/h62/item2/audit-v10-storage/witness_registry.py",
+            "blob": "75ecaeaa3b590a3931a59bf6d718d5c1193b55d2",
+            "line": 52
+          }
+        ],
+        "target": "tests/h62/item2/audit-v10-storage/array-logical-read-data-witness-map.json",
+        "target_blob": "a9315b023f67c761a629db5d7acb4b0a2ba71804",
+        "operation": "validated Python read of measured bytes"
+      },
+      {
+        "runner": "validated:scripts/h62/item2/audit-v10-storage/test_witness_registry.py",
+        "input_revision": "ccf6bece18dfd017ab94943f66e196988b02b449",
+        "frames": [
+          {
+            "path": "scripts/h62/item2/audit-v10-storage/test_witness_registry.py",
+            "blob": "722c52386a86d525e5d3bee66ad1a47dc8380dbf",
+            "line": 77
+          },
+          {
+            "path": "scripts/h62/item2/audit-v10-storage/test_witness_registry.py",
+            "blob": "722c52386a86d525e5d3bee66ad1a47dc8380dbf",
+            "line": 34
+          },
+          {
+            "path": "scripts/h62/item2/audit-v10-storage/witness_registry.py",
+            "blob": "75ecaeaa3b590a3931a59bf6d718d5c1193b55d2",
+            "line": 52
+          }
+        ],
+        "target": "tests/h62/item2/audit-v10-storage/array-logical-write-data-witness-map.json",
+        "target_blob": "12f889a06b8cbfeb0fe59ab006dab7e7cce12c61",
+        "operation": "validated Python read of measured bytes"
+      },
+      {
+        "runner": "validated:scripts/h62/item2/audit-v10-storage/test_witness_registry.py",
+        "input_revision": "ccf6bece18dfd017ab94943f66e196988b02b449",
+        "frames": [
+          {
+            "path": "scripts/h62/item2/audit-v10-storage/test_witness_registry.py",
+            "blob": "722c52386a86d525e5d3bee66ad1a47dc8380dbf",
+            "line": 77
+          },
+          {
+            "path": "scripts/h62/item2/audit-v10-storage/test_witness_registry.py",
+            "blob": "722c52386a86d525e5d3bee66ad1a47dc8380dbf",
+            "line": 34
+          },
+          {
+            "path": "scripts/h62/item2/audit-v10-storage/witness_registry.py",
+            "blob": "75ecaeaa3b590a3931a59bf6d718d5c1193b55d2",
+            "line": 52
+          }
+        ],
+        "target": "tests/h62/item2/audit-v10-storage/array-read-witness-map.json",
+        "target_blob": "86de0a0908a842b4efd7e21deabcaa0c8b4617a6",
+        "operation": "validated Python read of measured bytes"
+      },
+      {
+        "runner": "validated:scripts/h62/item2/audit-v10-storage/test_witness_registry.py",
+        "input_revision": "ccf6bece18dfd017ab94943f66e196988b02b449",
+        "frames": [
+          {
+            "path": "scripts/h62/item2/audit-v10-storage/test_witness_registry.py",
+            "blob": "722c52386a86d525e5d3bee66ad1a47dc8380dbf",
+            "line": 77
+          },
+          {
+            "path": "scripts/h62/item2/audit-v10-storage/test_witness_registry.py",
+            "blob": "722c52386a86d525e5d3bee66ad1a47dc8380dbf",
+            "line": 34
+          },
+          {
+            "path": "scripts/h62/item2/audit-v10-storage/witness_registry.py",
+            "blob": "75ecaeaa3b590a3931a59bf6d718d5c1193b55d2",
+            "line": 52
+          }
+        ],
+        "target": "tests/h62/item2/audit-v10-storage/array-write-witness-map.json",
+        "target_blob": "8ac2dde77d92ead1a51cdaccef93edebfec29b1e",
+        "operation": "validated Python read of measured bytes"
+      },
+      {
+        "runner": "validated:scripts/h62/item2/audit-v10-storage/test_witness_registry.py",
+        "input_revision": "ccf6bece18dfd017ab94943f66e196988b02b449",
+        "frames": [
+          {
+            "path": "scripts/h62/item2/audit-v10-storage/test_witness_registry.py",
+            "blob": "722c52386a86d525e5d3bee66ad1a47dc8380dbf",
+            "line": 77
+          },
+          {
+            "path": "scripts/h62/item2/audit-v10-storage/test_witness_registry.py",
+            "blob": "722c52386a86d525e5d3bee66ad1a47dc8380dbf",
+            "line": 34
+          },
+          {
+            "path": "scripts/h62/item2/audit-v10-storage/witness_registry.py",
+            "blob": "75ecaeaa3b590a3931a59bf6d718d5c1193b55d2",
+            "line": 52
+          }
+        ],
+        "target": "tests/h62/item2/audit-v10-storage/default-complete-witness-map.json",
+        "target_blob": "9f6baf6668595bfac2704db10519092b1ea1f01d",
+        "operation": "validated Python read of measured bytes"
+      },
+      {
+        "runner": "validated:scripts/h62/item2/audit-v10-storage/test_witness_registry.py",
+        "input_revision": "ccf6bece18dfd017ab94943f66e196988b02b449",
+        "frames": [
+          {
+            "path": "scripts/h62/item2/audit-v10-storage/test_witness_registry.py",
+            "blob": "722c52386a86d525e5d3bee66ad1a47dc8380dbf",
+            "line": 77
+          },
+          {
+            "path": "scripts/h62/item2/audit-v10-storage/test_witness_registry.py",
+            "blob": "722c52386a86d525e5d3bee66ad1a47dc8380dbf",
+            "line": 34
+          },
+          {
+            "path": "scripts/h62/item2/audit-v10-storage/witness_registry.py",
+            "blob": "75ecaeaa3b590a3931a59bf6d718d5c1193b55d2",
+            "line": 52
+          }
+        ],
+        "target": "tests/h62/item2/audit-v10-storage/default-owner-witness-map.json",
+        "target_blob": "d6deb8b51ae2b331fc45f6e3b094aa8806893f15",
+        "operation": "validated Python read of measured bytes"
+      },
+      {
+        "runner": "validated:scripts/h62/item2/audit-v10-storage/test_witness_registry.py",
+        "input_revision": "ccf6bece18dfd017ab94943f66e196988b02b449",
+        "frames": [
+          {
+            "path": "scripts/h62/item2/audit-v10-storage/test_witness_registry.py",
+            "blob": "722c52386a86d525e5d3bee66ad1a47dc8380dbf",
+            "line": 77
+          },
+          {
+            "path": "scripts/h62/item2/audit-v10-storage/test_witness_registry.py",
+            "blob": "722c52386a86d525e5d3bee66ad1a47dc8380dbf",
+            "line": 34
+          },
+          {
+            "path": "scripts/h62/item2/audit-v10-storage/witness_registry.py",
+            "blob": "75ecaeaa3b590a3931a59bf6d718d5c1193b55d2",
+            "line": 52
+          }
+        ],
+        "target": "tests/h62/item2/audit-v10-storage/generated-family-witness-map.json",
+        "target_blob": "fb2eda2d03b5f84ee57f6c409f9f97b248e12909",
+        "operation": "validated Python read of measured bytes"
+      },
+      {
+        "runner": "validated:scripts/h62/item2/audit-v10-storage/test_witness_registry.py",
+        "input_revision": "ccf6bece18dfd017ab94943f66e196988b02b449",
+        "frames": [
+          {
+            "path": "scripts/h62/item2/audit-v10-storage/test_witness_registry.py",
+            "blob": "722c52386a86d525e5d3bee66ad1a47dc8380dbf",
+            "line": 77
+          },
+          {
+            "path": "scripts/h62/item2/audit-v10-storage/test_witness_registry.py",
+            "blob": "722c52386a86d525e5d3bee66ad1a47dc8380dbf",
+            "line": 34
+          },
+          {
+            "path": "scripts/h62/item2/audit-v10-storage/witness_registry.py",
+            "blob": "75ecaeaa3b590a3931a59bf6d718d5c1193b55d2",
+            "line": 52
+          }
+        ],
+        "target": "tests/h62/item2/audit-v10-storage/key-bounds-witness-map.json",
+        "target_blob": "75b1dfaf838b1e94a9871abc12dfafecf16064b8",
+        "operation": "validated Python read of measured bytes"
+      },
+      {
+        "runner": "validated:scripts/h62/item2/audit-v10-storage/test_witness_registry.py",
+        "input_revision": "ccf6bece18dfd017ab94943f66e196988b02b449",
+        "frames": [
+          {
+            "path": "scripts/h62/item2/audit-v10-storage/test_witness_registry.py",
+            "blob": "722c52386a86d525e5d3bee66ad1a47dc8380dbf",
+            "line": 77
+          },
+          {
+            "path": "scripts/h62/item2/audit-v10-storage/test_witness_registry.py",
+            "blob": "722c52386a86d525e5d3bee66ad1a47dc8380dbf",
+            "line": 34
+          },
+          {
+            "path": "scripts/h62/item2/audit-v10-storage/witness_registry.py",
+            "blob": "75ecaeaa3b590a3931a59bf6d718d5c1193b55d2",
+            "line": 52
+          }
+        ],
+        "target": "tests/h62/item2/audit-v10-storage/layout-witness-map.json",
+        "target_blob": "155fd69312f5a2fc5913d11b76645858cd374c04",
+        "operation": "validated Python read of measured bytes"
+      },
+      {
+        "runner": "validated:scripts/h62/item2/audit-v10-storage/test_witness_registry.py",
+        "input_revision": "ccf6bece18dfd017ab94943f66e196988b02b449",
+        "frames": [
+          {
+            "path": "scripts/h62/item2/audit-v10-storage/test_witness_registry.py",
+            "blob": "722c52386a86d525e5d3bee66ad1a47dc8380dbf",
+            "line": 77
+          },
+          {
+            "path": "scripts/h62/item2/audit-v10-storage/test_witness_registry.py",
+            "blob": "722c52386a86d525e5d3bee66ad1a47dc8380dbf",
+            "line": 34
+          },
+          {
+            "path": "scripts/h62/item2/audit-v10-storage/witness_registry.py",
+            "blob": "75ecaeaa3b590a3931a59bf6d718d5c1193b55d2",
+            "line": 52
+          }
+        ],
+        "target": "tests/h62/item2/audit-v10-storage/lifecycle-data-witness-map.json",
+        "target_blob": "7144e9496c207504ec399b8019932943875f086f",
+        "operation": "validated Python read of measured bytes"
+      },
+      {
+        "runner": "validated:scripts/h62/item2/audit-v10-storage/test_witness_registry.py",
+        "input_revision": "ccf6bece18dfd017ab94943f66e196988b02b449",
+        "frames": [
+          {
+            "path": "scripts/h62/item2/audit-v10-storage/test_witness_registry.py",
+            "blob": "722c52386a86d525e5d3bee66ad1a47dc8380dbf",
+            "line": 77
+          },
+          {
+            "path": "scripts/h62/item2/audit-v10-storage/test_witness_registry.py",
+            "blob": "722c52386a86d525e5d3bee66ad1a47dc8380dbf",
+            "line": 34
+          },
+          {
+            "path": "scripts/h62/item2/audit-v10-storage/witness_registry.py",
+            "blob": "75ecaeaa3b590a3931a59bf6d718d5c1193b55d2",
+            "line": 52
+          }
+        ],
+        "target": "tests/h62/item2/audit-v10-storage/lifecycle-joint-witness-map.json",
+        "target_blob": "89890ce69d6dd0921d47d3550c2e822537fa7ad0",
+        "operation": "validated Python read of measured bytes"
+      },
+      {
+        "runner": "validated:scripts/h62/item2/audit-v10-storage/test_witness_registry.py",
+        "input_revision": "ccf6bece18dfd017ab94943f66e196988b02b449",
+        "frames": [
+          {
+            "path": "scripts/h62/item2/audit-v10-storage/test_witness_registry.py",
+            "blob": "722c52386a86d525e5d3bee66ad1a47dc8380dbf",
+            "line": 77
+          },
+          {
+            "path": "scripts/h62/item2/audit-v10-storage/test_witness_registry.py",
+            "blob": "722c52386a86d525e5d3bee66ad1a47dc8380dbf",
+            "line": 34
+          },
+          {
+            "path": "scripts/h62/item2/audit-v10-storage/witness_registry.py",
+            "blob": "75ecaeaa3b590a3931a59bf6d718d5c1193b55d2",
+            "line": 52
+          }
+        ],
+        "target": "tests/h62/item2/audit-v10-storage/loop-witness-map.json",
+        "target_blob": "4971bfc240c1ecd22b6734cea9bdeb11a0c9fd61",
+        "operation": "validated Python read of measured bytes"
+      },
+      {
+        "runner": "validated:scripts/h62/item2/audit-v10-storage/test_witness_registry.py",
+        "input_revision": "ccf6bece18dfd017ab94943f66e196988b02b449",
+        "frames": [
+          {
+            "path": "scripts/h62/item2/audit-v10-storage/test_witness_registry.py",
+            "blob": "722c52386a86d525e5d3bee66ad1a47dc8380dbf",
+            "line": 77
+          },
+          {
+            "path": "scripts/h62/item2/audit-v10-storage/test_witness_registry.py",
+            "blob": "722c52386a86d525e5d3bee66ad1a47dc8380dbf",
+            "line": 34
+          },
+          {
+            "path": "scripts/h62/item2/audit-v10-storage/witness_registry.py",
+            "blob": "75ecaeaa3b590a3931a59bf6d718d5c1193b55d2",
+            "line": 52
+          }
+        ],
+        "target": "tests/h62/item2/audit-v10-storage/push-data-witness-map.json",
+        "target_blob": "84f308658af9ef88dba7fd2d408279bf00016a9d",
+        "operation": "validated Python read of measured bytes"
+      },
+      {
+        "runner": "validated:scripts/h62/item2/audit-v10-storage/test_witness_registry.py",
+        "input_revision": "ccf6bece18dfd017ab94943f66e196988b02b449",
+        "frames": [
+          {
+            "path": "scripts/h62/item2/audit-v10-storage/test_witness_registry.py",
+            "blob": "722c52386a86d525e5d3bee66ad1a47dc8380dbf",
+            "line": 77
+          },
+          {
+            "path": "scripts/h62/item2/audit-v10-storage/test_witness_registry.py",
+            "blob": "722c52386a86d525e5d3bee66ad1a47dc8380dbf",
+            "line": 34
+          },
+          {
+            "path": "scripts/h62/item2/audit-v10-storage/witness_registry.py",
+            "blob": "75ecaeaa3b590a3931a59bf6d718d5c1193b55d2",
+            "line": 52
+          }
+        ],
+        "target": "tests/h62/item2/audit-v10-storage/push-joint-witness-map.json",
+        "target_blob": "f4e63a6052c32154e3b71dcc8e8588d84c1435eb",
+        "operation": "validated Python read of measured bytes"
+      },
+      {
+        "runner": "validated:scripts/h62/item2/audit-v10-storage/test_witness_registry.py",
+        "input_revision": "ccf6bece18dfd017ab94943f66e196988b02b449",
+        "frames": [
+          {
+            "path": "scripts/h62/item2/audit-v10-storage/test_witness_registry.py",
+            "blob": "722c52386a86d525e5d3bee66ad1a47dc8380dbf",
+            "line": 77
+          },
+          {
+            "path": "scripts/h62/item2/audit-v10-storage/test_witness_registry.py",
+            "blob": "722c52386a86d525e5d3bee66ad1a47dc8380dbf",
+            "line": 34
+          },
+          {
+            "path": "scripts/h62/item2/audit-v10-storage/witness_registry.py",
+            "blob": "75ecaeaa3b590a3931a59bf6d718d5c1193b55d2",
+            "line": 52
+          }
+        ],
+        "target": "tests/h62/item2/audit-v10-storage/represented-witness-map.json",
+        "target_blob": "2ab2c233e90f6984f7e75573edd2265442ee1043",
+        "operation": "validated Python read of measured bytes"
+      },
+      {
+        "runner": "validated:scripts/h62/item2/audit-v10-storage/test_witness_registry.py",
+        "input_revision": "ccf6bece18dfd017ab94943f66e196988b02b449",
+        "frames": [
+          {
+            "path": "scripts/h62/item2/audit-v10-storage/test_witness_registry.py",
+            "blob": "722c52386a86d525e5d3bee66ad1a47dc8380dbf",
+            "line": 77
+          },
+          {
+            "path": "scripts/h62/item2/audit-v10-storage/test_witness_registry.py",
+            "blob": "722c52386a86d525e5d3bee66ad1a47dc8380dbf",
+            "line": 34
+          },
+          {
+            "path": "scripts/h62/item2/audit-v10-storage/witness_registry.py",
+            "blob": "75ecaeaa3b590a3931a59bf6d718d5c1193b55d2",
+            "line": 52
+          }
+        ],
+        "target": "tests/h62/item2/audit-v10-storage/source-read-witness-map.json",
+        "target_blob": "a7ab41cace70af5769d4dd35af71facc18c1ccb2",
+        "operation": "validated Python read of measured bytes"
+      },
+      {
+        "runner": "validated:scripts/h62/item2/audit-v10-storage/test_witness_registry.py",
+        "input_revision": "ccf6bece18dfd017ab94943f66e196988b02b449",
+        "frames": [
+          {
+            "path": "scripts/h62/item2/audit-v10-storage/test_witness_registry.py",
+            "blob": "722c52386a86d525e5d3bee66ad1a47dc8380dbf",
+            "line": 77
+          },
+          {
+            "path": "scripts/h62/item2/audit-v10-storage/test_witness_registry.py",
+            "blob": "722c52386a86d525e5d3bee66ad1a47dc8380dbf",
+            "line": 34
+          },
+          {
+            "path": "scripts/h62/item2/audit-v10-storage/witness_registry.py",
+            "blob": "75ecaeaa3b590a3931a59bf6d718d5c1193b55d2",
+            "line": 52
+          }
+        ],
+        "target": "tests/h62/item2/audit-v10-storage/source-write-witness-map.json",
+        "target_blob": "049d179007d459b10a21ff599bf92074934e696e",
+        "operation": "validated Python read of measured bytes"
+      },
+      {
+        "runner": "validated:scripts/h62/item2/audit-v10-storage/test_witness_registry.py",
+        "input_revision": "ccf6bece18dfd017ab94943f66e196988b02b449",
+        "frames": [
+          {
+            "path": "scripts/h62/item2/audit-v10-storage/test_witness_registry.py",
+            "blob": "722c52386a86d525e5d3bee66ad1a47dc8380dbf",
+            "line": 77
+          },
+          {
+            "path": "scripts/h62/item2/audit-v10-storage/test_witness_registry.py",
+            "blob": "722c52386a86d525e5d3bee66ad1a47dc8380dbf",
+            "line": 34
+          },
+          {
+            "path": "scripts/h62/item2/audit-v10-storage/witness_registry.py",
+            "blob": "75ecaeaa3b590a3931a59bf6d718d5c1193b55d2",
+            "line": 52
+          }
+        ],
+        "target": "tests/h62/item2/audit-v10-storage/target-input-witness-map.json",
+        "target_blob": "134b3bb7a32b2b9cdd66bff334dda4b51d327a81",
+        "operation": "validated Python read of measured bytes"
+      },
+      {
+        "runner": "validated:scripts/h62/item2/audit-v10-storage/test_witness_registry.py",
+        "input_revision": "ccf6bece18dfd017ab94943f66e196988b02b449",
+        "frames": [
+          {
+            "path": "scripts/h62/item2/audit-v10-storage/test_witness_registry.py",
+            "blob": "722c52386a86d525e5d3bee66ad1a47dc8380dbf",
+            "line": 77
+          },
+          {
+            "path": "scripts/h62/item2/audit-v10-storage/test_witness_registry.py",
+            "blob": "722c52386a86d525e5d3bee66ad1a47dc8380dbf",
+            "line": 34
+          },
+          {
+            "path": "scripts/h62/item2/audit-v10-storage/witness_registry.py",
+            "blob": "75ecaeaa3b590a3931a59bf6d718d5c1193b55d2",
+            "line": 52
+          }
+        ],
+        "target": "tests/h62/item2/audit-v10-storage/target-reuse-data-witness-map.json",
+        "target_blob": "27be3561f9a4fb59c60a0f9d4e4c2107b44a2277",
+        "operation": "validated Python read of measured bytes"
+      },
+      {
+        "runner": "validated:scripts/h62/item2/audit-v10-storage/test_witness_registry.py",
+        "input_revision": "ccf6bece18dfd017ab94943f66e196988b02b449",
+        "frames": [
+          {
+            "path": "scripts/h62/item2/audit-v10-storage/test_witness_registry.py",
+            "blob": "722c52386a86d525e5d3bee66ad1a47dc8380dbf",
+            "line": 77
+          },
+          {
+            "path": "scripts/h62/item2/audit-v10-storage/test_witness_registry.py",
+            "blob": "722c52386a86d525e5d3bee66ad1a47dc8380dbf",
+            "line": 34
+          },
+          {
+            "path": "scripts/h62/item2/audit-v10-storage/witness_registry.py",
+            "blob": "75ecaeaa3b590a3931a59bf6d718d5c1193b55d2",
+            "line": 52
+          }
+        ],
+        "target": "tests/h62/item2/audit-v10-storage/target-reuse-joint-witness-map.json",
+        "target_blob": "6b27d308d3cae0b94b661aeec359a0890d0e2d33",
+        "operation": "validated Python read of measured bytes"
+      },
+      {
+        "runner": "validated:scripts/h62/item2/audit-v10-storage/test_witness_registry.py",
+        "input_revision": "ccf6bece18dfd017ab94943f66e196988b02b449",
+        "frames": [
+          {
+            "path": "scripts/h62/item2/audit-v10-storage/test_witness_registry.py",
+            "blob": "722c52386a86d525e5d3bee66ad1a47dc8380dbf",
+            "line": 77
+          },
+          {
+            "path": "scripts/h62/item2/audit-v10-storage/test_witness_registry.py",
+            "blob": "722c52386a86d525e5d3bee66ad1a47dc8380dbf",
+            "line": 34
+          },
+          {
+            "path": "scripts/h62/item2/audit-v10-storage/witness_registry.py",
+            "blob": "75ecaeaa3b590a3931a59bf6d718d5c1193b55d2",
+            "line": 52
+          }
+        ],
+        "target": "tests/h62/item2/audit-v10-storage/target-write-sequence-witness-map.json",
+        "target_blob": "c3e811b39ab250792410de5c06adf18c6f0c6163",
+        "operation": "validated Python read of measured bytes"
+      },
+      {
+        "runner": "validated:scripts/h62/item2/audit-v10-storage/test_witness_registry.py",
+        "input_revision": "ccf6bece18dfd017ab94943f66e196988b02b449",
+        "frames": [
+          {
+            "path": "scripts/h62/item2/audit-v10-storage/test_witness_registry.py",
+            "blob": "722c52386a86d525e5d3bee66ad1a47dc8380dbf",
+            "line": 77
+          },
+          {
+            "path": "scripts/h62/item2/audit-v10-storage/test_witness_registry.py",
+            "blob": "722c52386a86d525e5d3bee66ad1a47dc8380dbf",
+            "line": 34
+          },
+          {
+            "path": "scripts/h62/item2/audit-v10-storage/witness_registry.py",
+            "blob": "75ecaeaa3b590a3931a59bf6d718d5c1193b55d2",
+            "line": 52
+          }
+        ],
+        "target": "tests/h62/item2/audit-v10-storage/touched-data-witness-map.json",
+        "target_blob": "2a1d819c9194711248b66cd508ff1209f097251a",
+        "operation": "validated Python read of measured bytes"
+      },
+      {
+        "runner": "validated:scripts/h62/item2/audit-v10-storage/test_witness_registry.py",
+        "input_revision": "ccf6bece18dfd017ab94943f66e196988b02b449",
+        "frames": [
+          {
+            "path": "scripts/h62/item2/audit-v10-storage/test_witness_registry.py",
+            "blob": "722c52386a86d525e5d3bee66ad1a47dc8380dbf",
+            "line": 77
+          },
+          {
+            "path": "scripts/h62/item2/audit-v10-storage/test_witness_registry.py",
+            "blob": "722c52386a86d525e5d3bee66ad1a47dc8380dbf",
+            "line": 34
+          },
+          {
+            "path": "scripts/h62/item2/audit-v10-storage/witness_registry.py",
+            "blob": "75ecaeaa3b590a3931a59bf6d718d5c1193b55d2",
+            "line": 52
+          }
+        ],
+        "target": "tests/h62/item2/audit-v10-storage/touched-joint-witness-map.json",
+        "target_blob": "712d2eeeb7ea9ba29cded3615e445c0dd9f7466c",
         "operation": "validated Python read of measured bytes"
       }
     ]
