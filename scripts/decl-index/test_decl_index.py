@@ -218,7 +218,7 @@ class HostCache(unittest.TestCase):
         self.assertFalse(os.path.lexists(self.lib / "Solidity/Evm/MemoryStructDefaultPlan.olean"))
 
     def touched_importer(self):
-        """dc4: touched Solidity.Evm.User (olean in .lake/build) imports
+        """Touched Solidity.Evm.User (olean in .lake/build) imports
         MemoryStructDefaultPlan, whose olean is only in a Lake artifact cache."""
         src = self.top / "Solidity/Evm"; src.mkdir(parents=True)
         (src / "User.lean").write_text("import Solidity.Evm.MemoryStructDefaultPlan\n\ndef u := 1\n")
@@ -238,6 +238,18 @@ class HostCache(unittest.TestCase):
         u = self.touched_importer()
         with self.assertRaises(d.SetupError) as e: d.link_build(self.top, self.lib, [u])
         self.assertIn(self.M, str(e.exception))
+
+    def test_header_imports_skip_comments(self):
+        text = "/- header\n /- nested -/ -/\n-- line\nimport A.B -- why\n/-- doc -/\nimport C\n\ndef import_x := 1\nimport D\n"
+        self.assertEqual(d.header_imports(text), ["A.B", "C"])
+        self.assertEqual(d.header_imports("module\npublic import X\nimport all Y\n"), ["X", "Y"])
+
+    def test_closure_follows_import_after_header_comment(self):
+        src = self.top / "Solidity/Backend"; src.mkdir(parents=True)
+        (src / "EvmVectors.lean").write_text("/-\nVectors.\n-/\nimport Solidity.Backend.Assembler\n")
+        (src / "Assembler.lean").write_text("def a := 0\n")
+        self.assertEqual(d.import_closure(self.top, ["Solidity.Backend.EvmVectors"]),
+                         {"Solidity.Backend.EvmVectors", "Solidity.Backend.Assembler"})
 
     def test_trace_output_shapes(self):
         self.assertEqual(d.trace_hashes({"o": ["a.olean", "b"], "i": "c.ilean"}), ["a", "b", "c"])

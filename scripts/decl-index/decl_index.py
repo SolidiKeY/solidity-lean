@@ -85,9 +85,8 @@ def artifacts():
 def import_closure(top, modules):
     """`modules` and every module of this package they import, transitively, read from the
     `import` lines of the sources under `top` (modules without a source here, such as Lean's
-    own, are left out). dc4: link_build checked only the touched modules, so a transitive
-    import whose olean was not linked (MemoryStructDefaultPlan under b2) surfaced as Lean's
-    missing object file instead of a setup error."""
+    own, are left out). Checking only the touched modules let an unlinked transitive import
+    surface as Lean's missing object file instead of a setup error."""
     seen, todo = set(), list(modules)
     while todo:
         m = todo.pop()
@@ -97,14 +96,42 @@ def import_closure(top, modules):
         seen.add(m)
         try: text = f.read_text()
         except OSError: continue
-        for line in text.splitlines():
-            w = line.split()
-            if not w or w[0] in ("module", "prelude") or w[0].startswith("--"): continue
-            if w[0] == "public" and len(w) > 1 and w[1] == "import": w = w[1:]
-            if w[0] == "meta" and len(w) > 1 and w[1] == "import": w = w[1:]
-            if w[0] != "import": break
-            todo.extend(x for x in w[1:] if x not in ("all",) and not x.startswith("--"))
+        todo.extend(header_imports(text))
     return seen
+
+
+def header_imports(text):
+    """The modules a Lean file's header imports: comments (`--` and nested `/- -/`, doc
+    comments included) are skipped, `module`/`prelude` and `public`/`meta` prefixes and `all`
+    are allowed, and the header ends at the first other token."""
+    out, i, n, words = [], 0, len(text), []
+    while i < n:  # tokenize header, dropping comments
+        if text.startswith("--", i):
+            j = text.find("\n", i); i = n if j < 0 else j
+        elif text.startswith("/-", i):
+            depth, i = 1, i + 2
+            while i < n and depth:
+                if text.startswith("/-", i): depth += 1; i += 2
+                elif text.startswith("-/", i): depth -= 1; i += 2
+                else: i += 1
+        elif text[i].isspace(): i += 1
+        else:
+            j = i
+            while j < n and not text[j].isspace() and not text.startswith("--", j) and not text.startswith("/-", j): j += 1
+            words.append(text[i:j]); i = j
+            if len(words) > 1 and words[-2] not in ("import", "public", "meta", "all", "module", "prelude") \
+                    and words[-1] not in ("import", "public", "meta"):
+                break
+    k = 0
+    while k < len(words):
+        w = words[k]
+        if w in ("module", "prelude", "public", "meta", "all"): k += 1; continue
+        if w == "import" and k + 1 < len(words):
+            m = words[k + 1]
+            if m == "all" and k + 2 < len(words): m = words[k + 2]; k += 1
+            out.append(m); k += 2; continue
+        break
+    return out
 
 
 def trace_hashes(o):
