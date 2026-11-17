@@ -520,7 +520,8 @@ def git_policies(classifier, graph, rows):
                 raise ValueError('invalid Git policy output or line')
             if not _current(repo, writer['path'], writer['blob']): stale = True; break
             if posixpath.basename(writer['path']) == '.gitignore' or not any(
-                    r['path'] == writer['path'] and 'derived_from' not in r and not k.startswith('git-policy:') for k, r in graph.roots.items()):
+                    r['path'] == writer['path'] and 'derived_from' not in r and not k.startswith('git-policy:')
+                    and not r.get('python_argument_role') for k, r in graph.roots.items()):
                 raise ValueError('Git policy writer is not an entry point source')
             if full in repo.tree or any(p.startswith(full + '/') for p in repo.tree):
                 raise ValueError('Git policy output is tracked: ' + full)
@@ -972,35 +973,51 @@ REVIEWED_PYTHON_ARGS = frozenset({
 def python_argument_interface(text):
     """The argument-bearing interface of a Python program, or None.
 
-    Recorded from the AST: lines that load `sys.argv` (through `import sys`
+    Recorded from the AST: lines that read `sys.argv` (through `import sys`
     only), lines among them that take an open argv tail `sys.argv[k:]`
     (variadic or forwarded command), literal positional `add_argument` names
-    and literal `add_parser` subcommand names. A store to or rebinding of argv,
-    `from sys import argv`, an argv attribute of anything but the sys module, or
-    a computed subcommand name is not audited and gives None, as does a program
-    with none of these forms (a default program is source-only-program's role).
+    and literal `add_parser` subcommand names. Not audited, giving None: any
+    write, delete or method call on argv; `from sys import argv`; an argv
+    attribute of anything but the sys module; any other binding of the sys
+    name; `getattr` on sys; `parse_args` or `parse_known_args` with explicit
+    arguments; a computed positional or subcommand name. A program with none
+    of the recorded forms also gives None (a default program is
+    source-only-program's role).
     """
     try: tree = ast.parse(text)
     except (SyntaxError, ValueError, RecursionError): return None
-    modules = {a.asname or a.name for n in ast.walk(tree) if isinstance(n, ast.Import) for a in n.names if a.name == 'sys'}
+    imports = [a for n in ast.walk(tree) if isinstance(n, ast.Import) for a in n.names]
+    modules = {a.asname or a.name for a in imports if a.name == 'sys'}
+    if any((a.asname or a.name.split('.')[0]) in modules and a.name != 'sys' for a in imports): return None
+    parents = {child: node for node in ast.walk(tree) for child in ast.iter_child_nodes(node)}
     argv, tails, positionals, subcommands = set(), set(), set(), set()
     for n in ast.walk(tree):
-        if isinstance(n, ast.ImportFrom) and n.module == 'sys' and any(a.name in ('argv', '*') for a in n.names): return None
-        if isinstance(n, ast.Attribute) and n.attr == 'argv':
-            if not (isinstance(n.value, ast.Name) and n.value.id in modules and isinstance(n.ctx, ast.Load)): return None
-            argv.add(n.lineno)
+        if isinstance(n, ast.ImportFrom) and (n.module == 'sys' and any(a.name in ('argv', '*') for a in n.names)
+                                             or any((a.asname or a.name) in modules for a in n.names)): return None
         if isinstance(n, (ast.Global, ast.Nonlocal)) and set(n.names) & modules: return None
         if isinstance(n, ast.Name) and n.id in modules and not isinstance(n.ctx, ast.Load): return None
-        if (isinstance(n, ast.Subscript) and isinstance(n.value, ast.Attribute) and n.value.attr == 'argv'
-                and isinstance(n.slice, ast.Slice) and n.slice.upper is None and n.slice.step is None):
-            tails.add(n.lineno)
-        if isinstance(n, ast.Call) and isinstance(n.func, ast.Attribute) and n.func.attr in ('add_argument', 'add_parser'):
-            first = n.args[0] if n.args else None
-            literal = isinstance(first, ast.Constant) and isinstance(first.value, str)
-            if n.func.attr == 'add_parser':
+        if isinstance(n, ast.arg) and n.arg in modules: return None
+        if isinstance(n, ast.ExceptHandler) and n.name in modules: return None
+        if isinstance(n, (ast.FunctionDef, ast.AsyncFunctionDef, ast.ClassDef)) and n.name in modules: return None
+        if isinstance(n, ast.MatchAs) and n.name in modules or isinstance(n, ast.MatchStar) and n.name in modules: return None
+        if (isinstance(n, ast.Call) and isinstance(n.func, ast.Name) and n.func.id in ('getattr', 'setattr', 'delattr', 'vars')
+                and n.args and isinstance(n.args[0], ast.Name) and n.args[0].id in modules): return None
+        if isinstance(n, ast.Attribute) and n.attr == 'argv':
+            if not (isinstance(n.value, ast.Name) and n.value.id in modules and isinstance(n.ctx, ast.Load)): return None
+            parent = parents.get(n)
+            if isinstance(parent, ast.Attribute) and parent.value is n: return None  # argv.append(...) and the like
+            if isinstance(parent, ast.Subscript) and parent.value is n and not isinstance(parent.ctx, ast.Load): return None
+            argv.add(n.lineno)
+            if (isinstance(parent, ast.Subscript) and parent.value is n and isinstance(parent.slice, ast.Slice)
+                    and parent.slice.upper is None and parent.slice.step is None): tails.add(n.lineno)
+        if isinstance(n, ast.Call) and isinstance(n.func, ast.Attribute):
+            if n.func.attr in ('parse_args', 'parse_known_args', 'parse_intermixed_args') and (n.args or n.keywords): return None
+            if n.func.attr in ('add_argument', 'add_parser'):
+                first = n.args[0] if n.args else None
+                literal = isinstance(first, ast.Constant) and isinstance(first.value, str)
                 if not literal: return None
-                subcommands.add((n.lineno, first.value))
-            elif literal and not first.value.startswith('-'): positionals.add((n.lineno, first.value))
+                if n.func.attr == 'add_parser': subcommands.add((n.lineno, first.value))
+                elif not first.value.startswith('-'): positionals.add((n.lineno, first.value))
     if not (argv or positionals or subcommands): return None
     return {'argv_lines': sorted(argv), 'argv_tail_lines': sorted(tails),
             'positionals': [list(x) for x in sorted(positionals)], 'subcommands': [list(x) for x in sorted(subcommands)]}
@@ -1008,7 +1025,7 @@ def python_argument_interface(text):
 
 def _introduced(classifier, repo, commit, path, blob):
     """True iff commit holds blob at path and none of its parents does."""
-    if not classifier['hex_pin'](commit, 40): return False
+    if not classifier['hex_pin'](commit, 40) or commit in repo.boundaries: return False
     try: parents = classifier['git'](repo.root, 'rev-list', '--parents', '-n', '1', commit, '--').decode().split()
     except ValueError: return False
     if not parents or parents[0] != commit: return False
@@ -1580,6 +1597,7 @@ def successor_controls(classifier):
                               "    return parser.parse_args()\nif __name__ == '__main__':\n    main()\n"),
         'tests/args_alias.py': 'from sys import argv\nprint(argv[1])\n',
         'tests/args_rebind.py': 'import sys\nsys.argv = ["x", "y"]\nprint(sys.argv[1])\n',
+        'tests/gen/.gitignore': 'out.json\n',
         'tests/test_entry.py': 'import unittest\nclass T(unittest.TestCase):\n def test_import(self):\n  import helper\n  self.assertEqual(helper.VALUE, 3)\nif __name__ == "__main__": unittest.main()\n',
     }
     with tempfile.TemporaryDirectory() as tmp:
@@ -1786,6 +1804,13 @@ def successor_controls(classifier):
         assert python_argument_interface('import sys as s\nprint(s.argv[1:])\n') == {'argv_lines': [2], 'argv_tail_lines': [2], 'positionals': [], 'subcommands': []}
         assert python_argument_interface('import sys\nclass O: argv = 1\nprint(O().argv)\n') is None
         assert python_argument_interface('import argparse\np = argparse.ArgumentParser()\ns = p.add_subparsers()\ns.add_parser(NAME)\n') is None
+        for unaudited in ('import sys\nsys.argv[1:] = []\n', 'import sys\nsys.argv[1] = "x"\n', 'import sys\ndel sys.argv[1:]\n',
+                          'import sys\nsys.argv.append("x")\n', 'import sys\ndef f(sys): return sys.argv[1]\n',
+                          'import sys\ntry: pass\nexcept OSError as sys: pass\nprint(sys.argv[1])\n',
+                          'import sys\nfrom os import path as sys\nprint(sys.argv[1])\n', 'import sys\nprint(getattr(sys, "argv"), sys.argv[1])\n',
+                          'import argparse\np = argparse.ArgumentParser()\np.add_argument(NAME)\n',
+                          'import argparse\np = argparse.ArgumentParser()\np.add_argument("x")\np.parse_args(["y"])\n'):
+            assert python_argument_interface(unaudited) is None, unaudited
         py_role = lambda path, line, interface, repo=first, commit=A: {
             'path': path, 'input_revision': repo.ref, 'source_blob': blob(repo, path), 'kind': PYTHON_ARGS_KIND,
             'command': ['python3', '-B', path], 'entry_line': line, 'interface': interface,
@@ -1842,6 +1867,16 @@ def successor_controls(classifier):
                      command=['python3', '-B', 'tests/args.py'], entry_line=3)])
             rejected(first, 'conflicting standalone', standalone=[dict(program, path='tests/args.py', source_blob=blob(first, 'tests/args.py'),
                      command=['python3', '-B', 'tests/args.py'], entry_line=3), args_role])
+            # A current definition of the same path supersedes the role at a later revision.
+            current_program = dict(program, path='tests/args.py', input_revision=later.ref, source_blob=blob(later, 'tests/args.py'),
+                                   command=['python3', '-B', 'tests/args.py'], entry_line=3)
+            model, _ = run(later, standalone=[args_role, current_program])
+            assert 'py-args:tests/args.py' not in model['entry_points'] and 'source-only:tests/args.py' in model['entry_points']
+            # The role is no Git policy writer: it credits no generated output.
+            writer = {'path': 'tests/args.py', 'blob': blob(first, 'tests/args.py'), 'line': 5, 'literal': 'out.json'}
+            policy = {'path': 'tests/gen/.gitignore', 'blob': blob(first, 'tests/gen/.gitignore'), 'purpose': 'Synthetic output policy.',
+                      'matches': [{'line': 1, 'output': 'out.json', 'writer': writer}]}
+            rejected(first, 'not an entry point source', {'git_policies': [policy]}, standalone=[args_role])
             REVIEWED_PYTHON_ARGS = frozenset()
             rejected(first, 'unreviewed Python argument role', standalone=[args_role])
         finally: REVIEWED_PYTHON_ARGS = reviewed_args
