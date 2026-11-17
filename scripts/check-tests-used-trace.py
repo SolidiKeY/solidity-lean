@@ -26,7 +26,7 @@ timeout. Missing events, removed profiling and unsupported interpreters provide
 no non-use evidence. This telemetry is not proof or adversarial attestation.
 
 observed_routes(..., readonly_symlinks=True) is an explicit, off-by-default
-audit: a symlink from outside the scratch tree to a committed path
+audit (H1001): a symlink from outside the scratch tree to a committed path
 certifies reads of that path when nothing mutates, moves or aliases it through
 the link and only the link itself is removed. Off, results are unchanged.
 """
@@ -608,7 +608,7 @@ def _observed_routes(receipt, scratch, manifest, runner, nonpassing=False, modul
 def observed_routes(receipt, scratch, manifest, runner, readonly_symlinks=False):
     """Passing traces only; failures never receive passing-runner credit.
 
-    readonly_symlinks is an explicit, off-by-default opt-in; see _observed_routes.
+    readonly_symlinks is an explicit opt-in (H1001); see _observed_routes.
     """
     return _observed_routes(receipt, scratch, manifest, runner, readonly_symlinks=readonly_symlinks)
 
@@ -655,7 +655,7 @@ def observed_test_failure_routes(receipt, normal, scratch, manifest, runner, ins
         '70c5a9e41492bc3f21b4350e4e26f5656e89be41dae8549984cb6e5680ecf316',
         # Reviewed kernel-copy collector frozen with current-master census receipts.
         'bbc4200a194d2ac636f66db5ff5b32fc62efd3fb1af951849072dfd822834c64',
-        # Collector at 4645219e, before the opt-in read-only symlink audit;
+        # Collector at 4645219e, before the opt-in read-only symlink audit (H1001);
         # keeps traces it produced verifiable with unchanged results.
         '74a8ac05edadf4a4a1cf901134a8c23b24a844284ee8fe2a5f4e6fba274d251c',
     }
@@ -864,17 +864,8 @@ def module_entry_boundary_controls():
         print('module entry controls: positive import; loader-only/compile/dead/blocked/literal/read-after/wrong-bytes/code-replace/restored/failure/removed-profile/default-off PASS')
 
 
-def control_manifest(root, base, revision, sources, git):
-    """The committed-byte manifest of a control repository, written beside it."""
-    manifest = {'measured_revision': revision, 'files': {p: {
-        'blob': git('rev-parse', revision + ':' + p).decode().strip(),
-        'sha256': hashlib.sha256((root / p).read_bytes()).hexdigest()} for p in sources}}
-    manifest_path = base / 'manifest.json'; manifest_path.write_text(json.dumps(manifest))
-    return manifest, manifest_path
-
-
 def readonly_symlink_controls():
-    """Opt-in: an audited link to a committed read-only tree certifies its reads.
+    """H1001 opt-in: an audited link to a committed read-only tree certifies its reads.
 
     Real runs give the positive and mutation/alias/leftover refusals; injected
     syscall lines on the positive trace isolate each alias and cleanup rule.
@@ -903,7 +894,10 @@ def readonly_symlink_controls():
         git('init', '-q'); git('add', '.')
         git('-c', 'user.name=Control', '-c', 'user.email=control@example.invalid', 'commit', '-qm', 'symlink controls')
         revision = git('rev-parse', 'HEAD').decode().strip()
-        manifest, manifest_path = control_manifest(root, base, revision, sources, git)
+        manifest = {'measured_revision': revision, 'files': {p: {
+            'blob': git('rev-parse', revision + ':' + p).decode().strip(),
+            'sha256': hashlib.sha256((root / p).read_bytes()).hexdigest()} for p in sources}}
+        manifest_path = base / 'manifest.json'; manifest_path.write_text(json.dumps(manifest))
         receipts = {}
         for name in bodies:
             runner = 'tests/' + name + '.py'
@@ -1011,7 +1005,10 @@ def self_test():
         git('init', '-q'); git('add', '.')
         git('-c', 'user.name=Control', '-c', 'user.email=control@example.invalid', 'commit', '-qm', 'control')
         revision = git('rev-parse', 'HEAD').decode().strip()
-        manifest, manifest_path = control_manifest(root, base, revision, sources, git)
+        manifest = {'measured_revision': revision, 'files': {p: {
+            'blob': git('rev-parse', revision + ':' + p).decode().strip(),
+            'sha256': hashlib.sha256((root / p).read_bytes()).hexdigest()} for p in sources}}
+        manifest_path = base / 'manifest.json'; manifest_path.write_text(json.dumps(manifest))
         for scenario in ('failed_unit', 'bootstrap_unit', 'failed_plain', 'failed_mutation', 'escaped_unit', 'mutated_helper_unit'):
             runner = 'tests/' + scenario + '.py'; command = ['python3', '-B', runner]
             normal_path = base / (scenario + '.normal.log')
