@@ -8,6 +8,10 @@ A component of finish-line goal 5 (`runCarriesPanicCodes`): what the actual
 runner `Panic.Run.program` / `Panic.Run.stmt` returns, for every contract,
 context, state and program. No conjunct restricts the admitted programs.
 
+This component is already proved: every conjunct is a theorem of
+`Run/Contracts.lean`, `Run/Loop.lean`, `Run/Calls.lean` or `Eval.lean`, and
+`run_outcomes` below assembles them by name, so the two cannot drift apart.
+
 Not claimed: whole-program erasure of this runner to the V1 run. It is false:
 self-catch binds the executed callee's code (1 for a false assertion) where
 V1 binds the oracle's (e.g. 17). Only the local projections of expressions,
@@ -112,3 +116,22 @@ def panicRunOutcomes : Prop :=
     v.evalT σ = .ok a → value σ v = .ok a)
 
 end Solidity.Goals
+
+namespace Solidity.Correctness.Panic
+
+open Solidity.Semantics.Panic Solidity.Semantics.Panic.Run
+
+theorem run_outcomes : Solidity.Goals.panicRunOutcomes :=
+  ⟨program_nil, program_cons_error, program_cons_ok, stmt_block_error,
+   fun _ _ _ _ halt h => Loop.run_condition_error _ _ _ halt h, stmt_loop_error,
+   fun _ _ _ _ => rfl, fun _ _ _ _ _ h => Loop.run_of_iterN h, fun _ _ _ h => Loop.run_diverge h,
+   stmt_call_error, stmt_callRec_error, stmt_tryCall_self_panic,
+   fun ext rets ok err binder pnc other as body σ halt r nz self f =>
+     stmt_tryCall_self_resource ext rets ok err binder pnc other as body σ halt r nz self f,
+   stmt_assert_false, revertData_error,
+   fun ext rets as callee self kind _ handler σ halt f =>
+     catchData_error ext rets as callee self kind handler σ halt f,
+   value_erase, path_erase, loc_erase, mpath_erase, mloc_erase, source_erase, msource_erase,
+   args_erase, value_of_ok⟩
+
+end Solidity.Correctness.Panic
