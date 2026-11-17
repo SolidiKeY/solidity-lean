@@ -371,6 +371,7 @@ and open obligations. Test proposals remain proposals until applied.
 - [scripts/h62/item1/p16-generator/registrations/README.md](../scripts/h62/item1/p16-generator/registrations/README.md)
 - [scripts/h62/item2/audit-theories/handoff/CONFLICT-RESOLUTION-20261108.md](../scripts/h62/item2/audit-theories/handoff/CONFLICT-RESOLUTION-20261108.md)
 - [scripts/h62/item2/audit-theories/handoff/original-work-and-backfill-queue.md](../scripts/h62/item2/audit-theories/handoff/original-work-and-backfill-queue.md)
+- [scripts/heartbeats/README.md](../scripts/heartbeats/README.md)
 - [scripts/prose-backtest/README.md](../scripts/prose-backtest/README.md)
 - [vscode/README.md](../vscode/README.md)
 - [web/README.md](../web/README.md)
