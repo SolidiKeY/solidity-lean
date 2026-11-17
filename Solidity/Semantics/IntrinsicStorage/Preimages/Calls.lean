@@ -260,10 +260,7 @@ theorem litWrites_result {Γ₁ : Ctx} (bs : List UInt8) (i : Nat)
   | nil => rfl
   | cons b bs ih =>
     rw [litWrites, TRun.litWritesT]
-    split
-    · rw [seq_result]
-      simp only [TRun.seq, project, assignMem_result, ih]
-    · rfl
+    split <;> simp only [seq_result, TRun.seq, project, assignMem_result, ih]
 
 theorem litBytes_result {Γ₁ : Ctx} (bs : List UInt8)
     (k : Step C (.mem bytesR :: Γ) Γ₁) (σ : State C Γ) :
@@ -438,10 +435,8 @@ theorem callFrame_approx (n : Nat) (w : World contracts) {k : K} {α : Type}
   split
   · exact .refl _
   · simp only [Audit.result_bind, Audit.result_lift, Audit.result_pure]
-    refine TRes.Approx.bind (.refl _) fun st => ?_
-    refine TRes.Approx.bind (.refl _) fun σ => ?_
-    refine TRes.Approx.bind (Observe.program_approx n entry.body σ) fun o => ?_
-    exact .refl _
+    exact .bind (.refl _) fun _ => .bind (.refl _) fun σ =>
+      .bind (Observe.program_approx n entry.body σ) fun _ => .refl _
 
 noncomputable def call (n : Nat) (w : World contracts) {k : K} {α : Type}
     (r : Handle k) (entry : Entry (contracts k) α) (ctx : Context) :
@@ -479,9 +474,7 @@ theorem create_approx (n : Nat) (w : World contracts) (k : K) (self : Address)
     split
     · exact .refl _
     · simp only [Audit.result_bind, Audit.result_lift, Audit.result_pure]
-      refine TRes.Approx.bind (.refl _) fun σ => ?_
-      refine TRes.Approx.bind (Observe.program_approx n ctor σ) fun o => ?_
-      exact .refl _
+      exact .bind (.refl _) fun σ => .bind (Observe.program_approx n ctor σ) fun _ => .refl _
 
 /-- Atomic rollback changes the returned world, never the observed inputs. -/
 def atomic (w : World contracts) (a : Audit (World contracts × α)) :
