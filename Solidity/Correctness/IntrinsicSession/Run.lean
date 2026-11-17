@@ -29,6 +29,10 @@ without a final observation.
 
 `go` is the iteration from any boundary (history, action index, world); it
 returns the whole history and the worlds and frames from there on.
+
+A larger bound extends the run in all three projections (`run_mono`):
+`run_consistent`, `worlds_mono` and `frames_mono` are its parts, and
+`directed` gives bounds without resource failure a common upper bound.
 -/
 
 namespace Solidity.Semantics.IntrinsicSession
@@ -140,5 +144,121 @@ theorem run_fresh (completes : (deploy main roles ctor F wire r e).stops = false
   simp only [run, completes, Bool.false_eq_true, if_false]
 
 end Run
+
+/-! ## Consistency and monotonicity
+
+A larger bound observes more actions with the same failures, so its run
+extends the smaller one in all three projections at once (`run_mono`). -/
+
+/-- `a` is below `b`: its prefix is a prefix of `b`'s, and its worlds and
+frames lead `b`'s. -/
+def Run.Le {contracts : List Contract} (a b : Run contracts) : Prop :=
+  a.pfx.Le b.pfx ∧ a.worlds <+: b.worlds ∧ a.frames <+: b.frames
+
+theorem Run.Le.refl {contracts : List Contract} (a : Run contracts) : a.Le a :=
+  ⟨Prefix.Le.refl _, List.prefix_refl _, List.prefix_refl _⟩
+
+theorem Run.Le.after {contracts : List Contract} {a b : Run contracts}
+    (w : World (catalog contracts)) (fs : List (Frame (catalog contracts))) (le : a.Le b) :
+    (a.after w fs).Le (b.after w fs) :=
+  ⟨le.1, List.cons_prefix_cons.2 ⟨rfl, le.2.1⟩, (List.prefix_append_right_inj fs).2 le.2.2⟩
+
+section Mono
+
+variable {contracts : List Contract} {main : Nat} {roles : Fin contracts.length → Role}
+  {ctor : (k : Fin contracts.length) → Bytes → Option (Prog contracts[k] [] [])}
+  {entry : (k : Fin contracts.length) → Bytes → Option (Entry contracts[k] Bytes)}
+  {F : Fixed} {wire : Wire} {r r' : Bound} {e : SessionEnv}
+
+/-- A run from a boundary keeps the boundary's history. -/
+theorem go_extends : ∀ (k : Nat) (h : List Event) (n : Nat) (w : World (catalog contracts)),
+    h <+: (go entry F wire r e h n w k).pfx.events
+  | 0, _, _, _ => List.prefix_refl _
+  | k + 1, h, n, w => by
+    simp only [go]
+    split
+    · exact List.prefix_refl _
+    · split
+      · exact List.prefix_refl _
+      · exact (List.prefix_append _ _).trans (go_extends k _ _ _)
+
+/-- More actions extend the run from a boundary. -/
+theorem go_mono : ∀ (k k' : Nat) (h : List Event) (n : Nat) (w : World (catalog contracts)),
+    k ≤ k' → (go entry F wire r e h n w k).Le (go entry F wire r e h n w k')
+  | 0, k', h, n, w, _ => ⟨⟨go_extends k' h n w, .inl rfl⟩, List.nil_prefix, List.nil_prefix⟩
+  | k + 1, 0, _, _, _, le => absurd le (Nat.not_succ_le_zero k)
+  | k + 1, k' + 1, h, n, w, le => by
+    simp only [go]
+    split
+    · exact Run.Le.refl _
+    · split
+      · exact Run.Le.refl _
+      · exact (go_mono k k' _ _ _ (Nat.le_of_succ_le_succ le)).after _ _
+
+/-- The step reads the bound's failures only. -/
+theorem step_bound (same : r.fails = r'.fails) (h : List Event) (n : Nat)
+    (w : World (catalog contracts)) (a : Action) :
+    step entry F wire r e h n w a = step entry F wire r' e h n w a := by
+  cases a <;> simp only [step, request, same]
+
+theorem go_bound (same : r.fails = r'.fails) :
+    ∀ (k : Nat) (h : List Event) (n : Nat) (w : World (catalog contracts)),
+      go entry F wire r e h n w k = go entry F wire r' e h n w k
+  | 0, _, _, _ => rfl
+  | k + 1, h, n, w => by
+    simp only [go, step_bound same, go_bound same k]
+
+/-- The deployment reads the bound's deployment failure only. -/
+theorem deploy_bound (same : r.deployFails = r'.deployFails) :
+    deploy main roles ctor F wire r e = deploy main roles ctor F wire r' e := by
+  simp only [deploy, same]
+
+/-- **A larger bound extends the run** in its prefix, worlds and frames. -/
+theorem run_mono (w : SessionWorld contracts) (le : r ≤ r') :
+    (run main roles ctor entry F wire w e r).Le (run main roles ctor entry F wire w e r') := by
+  cases w with
+  | boundary w =>
+    simp only [run, go_bound le.2.2]
+    exact go_mono _ _ _ _ _ le.1
+  | fresh =>
+    simp only [run, deploy_bound le.2.1, go_bound le.2.2]
+    split
+    · exact Run.Le.refl _
+    · exact (go_mono _ _ _ _ _ le.1).after _ _
+
+end Mono
+
+section Interface
+
+variable {contracts : List Contract} (main : Nat) (roles : Fin contracts.length → Role)
+  (ctor : (k : Fin contracts.length) → Bytes → Option (Prog contracts[k] [] []))
+  (entry : (k : Fin contracts.length) → Bytes → Option (Entry contracts[k] Bytes))
+  (F : Fixed) (wire : Wire) (w : SessionWorld contracts) (e : SessionEnv) {r r' : Bound}
+
+/-- **Consistent**: the prefixes of one world and environment, in the bound
+order (the shape `Roadmap.Lang.consistent` needs). -/
+theorem run_consistent :
+    Prefixes.Consistent fun r => (run main roles ctor entry F wire w e r).pfx :=
+  fun _ _ le => (run_mono w le).1
+
+/-- The boundary worlds at a smaller bound lead those at a larger one. -/
+theorem worlds_mono (le : r ≤ r') :
+    (run main roles ctor entry F wire w e r).worlds <+:
+      (run main roles ctor entry F wire w e r').worlds :=
+  (run_mono w le).2.1
+
+/-- The executed frames at a smaller bound lead those at a larger one. -/
+theorem frames_mono (le : r ≤ r') :
+    (run main roles ctor entry F wire w e r).frames <+:
+      (run main roles ctor entry F wire w e r').frames :=
+  (run_mono w le).2.2
+
+end Interface
+
+/-- Admissible bounds without resource failure have common upper bounds. -/
+theorem directed {r r' : Bound} (good : r.Admissible ∧ r.NoFail) (good' : r'.Admissible ∧ r'.NoFail) :
+    ∃ r'' : Bound, (r''.Admissible ∧ r''.NoFail) ∧ r ≤ r'' ∧ r' ≤ r'' :=
+  let ⟨r'', noFail, le, le'⟩ := Bound.directed good.2 good'.2
+  ⟨r'', ⟨trivial, noFail⟩, le, le'⟩
 
 end Solidity.Semantics.IntrinsicSession
