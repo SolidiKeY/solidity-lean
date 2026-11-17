@@ -142,6 +142,7 @@ import Solidity.Examples.Goals.Hash
 import Solidity.Examples.Goals.Headline
 import Solidity.Examples.Goals.Loops
 import Solidity.Examples.Goals.LoopsProducer
+import Solidity.Examples.Goals.OpcodeEval
 import Solidity.Examples.Goals.Panic
 import Solidity.Examples.Goals.Plan
 import Solidity.Examples.Goals.ProseCalibrated

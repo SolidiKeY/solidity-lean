@@ -5,7 +5,9 @@ import hashlib
 import json
 import posixpath
 import re
+import shlex
 import tempfile
+from functools import lru_cache
 from pathlib import Path
 
 
@@ -40,7 +42,13 @@ FRAGMENT_SECTIONS = ('standalone', 'generators', 'reads', 'orphans', 'module_ent
 #   of node-import, node-readFileSync, lean-readFile (H951/H955).
 # git_policies: {path, blob, purpose, matches: [{line, output, writer}]} (H954).
 # Standalone kind committed-module-cli (main script) is the H955 argparse role.
-CONSUMER_SECTIONS = ('persistent_reads', 'static_routes', 'git_policies')
+# H978 (x1g): static forms lean-library-readFile and node-readFileSync-walk, and
+#   standalone kind source-only-program (revision-independent no-pass role).
+# H996 (x1i): standalone kind python-argument-source-role, a reviewed
+#   argument-bearing Python program as a source-only role that anchors nothing.
+# persistent_module_entries (H979): exact routes.module_entries claims that
+#   persist while every recorded object is unchanged.
+CONSUMER_SECTIONS = ('persistent_reads', 'static_routes', 'git_policies', 'persistent_module_entries')
 
 
 def fragment_identity(section, row):
@@ -49,7 +57,7 @@ def fragment_identity(section, row):
         keys = ('path',)
     elif section in ('standalone', 'generators', 'orphans'):
         keys = ('path', 'input_revision')
-    elif section in ('module_entries', 'reads', 'persistent_reads'):
+    elif section in ('module_entries', 'reads', 'persistent_reads', 'persistent_module_entries'):
         keys = ('runner', 'input_revision', 'target', 'frames')
     elif section == 'static_routes':
         keys = ('runner', 'form', 'target', 'frames')
@@ -57,7 +65,7 @@ def fragment_identity(section, row):
         raise ValueError('unknown fragment section')
     if any(k not in row for k in keys): raise ValueError('fragment entry lacks identity: ' + section)
     values = [row[k] for k in keys]
-    if section in ('module_entries', 'reads', 'persistent_reads', 'static_routes'):
+    if section in ('module_entries', 'reads', 'persistent_reads', 'static_routes', 'persistent_module_entries'):
         frames = row['frames']
         if not isinstance(frames, list) or any(not isinstance(f, dict) for f in frames):
             raise ValueError('invalid fragment frames')
@@ -124,6 +132,8 @@ STATIC_FORMS = {
     'node-import': ('Node static import of literal module-relative path', 'executes'),
     'node-readFileSync': ('Node readFileSync of literal path', 'consumes'),
     'lean-readFile': ('Lean IO.FS.readFile of literal cwd-relative path', 'consumes'),
+    'lean-library-readFile': ('Lean IO.FS.readFile of literal cwd-relative path in a top-level #eval/run_elab elaborated by a library build', 'consumes'),
+    'node-readFileSync-walk': ('Node readFileSync of each file a local recursive suffix walker yields', 'consumes'),
 }
 # Demonstrated passing runner kinds whose committed source may anchor a route.
 DEMONSTRATED_KINDS = ('unittest', 'node-test', 'runnable-entrypoint')
@@ -150,13 +160,19 @@ def _check_lines(repo, frames):
             raise ValueError('consumer route location mismatch')
 
 
-def _anchor_root(graph, runner, frames):
+def _anchor_root(graph, runner, frames, walk=False):
     """A current non-source-only root, or a demonstrated passing committed runner.
 
     A runner named validated:P or committed:P resolves to whichever of the two
     exists at the measured revision. Any other root (undemonstrated committed
-    source, CLI/policy source role, derived claim) anchors nothing.
+    source, CLI/policy source role, derived claim) anchors nothing, except that
+    a reviewed Node mode entry (H992) anchors the walker form alone (walk).
     """
+    if runner.startswith(NODE_MODE_PREFIX):
+        root = graph.roots.get(runner) if walk else None
+        if root is None or 'derived_from' in root or not root.get('node_mode_root'): return None, None
+        if root['path'] != frames[0]['path']: raise ValueError('consumer route does not start at its runner')
+        return runner, root
     if runner.startswith(('validated:', 'committed:')):
         path = runner.split(':', 1)[1]
         runner = 'validated:' + path if 'validated:' + path in graph.roots else 'committed:' + path
@@ -252,16 +268,32 @@ _NODE_IMPORT = re.compile(r"""^\s*(?:import\s+(?:[\w$*{}\s,]+?\s+from\s+)?|expor
 _NODE_FS = re.compile(r"""(?:\bimport\s*\{[^}]*\breadFileSync\b[^}]*\}\s*from\s*|\bconst\s*\{[^}]*\breadFileSync\b[^}]*\}\s*=\s*require\(\s*)(["'])(?:node:)?fs\1""")
 
 
-def _js_mask(text):
+@lru_cache(maxsize=16)
+def _js_mask(text, regex=False):
     """Blank JS comments, templates and quoted strings; keep string literal spans.
 
-    Regular-expression literals are not modelled. Callers locate keywords in
-    the masked code and accept an operand only at a recorded literal start, so
-    commented, quoted or templated text never yields a route.
+    Regular-expression literals are not modelled unless regex: then a slash
+    where an operand starts opens a single-line literal, blanked like a
+    comment (the walker form needs exact brace and comment structure).
+    Callers locate keywords in the masked code and accept an operand only at
+    a recorded literal start, so commented, quoted or templated text never
+    yields a route.
     """
-    out = []; literals = {}; at = 0; n = len(text)
+    out = []; literals = {}; at = 0; n = len(text); last = ''
     while at < n:
         c = text[at]
+        if regex and c == '/' and not text.startswith(('//', '/*'), at) and (not last or last in '(,=:[!&|?{};+-*%<>~^'):
+            end = at + 1; within = False
+            while end < n and text[end] != '\n' and (within or text[end] != '/'):
+                if text[end] == '\\': end += 1
+                elif text[end] == '[': within = True
+                elif text[end] == ']': within = False
+                end += 1
+            if end >= n or text[end] != '/':
+                out.append(c); last = c; at += 1; continue
+            end += 1
+            while end < n and text[end].isalpha(): end += 1
+            out.append(re.sub(r'[^\n]', ' ', text[at:end])); at = end; last = 'x'; continue
         if text.startswith('//', at):
             end = text.find('\n', at); end = n if end < 0 else end
         elif text.startswith('/*', at):
@@ -272,15 +304,18 @@ def _js_mask(text):
                 end += 2 if text[end] == '\\' else 1
             end = min(end + 1, n)
             if c != '`': literals[at] = text[at:end]
+            last = 'x'
         else:
-            out.append(c); at += 1; continue
+            out.append(c); at += 1
+            if not c.isspace(): last = c
+            continue
         out.append(re.sub(r'[^\n]', ' ', text[at:end])); at = end
     return ''.join(out), literals
 
 
-def _js_line(text, number):
+def _js_line(text, number, regex=False):
     """The line, its masked code, line-relative literal spans, and whole-file mask."""
-    code, literals = _js_mask(text)
+    code, literals = _js_mask(text, regex)
     starts = [0] + [m.end() for m in re.finditer('\n', text)]
     begin = starts[number - 1]; line = text.splitlines()[number - 1]; masked = code[begin:begin + len(line)]
     spans = {start - begin: len(token) for start, token in literals.items() if begin <= start < begin + len(line)}
@@ -315,17 +350,19 @@ def _node_read(source, text, number, cwd):
     return None
 
 
-def _lean_read(classifier, repo, source, number, cwd):
+def _lean_read(classifier, repo, source, number, cwd, commands=r'#eval'):
     """One literal read inside a top-level #eval command of this file.
 
     Only the elaborated runner file itself is accepted: an imported module's
     #eval does not run when its importer runs, and a def runs only if called.
+    A library build elaborates every imported module; that form also accepts
+    run_elab (commands) and reaches the module through header imports.
     """
     code, literals = classifier['lean_lex'](repo.texts[source])
     starts = [0] + [m.end() for m in re.finditer('\n', code)]
     lines = code.splitlines()
     command = next((lines[k] for k in range(number - 1, -1, -1) if lines[k][:1].strip()), '')
-    if not re.match(r'#eval\b', command): return None
+    if not re.match(r'(?:' + commands + r')\b', command): return None
     found = []; positions = dict(literals)
     for match in re.finditer(r'(?<![\w.])IO\.FS\.(?:readFile|readBinFile)(?![\w.!?\'])', code):
         if bisect.bisect_right(starts, match.start()) != number: continue
@@ -361,18 +398,32 @@ def static_routes(classifier, graph, rows):
         frames = row['frames']; target = row['target']; form = row['form']
         if not _frames_current(repo, frames, [(target, row['target_blob'])]): continue
         _check_lines(repo, frames)
-        original, root = _anchor_root(graph, row['runner'], frames)
+        original, root = _anchor_root(graph, row['runner'], frames, form == 'node-readFileSync-walk')
         if root is None: continue
         if root.get('source_only') and root.get('source_blob') != frames[0]['blob']: continue
         language = 'lean' if form.startswith('lean') else 'node'
-        if language == 'lean' and len(frames) != 1: raise ValueError('Lean read must be in the elaborated runner file')
+        library = form == 'lean-library-readFile'
+        if form == 'lean-readFile' and len(frames) != 1: raise ValueError('Lean read must be in the elaborated runner file')
+        # A library build elaborates its root's import closure; nothing else does.
+        if library and (root.get('kind') != 'Lean root' or root.get('source_only') or root.get('lake_package')
+                        or root.get('cwd', '.') != '.' or not _default_library(repo, root, frames[0]['path'])):
+            raise ValueError('Lean library read requires a repository Lean library root')
+        reader_text = repo.texts[frames[-1]['path']]
+        if library and (any(not _plain_lines(repo.texts[f['path']]) for f in frames)
+                        or re.search(r'(?m)^#exit\b', classifier['lean_code'](reader_text)[:_offset(reader_text, frames[-1]['line'])])):
+            raise ValueError('Lean library read follows #exit or ambiguous line breaks')
         suffixes = ('.lean',) if language == 'lean' else NODE_SUFFIXES
         if any(not f['path'].endswith(suffixes) for f in frames): raise ValueError('static route frame language mismatch')
         for caller, callee in zip(frames, frames[1:]):
-            if _node_import(caller['path'], repo.texts[caller['path']], caller['line']) != callee['path']: raise ValueError('static route hop is not a literal import')
+            if library:
+                if callee['path'] not in _lean_header_imports(classifier, repo, caller['path'], caller['line']):
+                    raise ValueError('static route hop is not a Lean header import')
+            elif _node_import(caller['path'], repo.texts[caller['path']], caller['line']) != callee['path']: raise ValueError('static route hop is not a literal import')
         reader = frames[-1]; cwd = root.get('cwd', '.')
         if form == 'node-import': resolved = _node_import(reader['path'], repo.texts[reader['path']], reader['line'])
         elif form == 'node-readFileSync': resolved = _node_read(reader['path'], repo.texts[reader['path']], reader['line'], cwd)
+        elif form == 'node-readFileSync-walk': resolved = _node_walk_read(reader['path'], repo, reader['line'], target, root, frames[0]['path'])
+        elif library: resolved = _lean_read(classifier, repo, reader['path'], reader['line'], cwd, r'#eval|run_elab')
         else: resolved = _lean_read(classifier, repo, reader['path'], reader['line'], cwd)
         if resolved is None or resolved != target: raise ValueError('static route target is not the literal ' + form + ' operand')
         if form == 'node-import' and not target.endswith(NODE_SUFFIXES): raise ValueError('Node import target is not a module')
@@ -381,7 +432,7 @@ def static_routes(classifier, graph, rows):
         if root.get('source_only') and not _historical_objects(classifier, repo, root['source_demonstration_revision'],
                 sorted({(f['path'], f['blob']) for f in frames} | {(target, row['target_blob'])})): continue
         operation, kind = STATIC_FORMS[form]
-        hop = 'Node static import'
+        hop = 'Lean header import elaborated by the library build' if library else 'Node static import'
         _observe(graph, original, row, frames, target, operation, kind, hop,
                  {'kind': 'static-' + form, 'purpose': row['purpose']})
 
@@ -469,7 +520,8 @@ def git_policies(classifier, graph, rows):
                 raise ValueError('invalid Git policy output or line')
             if not _current(repo, writer['path'], writer['blob']): stale = True; break
             if posixpath.basename(writer['path']) == '.gitignore' or not any(
-                    r['path'] == writer['path'] and 'derived_from' not in r and not k.startswith('git-policy:') for k, r in graph.roots.items()):
+                    r['path'] == writer['path'] and 'derived_from' not in r and not k.startswith('git-policy:')
+                    and not r.get('python_argument_role') for k, r in graph.roots.items()):
                 raise ValueError('Git policy writer is not an entry point source')
             if full in repo.tree or any(p.startswith(full + '/') for p in repo.tree):
                 raise ValueError('Git policy output is tracked: ' + full)
@@ -566,6 +618,609 @@ def declared_module_cli(repo, path):
             required.add(options[0])
     return None
 
+# ---------------------------------------------------------------------------
+# H978/H979 successor forms (x1g). Each is opt-in through a static-route form,
+# a consumer section or a standalone kind that no earlier fragment uses, so
+# without such rows every classification and output byte is unchanged. None
+# grants execution, passing-validation or proof credit beyond the named object.
+
+SOURCE_ONLY_KIND = 'source-only-program'
+MODULE_ENTRY_KEYS = frozenset({'runner', 'input_revision', 'frames', 'target', 'target_blob', 'operation',
+                               'module_code_sha256', 'module_frame_line', 'python', 'collector_sha256'})
+MODULE_ENTRY_OPERATION = 'entered measured Python module; no fixture consumption credit'
+
+
+def _offset(text, number):
+    return sum(len(line) + 1 for line in text.split('\n')[:number - 1])
+
+
+def _default_library(repo, root, path):
+    """A default lean_lib of the repository lakefile, sources at the root."""
+    import tomllib
+    match = re.fullmatch(r'lake build (\S+)', root.get('command', ''))
+    if match is None or root.get('location', '').split(':')[0] != 'lakefile.toml' or 'lakefile.toml' not in repo.texts: return False
+    try: config = tomllib.loads(repo.texts['lakefile.toml'])
+    except ValueError: return False
+    entries = [e for e in config.get('lean_lib', []) if isinstance(e, dict) and e.get('name') == match[1]]
+    if len(entries) != 1 or match[1] not in config.get('defaultTargets', []) or entries[0].get('srcDir', '.') not in ('.', './'): return False
+    names = entries[0].get('roots', [entries[0].get('root', match[1])])
+    return isinstance(names, list) and path in [n.replace('.', '/') + '.lean' for n in names if isinstance(n, str)]
+
+
+def _lean_header_imports(classifier, repo, source, number):
+    """Module paths named by a header import line: only imports precede it."""
+    lines = classifier['lean_code'](repo.texts[source]).splitlines()
+    pattern = r'\s*(?:(?:public|private|meta)\s+)*import(?:\s+all)?\s+(.+)'
+    for k, line in enumerate(lines[:number], 1):
+        if not line.strip() or re.fullmatch(r'\s*(?:module|prelude)\s*', line): continue
+        match = re.fullmatch(pattern, line)
+        if not match: return []
+        if k == number: return [m.replace('.', '/') + '.lean' for m in match[1].split()]
+    return []
+
+
+def _js_code(text, number):
+    """(code, literal spans): the line is code and string literals, optionally
+    followed by one trailing // comment, which is cut off."""
+    line, masked, spans, _, _ = _js_line(text, number, True)
+    inside = {at for start, size in spans.items() for at in range(start, start + size)}
+    bad = [at for at, c in enumerate(line) if masked[at] != c and at not in inside]
+    if bad:
+        if not line.startswith('//', bad[0]) or masked[bad[0]:].strip(): return None
+        line = line[:bad[0]]
+    return line, spans
+
+
+def _js_match(text, number, pattern):
+    """Full-line match of a code line whose quoted groups are real literals."""
+    found = _js_code(text, number)
+    if found is None: return None
+    match = re.fullmatch(r'\s*' + pattern + r'\s*', found[0])
+    if match is None: return None
+    for k in range(1, (match.re.groups or 0) + 1):
+        if match.group(k) in ('"', "'") and match.start(k) not in found[1]: return None
+    return match
+
+
+def _plain_lines(text):
+    """Newline is the only line separator, so splitlines and offsets agree."""
+    return not re.search('[\r\x0b\x0c\x1c\x1d\x1e\x85\u2028\u2029]', text)
+
+
+def _js_destructured(code, name):
+    """name is bound by a destructuring pattern or a parameter list."""
+    n = r'(?<![\w$.])' + re.escape(name) + r'(?![\w$])'
+    return bool(re.search(r'[{\[][^{}\[\];]*' + n + r'[^{}\[\];]*[}\]]\s*=(?![=>])', code)
+                or re.search(r'(?:\bfunction\b[^(]*|\bcatch\s*)\([^()]*' + n + r'[^()]*\)|\([^()]*' + n + r'[^()]*\)\s*=>|' + n + r'\s*=>', code))
+
+
+def _js_unique(text, code, name, pattern):
+    """The match of the one top-level line defining name; never rebound."""
+    lines = text.splitlines()
+    hits = [m for m in (_js_match(text, n, pattern) for n, line in enumerate(lines, 1) if name in line) if m]
+    if len(hits) != 1 or hits[0].string[:1].isspace(): return None
+    if len(re.findall(r'(?<![\w$.])' + re.escape(name) + r'\s*=(?!=)', code)) != 1: return None
+    if re.search(r'\b(?:function|let|var|class)\s+' + re.escape(name) + r'\b', code): return None
+    return hits[0]
+
+
+def _js_imported(text, code, names, module):
+    """Every name comes from one literal import of node:<module>, never rebound."""
+    for match in re.finditer(r'\bimport\s*\{([^}]*)\}\s*from\s*(["\'])(?:node:)?' + module + r'\2', text):
+        if code[match.start()] != text[match.start()] or match.start(2) not in _js_mask(text, True)[1]: continue
+        imported = {n.strip() for n in match[1].split(',')}
+        if not set(names) <= imported: continue
+        return not any(re.search(r'\b(?:function|const|let|var|class)\s+' + re.escape(n) + r'\b|(?<![\w$.])' + re.escape(n) + r'\s*=(?!=)', code)
+                       for n in names)
+    return False
+
+
+def _node_walk_read(source, repo, number, target, root, entry):
+    """H978: readFileSync(P) of each file a local recursive suffix walker yields.
+
+    Accepted shape, all re-derived from code lines (never comments, strings or
+    templates): `for (const P of W(resolve(ROOT, "dir"))[.sort()]) {` encloses
+    the read line directly (brace depth one) as `[const x =] readFileSync(P[,
+    "enc"])`, not as a conditional operand; W is the only local
+    `function W(d, out = []) {` with the readdirSync/join/statSync/endsWith
+    suffix body; ROOT is a top-level `const ROOT = resolve(dirname(
+    fileURLToPath(import.meta.url)), "rel")`. Early exits before the read are
+    only `if (P.startsWith(C)) continue;` with top-level `const C = resolve(ROOT,
+    "x")`, and the target lies outside each such C. Enclosing blocks are only
+    `if (MODE === "lit") {` with top-level `const MODE = process.argv[2];`, and
+    the root command passes that literal. The target is one tracked regular
+    file below dir with the suffix; nothing else is credited.
+    """
+    text = repo.texts[source]
+    if not _plain_lines(text): return None
+    code, _ = _js_mask(text, True); lines = text.splitlines()
+    if not (_js_imported(text, code, ('readFileSync', 'readdirSync', 'statSync'), 'fs')
+            and _js_imported(text, code, ('resolve', 'dirname', 'join'), 'path')
+            and _js_imported(text, code, ('fileURLToPath',), 'url')):
+        return None
+    read = _js_match(text, number, r'(?:(?:const|let|var)\s+[\w$]+\s*=\s*)?readFileSync\(\s*([\w$]+)\s*(?:,\s*(["\'])[\w-]+\2\s*)?\)[\s,;)]*')
+    if read is None: return None
+    variable = read[1]
+    # Brace stack over code before the read: the line of each open brace.
+    starts = [0] + [m.end() for m in re.finditer('\n', text)]
+    stack = []
+    for at in range(starts[number - 1]):
+        if code[at] == '{': stack.append(bisect.bisect_right(starts, at))
+        elif code[at] == '}':
+            if not stack: return None
+            stack.pop()
+    if not stack: return None
+    loop_line = stack[-1]
+    loop = _js_match(text, loop_line, r'for\s*\(\s*const\s+([\w$]+)\s+of\s+([\w$]+)\(\s*resolve\(\s*([\w$]+)\s*,\s*(["\'])([^"\'\\]+)\4\s*\)\s*\)(?:\.sort\(\))?\s*\)\s*\{')
+    if loop is None or loop[1] != variable: return None
+    walker, base_name, directory = loop[2], loop[3], loop[5]
+    code_line = lambda n: code[starts[n - 1]:starts[n - 1] + len(lines[n - 1])]
+    def statement_start(n):
+        """The previous code line ends a statement or opens a block (no braceless if/else/arrow)."""
+        previous = next((code_line(k).rstrip() for k in range(n - 1, 0, -1) if code_line(k).strip()), ';')
+        return previous.endswith((';', '{', '}'))
+    # The read is a statement or a direct argument of the call that starts its statement.
+    k = number - 1
+    while k > loop_line and code_line(k).strip() and not code_line(k).rstrip().endswith((';', '{', '}')): k -= 1
+    if k > loop_line and not code_line(k).strip(): return None
+    prefix = ''.join(code_line(n) + '\n' for n in range(k + 1, number))
+    if prefix.strip():
+        call = re.match(r'\s*(?!(?:if|while|for|switch|catch|with|return|else|do|throw|typeof|await|yield|new)\b)[\w$.]+\(', prefix)
+        if call is None or re.search(r'=>|\bfunction\b', prefix) or prefix.rstrip()[-1:] not in (',', '('): return None
+        depth = 0
+        for at, c in enumerate(prefix):
+            if c in '([{': depth += 1
+            elif c in ')]}': depth -= 1
+            if at >= call.end() - 1 and depth < 1: return None
+        if depth != 1: return None
+    elif not statement_start(number): return None
+    if not all(statement_start(n) for n in stack): return None
+    protected = (variable, walker, base_name, 'readFileSync', 'readdirSync', 'statSync', 'resolve', 'dirname', 'join', 'fileURLToPath')
+    if any(_js_destructured(code, name) for name in protected): return None
+    rel = _js_unique(text, code, base_name, r'const\s+' + re.escape(base_name) + r'\s*=\s*resolve\(\s*dirname\(\s*fileURLToPath\(\s*import\.meta\.url\s*\)\s*\)\s*,\s*(["\'])([^"\'\\]+)\1\s*\)\s*;?')
+    if rel is None: return None
+    base_dir = _clean(posixpath.join(posixpath.dirname(source), rel[2]))
+    walked = _clean(posixpath.join(base_dir, directory)) if base_dir is not None else None
+    # The walker definition, line by line.
+    definitions = [n for n in range(1, len(lines) + 1) if re.search(r'\bfunction\s+' + re.escape(walker) + r'\b', code_line(n))]
+    if len(definitions) != 1 or re.search(r'(?<![\w$.])' + re.escape(walker) + r'\s*=(?!=)', code): return None
+    head = definitions[0]
+    header = _js_match(text, head, r'function\s+' + re.escape(walker) + r'\s*\(\s*([\w$]+)\s*,\s*([\w$]+)\s*=\s*\[\s*\]\s*\)\s*\{')
+    if header is None or lines[head - 1][:1].isspace() or head + 7 > len(lines) or not statement_start(head): return None
+    d, out = map(re.escape, (header[1], header[2])); w = re.escape(walker)
+    body = [r'for\s*\(\s*const\s+([\w$]+)\s+of\s+readdirSync\(\s*' + d + r'\s*\)\s*\)\s*\{',
+            r'const\s+([\w$]+)\s*=\s*join\(\s*' + d + r'\s*,\s*([\w$]+)\s*\)\s*;?',
+            r'if\s*\(\s*statSync\(\s*([\w$]+)\s*\)\.isDirectory\(\)\s*\)\s*' + w + r'\(\s*([\w$]+)\s*,\s*' + out + r'\s*\)\s*;?',
+            r'else\s+if\s*\(\s*([\w$]+)\.endsWith\(\s*(["\'])(\.[\w.-]+)\2\s*\)\s*\)\s*' + out + r'\.push\(\s*([\w$]+)\s*\)\s*;?',
+            r'\}', r'return\s+' + out + r'\s*;?', r'\}']
+    found = [_js_match(text, head + k, pattern) for k, pattern in enumerate(body, 1)]
+    if any(m is None for m in found): return None
+    entry_name, path_name = found[0][1], found[1][1]
+    if (found[1][2] != entry_name or {found[2][1], found[2][2], found[3][1], found[3][4]} != {path_name}): return None
+    suffix = found[3][3]
+    if (walked is None or not target.startswith(walked + '/') or not target.endswith(suffix)
+            or target not in repo.tree or repo.tree[target][0] not in ('100644', '100755')): return None
+    # Early exits in the loop body before the read.
+    for n in range(loop_line + 1, number):
+        if not re.search(r'\b(?:continue|break|return|throw|exit|yield|await)\b', code_line(n)): continue
+        guard = _js_match(text, n, r'if\s*\(\s*' + re.escape(variable) + r'\.startsWith\(\s*([\w$]+)\s*\)\s*\)\s*continue\s*;?')
+        if guard is None or _js_destructured(code, guard[1]): return None
+        at = _js_unique(text, code, guard[1], r'const\s+' + re.escape(guard[1]) + r'\s*=\s*resolve\(\s*' + re.escape(base_name) + r'\s*,\s*(["\'])([^"\'\\]+)\1\s*\)\s*;?')
+        if at is None: return None
+        # JavaScript startsWith is a string prefix test on resolved paths.
+        skipped = _clean(posixpath.join(base_dir, at[2]))
+        if skipped is None or target.startswith(skipped): return None
+    # Enclosing blocks: only plain (never else) argv mode branches satisfied by the root command.
+    for opener in stack[:-1]:
+        branch = _js_match(text, opener, r'if\s*\(\s*([\w$]+)\s*===\s*(["\'])([^"\'\\]+)\2\s*\)\s*\{')
+        if (branch is None or _js_destructured(code, branch[1])
+                or _js_unique(text, code, branch[1], r'const\s+' + re.escape(branch[1]) + r'\s*=\s*process\.argv\[2\]\s*;?') is None): return None
+        try: words = shlex.split(root['command'])
+        except ValueError: return None
+        if words[:2] != ['node', entry] or len(words) < 3 or words[2] != branch[3]: return None
+    return target
+
+
+def source_only_program(classifier, graph, catalog, entry):
+    """H978: a no-pass default program as a revision-independent source role.
+
+    The definition binds an unchanged Python source and its genuine top-level
+    default entry line; the program matches no configured CLI or unittest form.
+    Unlike runnable-entrypoint it is never a validated runner, at its own
+    revision or any later one: no passing run, read anchor, fixture, helper,
+    child, generated-output, proof or runtime credit. A later revision keeps it
+    while the blob is unchanged and the recorded commit holds that blob; a
+    current definition of the same path supersedes it.
+    """
+    repo = graph.repo
+    required = {'path', 'input_revision', 'source_blob', 'command', 'kind', 'entry_line', 'purpose'}
+    if (set(entry) != required or not isinstance(entry['path'], str) or not isinstance(entry['source_blob'], str)
+            or not isinstance(entry['purpose'], str) or not entry['purpose'].strip()):
+        raise ValueError('invalid source-only program definition')
+    p = entry['path']; revision = entry['input_revision']
+    if not isinstance(revision, str) or not classifier['hex_pin'](revision, 40): raise ValueError('source-only program requires a full commit revision')
+    if any(e.get('path') == p and e.get('input_revision') == revision and e.get('kind') != SOURCE_ONLY_KIND for e in catalog['standalone']):
+        raise ValueError('conflicting standalone definitions: ' + p)
+    if revision != repo.ref:
+        if any(e.get('path') == p and e.get('input_revision') == repo.ref for e in catalog['standalone']): return
+        if not _current(repo, p, entry['source_blob']): return
+        if not _historical_objects(classifier, repo, revision, [(p, entry['source_blob'])]):
+            raise ValueError('unverifiable historical runner demonstration: ' + revision + ':' + p)
+    elif not _current(repo, p, entry['source_blob']): raise ValueError('standalone definition source mismatch: ' + p)
+    command = entry['command']
+    if command != ['python3', '-B', p] or not p.endswith('.py') or repo.tree[p][0] not in ('100644', '100755') or p not in repo.texts:
+        raise ValueError('unsupported source-only program invocation: ' + p)
+    try: lines = classifier['entrypoint_lines'](repo.bytes(p))
+    except (SyntaxError, ValueError, RecursionError): lines = set()
+    if type(entry['entry_line']) is not int or entry['entry_line'] not in lines:
+        raise ValueError('source-only program lacks its default top-level entry: ' + p)
+    if any(classifier[f](repo, p) is not None for f in ('declared_configured_cli', 'declared_module_cli', 'declared_unittest')):
+        raise ValueError('source-only program matches a configured CLI or unittest form: ' + p)
+    identity = 'source-only:' + p
+    graph.root(p, 'source-only default program', shlex.join(command), p, entry['entry_line'], root_id=identity)
+    if identity not in graph.roots: return
+    graph.roots[identity].update({'source_only': True, 'source_blob': entry['source_blob'], 'purpose': entry['purpose'],
+        'program_role': SOURCE_ONLY_KIND, 'source_declaration_revision': revision,
+        'validation_at_measured_revision': {'status': 'unavailable', 'command': command,
+            'reason': 'Default invocation is not certified to pass and matches no configured CLI form; revision-independent source role only. No read anchor, fixture, helper, child, generated-output, proof or runtime credit.'}})
+
+
+
+NODE_MODE_KIND = 'node-mode-source-root'
+NODE_MODE_PREFIX = 'node-mode:'
+# H992 (gh coord#1319): each reviewed argument-bearing Node entry, bound to
+# (path, source blob, mode, provenance line in that same blob). Nothing else
+# is promoted: another file, blob, mode, argument or documentation line fails.
+REVIEWED_NODE_MODES = frozenset({('scripts/parse-corpus.mjs', 'dd1093f6fe8bfe00ae772e0b8b4a0bc0dd4b265a', 'prepare', 17)})
+
+
+def node_mode_root(classifier, graph, catalog, entry, reviewed=None):
+    """H992: a reviewed `node P MODE` command as a source-only entry root.
+
+    The definition binds the exact command ['node', P, MODE], the source blob,
+    and its provenance: a whole-line // comment of that same blob that starts
+    with the verbatim command. P has a top-level `const M = process.argv[2];`
+    and a top-level `if (M === "MODE") {`. The root is never a validated or
+    passing runner and carries no execution, fixture, proof or runtime credit;
+    it anchors only node-readFileSync-walk routes, whose own checks still bind
+    every frame and target to their objects at the recorded revision. A later
+    revision keeps it while the blob is unchanged and the recorded commit
+    holds it.
+    """
+    repo = graph.repo
+    reviewed = REVIEWED_NODE_MODES if reviewed is None else reviewed
+    required = {'path', 'input_revision', 'source_blob', 'command', 'kind', 'provenance', 'purpose'}
+    if (set(entry) != required or not isinstance(entry['path'], str) or not isinstance(entry['source_blob'], str)
+            or not isinstance(entry['purpose'], str) or not entry['purpose'].strip()
+            or not isinstance(entry['provenance'], dict) or set(entry['provenance']) != {'path', 'blob', 'line', 'invocation'}):
+        raise ValueError('invalid Node mode root definition')
+    p = entry['path']; revision = entry['input_revision']; command = entry['command']; doc = entry['provenance']
+    if not isinstance(revision, str) or not classifier['hex_pin'](revision, 40): raise ValueError('Node mode root requires a full commit revision')
+    if any(e.get('path') == p and e.get('input_revision') == revision and e is not entry for e in catalog['standalone']):
+        raise ValueError('conflicting standalone definitions: ' + p)
+    if (not isinstance(command, list) or len(command) != 3 or command[:2] != ['node', p] or not isinstance(command[2], str)
+            or not re.fullmatch(r'[a-z][\w-]*', command[2]) or not p.endswith(NODE_SUFFIXES)):
+        raise ValueError('unsupported Node mode root invocation: ' + str(p))
+    mode = command[2]
+    if (doc['path'] != p or doc['blob'] != entry['source_blob'] or doc['invocation'] != shlex.join(command)
+            or (p, entry['source_blob'], mode, doc['line']) not in reviewed):
+        raise ValueError('unreviewed Node mode root: ' + p)
+    if revision != repo.ref:
+        if any(e.get('path') == p and e.get('input_revision') == repo.ref for e in catalog['standalone']): return
+        if not _current(repo, p, entry['source_blob']): return
+        if not _historical_objects(classifier, repo, revision, [(p, entry['source_blob'])]):
+            raise ValueError('unverifiable historical runner demonstration: ' + revision + ':' + p)
+    elif not _current(repo, p, entry['source_blob']): raise ValueError('standalone definition source mismatch: ' + p)
+    text = repo.texts.get(p)
+    if text is None or repo.tree[p][0] not in ('100644', '100755') or not _plain_lines(text):
+        raise ValueError('unsupported Node mode root invocation: ' + p)
+    code, _ = _js_mask(text, True); lines = text.splitlines(); line = doc['line']
+    # Provenance: a comment-only line of the measured blob, command first.
+    if (type(line) is not int or not 1 <= line <= len(lines) or _js_line(text, line, True)[1].strip()
+            or not re.match(r'\s*//\s*' + re.escape(doc['invocation']) + r'(?:\s|$)', lines[line - 1])):
+        raise ValueError('Node mode root lacks its verbatim source provenance: ' + p)
+    branches = [m for m in (_js_match(text, n, r'if\s*\(\s*([\w$]+)\s*===\s*(["\'])' + re.escape(mode) + r'\2\s*\)\s*\{')
+                            for n in range(1, len(lines) + 1) if mode in lines[n - 1]) if m and not m.string[:1].isspace()]
+    if (len(branches) != 1 or _js_destructured(code, branches[0][1])
+            or _js_unique(text, code, branches[0][1], r'const\s+' + re.escape(branches[0][1]) + r'\s*=\s*process\.argv\[2\]\s*;?') is None):
+        raise ValueError('Node mode root lacks its top-level argv mode branch: ' + p)
+    entry_line = next(n for n in range(1, len(lines) + 1) if not lines[n - 1][:1].isspace() and _js_match(text, n, re.escape(branches[0].group(0))))
+    identity = NODE_MODE_PREFIX + p
+    graph.root(p, 'source-only Node mode entry', shlex.join(command), p, entry_line, root_id=identity)
+    if identity not in graph.roots: return
+    graph.roots[identity].update({'source_only': True, 'node_mode_root': True, 'source_blob': entry['source_blob'],
+        'purpose': entry['purpose'], 'node_mode': mode, 'provenance': doc, 'source_demonstration_revision': revision,
+        'validation_at_measured_revision': {'status': 'unavailable', 'command': command,
+            'reason': 'Reviewed argument-bearing entry command; source role only, never run or certified to pass. Anchors only literal walker reads in its mode; no execution, helper, child, generated-output, proof or runtime credit.'}})
+
+
+PYTHON_ARGS_KIND = 'python-argument-source-role'
+PYTHON_ARGS_PREFIX = 'py-args:'
+# H996 (gh coord#1329, X1E-CONFIGURED-ROLE): each reviewed live Python program
+# that needs positional arguments, a forwarded command or a subcommand, bound to
+# (path, source blob, commit that introduced that blob at that path). Nothing
+# else is promoted: another file, blob or provenance commit fails, and no
+# argument, read, helper or output is ever recorded or credited.
+REVIEWED_PYTHON_ARGS = frozenset({
+    ('tests/directruntime-20261104/control-tuples/measure-native.py', 'c24f1113690cc7a6611d8f8d412ce5f8e77b5b1e', 'e6849d3bdf516099d20c33d3581d523449764018'),
+    ('tests/directruntime-20261104/control-tuples/run-bounded.py', '629db80c898eb6a19b1dc58a7bf1153bf65214dd', 'e6849d3bdf516099d20c33d3581d523449764018'),
+    ('tests/directruntime-20261104/memory-references/bounded-check.py', 'd9f1b14c51c9011736f0fb484f4fcf96d55cd615', '17f2902cdc6ab848317fc82e31a90ad2d7c4fba8'),
+    ('tests/directruntime-20261104/memory-references/browser-result-intake.py', 'fbb3489b8a38e1e8a8e96fa37d95fbea09d88903', '3bdd5ea4f35abb365b6bb57da56db7c23b645ac5'),
+    ('tests/directruntime-20261104/memory-references/census-controls.py', '08e1714023fc1f8e49ca09a8601d899ed54155f8', '44fa1c785b3168551c9f9589da56b5314b4ef740'),
+    ('tests/directruntime-20261104/memory-references/inspect-browser-evidence.py', '6f747cfa705fc346a6aedfb162e4e84df8978565', '9be4ce0a089f0888ac165ff770ac90e3879ece0d'),
+    ('tests/directruntime-20261104/memory-references/linker-attribution-controls.py', '06166345217a40838f67fc52998333cfafd4bbbd', '4d4407dbbd3e5fed9ed20fe8f76dde8bc0577e89'),
+    ('tests/directruntime-20261104/memory-references/linker-attribution.py', '3b487c691ab3b1710149a25eef37d14301bcd563', '4d4407dbbd3e5fed9ed20fe8f76dde8bc0577e89'),
+    ('tests/directruntime-20261104/memory-references/native-boundary-audit.py', '8c0601e110ec1c779e759456d05d64ca045a6232', 'c9230cc9692a5974728959907afa1f60733409ad'),
+    ('tests/directruntime-20261104/memory-references/native-closure-evidence.py', '1872f7842f78468b9d617f000e3469a7781a7fe2', '6479617481ce020d41f7061d9dcf4dbfe9bd1ab8'),
+    ('tests/directruntime-20261104/memory-references/native-refusal-controls.py', 'c2f89053088d9f5f615c75f408b6711c5f7b99dd', 'c9230cc9692a5974728959907afa1f60733409ad'),
+    ('tests/directruntime-20261104/memory-references/pack-cache.py', 'c10c9d9b34044d11582ab507e76bf017a9034449', '3c3346709988f245ee64b8ffc606dfec56e6c6e1'),
+    ('tests/directruntime-20261104/memory-references/runtime-boundary-census.py', '526851b6c2b502a149b80d2f7f1f0c8ae87b1113', '44fa1c785b3168551c9f9589da56b5314b4ef740'),
+    ('tests/directruntime-20261104/native-browser/bounded-command.py', '3c9e6eb7c60bf7906c7f605bdf0fa58f65f6a3df', 'ae8062cfb0f028667485e6f1a621ff69e62724fd'),
+    ('tests/directruntime-20261104/native-browser/environment/known-stack-continuation.py', '7898e125b8addd4b3badbb0d80e7001481c15741', 'e49c71436470851e0a3b295fa56b3b6c749e09b1'),
+    ('tests/directruntime-20261104/native-browser/h109/docker-probe.py', '2c67207ea5ce6c3d55e59f3ee2341b764028aedf', 'f11ae9a9025990629aaed70012fc71ebb0ba295d'),
+    ('tests/directruntime-20261104/native-browser/h109/input-inventory.py', '2bbde0bd62a3cb448e752e521d7761937d80a240', '937167b745b8a2d41d3a138581d7a9931ae039e3'),
+    ('tests/directruntime-20261104/native-browser/h109/source-snapshot.py', '32870f0d2fde915a2dfff0177fdb9d8b7acb1489', 'f8329bf24319a8056b0c95927d35444a11c3e84b'),
+    ('tests/directruntime-20261104/native-browser/hardening-native-audit.py', '36dd7768f98e954babdb111a2dd780a4b09877a6', '23a42307b1b336e5477c0bb5c8d8bfe6415b6ea6'),
+    ('tests/directruntime-20261104/native-browser/readbounds/serial-build.py', '071755cc6574cfb9c5f97ad5703072486ffc9249', 'c3a7094cc0c1f8b625a5a7a6a9eae61ec64444d0'),
+    ('tests/directruntime-20261104/native-browser/validation-admission.py', '1d56a3dc820b8ae3e503fedfbd4151ff530539bd', '15302eb51e3df48b9d8d46eaf50348dd1deddfb2'),
+    ('tests/directruntime-20261104/shared-translator/measure.py', '57c6a2f51633f72cf79c063740eff1f6ade3a26b', '5a2afc72aca1a35cf555fa1b462b9de4c2ef79b7'),
+    ('tests/directruntime-20261104/shared-translator/outer_guard.py', 'e33bbf7efee05de73e793c8f872e2e821d8c6421', '5a2afc72aca1a35cf555fa1b462b9de4c2ef79b7'),
+    ('tests/upstream/baseline-20261028/invocations/bulk/timed.py', 'c543b7aef3f458d0765b11b19741406a7ff78415', '2207c1bba286538fd63e4a0ff4960ed4a593a8ab'),
+    ('tests/upstream/baseline-20261028/invocations/retries/selector.py', '5b7a49f863f7c6fad8231d17d68628623948a00e', '2207c1bba286538fd63e4a0ff4960ed4a593a8ab'),
+})
+
+
+def python_argument_interface(text):
+    """The argument-bearing interface of a Python program, or None.
+
+    Recorded from the AST: lines that read `sys.argv` (through `import sys`
+    only), lines among them that take an open argv tail `sys.argv[k:]`
+    (variadic or forwarded command), literal positional `add_argument` names
+    and literal `add_parser` subcommand names. Not audited, giving None: any
+    write, delete or method call on argv; `from sys import argv`; an argv
+    attribute of anything but the sys module; any other binding of the sys
+    name; `getattr` on sys; `parse_args` or `parse_known_args` with explicit
+    arguments; a computed positional or subcommand name. A program with none
+    of the recorded forms also gives None (a default program is
+    source-only-program's role).
+    """
+    try: tree = ast.parse(text)
+    except (SyntaxError, ValueError, RecursionError): return None
+    imports = [a for n in ast.walk(tree) if isinstance(n, ast.Import) for a in n.names]
+    modules = {a.asname or a.name for a in imports if a.name == 'sys'}
+    if any((a.asname or a.name.split('.')[0]) in modules and a.name != 'sys' for a in imports): return None
+    parents = {child: node for node in ast.walk(tree) for child in ast.iter_child_nodes(node)}
+    argv, tails, positionals, subcommands = set(), set(), set(), set()
+    for n in ast.walk(tree):
+        if isinstance(n, ast.ImportFrom) and (n.module == 'sys' and any(a.name in ('argv', '*') for a in n.names)
+                                             or any((a.asname or a.name) in modules for a in n.names)): return None
+        if isinstance(n, (ast.Global, ast.Nonlocal)) and set(n.names) & modules: return None
+        if isinstance(n, ast.Name) and n.id in modules and not isinstance(n.ctx, ast.Load): return None
+        if isinstance(n, ast.arg) and n.arg in modules: return None
+        if isinstance(n, ast.ExceptHandler) and n.name in modules: return None
+        if isinstance(n, (ast.FunctionDef, ast.AsyncFunctionDef, ast.ClassDef)) and n.name in modules: return None
+        if isinstance(n, ast.MatchAs) and n.name in modules or isinstance(n, ast.MatchStar) and n.name in modules: return None
+        if (isinstance(n, ast.Call) and isinstance(n.func, ast.Name) and n.func.id in ('getattr', 'setattr', 'delattr', 'vars')
+                and n.args and isinstance(n.args[0], ast.Name) and n.args[0].id in modules): return None
+        if isinstance(n, ast.Attribute) and n.attr == 'argv':
+            if not (isinstance(n.value, ast.Name) and n.value.id in modules and isinstance(n.ctx, ast.Load)): return None
+            parent = parents.get(n)
+            if isinstance(parent, ast.Attribute) and parent.value is n: return None  # argv.append(...) and the like
+            if isinstance(parent, ast.Subscript) and parent.value is n and not isinstance(parent.ctx, ast.Load): return None
+            argv.add(n.lineno)
+            if (isinstance(parent, ast.Subscript) and parent.value is n and isinstance(parent.slice, ast.Slice)
+                    and parent.slice.upper is None and parent.slice.step is None): tails.add(n.lineno)
+        if isinstance(n, ast.Call) and isinstance(n.func, ast.Attribute):
+            if n.func.attr in ('parse_args', 'parse_known_args', 'parse_intermixed_args') and (n.args or n.keywords): return None
+            if n.func.attr in ('add_argument', 'add_parser'):
+                first = n.args[0] if n.args else None
+                literal = isinstance(first, ast.Constant) and isinstance(first.value, str)
+                if not literal: return None
+                if n.func.attr == 'add_parser': subcommands.add((n.lineno, first.value))
+                elif not first.value.startswith('-'): positionals.add((n.lineno, first.value))
+    if not (argv or positionals or subcommands): return None
+    return {'argv_lines': sorted(argv), 'argv_tail_lines': sorted(tails),
+            'positionals': [list(x) for x in sorted(positionals)], 'subcommands': [list(x) for x in sorted(subcommands)]}
+
+
+def _introduced(classifier, repo, commit, path, blob):
+    """True iff commit holds blob at path and none of its parents does."""
+    if not classifier['hex_pin'](commit, 40) or commit in repo.boundaries: return False
+    try: parents = classifier['git'](repo.root, 'rev-list', '--parents', '-n', '1', commit, '--').decode().split()
+    except ValueError: return False
+    if not parents or parents[0] != commit: return False
+    requests = [commit + ':' + path] + [p + ':' + path for p in parents[1:]]
+    raw = classifier['git'](repo.root, 'cat-file', '--batch-check', '-Z',
+                            data=b''.join(r.encode('utf-8', 'surrogateescape') + b'\0' for r in requests))
+    lines = raw.rstrip(b'\0').split(b'\0')
+    if len(lines) != len(requests): raise ValueError('Python argument role provenance batch mismatch')
+    held = [line.split()[0].decode() == blob and line.split()[1:2] == [b'blob'] if len(line.split()) == 3 else False for line in lines]
+    return held[0] and not any(held[1:])
+
+
+def python_argument_root(classifier, graph, catalog, entry, reviewed=None):
+    """H996: a reviewed argument-bearing Python program as a source-only role.
+
+    The definition binds the bare entry prefix ['python3', '-B', P] (never a
+    concrete argument), the source blob, its genuine top-level entry line, the
+    interface python_argument_interface records for that blob, and provenance:
+    the commit that introduced that blob at P, which must be in the reviewed
+    set. The configured CLI, module CLI and unittest guards are unchanged: a
+    program matching one is refused here. The root is never a validated or
+    passing runner and anchors nothing: no execution, pass, read-anchor,
+    fixture, helper, child, generated-output, proof or runtime credit. A later
+    revision keeps it while the blob is unchanged and the recorded commit holds
+    it; a current definition of the same path supersedes it.
+    """
+    repo = graph.repo
+    reviewed = REVIEWED_PYTHON_ARGS if reviewed is None else reviewed
+    required = {'path', 'input_revision', 'source_blob', 'command', 'kind', 'entry_line', 'interface', 'provenance', 'purpose'}
+    if (set(entry) != required or not isinstance(entry['path'], str) or not isinstance(entry['source_blob'], str)
+            or not isinstance(entry['purpose'], str) or not entry['purpose'].strip() or not isinstance(entry['interface'], dict)
+            or not isinstance(entry['provenance'], dict) or set(entry['provenance']) != {'commit', 'path', 'blob'}
+            or not all(isinstance(v, str) for v in entry['provenance'].values())):
+        raise ValueError('invalid Python argument role definition')
+    p = entry['path']; revision = entry['input_revision']; doc = entry['provenance']
+    if not isinstance(revision, str) or not classifier['hex_pin'](revision, 40): raise ValueError('Python argument role requires a full commit revision')
+    if any(e.get('path') == p and e.get('input_revision') == revision and e is not entry for e in catalog['standalone']):
+        raise ValueError('conflicting standalone definitions: ' + p)
+    if entry['command'] != ['python3', '-B', p] or not p.endswith('.py'):
+        raise ValueError('unsupported Python argument role invocation: ' + p)
+    if doc['path'] != p or doc['blob'] != entry['source_blob'] or (p, entry['source_blob'], doc['commit']) not in reviewed:
+        raise ValueError('unreviewed Python argument role: ' + p)
+    if revision != repo.ref:
+        if any(e.get('path') == p and e.get('input_revision') == repo.ref for e in catalog['standalone']): return
+        if not _current(repo, p, entry['source_blob']): return
+        if not _historical_objects(classifier, repo, revision, [(p, entry['source_blob'])]):
+            raise ValueError('unverifiable historical runner demonstration: ' + revision + ':' + p)
+    elif not _current(repo, p, entry['source_blob']): raise ValueError('standalone definition source mismatch: ' + p)
+    if repo.tree[p][0] not in ('100644', '100755') or p not in repo.texts:
+        raise ValueError('unsupported Python argument role invocation: ' + p)
+    if not _introduced(classifier, repo, doc['commit'], p, entry['source_blob']):
+        raise ValueError('Python argument role lacks its introducing provenance: ' + p)
+    try: lines = classifier['entrypoint_lines'](repo.bytes(p))
+    except (SyntaxError, ValueError, RecursionError): lines = set()
+    if type(entry['entry_line']) is not int or entry['entry_line'] not in lines:
+        raise ValueError('Python argument role lacks its top-level entry: ' + p)
+    if any(classifier[f](repo, p) is not None for f in ('declared_configured_cli', 'declared_module_cli', 'declared_unittest')):
+        raise ValueError('Python argument role matches a configured CLI or unittest form: ' + p)
+    interface = python_argument_interface(repo.texts[p])
+    if interface is None: raise ValueError('Python argument role lacks an audited argument interface: ' + p)
+    if canonical(interface) != canonical(entry['interface']): raise ValueError('Python argument role interface mismatch: ' + p)
+    identity = PYTHON_ARGS_PREFIX + p
+    graph.root(p, 'source-only Python argument entry', shlex.join(entry['command']), p, entry['entry_line'], root_id=identity)
+    if identity not in graph.roots: return
+    graph.roots[identity].update({'source_only': True, 'python_argument_role': True, 'source_blob': entry['source_blob'],
+        'purpose': entry['purpose'], 'interface': interface, 'provenance': doc, 'source_declaration_revision': revision,
+        'validation_at_measured_revision': {'status': 'unavailable', 'command': entry['command'],
+            'reason': 'Reviewed argument-bearing Python entry; the bare prefix needs arguments and no argument is recorded. Source role only, never run or certified to pass. No read anchor, fixture, helper, child, generated-output, proof or runtime credit.'}})
+
+
+SOURCE_ROLE_KINDS = {SOURCE_ONLY_KIND: source_only_program, NODE_MODE_KIND: node_mode_root, PYTHON_ARGS_KIND: python_argument_root}
+
+
+def persisted_module_entries(classifier, graph, catalog, rows):
+    """H979: opt-in persistence of reviewed routes.module_entries claims.
+
+    Each row is an exact claim already present in routes.module_entries. At
+    its own revision the ordinary check applies and the row adds nothing. At a
+    later --ref it is credited only if the passing runner definition at that
+    revision (unittest or runnable entry point), every frame and the target
+    are the same blobs now and at the recorded revision, and the collector,
+    exact CPython version, operation, frame line and entered code hash checks
+    of the ordinary claim pass on the measured bytes. A changed or missing
+    object grants nothing; a mismatch of the recorded objects is rejected.
+    Module entry is execution coverage only, never fixture or proof credit.
+    """
+    repo = graph.repo
+    if not rows: return
+    if not isinstance(rows, list): raise ValueError('invalid persisted module entries')
+    reviewed = {canonical(e) for e in catalog.get('module_entries', []) if isinstance(e, dict)}
+    seen = set(); observer = None
+    for row in rows:
+        if not isinstance(row, dict) or set(row) != MODULE_ENTRY_KEYS: raise ValueError('invalid persisted module entry')
+        key = canonical(row)
+        if key in seen: raise ValueError('duplicate persisted module entry')
+        seen.add(key)
+        if key not in reviewed: raise ValueError('persisted module entry is not a reviewed routes.module_entries claim')
+        if row['input_revision'] == repo.ref: continue
+        runner = row['runner']
+        if not isinstance(runner, str) or not runner.startswith('validated:'): raise ValueError('persisted module entry needs a validated runner')
+        path = runner[len('validated:'):]
+        definitions = [e for e in catalog['standalone'] if e.get('path') == path and e.get('input_revision') == row['input_revision']]
+        if (len(definitions) != 1 or definitions[0].get('kind') not in ('unittest', 'runnable-entrypoint')
+                or not isinstance(definitions[0].get('source_blob'), str)):
+            raise ValueError('persisted module entry lacks its passing runner definition')
+        source_blob = definitions[0]['source_blob']; target = row['target']; frames = row['frames']
+        if not isinstance(target, str) or not target.endswith('.py') or not isinstance(row['target_blob'], str):
+            raise ValueError('invalid persisted module entry target')
+        if not _frames_current(repo, frames, [(path, source_blob), (target, row['target_blob'])]): continue
+        _check_lines(repo, frames)
+        if frames[0]['path'] != path: raise ValueError('entered module chain lacks root')
+        if not _historical_objects(classifier, repo, row['input_revision'],
+                sorted({(f['path'], f['blob']) for f in frames} | {(path, source_blob), (target, row['target_blob'])})):
+            raise ValueError('persisted route objects differ at recorded revision ' + row['input_revision'])
+        original, root = _anchor_root(graph, runner, frames)
+        if root is None or root.get('runner_kind') not in ('unittest', 'runnable-entrypoint'): continue
+        if root.get('source_only') and root.get('source_blob') != source_blob: continue
+        if observer is None: observer = _module_observer(classifier)
+        _credit_module_entry(classifier, graph, row, original, root, key, observer, ':persisted-module:',
+            {'consumer_route': {'kind': 'persisted-module-entry', 'validated_revision': row['input_revision'], 'runner_definition_blob': source_blob}})
+
+
+def _module_observer(classifier):
+    """The trace helper that fingerprints code, and its own collector pin."""
+    helper = Path(classifier['__file__']).with_name('check-tests-used-trace.py')
+    spec = classifier['importlib'].util.spec_from_file_location('tests_used_module_identity', helper)
+    observer = classifier['importlib'].util.module_from_spec(spec); spec.loader.exec_module(observer)
+    return observer, hashlib.sha256(helper.read_bytes()).hexdigest()
+
+
+def _credit_module_entry(classifier, graph, entry, original, root, key, observer, label, extra=None):
+    """The one entered-module identity check, then its execution chain.
+
+    Shared by current claims and H979 persisted ones; the caller has checked
+    the claim's schema, revision, runner root and target pin. The collector is
+    reviewed, the CPython version exact, the operation the module-entry one,
+    the frame line in range and the module code hash one of the measured
+    bytes' compilations; every frame is the measured object from the root.
+    """
+    repo = graph.repo; target = entry['target']; observer, collector = observer
+    if not classifier['reviewed_module_collector'](repo, entry['collector_sha256'], collector): raise ValueError('unreviewed module entry collector')
+    if (entry['python'] != list(classifier['sys'].version_info[:3]) or any(type(n) is not int for n in entry['python'])
+            or classifier['sys'].implementation.name != 'cpython'):
+        raise ValueError('UNVERIFIABLE module code identity: exact CPython version required')
+    if entry['operation'] != MODULE_ENTRY_OPERATION: raise ValueError('unsupported module entry operation')
+    if type(entry['module_frame_line']) is not int or not 0 <= entry['module_frame_line'] <= len(repo.texts[target].splitlines()):
+        raise ValueError('invalid entered module frame location')
+    fingerprints = observer.source_code_hashes(repo.texts[target].encode('utf-8', 'surrogateescape'), '<measured>')
+    if entry['module_code_sha256'] not in fingerprints['module_code_hashes']: raise ValueError('entered module code mismatch')
+    frames = entry['frames']
+    if not isinstance(frames, list) or not frames or not isinstance(frames[0], dict) or frames[0].get('path') != root['path']:
+        raise ValueError('entered module chain lacks root')
+    for frame in frames:
+        if (not isinstance(frame, dict) or set(frame) != {'path', 'blob', 'line'}
+                or frame['path'] not in repo.tree or repo.tree[frame['path']][2] != frame['blob']
+                or type(frame['line']) is not int or not 1 <= frame['line'] <= len(repo.texts.get(frame['path'], '').splitlines())):
+            raise ValueError('invalid entered module caller')
+    excluded = classifier['excluded']
+    if excluded(target) or any(excluded(f['path']) for f in frames): return
+    identity = original + label + hashlib.sha256(key).hexdigest()
+    graph.roots[identity] = {**root, 'derived_from': original, 'entered_module': target,
+        'module_entry': {k: entry[k] for k in ('module_code_sha256', 'module_frame_line', 'python', 'collector_sha256')}, **(extra or {})}
+    chain = {'root': identity, 'entry': graph.roots[identity], 'edges': []}
+    for caller, callee in zip(frames, frames[1:] + [{'path': target}]):
+        chain = {**chain, 'edges': chain['edges'] + [{'source': caller['path'], 'target': callee['path'],
+            'line': caller['line'], 'operation': entry['operation'], 'kind': 'executes', 'validated_for': identity}]}
+        graph.observed.append((callee['path'], chain))
+
+
+def validated_module_entries(classifier, graph, entries):
+    """Reviewed positive execution claims, never static imports or data edges.
+
+    Exact entered module code, native reads preceding entry, successful paired
+    runs and collector provenance are validated deliberately outside inventory.
+    These deterministic definitions retain source/code/interpreter bindings;
+    ordinary inventory only compiles bytes to compare code, never executes them.
+    """
+    if not isinstance(entries, list): raise ValueError('invalid module entry definitions')
+    if not entries: return
+    repo = graph.repo; observer = _module_observer(classifier); seen = set()
+    for entry in entries:
+        if not isinstance(entry, dict) or set(entry) != MODULE_ENTRY_KEYS: raise ValueError('invalid entered module claim')
+        key = canonical(entry)
+        if key in seen: raise ValueError('duplicate entered module claim')
+        seen.add(key)
+        if entry['input_revision'] != repo.ref: continue
+        root = graph.roots.get(entry['runner'])
+        if root is None or root['kind'] != 'validated standalone runner' or root.get('source_only'):
+            raise ValueError('entered module requires passing current runner')
+        target = entry['target']
+        if target not in repo.tree or not target.endswith('.py') or repo.tree[target][2] != entry['target_blob']:
+            raise ValueError('entered module source pin mismatch')
+        _credit_module_entry(classifier, graph, entry, entry['runner'], root, key, observer, ':module:')
+
+
 def same_revision_reads(ref, fragments):
     """Persisted reads recorded at the measured revision join the ordinary reads."""
     for section in CONSUMER_SECTIONS: merge_fragment_entries(section, [], fragments[section])
@@ -586,6 +1241,20 @@ def add_consumer_routes(classifier, graph, catalog, fragments):
     persisted_reads(classifier, graph, catalog, fragments['persistent_reads'])
     static_routes(classifier, graph, fragments['static_routes'])
     git_policies(classifier, graph, fragments['git_policies'])
+    persisted_module_entries(classifier, graph, catalog, fragments['persistent_module_entries'])
+
+
+def _control_repository(classifier, root):
+    """A fresh Git repository at root; commit(changes, message) returns its Repository."""
+    git = classifier['git']
+    root.mkdir(); git(root, 'init', '-q')
+    def commit(changes, message):
+        for path, text in changes.items():
+            (root / path).parent.mkdir(parents=True, exist_ok=True); (root / path).write_text(text)
+        git(root, 'add', '-A', '-f')
+        git(root, '-c', 'user.name=Control', '-c', 'user.email=control@example.invalid', 'commit', '-qm', message)
+        return classifier['Repository'](root, 'HEAD')
+    return commit
 
 
 def fragment_controls(classifier):
@@ -693,7 +1362,7 @@ def fragment_controls(classifier):
 
 def consumer_route_controls(classifier):
     """Positive and negative controls for every opt-in consumer route."""
-    git = classifier['git']; Repository = classifier['Repository']; inventory = classifier['inventory']
+    inventory = classifier['inventory']
     original = classifier['read_fragments']
     unittest_source = ("import unittest\nOUT = 'tests/gen/result.json'\nclass T(unittest.TestCase):\n"
                        " def test_it(self):\n  open('tests/data.txt').read()\n  open('tests/other.txt').read()\n"
@@ -734,13 +1403,7 @@ def consumer_route_controls(classifier):
     for name, text in variants.items(): files['tests/cli-' + name + '.py'] = text
     with tempfile.TemporaryDirectory() as tmp:
         root = Path(tmp) / 'repo'
-        def commit(changes, message):
-            for path, text in changes.items():
-                (root / path).parent.mkdir(parents=True, exist_ok=True); (root / path).write_text(text)
-            git(root, 'add', '-A', '-f')
-            git(root, '-c', 'user.name=Control', '-c', 'user.email=control@example.invalid', 'commit', '-qm', message)
-            return Repository(root, 'HEAD')
-        root.mkdir(); git(root, 'init', '-q')
+        commit = _control_repository(classifier, root)
         first = commit(files, 'validated')
         blob = lambda repo, path: repo.tree[path][2]
         for name in variants: assert classifier['declared_module_cli'](first, 'tests/cli-' + name + '.py') is None, name
@@ -870,3 +1533,391 @@ def consumer_route_controls(classifier):
         assert rows['tests/fixture2.json']['class'] != 'keep'
         # A changed .gitignore blob is stale: the policy role is gone.
         assert rows['tests/gen/.gitignore']['class'] != 'keep'
+    successor_controls(classifier)
+
+
+def successor_controls(classifier):
+    """x1g positive and negative controls: library Lean reads, Node walker
+    reads, source-only programs and persisted module entries."""
+    inventory = classifier['inventory']
+    original = classifier['read_fragments']; sys = classifier['sys']
+    helper = Path(classifier['__file__']).with_name('check-tests-used-trace.py')
+    spec = classifier['importlib'].util.spec_from_file_location('successor_control_observer', helper)
+    observer = classifier['importlib'].util.module_from_spec(spec); spec.loader.exec_module(observer)
+    walk = ('import { readFileSync, readdirSync, statSync } from "node:fs";\nimport { resolve, dirname, join } from "node:path";\n'
+            'import { fileURLToPath } from "node:url";\n\nconst root = resolve(dirname(fileURLToPath(import.meta.url)), "..");\n'
+            'const cache = resolve(root, "tests/corpus/skip");\nconst mode = process.argv[2];\n\n'
+            'function walk(dir, out = []) {\n  for (const f of readdirSync(dir)) {\n    const p = join(dir, f);\n'
+            '    if (statSync(p).isDirectory()) walk(p, out);\n    else if (p.endsWith(".sol")) out.push(p);\n  }\n  return out;\n}\n\n'
+            'if (mode === "prepare") {\n  for (const p of walk(resolve(root, "tests/corpus")).sort()) {\n    if (p.startsWith(cache)) continue;\n'
+            '    const rel = p;\n    console.log(rel,\n      readFileSync(p, "latin1")); // POSITIVE\n  }\n'
+            '  // readFileSync(p, "latin1"); COMMENT\n  for (const p of walk(resolve(root, "tests/corpus")).sort()) {\n'
+            '    if (p.length > 3) {\n      readFileSync(p, "latin1"); // NESTED\n    }\n    if (p.endsWith("x.sol")) break;\n'
+            '    readFileSync(p); // AFTER-BREAK\n    const s = p.length > 3 ?\n      readFileSync(p) : ""; // CONDITIONAL\n  }\n'
+            '} else if (mode === "other") {\n  for (const p of walk(resolve(root, "tests/corpus"))) {\n    readFileSync(p); // OTHER-MODE\n  }\n}\n')
+    head = walk[:walk.index('if (mode === "prepare") {')]
+    loop = '  for (const p of walk(resolve(root, "tests/corpus"))) {\n'
+    adversarial = {  # each body places a read marked READ that must not be credited
+        'else-if': 'if (mode === "prepare") {\n} else if (mode === "prepare") {\n' + loop + '    readFileSync(p); // READ\n  }\n}\n',
+        'braceless-if': 'if (mode === "prepare") {\n' + loop + '    if (false)\n      readFileSync(p); // READ\n  }\n}\n',
+        'arrow': 'if (mode === "prepare") {\n' + loop + '    const f = () =>\n      readFileSync(p); // READ\n  }\n}\n',
+        'braceless-loop': 'if (mode === "prepare") {\n  if (false)\n' + loop + '    readFileSync(p); // READ\n  }\n}\n',
+        'regex-brace': 'if (mode === "other") {\n  "x".replace(/}/, "");\n' + loop + '    readFileSync(p); // READ\n  }\n}\n',
+        'regex-backtick': 'if (mode === "other") {\n  "x".replace(/`/, "");\n' + loop + '    readFileSync(p); // READ\n  }\n  "y".replace(/`/, "");\n}\n',
+        'destructured': 'if (mode === "prepare") {\n  const { readFileSync } = { readFileSync: () => "" };\n' + loop + '    readFileSync(p); // READ\n  }\n}\n',
+        'function': 'function never() {\n' + loop + '    readFileSync(p); // READ\n  }\n}\n',
+        'conditional': 'if (mode === "prepare") {\n' + loop + '    const s = p.length > 3 ?\n      readFileSync(p) : ""; // READ\n  }\n}\n',
+        'form-feed': 'if (mode === "prepare") {\n' + loop + '    readFileSync(p); // READ\n  }\n}\f\n',
+    }
+    plain = 'if (mode === "prepare") {\n' + loop + '    readFileSync(p); // READ\n  }\n}\n'
+    files = {
+        **{'tests/adv-' + name + '.mjs': head + body for name, body in adversarial.items()}, 'tests/adv-plain.mjs': head + plain,
+        'lakefile.toml': 'defaultTargets = ["Lib"]\n[[lean_lib]]\nname = "Lib"\n[[lean_lib]]\nname = "Extra"\n[[lean_lib]]\nname = "Src"\nsrcDir = "src"\n',
+        'Lib.lean': '/-! library root -/\nimport Lib.Mod Lib.Late\n-- import Lib.Mod\n', 'Extra.lean': 'import Lib.Mod\n',
+        'src/Src.lean': 'import Lib.Mod\n', 'Lib/Late.lean': 'import Lean\n#exit\n#eval IO.FS.readFile "tests/lib-eval.txt"\n',
+        'Lib/Mod.lean': ('import Lean\nopen Lean\n-- IO.FS.readFile "tests/lib-data.txt"\nrun_elab do\n  let s ← IO.FS.readFile\n    "tests/lib-data.txt"\n'
+                         '  logInfo s\ndef unused : IO String := IO.FS.readFile "tests/lib-data.txt"\n#eval IO.FS.readFile "tests/lib-eval.txt"\n'),
+        'tests/lib-data.txt': 'lib\n', 'tests/lib-eval.txt': 'eval\n',
+        'tests/R.lean': 'import Lib.Mod\n#eval IO.FS.readFile "tests/lib-eval.txt"\n',
+        '.github/workflows/lean.yml': 'jobs:\n  t:\n    steps:\n      - run: lean tests/R.lean\n',
+        'tests/walk.mjs': walk, 'tests/walk-bad.mjs': walk.replace('    if (statSync(p).isDirectory()) walk(p, out);\n', '    if (statSync(p).isDirectory()) return out;\n'),
+        'tests/walk.test.mjs': walk,
+        'tests/mode.mjs': '//   node tests/mode.mjs prepare   synthetic step\n// node tests/mode.mjs other\n' + walk,
+        'tests/mode-flat.mjs': '// node tests/mode-flat.mjs prepare\n' + walk.replace('if (mode === "prepare") {', 'if (true) {'),
+        'tests/corpus/a.sol': 'contract A {}\n', 'tests/corpus/sub/b.sol': 'contract B {}\n', 'tests/corpus/c.txt': 'c\n',
+        'tests/corpus/skip/d.sol': 'contract D {}\n', 'tests/data.txt': 'data\n',
+        'tests/README.md': 'Run `node tests/walk.mjs prepare`.\nRun `node tests/walk-bad.mjs prepare`.\nRun `node tests/walk.mjs other`.\n',
+        'tests/prog.py': 'import json\ndef main():\n    print(json.dumps(1))\nmain()\n',
+        'tests/prog_test.py': 'import unittest\nclass T(unittest.TestCase):\n def test_it(self): pass\nif __name__ == "__main__": unittest.main()\n',
+        'tests/prog_cli.py': "import argparse\nparser = argparse.ArgumentParser()\nparser.add_argument('--input', required=True)\nargs = parser.parse_args()\nprint(args.input)\n",
+        'tests/helper.py': 'VALUE = 3\n',
+        'tests/args.py': 'import sys\nlabel, *command = sys.argv[1:]\nif not command:\n    raise SystemExit("usage: args.py LABEL COMMAND")\nprint(label, command)\n',
+        'tests/args_sub.py': ("import argparse\ndef main():\n    parser = argparse.ArgumentParser()\n    sub = parser.add_subparsers(dest='mode', required=True)\n"
+                              "    pick = sub.add_parser('pick')\n    pick.add_argument('results')\n    pick.add_argument('--out', required=True)\n"
+                              "    return parser.parse_args()\nif __name__ == '__main__':\n    main()\n"),
+        'tests/args_alias.py': 'from sys import argv\nprint(argv[1])\n',
+        'tests/args_rebind.py': 'import sys\nsys.argv = ["x", "y"]\nprint(sys.argv[1])\n',
+        'tests/gen/.gitignore': 'out.json\n',
+        'tests/test_entry.py': 'import unittest\nclass T(unittest.TestCase):\n def test_import(self):\n  import helper\n  self.assertEqual(helper.VALUE, 3)\nif __name__ == "__main__": unittest.main()\n',
+    }
+    with tempfile.TemporaryDirectory() as tmp:
+        root = Path(tmp) / 'repo'
+        commit = _control_repository(classifier, root)
+        first = commit(files, 'validated'); A = first.ref
+        blob = lambda repo, path: repo.tree[path][2]
+        frame = lambda repo, path, line: {'path': path, 'blob': blob(repo, path), 'line': line}
+        line_of = lambda path, marker: next(n for n, l in enumerate(files[path].splitlines(), 1) if marker in l)
+        doc = lambda n, invocation: {'path': 'tests/README.md', 'blob': blob(first, 'tests/README.md'), 'line': n,
+                                     'invocation': invocation, 'normalization': 'verbatim'}
+        manual = lambda path, mode, n, repo=first: {'path': path, 'input_revision': repo.ref, 'source_blob': blob(repo, path), 'kind': 'manual-reproducer',
+                                                    'command': ['node', path, mode], 'documentation': doc(n, 'node ' + path + ' ' + mode)}
+        program = {'path': 'tests/prog.py', 'input_revision': A, 'source_blob': blob(first, 'tests/prog.py'),
+                   'command': ['python3', '-B', 'tests/prog.py'], 'kind': SOURCE_ONLY_KIND, 'entry_line': 4,
+                   'purpose': 'Synthetic default program whose run is not certified.'}
+        catalog = {'schema_version': 3, 'reads': [], 'generators': [], 'orphans': [], 'module_entries': [], 'standalone': [
+            manual('tests/walk.mjs', 'prepare', 1), manual('tests/walk-bad.mjs', 'prepare', 2),
+            {'path': 'tests/walk.test.mjs', 'input_revision': A, 'source_blob': blob(first, 'tests/walk.test.mjs'),
+             'command': ['node', '--test', 'tests/walk.test.mjs'], 'kind': 'node-test'},
+            {'path': 'tests/test_entry.py', 'input_revision': A, 'source_blob': blob(first, 'tests/test_entry.py'),
+             'command': ['python3', '-B', 'tests/test_entry.py'], 'kind': 'unittest'}]}
+        claim = {'runner': 'validated:tests/test_entry.py', 'input_revision': A, 'frames': [frame(first, 'tests/test_entry.py', 4)],
+                 'target': 'tests/helper.py', 'target_blob': blob(first, 'tests/helper.py'), 'operation': MODULE_ENTRY_OPERATION,
+                 'module_code_sha256': observer.code_fingerprint(compile(files['tests/helper.py'], '<measured>', 'exec', dont_inherit=True)),
+                 'module_frame_line': 0, 'python': list(sys.version_info[:3]), 'collector_sha256': hashlib.sha256(helper.read_bytes()).hexdigest()}
+        def run(repo, consumers=None, standalone=(), entries=None):
+            fragments = {key: [] for key in FRAGMENT_SECTIONS + ('roles', 'fixtures') + CONSUMER_SECTIONS}
+            fragments.update(consumers or {})
+            classifier['read_fragments'] = lambda _: fragments
+            local = dict(catalog, standalone=catalog['standalone'] + list(standalone),
+                         module_entries=[claim] if entries is None else entries)
+            try: model = inventory(repo, local)
+            finally: classifier['read_fragments'] = original
+            return model, {r['path']: r for r in model['records']}
+        def rejected(repo, text, consumers=None, standalone=(), entries=None):
+            try: run(repo, consumers, standalone, entries)
+            except ValueError as error: assert text in str(error), (text, str(error))
+            else: raise AssertionError('accepted: ' + text)
+        def route(repo, runner, form, frames, target):
+            return {'runner': runner, 'form': form, 'frames': frames, 'target': target,
+                    'target_blob': blob(repo, target), 'purpose': 'Synthetic successor route.'}
+        later = commit({'tests/unrelated.txt': 'later\n'}, 'later')
+        baseline_model, baseline = run(later, entries=[])
+        # Fragments of the earlier shape (no persistent_module_entries key) give the same model.
+        classifier['read_fragments'] = lambda _: {key: [] for key in FRAGMENT_SECTIONS + ('roles', 'fixtures') + CONSUMER_SECTIONS[:3]}
+        try: assert canonical(inventory(later, dict(catalog, module_entries=[]))) == canonical(baseline_model)
+        finally: classifier['read_fragments'] = original
+        for path in ('tests/lib-data.txt', 'tests/corpus/a.sol', 'tests/corpus/sub/b.sol', 'tests/prog.py', 'tests/helper.py'):
+            assert baseline[path]['class'] != 'keep', path
+        assert 'Lib.lean' in baseline_model['entry_points'] and baseline_model['entry_points']['Lib.lean']['kind'] == 'Lean root'
+
+        # (1) H978 Lean library run_elab read through header imports.
+        lib = lambda frames, target='tests/lib-data.txt', runner='Lib.lean': route(first, runner, 'lean-library-readFile', frames, target)
+        good_lib = lib([frame(first, 'Lib.lean', 2), frame(first, 'Lib/Mod.lean', 5)])
+        _, rows = run(later, {'static_routes': [good_lib]})
+        assert rows['tests/lib-data.txt']['class'] == 'keep'
+        assert rows['tests/lib-data.txt']['runner_chain']['edges'][0]['operation'] == 'Lean header import elaborated by the library build'
+        _, rows = run(later, {'static_routes': [lib([frame(first, 'Lib.lean', 2), frame(first, 'Lib/Mod.lean', 9)], 'tests/lib-eval.txt')]})
+        assert rows['tests/lib-eval.txt']['class'] == 'keep'
+        rejected(later, 'not a Lean header import', {'static_routes': [lib([frame(first, 'Lib.lean', 3), frame(first, 'Lib/Mod.lean', 5)])]})
+        rejected(later, 'not a Lean header import', {'static_routes': [lib([frame(first, 'Lib.lean', 1), frame(first, 'Lib/Mod.lean', 5)])]})
+        for n in (3, 6, 8):  # comment, literal line, def body
+            rejected(later, 'literal lean-library-readFile', {'static_routes': [lib([frame(first, 'Lib.lean', 2), frame(first, 'Lib/Mod.lean', n)])]})
+        rejected(later, 'repository Lean library root', {'static_routes': [lib([frame(first, 'tests/R.lean', 1), frame(first, 'Lib/Mod.lean', 5)], runner='tests/R.lean')]})
+        # Only a default lean_lib with root-relative sources is built by the default build.
+        rejected(later, 'repository Lean library root', {'static_routes': [lib([frame(first, 'Extra.lean', 1), frame(first, 'Lib/Mod.lean', 5)], runner='Extra.lean')]})
+        rejected(later, 'repository Lean library root', {'static_routes': [lib([frame(first, 'src/Src.lean', 1), frame(first, 'Lib/Mod.lean', 5)], runner='src/Src.lean')]})
+        rejected(later, 'follows #exit', {'static_routes': [lib([frame(first, 'Lib.lean', 2), frame(first, 'Lib/Late.lean', 3)], 'tests/lib-eval.txt')]})
+        # The single-file form still refuses an imported module.
+        rejected(later, 'elaborated runner file', {'static_routes': [route(first, 'tests/R.lean', 'lean-readFile',
+                 [frame(first, 'tests/R.lean', 1), frame(first, 'Lib/Mod.lean', 9)], 'tests/lib-eval.txt')]})
+
+        # (2) H978 Node readFileSync over a computed recursive walker; the
+        # manual reproducers are current roots only at their own revision.
+        node = lambda target, marker, path='tests/walk.mjs', runner='validated:tests/walk.mjs': route(
+            first, runner, 'node-readFileSync-walk', [frame(first, path, line_of(path, marker))], target)
+        _, rows = run(first, {'static_routes': [node('tests/corpus/a.sol', 'POSITIVE'), node('tests/corpus/sub/b.sol', 'POSITIVE')]})
+        assert rows['tests/corpus/a.sol']['class'] == 'keep' and rows['tests/corpus/sub/b.sol']['class'] == 'keep'
+        assert rows['tests/corpus/skip/d.sol']['class'] != 'keep'
+        for target, marker in (('tests/corpus/c.txt', 'POSITIVE'), ('tests/corpus/skip/d.sol', 'POSITIVE'), ('tests/data.txt', 'POSITIVE'),
+                               ('tests/corpus/a.sol', 'COMMENT'), ('tests/corpus/a.sol', 'NESTED'), ('tests/corpus/a.sol', 'AFTER-BREAK'),
+                               ('tests/corpus/a.sol', 'CONDITIONAL'), ('tests/corpus/a.sol', 'OTHER-MODE')):
+            rejected(first, 'literal node-readFileSync-walk', {'static_routes': [node(target, marker)]})
+        rejected(first, 'literal node-readFileSync-walk', {'static_routes': [node('tests/corpus/a.sol', 'POSITIVE', 'tests/walk-bad.mjs', 'validated:tests/walk-bad.mjs')]})
+        # A Node test root passes no prepare mode argument.
+        rejected(first, 'literal node-readFileSync-walk', {'static_routes': [node('tests/corpus/a.sol', 'POSITIVE', 'tests/walk.test.mjs', 'validated:tests/walk.test.mjs')]})
+        for name in ['plain'] + list(adversarial):
+            path = 'tests/adv-' + name + '.mjs'
+            got = _node_walk_read(path, first, line_of(path, '// READ'), 'tests/corpus/a.sol', {'command': 'node ' + path + ' prepare'}, path)
+            assert got == ('tests/corpus/a.sol' if name == 'plain' else None), name
+        moved = commit({'tests/corpus/a.sol': 'contract A2 {}\n'}, 'changed corpus')
+        _, rows = run(moved, {'static_routes': [node('tests/corpus/a.sol', 'POSITIVE'), node('tests/corpus/sub/b.sol', 'POSITIVE')]},
+                      standalone=[manual('tests/walk.mjs', 'prepare', 1, moved)])
+        assert rows['tests/corpus/a.sol']['class'] != 'keep' and rows['tests/corpus/sub/b.sol']['class'] == 'keep'
+
+        # (3) H978 source-only no-pass programs: never a validated runner.
+        model, rows = run(first, standalone=[program])
+        assert rows['tests/prog.py']['class'] == 'keep'
+        entry = model['entry_points']['source-only:tests/prog.py']
+        assert entry['source_only'] and entry['validation_at_measured_revision']['status'] == 'unavailable'
+        assert not any(k.endswith(':tests/prog.py') and not k.startswith('source-only:') for k in model['entry_points'])
+        model, rows = run(later, standalone=[program])
+        assert rows['tests/prog.py']['class'] == 'keep' and 'source-only:tests/prog.py' in model['entry_points']
+        # A source-only program anchors no route: the malformed row is never even inspected.
+        _, rows = run(later, {'static_routes': [route(first, 'source-only:tests/prog.py', 'node-import', [frame(first, 'tests/prog.py', 1)], 'tests/corpus/c.txt')]},
+                      standalone=[program])
+        assert rows['tests/corpus/c.txt']['class'] != 'keep'
+        rejected(later, 'unverifiable historical runner demonstration', standalone=[dict(program, input_revision='0' * 40)])
+        for change, text in (({'entry_line': 2}, 'default top-level entry'), ({'command': ['node', 'tests/prog.py']}, 'unsupported source-only'),
+                             ({'purpose': ' '}, 'invalid source-only'), ({'input_revision': 'HEAD'}, 'full commit revision'),
+                             ({'source_blob': '0' * 40}, 'source mismatch')):
+            rejected(first, text, standalone=[dict(program, **change)])
+        rejected(first, 'invalid source-only', standalone=[dict(program, input_scope=[])])
+        for path, line in (('tests/prog_test.py', 4), ('tests/prog_cli.py', 5)):
+            rejected(first, 'matches a configured CLI or unittest form', standalone=[dict(program, path=path, source_blob=blob(first, path),
+                     command=['python3', '-B', path], entry_line=line)])
+        rejected(first, 'conflicting standalone', standalone=[program, dict(program, kind='runnable-entrypoint', input_scope=[], other_reads='unresolved')])
+        rewritten = commit({'tests/prog.py': files['tests/prog.py'] + '# changed\n'}, 'changed program')
+        model, rows = run(rewritten, standalone=[program])
+        assert 'source-only:tests/prog.py' not in model['entry_points'] and rows['tests/prog.py']['class'] != 'keep'
+
+        # (5) H992 reviewed argument-bearing Node mode root: anchors the walker
+        # form only, as a source-only role with no passing-runner credit.
+        global REVIEWED_NODE_MODES
+        reviewed = REVIEWED_NODE_MODES
+        assert ('scripts/parse-corpus.mjs', 'dd1093f6fe8bfe00ae772e0b8b4a0bc0dd4b265a', 'prepare', 17) in reviewed and len(reviewed) == 1
+        mode_root = {'path': 'tests/mode.mjs', 'input_revision': A, 'source_blob': blob(first, 'tests/mode.mjs'), 'kind': NODE_MODE_KIND,
+                     'command': ['node', 'tests/mode.mjs', 'prepare'], 'purpose': 'Synthetic reviewed prepare step.',
+                     'provenance': {'path': 'tests/mode.mjs', 'blob': blob(first, 'tests/mode.mjs'), 'line': 1, 'invocation': 'node tests/mode.mjs prepare'}}
+        walked = lambda target, marker='POSITIVE', form='node-readFileSync-walk', runner='node-mode:tests/mode.mjs': route(
+            first, runner, form, [frame(first, 'tests/mode.mjs', line_of('tests/mode.mjs', marker))], target)
+        walks = {'static_routes': [walked('tests/corpus/a.sol'), walked('tests/corpus/sub/b.sol')]}
+        REVIEWED_NODE_MODES = frozenset({('tests/mode.mjs', blob(first, 'tests/mode.mjs'), 'prepare', 1),
+                                         ('tests/mode.mjs', blob(first, 'tests/mode.mjs'), 'other', 2),
+                                         ('tests/mode.mjs', blob(first, 'tests/mode.mjs'), 'prepare', 3),
+                                         ('tests/mode-flat.mjs', blob(first, 'tests/mode-flat.mjs'), 'prepare', 1)})
+        try:
+            assert run(first, walks)[1]['tests/corpus/a.sol']['class'] != 'keep'  # no root, no anchor
+            for repo in (first, later):
+                model, rows = run(repo, walks, standalone=[mode_root])
+                assert rows['tests/corpus/a.sol']['class'] == 'keep' and rows['tests/corpus/sub/b.sol']['class'] == 'keep'
+                assert rows['tests/corpus/skip/d.sol']['class'] != 'keep' and rows['tests/corpus/c.txt']['class'] != 'keep'
+                entry = model['entry_points']['node-mode:tests/mode.mjs']
+                assert entry['source_only'] and entry['validation_at_measured_revision']['status'] == 'unavailable'
+                assert entry['command'] == 'node tests/mode.mjs prepare' and entry['location'] == 'tests/mode.mjs:' + str(line_of('tests/mode.mjs', 'if (mode'))
+                assert not any(k.endswith(':tests/mode.mjs') and not k.startswith('node-mode:') for k in model['entry_points'])
+                assert rows['tests/corpus/a.sol']['runner_chain']['entry']['derived_from'] == 'node-mode:tests/mode.mjs'
+            # Without new rows the root adds nothing to the reads.
+            assert canonical(run(later, standalone=[mode_root])[1]['tests/corpus/a.sol']) == canonical(baseline['tests/corpus/a.sol'])
+            # The root anchors no other form, mode or reader line.
+            _, rows = run(first, {'static_routes': [walked('tests/corpus/c.txt', 'POSITIVE', 'node-readFileSync')]}, standalone=[mode_root])
+            assert rows['tests/corpus/c.txt']['class'] != 'keep'
+            for target, marker in (('tests/corpus/a.sol', 'OTHER-MODE'), ('tests/corpus/skip/d.sol', 'POSITIVE'), ('tests/corpus/a.sol', 'COMMENT')):
+                rejected(first, 'literal node-readFileSync-walk', {'static_routes': [walked(target, marker)]}, standalone=[mode_root])
+            other = dict(mode_root, command=['node', 'tests/mode.mjs', 'other'], provenance=dict(mode_root['provenance'], line=2, invocation='node tests/mode.mjs other'))
+            rejected(first, 'argv mode branch', walks, standalone=[other])  # an else-if mode is not a top-level branch
+            # Negative controls on the binding: schema, revision, command, provenance, review set, source, branch.
+            for change, text in (({'extra': 1}, 'invalid Node mode root'), ({'purpose': ' '}, 'invalid Node mode root'),
+                                 ({'input_revision': 'HEAD'}, 'full commit revision'),
+                                 ({'command': ['node', 'tests/mode.mjs']}, 'unsupported Node mode root'),
+                                 ({'command': ['node', 'tests/mode.mjs', 'prepare', '--x']}, 'unsupported Node mode root'),
+                                 ({'command': ['node', 'tests/mode.mjs', '--prepare']}, 'unsupported Node mode root'),
+                                 ({'command': ['node', '--test', 'tests/mode.mjs']}, 'unsupported Node mode root'),
+                                 ({'command': ['node', 'tests/mode.mjs', 'report']}, 'unreviewed Node mode root'),
+                                 ({'source_blob': '0' * 40}, 'unreviewed Node mode root'),
+                                 ({'provenance': dict(mode_root['provenance'], line=2)}, 'unreviewed Node mode root'),
+                                 ({'provenance': dict(mode_root['provenance'], line=3)}, 'verbatim source provenance'),
+                                 ({'provenance': dict(mode_root['provenance'], invocation='node tests/mode.mjs  prepare')}, 'unreviewed Node mode root'),
+                                 ({'provenance': dict(mode_root['provenance'], path='tests/README.md')}, 'unreviewed Node mode root'),
+                                 ({'provenance': {'path': 'tests/mode.mjs'}}, 'invalid Node mode root')):
+                rejected(first, text, walks, standalone=[dict(mode_root, **change)])
+            rejected(first, 'unverifiable historical runner demonstration', walks, standalone=[dict(mode_root, input_revision='0' * 40)])
+            rejected(first, 'conflicting standalone', walks, standalone=[mode_root, manual('tests/walk.mjs', 'prepare', 1) | {'path': 'tests/mode.mjs'}])
+            flat = {'path': 'tests/mode-flat.mjs', 'input_revision': A, 'source_blob': blob(first, 'tests/mode-flat.mjs'), 'kind': NODE_MODE_KIND,
+                    'command': ['node', 'tests/mode-flat.mjs', 'prepare'], 'purpose': 'No mode branch.',
+                    'provenance': {'path': 'tests/mode-flat.mjs', 'blob': blob(first, 'tests/mode-flat.mjs'), 'line': 1, 'invocation': 'node tests/mode-flat.mjs prepare'}}
+            rejected(first, 'argv mode branch', standalone=[flat])
+            REVIEWED_NODE_MODES = frozenset()
+            rejected(first, 'unreviewed Node mode root', walks, standalone=[mode_root])
+        finally: REVIEWED_NODE_MODES = reviewed
+        # A changed source drops the root and its reads.
+        edited = commit({'tests/mode.mjs': files['tests/mode.mjs'] + '// changed\n'}, 'changed mode root')
+        REVIEWED_NODE_MODES = reviewed | {('tests/mode.mjs', blob(first, 'tests/mode.mjs'), 'prepare', 1)}
+        try:
+            model, rows = run(edited, walks, standalone=[mode_root])
+            assert 'node-mode:tests/mode.mjs' not in model['entry_points'] and rows['tests/corpus/a.sol']['class'] != 'keep'
+        finally: REVIEWED_NODE_MODES = reviewed
+
+        # (6) H996 reviewed argument-bearing Python source role: a source-only
+        # root bound to blob, recorded interface and introducing commit that
+        # anchors nothing and credits no read, argument, helper or output.
+        global REVIEWED_PYTHON_ARGS
+        reviewed_args = REVIEWED_PYTHON_ARGS
+        assert len(reviewed_args) == 25 and all(p.startswith(('tests/directruntime-20261104/', 'tests/upstream/')) and p.endswith('.py')
+                                                for p, _, _ in reviewed_args)
+        assert ('tests/upstream/baseline-20261028/invocations/retries/selector.py', '5b7a49f863f7c6fad8231d17d68628623948a00e',
+                '2207c1bba286538fd63e4a0ff4960ed4a593a8ab') in reviewed_args
+        args_interface = {'argv_lines': [2], 'argv_tail_lines': [2], 'positionals': [], 'subcommands': []}
+        assert python_argument_interface(files['tests/args.py']) == args_interface
+        assert python_argument_interface(files['tests/args_sub.py']) == {'argv_lines': [], 'argv_tail_lines': [], 'positionals': [[6, 'results']], 'subcommands': [[5, 'pick']]}
+        for path in ('tests/prog.py', 'tests/helper.py', 'tests/args_alias.py', 'tests/args_rebind.py'):
+            assert python_argument_interface(files[path]) is None, path
+        assert python_argument_interface('import sys as s\nprint(s.argv[1:])\n') == {'argv_lines': [2], 'argv_tail_lines': [2], 'positionals': [], 'subcommands': []}
+        assert python_argument_interface('import sys\nclass O: argv = 1\nprint(O().argv)\n') is None
+        assert python_argument_interface('import argparse\np = argparse.ArgumentParser()\ns = p.add_subparsers()\ns.add_parser(NAME)\n') is None
+        for unaudited in ('import sys\nsys.argv[1:] = []\n', 'import sys\nsys.argv[1] = "x"\n', 'import sys\ndel sys.argv[1:]\n',
+                          'import sys\nsys.argv.append("x")\n', 'import sys\ndef f(sys): return sys.argv[1]\n',
+                          'import sys\ntry: pass\nexcept OSError as sys: pass\nprint(sys.argv[1])\n',
+                          'import sys\nfrom os import path as sys\nprint(sys.argv[1])\n', 'import sys\nprint(getattr(sys, "argv"), sys.argv[1])\n',
+                          'import argparse\np = argparse.ArgumentParser()\np.add_argument(NAME)\n',
+                          'import argparse\np = argparse.ArgumentParser()\np.add_argument("x")\np.parse_args(["y"])\n'):
+            assert python_argument_interface(unaudited) is None, unaudited
+        py_role = lambda path, line, interface, repo=first, commit=A: {
+            'path': path, 'input_revision': repo.ref, 'source_blob': blob(repo, path), 'kind': PYTHON_ARGS_KIND,
+            'command': ['python3', '-B', path], 'entry_line': line, 'interface': interface,
+            'provenance': {'commit': commit, 'path': path, 'blob': blob(repo, path)}, 'purpose': 'Synthetic reviewed argument-bearing program.'}
+        args_role = py_role('tests/args.py', 3, args_interface)
+        sub_role = py_role('tests/args_sub.py', 9, python_argument_interface(files['tests/args_sub.py']))
+        assert baseline['tests/args.py']['class'] != 'keep' and baseline['tests/args_sub.py']['class'] != 'keep'
+        REVIEWED_PYTHON_ARGS = frozenset({(p, blob(first, p), A) for p in ('tests/args.py', 'tests/args_sub.py', 'tests/args_alias.py',
+                                                                            'tests/args_rebind.py', 'tests/prog.py', 'tests/prog_cli.py', 'tests/prog_test.py')}
+                                         | {('tests/args.py', blob(first, 'tests/args.py'), later.ref)})
+        try:
+            for repo in (first, later):
+                model, rows = run(repo, standalone=[args_role, sub_role])
+                for path, role, line in (('tests/args.py', args_role, 3), ('tests/args_sub.py', sub_role, 9)):
+                    assert rows[path]['class'] == 'keep', path
+                    entry = model['entry_points']['py-args:' + path]
+                    assert entry['source_only'] and entry['python_argument_role'] and entry['validation_at_measured_revision']['status'] == 'unavailable'
+                    assert entry['command'] == 'python3 -B ' + path and entry['location'] == path + ':' + str(line)
+                    assert entry['interface'] == role['interface'] and entry['provenance'] == role['provenance']
+                    assert not any(k.endswith(':' + path) and not k.startswith('py-args:') for k in model['entry_points'])
+                # Nothing else changes: no read, helper, child or output credit.
+                assert all(canonical(r) == canonical(baseline[p]) for p, r in rows.items() if p not in ('tests/args.py', 'tests/args_sub.py')
+                           and p in baseline and repo is later)
+            # The role anchors no route: the malformed row is never even inspected.
+            _, rows = run(later, {'static_routes': [route(first, 'py-args:tests/args.py', 'node-import', [frame(first, 'tests/args.py', 2)], 'tests/corpus/c.txt')]},
+                          standalone=[args_role])
+            assert rows['tests/corpus/c.txt']['class'] != 'keep'
+            # Negative controls: schema, revision, command, review set, provenance, source, entry, interface.
+            for change, text in (({'extra': 1}, 'invalid Python argument role'), ({'purpose': ' '}, 'invalid Python argument role'),
+                                 ({'interface': []}, 'invalid Python argument role'),
+                                 ({'provenance': {'commit': A, 'path': 'tests/args.py'}}, 'invalid Python argument role'),
+                                 ({'provenance': dict(args_role['provenance'], commit=[A])}, 'invalid Python argument role'),
+                                 ({'input_revision': 'HEAD'}, 'full commit revision'),
+                                 ({'command': ['python3', '-B', 'tests/args.py', 'label', 'true']}, 'unsupported Python argument role'),
+                                 ({'command': ['python3', 'tests/args.py']}, 'unsupported Python argument role'),
+                                 ({'command': ['python3', '-m', 'unittest', 'tests/args.py']}, 'unsupported Python argument role'),
+                                 ({'source_blob': '0' * 40}, 'unreviewed Python argument role'),
+                                 ({'provenance': dict(args_role['provenance'], commit='0' * 40)}, 'unreviewed Python argument role'),
+                                 ({'provenance': dict(args_role['provenance'], path='tests/args_sub.py')}, 'unreviewed Python argument role'),
+                                 ({'provenance': dict(args_role['provenance'], commit=later.ref)}, 'introducing provenance'),
+                                 ({'entry_line': 2}, 'top-level entry'), ({'entry_line': True}, 'top-level entry'),
+                                 ({'interface': dict(args_interface, argv_lines=[3])}, 'interface mismatch'),
+                                 ({'interface': dict(args_interface, positionals=[[2, 'label']])}, 'interface mismatch')):
+                rejected(first, text, standalone=[dict(args_role, **change)])
+            rejected(first, 'unverifiable historical runner demonstration', standalone=[dict(args_role, input_revision='0' * 40)])
+            # The configured CLI, module CLI and unittest guards are unchanged and refuse the role.
+            for path, line in (('tests/prog_test.py', 4), ('tests/prog_cli.py', 5)):
+                rejected(first, 'matches a configured CLI or unittest form', standalone=[py_role(path, line, {})])
+            # A default program or an unaudited argv form has no argument interface.
+            for path, line in (('tests/prog.py', 4), ('tests/args_alias.py', 2), ('tests/args_rebind.py', 3)):
+                rejected(first, 'audited argument interface', standalone=[py_role(path, line, {})])
+            # No promotion beside another role for the same path and revision.
+            rejected(first, 'conflicting standalone', standalone=[args_role, dict(program, path='tests/args.py', source_blob=blob(first, 'tests/args.py'),
+                     command=['python3', '-B', 'tests/args.py'], entry_line=3)])
+            rejected(first, 'conflicting standalone', standalone=[dict(program, path='tests/args.py', source_blob=blob(first, 'tests/args.py'),
+                     command=['python3', '-B', 'tests/args.py'], entry_line=3), args_role])
+            # A current definition of the same path supersedes the role at a later revision.
+            current_program = dict(program, path='tests/args.py', input_revision=later.ref, source_blob=blob(later, 'tests/args.py'),
+                                   command=['python3', '-B', 'tests/args.py'], entry_line=3)
+            model, _ = run(later, standalone=[args_role, current_program])
+            assert 'py-args:tests/args.py' not in model['entry_points'] and 'source-only:tests/args.py' in model['entry_points']
+            # The role is no Git policy writer: it credits no generated output.
+            writer = {'path': 'tests/args.py', 'blob': blob(first, 'tests/args.py'), 'line': 5, 'literal': 'out.json'}
+            policy = {'path': 'tests/gen/.gitignore', 'blob': blob(first, 'tests/gen/.gitignore'), 'purpose': 'Synthetic output policy.',
+                      'matches': [{'line': 1, 'output': 'out.json', 'writer': writer}]}
+            rejected(first, 'not an entry point source', {'git_policies': [policy]}, standalone=[args_role])
+            REVIEWED_PYTHON_ARGS = frozenset()
+            rejected(first, 'unreviewed Python argument role', standalone=[args_role])
+        finally: REVIEWED_PYTHON_ARGS = reviewed_args
+        # A changed source drops the root at a later revision.
+        args_edited = commit({'tests/args.py': files['tests/args.py'] + '# changed\n'}, 'changed argument program')
+        REVIEWED_PYTHON_ARGS = reviewed_args | {('tests/args.py', blob(first, 'tests/args.py'), A)}
+        try:
+            model, rows = run(args_edited, standalone=[args_role])
+            assert 'py-args:tests/args.py' not in model['entry_points'] and rows['tests/args.py']['class'] != 'keep'
+            rejected(args_edited, 'source mismatch', standalone=[dict(args_role, input_revision=args_edited.ref)])
+        finally: REVIEWED_PYTHON_ARGS = reviewed_args
+
+        # (4) H979 persisted entered-module claims.
+        assert run(first)[1]['tests/helper.py']['class'] == 'keep'
+        persisted = {'persistent_module_entries': [claim]}
+        assert run(later)[1]['tests/helper.py']['class'] != 'keep'
+        model, rows = run(later, persisted)
+        assert rows['tests/helper.py']['class'] == 'keep'
+        details = rows['tests/helper.py']['runner_chain']['entry']['consumer_route']
+        assert details == {'kind': 'persisted-module-entry', 'validated_revision': A, 'runner_definition_blob': blob(first, 'tests/test_entry.py')}
+        assert rows['tests/helper.py']['runner_chain']['root'].startswith('committed:tests/test_entry.py:persisted-module:')
+        assert run(first, persisted)[1]['tests/helper.py']['class'] == 'keep'
+        rejected(later, 'not a reviewed routes.module_entries claim', persisted, entries=[])
+        rejected(later, 'duplicate persisted module entry', {'persistent_module_entries': [claim, dict(claim)]})
+        rejected(later, 'invalid persisted module entry', {'persistent_module_entries': [dict(claim, extra=1)]})
+        for key, value, text in (('runner', 'nonpassing:tests/test_entry.py', 'needs a validated runner'),
+                                 ('input_revision', '0' * 40, 'lacks its passing runner definition'),
+                                 ('python', [0, 0, 0], 'UNVERIFIABLE module code identity'),
+                                 ('collector_sha256', '0' * 64, 'unreviewed module entry collector'),
+                                 ('module_code_sha256', '0' * 64, 'entered module code mismatch'),
+                                 ('operation', 'validated Python read of measured bytes', 'unsupported module entry operation'),
+                                 ('module_frame_line', True, 'invalid entered module frame location')):
+            mutated = dict(claim, **{key: value})
+            rejected(later, text, {'persistent_module_entries': [mutated]}, entries=[mutated])
+        node_runner = dict(claim, runner='validated:tests/walk.test.mjs', frames=[frame(first, 'tests/walk.test.mjs', 1)])
+        rejected(later, 'lacks its passing runner definition', {'persistent_module_entries': [node_runner]}, entries=[node_runner])
+        # A changed target or runner grants nothing; forged current objects are refused.
+        changed = commit({'tests/helper.py': 'VALUE = 4\n'}, 'changed helper')
+        assert run(changed, persisted)[1]['tests/helper.py']['class'] != 'keep'
+        forged = dict(claim, target_blob=blob(changed, 'tests/helper.py'),
+                      module_code_sha256=observer.code_fingerprint(compile('VALUE = 4\n', '<measured>', 'exec', dont_inherit=True)))
+        rejected(changed, 'objects differ at recorded revision', {'persistent_module_entries': [forged]}, entries=[forged])
+        runner_changed = commit({'tests/helper.py': files['tests/helper.py'], 'tests/test_entry.py': files['tests/test_entry.py'] + '# changed\n'}, 'changed runner')
+        assert run(runner_changed, persisted)[1]['tests/helper.py']['class'] != 'keep'

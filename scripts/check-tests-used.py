@@ -123,11 +123,17 @@ if fragment_helper.is_file():
     merge_fragment_entries = fragment_rules.merge_fragment_entries
     CONSUMER_SECTIONS = fragment_rules.CONSUMER_SECTIONS
     declared_module_cli = fragment_rules.declared_module_cli
+    validated_module_entries = lambda graph, entries: fragment_rules.validated_module_entries(globals(), graph, entries)
+    SOURCE_ROLE_KINDS = fragment_rules.SOURCE_ROLE_KINDS
 else:
+    SOURCE_ROLE_KINDS = {}
     # Historical standalone drivers copy only check-tests-used*.py files.
     FRAGMENT_SECTIONS = ('standalone', 'generators', 'reads', 'orphans', 'module_entries')
     CONSUMER_SECTIONS = ()
     declared_module_cli = lambda *_: None
+    def validated_module_entries(graph, entries):
+        if not isinstance(entries, list): raise ValueError('invalid module entry definitions')
+        if entries: raise ValueError('missing fragment helper')
     def read_fragments(directory):
         if directory.exists(): raise ValueError('missing fragment helper')
         return {key: [] for key in FRAGMENT_SECTIONS + ('roles', 'fixtures')}
@@ -558,66 +564,6 @@ def reviewed_module_collector(repo, pin, current):
     return True
 
 
-def validated_module_entries(graph, entries):
-    """Reviewed positive execution claims, never static imports or data edges.
-
-    Exact entered module code, native reads preceding entry, successful paired
-    runs and collector provenance are validated deliberately outside inventory.
-    These deterministic definitions retain source/code/interpreter bindings;
-    ordinary inventory only compiles bytes to compare code, never executes them.
-    """
-    if not isinstance(entries, list): raise ValueError('invalid module entry definitions')
-    if not entries: return
-    repo = graph.repo
-    helper = Path(__file__).with_name('check-tests-used-trace.py')
-    spec = importlib.util.spec_from_file_location('tests_used_module_identity', helper)
-    observer = importlib.util.module_from_spec(spec); spec.loader.exec_module(observer)
-    collector = hashlib.sha256(helper.read_bytes()).hexdigest()
-    seen = set()
-    required = {'runner', 'input_revision', 'frames', 'target', 'target_blob', 'operation',
-                'module_code_sha256', 'module_frame_line', 'python', 'collector_sha256'}
-    for entry in entries:
-        if not isinstance(entry, dict) or set(entry) != required: raise ValueError('invalid entered module claim')
-        key = canonical(entry)
-        if key in seen: raise ValueError('duplicate entered module claim')
-        seen.add(key)
-        if entry['input_revision'] != repo.ref: continue
-        root = graph.roots.get(entry['runner'])
-        if root is None or root['kind'] != 'validated standalone runner' or root.get('source_only'):
-            raise ValueError('entered module requires passing current runner')
-        target = entry['target']
-        if target not in repo.tree or not target.endswith('.py') or repo.tree[target][2] != entry['target_blob']:
-            raise ValueError('entered module source pin mismatch')
-        if not reviewed_module_collector(repo, entry['collector_sha256'], collector): raise ValueError('unreviewed module entry collector')
-        if (entry['python'] != list(sys.version_info[:3]) or any(type(n) is not int for n in entry['python'])
-                or sys.implementation.name != 'cpython'):
-            raise ValueError('UNVERIFIABLE module code identity: exact CPython version required')
-        if entry['operation'] != 'entered measured Python module; no fixture consumption credit':
-            raise ValueError('unsupported module entry operation')
-        if type(entry['module_frame_line']) is not int or not 0 <= entry['module_frame_line'] <= len(repo.texts[target].splitlines()):
-            raise ValueError('invalid entered module frame location')
-        fingerprints = observer.source_code_hashes(repo.texts[target].encode('utf-8', 'surrogateescape'), '<measured>')
-        if entry['module_code_sha256'] not in fingerprints['module_code_hashes']:
-            raise ValueError('entered module code mismatch')
-        frames = entry['frames']
-        if not isinstance(frames, list) or not frames or not isinstance(frames[0], dict) or frames[0].get('path') != root['path']:
-            raise ValueError('entered module chain lacks root')
-        for frame in frames:
-            if (not isinstance(frame, dict) or set(frame) != {'path', 'blob', 'line'}
-                    or frame['path'] not in repo.tree or repo.tree[frame['path']][2] != frame['blob']
-                    or type(frame['line']) is not int or not 1 <= frame['line'] <= len(repo.texts.get(frame['path'], '').splitlines())):
-                raise ValueError('invalid entered module caller')
-        if excluded(target) or any(excluded(f['path']) for f in frames): continue
-        identity = entry['runner'] + ':module:' + hashlib.sha256(key).hexdigest()
-        graph.roots[identity] = {**root, 'derived_from': entry['runner'], 'entered_module': target,
-            'module_entry': {k: entry[k] for k in ('module_code_sha256', 'module_frame_line', 'python', 'collector_sha256')}}
-        chain = {'root': identity, 'entry': graph.roots[identity], 'edges': []}
-        for caller, callee in zip(frames, frames[1:] + [{'path': target}]):
-            chain = {**chain, 'edges': chain['edges'] + [{'source': caller['path'], 'target': callee['path'],
-                'line': caller['line'], 'operation': entry['operation'], 'kind': 'executes', 'validated_for': identity}]}
-            graph.observed.append((callee['path'], chain))
-
-
 def validated_routes(graph, catalog, extra_reads=()):
     """Reviewed validation definitions; raw run receipts live outside the branch.
 
@@ -659,6 +605,7 @@ def validated_routes(graph, catalog, extra_reads=()):
             if len(fields) != 3 or fields[0].decode() != expected_oid or fields[1] != expected_type:
                 raise ValueError('unverifiable historical runner demonstration: ' + request)
     for entry in catalog['standalone']:
+        if entry.get('kind') in SOURCE_ROLE_KINDS: SOURCE_ROLE_KINDS[entry['kind']](globals(), graph, catalog, entry); continue
         required = {'path', 'input_revision', 'source_blob', 'command', 'kind'}
         if entry.get('kind') == 'manual-reproducer': required.add('documentation')
         if entry.get('kind') == 'runnable-entrypoint': required.update(('entry_line', 'purpose', 'input_scope', 'other_reads'))
@@ -1780,8 +1727,8 @@ def inventory(repo, catalog=None):
                 if spelling != base: names[spelling].append(p)
     candidates = collections.defaultdict(list)
     candidate_sources = collections.defaultdict(set)  # eligibility is never display-capped
-    # Single indexed scan rather than one repository scan per inventoried file.
     token_re = re.compile(r'[A-Za-z0-9_.+@/-]+')
+    # Single indexed scan rather than one repository scan per inventoried file.
     for source, text in sorted(repo.texts.items()):
         for n, line in enumerate(text.splitlines(), 1):
             for token in dict.fromkeys(token_re.findall(line)):
