@@ -103,7 +103,7 @@ theorem step_eq : step entry F wire r e [s.deployed] 0 s.w1 (.request s.q) =
 /-- With room for the request, the prefix has the two events in order, the
 boundary worlds list both, and the frames are the create frame then the call
 frame. -/
-theorem two (one : r.horizon = 1) : run 0 roles ctor entry F wire .fresh e r =
+example (one : r.horizon = 1) : run 0 roles ctor entry F wire .fresh e r =
     ⟨⟨[s.deployed, s.transacted], none⟩, [s.w1, s.w2], [s.createFrame, s.callFrame]⟩ := by
   rw [run_fresh s.deploy_completes, s.deploy_eq, one]
   dsimp only
@@ -118,7 +118,7 @@ theorem one (zero : r.horizon = 0) : run 0 roles ctor entry F wire .fresh e r =
 
 /-- When no action follows the request, a larger bound completes the session
 with the request's outcome. -/
-theorem completes (two : r.horizon = 2)
+example (two : r.horizon = 2)
     (idle : e.requests [s.deployed, s.transacted] 1 = none) :
     run 0 roles ctor entry F wire .fresh e r =
       ⟨⟨[s.deployed, s.transacted], some (.success s.d)⟩, [s.w1, s.w2],
@@ -130,6 +130,25 @@ theorem completes (two : r.horizon = 2)
   rw [show [s.deployed] ++ [s.transacted] = [s.deployed, s.transacted] from rfl, go_idle idle]
   rfl
 
+/-- Every larger bound keeps that prefix of each in front (`run_consistent`,
+`worlds_mono`, `frames_mono`). -/
+example {r' : Bound} (zero : r.horizon = 0) (le : r ≤ r') :
+    [s.deployed] <+: (run 0 roles ctor entry F wire .fresh e r').pfx.events ∧
+      [s.w1] <+: (run 0 roles ctor entry F wire .fresh e r').worlds ∧
+      [s.createFrame] <+: (run 0 roles ctor entry F wire .fresh e r').frames := by
+  have events : (run 0 roles ctor entry F wire .fresh e r).pfx.Le
+      (run 0 roles ctor entry F wire .fresh e r').pfx :=
+    run_consistent 0 roles ctor entry F wire .fresh e r r' le
+  have worlds := worlds_mono 0 roles ctor entry F wire .fresh e le
+  have frames := frames_mono 0 roles ctor entry F wire .fresh e le
+  rw [s.one zero] at events worlds frames
+  exact ⟨events.1, worlds, frames⟩
+
 end TwoActions
+
+/-- Two bounds without resource failure have a common upper bound. -/
+example {r r' : Bound} (noFail : r.NoFail) (noFail' : r'.NoFail) :
+    ∃ r'' : Bound, (r''.Admissible ∧ r''.NoFail) ∧ r ≤ r'' ∧ r' ≤ r'' :=
+  directed ⟨trivial, noFail⟩ ⟨trivial, noFail'⟩
 
 end Solidity.Examples.IntrinsicSession.Run
