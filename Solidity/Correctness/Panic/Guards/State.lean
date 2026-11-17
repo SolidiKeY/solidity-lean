@@ -187,6 +187,17 @@ theorem memory_guard_length {E : Ty} (σ : State C Γ) (b : MPath C Γ (.ref (.a
   · simp [Val.evalT, base, bind, Except.bind, pure, Except.pure]
   · rfl
 
+/-- The dynamic memory index guard, after its operands are read. -/
+theorem memory_dyn_index_guard_eval {E : Ty} (σ : State C Γ)
+    (b : MPath C Γ (.ref (.array E))) (i : Val C Γ .uint) (ref : HRef σ.H (.array E))
+    (k : PrimTy.uint.Denote) (base : b.mvalT σ = .ok ref) (index : i.evalT σ = .ok k) :
+    (Checked.cmpU .lt rfl rfl i (.mlen b rfl)).evalT σ =
+      .ok (decide (k.val.toNat < σ.heap.len ref .dyn)) := by
+  rw [lt_eval σ i _ k _ index (memory_guard_length σ b ref base).1]
+  have nonneg := PrimTy.uint_nonneg k
+  exact congrArg Except.ok (decide_eq_decide.mpr (by
+    show k.val < ((σ.heap.len ref .dyn : Nat) : Int) ↔ _; omega))
+
 /-- A failed dynamic memory index guard: the bounds origin of the heap index
 producer at the evaluated object and index, and the path's V1 revert. -/
 theorem memory_dyn_index_guard_origin {E : Ty} (σ : State C Γ)
@@ -195,13 +206,11 @@ theorem memory_dyn_index_guard_origin {E : Ty} (σ : State C Γ)
     (failed : (Checked.cmpU .lt rfl rfl i (.mlen b rfl)).evalT σ = .ok false) :
     Panic.Origin (.index σ.heap ref .dyn k) .bounds ∧
       (MPath.loc (.index .dyn b i)).mvalT σ = .error .revert := by
-  rw [lt_eval σ i _ k _ index (memory_guard_length σ b ref base).1,
-    (memory_guard_length σ b ref base).2] at failed
-  have out := of_decide_eq_false (Except.ok.inj failed)
-  have nonneg := PrimTy.uint_nonneg k
+  rw [memory_dyn_index_guard_eval σ b i ref k base index] at failed
+  have out : ¬k.val.toNat < σ.heap.len ref .dyn := of_decide_eq_false (Except.ok.inj failed)
   have none : σ.heap.index ref .dyn k = none := by
     rw [Heap.index, List.getElem?_eq_none_iff]
-    omega
+    exact Nat.le_of_not_lt out
   exact ⟨Panic.index_origin σ.heap ref .dyn k none, by
     simp [MPath.mvalT, MLoc.addrT, base, index, Heap.readAddr, none, TRes.ofOpt, bind,
       Except.bind, pure, Except.pure]⟩

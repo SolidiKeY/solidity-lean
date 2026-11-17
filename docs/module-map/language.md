@@ -322,6 +322,8 @@ same option to its monitor fixtures; no environment fallback enables it.
 | `Syntax/NumericV2.lean` | Additive full-domain signed-power range guard and statement/value pair; v1 remains unchanged. |
 | `Syntax/NumericV2Correct.lean` | Exact mathematical range/value, guard-before-value execution and full Source arithmetic panic-payload proofs. |
 | `Syntax/NumericV2Controls.lean` | Magnitude-overflow, signed-boundary, huge-exponent unit and unchanged successful-state regressions. |
+| `Correctness/Panic/Guards/State.lean` | Origin equations of the generated state guards: storage and memory index (`Checked.idxPG`, `Checked.mIdxPG`, `0x32`) and empty pop (`0x31`), each with its guard list, producer origin, V1 revert and emitted panic bytes. |
+| `Examples/Panic/GuardsState.lean` | Kernel-checked state guard regressions: indexes past dynamic and fixed storage and memory arrays, a pop of an empty array, with passing controls. |
 | `Semantics/Panic/Eval.lean` | Panic-carrying evaluation of typed intrinsic producers, arithmetic and bounds helpers, mutually recursive paths and expressions, and assignment sources; retained producer operands and origin proofs, exact site codes, and local V1 projection laws. |
 | `Examples/Panic/Eval.lean` | Kernel panic-evaluation boundary controls for all nine origin codes, signed overflow, short-circuiting, local V1 behavior, and the exported evaluator API. |
 | `Semantics/Panic/Source.lean` | Additive V2 source producer interface retaining V1 origins exactly and width-aware narrowing results; local origin and boundary lemmas. |
