@@ -128,6 +128,7 @@ import Solidity.Examples.DecisionWrittenMemory
 import Solidity.Examples.DeclarationReduction
 import Solidity.Examples.DependentReduction
 import Solidity.Examples.Docs.ProseCalibrated.Allowance
+import Solidity.Examples.ElabTotal.Measure
 import Solidity.Examples.ExactReduction
 import Solidity.Examples.ExactUpdates
 import Solidity.Examples.ExampleNames
@@ -179,6 +180,7 @@ import Solidity.Examples.Panic.GuardsArith
 import Solidity.Examples.Panic.Origins
 import Solidity.Examples.Panic.ProvenanceControl
 import Solidity.Examples.Panic.ProvenanceEval
+import Solidity.Examples.Panic.ProvenanceUpdates
 import Solidity.Examples.Panic.Result
 import Solidity.Examples.Panic.Source
 import Solidity.Examples.ParameterReduction
