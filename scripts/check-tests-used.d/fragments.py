@@ -255,8 +255,9 @@ _NODE_FS = re.compile(r"""(?:\bimport\s*\{[^}]*\breadFileSync\b[^}]*\}\s*from\s*
 def _js_mask(text):
     """Blank JS comments, templates and quoted strings; keep string literal spans.
 
-    Regular-expression literals are not modelled; a line is only usable when
-    every blanked character on it belongs to a complete quoted literal.
+    Regular-expression literals are not modelled. Callers locate keywords in
+    the masked code and accept an operand only at a recorded literal start, so
+    commented, quoted or templated text never yields a route.
     """
     out = []; literals = {}; at = 0; n = len(text)
     while at < n:
@@ -278,24 +279,18 @@ def _js_mask(text):
 
 
 def _js_line(text, number):
-    """The line, its masked code and literal starts, or None if anything else is masked."""
+    """The line, its masked code, line-relative literal spans, and whole-file mask."""
     code, literals = _js_mask(text)
     starts = [0] + [m.end() for m in re.finditer('\n', text)]
     begin = starts[number - 1]; line = text.splitlines()[number - 1]; masked = code[begin:begin + len(line)]
     spans = {start - begin: len(token) for start, token in literals.items() if begin <= start < begin + len(line)}
-    at = 0
-    while at < len(line):
-        if masked[at] == line[at]: at += 1
-        elif at in spans: at += spans[at]
-        else: return None
     return line, masked, spans, code, literals
 
 
 def _node_import(source, text, number):
-    found = _js_line(text, number)
-    if found is None: return None
-    line, masked, spans, _, _ = found
+    line, masked, spans, _, _ = _js_line(text, number)
     match = _NODE_IMPORT.match(line)
+    if match and masked[:match.start(1)] != line[:match.start(1)]: return None
     if not match or match.start(1) not in spans or ('require(' in line) != bool(match[3]): return None
     if 'require(' in line and not source.endswith(('.cjs', '.js')): return None
     return _clean(posixpath.join(posixpath.dirname(source), match[2]))
@@ -303,7 +298,6 @@ def _node_import(source, text, number):
 
 def _node_read(source, text, number, cwd):
     found = _js_line(text, number)
-    if found is None: return None
     line, masked, spans, code, literals = found
     calls = [m for m in re.finditer(r'readFileSync\(', masked)]
     if len(calls) != 1 or calls[0].start() and re.match(r'[\w$.]', masked[calls[0].start() - 1]): return None
@@ -431,7 +425,7 @@ def _writer_names(repo, path, number, literal):
         return any(t.type == tokenize.STRING and t.start[0] == number and literal in t.string for t in tokens)
     if path.endswith(NODE_SUFFIXES):
         found = _js_line(text, number)
-        return found is not None and any(literal in found[0][at:at + size] for at, size in found[2].items())
+        return any(literal in found[0][at:at + size] for at, size in found[2].items())
     if path.endswith('.sh'):
         code = line.split(' #', 1)[0]
         return not line.lstrip().startswith('#') and literal in code
@@ -714,7 +708,8 @@ def consumer_route_controls(classifier):
                              "const x = readFileSync(computed());\n"
                              "foo(); // readFileSync(new URL('./fixture.json', import.meta.url))\n"
                              "console.log(\"readFileSync('tests/fixture.json')\");\n/*\n readFileSync('tests/fixture.json');\n*/\n"
-                             "const t = `\n readFileSync('tests/fixture.json');\n`;\nmock.readFileSync('tests/fixture.json');\n"),
+                             "const t = `\n readFileSync('tests/fixture.json');\n`;\nmock.readFileSync('tests/fixture.json');\n"
+                             "const y = readFileSync('tests/fixture.json'); // reviewed trailing note\n"),
         'tests/fixture.json': '{}\n',
         'tests/R.lean': ('import tests.LeanHelper\n-- IO.FS.readFile "tests/lean-data.txt"\n#eval show IO Unit from do\n  let s ← IO.FS.readFile "tests/lean-data.txt"\n  IO.println s\n'
                          'def unused : IO String := IO.FS.readFile "tests/lean-data.txt"\n'),
@@ -809,6 +804,8 @@ def consumer_route_controls(classifier):
         assert rows['tests/other.txt']['class'] is None and 'unreviewed_readers' in rows['tests/other.txt']['secondary']
         assert model['entry_points']['git-policy:tests/gen/.gitignore']['source_only']
         assert rows['tests/lean-helper.txt']['class'] != 'keep'
+        trailing = node(first, 'node-readFileSync', 'tests/fixture.json', [frame(first, 'tests/n.test.mjs', 1), frame(first, 'tests/helper.mjs', 15)])
+        assert {r['path']: r for r in run(later, {'static_routes': [trailing]})['records']}['tests/fixture.json']['class'] == 'keep'
         # The same rows at the validated revision are ordinary reads/routes.
         assert {r['path']: r for r in run(first, good)['records']}['tests/data.txt']['class'] == 'keep'
         # Negative controls: malformed forms are rejected.
