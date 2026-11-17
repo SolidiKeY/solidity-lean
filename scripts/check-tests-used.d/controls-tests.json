@@ -439,6 +439,32 @@
           "tests/h62/item1/p16-generator/proposed-owner-p16.patch"
         ],
         "other_reads": "unresolved"
+      },
+      {
+        "path": "tests/h62/item1/duplication-scanner/check_signature_records.py",
+        "input_revision": "d311137bf783a9a526d7e9f94604dc85e9fc0327",
+        "source_blob": "f83162b8cb4b2591b9b9c97a5c33c0b0637f9f32",
+        "command": [
+          "python3",
+          "-B",
+          "tests/h62/item1/duplication-scanner/check_signature_records.py"
+        ],
+        "kind": "source-only-program",
+        "entry_line": 126,
+        "purpose": "Existing Python program with a genuine default top-level entry and required positional input. The entry prefix does not supply that input and is not certified to pass. Source declaration only: no read anchor, fixture, helper, child, generated output, current validation, native or proof credit."
+      },
+      {
+        "path": "tests/h62/item6/migrate-source/acceptance.py",
+        "input_revision": "d311137bf783a9a526d7e9f94604dc85e9fc0327",
+        "source_blob": "6599b2b639abc22c3e5d1aa36e85aa7d4333c7f6",
+        "command": [
+          "python3",
+          "-B",
+          "tests/h62/item6/migrate-source/acceptance.py"
+        ],
+        "kind": "source-only-program",
+        "entry_line": 11,
+        "purpose": "Existing Python program with a genuine default top-level entry and required positional input. The entry prefix does not supply that input and is not certified to pass. Source declaration only: no read anchor, fixture, helper, child, generated output, current validation, native or proof credit."
       }
     ]
   },
