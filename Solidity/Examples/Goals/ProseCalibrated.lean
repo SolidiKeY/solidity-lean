@@ -1,8 +1,9 @@
 import Solidity.Goals.ProseCalibrated
+import Solidity.Docs.ProseCalibrated
 
 namespace Solidity.Goals
 /--
-info: open Solidity.Goals.proseCalibratedRatioRuleSound ← Solidity.Docs.prose_calibrated_ratio_rule_sound plan pb2-prose-ratio-rule
+info: proved Solidity.Goals.proseCalibratedRatioRuleSound ← Solidity.Docs.prose_calibrated_ratio_rule_sound plan pb2-prose-ratio-rule
 -/
 #guard_msgs in
 #roadmap_goal proseCalibratedRatioRuleSound
