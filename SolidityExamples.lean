@@ -169,6 +169,7 @@ import Solidity.Examples.MemoryNegativeCountermodel
 import Solidity.Examples.MemoryNegativeDecision
 import Solidity.Examples.MemoryStructWitness
 import Solidity.Examples.Notation
+import Solidity.Examples.Panic.Capture
 import Solidity.Examples.Panic.Eval
 import Solidity.Examples.Panic.GuardsArith
 import Solidity.Examples.Panic.Origins
