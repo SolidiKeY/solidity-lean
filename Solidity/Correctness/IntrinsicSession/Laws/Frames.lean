@@ -3,7 +3,7 @@ import Solidity.Correctness.IntrinsicSession.Laws.Frames.Steps
 /-!
 # The intrinsic session laws: the determined frames
 
-The fields `transacts`, `resumes` and `deploys` of `Solidity.Goals.IntrinsicSession.Laws` at
+The fields `transacts` and `resumes` of `Solidity.Goals.IntrinsicSession.Laws` at
 `spec F` and `view F` (step `is0p-session-laws`, lane frames), from the boundary lemmas of
 `Laws/Common.lean` and the unfolded steps of `Frames/Steps.lean`. The response table of `spec`
 is empty, so the frame of a law at `ext := []` is the step's own frame; the premises on
@@ -126,98 +126,5 @@ theorem Laws.resumes (F : Fixed) : ∀ x en h n t (q : Request), (spec F).lang.A
     | cons y seg =>
       cases (List.cons.inj same).1
       exact absurd trivial (quiet _ List.mem_cons_self)
-
-/-- **A deployment that never leaves its contract is the actual creation.** -/
-theorem Laws.deploys (F : Fixed) : ∀ (code : Code) (en : (spec F).lang.Env)
-      (k : Fin code.contracts.length) (body : Prog (code.catalog k) [] []),
-    (spec F).lang.Allowed en → k.val = code.main →
-    code.ctor k ((spec F).session en).deployArgs = some body → Prog.callsBack true body = false →
-    let e := (spec F).session en
-    let p := (spec F).ofWorld ((view F).initial code)
-    let this := F.createAddress e.deployer e.deployNonce
-    e.deployValue.val ≤ (e.balance e.deployer).val → this ≠ e.deployer →
-    let frame := fun ext =>
-      (ContractWorld.World.empty code.catalog
-          (Solidity.Goals.IntrinsicSession.funds e.balance) code.roles).transact fun w =>
-        w.create k (liftAddress this) body
-          { sender := liftAddress e.deployer, mode := .ordinary (liftWord e.deployValue),
-            ext := ext }
-    let res := frame []
-    (∀ ext, frame ext = res) →
-    (Ends res.2 → ∃ out address, Observed (spec F) p en
-      [Event.deploy e.deployer e.deployValue e.deployArgs out address]) ∧
-    (∀ r, Good (spec F) r → ((spec F).lang.sem p en r).events ≠ [] → ∃ out address,
-      let done := Event.deploy e.deployer e.deployValue e.deployArgs out address
-      [done] <+: ((spec F).lang.sem p en r).events ∧
-      match res.2 with
-      | .ok _ => (∃ d, out = .success d) ∧ address = some this ∧
-        ∃ t', t'.Shows code res.1 ∧ (view F).Boundary ((view F).initial code) en [done] 0 t'
-      | .error h => RevertMatches h out ∧ address = none) ∧
-    ∀ r, (spec F).lang.Admissible r → ∀ out address,
-      [Event.deploy e.deployer e.deployValue e.deployArgs out address] <+:
-        ((spec F).lang.sem p en r).events →
-      (out = .revert [] ∧ address = none) ∨
-      match res.2 with
-      | .ok _ => (∃ d, out = .success d) ∧ address = some this
-      | .error h => RevertMatches h out ∧ address = none := by
-  intro code en k body _ main resolved _
-  obtain ⟨kv, hk⟩ := k
-  cases main
-  intro e p this _ _ frame res _
-  have shows := fun r => fresh_events (F := F) (e := en) r code
-  -- A bound that fails the creation shows a revert with empty data and no address.
-  have failing : ∀ (r : Bound) out address, r.deployFails = true →
-      [Event.deploy e.deployer e.deployValue e.deployArgs out address] <+:
-        ((spec F).lang.sem p en r).events → out = .revert [] ∧ address = none := by
-    intro r out address fl pre
-    obtain ⟨evs, completes⟩ := deploy_fails (F := F) (e := en) (r := r) hk resolved fl
-    cases prefix_head ((shows r).2 completes) pre evs
-    exact ⟨rfl, rfl⟩
-  cases hres : res.2 with
-  | ok d =>
-    have ok := fun (r : Bound) (nf : r.deployFails = false) =>
-      deploy_ok (F := F) (e := en) (r := r) hk resolved nf hres
-    obtain ⟨evs, wd, completes⟩ := ok (Bound.upto 0) rfl
-    have b0 := deploy_boundary (F := F) (e := en) (code := code) completes
-    dsimp only [deployed] at b0
-    rw [evs, wd] at b0
-    refine ⟨fun _ => ⟨_, _, Boundary.observed b0⟩, fun r good _ => ⟨_, _,
-      (Boundary.reached b0 good (Nat.zero_le _)).2, ⟨_, rfl⟩, rfl, _, ⟨_, rfl, rfl, rfl, rfl⟩, b0⟩,
-      fun r _ out address pre => ?_⟩
-    cases fl : r.deployFails with
-    | true => exact .inl (failing r out address fl pre)
-    | false =>
-      obtain ⟨evs, -, completes⟩ := ok r fl
-      cases prefix_head ((shows r).2 completes) pre evs
-      exact .inr ⟨⟨_, rfl⟩, rfl⟩
-  | error hlt =>
-    cases c : ContractWorld.catchable hlt with
-    | true =>
-      have err := fun (r : Bound) (nf : r.deployFails = false) =>
-        deploy_error (F := F) (e := en) (r := r) hk resolved nf hres c
-      obtain ⟨evs, completes⟩ := err (Bound.upto 0) rfl
-      have b0 := deploy_boundary (F := F) (e := en) (code := code) completes
-      dsimp only [deployed] at b0
-      rw [evs] at b0
-      refine ⟨fun _ => ⟨_, _, Boundary.observed b0⟩, fun r good _ => ⟨_, _,
-        (Boundary.reached b0 good (Nat.zero_le _)).2, ⟨c, _, rfl, fun _ => rfl⟩, rfl⟩,
-        fun r _ out address pre => ?_⟩
-      cases fl : r.deployFails with
-      | true => exact .inl (failing r out address fl pre)
-      | false =>
-        obtain ⟨evs, completes⟩ := err r fl
-        cases prefix_head ((shows r).2 completes) pre evs
-        exact .inr ⟨⟨c, _, rfl, fun _ => rfl⟩, rfl⟩
-    | false =>
-      have halts := fun (r : Bound) (nf : r.deployFails = false) =>
-        deploy_halts (F := F) (e := en) (r := r) hk resolved nf hres c
-      refine ⟨fun ends => (nomatch c.symm.trans ends), fun r good ne =>
-        absurd (deploy_stops (halts (Bound.upto 0) rfl) good).1 ne, fun r _ out address pre => ?_⟩
-      cases fl : r.deployFails with
-      | true => exact .inl (failing r out address fl pre)
-      | false =>
-        have short : [Event.deploy e.deployer e.deployValue e.deployArgs out address] <+: [] :=
-          (shows r).1 (halts r fl) ▸ pre
-        exact nomatch List.prefix_nil.1 short
 
 end Solidity.Semantics.IntrinsicSession

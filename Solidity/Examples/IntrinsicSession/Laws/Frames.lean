@@ -1,8 +1,8 @@
 import Solidity.Correctness.IntrinsicSession.Laws.Frames
 import Solidity.Examples.IntrinsicSession.Spec
 
-/-! The determined-frame laws (`transacts`, `resumes`, `deploys`) on the one-contract session of
-`Spec.lean`: resumed at `w` for the request, fresh for the deployment of its code. -/
+/-! The determined-frame laws `transacts` and `resumes` on the one-contract session of
+`Spec.lean`, resumed at `w`. -/
 namespace Solidity.Examples.IntrinsicSession.Laws.Frames
 
 open Solidity.Roadmap Solidity.Semantics.IntrinsicSession Solidity.Examples.IntrinsicSession.Spec
@@ -13,10 +13,10 @@ open Solidity.Lowering.V08.EnvironmentProjection (liftWord liftAddress requestCo
 variable {C : Contract} {code : Code} {w : World code.catalog} {F : Fixed} {r : Bound}
   {e : SessionEnv} (s : OneRequest C code w F r e)
 
-/-- The three theorems are exactly the fields of the laws at `spec F`, `view F`. -/
+/-- The theorems are exactly the fields of the laws at `spec F`, `view F`. -/
 example (L : Solidity.Goals.IntrinsicSession.Laws F (spec F) (view F)) :
-    L.transacts = Laws.transacts F ∧ L.resumes = Laws.resumes F ∧ L.deploys = Laws.deploys F :=
-  ⟨rfl, rfl, rfl⟩
+    L.transacts = Laws.transacts F ∧ L.resumes = Laws.resumes F :=
+  ⟨rfl, rfl⟩
 
 /-- The request's frame under the response table `ext`. -/
 noncomputable abbrev called (s : OneRequest C code w F r e)
@@ -54,42 +54,5 @@ example (allowed : (spec F).lang.Allowed e) (good : Good (spec F) r) {ev : Event
     ∃ out, ev = Event.tx s.q.sender s.q.target s.q.value s.q.timestamp s.q.input out :=
   (Laws.resumes F s.start e [] 0 _ s.q allowed (Boundary.resume F ⟨code, w⟩ e) s.next s.funded
     r good [] ev isTx (fun _ m => nomatch m) pre).1
-
-/-- The creation of the session's code by its resolved constructor `body`, under `ext`. -/
-noncomputable abbrev created (_ : OneRequest C code w F r e) (k : Fin code.contracts.length)
-    (body : Prog (code.catalog k) [] []) (ext : List (Semantics.ExtKey × Semantics.ExtResult)) :
-    World code.catalog × TRes (Handle k) :=
-  (World.empty code.catalog (Solidity.Goals.IntrinsicSession.funds e.balance) code.roles).transact
-    fun v => v.create k (liftAddress (F.createAddress e.deployer e.deployNonce)) body
-      { sender := liftAddress e.deployer, mode := .ordinary (liftWord e.deployValue), ext := ext }
-
-/-- **`deploys`**: when the creation of the session's code returns, a good bound that shows
-anything of the fresh session shows the successful deployment at the created address first,
-and every bound that shows a deployment first shows that one or a revert with empty data. -/
-example (allowed : (spec F).lang.Allowed e) (k : Fin code.contracts.length)
-    (body : Prog (code.catalog k) [] []) (main : k.val = code.main)
-    (resolved : code.ctor k e.deployArgs = some body) (inside : Prog.callsBack true body = false)
-    (covered : e.deployValue.val ≤ (e.balance e.deployer).val)
-    (apart : F.createAddress e.deployer e.deployNonce ≠ e.deployer)
-    (table : ∀ ext, created s k body ext = created s k body []) (v : Handle k)
-    (returns : (created s k body []).2 = .ok v) (good : Good (spec F) r)
-    (some : ((spec F).lang.sem (Start.initial code) e r).events ≠ []) :
-    (∃ d, [Event.deploy e.deployer e.deployValue e.deployArgs (.success d)
-        (.some (F.createAddress e.deployer e.deployNonce))] <+:
-      ((spec F).lang.sem (Start.initial code) e r).events) ∧
-    ∀ r' out address, [Event.deploy e.deployer e.deployValue e.deployArgs out address] <+:
-        ((spec F).lang.sem (Start.initial code) e r').events →
-      (out = .revert [] ∧ address = none) ∨
-        ((∃ d, out = .success d) ∧ address = .some (F.createAddress e.deployer e.deployNonce)) := by
-  obtain ⟨_, shown, first⟩ := Laws.deploys F code e k body allowed main resolved inside covered
-    apart table
-  refine ⟨?_, fun r' out address pre => ?_⟩
-  · obtain ⟨out, address, pre, m⟩ := shown r good some
-    erw [returns] at m
-    obtain ⟨⟨d, rfl⟩, rfl, -⟩ := m
-    exact ⟨d, pre⟩
-  · have m := first r' trivial out address pre
-    erw [returns] at m
-    exact m
 
 end Solidity.Examples.IntrinsicSession.Laws.Frames
