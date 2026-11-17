@@ -2072,6 +2072,35 @@
           "tests/v14-help/check-memory-delete-axioms.py"
         ],
         "other_reads": "unresolved"
+      },
+      {
+        "path": "tests/sol-expression-uniqueness/checker-controls.py",
+        "input_revision": "3799f46a504e48d718c7d66fd1eccceac041ec76",
+        "source_blob": "c3aaa100b1f4c7651c1e626503712056314b524f",
+        "command": [
+          "python3",
+          "-B",
+          "tests/sol-expression-uniqueness/checker-controls.py"
+        ],
+        "kind": "runnable-entrypoint",
+        "entry_line": 53,
+        "purpose": "Passing host-side audit positive/corruption controls consume these exact metadata and source-text inputs. Saved axiom maps are reference expectations, not authenticated kernel output. H44 kernel-environment controls are explicitly skipped because their dumps are absent. Synthetic checkpoint logs and textual proof-scope scans do not establish Lean uniqueness, theorem truth, successful library elaboration, output provenance or EVM correctness. Other reads remain unresolved.",
+        "input_scope": [
+          "tests/sol-expression-uniqueness/axioms.json",
+          "tests/sol-expression-uniqueness/boundaries.json",
+          "tests/sol-expression-uniqueness/constructor-controls.json",
+          "tests/sol-expression-uniqueness/constructor-identity.json",
+          "tests/sol-expression-uniqueness/constructors.json",
+          "tests/sol-expression-uniqueness/declarations.json",
+          "tests/sol-expression-uniqueness/gate.sh",
+          "tests/sol-expression-uniqueness/obligations.json",
+          "tests/sol-expression-uniqueness/operators.json",
+          "tests/sol-expression-uniqueness/recursive-cases.json",
+          "tests/sol-expression-uniqueness/registration-manifest.json",
+          "tests/sol-expression-uniqueness/signatures.lean",
+          "tests/sol-expression-uniqueness/source-pins.json"
+        ],
+        "other_reads": "unresolved"
       }
     ]
   },
@@ -2343,6 +2372,273 @@
         ],
         "target": "tests/v14-help/MemoryDeleteAxioms.lean",
         "target_blob": "20f89e366237571c72287ccd43ca274f331c4cdb",
+        "operation": "validated Python read of measured bytes"
+      },
+      {
+        "runner": "validated:tests/sol-expression-uniqueness/checker-controls.py",
+        "input_revision": "3799f46a504e48d718c7d66fd1eccceac041ec76",
+        "frames": [
+          {
+            "path": "tests/sol-expression-uniqueness/checker-controls.py",
+            "blob": "c3aaa100b1f4c7651c1e626503712056314b524f",
+            "line": 117
+          },
+          {
+            "path": "scripts/check-sol-expression-uniqueness.py",
+            "blob": "363ce058894db0ae915be3f026e18b090693006d",
+            "line": 28
+          }
+        ],
+        "target": "tests/sol-expression-uniqueness/constructor-controls.json",
+        "target_blob": "9a2b352f64b56117b53259af563a768d83374597",
+        "operation": "validated Python read of measured bytes"
+      },
+      {
+        "runner": "validated:tests/sol-expression-uniqueness/checker-controls.py",
+        "input_revision": "3799f46a504e48d718c7d66fd1eccceac041ec76",
+        "frames": [
+          {
+            "path": "tests/sol-expression-uniqueness/checker-controls.py",
+            "blob": "c3aaa100b1f4c7651c1e626503712056314b524f",
+            "line": 145
+          },
+          {
+            "path": "scripts/check-sol-expression-uniqueness.py",
+            "blob": "363ce058894db0ae915be3f026e18b090693006d",
+            "line": 28
+          }
+        ],
+        "target": "tests/sol-expression-uniqueness/axioms.json",
+        "target_blob": "6080fb1364cef8b176d28d4ab79a5d1cdeac8c1d",
+        "operation": "validated Python read of measured bytes"
+      },
+      {
+        "runner": "validated:tests/sol-expression-uniqueness/checker-controls.py",
+        "input_revision": "3799f46a504e48d718c7d66fd1eccceac041ec76",
+        "frames": [
+          {
+            "path": "tests/sol-expression-uniqueness/checker-controls.py",
+            "blob": "c3aaa100b1f4c7651c1e626503712056314b524f",
+            "line": 154
+          },
+          {
+            "path": "scripts/check-sol-expression-uniqueness.py",
+            "blob": "363ce058894db0ae915be3f026e18b090693006d",
+            "line": 28
+          }
+        ],
+        "target": "tests/sol-expression-uniqueness/constructor-identity.json",
+        "target_blob": "6ded36f61811610d4da0473e3262d128d368478a",
+        "operation": "validated Python read of measured bytes"
+      },
+      {
+        "runner": "validated:tests/sol-expression-uniqueness/checker-controls.py",
+        "input_revision": "3799f46a504e48d718c7d66fd1eccceac041ec76",
+        "frames": [
+          {
+            "path": "tests/sol-expression-uniqueness/checker-controls.py",
+            "blob": "c3aaa100b1f4c7651c1e626503712056314b524f",
+            "line": 158
+          },
+          {
+            "path": "scripts/check-sol-expression-uniqueness.py",
+            "blob": "363ce058894db0ae915be3f026e18b090693006d",
+            "line": 28
+          }
+        ],
+        "target": "tests/sol-expression-uniqueness/operators.json",
+        "target_blob": "848020e8a057d1c95a8977b8effec4c16da827dc",
+        "operation": "validated Python read of measured bytes"
+      },
+      {
+        "runner": "validated:tests/sol-expression-uniqueness/checker-controls.py",
+        "input_revision": "3799f46a504e48d718c7d66fd1eccceac041ec76",
+        "frames": [
+          {
+            "path": "tests/sol-expression-uniqueness/checker-controls.py",
+            "blob": "c3aaa100b1f4c7651c1e626503712056314b524f",
+            "line": 161
+          },
+          {
+            "path": "scripts/check-sol-expression-uniqueness.py",
+            "blob": "363ce058894db0ae915be3f026e18b090693006d",
+            "line": 28
+          }
+        ],
+        "target": "tests/sol-expression-uniqueness/boundaries.json",
+        "target_blob": "89a8bbe8a67f6b5b9cde88fe3d9e3445391bbe79",
+        "operation": "validated Python read of measured bytes"
+      },
+      {
+        "runner": "validated:tests/sol-expression-uniqueness/checker-controls.py",
+        "input_revision": "3799f46a504e48d718c7d66fd1eccceac041ec76",
+        "frames": [
+          {
+            "path": "tests/sol-expression-uniqueness/checker-controls.py",
+            "blob": "c3aaa100b1f4c7651c1e626503712056314b524f",
+            "line": 17
+          },
+          {
+            "path": "scripts/check-sol-expression-uniqueness.py",
+            "blob": "363ce058894db0ae915be3f026e18b090693006d",
+            "line": 28
+          }
+        ],
+        "target": "tests/sol-expression-uniqueness/source-pins.json",
+        "target_blob": "cd4f4d4f0ea2d57978876c865f411da7ed478428",
+        "operation": "validated Python read of measured bytes"
+      },
+      {
+        "runner": "validated:tests/sol-expression-uniqueness/checker-controls.py",
+        "input_revision": "3799f46a504e48d718c7d66fd1eccceac041ec76",
+        "frames": [
+          {
+            "path": "tests/sol-expression-uniqueness/checker-controls.py",
+            "blob": "c3aaa100b1f4c7651c1e626503712056314b524f",
+            "line": 170
+          },
+          {
+            "path": "scripts/check-sol-expression-uniqueness.py",
+            "blob": "363ce058894db0ae915be3f026e18b090693006d",
+            "line": 28
+          }
+        ],
+        "target": "tests/sol-expression-uniqueness/declarations.json",
+        "target_blob": "def85b824bb791e4ec57f1f159010d5a657f1955",
+        "operation": "validated Python read of measured bytes"
+      },
+      {
+        "runner": "validated:tests/sol-expression-uniqueness/checker-controls.py",
+        "input_revision": "3799f46a504e48d718c7d66fd1eccceac041ec76",
+        "frames": [
+          {
+            "path": "tests/sol-expression-uniqueness/checker-controls.py",
+            "blob": "c3aaa100b1f4c7651c1e626503712056314b524f",
+            "line": 176
+          },
+          {
+            "path": "scripts/check-sol-expression-uniqueness.py",
+            "blob": "363ce058894db0ae915be3f026e18b090693006d",
+            "line": 28
+          }
+        ],
+        "target": "tests/sol-expression-uniqueness/constructors.json",
+        "target_blob": "5b580a0199eafc1f34210c456861cf2f3bc8f522",
+        "operation": "validated Python read of measured bytes"
+      },
+      {
+        "runner": "validated:tests/sol-expression-uniqueness/checker-controls.py",
+        "input_revision": "3799f46a504e48d718c7d66fd1eccceac041ec76",
+        "frames": [
+          {
+            "path": "tests/sol-expression-uniqueness/checker-controls.py",
+            "blob": "c3aaa100b1f4c7651c1e626503712056314b524f",
+            "line": 184
+          },
+          {
+            "path": "scripts/check-sol-expression-uniqueness.py",
+            "blob": "363ce058894db0ae915be3f026e18b090693006d",
+            "line": 28
+          }
+        ],
+        "target": "tests/sol-expression-uniqueness/recursive-cases.json",
+        "target_blob": "2640fc2ef81cfa0499ce20946d941d45ca4a2bde",
+        "operation": "validated Python read of measured bytes"
+      },
+      {
+        "runner": "validated:tests/sol-expression-uniqueness/checker-controls.py",
+        "input_revision": "3799f46a504e48d718c7d66fd1eccceac041ec76",
+        "frames": [
+          {
+            "path": "tests/sol-expression-uniqueness/checker-controls.py",
+            "blob": "c3aaa100b1f4c7651c1e626503712056314b524f",
+            "line": 64
+          },
+          {
+            "path": "scripts/check-sol-expression-uniqueness.py",
+            "blob": "363ce058894db0ae915be3f026e18b090693006d",
+            "line": 28
+          }
+        ],
+        "target": "tests/sol-expression-uniqueness/obligations.json",
+        "target_blob": "6a6ad92ece4af577b59562afa53b5406a47b803e",
+        "operation": "validated Python read of measured bytes"
+      },
+      {
+        "runner": "validated:tests/sol-expression-uniqueness/checker-controls.py",
+        "input_revision": "3799f46a504e48d718c7d66fd1eccceac041ec76",
+        "frames": [
+          {
+            "path": "tests/sol-expression-uniqueness/checker-controls.py",
+            "blob": "c3aaa100b1f4c7651c1e626503712056314b524f",
+            "line": 86
+          },
+          {
+            "path": "scripts/check-sol-expression-uniqueness.py",
+            "blob": "363ce058894db0ae915be3f026e18b090693006d",
+            "line": 28
+          }
+        ],
+        "target": "tests/sol-expression-uniqueness/registration-manifest.json",
+        "target_blob": "983ef820bc0d694f46fb8b3606f17e352e0d8428",
+        "operation": "validated Python read of measured bytes"
+      },
+      {
+        "runner": "validated:tests/sol-expression-uniqueness/checker-controls.py",
+        "input_revision": "3799f46a504e48d718c7d66fd1eccceac041ec76",
+        "frames": [
+          {
+            "path": "tests/sol-expression-uniqueness/checker-controls.py",
+            "blob": "c3aaa100b1f4c7651c1e626503712056314b524f",
+            "line": 109
+          },
+          {
+            "path": "tests/sol-expression-uniqueness/checker-controls.py",
+            "blob": "c3aaa100b1f4c7651c1e626503712056314b524f",
+            "line": 104
+          },
+          {
+            "path": "scripts/check-sol-expression-uniqueness.py",
+            "blob": "363ce058894db0ae915be3f026e18b090693006d",
+            "line": 480
+          }
+        ],
+        "target": "tests/sol-expression-uniqueness/signatures.lean",
+        "target_blob": "b621e4226bac1e2a3fede9f8f1cbdf7c8ac6ba1f",
+        "operation": "validated Python read of measured bytes"
+      },
+      {
+        "runner": "validated:tests/sol-expression-uniqueness/checker-controls.py",
+        "input_revision": "3799f46a504e48d718c7d66fd1eccceac041ec76",
+        "frames": [
+          {
+            "path": "tests/sol-expression-uniqueness/checker-controls.py",
+            "blob": "c3aaa100b1f4c7651c1e626503712056314b524f",
+            "line": 110
+          },
+          {
+            "path": "tests/sol-expression-uniqueness/checker-controls.py",
+            "blob": "c3aaa100b1f4c7651c1e626503712056314b524f",
+            "line": 23
+          },
+          {
+            "path": "scripts/check-sol-expression-uniqueness.py",
+            "blob": "363ce058894db0ae915be3f026e18b090693006d",
+            "line": 237
+          },
+          {
+            "path": "scripts/check-sol-expression-uniqueness.py",
+            "blob": "363ce058894db0ae915be3f026e18b090693006d",
+            "line": 237
+          },
+          {
+            "path": "scripts/check-sol-expression-uniqueness.py",
+            "blob": "363ce058894db0ae915be3f026e18b090693006d",
+            "line": 37
+          }
+        ],
+        "target": "tests/sol-expression-uniqueness/gate.sh",
+        "target_blob": "3c98a65a02f53475179bf79bea443c7553e1397e",
         "operation": "validated Python read of measured bytes"
       }
     ],
