@@ -4,15 +4,6 @@ import Solidity.Evm.MemoryFixedShapeCode
 namespace Solidity.Evm.Memory
 open Semantics
 
-private theorem primStrip {p : PrimTy} : {n : Nat} → (xs : SVec (.prim p) n) → xs.strip = xs
-  | _, .nil => by rw [SVec.strip_nil]
-  | _, .cons (.prim v) rest => by rw [SVec.strip_cons, SVal.strip_prim, primStrip rest]
-private theorem primOverlay {p : PrimTy} : {n : Nat} → (xs : SVec (.prim p) n) →
-    ∀ old, SVec.overlayOn old xs = xs
-  | _, .nil, _ => by rw [SVec.overlayOn_nil]
-  | _, .cons (.prim v) rest, [] => by rw [SVec.overlayOn_nil_cons, SVal.strip_prim, primStrip]
-  | _, .cons (.prim v) rest, o :: old => by rw [SVec.overlayOn_cons_cons, SVal.overlay_prim, primOverlay rest]
-
 theorem fixedPadStore_live (st : WordStore) (dst : Slot) (n k : Nat)
     (words : Nat → Fin W) (i : Nat) (hi : i < n) :
     fixedPadStore st dst n k words (dst.add i) = (words i).val := by
@@ -56,7 +47,7 @@ theorem primitiveFixed_dynamic_repr {H : HTy} {p : PrimTy} {n : Nat} {hp : Heap 
       (old.overlay ((FixedCopy.dynamic hn).apply (MVal.copyMToSt hp r))) := by
   cases old with
   | array oe osh oh =>
-    rw [primitiveFixed_snapshot, FixedCopy.apply, primStrip, SVal.overlay_array, primOverlay]
+    rw [primitiveFixed_snapshot, FixedCopy.apply, primitiveStrip, SVal.overlay_array, primitiveOverlay]
     refine .array ?_ hL ?_
     · rw [arrayCopyStore_length _ _ _ _ hn]
     · intro i x hx
@@ -76,7 +67,7 @@ theorem primitiveFixed_pad_repr {H : HTy} {p : PrimTy} {n k : Nat} {hp : Heap H}
     ReprAt (fixedPadStore st dst n k (fun i => payloadWord (m.mem (base.val + i))))
       L (.ref (.fixed (.prim p) k)) dst
       ((FixedCopy.fixed k hfit).apply (MVal.copyMToSt hp r)) := by
-  rw [primitiveFixed_snapshot, FixedCopy.apply, primStrip]
+  rw [primitiveFixed_snapshot, FixedCopy.apply, primitiveStrip]
   refine .fixed ?_
   intro i x hx
   rw [SVec.getElem?_padRight] at hx

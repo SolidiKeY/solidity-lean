@@ -9,16 +9,7 @@ open Semantics
 theorem allocRef_split {H : HTy} {R T : RefTy} (hp : Heap H) (o : MObj H R)
     (r : HRef (H ++ [R]) T) :
     (∃ q : HRef H T, q.wk (List.prefix_append H [R]) = r) ∨
-      (T = R ∧ HEq r (hp.alloc o).2) := by
-  by_cases hi : r.id < H.length
-  · let q : HRef H T := ⟨r.id, by simpa only [List.getElem?_append_left hi] using r.get?⟩
-    have he : q.wk (List.prefix_append H [R]) = r := by cases r; rfl
-    exact .inl ⟨q, he⟩
-  · have hr : r.id = H.length := by
-      have hl : r.id < (H ++ [R]).length := r.id_lt
-      simp only [List.length_append, List.length_singleton] at hl
-      omega
-    exact .inr (HRef.heq_of_id r (hp.alloc o).2 hr)
+      (T = R ∧ HEq r (hp.alloc o).2) := Solidity.Evm.Memory.allocRef_split hp o r
 
 theorem ValueRepr.wk {H H' : HTy} {base base' : Nat → Fin W} (e : H <+: H')
     (hb : BaseExtends H base base') {T : Ty} {v : MVal H T} {w : Word}

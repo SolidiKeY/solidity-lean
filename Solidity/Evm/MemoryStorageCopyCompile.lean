@@ -738,10 +738,6 @@ private def ProgSound (L b frame : Nat) {Γ Δ : Ctx} (F : Frag Γ) (G : Frag Δ
     b + frameNeedProg P ≤ frame → AllocationInput b frame (allocationCostProg P σ) σ base m → copyBoundProg P σ ≤ L →
       GrowingResult L b frame (allocationCostProg P σ) G σ base m (P.run σ) (run code m)
 
-private theorem statementEndCap {Γ Δ : Ctx} {s : Stmt C Γ Δ} {b frame : Nat}
-    (h : b + frameNeedStmt s ≤ frame) : b + Δ.length ≤ frame :=
-  Nat.le_trans (Nat.add_le_add_left (frameNeedStmt_end s) b) h
-
 private theorem nil_sound {L b frame : Nat} {Γ : Ctx} (F : Frag Γ) :
     ProgSound (C := C) L b frame F F .nil [] :=
   fun h _ _ _ => .inl ⟨⟨_, List.prefix_refl _⟩, _, _, rfl, rfl, h, rfl,

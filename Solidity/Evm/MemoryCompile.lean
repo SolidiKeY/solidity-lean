@@ -877,7 +877,7 @@ private def ProgSound (L b frame : Nat) {Γ Δ : Ctx} (F : Frag Γ) (G : Frag Δ
     b + frameNeedProg P ≤ frame → AllocationInput b frame (allocationCostProg P σ) σ base m →
       GrowingResult L b frame (allocationCostProg P σ) G σ base m (P.run σ) (run code m)
 
-private theorem statementEndCap {Γ Δ : Ctx} {s : Stmt C Γ Δ} {b frame : Nat}
+theorem statementEndCap {Γ Δ : Ctx} {s : Stmt C Γ Δ} {b frame : Nat}
     (h : b + frameNeedStmt s ≤ frame) : b + Δ.length ≤ frame :=
   Nat.le_trans (Nat.add_le_add_left (frameNeedStmt_end s) b) h
 

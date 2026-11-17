@@ -2,16 +2,6 @@ import Solidity.Evm.MemoryLoopScopeSound
 namespace Solidity.Evm.Memory.LoopScopes
 variable {C : Contract}
 
-private theorem old_stmt_cost_zero {b Γ Δ F G s code}
-    (hs : Loops.StmtCert (C := C) b (Γ := Γ) (Δ := Δ) F G s code)
-    {σ : State C Γ} {o : Solidity.Out C σ.H Δ} {amount}
-    (hn : hs.allocates = false) (hc : hs.Cost σ o amount) : amount = 0 := by
-  cases hs with
-  | finite cert =>
-    rw [hc]
-    simp only [allocationCostStmt, show hasAllocationStmt s = false from hn, Bool.false_eq_true, if_false]
-  | loop a c body cond code G hv hb stable => exact hc.cost_zero hn
-
 private theorem old_cost_zero {b Γ Δ F G P code}
     (hp : Loops.ProgCert (C := C) b (Γ := Γ) (Δ := Δ) F G P code)
     {σ : State C Γ} {o : Solidity.Out C σ.H Δ} {amount}
@@ -20,7 +10,7 @@ private theorem old_cost_zero {b Γ Δ F G P code}
   | nil => rfl
   | cons ho hc ht ih =>
     have h := Bool.or_eq_false_iff.mp hn
-    rw [old_stmt_cost_zero _ h.1 hc, ih h.2]
+    rw [Loops.stmt_cost_zero _ h.1 hc, ih h.2]
 
 
 theorem cost_nonallocating {b Γ Δ F G P code}

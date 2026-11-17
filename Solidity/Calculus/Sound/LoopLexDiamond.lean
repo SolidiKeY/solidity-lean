@@ -16,13 +16,13 @@ namespace Solidity.LoopLex
 
 variable {C : Contract} {Γ Γ₁ : Ctx}
 
-private theorem lower_ok {p : PrimTy} (v : Val C Γ p) (σ : State C Γ) {x : p.Denote}
+theorem lower_ok {p : PrimTy} (v : Val C Γ p) (σ : State C Γ) {x : p.Denote}
     (h : v.evalT σ = .ok x) : v.lower.eval σ = some x := by
   have hv := Val.lower_evalT σ v
   rw [h] at hv
   exact hv
 
-private theorem lower_error {p : PrimTy} (v : Val C Γ p) (σ : State C Γ) {e : THalt}
+theorem lower_error {p : PrimTy} (v : Val C Γ p) (σ : State C Γ) {e : THalt}
     (h : v.evalT σ = .error e) : v.lower.eval σ = none := by
   have he := Val.evalT_revertOnly σ v e h
   subst e
@@ -30,7 +30,7 @@ private theorem lower_error {p : PrimTy} (v : Val C Γ p) (σ : State C Γ) {e :
   rw [h] at hv
   exact hv
 
-private theorem anon_head {σ τ : State C Γ} {xs : List ((t : LTy) × Idx Γ t)}
+theorem anon_head {σ τ : State C Γ} {xs : List ((t : LTy) × Idx Γ t)}
     {hv : Option (List Name)} {μ : Mutability} {W : List (LTy × Nat)}
     (hxs : ∀ t (i : Idx Γ t), (t, i.toNat) ∈ W → (⟨t, i⟩ : (t : LTy) × Idx Γ t) ∈ xs)
     (hg : TGFrame μ σ τ) (ha : TLocAgree 0 W σ.env τ.env) (hk : FrameKeeps hv σ τ)
