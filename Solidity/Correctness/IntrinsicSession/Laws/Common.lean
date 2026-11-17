@@ -6,11 +6,9 @@ import Solidity.Goals.IntrinsicSession
 /-!
 # The intrinsic session: boundary invariant and unfolding lemmas
 
-Shared lemmas of the lanes of `IntrinsicSession.Laws` (plan step
-`is0p0-session-invariants`); no goal. A boundary is a `Walks` from the start's
-`origin` (`boundary_mk`, through `walk_go`), reached at a good bound
-(`boundary_iff`); `Boundary.next` and its companions decompose one action of
-`act` (the step at a good bound, `Bound.upto`); listed worlds are boundaries.
+Shared lemmas of the `IntrinsicSession.Laws` lanes (step `is0p0-session-invariants`): a boundary
+is a `Walks` from the start's `origin` (`boundary_mk`, `boundary_iff`); `Boundary.next` and its
+companions decompose one action of `act`, the step at a good bound; listed worlds are boundaries.
 -/
 
 namespace Solidity.Semantics.IntrinsicSession
@@ -48,8 +46,7 @@ theorem walk_succ {a : Action} : ∀ (k : Nat) {h h' : List Event} {n : Nat}
       some (h' ++ (step entry F wire r e h' (n + k) w' a).events,
         (step entry F wire r e h' (n + k) w' a).world)
   | 0, h, h', n, w, w', reach, next, completes => by
-    simp only [walk, Option.some.injEq, Prod.mk.injEq] at reach
-    obtain ⟨rfl, rfl⟩ := reach
+    cases reach
     simp only [Nat.add_zero, Nat.zero_add] at next completes ⊢
     simp only [walk, next, completes, Bool.false_eq_true, if_false]
   | k + 1, h, h', n, w, w', reach, next, completes => by
@@ -71,8 +68,7 @@ theorem walk_go : ∀ (k : Nat) {h h' : List Event} {n : Nat} {w w' : World (cat
           ws ++ (go entry F wire r e h' (n + k) w' j).worlds,
           fs ++ (go entry F wire r e h' (n + k) w' j).frames⟩
   | 0, h, h', n, w, w', reach => by
-    simp only [walk, Option.some.injEq, Prod.mk.injEq] at reach
-    obtain ⟨rfl, rfl⟩ := reach
+    cases reach
     exact ⟨[], [], rfl, rfl, fun j => by rw [Nat.zero_add, Nat.add_zero]; rfl⟩
   | k + 1, h, h', n, w, w', reach => by
     cases req : e.requests h n with
@@ -117,8 +113,6 @@ theorem go_length : ∀ (k : Nat) (h : List Event) (n : Nat) (w : World (catalog
       · rw [go_stops req cont]; exact Nat.zero_le _
 
 end Walk
-
-/-! ## Good bounds and unfolding -/
 
 /-- The bound at horizon `k` without resource failure. -/
 abbrev Bound.upto (k : Nat) : Bound := { horizon := k }
@@ -251,8 +245,6 @@ theorem boundary_mk :
       obtain ⟨rfl, same⟩ := Boundary.unique (F := F) ⟨w, rfl, st⟩ ⟨_, rfl, stands ⟨h0, w0, o, wk⟩⟩
       cases same
       exact ⟨h0, w0, o, wk⟩
-
-/-! ## The reachable-boundary invariant -/
 
 /-- **The reachable-boundary invariant**: a boundary is what the run reaches at
 a good bound whose horizon is the actions issued: its history, `n + 1` boundary
@@ -395,8 +387,6 @@ theorem deploy_stops {code : Code} (stops : (deployed F code e).stops = true)
     (by simp only [Start.origin, Start.initial, stops, if_true])
   exact ⟨by rw [sem_eq, pfx], List.map_eq_nil_iff.2 bnds⟩
 
-/-! ## Listed worlds -/
-
 /-- A listed world is the start resumed at its typed world, in the session's code. -/
 theorem listed_resume {ω : Start} (mem : ω ∈ (spec F).worlds x e r) :
     ω = (view F).resume ((view F).typed ω) ∧ ((view F).typed ω).code = ((view F).typed x).code := by
@@ -424,9 +414,7 @@ theorem boundary_of_index {m : Nat}
       omega
     | some q =>
       have b := boundary_mk.2 ⟨h0, w0, o, wk⟩
-      have := (Boundary.reached b good le).1
-      rw [at_m] at this
-      cases this
+      cases at_m.symm.trans (Boundary.reached b good le).1
       exact ⟨_, b, le⟩
 
 /-- **Every listed world at a good bound is a boundary** the prefix has reached. -/
