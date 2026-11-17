@@ -1,0 +1,1 @@
+| `Solidity/Semantics/IntrinsicStorage/Preimages/Run.lean` | Observed straight-line statement steps (assignments, declarations, op-assign, inc/dec, push/pop, transfer/send, memory moves, delete, new, require/assert); each result is the actual typed run result. |
