@@ -2292,6 +2292,24 @@
           "tests/generated/seed-0.json"
         ],
         "other_reads": "unresolved"
+      },
+      {
+        "path": "tests/roadmap-v17/test_join.py",
+        "input_revision": "3799f46a504e48d718c7d66fd1eccceac041ec76",
+        "source_blob": "64d0da5cafd6783a8cb62d173b912769bb230844",
+        "command": [
+          "python3",
+          "-B",
+          "tests/roadmap-v17/test_join.py"
+        ],
+        "kind": "unittest",
+        "purpose": "Passing host metadata-join and refusal controls consume exact committed request descriptors and one historical KeySort metadata row as reference inputs. Live conditions remain open. No authenticated compiler binary, generated contract, current KeySort output, Lean/kernel theorem, native execution or runtime acceptance credit. Other reads unresolved.",
+        "input_scope": [
+          "tests/roadmap-v17/requests/compiler.json",
+          "tests/roadmap-v17/requests/contracts.json",
+          "tests/roadmap-v17/requests/historical-keysort-row.json"
+        ],
+        "other_reads": "unresolved"
       }
     ],
     "module_entries": [
@@ -3295,6 +3313,73 @@
         ],
         "target": "tests/generated/seed-0.json",
         "target_blob": "e0d09c3b3f15a59d81889b54c3e80294b239ab69",
+        "operation": "validated Python read of measured bytes"
+      },
+      {
+        "runner": "validated:tests/roadmap-v17/test_join.py",
+        "input_revision": "3799f46a504e48d718c7d66fd1eccceac041ec76",
+        "frames": [
+          {
+            "path": "tests/roadmap-v17/test_join.py",
+            "blob": "64d0da5cafd6783a8cb62d173b912769bb230844",
+            "line": 119
+          },
+          {
+            "path": "tests/roadmap-v17/test_join.py",
+            "blob": "64d0da5cafd6783a8cb62d173b912769bb230844",
+            "line": 14
+          }
+        ],
+        "target": "tests/roadmap-v17/requests/historical-keysort-row.json",
+        "target_blob": "b2820a67d505f7c59fc8834def653c97f1a16e2e",
+        "operation": "validated Python read of measured bytes"
+      },
+      {
+        "runner": "validated:tests/roadmap-v17/test_join.py",
+        "input_revision": "3799f46a504e48d718c7d66fd1eccceac041ec76",
+        "frames": [
+          {
+            "path": "tests/roadmap-v17/test_join.py",
+            "blob": "64d0da5cafd6783a8cb62d173b912769bb230844",
+            "line": 119
+          },
+          {
+            "path": "tests/roadmap-v17/test_join.py",
+            "blob": "64d0da5cafd6783a8cb62d173b912769bb230844",
+            "line": 110
+          },
+          {
+            "path": "scripts/roadmap-v17-join.py",
+            "blob": "748c3cd065b10f56819680ddbd080f7d797bdb71",
+            "line": 121
+          }
+        ],
+        "target": "tests/roadmap-v17/requests/compiler.json",
+        "target_blob": "2c883063a7b1a88cb136a19b3aededdb64221086",
+        "operation": "validated Python read of measured bytes"
+      },
+      {
+        "runner": "validated:tests/roadmap-v17/test_join.py",
+        "input_revision": "3799f46a504e48d718c7d66fd1eccceac041ec76",
+        "frames": [
+          {
+            "path": "tests/roadmap-v17/test_join.py",
+            "blob": "64d0da5cafd6783a8cb62d173b912769bb230844",
+            "line": 119
+          },
+          {
+            "path": "tests/roadmap-v17/test_join.py",
+            "blob": "64d0da5cafd6783a8cb62d173b912769bb230844",
+            "line": 110
+          },
+          {
+            "path": "scripts/roadmap-v17-join.py",
+            "blob": "748c3cd065b10f56819680ddbd080f7d797bdb71",
+            "line": 121
+          }
+        ],
+        "target": "tests/roadmap-v17/requests/contracts.json",
+        "target_blob": "90022193a82c927c397f81445f88f5bd1e949106",
         "operation": "validated Python read of measured bytes"
       }
     ],
