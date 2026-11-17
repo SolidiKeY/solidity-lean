@@ -124,7 +124,9 @@ if fragment_helper.is_file():
     CONSUMER_SECTIONS = fragment_rules.CONSUMER_SECTIONS
     declared_module_cli = fragment_rules.declared_module_cli
     validated_module_entries = lambda graph, entries: fragment_rules.validated_module_entries(globals(), graph, entries)
+    SOURCE_ROLE_KINDS = fragment_rules.SOURCE_ROLE_KINDS
 else:
+    SOURCE_ROLE_KINDS = {}
     # Historical standalone drivers copy only check-tests-used*.py files.
     FRAGMENT_SECTIONS = ('standalone', 'generators', 'reads', 'orphans', 'module_entries')
     CONSUMER_SECTIONS = ()
@@ -547,13 +549,24 @@ def read_routes(catalog):
             yield {**base, 'target': row['path'], 'target_blob': row['blob']}
 
 
-def reviewed_module_collector(repo, pin, current):
+# Audited historical trace collectors, each bound to the exact commit holding
+# it. 74a8ac05 (d76458a00) -> current f01d503a (8d11968d4) adds only the
+# off-by-default readonly_symlinks audit (H1001): module-entry observation never
+# enables it, the lifted strace argument splitter and path resolution are
+# byte-for-byte equivalent, and source_code_hashes/code_fingerprint are
+# unchanged, so claims recorded under 74a8ac05 keep their meaning (H1010).
+REVIEWED_MODULE_COLLECTORS = {
+    '42027e7c42dac3912c1f8ef468a6d99bddb8075172c545b6a587692b039cff32':
+        'e6d215dff997377f70e17ce50d04b8eb12284b16',
+    '74a8ac05edadf4a4a1cf901134a8c23b24a844284ee8fe2a5f4e6fba274d251c':
+        'd76458a00eef321c6f34cc5f7f76e0dd02ff31b9',
+}
+
+
+def reviewed_module_collector(repo, pin, current, reviewed=None):
     """Keep already reviewed historical claims verifiable after collector fixes."""
     if pin == current: return True
-    reviewed = {
-        '42027e7c42dac3912c1f8ef468a6d99bddb8075172c545b6a587692b039cff32':
-            'e6d215dff997377f70e17ce50d04b8eb12284b16',
-    }
+    reviewed = REVIEWED_MODULE_COLLECTORS if reviewed is None else reviewed
     if not isinstance(pin, str) or pin not in reviewed: return False
     try: source = git(repo.root, 'show', reviewed[pin] + ':scripts/check-tests-used-trace.py')
     except ValueError as error:
@@ -603,7 +616,7 @@ def validated_routes(graph, catalog, extra_reads=()):
             if len(fields) != 3 or fields[0].decode() != expected_oid or fields[1] != expected_type:
                 raise ValueError('unverifiable historical runner demonstration: ' + request)
     for entry in catalog['standalone']:
-        if entry.get('kind') == 'source-only-program': fragment_rules.source_only_program(globals(), graph, catalog, entry); continue
+        if entry.get('kind') in SOURCE_ROLE_KINDS: SOURCE_ROLE_KINDS[entry['kind']](globals(), graph, catalog, entry); continue
         required = {'path', 'input_revision', 'source_blob', 'command', 'kind'}
         if entry.get('kind') == 'manual-reproducer': required.add('documentation')
         if entry.get('kind') == 'runnable-entrypoint': required.update(('entry_line', 'purpose', 'input_scope', 'other_reads'))
@@ -2125,6 +2138,24 @@ def module_entry_schema_controls():
         try: inventory(repo,bad)
         except ValueError: pass
         else: raise AssertionError('invalid entered module source line accepted')
+        # Historical collector pins: each audited blob only at its exact commit.
+        current=hashlib.sha256(helper.read_bytes()).hexdigest()
+        assert reviewed_module_collector(repo,current,current) and not reviewed_module_collector(repo,'0'*64,current)
+        assert not reviewed_module_collector(repo,['74a8ac05edadf4a4a1cf901134a8c23b24a844284ee8fe2a5f4e6fba274d251c'],current)
+        assert len(REVIEWED_MODULE_COLLECTORS)==2 and all(re.fullmatch('[0-9a-f]{64}',k) and re.fullmatch('[0-9a-f]{40}',v) for k,v in REVIEWED_MODULE_COLLECTORS.items())
+        for pin in REVIEWED_MODULE_COLLECTORS:  # the synthetic repository lacks the commits
+            try: reviewed_module_collector(repo,pin,current)
+            except ValueError as error: assert 'UNVERIFIABLE reviewed module collector source' in str(error)
+            else: raise AssertionError('unverifiable reviewed collector accepted')
+        home=type('Home',(),{'root':Path(__file__).resolve().parents[1]})()
+        held=[pin for pin,commit in REVIEWED_MODULE_COLLECTORS.items()
+              if subprocess.run(['git','-C',str(home.root),'cat-file','-e',commit+':scripts/check-tests-used-trace.py'],capture_output=True).returncode==0]
+        for pin in held:  # full clones: the real pins verify, and a pin bound to another commit is refused
+            assert reviewed_module_collector(home,pin,current)
+            swapped={pin:next(c for p,c in REVIEWED_MODULE_COLLECTORS.items() if p!=pin)}
+            try: reviewed_module_collector(home,pin,current,swapped)
+            except ValueError as error: assert 'reviewed module collector source mismatch' in str(error)
+            else: raise AssertionError('collector pin bound to another commit accepted')
 
 
 def self_test():

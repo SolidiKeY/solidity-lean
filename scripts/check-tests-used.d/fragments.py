@@ -44,6 +44,14 @@ FRAGMENT_SECTIONS = ('standalone', 'generators', 'reads', 'orphans', 'module_ent
 # Standalone kind committed-module-cli (main script) is the H955 argparse role.
 # H978 (x1g): static forms lean-library-readFile and node-readFileSync-walk, and
 #   standalone kind source-only-program (revision-independent no-pass role).
+# H996 (x1i): standalone kind python-argument-source-role, a reviewed
+#   argument-bearing Python program as a source-only role that anchors nothing.
+# H997 (x1j): standalone kind nonpython-entry-source-role, a reviewed live shell
+#   or Node program as a source-only role that anchors nothing.
+# H999 (x1k): standalone kind lean-check-source-role, a reviewed live non-root
+#   Lean check source bound to its blob and drivers; anchors nothing.
+# H1015 (x1o): standalone kind lean-fixture-source-role, the H999 rules for a
+#   reviewed Lean fixture source (roles.py); consumption only, anchors nothing.
 # persistent_module_entries (H979): exact routes.module_entries claims that
 #   persist while every recorded object is unchanged.
 CONSUMER_SECTIONS = ('persistent_reads', 'static_routes', 'git_policies', 'persistent_module_entries')
@@ -158,13 +166,19 @@ def _check_lines(repo, frames):
             raise ValueError('consumer route location mismatch')
 
 
-def _anchor_root(graph, runner, frames):
+def _anchor_root(graph, runner, frames, walk=False):
     """A current non-source-only root, or a demonstrated passing committed runner.
 
     A runner named validated:P or committed:P resolves to whichever of the two
     exists at the measured revision. Any other root (undemonstrated committed
-    source, CLI/policy source role, derived claim) anchors nothing.
+    source, CLI/policy source role, derived claim) anchors nothing, except that
+    a reviewed Node mode entry (H992) anchors the walker form alone (walk).
     """
+    if runner.startswith(NODE_MODE_PREFIX):
+        root = graph.roots.get(runner) if walk else None
+        if root is None or 'derived_from' in root or not root.get('node_mode_root'): return None, None
+        if root['path'] != frames[0]['path']: raise ValueError('consumer route does not start at its runner')
+        return runner, root
     if runner.startswith(('validated:', 'committed:')):
         path = runner.split(':', 1)[1]
         runner = 'validated:' + path if 'validated:' + path in graph.roots else 'committed:' + path
@@ -390,7 +404,7 @@ def static_routes(classifier, graph, rows):
         frames = row['frames']; target = row['target']; form = row['form']
         if not _frames_current(repo, frames, [(target, row['target_blob'])]): continue
         _check_lines(repo, frames)
-        original, root = _anchor_root(graph, row['runner'], frames)
+        original, root = _anchor_root(graph, row['runner'], frames, form == 'node-readFileSync-walk')
         if root is None: continue
         if root.get('source_only') and root.get('source_blob') != frames[0]['blob']: continue
         language = 'lean' if form.startswith('lean') else 'node'
@@ -512,7 +526,9 @@ def git_policies(classifier, graph, rows):
                 raise ValueError('invalid Git policy output or line')
             if not _current(repo, writer['path'], writer['blob']): stale = True; break
             if posixpath.basename(writer['path']) == '.gitignore' or not any(
-                    r['path'] == writer['path'] and 'derived_from' not in r and not k.startswith('git-policy:') for k, r in graph.roots.items()):
+                    r['path'] == writer['path'] and 'derived_from' not in r and not k.startswith('git-policy:')
+                    and not r.get('python_argument_role') and not r.get('nonpython_entry_role') and not r.get('lean_check_role')
+                    and not r.get('lean_fixture_role') for k, r in graph.roots.items()):
                 raise ValueError('Git policy writer is not an entry point source')
             if full in repo.tree or any(p.startswith(full + '/') for p in repo.tree):
                 raise ValueError('Git policy output is tracked: ' + full)
@@ -854,6 +870,550 @@ def source_only_program(classifier, graph, catalog, entry):
         'program_role': SOURCE_ONLY_KIND, 'source_declaration_revision': revision,
         'validation_at_measured_revision': {'status': 'unavailable', 'command': command,
             'reason': 'Default invocation is not certified to pass and matches no configured CLI form; revision-independent source role only. No read anchor, fixture, helper, child, generated-output, proof or runtime credit.'}})
+
+
+
+NODE_MODE_KIND = 'node-mode-source-root'
+NODE_MODE_PREFIX = 'node-mode:'
+# H992 (gh coord#1319): each reviewed argument-bearing Node entry, bound to
+# (path, source blob, mode, provenance line in that same blob). Nothing else
+# is promoted: another file, blob, mode, argument or documentation line fails.
+REVIEWED_NODE_MODES = frozenset({('scripts/parse-corpus.mjs', 'dd1093f6fe8bfe00ae772e0b8b4a0bc0dd4b265a', 'prepare', 17)})
+
+
+def node_mode_root(classifier, graph, catalog, entry, reviewed=None):
+    """H992: a reviewed `node P MODE` command as a source-only entry root.
+
+    The definition binds the exact command ['node', P, MODE], the source blob,
+    and its provenance: a whole-line // comment of that same blob that starts
+    with the verbatim command. P has a top-level `const M = process.argv[2];`
+    and a top-level `if (M === "MODE") {`. The root is never a validated or
+    passing runner and carries no execution, fixture, proof or runtime credit;
+    it anchors only node-readFileSync-walk routes, whose own checks still bind
+    every frame and target to their objects at the recorded revision. A later
+    revision keeps it while the blob is unchanged and the recorded commit
+    holds it.
+    """
+    repo = graph.repo
+    reviewed = REVIEWED_NODE_MODES if reviewed is None else reviewed
+    required = {'path', 'input_revision', 'source_blob', 'command', 'kind', 'provenance', 'purpose'}
+    if (set(entry) != required or not isinstance(entry['path'], str) or not isinstance(entry['source_blob'], str)
+            or not isinstance(entry['purpose'], str) or not entry['purpose'].strip()
+            or not isinstance(entry['provenance'], dict) or set(entry['provenance']) != {'path', 'blob', 'line', 'invocation'}):
+        raise ValueError('invalid Node mode root definition')
+    p = entry['path']; revision = entry['input_revision']; command = entry['command']; doc = entry['provenance']
+    if not isinstance(revision, str) or not classifier['hex_pin'](revision, 40): raise ValueError('Node mode root requires a full commit revision')
+    if any(e.get('path') == p and e.get('input_revision') == revision and e is not entry for e in catalog['standalone']):
+        raise ValueError('conflicting standalone definitions: ' + p)
+    if (not isinstance(command, list) or len(command) != 3 or command[:2] != ['node', p] or not isinstance(command[2], str)
+            or not re.fullmatch(r'[a-z][\w-]*', command[2]) or not p.endswith(NODE_SUFFIXES)):
+        raise ValueError('unsupported Node mode root invocation: ' + str(p))
+    mode = command[2]
+    if (doc['path'] != p or doc['blob'] != entry['source_blob'] or doc['invocation'] != shlex.join(command)
+            or (p, entry['source_blob'], mode, doc['line']) not in reviewed):
+        raise ValueError('unreviewed Node mode root: ' + p)
+    if revision != repo.ref:
+        if any(e.get('path') == p and e.get('input_revision') == repo.ref for e in catalog['standalone']): return
+        if not _current(repo, p, entry['source_blob']): return
+        if not _historical_objects(classifier, repo, revision, [(p, entry['source_blob'])]):
+            raise ValueError('unverifiable historical runner demonstration: ' + revision + ':' + p)
+    elif not _current(repo, p, entry['source_blob']): raise ValueError('standalone definition source mismatch: ' + p)
+    text = repo.texts.get(p)
+    if text is None or repo.tree[p][0] not in ('100644', '100755') or not _plain_lines(text):
+        raise ValueError('unsupported Node mode root invocation: ' + p)
+    code, _ = _js_mask(text, True); lines = text.splitlines(); line = doc['line']
+    # Provenance: a comment-only line of the measured blob, command first.
+    if (type(line) is not int or not 1 <= line <= len(lines) or _js_line(text, line, True)[1].strip()
+            or not re.match(r'\s*//\s*' + re.escape(doc['invocation']) + r'(?:\s|$)', lines[line - 1])):
+        raise ValueError('Node mode root lacks its verbatim source provenance: ' + p)
+    branches = [m for m in (_js_match(text, n, r'if\s*\(\s*([\w$]+)\s*===\s*(["\'])' + re.escape(mode) + r'\2\s*\)\s*\{')
+                            for n in range(1, len(lines) + 1) if mode in lines[n - 1]) if m and not m.string[:1].isspace()]
+    if (len(branches) != 1 or _js_destructured(code, branches[0][1])
+            or _js_unique(text, code, branches[0][1], r'const\s+' + re.escape(branches[0][1]) + r'\s*=\s*process\.argv\[2\]\s*;?') is None):
+        raise ValueError('Node mode root lacks its top-level argv mode branch: ' + p)
+    entry_line = next(n for n in range(1, len(lines) + 1) if not lines[n - 1][:1].isspace() and _js_match(text, n, re.escape(branches[0].group(0))))
+    identity = NODE_MODE_PREFIX + p
+    graph.root(p, 'source-only Node mode entry', shlex.join(command), p, entry_line, root_id=identity)
+    if identity not in graph.roots: return
+    graph.roots[identity].update({'source_only': True, 'node_mode_root': True, 'source_blob': entry['source_blob'],
+        'purpose': entry['purpose'], 'node_mode': mode, 'provenance': doc, 'source_demonstration_revision': revision,
+        'validation_at_measured_revision': {'status': 'unavailable', 'command': command,
+            'reason': 'Reviewed argument-bearing entry command; source role only, never run or certified to pass. Anchors only literal walker reads in its mode; no execution, helper, child, generated-output, proof or runtime credit.'}})
+
+
+# Reviewed (path, source blob, introducing commit) tables: an @COMMIT line,
+# then one `path blob` row per file it introduced; each path starts with an
+# abbreviation from _REVIEW_DIRECTORIES.
+_REVIEW_DIRECTORIES = {'N:': 'tests/directruntime-20261104/native-browser/', 'D:': 'tests/directruntime-20261104/', 'U:': 'tests/upstream/'}
+
+
+def _review_table(text):
+    rows, commit = set(), None
+    for line in filter(str.strip, text.split('\n')):
+        if line.startswith('@'): commit = line[1:]; continue
+        path, blob = line.split()
+        if commit is None: raise ValueError('invalid review table')
+        rows.add((_REVIEW_DIRECTORIES[path[:2]] + path[2:], blob, commit))
+    return frozenset(rows)
+
+
+PYTHON_ARGS_KIND = 'python-argument-source-role'
+PYTHON_ARGS_PREFIX = 'py-args:'
+# H996 (gh coord#1329, X1E-CONFIGURED-ROLE): each reviewed live Python program
+# that needs positional arguments, a forwarded command or a subcommand, bound to
+# (path, source blob, commit that introduced that blob at that path). Nothing
+# else is promoted: another file, blob or provenance commit fails, and no
+# argument, read, helper or output is ever recorded or credited.
+REVIEWED_PYTHON_ARGS = _review_table('''
+@15302eb51e3df48b9d8d46eaf50348dd1deddfb2
+N:validation-admission.py 1d56a3dc820b8ae3e503fedfbd4151ff530539bd
+@17f2902cdc6ab848317fc82e31a90ad2d7c4fba8
+D:memory-references/bounded-check.py d9f1b14c51c9011736f0fb484f4fcf96d55cd615
+@2207c1bba286538fd63e4a0ff4960ed4a593a8ab
+U:baseline-20261028/invocations/bulk/timed.py c543b7aef3f458d0765b11b19741406a7ff78415
+U:baseline-20261028/invocations/retries/selector.py 5b7a49f863f7c6fad8231d17d68628623948a00e
+@3bdd5ea4f35abb365b6bb57da56db7c23b645ac5
+D:memory-references/browser-result-intake.py fbb3489b8a38e1e8a8e96fa37d95fbea09d88903
+@3c3346709988f245ee64b8ffc606dfec56e6c6e1
+D:memory-references/pack-cache.py c10c9d9b34044d11582ab507e76bf017a9034449
+@44fa1c785b3168551c9f9589da56b5314b4ef740
+D:memory-references/census-controls.py 08e1714023fc1f8e49ca09a8601d899ed54155f8
+D:memory-references/runtime-boundary-census.py 526851b6c2b502a149b80d2f7f1f0c8ae87b1113
+@4d4407dbbd3e5fed9ed20fe8f76dde8bc0577e89
+D:memory-references/linker-attribution-controls.py 06166345217a40838f67fc52998333cfafd4bbbd
+D:memory-references/linker-attribution.py 3b487c691ab3b1710149a25eef37d14301bcd563
+@5a2afc72aca1a35cf555fa1b462b9de4c2ef79b7
+D:shared-translator/measure.py 57c6a2f51633f72cf79c063740eff1f6ade3a26b
+D:shared-translator/outer_guard.py e33bbf7efee05de73e793c8f872e2e821d8c6421
+@6479617481ce020d41f7061d9dcf4dbfe9bd1ab8
+D:memory-references/native-closure-evidence.py 1872f7842f78468b9d617f000e3469a7781a7fe2
+@9be4ce0a089f0888ac165ff770ac90e3879ece0d
+D:memory-references/inspect-browser-evidence.py 6f747cfa705fc346a6aedfb162e4e84df8978565
+@ca73d1a4e1aecbcbc566acaa1aa7392cad472b3d
+N:environment/test-known-stack-continuation.py 0224c0f28316d02a1489016c0e13c0fa20e6e80c
+N:prepare-image-cache.py c9695f1c0bf66b40be1f138f3da7e1ebc147ffde
+@ae8062cfb0f028667485e6f1a621ff69e62724fd
+N:bounded-command.py 3c9e6eb7c60bf7906c7f605bdf0fa58f65f6a3df
+@c9230cc9692a5974728959907afa1f60733409ad
+D:memory-references/native-boundary-audit.py 8c0601e110ec1c779e759456d05d64ca045a6232
+D:memory-references/native-refusal-controls.py c2f89053088d9f5f615c75f408b6711c5f7b99dd
+@e49c71436470851e0a3b295fa56b3b6c749e09b1
+N:environment/known-stack-continuation.py 7898e125b8addd4b3badbb0d80e7001481c15741
+@e6849d3bdf516099d20c33d3581d523449764018
+D:control-tuples/measure-native.py c24f1113690cc7a6611d8f8d412ce5f8e77b5b1e
+D:control-tuples/run-bounded.py 629db80c898eb6a19b1dc58a7bf1153bf65214dd
+@f11ae9a9025990629aaed70012fc71ebb0ba295d
+N:h109/docker-probe.py 2c67207ea5ce6c3d55e59f3ee2341b764028aedf
+''')
+
+
+def python_argument_interface(text):
+    """The argument-bearing interface of a Python program, or None.
+
+    Recorded from the AST: lines that read `sys.argv` (through `import sys`
+    only), lines among them that take an open argv tail `sys.argv[k:]`
+    (variadic or forwarded command), literal positional `add_argument` names
+    and literal `add_parser` subcommand names. Not audited, giving None: any
+    write, delete or method call on argv; `from sys import argv`; an argv
+    attribute of anything but the sys module; any other binding of the sys
+    name; `getattr` on sys; `parse_args` or `parse_known_args` with explicit
+    arguments; a computed positional or subcommand name. A program with none
+    of the recorded forms also gives None (a default program is
+    source-only-program's role).
+    """
+    try: tree = ast.parse(text)
+    except (SyntaxError, ValueError, RecursionError): return None
+    imports = [a for n in ast.walk(tree) if isinstance(n, ast.Import) for a in n.names]
+    modules = {a.asname or a.name for a in imports if a.name == 'sys'}
+    if any((a.asname or a.name.split('.')[0]) in modules and a.name != 'sys' for a in imports): return None
+    parents = {child: node for node in ast.walk(tree) for child in ast.iter_child_nodes(node)}
+    argv, tails, positionals, subcommands = set(), set(), set(), set()
+    for n in ast.walk(tree):
+        if isinstance(n, ast.ImportFrom) and (n.module == 'sys' and any(a.name in ('argv', '*') for a in n.names)
+                                             or any((a.asname or a.name) in modules for a in n.names)): return None
+        if isinstance(n, (ast.Global, ast.Nonlocal)) and set(n.names) & modules: return None
+        if isinstance(n, ast.Name) and n.id in modules and not isinstance(n.ctx, ast.Load): return None
+        if isinstance(n, ast.arg) and n.arg in modules: return None
+        if isinstance(n, ast.ExceptHandler) and n.name in modules: return None
+        if isinstance(n, (ast.FunctionDef, ast.AsyncFunctionDef, ast.ClassDef)) and n.name in modules: return None
+        if isinstance(n, ast.MatchAs) and n.name in modules or isinstance(n, ast.MatchStar) and n.name in modules: return None
+        if (isinstance(n, ast.Call) and isinstance(n.func, ast.Name) and n.func.id in ('getattr', 'setattr', 'delattr', 'vars')
+                and n.args and isinstance(n.args[0], ast.Name) and n.args[0].id in modules): return None
+        if isinstance(n, ast.Attribute) and n.attr == 'argv':
+            if not (isinstance(n.value, ast.Name) and n.value.id in modules and isinstance(n.ctx, ast.Load)): return None
+            parent = parents.get(n)
+            if isinstance(parent, ast.Attribute) and parent.value is n: return None  # argv.append(...) and the like
+            if isinstance(parent, ast.Subscript) and parent.value is n and not isinstance(parent.ctx, ast.Load): return None
+            argv.add(n.lineno)
+            if (isinstance(parent, ast.Subscript) and parent.value is n and isinstance(parent.slice, ast.Slice)
+                    and parent.slice.upper is None and parent.slice.step is None): tails.add(n.lineno)
+        if isinstance(n, ast.Call) and isinstance(n.func, ast.Attribute):
+            if n.func.attr in ('parse_args', 'parse_known_args', 'parse_intermixed_args') and (n.args or n.keywords): return None
+            if n.func.attr in ('add_argument', 'add_parser'):
+                first = n.args[0] if n.args else None
+                literal = isinstance(first, ast.Constant) and isinstance(first.value, str)
+                if not literal: return None
+                if n.func.attr == 'add_parser': subcommands.add((n.lineno, first.value))
+                elif not first.value.startswith('-'): positionals.add((n.lineno, first.value))
+    if not (argv or positionals or subcommands): return None
+    return {'argv_lines': sorted(argv), 'argv_tail_lines': sorted(tails),
+            'positionals': [list(x) for x in sorted(positionals)], 'subcommands': [list(x) for x in sorted(subcommands)]}
+
+
+def _introduced(classifier, repo, commit, path, blob):
+    """True iff commit holds blob at path and none of its parents does."""
+    if not classifier['hex_pin'](commit, 40) or commit in repo.boundaries: return False
+    try: parents = classifier['git'](repo.root, 'rev-list', '--parents', '-n', '1', commit, '--').decode().split()
+    except ValueError: return False
+    if not parents or parents[0] != commit: return False
+    requests = [commit + ':' + path] + [p + ':' + path for p in parents[1:]]
+    raw = classifier['git'](repo.root, 'cat-file', '--batch-check', '-Z',
+                            data=b''.join(r.encode('utf-8', 'surrogateescape') + b'\0' for r in requests))
+    lines = raw.rstrip(b'\0').split(b'\0')
+    if len(lines) != len(requests): raise ValueError('Python argument role provenance batch mismatch')
+    held = [line.split()[0].decode() == blob and line.split()[1:2] == [b'blob'] if len(line.split()) == 3 else False for line in lines]
+    return held[0] and not any(held[1:])
+
+
+def _role_schema(classifier, catalog, entry, required, label):
+    """Schema, revision and conflict checks of the reviewed source roles."""
+    if (set(entry) != required or not isinstance(entry['path'], str) or not isinstance(entry['source_blob'], str)
+            or not isinstance(entry['purpose'], str) or not entry['purpose'].strip() or not isinstance(entry['interface'], dict)
+            or not isinstance(entry['provenance'], dict) or set(entry['provenance']) != {'commit', 'path', 'blob'}
+            or not all(isinstance(v, str) for v in entry['provenance'].values())):
+        raise ValueError('invalid ' + label + ' definition')
+    p = entry['path']; revision = entry['input_revision']
+    if not isinstance(revision, str) or not classifier['hex_pin'](revision, 40): raise ValueError(label + ' requires a full commit revision')
+    if any(e.get('path') == p and e.get('input_revision') == revision and e is not entry for e in catalog['standalone']):
+        raise ValueError('conflicting standalone definitions: ' + p)
+
+
+def _role_current(classifier, repo, catalog, entry, pins):
+    """False when a later revision supersedes or changed a pinned object."""
+    p = entry['path']; revision = entry['input_revision']
+    if revision != repo.ref:
+        if any(e.get('path') == p and e.get('input_revision') == repo.ref for e in catalog['standalone']): return False
+        if not all(_current(repo, q, b) for q, b in pins): return False
+        if not _historical_objects(classifier, repo, revision, pins):
+            raise ValueError('unverifiable historical runner demonstration: ' + revision + ':' + p)
+    elif not all(_current(repo, q, b) for q, b in pins): raise ValueError('standalone definition source mismatch: ' + p)
+    return True
+
+
+def python_argument_root(classifier, graph, catalog, entry, reviewed=None):
+    """H996: a reviewed argument-bearing Python program as a source-only role.
+
+    The definition binds the bare entry prefix ['python3', '-B', P] (never a
+    concrete argument), the source blob, its genuine top-level entry line, the
+    interface python_argument_interface records for that blob, and provenance:
+    the commit that introduced that blob at P, which must be in the reviewed
+    set. The configured CLI, module CLI and unittest guards are unchanged: a
+    program matching one is refused here. The root is never a validated or
+    passing runner and anchors nothing: no execution, pass, read-anchor,
+    fixture, helper, child, generated-output, proof or runtime credit. A later
+    revision keeps it while the blob is unchanged and the recorded commit holds
+    it; a current definition of the same path supersedes it.
+    """
+    repo = graph.repo
+    reviewed = REVIEWED_PYTHON_ARGS if reviewed is None else reviewed
+    required = {'path', 'input_revision', 'source_blob', 'command', 'kind', 'entry_line', 'interface', 'provenance', 'purpose'}
+    _role_schema(classifier, catalog, entry, required, 'Python argument role')
+    p = entry['path']; revision = entry['input_revision']; doc = entry['provenance']
+    if entry['command'] != ['python3', '-B', p] or not p.endswith('.py'):
+        raise ValueError('unsupported Python argument role invocation: ' + p)
+    if doc['path'] != p or doc['blob'] != entry['source_blob'] or (p, entry['source_blob'], doc['commit']) not in reviewed:
+        raise ValueError('unreviewed Python argument role: ' + p)
+    if not _role_current(classifier, repo, catalog, entry, [(p, entry['source_blob'])]): return
+    if repo.tree[p][0] not in ('100644', '100755') or p not in repo.texts:
+        raise ValueError('unsupported Python argument role invocation: ' + p)
+    if not _introduced(classifier, repo, doc['commit'], p, entry['source_blob']):
+        raise ValueError('Python argument role lacks its introducing provenance: ' + p)
+    try: lines = classifier['entrypoint_lines'](repo.bytes(p))
+    except (SyntaxError, ValueError, RecursionError): lines = set()
+    if type(entry['entry_line']) is not int or entry['entry_line'] not in lines:
+        raise ValueError('Python argument role lacks its top-level entry: ' + p)
+    if any(classifier[f](repo, p) is not None for f in ('declared_configured_cli', 'declared_module_cli', 'declared_unittest')):
+        raise ValueError('Python argument role matches a configured CLI or unittest form: ' + p)
+    interface = python_argument_interface(repo.texts[p])
+    if interface is None: raise ValueError('Python argument role lacks an audited argument interface: ' + p)
+    if canonical(interface) != canonical(entry['interface']): raise ValueError('Python argument role interface mismatch: ' + p)
+    identity = PYTHON_ARGS_PREFIX + p
+    graph.root(p, 'source-only Python argument entry', shlex.join(entry['command']), p, entry['entry_line'], root_id=identity)
+    if identity not in graph.roots: return
+    graph.roots[identity].update({'source_only': True, 'python_argument_role': True, 'source_blob': entry['source_blob'],
+        'purpose': entry['purpose'], 'interface': interface, 'provenance': doc, 'source_declaration_revision': revision,
+        'validation_at_measured_revision': {'status': 'unavailable', 'command': entry['command'],
+            'reason': 'Reviewed argument-bearing Python entry; the bare prefix needs arguments and no argument is recorded. Source role only, never run or certified to pass. No read anchor, fixture, helper, child, generated-output, proof or runtime credit.'}})
+
+
+NONPY_ENTRY_KIND = 'nonpython-entry-source-role'
+NONPY_ENTRY_PREFIX = 'nonpy-entry:'
+# H997 (gh coord#1331, X1E-NONPY-ROLE): the one shebang each interpreter is
+# accepted with; the command names that interpreter explicitly.
+NONPY_SHEBANGS = {'.sh': ('bash', '#!/usr/bin/env bash', True), '.mjs': ('node', '#!/usr/bin/env node', False),
+                  '.cjs': ('node', '#!/usr/bin/env node', False)}
+# Each reviewed live shell or Node program, bound to (path, source blob, one
+# commit that introduced that blob at that path; where cherry-picks introduce
+# the same blob twice, the earlier one, and the other is refused as unreviewed). Nothing else is
+# promoted: another file, blob or provenance commit fails, and no argument,
+# read, helper, child or output is ever recorded or credited.
+REVIEWED_NONPY_ENTRIES = _review_table('''
+@0834bc67b042a63a8c804162781802245ae59c98
+D:shared-translator/address-fixture.mjs 7b43c79b13a92043dc9c6576fd1b45c6a574026d
+D:shared-translator/address-validate.sh 6f9014aa569e25b415aba09f7ef1c37f4a4dd3ea
+@0bdac88bfacec822c7157b7d5a3e713894571888
+N:h81-memory-controls.mjs f923767bff5e51583c3a445950cc22e978bd6505
+N:primitive-return/functional83.mjs 017a361b9d7ba28570a1ea323ff2da2f11e35530
+@15302eb51e3df48b9d8d46eaf50348dd1deddfb2
+D:shared-translator/read-bounds-validate.sh 05994407de7956849db17f9c7188b90376a3556d
+N:h109/scripts/registration-parent-checks.sh 63e8cc7662f430c985a20d7147a4dd404b043a5c
+@17f2902cdc6ab848317fc82e31a90ad2d7c4fba8
+D:memory-references/fixtures.cjs 903cd31f868d6af169e7e743519131eb0e63131e
+D:memory-references/prepare-admission.cjs 50a6ff09bbe39b55d8914427ea1f242db898c554
+D:memory-references/source-transport.mjs 880d9e38ef8476e5543075ee1fc4c703b6917880
+@18df52507a1cb6136e1340aee565964cdf6f012b
+N:browser-baseline-checks.sh b12fe571b40579d911cbe4b4103446524e7597a9
+N:browser-edit-controls.sh c941f40a9ea94ecef7b1855f33872426349baeec
+N:browser-smoke-checks.sh 1e6b7d76f5cc553ab1aa64f0147408bad52057f5
+N:browser-wire-audit.cjs 4c0ac946c684d5b825ab2c5d3b839b370522c832
+N:build-browser-baseline.sh 6945c2448ded7e30723144a1e71607f21b68847c
+N:link-symbol-diagnostic.sh 5e5c708c97d011052ae1e98cdddde9689a84e913
+N:mcp-baseline-checks.sh 26574e91841f4e49d3125f56ca287688aaeb93b8
+N:native-lsp-baseline.sh f3991cada4632b3bedc72fcd09b105b84a93386b
+@2207c1bba286538fd63e4a0ff4960ed4a593a8ab
+U:baseline-20261028/invocations/retries/harness.sh 67db42718e4d578b56d910e7e82fac1b732c23e0
+@23a42307b1b336e5477c0bb5c8d8bfe6415b6ea6
+N:published-f77-browser-build.sh b5361e73f7027cab3d7393477ab97f9239ac00cc
+N:published-f77-browser-checks.sh a310340cbbd46a253914122b15fa58c10b505230
+N:published-f77-browser-edit.sh 71f5edd301dd1fd34b38d4e837fc688c20a7e8a1
+N:published-f77-browser-extras.sh 416c6c9d7a3719ed67920b64c8542162c7c1628d
+N:published-f77-browser-smoke.sh cf153c3b1865aa6895202676bf29c0882980c959
+N:published-f77-mcp.sh f3f3c9ece70022adeb854c9532df41f3b6337d93
+N:published-f77-native-build.sh a0d99da1154b1e1bde0e38b63ffc7cd543c04bd0
+N:published-f77-native-lsp.sh 08d725fe11cf9be46012e40d0f5f8c538adb680b
+N:published-f77-validation.sh 515fd0bb1a379970d49bd411c7cfba586534758d
+N:published-f77-wasm-build.sh 31c07b3799d6cd108bf29e5593bfdf2dad655386
+@252be5a095f50a75c91e7b9ae55650eb4f6d7463
+N:published-8495-controls.mjs c1e0b5e9be554992cdfa67ec097ceeb9b43ce322
+N:request-identity/selector-negatives.mjs f79858cb61bf4a126b71dcd7cebeea2fa55dfc02
+@354dadf752721c3caffeaf916c3ccf07a243c449
+N:published-b86a-api.sh 807d5d2b9437c62910b0dfda56e95e241b3a5f97
+N:published-b86a-mcp.sh d1b955a0bc0ebdcc8d5de0ad2f8071d164cb534e
+@369739e39533161cdd077a06bf6842bf71d1baa3
+N:h35-gates.sh bb70b12b4b5552bf525c128602c9ba61301aec46
+@3ff9a2ea968af583d54f83defa62f537b28c235b
+N:browser-control-completion.cjs 82ecd2d5a0e038c2cf8ef4949a72837a335ff9cf
+N:hardening-browser-build.sh 6fd0f7517a5046993958792bd08f0df7a66a8315
+N:hardening-browser-checks.sh a3fda3aa57ad433c25f74c987902dc428d99bf89
+N:hardening-browser-controls.sh 53265ee586aa6620934ef84749c37aab62f9521c
+N:hardening-browser-edit.sh ce5cd598f667ab741c3dfd68fbe3412fab7cdb0b
+N:hardening-browser-smoke.sh 478ac8cd2e128af109dd094abf148a59498bf881
+N:hardening-native-build.sh 5f516e8b52f5a3bdc1fd7b151c75ed48fec2b7bd
+N:hardening-native-checks.mjs 2f13d3d616921e271ae7cb1f2dfe99ee0454c382
+N:hardening-native-checks.sh ab70817d323bfa5c25dbba5b80aae363e1d1a699
+N:hardening-validation.sh 169e84907b0e34ec25750b0a70d3ffe97509865f
+N:sort-conformance.sh a66c463a355476c8c906e4ba46807881f96bbac1
+N:startup-investigation.mjs a918cd39a422c15d82869a7f4b587dc2ab7d9d83
+@40bcc364c4f0caf313ebe8c65e1da66d2ad75b1b
+N:published-9584-api.sh 8d95e992c635c46c4971fa65dbcf5befe646e7c3
+N:published-9584-mcp.sh 8b0f45ccbe12441d761f7b9bdd3bbfb5ce0d32c1
+@44d89439afd8fe7aca251cd5693b5b7ea36cf603
+D:shared-translator/environment-fixture.mjs 03b2c7c55004a710a0d7a053df0550e48eeeaf40
+D:shared-translator/environment-validate.sh 9460e5febcad1c954204902e5b7a505c5a5f79da
+@4a66db87c8ed848aef4c2ac1732b1df326c6fa97
+D:shared-translator/fixed-byte-fixture.mjs 207f8ff6474cfed3a6443223eac989976bb3d9bb
+D:shared-translator/fixed-byte-validate.sh b4d495f62a04cab7ec344489563d20f63f832f33
+@4f5e84d8d3f90919c78e904697e5779fd3d0ce66
+N:readbounds/scripts/additional-functional.sh 54fddfe266f4d61562dc867195421d1819ba6419
+N:readbounds/scripts/axiom-gates-post-rebase.sh bdffe31da9f3c37864b74b8bf0f349654409db64
+N:readbounds/scripts/capture-gate.sh da4a38d9db9a361b9f304a5f2adeafdde9b44d95
+N:readbounds/scripts/dependency-gate.sh 1727e98a8e6d2b3bb0f4b79dc84cc5739746754f
+N:readbounds/scripts/functional-checks-recovered.sh bbad552d675f721adb47df555ac86b85916b8606
+N:readbounds/scripts/functional-checks.sh 46ac712e7df5083892b5634418b3aa9c2b874589
+N:readbounds/scripts/native-build.sh dfa96b4d7f60f7dd4f78ed60a44114a93de21fdf
+N:readbounds/scripts/proof-gates-post-rebase.sh 05160602dbedd46107efa412c8838bf14c0787d1
+@5a21cb291a6d2f0bd2e1aa6574c14e895453c78b
+N:environment/scripts/B-kernel-controls.sh 971e181a0d2b877229eeefb48306e9e6fa86f62d
+N:environment/scripts/address-marker-gate.sh a3fd70679b39c94289498f6900b24ad6495dc517
+N:environment/scripts/browser-build.sh 9a4017546027af0c77eef544ea3ba29f8198cde4
+N:environment/scripts/compile-producer-args.mjs e60007cd18e4f58d829c5cd85da0f5766cf34c6d
+N:environment/scripts/finite-gate.sh 78e4b5909d6dd81671cedb28178437804072e407
+N:environment/scripts/fixed-byte-gate.sh d4197132f138040fc277bd006f6393e0455ec9b9
+N:environment/scripts/lake-prefix.sh 2f2f8473b56c00259bcd400d6770c373bfea38cb
+N:environment/scripts/marker-gate.sh 1f6e42cf641de1003b3d9dca483f4aa47af9ff7d
+N:environment/scripts/mcp.sh 72cf3794cda2352c1fba6fc5bfbc02295b8a9b73
+N:environment/scripts/state-refusal-controls.mjs d65587568f7e0fe0cb3b5b15b19b76d386eb2152
+N:environment/scripts/wasm-build.sh 3450e74ddad66d1deaf08e1c93f82023ce75cd85
+@6842e804ce6a3605e31274d1746483b65eddeb09
+D:shared-translator/dynamic-bytes-fixture.mjs e823ea06bac4e522d24ff13eac1ffaff3342066f
+@6fceb880a8696cedecd6f2a55801c853e193ce2d
+U:repairs/group02-init-commands.sh fafe6ea30e62fdd93d33fefb3218567a66724617
+@77913ac1cff1147d1129caea943c881b4aa61ec7
+D:shared-translator/environment-decoder-validate.sh c9e849741ec9f96867766ecf7346f02c4d2389cf
+@7ce3c2a5ba098b705fca1c39c01fef467477fe6c
+U:repairs/group02-commands.sh af739fcdacb228adf9160e09b2b6c15918f77234
+@85f39a01073565da7edef0a778abec2b7df9b1d7
+N:hardening-wasm-build.sh 8c614bf7504ee59a1da79326f8408b4dec94e095
+@9465af2e2b24c438d98bc46b1dfaf890fb9adcb3
+N:h40-corpus-check.sh 2e9202333efe8ddc8d9ad0fc20f67af1c11ee11e
+N:h40-full-gates.sh ee21b4e3f0534d4282108db2d6ef38148527b3a8
+N:h40-mcp-checks.sh d2250ce009385237b7836fb88730724eeeffb295
+N:h40-policy-checks.sh ee410e7d961e8e65077e722eaa676df651265329
+N:h40-testsuite-check.sh 5e37e8524625eb35d21f977c842e4f5084799070
+@957e5defaa3c2e32df1e692d8781e0d89fed5199
+D:shared-translator/primitive-return-control-tuple-fixture.mjs a756a8e23bf3b19577268e44e960782928fe23b9
+D:shared-translator/primitive-return-fixture.mjs 20f5d5f88b83ddfda3de8cc8168c69908a71d0dd
+D:shared-translator/primitive-return-validate.sh 074e6d15f01d4bfd67c2bd0af103663f96231923
+@a1729b9c6283b199d3249b11c6224165798a00bb
+N:build-wasm-baseline.sh 579f45953b9ad98e4a5e8934aad0f54009d4dea5
+@ae8062cfb0f028667485e6f1a621ff69e62724fd
+N:bounded-keys.sh c530a67b2b5ef6283bbfe9113d88c39e655f21c6
+N:build-native-baseline.sh a9b7a2401b3bafae04de86bcb707eecd60e44e26
+N:fresh-spec-controls.mjs 667daf209b2060a60c0c3079502c320f138b05b0
+N:native-baseline-checks.sh 63a3811ce26da1c4bcfd5435781e65f9ea9c6d07
+N:prepare-baseline.mjs 086f041b6ffd9ecb7451479bf7d0c20e8799d33e
+@b44f0de87c2ab845b79c9d84004dcb7c91babded
+D:shared-translator/bounded.sh a6686039c6dec3b35d2f06a2b8403be31ff9dd42
+D:shared-translator/h90-base-census.sh 299ca2604fb7206c03d98bd084ca2b714158e078
+D:shared-translator/h90-census-command.sh 1004774e354dd25b941d6331ec0c52d92a2c86f6
+D:shared-translator/h90-validate.sh a67ec66c28490d60be84f27466897389d27dc82c
+D:shared-translator/narrow-local-fixture.mjs 8fb3e82889a9bef284ecd92f2c9cf71be89b2a25
+@bc4cb33ff40e97e88c04787419aaa0a16b618026
+D:shared-translator/fresh-construct-fixtures.mjs f6731c57f457a2b2b0fbbe57d6e67dbbafde9f40
+@c21364ef94c9f9102065b51edd00dd1cb904661d
+N:address/state-refusal-controls.mjs d65587568f7e0fe0cb3b5b15b19b76d386eb2152
+@c9230cc9692a5974728959907afa1f60733409ad
+D:memory-references/native-source-controls.mjs 3e46b94bea4cff0efe8f108ffd61d99838d79c63
+@d74b24de8dd2560366ed47ec8a5d96e3351e9378
+D:shared-translator/environment-proof-validate.sh db00b98f108dd43cbe5e9d46c01f405ae22f4a18
+@dc3f0ffc0431f87441e7bc3b8f263b38d02d229b
+N:published-8495-api.sh 9022e73f1b542446eae3c5e61ebd6197d0a2262a
+N:published-8495-controls.sh 74b1ebf5ffd8efc6b6ee01c8c24d398071eb42d0
+@e01ff4a52ffa532e47d3cb163bb97245f436e3b2
+N:compact-runtime-cache.sh 05e0333828e32952e0ff2af01265d7dd7b4ef324
+N:gmp-serial.sh c6defb5a7ac2f5e6cf98a114d8d6bfe69884280c
+N:wasm-inside.sh c7400f29384cfd151e157ff709a4707545d731a2
+@e49c71436470851e0a3b295fa56b3b6c749e09b1
+N:environment/scripts/checks.sh 63f4e50b51509f7a6273aa53fec3c9357c880ecc
+N:environment/scripts/historical/checks.sh 0887f3a28631e1853e860a9355d69580fcb5f615
+N:environment/scripts/historical/remaining-checks.sh c37ac7de446ea7c9f83c6fde04013ce82801695b
+N:environment/scripts/remaining-checks.sh 83e197d395972de024ac087aad4ebb3203a14732
+@e6865a2c7347df62db74bfc8b30aa00dce409c74
+N:h109/scripts/registration-lake.sh 9ac8f8bece17c2d01dd2653578f24f97de1dd24e
+@e778f14e03877c102aaaf739c60ecaccc9a989e5
+D:shared-translator/compatibility-fixtures.mjs 7eb7688e61d8f342b8549078635414d79f577e82
+D:shared-translator/compiler-coverage-fixtures.mjs dda8193f85512314ae76a2b7740d8591990f26dd
+D:shared-translator/composed-fixture.mjs b0af1badf585f4023819027bb1d8c6b3f85ba1cd
+D:shared-translator/modality-fixture.mjs 1e2484febd93269030f7d7956e7f9958dd448b21
+@eef016814a3deddf5e9ea85a97fadfc0ec73a114
+N:readbounds/axiom-gates.sh 6d77f69e2a86fa3d1ab1121b4cc9408aeb19fabd
+N:readbounds/module-gates.sh bd84543e2eab25c0fc8db0de1d7cff7cf27718f8
+N:readbounds/proof-gates.sh d1c49af7756b40057993698f72fb3394367d0b37
+''')
+
+
+def nonpython_entry_interface(path, text):
+    """The audited entry interface of a shell or Node program, or None.
+
+    Recorded: the interpreter, the shebang line (required for bash, optional
+    for Node) and the first top-level statement line (column 0; for Node the
+    first one that is not an import declaration). Not audited, giving None:
+    another suffix (`.js` depends on a package type), a `.test.` name (the
+    node-test kind keeps that naming), any other shebang, ambiguous line
+    breaks, a NUL byte, a column-0 shell line with a `return` command (a
+    sourced library), a shell file whose column-0 lines are all function
+    definitions, assignments or set/shopt, any Node `export` declaration,
+    in a `.cjs` file any bare `exports` reference, `module.exports` or
+    `module[...]` access or Object.assign/defineProperty on module (a CommonJS
+    library), or no top-level statement. The shell check is lexical: an
+    indented `return` is not distinguished from one in a function body, so
+    the review set, not this parser, is the gate.
+    """
+    suffix = posixpath.splitext(path)[1]
+    if suffix not in NONPY_SHEBANGS or '.test.' in posixpath.basename(path): return None
+    if not isinstance(text, str) or not _plain_lines(text) or '\0' in text: return None
+    interpreter, shebang, required = NONPY_SHEBANGS[suffix]
+    lines = text.split('\n'); first = lines[0]
+    if first.startswith('#!'):
+        if first != shebang: return None
+    elif required: return None
+    else: shebang = None
+    if interpreter == 'bash':
+        top, until = [], None  # column-0 lines outside here-document bodies
+        for n, line in enumerate(lines[1:], 2):
+            if until is not None:
+                if line.lstrip('\t') == until: until = None
+                continue
+            if line[:1] not in ('', '#', ' ', '\t'): top.append((n, line))
+            heredoc = re.search(r'<<-?\s*(["\']?)(\w+)\1', line)
+            if heredoc and '<<<' not in line: until = heredoc[2]
+        if until is not None: return None
+        if any(re.search(r'(?<![\w$-])return\b', line) for _, line in top): return None
+        definition = r'(?:function\s+[\w-]+|[\w-]+\s*\(\s*\))\s*\{?\s*$|\}\s*$|(?:export\s+|readonly\s+|declare\s+(?:-\w+\s+)*)?\w+=|(?:set|shopt)\s'
+        entry = top[0][0] if any(not re.match(definition, line) for _, line in top) else None
+    else:
+        masked = (' ' * len(first) + text[len(first):]) if shebang else text
+        code = _js_mask(masked, True)[0]
+        if re.search(r'(?<![\w$.])export\b', code): return None
+        if suffix == '.cjs' and re.search(r'(?<![\w$.])exports\b(?!\s*:)|(?<![\w$.])module\s*(?:\.\s*exports\b|\[)'
+                                         r'|\bObject\s*\.\s*(?:assign|defineProperty|defineProperties)\s*\(\s*module\b', code): return None
+        imports = {code.count('\n', 0, m.start()) + 1 + k for m in re.finditer(r'(?m)^import\b(?!\s*[(.])(?:[^{};\n]*\{[^}]*\}[^;\n]*|[^{};\n]*)', code)
+                   for k in range(m.group(0).count('\n') + 1)}
+        entry = next((n for n, line in enumerate(code.split('\n'), 1) if line[:1] not in ('', ' ', '\t') and n not in imports), None)
+    if entry is None: return None
+    return {'interpreter': interpreter, 'shebang': shebang, 'entry_line': entry}
+
+
+def nonpython_entry_root(classifier, graph, catalog, entry, reviewed=None):
+    """H997: a reviewed live shell or Node program as a source-only role.
+
+    The definition binds the exact command [interpreter, P] (never an
+    argument), the source blob, the interface nonpython_entry_interface
+    records for that blob (interpreter, shebang, top-level entry line) and
+    provenance: the commit that introduced that blob at P, which must be in
+    the reviewed set. Python programs keep source-only-program and the H996
+    role, `.test.` Node files keep node-test, manual reproducers are
+    unchanged. The root is never a validated or passing runner and anchors
+    nothing: no execution, pass, read-anchor, fixture, helper, child,
+    generated-output, proof or runtime credit. A later revision keeps it while
+    the blob is unchanged and the recorded commit holds it; a current
+    definition of the same path supersedes it.
+    """
+    repo = graph.repo
+    reviewed = REVIEWED_NONPY_ENTRIES if reviewed is None else reviewed
+    required = {'path', 'input_revision', 'source_blob', 'command', 'kind', 'interface', 'provenance', 'purpose'}
+    _role_schema(classifier, catalog, entry, required, 'non-Python entry role')
+    p = entry['path']; revision = entry['input_revision']; doc = entry['provenance']
+    shape = NONPY_SHEBANGS.get(posixpath.splitext(p)[1])
+    if shape is None or entry['command'] != [shape[0], p] or '.test.' in posixpath.basename(p):
+        raise ValueError('unsupported non-Python entry role invocation: ' + p)
+    if doc['path'] != p or doc['blob'] != entry['source_blob'] or (p, entry['source_blob'], doc['commit']) not in reviewed:
+        raise ValueError('unreviewed non-Python entry role: ' + p)
+    if not _role_current(classifier, repo, catalog, entry, [(p, entry['source_blob'])]): return
+    if repo.tree[p][0] not in ('100644', '100755') or p not in repo.texts:
+        raise ValueError('unsupported non-Python entry role invocation: ' + p)
+    if not _introduced(classifier, repo, doc['commit'], p, entry['source_blob']):
+        raise ValueError('non-Python entry role lacks its introducing provenance: ' + p)
+    interface = nonpython_entry_interface(p, repo.texts[p])
+    if interface is None: raise ValueError('non-Python entry role lacks an audited entry interface: ' + p)
+    if canonical(interface) != canonical(entry['interface']): raise ValueError('non-Python entry role interface mismatch: ' + p)
+    identity = NONPY_ENTRY_PREFIX + p
+    graph.root(p, 'source-only non-Python entry', shlex.join(entry['command']), p, interface['entry_line'], root_id=identity)
+    if identity not in graph.roots: return
+    graph.roots[identity].update({'source_only': True, 'nonpython_entry_role': True, 'source_blob': entry['source_blob'],
+        'purpose': entry['purpose'], 'interface': interface, 'provenance': doc, 'source_declaration_revision': revision,
+        'validation_at_measured_revision': {'status': 'unavailable', 'command': entry['command'],
+            'reason': 'Reviewed live shell or Node program; the command is the bare interpreter prefix, which may need arguments, and no argument is recorded. Source role only, never run or certified to pass. No read anchor, fixture, helper, child, generated-output, proof or runtime credit.'}})
+
+
+_roles = Path(__file__).with_name('roles.py')  # H999 and H1015 Lean gate source roles
+exec(compile(_roles.read_bytes(), str(_roles), 'exec'))
+
+
+
+SOURCE_ROLE_KINDS = {SOURCE_ONLY_KIND: source_only_program, NODE_MODE_KIND: node_mode_root, PYTHON_ARGS_KIND: python_argument_root,
+                     NONPY_ENTRY_KIND: nonpython_entry_root, LEAN_CHECK_KIND: lean_check_root,
+                     LEAN_FIXTURE_KIND: lean_fixture_root}
 
 
 def persisted_module_entries(classifier, graph, catalog, rows):
@@ -1339,6 +1899,8 @@ def successor_controls(classifier):
         '.github/workflows/lean.yml': 'jobs:\n  t:\n    steps:\n      - run: lean tests/R.lean\n',
         'tests/walk.mjs': walk, 'tests/walk-bad.mjs': walk.replace('    if (statSync(p).isDirectory()) walk(p, out);\n', '    if (statSync(p).isDirectory()) return out;\n'),
         'tests/walk.test.mjs': walk,
+        'tests/mode.mjs': '//   node tests/mode.mjs prepare   synthetic step\n// node tests/mode.mjs other\n' + walk,
+        'tests/mode-flat.mjs': '// node tests/mode-flat.mjs prepare\n' + walk.replace('if (mode === "prepare") {', 'if (true) {'),
         'tests/corpus/a.sol': 'contract A {}\n', 'tests/corpus/sub/b.sol': 'contract B {}\n', 'tests/corpus/c.txt': 'c\n',
         'tests/corpus/skip/d.sol': 'contract D {}\n', 'tests/data.txt': 'data\n',
         'tests/README.md': 'Run `node tests/walk.mjs prepare`.\nRun `node tests/walk-bad.mjs prepare`.\nRun `node tests/walk.mjs other`.\n',
@@ -1346,6 +1908,22 @@ def successor_controls(classifier):
         'tests/prog_test.py': 'import unittest\nclass T(unittest.TestCase):\n def test_it(self): pass\nif __name__ == "__main__": unittest.main()\n',
         'tests/prog_cli.py': "import argparse\nparser = argparse.ArgumentParser()\nparser.add_argument('--input', required=True)\nargs = parser.parse_args()\nprint(args.input)\n",
         'tests/helper.py': 'VALUE = 3\n',
+        'tests/args.py': 'import sys\nlabel, *command = sys.argv[1:]\nif not command:\n    raise SystemExit("usage: args.py LABEL COMMAND")\nprint(label, command)\n',
+        'tests/args_sub.py': ("import argparse\ndef main():\n    parser = argparse.ArgumentParser()\n    sub = parser.add_subparsers(dest='mode', required=True)\n"
+                              "    pick = sub.add_parser('pick')\n    pick.add_argument('results')\n    pick.add_argument('--out', required=True)\n"
+                              "    return parser.parse_args()\nif __name__ == '__main__':\n    main()\n"),
+        'tests/args_alias.py': 'from sys import argv\nprint(argv[1])\n',
+        'tests/args_rebind.py': 'import sys\nsys.argv = ["x", "y"]\nprint(sys.argv[1])\n',
+        'tests/gen/.gitignore': 'out.json\n',
+        'tests/drive.sh': '#!/usr/bin/env bash\nset -euo pipefail\npython3 tests/helper.py "$@" > tests/gen/out.json\n',
+        'tests/drive-sh.sh': '#!/bin/sh\necho drive\n',
+        'tests/lib.sh': '#!/usr/bin/env bash\nhelper() {\n  echo helper\n}\nreturn 0\n',
+        'tests/drive.mjs': "import { readFileSync } from 'node:fs';\nconst [input] = process.argv.slice(2);\nconsole.log(readFileSync(input, 'utf8'));\n",
+        'tests/drive.cjs': "#!/usr/bin/env node\n// drive\nconst fs = require('node:fs');\nconsole.log(fs.readFileSync('tests/helper.py', 'utf8'));\n",
+        'tests/drive.test.mjs': "import { readFileSync } from 'node:fs';\nconsole.log(readFileSync('tests/helper.py', 'utf8'));\n",
+        'tests/drive.js': "console.log('drive');\n",
+        'tests/lib.mjs': 'export const value = 1;\n',
+        'tests/lib.cjs': 'module.exports = { value: 1 };\n',
         'tests/test_entry.py': 'import unittest\nclass T(unittest.TestCase):\n def test_import(self):\n  import helper\n  self.assertEqual(helper.VALUE, 3)\nif __name__ == "__main__": unittest.main()\n',
     }
     with tempfile.TemporaryDirectory() as tmp:
@@ -1468,6 +2046,302 @@ def successor_controls(classifier):
         model, rows = run(rewritten, standalone=[program])
         assert 'source-only:tests/prog.py' not in model['entry_points'] and rows['tests/prog.py']['class'] != 'keep'
 
+        # (5) H992 reviewed argument-bearing Node mode root: anchors the walker
+        # form only, as a source-only role with no passing-runner credit.
+        global REVIEWED_NODE_MODES
+        reviewed = REVIEWED_NODE_MODES
+        assert ('scripts/parse-corpus.mjs', 'dd1093f6fe8bfe00ae772e0b8b4a0bc0dd4b265a', 'prepare', 17) in reviewed and len(reviewed) == 1
+        mode_root = {'path': 'tests/mode.mjs', 'input_revision': A, 'source_blob': blob(first, 'tests/mode.mjs'), 'kind': NODE_MODE_KIND,
+                     'command': ['node', 'tests/mode.mjs', 'prepare'], 'purpose': 'Synthetic reviewed prepare step.',
+                     'provenance': {'path': 'tests/mode.mjs', 'blob': blob(first, 'tests/mode.mjs'), 'line': 1, 'invocation': 'node tests/mode.mjs prepare'}}
+        walked = lambda target, marker='POSITIVE', form='node-readFileSync-walk', runner='node-mode:tests/mode.mjs': route(
+            first, runner, form, [frame(first, 'tests/mode.mjs', line_of('tests/mode.mjs', marker))], target)
+        walks = {'static_routes': [walked('tests/corpus/a.sol'), walked('tests/corpus/sub/b.sol')]}
+        REVIEWED_NODE_MODES = frozenset({('tests/mode.mjs', blob(first, 'tests/mode.mjs'), 'prepare', 1),
+                                         ('tests/mode.mjs', blob(first, 'tests/mode.mjs'), 'other', 2),
+                                         ('tests/mode.mjs', blob(first, 'tests/mode.mjs'), 'prepare', 3),
+                                         ('tests/mode-flat.mjs', blob(first, 'tests/mode-flat.mjs'), 'prepare', 1)})
+        try:
+            assert run(first, walks)[1]['tests/corpus/a.sol']['class'] != 'keep'  # no root, no anchor
+            for repo in (first, later):
+                model, rows = run(repo, walks, standalone=[mode_root])
+                assert rows['tests/corpus/a.sol']['class'] == 'keep' and rows['tests/corpus/sub/b.sol']['class'] == 'keep'
+                assert rows['tests/corpus/skip/d.sol']['class'] != 'keep' and rows['tests/corpus/c.txt']['class'] != 'keep'
+                entry = model['entry_points']['node-mode:tests/mode.mjs']
+                assert entry['source_only'] and entry['validation_at_measured_revision']['status'] == 'unavailable'
+                assert entry['command'] == 'node tests/mode.mjs prepare' and entry['location'] == 'tests/mode.mjs:' + str(line_of('tests/mode.mjs', 'if (mode'))
+                assert not any(k.endswith(':tests/mode.mjs') and not k.startswith('node-mode:') for k in model['entry_points'])
+                assert rows['tests/corpus/a.sol']['runner_chain']['entry']['derived_from'] == 'node-mode:tests/mode.mjs'
+            # Without new rows the root adds nothing to the reads.
+            assert canonical(run(later, standalone=[mode_root])[1]['tests/corpus/a.sol']) == canonical(baseline['tests/corpus/a.sol'])
+            # The root anchors no other form, mode or reader line.
+            _, rows = run(first, {'static_routes': [walked('tests/corpus/c.txt', 'POSITIVE', 'node-readFileSync')]}, standalone=[mode_root])
+            assert rows['tests/corpus/c.txt']['class'] != 'keep'
+            for target, marker in (('tests/corpus/a.sol', 'OTHER-MODE'), ('tests/corpus/skip/d.sol', 'POSITIVE'), ('tests/corpus/a.sol', 'COMMENT')):
+                rejected(first, 'literal node-readFileSync-walk', {'static_routes': [walked(target, marker)]}, standalone=[mode_root])
+            other = dict(mode_root, command=['node', 'tests/mode.mjs', 'other'], provenance=dict(mode_root['provenance'], line=2, invocation='node tests/mode.mjs other'))
+            rejected(first, 'argv mode branch', walks, standalone=[other])  # an else-if mode is not a top-level branch
+            # Negative controls on the binding: schema, revision, command, provenance, review set, source, branch.
+            for change, text in (({'extra': 1}, 'invalid Node mode root'), ({'purpose': ' '}, 'invalid Node mode root'),
+                                 ({'input_revision': 'HEAD'}, 'full commit revision'),
+                                 ({'command': ['node', 'tests/mode.mjs']}, 'unsupported Node mode root'),
+                                 ({'command': ['node', 'tests/mode.mjs', 'prepare', '--x']}, 'unsupported Node mode root'),
+                                 ({'command': ['node', 'tests/mode.mjs', '--prepare']}, 'unsupported Node mode root'),
+                                 ({'command': ['node', '--test', 'tests/mode.mjs']}, 'unsupported Node mode root'),
+                                 ({'command': ['node', 'tests/mode.mjs', 'report']}, 'unreviewed Node mode root'),
+                                 ({'source_blob': '0' * 40}, 'unreviewed Node mode root'),
+                                 ({'provenance': dict(mode_root['provenance'], line=2)}, 'unreviewed Node mode root'),
+                                 ({'provenance': dict(mode_root['provenance'], line=3)}, 'verbatim source provenance'),
+                                 ({'provenance': dict(mode_root['provenance'], invocation='node tests/mode.mjs  prepare')}, 'unreviewed Node mode root'),
+                                 ({'provenance': dict(mode_root['provenance'], path='tests/README.md')}, 'unreviewed Node mode root'),
+                                 ({'provenance': {'path': 'tests/mode.mjs'}}, 'invalid Node mode root')):
+                rejected(first, text, walks, standalone=[dict(mode_root, **change)])
+            rejected(first, 'unverifiable historical runner demonstration', walks, standalone=[dict(mode_root, input_revision='0' * 40)])
+            rejected(first, 'conflicting standalone', walks, standalone=[mode_root, manual('tests/walk.mjs', 'prepare', 1) | {'path': 'tests/mode.mjs'}])
+            flat = {'path': 'tests/mode-flat.mjs', 'input_revision': A, 'source_blob': blob(first, 'tests/mode-flat.mjs'), 'kind': NODE_MODE_KIND,
+                    'command': ['node', 'tests/mode-flat.mjs', 'prepare'], 'purpose': 'No mode branch.',
+                    'provenance': {'path': 'tests/mode-flat.mjs', 'blob': blob(first, 'tests/mode-flat.mjs'), 'line': 1, 'invocation': 'node tests/mode-flat.mjs prepare'}}
+            rejected(first, 'argv mode branch', standalone=[flat])
+            REVIEWED_NODE_MODES = frozenset()
+            rejected(first, 'unreviewed Node mode root', walks, standalone=[mode_root])
+        finally: REVIEWED_NODE_MODES = reviewed
+        # A changed source drops the root and its reads.
+        edited = commit({'tests/mode.mjs': files['tests/mode.mjs'] + '// changed\n'}, 'changed mode root')
+        REVIEWED_NODE_MODES = reviewed | {('tests/mode.mjs', blob(first, 'tests/mode.mjs'), 'prepare', 1)}
+        try:
+            model, rows = run(edited, walks, standalone=[mode_root])
+            assert 'node-mode:tests/mode.mjs' not in model['entry_points'] and rows['tests/corpus/a.sol']['class'] != 'keep'
+        finally: REVIEWED_NODE_MODES = reviewed
+
+        # (6) H996 reviewed argument-bearing Python source role: a source-only
+        # root bound to blob, recorded interface and introducing commit that
+        # anchors nothing and credits no read, argument, helper or output.
+        global REVIEWED_PYTHON_ARGS
+        reviewed_args = REVIEWED_PYTHON_ARGS
+        assert len(reviewed_args) == 23 and all(p.startswith(('tests/directruntime-20261104/', 'tests/upstream/')) and p.endswith('.py')
+                                                for p, _, _ in reviewed_args)
+        assert ('tests/upstream/baseline-20261028/invocations/retries/selector.py', '5b7a49f863f7c6fad8231d17d68628623948a00e',
+                '2207c1bba286538fd63e4a0ff4960ed4a593a8ab') in reviewed_args
+        nb = 'tests/directruntime-20261104/native-browser/'  # H1006
+        assert (nb + 'prepare-image-cache.py', 'c9695f1c0bf66b40be1f138f3da7e1ebc147ffde', 'ca73d1a4e1aecbcbc566acaa1aa7392cad472b3d') in reviewed_args
+        assert not {p for p, _, _ in reviewed_args} & {nb + p for p in ('h109/input-inventory.py', 'h109/source-snapshot.py',
+                                                                      'hardening-native-audit.py', 'readbounds/serial-build.py')}
+        args_interface = {'argv_lines': [2], 'argv_tail_lines': [2], 'positionals': [], 'subcommands': []}
+        assert python_argument_interface(files['tests/args.py']) == args_interface
+        assert python_argument_interface(files['tests/args_sub.py']) == {'argv_lines': [], 'argv_tail_lines': [], 'positionals': [[6, 'results']], 'subcommands': [[5, 'pick']]}
+        for path in ('tests/prog.py', 'tests/helper.py', 'tests/args_alias.py', 'tests/args_rebind.py'):
+            assert python_argument_interface(files[path]) is None, path
+        assert python_argument_interface('import sys as s\nprint(s.argv[1:])\n') == {'argv_lines': [2], 'argv_tail_lines': [2], 'positionals': [], 'subcommands': []}
+        assert python_argument_interface('import sys\nclass O: argv = 1\nprint(O().argv)\n') is None
+        assert python_argument_interface('import argparse\np = argparse.ArgumentParser()\ns = p.add_subparsers()\ns.add_parser(NAME)\n') is None
+        for unaudited in ('import sys\nsys.argv[1:] = []\n', 'import sys\nsys.argv[1] = "x"\n', 'import sys\ndel sys.argv[1:]\n',
+                          'import sys\nsys.argv.append("x")\n', 'import sys\ndef f(sys): return sys.argv[1]\n',
+                          'import sys\ntry: pass\nexcept OSError as sys: pass\nprint(sys.argv[1])\n',
+                          'import sys\nfrom os import path as sys\nprint(sys.argv[1])\n', 'import sys\nprint(getattr(sys, "argv"), sys.argv[1])\n',
+                          'import argparse\np = argparse.ArgumentParser()\np.add_argument(NAME)\n',
+                          'import argparse\np = argparse.ArgumentParser()\np.add_argument("x")\np.parse_args(["y"])\n'):
+            assert python_argument_interface(unaudited) is None, unaudited
+        py_role = lambda path, line, interface, repo=first, commit=A: {
+            'path': path, 'input_revision': repo.ref, 'source_blob': blob(repo, path), 'kind': PYTHON_ARGS_KIND,
+            'command': ['python3', '-B', path], 'entry_line': line, 'interface': interface,
+            'provenance': {'commit': commit, 'path': path, 'blob': blob(repo, path)}, 'purpose': 'Synthetic reviewed argument-bearing program.'}
+        args_role = py_role('tests/args.py', 3, args_interface)
+        sub_role = py_role('tests/args_sub.py', 9, python_argument_interface(files['tests/args_sub.py']))
+        assert baseline['tests/args.py']['class'] != 'keep' and baseline['tests/args_sub.py']['class'] != 'keep'
+        REVIEWED_PYTHON_ARGS = frozenset({(p, blob(first, p), A) for p in ('tests/args.py', 'tests/args_sub.py', 'tests/args_alias.py',
+                                                                            'tests/args_rebind.py', 'tests/prog.py', 'tests/prog_cli.py', 'tests/prog_test.py')}
+                                         | {('tests/args.py', blob(first, 'tests/args.py'), later.ref)})
+        try:
+            for repo in (first, later):
+                model, rows = run(repo, standalone=[args_role, sub_role])
+                for path, role, line in (('tests/args.py', args_role, 3), ('tests/args_sub.py', sub_role, 9)):
+                    assert rows[path]['class'] == 'keep', path
+                    entry = model['entry_points']['py-args:' + path]
+                    assert entry['source_only'] and entry['python_argument_role'] and entry['validation_at_measured_revision']['status'] == 'unavailable'
+                    assert entry['command'] == 'python3 -B ' + path and entry['location'] == path + ':' + str(line)
+                    assert entry['interface'] == role['interface'] and entry['provenance'] == role['provenance']
+                    assert not any(k.endswith(':' + path) and not k.startswith('py-args:') for k in model['entry_points'])
+                # Nothing else changes: no read, helper, child or output credit.
+                assert all(canonical(r) == canonical(baseline[p]) for p, r in rows.items() if p not in ('tests/args.py', 'tests/args_sub.py')
+                           and p in baseline and repo is later)
+            # The role anchors no route: the malformed row is never even inspected.
+            _, rows = run(later, {'static_routes': [route(first, 'py-args:tests/args.py', 'node-import', [frame(first, 'tests/args.py', 2)], 'tests/corpus/c.txt')]},
+                          standalone=[args_role])
+            assert rows['tests/corpus/c.txt']['class'] != 'keep'
+            # Negative controls: schema, revision, command, review set, provenance, source, entry, interface.
+            for change, text in (({'extra': 1}, 'invalid Python argument role'), ({'purpose': ' '}, 'invalid Python argument role'),
+                                 ({'interface': []}, 'invalid Python argument role'),
+                                 ({'provenance': {'commit': A, 'path': 'tests/args.py'}}, 'invalid Python argument role'),
+                                 ({'provenance': dict(args_role['provenance'], commit=[A])}, 'invalid Python argument role'),
+                                 ({'input_revision': 'HEAD'}, 'full commit revision'),
+                                 ({'command': ['python3', '-B', 'tests/args.py', 'label', 'true']}, 'unsupported Python argument role'),
+                                 ({'command': ['python3', 'tests/args.py']}, 'unsupported Python argument role'),
+                                 ({'command': ['python3', '-m', 'unittest', 'tests/args.py']}, 'unsupported Python argument role'),
+                                 ({'source_blob': '0' * 40}, 'unreviewed Python argument role'),
+                                 ({'provenance': dict(args_role['provenance'], commit='0' * 40)}, 'unreviewed Python argument role'),
+                                 ({'provenance': dict(args_role['provenance'], path='tests/args_sub.py')}, 'unreviewed Python argument role'),
+                                 ({'provenance': dict(args_role['provenance'], commit=later.ref)}, 'introducing provenance'),
+                                 ({'entry_line': 2}, 'top-level entry'), ({'entry_line': True}, 'top-level entry'),
+                                 ({'interface': dict(args_interface, argv_lines=[3])}, 'interface mismatch'),
+                                 ({'interface': dict(args_interface, positionals=[[2, 'label']])}, 'interface mismatch')):
+                rejected(first, text, standalone=[dict(args_role, **change)])
+            rejected(first, 'unverifiable historical runner demonstration', standalone=[dict(args_role, input_revision='0' * 40)])
+            # The configured CLI, module CLI and unittest guards are unchanged and refuse the role.
+            for path, line in (('tests/prog_test.py', 4), ('tests/prog_cli.py', 5)):
+                rejected(first, 'matches a configured CLI or unittest form', standalone=[py_role(path, line, {})])
+            # A default program or an unaudited argv form has no argument interface.
+            for path, line in (('tests/prog.py', 4), ('tests/args_alias.py', 2), ('tests/args_rebind.py', 3)):
+                rejected(first, 'audited argument interface', standalone=[py_role(path, line, {})])
+            # No promotion beside another role for the same path and revision.
+            rejected(first, 'conflicting standalone', standalone=[args_role, dict(program, path='tests/args.py', source_blob=blob(first, 'tests/args.py'),
+                     command=['python3', '-B', 'tests/args.py'], entry_line=3)])
+            rejected(first, 'conflicting standalone', standalone=[dict(program, path='tests/args.py', source_blob=blob(first, 'tests/args.py'),
+                     command=['python3', '-B', 'tests/args.py'], entry_line=3), args_role])
+            # A current definition of the same path supersedes the role at a later revision.
+            current_program = dict(program, path='tests/args.py', input_revision=later.ref, source_blob=blob(later, 'tests/args.py'),
+                                   command=['python3', '-B', 'tests/args.py'], entry_line=3)
+            model, _ = run(later, standalone=[args_role, current_program])
+            assert 'py-args:tests/args.py' not in model['entry_points'] and 'source-only:tests/args.py' in model['entry_points']
+            # The role is no Git policy writer: it credits no generated output.
+            writer = {'path': 'tests/args.py', 'blob': blob(first, 'tests/args.py'), 'line': 5, 'literal': 'out.json'}
+            policy = {'path': 'tests/gen/.gitignore', 'blob': blob(first, 'tests/gen/.gitignore'), 'purpose': 'Synthetic output policy.',
+                      'matches': [{'line': 1, 'output': 'out.json', 'writer': writer}]}
+            rejected(first, 'not an entry point source', {'git_policies': [policy]}, standalone=[args_role])
+            REVIEWED_PYTHON_ARGS = frozenset()
+            rejected(first, 'unreviewed Python argument role', standalone=[args_role])
+        finally: REVIEWED_PYTHON_ARGS = reviewed_args
+        # A changed source drops the root at a later revision.
+        args_edited = commit({'tests/args.py': files['tests/args.py'] + '# changed\n'}, 'changed argument program')
+        REVIEWED_PYTHON_ARGS = reviewed_args | {('tests/args.py', blob(first, 'tests/args.py'), A)}
+        try:
+            model, rows = run(args_edited, standalone=[args_role])
+            assert 'py-args:tests/args.py' not in model['entry_points'] and rows['tests/args.py']['class'] != 'keep'
+            rejected(args_edited, 'source mismatch', standalone=[dict(args_role, input_revision=args_edited.ref)])
+        finally: REVIEWED_PYTHON_ARGS = reviewed_args
+
+        # (7) H997 reviewed live shell/Node entry-source role: a source-only
+        # root bound to blob, interpreter, recorded interface and introducing
+        # commit that anchors nothing and credits no read, helper or output.
+        global REVIEWED_NONPY_ENTRIES
+        reviewed_nonpy = REVIEWED_NONPY_ENTRIES
+        assert len(reviewed_nonpy) == 115 and len({p for p, _, _ in reviewed_nonpy}) == 115
+        assert all(p.startswith(('tests/directruntime-20261104/', 'tests/upstream/')) and posixpath.splitext(p)[1] in NONPY_SHEBANGS
+                   and '.test.' not in p and classifier['hex_pin'](b, 40) and classifier['hex_pin'](c, 40) for p, b, c in reviewed_nonpy)
+        witnesses = {'tests/directruntime-20261104/shared-translator/bounded.sh', 'tests/directruntime-20261104/native-browser/readbounds/module-gates.sh',
+                     'tests/directruntime-20261104/memory-references/native-source-controls.mjs'}
+        assert witnesses <= {p for p, _, _ in reviewed_nonpy}
+        assert ('tests/directruntime-20261104/shared-translator/bounded.sh', 'a6686039c6dec3b35d2f06a2b8403be31ff9dd42',
+                'b44f0de87c2ab845b79c9d84004dcb7c91babded') in reviewed_nonpy
+        sh_interface = {'interpreter': 'bash', 'shebang': '#!/usr/bin/env bash', 'entry_line': 2}
+        mjs_interface = {'interpreter': 'node', 'shebang': None, 'entry_line': 2}
+        cjs_interface = {'interpreter': 'node', 'shebang': '#!/usr/bin/env node', 'entry_line': 3}
+        assert nonpython_entry_interface('tests/drive.sh', files['tests/drive.sh']) == sh_interface
+        assert nonpython_entry_interface('tests/drive.mjs', files['tests/drive.mjs']) == mjs_interface
+        assert nonpython_entry_interface('tests/drive.cjs', files['tests/drive.cjs']) == cjs_interface
+        for path in ('tests/lib.sh', 'tests/drive-sh.sh', 'tests/lib.mjs', 'tests/lib.cjs', 'tests/drive.test.mjs', 'tests/drive.js', 'tests/prog.py'):
+            assert nonpython_entry_interface(path, files[path]) is None, path
+        for path, text in (('x.mjs', "import 'node:fs';\n// only imports\n"), ('x.mjs', 'const a = 1;\nexport { a };\n'),
+                           ('x.mjs', 'const a = 1;\nexport default a;\n'), ('x.cjs', 'const a = 1;\nexports.a = a;\n'),
+                           ('x.cjs', 'const a = 1;\nmodule .exports = a;\n'), ('x.mjs', '#!/usr/bin/node\nconsole.log(1);\n'),
+                           ('x.sh', '#!/usr/bin/env bash\n# only comments\n  indented\n'), ('x.sh', '#!/usr/bin/env bash\necho a\r\n'),
+                           ('x.sh', '#!/usr/bin/env  bash\necho a\n'), ('x.sh', '#!/usr/bin/env bash\nf() { :; }\nreturn 0 2>/dev/null\n'),
+                           ('x.test.cjs', 'console.log(1);\n'), ('x.py', 'print(1)\n'), ('x.mjs', 'console.log(1);\0\n'),
+                           ('x.sh', '#!/usr/bin/env bash\nf() {\n  echo f\n}\nfunction g {\n  :\n}\nX=1\nexport Y=2\nset -e\n'),
+                           ('x.sh', '#!/usr/bin/env bash\n[[ -n ${X:-} ]] && return 0\necho a\n'), ('x.sh', '#!/usr/bin/env bash\ncat <<EOF\nunterminated\n'), ('x.sh', '#!/usr/bin/env bash\necho a; return\n'),
+                           ('x.cjs', 'Object.assign(exports, { a: 1 });\n'), ('x.cjs', "module['exports'] = 1;\n"),
+                           ('x.cjs', "Object.defineProperty(module, 'exports', { value: 1 });\n"), ('x.cjs', 'const e = exports;\ne.a = 1;\n')):
+            assert nonpython_entry_interface(path, text) is None, text
+        # Commented or quoted keywords are not declarations; a dynamic import is code.
+        assert nonpython_entry_interface('x.mjs', '// export const a = 1;\nconsole.log("export", `module.exports`);\n')['entry_line'] == 2
+        assert nonpython_entry_interface('x.mjs', "import a from './a.mjs';\nimport('./b.mjs');\n")['entry_line'] == 2
+        assert nonpython_entry_interface('x.mjs', "import {\n  a,\n  b,\n} from './a.mjs';\nconsole.log(a, b);\n")['entry_line'] == 5
+        assert nonpython_entry_interface('x.cjs', 'const report = { exports: 1 };\nconst module = 2;\nconsole.log(module, report);\n')['entry_line'] == 1
+        assert nonpython_entry_interface('x.sh', '#!/usr/bin/env bash\nset -e\nf() {\n  return 0\n}\nX=1\nf\n')['entry_line'] == 2
+        assert nonpython_entry_interface('x.sh', "#!/usr/bin/env bash\ncat > m.c <<'EOF'\nint main(void){return 0;}\nEOF\ncc m.c\n")['entry_line'] == 2
+        nonpy = lambda path, interface, command=None, repo=first, commit=A: {
+            'path': path, 'input_revision': repo.ref, 'source_blob': blob(repo, path), 'kind': NONPY_ENTRY_KIND,
+            'command': command or [interface['interpreter'], path], 'interface': interface,
+            'provenance': {'commit': commit, 'path': path, 'blob': blob(repo, path)}, 'purpose': 'Synthetic reviewed live program.'}
+        sh_role = nonpy('tests/drive.sh', sh_interface); mjs_role = nonpy('tests/drive.mjs', mjs_interface); cjs_role = nonpy('tests/drive.cjs', cjs_interface)
+        roles = (('tests/drive.sh', sh_role, 2), ('tests/drive.mjs', mjs_role, 2), ('tests/drive.cjs', cjs_role, 3))
+        assert all(baseline[path]['class'] != 'keep' for path, _, _ in roles)
+        REVIEWED_NONPY_ENTRIES = frozenset({(p, blob(first, p), A) for p in ('tests/drive.sh', 'tests/drive.mjs', 'tests/drive.cjs', 'tests/lib.sh',
+                                                                              'tests/drive-sh.sh', 'tests/lib.mjs', 'tests/drive.js', 'tests/walk.mjs')}
+                                           | {('tests/drive.sh', blob(first, 'tests/drive.sh'), later.ref)})
+        try:
+            for repo in (first, later):
+                model, rows = run(repo, standalone=[role for _, role, _ in roles])
+                for path, role, line in roles:
+                    assert rows[path]['class'] == 'keep', path
+                    entry = model['entry_points']['nonpy-entry:' + path]
+                    assert entry['source_only'] and entry['nonpython_entry_role'] and entry['validation_at_measured_revision']['status'] == 'unavailable'
+                    assert entry['command'] == role['command'][0] + ' ' + path and entry['location'] == path + ':' + str(line)
+                    assert entry['interface'] == role['interface'] and entry['provenance'] == role['provenance']
+                    assert not any(k.endswith(':' + path) and not k.startswith('nonpy-entry:') for k in model['entry_points'])
+                # Nothing else changes: no read, helper, child or output credit.
+                assert all(canonical(r) == canonical(baseline[p]) for p, r in rows.items() if p not in [p for p, _, _ in roles]
+                           and p in baseline and repo is later)
+            # The role anchors no route: the malformed row is never even inspected.
+            _, rows = run(later, {'static_routes': [route(first, 'nonpy-entry:tests/drive.mjs', 'node-import', [frame(first, 'tests/drive.mjs', 2)], 'tests/corpus/c.txt')]},
+                          standalone=[mjs_role])
+            assert rows['tests/corpus/c.txt']['class'] != 'keep'
+            # Negative controls: schema, revision, interpreter, review set, provenance, source, interface.
+            for change, text in (({'extra': 1}, 'invalid non-Python entry role'), ({'purpose': ' '}, 'invalid non-Python entry role'),
+                                 ({'interface': []}, 'invalid non-Python entry role'),
+                                 ({'provenance': {'commit': A, 'path': 'tests/drive.sh'}}, 'invalid non-Python entry role'),
+                                 ({'provenance': dict(sh_role['provenance'], commit=[A])}, 'invalid non-Python entry role'),
+                                 ({'input_revision': 'HEAD'}, 'full commit revision'),
+                                 ({'command': ['bash', 'tests/drive.sh', 'arg']}, 'unsupported non-Python entry role'),
+                                 ({'command': ['bash', '-x', 'tests/drive.sh']}, 'unsupported non-Python entry role'),
+                                 ({'command': ['sh', 'tests/drive.sh']}, 'unsupported non-Python entry role'),
+                                 ({'command': ['node', 'tests/drive.sh']}, 'unsupported non-Python entry role'),
+                                 ({'command': ['tests/drive.sh']}, 'unsupported non-Python entry role'),
+                                 ({'source_blob': '0' * 40}, 'unreviewed non-Python entry role'),
+                                 ({'provenance': dict(sh_role['provenance'], commit='0' * 40)}, 'unreviewed non-Python entry role'),
+                                 ({'provenance': dict(sh_role['provenance'], path='tests/drive.mjs')}, 'unreviewed non-Python entry role'),
+                                 ({'provenance': dict(sh_role['provenance'], commit=later.ref)}, 'introducing provenance'),
+                                 ({'interface': dict(sh_interface, entry_line=3)}, 'interface mismatch'),
+                                 ({'interface': dict(sh_interface, shebang=None)}, 'interface mismatch'),
+                                 ({'interface': dict(sh_interface, interpreter='sh')}, 'interface mismatch')):
+                rejected(first, text, standalone=[dict(sh_role, **change)])
+            rejected(first, 'unverifiable historical runner demonstration', standalone=[dict(sh_role, input_revision='0' * 40)])
+            for change in ({'command': ['node', '--test', 'tests/drive.mjs']}, {'command': ['node', 'tests/drive.mjs', 'prepare']},
+                           {'command': ['bash', 'tests/drive.mjs']}):
+                rejected(first, 'unsupported non-Python entry role', standalone=[dict(mjs_role, **change)])
+            # Other suffixes, Python and the node-test naming are refused before review.
+            for path, interpreter in (('tests/drive.js', 'node'), ('tests/drive.test.mjs', 'node'), ('tests/prog.py', 'python3')):
+                rejected(first, 'unsupported non-Python entry role', standalone=[nonpy(path, dict(mjs_interface, interpreter=interpreter))])
+            # A library or an unaudited shebang has no entry interface, even when reviewed.
+            for path in ('tests/lib.sh', 'tests/drive-sh.sh', 'tests/lib.mjs'):
+                rejected(first, 'audited entry interface', standalone=[nonpy(path, sh_interface, [NONPY_SHEBANGS[posixpath.splitext(path)[1]][0], path])])
+            # source-only-program and the H996 role stay Python-only.
+            rejected(first, 'unsupported source-only program', standalone=[dict(program, path='tests/drive.sh', source_blob=blob(first, 'tests/drive.sh'),
+                     command=['bash', 'tests/drive.sh'], entry_line=2)])
+            rejected(first, 'unsupported Python argument role', standalone=[dict(sh_role, kind=PYTHON_ARGS_KIND, entry_line=2)])
+            # No promotion beside another role for the same path and revision; a manual reproducer stays as it is.
+            rejected(first, 'conflicting standalone', standalone=[nonpy('tests/walk.mjs', {'interpreter': 'node', 'shebang': None, 'entry_line': 1})])
+            # A current definition of the same path supersedes the role at a later revision.
+            for order in (1, -1):
+                model, _ = run(later, standalone=[dict(sh_role, input_revision=later.ref, purpose='Current definition.'), sh_role][::order])
+                assert model['entry_points']['nonpy-entry:tests/drive.sh']['source_declaration_revision'] == later.ref
+                assert model['entry_points']['nonpy-entry:tests/drive.sh']['purpose'] == 'Current definition.'
+            # The role is no Git policy writer: it credits no generated output.
+            writer = {'path': 'tests/drive.sh', 'blob': blob(first, 'tests/drive.sh'), 'line': 3, 'literal': 'out.json'}
+            policy = {'path': 'tests/gen/.gitignore', 'blob': blob(first, 'tests/gen/.gitignore'), 'purpose': 'Synthetic output policy.',
+                      'matches': [{'line': 1, 'output': 'out.json', 'writer': writer}]}
+            rejected(first, 'not an entry point source', {'git_policies': [policy]}, standalone=[sh_role])
+            REVIEWED_NONPY_ENTRIES = frozenset()
+            rejected(first, 'unreviewed non-Python entry role', standalone=[sh_role])
+        finally: REVIEWED_NONPY_ENTRIES = reviewed_nonpy
+        # A changed source drops the root at a later revision.
+        sh_edited = commit({'tests/drive.sh': files['tests/drive.sh'] + '# changed\n'}, 'changed shell program')
+        REVIEWED_NONPY_ENTRIES = reviewed_nonpy | {('tests/drive.sh', blob(first, 'tests/drive.sh'), A)}
+        try:
+            model, rows = run(sh_edited, standalone=[sh_role])
+            assert 'nonpy-entry:tests/drive.sh' not in model['entry_points'] and rows['tests/drive.sh']['class'] != 'keep'
+            rejected(sh_edited, 'source mismatch', standalone=[dict(sh_role, input_revision=sh_edited.ref)])
+        finally: REVIEWED_NONPY_ENTRIES = reviewed_nonpy
+
         # (4) H979 persisted entered-module claims.
         assert run(first)[1]['tests/helper.py']['class'] == 'keep'
         persisted = {'persistent_module_entries': [claim]}
@@ -1500,3 +2374,119 @@ def successor_controls(classifier):
         rejected(changed, 'objects differ at recorded revision', {'persistent_module_entries': [forged]}, entries=[forged])
         runner_changed = commit({'tests/helper.py': files['tests/helper.py'], 'tests/test_entry.py': files['tests/test_entry.py'] + '# changed\n'}, 'changed runner')
         assert run(runner_changed, persisted)[1]['tests/helper.py']['class'] != 'keep'
+
+        # (8) H999 reviewed live non-root Lean check source: source-only root
+        # bound to blob, interface, introducing commit and reviewed drivers.
+        global REVIEWED_LEAN_CHECKS, REVIEWED_LEAN_CHECK_INVOCATIONS
+        saved = REVIEWED_LEAN_CHECKS, REVIEWED_LEAN_CHECK_INVOCATIONS, reviewed_nonpy
+        pa, pb = 'tests/directruntime-20261104/control-tuples/ProofAudit.lean', 'c60ce39b40db0e4a797d0afa4c1a8f14c40df466'
+        assert REVIEWED_LEAN_CHECKS == {(pa, pb, 'e6849d3bdf516099d20c33d3581d523449764018')} and len(REVIEWED_LEAN_CHECK_INVOCATIONS) == 5
+        assert all(q == pa and b == pb and (d, db) in {(p, b) for p, b, _ in reviewed_nonpy} and d.endswith('-validate.sh')
+                   and not d.endswith('/read-bounds-validate.sh') for q, b, d, db, _ in REVIEWED_LEAN_CHECK_INVOCATIONS)
+        G, X = LEAN_CHECK_DRIVER_LINE, 'tests/c/A.lean'
+        gate = '#!/usr/bin/env bash\n' + LEAN_CHECK_GATE_BRANCH + '\n' + LEAN_CHECK_GATE_LINE + '\nfi\n'
+        head = ('#!/usr/bin/env bash\n# driver\nset -euo pipefail\nfor t in Lib.Mod; do\n  lake build "$t"\ndone\nfiles=(tests/c/S.lean)\n'
+                'for n in P Q; do\n files+=("tests/c/$n.lean")\ndone\nfiles+=(tests/c/A.lean tests/c/T.lean)\n'
+                'files+=(tests/c/E.lean tests/c/I.lean tests/pkg/A.lean)\n')
+        driver = head + G + '\npython3 tests/helper.py\n'; gl = head.count('\n') + 1
+        audit = 'import tests.d.Dep Lib.Mod\n-- c\n/- block\n   c -/\n#check @D.v\n#print axioms D.v\n#check D.v  -- t\n'
+        add = {'scripts/coord-tools/gate.sh': gate, 'tests/c/run.sh': driver, X: audit, 'tests/d/Dep.lean': 'def D.v : Nat := 1\n',
+               'tests/c/E.lean': audit + '#eval IO.FS.readFile "tests/data.txt"\n', 'tests/c/I.lean': audit, 'tests/c/J.lean': 'import tests.c.I\n',
+               'tests/pkg/lakefile.toml': 'name = "pkg"\n', 'tests/pkg/A.lean': audit,
+               'tests/c/exec.sh': driver.replace('set -euo pipefail\n', 'set -euo pipefail\nexec true\n')}
+        lf = commit(add, 'Lean checks'); L = lf.ref; ll = commit({'tests/unrelated.txt': 'L\n'}, 'Lean later')
+        face = {'imports': ['tests.d.Dep', 'Lib.Mod'], 'check_lines': [5, 7], 'axiom_lines': [6]}
+        code = classifier['lean_code']
+        assert lean_check_interface(code, X, audit) == face and lean_check_invocation(driver, X, gl)
+        for t in ('#eval 1', 'theorem t : True := trivial', 'set_option x true', 'open D', '#check (D.v)', '#check D.v + 1', ' #check D.v',
+                  '#check\n  D.v', 'import Lean', '#check "x"', '"x"', '#print D.v', 'run_cmd pure ()', '#check a\r', '#check a\0'):
+            assert lean_check_interface(code, X, audit + t + '\n') is None, t
+        assert lean_check_interface(code, X, 'import D\n') is None and lean_check_interface(code, 'x.py', audit) is None
+        assert lean_check_interface(code, X, 'prelude\n' + audit) is None
+        for t in ('exec bash x.sh', 'cd tests', 'files=(tests/c/O.lean)', ' files=(tests/c/O.lean)', 'unset files', 'files[0]=x', 'bash() { :; }',
+                  'export PATH="$PWD/b:$PATH"', 'cat <<EOF\nx\nEOF', 'source l.sh', '. l.sh', 'false && \\', 'exit 0', 'eval "$x"', 'trap f EXIT',
+                  'files=(tests/c/A.lean ); files=( )', 'files=(x) # tests/c/A.lean )', 'echo "\nfiles+=(tests/c/A.lean)\n"', 'echo \\', ": '",
+                  'hash -p /bin/true bash', 'kill $$', 'declare -n f=fil""es', 'files=("tests/c/A.lean")'):
+            assert not lean_check_invocation(head + t + '\n' + G + '\n', X, gl + t.count('\n') + 1), t
+        for t in (head + 'if false; then\n' + G + '\nfi\n', head + 'for x in a; do\n' + G + '\ndone\n', head + ' ' + G + '\n'):
+            assert not lean_check_invocation(t, X, gl + 1 - t.startswith(head + ' ')), t
+        for old, new in (('files+=(tests/c/A.lean ', 'files+=('), ('files+=(tests/c/A.lean', ' files+=(tests/c/A.lean'),
+                         ('files+=(tests/c/A.lean', ' files=(tests/c/S.lean)\nfiles+=(tests/c/A.lean')):
+            t = head.replace(old, new) + G + '\n'; assert not lean_check_invocation(t, X, t.count('\n')), new
+        assert not lean_check_invocation(head + G.replace('per-file', 'touched') + '\n', X, gl)
+        libs = lambda t: type('R', (), {'texts': {'lakefile.toml': t}})()
+        assert _outside_root_libraries(libs('[[lean_lib]]\nname = "Lib"\n[[lean_exe]]\nname = "x"\nroot = "Main"\n'), X)
+        for t in ('name = "tests"', 'name = "L"\nsrcDir = "tests"', 'name = "L"\nsrcDir = "/r/tests"', 'name = "L"\nroots = "tests.c.A"', 'name = "L"\nsrcDir = "./tests/c"', 'name = "L"\nglobs = ["tests.+"]',
+                  'name = "L"\nroots = ["L", "tests.c.A"]', 'name = "L"\nsrcDir = ".."', 'name = "L"\nroot = 1'):
+            assert not _outside_root_libraries(libs('[[lean_lib]]\n' + t + '\n'), X), t
+        assert not _outside_root_libraries(libs('[[lean_lib]\n'), X)
+        call = lambda d='tests/c/run.sh', **k: dict({'driver': d, 'driver_blob': blob(lf, d), 'driver_commit': L, 'line': gl}, **k)
+        mk = lambda p=X: {'path': p, 'input_revision': L, 'source_blob': blob(lf, p), 'kind': LEAN_CHECK_KIND, 'command': lean_check_command(p),
+                          'interface': face, 'provenance': {'commit': L, 'path': p, 'blob': blob(lf, p)}, 'invocations': [call()], 'purpose': 'Synthetic.'}
+        role = mk(); base_model, base = run(ll, entries=[])
+        assert base[X]['class'] != 'keep' and base['tests/d/Dep.lean']['class'] != 'keep'
+        srcs = (X, 'tests/c/E.lean', 'tests/c/I.lean', 'tests/pkg/A.lean')
+        REVIEWED_LEAN_CHECKS = frozenset({(p, blob(lf, p), L) for p in srcs})
+        REVIEWED_LEAN_CHECK_INVOCATIONS = frozenset({(p, blob(lf, p), d, blob(lf, d), gl) for p in srcs for d in ('tests/c/run.sh', 'tests/c/exec.sh')})
+        drivers = {(d, blob(lf, d), L) for d in ('tests/c/run.sh', 'tests/c/exec.sh')}
+        REVIEWED_NONPY_ENTRIES = reviewed_nonpy | drivers
+        try:
+            for repo in (lf, ll):
+                model, rows = run(repo, standalone=[role]); entry = model['entry_points']['lean-check:' + X]
+                assert rows[X]['class'] == 'keep' and entry['source_only'] and entry['lean_check_role']
+                assert entry['validation_at_measured_revision']['status'] == 'unavailable' and entry['location'] == 'tests/c/run.sh:%d' % gl
+                assert entry['command'] == 'lake lean tests/c/A.lean -- --tstack=131072' and entry['invocations'] == role['invocations']
+                assert entry['interface'] == face and entry['provenance'] == role['provenance']
+                if repo is ll:  # no import-dependency, driver, read or proof credit
+                    assert all(canonical(r) == canonical(base[p]) for p, r in rows.items() if p != X)
+                    assert set(model['entry_points']) == set(base_model['entry_points']) | {'lean-check:' + X}
+            _, rows = run(ll, {'static_routes': [route(lf, 'lean-check:' + X, 'lean-readFile', [frame(lf, X, 5)], 'tests/data.txt')]}, standalone=[role])
+            assert rows['tests/data.txt']['class'] != 'keep'
+            Z = '0' * 40
+            for change, text in (({'extra': 1}, 'invalid Lean check'), ({'purpose': ' '}, 'invalid Lean check'), ({'invocations': []}, 'invalid Lean check'),
+                                 ({'invocations': [call(), call()]}, 'invalid Lean check'), ({'invocations': [call(line=str(gl))]}, 'invalid Lean check'),
+                                 ({'invocations': [call(command=['bash'])]}, 'invalid Lean check'), ({'provenance': {'commit': L}}, 'invalid Lean check'),
+                                 ({'input_revision': 'HEAD'}, 'full commit revision'), ({'command': ['lean', X]}, 'unsupported Lean check role invocation'),
+                                 ({'command': ['lake', 'env', 'lean', X]}, 'unsupported Lean check role invocation'),
+                                 ({'command': lean_check_command(X) + ['x']}, 'unsupported Lean check role invocation'),
+                                 ({'source_blob': Z}, 'unreviewed Lean check role'), ({'provenance': dict(role['provenance'], commit=Z)}, 'unreviewed Lean check role'),
+                                 ({'invocations': [call(line=gl - 1)]}, 'role invocation'), ({'invocations': [call(driver_blob=Z)]}, 'role invocation'),
+                                 ({'invocations': [call(driver_commit=Z)]}, 'role invocation'),
+                                 ({'invocations': [call(), call('tests/c/exec.sh')]}, 'driver does not run the source'),
+                                 ({'interface': dict(face, check_lines=[5])}, 'interface mismatch'), ({'interface': dict(face, imports=['Lib.Mod'])}, 'interface mismatch'),
+                                 ({'input_revision': Z}, 'unverifiable historical')):
+                rejected(lf, text, standalone=[dict(role, **change)])
+            rejected(lf, 'conflicting standalone', standalone=[role, dict(role, purpose='Other.')])
+            rejected(lf, 'check-only interface', standalone=[mk('tests/c/E.lean')])
+            for path in ('tests/c/I.lean', 'tests/pkg/A.lean'):  # importer, Lake package: stale
+                assert 'lean-check:' + path not in run(lf, standalone=[mk(path)])[0]['entry_points']
+            REVIEWED_NONPY_ENTRIES = reviewed_nonpy
+            rejected(lf, 'role invocation', standalone=[role])
+            REVIEWED_NONPY_ENTRIES = reviewed_nonpy | {('tests/c/run.sh', blob(lf, 'tests/c/run.sh'), A)}
+            rejected(lf, 'driver lacks its introducing provenance', standalone=[dict(role, invocations=[call(driver_commit=A)])])
+            REVIEWED_NONPY_ENTRIES = reviewed_nonpy | drivers
+            for order in (1, -1):  # a current definition supersedes
+                model, _ = run(ll, standalone=[dict(role, input_revision=ll.ref, purpose='Now.'), role][::order])
+                assert model['entry_points']['lean-check:' + X]['purpose'] == 'Now.'
+            # Other kinds and the manual-reproducer prefixes keep excluding Lean and Lake.
+            src = {'path': X, 'input_revision': L, 'source_blob': blob(lf, X)}
+            rejected(lf, 'unsupported source-only program', standalone=[dict(program, **src, command=['python3', '-B', X])])
+            rejected(lf, 'unsupported non-Python entry role', standalone=[{**{k: v for k, v in role.items() if k != 'invocations'}, 'kind': NONPY_ENTRY_KIND}])
+            for command in (lean_check_command(X), ['lean', X], ['lake', 'env', 'lean', X]):
+                rejected(lf, 'unsupported manual reproducer', standalone=[{**src, 'kind': 'manual-reproducer', 'command': command, 'documentation': doc(1, ' '.join(command))}])
+            rejected(lf, 'unsupported standalone invocation', standalone=[{**src, 'kind': 'unittest', 'command': lean_check_command(X)}])
+            writer = {'path': X, 'blob': blob(lf, X), 'line': 5, 'literal': 'out.json'}
+            policy = {'path': 'tests/gen/.gitignore', 'blob': blob(lf, 'tests/gen/.gitignore'), 'purpose': 'P.', 'matches': [{'line': 1, 'output': 'out.json', 'writer': writer}]}
+            rejected(lf, 'not an entry point source', {'git_policies': [policy]}, standalone=[role])
+            # A root library, changed gate.sh, source or driver drops the root later; a current claim on changed bytes is refused.
+            for changes in ({'lakefile.toml': files['lakefile.toml'] + '[[lean_lib]]\nname = "tests"\n'}, {'scripts/coord-tools/gate.sh': gate.replace('131072', '65536')},
+                            {'scripts/coord-tools/gate.sh': gate.replace('per-file ]', 'full ]')}, {X: audit + '#check D.v\n'}, {'tests/c/run.sh': driver + 'echo\n'}):
+                edited = commit(changes, 'edited')
+                model, rows = run(edited, standalone=[role])
+                assert 'lean-check:' + X not in model['entry_points'] and rows[X]['class'] != 'keep'
+                if X in changes or 'tests/c/run.sh' in changes: rejected(edited, 'source mismatch', standalone=[dict(role, input_revision=edited.ref)])
+                commit({'scripts/coord-tools/gate.sh': gate, X: audit, 'tests/c/run.sh': driver, 'lakefile.toml': files['lakefile.toml']}, 'restored')
+            REVIEWED_LEAN_CHECKS = frozenset()
+            rejected(lf, 'unreviewed Lean check role', standalone=[role])
+        finally: REVIEWED_LEAN_CHECKS, REVIEWED_LEAN_CHECK_INVOCATIONS, REVIEWED_NONPY_ENTRIES = saved
+        lean_fixture_controls(locals())  # (9) H1015, in roles.py

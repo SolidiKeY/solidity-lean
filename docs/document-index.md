@@ -262,6 +262,10 @@ and open obligations. Test proposals remain proposals until applied.
 - [docs/solkey-feedback.md](solkey-feedback.md)
 - [docs/solkey-migration.md](solkey-migration.md)
 - [docs/source-inputs.md](source-inputs.md)
+- [docs/testing/upstream/corpus-summary.md](testing/upstream/corpus-summary.md)
+- [docs/testing/upstream/group02-source-reference.md](testing/upstream/group02-source-reference.md)
+- [docs/testing/upstream/revert-power.md](testing/upstream/revert-power.md)
+- [docs/testing/upstream/transient-world.md](testing/upstream/transient-world.md)
 - [docs/testsuite-proofs.md](testsuite-proofs.md)
 - [docs/web-ide.md](web-ide.md)
 

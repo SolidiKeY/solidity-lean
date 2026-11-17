@@ -137,5 +137,86 @@ class Git(unittest.TestCase):
                 os.chdir(cwd)
 
 
+class LakeImports(unittest.TestCase):
+    """dump builds the touched modules with Lake before linking oleans, so a declaration new on
+    the lane is indexed even when .lake/build still holds an older olean (b2 pre-gate,
+    MemoryStructDefaultPlan). Lake and Lean are faked: lean sees what the linked olean holds."""
+
+    def dump_stale(self, build=True):
+        with tempfile.TemporaryDirectory() as t:
+            top = pathlib.Path(t); lib = top / ".lake/build/lib/lean/Solidity"; lib.mkdir(parents=True)
+            (lib / "M.olean").write_text("Old\n"); (lib / "M.trace").write_text("{}")
+            calls = []
+
+            def run(cmd, cwd=None, env=None, **kw):
+                calls.append(cmd[:2])
+                if cmd[:2] == ["lake", "build"]:
+                    (lib / "M.olean").write_text("Old\nMemoryStructDefaultPlan\n")
+                elif cmd[:2] == ["lake", "env"]:
+                    names = (pathlib.Path(env["DECLINDEX_LIB"]) / "Solidity/M.olean").read_text().split()
+                    pathlib.Path(env["DECLINDEX_OUT"]).write_text(
+                        "".join(json.dumps(row(n, i, "Solidity.M")) + "\n" for i, n in enumerate(names)))
+                    return subprocess.CompletedProcess(cmd, 0, f"decls={len(names)}\n", "")
+                return subprocess.CompletedProcess(cmd, 0, "", "")
+
+            saved = d.root, d.artifacts, d.subprocess.run, d.lake_build
+            d.root, d.artifacts, d.subprocess.run = (lambda: top), (lambda: None), run
+            if not build: d.lake_build = lambda top, modules: None
+            try:
+                out = top / "i.jsonl"; d.dump(out, ["Solidity.M"])
+                return calls, [r["name"] for r in d.load(out)]
+            finally:
+                d.root, d.artifacts, d.subprocess.run, d.lake_build = saved
+
+    def test_lake_build_runs_first(self):
+        calls, names = self.dump_stale()
+        self.assertEqual(calls, [["lake", "build"], ["lake", "env"]])
+        self.assertIn("MemoryStructDefaultPlan", names)
+
+    def test_old_invocation_misses_the_declaration(self):
+        _, names = self.dump_stale(build=False)
+        self.assertNotIn("MemoryStructDefaultPlan", names)
+
+
+class HostCache(unittest.TestCase):
+    """Coordinator host (dc3): Lake built MemoryStructDefaultPlan into a cache other than the
+    one decl_index guessed (no LAKE_CACHE_DIR, elan toolchain cache absent), .lake/build held
+    only its trace, nothing was linked and Lean reported the olean missing."""
+
+    def setUp(self):
+        self.t = tempfile.TemporaryDirectory(); t = pathlib.Path(self.t.name)
+        self.top, self.lib = t / "top", t / "lib"
+        self.build = self.top / ".lake/build/lib/lean/Solidity/Evm"; self.build.mkdir(parents=True)
+        (self.build / "MemoryStructDefaultPlan.trace").write_text(json.dumps({"outputs": {"o": "abc123"}}))
+        self.xdg = t / "xdg"; (self.xdg / "lake/artifacts").mkdir(parents=True)
+        self.env = {k: os.environ.get(k) for k in ("LAKE_CACHE_DIR", "XDG_CACHE_HOME", "HOME")}
+        os.environ.pop("LAKE_CACHE_DIR", None); os.environ["XDG_CACHE_HOME"] = str(self.xdg)
+        os.environ["HOME"] = str(t / "home")
+        self.run_saved = d.subprocess.run
+        d.subprocess.run = lambda cmd, **kw: subprocess.CompletedProcess(cmd, 1, "", "")  # no elan
+
+    def tearDown(self):
+        d.subprocess.run = self.run_saved
+        for k, v in self.env.items():
+            if v is None: os.environ.pop(k, None)
+            else: os.environ[k] = v
+        self.t.cleanup()
+
+    M = "Solidity.Evm.MemoryStructDefaultPlan"
+
+    def test_olean_in_xdg_cache_is_linked(self):
+        (self.xdg / "lake/artifacts/abc123.olean").write_text("MemoryStructDefaultPlan")
+        d.link_build(self.top, self.lib, [self.M])
+        self.assertEqual((self.lib / "Solidity/Evm/MemoryStructDefaultPlan.olean").read_text(),
+                         "MemoryStructDefaultPlan")
+
+    def test_unresolved_needed_module_is_a_setup_error(self):
+        (self.build / "Other.olean").write_text("x"); (self.build / "Other.trace").write_text("{}")
+        os.symlink(self.top / "gone.olean", self.build / "MemoryStructDefaultPlan.olean")
+        with self.assertRaises(d.SetupError) as e: d.link_build(self.top, self.lib, [self.M])
+        self.assertIn(self.M, str(e.exception))
+        self.assertFalse(os.path.lexists(self.lib / "Solidity/Evm/MemoryStructDefaultPlan.olean"))
+
+
 if __name__ == "__main__":
     unittest.main()
