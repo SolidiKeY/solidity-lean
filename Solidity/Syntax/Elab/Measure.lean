@@ -1,7 +1,7 @@
 import Solidity.Syntax.Elab.Arms
 
 /-!
-# A termination measure for the elaborator knot (et3a spike)
+# A termination measure for the elaborator knot
 
 The vocabulary in which a well-founded totalization of the `mutual` knot of
 `Syntax/Elab/Stmt.lean` states its decrease, over the five recursive fields
@@ -18,17 +18,18 @@ names: `hoist`, `hoistStmt`, `elabStmtP`, `elabStmt1`, `elabStmtsP`.
   its own measure.  This is "the arm at `x` gives the same result for two
   records that agree below the measure of `x`", relativized to `J`.
 
-The guard is not decoration.  With the trivial guard (`ElabPreds.top`) the
-shape cannot hold for any well-founded measure (the spike's counterexample,
-`Solidity/Examples/ElabTotal/Measure.lean`): `elabStmtPWith` passes the
-statement `rc.hoistStmt` returns to `rc.elabStmt1` (nested recursion), so over
-a record whose `hoistStmt` returns a `for` loop with an initializer,
+The guard is needed.  With the trivial guard (`ElabPreds.top`) the shape
+fails for every well-founded measure along one path
+(`Solidity/Examples/ElabTotal/Measure.lean`, `rel_cycle_forT_blk`):
+`elabStmtPWith` passes the statement `rc.hoistStmt` returns to `rc.elabStmt1`
+(nested recursion), so over a record whose `hoistStmt` returns a `for` loop
+with an initializer the arms call
 `elabStmtP blk → elabStmt1 (for …) → elabStmtsP [blk] → elabStmtP blk` at one
-scope; `rel_cycle3` closes the contradiction.  A guard on what `hoistStmt` and
-`hoist` return (their outputs no larger than their inputs, in the measure)
-removes the adversarial records; `Solidity/Examples/ElabTotal/Measure.lean`
-shows that clause 2 follows from guarded stability of the five arms and the
-guard's preservation by them.
+scope.  Which guard makes the five arms stable is open: a candidate bounds
+what `hoistStmt` and `hoist` return by their inputs, in the measure, and is
+not established here.  `Solidity/Examples/ElabTotal/Measure.lean` shows that
+clause 2 follows from guarded stability of the five arms and the guard's
+preservation by them, for any guard.
 -/
 
 namespace Solidity

@@ -2,7 +2,7 @@ import Solidity.Goals.ElabTotal
 import Solidity.Syntax.Elab.Measure
 
 /-!
-# Checks: the elaborator measure (et3a spike)
+# Checks: the elaborator measure
 
 Two results about clause 2 of `Solidity.Goals.elabKernelTotal`
 (`ElabKernelInduction`) and the measure vocabulary of
@@ -29,9 +29,11 @@ Two results about clause 2 of `Solidity.Goals.elabKernelTotal`
   where `blk = { e; loop (true) {} }` is `lowerLoops none [forT]`'s block.
   Each arrow is a call the arm makes through its record whose result is the
   arm's result (the spies below throw, and the arm throws what they throw), so
-  `Stable μ (ElabPreds.top C)` for the three arms forces
+  `Stable μ (ElabPreds.top C)` for the three arms needs
   `μ.elabStmt1 forT sc0 < μ.elabStmtP blk sc0 < μ.elabStmtsP [blk] sc0 <
-  μ.elabStmt1 forT sc0` (`rel_cycle3`).  The spies report the scope's
+  μ.elabStmt1 forT sc0`, a cycle (`rel_cycle_forT_blk`).  The last decrease
+  is proved from `Stable` (`stmtsStep_head_lt`); the first two are shown by
+  evaluation only.  The spies report the scope's
   inlining state (`funs`, `recs`, `inlined`, `top`), the same at every call.
 -/
 
@@ -214,7 +216,8 @@ def recA : ElabRec C0 :=
 #guard errOf (elabStmtPWith C0 recA blk) == s!"elabStmt1 {reprStr forT} @ {scopeTag sc0}"
 
 -- … and its result is that call's: with `elabStmt1` failing silently, so
--- does the arm (what `cut` makes of `recA` when `forT` is not below `blk`).
+-- does the arm.  (A `cut` of `recA` may also cut `hoistStmt`, which fails
+-- with the same `""`.)
 #guard errOf (elabStmtPWith C0 { recA with elabStmt1 := fun _ => throw "" } blk) == ""
 
 -- (2) `elabStmt1With` at `forT` calls `elabStmtsP` at `[blk]`, at `sc0`.
@@ -236,13 +239,38 @@ def recA : ElabRec C0 :=
   | .ok (P, s) => P.isEmpty && reprStr s == reprStr blk
   | .error _ => false
 
-/-- **No measure makes the three arms stable without a guard**: the three
-decreases the `#guard`s force close a cycle. -/
-theorem no_unguarded_measure {α : Type} [WellFoundedRelation α] (μ : ElabMeasure α)
+/-- **The `elabStmtsP` arm's stability forces its head decrease**, with no
+guard: over a record whose `elabStmtP` and `elabStmtsP` succeed, the arm
+succeeds, and over its cut it fails unless `elabStmtP s` is below. -/
+theorem stmtsStep_head_lt {α : Type} [WellFoundedRelation α] {C : Contract}
+    (μ : ElabMeasure α) (h : Stable μ (ElabPreds.top C) μ.elabStmtsP (elabStmtsStep C))
+    (s : RawStmt) (ss : List RawStmt) (sc : ElabScope) :
+    WellFoundedRelation.rel (μ.elabStmtP s sc) (μ.elabStmtsP (s :: ss) sc) := by
+  refine Classical.byContradiction fun hn => ?_
+  let r : ElabRec C := { (default : ElabRec C) with
+    elabStmtP := fun _ => pure [], elabStmtsP := fun _ => pure [] }
+  have hb : MeetsBelow μ (ElabPreds.top C) (μ.elabStmtsP (s :: ss) sc) r :=
+    ⟨fun _ _ _ _ _ _ _ _ _ => trivial, fun _ _ _ _ _ _ _ _ _ => trivial,
+     fun _ _ _ _ _ _ _ _ _ => trivial, fun _ _ _ _ _ _ _ _ _ => trivial,
+     fun _ _ _ _ _ _ _ _ _ => trivial⟩
+  have he := congrArg (fun x => (x.run ([], 0)).run {}) (h r (s :: ss) sc hb)
+  have hc : ((cut μ (μ.elabStmtsP (s :: ss) sc) r).elabStmtP s).run sc =
+      (throw "" : ElabM (SProg C)).run sc :=
+    (cutF_run ..).trans (if_neg hn)
+  simp only [elabStmtsStep, ReaderT.run, bind, ReaderT.bind] at he hc
+  rw [hc] at he
+  cases he
+
+/-- **The cycle**: the three decreases unguarded `Stable` would need along
+`elabStmtP blk → elabStmt1 forT → elabStmtsP [blk] → elabStmtP blk` cannot all
+hold.  The third is `stmtsStep_head_lt`; the first two are what the `#guard`s
+(1) and (2) show the arms depend on, unproved here: a proof would evaluate
+`elabStmtPWith` and `elabStmt1With` in the kernel. -/
+theorem rel_cycle_forT_blk {α : Type} [WellFoundedRelation α] (μ : ElabMeasure α)
     (h1 : WellFoundedRelation.rel (μ.elabStmt1 forT sc0) (μ.elabStmtP blk sc0))
     (h2 : WellFoundedRelation.rel (μ.elabStmtsP [blk] sc0) (μ.elabStmt1 forT sc0))
-    (h3 : WellFoundedRelation.rel (μ.elabStmtP blk sc0) (μ.elabStmtsP [blk] sc0)) : False :=
-  rel_cycle3 h1 h3 h2
+    (hst : Stable μ (ElabPreds.top C0) μ.elabStmtsP (elabStmtsStep C0)) : False :=
+  rel_cycle3 h1 (stmtsStep_head_lt μ hst blk [] sc0) h2
 
 end Counterexample
 
