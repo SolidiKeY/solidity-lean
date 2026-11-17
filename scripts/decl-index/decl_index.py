@@ -82,6 +82,40 @@ def artifacts():
     return out
 
 
+def import_closure(top, modules):
+    """`modules` and every module of this package they import, transitively, read from the
+    `import` lines of the sources under `top` (modules without a source here, such as Lean's
+    own, are left out). dc4: link_build checked only the touched modules, so a transitive
+    import whose olean was not linked (MemoryStructDefaultPlan under b2) surfaced as Lean's
+    missing object file instead of a setup error."""
+    seen, todo = set(), list(modules)
+    while todo:
+        m = todo.pop()
+        if m in seen: continue
+        f = top / (m.replace(".", "/") + ".lean")
+        if not f.is_file(): continue
+        seen.add(m)
+        try: text = f.read_text()
+        except OSError: continue
+        for line in text.splitlines():
+            w = line.split()
+            if not w or w[0] in ("module", "prelude") or w[0].startswith("--"): continue
+            if w[0] == "public" and len(w) > 1 and w[1] == "import": w = w[1:]
+            if w[0] == "meta" and len(w) > 1 and w[1] == "import": w = w[1:]
+            if w[0] != "import": break
+            todo.extend(x for x in w[1:] if x not in ("all",) and not x.startswith("--"))
+    return seen
+
+
+def trace_hashes(o):
+    """Every artifact hash in a trace's `outputs`: a string, a list, or a dict of them, with
+    any `.olean`-style extension dropped (Lake versions differ in the shape)."""
+    if isinstance(o, str): return [o.split(".", 1)[0]]
+    if isinstance(o, dict): o = list(o.values())
+    if isinstance(o, list): return [h for x in o for h in trace_hashes(x)]
+    return []
+
+
 def link_build(top, lib, need=()):
     """A LEAN_PATH directory of the oleans the traces name. With enableArtifactCache a fetched
     module's olean is only in Lake's cache, and a stale .lake/build olean can outlive a later
@@ -98,12 +132,17 @@ def link_build(top, lib, need=()):
         for n in os.listdir(art): names[n.split(".", 1)[0]].append((art, n))
     linked, done = 0, set()
     for t in build.rglob("*.trace"):
-        stem = t.with_suffix(""); rel = stem.relative_to(build)
-        try: o = json.loads(t.read_text()).get("outputs", {}).get("o")
+        stem = t.with_suffix("")
+        if stem.suffix in (".olean", ".ilean", ".c"): stem = stem.with_suffix("")
+        rel = stem.relative_to(build)
+        if ".".join(rel.parts) in done: continue
+        try:
+            outs = json.loads(t.read_text()).get("outputs", {})
+            o = outs.get("o", outs) if isinstance(outs, dict) else outs
         except (OSError, ValueError, AttributeError): o = None
         srcs, exts = [], set()
-        for h in (o if isinstance(o, list) else [o] if o else []):
-            for art, n in names.get(str(h), []):
+        for h in trace_hashes(o):
+            for art, n in names.get(h, []):
                 ext = n.split(".", 1)[1]
                 if ext.startswith("olean") and ext not in exts and (art / n).is_file():
                     srcs.append((art / n, ext)); exts.add(ext)
@@ -113,10 +152,12 @@ def link_build(top, lib, need=()):
         for src, ext in srcs:
             dst = lib / rel.parent / f"{stem.name}.{ext}"
             dst.parent.mkdir(parents=True, exist_ok=True)
+            if os.path.lexists(dst): continue
             os.symlink(src, dst); linked += 1
         if any(e == "olean" for _, e in srcs): done.add(".".join(rel.parts))
     if not linked: raise SetupError(f"{build}: no oleans found")
-    missing = sorted(set(need) - done)
+    missing = sorted(import_closure(top, need) | set(need)) if need else []
+    missing = [m for m in missing if m not in done]
     if missing:
         raise SetupError("no olean for %s in %s or caches %s (set LAKE_CACHE_DIR to Lake's cache)"
                          % (", ".join(missing), build, [str(a) for a in arts] or "none found"))

@@ -217,6 +217,35 @@ class HostCache(unittest.TestCase):
         self.assertIn(self.M, str(e.exception))
         self.assertFalse(os.path.lexists(self.lib / "Solidity/Evm/MemoryStructDefaultPlan.olean"))
 
+    def touched_importer(self):
+        """dc4: touched Solidity.Evm.User (olean in .lake/build) imports
+        MemoryStructDefaultPlan, whose olean is only in a Lake artifact cache."""
+        src = self.top / "Solidity/Evm"; src.mkdir(parents=True)
+        (src / "User.lean").write_text("import Solidity.Evm.MemoryStructDefaultPlan\n\ndef u := 1\n")
+        (src / "MemoryStructDefaultPlan.lean").write_text("def m := 0\n")
+        (self.build / "User.olean").write_text("User"); (self.build / "User.trace").write_text("{}")
+        return "Solidity.Evm.User"
+
+    def test_transitive_import_olean_from_cache_is_linked(self):
+        u = self.touched_importer()
+        (self.xdg / "lake/artifacts/abc123.olean").write_text("MemoryStructDefaultPlan")
+        d.link_build(self.top, self.lib, [u])
+        self.assertEqual((self.lib / "Solidity/Evm/MemoryStructDefaultPlan.olean").read_text(),
+                         "MemoryStructDefaultPlan")
+        self.assertEqual((self.lib / "Solidity/Evm/User.olean").read_text(), "User")
+
+    def test_unlinked_transitive_import_is_a_setup_error(self):
+        u = self.touched_importer()
+        with self.assertRaises(d.SetupError) as e: d.link_build(self.top, self.lib, [u])
+        self.assertIn(self.M, str(e.exception))
+
+    def test_trace_output_shapes(self):
+        self.assertEqual(d.trace_hashes({"o": ["a.olean", "b"], "i": "c.ilean"}), ["a", "b", "c"])
+        (self.build / "MemoryStructDefaultPlan.trace").write_text(json.dumps({"outputs": {"o": ["abc123.olean"]}}))
+        (self.xdg / "lake/artifacts/abc123.olean").write_text("MemoryStructDefaultPlan")
+        d.link_build(self.top, self.lib, [self.M])
+        self.assertTrue((self.lib / "Solidity/Evm/MemoryStructDefaultPlan.olean").is_file())
+
 
 if __name__ == "__main__":
     unittest.main()
