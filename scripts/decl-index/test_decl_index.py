@@ -217,6 +217,47 @@ class HostCache(unittest.TestCase):
         self.assertIn(self.M, str(e.exception))
         self.assertFalse(os.path.lexists(self.lib / "Solidity/Evm/MemoryStructDefaultPlan.olean"))
 
+    def touched_importer(self):
+        """Touched Solidity.Evm.User (olean in .lake/build) imports
+        MemoryStructDefaultPlan, whose olean is only in a Lake artifact cache."""
+        src = self.top / "Solidity/Evm"; src.mkdir(parents=True)
+        (src / "User.lean").write_text("import Solidity.Evm.MemoryStructDefaultPlan\n\ndef u := 1\n")
+        (src / "MemoryStructDefaultPlan.lean").write_text("def m := 0\n")
+        (self.build / "User.olean").write_text("User"); (self.build / "User.trace").write_text("{}")
+        return "Solidity.Evm.User"
+
+    def test_transitive_import_olean_from_cache_is_linked(self):
+        u = self.touched_importer()
+        (self.xdg / "lake/artifacts/abc123.olean").write_text("MemoryStructDefaultPlan")
+        d.link_build(self.top, self.lib, [u])
+        self.assertEqual((self.lib / "Solidity/Evm/MemoryStructDefaultPlan.olean").read_text(),
+                         "MemoryStructDefaultPlan")
+        self.assertEqual((self.lib / "Solidity/Evm/User.olean").read_text(), "User")
+
+    def test_unlinked_transitive_import_is_a_setup_error(self):
+        u = self.touched_importer()
+        with self.assertRaises(d.SetupError) as e: d.link_build(self.top, self.lib, [u])
+        self.assertIn(self.M, str(e.exception))
+
+    def test_header_imports_skip_comments(self):
+        text = "/- header\n /- nested -/ -/\n-- line\nimport A.B -- why\n/-- doc -/\nimport C\n\ndef import_x := 1\nimport D\n"
+        self.assertEqual(d.header_imports(text), ["A.B", "C"])
+        self.assertEqual(d.header_imports("module\npublic import X\nimport all Y\n"), ["X", "Y"])
+
+    def test_closure_follows_import_after_header_comment(self):
+        src = self.top / "Solidity/Backend"; src.mkdir(parents=True)
+        (src / "EvmVectors.lean").write_text("/-\nVectors.\n-/\nimport Solidity.Backend.Assembler\n")
+        (src / "Assembler.lean").write_text("def a := 0\n")
+        self.assertEqual(d.import_closure(self.top, ["Solidity.Backend.EvmVectors"]),
+                         {"Solidity.Backend.EvmVectors", "Solidity.Backend.Assembler"})
+
+    def test_trace_output_shapes(self):
+        self.assertEqual(d.trace_hashes({"o": ["a.olean", "b"], "i": "c.ilean"}), ["a", "b", "c"])
+        (self.build / "MemoryStructDefaultPlan.trace").write_text(json.dumps({"outputs": {"o": ["abc123.olean"]}}))
+        (self.xdg / "lake/artifacts/abc123.olean").write_text("MemoryStructDefaultPlan")
+        d.link_build(self.top, self.lib, [self.M])
+        self.assertTrue((self.lib / "Solidity/Evm/MemoryStructDefaultPlan.olean").is_file())
+
 
 if __name__ == "__main__":
     unittest.main()
