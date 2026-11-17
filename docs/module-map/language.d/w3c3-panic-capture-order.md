@@ -1,0 +1,2 @@
+| `Correctness/Panic/Capture.lean` | Capture linkage of source panics: a scalar capture's local reads the operand's value, `enumCapture`/`narrowCapture` output equations and their failed checks' origins at that value. |
+| `Examples/Panic/Capture.lean` | Checks: an enum conversion of a compound operand failing with code 0x21 at the operand's value, in both modes, and the elaborator's emitted capture and check. |
