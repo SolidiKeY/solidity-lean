@@ -124,27 +124,36 @@ REVIEWED_LEAN_FIXTURE_INVOCATIONS = frozenset(
         'H90Census': 'address environment', 'PrimitiveReturnControls': 'address environment fixed-byte primitive-return'}[posixpath.basename(p)[:-5]].split())
 
 
+# Column-0 commands that make a body a fixture (declaration, evaluation, elaboration).
+FIXTURE_COMMAND = (r'(?:@\[[^\]]*\][ \t]*)?(?:(?:private|protected|noncomputable|partial|unsafe|nonrec)[ \t]+)*'
+                   r'(?:def|theorem|lemma|abbrev|instance|structure|inductive|class|example|opaque|axiom|#eval|#guard|#reduce'
+                   r'|run_elab|run_cmd|run_meta|elab|macro|syntax|macro_rules|elab_rules)(?![\w.\'])')
+
+
 def lean_fixture_interface(lean_code, path, text):
     """Header imports and the first body line of a Lean fixture source, or None.
 
     Only column-0 `import NAMES` lines and blank or comment lines precede the
     body; the body follows at least one import and holds no later import,
-    prelude or module line and no #exit. A check-only source (H999 interface)
-    is not a fixture. NUL or ambiguous line breaks give None."""
+    prelude or module line and no #exit anywhere. The body must hold a
+    column-0 declaration or evaluation command (FIXTURE_COMMAND), so a source
+    of only #check/#print/open/set_option lines is never a fixture, whether or
+    not the H999 grammar accepts it. NUL or ambiguous line breaks give None."""
     if not path.endswith('.lean') or not isinstance(text, str) or not _plain_lines(text) or '\0' in text: return None
     code = lean_code(text)
     if code.count('\n') != text.count('\n') or lean_check_interface(lean_code, path, text) is not None: return None
-    imports, body = [], None
+    if re.search(r'#exit(?![\w.\'])', code): return None
+    imports, body, command = [], None, False
     for n, (line, raw) in enumerate(zip(code.split('\n'), text.split('\n')), 1):
         line = line.rstrip()
         if not line: continue
-        if re.match(r'\s*#exit(?![\w.\'])', line): return None
         header = re.match(r'\s*(?:(?:public|private|meta)\s+)*(?:import|prelude|module)(?![\w.\'])', line)
         match = re.fullmatch(r'import((?:[ \t]+' + _LEAN_NAME + r')+)', line)
-        if body is None and match and raw.startswith(line): imports.extend(match[1].split()); continue
+        if body is None and match and raw.startswith(line) and 'all' not in match[1].split(): imports.extend(match[1].split()); continue
         if header: return None
         if body is None: body = n
-    return {'imports': imports, 'body_line': body} if imports and body else None
+        command = command or re.match(FIXTURE_COMMAND, line) is not None
+    return {'imports': imports, 'body_line': body} if imports and body and command else None
 
 
 LEAN_CHECK_FORM = {'role': 'Lean check role', 'shape': 'check-only', 'interface': lean_check_interface, 'prefix': LEAN_CHECK_PREFIX,
@@ -258,20 +267,23 @@ def lean_fixture_controls(env):
     assert ('tests/directruntime-20261104/control-tuples/ProductionControls.lean', 'ca25c4ca010fa72c0512c2b7523fabcccbbad7e7',
             '2366c57f099b27d4673dda504d258ba77ff3fcaf') in REVIEWED_LEAN_FIXTURES
     G, X = LEAN_CHECK_DRIVER_LINE, 'tests/f/F.lean'
-    fixture = 'import Lib.Mod\n-- fixture\n\ndef F.v : Nat := 1\n#eval IO.FS.readFile "tests/data.txt"\ntheorem F.t : F.v = 1 := rfl\n'
+    fixture = 'import Lib.Mod tests.f.Dep\n-- fixture\n\ndef F.v : Nat := 1\n#eval IO.FS.readFile "tests/data.txt"\ntheorem F.t : F.v = 1 := rfl\n'
     check = 'import Lib.Mod\n#check D.v\n'
-    face = {'imports': ['Lib.Mod'], 'body_line': 4}
+    face = {'imports': ['Lib.Mod', 'tests.f.Dep'], 'body_line': 4}
     assert lean_fixture_interface(code, X, fixture) == face
     assert lean_fixture_interface(code, X, 'import A B -- c\n/- x -/\nrun_elab pure ()\n') == {'imports': ['A', 'B'], 'body_line': 3}
+    assert lean_fixture_interface(code, X, 'import A\nopen A\n@[simp] private def x := 1\n#check x\n') == {'imports': ['A'], 'body_line': 2}
     for t in ('', 'import A\n', '-- c\n', 'def x := 1\n', fixture + 'import B\n', 'prelude\n' + fixture, fixture.replace('-- fixture', 'module'),
               fixture + '#exit\n', fixture + '  #exit\n', ' import A\n#eval 1\n', 'import A\r\n#eval 1\n', fixture + '\0\n', 'import A.\n#eval 1\n',
-              check, 'import A\n#print axioms A\n', fixture.replace('\n', '\n\x0b', 1)):
+              check, 'import A\n#print axioms A\n', fixture.replace('\n', '\n\x0b', 1), 'import A\n#check Foo -- see "x"\n',
+              'import A\n#check (Foo)\n', 'import A\nopen A\n#check Foo\n', 'import A\nset_option x true\n#print A\n', 'import A\n  def x := 1\n',
+              'import A\ndef x := 1 #exit\n', 'import A\nset_option x true in #exit\n#eval 1\n', 'import all A\n#eval 1\n', 'import A\n#evaluate 1\n'):
         assert lean_fixture_interface(code, X, t) is None, t
     assert lean_fixture_interface(code, 'x.py', fixture) is None and lean_check_interface(code, X, fixture) is None
     head = '#!/usr/bin/env bash\nset -euo pipefail\nfiles=(tests/f/F.lean tests/f/C.lean tests/f/I.lean tests/f/X.lean tests/fpkg/F.lean)\n'
     driver = head + G + '\n'; gl = 4
     add = {'scripts/coord-tools/gate.sh': gate, 'tests/f/run.sh': driver, 'tests/f/exec.sh': driver.replace('set -euo pipefail\n', 'exec true\n'),
-           X: fixture, 'tests/f/C.lean': check, 'tests/f/I.lean': fixture, 'tests/f/J.lean': 'import tests.f.I\n',
+           X: fixture, 'tests/f/Dep.lean': 'def Dep.v : Nat := 1\n', 'tests/f/C.lean': check, 'tests/f/I.lean': fixture, 'tests/f/J.lean': 'import tests.f.I\n',
            'tests/f/X.lean': fixture + '#exit\n', 'tests/fpkg/lakefile.toml': 'name = "fpkg"\n', 'tests/fpkg/F.lean': fixture}
     lf = commit(add, 'Lean fixtures'); L = lf.ref; ll = commit({'tests/unrelated.txt': 'F\n'}, 'Lean fixtures later')
     assert lean_check_invocation(driver, X, gl) and not lean_check_invocation(add['tests/f/exec.sh'], X, gl)
@@ -280,7 +292,7 @@ def lean_fixture_controls(env):
         'path': p, 'input_revision': L, 'source_blob': blob(lf, p), 'kind': kind, 'command': lean_check_command(p), 'interface': interface,
         'provenance': {'commit': L, 'path': p, 'blob': blob(lf, p)}, 'invocations': [call()], 'purpose': 'Synthetic fixture.'}
     role = mk(); base_model, base = run(ll, entries=[])
-    assert base[X]['class'] != 'keep'
+    assert base[X]['class'] != 'keep' and base['tests/f/Dep.lean']['class'] != 'keep'
     srcs = (X, 'tests/f/C.lean', 'tests/f/I.lean', 'tests/f/X.lean', 'tests/fpkg/F.lean')
     drivers = {(d, blob(lf, d), L) for d in ('tests/f/run.sh', 'tests/f/exec.sh')}
     saved = REVIEWED_LEAN_FIXTURES, REVIEWED_LEAN_FIXTURE_INVOCATIONS, REVIEWED_NONPY_ENTRIES
