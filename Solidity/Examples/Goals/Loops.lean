@@ -213,6 +213,7 @@ example {rel : (E : Source.Env) → (C : Contract) → Simulation.StateRelation 
       (∀ r : Request, r.Succeeds → ∃ s, Decode.decode r = some s) ∧
       (∀ (r : Request) s, r.Succeeds → Spells r s → Decode.decode r = some s) ∧
       (∀ (r : Request) o after parts program, r.pipeline o after parts program →
+        Allocation.RoundTrip r.input.names ∧
         SafeSpellings r.input.names (Allocation.scope r o after).protectedNames
           (Allocation.scope r o after).generated) ∧
       (∀ (r : Request) o after parts program s, Decode.decode r = some s →
@@ -264,6 +265,7 @@ example :
       (∀ r : Request, r.Succeeds → ∃ s, Decode.decode r = some s) ∧
       (∀ (r : Request) s, r.Succeeds → Spells r s → Decode.decode r = some s) ∧
       (∀ (r : Request) o after parts program, r.pipeline o after parts program →
+        Allocation.RoundTrip r.input.names ∧
         SafeSpellings r.input.names (Allocation.scope r o after).protectedNames
           (Allocation.scope r o after).generated) ∧
       (∀ (r : Request) o after parts program s, Decode.decode r = some s →
@@ -291,6 +293,19 @@ example (s : SourceProgram) (e : SourceExecution s) :
 example (s : SourceProgram) (e : SourceExecution s) (points : e.plan.isSome = true) :
     ¬ (Observe.source s).allowed e :=
   fun admitted => by rw [admitted.1] at points; cases points
+
+/-- H1036: the round-trip law is part of the allocation obligation; a scheme
+that never reads a name back does not satisfy it. -/
+example : ¬ Allocation.RoundTrip ⟨fun s n => s ++ toString n, fun _ => none⟩ :=
+  fun law => nomatch law "se" 0
+
+/-- H1035: the bound simulation gives the `relates` half of the pipeline
+obligation; it is an obligation beside the contract, not part of it. -/
+example {decode : Request → Option SourceProgram} (h : Simulation.Bound loopRel decode)
+    {r : Request} {o after parts} {program : Blk r.contract r.context.ctx} {s : SourceProgram}
+    (d : decode r = some s) (run : r.pipeline o after parts program) :
+    Simulation.Simulates loopRel s program :=
+  h.simulates d run
 
 end Decoder
 

@@ -175,9 +175,8 @@ their own. The trace is not complete, and both lists under-approximate:
 * generated: only names read in the lowered output or live after elaboration
   are seen, so a temporary declared and never read, one that occurs only in
   the intrinsic program, and a memo-reused callee name below the interval
-  are missing; with a `FreshNames` whose `parse` never succeeds the list is
-  empty and the obligation trivial. No round-trip law on `FreshNames` is
-  assumed or stated. -/
+  are missing. The round-trip law on `FreshNames` (`RoundTrip`, H1036) is part
+  of the trace, so a scheme whose `parse` never succeeds does not pass. -/
 namespace Allocation
 
 /-- Names in scope of the request: caller and callee locals, return slots,
@@ -205,11 +204,19 @@ def scope (r : Request) (o : ProductionOutput) (after : Checker.Snapshot) : Allo
   ⟨protectedNames r, generated r.input.names r.input.before.locals.2 after.locals.2
     (o.raw.flatMap RawStmt.names ++ after.locals.1.map Prod.fst)⟩
 
-/-- The trace of a run is its one scope. -/
+/-- **The round-trip law** (H1036): every fresh identifier is read back from
+its own spelling. `FreshNames` carries no such law; without it the spelling
+based trace can be empty or wrong. It is an obligation of every run, part of
+the trace below, not an assumption. -/
+def RoundTrip (names : FreshNames) : Prop :=
+  ∀ base index, names.parse (names.name base index) = some (base, index)
+
+/-- The trace of a run is its one scope, under a fresh-name scheme that
+round-trips. -/
 def trace (r : Request) (o : ProductionOutput) (after : Checker.Snapshot)
     (_ : SProg r.contract) (_ : Blk r.contract r.context.ctx)
     (scopes : List AllocationScope) : Prop :=
-  scopes = [scope r o after]
+  scopes = [scope r o after] ∧ RoundTrip r.input.names
 
 end Allocation
 
@@ -222,12 +229,12 @@ relative to a state relation `rel` (values and globals; `loopRel` below is the
 stage-1 one). It speaks of
 the admitted executions only (`Observe.Admitted`).
 
-Known defects, open. `Simulates` can hold vacuously: its context maps are
-chosen existentially and are tied to no names, so a map between unrelatable
-types makes the premise unsatisfiable; and nothing asks `rel` to be non-empty
-or total (a `glob` that is never true satisfies it). Unlike the diagram of
-`Goals/Shrink.lean` it has no total initial matching, no integer reflection
-and no freshness clause. The return witness of the e1 return endpoint is not
+Known defects, open. `Simulates` alone can hold vacuously: its context maps
+are chosen existentially, so a map between unrelatable types makes the premise
+unsatisfiable, and a `glob` that is never true satisfies it. `Positional`,
+`InitialMatching` and `Bound` (H1035) state the binding and the totality that
+rule this out, as obligations beside the contract. Unlike the diagram of
+`Goals/Shrink.lean` there is no integer reflection and no freshness clause. The return witness of the e1 return endpoint is not
 kept: a Source `return` and a normal completion match the same model results. -/
 namespace Simulation
 
@@ -262,15 +269,23 @@ out at every horizon is matched only by a diverging model run, so this is both
 directions on related pairs only; it is not the backward half of `PassCorrect`.
 Since model exhaustion, a stuck Source run and an escaping jump match nothing,
 proving it means proving they do not occur from related states. -/
+def SimulatesAt (rel : (E : Source.Env) → (C : Contract) → StateRelation E C)
+    (s : SourceProgram) {C : Contract} {Γ : Ctx} (p : Blk C Γ)
+    (m : Lowering.V07.ContextMap s.before Γ) (m' : Lowering.V07.ContextMap s.after p.1)
+    (emb : Thin Γ p.1) : Prop :=
+  ∀ (e : SourceExecution s) (tgt : State C Γ), Observe.Admitted e →
+    m.Related ((rel s.env C).val tgt.H) e.initial.1 tgt.env →
+    (rel s.env C).glob e.glob e.frame e.initial.2 tgt.glob →
+    ∃ N, ∀ n,
+      Final (rel s.env C) m m' emb e.glob e.frame (e.result (n + N)) (p.2.run tgt)
+
+/-- The simulation at some context maps. This is `relates`: the frozen
+interface gives it a Source program and a block only, with no request, names
+or positions to bind the maps to (see `Bound` below). -/
 def Simulates (rel : (E : Source.Env) → (C : Contract) → StateRelation E C)
     (s : SourceProgram) {C : Contract} {Γ : Ctx} (p : Blk C Γ) : Prop :=
   ∃ (m : Lowering.V07.ContextMap s.before Γ) (m' : Lowering.V07.ContextMap s.after p.1)
-    (emb : Thin Γ p.1),
-    ∀ (e : SourceExecution s) (tgt : State C Γ), Observe.Admitted e →
-      m.Related ((rel s.env C).val tgt.H) e.initial.1 tgt.env →
-      (rel s.env C).glob e.glob e.frame e.initial.2 tgt.glob →
-      ∃ N, ∀ n,
-        Final (rel s.env C) m m' emb e.glob e.frame (e.result (n + N)) (p.2.run tgt)
+    (emb : Thin Γ p.1), SimulatesAt rel s p m m' emb
 
 /-- A block of one statement runs as the statement, one horizon later. -/
 theorem execItems_single {E : Source.Env} (G : Source.Glob E) (F : Source.Fr) (n nps : Nat)
@@ -344,6 +359,48 @@ theorem vacuous (empty : ∀ E C G F st σ, ¬ (rel E C).glob G F st σ) {s : So
     {C : Contract} {Γ : Ctx} (p : Blk C Γ) (m : Lowering.V07.ContextMap s.before Γ)
     (m' : Lowering.V07.ContextMap s.after p.1) (emb : Thin Γ p.1) : Simulates rel s p :=
   ⟨m, m', emb, fun _ _ _ _ glob => absurd glob (empty _ _ _ _ _ _)⟩
+
+/-! ### The map bound to the request, and total initial matching (H1035)
+
+The decoder reads the Source locals off the request's locals in order, so the
+map a request names is the positional one: the i-th Source local is the i-th
+model local. These two obligations bind the simulation to that map and ask
+that every admitted Source execution has a related model state. They are
+stated beside the contract, not inside `relates`: the frozen compatibility
+fields quantify `relates` over every context map and every Source context of
+the e1 families, including maps that are not positional and contexts with
+unrelatable types, so putting either requirement inside `relates` would make
+those fields false. Neither is implied by the contract. -/
+
+/-- The map sends each Source local to the model local at its position. -/
+def Positional {srcΓ : Source.RCtx} {Γ : Ctx} (m : Lowering.V07.ContextMap srcΓ Γ) : Prop :=
+  ∀ {τ : Source.STy} (i : Source.Idx srcΓ τ), (m.slot i).2.toNat = i.toNat
+
+/-- **Total initial matching**: a decoded request has a positional map under
+which every admitted Source execution has a related model state. -/
+def InitialMatching (rel : (E : Source.Env) → (C : Contract) → StateRelation E C)
+    (decode : Request → Option SourceProgram) : Prop :=
+  ∀ (r : Request) (s : SourceProgram), decode r = some s →
+    ∃ m : Lowering.V07.ContextMap s.before r.context.ctx, Positional m ∧
+      ∀ e : SourceExecution s, Observe.Admitted e → ∃ tgt : State r.contract r.context.ctx,
+        m.Related ((rel s.env r.contract).val tgt.H) e.initial.1 tgt.env ∧
+        (rel s.env r.contract).glob e.glob e.frame e.initial.2 tgt.glob
+
+/-- **The bound simulation**: every successful pipeline of a decoded request
+simulates at a positional map. It implies the `relates` half of the pipeline
+obligation (`Bound.simulates`); the converse does not hold. -/
+def Bound (rel : (E : Source.Env) → (C : Contract) → StateRelation E C)
+    (decode : Request → Option SourceProgram) : Prop :=
+  ∀ (r : Request) o after parts (program : Blk r.contract r.context.ctx) s, decode r = some s →
+    r.pipeline o after parts program →
+    ∃ m m' emb, Positional m ∧ SimulatesAt rel s program m m' emb
+
+theorem Bound.simulates {decode : Request → Option SourceProgram} (h : Bound rel decode)
+    {r : Request} {o after parts} {program : Blk r.contract r.context.ctx} {s : SourceProgram}
+    (d : decode r = some s) (run : r.pipeline o after parts program) :
+    Simulates rel s program :=
+  (h r o after parts program s d run).elim fun m rest =>
+    rest.elim fun m' rest => rest.elim fun emb at_ => ⟨m, m', emb, at_.2⟩
 
 end Simulation
 
@@ -530,8 +587,8 @@ theorem loopBoundaryAt_returns
 
 /-- **What is left at the boundary**, for a state relation that reflects
 Booleans and relates `false` to `false`: the decoder is defined on every
-successful request and complete for `Spells` there; the run's one allocation
-scope is safe; and each successful pipeline simulates its decoded program and
+successful request and complete for `Spells` there; the fresh-name scheme
+round-trips and the run's one allocation scope is safe; and each successful pipeline simulates its decoded program and
 refines it under the policies. The two family obligations follow from the two
 hypotheses on `rel` (`loopRel` has both). -/
 theorem loopResidualAt_iff
@@ -542,6 +599,7 @@ theorem loopResidualAt_iff
       (∀ r : Request, r.Succeeds → ∃ s, Decode.decode r = some s) ∧
       (∀ (r : Request) s, r.Succeeds → Spells r s → Decode.decode r = some s) ∧
       (∀ (r : Request) o after parts program, r.pipeline o after parts program →
+        Allocation.RoundTrip r.input.names ∧
         SafeSpellings r.input.names (Allocation.scope r o after).protectedNames
           (Allocation.scope r o after).generated) ∧
       (∀ (r : Request) o after parts program s, Decode.decode r = some s →
@@ -553,13 +611,13 @@ theorem loopResidualAt_iff
     ⟨covered, complete, fun r o after parts program run => ?_, pipeline⟩,
     fun ⟨covered, complete, allocation, pipeline⟩ =>
       ⟨covered, complete, fun r o after parts program run =>
-        ⟨_, rfl, fun scope member => ?_⟩, pipeline,
+        ⟨_, ⟨rfl, (allocation r o after parts program run).1⟩, fun scope member => ?_⟩, pipeline,
         loopBoundaryAt_normal reflect falseRel, loopBoundaryAt_returns reflect falseRel⟩⟩
-  · obtain ⟨scopes, trace, safe⟩ := allocation r o after parts program run
+  · obtain ⟨scopes, ⟨trace, law⟩, safe⟩ := allocation r o after parts program run
     cases trace
-    exact safe _ (List.mem_singleton.mpr rfl)
+    exact ⟨law, safe _ (List.mem_singleton.mpr rfl)⟩
   · cases List.mem_singleton.mp member
-    exact allocation r o after parts program run
+    exact (allocation r o after parts program run).2
 
 /-! ## The boundary at the stage-1 state relation
 
@@ -578,6 +636,7 @@ theorem loopResidualStage1_iff :
       (∀ r : Request, r.Succeeds → ∃ s, Decode.decode r = some s) ∧
       (∀ (r : Request) s, r.Succeeds → Spells r s → Decode.decode r = some s) ∧
       (∀ (r : Request) o after parts program, r.pipeline o after parts program →
+        Allocation.RoundTrip r.input.names ∧
         SafeSpellings r.input.names (Allocation.scope r o after).protectedNames
           (Allocation.scope r o after).generated) ∧
       (∀ (r : Request) o after parts program s, Decode.decode r = some s →
