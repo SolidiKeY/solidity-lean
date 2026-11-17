@@ -1440,6 +1440,47 @@
           "tests/directruntime-20261104/native-browser/h109/readonly-inputs.py"
         ],
         "other_reads": "unresolved"
+      },
+      {
+        "path": "scripts/solidity-baseline-attribution.test.py",
+        "input_revision": "1c4cebc10f5024c822481dbcc176cda55a1eda20",
+        "source_blob": "5a2af45b12378bada0a3b80b99b4203e015bafa9",
+        "command": [
+          "python3",
+          "-B",
+          "scripts/solidity-baseline-attribution.test.py"
+        ],
+        "kind": "unittest",
+        "purpose": "Existing baseline attribution or native-cache integrity regression suite. Ordinary and instrumented invocations passed at recorded revision (8 attribution tests or17 native tests). Exact test-context reads of listed committed bytes only; historical baseline/cache diagnostic integrity, not current passing validation, cache execution validity, Lean/compiler reproduction, semantic adequacy, proof or runtime acceptance.",
+        "input_scope": [
+          "tests/upstream/baseline-20261028/attribution/README.md",
+          "tests/upstream/baseline-20261028/attribution/index.json",
+          "tests/upstream/baseline-20261028/attribution/reproduction-inputs.json",
+          "tests/upstream/baseline-20261028/attribution/reproduction-inputs.tar.gz"
+        ],
+        "other_reads": "unresolved"
+      },
+      {
+        "path": "scripts/solidity-baseline-native.test.py",
+        "input_revision": "1c4cebc10f5024c822481dbcc176cda55a1eda20",
+        "source_blob": "d23711b632b21ef6aae80e03707daf2ae23f10a4",
+        "command": [
+          "python3",
+          "-B",
+          "scripts/solidity-baseline-native.test.py"
+        ],
+        "kind": "unittest",
+        "purpose": "Existing baseline attribution or native-cache integrity regression suite. Ordinary and instrumented invocations passed at recorded revision (8 attribution tests or17 native tests). Exact test-context reads of listed committed bytes only; historical baseline/cache diagnostic integrity, not current passing validation, cache execution validity, Lean/compiler reproduction, semantic adequacy, proof or runtime acceptance.",
+        "input_scope": [
+          "tests/upstream/baseline-20261028/gaps/gaps.json",
+          "tests/upstream/baseline-20261028/native-cache/README.md",
+          "tests/upstream/baseline-20261028/native-cache/archive.json",
+          "tests/upstream/baseline-20261028/native-cache/evidence.tar.gz",
+          "tests/upstream/baseline-20261028/native-cache/matrix.json",
+          "tests/upstream/baseline-20261028/probes/matrix.json",
+          "tests/upstream/solidity-0.8.38.tar.gz"
+        ],
+        "other_reads": "unresolved"
       }
     ]
   },
@@ -2952,6 +2993,447 @@
         ],
         "target": "tests/directruntime-20261104/native-browser/h109/readonly-inputs.py",
         "target_blob": "2cf66269c0c80f93accc30581aef013dd12762f5",
+        "operation": "validated Python read of measured bytes"
+      },
+      {
+        "runner": "validated:scripts/solidity-baseline-attribution.test.py",
+        "input_revision": "1c4cebc10f5024c822481dbcc176cda55a1eda20",
+        "frames": [
+          {
+            "path": "scripts/solidity-baseline-attribution.test.py",
+            "blob": "5a2af45b12378bada0a3b80b99b4203e015bafa9",
+            "line": 68
+          },
+          {
+            "path": "scripts/solidity-baseline-attribution.test.py",
+            "blob": "5a2af45b12378bada0a3b80b99b4203e015bafa9",
+            "line": 33
+          }
+        ],
+        "target": "tests/upstream/baseline-20261028/attribution/index.json",
+        "target_blob": "836fdf0ae7cfd19dc1afb11f357dcd1d08585583",
+        "operation": "validated Python read of measured bytes"
+      },
+      {
+        "runner": "validated:scripts/solidity-baseline-attribution.test.py",
+        "input_revision": "1c4cebc10f5024c822481dbcc176cda55a1eda20",
+        "frames": [
+          {
+            "path": "scripts/solidity-baseline-attribution.test.py",
+            "blob": "5a2af45b12378bada0a3b80b99b4203e015bafa9",
+            "line": 68
+          },
+          {
+            "path": "scripts/solidity-baseline-attribution.test.py",
+            "blob": "5a2af45b12378bada0a3b80b99b4203e015bafa9",
+            "line": 52
+          }
+        ],
+        "target": "tests/upstream/baseline-20261028/attribution/reproduction-inputs.json",
+        "target_blob": "ab7c263c27c73cf90745cc50c79d1be812074b2c",
+        "operation": "validated Python read of measured bytes"
+      },
+      {
+        "runner": "validated:scripts/solidity-baseline-attribution.test.py",
+        "input_revision": "1c4cebc10f5024c822481dbcc176cda55a1eda20",
+        "frames": [
+          {
+            "path": "scripts/solidity-baseline-attribution.test.py",
+            "blob": "5a2af45b12378bada0a3b80b99b4203e015bafa9",
+            "line": 68
+          },
+          {
+            "path": "scripts/solidity-baseline-attribution.test.py",
+            "blob": "5a2af45b12378bada0a3b80b99b4203e015bafa9",
+            "line": 54
+          }
+        ],
+        "target": "tests/upstream/baseline-20261028/attribution/reproduction-inputs.tar.gz",
+        "target_blob": "bfd17a5932b9323618f57ae0aec252ed6319e35b",
+        "operation": "validated Python read of measured bytes"
+      },
+      {
+        "runner": "validated:scripts/solidity-baseline-attribution.test.py",
+        "input_revision": "1c4cebc10f5024c822481dbcc176cda55a1eda20",
+        "frames": [
+          {
+            "path": "scripts/solidity-baseline-attribution.test.py",
+            "blob": "5a2af45b12378bada0a3b80b99b4203e015bafa9",
+            "line": 68
+          },
+          {
+            "path": "scripts/solidity-baseline-attribution.test.py",
+            "blob": "5a2af45b12378bada0a3b80b99b4203e015bafa9",
+            "line": 57
+          }
+        ],
+        "target": "tests/upstream/baseline-20261028/attribution/reproduction-inputs.tar.gz",
+        "target_blob": "bfd17a5932b9323618f57ae0aec252ed6319e35b",
+        "operation": "validated Python read of measured bytes"
+      },
+      {
+        "runner": "validated:scripts/solidity-baseline-attribution.test.py",
+        "input_revision": "1c4cebc10f5024c822481dbcc176cda55a1eda20",
+        "frames": [
+          {
+            "path": "scripts/solidity-baseline-attribution.test.py",
+            "blob": "5a2af45b12378bada0a3b80b99b4203e015bafa9",
+            "line": 68
+          },
+          {
+            "path": "scripts/solidity-baseline-attribution.test.py",
+            "blob": "5a2af45b12378bada0a3b80b99b4203e015bafa9",
+            "line": 66
+          }
+        ],
+        "target": "tests/upstream/baseline-20261028/attribution/index.json",
+        "target_blob": "836fdf0ae7cfd19dc1afb11f357dcd1d08585583",
+        "operation": "validated Python read of measured bytes"
+      },
+      {
+        "runner": "validated:scripts/solidity-baseline-attribution.test.py",
+        "input_revision": "1c4cebc10f5024c822481dbcc176cda55a1eda20",
+        "frames": [
+          {
+            "path": "scripts/solidity-baseline-attribution.test.py",
+            "blob": "5a2af45b12378bada0a3b80b99b4203e015bafa9",
+            "line": 68
+          },
+          {
+            "path": "scripts/solidity-baseline-attribution.test.py",
+            "blob": "5a2af45b12378bada0a3b80b99b4203e015bafa9",
+            "line": 67
+          }
+        ],
+        "target": "tests/upstream/baseline-20261028/attribution/README.md",
+        "target_blob": "a681e1df7b42b11833e9f14f2c217bbef3cd8923",
+        "operation": "validated Python read of measured bytes"
+      },
+      {
+        "runner": "validated:scripts/solidity-baseline-native.test.py",
+        "input_revision": "1c4cebc10f5024c822481dbcc176cda55a1eda20",
+        "frames": [
+          {
+            "path": "scripts/solidity-baseline-native.test.py",
+            "blob": "d23711b632b21ef6aae80e03707daf2ae23f10a4",
+            "line": 53
+          },
+          {
+            "path": "scripts/solidity-baseline-native.test.py",
+            "blob": "d23711b632b21ef6aae80e03707daf2ae23f10a4",
+            "line": 12
+          },
+          {
+            "path": "scripts/solidity-baseline-native-index.py",
+            "blob": "f6fc1db532d415243eb4b91106902c321991d999",
+            "line": 11
+          },
+          {
+            "path": "scripts/solidity-baseline-native-index.py",
+            "blob": "f6fc1db532d415243eb4b91106902c321991d999",
+            "line": 9
+          }
+        ],
+        "target": "tests/upstream/baseline-20261028/native-cache/archive.json",
+        "target_blob": "45cfd293d07d458a8aa55454f52c204396a9a819",
+        "operation": "validated Python read of measured bytes"
+      },
+      {
+        "runner": "validated:scripts/solidity-baseline-native.test.py",
+        "input_revision": "1c4cebc10f5024c822481dbcc176cda55a1eda20",
+        "frames": [
+          {
+            "path": "scripts/solidity-baseline-native.test.py",
+            "blob": "d23711b632b21ef6aae80e03707daf2ae23f10a4",
+            "line": 53
+          },
+          {
+            "path": "scripts/solidity-baseline-native.test.py",
+            "blob": "d23711b632b21ef6aae80e03707daf2ae23f10a4",
+            "line": 12
+          },
+          {
+            "path": "scripts/solidity-baseline-native-index.py",
+            "blob": "f6fc1db532d415243eb4b91106902c321991d999",
+            "line": 12
+          }
+        ],
+        "target": "tests/upstream/baseline-20261028/native-cache/evidence.tar.gz",
+        "target_blob": "c8f25fba4f7c847e8a61b31b156d3c10af1378bd",
+        "operation": "validated Python read of measured bytes"
+      },
+      {
+        "runner": "validated:scripts/solidity-baseline-native.test.py",
+        "input_revision": "1c4cebc10f5024c822481dbcc176cda55a1eda20",
+        "frames": [
+          {
+            "path": "scripts/solidity-baseline-native.test.py",
+            "blob": "d23711b632b21ef6aae80e03707daf2ae23f10a4",
+            "line": 53
+          },
+          {
+            "path": "scripts/solidity-baseline-native.test.py",
+            "blob": "d23711b632b21ef6aae80e03707daf2ae23f10a4",
+            "line": 12
+          },
+          {
+            "path": "scripts/solidity-baseline-native-index.py",
+            "blob": "f6fc1db532d415243eb4b91106902c321991d999",
+            "line": 13
+          }
+        ],
+        "target": "tests/upstream/baseline-20261028/native-cache/evidence.tar.gz",
+        "target_blob": "c8f25fba4f7c847e8a61b31b156d3c10af1378bd",
+        "operation": "validated Python read of measured bytes"
+      },
+      {
+        "runner": "validated:scripts/solidity-baseline-native.test.py",
+        "input_revision": "1c4cebc10f5024c822481dbcc176cda55a1eda20",
+        "frames": [
+          {
+            "path": "scripts/solidity-baseline-native.test.py",
+            "blob": "d23711b632b21ef6aae80e03707daf2ae23f10a4",
+            "line": 53
+          },
+          {
+            "path": "scripts/solidity-baseline-native.test.py",
+            "blob": "d23711b632b21ef6aae80e03707daf2ae23f10a4",
+            "line": 25
+          },
+          {
+            "path": "scripts/solidity-baseline-native-index.py",
+            "blob": "f6fc1db532d415243eb4b91106902c321991d999",
+            "line": 160
+          },
+          {
+            "path": "scripts/solidity-baseline-native-index.py",
+            "blob": "f6fc1db532d415243eb4b91106902c321991d999",
+            "line": 9
+          }
+        ],
+        "target": "tests/upstream/baseline-20261028/gaps/gaps.json",
+        "target_blob": "6754c3029d897ee2599f67e3cd180e7960484164",
+        "operation": "validated Python read of measured bytes"
+      },
+      {
+        "runner": "validated:scripts/solidity-baseline-native.test.py",
+        "input_revision": "1c4cebc10f5024c822481dbcc176cda55a1eda20",
+        "frames": [
+          {
+            "path": "scripts/solidity-baseline-native.test.py",
+            "blob": "d23711b632b21ef6aae80e03707daf2ae23f10a4",
+            "line": 53
+          },
+          {
+            "path": "scripts/solidity-baseline-native.test.py",
+            "blob": "d23711b632b21ef6aae80e03707daf2ae23f10a4",
+            "line": 25
+          },
+          {
+            "path": "scripts/solidity-baseline-native-index.py",
+            "blob": "f6fc1db532d415243eb4b91106902c321991d999",
+            "line": 163
+          }
+        ],
+        "target": "tests/upstream/solidity-0.8.38.tar.gz",
+        "target_blob": "3309ef21d6933a90990ad8b2eb3a34671cf7c4fc",
+        "operation": "validated Python read of measured bytes"
+      },
+      {
+        "runner": "validated:scripts/solidity-baseline-native.test.py",
+        "input_revision": "1c4cebc10f5024c822481dbcc176cda55a1eda20",
+        "frames": [
+          {
+            "path": "scripts/solidity-baseline-native.test.py",
+            "blob": "d23711b632b21ef6aae80e03707daf2ae23f10a4",
+            "line": 53
+          },
+          {
+            "path": "scripts/solidity-baseline-native.test.py",
+            "blob": "d23711b632b21ef6aae80e03707daf2ae23f10a4",
+            "line": 25
+          },
+          {
+            "path": "scripts/solidity-baseline-native-index.py",
+            "blob": "f6fc1db532d415243eb4b91106902c321991d999",
+            "line": 35
+          },
+          {
+            "path": "scripts/solidity-baseline-native-index.py",
+            "blob": "f6fc1db532d415243eb4b91106902c321991d999",
+            "line": 11
+          },
+          {
+            "path": "scripts/solidity-baseline-native-index.py",
+            "blob": "f6fc1db532d415243eb4b91106902c321991d999",
+            "line": 9
+          }
+        ],
+        "target": "tests/upstream/baseline-20261028/native-cache/archive.json",
+        "target_blob": "45cfd293d07d458a8aa55454f52c204396a9a819",
+        "operation": "validated Python read of measured bytes"
+      },
+      {
+        "runner": "validated:scripts/solidity-baseline-native.test.py",
+        "input_revision": "1c4cebc10f5024c822481dbcc176cda55a1eda20",
+        "frames": [
+          {
+            "path": "scripts/solidity-baseline-native.test.py",
+            "blob": "d23711b632b21ef6aae80e03707daf2ae23f10a4",
+            "line": 53
+          },
+          {
+            "path": "scripts/solidity-baseline-native.test.py",
+            "blob": "d23711b632b21ef6aae80e03707daf2ae23f10a4",
+            "line": 25
+          },
+          {
+            "path": "scripts/solidity-baseline-native-index.py",
+            "blob": "f6fc1db532d415243eb4b91106902c321991d999",
+            "line": 35
+          },
+          {
+            "path": "scripts/solidity-baseline-native-index.py",
+            "blob": "f6fc1db532d415243eb4b91106902c321991d999",
+            "line": 12
+          }
+        ],
+        "target": "tests/upstream/baseline-20261028/native-cache/evidence.tar.gz",
+        "target_blob": "c8f25fba4f7c847e8a61b31b156d3c10af1378bd",
+        "operation": "validated Python read of measured bytes"
+      },
+      {
+        "runner": "validated:scripts/solidity-baseline-native.test.py",
+        "input_revision": "1c4cebc10f5024c822481dbcc176cda55a1eda20",
+        "frames": [
+          {
+            "path": "scripts/solidity-baseline-native.test.py",
+            "blob": "d23711b632b21ef6aae80e03707daf2ae23f10a4",
+            "line": 53
+          },
+          {
+            "path": "scripts/solidity-baseline-native.test.py",
+            "blob": "d23711b632b21ef6aae80e03707daf2ae23f10a4",
+            "line": 25
+          },
+          {
+            "path": "scripts/solidity-baseline-native-index.py",
+            "blob": "f6fc1db532d415243eb4b91106902c321991d999",
+            "line": 35
+          },
+          {
+            "path": "scripts/solidity-baseline-native-index.py",
+            "blob": "f6fc1db532d415243eb4b91106902c321991d999",
+            "line": 13
+          }
+        ],
+        "target": "tests/upstream/baseline-20261028/native-cache/evidence.tar.gz",
+        "target_blob": "c8f25fba4f7c847e8a61b31b156d3c10af1378bd",
+        "operation": "validated Python read of measured bytes"
+      },
+      {
+        "runner": "validated:scripts/solidity-baseline-native.test.py",
+        "input_revision": "1c4cebc10f5024c822481dbcc176cda55a1eda20",
+        "frames": [
+          {
+            "path": "scripts/solidity-baseline-native.test.py",
+            "blob": "d23711b632b21ef6aae80e03707daf2ae23f10a4",
+            "line": 53
+          },
+          {
+            "path": "scripts/solidity-baseline-native.test.py",
+            "blob": "d23711b632b21ef6aae80e03707daf2ae23f10a4",
+            "line": 25
+          },
+          {
+            "path": "scripts/solidity-baseline-native-index.py",
+            "blob": "f6fc1db532d415243eb4b91106902c321991d999",
+            "line": 35
+          },
+          {
+            "path": "scripts/solidity-baseline-native-index.py",
+            "blob": "f6fc1db532d415243eb4b91106902c321991d999",
+            "line": 9
+          }
+        ],
+        "target": "tests/upstream/baseline-20261028/probes/matrix.json",
+        "target_blob": "87abe6999d05b8184710fec164a1645d6c65703d",
+        "operation": "validated Python read of measured bytes"
+      },
+      {
+        "runner": "validated:scripts/solidity-baseline-native.test.py",
+        "input_revision": "1c4cebc10f5024c822481dbcc176cda55a1eda20",
+        "frames": [
+          {
+            "path": "scripts/solidity-baseline-native.test.py",
+            "blob": "d23711b632b21ef6aae80e03707daf2ae23f10a4",
+            "line": 53
+          },
+          {
+            "path": "scripts/solidity-baseline-native.test.py",
+            "blob": "d23711b632b21ef6aae80e03707daf2ae23f10a4",
+            "line": 27
+          }
+        ],
+        "target": "tests/upstream/baseline-20261028/probes/matrix.json",
+        "target_blob": "87abe6999d05b8184710fec164a1645d6c65703d",
+        "operation": "validated Python read of measured bytes"
+      },
+      {
+        "runner": "validated:scripts/solidity-baseline-native.test.py",
+        "input_revision": "1c4cebc10f5024c822481dbcc176cda55a1eda20",
+        "frames": [
+          {
+            "path": "scripts/solidity-baseline-native.test.py",
+            "blob": "d23711b632b21ef6aae80e03707daf2ae23f10a4",
+            "line": 53
+          },
+          {
+            "path": "scripts/solidity-baseline-native.test.py",
+            "blob": "d23711b632b21ef6aae80e03707daf2ae23f10a4",
+            "line": 40
+          }
+        ],
+        "target": "tests/upstream/baseline-20261028/native-cache/matrix.json",
+        "target_blob": "e9caba3b851df7d5501a7156e34a5c25c7cab3c1",
+        "operation": "validated Python read of measured bytes"
+      },
+      {
+        "runner": "validated:scripts/solidity-baseline-native.test.py",
+        "input_revision": "1c4cebc10f5024c822481dbcc176cda55a1eda20",
+        "frames": [
+          {
+            "path": "scripts/solidity-baseline-native.test.py",
+            "blob": "d23711b632b21ef6aae80e03707daf2ae23f10a4",
+            "line": 53
+          },
+          {
+            "path": "scripts/solidity-baseline-native.test.py",
+            "blob": "d23711b632b21ef6aae80e03707daf2ae23f10a4",
+            "line": 45
+          }
+        ],
+        "target": "tests/upstream/baseline-20261028/native-cache/README.md",
+        "target_blob": "12b734002367168f28acf7590789e75decd446d9",
+        "operation": "validated Python read of measured bytes"
+      },
+      {
+        "runner": "validated:scripts/solidity-baseline-native.test.py",
+        "input_revision": "1c4cebc10f5024c822481dbcc176cda55a1eda20",
+        "frames": [
+          {
+            "path": "scripts/solidity-baseline-native.test.py",
+            "blob": "d23711b632b21ef6aae80e03707daf2ae23f10a4",
+            "line": 53
+          },
+          {
+            "path": "scripts/solidity-baseline-native.test.py",
+            "blob": "d23711b632b21ef6aae80e03707daf2ae23f10a4",
+            "line": 50
+          }
+        ],
+        "target": "tests/upstream/baseline-20261028/native-cache/matrix.json",
+        "target_blob": "e9caba3b851df7d5501a7156e34a5c25c7cab3c1",
         "operation": "validated Python read of measured bytes"
       }
     ],
