@@ -75,12 +75,6 @@ info: unstated Solidity.Goals.commentsAsCode ← Solidity.Docs.comments_as_code 
 #roadmap_goal commentsAsCode
 
 /--
-info: open Solidity.Goals.opcodeEvalUniversal ← Solidity.Yul.opcode_eval_universal plan v1-yul-checks-universal
--/
-#guard_msgs in
-#roadmap_goal opcodeEvalUniversal
-
-/--
 info: open Solidity.Goals.leanInventorySound ← Solidity.LeanInventory.inventory_sound plan k1-lean-inventory
 -/
 #guard_msgs in
