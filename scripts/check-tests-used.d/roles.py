@@ -1395,7 +1395,8 @@ def nonpassing_persistence_controls(env):
 # Refused, left unresolved: the /evidence/wait-usage binary of
 # migrate-optimizer/measure.py (compiled off-Git, not a source consumer) is no
 # driver of wait-usage.c; audit-precompiles/serial.toml (bin/lake reads it only
-# through $H62_AUDIT_CONFIG, no exact binding). Source role only: no execution,
+# through $H62_AUDIT_CONFIG, no exact binding). Closed.lean's blob was
+# introduced twice (6fa35bb9, 3e9a0f88): the earlier is recorded. Source role only: no execution,
 # compile, pass, read anchor, fixture, helper, child, output, proof or runtime credit.
 PROGRAM_FORM_KIND = 'program-form-source-role'
 PROGRAM_FORM_PREFIX = 'program-form:'
@@ -1518,7 +1519,7 @@ def program_form_root(classifier, graph, catalog, entry, reviewed=None, drivers=
         raise ValueError('invalid ' + role + ' definition')
     p = entry['path']; revision = entry['input_revision']; doc = entry['provenance']; blob = entry['source_blob']
     form = entry['interface'].get('form')
-    if form not in PROGRAM_FORM_COMMANDS or entry['command'] != PROGRAM_FORM_COMMANDS[form](p) or _clean(p) != p:
+    if not isinstance(form, str) or form not in PROGRAM_FORM_COMMANDS or entry['command'] != PROGRAM_FORM_COMMANDS[form](p) or _clean(p) != p:
         raise ValueError('unsupported ' + role + ' invocation: ' + p)
     if doc['path'] != p or doc['blob'] != blob or (p, blob, doc['commit']) not in reviewed: raise ValueError('unreviewed ' + role + ': ' + p)
     if any((p, c['path'], c['blob'], c['line'], c['literal']) not in drivers for c in calls): raise ValueError('unreviewed ' + role + ' driver: ' + p)
@@ -1565,6 +1566,10 @@ def program_form_root(classifier, graph, catalog, entry, reviewed=None, drivers=
 # reader public-api-inventory.py is no entry root, only a module a test
 # enters, and its main path needs the unavailable H44 archive). Unavailable
 # runtime data (H44 archive, B05 snapshots, G52_BULK) grants nothing.
+# ReservedNames.proposed.patch is also the consumer's own output without
+# --check: only the check-mode read is credited, never generation. Not
+# audited (blob pins and review are the gate): dead code, and whether the
+# consumer or driver line is reached at run time.
 # Source/consumption credit only: no execution, pass, read anchor, output,
 # proof or runtime credit.
 SOURCE_DEP_KIND = 'source-dependency-role'
@@ -1600,13 +1605,16 @@ def _module_name(tree, name, line):
     stores = [n for n in ast.walk(tree) if isinstance(n, ast.Name) and n.id == name and not isinstance(n.ctx, ast.Load)]
     stores += [n for n in ast.walk(tree) if isinstance(n, (ast.FunctionDef, ast.AsyncFunctionDef, ast.ClassDef, ast.alias))
                and (getattr(n, 'name', None) == name or getattr(n, 'asname', None) == name)]
+    stores += [n for n in ast.walk(tree) if isinstance(n, ast.arg) and n.arg == name or isinstance(n, ast.ExceptHandler) and n.name == name
+               or isinstance(n, (ast.Global, ast.Nonlocal)) and name in n.names]
     return nodes[0] if len(nodes) == 1 and len(stores) == 1 and nodes[0].lineno == line else None
 
 
 def _rooted(node, path):
     """node is the literal path or `<root> / path` with the literal on the right."""
     if isinstance(node, ast.Constant): return node.value == path and node
-    return isinstance(node, ast.BinOp) and isinstance(node.op, ast.Div) and isinstance(node.right, ast.Constant) and node.right.value == path and node.right
+    return (isinstance(node, ast.BinOp) and isinstance(node.op, ast.Div) and isinstance(node.left, (ast.Name, ast.Attribute))
+            and isinstance(node.right, ast.Constant) and node.right.value == path and node.right)
 
 
 def dependency_operation(text, path, literal_line, operation_line, operation):
@@ -1619,7 +1627,9 @@ def dependency_operation(text, path, literal_line, operation_line, operation):
         if len(names) != 1 or _module_name(tree, names[0].targets[0].id, literal_line) is None: return False
         name = names[0].targets[0].id
         for call in ast.walk(tree):
-            if not isinstance(call, ast.Call) or not call.args or not isinstance(call.args[0], ast.List): continue
+            if (not isinstance(call, ast.Call) or not call.args or not isinstance(call.args[0], ast.List) or not isinstance(call.func, ast.Attribute)
+                    or call.func.attr not in ('run', 'call', 'check_call', 'check_output', 'Popen')
+                    or not isinstance(call.func.value, ast.Name) or call.func.value.id != 'subprocess'): continue
             items = call.args[0].elts
             if not items or not isinstance(items[0], ast.Constant) or items[0].value != 'patch': continue
             if any(isinstance(e, ast.Call) and isinstance(e.func, ast.Name) and e.func.id == 'str' and len(e.args) == 1 and not e.keywords
@@ -1634,7 +1644,10 @@ def dependency_operation(text, path, literal_line, operation_line, operation):
             for k in range(1, len(items) - 1):
                 if (isinstance(items[k], ast.Constant) and items[k].value == '-f' and isinstance(items[k + 1], ast.Constant)
                         and items[k + 1].value == path and items[k + 1].lineno == literal_line
-                        and any(isinstance(c, ast.Constant) and c.value == 'lake' for c in ast.walk(items[0]))
+                        and (isinstance(items[0], ast.Constant) and items[0].value == 'lake' or isinstance(items[0], ast.Call)
+                             and isinstance(items[0].func, ast.Name) and items[0].func.id == 'str' and len(items[0].args) == 1
+                             and isinstance(items[0].args[0], ast.BinOp) and isinstance(items[0].args[0].op, ast.Div)
+                             and isinstance(items[0].args[0].right, ast.Constant) and items[0].args[0].right.value == 'lake')
                         and any(isinstance(e, ast.Constant) and e.value == 'build' for e in items[k + 2:])):
                     return True
         return False
@@ -1685,7 +1698,7 @@ def source_dependency_root(classifier, graph, catalog, entry, reviewed=None, con
         raise ValueError('invalid ' + role + ' definition')
     p = entry['path']; revision = entry['input_revision']; doc = entry['provenance']; blob = entry['source_blob']
     operation = entry['interface']['operation']
-    if (operation not in DEPENDENCY_OPERATIONS or entry['command'] != ['python3', '-B', c['path']] or _clean(p) != p
+    if (not isinstance(operation, str) or operation not in DEPENDENCY_OPERATIONS or entry['command'] != ['python3', '-B', c['path']] or _clean(p) != p
             or not c['path'].endswith('.py') or p.endswith(('.py', '.sh', '.mjs', '.cjs', '.js', '.lean'))):
         raise ValueError('unsupported ' + role + ' invocation: ' + p)
     if doc['path'] != p or doc['blob'] != blob or (p, blob, doc['commit']) not in reviewed: raise ValueError('unreviewed ' + role + ': ' + p)
@@ -1824,6 +1837,7 @@ def program_form_controls(env):
                              ({'drivers': [dict(d(5, D + 'bin'), line='5')]}, 'invalid program form'),
                              ({'input_revision': 'HEAD'}, 'full commit revision'), ({'command': ['bash', W]}, 'unsupported program form'),
                              ({'command': [W, '--x']}, 'unsupported program form'), ({'interface': dict(faces[W], form='script')}, 'unsupported program form'),
+                             ({'interface': dict(faces[W], form=['bash-wrapper'])}, 'unsupported program form'),
                              ({'source_blob': Z}, 'unreviewed program form role'), ({'provenance': dict(w['provenance'], commit=Z)}, 'unreviewed program form role'),
                              ({'drivers': [d(4, D + 'bin')]}, 'unreviewed program form role driver'),
                              ({'drivers': [dict(d(5, D + 'bin'), literal='bin')]}, 'unreviewed program form role driver'),
@@ -1921,6 +1935,15 @@ def source_dependency_controls(env):
         assert not dependency_operation(accept, *args), args
     assert not dependency_operation(bad, O, 4, 8, 'check-read') and not dependency_operation(bad, O, 4, 9, 'check-read')
     assert not dependency_operation('def broken(:\n', P, 1, 1, 'patch-input')
+    head = "import subprocess\nfrom pathlib import Path\nROOT = Path('.')\nPATCH = ROOT / 'scripts/h62/sd/migration.patch'\n"
+    assert dependency_operation(head + "subprocess.run(['patch', str(PATCH)])\n", P, 4, 5, 'patch-input')
+    for tail in ("def f(PATCH): subprocess.run(['patch', str(PATCH)])\n", "try: pass\nexcept Exception as PATCH:\n subprocess.run(['patch', str(PATCH)])\n",
+                 "print(['patch', str(PATCH)])\n", "def g():\n global PATCH\n PATCH = 1\nsubprocess.run(['patch', str(PATCH)])\n"):
+        n = len((head + tail).split('\n')) - 1
+        assert not dependency_operation(head + tail, P, 4, n, 'patch-input'), tail
+    assert not dependency_operation(head.replace("ROOT / ", "Path('/tmp') / ") + "subprocess.run(['patch', str(PATCH)])\n", P, 4, 5, 'patch-input')
+    assert not dependency_operation("x = [f('lake') and 'rm', '-f', 'scripts/h62/sd/pinned.toml', 'build']\n", T, 1, 1, 'lake-config')
+    assert dependency_operation("x = ['lake', '-f', 'scripts/h62/sd/pinned.toml', 'build']\n", T, 1, 1, 'lake-config')
     saved = REVIEWED_SOURCE_DEPENDENCIES, REVIEWED_DEPENDENCY_CONSUMERS
     REVIEWED_SOURCE_DEPENDENCIES = frozenset({(p, blob(sd, p), R) for p in (P, T, O, U)})
     REVIEWED_DEPENDENCY_CONSUMERS = frozenset({(p, c, blob(sd, c), ll, ol, op) for p, (c, ll, ol, op) in ops.items()}
@@ -1948,6 +1971,7 @@ def source_dependency_controls(env):
                              ({'consumer': dict(m['consumer'], literal_line='4')}, 'invalid source dependency'),
                              ({'interface': {'operation': 'patch-input', 'x': 1}}, 'invalid source dependency'),
                              ({'input_revision': 'HEAD'}, 'full commit revision'), ({'interface': {'operation': 'read'}}, 'unsupported source dependency'),
+                             ({'interface': {'operation': ['patch-input']}}, 'unsupported source dependency'),
                              ({'command': ['python3', A]}, 'unsupported source dependency'),
                              ({'source_blob': Z}, 'unreviewed source dependency role'), ({'provenance': dict(m['provenance'], commit=Z)}, 'unreviewed source dependency role'),
                              ({'consumer': dict(m['consumer'], operation_line=10)}, 'unreviewed source dependency role consumer'),
