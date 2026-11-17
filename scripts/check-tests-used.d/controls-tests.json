@@ -363,11 +363,961 @@
           "tests/h62/item2/audit-bytecode-selection/selection-field-witnesses.json"
         ],
         "other_reads": "unresolved"
+      },
+      {
+        "path": "tests/h62/item1/trust-fragments/test_collector.py",
+        "input_revision": "27ae97235a41f609e147d2307a8d162f4957cca6",
+        "source_blob": "34487bdd6a4f7e1c0c55a0427baded2953ab2131",
+        "command": [
+          "python3",
+          "-B",
+          "tests/h62/item1/trust-fragments/test_collector.py"
+        ],
+        "kind": "unittest",
+        "purpose": "Historical unchanged-source regression suite passed ordinary and instrumented execution in its exact recorded Git context. Current default execution fails because the live audit/gate baseline has drifted; that failure is preserved. Only the listed exact primary data reads are certified; no current passing-validation, native Lean or proof credit. Tests use disposable fixtures and synthetic gate/tool controls.",
+        "input_scope": [
+          "tests/h62/item1/trust-fragments/fragments/000-audit.leanfrag",
+          "tests/h62/item1/trust-fragments/fragments/001-audit.leanfrag",
+          "tests/h62/item1/trust-fragments/fragments/002-audit.leanfrag",
+          "tests/h62/item1/trust-fragments/fragments/003-audit.leanfrag",
+          "tests/h62/item1/trust-fragments/fragments/004-audit.leanfrag",
+          "tests/h62/item1/trust-fragments/fragments/005-audit.leanfrag",
+          "tests/h62/item1/trust-fragments/fragments/006-audit.leanfrag",
+          "tests/h62/item1/trust-fragments/fragments/007-audit.leanfrag",
+          "tests/h62/item1/trust-fragments/fragments/008-audit.leanfrag",
+          "tests/h62/item1/trust-fragments/fragments/009-audit.leanfrag",
+          "tests/h62/item1/trust-fragments/fragments/010-audit.leanfrag",
+          "tests/h62/item1/trust-fragments/fragments/011-audit.leanfrag",
+          "tests/h62/item1/trust-fragments/fragments/012-audit.leanfrag",
+          "tests/h62/item1/trust-fragments/fragments/013-audit.leanfrag",
+          "tests/h62/item1/trust-fragments/fragments/014-audit.leanfrag",
+          "tests/h62/item1/trust-fragments/fragments/015-audit.leanfrag",
+          "tests/h62/item1/trust-fragments/fragments/016-audit.leanfrag",
+          "tests/h62/item1/trust-fragments/fragments/017-audit.leanfrag",
+          "tests/h62/item1/trust-fragments/fragments/018-audit.leanfrag",
+          "tests/h62/item1/trust-fragments/fragments/019-audit.leanfrag",
+          "tests/h62/item1/trust-fragments/fragments/020-audit.leanfrag",
+          "tests/h62/item1/trust-fragments/fragments/021-audit.leanfrag",
+          "tests/h62/item1/trust-fragments/fragments/022-audit.leanfrag",
+          "tests/h62/item1/trust-fragments/fragments/023-audit.leanfrag",
+          "tests/h62/item1/trust-fragments/fragments/024-audit.leanfrag",
+          "tests/h62/item1/trust-fragments/fragments/025-audit.leanfrag",
+          "tests/h62/item1/trust-fragments/fragments/026-audit.leanfrag",
+          "tests/h62/item1/trust-fragments/fragments/027-audit.leanfrag",
+          "tests/h62/item1/trust-fragments/fragments/028-audit.leanfrag",
+          "tests/h62/item1/trust-fragments/fragments/029-audit.leanfrag",
+          "tests/h62/item1/trust-fragments/fragments/030-audit.leanfrag",
+          "tests/h62/item1/trust-fragments/fragments/031-audit.leanfrag",
+          "tests/h62/item1/trust-fragments/fragments/032-audit.leanfrag",
+          "tests/h62/item1/trust-fragments/fragments/033-audit.leanfrag",
+          "tests/h62/item1/trust-fragments/fragments/034-audit.leanfrag",
+          "tests/h62/item1/trust-fragments/fragments/035-audit.leanfrag",
+          "tests/h62/item1/trust-fragments/fragments/036-audit.leanfrag",
+          "tests/h62/item1/trust-fragments/fragments/037-audit.leanfrag",
+          "tests/h62/item1/trust-fragments/fragments/038-audit.leanfrag",
+          "tests/h62/item1/trust-fragments/fragments/039-audit.leanfrag",
+          "tests/h62/item1/trust-fragments/fragments/040-audit.leanfrag",
+          "tests/h62/item1/trust-fragments/fragments/041-audit.leanfrag",
+          "tests/h62/item1/trust-fragments/fragments/042-audit.leanfrag",
+          "tests/h62/item1/trust-fragments/fragments/043-audit.leanfrag"
+        ],
+        "other_reads": "unresolved"
+      },
+      {
+        "path": "tests/h62/item1/p16-generator/test_generator.py",
+        "input_revision": "56cd04f351e8b07f96878891a5f6a89765ba6299",
+        "source_blob": "8be945d886ec0ad8aefe4930d5ec1eb19fc78e3c",
+        "command": [
+          "python3",
+          "-B",
+          "tests/h62/item1/p16-generator/test_generator.py"
+        ],
+        "kind": "unittest",
+        "purpose": "Historical unchanged-source regression suite passed ordinary and instrumented execution in its exact recorded Git context. Current default execution fails because the live audit/gate baseline has drifted; that failure is preserved. Only the listed exact primary data reads are certified; no current passing-validation, native Lean or proof credit. Tests use disposable fixtures and synthetic gate/tool controls.",
+        "input_scope": [
+          "tests/h62/item1/p16-generator/proposed-gate.patch",
+          "tests/h62/item1/p16-generator/proposed-owner-p16.patch"
+        ],
+        "other_reads": "unresolved"
       }
     ]
   },
   "consumer_routes": {
     "persistent_reads": [
+      {
+        "runner": "validated:tests/h62/item1/p16-generator/test_generator.py",
+        "input_revision": "56cd04f351e8b07f96878891a5f6a89765ba6299",
+        "frames": [
+          {
+            "path": "tests/h62/item1/p16-generator/test_generator.py",
+            "blob": "8be945d886ec0ad8aefe4930d5ec1eb19fc78e3c",
+            "line": 551
+          },
+          {
+            "path": "tests/h62/item1/p16-generator/test_generator.py",
+            "blob": "8be945d886ec0ad8aefe4930d5ec1eb19fc78e3c",
+            "line": 461
+          }
+        ],
+        "target": "tests/h62/item1/p16-generator/proposed-gate.patch",
+        "target_blob": "bfa74302374c0ebb08af9ae347dfc9e801646a0a",
+        "operation": "validated Python read of measured bytes"
+      },
+      {
+        "runner": "validated:tests/h62/item1/p16-generator/test_generator.py",
+        "input_revision": "56cd04f351e8b07f96878891a5f6a89765ba6299",
+        "frames": [
+          {
+            "path": "tests/h62/item1/p16-generator/test_generator.py",
+            "blob": "8be945d886ec0ad8aefe4930d5ec1eb19fc78e3c",
+            "line": 551
+          },
+          {
+            "path": "tests/h62/item1/p16-generator/test_generator.py",
+            "blob": "8be945d886ec0ad8aefe4930d5ec1eb19fc78e3c",
+            "line": 108
+          }
+        ],
+        "target": "tests/h62/item1/p16-generator/proposed-owner-p16.patch",
+        "target_blob": "d58c609aad3c633d8ee8831db0288c4a5ca0155f",
+        "operation": "validated Python read of measured bytes"
+      },
+      {
+        "runner": "validated:tests/h62/item1/trust-fragments/test_collector.py",
+        "input_revision": "27ae97235a41f609e147d2307a8d162f4957cca6",
+        "frames": [
+          {
+            "path": "tests/h62/item1/trust-fragments/test_collector.py",
+            "blob": "34487bdd6a4f7e1c0c55a0427baded2953ab2131",
+            "line": 444
+          },
+          {
+            "path": "tests/h62/item1/trust-fragments/test_collector.py",
+            "blob": "34487bdd6a4f7e1c0c55a0427baded2953ab2131",
+            "line": 409
+          }
+        ],
+        "target": "tests/h62/item1/trust-fragments/fragments/000-audit.leanfrag",
+        "target_blob": "b789a4ea2b7d84b86bd598328776b7c172dcb8d6",
+        "operation": "validated Python read of measured bytes"
+      },
+      {
+        "runner": "validated:tests/h62/item1/trust-fragments/test_collector.py",
+        "input_revision": "27ae97235a41f609e147d2307a8d162f4957cca6",
+        "frames": [
+          {
+            "path": "tests/h62/item1/trust-fragments/test_collector.py",
+            "blob": "34487bdd6a4f7e1c0c55a0427baded2953ab2131",
+            "line": 444
+          },
+          {
+            "path": "tests/h62/item1/trust-fragments/test_collector.py",
+            "blob": "34487bdd6a4f7e1c0c55a0427baded2953ab2131",
+            "line": 409
+          }
+        ],
+        "target": "tests/h62/item1/trust-fragments/fragments/001-audit.leanfrag",
+        "target_blob": "16139ed551d0b9af974e3f5d67ea58c21ea7a48f",
+        "operation": "validated Python read of measured bytes"
+      },
+      {
+        "runner": "validated:tests/h62/item1/trust-fragments/test_collector.py",
+        "input_revision": "27ae97235a41f609e147d2307a8d162f4957cca6",
+        "frames": [
+          {
+            "path": "tests/h62/item1/trust-fragments/test_collector.py",
+            "blob": "34487bdd6a4f7e1c0c55a0427baded2953ab2131",
+            "line": 444
+          },
+          {
+            "path": "tests/h62/item1/trust-fragments/test_collector.py",
+            "blob": "34487bdd6a4f7e1c0c55a0427baded2953ab2131",
+            "line": 409
+          }
+        ],
+        "target": "tests/h62/item1/trust-fragments/fragments/002-audit.leanfrag",
+        "target_blob": "89df340a69557fc39a6368f3541ce91577287c30",
+        "operation": "validated Python read of measured bytes"
+      },
+      {
+        "runner": "validated:tests/h62/item1/trust-fragments/test_collector.py",
+        "input_revision": "27ae97235a41f609e147d2307a8d162f4957cca6",
+        "frames": [
+          {
+            "path": "tests/h62/item1/trust-fragments/test_collector.py",
+            "blob": "34487bdd6a4f7e1c0c55a0427baded2953ab2131",
+            "line": 444
+          },
+          {
+            "path": "tests/h62/item1/trust-fragments/test_collector.py",
+            "blob": "34487bdd6a4f7e1c0c55a0427baded2953ab2131",
+            "line": 409
+          }
+        ],
+        "target": "tests/h62/item1/trust-fragments/fragments/003-audit.leanfrag",
+        "target_blob": "221b9acd01ca3da7f92f3f00f9063e8a3aa584af",
+        "operation": "validated Python read of measured bytes"
+      },
+      {
+        "runner": "validated:tests/h62/item1/trust-fragments/test_collector.py",
+        "input_revision": "27ae97235a41f609e147d2307a8d162f4957cca6",
+        "frames": [
+          {
+            "path": "tests/h62/item1/trust-fragments/test_collector.py",
+            "blob": "34487bdd6a4f7e1c0c55a0427baded2953ab2131",
+            "line": 444
+          },
+          {
+            "path": "tests/h62/item1/trust-fragments/test_collector.py",
+            "blob": "34487bdd6a4f7e1c0c55a0427baded2953ab2131",
+            "line": 409
+          }
+        ],
+        "target": "tests/h62/item1/trust-fragments/fragments/004-audit.leanfrag",
+        "target_blob": "04174a9219c5b8b488bb1d57e43fc4690167613a",
+        "operation": "validated Python read of measured bytes"
+      },
+      {
+        "runner": "validated:tests/h62/item1/trust-fragments/test_collector.py",
+        "input_revision": "27ae97235a41f609e147d2307a8d162f4957cca6",
+        "frames": [
+          {
+            "path": "tests/h62/item1/trust-fragments/test_collector.py",
+            "blob": "34487bdd6a4f7e1c0c55a0427baded2953ab2131",
+            "line": 444
+          },
+          {
+            "path": "tests/h62/item1/trust-fragments/test_collector.py",
+            "blob": "34487bdd6a4f7e1c0c55a0427baded2953ab2131",
+            "line": 409
+          }
+        ],
+        "target": "tests/h62/item1/trust-fragments/fragments/005-audit.leanfrag",
+        "target_blob": "7485aa42fac115e445b671522c90a3fbd8cfbecf",
+        "operation": "validated Python read of measured bytes"
+      },
+      {
+        "runner": "validated:tests/h62/item1/trust-fragments/test_collector.py",
+        "input_revision": "27ae97235a41f609e147d2307a8d162f4957cca6",
+        "frames": [
+          {
+            "path": "tests/h62/item1/trust-fragments/test_collector.py",
+            "blob": "34487bdd6a4f7e1c0c55a0427baded2953ab2131",
+            "line": 444
+          },
+          {
+            "path": "tests/h62/item1/trust-fragments/test_collector.py",
+            "blob": "34487bdd6a4f7e1c0c55a0427baded2953ab2131",
+            "line": 409
+          }
+        ],
+        "target": "tests/h62/item1/trust-fragments/fragments/006-audit.leanfrag",
+        "target_blob": "694b4a1deeacd563857790beb0e30600c04eee53",
+        "operation": "validated Python read of measured bytes"
+      },
+      {
+        "runner": "validated:tests/h62/item1/trust-fragments/test_collector.py",
+        "input_revision": "27ae97235a41f609e147d2307a8d162f4957cca6",
+        "frames": [
+          {
+            "path": "tests/h62/item1/trust-fragments/test_collector.py",
+            "blob": "34487bdd6a4f7e1c0c55a0427baded2953ab2131",
+            "line": 444
+          },
+          {
+            "path": "tests/h62/item1/trust-fragments/test_collector.py",
+            "blob": "34487bdd6a4f7e1c0c55a0427baded2953ab2131",
+            "line": 409
+          }
+        ],
+        "target": "tests/h62/item1/trust-fragments/fragments/007-audit.leanfrag",
+        "target_blob": "241038fec2fecda2f297826df4877a951a597f32",
+        "operation": "validated Python read of measured bytes"
+      },
+      {
+        "runner": "validated:tests/h62/item1/trust-fragments/test_collector.py",
+        "input_revision": "27ae97235a41f609e147d2307a8d162f4957cca6",
+        "frames": [
+          {
+            "path": "tests/h62/item1/trust-fragments/test_collector.py",
+            "blob": "34487bdd6a4f7e1c0c55a0427baded2953ab2131",
+            "line": 444
+          },
+          {
+            "path": "tests/h62/item1/trust-fragments/test_collector.py",
+            "blob": "34487bdd6a4f7e1c0c55a0427baded2953ab2131",
+            "line": 409
+          }
+        ],
+        "target": "tests/h62/item1/trust-fragments/fragments/008-audit.leanfrag",
+        "target_blob": "322af5959e3595ff80e0674f6344f2e094f7340e",
+        "operation": "validated Python read of measured bytes"
+      },
+      {
+        "runner": "validated:tests/h62/item1/trust-fragments/test_collector.py",
+        "input_revision": "27ae97235a41f609e147d2307a8d162f4957cca6",
+        "frames": [
+          {
+            "path": "tests/h62/item1/trust-fragments/test_collector.py",
+            "blob": "34487bdd6a4f7e1c0c55a0427baded2953ab2131",
+            "line": 444
+          },
+          {
+            "path": "tests/h62/item1/trust-fragments/test_collector.py",
+            "blob": "34487bdd6a4f7e1c0c55a0427baded2953ab2131",
+            "line": 409
+          }
+        ],
+        "target": "tests/h62/item1/trust-fragments/fragments/009-audit.leanfrag",
+        "target_blob": "cbf7dbf1a9dcb7ff902531750b60f2fcfd4a3ba9",
+        "operation": "validated Python read of measured bytes"
+      },
+      {
+        "runner": "validated:tests/h62/item1/trust-fragments/test_collector.py",
+        "input_revision": "27ae97235a41f609e147d2307a8d162f4957cca6",
+        "frames": [
+          {
+            "path": "tests/h62/item1/trust-fragments/test_collector.py",
+            "blob": "34487bdd6a4f7e1c0c55a0427baded2953ab2131",
+            "line": 444
+          },
+          {
+            "path": "tests/h62/item1/trust-fragments/test_collector.py",
+            "blob": "34487bdd6a4f7e1c0c55a0427baded2953ab2131",
+            "line": 409
+          }
+        ],
+        "target": "tests/h62/item1/trust-fragments/fragments/010-audit.leanfrag",
+        "target_blob": "b94dd200f61d07a454e295c6abf10f46e5499925",
+        "operation": "validated Python read of measured bytes"
+      },
+      {
+        "runner": "validated:tests/h62/item1/trust-fragments/test_collector.py",
+        "input_revision": "27ae97235a41f609e147d2307a8d162f4957cca6",
+        "frames": [
+          {
+            "path": "tests/h62/item1/trust-fragments/test_collector.py",
+            "blob": "34487bdd6a4f7e1c0c55a0427baded2953ab2131",
+            "line": 444
+          },
+          {
+            "path": "tests/h62/item1/trust-fragments/test_collector.py",
+            "blob": "34487bdd6a4f7e1c0c55a0427baded2953ab2131",
+            "line": 409
+          }
+        ],
+        "target": "tests/h62/item1/trust-fragments/fragments/011-audit.leanfrag",
+        "target_blob": "1eb436a36526db69ba5ca12978a4f7ad115138b0",
+        "operation": "validated Python read of measured bytes"
+      },
+      {
+        "runner": "validated:tests/h62/item1/trust-fragments/test_collector.py",
+        "input_revision": "27ae97235a41f609e147d2307a8d162f4957cca6",
+        "frames": [
+          {
+            "path": "tests/h62/item1/trust-fragments/test_collector.py",
+            "blob": "34487bdd6a4f7e1c0c55a0427baded2953ab2131",
+            "line": 444
+          },
+          {
+            "path": "tests/h62/item1/trust-fragments/test_collector.py",
+            "blob": "34487bdd6a4f7e1c0c55a0427baded2953ab2131",
+            "line": 409
+          }
+        ],
+        "target": "tests/h62/item1/trust-fragments/fragments/012-audit.leanfrag",
+        "target_blob": "ddafec3bbf137e6593e0831f2a0d45c19f950cce",
+        "operation": "validated Python read of measured bytes"
+      },
+      {
+        "runner": "validated:tests/h62/item1/trust-fragments/test_collector.py",
+        "input_revision": "27ae97235a41f609e147d2307a8d162f4957cca6",
+        "frames": [
+          {
+            "path": "tests/h62/item1/trust-fragments/test_collector.py",
+            "blob": "34487bdd6a4f7e1c0c55a0427baded2953ab2131",
+            "line": 444
+          },
+          {
+            "path": "tests/h62/item1/trust-fragments/test_collector.py",
+            "blob": "34487bdd6a4f7e1c0c55a0427baded2953ab2131",
+            "line": 409
+          }
+        ],
+        "target": "tests/h62/item1/trust-fragments/fragments/013-audit.leanfrag",
+        "target_blob": "8bcc9c85004ba20df2bc2d3ec98f3068af87d8dc",
+        "operation": "validated Python read of measured bytes"
+      },
+      {
+        "runner": "validated:tests/h62/item1/trust-fragments/test_collector.py",
+        "input_revision": "27ae97235a41f609e147d2307a8d162f4957cca6",
+        "frames": [
+          {
+            "path": "tests/h62/item1/trust-fragments/test_collector.py",
+            "blob": "34487bdd6a4f7e1c0c55a0427baded2953ab2131",
+            "line": 444
+          },
+          {
+            "path": "tests/h62/item1/trust-fragments/test_collector.py",
+            "blob": "34487bdd6a4f7e1c0c55a0427baded2953ab2131",
+            "line": 409
+          }
+        ],
+        "target": "tests/h62/item1/trust-fragments/fragments/014-audit.leanfrag",
+        "target_blob": "142fbf5bafa366ac77dae68bfca00d777c4fcf23",
+        "operation": "validated Python read of measured bytes"
+      },
+      {
+        "runner": "validated:tests/h62/item1/trust-fragments/test_collector.py",
+        "input_revision": "27ae97235a41f609e147d2307a8d162f4957cca6",
+        "frames": [
+          {
+            "path": "tests/h62/item1/trust-fragments/test_collector.py",
+            "blob": "34487bdd6a4f7e1c0c55a0427baded2953ab2131",
+            "line": 444
+          },
+          {
+            "path": "tests/h62/item1/trust-fragments/test_collector.py",
+            "blob": "34487bdd6a4f7e1c0c55a0427baded2953ab2131",
+            "line": 409
+          }
+        ],
+        "target": "tests/h62/item1/trust-fragments/fragments/015-audit.leanfrag",
+        "target_blob": "5b17b3bb114464dee48e9007f80ec511373eb9cb",
+        "operation": "validated Python read of measured bytes"
+      },
+      {
+        "runner": "validated:tests/h62/item1/trust-fragments/test_collector.py",
+        "input_revision": "27ae97235a41f609e147d2307a8d162f4957cca6",
+        "frames": [
+          {
+            "path": "tests/h62/item1/trust-fragments/test_collector.py",
+            "blob": "34487bdd6a4f7e1c0c55a0427baded2953ab2131",
+            "line": 444
+          },
+          {
+            "path": "tests/h62/item1/trust-fragments/test_collector.py",
+            "blob": "34487bdd6a4f7e1c0c55a0427baded2953ab2131",
+            "line": 409
+          }
+        ],
+        "target": "tests/h62/item1/trust-fragments/fragments/016-audit.leanfrag",
+        "target_blob": "2c493be60eb7e2f1ba0780be3a0d6fe821ddfe60",
+        "operation": "validated Python read of measured bytes"
+      },
+      {
+        "runner": "validated:tests/h62/item1/trust-fragments/test_collector.py",
+        "input_revision": "27ae97235a41f609e147d2307a8d162f4957cca6",
+        "frames": [
+          {
+            "path": "tests/h62/item1/trust-fragments/test_collector.py",
+            "blob": "34487bdd6a4f7e1c0c55a0427baded2953ab2131",
+            "line": 444
+          },
+          {
+            "path": "tests/h62/item1/trust-fragments/test_collector.py",
+            "blob": "34487bdd6a4f7e1c0c55a0427baded2953ab2131",
+            "line": 409
+          }
+        ],
+        "target": "tests/h62/item1/trust-fragments/fragments/017-audit.leanfrag",
+        "target_blob": "f49d5b153704139785d84b2563f7d002a1b23f45",
+        "operation": "validated Python read of measured bytes"
+      },
+      {
+        "runner": "validated:tests/h62/item1/trust-fragments/test_collector.py",
+        "input_revision": "27ae97235a41f609e147d2307a8d162f4957cca6",
+        "frames": [
+          {
+            "path": "tests/h62/item1/trust-fragments/test_collector.py",
+            "blob": "34487bdd6a4f7e1c0c55a0427baded2953ab2131",
+            "line": 444
+          },
+          {
+            "path": "tests/h62/item1/trust-fragments/test_collector.py",
+            "blob": "34487bdd6a4f7e1c0c55a0427baded2953ab2131",
+            "line": 409
+          }
+        ],
+        "target": "tests/h62/item1/trust-fragments/fragments/018-audit.leanfrag",
+        "target_blob": "7dd5bf9ccb398140ea3b1367f42eb5cc33f22e5d",
+        "operation": "validated Python read of measured bytes"
+      },
+      {
+        "runner": "validated:tests/h62/item1/trust-fragments/test_collector.py",
+        "input_revision": "27ae97235a41f609e147d2307a8d162f4957cca6",
+        "frames": [
+          {
+            "path": "tests/h62/item1/trust-fragments/test_collector.py",
+            "blob": "34487bdd6a4f7e1c0c55a0427baded2953ab2131",
+            "line": 444
+          },
+          {
+            "path": "tests/h62/item1/trust-fragments/test_collector.py",
+            "blob": "34487bdd6a4f7e1c0c55a0427baded2953ab2131",
+            "line": 409
+          }
+        ],
+        "target": "tests/h62/item1/trust-fragments/fragments/019-audit.leanfrag",
+        "target_blob": "8e3c9799fc34ff730cdc836d8491f2f53c042da3",
+        "operation": "validated Python read of measured bytes"
+      },
+      {
+        "runner": "validated:tests/h62/item1/trust-fragments/test_collector.py",
+        "input_revision": "27ae97235a41f609e147d2307a8d162f4957cca6",
+        "frames": [
+          {
+            "path": "tests/h62/item1/trust-fragments/test_collector.py",
+            "blob": "34487bdd6a4f7e1c0c55a0427baded2953ab2131",
+            "line": 444
+          },
+          {
+            "path": "tests/h62/item1/trust-fragments/test_collector.py",
+            "blob": "34487bdd6a4f7e1c0c55a0427baded2953ab2131",
+            "line": 409
+          }
+        ],
+        "target": "tests/h62/item1/trust-fragments/fragments/020-audit.leanfrag",
+        "target_blob": "6b44757ff7087bd457eafee009c4c12d10bc8f99",
+        "operation": "validated Python read of measured bytes"
+      },
+      {
+        "runner": "validated:tests/h62/item1/trust-fragments/test_collector.py",
+        "input_revision": "27ae97235a41f609e147d2307a8d162f4957cca6",
+        "frames": [
+          {
+            "path": "tests/h62/item1/trust-fragments/test_collector.py",
+            "blob": "34487bdd6a4f7e1c0c55a0427baded2953ab2131",
+            "line": 444
+          },
+          {
+            "path": "tests/h62/item1/trust-fragments/test_collector.py",
+            "blob": "34487bdd6a4f7e1c0c55a0427baded2953ab2131",
+            "line": 409
+          }
+        ],
+        "target": "tests/h62/item1/trust-fragments/fragments/021-audit.leanfrag",
+        "target_blob": "26882bbbad327d2970c05fe469c21a8e79576529",
+        "operation": "validated Python read of measured bytes"
+      },
+      {
+        "runner": "validated:tests/h62/item1/trust-fragments/test_collector.py",
+        "input_revision": "27ae97235a41f609e147d2307a8d162f4957cca6",
+        "frames": [
+          {
+            "path": "tests/h62/item1/trust-fragments/test_collector.py",
+            "blob": "34487bdd6a4f7e1c0c55a0427baded2953ab2131",
+            "line": 444
+          },
+          {
+            "path": "tests/h62/item1/trust-fragments/test_collector.py",
+            "blob": "34487bdd6a4f7e1c0c55a0427baded2953ab2131",
+            "line": 409
+          }
+        ],
+        "target": "tests/h62/item1/trust-fragments/fragments/022-audit.leanfrag",
+        "target_blob": "fad3a58dfdf32236e4fd7fab0fa1196a57caf334",
+        "operation": "validated Python read of measured bytes"
+      },
+      {
+        "runner": "validated:tests/h62/item1/trust-fragments/test_collector.py",
+        "input_revision": "27ae97235a41f609e147d2307a8d162f4957cca6",
+        "frames": [
+          {
+            "path": "tests/h62/item1/trust-fragments/test_collector.py",
+            "blob": "34487bdd6a4f7e1c0c55a0427baded2953ab2131",
+            "line": 444
+          },
+          {
+            "path": "tests/h62/item1/trust-fragments/test_collector.py",
+            "blob": "34487bdd6a4f7e1c0c55a0427baded2953ab2131",
+            "line": 409
+          }
+        ],
+        "target": "tests/h62/item1/trust-fragments/fragments/023-audit.leanfrag",
+        "target_blob": "697fb9a67e9fd6044a68be0a11a9bab1011ea736",
+        "operation": "validated Python read of measured bytes"
+      },
+      {
+        "runner": "validated:tests/h62/item1/trust-fragments/test_collector.py",
+        "input_revision": "27ae97235a41f609e147d2307a8d162f4957cca6",
+        "frames": [
+          {
+            "path": "tests/h62/item1/trust-fragments/test_collector.py",
+            "blob": "34487bdd6a4f7e1c0c55a0427baded2953ab2131",
+            "line": 444
+          },
+          {
+            "path": "tests/h62/item1/trust-fragments/test_collector.py",
+            "blob": "34487bdd6a4f7e1c0c55a0427baded2953ab2131",
+            "line": 409
+          }
+        ],
+        "target": "tests/h62/item1/trust-fragments/fragments/024-audit.leanfrag",
+        "target_blob": "8a697942c95bc514cff4a1a69d28a27d84082d59",
+        "operation": "validated Python read of measured bytes"
+      },
+      {
+        "runner": "validated:tests/h62/item1/trust-fragments/test_collector.py",
+        "input_revision": "27ae97235a41f609e147d2307a8d162f4957cca6",
+        "frames": [
+          {
+            "path": "tests/h62/item1/trust-fragments/test_collector.py",
+            "blob": "34487bdd6a4f7e1c0c55a0427baded2953ab2131",
+            "line": 444
+          },
+          {
+            "path": "tests/h62/item1/trust-fragments/test_collector.py",
+            "blob": "34487bdd6a4f7e1c0c55a0427baded2953ab2131",
+            "line": 409
+          }
+        ],
+        "target": "tests/h62/item1/trust-fragments/fragments/025-audit.leanfrag",
+        "target_blob": "a2d73507b2841051b8550c35b906e389f965a4b0",
+        "operation": "validated Python read of measured bytes"
+      },
+      {
+        "runner": "validated:tests/h62/item1/trust-fragments/test_collector.py",
+        "input_revision": "27ae97235a41f609e147d2307a8d162f4957cca6",
+        "frames": [
+          {
+            "path": "tests/h62/item1/trust-fragments/test_collector.py",
+            "blob": "34487bdd6a4f7e1c0c55a0427baded2953ab2131",
+            "line": 444
+          },
+          {
+            "path": "tests/h62/item1/trust-fragments/test_collector.py",
+            "blob": "34487bdd6a4f7e1c0c55a0427baded2953ab2131",
+            "line": 409
+          }
+        ],
+        "target": "tests/h62/item1/trust-fragments/fragments/026-audit.leanfrag",
+        "target_blob": "d2baf56bf43fe3537293687ac48d2661acf2a5b8",
+        "operation": "validated Python read of measured bytes"
+      },
+      {
+        "runner": "validated:tests/h62/item1/trust-fragments/test_collector.py",
+        "input_revision": "27ae97235a41f609e147d2307a8d162f4957cca6",
+        "frames": [
+          {
+            "path": "tests/h62/item1/trust-fragments/test_collector.py",
+            "blob": "34487bdd6a4f7e1c0c55a0427baded2953ab2131",
+            "line": 444
+          },
+          {
+            "path": "tests/h62/item1/trust-fragments/test_collector.py",
+            "blob": "34487bdd6a4f7e1c0c55a0427baded2953ab2131",
+            "line": 409
+          }
+        ],
+        "target": "tests/h62/item1/trust-fragments/fragments/027-audit.leanfrag",
+        "target_blob": "6316c52ba1d70df0751194ece71a8f40cb416a73",
+        "operation": "validated Python read of measured bytes"
+      },
+      {
+        "runner": "validated:tests/h62/item1/trust-fragments/test_collector.py",
+        "input_revision": "27ae97235a41f609e147d2307a8d162f4957cca6",
+        "frames": [
+          {
+            "path": "tests/h62/item1/trust-fragments/test_collector.py",
+            "blob": "34487bdd6a4f7e1c0c55a0427baded2953ab2131",
+            "line": 444
+          },
+          {
+            "path": "tests/h62/item1/trust-fragments/test_collector.py",
+            "blob": "34487bdd6a4f7e1c0c55a0427baded2953ab2131",
+            "line": 409
+          }
+        ],
+        "target": "tests/h62/item1/trust-fragments/fragments/028-audit.leanfrag",
+        "target_blob": "758ed53793f2cfd95772c0af01d6c63ccf0687f9",
+        "operation": "validated Python read of measured bytes"
+      },
+      {
+        "runner": "validated:tests/h62/item1/trust-fragments/test_collector.py",
+        "input_revision": "27ae97235a41f609e147d2307a8d162f4957cca6",
+        "frames": [
+          {
+            "path": "tests/h62/item1/trust-fragments/test_collector.py",
+            "blob": "34487bdd6a4f7e1c0c55a0427baded2953ab2131",
+            "line": 444
+          },
+          {
+            "path": "tests/h62/item1/trust-fragments/test_collector.py",
+            "blob": "34487bdd6a4f7e1c0c55a0427baded2953ab2131",
+            "line": 409
+          }
+        ],
+        "target": "tests/h62/item1/trust-fragments/fragments/029-audit.leanfrag",
+        "target_blob": "279af862273cb27678db3945b69fafa8a52f250b",
+        "operation": "validated Python read of measured bytes"
+      },
+      {
+        "runner": "validated:tests/h62/item1/trust-fragments/test_collector.py",
+        "input_revision": "27ae97235a41f609e147d2307a8d162f4957cca6",
+        "frames": [
+          {
+            "path": "tests/h62/item1/trust-fragments/test_collector.py",
+            "blob": "34487bdd6a4f7e1c0c55a0427baded2953ab2131",
+            "line": 444
+          },
+          {
+            "path": "tests/h62/item1/trust-fragments/test_collector.py",
+            "blob": "34487bdd6a4f7e1c0c55a0427baded2953ab2131",
+            "line": 409
+          }
+        ],
+        "target": "tests/h62/item1/trust-fragments/fragments/030-audit.leanfrag",
+        "target_blob": "4207837b247a2bfdcfd1bd41e74dd689b49ec4e9",
+        "operation": "validated Python read of measured bytes"
+      },
+      {
+        "runner": "validated:tests/h62/item1/trust-fragments/test_collector.py",
+        "input_revision": "27ae97235a41f609e147d2307a8d162f4957cca6",
+        "frames": [
+          {
+            "path": "tests/h62/item1/trust-fragments/test_collector.py",
+            "blob": "34487bdd6a4f7e1c0c55a0427baded2953ab2131",
+            "line": 444
+          },
+          {
+            "path": "tests/h62/item1/trust-fragments/test_collector.py",
+            "blob": "34487bdd6a4f7e1c0c55a0427baded2953ab2131",
+            "line": 409
+          }
+        ],
+        "target": "tests/h62/item1/trust-fragments/fragments/031-audit.leanfrag",
+        "target_blob": "c84d1715d849331137d27aacec624579383af052",
+        "operation": "validated Python read of measured bytes"
+      },
+      {
+        "runner": "validated:tests/h62/item1/trust-fragments/test_collector.py",
+        "input_revision": "27ae97235a41f609e147d2307a8d162f4957cca6",
+        "frames": [
+          {
+            "path": "tests/h62/item1/trust-fragments/test_collector.py",
+            "blob": "34487bdd6a4f7e1c0c55a0427baded2953ab2131",
+            "line": 444
+          },
+          {
+            "path": "tests/h62/item1/trust-fragments/test_collector.py",
+            "blob": "34487bdd6a4f7e1c0c55a0427baded2953ab2131",
+            "line": 409
+          }
+        ],
+        "target": "tests/h62/item1/trust-fragments/fragments/032-audit.leanfrag",
+        "target_blob": "a4dfefbc4beb4096ab1226e663108a8e2caf78d7",
+        "operation": "validated Python read of measured bytes"
+      },
+      {
+        "runner": "validated:tests/h62/item1/trust-fragments/test_collector.py",
+        "input_revision": "27ae97235a41f609e147d2307a8d162f4957cca6",
+        "frames": [
+          {
+            "path": "tests/h62/item1/trust-fragments/test_collector.py",
+            "blob": "34487bdd6a4f7e1c0c55a0427baded2953ab2131",
+            "line": 444
+          },
+          {
+            "path": "tests/h62/item1/trust-fragments/test_collector.py",
+            "blob": "34487bdd6a4f7e1c0c55a0427baded2953ab2131",
+            "line": 409
+          }
+        ],
+        "target": "tests/h62/item1/trust-fragments/fragments/033-audit.leanfrag",
+        "target_blob": "969fabdb9312fea0a3ea4602e871aa964e76e656",
+        "operation": "validated Python read of measured bytes"
+      },
+      {
+        "runner": "validated:tests/h62/item1/trust-fragments/test_collector.py",
+        "input_revision": "27ae97235a41f609e147d2307a8d162f4957cca6",
+        "frames": [
+          {
+            "path": "tests/h62/item1/trust-fragments/test_collector.py",
+            "blob": "34487bdd6a4f7e1c0c55a0427baded2953ab2131",
+            "line": 444
+          },
+          {
+            "path": "tests/h62/item1/trust-fragments/test_collector.py",
+            "blob": "34487bdd6a4f7e1c0c55a0427baded2953ab2131",
+            "line": 409
+          }
+        ],
+        "target": "tests/h62/item1/trust-fragments/fragments/034-audit.leanfrag",
+        "target_blob": "ee6aed4d03074a5df3927c446e72cb211c276f5f",
+        "operation": "validated Python read of measured bytes"
+      },
+      {
+        "runner": "validated:tests/h62/item1/trust-fragments/test_collector.py",
+        "input_revision": "27ae97235a41f609e147d2307a8d162f4957cca6",
+        "frames": [
+          {
+            "path": "tests/h62/item1/trust-fragments/test_collector.py",
+            "blob": "34487bdd6a4f7e1c0c55a0427baded2953ab2131",
+            "line": 444
+          },
+          {
+            "path": "tests/h62/item1/trust-fragments/test_collector.py",
+            "blob": "34487bdd6a4f7e1c0c55a0427baded2953ab2131",
+            "line": 409
+          }
+        ],
+        "target": "tests/h62/item1/trust-fragments/fragments/035-audit.leanfrag",
+        "target_blob": "61f149b2c9800005adda2d734b4f35f1e7abf071",
+        "operation": "validated Python read of measured bytes"
+      },
+      {
+        "runner": "validated:tests/h62/item1/trust-fragments/test_collector.py",
+        "input_revision": "27ae97235a41f609e147d2307a8d162f4957cca6",
+        "frames": [
+          {
+            "path": "tests/h62/item1/trust-fragments/test_collector.py",
+            "blob": "34487bdd6a4f7e1c0c55a0427baded2953ab2131",
+            "line": 444
+          },
+          {
+            "path": "tests/h62/item1/trust-fragments/test_collector.py",
+            "blob": "34487bdd6a4f7e1c0c55a0427baded2953ab2131",
+            "line": 409
+          }
+        ],
+        "target": "tests/h62/item1/trust-fragments/fragments/036-audit.leanfrag",
+        "target_blob": "b94d1fee3c13cfec21b12cf7f5ddcc0e593dd757",
+        "operation": "validated Python read of measured bytes"
+      },
+      {
+        "runner": "validated:tests/h62/item1/trust-fragments/test_collector.py",
+        "input_revision": "27ae97235a41f609e147d2307a8d162f4957cca6",
+        "frames": [
+          {
+            "path": "tests/h62/item1/trust-fragments/test_collector.py",
+            "blob": "34487bdd6a4f7e1c0c55a0427baded2953ab2131",
+            "line": 444
+          },
+          {
+            "path": "tests/h62/item1/trust-fragments/test_collector.py",
+            "blob": "34487bdd6a4f7e1c0c55a0427baded2953ab2131",
+            "line": 409
+          }
+        ],
+        "target": "tests/h62/item1/trust-fragments/fragments/037-audit.leanfrag",
+        "target_blob": "aca6b8c692545326b7a59d626df3083d5f5fc8de",
+        "operation": "validated Python read of measured bytes"
+      },
+      {
+        "runner": "validated:tests/h62/item1/trust-fragments/test_collector.py",
+        "input_revision": "27ae97235a41f609e147d2307a8d162f4957cca6",
+        "frames": [
+          {
+            "path": "tests/h62/item1/trust-fragments/test_collector.py",
+            "blob": "34487bdd6a4f7e1c0c55a0427baded2953ab2131",
+            "line": 444
+          },
+          {
+            "path": "tests/h62/item1/trust-fragments/test_collector.py",
+            "blob": "34487bdd6a4f7e1c0c55a0427baded2953ab2131",
+            "line": 409
+          }
+        ],
+        "target": "tests/h62/item1/trust-fragments/fragments/038-audit.leanfrag",
+        "target_blob": "73b90b3b8e9061a83148b94637258b37785036d6",
+        "operation": "validated Python read of measured bytes"
+      },
+      {
+        "runner": "validated:tests/h62/item1/trust-fragments/test_collector.py",
+        "input_revision": "27ae97235a41f609e147d2307a8d162f4957cca6",
+        "frames": [
+          {
+            "path": "tests/h62/item1/trust-fragments/test_collector.py",
+            "blob": "34487bdd6a4f7e1c0c55a0427baded2953ab2131",
+            "line": 444
+          },
+          {
+            "path": "tests/h62/item1/trust-fragments/test_collector.py",
+            "blob": "34487bdd6a4f7e1c0c55a0427baded2953ab2131",
+            "line": 409
+          }
+        ],
+        "target": "tests/h62/item1/trust-fragments/fragments/039-audit.leanfrag",
+        "target_blob": "b559a550de15d87249c5c4d6004b73b4d3ef4840",
+        "operation": "validated Python read of measured bytes"
+      },
+      {
+        "runner": "validated:tests/h62/item1/trust-fragments/test_collector.py",
+        "input_revision": "27ae97235a41f609e147d2307a8d162f4957cca6",
+        "frames": [
+          {
+            "path": "tests/h62/item1/trust-fragments/test_collector.py",
+            "blob": "34487bdd6a4f7e1c0c55a0427baded2953ab2131",
+            "line": 444
+          },
+          {
+            "path": "tests/h62/item1/trust-fragments/test_collector.py",
+            "blob": "34487bdd6a4f7e1c0c55a0427baded2953ab2131",
+            "line": 409
+          }
+        ],
+        "target": "tests/h62/item1/trust-fragments/fragments/040-audit.leanfrag",
+        "target_blob": "129b69da6424ec1d418b931170c1779792cad99f",
+        "operation": "validated Python read of measured bytes"
+      },
+      {
+        "runner": "validated:tests/h62/item1/trust-fragments/test_collector.py",
+        "input_revision": "27ae97235a41f609e147d2307a8d162f4957cca6",
+        "frames": [
+          {
+            "path": "tests/h62/item1/trust-fragments/test_collector.py",
+            "blob": "34487bdd6a4f7e1c0c55a0427baded2953ab2131",
+            "line": 444
+          },
+          {
+            "path": "tests/h62/item1/trust-fragments/test_collector.py",
+            "blob": "34487bdd6a4f7e1c0c55a0427baded2953ab2131",
+            "line": 409
+          }
+        ],
+        "target": "tests/h62/item1/trust-fragments/fragments/041-audit.leanfrag",
+        "target_blob": "b52cc2d4bf7008981ab5e6e8d9db0bc7ff8eb346",
+        "operation": "validated Python read of measured bytes"
+      },
+      {
+        "runner": "validated:tests/h62/item1/trust-fragments/test_collector.py",
+        "input_revision": "27ae97235a41f609e147d2307a8d162f4957cca6",
+        "frames": [
+          {
+            "path": "tests/h62/item1/trust-fragments/test_collector.py",
+            "blob": "34487bdd6a4f7e1c0c55a0427baded2953ab2131",
+            "line": 444
+          },
+          {
+            "path": "tests/h62/item1/trust-fragments/test_collector.py",
+            "blob": "34487bdd6a4f7e1c0c55a0427baded2953ab2131",
+            "line": 409
+          }
+        ],
+        "target": "tests/h62/item1/trust-fragments/fragments/042-audit.leanfrag",
+        "target_blob": "7c937edc8ab29003649ace83843ce502e07bce0b",
+        "operation": "validated Python read of measured bytes"
+      },
+      {
+        "runner": "validated:tests/h62/item1/trust-fragments/test_collector.py",
+        "input_revision": "27ae97235a41f609e147d2307a8d162f4957cca6",
+        "frames": [
+          {
+            "path": "tests/h62/item1/trust-fragments/test_collector.py",
+            "blob": "34487bdd6a4f7e1c0c55a0427baded2953ab2131",
+            "line": 444
+          },
+          {
+            "path": "tests/h62/item1/trust-fragments/test_collector.py",
+            "blob": "34487bdd6a4f7e1c0c55a0427baded2953ab2131",
+            "line": 409
+          }
+        ],
+        "target": "tests/h62/item1/trust-fragments/fragments/043-audit.leanfrag",
+        "target_blob": "5a6425a5a46153bd5d2a999d12c91c6b427a61fd",
+        "operation": "validated Python read of measured bytes"
+      },
       {
         "runner": "validated:tests/h62/item2/audit-bytecode-selection/test_exact_domains.py",
         "input_revision": "6bdd1511df45f0a7fd4a8ac594813e1444b07b5d",
