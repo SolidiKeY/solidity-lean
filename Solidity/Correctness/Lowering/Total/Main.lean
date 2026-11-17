@@ -51,7 +51,7 @@ The concrete boundary is begun below, not finished:
   events, the kind of the outcome at the first completing horizon.
 * `Simulation.Simulates rel` is `relates` (H1022): one general simulation,
   which the e1 endpoints imply (`of_endpoint`, `of_retEndpoint`).
-  It is relative to a state relation `rel`; no concrete one exists yet.
+  It is relative to a state relation `rel`.
 * `Allocation.trace` is the allocation trace (H1023): one scope per run.
 * `loopBoundaryAt rel` assembles them with `rel` unbound. For a `rel` that
   reflects Booleans and relates `false` to `false`, `loopResidualAt_iff` gives
@@ -75,7 +75,7 @@ elaborated program, and no request's `Request.Succeeds` can be derived (it can
 be refuted where top-level lowering, which is total, fails). So the decoder's
 coverage obligation cannot be proved today; once the elaborator is total it
 fails on the first successful request in a listed gap. Also not proved:
-`InferComplete`, and anything about a concrete state relation. `Solidity.Goals.lowerLoopsCorrect`
+`InferComplete`, and that `loopRel` has any related pair. `Solidity.Goals.lowerLoopsCorrect`
 stays unstated until the boundary is complete.
 -/
 namespace Solidity.Correctness.Lowering.Total
@@ -305,12 +305,13 @@ def assignOp : BinOp → Option Source.AssignOp
   | .shl => some .shl | .shr => some .sar
   | _ => none
 
-/-- Environment reads. `address(this)` and its balance are gaps. -/
+/-- Environment reads. `msg.sender`, `address(this)` and its balance are gaps:
+the model has erased the address type and the state relation does not relate
+them. -/
 def env : EnvKey → Option (Syn .expr)
-  | .msgSender => some (.member (.ident "msg") "sender")
   | .msgValue => some (.member (.ident "msg") "value")
   | .timestamp => some (.member (.ident "block") "timestamp")
-  | .selfBalance | .selfAddress => none
+  | .msgSender | .selfBalance | .selfAddress => none
 
 mutual
 /-- Expressions. Gaps: `newArr`, `named`, the wrapping operators, a tuple of
@@ -870,39 +871,17 @@ theorem stmt_spells : (k : SCtx) → (s : RawStmt) → (t : Syn (.stmt k)) →
   | ⟨false, u⟩, .brk, t, h => by simp [Decode.stmt, Decode.jump] at h
   | ⟨true, u⟩, .cont, t, h => by simp [Decode.stmt, Decode.jump] at h; subst h; exact .cont
   | ⟨false, u⟩, .cont, t, h => by simp [Decode.stmt, Decode.jump] at h
-  | k, s@(.assign ..), t, h
-  | k, s@(.decl ..), t, h
-  | k, s@(.declStorage ..), t, h
-  | k, s@(.declMemory ..), t, h
-  | k, s@(.delete ..), t, h
-  | k, s@(.opAssign ..), t, h
-  | k, s@(.incDec ..), t, h
-  | k, s@(.pushOpAssign ..), t, h
-  | k, s@(.pushIncDec ..), t, h
-  | k, s@(.call ..), t, h
-  | k, s@(.assignIncDec ..), t, h
-  | k, s@(.assignPush ..), t, h
-  | k, s@(.declStoragePush ..), t, h
-  | k, s@(.declPush ..), t, h
-  | k, s@(.require ..), t, h
-  | k, s@(.assert ..), t, h
-  | k, s@.revert, t, h
-  | k, s@(.revertMsg ..), t, h
-  | k, s@(.requireMsg ..), t, h
-  | k, s@(.revertReason ..), t, h
-  | k, s@(.requireReason ..), t, h
-  | k, s@(.revertRaw ..), t, h
-  | k, s@(.revertErr ..), t, h
-  | k, s@(.requireErr ..), t, h
-  | k, s@.assumeFalse, t, h
-  | k, s@(.eval ..), t, h
-  | k, s@(.unchecked ..), t, h
-  | k, s@(.checked ..), t, h
-  | k, s@(.tryCall ..), t, h
-  | k, s@(.send ..), t, h
-  | k, s@(.tupleDecl ..), t, h
-  | k, s@(.tupleAssign ..), t, h
-  | k, s@.hole, t, h => by
+  | k, s@(.assign ..), t, h | k, s@(.decl ..), t, h | k, s@(.declStorage ..), t, h
+  | k, s@(.declMemory ..), t, h | k, s@(.delete ..), t, h | k, s@(.opAssign ..), t, h
+  | k, s@(.incDec ..), t, h | k, s@(.pushOpAssign ..), t, h | k, s@(.pushIncDec ..), t, h
+  | k, s@(.call ..), t, h | k, s@(.assignIncDec ..), t, h | k, s@(.assignPush ..), t, h
+  | k, s@(.declStoragePush ..), t, h | k, s@(.declPush ..), t, h | k, s@(.require ..), t, h
+  | k, s@(.assert ..), t, h | k, s@.revert, t, h | k, s@(.revertMsg ..), t, h
+  | k, s@(.requireMsg ..), t, h | k, s@(.revertReason ..), t, h | k, s@(.requireReason ..), t, h
+  | k, s@(.revertRaw ..), t, h | k, s@(.revertErr ..), t, h | k, s@(.requireErr ..), t, h
+  | k, s@.assumeFalse, t, h | k, s@(.eval ..), t, h | k, s@(.unchecked ..), t, h
+  | k, s@(.checked ..), t, h | k, s@(.tryCall ..), t, h | k, s@(.send ..), t, h
+  | k, s@(.tupleDecl ..), t, h | k, s@(.tupleAssign ..), t, h | k, s@.hole, t, h => by
       spell_simp Decode.stmt at h; obtain ⟨a, ha, rfl⟩ := h; exact .simple (simple_spells _ _ ha)
 theorem items_spells : (k : SCtx) → (b : List RawStmt) → (t : Syn (.list (.item k))) →
     Decode.items k b = some t → Items k b t
@@ -917,47 +896,26 @@ theorem items_spells : (k : SCtx) → (b : List RawStmt) → (t : Syn (.list (.i
       bind_simp at h
       obtain ⟨_, _, h⟩ := h
       exact h.elim
-  | k, s@(.assign ..) :: rest, t, h
-  | k, s@(.decl ..) :: rest, t, h
-  | k, s@(.declStorage ..) :: rest, t, h
-  | k, s@(.declMemory ..) :: rest, t, h
-  | k, s@(.delete ..) :: rest, t, h
-  | k, s@(.opAssign ..) :: rest, t, h
-  | k, s@(.incDec ..) :: rest, t, h
-  | k, s@(.pushOpAssign ..) :: rest, t, h
-  | k, s@(.pushIncDec ..) :: rest, t, h
-  | k, s@(.call ..) :: rest, t, h
-  | k, s@(.assignIncDec ..) :: rest, t, h
-  | k, s@(.assignPush ..) :: rest, t, h
-  | k, s@(.declStoragePush ..) :: rest, t, h
-  | k, s@(.declPush ..) :: rest, t, h
-  | k, s@(.ite ..) :: rest, t, h
-  | k, s@(.require ..) :: rest, t, h
-  | k, s@(.assert ..) :: rest, t, h
-  | k, s@.revert :: rest, t, h
-  | k, s@(.revertMsg ..) :: rest, t, h
-  | k, s@(.requireMsg ..) :: rest, t, h
-  | k, s@(.revertReason ..) :: rest, t, h
-  | k, s@(.requireReason ..) :: rest, t, h
-  | k, s@(.revertRaw ..) :: rest, t, h
-  | k, s@(.revertErr ..) :: rest, t, h
-  | k, s@(.requireErr ..) :: rest, t, h
-  | k, s@.assumeFalse :: rest, t, h
-  | k, s@(.ret ..) :: rest, t, h
-  | k, s@(.eval ..) :: rest, t, h
-  | k, s@(.checked ..) :: rest, t, h
-  | k, s@(.tryCall ..) :: rest, t, h
-  | k, s@(.send ..) :: rest, t, h
-  | k, s@(.tupleDecl ..) :: rest, t, h
-  | k, s@(.tupleAssign ..) :: rest, t, h
-  | k, s@(.block ..) :: rest, t, h
-  | k, s@(.whileLoop ..) :: rest, t, h
-  | k, s@(.forLoop ..) :: rest, t, h
-  | k, s@(.doWhile ..) :: rest, t, h
-  | k, s@.brk :: rest, t, h
-  | k, s@.cont :: rest, t, h
-  | k, s@(.loop ..) :: rest, t, h
-  | k, s@.hole :: rest, t, h => by
+  | k, s@(.assign ..) :: rest, t, h | k, s@(.decl ..) :: rest, t, h
+  | k, s@(.declStorage ..) :: rest, t, h | k, s@(.declMemory ..) :: rest, t, h
+  | k, s@(.delete ..) :: rest, t, h | k, s@(.opAssign ..) :: rest, t, h
+  | k, s@(.incDec ..) :: rest, t, h | k, s@(.pushOpAssign ..) :: rest, t, h
+  | k, s@(.pushIncDec ..) :: rest, t, h | k, s@(.call ..) :: rest, t, h
+  | k, s@(.assignIncDec ..) :: rest, t, h | k, s@(.assignPush ..) :: rest, t, h
+  | k, s@(.declStoragePush ..) :: rest, t, h | k, s@(.declPush ..) :: rest, t, h
+  | k, s@(.ite ..) :: rest, t, h | k, s@(.require ..) :: rest, t, h
+  | k, s@(.assert ..) :: rest, t, h | k, s@.revert :: rest, t, h
+  | k, s@(.revertMsg ..) :: rest, t, h | k, s@(.requireMsg ..) :: rest, t, h
+  | k, s@(.revertReason ..) :: rest, t, h | k, s@(.requireReason ..) :: rest, t, h
+  | k, s@(.revertRaw ..) :: rest, t, h | k, s@(.revertErr ..) :: rest, t, h
+  | k, s@(.requireErr ..) :: rest, t, h | k, s@.assumeFalse :: rest, t, h
+  | k, s@(.ret ..) :: rest, t, h | k, s@(.eval ..) :: rest, t, h
+  | k, s@(.checked ..) :: rest, t, h | k, s@(.tryCall ..) :: rest, t, h
+  | k, s@(.send ..) :: rest, t, h | k, s@(.tupleDecl ..) :: rest, t, h
+  | k, s@(.tupleAssign ..) :: rest, t, h | k, s@(.block ..) :: rest, t, h
+  | k, s@(.whileLoop ..) :: rest, t, h | k, s@(.forLoop ..) :: rest, t, h
+  | k, s@(.doWhile ..) :: rest, t, h | k, s@.brk :: rest, t, h | k, s@.cont :: rest, t, h
+  | k, s@(.loop ..) :: rest, t, h | k, s@.hole :: rest, t, h => by
       spell_simp Decode.items at h; obtain ⟨s', hs, r', hr, rfl⟩ := h
       exact .stmt (stmt_spells _ _ _ hs) (items_spells _ _ _ hr)
 end
@@ -1161,8 +1119,8 @@ end Allocation
 One relation for every decoded program and its elaborated block, in place of
 the e1 endpoints by cases. The e1 endpoints imply it (`of_endpoint`,
 `of_retEndpoint`); they are stronger and are not recovered from it. It is
-relative to a state relation `rel` (values and globals): no concrete Source to
-model global-state relation exists yet, so none is chosen here. It speaks of
+relative to a state relation `rel` (values and globals; `loopRel` below is the
+stage-1 one). It speaks of
 runs with no failure plan and known calldata only.
 
 Known defects, open. `Simulates` can hold vacuously: its context maps are
@@ -1295,14 +1253,18 @@ primitive model value and the Source value of the corresponding type, by
 `Source.Agreement.PrimitiveRel`; no other pair of types is related. Globals:
 each primitive state variable holds related values in the model storage and
 in the storage of the running Source account, at the canonical unit's path;
-`msg.value` and the block timestamp agree. A contract with a state variable of
-any other type has no related globals, as the decoder has no unit for it.
+`msg.value` and the block timestamp agree; the Source frame is not static and
+checks arithmetic. A contract with a state variable of any other type has no
+related globals, as the decoder has no unit for it.
 
-Not related, so unconstrained and open: memory heaps, the ledger and balances,
-the caller and own address (the model has erased their type), transient
-storage, the Source journal, events and logs, and resource metadata. No total
-initial matching is proved: that every Source state of a decoded program has a
-related model state is an obligation not yet stated. -/
+Not related, so unconstrained: memory heaps; the ledger, balances and
+`selfBalance`; the caller and own address; external-call results (`tx.ext`);
+transient storage; other accounts; the Source journal, events, logs, function
+locals and resource metadata; the frame's contract, depth and calldata; and
+all of the Source globals but the timestamp. No related pair is exhibited and
+no total initial matching is proved: that the cell type at each path equals
+the declared type, and that every Source state of a decoded program has a
+related model state, are obligations not yet stated. -/
 namespace Relation
 
 open Source.Agreement (sourceTy PrimitiveRel)
@@ -1326,11 +1288,13 @@ def fields {D : Source.Layout} (read : Source.SPath → Option ((τ : Source.STy
   | _, .nil => True
   | _, .cons (f := x) v rest => field read x v ∧ fields read rest
 
-/-- Globals: storage of the running account, `msg.value`, the timestamp. -/
+/-- Globals: storage of the running account, `msg.value`, the timestamp, and a
+Source frame that may write and checks arithmetic, as the model always does. -/
 def glob (E : Source.Env) (C : Contract) (G : Source.Glob E) (F : Source.Fr) (st : Source.St E)
     (σ : State C []) : Prop :=
   fields (fun p => ((st.ex.world.accounts F.this).storage.read p).map fun v => ⟨_, v⟩) σ.storage ∧
-  σ.tx.msgValue.1 = (F.value.val : Int) ∧ σ.tx.timestamp.1 = (G.timestamp.val : Int)
+  σ.tx.msgValue.1 = (F.value.val : Int) ∧ σ.tx.timestamp.1 = (G.timestamp.val : Int) ∧
+  F.static = false ∧ F.checked = true
 
 end Relation
 
@@ -1468,7 +1432,7 @@ Booleans and relates `false` to `false`: the decoder is defined on every
 successful request and complete for `Spells` there; the run's one allocation
 scope is safe; and each successful pipeline simulates its decoded program and
 refines it under the policies. The two family obligations follow from the two
-hypotheses on `rel`; for a future concrete `rel` those are owed. -/
+hypotheses on `rel` (`loopRel` has both). -/
 theorem loopResidualAt_iff
     (reflect : ∀ E C H (v : Source.Val E.layout .bool) (b : Bool),
       (rel E C).val H .bool (.val .bool) v b → v = .bool b)
