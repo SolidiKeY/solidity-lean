@@ -6,7 +6,7 @@ import Solidity.Correctness.Panic.Guards.State
 Each state guard family at a concrete failing evaluation: an index past a
 storage array (dynamic and fixed), an index past a memory array (dynamic and
 fixed) and a pop of an empty array. The emitted code is read off the site
-(`0x32`, `0x31`); the last valid index is the control that the guard passes.
+(`0x32`, `0x31`); each family has a control where its guard evaluates to `true`.
 -/
 
 namespace Solidity.Examples.Panic.GuardsState
@@ -117,8 +117,30 @@ theorem memory_fixed_past_end :
   (memory_fixed_index_source σₘ mfix (mlit 2) fixRef (u 2) (by decide) rfl rfl
     ((fixed_index_guard_eval σₘ (mlit 2) (u 2) 2 (by decide) rfl).trans (congrArg Except.ok (by rfl)))).2
 
-/-- Control: the guard of `m[0]` read length one and passes. -/
-example : (Val.mlen mdyn rfl).evalT σₘ = .ok (σₘ.heap.lenU dynRef) :=
-  (memory_guard_length σₘ mdyn dynRef rfl).1
+/-- Control: `m[0]`, the only element, passes the dynamic memory guard. -/
+example : (Checked.cmpU .lt rfl rfl (mlit 0) (.mlen mdyn rfl)).evalT σₘ = .ok true :=
+  (memory_dyn_index_guard_eval σₘ mdyn (mlit 0) dynRef (u 0) rfl rfl).trans
+    (congrArg Except.ok (by rw [Heap.len, MObj.elems_dyn]; rfl))
+
+/-- Control: `f[1]`, the last element, passes the fixed memory guard. -/
+example : (Checked.cmpU .lt rfl rfl (mlit 1) (Checked.litU 2 (by decide))).evalT σₘ = .ok true :=
+  (fixed_index_guard_eval σₘ (mlit 1) (u 1) 2 (by decide) rfl).trans (congrArg Except.ok (by rfl))
+
+private def singleton : SVal (.ref (.array (.prim .uint))) :=
+  .array (SVec.ofList [.prim (u 7)]) (.ofList []) (by decide)
+private def valuesRef : SRef C (.ref (.array (.prim .uint))) := .ofRoot "values" rfl
+
+/-- The start state with `values = [7]`. -/
+private def σ₁ : State C [] :=
+  { σ₀ with storage := (Storage.init C).set valuesRef.hroot singleton }
+
+/-- Control: `values[0]` of a one-element array passes the dynamic storage guard. -/
+example : (Checked.cmpU .lt rfl rfl (lit 0) (.len values rfl)).evalT σ₁ = .ok true :=
+  (storage_dyn_index_guard_eval σ₁ values (lit 0) valuesRef (u 0) singleton rfl rfl rfl).trans
+    (congrArg Except.ok (by rfl))
+
+/-- Control: the pop guard of a one-element array passes. -/
+example : (Checked.cmpU .gt rfl rfl (.len values rfl) (Checked.litU 0 (by decide))).evalT σ₁ =
+    .ok true := rfl
 
 end Solidity.Examples.Panic.GuardsState
