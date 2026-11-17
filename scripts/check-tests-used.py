@@ -659,6 +659,7 @@ def validated_routes(graph, catalog, extra_reads=()):
             if len(fields) != 3 or fields[0].decode() != expected_oid or fields[1] != expected_type:
                 raise ValueError('unverifiable historical runner demonstration: ' + request)
     for entry in catalog['standalone']:
+        if entry.get('kind') == 'source-only-program': fragment_rules.source_only_program(globals(), graph, catalog, entry); continue
         required = {'path', 'input_revision', 'source_blob', 'command', 'kind'}
         if entry.get('kind') == 'manual-reproducer': required.add('documentation')
         if entry.get('kind') == 'runnable-entrypoint': required.update(('entry_line', 'purpose', 'input_scope', 'other_reads'))
@@ -1780,7 +1781,6 @@ def inventory(repo, catalog=None):
                 if spelling != base: names[spelling].append(p)
     candidates = collections.defaultdict(list)
     candidate_sources = collections.defaultdict(set)  # eligibility is never display-capped
-    # Single indexed scan rather than one repository scan per inventoried file.
     token_re = re.compile(r'[A-Za-z0-9_.+@/-]+')
     for source, text in sorted(repo.texts.items()):
         for n, line in enumerate(text.splitlines(), 1):
