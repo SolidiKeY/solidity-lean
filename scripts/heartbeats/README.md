@@ -6,7 +6,7 @@ elaboration (`Elab.async=false`, so kernel checking counts) and a 128 MiB stack
 time is reported as well, but it is informational only.
 
 ```
-scripts/heartbeats/collect.sh [--timeout S] MODULE|FILE.lean...
+scripts/heartbeats/collect.sh [--timeout S] MODULE|PATH.lean...
 scripts/heartbeats/collect.sh --write BASELINE.json MODULE...
 scripts/heartbeats/collect.sh --check BASELINE.json [--tolerance PCT] [--min UNITS] MODULE...
 ```
@@ -28,8 +28,9 @@ units (raw / 1000, three exact decimals). `heartbeats` is the sum of
  "import_wall_s":0.2, "errors":0, "commands":[{"line":7,"kind":"theorem","name":"heavy","heartbeats":235.348}, …]}
 ```
 
-A `FILE.lean` outside the checkout is named by its basename. `name` is the declared name under the current namespace, or `null` (`example`,
-`#eval`, anonymous `instance`, …). Exit status: 0 = success, 1 = elaboration
+A `.lean` path outside the checkout is named by its basename. `name` is the
+declared name under the current namespace, or `null` (`example`, `#eval`,
+anonymous `instance`, …). Exit status: 0 = success, 1 = elaboration
 errors or ratchet failure, 2 = usage or build error, 124 = `--timeout` expired.
 `--timeout` is only a backstop against hangs and is off by default.
 

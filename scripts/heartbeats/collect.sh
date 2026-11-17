@@ -2,7 +2,7 @@
 # Heartbeat collector: one JSON line per module (scripts/heartbeats/README.md).
 set -uo pipefail
 usage() {
-  echo "usage: collect.sh [--timeout S] [--write BASELINE | --check BASELINE [--tolerance PCT] [--min UNITS]] MODULE|FILE.lean..." >&2
+  echo "usage: collect.sh [--timeout S] [--write BASELINE | --check BASELINE [--tolerance PCT] [--min UNITS]] MODULE|PATH.lean..." >&2
   exit 2
 }
 root=$(cd "$(dirname "$0")/../.." && pwd) || exit 2
