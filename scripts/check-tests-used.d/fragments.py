@@ -900,31 +900,82 @@ def persisted_module_entries(classifier, graph, catalog, rows):
         original, root = _anchor_root(graph, runner, frames)
         if root is None or root.get('runner_kind') not in ('unittest', 'runnable-entrypoint'): continue
         if root.get('source_only') and root.get('source_blob') != source_blob: continue
-        if observer is None:
-            helper = Path(classifier['__file__']).with_name('check-tests-used-trace.py')
-            spec = classifier['importlib'].util.spec_from_file_location('tests_used_persisted_module_identity', helper)
-            observer = classifier['importlib'].util.module_from_spec(spec); spec.loader.exec_module(observer)
-            collector = hashlib.sha256(helper.read_bytes()).hexdigest()
-        if not classifier['reviewed_module_collector'](repo, row['collector_sha256'], collector): raise ValueError('unreviewed module entry collector')
-        version = classifier['sys'].version_info[:3]
-        if (not isinstance(row['python'], list) or any(type(n) is not int for n in row['python']) or row['python'] != list(version)
-                or classifier['sys'].implementation.name != 'cpython'):
-            raise ValueError('UNVERIFIABLE module code identity: exact CPython version required')
-        if row['operation'] != MODULE_ENTRY_OPERATION: raise ValueError('unsupported module entry operation')
-        if type(row['module_frame_line']) is not int or not 0 <= row['module_frame_line'] <= len(repo.texts[target].splitlines()):
-            raise ValueError('invalid entered module frame location')
-        if row['module_code_sha256'] not in observer.source_code_hashes(repo.texts[target].encode('utf-8', 'surrogateescape'), '<measured>')['module_code_hashes']:
-            raise ValueError('entered module code mismatch')
-        if classifier['excluded'](target) or any(classifier['excluded'](f['path']) for f in frames): continue
-        identity = original + ':persisted-module:' + hashlib.sha256(key).hexdigest()
-        graph.roots[identity] = {**root, 'derived_from': original, 'entered_module': target,
-            'module_entry': {k: row[k] for k in ('module_code_sha256', 'module_frame_line', 'python', 'collector_sha256')},
-            'consumer_route': {'kind': 'persisted-module-entry', 'validated_revision': row['input_revision'], 'runner_definition_blob': source_blob}}
-        chain = {'root': identity, 'entry': graph.roots[identity], 'edges': []}
-        for caller, callee in zip(frames, frames[1:] + [{'path': target}]):
-            chain = {**chain, 'edges': chain['edges'] + [{'source': caller['path'], 'target': callee['path'],
-                'line': caller['line'], 'operation': MODULE_ENTRY_OPERATION + ' (persisted)', 'kind': 'executes', 'validated_for': identity}]}
-            graph.observed.append((callee['path'], chain))
+        if observer is None: observer = _module_observer(classifier)
+        _credit_module_entry(classifier, graph, row, original, root, key, observer, ':persisted-module:',
+            {'consumer_route': {'kind': 'persisted-module-entry', 'validated_revision': row['input_revision'], 'runner_definition_blob': source_blob}})
+
+
+def _module_observer(classifier):
+    """The trace helper that fingerprints code, and its own collector pin."""
+    helper = Path(classifier['__file__']).with_name('check-tests-used-trace.py')
+    spec = classifier['importlib'].util.spec_from_file_location('tests_used_module_identity', helper)
+    observer = classifier['importlib'].util.module_from_spec(spec); spec.loader.exec_module(observer)
+    return observer, hashlib.sha256(helper.read_bytes()).hexdigest()
+
+
+def _credit_module_entry(classifier, graph, entry, original, root, key, observer, label, extra=None):
+    """The one entered-module identity check, then its execution chain.
+
+    Shared by current claims and H979 persisted ones; the caller has checked
+    the claim's schema, revision, runner root and target pin. The collector is
+    reviewed, the CPython version exact, the operation the module-entry one,
+    the frame line in range and the module code hash one of the measured
+    bytes' compilations; every frame is the measured object from the root.
+    """
+    repo = graph.repo; target = entry['target']; observer, collector = observer
+    if not classifier['reviewed_module_collector'](repo, entry['collector_sha256'], collector): raise ValueError('unreviewed module entry collector')
+    if (entry['python'] != list(classifier['sys'].version_info[:3]) or any(type(n) is not int for n in entry['python'])
+            or classifier['sys'].implementation.name != 'cpython'):
+        raise ValueError('UNVERIFIABLE module code identity: exact CPython version required')
+    if entry['operation'] != MODULE_ENTRY_OPERATION: raise ValueError('unsupported module entry operation')
+    if type(entry['module_frame_line']) is not int or not 0 <= entry['module_frame_line'] <= len(repo.texts[target].splitlines()):
+        raise ValueError('invalid entered module frame location')
+    fingerprints = observer.source_code_hashes(repo.texts[target].encode('utf-8', 'surrogateescape'), '<measured>')
+    if entry['module_code_sha256'] not in fingerprints['module_code_hashes']: raise ValueError('entered module code mismatch')
+    frames = entry['frames']
+    if not isinstance(frames, list) or not frames or not isinstance(frames[0], dict) or frames[0].get('path') != root['path']:
+        raise ValueError('entered module chain lacks root')
+    for frame in frames:
+        if (not isinstance(frame, dict) or set(frame) != {'path', 'blob', 'line'}
+                or frame['path'] not in repo.tree or repo.tree[frame['path']][2] != frame['blob']
+                or type(frame['line']) is not int or not 1 <= frame['line'] <= len(repo.texts.get(frame['path'], '').splitlines())):
+            raise ValueError('invalid entered module caller')
+    excluded = classifier['excluded']
+    if excluded(target) or any(excluded(f['path']) for f in frames): return
+    identity = original + label + hashlib.sha256(key).hexdigest()
+    graph.roots[identity] = {**root, 'derived_from': original, 'entered_module': target,
+        'module_entry': {k: entry[k] for k in ('module_code_sha256', 'module_frame_line', 'python', 'collector_sha256')}, **(extra or {})}
+    chain = {'root': identity, 'entry': graph.roots[identity], 'edges': []}
+    for caller, callee in zip(frames, frames[1:] + [{'path': target}]):
+        chain = {**chain, 'edges': chain['edges'] + [{'source': caller['path'], 'target': callee['path'],
+            'line': caller['line'], 'operation': entry['operation'], 'kind': 'executes', 'validated_for': identity}]}
+        graph.observed.append((callee['path'], chain))
+
+
+def validated_module_entries(classifier, graph, entries):
+    """Reviewed positive execution claims, never static imports or data edges.
+
+    Exact entered module code, native reads preceding entry, successful paired
+    runs and collector provenance are validated deliberately outside inventory.
+    These deterministic definitions retain source/code/interpreter bindings;
+    ordinary inventory only compiles bytes to compare code, never executes them.
+    """
+    if not isinstance(entries, list): raise ValueError('invalid module entry definitions')
+    if not entries: return
+    repo = graph.repo; observer = _module_observer(classifier); seen = set()
+    for entry in entries:
+        if not isinstance(entry, dict) or set(entry) != MODULE_ENTRY_KEYS: raise ValueError('invalid entered module claim')
+        key = canonical(entry)
+        if key in seen: raise ValueError('duplicate entered module claim')
+        seen.add(key)
+        if entry['input_revision'] != repo.ref: continue
+        root = graph.roots.get(entry['runner'])
+        if root is None or root['kind'] != 'validated standalone runner' or root.get('source_only'):
+            raise ValueError('entered module requires passing current runner')
+        target = entry['target']
+        if target not in repo.tree or not target.endswith('.py') or repo.tree[target][2] != entry['target_blob']:
+            raise ValueError('entered module source pin mismatch')
+        _credit_module_entry(classifier, graph, entry, entry['runner'], root, key, observer, ':module:')
 
 
 def same_revision_reads(ref, fragments):
@@ -948,6 +999,19 @@ def add_consumer_routes(classifier, graph, catalog, fragments):
     static_routes(classifier, graph, fragments['static_routes'])
     git_policies(classifier, graph, fragments['git_policies'])
     persisted_module_entries(classifier, graph, catalog, fragments['persistent_module_entries'])
+
+
+def _control_repository(classifier, root):
+    """A fresh Git repository at root; commit(changes, message) returns its Repository."""
+    git = classifier['git']
+    root.mkdir(); git(root, 'init', '-q')
+    def commit(changes, message):
+        for path, text in changes.items():
+            (root / path).parent.mkdir(parents=True, exist_ok=True); (root / path).write_text(text)
+        git(root, 'add', '-A', '-f')
+        git(root, '-c', 'user.name=Control', '-c', 'user.email=control@example.invalid', 'commit', '-qm', message)
+        return classifier['Repository'](root, 'HEAD')
+    return commit
 
 
 def fragment_controls(classifier):
@@ -1096,13 +1160,7 @@ def consumer_route_controls(classifier):
     for name, text in variants.items(): files['tests/cli-' + name + '.py'] = text
     with tempfile.TemporaryDirectory() as tmp:
         root = Path(tmp) / 'repo'
-        def commit(changes, message):
-            for path, text in changes.items():
-                (root / path).parent.mkdir(parents=True, exist_ok=True); (root / path).write_text(text)
-            git(root, 'add', '-A', '-f')
-            git(root, '-c', 'user.name=Control', '-c', 'user.email=control@example.invalid', 'commit', '-qm', message)
-            return Repository(root, 'HEAD')
-        root.mkdir(); git(root, 'init', '-q')
+        commit = _control_repository(classifier, root)
         first = commit(files, 'validated')
         blob = lambda repo, path: repo.tree[path][2]
         for name in variants: assert classifier['declared_module_cli'](first, 'tests/cli-' + name + '.py') is None, name
@@ -1292,13 +1350,7 @@ def successor_controls(classifier):
     }
     with tempfile.TemporaryDirectory() as tmp:
         root = Path(tmp) / 'repo'
-        def commit(changes, message):
-            for path, text in changes.items():
-                (root / path).parent.mkdir(parents=True, exist_ok=True); (root / path).write_text(text)
-            git(root, 'add', '-A', '-f')
-            git(root, '-c', 'user.name=Control', '-c', 'user.email=control@example.invalid', 'commit', '-qm', message)
-            return Repository(root, 'HEAD')
-        root.mkdir(); git(root, 'init', '-q')
+        commit = _control_repository(classifier, root)
         first = commit(files, 'validated'); A = first.ref
         blob = lambda repo, path: repo.tree[path][2]
         frame = lambda repo, path, line: {'path': path, 'blob': blob(repo, path), 'line': line}
