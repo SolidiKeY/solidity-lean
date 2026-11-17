@@ -146,10 +146,7 @@ def LTm.lit? {p : PrimTy} : (t : LTm C (.val p)) → Option {v : p.Denote // t =
 
 /-! ## Values at their ranges -/
 
-theorem uint_val_nonneg (v : PrimTy.uint.Denote) : 0 ≤ v.val := by
-  have h := v.property
-  simp only [PrimTy.inRange, decide_eq_true_eq] at h
-  exact h.1
+theorem uint_val_nonneg (v : PrimTy.uint.Denote) : 0 ≤ v.val := Solidity.PrimTy.uint_nonneg ..
 
 theorem uint_val_lt (v : PrimTy.uint.Denote) : v.val < ((2 ^ 256 : Nat) : Int) := by
   have h := v.property
@@ -937,18 +934,7 @@ theorem encode_int (v : PrimTy.int.Denote) :
   rw [encode_integer]; rfl
 
 theorem eq_ediv_iff {d : Int} (hd : 0 < d) (v w : Int) :
-    w = v / d ↔ d * w ≤ v ∧ v ≤ d * w + (d - 1) := by
-  constructor
-  · rintro rfl
-    have h1 := Int.ediv_mul_le v (Int.ne_of_gt hd)
-    have h2 := Int.lt_ediv_add_one_mul_self v hd
-    rw [Int.add_mul, Int.one_mul] at h2
-    rw [Int.mul_comm]
-    omega
-  · rintro ⟨h1, h2⟩
-    have hle : w ≤ v / d := (Int.le_ediv_iff_mul_le hd).mpr (by rw [Int.mul_comm]; exact h1)
-    have hlt : v / d < w + 1 := (Int.ediv_lt_iff_lt_mul hd).mpr (by rw [Int.add_mul, Int.one_mul, Int.mul_comm]; omega)
-    omega
+    w = v / d ↔ d * w ≤ v ∧ v ≤ d * w + (d - 1) := Solidity.Decide.BitArith.ediv_iff hd v w
 
 /-- A quotient below the largest value `M` its dividend may take: the bound
 the relation states, so that the decision need not discover it. -/
