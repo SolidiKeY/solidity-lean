@@ -1,6 +1,7 @@
 import Solidity.Calculus.KIntBinder
 import Solidity.Calculus.MemHoist
 import Solidity.Calculus.KIntTwoAnchors
+import Solidity.Calculus.RunFrameOwn
 
 /-!
 # Binders of KeY's `int` read over two words (M7, features 30 and 31)
@@ -575,12 +576,8 @@ end Symbols
 /-! ### Terms -/
 
 /-- Two positions of one type at one depth are one. -/
-theorem Idx.eq_of_toNat_eq {t : LTy} : {Γ : Ctx} → (i j : Idx Γ t) → i.toNat = j.toNat → i = j
-  | _, .here, .here, _ => rfl
-  | _, .here, .there j, h => absurd h (by simp only [Idx.toNat]; omega)
-  | _, .there i, .here, h => absurd h (by simp only [Idx.toNat]; omega)
-  | _, .there i, .there j, h => by
-    rw [Idx.eq_of_toNat_eq i j (by simpa only [Idx.toNat, Nat.add_right_cancel_iff] using h)]
+theorem Idx.eq_of_toNat_eq {t : LTy} : {Γ : Ctx} → (i j : Idx Γ t) → i.toNat = j.toNat → i = j :=
+  Solidity.Idx.eq_of_toNat
 
 /-- A local of another type than `zi`'s is not set by setting `zi`. -/
 theorem TEnv.get_setLocal_ne {H : HTy} {Γ : Ctx} {t : LTy} (zi : Idx Γ .kint) (i : Idx Γ t)
@@ -1032,10 +1029,7 @@ def Fml.sb? : {Γ Δ : Ctx} → Sb C Γ Δ → Fml C Γ → Option (Fml C Δ)
 
 /-- A pushed state read one binder out is the state. -/
 theorem State.pull_up {Δ : Ctx} (σ : State C Δ) {u : LTy} (w : u.TDenote C σ.H) :
-    (σ.push w).pull (Ren.up u) = σ := by
-  show σ.withEnv (Decide.TEnv.pull (Δ := u :: Δ) ⟨fun j => .there ((Ren.id Δ).f j)⟩ (w, σ.env)) = σ
-  rw [Decide.TEnv.pull_there, Decide.TEnv.pull_id]
-  rfl
+    (σ.push w).pull (Ren.up u) = σ := Solidity.State.pull_up_push ..
 
 theorem SbT.val_up {Δ : Ctx} (σ : State C Δ) {u : LTy} (w : u.TDenote C σ.H) {t : LTy}
     (x : SbT C Δ t) : (x.up u).val (σ.push w) = x.val σ := by

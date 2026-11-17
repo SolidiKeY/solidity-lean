@@ -101,13 +101,6 @@ theorem StmtFrag.correct {b L frame : Nat} {Γ Δ : Ctx} {F : Frag Γ} {G : Frag
       have he := frameNeedStmt_end (Stmt.declLocal _ x (some v))
       exact Nat.le_trans (Nat.add_le_add_left he b) hcap)
 
-private theorem run_cons_revert {Γ Δ Ξ : Ctx} {σ : State C Γ}
-    {s : Stmt C Γ Δ} {P : Prog C Δ Ξ} (h : s.run σ = .error .revert) :
-    (Prog.cons s P).run σ = .error .revert := by
-  show TRun.seq s.runR P.runR σ = _
-  simp only [TRun.seq, Solidity.Stmt.run] at h ⊢
-  rw [h]
-
 theorem ProgFrag.correct {b L frame : Nat} {Γ Δ : Ctx} {F : Frag Γ} {G : Frag Δ}
     {P : Prog C Γ Δ} {code : List Instr} (hp : ProgFrag b F G P code)
     {σ : State C Γ} {base : Nat → Fin W} {m : Machine}

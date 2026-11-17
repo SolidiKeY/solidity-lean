@@ -1,4 +1,5 @@
 import Solidity.Calculus.SoundKit
+import Solidity.Theory.Typed.Leaves
 
 /-!
 # Soundness of the update arms
@@ -45,7 +46,7 @@ theorem TRes.AgreesO.cases {α β γ δ : Type} {f : α → β} {t : TRes α} {u
 
 /-- A step that only returns, against its reading. -/
 theorem TRes.AgreesO.ret {γ δ : Type} {g : γ → δ} {c : γ} {X : Option δ} (h : X = some (g c)) :
-    TRes.AgreesO g (Except.ok c : TRes γ) X := h
+    TRes.AgreesO g (Except.ok c : TRes γ) X := Solidity.TRes.AgreesO.of_eq h
 
 /-! ## Updates computed -/
 
@@ -120,74 +121,67 @@ theorem Tm.eval_pvV {p : PrimTy} (i : Idx Γ (.val p)) :
 
 theorem Tm.eval_save {T : Ty} (s : Tm C Γ .st) (q : Tm C Γ (.path T)) (v : Tm C Γ (.sv T)) :
     (Tm.app3 .save s q v).eval σ =
-      (s.eval σ).bind fun st => (q.eval σ).bind fun r => (v.eval σ).bind fun w => st.write r w := by
-  rw [Tm.eval_app3, Op3.eval_eq_evalM]; rfl
+      (s.eval σ).bind fun st => (q.eval σ).bind fun r => (v.eval σ).bind fun w => st.write r w :=
+  rfl
 
 theorem Tm.eval_push {E : Ty} (s : Tm C Γ .st) (q : Tm C Γ (.path (.ref (.array E))))
     (v : Tm C Γ (.sv E)) :
     (Tm.app3 .push s q v).eval σ = (s.eval σ).bind fun st => (q.eval σ).bind fun r =>
-      st.push r fun _ => (v.eval σ).map SVal.strip := by
-  rw [Tm.eval_app3, Op3.eval_eq_evalM]; rfl
+      st.push r fun _ => (v.eval σ).map SVal.strip := rfl
 
 theorem Tm.eval_write {T : Ty} (m : Tm C Γ .mem) (a : Tm C Γ (.addr T)) (v : Tm C Γ (.mv T)) :
     (Tm.app3 .write m a v).eval σ =
-      (m.eval σ).bind fun μ => (a.eval σ).bind fun ad => (v.eval σ).bind fun w => μ.writeT ad w := by
-  rw [Tm.eval_app3, Op3.eval_eq_evalM]; rfl
+      (m.eval σ).bind fun μ => (a.eval σ).bind fun ad => (v.eval σ).bind fun w => μ.writeT ad w :=
+  rfl
 
 theorem Tm.eval_find {p : PrimTy} (s : Tm C Γ .st) (q : Tm C Γ (.path (.prim p))) :
     (Tm.app2 .find s q).eval σ =
-      (s.eval σ).bind fun st => (q.eval σ).bind fun r => (st.find r).bind fun w => some w.view := by
-  rw [Tm.eval_app2, Op2.eval_eq_evalM]; rfl
+      (s.eval σ).bind fun st => (q.eval σ).bind fun r => (st.find r).bind fun w => some w.view :=
+  rfl
 
 theorem Tm.eval_sfind {T : Ty} (s : Tm C Γ .st) (q : Tm C Γ (.path T)) :
-    (Tm.app2 .sfind s q).eval σ = (s.eval σ).bind fun st => (q.eval σ).bind fun r => st.find r := by
-  rw [Tm.eval_app2, Op2.eval_eq_evalM]; rfl
+    (Tm.app2 .sfind s q).eval σ = (s.eval σ).bind fun st => (q.eval σ).bind fun r => st.find r :=
+  rfl
 
 theorem Tm.eval_delAt {T : Ty} (s : Tm C Γ .st) (q : Tm C Γ (.path T)) :
-    (Tm.app2 .delAt s q).eval σ = (s.eval σ).bind fun st => (q.eval σ).bind fun r => st.delete r := by
-  rw [Tm.eval_app2, Op2.eval_eq_evalM]; rfl
+    (Tm.app2 .delAt s q).eval σ = (s.eval σ).bind fun st => (q.eval σ).bind fun r => st.delete r :=
+  rfl
 
 theorem Tm.eval_pushSlot {E : Ty} (s : Tm C Γ .st) (q : Tm C Γ (.path (.ref (.array E)))) :
     (Tm.app2 .pushSlot s q).eval σ =
-      (s.eval σ).bind fun st => (q.eval σ).bind fun r => st.push r some := by
-  rw [Tm.eval_app2, Op2.eval_eq_evalM]; rfl
+      (s.eval σ).bind fun st => (q.eval σ).bind fun r => st.push r some := rfl
 
 theorem Tm.eval_pop {E : Ty} (s : Tm C Γ .st) (q : Tm C Γ (.path (.ref (.array E)))) :
-    (Tm.app2 .pop s q).eval σ = (s.eval σ).bind fun st => (q.eval σ).bind fun r => st.pop false r := by
-  rw [Tm.eval_app2, Op2.eval_eq_evalM]; rfl
+    (Tm.app2 .pop s q).eval σ = (s.eval σ).bind fun st => (q.eval σ).bind fun r => st.pop false r :=
+  rfl
 
 theorem Tm.eval_shrink {E : Ty} (s : Tm C Γ .st) (q : Tm C Γ (.path (.ref (.array E)))) :
-    (Tm.app2 .shrink s q).eval σ = (s.eval σ).bind fun st => (q.eval σ).bind fun r => st.pop true r := by
-  rw [Tm.eval_app2, Op2.eval_eq_evalM]; rfl
+    (Tm.app2 .shrink s q).eval σ = (s.eval σ).bind fun st => (q.eval σ).bind fun r => st.pop true r :=
+  rfl
 
 theorem Tm.eval_copyMem {R : RefTy} (m : Tm C Γ .mem) (i : Tm C Γ (.ident R)) :
     (Tm.app2 .copyMem m i).eval σ = (m.eval σ).bind fun μ => (i.eval σ).bind fun id =>
-      (HRef.ofId? μ.H' R id).bind fun r => some (MVal.copyMToSt μ.heap (T := .ref R) r) := by
-  rw [Tm.eval_app2, Op2.eval_eq_evalM]; rfl
+      (HRef.ofId? μ.H' R id).bind fun r => some (MVal.copyMToSt μ.heap (T := .ref R) r) := rfl
 
 theorem Tm.eval_sval {p : PrimTy} (t : Tm C Γ (.val p)) :
     (Tm.app1 .sval t).eval σ = (t.eval σ).map SVal.prim := by
   rw [Tm.eval_app1, Op1.eval_eq_evalM]; rfl
 
 theorem Tm.eval_mval {p : PrimTy} (t : Tm C Γ (.val p)) :
-    (Tm.app1 .mval t).eval σ = t.eval σ := by
-  rw [Tm.eval_app1, Op1.eval_eq_evalM]; rfl
+    (Tm.app1 .mval t).eval σ = t.eval σ := rfl
 
 theorem Tm.eval_ref {R : RefTy} (t : Tm C Γ (.ident R)) :
-    (Tm.app1 .ref t).eval σ = t.eval σ := by
-  rw [Tm.eval_app1, Op1.eval_eq_evalM]; rfl
+    (Tm.app1 .ref t).eval σ = t.eval σ := rfl
 
 theorem Tm.eval_next {E : Ty} (q : Tm C Γ (.path (.ref (.array E)))) :
-    (Tm.app1 .next q).eval σ = (q.eval σ).bind σ.storage.nextT := by
-  rw [Tm.eval_app1, Op1.eval_eq_evalM]; rfl
+    (Tm.app1 .next q).eval σ = (q.eval σ).bind σ.storage.nextT := rfl
 
 theorem Tm.eval_castV {p q : PrimTy} (h : p = q) (t : Tm C Γ (.val p)) :
     (Tm.castV h t).eval σ = h ▸ t.eval σ := by
   subst h; rfl
 
 theorem Tm.eval_binop (op : BinOp) {p : PrimTy} (h : op.accepts p = true) (a b : Tm C Γ (.val p)) :
-    (Tm.app2 (.binop op h) a b).eval σ = (a.eval σ).bind fun x => binopT op h x (b.eval σ) := by
-  rw [Tm.eval_app2, Op2.eval_eq_evalM]; rfl
+    (Tm.app2 (.binop op h) a b).eval σ = (a.eval σ).bind fun x => binopT op h x (b.eval σ) := rfl
 
 /-- A grown heap's memory, written at a typed address with a typed slot. -/
 theorem Grown.writeT_toT {H : HTy} (m : Grown H (fun _ => Unit)) {T : Ty} (a : MAddr m.H' T)
@@ -213,7 +207,7 @@ theorem TRes.ofOpt_none_bind {α β : Type} (f : α → TRes β) :
 
 /-- A storage write of a word is its save. -/
 theorem Storage.write_prim {p : PrimTy} (st : Storage C) (r : SRef C (.prim p)) (x : p.Denote) :
-    st.write r (.prim x) = st.save r (.prim x) := rfl
+    st.write r (.prim x) = st.save r (.prim x) := Solidity.Storage.write_word st r x
 
 end Updates
 
@@ -345,8 +339,8 @@ section OpLoc
 variable {Γ : Ctx} (σ : State C Γ) {op : BinOp} {p : PrimTy}
 
 theorem Tm.eval_read {p : PrimTy} (m : Tm C Γ .mem) (a : Tm C Γ (.addr (.prim p))) :
-    (Tm.app2 .read m a).eval σ = (m.eval σ).bind fun μ => (a.eval σ).bind fun ad => μ.readT ad := by
-  rw [Tm.eval_app2, Op2.eval_eq_evalM]; rfl
+    (Tm.app2 .read m a).eval σ = (m.eval σ).bind fun μ => (a.eval σ).bind fun ad => μ.readT ad :=
+  rfl
 
 /-- A compound operator on two terms is `compoundT` on the integers they read. -/
 theorem Tm.eval_compound (hop : op.hasCompoundAssign = true) (hp : p.isNumeric = true)

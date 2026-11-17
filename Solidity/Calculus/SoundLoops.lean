@@ -49,24 +49,12 @@ theorem holds_isBool_pvV (x : Idx Γ (.val .bool)) (σ : State C Γ) (b : Bool) 
 /-- A value that returns over the typed state: its lowered term reads it
 (`Val.lower_evalT`). -/
 theorem Val.lower_eval_ok {p : PrimTy} (v : Val C Γ p) (σ : State C Γ) {x : p.Denote}
-    (h : v.evalT σ = .ok x) : v.lower.eval σ = some x := by
-  have h' := Val.lower_evalT σ v
-  rw [h] at h'
-  exact h'
+    (h : v.evalT σ = .ok x) : v.lower.eval σ = some x := Solidity.LoopLex.lower_ok v σ h
 
 /-- What a value's lowered term reads where the typed value halts: `none`,
 for it never diverges nor panics. -/
 theorem Val.lower_eval_error {p : PrimTy} (v : Val C Γ p) (σ : State C Γ) {e : THalt}
-    (h : v.evalT σ = .error e) : v.lower.eval σ = none := by
-  have hnd := Val.evalT_ends σ v
-  have h' := Val.lower_evalT σ v
-  rw [h] at hnd h'
-  cases e with
-  | revert => exact h'
-  | panic => exact h'.elim
-  | revertWith _ => exact h'.elim
-  | diverge => exact absurd rfl hnd.1
-  | exhausted => exact absurd rfl hnd.2
+    (h : v.evalT σ = .error e) : v.lower.eval σ = none := Solidity.LoopLex.lower_error v σ h
 
 /-- **A lowered condition** holds `b` over the typed state where it
 evaluates to `b`. -/
@@ -203,25 +191,8 @@ theorem holds_anonHavoc {σ τ : State C Γ} {xs : List ((t : LTy) × Idx Γ t)}
     {hv : Option (List Name)} {μ : Mutability} {W : List (LTy × Nat)}
     (hxs : ∀ t (i : Idx Γ t), (t, i.toNat) ∈ W → (⟨t, i⟩ : (t : LTy) × Idx Γ t) ∈ xs)
     (hg : TGFrame μ σ τ) (ha : TLocAgree 0 W σ.env τ.env) (hk : FrameKeeps hv σ τ)
-    {ψ : Fml C Γ} (h : holds σ (Fml.anonHavoc xs hv ψ)) : holds τ ψ := by
-  obtain ⟨b, hb⟩ := State.eq_anonHavoc hxs hg ha
-  match hv, hk, h with
-  | none, _, h =>
-    rw [hb]
-    exact h b τ.storage τ.net τ.selfBalance
-  | some [], hk, h =>
-    have hst : τ.storage = σ.storage := hk.1.symm
-    have hτ : τ = σ.anon xs b := by rw [hb, hst, hk.2.1, hk.2.2]; rfl
-    rw [hτ]
-    exact h b
-  | some (r :: L), hk, h =>
-    have h₁ := Modality.forallB_all (h b) τ.storage
-    have hτ : τ = (σ.anon xs b).withStorage (Storage.anon (r :: L) (σ.anon xs b).storage τ.storage) := by
-      have hs : Storage.anon (r :: L) (σ.anon xs b).storage τ.storage = τ.storage := hk.1
-      rw [hs, hb, hk.2.1, hk.2.2]
-      rfl
-    rw [hτ]
-    exact Upd.afterT.of_lands h₁ (Upd.lands_anonSt (r :: L) (σ.anon xs b) τ.storage)
+    {ψ : Fml C Γ} (h : holds σ (Fml.anonHavoc xs hv ψ)) : holds τ ψ :=
+  Solidity.LoopLex.anon_head hxs hg ha hk h
 
 /-- The loop's run from `σ`, read through its states, then the rest. -/
 abbrev loopThen {Γ₂ Γ₀ : Ctx} (σ : State C Γ) (ω : Prog C Γ Γ₂) (κ : Frames C Γ₂ Γ₀)
