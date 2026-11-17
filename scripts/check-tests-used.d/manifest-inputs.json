@@ -75,6 +75,33 @@
         "path": "tests/h28-sol/mutation-testing/tools/freeze.py",
         "purpose": "Default manifest generator reads pilot JSON and hashes oracle source bytes into an isolated generated manifest. Paired normal and observed runs passed; unchanged measured inputs only. No generated-output, Lean execution, semantic-test or proof credit.",
         "source_blob": "a881b5540545fd866e269240ae2c51839a334870"
+      },
+      {
+        "command": [
+          "python3",
+          "-B",
+          "tests/h28-sol/mutation-testing/tools/freeze_final.py"
+        ],
+        "entry_line": 138,
+        "input_revision": "77d76a6b1fd5971d82683e3247bd38f5e07f5080",
+        "input_scope": [
+          "tests/h28-sol/mutation-testing/manifests/h28-full.json",
+          "tests/h28-sol/mutation-testing/oracles/BoundsZeroKill.lean",
+          "tests/h28-sol/mutation-testing/oracles/BoundsZeroOnProduction.lean",
+          "tests/h28-sol/mutation-testing/oracles/DivAssignBaseline.lean",
+          "tests/h28-sol/mutation-testing/oracles/DivisionOperandsKill.lean",
+          "tests/h28-sol/mutation-testing/oracles/DivisionOperandsOnProduction.lean",
+          "tests/h28-sol/mutation-testing/oracles/LengthReadBaseline.lean",
+          "tests/h28-sol/mutation-testing/oracles/LengthReevalSound.lean",
+          "tests/h28-sol/mutation-testing/oracles/PushLastSlotKill.lean",
+          "tests/h28-sol/mutation-testing/oracles/PushLastSlotOnProduction.lean",
+          "tests/h28-sol/mutation-testing/oracles/RootDeleteSkippedOnProduction.lean"
+        ],
+        "kind": "runnable-entrypoint",
+        "other_reads": "unresolved",
+        "path": "tests/h28-sol/mutation-testing/tools/freeze_final.py",
+        "purpose": "Default final-manifest generator reads the retained full manifest and hashes oracle source bytes. Paired normal/observed invocations passed in an isolated checkout. Exact unchanged inputs only; no generated-output, Lean execution, semantic or proof credit.",
+        "source_blob": "6663df365dbc63476d2ef913780e7bce9fce0ff8"
       }
     ]
   },
@@ -1410,6 +1437,290 @@
         ],
         "target": "tests/h28-sol/mutation-testing/oracles/TransferZeroKill.lean",
         "target_blob": "ec865af24d2b7363be2f37d6594d6c912e486d40",
+        "operation": "validated Python read of measured bytes"
+      },
+      {
+        "runner": "validated:tests/h28-sol/mutation-testing/tools/freeze_final.py",
+        "input_revision": "77d76a6b1fd5971d82683e3247bd38f5e07f5080",
+        "frames": [
+          {
+            "path": "tests/h28-sol/mutation-testing/tools/freeze_final.py",
+            "blob": "6663df365dbc63476d2ef913780e7bce9fce0ff8",
+            "line": 139
+          },
+          {
+            "path": "tests/h28-sol/mutation-testing/tools/freeze_final.py",
+            "blob": "6663df365dbc63476d2ef913780e7bce9fce0ff8",
+            "line": 49
+          }
+        ],
+        "target": "tests/h28-sol/mutation-testing/manifests/h28-full.json",
+        "target_blob": "2d5741f342a617b3e32129f21d5d459144261fa7",
+        "operation": "validated Python read of measured bytes"
+      },
+      {
+        "runner": "validated:tests/h28-sol/mutation-testing/tools/freeze_final.py",
+        "input_revision": "77d76a6b1fd5971d82683e3247bd38f5e07f5080",
+        "frames": [
+          {
+            "path": "tests/h28-sol/mutation-testing/tools/freeze_final.py",
+            "blob": "6663df365dbc63476d2ef913780e7bce9fce0ff8",
+            "line": 139
+          },
+          {
+            "path": "tests/h28-sol/mutation-testing/tools/freeze_final.py",
+            "blob": "6663df365dbc63476d2ef913780e7bce9fce0ff8",
+            "line": 71
+          },
+          {
+            "path": "tests/h28-sol/mutation-testing/tools/freeze_final.py",
+            "blob": "6663df365dbc63476d2ef913780e7bce9fce0ff8",
+            "line": 43
+          },
+          {
+            "path": "tests/h28-sol/mutation-testing/tools/freeze_final.py",
+            "blob": "6663df365dbc63476d2ef913780e7bce9fce0ff8",
+            "line": 37
+          }
+        ],
+        "target": "tests/h28-sol/mutation-testing/oracles/BoundsZeroKill.lean",
+        "target_blob": "26d86ccbf0ff9a72d57ad2bf820a0be61b21fe8a",
+        "operation": "validated Python read of measured bytes"
+      },
+      {
+        "runner": "validated:tests/h28-sol/mutation-testing/tools/freeze_final.py",
+        "input_revision": "77d76a6b1fd5971d82683e3247bd38f5e07f5080",
+        "frames": [
+          {
+            "path": "tests/h28-sol/mutation-testing/tools/freeze_final.py",
+            "blob": "6663df365dbc63476d2ef913780e7bce9fce0ff8",
+            "line": 139
+          },
+          {
+            "path": "tests/h28-sol/mutation-testing/tools/freeze_final.py",
+            "blob": "6663df365dbc63476d2ef913780e7bce9fce0ff8",
+            "line": 114
+          },
+          {
+            "path": "tests/h28-sol/mutation-testing/tools/freeze_final.py",
+            "blob": "6663df365dbc63476d2ef913780e7bce9fce0ff8",
+            "line": 37
+          }
+        ],
+        "target": "tests/h28-sol/mutation-testing/oracles/BoundsZeroOnProduction.lean",
+        "target_blob": "24e7d652e99a17e9dab6e4e8fcf9d748604587fc",
+        "operation": "validated Python read of measured bytes"
+      },
+      {
+        "runner": "validated:tests/h28-sol/mutation-testing/tools/freeze_final.py",
+        "input_revision": "77d76a6b1fd5971d82683e3247bd38f5e07f5080",
+        "frames": [
+          {
+            "path": "tests/h28-sol/mutation-testing/tools/freeze_final.py",
+            "blob": "6663df365dbc63476d2ef913780e7bce9fce0ff8",
+            "line": 139
+          },
+          {
+            "path": "tests/h28-sol/mutation-testing/tools/freeze_final.py",
+            "blob": "6663df365dbc63476d2ef913780e7bce9fce0ff8",
+            "line": 113
+          },
+          {
+            "path": "tests/h28-sol/mutation-testing/tools/freeze_final.py",
+            "blob": "6663df365dbc63476d2ef913780e7bce9fce0ff8",
+            "line": 37
+          }
+        ],
+        "target": "tests/h28-sol/mutation-testing/oracles/DivAssignBaseline.lean",
+        "target_blob": "31a91d65f11a3b154e4240faebec8724f5acd9bd",
+        "operation": "validated Python read of measured bytes"
+      },
+      {
+        "runner": "validated:tests/h28-sol/mutation-testing/tools/freeze_final.py",
+        "input_revision": "77d76a6b1fd5971d82683e3247bd38f5e07f5080",
+        "frames": [
+          {
+            "path": "tests/h28-sol/mutation-testing/tools/freeze_final.py",
+            "blob": "6663df365dbc63476d2ef913780e7bce9fce0ff8",
+            "line": 139
+          },
+          {
+            "path": "tests/h28-sol/mutation-testing/tools/freeze_final.py",
+            "blob": "6663df365dbc63476d2ef913780e7bce9fce0ff8",
+            "line": 71
+          },
+          {
+            "path": "tests/h28-sol/mutation-testing/tools/freeze_final.py",
+            "blob": "6663df365dbc63476d2ef913780e7bce9fce0ff8",
+            "line": 43
+          },
+          {
+            "path": "tests/h28-sol/mutation-testing/tools/freeze_final.py",
+            "blob": "6663df365dbc63476d2ef913780e7bce9fce0ff8",
+            "line": 37
+          }
+        ],
+        "target": "tests/h28-sol/mutation-testing/oracles/DivisionOperandsKill.lean",
+        "target_blob": "ef6e9207a867ea7befd7b9420de6caf24880df97",
+        "operation": "validated Python read of measured bytes"
+      },
+      {
+        "runner": "validated:tests/h28-sol/mutation-testing/tools/freeze_final.py",
+        "input_revision": "77d76a6b1fd5971d82683e3247bd38f5e07f5080",
+        "frames": [
+          {
+            "path": "tests/h28-sol/mutation-testing/tools/freeze_final.py",
+            "blob": "6663df365dbc63476d2ef913780e7bce9fce0ff8",
+            "line": 139
+          },
+          {
+            "path": "tests/h28-sol/mutation-testing/tools/freeze_final.py",
+            "blob": "6663df365dbc63476d2ef913780e7bce9fce0ff8",
+            "line": 114
+          },
+          {
+            "path": "tests/h28-sol/mutation-testing/tools/freeze_final.py",
+            "blob": "6663df365dbc63476d2ef913780e7bce9fce0ff8",
+            "line": 37
+          }
+        ],
+        "target": "tests/h28-sol/mutation-testing/oracles/DivisionOperandsOnProduction.lean",
+        "target_blob": "059d888bd691a3d7fe8850fa3aa497d745fd74fd",
+        "operation": "validated Python read of measured bytes"
+      },
+      {
+        "runner": "validated:tests/h28-sol/mutation-testing/tools/freeze_final.py",
+        "input_revision": "77d76a6b1fd5971d82683e3247bd38f5e07f5080",
+        "frames": [
+          {
+            "path": "tests/h28-sol/mutation-testing/tools/freeze_final.py",
+            "blob": "6663df365dbc63476d2ef913780e7bce9fce0ff8",
+            "line": 139
+          },
+          {
+            "path": "tests/h28-sol/mutation-testing/tools/freeze_final.py",
+            "blob": "6663df365dbc63476d2ef913780e7bce9fce0ff8",
+            "line": 71
+          },
+          {
+            "path": "tests/h28-sol/mutation-testing/tools/freeze_final.py",
+            "blob": "6663df365dbc63476d2ef913780e7bce9fce0ff8",
+            "line": 42
+          },
+          {
+            "path": "tests/h28-sol/mutation-testing/tools/freeze_final.py",
+            "blob": "6663df365dbc63476d2ef913780e7bce9fce0ff8",
+            "line": 37
+          }
+        ],
+        "target": "tests/h28-sol/mutation-testing/oracles/LengthReadBaseline.lean",
+        "target_blob": "1bf6311d19444c81de6ebbb7523fa4d771570122",
+        "operation": "validated Python read of measured bytes"
+      },
+      {
+        "runner": "validated:tests/h28-sol/mutation-testing/tools/freeze_final.py",
+        "input_revision": "77d76a6b1fd5971d82683e3247bd38f5e07f5080",
+        "frames": [
+          {
+            "path": "tests/h28-sol/mutation-testing/tools/freeze_final.py",
+            "blob": "6663df365dbc63476d2ef913780e7bce9fce0ff8",
+            "line": 139
+          },
+          {
+            "path": "tests/h28-sol/mutation-testing/tools/freeze_final.py",
+            "blob": "6663df365dbc63476d2ef913780e7bce9fce0ff8",
+            "line": 71
+          },
+          {
+            "path": "tests/h28-sol/mutation-testing/tools/freeze_final.py",
+            "blob": "6663df365dbc63476d2ef913780e7bce9fce0ff8",
+            "line": 43
+          },
+          {
+            "path": "tests/h28-sol/mutation-testing/tools/freeze_final.py",
+            "blob": "6663df365dbc63476d2ef913780e7bce9fce0ff8",
+            "line": 37
+          }
+        ],
+        "target": "tests/h28-sol/mutation-testing/oracles/LengthReevalSound.lean",
+        "target_blob": "d59f950f19a86d44d9e36c8af699646cdd914c4d",
+        "operation": "validated Python read of measured bytes"
+      },
+      {
+        "runner": "validated:tests/h28-sol/mutation-testing/tools/freeze_final.py",
+        "input_revision": "77d76a6b1fd5971d82683e3247bd38f5e07f5080",
+        "frames": [
+          {
+            "path": "tests/h28-sol/mutation-testing/tools/freeze_final.py",
+            "blob": "6663df365dbc63476d2ef913780e7bce9fce0ff8",
+            "line": 139
+          },
+          {
+            "path": "tests/h28-sol/mutation-testing/tools/freeze_final.py",
+            "blob": "6663df365dbc63476d2ef913780e7bce9fce0ff8",
+            "line": 71
+          },
+          {
+            "path": "tests/h28-sol/mutation-testing/tools/freeze_final.py",
+            "blob": "6663df365dbc63476d2ef913780e7bce9fce0ff8",
+            "line": 43
+          },
+          {
+            "path": "tests/h28-sol/mutation-testing/tools/freeze_final.py",
+            "blob": "6663df365dbc63476d2ef913780e7bce9fce0ff8",
+            "line": 37
+          }
+        ],
+        "target": "tests/h28-sol/mutation-testing/oracles/PushLastSlotKill.lean",
+        "target_blob": "c772be1a1e43d30e74cb442adefa55dfec010ab6",
+        "operation": "validated Python read of measured bytes"
+      },
+      {
+        "runner": "validated:tests/h28-sol/mutation-testing/tools/freeze_final.py",
+        "input_revision": "77d76a6b1fd5971d82683e3247bd38f5e07f5080",
+        "frames": [
+          {
+            "path": "tests/h28-sol/mutation-testing/tools/freeze_final.py",
+            "blob": "6663df365dbc63476d2ef913780e7bce9fce0ff8",
+            "line": 139
+          },
+          {
+            "path": "tests/h28-sol/mutation-testing/tools/freeze_final.py",
+            "blob": "6663df365dbc63476d2ef913780e7bce9fce0ff8",
+            "line": 114
+          },
+          {
+            "path": "tests/h28-sol/mutation-testing/tools/freeze_final.py",
+            "blob": "6663df365dbc63476d2ef913780e7bce9fce0ff8",
+            "line": 37
+          }
+        ],
+        "target": "tests/h28-sol/mutation-testing/oracles/PushLastSlotOnProduction.lean",
+        "target_blob": "d0b21770500b446739494cba3bb0d971302960aa",
+        "operation": "validated Python read of measured bytes"
+      },
+      {
+        "runner": "validated:tests/h28-sol/mutation-testing/tools/freeze_final.py",
+        "input_revision": "77d76a6b1fd5971d82683e3247bd38f5e07f5080",
+        "frames": [
+          {
+            "path": "tests/h28-sol/mutation-testing/tools/freeze_final.py",
+            "blob": "6663df365dbc63476d2ef913780e7bce9fce0ff8",
+            "line": 139
+          },
+          {
+            "path": "tests/h28-sol/mutation-testing/tools/freeze_final.py",
+            "blob": "6663df365dbc63476d2ef913780e7bce9fce0ff8",
+            "line": 114
+          },
+          {
+            "path": "tests/h28-sol/mutation-testing/tools/freeze_final.py",
+            "blob": "6663df365dbc63476d2ef913780e7bce9fce0ff8",
+            "line": 37
+          }
+        ],
+        "target": "tests/h28-sol/mutation-testing/oracles/RootDeleteSkippedOnProduction.lean",
+        "target_blob": "3c60285660f1fa459db6c2434702e21228c2e62f",
         "operation": "validated Python read of measured bytes"
       }
     ]
