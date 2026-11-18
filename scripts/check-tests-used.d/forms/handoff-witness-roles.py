@@ -16,8 +16,8 @@
 #                        V.read_text(); the entry program loads the module with importlib.util.spec_from_file_location
 #                        (<name>, ROOT / '<module>'), module_from_spec and exec_module. Reviewed: bulk-manifest.json,
 #                        read by public-api-inventory.py's main path and entered by test_public_api_inventory.py.
-#                        Provenance by position: whether the main path runs is not decided (its H44 archive is
-#                        unavailable); H1074 refused it as a consumer route, this is a source role only.
+#                        Provenance by position: whether the main path runs is not decided (the archive the manifest
+#                        names is external and absent), so this is a source role, never a consumer route.
 # Row shape (all keys required): {'kind': 'handoff-witness-role', 'path': P, 'input_revision': R, 'source_blob',
 #   'command': ['python3', '-B', E], 'operation', 'entry': {'path': E, 'blob', 'import_line'},
 #   'module': {'path': M, 'blob', 'line' (the pin line, or the main call line)}, 'read': {'path', 'line'}, 'purpose'}.
@@ -75,37 +75,17 @@ def _hw_parse(text):
     except (SyntaxError, ValueError, RecursionError): return None
 
 
-def _hw_bindings(tree, name):
-    """How many places in tree bind name: stores, deletions, parameters, imports, defs, handlers, patterns, global/nonlocal."""
-    count = 0
-    for node in ast.walk(tree):
-        if isinstance(node, ast.Name): count += node.id == name and isinstance(node.ctx, (ast.Store, ast.Del))
-        elif isinstance(node, ast.arg): count += node.arg == name
-        elif isinstance(node, (ast.Import, ast.ImportFrom)): count += sum((a.asname or a.name).split('.')[0] == name for a in node.names)
-        elif isinstance(node, (ast.FunctionDef, ast.AsyncFunctionDef, ast.ClassDef, ast.ExceptHandler, ast.MatchAs, ast.MatchStar)):
-            count += getattr(node, 'name', None) == name
-        elif isinstance(node, ast.MatchMapping): count += node.rest == name
-        elif isinstance(node, (ast.Global, ast.Nonlocal)): count += name in node.names
-    return count
+def _hw_ast(name):
+    """An AST helper of forms/checkpoint-audit-records.py (loaded earlier in the same namespace): _checkpoint_bindings
+    (binding count), _checkpoint_bound (one module-level value), _checkpoint_imported (one plain import) and
+    _checkpoint_root (Path(__file__).resolve().parents[depth]). One copy, so a fix to these checks applies to both."""
+    return _hw_shared('_checkpoint_' + name)
 
 
-def _hw_module_value(tree, name):
-    """The value of the one module-level `name = value`, when nothing else in the module binds name."""
-    values = [n.value for n in tree.body if isinstance(n, ast.Assign) and len(n.targets) == 1 and isinstance(n.targets[0], ast.Name)
-              and n.targets[0].id == name]
-    return values[0] if len(values) == 1 and _hw_bindings(tree, name) == 1 else None
+def _hw_import(node): return isinstance(node, ast.Import)
 
 
-def _hw_imported(tree, name, module):
-    """True iff name's one binding is `from <module> import name` (unaliased, absolute)."""
-    return _hw_bindings(tree, name) == 1 and any(isinstance(n, ast.ImportFrom) and n.module == module and n.level == 0
-                                                 and any(a.name == name and a.asname is None for a in n.names) for n in tree.body)
-
-
-def _hw_plain_import(tree, name):
-    """True iff name's one binding is a top-level plain `import name` (or `import name.sub`)."""
-    return _hw_bindings(tree, name) == 1 and any(isinstance(n, ast.Import) and any(
-        a.asname is None and a.name.split('.')[0] == name for a in n.names) for n in tree.body)
+def _hw_from_pathlib(node): return isinstance(node, ast.ImportFrom) and node.module == 'pathlib' and node.level == 0
 
 
 def _hw_const(node, kind=str):
@@ -115,22 +95,6 @@ def _hw_const(node, kind=str):
 def _hw_attr(node, base, attr):
     """True iff node is the attribute base.attr of a plain name."""
     return isinstance(node, ast.Attribute) and node.attr == attr and isinstance(node.value, ast.Name) and node.value.id == base
-
-
-def _hw_root(tree, node, path):
-    """True iff node is a name bound once to Path(__file__).resolve().parents[k], the repository root of path."""
-    value = _hw_module_value(tree, node.id) if isinstance(node, ast.Name) else None
-    if not (isinstance(value, ast.Subscript) and _hw_const(value.slice, int) == path.count('/')
-            and isinstance(value.value, ast.Attribute) and value.value.attr == 'parents'):
-        return False
-    resolve = value.value.value
-    if not (isinstance(resolve, ast.Call) and not resolve.args and not resolve.keywords and isinstance(resolve.func, ast.Attribute)
-            and resolve.func.attr == 'resolve'):
-        return False
-    call = resolve.func.value
-    return (isinstance(call, ast.Call) and isinstance(call.func, ast.Name) and call.func.id == 'Path' and not call.keywords
-            and len(call.args) == 1 and isinstance(call.args[0], ast.Name) and call.args[0].id == '__file__'
-            and _hw_bindings(tree, '__file__') == 0 and _hw_imported(tree, 'Path', 'pathlib'))
 
 
 def _hw_parents(tree):
@@ -190,12 +154,12 @@ def handoff_pin(module_text, witness, data, pin_line):
         key = node.value.keys[keys.index(base)]; value = node.value.values[keys.index(base)]
         if (key.lineno == pin_line and isinstance(value, ast.Tuple) and len(value.elts) == 2
                 and _hw_const(value.elts[0], int) == len(data) and _hw_const(value.elts[1]) == hashlib.sha256(data).hexdigest()
-                and _hw_module_value(tree, node.targets[0].id) is node.value):
+                and _hw_ast('bound')(tree, node.targets[0].id) is node.value):
             pins = node.targets[0].id
     prefixes = [n.targets[0].id for n in tree.body if isinstance(n, ast.Assign) and len(n.targets) == 1 and isinstance(n.targets[0], ast.Name)
                 and isinstance(n.value, ast.Call) and isinstance(n.value.func, ast.Name) and n.value.func.id == 'Path'
                 and len(n.value.args) == 1 and not n.value.keywords and _hw_const(n.value.args[0]) == directory]
-    if (pins is None or len(prefixes) != 1 or _hw_module_value(tree, prefixes[0]) is None or not _hw_imported(tree, 'Path', 'pathlib')
+    if (pins is None or len(prefixes) != 1 or _hw_ast('bound')(tree, prefixes[0]) is None or not _hw_ast('imported')(tree, 'Path', _hw_from_pathlib)
             or _hw_patched(tree, {pins, prefixes[0]}, calls=True)):
         return None
     return pins, prefixes[0]
@@ -204,12 +168,12 @@ def handoff_pin(module_text, witness, data, pin_line):
 def handoff_pinned_show(entry_text, entry_path, module_path, import_line, read_line, pins, prefix):
     """The 40-hex BASE commit of the entry's pinned `git show BASE:rel` read, else None (see the header)."""
     tree = _hw_parse(entry_text)
-    if tree is None or posixpath.dirname(entry_path) != posixpath.dirname(module_path) or not _hw_plain_import(tree, 'subprocess'): return None
+    if tree is None or posixpath.dirname(entry_path) != posixpath.dirname(module_path) or not _hw_ast('imported')(tree, 'subprocess', _hw_import): return None
     name = posixpath.basename(module_path)[:-3]
     imports = [n for n in tree.body if isinstance(n, ast.Import) and n.lineno == import_line and len(n.names) == 1 and n.names[0].name == name]
     if len(imports) != 1: return None
     alias = imports[0].names[0].asname or name
-    if _hw_bindings(tree, alias) != 1 or _hw_patched(tree, {alias, 'subprocess'}): return None
+    if _hw_ast('bindings')(tree, alias) != 1 or _hw_patched(tree, {alias, 'subprocess'}): return None
     parents = _hw_parents(tree)
     for call in _hw_calls(tree, read_line):
         if not (isinstance(call.func, ast.Attribute) and call.func.attr in _HW_RUNS and isinstance(call.func.value, ast.Name)
@@ -235,18 +199,18 @@ def handoff_pinned_show(entry_text, entry_path, module_path, import_line, read_l
         if (not _hw_statement(parents, call, loop.body) or not any(s is loop for s in function.body) or not any(s is function for s in owner.body)
                 or not any(s is owner for s in tree.body) or function.decorator_list or owner.decorator_list
                 or any(isinstance(s, (ast.Return, ast.Raise)) for s in function.body[:function.body.index(loop)])
-                or not function.args.args or function.args.args[0].arg != 'self' or _hw_bindings(function, 'self') != 1):
+                or not function.args.args or function.args.args[0].arg != 'self' or _hw_ast('bindings')(function, 'self') != 1):
             continue
-        if not (_hw_attr(loop.iter, alias, pins) and isinstance(loop.target, ast.Name)) or _hw_bindings(function, rel) != 1: continue
+        if not (_hw_attr(loop.iter, alias, pins) and isinstance(loop.target, ast.Name)) or _hw_ast('bindings')(function, rel) != 1: continue
         index = loop.target.id
         bound = [s for s in loop.body if isinstance(s, ast.Assign) and len(s.targets) == 1 and isinstance(s.targets[0], ast.Name)
                  and s.targets[0].id == rel and s.lineno < read_line and isinstance(s.value, ast.BinOp) and isinstance(s.value.op, ast.Div)
                  and _hw_attr(s.value.left, alias, prefix) and isinstance(s.value.right, ast.Name) and s.value.right.id == index]
-        if len(bound) != 1 or _hw_bindings(function, index) != 1: continue
+        if len(bound) != 1 or _hw_ast('bindings')(function, index) != 1: continue
         values = [s.value for s in owner.body if isinstance(s, ast.Assign) and len(s.targets) == 1 and isinstance(s.targets[0], ast.Name)
                   and s.targets[0].id == constant]
         stores = [n for n in ast.walk(tree) if isinstance(n, ast.Attribute) and n.attr == constant and not isinstance(n.ctx, ast.Load)]
-        commit = _hw_const(values[0]) if len(values) == 1 and not stores and _hw_bindings(owner, constant) == 1 else None
+        commit = _hw_const(values[0]) if len(values) == 1 and not stores and _hw_ast('bindings')(owner, constant) == 1 else None
         if isinstance(commit, str) and len(commit) == 40 and all(c in '0123456789abcdef' for c in commit): return commit
     return None
 
@@ -255,19 +219,19 @@ def handoff_main_read(module_text, module_path, witness, main_line, read_line):
     """True iff the module's main block calls F(ROOT) on main_line and F(r) reads (r / witness).read_text() on read_line."""
     tree = _hw_parse(module_text)
     if tree is None: return False
-    functions = {n.name: n for n in tree.body if isinstance(n, ast.FunctionDef) and not n.decorator_list and _hw_bindings(tree, n.name) == 1}
+    functions = {n.name: n for n in tree.body if isinstance(n, ast.FunctionDef) and not n.decorator_list and _hw_ast('bindings')(tree, n.name) == 1}
     mains = [n for n in tree.body if isinstance(n, ast.If) and isinstance(n.test, ast.Compare) and isinstance(n.test.left, ast.Name)
              and n.test.left.id == '__name__' and len(n.test.ops) == 1 and isinstance(n.test.ops[0], ast.Eq)
              and _hw_const(n.test.comparators[0]) == '__main__']
-    if _hw_bindings(tree, '__name__') or len(mains) != 1 or _hw_patched(tree, set()): return False
+    if _hw_ast('bindings')(tree, '__name__') or len(mains) != 1 or _hw_patched(tree, set()): return False
     parents = _hw_parents(tree)
     for call in _hw_calls(mains[0], main_line):
         if not (_hw_statement(parents, call, mains[0].body) and isinstance(call.func, ast.Name) and call.func.id in functions and len(call.args) == 1 and not call.keywords
-                and _hw_root(tree, call.args[0], module_path)):
+                and _hw_ast('root')(tree, call.args[0], module_path)):
             continue
         function = functions[call.func.id]; params = function.args
         if (params.posonlyargs or params.vararg or params.kwonlyargs or params.kwarg or params.defaults or len(params.args) != 1
-                or _hw_bindings(function, params.args[0].arg) != 1):
+                or _hw_ast('bindings')(function, params.args[0].arg) != 1):
             continue
         root = params.args[0].arg
         for read in _hw_calls(function, read_line):
@@ -277,7 +241,7 @@ def handoff_main_read(module_text, module_path, witness, main_line, read_line):
             bound = [s for s in function.body if isinstance(s, ast.Assign) and len(s.targets) == 1 and isinstance(s.targets[0], ast.Name)
                      and s.targets[0].id == name and s.lineno < read_line and isinstance(s.value, ast.BinOp) and isinstance(s.value.op, ast.Div)
                      and isinstance(s.value.left, ast.Name) and s.value.left.id == root and _hw_const(s.value.right) == witness]
-            if len(bound) == 1 and _hw_bindings(function, name) == 1: return True
+            if len(bound) == 1 and _hw_ast('bindings')(function, name) == 1: return True
     return False
 
 
@@ -285,7 +249,7 @@ def handoff_file_import(entry_text, entry_path, module_path, import_line):
     """True iff the entry loads module_path once at module level: spec_from_file_location(name, ROOT / module_path) on
     import_line, module_from_spec(spec) and spec.loader.exec_module(module), ROOT the entry's repository root."""
     tree = _hw_parse(entry_text)
-    if tree is None or not _hw_plain_import(tree, 'importlib') or not any(
+    if tree is None or _hw_ast('bindings')(tree, 'importlib') != 1 or not any(
             isinstance(n, ast.Import) and any(a.name == 'importlib.util' and a.asname is None for a in n.names) for n in tree.body):
         return False
     util = lambda node, attr: (isinstance(node, ast.Call) and isinstance(node.func, ast.Attribute) and node.func.attr == attr
@@ -294,12 +258,12 @@ def handoff_file_import(entry_text, entry_path, module_path, import_line):
     specs = [n for n in tree.body if isinstance(n, ast.Assign) and n.lineno == import_line and len(n.targets) == 1
              and isinstance(n.targets[0], ast.Name) and util(n.value, 'spec_from_file_location') and len(n.value.args) == 2
              and _hw_const(n.value.args[0]) is not None and isinstance(n.value.args[1], ast.BinOp) and isinstance(n.value.args[1].op, ast.Div)
-             and _hw_const(n.value.args[1].right) == module_path and _hw_root(tree, n.value.args[1].left, entry_path)]
-    if len(specs) != 1 or _hw_bindings(tree, specs[0].targets[0].id) != 1: return False
+             and _hw_const(n.value.args[1].right) == module_path and _hw_ast('root')(tree, n.value.args[1].left, entry_path)]
+    if len(specs) != 1 or _hw_ast('bindings')(tree, specs[0].targets[0].id) != 1: return False
     spec = specs[0].targets[0].id
     modules = [n.targets[0].id for n in tree.body if isinstance(n, ast.Assign) and len(n.targets) == 1 and isinstance(n.targets[0], ast.Name)
                and util(n.value, 'module_from_spec') and len(n.value.args) == 1 and isinstance(n.value.args[0], ast.Name) and n.value.args[0].id == spec]
-    if len(modules) != 1 or _hw_bindings(tree, modules[0]) != 1: return False
+    if len(modules) != 1 or _hw_ast('bindings')(tree, modules[0]) != 1: return False
     return any(isinstance(n, ast.Expr) and isinstance(n.value, ast.Call) and isinstance(n.value.func, ast.Attribute)
                and n.value.func.attr == 'exec_module' and _hw_attr(n.value.func.value, spec, 'loader') and not n.value.keywords
                and len(n.value.args) == 1 and isinstance(n.value.args[0], ast.Name) and n.value.args[0].id == modules[0] for n in tree.body)
