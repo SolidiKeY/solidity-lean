@@ -1,5 +1,5 @@
 import Solidity.Goals.LoweringSession
-import Solidity.Correctness.Lowering.Sim.Session.Target
+import Solidity.Correctness.Lowering.Sim.Session.Backward
 
 /-! The per-frame obligations of the forward session diagram (plan step
 `ls2s-session-diagrams`, lane forward), and the session-level match they give.
@@ -30,12 +30,6 @@ variable [FreshNames] {E : Solidity.Source.Env}
 /-- A boundary world of the lowered code of `c`. -/
 abbrev LoweredWorld (c : Compilation) : Type :=
   World (Solidity.Semantics.IntrinsicSession.catalog (loweredCode c).contracts)
-
-/-- The target machine of the lowered world of `c` in `e`: the intrinsic
-session machine without resource failure, over the session spec's `wire`. -/
-noncomputable abbrev targetMachine (F : Fixed) (c : Compilation) (e : SessionEnv) : Machine :=
-  machine₀ (loweredCode c).main (loweredCode c).roles (loweredCode c).ctor (loweredCode c).entry
-    F wire (loweredWorld c).world e
 
 /-- The deployment of the lowered world, without resource failure. -/
 noncomputable abbrev targetDeploy (F : Fixed) (c : Compilation) (e : SessionEnv) :=
@@ -81,7 +75,7 @@ and the last outcome is the history's; an ended Source session is observed. -/
 def MatchedFrames.Matches {D : Solidity.Goals.Shrink.Lowering.Diagram} {F : Fixed}
     {P : Solidity.Source.SrcProg E} {c : Compilation} {e : SessionEnv} (fr : MatchedFrames D F P c e) :
     SourceState E → State (loweredCode c).contracts → Prop
-  | .start, t => t = (targetMachine F c e).initial
+  | .start, t => t = (targetMachine F (loweredWorld c) e).initial
   | .run _ _ i s last, t => t.history = s.events ∧ t.issued = i ∧ t.pending = .action ∧
       fr.Inv s t.world ∧ lastOutcome s.events = some last
   | .done p, t => t.observe = p

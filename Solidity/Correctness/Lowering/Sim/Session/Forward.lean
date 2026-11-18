@@ -9,9 +9,11 @@ From matched frames (`MatchedFrames`, `Forward/Frames.lean`) in every environmen
 * `forward`: a `Sim.Diagram` from the Source session machine at `envAbs e` to
   the intrinsic session machine of the lowered world, with `MatchedFrames.Matches` as
   its `matchState`. A Source frame that does not complete is a stutter.
-* `sourceLang`, `targetLang`: the languages whose `Behaviour.ofLang` are
-  `Shrink.Lowering.sourceBehaviour` and `targetBehaviour` (by `rfl`), so the
-  record below has the type `Sim.lang_passCorrect` consumes.
+* The languages are `sourceLang` and `targetLang` of `Session/Backward.lean`,
+  whose `Behaviour.ofLang` are `Shrink.Lowering.sourceBehaviour` and
+  `targetBehaviour` by `rfl`, and the target machine is its `targetMachine` at
+  the lowered world, so the record below pairs with `backwardResources` in
+  `Sim.lang_passCorrect`.
 * `forwardResources`: the `Sim.ForwardResources` record. Its transport is
   `Shrink.Lowering.transport D` (the horizon `D.fuel n`, no resource failure);
   `ready` reads the target's `Forward` (no resource failure, the hash bound)
@@ -50,7 +52,7 @@ variable [FreshNames] {E : Solidity.Source.Env} {D : Solidity.Goals.Shrink.Lower
 
 /-- The deployment is matched, and issues no action. -/
 theorem MatchedFrames.deploy_matched (fr : MatchedFrames D F P c e) (n : Nat) :
-    ∃ t, Star (targetMachine F c e).step (targetMachine F c e).initial t ∧
+    ∃ t, Star (targetMachine F (loweredWorld c) e).step (targetMachine F (loweredWorld c) e).initial t ∧
       fr.Matches (deployStep P e n) t ∧ t.issued = 0 := by
   have d := fr.deploy n
   cases hs : deployStep P e n with
@@ -65,21 +67,21 @@ theorem MatchedFrames.deploy_matched (fr : MatchedFrames D F P c e) (n : Nat) :
     obtain ⟨-, -, rfl⟩ := deployStep_run hs
     refine ⟨⟨(targetDeploy F c e).events, (targetDeploy F c e).world, 0, .action⟩, .single ?_,
       ⟨events, rfl, rfl, inv, last⟩, rfl⟩
-    show next _ _ _ _ _ _ _ _ _ = _
-    simp only [machine, State.start, next, stops, Bool.false_eq_true, if_false]
-    rfl
+    show next (loweredCode c).main (loweredCode c).roles (loweredCode c).ctor (loweredCode c).entry
+      F wire _ e (State.start (loweredCode c).roles e .fresh) = _
+    simp only [State.start, next, stops, Bool.false_eq_true, if_false]
 
 /-- An action from a matched boundary is matched, issuing at most one action. -/
 theorem MatchedFrames.act_matched (fr : MatchedFrames D F P c e) (n k i : Nat) (s : Solidity.Source.St E)
     (last : Outcome) (t : State (loweredCode c).contracts) (m : fr.Matches (.run n (k + 1) i s last) t) :
-    ∃ t', Star (targetMachine F c e).step t t' ∧ fr.Matches (actStep P e n k i s last) t' ∧
+    ∃ t', Star (targetMachine F (loweredWorld c) e).step t t' ∧ fr.Matches (actStep P e n k i s last) t' ∧
       t'.issued ≤ i + 1 := by
   obtain ⟨h, w, j, pend⟩ := t
   obtain ⟨rfl, rfl, rfl, inv, hlast⟩ := m
   cases req : e.requests s.events j with
   | none =>
     refine ⟨⟨s.events, w, j, .idle⟩, .single ?_, ?_, Nat.le_succ _⟩
-    · show next _ _ _ _ _ _ _ _ _ = _
+    · show next (loweredCode c).main (loweredCode c).roles (loweredCode c).ctor (loweredCode c).entry F wire _ e _ = _
       simp only [next, req]
     · have hs : actStep P e n k j s last = .done ⟨s.events, some last⟩ := by
         simp only [actStep, req]
@@ -101,12 +103,12 @@ theorem MatchedFrames.act_matched (fr : MatchedFrames D F P c e) (n k i : Nat) (
       refine ⟨⟨s.events ++ (targetStep F c e s.events j w a).events,
         (targetStep F c e s.events j w a).world, j + 1, .action⟩, .single ?_,
         ⟨events.symm, rfl, rfl, inv', last'⟩, Nat.le_refl _⟩
-      show next _ _ _ _ _ _ _ _ _ = _
+      show next (loweredCode c).main (loweredCode c).roles (loweredCode c).ctor (loweredCode c).entry F wire _ e _ = _
       simp only [next, req, stops, Bool.false_eq_true, if_false]
 
 /-- **The forward session diagram** from matched frames. -/
 noncomputable def forward (fr : MatchedFrames D F P c e) :
-    Diagram (sourceMachine P (envAbs e)) (targetMachine F c e) where
+    Diagram (sourceMachine P (envAbs e)) (targetMachine F (loweredWorld c) e) where
   matchState := fr.Matches
   initial := rfl
   step s s' t edge m := by
@@ -129,7 +131,7 @@ observe the session's prefix, within the action budget. -/
 theorem MatchedFrames.go_matched (fr : MatchedFrames D F P c e) (n : Nat) :
     ∀ k i (s : Solidity.Source.St E) last (t : State (loweredCode c).contracts),
       fr.Matches (.run n k i s last) t →
-      ∃ s' t', Star (targetMachine F c e).step t t' ∧ fr.Matches s' t' ∧
+      ∃ s' t', Star (targetMachine F (loweredWorld c) e).step t t' ∧ fr.Matches s' t' ∧
         s'.observe = Solidity.Source.sessionGoEvents P e n k i s last ∧ t'.issued ≤ i + k
   | 0, i, s, last, t, m => ⟨_, t, .refl _, m, rfl, Nat.le_of_eq m.2.1⟩
   | k + 1, i, s, last, t, m => by
@@ -144,7 +146,7 @@ theorem MatchedFrames.go_matched (fr : MatchedFrames D F P c e) (n : Nat) :
 /-- **The session at horizon `n` is matched within it**: a matched reachable
 target state observes the Source prefix at `n` having issued at most `n` actions. -/
 theorem MatchedFrames.session_matched (fr : MatchedFrames D F P c e) (n : Nat) :
-    ∃ t, (targetMachine F c e).Reachable t ∧ t.observe = Solidity.Source.sessionAtEvents P e n ∧
+    ∃ t, (targetMachine F (loweredWorld c) e).Reachable t ∧ t.observe = Solidity.Source.sessionAtEvents P e n ∧
       t.issued ≤ n := by
   obtain ⟨t₁, path₁, m₁, zero⟩ := fr.deploy_matched n
   have res := deployStep_result P e n
@@ -159,25 +161,6 @@ theorem MatchedFrames.session_matched (fr : MatchedFrames D F P c e) (n : Nat) :
 
 /-! ## The languages and the resource record -/
 
-/-- The Source session language read at horizons whose transported target
-bound is ready: `Behaviour.ofLang` of it is `sourceBehaviour`. -/
-noncomputable def sourceLang (D : Solidity.Goals.Shrink.Lowering.Diagram) (F : Fixed)
-    (E : Solidity.Source.Env) (c : Compilation) : Lang Event Outcome :=
-  { Solidity.Source.sourceLangEvents E with
-    Forward := fun _ e n =>
-      (Behaviour.ofLang (spec F).lang ((spec F).ofWorld (loweredWorld c))).Ready e (transport D n) }
-
-/-- The intrinsic session language at bounds without resource failure:
-`Behaviour.ofLang` of it is `targetBehaviour`. -/
-noncomputable def targetLang (F : Fixed) : Lang Event Outcome :=
-  { (spec F).lang with Admissible := Solidity.Semantics.IntrinsicSession.Bound.NoFail }
-
-theorem ofLang_sourceLang (P : Solidity.Source.SrcProg E) :
-    Behaviour.ofLang (sourceLang D F E c) P = sourceBehaviour D F P (loweredWorld c) := rfl
-
-theorem ofLang_targetLang :
-    Behaviour.ofLang (targetLang F) (loweredWorld c) = targetBehaviour F (loweredWorld c) := rfl
-
 /-- **Forward at the transported bound**: the Source session at horizon `n` is
 below the lowered run at horizon `D.fuel n`. -/
 theorem MatchedFrames.session_le (fr : MatchedFrames D F P c e) (grows : ∀ n, n < D.fuel n) (n : Nat) :
@@ -190,8 +173,8 @@ theorem MatchedFrames.session_le (fr : MatchedFrames D F P c e) (grows : ∀ n, 
 consumes: coverage is the Source machine's, readiness is the target's read off
 the Source `Forward`, and matched states stay below the transported run. -/
 noncomputable def forwardResources (fr : ∀ e, MatchedFrames D F P c e) (grows : ∀ n, n < D.fuel n) :
-    ForwardResources (Behaviour.ofLang (sourceLang D F E c) P)
-      (Behaviour.ofLang (targetLang F) (loweredWorld c)) (sourceMachine P) (targetMachine F c)
+    ForwardResources (Behaviour.ofLang (sourceLang D F E (loweredWorld c)) P)
+      (Behaviour.ofLang (targetLang F) (loweredWorld c)) (sourceMachine P) (targetMachine F (loweredWorld c))
       envAbs (fun e => forward (fr e)) where
   need _ n := transport D n
   coverage := fun e r _ _ => sourceMachine_reaches P e r
