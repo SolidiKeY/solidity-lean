@@ -442,4 +442,5 @@ import Solidity.Examples.YulLayout.InstancesMemory
 import Solidity.Examples.YulLayout.InstancesStorage
 import Solidity.Examples.YulLayout.LawsRead
 import Solidity.Examples.YulLayout.LawsWrite
+import Solidity.Examples.YulLayout.LawsWriteRead
 import Solidity.Examples.YulLayout.ScalarPilot
