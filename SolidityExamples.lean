@@ -416,3 +416,5 @@ import Solidity.Examples.Tools
 import Solidity.Examples.TypedLinear
 import Solidity.Examples.Verify
 import Solidity.Examples.YulLayout.Geometry
+import Solidity.Examples.YulLayout.InstancesMemory
+import Solidity.Examples.YulLayout.LawsWrite
