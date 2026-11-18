@@ -1,4 +1,5 @@
 import Solidity.Goals.IntrinsicStorage
+import Solidity.Correctness.IntrinsicSession.Storage
 
 /-! Pin and controls for the intrinsic storage accounting goal. -/
 
@@ -10,6 +11,20 @@ info: open Solidity.Goals.intrinsicStorageAccounting ← Solidity.Semantics.Intr
 #guard_msgs in
 -- Concrete storage/frame accounting is specified; the session implementation remains open.
 #roadmap_goal intrinsicStorageAccounting
+
+/-- The goal holds at `spec F`, `view F` once the fuelled run is adequate: a
+non-diverging `Prog.run` is completed by some fuel's observation. That adequacy
+is the one open premise. -/
+example (ad : Solidity.Semantics.IntrinsicSession.FuelAdequate) : intrinsicStorageAccounting :=
+  Solidity.Semantics.IntrinsicSession.storage_accounting_of_adequate ad
+
+/--
+info: 'Solidity.Semantics.IntrinsicSession.storage_accounting_of_adequate' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound]
+-/
+#guard_msgs in
+#print axioms Solidity.Semantics.IntrinsicSession.storage_accounting_of_adequate
 
 /-! Layout controls for the storage prerequisite: ideal slot terms (`Storage.Loc`,
 `Pre`) of actual typed paths. None enumerates an address, key or word domain. -/
