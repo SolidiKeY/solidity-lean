@@ -61,9 +61,57 @@
         },
         "purpose": "Exact Git ignore policy for the implicit CPython cache of the reviewed bytecode-enabled child launch and sibling import. Source-policy credit only; launch/import reachability and external interpreter environment are not execution or pass claims. No helper, output, proof or runtime credit."
       }
+    ],
+    "persistent_module_entries": [
+      {
+        "collector_sha256": "c6685584f5ff4dffdb2ce28f028177c15b30a74d6277fedde4182106781131ad",
+        "frames": [
+          {
+            "blob": "85f52a3748dfce8a0135326b739aaca773cd4e93",
+            "line": 15,
+            "path": "tests/h62/item5/statement-graph/test_graph.py"
+          }
+        ],
+        "input_revision": "e3394c72f659f7c5423c7a7187953ad53e481635",
+        "module_code_sha256": "3fe927016bea24527b5df46a6f7b0ed2244a6f3bb9eb4df5b6b2fc1afb3d95a0",
+        "module_frame_line": 0,
+        "operation": "entered measured Python module; no fixture consumption credit",
+        "python": [
+          3,
+          12,
+          14
+        ],
+        "runner": "validated:tests/h62/item5/statement-graph/test_graph.py",
+        "target": "scripts/h62/item5/statement-graph/owner_overlay.py",
+        "target_blob": "a4233e8fbd5563a56783344e370a060997b5754a"
+      }
     ]
   },
   "routes": {
+    "module_entries": [
+      {
+        "collector_sha256": "c6685584f5ff4dffdb2ce28f028177c15b30a74d6277fedde4182106781131ad",
+        "frames": [
+          {
+            "blob": "85f52a3748dfce8a0135326b739aaca773cd4e93",
+            "line": 15,
+            "path": "tests/h62/item5/statement-graph/test_graph.py"
+          }
+        ],
+        "input_revision": "e3394c72f659f7c5423c7a7187953ad53e481635",
+        "module_code_sha256": "3fe927016bea24527b5df46a6f7b0ed2244a6f3bb9eb4df5b6b2fc1afb3d95a0",
+        "module_frame_line": 0,
+        "operation": "entered measured Python module; no fixture consumption credit",
+        "python": [
+          3,
+          12,
+          14
+        ],
+        "runner": "validated:tests/h62/item5/statement-graph/test_graph.py",
+        "target": "scripts/h62/item5/statement-graph/owner_overlay.py",
+        "target_blob": "a4233e8fbd5563a56783344e370a060997b5754a"
+      }
+    ],
     "standalone": [
       {
         "command": [
@@ -1253,6 +1301,114 @@
         },
         "purpose": "Exact source input handed by a kept consumer to the reviewed check-read operation. Source/consumption role only; unavailable historical archives or snapshots do not pass. No invocation, execution, passing run, data-read anchor, generation, output completeness, compatibility, proof or runtime credit.",
         "source_blob": "dad642373f549afefaff18069c39932b9eee8e00"
+      },
+      {
+        "command": [
+          "python3",
+          "-B",
+          "scripts/h62/item2/audit-theories/test_current_replay.py"
+        ],
+        "entry": {
+          "blob": "57f9d543e4e0c5108f3392bf51b02152e8245877",
+          "import_line": 4,
+          "path": "scripts/h62/item2/audit-theories/test_current_replay.py"
+        },
+        "input_revision": "37d4fd3ce32e5a2b433a312d3ca2d3f150892d2a",
+        "kind": "handoff-witness-role",
+        "module": {
+          "blob": "be36e9615801d394d83697e3ba58a07fea4ae568",
+          "line": 24,
+          "path": "scripts/h62/item2/audit-theories/paired_evidence.py"
+        },
+        "operation": "pinned-history-show",
+        "path": "scripts/h62/item2/audit-theories/handoff/CONFLICT-RESOLUTION-20261108.md",
+        "purpose": "Exact reviewed witness bound to the pinned historical Git read or the literal repository-root main-path read, and to the current entry/import identity. Source retention only; no consumer route, invocation, execution, passing run, read anchor, fixture, output, ownership, compatibility, proof or runtime credit. External archives remain unavailable.",
+        "read": {
+          "line": 38,
+          "path": "scripts/h62/item2/audit-theories/test_current_replay.py"
+        },
+        "source_blob": "e824c7f9512b45028b20371048ad0de6fb75d436"
+      },
+      {
+        "command": [
+          "python3",
+          "-B",
+          "scripts/h62/item2/audit-theories/test_current_replay.py"
+        ],
+        "entry": {
+          "blob": "57f9d543e4e0c5108f3392bf51b02152e8245877",
+          "import_line": 4,
+          "path": "scripts/h62/item2/audit-theories/test_current_replay.py"
+        },
+        "input_revision": "37d4fd3ce32e5a2b433a312d3ca2d3f150892d2a",
+        "kind": "handoff-witness-role",
+        "module": {
+          "blob": "be36e9615801d394d83697e3ba58a07fea4ae568",
+          "line": 22,
+          "path": "scripts/h62/item2/audit-theories/paired_evidence.py"
+        },
+        "operation": "pinned-history-show",
+        "path": "scripts/h62/item2/audit-theories/handoff/original-frozen-assignment.txt",
+        "purpose": "Exact reviewed witness bound to the pinned historical Git read or the literal repository-root main-path read, and to the current entry/import identity. Source retention only; no consumer route, invocation, execution, passing run, read anchor, fixture, output, ownership, compatibility, proof or runtime credit. External archives remain unavailable.",
+        "read": {
+          "line": 38,
+          "path": "scripts/h62/item2/audit-theories/test_current_replay.py"
+        },
+        "source_blob": "18e25bf3280604b02fc0877400b343a4749d9ea3"
+      },
+      {
+        "command": [
+          "python3",
+          "-B",
+          "scripts/h62/item2/audit-theories/test_current_replay.py"
+        ],
+        "entry": {
+          "blob": "57f9d543e4e0c5108f3392bf51b02152e8245877",
+          "import_line": 4,
+          "path": "scripts/h62/item2/audit-theories/test_current_replay.py"
+        },
+        "input_revision": "37d4fd3ce32e5a2b433a312d3ca2d3f150892d2a",
+        "kind": "handoff-witness-role",
+        "module": {
+          "blob": "be36e9615801d394d83697e3ba58a07fea4ae568",
+          "line": 23,
+          "path": "scripts/h62/item2/audit-theories/paired_evidence.py"
+        },
+        "operation": "pinned-history-show",
+        "path": "scripts/h62/item2/audit-theories/handoff/original-work-and-backfill-queue.md",
+        "purpose": "Exact reviewed witness bound to the pinned historical Git read or the literal repository-root main-path read, and to the current entry/import identity. Source retention only; no consumer route, invocation, execution, passing run, read anchor, fixture, output, ownership, compatibility, proof or runtime credit. External archives remain unavailable.",
+        "read": {
+          "line": 38,
+          "path": "scripts/h62/item2/audit-theories/test_current_replay.py"
+        },
+        "source_blob": "73326fc36de3421854174f16e5cf62a7976ca29e"
+      },
+      {
+        "command": [
+          "python3",
+          "-B",
+          "tests/h62/item6/migrate-root-gate/test_public_api_inventory.py"
+        ],
+        "entry": {
+          "blob": "c4e0b487f0a70e1d8f6435bc8ea8a38e6b5ac7cd",
+          "import_line": 20,
+          "path": "tests/h62/item6/migrate-root-gate/test_public_api_inventory.py"
+        },
+        "input_revision": "37d4fd3ce32e5a2b433a312d3ca2d3f150892d2a",
+        "kind": "handoff-witness-role",
+        "module": {
+          "blob": "a5d6dde5be926751371f820ea6afb463281d515a",
+          "line": 349,
+          "path": "scripts/h62/item6/migrate-root-gate/public-api-inventory.py"
+        },
+        "operation": "main-root-read",
+        "path": "scripts/h62/item6/migrate-root-gate/bulk-manifest.json",
+        "purpose": "Exact reviewed witness bound to the pinned historical Git read or the literal repository-root main-path read, and to the current entry/import identity. Source retention only; no consumer route, invocation, execution, passing run, read anchor, fixture, output, ownership, compatibility, proof or runtime credit. External archives remain unavailable.",
+        "read": {
+          "line": 200,
+          "path": "scripts/h62/item6/migrate-root-gate/public-api-inventory.py"
+        },
+        "source_blob": "225df645d3ebfc2903b2f54fce53b2e2f8295e87"
       }
     ]
   },
