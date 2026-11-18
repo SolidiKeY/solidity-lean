@@ -5,8 +5,8 @@ import Solidity.Correctness.Lowering.Sim.Session.Source
 /-!
 # The session-level lift of the lowering diagram (H556 option A, sg1)
 
-`SessionLift D` is the conjunct `loweringBySimulation` (`Goals/LoweringSim.lean`)
-adds for the diagram `D`: the lift of `D` from function bodies to the actual
+`SessionLift D` is the conjunct `loweringBySimulationV2` (`Goals/LoweringSim.lean`)
+adds to v1 for the diagram `D`: the lift of `D` from function bodies to the actual
 Source session semantics (`Source.sourceLangEvents`) and the concrete intrinsic
 session semantics (`Semantics.IntrinsicSession.spec F`, for every
 `F : Roadmap.Fixed`). No goal here; the diagram vocabulary
@@ -46,7 +46,10 @@ session semantics (`Semantics.IntrinsicSession.spec F`, for every
   bound holds, at the deployed address, a storage `D.globRel` relates to the
   source state, and the source history is a prefix of the target's.
 
-## Choices (stated, not hidden)
+## Choices (stated, not hidden; accepted for v2 by H1185 and H1186)
+
+Both are temporary: a later plan step removes each, and v2 is kept next to v1
+(H314) until then.
 
 * **Two premises are read into the behaviours** (`sourceBehaviour`,
   `targetBehaviour`). Against `Behaviour.ofLang` read verbatim the refinement is

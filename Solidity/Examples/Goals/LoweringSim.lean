@@ -4,17 +4,25 @@ import Solidity.Syntax.Splice
 namespace Solidity.Goals
 
 /--
-info: open Solidity.Goals.loweringBySimulation ← Solidity.Correctness.Lowering.Sim.lowering_producer blocked by [Solidity.Goals.intrinsicSessionSemantics, Solidity.Goals.intrinsicStorageAccounting] plan ls3-lowering-compose
+info: open Solidity.Goals.loweringBySimulation ← Solidity.Correctness.Lowering.Sim.lowering_producer plan ls3-lowering-compose
 -/
 #guard_msgs in
 #roadmap_goal loweringBySimulation
 
-/-- The restatement is additive: the diagram statement before H556 option A is
-a conjunct of the goal. -/
-example : Solidity.Goals.loweringBySimulation →
+/--
+info: open Solidity.Goals.loweringBySimulationV2 ← Solidity.Correctness.Lowering.Sim.lowering_producer_v2 blocked by [Solidity.Goals.intrinsicSessionSemantics, Solidity.Goals.intrinsicStorageAccounting] plan ls3-lowering-compose
+-/
+#guard_msgs in
+#roadmap_goal loweringBySimulationV2
+
+/-- v1 is the statement before H556 option A. -/
+example : Solidity.Goals.loweringBySimulation =
     (letI : FreshNames := Solidity.Goals.Shrink.Lowering.productionNames;
       Solidity.Goals.Shrink.Lowering.CallerBound ∧
-        ∃ D : Solidity.Goals.Shrink.Lowering.Diagram, D.Simulates ∧ D.Total) :=
+        ∃ D : Solidity.Goals.Shrink.Lowering.Diagram, D.Simulates ∧ D.Total) := rfl
+
+/-- v2 is additive: v1 is a conjunct of it. -/
+example : Solidity.Goals.loweringBySimulationV2 → Solidity.Goals.loweringBySimulation :=
   fun ⟨bound, D, simulates, total, _⟩ => ⟨bound, D, simulates, total⟩
 
 namespace Shrink.Lowering
