@@ -196,6 +196,7 @@ import Solidity.Examples.Lowering.Sim.Cases
 import Solidity.Examples.Lowering.Sim.Match
 import Solidity.Examples.Lowering.Sim.Session.Backward
 import Solidity.Examples.Lowering.Sim.Session.Binding
+import Solidity.Examples.Lowering.Sim.Session.Forward
 import Solidity.Examples.Lowering.Sim.Session.Source
 import Solidity.Examples.Lowering.Sim.Session.Target
 import Solidity.Examples.MemoryFloor

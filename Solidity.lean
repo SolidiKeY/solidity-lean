@@ -2468,6 +2468,9 @@ import Solidity.Correctness.Lowering.Sim.Session.Backward.NoDiagram
 import Solidity.Correctness.Lowering.Sim.Session.Binding
 import Solidity.Correctness.Lowering.Sim.Session.Binding.Agreement
 import Solidity.Correctness.Lowering.Sim.Session.Binding.Initial
+import Solidity.Correctness.Lowering.Sim.Session.Forward
+import Solidity.Correctness.Lowering.Sim.Session.Forward.Frames
+import Solidity.Correctness.Lowering.Sim.Session.Forward.Within
 import Solidity.Correctness.Lowering.Sim.Session.Source
 import Solidity.Correctness.Lowering.Sim.Session.Target
 import Solidity.Correctness.Lowering.Sim.Session.Target.Machine

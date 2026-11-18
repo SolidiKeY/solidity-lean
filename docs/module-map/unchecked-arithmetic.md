@@ -29,6 +29,10 @@
 | `Correctness/Lowering/Sim/Session/Binding/Initial.lean` | Initial matching under `globRel`: an unwritten Source instance and a model frame at `Storage.init` (`fields_fresh`, `globRel_fresh`, `initial_globRel`), and the deployment frame of a lowered world at an unfunded address (`enter_fresh`, `deploy_initial`). |
 | `Correctness/Lowering/Sim/Session/Binding/Agreement.lean` | Storage and event agreement from `globRel`: it reads the model's own address, storage and funds only (`globRel_congr`); a committed frame leaves a related account at its address and funds (`globRel_committed`, `boundaryAt`); `Agrees Sim.diagram` unfolded (`globRel_boundaryState`, `agrees_iff`: the goal's `boundaryState` reads Source address zero). |
 | `Examples/Lowering/Sim/Session/Binding.lean` | The binding lane's declarations on one accepted program (`contract C { uint x; }` without entries): in the fragment, bound, initially matched, and related at a boundary. |
+| `Correctness/Lowering/Sim/Session/Forward.lean` | The forward session diagram and the shape of its `ForwardResources` record over the hypothesis of matched frames, which the session semantics do not currently satisfy in every environment. |
+| `Correctness/Lowering/Sim/Session/Forward/Frames.lean` | The provisional per-frame hypothesis of the forward session diagram and the session-level match. |
+| `Correctness/Lowering/Sim/Session/Forward/Within.lean` | A reachable target session state observes a prefix of the run at every horizon above its issued actions. |
+| `Examples/Lowering/Sim/Session/Forward.lean` | Type-level uses of the forward session diagram and its resource record on the session of `spin`, under the unmet hypothesis of matched frames. |
 # Unchecked arithmetic
 
 | Module | Purpose |
