@@ -11,7 +11,6 @@ private def R (count : Nat) : RefTy := .fixed (.prim .uint) count
 private def H (count : Nat) : HTy := [R count]
 private def old (count : Nat) : HRef (H count) (R count) := ⟨0,rfl⟩
 private def values (payloads : List (Fin W)) : List PrimTy.uint.Denote := payloads.map indexValue
-private theorem wide : 256 < W := by decide
 private def heap (payloads : List (Fin W)) : Heap (H payloads.length) :=
   (⟨values payloads,by rw [values,List.length_map]⟩,())
 private def bases : Nat → Fin W := fun _ => wmod 16
@@ -28,7 +27,7 @@ private theorem heap_repr (payloads : List (Fin W)) (bounded : payloads.length <
     change 8 ≤ 16
     decide) (by
     refine ⟨?_,?_,?_⟩
-    · have large : 256 < W := wide
+    · have large : 256 < W := by decide
       with_unfolding_all change 16 + max 1 payloads.length ≤ W
       omega
     · intro impossible
