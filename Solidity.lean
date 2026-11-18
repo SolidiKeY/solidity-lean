@@ -2505,6 +2505,7 @@ import Solidity.Correctness.Lowering.Unchecked.WordProgram
 import Solidity.Correctness.Lowering.Unchecked.WordUpdateWitness
 import Solidity.Correctness.Lowering.Unchecked.WrappingArithmetic
 import Solidity.Correctness.Panic.Capture
+import Solidity.Correctness.Panic.Dispatch
 import Solidity.Correctness.Panic.Guards.Arith
 import Solidity.Correctness.Panic.Guards.State
 import Solidity.Correctness.Panic.Provenance
@@ -3351,7 +3352,6 @@ import Solidity.Goals.OpcodeEvalUniversal
 import Solidity.Goals.Panic
 import Solidity.Goals.PanicProvenance
 import Solidity.Goals.PanicRun
-import Solidity.Goals.PanicSource
 import Solidity.Goals.Plan
 import Solidity.Goals.ProseCalibrated
 import Solidity.Goals.ProseRatioRuleSound

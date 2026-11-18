@@ -165,7 +165,6 @@ import Solidity.Examples.Goals.OpcodeEval
 import Solidity.Examples.Goals.Panic
 import Solidity.Examples.Goals.PanicProvenance
 import Solidity.Examples.Goals.PanicRun
-import Solidity.Examples.Goals.PanicSource
 import Solidity.Examples.Goals.Plan
 import Solidity.Examples.Goals.ProseCalibrated
 import Solidity.Examples.Goals.ProseRatioRuleSound
