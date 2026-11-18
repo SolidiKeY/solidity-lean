@@ -7,7 +7,7 @@ The rewrites of `Syntax/Elab/Values.lean` that every statement goes through
 before `hoistStmt` are total, so each unfolds by its named equations with no
 `native_decide`: structural ones (`fnTyOfExpr`, `rawFnTyOfExpr?`, `bytesOf?`)
 also reduce in the kernel (`rfl`), the well-founded ones (`narrowPure`, the
-three mutual `narrow…?`, `abiTyName`, `bytesPure`) by rewriting. The `#guard`s pin the
+three mutual `narrow…?`, `abiTyName`, `bytesPure`, `fnPure`) by rewriting. The `#guard`s pin the
 compiled functions.
 -/
 
@@ -333,5 +333,80 @@ theorem bytesPure_prefix_width (C : Contract) (Γ : ECtx) (f : String) (as : Lis
   "error: index 9 out of range"
 #guard shown (bytesPure C0 [] (.call "#bytesPrefix" [.name "x"])) ==
   "error: a fixed byte prefix needs its width"
+
+/-! ### `fnPure`: by the node count (`RawExpr.nodes`) -/
+
+/-- Every arm that only rebuilds its node, on leaves. -/
+theorem fnPure_rebuild (C : Contract) (Γ : ECtx) (x : String) (T : RawTy) (o : IncDec)
+    (m : ModOp) (u : UnOp) (op : BinOp) (ns : List String) :
+    fnPure C Γ (.modular m (.incDec o (.name x)) (.newArr T (.name x))
+        (.ternary (.name x) (.index (.name x) (.num 1))
+          (.named "f" ns [.tuple [.name x], .unop u (.binop op (.name x) (.num 1))]))) =
+      pure (.modular m (.incDec o (.name x)) (.newArr T (.name x))
+        (.ternary (.name x) (.index (.name x) (.num 1))
+          (.named "f" ns [.tuple [.name x], .unop u (.binop op (.name x) (.num 1))]))) := by
+  rw [fnPure_modular, fnPure_incDec, fnPure_newArr, fnPure_ternary, fnPure_index, fnPure_named,
+    List.mapM_cons, List.mapM_cons, List.mapM_nil, fnPure_tuple, List.mapM_cons, List.mapM_nil,
+    fnPure_unop, fnPure_binop, (fnPure_other C Γ).2.1, (fnPure_other C Γ).1]
+  rfl
+
+/-- An assignment's target is not entered; a call with no argument is itself. -/
+theorem fnPure_targets (C : Contract) (Γ : ECtx) (l : RawExpr) (op : BinOp) (o : IncDec)
+    (f : String) :
+    fnPure C Γ (.assign l (.num 1)) = pure (.assign l (.num 1)) ∧
+      fnPure C Γ (.opAssign op l (.num 1)) = pure (.opAssign op l (.num 1)) ∧
+      fnPure C Γ (.incDec o (.call f [])) = pure (.incDec o (.call f [])) := by
+  refine ⟨?_, ?_, ?_⟩
+  · rw [fnPure_assign, (fnPure_other C Γ).1]; rfl
+  · rw [fnPure_opAssign, (fnPure_other C Γ).1]; rfl
+  · rw [fnPure_incDec, fnPure_call_nil]; rfl
+
+/-- The first arm's four branches on one literal argument: `abi.encodeCall`
+wants a function and a tuple; an encoder, a call through a value and any
+other call rebuild the call. -/
+theorem fnPure_call_branches (C : Contract) (Γ : ECtx) (f : String) :
+    ((f == "abi.encodeCall") = true → fnPure C Γ (.call f [.num 1]) =
+        throw "abi.encodeCall takes a function and an argument tuple") ∧
+      (¬(f == "abi.encodeCall") = true →
+        ¬(encodeBuiltin f && (lookupBy f C.funs).isNone) = true →
+        fnPure C Γ (.call f [.num 1]) = pure (.call f [.num 1])) := by
+  refine ⟨fun hf => ?_, fun hf hb => ?_⟩
+  · rw [fnPure_encodeCall C Γ f _ _ hf, (fnPure_other C Γ).1]; rfl
+  · by_cases hv : (f == callValueName) = true
+    · rw [fnPure_callValue C Γ f _ _ hf hb hv, (fnPure_other C Γ).1]; rfl
+    · rw [fnPure_call_cons C Γ f _ _ hf hb hv, (fnPure_other C Γ).1]; rfl
+
+/-- An encoder's argument that is no function value is lowered and kept. -/
+theorem fnPure_encodeBuiltin_num (C : Contract) (Γ : ECtx) (f : String)
+    (hf : ¬(f == "abi.encodeCall") = true)
+    (hb : (encodeBuiltin f && (lookupBy f C.funs).isNone) = true)
+    (hr : rawFnTyOfExpr? C Γ (.num 1) = none) :
+    fnPure C Γ (.call f [.num 1]) = pure (.call f [.num 1]) := by
+  rw [fnPure_encodeBuiltin C Γ f _ _ hf hb, List.mapM_cons, List.mapM_nil,
+    (fnPure_other C Γ).1, hr]
+  rfl
+
+/-- A member that is neither `.selector` nor `.address`, of no external
+function: the base is lowered, the member kept. -/
+theorem fnPure_field_plain (C : Contract) (Γ : ECtx) (x m : String)
+    (hm : (m == "selector" || m == "address") = false)
+    (he : extMember? C Γ (.field (.name x) m) = none) :
+    fnPure C Γ (.field (.name x) m) = pure (.field (.name x) m) := by
+  rw [fnPure_field, if_neg (by rw [hm]; exact Bool.false_ne_true), extMember?_match_eq, he,
+    (fnPure_other C Γ).2.1]
+  rfl
+
+/-- The member arm's test of an external function type is the pattern it
+replaced (`fnParts?_any_eq`): on a type that is no function's, the other branch. -/
+example (ty : String) (h : fnParts? ty = none) :
+    (if (fnParts? ty).any (·.2.2) then 1 else 0) = 0 := by
+  rw [fnParts?_any_eq, h]
+
+#guard shown (fnPure C0 [] (.call "f" [.field (.name "a") "b", .num 2])) == "f(a.b, 2)"
+#guard shown (fnPure C0 [] (.call "abi.encodeCall" [.num 1])) ==
+  "error: abi.encodeCall takes a function and an argument tuple"
+#guard shown (fnPure C0 [] (.call "abi.encodeCall" [.name "g", .tuple [.num 1]])) ==
+  "error: abi.encodeCall: the function's ABI parameter types are unavailable"
+#guard shown (fnPure C0 [] (.call "abi.encode" [.num 1, .name "a"])) == "abi.encode(1, a)"
 
 end Solidity.Examples.ElabTotal.Values
