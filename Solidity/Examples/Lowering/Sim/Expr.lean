@@ -1,5 +1,5 @@
 import Solidity.Correctness.Lowering.Sim.Expr.Strength
-import Solidity.Correctness.Lowering.Sim.Expr.Capture
+import Solidity.Correctness.Lowering.Sim.Expr.Frame
 import Solidity.Correctness.Lowering.Sim.Expr.Operand
 import Solidity.Correctness.Lowering.Sim.Expr.Scope
 
@@ -83,5 +83,20 @@ example [FreshNames] (C : Contract) (rc : ElabRec C) :
     elabStmt1With C rc (.unchecked []) = (do
       withReader (fun sc => { sc with unchecked := true })
         (rc.elabBranch (← ElabM.lift (uncheckStmts [])))) := stmt1_unchecked C rc []
+
+/-- v2 (frame relation): the v1 cases give every v2 site, and the `push()++`
+case holds from the v2 obligation of `rc.hoist`. -/
+example [FreshNames] (kernel : elabKernelTotal) (exprs : ExprCases) (C : Contract)
+    (raw : List RawStmt) (sc : ElabScope) (st : ECtx × Nat) : SiteSim₂ C raw sc st [] st :=
+  sites₂_of_exprCases C kernel exprs raw sc st [] st
+
+example [FreshNames] (C : Contract) (rc : ElabRec C)
+    (hoist : ∀ e sc st out st', Solidity.Goals.ElabRan (rc.hoist e) sc st out st' →
+      ∀ raw, SiteSim₂ C raw sc st out.1 st')
+    (sc : ElabScope) (st st' : ECtx × Nat) (out : SProg C × RawStmt)
+    (ran : Solidity.Goals.ElabRan
+      (hoistStmtWith C rc (.pushIncDec .postInc (.name "xs"))) sc st out st') :
+    SiteSim₂ C [] sc st out.1 st' :=
+  hoistStmt_pushIncDec_sat₂ C rc hoist _ _ sc st out st' ran []
 
 end Solidity.Examples.Lowering.Sim.Expr
