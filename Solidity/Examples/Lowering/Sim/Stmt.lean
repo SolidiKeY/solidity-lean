@@ -1,5 +1,5 @@
 import Solidity.Correctness.Lowering.Sim.Stmt.Main
-import Solidity.Correctness.Lowering.Sim.Stmt.V2
+import Solidity.Correctness.Lowering.Sim.Stmt.Framed
 
 /-!
 # The statement cases of the lowering diagram, used
