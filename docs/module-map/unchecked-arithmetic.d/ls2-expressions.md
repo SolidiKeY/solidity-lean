@@ -1,0 +1,2 @@
+| `Correctness/Lowering/Sim/Expr/Strength.lean` | The strength of `ExprCases`: at a record whose unconstrained `hoistTop` returns arbitrary captures (`passRec`) the declaration arm of `hoistStmtWith` gives the site obligation of every run (`sites_of_exprCases`), so `ExprCases` alone implies `diagram.Simulates` (`simulates_of_exprCases`); `expr_cases` is not proved. |
+| `Examples/Lowering/Sim/Expr.lean` | The expression cases at the declaration arm of `hoistStmtWith`, and the axioms of `simulates_of_exprCases`. |
