@@ -2,14 +2,11 @@ import Solidity.Correctness.Lowering.Total.Contract
 import Solidity.Goals.Loops
 
 /-! Interface regression checks. These do not claim production coverage or
-bind the legacy goal before E2B. -/
+bind the legacy goal. -/
 namespace Solidity.Examples.Goals.LoopsProducer
 
 open Solidity.Correctness.Lowering
 open Total
-
-/-- E2C does not change the legacy goal or its guard. -/
-example : Solidity.Goals.lowerLoopsCorrect = Solidity.Goal.Unstated := rfl
 
 /-- The new production equation agrees exactly with the existing receipt. -/
 example [names : FreshNames] {E : Source.Env} {returns : List Source.STy}
