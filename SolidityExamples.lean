@@ -202,8 +202,8 @@ import Solidity.Examples.Lowering.Sim.Session.Binding
 import Solidity.Examples.Lowering.Sim.Session.Forward
 import Solidity.Examples.Lowering.Sim.Session.Source
 import Solidity.Examples.Lowering.Sim.Session.Target
-import Solidity.Examples.Lowering.Sim.Stmt
 import Solidity.Examples.Lowering.Sim.State
+import Solidity.Examples.Lowering.Sim.Stmt
 import Solidity.Examples.MemoryFloor
 import Solidity.Examples.MemoryInstantiation
 import Solidity.Examples.MemoryNegativeCountermodel
