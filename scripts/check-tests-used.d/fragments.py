@@ -449,7 +449,7 @@ def static_routes(classifier, graph, rows):
         if form == 'node-import': resolved = _node_import(reader['path'], repo.texts[reader['path']], reader['line'])
         elif form == 'node-readFileSync': resolved = _node_read(reader['path'], repo.texts[reader['path']], reader['line'], cwd)
         elif form == 'node-readFileSync-walk': resolved = _node_walk_read(reader['path'], repo, reader['line'], target, root, frames[0]['path'])
-        elif library: resolved = _lean_read(classifier, repo, reader['path'], reader['line'], cwd, '|'.join(LEAN_LIBRARY_COMMANDS))
+        elif library: resolved = _lean_read(classifier, repo, reader['path'], reader['line'], cwd, '|'.join(map(re.escape, LEAN_LIBRARY_COMMANDS)))
         else: resolved = _lean_read(classifier, repo, reader['path'], reader['line'], cwd)
         if resolved is None or resolved != target: raise ValueError('static route target is not the literal ' + form + ' operand')
         if form == 'node-import' and not target.endswith(NODE_SUFFIXES): raise ValueError('Node import target is not a module')
@@ -2523,3 +2523,6 @@ def successor_controls(classifier):
         source_dependency_controls(locals())  # (15) H1074, in roles.py
         cache_policy_controls(locals())  # (16) H1053, in roles.py
         for control in FORM_CONTROLS: control(locals())  # (17) x1y registry, then forms/*.py
+
+
+load_forms(FORMS_DIRECTORY)  # x1y: forms/*.py, after every definition here

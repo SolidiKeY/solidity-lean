@@ -1,5 +1,5 @@
-# Census form registry (x1y), exec'd by fragments.py in its namespace after roles.py and the kind tables.
-# Every forms/*.py (sorted) is exec'd in that namespace; a form never edits a shared checker file. It may:
+# Census form registry (x1y), exec'd by fragments.py in its namespace after roles.py and the kind tables; the last
+# line of fragments.py execs every forms/*.py (sorted) in that namespace. A form never edits a shared file. It may:
 #   register_source_role(kind, root, late=False)  -> SOURCE_ROLE_KINDS / LATE_SOURCE_ROLE_KINDS (no duplicate kind)
 #   FORM_CONTROLS.append(control)                  -> control(env) runs at the end of successor_controls, env = its locals()
 #   register_consumer_section(section, keys, framed, handler)  -> CONSUMER_HANDLERS: section -> (identity keys,
@@ -13,17 +13,19 @@
 #   PYTHON_ARGUMENT_FORMS[source blob] = recogniser(text) -> interface or None, before python_argument_interface
 #   LEAN_FIXTURE_FORMS.append(predicate(text, path, line)) -> Lean fixture driver invocation after lean_check_invocation
 # A form binding a name another form, fragments.py, roles.py or this file binds is a ValueError naming both files,
-# unless the name is a registry table above or listed in the form's REBINDS tuple. Errors name the form module.
+# unless the name is a registry table above or listed in the form's REBINDS tuple; derived names (_DERIVED) are
+# never bound by a form. Load errors name the form module; table errors name the part.
 # Controls: registry_controls (first FORM_CONTROLS entry) loads synthetic forms directories.
 import ast, json, tempfile
 from pathlib import Path
 FORMS_DIRECTORY = Path(__file__).with_name('forms')
 _REGISTRY_TABLES = ('SOURCE_ROLE_KINDS', 'LATE_SOURCE_ROLE_KINDS', 'FORM_CONTROLS', 'CONSUMER_HANDLERS', 'REVIEW_TABLE_PARTS',
                     'LEAN_LIBRARY_COMMANDS', 'PYTHON_ARGUMENT_FORMS', 'LEAN_FIXTURE_FORMS', '_FORM_MODULE')
+_DERIVED = ('CONSUMER_SECTIONS', 'REVIEWED_NONPY_ENTRIES', 'REVIEWED_PYTHON_ARGS', 'REVIEWED_LEAN_FIXTURES', 'REVIEWED_LEAN_FIXTURE_INVOCATIONS')
 _FORM_MODULE = 'registry.py'
 FORM_CONTROLS = []
 CONSUMER_HANDLERS = {
-    'persistent_reads': (('runner', 'input_revision', 'target', 'frames'), True, persisted_reads),
+    'persistent_reads': (('runner', 'input_revision', 'target', 'frames'), True, lambda c, g, k, rows: persisted_reads(c, g, k, rows)),
     'static_routes': (('runner', 'form', 'target', 'frames'), True, lambda c, g, _, rows: static_routes(c, g, rows)),
     'git_policies': (('path',), False, lambda c, g, _, rows: git_policies(c, g, rows)),
     'persistent_module_entries': (('runner', 'input_revision', 'target', 'frames'), True,
@@ -56,16 +58,17 @@ def register_consumer_section(section, keys, framed, handler):
 def review_union(name, column=1):
     """Column `column` of REVIEW_TABLE_PARTS[name] as one table, checked against its parts."""
     parts = REVIEW_TABLE_PARTS[name]; rows = [row for part in parts for row in part[column]]
-    if (len(set(rows)) != len(rows) or column == 1 and len({row[0] for row in rows}) != len(rows)
-            or any(not row[0].startswith(part[-1]) for part in parts for row in part[column])):
-        raise ValueError('invalid review table parts: ' + name)
+    if len(set(rows)) != len(rows) or column == 1 and len({row[0] for row in rows}) != len(rows):
+        raise ValueError('repeated row or path in review table parts: ' + name)
+    for part in parts:
+        if any(not row[0].startswith(part[-1]) for row in part[column]): raise ValueError('review table part ' + name + ' ' + part[0] + ' leaves its prefixes')
     return frozenset(rows)
 
 
 def python_argument_form(blob, text):
     """H996 interface of a Python argument role: a registered form for its blob, else the audited one."""
-    form = PYTHON_ARGUMENT_FORMS.get(blob)
-    return form and form(text) or python_argument_interface(text)
+    interface = PYTHON_ARGUMENT_FORMS[blob](text) if blob in PYTHON_ARGUMENT_FORMS else None
+    return python_argument_interface(text) if interface is None else interface
 
 
 def lean_gate_invocation(form, text, path, line):
@@ -107,6 +110,7 @@ def load_forms(directory):
             except Exception as error: raise ValueError('forms module ' + label + ' failed: ' + repr(error)) from error
             rebinds = namespace.pop('REBINDS', ())
             for name in sorted(k for k, v in namespace.items() if k not in before or before[k] is not v):
+                if name in _DERIVED: raise ValueError('forms module ' + label + ' binds the derived name ' + name)
                 if name in owners and name not in _REGISTRY_TABLES and name not in rebinds:
                     raise ValueError('forms module ' + label + ' binds ' + name + ', already bound by ' + owners[name])
                 owners.setdefault(name, label)
@@ -132,6 +136,10 @@ def registry_controls(env):
         assert CONSUMER_SECTIONS == tuple(CONSUMER_HANDLERS) and CONSUMER_SECTIONS[:5] == (
             'persistent_reads', 'static_routes', 'git_policies', 'persistent_module_entries', 'cache_policies')
         assert LEAN_LIBRARY_COMMANDS[:3] == ('#eval', 'run_elab', 'run_cmd')
+        # The audited base parts keep their counts; forms add parts after them.
+        assert [(p[0], len(p[1])) for p in REVIEW_TABLE_PARTS['nonpy'][:4]] == [('H997', 115), ('H1025', 61), ('H1004', 2), ('H1032', 23)]
+        assert [(p[0], len(p[1])) for p in REVIEW_TABLE_PARTS['python-args'][:1]] == [('H996', 23)]
+        assert [(p[0], len(p[1]), len(p[2])) for p in REVIEW_TABLE_PARTS['lean-fixtures'][:1]] == [('H1015', 7, 22)]
         load_forms(tmp / 'missing'); load('empty', {})
         assert CONSUMER_SECTIONS == saved['CONSUMER_SECTIONS'] and REVIEWED_NONPY_ENTRIES == saved['REVIEWED_NONPY_ENTRIES']
         ran = []
@@ -173,11 +181,12 @@ REBINDS = ('_REVIEW_DIRECTORIES',)
         rejected('section', {'s.py': 'register_consumer_section("git_policies", ("path",), False, None)\n'}, 'section/s.py', 'git_policies')
         rejected('raises', {'r.py': 'raise RuntimeError("boom")\n'}, 'raises/r.py', 'boom')
         rejected('helper', {'a.py': 'def helper(): pass\n', 'b.py': 'def helper(): pass\n'}, 'helper/b.py', 'helper/a.py')
-        rejected('shadow', {'a.py': 'def static_routes(*_): pass\n'}, 'shadow/a.py', 'fragments.py')
-        rejected('part', {'a.py': 'REVIEW_TABLE_PARTS["nonpy"].append(("X", frozenset({("docs/x.sh", "b", "c")}), ("tests/",)))\n'}, 'nonpy')
+        rejected('part', {'a.py': 'REVIEW_TABLE_PARTS["nonpy"].append(("X", frozenset({("docs/x.sh", "b", "c")}), ("tests/",)))\n'}, 'nonpy X')
+        rejected('derived', {'a.py': 'CONSUMER_SECTIONS = ()\nREBINDS = ("CONSUMER_SECTIONS",)\n'}, 'derived/a.py', 'CONSUMER_SECTIONS')
+        rejected('shadow', {'a.py': 'def add_consumer_routes(*_): pass\n'}, 'shadow/a.py', 'fragments.py')  # defined after this file
     finally:
         namespace.clear(); namespace.update(saved); scratch.cleanup()
 
 
 FORM_CONTROLS.append(registry_controls)
-load_forms(FORMS_DIRECTORY)
+_derive()
