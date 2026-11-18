@@ -129,6 +129,7 @@ import Solidity.Examples.DeclarationReduction
 import Solidity.Examples.DependentReduction
 import Solidity.Examples.Docs.ProseCalibrated.Allowance
 import Solidity.Examples.ElabTotal.Measure
+import Solidity.Examples.ElabTotal.Stmts
 import Solidity.Examples.ExactReduction
 import Solidity.Examples.ExactUpdates
 import Solidity.Examples.ExampleNames
