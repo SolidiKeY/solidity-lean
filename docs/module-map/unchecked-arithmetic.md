@@ -11,6 +11,9 @@
 | `Correctness/Sim/Lang.lean` | Instantiate the simulation framework with the existing Lang adapter. |
 | `Correctness/Sim/Observation.lean` | Observation diagrams over the roadmap's unchanged prefix order. |
 | `Correctness/Sim/Steps.lean` | Finite transition closures and reusable simulation diagrams. |
+| `Correctness/Lowering/Sim/Match/Relations.lean` | The lowering diagram's value, global and frame relations, context alignment and total matching of locals and globals. |
+| `Correctness/Lowering/Sim/Match.lean` | The lowering diagram candidate (`Sim.diagram`): its association, relation-only laws, total initial matching and `caller_bound`. |
+| `Examples/Lowering/Sim/Match.lean` | Association smoke of the lowering diagram on one standalone loop (`Assoc` when placed), and uses of its declarations. |
 | `Correctness/Lowering/Sim/Session/Source.lean` | A small-step presentation of the Source session semantics with run coverage and realization. |
 | `Examples/Lowering/Sim/Session/Source.lean` | The source session machine on two small programs: coverage, realization and checked paths. |
 | `Correctness/Lowering/Sim/Session/Target.lean` | The intrinsic session run's machine covers and realizes it: `covers` (every bound's run prefix is reached in the machine with the bound's failures), `realizes` (every reachable state is a `Prefix.Le`-prefix of the run at a bound with the same failures), and their readings `covers_noFail` / `realizes_noFail` in the machine without failures. |
