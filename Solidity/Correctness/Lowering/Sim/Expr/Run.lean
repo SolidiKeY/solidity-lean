@@ -16,7 +16,7 @@ that the arms preserve.
   `S`, with the obligations of the callbacks an arm calls as hypotheses.
 
 `Pieces` is the local stand-in for the statement-level relation of the v2 case
-interface (`ls1c2-cases-v2`, `Sim/Match/CasesV2.lean`, not landed): the arms'
+interface (plan step ls1c2-cases-v2, not landed): the arms'
 facts are instantiated at it once it lands. The whole-body site obligations
 (`SiteSim`, `SiteSim₂`) are not `Pieces`: they are not closed under
 concatenation.
