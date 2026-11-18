@@ -27,6 +27,12 @@
 # pass; no execution, pass, proof, driver, relay, read, import or output credit.
 import ast, re, shlex
 
+# The fragments.py, roles.py and registry.py names this form uses, bound to the same objects (the loader sees no
+# rebinding) so that they are defined names here; the derived REVIEWED_LEAN_FIXTURES is read at call time.
+_native_driver_namespace = globals()
+(FIXTURE_COMMAND, FORM_CONTROLS, LATE_SOURCE_ROLE_KINDS, LEAN_FIXTURE_KIND, REVIEWED_LEAN_CHECKS, SOURCE_ROLE_KINDS, _LEAN_NAME, _REVIEW_DIRECTORIES, _clean, _introduced, _outside_root_libraries, _plain_lines, _review_table, _role_current, _role_schema, canonical, register_source_role) = (
+    _native_driver_namespace[name] for name in ('FIXTURE_COMMAND', 'FORM_CONTROLS', 'LATE_SOURCE_ROLE_KINDS', 'LEAN_FIXTURE_KIND', 'REVIEWED_LEAN_CHECKS', 'SOURCE_ROLE_KINDS', '_LEAN_NAME', '_REVIEW_DIRECTORIES', '_clean', '_introduced', '_outside_root_libraries', '_plain_lines', '_review_table', '_role_current', '_role_schema', 'canonical', 'register_source_role'))
+
 NATIVE_DRIVER_KIND = 'native-driver-source-role'
 NATIVE_DRIVER_PREFIX = 'native-driver:'
 NATIVE_DRIVER_TOOLS = ('lean_diagnostic_messages',)
@@ -277,7 +283,7 @@ def native_driver_controls(env):
     # The audited witnesses: 2 sources, 3 driver lines, disjoint from the Lean gate roles.
     assert len(NATIVE_DRIVER_SOURCES) == 2 and len(NATIVE_DRIVER_INVOCATIONS) == 3
     assert {(p, b) for p, b, _ in NATIVE_DRIVER_SOURCES} == {r[:2] for r in NATIVE_DRIVER_INVOCATIONS}
-    assert not {p for p, _, _ in NATIVE_DRIVER_SOURCES} & {p for p, _, _ in REVIEWED_LEAN_CHECKS | REVIEWED_LEAN_FIXTURES}
+    assert not {p for p, _, _ in NATIVE_DRIVER_SOURCES} & {p for p, _, _ in REVIEWED_LEAN_CHECKS | _native_driver_namespace['REVIEWED_LEAN_FIXTURES']}
     assert ('tests/h62/item2/audit-abi-world/H62AbiWorld/CodecWitnesses.lean', '964af62f95acb6dae17a164a50236a782ff23701',
             'scripts/h62/item2/audit-abi-world/measure.py', 'b054f2db8c19e7127f4e7856070e625775d9b5b0', 'ae2df853a300afd910e86bc09e6c82eca3999141',
             18, 'mcp-relay', 'scripts/h62/item2/audit-abi-world/mcp_call.py', '2ca1426faff254135184084f149b45ddfbd0397a',
