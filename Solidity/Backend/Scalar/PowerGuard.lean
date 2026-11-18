@@ -73,18 +73,6 @@ def cellAccept (w : Fin 32) (i : Fin 255) (a n : Word) : Bool :=
   decide (n.toNat = i.val+1) && decide (a.toNat ≤ naturalThresholds[w][i])
 
 
-private theorem stepDup3 (a b c : Word) (tail : Stack) :
-    step (.op (.DUP ⟨2, by decide⟩)) (a::b::c::tail) = some (c::a::b::c::tail) := rfl
-private theorem stepEq (a b : Word) (tail : Stack) :
-    step (.op .EQ) (a::b::tail) = some (flag (a==b)::tail) := rfl
-private theorem stepLt (a b : Word) (tail : Stack) :
-    step (.op .LT) (a::b::tail) = some (flag (decide (a.toNat<b.toNat))::tail) := rfl
-private theorem stepZero (a : Word) (tail : Stack) :
-    step (.op .ISZERO) (a::tail) = some (flag (a==0)::tail) := rfl
-private theorem stepAnd (a b : Word) (tail : Stack) :
-    step (.op .AND) (a::b::tail) = some ((a &&& b)::tail) := rfl
-private theorem stepOr (a b : Word) (tail : Stack) :
-    step (.op .OR) (a::b::tail) = some ((a ||| b)::tail) := rfl
 
 theorem powerCell_correct (w : Fin 32) (i : Fin 255)
     (acc : Bool) (a n : Word) (tail : Stack) :

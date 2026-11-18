@@ -1,5 +1,6 @@
 import Solidity.Backend.PrimitivePackets.SignedCheckedMul.Agreement
 import Solidity.Backend.PrimitivePackets.SignedDiv.Controls
+import Solidity.Backend.PrimitivePackets.PanicBytes
 
 /-! Selected-code controls for checked int256 multiplication. Every joint control
 instantiates the arbitrary-state `success`/`overflow` theorems at the populated
@@ -115,7 +116,8 @@ theorem low_fuel (p : Roadmap.Pipeline) :
  (.binary .mul (.local .here) (.local (.there .here)))).run (SignedDiv.Controls.source seven two)=
  (.error .timeout,SignedDiv.Controls.source seven two) := by rfl
 
-theorem exact_panic : Source.panicData .arithmetic=[78,72,123,113]++List.replicate 31 0++[17] := by decide
+theorem exact_panic : Source.panicData .arithmetic=[78,72,123,113]++List.replicate 31 0++[17] :=
+  PanicBytes.exact_panic_bytes
 /-- info: 'Solidity.Backend.PrimitivePackets.SignedCheckedMul.source_success' depends on axioms: [propext, Classical.choice, Quot.sound] -/
 #guard_msgs (whitespace := lax) in #print axioms Solidity.Backend.PrimitivePackets.SignedCheckedMul.source_success
 /-- info: 'Solidity.Backend.PrimitivePackets.SignedCheckedMul.source_overflow' depends on axioms: [propext, Classical.choice, Quot.sound] -/

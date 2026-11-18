@@ -165,15 +165,4 @@ theorem underflow_does_not_wrap (tail : List Word) :
   cases h
 
 end Fixture
-
-theorem exact_panic_bytes : Source.panicData .arithmetic =
-    [0x4e,0x48,0x7b,0x71] ++ List.replicate 31 0 ++ [0x11] := by
-  first | decide | rfl | omega
-
-theorem panic_not_truncated : Source.panicData .arithmetic ≠
-    [0x4e,0x48,0x7b,0x71,0x11] := by
-  first | decide | rfl | omega
-
-theorem panic_not_empty : Source.panicData .arithmetic ≠ [] := by
-  first | decide | rfl | omega
 end Solidity.Backend.PrimitivePackets.CheckedSub.Controls

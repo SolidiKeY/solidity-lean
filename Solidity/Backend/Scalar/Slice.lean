@@ -277,6 +277,36 @@ theorem step_pushWord (w : Word) (st : Stack) :
     exact Nat.mod_eq_of_lt w.isLt
   rw [hw]
 
+/-! One-step facts for the opcodes the scalar guards emit. -/
+theorem stepDup1 (a : Word) (tail : Stack) :
+    step (.op (.DUP ⟨0, by decide⟩)) (a::tail) = some (a::a::tail) := rfl
+theorem stepDup2 (a b : Word) (tail : Stack) :
+    step (.op (.DUP ⟨1, by decide⟩)) (a::b::tail) = some (b::a::b::tail) := rfl
+theorem stepDup3 (a b c : Word) (tail : Stack) :
+    step (.op (.DUP ⟨2, by decide⟩)) (a::b::c::tail) = some (c::a::b::c::tail) := rfl
+theorem stepSwap1 (a b : Word) (tail : Stack) :
+    step (.op (.SWAP ⟨0, by decide⟩)) (a::b::tail) = some (b::a::tail) := rfl
+theorem stepPop (a : Word) (tail : Stack) :
+    step (.op .POP) (a::tail) = some tail := rfl
+theorem stepAdd (a b : Word) (tail : Stack) :
+    step (.op .ADD) (a::b::tail) = some ((a+b)::tail) := rfl
+theorem stepSub (a b : Word) (tail : Stack) :
+    step (.op .SUB) (a::b::tail) = some ((a-b)::tail) := rfl
+theorem stepMul (a b : Word) (tail : Stack) :
+    step (.op .MUL) (a::b::tail) = some ((a*b)::tail) := rfl
+theorem stepEq (a b : Word) (tail : Stack) :
+    step (.op .EQ) (a::b::tail) = some (flag (a==b)::tail) := rfl
+theorem stepLt (a b : Word) (tail : Stack) :
+    step (.op .LT) (a::b::tail) = some (flag (decide (a.toNat<b.toNat))::tail) := rfl
+theorem stepSlt (a b : Word) (tail : Stack) :
+    step (.op .SLT) (a::b::tail) = some (flag (decide (a.toInt<b.toInt))::tail) := rfl
+theorem stepZero (a : Word) (tail : Stack) :
+    step (.op .ISZERO) (a::tail) = some (flag (a==0)::tail) := rfl
+theorem stepAnd (a b : Word) (tail : Stack) :
+    step (.op .AND) (a::b::tail) = some ((a &&& b)::tail) := rfl
+theorem stepOr (a b : Word) (tail : Stack) :
+    step (.op .OR) (a::b::tail) = some ((a ||| b)::tail) := rfl
+
 /-- The emitted immediate is really 33 bytes including its opcode. -/
 theorem encode_pushWord (w : Word) :
     (pushWord w).encode = 0x7f :: (toBytesBE 32 w.toNat).toList := rfl

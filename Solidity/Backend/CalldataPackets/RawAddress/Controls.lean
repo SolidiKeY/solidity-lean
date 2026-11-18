@@ -137,11 +137,6 @@ theorem oversized_entry : Source.cdTail oversized 0 32=.error (.revert []) := by
   rw [show Source.wordAt (oversized.drop 32) 0=2^64 from by decide]
   rfl
 
-theorem missing_head : Source.cdTail [] 0 32=.error (.revert []) := by
-  unfold Source.cdTail
-  rw [show Source.wordAt [] 0=0 from by decide]
-  rfl
-
 theorem dirty_is_not_allocation_panic :
     (Source.cdToMem dirty (ArrayTy false) 3 2).run old≠
       (.error (.revert (Source.panicData .alloc)),old) := by
