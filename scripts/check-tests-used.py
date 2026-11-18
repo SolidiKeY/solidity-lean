@@ -551,16 +551,18 @@ def read_routes(catalog):
 
 
 # Audited historical trace collectors, each bound to the exact commit holding
-# it. 74a8ac05 (d76458a00) -> current f01d503a (8d11968d4) adds only the
-# off-by-default readonly_symlinks audit (H1001): module-entry observation never
-# enables it, the lifted strace argument splitter and path resolution are
-# byte-for-byte equivalent, and source_code_hashes/code_fingerprint are
-# unchanged, so claims recorded under 74a8ac05 keep their meaning (H1010).
+# it. 74a8ac05 (d76458a00) -> f01d503a (8d11968d4) adds only the off-by-default
+# readonly_symlinks audit (H1001) with byte-equivalent path resolution and code
+# hashes. f01d503a -> current only taints more path spellings ('..', '//',
+# /proc, symlinkat; H1008): it certifies a subset and module code hashes are
+# unchanged, so claims under these pins keep their meaning (H1010).
 REVIEWED_MODULE_COLLECTORS = {
     '42027e7c42dac3912c1f8ef468a6d99bddb8075172c545b6a587692b039cff32':
         'e6d215dff997377f70e17ce50d04b8eb12284b16',
     '74a8ac05edadf4a4a1cf901134a8c23b24a844284ee8fe2a5f4e6fba274d251c':
         'd76458a00eef321c6f34cc5f7f76e0dd02ff31b9',
+    'f01d503a7acdfd5e19ae3ee71d6b128deb0bfcc979569e2adf45fe5976115dd7':
+        '8d11968d41505c0dbee15841a312c041f3465640',
 }
 
 
@@ -2146,7 +2148,7 @@ def module_entry_schema_controls():
         current=hashlib.sha256(helper.read_bytes()).hexdigest()
         assert reviewed_module_collector(repo,current,current) and not reviewed_module_collector(repo,'0'*64,current)
         assert not reviewed_module_collector(repo,['74a8ac05edadf4a4a1cf901134a8c23b24a844284ee8fe2a5f4e6fba274d251c'],current)
-        assert len(REVIEWED_MODULE_COLLECTORS)==2 and all(re.fullmatch('[0-9a-f]{64}',k) and re.fullmatch('[0-9a-f]{40}',v) for k,v in REVIEWED_MODULE_COLLECTORS.items())
+        assert len(REVIEWED_MODULE_COLLECTORS)==3 and all(re.fullmatch('[0-9a-f]{64}',k) and re.fullmatch('[0-9a-f]{40}',v) for k,v in REVIEWED_MODULE_COLLECTORS.items())
         for pin in REVIEWED_MODULE_COLLECTORS:  # the synthetic repository lacks the commits
             try: reviewed_module_collector(repo,pin,current)
             except ValueError as error: assert 'UNVERIFIABLE reviewed module collector source' in str(error)
