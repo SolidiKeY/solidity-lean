@@ -1,0 +1,25 @@
+{
+ "Solidity/Examples/Goals/PanicSource.lean:Solidity.Correctness.Panic.dispatch_fallback_run": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Examples/Goals/PanicSource.lean:Solidity.Correctness.Panic.fnDispatchWith_fallback": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Examples/Goals/PanicSource.lean:Solidity.Correctness.Panic.fnMemoryDispatchWith_fallback": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Examples/Goals/PanicSource.lean:Solidity.Correctness.Panic.fnTupleDispatchWith_fallback": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Examples/Goals/PanicSource.lean:Solidity.Correctness.Panic.receiveSelfBodyWith_plain": [
+  "propext"
+ ],
+ "Solidity/Examples/Goals/PanicSource.lean:Solidity.Correctness.Panic.trySelfBodyWith_instrumented": [
+  "propext"
+ ]
+}
