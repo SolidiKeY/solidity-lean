@@ -213,7 +213,7 @@ def _observe(graph, original, row, frames, target, operation, kind, hop, details
     for caller, callee in zip(frames, frames[1:]):
         chain = {**chain, 'edges': chain['edges'] + [{'source': caller['path'], 'target': callee['path'],
             'line': caller['line'], 'operation': hop, 'kind': 'executes', 'validated_for': identity}]}
-        graph.observed.append((callee['path'], chain))
+        if details['kind'] != 'persisted-read': graph.observed.append((callee['path'], chain))
     reader = frames[-1]
     chain = {**chain, 'edges': chain['edges'] + [{'source': reader['path'], 'target': target, 'line': reader['line'],
         'operation': operation, 'kind': kind, 'validated_for': identity}]}
@@ -237,13 +237,12 @@ def _historical_objects(classifier, repo, revision, pins):
 
 
 def persisted_reads(classifier, graph, catalog, rows):
-    """H938: a validated read declaration persists while every object is unchanged.
+    """H938: a validated read persists while every object is unchanged.
 
-    The row is an ordinary read definition recorded at its validation revision.
-    At that revision it is processed exactly like a read; at any later --ref it
-    credits the read only if the runner definition at that revision, every frame
-    and the target are the same blobs now and at the recorded revision. Scope
-    eligibility is the definition's own reviewed scope; nothing is widened.
+    At its validation revision the row is an ordinary read; at a later --ref it
+    credits its target alone (frames are provenance, H1108) if the runner
+    definition, every frame and the target are the same blobs now and then, and
+    the target is in the definition's own reviewed scope.
     """
     repo = graph.repo
     for row in rows:
