@@ -1,0 +1,2 @@
+| `Yul/Layout/ScalarPilot.lean` | `scalarPilot`: `geometry` satisfies all 4 fields of `Shrink.LayoutView.ScalarPilot`, for every allocator; `scalarPathRead` and `scalarPathWrite` in both slot regions through the `.scalar` case of `Geometry.read`/`Geometry.write`. |
+| `Examples/YulLayout/ScalarPilot.lean` | Checks of `scalarPilot` on small concrete inputs: a transient path read, a storage path write, a memory word and a one-byte slot footprint. |

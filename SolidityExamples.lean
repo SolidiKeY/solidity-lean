@@ -192,6 +192,7 @@ import Solidity.Examples.LexVariant
 import Solidity.Examples.LinearDecision
 import Solidity.Examples.Lowering.Sim.Cases
 import Solidity.Examples.Lowering.Sim.Match
+import Solidity.Examples.Lowering.Sim.Session.Binding
 import Solidity.Examples.Lowering.Sim.Session.Source
 import Solidity.Examples.Lowering.Sim.Session.Target
 import Solidity.Examples.MemoryFloor
@@ -435,4 +436,6 @@ import Solidity.Examples.TypedLinear
 import Solidity.Examples.Verify
 import Solidity.Examples.YulLayout.Geometry
 import Solidity.Examples.YulLayout.InstancesMemory
+import Solidity.Examples.YulLayout.LawsRead
 import Solidity.Examples.YulLayout.LawsWrite
+import Solidity.Examples.YulLayout.ScalarPilot

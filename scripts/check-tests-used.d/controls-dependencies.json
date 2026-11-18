@@ -1301,6 +1301,114 @@
         },
         "purpose": "Exact source input handed by a kept consumer to the reviewed check-read operation. Source/consumption role only; unavailable historical archives or snapshots do not pass. No invocation, execution, passing run, data-read anchor, generation, output completeness, compatibility, proof or runtime credit.",
         "source_blob": "dad642373f549afefaff18069c39932b9eee8e00"
+      },
+      {
+        "command": [
+          "python3",
+          "-B",
+          "scripts/h62/item2/audit-theories/test_current_replay.py"
+        ],
+        "entry": {
+          "blob": "57f9d543e4e0c5108f3392bf51b02152e8245877",
+          "import_line": 4,
+          "path": "scripts/h62/item2/audit-theories/test_current_replay.py"
+        },
+        "input_revision": "37d4fd3ce32e5a2b433a312d3ca2d3f150892d2a",
+        "kind": "handoff-witness-role",
+        "module": {
+          "blob": "be36e9615801d394d83697e3ba58a07fea4ae568",
+          "line": 24,
+          "path": "scripts/h62/item2/audit-theories/paired_evidence.py"
+        },
+        "operation": "pinned-history-show",
+        "path": "scripts/h62/item2/audit-theories/handoff/CONFLICT-RESOLUTION-20261108.md",
+        "purpose": "Exact reviewed witness bound to the pinned historical Git read or the literal repository-root main-path read, and to the current entry/import identity. Source retention only; no consumer route, invocation, execution, passing run, read anchor, fixture, output, ownership, compatibility, proof or runtime credit. External archives remain unavailable.",
+        "read": {
+          "line": 38,
+          "path": "scripts/h62/item2/audit-theories/test_current_replay.py"
+        },
+        "source_blob": "e824c7f9512b45028b20371048ad0de6fb75d436"
+      },
+      {
+        "command": [
+          "python3",
+          "-B",
+          "scripts/h62/item2/audit-theories/test_current_replay.py"
+        ],
+        "entry": {
+          "blob": "57f9d543e4e0c5108f3392bf51b02152e8245877",
+          "import_line": 4,
+          "path": "scripts/h62/item2/audit-theories/test_current_replay.py"
+        },
+        "input_revision": "37d4fd3ce32e5a2b433a312d3ca2d3f150892d2a",
+        "kind": "handoff-witness-role",
+        "module": {
+          "blob": "be36e9615801d394d83697e3ba58a07fea4ae568",
+          "line": 22,
+          "path": "scripts/h62/item2/audit-theories/paired_evidence.py"
+        },
+        "operation": "pinned-history-show",
+        "path": "scripts/h62/item2/audit-theories/handoff/original-frozen-assignment.txt",
+        "purpose": "Exact reviewed witness bound to the pinned historical Git read or the literal repository-root main-path read, and to the current entry/import identity. Source retention only; no consumer route, invocation, execution, passing run, read anchor, fixture, output, ownership, compatibility, proof or runtime credit. External archives remain unavailable.",
+        "read": {
+          "line": 38,
+          "path": "scripts/h62/item2/audit-theories/test_current_replay.py"
+        },
+        "source_blob": "18e25bf3280604b02fc0877400b343a4749d9ea3"
+      },
+      {
+        "command": [
+          "python3",
+          "-B",
+          "scripts/h62/item2/audit-theories/test_current_replay.py"
+        ],
+        "entry": {
+          "blob": "57f9d543e4e0c5108f3392bf51b02152e8245877",
+          "import_line": 4,
+          "path": "scripts/h62/item2/audit-theories/test_current_replay.py"
+        },
+        "input_revision": "37d4fd3ce32e5a2b433a312d3ca2d3f150892d2a",
+        "kind": "handoff-witness-role",
+        "module": {
+          "blob": "be36e9615801d394d83697e3ba58a07fea4ae568",
+          "line": 23,
+          "path": "scripts/h62/item2/audit-theories/paired_evidence.py"
+        },
+        "operation": "pinned-history-show",
+        "path": "scripts/h62/item2/audit-theories/handoff/original-work-and-backfill-queue.md",
+        "purpose": "Exact reviewed witness bound to the pinned historical Git read or the literal repository-root main-path read, and to the current entry/import identity. Source retention only; no consumer route, invocation, execution, passing run, read anchor, fixture, output, ownership, compatibility, proof or runtime credit. External archives remain unavailable.",
+        "read": {
+          "line": 38,
+          "path": "scripts/h62/item2/audit-theories/test_current_replay.py"
+        },
+        "source_blob": "73326fc36de3421854174f16e5cf62a7976ca29e"
+      },
+      {
+        "command": [
+          "python3",
+          "-B",
+          "tests/h62/item6/migrate-root-gate/test_public_api_inventory.py"
+        ],
+        "entry": {
+          "blob": "c4e0b487f0a70e1d8f6435bc8ea8a38e6b5ac7cd",
+          "import_line": 20,
+          "path": "tests/h62/item6/migrate-root-gate/test_public_api_inventory.py"
+        },
+        "input_revision": "37d4fd3ce32e5a2b433a312d3ca2d3f150892d2a",
+        "kind": "handoff-witness-role",
+        "module": {
+          "blob": "a5d6dde5be926751371f820ea6afb463281d515a",
+          "line": 349,
+          "path": "scripts/h62/item6/migrate-root-gate/public-api-inventory.py"
+        },
+        "operation": "main-root-read",
+        "path": "scripts/h62/item6/migrate-root-gate/bulk-manifest.json",
+        "purpose": "Exact reviewed witness bound to the pinned historical Git read or the literal repository-root main-path read, and to the current entry/import identity. Source retention only; no consumer route, invocation, execution, passing run, read anchor, fixture, output, ownership, compatibility, proof or runtime credit. External archives remain unavailable.",
+        "read": {
+          "line": 200,
+          "path": "scripts/h62/item6/migrate-root-gate/public-api-inventory.py"
+        },
+        "source_blob": "225df645d3ebfc2903b2f54fce53b2e2f8295e87"
       }
     ]
   },
