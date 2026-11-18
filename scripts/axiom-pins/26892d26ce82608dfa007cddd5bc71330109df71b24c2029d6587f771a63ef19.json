@@ -1,6 +1,0 @@
-{
- "Solidity/Correctness/Panic/Dispatch.lean:Solidity.Correctness.Panic.fnDispatchWith_fallback": [
-  "Quot.sound",
-  "propext"
- ]
-}

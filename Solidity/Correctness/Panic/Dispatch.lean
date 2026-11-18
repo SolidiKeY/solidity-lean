@@ -248,9 +248,4 @@ theorem trySelfBodyWith_instrumented (rc : PanicProducerRec C) (g : String) {Γ 
     | exact Post.ret (Or.inr ⟨_, _, _, ‹_›, rfl⟩)
     | post_step
 
-/--
-info: 'Solidity.Correctness.Panic.fnDispatchWith_fallback' depends on axioms: [propext, Quot.sound]
--/
-#guard_msgs in #print axioms fnDispatchWith_fallback
-
 end Solidity.Correctness.Panic
