@@ -308,6 +308,42 @@ class HostCache(unittest.TestCase):
         d.link_build(self.top, self.lib, [u])
         self.assertEqual((self.lib / "Solidity/Evm/MemoryStructDefaultPlan.olean").read_text(), "local")
 
+    def test_stale_output_beside_current_trace_is_not_linked(self):
+        """H1165: Shrink's trace in the tree under test names the current olean, while a
+        `.olean.hash` left by an older build and Lake's inputs jsonl (from the shared checkout's
+        pre-split build) name the stale one, which is also in the cache."""
+        u = self.touched_importer()
+        cur, old = "%016x" % 596291098603368863, "%016x" % 16904971609354165623
+        (self.build / "MemoryStructDefaultPlan.trace").write_text(
+            json.dumps({"depHash": "15601523054474717107", "outputs": {"o": 596291098603368863}}))
+        (self.build / "MemoryStructDefaultPlan.olean.hash").write_text(old)
+        arts = self.xdg / "lake/artifacts"; (self.xdg / "lake/inputs").mkdir()
+        (self.xdg / "lake/inputs/solidity.jsonl").write_text(
+            json.dumps({"i": "15601523054474717107", "o": {"o": 16904971609354165623}}) + "\n")
+        (arts / (old + ".olean")).write_text("stale")
+        with self.assertRaises(d.SetupError) as e: d.link_build(self.top, self.lib, [u])
+        self.assertIn(self.M, str(e.exception)); self.assertIn(cur, str(e.exception))
+        self.assertFalse(os.path.lexists(self.lib / "Solidity/Evm/MemoryStructDefaultPlan.olean"))
+        (arts / (cur + ".olean")).write_text("current")
+        d.link_build(self.top, self.top.parent / "lib2", [u])
+        self.assertEqual((self.top.parent / "lib2/Solidity/Evm/MemoryStructDefaultPlan.olean").read_text(), "current")
+
+    def test_inputs_jsonl_with_two_outputs_is_stale(self):
+        """A trace without outputs whose input hash Lake's jsonl maps to two oleans is refused;
+        a single mapping is followed."""
+        u = self.touched_importer()
+        (self.build / "MemoryStructDefaultPlan.trace").write_text(json.dumps({"depHash": 7}))
+        arts = self.xdg / "lake/artifacts"; (self.xdg / "lake/inputs").mkdir()
+        (arts / "00000000000000aa.olean").write_text("current")
+        (arts / "00000000000000bb.olean").write_text("stale")
+        jl = self.xdg / "lake/inputs/solidity.jsonl"
+        jl.write_text(json.dumps({"i": 7, "o": "00000000000000aa"}) + "\n")
+        d.link_build(self.top, self.lib, [u])
+        self.assertEqual((self.lib / "Solidity/Evm/MemoryStructDefaultPlan.olean").read_text(), "current")
+        jl.write_text(jl.read_text() + json.dumps({"i": 7, "o": "00000000000000bb"}) + "\n")
+        with self.assertRaises(d.SetupError) as e: d.link_build(self.top, self.top.parent / "lib2", [u])
+        self.assertIn(self.M, str(e.exception))
+
     def test_whole_library_closure_is_checked(self):
         """The `import Solidity` run checks the root's closure too (failure 1 was reached there)."""
         self.touched_importer()

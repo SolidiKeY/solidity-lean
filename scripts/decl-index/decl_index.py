@@ -187,6 +187,36 @@ def trace_hashes(o):
     return []
 
 
+def trace_dep_hash(t):
+    """The input hash (`depHash`) a module's trace records, or None."""
+    try: v = json.loads(t.read_text()).get("depHash")
+    except (OSError, ValueError, AttributeError): return None
+    return None if v is None or isinstance(v, bool) else str(v)
+
+
+def jsonl_outputs(arts, dep):
+    """The olean hashes Lake's inputs jsonl (`<cache>/inputs/*.jsonl`, next to each artifact
+    directory in `arts`) maps the input hash `dep` to. Used only when the trace names no output:
+    a single answer is taken; two different outputs for one input hash mean one was built from
+    an older source (H1165: Shrink's 16904971609354165623 before the gm2 split), so the module
+    gets the impossible hash `ambiguous:<dep>` and is reported as stale rather than guessed."""
+    if dep is None: return []
+    found = []
+    for art in arts:
+        for f in sorted((art.parent / "inputs").glob("*.jsonl")) if (art.parent / "inputs").is_dir() else []:
+            try: lines = f.read_text().splitlines()
+            except OSError: continue
+            for line in lines:
+                try: r = json.loads(line)
+                except ValueError: continue
+                if not isinstance(r, dict) or str(r.get("i", r.get("depHash"))) != dep: continue
+                o = r.get("o", r.get("outputs"))
+                o = o.get("o", o) if isinstance(o, dict) else o
+                for h in trace_hashes(o):
+                    if h not in found: found.append(h)
+    return found if len(found) <= 1 else ["ambiguous:" + dep]
+
+
 def build_olean_matches(stem, hashes):
     """Whether the real .lake/build olean of `stem` is the one its trace names (H1086): its
     `.olean.hash` (rewritten by Lake when it restores an artifact) is one of the trace's
@@ -225,12 +255,16 @@ def _link_pass(build, lib, arts, done, stale=None):
         except (OSError, ValueError, AttributeError): o = None
         srcs, exts = [], set()
         named = trace_hashes(o) if t.suffix == ".trace" else []
-        for h in named + hash_file_hashes(stem):
+        if not named and t.suffix == ".trace": named = jsonl_outputs(arts, trace_dep_hash(t))
+        # H1165: the trace of the tree under test decides; a `.hash` file or Lake's inputs jsonl
+        # naming another output is a leftover of an older source and is never linked.
+        for h in named or hash_file_hashes(stem):
             for art, n in names.get(h, []):
                 ext = n.split(".", 1)[1]
                 if ext.startswith("olean") and ext not in exts and (art / n).is_file():
                     srcs.append((art / n, ext)); exts.add(ext)
-        if "olean" not in exts and named and not build_olean_matches(stem, set(named)):
+        if "olean" not in exts and named and (named[0].startswith("ambiguous:")
+                                              or not build_olean_matches(stem, set(named))):
             stale.setdefault(".".join(rel.parts), named)
             continue
         if "olean" not in exts:
