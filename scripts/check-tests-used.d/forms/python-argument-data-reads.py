@@ -21,6 +21,7 @@
 # output or proof credit; the committed-cli root, the other source-only roles
 # and their premises are unchanged.
 import ast, hashlib
+from pathlib import Path
 # Checker names this form uses, bound by fragments.py, roles.py and registry.py
 # (rebound to the same objects, so the registry's collision check is unaffected).
 (CONSUMER_HANDLERS, FORM_CONTROLS, PERSISTED_OPERATION, _check_lines, _current, _historical_objects, _module_name, _rooted,
@@ -55,21 +56,46 @@ def _py_arg_main(tree):
     return mains[0] if len(mains) == 1 else None
 
 
-def _py_arg_external_guard(function):
-    """main() calls <parser>.error when <args>.output.resolve().is_relative_to(...)."""
-    for node in ast.walk(function):
-        if not isinstance(node, ast.If) or not isinstance(node.test, ast.Call) or len(node.test.args) != 1: continue
+def _py_arg_enclosing(function):
+    """id(node) -> enclosing nodes, for every node of main() outside nested definitions."""
+    result = {}; stack = [(function, ())]
+    while stack:
+        node, outer = stack.pop(); result[id(node)] = outer
+        for child in ast.iter_child_nodes(node):
+            if not isinstance(child, (ast.FunctionDef, ast.AsyncFunctionDef, ast.Lambda, ast.ClassDef)): stack.append((child, outer + (node,)))
+    return result
+
+
+def _py_arg_external_guard(function, root):
+    """A direct statement of main(): if <args>.output.resolve().is_relative_to(<root>): <parser>.error(...),
+    <parser> bound in main() to argparse.ArgumentParser() and <root> the target's root expression."""
+    parsers = {s.targets[0].id for s in function.body if isinstance(s, ast.Assign) and len(s.targets) == 1 and isinstance(s.targets[0], ast.Name)
+               and isinstance(s.value, ast.Call) and isinstance(s.value.func, ast.Attribute) and s.value.func.attr == 'ArgumentParser'
+               and isinstance(s.value.func.value, ast.Name) and s.value.func.value.id == 'argparse'}
+    for node in function.body:
+        if not isinstance(node, ast.If) or node.orelse or not isinstance(node.test, ast.Call) or len(node.test.args) != 1 or node.test.keywords: continue
         test = node.test.func
         if not (isinstance(test, ast.Attribute) and test.attr == 'is_relative_to' and isinstance(test.value, ast.Call)
                 and not test.value.args and isinstance(test.value.func, ast.Attribute) and test.value.func.attr == 'resolve'
                 and isinstance(test.value.func.value, ast.Attribute) and test.value.func.value.attr == 'output'
-                and isinstance(test.value.func.value.value, ast.Name)): continue
+                and isinstance(test.value.func.value.value, ast.Name) and ast.dump(node.test.args[0]) == ast.dump(root)): continue
         body = node.body
         if (len(body) == 1 and isinstance(body[0], ast.Expr) and isinstance(body[0].value, ast.Call)
                 and isinstance(body[0].value.func, ast.Attribute) and body[0].value.func.attr == 'error'
-                and isinstance(body[0].value.func.value, ast.Name)):
+                and isinstance(body[0].value.func.value, ast.Name) and body[0].value.func.value.id in parsers):
             return True
     return False
+
+
+def _py_arg_main_call(tree, main_line):
+    """main() is called at main_line at module level or directly under if __name__ == '__main__'."""
+    def call(n):
+        return (isinstance(n, ast.Expr) and isinstance(n.value, ast.Call) and isinstance(n.value.func, ast.Name) and n.value.func.id == 'main'
+                and not n.value.args and not n.value.keywords and n.lineno == main_line)
+    def dunder(test):
+        return (isinstance(test, ast.Compare) and len(test.ops) == 1 and isinstance(test.ops[0], ast.Eq) and len(test.comparators) == 1
+                and {ast.dump(test.left), ast.dump(test.comparators[0])} == {ast.dump(ast.Name('__name__', ast.Load())), ast.dump(ast.Constant('__main__'))})
+    return any(call(n) for n in tree.body) or any(isinstance(n, ast.If) and dunder(n.test) and any(call(b) for b in n.body) for n in tree.body)
 
 
 def python_argument_read_form(text, target, main_line, reader_line):
@@ -77,21 +103,18 @@ def python_argument_read_form(text, target, main_line, reader_line):
     try: tree = ast.parse(text)
     except (SyntaxError, ValueError, RecursionError): return False
     function = _py_arg_main(tree)
-    if function is None or function.decorator_list or not _py_arg_external_guard(function): return False
-    if not any(isinstance(n, ast.Expr) and isinstance(n.value, ast.Call) and isinstance(n.value.func, ast.Name)
-               and n.value.func.id == 'main' and not n.value.args and n.lineno == main_line
-               for node in tree.body for n in [node] + (node.body if isinstance(node, ast.If) else [])):
-        return False
-    nested = {id(n) for d in ast.walk(function) if d is not function and isinstance(d, (ast.FunctionDef, ast.AsyncFunctionDef, ast.Lambda, ast.ClassDef))
-              for n in ast.walk(d)}
+    if function is None or function.decorator_list or not _py_arg_main_call(tree, main_line): return False
+    enclosing = _py_arg_enclosing(function)
     for call in ast.walk(function):
-        if (id(call) in nested or not isinstance(call, ast.Call) or call.args or call.keywords or call.lineno != reader_line
+        if (id(call) not in enclosing or not isinstance(call, ast.Call) or call.args or call.keywords or call.lineno != reader_line
                 or not isinstance(call.func, ast.Attribute) or call.func.attr != 'read_text' or not isinstance(call.func.value, ast.Name)):
             continue
+        if any(isinstance(n, (ast.If, ast.While, ast.IfExp)) and isinstance(n.test, ast.Constant) for n in enclosing[id(call)]): continue
         name = call.func.value.id
         assigns = [n for n in tree.body if isinstance(n, ast.Assign) and len(n.targets) == 1 and isinstance(n.targets[0], ast.Name)
                    and n.targets[0].id == name and isinstance(n.value, ast.BinOp) and _rooted(n.value, target)]
-        if len(assigns) == 1 and _module_name(tree, name, assigns[0].lineno) is not None: return True
+        if (len(assigns) == 1 and _module_name(tree, name, assigns[0].lineno) is not None
+                and _py_arg_external_guard(function, assigns[0].value.left)): return True
     return False
 
 
@@ -223,7 +246,23 @@ def python_argument_read_controls(env):
         rejected(later, 'unbounded', reads(row(line=12)), standalone=[cli()])
         rejected(later, 'runner configuration', reads(row(main=15)), standalone=[cli()])
         rejected(later, 'differ at recorded revision', reads(dict(row(), input_revision=env['first'].ref)), standalone=[cli()])
-        # No committed-cli root (or one for other bytes), or a changed target or source: stale, no credit.
+        # The static form refuses each loosened shape (same line numbers as text).
+        G = '    if a.output.resolve().is_relative_to(ROOT): p.error("output must be off git")\n'
+        assert python_argument_read_form(text, T, 16, 13) and python_argument_read_form(text, O, 16, 15)
+        for variant in (text.replace(G, '    def never(): p.error("x") if a.output.resolve().is_relative_to(ROOT) else 0\n'),  # guard in a nested def
+                        text.replace(G, G.replace('is_relative_to(ROOT)', 'is_relative_to(Path("/x"))')),  # another root
+                        text.replace(G, G.replace('p.error', 'a.error')),  # not the parser
+                        text.replace('    elif PIN.read_text() != "pin\\n": raise SystemExit("drift")', '    if False: PIN.read_text()'),  # dead read
+                        text.replace('if __name__ == "__main__": main()', 'if False: main()')):  # dead entry call
+            assert variant != text and not python_argument_read_form(variant, T, 16, 13), variant
+        assert not python_argument_read_form(text.replace('    p = argparse.ArgumentParser()', '    p = object()'), T, 16, 13)
+        # The two reviewed programs show the form at their reviewed blobs (when this checkout has them).
+        checkout = Path(env['classifier']['__file__']).resolve().parent.parent
+        for source, source_blob, _, target, _, frame_rows, _, _ in saved:
+            try: data = env['classifier']['git'](checkout, 'cat-file', 'blob', source_blob)
+            except ValueError: continue
+            assert python_argument_read_form(data.decode(), target, frame_rows[0][2], frame_rows[-1][2]), source
+        # No committed-cli root, or a changed target or source: stale, no credit.
         REVIEWED_PY_ARG_READS = frozenset({review()})
         _, rows = run(later, reads(row()))
         assert rows[T]['class'] != 'keep'
