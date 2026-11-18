@@ -834,7 +834,7 @@ The P2 review note identified that private `.lake` wrapper locations were not
 reviewable from Git. The [wrapper index](../../tests/directruntime-20261104/native-browser/environment/wrapper-index.json)
 now maps twenty preserved source/configuration snapshots to repository paths,
 sealed archive members, sizes and SHA256 hashes. The
-[scripts README](../../tests/directruntime-20261104/native-browser/environment/scripts/README.md)
+[scripts README](../testing/directruntime/native-browser-environment-scripts.md)
 explains the original preparation, failed/recovered continuation and bounds.
 A read-only verifier checks the tracked snapshots and optionally their sealed
 archive members; it executes no historical wrapper.
@@ -886,7 +886,7 @@ unchanged; no Lean source, theorem, budget or trust boundary changed.
 H127 assigns this lane the H109 slow-example runner after two rejected Terra
 drafts. It does not transfer the rest of H55–H58 or clear runtime STOPs. The
 existing fourteen-module non-default slow library is retained. The
-[pre-use contract](../../tests/directruntime-20261104/native-browser/h109/RUNNER-DESIGN.md)
+[pre-use contract](../testing/directruntime/native-browser-runner-design.md)
 requires sealed source/Git/package/toolchain/cache inputs, actual kernel cgroup
 checks, serial execution, whole-container cleanup and precise timing/memory
 provenance. The exact H116 intake supersedes the provisional600 plan: only cumulative
@@ -1001,7 +1001,7 @@ required Identity diamond controls and the original 84-request journal inventory
 closure has matching native/WASM compiled bodies and an off-Git raw C archive.
 Browser negatives remain FAIL 13/14: a byte-identical diagnostic symbol map
 identifies repeated frame 2388 as BEnv.set in DecideScoped. No runtime or timing
-STOP is cleared. See tests/directruntime-20261104/native-browser/readbounds/README.md
+STOP is cleared. See [the readbounds guide](../testing/directruntime/native-browser-readbounds.md)
 for tracked wrappers. Commands, resources and sealed records are in the private
 coordination repository under `evidence/solidity-directruntime-20261104/native-browser/`.
 
