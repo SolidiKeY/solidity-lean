@@ -25,7 +25,7 @@ session semantics (`Semantics.IntrinsicSession.spec F`, for every
   **The accepted fragment** (`Compilation.Accepted`): every deployment and
   entry program is in t0's `ProgOk []`; a Source program is in the fragment
   (`InFragment`) when it has such a compilation.
-* **(b) The program-to-body binding** (`Bound`): every production run in the
+* **(b) The program-to-body binding** (`BodiesBound`): every production run in the
   fragment at a callee site of a function of the compilation is associated by
   `D.Assoc` with the `Body` whose resolved statement is the actual resolved body
   of the Source function of that name (`Body.ofResolved`), with the run's own raw
@@ -64,7 +64,7 @@ session semantics (`Semantics.IntrinsicSession.spec F`, for every
   its entry stubs (the calldata decoding as raw argument expressions, the
   return-data reader) are existential too, since no production ABI dispatcher
   over raw contracts exists. The bodies those entries run are the actual
-  production runs `Bound` constrains.
+  production runs `BodiesBound` constrains.
 * Function bodies are bound by name within the main contract; overloads and
   inherited functions share a name and are not told apart.
 -/
@@ -75,7 +75,7 @@ namespace Lowering
 
 open Solidity.Roadmap (Event Outcome SessionEnv Bytes)
 open Solidity.Roadmap.G49Final (Behaviour PassCorrect)
-open Solidity.Semantics.IntrinsicSession (Start Bound spec runOf)
+open Solidity.Semantics.IntrinsicSession (Start spec runOf)
 open Solidity.Goals.IntrinsicSession (Code)
 open Solidity.Correctness.Lowering.Sim.Session (SourceState sourceMachine)
 
@@ -186,7 +186,7 @@ def Site.Calls (C : Contract) (f : String) : Site → Prop
 /-- **The binding**: every production run in the fragment at a site of a
 function of the compilation is associated by `D` with the actual resolved body
 of the Source function of that name. -/
-def Bound (D : Diagram) {E : Source.Env} (P : Source.SrcProg E) (c : Compilation) : Prop :=
+def BodiesBound (D : Diagram) {E : Source.Env} (P : Source.SrcProg E) (c : Compilation) : Prop :=
   ∀ d rb, SrcFun P d rb →
     ∀ raw returnSlots scope before site (u : Emitted), u.C = c.C → site.Calls c.C d.name →
       Production (Body.ofResolved rb raw returnSlots scope before site) u → Accepted u →
@@ -197,9 +197,11 @@ def Bound (D : Diagram) {E : Source.Env} (P : Source.SrcProg E) (c : Compilation
 /-- **The environment map**: target and source both read session environments. -/
 def envAbs : SessionEnv → SessionEnv := id
 
+omit [FreshNames] in
 theorem envAbs_sound (F : Roadmap.Fixed) {E : Source.Env} (e : SessionEnv) :
     (spec F).lang.Allowed e → (Source.sourceLangEvents E).Allowed (envAbs e) := id
 
+omit [FreshNames] in
 theorem envAbs_onto (F : Roadmap.Fixed) {E : Source.Env} (e : SessionEnv) :
     (Source.sourceLangEvents E).Allowed e → ∃ e', (spec F).lang.Allowed e' ∧ envAbs e' = e :=
   fun h => ⟨e, h, rfl⟩
@@ -208,12 +210,13 @@ theorem envAbs_onto (F : Roadmap.Fixed) {E : Source.Env} (e : SessionEnv) :
 
 /-- **The resource transport**: the source horizon `n` needs the target bound of
 horizon `D.fuel n`, without resource failure. -/
-def transport (D : Diagram) (n : Nat) : Bound := { horizon := D.fuel n }
+def transport (D : Diagram) (n : Nat) : Semantics.IntrinsicSession.Bound := { horizon := D.fuel n }
 
 /-- The lowered world's behaviour: `Behaviour.ofLang` of the session spec, at
 bounds without resource failure. -/
 noncomputable def targetBehaviour (F : Roadmap.Fixed) (x : Start) : Behaviour :=
-  { Behaviour.ofLang (spec F).lang ((spec F).ofWorld x) with Admissible := Bound.NoFail }
+  { Behaviour.ofLang (spec F).lang ((spec F).ofWorld x) with
+    Admissible := Semantics.IntrinsicSession.Bound.NoFail }
 
 /-- The source program's behaviour: `Behaviour.ofLang` of the Source session,
 read at horizons whose transported target bound is ready (no resource failure,
@@ -241,7 +244,8 @@ def Agrees (D : Diagram) (F : Roadmap.Fixed) {E : Source.Env} (P : Source.SrcPro
     (sourceMachine P e).Reachable (SourceState.run n k i s last) →
       s.events <+: ((spec F).lang.sem x e (transport D n)).events ∧
       ∀ w, (runOf F x e (transport D n)).worlds[i]? = some w →
-        ∀ a, w.accounts (P.fixed.createAddress e.deployer e.deployNonce) = some a →
+        ∀ a, w.accounts (Solidity.Lowering.V08.EnvironmentProjection.liftAddress
+          (P.fixed.createAddress e.deployer e.deployNonce)) = some a →
           D.globRel s (boundaryState a)
 
 /-- **The lift of `D` for one Source program and its compilation**: a session
@@ -259,7 +263,7 @@ whose function bodies are bound to the program's resolved bodies, and whose
 lowered world refines the program's session. -/
 def SessionLift (D : Diagram) : Prop :=
   ∀ (F : Roadmap.Fixed) (E : Source.Env) (P : Source.SrcProg E), InFragment P →
-    ∃ c : Compilation, c.Names P ∧ c.Accepted ∧ Bound D P c ∧ Lift D F P c
+    ∃ c : Compilation, c.Names P ∧ c.Accepted ∧ BodiesBound D P c ∧ Lift D F P c
 
 end Lowering
 

@@ -56,11 +56,12 @@ theorem lift_refused_stuck (D : Diagram) (F : Roadmap.Fixed) {E : Source.Env}
   rintro ⟨⟨pc, abs, _⟩, _⟩
   obtain ⟨e, r, o, allowed, noFail, guard, done⟩ := completes
   obtain ⟨n, _, _, le⟩ := pc.back e r allowed noFail guard
-  have same := le.final_eq done
-  rw [abs] at same
-  have stuck := never e n
-  rw [same] at stuck
-  exact absurd (stuck.symm.trans done) (by simp)
+  have final : ((Source.sourceLangEvents E).sem P e n).final = some o := by
+    have same := congrArg Prefix.final (le.final_eq done)
+    rw [abs] at same
+    exact same.trans done
+  rw [never] at final
+  cases final
 
 end Shrink.Lowering
 
