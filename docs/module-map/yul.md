@@ -258,3 +258,4 @@
 | `Examples/YulLayout/InstancesMemory.lean` | Checks of the four memory instance facts on small concrete inputs; each is used. |
 | `Yul/Layout/Instances/Storage.lean` | `Instances.scalarPath`, `Instances.apart`, `Instances.cells`: the three storage fields of `Shrink.LayoutView.Instances` for `geometry` (a scalar path in storage, path separation as footprint disjointness, the persistent and transient paths of one frame), each with the field's statement. `scalarPath` and `cells` are `scalarPathRead` of `scalarPilot`; `apart` reads the scalar footprint off the pilot's `scalar` field. |
 | `Examples/YulLayout/InstancesStorage.lean` | Checks of the three storage instance facts on small concrete inputs; each is used. |
+| `Yul/Layout/Pilot.lean` | `pilot_correct`: `Solidity.Goals.yulLayoutPilot` at `view`, from `view_laws` and `scalarPilot alloc`. |
