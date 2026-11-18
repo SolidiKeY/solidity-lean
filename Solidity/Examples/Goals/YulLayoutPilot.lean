@@ -9,4 +9,7 @@ info: proved Solidity.Goals.yulLayoutPilot ← Solidity.Yul.Layout.pilot_correct
 #guard_msgs in
 #roadmap_goal yulLayoutPilot
 
+/-- The pin's proof closes the goal statement. -/
+example : yulLayoutPilot := Solidity.Yul.Layout.pilot_correct
+
 end Solidity.Goals
