@@ -2468,6 +2468,9 @@ import Solidity.Correctness.Lowering.Sim.Session.Backward.NoDiagram
 import Solidity.Correctness.Lowering.Sim.Session.Binding
 import Solidity.Correctness.Lowering.Sim.Session.Binding.Agreement
 import Solidity.Correctness.Lowering.Sim.Session.Binding.Initial
+import Solidity.Correctness.Lowering.Sim.Session.Forward
+import Solidity.Correctness.Lowering.Sim.Session.Forward.Frames
+import Solidity.Correctness.Lowering.Sim.Session.Forward.Within
 import Solidity.Correctness.Lowering.Sim.Session.Source
 import Solidity.Correctness.Lowering.Sim.Session.Target
 import Solidity.Correctness.Lowering.Sim.Session.Target.Machine
@@ -2505,6 +2508,7 @@ import Solidity.Correctness.Lowering.Unchecked.WordProgram
 import Solidity.Correctness.Lowering.Unchecked.WordUpdateWitness
 import Solidity.Correctness.Lowering.Unchecked.WrappingArithmetic
 import Solidity.Correctness.Panic.Capture
+import Solidity.Correctness.Panic.Dispatch
 import Solidity.Correctness.Panic.Guards.Arith
 import Solidity.Correctness.Panic.Guards.State
 import Solidity.Correctness.Panic.Provenance
@@ -4611,6 +4615,7 @@ import Solidity.Syntax.DispatchChain
 import Solidity.Syntax.Elab
 import Solidity.Syntax.Elab.Arms
 import Solidity.Syntax.Elab.Context
+import Solidity.Syntax.Elab.Guard
 import Solidity.Syntax.Elab.Lower
 import Solidity.Syntax.Elab.Measure
 import Solidity.Syntax.Elab.Panic
@@ -5362,8 +5367,10 @@ import Solidity.Yul.Interfaces.P16
 import Solidity.Yul.Layout.Geometric
 import Solidity.Yul.Layout.Geometry
 import Solidity.Yul.Layout.Instances.Memory
+import Solidity.Yul.Layout.Instances.Storage
 import Solidity.Yul.Layout.Laws.Read
 import Solidity.Yul.Layout.Laws.Write
+import Solidity.Yul.Layout.Laws.WriteRead
 import Solidity.Yul.Layout.ReadSequence
 import Solidity.Yul.Layout.ScalarPilot
 import Solidity.Yul.LocalBlock
