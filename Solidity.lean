@@ -2460,6 +2460,11 @@ import Solidity.Correctness.Lowering.Loops.Statement
 import Solidity.Correctness.Lowering.Loops.WhileBreak
 import Solidity.Correctness.Lowering.Loops.WhileContinue
 import Solidity.Correctness.Lowering.Loops.WhileReset
+import Solidity.Correctness.Lowering.Sim.Expr.Capture
+import Solidity.Correctness.Lowering.Sim.Expr.Frame
+import Solidity.Correctness.Lowering.Sim.Expr.Operand
+import Solidity.Correctness.Lowering.Sim.Expr.Scope
+import Solidity.Correctness.Lowering.Sim.Expr.Strength
 import Solidity.Correctness.Lowering.Sim.Match
 import Solidity.Correctness.Lowering.Sim.Match.Cases
 import Solidity.Correctness.Lowering.Sim.Match.Relations
@@ -2468,6 +2473,9 @@ import Solidity.Correctness.Lowering.Sim.Session.Backward.NoDiagram
 import Solidity.Correctness.Lowering.Sim.Session.Binding
 import Solidity.Correctness.Lowering.Sim.Session.Binding.Agreement
 import Solidity.Correctness.Lowering.Sim.Session.Binding.Initial
+import Solidity.Correctness.Lowering.Sim.Session.Forward
+import Solidity.Correctness.Lowering.Sim.Session.Forward.Frames
+import Solidity.Correctness.Lowering.Sim.Session.Forward.Within
 import Solidity.Correctness.Lowering.Sim.Session.Source
 import Solidity.Correctness.Lowering.Sim.Session.Target
 import Solidity.Correctness.Lowering.Sim.Session.Target.Machine
@@ -2505,6 +2513,7 @@ import Solidity.Correctness.Lowering.Unchecked.WordProgram
 import Solidity.Correctness.Lowering.Unchecked.WordUpdateWitness
 import Solidity.Correctness.Lowering.Unchecked.WrappingArithmetic
 import Solidity.Correctness.Panic.Capture
+import Solidity.Correctness.Panic.Dispatch
 import Solidity.Correctness.Panic.Guards.Arith
 import Solidity.Correctness.Panic.Guards.State
 import Solidity.Correctness.Panic.Provenance
@@ -5366,6 +5375,7 @@ import Solidity.Yul.Layout.Instances.Memory
 import Solidity.Yul.Layout.Instances.Storage
 import Solidity.Yul.Layout.Laws.Read
 import Solidity.Yul.Layout.Laws.Write
+import Solidity.Yul.Layout.Laws.WriteRead
 import Solidity.Yul.Layout.ReadSequence
 import Solidity.Yul.Layout.ScalarPilot
 import Solidity.Yul.LocalBlock
