@@ -1,0 +1,2 @@
+| `Yul/Layout/Laws/Write.lean` | The write laws of `geometry`, stated as the same-named `Shrink.LayoutView.Laws` fields: `illTyped` (an ill-typed write fails), `write_total` (a fitting mapping-free storage or transient write succeeds) and `frame` (a write changes cells of the written footprint only). They mention no allocator. |
+| `Examples/YulLayout/LawsWrite.lean` | Each write law as the `Laws` field of a view over `geometry`, and one concrete use of each. |
