@@ -2,7 +2,7 @@ import Solidity.Correctness.Lowering.Sim.Session.Forward.Frames
 import Solidity.Correctness.Lowering.Sim.Session.Forward.Within
 import Solidity.Correctness.Lowering.Sim.Match
 
-/-! # The forward session diagram (plan step `ls2s-session-diagrams`, lane forward)
+/-! # The forward session diagram
 
 From matched frames (`MatchedFrames`, `Forward/Frames.lean`) in every environment:
 
@@ -37,7 +37,18 @@ From matched frames (`MatchedFrames`, `Forward/Frames.lean`) in every environmen
   (`IntrinsicSession.request`), in every environment that issues one.
 
 The last makes `MatchedFrames D F P c e` unsatisfiable for such an `e` once the
-Source deployment completes there. -/
+Source deployment completes there (read off the two semantics, not proved
+here). So for a program whose deployment completes in some environment, the
+family `∀ e, MatchedFrames D F P c e` that `forwardResources` takes has no
+inhabitant as the two session semantics stand: `forwardResources`,
+`forwardResources_diagram` and `MatchedFrames.session_le` are then vacuous.
+They fix the shape of the forward half (types, transport, horizon bound) and
+are no evidence that any program refines. `forward` at one environment is not
+affected by other environments.
+
+Follow-up: `go_within` (`Forward/Within.lean`) repeats `go_realized`
+(`Session/Target.lean`) with one more conjunct; `go_realized` should become
+its corollary there. -/
 namespace Solidity.Correctness.Lowering.Sim.Session
 
 open Solidity.Roadmap (Event Outcome SessionEnv Fixed Prefix Lang)
@@ -171,7 +182,10 @@ theorem MatchedFrames.session_le (fr : MatchedFrames D F P c e) (grows : ∀ n, 
 
 /-- **The forward resource record**, of the type `Sim.lang_passCorrect`
 consumes: coverage is the Source machine's, readiness is the target's read off
-the Source `Forward`, and matched states stay below the transported run. -/
+the Source `Forward`, and matched states stay below the transported run.
+A template, not evidence: `fr` has no inhabitant for a program whose
+deployment completes in some environment (module comment, "What is not
+proved"). -/
 noncomputable def forwardResources (fr : ∀ e, MatchedFrames D F P c e) (grows : ∀ n, n < D.fuel n) :
     ForwardResources (Behaviour.ofLang (sourceLang D F E (loweredWorld c)) P)
       (Behaviour.ofLang (targetLang F) (loweredWorld c)) (sourceMachine P) (targetMachine F (loweredWorld c))
@@ -186,7 +200,8 @@ noncomputable def forwardResources (fr : ∀ e, MatchedFrames D F P c e) (grows 
     rw [same]
     exact (fr e).session_le grows r
 
-/-- The record for the lowering diagram, whose transport `2 * n + 2` grows. -/
+/-- The record for the lowering diagram, whose transport `2 * n + 2` grows.
+As vacuous as `forwardResources` while `fr` cannot be met. -/
 noncomputable def forwardResources_diagram (fr : ∀ e, MatchedFrames diagram F P c e) :=
   forwardResources fr fun n => by show n < 2 * n + 2; omega
 

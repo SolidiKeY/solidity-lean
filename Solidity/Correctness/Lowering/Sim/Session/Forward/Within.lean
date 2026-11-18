@@ -1,8 +1,7 @@
 import Solidity.Correctness.Lowering.Sim.Session.Target
 
-/-! The target session machine within a horizon (plan step
-`ls2s-session-diagrams`, lane forward): a reachable state that has issued `i`
-actions observes a prefix of the run at every horizon above `i`. This is
+/-! The target session machine within a horizon: a reachable state that has
+issued `i` actions observes a prefix of the run at every horizon above `i`. This is
 `realizes` of `Session/Target.lean` with the horizon it leaves existential,
 which the forward resource bound needs. -/
 namespace Solidity.Correctness.Lowering.Sim.Session

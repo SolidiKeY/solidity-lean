@@ -1,8 +1,8 @@
 import Solidity.Goals.LoweringSession
 import Solidity.Correctness.Lowering.Sim.Session.Backward
 
-/-! The per-frame obligations of the forward session diagram (plan step
-`ls2s-session-diagrams`, lane forward), and the session-level match they give.
+/-! The per-frame obligations of the forward session diagram, and the
+session-level match they give.
 
 `MatchedFrames D F P c e` is what the forward diagram needs of every frame of a
 session of `P` in `e` against the lowered world of `c`: the deployment and
@@ -12,10 +12,10 @@ Its invariant `Inv` implies the `D.globRel` clause of
 `Shrink.Lowering.Agrees`. Nothing here derives `MatchedFrames` from
 `Diagram.Simulates`; see `Session/Forward.lean`, "What is not proved".
 
-**Provisional (H1199).** `MatchedFrames` is not frozen: the binding lane may
-prototype against it, and its fields may change once the v2 statements (the
-session lift with `F := P.fixed` and elaboration receipts, the Source session
-at instance-less addresses) are settled. -/
+`MatchedFrames` is provisional: as the two session semantics stand it cannot
+be met in an environment that issues a funded request to an address without an
+instance after a completed deployment, and its fields may change with the
+statements that remove that mismatch. -/
 namespace Solidity.Correctness.Lowering.Sim.Session
 
 open Solidity.Roadmap (Event Outcome SessionEnv Fixed)

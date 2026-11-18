@@ -4,8 +4,13 @@ import Solidity.Source.SessionExamples
 /-! The forward session diagram and its resource record on the session of
 `spin` (`Solidity.Source.SessionExamples`) against the lowered world of a
 compilation, from matched frames. `MatchedFrames` is a hypothesis here as in
-`Session/Forward.lean`: no frame of a concrete compilation is matched in the
-kernel (its entries run the `partial` elaborator). -/
+`Session/Forward.lean`, and these are type-level uses, not evidence of a
+refinement: no frame of a concrete compilation is matched in the kernel (its
+entries run the `partial` elaborator), and the family
+`∀ e, MatchedFrames ..` that `spin_forward` and `spin_passCorrect` take has no
+inhabitant when the deployment completes in some environment (a Source request
+to an address without an instance reverts, the intrinsic one succeeds). Only
+`spin_matched` asks for one environment. -/
 namespace Solidity.Examples.Lowering.Sim.Session.Forward
 
 open Solidity.Source Solidity.Source.SessionExamples
@@ -46,8 +51,9 @@ theorem spin_forward (fr : ∀ e, MatchedFrames diagram F (progSpin el) c e) (n 
   exact ⟨R.ready envSpin n allowed ready, le.final_eq done⟩
 
 /-- The record has the type `Sim.lang_passCorrect` consumes: with a reverse
-diagram and its resources it gives the `PassCorrect` of
-`Shrink.Lowering.Lift`. -/
+diagram and its resources the application has the type of the `PassCorrect`
+in `Shrink.Lowering.Lift`. A type check only: `fr` cannot be met as the
+semantics stand (module comment), so no `PassCorrect` is obtained. -/
 noncomputable def spin_passCorrect (fr : ∀ e, MatchedFrames diagram F (progSpin el) c e)
     (reverse : ∀ e, Solidity.Correctness.Sim.Diagram (targetMachine F (loweredWorld c) e)
       (sourceMachine (progSpin el) (envAbs e)))
