@@ -25,6 +25,8 @@
 # root library or Lean importer of the source: no root).
 # Source-retention credit only: never run, never certified to elaborate or
 # pass; no execution, pass, proof, driver, relay, read, import or output credit.
+import ast, re, shlex
+
 NATIVE_DRIVER_KIND = 'native-driver-source-role'
 NATIVE_DRIVER_PREFIX = 'native-driver:'
 NATIVE_DRIVER_TOOLS = ('lean_diagnostic_messages',)
