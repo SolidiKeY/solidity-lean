@@ -359,6 +359,7 @@ import Solidity.Examples.Tactics.QuantifiedDiamond
 import Solidity.Examples.Tactics.Reachable
 import Solidity.Examples.Tactics.Recovery
 import Solidity.Examples.Tactics.Recursion
+import Solidity.Examples.Tactics.Recursion.CallbackMemoryAndNonlinear
 import Solidity.Examples.Tactics.ReferenceParameters
 import Solidity.Examples.Tactics.Revert
 import Solidity.Examples.Tactics.RevertFormulas
