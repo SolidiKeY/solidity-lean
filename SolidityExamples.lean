@@ -411,3 +411,4 @@ import Solidity.Examples.Termination
 import Solidity.Examples.Tools
 import Solidity.Examples.TypedLinear
 import Solidity.Examples.Verify
+import Solidity.Examples.YulLayout.Geometry
