@@ -61,9 +61,57 @@
         },
         "purpose": "Exact Git ignore policy for the implicit CPython cache of the reviewed bytecode-enabled child launch and sibling import. Source-policy credit only; launch/import reachability and external interpreter environment are not execution or pass claims. No helper, output, proof or runtime credit."
       }
+    ],
+    "persistent_module_entries": [
+      {
+        "collector_sha256": "c6685584f5ff4dffdb2ce28f028177c15b30a74d6277fedde4182106781131ad",
+        "frames": [
+          {
+            "blob": "85f52a3748dfce8a0135326b739aaca773cd4e93",
+            "line": 15,
+            "path": "tests/h62/item5/statement-graph/test_graph.py"
+          }
+        ],
+        "input_revision": "e3394c72f659f7c5423c7a7187953ad53e481635",
+        "module_code_sha256": "3fe927016bea24527b5df46a6f7b0ed2244a6f3bb9eb4df5b6b2fc1afb3d95a0",
+        "module_frame_line": 0,
+        "operation": "entered measured Python module; no fixture consumption credit",
+        "python": [
+          3,
+          12,
+          14
+        ],
+        "runner": "validated:tests/h62/item5/statement-graph/test_graph.py",
+        "target": "scripts/h62/item5/statement-graph/owner_overlay.py",
+        "target_blob": "a4233e8fbd5563a56783344e370a060997b5754a"
+      }
     ]
   },
   "routes": {
+    "module_entries": [
+      {
+        "collector_sha256": "c6685584f5ff4dffdb2ce28f028177c15b30a74d6277fedde4182106781131ad",
+        "frames": [
+          {
+            "blob": "85f52a3748dfce8a0135326b739aaca773cd4e93",
+            "line": 15,
+            "path": "tests/h62/item5/statement-graph/test_graph.py"
+          }
+        ],
+        "input_revision": "e3394c72f659f7c5423c7a7187953ad53e481635",
+        "module_code_sha256": "3fe927016bea24527b5df46a6f7b0ed2244a6f3bb9eb4df5b6b2fc1afb3d95a0",
+        "module_frame_line": 0,
+        "operation": "entered measured Python module; no fixture consumption credit",
+        "python": [
+          3,
+          12,
+          14
+        ],
+        "runner": "validated:tests/h62/item5/statement-graph/test_graph.py",
+        "target": "scripts/h62/item5/statement-graph/owner_overlay.py",
+        "target_blob": "a4233e8fbd5563a56783344e370a060997b5754a"
+      }
+    ],
     "standalone": [
       {
         "command": [
