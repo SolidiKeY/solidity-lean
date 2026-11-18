@@ -62,6 +62,7 @@ HANDOFF_WITNESS_REVIEWED = frozenset({
 })
 HANDOFF_WITNESS_UNRESOLVED = ('scripts/h62/item2/audit-theories/handoff/scope-manifest.json', 'scripts/h62/item2/audit-precompiles/serial.toml')
 _HW_RUNS = ('check_output', 'run')
+_HW_MUTATORS = ('pop', 'popitem', 'clear', 'update', 'setdefault', '__setitem__', '__delitem__', '__init__')
 
 
 def _hw_shared(name):
@@ -148,6 +149,29 @@ def _hw_calls(tree, line):
     return [n for n in ast.walk(tree) if isinstance(n, ast.Call) and n.lineno == line]
 
 
+def _hw_patched(tree, names, calls=False):
+    """True iff tree star-imports, or stores to or deletes an attribute or item of one of names (or, with calls, calls a
+    mutating method of one)."""
+    def based(node): return isinstance(node, ast.Name) and node.id in names
+    return any(isinstance(n, ast.ImportFrom) and any(a.name == '*' for a in n.names)
+               or isinstance(n, (ast.Attribute, ast.Subscript)) and not isinstance(n.ctx, ast.Load) and based(n.value)
+               or calls and isinstance(n, ast.Call) and isinstance(n.func, ast.Attribute) and based(n.func.value) and n.func.attr in _HW_MUTATORS
+               for n in ast.walk(tree))
+
+
+def _hw_statement(parents, node, block):
+    """True iff node runs as part of a plain statement directly in block: its ancestors up to that statement are only
+    calls and attributes (no lambda, comprehension, conditional or boolean), the statement is an Assign, Expr or Return,
+    and no earlier statement of block returns, raises, breaks or continues."""
+    current = node
+    while current in parents and not isinstance(parents[current], ast.stmt):
+        current = parents[current]
+        if not isinstance(current, (ast.Call, ast.Attribute, ast.keyword)): return False
+    statement = parents.get(current)
+    if not isinstance(statement, (ast.Assign, ast.Expr, ast.Return)) or not any(s is statement for s in block): return False
+    return not any(isinstance(s, (ast.Return, ast.Raise, ast.Break, ast.Continue)) for s in block[:[i for i, s in enumerate(block) if s is statement][0]])
+
+
 def handoff_pin(module_text, witness, data, pin_line):
     """The (PINS, PREFIX) names of a module pinning witness's bytes at pin_line, else None.
 
@@ -171,7 +195,8 @@ def handoff_pin(module_text, witness, data, pin_line):
     prefixes = [n.targets[0].id for n in tree.body if isinstance(n, ast.Assign) and len(n.targets) == 1 and isinstance(n.targets[0], ast.Name)
                 and isinstance(n.value, ast.Call) and isinstance(n.value.func, ast.Name) and n.value.func.id == 'Path'
                 and len(n.value.args) == 1 and not n.value.keywords and _hw_const(n.value.args[0]) == directory]
-    if pins is None or len(prefixes) != 1 or _hw_module_value(tree, prefixes[0]) is None or not _hw_imported(tree, 'Path', 'pathlib'):
+    if (pins is None or len(prefixes) != 1 or _hw_module_value(tree, prefixes[0]) is None or not _hw_imported(tree, 'Path', 'pathlib')
+            or _hw_patched(tree, {pins, prefixes[0]}, calls=True)):
         return None
     return pins, prefixes[0]
 
@@ -184,7 +209,7 @@ def handoff_pinned_show(entry_text, entry_path, module_path, import_line, read_l
     imports = [n for n in tree.body if isinstance(n, ast.Import) and n.lineno == import_line and len(n.names) == 1 and n.names[0].name == name]
     if len(imports) != 1: return None
     alias = imports[0].names[0].asname or name
-    if _hw_bindings(tree, alias) != 1: return None
+    if _hw_bindings(tree, alias) != 1 or _hw_patched(tree, {alias, 'subprocess'}): return None
     parents = _hw_parents(tree)
     for call in _hw_calls(tree, read_line):
         if not (isinstance(call.func, ast.Attribute) and call.func.attr in _HW_RUNS and isinstance(call.func.value, ast.Name)
@@ -192,10 +217,7 @@ def handoff_pinned_show(entry_text, entry_path, module_path, import_line, read_l
                 and [k.arg for k in call.keywords] == ['cwd'] and _hw_attr(call.keywords[0].value, alias, 'ROOT')):
             continue
         words = call.args[0].elts
-        options = [_hw_const(w) for w in words[1:-2]]
-        if (len(words) < 3 or _hw_const(words[0]) != 'git' or _hw_const(words[-2]) != 'show'
-                or not all(isinstance(o, str) and o.startswith('--') for o in options)):
-            continue
+        if [_hw_const(w) for w in words[:-1]] not in (['git', 'show'], ['git', '--no-replace-objects', 'show']): continue
         spec = words[-1]
         if not (isinstance(spec, ast.BinOp) and isinstance(spec.op, ast.Add) and isinstance(spec.left, ast.BinOp)
                 and isinstance(spec.left.op, ast.Add) and _hw_const(spec.left.right) == ':' and isinstance(spec.right, ast.Call)
@@ -210,6 +232,11 @@ def handoff_pinned_show(entry_text, entry_path, module_path, import_line, read_l
         if not loops or not functions or not classes or not (chain.index(loops[0]) < chain.index(functions[0]) < chain.index(classes[0])):
             continue
         loop, function, owner = loops[0], functions[0], classes[0]
+        if (not _hw_statement(parents, call, loop.body) or not any(s is loop for s in function.body) or not any(s is function for s in owner.body)
+                or not any(s is owner for s in tree.body) or function.decorator_list or owner.decorator_list
+                or any(isinstance(s, (ast.Return, ast.Raise)) for s in function.body[:function.body.index(loop)])
+                or not function.args.args or function.args.args[0].arg != 'self' or _hw_bindings(function, 'self') != 1):
+            continue
         if not (_hw_attr(loop.iter, alias, pins) and isinstance(loop.target, ast.Name)) or _hw_bindings(function, rel) != 1: continue
         index = loop.target.id
         bound = [s for s in loop.body if isinstance(s, ast.Assign) and len(s.targets) == 1 and isinstance(s.targets[0], ast.Name)
@@ -228,13 +255,14 @@ def handoff_main_read(module_text, module_path, witness, main_line, read_line):
     """True iff the module's main block calls F(ROOT) on main_line and F(r) reads (r / witness).read_text() on read_line."""
     tree = _hw_parse(module_text)
     if tree is None: return False
-    functions = {n.name: n for n in tree.body if isinstance(n, ast.FunctionDef) and _hw_bindings(tree, n.name) == 1}
+    functions = {n.name: n for n in tree.body if isinstance(n, ast.FunctionDef) and not n.decorator_list and _hw_bindings(tree, n.name) == 1}
     mains = [n for n in tree.body if isinstance(n, ast.If) and isinstance(n.test, ast.Compare) and isinstance(n.test.left, ast.Name)
              and n.test.left.id == '__name__' and len(n.test.ops) == 1 and isinstance(n.test.ops[0], ast.Eq)
              and _hw_const(n.test.comparators[0]) == '__main__']
-    if _hw_bindings(tree, '__name__') or len(mains) != 1: return False
-    for call in (c for c in _hw_calls(mains[0], main_line)):
-        if not (isinstance(call.func, ast.Name) and call.func.id in functions and len(call.args) == 1 and not call.keywords
+    if _hw_bindings(tree, '__name__') or len(mains) != 1 or _hw_patched(tree, set()): return False
+    parents = _hw_parents(tree)
+    for call in _hw_calls(mains[0], main_line):
+        if not (_hw_statement(parents, call, mains[0].body) and isinstance(call.func, ast.Name) and call.func.id in functions and len(call.args) == 1 and not call.keywords
                 and _hw_root(tree, call.args[0], module_path)):
             continue
         function = functions[call.func.id]; params = function.args
@@ -244,7 +272,7 @@ def handoff_main_read(module_text, module_path, witness, main_line, read_line):
         root = params.args[0].arg
         for read in _hw_calls(function, read_line):
             if not (isinstance(read.func, ast.Attribute) and read.func.attr == 'read_text' and not read.args and not read.keywords
-                    and isinstance(read.func.value, ast.Name)): continue
+                    and isinstance(read.func.value, ast.Name) and _hw_statement(parents, read, function.body)): continue
             name = read.func.value.id
             bound = [s for s in function.body if isinstance(s, ast.Assign) and len(s.targets) == 1 and isinstance(s.targets[0], ast.Name)
                      and s.targets[0].id == name and s.lineno < read_line and isinstance(s.value, ast.BinOp) and isinstance(s.value.op, ast.Div)
@@ -453,6 +481,30 @@ def handoff_witness_controls(env):
         later_read = row(W, 'pinned-history-show', read={'line': show + 2})
         HANDOFF_WITNESS_REVIEWED = HANDOFF_WITNESS_REVIEWED | {tuple_of(later_read)}
         rejected(readers, 'pinned commit does not hold the witness blob', standalone=runners + [later_read])
+        # Reviewer mutants (each keeps the reviewed shape at a line): skipped or dead scope, a rebound self, another
+        # repository, patched modules, star imports, a call off the main path, a read after a return, a decorated reader.
+        sources = {PE: test, PM: pins, IM: inv, IE: inv_test}
+        q = '            raw = subprocess.check_output(["git", "--no'
+        mutants = ((PE, test.replace('\n\n\nclass T', '\n\n@unittest.skip("x")\nclass T'), 0, {}),
+                   (PE, test.replace('\n\n    def test_pins', '\n    @unittest.skip("x")\n    def test_pins'), 0, {}),
+                   (PE, test.replace(q, '            if False: raw = subprocess.check_output(["git", "--no'), 0, {}),
+                   (PE, test.replace('            # raw =', '            self = p  #'), 0, {}),
+                   (PE, test.replace('"--no-replace-objects"', '"--git-dir=/x/.git"', 1), 0, {}),
+                   (PE, test.replace('            # raw =', '            subprocess.check_output = None  #'), 0, {}),
+                   (PE, test.replace('            # raw =', '            p.PINS = {}  #'), 0, {}),
+                   (PM, pins + 'del PINS["a.md"]\n', 0, {}), (PM, pins + 'PINS.clear()\n', 0, {}), (PM, pins + 'from os import *\n', 0, {}),
+                   (IM, inv.replace('    data = archived(ROOT)\n    rest = other(ROOT)\n    # archived(ROOT)\n',
+                                    '    rest = other(ROOT)\nelse:\n    data = archived(ROOT)\n'), 1, {'module': {'line': main + 2}}),
+                   (IM, inv.replace('    data = archived(ROOT)', '    data = lambda: archived(ROOT)'), 1, {}),
+                   (IM, inv.replace('/bulk.json"\n    return', '/bulk.json"; return None\n    return'), 1, {}),
+                   (IM, inv.replace('\n\n\ndef archived', '\n\n@staticmethod\ndef archived'), 1, {}))
+        for path, text, k, overrides in mutants:
+            assert text != sources[path] and text.count('\n') - sources[path].count('\n') in (0, 1), path
+            mutant = commit({path: text}, 'handoff witness mutant')
+            y = row(good[k]['path'], good[k]['operation'], repo=mutant, **overrides)
+            HANDOFF_WITNESS_REVIEWED = HANDOFF_WITNESS_REVIEWED | {tuple_of(y)}
+            rejected(mutant, 'does not perform its operation', standalone=[unit(PE, mutant), unit(IE, mutant), y])
+            commit({path: sources[path]}, 'handoff witness mutant restored')
         # Unreviewed: another blob, reader, line, operation, entry or module, and the real table on synthetic rows.
         for change in ({'source_blob': blob(readers, X)}, {'read': {'line': show + 3}},
                        {'entry': {'import_line': 3}}, {'module': {'line': 5}}):
