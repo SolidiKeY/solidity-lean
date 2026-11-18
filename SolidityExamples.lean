@@ -194,6 +194,7 @@ import Solidity.Examples.LexTermSize
 import Solidity.Examples.LexVariant
 import Solidity.Examples.LinearDecision
 import Solidity.Examples.Lowering.Sim.Cases
+import Solidity.Examples.Lowering.Sim.Expr
 import Solidity.Examples.Lowering.Sim.Match
 import Solidity.Examples.Lowering.Sim.Session.Backward
 import Solidity.Examples.Lowering.Sim.Session.Binding
@@ -446,3 +447,4 @@ import Solidity.Examples.YulLayout.LawsRead
 import Solidity.Examples.YulLayout.LawsWrite
 import Solidity.Examples.YulLayout.LawsWriteRead
 import Solidity.Examples.YulLayout.ScalarPilot
+import Solidity.Examples.YulLayout.View
