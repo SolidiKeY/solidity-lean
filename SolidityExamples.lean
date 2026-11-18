@@ -186,6 +186,7 @@ import Solidity.Examples.Notation
 import Solidity.Examples.Panic.Capture
 import Solidity.Examples.Panic.Eval
 import Solidity.Examples.Panic.GuardsArith
+import Solidity.Examples.Panic.GuardsState
 import Solidity.Examples.Panic.Origins
 import Solidity.Examples.Panic.ProvenanceControl
 import Solidity.Examples.Panic.ProvenanceEval
