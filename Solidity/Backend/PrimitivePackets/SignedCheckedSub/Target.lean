@@ -17,9 +17,7 @@ theorem value_success {C : Contract} {Γ : Ctx} (s : State C Γ)
     (value a b).evalT s = .ok (integerValue U (x-y) fits) := by
   simp only [value,Val.evalT,Simple.evalT,ha,hb,BinOp.shortT,bind,Except.bind]
   change TRes.ofOpt (PrimTy.int.ofInt? (x-y)) = _
-  have hr : PrimTy.int.inRange (x-y) = true := integer_range U (x-y) fits
-  simp only [PrimTy.ofInt?,dif_pos hr,TRes.ofOpt]
-  first | rfl | simp only [integerValue,U]
+  exact CheckedBinary.ofInt_ok U (x-y) fits
 
 theorem value_overflow {C : Contract} {Γ : Ctx} (s : State C Γ)
     (a b : Idx Γ (.val .int)) (x y : Int)
@@ -30,15 +28,7 @@ theorem value_overflow {C : Contract} {Γ : Ctx} (s : State C Γ)
     (value a b).evalT s = .error .revert := by
   simp only [value,Val.evalT,Simple.evalT,ha,hb,BinOp.shortT,bind,Except.bind]
   change TRes.ofOpt (PrimTy.int.ofInt? (x-y)) = _
-  have hr : PrimTy.int.inRange (x-y) ≠ true := by
-    intro h
-    simp only [PrimTy.inRange,decide_eq_true_eq] at h
-    change ¬ (-((2^255:Nat):Int) ≤ x-y ∧ x-y ≤ ((2^255:Nat):Int)-1) at overflow
-    apply overflow
-    change -((2^255:Nat):Int) ≤ x-y ∧ x-y ≤ ((2^255:Nat):Int)-1
-    change -((2^255:Nat):Int) ≤ x-y ∧ x-y < ((2^255:Nat):Int) at h
-    omega
-  simp only [PrimTy.ofInt?,dif_neg hr,TRes.ofOpt]
+  exact CheckedBinary.ofInt_revert U rfl (x-y) overflow
 
 theorem target_success {C : Contract} {Γ : Ctx} {offset L frame : Nat} {F : Frag Γ}
     (s : State C Γ) (a b : Idx Γ (.val .int)) (x y : Int)

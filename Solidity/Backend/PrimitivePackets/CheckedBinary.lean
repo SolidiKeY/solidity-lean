@@ -1,8 +1,9 @@
 import Solidity.Lowering.V07.UnsignedAddition
 
 /-! Shared checked Source evaluation of a non-logical integer operator on two
-locals, for the checked add, sub and mul packets (unsigned and signed). Each
-packet keeps its own statements and instantiates these at its operator. -/
+locals, and the range check of its 256-bit target result, for the checked add,
+sub and mul packets (unsigned and signed). Each packet keeps its own
+statements and instantiates these at its operator. -/
 namespace Solidity.Backend.PrimitivePackets.CheckedBinary
 open Solidity.Lowering.V07
 
@@ -59,4 +60,40 @@ theorem source_overflow (G : Source.Glob E) (F : Source.Fr) (fuel : Nat) (s : So
   simp only [Source.intRes,dif_neg outside,if_true,Source.panic]
   rfl
 
+/-- A target result in range: the range-checked integer is the represented value. -/
+theorem ofInt_ok (U : Source.IntTy) (n : Int) (fits : U.lo ≤ n ∧ n ≤ U.hi) :
+    TRes.ofOpt ((integerPrim U).ofInt? n) = .ok (integerValue U n fits) := by
+  have hr := integer_range U n fits
+  obtain ⟨sign,bits,valid⟩ := U
+  cases sign
+  · change PrimTy.uint.inRange n = true at hr
+    change TRes.ofOpt (PrimTy.uint.ofInt? n) = _
+    simp only [PrimTy.ofInt?,dif_pos hr,TRes.ofOpt]; rfl
+  · change PrimTy.int.inRange n = true at hr
+    change TRes.ofOpt (PrimTy.int.ofInt? n) = _
+    simp only [PrimTy.ofInt?,dif_pos hr,TRes.ofOpt]; rfl
+
+/-- A 256-bit target result out of range reverts. -/
+theorem ofInt_revert (U : Source.IntTy) (wide : U.bits = 256) (n : Int)
+    (outside : ¬ (U.lo ≤ n ∧ n ≤ U.hi)) :
+    TRes.ofOpt ((integerPrim U).ofInt? n) = (.error .revert : TRes (integerPrim U).Denote) := by
+  obtain ⟨sign,bits,valid⟩ := U
+  cases wide
+  cases sign
+  · have hr : PrimTy.uint.inRange n ≠ true := by
+      intro h
+      simp only [PrimTy.inRange,decide_eq_true_eq] at h
+      change ¬ (0 ≤ n ∧ n ≤ Semantics.uintBound-1) at outside
+      change 0 ≤ n ∧ n < Semantics.uintBound at h
+      omega
+    change TRes.ofOpt (PrimTy.uint.ofInt? n) = _
+    simp only [PrimTy.ofInt?,dif_neg hr,TRes.ofOpt]
+  · have hr : PrimTy.int.inRange n ≠ true := by
+      intro h
+      simp only [PrimTy.inRange,decide_eq_true_eq] at h
+      change ¬ (-Semantics.intBound ≤ n ∧ n ≤ Semantics.intBound-1) at outside
+      change -Semantics.intBound ≤ n ∧ n < Semantics.intBound at h
+      omega
+    change TRes.ofOpt (PrimTy.int.ofInt? n) = _
+    simp only [PrimTy.ofInt?,dif_neg hr,TRes.ofOpt]
 end Solidity.Backend.PrimitivePackets.CheckedBinary
