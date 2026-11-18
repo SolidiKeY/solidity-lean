@@ -472,15 +472,15 @@ theorem RawExpr.mapMFuel_succ {m : Type → Type} [Monad m] [Inhabited (m RawExp
 the expressions inside what it returns are rewritten, left to right.
 
 Total: `RawExpr.mapMFuel` to a depth past the expression's size
-(`RawExpr.fuel`) by `RawExpr.mapMSlack`.  The rewrite itself has no total
+(`RawExpr.fuel`) by `RawExpr.mapMSlack` (the slack is the left summand: the
+kernel's `+` recurses on the right one, so a call at an expression that is
+not a literal stays folded).  The rewrite itself has no total
 definition (a callback that wraps its argument, `pure ∘ .unop .neg`, never
 ends), so the defining equation holds for a callback whose results are no
-larger in a measure (`RawExpr.mapM_eq_of_measure`); irreducible, so that a
-failing unification does not unfold it to that depth (evaluate it with
-`with_unfolding_all rfl`). -/
-@[irreducible] def RawExpr.mapM {m : Type → Type} [Monad m] [Inhabited (m RawExpr)]
+larger in a measure (`RawExpr.mapM_eq_of_measure`). -/
+def RawExpr.mapM {m : Type → Type} [Monad m] [Inhabited (m RawExpr)]
     (f : RawExpr → m RawExpr) (e : RawExpr) : m RawExpr :=
-  RawExpr.mapMFuel f (e.fuel + RawExpr.mapMSlack) e
+  RawExpr.mapMFuel f (RawExpr.mapMSlack + e.fuel) e
 
 /-- The expressions directly inside an expression. -/
 def RawExpr.parts : RawExpr → List RawExpr
@@ -495,7 +495,7 @@ def RawExpr.parts : RawExpr → List RawExpr
 within the depth `RawExpr.mapM` runs to. -/
 structure RawExpr.Measure (μ : RawExpr → Nat) : Prop where
   part : ∀ e a, a ∈ e.parts → μ a < μ e
-  fuel : ∀ e, μ e < e.fuel + RawExpr.mapMSlack
+  fuel : ∀ e, μ e < RawExpr.mapMSlack + e.fuel
 
 theorem RawExpr.measure_sizeOf : RawExpr.Measure sizeOf where
   part e a h := by
@@ -624,20 +624,20 @@ theorem RawExpr.mapM_eq_of_measure {m : Type → Type} [Monad m] [LawfulMonad m]
       | .opAssign op l r => return .opAssign op (← l.mapM f) (← r.mapM f)
       | e => pure e) := by
   obtain rfl : f = fun e => (·.1) <$> g e := funext hf
-  have hK : e.fuel + RawExpr.mapMSlack = (e.fuel + RawExpr.mapMSlack - 1) + 1 := by
+  have hK : RawExpr.mapMSlack + e.fuel = (RawExpr.mapMSlack + e.fuel - 1) + 1 := by
     unfold RawExpr.mapMSlack; omega
   rw [RawExpr.mapM, hK, RawExpr.mapMFuel_succ]
   simp only [bind_map_left]
   refine bind_congr fun ⟨e', he⟩ => ?_
   have key : ∀ a, a ∈ e'.parts →
-      RawExpr.mapMFuel (fun e => (·.1) <$> g e) (e.fuel + RawExpr.mapMSlack - 1) a =
+      RawExpr.mapMFuel (fun e => (·.1) <$> g e) (RawExpr.mapMSlack + e.fuel - 1) a =
         a.mapM (fun e => (·.1) <$> g e) :=
     fun a ha => by
       have := hμ.part e' a ha; have := hμ.fuel e; have := hμ.fuel a
       rw [RawExpr.mapM]
       exact RawExpr.mapMFuel_measure hμ.part g _ _ a (by omega) (by omega)
   have keyL : ∀ as : List RawExpr, (∀ a ∈ as, a ∈ e'.parts) →
-      as.mapM (RawExpr.mapMFuel (fun e => (·.1) <$> g e) (e.fuel + RawExpr.mapMSlack - 1)) =
+      as.mapM (RawExpr.mapMFuel (fun e => (·.1) <$> g e) (RawExpr.mapMSlack + e.fuel - 1)) =
         as.mapM (fun a => a.mapM (fun e => (·.1) <$> g e)) :=
     fun as has => List.mapM_congr_mem as fun a ha => key a (has a ha)
   cases e' <;> simp only [] <;>
@@ -650,7 +650,8 @@ theorem RawExpr.mapM_eq_of_measure {m : Type → Type} [Monad m] [LawfulMonad m]
       | rfl
 
 /-- In `Except`, for a callback whose successful results are no larger. -/
-theorem RawExpr.mapM_except_eq {ε : Type} {μ : RawExpr → Nat} (hμ : RawExpr.Measure μ)
+theorem RawExpr.mapM_except_eq {ε : Type} [Inhabited (Except ε RawExpr)] {μ : RawExpr → Nat}
+    (hμ : RawExpr.Measure μ)
     (f : RawExpr → Except ε RawExpr) (hf : ∀ e e', f e = .ok e' → μ e' ≤ μ e) (e : RawExpr) :
     RawExpr.mapM f e = (do
       match ← f e with
@@ -681,7 +682,7 @@ theorem RawExpr.mapM_except_eq {ε : Type} {μ : RawExpr → Nat} (hμ : RawExpr
       exact this (f e) (hf e)) e
 
 /-- In `Id`, for a callback whose results are no larger. -/
-theorem RawExpr.mapM_id_eq {μ : RawExpr → Nat} (hμ : RawExpr.Measure μ)
+theorem RawExpr.mapM_id_eq [Inhabited (Id RawExpr)] {μ : RawExpr → Nat} (hμ : RawExpr.Measure μ)
     (f : RawExpr → RawExpr) (hf : ∀ e, μ (f e) ≤ μ e) (e : RawExpr) :
     RawExpr.mapM (m := Id) f e =
       (match f e with
