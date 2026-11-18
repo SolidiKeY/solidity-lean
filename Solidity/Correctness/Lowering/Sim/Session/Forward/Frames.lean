@@ -10,7 +10,12 @@ every action started from related boundaries reach related boundaries with
 the same events, and a Source frame that does not complete shows no event.
 Its invariant `Inv` implies the `D.globRel` clause of
 `Shrink.Lowering.Agrees`. Nothing here derives `MatchedFrames` from
-`Diagram.Simulates`; see `Session/Forward.lean`, "What is not proved". -/
+`Diagram.Simulates`; see `Session/Forward.lean`, "What is not proved".
+
+**Provisional (H1199).** `MatchedFrames` is not frozen: the binding lane may
+prototype against it, and its fields may change once the v2 statements (the
+session lift with `F := P.fixed` and elaboration receipts, the Source session
+at instance-less addresses) are settled. -/
 namespace Solidity.Correctness.Lowering.Sim.Session
 
 open Solidity.Roadmap (Event Outcome SessionEnv Fixed)
