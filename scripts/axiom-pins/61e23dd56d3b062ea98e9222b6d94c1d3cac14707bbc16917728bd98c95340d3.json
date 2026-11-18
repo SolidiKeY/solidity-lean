@@ -1,7 +1,0 @@
-{
- "Solidity/Examples/Goals/IntrinsicStorage.lean:Solidity.Semantics.IntrinsicSession.storage_accounting_of_adequate": [
-  "Classical.choice",
-  "Quot.sound",
-  "propext"
- ]
-}

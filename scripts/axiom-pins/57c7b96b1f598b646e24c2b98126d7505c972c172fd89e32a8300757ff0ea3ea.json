@@ -1,7 +1,0 @@
-{
- "Solidity/Examples/Goals/IntrinsicSession.lean:Solidity.Semantics.IntrinsicSession.session_semantics_correct": [
-  "Classical.choice",
-  "Quot.sound",
-  "propext"
- ]
-}

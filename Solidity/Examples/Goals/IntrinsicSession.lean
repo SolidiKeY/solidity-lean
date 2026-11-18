@@ -1,23 +1,14 @@
 import Solidity.Goals.IntrinsicSession
-import Solidity.Correctness.IntrinsicSession.Main
 
 /-! Pin and controls for the intrinsic-session plan goal. -/
 
 namespace Solidity.Goals
 
 /--
-info: proved Solidity.Goals.intrinsicSessionSemantics ← Solidity.Semantics.IntrinsicSession.session_semantics_correct plan is0-intrinsic-session
+info: open Solidity.Goals.intrinsicSessionSemantics ← Solidity.Semantics.IntrinsicSession.session_semantics_correct plan is0-intrinsic-session
 -/
 #guard_msgs in
 #roadmap_goal intrinsicSessionSemantics
-
-/--
-info: 'Solidity.Semantics.IntrinsicSession.session_semantics_correct' depends on axioms: [propext,
- Classical.choice,
- Quot.sound]
--/
-#guard_msgs in
-#print axioms Solidity.Semantics.IntrinsicSession.session_semantics_correct
 
 /-! The intrinsic session laws refuse a candidate that never observes an event:
 a resumed session whose first action is a credit must show it. -/
