@@ -68,4 +68,12 @@ info: 'Solidity.Backend.MemoryCopies.referenceDefaultDemand' depends on axioms: 
 -/
 #guard_msgs in
 #print axioms referenceDefaultDemand
+
+/-- Stripping commutes with replication. -/
+theorem strip_replicate {T : Ty} (value : SVal T) (count : Nat) :
+    (SVec.replicate value count).strip = SVec.replicate value.strip count := by
+  induction count with
+  | zero => simp only [SVec.replicate, SVec.strip_nil]
+  | succ count previous => simp only [SVec.replicate, SVec.strip_cons, previous]
+
 end Solidity.Backend.MemoryCopies

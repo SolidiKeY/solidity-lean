@@ -54,7 +54,8 @@ theorem SourceBoolRefsAt.eval_nested_assign_of_write {E : Source.Env} {Γ : Sour
   rw [Source.Hoare.run_bind,hw]
   rfl
 
-private theorem local_uint_code {C : Contract} {Γ : Ctx} {L b : Nat} {F : Evm.Frag Γ}
+/-- A `uint` local compiles to a push of its word. -/
+theorem local_uint_code {C : Contract} {Γ : Ctx} {L b : Nat} {F : Evm.Frag Γ}
     {σ : State C Γ} {m : Evm.Machine} (hm : Evm.Sim C L b F σ m)
     (index : Idx Γ (.val .uint)) (i : Fin Evm.W) (ht : TEnv.get index σ.env=Evm.Memory.indexValue i) :
     Evm.run (Evm.compileVal b (.simple (.local index) : Val C Γ .uint)) m=.ok (m.push (.val i)) 0 := by

@@ -16,14 +16,14 @@ structure PairAt {E : Source.Env} {Γ : Source.RCtx} {H : HTy}
     fs.nth 1 SourceBoolArrayTy = .ok (.val (.memRef rfl childAddress))
   leaf : SourceBoolMemoryAt y childAddress hp (hp.field root layout.child_type) .dyn
 
-private theorem default_field {H : HTy} {hp : Heap H} {s : Name}
+theorem default_field {H : HTy} {hp : Heap H} {s : Name}
     {root : HRef H (.struct s)} (hd : hp.Dflt (.ref (.struct s)) root)
     {f : Name} {T : Ty} (hf : lookupBy f (structDef s) = some T) :
     hp.Dflt T (hp.field root hf) := by
   cases hd with
   | struct _ fields => exact fields hf
 
-private theorem default_array_length {H : HTy} {hp : Heap H}
+theorem default_array_length {H : HTy} {hp : Heap H}
     {r : HRef H (.array (.prim .bool))} (hd : hp.Dflt (.ref (.array (.prim .bool))) r) :
     hp.len r .dyn = 0 := by
   cases hd with

@@ -6,17 +6,6 @@ import Solidity.Evm.MemoryObjectStatements
 Source observer and compatible Objects.StateRepr. No copy or new evaluator. -/
 namespace Solidity.Backend.MemoryOps
 
-/-- Other Source locals are framed by their actual intrinsic positions. -/
-theorem source_locals_get_set_other {D : Source.Layout} :
-    {Γ : Source.RCtx} → {τ υ : Source.STy} → (l : Source.Locals D Γ) →
-    (i : Source.Idx Γ τ) → (j : Source.Idx Γ υ) → (v : Source.Val D τ) →
-    i.toNat≠j.toNat → (l.set i v).get j=l.get j
-  | _, _, _, .cons _ _, .here, .here, _, h => (h rfl).elim
-  | _, _, _, .cons _ _, .here, .there _, _, _ => rfl
-  | _, _, _, .cons _ _, .there _, .here, _, _ => rfl
-  | _, _, _, .cons _ rest, .there i, .there j, v, h =>
-      source_locals_get_set_other rest i j v (fun he => h (congrArg (·+1) he))
-
 private theorem source_idx_type {Γ : Source.RCtx} {τ : Source.STy} (i : Source.Idx Γ τ) : Γ[i.toNat]?=some τ := by
   induction i with
   | here => rfl

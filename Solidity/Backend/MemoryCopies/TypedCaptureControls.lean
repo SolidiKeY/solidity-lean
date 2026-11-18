@@ -61,15 +61,6 @@ private theorem allocator (payloads : List (Fin W)) (bounded : payloads.length <
     with_unfolding_all change 16 + max 1 payloads.length ≤ 256
     omega
 
-private theorem uint_word {H : HTy} {A : RefTy} (heap : Heap H) (reference : HRef H A) (a : ArrTy A (.prim .uint))
-    (base : Nat → Fin W) (target : Machine) (representation : Objects.ArrayRepr heap reference a base target)
-    (index : Nat) (payload : Fin W) (selected : (MObj.elems a (heap.get reference))[index]? = some (indexValue payload)) :
-    target.mem ((base reference.id).val + Objects.header a + index) = .val payload := by
-  obtain ⟨word,stored,equal⟩ := representation.elements index (indexValue payload) selected
-  have same : word = payload := Fin.ext (Int.ofNat_inj.mp equal.symm)
-  subst word
-  exact stored
-
 
 private def captured (payloads : List (Fin W)) (start stop offset : Nat)
     (hs : MemoryOps.SliceBounds ((heap payloads).len (old payloads.length) .fixed) start stop)
@@ -96,9 +87,9 @@ theorem primitive_right : ∃ target,
   obtain ⟨target,ran,allocated,cursor,first,second,_,_⟩ :=
     primitive_runtime [wmod 11,wmod 23,wmod 37,wmod 41] (by decide) 0 3 1 ⟨by decide,by with_unfolding_all decide +kernel⟩ (by with_unfolding_all decide +kernel)
   refine ⟨target,ran,cursor,first,second,?_,?_,?_⟩
-  · exact uint_word _ (old 4) .fixed bases target (allocated.heap.arrays .fixed (old 4)) 1 (wmod 11) (by with_unfolding_all rfl)
-  · exact uint_word _ (old 4) .fixed bases target (allocated.heap.arrays .fixed (old 4)) 2 (wmod 23) (by with_unfolding_all rfl)
-  · exact uint_word _ (old 4) .fixed bases target (allocated.heap.arrays .fixed (old 4)) 3 (wmod 37) (by with_unfolding_all rfl)
+  · exact array_uint_word _ (old 4) .fixed bases target (allocated.heap.arrays .fixed (old 4)) 1 (wmod 11) (by with_unfolding_all rfl)
+  · exact array_uint_word _ (old 4) .fixed bases target (allocated.heap.arrays .fixed (old 4)) 2 (wmod 23) (by with_unfolding_all rfl)
+  · exact array_uint_word _ (old 4) .fixed bases target (allocated.heap.arrays .fixed (old 4)) 3 (wmod 37) (by with_unfolding_all rfl)
 
 theorem primitive_left : ∃ target,
     run (typedCaptureCode bases (old 4) .fixed (old 4) .fixed 1 4 0) (machine [wmod 11,wmod 23,wmod 37,wmod 41]) = .ok target 0 ∧
@@ -106,9 +97,9 @@ theorem primitive_left : ∃ target,
   obtain ⟨target,ran,allocated,cursor,_,_,_,_⟩ :=
     primitive_runtime [wmod 11,wmod 23,wmod 37,wmod 41] (by decide) 1 4 0 ⟨by decide,by with_unfolding_all decide +kernel⟩ (by with_unfolding_all decide +kernel)
   refine ⟨target,ran,?_,?_,?_,cursor⟩
-  · exact uint_word _ (old 4) .fixed bases target (allocated.heap.arrays .fixed (old 4)) 0 (wmod 23) (by with_unfolding_all rfl)
-  · exact uint_word _ (old 4) .fixed bases target (allocated.heap.arrays .fixed (old 4)) 1 (wmod 37) (by with_unfolding_all rfl)
-  · exact uint_word _ (old 4) .fixed bases target (allocated.heap.arrays .fixed (old 4)) 2 (wmod 41) (by with_unfolding_all rfl)
+  · exact array_uint_word _ (old 4) .fixed bases target (allocated.heap.arrays .fixed (old 4)) 0 (wmod 23) (by with_unfolding_all rfl)
+  · exact array_uint_word _ (old 4) .fixed bases target (allocated.heap.arrays .fixed (old 4)) 1 (wmod 37) (by with_unfolding_all rfl)
+  · exact array_uint_word _ (old 4) .fixed bases target (allocated.heap.arrays .fixed (old 4)) 2 (wmod 41) (by with_unfolding_all rfl)
 
 theorem empty_endpoint (payloads : List (Fin W)) :
     run (typedCaptureCode bases (old payloads.length) .fixed (old payloads.length) .fixed payloads.length payloads.length payloads.length)
@@ -129,7 +120,7 @@ theorem primitive_long : ∃ target,
   obtain ⟨target,ran,allocated,cursor,first,second,_,_⟩ :=
     primitive_runtime long (by rw [long,List.length_ofFn]; decide) 0 63 1 hs hd
   refine ⟨target,ran,cursor,first,second,?_⟩
-  apply uint_word _ (old 64) .fixed bases target (allocated.heap.arrays .fixed (old 64)) 63 (wmod 63)
+  apply array_uint_word _ (old 64) .fixed bases target (allocated.heap.arrays .fixed (old 64)) 63 (wmod 63)
   have snapshot : (MObj.elems .fixed ((captured long 0 63 1 hs hd).get (old 64)))[63]? =
       (MObj.elems .fixed ((heap long).get (old 64)))[62]? :=
     MemoryOps.captureOverwrite_read (heap long) (old 64) .fixed (old 64) .fixed 0 63 1 62 hs hd (by decide)
@@ -163,10 +154,10 @@ theorem reference_runtime : ∃ target,
   refine ⟨target,ran,allocated,lower 0 (by decide),lower 1 (by decide),lower 2 (by decide),?_,?_,?_,?_,congrArg Machine.stack shape⟩
   · exact (allocated.heap.arrays .fixed parent).elements 0 right (by with_unfolding_all rfl)
   · exact (allocated.heap.arrays .fixed parent).elements 1 right (by with_unfolding_all rfl)
-  · apply uint_word _ left .dyn refInput.base target (allocated.heap.arrays .dyn left) 0 (wmod 7)
+  · apply array_uint_word _ left .dyn refInput.base target (allocated.heap.arrays .dyn left) 0 (wmod 7)
     rw [frame left (by decide)]
     with_unfolding_all rfl
-  · apply uint_word _ right .dyn refInput.base target (allocated.heap.arrays .dyn right) 0 (wmod 9)
+  · apply array_uint_word _ right .dyn refInput.base target (allocated.heap.arrays .dyn right) 0 (wmod 9)
     rw [frame right (by decide)]
     with_unfolding_all rfl
 
@@ -189,8 +180,8 @@ theorem dynamic_runtime : ∃ target,
       (allocated.heap.arrays .dyn right).length rfl
     rw [typed_capture_length refInput.heap left .dyn right .dyn 0 1 0 hs hd right .dyn] at header
     with_unfolding_all exact header
-  · exact uint_word _ right .dyn refInput.base target (allocated.heap.arrays .dyn right) 0 (wmod 7) (by with_unfolding_all rfl)
-  · apply uint_word _ left .dyn refInput.base target (allocated.heap.arrays .dyn left) 0 (wmod 7)
+  · exact array_uint_word _ right .dyn refInput.base target (allocated.heap.arrays .dyn right) 0 (wmod 7) (by with_unfolding_all rfl)
+  · apply array_uint_word _ left .dyn refInput.base target (allocated.heap.arrays .dyn left) 0 (wmod 7)
     rw [frame left (by decide)]
     with_unfolding_all rfl
   · exact (allocated.heap.arrays .fixed parent).elements 0 left (by rw [frame parent (by decide)]; with_unfolding_all rfl)

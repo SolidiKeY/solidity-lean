@@ -249,4 +249,15 @@ def typedCapture : TypedCaptureCertificate := by
 #print axioms typed_capture_allocator
 #print axioms typed_capture_success
 #print axioms typedCapture
+
+/-- A represented `uint` element is stored as its word. -/
+theorem array_uint_word {H : HTy} {A : RefTy} (heap : Heap H) (reference : HRef H A) (a : ArrTy A (.prim .uint))
+    (base : Nat → Fin W) (target : Machine) (representation : Objects.ArrayRepr heap reference a base target)
+    (index : Nat) (payload : Fin W) (selected : (MObj.elems a (heap.get reference))[index]? = some (indexValue payload)) :
+    target.mem ((base reference.id).val + Objects.header a + index) = .val payload := by
+  obtain ⟨word,stored,equal⟩ := representation.elements index (indexValue payload) selected
+  have same : word = payload := Fin.ext (Int.ofNat_inj.mp equal.symm)
+  subst word
+  exact stored
+
 end Solidity.Backend.MemoryCopies

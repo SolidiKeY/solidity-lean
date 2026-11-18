@@ -112,5 +112,11 @@ theorem pointer_eight_not_numeric : Semantics.wordBytes 8≠Semantics.wordBytes 
 #guard_msgs (whitespace := lax) in #print axioms WordFrame.pointer_write
 /-- info: 'Solidity.Backend.MemoryOps.Physical.reference_store_frames' depends on axioms: [propext, Classical.choice, Quot.sound] -/
 #guard_msgs (whitespace := lax) in #print axioms reference_store_frames
-end Solidity.Backend.MemoryOps.Physical
 
+/-- Reading back a written 32-byte word returns it. -/
+theorem word_read_written (memory : Environment.Memory) (a w : Nat) :
+    Environment.readMemory (Environment.writeBytes memory a (Semantics.wordBytes w)) a 32 =
+      Semantics.wordBytes w := by
+  simpa only [Environment.wordBytes_length] using Environment.read_written (Semantics.wordBytes w) a memory
+
+end Solidity.Backend.MemoryOps.Physical

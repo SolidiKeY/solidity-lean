@@ -166,18 +166,11 @@ theorem saturated_refusal (payloads : List (Fin W)) (bounded : payloads.length <
 theorem empty_saturated_refusal : run checkedStorageArrayCode ((moved [] wMax).push (.slot source)) = .revert :=
   saturated_refusal [] (by decide)
 
-private theorem cursor_value (n : Nat) (positive : 0 < n) (bounded : n ≤ W) :
-    (wmod (W - n)).val = W - n := Nat.mod_eq_of_lt (by omega)
-private theorem cursor_above (n : Nat) (positive : 0 < n) (bounded : n ≤ 128) : 40 ≤ (wmod (W - n)).val := by
-  have large : 256 < W := by decide
-  rw [cursor_value n positive (by omega)]
-  omega
-
 theorem pair_boundary_refusal :
     run checkedStorageArrayCode ((moved [wmod 11,wmod 23] (wmod (W - 3))).push (.slot source)) = .revert := by
   rw [checked_storage_array_run input.heap .uint (values [wmod 11,wmod 23]) (by decide) input.base 8 (wmod (W - 3))
     (moved [wmod 11,wmod 23] (wmod (W - 3))) source 128
-    (moved_allocator _ _ (cursor_above 3 (by decide) (by decide))) (moved_representation _ (by decide) _),cursor_value 3 (by decide) (by decide)]
+    (moved_allocator _ _ (wmod_sub_above 3 (by decide) (by decide))) (moved_representation _ (by decide) _),wmod_sub_val 3 (by decide) (by decide)]
   apply if_neg
   change ¬ (W - 3 + (2 + 1) < W)
   have large : 3 ≤ W := by decide
@@ -187,24 +180,24 @@ theorem pair_last_fitting : ∃ fits,
     CheckedStorageArrayResult input.heap .uint (values [wmod 11,wmod 23]) (by decide) input.base 8 (wmod (W - 4))
       (moved [wmod 11,wmod 23] (wmod (W - 4))) source fits := by
   have fits : (wmod (W - 4)).val + ((values [wmod 11,wmod 23]).length + 1) < W := by
-    rw [cursor_value 4 (by decide) (by decide)]
+    rw [wmod_sub_val 4 (by decide) (by decide)]
     change W - 4 + (2 + 1) < W
     have large : 4 ≤ W := by decide
     omega
   exact ⟨fits,checked_storage_array_success input.heap .uint _ (by decide) input.base 8 _ _ source 128
-    (moved_allocator _ _ (cursor_above 4 (by decide) (by decide))) (moved_representation _ (by decide) _) fits⟩
+    (moved_allocator _ _ (wmod_sub_above 4 (by decide) (by decide))) (moved_representation _ (by decide) _) fits⟩
 
 theorem header_selects_capacity :
     (∃ fits, CheckedStorageArrayResult input.heap .uint (values []) (by decide) input.base 8 (wmod (W - 3))
       (moved [] (wmod (W - 3))) source fits) ∧
     run checkedStorageArrayCode ((moved [wmod 11,wmod 23] (wmod (W - 3))).push (.slot source)) = .revert := by
   have fits : (wmod (W - 3)).val + ((values []).length + 1) < W := by
-    rw [cursor_value 3 (by decide) (by decide)]
+    rw [wmod_sub_val 3 (by decide) (by decide)]
     change W - 3 + (0 + 1) < W
     have large : 3 ≤ W := by decide
     omega
   exact ⟨⟨fits,checked_storage_array_success input.heap .uint _ (by decide) input.base 8 _ _ source 128
-    (moved_allocator _ _ (cursor_above 3 (by decide) (by decide))) (moved_representation _ (by decide) _) fits⟩,pair_boundary_refusal⟩
+    (moved_allocator _ _ (wmod_sub_above 3 (by decide) (by decide))) (moved_representation _ (by decide) _) fits⟩,pair_boundary_refusal⟩
 
 #print axioms certificate_inhabited
 #print axioms actual_runtime

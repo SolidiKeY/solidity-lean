@@ -201,11 +201,9 @@ theorem empty_saturated_refusal :
     run (checkedFixedMemoryCode 0) ((moved [] wMax).push w[16]) = .revert :=
   (saturated_refusal [] (by decide)).2
 
-private theorem cursor_value (n : Nat) (positive : 0 < n) (bounded : n ≤ W) :
-    (wmod (W - n)).val = W - n := Nat.mod_eq_of_lt (by omega)
 private theorem cursor_above (n : Nat) (positive : 0 < n) (bounded : n ≤ 128) : 256 ≤ (wmod (W - n)).val := by
   have large : 1024 < W := by decide
-  rw [cursor_value n positive (by omega)]
+  rw [wmod_sub_val n positive (by omega)]
   omega
 
 theorem pair_boundary_refusal :
@@ -214,7 +212,7 @@ theorem pair_boundary_refusal :
       (moved [wmod 11,wmod 23] (wmod (W - 2))) :=
     moved_allocator [wmod 11,wmod 23] (by decide) _ (cursor_above 2 (by decide) (by decide))
   rw [checked_fixed_memory_run 2 (moved [wmod 11,wmod 23] (wmod (W - 2))) (wmod (W - 2)) ⟨16,by decide⟩
-    allocated.free.cell,cursor_value 2 (by decide) (by decide)]
+    allocated.free.cell,wmod_sub_val 2 (by decide) (by decide)]
   apply if_neg
   have large : 2 ≤ W := by decide
   change ¬ (W - 2 + max 1 2 < W)
@@ -224,7 +222,7 @@ theorem pair_last_fitting : ∃ fits,
     CheckedFixedMemoryResult (heap [wmod 11,wmod 23]) .uint 2 (old 2) bases 8 (wmod (W - 3))
       (moved [wmod 11,wmod 23] (wmod (W - 3))) fits := by
   have fits : (wmod (W - 3)).val + max 1 2 < W := by
-    rw [cursor_value 3 (by decide) (by decide)]
+    rw [wmod_sub_val 3 (by decide) (by decide)]
     have large : 3 ≤ W := by decide
     omega
   exact ⟨fits,checked_fixed_memory_success (heap [wmod 11,wmod 23]) .uint 2 (old 2) bases 8 (wmod (W - 3))
@@ -236,7 +234,7 @@ theorem fixed_count_selects_capacity :
       (moved [] (wmod (W - 2))) fits) ∧
     run (checkedFixedMemoryCode 2) ((moved [wmod 11,wmod 23] (wmod (W - 2))).push w[16]) = .revert := by
   have fits : (wmod (W - 2)).val + max 1 0 < W := by
-    rw [cursor_value 2 (by decide) (by decide)]
+    rw [wmod_sub_val 2 (by decide) (by decide)]
     have large : 2 ≤ W := by decide
     omega
   exact ⟨⟨fits,checked_fixed_memory_success (heap []) .uint 0 (old 0) bases 8 (wmod (W - 2))
