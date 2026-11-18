@@ -19,10 +19,9 @@ namespace Solidity.Yul.Layout.Instances
 open Solidity.Goals
 open Solidity.Yul.Views
 
-private theorem word_bound : (256 : Nat) ^ 32 = 2 ^ 256 := by decide
-
+/-- A memory word is below `256 ^ 32`, the bound of a 32-byte scalar. -/
 private theorem mloadNat_lt (b : ByteView) (a : Nat) : mloadNat b a < 256 ^ 32 :=
-  word_bound ▸ (mload b a).isLt
+  (by decide : (256 : Nat) ^ 32 = 2 ^ 256) ▸ (mload b a).isLt
 
 /-- A memory word reads as `mloadNat`, cleaned or not, at every offset mark. -/
 private theorem read_word (P : Shrink.Params) (a o : Nat) (m : Shrink.Phys) :
