@@ -347,6 +347,9 @@ def _observed_routes(receipt, scratch, manifest, runner, nonpassing=False, modul
 
     Every mutated path and directory descendant is excluded, even if restored.
     Unknown descriptor inheritance and incomplete syscall records get no credit.
+    Mutated names are matched as the kernel may resolve them: '..' after a
+    component, '//', /proc and /dev/fd spellings, symlinkat targets and
+    relative names through the tree's root or an ancestor (H1008).
 
     readonly_symlinks (off by default) audits one shape instead of tainting the
     target of symlink(TARGET, LINK): TARGET is a committed file or directory
@@ -392,10 +395,16 @@ def _observed_routes(receipt, scratch, manifest, runner, nonpassing=False, modul
             suffix = posixpath.normpath(value)
             while suffix.startswith('../'): suffix = suffix[3:]
             if suffix in ('.', '..'): dirty.update(files); return
-            # The unknown base may enclose the tree, so every trailing part counts.
-            parts = suffix.split('/')
-            for tail in ('/'.join(parts[i:]) for i in range(len(parts))):
-                dirty.update(p for p in files if p == tail or p.endswith('/' + tail) or ('/' + tail + '/') in ('/' + p))
+            dirty.update(p for p in files if p == suffix or p.endswith('/' + suffix) or
+                         ('/' + suffix + '/') in ('/' + p))
+            # The unknown base may enclose the tree: a name may run through its
+            # root (taint the rest) or name it or an ancestor (taint all).
+            parts = suffix.split('/'); root_parts = scratch.strip('/').split('/')
+            for i in range(1, len(parts) + 1):
+                for k in range(i, len(root_parts) + 1):
+                    if parts[:i] != root_parts[k - i:k] or k < len(root_parts) and i < len(parts): continue
+                    if k < len(root_parts) or i == len(parts): dirty.update(files); return
+                    taint(scratch + '/' + '/'.join(parts[i:]))
     arguments = strace_arguments
     def resolve(value, directory=None):
         try: path = ast.literal_eval(value)
@@ -1024,7 +1033,7 @@ def path_spelling_controls():
             shutil.copyfile(receipt['events'], str(stem) + '.events.jsonl')
             return 'tests/x.txt' in {r['target'] for r in observed_routes(dict(receipt, events=str(stem) + '.events.jsonl'), root, manifest, runner)}
         x = str(root / 'tests/x.txt')
-        assert certified([]) and certified(['unlink("/elsewhere/y.txt") = 0'])
+        assert certified([]) and certified(['unlink("/elsewhere/y.txt") = 0', 'rmdir("build/tests") = 0'])
         refusals = {
             'symlinkat-relative-target': ['symlinkat("../tests", AT_FDCWD</elsewhere>, "s") = 0'],
             'dotdot-dirfd-name': ['unlinkat(AT_FDCWD</elsewhere>, "link/../x.txt", 0) = 0'],
@@ -1035,6 +1044,7 @@ def path_spelling_controls():
             'chdir-proc-fd': ['chdir("/proc/self/fd") = 0', 'truncate("3", 0) = 0'],
             'relative-enclosing-name': ['unlink(' + json.dumps(x.lstrip('/')) + ') = 0'],
             'rename-scratch-ancestor': ['rename(' + json.dumps(str(root.parent)) + ', "/elsewhere/moved") = 0'],
+            'relative-scratch-ancestor': ['rename(' + json.dumps(root.parent.name) + ', "moved") = 0'],
         }
         for label, inject in refusals.items(): assert not certified(inject), label
         print('path spelling controls: positive; symlinkat/dotdot/double-slash/proc-root runs; ' + '/'.join(refusals) + ' PASS')
