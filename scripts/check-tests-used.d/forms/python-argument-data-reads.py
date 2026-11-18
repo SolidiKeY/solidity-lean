@@ -20,6 +20,13 @@
 # Source-data read credit only: no current validation, native, semantic, pass,
 # output or proof credit; the committed-cli root, the other source-only roles
 # and their premises are unchanged.
+import ast, hashlib
+# Checker names this form uses, bound by fragments.py, roles.py and registry.py
+# (rebound to the same objects, so the registry's collision check is unaffected).
+(CONSUMER_HANDLERS, FORM_CONTROLS, PERSISTED_OPERATION, _check_lines, _current, _historical_objects, _module_name, _rooted,
+ canonical, register_consumer_section) = (globals()[name] for name in (
+    'CONSUMER_HANDLERS', 'FORM_CONTROLS', 'PERSISTED_OPERATION', '_check_lines', '_current', '_historical_objects', '_module_name',
+    '_rooted', 'canonical', 'register_consumer_section'))
 PY_ARG_READ_SECTION = 'python_argument_reads'
 PY_ARG_READ_KEY = 'argument-bearing Python data read'
 PY_ARG_READ_OPERATION = 'blob-bound persisted read_text of a reviewed argument-bearing Python program run with external output'
