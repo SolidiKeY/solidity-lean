@@ -1101,20 +1101,20 @@ example (g : String) {Γ : NCtx} (args : List (ExtArg C Γ.ctx)) (ρ : Ctx)
   congrArg (fun p => ElabM.runFrom p sc st)
     ((elabRec_trySelfBody C g args ρ).trans (trySelfBody_eq C g args ρ))
 
-/-- Tuple dispatch's public equation also preserves failures and the returned context. -/
+/-- Tuple dispatch's public equation lifted through `runFrom`. -/
 example (ts : List (Option RawExpr)) (h ty : String) (args : List RawExpr)
     (sc : ElabScope) (st : ECtx × Nat) :
     (fnTupleDispatch C ts h ty args).runFrom sc st =
       (fnTupleDispatchWith C (panicProducerRec C ()) ts h ty args).runFrom sc st :=
   congrArg (fun p => ElabM.runFrom p sc st) (fnTupleDispatch_eq C ts h ty args)
 
-/-- Receive execution uses its public equation without adding panic instrumentation. -/
+/-- Receive execution's public equation lifted through `runFrom`. -/
 example {Γ : NCtx} (v : RawExpr) (sc : ElabScope) (st : ECtx × Nat) :
     (receiveSelfBody C (Γ := Γ) v).runFrom sc st =
       (receiveSelfBodyWith C (panicProducerRec C ()) (Γ := Γ) v).runFrom sc st :=
   congrArg (fun p => ElabM.runFrom p sc st) (receiveSelfBody_eq C (Γ := Γ) v)
 
--- H30/H48: standard-only dependencies inherited from dispatchCaptures.
+-- Standard-only dependencies inherited from dispatchCaptures.
 /-- info: 'Solidity.fnDispatch' depends on axioms: [propext, Quot.sound] -/
 #guard_msgs in #print axioms fnDispatch
 
