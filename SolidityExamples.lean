@@ -128,6 +128,7 @@ import Solidity.Examples.DecisionWrittenMemory
 import Solidity.Examples.DeclarationReduction
 import Solidity.Examples.DependentReduction
 import Solidity.Examples.Docs.ProseCalibrated.Allowance
+import Solidity.Examples.ElabTotal.Guard
 import Solidity.Examples.ElabTotal.Measure
 import Solidity.Examples.ExactReduction
 import Solidity.Examples.ExactUpdates
@@ -192,6 +193,7 @@ import Solidity.Examples.LexVariant
 import Solidity.Examples.LinearDecision
 import Solidity.Examples.Lowering.Sim.Cases
 import Solidity.Examples.Lowering.Sim.Match
+import Solidity.Examples.Lowering.Sim.Session.Backward
 import Solidity.Examples.Lowering.Sim.Session.Binding
 import Solidity.Examples.Lowering.Sim.Session.Source
 import Solidity.Examples.Lowering.Sim.Session.Target
@@ -436,6 +438,7 @@ import Solidity.Examples.TypedLinear
 import Solidity.Examples.Verify
 import Solidity.Examples.YulLayout.Geometry
 import Solidity.Examples.YulLayout.InstancesMemory
+import Solidity.Examples.YulLayout.InstancesStorage
 import Solidity.Examples.YulLayout.LawsRead
 import Solidity.Examples.YulLayout.LawsWrite
 import Solidity.Examples.YulLayout.ScalarPilot
