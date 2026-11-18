@@ -1,8 +1,11 @@
 import Solidity.Tools.Goal
+import Solidity.Hashes
 
 /-! The goal-pin vocabulary `GoalPinSpec`, moved out of `Goals/Plan.lean` (H666). -/
 
 namespace Solidity.Goals
+
+open Solidity.Goal
 
 namespace GoalPinSpec
 
