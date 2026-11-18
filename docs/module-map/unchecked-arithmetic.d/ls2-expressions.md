@@ -1,2 +1,5 @@
 | `Correctness/Lowering/Sim/Expr/Strength.lean` | The strength of `ExprCases`: at a record whose unconstrained `hoistTop` returns arbitrary captures (`passRec`) the declaration arm of `hoistStmtWith` gives the site obligation of every run (`sites_of_exprCases`), so `ExprCases` alone implies `diagram.Simulates` (`simulates_of_exprCases`); `expr_cases` is not proved. |
-| `Examples/Lowering/Sim/Expr.lean` | The expression cases at the declaration arm of `hoistStmtWith`. |
+| `Correctness/Lowering/Sim/Expr/Operand.lean` | `hoistWith` at an arbitrary record on names, Booleans, environment reads, numerals, unary operations and compound assignments (`hoist_name`, `hoist_num`, `hoist_unop`, `hoist_opAssign`). |
+| `Correctness/Lowering/Sim/Expr/Capture.lean` | `hoistStmtWith` at an arbitrary record on its leaf and one-callback arms, and the frozen case at `b.push()++` from `RecSim` (`hoistStmt_pushIncDec_sat`). |
+| `Correctness/Lowering/Sim/Expr/Scope.lean` | `elabStmt1With` on `unchecked` and `checked` blocks: `rc.elabBranch` under the changed scope (`stmt1_unchecked`, `stmt1_checked`). |
+| `Examples/Lowering/Sim/Expr.lean` | The expression cases: the declaration arm of `hoistStmtWith`, the provable `push()++` arm, an operand and a scope. |
