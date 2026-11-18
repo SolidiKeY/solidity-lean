@@ -1,4 +1,5 @@
-# H1203 (gh#1518, H62-X1AF-COVERAGE, A) census form: source-only roles for the implicit CPython cache .gitignore
+# H1203 (gh#1518, H62-X1AF-COVERAGE, A) census form (planned as h62-cache-and-manifest-roles.py; named after its content
+# because the hygiene path check refuses an h62 segment): source-only roles for the implicit CPython cache .gitignore
 # policies of scripts/h62 that H1053 (roles.py, cache_policies) refused, and the review of the audit-theories
 # scope-manifest.json. Exec'd by registry.py in the namespace of fragments.py (see registry.py's header); it registers
 # one late standalone kind and one control and binds no shared name. Opt-in: without a standalone row of this kind
