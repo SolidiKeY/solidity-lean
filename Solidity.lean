@@ -2431,6 +2431,11 @@ import Solidity.Calculus.UpdateRules
 import Solidity.Calculus.VisitedSet
 import Solidity.Calculus.WalkSyntax
 import Solidity.Calculus.WkOver
+import Solidity.Correctness.IntrinsicSession.Laws.Boundary
+import Solidity.Correctness.IntrinsicSession.Laws.Common
+import Solidity.Correctness.IntrinsicSession.Laws.Frames
+import Solidity.Correctness.IntrinsicSession.Laws.Frames.Steps
+import Solidity.Correctness.IntrinsicSession.Laws.Structure
 import Solidity.Correctness.IntrinsicSession.Run
 import Solidity.Correctness.IntrinsicSession.Spec
 import Solidity.Correctness.IntrinsicSession.Step
@@ -2455,6 +2460,7 @@ import Solidity.Correctness.Lowering.Loops.Statement
 import Solidity.Correctness.Lowering.Loops.WhileBreak
 import Solidity.Correctness.Lowering.Loops.WhileContinue
 import Solidity.Correctness.Lowering.Loops.WhileReset
+import Solidity.Correctness.Lowering.Sim.Session.Source
 import Solidity.Correctness.Lowering.Sim.Session.Target
 import Solidity.Correctness.Lowering.Sim.Session.Target.Machine
 import Solidity.Correctness.Lowering.Total.Contract
@@ -2485,9 +2491,12 @@ import Solidity.Correctness.Lowering.Unchecked.WordOne
 import Solidity.Correctness.Lowering.Unchecked.WordProgram
 import Solidity.Correctness.Lowering.Unchecked.WordUpdateWitness
 import Solidity.Correctness.Lowering.Unchecked.WrappingArithmetic
+import Solidity.Correctness.Panic.Capture
 import Solidity.Correctness.Panic.Guards.Arith
+import Solidity.Correctness.Panic.Provenance
 import Solidity.Correctness.Panic.Provenance.Control
 import Solidity.Correctness.Panic.Provenance.Eval
+import Solidity.Correctness.Panic.Provenance.Updates
 import Solidity.Correctness.Sim.Examples
 import Solidity.Correctness.Sim.Lang
 import Solidity.Correctness.Sim.Observation
@@ -4569,6 +4578,7 @@ import Solidity.Syntax.Elab
 import Solidity.Syntax.Elab.Arms
 import Solidity.Syntax.Elab.Context
 import Solidity.Syntax.Elab.Lower
+import Solidity.Syntax.Elab.Measure
 import Solidity.Syntax.Elab.Panic
 import Solidity.Syntax.Elab.SliceCopy
 import Solidity.Syntax.Elab.Stmt
