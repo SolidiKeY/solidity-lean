@@ -325,26 +325,390 @@ def RawExpr.any (p : RawExpr → Bool) (e : RawExpr) : Bool :=
     | .call _ as | .named _ _ as | .tuple as => as.attach.any fun ⟨a, _⟩ => a.any p
     | .num _ | .name _ | .bool _ | .env _ => false
 
-/-- The expression rewritten from the top down: `f` rewrites a node, then
-the expressions inside what it returns are rewritten, left to right. -/
-partial def RawExpr.mapM {m : Type → Type} [Monad m] [Inhabited (m RawExpr)]
-    (f : RawExpr → m RawExpr) (e : RawExpr) : m RawExpr := do
-  match ← f e with
-  | .field a g => return .field (← a.mapM f) g
-  | .index a b => return .index (← a.mapM f) (← b.mapM f)
-  | .binop op a b => return .binop op (← a.mapM f) (← b.mapM f)
-  | .unop op a => return .unop op (← a.mapM f)
-  | .ternary c a b => return .ternary (← c.mapM f) (← a.mapM f) (← b.mapM f)
-  | .incDec op a => return .incDec op (← a.mapM f)
-  | .newArr T n => return .newArr T (← n.mapM f)
-  | .call g as => return .call g (← as.mapM (·.mapM f))
-  | .modular op a b k => return .modular op (← a.mapM f) (← b.mapM f) (← k.mapM f)
-  | .named g ns as => return .named g ns (← as.mapM (·.mapM f))
-  | .tuple as => return .tuple (← as.mapM (·.mapM f))
-  | .assign l r => return .assign (← l.mapM f) (← r.mapM f)
-  | .opAssign op l r => return .opAssign op (← l.mapM f) (← r.mapM f)
-  | e => pure e
+/-- An upper bound of `sizeOf s`, computed. -/
+def strFuel (s : String) : Nat :=
+  s.data.foldr (fun c n => c.toNat + 8 + n) 2
 
+theorem sizeOf_le_strFuel (s : String) : sizeOf s ≤ strFuel s := by
+  obtain ⟨l⟩ := s
+  show 1 + sizeOf l ≤ List.foldr _ 2 l
+  induction l with
+  | nil => simp
+  | cons c l ih =>
+    obtain ⟨⟨⟨⟨v, hv⟩⟩⟩, h⟩ := c
+    simp only [List.foldr_cons, List.cons.sizeOf_spec, Char.mk.sizeOf_spec, UInt32.ofBitVec.sizeOf_spec,
+      BitVec.ofFin.sizeOf_spec, Fin.mk.sizeOf_spec, sizeOf_nat, sizeOf_default, Char.toNat] at ih ⊢
+    show _ ≤ v + 8 + _
+    omega
+
+/-- An upper bound of `sizeOf T`, computed. -/
+def RawTy.fuel : RawTy → Nat
+  | .named s => 1 + strFuel s
+  | .mapping k v => 1 + k.fuel + v.fuel
+  | .array t => 1 + t.fuel
+  | .fixed t n => 1 + t.fuel + n
+
+theorem RawTy.sizeOf_le_fuel (T : RawTy) : sizeOf T ≤ T.fuel := by
+  induction T with
+  | named s => have := sizeOf_le_strFuel s; simp [RawTy.fuel]; omega
+  | mapping k v ihk ihv => simp [RawTy.fuel]; omega
+  | array t ih => simp [RawTy.fuel]; omega
+  | fixed t n ih => simp [RawTy.fuel]; omega
+
+mutual
+/-- An upper bound of `sizeOf e`, computed: the fuel of `RawExpr.mapM`. -/
+def RawExpr.fuel : RawExpr → Nat
+  | .num n => 1 + n
+  | .name x => 1 + strFuel x
+  | .bool _ => 2
+  | .field e f => 1 + e.fuel + strFuel f
+  | .index a b | .assign a b => 1 + a.fuel + b.fuel
+  | .binop _ a b | .opAssign _ a b => 2 + a.fuel + b.fuel
+  | .unop _ a | .incDec _ a => 2 + a.fuel
+  | .ternary c a b => 1 + c.fuel + a.fuel + b.fuel
+  | .newArr T n => 1 + T.fuel + n.fuel
+  | .call f as => 1 + strFuel f + RawExpr.fuelList as
+  | .modular _ a b k => 2 + a.fuel + b.fuel + k.fuel
+  | .named f ns as => 1 + strFuel f + ns.foldr (fun s n => 1 + strFuel s + n) 1 + RawExpr.fuelList as
+  | .env _ => 2
+  | .tuple es => 1 + RawExpr.fuelList es
+/-- `RawExpr.fuel` of a list. -/
+def RawExpr.fuelList : List RawExpr → Nat
+  | [] => 1
+  | e :: es => 1 + e.fuel + RawExpr.fuelList es
+end
+
+theorem sizeOf_le_strsFuel (ns : List String) :
+    sizeOf ns ≤ ns.foldr (fun s n => 1 + strFuel s + n) 1 := by
+  induction ns with
+  | nil => simp
+  | cons s ns ih => have := sizeOf_le_strFuel s; simp at ih ⊢; omega
+
+mutual
+theorem RawExpr.sizeOf_le_fuel : (e : RawExpr) → sizeOf e ≤ e.fuel
+  | .num n => by simp [RawExpr.fuel]
+  | .name x => by have := sizeOf_le_strFuel x; simp [RawExpr.fuel]; omega
+  | .bool b => by cases b <;> simp [RawExpr.fuel]
+  | .field e f => by
+    have := sizeOf_le_strFuel f; have := e.sizeOf_le_fuel; simp [RawExpr.fuel]; omega
+  | .index a b | .assign a b => by
+    have := a.sizeOf_le_fuel; have := b.sizeOf_le_fuel; simp [RawExpr.fuel]; omega
+  | .binop op a b | .opAssign op a b => by
+    have := a.sizeOf_le_fuel; have := b.sizeOf_le_fuel; cases op <;> simp [RawExpr.fuel] <;> omega
+  | .unop op a => by have := a.sizeOf_le_fuel; cases op <;> simp [RawExpr.fuel] <;> omega
+  | .incDec op a => by have := a.sizeOf_le_fuel; cases op <;> simp [RawExpr.fuel] <;> omega
+  | .ternary c a b => by
+    have := a.sizeOf_le_fuel; have := b.sizeOf_le_fuel; have := c.sizeOf_le_fuel
+    simp [RawExpr.fuel]; omega
+  | .newArr T n => by
+    have := T.sizeOf_le_fuel; have := n.sizeOf_le_fuel; simp [RawExpr.fuel]; omega
+  | .call f as => by
+    have := sizeOf_le_strFuel f; have := RawExpr.sizeOf_le_fuelList as; simp [RawExpr.fuel]; omega
+  | .modular op a b k => by
+    have := a.sizeOf_le_fuel; have := b.sizeOf_le_fuel; have := k.sizeOf_le_fuel
+    cases op <;> simp [RawExpr.fuel] <;> omega
+  | .named f ns as => by
+    have := sizeOf_le_strFuel f; have := sizeOf_le_strsFuel ns
+    have := RawExpr.sizeOf_le_fuelList as; simp [RawExpr.fuel]; omega
+  | .env k => by cases k <;> simp [RawExpr.fuel]
+  | .tuple es => by have := RawExpr.sizeOf_le_fuelList es; simp [RawExpr.fuel]; omega
+theorem RawExpr.sizeOf_le_fuelList : (es : List RawExpr) → sizeOf es ≤ RawExpr.fuelList es
+  | [] => by simp [RawExpr.fuelList]
+  | e :: es => by
+    have := e.sizeOf_le_fuel; have := RawExpr.sizeOf_le_fuelList es
+    simp [RawExpr.fuelList]; omega
+end
+
+/-- `RawExpr.mapM` to the depth `n`: `default` below it. -/
+def RawExpr.mapMFuel {m : Type → Type} [Monad m] [Inhabited (m RawExpr)]
+    (f : RawExpr → m RawExpr) : Nat → RawExpr → m RawExpr
+  | 0, _ => default
+  | n + 1, e => do
+    match ← f e with
+    | .field a g => return .field (← mapMFuel f n a) g
+    | .index a b => return .index (← mapMFuel f n a) (← mapMFuel f n b)
+    | .binop op a b => return .binop op (← mapMFuel f n a) (← mapMFuel f n b)
+    | .unop op a => return .unop op (← mapMFuel f n a)
+    | .ternary c a b => return .ternary (← mapMFuel f n c) (← mapMFuel f n a) (← mapMFuel f n b)
+    | .incDec op a => return .incDec op (← mapMFuel f n a)
+    | .newArr T k => return .newArr T (← mapMFuel f n k)
+    | .call g as => return .call g (← as.mapM (mapMFuel f n))
+    | .modular op a b k =>
+      return .modular op (← mapMFuel f n a) (← mapMFuel f n b) (← mapMFuel f n k)
+    | .named g ns as => return .named g ns (← as.mapM (mapMFuel f n))
+    | .tuple as => return .tuple (← as.mapM (mapMFuel f n))
+    | .assign l r => return .assign (← mapMFuel f n l) (← mapMFuel f n r)
+    | .opAssign op l r => return .opAssign op (← mapMFuel f n l) (← mapMFuel f n r)
+    | e => pure e
+
+/-- The depth `RawExpr.mapM` runs to beyond its argument's size: room for a
+callback that grows a node (`sliceNode`, `RawExpr.selfFrame`). -/
+def RawExpr.mapMSlack : Nat := 4294967296
+
+theorem RawExpr.mapMFuel_zero {m : Type → Type} [Monad m] [Inhabited (m RawExpr)]
+    (f : RawExpr → m RawExpr) (e : RawExpr) : RawExpr.mapMFuel f 0 e = default := rfl
+
+theorem RawExpr.mapMFuel_succ {m : Type → Type} [Monad m] [Inhabited (m RawExpr)]
+    (f : RawExpr → m RawExpr) (n : Nat) (e : RawExpr) :
+    RawExpr.mapMFuel f (n + 1) e = (do
+      match ← f e with
+      | .field a g => return .field (← mapMFuel f n a) g
+      | .index a b => return .index (← mapMFuel f n a) (← mapMFuel f n b)
+      | .binop op a b => return .binop op (← mapMFuel f n a) (← mapMFuel f n b)
+      | .unop op a => return .unop op (← mapMFuel f n a)
+      | .ternary c a b => return .ternary (← mapMFuel f n c) (← mapMFuel f n a) (← mapMFuel f n b)
+      | .incDec op a => return .incDec op (← mapMFuel f n a)
+      | .newArr T k => return .newArr T (← mapMFuel f n k)
+      | .call g as => return .call g (← as.mapM (mapMFuel f n))
+      | .modular op a b k =>
+        return .modular op (← mapMFuel f n a) (← mapMFuel f n b) (← mapMFuel f n k)
+      | .named g ns as => return .named g ns (← as.mapM (mapMFuel f n))
+      | .tuple as => return .tuple (← as.mapM (mapMFuel f n))
+      | .assign l r => return .assign (← mapMFuel f n l) (← mapMFuel f n r)
+      | .opAssign op l r => return .opAssign op (← mapMFuel f n l) (← mapMFuel f n r)
+      | e => pure e) := rfl
+
+/-- The expression rewritten from the top down: `f` rewrites a node, then
+the expressions inside what it returns are rewritten, left to right.
+
+Total: `RawExpr.mapMFuel` to a depth past the expression's size
+(`RawExpr.fuel`) by `RawExpr.mapMSlack`.  The rewrite itself has no total
+definition (a callback that wraps its argument, `pure ∘ .unop .neg`, never
+ends), so the defining equation holds for a callback whose results are no
+larger in a measure (`RawExpr.mapM_eq_of_measure`); irreducible, so that a
+failing unification does not unfold it to that depth (evaluate it with
+`with_unfolding_all rfl`). -/
+@[irreducible] def RawExpr.mapM {m : Type → Type} [Monad m] [Inhabited (m RawExpr)]
+    (f : RawExpr → m RawExpr) (e : RawExpr) : m RawExpr :=
+  RawExpr.mapMFuel f (e.fuel + RawExpr.mapMSlack) e
+
+/-- The expressions directly inside an expression. -/
+def RawExpr.parts : RawExpr → List RawExpr
+  | .field a _ | .unop _ a | .incDec _ a | .newArr _ a => [a]
+  | .index a b | .binop _ a b | .assign a b | .opAssign _ a b => [a, b]
+  | .ternary c a b => [c, a, b]
+  | .modular _ a b k => [a, b, k]
+  | .call _ as | .named _ _ as | .tuple as => as
+  | .num _ | .name _ | .bool _ | .env _ => []
+
+/-- A measure for `RawExpr.mapM`: smaller on an expression's parts, and
+within the depth `RawExpr.mapM` runs to. -/
+structure RawExpr.Measure (μ : RawExpr → Nat) : Prop where
+  part : ∀ e a, a ∈ e.parts → μ a < μ e
+  fuel : ∀ e, μ e < e.fuel + RawExpr.mapMSlack
+
+theorem RawExpr.measure_sizeOf : RawExpr.Measure sizeOf where
+  part e a h := by
+    cases e <;> simp [RawExpr.parts] at h <;>
+      first
+        | (have := List.sizeOf_lt_of_mem h; simp; omega)
+        | (rcases h with rfl | rfl | rfl <;> simp <;> omega)
+        | (rcases h with rfl | rfl <;> simp <;> omega)
+        | (subst h; simp <;> omega)
+  fuel e := by have := e.sizeOf_le_fuel; unfold RawExpr.mapMSlack; omega
+
+mutual
+/-- The number of nodes: a measure that ignores what the leaves carry, so a
+callback that renames or folds a literal does not grow it. -/
+def RawExpr.nodes : RawExpr → Nat
+  | .field a _ | .unop _ a | .incDec _ a | .newArr _ a => 1 + a.nodes
+  | .index a b | .binop _ a b | .assign a b | .opAssign _ a b => 1 + a.nodes + b.nodes
+  | .ternary c a b | .modular _ c a b => 1 + c.nodes + a.nodes + b.nodes
+  | .call _ as | .named _ _ as | .tuple as => 1 + RawExpr.nodesList as
+  | .num _ | .name _ | .bool _ | .env _ => 1
+/-- `RawExpr.nodes` of a list. -/
+def RawExpr.nodesList : List RawExpr → Nat
+  | [] => 0
+  | e :: es => e.nodes + RawExpr.nodesList es
+end
+
+theorem RawExpr.nodes_lt_of_mem {a : RawExpr} :
+    {as : List RawExpr} → a ∈ as → a.nodes ≤ RawExpr.nodesList as
+  | b :: as, h => by
+    rcases List.mem_cons.1 h with rfl | h
+    · simp [RawExpr.nodesList]
+    · have := RawExpr.nodes_lt_of_mem h; simp [RawExpr.nodesList]; omega
+
+mutual
+theorem RawExpr.nodes_le_fuel : (e : RawExpr) → e.nodes ≤ e.fuel
+  | .field a _ | .unop _ a | .incDec _ a | .newArr _ a => by
+    have := a.nodes_le_fuel; simp [RawExpr.nodes, RawExpr.fuel]; omega
+  | .index a b | .binop _ a b | .assign a b | .opAssign _ a b => by
+    have := a.nodes_le_fuel; have := b.nodes_le_fuel; simp [RawExpr.nodes, RawExpr.fuel]; omega
+  | .ternary c a b | .modular _ c a b => by
+    have := a.nodes_le_fuel; have := b.nodes_le_fuel; have := c.nodes_le_fuel
+    simp [RawExpr.nodes, RawExpr.fuel]; omega
+  | .call _ as | .named _ _ as | .tuple as => by
+    have := RawExpr.nodesList_le_fuelList as; simp [RawExpr.nodes, RawExpr.fuel]; omega
+  | .num _ | .name _ | .bool _ | .env _ => by simp [RawExpr.nodes, RawExpr.fuel]
+theorem RawExpr.nodesList_le_fuelList : (es : List RawExpr) →
+    RawExpr.nodesList es ≤ RawExpr.fuelList es
+  | [] => by simp [RawExpr.nodesList]
+  | e :: es => by
+    have := e.nodes_le_fuel; have := RawExpr.nodesList_le_fuelList es
+    simp [RawExpr.nodesList, RawExpr.fuelList]; omega
+end
+
+theorem RawExpr.measure_nodes : RawExpr.Measure RawExpr.nodes where
+  part e a h := by
+    cases e <;> simp [RawExpr.parts] at h <;>
+      first
+        | (have := RawExpr.nodes_lt_of_mem h; simp [RawExpr.nodes]; omega)
+        | (rcases h with rfl | rfl | rfl <;> simp [RawExpr.nodes] <;> omega)
+        | (rcases h with rfl | rfl <;> simp [RawExpr.nodes] <;> omega)
+        | (subst h; simp [RawExpr.nodes] <;> omega)
+  fuel e := by have := e.nodes_le_fuel; unfold RawExpr.mapMSlack; omega
+
+theorem List.mapM_congr_mem {m : Type → Type} [Monad m] [LawfulMonad m] {α β : Type}
+    {f g : α → m β} : (l : List α) → (∀ a ∈ l, f a = g a) → l.mapM f = l.mapM g
+  | [], _ => by simp
+  | a :: l, h => by
+    rw [List.mapM_cons, List.mapM_cons, h a (by simp),
+      List.mapM_congr_mem l fun b hb => h b (by simp [hb])]
+
+/-- For a callback whose results are no larger in `μ`, every depth above
+`μ e` computes the same. -/
+theorem RawExpr.mapMFuel_measure {m : Type → Type} [Monad m] [LawfulMonad m] [Inhabited (m RawExpr)]
+    {μ : RawExpr → Nat} (hμ : ∀ e a, a ∈ e.parts → μ a < μ e)
+    (g : (e : RawExpr) → m { e' : RawExpr // μ e' ≤ μ e }) :
+    ∀ (n n' : Nat) (e : RawExpr), μ e < n → μ e < n' →
+      RawExpr.mapMFuel (fun e => (·.1) <$> g e) n e =
+        RawExpr.mapMFuel (fun e => (·.1) <$> g e) n' e := by
+  intro n
+  induction n with
+  | zero => intro n' e h; omega
+  | succ n ih =>
+    intro n' e h h'
+    obtain _ | n' := n'
+    · omega
+    rw [RawExpr.mapMFuel_succ, RawExpr.mapMFuel_succ]
+    simp only [bind_map_left]
+    refine bind_congr fun ⟨e', he⟩ => ?_
+    have key : ∀ a, a ∈ e'.parts →
+        RawExpr.mapMFuel (fun e => (·.1) <$> g e) n a =
+          RawExpr.mapMFuel (fun e => (·.1) <$> g e) n' a :=
+      fun a ha => have := hμ e' a ha; ih n' a (by omega) (by omega)
+    have keyL : ∀ as : List RawExpr, (∀ a ∈ as, a ∈ e'.parts) →
+        as.mapM (RawExpr.mapMFuel (fun e => (·.1) <$> g e) n) =
+          as.mapM (RawExpr.mapMFuel (fun e => (·.1) <$> g e) n') :=
+      fun as has => List.mapM_congr_mem as fun a ha => key a (has a ha)
+    cases e' <;> simp only [] <;>
+      first
+        | (rw [keyL _ (by simp [RawExpr.parts])])
+        | (rw [key _ (by simp [RawExpr.parts]), key _ (by simp [RawExpr.parts]),
+            key _ (by simp [RawExpr.parts])])
+        | (rw [key _ (by simp [RawExpr.parts]), key _ (by simp [RawExpr.parts])])
+        | (rw [key _ (by simp [RawExpr.parts])])
+        | rfl
+
+/-- **The defining equation of `RawExpr.mapM`**, for a callback `f` whose
+results are no larger in a measure `μ` (`g` is `f` with that evidence). -/
+theorem RawExpr.mapM_eq_of_measure {m : Type → Type} [Monad m] [LawfulMonad m]
+    [Inhabited (m RawExpr)] {μ : RawExpr → Nat} (hμ : RawExpr.Measure μ)
+    (f : RawExpr → m RawExpr) (g : (e : RawExpr) → m { e' : RawExpr // μ e' ≤ μ e })
+    (hf : ∀ e, f e = (·.1) <$> g e) (e : RawExpr) :
+    RawExpr.mapM f e = (do
+      match ← f e with
+      | .field a g => return .field (← a.mapM f) g
+      | .index a b => return .index (← a.mapM f) (← b.mapM f)
+      | .binop op a b => return .binop op (← a.mapM f) (← b.mapM f)
+      | .unop op a => return .unop op (← a.mapM f)
+      | .ternary c a b => return .ternary (← c.mapM f) (← a.mapM f) (← b.mapM f)
+      | .incDec op a => return .incDec op (← a.mapM f)
+      | .newArr T n => return .newArr T (← n.mapM f)
+      | .call g as => return .call g (← as.mapM (·.mapM f))
+      | .modular op a b k => return .modular op (← a.mapM f) (← b.mapM f) (← k.mapM f)
+      | .named g ns as => return .named g ns (← as.mapM (·.mapM f))
+      | .tuple as => return .tuple (← as.mapM (·.mapM f))
+      | .assign l r => return .assign (← l.mapM f) (← r.mapM f)
+      | .opAssign op l r => return .opAssign op (← l.mapM f) (← r.mapM f)
+      | e => pure e) := by
+  obtain rfl : f = fun e => (·.1) <$> g e := funext hf
+  have hK : e.fuel + RawExpr.mapMSlack = (e.fuel + RawExpr.mapMSlack - 1) + 1 := by
+    unfold RawExpr.mapMSlack; omega
+  rw [RawExpr.mapM, hK, RawExpr.mapMFuel_succ]
+  simp only [bind_map_left]
+  refine bind_congr fun ⟨e', he⟩ => ?_
+  have key : ∀ a, a ∈ e'.parts →
+      RawExpr.mapMFuel (fun e => (·.1) <$> g e) (e.fuel + RawExpr.mapMSlack - 1) a =
+        a.mapM (fun e => (·.1) <$> g e) :=
+    fun a ha => by
+      have := hμ.part e' a ha; have := hμ.fuel e; have := hμ.fuel a
+      rw [RawExpr.mapM]
+      exact RawExpr.mapMFuel_measure hμ.part g _ _ a (by omega) (by omega)
+  have keyL : ∀ as : List RawExpr, (∀ a ∈ as, a ∈ e'.parts) →
+      as.mapM (RawExpr.mapMFuel (fun e => (·.1) <$> g e) (e.fuel + RawExpr.mapMSlack - 1)) =
+        as.mapM (fun a => a.mapM (fun e => (·.1) <$> g e)) :=
+    fun as has => List.mapM_congr_mem as fun a ha => key a (has a ha)
+  cases e' <;> simp only [] <;>
+    first
+      | (rw [keyL _ (by simp [RawExpr.parts])])
+      | (rw [key _ (by simp [RawExpr.parts]), key _ (by simp [RawExpr.parts]),
+          key _ (by simp [RawExpr.parts])])
+      | (rw [key _ (by simp [RawExpr.parts]), key _ (by simp [RawExpr.parts])])
+      | (rw [key _ (by simp [RawExpr.parts])])
+      | rfl
+
+/-- In `Except`, for a callback whose successful results are no larger. -/
+theorem RawExpr.mapM_except_eq {ε : Type} {μ : RawExpr → Nat} (hμ : RawExpr.Measure μ)
+    (f : RawExpr → Except ε RawExpr) (hf : ∀ e e', f e = .ok e' → μ e' ≤ μ e) (e : RawExpr) :
+    RawExpr.mapM f e = (do
+      match ← f e with
+      | .field a g => return .field (← a.mapM f) g
+      | .index a b => return .index (← a.mapM f) (← b.mapM f)
+      | .binop op a b => return .binop op (← a.mapM f) (← b.mapM f)
+      | .unop op a => return .unop op (← a.mapM f)
+      | .ternary c a b => return .ternary (← c.mapM f) (← a.mapM f) (← b.mapM f)
+      | .incDec op a => return .incDec op (← a.mapM f)
+      | .newArr T n => return .newArr T (← n.mapM f)
+      | .call g as => return .call g (← as.mapM (·.mapM f))
+      | .modular op a b k => return .modular op (← a.mapM f) (← b.mapM f) (← k.mapM f)
+      | .named g ns as => return .named g ns (← as.mapM (·.mapM f))
+      | .tuple as => return .tuple (← as.mapM (·.mapM f))
+      | .assign l r => return .assign (← l.mapM f) (← r.mapM f)
+      | .opAssign op l r => return .opAssign op (← l.mapM f) (← r.mapM f)
+      | e => pure e) :=
+  RawExpr.mapM_eq_of_measure hμ f
+    (fun e => match f e, hf e with
+      | .ok e', h => .ok ⟨e', h e' rfl⟩
+      | .error s, _ => .error s)
+    (fun e => by
+      have : ∀ (x : Except ε RawExpr) (h : ∀ e', x = .ok e' → μ e' ≤ μ e),
+          x = (·.1) <$> (match x, h with
+            | .ok e', h => .ok ⟨e', h e' rfl⟩
+            | .error s, _ => .error s : Except ε { e' // μ e' ≤ μ e }) := by
+        intro x h; cases x <;> rfl
+      exact this (f e) (hf e)) e
+
+/-- In `Id`, for a callback whose results are no larger. -/
+theorem RawExpr.mapM_id_eq {μ : RawExpr → Nat} (hμ : RawExpr.Measure μ)
+    (f : RawExpr → RawExpr) (hf : ∀ e, μ (f e) ≤ μ e) (e : RawExpr) :
+    RawExpr.mapM (m := Id) f e =
+      (match f e with
+      | .field a g => .field (a.mapM (m := Id) f) g
+      | .index a b => .index (a.mapM (m := Id) f) (b.mapM (m := Id) f)
+      | .binop op a b => .binop op (a.mapM (m := Id) f) (b.mapM (m := Id) f)
+      | .unop op a => .unop op (a.mapM (m := Id) f)
+      | .ternary c a b =>
+        .ternary (c.mapM (m := Id) f) (a.mapM (m := Id) f) (b.mapM (m := Id) f)
+      | .incDec op a => .incDec op (a.mapM (m := Id) f)
+      | .newArr T n => .newArr T (n.mapM (m := Id) f)
+      | .call g as => .call g (as.map (·.mapM (m := Id) f))
+      | .modular op a b k =>
+        .modular op (a.mapM (m := Id) f) (b.mapM (m := Id) f) (k.mapM (m := Id) f)
+      | .named g ns as => .named g ns (as.map (·.mapM (m := Id) f))
+      | .tuple as => .tuple (as.map (·.mapM (m := Id) f))
+      | .assign l r => .assign (l.mapM (m := Id) f) (r.mapM (m := Id) f)
+      | .opAssign op l r => .opAssign op (l.mapM (m := Id) f) (r.mapM (m := Id) f)
+      | e => e) := by
+  rw [RawExpr.mapM_eq_of_measure hμ (m := Id) f (fun e => (⟨f e, hf e⟩ : { e' // μ e' ≤ μ e }))
+    (fun _ => rfl)]
+  generalize f e = x
+  have hL : ∀ as : List RawExpr, as.mapM (m := Id) (·.mapM f) = as.map (·.mapM (m := Id) f) :=
+    fun as => by induction as with
+      | nil => rfl
+      | cons a as ih => rw [List.mapM_cons, ih]; rfl
+  cases x <;> first | rfl | exact congrArg _ (hL _)
 /-- The names a raw expression reads, in order. -/
 def RawExpr.names : RawExpr → List String
   | .name x => [x]
