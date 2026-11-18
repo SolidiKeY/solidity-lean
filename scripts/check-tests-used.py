@@ -799,15 +799,15 @@ def validated_routes(graph, catalog, extra_reads=()):
         if not eligible and all(frame['path'] == graph.roots[original]['path'] for frame in frames): continue
         identity = original + ':read:' + hashlib.sha256(canonical(route)).hexdigest()
         graph.roots[identity] = {**graph.roots[original], 'derived_from': original, 'observed_target': target}
-        # Preserve the complete ordered stack, including repeated source paths.
-        # Turning it into filename nodes could shortcut a callback or recursion.
+        # Keep the ordered stack: path nodes might skip a callback or
+        # recursion. A failed run credits its target only (H1108).
         chain = {'root': identity, 'entry': graph.roots[identity], 'edges': []}
         for caller, callee in zip(frames, frames[1:]):
             chain = {**chain, 'edges': chain['edges'] + [{
                 'source': caller['path'], 'target': callee['path'],
                 'line': caller['line'], 'operation': ('Observed nonpassing unittest call stack' if nonpassing else 'validated Python call stack'),
                 'kind': 'executes', 'validated_for': identity}]}
-            graph.observed.append((callee['path'], chain))
+            if not nonpassing: graph.observed.append((callee['path'], chain))
         reader = frames[-1]
         chain = {**chain, 'edges': chain['edges'] + [{
             'source': reader['path'], 'target': target, 'line': reader['line'],
@@ -1888,7 +1888,7 @@ def nonpassing_boundary_controls():
                  'operation': 'Observed fixture read during nonpassing unittest'}
         catalog = {'schema_version': 1, 'standalone': [entry], 'reads': [route], 'generators': [], 'orphans': []}
         result = inventory(repo, catalog); rows = {r['path']: r for r in result['records']}
-        assert rows['tests/data.txt']['class'] == rows['tests/helper.py']['class'] == 'keep'
+        assert (rows['tests/data.txt']['class'], rows['tests/helper.py']['class']) == ('keep', None)
         chain = rows['tests/data.txt']['runner_chain']; assert chain['entry']['source_only']
         assert chain['entry']['validation_at_measured_revision']['status'] == 'failed'
         assert chain['entry']['kind'] == 'nonpassing committed unittest runner'
@@ -1897,11 +1897,11 @@ def nonpassing_boundary_controls():
         assert 'tests/other.txt' not in graph.chains()
         execution_only = copy.deepcopy(catalog); execution_only['standalone'][0]['input_scope'] = []
         execution_rows = {r['path']: r for r in inventory(repo, execution_only)['records']}
-        assert execution_rows['tests/helper.py']['class'] == 'keep' and execution_rows['tests/data.txt']['class'] is None
+        assert execution_rows['tests/helper.py']['class'] is None and execution_rows['tests/data.txt']['class'] is None
         outside = copy.deepcopy(catalog); outside['reads'][0].update(target='tests/other.txt', target_blob=repo.tree['tests/other.txt'][2])
         outside_rows = {r['path']: r for r in inventory(repo, outside)['records']}
         assert outside_rows['tests/other.txt']['class'] is None and outside_rows['tests/other.txt']['secondary']['unreviewed_readers']
-        assert outside_rows['tests/helper.py']['class'] == 'keep'
+        assert outside_rows['tests/helper.py']['class'] is None
         root_only = copy.deepcopy(outside); root_only['reads'][0]['frames'] = root_only['reads'][0]['frames'][:2]
         root_rows = {r['path']: r for r in inventory(repo, root_only)['records']}
         assert root_rows['tests/other.txt']['class'] is None and root_rows['tests/helper.py']['class'] is None
