@@ -130,7 +130,6 @@ T:yul-views/inherited-sequence-run.mjs adeb09dc75c286b40aff496db08e67b20f597ceb
 @fd67008ed20590639e04345fbb12a9dfa645a95f
 T:backend-environment/ownership.mjs c7e75bcd68c0b2347212973ffdfeba0c285362f9
 ''')
-REVIEWED_NONPY_ENTRIES = REVIEWED_NONPY_ENTRIES | REVIEWED_NONPY_ENTRIES_H1025
 # H1004 (gh#1340, X1E-SOURCE-PROGRAM-ROLES, Option B), form (1): the two Node
 # CLI programs of x1e-classify-h28-h55 that match the H997 interface, reviewed
 # under the unchanged H997 rules; same (path, blob, introducing commit) form.
@@ -141,7 +140,6 @@ T:h28-sol/type-grammar/run_solc.mjs cb05eeac7078737564180bdc3d7f030520c35065
 @3b327d00fd2262cfb27ccecdc911e9c5d2e7d4f1
 T:h28-sol/literal-grammar/solc-fixtures.mjs 56774afb5f8d6355c2e8fca81557371364b2b08d
 ''')
-REVIEWED_NONPY_ENTRIES = REVIEWED_NONPY_ENTRIES | REVIEWED_NONPY_ENTRIES_H1004
 # H1032 (gh#1410, H62-ADDITIONAL-NONPY-PINS, Option B) and H1067 (gh#1419,
 # Q-FAILEMIT, Option A): the scripts/h62 shell and Node programs and the two
 # tests/failure-emission Node programs that match the H997 interface, reviewed
@@ -201,7 +199,6 @@ H:item1/packet-panic/run_mcp_diagnostic.sh 6de05d52d827a614e76f233d86f30535473c9
 @f53f026ac5ebe95273913dc837c23cc9baca3c08
 H:item3/g52-differential/system_request_reproducer.mjs 727c99747e5362d3654f223400a3f73960314740
 ''')
-REVIEWED_NONPY_ENTRIES = REVIEWED_NONPY_ENTRIES | REVIEWED_NONPY_ENTRIES_H1032
 
 LEAN_CHECK_KIND = 'lean-check-source-role'
 LEAN_CHECK_PREFIX = 'lean-check:'
@@ -403,7 +400,7 @@ def _lean_gate_root(classifier, graph, catalog, entry, reviewed, invocations, fo
     for c in calls:
         if c['driver'] not in repo.texts or nonpython_entry_interface(c['driver'], repo.texts[c['driver']]) is None:
             raise ValueError(role + ' driver lacks an audited entry interface: ' + c['driver'])
-        if not lean_check_invocation(repo.texts[c['driver']], p, c['line']): raise ValueError(role + ' driver does not run the source: ' + c['driver'])
+        if not lean_gate_invocation(form, repo.texts[c['driver']], p, c['line']): raise ValueError(role + ' driver does not run the source: ' + c['driver'])
     if '\n' + LEAN_CHECK_GATE_BRANCH + '\n' + LEAN_CHECK_GATE_LINE + '\n' not in repo.texts.get(LEAN_CHECK_GATE, ''): return
     identity = form['prefix'] + p
     graph.root(p, 'source-only ' + form['source'], shlex.join(entry['command']), calls[0]['driver'], calls[0]['line'], root_id=identity)
@@ -457,7 +454,7 @@ def lean_fixture_controls(env):
         'commit', 'run', 'rejected', 'blob', 'route', 'frame', 'gate', 'reviewed_nonpy', 'files'))
     code = env['classifier']['lean_code']
     # The audited witnesses: 7 sources, 22 driver lines, all reviewed H997 drivers, disjoint from H999.
-    assert len(REVIEWED_LEAN_FIXTURES) == 7 and len(REVIEWED_LEAN_FIXTURE_INVOCATIONS) == 22
+    assert REVIEWED_LEAN_FIXTURES == review_union('lean-fixtures') and REVIEWED_LEAN_FIXTURE_INVOCATIONS == review_union('lean-fixtures', 2)
     assert {(p, b) for p, b, _ in REVIEWED_LEAN_FIXTURES} == {(p, b) for p, b, _, _, _ in REVIEWED_LEAN_FIXTURE_INVOCATIONS}
     assert not {p for p, _, _ in REVIEWED_LEAN_FIXTURES} & {p for p, _, _ in REVIEWED_LEAN_CHECKS}
     assert all((d, db) in {(q, b) for q, b, _ in reviewed_nonpy} and (d, db, n) in {(d, b, n) for _, _, d, b, n in REVIEWED_LEAN_CHECK_INVOCATIONS}
@@ -564,7 +561,7 @@ def nonpy_roleset_controls(env):
     run, rejected, blob, first, A, sh_role = (env[k] for k in ('run', 'rejected', 'blob', 'first', 'A', 'sh_role'))
     rows = REVIEWED_NONPY_ENTRIES_H1025; paths = {p for p, _, _ in rows}
     # 61 rows, one per path, disjoint from H997 and outside x1e-classify-runtime-upstream's directories.
-    assert len(rows) == len(paths) == 61 and rows <= REVIEWED_NONPY_ENTRIES and len(REVIEWED_NONPY_ENTRIES) == 178 + 23  # + H1032/H1067
+    assert len(rows) == len(paths) == 61 and rows <= REVIEWED_NONPY_ENTRIES and REVIEWED_NONPY_ENTRIES == review_union('nonpy')
     assert not paths & {p for p, _, _ in REVIEWED_NONPY_ENTRIES - rows}
     # H1004 form (1): two H28 Node programs, one row per path, disjoint from the rest.
     h1004 = REVIEWED_NONPY_ENTRIES_H1004
