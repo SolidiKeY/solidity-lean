@@ -20,8 +20,4 @@ example [FreshNames] (kernel : elabKernelTotal) (exprs : ExprCases) (C : Contrac
     (raw : List RawStmt) (sc : ElabScope) (st : ECtx × Nat) : SiteSim C raw sc st [] st :=
   sites_of_exprCases kernel exprs C raw sc st [] st
 
-/-- info: 'Solidity.Correctness.Lowering.Sim.simulates_of_exprCases' depends on axioms: [propext, Classical.choice, Quot.sound] -/
-#guard_msgs (whitespace := lax) in
-#print axioms Solidity.Correctness.Lowering.Sim.simulates_of_exprCases
-
 end Solidity.Examples.Lowering.Sim.Expr
