@@ -297,12 +297,23 @@ def elabRecWithProducers (rc : ElabRec C) (pr : PanicProducerRec C) : ElabRec C 
     fnMemoryDispatch := fnMemoryDispatchWith C pr
     trySelfBody := fun g {_} args ρ => trySelfBodyWith C pr g args ρ }
 
+/-- A block, over the per-statement producer `stmt`: each statement in
+order, the state threaded, the programs concatenated. Total (structural on
+the list), so the block's two equations hold definitionally; the knot passes
+the partial `elabStmtP`, and the public `elabStmtsP` is this at it. -/
+def elabStmtsPWith (stmt : RawStmt → ElabM (SProg C)) : List RawStmt → ElabM (SProg C)
+  | [] => pure []
+  | s :: ss => do
+    let P ← stmt s
+    let Q ← elabStmtsPWith stmt ss
+    pure (P ++ Q)
+
 mutual
 
 /-- The recursive hooks, delayed until a producer is called. -/
 partial def panicProducerRec (_ : Unit) : PanicProducerRec C where
   extDispatch := extDispatch
-  elabStmtsP := elabStmtsP
+  elabStmtsP := elabStmtsPWith C elabStmtP
   elabScope := elabScope
   elabCallRet := @elabCallRet
 
@@ -335,7 +346,7 @@ partial def elabRecCore (_ : Unit) : ElabRec C where
   elabStmt1 := elabStmt1
   loopExpr := loopExpr
   loopQ := loopQ
-  elabStmtsP := elabStmtsP
+  elabStmtsP := elabStmtsPWith C elabStmtP
   elabBranch := elabBranch
   elabScope := elabScope
   elabTuple := @elabTuple
@@ -449,7 +460,7 @@ partial def abiMemBytes (a : RawExpr) : ElabM (SProg C × String) := do
   if let .name x := a then
     if let .ok (.mpath ..) := synth C (← nctx) a then return ([], x)
   let x := toString (← freshCapture "mv")
-  pure (← elabStmtsP [.declMemory (.named "bytes") x (some a)], x)
+  pure (← elabStmtsPWith C elabStmtP [.declMemory (.named "bytes") x (some a)], x)
 
 
 
@@ -474,7 +485,7 @@ partial def abiDecodeBytes (T : String) (d : ByteSrc) (h n : Nat) : ElabM (SProg
      .whileLoop {} (.binop .lt (.name j) (.name L))
        [.assign (.index (.name x) (.name j)) (abiByte d (.binop .add start (.name j))),
         .assign (.name j) (.binop .add (.name j) (.num 1))]]
-  pure (← elabStmtsP S, x)
+  pure (← elabStmtsPWith C elabStmtP S, x)
 
 /-- `abi.encode(…)` (`std`) or `abi.encodePacked(…)`/`bytes.concat(…)`/
 `string.concat(…)` (`strs`: byte strings only) of the hoisted arguments: a
@@ -568,7 +579,8 @@ partial def hoistCallArgs (f : String) (args : List RawExpr) :
     prepared := prepared ++ [a]
   -- the late copies, in argument order
   for (y, R, ws, shape, x) in copies do
-    P := P ++ (← elabStmtsP [.declMemory (rawTyW ws (.ref R) "") y (some (.name (toString x)))])
+    P := P ++ (← elabStmtsPWith C elabStmtP
+      [.declMemory (rawTyW ws (.ref R) "") y (some (.name (toString x)))])
     declareShape y shape
   pure (P, prepared)
 
@@ -808,13 +820,13 @@ partial def elabValueCall (Γ : NCtx) (ix : Idx Γ.ctx (.val .bool)) (okName : R
   let v ← checkIn C Γ' .uint a
   let setOk (b : Bool) : List RawStmt := [.assign okName (.bool b)]
   let (Γe, _) ← get
-  let okP ← elabStmtsP (setOk true)
+  let okP ← elabStmtsPWith C elabStmtP (setOk true)
   let okP ← ElabM.lift (SProg.chain Γ'.names ([] ++ Γ'.ctx) okP)
   let (_, k) ← get
   set (Γe, k)
   let err ← elabScope Γ' (setOk false)
   let ⟨κ, cb⟩ := CodeBinder.ofOption (none : Option Var)
-  let pnc ← elabStmtsP (setOk false)
+  let pnc ← elabStmtsPWith C elabStmtP (setOk false)
   let pnc ← ElabM.lift (SProg.chain (cb.names ++ Γ'.names) (κ ++ Γ'.ctx) pnc)
   let (_, k) ← get
   set (Γe, k)
@@ -885,19 +897,11 @@ partial def loopQ (Γ : NCtx) : RawInv → ElabM (LoopQ C Γ.ctx)
     set st
     pure (.all (Var.ofName x) p body)
 
-/-- A block. -/
-partial def elabStmtsP : List RawStmt → ElabM (SProg C)
-  | [] => pure []
-  | s :: ss => do
-    let P ← elabStmtP s
-    let Q ← elabStmtsP ss
-    pure (P ++ Q)
-
 /-- A branch: its declarations stay inside it, and it does not deploy
 (`ElabScope.top`). -/
 partial def elabBranch (ss : List RawStmt) : ElabM (SProg C) := do
   let (Γ, _) ← get
-  let P ← withReader (fun sc => { sc with top := false }) (elabStmtsP ss)
+  let P ← withReader (fun sc => { sc with top := false }) (elabStmtsPWith C elabStmtP ss)
   let (_, k) ← get
   set (Γ, k)
   pure P
@@ -949,7 +953,7 @@ partial def elabTuple (ts : List (Option RawExpr)) (rhs : RawExpr) (direct : Boo
     (nonLocal > 1 || (tgts.map (·.toStr)).eraseDups.length != tgts.length)
   match rhs with
   | .ternary c a b =>
-    elabStmtsP [.ite c [.tupleAssign ts a] [.tupleAssign ts b]]
+    elabStmtsPWith C elabStmtP [.ite c [.tupleAssign ts a] [.tupleAssign ts b]]
   | .call f args =>
     -- a call through a value that is not a name (`s.f(x)`, `fs[i](x)`,
     -- `(h)(x)`): the callee into a fresh local of its type first, as
@@ -958,7 +962,7 @@ partial def elabTuple (ts : List (Option RawExpr)) (rhs : RawExpr) (direct : Boo
       if let h :: rest := args then
         if let some ty := fnTyOfExpr C (← ctx) h then
           let y := toString (← freshCapture "se")
-          let P ← elabStmtsP [.decl (.named ty) y (some h)]
+          let P ← elabStmtsPWith C elabStmtP [.decl (.named ty) y (some h)]
           return P ++ (← (fnTupleDispatchWith C (panicProducerRec ())) ts y ty rest)
     -- a call through an internal function value (`fnTupleDispatch`)
     if (← read).funs.all (·.1 != f) then
@@ -972,7 +976,7 @@ partial def elabTuple (ts : List (Option RawExpr)) (rhs : RawExpr) (direct : Boo
     unless rs.length == ts.length do throw s!"{f} returns {rs.length} values, not {ts.length}"
     for (r, t) in rs do declare C (toString r) t
     let pairs := if reverseWrites then (ts.zip rs).reverse else ts.zip rs
-    let R ← elabStmtsP (pairs.filterMap fun (t, (r, _)) =>
+    let R ← elabStmtsPWith C elabStmtP (pairs.filterMap fun (t, (r, _)) =>
       t.map fun t => .assign t (.name (toString r)))
     pure (P ++ Q ++ R)
   | .tuple es =>
@@ -1005,10 +1009,25 @@ partial def elabTuple (ts : List (Option RawExpr)) (rhs : RawExpr) (direct : Boo
         tmps := tmps ++ [bind x]
         asgs := asgs ++ [.assign t (.name x)]
       | none => unless e.isPure do tmps := tmps ++ [.eval [e]]
-    elabStmtsP (tmps ++ (if reverseWrites then asgs.reverse else asgs))
+    elabStmtsPWith C elabStmtP (tmps ++ (if reverseWrites then asgs.reverse else asgs))
   | _ => throw s!"{rhs.toStr}: the right-hand side of a tuple assignment is a tuple or a call"
 
 end
+
+/-- A block (`elabStmtsPWith` at the knot's `elabStmtP`): the same term
+the recursive arms and both records use. -/
+def elabStmtsP : List RawStmt → ElabM (SProg C) :=
+  elabStmtsPWith C (elabStmtP C)
+
+/-- The empty block's equation. -/
+theorem elabStmtsP_nil : elabStmtsP C [] = pure [] := rfl
+
+/-- A block's head statement, then its rest, their programs concatenated. -/
+theorem elabStmtsP_cons (s : RawStmt) (ss : List RawStmt) :
+    elabStmtsP C (s :: ss) = (do
+      let P ← elabStmtP C s
+      let Q ← elabStmtsP C ss
+      pure (P ++ Q)) := rfl
 
 /-- The public recursion record exposes its panic producers definitionally. -/
 def elabRec (_ : Unit) : ElabRec C :=
