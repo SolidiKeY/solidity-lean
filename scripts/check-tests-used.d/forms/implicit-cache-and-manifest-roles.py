@@ -13,7 +13,9 @@
 # `git check-ignore` (this tree's ancestor .gitignore blobs only) reports for the untracked cache directory, and no
 # driver or program text mentions a bytecode switch or writes the environment; the one refinement is that a
 # statement `os.environ['KEY'] = value` with KEY a literal outside PYTHON* is not an environment write here (it
-# cannot name a CPython switch). Launch forms, re-derived from the syntax tree of the exact driver blob:
+# cannot name a CPython switch), and a syntax guard (_cm_patches) also refuses any other use of os.environ, environb,
+# putenv/unsetenv/setenv, ctypes, setattr/delattr/__dict__ and attribute stores on os, sys, subprocess, Path, pathlib
+# or importlib. Not audited: modules the driver imports in the parent process (the real ones write no environment). Launch forms, re-derived from the syntax tree of the exact driver blob:
 #   program-wrapper  line L is a module-level statement W('<name>.py', ...) and W is the one module-level
 #                    `def W(p, *rest): subprocess.F([sys.executable, str(D / p), *map(str, rest)], ...)`, D bound
 #                    once to Path(__file__).resolve().parent; the program is the driver's sibling <name>.py.
@@ -174,17 +176,22 @@ def _cm_module_def(tree, name):
     return None if a.posonlyargs or a.kwonlyargs or a.kwarg or a.defaults or a.kw_defaults else defs[0]
 
 
-def _cm_unmutated(tree, scope, name, allowed=()):
-    """name is never the base of an attribute, subscript, starred or call argument other than the nodes in allowed and
-    the copying builtins dict and repr (never bound in tree)."""
-    for n in ast.walk(scope):
-        if isinstance(n, (ast.Attribute, ast.Subscript)) and isinstance(n.value, ast.Name) and n.value.id == name: return False
-        pure = isinstance(n, ast.Call) and isinstance(n.func, ast.Name) and n.func.id in ('dict', 'repr') and _cm_bindings(tree, n.func.id) == 0
-        if isinstance(n, ast.Call) and n not in allowed and not pure and any(
-                isinstance(a, ast.Name) and a.id == name for a in list(n.args) + [k.value for k in n.keywords]):
-            return False
-        if isinstance(n, ast.Starred) and isinstance(n.value, ast.Name) and n.value.id == name: return False
-    return True
+def _cm_unaliased(tree, body, name, launch):
+    """Every use of name is the launch's argument, or lies after the launch: the launch is the value of a statement of
+    body, or of a `with` block nested (only through `with` blocks) in body, and each other use is in a statement after
+    that statement or after an enclosing `with` in its own block. Nothing can copy, alias or mutate the list before it
+    runs, and no loop can run it again after a later statement."""
+    def path(stmts):
+        for k, st in enumerate(stmts):
+            if isinstance(st, (ast.Expr, ast.Assign)) and st.value is launch: return [(stmts, k)]
+            if isinstance(st, ast.With):
+                inner = path(st.body)
+                if inner: return [(stmts, k)] + inner
+        return None
+    chain = path(body)
+    if not chain: return False
+    later = {id(n) for stmts, k in chain for st in stmts[k + 1:] for n in ast.walk(st)}
+    return all(n is launch.args[0] or id(n) in later for n in ast.walk(tree) if isinstance(n, ast.Name) and n.id == name and isinstance(n.ctx, ast.Load))
 
 
 def _cm_cwd(tree, name):
@@ -243,8 +250,7 @@ def _cm_argv_wrapper(tree, driver, line, literal):
     launches = [n for n in ast.walk(f) if isinstance(n, ast.Call) and isinstance(n.func, ast.Attribute)
                 and isinstance(n.func.value, ast.Name) and n.func.value.id == 'subprocess']
     if (len(launches) != 1 or not _cm_launch_call(tree, launches[0], 'argv-wrapper') or not isinstance(launches[0].args[0], ast.Name)
-            or launches[0].args[0].id != argv or _cm_bindings(f, argv) != 1 or not _cm_unmutated(tree, f, argv, launches)
-            or not any(isinstance(s, (ast.Expr, ast.Assign)) and s.value is launches[0] for s in f.body)):
+            or launches[0].args[0].id != argv or _cm_bindings(f, argv) != 1 or not _cm_unaliased(f, f.body, argv, launches[0])):
         return None
     elts = call.args[0].elts
     if len(elts) < 2 or any(isinstance(e, ast.Starred) for e in elts[:2]) or not _cm_executable(tree, elts[0]): return None
@@ -265,7 +271,7 @@ def _cm_flock(tree, driver, line, literal):
                     and _cm_cwd(tree, div.left.id) and _cm_const(div.right) == literal)):
         return None
     launches = [n for n in ast.walk(tree) if isinstance(n, ast.Call) and n.args and isinstance(n.args[0], ast.Name) and n.args[0].id == name]
-    if len(launches) != 1 or not _cm_launch_call(tree, launches[0], 'flock-cwd') or not _cm_unmutated(tree, tree, name, launches): return None
+    if len(launches) != 1 or not _cm_launch_call(tree, launches[0], 'flock-cwd') or not _cm_unaliased(tree, tree.body, name, launches[0]): return None
     if any(k.arg == 'cwd' and not (isinstance(k.value, ast.Name) and k.value.id == div.left.id) for k in launches[0].keywords): return None
     return literal
 
@@ -322,11 +328,44 @@ def h62_cache_switches_off(text):
     if _cm_plain(tree, 'os'):
         for n in ast.walk(tree):
             if not (isinstance(n, ast.Assign) and len(n.targets) == 1): continue
-            t = n.targets[0]; key = isinstance(t, ast.Subscript) and _cm_attr(t.value, 'os', 'environ') and _cm_const(t.slice)
-            if key and not key.upper().startswith('PYTHON') and t.lineno == t.end_lineno:
+            t = n.targets[0]
+            if isinstance(t, ast.Subscript) and _cm_attr(t.value, 'os', 'environ') and _cm_blankable(t):
                 lines[t.lineno - 1][t.col_offset:t.end_col_offset] = b' ' * (t.end_col_offset - t.col_offset)
     blanked = b'\n'.join(lines).decode('utf-8', 'surrogateescape')
-    return bool(_cm('_ENVIRONMENT_WRITE').search(blanked))
+    return bool(_cm('_ENVIRONMENT_WRITE').search(blanked)) or _cm_patches(tree)
+
+
+_CM_ENV_NAMES = frozenset({'environ', 'environb', 'putenv', 'unsetenv', 'setenv', 'ctypes', 'setattr', 'delattr', '__dict__'})
+
+
+def _cm_patches(tree):
+    """True iff the tree could write the environment or patch the launch machinery outside the forms read by syntax:
+    os.environ is used other than as a subscript read, a blanked literal-key store, dict(os.environ, ...) or .get/.copy;
+    or it names environb, putenv, unsetenv, setenv, ctypes, setattr, delattr or __dict__, or stores or deletes an
+    attribute of os, sys, subprocess, Path, pathlib or importlib."""
+    parents = {child: node for node in ast.walk(tree) for child in ast.iter_child_nodes(node)}
+    for n in ast.walk(tree):
+        if isinstance(n, ast.Name) and n.id in _CM_ENV_NAMES or isinstance(n, ast.alias) and (
+                n.name.split('.')[0] in _CM_ENV_NAMES or n.name in _CM_ENV_NAMES or (n.asname or '') in _CM_ENV_NAMES):
+            return True
+        if isinstance(n, ast.Attribute) and n.attr in _CM_ENV_NAMES - {'environ'}: return True
+        if (isinstance(n, ast.Attribute) and not isinstance(n.ctx, ast.Load) and isinstance(n.value, ast.Name)
+                and n.value.id in ('os', 'sys', 'subprocess', 'Path', 'pathlib', 'importlib')):
+            return True
+        if isinstance(n, ast.Attribute) and n.attr == 'environ':
+            up = parents.get(n)
+            single = isinstance(parents.get(up), ast.Assign) and parents[up].targets == [up]
+            ok = (isinstance(up, ast.Subscript) and up.value is n and (isinstance(up.ctx, ast.Load) or single and _cm_blankable(up))
+                  or isinstance(up, ast.Call) and isinstance(up.func, ast.Name) and up.func.id == 'dict' and up.args[:1] == [n]
+                  or isinstance(up, ast.Attribute) and up.attr in ('get', 'copy') and isinstance(parents.get(up), ast.Call))
+            if not (_cm_attr(n, 'os', 'environ') and ok): return True
+    return False
+
+
+def _cm_blankable(target):
+    """A store target os.environ['KEY'] of a one-target assignment with a literal KEY outside PYTHON*."""
+    key = _cm_const(target.slice)
+    return bool(key) and not key.upper().startswith('PYTHON') and target.lineno == target.end_lineno
 
 
 def h62_cache_policy_root(classifier, graph, catalog, entry, reviewed=None):
@@ -367,7 +406,8 @@ def h62_cache_policy_root(classifier, graph, catalog, entry, reviewed=None):
         raise ValueError('unreviewed ' + role + ': ' + p)
     pins = [(p, blob), (d['path'], d['blob']), (g['path'], g['blob']), (m['path'], m['blob'])]
     if not _cm('_role_current')(classifier, repo, catalog, entry, pins): return
-    if repo.tree[p][0] != '100644' or any(q not in repo.texts for q, _ in pins): raise ValueError('unsupported ' + role + ' invocation: ' + p)
+    if (repo.tree[p][0] != '100644' or any(q not in repo.texts for q, _ in pins)
+            or any(repo.tree[q][0] not in ('100644', '100755') for q, _ in pins[1:])): raise ValueError('unsupported ' + role + ' invocation: ' + p)
     if not _cm('_introduced')(classifier, repo, entry['provenance'], p, blob): raise ValueError(role + ' lacks its introducing provenance: ' + p)
     rules = _cm('_cache_rules')(repo.texts[p])
     if not rules or any(rule not in _cm('CPYTHON_CACHE_RULES') for _, rule in rules):
@@ -516,13 +556,32 @@ def h62_cache_controls(env):
             (AW, AW + 'prog.py', aw_prog + 'import sys\nsys.modules["mod"] = mod\n', imports),
             (AW, AW + 'prog.py', aw_prog + 'other = importlib.util.find_spec("mod")\n', imports),
             (FL, FL + 'drv.py', fl_drv.replace('cwd=root,', 'cwd="/tmp",'), launch),
-            (FL, FL + 'drv.py', fl_drv + 'cmd.insert(3, "-B")\n', launch),
+            (FL, FL + 'drv.py', fl_drv.replace('child = ', 'cmd.insert(3, "-B")\nchild = '), launch),
             (FL, FL + 'drv.py', fl_drv + 'cmd += ["x"]\n', launch),
             (FL, FL + 'drv.py', fl_drv + 'subprocess.run(cmd)\n', launch),
             (FL, FL + 'drv.py', fl_drv + 'print(len(cmd))\n', launch),
             (FL, FL + 'drv.py', fl_drv.replace('root = pathlib.Path.cwd()', 'root = pathlib.Path("/tmp")'), launch),
             (FL, FL + 'drv.py', fl_drv.replace('"flock", "/tmp', '"nice", "/tmp'), launch),
-            (FL, FL + 'drv.py', fl_drv.replace('child = subprocess.Popen(cmd,', 'child = subprocess.Popen(cmd, env={},'), launch))
+            (FL, FL + 'drv.py', fl_drv.replace('child = subprocess.Popen(cmd,', 'child = subprocess.Popen(cmd, env={},'), launch),
+            # Aliases mutated before the launch (skeptic review): a copy, a container, a loop over a container.
+            (AW, AW + 'drv.py', aw_drv.replace('    result = ', '    x = argv; x.insert(1, "-B")\n    result = '), launch, {'launch': {'line': 11}}),
+            (AW, AW + 'drv.py', aw_drv.replace('    result = ', '    x = [argv]; x[0].insert(1, "-B")\n    result = '), launch, {'launch': {'line': 11}}),
+            (FL, FL + 'drv.py', fl_drv.replace('child = ', 'cmd2 = cmd; cmd2 += ["-B"]\nchild = '), launch),
+            (FL, FL + 'drv.py', fl_drv.replace('child = ', 'for c in [cmd]: c.insert(3, "-B")\nchild = '), launch),
+            (FL, FL + 'drv.py', fl_drv.replace('child = subprocess.Popen(cmd,', 'if cmd: child = subprocess.Popen(cmd,'), launch),
+            (FL, FL + 'drv.py', fl_drv.replace('child = subprocess.Popen(cmd,', 'for _ in "ab": child = subprocess.Popen(cmd,'), launch),
+            (FL, FL + 'drv.py', fl_drv.replace('child = subprocess.Popen(cmd,', 'with open("/dev/null") as cmd2: cmd.insert(3, "-B"); child = subprocess.Popen(cmd,'), launch),
+            # Environment writes and patches the regex misses (skeptic review).
+            (PW, PW + 'drv.py', pw_drv.replace("os.environ['LEAN_NUM_THREADS'] = '1'", "os.environ['PYTHONX' 'Y' or ']'] = '1'"), off),
+            (PW, PW + 'drv.py', pw_drv.replace("os.environ['LEAN_NUM_THREADS'] = '1'", "e = os.environ; e['PYTHONX' + 'Y'] = '1'"), off),
+            (PW, PW + 'drv.py', pw_drv.replace("os.environ['LEAN_NUM_THREADS'] = '1'", "os.environ |= {'PYTHONX': '1'}"), off),
+            (PW, PW + 'drv.py', pw_drv.replace("os.environ['LEAN_NUM_THREADS'] = '1'", "os.environ['A'] = os.environ['B'] = '1'"), off),
+            (PW, PW + 'drv.py', pw_drv.replace("import os\n", "import os\nfrom os import environ as E\n").replace("python('prog.py', '--x', 1)", "x = 0"), off),
+            (PW, PW + 'drv.py', pw_drv.replace("os.environ['LEAN_NUM_THREADS'] = '1'", "os.environb[b'X'] = b'1'"), off),
+            (PW, PW + 'drv.py', pw_drv.replace("os.environ['LEAN_NUM_THREADS'] = '1'", "sys.executable = '/bin/true'"), off),
+            (PW, PW + 'drv.py', pw_drv.replace("os.environ['LEAN_NUM_THREADS'] = '1'", "setattr(sys, 'executable', '/bin/true')"), off),
+            (PW, PW + 'drv.py', pw_drv.replace("os.environ['LEAN_NUM_THREADS'] = '1'", "subprocess.run = print"), off),
+            (AW, AW + 'prog.py', aw_prog.replace('import importlib.util\n', 'import importlib.util, ctypes\n'), off))
         for base_, path, text, message, *overrides in mutants:
             assert text != files[path], path
             mutant = commit({path: text}, 'h62 cache policy mutant')
@@ -531,6 +590,13 @@ def h62_cache_controls(env):
             H62_CACHE_REVIEWED = review(*good, y)
             rejected(mutant, message, standalone=roots(mutant, texts) + [y])
             commit({path: files[path]}, 'h62 cache policy mutant restored')
+        # The launch inside a `with` block (as launch_baseline.py) keeps the role; data after it may hold the list.
+        wrapped = fl_drv.replace('child = subprocess.Popen(cmd,', 'with open("/dev/null") as sink:\n    child = subprocess.Popen(cmd, stdout=sink,')
+        held_ = commit({FL + 'drv.py': wrapped}, 'h62 cache policy with-launch')
+        y = row(FL, repo=held_)
+        H62_CACHE_REVIEWED = review(*good, y)
+        assert run(held_, standalone=roots(held_, {FL + 'drv.py': wrapped}) + [y])[1][FL + '.gitignore']['class'] == 'keep'
+        commit({FL + 'drv.py': fl_drv}, 'h62 cache policy with-launch restored')
         # Policy refusals: another rule, a file rule at the line, a tracked cache, a non-directory match.
         for text, line, extra, message in (('__pycache__/\n*.olean\n', 1, {}, 'outside the CPython cache rules'),
                                            ('*.pyc\n__pycache__/\n', 1, {}, 'names no cache directory rule'),
