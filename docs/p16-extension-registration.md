@@ -7,7 +7,7 @@ the instructions for registering extensions and for checking the generated file.
 ## Proposed extension registration
 
 This proposal requires VY1/VY3 agreement before integration. Each addition uses
-one `VY1-Name.json` or `VY3-Name.json` in [`registrations/`](../scripts/h62/item1/p16-generator/registrations)
+one `VY1-Name.json` or `VY3-Name.json` in `registrations/`
 with exactly these fields:
 
 ```json
