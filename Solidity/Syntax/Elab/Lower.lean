@@ -162,11 +162,43 @@ end
 
 /-! ### Inlining a call -/
 
+/- The measure of the callee-side producers (`renameStmts`, `lowerReturns`):
+every block a statement holds counts, and a `for` loop's initialisation
+twice, so that `init ++ [for (; c; upd) body]` weighs less than the loop. -/
+namespace CalleeKernel
+
+mutual
+  def stmtWeight : RawStmt → Nat
+    | .block b | .unchecked b | .checked _ b => listWeight b + 1
+    | .ite _ t e => listWeight t + listWeight e + 1
+    | .tryCall _ _ _ _ ok err _ pnc other =>
+      listWeight ok + listWeight err + listWeight pnc + listWeight other + 1
+    | .whileLoop _ _ b | .doWhile _ b _ | .loop _ _ b => listWeight b + 1
+    | .forLoop _ i _ u b => 2 * listWeight i + listWeight u + listWeight b + 1
+    | _ => 1
+  def listWeight : List RawStmt → Nat
+    | [] => 0
+    | s :: ss => stmtWeight s + listWeight ss
+end
+
+omit [FreshNames] in
+theorem stmtWeight_pos (s : RawStmt) : 0 < stmtWeight s := by
+  cases s <;> simp only [stmtWeight] <;> omega
+
+omit [FreshNames] in
+theorem listWeight_append (as bs : List RawStmt) :
+    listWeight (as ++ bs) = listWeight as + listWeight bs := by
+  induction as with
+  | nil => simp only [List.nil_append, listWeight, Nat.zero_add]
+  | cons a as ih => simp only [List.cons_append, listWeight, ih, Nat.add_assoc]
+
+end CalleeKernel
+
 /-- A callee's body with its locals renamed fresh, each declaration's name
 numbered as a capture of its kind is (`se`, `sp`, `mv`), and the names `ρ`
 maps (its parameters and return variable) renamed: inlined, it binds no
 name the caller uses. -/
-partial def renameStmts (ρ : List (String × String)) : List RawStmt → ElabM (List RawStmt)
+def renameStmts (ρ : List (String × String)) : List RawStmt → ElabM (List RawStmt)
   | [] => pure []
   | s :: ss => do
     let r := RawExpr.rename ρ
@@ -231,14 +263,185 @@ partial def renameStmts (ρ : List (String × String)) : List RawStmt → ElabM 
     | .forLoop a [] c u b =>
       pure (.forLoop (ra a) [] (c.map r) (← renameStmts ρ u) (← renameStmts ρ b) ::
         (← renameStmts ρ ss))
-    | .forLoop a i c u b =>
+    | .forLoop a (s₀ :: i) c u b =>
       -- the initialisation's declarations scope over the rest of the loop
-      let out ← renameStmts ρ (i ++ [.forLoop a [] c u b])
+      let out ← renameStmts ρ (s₀ :: i ++ [.forLoop a [] c u b])
       match out.getLast? with
       | some (.forLoop a' [] c' u' b') =>
         pure (.forLoop a' out.dropLast c' u' b' :: (← renameStmts ρ ss))
       | _ => throw "a `for` loop's initialisation, renamed"
     | s => pure ((Id.run (s.mapExprsM (pure ∘ r))) :: (← renameStmts ρ ss))
+termination_by ss => CalleeKernel.listWeight ss
+decreasing_by
+  all_goals simp_wf
+  all_goals simp only [CalleeKernel.listWeight, CalleeKernel.stmtWeight,
+    CalleeKernel.listWeight_append]
+  all_goals first
+    | omega
+    | (have := CalleeKernel.stmtWeight_pos ‹RawStmt›; omega)
+
+/-- The statements `renameStmts` rewrites by their expressions alone: no
+declaration it numbers, no block it descends into. -/
+def RawStmt.renameLeaf : RawStmt → Bool
+  | .decl .. | .declStorage .. | .declMemory .. | .declStoragePush .. | .declPush ..
+  | .send (some _) (.name _) .. | .ite .. | .unchecked _ | .checked .. | .block _
+  | .tupleDecl .. | .tryCall .. | .whileLoop .. | .doWhile .. | .loop .. | .forLoop .. => false
+  | _ => true
+
+/-- A loop's specification renamed, as `renameStmts` renames it. -/
+def RawLoopSpec.rename (ρ : List (String × String)) (a : RawLoopSpec) : RawLoopSpec :=
+  { Id.run (a.mapM (pure ∘ RawExpr.rename ρ)) with qinv := a.qinv.map (RawInv.rename ρ) }
+
+/-! `renameStmts`'s defining equations, one per arm. -/
+
+section
+variable (ρ : List (String × String)) (ss : List RawStmt)
+
+theorem renameStmts_nil : renameStmts ρ [] = pure [] := by
+  rw [renameStmts]
+
+theorem renameStmts_decl (T : RawTy) (x : String) (i : Option RawExpr) :
+    renameStmts ρ (.decl T x i :: ss) = (do
+      let y := toString (← freshCapture "se")
+      pure (.decl T y (i.map (RawExpr.rename ρ)) :: (← renameStmts ((x, y) :: ρ) ss))) := by
+  rw [renameStmts]; rfl
+
+theorem renameStmts_declStorage (T : RawTy) (x : String) (i : Option RawExpr) :
+    renameStmts ρ (.declStorage T x i :: ss) = (do
+      let y := toString (← freshCapture "sp")
+      pure (.declStorage T y (i.map (RawExpr.rename ρ)) :: (← renameStmts ((x, y) :: ρ) ss))) := by
+  rw [renameStmts]; rfl
+
+theorem renameStmts_declMemory (T : RawTy) (x : String) (i : Option RawExpr) :
+    renameStmts ρ (.declMemory T x i :: ss) = (do
+      let y := toString (← freshCapture "mv")
+      pure (.declMemory T y (i.map (RawExpr.rename ρ)) :: (← renameStmts ((x, y) :: ρ) ss))) := by
+  rw [renameStmts]; rfl
+
+theorem renameStmts_declStoragePush (T : RawTy) (x : String) (b : RawExpr) :
+    renameStmts ρ (.declStoragePush T x b :: ss) = (do
+      let y := toString (← freshCapture "sp")
+      pure (.declStoragePush T y (RawExpr.rename ρ b) :: (← renameStmts ((x, y) :: ρ) ss))) := by
+  rw [renameStmts]; rfl
+
+theorem renameStmts_declPush (T : RawTy) (x : String) (b : RawExpr) :
+    renameStmts ρ (.declPush T x b :: ss) = (do
+      let y := toString (← freshCapture "se")
+      pure (.declPush T y (RawExpr.rename ρ b) :: (← renameStmts ((x, y) :: ρ) ss))) := by
+  rw [renameStmts]; rfl
+
+theorem renameStmts_send (T : RawTy) (x : String) (e a : RawExpr) (g : Bool) :
+    renameStmts ρ (.send (some T) (.name x) e a g :: ss) = (do
+      let y := toString (← freshCapture "se")
+      pure (.send (some T) (.name y) (RawExpr.rename ρ e) (RawExpr.rename ρ a) g ::
+        (← renameStmts ((x, y) :: ρ) ss))) := by
+  rw [renameStmts]; rfl
+
+theorem renameStmts_ite (c : RawExpr) (t e : List RawStmt) :
+    renameStmts ρ (.ite c t e :: ss) = (do
+      pure (.ite (RawExpr.rename ρ c) (← renameStmts ρ t) (← renameStmts ρ e) ::
+        (← renameStmts ρ ss))) := by
+  rw [renameStmts]
+
+theorem renameStmts_unchecked (b : List RawStmt) :
+    renameStmts ρ (.unchecked b :: ss) = (do
+      pure (.unchecked (← renameStmts ρ b) :: (← renameStmts ρ ss))) := by
+  rw [renameStmts]
+
+theorem renameStmts_checked (o : OFMode) (b : List RawStmt) :
+    renameStmts ρ (.checked o b :: ss) = (do
+      pure (.checked o (← renameStmts ρ b) :: (← renameStmts ρ ss))) := by
+  rw [renameStmts]
+
+theorem renameStmts_block (b : List RawStmt) :
+    renameStmts ρ (.block b :: ss) = (do
+      pure (.block (← renameStmts ρ b) :: (← renameStmts ρ ss))) := by
+  rw [renameStmts]
+
+theorem renameStmts_tupleDecl (vs : List (Option (RawTy × String))) (e : RawExpr) :
+    renameStmts ρ (.tupleDecl vs e :: ss) = (do
+      let mut ρ' := ρ
+      let mut vs' := []
+      for v in vs do
+        match v with
+        | some (T, x) =>
+          let y := toString (← freshCapture "se")
+          ρ' := (x, y) :: ρ'
+          vs' := vs' ++ [some (T, y)]
+        | none => vs' := vs' ++ [none]
+      pure (.tupleDecl vs' (RawExpr.rename ρ e) :: (← renameStmts ρ' ss))) := by
+  rw [renameStmts]
+
+theorem renameStmts_tryCall (e : RawExpr) (g : String) (as : List RawExpr) (rets : List
+    (RawTy × String)) (ok err : List RawStmt) (code : Option String) (pnc other : List RawStmt) :
+    renameStmts ρ (.tryCall e g as rets ok err code pnc other :: ss) = (do
+      let mut ρok := ρ
+      let mut rets' := []
+      for (T, x) in rets do
+        let y := toString (← freshCapture "se")
+        ρok := (x, y) :: ρok
+        rets' := rets' ++ [(T, y)]
+      let (code', ρp) ← match code with
+        | some x => do
+          let y := toString (← freshCapture "se")
+          pure (some y, (x, y) :: ρ)
+        | none => pure (none, ρ)
+      pure (.tryCall (RawExpr.rename ρ e) g (as.map (RawExpr.rename ρ)) rets'
+        (← renameStmts ρok ok) (← renameStmts ρ err) code'
+        (← renameStmts ρp pnc) (← renameStmts ρ other) :: (← renameStmts ρ ss))) := by
+  rw [renameStmts]; cases code <;> rfl
+
+theorem renameStmts_whileLoop (a : RawLoopSpec) (c : RawExpr) (b : List RawStmt) :
+    renameStmts ρ (.whileLoop a c b :: ss) = (do
+      pure (.whileLoop (a.rename ρ) (RawExpr.rename ρ c) (← renameStmts ρ b) ::
+        (← renameStmts ρ ss))) := by
+  rw [renameStmts]; rfl
+
+theorem renameStmts_doWhile (a : RawLoopSpec) (c : RawExpr) (b : List RawStmt) :
+    renameStmts ρ (.doWhile a b c :: ss) = (do
+      pure (.doWhile (a.rename ρ) (← renameStmts ρ b) (RawExpr.rename ρ c) ::
+        (← renameStmts ρ ss))) := by
+  rw [renameStmts]; rfl
+
+theorem renameStmts_loop (a : RawLoopSpec) (c : RawExpr) (b : List RawStmt) :
+    renameStmts ρ (.loop a c b :: ss) = (do
+      pure (.loop (a.rename ρ) (RawExpr.rename ρ c) (← renameStmts ρ b) ::
+        (← renameStmts ρ ss))) := by
+  rw [renameStmts]; rfl
+
+theorem renameStmts_forLoop_nil (a : RawLoopSpec) (c : Option RawExpr) (u b : List RawStmt) :
+    renameStmts ρ (.forLoop a [] c u b :: ss) = (do
+      pure (.forLoop (a.rename ρ) [] (c.map (RawExpr.rename ρ)) (← renameStmts ρ u)
+        (← renameStmts ρ b) :: (← renameStmts ρ ss))) := by
+  rw [renameStmts]; rfl
+
+/-- A `for` loop with an initialisation: the initialisation and the loop
+without it are renamed as one block, so its declarations scope over the loop. -/
+theorem renameStmts_forLoop_cons (a : RawLoopSpec) (s₀ : RawStmt) (i : List RawStmt)
+    (c : Option RawExpr) (u b : List RawStmt) :
+    renameStmts ρ (.forLoop a (s₀ :: i) c u b :: ss) = (do
+      let out ← renameStmts ρ (s₀ :: i ++ [.forLoop a [] c u b])
+      match out.getLast? with
+      | some (.forLoop a' [] c' u' b') =>
+        pure (.forLoop a' out.dropLast c' u' b' :: (← renameStmts ρ ss))
+      | _ => throw "a `for` loop's initialisation, renamed") := by
+  rw [renameStmts]
+
+/-- Every other statement: its expressions renamed. -/
+theorem renameStmts_leaf (s : RawStmt) (h : s.renameLeaf = true) :
+    renameStmts ρ (s :: ss) = (do
+      pure ((Id.run (s.mapExprsM (pure ∘ RawExpr.rename ρ))) :: (← renameStmts ρ ss))) := by
+  rw [renameStmts.eq_def]
+  cases s
+  case send T x _ _ _ =>
+    cases T <;> cases x <;> first
+      | (simp only [RawStmt.renameLeaf, Bool.false_eq_true] at h; done)
+      | rfl
+  all_goals first
+    | (simp only [RawStmt.renameLeaf, Bool.false_eq_true] at h; done)
+    | rfl
+
+end
 
 /-- `return e;`, lowered to the return variables `rs`: `r = e;` for one;
 for several, `r₀ = e₀; r₁ = e₁; …` from `return (e₀, e₁, …);`, or, when a
@@ -284,7 +487,7 @@ first, to a flag (`lowerLoops`), since this cannot give an early exit from a
 loop: what is left of it is the `if (ret) return;` after the outermost loop.
 A function on a body as read: it may run before or
 after the body is renamed. -/
-partial def lowerReturns (r : List String) : List RawStmt → Except String (List RawStmt)
+def lowerReturns (r : List String) : List RawStmt → Except String (List RawStmt)
   | [] => pure []
   | .ret none :: _ => pure []
   | .ret (some e) :: _ => lowerReturn r e
@@ -325,6 +528,108 @@ partial def lowerReturns (r : List String) : List RawStmt → Except String (Lis
       throw "`return` inside `checked { … }` with statements after the block"
     pure (.checked o (← lowerReturns r b) :: (← lowerReturns r ss))
   | s :: ss => do pure (s :: (← lowerReturns r ss))
+termination_by ss => CalleeKernel.listWeight ss
+decreasing_by
+  all_goals simp_wf
+  all_goals simp only [CalleeKernel.listWeight, CalleeKernel.stmtWeight,
+    CalleeKernel.listWeight_append]
+  all_goals first
+    | omega
+    | (have := CalleeKernel.stmtWeight_pos ‹RawStmt›; omega)
+
+/-- The statements `lowerReturns` keeps as they are. -/
+def RawStmt.returnLeaf : RawStmt → Bool
+  | .ret _ | .block _ | .ite .. | .tryCall .. | .unchecked _ | .checked .. => false
+  | _ => true
+
+/-! `lowerReturns`'s defining equations, one per arm. -/
+
+section
+variable (r : List String) (ss : List RawStmt)
+
+omit [FreshNames] in
+theorem lowerReturns_nil : lowerReturns r [] = pure [] := by
+  rw [lowerReturns]
+
+omit [FreshNames] in
+theorem lowerReturns_ret_none :
+    lowerReturns r (.ret none :: ss) = pure [] := by
+  rw [lowerReturns]
+
+omit [FreshNames] in
+theorem lowerReturns_ret_some (e : RawExpr) :
+    lowerReturns r (.ret (some e) :: ss) = lowerReturn r e := by
+  rw [lowerReturns]
+
+omit [FreshNames] in
+/-- A block with a `return` inside and statements after it is spliced into
+them: the one call on a list that is no part of the argument (`b ++ ss`). -/
+theorem lowerReturns_block (b : List RawStmt) :
+    lowerReturns r (.block b :: ss) = (do
+      if b.any RawStmt.hasReturn && !ss.isEmpty then
+        for x in b.flatMap RawStmt.declaredAll do
+          if ss.any (·.mentions x) then
+            throw s!"`return` in a block declaring {x}, which the statements after it name"
+        lowerReturns r (b ++ ss)
+      else
+        pure (.block (← lowerReturns r b) :: (← lowerReturns r ss))) := by
+  rw [lowerReturns]
+
+omit [FreshNames] in
+theorem lowerReturns_ite (c : RawExpr) (t e : List RawStmt) :
+    lowerReturns r (.ite c t e :: ss) = (do
+      if (t.any RawStmt.hasReturn || e.any RawStmt.hasReturn) && !ss.isEmpty then
+        for x in (t ++ e).flatMap RawStmt.declaredAll do
+          if ss.any (·.mentions x) then
+            throw s!"`return` in a branch declaring {x}, which the statements after it name"
+        pure [.ite c (← lowerReturns r (t ++ ss)) (← lowerReturns r (e ++ ss))]
+      else
+        pure (.ite c (← lowerReturns r t) (← lowerReturns r e) :: (← lowerReturns r ss))) := by
+  rw [lowerReturns]
+
+omit [FreshNames] in
+theorem lowerReturns_tryCall (e : RawExpr) (g : String) (as : List RawExpr) (rets : List
+    (RawTy × String)) (ok err : List RawStmt) (code : Option String) (pnc other : List RawStmt) :
+    lowerReturns r (.tryCall e g as rets ok err code pnc other :: ss) = (do
+      let bs := [ok, err, pnc, other]
+      if bs.any (·.any RawStmt.hasReturn) && !ss.isEmpty then
+        for x in (bs.flatten.flatMap RawStmt.declaredAll ++ rets.map (·.2) ++ code.toList) do
+          if ss.any (·.mentions x) then
+            throw s!"`return` in a clause declaring {x}, which the statements after it name"
+        pure [.tryCall e g as rets (← lowerReturns r (ok ++ ss)) (← lowerReturns r (err ++ ss)) code
+          (← lowerReturns r (pnc ++ ss)) (← lowerReturns r (other ++ ss))]
+      else
+        pure (.tryCall e g as rets (← lowerReturns r ok) (← lowerReturns r err) code
+          (← lowerReturns r pnc) (← lowerReturns r other) :: (← lowerReturns r ss))) := by
+  rw [lowerReturns]
+
+omit [FreshNames] in
+theorem lowerReturns_unchecked (b : List RawStmt) :
+    lowerReturns r (.unchecked b :: ss) = (do
+      if b.any RawStmt.hasReturn && !ss.isEmpty then
+        throw "`return` inside `unchecked { … }` with statements after the block"
+      pure (.unchecked (← lowerReturns r b) :: (← lowerReturns r ss))) := by
+  rw [lowerReturns]
+
+omit [FreshNames] in
+theorem lowerReturns_checked (o : OFMode) (b : List RawStmt) :
+    lowerReturns r (.checked o b :: ss) = (do
+      if b.any RawStmt.hasReturn && !ss.isEmpty then
+        throw "`return` inside `checked { … }` with statements after the block"
+      pure (.checked o (← lowerReturns r b) :: (← lowerReturns r ss))) := by
+  rw [lowerReturns]
+
+omit [FreshNames] in
+/-- Every other statement stays, and the rest is lowered. -/
+theorem lowerReturns_leaf (s : RawStmt) (h : s.returnLeaf = true) :
+    lowerReturns r (s :: ss) = (do pure (s :: (← lowerReturns r ss))) := by
+  rw [lowerReturns.eq_def]
+  cases s
+  all_goals first
+    | (simp only [RawStmt.returnLeaf, Bool.false_eq_true] at h; done)
+    | rfl
+
+end
 
 /-! ### Loops, lowered
 
@@ -626,27 +931,30 @@ def RawStmt.hasHole (s : RawStmt) : Bool :=
 
 /-- A modifier's body with each `_;` the block `inner`, at any depth.  Not
 inside `unchecked`, as solc refuses it there. -/
-partial def RawStmt.fillHole (inner : List RawStmt) (s : RawStmt) : Except String RawStmt :=
-  let go := fun (b : List RawStmt) => b.mapM (RawStmt.fillHole inner)
+def RawStmt.fillHole (inner : List RawStmt) (s : RawStmt) : Except String RawStmt :=
   match s with
   | .hole => pure (.block inner)
-  | .ite c t e => return .ite c (← go t) (← go e)
-  | .block b => return .block (← go b)
+  | .ite c t e =>
+    return .ite c (← t.mapM (RawStmt.fillHole inner)) (← e.mapM (RawStmt.fillHole inner))
+  | .block b => return .block (← b.mapM (RawStmt.fillHole inner))
   | .unchecked b =>
     if b.any RawStmt.hasHole then throw "`_;` inside `unchecked { … }`" else pure (.unchecked b)
-  | .checked o b => return .checked o (← go b)
+  | .checked o b => return .checked o (← b.mapM (RawStmt.fillHole inner))
   | .tryCall e g as rets ok err code pnc other =>
-    return .tryCall e g as rets (← go ok) (← go err) code (← go pnc) (← go other)
-  | .whileLoop a c b => return .whileLoop a c (← go b)
-  | .doWhile a b c => return .doWhile a (← go b) c
-  | .loop a c b => return .loop a c (← go b)
-  | .forLoop a i c u b => return .forLoop a i c u (← go b)
+    return .tryCall e g as rets (← ok.mapM (RawStmt.fillHole inner))
+      (← err.mapM (RawStmt.fillHole inner)) code (← pnc.mapM (RawStmt.fillHole inner))
+      (← other.mapM (RawStmt.fillHole inner))
+  | .whileLoop a c b => return .whileLoop a c (← b.mapM (RawStmt.fillHole inner))
+  | .doWhile a b c => return .doWhile a (← b.mapM (RawStmt.fillHole inner)) c
+  | .loop a c b => return .loop a c (← b.mapM (RawStmt.fillHole inner))
+  | .forLoop a i c u b => return .forLoop a i c u (← b.mapM (RawStmt.fillHole inner))
   | s => pure s
+termination_by sizeOf s
 
 /-- Reconstruct a slot type without losing ABI/function markers at any depth.
 Enum identity is already abstracted by the existing `enumRows` representation;
 any declared enum realizes that same shape. The full shape is checked below. -/
-partial def modifierSlotTy (ws : List (String × Nat)) (T : Ty) (n : String) : Except String RawTy := do
+def modifierSlotTy (ws : List (String × Nat)) (T : Ty) (n : String) : Except String RawTy := do
   let rt ← go T n
   let (actual, shape) ← elabTyW C rt
   let wanted := shapeUnder ws n
@@ -709,6 +1017,62 @@ def modifierFrame (d : FunDecl) (ρ : List (String × String))
     outs := outs ++ [.assign (.name old) (.name x)]
   return [.block (decls ++ (← renameStmts names inner) ++ outs)]
 
+/-- One modifier `m` around `inner`, the code its `_;` runs (the modifiers
+after it around the function's body): `wrapMods`'s step. -/
+def wrapMod (frame : Option (FunDecl × List (String × String))) (m : ModApp)
+    (inner : List RawStmt) : ElabM (List RawStmt) := do
+  let mut incoming : List (String × String) := []
+  let mut inputs : List RawStmt := []
+  let mut results : List RawStmt := []
+  let mut restore : List RawStmt := []
+  if let some (d, ρ) := frame then
+    for (n, T) in d.rets do
+      if T matches .ref _ then
+        unless d.retMem do throw "viaIR modifier frames with storage returns are not supported"
+      let old := (lookupBy n ρ).getD n
+      let x := toString (← freshCapture "se")
+      let result := toString (← freshCapture "se")
+      results := results ++ [← ElabM.lift (modifierSlotCopy C d n result T false (.name old))]
+      inputs := inputs ++ [← ElabM.lift (modifierSlotCopy C d n x T false (.name old))]
+      restore := restore ++ [.assign (.name old) (.name result)]
+      incoming := (old, x) :: incoming
+  let inner ← match frame with
+    | none => pure inner
+    | some (d, ρ) => modifierFrame C d ρ incoming inner
+  unless m.params.length == m.args.length do
+    throw s!"modifier {m.name} takes {m.params.length} arguments, not {m.args.length}"
+  let mut ρ : List (String × String) := []
+  let mut decls : List RawStmt := []
+  for ((n, T), a) in m.params.zip m.args do
+    -- a narrow parameter (`uint8 n`) is a local of its type: its argument
+    -- fits it; a reference one a local at its location, its argument's
+    -- narrow positions checked against its own (`shapeCheck`): a storage
+    -- one an alias, a memory one bound as `T memory y = a;` binds it
+    match T with
+    | .prim p =>
+      let y := toString (← freshCapture "se")
+      decls := decls ++ [.decl (.named (declTyName m.widths n p)) y (some a)]
+      ρ := (n, y) :: ρ
+    | .ref _ =>
+      let rt := rawTyW m.widths T n
+      match lookupBy n m.locs with
+      | some .storage =>
+        let y := toString (← freshCapture "sp")
+        decls := decls ++ [.declStorage rt y (some a)]
+        ρ := (n, y) :: ρ
+      | some .memory =>
+        let y := toString (← freshCapture "mv")
+        decls := decls ++ [.declMemory rt y (some a)]
+        ρ := (n, y) :: ρ
+      | _ => throw s!"modifier {m.name}: the reference parameter {n} is in memory or storage"
+  let code ← renameStmts ρ m.body
+  -- a `return` ends the modifier alone: the code after the `_;` of the
+  -- modifiers outside it still runs (solc's legacy pipeline)
+  let code ← if code.any RawStmt.hasReturn then
+      ElabM.lift (lowerReturns [] (← lowerLoops (some []) code))
+    else pure code
+  pure (results ++ decls ++ inputs ++ restore ++ (← ElabM.lift (code.mapM (RawStmt.fillHole inner))))
+
 /-- **Modifiers, inlined** around a function's body (its locals already
 fresh), the first listed outermost, as solc runs them: a modifier's
 parameters are declared fresh with its arguments (read in the function's
@@ -722,62 +1086,22 @@ it does in solc.  A body run by several
 `_;` (or by one in a loop) is run again in the same locals, its parameters
 and return variables not reset in legacy. ViaIR uses separate parameter
 and return slots for each placeholder call (`modifierFrame`). -/
-partial def wrapMods (body : List RawStmt) (frame : Option (FunDecl × List (String × String)) := none) :
+def wrapMods (body : List RawStmt) (frame : Option (FunDecl × List (String × String)) := none) :
     List ModApp → ElabM (List RawStmt)
   | [] => pure body
   | m :: ms => do
     let inner ← wrapMods body frame ms
-    let mut incoming : List (String × String) := []
-    let mut inputs : List RawStmt := []
-    let mut results : List RawStmt := []
-    let mut restore : List RawStmt := []
-    if let some (d, ρ) := frame then
-      for (n, T) in d.rets do
-        if T matches .ref _ then
-          unless d.retMem do throw "viaIR modifier frames with storage returns are not supported"
-        let old := (lookupBy n ρ).getD n
-        let x := toString (← freshCapture "se")
-        let result := toString (← freshCapture "se")
-        results := results ++ [← ElabM.lift (modifierSlotCopy C d n result T false (.name old))]
-        inputs := inputs ++ [← ElabM.lift (modifierSlotCopy C d n x T false (.name old))]
-        restore := restore ++ [.assign (.name old) (.name result)]
-        incoming := (old, x) :: incoming
-    let inner ← match frame with
-      | none => pure inner
-      | some (d, ρ) => modifierFrame C d ρ incoming inner
-    unless m.params.length == m.args.length do
-      throw s!"modifier {m.name} takes {m.params.length} arguments, not {m.args.length}"
-    let mut ρ : List (String × String) := []
-    let mut decls : List RawStmt := []
-    for ((n, T), a) in m.params.zip m.args do
-      -- a narrow parameter (`uint8 n`) is a local of its type: its argument
-      -- fits it; a reference one a local at its location, its argument's
-      -- narrow positions checked against its own (`shapeCheck`): a storage
-      -- one an alias, a memory one bound as `T memory y = a;` binds it
-      match T with
-      | .prim p =>
-        let y := toString (← freshCapture "se")
-        decls := decls ++ [.decl (.named (declTyName m.widths n p)) y (some a)]
-        ρ := (n, y) :: ρ
-      | .ref _ =>
-        let rt := rawTyW m.widths T n
-        match lookupBy n m.locs with
-        | some .storage =>
-          let y := toString (← freshCapture "sp")
-          decls := decls ++ [.declStorage rt y (some a)]
-          ρ := (n, y) :: ρ
-        | some .memory =>
-          let y := toString (← freshCapture "mv")
-          decls := decls ++ [.declMemory rt y (some a)]
-          ρ := (n, y) :: ρ
-        | _ => throw s!"modifier {m.name}: the reference parameter {n} is in memory or storage"
-    let code ← renameStmts ρ m.body
-    -- a `return` ends the modifier alone: the code after the `_;` of the
-    -- modifiers outside it still runs (solc's legacy pipeline)
-    let code ← if code.any RawStmt.hasReturn then
-        ElabM.lift (lowerReturns [] (← lowerLoops (some []) code))
-      else pure code
-    pure (results ++ decls ++ inputs ++ restore ++ (← ElabM.lift (code.mapM (RawStmt.fillHole inner))))
+    wrapMod C frame m inner
+
+theorem wrapMods_nil (body : List RawStmt) (frame : Option (FunDecl × List (String × String))) :
+    wrapMods C body frame [] = pure body := rfl
+
+/-- The modifiers after `m` wrap the body first; `m` goes around the result. -/
+theorem wrapMods_cons (body : List RawStmt) (frame : Option (FunDecl × List (String × String)))
+    (m : ModApp) (ms : List ModApp) :
+    wrapMods C body frame (m :: ms) = (do
+      let inner ← wrapMods C body frame ms
+      wrapMod C frame m inner) := rfl
 
 /-- The statements of `unchecked { … }` with their arithmetic wrapping: `x += 1;`
 and `x++;` are `x = x +% 1;`.  A call's callee stays checked, as in solc. -/
