@@ -8,15 +8,21 @@ import Solidity.Yul.Layout.Laws.Write
 `geometry`: a fitting tree whose write succeeds and whose written footprint
 is separated is read back. It mentions no allocator.
 
-The proof is one mutual recursion over the written tree. A leaf codec reads
+`write_read` is a mutual recursion over the written tree. A leaf codec reads
 back what it wrote. For a sequence, element `i` reads back after its own write
 (the recursion), and the later writes keep it: they change only their own
 written footprints (`frame`), the read of element `i` depends only on its
 read footprint (`local_read`), that footprint lies inside its written
-footprint (`cells_sub`), and `Separated` keeps the two apart. `Separated` and
-the footprints are taken in the final state; `written_indep` moves them to
-the state after the element's own write, because the footprint of a
-successful nested write does not depend on the state.
+footprint (`cells_sub`), and `Separated` keeps the two apart. The length word
+of a dynamic array survives its element writes the same way (`length_agree`).
+`Separated` and the footprints are taken in the final state; `written_indep`
+moves them to the state after the element's own write, because the footprint
+of a successful nested write does not depend on the state. `written_indep`
+and `cells_sub` are recursions of the same shape.
+
+The helpers `bind_some`, `writeLength_mem`, `writeBlob_mem`, `data_congr`,
+`elem_nested`, `field_nested`, `writeElems_frame` and `writeFields_frame`
+restate private lemmas of `Laws/Write.lean`, which this module cannot reach.
 -/
 namespace Solidity.Yul.Layout
 
@@ -52,8 +58,8 @@ private theorem scalar_write_read (P : Shrink.Params) (w : Nat) (l : Shrink.Loc)
     subst h
     have hv : v < 2 ^ 256 := Nat.lt_of_lt_of_le hf.2.2
       (Nat.pow_le_pow_right (by decide : 0 < 256) hf.2.1)
-    have hl : mloadNat (m.withMemory (mstore m.memory l.word (Shrink.toWord v))).memory l.word = v :=
-      mloadNat_mstore m.memory l.word v hv
+    have hl : mloadNat (m.withMemory (mstore m.memory l.word (Shrink.toWord v))).memory l.word
+        = v := mloadNat_mstore m.memory l.word v hv
     rw [hl, Nat.mod_eq_of_lt hf.2.2, ite_self]
   · simp only [geometry, if_neg hr] at h ⊢
     cases hfd : slotField w l.offset with
@@ -166,7 +172,7 @@ private theorem writeBlob_mem {P : Shrink.Params} {l : Shrink.Loc} {bs : List UI
     · cases h
   · cases h
 
-/-- A `bytes` value reads back when its head slot is apart from its data. -/
+/-- A `bytes` value reads back; in slots, when its head slot is apart from its data. -/
 private theorem blob_write_read (P : Shrink.Params) (l : Shrink.Loc) (bs : List UInt8)
     (m m' : Shrink.Phys) (h : geometry.writeBlob P l bs m = some m')
     (hs : Shrink.Apart (geometry.lengthCells P l) (geometry.blobCells P l m')) :
@@ -209,7 +215,7 @@ private theorem data_congr {P : Shrink.Params} {l : Shrink.Loc} (m m' : Shrink.P
   · simp only [dataLoc, if_pos hr, if_pos (h hr)]
   · simp only [dataLoc, if_neg hr]
 
-/-- A memory element of a dynamic layout is an indirect header. -/
+/-- A memory element carries the offset mark of its layout (`indirect`). -/
 private theorem elem_nested (P : Shrink.Params) (e : Shrink.Layout) (l : Shrink.Loc) (i : Nat)
     (h : (geometry.elem P e l i).region = .memory) :
     (geometry.elem P e l i).offset = indirect e := by
@@ -218,6 +224,7 @@ private theorem elem_nested (P : Shrink.Params) (e : Shrink.Layout) (l : Shrink.
   · simp only [geometry, if_neg hr] at h
     cases e <;> exact absurd h hr
 
+/-- A memory member carries the offset mark of its layout. -/
 private theorem field_nested (P : Shrink.Params) (fs : List Shrink.Layout) (l : Shrink.Loc)
     (i : Nat) (f : Shrink.Layout) (hf : fs[i]? = some f)
     (h : (geometry.field P fs l i).region = .memory) :
@@ -227,12 +234,13 @@ private theorem field_nested (P : Shrink.Params) (fs : List Shrink.Layout) (l : 
   · simp only [geometry, if_neg hr] at h
     exact absurd h hr
 
-/-! ## The footprint and separation of a successful nested write are state-independent -/
+/-! ## Footprint and separation of a successful nested write: state-independent -/
 
 mutual
 private theorem written_indep (P : Shrink.Params) :
     ∀ (t : Shrink.Tree) (L : Shrink.Layout) (l : Shrink.Loc) (m₀ m₀' : Shrink.Phys),
-      geometry.write P L l t m₀ = some m₀' → (l.region = .memory → l.offset = indirect L) →
+      geometry.write P L l t m₀ = some m₀' →
+      (l.region = .memory → l.offset = indirect L) →
       ∀ m₁ m₂ : Shrink.Phys, geometry.cellsT P L l t m₁ = geometry.cellsT P L l t m₂ ∧
         geometry.Separated P L l t m₁ = geometry.Separated P L l t m₂
   | .leaf v, L, l, m₀, m₀', h, _, m₁, m₂ => by
@@ -287,7 +295,8 @@ private theorem written_indep (P : Shrink.Params) :
 private theorem writtenElems_indep (P : Shrink.Params) :
     ∀ (xs : List Shrink.Tree) (e : Shrink.Layout) (l : Shrink.Loc) (i : Nat)
       (m₀ m₀' : Shrink.Phys), geometry.writeElems P e l xs i m₀ = some m₀' →
-      ∀ m₁ m₂ : Shrink.Phys, geometry.elemCellsT P e l xs i m₁ = geometry.elemCellsT P e l xs i m₂ ∧
+      ∀ m₁ m₂ : Shrink.Phys,
+        geometry.elemCellsT P e l xs i m₁ = geometry.elemCellsT P e l xs i m₂ ∧
         geometry.ElemsSeparated P e l xs i m₁ = geometry.ElemsSeparated P e l xs i m₂
   | [], _, _, _, _, _, _, _, _ =>
     ⟨funext fun c => by rw [Shrink.Geometry.elemCellsT, Shrink.Geometry.elemCellsT],
@@ -297,15 +306,18 @@ private theorem writtenElems_indep (P : Shrink.Params) :
     obtain ⟨m, hx, hxs⟩ := bind_some h
     obtain ⟨c₁, s₁⟩ := written_indep P x e _ m₀ m hx (elem_nested P e l i) m₁ m₂
     obtain ⟨c₂, s₂⟩ := writtenElems_indep P xs e l (i + 1) m m₀' hxs m₁ m₂
-    exact ⟨funext fun c => by rw [Shrink.Geometry.elemCellsT, Shrink.Geometry.elemCellsT, c₁, c₂],
-      by rw [Shrink.Geometry.ElemsSeparated, Shrink.Geometry.ElemsSeparated, c₁, c₂, s₁, s₂]⟩
+    exact ⟨funext fun c => by
+        rw [Shrink.Geometry.elemCellsT, Shrink.Geometry.elemCellsT, c₁, c₂],
+      by rw [Shrink.Geometry.ElemsSeparated, Shrink.Geometry.ElemsSeparated, c₁, c₂, s₁,
+        s₂]⟩
 private theorem writtenFields_indep (P : Shrink.Params) :
     ∀ (xs : List Shrink.Tree) (fs all : List Shrink.Layout) (l : Shrink.Loc) (i : Nat)
       (m₀ m₀' : Shrink.Phys), geometry.writeFields P all l fs xs i m₀ = some m₀' →
       (∀ j, all[i + j]? = fs[j]?) →
       ∀ m₁ m₂ : Shrink.Phys,
         geometry.fieldCellsT P all l fs xs i m₁ = geometry.fieldCellsT P all l fs xs i m₂ ∧
-        geometry.FieldsSeparated P all l fs xs i m₁ = geometry.FieldsSeparated P all l fs xs i m₂
+        geometry.FieldsSeparated P all l fs xs i m₁ =
+          geometry.FieldsSeparated P all l fs xs i m₂
   | [], fs, _, _, _, _, _, _, _, _, _ => by
     cases fs <;>
       exact ⟨funext fun c => by simp only [Shrink.Geometry.fieldCellsT],
@@ -316,12 +328,14 @@ private theorem writtenFields_indep (P : Shrink.Params) :
   | x :: xs, f :: fs, all, l, i, m₀, m₀', h, hi, m₁, m₂ => by
     rw [Shrink.Geometry.writeFields] at h
     obtain ⟨m, hx, hxs⟩ := bind_some h
-    obtain ⟨c₁, s₁⟩ := written_indep P x f _ m₀ m hx (field_nested P all l i f (hi 0)) m₁ m₂
+    obtain ⟨c₁, s₁⟩ :=
+      written_indep P x f _ m₀ m hx (field_nested P all l i f (hi 0)) m₁ m₂
     obtain ⟨c₂, s₂⟩ := writtenFields_indep P xs fs all l (i + 1) m m₀' hxs
       (fun j => by rw [show i + 1 + j = i + (j + 1) by omega]; exact hi (j + 1)) m₁ m₂
     exact ⟨funext fun c => by
         rw [Shrink.Geometry.fieldCellsT, Shrink.Geometry.fieldCellsT, c₁, c₂],
-      by rw [Shrink.Geometry.FieldsSeparated, Shrink.Geometry.FieldsSeparated, c₁, c₂, s₁, s₂]⟩
+      by rw [Shrink.Geometry.FieldsSeparated, Shrink.Geometry.FieldsSeparated, c₁, c₂, s₁,
+        s₂]⟩
 end
 
 /-! ## Later sibling writes change their own footprints only -/

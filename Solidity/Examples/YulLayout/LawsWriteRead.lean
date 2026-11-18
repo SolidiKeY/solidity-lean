@@ -2,7 +2,8 @@ import Solidity.Yul.Layout.Laws.WriteRead
 
 /-! Checks of `Yul/Layout/Laws/WriteRead.lean`: `write_read` is the same-named
 `Shrink.LayoutView.Laws` field of a view over `geometry`, for every allocator,
-and is used on a scalar, on a memory `bytes` object and on two sibling words. -/
+and is used, given a successful write, on a scalar, on a memory `bytes` object
+and on two sibling words. -/
 namespace Solidity.Examples.YulLayout.LawsWriteRead
 
 open Solidity.Goals
@@ -14,11 +15,12 @@ example (V : Shrink.LayoutView) (hV : V.geometry = geometry) :
       V.geometry.Separated P L l t m' → V.geometry.read P L l m' = some t :=
   hV ▸ write_read
 
-/-- A word reads back at every location; a scalar has no separation premise. -/
+/-- A word reads back wherever its write succeeds; a scalar has no separation premise. -/
 example (P : Shrink.Params) (l : Shrink.Loc) (m m' : Shrink.Phys) (v : Nat) (hv : v < 256 ^ 32)
     (h : geometry.write P (.scalar 32) l (.leaf v) m = some m') :
     geometry.read P (.scalar 32) l m' = some (.leaf v) :=
-  write_read P _ l _ m m' (by simp only [Shrink.Layout.Fits]; exact ⟨by decide, by decide, hv⟩) h
+  write_read P _ l _ m m'
+    (by simp only [Shrink.Layout.Fits]; exact ⟨by decide, by decide, hv⟩) h
     (by simp only [Shrink.Geometry.Separated])
 
 /-- A memory `bytes` object reads back: its length word ends where its payload starts. -/
@@ -46,7 +48,8 @@ example (P : Shrink.Params) (a : Nat) (m m' : Shrink.Phys) (v w : Nat)
   write_read P _ _ _ m m'
     (by
       simp only [Shrink.Layout.Fits, Shrink.Layout.FitsAll, List.length_cons, List.length_nil]
-      exact ⟨trivial, by decide, ⟨by decide, by decide, hv⟩, ⟨by decide, by decide, hw⟩, trivial⟩)
+      exact ⟨trivial, by decide, ⟨by decide, by decide, hv⟩, ⟨by decide, by decide, hw⟩,
+        trivial⟩)
     h (by
       simp only [Shrink.Geometry.Separated, Shrink.Geometry.ElemsSeparated,
         Shrink.Geometry.cellsT, Shrink.Geometry.elemCellsT, geometry, memSize, if_true, or_false,
