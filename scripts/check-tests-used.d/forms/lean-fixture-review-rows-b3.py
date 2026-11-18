@@ -31,6 +31,18 @@
 # test_components.py), since H1015 drivers are reviewed shell entries; and the
 # sources no committed program names by path (roadmap-g19/g36, v14-constructor,
 # v14-help, vo1, most of vt1, roadmap-v16 controls, automation, ...).
+# H1231 (Q-X1AG-1, Option A): registry part 'lean-checks' takes extra H999 rows
+# (lean_check_root unions them with the pinned table). No B3 source qualifies, so
+# this form adds no lean-checks part; the control below exercises the part end to
+# end. The three B3 sources that match lean_check_interface have no reviewed
+# gate.sh per-file shell driver: calldata-packets-1105/RawBool/Signatures.lean
+# (calldata_audit_controls.py), sol-numeric-literals/h35/PrintAxioms.lean
+# (validate-axioms.py), vt1/ImportFollowup/Signatures.lean (no program names it).
+# The 45 `#guard_msgs in #print axioms` sources (roadmap-g19/g36, v14-*,
+# sol-constant-depth, RawInt, BitNot, roadmap-v16/CalculusControls) match neither
+# H999 nor H1015; their reader is scripts/check-axiom-pins.mjs, a CI root
+# (trust.yml) whose collect() walk reads every tests/**/*.lean. Crediting that
+# walk is a Node walker form, not a Lean check row, and is left unresolved here.
 _B3_SETUP_LINE = (r'LEAN_NUM_THREADS=1 lake "\$\{([A-Za-z_]\w*)\[@\]\}" env lean -j1 --tstack=131072 --setup "\$work/setup\.json"'
                   r'[ \t]+([A-Za-z0-9_][\w./+-]*)')
 _B3_TOPLEVEL = 'root=$(git rev-parse --show-toplevel)'
@@ -134,6 +146,37 @@ def lean_fixture_b3_controls(env):
         REVIEWED_LEAN_FIXTURES = frozenset()
         rejected(ll, 'unreviewed Lean fixture role', standalone=[role])
     finally: REVIEWED_LEAN_FIXTURES, REVIEWED_LEAN_FIXTURE_INVOCATIONS, REVIEWED_NONPY_ENTRIES = saved
+    lean_check_extra_control(env)
+
+
+def lean_check_extra_control(env):
+    """H1231: a row in the registry's extra lean-checks part reaches lean_check_root;
+    without it the same role is unreviewed, and the pinned H999 table is unchanged."""
+    global REVIEWED_LEAN_CHECK_EXTRA, REVIEWED_LEAN_CHECK_EXTRA_INVOCATIONS, REVIEWED_NONPY_ENTRIES
+    commit, run, rejected, blob, gate, reviewed_nonpy, classifier = (env[k] for k in ('commit', 'run', 'rejected', 'blob', 'gate', 'reviewed_nonpy', 'classifier'))
+    assert REVIEWED_LEAN_CHECK_EXTRA == REVIEWED_LEAN_CHECK_EXTRA_INVOCATIONS == frozenset() and len(REVIEWED_LEAN_CHECKS) == 1
+    X, D = 'tests/b3c/A.lean', 'tests/b3c/run.sh'
+    audit = 'import Lib.Mod\n#check @Nat.succ\n#print axioms Nat.succ\n'
+    driver = '#!/usr/bin/env bash\nset -euo pipefail\nfiles=(tests/b3c/A.lean)\n' + LEAN_CHECK_DRIVER_LINE + '\n'; gl = 4
+    face = lean_check_interface(classifier['lean_code'], X, audit)
+    assert face is not None and lean_check_invocation(driver, X, gl)
+    lf = commit({'scripts/coord-tools/gate.sh': gate, D: driver, X: audit}, 'extra Lean check'); L = lf.ref
+    ll = commit({'tests/unrelated.txt': 'extra check later\n'}, 'extra Lean check later')
+    role = {'path': X, 'input_revision': L, 'source_blob': blob(lf, X), 'kind': LEAN_CHECK_KIND, 'command': lean_check_command(X), 'interface': face,
+            'provenance': {'commit': L, 'path': X, 'blob': blob(lf, X)}, 'purpose': 'Synthetic extra check.',
+            'invocations': [{'driver': D, 'driver_blob': blob(lf, D), 'driver_commit': L, 'line': gl}]}
+    saved = REVIEWED_LEAN_CHECK_EXTRA, REVIEWED_LEAN_CHECK_EXTRA_INVOCATIONS, REVIEWED_NONPY_ENTRIES
+    REVIEWED_NONPY_ENTRIES = reviewed_nonpy | {(D, blob(lf, D), L)}
+    try:
+        rejected(ll, 'unreviewed Lean check role', standalone=[role])
+        REVIEWED_LEAN_CHECK_EXTRA = frozenset({(X, blob(lf, X), L)})
+        rejected(ll, 'unreviewed Lean check role invocation', standalone=[role])
+        REVIEWED_LEAN_CHECK_EXTRA_INVOCATIONS = frozenset({(X, blob(lf, X), D, blob(lf, D), gl)})
+        model, rows = run(ll, standalone=[role]); entry = model['entry_points'][LEAN_CHECK_PREFIX + X]
+        assert rows[X]['class'] == 'keep' and entry['lean_check_role'] and entry['source_only']
+        assert entry['validation_at_measured_revision']['status'] == 'unavailable'
+        rejected(ll, 'unreviewed Lean fixture role', standalone=[dict(role, kind=LEAN_FIXTURE_KIND)])  # a check row is never a fixture row
+    finally: REVIEWED_LEAN_CHECK_EXTRA, REVIEWED_LEAN_CHECK_EXTRA_INVOCATIONS, REVIEWED_NONPY_ENTRIES = saved
 
 
 FORM_CONTROLS.append(lean_fixture_b3_controls)
