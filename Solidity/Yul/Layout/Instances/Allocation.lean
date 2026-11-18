@@ -1,6 +1,6 @@
 import Solidity.Yul.Layout.View
 import Solidity.Yul.Views.ObjectMemoryAllocation
-import Solidity.Yul.Views.StaticUintMemory
+import Solidity.Yul.Views.DynamicUintMemory
 
 /-!
 # The allocation instance facts of the layout view
@@ -10,7 +10,7 @@ The two allocation fields of `Shrink.LayoutView.Instances`, for `view`:
 `view` for `V`.
 
 `alloc` stores the free pointer and then the object (`alloc_at`). A `bytes`
-object is `bytesObjectView`, the image of `byteAllocationView`. An object of
+object is written as `byteAllocationView` writes it. An object of
 words is written first word first, while `wordListView` stores the last word
 first; the stores are disjoint, so the two agree (`put_words`, `put_members`).
 `objectAllocation` takes the prepared image apart (`alloc_image`): `bytes` and
@@ -63,12 +63,8 @@ private theorem put_word (P : Shrink.Params) (a o f : Nat) (w : Roadmap.Word) (m
 /-- A store below a serialized list commutes with it. -/
 private theorem wordList_mstore (ws : List Roadmap.Word) (b : ByteView) (a base : Nat)
     (w : Roadmap.Word) (below : a + 32 ≤ base) :
-    wordListView ws (mstore b a w) base = mstore (wordListView ws b base) a w := by
-  induction ws generalizing base with
-  | nil => rfl
-  | cons v ws ih =>
-    rw [wordListView, wordListView, ih (base + 32) (by omega)]
-    exact mstore_disjoint_commute _ _ _ _ _ (Or.inl below)
+    wordListView ws (mstore b a w) base = mstore (wordListView ws b base) a w :=
+  wordList_disjoint_commute [w] ws b a base (Or.inl below)
 
 /-- Words placed as array elements from element `i` are their serialized list. -/
 private theorem put_words (P : Shrink.Params) (base : Nat) (ws : List Roadmap.Word) (i f : Nat)
@@ -211,6 +207,8 @@ private theorem alloc_struct (P : Shrink.Params) (ws : List Roadmap.Word) (n : N
     Nat.mul_zero, Nat.add_zero, Option.map_some]
   rfl
 
+/-! ## Prepared images -/
+
 /-- A prepared image of a shaped object is a generic allocation of the shape's layout. -/
 private theorem alloc_image (P : Shrink.Params) {D : Source.Layout} {h : Source.Heap D}
     {q : Placement h} {τ : Source.STy} {data : Source.Data D τ} (prepared : MemoryImage q data)
@@ -276,9 +274,9 @@ theorem objectAllocation (P : Shrink.Params) {D : Source.Layout} (h : Source.Hea
     m.free = base → free.val = base + shape.size →
     ∃ t, (Shrink.memoryShapeLayout shape).Fits t ∧
       view.alloc P (Shrink.memoryShapeLayout shape) t m = some (base, m.withMemory image) := by
-  intro view here size
-  rw [objectAllocationView, Option.map_eq_some_iff] at view
-  obtain ⟨prepared, -, rfl⟩ := view
+  intro encoded here size
+  rw [objectAllocationView, Option.map_eq_some_iff] at encoded
+  obtain ⟨prepared, -, rfl⟩ := encoded
   exact alloc_image P prepared shape shaped base free m (Nat.le_trans p.free_start after) here size
 
 end Solidity.Yul.Layout.Instances

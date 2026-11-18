@@ -1,7 +1,7 @@
 import Solidity.Yul.Layout.Instances.Allocation
 
 /-! Checks of the allocation instance facts on small concrete inputs: each
-declaration of `Yul/Layout/Instances/Allocation.lean` is used once. -/
+declaration of `Yul/Layout/Instances/Allocation.lean` is used. -/
 namespace Solidity.Examples.YulLayout.InstancesAllocation
 
 open Solidity.Goals
@@ -44,13 +44,13 @@ example (P : Shrink.Params) {D : Source.Layout} (h : Source.Heap D) (p : Placeme
     (shaped : HasMemoryShape data (.strct n)) (free : Roadmap.Word)
     (fresh : ∀ a, (h.cells a).isSome → p.address a ≠ p.free.val)
     (fits : p.free.val + (MemoryShape.strct n).size ≤ free.val) (m : Shrink.Phys) (image : ByteView)
-    (view : objectAllocationView h p data memory (.strct n) shaped p.free.val free (Nat.le_refl _)
+    (encoded : objectAllocationView h p data memory (.strct n) shaped p.free.val free (Nat.le_refl _)
       fresh fits m.memory = some image)
     (here : m.free = p.free.val) (size : free.val = p.free.val + (MemoryShape.strct n).size) :
-    ∃ t a m', Solidity.Yul.Layout.view.alloc P (.struct (List.replicate n (.scalar 32))) t m =
+    ∃ t a m', view.alloc P (.struct (List.replicate n (.scalar 32))) t m =
       some (a, m') ∧ a = p.free.val :=
   let ⟨t, _, run⟩ := Instances.objectAllocation P h p data memory (.strct n) shaped p.free.val free
-    (Nat.le_refl _) fresh fits m image view here size
+    (Nat.le_refl _) fresh fits m image encoded here size
   ⟨t, _, _, run, rfl⟩
 
 end Solidity.Examples.YulLayout.InstancesAllocation
