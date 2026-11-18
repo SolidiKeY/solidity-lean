@@ -29,16 +29,6 @@ private theorem run : FiniteRun 128 4 2 CopyDemandControls.hash preimages locati
       intro p member
       change p ∈ [] at member
       cases member
-private theorem before_dst : Represented CopyDemandControls.old [.length .nil]
-    CopyDemandControls.root CopyDemandControls.store := by
-  intro q member
-  have same := List.mem_singleton.mp member
-  subst q
-  refine ⟨True.intro,⟨by decide,by decide⟩,?_⟩
-  intro word observed
-  change some two = some word at observed
-  cases observed
-  rfl
 private theorem before_src : Represented CopyDemandControls.src [.length .nil]
     (.root 1) CopyDemandControls.store := by
   intro q member
@@ -61,7 +51,7 @@ theorem actual_header_owner :
       (CopyWrites.numericCopy (N := 128) CopyDemandControls.old CopyDemandControls.src
         CopyDemandControls.root (.root 1) CopyDemandControls.hash CopyDemandControls.machine) :=
   CopyHeaders.represented_header CopyDemandControls.old CopyDemandControls.src CopyDemandControls.root
-    (.root 1) CopyDemandControls.store CopyDemandControls.machine run before_dst before_src
+    (.root 1) CopyDemandControls.store CopyDemandControls.machine run CopyDemandControls.old_header_represented before_src
     (fun _ _ => rfl)
     (List.mem_append.mpr (Or.inl (List.mem_map.mpr ⟨.length .nil,by
       change (Query.length .nil : Query CopyDemandControls.graph CopyDemandControls.Outer) ∈

@@ -113,12 +113,6 @@ def afterStore {n : Nat} {G : Schema n} {p : PrimTy}
     (old : Value G (.array (.prim p))) (base : Solidity.Storage.Loc) (store : Store) : Store :=
   Representation.write (symbolicPrefix store base old.length.val) base ClearDemands.zero
 
-private theorem data_ne_base (base : Solidity.Storage.Loc) (j : Nat) : Solidity.Storage.Loc.data base j ≠ base := by
-  intro same
-  have depths := congrArg Solidity.Storage.Loc.depth same
-  change base.depth+1 = base.depth at depths
-  omega
-
 /-- Selected PUBLIC postowner is DERIVED from OLD header/unvisited observations
 and independent graph clear; no desired postrelation or old cleared-word0 premise.
 The original PUBLIC lmax metadata interface is retained exactly. -/
@@ -152,7 +146,7 @@ theorem represented {n : Nat} {G : Schema n} {p : PrimTy}
         cases observed
         rw [PrimitivePop.element_location]
         unfold afterStore
-        rw [Representation.write_other _ _ _ _ (data_ne_base base i.val),symbolic_data,if_pos live]
+        rw [Representation.write_other _ _ _ _ (Solidity.Storage.Loc.data_ne_self base i.val),symbolic_data,if_pos live]
     · have oldMember : PrimitivePop.elementQuery (G := G) (p := p) i ∈ oldQueries old indices :=
         List.mem_cons_of_mem _ (List.mem_map.mpr ⟨i,List.mem_filter.mpr ⟨inside,by simp only [decide_eq_true_eq]; omega⟩,rfl⟩)
       have oldOwner := before _ oldMember
@@ -162,7 +156,7 @@ theorem represented {n : Nat} {G : Schema n} {p : PrimTy}
       have oldRead := oldOwner.2.2 word observed
       rw [PrimitivePop.element_location] at oldRead ⊢
       unfold afterStore
-      rw [Representation.write_other _ _ _ _ (data_ne_base base i.val),symbolic_data,if_neg live]
+      rw [Representation.write_other _ _ _ _ (Solidity.Storage.Loc.data_ne_self base i.val),symbolic_data,if_neg live]
       exact oldRead
 
 

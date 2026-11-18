@@ -64,12 +64,6 @@ private theorem contextCovered : ∀ q ∈ contexts groups, q.location CopyDeman
   change q ∈ [leaf 0 0,leaf 0 1,leaf 0 2,header 0,leaf 2 0,header 2,leaf 3 0] at member
   simp only [List.mem_cons,List.not_mem_nil,or_false] at member
   rcases member with rfl | rfl | rfl | rfl | rfl | rfl | rfl <;> decide
-private theorem written : ∀ q ∈ ClearDemands.slotDemands (AggregatePop.lastSlot CopyDemandControls.old),
-    q.location (AggregatePop.childBase CopyDemandControls.old CopyDemandControls.root) ∈ CopyDemandControls.locations := by
-  intro q member
-  change q ∈ [word 0,word 1,.length .nil] at member
-  simp only [List.mem_cons,List.not_mem_nil,or_false] at member
-  rcases member with rfl | rfl | rfl <;> decide
 private theorem separated : ∀ q ∈ selected, ∀ d ∈ ClearDemands.slotDemands (AggregatePop.lastSlot CopyDemandControls.old),
     d.location (AggregatePop.childBase CopyDemandControls.old CopyDemandControls.root) =
       q.location (AggregatePop.childBase CopyDemandControls.old CopyDemandControls.root) → d = q := by
@@ -158,7 +152,7 @@ theorem every_prefix (d : Nat) : ∃ result : Value G (wrapTy d),
     CopyDemandControls.root CopyDemandControls.store CopyDemandControls.machine CopyDemandControls.run
     (rootBefore d) (fun _ _ => rfl) (by simpa only [location] using (show CopyDemandControls.root ∈ CopyDemandControls.locations by decide))
     (by simpa only [location] using targetCovered) (by simpa only [location] using contextCovered)
-    (by simpa only [location] using written) (by simpa only [location] using separated)
+    (by simpa only [location] using AggregatePopControls.written) (by simpa only [location] using separated)
     (by simpa only [location] using headerSeparated) otherIndices (by simpa only [location] using noAlias)
   have childEqual : child = popped := Option.some.inj (changed.symm.trans (show recursivePop CopyDemandControls.old = some popped from rfl))
   subst child

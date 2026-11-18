@@ -24,10 +24,8 @@ theorem clear_compatible {n : Nat} {G : Schema n} {T : TypeGraph.Ty n}
 
 theorem clear_slot_compatible {n : Nat} {G : Schema n} {T : TypeGraph.Ty n}
     (old : Slot G T) (q : Query G T) (before : q.compatible (old.getD (Value.dflt T))) :
-    q.compatible ((recursiveClearSlot old).getD (Value.dflt T)) := by
-  cases old with
-  | absent => exact before
-  | present value => exact clear_compatible value q before
+    q.compatible ((recursiveClearSlot old).getD (Value.dflt T)) :=
+  ClearDemands.clear_slot_getD_compatible old q before
 
 mutual
 /-- Selected post header bounds derive from OLD destination observations and

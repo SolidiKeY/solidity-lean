@@ -43,7 +43,8 @@ private theorem queryCovered : ∀ q ∈ selected,
   intro q member
   simp only [selected,List.mem_cons,List.not_mem_nil,or_false] at member
   rcases member with rfl | rfl | rfl | rfl <;> decide
-private theorem written : ∀ q ∈ ClearDemands.slotDemands (lastSlot CopyDemandControls.old),
+/-- Every demand of the cleared last slot lies in the control locations. -/
+theorem written : ∀ q ∈ ClearDemands.slotDemands (lastSlot CopyDemandControls.old),
     q.location (childBase CopyDemandControls.old CopyDemandControls.root) ∈ CopyDemandControls.locations := by
   intro q member
   change q ∈ [.word (.cons (.index (ix 0)) .nil),.word (.cons (.index (ix 1)) .nil),.length .nil] at member
