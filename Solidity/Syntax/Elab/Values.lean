@@ -1968,7 +1968,8 @@ section FnPureMeasure
 variable {C}
 
 mutual
-/-- The nodes of an expression, names and literals not counted: the measure
+/-- The nodes of an expression, each counted once whatever name or literal it
+carries: the measure
 `fnPure` decreases (`abi.encodeCall` lowers the conversion `T(a)` of an
 argument `a`, whose `sizeOf` the name `T` makes arbitrary). -/
 def RawExpr.nodes : RawExpr → Nat
@@ -2203,7 +2204,8 @@ theorem extMember?_match_eq {β : Type} (Γ : ECtx) (h : RawExpr)
       | none => k₂) := by
   split <;> rename_i heq <;> simp only [heq]
 /-! The defining equations of `fnPure`, one per arm (the first arm's four
-branches each their own), as written before the function was total. -/
+branches each their own), as written before the function was total; the
+member arm (`fnPure_field`) is in the definition's present spelling. -/
 
 /-- `abi.encodeCall(h, t)`. -/
 theorem fnPure_encodeCall (Γ : ECtx) (f : String) (h : RawExpr) (as : List RawExpr)
@@ -2284,7 +2286,8 @@ theorem fnPure_call_cons (Γ : ECtx) (f : String) (h : RawExpr) (as : List RawEx
 
 /-- The member arm, as the definition now reads. Two spellings differ from the
 text before the function was total: the matches on `extMember?` name their
-equation (`extMember?_match_eq` gives the plain match), and an external
+equation (`extMember?_match_eq` gives the plain match; the first, an `if let`
+before, has `| none => pure ()` and goes on), and an external
 function type is tested by `any` where the pattern `some (_, _, true)` stood
 (`fnParts?_any_eq`). -/
 theorem fnPure_field (Γ : ECtx) (e : RawExpr) (m : String) :
@@ -2308,6 +2311,7 @@ theorem fnPure_field (Γ : ECtx) (e : RawExpr) (m : String) :
       | none => do pure (.field (← fnPure C Γ e) m)) := by
   rw [fnPure]
 
+/-- The call arm at no argument, evaluated. -/
 theorem fnPure_call_nil (Γ : ECtx) (f : String) :
     fnPure C Γ (.call f []) = pure (.call f []) := by
   rw [fnPure] <;> first | rfl | (intro _ _ h; cases h)
