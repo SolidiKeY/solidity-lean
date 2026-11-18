@@ -157,7 +157,10 @@ import Solidity.Examples.Goals.Shrink
 import Solidity.Examples.Goals.Taclets
 import Solidity.Examples.Goals.Total
 import Solidity.Examples.InputReduction
+import Solidity.Examples.IntrinsicSession.Laws.Boundary
 import Solidity.Examples.IntrinsicSession.Laws.Common
+import Solidity.Examples.IntrinsicSession.Laws.Frames
+import Solidity.Examples.IntrinsicSession.Laws.Structure
 import Solidity.Examples.IntrinsicSession.Run
 import Solidity.Examples.IntrinsicSession.Spec
 import Solidity.Examples.IntrinsicSession.Step
@@ -169,6 +172,7 @@ import Solidity.Examples.LexRuleSyntax
 import Solidity.Examples.LexTermSize
 import Solidity.Examples.LexVariant
 import Solidity.Examples.LinearDecision
+import Solidity.Examples.Lowering.Sim.Session.Source
 import Solidity.Examples.Lowering.Sim.Session.Target
 import Solidity.Examples.MemoryFloor
 import Solidity.Examples.MemoryInstantiation
@@ -176,6 +180,7 @@ import Solidity.Examples.MemoryNegativeCountermodel
 import Solidity.Examples.MemoryNegativeDecision
 import Solidity.Examples.MemoryStructWitness
 import Solidity.Examples.Notation
+import Solidity.Examples.Panic.Capture
 import Solidity.Examples.Panic.Eval
 import Solidity.Examples.Panic.GuardsArith
 import Solidity.Examples.Panic.Origins
