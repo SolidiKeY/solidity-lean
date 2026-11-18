@@ -12,8 +12,11 @@ example (P : Shrink.Params) (a : Nat) (m m' : Shrink.Phys)
     geometry.read P (.scalar 32) ⟨.memory, a, 0⟩ m =
       geometry.read P (.scalar 32) ⟨.memory, a, 0⟩ m' :=
   local_read P (.scalar 32) ⟨.memory, a, 0⟩ m m' fun c hc => by
+    rw [Shrink.Geometry.cells] at hc
     cases c with
-    | slot r w b => exact hc.elim
-    | mem x => exact congrArg UInt8.toNat (same x hc.1 hc.2)
+    | slot r w b => exact absurd hc id
+    | mem x =>
+      have inside : a ≤ x ∧ x < a + 32 := hc
+      exact congrArg UInt8.toNat (same x inside.1 inside.2)
 
 end Solidity.Examples.YulLayout.LawsRead
