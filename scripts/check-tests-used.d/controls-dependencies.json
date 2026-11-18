@@ -1409,6 +1409,99 @@
           "path": "scripts/h62/item6/migrate-root-gate/public-api-inventory.py"
         },
         "source_blob": "225df645d3ebfc2903b2f54fce53b2e2f8295e87"
+      },
+      {
+        "command": [
+          "python3",
+          "-B",
+          "scripts/h62/item2/audit-compiler-transport/h69_validate.py"
+        ],
+        "input_revision": "519932356a0ea7c22f4aa984534a7c6dd803ac26",
+        "kind": "h62-cache-policy-role",
+        "launch": {
+          "blob": "de305187fbff497525095db65992b02f5cb13463",
+          "form": "program-wrapper",
+          "line": 43,
+          "literal": "generate_reflection.py",
+          "path": "scripts/h62/item2/audit-compiler-transport/h69_validate.py"
+        },
+        "line": 1,
+        "module": {
+          "blob": "fb8a158c1461dea8f3a565f834d84557ea713ee9",
+          "path": "scripts/h62/item2/audit-compiler-transport/census.py"
+        },
+        "path": "scripts/h62/item2/audit-compiler-transport/.gitignore",
+        "program": {
+          "blob": "8d883515e9c99761411f79100ba9366890a7f4a8",
+          "import": "static",
+          "import_line": 6,
+          "path": "scripts/h62/item2/audit-compiler-transport/generate_reflection.py"
+        },
+        "provenance": "d02bd456c9961bed758f6078f51032b115729476",
+        "purpose": "Implicit CPython cache policy of audit-compiler-transport: h69_validate.py (kept python3 -B root) relaunches generate_reflection.py with sys.executable, which imports census.py. Source-policy role only. Only the reviewed source-policy relationship is retained; no consumer invocation, execution, passing run, helper, output, proof or runtime credit. Launch/import reachability and the external interpreter environment remain unaudited.",
+        "source_blob": "c18dd8d83ceed1806b50b0aaa46beb7e335fff13"
+      },
+      {
+        "command": [
+          "python3",
+          "-B",
+          "scripts/h62/item4/generic-yul-views/acceptance.py"
+        ],
+        "input_revision": "519932356a0ea7c22f4aa984534a7c6dd803ac26",
+        "kind": "h62-cache-policy-role",
+        "launch": {
+          "blob": "ef73cc19f9a708c9e3ee21c6e8bf8b5584a253a1",
+          "form": "argv-wrapper",
+          "line": 46,
+          "literal": "test_census.py",
+          "path": "scripts/h62/item4/generic-yul-views/acceptance.py"
+        },
+        "line": 1,
+        "module": {
+          "blob": "24df327e36cf9bfe537da98d10734c7c45ffc56a",
+          "path": "scripts/h62/item4/generic-yul-views/census.py"
+        },
+        "path": "scripts/h62/item4/generic-yul-views/.gitignore",
+        "program": {
+          "blob": "e99157ce8cef667474d1de620e33451d1c38be73",
+          "import": "file-location",
+          "import_line": 8,
+          "path": "scripts/h62/item4/generic-yul-views/test_census.py"
+        },
+        "provenance": "7689952982335b4d8212db983704ecbdca7c1df2",
+        "purpose": "Implicit CPython cache policy of generic-yul-views: acceptance.py (kept python3 -B root) runs test_census.py with sys.executable, which loads census.py by file location. Source-policy role only. Only the reviewed source-policy relationship is retained; no consumer invocation, execution, passing run, helper, output, proof or runtime credit. Launch/import reachability and the external interpreter environment remain unaudited.",
+        "source_blob": "c18dd8d83ceed1806b50b0aaa46beb7e335fff13"
+      },
+      {
+        "command": [
+          "python3",
+          "-B",
+          "scripts/h62/item6/migrate-hash/launch_baseline.py"
+        ],
+        "input_revision": "519932356a0ea7c22f4aa984534a7c6dd803ac26",
+        "kind": "h62-cache-policy-role",
+        "launch": {
+          "blob": "7c3887ee53e84f07b3561f6200b673db3d865036",
+          "form": "flock-cwd",
+          "line": 16,
+          "literal": "scripts/h62/item6/migrate-hash/full_measure.py",
+          "path": "scripts/h62/item6/migrate-hash/launch_baseline.py"
+        },
+        "line": 1,
+        "module": {
+          "blob": "98e527e654c4ed29919d56c4d343a72e75fca3fa",
+          "path": "scripts/h62/item6/migrate-hash/lean_lex.py"
+        },
+        "path": "scripts/h62/item6/migrate-hash/.gitignore",
+        "program": {
+          "blob": "cae845b44b6c50bd6ea69065b113099fe40eb73d",
+          "import": "static",
+          "import_line": 9,
+          "path": "scripts/h62/item6/migrate-hash/full_measure.py"
+        },
+        "provenance": "2a18afcdba00a85645b0b3079704f78ffcd78860",
+        "purpose": "Implicit CPython cache policy of migrate-hash: launch_baseline.py (kept python3 -B root) runs full_measure.py under flock with sys.executable, which imports lean_lex.py. Source-policy role only. Only the reviewed source-policy relationship is retained; no consumer invocation, execution, passing run, helper, output, proof or runtime credit. Launch/import reachability and the external interpreter environment remain unaudited.",
+        "source_blob": "a348e5040c3d2ac0cee5da2f21942aa68f106669"
       }
     ]
   },

@@ -441,9 +441,11 @@ import Solidity.Examples.Tools
 import Solidity.Examples.TypedLinear
 import Solidity.Examples.Verify
 import Solidity.Examples.YulLayout.Geometry
+import Solidity.Examples.YulLayout.InstancesAllocation
 import Solidity.Examples.YulLayout.InstancesMemory
 import Solidity.Examples.YulLayout.InstancesStorage
 import Solidity.Examples.YulLayout.LawsRead
 import Solidity.Examples.YulLayout.LawsWrite
 import Solidity.Examples.YulLayout.LawsWriteRead
 import Solidity.Examples.YulLayout.ScalarPilot
+import Solidity.Examples.YulLayout.View
