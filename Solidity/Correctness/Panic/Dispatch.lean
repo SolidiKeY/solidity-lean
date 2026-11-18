@@ -13,17 +13,51 @@ producer of `Syntax/Elab/Stmt.lean`:
   (`fnDispatchWith_fallback`); the fallback runs when no arm's guard holds (`dispatch_fallback_run`);
 * `fnTupleDispatchWith`, `fnMemoryDispatchWith`: the run ends by handing `rc.elabStmtsP` a raw dispatch
   whose last `else` is `rawFallback` (`fnTupleDispatchWith_fallback`, `fnMemoryDispatchWith_fallback`);
-* `trySelfBodyWith`: the inlined body is instrumented (`withPanics`) exactly when the callee is not a
-  compiler getter (`trySelfBodyWith_instrumented`);
-* `receiveSelfBodyWith`: the inlined `receive` is not instrumented (`receiveSelfBodyWith_plain`).
+* `trySelfBodyWith`: the body is `Stmt.selfCall?` of the statement `rc.elabCallRet` returned for the
+  callee, instrumented (`withPanics`) exactly when the callee is not a compiler getter
+  (`trySelfBodyWith_instrumented`);
+* `receiveSelfBodyWith`: the body is `Stmt.selfCall?` of the statement `rc.elabCallRet` returned for
+  `receive`, with no `withPanics` (`receiveSelfBodyWith_plain`).
 
-`Post` and `Hands` are the two run predicates; their rules are applied by head symbol (`post_step`,
+`Post` and `Hands` are the two run predicates, `Returns` records where a value came from; their rules are applied by head symbol (`post_step`,
 `hands_step`), so no proof restates a producer's body.
 -/
 
 namespace Solidity.Correctness.Panic
 
 open Solidity Semantics
+
+/-- A bind in `ElabM`, run. -/
+theorem bind_run {α β : Type} (x : ElabM α) (f : α → ElabM β) (sc : ElabScope) (st : ECtx × Nat)
+    (m : CallMemo) : (x >>= f) sc st m =
+      (match x sc st m with | .ok ((a, s), m₁) => f a sc s m₁ | .error e => .error e) := by
+  show (x sc st m >>= _) = _
+  cases x sc st m <;> rfl
+
+/-- `a` is the value of some successful run of `x` in scope `sc`. -/
+def Returns {α : Type} (x : ElabM α) (sc : ElabScope) (a : α) : Prop :=
+  ∃ st m st' m', x sc st m = .ok ((a, st'), m')
+
+/-- A value returned under `withReader` is returned in the changed scope. -/
+theorem Returns.reader {α : Type} {g : ElabScope → ElabScope} {x : ElabM α} {sc : ElabScope} {a : α}
+    (h : Returns (withReader g x) sc a) : Returns x (g sc) a := h
+
+/-- A guarded call that returned `some b` did so through a successful run of the call. -/
+theorem Returns.of_tryCatch_some {α β : Type} {x : ElabM α} {g : α → β} {sc : ElabScope} {b : β}
+    (h : Returns (tryCatch (x >>= fun a => pure (some (g a))) fun _ => pure none) sc (some b)) :
+    ∃ a, Returns x sc a ∧ g a = b := by
+  obtain ⟨st, m, st', m', h⟩ := h
+  have e : (tryCatch (x >>= fun a => pure (some (g a))) fun _ => (pure none : ElabM (Option β)))
+      sc st m = (match x sc st m with
+        | .ok ((a, s), m₁) => .ok ((some (g a), s), m₁)
+        | .error _ => .ok ((none, st), m)) := by
+    show (tryCatch ((x >>= fun a => pure (some (g a))) sc st m) _) = _
+    rw [bind_run]
+    cases x sc st m <;> rfl
+  rw [e] at h
+  split at h
+  · next a s m₁ hx => cases h; exact ⟨a, ⟨st, m, _, _, hx⟩, rfl⟩
+  · cases h
 
 /-- Every successful run of `x` in scope `sc` returns a value satisfying `Q`. -/
 def Post {α : Type} (x : ElabM α) (sc : ElabScope) (Q : α → Prop) : Prop :=
@@ -35,18 +69,18 @@ variable {α β : Type} {sc : ElabScope}
 theorem bind {x : ElabM α} {f : α → ElabM β} {Q₁ : α → Prop} {Q : β → Prop}
     (hx : Post x sc Q₁) (hf : ∀ a, Q₁ a → Post (f a) sc Q) : Post (x >>= f) sc Q := by
   intro st m b st' m' h
-  have e : (x >>= f) sc st m =
-      (match x sc st m with | .ok ((a, s), m₁) => f a sc s m₁ | .error e => .error e) := by
-    show (x sc st m >>= _) = _
-    cases x sc st m <;> rfl
-  rw [e] at h
+  rw [bind_run] at h
   split at h
   · next a s m₁ hx' => exact hf a (hx _ _ _ _ _ hx') _ _ _ _ _ h
   · cases h
 
+/-- The continuation may use that its argument was returned by `x`. -/
+theorem bind_ret {x : ElabM α} {f : α → ElabM β} {Q : β → Prop}
+    (hf : ∀ a, Returns x sc a → Post (f a) sc Q) : Post (x >>= f) sc Q :=
+  bind (Q₁ := Returns x sc) (fun st m _ st' m' h => ⟨st, m, st', m', h⟩) hf
+
 theorem bind_true {x : ElabM α} {f : α → ElabM β} {Q : β → Prop}
-    (hf : ∀ a, Post (f a) sc Q) : Post (x >>= f) sc Q :=
-  bind (Q₁ := fun _ => True) (fun _ _ _ _ _ _ => trivial) fun a _ => hf a
+    (hf : ∀ a, Post (f a) sc Q) : Post (x >>= f) sc Q := bind_ret fun a _ => hf a
 
 theorem ret {a : α} {Q : α → Prop} (h : Q a) : Post (Pure.pure a) sc Q := by
   intro st m b st' m' e; cases e; exact h
@@ -86,7 +120,7 @@ macro "post_step" : tactic => `(tactic| with_reducible first
   | refine Post.frame ?_
   | refine Post.read_bind ?_
   | refine Post.cond ?_ ?_
-  | refine Post.bind_true fun _ => ?_
+  | refine Post.bind_ret fun _ _ => ?_
   | split)
 
 /-- Every successful run of `x` in scope `sc` is the run, from some state, of a computation in `K`:
@@ -103,11 +137,7 @@ theorem self {y : ElabM α} {K : ElabM α → Prop} (h : K y) : Hands y sc K :=
 theorem bind_true {x : ElabM α} {f : α → ElabM β} {K : ElabM β → Prop}
     (hf : ∀ a, Hands (f a) sc K) : Hands (x >>= f) sc K := by
   intro st m r h
-  have e : (x >>= f) sc st m =
-      (match x sc st m with | .ok ((a, s), m₁) => f a sc s m₁ | .error e => .error e) := by
-    show (x sc st m >>= _) = _
-    cases x sc st m <;> rfl
-  rw [e] at h
+  rw [bind_run] at h
   split at h
   · exact hf _ _ _ _ h
   · cases h
@@ -218,26 +248,37 @@ theorem fnDispatchWith_fallback (rc : PanicProducerRec C) (h ty : String) (args 
   · exact Post.fail
 
 omit [FreshNames] in
-/-- `receiveSelfBodyWith` returns `Stmt.selfCall?` of an elaborated statement, uninstrumented. -/
+/-- `receiveSelfBodyWith` returns `Stmt.selfCall?` of the very statement `rc.elabCallRet` returned
+for the inlined `receive`: no `withPanics` is added. -/
 theorem receiveSelfBodyWith_plain (rc : PanicProducerRec C) {Γ : NCtx} (v : RawExpr)
     (sc : ElabScope) :
     Post (receiveSelfBodyWith C rc (Γ := Γ) v) sc fun body =>
-      body = none ∨ ∃ (Δ : Ctx) (s : Stmt C Γ.ctx Δ), body = Stmt.selfCall? C [] s := by
+      body = none ∨ ∃ (sc' : ElabScope) (st : SStmt C)
+          (rest : Option (NCtx × RefTy × Var × Bool) × List (Var × LocalTy))
+          (h : st.Γ.ctx = Γ.ctx),
+        Returns (rc.elabCallRet "receive" [v] none (targets := true) (selfFrame := true)) sc'
+          ([st], rest) ∧
+        body = Stmt.selfCall? C [] (h ▸ st.s) := by
   unfold receiveSelfBodyWith
   dsimp only
-  repeat' post_step
-  all_goals first
+  repeat' first
     | exact Post.ret (Or.inl rfl)
-    | exact Post.ret (Or.inr ⟨_, _, rfl⟩)
+    | (obtain ⟨⟨_, rest⟩, called, rfl⟩ := Returns.of_tryCatch_some ‹Returns (tryCatch _ _) _ _›
+       exact Post.ret (Or.inr ⟨_, _, rest, ‹_›, called.reader, rfl⟩))
+    | post_step
 
-/-- `trySelfBodyWith` instruments the inlined body exactly when the callee is not a getter. -/
+/-- `trySelfBodyWith` returns `Stmt.selfCall?` of the very statement `rc.elabCallRet` returned for
+the callee `g`, instrumented (`withPanics`) exactly when `g`'s declaration is not a compiler getter. -/
 theorem trySelfBodyWith_instrumented (rc : PanicProducerRec C) (g : String) {Γ : NCtx}
     (args : List (ExtArg C Γ.ctx)) (ρ : Ctx) (sc : ElabScope) :
     Post (trySelfBodyWith C rc g args ρ) sc fun body =>
-      body = none ∨ ∃ (name : Name) (d : FunDecl)
-          (inlined : Option ((ps : Ctx) × (Γf : Ctx) × Args C Γ.ctx ps × Prog C (ρ ++ ps) Γf)),
+      body = none ∨ ∃ (name : Name) (d : FunDecl) (st : SStmt C)
+          (rest : Option (NCtx × RefTy × Var × Bool) × List (Var × LocalTy))
+          (h : st.Γ.ctx = Γ.ctx),
         sc.funs.find? (·.1 == g) = some (name, d) ∧
-        body = inlined.map fun ⟨ps, Γf, sargs, sbody⟩ =>
+        Returns (rc.elabCallRet g (args.map fun a => Simple.toRaw C Γ.names a.2) none
+          (targets := !ρ.isEmpty || d.rets.isEmpty) (selfFrame := true)) sc ([st], rest) ∧
+        body = (Stmt.selfCall? C ρ (h ▸ st.s)).map fun ⟨ps, Γf, sargs, sbody⟩ =>
           ⟨ps, Γf, sargs, if (d.sourceDecl.any fun source => match source.callable with
             | .getter _ => true
             | _ => false) then sbody else sbody.withPanics⟩ := by
@@ -245,7 +286,8 @@ theorem trySelfBodyWith_instrumented (rc : PanicProducerRec C) (g : String) {Γ 
   dsimp only
   repeat' first
     | exact Post.ret (Or.inl rfl)
-    | exact Post.ret (Or.inr ⟨_, _, _, ‹_›, rfl⟩)
+    | (obtain ⟨⟨_, rest⟩, called, rfl⟩ := Returns.of_tryCatch_some ‹Returns (tryCatch _ _) _ _›
+       exact Post.ret (Or.inr ⟨_, _, _, rest, ‹_›, ‹_›, called, rfl⟩))
     | post_step
 
 end Solidity.Correctness.Panic
