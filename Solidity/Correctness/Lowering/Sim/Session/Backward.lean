@@ -20,7 +20,9 @@ record has exactly the type `Sim.lang_passCorrect` consumes.
 * `backward`: the frozen backward clause from a reverse diagram family.
 
 The reverse diagram itself is not here: between these two machines none exists
-once a target session has no last action (`Backward/NoDiagram.lean`). -/
+once a target session has no last action (`Backward/NoDiagram.lean`). It is
+built against the machine with a chosen horizon (`Backward/Bounded.lean`,
+`Backward/Reverse.lean`). -/
 namespace Solidity.Correctness.Lowering.Sim.Session
 
 open Solidity.Roadmap (Event Outcome SessionEnv Lang Fixed)

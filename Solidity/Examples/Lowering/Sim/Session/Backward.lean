@@ -1,4 +1,4 @@
-import Solidity.Correctness.Lowering.Sim.Session.Backward.NoDiagram
+import Solidity.Correctness.Lowering.Sim.Session.Backward.Reverse
 
 /-! Checks of the backward lane of the session lift on a small session: the
 lowered world of a compilation that resolves no deployment and no entry, in an
@@ -9,12 +9,16 @@ environment that issues a credit at every boundary.
 * The reverse diagram that certificate needs does not exist on this session:
   its deployment reverts unresolved, every later action is a credit, and the
   Source session machine cannot follow (`no_reverse_diagram_credits`). The
-  environment is allowed whenever the one it is built from is. -/
+  environment is allowed whenever the one it is built from is.
+* Against the machine with a chosen horizon the diagram exists from the
+  frame-level backward match (`FrameBackward`, a hypothesis here): on the small
+  session it is used once with the record, through `lang_passCorrect`, and
+  once for the backward clause and its completed-run reading. -/
 namespace Solidity.Examples.Lowering.Sim.Session.Backward
 
 open Solidity.Roadmap (SessionEnv Fixed Address)
 open Solidity.Roadmap.G49Final (Behaviour PassCorrect)
-open Solidity.Semantics.IntrinsicSession (Start deploy wire)
+open Solidity.Semantics.IntrinsicSession (Start deploy wire Bound lang)
 open Solidity.Goals.Shrink.Lowering
 open Solidity.Correctness.Sim (ForwardResources lang_passCorrect)
 open Solidity.Correctness.Lowering.Sim.Session
@@ -63,5 +67,37 @@ example (C : Contract) (F : Fixed) {E : Source.Env} (P : Source.SrcProg E) (e : 
       (targetMachine F (loweredWorld (noCode C)) e') (sourceMachine P (envAbs e'))) := fun all =>
   let ⟨D⟩ := all (credits e) allowed
   no_reverse_diagram_credits P F _ _ (noCode_deploys C F _) (fun _ _ => ⟨_, _, rfl⟩) D
+
+/-- The frame-level backward match of the small session, in every environment. -/
+abbrev Frames (C : Contract) (F : Fixed) {E : Source.Env} (P : Source.SrcProg E) : Type :=
+  ∀ e, FrameBackward P (loweredCode (noCode C)).main (loweredCode (noCode C)).roles
+    (loweredCode (noCode C)).ctor (loweredCode (noCode C)).entry F wire e
+
+/-- **The diagram and the record, once**: with any forward half, the reverse
+diagram of the small session and its record give the session certificate. -/
+noncomputable example (D : Diagram) (C : Contract) (F : Fixed) {E : Source.Env}
+    (P : Source.SrcProg E) (fb : Frames C F P)
+    (forward : ∀ e, Solidity.Correctness.Sim.Diagram (sourceMachine P (envAbs e))
+      (boundedTarget F (loweredWorld (noCode C)) e))
+    (resources : ForwardResources (Behaviour.ofLang (sourceLang D F E (loweredWorld (noCode C))) P)
+      (Behaviour.ofLang (targetLang F) (loweredWorld (noCode C))) (sourceMachine P)
+      (boundedTarget F (loweredWorld (noCode C))) envAbs forward) :
+    PassCorrect (sourceBehaviour D F P (loweredWorld (noCode C)))
+      (targetBehaviour F (loweredWorld (noCode C))) :=
+  let reverse : ∀ e, Solidity.Correctness.Sim.Diagram (boundedTarget F (loweredWorld (noCode C)) e)
+      (sourceMachine P (envAbs e)) := fun e => reverseDiagram (fb e)
+  lang_passCorrect (sourceLang D F E _) (targetLang F) P (loweredWorld (noCode C)) (sourceMachine P)
+    (boundedTarget F _) envAbs (fun e => envAbs_sound F (E := E) e)
+    (fun e => envAbs_onto F (E := E) e) forward reverse resources (boundedResources D F P _ reverse)
+
+/-- A session of the small world that ends is a Source session that ends with
+the same history and outcome: the backward clause on a completed run. -/
+example (D : Diagram) (C : Contract) (F : Fixed) {E : Source.Env} (P : Source.SrcProg E)
+    (fb : Frames C F P) (e : SessionEnv) (r : Bound) (allowed : e.Allowed) (noFail : r.NoFail)
+    (guard : (lang F).Guard (loweredWorld (noCode C)) e r) (o : Solidity.Roadmap.Outcome)
+    (done : ((lang F).sem (loweredWorld (noCode C)) e r).final = some o) :
+    ∃ n, (Source.sourceLangEvents E).sem P e n = (lang F).sem (loweredWorld (noCode C)) e r :=
+  let ⟨n, le⟩ := backward_of_frames D F P (loweredCode (noCode C)) fb e r allowed noFail guard
+  ⟨n, le.final_eq done⟩
 
 end Solidity.Examples.Lowering.Sim.Session.Backward
