@@ -32,6 +32,15 @@ example (kernel : elabKernelTotal) (C : Contract) :
     Stmt.Refuses (elabStmtPWith C (elabRec C ()) .cont) :=
   Stmt.jump_refuses C _ ⟨(kernel.1 C).1.2.2.2.2.1, (kernel.1 C).1.2.2.2.1⟩ .cont rfl
 
+/-- `StmtCases` from its conjuncts other than the jumps. -/
+example
+    (rest : elabKernelTotal → ∀ (C : Contract) (rc : ElabRec C), RecSim C rc →
+      StmtArm C rc .assign ∧ StmtArm C rc .declLocal ∧ StmtArm C rc .opAssign ∧
+      StmtArm C rc .incDec ∧ StmtArm C rc .require ∧ StmtArm C rc .assert ∧
+      StmtArm C rc .revert ∧ StmtArm C rc .ite ∧ StmtArm C rc .block ∧
+      ElabSat (blockQ C) (elabStmtsStep C rc)) : StmtCases :=
+  stmt_cases_of rest
+
 /-- A simulated body completes at a checked frame exactly when it completes
 at an unchecked one. -/
 example {b : Body} {u : Emitted} {m : Solidity.Lowering.V07.ContextMap b.ctx u.Γ}
@@ -42,17 +51,5 @@ example {b : Body} {u : Emitted} {m : Solidity.Lowering.V07.ContextMap b.ctx u.�
     (∃ x, (sourceRun b G { F with checked := true } n 0 none src).1 = .ok x) ↔
       ∃ x, (sourceRun b G { F with checked := false } n 0 none src).1 = .ok x :=
   sim.frame_blind G G _ _ 0 0 none none src n done done'
-
-/-- info: 'Solidity.Correctness.Lowering.Sim.jump_cases' depends on axioms:
-[propext, Classical.choice, Quot.sound] -/
-#guard_msgs (whitespace := lax) in #print axioms jump_cases
-
-/-- info: 'Solidity.Correctness.Lowering.Sim.one_not_runSim' depends on axioms:
-[propext, Classical.choice, Quot.sound] -/
-#guard_msgs (whitespace := lax) in #print axioms one_not_runSim
-
-/-- info: 'Solidity.Correctness.Lowering.Sim.stmt_cases_of' depends on axioms:
-[propext, Classical.choice, Quot.sound] -/
-#guard_msgs (whitespace := lax) in #print axioms stmt_cases_of
 
 end Solidity.Examples.Lowering.Sim.Stmt
