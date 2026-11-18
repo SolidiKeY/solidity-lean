@@ -6,9 +6,9 @@ import Solidity.Yul.Layout.ReadSequence
 
 `local_read` is the statement of `Shrink.LayoutView.Laws.local_read` for
 `geometry`: two states that agree on every cell of `geometry.cells` (taken in
-the first state) give the same `geometry.read`. The proof is one structural
+the first state) give the same `geometry.read`. The proof is one mutual
 recursion over the layout; each leaf codec is shown to read only the bytes its
-footprint names, and the length word of a dynamic array or `bytes` fixes the
+footprint names, and the length footprint of a dynamic array or `bytes` fixes the
 length and the data location before its payload is compared.
 -/
 namespace Solidity.Yul.Layout
