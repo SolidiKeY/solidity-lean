@@ -1,7 +1,7 @@
 import Solidity.Yul.Layout.Geometric
 
 /-! Checks of the layout geometry on small concrete inputs: each declaration
-of `Yul/Layout/Geometry.lean` and `Yul/Layout/Geometric.lean` is used once. -/
+of `Yul/Layout/Geometry.lean` and `Yul/Layout/Geometric.lean` is used. -/
 namespace Solidity.Examples.YulLayout.Geometry
 
 open Solidity.Goals

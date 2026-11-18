@@ -240,4 +240,4 @@
 | `Yul/Checks/DirtyReadbackControls.lean` | Controls of `DirtyReadback`: one positive per type family and pipeline matching the recorded solc evidence, frame readback of `LocalBlock`'s `dirtyTwo`/`dirtyFalse`, a refused dirty `bytes1`, coherence refusals kept. |
 | `Yul/Layout/Geometry.lean` | `geometry`, the 13 leaf fields of `Shrink.Geometry` for the one layout view: packed slot scalars (`slotField`), memory words with the `cleanDirty` mask, the pinned length, data, key, element and member placements, slot `bytes` at `keccak(slot)` with a length-independent data footprint, inline memory objects (`memSize`) with a two-word header (length, data address) for a nested dynamic member (`indirect`, `dataLoc`). No allocator and no `LayoutView`. |
 | `Yul/Layout/Geometric.lean` | `geometric`: `geometry` satisfies all 8 fields of `Shrink.LayoutView.Geometric`, for every allocator. |
-| `Examples/YulLayout/Geometry.lean` | Checks of `geometry` and `geometric` on small concrete inputs, one use per declaration. |
+| `Examples/YulLayout/Geometry.lean` | Checks of `geometry` and `geometric` on small concrete inputs; every declaration is used. |
