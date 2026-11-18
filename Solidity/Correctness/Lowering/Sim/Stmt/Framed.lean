@@ -16,11 +16,14 @@ take a frame relation as a premise.
   over the v2 run clauses. Every v1 result transfers (`RunSim.of_v1`,
   `StmtArm.of_v1`), so the jump conjunct holds (`jump_cases`).
 
-Provisional and unfrozen. Not here: initial matching does not yet produce a
-target state that also meets `frameRel` (v1's `globRel_total` picks the zero
-address), so `V2.RunSim` does not show the frame premise satisfiable; and the
-cases are still per arm, which `Sim/Match/Cases.lean` ("Limitations") shows
-unprovable where an arm's output is a part of a body's elaboration.
+* `initial_matching`: at every frame that is checked and not static, every
+  Source state of an associated body has a related target state that also
+  meets `frameRel`, so the frame premise is satisfiable where it can be.
+
+Provisional and unfrozen. Not here: `V2.RunSim` itself still asks for v1's
+initial matching only; and the cases are still per arm, which
+`Sim/Match/Cases.lean` ("Limitations") shows unprovable where an arm's output
+is a part of a body's elaboration.
 -/
 
 namespace Solidity.Correctness.Lowering.Sim.Stmt.V2
@@ -102,6 +105,35 @@ frames that separate v1's runs (`RunSim.frame_blind`) are not compared. -/
 theorem frame_checked {E : Source.Env} {C : Contract} {Γ : Ctx} {G : Source.Glob E}
     {F : Source.Fr} {σ : State C Γ} (h : diagram.frameRel G F σ) :
     F.static = false ∧ F.checked = true := h.2.2.2.2
+
+omit [FreshNames] in
+/-- **Initial matching under the frame premise**: at a checked, non-static
+frame every Source state of an associated body has a related target state
+whose transaction is the frame (`frameRel`), at the frame's own instance. -/
+theorem initial_matching (b : Body) (u : Emitted) (m : ContextMap b.ctx u.Γ)
+    (h : Sim.diagram.Assoc b u m) (G : Source.Glob b.E) (F : Source.Fr)
+    (frame : F.static = false ∧ F.checked = true) (src : Source.EMState b.E b.ctx) :
+    ∃ tgt : State u.C u.Γ, m.Related (fun τ v => diagram.valRel τ v) src.1 tgt.env ∧
+      diagram.globRel src.2 tgt ∧ diagram.frameRel G F tgt := by
+  have h : Sim.Assoc b u m := h
+  obtain ⟨env, related⟩ := h.2.2.1.locals b.E.layout u.C [] src.1
+  obtain ⟨storage, fields⟩ := Total.Simulation.fields_onto (cell src.2 F.this) u.C.vars
+    fun x T mem => by
+      obtain ⟨p, rfl, ty⟩ := h.storageTyped x T mem
+      exact ⟨p, rfl, Total.Simulation.read_prim _ _ p ty⟩
+  have wide (a : Roadmap.Address) : a.val < 2 ^ 256 :=
+    Nat.lt_of_lt_of_le a.isLt (Nat.pow_le_pow_right (by decide) (by decide))
+  let word := Total.Simulation.wordDenote
+  let tx : TTx :=
+    { msgSender := word ⟨_, wide F.sender⟩
+      selfAddress := word ⟨_, wide F.this⟩
+      msgValue := word F.value
+      timestamp := word G.timestamp }
+  by_cases fits : Source.Monetary.Fits (src.2.ex.world.accounts F.this).balance
+  · exact ⟨⟨storage, [], Heap.empty, env, [], word ⟨_, fits⟩, tx⟩, related,
+      ⟨F.this, rfl, fields, fun _ => rfl⟩, rfl, rfl, rfl, rfl, frame⟩
+  · exact ⟨⟨storage, [], Heap.empty, env, [], PrimTy.dflt .uint, tx⟩, related,
+      ⟨F.this, rfl, fields, fun h => absurd h fits⟩, rfl, rfl, rfl, rfl, frame⟩
 
 variable (C : Contract)
 
