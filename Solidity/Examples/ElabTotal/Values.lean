@@ -3,8 +3,8 @@ import Solidity.Syntax.Elab.Values
 /-!
 # Checks: the value rewrites' equations
 
-The functions of `Syntax/Elab/Values.lean` checked here are total (`abiTyExpr?`
-and `abiFnType` are still `partial`), so each unfolds by its named equations with no
+The functions of `Syntax/Elab/Values.lean` checked here are total (other
+functions of that file are still `partial`), so each unfolds by its named equations with no
 `native_decide`: structural ones (`fnTyOfExpr`, `rawFnTyOfExpr?`, `bytesOf?`)
 also reduce in the kernel (`rfl`), the well-founded one (`narrowPure`, through
 `List.mapM`) by rewriting. The `#guard`s pin the compiled functions.
