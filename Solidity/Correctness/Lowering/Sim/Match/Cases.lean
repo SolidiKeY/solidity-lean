@@ -153,9 +153,10 @@ theorem recSim_of_step (rc : ElabRec C) (induction : ElabKernelInduction C rc)
 /-- The statement families: the constructors of `PublicCompilerTotal.StmtOk`
 read on the raw statement, `arith` for the arithmetic scopes, `state` for what
 has no constructor there (memory, ABI, data-carrying errors, sends, `try`,
-pushes, tuples, jumps), `loop` for the loops. -/
+pushes, tuples), `jump` for what the lowering removes before elaboration
+(`return`, `break`, `continue`, `_`), `loop` for the loops. -/
 inductive StmtFamily where
-  | assign | declLocal | opAssign | incDec | require | assert | revert | ite | block
+  | assign | declLocal | opAssign | incDec | require | assert | revert | ite | block | jump
   | arith | declStorage | call | state | loop
   deriving DecidableEq, Repr
 
@@ -173,6 +174,7 @@ def stmtFamily : RawStmt → StmtFamily
   | .revert => .revert
   | .ite .. => .ite
   | .block _ => .block
+  | .ret _ | .brk | .cont | .hole => .jump
   | .unchecked _ | .checked .. => .arith
   | .declStorage .. => .declStorage
   | .whileLoop .. | .forLoop .. | .doWhile .. | .loop .. => .loop
@@ -190,12 +192,17 @@ def exprFamily : RawExpr → ExprFamily
   | .binop .. | .unop .. | .modular .. | .incDec .. | .assign .. | .opAssign .. => .arith
   | _ => .state
 
-/-- The statement arms of a family meet the obligations: every successful
-output of `elabStmtPWith` and of `elabStmt1With` on a statement of it. -/
-def StmtArm (rc : ElabRec C) (family : StmtFamily) : Prop :=
+/-- A statement arm meets the obligations on a family: every successful
+output of it on a statement of the family. -/
+def ArmSat (arm : RawStmt → ElabM (SProg C)) (family : StmtFamily) : Prop :=
   ∀ s, stmtFamily s = family →
-    (∀ sc st P st', ElabRan (elabStmtPWith C rc s) sc st P st' → stmtQ C s sc st P st') ∧
-    (∀ sc st P st', ElabRan (elabStmt1With C rc s) sc st P st' → stmtQ C s sc st P st')
+    ∀ sc st P st', ElabRan (arm s) sc st P st' → stmtQ C s sc st P st'
+
+/-- The statement arms of a family meet the obligations: `elabStmtPWith`
+(captures, then the statement) and `elabStmt1With` (the statement), one leaf
+conjunct each. -/
+def StmtArm (rc : ElabRec C) (family : StmtFamily) : Prop :=
+  ArmSat C (elabStmtPWith C rc) family ∧ ArmSat C (elabStmt1With C rc) family
 
 /-- The capture arm of a family meets the obligations: every successful
 output of `hoistWith` on an expression of it. -/
@@ -219,7 +226,7 @@ def StmtCases : Prop :=
   elabKernelTotal → ∀ (C : Contract) (rc : ElabRec C), RecSim C rc →
     StmtArm C rc .assign ∧ StmtArm C rc .declLocal ∧ StmtArm C rc .opAssign ∧
     StmtArm C rc .incDec ∧ StmtArm C rc .require ∧ StmtArm C rc .assert ∧
-    StmtArm C rc .revert ∧ StmtArm C rc .ite ∧ StmtArm C rc .block ∧
+    StmtArm C rc .revert ∧ StmtArm C rc .ite ∧ StmtArm C rc .block ∧ StmtArm C rc .jump ∧
     ElabSat (blockQ C) (elabStmtsStep C rc)
 
 /-- **State cases**: storage, memory, ABI, errors and calls: the storage
@@ -243,21 +250,22 @@ theorem step_of_cases (kernel : elabKernelTotal) (exprs : ExprCases) (stmts : St
     ElabSat (stmtQ C) (elabStmtPWith C r) ∧ ElabSat (stmtQ C) (elabStmt1With C r) ∧
     ElabSat (blockQ C) (elabStmtsStep C r) := by
   obtain ⟨operand, arith, captured, scopes⟩ := exprs kernel C r sim
-  obtain ⟨assign, declLocal, opAssign, incDec, require, assert, revert, ite, block, sequence⟩ :=
+  obtain ⟨assign, declLocal, opAssign, incDec, require, assert, revert, ite, block, jump,
+    sequence⟩ :=
     stmts kernel C r sim
   obtain ⟨declStorage, call, state, reach, _⟩ := states kernel C r sim
   have arm (s : RawStmt) : StmtArm C r (stmtFamily s) := by
     cases family : stmtFamily s
     all_goals first
       | exact assign | exact declLocal | exact opAssign | exact incDec | exact require
-      | exact assert | exact revert | exact ite | exact block | exact scopes
+      | exact assert | exact revert | exact ite | exact block | exact jump | exact scopes
       | exact declStorage | exact call | exact state | exact loops r sim
   have capture (e : RawExpr) : ExprArm C r (exprFamily e) := by
     cases family : exprFamily e
     all_goals first | exact operand | exact arith | exact reach
   exact ⟨fun e sc st out st' ran => capture e e rfl sc st out st' ran, captured,
-    fun s sc st P st' ran => (arm s s rfl).1 sc st P st' ran,
-    fun s sc st P st' ran => (arm s s rfl).2 sc st P st' ran, sequence⟩
+    fun s sc st P st' ran => (arm s).1 s rfl sc st P st' ran,
+    fun s sc st P st' ran => (arm s).2 s rfl sc st P st' ran, sequence⟩
 
 /-- **The cases suffice**: with a loop hypothesis they give the per-run part
 of `diagram.Simulates`, by `ElabKernelInduction` at `elabRec C ()`. -/
