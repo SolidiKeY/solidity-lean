@@ -14,24 +14,40 @@ namespace Solidity.Examples.Lowering.Sim.Session.Backward
 
 open Solidity.Roadmap (SessionEnv Fixed Address)
 open Solidity.Roadmap.G49Final (Behaviour PassCorrect)
-open Solidity.Semantics.IntrinsicSession (Start deploy wire)
+open Solidity.Semantics.IntrinsicSession (Start deploy wire Bound lang)
 open Solidity.Goals.Shrink.Lowering
 open Solidity.Correctness.Sim (ForwardResources lang_passCorrect)
 open Solidity.Correctness.Lowering.Sim.Session
 
 variable [FreshNames]
 
+/-- The goal's two behaviours are `Behaviour.ofLang` of the lane's languages. -/
+example (D : Diagram) (F : Fixed) {E : Source.Env} (P : Source.SrcProg E) (x : Start) :
+    Behaviour.ofLang (sourceLang D F E x) P = sourceBehaviour D F P x ∧
+      Behaviour.ofLang (targetLang F) x = targetBehaviour F x := ⟨rfl, rfl⟩
+
 /-- The record is consumed by `lang_passCorrect` as it is, and the certificate
 is one between `sourceBehaviour` and `targetBehaviour`. -/
-noncomputable example (D : Diagram) (F : Fixed) {E : Source.Env} (P : Source.SrcProg E) (x : Start)
+example (D : Diagram) (F : Fixed) {E : Source.Env} (P : Source.SrcProg E) (x : Start)
     (forward : ∀ e, Solidity.Correctness.Sim.Diagram (sourceMachine P (envAbs e)) (targetMachine F x e))
     (reverse : ∀ e, Solidity.Correctness.Sim.Diagram (targetMachine F x e) (sourceMachine P (envAbs e)))
     (resources : ForwardResources (Behaviour.ofLang (sourceLang D F E x) P)
       (Behaviour.ofLang (targetLang F) x) (sourceMachine P) (targetMachine F x) envAbs forward) :
-    PassCorrect (sourceBehaviour D F P x) (targetBehaviour F x) :=
-  lang_passCorrect (sourceLang D F E x) (targetLang F) P x (sourceMachine P) (targetMachine F x)
-    envAbs (fun e => envAbs_sound F (E := E) e) (fun e => envAbs_onto F (E := E) e) forward reverse resources
-    (backwardResources D F P x reverse)
+    Nonempty (PassCorrect (sourceBehaviour D F P x) (targetBehaviour F x)) :=
+  ⟨lang_passCorrect (sourceLang D F E x) (targetLang F) P x (sourceMachine P) (targetMachine F x)
+    envAbs (fun e => envAbs_sound F (E := E) e) (fun e => envAbs_onto F (E := E) e) forward reverse
+    resources (backwardResources D F P x reverse)⟩
+
+/-- The backward clause on a completed run: a target session that ends is a
+Source session that ends with the same history and outcome. -/
+example (D : Diagram) (F : Fixed) {E : Source.Env} (P : Source.SrcProg E) (x : Start)
+    (reverse : ∀ e, Solidity.Correctness.Sim.Diagram (targetMachine F x e) (sourceMachine P (envAbs e)))
+    (e : SessionEnv) (r : Bound) (allowed : e.Allowed) (noFail : r.NoFail)
+    (guard : (lang F).Guard x e r) (o : Solidity.Roadmap.Outcome)
+    (done : ((lang F).sem x e r).final = some o) :
+    ∃ n, (Source.sourceLangEvents E).sem P e n = (lang F).sem x e r :=
+  let ⟨n, le⟩ := backward D F P x reverse e r allowed noFail guard
+  ⟨n, le.final_eq done⟩
 
 /-- A compilation of `C` that resolves nothing. -/
 def noCode (C : Contract) : Compilation := ⟨C, fun _ => none, fun _ => none⟩

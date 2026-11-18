@@ -6,8 +6,8 @@ import Solidity.Correctness.Lowering.Sim.Session.Target
 `Shrink.Lowering.Lift` asks a `PassCorrect` between `sourceBehaviour` and
 `targetBehaviour`, which are not `Behaviour.ofLang` of the two frozen languages
 read verbatim. They are `Behaviour.ofLang` of `sourceLang` and `targetLang`
-below (`sourceLang_behaviour`, `targetLang_behaviour`, both `rfl`), so the
-record has exactly the type `Sim.lang_passCorrect` consumes.
+below, by `rfl` (checked in `Examples/Lowering/Sim/Session/Backward.lean`), so
+the record has exactly the type `Sim.lang_passCorrect` consumes.
 
 * `targetMachine F x e`: the frozen session machine without resource failure
   (`machine₀`) at the code and world of the start `x`.
@@ -41,12 +41,6 @@ noncomputable def sourceLang (D : Diagram) (F : Fixed) (E : Source.Env) (x : Sta
 admissible bounds are those without resource failure. -/
 noncomputable def targetLang (F : Fixed) : Lang Event Outcome :=
   { lang F with Admissible := Bound.NoFail }
-
-theorem sourceLang_behaviour (D : Diagram) (F : Fixed) {E : Source.Env} (P : Source.SrcProg E)
-    (x : Start) : Behaviour.ofLang (sourceLang D F E x) P = sourceBehaviour D F P x := rfl
-
-theorem targetLang_behaviour (F : Fixed) (x : Start) :
-    Behaviour.ofLang (targetLang F) x = targetBehaviour F x := rfl
 
 /-- **The target machine** of a session start: the frozen session machine
 without resource failure, at the start's code and world. -/
