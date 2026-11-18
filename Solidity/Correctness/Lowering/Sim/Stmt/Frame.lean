@@ -33,8 +33,8 @@ open Solidity.Lowering.V07 (ContextMap)
 open Solidity.Correctness.Lowering.Unchecked (RawOneInput SourceOneAssociation sourceOne_runV2)
 
 /-- A matched pair completes on both sides or halts on both. -/
-theorem final_ok_iff {E : Source.Env} {srcΓ : Source.RCtx} {C : Contract} {Γ Γ' : Ctx} {H : HTy}
-    {m : ContextMap srcΓ Γ} {emb : Thin Γ Γ'}
+theorem Stmt.final_ok_iff {E : Source.Env} {srcΓ : Source.RCtx} {C : Contract} {Γ Γ' : Ctx}
+    {H : HTy} {m : ContextMap srcΓ Γ} {emb : Thin Γ Γ'}
     {src : Except Source.Halt (Source.Out E.layout srcΓ srcΓ) ×
       (Source.Locals E.layout [] × Source.St E)}
     {tgt : TRes (Out C H Γ')} (h : diagram.Final m emb src tgt) :
@@ -54,15 +54,15 @@ theorem RunSim.frame_blind {b : Body} {u : Emitted} {m : ContextMap b.ctx u.Γ}
       ∃ x, (sourceRun b G' F' n nps' ph' src).1 = .ok x := by
   obtain ⟨_, initial, emb, runs⟩ := sim
   obtain ⟨tgt, related, glob⟩ := initial src
-  exact (final_ok_iff ((runs G F nps ph src tgt related glob).1 n done)).trans
-    (final_ok_iff ((runs G' F' nps' ph' src tgt related glob).1 n done')).symm
+  exact (Stmt.final_ok_iff ((runs G F nps ph src tgt related glob).1 n done)).trans
+    (Stmt.final_ok_iff ((runs G' F' nps' ph' src tgt related glob).1 n done')).symm
 
 /-- A local reads what was set at its position. -/
-theorem locals_get_set {D : Source.Layout} : {Γ : Source.RCtx} → {τ : Source.STy} →
+theorem Stmt.locals_get_set {D : Source.Layout} : {Γ : Source.RCtx} → {τ : Source.STy} →
     (ls : Source.Locals D Γ) → (i : Source.Idx Γ τ) → (v : Source.Val D τ) →
     (ls.set i v).get i = v
   | _, _, .cons _ _, .here, _ => rfl
-  | _, _, .cons _ r, .there i, v => locals_get_set r i v
+  | _, _, .cons _ r, .there i, v => Stmt.locals_get_set r i v
 
 /-- **No simulation of a local increment.** A body whose resolved statement
 is an increment, a decrement or a compound `± 1` of an integer local has
@@ -90,7 +90,7 @@ theorem one_not_runSim {input : RawStmt} (context : Source.Ctx) (raw : RawOneInp
   let ls := src.1.set certificate.slot (.int edge inside)
   have value (checked : Bool) : Source.incDecVal checked raw.inc (ls.get certificate.slot) =
       Source.intRes certificate.type checked (if raw.inc then edge + 1 else edge - 1) := by
-    rw [locals_get_set]; rfl
+    rw [Stmt.locals_get_set]; rfl
   have run (checked : Bool) := sourceOne_runV2 context raw statement certificate G
     { F with checked := checked } 3 0 none none true ls src.2
   simp only [value] at run
