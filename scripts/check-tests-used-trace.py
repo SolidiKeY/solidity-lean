@@ -283,7 +283,7 @@ def run(command, scratch, manifest, output, timeout=30, observe_module_entry=Fal
         with open(str(output) + '.stdout', 'wb') as stream:
             if not shutil.which('strace'): raise ValueError('strace is required for actual read validation')
             traced = ['strace', '-f', '-qq', '-yy', '-s', '256', '-e',
-                      'trace=%file,read,pread64,write,pwrite64,mmap,sendfile,copy_file_range,close',
+                      'trace=%file,fchdir,read,pread64,write,pwrite64,mmap,sendfile,copy_file_range,close',
                       '-o', str(output) + '.syscalls', '--', *command]
             process = subprocess.Popen(traced, cwd=scratch, env=env, stdout=stream,
                                        stderr=subprocess.STDOUT, start_new_session=True)
@@ -422,9 +422,9 @@ def _observed_routes(receipt, scratch, manifest, runner, nonpassing=False, modul
         # may leave a symlink, so only the part after the last '..' is known.
         path = resolve(value, directory)
         if path is None: dirty.update(files); return
-        if path.startswith('/'):
-            parts = path.split('/')
-            path = '/'.join(parts[len(parts) - parts[::-1].index('..'):]) or '.' if '..' in parts else posixpath.normpath('/' + path.lstrip('/'))
+        parts = path.split('/')
+        if '..' in parts: path = '/'.join(parts[len(parts) - parts[::-1].index('..'):]) or '.'
+        elif path.startswith('/'): path = posixpath.normpath('/' + path.lstrip('/'))
         bare = posixpath.normpath(path)
         while bare.startswith('../'): bare = bare[3:]
         if opaque('/' + bare.lstrip('/')) or path.startswith('/') and inside(scratch, path): dirty.update(files); return
@@ -546,7 +546,10 @@ def _observed_routes(receipt, scratch, manifest, runner, nonpassing=False, modul
                         all_read_paths.add(actual); thread_reads.setdefault(tid, set()).add(actual)
                     event_id = descriptors.get((tid, int(source[1])))
                     if event_id and actual == events[event_id]['target']: reads.add(event_id)
-        if line.startswith('chdir(') and (args := arguments(line)) and opaque(resolve(args[0]) or '/proc'): dirty.update(files)
+        if re.match(r'f?chdir\(', line):  # later relative names start there
+            args = arguments(line); fd = re.fullmatch(r'\d+<([^<>]+)>', args[0]) if args else None
+            where = fd[1] if fd else resolve(args[0]) if args and not line.startswith('f') else None
+            if where is None or {'proc', 'dev'} & set(posixpath.normpath(where).split('/')): dirty.update(files)
         closed = re.match(r'close\((\d+).*\)\s+=\s+0\s*$', line)
         if closed: descriptors.pop((tid, int(closed[1])), None)
         path_change = bool(re.match(r'(?:creat|truncate|ftruncate|unlink|unlinkat|rmdir|rename|renameat|renameat2|link|linkat|symlink|symlinkat)\(', line))
@@ -1042,6 +1045,10 @@ def path_spelling_controls():
             'dotdot-proc-fd': ['truncate("/a/../proc/self/fd/3", 0) = 0'],
             'dev-fd': ['truncate("/dev/fd/3", 0) = 0'],
             'chdir-proc-fd': ['chdir("/proc/self/fd") = 0', 'truncate("3", 0) = 0'],
+            'chdir-dev': ['chdir("/./dev") = 0', 'truncate("fd/3", 0) = 0'],
+            'chdir-relative-proc': ['chdir("proc/self/fd") = 0', 'truncate("3", 0) = 0'],
+            'fchdir-proc-fd': ['fchdir(7</proc/99/fd>) = 0', 'truncate("3", 0) = 0'],
+            'dotdot-relative-name': ['unlink("a/link/../x.txt") = 0'],
             'relative-enclosing-name': ['unlink(' + json.dumps(x.lstrip('/')) + ') = 0'],
             'rename-scratch-ancestor': ['rename(' + json.dumps(str(root.parent)) + ', "/elsewhere/moved") = 0'],
             'relative-scratch-ancestor': ['rename(' + json.dumps(root.parent.name) + ', "moved") = 0'],
