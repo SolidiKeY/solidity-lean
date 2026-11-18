@@ -15,6 +15,8 @@
 # A form binding a name another form, fragments.py, roles.py or this file binds is a ValueError naming both files,
 # unless the name is a registry table above or listed in the form's REBINDS tuple. Errors name the form module.
 # Controls: registry_controls (first FORM_CONTROLS entry) loads synthetic forms directories.
+import ast, json, tempfile
+from pathlib import Path
 FORMS_DIRECTORY = Path(__file__).with_name('forms')
 _REGISTRY_TABLES = ('SOURCE_ROLE_KINDS', 'LATE_SOURCE_ROLE_KINDS', 'FORM_CONTROLS', 'CONSUMER_HANDLERS', 'REVIEW_TABLE_PARTS',
                     'LEAN_LIBRARY_COMMANDS', 'PYTHON_ARGUMENT_FORMS', 'LEAN_FIXTURE_FORMS', '_FORM_MODULE')
@@ -145,7 +147,7 @@ LEAN_LIBRARY_COMMANDS += ('run_meta',)
 _REVIEW_DIRECTORIES = dict(_REVIEW_DIRECTORIES)
 REBINDS = ('_REVIEW_DIRECTORIES',)
 '''.replace('RAN', 'env_ran')})
-        assert B_SEEN and LATE_SOURCE_ROLE_KINDS['synthetic-role'] is synthetic_root and 'synthetic-role' not in SOURCE_ROLE_KINDS
+        assert namespace['B_SEEN'] and LATE_SOURCE_ROLE_KINDS['synthetic-role'] is namespace['synthetic_root'] and 'synthetic-role' not in SOURCE_ROLE_KINDS
         assert CONSUMER_SECTIONS[-1] == 'synthetic_routes' and 'REBINDS' not in namespace
         row = {'path': 'tests/a', 'note': 'n', 'other': 1}
         assert fragment_identity('synthetic_routes', row) == canonical(['tests/a', 'n'])

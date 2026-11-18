@@ -8,7 +8,7 @@ source dependencies of kept programs; plus the H1070 run_cmd read controls.
 Executed by fragments.py in its own namespace (helpers, review tables and the
 self-test rebinding of REVIEWED_* names are shared). Classifier path: excluded
 from candidate discovery like the rest of scripts/check-tests-used*."""
-
+import ast, hashlib, posixpath, re, shlex
 
 # H1025 (gh#1384, QX1E-ROLESET, Option A): x1e-classify-rest's 62 shell/Node
 # programs that match the H997 interface, reviewed case by case under the
