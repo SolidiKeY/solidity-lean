@@ -3342,6 +3342,7 @@ import Solidity.Goals.OpcodeEvalUniversal
 import Solidity.Goals.Panic
 import Solidity.Goals.PanicProvenance
 import Solidity.Goals.PanicRun
+import Solidity.Goals.PanicSource
 import Solidity.Goals.Plan
 import Solidity.Goals.ProseCalibrated
 import Solidity.Goals.ProseRatioRuleSound
