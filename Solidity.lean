@@ -5372,6 +5372,7 @@ import Solidity.Yul.Interfaces.P16
 import Solidity.Yul.Layout.Alloc
 import Solidity.Yul.Layout.Geometric
 import Solidity.Yul.Layout.Geometry
+import Solidity.Yul.Layout.Instances.Allocation
 import Solidity.Yul.Layout.Instances.Memory
 import Solidity.Yul.Layout.Instances.Storage
 import Solidity.Yul.Layout.Laws
