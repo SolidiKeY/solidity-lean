@@ -12,9 +12,8 @@ for the frozen `Sim.diagram`:
   integer `x++`, `x--`, `x += 1` or `x -= 1` has `RunSim` with no emitted
   program (`one_not_runSim`, `Stmt/Frame.lean`), so the `incDec` and
   `opAssign` conjuncts hold only if no production run of the fragment is
-  associated with such a body. The cause (`RunSim.frame_blind`) is the
-  forward clause over every Source frame; it reaches every family whose
-  Source run reads the frame (checked arithmetic, state writes, state reads);
+  associated with such a body. The cause (`RunSim.frame_blind`) reaches every
+  family whose Source run reads the frame (arithmetic, state writes and reads);
 * not proved: `revert`, the only other family whose Source run reads no frame.
 
 `stmt_cases_of` is `StmtCases` from the conjuncts that remain.
