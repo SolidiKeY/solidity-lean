@@ -80,4 +80,8 @@ example :
 
 example : (RawExpr.named "f" ["a"] []).nodes < (RawExpr.call "f" [.num 0]).nodes := by decide
 
+/-- Out of fuel the walk answers the monad's default; the slack keeps `mapM` away from it. -/
+example (f : RawExpr → Except String RawExpr) (e : RawExpr) :
+    RawExpr.mapMFuel f 0 e = default := RawExpr.mapMFuel_zero f e
+
 end Solidity.Examples.ElabTotal.Context
