@@ -34,12 +34,11 @@ induction `Solidity.Goals.ElabKernelInduction` (a clause of
 
 Loops are not a case: nothing here mentions `lowerLoops`. The three
 propositions and a loop hypothesis (`StmtArm C r .loop` for every record with
-`RecSim`; ls3a-sim-induction owns its statement over the lowering) give the
-per-run part of `diagram.Simulates` by `ElabKernelInduction` at
-`elabRec C ()`: `runs_of_cases`. The shapes keep the flag-based loop lowering
-(`Lowered` is a premise of `SiteSim`, never unfolded), fresh-state soundness
-(`LowerFresh` is a conclusion of `RunSim`) and the resource transport
-(`diagram.fuel` in the forward clause).
+`RecSim`; ls3a-sim-induction owns it) give the per-run part of
+`diagram.Simulates` by `ElabKernelInduction` at `elabRec C ()`
+(`runs_of_cases`). `Lowered` (the flag-based lowering) is a premise of
+`SiteSim`, `LowerFresh` a conclusion of `RunSim`, and the forward clause is at
+`diagram.fuel`.
 
 ## Limitations
 
