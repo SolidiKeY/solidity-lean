@@ -3,9 +3,8 @@ import Solidity.Correctness.Lowering.Sim.Smoke
 /-!
 # The case interface of the lowering diagram, used
 
-Each declaration of `Sim/Match/Cases.lean` once: the instantiation of
-`ElabKernelInduction` at `RecSim`, the families of some raw inputs, and the
-cases with a loop hypothesis giving `diagram.Simulates`. Then the smokes of
+The instantiation of `ElabKernelInduction` at `RecSim`, the families of some
+raw inputs, the cases implying `diagram.Simulates`, and the smokes of
 `Sim/Smoke.lean` as leaf conjuncts of `StmtCases`.
 -/
 namespace Solidity.Examples.Lowering.Sim.Cases

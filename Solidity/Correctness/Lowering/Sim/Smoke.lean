@@ -21,11 +21,9 @@ What of `Sim/Match/Cases.lean` is proved here, at an arbitrary callback record:
   keeps the context and halts with `revert` at every fuel (`revert_placed`),
   which `HaltMatch` matches with a Source revert without data.
 
-Not proved: the premise of `revert_arm_of`. It is not a fact about the arm:
-it needs the standalone lowering inverted at a body whose output is
-`[.revert]` (`lowerLoops none` on every spelled statement, loops included)
-and the Source typing of `revert()` inverted in the canonical unit
-(`Total.Decode.unit`).
+Not proved: the premise of `revert_arm_of` (the standalone lowering inverted
+at a body whose output is `[.revert]`, and the Source typing of `revert()`
+inverted in the canonical unit, `Total.Decode.unit`).
 -/
 
 namespace Solidity.Correctness.Lowering.Sim
