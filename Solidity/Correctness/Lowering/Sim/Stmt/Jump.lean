@@ -14,10 +14,6 @@ import Solidity.Correctness.Lowering.Sim.Smoke
   `elabKernelTotal`: the rewriting passes keep a jump, `hoistStmtWith`
   captures nothing of it and `elabStmt1With` throws). No body is elaborated
   to the output of a jump, so the obligations hold of no run.
-
-The passes that rewrite the expression of `return e` (`RawExpr.orderNamed`,
-`fnPure`, `bytesPure`, `narrowPure`, the last three `partial`) are not
-unfolded: whatever they return, what follows refuses (`Stmt.Refuses.bind`).
 -/
 
 namespace Solidity.Correctness.Lowering.Sim

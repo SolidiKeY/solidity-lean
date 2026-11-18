@@ -17,13 +17,8 @@ neither. So a body with `RunSim` completes or halts alike at every frame
 
 Consequence for `StmtCases`: its `incDec` and `opAssign` conjuncts hold only if
 no production run in the fragment is associated with such a body, and
-`Total.Spells` spells them (`Spells.Simple.incDec`, `.opAssign`). The same
-reading applies to every family whose Source run evaluates checked
-arithmetic (`Source.binVal F.checked`), writes the state (`Source.applyOp`
-refuses in a static frame) or reads a state variable (`globRel` relates the
-account of some address, the Source reads `F.this`). The frame is not a
-parameter of `Diagram.Simulates`, so the repair is in the goal vocabulary
-(`frameRel` of `Sim/Match/Relations.lean` as a premise of the forward clause).
+`Total.Spells` spells them. The same holds of every family whose Source run
+reads the frame; the repair is the frame premise of `Stmt/Framed.lean`.
 -/
 
 namespace Solidity.Correctness.Lowering.Sim
