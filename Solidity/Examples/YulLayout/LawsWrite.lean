@@ -30,7 +30,7 @@ example (P : Shrink.Params) (l : Shrink.Loc) (m : Shrink.Phys) :
     geometry.write P (.scalar 1) l (.leaf 256) m = none :=
   illTyped P _ l _ m (by simp only [Shrink.Layout.Fits]; decide)
 
-/-- A storage `bytes[1]` takes any byte string. -/
+/-- A storage `bytes[1]` takes any byte string shorter than `2 ^ 256`. -/
 example (P : Shrink.Params) (m : Shrink.Phys) (bs : List UInt8) (h : bs.length < 2 ^ 256) :
     ∃ m', geometry.write P (.fixedArray .bytes 1) ⟨.storage, 0, 0⟩ (.node [.blob bs]) m = some m' :=
   write_total P _ _ _ m (by decide) (by simp only [Shrink.Layout.NoMapping])

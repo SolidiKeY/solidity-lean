@@ -11,6 +11,7 @@ could move a footprint that depends on the state, so the induction uses
 `cellsT_indep`: the footprint of a successful nested write does not depend
 on the state. In memory this holds because a nested dynamic array or `bytes`
 sits behind an indirect header, where the geometry refuses the write.
+In slots no footprint reads the state.
 -/
 namespace Solidity.Yul.Layout
 
@@ -434,8 +435,8 @@ private theorem writeElems_illTyped (P : Shrink.Params) :
     | none => rfl
     | some m₁ =>
       exact writeElems_illTyped P xs e l (i + 1) m₁ fun ha => h
-        ⟨Classical.byContradiction fun hn => Option.noConfusion (illTyped P e _ x m hn ▸ hx : none = some m₁),
-          ha⟩
+        ⟨Classical.byContradiction fun hn =>
+          Option.noConfusion (illTyped P e _ x m hn ▸ hx : none = some m₁), ha⟩
 private theorem writeFields_illTyped (P : Shrink.Params) :
     ∀ (xs : List Shrink.Tree) (fs all : List Shrink.Layout) (l : Shrink.Loc) (i : Nat)
       (m : Shrink.Phys), ¬ Shrink.Layout.FitsFields fs xs →
@@ -455,8 +456,8 @@ private theorem writeFields_illTyped (P : Shrink.Params) :
     | none => rfl
     | some m₁ =>
       exact writeFields_illTyped P xs fs all l (i + 1) m₁ fun ha => h
-        ⟨Classical.byContradiction fun hn => Option.noConfusion (illTyped P f _ x m hn ▸ hx : none = some m₁),
-          ha⟩
+        ⟨Classical.byContradiction fun hn =>
+          Option.noConfusion (illTyped P f _ x m hn ▸ hx : none = some m₁), ha⟩
 end
 
 /-! ## Fitting slot writes succeed -/
