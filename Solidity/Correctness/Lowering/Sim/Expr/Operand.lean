@@ -1,4 +1,5 @@
 import Solidity.Syntax.Elab.Arms
+import Solidity.Correctness.Lowering.Sim.Expr.Run
 
 /-!
 # The capture arm on operands and arithmetic (ls2-expressions)
@@ -14,6 +15,10 @@ the case interface reads the arms through them.
   `narrowCapture` (`hoist_unop`);
 * a compound assignment with a target without `++`/`--` is the block of that
   one statement (`rc.elabStmtsP`), its value the target (`hoist_opAssign`).
+
+For a capture predicate `S` with `Pieces S` (`Sim/Expr/Run.lean`) the arms
+emit captures in `S`, from the obligations of the callbacks they call as
+hypotheses (`hoist_leaf_emits`, `hoist_unop_emits`, `hoist_opAssign_emits`).
 
 Not here: `.ternary`, `.binop`, `.modular`, `.incDec`, `.assign` (their arms
 branch on `synth`, `hasNarrow` and the scope).
@@ -59,5 +64,48 @@ theorem hoist_opAssign (op : BinOp) (l r : RawExpr) (h : l.hasIncDec = false) :
     pure (Q, l)) = _
   rw [h]
   rfl
+
+open Solidity.Goals (ElabRan)
+
+variable {C rc} {S : ElabScope → ECtx × Nat → SProg C → ECtx × Nat → Prop}
+
+/-- A leaf operand emits no captures. -/
+theorem hoist_leaf_emits (ok : Pieces S) {e : RawExpr}
+    (leaf : (∃ x, e = .name x) ∨ (∃ b, e = .bool b) ∨ (∃ k, e = .env k) ∨ ∃ n, e = .num n)
+    {sc : ElabScope} {st st' : ECtx × Nat} {out : SProg C × RawExpr}
+    (ran : ElabRan (hoistWith C rc e) sc st out st') : S sc st out.1 st' := by
+  have h : hoistWith C rc e = pure ([], e) := by
+    obtain ⟨x, rfl⟩ | ⟨b, rfl⟩ | ⟨k, rfl⟩ | ⟨n, rfl⟩ := leaf
+    · exact hoist_name C rc x
+    · exact hoist_bool C rc b
+    · exact hoist_env C rc k
+    · exact hoist_num C rc n
+  rw [h] at ran
+  obtain ⟨h₁, h₂⟩ := ran_pure ran
+  rw [h₁, h₂]
+  exact ok.nil sc st
+
+/-- A unary operation emits its operand's captures, then `narrowCapture`'s. -/
+theorem hoist_unop_emits (ok : Pieces S) (hoist : Emits S rc.hoist)
+    (narrow : Emits S (narrowCapture C)) {op : UnOp} {a : RawExpr}
+    (h : (RawExpr.unop op a).constRat? = none) {sc : ElabScope} {st st' : ECtx × Nat}
+    {out : SProg C × RawExpr} (ran : ElabRan (hoistWith C rc (.unop op a)) sc st out st') :
+    S sc st out.1 st' := by
+  rw [hoist_unop C rc op a h] at ran
+  obtain ⟨⟨P, a'⟩, st₁, r₁, r₂⟩ := ran_bind ran
+  obtain ⟨⟨Q, e⟩, st₂, r₃, r₄⟩ := ran_bind r₂
+  obtain ⟨rfl, rfl⟩ := ran_pure r₄
+  exact ok.append (hoist _ _ _ _ _ r₁) (narrow _ _ _ _ _ r₃)
+
+/-- A compound assignment as a value emits the block of that statement. -/
+theorem hoist_opAssign_emits
+    (block : ∀ ss sc st P st', ElabRan (rc.elabStmtsP ss) sc st P st' → S sc st P st')
+    {op : BinOp} {l r : RawExpr} (h : l.hasIncDec = false) {sc : ElabScope}
+    {st st' : ECtx × Nat} {out : SProg C × RawExpr}
+    (ran : ElabRan (hoistWith C rc (.opAssign op l r)) sc st out st') : S sc st out.1 st' := by
+  rw [hoist_opAssign C rc op l r h] at ran
+  obtain ⟨Q, st₁, r₁, r₂⟩ := ran_bind ran
+  obtain ⟨rfl, rfl⟩ := ran_pure r₂
+  exact block _ _ _ _ _ r₁
 
 end Solidity.Correctness.Lowering.Sim

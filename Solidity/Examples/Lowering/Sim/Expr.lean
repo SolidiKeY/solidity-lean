@@ -99,4 +99,42 @@ example [FreshNames] (C : Contract) (rc : ElabRec C)
     SiteSim₂ C [] sc st out.1 st' :=
   hoistStmt_pushIncDec_sat₂ C rc hoist _ _ sc st out st' ran []
 
+/-! ## Capture predicates
+
+One instance of `Pieces`: the fresh counter does not decrease. The arms keep
+it from the same fact of the callbacks they call. -/
+
+/-- The fresh counter only grows. -/
+def Grows (C : Contract) (_ : ElabScope) (st : ECtx × Nat) (_ : SProg C) (st' : ECtx × Nat) : Prop :=
+  st.2 ≤ st'.2
+
+theorem grows (C : Contract) : Pieces (Grows C) :=
+  ⟨fun _ _ => Nat.le_refl _, fun h k => Nat.le_trans h k⟩
+
+open Solidity.Goals (ElabRan) in
+example [FreshNames] (C : Contract) (rc : ElabRec C) (hoist : Emits (Grows C) rc.hoist)
+    (top : Emits (Grows C) rc.hoistTop) (narrow : Emits (Grows C) (narrowCapture C))
+    (capture : Emits (Grows C) (captureExpr C))
+    (block : ∀ ss sc st P st', ElabRan (rc.elabStmtsP ss) sc st P st' → Grows C sc st P st')
+    (sc : ElabScope) (st st' : ECtx × Nat) :
+    (∀ out, ElabRan (hoistWith C rc (.name "x")) sc st out st' → st.2 ≤ st'.2) ∧
+    (∀ out, ElabRan (hoistWith C rc (.unop .not (.name "x"))) sc st out st' → st.2 ≤ st'.2) ∧
+    (∀ out, ElabRan (hoistWith C rc (.opAssign .add (.name "x") (.num 1))) sc st out st' →
+      st.2 ≤ st'.2) ∧
+    (∀ out, ElabRan (hoistStmtWith C rc .revert) sc st out st' → st.2 ≤ st'.2) ∧
+    (∀ out, ElabRan (hoistStmtWith C rc (.pushIncDec .postInc (.name "xs"))) sc st out st' →
+      st.2 ≤ st'.2) ∧
+    (∀ out, ElabRan (hoistStmtWith C rc (.decl (.named "uint") "y" (some (.name "x")))) sc st
+      out st' → st.2 ≤ st'.2) ∧
+    (∀ out, ElabRan (hoistStmtWith C rc (.opAssign .add (.name "x") (.name "y"))) sc st out st' →
+      st.2 ≤ st'.2) :=
+  ⟨fun _ ran => hoist_leaf_emits (grows C) (.inl ⟨_, rfl⟩) ran,
+    fun _ ran => hoist_unop_emits (grows C) hoist narrow rfl ran,
+    fun _ ran => hoist_opAssign_emits block
+      (by first | decide | simp [RawExpr.hasIncDec, RawExpr.any]) ran,
+    fun _ ran => hoistStmt_leaf_emits (grows C) (.inl rfl) ran,
+    fun _ ran => hoistStmt_pushIncDec_emits hoist ran,
+    fun _ ran => hoistStmt_decl_emits top ran,
+    fun _ ran => hoistStmt_opAssign_emits (grows C) hoist capture ran⟩
+
 end Solidity.Examples.Lowering.Sim.Expr

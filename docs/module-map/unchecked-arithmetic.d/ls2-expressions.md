@@ -3,4 +3,5 @@
 | `Correctness/Lowering/Sim/Expr/Capture.lean` | `hoistStmtWith` at an arbitrary record on its leaf and one-callback arms, and the frozen case at `b.push()++` from `RecSim` (`hoistStmt_pushIncDec_sat`). |
 | `Correctness/Lowering/Sim/Expr/Scope.lean` | `elabStmt1With` on `unchecked` and `checked` blocks: `rc.elabBranch` under the changed scope (`stmt1_unchecked`, `stmt1_checked`). |
 | `Correctness/Lowering/Sim/Expr/Frame.lean` | The run and site obligations under the frame relation, v2 (H1205): `RunSim₂`, `SiteSim₂`, the bridges from v1 (`RunSim.frame`, `SiteSim.frame`, `sites₂_of_exprCases`) and the `push()++` case at v2. |
+| `Correctness/Lowering/Sim/Expr/Run.lean` | Successful runs through `pure` and `>>=` (`ran_pure`, `ran_bind`) and capture predicates closed under concatenation (`Pieces`, `Emits`), over which the arms' case facts are stated until the v2 case interface lands. |
 | `Examples/Lowering/Sim/Expr.lean` | The expression cases: the declaration arm of `hoistStmtWith`, the provable `push()++` arm, an operand and a scope. |
