@@ -1,11 +1,13 @@
 import Solidity.Correctness.Lowering.Sim.State.Calls
+import Solidity.Correctness.Lowering.Sim.State.Storage
 
 /-!
 # The state cases of the lowering diagram, used
 
 `StateCases` on its call arm (`elabCallRetWith`): every run is an output of
 the arm at a record that meets `RecSim`, so the call conjunct is `SiteSim` of
-every run and `StateCases` alone implies `diagram.Simulates`.
+every run and `StateCases` alone implies `diagram.Simulates`. Its storage
+declaration and state statement leaves, on concrete arms.
 -/
 namespace Solidity.Examples.Lowering.Sim.State
 
@@ -22,6 +24,16 @@ example (C : Contract) (sc : ElabScope) (st : ECtx × Nat) :
       (some (.fresh "" 0, .uint)) 256 false false false false) sc st ([], none, [])
       (st.1, st.2 + 1) :=
   ⟨freeRec_sim C _ _, freeRec_ran C _ sc st _ _⟩
+
+/-- The state leaf of `StateCases` for `elabStmt1With` on `delete x;`, at every
+record: its site obligation holds of no body. -/
+example (C : Contract) (rc : ElabRec C) (sc : ElabScope) (st st' : ECtx × Nat) (P : SProg C)
+    (ran : ElabRan (elabStmt1With C rc (.delete (.name "x"))) sc st P st') :
+    stmtQ C (.delete (.name "x")) sc st P st' :=
+  (state_arm C rc).2 _ rfl sc st P st' ran
+
+/-- The storage-declaration leaves, at every record. -/
+example (C : Contract) (rc : ElabRec C) : StmtArm C rc .declStorage := declStorage_arm C rc
 
 /-- `StateCases` on the call arm of one contract: `SiteSim` of every run. -/
 example (kernel : elabKernelTotal) (states : StateCases) (C : Contract) (raw : List RawStmt)
