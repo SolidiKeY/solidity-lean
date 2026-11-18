@@ -152,7 +152,7 @@ theorem every_prefix (d : Nat) : ∃ result : Value G (wrapTy d),
     CopyDemandControls.root CopyDemandControls.store CopyDemandControls.machine CopyDemandControls.run
     (rootBefore d) (fun _ _ => rfl) (by simpa only [location] using (show CopyDemandControls.root ∈ CopyDemandControls.locations by decide))
     (by simpa only [location] using targetCovered) (by simpa only [location] using contextCovered)
-    (by simpa only [location] using AggregatePopControls.written) (by simpa only [location] using separated)
+    (by simpa only [location] using AggregatePopControls.lastSlot_demands_located) (by simpa only [location] using separated)
     (by simpa only [location] using headerSeparated) otherIndices (by simpa only [location] using noAlias)
   have childEqual : child = popped := Option.some.inj (changed.symm.trans (show recursivePop CopyDemandControls.old = some popped from rfl))
   subst child

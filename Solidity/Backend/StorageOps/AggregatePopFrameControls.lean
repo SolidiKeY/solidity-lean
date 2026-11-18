@@ -99,7 +99,7 @@ theorem whole_fixture_certificate : AggregatePop.execute (N := 128) CopyDemandCo
     Transport 128 CopyDemandControls.hash CopyDemandControls.locations after final := by
   obtain ⟨actual,executed,represented,transported⟩ := complete_all CopyDemandControls.old popped rfl selected groups
     CopyDemandControls.root CopyDemandControls.store CopyDemandControls.machine CopyDemandControls.run
-    targetBefore contextBefore (fun _ _ => rfl) (by decide) targetCovered contextCovered AggregatePopControls.written separated headerSeparated otherIndices noAlias
+    targetBefore contextBefore (fun _ _ => rfl) (by decide) targetCovered contextCovered AggregatePopControls.lastSlot_demands_located separated headerSeparated otherIndices noAlias
   have expected : AggregatePop.execute (N := 128) CopyDemandControls.old CopyDemandControls.hash CopyDemandControls.root
       CopyDemandControls.machine = some final := rfl
   have equal := Option.some.inj (executed.symm.trans expected)
@@ -226,7 +226,7 @@ theorem fixed_complete_observations :
      (one,one,one,zero,zero,one,one,seven,seven)) := rfl
 
 /-- GOOD regions do not imply typed-query injectivity: malformed index0/fixed2
-is logically framed but shares the AggregatePopControls.written word with valid index1/fixed0. -/
+is logically framed but shares the written word with valid index1/fixed0. -/
 theorem failed_query_alias_negative :
     (fixedLeaf 0 2).read fixedResult = (fixedLeaf 0 2).read fixedOld ∧
     (fixedLeaf 0 2).read fixedOld = none ∧ (fixedLeaf 0 2).read fixedResult = none ∧
@@ -270,7 +270,7 @@ theorem pop_push_certificate : PopPush.execute (N := 128) CopyDemandControls.old
     Transport 128 CopyDemandControls.hash CopyDemandControls.locations reusedStore reusedMachine := by
   obtain ⟨actual,executed,owner,transported⟩ := PopPush.complete_numeric CopyDemandControls.old popped reused rfl rfl rfl selected groups
     CopyDemandControls.root CopyDemandControls.store CopyDemandControls.machine CopyDemandControls.run targetBefore contextBefore
-    (fun _ _ => rfl) (by decide) targetCovered contextCovered AggregatePopControls.written separated headerSeparated otherIndices noAlias
+    (fun _ _ => rfl) (by decide) targetCovered contextCovered AggregatePopControls.lastSlot_demands_located separated headerSeparated otherIndices noAlias
   have expected : PopPush.execute (N := 128) CopyDemandControls.old CopyDemandControls.hash CopyDemandControls.root CopyDemandControls.machine = some reusedMachine := rfl
   have same := Option.some.inj (executed.symm.trans expected)
   subst actual

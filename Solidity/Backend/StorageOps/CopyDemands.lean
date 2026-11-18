@@ -286,6 +286,7 @@ theorem outside_slot_frame {n : Nat} {G : Schema n} :
     ⟨frame.1,frame.2,fun impossible => Slot.noConfusion impossible⟩
 end
 
+/-- Writes elsewhere leave a location unchanged. -/
 theorem writes_outside (updates : List (Solidity.Storage.Loc × Semantics.Word))
     (store : Store) (location : Solidity.Storage.Loc)
     (outside : ∀ op ∈ updates, location ≠ op.1) :

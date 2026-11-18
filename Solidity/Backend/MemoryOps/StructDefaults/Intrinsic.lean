@@ -16,6 +16,7 @@ structure PairAt {E : Source.Env} {Γ : Source.RCtx} {H : HTy}
     fs.nth 1 SourceBoolArrayTy = .ok (.val (.memRef rfl childAddress))
   leaf : SourceBoolMemoryAt y childAddress hp (hp.field root layout.child_type) .dyn
 
+/-- A default struct's fields are defaults. -/
 theorem default_field {H : HTy} {hp : Heap H} {s : Name}
     {root : HRef H (.struct s)} (hd : hp.Dflt (.ref (.struct s)) root)
     {f : Name} {T : Ty} (hf : lookupBy f (structDef s) = some T) :
@@ -23,7 +24,8 @@ theorem default_field {H : HTy} {hp : Heap H} {s : Name}
   cases hd with
   | struct _ fields => exact fields hf
 
-theorem default_array_length {H : HTy} {hp : Heap H}
+/-- A default dynamic `bool` array is empty. -/
+theorem default_bool_array_length {H : HTy} {hp : Heap H}
     {r : HRef H (.array (.prim .bool))} (hd : hp.Dflt (.ref (.array (.prim .bool))) r) :
     hp.len r .dyn = 0 := by
   cases hd with
@@ -46,7 +48,7 @@ theorem source_pair_intrinsic {E : Source.Env} {Γ : Source.RCtx} {H : HTy}
   have tagZero : g.heap.field g.val layout.tag_type = PrimTy.uint.dflt :=
     (default_field hd layout.tag_type).prim_eq
   have childEmpty : MObj.elems .dyn (g.heap.get (g.heap.field g.val layout.child_type)) = [] :=
-    List.length_eq_zero_iff.mp (default_array_length (default_field hd layout.child_type))
+    List.length_eq_zero_iff.mp (default_bool_array_length (default_field hd layout.child_type))
   obtain ⟨fs, evaluated, first, child⟩ := source_pair_default y dn layout.source_types fuel
   rw [evaluated]
   refine ⟨⟨⟨fs, pairHeap_parent y.2.heap dn fs, ?_, child⟩, ?_⟩,

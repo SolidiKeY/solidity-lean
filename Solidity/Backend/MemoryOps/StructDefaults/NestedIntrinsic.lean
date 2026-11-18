@@ -53,7 +53,7 @@ theorem source_nested_intrinsic {E : Source.Env} {Γ : Source.RCtx} {H : HTy}
       PrimTy.uint.dflt := (default_field innerDefault layout.inner.tag_type).prim_eq
   have childEmpty : MObj.elems .dyn (g.heap.get
       (g.heap.field (g.heap.field g.val layout.inner_type) layout.inner.child_type)) = [] :=
-    List.length_eq_zero_iff.mp (default_array_length (default_field innerDefault layout.inner.child_type))
+    List.length_eq_zero_iff.mp (default_bool_array_length (default_field innerDefault layout.inner.child_type))
   obtain ⟨ifs, ofs, evaluated, innerPointer, flag, tagValue, childPointer⟩ :=
     source_nested_default_observers y innerDN outerDN layout.inner.source_types layout.source_outer fuel
   rw [evaluated]

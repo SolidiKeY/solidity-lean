@@ -14,7 +14,8 @@ theorem source_locals_get_set {D : Source.Layout} : {Γ : Source.RCtx} → {τ :
   | _, _, .cons _ _, .here, _ => rfl
   | _, _, .cons _ l, .there i, v => source_locals_get_set l i v
 
-/-- Writing one local leaves every other local unchanged. -/
+/-- Writing one local leaves every other local unchanged; positions alone frame it,
+no address injectivity is involved. -/
 theorem source_locals_get_set_other {D : Source.Layout} {Γ : Source.RCtx} {τ υ : Source.STy}
     (l : Source.Locals D Γ) (dst : Source.Idx Γ τ) (other : Source.Idx Γ υ)
     (v : Source.Val D τ) (ne : dst.toNat≠other.toNat) : (l.set dst v).get other=l.get other := by

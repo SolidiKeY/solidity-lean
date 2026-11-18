@@ -176,7 +176,7 @@ theorem combined_certificate :
     (fun _ _ => rfl) (List.mem_append.mpr (Or.inl (by decide)))
     (fun q member => List.mem_append.mpr (Or.inl (targetCovered q member)))
     (fun q member => List.mem_append.mpr (Or.inl (contextCovered q member))) outsideCovered
-    (fun q member => List.mem_append.mpr (Or.inl (AggregatePopControls.written q member))) separated headerSeparated otherIndices noAlias outsideApart outsideNonalias
+    (fun q member => List.mem_append.mpr (Or.inl (AggregatePopControls.lastSlot_demands_located q member))) separated headerSeparated otherIndices noAlias outsideApart outsideNonalias
   have expected : AggregatePop.execute (N := 128) CopyDemandControls.old CopyDemandControls.hash (pathLoc dst CopyDemandControls.root)
       CopyDemandControls.machine = some final := rfl
   have equal := Option.some.inj (executed.symm.trans expected)
