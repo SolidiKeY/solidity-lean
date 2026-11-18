@@ -63,10 +63,4 @@ noncomputable def spin_passCorrect (fr : ∀ e, MatchedFrames diagram F (progSpi
     reverse
     (forwardResources_diagram fr) R
 
-/-- info: 'Solidity.Examples.Lowering.Sim.Session.Forward.spin_passCorrect' depends on axioms: [propext,
- Classical.choice,
- Quot.sound] -/
-#guard_msgs in
-#print axioms spin_passCorrect
-
 end Solidity.Examples.Lowering.Sim.Session.Forward
