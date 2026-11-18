@@ -130,6 +130,7 @@ import Solidity.Examples.DependentReduction
 import Solidity.Examples.Docs.ProseCalibrated.Allowance
 import Solidity.Examples.ElabTotal.Context
 import Solidity.Examples.ElabTotal.Guard
+import Solidity.Examples.ElabTotal.Lower
 import Solidity.Examples.ElabTotal.Measure
 import Solidity.Examples.ElabTotal.Stmts
 import Solidity.Examples.ElabTotal.Values
