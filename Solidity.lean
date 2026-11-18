@@ -2461,10 +2461,12 @@ import Solidity.Correctness.Lowering.Loops.WhileBreak
 import Solidity.Correctness.Lowering.Loops.WhileContinue
 import Solidity.Correctness.Lowering.Loops.WhileReset
 import Solidity.Correctness.Lowering.Sim.Match
+import Solidity.Correctness.Lowering.Sim.Match.Cases
 import Solidity.Correctness.Lowering.Sim.Match.Relations
 import Solidity.Correctness.Lowering.Sim.Session.Source
 import Solidity.Correctness.Lowering.Sim.Session.Target
 import Solidity.Correctness.Lowering.Sim.Session.Target.Machine
+import Solidity.Correctness.Lowering.Sim.Smoke
 import Solidity.Correctness.Lowering.Total.Boundary
 import Solidity.Correctness.Lowering.Total.Contract
 import Solidity.Correctness.Lowering.Total.Coverage
