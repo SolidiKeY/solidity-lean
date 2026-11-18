@@ -1,347 +1,88 @@
-{
-  "schema_version": 1,
-  "routes": {
-    "standalone": [
-      {
-        "path": "scripts/check-doc-navigation.py",
-        "input_revision": "951d6ccc77a3de40bff0776ba83ef603abecfc21",
-        "source_blob": "956ac0e78a2ce9622e1f205887a852dfa27b2b92",
-        "command": [
-          "python3",
-          "-B",
-          "scripts/check-doc-navigation.py"
-        ],
-        "kind": "runnable-entrypoint",
-        "entry_line": 158,
-        "purpose": "Passing documentation link/text checker; no validation of documented examples/artifacts, Lean/kernel/proof or runtime credit.",
-        "input_scope": [
-          "tests/automation/README.md",
-          "tests/calldata-packets-1105/RawUintN/README.md",
-          "tests/contract-world-certificates/README.md",
-          "tests/creation-artifacts/README.md",
-          "tests/editor-parity/README.md",
-          "tests/editor-parity/compiler-project-baseline.md",
-          "tests/editor-parity/lsp-baseline.md",
-          "tests/failure-emission/README.md",
-          "tests/source-immutables/README.md",
-          "tests/terra-20261103/audit-selection/README.md",
-          "tests/terra-20261103/disk/README.md",
-          "tests/terra-20261103/gate/README.md",
-          "tests/terra-20261103/mcp/README.md",
-          "tests/terra-20261103/seal/README.md",
-          "tests/terra-20261103/tactics/README.md",
-          "tests/yul-composition/held/README.md"
-        ],
-        "other_reads": "unresolved"
-      }
-    ]
-  },
-  "consumer_routes": {
-    "persistent_reads": [
-      {
-        "runner": "validated:scripts/check-doc-navigation.py",
-        "input_revision": "951d6ccc77a3de40bff0776ba83ef603abecfc21",
-        "frames": [
-          {
-            "path": "scripts/check-doc-navigation.py",
-            "blob": "956ac0e78a2ce9622e1f205887a852dfa27b2b92",
-            "line": 159
-          },
-          {
-            "path": "scripts/check-doc-navigation.py",
-            "blob": "956ac0e78a2ce9622e1f205887a852dfa27b2b92",
-            "line": 138
-          }
-        ],
-        "target": "tests/automation/README.md",
-        "target_blob": "de76e00f38a91c3f66e68da0094907a8f27f39cf",
-        "operation": "validated Python read of measured bytes"
-      },
-      {
-        "runner": "validated:scripts/check-doc-navigation.py",
-        "input_revision": "951d6ccc77a3de40bff0776ba83ef603abecfc21",
-        "frames": [
-          {
-            "path": "scripts/check-doc-navigation.py",
-            "blob": "956ac0e78a2ce9622e1f205887a852dfa27b2b92",
-            "line": 159
-          },
-          {
-            "path": "scripts/check-doc-navigation.py",
-            "blob": "956ac0e78a2ce9622e1f205887a852dfa27b2b92",
-            "line": 138
-          }
-        ],
-        "target": "tests/calldata-packets-1105/RawUintN/README.md",
-        "target_blob": "a5fe05507be277fa97f02c2a5447811ee5c28e26",
-        "operation": "validated Python read of measured bytes"
-      },
-      {
-        "runner": "validated:scripts/check-doc-navigation.py",
-        "input_revision": "951d6ccc77a3de40bff0776ba83ef603abecfc21",
-        "frames": [
-          {
-            "path": "scripts/check-doc-navigation.py",
-            "blob": "956ac0e78a2ce9622e1f205887a852dfa27b2b92",
-            "line": 159
-          },
-          {
-            "path": "scripts/check-doc-navigation.py",
-            "blob": "956ac0e78a2ce9622e1f205887a852dfa27b2b92",
-            "line": 138
-          }
-        ],
-        "target": "tests/contract-world-certificates/README.md",
-        "target_blob": "56c8b61ba5ee29d6e72d2c25f700ddb2273e1c96",
-        "operation": "validated Python read of measured bytes"
-      },
-      {
-        "runner": "validated:scripts/check-doc-navigation.py",
-        "input_revision": "951d6ccc77a3de40bff0776ba83ef603abecfc21",
-        "frames": [
-          {
-            "path": "scripts/check-doc-navigation.py",
-            "blob": "956ac0e78a2ce9622e1f205887a852dfa27b2b92",
-            "line": 159
-          },
-          {
-            "path": "scripts/check-doc-navigation.py",
-            "blob": "956ac0e78a2ce9622e1f205887a852dfa27b2b92",
-            "line": 138
-          }
-        ],
-        "target": "tests/creation-artifacts/README.md",
-        "target_blob": "4888979134c0af15fe4f4c6e1380d2ab8077efa3",
-        "operation": "validated Python read of measured bytes"
-      },
-      {
-        "runner": "validated:scripts/check-doc-navigation.py",
-        "input_revision": "951d6ccc77a3de40bff0776ba83ef603abecfc21",
-        "frames": [
-          {
-            "path": "scripts/check-doc-navigation.py",
-            "blob": "956ac0e78a2ce9622e1f205887a852dfa27b2b92",
-            "line": 159
-          },
-          {
-            "path": "scripts/check-doc-navigation.py",
-            "blob": "956ac0e78a2ce9622e1f205887a852dfa27b2b92",
-            "line": 138
-          }
-        ],
-        "target": "tests/editor-parity/README.md",
-        "target_blob": "9946cc35497ed10cc9d2568cc2367d2e999c9474",
-        "operation": "validated Python read of measured bytes"
-      },
-      {
-        "runner": "validated:scripts/check-doc-navigation.py",
-        "input_revision": "951d6ccc77a3de40bff0776ba83ef603abecfc21",
-        "frames": [
-          {
-            "path": "scripts/check-doc-navigation.py",
-            "blob": "956ac0e78a2ce9622e1f205887a852dfa27b2b92",
-            "line": 159
-          },
-          {
-            "path": "scripts/check-doc-navigation.py",
-            "blob": "956ac0e78a2ce9622e1f205887a852dfa27b2b92",
-            "line": 138
-          }
-        ],
-        "target": "tests/editor-parity/compiler-project-baseline.md",
-        "target_blob": "40600991822a6c879a28df2a1fc8675b5916ab42",
-        "operation": "validated Python read of measured bytes"
-      },
-      {
-        "runner": "validated:scripts/check-doc-navigation.py",
-        "input_revision": "951d6ccc77a3de40bff0776ba83ef603abecfc21",
-        "frames": [
-          {
-            "path": "scripts/check-doc-navigation.py",
-            "blob": "956ac0e78a2ce9622e1f205887a852dfa27b2b92",
-            "line": 159
-          },
-          {
-            "path": "scripts/check-doc-navigation.py",
-            "blob": "956ac0e78a2ce9622e1f205887a852dfa27b2b92",
-            "line": 138
-          }
-        ],
-        "target": "tests/editor-parity/lsp-baseline.md",
-        "target_blob": "40600991822a6c879a28df2a1fc8675b5916ab42",
-        "operation": "validated Python read of measured bytes"
-      },
-      {
-        "runner": "validated:scripts/check-doc-navigation.py",
-        "input_revision": "951d6ccc77a3de40bff0776ba83ef603abecfc21",
-        "frames": [
-          {
-            "path": "scripts/check-doc-navigation.py",
-            "blob": "956ac0e78a2ce9622e1f205887a852dfa27b2b92",
-            "line": 159
-          },
-          {
-            "path": "scripts/check-doc-navigation.py",
-            "blob": "956ac0e78a2ce9622e1f205887a852dfa27b2b92",
-            "line": 138
-          }
-        ],
-        "target": "tests/failure-emission/README.md",
-        "target_blob": "3257f5ca5671b0a4dbac88dc93d02fb98a3dbf3f",
-        "operation": "validated Python read of measured bytes"
-      },
-      {
-        "runner": "validated:scripts/check-doc-navigation.py",
-        "input_revision": "951d6ccc77a3de40bff0776ba83ef603abecfc21",
-        "frames": [
-          {
-            "path": "scripts/check-doc-navigation.py",
-            "blob": "956ac0e78a2ce9622e1f205887a852dfa27b2b92",
-            "line": 159
-          },
-          {
-            "path": "scripts/check-doc-navigation.py",
-            "blob": "956ac0e78a2ce9622e1f205887a852dfa27b2b92",
-            "line": 138
-          }
-        ],
-        "target": "tests/source-immutables/README.md",
-        "target_blob": "1a49dd4a876d7b48fea3bf68f1e5b81bc9204dce",
-        "operation": "validated Python read of measured bytes"
-      },
-      {
-        "runner": "validated:scripts/check-doc-navigation.py",
-        "input_revision": "951d6ccc77a3de40bff0776ba83ef603abecfc21",
-        "frames": [
-          {
-            "path": "scripts/check-doc-navigation.py",
-            "blob": "956ac0e78a2ce9622e1f205887a852dfa27b2b92",
-            "line": 159
-          },
-          {
-            "path": "scripts/check-doc-navigation.py",
-            "blob": "956ac0e78a2ce9622e1f205887a852dfa27b2b92",
-            "line": 138
-          }
-        ],
-        "target": "tests/terra-20261103/audit-selection/README.md",
-        "target_blob": "17ea4b1b1e33d56b86cf215fb5616fca031b78fa",
-        "operation": "validated Python read of measured bytes"
-      },
-      {
-        "runner": "validated:scripts/check-doc-navigation.py",
-        "input_revision": "951d6ccc77a3de40bff0776ba83ef603abecfc21",
-        "frames": [
-          {
-            "path": "scripts/check-doc-navigation.py",
-            "blob": "956ac0e78a2ce9622e1f205887a852dfa27b2b92",
-            "line": 159
-          },
-          {
-            "path": "scripts/check-doc-navigation.py",
-            "blob": "956ac0e78a2ce9622e1f205887a852dfa27b2b92",
-            "line": 138
-          }
-        ],
-        "target": "tests/terra-20261103/disk/README.md",
-        "target_blob": "4d1e87dcd75790d86a4dc25af2a08e539c1a5a92",
-        "operation": "validated Python read of measured bytes"
-      },
-      {
-        "runner": "validated:scripts/check-doc-navigation.py",
-        "input_revision": "951d6ccc77a3de40bff0776ba83ef603abecfc21",
-        "frames": [
-          {
-            "path": "scripts/check-doc-navigation.py",
-            "blob": "956ac0e78a2ce9622e1f205887a852dfa27b2b92",
-            "line": 159
-          },
-          {
-            "path": "scripts/check-doc-navigation.py",
-            "blob": "956ac0e78a2ce9622e1f205887a852dfa27b2b92",
-            "line": 138
-          }
-        ],
-        "target": "tests/terra-20261103/gate/README.md",
-        "target_blob": "6ec32037c5c0ef7fe2135603ff10f89fea748c5c",
-        "operation": "validated Python read of measured bytes"
-      },
-      {
-        "runner": "validated:scripts/check-doc-navigation.py",
-        "input_revision": "951d6ccc77a3de40bff0776ba83ef603abecfc21",
-        "frames": [
-          {
-            "path": "scripts/check-doc-navigation.py",
-            "blob": "956ac0e78a2ce9622e1f205887a852dfa27b2b92",
-            "line": 159
-          },
-          {
-            "path": "scripts/check-doc-navigation.py",
-            "blob": "956ac0e78a2ce9622e1f205887a852dfa27b2b92",
-            "line": 138
-          }
-        ],
-        "target": "tests/terra-20261103/mcp/README.md",
-        "target_blob": "a8c78126b7714bab377524aa06d06eb5312e7fad",
-        "operation": "validated Python read of measured bytes"
-      },
-      {
-        "runner": "validated:scripts/check-doc-navigation.py",
-        "input_revision": "951d6ccc77a3de40bff0776ba83ef603abecfc21",
-        "frames": [
-          {
-            "path": "scripts/check-doc-navigation.py",
-            "blob": "956ac0e78a2ce9622e1f205887a852dfa27b2b92",
-            "line": 159
-          },
-          {
-            "path": "scripts/check-doc-navigation.py",
-            "blob": "956ac0e78a2ce9622e1f205887a852dfa27b2b92",
-            "line": 138
-          }
-        ],
-        "target": "tests/terra-20261103/seal/README.md",
-        "target_blob": "28187038ab523731d93603ee7033c23091e39d70",
-        "operation": "validated Python read of measured bytes"
-      },
-      {
-        "runner": "validated:scripts/check-doc-navigation.py",
-        "input_revision": "951d6ccc77a3de40bff0776ba83ef603abecfc21",
-        "frames": [
-          {
-            "path": "scripts/check-doc-navigation.py",
-            "blob": "956ac0e78a2ce9622e1f205887a852dfa27b2b92",
-            "line": 159
-          },
-          {
-            "path": "scripts/check-doc-navigation.py",
-            "blob": "956ac0e78a2ce9622e1f205887a852dfa27b2b92",
-            "line": 138
-          }
-        ],
-        "target": "tests/terra-20261103/tactics/README.md",
-        "target_blob": "51118b50189606e7c6b225e346bfc64fc5d96fbb",
-        "operation": "validated Python read of measured bytes"
-      },
-      {
-        "runner": "validated:scripts/check-doc-navigation.py",
-        "input_revision": "951d6ccc77a3de40bff0776ba83ef603abecfc21",
-        "frames": [
-          {
-            "path": "scripts/check-doc-navigation.py",
-            "blob": "956ac0e78a2ce9622e1f205887a852dfa27b2b92",
-            "line": 159
-          },
-          {
-            "path": "scripts/check-doc-navigation.py",
-            "blob": "956ac0e78a2ce9622e1f205887a852dfa27b2b92",
-            "line": 138
-          }
-        ],
-        "target": "tests/yul-composition/held/README.md",
-        "target_blob": "d791badaba15aff272a277114fbfff75a624a525",
-        "operation": "validated Python read of measured bytes"
-      }
-    ]
-  }
-}
+{"schema_version":1,"routes":{"standalone":[
+{"path":"scripts/check-doc-navigation.py","input_revision":"951d6ccc77a3de40bff0776ba83ef603abecfc21","source_blob":"956ac0e78a2ce9622e1f205887a852dfa27b2b92","command":["python3","-B","scripts/check-doc-navigation.py"],"kind":"runnable-entrypoint","entry_line":158,"purpose":"Passing documentation link/text checker; no validation of documented examples/artifacts, Lean/kernel/proof or runtime credit.","input_scope":["tests/automation/README.md","tests/calldata-packets-1105/RawUintN/README.md","tests/contract-world-certificates/README.md","tests/creation-artifacts/README.md","tests/editor-parity/README.md","tests/editor-parity/compiler-project-baseline.md","tests/editor-parity/lsp-baseline.md","tests/failure-emission/README.md","tests/source-immutables/README.md","tests/terra-20261103/audit-selection/README.md","tests/terra-20261103/disk/README.md","tests/terra-20261103/gate/README.md","tests/terra-20261103/mcp/README.md","tests/terra-20261103/seal/README.md","tests/terra-20261103/tactics/README.md","tests/yul-composition/held/README.md"],"other_reads":"unresolved"}]},"consumer_routes":{"persistent_reads":[
+{"runner":"validated:scripts/check-doc-navigation.py","input_revision":"951d6ccc77a3de40bff0776ba83ef603abecfc21","frames":[{"path":"scripts/check-doc-navigation.py","blob":"956ac0e78a2ce9622e1f205887a852dfa27b2b92","line":159},{"path":"scripts/check-doc-navigation.py","blob":"956ac0e78a2ce9622e1f205887a852dfa27b2b92","line":138}],"target":"tests/automation/README.md","target_blob":"de76e00f38a91c3f66e68da0094907a8f27f39cf","operation":"validated Python read of measured bytes"},
+{"runner":"validated:scripts/check-doc-navigation.py","input_revision":"951d6ccc77a3de40bff0776ba83ef603abecfc21","frames":[{"path":"scripts/check-doc-navigation.py","blob":"956ac0e78a2ce9622e1f205887a852dfa27b2b92","line":159},{"path":"scripts/check-doc-navigation.py","blob":"956ac0e78a2ce9622e1f205887a852dfa27b2b92","line":138}],"target":"tests/calldata-packets-1105/RawUintN/README.md","target_blob":"a5fe05507be277fa97f02c2a5447811ee5c28e26","operation":"validated Python read of measured bytes"},
+{"runner":"validated:scripts/check-doc-navigation.py","input_revision":"951d6ccc77a3de40bff0776ba83ef603abecfc21","frames":[{"path":"scripts/check-doc-navigation.py","blob":"956ac0e78a2ce9622e1f205887a852dfa27b2b92","line":159},{"path":"scripts/check-doc-navigation.py","blob":"956ac0e78a2ce9622e1f205887a852dfa27b2b92","line":138}],"target":"tests/contract-world-certificates/README.md","target_blob":"56c8b61ba5ee29d6e72d2c25f700ddb2273e1c96","operation":"validated Python read of measured bytes"},
+{"runner":"validated:scripts/check-doc-navigation.py","input_revision":"951d6ccc77a3de40bff0776ba83ef603abecfc21","frames":[{"path":"scripts/check-doc-navigation.py","blob":"956ac0e78a2ce9622e1f205887a852dfa27b2b92","line":159},{"path":"scripts/check-doc-navigation.py","blob":"956ac0e78a2ce9622e1f205887a852dfa27b2b92","line":138}],"target":"tests/creation-artifacts/README.md","target_blob":"4888979134c0af15fe4f4c6e1380d2ab8077efa3","operation":"validated Python read of measured bytes"},
+{"runner":"validated:scripts/check-doc-navigation.py","input_revision":"951d6ccc77a3de40bff0776ba83ef603abecfc21","frames":[{"path":"scripts/check-doc-navigation.py","blob":"956ac0e78a2ce9622e1f205887a852dfa27b2b92","line":159},{"path":"scripts/check-doc-navigation.py","blob":"956ac0e78a2ce9622e1f205887a852dfa27b2b92","line":138}],"target":"tests/editor-parity/README.md","target_blob":"9946cc35497ed10cc9d2568cc2367d2e999c9474","operation":"validated Python read of measured bytes"},
+{"runner":"validated:scripts/check-doc-navigation.py","input_revision":"951d6ccc77a3de40bff0776ba83ef603abecfc21","frames":[{"path":"scripts/check-doc-navigation.py","blob":"956ac0e78a2ce9622e1f205887a852dfa27b2b92","line":159},{"path":"scripts/check-doc-navigation.py","blob":"956ac0e78a2ce9622e1f205887a852dfa27b2b92","line":138}],"target":"tests/editor-parity/compiler-project-baseline.md","target_blob":"40600991822a6c879a28df2a1fc8675b5916ab42","operation":"validated Python read of measured bytes"},
+{"runner":"validated:scripts/check-doc-navigation.py","input_revision":"951d6ccc77a3de40bff0776ba83ef603abecfc21","frames":[{"path":"scripts/check-doc-navigation.py","blob":"956ac0e78a2ce9622e1f205887a852dfa27b2b92","line":159},{"path":"scripts/check-doc-navigation.py","blob":"956ac0e78a2ce9622e1f205887a852dfa27b2b92","line":138}],"target":"tests/editor-parity/lsp-baseline.md","target_blob":"40600991822a6c879a28df2a1fc8675b5916ab42","operation":"validated Python read of measured bytes"},
+{"runner":"validated:scripts/check-doc-navigation.py","input_revision":"951d6ccc77a3de40bff0776ba83ef603abecfc21","frames":[{"path":"scripts/check-doc-navigation.py","blob":"956ac0e78a2ce9622e1f205887a852dfa27b2b92","line":159},{"path":"scripts/check-doc-navigation.py","blob":"956ac0e78a2ce9622e1f205887a852dfa27b2b92","line":138}],"target":"tests/failure-emission/README.md","target_blob":"3257f5ca5671b0a4dbac88dc93d02fb98a3dbf3f","operation":"validated Python read of measured bytes"},
+{"runner":"validated:scripts/check-doc-navigation.py","input_revision":"951d6ccc77a3de40bff0776ba83ef603abecfc21","frames":[{"path":"scripts/check-doc-navigation.py","blob":"956ac0e78a2ce9622e1f205887a852dfa27b2b92","line":159},{"path":"scripts/check-doc-navigation.py","blob":"956ac0e78a2ce9622e1f205887a852dfa27b2b92","line":138}],"target":"tests/source-immutables/README.md","target_blob":"1a49dd4a876d7b48fea3bf68f1e5b81bc9204dce","operation":"validated Python read of measured bytes"},
+{"runner":"validated:scripts/check-doc-navigation.py","input_revision":"951d6ccc77a3de40bff0776ba83ef603abecfc21","frames":[{"path":"scripts/check-doc-navigation.py","blob":"956ac0e78a2ce9622e1f205887a852dfa27b2b92","line":159},{"path":"scripts/check-doc-navigation.py","blob":"956ac0e78a2ce9622e1f205887a852dfa27b2b92","line":138}],"target":"tests/terra-20261103/audit-selection/README.md","target_blob":"17ea4b1b1e33d56b86cf215fb5616fca031b78fa","operation":"validated Python read of measured bytes"},
+{"runner":"validated:scripts/check-doc-navigation.py","input_revision":"951d6ccc77a3de40bff0776ba83ef603abecfc21","frames":[{"path":"scripts/check-doc-navigation.py","blob":"956ac0e78a2ce9622e1f205887a852dfa27b2b92","line":159},{"path":"scripts/check-doc-navigation.py","blob":"956ac0e78a2ce9622e1f205887a852dfa27b2b92","line":138}],"target":"tests/terra-20261103/disk/README.md","target_blob":"4d1e87dcd75790d86a4dc25af2a08e539c1a5a92","operation":"validated Python read of measured bytes"},
+{"runner":"validated:scripts/check-doc-navigation.py","input_revision":"951d6ccc77a3de40bff0776ba83ef603abecfc21","frames":[{"path":"scripts/check-doc-navigation.py","blob":"956ac0e78a2ce9622e1f205887a852dfa27b2b92","line":159},{"path":"scripts/check-doc-navigation.py","blob":"956ac0e78a2ce9622e1f205887a852dfa27b2b92","line":138}],"target":"tests/terra-20261103/gate/README.md","target_blob":"6ec32037c5c0ef7fe2135603ff10f89fea748c5c","operation":"validated Python read of measured bytes"},
+{"runner":"validated:scripts/check-doc-navigation.py","input_revision":"951d6ccc77a3de40bff0776ba83ef603abecfc21","frames":[{"path":"scripts/check-doc-navigation.py","blob":"956ac0e78a2ce9622e1f205887a852dfa27b2b92","line":159},{"path":"scripts/check-doc-navigation.py","blob":"956ac0e78a2ce9622e1f205887a852dfa27b2b92","line":138}],"target":"tests/terra-20261103/mcp/README.md","target_blob":"a8c78126b7714bab377524aa06d06eb5312e7fad","operation":"validated Python read of measured bytes"},
+{"runner":"validated:scripts/check-doc-navigation.py","input_revision":"951d6ccc77a3de40bff0776ba83ef603abecfc21","frames":[{"path":"scripts/check-doc-navigation.py","blob":"956ac0e78a2ce9622e1f205887a852dfa27b2b92","line":159},{"path":"scripts/check-doc-navigation.py","blob":"956ac0e78a2ce9622e1f205887a852dfa27b2b92","line":138}],"target":"tests/terra-20261103/seal/README.md","target_blob":"28187038ab523731d93603ee7033c23091e39d70","operation":"validated Python read of measured bytes"},
+{"runner":"validated:scripts/check-doc-navigation.py","input_revision":"951d6ccc77a3de40bff0776ba83ef603abecfc21","frames":[{"path":"scripts/check-doc-navigation.py","blob":"956ac0e78a2ce9622e1f205887a852dfa27b2b92","line":159},{"path":"scripts/check-doc-navigation.py","blob":"956ac0e78a2ce9622e1f205887a852dfa27b2b92","line":138}],"target":"tests/terra-20261103/tactics/README.md","target_blob":"51118b50189606e7c6b225e346bfc64fc5d96fbb","operation":"validated Python read of measured bytes"},
+{"runner":"validated:scripts/check-doc-navigation.py","input_revision":"951d6ccc77a3de40bff0776ba83ef603abecfc21","frames":[{"path":"scripts/check-doc-navigation.py","blob":"956ac0e78a2ce9622e1f205887a852dfa27b2b92","line":159},{"path":"scripts/check-doc-navigation.py","blob":"956ac0e78a2ce9622e1f205887a852dfa27b2b92","line":138}],"target":"tests/yul-composition/held/README.md","target_blob":"d791badaba15aff272a277114fbfff75a624a525","operation":"validated Python read of measured bytes"}],
+"static_routes":[
+{"runner":"committed:tests/yul-views/abi-input-reference.test.mjs","frames":[{"path":"tests/yul-views/abi-input-reference.test.mjs","blob":"d9317b88e12dc7de19958fbbb7b1fa14185df450","line":3}],"form":"node-import","target":"tests/yul-views/abi-input-reference.mjs","target_blob":"cfbc7d50551bacf40d7f91445fc5c6efd09fffb1","purpose":"Literal Node import executed by the unchanged committed yul-views reference test (demonstrated at fbeec65d; reobserved passing 2026-11-18 as `node TEST REPORT` with a report from the pinned solc 0.8.38). Static module source consumption only; no report authenticity, fixture-data, compiler, EVM, Lean/kernel or proof credit."},
+{"runner":"committed:tests/yul-views/aggregate-dynamic-reference.test.mjs","frames":[{"path":"tests/yul-views/aggregate-dynamic-reference.test.mjs","blob":"bc20e80e0293c6928b67c64f31f038626698ce97","line":3}],"form":"node-import","target":"tests/yul-views/aggregate-dynamic-reference.mjs","target_blob":"6fab1abb602cf8963a909ffcbeac4199e5be992f","purpose":"Literal Node import executed by the unchanged committed yul-views reference test (demonstrated at fbeec65d; reobserved passing 2026-11-18 as `node TEST REPORT` with a report from the pinned solc 0.8.38). Static module source consumption only; no report authenticity, fixture-data, compiler, EVM, Lean/kernel or proof credit."},
+{"runner":"committed:tests/yul-views/aggregate-writeback-reference.test.mjs","frames":[{"path":"tests/yul-views/aggregate-writeback-reference.test.mjs","blob":"f3c2f879b027768e6fd744fee87a79b08c706c6b","line":3}],"form":"node-import","target":"tests/yul-views/aggregate-writeback-reference.mjs","target_blob":"1d0267fa5dbebaef85025ce3da28de51f2275b5e","purpose":"Literal Node import executed by the unchanged committed yul-views reference test (demonstrated at fbeec65d; reobserved passing 2026-11-18 as `node TEST REPORT` with a report from the pinned solc 0.8.38). Static module source consumption only; no report authenticity, fixture-data, compiler, EVM, Lean/kernel or proof credit."},
+{"runner":"committed:tests/yul-views/declaration-packing-reference.test.mjs","frames":[{"path":"tests/yul-views/declaration-packing-reference.test.mjs","blob":"413c8a68732baf98de2351b1257e9afe6fd109e9","line":3}],"form":"node-import","target":"tests/yul-views/declaration-packing-reference.mjs","target_blob":"be02555ec3be74e46c837be5e66897d40e6440a4","purpose":"Literal Node import executed by the unchanged committed yul-views reference test (demonstrated at fbeec65d; reobserved passing 2026-11-18 as `node TEST REPORT` with a report from the pinned solc 0.8.38). Static module source consumption only; no report authenticity, fixture-data, compiler, EVM, Lean/kernel or proof credit."},
+{"runner":"committed:tests/yul-views/dynamic-storage-reference.test.mjs","frames":[{"path":"tests/yul-views/dynamic-storage-reference.test.mjs","blob":"47b9d90e409c0cd6810aaafff7bece477ca0b9fd","line":3}],"form":"node-import","target":"tests/yul-views/dynamic-storage-reference.mjs","target_blob":"93506c2024b89aef7e9a507c80530458d1c82a57","purpose":"Literal Node import executed by the unchanged committed yul-views reference test (demonstrated at fbeec65d; reobserved passing 2026-11-18 as `node TEST REPORT` with a report from the pinned solc 0.8.38). Static module source consumption only; no report authenticity, fixture-data, compiler, EVM, Lean/kernel or proof credit."},
+{"runner":"committed:tests/yul-views/dynamic-uint-reference.test.mjs","frames":[{"path":"tests/yul-views/dynamic-uint-reference.test.mjs","blob":"e62c19b081a0c905999864bb0c844d8283a1ec26","line":3}],"form":"node-import","target":"tests/yul-views/dynamic-uint-reference.mjs","target_blob":"578a36101df231ff7eb86cb249d79d28a584bcae","purpose":"Literal Node import executed by the unchanged committed yul-views reference test (demonstrated at fbeec65d; reobserved passing 2026-11-18 as `node TEST REPORT` with a report from the pinned solc 0.8.38). Static module source consumption only; no report authenticity, fixture-data, compiler, EVM, Lean/kernel or proof credit."},
+{"runner":"committed:tests/yul-views/finite-reference.test.mjs","frames":[{"path":"tests/yul-views/finite-reference.test.mjs","blob":"7ab57d16aa568478df6eef977e315bb14f8c90bc","line":3}],"form":"node-import","target":"tests/yul-views/finite-reference.mjs","target_blob":"910f11690fb6b9577dbf1c5220aa207f65e8c812","purpose":"Literal Node import executed by the unchanged committed yul-views reference test (demonstrated at fbeec65d; reobserved passing 2026-11-18 as `node TEST REPORT` with a report from the pinned solc 0.8.38). Static module source consumption only; no report authenticity, fixture-data, compiler, EVM, Lean/kernel or proof credit."},
+{"runner":"committed:tests/yul-views/frame-calldata-reference.test.mjs","frames":[{"path":"tests/yul-views/frame-calldata-reference.test.mjs","blob":"ed092162118150f8bda4187aafcff96f3b0891e5","line":3}],"form":"node-import","target":"tests/yul-views/frame-calldata-reference.mjs","target_blob":"9cafdcf7761a12c8efa0c109f323ca93a1f7b15c","purpose":"Literal Node import executed by the unchanged committed yul-views reference test (demonstrated at fbeec65d; reobserved passing 2026-11-18 as `node TEST REPORT` with a report from the pinned solc 0.8.38). Static module source consumption only; no report authenticity, fixture-data, compiler, EVM, Lean/kernel or proof credit."},
+{"runner":"committed:tests/yul-views/heap-bytes-reference.test.mjs","frames":[{"path":"tests/yul-views/heap-bytes-reference.test.mjs","blob":"15c710b41fb651f5c5ff36362825528e630c5b86","line":3}],"form":"node-import","target":"tests/yul-views/heap-bytes-reference.mjs","target_blob":"8e19029b565358985e03fb24e450866e5164d720","purpose":"Literal Node import executed by the unchanged committed yul-views reference test (demonstrated at fbeec65d; reobserved passing 2026-11-18 as `node TEST REPORT` with a report from the pinned solc 0.8.38). Static module source consumption only; no report authenticity, fixture-data, compiler, EVM, Lean/kernel or proof credit."},
+{"runner":"committed:tests/yul-views/heap-resize-reference.test.mjs","frames":[{"path":"tests/yul-views/heap-resize-reference.test.mjs","blob":"cdeb1a13c2f4d6fa02fa06486416f4bd70105f1c","line":3}],"form":"node-import","target":"tests/yul-views/heap-resize-reference.mjs","target_blob":"ad06d33ac4f97a25e77730c894e7114570ca9afa","purpose":"Literal Node import executed by the unchanged committed yul-views reference test (demonstrated at fbeec65d; reobserved passing 2026-11-18 as `node TEST REPORT` with a report from the pinned solc 0.8.38). Static module source consumption only; no report authenticity, fixture-data, compiler, EVM, Lean/kernel or proof credit."},
+{"runner":"committed:tests/yul-views/inherited-sequence-reference.test.mjs","frames":[{"path":"tests/yul-views/inherited-sequence-reference.test.mjs","blob":"8e6fc97778be05744b64a94b2ae286cb561cd2b4","line":3}],"form":"node-import","target":"tests/yul-views/inherited-sequence-reference.mjs","target_blob":"6630dd95e3663f4f354cd3f410e91198e9a24bc3","purpose":"Literal Node import executed by the unchanged committed yul-views reference test (demonstrated at fbeec65d; reobserved passing 2026-11-18 as `node TEST REPORT` with a report from the pinned solc 0.8.38). Static module source consumption only; no report authenticity, fixture-data, compiler, EVM, Lean/kernel or proof credit."},
+{"runner":"committed:tests/yul-views/joint-memory-reference.test.mjs","frames":[{"path":"tests/yul-views/joint-memory-reference.test.mjs","blob":"02701007386fa4d8fe1047fc45d298dfdf8b0bc9","line":3}],"form":"node-import","target":"tests/yul-views/joint-memory-reference.mjs","target_blob":"3caa1e56fc8f1ced78539f32c9a5b6da6e084c91","purpose":"Literal Node import executed by the unchanged committed yul-views reference test (demonstrated at fbeec65d; reobserved passing 2026-11-18 as `node TEST REPORT` with a report from the pinned solc 0.8.38). Static module source consumption only; no report authenticity, fixture-data, compiler, EVM, Lean/kernel or proof credit."},
+{"runner":"committed:tests/yul-views/mapping-transient-reference.test.mjs","frames":[{"path":"tests/yul-views/mapping-transient-reference.test.mjs","blob":"40fd18eaa547e0ef899708342f7918b9dc1da4ca","line":3}],"form":"node-import","target":"tests/yul-views/mapping-transient-reference.mjs","target_blob":"514edfcd9f0f0990c369f83eb8991318e297a554","purpose":"Literal Node import executed by the unchanged committed yul-views reference test (demonstrated at fbeec65d; reobserved passing 2026-11-18 as `node TEST REPORT` with a report from the pinned solc 0.8.38). Static module source consumption only; no report authenticity, fixture-data, compiler, EVM, Lean/kernel or proof credit."},
+{"runner":"committed:tests/yul-views/member-arrays-reference.test.mjs","frames":[{"path":"tests/yul-views/member-arrays-reference.test.mjs","blob":"50924035e89d3d3e52a2d84db8a200ac36f697ba","line":3}],"form":"node-import","target":"tests/yul-views/member-arrays-reference.mjs","target_blob":"5c3464bd079252b9945bf2aefb5c7c5f6cf8a7a9","purpose":"Literal Node import executed by the unchanged committed yul-views reference test (demonstrated at fbeec65d; reobserved passing 2026-11-18 as `node TEST REPORT` with a report from the pinned solc 0.8.38). Static module source consumption only; no report authenticity, fixture-data, compiler, EVM, Lean/kernel or proof credit."},
+{"runner":"committed:tests/yul-views/memory-scalar-words-reference.test.mjs","frames":[{"path":"tests/yul-views/memory-scalar-words-reference.test.mjs","blob":"de2348f94bc116dc2bd61370ab6ad06d2460207f","line":3}],"form":"node-import","target":"tests/yul-views/memory-scalar-words-reference.mjs","target_blob":"6fc93fbe64e09bbc443de1c297fc32bc9730a685","purpose":"Literal Node import executed by the unchanged committed yul-views reference test (demonstrated at fbeec65d; reobserved passing 2026-11-18 as `node TEST REPORT` with a report from the pinned solc 0.8.38). Static module source consumption only; no report authenticity, fixture-data, compiler, EVM, Lean/kernel or proof credit."},
+{"runner":"committed:tests/yul-views/mixed-heap-reference.test.mjs","frames":[{"path":"tests/yul-views/mixed-heap-reference.test.mjs","blob":"a8bc42d682693e0bbe29b8e8c6ea818f94a5a8d8","line":3}],"form":"node-import","target":"tests/yul-views/mixed-heap-reference.mjs","target_blob":"3cf1ba746eb5023d253d3dc82fc052d686e8f06a","purpose":"Literal Node import executed by the unchanged committed yul-views reference test (demonstrated at fbeec65d; reobserved passing 2026-11-18 as `node TEST REPORT` with a report from the pinned solc 0.8.38). Static module source consumption only; no report authenticity, fixture-data, compiler, EVM, Lean/kernel or proof credit."},
+{"runner":"committed:tests/yul-views/nested-dynamic-reference.test.mjs","frames":[{"path":"tests/yul-views/nested-dynamic-reference.test.mjs","blob":"630e84a02c2ea731c75946cf2dcb5923aeff6c0d","line":3}],"form":"node-import","target":"tests/yul-views/nested-dynamic-reference.mjs","target_blob":"ff53d4e0c461f6b6e4a229d8738d61c3a7dcf184","purpose":"Literal Node import executed by the unchanged committed yul-views reference test (demonstrated at fbeec65d; reobserved passing 2026-11-18 as `node TEST REPORT` with a report from the pinned solc 0.8.38). Static module source consumption only; no report authenticity, fixture-data, compiler, EVM, Lean/kernel or proof credit."},
+{"runner":"committed:tests/yul-views/nested-mapping-reference.test.mjs","frames":[{"path":"tests/yul-views/nested-mapping-reference.test.mjs","blob":"4e2c5fa4224d1a97c696972dc99c0615588d6825","line":3}],"form":"node-import","target":"tests/yul-views/nested-mapping-reference.mjs","target_blob":"0eced64d28aa534c5c2cf8176a1d31f5a936aba9","purpose":"Literal Node import executed by the unchanged committed yul-views reference test (demonstrated at fbeec65d; reobserved passing 2026-11-18 as `node TEST REPORT` with a report from the pinned solc 0.8.38). Static module source consumption only; no report authenticity, fixture-data, compiler, EVM, Lean/kernel or proof credit."},
+{"runner":"committed:tests/yul-views/object-allocation-reference.test.mjs","frames":[{"path":"tests/yul-views/object-allocation-reference.test.mjs","blob":"f3213a197128440aaafa5e2d34ce2eb16642b53a","line":3}],"form":"node-import","target":"tests/yul-views/object-allocation-reference.mjs","target_blob":"6d3efafd29f39c27031f82b5870abdf10a2d81a5","purpose":"Literal Node import executed by the unchanged committed yul-views reference test (demonstrated at fbeec65d; reobserved passing 2026-11-18 as `node TEST REPORT` with a report from the pinned solc 0.8.38). Static module source consumption only; no report authenticity, fixture-data, compiler, EVM, Lean/kernel or proof credit."},
+{"runner":"committed:tests/yul-views/origin-sequence-reference.test.mjs","frames":[{"path":"tests/yul-views/origin-sequence-reference.test.mjs","blob":"128e63f2611bce14c9ed3e63a7838f88651a6347","line":3}],"form":"node-import","target":"tests/yul-views/origin-sequence-reference.mjs","target_blob":"52e70321f01afa25a60446e8729b67e612dc5d33","purpose":"Literal Node import executed by the unchanged committed yul-views reference test (demonstrated at fbeec65d; reobserved passing 2026-11-18 as `node TEST REPORT` with a report from the pinned solc 0.8.38). Static module source consumption only; no report authenticity, fixture-data, compiler, EVM, Lean/kernel or proof credit."},
+{"runner":"committed:tests/yul-views/owned-bool-dynamic-reference.test.mjs","frames":[{"path":"tests/yul-views/owned-bool-dynamic-reference.test.mjs","blob":"c7f08b1e44ab682ebb3644084bc4fe0b784886a8","line":3}],"form":"node-import","target":"tests/yul-views/owned-bool-dynamic-reference.mjs","target_blob":"8a850b849b96234e1e2fd058e40cec470852483a","purpose":"Literal Node import executed by the unchanged committed yul-views reference test (demonstrated at fbeec65d; reobserved passing 2026-11-18 as `node TEST REPORT` with a report from the pinned solc 0.8.38). Static module source consumption only; no report authenticity, fixture-data, compiler, EVM, Lean/kernel or proof credit."},
+{"runner":"committed:tests/yul-views/owned-bool-reference.test.mjs","frames":[{"path":"tests/yul-views/owned-bool-reference.test.mjs","blob":"82eb6dbbada3f2b1a1289a00b5d1f47bf87461f7","line":3}],"form":"node-import","target":"tests/yul-views/owned-bool-reference.mjs","target_blob":"e7af46ac2f4215b4916fbf07ebce0508f797ed6e","purpose":"Literal Node import executed by the unchanged committed yul-views reference test (demonstrated at fbeec65d; reobserved passing 2026-11-18 as `node TEST REPORT` with a report from the pinned solc 0.8.38). Static module source consumption only; no report authenticity, fixture-data, compiler, EVM, Lean/kernel or proof credit."},
+{"runner":"committed:tests/yul-views/owned-inventory-reference.test.mjs","frames":[{"path":"tests/yul-views/owned-inventory-reference.test.mjs","blob":"71bbc5323f2de41350071406a6749df435de08d5","line":3}],"form":"node-import","target":"tests/yul-views/owned-inventory-reference.mjs","target_blob":"c18eaa1e1674b7ecb3d1cff6e8c1629cf2dfd7d6","purpose":"Literal Node import executed by the unchanged committed yul-views reference test (demonstrated at fbeec65d; reobserved passing 2026-11-18 as `node TEST REPORT` with a report from the pinned solc 0.8.38). Static module source consumption only; no report authenticity, fixture-data, compiler, EVM, Lean/kernel or proof credit."},
+{"runner":"committed:tests/yul-views/packed-dynamic-reference.test.mjs","frames":[{"path":"tests/yul-views/packed-dynamic-reference.test.mjs","blob":"380a49b79e269f2734175d7ced411a726fe99cbf","line":3}],"form":"node-import","target":"tests/yul-views/packed-dynamic-reference.mjs","target_blob":"a71c38e86f87539ea3a4d0cf6b6f40f949935a8b","purpose":"Literal Node import executed by the unchanged committed yul-views reference test (demonstrated at fbeec65d; reobserved passing 2026-11-18 as `node TEST REPORT` with a report from the pinned solc 0.8.38). Static module source consumption only; no report authenticity, fixture-data, compiler, EVM, Lean/kernel or proof credit."},
+{"runner":"committed:tests/yul-views/packed-residual-reference.test.mjs","frames":[{"path":"tests/yul-views/packed-residual-reference.test.mjs","blob":"4f426765033b5defd659cb8705c6c35878f0936a","line":3}],"form":"node-import","target":"tests/yul-views/packed-residual-reference.mjs","target_blob":"7889dd7e650a583d92eb0728a7e3447280d236d2","purpose":"Literal Node import executed by the unchanged committed yul-views reference test (demonstrated at fbeec65d; reobserved passing 2026-11-18 as `node TEST REPORT` with a report from the pinned solc 0.8.38). Static module source consumption only; no report authenticity, fixture-data, compiler, EVM, Lean/kernel or proof credit."},
+{"runner":"committed:tests/yul-views/physical-upstream.test.mjs","frames":[{"path":"tests/yul-views/physical-upstream.test.mjs","blob":"ef1072194b08b8674db5d2c8e11c65855b544981","line":4}],"form":"node-import","target":"tests/yul-views/physical-upstream.mjs","target_blob":"689c093c233ad5b6580802a5806a57ea82f64c30","purpose":"Literal Node import executed by the unchanged committed yul-views reference test (demonstrated at fbeec65d; reobserved passing 2026-11-18 as `node TEST REPORT` with a report from the pinned solc 0.8.38). Static module source consumption only; no report authenticity, fixture-data, compiler, EVM, Lean/kernel or proof credit."},
+{"runner":"committed:tests/yul-views/primitive-dynamic-reference.test.mjs","frames":[{"path":"tests/yul-views/primitive-dynamic-reference.test.mjs","blob":"52c8097ea9cebb0af7591129aa5c57c4b667b715","line":3}],"form":"node-import","target":"tests/yul-views/primitive-dynamic-reference.mjs","target_blob":"6047c36a8ca86ab5776b0ff42d206e8708dfd37d","purpose":"Literal Node import executed by the unchanged committed yul-views reference test (demonstrated at fbeec65d; reobserved passing 2026-11-18 as `node TEST REPORT` with a report from the pinned solc 0.8.38). Static module source consumption only; no report authenticity, fixture-data, compiler, EVM, Lean/kernel or proof credit."},
+{"runner":"committed:tests/yul-views/recursive-declaration-reference.test.mjs","frames":[{"path":"tests/yul-views/recursive-declaration-reference.test.mjs","blob":"76450a377bfe245445e192e19d998836a342f1f5","line":3}],"form":"node-import","target":"tests/yul-views/recursive-declaration-reference.mjs","target_blob":"637168c8947a59ac7cbb338d1700890a07209cad","purpose":"Literal Node import executed by the unchanged committed yul-views reference test (demonstrated at fbeec65d; reobserved passing 2026-11-18 as `node TEST REPORT` with a report from the pinned solc 0.8.38). Static module source consumption only; no report authenticity, fixture-data, compiler, EVM, Lean/kernel or proof credit."},
+{"runner":"committed:tests/yul-views/recursive-dynamic-reference.test.mjs","frames":[{"path":"tests/yul-views/recursive-dynamic-reference.test.mjs","blob":"e0126f2a27a5aa036681e9bc14313245364d4694","line":3}],"form":"node-import","target":"tests/yul-views/recursive-dynamic-reference.mjs","target_blob":"b386b783f82f09ad5408bc27c344ef9457591e41","purpose":"Literal Node import executed by the unchanged committed yul-views reference test (demonstrated at fbeec65d; reobserved passing 2026-11-18 as `node TEST REPORT` with a report from the pinned solc 0.8.38). Static module source consumption only; no report authenticity, fixture-data, compiler, EVM, Lean/kernel or proof credit."},
+{"runner":"committed:tests/yul-views/residual-mcopy-reference.test.mjs","frames":[{"path":"tests/yul-views/residual-mcopy-reference.test.mjs","blob":"99bd40e3c2f9b2a7fa839a480a868b9ac7b409e4","line":3}],"form":"node-import","target":"tests/yul-views/residual-mcopy-reference.mjs","target_blob":"f2afb5fcff53b2fe4ca7881aae89527a14ac87db","purpose":"Literal Node import executed by the unchanged committed yul-views reference test (demonstrated at fbeec65d; reobserved passing 2026-11-18 as `node TEST REPORT` with a report from the pinned solc 0.8.38). Static module source consumption only; no report authenticity, fixture-data, compiler, EVM, Lean/kernel or proof credit."},
+{"runner":"committed:tests/yul-views/residual-memory-reference.test.mjs","frames":[{"path":"tests/yul-views/residual-memory-reference.test.mjs","blob":"4428d2ae50dba29877e1f4b0ae88a8d062dcb6db","line":3}],"form":"node-import","target":"tests/yul-views/residual-memory-reference.mjs","target_blob":"49dd574d88bd4709846f50b6fb9c1935ff400bbc","purpose":"Literal Node import executed by the unchanged committed yul-views reference test (demonstrated at fbeec65d; reobserved passing 2026-11-18 as `node TEST REPORT` with a report from the pinned solc 0.8.38). Static module source consumption only; no report authenticity, fixture-data, compiler, EVM, Lean/kernel or proof credit."},
+{"runner":"committed:tests/yul-views/residual-reference.test.mjs","frames":[{"path":"tests/yul-views/residual-reference.test.mjs","blob":"87ac6e2371e92380dd0d15dce06491e69c58c8d8","line":3}],"form":"node-import","target":"tests/yul-views/residual-reference.mjs","target_blob":"532a94dc55c226de7db789d2dd21abceacf79550","purpose":"Literal Node import executed by the unchanged committed yul-views reference test (demonstrated at fbeec65d; reobserved passing 2026-11-18 as `node TEST REPORT` with a report from the pinned solc 0.8.38). Static module source consumption only; no report authenticity, fixture-data, compiler, EVM, Lean/kernel or proof credit."},
+{"runner":"committed:tests/yul-views/retained-allocation-reference.test.mjs","frames":[{"path":"tests/yul-views/retained-allocation-reference.test.mjs","blob":"ad3decf88461f8252f237422b22af647d947bdd6","line":3}],"form":"node-import","target":"tests/yul-views/retained-allocation-reference.mjs","target_blob":"35f49f242cf0daa30e7318e406069687348f6117","purpose":"Literal Node import executed by the unchanged committed yul-views reference test (demonstrated at fbeec65d; reobserved passing 2026-11-18 as `node TEST REPORT` with a report from the pinned solc 0.8.38). Static module source consumption only; no report authenticity, fixture-data, compiler, EVM, Lean/kernel or proof credit."},
+{"runner":"committed:tests/yul-views/retained-heap-reference.test.mjs","frames":[{"path":"tests/yul-views/retained-heap-reference.test.mjs","blob":"c92da806f190542cf052607a509b9a2f7359f264","line":3}],"form":"node-import","target":"tests/yul-views/retained-heap-reference.mjs","target_blob":"255fc97c021c5d7917d0691fc5df63f16cc1ce9b","purpose":"Literal Node import executed by the unchanged committed yul-views reference test (demonstrated at fbeec65d; reobserved passing 2026-11-18 as `node TEST REPORT` with a report from the pinned solc 0.8.38). Static module source consumption only; no report authenticity, fixture-data, compiler, EVM, Lean/kernel or proof credit."},
+{"runner":"committed:tests/yul-views/retained-member-arrays-reference.test.mjs","frames":[{"path":"tests/yul-views/retained-member-arrays-reference.test.mjs","blob":"f9730a67b68983cdf7044e72432f54d0ccc1b076","line":3}],"form":"node-import","target":"tests/yul-views/retained-member-arrays-reference.mjs","target_blob":"749febbe92107157b27595a55e7355588b0cad78","purpose":"Literal Node import executed by the unchanged committed yul-views reference test (demonstrated at fbeec65d; reobserved passing 2026-11-18 as `node TEST REPORT` with a report from the pinned solc 0.8.38). Static module source consumption only; no report authenticity, fixture-data, compiler, EVM, Lean/kernel or proof credit."},
+{"runner":"committed:tests/yul-views/retained-storage-reference.test.mjs","frames":[{"path":"tests/yul-views/retained-storage-reference.test.mjs","blob":"3802f2b143c319dfc06e9a0dea8b387c7a716969","line":3}],"form":"node-import","target":"tests/yul-views/retained-storage-reference.mjs","target_blob":"12771c34dc51465d6d30de085f0757664e936ec0","purpose":"Literal Node import executed by the unchanged committed yul-views reference test (demonstrated at fbeec65d; reobserved passing 2026-11-18 as `node TEST REPORT` with a report from the pinned solc 0.8.38). Static module source consumption only; no report authenticity, fixture-data, compiler, EVM, Lean/kernel or proof credit."},
+{"runner":"committed:tests/yul-views/root-sequence-reference.test.mjs","frames":[{"path":"tests/yul-views/root-sequence-reference.test.mjs","blob":"596d20664c832128d4da92def1f28de0be9f4b14","line":3}],"form":"node-import","target":"tests/yul-views/root-sequence-reference.mjs","target_blob":"80b2b92798b66f287a1bcf41df1dc046ab29dc3e","purpose":"Literal Node import executed by the unchanged committed yul-views reference test (demonstrated at fbeec65d; reobserved passing 2026-11-18 as `node TEST REPORT` with a report from the pinned solc 0.8.38). Static module source consumption only; no report authenticity, fixture-data, compiler, EVM, Lean/kernel or proof credit."},
+{"runner":"committed:tests/yul-views/scalar-dynamic-reference.test.mjs","frames":[{"path":"tests/yul-views/scalar-dynamic-reference.test.mjs","blob":"e19a1e1a9779a451535799ec54e2bb2aa6e35a60","line":3}],"form":"node-import","target":"tests/yul-views/scalar-dynamic-reference.mjs","target_blob":"8d42c84d6124d880076e0b1f5e6046ec45faf6b7","purpose":"Literal Node import executed by the unchanged committed yul-views reference test (demonstrated at fbeec65d; reobserved passing 2026-11-18 as `node TEST REPORT` with a report from the pinned solc 0.8.38). Static module source consumption only; no report authenticity, fixture-data, compiler, EVM, Lean/kernel or proof credit."},
+{"runner":"committed:tests/yul-views/scalar-memory-alias-reference.test.mjs","frames":[{"path":"tests/yul-views/scalar-memory-alias-reference.test.mjs","blob":"827a358e0018ca27f16db559281fa5ca672c527e","line":3}],"form":"node-import","target":"tests/yul-views/scalar-memory-alias-reference.mjs","target_blob":"090279e74d4091f87942c8d30b8ed4af8744a529","purpose":"Literal Node import executed by the unchanged committed yul-views reference test (demonstrated at fbeec65d; reobserved passing 2026-11-18 as `node TEST REPORT` with a report from the pinned solc 0.8.38). Static module source consumption only; no report authenticity, fixture-data, compiler, EVM, Lean/kernel or proof credit."},
+{"runner":"committed:tests/yul-views/scalar-memory-ops-reference.test.mjs","frames":[{"path":"tests/yul-views/scalar-memory-ops-reference.test.mjs","blob":"945d17a66d1ec5caec726a691d0a000bc266850b","line":3}],"form":"node-import","target":"tests/yul-views/scalar-memory-ops-reference.mjs","target_blob":"bbf43a5a2f4f94d3e4bdf0340ed0508fbc1665a1","purpose":"Literal Node import executed by the unchanged committed yul-views reference test (demonstrated at fbeec65d; reobserved passing 2026-11-18 as `node TEST REPORT` with a report from the pinned solc 0.8.38). Static module source consumption only; no report authenticity, fixture-data, compiler, EVM, Lean/kernel or proof credit."},
+{"runner":"committed:tests/yul-views/signed-dynamic-reference.test.mjs","frames":[{"path":"tests/yul-views/signed-dynamic-reference.test.mjs","blob":"84c69ecde8a58c8b5da01af9d57c5d1f045f3920","line":3}],"form":"node-import","target":"tests/yul-views/signed-dynamic-reference.mjs","target_blob":"672c443ba3633fa7ea23923d5a61661efc1f43bc","purpose":"Literal Node import executed by the unchanged committed yul-views reference test (demonstrated at fbeec65d; reobserved passing 2026-11-18 as `node TEST REPORT` with a report from the pinned solc 0.8.38). Static module source consumption only; no report authenticity, fixture-data, compiler, EVM, Lean/kernel or proof credit."},
+{"runner":"committed:tests/yul-views/tuple-storage-reference.test.mjs","frames":[{"path":"tests/yul-views/tuple-storage-reference.test.mjs","blob":"7b64d24a725748b3f781fcd6a387eca7cd1c4a59","line":3}],"form":"node-import","target":"tests/yul-views/tuple-storage-reference.mjs","target_blob":"a5a63e5b80005b917765bd31ea1f657790032754","purpose":"Literal Node import executed by the unchanged committed yul-views reference test (demonstrated at fbeec65d; reobserved passing 2026-11-18 as `node TEST REPORT` with a report from the pinned solc 0.8.38). Static module source consumption only; no report authenticity, fixture-data, compiler, EVM, Lean/kernel or proof credit."},
+{"runner":"committed:tests/yul-views/word-writeback-reference.test.mjs","frames":[{"path":"tests/yul-views/word-writeback-reference.test.mjs","blob":"5936ef3444ac8941fe6da6ff18f2de5e4cee0ed6","line":3}],"form":"node-import","target":"tests/yul-views/word-writeback-reference.mjs","target_blob":"f99356702a358ed7764f708eb554140c6cd8109f","purpose":"Literal Node import executed by the unchanged committed yul-views reference test (demonstrated at fbeec65d; reobserved passing 2026-11-18 as `node TEST REPORT` with a report from the pinned solc 0.8.38). Static module source consumption only; no report authenticity, fixture-data, compiler, EVM, Lean/kernel or proof credit."},
+{"runner":"committed:tests/yul-views/writeback-reference.test.mjs","frames":[{"path":"tests/yul-views/writeback-reference.test.mjs","blob":"bdff4da912f5b4ca306fc3d52821d28c2b77d495","line":3}],"form":"node-import","target":"tests/yul-views/writeback-reference.mjs","target_blob":"3a56702c53698b2aee2c6073cc0a473a2306b6da","purpose":"Literal Node import executed by the unchanged committed yul-views reference test (demonstrated at fbeec65d; reobserved passing 2026-11-18 as `node TEST REPORT` with a report from the pinned solc 0.8.38). Static module source consumption only; no report authenticity, fixture-data, compiler, EVM, Lean/kernel or proof credit."},
+{"runner":"committed:tests/yul-views/abi-input-reference.test.mjs","frames":[{"path":"tests/yul-views/abi-input-reference.test.mjs","blob":"d9317b88e12dc7de19958fbbb7b1fa14185df450","line":3},{"path":"tests/yul-views/abi-input-reference.mjs","blob":"cfbc7d50551bacf40d7f91445fc5c6efd09fffb1","line":29}],"form":"node-readFileSync","target":"tests/yul-views/AbiInputAllocation.sol","target_blob":"2ccf6e60103ba67692fb60f9d9a5b2c87016e6d4","purpose":"Literal Node readFileSync of the source fixture, observed executing at this line while the unchanged committed yul-views reference test (demonstrated at fbeec65d) passed on 2026-11-18 with a pinned-solc 0.8.38 report. Source-byte consumption only; no compiler, EVM, report authenticity, Lean/kernel or proof credit."},
+{"runner":"committed:tests/yul-views/aggregate-dynamic-reference.test.mjs","frames":[{"path":"tests/yul-views/aggregate-dynamic-reference.test.mjs","blob":"bc20e80e0293c6928b67c64f31f038626698ce97","line":3},{"path":"tests/yul-views/aggregate-dynamic-reference.mjs","blob":"6fab1abb602cf8963a909ffcbeac4199e5be992f","line":24}],"form":"node-readFileSync","target":"tests/yul-views/AggregateDynamic.sol","target_blob":"85696bb69547cd5ef47971f18cc2277e2cfab220","purpose":"Literal Node readFileSync of the source fixture, observed executing at this line while the unchanged committed yul-views reference test (demonstrated at fbeec65d) passed on 2026-11-18 with a pinned-solc 0.8.38 report. Source-byte consumption only; no compiler, EVM, report authenticity, Lean/kernel or proof credit."},
+{"runner":"committed:tests/yul-views/declaration-packing-reference.test.mjs","frames":[{"path":"tests/yul-views/declaration-packing-reference.test.mjs","blob":"413c8a68732baf98de2351b1257e9afe6fd109e9","line":3},{"path":"tests/yul-views/declaration-packing-reference.mjs","blob":"be02555ec3be74e46c837be5e66897d40e6440a4","line":35}],"form":"node-readFileSync","target":"tests/yul-views/DeclarationPacking.sol","target_blob":"f94b872f3cbf451f7705dda29d4878094d553899","purpose":"Literal Node readFileSync of the source fixture, observed executing at this line while the unchanged committed yul-views reference test (demonstrated at fbeec65d) passed on 2026-11-18 with a pinned-solc 0.8.38 report. Source-byte consumption only; no compiler, EVM, report authenticity, Lean/kernel or proof credit."},
+{"runner":"committed:tests/yul-views/dynamic-storage-reference.test.mjs","frames":[{"path":"tests/yul-views/dynamic-storage-reference.test.mjs","blob":"47b9d90e409c0cd6810aaafff7bece477ca0b9fd","line":3},{"path":"tests/yul-views/dynamic-storage-reference.mjs","blob":"93506c2024b89aef7e9a507c80530458d1c82a57","line":39}],"form":"node-readFileSync","target":"tests/yul-views/DynamicStorage.sol","target_blob":"a381e63f0a0c44a3a470bc1688c31d9f68a5e59a","purpose":"Literal Node readFileSync of the source fixture, observed executing at this line while the unchanged committed yul-views reference test (demonstrated at fbeec65d) passed on 2026-11-18 with a pinned-solc 0.8.38 report. Source-byte consumption only; no compiler, EVM, report authenticity, Lean/kernel or proof credit."},
+{"runner":"committed:tests/yul-views/frame-calldata-reference.test.mjs","frames":[{"path":"tests/yul-views/frame-calldata-reference.test.mjs","blob":"ed092162118150f8bda4187aafcff96f3b0891e5","line":3},{"path":"tests/yul-views/frame-calldata-reference.mjs","blob":"9cafdcf7761a12c8efa0c109f323ca93a1f7b15c","line":28}],"form":"node-readFileSync","target":"tests/yul-views/FrameCalldata.sol","target_blob":"e9ff4e92c7f0a020aba9bc4d844a45544f57fe1d","purpose":"Literal Node readFileSync of the source fixture, observed executing at this line while the unchanged committed yul-views reference test (demonstrated at fbeec65d) passed on 2026-11-18 with a pinned-solc 0.8.38 report. Source-byte consumption only; no compiler, EVM, report authenticity, Lean/kernel or proof credit."},
+{"runner":"committed:tests/yul-views/inherited-sequence-reference.test.mjs","frames":[{"path":"tests/yul-views/inherited-sequence-reference.test.mjs","blob":"8e6fc97778be05744b64a94b2ae286cb561cd2b4","line":3},{"path":"tests/yul-views/inherited-sequence-reference.mjs","blob":"6630dd95e3663f4f354cd3f410e91198e9a24bc3","line":30}],"form":"node-readFileSync","target":"tests/yul-views/InheritedSequence.sol","target_blob":"ba98c624e73490b9f70ff50ede937349b53ac784","purpose":"Literal Node readFileSync of the source fixture, observed executing at this line while the unchanged committed yul-views reference test (demonstrated at fbeec65d) passed on 2026-11-18 with a pinned-solc 0.8.38 report. Source-byte consumption only; no compiler, EVM, report authenticity, Lean/kernel or proof credit."},
+{"runner":"committed:tests/yul-views/mapping-transient-reference.test.mjs","frames":[{"path":"tests/yul-views/mapping-transient-reference.test.mjs","blob":"40fd18eaa547e0ef899708342f7918b9dc1da4ca","line":3},{"path":"tests/yul-views/mapping-transient-reference.mjs","blob":"514edfcd9f0f0990c369f83eb8991318e297a554","line":37}],"form":"node-readFileSync","target":"tests/yul-views/MappingTransient.sol","target_blob":"34ee08facb72a22e819bf1f08285c2fdfb3e0cc6","purpose":"Literal Node readFileSync of the source fixture, observed executing at this line while the unchanged committed yul-views reference test (demonstrated at fbeec65d) passed on 2026-11-18 with a pinned-solc 0.8.38 report. Source-byte consumption only; no compiler, EVM, report authenticity, Lean/kernel or proof credit."},
+{"runner":"committed:tests/yul-views/nested-dynamic-reference.test.mjs","frames":[{"path":"tests/yul-views/nested-dynamic-reference.test.mjs","blob":"630e84a02c2ea731c75946cf2dcb5923aeff6c0d","line":3},{"path":"tests/yul-views/nested-dynamic-reference.mjs","blob":"ff53d4e0c461f6b6e4a229d8738d61c3a7dcf184","line":40}],"form":"node-readFileSync","target":"tests/yul-views/NestedDynamic.sol","target_blob":"3411f38adf61e428c43e4f30c91c7999b13b61dc","purpose":"Literal Node readFileSync of the source fixture, observed executing at this line while the unchanged committed yul-views reference test (demonstrated at fbeec65d) passed on 2026-11-18 with a pinned-solc 0.8.38 report. Source-byte consumption only; no compiler, EVM, report authenticity, Lean/kernel or proof credit."},
+{"runner":"committed:tests/yul-views/nested-mapping-reference.test.mjs","frames":[{"path":"tests/yul-views/nested-mapping-reference.test.mjs","blob":"4e2c5fa4224d1a97c696972dc99c0615588d6825","line":3},{"path":"tests/yul-views/nested-mapping-reference.mjs","blob":"0eced64d28aa534c5c2cf8176a1d31f5a936aba9","line":32}],"form":"node-readFileSync","target":"tests/yul-views/NestedMapping.sol","target_blob":"84b8c95c4d991f8686710130223492a6300b7773","purpose":"Literal Node readFileSync of the source fixture, observed executing at this line while the unchanged committed yul-views reference test (demonstrated at fbeec65d) passed on 2026-11-18 with a pinned-solc 0.8.38 report. Source-byte consumption only; no compiler, EVM, report authenticity, Lean/kernel or proof credit."},
+{"runner":"committed:tests/yul-views/object-allocation-reference.test.mjs","frames":[{"path":"tests/yul-views/object-allocation-reference.test.mjs","blob":"f3213a197128440aaafa5e2d34ce2eb16642b53a","line":3},{"path":"tests/yul-views/object-allocation-reference.mjs","blob":"6d3efafd29f39c27031f82b5870abdf10a2d81a5","line":22}],"form":"node-readFileSync","target":"tests/yul-views/ObjectAllocation.sol","target_blob":"7e169f0105b7710d0f07ceb28066328717e0f06c","purpose":"Literal Node readFileSync of the source fixture, observed executing at this line while the unchanged committed yul-views reference test (demonstrated at fbeec65d) passed on 2026-11-18 with a pinned-solc 0.8.38 report. Source-byte consumption only; no compiler, EVM, report authenticity, Lean/kernel or proof credit."},
+{"runner":"committed:tests/yul-views/origin-sequence-reference.test.mjs","frames":[{"path":"tests/yul-views/origin-sequence-reference.test.mjs","blob":"128e63f2611bce14c9ed3e63a7838f88651a6347","line":3},{"path":"tests/yul-views/origin-sequence-reference.mjs","blob":"52e70321f01afa25a60446e8729b67e612dc5d33","line":30}],"form":"node-readFileSync","target":"tests/yul-views/OriginSequence.sol","target_blob":"0f49d8faf17dae65ea5b53845d874d9aae9a6e75","purpose":"Literal Node readFileSync of the source fixture, observed executing at this line while the unchanged committed yul-views reference test (demonstrated at fbeec65d) passed on 2026-11-18 with a pinned-solc 0.8.38 report. Source-byte consumption only; no compiler, EVM, report authenticity, Lean/kernel or proof credit."},
+{"runner":"committed:tests/yul-views/owned-bool-dynamic-reference.test.mjs","frames":[{"path":"tests/yul-views/owned-bool-dynamic-reference.test.mjs","blob":"c7f08b1e44ab682ebb3644084bc4fe0b784886a8","line":3},{"path":"tests/yul-views/owned-bool-dynamic-reference.mjs","blob":"8a850b849b96234e1e2fd058e40cec470852483a","line":26}],"form":"node-readFileSync","target":"tests/yul-views/OwnedBoolDynamic.sol","target_blob":"d27ca80a18952852372a0acbc1e0e36be9204b35","purpose":"Literal Node readFileSync of the source fixture, observed executing at this line while the unchanged committed yul-views reference test (demonstrated at fbeec65d) passed on 2026-11-18 with a pinned-solc 0.8.38 report. Source-byte consumption only; no compiler, EVM, report authenticity, Lean/kernel or proof credit."},
+{"runner":"committed:tests/yul-views/owned-bool-reference.test.mjs","frames":[{"path":"tests/yul-views/owned-bool-reference.test.mjs","blob":"82eb6dbbada3f2b1a1289a00b5d1f47bf87461f7","line":3},{"path":"tests/yul-views/owned-bool-reference.mjs","blob":"e7af46ac2f4215b4916fbf07ebce0508f797ed6e","line":19}],"form":"node-readFileSync","target":"tests/yul-views/OwnedBool.sol","target_blob":"7eda957ab04f38bf02630ffa395ef3a4c3af7140","purpose":"Literal Node readFileSync of the source fixture, observed executing at this line while the unchanged committed yul-views reference test (demonstrated at fbeec65d) passed on 2026-11-18 with a pinned-solc 0.8.38 report. Source-byte consumption only; no compiler, EVM, report authenticity, Lean/kernel or proof credit."},
+{"runner":"committed:tests/yul-views/packed-dynamic-reference.test.mjs","frames":[{"path":"tests/yul-views/packed-dynamic-reference.test.mjs","blob":"380a49b79e269f2734175d7ced411a726fe99cbf","line":3},{"path":"tests/yul-views/packed-dynamic-reference.mjs","blob":"a71c38e86f87539ea3a4d0cf6b6f40f949935a8b","line":41}],"form":"node-readFileSync","target":"tests/yul-views/PackedDynamic.sol","target_blob":"2ecd4c4636efbfcd44615f44b5f5725e3ce7c0d1","purpose":"Literal Node readFileSync of the source fixture, observed executing at this line while the unchanged committed yul-views reference test (demonstrated at fbeec65d) passed on 2026-11-18 with a pinned-solc 0.8.38 report. Source-byte consumption only; no compiler, EVM, report authenticity, Lean/kernel or proof credit."},
+{"runner":"committed:tests/yul-views/primitive-dynamic-reference.test.mjs","frames":[{"path":"tests/yul-views/primitive-dynamic-reference.test.mjs","blob":"52c8097ea9cebb0af7591129aa5c57c4b667b715","line":3},{"path":"tests/yul-views/primitive-dynamic-reference.mjs","blob":"6047c36a8ca86ab5776b0ff42d206e8708dfd37d","line":45}],"form":"node-readFileSync","target":"tests/yul-views/PrimitiveDynamic.sol","target_blob":"f6bddbde2a19f982246420dcb826eb488f85dd49","purpose":"Literal Node readFileSync of the source fixture, observed executing at this line while the unchanged committed yul-views reference test (demonstrated at fbeec65d) passed on 2026-11-18 with a pinned-solc 0.8.38 report. Source-byte consumption only; no compiler, EVM, report authenticity, Lean/kernel or proof credit."},
+{"runner":"committed:tests/yul-views/recursive-declaration-reference.test.mjs","frames":[{"path":"tests/yul-views/recursive-declaration-reference.test.mjs","blob":"76450a377bfe245445e192e19d998836a342f1f5","line":3},{"path":"tests/yul-views/recursive-declaration-reference.mjs","blob":"637168c8947a59ac7cbb338d1700890a07209cad","line":33}],"form":"node-readFileSync","target":"tests/yul-views/RecursiveDeclaration.sol","target_blob":"e673dd93933b4e24e0ce2f365653bfd97f713820","purpose":"Literal Node readFileSync of the source fixture, observed executing at this line while the unchanged committed yul-views reference test (demonstrated at fbeec65d) passed on 2026-11-18 with a pinned-solc 0.8.38 report. Source-byte consumption only; no compiler, EVM, report authenticity, Lean/kernel or proof credit."},
+{"runner":"committed:tests/yul-views/recursive-dynamic-reference.test.mjs","frames":[{"path":"tests/yul-views/recursive-dynamic-reference.test.mjs","blob":"e0126f2a27a5aa036681e9bc14313245364d4694","line":3},{"path":"tests/yul-views/recursive-dynamic-reference.mjs","blob":"b386b783f82f09ad5408bc27c344ef9457591e41","line":45}],"form":"node-readFileSync","target":"tests/yul-views/RecursiveDynamic.sol","target_blob":"6f795cc7d34b2133db71ddc5736cf8b6a286aad9","purpose":"Literal Node readFileSync of the source fixture, observed executing at this line while the unchanged committed yul-views reference test (demonstrated at fbeec65d) passed on 2026-11-18 with a pinned-solc 0.8.38 report. Source-byte consumption only; no compiler, EVM, report authenticity, Lean/kernel or proof credit."},
+{"runner":"committed:tests/yul-views/residual-mcopy-reference.test.mjs","frames":[{"path":"tests/yul-views/residual-mcopy-reference.test.mjs","blob":"99bd40e3c2f9b2a7fa839a480a868b9ac7b409e4","line":3},{"path":"tests/yul-views/residual-mcopy-reference.mjs","blob":"f2afb5fcff53b2fe4ca7881aae89527a14ac87db","line":26}],"form":"node-readFileSync","target":"tests/yul-views/ResidualMcopy.sol","target_blob":"12d354820ec1a3e3eb67ef94cddae5b62f51fb7e","purpose":"Literal Node readFileSync of the source fixture, observed executing at this line while the unchanged committed yul-views reference test (demonstrated at fbeec65d) passed on 2026-11-18 with a pinned-solc 0.8.38 report. Source-byte consumption only; no compiler, EVM, report authenticity, Lean/kernel or proof credit."},
+{"runner":"committed:tests/yul-views/residual-memory-reference.test.mjs","frames":[{"path":"tests/yul-views/residual-memory-reference.test.mjs","blob":"4428d2ae50dba29877e1f4b0ae88a8d062dcb6db","line":3},{"path":"tests/yul-views/residual-memory-reference.mjs","blob":"49dd574d88bd4709846f50b6fb9c1935ff400bbc","line":37}],"form":"node-readFileSync","target":"tests/yul-views/ResidualMemory.sol","target_blob":"0b6a15629ebdeb3860064263b3fbe8b522e246c7","purpose":"Literal Node readFileSync of the source fixture, observed executing at this line while the unchanged committed yul-views reference test (demonstrated at fbeec65d) passed on 2026-11-18 with a pinned-solc 0.8.38 report. Source-byte consumption only; no compiler, EVM, report authenticity, Lean/kernel or proof credit."},
+{"runner":"committed:tests/yul-views/retained-allocation-reference.test.mjs","frames":[{"path":"tests/yul-views/retained-allocation-reference.test.mjs","blob":"ad3decf88461f8252f237422b22af647d947bdd6","line":3},{"path":"tests/yul-views/retained-allocation-reference.mjs","blob":"35f49f242cf0daa30e7318e406069687348f6117","line":22}],"form":"node-readFileSync","target":"tests/yul-views/RetainedAllocation.sol","target_blob":"8cc2d45284e4c6ec6628f95ff682f784e3810e63","purpose":"Literal Node readFileSync of the source fixture, observed executing at this line while the unchanged committed yul-views reference test (demonstrated at fbeec65d) passed on 2026-11-18 with a pinned-solc 0.8.38 report. Source-byte consumption only; no compiler, EVM, report authenticity, Lean/kernel or proof credit."},
+{"runner":"committed:tests/yul-views/retained-storage-reference.test.mjs","frames":[{"path":"tests/yul-views/retained-storage-reference.test.mjs","blob":"3802f2b143c319dfc06e9a0dea8b387c7a716969","line":3},{"path":"tests/yul-views/retained-storage-reference.mjs","blob":"12771c34dc51465d6d30de085f0757664e936ec0","line":32}],"form":"node-readFileSync","target":"tests/yul-views/RetainedStorage.sol","target_blob":"23ea801f40ec16fa38d26e6a04cb30305f3d54ff","purpose":"Literal Node readFileSync of the source fixture, observed executing at this line while the unchanged committed yul-views reference test (demonstrated at fbeec65d) passed on 2026-11-18 with a pinned-solc 0.8.38 report. Source-byte consumption only; no compiler, EVM, report authenticity, Lean/kernel or proof credit."},
+{"runner":"committed:tests/yul-views/root-sequence-reference.test.mjs","frames":[{"path":"tests/yul-views/root-sequence-reference.test.mjs","blob":"596d20664c832128d4da92def1f28de0be9f4b14","line":3},{"path":"tests/yul-views/root-sequence-reference.mjs","blob":"80b2b92798b66f287a1bcf41df1dc046ab29dc3e","line":30}],"form":"node-readFileSync","target":"tests/yul-views/RootSequence.sol","target_blob":"36cfa42bfa92db8262f4b5917615f11709acfcd1","purpose":"Literal Node readFileSync of the source fixture, observed executing at this line while the unchanged committed yul-views reference test (demonstrated at fbeec65d) passed on 2026-11-18 with a pinned-solc 0.8.38 report. Source-byte consumption only; no compiler, EVM, report authenticity, Lean/kernel or proof credit."},
+{"runner":"committed:tests/yul-views/scalar-dynamic-reference.test.mjs","frames":[{"path":"tests/yul-views/scalar-dynamic-reference.test.mjs","blob":"e19a1e1a9779a451535799ec54e2bb2aa6e35a60","line":3},{"path":"tests/yul-views/scalar-dynamic-reference.mjs","blob":"8d42c84d6124d880076e0b1f5e6046ec45faf6b7","line":52}],"form":"node-readFileSync","target":"tests/yul-views/ScalarDynamic.sol","target_blob":"7767adf1f8d796fe4e27e1eee84697ffae40fcc3","purpose":"Literal Node readFileSync of the source fixture, observed executing at this line while the unchanged committed yul-views reference test (demonstrated at fbeec65d) passed on 2026-11-18 with a pinned-solc 0.8.38 report. Source-byte consumption only; no compiler, EVM, report authenticity, Lean/kernel or proof credit."},
+{"runner":"committed:tests/yul-views/signed-dynamic-reference.test.mjs","frames":[{"path":"tests/yul-views/signed-dynamic-reference.test.mjs","blob":"84c69ecde8a58c8b5da01af9d57c5d1f045f3920","line":3},{"path":"tests/yul-views/signed-dynamic-reference.mjs","blob":"672c443ba3633fa7ea23923d5a61661efc1f43bc","line":49}],"form":"node-readFileSync","target":"tests/yul-views/SignedDynamic.sol","target_blob":"7ca9012ed94be36e7fa7d4445811e6707be96f69","purpose":"Literal Node readFileSync of the source fixture, observed executing at this line while the unchanged committed yul-views reference test (demonstrated at fbeec65d) passed on 2026-11-18 with a pinned-solc 0.8.38 report. Source-byte consumption only; no compiler, EVM, report authenticity, Lean/kernel or proof credit."},
+{"runner":"committed:tests/yul-views/tuple-storage-reference.test.mjs","frames":[{"path":"tests/yul-views/tuple-storage-reference.test.mjs","blob":"7b64d24a725748b3f781fcd6a387eca7cd1c4a59","line":3},{"path":"tests/yul-views/tuple-storage-reference.mjs","blob":"a5a63e5b80005b917765bd31ea1f657790032754","line":33}],"form":"node-readFileSync","target":"tests/yul-views/TupleStorage.sol","target_blob":"d67368c9954de65fa4cda72cfbb62ed8e519609e","purpose":"Literal Node readFileSync of the source fixture, observed executing at this line while the unchanged committed yul-views reference test (demonstrated at fbeec65d) passed on 2026-11-18 with a pinned-solc 0.8.38 report. Source-byte consumption only; no compiler, EVM, report authenticity, Lean/kernel or proof credit."}]}}
