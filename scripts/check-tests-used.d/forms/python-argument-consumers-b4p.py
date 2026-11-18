@@ -14,7 +14,8 @@
 # the read with exactly these frames (outermost first), and that the run left
 # the checkout byte-identical. Re-derived from the measured bytes: every frame
 # is in P, frames[0] lies in P's one top-level `if __name__ == "__main__":`
-# block and the last frame line names a read (read_bytes/read_text/open/
+# block, each later frame lies in a uniquely named function that the previous
+# frame line calls, and the last frame line names a read (read_bytes/read_text/open/
 # tarfile.open). Opt-in twice by exact tuple: the run (P, blob, D, command) in
 # REVIEWED_PY_ARG_CONSUMER_RUNS and the read (P, command, frames, target, target
 # blob) in REVIEWED_PY_ARG_CONSUMER_READS; anything else is rejected. At any
@@ -68,6 +69,20 @@ def pyc_main_lines(text):
     return (mains[0].body[0].lineno, mains[0].end_lineno) if len(mains) == 1 else None
 
 
+def pyc_calls_chain(text, lines):
+    """Each later frame line lies in a function whose name the previous frame line calls."""
+    try: tree = ast.parse(text)
+    except (SyntaxError, ValueError, RecursionError): return False
+    functions = [n for n in ast.walk(tree) if isinstance(n, (ast.FunctionDef, ast.AsyncFunctionDef))]
+    source = text.split('\n')
+    for caller, callee in zip(lines, lines[1:]):
+        enclosing = [n for n in functions if n.lineno <= callee <= n.end_lineno]
+        if not enclosing: return False
+        name = max(enclosing, key=lambda n: n.lineno).name
+        if sum(n.name == name for n in functions) != 1 or not re.search(r'(?<![\w.])' + re.escape(name) + r'\s*\(', source[caller - 1]): return False
+    return True
+
+
 def python_argument_consumer_reads(classifier, graph, rows, runs=None, reads=None):
     """H1234 (3): exact reads observed in a demonstrated literal-argv run of a Python consumer."""
     repo = graph.repo
@@ -95,7 +110,8 @@ def python_argument_consumer_reads(classifier, graph, rows, runs=None, reads=Non
         if 'derived_from' in root or root.get('path') != p or root.get('source_blob') != frames[0]['blob']: continue
         _check_lines(repo, frames)
         text = repo.texts[p]; span = pyc_main_lines(text); lines = text.split('\n')
-        if span is None or not span[0] <= frames[0]['line'] <= span[1] or not _PYC_READ.search(lines[frames[-1]['line'] - 1]):
+        if (span is None or not span[0] <= frames[0]['line'] <= span[1] or not _PYC_READ.search(lines[frames[-1]['line'] - 1])
+                or not pyc_calls_chain(text, [f['line'] for f in frames])):
             raise ValueError('Python argument consumer read is not a main-block call stack ending at a read')
         if classifier['excluded'](target) or classifier['excluded'](p): continue
         if not _historical_objects(classifier, repo, row['input_revision'], sorted({(p, frames[0]['blob']), (target, row['target_blob'])})): continue
@@ -143,7 +159,7 @@ def python_argument_consumer_controls(env):
     try:
         base = run(pl, standalone=[role])[1]; assert base[T]['class'] != 'keep'
         rejected(pl, 'unreviewed Python argument consumer read', reads(row()), standalone=[role])
-        bad = [row((9, 5)), row((11, 4)), row((8,), "tests/pyc/other.txt")]
+        bad = [row((9, 5)), row((11, 4)), row((8,), "tests/pyc/other.txt"), row((11, 8), "tests/pyc/other.txt")]
         REVIEWED_PY_ARG_CONSUMER_READS = frozenset(key(r) for r in [row()] + bad)
         rejected(pl, 'lacks its demonstrated run', reads(row()), standalone=[role])
         REVIEWED_PY_ARG_CONSUMER_RUNS = frozenset({(P, blob(pc, P), D, tuple(cmd))})
@@ -153,7 +169,7 @@ def python_argument_consumer_controls(env):
         assert chain['entry']['consumer_route']['demonstrated_command'] == cmd and chain['edges'][-1]['operation'] == PYC_OPERATION
         assert model['entry_points'][PYTHON_ARGS_PREFIX + P]['source_only']
         assert sorted(p for p, r in rows.items() if canonical(r) != canonical(base[p])) == [T]  # the target alone
-        for r, message in zip(bad, ('main-block call stack ending at a read', 'main-block call stack ending at a read', 'main-block call stack ending at a read')):
+        for r, message in zip(bad, ('main-block call stack ending at a read',) * 4):
             rejected(pl, message, reads(r), standalone=[role])
         for r, message in ((row(operation='x'), 'invalid Python argument consumer read route'), (dict(row(), extra=1), 'invalid Python argument consumer read route'),
                            (row(runner='nonpy-entry:' + P), 'invalid Python argument consumer read route'),

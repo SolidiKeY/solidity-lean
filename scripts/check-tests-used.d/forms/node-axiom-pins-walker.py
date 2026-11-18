@@ -20,18 +20,21 @@
 #   process.argv.includes("--fragment-op")) {` at depth 0 and its own `} else
 #   if (main) {` whose first two statements are `const root = resolve(dirname(
 #   fileURLToPath(import.meta.url)), "..");` and `const found = collect(root);`;
-# - no depth-0 statement before that `if` can end the run: no exit, abort,
-#   kill, reallyExit or throw name, `process` only as process.argv, no call
-#   of a function W defines;
+# - nothing in W before that `if` (collect, pins and every other definition
+#   included) shows a way to end the run early: the form (a) audit
+#   node_producer_quiet (no exit/abort/kill/reallyExit name, `process` only as
+#   argv/env/exitCode, no process module, also in template substitutions);
+#   no depth-0 statement there throws or calls a function W defines;
 # - W's local static imports are exactly the reviewed modules, each importing
-#   only node: built-ins (they are evaluated before W's body).
+#   only node: built-ins and passing the same audit (they are evaluated first).
 # So `node W` with no argument runs collect(root) before anything that can stop
 # it, and a completed walk read every tracked `.lean` file under tests/ that no
 # skip rule names. A row also needs the target to hold a lexical `#guard_msgs
 # [(opts)] in #print axioms X` outside comments and strings (the pin W checks)
 # and the inventory W compares against (AXPIN_INVENTORY, the literal `const
 # INVENTORY` of W) to record at least one pin of that source, so the read is
-# the pin comparison the CI step performs, not an incidental scan.
+# the pin comparison the CI step performs, not an incidental scan; an inventory
+# that is missing, invalid or no longer records the source makes the row stale.
 # Opt-in twice by exact tuple: the walker (W, blob, read line, ((import, blob),
 # ...)) in REVIEWED_AXIOM_PIN_WALKERS and the source (target, blob) in
 # REVIEWED_AXIOM_PIN_READS; anything else is rejected. A changed W, import or
@@ -190,7 +193,9 @@ def axiom_pin_walker(text):
     if any(depths[n - 1] == 0 and masked[n - 1].strip() for n in range(opener + 1, branch)): return None  # the else closes that if
     following = [n for n in range(branch + 1, len(lines) + 1) if masked[n - 1].strip()][:2]
     if len(following) != 2 or not all(code_line(n, e) for n, e in zip(following, AXPIN_MAIN_BRANCH[1:])): return None
-    # Depth-0 code before the opener: nothing that can stop the run first.
+    # Everything before the opener (collect, pins and every other definition included): no way to end the
+    # run early (the form (a) audit node_producer_quiet, also inside template substitutions).
+    if not node_producer_quiet('\n'.join(lines[:opener - 1])): return None
     top = '\n'.join(m for n, m in enumerate(masked[:opener - 1], 1) if depths[n - 1] == 0)
     if re.search(r'(?<![\w$])(?:exit|abort|kill|reallyExit|throw)(?![\w$])|(?<![\w$])process(?![\w$])(?!\s*\.\s*argv(?![\w$]))', top): return None
     local = set(re.findall(r'\bfunction\s+([\w$]+)', code)) | set(re.findall(r'\b(?:const|let|var)\s+([\w$]+)\s*=\s*(?:async\s*)?(?:\([^()]*\)|[\w$]+)\s*=>', code))
@@ -258,14 +263,14 @@ def axiom_pin_walker_reads(classifier, graph, rows, walkers=None, reads=None):
         if posixpath.dirname(w) == '' or '/' in posixpath.dirname(w) or shape is None or shape[0] != frame['line']:
             raise ValueError('axiom-pin walker is not the reviewed collect() walk run from main')
         local = sorted(posixpath.normpath(posixpath.join(posixpath.dirname(w), m)) for m in shape[1])
-        if local != sorted(p for p, _ in reviewed[0][3]) or not all(_axpin_builtin_only(repo.texts.get(p)) for p in local):
+        if local != sorted(p for p, _ in reviewed[0][3]) or not all(_axpin_builtin_only(repo.texts.get(p)) and node_producer_quiet(repo.texts[p]) for p in local):
             raise ValueError('axiom-pin walker imports are not the reviewed built-in-only modules')
         parts = target.split('/')
         if (parts[0] != 'tests' or not target.endswith('.lean') or '.lake' in parts
                 or repo.tree[target][0] not in ('100644', '100755') or target not in repo.texts):
             raise ValueError('axiom-pin walker target is not a tracked .lean file the walk collects')
-        if not AXPIN_PIN.search(classifier['lean_code'](repo.texts[target])) or target not in _axpin_inventory(repo, cache):
-            raise ValueError('axiom-pin walker target has no recorded #guard_msgs pin: ' + target)
+        if not AXPIN_PIN.search(classifier['lean_code'](repo.texts[target])): raise ValueError('axiom-pin walker target has no #guard_msgs pin: ' + target)
+        if target not in _axpin_inventory(repo, cache): continue  # inventory missing, invalid or not recording it: stale
         if classifier['excluded'](target) or classifier['excluded'](w): continue
         _observe(graph, w, row, frames, target, AXPIN_OPERATION, 'consumes', 'none',
                  {'kind': 'axiom-pin-walk', 'purpose': row['purpose'], 'ci_command': root['command'], 'inventory': AXPIN_INVENTORY})
@@ -302,9 +307,13 @@ def axiom_pin_walker_controls(env):
                      ('export function collect', '/*\n*/ export function collect'), ('export function collect', 'export function collect2(root) {}\nfunction collect'),
                      ('const INVENTORY = "scripts/g07-axiom-pins.json"', 'const INVENTORY = "scripts/other.json"'),
                      ('import { blankLean', 'import "./side.mjs";\nimport { blankLean'), ('const INVENTORY', 'const m = await import("./y.mjs");\nconst INVENTORY'),
-                     ('const INVENTORY', 'collect = () => new Map();\nconst INVENTORY'), ('\n', '\r\n')):
+                     ('const INVENTORY', 'collect = () => new Map();\nconst INVENTORY'), ('\n', '\r\n'),
+                     ('const INVENTORY', 'if (true) {\n  process.exit(0);\n}\nconst INVENTORY'), ('const INVENTORY', 'try {\n  process.exit(0);\n} finally {}\nconst INVENTORY'),
+                     ('const INVENTORY', 'const s = `${process.exit(0)}`;\nconst INVENTORY'),
+                     ('  return blankLean(text)', '  if (!text) process.exit(0);\n  return blankLean(text)')):
         assert walker.count(old) >= 1 and axiom_pin_walker(walker.replace(old, new, 1 if old != '\n' else -1)) is None, old
     assert axiom_pin_walker(None) is None and _axpin_builtin_only('import {x} from "node:fs";\nexport const y = 1;\n')
+    assert not node_producer_quiet('import {x} from "node:fs";\nprocess.exit(0);\n')  # a helper that exits is refused too
     for t in ('import {x} from "./x.mjs";\n', 'const m = await import("node:fs");\n', 'import {createRequire} from "node:module";\n', 'import "./x.mjs";\n'):
         assert not _axpin_builtin_only(t), t
     pin = lambda name: "/-- info: '" + name + "' depends on axioms: [propext] -/\n#guard_msgs in\n#print axioms " + name + '\n'
@@ -332,8 +341,9 @@ def axiom_pin_walker_controls(env):
         assert rows[A]['class'] == 'keep' and chain['entry']['derived_from'] == W and chain['entry']['consumer_route']['kind'] == 'axiom-pin-walk'
         assert chain['edges'][-1]['operation'] == AXPIN_OPERATION and chain['edges'][-1]['line'] == read
         assert sorted(p for p, r in rows.items() if canonical(r) != canonical(base[p])) == [A]  # one read only
-        for target in ('tests/ax/Bare.lean', 'tests/ax/Comment.lean', 'tests/ax/Unrecorded.lean'):
-            rejected(later, 'no recorded #guard_msgs pin', reads(row(target)))
+        assert run(later, reads(row('tests/ax/Unrecorded.lean')))[1]['tests/ax/Unrecorded.lean']['class'] != 'keep'  # not recorded: stale
+        for target in ('tests/ax/Bare.lean', 'tests/ax/Comment.lean'):
+            rejected(later, 'no #guard_msgs pin', reads(row(target)))
         for target in ('tests/ax/data.txt', 'docs/D.lean'):
             rejected(later, 'tracked .lean file the walk collects', reads(row(target)))
         for bad, message in ((row(form='node-readFileSync-walk'), 'invalid axiom-pin walker route'), (dict(row(), extra=1), 'invalid axiom-pin walker route'),

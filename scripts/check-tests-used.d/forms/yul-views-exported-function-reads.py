@@ -20,9 +20,12 @@
 #   node_producer_quiet: no exit/abort/kill/reallyExit name, `process` only as
 #   process.argv/env/exitCode, no process module, also in template
 #   substitutions), and both are .mjs ES modules.
-# So a run of P that completed made the call and the read; modules off the
-# frame path are not audited, so the recorded demonstration of the exact
-# objects is the gate, as in form (a). Opt-in twice by exact tuple: the
+# So a run of P that completed made the call and the read. Modules off the
+# frame path are not audited lexically, so P's whole local static import
+# closure (node_local_import_closure, every module that can run before the
+# read) must be the same objects now and at the demonstration revision, and a
+# closure module with a dynamic import( is never credited (stale otherwise);
+# off-Git packages are covered only by the recorded demonstration. Opt-in twice by exact tuple: the
 # producer (P, blob, demonstration revision, argv) in
 # REVIEWED_EXPORTED_FUNCTION_PRODUCERS and the route (P, frames, target, target
 # blob) in REVIEWED_EXPORTED_FUNCTION_READS; anything else is rejected. At a
@@ -170,7 +173,9 @@ def exported_function_reads(classifier, graph, rows, producers=None, reads=None)
             raise ValueError('exported function read is not the first-statement literal readFileSync of its target')
         if classifier['excluded'](target) or any(classifier['excluded'](f['path']) for f in frames): continue
         revision, argv = demonstrated[0][2:]
-        if not _historical_objects(classifier, repo, revision, sorted({(f['path'], f['blob']) for f in frames} | {(target, row['target_blob'])})): continue
+        closure = node_local_import_closure(repo, p)  # mjs-checker-demonstrated-run.py
+        if closure is None or not _historical_objects(classifier, repo, revision, sorted(set(closure) | {(f['path'], f['blob']) for f in frames} | {(target, row['target_blob'])})):
+            continue
         _efr_observe(graph, row['runner'], row, frames, target,
                      {'kind': 'exported-function-read', 'purpose': row['purpose'], 'demonstration_revision': revision, 'demonstrated_command': list(argv)})
 
@@ -264,7 +269,7 @@ def exported_function_controls(env):
                            (dict(row(), extra=1), 'invalid exported function read route'), (row(purpose=' '), 'invalid exported function read route'),
                            (dict(row(), frames=row()['frames'][:1]), 'not a producer call and a module read')):
             rejected(nl, message, reads(r), standalone=[role])
-        # Each section refuses the other's table; no H997 role gives no credit.
+        # Form (a)'s section refuses these rows (form and table); no H997 role gives no credit.
         rejected(nl, 'invalid Node producer read route', {NODE_PRODUCER_SECTION: [row()]}, standalone=[role])
         rejected(nl, 'unreviewed Node producer read', {NODE_PRODUCER_SECTION: [row(form='node-readFileSync')]}, standalone=[role])
         assert run(nl, reads(row()))[1][T]['class'] != 'keep'
@@ -275,6 +280,9 @@ def exported_function_controls(env):
         REVIEWED_EXPORTED_FUNCTION_PRODUCERS = frozenset({(P, blob(nc, P), N, ('node', P))})
         assert run(later, reads(row()), standalone=[role])[1][T]['class'] != 'keep'  # stale target: no credit, no error
         assert run(restored, reads(row()), standalone=[role])[1][T]['class'] == 'keep'
+        # A module the producer runs before the read (here D's) changed: every row goes stale, no error.
+        other = commit({'tests/efr/d-reference.mjs': files['tests/efr/d-reference.mjs'] + '// changed\n'}, 'efr closure changed')
+        assert run(other, reads(row()), standalone=[role])[1][T]['class'] != 'keep'
     finally: REVIEWED_EXPORTED_FUNCTION_PRODUCERS, REVIEWED_EXPORTED_FUNCTION_READS, REVIEWED_NONPY_ENTRIES = saved
 
 

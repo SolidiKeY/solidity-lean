@@ -12,7 +12,11 @@
 # top-level unconditional literal readFileSync(new URL(..., import.meta.url))
 # statement of the quiet module C (no exit/abort/kill name, `process` only as
 # argv/env/exitCode), and C, frames and target are the same blobs now and at the
-# demonstration revision. Opt-in twice by exact tuple: the checker (C, blob,
+# demonstration revision. So that nothing unpinned runs before the read, C's whole
+# local static import closure (node_local_import_closure) must also be the same
+# objects now and at the demonstration revision (stale otherwise), and a closure
+# module with a dynamic import( is never credited; off-Git packages and
+# createRequire loads are covered only by the demonstration. Opt-in twice by exact tuple: the checker (C, blob,
 # demonstration revision, argv with placeholders for off-Git arguments) in
 # REVIEWED_MJS_CHECKERS and the route (C, frames, target, target blob) in
 # REVIEWED_MJS_CHECKER_READS; anything else is rejected, and each section
@@ -46,8 +50,10 @@
 # source-units). tests/trust-inventory.json is read by the CI trust check, but
 # the reviewed route in check-tests-used.py pins gate.sh/checks-fast.sh blobs
 # that master has since changed (checker-owner refresh, not a form).
-(FORM_CONTROLS, NONPY_ENTRY_PREFIX, REVIEW_TABLE_PARTS, register_consumer_section) = (globals()[name] for name in (
-    'FORM_CONTROLS', 'NONPY_ENTRY_PREFIX', 'REVIEW_TABLE_PARTS', 'register_consumer_section'))
+(FORM_CONTROLS, NODE_SUFFIXES, NONPY_ENTRY_PREFIX, REVIEW_TABLE_PARTS, _current, _historical_objects, _js_mask, _node_import, _plain_lines,
+ register_consumer_section) = (globals()[name] for name in (
+    'FORM_CONTROLS', 'NODE_SUFFIXES', 'NONPY_ENTRY_PREFIX', 'REVIEW_TABLE_PARTS', '_current', '_historical_objects', '_js_mask', '_node_import',
+    '_plain_lines', 'register_consumer_section'))
 MJS_CHECKER_SECTION = 'mjs_checker_reads'
 _MJS_REVISION = 'abec4d99f58359480428d46e832ade9db3f0fc62'
 # checker (under scripts/), blob, introducing commit, read line, target (under tests/), target blob, argv after `node C`
@@ -69,55 +75,108 @@ REVIEWED_MJS_CHECKER_READS = frozenset(('scripts/' + c, (('scripts/' + c, b, lin
 REVIEW_TABLE_PARTS['nonpy'].append(('H1234', frozenset(('scripts/' + c, b, intro) for c, b, intro, *_ in _MJS_ROWS), ('scripts/',)))
 
 
+def node_local_import_closure(repo, path):
+    """(path, blob) of path and every local module its column-0 static imports reach, or None.
+
+    None when a local import is missing from the tree or a module in the closure has a
+    dynamic import( (an unpinned module could then run before the read). Bare-specifier
+    packages (off-Git node_modules) are outside the closure; the demonstration covers them."""
+    seen = {path: repo.tree[path][2]} if path in repo.tree and path in repo.texts else None
+    todo = [path]
+    while seen is not None and todo:
+        source = todo.pop(); text = repo.texts.get(source)
+        if not isinstance(text, str) or not _plain_lines(text) or re.search(r'(?<![\w$.])import\s*\(', _js_mask(text, True)[0]): return None
+        for n, line in enumerate(text.split('\n'), 1):
+            if not line.startswith('import'): continue
+            found = _node_import(source, text, n)
+            if found is None or not found.endswith(NODE_SUFFIXES) or found in seen: continue
+            if found not in repo.tree or found not in repo.texts: return None
+            seen[found] = repo.tree[found][2]; todo.append(found)
+    return None if seen is None else sorted(seen.items())
+
+
+def node_closure_demonstrated(classifier, repo, rows, producers):
+    """Rows whose producer's whole local import closure is the same objects now and at its
+    demonstration revision; any other well-formed row is stale (dropped, no credit, no error).
+    Malformed rows pass through, so the handler still rejects them."""
+    kept = []
+    for row in rows:
+        runner = row.get('runner') if isinstance(row, dict) else None
+        if not isinstance(runner, str) or not runner.startswith(NONPY_ENTRY_PREFIX): kept.append(row); continue
+        p = runner[len(NONPY_ENTRY_PREFIX):]
+        revisions = [d[2] for d in producers if d[0] == p and _current(repo, p, d[1])]
+        if len(revisions) != 1: kept.append(row); continue
+        closure = node_local_import_closure(repo, p)
+        if closure is not None and _historical_objects(classifier, repo, revisions[0], closure): kept.append(row)
+    return kept
+
+
 register_consumer_section(MJS_CHECKER_SECTION, ('runner', 'form', 'target', 'frames'), True,
-                          lambda c, g, _, rows: node_producer_reads(c, g, rows, REVIEWED_MJS_CHECKERS, REVIEWED_MJS_CHECKER_READS))
+                          lambda c, g, _, rows: node_producer_reads(c, g, node_closure_demonstrated(c, g.repo, rows, REVIEWED_MJS_CHECKERS),
+                                                                    REVIEWED_MJS_CHECKERS, REVIEWED_MJS_CHECKER_READS))
 
 
 def mjs_checker_controls(env):
     """H1234 (2) controls: the reviewed tables and H997 part, a synthetic
-    scripts/ checker credited only through this section with both reviews, and
-    each section refusing the other's table."""
-    global REVIEWED_MJS_CHECKERS, REVIEWED_MJS_CHECKER_READS, REVIEWED_NONPY_ENTRIES
+    scripts/ checker credited only through this section with both reviews and
+    an unchanged import closure, and each section refusing the other's table."""
+    global REVIEWED_MJS_CHECKERS, REVIEWED_MJS_CHECKER_READS, REVIEWED_NONPY_ENTRIES, REVIEWED_NODE_PRODUCERS, REVIEWED_NODE_PRODUCER_READS
     commit, run, rejected, blob, frame, reviewed_nonpy = (env[k] for k in ('commit', 'run', 'rejected', 'blob', 'frame', 'reviewed_nonpy'))
     assert len(REVIEWED_MJS_CHECKERS) == len(REVIEWED_MJS_CHECKER_READS) == 6
     part = [p for p in REVIEW_TABLE_PARTS['nonpy'] if p[0] == 'H1234']
     assert len(part) == 1 and part[0][1] <= reviewed_nonpy and {r[:2] for r in part[0][1]} == {c[:2] for c in REVIEWED_MJS_CHECKERS}
     assert all(r[1][0][:2] in {c[:2] for c in REVIEWED_MJS_CHECKERS} and r[0].startswith('scripts/') and r[2].startswith('tests/') for r in REVIEWED_MJS_CHECKER_READS)
     assert not {r[2] for r in REVIEWED_MJS_CHECKER_READS} & {r[2] for r in REVIEWED_NODE_PRODUCER_READS}
-    C = 'scripts/mjsck/check.mjs'
-    checker = ("#!/usr/bin/env node\nimport {readFileSync} from 'node:fs';\nconst [compiler]=process.argv.slice(2);\n"
+    C, H = 'scripts/mjsck/check.mjs', 'scripts/mjsck/help.mjs'
+    checker = ("#!/usr/bin/env node\nimport {readFileSync} from 'node:fs';\nimport {help} from './help.mjs';\nconst [compiler]=process.argv.slice(2);\n"
                "if(!compiler)throw Error('usage');\nconst source=readFileSync(new URL('../../tests/mjsck/Top.sol',import.meta.url),'utf8');\n"
-               "for(const x of [1]){\nreadFileSync(new URL('../../tests/mjsck/Loop.sol',import.meta.url));\n}\nconsole.log(source.length);\n")
-    nc = commit({C: checker, 'tests/mjsck/Top.sol': 'top\n', 'tests/mjsck/Loop.sol': 'loop\n'}, 'mjs checker'); N = nc.ref
+               "for(const x of [1]){\nreadFileSync(new URL('../../tests/mjsck/Loop.sol',import.meta.url));\n}\nconsole.log(source.length,help);\n")
+    helper = "import {deep} from './deep.mjs';\nexport const help=deep;\n"
+    nc = commit({C: checker, H: helper, 'scripts/mjsck/deep.mjs': 'export const deep=1;\n', 'tests/mjsck/Top.sol': 'top\n', 'tests/mjsck/Loop.sol': 'loop\n'},
+                'mjs checker'); N = nc.ref
     nl = commit({'tests/unrelated.txt': 'mjs later\n'}, 'mjs checker later')
+    assert [p for p, _ in node_local_import_closure(nl, C)] == [C, 'scripts/mjsck/deep.mjs', H]
     iface = nonpython_entry_interface(C, checker); assert iface is not None
     role = {'path': C, 'input_revision': N, 'source_blob': blob(nc, C), 'kind': NONPY_ENTRY_KIND, 'command': ['node', C], 'interface': iface,
             'provenance': {'commit': N, 'path': C, 'blob': blob(nc, C)}, 'purpose': 'Synthetic checker.'}
     T = 'tests/mjsck/Top.sol'
-    row = lambda line=5, target=T, **k: dict({'runner': NONPY_ENTRY_PREFIX + C, 'frames': [frame(nc, C, line)], 'form': 'node-readFileSync',
+    row = lambda line=6, target=T, **k: dict({'runner': NONPY_ENTRY_PREFIX + C, 'frames': [frame(nc, C, line)], 'form': 'node-readFileSync',
                                               'target': target, 'target_blob': blob(nc, target), 'purpose': 'Synthetic checker read.'}, **k)
     key = lambda r: (C, tuple((f['path'], f['blob'], f['line']) for f in r['frames']), r['target'], r['target_blob'])
     reads = lambda *rows: {MJS_CHECKER_SECTION: list(rows)}
-    saved = REVIEWED_MJS_CHECKERS, REVIEWED_MJS_CHECKER_READS, REVIEWED_NONPY_ENTRIES
+    demonstrated = frozenset({(C, blob(nc, C), N, ('node', C, 'PINNED_COMPILER'))})
+    saved = REVIEWED_MJS_CHECKERS, REVIEWED_MJS_CHECKER_READS, REVIEWED_NONPY_ENTRIES, REVIEWED_NODE_PRODUCERS, REVIEWED_NODE_PRODUCER_READS
     try:
         rejected(nl, 'unreviewed non-Python entry role', standalone=[role])  # no H997 row for the checker yet
         REVIEWED_NONPY_ENTRIES = reviewed_nonpy | {(C, blob(nc, C), N)}
         base = run(nl, standalone=[role])[1]; assert base[T]['class'] != 'keep'
         rejected(nl, 'unreviewed Node producer read', reads(row()), standalone=[role])
-        REVIEWED_MJS_CHECKER_READS = frozenset({key(row()), key(row(7, 'tests/mjsck/Loop.sol'))})
+        REVIEWED_MJS_CHECKER_READS = frozenset({key(row()), key(row(8, 'tests/mjsck/Loop.sol'))})
         rejected(nl, 'lacks a demonstrated producer', reads(row()), standalone=[role])
-        REVIEWED_MJS_CHECKERS = frozenset({(C, blob(nc, C), N, ('node', C, 'PINNED_COMPILER'))})
+        REVIEWED_MJS_CHECKERS = demonstrated
         rows = run(nl, reads(row()), standalone=[role])[1]
         assert rows[T]['class'] == 'keep' and rows[T]['runner_chain']['entry']['derived_from'] == NONPY_ENTRY_PREFIX + C
         assert rows[T]['runner_chain']['entry']['consumer_route']['demonstrated_command'] == ['node', C, 'PINNED_COMPILER']
         assert sorted(p for p, r in rows.items() if canonical(r) != canonical(base[p])) == [T]
-        rejected(nl, 'top-level literal readFileSync', reads(row(7, 'tests/mjsck/Loop.sol')), standalone=[role])
-        # The form (a) section refuses this table and this section refuses form (a)'s.
-        rejected(nl, 'unreviewed Node producer read', {NODE_PRODUCER_SECTION: [row()]}, standalone=[role])
-        REVIEWED_MJS_CHECKER_READS, REVIEWED_MJS_CHECKERS = saved[:2]
+        rejected(nl, 'top-level literal readFileSync', reads(row(8, 'tests/mjsck/Loop.sol')), standalone=[role])
+        rejected(nl, 'invalid Node producer read route', reads(dict(row(), extra=1)), standalone=[role])  # malformed rows still reach the handler
+        # A module two imports away changed, or gained a dynamic import: stale, no credit, no error.
+        deep = commit({'scripts/mjsck/deep.mjs': 'process.exitCode=0;\nexport const deep=1;\n'}, 'mjs deep changed')
+        assert run(deep, reads(row()), standalone=[role])[1][T]['class'] != 'keep'
+        dynamic = commit({'scripts/mjsck/deep.mjs': 'export const deep=1;\n', H: helper + "await import('./deep.mjs');\n"}, 'mjs dynamic import')
+        assert node_local_import_closure(dynamic, C) is None and run(dynamic, reads(row()), standalone=[role])[1][T]['class'] != 'keep'
+        back = commit({H: helper}, 'mjs restored')
+        assert run(back, reads(row()), standalone=[role])[1][T]['class'] == 'keep'
+        # Each section refuses the other's table, even when that table holds the row.
+        REVIEWED_NODE_PRODUCERS, REVIEWED_NODE_PRODUCER_READS = demonstrated, REVIEWED_MJS_CHECKER_READS
+        REVIEWED_MJS_CHECKERS, REVIEWED_MJS_CHECKER_READS = saved[:2]
+        assert run(nl, {NODE_PRODUCER_SECTION: [row()]}, standalone=[role])[1][T]['class'] == 'keep'  # form (a) with the seeded table
         rejected(nl, 'unreviewed Node producer read', reads(row()), standalone=[role])
-        assert not REVIEWED_NODE_PRODUCER_READS & REVIEWED_MJS_CHECKER_READS and not REVIEWED_NODE_PRODUCERS & REVIEWED_MJS_CHECKERS
-    finally: REVIEWED_MJS_CHECKERS, REVIEWED_MJS_CHECKER_READS, REVIEWED_NONPY_ENTRIES = saved
+        REVIEWED_NODE_PRODUCERS, REVIEWED_NODE_PRODUCER_READS = saved[3:]
+        REVIEWED_MJS_CHECKERS, REVIEWED_MJS_CHECKER_READS = demonstrated, frozenset({key(row())})
+        rejected(nl, 'unreviewed Node producer read', {NODE_PRODUCER_SECTION: [row()]}, standalone=[role])
+        assert not REVIEWED_NODE_PRODUCER_READS & saved[1] and not REVIEWED_NODE_PRODUCERS & saved[0]
+    finally: REVIEWED_MJS_CHECKERS, REVIEWED_MJS_CHECKER_READS, REVIEWED_NONPY_ENTRIES, REVIEWED_NODE_PRODUCERS, REVIEWED_NODE_PRODUCER_READS = saved
 
 
 FORM_CONTROLS.append(mjs_checker_controls)
