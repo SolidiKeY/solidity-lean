@@ -31,9 +31,7 @@ per-run statement.
 -/
 namespace Solidity.Correctness.Lowering.Sim
 
-open Solidity.Goals (ElabRan elabKernelTotal)
 open Solidity.Goals.Shrink.Lowering
-open Solidity.Lowering.V07 (ContextMap)
 open Solidity.LowerKernel
 
 variable [FreshNames]
@@ -127,8 +125,7 @@ theorem loopFinish_shape (spec : RawLoopSpec) (c : RawExpr) (init upd : List Raw
           simp -zeta only [j7]
           refine Yields.bind Yields.trivial (fun _ _ _ => ?_)
           extract_lets j9 j8
-          have h9 : ∀ y fl, Yields (j9 y) fl fun r => Shape r.1 :=
-            fun _ _ => Yields.pure (Or.inr rfl)
+          have h9 : ∀ y fl, Yields (j9 y) fl fun r => Shape r.1 := fun _ _ => .pure (.inr rfl)
           clear_value j9
           have h8 : ∀ y fl, Yields (j8 y) fl fun r => Shape r.1 := by
             intro y fl
