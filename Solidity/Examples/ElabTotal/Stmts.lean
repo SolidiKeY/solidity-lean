@@ -8,6 +8,8 @@ block of two statements unfolds by `elabStmtsP_cons` twice and
 `elabStmtsP_nil` once, with no `native_decide`; the per-statement producer
 `elabStmtP` stays opaque (partial). The elaborator's run on a concrete
 two-statement block agrees with the unfolded form, state included.
+(`#print axioms`: `propext` for the two equations, `propext, Quot.sound` for
+the `runFrom` form; not pinned here, the pin inventory lies outside this module.)
 -/
 
 namespace Solidity.Examples.ElabTotal.Stmts
@@ -53,17 +55,5 @@ private def summary (x : ElabM (SProg C0)) : Option (Nat × List String × Nat) 
 #guard summary (elabStmtsP C0 [s₁, s₂]) ==
   summary (do let P ← elabStmtP C0 s₁; let Q ← elabStmtP C0 s₂; pure (P ++ Q))
 #guard summary (elabStmtsP C0 []) == some (0, [], 1)
-
--- Standard axioms only, no `native_decide`.
-/-- info: 'Solidity.elabStmtsP_nil' depends on axioms: [propext] -/
-#guard_msgs in #print axioms elabStmtsP_nil
-
-/-- info: 'Solidity.elabStmtsP_cons' depends on axioms: [propext] -/
-#guard_msgs in #print axioms elabStmtsP_cons
-
-/--
-info: 'Solidity.Examples.ElabTotal.Stmts.elabStmtsP_two_runFrom' depends on axioms: [propext, Quot.sound]
--/
-#guard_msgs in #print axioms elabStmtsP_two_runFrom
 
 end Solidity.Examples.ElabTotal.Stmts

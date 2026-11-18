@@ -234,7 +234,7 @@ commands; it never enters the core import graph.
 | `Hash/CollisionBridgeControls.lean` | Concrete admitted, compiled quiet success using HashPremise.nil. |
 | `Hash/CompilerCorrect.lean` | Operational producers and encoding facts for the frozen E4A contract. |
 | `Hash/CompilerCorrect/Prefix.lean` | Finite-prefix transport and divergence-safe composition for the frozen E4A contract. |
-| `Examples/ElabTotal/Stmts.lean` | Checks of the block's two equations (`elabStmtsP_nil`, `elabStmtsP_cons`, now that `elabStmtsP` is the total `elabStmtsPWith` at the knot's `elabStmtP`): a two-statement block unfolded symbolically and through `runFrom`, and a concrete `uint x = 1; x = 2;` run agreeing with its statements run in turn, axioms pinned. |
+| `Examples/ElabTotal/Stmts.lean` | Checks of the block's two equations (`elabStmtsP_nil`, `elabStmtsP_cons`, now that `elabStmtsP` is the total `elabStmtsPWith` at the knot's `elabStmtP`): a two-statement block unfolded symbolically and through `runFrom`, and a concrete `uint x = 1; x = 2;` run agreeing with its statements run in turn. |
 | `Syntax/Elab/Measure.lean` | The elaborator knot's decrease vocabulary: `ElabMeasure` (a measure per recursive field), `cut` (a record below a level), the guarded arm shape `Stable`, `stmtsArm_stable`. |
 | `Examples/ElabTotal/Measure.lean` | Clause 2 of `elabKernelTotal` from the arms' guarded decrease (`elabKernelInduction_of_stable`); the unguarded cycle `elabStmtP → elabStmt1 → elabStmtsP` (`rel_cycle_forT_blk`; one decrease proved from `Stable`, two `#guard`ed). |
 | `Solidity/Semantics/Storage/TypeLayout.lean` | AST-only full-word sizes, member offsets and bounds; preserves the established `Solidity.Evm` definitions and equation lemmas. |
