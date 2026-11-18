@@ -8,10 +8,14 @@
 # line is a top-level statement `[const|let|var NAME =] readFileSync(new URL('REL',
 # import.meta.url) | join/resolve(__dirname, 'REL')[, ...]);` (H951 literal reader;
 # a cwd-relative literal is refused, since the run's cwd is not recorded): column 0,
-# bracket depth 0, after a line ending a statement (';' or '}'), with no
-# process.exit/abort/kill before it. ESM evaluates every static import before the
-# importer's body and runs top-level statements in order, so a run that exits
-# successfully performed the read. All frames are .mjs. Opt-in twice by exact
+# bracket depth 0, after a line ending a statement (';' or '}'). No frame module
+# shows a way to end the run early anywhere (functions are hoisted): no
+# exit/abort/kill/reallyExit name, `process` only as process.argv/env/exitCode, no
+# process module import, also inside template substitutions. ESM evaluates static
+# imports before the importer's body and runs top-level statements in order, so
+# a run of these exact objects that completed performed the read; modules the
+# producer imports off the frame path are not audited (one could exit early), so
+# the recorded demonstration of the exact objects remains the gate. All frames are .mjs. Opt-in twice by exact
 # tuple: the producer (P, blob, demonstration revision, argv) in
 # REVIEWED_NODE_PRODUCERS and the route (P, frames, target, target blob) in
 # REVIEWED_NODE_PRODUCER_READS; anything else is rejected. At a measured --ref the
@@ -44,6 +48,18 @@ _NODE_PRODUCER_READ = (r'(?:(?:const|let|var)[ \t]+[\w$]+[ \t]*=[ \t]*)?readFile
                        r'[^;]*\)[ \t]*;[ \t]*')
 
 
+def node_producer_quiet(text):
+    """No way to end the run early that this lexical audit can see, anywhere in
+    the module (functions are hoisted): no exit/abort/kill/reallyExit name, no
+    `process` but process.argv/env/exitCode, no `process` module import or
+    require, also inside template substitutions (which must hold no braces)."""
+    code, literals = _js_mask(text, True)
+    forbidden = r'(?<![\w$])(?:exit|abort|kill|reallyExit)(?![\w$])|(?<![\w$])process(?![\w$])(?!\s*\.\s*(?:argv|env|exitCode)(?![\w$]))'
+    substitutions = re.findall(r'\$\{([^{}`]*)\}', text)
+    return not (re.search(forbidden, code) or any(re.search(forbidden, x) for x in substitutions) or text.count('${') != len(substitutions)
+                or any(v[1:-1] in ('process', 'node:process') for v in literals.values()))
+
+
 def node_producer_top_level(text, number):
     """Line number of text is an unconditional top-level read statement (see above)."""
     if not isinstance(text, str) or not _plain_lines(text) or '\0' in text: return False
@@ -55,7 +71,7 @@ def node_producer_top_level(text, number):
     if sum(before.count(c) for c in '([{') != sum(before.count(c) for c in ')]}'): return False
     previous = [m.rstrip() for m in masked[:number - 1] if m.strip()]
     if previous and not previous[-1].endswith((';', '}')): return False
-    return not re.search(r'\bprocess\s*\.\s*(?:exit|abort|kill|reallyExit)\b|\bprocess\s*\[', before)
+    return node_producer_quiet(text)
 
 
 def node_producer_reads(classifier, graph, rows, producers=None, reads=None):
@@ -80,7 +96,7 @@ def node_producer_reads(classifier, graph, rows, producers=None, reads=None):
         if (root is None or 'derived_from' in root or not root.get('nonpython_entry_role') or not root.get('source_only')
                 or root.get('source_blob') != frames[0]['blob'] or root.get('path') != p): continue
         _check_lines(repo, frames)
-        if any(not f['path'].endswith('.mjs') or not _plain_lines(repo.texts[f['path']]) for f in frames):
+        if any(not f['path'].endswith('.mjs') or not _plain_lines(repo.texts[f['path']]) or not node_producer_quiet(repo.texts[f['path']]) for f in frames):
             raise ValueError('Node producer read frames must be ES modules')
         for caller, callee in zip(frames, frames[1:]):
             line = repo.texts[caller['path']].split('\n')[caller['line'] - 1]
@@ -117,11 +133,15 @@ def node_producer_controls(env):
             "const plain=readFileSync('tests/nprod/top.sol','utf8');\n"                                                    # 13 cwd-relative
             "// readFileSync(new URL('./top.sol',import.meta.url));\n"                                                     # 14 comment
             "const both=readFileSync(new URL('./top.sol',import.meta.url))||readFileSync(new URL('./cond.sol',import.meta.url));\n"  # 15 two reads
-            "process.exit(0);\nconst late=readFileSync(new URL('./late.sol',import.meta.url),'utf8');\n")                  # 17 after exit
+            "process.exitCode=0;\n")
     helper = "import {readFileSync} from 'node:fs';\nconst h=readFileSync(new URL('./helper.sol',import.meta.url),'utf8');\nexport const helper=()=>h;\n"
-    files = {P: prod, H: helper, **{'tests/nprod/' + n + '.sol': n + '\n' for n in ('top', 'inner', 'cond', 'late', 'helper')}}
+    files = {P: prod, H: helper, **{'tests/nprod/' + n + '.sol': n + '\n' for n in ('top', 'inner', 'cond', 'helper')}}
     assert node_producer_top_level(prod, 5) and node_producer_top_level(helper, 2)
-    for n in (3, 7, 10, 12, 14, 17): assert not node_producer_top_level(prod, n), n
+    for n in (3, 7, 10, 12, 14): assert not node_producer_top_level(prod, n), n
+    # Any visible way to end the run early, anywhere in the module, refuses every line.
+    for t in ('process.exit(0);', 'function g(){ process.exit(0); }', 'const {exit}=process;', "import {exit} from 'node:process';",
+              'const p=process;', 'process["exit"](0);', 'const s=`${process.exit(0)}`;', 'const s=`${{a:1}.a}`;', 'x.abort();', "const q=require('process');"):
+        assert not node_producer_top_level(prod + t + '\n', 5) and not node_producer_top_level(prod.replace('if(!a', t + '\nif(!a'), 6), t
     assert not node_producer_top_level(prod.replace('\n', '\r\n'), 5) and not node_producer_top_level(None, 5) and not node_producer_top_level(prod, '5')
     nc = commit(files, 'Node producer'); N = nc.ref; nl = commit({'tests/unrelated.txt': 'nprod later\n'}, 'Node producer later')
     iface = nonpython_entry_interface(P, prod); assert iface is not None
@@ -140,7 +160,7 @@ def node_producer_controls(env):
         assert base[T]['class'] != 'keep' and NONPY_ENTRY_PREFIX + P in base_model['entry_points']
         rejected(nl, 'unreviewed Node producer read', reads(row()), standalone=[role])
         REVIEWED_NODE_PRODUCER_READS = frozenset(key(r) for r in [row(), hop] + [row([frame(nc, P, n)], t) for n, t in (
-            (7, 'tests/nprod/inner.sol'), (10, 'tests/nprod/cond.sol'), (12, 'tests/nprod/cond.sol'), (13, T), (14, T), (15, T), (17, 'tests/nprod/late.sol'))])
+            (7, 'tests/nprod/inner.sol'), (10, 'tests/nprod/cond.sol'), (12, 'tests/nprod/cond.sol'), (13, T), (14, T), (15, T))])
         rejected(nl, 'lacks a demonstrated producer', reads(row()), standalone=[role])
         REVIEWED_NODE_PRODUCERS = frozenset({(P, blob(nc, P), N, ('node', P, 'IN', 'OUT'))})
         for good, target in ((row(), T), (hop, 'tests/nprod/helper.sol')):
@@ -150,7 +170,7 @@ def node_producer_controls(env):
             assert chain['entry']['consumer_route']['kind'] == 'node-producer-read' and chain['edges'][-1]['operation'] == NODE_PRODUCER_OPERATION
             assert model['entry_points'][NONPY_ENTRY_PREFIX + P]['source_only'] and 'validated:' + P not in model['entry_points']
         assert sorted(p for p, r in run(nl, reads(row()), standalone=[role])[1].items() if canonical(r) != canonical(base[p])) == [T]  # one read only
-        for n, t in ((7, 'tests/nprod/inner.sol'), (10, 'tests/nprod/cond.sol'), (12, 'tests/nprod/cond.sol'), (13, T), (14, T), (15, T), (17, 'tests/nprod/late.sol')):
+        for n, t in ((7, 'tests/nprod/inner.sol'), (10, 'tests/nprod/cond.sol'), (12, 'tests/nprod/cond.sol'), (13, T), (14, T), (15, T)):
             rejected(nl, 'top-level literal readFileSync', reads(row([frame(nc, P, n)], t)), standalone=[role])
         # No H997 role, or the role anchoring the ordinary static form: no credit.
         assert run(nl, reads(row()))[1][T]['class'] != 'keep'
@@ -160,7 +180,7 @@ def node_producer_controls(env):
                              (row([frame(nc, H, 2)], 'tests/nprod/helper.sol'), 'does not start at its producer')):
             rejected(nl, message, reads(bad), standalone=[role])
         # The frame and target objects must be the ones at the demonstration revision.
-        later =commit({T: 'top changed\n'}, 'Node producer data changed'); restored = commit({T: 'top\n'}, 'Node producer data restored')
+        later = commit({T: 'top changed\n'}, 'Node producer data changed'); restored = commit({T: 'top\n'}, 'Node producer data restored')
         REVIEWED_NODE_PRODUCERS = frozenset({(P, blob(nc, P), later.ref, ('node', P))})
         assert run(restored, reads(row()), standalone=[role])[1][T]['class'] != 'keep'
         REVIEWED_NODE_PRODUCERS = frozenset({(P, blob(nc, P), N, ('node', P))})

@@ -7,11 +7,13 @@
 #   if [ -n "${LAKE_CONFIG:-}" ]; then A=(-f "$LAKE_CONFIG"); fi
 # work is only `work=$(mktemp -d)`, and the working directory is only ever the
 # repository root (`cd "$(git rev-parse --show-toplevel)"`, or `cd "$root"` after
-# the one `root=$(git rev-parse --show-toplevel)`). Before the line: here-document
-# bodies are skipped to their exact terminator; other lines have balanced quotes,
-# no backquote or continuation, no other cd/pushd/popd, no alias, eval, source,
-# exec, exit, return, function definition or declare/unset of a variable, and
-# every block is closed. Lexical; the review set gates. The driver's environment
+# the one `root=$(git rev-parse --show-toplevel)`). Every line before it is on a
+# whitelist: the bash shebang, blank and column-0 comment lines, `set -euo
+# pipefail`, `trap 'rm -rf "$work"' EXIT`, those assignments and cd lines, and
+# one setup writer `python3 - "$work/setup.json" <<'TAG'` whose here-document
+# body is skipped to its exact terminator; any other line refuses the form, so
+# no block, operator, alias, function, exit or directory change can precede the
+# driver line. The review set gates. The driver's environment
 # (LAKE_CONFIG, PATH, the generated setup file) is not audited: it only bounds
 # consumption credit. Rows go through the registry's lean-fixtures part (the H1015
 # rules of lean_fixture_root, unchanged): consumption only, no elaboration, pass,
@@ -33,6 +35,8 @@ _B3_SETUP_LINE = (r'LEAN_NUM_THREADS=1 lake "\$\{([A-Za-z_]\w*)\[@\]\}" env lean
                   r'[ \t]+([A-Za-z0-9_][\w./+-]*)')
 _B3_TOPLEVEL = 'root=$(git rev-parse --show-toplevel)'
 _B3_REPOSITORY_CD = ('cd "$(git rev-parse --show-toplevel)"', 'cd "$root"')
+_B3_PREAMBLE = ('set -euo pipefail', 'trap \'rm -rf "$work"\' EXIT')
+_B3_SETUP_WRITER = r'python3 - "\$work/setup\.json" <<\'([A-Z]+)\''
 
 
 def lean_setup_env_invocation(text, path, line):
@@ -42,37 +46,20 @@ def lean_setup_env_invocation(text, path, line):
     if type(line) is not int or not 1 <= line <= len(lines): return False
     match = re.fullmatch(_B3_SETUP_LINE, lines[line - 1])
     if match is None or match[2] != path or _clean(path) != path: return False
-    array = match[1]; before = lines[:line - 1]
-    expected = {array + '=()': 1, 'if [ -n "${LAKE_CONFIG:-}" ]; then ' + array + '=(-f "$LAKE_CONFIG"); fi': 1, 'work=$(mktemp -d)': 1}
-    if any(before.count(k) != v for k, v in expected.items()): return False
-    assignment = lambda name: r'(?<![\w$])' + name + r'(?:\[[^\]]*\])?\+?='
-    depth = 0; heredoc = None; root = False; seen = []
-    for n, raw in enumerate(before, 1):
+    array = match[1]; empty = array + '=()'; optional = 'if [ -n "${LAKE_CONFIG:-}" ]; then ' + array + '=(-f "$LAKE_CONFIG"); fi'
+    seen = []; heredoc = None; root = writer = False
+    for n, raw in enumerate(lines[:line - 1], 1):
         if heredoc is not None:
-            if (raw.lstrip('\t') if heredoc[0] else raw) == heredoc[1]: heredoc = None
+            if raw == heredoc: heredoc = None
             continue
-        if n == 1 and raw.startswith('#!') or not raw.strip() or raw.strip().startswith('#'): continue
-        if raw in expected: seen.append(raw)
-        elif re.search(assignment(re.escape(array)) + '|' + assignment('work'), raw): return False
-        if raw == _B3_TOPLEVEL: root = True
-        elif re.search(assignment('root'), raw): return False
-        if raw in _B3_REPOSITORY_CD and (raw == _B3_REPOSITORY_CD[0] or root): continue
-        try: words = shlex.split(raw, comments=True)
-        except ValueError: return False
-        if '`' in raw or raw.rstrip().endswith('\\') or re.search(r'\w\s*\(\s*\)', raw): return False
-        if re.search(r'(?<![\w$./-])(?:cd|pushd|popd|alias|eval|source|function|exit|return|exec|unalias|enable|builtin|hash|declare|typeset'
-                     r'|unset|readonly|local|mapfile|readarray|read)(?![\w-])|(?:^|[;&|]\s*)\.\s', raw): return False
-        unquoted = re.sub(r'\'[^\']*\'|"(?:[^"\\]|\\.)*"', '', raw)
-        if raw.count('<<') != unquoted.count('<<'): return False  # a quoted << is never a here-document
-        here = re.findall(r'(?<!<)<<(-?)[ \t]*([\'"]?)([A-Za-z_]\w*)\2', raw)
-        if len(here) > 1: return False
-        for word in words:
-            depth += word in ('for', 'while', 'until', 'if', 'case', 'select', '{') or 0
-            depth -= word in ('done', 'fi', 'esac', '}') or 0
-            if depth < 0: return False
-        if here: heredoc = (here[0][0] == '-', here[0][2])
-    empty, optional = list(expected)[:2]
-    return depth == 0 and heredoc is None and sorted(seen) == sorted(expected) and seen.index(empty) < seen.index(optional)
+        opener = re.fullmatch(_B3_SETUP_WRITER, raw)
+        if n == 1 and raw == '#!/usr/bin/env bash' or not raw or raw.startswith('#') or raw in _B3_PREAMBLE: continue
+        if opener and not writer: heredoc = opener[1]; writer = True; continue
+        if raw == _B3_TOPLEVEL and not root: root = True; continue
+        if raw == _B3_REPOSITORY_CD[0] or raw == _B3_REPOSITORY_CD[1] and root: continue
+        if raw in (empty, optional, 'work=$(mktemp -d)'): seen.append(raw); continue
+        return False  # anything else in the preamble is refused
+    return heredoc is None and sorted(seen) == sorted((empty, optional, 'work=$(mktemp -d)')) and seen.index(empty) < seen.index(optional)
 
 
 LEAN_FIXTURE_FORMS.append(lean_setup_env_invocation)
@@ -108,9 +95,14 @@ def lean_fixture_b3_controls(env):
     assert not lean_setup_env_invocation(lit, 'tests/b3/Other.lean', n1) and not lean_setup_env_invocation(lit, X, n1 - 1)
     assert not lean_check_invocation(lit, X, n1) and lean_gate_invocation(LEAN_FIXTURE_FORM, lit, X, n1) and not lean_gate_invocation(LEAN_CHECK_FORM, lit, X, n1)
     head, tail = pre.split('args=()\n')
+    root_twice = 'root=$(git rev-parse --show-toplevel)'
+    writer_twice = 'python3 - "$work/setup.json" <<\'PY\'\nPY'
     for t in ('cd tests', 'cd "$root"', 'pushd x', 'exec bash x.sh', 'exit 0', 'return 0', 'f() { :; }', 'function f { :; }', 'alias lake=true', 'eval "$x"',
               'source x.sh', '. x.sh', 'echo `x`', 'echo \\', ": '", 'for x in a; do', 'if true; then', '{', 'cat <<EOF\nx', 'args+=(x)', 'args[0]=x',
-              'declare -n a=args', 'unset args', 'work=/tmp', 'root=/tmp', 'readarray args < f', 'read -a args'):
+              'declare -n a=args', 'unset args', 'work=/tmp', 'root=/tmp', 'readarray args < f', 'read -a args',
+              'if [ -n "${RUN:-}" ]; then\necho fi', 'while false; do\necho done', '[ -z "${RUN:-}" ] ||', 'echo hi # <<true\ncd tests\ntrue',
+              "c''d tests", 'c\\d tests', "ex''it 0", 'X=c\n"${X}d" tests', 'trap "c\'\'d /" DEBUG', 'for root in /tmp; do :; done',
+              'printf -v root %s /tmp', 'getopts r root', root_twice, writer_twice):
         bad = head.replace('cd "$root"\n', '') if t == 'cd "$root"' else head
         if t == 'cd "$root"': bad = bad.replace('root=$(git rev-parse --show-toplevel)\n', '')
         text = bad + t + '\nargs=()\n' + tail + L1 + '\n'

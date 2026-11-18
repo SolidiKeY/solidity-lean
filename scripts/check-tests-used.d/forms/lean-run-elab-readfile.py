@@ -10,8 +10,11 @@
 # REVIEWED_RUN_ELAB_READS; anything else is rejected. At a measured --ref the row
 # credits its one target while FILE and the target are those blobs (stale
 # otherwise: no credit, no error), FILE is a current CI root whose command
-# elaborates exactly FILE from the repository root, nothing in FILE before the
-# line is #exit, and the line re-derives, through the H951 reader, to one literal
+# elaborates exactly FILE from the repository root (otherwise stale too), no
+# #exit at any indentation precedes the line, the line is the first statement of
+# a column-0 `run_elab do` block, binding the read with `←` (`let P ← IO.FS.readFile
+# "..."` or `let P := f (← IO.FS.readFile "...")`), so it runs whenever the
+# command does, and the line re-derives, through the H951 reader, to one literal
 # read in a column-0 run_elab command. Consumption credit only: no elaboration,
 # pass, proof, import or runtime credit; the CI root and every other form are
 # unchanged.
@@ -31,6 +34,9 @@ REVIEWED_RUN_ELAB_READS = frozenset({
     (_RUN_ELAB_FILE, _RUN_ELAB_BLOB, 24, 'tests/automation/DirectRuntimeAdmission.ast.json', '3e13c01a230936adf3d721a173fdc7549323d7d5'),
     (_RUN_ELAB_FILE, _RUN_ELAB_BLOB, 45, 'tests/automation/DirectRuntimeAdmission.ast.json', '3e13c01a230936adf3d721a173fdc7549323d7d5'),
 })
+
+
+_RUN_ELAB_FIRST = r'  let [^\n]*?(?:\(←|←)[ \t]*IO\.FS\.readFile[ \t]*"'
 
 
 def _run_elab_command(command, path):
@@ -61,10 +67,13 @@ def lean_run_elab_reads(classifier, graph, rows, reviewed=None):
         root = graph.roots.get(runner)
         if (root is None or root.get('kind') != 'CI' or root.get('path') != path or 'derived_from' in root or root.get('source_only')
                 or root.get('cwd', '.') != '.' or not path.endswith('.lean') or not _run_elab_command(root.get('command', ''), path)):
-            raise ValueError('Lean run_elab read requires a CI root elaborating the file')
-        text = repo.texts[path]
-        if not _plain_lines(text) or re.search(r'(?m)^#exit\b', classifier['lean_code'](text)[:_offset(text, reader['line'])]):
+            continue  # the workflow no longer elaborates exactly this file: stale, no credit
+        text = repo.texts[path]; lines = text.split('\n')
+        if not _plain_lines(text) or re.search(r'(?m)^\s*#exit\b', classifier['lean_code'](text)[:_offset(text, reader['line'])]):
             raise ValueError('Lean run_elab read follows #exit or ambiguous line breaks')
+        # Unconditional: the first statement of a column-0 `run_elab do`, binding the read with `←`.
+        if reader['line'] < 2 or lines[reader['line'] - 2] != 'run_elab do' or not re.match(_RUN_ELAB_FIRST, lines[reader['line'] - 1]):
+            raise ValueError('Lean run_elab read is not the first statement of a run_elab do block')
         if _lean_read(classifier, repo, path, reader['line'], '.', r'run_elab') != target:
             raise ValueError('Lean run_elab read target is not the literal run_elab operand')
         if classifier['excluded'](target) or classifier['excluded'](path): continue
@@ -86,13 +95,17 @@ def lean_run_elab_controls(env):
     assert _run_elab_command('lake env lean -j1 --tstack=131072 tests/E.lean', 'tests/E.lean')
     for c in ('lake env lean tests/F.lean', 'lake lean tests/E.lean', 'lean --run tests/E.lean', 'lean tests/E.lean x', 'lean "tests/E.lean', 'node tests/E.lean'):
         assert not _run_elab_command(c, 'tests/E.lean'), c
-    E, F, D, V, W = 'tests/elab/E.lean', 'tests/elab/F.lean', 'tests/elab/data.txt', 'tests/elab/eval.txt', 'tests/elab/late.txt'
+    E, F, G, D, V, W = 'tests/elab/E.lean', 'tests/elab/F.lean', 'tests/elab/G.lean', 'tests/elab/data.txt', 'tests/elab/eval.txt', 'tests/elab/late.txt'
     elab = ('import Lean\nopen Lean\nrun_elab do\n  let s ← IO.FS.readFile "tests/elab/data.txt"\n  logInfo s\n'
             '#eval IO.FS.readFile "tests/elab/eval.txt"\n-- run_elab IO.FS.readFile "tests/elab/data.txt"\n'
             'def f : IO String := IO.FS.readFile "tests/elab/data.txt"\nrun_elab do\n  let a ← IO.FS.readFile "tests/elab/data.txt"\n'
             '  let b ← IO.FS.readFile "tests/elab/eval.txt"\n  logInfo (a ++ b)\n#exit\nrun_elab do\n  let s ← IO.FS.readFile "tests/elab/late.txt"\n')
+    guarded = ('import Lean\nopen Lean\nrun_elab do\n  if false then\n    let s ← IO.FS.readFile "tests/elab/data.txt"\n    logInfo s\n'
+               'run_elab do\n  let a ← pure ()\n  let s ← IO.FS.readFile "tests/elab/data.txt"\n  logInfo s\n  #exit\n'
+               'run_elab do\n  let s ← IO.FS.readFile "tests/elab/data.txt"\n')
     ec = commit({'.github/workflows/elab.yml': 'jobs:\n  t:\n    steps:\n      - run: lake env lean -j1 --tstack=131072 tests/elab/E.lean\n'
-                 '      - run: lean tests/elab/F.lean extra\n', E: elab, F: elab, D: 'd\n', V: 'v\n', W: 'w\n'}, 'run_elab reads')
+                 '      - run: lean tests/elab/F.lean extra\n      - run: lean tests/elab/G.lean\n', E: elab, F: elab, G: guarded,
+                 D: 'd\n', V: 'v\n', W: 'w\n'}, 'run_elab reads')
     el = commit({'tests/unrelated.txt': 'run_elab later\n'}, 'run_elab later')
     row = lambda line=4, target=D, path=E, **k: dict({'runner': path, 'frames': [frame(ec, path, line)], 'form': RUN_ELAB_FORM, 'target': target,
                                                       'target_blob': blob(ec, target), 'purpose': 'Synthetic run_elab read.'}, **k)
@@ -102,7 +115,8 @@ def lean_run_elab_controls(env):
     saved = REVIEWED_RUN_ELAB_READS
     try:
         rejected(el, 'unreviewed Lean run_elab read', reads(row()))
-        REVIEWED_RUN_ELAB_READS = frozenset((p, blob(ec, p), n, t, blob(ec, t)) for p in (E, F) for n, t in ((4, D), (6, V), (7, D), (8, D), (10, D), (11, V), (15, W)))
+        REVIEWED_RUN_ELAB_READS = frozenset((p, blob(ec, p), n, t, blob(ec, t)) for p in (E, F) for n, t in ((4, D), (6, V), (7, D), (8, D), (10, D), (11, V), (15, W))) | frozenset(
+            (G, blob(ec, G), n, D, blob(ec, D)) for n in (5, 9, 13))
         for repo in (ec, el):
             model, rows = run(repo, reads(row())); plain = run(repo)[1]
             chain = rows[D]['runner_chain']
@@ -110,12 +124,15 @@ def lean_run_elab_controls(env):
             assert chain['edges'] == [{'source': E, 'target': D, 'line': 4, 'operation': RUN_ELAB_OPERATION, 'kind': 'consumes', 'validated_for': chain['root']}]
             changed = sorted(p for p, r in rows.items() if canonical(r) != canonical(plain[p]))
             assert changed == [D], changed  # one read, nothing else
-        # Refused shapes: the #eval line (H951's lean-readFile form), a comment, a def body, two reads on one
-        # line, a read after #exit, a non-CI file, extra frames, a wrong runner or target, a malformed row.
-        for line, target, text in ((6, V, 'literal run_elab operand'), (7, D, 'literal run_elab operand'), (8, D, 'literal run_elab operand'),
-                                   (15, W, '#exit'), (4, V, 'unreviewed')):
+        # Refused shapes: the #eval line (H951's lean-readFile form), a comment, a def body, a later statement,
+        # a read after #exit, extra frames, a wrong runner or target, a malformed row.
+        for line, target, text in ((6, V, 'first statement'), (7, D, 'first statement'), (8, D, 'first statement'),
+                                   (15, W, '#exit'), (4, V, 'unreviewed'), (11, V, 'first statement')):
             rejected(el, text, reads(row(line, target)))
-        rejected(el, 'CI root elaborating the file', reads(row(path=F)))
+        assert run(el, reads(row(10, D)))[1][D]['class'] == 'keep'
+        for line, text in ((5, 'first statement'), (9, 'first statement'), (13, '#exit')):  # a guarded, later or #exit-shadowed read
+            rejected(el, text, reads(row(line, D, G)))
+        assert run(el, reads(row(path=F)))[1][D]['class'] != 'keep'  # F's command passes an extra argument: no CI root for it
         rejected(el, 'elaborated CI file', reads(row(frames=[frame(ec, E, 3), frame(ec, E, 4)])))
         rejected(el, 'elaborated CI file', reads(row(runner=F)))
         for bad in (row(form='lean-readFile'), row(purpose=' '), dict(row(), extra=1), row(target_blob=None)):
@@ -126,7 +143,7 @@ def lean_run_elab_controls(env):
             assert run(edited, reads(row()))[1][D]['class'] != 'keep', change
             commit({k: (elab if k == E else 'd\n') for k in change}, 'run_elab restored')
         moved = commit({'.github/workflows/elab.yml': 'jobs:\n  t:\n    steps:\n      - run: lean tests/elab/F.lean\n'}, 'run_elab moved')
-        rejected(moved, 'CI root elaborating the file', reads(row()))
+        assert run(moved, reads(row()))[1][D]['class'] != 'keep'  # no longer elaborated: stale, never an error
     finally: REVIEWED_RUN_ELAB_READS = saved
 
 
