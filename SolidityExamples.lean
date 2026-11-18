@@ -147,6 +147,7 @@ import Solidity.Examples.Goals.IntrinsicSession
 import Solidity.Examples.Goals.IntrinsicStorage
 import Solidity.Examples.Goals.Loops
 import Solidity.Examples.Goals.LoopsProducer
+import Solidity.Examples.Goals.LoweringSim
 import Solidity.Examples.Goals.OpcodeEval
 import Solidity.Examples.Goals.Panic
 import Solidity.Examples.Goals.PanicProvenance
@@ -156,6 +157,8 @@ import Solidity.Examples.Goals.ProseCalibrated
 import Solidity.Examples.Goals.Shrink
 import Solidity.Examples.Goals.Taclets
 import Solidity.Examples.Goals.Total
+import Solidity.Examples.Goals.YulLayoutPilot
+import Solidity.Examples.Goals.YulLayoutView
 import Solidity.Examples.InputReduction
 import Solidity.Examples.IntrinsicSession.Laws.Boundary
 import Solidity.Examples.IntrinsicSession.Laws.Common

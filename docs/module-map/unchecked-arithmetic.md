@@ -1,4 +1,8 @@
 <!-- Generated from docs/module-map/unchecked-arithmetic.d/ by scripts/coord-tools/fragments.sh; edit the fragments there, not this file. -->
+| `Correctness/Lowering/Total/Main.lean` | The loop contract composed with the production and family theorems: it is interpretation faithfulness and `Residual` (unproved); `production_correct` derives the consumer from `Residual` and `FullDomain`. |
+| `Correctness/Lowering/Total/Decode.lean` | The stage-1 raw-to-Source decoder `Decode.decode`: a chosen Source spelling of the raw input, then Source inference and resolution; every other input is a gap. |
+| `Correctness/Lowering/Total/Spells.lean` | The inductive spelling relation `Spells`; the decoder is sound for it and complete if Source inference is (`InferComplete`, unproved). |
+| `Correctness/Lowering/Total/Boundary.lean` | The stage-1 boundary: observation policies, general simulation, allocation trace, state relation `loopRel`, and `loopResidualStage1_iff` (four obligations left, unproved; known defects listed). |
 | `Correctness/Lowering/Total/Contract.lean` | Universal loop-production candidate and explicit semantic coverage obligations. |
 | `Correctness/Lowering/Total/Relation.lean` | Finite lowering derivations and caller-preserving fresh-name equivalence. |
 | `Correctness/Lowering/Total/Coverage.lean` | `LowersTo` is functional, and its exact raw output on each loop-family input template. |

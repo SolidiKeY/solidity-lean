@@ -43,6 +43,9 @@
 | `Roadmap/G49Final/PassChain.lean` | Frozen G01 certificate-chain backfill: composes the existing Lowering, Compilation and Execution certificates at the lowered world and assembled artifact; constructs no producer. |
 | `Goals/IntrinsicSession.lean` | The intrinsic-session plan goal `intrinsicSessionSemantics` (`is0-intrinsic-session`) with its `IntrinsicSession` law vocabulary, moved out of `Goals/Plan.lean` (H666). |
 | `Examples/Goals/IntrinsicSession.lean` | The pinned `#roadmap_goal` check and negative controls for `intrinsicSessionSemantics`. |
+| `Goals/LoweringDiagram.lean` | The `Shrink.Lowering` simulation-diagram vocabulary (`Diagram`, `CallerBound`, `productionNames`, …) that `loweringBySimulation` is stated over; no goal. |
+| `Goals/LoweringSim.lean` | `loweringBySimulation`: the H517 lowering shrink goal, open (one simulation diagram over the actual production lowering on t0's fragment; session lift deferred by H556). |
+| `Examples/Goals/{LoweringSim,YulLayoutView,YulLayoutPilot}.lean` | One pinned `#roadmap_goal` open check per shrink goal; `Examples/Goals/Shrink.lean` imports the three. |
 | `Goals.lean`, `Tools/Goal.lean`, `Examples/Goals.lean` | Roadmap `@[goal]` definitions, the attribute and `#roadmap`, and pinned output, respectively. |
 | `Goals/IntrinsicStorage.lean` | The storage/preimage strengthening `intrinsicStorageAccounting` (`is0-intrinsic-session`) of the intrinsic-session goal: `IntrinsicSession.Laws` plus `StorageLaws` (concrete `View.stored`, `FrameInputs`, `call_inputs`, `create_inputs` over `IntrinsicStorage.Preimages`). |
 | `Examples/Goals/IntrinsicStorage.lean` | The pinned open `#roadmap_goal` check for `intrinsicStorageAccounting`, with storage layout and preimage controls. |

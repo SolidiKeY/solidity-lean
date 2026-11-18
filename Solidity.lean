@@ -2463,11 +2463,15 @@ import Solidity.Correctness.Lowering.Loops.WhileReset
 import Solidity.Correctness.Lowering.Sim.Session.Source
 import Solidity.Correctness.Lowering.Sim.Session.Target
 import Solidity.Correctness.Lowering.Sim.Session.Target.Machine
+import Solidity.Correctness.Lowering.Total.Boundary
 import Solidity.Correctness.Lowering.Total.Contract
 import Solidity.Correctness.Lowering.Total.Coverage
 import Solidity.Correctness.Lowering.Total.Coverage.Checks
+import Solidity.Correctness.Lowering.Total.Decode
+import Solidity.Correctness.Lowering.Total.Main
 import Solidity.Correctness.Lowering.Total.Production
 import Solidity.Correctness.Lowering.Total.Relation
+import Solidity.Correctness.Lowering.Total.Spells
 import Solidity.Correctness.Lowering.Unchecked.CallWitness
 import Solidity.Correctness.Lowering.Unchecked.CalleeMode
 import Solidity.Correctness.Lowering.Unchecked.Composition
@@ -3318,6 +3322,8 @@ import Solidity.Goals.Headline
 import Solidity.Goals.IntrinsicSession
 import Solidity.Goals.IntrinsicStorage
 import Solidity.Goals.Loops
+import Solidity.Goals.LoweringDiagram
+import Solidity.Goals.LoweringSim
 import Solidity.Goals.Panic
 import Solidity.Goals.PanicProvenance
 import Solidity.Goals.PanicRun
