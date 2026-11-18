@@ -5360,8 +5360,8 @@ import Solidity.Yul.Interfaces.P16
 import Solidity.Yul.Layout.Geometric
 import Solidity.Yul.Layout.Geometry
 import Solidity.Yul.Layout.Instances.Memory
-import Solidity.Yul.Layout.Laws.Write
 import Solidity.Yul.Layout.Laws.Read
+import Solidity.Yul.Layout.Laws.Write
 import Solidity.Yul.Layout.ReadSequence
 import Solidity.Yul.Layout.ScalarPilot
 import Solidity.Yul.LocalBlock
