@@ -53,14 +53,14 @@ def python_argument_tuple_loop(text):
     if len(loops) != 1 or loops[0].orelse or any(isinstance(n, ast.NamedExpr) for n in ast.walk(loops[0])): return None
     loop = loops[0]
     if not (isinstance(name, ast.Name) and isinstance(loop.target, ast.Name) and loop.target.id == name.id
-            and isinstance(loop.iter, ast.Tuple) and loop.iter.elts and name.lineno == name.end_lineno): return None
+            and isinstance(loop.iter, ast.Tuple) and loop.iter.elts and call.lineno == call.end_lineno): return None
     if not all(isinstance(e, ast.Constant) and type(e.value) is str for e in loop.iter.elts): return None
     names = [e.value for e in loop.iter.elts]
     if len(set(names)) != len(names) or any(not n or n.startswith('-') for n in names): return None
     edited = py_arg_splice(text, [(name.lineno, name.col_offset, name.end_col_offset, repr(names[0]))])
     interface = None if edited is None else python_argument_interface(edited)
     if interface is None: return None
-    positionals = {tuple(x) for x in interface['positionals']} | {(name.lineno, n) for n in names}
+    positionals = {tuple(x) for x in interface['positionals']} | {(call.lineno, n) for n in names}
     return dict(interface, positionals=[list(x) for x in sorted(positionals)])
 
 
@@ -68,8 +68,8 @@ def python_argument_dunder_sys(text):
     """argv reads through `__import__("sys").argv`, as if through `import sys`.
 
     Every `__import__` in the program is the builtin called as exactly `__import__("sys")` (no other argument) whose
-    value only has its `argv` read; nothing binds, deletes or names `__import__` otherwise (no attribute of that
-    name either). Each call is read as `sys` and `import sys` is appended; the audited interface then refuses any
+    value only has its `argv` read; nothing names `__import__` otherwise: no binding, attribute or string of that
+    name, and no `__builtins__` or `builtins` (a computed rebinding stays outside this syntactic audit). Each call is read as `sys` and `import sys` is appended; the audited interface then refuses any
     write or method call on argv, any other binding of sys and the rest as for `import sys`.
     """
     tree = py_arg_parse(text)
@@ -79,12 +79,14 @@ def python_argument_dunder_sys(text):
     for n in ast.walk(tree):
         if isinstance(n, ast.Global) or isinstance(n, ast.Nonlocal):
             if '__import__' in n.names: return None
-        elif isinstance(n, ast.Attribute) and n.attr == '__import__': return None
+        elif isinstance(n, ast.Attribute) and n.attr in ('__import__', '__builtins__'): return None
+        elif isinstance(n, ast.Constant) and n.value in ('__import__', '__builtins__', 'builtins'): return None
+        elif isinstance(n, ast.Name) and n.id == '__builtins__': return None
         elif isinstance(n, ast.Name) and n.id == '__import__':
             call = parents.get(n)
             if not (isinstance(n.ctx, ast.Load) and isinstance(call, ast.Call) and call.func is n): return None
             calls.append(call)
-        elif any(getattr(n, field, None) == '__import__' for field in ('name', 'asname', 'arg')): return None
+        elif any(getattr(n, field, None) in ('__import__', 'builtins') for field in ('name', 'asname', 'arg', 'module')): return None
     for call in calls:
         parent = parents.get(call)
         if (call.keywords or len(call.args) != 1 or not isinstance(call.args[0], ast.Constant) or call.args[0].value != 'sys'
@@ -140,7 +142,7 @@ def python_argument_form_controls(env):
                     loop.replace('p.parse_args()\n', 'else: pass\np.parse_args()\n'),
                     loop.replace('p.parse_args()', 'p.parse_args(["x"])'), loop + 'p.add_argument(NAME)\n',
                     loop.replace('add_argument(name)', 'add_argument(name, default=(name := "x"))'),
-                    loop.replace('\n', '\r\n')):
+                    loop.replace('add_argument(name)', 'add_argument(\n        name)'), loop.replace('\n', '\r\n')):
         assert python_argument_tuple_loop(variant) is None, variant
     dunder = 'out = __import__("sys").argv[1]\nrest = __import__("sys").argv[2:]\n'
     assert python_argument_dunder_sys(dunder) == {'argv_lines': [1, 2], 'argv_tail_lines': [2], 'positionals': [], 'subcommands': []}
@@ -149,7 +151,8 @@ def python_argument_form_controls(env):
                     '__import__ = print\n__import__("sys").argv[1]\n', 'import builtins\nbuiltins.__import__("sys").argv[1]\n',
                     'def f(__import__): pass\n__import__("sys").argv[1]\n', 'sys = 1\n__import__("sys").argv[1]\n',
                     'from os import path as __import__\n__import__("sys").argv[1]\n', 'f(__import__)\n__import__("sys").argv[1]\n',
-                    '__import__(\n"sys").argv[1]\n'):
+                    '__import__(\n"sys").argv[1]\n', 'globals()["__import__"] = print\n__import__("sys").argv[1]\n',
+                    '__builtins__.x = 1\n__import__("sys").argv[1]\n', 'from builtins import print\n__import__("sys").argv[1]\n'):
         assert python_argument_dunder_sys(variant) is None, variant
 
 
