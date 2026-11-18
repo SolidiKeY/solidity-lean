@@ -1,8 +1,7 @@
 import Solidity.Goals.LoweringSession
 import Solidity.Correctness.Lowering.Sim.Session.Target
 
-/-! The backward half of the session-level lift (plan step
-`ls2s-session-diagrams`, lane backward): the resource record.
+/-! The backward half of the session-level lift: the resource record.
 
 `Shrink.Lowering.Lift` asks a `PassCorrect` between `sourceBehaviour` and
 `targetBehaviour`, which are not `Behaviour.ofLang` of the two frozen languages
@@ -20,7 +19,9 @@ record has exactly the type `Sim.lang_passCorrect` consumes.
 * `backward`: the frozen backward clause from a reverse diagram family.
 
 The reverse diagram itself is not here: between these two machines none exists
-once a target session has no last action (`Backward/NoDiagram.lean`). -/
+for a start whose deployment completes in an environment that issues a credit
+at every boundary (`Backward/NoDiagram.lean`). For such starts `backward` and
+`backwardResources` are vacuous as the machines stand. -/
 namespace Solidity.Correctness.Lowering.Sim.Session
 
 open Solidity.Roadmap (Event Outcome SessionEnv Lang Fixed)

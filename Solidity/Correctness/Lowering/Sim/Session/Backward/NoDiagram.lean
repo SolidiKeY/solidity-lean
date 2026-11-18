@@ -1,8 +1,8 @@
 import Solidity.Correctness.Lowering.Sim.Session.Backward
 
-/-! No reverse diagram into the Source session machine (plan step
-`ls2s-session-diagrams`, lane backward): why `Backward.lean` takes the reverse
-diagram family as a hypothesis.
+/-! No reverse diagram into the Source session machine, for a session whose
+deployment completes: why `Backward.lean` takes the reverse diagram family as
+a hypothesis.
 
 `sourceMachine` chooses its horizon at its first step and spends one unit of
 action budget per later step, so past the start it reaches finitely many
@@ -13,12 +13,14 @@ such diagram exists for a machine `T` whose every reachable state steps to a
 longer history (`no_reverse_diagram`); this reads neither the lowering nor a
 relation between the two sides.
 
-The frozen target machine is such a `T` whenever its session has no last
-action and no frame stops it: `target_grows` shows it for an environment that
-issues a credit at every boundary, after a deployment that completes
-(`no_reverse_diagram_credits`). The premise `∀ e, Diagram (T e) (S (envAbs e))`
-of `Sim.lang_passCorrect` is therefore false for the two frozen session
-machines, whatever the program and its compilation. -/
+The frozen target machine is such a `T` in an environment that issues a credit
+at every boundary, provided the deployment's frame completes there
+(`target_grows`, `no_reverse_diagram_credits`). So for every Source program
+and every session start whose deployment completes in such an environment, the
+premise `∀ e, Diagram (T e) (S (envAbs e))` of `Sim.lang_passCorrect` is false
+for the two frozen session machines. Nothing is shown for a start whose
+deployment stops the session in every environment (a frame that exhausts or
+diverges): its target machine rests at an empty history. -/
 namespace Solidity.Correctness.Lowering.Sim.Session
 
 open Solidity.Roadmap (Event Outcome SessionEnv Fixed Bytes Action)

@@ -55,8 +55,8 @@ example (C : Contract) (F : Fixed) {E : Source.Env} (P : Source.SrcProg E) (e : 
       (sourceMachine P (envAbs (credits e)))) : False :=
   no_reverse_diagram_credits P F _ _ (noCode_deploys C F _) (fun _ _ => ⟨_, _, rfl⟩) D
 
-/-- So the reverse premise of `lang_passCorrect` fails for the frozen machines,
-already on allowed environments. -/
+/-- So the reverse premise of `lang_passCorrect` fails for the frozen machines at
+this start (its deployment completes), already on allowed environments. -/
 example (C : Contract) (F : Fixed) {E : Source.Env} (P : Source.SrcProg E) (e : SessionEnv)
     (allowed : e.Allowed) :
     ¬ ∀ e', e'.Allowed → Nonempty (Solidity.Correctness.Sim.Diagram
