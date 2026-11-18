@@ -1,0 +1,1 @@
+| `Examples/ElabTotal/Values.lean` | Checks of the value rewrites' named equations, now that the rewrites of `Syntax/Elab/Values.lean` are total: `bytesOf?`, `fnTyOfExpr`, `rawFnTyOfExpr?` (structural; unfolded by equation and by `rfl`), `narrowPure` (well-founded through `List.mapM`; unfolded by equation), each pinned by `#guard`s on the compiled function. |
