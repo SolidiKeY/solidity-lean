@@ -2475,6 +2475,10 @@ import Solidity.Correctness.Lowering.Sim.Session.Source
 import Solidity.Correctness.Lowering.Sim.Session.Target
 import Solidity.Correctness.Lowering.Sim.Session.Target.Machine
 import Solidity.Correctness.Lowering.Sim.Smoke
+import Solidity.Correctness.Lowering.Sim.Stmt.Frame
+import Solidity.Correctness.Lowering.Sim.Stmt.Framed
+import Solidity.Correctness.Lowering.Sim.Stmt.Jump
+import Solidity.Correctness.Lowering.Sim.Stmt.Main
 import Solidity.Correctness.Lowering.Total.Boundary
 import Solidity.Correctness.Lowering.Total.Contract
 import Solidity.Correctness.Lowering.Total.Coverage
