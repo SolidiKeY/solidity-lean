@@ -3321,6 +3321,8 @@ import Solidity.Goals.Headline
 import Solidity.Goals.IntrinsicSession
 import Solidity.Goals.IntrinsicStorage
 import Solidity.Goals.Loops
+import Solidity.Goals.LoweringDiagram
+import Solidity.Goals.LoweringSim
 import Solidity.Goals.Panic
 import Solidity.Goals.PanicProvenance
 import Solidity.Goals.PanicRun
