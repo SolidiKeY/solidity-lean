@@ -21,6 +21,7 @@ The lowering goal `loweringBySimulation` is stated in `Goals/LoweringSim.lean`.
   an instance relation that pins the view to every existing per-shape view
   definition of `Solidity/Yul/Views` (inventory below).
   Its Scalar pilot `yulLayoutPilot` (`Solidity.Yul.Layout.pilot_correct`)
+  asks for the same laws and only the scalar correspondence (`ScalarPilot`).
 
 ## Views inventory (per-shape view definitions, read at the launch base)
 
