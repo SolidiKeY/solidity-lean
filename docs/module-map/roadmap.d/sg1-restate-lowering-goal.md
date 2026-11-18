@@ -1,0 +1,1 @@
+| `Goals/LoweringSession.lean` | `Shrink.Lowering.SessionLift`, the session-level conjunct of `loweringBySimulation` (H556 A): the raw compilation and `loweredWorld`, the program-to-body binding `Bound`, `envAbs`, a `PassCorrect` into `IntrinsicSession.spec F` with resource transport `D.fuel`, and boundary storage/event agreement through `globRel` (`Agrees`); no goal. |
