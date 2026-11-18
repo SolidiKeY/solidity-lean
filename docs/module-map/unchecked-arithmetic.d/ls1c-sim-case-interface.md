@@ -1,0 +1,2 @@
+| `Correctness/Lowering/Sim/Match/Cases.lean` | The open-recursion case interface of the lowering diagram: `RunSim`, `SiteSim`, `RecSim` (the instance of `ElabKernelInduction`), `ExprCases`, `StmtCases`, `StateCases`, and their sufficiency (`runs_of_cases`). |
+| `Examples/Lowering/Sim/Cases.lean` | Uses of the case interface: the induction instance, the families, and `diagram.Simulates` from the cases and a loop hypothesis. |
