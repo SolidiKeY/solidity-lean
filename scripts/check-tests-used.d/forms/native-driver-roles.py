@@ -23,6 +23,12 @@
 # the literal to file_path is part of that per-blob review, the recogniser
 # only re-checks the form. The H1015 staleness rules apply (Lake package,
 # root library or Lean importer of the source: no root).
+# Refused form (H1082 follow-up): a direct `lean` command loop such as
+# scripts/h62/item2/audit-typing/check_closure.py (blob 20dc7fe5), which runs
+# an absolute workstation lean on TESTS + '<Name>.lean' with LEAN_PATH set only
+# to an uncommitted evidence olean directory. It holds no single exact path
+# literal, is no MCP form, and its imports resolve only through uncommitted
+# oleans, so its sources stay unresolved (controls 'direct-lean-*').
 # Source-retention credit only: never run, never certified to elaborate or
 # pass; no execution, pass, proof, driver, relay, read, import or output credit.
 import ast, re, shlex
@@ -322,6 +328,13 @@ def native_driver_controls(env):
     assert native_driver_invocation(client, X, cl, 'mcp-client') and native_driver_invocation(bound, X, bl, 'mcp-client')
     assert native_driver_invocation(measure, X, ml, 'mcp-relay', R, relay) and native_driver_relay(relay)
     computed = client.replace('Path("' + X + '")', 'Path("tests/n") / "F.lean"')
+    direct = ('import os, subprocess\nfrom pathlib import Path\nLEAN = Path("/workspace/lean/bin/lean")\nTESTS = "tests/n/"\n'
+              'def main():\n    env = dict(os.environ, LEAN_PATH="/workspace/evidence/olean")\n    for path in [TESTS+"F.lean", TESTS+"G.lean"]:\n'
+              '        command = [str(LEAN), "-j1", "--tstack=131072", "-o", "/workspace/evidence/out.olean", path]\n'
+              '        subprocess.Popen(command, env=env).wait()\nif __name__ == "__main__":\n    main()\n')
+    direct_literal = direct.replace('[TESTS+"F.lean", TESTS+"G.lean"]', '["' + X + '"]')
+    direct_bound = direct.replace('TESTS = "tests/n/"\n', 'TARGET = "' + X + '"\n').replace('[TESTS+"F.lean", TESTS+"G.lean"]', '[TARGET]')
+    assert direct_literal.split('\n')[6].count(X) == 1 and direct_bound.split('\n')[3] == 'TARGET = "' + X + '"'
     adversarial = {  # (text, line, form, relay, relay text): each must be refused
         'computed': (computed, cl, 'mcp-client', None, None), 'wrong-line': (client, cl + 1, 'mcp-client', None, None),
         'twice': (client.replace('args = parser', 'SUPPORT = ["' + X + '"]\nargs = parser'), cl, 'mcp-client', None, None),
@@ -351,6 +364,11 @@ def native_driver_controls(env):
         'relay-other-name': (measure.replace('dict(file_path=module', 'dict(file_path=other'), ml, 'mcp-relay', R, relay),
         'relay-default-only': (client, cl, 'mcp-relay', R, relay), 'relay-is-source': (measure, ml, 'mcp-relay', X, relay),
         'relay-local': (measure.replace('module = "' + X + '"\n', 'def f():\n    module = "' + X + '"\n'), ml + 1, 'mcp-relay', R, relay),
+        # check_closure.py's shape: a direct lean loop over TESTS + name, oleans from an evidence directory.
+        'direct-lean-concat': (direct, 7, 'mcp-client', None, None), 'direct-lean-concat-relay': (direct, 7, 'mcp-relay', R, relay),
+        'direct-lean-literal': (direct_literal, 7, 'mcp-client', None, None),
+        'direct-lean-literal-relay': (direct_literal, 7, 'mcp-relay', R, relay),
+        'direct-lean-bound': (direct_bound, 4, 'mcp-relay', R, relay), 'direct-lean-bound-client': (direct_bound, 4, 'mcp-client', None, None),
     }
     for name, (text, n, form, rel, rtext) in adversarial.items():
         assert not native_driver_invocation(text, X, n, form, rel, rtext), name
@@ -358,7 +376,7 @@ def native_driver_controls(env):
     D, B = 'tests/n/drive.py', 'tests/n/bound.py'
     add = {X: fixture, D: client, B: bound, M: measure, R: relay, 'tests/n/I.lean': fixture.replace('F', 'I'),
            'tests/n/J.lean': 'import tests.n.I\n#eval 1\n', 'tests/n/C.lean': 'import A\n#check A\n', 'tests/npkg/lakefile.toml': 'name = "npkg"\n',
-           'tests/npkg/F.lean': fixture, 'tests/n/other.py': client.replace(X, 'tests/n/I.lean')}
+           'tests/npkg/F.lean': fixture, 'tests/n/other.py': client.replace(X, 'tests/n/I.lean'), 'tests/n/direct.py': direct_literal}
     nd = commit(add, 'native drivers'); L = nd.ref; nl = commit({'tests/unrelated-native.txt': 'n\n'}, 'native drivers later')
     call = lambda d=D, n=cl, form='mcp-client', **k: dict({'driver': d, 'driver_blob': blob(nd, d), 'driver_commit': L, 'line': n, 'form': form}, **k)
     relayed = lambda **k: call(M, ml, 'mcp-relay', **dict({'relay': R, 'relay_blob': blob(nd, R), 'relay_commit': L}, **k))
@@ -369,7 +387,7 @@ def native_driver_controls(env):
     srcs = (X, 'tests/n/I.lean', 'tests/n/C.lean', 'tests/npkg/F.lean')
     sources = frozenset({(p, blob(nd, p), L) for p in srcs})
     def calls_for(p):
-        rows = {(p, blob(nd, p), d, blob(nd, d), L, n, 'mcp-client', None, None, None) for d, n in ((D, cl), (B, bl), ('tests/n/other.py', cl))}
+        rows = {(p, blob(nd, p), d, blob(nd, d), L, n, 'mcp-client', None, None, None) for d, n in ((D, cl), (B, bl), ('tests/n/other.py', cl), ('tests/n/direct.py', 7))}
         return rows | {(p, blob(nd, p), M, blob(nd, M), L, ml, 'mcp-relay', R, blob(nd, R), L)}
     invocations = frozenset(r for p in srcs for r in calls_for(p))
     role = mk(); base_model, base = run(nl, entries=[])
@@ -401,6 +419,7 @@ def native_driver_controls(env):
                              ({'invocations': [call(driver_commit=Z)]}, 'role invocation'), ({'invocations': [relayed(relay_commit=Z)]}, 'role invocation'),
                              ({'invocations': [call(M, ml)]}, 'role invocation'), ({'invocations': [call(D, cl, 'mcp-relay', relay=R, relay_blob=blob(nd, R), relay_commit=L)]}, 'role invocation'),
                              ({'invocations': [call('tests/n/other.py')]}, 'native driver role driver does not run the source'),
+                             ({'invocations': [call('tests/n/direct.py', 7)]}, 'native driver role driver does not run the source'),
                              ({'interface': dict(face, body_line=3)}, 'native driver role interface mismatch'),
                              ({'input_revision': Z}, 'unverifiable historical')):
             rejected(nd, text, standalone=[dict(role, **change)])
