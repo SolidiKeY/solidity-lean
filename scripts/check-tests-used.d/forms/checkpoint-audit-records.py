@@ -10,6 +10,10 @@
 #    'command': ['python3', '-B', V], 'validator': {'path': V, 'blob', 'entry_line', 'invocation_line'},
 #    'audit': {'path': A, 'blob'}, 'provenance': {'reader': V or A, 'line'}, 'purpose': text}
 # P is V (provenance: V at its entry line), A (V at its invocation line) or a path read by V or A at the line.
+# V's invocation is subprocess.<run>(['python3', A], cwd=ROOT) and a read is (ROOT / P).read_text|read_bytes(), ROOT
+# bound once to Path(__file__).resolve().parents[k] of the reader. Lines are provenance by position: whether a line
+# ran at the checkpoint is not decided. A record never displaces another root of its path, nor a definition of the
+# path at the measured revision, and conflicts with any other standalone row of the same path and revision.
 import ast
 import shlex
 
@@ -33,9 +37,32 @@ def _checkpoint_bound(tree, name):
     """The value of a unique module-level `name = value` assignment, else None."""
     values = [node.value for node in tree.body if isinstance(node, ast.Assign) and len(node.targets) == 1
               and isinstance(node.targets[0], ast.Name) and node.targets[0].id == name]
-    rebound = [node for node in ast.walk(tree) if isinstance(node, (ast.Name, ast.arg)) and getattr(node, 'id', getattr(node, 'arg', None)) == name
-               and isinstance(getattr(node, 'ctx', ast.Store()), (ast.Store, ast.Del))]
-    return values[0] if len(values) == 1 and len(rebound) == 1 else None
+    return values[0] if len(values) == 1 and _checkpoint_bindings(tree, name) == 1 else None
+
+
+def _checkpoint_bindings(tree, name):
+    """How many places bind name: stores, deletions, parameters, imports, defs, handlers, patterns and global/nonlocal."""
+    count = 0
+    for node in ast.walk(tree):
+        if isinstance(node, ast.Name): count += node.id == name and isinstance(node.ctx, (ast.Store, ast.Del))
+        elif isinstance(node, ast.arg): count += node.arg == name
+        elif isinstance(node, (ast.Import, ast.ImportFrom)): count += sum((a.asname or a.name).split('.')[0] == name for a in node.names)
+        elif isinstance(node, (ast.FunctionDef, ast.AsyncFunctionDef, ast.ClassDef, ast.ExceptHandler, ast.MatchAs, ast.MatchStar)):
+            count += getattr(node, 'name', None) == name
+        elif isinstance(node, ast.MatchMapping): count += node.rest == name
+        elif isinstance(node, (ast.Global, ast.Nonlocal)): count += name in node.names
+    return count
+
+
+def _checkpoint_imported(tree, name, form):
+    """True iff name's one binding is a plain (unaliased) import of that form."""
+    return _checkpoint_bindings(tree, name) == 1 and any(form(n) and any(a.name == name and a.asname is None for a in n.names)
+                                                          for n in ast.walk(tree) if isinstance(n, (ast.Import, ast.ImportFrom)))
+
+
+def _checkpoint_unbound(tree, *names):
+    """True iff the module never binds any of names."""
+    return all(_checkpoint_bindings(tree, n) == 0 for n in names)
 
 
 def _checkpoint_string(tree, node):
@@ -59,20 +86,27 @@ def _checkpoint_root(tree, node, reader):
             and path.args[0].id == '__file__'):
         return False
     func = path.func
-    return (isinstance(func, ast.Name) and func.id == 'Path' or isinstance(func, ast.Attribute) and func.attr == 'Path'
-            and isinstance(func.value, ast.Name) and func.value.id == 'pathlib')
+    if not _checkpoint_unbound(tree, '__file__'): return False
+    if isinstance(func, ast.Name) and func.id == 'Path':
+        return _checkpoint_imported(tree, 'Path', lambda n: isinstance(n, ast.ImportFrom) and n.module == 'pathlib' and n.level == 0)
+    return (isinstance(func, ast.Attribute) and func.attr == 'Path' and isinstance(func.value, ast.Name) and func.value.id == 'pathlib'
+            and _checkpoint_imported(tree, 'pathlib', lambda n: isinstance(n, ast.Import)))
 
 
-def checkpoint_invocation(text, audit, line):
-    """True iff line holds subprocess.<run>(['python3', audit], ...) of the audit, as a literal argument list."""
+def checkpoint_invocation(text, validator, audit, line):
+    """True iff line holds subprocess.<run>(['python3', audit], cwd=ROOT, ...): a literal argument list run from
+    the repository root of the validator. Provenance by position: whether that line runs is not decided here."""
     tree = _checkpoint_tree(text)
-    if tree is None: return False
+    if tree is None or not _checkpoint_imported(tree, 'subprocess', lambda n: isinstance(n, ast.Import)): return False
     for node in ast.walk(tree):
         if (isinstance(node, ast.Call) and node.lineno == line and isinstance(node.func, ast.Attribute) and node.func.attr in _CHECKPOINT_RUNS
                 and isinstance(node.func.value, ast.Name) and node.func.value.id == 'subprocess' and node.args
                 and isinstance(node.args[0], ast.List)):
             words = [_checkpoint_string(tree, e) if isinstance(e, ast.Constant) else None for e in node.args[0].elts]
-            if words in (['python3', audit], ['python3', '-B', audit]): return True
+            cwd = [k.value for k in node.keywords if k.arg == 'cwd']
+            if (words in (['python3', audit], ['python3', '-B', audit]) and len(cwd) == 1 and len(node.args) == 1
+                    and _checkpoint_root(tree, cwd[0], validator)):
+                return True
     return False
 
 
@@ -112,8 +146,7 @@ def checkpoint_audit_root(classifier, graph, catalog, entry):
     p = entry['path']; checkpoint = entry['input_revision']; blob = entry['source_blob']
     if not isinstance(checkpoint, str) or not classifier['hex_pin'](checkpoint, 40): raise ValueError(role + ' requires a full checkpoint commit')
     if checkpoint == repo.ref: raise ValueError(role + ' checkpoint is the measured revision, not a historical checkpoint: ' + p)
-    if any(e is not entry and e.get('kind') == CHECKPOINT_AUDIT_KIND and e.get('path') == p and e.get('input_revision') == checkpoint
-           for e in catalog['standalone']):
+    if any(e is not entry and e.get('path') == p and e.get('input_revision') == checkpoint for e in catalog['standalone']):
         raise ValueError('conflicting standalone definitions: ' + p)
     paths = (v['path'], a['path'])
     if (entry['command'] != ['python3', '-B', v['path']] or len(set(paths)) != 2 or not all(q.endswith('.py') for q in paths)
@@ -125,17 +158,20 @@ def checkpoint_audit_root(classifier, graph, catalog, entry):
     if not _checkpoint_shared('_role_current')(classifier, repo, catalog, entry, pins): return
     try: classifier['git'](repo.root, 'merge-base', '--is-ancestor', checkpoint, repo.ref)
     except ValueError: raise ValueError(role + ' checkpoint is not an ancestor of the measured revision: ' + checkpoint) from None
-    if not all(q in repo.texts for q in paths): raise ValueError('unsupported ' + role + ' invocation: ' + p)
+    if not all(q in repo.texts for q in paths) or any(repo.tree[q][0] not in ('100644', '100755') for q, _ in pins):
+        raise ValueError('unsupported ' + role + ' invocation: ' + p)
     try: entries = classifier['entrypoint_lines'](repo.bytes(v['path']))
     except (SyntaxError, ValueError, RecursionError): entries = set()
     if v['entry_line'] not in entries: raise ValueError(role + ' validator lacks its default top-level entry: ' + v['path'])
-    if not checkpoint_invocation(repo.texts[v['path']], a['path'], v['invocation_line']):
+    if not checkpoint_invocation(repo.texts[v['path']], v['path'], a['path'], v['invocation_line']):
         raise ValueError(role + ' validator does not invoke its audit: ' + v['path'])
     reader, line = doc['reader'], doc['line']
     if p == v['path']: held = reader == p and line == v['entry_line']
     elif p == a['path']: held = reader == v['path'] and line == v['invocation_line']
     else: held = checkpoint_read(repo.texts[reader], reader, p, line)
     if not held: raise ValueError(role + ' provenance does not name its target: ' + reader + ':' + str(line))
+    # A path some other root already holds keeps that root's chain: the record never displaces stronger evidence.
+    if any(r['path'] == p for r in graph.roots.values()): return
     identity = CHECKPOINT_AUDIT_PREFIX + p + '@' + checkpoint
     graph.root(p, 'historical checkpoint audit record', shlex.join(entry['command']), reader, line, root_id=identity)
     if identity not in graph.roots: return
@@ -160,7 +196,8 @@ def checkpoint_audit_controls(env):
                  "PIN = 'tests/cpa/pin.json'\ndef scope():\n    data = (ROOT / PIN).read_text()\n"
                  "    # subprocess.run(['python3', 'tests/cpa/audit.py'])\n"
                  "    subprocess.run(['python3', 'tests/cpa/audit.py'], cwd=ROOT, check=True)\n    return data\n"
-                 "if __name__ == '__main__':\n    scope()\ndef other():\n    subprocess.run(['python3', 'tests/cpa/other.py'])\n")
+                 "if __name__ == '__main__':\n    scope()\ndef other():\n    subprocess.run(['python3', 'tests/cpa/other.py'])\n"
+                 "def foreign():\n    subprocess.run(['python3', 'tests/cpa/audit.py'], cwd='/tmp', check=True)\n")
     audit = ('"""Synthetic audit."""\nimport json, pathlib\nroot = pathlib.Path(__file__).resolve().parents[2]\n'
              "pin = json.loads((root / 'tests/cpa/pin.json').read_text())\n"
              "other = (root.parent / 'tests/cpa/other.json').read_text()\nnote = 'tests/cpa/other.json'\n"
@@ -209,7 +246,7 @@ def checkpoint_audit_controls(env):
         rejected(later, 'not an ancestor', standalone=[record(T, A, 4, checkpoint=after.ref)])
         rejected(later, 'not a historical checkpoint', standalone=[record(T, A, 4, checkpoint=later.ref)])
         # Provenance lines: commented invocation, string-only path, foreign root, commented read, wrong reader.
-        for line in (7, 13):  # a commented invocation, another program's
+        for line in (7, 13, 15):  # a commented invocation, another program's, a foreign working directory
             rejected(later, 'does not invoke its audit', standalone=[record(T, A, 4, validator=dict(good['validator'], invocation_line=line))])
         rejected(later, 'lacks its default top-level entry', standalone=[record(T, A, 4, validator=dict(good['validator'], entry_line=6))])
         for path, reader, line in ((O, A, 5), (O, A, 6), (O, A, 7), (T, V, 7), (T, A, 5), (A, A, 8), (V, A, entry_line)):
@@ -219,6 +256,21 @@ def checkpoint_audit_controls(env):
         rejected(later, 'invalid checkpoint audit record definition', standalone=[dict(good, entry_line=4)])
         rejected(later, 'invalid checkpoint audit record definition', standalone=[record(T, A, 4, purpose=' ')])
         rejected(later, 'conflicting standalone definitions', standalone=[good, dict(good, purpose='Other.')])
+        rejected(later, 'invalid checkpoint audit record definition', standalone=[record(T, A, True)])
+        only = lambda revision: {'path': V, 'input_revision': revision, 'source_blob': blob(later, V), 'command': ['python3', '-B', V],
+                                 'kind': _checkpoint_shared('SOURCE_ONLY_KIND'), 'entry_line': entry_line, 'purpose': 'Synthetic source-only validator.'}
+        rejected(later, 'conflicting standalone definitions', standalone=[only(C), record(V, V, entry_line)])
+        # A current definition of the path supersedes the record; a path another root holds keeps that root.
+        for revision in (later.ref, after.ref):
+            model, rows = run(later, standalone=[only(revision), record(V, V, entry_line)])
+            assert rows[V]['class'] == 'keep' and not any(k.startswith(CHECKPOINT_AUDIT_PREFIX) for k in model['entry_points']), revision
+        # A changed validator makes the record stale; a rebound repository root names nothing.
+        _, rows = run(commit({V: validator + '# changed\n'}, 'checkpoint audit changed validator'), standalone=[good])
+        assert rows[T]['class'] != 'keep'
+        for n, tail in enumerate(('try:\n    pass\nexcept ValueError as root:\n    pass\n', '__file__ = "tests/x/y/z.py"\n', 'pathlib = None\n')):
+            rebound = commit({V: validator, A: audit + tail}, 'checkpoint audit rebound root')
+            rejected(commit({'tests/cpa-later.txt': str(n)}, 'checkpoint audit after rebound'), 'does not name its target',
+                     standalone=[record(T, A, 4, repo=rebound, checkpoint=rebound.ref)])
     finally:
         git(root, 'rm', '-q', '-r', '--ignore-unmatch', '--', D, 'tests/cpa', 'tests/cpa-before.txt', 'tests/cpa-later.txt', 'tests/cpa-after.txt')
         git(root, '-c', 'user.name=Control', '-c', 'user.email=control@example.invalid', 'commit', '-qm', 'checkpoint audit removed')
