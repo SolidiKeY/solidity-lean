@@ -190,6 +190,7 @@ import Solidity.Examples.LexRuleSyntax
 import Solidity.Examples.LexTermSize
 import Solidity.Examples.LexVariant
 import Solidity.Examples.LinearDecision
+import Solidity.Examples.Lowering.Sim.Match
 import Solidity.Examples.Lowering.Sim.Session.Source
 import Solidity.Examples.Lowering.Sim.Session.Target
 import Solidity.Examples.MemoryFloor
