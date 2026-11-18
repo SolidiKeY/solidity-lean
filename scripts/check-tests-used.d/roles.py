@@ -457,8 +457,10 @@ def lean_fixture_controls(env):
     assert REVIEWED_LEAN_FIXTURES == review_union('lean-fixtures') and REVIEWED_LEAN_FIXTURE_INVOCATIONS == review_union('lean-fixtures', 2)
     assert {(p, b) for p, b, _ in REVIEWED_LEAN_FIXTURES} == {(p, b) for p, b, _, _, _ in REVIEWED_LEAN_FIXTURE_INVOCATIONS}
     assert not {p for p, _, _ in REVIEWED_LEAN_FIXTURES} & {p for p, _, _ in REVIEWED_LEAN_CHECKS}
-    assert all((d, db) in {(q, b) for q, b, _ in reviewed_nonpy} and (d, db, n) in {(d, b, n) for _, _, d, b, n in REVIEWED_LEAN_CHECK_INVOCATIONS}
-               for _, _, d, db, n in REVIEWED_LEAN_FIXTURE_INVOCATIONS)
+    assert all((d, db) in {(q, b) for q, b, _ in reviewed_nonpy} for _, _, d, db, _ in REVIEWED_LEAN_FIXTURE_INVOCATIONS)
+    # H1174: the H999 gate-list lines bind the H1015 part only; later parts (H1019) keep their own controls.
+    assert REVIEW_TABLE_PARTS['lean-fixtures'][0][0] == 'H1015' and all(
+        (d, db, n) in {(d, b, n) for _, _, d, b, n in REVIEWED_LEAN_CHECK_INVOCATIONS} for _, _, d, db, n in REVIEW_TABLE_PARTS['lean-fixtures'][0][2])
     assert ('tests/directruntime-20261104/control-tuples/ProductionControls.lean', 'ca25c4ca010fa72c0512c2b7523fabcccbbad7e7',
             '2366c57f099b27d4673dda504d258ba77ff3fcaf') in REVIEWED_LEAN_FIXTURES
     G, X = LEAN_CHECK_DRIVER_LINE, 'tests/f/F.lean'
