@@ -128,6 +128,7 @@ import Solidity.Examples.DecisionWrittenMemory
 import Solidity.Examples.DeclarationReduction
 import Solidity.Examples.DependentReduction
 import Solidity.Examples.Docs.ProseCalibrated.Allowance
+import Solidity.Examples.ElabTotal.Guard
 import Solidity.Examples.ElabTotal.Measure
 import Solidity.Examples.ExactReduction
 import Solidity.Examples.ExactUpdates
