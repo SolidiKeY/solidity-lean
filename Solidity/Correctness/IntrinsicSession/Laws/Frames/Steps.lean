@@ -4,8 +4,9 @@ import Solidity.Correctness.IntrinsicSession.Laws.Common
 # The intrinsic session: the determined steps, unfolded
 
 Helpers of `Laws/Frames.lean` (step `is0p-session-laws`, lane frames): the step of a resolved,
-affordable request at any bound, as the actual frame with no answers (`callOf`); what a session
-with an empty history shows first at a bound with resource failures (`first_tx`).
+affordable request and of a resolved deployment at any bound, as the actual frame with no
+answers (`callOf`, `createOf`); what a session with an empty history shows first at a bound with
+resource failures (`first_tx`, `fresh_events`).
 -/
 
 namespace Solidity.Semantics.IntrinsicSession
@@ -229,5 +230,71 @@ theorem first_tx (b : (view F).Boundary x e [] n ⟨x.code, w⟩)
       exact nomatch List.prefix_nil.1 (pre.trans short)
 
 end Request
+
+/-! ## The deployment -/
+
+section Deploy
+
+variable {F : Fixed} {e : SessionEnv} {r : Bound} {code : Code}
+  (hk : code.main < code.contracts.length) {body : Prog (code.catalog ⟨code.main, hk⟩) [] []}
+
+/-- The creation frame of the main contract's resolved constructor, with no answers. -/
+noncomputable abbrev createOf (F : Fixed) (e : SessionEnv) (code : Code)
+    (hk : code.main < code.contracts.length) (body : Prog (code.catalog ⟨code.main, hk⟩) [] []) :=
+  (initial code.roles e).transact fun v =>
+    v.create ⟨code.main, hk⟩ (liftAddress (F.createAddress e.deployer e.deployNonce)) body
+      (deployContext wire e)
+
+/-- The creation returns: the deployment's event at its address, and its world. -/
+theorem deploy_ok (resolved : code.ctor ⟨code.main, hk⟩ e.deployArgs = some body)
+    (nofail : r.deployFails = false) {d : Handle (⟨code.main, hk⟩ : Fin code.contracts.length)} (eq : (createOf F e code hk body).2 = .ok d) :
+    (deploy code.main code.roles code.ctor F wire r e).events =
+      [Event.deploy e.deployer e.deployValue e.deployArgs (.success [])
+        (some (F.createAddress e.deployer e.deployNonce))] ∧
+    (deploy code.main code.roles code.ctor F wire r e).world = (createOf F e code hk body).1 ∧
+    (deploy code.main code.roles code.ctor F wire r e).stops = false := by
+  simp only [deploy, dif_pos hk, resolved, nofail, Bool.false_eq_true, if_false, eq, and_self]
+
+/-- The creation fails observably: the deployment's revert with its data. -/
+theorem deploy_error (resolved : code.ctor ⟨code.main, hk⟩ e.deployArgs = some body)
+    (nofail : r.deployFails = false) {hlt : THalt}
+    (eq : (createOf F e code hk body).2 = .error hlt) (caught : ContractWorld.catchable hlt = true) :
+    (deploy code.main code.roles code.ctor F wire r e).events =
+      [Event.deploy e.deployer e.deployValue e.deployArgs (.revert hlt.data) none] ∧
+    (deploy code.main code.roles code.ctor F wire r e).stops = false := by
+  simp only [deploy, dif_pos hk, resolved, nofail, Bool.false_eq_true, if_false, eq, caught,
+    if_true, and_self]
+
+/-- The creation exhausts or diverges: the session stops. -/
+theorem deploy_halts (resolved : code.ctor ⟨code.main, hk⟩ e.deployArgs = some body)
+    (nofail : r.deployFails = false) {hlt : THalt}
+    (eq : (createOf F e code hk body).2 = .error hlt)
+    (halts : ContractWorld.catchable hlt = false) :
+    (deploy code.main code.roles code.ctor F wire r e).stops = true := by
+  simp only [deploy, dif_pos hk, resolved, nofail, Bool.false_eq_true, if_false, eq, halts]
+
+/-- The bound fails the creation: a revert with empty data and no address. -/
+theorem deploy_fails (resolved : code.ctor ⟨code.main, hk⟩ e.deployArgs = some body)
+    (fails : r.deployFails = true) :
+    (deploy code.main code.roles code.ctor F wire r e).events =
+      [Event.deploy e.deployer e.deployValue e.deployArgs (.revert []) none] ∧
+    (deploy code.main code.roles code.ctor F wire r e).stops = false := by
+  simp only [deploy, dif_pos hk, resolved, fails, if_true, and_self]
+
+/-- **A fresh session at any bound** shows nothing when its deployment stops, and the
+deployment's events first otherwise. -/
+theorem fresh_events (r : Bound) (code : Code) :
+    ((deploy code.main code.roles code.ctor F wire r e).stops = true →
+      ((spec F).lang.sem (Start.initial code) e r).events = []) ∧
+    ((deploy code.main code.roles code.ctor F wire r e).stops = false →
+      (deploy code.main code.roles code.ctor F wire r e).events <+:
+        ((spec F).lang.sem (Start.initial code) e r).events) := by
+  have sem : (spec F).lang.sem (Start.initial code) e r =
+      (run code.main code.roles code.ctor code.entry F wire .fresh e r).pfx := rfl
+  rw [sem]
+  exact ⟨fun stop => by rw [run_fresh_stops stop],
+    fun completes => by rw [run_fresh completes]; exact go_extends _ _ _ _⟩
+
+end Deploy
 
 end Solidity.Semantics.IntrinsicSession
