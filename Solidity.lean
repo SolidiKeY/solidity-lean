@@ -2480,6 +2480,8 @@ import Solidity.Correctness.Lowering.Sim.Session.Source
 import Solidity.Correctness.Lowering.Sim.Session.Target
 import Solidity.Correctness.Lowering.Sim.Session.Target.Machine
 import Solidity.Correctness.Lowering.Sim.Smoke
+import Solidity.Correctness.Lowering.Sim.State.Calls
+import Solidity.Correctness.Lowering.Sim.State.Storage
 import Solidity.Correctness.Lowering.Total.Boundary
 import Solidity.Correctness.Lowering.Total.Contract
 import Solidity.Correctness.Lowering.Total.Coverage
@@ -5372,6 +5374,7 @@ import Solidity.Yul.Interfaces.P16
 import Solidity.Yul.Layout.Alloc
 import Solidity.Yul.Layout.Geometric
 import Solidity.Yul.Layout.Geometry
+import Solidity.Yul.Layout.Instances.Allocation
 import Solidity.Yul.Layout.Instances.Memory
 import Solidity.Yul.Layout.Instances.Storage
 import Solidity.Yul.Layout.Laws
@@ -5379,6 +5382,7 @@ import Solidity.Yul.Layout.Laws.Alloc
 import Solidity.Yul.Layout.Laws.Read
 import Solidity.Yul.Layout.Laws.Write
 import Solidity.Yul.Layout.Laws.WriteRead
+import Solidity.Yul.Layout.Pilot
 import Solidity.Yul.Layout.ReadSequence
 import Solidity.Yul.Layout.ScalarPilot
 import Solidity.Yul.Layout.View
