@@ -47,18 +47,11 @@ example (kernel : elabKernelTotal) (C : Contract) (rc : ElabRec C) :
     Stmt.V2.ArmSat C (elabStmtPWith C rc) .jump :=
   (Stmt.V2.jump_cases C kernel rc).1
 
-/-- v2's `Simulates` from its per-run obligations. -/
-example
-    (runs : ∀ (b : Body) (u : Emitted) (m : Solidity.Lowering.V07.ContextMap b.ctx u.Γ),
-      Production b u → Accepted u → diagram.Assoc b u m → Stmt.V2.RunSim b u m) :
-    Stmt.V2.diagram.Simulates :=
-  Stmt.V2.simulates_of_runs runs
-
 /-- Under v2 a checked, non-static frame has a matched target state. -/
 example (b : Body) (u : Emitted) (m : Solidity.Lowering.V07.ContextMap b.ctx u.Γ)
     (h : diagram.Assoc b u m) (G : Source.Glob b.E) (F : Source.Fr)
     (frame : F.static = false ∧ F.checked = true) (src : Source.EMState b.E b.ctx) :
-    ∃ tgt : State u.C u.Γ, Stmt.V2.diagram.frameRel G F tgt :=
+    ∃ tgt : State u.C u.Γ, frameRel G F tgt :=
   (Stmt.V2.initial_matching b u m h G F frame src).imp fun _ h => h.2.2
 
 end Solidity.Examples.Lowering.Sim.Stmt
