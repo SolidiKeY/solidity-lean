@@ -588,73 +588,196 @@ private def naturalThresholdRow31 : Vector Nat 255 := ( #v[
     #v[2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2]
  ] : Vector (Vector Nat 17) 15).flatten
 
-/-- Row `row` holds the `(i+1)`-th roots of `2 ^ bits`, rounded down. -/
-abbrev RowBounds (row : Vector Nat 255) (bits : Nat) : Prop :=
-  ∀ (i : Fin 255), row[i] < 2 ^ bits ∧ row[i] ^ (i.val + 1) < 2 ^ bits ∧
-    2 ^ bits ≤ (row[i] + 1) ^ (i.val + 1)
-private theorem rowBounds0 : RowBounds naturalThresholdRow0 8 := by
+private theorem rowBounds0 : ∀ (i : Fin 255),
+    naturalThresholdRow0[i] < 2 ^ 8 ∧
+    naturalThresholdRow0[i] ^ (i.val + 1) < 2 ^ 8 ∧
+    2 ^ 8 ≤ (naturalThresholdRow0[i] + 1) ^ (i.val + 1) := by
   decide +kernel
-private theorem rowBounds1 : RowBounds naturalThresholdRow1 16 := by
+
+private theorem rowBounds1 : ∀ (i : Fin 255),
+    naturalThresholdRow1[i] < 2 ^ 16 ∧
+    naturalThresholdRow1[i] ^ (i.val + 1) < 2 ^ 16 ∧
+    2 ^ 16 ≤ (naturalThresholdRow1[i] + 1) ^ (i.val + 1) := by
   decide +kernel
-private theorem rowBounds2 : RowBounds naturalThresholdRow2 24 := by
+
+private theorem rowBounds2 : ∀ (i : Fin 255),
+    naturalThresholdRow2[i] < 2 ^ 24 ∧
+    naturalThresholdRow2[i] ^ (i.val + 1) < 2 ^ 24 ∧
+    2 ^ 24 ≤ (naturalThresholdRow2[i] + 1) ^ (i.val + 1) := by
   decide +kernel
-private theorem rowBounds3 : RowBounds naturalThresholdRow3 32 := by
+
+private theorem rowBounds3 : ∀ (i : Fin 255),
+    naturalThresholdRow3[i] < 2 ^ 32 ∧
+    naturalThresholdRow3[i] ^ (i.val + 1) < 2 ^ 32 ∧
+    2 ^ 32 ≤ (naturalThresholdRow3[i] + 1) ^ (i.val + 1) := by
   decide +kernel
-private theorem rowBounds4 : RowBounds naturalThresholdRow4 40 := by
+
+private theorem rowBounds4 : ∀ (i : Fin 255),
+    naturalThresholdRow4[i] < 2 ^ 40 ∧
+    naturalThresholdRow4[i] ^ (i.val + 1) < 2 ^ 40 ∧
+    2 ^ 40 ≤ (naturalThresholdRow4[i] + 1) ^ (i.val + 1) := by
   decide +kernel
-private theorem rowBounds5 : RowBounds naturalThresholdRow5 48 := by
+
+private theorem rowBounds5 : ∀ (i : Fin 255),
+    naturalThresholdRow5[i] < 2 ^ 48 ∧
+    naturalThresholdRow5[i] ^ (i.val + 1) < 2 ^ 48 ∧
+    2 ^ 48 ≤ (naturalThresholdRow5[i] + 1) ^ (i.val + 1) := by
   decide +kernel
-private theorem rowBounds6 : RowBounds naturalThresholdRow6 56 := by
+
+private theorem rowBounds6 : ∀ (i : Fin 255),
+    naturalThresholdRow6[i] < 2 ^ 56 ∧
+    naturalThresholdRow6[i] ^ (i.val + 1) < 2 ^ 56 ∧
+    2 ^ 56 ≤ (naturalThresholdRow6[i] + 1) ^ (i.val + 1) := by
   decide +kernel
-private theorem rowBounds7 : RowBounds naturalThresholdRow7 64 := by
+
+private theorem rowBounds7 : ∀ (i : Fin 255),
+    naturalThresholdRow7[i] < 2 ^ 64 ∧
+    naturalThresholdRow7[i] ^ (i.val + 1) < 2 ^ 64 ∧
+    2 ^ 64 ≤ (naturalThresholdRow7[i] + 1) ^ (i.val + 1) := by
   decide +kernel
-private theorem rowBounds8 : RowBounds naturalThresholdRow8 72 := by
+
+private theorem rowBounds8 : ∀ (i : Fin 255),
+    naturalThresholdRow8[i] < 2 ^ 72 ∧
+    naturalThresholdRow8[i] ^ (i.val + 1) < 2 ^ 72 ∧
+    2 ^ 72 ≤ (naturalThresholdRow8[i] + 1) ^ (i.val + 1) := by
   decide +kernel
-private theorem rowBounds9 : RowBounds naturalThresholdRow9 80 := by
+
+private theorem rowBounds9 : ∀ (i : Fin 255),
+    naturalThresholdRow9[i] < 2 ^ 80 ∧
+    naturalThresholdRow9[i] ^ (i.val + 1) < 2 ^ 80 ∧
+    2 ^ 80 ≤ (naturalThresholdRow9[i] + 1) ^ (i.val + 1) := by
   decide +kernel
-private theorem rowBounds10 : RowBounds naturalThresholdRow10 88 := by
+
+private theorem rowBounds10 : ∀ (i : Fin 255),
+    naturalThresholdRow10[i] < 2 ^ 88 ∧
+    naturalThresholdRow10[i] ^ (i.val + 1) < 2 ^ 88 ∧
+    2 ^ 88 ≤ (naturalThresholdRow10[i] + 1) ^ (i.val + 1) := by
   decide +kernel
-private theorem rowBounds11 : RowBounds naturalThresholdRow11 96 := by
+
+private theorem rowBounds11 : ∀ (i : Fin 255),
+    naturalThresholdRow11[i] < 2 ^ 96 ∧
+    naturalThresholdRow11[i] ^ (i.val + 1) < 2 ^ 96 ∧
+    2 ^ 96 ≤ (naturalThresholdRow11[i] + 1) ^ (i.val + 1) := by
   decide +kernel
-private theorem rowBounds12 : RowBounds naturalThresholdRow12 104 := by
+
+private theorem rowBounds12 : ∀ (i : Fin 255),
+    naturalThresholdRow12[i] < 2 ^ 104 ∧
+    naturalThresholdRow12[i] ^ (i.val + 1) < 2 ^ 104 ∧
+    2 ^ 104 ≤ (naturalThresholdRow12[i] + 1) ^ (i.val + 1) := by
   decide +kernel
-private theorem rowBounds13 : RowBounds naturalThresholdRow13 112 := by
+
+private theorem rowBounds13 : ∀ (i : Fin 255),
+    naturalThresholdRow13[i] < 2 ^ 112 ∧
+    naturalThresholdRow13[i] ^ (i.val + 1) < 2 ^ 112 ∧
+    2 ^ 112 ≤ (naturalThresholdRow13[i] + 1) ^ (i.val + 1) := by
   decide +kernel
-private theorem rowBounds14 : RowBounds naturalThresholdRow14 120 := by
+
+private theorem rowBounds14 : ∀ (i : Fin 255),
+    naturalThresholdRow14[i] < 2 ^ 120 ∧
+    naturalThresholdRow14[i] ^ (i.val + 1) < 2 ^ 120 ∧
+    2 ^ 120 ≤ (naturalThresholdRow14[i] + 1) ^ (i.val + 1) := by
   decide +kernel
-private theorem rowBounds15 : RowBounds naturalThresholdRow15 128 := by
+
+private theorem rowBounds15 : ∀ (i : Fin 255),
+    naturalThresholdRow15[i] < 2 ^ 128 ∧
+    naturalThresholdRow15[i] ^ (i.val + 1) < 2 ^ 128 ∧
+    2 ^ 128 ≤ (naturalThresholdRow15[i] + 1) ^ (i.val + 1) := by
   decide +kernel
-private theorem rowBounds16 : RowBounds naturalThresholdRow16 136 := by
+
+private theorem rowBounds16 : ∀ (i : Fin 255),
+    naturalThresholdRow16[i] < 2 ^ 136 ∧
+    naturalThresholdRow16[i] ^ (i.val + 1) < 2 ^ 136 ∧
+    2 ^ 136 ≤ (naturalThresholdRow16[i] + 1) ^ (i.val + 1) := by
   decide +kernel
-private theorem rowBounds17 : RowBounds naturalThresholdRow17 144 := by
+
+private theorem rowBounds17 : ∀ (i : Fin 255),
+    naturalThresholdRow17[i] < 2 ^ 144 ∧
+    naturalThresholdRow17[i] ^ (i.val + 1) < 2 ^ 144 ∧
+    2 ^ 144 ≤ (naturalThresholdRow17[i] + 1) ^ (i.val + 1) := by
   decide +kernel
-private theorem rowBounds18 : RowBounds naturalThresholdRow18 152 := by
+
+private theorem rowBounds18 : ∀ (i : Fin 255),
+    naturalThresholdRow18[i] < 2 ^ 152 ∧
+    naturalThresholdRow18[i] ^ (i.val + 1) < 2 ^ 152 ∧
+    2 ^ 152 ≤ (naturalThresholdRow18[i] + 1) ^ (i.val + 1) := by
   decide +kernel
-private theorem rowBounds19 : RowBounds naturalThresholdRow19 160 := by
+
+private theorem rowBounds19 : ∀ (i : Fin 255),
+    naturalThresholdRow19[i] < 2 ^ 160 ∧
+    naturalThresholdRow19[i] ^ (i.val + 1) < 2 ^ 160 ∧
+    2 ^ 160 ≤ (naturalThresholdRow19[i] + 1) ^ (i.val + 1) := by
   decide +kernel
-private theorem rowBounds20 : RowBounds naturalThresholdRow20 168 := by
+
+private theorem rowBounds20 : ∀ (i : Fin 255),
+    naturalThresholdRow20[i] < 2 ^ 168 ∧
+    naturalThresholdRow20[i] ^ (i.val + 1) < 2 ^ 168 ∧
+    2 ^ 168 ≤ (naturalThresholdRow20[i] + 1) ^ (i.val + 1) := by
   decide +kernel
-private theorem rowBounds21 : RowBounds naturalThresholdRow21 176 := by
+
+private theorem rowBounds21 : ∀ (i : Fin 255),
+    naturalThresholdRow21[i] < 2 ^ 176 ∧
+    naturalThresholdRow21[i] ^ (i.val + 1) < 2 ^ 176 ∧
+    2 ^ 176 ≤ (naturalThresholdRow21[i] + 1) ^ (i.val + 1) := by
   decide +kernel
-private theorem rowBounds22 : RowBounds naturalThresholdRow22 184 := by
+
+private theorem rowBounds22 : ∀ (i : Fin 255),
+    naturalThresholdRow22[i] < 2 ^ 184 ∧
+    naturalThresholdRow22[i] ^ (i.val + 1) < 2 ^ 184 ∧
+    2 ^ 184 ≤ (naturalThresholdRow22[i] + 1) ^ (i.val + 1) := by
   decide +kernel
-private theorem rowBounds23 : RowBounds naturalThresholdRow23 192 := by
+
+private theorem rowBounds23 : ∀ (i : Fin 255),
+    naturalThresholdRow23[i] < 2 ^ 192 ∧
+    naturalThresholdRow23[i] ^ (i.val + 1) < 2 ^ 192 ∧
+    2 ^ 192 ≤ (naturalThresholdRow23[i] + 1) ^ (i.val + 1) := by
   decide +kernel
-private theorem rowBounds24 : RowBounds naturalThresholdRow24 200 := by
+
+private theorem rowBounds24 : ∀ (i : Fin 255),
+    naturalThresholdRow24[i] < 2 ^ 200 ∧
+    naturalThresholdRow24[i] ^ (i.val + 1) < 2 ^ 200 ∧
+    2 ^ 200 ≤ (naturalThresholdRow24[i] + 1) ^ (i.val + 1) := by
   decide +kernel
-private theorem rowBounds25 : RowBounds naturalThresholdRow25 208 := by
+
+private theorem rowBounds25 : ∀ (i : Fin 255),
+    naturalThresholdRow25[i] < 2 ^ 208 ∧
+    naturalThresholdRow25[i] ^ (i.val + 1) < 2 ^ 208 ∧
+    2 ^ 208 ≤ (naturalThresholdRow25[i] + 1) ^ (i.val + 1) := by
   decide +kernel
-private theorem rowBounds26 : RowBounds naturalThresholdRow26 216 := by
+
+private theorem rowBounds26 : ∀ (i : Fin 255),
+    naturalThresholdRow26[i] < 2 ^ 216 ∧
+    naturalThresholdRow26[i] ^ (i.val + 1) < 2 ^ 216 ∧
+    2 ^ 216 ≤ (naturalThresholdRow26[i] + 1) ^ (i.val + 1) := by
   decide +kernel
-private theorem rowBounds27 : RowBounds naturalThresholdRow27 224 := by
+
+private theorem rowBounds27 : ∀ (i : Fin 255),
+    naturalThresholdRow27[i] < 2 ^ 224 ∧
+    naturalThresholdRow27[i] ^ (i.val + 1) < 2 ^ 224 ∧
+    2 ^ 224 ≤ (naturalThresholdRow27[i] + 1) ^ (i.val + 1) := by
   decide +kernel
-private theorem rowBounds28 : RowBounds naturalThresholdRow28 232 := by
+
+private theorem rowBounds28 : ∀ (i : Fin 255),
+    naturalThresholdRow28[i] < 2 ^ 232 ∧
+    naturalThresholdRow28[i] ^ (i.val + 1) < 2 ^ 232 ∧
+    2 ^ 232 ≤ (naturalThresholdRow28[i] + 1) ^ (i.val + 1) := by
   decide +kernel
-private theorem rowBounds29 : RowBounds naturalThresholdRow29 240 := by
+
+private theorem rowBounds29 : ∀ (i : Fin 255),
+    naturalThresholdRow29[i] < 2 ^ 240 ∧
+    naturalThresholdRow29[i] ^ (i.val + 1) < 2 ^ 240 ∧
+    2 ^ 240 ≤ (naturalThresholdRow29[i] + 1) ^ (i.val + 1) := by
   decide +kernel
-private theorem rowBounds30 : RowBounds naturalThresholdRow30 248 := by
+
+private theorem rowBounds30 : ∀ (i : Fin 255),
+    naturalThresholdRow30[i] < 2 ^ 248 ∧
+    naturalThresholdRow30[i] ^ (i.val + 1) < 2 ^ 248 ∧
+    2 ^ 248 ≤ (naturalThresholdRow30[i] + 1) ^ (i.val + 1) := by
   decide +kernel
-private theorem rowBounds31 : RowBounds naturalThresholdRow31 256 := by
+
+private theorem rowBounds31 : ∀ (i : Fin 255),
+    naturalThresholdRow31[i] < 2 ^ 256 ∧
+    naturalThresholdRow31[i] ^ (i.val + 1) < 2 ^ 256 ∧
+    2 ^ 256 ≤ (naturalThresholdRow31[i] + 1) ^ (i.val + 1) := by
   decide +kernel
 
 def naturalThresholds : Vector (Vector Nat 255) 32 := #v[
