@@ -34,6 +34,7 @@ import ast
 import hashlib
 import posixpath
 import shlex
+from pathlib import Path
 
 HANDOFF_WITNESS_KIND = 'handoff-witness-role'
 HANDOFF_WITNESS_PREFIX = 'handoff-witness:'
@@ -61,6 +62,11 @@ HANDOFF_WITNESS_REVIEWED = frozenset({
 })
 HANDOFF_WITNESS_UNRESOLVED = ('scripts/h62/item2/audit-theories/handoff/scope-manifest.json', 'scripts/h62/item2/audit-precompiles/serial.toml')
 _HW_RUNS = ('check_output', 'run')
+
+
+def _hw_shared(name):
+    """A name of the fragments.py namespace this module is exec'd in."""
+    return globals()[name]
 
 
 def _hw_parse(text):
@@ -310,12 +316,12 @@ def handoff_witness_root(classifier, graph, catalog, entry, reviewed=None):
     if any(x is not entry and x.get('path') == p and x.get('input_revision') == revision for x in catalog['standalone']):
         raise ValueError('conflicting standalone definitions: ' + p)
     reader = e['path'] if operation == 'pinned-history-show' else m['path']
-    if (operation not in HANDOFF_WITNESS_OPERATIONS or entry['command'] != ['python3', '-B', e['path']] or _clean(p) != p
+    if (operation not in HANDOFF_WITNESS_OPERATIONS or entry['command'] != ['python3', '-B', e['path']] or _hw_shared('_clean')(p) != p
             or p.endswith('.py') or e['path'] == m['path'] or not all(q.endswith('.py') for q in (e['path'], m['path'])) or r['path'] != reader):
         raise ValueError('unsupported ' + role + ' invocation: ' + p)
     if (p, blob, operation, e['path'], e['blob'], e['import_line'], m['path'], m['blob'], m['line'], r['path'], r['line']) not in reviewed:
         raise ValueError('unreviewed ' + role + ': ' + p)
-    if not _role_current(classifier, repo, catalog, entry, [(p, blob), (e['path'], e['blob']), (m['path'], m['blob'])]): return
+    if not _hw_shared('_role_current')(classifier, repo, catalog, entry, [(p, blob), (e['path'], e['blob']), (m['path'], m['blob'])]): return
     if not all(q in repo.texts for q in (e['path'], m['path'])) or any(repo.tree[q][0] not in ('100644', '100755') for q in (p, e['path'], m['path'])):
         raise ValueError('unsupported ' + role + ' invocation: ' + p)
     held = handoff_operation(operation, repo.texts[e['path']], repo.texts[m['path']], entry, repo.bytes(p))
@@ -326,7 +332,7 @@ def handoff_witness_root(classifier, graph, catalog, entry, reviewed=None):
             pinned = classifier['git'](repo.root, 'rev-parse', '--verify', '-q', held + ':' + p).decode().strip()
         except ValueError: pinned = None
         if pinned != blob: raise ValueError(role + ' pinned commit does not hold the witness blob: ' + held + ':' + p)
-    if not _entry_root(graph, e['path'], e['blob']):
+    if not _hw_shared('_entry_root')(graph, e['path'], e['blob']):
         if revision == repo.ref: raise ValueError(role + ' entry is not a python3 -B entry root: ' + e['path'])
         return
     if any(x['path'] == p for x in graph.roots.values()): return
@@ -350,8 +356,8 @@ def handoff_witness_controls(env):
     unreviewed rows, a missing entry root, schema and conflict errors)."""
     global HANDOFF_WITNESS_REVIEWED
     commit, run, rejected, blob, classifier, root = (env[k] for k in ('commit', 'run', 'rejected', 'blob', 'classifier', 'root'))
-    git = classifier['git']
-    assert HANDOFF_WITNESS_KIND in LATE_SOURCE_ROLE_KINDS and HANDOFF_WITNESS_KIND not in SOURCE_ROLE_KINDS
+    git = classifier['git']; canonical = _hw_shared('canonical')
+    assert HANDOFF_WITNESS_KIND in _hw_shared('LATE_SOURCE_ROLE_KINDS') and HANDOFF_WITNESS_KIND not in _hw_shared('SOURCE_ROLE_KINDS')
     # The reviewed rows: four witnesses, never the two refused ones, each re-derived on its pinned blobs when held.
     assert len(HANDOFF_WITNESS_REVIEWED) == 4 and not {t[0] for t in HANDOFF_WITNESS_REVIEWED} & set(HANDOFF_WITNESS_UNRESOLVED)
     home = Path(classifier['__file__']).resolve().parents[1]
@@ -506,5 +512,5 @@ def handoff_witness_controls(env):
         git(root, '-c', 'user.name=Control', '-c', 'user.email=control@example.invalid', 'commit', '-qm', 'handoff witnesses removed')
 
 
-register_source_role(HANDOFF_WITNESS_KIND, handoff_witness_root, late=True)
-FORM_CONTROLS.append(handoff_witness_controls)
+_hw_shared('register_source_role')(HANDOFF_WITNESS_KIND, handoff_witness_root, late=True)
+_hw_shared('FORM_CONTROLS').append(handoff_witness_controls)
