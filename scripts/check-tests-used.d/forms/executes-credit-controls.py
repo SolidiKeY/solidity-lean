@@ -5,7 +5,8 @@
 # persisted_reads in fragments.py). The recorded frames stay in the chain as
 # provenance. x1r (ce4999b50) already did this for persisted nonpassing reads
 # (persisted_nonpassing_read, roles.py); its controls stay there. A passing
-# read at its own revision still credits its frames: that run executed them.
+# read at its own revision still credits its frames (that run executed them),
+# and so does a static route (a literal import chain); controls pin both.
 # Controls only: this form registers no role, section or table.
 
 _executes_credit_namespace = globals()
@@ -20,17 +21,20 @@ def executes_credit_controls(env):
     persisted read get no executes credit; the target keeps its credit."""
     commit, run, blob = (env[k] for k in ('commit', 'run', 'blob'))
     P = 'tests/ec_np_test.py'; V = 'tests/ec_pass_test.py'; H = 'tests/ec_helper.py'
-    D = 'tests/ec-data.txt'; F = 'tests/ec-frame.txt'
+    D = 'tests/ec-data.txt'; F = 'tests/ec-frame.txt'; N = 'tests/ec.test.mjs'; L = 'tests/ec-lib.mjs'; J = 'tests/ec-node.json'
     nonpassing = ("import unittest\nclass T(unittest.TestCase):\n def test_it(self):\n  __import__('ec_helper').load('tests/ec-data.txt')\n"
                   "  self.fail('nonpassing')\nif __name__ == '__main__': unittest.main()\n")
     passing = ("import unittest\nclass T(unittest.TestCase):\n def test_it(self):\n  __import__('ec_helper').load('tests/ec-data.txt')\n"
                "if __name__ == '__main__': unittest.main()\n")
-    ec = commit({P: nonpassing, V: passing, H: 'def load(p):\n    return open(p).read()\n', D: 'ec data\n', F: 'ec frame\n'}, 'executes credit')
+    node = {N: "import { load } from './ec-lib.mjs';\nload();\n", J: '{}\n',
+            L: "import { readFileSync } from 'node:fs';\nexport function load() {\n  return readFileSync(new URL('./ec-node.json', import.meta.url), 'utf8');\n}\n"}
+    ec = commit({P: nonpassing, V: passing, H: 'def load(p):\n    return open(p).read()\n', D: 'ec data\n', F: 'ec frame\n', **node}, 'executes credit')
     E = ec.ref; later = commit({'tests/unrelated.txt': 'EC\n'}, 'executes credit later')
     defs = [{'path': P, 'input_revision': E, 'source_blob': blob(ec, P), 'command': ['python3', '-B', P], 'kind': 'nonpassing-unittest',
              'purpose': 'Synthetic failing test.', 'input_scope': [D]},
             {'path': V, 'input_revision': E, 'source_blob': blob(ec, V), 'command': ['python3', '-B', V], 'kind': 'unittest',
-             'purpose': 'Synthetic passing test.', 'input_scope': [D], 'other_reads': 'unresolved'}]
+             'purpose': 'Synthetic passing test.', 'input_scope': [D], 'other_reads': 'unresolved'},
+            {'path': N, 'input_revision': E, 'source_blob': blob(ec, N), 'command': ['node', '--test', N], 'kind': 'node-test'}]
     frame = lambda path, line, qual=None, first=None: dict(
         {'path': path, 'blob': blob(ec, path), 'line': line}, **({} if qual is None else {'code_qualname': qual, 'code_firstlineno': first}))
     helper = {'nonpassing': frame(H, 2, 'load', 1), 'passing': frame(H, 2)}
@@ -43,7 +47,7 @@ def executes_credit_controls(env):
                                       'target_blob': blob(ec, D), 'operation': operation}]}
     base = {repo.ref: run(repo, standalone=defs)[1] for repo in (ec, later)}
     for repo in (ec, later):
-        for path in (D, H, F): assert base[repo.ref][path]['class'] != 'keep', path
+        for path in (D, H, F, L, J): assert base[repo.ref][path]['class'] != 'keep', path
     # (1) Same revision, nonpassing: the target only; helper and data frames
     # stay in the chain (executes provenance) but gain no record change.
     for extra in (helper['nonpassing'], data['nonpassing']):
@@ -64,6 +68,11 @@ def executes_credit_controls(env):
     # the helper keeps that credit (H1108 restricts only the two forms above).
     _, rows = run(ec, read('passing', helper['passing']), standalone=defs)
     assert rows[D]['class'] == 'keep' and rows[H]['class'] == 'keep' and rows[H]['runner_chain']['edges'][-1]['kind'] == 'executes'
+    # Likewise a static route (_observe outside persisted reads) credits its imported frames.
+    static = {'runner': 'committed:' + N, 'form': 'node-readFileSync', 'target': J, 'target_blob': blob(ec, J), 'purpose': 'Synthetic Node fixture.',
+              'frames': [{'path': N, 'blob': blob(ec, N), 'line': 1}, {'path': L, 'blob': blob(ec, L), 'line': 3}]}
+    _, rows = run(later, {'static_routes': [static]}, standalone=defs)
+    assert rows[J]['class'] == rows[L]['class'] == 'keep' and rows[L]['runner_chain']['edges'][-1]['kind'] == 'executes'
 
 
 FORM_CONTROLS.append(executes_credit_controls)
