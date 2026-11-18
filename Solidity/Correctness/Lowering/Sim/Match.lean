@@ -1,22 +1,23 @@
 import Solidity.Correctness.Lowering.Sim.Match.Relations
 
 /-!
-# The one lowering diagram (plan step `ls1-sim-diagrams`)
+# The lowering diagram
 
-`diagram : Shrink.Lowering.Diagram`, the single simulation `loweringBySimulation`
-(`Goals/LoweringSim.lean`) is proved with, and what does not depend on the
-producers' recursion: the three relation-only conjuncts of `Diagram.Simulates`
-(`diagram_relations`), total initial matching (`initial_matching`) and
-`caller_bound`. The per-construct cases, the induction and coverage are later
-steps. Frozen once landed.
+`diagram : Shrink.Lowering.Diagram`, the candidate simulation for
+`loweringBySimulation` (`Goals/LoweringSim.lean`), and what does not depend on
+the producers' recursion: the three relation-only conjuncts of
+`Diagram.Simulates` (`diagram_relations`), total initial matching
+(`initial_matching`) and `caller_bound`. Neither `diagram.Simulates` nor
+`diagram.Total` is proved here, and with the goal vocabulary as it stands
+neither is provable for this value: see "Limitations".
 
 ## The association
 
 `Assoc b u m` reads the body and the emitted program as a request of the
-landed decoder vocabulary (`request`, `Total.Request`) and asks that
+decoder vocabulary (`request`, `Total.Request`) and asks that
 
 * the emitted program is placed in the caller's context under the caller's
-  names (`Production` does not fix `u.Γ` or `u.output.names`);
+  names;
 * `m` is `Aligned`: positional, with a related model local for every Source
   local;
 * the request spells a Source program (`Total.Spells`: the raw input spells a
@@ -28,15 +29,24 @@ landed decoder vocabulary (`request`, `Total.Request`) and asks that
 It does not contain `Production`: both `Diagram.Simulates` and `Diagram.Total`
 supply it, and the elaborator is `partial`, so no closed run has a kernel proof.
 
-## Limitations (reported with the step)
+## Limitations
 
+* **`diagram.Total` is not provable, even at standalone loops.** `Production`
+  leaves `u.Γ` and `u.output.names` free (`Lowered` and `Threaded` mention
+  neither; `SProg.chain` places under any names and context), while `Assoc`
+  requires them to be the caller's, as the simulation needs. `Total` ranges
+  over every such `u`. Closing this needs a goal-side change: `Production`
+  (or `Threaded`) fixing `u.Γ` and `u.output.names` from the elaboration's
+  locals, as `Checker.StateThreading` does.
 * `Total.Spells` holds for plain requests only (`Total.Decode.plain`: no
   callee, no return slots, checked scope) in contracts the canonical unit
   covers (`Total.Decode.unit`: primitive state variables, no functions).
   A function body is in `Reads`, and `request` passes the callee to the
   decoder vocabulary, but until that vocabulary reads callee requests no
-  callee or recursive site is associated and `Diagram.Total` is not provable.
-* `Diagram.Simulates` quantifies over every Source frame; see `frameRel`.
+  callee or recursive site is associated.
+* **The forward clause of `diagram.Simulates` is not provable as stated.**
+  `Diagram.Simulates` quantifies over every Source frame, and `globRel` has no
+  frame; see `frameRel`.
 -/
 namespace Solidity.Correctness.Lowering.Sim
 
@@ -50,7 +60,7 @@ def siteCallee : Site → Option Total.CalleeRequest
   | .callee d ρ ctor selfFrame Γf funs k₀ | .recursive d ρ ctor selfFrame Γf funs k₀ _ _ =>
     some ⟨d, ρ, ctor, selfFrame, Γf, funs, k₀⟩
 
-/-- A body and the contract of an emitted program as a request of the landed
+/-- A body and the contract of an emitted program as a request of the
 decoder vocabulary, under the production fresh-name policy. -/
 def request (b : Body) (u : Emitted) : Total.Request :=
   ⟨u.C, ⟨productionNames, b.input.returnSlots, b.input.raw, b.input.scope, b.input.before⟩,
@@ -77,7 +87,7 @@ def Assoc (b : Body) (u : Emitted) (m : ContextMap b.ctx u.Γ) : Prop :=
   u.Γ = (request b u).context.ctx ∧ u.output.names = (request b u).context.names ∧
   Aligned m ∧ ∃ s, Total.Spells (request b u) s ∧ Reads b s
 
-/-- **The one diagram.** A model loop runs as many iterations as its Source
+/-- **The diagram.** A model loop runs as many iterations as its Source
 loop, or one more for a lowered first pass, and a Source horizon bounds the
 iterations of every loop it completes; the transport is generous, since more
 model fuel never changes a completed run (`Prog.runF_approx`). -/

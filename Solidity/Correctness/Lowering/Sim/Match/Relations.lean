@@ -2,16 +2,16 @@ import Solidity.Goals.LoweringDiagram
 import Solidity.Correctness.Lowering.Total.Boundary
 
 /-!
-# Source-to-Intrinsic match relations (plan step `ls1-sim-diagrams`)
+# Source-to-Intrinsic match relations
 
-The value relation, the global relation and the context alignment of the one
+The value relation, the global relation and the context alignment of the
 lowering diagram (`Sim.diagram`, `Sim/Match.lean`), with the laws that mention
-no producer. Frozen once landed: later steps prove against it.
+no producer.
 
 * `valRel`: a Source Boolean and the same model Boolean; a Source integer of
   any width and the model integer of the same sign with the same number
   (`IntValueRel`). No other pair of types is related: addresses, enums, fixed
-  bytes, references and formula locals are gaps, as in the landed decoder
+  bytes, references and formula locals are gaps, as in the decoder
   (`Total.Decode.localTy`).
 * `globRel`: at the instance whose address is the model's `tx.selfAddress`,
   every primitive state variable holds related values, read as the Source
@@ -20,7 +20,7 @@ no producer. Frozen once landed: later steps prove against it.
   are the account's balance when that is a word.
 * `frameRel`: what `globRel` cannot say, because its type sees no call frame.
   `Diagram.Simulates` quantifies over every frame, so the forward diagram is
-  provable only under it (reported with this step).
+  provable only under it: `Goals/LoweringDiagram.lean` has no place for it.
 
 Not related: memory heaps, the model ledger `net` and other accounts'
 balances (they need the frame's opening funds), external-call answers
@@ -69,13 +69,13 @@ theorem liftable_int (t : Source.IntTy) : Liftable (.int t) (.val (integerPrim t
     | int n h => exact ⟨integerValue t n h, rfl, (integer_observe t n h).symm⟩
     | memRef h | storRef h | cdRef h => cases h
 
-/-- The primitive pairs of the landed boundary relation are liftable. -/
+/-- The primitive pairs of the boundary relation (`Total.Relation.val`) are liftable. -/
 theorem liftable_prim : (p : PrimTy) → Liftable (sourceTy p) (.val p)
   | .bool => liftable_bool
   | .uint => liftable_int Source.IntTy.u256
   | .int => liftable_int { Source.IntTy.u256 with signed := true }
 
-/-- The landed primitive correspondence is contained in `valRel`. -/
+/-- The primitive correspondence (`PrimitiveRel`) is contained in `valRel`. -/
 theorem valRel_of_primitive {D : Source.Layout} {C : Contract} {H : HTy} {p : PrimTy}
     {v : Source.Val D (sourceTy p)} {x : p.Denote} (h : PrimitiveRel D p v x) :
     valRel (C := C) (H := H) (sourceTy p) (.val p) v x := by
@@ -84,7 +84,7 @@ theorem valRel_of_primitive {D : Source.Layout} {C : Contract} {H : HTy} {p : Pr
   | uint x h => exact ⟨rfl, rfl⟩
   | int x h => exact ⟨rfl, rfl⟩
 
-/-- The landed boundary value relation (`Total.Relation.val`) is contained in
+/-- The boundary value relation (`Total.Relation.val`) is contained in
 `valRel`. -/
 theorem valRel_of_boundary {E : Source.Env} {C : Contract} {H : HTy} {τ : Source.STy} {u : LTy}
     {v : Source.Val E.layout τ} {x : u.TDenote C H} (h : Total.Relation.val E C H τ u v x) :
@@ -105,7 +105,7 @@ inductive Aligned : {srcΓ : Source.RCtx} → {Γ : Ctx} → ContextMap srcΓ Γ
   | cons {srcΓ : Source.RCtx} {Γ : Ctx} {m : ContextMap srcΓ Γ} (τ : Source.STy) (u : LTy) :
       Aligned m → Liftable τ u → Aligned (m.cons τ u)
 
-/-- An aligned map is the positional map of the landed boundary. -/
+/-- An aligned map is the positional map of the boundary (`Total.Simulation.Positional`). -/
 theorem Aligned.positional {srcΓ : Source.RCtx} {Γ : Ctx} {m : ContextMap srcΓ Γ}
     (a : Aligned m) : Total.Simulation.Positional m := by
   induction a with
@@ -174,7 +174,7 @@ theorem globRel.at_frame {E : Source.Env} {C : Contract} {Γ : Ctx} {st : Source
   have same : self = F.this := Fin.ext (Int.ofNat.inj (address.trans frame.1.symm))
   exact same ▸ rest
 
-/-- **Compatibility with the landed boundary**: where no path is transient,
+/-- **Compatibility with the boundary**: where no path is transient,
 `globRel` and `frameRel` give the stage-1 global relation `Total.Relation.glob`. -/
 theorem globRel.boundary {E : Source.Env} {C : Contract} {Γ : Ctx} {st : Source.St E}
     {σ : State C Γ} (h : globRel st σ) {G : Source.Glob E} {F : Source.Fr}
