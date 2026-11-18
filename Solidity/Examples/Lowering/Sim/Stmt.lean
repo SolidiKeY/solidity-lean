@@ -12,11 +12,11 @@ namespace Solidity.Examples.Lowering.Sim.Stmt
 open Solidity.Goals (ElabRan ElabSat elabStmtsStep elabKernelTotal)
 open Solidity.Goals.Shrink.Lowering
 open Solidity.Correctness.Lowering.Sim
+open Solidity.Correctness.Lowering.Unchecked (RawOneInput SourceOneAssociation)
 
 variable [FreshNames]
 
-/-- `break;` through `elabStmtPWith`, at every record: its output meets the
-obligations at its site (no body is elaborated to it). -/
+/-- `break;` through `elabStmtPWith` at every record: no body is elaborated to it. -/
 example (kernel : elabKernelTotal) (C : Contract) (rc : ElabRec C) (sc : ElabScope)
     (st st' : ECtx × Nat) (P : SProg C) (ran : ElabRan (elabStmtPWith C rc .brk) sc st P st') :
     stmtQ C .brk sc st P st' :=
@@ -31,16 +31,16 @@ example
       ElabSat (blockQ C) (elabStmtsStep C rc)) : StmtCases :=
   stmt_cases_of rest
 
-/-- A simulated body completes at a checked frame exactly when it completes
-at an unchecked one. -/
-example {b : Body} {u : Emitted} {m : Solidity.Lowering.V07.ContextMap b.ctx u.Γ}
-    (sim : RunSim b u m) (G : Source.Glob b.E) (F : Source.Fr) (src : Source.EMState b.E b.ctx)
-    (n : Nat)
-    (done : (sourceRun b G { F with checked := true } n 0 none src).1 ≠ .error .timeout)
-    (done' : (sourceRun b G { F with checked := false } n 0 none src).1 ≠ .error .timeout) :
-    (∃ x, (sourceRun b G { F with checked := true } n 0 none src).1 = .ok x) ↔
-      ∃ x, (sourceRun b G { F with checked := false } n 0 none src).1 = .ok x :=
-  sim.frame_blind G G _ _ 0 0 none none src n done done'
+/-- Under v1 no emitted program simulates a body resolved to a local `x++` or `x -= 1`. -/
+example {input : RawStmt} (context : Source.Ctx) (raw : RawOneInput input) {k : Source.SCtx}
+    (statement : Source.RStmt context.env context.rets context.inModifier k context.tys context.tys)
+    (certificate : SourceOneAssociation context raw statement) (scope : ElabScope)
+    (before : Solidity.Correctness.Lowering.Checker.Snapshot) (site : Site) (u : Emitted)
+    (m : Solidity.Lowering.V07.ContextMap context.tys u.Γ) (G : Source.Glob context.env)
+    (F : Source.Fr) (src : Source.EMState context.env context.tys) :
+    ¬ RunSim ⟨context.env, context.rets, context.inModifier, k, context.tys,
+      ⟨[], statement, none, scope, before⟩, site⟩ u m :=
+  one_not_runSim context raw statement certificate [] none scope before site u m G F src
 
 /-- The jump conjunct under the v2 frame premise, on `break;`. -/
 example (kernel : elabKernelTotal) (C : Contract) (rc : ElabRec C) :

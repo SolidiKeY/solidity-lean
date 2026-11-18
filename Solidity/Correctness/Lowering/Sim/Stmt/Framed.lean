@@ -82,7 +82,8 @@ def Diagram.Simulates (D : Diagram) : Prop :=
     Production b u → Accepted u → D.Assoc b u m → D.RunSim b u m
 
 /-- The per-run obligations of `V2.diagram`. -/
-abbrev RunSim (b : Body) (u : Emitted) (m : ContextMap b.ctx u.Γ) : Prop := diagram.RunSim b u m
+abbrev RunSim (b : Body) (u : Emitted) (m : ContextMap b.ctx u.Γ) : Prop :=
+  Diagram.RunSim diagram b u m
 
 omit [FreshNames] in
 /-- A v1 run is a v2 run: the frame premise is dropped. -/
