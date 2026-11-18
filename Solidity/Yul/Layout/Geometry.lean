@@ -13,17 +13,21 @@ so that the `LayoutView.Laws` can hold:
   succeed at every location (`write_total`) and read back (`write_read`).
 * Storage and transient `bytes`: the head slot holds the length (as a dynamic
   array's does), byte `i` is byte `31 - i % 32` of slot `keccak(slot) + i / 32`.
-  The writer stores the head last, so the written footprint is the footprint
-  of the result even when the head slot collides with a data slot (`frame`).
-  solc's short/long encoding (`2 * length + 1`) is not used: it cannot store a
+  The data footprint is every slot the data of a fitting length can reach
+  (`2 ^ 251` slots from `keccak(slot)`), not only the slots of the current
+  length: `Geometry.cellsT` takes a `bytes` footprint from the result state,
+  where a later sibling write may have overwritten the head slot, so a
+  footprint that depends on the stored length would miss cells the write
+  changed (`frame`). solc's short/long encoding (`2 * length + 1`) is not used: it cannot store a
   length of `2 ^ 255` or more, which `Layout.Fits` admits.
 * Memory objects are inline: element `i` starts `i * memSize e` after the
   base. `Geometry.elem` and `Geometry.scalarCells` see no state, so a nested
   dynamic array or `bytes` cannot be reached through an ordinary pointer word.
   A nested dynamic member is a two-word header (length, data address) at a
   location with a nonzero `offset` (`indirect`); `dataLoc` follows the address
-  and the length footprint covers both words. A location with offset 0 is the
-  pinned object (`bytesObjectView`, `memberArrayView`): length word, then data.
+  and the length footprint covers both words. A dynamic array or `bytes` at
+  offset 0 is the pinned object (`bytesObjectView`, `memberArrayView`): length
+  word, then data.
 * A length or `bytes` write through an indirect header is refused: an element
   write could overwrite the data address, and then the written footprint
   (taken in the result state) would miss the cells changed (`frame`). Such
@@ -45,8 +49,9 @@ def slotField (width offset : Nat) : Option Field :=
   else none
 
 mutual
-/-- The bytes a layout occupies inline in memory: a word per scalar, a
-two-word header (length, data address) per nested dynamic array or `bytes`. -/
+/-- The bytes a nested value occupies inline in memory: a word per scalar, a
+two-word header (length, data address) per dynamic array or `bytes`, a word
+for a mapping (which no memory object holds). -/
 def memSize : Shrink.Layout → Nat
   | .scalar _ => 32
   | .fixedArray e n => n * memSize e
@@ -150,7 +155,7 @@ def geometry : Shrink.Geometry where
   blobCells P l m c :=
     if l.region = .memory then
       Shrink.objectCells (dataLoc P l m).word (mloadNat m.memory l.word) c
-    else ∃ i, i < (m.slots l.region (Shrink.toWord l.word)).val ∧
-      c = .slot l.region (Shrink.toWord ((dataLoc P l m).word + i / 32)) (31 - i % 32)
+    else ∃ j b, j < 2 ^ 251 ∧ b < 32 ∧
+      c = .slot l.region (Shrink.toWord ((dataLoc P l m).word + j)) b
 
 end Solidity.Yul.Layout
