@@ -4,53 +4,51 @@ import Solidity.Goals.ElabTotal
 /-!
 # The lowering diagram: the open-recursion case interface
 
-`Diagram.Simulates` quantifies over the outputs of the actual elaborator
-(`ElaborationReceipt`: `elabStmtsP`, then `SProg.chain`), whose knot is
-`partial`. Its arms are total definitions over a callback record
-(`Syntax/Elab/Arms.lean`), so the cases of the simulation are stated here over
-those arms at an arbitrary record, and the knot is closed afterwards by the
-induction `Solidity.Goals.ElabKernelInduction` (a clause of
-`Solidity.Goals.elabKernelTotal`).
+`Diagram.Simulates` quantifies over outputs of the actual elaborator, whose
+knot is `partial`; its arms are total over a callback record (`Arms.lean`). The
+cases are stated over the arms at an arbitrary record, and the knot is closed
+by `Solidity.Goals.ElabKernelInduction` (a clause of `elabKernelTotal`).
 
 * `RunSim b u m`: the per-run obligations of `Diagram.Simulates` for
   `Sim.diagram`: `LowerFresh`, total initial matching, and for one context
-  extension the forward final matching at the transported fuel
-  (`Diagram.Final`), stability of completed Source runs under larger horizons
-  and the backward clause. `simulates_of_runs` checks that it is that part.
-* `SiteSim C raw sc st P st'`: `RunSim` for every body and every emitted
-  program whose elaboration is the run `raw, sc, st ↦ P, st'` placed by
-  `SProg.chain`, lowered and threaded at the body's site (`Lowered`,
-  `Threaded`), in the fragment (`Accepted`) and associated (`diagram.Assoc`).
+  extension the forward final matching at the transported fuel, stability of
+  completed Source runs and the backward clause (`simulates_of_runs`).
+* `SiteSim C raw sc st P st'`: `RunSim` for every body and emitted program
+  whose actual elaboration (`ElaborationReceipt`) has the data of the run
+  `raw, sc, st ↦ P, st'`, lowered and threaded at the body's site, in the
+  fragment and associated (`Lowered`, `Threaded`, `Accepted`, `diagram.Assoc`).
 * `RecSim C rc`: every successful run of `rc.hoist`, `rc.hoistStmt`,
   `rc.elabStmtP`, `rc.elabStmt1` and `rc.elabStmtsP` meets `SiteSim` at its
-  site (`hoistQ`, `hoistStmtQ`, `stmtQ`, `blockQ`): the five predicates of
-  `ElabKernelInduction`, instantiated (`recSim_of_step`).
+  site: the five predicates of `ElabKernelInduction` (`recSim_of_step`).
 * `ExprCases`, `StmtCases`, `StateCases`: for every record with `RecSim`, the
   successful outputs of the arms meet the same obligations, one conjunct per
-  family (`StmtFamily`, `ExprFamily`: the statement constructors of
-  `PublicCompilerTotal.StmtOk`, read on the raw input). Each takes
-  `elabKernelTotal` as a hypothesis, for the defining equations of the
-  `partial` helpers its arms call.
+  family (the constructors of `PublicCompilerTotal.StmtOk`, read on the raw
+  input). Each takes `elabKernelTotal`, for the equations of the `partial`
+  helpers its arms call.
 
 Loops are not a case: nothing here mentions `lowerLoops`. The three
 propositions and a loop hypothesis (`StmtArm C r .loop` for every record with
-`RecSim`; ls3a-sim-induction owns it) give the per-run part of
+`RecSim`; ls3a-sim-induction owns it) imply the per-run part of
 `diagram.Simulates` by `ElabKernelInduction` at `elabRec C ()`
 (`runs_of_cases`). `Lowered` (the flag-based lowering) is a premise of
-`SiteSim`, `LowerFresh` a conclusion of `RunSim`, and the forward clause is at
+`SiteSim`, `LowerFresh` a conclusion of `RunSim`, the forward clause is at
 `diagram.fuel`.
 
 ## Limitations
 
-* `ElabKernelInduction` constrains five fields of the record. An arm that
-  calls another field (`elabBranch`, `elabCall`, `hoistTop`, …) at an arbitrary
-  record has no hypothesis on that call's output, so its case needs the field's
-  equation over the record, which `elabKernelTotal` does not state.
-* `ElabKernelHelpers` states the equations of `RawExpr.mapM`, `lowerReturns`
+* **The cases are not provable arm by arm.** `SiteSim` reads a callback's
+  output as the complete elaboration of a lowered body. An arm's output is in
+  general a part of one (`elabStmtPWith` returns captures, then
+  `rc.elabStmt1` of the rest; a declaration changes the context, and a `Body`
+  has one), and `RecSim` says nothing of a concatenation. A case is provable
+  directly only where the output is a whole body's elaboration; elsewhere it
+  holds only as a consequence of the per-run statement. So `runs_of_cases` is
+  an implication, not a proof plan: a statement-level relation (an additive
+  v2) has to replace it.
+* `ElabKernelInduction` constrains five fields of the record; an arm that calls
+  another (`elabBranch`, `elabCall`, `hoistTop`, …) has no hypothesis on it.
+  `ElabKernelHelpers` states the equations of `RawExpr.mapM`, `lowerReturns`
   and `renameStmts` only.
-* `SiteSim` is the whole-body obligation: a callback's run is read as the
-  elaboration of a whole lowered body. It is not an invariant of a statement
-  inside a body (a declaration changes the context, and `Body` has one).
 -/
 namespace Solidity.Correctness.Lowering.Sim
 
@@ -91,16 +89,19 @@ theorem simulates_of_runs
 
 variable (C : Contract)
 
-/-- The elaboration recorded in `o` is the run `raw, sc, st ↦ P, st'`, placed
-by `SProg.chain` under the output's names. -/
+/-- The elaboration recorded in `o` is an actual one (`ElaborationReceipt`:
+`elabStmtsP` on `o.raw`, placed by `SProg.chain`) whose input, scope, states
+and parts are those of the run `raw, sc, st ↦ P, st'`. -/
 def Elaborated {Γ : Ctx} (o : Output C Γ) (raw : List RawStmt) (sc : ElabScope)
     (st : ECtx × Nat) (P : SProg C) (st' : ECtx × Nat) : Prop :=
   o.raw = raw ∧ o.elabScope = sc ∧ o.beforeElab.locals = st ∧ o.elaborated = P ∧
-  o.afterElab.locals = st' ∧ SProg.chain o.names Γ P = .ok o.program
+  o.afterElab.locals = st' ∧ ElaborationReceipt o
 
 /-- **The obligations at a site**: every body and emitted program whose
-elaboration is this run, lowered and threaded at the body's site, in the
-fragment and associated by the diagram, meets `RunSim`. -/
+actual elaboration has the data of this run, lowered and threaded at the
+body's site, in the fragment and associated by the diagram, meets `RunSim`.
+The receipt is a premise: a run whose parts are not the elaboration of the
+body's lowered input obliges nothing. -/
 def SiteSim (raw : List RawStmt) (sc : ElabScope) (st : ECtx × Nat) (P : SProg C)
     (st' : ECtx × Nat) : Prop :=
   ∀ (b : Body) (Γ : Ctx) (o : Output C Γ) (m : ContextMap b.ctx Γ),
@@ -109,12 +110,14 @@ def SiteSim (raw : List RawStmt) (sc : ElabScope) (st : ECtx × Nat) (P : SProg 
 
 /-! ## The record -/
 
-/-- The captures of an expression, at any lowered body they are the parts of. -/
+/-- The captures of an expression, at any lowered body whose whole elaboration
+they are (the receipt in `SiteSim` ties the body to them). -/
 def hoistQ (_ : RawExpr) (sc : ElabScope) (st : ECtx × Nat) (out : SProg C × RawExpr)
     (st' : ECtx × Nat) : Prop :=
   ∀ raw, SiteSim C raw sc st out.1 st'
 
-/-- The captures of a statement, at any lowered body they are the parts of. -/
+/-- The captures of a statement, at any lowered body whose whole elaboration
+they are. -/
 def hoistStmtQ (_ : RawStmt) (sc : ElabScope) (st : ECtx × Nat) (out : SProg C × RawStmt)
     (st' : ECtx × Nat) : Prop :=
   ∀ raw, SiteSim C raw sc st out.1 st'
@@ -266,8 +269,10 @@ theorem step_of_cases (kernel : elabKernelTotal) (exprs : ExprCases) (stmts : St
     fun s sc st P st' ran => (arm s).1 s rfl sc st P st' ran,
     fun s sc st P st' ran => (arm s).2 s rfl sc st P st' ran, sequence⟩
 
-/-- **The cases suffice**: with a loop hypothesis they give the per-run part
-of `diagram.Simulates`, by `ElabKernelInduction` at `elabRec C ()`. -/
+/-- **The cases imply the per-run part** of `diagram.Simulates`, with a loop
+hypothesis, by `ElabKernelInduction` at `elabRec C ()`. This is an
+implication only: see "Limitations" for why the cases are not provable arm by
+arm. -/
 theorem runs_of_cases (kernel : elabKernelTotal) (exprs : ExprCases) (stmts : StmtCases)
     (states : StateCases)
     (loops : ∀ (C : Contract) (r : ElabRec C), RecSim C r → StmtArm C r .loop)
@@ -281,6 +286,7 @@ theorem runs_of_cases (kernel : elabKernelTotal) (exprs : ExprCases) (stmts : St
     names.2.2.2.2.2.2.2.2.2.2.2.2.2.2.2.2.2.2.2.2.2.2.2.2.2.1
   obtain ⟨lowered, ⟨ran, placed⟩, threaded⟩ := production
   exact sim.2.2.2.2 o.raw o.elabScope o.beforeElab.locals o.elaborated o.afterElab.locals
-    ⟨_, _, block ▸ ran⟩ b Γ o m ⟨rfl, rfl, rfl, rfl, rfl, placed⟩ lowered threaded accepted assoc
+    ⟨_, _, block ▸ ran⟩ b Γ o m ⟨rfl, rfl, rfl, rfl, rfl, ran, placed⟩ lowered threaded accepted
+    assoc
 
 end Solidity.Correctness.Lowering.Sim

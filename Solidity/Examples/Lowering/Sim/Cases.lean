@@ -22,8 +22,7 @@ example (C : Contract) (rc : ElabRec C) (induction : ElabKernelInduction C rc)
       ElabSat (hoistQ C) (hoistWith C r) ∧ ElabSat (hoistStmtQ C) (hoistStmtWith C r) ∧
       ElabSat (stmtQ C) (elabStmtPWith C r) ∧ ElabSat (stmtQ C) (elabStmt1With C r) ∧
       ElabSat (blockQ C) (elabStmtsStep C r)) : RecSim C rc :=
-  induction (hoistQ C) (hoistStmtQ C) (stmtQ C) (stmtQ C) (blockQ C)
-    fun r h s p o l => step r ⟨h, s, p, o, l⟩
+  recSim_of_step C rc induction step
 
 /-- The families of some raw inputs. -/
 example : stmtFamily .revert = .revert ∧
@@ -32,8 +31,8 @@ example : stmtFamily .revert = .revert ∧
     exprFamily (.binop .add (.num 1) (.num 2)) = .arith ∧ exprFamily (.call "f" []) = .state :=
   ⟨rfl, rfl, rfl, rfl, rfl, rfl⟩
 
-/-- **Sufficiency**: the three cases and a loop hypothesis give
-`diagram.Simulates`, by the knot induction of `elabKernelTotal`. -/
+/-- The three cases and a loop hypothesis imply `diagram.Simulates`, by the
+knot induction of `elabKernelTotal` (an implication, not a proof plan). -/
 example (kernel : elabKernelTotal) (exprs : ExprCases) (stmts : StmtCases) (states : StateCases)
     (loops : ∀ (C : Contract) (r : ElabRec C), RecSim C r → StmtArm C r .loop) :
     diagram.Simulates :=

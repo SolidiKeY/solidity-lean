@@ -142,7 +142,8 @@ theorem revert_arm_of (rc : ElabRec C)
   subst hs
   obtain ⟨rfl, rfl⟩ := revert_ran C rc ran
   intro b Γ o m run lowered threaded _ assoc
-  obtain ⟨raw, _, _, _, _, placed⟩ := run
+  obtain ⟨raw, _, _, parts, _, _, placed⟩ := run
+  rw [parts] at placed
   obtain ⟨fresh, source⟩ := bodies b Γ o m raw lowered threaded assoc
   obtain ⟨⟨emb⟩, target⟩ := revert_placed C placed
   refine runSim_of assoc fresh emb fun G F nps ph src tgt _ _ => ?_
