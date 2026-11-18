@@ -23,15 +23,16 @@
 #   migrate-backend, migrate-counterexamples, migrate-solkey (no-program-launch): no Python program launch at all
 #     (backend's only interpreter use is `-m lean_lsp_mcp`, a non-sibling module, through StdioServerParameters). Their
 #     sibling importers (backend capture_root_exit_proposal, check_fixture_mcp, reconcile_imports; counterexamples
-#     measure, summarize; solkey measure) are no kept roots, and the tests that load modules by file location run in
-#     python3 -B roots.
+#     measure, summarize) are no kept roots, solkey measure.py is a python3 -B root (no cache), and the tests that load
+#     these modules by file location or sys.path run in python3 -B roots.
 #   migrate-corpus (no-sibling-import): acceptance.py:23,28,47,71 launch bounded.py and compare.py; neither imports a
 #     sibling module (bounded.py also names ctypes); acceptance.py loads census.py by file location but is no kept root
 #     and no committed text invokes it.
-#   migrate-frontend (argument-module): measure.py:222 relaunches `__file__` (no launch form; driver = program) and the
-#     worker loads its module from Path(sys.argv[2]), no exact binding; the launch sits in SignalRaceTest, reached only
-#     under a `--signal-test` argument that no kept root or committed invocation passes (the kept root
-#     `python3 -B .../measure.py` runs main()).
+#   migrate-frontend (argument-module): measure.py:222 relaunches `__file__`. That is the H1053 self-relaunch launch
+#     form (roles.py _python_launch accepts it; no H1203 form does, driver = program), but the relaunched worker loads
+#     its module from Path(sys.argv[2]): no exact sibling import (H1053) and no exact binding of the module. (The
+#     launch also sits in SignalRaceTest, under a `--signal-test` argument no committed invocation passes; H1053 does
+#     not audit whether a launch runs, so that is noted, not relied on.)
 #   migrate-testsuite (environment-mapping): export-interfaces.py:18 launches generate-interface.py (static sibling
 #     import of expr_dag at line 8) with env=env, a copied and edited os.environ mapping (outside the H1053 env-keyword
 #     guard and every H1203 form), and export-interfaces.py is no kept root and no committed text invokes it.
@@ -40,13 +41,19 @@
 #     SHA-256 pin (HISTORICAL_PINS holds the other three records); the only other committed reader,
 #     test_current_replay.py, writes a synthetic stand-in; no committed invocation binds the argument to this
 #     checkout. No exact binding (H1113/H1203 exact-binding rule).
+# Outside the nine directories, tests/h62/item2/audit-evm-compiler/check_runtime.py:9,14 launch evm bounded.py
+# bytecode-enabled; bounded.py imports no sibling module. Nothing binds scope-manifest.json exactly
+# (audit_dispositions.py binds only COORDINATOR-ANSWERS-20261107.json).
 # Documentation commands (docs/feature-work) are no kept roots (_entry_root refuses documentation reference roles);
 # the bytecode-enabled ones there (abi-world census.py, yul record_h69/census/acceptance) import no sibling module.
-# The control re-derives every refusal on the pinned blobs when RR_BASE is held, exercises each refused shape against
-# the H1203 recognisers next to an accepted twin, and checks that rows claiming the ten paths are refused by the H1053,
-# H1203 and H1113 handlers. Source-only limits unchanged: no consumer, invocation, pass or proof credit is granted.
+# The control re-derives every refusal on the pinned blobs when RR_BASE is held (else it says on stderr that it
+# skipped them): the candidate census, the H1053 and H1203 launch forms, the sibling imports, and, past review, the
+# H1203, H1053 and H1113 handlers on the real tree at RR_BASE with each claim treated as reviewed (RR_PAST_REVIEW: the
+# guard that refuses it). It also exercises each refused shape against the H1203 recognisers next to an accepted twin,
+# and checks that rows claiming the ten paths are refused by the handlers, directly and through the inventory. Source-only limits unchanged: no consumer, invocation, pass or proof credit is granted.
 import ast
 import posixpath
+import sys
 from pathlib import Path
 
 RR_BASE = '57c3b2f77d4b62bb9373286447fd344d6b7dc746'
@@ -102,7 +109,25 @@ RR_OPTIONED = frozenset({
     (_ABI + 'receipts.py', 45, '-B'), (_ABI + 'resume_accept.py', 41, '-B'), (_ABI + 'resume_measure.py', 20, '-B'),
     (_ABI + 'resume_measure.py', 26, '-B'), (_ABI + 'test_bounded.py', 26, '-B'), (_ABI + 'test_coverage.py', 29, '-B'),
     (_FRO + 'measure.py', 194, '-c'), (_RR6 + 'migrate-backend/check_fixture_mcp.py', 100, 'keyword'),
+    (_ABI + 'vectors_call.py', 14, '-B'), (_ABI + 'fidelity_call.py', 14, '-B'),
+    (_ABI + 'mcp_call.py', 34, 'keyword'), (_ABI + 'resume_mcp_call.py', 51, 'keyword'),  # both `-m lean_lsp_mcp`
 })
+# The one candidate the H1053 launch form (roles.py _python_launch) accepts: the self-relaunch of migrate-frontend.
+RR_H1053_LAUNCHES = frozenset({(_FRO + 'measure.py', 222)})
+# Past review (each claim of RR_CLAIMS and of the manifest treated as reviewed, real blobs and introducing commit at
+# RR_BASE): the refusal of the H1203 handler, of the H1053 handler, and of the H1113 handler for the manifest.
+RR_PAST_REVIEW = {
+    _ABI + '.gitignore': ('producer switches bytecode off', 'program has no exact sibling import'),
+    _EVM + '.gitignore': ('rule outside the CPython cache rules', 'rule outside the CPython cache rules'),
+    _YUL + '.gitignore': ('program does not import its module', 'program has no exact sibling import'),
+    _RR6 + 'migrate-backend/.gitignore': ('driver line is no bytecode-enabled launch', 'driver line is no bytecode-enabled launch'),
+    _COR + '.gitignore': ('program does not import its module', 'program has no exact sibling import'),
+    _RR6 + 'migrate-counterexamples/.gitignore': ('driver line is no bytecode-enabled launch', 'driver line is no bytecode-enabled launch'),
+    _FRO + '.gitignore': ('unsupported h62 cache policy role invocation', 'program has no exact sibling import'),
+    _RR6 + 'migrate-solkey/.gitignore': ('driver line is no bytecode-enabled launch', 'driver line is no bytecode-enabled launch'),
+    _TST + '.gitignore': ('driver line is no bytecode-enabled launch', 'driver line is no bytecode-enabled launch'),
+    _RR2 + 'audit-theories/handoff/scope-manifest.json': ('reader does not perform its operation',),
+}
 _RR_THEORIES = _RR2 + 'audit-theories/'
 _RR_PAIRED = (_RR_THEORIES + 'paired_evidence.py', 'be36e9615801d394d83697e3ba58a07fea4ae568')
 # Hypothetical claims of each policy from its nearest real launch (form, driver, line, literal, program, import form,
@@ -130,6 +155,9 @@ def _rr(name):
 
 
 def _rr_interpreter(node):
+    if isinstance(node, ast.Call) and isinstance(node.func, ast.Name) and node.func.id == 'str' and len(node.args) == 1:
+        node = node.args[0]  # str(ROOT / '.venv/bin/python')
+        while isinstance(node, ast.BinOp) and isinstance(node.op, ast.Div): node = node.right
     return (isinstance(node, ast.Attribute) and node.attr == 'executable' and isinstance(node.value, ast.Name) and node.value.id == 'sys'
             or isinstance(node, ast.Constant) and type(node.value) is str and posixpath.basename(node.value).startswith('python'))
 
@@ -185,8 +213,8 @@ def _rr_manifest_row(revision, operation):
     path = _RR_THEORIES + 'handoff/scope-manifest.json'; entry = replay[0] if operation == 'pinned-history-show' else _RR_THEORIES + 'check_paired_evidence.py'
     return {'kind': _rr('HANDOFF_WITNESS_KIND'), 'path': path, 'input_revision': revision, 'source_blob': RR_REFUSED[path][0],
             'command': ['python3', '-B', entry], 'operation': operation, 'entry': {'path': entry, 'blob': replay[1], 'import_line': replay[2]},
-            'module': {'path': paired[0], 'blob': paired[1], 'line': 110},
-            'read': {'path': entry if operation == 'pinned-history-show' else paired[0], 'line': 110},
+            'module': {'path': paired[0], 'blob': paired[1], 'line': 22 if operation == 'pinned-history-show' else 110},
+            'read': {'path': entry if operation == 'pinned-history-show' else paired[0], 'line': 38 if operation == 'pinned-history-show' else 110},  # 38: the replay's pinned show
             'purpose': 'Hypothetical claim of the refused manifest (H1221 control).'}
 
 
@@ -231,7 +259,7 @@ def _rr_shape_controls():
     assert rr_interpreter_lists('[') is None and rr_interpreter_lists('x = ["lean", "python3"]\n') == set()
 
 
-def _rr_blob_controls(git, home):
+def _rr_blob_controls(classifier, git, home):
     """The refusals re-derived on the pinned blobs at RR_BASE (skipped when this checkout does not hold RR_BASE)."""
     try: git(home, 'cat-file', '-e', RR_BASE + '^{commit}')
     except ValueError: return False
@@ -239,7 +267,7 @@ def _rr_blob_controls(git, home):
     for path, (b, _) in RR_REFUSED.items():
         assert git(home, 'rev-parse', RR_BASE + ':' + path).decode().strip() == b, path
     directories = sorted({posixpath.dirname(p) + '/' for p in RR_REFUSED if p.endswith('.gitignore')})
-    candidates, optioned = set(), set()
+    candidates, optioned, h1053 = set(), set(), set()
     trees = {}
     for d in directories:
         listing = git(home, 'ls-tree', '-r', RR_BASE, '--', d).decode().splitlines()
@@ -259,6 +287,9 @@ def _rr_blob_controls(git, home):
             for literal in (posixpath.basename(program), program):
                 assert _rr('h62_cache_launch')(form, dtext, driver, line, literal) is None, (driver, line, form, literal)
         assert _rr_sibling_imports(ptext, program, tree) == sibling, (program, sibling)
+        literals = [None] if program == driver else [program, posixpath.basename(program)]
+        if any(_rr('_python_launch')(dtext, driver, line, lit, program) for lit in literals): h1053.add((driver, line))
+    assert h1053 == RR_H1053_LAUNCHES, h1053
     rules, cpython = _rr('_cache_rules'), _rr('CPYTHON_CACHE_RULES')
     for path, (b, reason) in RR_REFUSED.items():
         if not path.endswith('.gitignore'): continue
@@ -290,6 +321,33 @@ def _rr_blob_controls(git, home):
     assert readers == {_RR_PAIRED[0], _RR_THEORIES + 'test_current_replay.py'}, readers
     replay = git(home, 'show', RR_BASE + ':' + _RR_THEORIES + 'test_current_replay.py').decode()
     assert '"synthetic_repository_bound_input"' in replay
+    return _rr_past_review(classifier, git, home)
+
+
+def _rr_past_review(classifier, git, home):
+    """Each claim treated as reviewed on the real tree at RR_BASE: the handlers refuse it on its bytes (RR_PAST_REVIEW)."""
+    repo = classifier['Repository'](home, RR_BASE)
+    graph = type('RRGraph', (), {'repo': repo, 'roots': {}})(); catalog = {'standalone': []}
+    blob_of = lambda q: repo.tree[q][2]
+    for path in sorted(RR_CLAIMS):
+        intro = git(home, 'log', '--format=%H', '--diff-filter=A', RR_BASE, '--', path).decode().split()[-1]
+        claim = _rr_claim(path, RR_BASE); claim['provenance'] = intro
+        for k in ('launch', 'program', 'module'): claim[k]['blob'] = blob_of(claim[k]['path'])
+        d, g, m = claim['launch'], claim['program'], claim['module']
+        tuple_ = (path, claim['source_blob'], intro, claim['line'], d['form'], d['path'], d['blob'], d['line'], d['literal'], g['path'],
+                  g['blob'], g['import'], g['import_line'], m['path'], m['blob'])
+        h1203, h1053 = RR_PAST_REVIEW[path]
+        _rr_refused(lambda: _rr('h62_cache_policy_root')(classifier, graph, catalog, claim, reviewed=frozenset({tuple_})), h1203)
+        row = _rr_policy_row(path, RR_BASE); row['provenance']['commit'] = intro; q = row['matches'][0]['producer']
+        for k in ('root', 'driver', 'program', 'module'): q[k + '_blob'] = blob_of(q[k])
+        _rr_refused(lambda: _rr('cache_policies')(classifier, graph, [row], reviewed={path: (row['blob'], intro, row['matches'])}), h1053)
+    for operation in ('pinned-history-show', 'main-root-read'):
+        row = _rr_manifest_row(RR_BASE, operation)
+        for k in ('entry', 'module'): row[k]['blob'] = blob_of(row[k]['path'])
+        e, m, r = row['entry'], row['module'], row['read']
+        tuple_ = (row['path'], row['source_blob'], operation, e['path'], e['blob'], e['import_line'], m['path'], m['blob'], m['line'], r['path'], r['line'])
+        _rr_refused(lambda: _rr('handoff_witness_root')(classifier, graph, catalog, row, reviewed=frozenset({tuple_})),
+                    RR_PAST_REVIEW[row['path']][0])
     return True
 
 
@@ -308,7 +366,8 @@ def refused_review_controls(env):
     assert _RR_THEORIES + 'handoff/scope-manifest.json' in _rr('HANDOFF_WITNESS_UNRESOLVED') and _rr('_HW_PAIRED') == _RR_PAIRED
     assert not any(getattr(f, '__name__', '').startswith('rr_') for f in (*_rr('SOURCE_ROLE_KINDS').values(), *_rr('LATE_SOURCE_ROLE_KINDS').values()))
     _rr_shape_controls()
-    _rr_blob_controls(git, Path(classifier['__file__']).resolve().parents[1])
+    if not _rr_blob_controls(classifier, git, Path(classifier['__file__']).resolve().parents[1]):
+        print('H1221 refused-cache-and-manifest-review: ' + RR_BASE[:12] + ' not held; pinned-blob controls skipped', file=sys.stderr)
     # Direct handler refusals of hypothetical claims of every path.
     revision = '1' * 40; graph = type('RRGraph', (), {'repo': None})(); catalog = {'standalone': []}
     for path in sorted(RR_CLAIMS):
@@ -329,7 +388,7 @@ def refused_review_controls(env):
     texts[_RR_THEORIES + 'handoff/scope-manifest.json'] = '{}\n'
     try:
         repo = commit(texts, 'h62 refused paths')
-        assert all(repo.tree[p][2] == RR_REFUSED[p][0] for p in RR_CLAIMS if p != _EVM + '.gitignore' and p != _COR + '.gitignore')
+        assert all(repo.tree[p][2] == RR_REFUSED[p][0] for p in RR_CLAIMS)
         for path in (_TST + '.gitignore', _RR6 + 'migrate-solkey/.gitignore'):
             rejected(repo, 'unreviewed h62 cache policy role', standalone=[_rr_claim(path, repo.ref)])
             rejected(repo, 'unreviewed cache policy role', consumers={'cache_policies': [_rr_policy_row(path, repo.ref)]})
