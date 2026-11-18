@@ -100,13 +100,6 @@ theorem simulates_of_runs
   ⟨diagram_relations.1, diagram_relations.2.1, diagram_relations.2.2, runs⟩
 
 omit [FreshNames] in
-/-- Under the frame premise the Source frame is checked and not static: the
-frames that separate v1's runs (`RunSim.frame_blind`) are not compared. -/
-theorem frame_checked {E : Source.Env} {C : Contract} {Γ : Ctx} {G : Source.Glob E}
-    {F : Source.Fr} {σ : State C Γ} (h : diagram.frameRel G F σ) :
-    F.static = false ∧ F.checked = true := h.2.2.2.2
-
-omit [FreshNames] in
 /-- **Initial matching under the frame premise**: at a checked, non-static
 frame every Source state of an associated body has a related target state
 whose transaction is the frame (`frameRel`), at the frame's own instance. -/

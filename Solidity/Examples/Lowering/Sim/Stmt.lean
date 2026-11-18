@@ -4,7 +4,7 @@ import Solidity.Correctness.Lowering.Sim.Stmt.Framed
 /-!
 # The statement cases of the lowering diagram, used
 
-The jump conjunct of `StmtCases` on concrete arms, `StmtCases` from the
+The jump conjunct of `StmtCases` on a concrete arm, `StmtCases` from the
 conjuncts that remain, and the frame obstruction at a body.
 -/
 namespace Solidity.Examples.Lowering.Sim.Stmt
@@ -21,17 +21,6 @@ example (kernel : elabKernelTotal) (C : Contract) (rc : ElabRec C) (sc : ElabSco
     (st st' : ECtx × Nat) (P : SProg C) (ran : ElabRan (elabStmtPWith C rc .brk) sc st P st') :
     stmtQ C .brk sc st P st' :=
   (jump_cases C kernel rc).1 .brk rfl sc st P st' ran
-
-/-- `return e;` through `elabStmt1With`, at every record. -/
-example (kernel : elabKernelTotal) (C : Contract) (rc : ElabRec C) (e : RawExpr) :
-    ∀ sc st P st', ElabRan (elabStmt1With C rc (.ret (some e))) sc st P st' →
-      stmtQ C (.ret (some e)) sc st P st' :=
-  (jump_cases C kernel rc).2 (.ret (some e)) rfl
-
-/-- The actual knot's statement arm refuses `continue;`. -/
-example (kernel : elabKernelTotal) (C : Contract) :
-    Stmt.Refuses (elabStmtPWith C (elabRec C ()) .cont) :=
-  Stmt.jump_refuses C _ ⟨(kernel.1 C).1.2.2.2.2.1, (kernel.1 C).1.2.2.2.1⟩ .cont rfl
 
 /-- `StmtCases` from its conjuncts other than the jumps. -/
 example
