@@ -8,7 +8,10 @@
 #   REVIEW_TABLE_PARTS[t].append(part): 'nonpy' -> REVIEWED_NONPY_ENTRIES, 'python-args' -> REVIEWED_PYTHON_ARGS with
 #       part (label, rows, path prefixes); 'lean-fixtures' -> REVIEWED_LEAN_FIXTURES / _INVOCATIONS with part
 #       (label, fixture rows, driver rows, path prefixes). Tables are unions; a path in two rows, a repeated row or
-#       a path outside its part's prefixes is a ValueError; the self-test counts come from the parts
+#       a path outside its part's prefixes is a ValueError; the self-test counts come from the parts;
+#       'lean-checks' (H1231) -> extra H999 rows REVIEWED_LEAN_CHECK_EXTRA / _EXTRA_INVOCATIONS with part (label, check
+#       rows, driver rows, path prefixes): part 0 is the pinned H999 table of roles.py, lean_check_root unions the
+#       later parts with it, and a lean-checks path that is also a lean-fixtures path is a ValueError
 #   LEAN_LIBRARY_COMMANDS += (command,)            -> top-level Lean commands of the lean-library-readFile form
 #   PYTHON_ARGUMENT_FORMS[source blob] = recogniser(text) -> interface or None, before python_argument_interface
 #   LEAN_FIXTURE_FORMS.append(predicate(text, path, line)) -> Lean fixture driver invocation after lean_check_invocation
@@ -21,7 +24,8 @@ from pathlib import Path
 FORMS_DIRECTORY = Path(__file__).with_name('forms')
 _REGISTRY_TABLES = ('SOURCE_ROLE_KINDS', 'LATE_SOURCE_ROLE_KINDS', 'FORM_CONTROLS', 'CONSUMER_HANDLERS', 'REVIEW_TABLE_PARTS',
                     'LEAN_LIBRARY_COMMANDS', 'PYTHON_ARGUMENT_FORMS', 'LEAN_FIXTURE_FORMS', '_FORM_MODULE')
-_DERIVED = ('CONSUMER_SECTIONS', 'REVIEWED_NONPY_ENTRIES', 'REVIEWED_PYTHON_ARGS', 'REVIEWED_LEAN_FIXTURES', 'REVIEWED_LEAN_FIXTURE_INVOCATIONS')
+_DERIVED = ('CONSUMER_SECTIONS', 'REVIEWED_NONPY_ENTRIES', 'REVIEWED_PYTHON_ARGS', 'REVIEWED_LEAN_FIXTURES', 'REVIEWED_LEAN_FIXTURE_INVOCATIONS',
+            'REVIEWED_LEAN_CHECK_EXTRA', 'REVIEWED_LEAN_CHECK_EXTRA_INVOCATIONS')
 _FORM_MODULE = 'registry.py'
 FORM_CONTROLS = []
 CONSUMER_HANDLERS = {
@@ -36,7 +40,8 @@ REVIEW_TABLE_PARTS = {
               ('H1025', REVIEWED_NONPY_ENTRIES_H1025, ('tests/',)), ('H1004', REVIEWED_NONPY_ENTRIES_H1004, ('tests/h28-sol/',)),
               ('H1032', REVIEWED_NONPY_ENTRIES_H1032, ('tests/', 'scripts/h62/'))],
     'python-args': [('H996', REVIEWED_PYTHON_ARGS, ('tests/directruntime-20261104/', 'tests/upstream/'))],
-    'lean-fixtures': [('H1015', REVIEWED_LEAN_FIXTURES, REVIEWED_LEAN_FIXTURE_INVOCATIONS, ('tests/directruntime-20261104/',))]}
+    'lean-fixtures': [('H1015', REVIEWED_LEAN_FIXTURES, REVIEWED_LEAN_FIXTURE_INVOCATIONS, ('tests/directruntime-20261104/',))],
+    'lean-checks': [('H999', REVIEWED_LEAN_CHECKS, REVIEWED_LEAN_CHECK_INVOCATIONS, ('tests/directruntime-20261104/',))]}
 LEAN_LIBRARY_COMMANDS = ('#eval', 'run_elab', 'run_cmd')
 PYTHON_ARGUMENT_FORMS = {}
 LEAN_FIXTURE_FORMS = []
@@ -77,9 +82,15 @@ def lean_gate_invocation(form, text, path, line):
 
 def _derive():
     global CONSUMER_SECTIONS, REVIEWED_NONPY_ENTRIES, REVIEWED_PYTHON_ARGS, REVIEWED_LEAN_FIXTURES, REVIEWED_LEAN_FIXTURE_INVOCATIONS
+    global REVIEWED_LEAN_CHECK_EXTRA, REVIEWED_LEAN_CHECK_EXTRA_INVOCATIONS
     CONSUMER_SECTIONS = tuple(CONSUMER_HANDLERS)
     REVIEWED_NONPY_ENTRIES = review_union('nonpy'); REVIEWED_PYTHON_ARGS = review_union('python-args')
     REVIEWED_LEAN_FIXTURES = review_union('lean-fixtures'); REVIEWED_LEAN_FIXTURE_INVOCATIONS = review_union('lean-fixtures', 2)
+    checks = review_union('lean-checks'); review_union('lean-checks', 2)
+    if {row[0] for row in checks} & {row[0] for row in REVIEWED_LEAN_FIXTURES}: raise ValueError('review table parts lean-checks and lean-fixtures share a path')
+    extra = REVIEW_TABLE_PARTS['lean-checks'][1:]
+    REVIEWED_LEAN_CHECK_EXTRA = frozenset(row for part in extra for row in part[1])
+    REVIEWED_LEAN_CHECK_EXTRA_INVOCATIONS = frozenset(row for part in extra for row in part[2])
 
 
 def _owners():
@@ -140,8 +151,11 @@ def registry_controls(env):
         assert [(p[0], len(p[1])) for p in REVIEW_TABLE_PARTS['nonpy'][:4]] == [('H997', 115), ('H1025', 61), ('H1004', 2), ('H1032', 23)]
         assert [(p[0], len(p[1])) for p in REVIEW_TABLE_PARTS['python-args'][:1]] == [('H996', 23)]
         assert [(p[0], len(p[1]), len(p[2])) for p in REVIEW_TABLE_PARTS['lean-fixtures'][:1]] == [('H1015', 7, 22)]
+        assert [(p[0], p[1], p[2]) for p in REVIEW_TABLE_PARTS['lean-checks'][:1]] == [('H999', REVIEWED_LEAN_CHECKS, REVIEWED_LEAN_CHECK_INVOCATIONS)]
+        assert len(REVIEWED_LEAN_CHECKS) == 1 and len(REVIEWED_LEAN_CHECK_INVOCATIONS) == 5
         load_forms(tmp / 'missing'); load('empty', {})
         assert CONSUMER_SECTIONS == saved['CONSUMER_SECTIONS'] and REVIEWED_NONPY_ENTRIES == saved['REVIEWED_NONPY_ENTRIES']
+        assert REVIEWED_LEAN_CHECK_EXTRA == REVIEWED_LEAN_CHECK_EXTRA_INVOCATIONS == frozenset() == saved['REVIEWED_LEAN_CHECK_EXTRA']
         ran = []
         load('good', {'b.py': 'B_SEEN = A_SEEN\n', 'a.py': '''A_SEEN = True
 def synthetic_root(classifier, graph, catalog, entry): pass
@@ -152,6 +166,8 @@ PYTHON_ARGUMENT_FORMS['d' * 40] = lambda text: {'synthetic': text}
 LEAN_FIXTURE_FORMS.append(lambda text, path, line: text == path)
 FORM_CONTROLS.append(lambda env: RAN.append(('control', env['marker'])))
 LEAN_LIBRARY_COMMANDS += ('run_meta',)
+REVIEW_TABLE_PARTS['lean-checks'].append(('X1Y', frozenset({('tests/x1y/C.lean', 'b' * 40, 'c' * 40)}),
+                                          frozenset({('tests/x1y/C.lean', 'b' * 40, 'tests/x1y/run.sh', 'e' * 40, 3)}), ('tests/x1y/',)))
 _REVIEW_DIRECTORIES = dict(_REVIEW_DIRECTORIES)
 REBINDS = ('_REVIEW_DIRECTORIES',)
 '''.replace('RAN', 'env_ran')})
@@ -174,6 +190,8 @@ REBINDS = ('_REVIEW_DIRECTORIES',)
         for control in FORM_CONTROLS: control({'marker': 1})
         assert ran == [(s, []) for s in saved['CONSUMER_SECTIONS']] + [('handler', [row]), ('control', 1)]
         assert ('tests/x1y/run.sh', 'b' * 40, 'c' * 40) in REVIEWED_NONPY_ENTRIES and len(REVIEWED_NONPY_ENTRIES) == len(saved['REVIEWED_NONPY_ENTRIES']) + 1
+        assert REVIEWED_LEAN_CHECK_EXTRA == {('tests/x1y/C.lean', 'b' * 40, 'c' * 40)} and len(REVIEWED_LEAN_CHECK_EXTRA_INVOCATIONS) == 1
+        assert REVIEWED_LEAN_CHECKS is saved['REVIEWED_LEAN_CHECKS']  # the pinned H999 table itself is never changed
         assert python_argument_form('d' * 40, 'x') == {'synthetic': 'x'} and python_argument_form('e' * 40, 'x = 1\n') is None
         assert lean_gate_invocation(LEAN_FIXTURE_FORM, 'p', 'p', 1) and not lean_gate_invocation(LEAN_CHECK_FORM, 'p', 'p', 1)
         rejected('kind', {'k.py': 'register_source_role(SOURCE_ONLY_KIND, None)\n'}, 'kind/k.py', SOURCE_ONLY_KIND)
@@ -183,6 +201,11 @@ REBINDS = ('_REVIEW_DIRECTORIES',)
         rejected('helper', {'a.py': 'def helper(): pass\n', 'b.py': 'def helper(): pass\n'}, 'helper/b.py', 'helper/a.py')
         rejected('part', {'a.py': 'REVIEW_TABLE_PARTS["nonpy"].append(("X", frozenset({("docs/x.sh", "b", "c")}), ("tests/",)))\n'}, 'nonpy X')
         rejected('derived', {'a.py': 'CONSUMER_SECTIONS = ()\nREBINDS = ("CONSUMER_SECTIONS",)\n'}, 'derived/a.py', 'CONSUMER_SECTIONS')
+        rejected('extra', {'a.py': 'REVIEWED_LEAN_CHECK_EXTRA = frozenset()\n'}, 'extra/a.py', 'REVIEWED_LEAN_CHECK_EXTRA')
+        check = lambda path, prefix='tests/': 'REVIEW_TABLE_PARTS["lean-checks"].append(("C", frozenset({(%r, "b", "c")}), frozenset(), (%r,)))\n' % (path, prefix)
+        rejected('checkprefix', {'a.py': check('docs/C.lean')}, 'lean-checks C')
+        rejected('checkrepeat', {'a.py': check(next(iter(REVIEWED_LEAN_CHECKS))[0])}, 'lean-checks')
+        rejected('checkfixture', {'a.py': check(next(iter(REVIEWED_LEAN_FIXTURES))[0])}, 'share a path')
         rejected('shadow', {'a.py': 'def add_consumer_routes(*_): pass\n'}, 'shadow/a.py', 'fragments.py')  # defined after this file
     finally:
         namespace.clear(); namespace.update(saved); scratch.cleanup()
