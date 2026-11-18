@@ -179,7 +179,14 @@ private theorem put_spec (P : Shrink.Params) :
       rw [Shrink.Layout.Fits] at hf
       rw [put, if_pos hf] at h
       cases h
-      exact bytes_placed P bs a f m hf ha hk
+      simp only [memSize, tailSize] at ha hk ⊢
+      have p := bytes_placed P bs a f m hf ha (by omega)
+      refine ⟨p.storage, p.transient, fun y h1 h2 => p.frame y h1 (by omega),
+        fun m'' agree => ?_⟩
+      obtain ⟨r, c⟩ := p.good m'' fun y hy => agree y (by omega)
+      refine ⟨r, fun c' hc => ?_⟩
+      obtain ⟨y, rfl, hy⟩ := c c' hc
+      exact ⟨y, rfl, by omega⟩
     | _ => simp only [Shrink.Layout.Fits] at hf
   | .node xs, L, a, f, m, m', hf, ha, hk, h => by
     cases L with
@@ -593,11 +600,11 @@ private theorem allocSize_le (L : Shrink.Layout) (t : Shrink.Tree) (hn : L.NoMap
     (hf : L.Fits t) : allocSize L t ≤ 64 * t.weight := by
   have s := size_le t L hn hf
   cases L with
-  | bytes =>
-    cases t with
-    | blob bs => simp only [allocSize, tailSize, Shrink.Tree.weight]; omega
-    | _ => simp only [Shrink.Layout.Fits] at hf
   | dynArray e =>
+    simp only [memSize] at s
+    simp only [allocSize]
+    omega
+  | bytes =>
     simp only [memSize] at s
     simp only [allocSize]
     omega

@@ -14,13 +14,16 @@ The root object is the pinned one: a root `bytes` is `geometry.write`
 of `byteAllocationView`), a root dynamic array is its length word and then its
 elements, anything else is its inline members (`put`). On a layout without a
 nested dynamic array or `bytes` the writes are the `mstore`s of
-`geometry.write`, the images of `objectAllocationView`.
+`geometry.write`, in the sizes of `MemoryShape.size`; that they are the images
+of `objectAllocationView` is left to `LayoutView.Instances.objectAllocation`.
 
 A nested dynamic array or `bytes` cannot be written by `geometry.write`
 (`Geometry.lean`: a write through an indirect header is refused), so `put`
 builds it: the two-word header (length, data address) inline, the data out of
 line at the tail pointer `f`. `tailSize` is the out-of-line size, so the tail
 pointer of a later sibling is known without threading it through the result.
+`put` always writes a dynamic array or `bytes` as an indirect header, whatever
+the offset of the location: the root object goes through `allocAt`.
 -/
 namespace Solidity.Yul.Layout
 
@@ -28,12 +31,13 @@ open Solidity.Goals
 open Solidity.Yul.Views
 
 mutual
-/-- The out-of-line bytes of a nested value: the data of every nested dynamic
-array and `bytes` below it. -/
+/-- The out-of-line bytes of a value: the elements of a dynamic array, the
+payload of a `bytes` rounded up to words (so an aligned free pointer stays
+aligned), and the same for everything nested below. -/
 def tailSize : Shrink.Layout → Shrink.Tree → Nat
   | .fixedArray e _, .node xs => tailSizes e xs
   | .dynArray e, .node xs => xs.length * memSize e + tailSizes e xs
-  | .bytes, .blob bs => bs.length
+  | .bytes, .blob bs => (bs.length + 31) / 32 * 32
   | .struct fs, .node xs => tailFields fs xs
   | _, _ => 0
 /-- The out-of-line bytes of a sequence of elements. -/
@@ -92,8 +96,7 @@ length word, elements and their out-of-line data, anything else its inline
 members and their out-of-line data. -/
 def allocSize (L : Shrink.Layout) (t : Shrink.Tree) : Nat :=
   match L with
-  | .bytes => 32 + (tailSize L t + 31) / 32 * 32
-  | .dynArray _ => 32 + tailSize L t
+  | .bytes | .dynArray _ => 32 + tailSize L t
   | _ => memSize L + tailSize L t
 
 /-- The root object written at address `a`. -/
