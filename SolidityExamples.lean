@@ -133,6 +133,7 @@ import Solidity.Examples.ElabTotal.Guard
 import Solidity.Examples.ElabTotal.Lower
 import Solidity.Examples.ElabTotal.Measure
 import Solidity.Examples.ElabTotal.Stmts
+import Solidity.Examples.ElabTotal.Values
 import Solidity.Examples.ExactReduction
 import Solidity.Examples.ExactUpdates
 import Solidity.Examples.ExampleNames
@@ -204,6 +205,7 @@ import Solidity.Examples.Lowering.Sim.Session.Forward
 import Solidity.Examples.Lowering.Sim.Session.Source
 import Solidity.Examples.Lowering.Sim.Session.Target
 import Solidity.Examples.Lowering.Sim.State
+import Solidity.Examples.Lowering.Sim.Stmt
 import Solidity.Examples.MemoryFloor
 import Solidity.Examples.MemoryInstantiation
 import Solidity.Examples.MemoryNegativeCountermodel
