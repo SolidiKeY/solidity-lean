@@ -69,24 +69,19 @@ FRAGMENT_SECTIONS = ('standalone', 'generators', 'reads', 'orphans', 'module_ent
 #   source-only failed-run root, the named in-scope read only, no pass credit.
 # cache_policies (H1053, x1t): {path, blob, purpose, provenance, matches: [{line,
 #   output, producer}]}, the implicit CPython cache policy role (roles.py).
-CONSUMER_SECTIONS = ('persistent_reads', 'static_routes', 'git_policies', 'persistent_module_entries', 'cache_policies')
+# CONSUMER_SECTIONS and their identities derive from CONSUMER_HANDLERS (registry.py).
 
 
 def fragment_identity(section, row):
     if not isinstance(row, dict): raise ValueError('fragment entry must be an object')
-    if section in ('roles', 'fixtures', 'git_policies', 'cache_policies'):
-        keys = ('path',)
-    elif section in ('standalone', 'generators', 'orphans'):
-        keys = ('path', 'input_revision')
-    elif section in ('module_entries', 'reads', 'persistent_reads', 'persistent_module_entries'):
-        keys = ('runner', 'input_revision', 'target', 'frames')
-    elif section == 'static_routes':
-        keys = ('runner', 'form', 'target', 'frames')
-    else:
-        raise ValueError('unknown fragment section')
+    if section in ('roles', 'fixtures'): keys, framed = ('path',), False
+    elif section in ('standalone', 'generators', 'orphans'): keys, framed = ('path', 'input_revision'), False
+    elif section in ('module_entries', 'reads'): keys, framed = ('runner', 'input_revision', 'target', 'frames'), True
+    elif section in CONSUMER_HANDLERS: keys, framed = CONSUMER_HANDLERS[section][:2]
+    else: raise ValueError('unknown fragment section')
     if any(k not in row for k in keys): raise ValueError('fragment entry lacks identity: ' + section)
     values = [row[k] for k in keys]
-    if section in ('module_entries', 'reads', 'persistent_reads', 'static_routes', 'persistent_module_entries'):
+    if framed:
         frames = row['frames']
         if not isinstance(frames, list) or any(not isinstance(f, dict) for f in frames):
             raise ValueError('invalid fragment frames')
@@ -454,7 +449,7 @@ def static_routes(classifier, graph, rows):
         if form == 'node-import': resolved = _node_import(reader['path'], repo.texts[reader['path']], reader['line'])
         elif form == 'node-readFileSync': resolved = _node_read(reader['path'], repo.texts[reader['path']], reader['line'], cwd)
         elif form == 'node-readFileSync-walk': resolved = _node_walk_read(reader['path'], repo, reader['line'], target, root, frames[0]['path'])
-        elif library: resolved = _lean_read(classifier, repo, reader['path'], reader['line'], cwd, r'#eval|run_elab|run_cmd')
+        elif library: resolved = _lean_read(classifier, repo, reader['path'], reader['line'], cwd, '|'.join(map(re.escape, LEAN_LIBRARY_COMMANDS)))
         else: resolved = _lean_read(classifier, repo, reader['path'], reader['line'], cwd)
         if resolved is None or resolved != target: raise ValueError('static route target is not the literal ' + form + ' operand')
         if form == 'node-import' and not target.endswith(NODE_SUFFIXES): raise ValueError('Node import target is not a module')
@@ -1162,7 +1157,7 @@ def python_argument_root(classifier, graph, catalog, entry, reviewed=None):
         raise ValueError('Python argument role lacks its top-level entry: ' + p)
     if any(classifier[f](repo, p) is not None for f in ('declared_configured_cli', 'declared_module_cli', 'declared_unittest')):
         raise ValueError('Python argument role matches a configured CLI or unittest form: ' + p)
-    interface = python_argument_interface(repo.texts[p])
+    interface = python_argument_form(entry['source_blob'], repo.texts[p])
     if interface is None: raise ValueError('Python argument role lacks an audited argument interface: ' + p)
     if canonical(interface) != canonical(entry['interface']): raise ValueError('Python argument role interface mismatch: ' + p)
     identity = PYTHON_ARGS_PREFIX + p
@@ -1445,6 +1440,8 @@ SOURCE_ROLE_KINDS = {SOURCE_ONLY_KIND: source_only_program, NODE_MODE_KIND: node
 # Kinds dispatched after every other standalone definition, so they can bind
 # the roots those definitions create (H1051 importers).
 LATE_SOURCE_ROLE_KINDS = {PY_IMPORT_KIND: python_import_root, PROGRAM_FORM_KIND: program_form_root, SOURCE_DEP_KIND: source_dependency_root}
+_registry = Path(__file__).with_name('registry.py')  # x1y census form registry, forms/*.py
+exec(compile(_registry.read_bytes(), str(_registry), 'exec'))
 
 
 def persisted_module_entries(classifier, graph, catalog, rows):
@@ -1586,11 +1583,7 @@ def isolated(classifier, controls):
 
 def add_consumer_routes(classifier, graph, catalog, fragments):
     """Entry point from inventory(), after every other root is known."""
-    persisted_reads(classifier, graph, catalog, fragments['persistent_reads'])
-    static_routes(classifier, graph, fragments['static_routes'])
-    git_policies(classifier, graph, fragments['git_policies'])
-    persisted_module_entries(classifier, graph, catalog, fragments['persistent_module_entries'])
-    cache_policies(classifier, graph, fragments['cache_policies'])
+    for section, (_, _, handler) in CONSUMER_HANDLERS.items(): handler(classifier, graph, catalog, fragments[section])
 
 
 def _control_repository(classifier, root):
@@ -2150,8 +2143,7 @@ def successor_controls(classifier):
         # anchors nothing and credits no read, argument, helper or output.
         global REVIEWED_PYTHON_ARGS
         reviewed_args = REVIEWED_PYTHON_ARGS
-        assert len(reviewed_args) == 23 and all(p.startswith(('tests/directruntime-20261104/', 'tests/upstream/')) and p.endswith('.py')
-                                                for p, _, _ in reviewed_args)
+        assert reviewed_args == review_union('python-args') and all(p.endswith('.py') for p, _, _ in reviewed_args)
         assert ('tests/upstream/baseline-20261028/invocations/retries/selector.py', '5b7a49f863f7c6fad8231d17d68628623948a00e',
                 '2207c1bba286538fd63e4a0ff4960ed4a593a8ab') in reviewed_args
         nb = 'tests/directruntime-20261104/native-browser/'  # H1006
@@ -2256,10 +2248,9 @@ def successor_controls(classifier):
         # commit that anchors nothing and credits no read, helper or output.
         global REVIEWED_NONPY_ENTRIES
         reviewed_nonpy = REVIEWED_NONPY_ENTRIES
-        assert len(reviewed_nonpy) == 201 and len({p for p, _, _ in reviewed_nonpy}) == 201  # H997 115, H1025 61, H1004 2, H1032/H1067 23
-        assert all(p.startswith(('tests/', 'scripts/h62/')) and posixpath.splitext(p)[1] in NONPY_SHEBANGS
+        assert reviewed_nonpy == review_union('nonpy')  # one row per path, each under its part's prefixes
+        assert all(posixpath.splitext(p)[1] in NONPY_SHEBANGS
                    and '.test.' not in p and classifier['hex_pin'](b, 40) and classifier['hex_pin'](c, 40) for p, b, c in reviewed_nonpy)
-        assert all(p.startswith(('tests/directruntime-20261104/', 'tests/upstream/')) for p, _, _ in reviewed_nonpy - REVIEWED_NONPY_ENTRIES_H1025 - REVIEWED_NONPY_ENTRIES_H1004 - REVIEWED_NONPY_ENTRIES_H1032)
         witnesses = {'tests/directruntime-20261104/shared-translator/bounded.sh', 'tests/directruntime-20261104/native-browser/readbounds/module-gates.sh',
                      'tests/directruntime-20261104/memory-references/native-source-controls.mjs'}
         assert witnesses <= {p for p, _, _ in reviewed_nonpy}
@@ -2531,3 +2522,7 @@ def successor_controls(classifier):
         program_form_controls(locals())  # (14) H1072, in roles.py
         source_dependency_controls(locals())  # (15) H1074, in roles.py
         cache_policy_controls(locals())  # (16) H1053, in roles.py
+        for control in FORM_CONTROLS: control(locals())  # (17) x1y registry, then forms/*.py
+
+
+load_forms(FORMS_DIRECTORY)  # x1y: forms/*.py, after every definition here
