@@ -15,7 +15,8 @@ def lean_literal_invocation(text, path, line):
     have balanced quotes, no backquote or continuation, no cd/pushd/popd/alias/
     eval/function definition, no exit or return, no exec but a pure
     redirection, and every for/while/until/if/case/select/{ is closed.
-    Lexical; the review set gates."""
+    Lexical; the review set gates. `source`, `.` and PATH changes are
+    accepted unaudited: the environment only bounds consumption credit."""
     if not isinstance(text, str) or not _plain_lines(text) or '\0' in text: return False
     lines = text.split('\n')
     if type(line) is not int or not 1 <= line <= len(lines): return False
@@ -32,6 +33,8 @@ def lean_literal_invocation(text, path, line):
         if '`' in raw or raw.rstrip().endswith('\\') or re.search(r'\w\s*\(\s*\)', raw): return False
         if re.search(r'(?<![\w$./-])(?:cd|pushd|popd|alias|eval|function|exit|return|unalias|enable|builtin|hash)(?![\w-])', raw): return False
         if re.search(r'(?<![\w$./-])exec(?![\w-])', raw) and not re.fullmatch(r'exec(?:[ \t]+\d*[<>]&?[^\s;&|]+)+[ \t]*', raw): return False
+        unquoted = re.sub(r'\'[^\']*\'|"(?:[^"\\]|\\.)*"', '', raw)
+        if raw.count('<<') != unquoted.count('<<'): return False  # a quoted << is never a here-document
         here = re.findall(r'(?<!<)<<(-?)[ \t]*([\'"]?)([A-Za-z_]\w*)\2', raw)
         if len(here) > 1: return False
         for word in words:
@@ -95,7 +98,7 @@ def lean_literal_controls(env):
     pre = lit[:-len(L1) - 1]
     for t in ('cd tests', 'pushd x', 'exec bash x.sh', 'exit 0', 'true || exit 1', 'return 0', 'f() { :; }', 'function f { :; }', 'alias bash=true',
               'eval "$x"', 'echo `x`', 'echo \\', ": '", 'for x in a; do', 'if true; then', 'while true; do', '{', 'case x in', 'echo done\nfor x in a; do',
-              'cat <<EOF\nx', 'cat <<A <<B\nA\nB', 'hash -p /bin/true bash', 'builtin cd x', 'enable -n echo'):
+              'cat <<EOF\nx', "echo '<<X'\ncd /tmp\nX", 'echo "a<<X"\nexit 0\nX', 'cat <<A <<B\nA\nB', 'hash -p /bin/true bash', 'builtin cd x', 'enable -n echo'):
         assert not lean_literal_invocation(pre + t + '\n' + L1 + '\n', X, ll1 + t.count('\n') + 1), t
     for t in (L1 + ' && true', L1 + ' # c', ' ' + L1, L1.replace('tests/f/F.lean', '"tests/f/F.lean"'), L1 + ' $X',
               L1.replace('Lib/M.lean', '../M.lean'), L1.replace('per-file', 'touched'), 'bash scripts/coord-tools/gate.sh per-file "${files[@]}" tests/f/F.lean',
