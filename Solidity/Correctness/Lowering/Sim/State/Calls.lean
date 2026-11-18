@@ -60,14 +60,6 @@ theorem freeRec_sim (P : SProg C) (st' : ECtx × Nat) : RecSim C (freeRec C P st
     fun _ _ _ _ _ h => (not_ran_throw _ _ _ _ _ h).elim,
     fun _ _ _ _ _ h => (not_ran_throw _ _ _ _ _ h).elim⟩
 
-/-- The core of the call arm at `freeRec`, on a call through a value with a
-result binder: `callValue`'s parts and state, the memo kept. -/
-theorem freeRec_core (P : SProg C) (sc : ElabScope) (st st' : ECtx × Nat) (res : Var × PrimTy)
-    (m : CallMemo) :
-    (((elabCallRetCore C (freeRec C P st') callValueName [.num 0] (some res) 256 false false
-      false false).run sc).run st).run m = .ok (((P, none, []), st'), m) :=
-  rfl
-
 /-- The core between `CallMemo.enter` and `CallMemo.leave`, from an empty
 memo, whether or not the callee is shared. -/
 theorem freeRec_entered (P : SProg C) (sc : ElabScope) (st st' : ECtx × Nat) (res : Var × PrimTy)
