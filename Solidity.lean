@@ -2463,6 +2463,8 @@ import Solidity.Correctness.Lowering.Loops.WhileReset
 import Solidity.Correctness.Lowering.Sim.Match
 import Solidity.Correctness.Lowering.Sim.Match.Cases
 import Solidity.Correctness.Lowering.Sim.Match.Relations
+import Solidity.Correctness.Lowering.Sim.Session.Backward
+import Solidity.Correctness.Lowering.Sim.Session.Backward.NoDiagram
 import Solidity.Correctness.Lowering.Sim.Session.Binding
 import Solidity.Correctness.Lowering.Sim.Session.Binding.Agreement
 import Solidity.Correctness.Lowering.Sim.Session.Binding.Initial
