@@ -7,8 +7,8 @@ What `hoistStmtWith` returns, at an arbitrary callback record, on the arms
 that are a leaf or one callback:
 
 * statements without a capture arm keep the statement and the state
-  (`hoistStmt_revert`, `hoistStmt_block`, `hoistStmt_unchecked`,
-  `hoistStmt_checked`);
+  (`hoistStmt_revert`, `hoistStmt_unchecked`; every statement in the arm's
+  default case is the same);
 * `b.push()++` is the captures of `b` (`hoistStmt_pushIncDec`), a constrained
   callback, so the frozen case holds there from `RecSim`
   (`hoistStmt_pushIncDec_sat`);
@@ -25,14 +25,8 @@ variable [FreshNames] (C : Contract) (rc : ElabRec C)
 
 theorem hoistStmt_revert : hoistStmtWith C rc .revert = pure ([], .revert) := rfl
 
-theorem hoistStmt_block (ss : List RawStmt) :
-    hoistStmtWith C rc (.block ss) = pure ([], .block ss) := rfl
-
 theorem hoistStmt_unchecked (ss : List RawStmt) :
     hoistStmtWith C rc (.unchecked ss) = pure ([], .unchecked ss) := rfl
-
-theorem hoistStmt_checked (o : OFMode) (ss : List RawStmt) :
-    hoistStmtWith C rc (.checked o ss) = pure ([], .checked o ss) := rfl
 
 theorem hoistStmt_pushIncDec (op : IncDec) (b : RawExpr) :
     hoistStmtWith C rc (.pushIncDec op b) = (do
