@@ -1,0 +1,1260 @@
+{
+  "consumer_routes": {
+    "cache_policies": [
+      {
+        "blob": "c18dd8d83ceed1806b50b0aaa46beb7e335fff13",
+        "matches": [
+          {
+            "line": 1,
+            "output": "__pycache__/",
+            "producer": {
+              "driver": "scripts/h62/item2/audit-precompiles/successor_acceptance.py",
+              "driver_blob": "d3c1b15e0e63f6455fea83b6bf6bccfe8637d09d",
+              "driver_line": 66,
+              "import_line": 4,
+              "literal": "scripts/h62/item2/audit-precompiles/coverage.py",
+              "module": "scripts/h62/item2/audit-precompiles/census.py",
+              "module_blob": "f85a629ef472f0557fd1231a3f0b9aafe0a29de6",
+              "program": "scripts/h62/item2/audit-precompiles/coverage.py",
+              "program_blob": "488a124a7e71e222067d5e27b2efc9aa5a3ea015",
+              "root": "scripts/h62/item2/audit-precompiles/test_successor_acceptance.py",
+              "root_blob": "a44c21052e9734018f922ff4dc7d9c68f4dafa87",
+              "root_line": 4
+            }
+          }
+        ],
+        "path": "scripts/h62/item2/audit-precompiles/.gitignore",
+        "provenance": {
+          "blob": "c18dd8d83ceed1806b50b0aaa46beb7e335fff13",
+          "commit": "c552a7f12fb45f663f761dd58f253657e939c8b4",
+          "path": "scripts/h62/item2/audit-precompiles/.gitignore"
+        },
+        "purpose": "Exact Git ignore policy for the implicit CPython cache of the reviewed bytecode-enabled child launch and sibling import. Source-policy credit only; launch/import reachability and external interpreter environment are not execution or pass claims. No helper, output, proof or runtime credit."
+      },
+      {
+        "blob": "43ae0e2a6c6d8fca34872506ca0f2e64194fec7c",
+        "matches": [
+          {
+            "line": 1,
+            "output": "__pycache__/",
+            "producer": {
+              "driver": "scripts/h62/item3/g52-differential/engine_payload_reference.mjs",
+              "driver_blob": "5cefcbe5dc1ef8082ac17636ec788f20d3ebea93",
+              "driver_line": 107,
+              "import_line": 12,
+              "literal": "eest_export.py",
+              "module": "scripts/h62/item3/g52-differential/pipeline.py",
+              "module_blob": "31e3aae81e884d111cb4b14aa2502b71559ccc16",
+              "program": "scripts/h62/item3/g52-differential/eest_export.py",
+              "program_blob": "ad0353db5e76003b5b825364bac84c16ec7cd341",
+              "root": "tests/h62/item3/g52-differential/engine_conversion_failure.test.mjs",
+              "root_blob": "72c9386ed126b2f75919c1cfce98a071a22dbfe7",
+              "root_line": 8
+            }
+          }
+        ],
+        "path": "scripts/h62/item3/g52-differential/.gitignore",
+        "provenance": {
+          "blob": "43ae0e2a6c6d8fca34872506ca0f2e64194fec7c",
+          "commit": "d448d0f7658bec8e4a41e0d35b00dea98154c580",
+          "path": "scripts/h62/item3/g52-differential/.gitignore"
+        },
+        "purpose": "Exact Git ignore policy for the implicit CPython cache of the reviewed bytecode-enabled child launch and sibling import. Source-policy credit only; launch/import reachability and external interpreter environment are not execution or pass claims. No helper, output, proof or runtime credit."
+      }
+    ]
+  },
+  "routes": {
+    "standalone": [
+      {
+        "command": [
+          "python3",
+          "-B",
+          "scripts/h62/item1/p16-generator/census.py"
+        ],
+        "entry_line": 93,
+        "input_revision": "803a7cd24d6eeec56b059d67f974e341330b4490",
+        "input_scope": [
+          "scripts/h62/item1/p16-generator/baseline-inventory.json",
+          "scripts/h62/item1/p16-generator/body/",
+          "scripts/h62/item1/p16-generator/imports/"
+        ],
+        "kind": "runnable-entrypoint",
+        "other_reads": "unresolved",
+        "path": "scripts/h62/item1/p16-generator/census.py",
+        "purpose": "Paired ordinary and native-read-instrumented execution passed at this exact historical snapshot. Only the baseline manifest and 72 existing raw fragments are enrolled by separately observed persisted byte-read routes. No current passing-run, module execution, producer completeness, Lean, semantic, compatibility or proof credit.",
+        "source_blob": "64b665aab18181183048551b41c6d217ba397df0"
+      },
+      {
+        "command": [
+          "python3",
+          "-B",
+          "scripts/h62/item2/audit-abi-world/accept_runtime.py"
+        ],
+        "imports": [
+          {
+            "importer": "scripts/h62/item2/audit-abi-world/accept_runtime.py",
+            "importer_blob": "5a0df8230341bd078680f542be8921e23c208c92",
+            "importer_commit": "38aef082f5b0e96e257fb91b62d8e432e8eec48d",
+            "line": 6
+          },
+          {
+            "importer": "scripts/h62/item2/audit-abi-world/coverage.py",
+            "importer_blob": "c2c8b01802fa3500b1cdc15fe00f870487c83605",
+            "importer_commit": "38aef082f5b0e96e257fb91b62d8e432e8eec48d",
+            "line": 39
+          },
+          {
+            "importer": "scripts/h62/item2/audit-abi-world/extract_vectors.py",
+            "importer_blob": "ce6483f9dae3fe02dbe716cee03436ed401f777a",
+            "importer_commit": "38aef082f5b0e96e257fb91b62d8e432e8eec48d",
+            "line": 6
+          }
+        ],
+        "input_revision": "a27ec14a756b2011bd864609ada2c4dbd65addc0",
+        "interface": {
+          "module": "receipts",
+          "names": [
+            "checked_receipt"
+          ]
+        },
+        "kind": "python-import-source-role",
+        "path": "scripts/h62/item2/audit-abi-world/receipts.py",
+        "provenance": {
+          "blob": "f863fce768398bc7b8cf6f74c8998a746d454a16",
+          "commit": "8a1794652d299cd042c815441a426e7efb642522",
+          "path": "scripts/h62/item2/audit-abi-world/receipts.py"
+        },
+        "purpose": "Reviewed exact Python import dependency of the named kept entry sources. Source consumption only: no invocation, passing-run, entered-module, data-read, fixture, child, runtime, compatibility or proof credit.",
+        "source_blob": "f863fce768398bc7b8cf6f74c8998a746d454a16"
+      },
+      {
+        "command": [
+          "python3",
+          "-B",
+          "scripts/h62/item2/audit-abi-world/resume_accept.py"
+        ],
+        "imports": [
+          {
+            "importer": "scripts/h62/item2/audit-abi-world/resume_accept.py",
+            "importer_blob": "57cdfd9506bb1573432358e179b8d060c9612d92",
+            "importer_commit": "a37430cd3673749dee65c301a069792efd1bccab",
+            "line": 12
+          },
+          {
+            "importer": "scripts/h62/item2/audit-abi-world/resume_mcp_call.py",
+            "importer_blob": "68a3a88a246c7da9a75e247c890bedb87206a28e",
+            "importer_commit": "8e3023d10b62574b7be84630c064b53b8dcfbb09",
+            "line": 39
+          }
+        ],
+        "input_revision": "a27ec14a756b2011bd864609ada2c4dbd65addc0",
+        "interface": {
+          "module": "resume_sources",
+          "names": [
+            "snapshot"
+          ]
+        },
+        "kind": "python-import-source-role",
+        "path": "scripts/h62/item2/audit-abi-world/resume_sources.py",
+        "provenance": {
+          "blob": "714d79517abf92322b312a25223adcb55ba82050",
+          "commit": "8e3023d10b62574b7be84630c064b53b8dcfbb09",
+          "path": "scripts/h62/item2/audit-abi-world/resume_sources.py"
+        },
+        "purpose": "Reviewed exact Python import dependency of the named kept entry sources. Source consumption only: no invocation, passing-run, entered-module, data-read, fixture, child, runtime, compatibility or proof credit.",
+        "source_blob": "714d79517abf92322b312a25223adcb55ba82050"
+      },
+      {
+        "command": [
+          "python3",
+          "-B",
+          "scripts/h62/item2/audit-calculus/acceptance.py"
+        ],
+        "imports": [
+          {
+            "importer": "scripts/h62/item2/audit-calculus/acceptance.py",
+            "importer_blob": "675133d51e0202e01e5cf4532a26996debb4371e",
+            "importer_commit": "c361178f68f34c276a02b15691cd726aaa85a51e",
+            "line": 11
+          }
+        ],
+        "input_revision": "a27ec14a756b2011bd864609ada2c4dbd65addc0",
+        "interface": {
+          "module": "owners",
+          "names": [
+            "inventory"
+          ]
+        },
+        "kind": "python-import-source-role",
+        "path": "scripts/h62/item2/audit-calculus/owners.py",
+        "provenance": {
+          "blob": "c471b8400bc553a8bd554c3b335bb6074bfc9a33",
+          "commit": "c1384ed9310f9c5402d521036d0c75cacf79fc99",
+          "path": "scripts/h62/item2/audit-calculus/owners.py"
+        },
+        "purpose": "Reviewed exact Python import dependency of the named kept entry sources. Source consumption only: no invocation, passing-run, entered-module, data-read, fixture, child, runtime, compatibility or proof credit.",
+        "source_blob": "c471b8400bc553a8bd554c3b335bb6074bfc9a33"
+      },
+      {
+        "command": [
+          "python3",
+          "-B",
+          "scripts/h62/item2/audit-language/check.py"
+        ],
+        "imports": [
+          {
+            "importer": "scripts/h62/item2/audit-language/check.py",
+            "importer_blob": "367616d8d65dd2bd6abb1e5fac7138050f2acc78",
+            "importer_commit": "16e98ad46223e6fe4a97dadb8187497537f57dce",
+            "line": 56
+          },
+          {
+            "importer": "scripts/h62/item2/audit-language/retire_export.py",
+            "importer_blob": "4748376ef83284136230125977bd0725e39fe43a",
+            "importer_commit": "16e98ad46223e6fe4a97dadb8187497537f57dce",
+            "line": 34
+          },
+          {
+            "importer": "scripts/h62/item2/audit-language/verify.py",
+            "importer_blob": "9f433a190b2e3da5ef46fbc977741621c6b807ba",
+            "importer_commit": "16e98ad46223e6fe4a97dadb8187497537f57dce",
+            "line": 22
+          }
+        ],
+        "input_revision": "a27ec14a756b2011bd864609ada2c4dbd65addc0",
+        "interface": {
+          "module": "gate_repair",
+          "names": [
+            "approved_revisions"
+          ]
+        },
+        "kind": "python-import-source-role",
+        "path": "scripts/h62/item2/audit-language/gate_repair.py",
+        "provenance": {
+          "blob": "84db13d263f185022e5e24b65c2f1ae7eaa37c63",
+          "commit": "febcbe09fe79e890c66baf4f266490beb674a357",
+          "path": "scripts/h62/item2/audit-language/gate_repair.py"
+        },
+        "purpose": "Reviewed exact Python import dependency of the named kept entry sources. Source consumption only: no invocation, passing-run, entered-module, data-read, fixture, child, runtime, compatibility or proof credit.",
+        "source_blob": "84db13d263f185022e5e24b65c2f1ae7eaa37c63"
+      },
+      {
+        "command": [
+          "python3",
+          "-B",
+          "scripts/h62/item2/audit-theories/coverage_ledger.py"
+        ],
+        "imports": [
+          {
+            "importer": "scripts/h62/item2/audit-theories/coverage_ledger.py",
+            "importer_blob": "c459994e09c06ade984aabd8af6483287f5f215a",
+            "importer_commit": "107cb28c032e3bff522ff6db0fdf0be54b2bbefd",
+            "line": 12
+          },
+          {
+            "importer": "scripts/h62/item2/audit-theories/mutability_input_roles.py",
+            "importer_blob": "c67019762b0c5dfb9d489b756866d5fa353131ca",
+            "importer_commit": "107cb28c032e3bff522ff6db0fdf0be54b2bbefd",
+            "line": 11
+          },
+          {
+            "importer": "scripts/h62/item2/audit-theories/verify_acceptance_snapshot.py",
+            "importer_blob": "c805842b75bc519260d857f9730671c78421cbe1",
+            "importer_commit": "107cb28c032e3bff522ff6db0fdf0be54b2bbefd",
+            "line": 15
+          }
+        ],
+        "input_revision": "a27ec14a756b2011bd864609ada2c4dbd65addc0",
+        "interface": {
+          "module": "pending_impossibility",
+          "names": [
+            "PENDING"
+          ]
+        },
+        "kind": "python-import-source-role",
+        "path": "scripts/h62/item2/audit-theories/pending_impossibility.py",
+        "provenance": {
+          "blob": "2bf62f1f7376305a6e152d1d7f3db2ba6da6de3f",
+          "commit": "107cb28c032e3bff522ff6db0fdf0be54b2bbefd",
+          "path": "scripts/h62/item2/audit-theories/pending_impossibility.py"
+        },
+        "purpose": "Reviewed exact Python import dependency of the named kept entry sources. Source consumption only: no invocation, passing-run, entered-module, data-read, fixture, child, runtime, compatibility or proof credit.",
+        "source_blob": "2bf62f1f7376305a6e152d1d7f3db2ba6da6de3f"
+      },
+      {
+        "command": [
+          "python3",
+          "-B",
+          "scripts/h62/item4/generic-primitive-packets/check.py"
+        ],
+        "imports": [
+          {
+            "importer": "scripts/h62/item4/generic-primitive-packets/check.py",
+            "importer_blob": "c4be638c1f7ecb46ffcb3d6ff1cafa95c1ea3a54",
+            "importer_commit": "0a34d9c508ca24f6a914553953a0bc4abf5863dc",
+            "line": 18
+          },
+          {
+            "importer": "scripts/h62/item4/generic-primitive-packets/measure.py",
+            "importer_blob": "b108aa52de426ccb7058056ebd39ce1ea18f9b50",
+            "importer_commit": "0a34d9c508ca24f6a914553953a0bc4abf5863dc",
+            "line": 17
+          }
+        ],
+        "input_revision": "a27ec14a756b2011bd864609ada2c4dbd65addc0",
+        "interface": {
+          "module": "runtime",
+          "names": [
+            "bound",
+            "compiler",
+            "fingerprint",
+            "guard",
+            "memory_cap",
+            "sha"
+          ]
+        },
+        "kind": "python-import-source-role",
+        "path": "scripts/h62/item4/generic-primitive-packets/runtime.py",
+        "provenance": {
+          "blob": "015e64e5fac885e6962e5bd90fe284b9c1ae2820",
+          "commit": "56a137f709aa737d2e3886aca2daf9f52b40261c",
+          "path": "scripts/h62/item4/generic-primitive-packets/runtime.py"
+        },
+        "purpose": "Reviewed exact Python import dependency of the named kept entry sources. Source consumption only: no invocation, passing-run, entered-module, data-read, fixture, child, runtime, compatibility or proof credit.",
+        "source_blob": "015e64e5fac885e6962e5bd90fe284b9c1ae2820"
+      },
+      {
+        "command": [
+          "python3",
+          "-B",
+          "scripts/h62/item6/migrate-hash/census.py"
+        ],
+        "imports": [
+          {
+            "importer": "scripts/h62/item6/migrate-hash/census.py",
+            "importer_blob": "0ddef2ed5405c2bbcd8ff199c43097a7a847147a",
+            "importer_commit": "df554535e9c8d308276a99ea23611c7d63ae5919",
+            "line": 13
+          },
+          {
+            "importer": "scripts/h62/item6/migrate-hash/full_measure.py",
+            "importer_blob": "cae845b44b6c50bd6ea69065b113099fe40eb73d",
+            "importer_commit": "df554535e9c8d308276a99ea23611c7d63ae5919",
+            "line": 9
+          }
+        ],
+        "input_revision": "a27ec14a756b2011bd864609ada2c4dbd65addc0",
+        "interface": {
+          "module": "lean_lex",
+          "names": [
+            "strip_comments"
+          ]
+        },
+        "kind": "python-import-source-role",
+        "path": "scripts/h62/item6/migrate-hash/lean_lex.py",
+        "provenance": {
+          "blob": "98e527e654c4ed29919d56c4d343a72e75fca3fa",
+          "commit": "df554535e9c8d308276a99ea23611c7d63ae5919",
+          "path": "scripts/h62/item6/migrate-hash/lean_lex.py"
+        },
+        "purpose": "Reviewed exact Python import dependency of the named kept entry sources. Source consumption only: no invocation, passing-run, entered-module, data-read, fixture, child, runtime, compatibility or proof credit.",
+        "source_blob": "98e527e654c4ed29919d56c4d343a72e75fca3fa"
+      },
+      {
+        "command": [
+          "python3",
+          "-B",
+          "scripts/h62/item6/migrate-lowering/bounded.py"
+        ],
+        "imports": [
+          {
+            "importer": "scripts/h62/item6/migrate-lowering/bounded.py",
+            "importer_blob": "b4c9edefa18f3c1b3dd7f11f8ffa46c61aaf31bd",
+            "importer_commit": "aa07794d3f1084a560f308c2b469198a577ee1a5",
+            "line": 6
+          },
+          {
+            "importer": "scripts/h62/item6/migrate-lowering/supervise.py",
+            "importer_blob": "38d19f87951efbbb531a321d9e0d48604ca4a78e",
+            "importer_commit": "aa07794d3f1084a560f308c2b469198a577ee1a5",
+            "line": 4
+          }
+        ],
+        "input_revision": "a27ec14a756b2011bd864609ada2c4dbd65addc0",
+        "interface": {
+          "module": "process_group",
+          "names": [
+            "members",
+            "stop_owned"
+          ]
+        },
+        "kind": "python-import-source-role",
+        "path": "scripts/h62/item6/migrate-lowering/process_group.py",
+        "provenance": {
+          "blob": "31d1dba2b8ff9c33da3c25758b83227a7bebe5e3",
+          "commit": "d48bc8cb306d50626864c00c53cdd5c585438ec0",
+          "path": "scripts/h62/item6/migrate-lowering/process_group.py"
+        },
+        "purpose": "Reviewed exact Python import dependency of the named kept entry sources. Source consumption only: no invocation, passing-run, entered-module, data-read, fixture, child, runtime, compatibility or proof credit.",
+        "source_blob": "31d1dba2b8ff9c33da3c25758b83227a7bebe5e3"
+      },
+      {
+        "command": [
+          "python3",
+          "-B",
+          "scripts/h62/item6/migrate-precompiles/census.py"
+        ],
+        "imports": [
+          {
+            "importer": "scripts/h62/item6/migrate-precompiles/census.py",
+            "importer_blob": "634868cff19058fe2d32bbfc691c2c2694c23b3b",
+            "importer_commit": "d393a60b76120dfab477e62c569f11cf34cdcfcb",
+            "line": 7
+          }
+        ],
+        "input_revision": "a27ec14a756b2011bd864609ada2c4dbd65addc0",
+        "interface": {
+          "module": "contract",
+          "names": [
+            "expected"
+          ]
+        },
+        "kind": "python-import-source-role",
+        "path": "scripts/h62/item6/migrate-precompiles/contract.py",
+        "provenance": {
+          "blob": "292e032d3602f997b88830c25d51bca1cc95f883",
+          "commit": "4e7929f0bf488c8c23c7b42f6a186121c6951a4c",
+          "path": "scripts/h62/item6/migrate-precompiles/contract.py"
+        },
+        "purpose": "Reviewed exact Python import dependency of the named kept entry sources. Source consumption only: no invocation, passing-run, entered-module, data-read, fixture, child, runtime, compatibility or proof credit.",
+        "source_blob": "292e032d3602f997b88830c25d51bca1cc95f883"
+      },
+      {
+        "command": [
+          "python3",
+          "-B",
+          "scripts/h62/item6/migrate-root-gate/cache-roundtrip.py"
+        ],
+        "imports": [
+          {
+            "importer": "scripts/h62/item6/migrate-root-gate/cache-roundtrip.py",
+            "importer_blob": "ff642bece78b93da3e6cd534cdb66de4e73506b0",
+            "importer_commit": "df554535e9c8d308276a99ea23611c7d63ae5919",
+            "line": 19
+          }
+        ],
+        "input_revision": "a27ec14a756b2011bd864609ada2c4dbd65addc0",
+        "interface": {
+          "module": "release_integrity",
+          "names": [
+            "verify_release"
+          ]
+        },
+        "kind": "python-import-source-role",
+        "path": "scripts/h62/item6/migrate-root-gate/release_integrity.py",
+        "provenance": {
+          "blob": "49a4e4707d6bfdcedef222b66a2f2af9df73c536",
+          "commit": "df554535e9c8d308276a99ea23611c7d63ae5919",
+          "path": "scripts/h62/item6/migrate-root-gate/release_integrity.py"
+        },
+        "purpose": "Reviewed exact Python import dependency of the named kept entry sources. Source consumption only: no invocation, passing-run, entered-module, data-read, fixture, child, runtime, compatibility or proof credit.",
+        "source_blob": "49a4e4707d6bfdcedef222b66a2f2af9df73c536"
+      },
+      {
+        "command": [
+          "python3",
+          "-B",
+          "scripts/h62/item6/migrate-semantics/api_evidence.py"
+        ],
+        "imports": [
+          {
+            "importer": "scripts/h62/item6/migrate-semantics/api_evidence.py",
+            "importer_blob": "4cb5c110945cbeffa15ea2f48bb8a05d2fb29a9b",
+            "importer_commit": "40be303ce78a6d6bcad5d4c4b8c7285cc1732767",
+            "line": 5
+          },
+          {
+            "importer": "scripts/h62/item6/migrate-semantics/cgroup_controls.py",
+            "importer_blob": "ec85416b5b4134dc11fa801c4cb596109edfaa0a",
+            "importer_commit": "40be303ce78a6d6bcad5d4c4b8c7285cc1732767",
+            "line": 5
+          },
+          {
+            "importer": "scripts/h62/item6/migrate-semantics/cgroup_prerequisite.py",
+            "importer_blob": "eeb10340cfd2da86bc9f5839ef69dd3ad15f7fef",
+            "importer_commit": "40be303ce78a6d6bcad5d4c4b8c7285cc1732767",
+            "line": 5
+          },
+          {
+            "importer": "scripts/h62/item6/migrate-semantics/compare_samples.py",
+            "importer_blob": "c3fbd043c55091388a581dafe6cc6cdfc6a0e4ed",
+            "importer_commit": "40be303ce78a6d6bcad5d4c4b8c7285cc1732767",
+            "line": 5
+          },
+          {
+            "importer": "scripts/h62/item6/migrate-semantics/measure.py",
+            "importer_blob": "2875c98d5b0ddb2fb825542114452b838a6f9bea",
+            "importer_commit": "40be303ce78a6d6bcad5d4c4b8c7285cc1732767",
+            "line": 6
+          },
+          {
+            "importer": "scripts/h62/item6/migrate-semantics/owner_hash_fixture.py",
+            "importer_blob": "3e65a61636afff9d97f7f5bc9facd0425b8b7b94",
+            "importer_commit": "40be303ce78a6d6bcad5d4c4b8c7285cc1732767",
+            "line": 5
+          },
+          {
+            "importer": "scripts/h62/item6/migrate-semantics/probe.py",
+            "importer_blob": "d99f64b94069c8ef9d83c5f0be79c8fb99d61a28",
+            "importer_commit": "40be303ce78a6d6bcad5d4c4b8c7285cc1732767",
+            "line": 6
+          }
+        ],
+        "input_revision": "a27ec14a756b2011bd864609ada2c4dbd65addc0",
+        "interface": {
+          "module": "bounded",
+          "names": [
+            "available",
+            "cap_kind",
+            "controller_mount",
+            "passed",
+            "run",
+            "settings"
+          ]
+        },
+        "kind": "python-import-source-role",
+        "path": "scripts/h62/item6/migrate-semantics/bounded.py",
+        "provenance": {
+          "blob": "921f0c36065a3d5ba781b7fd46f324a5bf1c07a3",
+          "commit": "40be303ce78a6d6bcad5d4c4b8c7285cc1732767",
+          "path": "scripts/h62/item6/migrate-semantics/bounded.py"
+        },
+        "purpose": "Reviewed exact Python import dependency of the named kept entry sources. Source consumption only: no invocation, passing-run, entered-module, data-read, fixture, child, runtime, compatibility or proof credit.",
+        "source_blob": "921f0c36065a3d5ba781b7fd46f324a5bf1c07a3"
+      },
+      {
+        "command": [
+          "bash",
+          "scripts/h62/item1/duplication-scanner/check_signature_fixture.sh"
+        ],
+        "input_revision": "ff6d436888960a4c515b09b72ea2051101004293",
+        "interface": {
+          "entry_line": 3,
+          "interpreter": "bash",
+          "shebang": "#!/usr/bin/env bash"
+        },
+        "kind": "nonpython-entry-source-role",
+        "path": "scripts/h62/item1/duplication-scanner/check_signature_fixture.sh",
+        "provenance": {
+          "blob": "008a7a6a13c68c0d1ae30d6654c4c579da64ec27",
+          "commit": "aa5b22c028e90fd652c6c8e454b0d7cce8a39d7e",
+          "path": "scripts/h62/item1/duplication-scanner/check_signature_fixture.sh"
+        },
+        "purpose": "Reviewed declared program source with exact interpreter, entry interface and introducing provenance. Source role only: no invocation, execution, passing run, read anchor, fixture, helper, child, generated-output, proof or runtime credit.",
+        "source_blob": "008a7a6a13c68c0d1ae30d6654c4c579da64ec27"
+      },
+      {
+        "command": [
+          "bash",
+          "scripts/h62/item1/packet-panic/run_current_consumer.sh"
+        ],
+        "input_revision": "ff6d436888960a4c515b09b72ea2051101004293",
+        "interface": {
+          "entry_line": 3,
+          "interpreter": "bash",
+          "shebang": "#!/usr/bin/env bash"
+        },
+        "kind": "nonpython-entry-source-role",
+        "path": "scripts/h62/item1/packet-panic/run_current_consumer.sh",
+        "provenance": {
+          "blob": "cfd83c59a0cf71da6179928e9480ef22dae3f1d8",
+          "commit": "7ca224b4f7976aa26da556c10cbd4c95aabe6cd8",
+          "path": "scripts/h62/item1/packet-panic/run_current_consumer.sh"
+        },
+        "purpose": "Reviewed declared program source with exact interpreter, entry interface and introducing provenance. Source role only: no invocation, execution, passing run, read anchor, fixture, helper, child, generated-output, proof or runtime credit.",
+        "source_blob": "cfd83c59a0cf71da6179928e9480ef22dae3f1d8"
+      },
+      {
+        "command": [
+          "bash",
+          "scripts/h62/item1/packet-panic/run_mcp_diagnostic.sh"
+        ],
+        "input_revision": "ff6d436888960a4c515b09b72ea2051101004293",
+        "interface": {
+          "entry_line": 2,
+          "interpreter": "bash",
+          "shebang": "#!/usr/bin/env bash"
+        },
+        "kind": "nonpython-entry-source-role",
+        "path": "scripts/h62/item1/packet-panic/run_mcp_diagnostic.sh",
+        "provenance": {
+          "blob": "6de05d52d827a614e76f233d86f30535473c9a1c",
+          "commit": "edcf2535758d57d1fb708488f5f9601b5222e707",
+          "path": "scripts/h62/item1/packet-panic/run_mcp_diagnostic.sh"
+        },
+        "purpose": "Reviewed declared program source with exact interpreter, entry interface and introducing provenance. Source role only: no invocation, execution, passing run, read anchor, fixture, helper, child, generated-output, proof or runtime credit.",
+        "source_blob": "6de05d52d827a614e76f233d86f30535473c9a1c"
+      },
+      {
+        "command": [
+          "bash",
+          "scripts/h62/item1/packet-panic/run_overlay_consumer.sh"
+        ],
+        "input_revision": "ff6d436888960a4c515b09b72ea2051101004293",
+        "interface": {
+          "entry_line": 3,
+          "interpreter": "bash",
+          "shebang": "#!/usr/bin/env bash"
+        },
+        "kind": "nonpython-entry-source-role",
+        "path": "scripts/h62/item1/packet-panic/run_overlay_consumer.sh",
+        "provenance": {
+          "blob": "3966568cfddd69f256e3342db59c29e1c2d12dcb",
+          "commit": "2d3ec4d32e449fb20f745c6e4c3662aab400ce89",
+          "path": "scripts/h62/item1/packet-panic/run_overlay_consumer.sh"
+        },
+        "purpose": "Reviewed declared program source with exact interpreter, entry interface and introducing provenance. Source role only: no invocation, execution, passing run, read anchor, fixture, helper, child, generated-output, proof or runtime credit.",
+        "source_blob": "3966568cfddd69f256e3342db59c29e1c2d12dcb"
+      },
+      {
+        "command": [
+          "bash",
+          "scripts/h62/item1/packet-panic/run_serial_closure.sh"
+        ],
+        "input_revision": "ff6d436888960a4c515b09b72ea2051101004293",
+        "interface": {
+          "entry_line": 3,
+          "interpreter": "bash",
+          "shebang": "#!/usr/bin/env bash"
+        },
+        "kind": "nonpython-entry-source-role",
+        "path": "scripts/h62/item1/packet-panic/run_serial_closure.sh",
+        "provenance": {
+          "blob": "0463a95129f8454789ebd21e75892cd6fb5df8aa",
+          "commit": "dd5422d715cba78da3394bc6d9b3a0d38be97209",
+          "path": "scripts/h62/item1/packet-panic/run_serial_closure.sh"
+        },
+        "purpose": "Reviewed declared program source with exact interpreter, entry interface and introducing provenance. Source role only: no invocation, execution, passing run, read anchor, fixture, helper, child, generated-output, proof or runtime credit.",
+        "source_blob": "0463a95129f8454789ebd21e75892cd6fb5df8aa"
+      },
+      {
+        "command": [
+          "node",
+          "scripts/h62/item2/audit-abi-world/propose_pin_sync.mjs"
+        ],
+        "input_revision": "ff6d436888960a4c515b09b72ea2051101004293",
+        "interface": {
+          "entry_line": 8,
+          "interpreter": "node",
+          "shebang": null
+        },
+        "kind": "nonpython-entry-source-role",
+        "path": "scripts/h62/item2/audit-abi-world/propose_pin_sync.mjs",
+        "provenance": {
+          "blob": "189949019347ca7300e1d2009d5fb83dae9e66a0",
+          "commit": "c388d3209661b33ddd6d0fc6301039332d5085ee",
+          "path": "scripts/h62/item2/audit-abi-world/propose_pin_sync.mjs"
+        },
+        "purpose": "Reviewed declared program source with exact interpreter, entry interface and introducing provenance. Source role only: no invocation, execution, passing run, read anchor, fixture, helper, child, generated-output, proof or runtime credit.",
+        "source_blob": "189949019347ca7300e1d2009d5fb83dae9e66a0"
+      },
+      {
+        "command": [
+          "node",
+          "scripts/h62/item2/audit-abi-world/replay.mjs"
+        ],
+        "input_revision": "ff6d436888960a4c515b09b72ea2051101004293",
+        "interface": {
+          "entry_line": 8,
+          "interpreter": "node",
+          "shebang": null
+        },
+        "kind": "nonpython-entry-source-role",
+        "path": "scripts/h62/item2/audit-abi-world/replay.mjs",
+        "provenance": {
+          "blob": "b9624c2c243789f070eb2b0375016537bf4696f5",
+          "commit": "38aef082f5b0e96e257fb91b62d8e432e8eec48d",
+          "path": "scripts/h62/item2/audit-abi-world/replay.mjs"
+        },
+        "purpose": "Reviewed declared program source with exact interpreter, entry interface and introducing provenance. Source role only: no invocation, execution, passing run, read anchor, fixture, helper, child, generated-output, proof or runtime credit.",
+        "source_blob": "b9624c2c243789f070eb2b0375016537bf4696f5"
+      },
+      {
+        "command": [
+          "bash",
+          "scripts/h62/item2/audit-exact-verification/bounded-check.sh"
+        ],
+        "input_revision": "ff6d436888960a4c515b09b72ea2051101004293",
+        "interface": {
+          "entry_line": 3,
+          "interpreter": "bash",
+          "shebang": "#!/usr/bin/env bash"
+        },
+        "kind": "nonpython-entry-source-role",
+        "path": "scripts/h62/item2/audit-exact-verification/bounded-check.sh",
+        "provenance": {
+          "blob": "fabdbb74f741952b7ddf419e8ef8c321fc349c01",
+          "commit": "dee26790869de6ace73aa7cfd8c72a666c6f34ea",
+          "path": "scripts/h62/item2/audit-exact-verification/bounded-check.sh"
+        },
+        "purpose": "Reviewed declared program source with exact interpreter, entry interface and introducing provenance. Source role only: no invocation, execution, passing run, read anchor, fixture, helper, child, generated-output, proof or runtime credit.",
+        "source_blob": "fabdbb74f741952b7ddf419e8ef8c321fc349c01"
+      },
+      {
+        "command": [
+          "node",
+          "scripts/h62/item2/audit-g25-scalar-lowering/reference-boundaries.mjs"
+        ],
+        "input_revision": "ff6d436888960a4c515b09b72ea2051101004293",
+        "interface": {
+          "entry_line": 7,
+          "interpreter": "node",
+          "shebang": null
+        },
+        "kind": "nonpython-entry-source-role",
+        "path": "scripts/h62/item2/audit-g25-scalar-lowering/reference-boundaries.mjs",
+        "provenance": {
+          "blob": "0f70488fd1d9ef171e6b2ad0a31a31a0aa144694",
+          "commit": "43a4378789b5200792bb0cd1862b7fcbd7b37305",
+          "path": "scripts/h62/item2/audit-g25-scalar-lowering/reference-boundaries.mjs"
+        },
+        "purpose": "Reviewed declared program source with exact interpreter, entry interface and introducing provenance. Source role only: no invocation, execution, passing run, read anchor, fixture, helper, child, generated-output, proof or runtime credit.",
+        "source_blob": "0f70488fd1d9ef171e6b2ad0a31a31a0aa144694"
+      },
+      {
+        "command": [
+          "bash",
+          "scripts/h62/item2/audit-v10-storage/validate.sh"
+        ],
+        "input_revision": "ff6d436888960a4c515b09b72ea2051101004293",
+        "interface": {
+          "entry_line": 2,
+          "interpreter": "bash",
+          "shebang": "#!/usr/bin/env bash"
+        },
+        "kind": "nonpython-entry-source-role",
+        "path": "scripts/h62/item2/audit-v10-storage/validate.sh",
+        "provenance": {
+          "blob": "2cd98549345e3103c0b4ccf3f393e93450d405ad",
+          "commit": "8ad1dffb4c731046a343120e557e9981e745e2cf",
+          "path": "scripts/h62/item2/audit-v10-storage/validate.sh"
+        },
+        "purpose": "Reviewed declared program source with exact interpreter, entry interface and introducing provenance. Source role only: no invocation, execution, passing run, read anchor, fixture, helper, child, generated-output, proof or runtime credit.",
+        "source_blob": "2cd98549345e3103c0b4ccf3f393e93450d405ad"
+      },
+      {
+        "command": [
+          "node",
+          "scripts/h62/item3/g52-differential/engine_input_transactions.mjs"
+        ],
+        "input_revision": "ff6d436888960a4c515b09b72ea2051101004293",
+        "interface": {
+          "entry_line": 7,
+          "interpreter": "node",
+          "shebang": null
+        },
+        "kind": "nonpython-entry-source-role",
+        "path": "scripts/h62/item3/g52-differential/engine_input_transactions.mjs",
+        "provenance": {
+          "blob": "eb052fbebfcca36cedd0699a5a54d76302a3e46a",
+          "commit": "999ec1a2fb080c40d4ac0f69b760ad395146540b",
+          "path": "scripts/h62/item3/g52-differential/engine_input_transactions.mjs"
+        },
+        "purpose": "Reviewed declared program source with exact interpreter, entry interface and introducing provenance. Source role only: no invocation, execution, passing run, read anchor, fixture, helper, child, generated-output, proof or runtime credit.",
+        "source_blob": "eb052fbebfcca36cedd0699a5a54d76302a3e46a"
+      },
+      {
+        "command": [
+          "node",
+          "scripts/h62/item3/g52-differential/reference.mjs"
+        ],
+        "input_revision": "ff6d436888960a4c515b09b72ea2051101004293",
+        "interface": {
+          "entry_line": 7,
+          "interpreter": "node",
+          "shebang": null
+        },
+        "kind": "nonpython-entry-source-role",
+        "path": "scripts/h62/item3/g52-differential/reference.mjs",
+        "provenance": {
+          "blob": "2126871f49fedcacff3e5523ba48a90724ee550c",
+          "commit": "bd5a97dbe229552632375967a27215e91bd9ccd7",
+          "path": "scripts/h62/item3/g52-differential/reference.mjs"
+        },
+        "purpose": "Reviewed declared program source with exact interpreter, entry interface and introducing provenance. Source role only: no invocation, execution, passing run, read anchor, fixture, helper, child, generated-output, proof or runtime credit.",
+        "source_blob": "2126871f49fedcacff3e5523ba48a90724ee550c"
+      },
+      {
+        "command": [
+          "node",
+          "scripts/h62/item3/g52-differential/system_request_reproducer.mjs"
+        ],
+        "input_revision": "ff6d436888960a4c515b09b72ea2051101004293",
+        "interface": {
+          "entry_line": 11,
+          "interpreter": "node",
+          "shebang": null
+        },
+        "kind": "nonpython-entry-source-role",
+        "path": "scripts/h62/item3/g52-differential/system_request_reproducer.mjs",
+        "provenance": {
+          "blob": "727c99747e5362d3654f223400a3f73960314740",
+          "commit": "f53f026ac5ebe95273913dc837c23cc9baca3c08",
+          "path": "scripts/h62/item3/g52-differential/system_request_reproducer.mjs"
+        },
+        "purpose": "Reviewed declared program source with exact interpreter, entry interface and introducing provenance. Source role only: no invocation, execution, passing run, read anchor, fixture, helper, child, generated-output, proof or runtime credit.",
+        "source_blob": "727c99747e5362d3654f223400a3f73960314740"
+      },
+      {
+        "command": [
+          "node",
+          "scripts/h62/item3/g52-differential/typed.mjs"
+        ],
+        "input_revision": "ff6d436888960a4c515b09b72ea2051101004293",
+        "interface": {
+          "entry_line": 9,
+          "interpreter": "node",
+          "shebang": null
+        },
+        "kind": "nonpython-entry-source-role",
+        "path": "scripts/h62/item3/g52-differential/typed.mjs",
+        "provenance": {
+          "blob": "072c1f80666313aab973f66f92084b387943d781",
+          "commit": "6a68fe831eaa6b4a9132499e243c3a7a80732dcf",
+          "path": "scripts/h62/item3/g52-differential/typed.mjs"
+        },
+        "purpose": "Reviewed declared program source with exact interpreter, entry interface and introducing provenance. Source role only: no invocation, execution, passing run, read anchor, fixture, helper, child, generated-output, proof or runtime credit.",
+        "source_blob": "072c1f80666313aab973f66f92084b387943d781"
+      },
+      {
+        "command": [
+          "bash",
+          "scripts/h62/item4/generic-internalflow/acceptance.sh"
+        ],
+        "input_revision": "ff6d436888960a4c515b09b72ea2051101004293",
+        "interface": {
+          "entry_line": 2,
+          "interpreter": "bash",
+          "shebang": "#!/usr/bin/env bash"
+        },
+        "kind": "nonpython-entry-source-role",
+        "path": "scripts/h62/item4/generic-internalflow/acceptance.sh",
+        "provenance": {
+          "blob": "39764e90676bc39cf4573733a428f3daceb33715",
+          "commit": "c98a7d018f528c9b049d32ee82baa40ea4aa7f6d",
+          "path": "scripts/h62/item4/generic-internalflow/acceptance.sh"
+        },
+        "purpose": "Reviewed declared program source with exact interpreter, entry interface and introducing provenance. Source role only: no invocation, execution, passing run, read anchor, fixture, helper, child, generated-output, proof or runtime credit.",
+        "source_blob": "39764e90676bc39cf4573733a428f3daceb33715"
+      },
+      {
+        "command": [
+          "bash",
+          "scripts/h62/item4/generic-v08/check-width-v2.sh"
+        ],
+        "input_revision": "ff6d436888960a4c515b09b72ea2051101004293",
+        "interface": {
+          "entry_line": 3,
+          "interpreter": "bash",
+          "shebang": "#!/usr/bin/env bash"
+        },
+        "kind": "nonpython-entry-source-role",
+        "path": "scripts/h62/item4/generic-v08/check-width-v2.sh",
+        "provenance": {
+          "blob": "90a299b755dd97002da0e4b96b5698f91b6c90a9",
+          "commit": "d8240996977999ccc01a431a46957f50de29a1e9",
+          "path": "scripts/h62/item4/generic-v08/check-width-v2.sh"
+        },
+        "purpose": "Reviewed declared program source with exact interpreter, entry interface and introducing provenance. Source role only: no invocation, execution, passing run, read anchor, fixture, helper, child, generated-output, proof or runtime credit.",
+        "source_blob": "90a299b755dd97002da0e4b96b5698f91b6c90a9"
+      },
+      {
+        "command": [
+          "node",
+          "scripts/h62/item5/statement-graph/reproduce_core_baseline.mjs"
+        ],
+        "input_revision": "ff6d436888960a4c515b09b72ea2051101004293",
+        "interface": {
+          "entry_line": 10,
+          "interpreter": "node",
+          "shebang": "#!/usr/bin/env node"
+        },
+        "kind": "nonpython-entry-source-role",
+        "path": "scripts/h62/item5/statement-graph/reproduce_core_baseline.mjs",
+        "provenance": {
+          "blob": "0af6bf35eeffa24073600f593a5fe64d7a784d50",
+          "commit": "e8746b88a8a81c1f4e017d986ba3c15f2022ec88",
+          "path": "scripts/h62/item5/statement-graph/reproduce_core_baseline.mjs"
+        },
+        "purpose": "Reviewed declared program source with exact interpreter, entry interface and introducing provenance. Source role only: no invocation, execution, passing run, read anchor, fixture, helper, child, generated-output, proof or runtime credit.",
+        "source_blob": "0af6bf35eeffa24073600f593a5fe64d7a784d50"
+      },
+      {
+        "command": [
+          "bash",
+          "scripts/h62/item6/migrate-evm/run-bounded.sh"
+        ],
+        "input_revision": "ff6d436888960a4c515b09b72ea2051101004293",
+        "interface": {
+          "entry_line": 3,
+          "interpreter": "bash",
+          "shebang": "#!/usr/bin/env bash"
+        },
+        "kind": "nonpython-entry-source-role",
+        "path": "scripts/h62/item6/migrate-evm/run-bounded.sh",
+        "provenance": {
+          "blob": "707492d31651425496b52520baf30fb4b220084f",
+          "commit": "c9df585f9c78134adc2f14ff383925d207502679",
+          "path": "scripts/h62/item6/migrate-evm/run-bounded.sh"
+        },
+        "purpose": "Reviewed declared program source with exact interpreter, entry interface and introducing provenance. Source role only: no invocation, execution, passing run, read anchor, fixture, helper, child, generated-output, proof or runtime credit.",
+        "source_blob": "707492d31651425496b52520baf30fb4b220084f"
+      },
+      {
+        "command": [
+          "bash",
+          "scripts/h62/item6/migrate-evm/run-inventory.sh"
+        ],
+        "input_revision": "ff6d436888960a4c515b09b72ea2051101004293",
+        "interface": {
+          "entry_line": 2,
+          "interpreter": "bash",
+          "shebang": "#!/usr/bin/env bash"
+        },
+        "kind": "nonpython-entry-source-role",
+        "path": "scripts/h62/item6/migrate-evm/run-inventory.sh",
+        "provenance": {
+          "blob": "cbbfa6a6e1b489373931174db48bc7e04651ae38",
+          "commit": "67d5543b4a567d74a44fd1c2b369451150637efa",
+          "path": "scripts/h62/item6/migrate-evm/run-inventory.sh"
+        },
+        "purpose": "Reviewed declared program source with exact interpreter, entry interface and introducing provenance. Source role only: no invocation, execution, passing run, read anchor, fixture, helper, child, generated-output, proof or runtime credit.",
+        "source_blob": "cbbfa6a6e1b489373931174db48bc7e04651ae38"
+      },
+      {
+        "command": [
+          "bash",
+          "scripts/h62/item6/migrate-examples/measure.sh"
+        ],
+        "input_revision": "ff6d436888960a4c515b09b72ea2051101004293",
+        "interface": {
+          "entry_line": 2,
+          "interpreter": "bash",
+          "shebang": "#!/usr/bin/env bash"
+        },
+        "kind": "nonpython-entry-source-role",
+        "path": "scripts/h62/item6/migrate-examples/measure.sh",
+        "provenance": {
+          "blob": "2faff69f66fb140611b873df43ebb042c354cabf",
+          "commit": "a8e256c0c577ba5d2a5781b6cf1bf791db9bc967",
+          "path": "scripts/h62/item6/migrate-examples/measure.sh"
+        },
+        "purpose": "Reviewed declared program source with exact interpreter, entry interface and introducing provenance. Source role only: no invocation, execution, passing run, read anchor, fixture, helper, child, generated-output, proof or runtime credit.",
+        "source_blob": "2faff69f66fb140611b873df43ebb042c354cabf"
+      },
+      {
+        "command": [
+          "bash",
+          "scripts/h62/item6/migrate-testsuite/run-bounded.sh"
+        ],
+        "input_revision": "ff6d436888960a4c515b09b72ea2051101004293",
+        "interface": {
+          "entry_line": 2,
+          "interpreter": "bash",
+          "shebang": "#!/usr/bin/env bash"
+        },
+        "kind": "nonpython-entry-source-role",
+        "path": "scripts/h62/item6/migrate-testsuite/run-bounded.sh",
+        "provenance": {
+          "blob": "7c1f46ffda3384ad3683536020638753cc763d73",
+          "commit": "4255f8873cb7af3b2d5c9a50e87fbdda0f5a28bd",
+          "path": "scripts/h62/item6/migrate-testsuite/run-bounded.sh"
+        },
+        "purpose": "Reviewed declared program source with exact interpreter, entry interface and introducing provenance. Source role only: no invocation, execution, passing run, read anchor, fixture, helper, child, generated-output, proof or runtime credit.",
+        "source_blob": "7c1f46ffda3384ad3683536020638753cc763d73"
+      },
+      {
+        "command": [
+          "scripts/h62/item1/packet-panic/bin/lake"
+        ],
+        "drivers": [
+          {
+            "blob": "5202ea886d34a151c75409f211c34a75492530cc",
+            "line": 22,
+            "literal": "scripts/h62/item1/packet-panic/bin",
+            "path": "scripts/h62/item1/packet-panic/mcp_diagnostics.py"
+          },
+          {
+            "blob": "105adcb31443cb82afdb5e9cb8797278c733a248",
+            "line": 54,
+            "literal": "scripts/h62/item1/packet-panic/bin",
+            "path": "scripts/h62/item1/packet-panic/mcp_serial_diagnostic.py"
+          }
+        ],
+        "input_revision": "ff6d436888960a4c515b09b72ea2051101004293",
+        "interface": {
+          "entry_line": 2,
+          "form": "bash-wrapper",
+          "interpreter": "bash",
+          "shebang": "#!/usr/bin/env bash"
+        },
+        "kind": "program-form-source-role",
+        "path": "scripts/h62/item1/packet-panic/bin/lake",
+        "provenance": {
+          "blob": "ee601ac456cd001e848299f770e5332550bae9c5",
+          "commit": "edcf2535758d57d1fb708488f5f9601b5222e707",
+          "path": "scripts/h62/item1/packet-panic/bin/lake"
+        },
+        "purpose": "Reviewed declared program form bound to its exact source interface and actual committed driver identities where present. An empty driver list makes no consumer claim; the external wait-usage binary is not a source consumer. No invocation, compile, execution, passing run, read anchor, fixture, child, generated-output, proof or runtime credit.",
+        "source_blob": "ee601ac456cd001e848299f770e5332550bae9c5"
+      },
+      {
+        "command": [
+          "scripts/h62/item2/audit-abi-world/bin/lake"
+        ],
+        "drivers": [
+          {
+            "blob": "2ca1426faff254135184084f149b45ddfbd0397a",
+            "line": 17,
+            "literal": "bin",
+            "path": "scripts/h62/item2/audit-abi-world/mcp_call.py"
+          }
+        ],
+        "input_revision": "ff6d436888960a4c515b09b72ea2051101004293",
+        "interface": {
+          "entry_line": 2,
+          "form": "bash-wrapper",
+          "interpreter": "bash",
+          "shebang": "#!/usr/bin/env bash"
+        },
+        "kind": "program-form-source-role",
+        "path": "scripts/h62/item2/audit-abi-world/bin/lake",
+        "provenance": {
+          "blob": "cb9d075c879d9a3ae9d8b9f65bf436bdad0038c8",
+          "commit": "b97125425c8eadbe2174b07fcda96c99c9088469",
+          "path": "scripts/h62/item2/audit-abi-world/bin/lake"
+        },
+        "purpose": "Reviewed declared program form bound to its exact source interface and actual committed driver identities where present. An empty driver list makes no consumer claim; the external wait-usage binary is not a source consumer. No invocation, compile, execution, passing run, read anchor, fixture, child, generated-output, proof or runtime credit.",
+        "source_blob": "cb9d075c879d9a3ae9d8b9f65bf436bdad0038c8"
+      },
+      {
+        "command": [
+          "scripts/h62/item2/audit-abi-world/resume-bin/lake"
+        ],
+        "drivers": [
+          {
+            "blob": "68a3a88a246c7da9a75e247c890bedb87206a28e",
+            "line": 22,
+            "literal": "resume-bin",
+            "path": "scripts/h62/item2/audit-abi-world/resume_mcp_call.py"
+          }
+        ],
+        "input_revision": "ff6d436888960a4c515b09b72ea2051101004293",
+        "interface": {
+          "entry_line": 2,
+          "form": "bash-wrapper",
+          "interpreter": "bash",
+          "shebang": "#!/usr/bin/env bash"
+        },
+        "kind": "program-form-source-role",
+        "path": "scripts/h62/item2/audit-abi-world/resume-bin/lake",
+        "provenance": {
+          "blob": "ad3f0e60d81934cfcd60b40a5eea6a171d4f5c62",
+          "commit": "8e3023d10b62574b7be84630c064b53b8dcfbb09",
+          "path": "scripts/h62/item2/audit-abi-world/resume-bin/lake"
+        },
+        "purpose": "Reviewed declared program form bound to its exact source interface and actual committed driver identities where present. An empty driver list makes no consumer claim; the external wait-usage binary is not a source consumer. No invocation, compile, execution, passing run, read anchor, fixture, child, generated-output, proof or runtime credit.",
+        "source_blob": "ad3f0e60d81934cfcd60b40a5eea6a171d4f5c62"
+      },
+      {
+        "command": [
+          "lean",
+          "--run",
+          "scripts/h62/item2/audit-evm-compiler/Closed.lean"
+        ],
+        "drivers": [
+          {
+            "blob": "3798c99de0c5773d733ed69ef2a9af0c422f94a3",
+            "line": 28,
+            "literal": "scripts/h62/item2/audit-evm-compiler/Closed.lean",
+            "path": "scripts/h62/item2/audit-evm-compiler/closed_census.py"
+          }
+        ],
+        "input_revision": "ff6d436888960a4c515b09b72ea2051101004293",
+        "interface": {
+          "entry_line": 24,
+          "form": "lean-run",
+          "interpreter": "lean --run"
+        },
+        "kind": "program-form-source-role",
+        "path": "scripts/h62/item2/audit-evm-compiler/Closed.lean",
+        "provenance": {
+          "blob": "d2599fcbce28c22bf73f70539f37a5865a16dcbc",
+          "commit": "6fa35bb9e28fb82d79877f79a6eab1bca3cca233",
+          "path": "scripts/h62/item2/audit-evm-compiler/Closed.lean"
+        },
+        "purpose": "Reviewed declared program form bound to its exact source interface and actual committed driver identities where present. An empty driver list makes no consumer claim; the external wait-usage binary is not a source consumer. No invocation, compile, execution, passing run, read anchor, fixture, child, generated-output, proof or runtime credit.",
+        "source_blob": "d2599fcbce28c22bf73f70539f37a5865a16dcbc"
+      },
+      {
+        "command": [
+          "lean",
+          "--run",
+          "scripts/h62/item2/audit-evm-compiler/Inspect.lean"
+        ],
+        "drivers": [
+          {
+            "blob": "3884ee420a9a9cfccd9d76388e6a06f243d551ce",
+            "line": 16,
+            "literal": "scripts/h62/item2/audit-evm-compiler/Inspect.lean",
+            "path": "scripts/h62/item2/audit-evm-compiler/inspect.py"
+          },
+          {
+            "blob": "12276aaf30cbd92d243a1e4d9e9b905e986e3d63",
+            "line": 20,
+            "literal": "scripts/h62/item2/audit-evm-compiler/Inspect.lean",
+            "path": "scripts/h62/item2/audit-evm-compiler/inspect_bridge.py"
+          }
+        ],
+        "input_revision": "ff6d436888960a4c515b09b72ea2051101004293",
+        "interface": {
+          "entry_line": 25,
+          "form": "lean-run",
+          "interpreter": "lean --run"
+        },
+        "kind": "program-form-source-role",
+        "path": "scripts/h62/item2/audit-evm-compiler/Inspect.lean",
+        "provenance": {
+          "blob": "190737f188a3fdd9d01f33639313261e99470a17",
+          "commit": "defea88d6c4f5d2b352517c337dd0707da536725",
+          "path": "scripts/h62/item2/audit-evm-compiler/Inspect.lean"
+        },
+        "purpose": "Reviewed declared program form bound to its exact source interface and actual committed driver identities where present. An empty driver list makes no consumer claim; the external wait-usage binary is not a source consumer. No invocation, compile, execution, passing run, read anchor, fixture, child, generated-output, proof or runtime credit.",
+        "source_blob": "190737f188a3fdd9d01f33639313261e99470a17"
+      },
+      {
+        "command": [
+          "scripts/h62/item2/audit-precompiles/bin/lake"
+        ],
+        "drivers": [],
+        "input_revision": "ff6d436888960a4c515b09b72ea2051101004293",
+        "interface": {
+          "entry_line": 2,
+          "form": "bash-wrapper",
+          "interpreter": "bash",
+          "shebang": "#!/usr/bin/env bash"
+        },
+        "kind": "program-form-source-role",
+        "path": "scripts/h62/item2/audit-precompiles/bin/lake",
+        "provenance": {
+          "blob": "2fe5606eaa15dc5836668a91b4853445d40007b4",
+          "commit": "a118d00ca45bd18acca3e0181d0594f15fea66d0",
+          "path": "scripts/h62/item2/audit-precompiles/bin/lake"
+        },
+        "purpose": "Reviewed declared program form bound to its exact source interface and actual committed driver identities where present. An empty driver list makes no consumer claim; the external wait-usage binary is not a source consumer. No invocation, compile, execution, passing run, read anchor, fixture, child, generated-output, proof or runtime credit.",
+        "source_blob": "2fe5606eaa15dc5836668a91b4853445d40007b4"
+      },
+      {
+        "command": [
+          "cc",
+          "scripts/h62/item6/migrate-optimizer/wait-usage.c"
+        ],
+        "drivers": [],
+        "input_revision": "ff6d436888960a4c515b09b72ea2051101004293",
+        "interface": {
+          "entry_line": 9,
+          "form": "c-program",
+          "interpreter": "cc"
+        },
+        "kind": "program-form-source-role",
+        "path": "scripts/h62/item6/migrate-optimizer/wait-usage.c",
+        "provenance": {
+          "blob": "8ba1a568a8ae4d52d3104c61fcec1673df9d8213",
+          "commit": "42fdfedd31394b44c383586c9364e647128d090d",
+          "path": "scripts/h62/item6/migrate-optimizer/wait-usage.c"
+        },
+        "purpose": "Reviewed declared program form bound to its exact source interface and actual committed driver identities where present. An empty driver list makes no consumer claim; the external wait-usage binary is not a source consumer. No invocation, compile, execution, passing run, read anchor, fixture, child, generated-output, proof or runtime credit.",
+        "source_blob": "8ba1a568a8ae4d52d3104c61fcec1673df9d8213"
+      },
+      {
+        "command": [
+          "python3",
+          "-B",
+          "scripts/h62/item1/trust-fragments/accept_migration.py"
+        ],
+        "consumer": {
+          "blob": "889014ac49aee6edcae261cf9b812f9ccd790d07",
+          "literal_line": 19,
+          "operation_line": 63,
+          "path": "scripts/h62/item1/trust-fragments/accept_migration.py"
+        },
+        "input_revision": "ff6d436888960a4c515b09b72ea2051101004293",
+        "interface": {
+          "operation": "patch-input"
+        },
+        "kind": "source-dependency-role",
+        "path": "scripts/h62/item1/trust-fragments/migration.patch",
+        "provenance": {
+          "blob": "677c556e219ddcb3e40bfaa7251e07c433e06b52",
+          "commit": "2ce3562fecd65f68d7e5a0f17464322a42068f4c",
+          "path": "scripts/h62/item1/trust-fragments/migration.patch"
+        },
+        "purpose": "Exact source input handed by a kept consumer to the reviewed patch-input operation. Source/consumption role only; unavailable historical archives or snapshots do not pass. No invocation, execution, passing run, data-read anchor, generation, output completeness, compatibility, proof or runtime credit.",
+        "source_blob": "677c556e219ddcb3e40bfaa7251e07c433e06b52"
+      },
+      {
+        "command": [
+          "python3",
+          "-B",
+          "scripts/h62/item2/audit-v10-storage/validate.py"
+        ],
+        "consumer": {
+          "blob": "a5304d017e8ca3986e2dc974904d7dd1bf6df7eb",
+          "literal_line": 80,
+          "operation_line": 80,
+          "path": "scripts/h62/item2/audit-v10-storage/validate.py"
+        },
+        "input_revision": "ff6d436888960a4c515b09b72ea2051101004293",
+        "interface": {
+          "operation": "lake-config"
+        },
+        "kind": "source-dependency-role",
+        "path": "scripts/h62/item2/audit-v10-storage/pinned-lakefile.toml",
+        "provenance": {
+          "blob": "b9d804415273c3bcb9509ca3a813fb3f6c3f9ff4",
+          "commit": "8ad1dffb4c731046a343120e557e9981e745e2cf",
+          "path": "scripts/h62/item2/audit-v10-storage/pinned-lakefile.toml"
+        },
+        "purpose": "Exact source input handed by a kept consumer to the reviewed lake-config operation. Source/consumption role only; unavailable historical archives or snapshots do not pass. No invocation, execution, passing run, data-read anchor, generation, output completeness, compatibility, proof or runtime credit.",
+        "source_blob": "b9d804415273c3bcb9509ca3a813fb3f6c3f9ff4"
+      },
+      {
+        "command": [
+          "python3",
+          "-B",
+          "scripts/h62/item6/migrate-yul/generate-reserved-fixture.py"
+        ],
+        "consumer": {
+          "blob": "e0435909f3ec2b9846680db836bc4bd27d78c5cf",
+          "literal_line": 18,
+          "operation_line": 21,
+          "path": "scripts/h62/item6/migrate-yul/generate-reserved-fixture.py"
+        },
+        "input_revision": "ff6d436888960a4c515b09b72ea2051101004293",
+        "interface": {
+          "operation": "check-read"
+        },
+        "kind": "source-dependency-role",
+        "path": "scripts/h62/item6/migrate-yul/ReservedNames.proposed.patch",
+        "provenance": {
+          "blob": "dad642373f549afefaff18069c39932b9eee8e00",
+          "commit": "da45db4c43577480bc14ee23e1dd9ad8b527a34e",
+          "path": "scripts/h62/item6/migrate-yul/ReservedNames.proposed.patch"
+        },
+        "purpose": "Exact source input handed by a kept consumer to the reviewed check-read operation. Source/consumption role only; unavailable historical archives or snapshots do not pass. No invocation, execution, passing run, data-read anchor, generation, output completeness, compatibility, proof or runtime credit.",
+        "source_blob": "dad642373f549afefaff18069c39932b9eee8e00"
+      }
+    ]
+  },
+  "schema_version": 1
+}
