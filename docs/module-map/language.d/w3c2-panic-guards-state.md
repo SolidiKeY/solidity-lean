@@ -1,0 +1,2 @@
+| `Correctness/Panic/Guards/State.lean` | Origin equations of the generated state guards: storage and memory index (`Checked.idxPG`, `Checked.mIdxPG`, `0x32`) and empty pop (`0x31`), each with its guard list, producer origin, V1 revert and emitted panic bytes. |
+| `Examples/Panic/GuardsState.lean` | Kernel-checked state guard regressions: indexes past dynamic and fixed storage and memory arrays, a pop of an empty array, with passing controls. |

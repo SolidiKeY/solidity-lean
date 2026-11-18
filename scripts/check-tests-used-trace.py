@@ -283,7 +283,7 @@ def run(command, scratch, manifest, output, timeout=30, observe_module_entry=Fal
         with open(str(output) + '.stdout', 'wb') as stream:
             if not shutil.which('strace'): raise ValueError('strace is required for actual read validation')
             traced = ['strace', '-f', '-qq', '-yy', '-s', '256', '-e',
-                      'trace=%file,read,pread64,write,pwrite64,mmap,sendfile,copy_file_range,close',
+                      'trace=%file,fchdir,read,pread64,write,pwrite64,mmap,sendfile,copy_file_range,close',
                       '-o', str(output) + '.syscalls', '--', *command]
             process = subprocess.Popen(traced, cwd=scratch, env=env, stdout=stream,
                                        stderr=subprocess.STDOUT, start_new_session=True)
@@ -347,6 +347,9 @@ def _observed_routes(receipt, scratch, manifest, runner, nonpassing=False, modul
 
     Every mutated path and directory descendant is excluded, even if restored.
     Unknown descriptor inheritance and incomplete syscall records get no credit.
+    Mutated names are matched as the kernel may resolve them: '..' after a
+    component, '//', /proc and /dev/fd spellings, symlinkat targets and
+    relative names through the tree's root or an ancestor (H1008).
 
     readonly_symlinks (off by default) audits one shape instead of tainting the
     target of symlink(TARGET, LINK): TARGET is a committed file or directory
@@ -394,6 +397,14 @@ def _observed_routes(receipt, scratch, manifest, runner, nonpassing=False, modul
             if suffix in ('.', '..'): dirty.update(files); return
             dirty.update(p for p in files if p == suffix or p.endswith('/' + suffix) or
                          ('/' + suffix + '/') in ('/' + p))
+            # The unknown base may enclose the tree: a name may run through its
+            # root (taint the rest) or name it or an ancestor (taint all).
+            parts = suffix.split('/'); root_parts = scratch.strip('/').split('/')
+            for i in range(1, len(parts) + 1):
+                for k in range(i, len(root_parts) + 1):
+                    if parts[:i] != root_parts[k - i:k] or k < len(root_parts) and i < len(parts): continue
+                    if k < len(root_parts) or i == len(parts): dirty.update(files); return
+                    taint(scratch + '/' + '/'.join(parts[i:]))
     arguments = strace_arguments
     def resolve(value, directory=None):
         try: path = ast.literal_eval(value)
@@ -401,11 +412,22 @@ def _observed_routes(receipt, scratch, manifest, runner, nonpassing=False, modul
         if not isinstance(path, str): return None
         if not path.startswith('/') and directory is not None:
             match = re.search(r'<([^>]+)>', directory)
-            if match: path = posixpath.normpath(posixpath.join(match[1], path))
+            if match: path = posixpath.join(match[1], path)
         return path
+    def opaque(path):
+        # Magic links the kernel follows to any file: /proc and /dev/fd spellings.
+        return re.match(r'/+(?:proc|dev/+(?:fd|stdin|stdout|stderr))(?:/|$)', path) is not None
     def path_argument(value, directory=None):
+        # Names resolve in the kernel: '//' is '/', and '..' after a component
+        # may leave a symlink, so only the part after the last '..' is known.
         path = resolve(value, directory)
         if path is None: dirty.update(files); return
+        parts = path.split('/')
+        if '..' in parts: path = '/'.join(parts[len(parts) - parts[::-1].index('..'):]) or '.'
+        elif path.startswith('/'): path = posixpath.normpath('/' + path.lstrip('/'))
+        bare = posixpath.normpath(path)
+        while bare.startswith('../'): bare = bare[3:]
+        if opaque('/' + bare.lstrip('/')) or path.startswith('/') and inside(scratch, path): dirty.update(files); return
         taint(path)
     def audited_symlink(args):
         # Only the exact shape documented above; anything else keeps the old taint.
@@ -524,6 +546,10 @@ def _observed_routes(receipt, scratch, manifest, runner, nonpassing=False, modul
                         all_read_paths.add(actual); thread_reads.setdefault(tid, set()).add(actual)
                     event_id = descriptors.get((tid, int(source[1])))
                     if event_id and actual == events[event_id]['target']: reads.add(event_id)
+        if re.match(r'f?chdir\(', line):  # later relative names start there
+            args = arguments(line); fd = re.fullmatch(r'\d+<([^<>]+)>', args[0]) if args else None
+            where = fd[1] if fd else resolve(args[0]) if args and not line.startswith('f') else None
+            if where is None or {'proc', 'dev'} & set(posixpath.normpath(where).split('/')): dirty.update(files)
         closed = re.match(r'close\((\d+).*\)\s+=\s+0\s*$', line)
         if closed: descriptors.pop((tid, int(closed[1])), None)
         path_change = bool(re.match(r'(?:creat|truncate|ftruncate|unlink|unlinkat|rmdir|rename|renameat|renameat2|link|linkat|symlink|symlinkat)\(', line))
@@ -566,7 +592,7 @@ def _observed_routes(receipt, scratch, manifest, runner, nonpassing=False, modul
             elif name == 'unlinkat' and len(args) >= 2:
                 path_argument(args[1], args[0])
             elif name == 'symlinkat' and len(args) >= 3:
-                path_argument(args[2], args[1])
+                path_argument(args[0]); path_argument(args[2], args[1])
             elif name in ('rename', 'link', 'symlink') and len(args) >= 2:
                 path_argument(args[0]); path_argument(args[1])
             elif name != 'ftruncate':
@@ -965,6 +991,72 @@ def readonly_symlink_controls():
         print('readonly symlink controls: positive; write/rename-inside/alias-escape/hardlink/leftover runs; ' + '/'.join(refusals) + '; default-off PASS')
 
 
+def path_spelling_controls():
+    """Default (flag-off) path checks: each spelling the kernel resolves past
+    lexical normalization taints the committed file it reaches (H1008)."""
+    with tempfile.TemporaryDirectory(prefix='tests-used-spelling-controls-') as directory:
+        base = Path(directory); root = (base / 'repo').resolve(); root.mkdir()
+        head = ('import os, shutil, tempfile\nfrom pathlib import Path\nroot = Path(__file__).resolve().parents[1]\n'
+                'tmp = Path(tempfile.mkdtemp(dir=root.parent)); (tmp / "a").mkdir(); x = str(root / "tests/x.txt")\n'
+                'assert Path("tests/x.txt").read_text() == "measured\\n"\n'
+                'def away(name): os.rename(name, tmp / "saved"); os.rename(tmp / "saved", name)\n')
+        bodies = {
+            'positive': 'away(str(tmp / "a"))\n',
+            'symlinkat': 'fd = os.open(tmp, os.O_RDONLY)\nos.symlink(str(root / "tests"), "s", dir_fd=fd); os.close(fd)\naway(str(tmp / "s" / "x.txt"))\n',
+            'dotdot': 'os.symlink(root / "tests/sub", tmp / "a" / "link")\naway(str(tmp / "a" / "link" / ".." / "x.txt"))\n',
+            'double_slash': 'away("/" + x)\n',
+            'proc_root': 'away("/proc/self/root" + x)\n',
+        }
+        sources = {'tests/x.txt': 'measured\n', 'tests/sub/keep.txt': 'keep\n'}
+        for name, body in bodies.items(): sources['tests/' + name + '.py'] = head + body + 'shutil.rmtree(tmp)\n'
+        for path, content in sources.items():
+            target = root / path; target.parent.mkdir(parents=True, exist_ok=True); target.write_text(content)
+        def git(*args): return subprocess.check_output(['git', '-C', str(root), '-c', 'core.hooksPath=/dev/null', *args])
+        git('init', '-q'); git('add', '.')
+        git('-c', 'user.name=Control', '-c', 'user.email=control@example.invalid', 'commit', '-qm', 'spelling controls')
+        revision = git('rev-parse', 'HEAD').decode().strip()
+        manifest = {'measured_revision': revision, 'files': {p: {
+            'blob': git('rev-parse', revision + ':' + p).decode().strip(),
+            'sha256': hashlib.sha256((root / p).read_bytes()).hexdigest()} for p in sources}}
+        manifest_path = base / 'manifest.json'; manifest_path.write_text(json.dumps(manifest))
+        receipts = {}
+        for name in bodies:
+            runner = 'tests/' + name + '.py'
+            receipt = run(['python3', '-B', runner], root, manifest_path, base / 'out' / name, 15)
+            assert receipt['exit'] == 0, (name, Path(receipt['stdout']).read_text())
+            targets = {r['target'] for r in observed_routes(receipt, root, manifest, runner)}
+            assert ('tests/x.txt' in targets) == (name == 'positive'), (name, targets)
+            receipts[name] = receipt
+        receipt = receipts['positive']; runner = 'tests/positive.py'
+        syscalls = Path(str(receipt['events']).removesuffix('.events.jsonl') + '.syscalls')
+        lines = syscalls.read_text().splitlines(); tid = re.match(r'^(\d+)', lines[-1])[1]
+        def certified(inject):
+            stem = base / 'variants' / str(len(list(base.glob('variants/*.syscalls')))); stem.parent.mkdir(exist_ok=True)
+            Path(str(stem) + '.syscalls').write_text('\n'.join(lines[:-1] + [tid + '  ' + i for i in inject] + lines[-1:]) + '\n')
+            shutil.copyfile(receipt['events'], str(stem) + '.events.jsonl')
+            return 'tests/x.txt' in {r['target'] for r in observed_routes(dict(receipt, events=str(stem) + '.events.jsonl'), root, manifest, runner)}
+        x = str(root / 'tests/x.txt')
+        assert certified([]) and certified(['unlink("/elsewhere/y.txt") = 0', 'rmdir("build/tests") = 0'])
+        refusals = {
+            'symlinkat-relative-target': ['symlinkat("../tests", AT_FDCWD</elsewhere>, "s") = 0'],
+            'dotdot-dirfd-name': ['unlinkat(AT_FDCWD</elsewhere>, "link/../x.txt", 0) = 0'],
+            'double-slash-dirfd': ['truncate(' + json.dumps('//' + x.lstrip('/')) + ', 0) = 0'],
+            'dot-proc-fd': ['truncate("/./proc/self/fd/3", 0) = 0'],
+            'dotdot-proc-fd': ['truncate("/a/../proc/self/fd/3", 0) = 0'],
+            'dev-fd': ['truncate("/dev/fd/3", 0) = 0'],
+            'chdir-proc-fd': ['chdir("/proc/self/fd") = 0', 'truncate("3", 0) = 0'],
+            'chdir-dev': ['chdir("/./dev") = 0', 'truncate("fd/3", 0) = 0'],
+            'chdir-relative-proc': ['chdir("proc/self/fd") = 0', 'truncate("3", 0) = 0'],
+            'fchdir-proc-fd': ['fchdir(7</proc/99/fd>) = 0', 'truncate("3", 0) = 0'],
+            'dotdot-relative-name': ['unlink("a/link/../x.txt") = 0'],
+            'relative-enclosing-name': ['unlink(' + json.dumps(x.lstrip('/')) + ') = 0'],
+            'rename-scratch-ancestor': ['rename(' + json.dumps(str(root.parent)) + ', "/elsewhere/moved") = 0'],
+            'relative-scratch-ancestor': ['rename(' + json.dumps(root.parent.name) + ', "moved") = 0'],
+        }
+        for label, inject in refusals.items(): assert not certified(inject), label
+        print('path spelling controls: positive; symlinkat/dotdot/double-slash/proc-root runs; ' + '/'.join(refusals) + ' PASS')
+
+
 def self_test():
     with tempfile.TemporaryDirectory(prefix='tests-used-trace-controls-') as directory:
         base = Path(directory); root = base / 'repo'; root.mkdir()
@@ -1110,6 +1202,7 @@ def self_test():
     kernel_copy_boundary_controls()
     module_entry_boundary_controls()
     readonly_symlink_controls()
+    path_spelling_controls()
     print('trace self-test: measured inputs, forged manifest, index flags, bytecode, actual read/fd correlation, historical/synthetic code, link aliases, directory replacement and command binding PASS')
 
 

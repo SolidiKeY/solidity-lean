@@ -1,4 +1,8 @@
 <!-- Generated from docs/module-map/unchecked-arithmetic.d/ by scripts/coord-tools/fragments.sh; edit the fragments there, not this file. -->
+| `Correctness/Lowering/Total/Main.lean` | The loop contract composed with the production and family theorems: it is interpretation faithfulness and `Residual` (unproved); `production_correct` derives the consumer from `Residual` and `FullDomain`. |
+| `Correctness/Lowering/Total/Decode.lean` | The stage-1 raw-to-Source decoder `Decode.decode`: a chosen Source spelling of the raw input, then Source inference and resolution; every other input is a gap. |
+| `Correctness/Lowering/Total/Spells.lean` | The inductive spelling relation `Spells`; the decoder is sound for it and complete if Source inference is (`InferComplete`, unproved). |
+| `Correctness/Lowering/Total/Boundary.lean` | The stage-1 boundary: observation policies, general simulation, allocation trace, state relation `loopRel`, and `loopResidualStage1_iff` (four obligations left, unproved; known defects listed). |
 | `Correctness/Lowering/Total/Contract.lean` | Universal loop-production candidate and explicit semantic coverage obligations. |
 | `Correctness/Lowering/Total/Relation.lean` | Finite lowering derivations and caller-preserving fresh-name equivalence. |
 | `Correctness/Lowering/Total/Coverage.lean` | `LowersTo` is functional, and its exact raw output on each loop-family input template. |
@@ -7,6 +11,8 @@
 | `Correctness/Sim/Lang.lean` | Instantiate the simulation framework with the existing Lang adapter. |
 | `Correctness/Sim/Observation.lean` | Observation diagrams over the roadmap's unchanged prefix order. |
 | `Correctness/Sim/Steps.lean` | Finite transition closures and reusable simulation diagrams. |
+| `Correctness/Lowering/Sim/Session/Source.lean` | A small-step presentation of the Source session semantics with run coverage and realization. |
+| `Examples/Lowering/Sim/Session/Source.lean` | The source session machine on two small programs: coverage, realization and checked paths. |
 | `Correctness/Lowering/Sim/Session/Target.lean` | The intrinsic session run's machine covers and realizes it: `covers` (every bound's run prefix is reached in the machine with the bound's failures), `realizes` (every reachable state is a `Prefix.Le`-prefix of the run at a bound with the same failures), and their readings `covers_noFail` / `realizes_noFail` in the machine without failures. |
 | `Correctness/Lowering/Sim/Session/Target/Machine.lean` | The intrinsic session run as a `Sim.Machine` per session world, environment and failures: boundary states (history, typed world, actions issued, pending deployment/action/idle/stopped), one step per deployment or action, `observe` the prefix so far; `machine_congr`, front-grown `Path`. |
 | `Examples/Lowering/Sim/Session/Target.lean` | One-contract checks: the machine reaches the deployment and request prefix, and the final outcome once idle; the state after the deployment is realized below a run without resource failure. |
