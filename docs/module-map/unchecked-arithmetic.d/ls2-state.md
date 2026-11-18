@@ -1,0 +1,2 @@
+| `Correctness/Lowering/Sim/State/Calls.lean` | The call conjunct of `StateCases` is the whole per-run statement: at `freeRec` (`RecSim` with no run to check, a free `callValue`) every run is an output of `elabCallRetWith` (`freeRec_ran`), so `StateCases` alone implies `diagram.Simulates` (`simulates_of_state_cases`). |
+| `Examples/Lowering/Sim/State.lean` | Uses of the state cases: the call arm at `freeRec`, `SiteSim` of every run from `StateCases`, and `diagram.Simulates` from `StateCases` alone. |
