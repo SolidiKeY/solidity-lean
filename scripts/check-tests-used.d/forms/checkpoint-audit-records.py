@@ -9,7 +9,9 @@
 #   {'kind': 'checkpoint-audit-record', 'path': P, 'input_revision': C (the checkpoint), 'source_blob': blob of P,
 #    'command': ['python3', '-B', V], 'validator': {'path': V, 'blob', 'entry_line', 'invocation_line'},
 #    'audit': {'path': A, 'blob'}, 'provenance': {'reader': V or A, 'line'}, 'purpose': text}
-# P is V (provenance: V at its entry line), A (V at its invocation line) or a path read by V or A at the line.
+# P is A (provenance: V at its invocation line) or a path read by V or A at the line, never V itself: a root of V
+# with command `python3 -B V` would have the shape of a current entry root, which late roles accept (roles.py
+# _entry_root and the import role's importer check), so a record root never has command `python3 -B P`.
 # V's invocation is subprocess.<run>(['python3', A], cwd=ROOT) and a read is (ROOT / P).read_text|read_bytes(), ROOT
 # bound once to Path(__file__).resolve().parents[k] of the reader. Lines are provenance by position: whether a line
 # ran at the checkpoint is not decided. A record never displaces another root of its path, nor a definition of the
@@ -131,8 +133,9 @@ def checkpoint_audit_root(classifier, graph, catalog, entry):
     audit blobs are those paths' objects both at C and now (a changed blob makes
     the record stale; a blob C does not hold is an error). The validator has its
     top-level default entry and literally invokes the audit; the target is the
-    validator, the audit, or a literal repository-root read of either. Neither
-    is run here: historical provenance only, never a validated runner.
+    audit or a literal repository-root read of either, never the validator, so
+    the root is never shaped like a `python3 -B P` entry root of its path.
+    Neither is run here: historical provenance only, never a validated runner.
     """
     repo = graph.repo; role = 'checkpoint audit record'
     required = {'path', 'input_revision', 'source_blob', 'command', 'kind', 'validator', 'audit', 'provenance', 'purpose'}
@@ -150,7 +153,8 @@ def checkpoint_audit_root(classifier, graph, catalog, entry):
         raise ValueError('conflicting standalone definitions: ' + p)
     paths = (v['path'], a['path'])
     if (entry['command'] != ['python3', '-B', v['path']] or len(set(paths)) != 2 or not all(q.endswith('.py') for q in paths)
-            or doc['reader'] not in paths or not p.startswith(classifier['SCOPE']) or _checkpoint_shared('_clean')(p) != p):
+            or doc['reader'] not in paths or not p.startswith(classifier['SCOPE']) or _checkpoint_shared('_clean')(p) != p
+            or p == v['path']):
         raise ValueError('unsupported ' + role + ' invocation: ' + p)
     pins = sorted({(p, blob), (v['path'], v['blob']), (a['path'], a['blob'])})
     if len({q for q, _ in pins}) != len(pins): raise ValueError('inconsistent ' + role + ' blobs: ' + p)
@@ -166,13 +170,13 @@ def checkpoint_audit_root(classifier, graph, catalog, entry):
     if not checkpoint_invocation(repo.texts[v['path']], v['path'], a['path'], v['invocation_line']):
         raise ValueError(role + ' validator does not invoke its audit: ' + v['path'])
     reader, line = doc['reader'], doc['line']
-    if p == v['path']: held = reader == p and line == v['entry_line']
-    elif p == a['path']: held = reader == v['path'] and line == v['invocation_line']
+    if p == a['path']: held = reader == v['path'] and line == v['invocation_line']
     else: held = checkpoint_read(repo.texts[reader], reader, p, line)
     if not held: raise ValueError(role + ' provenance does not name its target: ' + reader + ':' + str(line))
     # A path some other root already holds keeps that root's chain: the record never displaces stronger evidence.
     if any(r['path'] == p for r in graph.roots.values()): return
     identity = CHECKPOINT_AUDIT_PREFIX + p + '@' + checkpoint
+    if shlex.join(entry['command']) == shlex.join(['python3', '-B', p]): raise ValueError(role + ' would be an entry root: ' + p)
     graph.root(p, 'historical checkpoint audit record', shlex.join(entry['command']), reader, line, root_id=identity)
     if identity not in graph.roots: return
     graph.roots[identity].update({'source_only': True, 'checkpoint_audit_record': True, 'source_blob': blob, 'purpose': entry['purpose'],
@@ -217,13 +221,18 @@ def checkpoint_audit_controls(env):
         assert CHECKPOINT_AUDIT_KIND in _checkpoint_shared('SOURCE_ROLE_KINDS') and CHECKPOINT_AUDIT_KIND not in _checkpoint_shared('LATE_SOURCE_ROLE_KINDS')
         base_model, base = run(later)
         assert all(base[q]['class'] != 'keep' for q in (T, O))
-        positives = ((T, V, 6), (T, A, 4), (A, V, 8), (V, V, entry_line))
+        positives = ((T, V, 6), (T, A, 4), (A, V, 8))
+        entry_root = _checkpoint_shared('_entry_root')
+        class Roots:  # the late roles' view of the graph: its roots alone
+            def __init__(self, roots): self.roots = roots
         for path, reader, line in positives:
             model, rows = run(later, standalone=[record(path, reader, line)])
             root_row = model['entry_points'][CHECKPOINT_AUDIT_PREFIX + path + '@' + C]
             assert rows[path]['class'] == 'keep' and rows[path]['runner_chain']['edges'] == [], path
             assert root_row['source_only'] and root_row['validation_at_measured_revision']['status'] == 'unavailable'
             assert root_row['location'] == reader + ':' + str(line) and root_row['checkpoint'] == C
+            # Late roles (python import importers, program-form drivers, source dependency consumers) find no entry root.
+            assert root_row['command'] != shlex.join(['python3', '-B', path]) and not entry_root(Roots({0: root_row}), path, blob(later, path))
             # Source-only provenance of the one target: no other record changes and no other root appears.
             assert all(canonical(r) == canonical(base[q]) for q, r in rows.items() if q != path), path
             assert set(model['entry_points']) - set(base_model['entry_points']) == {CHECKPOINT_AUDIT_PREFIX + path + '@' + C}
@@ -249,21 +258,24 @@ def checkpoint_audit_controls(env):
         for line in (7, 13, 15):  # a commented invocation, another program's, a foreign working directory
             rejected(later, 'does not invoke its audit', standalone=[record(T, A, 4, validator=dict(good['validator'], invocation_line=line))])
         rejected(later, 'lacks its default top-level entry', standalone=[record(T, A, 4, validator=dict(good['validator'], entry_line=6))])
-        for path, reader, line in ((O, A, 5), (O, A, 6), (O, A, 7), (T, V, 7), (T, A, 5), (A, A, 8), (V, A, entry_line)):
+        for path, reader, line in ((O, A, 5), (O, A, 6), (O, A, 7), (T, V, 7), (T, A, 5), (A, A, 8)):
             rejected(later, 'does not name its target', standalone=[record(path, reader, line)])
         rejected(later, 'unsupported checkpoint audit record invocation', standalone=[record(T, A, 4, command=['python3', '-B', A])])
         rejected(later, 'unsupported checkpoint audit record invocation', standalone=[record(T, 'tests/cpa/x.py', 4)])
+        for reader, line in ((V, entry_line), (A, entry_line)):  # the validator itself is never a record target
+            rejected(later, 'unsupported checkpoint audit record invocation', standalone=[record(V, reader, line)])
         rejected(later, 'invalid checkpoint audit record definition', standalone=[dict(good, entry_line=4)])
         rejected(later, 'invalid checkpoint audit record definition', standalone=[record(T, A, 4, purpose=' ')])
         rejected(later, 'conflicting standalone definitions', standalone=[good, dict(good, purpose='Other.')])
         rejected(later, 'invalid checkpoint audit record definition', standalone=[record(T, A, True)])
-        only = lambda revision: {'path': V, 'input_revision': revision, 'source_blob': blob(later, V), 'command': ['python3', '-B', V],
-                                 'kind': _checkpoint_shared('SOURCE_ONLY_KIND'), 'entry_line': entry_line, 'purpose': 'Synthetic source-only validator.'}
-        rejected(later, 'conflicting standalone definitions', standalone=[only(C), record(V, V, entry_line)])
+        only = lambda revision: {'path': A, 'input_revision': revision, 'source_blob': blob(later, A), 'command': ['python3', '-B', A],
+                                 'kind': _checkpoint_shared('SOURCE_ONLY_KIND'), 'entry_line': max(classifier['entrypoint_lines'](audit.encode())),
+                                 'purpose': 'Synthetic source-only audit.'}
+        rejected(later, 'conflicting standalone definitions', standalone=[only(C), record(A, V, 8)])
         # A current definition of the path supersedes the record; a path another root holds keeps that root.
         for revision in (later.ref, after.ref):
-            model, rows = run(later, standalone=[only(revision), record(V, V, entry_line)])
-            assert rows[V]['class'] == 'keep' and not any(k.startswith(CHECKPOINT_AUDIT_PREFIX) for k in model['entry_points']), revision
+            model, rows = run(later, standalone=[only(revision), record(A, V, 8)])
+            assert rows[A]['class'] == 'keep' and not any(k.startswith(CHECKPOINT_AUDIT_PREFIX) for k in model['entry_points']), revision
         # A changed validator makes the record stale; a rebound repository root names nothing.
         _, rows = run(commit({V: validator + '# changed\n'}, 'checkpoint audit changed validator'), standalone=[good])
         assert rows[T]['class'] != 'keep'
