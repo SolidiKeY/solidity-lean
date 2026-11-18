@@ -49,10 +49,10 @@
 # #print axioms) and roadmap-v16/CalculusControls.lean (bare `#print axioms`
 # without #guard_msgs, so W finds no pin), and every other B3 source (no pin).
 import json, posixpath, shlex
-(CONSUMER_HANDLERS, FORM_CONTROLS, _check_lines, _current, _frames_current, _js_code, _js_destructured, _js_imported, _js_line,
- _js_mask, _node_import, _observe, _plain_lines, register_consumer_section) = (globals()[name] for name in (
-    'CONSUMER_HANDLERS', 'FORM_CONTROLS', '_check_lines', '_current', '_frames_current', '_js_code', '_js_destructured', '_js_imported',
-    '_js_line', '_js_mask', '_node_import', '_observe', '_plain_lines', 'register_consumer_section'))
+(FORM_CONTROLS, _check_lines, _current, _frames_current, _js_code, _js_destructured, _js_imported,
+ _js_mask, _node_import, _observe, _plain_lines, canonical, register_consumer_section) = (globals()[name] for name in (
+    'FORM_CONTROLS', '_check_lines', '_current', '_frames_current', '_js_code', '_js_destructured', '_js_imported',
+    '_js_mask', '_node_import', '_observe', '_plain_lines', 'canonical', 'register_consumer_section'))
 AXPIN_SECTION = 'axiom_pin_walker_reads'
 AXPIN_FORM = 'node-axiom-pins-walk'
 AXPIN_OPERATION = 'Node readFileSync of each .lean file the CI axiom-pin walker collect() yields, compared with the recorded pin inventory'
