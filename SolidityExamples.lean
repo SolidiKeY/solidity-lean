@@ -128,6 +128,7 @@ import Solidity.Examples.DecisionWrittenMemory
 import Solidity.Examples.DeclarationReduction
 import Solidity.Examples.DependentReduction
 import Solidity.Examples.Docs.ProseCalibrated.Allowance
+import Solidity.Examples.ElabTotal.Context
 import Solidity.Examples.ElabTotal.Guard
 import Solidity.Examples.ElabTotal.Measure
 import Solidity.Examples.ElabTotal.Stmts
@@ -201,6 +202,7 @@ import Solidity.Examples.Lowering.Sim.Session.Binding
 import Solidity.Examples.Lowering.Sim.Session.Forward
 import Solidity.Examples.Lowering.Sim.Session.Source
 import Solidity.Examples.Lowering.Sim.Session.Target
+import Solidity.Examples.Lowering.Sim.State
 import Solidity.Examples.MemoryFloor
 import Solidity.Examples.MemoryInstantiation
 import Solidity.Examples.MemoryNegativeCountermodel
@@ -447,5 +449,7 @@ import Solidity.Examples.YulLayout.InstancesStorage
 import Solidity.Examples.YulLayout.LawsRead
 import Solidity.Examples.YulLayout.LawsWrite
 import Solidity.Examples.YulLayout.LawsWriteRead
+import Solidity.Examples.YulLayout.PilotScalar.Frame
+import Solidity.Examples.YulLayout.PilotScalar.Path
 import Solidity.Examples.YulLayout.ScalarPilot
 import Solidity.Examples.YulLayout.View
