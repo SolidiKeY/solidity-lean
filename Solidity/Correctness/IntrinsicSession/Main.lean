@@ -17,32 +17,37 @@ imports a Goals module, which the layers gate forbids for core modules.
 
 namespace Solidity.Semantics.IntrinsicSession
 
+open Solidity.Roadmap (Fixed)
+
+/-- Every law of `IntrinsicSession.Laws` at `spec F`, `view F`, field by field. -/
+theorem laws (F : Fixed) : Solidity.Goals.IntrinsicSession.Laws F (spec F) (view F) :=
+  { fixed := Laws.fixed F
+    precompiles := Laws.precompiles F
+    this := Laws.this F
+    directed := Laws.directed F
+    worlds_consistent := Laws.worlds_consistent F
+    hashed_consistent := Laws.hashed_consistent F
+    slotHashed_sub := Laws.slotHashed_sub F
+    final_last := Laws.final_last F
+    answered := Laws.answered F
+    typed_resume := Laws.typed_resume F
+    initial_code := Laws.initial_code F
+    worlds_code := Laws.worlds_code F
+    listed_resumes := Laws.listed_resumes F
+    stored_hashed := Laws.stored_hashed F
+    starts := Laws.starts F
+    boundary_observed := Laws.boundary_observed F
+    boundary_code := Laws.boundary_code F
+    listed_boundary := Laws.listed_boundary F
+    idle := Laws.idle F
+    dropped := Laws.dropped F
+    credited := Laws.credited F
+    transacts := Laws.transacts F
+    resumes := Laws.resumes F
+    deploys := Laws.deploys F }
+
 /-- **The concrete intrinsic session semantics satisfies its laws.** -/
 theorem session_semantics_correct : Solidity.Goals.intrinsicSessionSemantics := fun F =>
-  ⟨spec F, view F,
-    { fixed := Laws.fixed F
-      precompiles := Laws.precompiles F
-      this := Laws.this F
-      directed := Laws.directed F
-      worlds_consistent := Laws.worlds_consistent F
-      hashed_consistent := Laws.hashed_consistent F
-      slotHashed_sub := Laws.slotHashed_sub F
-      final_last := Laws.final_last F
-      answered := Laws.answered F
-      typed_resume := Laws.typed_resume F
-      initial_code := Laws.initial_code F
-      worlds_code := Laws.worlds_code F
-      listed_resumes := Laws.listed_resumes F
-      stored_hashed := Laws.stored_hashed F
-      starts := Laws.starts F
-      boundary_observed := Laws.boundary_observed F
-      boundary_code := Laws.boundary_code F
-      listed_boundary := Laws.listed_boundary F
-      idle := Laws.idle F
-      dropped := Laws.dropped F
-      credited := Laws.credited F
-      transacts := Laws.transacts F
-      resumes := Laws.resumes F
-      deploys := Laws.deploys F }⟩
+  ⟨spec F, view F, laws F⟩
 
 end Solidity.Semantics.IntrinsicSession
