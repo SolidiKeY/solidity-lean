@@ -12,14 +12,14 @@ def sourceConcrete (glob : Solidity.Source.Glob Solidity.Yul.Checks.LocalDefault
  (locals : Solidity.Source.Locals Solidity.Yul.Checks.LocalDefaultNoGuard.Fixture.env.layout Solidity.Yul.Checks.LocalDefaultNoGuard.Fixture.ctx.tys) (world : Solidity.Source.St Solidity.Yul.Checks.LocalDefaultNoGuard.Fixture.env) :=
  Solidity.Yul.LocalLoopFailure.sourceNoPostTimeout Solidity.Yul.Checks.LocalDefaultNoGuard.Fixture.env [] false false Solidity.Yul.Checks.LocalDefaultNoGuard.Fixture.ctx.tys Solidity.Yul.Checks.LocalDefaultNoGuard.Out Solidity.Yul.Checks.LocalDefaultNoGuard.items Solidity.Yul.Checks.LocalDefaultNoGuard.proof glob frame fuel nps ph locals world
 
-theorem omittedTimeout : Solidity.Yul.LocalDefaultNoGuard.runNoPost Solidity.Yul.Checks.LocalDefaultNoGuard.proof 9 Solidity.Yul.Checks.LocalDefaultNoGuard.initial = .halted .timeout Solidity.Yul.Checks.LocalDefaultNoGuard.afterFalsePostBody := by
-  rfl
+theorem omittedTimeout : Solidity.Yul.LocalDefaultNoGuard.runNoPost Solidity.Yul.Checks.LocalDefaultNoGuard.proof 9 Solidity.Yul.Checks.LocalDefaultNoGuard.initial = .halted .timeout Solidity.Yul.Checks.LocalDefaultNoGuard.afterFalsePostBody :=
+  Solidity.Yul.Checks.LocalDefaultNoGuard.withoutPost
 
-theorem guardedCompletion : Solidity.Yul.LocalDefaultWhile.run Solidity.Yul.Checks.LocalDefaultPostIter.readTest Solidity.Yul.Checks.LocalDefaultNoGuard.proof 9 Solidity.Yul.Checks.LocalDefaultNoGuard.initial = .normal (Solidity.Yul.Checks.LocalDefaultNoGuard.assigned false) := by
-  rfl
+theorem guardedCompletion : Solidity.Yul.LocalDefaultWhile.run Solidity.Yul.Checks.LocalDefaultPostIter.readTest Solidity.Yul.Checks.LocalDefaultNoGuard.proof 9 Solidity.Yul.Checks.LocalDefaultNoGuard.initial = .normal (Solidity.Yul.Checks.LocalDefaultNoGuard.assigned false) :=
+  Solidity.Yul.Checks.LocalDefaultWhile.completion
 
-theorem falseGuard : Solidity.Yul.LocalDefaultWhile.run Solidity.Yul.Checks.LocalDefaultPostIter.stopTest Solidity.Yul.Checks.LocalDefaultNoGuard.proof 2 Solidity.Yul.Checks.LocalDefaultNoGuard.initial = .normal Solidity.Yul.Checks.LocalDefaultNoGuard.initial := by
-  rfl
+theorem falseGuard : Solidity.Yul.LocalDefaultWhile.run Solidity.Yul.Checks.LocalDefaultPostIter.stopTest Solidity.Yul.Checks.LocalDefaultNoGuard.proof 2 Solidity.Yul.Checks.LocalDefaultNoGuard.initial = .normal Solidity.Yul.Checks.LocalDefaultNoGuard.initial :=
+  Solidity.Yul.Checks.LocalDefaultWhile.stopUnchanged
 
 theorem retainedScope : Solidity.Yul.LocalDefaultItems.blockRun Solidity.Yul.Checks.LocalDefaultNoGuard.proof 7 Solidity.Yul.Checks.LocalDefaultNoGuard.initial = .halted .timeout Solidity.Yul.Checks.LocalDefaultItems.bodyState := by
   rfl

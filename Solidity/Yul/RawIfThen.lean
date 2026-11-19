@@ -109,9 +109,6 @@ theorem correct {ctx returns modifier control condition yes}
         RawCoherent.capture state (LocalState.ofClean (locals,world))
       have nextSame : RawCoherent.coherent nextFrame = true :=
         RawCoherent.capture_coherent state locals world
-      have nextClean : nextFrame.clean = locals := by
-        simp only [nextFrame, RawCoherent.capture, LocalState.ofClean,
-          LocalValues.clean_ofClean, Option.getD_some]
       cases tag with
       | error halt =>
         change RawCondition.eval test fuel state = (.error halt,nextFrame) at conditionRun
@@ -125,22 +122,14 @@ theorem correct {ctx returns modifier control condition yes}
             cases choice with
             | false =>
               change RawCondition.eval test fuel state = (.ok false,nextFrame) at conditionRun
-              have sourceCondition :
-                  (Solidity.Source.evalE glob frame fuel condition).run (state.clean,state.world) =
-                    (.ok (.val (.bool false)),(nextFrame.clean,nextFrame.world)) := by
-                rw [nextClean]
-                exact actual
+              have sourceCondition := RawCoherent.capture_result state actual
               simp only [run, conditionRun, Bool.false_eq_true, if_false]
               exact ⟨nextSame, source_false condition yes glob frame fuel nps ph
                 state nextFrame sourceCondition⟩
             | true =>
               change RawCondition.eval test fuel state = (.ok true,nextFrame) at conditionRun
               have branch := RawSequence.block_correct one glob frame fuel nps ph nextFrame nextSame
-              have sourceCondition :
-                  (Solidity.Source.evalE glob frame fuel condition).run (state.clean,state.world) =
-                    (.ok (.val (.bool true)),(nextFrame.clean,nextFrame.world)) := by
-                rw [nextClean]
-                exact actual
+              have sourceCondition := RawCoherent.capture_result state actual
               have selected := source_true condition yes glob frame fuel nps ph
                 state nextFrame (RawSequence.block one fuel nextFrame) sourceCondition branch.2
               simp only [run, conditionRun, if_true]

@@ -1,3 +1,4 @@
+import Solidity.Yul.Views.HeapEnumerationControls
 import Solidity.Yul.Adapters.FrameHeap
 import Solidity.Yul.Adapters.ImageIdentity
 import Solidity.Yul.Views.MixedHeapControls
@@ -25,28 +26,12 @@ private theorem room (pipeline : Pipeline) : mixedPlacement.free.val≤(carrier 
   decide
 
 private theorem supported_entry (e : MixedHeapEntry mixedPlacement) (member : e∈mixedEntries) :
-    InventoryTypeSupported mixedEnv e.ty := by
-  simp only [mixedEntries,List.mem_cons,List.not_mem_nil,or_false] at member
-  rcases member with rfl | rfl | rfl | rfl | rfl | rfl
-  · trivial
-  · trivial
-  · exact Or.inl (Or.inr (Or.inl rfl))
-  · intro τ ht
-    change τ∈[.bool,.int .u256,.bytes .memory,.bytes .memory,mixedArrayTy] at ht
-    simp only [List.mem_cons,List.not_mem_nil,or_false] at ht
-    rcases ht with rfl | rfl | rfl | rfl | rfl
-    · exact Or.inl (Or.inl rfl)
-    · exact Or.inl (Or.inr (Or.inl rfl))
-    all_goals exact Or.inl (Or.inr (Or.inr rfl))
-  · exact Or.inl (Or.inr (Or.inr rfl))
-  · trivial
+    InventoryTypeSupported mixedEnv e.ty :=
+  inventory_mixed_support e member
+
 private theorem supported (a : Nat) (τ : Source.STy) (d : Source.Data mixedLayout τ)
-    (found : mixedHeap.get a=some ⟨τ,d⟩) : InventoryTypeSupported mixedEnv τ := by
-  have present : (mixedHeap.cells a).isSome := by rw [show mixedHeap.cells a=some ⟨τ,d⟩ from found];rfl
-  obtain ⟨e,member,same⟩:=mixed_coverage a present
-  have eq:=Option.some.inj (found.symm.trans (same ▸ e.found))
-  cases eq
-  exact supported_entry e member
+    (found : mixedHeap.get a=some ⟨τ,d⟩) : InventoryTypeSupported mixedEnv τ :=
+  generated_mixed_types_supported a τ d found
 
 /-- No supplied entry list/view/inverse: computed from actual owner heap and
 its real Placement, including structs, arrays and shared child pointers. -/

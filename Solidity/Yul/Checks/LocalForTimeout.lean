@@ -24,19 +24,16 @@ theorem zeroCaller : ∀ (world : Solidity.Source.St Solidity.Yul.Checks.LocalFo
 
 
 theorem retainedCounter : ∀ (world : Solidity.Source.St Solidity.Yul.Checks.LocalForTimeout.env),
- Solidity.Yul.LocalBoolForNoGuard.runNoPost Solidity.Yul.Checks.LocalForTimeout.read Solidity.Yul.Checks.LocalForTimeout.body 8 (Solidity.Yul.Checks.LocalForTimeout.state (Solidity.Yul.Checks.LocalForTimeout.raw 2) world) = .halted .timeout (Solidity.Yul.Checks.LocalForTimeout.counterChanged world) := by
-  intro world; rfl
-
+ Solidity.Yul.LocalBoolForNoGuard.runNoPost Solidity.Yul.Checks.LocalForTimeout.read Solidity.Yul.Checks.LocalForTimeout.body 8 (Solidity.Yul.Checks.LocalForTimeout.state (Solidity.Yul.Checks.LocalForTimeout.raw 2) world) = .halted .timeout (Solidity.Yul.Checks.LocalForTimeout.counterChanged world) :=
+  Solidity.Yul.Checks.LocalForNoGuardFailure.counterPrefix
 
 theorem postEffects : Solidity.Yul.LocalBoolForNoGuard.run Solidity.Yul.Checks.LocalBoolForNoGuard.yes Solidity.Yul.Checks.LocalBoolForNoGuard.failing Solidity.Yul.Checks.LocalBoolForNoGuard.proof 8 Solidity.Yul.Checks.LocalBoolForNoGuard.initial =
- .halted .timeout Solidity.Yul.Checks.LocalBoolForNoGuard.postFailed := by
-  rfl
-
+ .halted .timeout Solidity.Yul.Checks.LocalBoolForNoGuard.postFailed :=
+  Solidity.Yul.Checks.LocalForNoGuardFailure.postFailurePrefix
 
 theorem presentGuardNormal : ∀ (world : Solidity.Source.St Solidity.Yul.Checks.LocalForTimeout.env),
- Solidity.Yul.LocalBoolFor.run Solidity.Yul.Checks.LocalForTimeout.read Solidity.Yul.Checks.LocalForTimeout.test Solidity.Yul.Checks.LocalForTimeout.body 9 (Solidity.Yul.Checks.LocalForTimeout.state (Solidity.Yul.Checks.LocalForTimeout.raw 2) world) = .normal (Solidity.Yul.Checks.LocalForTimeout.state Solidity.Yul.Checks.LocalForTimeout.cleanFalse world) := by
-  intro world; rfl
-
+ Solidity.Yul.LocalBoolFor.run Solidity.Yul.Checks.LocalForTimeout.read Solidity.Yul.Checks.LocalForTimeout.test Solidity.Yul.Checks.LocalForTimeout.body 9 (Solidity.Yul.Checks.LocalForTimeout.state (Solidity.Yul.Checks.LocalForTimeout.raw 2) world) = .normal (Solidity.Yul.Checks.LocalForTimeout.state Solidity.Yul.Checks.LocalForTimeout.cleanFalse world) :=
+  Solidity.Yul.Checks.LocalForNoPostHorizon.completedObserved
 
 theorem falseGuardNormal : ∀ (world : Solidity.Source.St Solidity.Yul.Checks.LocalForTimeout.env),
  Solidity.Yul.LocalBoolFor.run Solidity.Yul.Checks.LocalForTimeout.stop Solidity.Yul.Checks.LocalForTimeout.test Solidity.Yul.Checks.LocalForTimeout.body 3 (Solidity.Yul.Checks.LocalForTimeout.state (Solidity.Yul.Checks.LocalForTimeout.raw 2) world) = .normal (Solidity.Yul.Checks.LocalForTimeout.state (Solidity.Yul.Checks.LocalForTimeout.raw 2) world) := by

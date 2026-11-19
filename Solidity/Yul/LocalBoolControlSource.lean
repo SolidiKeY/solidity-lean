@@ -5,6 +5,18 @@ Child-execution premises below are real equations; the final clean composition
 must discharge them using actual source runs, never assume a preparation law. -/
 namespace Solidity.Yul.LocalBoolControl
 
+/-- Run an actual Source action under separate locals, retaining the reached
+world on both success and halt and exposing inner locals only on success. -/
+theorem source_sub_run {env Γ Δ α} {action : Solidity.Source.EM env Δ α}
+    {locals : Solidity.Source.Locals env.layout Δ}
+    (outer : Solidity.Source.Locals env.layout Γ) {world afterWorld : Solidity.Source.St env}
+    {after : Solidity.Source.Locals env.layout Δ} {result : Solidity.Source.R α}
+    (actual : action.run (locals, world) = (result, (after, afterWorld))) :
+    (Solidity.Source.EM.sub locals action).run (outer, world) =
+      (result.map (fun value => (value, after)), (outer, afterWorld)) := by
+  change action (locals, world) = _ at actual
+  cases result <;> simp only [Solidity.Source.EM.sub, ExceptT.run, ExceptT.mk, actual, Except.map]
+
 theorem source_and_error {env ctx} (left right : Solidity.Source.RExpr env ctx .bool)
     (glob : Solidity.Source.Glob env) (frame : Solidity.Source.Fr) (fuel : Nat)
     (state next : Solidity.Source.Locals env.layout ctx × Solidity.Source.St env)
