@@ -308,6 +308,85 @@ def elabStmtsPWith (stmt : RawStmt → ElabM (SProg C)) : List RawStmt → ElabM
     let Q ← elabStmtsPWith stmt ss
     pure (P ++ Q)
 
+/-- Two operands in evaluation order: hold the first read before the second
+operand's effects or explicit overflow guards. -/
+def hoistPairWith (hoist : RawExpr → ElabM (SProg C × RawExpr)) (first last : RawExpr) : ElabM (SProg C × RawExpr × RawExpr) := do
+  let (P, first) ← hoist first
+  let powerData := powerDataNeeded C (← read) (← ctx) last
+  -- Expanding a pure later power inserts failing guards too. Evaluate the
+  -- earlier operand before those guards, even when neither operand writes.
+  let (Pc, first) ← if powerData then captureExpr C first else captureBefore C first [last]
+  let (Q, last) ← if last.hasIncDec || last.hasIdxLen || last.hasCast || hasNarrow C (← ctx) last || powerData
+    then hoist last else pure ([], last)
+  pure (P ++ Pc ++ Q, first, last)
+
+/-- Binary operands follow the contract's schedule; their positions in the
+operator stay fixed, including for subtraction and comparisons. -/
+def hoistBinopWith (hoist : RawExpr → ElabM (SProg C × RawExpr)) (op : BinOp) (a b : RawExpr) : ElabM (SProg C × RawExpr) := do
+  let ltr := C.evalOrder.binaryLeftToRight
+  let (P, first, last) ← if ltr then hoistPairWith C hoist a b else hoistPairWith C hoist b a
+  pure (P, if ltr then .binop op first last else .binop op last first)
+
+/-- `hoist`, but an operation at the top is left to the statement, which
+checks its narrow width after the write (`narrowPost`). -/
+def hoistTopWith (hoist : RawExpr → ElabM (SProg C × RawExpr)) (e : RawExpr) : ElabM (SProg C × RawExpr) := do
+  let e ← e.foldConst
+  match e with
+  | .binop op a b => do
+    let sc ← read
+    -- Only the newly enabled unsigned self-frame route uses the expansion.
+    -- Signed, unchecked and explicit checking modes keep their old captures.
+    let selfPower := sc.selfFrame && !sc.unchecked && sc.overflow.isNone &&
+      (intTyOf C (← ctx) a).all (fun (p, _) => p == .uint)
+    if op.shortCircuits || (op == .pow && (sc.retainFailureData || selfPower)) then
+      hoist (.binop op a b)
+    else hoistBinopWith C hoist op a b
+  | .unop op a => do
+    let (P, a) ← hoist a
+    pure (P, .unop op a)
+  | e => hoist e
+
+/-- `l = r;`: the right-hand side's captures, then the target's; an operation at
+the top of `r` stays there when `l` is a variable (`hoistTop`). -/
+def hoistAssignWith (hoist : RawExpr → ElabM (SProg C × RawExpr)) (l r : RawExpr) : ElabM (SProg C × RawStmt) := do
+  let (P, r) ← if l matches .name _ then hoistTopWith C hoist r else hoist r
+  -- a storage reference into a memory object's member or element: copied
+  -- into a fresh memory object first, before the target's index (solkey's
+  -- `memoryIndexWriteStorageRefRhsCapture`: `T memory mv = sp; m[i] = mv;`)
+  let (P, r) ← do
+    let Γ ← nctx
+    -- the target's shape: its indices, which may have effects, read as `0`
+    let rec shape : RawExpr → RawExpr
+      | .index e _ => .index (shape e) (.num 0)
+      | .field e f => .field (shape e) f
+      | e => e
+    match synth C Γ (shape l), synth C Γ r with
+    | .ok (.mpath (.ref _) (.loc _)), .ok (.path (.ref R) sp) =>
+      match hm : (Ty.ref R).mapFree with
+      | true =>
+        let x ← captureRef C "mv" (.mem R) r
+        pure (P ++ [.of Γ (.declMem R x (some (.copy sp hm)) rfl hm)], .name (toString x))
+      | false => throw "a copy into memory of a type that holds a mapping"
+    | _, _ => pure (P, r)
+  let (Pc, r) ← if l.hasIncDec then captureExpr C r else pure ([], r)
+  let (Q, l) ← hoist l
+  pure (P ++ Pc ++ Q, .assign l r)
+
+/-- A call's arguments, left to right. A non-simple earlier value is held
+before hoisting any later argument: casts, fixed-length bases, narrow checks
+and modular guards can fail even when they do not modify the state. Bare
+names still use the effect-aware capture policy. Already held fresh values
+and literals need no additional capture (`captureExpr`). -/
+def hoistArgsWith (hoist : RawExpr → ElabM (SProg C × RawExpr)) : List RawExpr → ElabM (SProg C × List RawExpr)
+  | [] => pure ([], [])
+  | a :: as => do
+    let (P, a) ← hoist a
+    let (Pc, a) ← if !as.isEmpty && !(a matches .name _) then
+        captureExpr C a
+      else captureBefore C a as
+    let (Q, as) ← hoistArgsWith hoist as
+    pure (P ++ Pc ++ Q, a :: as)
+
 mutual
 
 /-- The recursive hooks, delayed until a producer is called. -/
@@ -321,10 +400,10 @@ partial def panicProducerRec (_ : Unit) : PanicProducerRec C where
 defined before it. -/
 partial def elabRecCore (_ : Unit) : ElabRec C where
   hoist := hoist
-  hoistBinop := hoistBinop
-  hoistTop := hoistTop
-  hoistAssign := hoistAssign
-  hoistArgs := hoistArgs
+  hoistBinop := hoistBinopWith C hoist
+  hoistTop := hoistTopWith C hoist
+  hoistAssign := hoistAssignWith C hoist
+  hoistArgs := hoistArgsWith C hoist
   abiMemBytes := abiMemBytes
   abiDecodeBytes := abiDecodeBytes
   abiEncode := @abiEncode
@@ -374,85 +453,6 @@ narrow check is captured where solc evaluates it, under a test of its own: `a
 `uint se; if (c) { se = a; } else { se = b; }`. -/
 partial def hoist (s0 : RawExpr) : ElabM (SProg C × RawExpr) :=
   hoistWith C (elabRecWithProducers C (elabRecCore ()) (panicProducerRec ())) s0
-
-/-- Two operands in evaluation order: hold the first read before the second
-operand's effects or explicit overflow guards. -/
-partial def hoistPair (first last : RawExpr) : ElabM (SProg C × RawExpr × RawExpr) := do
-  let (P, first) ← hoist first
-  let powerData := powerDataNeeded C (← read) (← ctx) last
-  -- Expanding a pure later power inserts failing guards too. Evaluate the
-  -- earlier operand before those guards, even when neither operand writes.
-  let (Pc, first) ← if powerData then captureExpr C first else captureBefore C first [last]
-  let (Q, last) ← if last.hasIncDec || last.hasIdxLen || last.hasCast || hasNarrow C (← ctx) last || powerData
-    then hoist last else pure ([], last)
-  pure (P ++ Pc ++ Q, first, last)
-
-/-- Binary operands follow the contract's schedule; their positions in the
-operator stay fixed, including for subtraction and comparisons. -/
-partial def hoistBinop (op : BinOp) (a b : RawExpr) : ElabM (SProg C × RawExpr) := do
-  let ltr := C.evalOrder.binaryLeftToRight
-  let (P, first, last) ← if ltr then hoistPair a b else hoistPair b a
-  pure (P, if ltr then .binop op first last else .binop op last first)
-
-/-- `hoist`, but an operation at the top is left to the statement, which
-checks its narrow width after the write (`narrowPost`). -/
-partial def hoistTop (e : RawExpr) : ElabM (SProg C × RawExpr) := do
-  let e ← e.foldConst
-  match e with
-  | .binop op a b => do
-    let sc ← read
-    -- Only the newly enabled unsigned self-frame route uses the expansion.
-    -- Signed, unchecked and explicit checking modes keep their old captures.
-    let selfPower := sc.selfFrame && !sc.unchecked && sc.overflow.isNone &&
-      (intTyOf C (← ctx) a).all (fun (p, _) => p == .uint)
-    if op.shortCircuits || (op == .pow && (sc.retainFailureData || selfPower)) then
-      hoist (.binop op a b)
-    else hoistBinop op a b
-  | .unop op a => do
-    let (P, a) ← hoist a
-    pure (P, .unop op a)
-  | e => hoist e
-
-/-- `l = r;`: the right-hand side's captures, then the target's; an operation at
-the top of `r` stays there when `l` is a variable (`hoistTop`). -/
-partial def hoistAssign (l r : RawExpr) : ElabM (SProg C × RawStmt) := do
-  let (P, r) ← if l matches .name _ then hoistTop r else hoist r
-  -- a storage reference into a memory object's member or element: copied
-  -- into a fresh memory object first, before the target's index (solkey's
-  -- `memoryIndexWriteStorageRefRhsCapture`: `T memory mv = sp; m[i] = mv;`)
-  let (P, r) ← do
-    let Γ ← nctx
-    -- the target's shape: its indices, which may have effects, read as `0`
-    let rec shape : RawExpr → RawExpr
-      | .index e _ => .index (shape e) (.num 0)
-      | .field e f => .field (shape e) f
-      | e => e
-    match synth C Γ (shape l), synth C Γ r with
-    | .ok (.mpath (.ref _) (.loc _)), .ok (.path (.ref R) sp) =>
-      match hm : (Ty.ref R).mapFree with
-      | true =>
-        let x ← captureRef C "mv" (.mem R) r
-        pure (P ++ [.of Γ (.declMem R x (some (.copy sp hm)) rfl hm)], .name (toString x))
-      | false => throw "a copy into memory of a type that holds a mapping"
-    | _, _ => pure (P, r)
-  let (Pc, r) ← if l.hasIncDec then captureExpr C r else pure ([], r)
-  let (Q, l) ← hoist l
-  pure (P ++ Pc ++ Q, .assign l r)
-
-/-- A call's arguments, left to right. A non-simple earlier value is held
-before hoisting any later argument: casts, fixed-length bases, narrow checks
-and modular guards can fail even when they do not modify the state. Bare
-names still use the effect-aware capture policy. Already held fresh values
-and literals need no additional capture (`captureExpr`). -/
-partial def hoistArgs : List RawExpr → ElabM (SProg C × List RawExpr)
-  | [] => pure ([], [])
-  | a :: as => do
-    let (P, a) ← hoist a
-    let (Pc, a) ← if !as.isEmpty && !(a matches .name _) then
-        captureExpr C a
-      else captureBefore C a as
-    let (Q, as) ← hoistArgs as
-    pure (P ++ Pc ++ Q, a :: as)
 
 /-- A byte string as a memory local: a memory one bound to a fresh name, a
 storage one copied into a fresh memory `bytes` (solc's conversion). -/
@@ -514,8 +514,8 @@ partial def hoistCallArgs (f : String) (args : List RawExpr) :
   if f == callValueName && (args.head?.bind (fnTyOfExpr C (← ctx))).isSome then
     return ([], args)
   let d := if f == "constructor" then C.ctor else lookupBy f funs
-  let some d := d | return ← hoistArgs args
-  unless d.params.any (fun (_, T) => T matches .ref _) do return ← hoistArgs args
+  let some d := d | return ← hoistArgsWith C hoist args
+  unless d.params.any (fun (_, T) => T matches .ref _) do return ← hoistArgsWith C hoist args
   unless d.params.length == args.length do
     throw s!"{f} takes {d.params.length} arguments, not {args.length}"
   let mut P : SProg C := []
@@ -1013,6 +1013,26 @@ partial def elabTuple (ts : List (Option RawExpr)) (rhs : RawExpr) (direct : Boo
   | _ => throw s!"{rhs.toStr}: the right-hand side of a tuple assignment is a tuple or a call"
 
 end
+
+/-- Two operands in the contract's evaluation order. -/
+def hoistPair (first last : RawExpr) : ElabM (SProg C × RawExpr × RawExpr) :=
+  hoistPairWith C (hoist C) first last
+
+/-- Binary operands hoisted in the contract's evaluation order. -/
+def hoistBinop (op : BinOp) (a b : RawExpr) : ElabM (SProg C × RawExpr) :=
+  hoistBinopWith C (hoist C) op a b
+
+/-- Hoist an expression, leaving a top-level operation to its statement. -/
+def hoistTop (e : RawExpr) : ElabM (SProg C × RawExpr) :=
+  hoistTopWith C (hoist C) e
+
+/-- Hoist an assignment's right-hand side and then its target. -/
+def hoistAssign (l r : RawExpr) : ElabM (SProg C × RawStmt) :=
+  hoistAssignWith C (hoist C) l r
+
+/-- Hoist call arguments from left to right. -/
+def hoistArgs : List RawExpr → ElabM (SProg C × List RawExpr) :=
+  hoistArgsWith C (hoist C)
 
 /-- A block (`elabStmtsPWith` at the knot's `elabStmtP`): the same term
 the recursive arms and both records use. -/
