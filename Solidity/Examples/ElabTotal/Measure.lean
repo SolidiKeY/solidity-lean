@@ -188,6 +188,17 @@ def forT : RawStmt := .forLoop {} [eS] none [] []
 /-- `{ e; loop (true) { } }`: `forT`, lowered. -/
 def blk : RawStmt := .block [eS, .loop {} (.bool true) []]
 
+/-- An assignment cannot acquire the loop initializer used by the spy above,
+even if its expression callback returns arbitrary expressions and programs. -/
+example [FreshNames] (hoist : RawExpr → ElabM (SProg C0 × RawExpr))
+    (l r : RawExpr) (sc : ElabScope) (st st' : ECtx × Nat) (m m' : CallMemo)
+    (P : SProg C0) :
+    (((hoistAssignWith C0 hoist l r).run sc).run st).run m ≠
+      .ok (((P, forT), st'), m') := by
+  intro h
+  obtain ⟨l', r', he⟩ := hoistAssignWith_shape C0 hoist l r sc st st' m m' (P, forT) h
+  cases he
+
 /-- What bounds inlining at a call: the scope's functions, recursive frames and
 inlined calls. -/
 def scopeTag (sc : ElabScope) : String :=
