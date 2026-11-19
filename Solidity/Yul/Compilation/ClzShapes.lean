@@ -117,8 +117,13 @@ theorem expansion_shape (h : Nat) (enough : 1 ≤ h) : CodeShape clzExpansion h 
 /-- Exact every-boundary capacity for all256 emitted bit steps, including
 initialization and retirement. This is not a charged/native execution bound. -/
 theorem expansion_capacity (h : Int) :
-    stackBound clzExpansion h = true ↔ 0 ≤ h ∧ h+5 ≤ 1024 :=
-  clzExpansion_bound_iff h
+    stackBound clzExpansion h = true ↔ 0 ≤ h ∧ h+5 ≤ 1024 := by
+  change stackBound ([pushWord 256]++clzScanCode 256 (by decide)++writeSlot ⟨0,by decide⟩) h = true ↔ _
+  rw [List.append_assoc,bound_append]
+  have initialDelta : ([pushWord 256].map stackDelta).sum = (1 : Int) := rfl
+  rw [initialDelta,bound_append,scan_delta,Int.add_zero]
+  simp only [Bool.and_eq_true,initial_capacity,scan_capacity,retire_capacity]
+  omega
 
 /-- Existing intrinsic code packet with both operand and prefix-capacity
 proofs. No fake runtime transition is supplied by this constructor. -/
