@@ -188,7 +188,7 @@ def forT : RawStmt := .forLoop {} [eS] none [] []
 /-- `{ e; loop (true) { } }`: `forT`, lowered. -/
 def blk : RawStmt := .block [eS, .loop {} (.bool true) []]
 
-/-- An assignment cannot acquire the loop initializer used by the spy above,
+/-- An assignment cannot acquire the loop initializer used by the spy below,
 even if its expression callback returns arbitrary expressions and programs. -/
 example [FreshNames] (hoist : RawExpr → ElabM (SProg C0 × RawExpr))
     (l r : RawExpr) (sc : ElabScope) (st st' : ECtx × Nat) (m m' : CallMemo)
