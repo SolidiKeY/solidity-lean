@@ -98,9 +98,39 @@ theorem stable_at {β γ : Type} {μ : ElabMeasure α} {J : ElabPreds C} {m : β
   subst hx
   exact h rc x sc hb
 
-/-- **Clause 2 from the arms' guarded decrease.** -/
-theorem elabKernelInduction_of_stable (μ : ElabMeasure α) (J : ElabPreds C) (rc : ElabRec C)
-    (hfix : ElabKernelFix C rc) (hst : ArmsStable μ J) (hJ : GuardKept J) :
+/-- Stability at the actual record suffices; unrelated helper implementations
+need not satisfy the same decrease obligations. -/
+def ArmsStableFor (μ : ElabMeasure α) (J : ElabPreds C) (rc : ElabRec C) : Prop :=
+  StableFor μ J μ.hoist (hoistWith C) rc ∧
+  StableFor μ J μ.hoistStmt (hoistStmtWith C) rc ∧
+  StableFor μ J μ.elabStmtP (elabStmtPWith C) rc ∧
+  StableFor μ J μ.elabStmt1 (elabStmt1With C) rc ∧
+  StableFor μ J μ.elabStmtsP (elabStmtsStep C) rc
+
+/-- Guard preservation is needed only for cuts of the actual record. Cuts
+retain its helper fields, including their independently proved invariants. -/
+def GuardKeptFor (μ : ElabMeasure α) (J : ElabPreds C) (rc : ElabRec C) : Prop :=
+  ∀ a, let r := cut μ a rc
+    ElabSat J.hoist r.hoist → ElabSat J.hoistStmt r.hoistStmt →
+    ElabSat J.elabStmtP r.elabStmtP → ElabSat J.elabStmt1 r.elabStmt1 →
+    ElabSat J.elabStmtsP r.elabStmtsP →
+    ElabSat J.hoist (hoistWith C r) ∧ ElabSat J.hoistStmt (hoistStmtWith C r) ∧
+    ElabSat J.elabStmtP (elabStmtPWith C r) ∧ ElabSat J.elabStmt1 (elabStmt1With C r) ∧
+    ElabSat J.elabStmtsP (elabStmtsStep C r)
+
+omit [FreshNames] in
+private theorem stableFor_at {β γ : Type} {μ : ElabMeasure α} {J : ElabPreds C}
+    {m : β → ElabScope → α} {arm : ElabRec C → β → ElabM γ}
+    {a : α} {rc : ElabRec C} (h : StableFor μ J m arm rc)
+    (hb : MeetsBelow μ J a rc) :
+    ∀ x sc, m x sc = a → (arm (cut μ a rc) x).run sc = (arm rc x).run sc := by
+  intro x sc he
+  subst a
+  exact h x sc hb
+
+/-- Induction from guarded decrease at the actual record and its cuts. -/
+theorem elabKernelInduction_of_guarded_cut (μ : ElabMeasure α) (J : ElabPreds C) (rc : ElabRec C)
+    (hfix : ElabKernelFix C rc) (hst : ArmsStableFor μ J rc) (hJ : GuardKeptFor μ J rc) :
     ElabKernelInduction C rc := by
   intro QH QS QP Q1 QL hQ
   obtain ⟨hnil, hcons, hP, h1, hS, hH⟩ := hfix
@@ -152,24 +182,68 @@ theorem elabKernelInduction_of_stable (μ : ElabMeasure α) (J : ElabPreds C) (r
       (elabSat_iff.2 fun x sc st b st' m m' hr => (cP x sc st b st' m m' hr).1)
       (elabSat_iff.2 fun x sc st b st' m m' hr => (c1 x sc st b st' m m' hr).1)
       (elabSat_iff.2 fun x sc st b st' m m' hr => (cL x sc st b st' m m' hr).1)
-    obtain ⟨jH, jS, jP, j1, jL⟩ := hJ r'
+    obtain ⟨jH, jS, jP, j1, jL⟩ := hJ a
       (elabSat_iff.2 fun x sc st b st' m m' hr => (cH x sc st b st' m m' hr).2)
       (elabSat_iff.2 fun x sc st b st' m m' hr => (cS x sc st b st' m m' hr).2)
       (elabSat_iff.2 fun x sc st b st' m m' hr => (cP x sc st b st' m m' hr).2)
       (elabSat_iff.2 fun x sc st b st' m m' hr => (c1 x sc st b st' m m' hr).2)
       (elabSat_iff.2 fun x sc st b st' m m' hr => (cL x sc st b st' m m' hr).2)
-    exact ⟨field_meets hH (stable_at hst.1 bJ) qH jH,
-      field_meets hS (stable_at hst.2.1 bJ) qS jS,
-      field_meets hP (stable_at hst.2.2.1 bJ) qP jP,
-      field_meets h1 (stable_at hst.2.2.2.1 bJ) q1 j1,
-      field_meets hL (stable_at hst.2.2.2.2 bJ) qL jL⟩
+    exact ⟨field_meets hH (stableFor_at hst.1 bJ) qH jH,
+      field_meets hS (stableFor_at hst.2.1 bJ) qS jS,
+      field_meets hP (stableFor_at hst.2.2.1 bJ) qP jP,
+      field_meets h1 (stableFor_at hst.2.2.2.1 bJ) q1 j1,
+      field_meets hL (stableFor_at hst.2.2.2.2 bJ) qL jL⟩
   exact ⟨elabSat_iff.2 fun x sc st b st' m m' hr => ((key _).1 x sc rfl st b st' m m' hr).1,
     elabSat_iff.2 fun x sc st b st' m m' hr => ((key _).2.1 x sc rfl st b st' m m' hr).1,
     elabSat_iff.2 fun x sc st b st' m m' hr => ((key _).2.2.1 x sc rfl st b st' m m' hr).1,
     elabSat_iff.2 fun x sc st b st' m m' hr => ((key _).2.2.2.1 x sc rfl st b st' m m' hr).1,
     elabSat_iff.2 fun x sc st b st' m m' hr => ((key _).2.2.2.2 x sc rfl st b st' m m' hr).1⟩
 
+/-- The universal guarded-stability criterion retains its original statement. -/
+theorem elabKernelInduction_of_stable (μ : ElabMeasure α) (J : ElabPreds C) (rc : ElabRec C)
+    (hfix : ElabKernelFix C rc) (hst : ArmsStable μ J) (hJ : GuardKept J) :
+    ElabKernelInduction C rc :=
+  elabKernelInduction_of_guarded_cut μ J rc hfix
+    ⟨fun x sc hb => stable_at hst.1 hb x sc rfl,
+     fun x sc hb => stable_at hst.2.1 hb x sc rfl,
+     fun x sc hb => stable_at hst.2.2.1 hb x sc rfl,
+     fun x sc hb => stable_at hst.2.2.2.1 hb x sc rfl,
+     fun x sc hb => stable_at hst.2.2.2.2 hb x sc rfl⟩
+    (fun a => hJ (cut μ a rc))
+
 end Induction
+
+section ScopeRank
+
+/-- The other scope updates performed on recursive-body entry do not affect
+its strict decrease. -/
+example (C : Contract) (sc : ElabScope) (rf : RecFrame)
+    (funs : List (Name × FunDecl)) (selfFrame : Bool) (k₀ k₁ : Nat)
+    (hr : isRecursiveC C rf.name = true) (hn : sc.recs.any (·.name == rf.name) = false) :
+    WellFoundedRelation.rel
+      (({ sc with funs := funs, top := false, selfFrame := selfFrame, unchecked := false,
+                  inlined := (k₀, k₁) :: sc.inlined, recs := rf :: sc.recs } : ElabScope).callRank C)
+      (sc.callRank C) :=
+  ElabScope.callRank_push C sc rf funs hr hn
+
+/-- Ordinary inlining's context flags likewise leave the prefix argument valid. -/
+example (C : Contract) (sc : ElabScope) (i k₀ k₁ : Nat) (selfFrame : Bool)
+    (hi : i < sc.funs.length) :
+    WellFoundedRelation.rel
+      (({ sc with funs := sc.funs.take i, top := false, selfFrame := selfFrame, unchecked := false,
+                  inlined := (k₀, k₁) :: sc.inlined } : ElabScope).callRank C)
+      (sc.callRank C) :=
+  ElabScope.callRank_prefix C sc i hi
+
+/-- Explicit constructor entry can restore all contract functions even when
+the public caller supplied a non-deployment scope. -/
+example (C : Contract) (sc : ElabScope) :
+    WellFoundedRelation.rel
+      (({ sc with top := false, funs := C.funs } : ElabScope).callRank C)
+      (sc.callRank C true) :=
+  ElabScope.callRank_ctor C _ _ rfl
+
+end ScopeRank
 
 section Counterexample
 
@@ -226,6 +300,20 @@ example [FreshNames] (C : Contract) (rc : ElabRec C)
     rfl
   refine ⟨hc, ?_⟩
   simpa only [RawStmt.control_weight] using congrArg StmtControl.weight hc
+
+/-- Cutting the five recursive fields retains the assignment helper's shape
+invariant, so the residual-control guard holds at every cut level too. -/
+example [FreshNames] {α : Type} [WellFoundedRelation α] (μ : ElabMeasure α) (a : α)
+    (C : Contract) (rc : ElabRec C) (s : RawStmt) (sc : ElabScope)
+    (st st' : ECtx × Nat) (m m' : CallMemo) (out : SProg C × RawStmt)
+    (h : (((hoistStmtWith C
+      (cut μ a { rc with hoistAssign := hoistAssignWith C rc.hoist }) s).run sc).run st).run m =
+      .ok ((out, st'), m')) : out.2.control = s.control := by
+  refine hoistStmtWith_control _ ?_ s sc st m out st' m' h
+  intro l r sc st m out st' m' he
+  obtain ⟨l', r', hs⟩ := hoistAssignWith_shape C rc.hoist l r sc st st' m m' out he
+  rw [hs]
+  rfl
 
 /-- What bounds inlining at a call: the scope's functions, recursive frames and
 inlined calls. -/

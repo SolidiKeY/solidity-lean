@@ -5,7 +5,7 @@ import Solidity.Syntax.Elab.Arms
 
 The vocabulary in which a well-founded totalization of the `mutual` knot of
 `Syntax/Elab/Stmt.lean` states its decrease, over the five recursive fields
-that clause 2 of `Solidity.Goals.elabKernelTotal` (`ElabKernelInduction`)
+that the induction clause of `Solidity.Goals.elabKernelTotal` (`ElabKernelInduction`)
 names: `hoist`, `hoistStmt`, `elabStmtP`, `elabStmt1`, `elabStmtsP`.
 
 * `ElabMeasure α`: one measure per field, of the input and the scope (the
@@ -17,6 +17,11 @@ names: `hoist`, `hoistStmt`, `elabStmtP`, `elabStmt1`, `elabStmtsP`.
   measure of `x` meet the guard `J`: the arm calls the five fields only below
   its own measure.  This is "the arm at `x` gives the same result for two
   records that agree below the measure of `x`", relativized to `J`.
+
+`StableFor` specializes the obligation to one record, so proofs can use
+invariants of its actual helper fields. `ElabScope.callRank` handles scope
+changes on body entry; local expression and statement transformations still
+need further measure components.
 
 The guard is needed.  With the trivial guard (`ElabPreds.top`) the shape
 fails for every well-founded measure along one path
@@ -35,6 +40,105 @@ preservation by them, for any guard.
 namespace Solidity
 
 open Semantics
+
+private theorem reachableBy_missing (callees : FunDecl → List String)
+    (funs : List (Name × FunDecl)) (f : String) (h : lookupBy f funs = none) :
+    reachableBy callees funs f = [] := by
+  simp only [reachableBy, h, Option.map_none, Option.getD_none, List.contains_eq_mem,
+    List.isEmpty_iff, bind_pure_comp, map_pure, Std.Range.forIn_eq_forIn_range', Std.Range.size,
+    Nat.sub_zero, Nat.add_one_sub_one, Nat.div_one, List.range'_succ, Nat.zero_add, List.forIn_cons,
+    List.not_mem_nil, decide_false, Bool.not_false, Bool.true_and, List.filter_nil,
+    List.eraseDups_nil, ↓reduceIte, pure_bind, Id.run_pure]
+private theorem recursive_has_decl (C : Contract) (f : String) (hr : isRecursiveC C f = true) :
+    ∃ d, (f, d) ∈ C.funs := by
+  cases h : lookupBy f C.funs with
+  | none =>
+    have hz : reachableC C f = [] := reachableBy_missing _ _ _ h
+    simp only [isRecursiveC, hz, List.contains_nil, Bool.false_eq_true] at hr
+  | some d => exact ⟨d, lookupBy_eq_some_mem h⟩
+/-- Contract functions not yet represented by an active recursive frame. -/
+def ElabScope.unframedCount (C : Contract) (sc : ElabScope) : Nat :=
+  (C.funs.filter fun p => !(sc.recs.any (·.name == p.1))).length
+
+/-- Opening a previously absent recursive frame strictly decreases the count,
+even if the recursive call widens the list of callable functions. -/
+private theorem ElabScope.unframedCount_push_of_mem (C : Contract) (sc : ElabScope) (rf : RecFrame)
+    (d : FunDecl) (hm : (rf.name, d) ∈ C.funs)
+    (hn : sc.recs.any (·.name == rf.name) = false) :
+    ({ sc with recs := rf :: sc.recs } : ElabScope).unframedCount C < sc.unframedCount C := by
+  unfold ElabScope.unframedCount
+  have he : C.funs.filter (fun p => !((rf :: sc.recs).any (·.name == p.1))) =
+      (C.funs.filter fun p => !(sc.recs.any (·.name == p.1))).filter
+        (fun p => !(rf.name == p.1)) := by
+    simp only [List.any_cons, Bool.not_or, List.filter_filter]
+  rw [he]
+  apply List.length_filter_lt_length_iff_exists.mpr
+  refine ⟨(rf.name, d), ?_, ?_⟩
+  · simp only [List.mem_filter, hm, hn, Bool.not_false, and_self]
+  · simp only [beq_self_eq_true, Bool.not_true, Bool.false_eq_true, not_false_eq_true]
+
+/-- A recursive body gains a new active frame, removing a contract function
+from the finite count of possible recursive-body expansions. -/
+theorem ElabScope.unframedCount_push (C : Contract) (sc : ElabScope) (rf : RecFrame)
+    (hr : isRecursiveC C rf.name = true) (hn : sc.recs.any (·.name == rf.name) = false) :
+    ({ sc with recs := rf :: sc.recs } : ElabScope).unframedCount C < sc.unframedCount C := by
+  obtain ⟨d, hm⟩ := recursive_has_decl C rf.name hr
+  exact ElabScope.unframedCount_push_of_mem C sc rf d hm hn
+
+/-- A rank for scope changes during body expansion: deployment permission,
+unopened recursive functions, then the callable prefix length. Expression and
+statement transformations need further measure components. `ctor` covers
+public constructor-call entry even when the supplied scope has `top = false`. -/
+def ElabScope.callRank (C : Contract) (sc : ElabScope) (ctor : Bool := false) : Nat × Nat × Nat :=
+  (if sc.top || ctor then 1 else 0, sc.unframedCount C, sc.funs.length)
+
+/-- Entering a body that cannot deploy decreases the first component. -/
+theorem ElabScope.callRank_top (C : Contract) (sc sc' : ElabScope)
+    (ht : sc.top = true) (hf : sc'.top = false) :
+    WellFoundedRelation.rel (sc'.callRank C) (sc.callRank C) := by
+  unfold ElabScope.callRank
+  apply Prod.Lex.left
+  simp only [ht, hf]
+  exact Nat.zero_lt_one
+
+/-- Explicit constructor entry decreases when its body disables deployment,
+including a public call entered with `scope.top = false`. -/
+theorem ElabScope.callRank_ctor (C : Contract) (sc sc' : ElabScope)
+    (hf : sc'.top = false) :
+    WellFoundedRelation.rel (sc'.callRank C) (sc.callRank C true) := by
+  unfold ElabScope.callRank
+  apply Prod.Lex.left
+  simp only [hf, Bool.or_true]
+  exact Nat.zero_lt_one
+
+/-- A recursive body may widen its callable scope, but its fresh frame
+strictly reduces the second component. -/
+theorem ElabScope.callRank_push (C : Contract) (sc : ElabScope) (rf : RecFrame)
+    (funs : List (Name × FunDecl)) (hr : isRecursiveC C rf.name = true)
+    (hn : sc.recs.any (·.name == rf.name) = false) :
+    WellFoundedRelation.rel
+      (({ sc with top := false, funs := funs, recs := rf :: sc.recs } : ElabScope).callRank C)
+      (sc.callRank C) := by
+  cases ht : sc.top with
+  | true => exact ElabScope.callRank_top C _ _ ht rfl
+  | false =>
+    unfold ElabScope.callRank
+    simp only [ht]
+    exact Prod.Lex.right 0 (Prod.Lex.left _ _ (ElabScope.unframedCount_push C sc rf hr hn))
+
+/-- Ordinary inlining restricts calls to a strict prefix. -/
+theorem ElabScope.callRank_prefix (C : Contract) (sc : ElabScope) (i : Nat)
+    (hi : i < sc.funs.length) :
+    WellFoundedRelation.rel
+      (({ sc with top := false, funs := sc.funs.take i } : ElabScope).callRank C)
+      (sc.callRank C) := by
+  cases ht : sc.top with
+  | true => exact ElabScope.callRank_top C _ _ ht rfl
+  | false =>
+    unfold ElabScope.callRank
+    simp only [ht]
+    exact Prod.Lex.right 0 (Prod.Lex.right (sc.unframedCount C)
+      (Nat.lt_of_le_of_lt (List.length_take_le i sc.funs) hi))
 
 /-- A statement's block-bearing constructor and its unvisited child lists.
 Statements without child blocks share `leaf`; loop forms remain distinct. -/
@@ -278,6 +382,13 @@ def MeetsBelow {C : Contract} (μ : ElabMeasure α) (J : ElabPreds C) (a : α) (
 def Stable {C : Contract} {β γ : Type} (μ : ElabMeasure α) (J : ElabPreds C)
     (m : β → ElabScope → α) (arm : ElabRec C → β → ElabM γ) : Prop :=
   ∀ (r : ElabRec C) x sc, MeetsBelow μ J (m x sc) r →
+    (arm (cut μ (m x sc) r) x).run sc = (arm r x).run sc
+
+/-- The decrease obligation for one specified record. Its helper fields may
+satisfy invariants that do not hold for arbitrary `ElabRec` values. -/
+def StableFor {C : Contract} {β γ : Type} (μ : ElabMeasure α) (J : ElabPreds C)
+    (m : β → ElabScope → α) (arm : ElabRec C → β → ElabM γ) (r : ElabRec C) : Prop :=
+  ∀ x sc, MeetsBelow μ J (m x sc) r →
     (arm (cut μ (m x sc) r) x).run sc = (arm r x).run sc
 
 /-- The block's `elabStmtsP`, over the record (`Goals.elabStmtsStep`). -/
