@@ -1,0 +1,2 @@
+| `Correctness/Lowering/Sim/Match/CasesV2.lean` | Shared frame-aware case conclusions at a fixed record, reusing `SiteSim₂` and `Stmt.V2.StmtArm`; fieldwise bridges from applicable v1 case hypotheses with kernel laws and v1 `RecSim`. Documents the unresolved capture/composition dependency; no recursive closure or final simulation. |
+| `Examples/Lowering/Sim/CasesV2.lean` | Checked uses of the shared bridge, block-site projection and existing run bridge. |
