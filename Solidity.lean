@@ -1548,6 +1548,7 @@ import Solidity.Backend.PrimitivePackets.CheckedAdd.Controls
 import Solidity.Backend.PrimitivePackets.CheckedAdd.Selected
 import Solidity.Backend.PrimitivePackets.CheckedAdd.Source
 import Solidity.Backend.PrimitivePackets.CheckedAdd.Target
+import Solidity.Backend.PrimitivePackets.CheckedBinary
 import Solidity.Backend.PrimitivePackets.CheckedMul.Agreement
 import Solidity.Backend.PrimitivePackets.CheckedMul.Controls
 import Solidity.Backend.PrimitivePackets.CheckedMul.Populated

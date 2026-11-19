@@ -162,17 +162,26 @@ theorem copyItemsAux_complete {E : Source.Env} {R : List Source.STy} {M : Bool}
       some (.blocks steps) := by
   simp [blocksPlan?,AssignmentBlocks.statement,blockStatement?,copyItems_complete]
 
+/-- `recognize` on a block tries the block templates in order. -/
+private theorem recognize_block {E : Source.Env} {R : List Source.STy} {M : Bool}
+    {k : Source.SCtx} {Γ Γ' : Source.RCtx} (input : Source.RStmt E R M k Γ Γ)
+    (b : Source.RItems E R M k Γ Γ') (isBlock : input = .block b) :
+    recognize input =
+      (blocksPlan? input).orElse (fun _ =>
+      ((returning? input).map Returning.plan).orElse (fun _ =>
+      ((returnTail? input).map ReturnTailView.plan).orElse (fun _ =>
+      (sequencePlan? input).orElse (fun _ =>
+      (pairPlan? input).orElse (fun _ => continuationPlan? input))))) := by
+  subst isBlock
+  rfl
+
 private theorem recognizeCase_blocksPlan_exact {E : Source.Env} {R : List Source.STy} {M : Bool}
     {k : Source.SCtx} {Γ : Source.RCtx}
     (steps : List (Source.Idx Γ .bool × Source.Idx Γ .bool)) :
     recognize (AssignmentBlocks.statement (E := E) (R := R) (M := M) (k := k) steps) =
       some (.blocks steps) := by
   let input := (AssignmentBlocks.statement (E := E) (R := R) (M := M) (k := k) steps)
-  change (blocksPlan? input).orElse (fun _ =>
-    ((returning? input).map Returning.plan).orElse (fun _ =>
-    ((returnTail? input).map ReturnTailView.plan).orElse (fun _ =>
-    (sequencePlan? input).orElse (fun _ =>
-    (pairPlan? input).orElse (fun _ => continuationPlan? input))))) = _
+  rw [recognize_block input _ rfl]
   have yes : blocksPlan? input = some (.blocks steps) := blocksPlan_exact steps
   rw [yes]
   rfl
@@ -196,11 +205,7 @@ private theorem recognizeCase_sequencePlan_exact {E : Source.Env} {R : List Sour
       ci ca i a j b dest donor) = some (.sequence ci ca i a j b dest donor) := by
   let input := (ConditionalSequence.statement (E := E) (R := R) (M := M) (k := k)
       ci ca i a j b dest donor)
-  change (blocksPlan? input).orElse (fun _ =>
-    ((returning? input).map Returning.plan).orElse (fun _ =>
-    ((returnTail? input).map ReturnTailView.plan).orElse (fun _ =>
-    (sequencePlan? input).orElse (fun _ =>
-    (pairPlan? input).orElse (fun _ => continuationPlan? input))))) = _
+  rw [recognize_block input _ rfl]
   have no0 : blocksPlan? input = none := rfl
   have no1 : returning? input = none := by
     simp [input,returning?,ConditionalSequence.statement,blockStatement?,twoItems?,emptyItems?,conditional_exact,returnStatement?]
@@ -215,11 +220,7 @@ private theorem recognizeCase_returning_exact {E : Source.Env} {M : Bool}
     recognize (ConditionalReturn.statement (E := E) (M := M) (k := k) ci ca i a j b) =
       some (.returning ci ca i a j b) := by
   let input := (ConditionalReturn.statement (E := E) (M := M) (k := k) ci ca i a j b)
-  change (blocksPlan? input).orElse (fun _ =>
-    ((returning? input).map Returning.plan).orElse (fun _ =>
-    ((returnTail? input).map ReturnTailView.plan).orElse (fun _ =>
-    (sequencePlan? input).orElse (fun _ =>
-    (pairPlan? input).orElse (fun _ => continuationPlan? input))))) = _
+  rw [recognize_block input _ rfl]
   have no0 : blocksPlan? input = none := rfl
   have yes : returning? input = some (.returns ci ca i a j b) := returning_exact ci ca i a j b
   rw [no0,yes]
@@ -233,11 +234,7 @@ private theorem recognizeCase_continuationPlan_exact {E : Source.Env} {M : Bool}
       ci ca i a j b tail) = some (.continuation ci ca i a j b tail) := by
   let input := (ConditionalReturnContinuation.statement (E := E) (M := M) (k := k)
       ci ca i a j b tail)
-  change (blocksPlan? input).orElse (fun _ =>
-    ((returning? input).map Returning.plan).orElse (fun _ =>
-    ((returnTail? input).map ReturnTailView.plan).orElse (fun _ =>
-    (sequencePlan? input).orElse (fun _ =>
-    (pairPlan? input).orElse (fun _ => continuationPlan? input))))) = _
+  rw [recognize_block input _ rfl]
   have no0 : blocksPlan? input = none := rfl
   have no1 : returning? input = none := by
     cases tail
@@ -265,11 +262,7 @@ private theorem recognizeCase_returnTail_exact {E : Source.Env} {M : Bool}
     recognize (ReturnTail.statement (E := E) (M := M) (k := k) ci ca i a) =
       some (.returnTail ci ca i a) := by
   let input := (ReturnTail.statement (E := E) (M := M) (k := k) ci ca i a)
-  change (blocksPlan? input).orElse (fun _ =>
-    ((returning? input).map Returning.plan).orElse (fun _ =>
-    ((returnTail? input).map ReturnTailView.plan).orElse (fun _ =>
-    (sequencePlan? input).orElse (fun _ =>
-    (pairPlan? input).orElse (fun _ => continuationPlan? input))))) = _
+  rw [recognize_block input _ rfl]
   have no0 : blocksPlan? input = none := rfl
   have no1 : returning? input = none := rfl
   have yes : returnTail? input = some (.tail ci ca i a) := returnTail_exact ci ca i a
@@ -282,11 +275,7 @@ private theorem recognizeCase_pairPlan_exact {E : Source.Env} {M : Bool}
     recognize (ReturnPair.statement (E := E) (M := M) (k := k) ci ca i a dest donor) =
       some (.returnPair ci ca i a dest donor) := by
   let input := (ReturnPair.statement (E := E) (M := M) (k := k) ci ca i a dest donor)
-  change (blocksPlan? input).orElse (fun _ =>
-    ((returning? input).map Returning.plan).orElse (fun _ =>
-    ((returnTail? input).map ReturnTailView.plan).orElse (fun _ =>
-    (sequencePlan? input).orElse (fun _ =>
-    (pairPlan? input).orElse (fun _ => continuationPlan? input))))) = _
+  rw [recognize_block input _ rfl]
   have no0 : blocksPlan? input = none := rfl
   have no1 : returning? input = none := rfl
   have no2 : returnTail? input = none := rfl
