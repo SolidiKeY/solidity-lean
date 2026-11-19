@@ -109,19 +109,8 @@ theorem finite_overlap_observations :
 is reused intact; its complete reader footprint consists of successful reads. -/
 theorem overlap_source_provenance :
     Represented CopyWriteControls.sourceNode
-      (ClearDemands.demands CopyWriteControls.sourceNode) CopyWriteControls.overlapSource CopyWriteControls.overlapStore := by
-  intro q member
-  apply CopyWriteControls.overlap_source_owner q
-  change q ∈ [.word (.cons (.field .here) .nil),
-    .word (.cons (.field (.there .here)) (.cons (.index ⟨0,by decide⟩) (.cons (.field .here) .nil))),
-    .length (.cons (.field (.there .here)) (.cons (.index ⟨0,by decide⟩) (.cons (.field (.there .here)) .nil))),
-    .length (.cons (.field (.there .here)) .nil)] at member
-  simp only [List.mem_cons,List.not_mem_nil,or_false] at member
-  rcases member with rfl | rfl | rfl | rfl
-  · exact List.mem_cons_self
-  · exact List.mem_cons_of_mem _ (List.mem_cons_of_mem _ List.mem_cons_self)
-  · exact List.mem_cons_of_mem _ (List.mem_cons_of_mem _ (List.mem_cons_of_mem _ List.mem_cons_self))
-  · exact List.mem_cons_of_mem _ List.mem_cons_self
+      (ClearDemands.demands CopyWriteControls.sourceNode) CopyWriteControls.overlapSource CopyWriteControls.overlapStore :=
+  CopyWriteControls.overlap_source_demands
 
 private def changedOutside : WordStore := writeWord CopyDemandControls.machine 127 zero
 

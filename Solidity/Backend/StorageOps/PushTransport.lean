@@ -35,9 +35,6 @@ theorem element_read {n : Nat} {G : Schema n} {p : PrimTy}
             Step.get, dif_neg outside, dif_neg allocated, if_neg fresh, Option.bind_none, Option.map_none]
     next full => cases pushed
 
-private theorem data_ne_base (base : Solidity.Storage.Loc) (i : Nat) : Solidity.Storage.Loc.data base i ≠ base := by
-  exact Solidity.Storage.Loc.data_ne_self base i
-
 /-- The post-owner relation holds IFF its original header coverage holds.
 This characterizes the real public-interface boundary without adding a source
 restriction, assuming post-preservation or weakening any predicate. -/
@@ -76,7 +73,7 @@ theorem represented_iff {n : Nat} {G : Schema n} {p : PrimTy}
       intro word observed
       rw [element_read old result pushed i] at observed
       rw [PrimitivePop.element_location]
-      simp only [Representation.write, if_neg (data_ne_base base i.val)]
+      simp only [Representation.write, if_neg (Solidity.Storage.Loc.data_ne_self base i.val)]
       by_cases newIndex : i.val = old.length.val
       · rw [if_pos newIndex] at observed
         cases observed

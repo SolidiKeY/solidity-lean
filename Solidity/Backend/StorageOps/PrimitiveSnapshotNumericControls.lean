@@ -88,9 +88,6 @@ private noncomputable def target2 := {target1 with store:=Evm.WordStore.write ta
 private noncomputable def wrongTarget := {target2 with store:=Evm.WordStore.write target2.store (.root 3) 17}
 private def wrongCode := TargetOperations.copyCode (.root 1) (.root 0) ++
  (TargetOperations.copyCode (.root 2) (.root 1) ++ TargetOperations.copyCode (.root 3) (.root 2))
-private theorem copy_known (machine : Evm.Machine) (dst src : Evm.Slot) (value : Nat) (known : machine.store src=value) :
- Evm.run (TargetOperations.copyCode dst src) machine=.ok {machine with store:=Evm.WordStore.write machine.store dst value} 0 := by
- rw [TargetOperations.run_copy,Evm.WordStore.cells_val,known]
 
 theorem wrong_streaming :
  Evm.run wrongCode target=.ok wrongTarget 0 ∧
@@ -99,10 +96,10 @@ theorem wrong_streaming :
  ¬ Transport 16 hash locations afterSymbolic streaming3 := by
  refine ⟨?_,rfl,by decide,?_⟩
  · unfold wrongCode
-   rw [Evm.run_append_ok (copy_known target (.root 1) (.root 0) 17 rfl)]
+   rw [Evm.run_append_ok (TargetOperations.run_copy_known target (.root 1) (.root 0) 17 rfl)]
    change Evm.run (TargetOperations.copyCode (.root 2) (.root 1) ++ TargetOperations.copyCode (.root 3) (.root 2)) target1=.ok wrongTarget 0
-   rw [Evm.run_append_ok (copy_known target1 (.root 2) (.root 1) 17 (Evm.WordStore.write_same_of_lt _ _ _ (by decide)))]
-   exact copy_known target2 (.root 3) (.root 2) 17 (Evm.WordStore.write_same_of_lt _ _ _ (by decide))
+   rw [Evm.run_append_ok (TargetOperations.run_copy_known target1 (.root 2) (.root 1) 17 (Evm.WordStore.write_same_of_lt _ _ _ (by decide)))]
+   exact TargetOperations.run_copy_known target2 (.root 3) (.root 2) 17 (Evm.WordStore.write_same_of_lt _ _ _ (by decide))
  · intro alleged
    have bad:=alleged (.root 2) (by decide)
    change word 17=word 23 at bad

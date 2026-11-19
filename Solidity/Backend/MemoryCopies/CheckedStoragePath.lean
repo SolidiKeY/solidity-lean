@@ -5,12 +5,6 @@ Source and representation results are transported without changing semantics. -/
 namespace Solidity.Backend.MemoryCopies
 open Evm Evm.Memory
 
-private theorem append_run_eq (left right suffix : List Instr) (machine : Machine)
-    (same : run left machine = run right machine) :
-    run (left ++ suffix) machine = run (right ++ suffix) machine := by
-  simp only [run] at same ⊢
-  rw [exec_append,exec_append,same]
-
 theorem checked_storage_path_run {C : Contract} {Γ : Ctx} {primitive : PrimTy} {L b frame : Nat} {frag : Frag Γ}
     (state : State C Γ) (base : Nat → Fin W) (cursor : Fin W) (machine : Machine)
     (path : SPath C Γ (.ref (.array (.prim primitive)))) (reference : SRef C (.ref (.array (.prim primitive))))
@@ -65,7 +59,7 @@ theorem checked_storage_path_declaration_success {C : Contract} {Γ : Ctx} {prim
   refine ⟨base',target,source,?_,afterRepr,allocated,extension,stack,root,localAt,below⟩
   have equal : run (checkedStoragePathCode b path) machine = run (runtimePathArrayCode b path) machine := by
     rw [checked_storage_path_run state base cursor machine path reference values bounded represented allocator supported resolved found,if_pos fits]
-  exact (append_run_eq _ _ _ machine equal).trans ran
+  exact (run_append_congr _ _ _ machine equal).trans ran
 
 theorem checked_storage_path_rebind_success {C : Contract} {Γ : Ctx} {primitive : PrimTy} {L b frame : Nat} {frag : Frag Γ}
     (state : State C Γ) (base : Nat → Fin W) (cursor : Fin W) (machine : Machine)
@@ -83,7 +77,7 @@ theorem checked_storage_path_rebind_success {C : Contract} {Γ : Ctx} {primitive
   refine ⟨base',target,source,?_,afterRepr,allocated,extension,stack,root,localAt,below,kept,fresh⟩
   have equal : run (checkedStoragePathCode b path) machine = run (runtimePathArrayCode b path) machine := by
     rw [checked_storage_path_run state base cursor machine path reference values bounded represented allocator supported resolved found,if_pos fits]
-  exact (append_run_eq _ _ _ machine equal).trans ran
+  exact (run_append_congr _ _ _ machine equal).trans ran
 
 theorem checked_storage_path_body {C : Contract} {Γ : Ctx} {primitive : PrimTy} {L b frame : Nat} {frag : Frag Γ}
     (state : State C Γ) (base : Nat → Fin W) (cursor : Fin W) (machine : Machine)

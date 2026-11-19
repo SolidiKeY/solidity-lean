@@ -5,22 +5,6 @@ copy certificates. No caller supplies a second count or a capacity assumption. -
 namespace Solidity.Backend.MemoryCopies
 open Evm Evm.Memory
 
-private theorem primitive_elements_words {primitive : PrimTy} (values : List primitive.Denote) :
-    elementWordCount (SVec.ofList (values.map SVal.prim)) = 0 := by
-  induction values with
-  | nil => simp only [List.map_nil, SVec.ofList, elementWordCount]
-  | cons value values ih =>
-    simp only [List.map_cons, SVec.ofList, elementWordCount, liveWordCount, ih, Nat.zero_add]
-
-private theorem nested_elements_words (primitive : PrimTy) (rows : List (PrimitiveStorageRow primitive)) :
-    elementWordCount (nestedStorageValues primitive rows) = nestedStorageDemand rows := by
-  induction rows with
-  | nil => rfl
-  | cons row rows ih =>
-    simp only [nestedStorageValues, elementWordCount, liveWordCount, primitiveArrayValue,
-      primitive_elements_words, nestedStorageDemand, List.length_map, ih]
-    omega
-
 theorem nested_location_memory_demand {H : HTy} (heap : Heap H) (primitive : PrimTy)
     (rows : List (PrimitiveStorageRow primitive)) (bounded : rows.length < W) :
     let first := (nestedStorageParentValue primitive rows bounded).copyStToM heap rfl
@@ -29,7 +13,7 @@ theorem nested_location_memory_demand {H : HTy} (heap : Heap H) (primitive : Pri
   rw [memory_parent_demand_snapshot,
     (storageHeapContents (nestedStorageParentValue primitive rows bounded) rfl).contents heap,
     liveWordCount_strip]
-  simp only [nestedStorageParentValue, liveWordCount, nested_elements_words, nestedStorageParentDemand]
+  simp only [nestedStorageParentValue, liveWordCount, nestedStorage_elementWordCount, nestedStorageParentDemand]
   omega
 
 theorem nested_location_pipeline_after_first {H : HTy} (heap : Heap H) (primitive : PrimTy)

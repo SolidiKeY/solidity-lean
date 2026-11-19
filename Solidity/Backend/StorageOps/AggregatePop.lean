@@ -140,12 +140,8 @@ def queries {n : Nat} {G : Schema n} {E : TypeGraph.Ty n}
 
 theorem slot_compatible {n : Nat} {G : Schema n} {E : TypeGraph.Ty n}
     (slot : Slot G E) (q : Query G E) (before : q.compatible (slot.getD (Value.dflt E))) :
-    q.compatible ((recursiveClearSlot slot).getD (Value.dflt E)) := by
-  classical
-  by_cases member : q ∈ ClearDemands.slotDemands slot
-  · exact ClearDemands.listed_slot_compatible slot q member before
-  · rw [(ClearDemands.outside_slot_frame slot q member).2]
-    exact before
+    q.compatible ((recursiveClearSlot slot).getD (Value.dflt E)) :=
+  ClearDemands.clear_slot_getD_compatible slot q before
 
 /-- Full selected last-slot ROOT representation and actual current-header
 numeric execution. OLD relations, finite coverage/run and symbolic separation

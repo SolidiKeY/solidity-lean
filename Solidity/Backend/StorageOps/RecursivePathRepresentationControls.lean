@@ -318,18 +318,6 @@ private theorem aOld : Represented CopyWriteControls.oldNode aQueries (.root 0) 
     | exact ⟨by decide,by decide⟩
     | (intro word observed; change some zero = some word at observed; cases observed; rfl)
     | (intro word observed; change some one = some word at observed; cases observed; rfl)
-private theorem aSrc : Represented CopyWriteControls.sourceNode (ClearDemands.demands CopyWriteControls.sourceNode)
-    CopyWriteControls.overlapSource CopyWriteControls.overlapStore := by
-  intro q member
-  apply CopyWriteControls.overlap_source_owner q
-  change q ∈ [af,acf,ack,ak] at member
-  change q ∈ [af,ak,acf,ack]
-  simp only [List.mem_cons,List.not_mem_nil,or_false] at member ⊢
-  rcases member with rfl | rfl | rfl | rfl
-  · exact Or.inl rfl
-  · exact Or.inr (Or.inr (Or.inl rfl))
-  · exact Or.inr (Or.inr (Or.inr rfl))
-  · exact Or.inr (Or.inl rfl)
 private theorem aSourceCovered : ∀ q ∈ ClearDemands.demands CopyWriteControls.sourceNode,
     (q.prefix aSource).location (.root 0) ∈ CopyWriteControls.overlapLocations := by
   intro q member
@@ -372,7 +360,7 @@ theorem aliased_root_certificate :
     aPermit rfl aRead aCopied aQueries (.root 0) CopyWriteControls.overlapStore CopyWriteControls.overlapMachine
     CopyWriteControls.overlap_run
   · exact Represented.prefix .nil rfl True.intro aOld
-  · exact Represented.prefix aSource aRead (by simp only [aSource,aKids,TypeGraph.Path.append,PathSupported,StepSupported]; decide) aSrc
+  · exact Represented.prefix aSource aRead (by simp only [aSource,aKids,TypeGraph.Path.append,PathSupported,StepSupported]; decide) CopyWriteControls.overlap_source_demands
   · exact fun _ _ => rfl
   · exact aSourceCovered
   · exact aQueriesCovered

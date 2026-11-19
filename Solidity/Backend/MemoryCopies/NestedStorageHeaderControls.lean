@@ -15,9 +15,8 @@ private structure Input where
 private def input : Input := ⟨_, _, _, _, ObjectArrayExamples.initial_allocator⟩
 private abbrev Row := {payloads : List (Fin W) // payloads.length < 128}
 private def values (payloads : List (Fin W)) : List PrimTy.uint.Denote := payloads.map indexValue
-private theorem wide : 1024 < W := by decide
 private def convert (row : Row) : PrimitiveStorageRow .uint :=
-  ⟨values row.val, by rw [values, List.length_map]; have bound : row.val.length < 128 := row.property; have large : 1024 < W := wide; omega⟩
+  ⟨values row.val, by rw [values, List.length_map]; have bound : row.val.length < 128 := row.property; have large : 1024 < W := (by decide); omega⟩
 private def rows (entries : List Row) : List (PrimitiveStorageRow .uint) := entries.map convert
 private def payloadAt (entries : List Row) (offset : Nat) : List (Fin W) := (entries[offset]?.map Subtype.val).getD []
 private def source : Slot := .data (.root 0) 0
@@ -47,7 +46,7 @@ private theorem represented (entries : List Row) (start : Nat) :
     · simp only [machine, allocateMachine, writeMachine, store, source, Slot.add, Nat.zero_add,
         WordStore.read, Nat.le_add_right, if_true, Nat.add_sub_cancel_left,
         payloadAt, picked, Option.map_some, Option.getD_some, convert, values, List.length_map]
-      exact Nat.mod_eq_of_lt (show row.val.length < W by have large : 1024 < W := wide; have bound : row.val.length < 128 := row.property; omega)
+      exact Nat.mod_eq_of_lt (show row.val.length < W by have large : 1024 < W := (by decide); have bound : row.val.length < 128 := row.property; omega)
     · intro item value chosen
       simp only [SVec.toList_ofList, convert, values, List.getElem?_map] at chosen
       cases found : row.val[item]? with
@@ -78,14 +77,14 @@ private theorem allocator (entries : List Row) : Objects.AllocatorRepr input.hea
   input.allocator.mem_eq rfl
 private theorem rowBound (entries : List Row) (bounded : entries.length < 128) : (rows entries).length < W := by
   rw [rows, List.length_map]
-  have large : 1024 < W := wide
+  have large : 1024 < W := by decide
   omega
 private theorem outer_repr (entries : List Row) (bounded : entries.length < 128) (shadow : Shadow) :
     ReprAt (before entries).store 128 (.ref (.array (.ref (.array (.prim .uint))))) outer
       (nestedStorageHeaderValue .uint (rows entries) (rowBound entries bounded) shadow) := by
   refine .array ?_ (by simpa only [rows, List.length_map] using bounded) ?_
   · simp only [before, store, outer, WordStore.read, rows, List.length_map]
-    exact Nat.mod_eq_of_lt (by have large : 1024 < W := wide; omega)
+    exact Nat.mod_eq_of_lt (by have large : 1024 < W := (by decide); omega)
   · intro offset selected chosen
     simp only [nested_storage_header_values, rows, List.map_map, List.getElem?_map] at chosen
     obtain ⟨row, picked, equal⟩ := Option.map_eq_some_iff.mp chosen
@@ -105,7 +104,7 @@ theorem actual_typed (entries : List Row) (bounded : entries.length < 4) (shadow
     simp only [nestedStorageParentDemand, rows, List.length_map]
     change 40 + (entries.length + 1 + nestedStorageDemand (entries.map convert)) < W
     change nestedStorageDemand (entries.map convert) ≤ 128 * entries.length at cost
-    have large : 1024 < W := wide
+    have large : 1024 < W := by decide
     omega
   exact ⟨fits, nested_storage_header_success input.heap .uint (rows entries) _ shadow input.base 8 (wmod 40) (before entries)
     outer 128 (allocator entries) (outer_repr entries (by omega) shadow) fits⟩
@@ -315,7 +314,7 @@ theorem header_selects_capacity :
     (∃ fits, NestedStorageHeaderResult input.heap .uint (rows []) (rowBound [] (by decide)) .nil input.base 8
       (wmod (W - 2)) (moved [] (wmod (W - 2))) outer fits) ∧
     run nestedStorageHeaderCode ((moved [empty] (wmod (W - 2))).push (.slot outer)) = .revert := by
-  have large : 1024 < W := wide
+  have large : 1024 < W := by decide
   have cursorValue : (wmod (W - 2)).val = W - 2 := Nat.mod_eq_of_lt (by omega)
   have above : 40 ≤ (wmod (W - 2)).val := by rw [cursorValue]; omega
   have fits : (wmod (W - 2)).val + nestedStorageParentDemand (rows []) < W := by
@@ -328,7 +327,7 @@ theorem header_selects_capacity :
 
 theorem child_refusal_after_header :
     run nestedStorageHeaderCode ((moved [empty] (wmod (W - 3))).push (.slot outer)) = .revert := by
-  have large : 1024 < W := wide
+  have large : 1024 < W := by decide
   have cursorValue : (wmod (W - 3)).val = W - 3 := Nat.mod_eq_of_lt (by omega)
   exact actual_refusal [empty] (by decide) .nil _ (by rw [cursorValue]; omega) (by
     change ¬ (wmod (W - 3)).val + 3 < W

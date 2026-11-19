@@ -45,9 +45,6 @@ private theorem rightLength : hp.len right .dyn=1 := by
 private theorem parentElements : MObj.elems .dyn (hp.get root)=[left,left] := by
   simp only [MObj.elems_dyn]
   rfl
-private theorem written_read (memory : Environment.Memory) (a value : Nat) :
-    Environment.readMemory (Environment.writeBytes memory a (Semantics.wordBytes value)) a 32=Semantics.wordBytes value := by
-  simpa only [Environment.wordBytes_length] using Environment.read_written (Semantics.wordBytes value) a memory
 private theorem image_read (c value : Nat) (hit : (c,value)∈image) :
     Environment.readMemory bytes (32*c) 32=Semantics.wordBytes value := by
   simp only [image,List.mem_cons,List.not_mem_nil,or_false,Prod.mk.injEq] at hit
@@ -55,7 +52,7 @@ private theorem image_read (c value : Nat) (hit : (c,value)∈image) :
   all_goals
     simp only [bytes,image,List.foldl_cons,List.foldl_nil]
     repeat (rw [readMemory_write_frame]; case sep => simp only [Environment.wordBytes_length];omega)
-    exact written_read _ _ _
+    exact Physical.word_read_written _ _ _
 private theorem parentAt : ReferenceArrayAt hp root base machine bytes := by
   constructor
   · constructor
@@ -173,9 +170,9 @@ theorem redirect_write_client :
 
 
 private theorem middle_written_read : Environment.readMemory middleBytes 544 32=Semantics.wordBytes 256 :=
-  written_read bytes 544 256
+  Physical.word_read_written bytes 544 256
 private theorem final_written_read : Environment.readMemory finalBytes 288 32=Semantics.wordBytes 1 :=
-  written_read middleBytes 288 1
+  Physical.word_read_written middleBytes 288 1
 private theorem middle_other_read (c value : Nat) (hit : (c,value)∈image) (different : c≠17) :
     Environment.readMemory middleBytes (32*c) 32=Semantics.wordBytes value := by
   unfold middleBytes
@@ -193,7 +190,7 @@ private theorem final_other_read (c value : Nat) (hit : (c,value)∈image) (notP
 private theorem final_pointer_read : Environment.readMemory finalBytes 544 32=Semantics.wordBytes 256 := by
   unfold finalBytes
   rw [readMemory_write_frame]
-  · exact written_read bytes 544 256
+  · exact Physical.word_read_written bytes 544 256
   · simp only [Environment.wordBytes_length]
     omega
 private theorem leftLength : hp.len left .dyn=2 := by

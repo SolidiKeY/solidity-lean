@@ -1,4 +1,5 @@
 import Solidity.Backend.MemoryCopies.NestedStorageParentInterface
+import Solidity.Backend.MemoryCopies.TraversalWords
 
 /-! Reserve the physical parent first, traverse actual children, then adopt the
 intrinsic parent after them. All execution uses existing target components. -/
@@ -186,4 +187,26 @@ def nestedStorageParent : NestedStorageParentCertificate := ⟨nested_storage_pa
 #print axioms nested_storage_parent_refusal
 #print axioms nested_storage_parent_correct
 #print axioms nestedStorageParent
+section
+open Evm Evm.Memory
+
+/-- Primitive elements own no live heap words. -/
+theorem primitive_elementWordCount {primitive : PrimTy} (items : List primitive.Denote) :
+    elementWordCount (SVec.ofList (items.map SVal.prim)) = 0 := by
+  induction items with
+  | nil => simp only [List.map_nil,SVec.ofList,elementWordCount]
+  | cons item items ih => simp only [List.map_cons,SVec.ofList,elementWordCount,liveWordCount,ih,Nat.zero_add]
+
+/-- The rows of a nested storage array own exactly their storage demand in live words. -/
+theorem nestedStorage_elementWordCount (primitive : PrimTy) (rows : List (PrimitiveStorageRow primitive)) :
+    elementWordCount (nestedStorageValues primitive rows) = nestedStorageDemand rows := by
+  induction rows with
+  | nil => rfl
+  | cons row rows ih =>
+    simp only [nestedStorageValues,elementWordCount,primitiveArrayValue,liveWordCount,
+      primitive_elementWordCount,List.length_map,nestedStorageDemand,ih]
+    omega
+
+end
+
 end Solidity.Backend.MemoryCopies
