@@ -36,6 +36,161 @@ namespace Solidity
 
 open Semantics
 
+/-- A statement's block-bearing constructor and its unvisited child lists.
+Statements without child blocks share `leaf`; loop forms remain distinct. -/
+inductive StmtControl where
+  | leaf
+  | block (body : List RawStmt)
+  | unchecked (body : List RawStmt)
+  | checked (body : List RawStmt)
+  | ite (yes no : List RawStmt)
+  | tryCall (ok err panic other : List RawStmt)
+  | whileLoop (body : List RawStmt)
+  | doWhile (body : List RawStmt)
+  | loop (body : List RawStmt)
+  | forLoop (init update body : List RawStmt)
+
+/-- Forget a statement's own expressions without forgetting its
+block-bearing constructor or any statement inside a child block. -/
+def RawStmt.control : RawStmt → StmtControl
+  | .block b => .block b
+  | .unchecked b => .unchecked b
+  | .checked _ b => .checked b
+  | .ite _ t e => .ite t e
+  | .tryCall _ _ _ _ ok err _ panic other => .tryCall ok err panic other
+  | .whileLoop _ _ b => .whileLoop b
+  | .doWhile _ b _ => .doWhile b
+  | .loop _ _ b => .loop b
+  | .forLoop _ i _ u b => .forLoop i u b
+  | _ => .leaf
+
+/-- Expression rewriting preserves more than numeric weight: it keeps the
+block-bearing constructor and every unvisited child statement, with the same effects. -/
+theorem RawStmt.mapExprsM_control {m : Type → Type} [Monad m] [LawfulMonad m]
+    (f : RawExpr → m RawExpr) (s : RawStmt) :
+    control <$> s.mapExprsM f = (fun _ => control s) <$> s.mapExprsM f := by
+  cases s <;> simp only [RawStmt.mapExprsM, map_bind,
+    LawfulApplicative.map_pure, control]
+
+/-- Rewriting a statement's own expressions leaves its control-tree
+weight unchanged, including the blocks held by loops and branches. The
+callback's effects are retained on both sides. -/
+theorem CalleeKernel.mapExprsM_weight {m : Type → Type} [Monad m] [LawfulMonad m]
+    (f : RawExpr → m RawExpr) (s : RawStmt) :
+    stmtWeight <$> s.mapExprsM f =
+      (fun _ => stmtWeight s) <$> s.mapExprsM f := by
+  cases s <;> simp only [RawStmt.mapExprsM, map_bind,
+    LawfulApplicative.map_pure, stmtWeight]
+
+/-- The control-weight equality also holds of a successful expression
+rewrite that accumulates a program while running the elaborator's states. -/
+theorem CalleeKernel.mapExprsM_run_weight {C : Contract}
+    (f : RawExpr → StateT (SProg C) ElabM RawExpr) (s s' : RawStmt)
+    (P P' : SProg C) (sc : ElabScope) (st st' : ECtx × Nat) (m m' : CallMemo)
+    (h : ((((s.mapExprsM f).run P).run sc).run st).run m = .ok (((s', P'), st'), m')) :
+    stmtWeight s' = stmtWeight s := by
+  have e := congrArg (fun x : StateT (SProg C) ElabM Nat => x P sc st m)
+    (mapExprsM_weight f s)
+  simp only [StateT.run, ReaderT.run] at h
+  simp only [Functor.map, StateT.map, bind, ReaderT.bind, StateT.bind,
+    pure, ReaderT.pure, StateT.pure, h, Except.bind, Except.pure] at e
+  exact congrArg (fun x => x.1.1.1) (Except.ok.inj e)
+
+namespace ElabControlProof
+
+private def Obs {α : Type} (x : ElabM α) (Q : α → Prop) : Prop :=
+  ∀ sc st m a st' m', x sc st m = .ok ((a, st'), m') → Q a
+private theorem obs_pure {α : Type} {a : α} {Q : α → Prop} (h : Q a) :
+    Obs (pure a) Q := by
+  intro sc st m b st' m' he
+  cases he
+  exact h
+private theorem obs_bind {α β : Type} {x : ElabM α} {f : α → ElabM β}
+    {P : α → Prop} {Q : β → Prop} (hx : Obs x P)
+    (hf : ∀ a, P a → Obs (f a) Q) : Obs (x >>= f) Q := by
+  intro sc st m b st' m' h
+  change (do let ((a, s), n) ← x sc st m; f a sc s n) = .ok ((b, st'), m') at h
+  cases he : x sc st m with
+  | error err => simp only [he, bind, Except.bind] at h; cases h
+  | ok v =>
+    rcases v with ⟨⟨a, s⟩, n⟩
+    simp only [he, bind, Except.bind] at h
+    exact hf a (hx sc st m a s n he) sc s n b st' m' h
+private theorem obs_any {α β : Type} {x : ElabM α} {f : α → ElabM β}
+    {Q : β → Prop} (hf : ∀ a, Obs (f a) Q) : Obs (x >>= f) Q :=
+  obs_bind (P := fun _ => True) (fun _ _ _ _ _ _ _ => trivial) (fun a _ => hf a)
+private theorem obs_throw {α : Type} {err : String} {Q : α → Prop} :
+    Obs (throw err : ElabM α) Q := by
+  intro sc st m a st' m' h
+  cases h
+private theorem obs_map {C : Contract} (f : RawExpr → StateT (SProg C) ElabM RawExpr)
+    (s : RawStmt) (P : SProg C) :
+    Obs ((s.mapExprsM f).run P) (fun out => out.1.control = s.control) := by
+  intro sc st m out st' m' h
+  have he := congrArg (fun x : StateT (SProg C) ElabM StmtControl => x P sc st m)
+    (RawStmt.mapExprsM_control f s)
+  simp only [Functor.map, StateT.map, bind, ReaderT.bind, StateT.bind,
+    pure, ReaderT.pure, StateT.pure, StateT.run] at h he
+  simp only [h, Except.bind, Except.pure] at he
+  exact congrArg (fun x => x.1.1.1) (Except.ok.inj he)
+private theorem assign_control [FreshNames] (C : Contract) (rc : ElabRec C)
+    (ha : ∀ l r, Obs (rc.hoistAssign l r) (fun out => out.2.control = .leaf))
+    (l r : RawExpr) : Obs (hoistStmtWith C rc (.assign l r))
+      (fun out => out.2.control = .leaf) := by
+  simp only [hoistStmtWith, bind_pure, pure_bind]
+  repeat (with_reducible first
+    | contradiction
+    | (apply obs_pure; dsimp only [RawStmt.control] <;> rfl)
+    | exact obs_throw
+    | exact ha _ _
+    | (apply obs_any; intro x)
+    | split)
+private theorem hoist_control [FreshNames] (C : Contract) (rc : ElabRec C)
+    (ha : ∀ l r, Obs (rc.hoistAssign l r) (fun out => out.2.control = .leaf))
+    (s : RawStmt) : Obs (hoistStmtWith C rc s) (fun out => out.2.control = s.control) := by
+  cases s
+  case assign l r => exact assign_control C rc ha l r
+  all_goals simp only [hoistStmtWith, bind_pure, pure_bind, RawStmt.control]
+  all_goals repeat (with_reducible first
+    | contradiction
+    | (apply obs_pure; dsimp only [RawStmt.control] <;> rfl)
+    | exact obs_throw
+    | exact ha _ _
+    | (apply obs_bind (obs_map ..); intro out h
+       apply obs_pure
+       simpa only [RawStmt.control] using h)
+    | (apply obs_any; intro x)
+    | split)
+
+end ElabControlProof
+
+/-- Numeric control weight is a projection of the retained constructor and child lists. -/
+def StmtControl.weight : StmtControl → Nat
+  | .leaf => 1
+  | .block b | .unchecked b | .checked b | .whileLoop b | .doWhile b | .loop b =>
+      CalleeKernel.listWeight b + 1
+  | .ite t e => CalleeKernel.listWeight t + CalleeKernel.listWeight e + 1
+  | .tryCall ok err panic other => CalleeKernel.listWeight ok + CalleeKernel.listWeight err +
+      CalleeKernel.listWeight panic + CalleeKernel.listWeight other + 1
+  | .forLoop i u b => 2 * CalleeKernel.listWeight i + CalleeKernel.listWeight u +
+      CalleeKernel.listWeight b + 1
+
+/-- Retaining a statement's control also retains its existing termination weight. -/
+theorem RawStmt.control_weight (s : RawStmt) : s.control.weight = CalleeKernel.stmtWeight s := by
+  cases s <;> rfl
+
+/-- Successful hoisting keeps the block-bearing constructor and all child
+statements, provided assignment hoisting returns a statement without child blocks. -/
+theorem hoistStmtWith_control [FreshNames] {C : Contract} (rc : ElabRec C)
+    (ha : ∀ l r sc st m out st' m',
+      (((rc.hoistAssign l r).run sc).run st).run m = .ok ((out, st'), m') →
+        out.2.control = .leaf)
+    (s : RawStmt) (sc : ElabScope) (st : ECtx × Nat) (m : CallMemo)
+    (out : SProg C × RawStmt) (st' : ECtx × Nat) (m' : CallMemo)
+    (h : (((hoistStmtWith C rc s).run sc).run st).run m = .ok ((out, st'), m')) :
+    out.2.control = s.control :=
+  ElabControlProof.hoist_control C rc ha s sc st m out st' m' h
+
 /-- No element of a well-founded relation lies on a cycle of three. -/
 theorem rel_cycle3 {α : Type} [WellFoundedRelation α] {a b c : α}
     (h1 : WellFoundedRelation.rel a b) (h2 : WellFoundedRelation.rel b c)

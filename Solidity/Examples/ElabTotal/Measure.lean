@@ -188,6 +188,45 @@ def forT : RawStmt := .forLoop {} [eS] none [] []
 /-- `{ e; loop (true) { } }`: `forT`, lowered. -/
 def blk : RawStmt := .block [eS, .loop {} (.bool true) []]
 
+/-- The spike's two statements have equal control weight: weight equality
+alone cannot distinguish the loop from its lowered block. -/
+example : CalleeKernel.stmtWeight forT = CalleeKernel.stmtWeight blk := rfl
+
+/-- Rewriting only a loop's expressions cannot produce the spike's block,
+even when the callback may fail or return arbitrary expressions. -/
+example (f : RawExpr → Except String RawExpr) : forT.mapExprsM f ≠ .ok blk := by
+  intro h
+  have he := RawStmt.mapExprsM_control f forT
+  rw [h] at he
+  cases he
+
+/-- An assignment cannot acquire the loop initializer used by the spy below,
+even if its expression callback returns arbitrary expressions and programs. -/
+example [FreshNames] (hoist : RawExpr → ElabM (SProg C0 × RawExpr))
+    (l r : RawExpr) (sc : ElabScope) (st st' : ECtx × Nat) (m m' : CallMemo)
+    (P : SProg C0) :
+    (((hoistAssignWith C0 hoist l r).run sc).run st).run m ≠
+      .ok (((P, forT), st'), m') := by
+  intro h
+  obtain ⟨l', r', he⟩ := hoistAssignWith_shape C0 hoist l r sc st st' m m' (P, forT) h
+  cases he
+
+/-- The actual assignment helper supplies the only helper assumption in the guard. -/
+example [FreshNames] (C : Contract) (rc : ElabRec C)
+    (s : RawStmt) (sc : ElabScope) (st : ECtx × Nat) (m : CallMemo)
+    (out : SProg C × RawStmt) (st' : ECtx × Nat) (m' : CallMemo)
+    (h : (((hoistStmtWith C { rc with hoistAssign := hoistAssignWith C rc.hoist } s).run sc).run st).run m =
+      .ok ((out, st'), m')) : out.2.control = s.control ∧
+      CalleeKernel.stmtWeight out.2 = CalleeKernel.stmtWeight s := by
+  have hc : out.2.control = s.control := by
+    refine hoistStmtWith_control _ ?_ s sc st m out st' m' h
+    intro l r sc st m out st' m' he
+    obtain ⟨l', r', hs⟩ := hoistAssignWith_shape C rc.hoist l r sc st st' m m' out he
+    rw [hs]
+    rfl
+  refine ⟨hc, ?_⟩
+  simpa only [RawStmt.control_weight] using congrArg StmtControl.weight hc
+
 /-- What bounds inlining at a call: the scope's functions, recursive frames and
 inlined calls. -/
 def scopeTag (sc : ElabScope) : String :=
