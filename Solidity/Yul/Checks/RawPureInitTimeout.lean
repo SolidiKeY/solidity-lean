@@ -50,8 +50,8 @@ theorem breakCounterexample : (Solidity.Yul.RawSourceAdapterFor.run (Solidity.Yu
 theorem initializerCounterexample : ∀ (glob : Solidity.Source.Glob Solidity.Yul.Checks.RawPureInitTimeout.env) (frame : Solidity.Source.Fr) (nps : Nat) (ph : Option (Solidity.Source.Ph Solidity.Yul.Checks.RawPureInitTimeout.env)), Solidity.Source.firstDone (fun fuel => (Solidity.Source.execS glob frame fuel nps ph Solidity.Yul.Checks.RawPureInitTimeout.Old.invalidInitialized Solidity.Yul.Checks.RawPureInitTimeout.initial.clean).run (Solidity.Source.L0 Solidity.Yul.Checks.RawPureInitTimeout.env,Solidity.Yul.Checks.RawPureInitTimeout.initial.world)) 2 ≠ none :=
   Solidity.Yul.Checks.RawSourceLoopTimeout.initializedCounterexample
 
-theorem dirtyRefusal : Solidity.Yul.RawCoherent.coherent Solidity.Yul.Checks.RawPureInitTimeout.dirty = false := by
-  exact Solidity.Yul.Checks.RawPureInitTimeout.Old.dirtyInput.1
+theorem dirtyRefusal : Solidity.Yul.RawCoherent.coherent Solidity.Yul.Checks.RawPureInitTimeout.dirty = false :=
+  Solidity.Yul.Checks.RawStatementHorizon.dirtyRefusal
 
 /-- Initializer stage only; the loop prefix is checked in RawPureInitPrefix. -/
 theorem initializerPrefix : (Solidity.Yul.RawSequence.block Solidity.Yul.Checks.RawPureInitTimeout.initProof 5 Solidity.Yul.Checks.RawPureInitTimeout.dirty).1 = .ok () ∧ (Solidity.Yul.RawFrame.view (Solidity.Yul.RawSequence.block Solidity.Yul.Checks.RawPureInitTimeout.initProof 5 Solidity.Yul.Checks.RawPureInitTimeout.dirty).2 Solidity.Yul.Checks.RawStatementHorizon.flag).val = 1 ∧ (Solidity.Yul.RawFrame.view (Solidity.Yul.RawSequence.block Solidity.Yul.Checks.RawPureInitTimeout.initProof 5 Solidity.Yul.Checks.RawPureInitTimeout.dirty).2 Solidity.Yul.Checks.RawStatementHorizon.small).val = 257 := by

@@ -49,11 +49,8 @@ theorem pipelineCounterexample : ∀ (world : Solidity.Source.St Solidity.Yul.Ch
 
 
 theorem dirtyBoundary : ∀ (world : Solidity.Source.St Solidity.Yul.Checks.RawCheckedWhileHorizon.Old.env),
- Solidity.Yul.RawCoherent.coherent (Solidity.Yul.Checks.RawCheckedWhileHorizon.Old.initial 2 257 2 world) ≠ true := by
-  intro world
-  rw [Solidity.Yul.Checks.RawCheckedWhile.dirtyBoundary world]
-  intro bad
-  cases bad
+ Solidity.Yul.RawCoherent.coherent (Solidity.Yul.Checks.RawCheckedWhileHorizon.Old.initial 2 257 2 world) ≠ true :=
+  Solidity.Yul.Checks.RawU8Statement.dirtyNotCoherent
 
 theorem foreverRefuses : ∀ (pipeline : Solidity.Roadmap.Pipeline) (fuel : Nat) (state : Solidity.Yul.RawFrame.State Solidity.Yul.Checks.RawCheckedWhileHorizon.Old.ctx),
  (Solidity.Yul.RawCheckedWhile.run Solidity.Yul.Checks.RawCheckedWhileHorizon.Old.always Solidity.Yul.Checks.RawCheckedWhileHorizon.Old.emptyProof pipeline fuel state).1 ≠ .error .timeout → False := by
@@ -134,11 +131,7 @@ theorem cleanSourceStable : ∀ (glob : Solidity.Source.Glob Solidity.Yul.Checks
   have ready : (RawCheckedWhile.run Old.readFlag Old.copyProof glob.pipeline 7
       (RawFrame.ofClean Old.clean world)).1 ≠ .error .timeout := by
     intro bad
-    have timed : (RawSequence.represented (RawCheckedWhile.run Old.readFlag Old.copyProof glob.pipeline 7
-        (RawFrame.ofClean Old.clean world))).1 = .error .timeout := by
-      simp only [RawSequence.represented,bad,Except.map]
-    have impossible := completion.symm.trans timed
-    cases impossible
+    simp only [RawSequence.represented, bad, Except.map] at completion <;> cases completion
   exact RawCheckedWhileHorizon.sourceExtension Old.ctx [] false false false _
     Old.readFlag Old.copyItems Old.copyProof glob frame checked 7 extra nps ph
     (RawFrame.ofClean Old.clean world) (@RawCoherent.coherent_ofClean Old.ctx Old.clean world) ready

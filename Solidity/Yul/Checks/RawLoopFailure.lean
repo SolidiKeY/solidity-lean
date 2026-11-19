@@ -47,8 +47,8 @@ theorem dirtyPostPrefix : (Solidity.Yul.RawSourceForPost.run (.base (.literal tr
 theorem breakCounterexample : (Solidity.Yul.RawControlledWhile.run (.base (.literal true)) Solidity.Yul.Checks.RawLoopFailure.Old.breakProof 2 Solidity.Yul.Checks.RawLoopFailure.dirty).1 = .ok () ∧ Solidity.Yul.RawNoGuardFailure.noBreak Solidity.Yul.Checks.RawLoopFailure.Old.breakProof = false ∧ (Solidity.Yul.RawFrame.view (Solidity.Yul.RawControlledWhile.run (.base (.literal true)) Solidity.Yul.Checks.RawLoopFailure.Old.breakProof 2 Solidity.Yul.Checks.RawLoopFailure.dirty).2 Solidity.Yul.Checks.RawLoopFailure.flag).val = 2 ∧ (Solidity.Yul.RawFrame.view (Solidity.Yul.RawControlledWhile.run (.base (.literal true)) Solidity.Yul.Checks.RawLoopFailure.Old.breakProof 2 Solidity.Yul.Checks.RawLoopFailure.dirty).2 Solidity.Yul.Checks.RawLoopFailure.small).val = 257 := by
   exact ⟨rfl,rfl,rfl,rfl⟩
 
-theorem initializerCounterexample : (Solidity.Yul.Checks.RawLoopFailure.Old.refusedBreak.run 2 Solidity.Yul.Checks.RawLoopFailure.dirty).1 = .error (.stuck "for initializer") ∧ (Solidity.Source.Halt.stuck "for initializer" ≠ .timeout) := by
-  exact ⟨Solidity.Yul.Checks.RawLoopFailure.Old.breakRefusal.1,by intro bad; cases bad⟩
+theorem initializerCounterexample : (Solidity.Yul.Checks.RawLoopFailure.Old.refusedBreak.run 2 Solidity.Yul.Checks.RawLoopFailure.dirty).1 = .error (.stuck "for initializer") ∧ (Solidity.Source.Halt.stuck "for initializer" ≠ .timeout) :=
+  Solidity.Yul.Checks.RawInitializedForHorizon.initializerCounterexample
 
 #print axioms Solidity.Yul.RawLoopFailure.while_error
 #print axioms Solidity.Yul.RawLoopFailure.do_while_error
