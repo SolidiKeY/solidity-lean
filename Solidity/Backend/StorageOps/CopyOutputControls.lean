@@ -293,20 +293,7 @@ theorem slot_combinations :
     (by intro value same; cases same) one rfl
   have ya := slot_output (Slot.present (.prim (p := .bool) true) : Slot CopyDemandControls.graph (.prim .bool)) .absent p q one before zero rfl
   have yn := slot_output (Slot.present (.prim (p := .bool) true) : Slot CopyDemandControls.graph (.prim .bool)) (.present (.prim (p := .bool) false)) p q one before zero rfl
-  change (traceWord q _ seven,traceWord q _ seven,traceWord q _ one,traceWord q _ one) = _
-  have first : traceWord q (CopyWrites.slotWrites (.absent : Slot CopyDemandControls.graph (.prim .bool)) .absent (fun _ => seven)) seven = zero := aa
-  have third : traceWord q (CopyWrites.slotWrites (Slot.present (.prim (p := .bool) true) : Slot CopyDemandControls.graph (.prim .bool)) .absent (fun _ => seven)) one = zero := ya
-  have second : traceWord q (CopyWrites.slotWrites (.absent : Slot CopyDemandControls.graph (.prim .bool))
-      (.present (.prim true)) (fun _ => one)) seven = one := by
-    change traceWord q [(q,zero),(q,one)] seven = one
-    change traceWord q [(q,zero),(q,one)] seven = one at ay
-    exact ay
-  have fourth : traceWord q (CopyWrites.slotWrites (Slot.present (.prim true) : Slot CopyDemandControls.graph (.prim .bool))
-      (.present (.prim false)) (fun _ => zero)) one = zero := by
-    change traceWord q [(q,zero)] one = zero
-    change traceWord q [(q,zero)] one = zero at yn
-    exact yn
-  rw [first,second,third,fourth]
+  exact Prod.ext aa (Prod.ext ay (Prod.ext ya yn))
 
 private def twoSize : FixedSize := ⟨2,by decide⟩
 private abbrev FixedNodes : TypeGraph.Ty 1 := .fixed (.array (.node 0)) twoSize

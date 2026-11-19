@@ -112,13 +112,12 @@ theorem custom_agreement (pipeline : Roadmap.Pipeline) :
           Lowering.V08.BoolErrorControls.bits))},
         some (.revert (Lowering.V08.BoolErrorLowering.payload (global pipeline)
           (Lowering.V08.BoolErrorControls.declaration 3) Lowering.V08.BoolErrorControls.bits))) := by
-  refine ⟨compile_custom_selected (global pipeline) 8 customStmt (customCode pipeline) ?_, ?_, ?_⟩
-  · exact Lowering.V08.BoolErrorCompleteness.emit_complete (global pipeline) 8 _ _ _
-  · exact Lowering.V08.BoolErrorLowering.source_run (global pipeline) frame 0
-      (Lowering.V08.BoolErrorControls.declaration 3) Lowering.V08.BoolErrorControls.bits
-      Lowering.V08.BoolErrorControls.typed_three locals populated
-  · exact Lowering.V08.BoolErrorLowering.emitted_run (global pipeline) _ _ 8 tail machine
-      (Lowering.V08.BoolErrorControls.fits pipeline) (by decide +kernel)
+  refine ⟨compile_custom_selected (global pipeline) 8 customStmt (customCode pipeline)
+    (Lowering.V08.BoolErrorCompleteness.emit_complete (global pipeline) 8 _ _ _), ?_⟩
+  exact Lowering.V08.BoolErrorLowering.lowered (global pipeline) frame 0
+    (Lowering.V08.BoolErrorControls.declaration 3) Lowering.V08.BoolErrorControls.bits
+    Lowering.V08.BoolErrorControls.typed_three locals populated 8 tail machine
+    (Lowering.V08.BoolErrorControls.fits pipeline) (by decide +kernel)
 
 theorem skip_refused (pipeline : Roadmap.Pipeline) :
     compileStatement (global pipeline) 5 (.skip : RStmt E [] false .body [.bool] [.bool]) = none := rfl
