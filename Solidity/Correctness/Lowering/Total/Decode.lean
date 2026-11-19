@@ -105,12 +105,29 @@ def components : List RawExpr → Option (Syn (.list (.opt .expr)))
   | e :: es => do pure (.cons (.some (← expr e)) (← components es))
 end
 
-/-- Local declaration types: the three primitive types by their canonical
-names. Narrow integers, `address`, references and user types are gaps. -/
+/-- The Source elementary type of a model primitive at a width: `bool`, or
+`uintN`/`intN` for a width that is a multiple of 8 in `8 … 256`. -/
+def primElem : PrimTy → Nat → Option Source.Elem
+  | .bool, bits => if bits = 256 then some .bool else none
+  | .uint, bits =>
+    if h : bits % 8 = 0 ∧ 8 ≤ bits ∧ bits ≤ 256 then some (.int false bits h) else none
+  | .int, bits =>
+    if h : bits % 8 = 0 ∧ 8 ≤ bits ∧ bits ≤ 256 then some (.int true bits h) else none
+
+/-- The Source type of a model primitive at a width. -/
+def primTy (p : PrimTy) (bits : Nat) : Option STy := (primElem p bits).map (Source.Elem.ty .memory)
+
+/-- Local declaration types: `bool`, `uint`/`int` (256 bits) and the narrow
+`uintN`/`intN`, by name. `address`, `bytesN`, enums, references and user types
+are gaps. -/
 def typeName : RawTy → Option (Syn .typeName)
-  | .named "bool" => some (.elem .bool)
-  | .named "uint" | .named "uint256" => some (.elem uintElem)
-  | .named "int" | .named "int256" => some (.elem intElem)
+  | .named s =>
+    if s = "bool" then some (.elem .bool)
+    else if s = "uint" ∨ s = "uint256" then (primElem .uint 256).map .elem
+    else if s = "int" ∨ s = "int256" then (primElem .int 256).map .elem
+    else match narrowTy? s with
+      | some (p, bits) => (primElem p bits).map .elem
+      | none => none
   | _ => none
 
 /-- Simple statements: a declaration, an assignment, an update, a builtin
@@ -198,11 +215,11 @@ def items (k : SCtx) : List RawStmt → Option (Syn (.list (.item k)))
   | s :: rest => do pure (.cons (.stmtItem (← stmt k s)) (← items k rest))
 end
 
-/-- Source type of a model local: a full-width primitive with no shape rows.
-Narrow locals, locals carrying a shape (the marker of an erased `address`,
-`bytes32`, enum or function type), references and formula locals are gaps. -/
+/-- Source type of a model local: a primitive at its declared width with no
+shape rows. Locals carrying a shape (the marker of an erased `address`,
+`bytesN`, enum or function type), references and formula locals are gaps. -/
 def localTy : LocalTy → Option STy
-  | .val p 256 [] => some (Source.Agreement.sourceTy p)
+  | .val p bits [] => primTy p bits
   | _ => none
 
 /-- The Source locals of a model context, innermost first, by name. -/
@@ -210,29 +227,31 @@ def locals : ECtx → Option (List (String × STy))
   | [] => some []
   | (x, t) :: Γ => do pure ((x, ← localTy t) :: (← locals Γ))
 
-/-- State variable types: primitive only (references are gaps). A model `uint`
-is spelled `uint256` even where the original declared `address` or an enum:
-the model has erased that, and `relates` must absorb it. -/
-def stateTy : Ty → Option (Syn .typeName)
-  | .prim .bool => some (.elem .bool)
-  | .prim .uint => some (.elem uintElem)
-  | .prim .int => some (.elem intElem)
+/-- State variable types: a primitive at its width (references are gaps). -/
+def stateTy (bits : Nat) : Ty → Option (Syn .typeName)
+  | .prim p => (primElem p bits).map .elem
   | _ => none
 
-/-- The state variables, in declaration order. Transient roots are gaps. -/
-def stateVars : List (Name × Ty) → Option (Syn (.list (.part false)))
+/-- The width of a state variable: its row in the width table, or 256. -/
+def stateBits (widths : List (Name × Nat)) (x : Name) : Nat :=
+  (Semantics.lookupBy x widths).getD 256
+
+/-- The state variables, in declaration order, each at its width. -/
+def stateVars (widths : List (Name × Nat)) : List (Name × Ty) → Option (Syn (.list (.part false)))
   | [] => some .nil
   | (x, T) :: rest => do
-      pure (.cons (.stateVar (← stateTy T) none none none false x .none) (← stateVars rest))
+      pure (.cons (.stateVar (← stateTy (stateBits widths x) T) none none none false x .none)
+        (← stateVars widths rest))
 
 /-- The canonical Source unit of a model contract: one contract with its
-state variables. Functions, enums, the constructor, initializers and narrow
-widths are not spelled, so a request that calls a function, or whose contract
-has any of them, is a gap. -/
+state variables at their widths. Functions, enums, the constructor and
+initializers are not spelled, and a width row that is not a state variable's
+own width (a marker such as `x#address`, or a position below a reference) is
+not read, so a contract with any of them is a gap. -/
 def unit (C : Contract) : Option (Syn .unit) :=
   if C.transientRoots.isEmpty && C.funs.isEmpty && C.enums.isEmpty && C.ctor.isNone &&
-      C.widths.isEmpty && C.inits.isEmpty then
-    (stateVars C.vars).map fun parts =>
+      (C.widths.all fun w => C.vars.any fun v => v.1 == w.1) && C.inits.isEmpty then
+    (stateVars C.widths C.vars).map fun parts =>
       .unit (.cons (.contract false contractName .none .nil parts) .nil)
   else none
 

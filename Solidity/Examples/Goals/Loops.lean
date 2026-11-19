@@ -131,12 +131,17 @@ example : Decode.decode (sampleRequest [.assign (.name "i") (.name "z")]) = none
 example : Decode.decode (sampleRequest [.brk]) = none := rfl
 example : Decode.decode (sampleRequest [.eval []]) = none := rfl
 
-/-- A primitive state variable resolves in the canonical unit; a narrow one
-is a gap. -/
+/-- A primitive state variable resolves in the canonical unit, a narrow one
+at its width (`uint8 s`: assigning 1 types, assigning 256 does not); a width
+row that is a marker is a gap. -/
 example : (Decode.decode { sampleRequest [.assign (.name "s") (.name "a")] with
     contract := { vars := [("s", .prim .bool)] } }).isSome = true := rfl
-example : Decode.decode { sampleRequest [.assign (.name "s") (.num 1)] with
+example : (Decode.decode { sampleRequest [.assign (.name "s") (.num 1)] with
+    contract := { vars := [("s", .prim .uint)], widths := [("s", 8)] } }).isSome = true := rfl
+example : Decode.decode { sampleRequest [.assign (.name "s") (.num 256)] with
     contract := { vars := [("s", .prim .uint)], widths := [("s", 8)] } } = none := rfl
+example : Decode.decode { sampleRequest [.assign (.name "s") (.num 1)] with
+    contract := { vars := [("s", .prim .uint)], widths := [("s#address", 20)] } } = none := rfl
 
 /-- Spellings no e1 sample exercises, over `uint x`, `int y`, `bool a`: each is
 typed by Source inference (that it means what the model gives it is open). -/
@@ -160,14 +165,33 @@ example : (Decode.decode (wordRequest
     [.loop {} (.name "a") [.assign (.name "a") (.bool false)], .require (.name "a"),
      .assert (.unop .not (.name "a")), .revert])).isSome = true := rfl
 /-- Further gaps: a wrapping operator, a cast written as a call, nested
-`unchecked`, a narrow local. -/
+`unchecked`, a local with a width that is no integer type's, a local marked
+as an erased `address`. -/
 example : Decode.decode (wordRequest [.assign (.name "x") (.binop .addW (.name "x") (.num 1))]) =
     none := rfl
 example : Decode.decode (wordRequest [.assign (.name "x") (.call "uint" [.name "y"])]) = none := rfl
 example : Decode.decode (wordRequest [.unchecked [.unchecked []]]) = none := rfl
 example : Decode.decode { wordRequest [] with
-    input := { (wordRequest []).input with before := ⟨([("n", .val .uint 8)], 1), {}⟩ } } =
+    input := { (wordRequest []).input with before := ⟨([("n", .val .uint 12)], 1), {}⟩ } } =
     none := rfl
+example : Decode.decode { wordRequest [] with
+    input := { (wordRequest []).input with
+      before := ⟨([("n", .val .uint 256 [("#address", 20)])], 1), {}⟩ } } = none := rfl
+/-- Narrow locals decode at their widths: over `uint8 n; int16 k`, the
+assignment `n = n` types and `n = k` does not. -/
+example : (Decode.decode { wordRequest [.assign (.name "n") (.name "n")] with
+    input := { (wordRequest [.assign (.name "n") (.name "n")]).input with
+      before := ⟨([("n", .val .uint 8), ("k", .val .int 16)], 1), {}⟩ } }).isSome = true := rfl
+example : Decode.decode { wordRequest [.assign (.name "n") (.name "k")] with
+    input := { (wordRequest [.assign (.name "n") (.name "k")]).input with
+      before := ⟨([("n", .val .uint 8), ("k", .val .int 16)], 1), {}⟩ } } = none := rfl
+/-! A narrow declaration by name (`uint8 m = n; int16 j = k;`) decodes too. The
+name is read by string functions, so this is evaluated, not kernel-checked. -/
+#guard (Decode.decode { wordRequest [.decl (.named "uint8") "m" (some (.name "n")),
+      .decl (.named "int16") "j" (some (.name "k"))] with
+    input := { (wordRequest [.decl (.named "uint8") "m" (some (.name "n")),
+        .decl (.named "int16") "j" (some (.name "k"))]).input with
+      before := ⟨([("n", .val .uint 8), ("k", .val .int 16)], 1), {}⟩ } }).isSome
 
 /-- The decoder reads only plain requests: a callee body, return slots or an
 `unchecked` scope is a gap, not a guess. -/
@@ -275,14 +299,14 @@ example :
             (Observe.target program).behaviour)) :=
   (contract_reference_iff _ _).trans loopResidualStage1_iff
 
-/-- The stage-1 value relation: a model `uint` and the Source `uint256` of the
-same number are related; a `uint` and a `bool` are not. -/
+/-- The value relation: a model `uint` and the Source `uint256` of the same
+number are related; a `uint` and a `bool` are not. -/
 example (E : Source.Env) (C : Contract) (H : HTy) (x : PrimTy.uint.Denote) :
     ∃ v, (loopRel E C).val H (.int Source.IntTy.u256) (.val .uint) v x :=
   Relation.val_total E C H .uint x
 example (E : Source.Env) (C : Contract) (H : HTy) (v : Source.Val E.layout .bool)
     (x : PrimTy.uint.Denote) : ¬ (loopRel E C).val H .bool (.val .uint) v x :=
-  fun ⟨h, _⟩ => nomatch h
+  fun h => nomatch h
 
 /-- H1033: the Source policy allows exactly the admitted executions, and an
 execution with a failure plan is not one. -/
@@ -350,10 +374,12 @@ example : cellEnv.cellTy ⟨⟨some Decode.contractName, "k"⟩, []⟩ =
     Source.Agreement.sourceTy .int := rfl
 
 /-- The general cell-type equation: in the canonical unit, the cell of the
-state variable the model reads under a name has that primitive's Source type. -/
+state variable the model reads under a name has the decoder's Source type of
+that primitive at the variable's width. -/
 example {C : Contract} {u : Source.Syn .unit} (h : Decode.unit C = some u) {x : Name}
     {p : PrimTy} (hx : Semantics.lookupBy x C.vars = some (.prim p)) :
-    u.env.cellTy ⟨⟨some Decode.contractName, x⟩, []⟩ = Source.Agreement.sourceTy p :=
+    ∃ τ, Decode.primTy p (Decode.stateBits C.widths x) = some τ ∧
+      u.env.cellTy ⟨⟨some Decode.contractName, x⟩, []⟩ = τ :=
   Decode.unit_cellTy h hx
 
 /-- Total initial matching is a theorem for the stage-1 relation: the state

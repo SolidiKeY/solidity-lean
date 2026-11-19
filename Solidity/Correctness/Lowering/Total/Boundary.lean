@@ -452,13 +452,14 @@ theorem Bound.simulates {decode : Request → Option SourceProgram} (h : Bound r
 
 end Simulation
 
-/-! ## The concrete state relation (stage 1)
+/-! ## The concrete state relation
 
-The state relation of the fragment the stage-1 decoder covers. Values: a
-primitive model value and the Source value of the corresponding type, by
-`Source.Agreement.PrimitiveRel`; no other pair of types is related. Globals:
-each primitive state variable holds related values in the model storage and
-in the storage of the running Source account, at the canonical unit's path;
+The state relation of the fragment the decoder covers. Values: a model
+primitive and a Source Boolean or integer of the same signedness holding the
+same number (`ValRel`); the Source width is not fixed by the relation, the
+decoder's types fix it. No other pair of types is related. Globals: each
+primitive state variable holds related values in the model storage and in the
+storage of the running Source account, at the canonical unit's path;
 `msg.value` and the block timestamp agree; the Source frame is not static and
 checks arithmetic. A contract with a state variable of any other type has no
 related globals, as the decoder has no unit for it.
@@ -467,24 +468,32 @@ Not related, so unconstrained: memory heaps; the ledger, balances and
 `selfBalance`; the caller and own address; external-call results (`tx.ext`);
 transient storage; other accounts; the Source journal, events, logs, function
 locals and resource metadata; the frame's contract, depth and calldata; and
-all of the Source globals but the timestamp. No related pair is exhibited and
-no total initial matching is proved: `Simulation.InitialMatching` states it,
-and it needs the cell type at each path to equal the declared type. -/
+all of the Source globals but the timestamp. Total initial matching for this
+relation is proved below (`Simulation.initialMatching_loopRel`). -/
 namespace Relation
 
-open Source.Agreement (sourceTy PrimitiveRel)
+/-- A model primitive value and the Source value it stands for: the same
+Boolean, or the same number at an integer type of the primitive's sign. -/
+inductive ValRel (D : Source.Layout) :
+    (τ : Source.STy) → (p : PrimTy) → Source.Val D τ → p.Denote → Prop where
+  | bool (b : Bool) : ValRel D .bool .bool (.bool b) b
+  | uint (t : Source.IntTy) (unsigned : t.signed = false) (n : Int) (h : t.lo ≤ n ∧ n ≤ t.hi)
+      (x : PrimTy.uint.Denote) (same : x.1 = n) : ValRel D (.int t) .uint (.int n h) x
+  | int (t : Source.IntTy) (signed : t.signed = true) (n : Int) (h : t.lo ≤ n ∧ n ≤ t.hi)
+      (x : PrimTy.int.Denote) (same : x.1 = n) : ValRel D (.int t) .int (.int n h) x
 
-/-- Values: primitives at corresponding types. -/
+/-- Values: primitives only. -/
 def val (E : Source.Env) (C : Contract) (H : HTy) (τ : Source.STy) :
     (u : LTy) → Source.Val E.layout τ → u.TDenote C H → Prop
-  | .val p, v, x => ∃ h : τ = sourceTy p, PrimitiveRel E.layout p (h ▸ v) x
+  | .val p, v, x => ValRel E.layout τ p v x
   | _, _, _ => False
 
 /-- One state variable: a primitive holds related values at its path. -/
 def field {D : Source.Layout} (read : Source.SPath → Option ((τ : Source.STy) × Source.Val D τ))
     (x : Name) : {T : Ty} → SVal T → Prop
   | _, .prim (p := p) w =>
-    ∃ v, read ⟨⟨some Decode.contractName, x⟩, []⟩ = some ⟨sourceTy p, v⟩ ∧ PrimitiveRel D p v w
+    ∃ (τ : Source.STy) (v : Source.Val D τ),
+      read ⟨⟨some Decode.contractName, x⟩, []⟩ = some ⟨τ, v⟩ ∧ ValRel D τ p v w
   | _, _ => False
 
 /-- Every state variable, in declaration order. -/
@@ -503,14 +512,16 @@ def glob (E : Source.Env) (C : Contract) (G : Source.Glob E) (F : Source.Fr) (st
 
 end Relation
 
-/-- The value relation is total on primitives: every model primitive has a
-related Source value. (Nothing of the kind is proved for globals.) -/
-theorem Relation.val_total (E : Source.Env) (C : Contract) (H : HTy) (p : PrimTy)
-    (x : p.Denote) :
-    ∃ v, Relation.val E C H (Source.Agreement.sourceTy p) (.val p) v x :=
-  ⟨Source.Agreement.ofModel E.layout p x, rfl, Source.Agreement.ofModel_related E.layout p x⟩
+/-- Every model primitive has a related Source value at the full-width type. -/
+theorem Relation.val_total (E : Source.Env) (C : Contract) (H : HTy) : (p : PrimTy) →
+    (x : p.Denote) → ∃ v, Relation.val E C H (Source.Agreement.sourceTy p) (.val p) v x
+  | .bool, b => ⟨.bool b, .bool b⟩
+  | .uint, x => ⟨.int x.1 ((Source.Agreement.uint_range x.1).mp x.2),
+      .uint Source.IntTy.u256 rfl _ _ x rfl⟩
+  | .int, x => ⟨.int x.1 ((Source.Agreement.int_range x.1).mp x.2),
+      .int { Source.IntTy.u256 with signed := true } rfl _ _ x rfl⟩
 
-/-- The stage-1 state relation. -/
+/-- The state relation. -/
 def loopRel (E : Source.Env) (C : Contract) : Simulation.StateRelation E C :=
   ⟨Relation.val E C, Relation.glob E C⟩
 
@@ -518,22 +529,91 @@ def loopRel (E : Source.Env) (C : Contract) : Simulation.StateRelation E C :=
 theorem loopRel_reflect (E : Source.Env) (C : Contract) (H : HTy)
     (v : Source.Val E.layout .bool) (b : Bool)
     (h : (loopRel E C).val H .bool (.val .bool) v b) : v = .bool b := by
-  obtain ⟨_, r⟩ := h
-  cases r
+  cases h
   rfl
 
 /-- It relates `false` to `false`. -/
 theorem loopRel_false (E : Source.Env) (C : Contract) (H : HTy) :
     (loopRel E C).val H .bool (.val .bool) (.bool false) false :=
-  ⟨rfl, .bool false⟩
+  .bool false
+
+/-! ## The decoder's primitive types
+
+A primitive slot is a model primitive together with a Source type the decoder
+gives it at some width. Every Source value of such a type is the image of a
+model value: a narrow integer is in the full-width range. -/
+namespace Simulation
+
+/-- `τ` is the decoder's Source type of the primitive `p` at some width. -/
+def Prim (p : PrimTy) (τ : Source.STy) : Prop := ∃ bits, Decode.primTy p bits = some τ
+
+/-- The shape of a primitive slot's Source type. -/
+theorem Prim.cases {p : PrimTy} {τ : Source.STy} (h : Prim p τ) :
+    (p = .bool ∧ τ = .bool) ∨
+    (∃ t : Source.IntTy, τ = .int t ∧ ((p = .uint ∧ t.signed = false) ∨
+      (p = .int ∧ t.signed = true))) := by
+  obtain ⟨bits, h⟩ := h
+  simp only [Decode.primTy, Option.map_eq_some_iff] at h
+  obtain ⟨e, he, rfl⟩ := h
+  cases p with
+  | bool =>
+    simp only [Decode.primElem] at he
+    split at he
+    · cases he; exact .inl ⟨rfl, rfl⟩
+    · cases he
+  | uint =>
+    simp only [Decode.primElem] at he
+    split at he
+    · cases he; exact .inr ⟨_, rfl, .inl ⟨rfl, rfl⟩⟩
+    · cases he
+  | int =>
+    simp only [Decode.primElem] at he
+    split at he
+    · cases he; exact .inr ⟨_, rfl, .inr ⟨rfl, rfl⟩⟩
+    · cases he
+
+/-- An unsigned integer type's range is inside `uint`'s. -/
+theorem uint_inRange (t : Source.IntTy) (unsigned : t.signed = false) (n : Int)
+    (h : t.lo ≤ n ∧ n ≤ t.hi) : PrimTy.uint.inRange n = true := by
+  refine (Source.Agreement.uint_range n).mpr ?_
+  have pow : 2 ^ t.bits ≤ 2 ^ 256 := Nat.pow_le_pow_right (by decide) t.valid.2.2
+  simp only [Source.IntTy.lo, Source.IntTy.hi, unsigned, Source.IntTy.u256, Bool.false_eq_true,
+    if_false] at h ⊢
+  omega
+
+/-- A signed integer type's range is inside `int`'s. -/
+theorem int_inRange (t : Source.IntTy) (signed : t.signed = true) (n : Int)
+    (h : t.lo ≤ n ∧ n ≤ t.hi) : PrimTy.int.inRange n = true := by
+  refine (Source.Agreement.int_range n).mpr ?_
+  have pow : 2 ^ (t.bits - 1) ≤ 2 ^ 255 :=
+    Nat.pow_le_pow_right (by decide) (by have := t.valid.2.2; omega)
+  simp only [Source.IntTy.lo, Source.IntTy.hi, signed, Source.IntTy.u256, if_true] at h ⊢
+  omega
+
+/-- Every Source value at a primitive slot's type is the image of a model value. -/
+theorem prim_onto (D : Source.Layout) {p : PrimTy} {τ : Source.STy} (h : Prim p τ)
+    (v : Source.Val D τ) : ∃ w : p.Denote, Relation.ValRel D τ p v w := by
+  rcases h.cases with ⟨rfl, rfl⟩ | ⟨t, rfl, ⟨rfl, unsigned⟩ | ⟨rfl, signed⟩⟩
+  · exact match v with
+      | .bool b => ⟨b, .bool b⟩
+  · exact match v with
+      | .int n hn => ⟨⟨n, uint_inRange t unsigned n hn⟩, .uint t unsigned n hn _ rfl⟩
+  · exact match v with
+      | .int n hn => ⟨⟨n, int_inRange t signed n hn⟩, .int t signed n hn _ rfl⟩
+
+/-- A primitive slot's type has a default value, so its cell always reads. -/
+theorem Prim.default (D : Source.Layout) {p : PrimTy} {τ : Source.STy} (h : Prim p τ) :
+    (Source.Val.default D τ).isSome = true := by
+  rcases h.cases with ⟨_, rfl⟩ | ⟨t, rfl, _⟩ <;> rfl
+
+end Simulation
 
 /-! ## The storage cell types of the canonical unit
 
 For the globals half of total initial matching: in the decoder's canonical
 unit, the Source cell at the path of the state variable the model reads under
-a name has the Source type of that primitive. This is the type equation the
-storage clause of `loopRel` needs; it does not yet give a related pair of
-states. -/
+a name has the decoder's Source type of that primitive at the variable's
+width. -/
 namespace Decode
 
 /-- The declaration of a primitive state variable in the canonical unit. -/
@@ -542,10 +622,10 @@ def varDecl (x : Name) (T : Source.Syn .typeName) : Source.Decl :=
 
 /-- The canonical unit's declaration of the state variable the model reads
 under the name `x`. -/
-theorem stateVars_find (x : Name) (p : PrimTy) : (vars : List (Name × Ty)) →
-    (parts : Source.Syn (.list (.part false))) → stateVars vars = some parts →
-    Semantics.lookupBy x vars = some (.prim p) →
-    ∃ T, stateTy (.prim p) = some T ∧
+theorem stateVars_find (widths : List (Name × Nat)) (x : Name) (p : PrimTy) :
+    (vars : List (Name × Ty)) → (parts : Source.Syn (.list (.part false))) →
+    stateVars widths vars = some parts → Semantics.lookupBy x vars = some (.prim p) →
+    ∃ T, stateTy (stateBits widths x) (.prim p) = some T ∧
       (parts.collect (some contractName)).find?
         (fun d => d.kind == .stateVar && d.scope == some contractName && d.name == x) =
         some (varDecl x T)
@@ -561,28 +641,31 @@ theorem stateVars_find (x : Name) (p : PrimTy) : (vars : List (Name × Ty)) →
         subst hx
         exact ⟨T', hT, by simp [Source.Syn.collect, varDecl]⟩
       · simp only [if_neg e] at hx
-        obtain ⟨T, hT', found⟩ := stateVars_find x p rest parts' hp hx
+        obtain ⟨T, hT', found⟩ := stateVars_find widths x p rest parts' hp hx
         refine ⟨T, hT', ?_⟩
         have ne : (y == x) = false := by simpa using fun h => e h.symm
         simp [Source.Syn.collect, ne, found]
 
 /-- **The cell type of a primitive state variable** in the canonical unit is
-the Source type of the model primitive: the equation the state relation's
-storage clause needs. -/
+the decoder's Source type of the model primitive at the variable's width. -/
 theorem unit_cellTy {C : Contract} {u : Source.Syn .unit} (h : unit C = some u) {x : Name}
     {p : PrimTy} (hx : Semantics.lookupBy x C.vars = some (.prim p)) :
-    u.env.cellTy ⟨⟨some contractName, x⟩, []⟩ = Source.Agreement.sourceTy p := by
+    ∃ τ, primTy p (stateBits C.widths x) = some τ ∧
+      u.env.cellTy ⟨⟨some contractName, x⟩, []⟩ = τ := by
   unfold unit at h
   split at h
   · simp only [Option.map_eq_some_iff] at h
     obtain ⟨parts, hp, rfl⟩ := h
-    obtain ⟨T, hT, found⟩ := stateVars_find x p C.vars parts hp hx
+    obtain ⟨T, hT, found⟩ := stateVars_find C.widths x p C.vars parts hp hx
     have decl : (Source.Syn.unit (.cons (.contract false contractName .none .nil parts) .nil)).env.declOf
         .stateVar ⟨some contractName, x⟩ = some (varDecl x T) := by
       simp [Source.Env.declOf, Source.Syn.env, Source.Syn.decls, Source.Syn.collect, found]
+    simp only [stateTy, Option.map_eq_some_iff] at hT
+    obtain ⟨e, he, rfl⟩ := hT
+    refine ⟨e.ty .memory, by simp [primTy, he], ?_⟩
     simp only [Source.Env.cellTy, Source.Env.pathTy, List.foldl_nil, Source.Env.rootTy, decl,
       Option.bind_some]
-    cases p <;> (cases hT; rfl)
+    cases p <;> simp only [primElem] at he <;> split at he <;> first | (cases he; rfl) | cases he
   · cases h
 
 end Decode
@@ -590,72 +673,71 @@ end Decode
 /-! ## The locals half of total initial matching
 
 A decoded request has the positional map, and under it every Source locals has
-related model locals: the part of `Simulation.InitialMatching` that concerns
-locals, proved for every decoded request. The globals part (storage cell
-types, `msg.value`, the timestamp) stays open. -/
+related model locals. -/
 namespace Simulation
 
-/-- The positional map of a list of primitive locals. -/
-def primitiveMap : (ps : List PrimTy) → Lowering.V07.ContextMap (Source.Agreement.sourceContext ps) (Source.Agreement.modelContext ps)
-  | [] => .empty
-  | p :: ps => (primitiveMap ps).cons (Source.Agreement.sourceTy p) (.val p)
+/-- Source context of a list of primitive slots. -/
+def srcCtx (ss : List (PrimTy × Source.STy)) : Source.RCtx := ss.map (·.2)
 
-theorem primitiveMap_positional : (ps : List PrimTy) → Positional (primitiveMap ps)
+/-- Model context of a list of primitive slots. -/
+def modCtx (ss : List (PrimTy × Source.STy)) : Ctx := ss.map fun s => .val s.1
+
+/-- The positional map of a list of primitive slots. -/
+def slotMap : (ss : List (PrimTy × Source.STy)) → Lowering.V07.ContextMap (srcCtx ss) (modCtx ss)
+  | [] => .empty
+  | s :: ss => (slotMap ss).cons s.2 (.val s.1)
+
+theorem slotMap_positional : (ss : List (PrimTy × Source.STy)) → Positional (slotMap ss)
   | [] => fun i => nomatch i
-  | p :: ps => fun i => by
+  | _ :: ss => fun i => by
       cases i with
       | here => rfl
-      | there j => exact congrArg (· + 1) (primitiveMap_positional ps j)
+      | there j => exact congrArg (· + 1) (slotMap_positional ss j)
 
-/-- Every Source value of a primitive's type is the image of a model value. -/
-theorem val_onto (E : Source.Env) (C : Contract) (H : HTy) :
-    (p : PrimTy) → (v : Source.Val E.layout (Source.Agreement.sourceTy p)) →
-      ∃ x : p.Denote, Relation.val E C H (Source.Agreement.sourceTy p) (.val p) v x
-  | .bool, .bool b => ⟨b, rfl, .bool b⟩
-  | .uint, .int n h => ⟨⟨n, (Source.Agreement.uint_range n).mpr h⟩, rfl,
-      Source.Agreement.PrimitiveRel.uint ⟨n, (Source.Agreement.uint_range n).mpr h⟩ h⟩
-  | .int, .int n h => ⟨⟨n, (Source.Agreement.int_range n).mpr h⟩, rfl,
-      Source.Agreement.PrimitiveRel.int ⟨n, (Source.Agreement.int_range n).mpr h⟩ h⟩
-
-/-- Every Source locals of primitive types has related model locals. -/
+/-- Every Source locals at primitive slots has related model locals. -/
 theorem locals_onto (E : Source.Env) (C : Contract) (H : HTy) :
-    (ps : List PrimTy) → (ls : Source.Locals E.layout (Source.Agreement.sourceContext ps)) →
-      ∃ env : TEnv C H (Source.Agreement.modelContext ps),
-        (primitiveMap ps).Related (Relation.val E C H) ls env
-  | [], .nil => ⟨(), fun i => nomatch i⟩
-  | p :: ps, .cons v rest => by
-      obtain ⟨x, hx⟩ := val_onto E C H p v
-      obtain ⟨env, henv⟩ := locals_onto E C H ps rest
-      exact ⟨(x, env), Lowering.V07.ContextMap.related_cons _ _ _ _ henv _ _ _ _ hx⟩
+    (ss : List (PrimTy × Source.STy)) → (∀ s ∈ ss, Prim s.1 s.2) →
+    (ls : Source.Locals E.layout (srcCtx ss)) →
+      ∃ env : TEnv C H (modCtx ss), (slotMap ss).Related (Relation.val E C H) ls env
+  | [], _, .nil => ⟨(), fun i => nomatch i⟩
+  | s :: ss, prim, .cons v rest => by
+      obtain ⟨x, hx⟩ := prim_onto E.layout (prim s (List.mem_cons_self ..)) v
+      obtain ⟨env, henv⟩ := locals_onto E C H ss (fun t m => prim t (List.mem_cons_of_mem _ m)) rest
+      exact ⟨(x, env), Lowering.V07.ContextMap.related_cons _ _ _ _ henv _ _ _ _
+        (show Relation.val E C H s.2 (.val s.1) v x from hx)⟩
 
-/-- A decoded local is a model primitive at the corresponding Source type. -/
+/-- A decoded local is a model primitive at one of the decoder's types. -/
 theorem localTy_some {t : LocalTy} {τ : Source.STy} (h : Decode.localTy t = some τ) :
-    ∃ p : PrimTy, t.toLTy = .val p ∧ τ = Source.Agreement.sourceTy p := by
+    ∃ p : PrimTy, t.toLTy = .val p ∧ Prim p τ := by
   cases t with
   | val p bits shape =>
-    refine ⟨p, rfl, ?_⟩
+    refine ⟨p, rfl, bits, ?_⟩
     unfold Decode.localTy at h
     split at h <;> simp_all
   | _ => simp [Decode.localTy] at h
 
-/-- The decoder's locals are primitive, position by position, on both sides. -/
+/-- The decoder's locals are primitive slots, position by position. -/
 theorem locals_primitive : (Γ : ECtx) → (L : List (String × Source.STy)) →
     Decode.locals Γ = some L →
-    ∃ ps : List PrimTy, Source.tysOf L = Source.Agreement.sourceContext ps ∧
-      ∀ names : FreshNames, (@ECtx.toNCtx names Γ).ctx = Source.Agreement.modelContext ps
+    ∃ ss : List (PrimTy × Source.STy), (∀ s ∈ ss, Prim s.1 s.2) ∧
+      Source.tysOf L = srcCtx ss ∧ ∀ names : FreshNames, (@ECtx.toNCtx names Γ).ctx = modCtx ss
   | [], L, h => by
       cases h
-      exact ⟨[], rfl, fun _ => rfl⟩
+      exact ⟨[], (fun _ m => by cases m), rfl, fun _ => rfl⟩
   | (x, t) :: Γ, L, h => by
       simp only [Decode.locals, Option.bind_eq_bind, Option.pure_def, Option.bind_eq_some_iff,
         Option.some.injEq] at h
       obtain ⟨τ, hτ, L', hL, rfl⟩ := h
-      obtain ⟨ps, hs, hm⟩ := locals_primitive Γ L' hL
-      obtain ⟨p, ht, rfl⟩ := localTy_some hτ
-      exact ⟨p :: ps, congrArg (Source.Agreement.sourceTy p :: ·) hs, fun names => by
-        change t.toLTy :: (@ECtx.toNCtx names Γ).ctx = _
+      obtain ⟨ss, prim, hs, hm⟩ := locals_primitive Γ L' hL
+      obtain ⟨p, ht, hp⟩ := localTy_some hτ
+      refine ⟨(p, τ) :: ss, ?_, congrArg (τ :: ·) hs, fun names => ?_⟩
+      · intro s m
+        rcases List.mem_cons.mp m with e | m'
+        · cases e; exact hp
+        · exact prim s m'
+      · change t.toLTy :: (@ECtx.toNCtx names Γ).ctx = _
         rw [ht, hm names]
-        rfl⟩
+        rfl
 
 /-- **The locals half of total initial matching.** A decoded request has a
 positional map under which every Source locals has related model locals. -/
@@ -671,49 +753,40 @@ theorem decode_locals_matching {r : Request} {s : SourceProgram}
     simp only [Decode.plain, Bool.and_eq_true, Option.isNone_iff_eq_none] at plain
     exact plain.1.1.1
   subst none
-  obtain ⟨ps, hs, hm⟩ := locals_primitive _ _ hL
-  have key : ∀ {srcΓ : Source.RCtx} {Γ : Ctx}, srcΓ = Source.Agreement.sourceContext ps → Γ = Source.Agreement.modelContext ps →
+  obtain ⟨ss, prim, hs, hm⟩ := locals_primitive _ _ hL
+  have key : ∀ {srcΓ : Source.RCtx} {Γ : Ctx}, srcΓ = srcCtx ss → Γ = modCtx ss →
       ∃ m : Lowering.V07.ContextMap srcΓ Γ, Positional m ∧
         ∀ (H : HTy) (ls : Source.Locals C.env.layout srcΓ),
           ∃ env : TEnv contract H Γ, m.Related (Relation.val C.env contract H) ls env := by
     intro srcΓ Γ e e'
     subst e e'
-    exact ⟨primitiveMap ps, primitiveMap_positional ps, fun H ls => locals_onto _ _ H ps ls⟩
+    exact ⟨slotMap ss, slotMap_positional ss, fun H ls => locals_onto _ _ H ss prim ls⟩
   exact key hs (hm input.names)
 
 end Simulation
 
-/-! ## Total initial matching, proved for the stage-1 relation
+/-! ## Total initial matching, proved
 
 The globals half: a model storage related to the Source cells exists, because
-every state variable of a decodable contract is primitive, its cell has the
-primitive's Source type (`Decode.unit_cellTy`) and always reads a value. With
-the locals half this proves `InitialMatching loopRel Decode.decode`. -/
+every state variable of a decodable contract is primitive, its cell has one of
+the decoder's types (`Decode.unit_cellTy`) and always reads a value. With the
+locals half this proves `InitialMatching loopRel Decode.decode`. -/
 namespace Simulation
 
-/-- Every Source value of a primitive's type is the image of a model value. -/
-theorem prim_onto (D : Source.Layout) : (p : PrimTy) → (v : Source.Val D (Source.Agreement.sourceTy p)) →
-    ∃ w : p.Denote, Source.Agreement.PrimitiveRel D p v w
-  | .bool, .bool b => ⟨b, .bool b⟩
-  | .uint, .int n h => ⟨⟨n, (Source.Agreement.uint_range n).mpr h⟩,
-      Source.Agreement.PrimitiveRel.uint ⟨n, (Source.Agreement.uint_range n).mpr h⟩ h⟩
-  | .int, .int n h => ⟨⟨n, (Source.Agreement.int_range n).mpr h⟩,
-      Source.Agreement.PrimitiveRel.int ⟨n, (Source.Agreement.int_range n).mpr h⟩ h⟩
-
 /-- A model storage related to given Source reads exists when every state
-variable is primitive and its cell reads at the primitive's Source type. -/
+variable is primitive and its cell reads at one of the decoder's types. -/
 theorem fields_onto {D : Source.Layout}
     (read : Source.SPath → Option ((τ : Source.STy) × Source.Val D τ)) :
     (fs : List (Name × Ty)) →
-    (∀ x T, (x, T) ∈ fs → ∃ p, T = .prim p ∧ ∃ v : Source.Val D (Source.Agreement.sourceTy p),
-      read ⟨⟨some Decode.contractName, x⟩, []⟩ = some ⟨Source.Agreement.sourceTy p, v⟩) →
+    (∀ x T, (x, T) ∈ fs → ∃ p, T = .prim p ∧ ∃ (τ : Source.STy) (v : Source.Val D τ),
+      Prim p τ ∧ read ⟨⟨some Decode.contractName, x⟩, []⟩ = some ⟨τ, v⟩) →
     ∃ st : SFields fs, Relation.fields read st
   | [], _ => ⟨.nil, trivial⟩
   | (x, T) :: fs, h => by
-      obtain ⟨p, rfl, v, hv⟩ := h x T (List.mem_cons_self ..)
-      obtain ⟨w, hw⟩ := prim_onto D p v
+      obtain ⟨p, rfl, τ, v, prim, hv⟩ := h x T (List.mem_cons_self ..)
+      obtain ⟨w, hw⟩ := prim_onto D prim v
       obtain ⟨rest, hrest⟩ := fields_onto read fs fun y U m => h y U (List.mem_cons_of_mem _ m)
-      exact ⟨.cons (.prim w) rest, ⟨v, hv, hw⟩, hrest⟩
+      exact ⟨.cons (.prim w) rest, ⟨τ, v, hv, hw⟩, hrest⟩
 
 /-- A binding of a list with distinct keys is the one its lookup finds. -/
 theorem lookup_of_mem {α : Type} : (l : List (Name × α)) → Semantics.nodupKeysB l = true →
@@ -731,8 +804,9 @@ theorem lookup_of_mem {α : Type} : (l : List (Name × α)) → Semantics.nodupK
 
 /-- The decoder gives a unit only to contracts whose state variables are all
 primitive. -/
-theorem stateVars_prim : (vars : List (Name × Ty)) → (parts : Source.Syn (.list (.part false))) →
-    Decode.stateVars vars = some parts → ∀ x T, (x, T) ∈ vars → ∃ p, T = .prim p
+theorem stateVars_prim (widths : List (Name × Nat)) : (vars : List (Name × Ty)) →
+    (parts : Source.Syn (.list (.part false))) →
+    Decode.stateVars widths vars = some parts → ∀ x T, (x, T) ∈ vars → ∃ p, T = .prim p
   | [], _, _, _, _, m => nomatch m
   | (y, U) :: rest, parts, h, x, T, m => by
       simp only [Decode.stateVars, Option.bind_eq_bind, Option.pure_def, Option.bind_eq_some_iff,
@@ -742,31 +816,22 @@ theorem stateVars_prim : (vars : List (Name × Ty)) → (parts : Source.Syn (.li
       · cases e
         unfold Decode.stateTy at hT
         split at hT <;> first | exact ⟨_, rfl⟩ | cases hT
-      · exact stateVars_prim rest parts' hp x T m'
+      · exact stateVars_prim widths rest parts' hp x T m'
 
-/-- A cell of a primitive's Source type always reads a value of that type. -/
+/-- A cell at one of the decoder's types always reads a value of that type. -/
 theorem read_prim {D : Source.Layout} {L : Source.SPath → Source.STy} (s : Source.Storage D L)
-    (path : Source.SPath) (p : PrimTy) (h : L path = Source.Agreement.sourceTy p) :
-    ∃ v : Source.Val D (Source.Agreement.sourceTy p),
+    (path : Source.SPath) {p : PrimTy} {τ : Source.STy} (prim : Prim p τ) (h : L path = τ) :
+    ∃ v : Source.Val D τ,
       ((s.read path).map fun v => (⟨_, v⟩ : (τ : Source.STy) × Source.Val D τ)) =
-        some (⟨Source.Agreement.sourceTy p, v⟩ : (τ : Source.STy) × Source.Val D τ) := by
-  have dflt : ∀ τ : Source.STy, τ = Source.Agreement.sourceTy p → (Source.Val.default D τ).isSome = true := by
-    intro τ e
-    subst e
-    cases p <;> rfl
+        some (⟨τ, v⟩ : (τ : Source.STy) × Source.Val D τ) := by
+  subst h
   have present : (s.read path).isSome = true := by
     unfold Source.Storage.read
     split
     · rfl
-    · exact dflt _ h
-  have key : ∀ (τ : Source.STy) (o : Option (Source.Val D τ)), τ = Source.Agreement.sourceTy p → o.isSome = true →
-      ∃ v : Source.Val D (Source.Agreement.sourceTy p),
-        (o.map fun v => (⟨τ, v⟩ : (τ : Source.STy) × Source.Val D τ)) = some (⟨Source.Agreement.sourceTy p, v⟩ : (τ : Source.STy) × Source.Val D τ) := by
-    intro τ o e ok
-    subst e
-    obtain ⟨v, rfl⟩ := Option.isSome_iff_exists.mp ok
-    exact ⟨v, rfl⟩
-  exact key _ _ h present
+    · exact prim.default D
+  obtain ⟨v, e⟩ := Option.isSome_iff_exists.mp present
+  exact ⟨v, by rw [e]; rfl⟩
 
 /-- A `Word` as a model `uint`. -/
 def wordDenote (w : Roadmap.Word) : PrimTy.uint.Denote :=
@@ -774,10 +839,10 @@ def wordDenote (w : Roadmap.Word) : PrimTy.uint.Denote :=
     simp only [PrimTy.inRange, decide_eq_true_eq]
     exact ⟨Int.natCast_nonneg _, Int.ofNat_lt.mpr w.isLt⟩⟩
 
-/-- **Total initial matching holds for the stage-1 state relation**: every
-admitted Source execution of a successful decoded request has a related model
-state under the positional map. So `loopRel` is not degenerate on decoded
-requests, and the simulation premise is never vacuous there. -/
+/-- **Total initial matching holds for the state relation**: every admitted
+Source execution of a successful decoded request has a related model state
+under the positional map. So `loopRel` is not degenerate on decoded requests,
+and the simulation premise is never vacuous there. -/
 theorem initialMatching_loopRel : InitialMatching loopRel Decode.decode := by
   intro r s _ decoded
   obtain ⟨m, positional, locals⟩ := decode_locals_matching decoded
@@ -794,9 +859,11 @@ theorem initialMatching_loopRel : InitialMatching loopRel Decode.decode := by
     obtain ⟨storage, hstorage⟩ := fields_onto
       (fun p => ((e.initial.2.ex.world.accounts e.frame.this).storage.read p).map fun v => ⟨_, v⟩)
       r.contract.vars fun x T mem => by
-        obtain ⟨p, rfl⟩ := stateVars_prim _ _ hparts x T mem
-        exact ⟨p, rfl, read_prim _ _ p
-          (Decode.unit_cellTy hu (lookup_of_mem _ r.contract.vars_nodup x _ mem))⟩
+        obtain ⟨p, rfl⟩ := stateVars_prim _ _ _ hparts x T mem
+        obtain ⟨τ, hτ, cell⟩ :=
+          Decode.unit_cellTy hu (lookup_of_mem _ r.contract.vars_nodup x _ mem)
+        obtain ⟨v, hv⟩ := read_prim _ _ (p := p) ⟨_, hτ⟩ cell
+        exact ⟨p, rfl, τ, v, ⟨_, hτ⟩, hv⟩
     exact ⟨⟨storage, [], Heap.empty, env, [], PrimTy.dflt .uint,
         { msgValue := wordDenote e.frame.value, timestamp := wordDenote e.glob.timestamp }⟩,
       related, hstorage, rfl, rfl, admitted.2.2.1, admitted.2.2.2⟩
@@ -950,7 +1017,7 @@ defects listed at the policies, the simulation and the allocation trace
 stand, the state relation leaves most of the state unrelated, and the decoder
 has gaps. -/
 
-/-- The stage-1 boundary. -/
+/-- The boundary at the state relation `loopRel`. -/
 def loopBoundaryStage1 : SemanticBoundary := loopBoundaryAt loopRel
 
 /-- At the stage-1 boundary both family obligations are theorems, and four
