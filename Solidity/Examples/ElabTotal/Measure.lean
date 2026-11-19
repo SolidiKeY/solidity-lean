@@ -211,6 +211,22 @@ example [FreshNames] (hoist : RawExpr → ElabM (SProg C0 × RawExpr))
   obtain ⟨l', r', he⟩ := hoistAssignWith_shape C0 hoist l r sc st st' m m' (P, forT) h
   cases he
 
+/-- The actual assignment helper supplies the only helper assumption in the guard. -/
+example [FreshNames] (C : Contract) (rc : ElabRec C)
+    (s : RawStmt) (sc : ElabScope) (st : ECtx × Nat) (m : CallMemo)
+    (out : SProg C × RawStmt) (st' : ECtx × Nat) (m' : CallMemo)
+    (h : (((hoistStmtWith C { rc with hoistAssign := hoistAssignWith C rc.hoist } s).run sc).run st).run m =
+      .ok ((out, st'), m')) : out.2.control = s.control ∧
+      CalleeKernel.stmtWeight out.2 = CalleeKernel.stmtWeight s := by
+  have hc : out.2.control = s.control := by
+    refine hoistStmtWith_control _ ?_ s sc st m out st' m' h
+    intro l r sc st m out st' m' he
+    obtain ⟨l', r', hs⟩ := hoistAssignWith_shape C rc.hoist l r sc st st' m m' out he
+    rw [hs]
+    rfl
+  refine ⟨hc, ?_⟩
+  simpa only [RawStmt.control_weight] using congrArg StmtControl.weight hc
+
 /-- What bounds inlining at a call: the scope's functions, recursive frames and
 inlined calls. -/
 def scopeTag (sc : ElabScope) : String :=
