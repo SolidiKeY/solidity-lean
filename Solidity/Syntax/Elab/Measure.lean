@@ -46,6 +46,20 @@ theorem CalleeKernel.mapExprsM_weight {m : Type → Type} [Monad m] [LawfulMonad
   cases s <;> simp only [RawStmt.mapExprsM, map_bind,
     LawfulApplicative.map_pure, stmtWeight]
 
+/-- The control-weight equality also holds of a successful expression
+rewrite that accumulates a program while running the elaborator's states. -/
+theorem CalleeKernel.mapExprsM_run_weight {C : Contract}
+    (f : RawExpr → StateT (SProg C) ElabM RawExpr) (s s' : RawStmt)
+    (P P' : SProg C) (sc : ElabScope) (st st' : ECtx × Nat) (m m' : CallMemo)
+    (h : ((((s.mapExprsM f).run P).run sc).run st).run m = .ok (((s', P'), st'), m')) :
+    stmtWeight s' = stmtWeight s := by
+  have e := congrArg (fun x : StateT (SProg C) ElabM Nat => x P sc st m)
+    (mapExprsM_weight f s)
+  simp only [StateT.run, ReaderT.run] at h
+  simp only [Functor.map, StateT.map, bind, ReaderT.bind, StateT.bind,
+    pure, ReaderT.pure, StateT.pure, h, Except.bind, Except.pure] at e
+  exact congrArg (fun x => x.1.1.1) (Except.ok.inj e)
+
 /-- No element of a well-founded relation lies on a cycle of three. -/
 theorem rel_cycle3 {α : Type} [WellFoundedRelation α] {a b c : α}
     (h1 : WellFoundedRelation.rel a b) (h2 : WellFoundedRelation.rel b c)
