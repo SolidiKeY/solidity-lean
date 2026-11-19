@@ -392,6 +392,9 @@ example : Decode.tablesW.decode { sampleRequest [] with
 example : Decode.tablesW.decode { narrowRequest [] with
     input := { (narrowRequest []).input with
       before := ⟨([("a", .val .uint 256 [("#address", 20)])], 1), {}⟩ } } = none := rfl
+/-- The two versions' tables: the landed decoder's, and the width-aware ones. -/
+example : Decode.tables1 = ⟨Decode.typeName, Decode.localTy, Decode.unit⟩ := rfl
+example : Decode.tablesW = ⟨Decode.typeNameW, Decode.localTyW, Decode.unitW⟩ := rfl
 /-- On the e1 sample the version agrees with the landed decoder. -/
 example : Decode.tablesW.decode (sampleRequest RawProbe.input) =
     Decode.decode (sampleRequest RawProbe.input) := rfl
