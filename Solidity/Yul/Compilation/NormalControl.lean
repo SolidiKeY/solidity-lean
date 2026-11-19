@@ -116,6 +116,115 @@ theorem Derivation.source {c n fuel} {stmt : Stmt [] [] c n}
     · rw [if_neg (fun h => zero (truth.mp h)),ih]
       simp only [if_neg zero]
 
+/-- Concrete selector equations and actual leaf executions transport the existing
+normal-control derivation without changing any consumer's selection boundary. -/
+theorem machine_with
+    (selectCode : Backend.Program → Option (List Evm.Instr))
+    (selectBlock : Backend.Block → Option (List Evm.Instr))
+    (codeRule : ∀ p, selectBlock (.code p) = selectCode p)
+    (seqRule : ∀ a b, selectBlock (.seq a b) =
+      (selectBlock a).bind (fun x => (selectBlock b).map (fun y => x ++ y)))
+    (branchRule : ∀ c a b, selectBlock (.ite c a b) =
+      (selectCode c).bind (fun x => (selectBlock a).bind
+        (fun y => (selectBlock b).map (fun z => MachineControl.branchCode x y z))))
+    (emptyCode : selectCode [] = some [])
+    (stmtLaw : ∀ {n : Nat} {update : Vector Scalar.Word n → Vector Scalar.Word n}
+      (lowered : LoweredStmt n update) (depth : Nat) (p : Backend.Program) (q : List Evm.Instr),
+      lowered.code depth = some p → selectCode p = some q →
+      ∀ (locals : Vector Scalar.Word n) (newer : Vector Scalar.Word depth)
+        (m : Evm.Machine) (caller : List Evm.Word),
+      Evm.run q {m with stack := (newer.toList ++ locals.toList).map MachineAdapter.coreWord ++ caller} =
+        .ok {m with stack := (newer.toList ++ (update locals).toList).map MachineAdapter.coreWord ++ caller} 0)
+    (exprLaw : ∀ {n : Nat} {value : Vector Scalar.Word n → Scalar.Word}
+      (lowered : LoweredExpr n value) (depth : Nat) (p : Backend.Program) (q : List Evm.Instr),
+      lowered.code depth = some p → selectCode p = some q →
+      ∀ (locals : Vector Scalar.Word n) (newer : Vector Scalar.Word depth)
+        (m : Evm.Machine) (caller : List Evm.Word),
+      Evm.run q {m with stack := (newer.toList ++ locals.toList).map MachineAdapter.coreWord ++ caller} =
+        .ok {m with stack := MachineAdapter.coreWord (value locals) ::
+          ((newer.toList ++ locals.toList).map MachineAdapter.coreWord ++ caller)} 0)
+    {c n fuel} {stmt : Stmt [] [] c n}
+    (compiled : NormalControl.Derivation fuel stmt) (depth : Nat)
+    (block : Backend.Block) (code : List Evm.Instr)
+    (emitted : compiled.emit depth = some block)
+    (translated : selectBlock block = some code)
+    (locals : Vector Scalar.Word n) (newer : Vector Scalar.Word depth)
+    (m : Evm.Machine) (caller : List Evm.Word) :
+    Evm.run code {m with stack := (newer.toList ++ locals.toList).map MachineAdapter.coreWord ++ caller} =
+      .ok {m with stack := (newer.toList ++ (compiled.update locals).toList).map MachineAdapter.coreWord ++ caller} 0 := by
+  induction compiled generalizing block code locals with
+  | scalar leaf =>
+    change (leaf.lowered.code depth).map Backend.Block.code = some block at emitted
+    cases hp : leaf.lowered.code depth with
+    | none => simp only [hp,Option.map_none,reduceCtorEq] at emitted
+    | some p =>
+      simp only [hp,Option.map_some,Option.some.injEq] at emitted
+      subst block
+      rw [codeRule] at translated
+      exact stmtLaw leaf.lowered depth p code hp translated locals newer m caller
+  | seq first second ihFirst ihSecond =>
+    change (do
+      let a ← first.emit depth
+      let b ← second.emit depth
+      pure (Backend.Block.seq a b)) = some block at emitted
+    cases ha : first.emit depth with
+    | none => simp only [ha] at emitted; cases emitted
+    | some a =>
+      cases hb : second.emit depth with
+      | none => simp only [ha,hb] at emitted; cases emitted
+      | some b =>
+        simp only [ha,hb] at emitted
+        have same : Backend.Block.seq a b = block := Option.some.inj emitted
+        subst block
+        rw [seqRule] at translated
+        cases sa : selectBlock a with
+        | none => simp only [sa,Option.bind_none,reduceCtorEq] at translated
+        | some qa =>
+          cases sb : selectBlock b with
+          | none => simp only [sa,sb,Option.bind_some,Option.map_none,reduceCtorEq] at translated
+          | some qb =>
+            simp only [sa,sb,Option.bind_some,Option.map_some,Option.some.injEq] at translated
+            subst code
+            rw [Evm.run_append_ok (ihFirst a qa ha sa locals)]
+            exact ihSecond b qb hb sb (first.update locals)
+  | branch condition arm ih =>
+    change (do
+      let cc ← condition.lowered.code depth
+      let bb ← arm.emit depth
+      pure (Backend.Block.ite cc bb (.code []))) = some block at emitted
+    cases hc : condition.lowered.code depth with
+    | none => simp only [hc] at emitted; cases emitted
+    | some cc =>
+      cases hb : arm.emit depth with
+      | none => simp only [hc,hb] at emitted; cases emitted
+      | some bb =>
+        simp only [hc,hb] at emitted
+        have same : Backend.Block.ite cc bb (.code []) = block := Option.some.inj emitted
+        subst block
+        rw [branchRule, codeRule, emptyCode] at translated
+        cases sc : selectCode cc with
+        | none => simp only [sc,Option.bind_none,reduceCtorEq] at translated
+        | some qc =>
+          cases sb : selectBlock bb with
+          | none => simp only [sc,sb,Option.bind_some,Option.bind_none,reduceCtorEq] at translated
+          | some qb =>
+            simp only [sc,sb,Option.bind_some,Option.map_some,Option.some.injEq] at translated
+            subst code
+            have law := MachineControl.branchCode_run
+              ⟨(condition.value locals).toNat,(condition.value locals).isLt⟩ qc qb []
+              {m with stack := (newer.toList ++ locals.toList).map MachineAdapter.coreWord ++ caller}
+              {m with stack := (newer.toList ++ (arm.update locals).toList).map MachineAdapter.coreWord ++ caller}
+              {m with stack := (newer.toList ++ locals.toList).map MachineAdapter.coreWord ++ caller}
+              (exprLaw condition.lowered depth cc qc hc sc locals newer m caller)
+              (ih bb qb hb sb locals) (by rfl)
+            have truth : (condition.value locals).toNat = 0 ↔ condition.value locals = 0 :=
+              ⟨fun h => BitVec.eq_of_toNat_eq h,fun h => congrArg BitVec.toNat h⟩
+            change _ = Evm.Out.ok {m with stack := (newer.toList ++
+              (if condition.value locals = 0 then locals else arm.update locals).toList).map MachineAdapter.coreWord ++ caller} 0
+            by_cases zero : condition.value locals = 0
+            · simpa only [truth,zero,ite_true] using law
+            · simpa only [truth,zero,ite_false] using law
+
 #print axioms Derivation.source
 #print axioms compile
 end Solidity.Yul.Compilation.NormalControl
