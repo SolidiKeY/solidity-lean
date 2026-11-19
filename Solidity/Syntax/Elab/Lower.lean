@@ -1105,7 +1105,7 @@ theorem wrapMods_cons (body : List RawStmt) (frame : Option (FunDecl × List (St
 
 /-- The statements of `unchecked { … }` with their arithmetic wrapping: `x += 1;`
 and `x++;` are `x = x +% 1;`.  A call's callee stays checked, as in solc. -/
-partial def uncheckStmts : List RawStmt → Except String (List RawStmt)
+def uncheckStmts : List RawStmt → Except String (List RawStmt)
   | [] => pure []
   | s :: ss => do
     let s' ← match s with
@@ -1135,6 +1135,14 @@ partial def uncheckStmts : List RawStmt → Except String (List RawStmt)
           (← uncheckStmts b))
       | s => s.mapExprsM RawExpr.uncheck
     pure (s' :: (← uncheckStmts ss))
+
+termination_by ss => CalleeKernel.listWeight ss
+decreasing_by
+  all_goals simp_wf
+  all_goals simp only [CalleeKernel.listWeight, CalleeKernel.stmtWeight]
+  all_goals first
+    | omega
+    | (have := CalleeKernel.stmtWeight_pos ‹RawStmt›; omega)
 
 /-- Why a call of `f`, returning a `T` that is a reference, is refused. -/
 def refReturnMsg (f : String) (T : Ty) : String :=

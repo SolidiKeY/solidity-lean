@@ -539,13 +539,57 @@ def hoistCallArgsWith (hoist : RawExpr → ElabM (SProg C × RawExpr))
 
 
 
+/-- A loop's condition, invariant or variant, of type `p` (its narrow
+rewrites done, `elabStmtP`), read in `Γ`: nothing may be captured before it,
+since it is evaluated where the loop is, again.  So an effect, a call to a
+declared function, a cast, a narrow operation that needs a capture or a
+struct constructor in it is refused (`docs/loops.md`), where solkey
+evaluates it per iteration. -/
+def loopExprWith (hoist : RawExpr → ElabM (SProg C × RawExpr)) (Γ : NCtx) (p : PrimTy) (e : RawExpr) (what : String) : ElabM (Val C Γ.ctx p) := do
+  let st ← get
+  let (P, _) ← hoist e
+  set st
+  unless P.isEmpty do
+    throw s!"{e.toStr}: a loop's {what} needs a statement before it (an effect, a call, \
+      a cast, a narrow operation or a constructor), and is evaluated again each iteration"
+  checkIn C Γ p e
+
+/-- A quantified invariant clause (`LoopQ`): its bound local pushed while
+its body is read. -/
+def loopQWith (loop : (Γ : NCtx) → (p : PrimTy) → RawExpr → String → ElabM (Val C Γ.ctx p)) (Γ : NCtx) : RawInv → ElabM (LoopQ C Γ.ctx)
+  | .expr e => do pure (.val (← loop Γ .bool e "invariant"))
+  | .imp a b => do
+    pure (.imp (← loop Γ .bool a "invariant") (← loop Γ .bool b "invariant"))
+  | .all p x b => do
+    let st ← get
+    modify fun (Γe, k) => ((x, .val p) :: Γe, k)
+    let body ← loopQWith loop ((Var.ofName x, .val p) :: Γ) b
+    set st
+    pure (.all (Var.ofName x) p body)
+
+/-- A branch: its declarations stay inside it, and it does not deploy
+(`ElabScope.top`). -/
+def elabBranchWith (stmt : RawStmt → ElabM (SProg C)) (ss : List RawStmt) : ElabM (SProg C) := do
+  let (Γ, _) ← get
+  let P ← withReader (fun sc => { sc with top := false }) (elabStmtsPWith C stmt ss)
+  let (_, k) ← get
+  set (Γ, k)
+  pure P
+
+/-- A branch as a block of its own, from the locals in scope `Γ` (which it
+must be entered in). -/
+def elabScopeWith (branch : List RawStmt → ElabM (SProg C)) (Γ : NCtx) (ss : List RawStmt) : ElabM (Blk C Γ.ctx) := do
+  ElabM.lift (SProg.chain Γ.names Γ.ctx (← branch ss))
+
+
+
 mutual
 
 /-- The recursive hooks, delayed until a producer is called. -/
 partial def panicProducerRec (_ : Unit) : PanicProducerRec C where
   extDispatch := extDispatch
   elabStmtsP := elabStmtsPWith C elabStmtP
-  elabScope := elabScope
+  elabScope := elabScopeWith C (elabBranchWith C elabStmtP)
   elabCallRet := @elabCallRet
 
 /-- The record of the block's functions (`ElabRec`), which ties the arms
@@ -575,11 +619,11 @@ partial def elabRecCore (_ : Unit) : ElabRec C where
   hoistStmt := hoistStmt
   elabStmtP := elabStmtP
   elabStmt1 := elabStmt1
-  loopExpr := loopExpr
-  loopQ := loopQ
+  loopExpr := loopExprWith C hoist
+  loopQ := loopQWith C (loopExprWith C hoist)
   elabStmtsP := elabStmtsPWith C elabStmtP
-  elabBranch := elabBranch
-  elabScope := elabScope
+  elabBranch := elabBranchWith C elabStmtP
+  elabScope := elabScopeWith C (elabBranchWith C elabStmtP)
   elabTuple := @elabTuple
 
 /-- **Captures before a statement**: an `++`/`−−` inside an expression, and a
@@ -661,7 +705,7 @@ partial def extDispatch (h ty : String) (ps rs : List String) (args : List RawEx
   let (Γ0, _) ← get
   if resNew then
     if let some (x, p) := res then declare C (toString x) (.val p resW)
-  let P ← elabBranch (pre ++ disp)
+  let P ← (elabBranchWith C elabStmtP) (pre ++ disp)
   modify fun (_, k) => (Γ0, k)
   pure P
 
@@ -694,7 +738,7 @@ partial def callValue (h : RawExpr) (args : List RawExpr) (res : Option (Var × 
   let (Γ0, _) ← get
   if resNew then
     if let some (x, p) := res then declare C (toString x) (.val p resW)
-  let P ← elabBranch stmts
+  let P ← (elabBranchWith C elabStmtP) stmts
   modify fun (_, k) => (Γ0, k)
   pure P
 
@@ -850,13 +894,13 @@ partial def elabValueCall (Γ : NCtx) (ix : Idx Γ.ctx (.val .bool)) (okName : R
   let okP ← ElabM.lift (SProg.chain Γ'.names ([] ++ Γ'.ctx) okP)
   let (_, k) ← get
   set (Γe, k)
-  let err ← elabScope Γ' (setOk false)
+  let err ← (elabScopeWith C (elabBranchWith C elabStmtP)) Γ' (setOk false)
   let ⟨κ, cb⟩ := CodeBinder.ofOption (none : Option Var)
   let pnc ← elabStmtsPWith C elabStmtP (setOk false)
   let pnc ← ElabM.lift (SProg.chain (cb.names ++ Γ'.names) (κ ++ Γ'.ctx) pnc)
   let (_, k) ← get
   set (Γe, k)
-  let other ← elabScope Γ' (setOk false)
+  let other ← (elabScopeWith C (elabBranchWith C elabStmtP)) Γ' (setOk false)
   let call : ExtCall C Γ'.ctx := ⟨addr', "receive", [], .call, .unknown⟩
   let tryS : Stmt C Γ'.ctx Γ'.ctx :=
     .tryCall call Binders.nil okP.2 err.2 cb pnc.2 other.2 sargs sbody true
@@ -894,49 +938,6 @@ partial def elabStmtP (s : RawStmt) : ElabM (SProg C) :=
 /-- A statement whose expressions have no effect left. -/
 partial def elabStmt1 (s0 : RawStmt) : ElabM (SProg C) :=
   elabStmt1With C (elabRecWithProducers C (elabRecCore ()) (panicProducerRec ())) s0
-
-/-- A loop's condition, invariant or variant, of type `p` (its narrow
-rewrites done, `elabStmtP`), read in `Γ`: nothing may be captured before it,
-since it is evaluated where the loop is, again.  So an effect, a call to a
-declared function, a cast, a narrow operation that needs a capture or a
-struct constructor in it is refused (`docs/loops.md`), where solkey
-evaluates it per iteration. -/
-partial def loopExpr (Γ : NCtx) (p : PrimTy) (e : RawExpr) (what : String) : ElabM (Val C Γ.ctx p) := do
-  let st ← get
-  let (P, _) ← hoist e
-  set st
-  unless P.isEmpty do
-    throw s!"{e.toStr}: a loop's {what} needs a statement before it (an effect, a call, \
-      a cast, a narrow operation or a constructor), and is evaluated again each iteration"
-  checkIn C Γ p e
-
-/-- A quantified invariant clause (`LoopQ`): its bound local pushed while
-its body is read. -/
-partial def loopQ (Γ : NCtx) : RawInv → ElabM (LoopQ C Γ.ctx)
-  | .expr e => do pure (.val (← loopExpr Γ .bool e "invariant"))
-  | .imp a b => do
-    pure (.imp (← loopExpr Γ .bool a "invariant") (← loopExpr Γ .bool b "invariant"))
-  | .all p x b => do
-    let st ← get
-    modify fun (Γe, k) => ((x, .val p) :: Γe, k)
-    let body ← loopQ ((Var.ofName x, .val p) :: Γ) b
-    set st
-    pure (.all (Var.ofName x) p body)
-
-/-- A branch: its declarations stay inside it, and it does not deploy
-(`ElabScope.top`). -/
-partial def elabBranch (ss : List RawStmt) : ElabM (SProg C) := do
-  let (Γ, _) ← get
-  let P ← withReader (fun sc => { sc with top := false }) (elabStmtsPWith C elabStmtP ss)
-  let (_, k) ← get
-  set (Γ, k)
-  pure P
-
-/-- A branch as a block of its own, from the locals in scope `Γ` (which it
-must be entered in). -/
-partial def elabScope (Γ : NCtx) (ss : List RawStmt) : ElabM (Blk C Γ.ctx) := do
-  ElabM.lift (SProg.chain Γ.names Γ.ctx (← elabBranch ss))
-
 
 /-- **A tuple assignment** `(t₀, , t₂) = e;`, written out as solkey's
 `ParserUtils.tupleAssignment` writes it.  From a call of a function of several
@@ -1039,6 +1040,23 @@ partial def elabTuple (ts : List (Option RawExpr)) (rhs : RawExpr) (direct : Boo
   | _ => throw s!"{rhs.toStr}: the right-hand side of a tuple assignment is a tuple or a call"
 
 end
+
+
+/-- Read a loop expression after checking that hoisting emits no statements. -/
+def loopExpr (Γ : NCtx) (p : PrimTy) (e : RawExpr) (what : String) : ElabM (Val C Γ.ctx p) :=
+  loopExprWith C (hoist C) Γ p e what
+
+/-- Read an invariant, preserving its quantified local contexts. -/
+def loopQ (Γ : NCtx) : RawInv → ElabM (LoopQ C Γ.ctx) :=
+  loopQWith C (loopExpr C) Γ
+
+/-- Elaborate a branch with declarations scoped inside it and deployment disabled. -/
+def elabBranch (ss : List RawStmt) : ElabM (SProg C) :=
+  elabBranchWith C (elabStmtP C) ss
+
+/-- Chain the branch into a block with the supplied local context. -/
+def elabScope (Γ : NCtx) (ss : List RawStmt) : ElabM (Blk C Γ.ctx) :=
+  elabScopeWith C (elabBranch C) Γ ss
 
 /-- Two operands in the contract's evaluation order. -/
 def hoistPair (first last : RawExpr) : ElabM (SProg C × RawExpr × RawExpr) :=
