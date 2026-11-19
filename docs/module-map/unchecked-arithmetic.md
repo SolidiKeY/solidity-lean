@@ -7,6 +7,8 @@
 | `Correctness/Lowering/Total/Relation.lean` | Finite lowering derivations and caller-preserving fresh-name equivalence. |
 | `Correctness/Lowering/Total/Coverage.lean` | `LowersTo` is functional, and its exact raw output on each loop-family input template. |
 | `Correctness/Lowering/Total/Coverage/Checks.lean` | The e1 sample inputs as template instances; the while/break probe's actual output is the only one. |
+| `Correctness/Lowering/Sim/Match/CasesV2.lean` | Shared frame-aware case conclusions at a fixed record, reusing `SiteSim₂` and `Stmt.V2.StmtArm`; fieldwise bridges from applicable v1 case hypotheses with kernel laws and v1 `RecSim`. Documents the unresolved capture/composition dependency; no recursive closure or final simulation. |
+| `Examples/Lowering/Sim/CasesV2.lean` | Checked uses of the shared bridge, block-site projection and existing run bridge. |
 | `Correctness/Sim/Examples.lean` | Checked boundary examples for the simulation framework. |
 | `Correctness/Sim/Lang.lean` | Instantiate the simulation framework with the existing Lang adapter. |
 | `Correctness/Sim/Observation.lean` | Observation diagrams over the roadmap's unchanged prefix order. |
@@ -17,8 +19,6 @@
 | `Correctness/Lowering/Sim/Match/Cases.lean` | The open-recursion case interface of the lowering diagram: `RunSim`, `SiteSim`, `RecSim` (the instance of `ElabKernelInduction`), `ExprCases`, `StmtCases`, `StateCases`, and their sufficiency (`runs_of_cases`). |
 | `Correctness/Lowering/Sim/Smoke.lean` | The case interface on two arms of `elabStmt1With`: stability for every body (`source_stable`), `RunSim` reduced to its lowering and run clauses, the refusing jump arm, and the `revert();` arm from the Source side of its bodies. |
 | `Examples/Lowering/Sim/Cases.lean` | Uses of the case interface and its smokes: the induction instance, the families, `diagram.Simulates` from the cases and a loop hypothesis, the jump and `revert();` leaves. |
-| `Correctness/Lowering/Sim/Match/CasesV2.lean` | Shared frame-aware case conclusions at a fixed record, reusing `SiteSim₂` and `Stmt.V2.StmtArm`; fieldwise bridges from applicable v1 case hypotheses with kernel laws and v1 `RecSim`. Documents the unresolved capture/composition dependency; no recursive closure or final simulation. |
-| `Examples/Lowering/Sim/CasesV2.lean` | Checked uses of the shared bridge, block-site projection and existing run bridge. |
 | `Correctness/Lowering/Sim/Session/Source.lean` | A small-step presentation of the Source session semantics with run coverage and realization. |
 | `Examples/Lowering/Sim/Session/Source.lean` | The source session machine on two small programs: coverage, realization and checked paths. |
 | `Correctness/Lowering/Sim/Session/Target.lean` | The intrinsic session run's machine covers and realizes it: `covers` (every bound's run prefix is reached in the machine with the bound's failures), `realizes` (every reachable state is a `Prefix.Le`-prefix of the run at a bound with the same failures), and their readings `covers_noFail` / `realizes_noFail` in the machine without failures. |
