@@ -45,8 +45,8 @@ theorem branch_reflect {c : Control} {n fuel : Nat} {test : Expr [] [] n 1} {bod
  (condition : ProducerExpressions.Compiled fuel test) (armProfile : StmtWordP body)
  (p : Backend.Program) (q qb : List Evm.Instr)
  (hp : condition.lowered.code 0 = some p) (sq : WordMachine.selectCode p = some q)
- (caller : List Evm.Word) (armLaw : CompletionControls.ModelSource body armProfile qb caller) :
- CompletionControls.ModelSource (.if_ test body) ⟨condition.profile,armProfile⟩ (MachineControl.branchCode q qb []) caller := by
+ (caller : List Evm.Word) (armLaw : SourceLoop.ModelSource body armProfile qb caller) :
+ SourceLoop.ModelSource (.if_ test body) ⟨condition.profile,armProfile⟩ (MachineControl.branchCode q qb []) caller := by
  intro locals m final skip ran
  have testedTarget : Evm.run q {m with stack := locals.toList.map coreWord++caller} =
    .ok {m with stack := coreWord (condition.value locals)::(locals.toList.map coreWord++caller)} 0 := by
@@ -85,7 +85,7 @@ theorem model_to_source {c : Control} {n fuel : Nat} {stmt : Stmt [] [] c n}
    obtain ⟨a,ha,rest⟩ := Option.bind_eq_some_iff.mp lowered
    obtain ⟨b,hb,same⟩ := Option.bind_eq_some_iff.mp rest
    cases Option.some.inj same
-   exact CompletionControls.seq_reflect left.profile right.profile a b caller
+   exact SourceLoop.seq_reflect left.profile right.profile a b caller
      (ihLeft a ha) (ihRight b hb) locals m final skip ran
 
  | branch condition arm ih =>

@@ -53,14 +53,14 @@ theorem source_let {c : Control} {n fuel : Nat} {rhs : Expr [] [] n 1} {body : S
 machine, caller frame and pending skip in the successful executor result. -/
 abbrev ModelSource {c : Control} {n : Nat} (stmt : Stmt [] [] c n)
  (profile : StmtWordP stmt) (code : List Evm.Instr) (caller : List Evm.Word) :=
- CompletionControls.ModelSource stmt profile code caller
+ SourceLoop.ModelSource stmt profile code caller
 
 theorem seq_reflect {c : Control} {n : Nat} {a b : Stmt [] [] c n}
  (leftProfile : StmtWordP a) (rightProfile : StmtWordP b) (qa qb : List Evm.Instr)
  (caller : List Evm.Word)
  (leftLaw : ModelSource a leftProfile qa caller) (rightLaw : ModelSource b rightProfile qb caller) :
  ModelSource (.seq a b) ⟨leftProfile,rightProfile⟩ (qa++qb) caller := by
- exact CompletionControls.seq_reflect leftProfile rightProfile qa qb caller leftLaw rightLaw
+ exact SourceLoop.seq_reflect leftProfile rightProfile qa qb caller leftLaw rightLaw
 
 theorem branch_reflect {c : Control} {n fuel : Nat} {test : Expr [] [] n 1} {body : Stmt [] [] c n}
  (condition : ProducerExpressions.Compiled fuel test) (armProfile : StmtWordP body)

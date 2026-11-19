@@ -85,7 +85,7 @@ theorem source_to_model {c : Control} {n fuel : Nat} {stmt : Stmt [] [] c n}
    obtain ⟨a,ha,rest⟩ := Option.bind_eq_some_iff.mp lowered
    obtain ⟨b,hb,same⟩ := Option.bind_eq_some_iff.mp rest
    cases Option.some.inj same
-   exact CompletionControls.seq_forward left.profile right.profile a b m caller
+   exact SourceLoop.seq_forward left.profile right.profile a b m caller
      (ihLeft a ha) (ihRight b hb) horizon locals result ran
 
 /-- Concrete artifact transport with no stored execution or simulation law. -/

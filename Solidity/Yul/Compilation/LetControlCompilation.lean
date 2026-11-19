@@ -88,8 +88,8 @@ theorem branch_forward {c : Control} {n fuel : Nat} {test : Expr [] [] n 1} {bod
  (condition : ProducerExpressions.Compiled fuel test) (armProfile : StmtWordP body)
  (p : Backend.Program) (q qb : List Evm.Instr)
  (hp : condition.lowered.code 0 = some p) (sq : WordMachine.selectCode p = some q)
- (m : Evm.Machine) (caller : List Evm.Word) (armLaw : CompletionControls.SourceModel body armProfile qb m caller) :
- CompletionControls.SourceModel (.if_ test body) ⟨condition.profile,armProfile⟩ (MachineControl.branchCode q qb []) m caller := by
+ (m : Evm.Machine) (caller : List Evm.Word) (armLaw : SourceLoop.SourceModel body armProfile qb m caller) :
+ SourceLoop.SourceModel (.if_ test body) ⟨condition.profile,armProfile⟩ (MachineControl.branchCode q qb []) m caller := by
  intro horizon locals result ran
  have testedTarget : Evm.run q {m with stack := locals.toList.map coreWord++caller} =
    .ok {m with stack := coreWord (condition.value locals)::(locals.toList.map coreWord++caller)} 0 := by
@@ -143,7 +143,7 @@ theorem source_to_model {c : Control} {n fuel : Nat} {stmt : Stmt [] [] c n}
    obtain ⟨a,ha,rest⟩ := Option.bind_eq_some_iff.mp lowered
    obtain ⟨b,hb,same⟩ := Option.bind_eq_some_iff.mp rest
    cases Option.some.inj same
-   exact CompletionControls.seq_forward left.profile right.profile a b m caller
+   exact SourceLoop.seq_forward left.profile right.profile a b m caller
      (ihLeft a ha) (ihRight b hb) horizon locals result ran
 
  | branch condition arm ih =>

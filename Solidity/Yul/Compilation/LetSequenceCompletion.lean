@@ -27,7 +27,7 @@ theorem model_to_source {c : Control} {n fuel : Nat} {stmt : Stmt [] [] c n}
    obtain ⟨a,ha,rest⟩ := Option.bind_eq_some_iff.mp lowered
    obtain ⟨b,hb,same⟩ := Option.bind_eq_some_iff.mp rest
    cases Option.some.inj same
-   exact CompletionControls.seq_reflect left.profile right.profile a b caller
+   exact SourceLoop.seq_reflect left.profile right.profile a b caller
      (ihLeft a ha) (ihRight b hb) locals m final skip ran
 
 /-- Actual compiler artifact projection; no simulation law is stored. -/

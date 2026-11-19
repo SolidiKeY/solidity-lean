@@ -149,14 +149,14 @@ theorem scope_selected (entry exit : Backend.Program) (body : Backend.Block) (co
 machine and caller frame. This is not stored in compiler certificates. -/
 abbrev SourceModel {c : Control} {n : Nat} (stmt : Stmt [] [] c n)
  (profile : StmtWordP stmt) (code : List Evm.Instr) (m : Evm.Machine) (caller : List Evm.Word) :=
- CompletionControls.SourceModel stmt profile code m caller
+ SourceLoop.SourceModel stmt profile code m caller
 
 theorem seq_forward {c : Control} {n : Nat} {a b : Stmt [] [] c n}
  (leftProfile : StmtWordP a) (rightProfile : StmtWordP b) (qa qb : List Evm.Instr)
  (m : Evm.Machine) (caller : List Evm.Word)
  (leftLaw : SourceModel a leftProfile qa m caller) (rightLaw : SourceModel b rightProfile qb m caller) :
  SourceModel (.seq a b) ⟨leftProfile,rightProfile⟩ (qa++qb) m caller := by
- exact CompletionControls.seq_forward leftProfile rightProfile qa qb m caller leftLaw rightLaw
+ exact SourceLoop.seq_forward leftProfile rightProfile qa qb m caller leftLaw rightLaw
 
 theorem branch_forward {c : Control} {n fuel : Nat} {test : Expr [] [] n 1} {body : Stmt [] [] c n}
  (condition : ProducerExpressions.Compiled fuel test) (armProfile : StmtWordP body)
