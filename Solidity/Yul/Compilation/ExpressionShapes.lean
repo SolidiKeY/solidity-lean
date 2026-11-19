@@ -57,6 +57,29 @@ theorem binary {n : Nat} {left right : Vector Scalar.Word n → Scalar.Word}
       rw [show n+(1+depth) = n+depth+1 by omega] at second
       exact append (append first second)
         (.cons (.mk 2 1 (n+depth) row (by omega) (by omega)) (.nil (n+depth+1)))
+/-- Operand shapes derived from two actual child visits, uniformly for each compiler. -/
+theorem binary_visit
+    (visit : ∀ {n r : Nat}, (fuel : Nat) → (expr : Solidity.Yul.Expr [] [] n r) →
+      Option (ProducerExpressions.Compiled fuel expr))
+    {fuel n : Nat} {args : Fin 2 → Solidity.Yul.Expr [] [] n 1}
+    {op : Solidity.Yul.Pure 2} (bridge : ProducerExpressions.BinaryBridge op)
+    (row : arity (.op bridge.selection.opcode) = some (2,1))
+    (leftLaws : ∀ (child : ProducerExpressions.Compiled fuel (args 0)), visit fuel (args 0) = some child →
+      ∀ depth p, child.lowered.code depth = some p → CodeShape p (n+depth) (n+depth+1))
+    (rightLaws : ∀ (child : ProducerExpressions.Compiled fuel (args 1)), visit fuel (args 1) = some child →
+      ∀ depth p, child.lowered.code depth = some p → CodeShape p (n+depth) (n+depth+1))
+    (compiled : ProducerExpressions.Compiled (fuel+1) (.builtin (.pure op) args))
+    (visited : (visit fuel (args 0)).bind (fun left =>
+      (visit fuel (args 1)).bind (fun right => some (ProducerExpressions.binary bridge left right))) = some compiled)
+    (depth : Nat) (p : Program) (emitted : compiled.lowered.code depth = some p) :
+    CodeShape p (n+depth) (n+depth+1) := by
+  obtain ⟨left,leftVisit,rest⟩ := Option.bind_eq_some_iff.mp visited
+  obtain ⟨right,rightVisit,same⟩ := Option.bind_eq_some_iff.mp rest
+  have equal : ProducerExpressions.binary bridge left right = compiled := Option.some.inj same
+  subst compiled
+  exact ExpressionShapes.binary bridge.selection left.lowered right.lowered row
+    (leftLaws left leftVisit) (rightLaws right rightVisit) depth p emitted
+
 /-- info: 'Solidity.Yul.Compilation.ExpressionShapes.append' depends on axioms: [propext, Quot.sound] -/
 #guard_msgs in
 #print axioms append

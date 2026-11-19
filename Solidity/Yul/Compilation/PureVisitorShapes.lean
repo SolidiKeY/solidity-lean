@@ -20,13 +20,9 @@ private theorem binary_visit {fuel n : Nat} {args : Fin 2 → Solidity.Yul.Expr 
     (visited : (PureExpressions.compile fuel (args 0)).bind (fun left =>
       (PureExpressions.compile fuel (args 1)).bind (fun right => some (ProducerExpressions.binary bridge left right))) = some compiled)
     (depth : Nat) (p : Program) (emitted : compiled.lowered.code depth = some p) :
-    CodeShape p (n+depth) (n+depth+1) := by
-  obtain ⟨left,leftVisit,rest⟩ := Option.bind_eq_some_iff.mp visited
-  obtain ⟨right,rightVisit,same⟩ := Option.bind_eq_some_iff.mp rest
-  have equal : ProducerExpressions.binary bridge left right = compiled := Option.some.inj same
-  subst compiled
-  exact ExpressionShapes.binary bridge.selection left.lowered right.lowered row
-    (leftLaws left leftVisit) (rightLaws right rightVisit) depth p emitted
+    CodeShape p (n+depth) (n+depth+1) :=
+  ExpressionShapes.binary_visit @PureExpressions.compile bridge row leftLaws rightLaws
+    compiled visited depth p emitted
 
 private theorem unary_visit {fuel n : Nat} {args : Fin 1 → Solidity.Yul.Expr [] [] n 1}
     {op : Solidity.Yul.Pure 1} (bridge : WordExpressions.UnaryBridge op)

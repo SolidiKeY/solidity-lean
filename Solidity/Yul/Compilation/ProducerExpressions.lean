@@ -74,6 +74,16 @@ def binary {fuel n : Nat} {args : Fin 2 → Expr [] [] n 1} {op : Pure 2}
     change some (fun _ => op.eval _) = some (fun _ => _)
     rw [bridge.agrees]
 
+/-- Visit binary children in their existing order. The callback leaves the right
+child unvisited when the left fails; the original fuel and source indices remain. -/
+@[inline] def visitBinary {fuel n : Nat} {args : Fin 2 → Expr [] [] n 1} {op : Pure 2}
+    (bridge : BinaryBridge op)
+    (visit : (i : Fin 2) → Option (Compiled fuel (args i))) :
+    Option (Compiled (fuel+1) (.builtin (.pure op) args)) := do
+  let left ← visit 0
+  let right ← visit 1
+  pure (binary bridge left right)
+
 /-- Real recursive visitor on the producer AST. Unsupported constructors return
 none; no untyped expression tree or assumed source execution is introduced. -/
 def compile {n r : Nat} (fuel : Nat) (expr : Expr [] [] n r) :
@@ -91,18 +101,9 @@ def compile {n r : Nat} (fuel : Nat) (expr : Expr [] [] n r) :
         cases builtin with
         | pure op =>
             cases op with
-            | add => exact do
-                let left ← compile fuel (args 0)
-                let right ← compile fuel (args 1)
-                pure (binary addBridge left right)
-            | sub => exact do
-                let left ← compile fuel (args 0)
-                let right ← compile fuel (args 1)
-                pure (binary subBridge left right)
-            | mul => exact do
-                let left ← compile fuel (args 0)
-                let right ← compile fuel (args 1)
-                pure (binary mulBridge left right)
+            | add => exact ProducerExpressions.visitBinary addBridge (fun i => compile fuel (args i))
+            | sub => exact ProducerExpressions.visitBinary subBridge (fun i => compile fuel (args i))
+            | mul => exact ProducerExpressions.visitBinary mulBridge (fun i => compile fuel (args i))
             | _ => exact none
         | _ => exact none
 termination_by structural fuel
