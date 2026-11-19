@@ -36,6 +36,16 @@ namespace Solidity
 
 open Semantics
 
+/-- Rewriting a statement's own expressions leaves its control-tree
+weight unchanged, including the blocks held by loops and branches. The
+callback's effects are retained on both sides. -/
+theorem CalleeKernel.mapExprsM_weight {m : Type → Type} [Monad m] [LawfulMonad m]
+    (f : RawExpr → m RawExpr) (s : RawStmt) :
+    stmtWeight <$> s.mapExprsM f =
+      (fun _ => stmtWeight s) <$> s.mapExprsM f := by
+  cases s <;> simp only [RawStmt.mapExprsM, map_bind,
+    LawfulApplicative.map_pure, stmtWeight]
+
 /-- No element of a well-founded relation lies on a cycle of three. -/
 theorem rel_cycle3 {α : Type} [WellFoundedRelation α] {a b c : α}
     (h1 : WellFoundedRelation.rel a b) (h2 : WellFoundedRelation.rel b c)
