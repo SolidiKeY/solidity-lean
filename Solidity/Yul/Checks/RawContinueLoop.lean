@@ -78,9 +78,8 @@ theorem initializedAll : ∀ (pipeline : Solidity.Roadmap.Pipeline) (fuel : Nat)
     RawContinueLoop.initialized_world Old.ctx "n" [] false false argument pipeline fuel
     (Old.initial 2 257 2 world)⟩
 
-theorem dirtyInputRefuses : ∀ (world : Solidity.Source.St Solidity.Yul.Checks.RawContinueLoop.Old.ctx.env), Solidity.Yul.RawCoherent.coherent (Solidity.Yul.Checks.RawContinueLoop.Old.initial 2 257 2 world) = false := by
-  intro world
-  rfl
+theorem dirtyInputRefuses : ∀ (world : Solidity.Source.St Solidity.Yul.Checks.RawContinueLoop.Old.ctx.env), Solidity.Yul.RawCoherent.coherent (Solidity.Yul.Checks.RawContinueLoop.Old.initial 2 257 2 world) = false :=
+  Solidity.Yul.Checks.RawCheckedIfElse.dirtyNotSource
 
 theorem coherentAll : ∀ (pipeline : Solidity.Roadmap.Pipeline) (fuel : Nat)
  (world : Solidity.Source.St Old.ctx.env),

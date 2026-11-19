@@ -67,9 +67,8 @@ theorem iteration_reflect {c : Backend.Program} {b : Backend.Block} {qc qb : Lis
                exact ⟨output,done,finalFrame,StructuredExec.loopMore cRun zero bodyTrace remaining⟩
 
 theorem singleton_run (qc qb : List Evm.Instr) (initial : Evm.Machine) :
- Evm.run [.loop qc qb] initial = Evm.loopRun (Evm.run qc) (Evm.run qb) initial := by
- change (Evm.loopRun (Evm.run qc) (Evm.run qb) initial).bind (fun m k => Evm.exec [] k m) = _
- cases Evm.loopRun (Evm.run qc) (Evm.run qb) initial <;> rfl
+ Evm.run [.loop qc qb] initial = Evm.loopRun (Evm.run qc) (Evm.run qb) initial :=
+  WordBlockExecution.loop_singleton qc qb initial
 
 /-- Whole successful loop execution derives its finite iteration witness; no
 finite-prefix, termination or favourable guard premise is supplied by callers. -/

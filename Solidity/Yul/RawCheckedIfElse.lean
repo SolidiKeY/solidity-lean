@@ -46,9 +46,6 @@ theorem correct {ctx returns modifier control condition yes no}
         RawCoherent.capture state (LocalState.ofClean (locals,world))
       have nextSame : RawCoherent.coherent nextFrame = true :=
         RawCoherent.capture_coherent state locals world
-      have nextClean : nextFrame.clean = locals := by
-        simp only [nextFrame, RawCoherent.capture, LocalState.ofClean,
-          LocalValues.clean_ofClean, Option.getD_some]
       cases tag with
       | error halt =>
         change RawCondition.eval test fuel state = (.error halt,nextFrame) at conditionRun
@@ -63,11 +60,7 @@ theorem correct {ctx returns modifier control condition yes no}
             | false =>
               change RawCondition.eval test fuel state = (.ok false,nextFrame) at conditionRun
               have branch := RawCheckedSequence.block_correct ctx returns modifier control no two glob frame checked fuel nps ph nextFrame nextSame
-              have sourceCondition :
-                  (Solidity.Source.evalE glob frame fuel condition).run (state.clean,state.world) =
-                    (.ok (.val (.bool false)),(nextFrame.clean,nextFrame.world)) := by
-                rw [nextClean]
-                exact actual
+              have sourceCondition := RawCoherent.capture_result state actual
               have selected := RawIfElse.source_selected condition yes no glob frame fuel nps ph
                 state nextFrame false (RawCheckedSequence.block two glob.pipeline fuel nextFrame) sourceCondition branch.2
               simp only [run, conditionRun, Bool.false_eq_true, if_false]
@@ -75,11 +68,7 @@ theorem correct {ctx returns modifier control condition yes no}
             | true =>
               change RawCondition.eval test fuel state = (.ok true,nextFrame) at conditionRun
               have branch := RawCheckedSequence.block_correct ctx returns modifier control yes one glob frame checked fuel nps ph nextFrame nextSame
-              have sourceCondition :
-                  (Solidity.Source.evalE glob frame fuel condition).run (state.clean,state.world) =
-                    (.ok (.val (.bool true)),(nextFrame.clean,nextFrame.world)) := by
-                rw [nextClean]
-                exact actual
+              have sourceCondition := RawCoherent.capture_result state actual
               have selected := RawIfElse.source_selected condition yes no glob frame fuel nps ph
                 state nextFrame true (RawCheckedSequence.block one glob.pipeline fuel nextFrame) sourceCondition branch.2
               simp only [run, conditionRun, if_true]

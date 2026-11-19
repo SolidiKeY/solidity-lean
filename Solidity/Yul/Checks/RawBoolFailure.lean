@@ -48,8 +48,8 @@ theorem completedDirtyExpression : (Solidity.Yul.RawCoherent.execS Solidity.Yul.
 theorem breakSuccess : (Solidity.Yul.RawLoopBody.run Solidity.Yul.Checks.RawBoolFailure.breakBody 2 Solidity.Yul.Checks.RawBoolFailure.dirty).1 = .ok (.break_ rfl) ∧ (Solidity.Yul.RawFrame.view (Solidity.Yul.RawLoopBody.run Solidity.Yul.Checks.RawBoolFailure.breakBody 2 Solidity.Yul.Checks.RawBoolFailure.dirty).2 Solidity.Yul.Checks.RawBoolFailure.flag).val = 2 ∧ (Solidity.Yul.RawFrame.view (Solidity.Yul.RawLoopBody.run Solidity.Yul.Checks.RawBoolFailure.breakBody 2 Solidity.Yul.Checks.RawBoolFailure.dirty).2 Solidity.Yul.Checks.RawBoolFailure.small).val = 257 := by
   exact Solidity.Yul.Checks.RawBoolFailure.Old.breakSelected
 
-theorem initializerCounterexample : (Solidity.Yul.Checks.RawBoolFailure.Old.refusedBreak.run 2 Solidity.Yul.Checks.RawBoolFailure.dirty).1 = .error (.stuck "for initializer") ∧ (Solidity.Source.Halt.stuck "for initializer" ≠ .timeout) := by
-  exact ⟨Solidity.Yul.Checks.RawBoolFailure.Old.breakRefusal.1,by intro bad; cases bad⟩
+theorem initializerCounterexample : (Solidity.Yul.Checks.RawBoolFailure.Old.refusedBreak.run 2 Solidity.Yul.Checks.RawBoolFailure.dirty).1 = .error (.stuck "for initializer") ∧ (Solidity.Source.Halt.stuck "for initializer" ≠ .timeout) :=
+  Solidity.Yul.Checks.RawInitializedForHorizon.initializerCounterexample
 
 theorem zeroCondition : ∀ state : Solidity.Yul.RawFrame.State Solidity.Yul.Checks.RawBoolFailure.ctx, (Solidity.Yul.RawCondition.eval Solidity.Yul.Checks.RawBoolFailure.read 0 state).1 = .error .timeout := by
   intro state

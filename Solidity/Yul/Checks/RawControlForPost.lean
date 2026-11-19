@@ -164,9 +164,8 @@ theorem preTimeout : ∀ (pipeline : Solidity.Roadmap.Pipeline) (world : Solidit
   intro pipeline world
   exact ⟨rfl,rfl⟩
 
-theorem dirtyRefuses : ∀ (world : Solidity.Source.St Solidity.Yul.Checks.RawControlForPost.Old.env), Solidity.Yul.RawCoherent.coherent (Solidity.Yul.Checks.RawControlForPost.Old.initial 2 257 2 world) = false := by
-  intro world
-  rfl
+theorem dirtyRefuses : ∀ (world : Solidity.Source.St Solidity.Yul.Checks.RawControlForPost.Old.env), Solidity.Yul.RawCoherent.coherent (Solidity.Yul.Checks.RawControlForPost.Old.initial 2 257 2 world) = false :=
+  Solidity.Yul.Checks.RawU8Statement.dirtyRefusal
 
 theorem sourceAll : ∀ (glob : Solidity.Source.Glob Solidity.Yul.Checks.RawControlForPost.Old.env) (frame : Solidity.Source.Fr), frame.checked = true →
  ∀ (fuel nps : Nat) (ph : Option (Solidity.Source.Ph Solidity.Yul.Checks.RawControlForPost.Old.env)) (world : Solidity.Source.St Solidity.Yul.Checks.RawControlForPost.Old.env),

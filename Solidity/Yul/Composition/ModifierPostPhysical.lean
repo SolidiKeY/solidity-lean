@@ -461,13 +461,18 @@ theorem body_low_2 {E : Source.Env} {Γ : Source.RCtx} (G : Source.Glob E) (F : 
     (Source.runMods (program G) F 2 (ModifierPhysical.body bodyIndex) [invocation argIndex] inside).run (.nil,state) =
       (.error .timeout,(.nil,state)) := rfl
 
-theorem body_low_3 {E : Source.Env} {Γ : Source.RCtx} (G : Source.Glob E) (F : Source.Fr)
+private theorem body_low_of_post_timeout {E : Source.Env} {Γ : Source.RCtx} (G : Source.Glob E) (F : Source.Fr)
     (bodyIndex argIndex : Source.Idx Γ (.bytes .memory))
-    (inside : Source.Locals E.layout Γ) (state : Source.St E) :
-    (Source.runMods (program G) F 3 (ModifierPhysical.body bodyIndex) [invocation argIndex] inside).run (.nil,state) =
+    (inside : Source.Locals E.layout Γ) (state : Source.St E) (fuel : Nat)
+    (timeout :
+      (Source.execItems (program G) F (fuel+2) 1 (some ⟨ModifierPhysical.body bodyIndex,[],inside⟩)
+        (postBody E).items (.cons (inside.get argIndex) .nil)).run
+        (.nil,{state with fnLocals:=⟨Γ,inside⟩}) =
+        (.error .timeout,(.nil,{state with fnLocals:=⟨Γ,inside⟩}))) :
+    (Source.runMods (program G) F (fuel+3) (ModifierPhysical.body bodyIndex) [invocation argIndex] inside).run (.nil,state) =
       (.error .timeout,(.nil,state)) := by
   rw [Source.runMods,Source.Hoare.run_bind]
-  have args : (Source.EM.sub inside (Source.evalConvArgs (program G) F 2 (invocation argIndex).args) : Source.EM E [] _).run
+  have args : (Source.EM.sub inside (Source.evalConvArgs (program G) F (fuel+2) (invocation argIndex).args) : Source.EM E [] _).run
       (.nil,state) = (.ok (Source.Vals.cons (inside.get argIndex) .nil,inside),(.nil,state)) := by
     change ((Except.ok ((Source.Vals.cons (inside.get argIndex) .nil : Source.Vals E.layout [.bytes .memory]),inside), (Source.Locals.nil,state)) :
       Except Source.Halt (Source.Vals E.layout [.bytes .memory] × Source.Locals E.layout Γ) × Source.EMState E []) = _
@@ -487,139 +492,51 @@ theorem body_low_3 {E : Source.Env} {Γ : Source.RCtx} (G : Source.Glob E) (F : 
   rw [install]
   dsimp only
   rw [Source.Hoare.run_bind,AttemptPhysical.attempt_run]
-  have ran := post_items_low_2 (program G) F bodyIndex inside (inside.get argIndex) state
+  have ran := timeout
   dsimp only [ModifierPhysical.body,postBody] at ran
   dsimp only [Source.Vals.onto,Source.L0,List.length_cons,List.length_nil]
   rw [ran]
   rfl
+
+theorem body_low_3 {E : Source.Env} {Γ : Source.RCtx} (G : Source.Glob E) (F : Source.Fr)
+    (bodyIndex argIndex : Source.Idx Γ (.bytes .memory))
+    (inside : Source.Locals E.layout Γ) (state : Source.St E) :
+    (Source.runMods (program G) F 3 (ModifierPhysical.body bodyIndex) [invocation argIndex] inside).run (.nil,state) =
+      (.error .timeout,(.nil,state)) :=
+  body_low_of_post_timeout G F bodyIndex argIndex inside state 0
+    (post_items_low_2 (program G) F bodyIndex inside (inside.get argIndex) state)
 
 theorem body_low_4 {E : Source.Env} {Γ : Source.RCtx} (G : Source.Glob E) (F : Source.Fr)
     (bodyIndex argIndex : Source.Idx Γ (.bytes .memory))
     (inside : Source.Locals E.layout Γ) (state : Source.St E) :
     (Source.runMods (program G) F 4 (ModifierPhysical.body bodyIndex) [invocation argIndex] inside).run (.nil,state) =
-      (.error .timeout,(.nil,state)) := by
-  rw [Source.runMods,Source.Hoare.run_bind]
-  have args : (Source.EM.sub inside (Source.evalConvArgs (program G) F 3 (invocation argIndex).args) : Source.EM E [] _).run
-      (.nil,state) = (.ok (Source.Vals.cons (inside.get argIndex) .nil,inside),(.nil,state)) := by
-    change ((Except.ok ((Source.Vals.cons (inside.get argIndex) .nil : Source.Vals E.layout [.bytes .memory]),inside), (Source.Locals.nil,state)) :
-      Except Source.Halt (Source.Vals E.layout [.bytes .memory] × Source.Locals E.layout Γ) × Source.EMState E []) = _
-    rfl
-  rw [args]
-  dsimp only [invocation]
-  rw [lookup_post]
-  dsimp only [postBody]
-  rw [dif_pos (show ([Source.STy.bytes .memory] : Source.RCtx).reverseAux [] = [Source.STy.bytes .memory] from rfl),Source.Hoare.run_bind]
-  have read : (Source.EM.st : Source.EM E [] _).run (.nil,state) = (.ok state,(.nil,state)) := rfl
-  rw [read]
-  dsimp only
-  rw [Source.Hoare.run_bind]
-  dsimp only [ModifierPhysical.body]
-  have install : (Source.EM.modSt (fun s : Source.St E=>{s with fnLocals:=⟨Γ,inside⟩}) : Source.EM E [] Unit).run
-      (.nil,state) = (.ok (),(.nil,{state with fnLocals:=⟨Γ,inside⟩})) := rfl
-  rw [install]
-  dsimp only
-  rw [Source.Hoare.run_bind,AttemptPhysical.attempt_run]
-  have ran := post_items_low_3 (program G) F bodyIndex inside (inside.get argIndex) state
-  dsimp only [ModifierPhysical.body,postBody] at ran
-  dsimp only [Source.Vals.onto,Source.L0,List.length_cons,List.length_nil]
-  rw [ran]
-  rfl
+      (.error .timeout,(.nil,state)) :=
+  body_low_of_post_timeout G F bodyIndex argIndex inside state 1
+    (post_items_low_3 (program G) F bodyIndex inside (inside.get argIndex) state)
 
 theorem body_low_5 {E : Source.Env} {Γ : Source.RCtx} (G : Source.Glob E) (F : Source.Fr)
     (bodyIndex argIndex : Source.Idx Γ (.bytes .memory))
     (inside : Source.Locals E.layout Γ) (state : Source.St E) :
     (Source.runMods (program G) F 5 (ModifierPhysical.body bodyIndex) [invocation argIndex] inside).run (.nil,state) =
-      (.error .timeout,(.nil,state)) := by
-  rw [Source.runMods,Source.Hoare.run_bind]
-  have args : (Source.EM.sub inside (Source.evalConvArgs (program G) F 4 (invocation argIndex).args) : Source.EM E [] _).run
-      (.nil,state) = (.ok (Source.Vals.cons (inside.get argIndex) .nil,inside),(.nil,state)) := by
-    change ((Except.ok ((Source.Vals.cons (inside.get argIndex) .nil : Source.Vals E.layout [.bytes .memory]),inside), (Source.Locals.nil,state)) :
-      Except Source.Halt (Source.Vals E.layout [.bytes .memory] × Source.Locals E.layout Γ) × Source.EMState E []) = _
-    rfl
-  rw [args]
-  dsimp only [invocation]
-  rw [lookup_post]
-  dsimp only [postBody]
-  rw [dif_pos (show ([Source.STy.bytes .memory] : Source.RCtx).reverseAux [] = [Source.STy.bytes .memory] from rfl),Source.Hoare.run_bind]
-  have read : (Source.EM.st : Source.EM E [] _).run (.nil,state) = (.ok state,(.nil,state)) := rfl
-  rw [read]
-  dsimp only
-  rw [Source.Hoare.run_bind]
-  dsimp only [ModifierPhysical.body]
-  have install : (Source.EM.modSt (fun s : Source.St E=>{s with fnLocals:=⟨Γ,inside⟩}) : Source.EM E [] Unit).run
-      (.nil,state) = (.ok (),(.nil,{state with fnLocals:=⟨Γ,inside⟩})) := rfl
-  rw [install]
-  dsimp only
-  rw [Source.Hoare.run_bind,AttemptPhysical.attempt_run]
-  have ran := post_items_low_4 (program G) F bodyIndex inside (inside.get argIndex) state
-  dsimp only [ModifierPhysical.body,postBody] at ran
-  dsimp only [Source.Vals.onto,Source.L0,List.length_cons,List.length_nil]
-  rw [ran]
-  rfl
+      (.error .timeout,(.nil,state)) :=
+  body_low_of_post_timeout G F bodyIndex argIndex inside state 2
+    (post_items_low_4 (program G) F bodyIndex inside (inside.get argIndex) state)
 
 theorem body_low_6 {E : Source.Env} {Γ : Source.RCtx} (G : Source.Glob E) (F : Source.Fr)
     (bodyIndex argIndex : Source.Idx Γ (.bytes .memory))
     (inside : Source.Locals E.layout Γ) (state : Source.St E) :
     (Source.runMods (program G) F 6 (ModifierPhysical.body bodyIndex) [invocation argIndex] inside).run (.nil,state) =
-      (.error .timeout,(.nil,state)) := by
-  rw [Source.runMods,Source.Hoare.run_bind]
-  have args : (Source.EM.sub inside (Source.evalConvArgs (program G) F 5 (invocation argIndex).args) : Source.EM E [] _).run
-      (.nil,state) = (.ok (Source.Vals.cons (inside.get argIndex) .nil,inside),(.nil,state)) := by
-    change ((Except.ok ((Source.Vals.cons (inside.get argIndex) .nil : Source.Vals E.layout [.bytes .memory]),inside), (Source.Locals.nil,state)) :
-      Except Source.Halt (Source.Vals E.layout [.bytes .memory] × Source.Locals E.layout Γ) × Source.EMState E []) = _
-    rfl
-  rw [args]
-  dsimp only [invocation]
-  rw [lookup_post]
-  dsimp only [postBody]
-  rw [dif_pos (show ([Source.STy.bytes .memory] : Source.RCtx).reverseAux [] = [Source.STy.bytes .memory] from rfl),Source.Hoare.run_bind]
-  have read : (Source.EM.st : Source.EM E [] _).run (.nil,state) = (.ok state,(.nil,state)) := rfl
-  rw [read]
-  dsimp only
-  rw [Source.Hoare.run_bind]
-  dsimp only [ModifierPhysical.body]
-  have install : (Source.EM.modSt (fun s : Source.St E=>{s with fnLocals:=⟨Γ,inside⟩}) : Source.EM E [] Unit).run
-      (.nil,state) = (.ok (),(.nil,{state with fnLocals:=⟨Γ,inside⟩})) := rfl
-  rw [install]
-  dsimp only
-  rw [Source.Hoare.run_bind,AttemptPhysical.attempt_run]
-  have ran := post_items_low_5 (program G) F bodyIndex inside (inside.get argIndex) state
-  dsimp only [ModifierPhysical.body,postBody] at ran
-  dsimp only [Source.Vals.onto,Source.L0,List.length_cons,List.length_nil]
-  rw [ran]
-  rfl
+      (.error .timeout,(.nil,state)) :=
+  body_low_of_post_timeout G F bodyIndex argIndex inside state 3
+    (post_items_low_5 (program G) F bodyIndex inside (inside.get argIndex) state)
 
 theorem body_low_7 {E : Source.Env} {Γ : Source.RCtx} (G : Source.Glob E) (F : Source.Fr)
     (bodyIndex argIndex : Source.Idx Γ (.bytes .memory))
     (inside : Source.Locals E.layout Γ) (state : Source.St E) :
     (Source.runMods (program G) F 7 (ModifierPhysical.body bodyIndex) [invocation argIndex] inside).run (.nil,state) =
-      (.error .timeout,(.nil,state)) := by
-  rw [Source.runMods,Source.Hoare.run_bind]
-  have args : (Source.EM.sub inside (Source.evalConvArgs (program G) F 6 (invocation argIndex).args) : Source.EM E [] _).run
-      (.nil,state) = (.ok (Source.Vals.cons (inside.get argIndex) .nil,inside),(.nil,state)) := by
-    change ((Except.ok ((Source.Vals.cons (inside.get argIndex) .nil : Source.Vals E.layout [.bytes .memory]),inside), (Source.Locals.nil,state)) :
-      Except Source.Halt (Source.Vals E.layout [.bytes .memory] × Source.Locals E.layout Γ) × Source.EMState E []) = _
-    rfl
-  rw [args]
-  dsimp only [invocation]
-  rw [lookup_post]
-  dsimp only [postBody]
-  rw [dif_pos (show ([Source.STy.bytes .memory] : Source.RCtx).reverseAux [] = [Source.STy.bytes .memory] from rfl),Source.Hoare.run_bind]
-  have read : (Source.EM.st : Source.EM E [] _).run (.nil,state) = (.ok state,(.nil,state)) := rfl
-  rw [read]
-  dsimp only
-  rw [Source.Hoare.run_bind]
-  dsimp only [ModifierPhysical.body]
-  have install : (Source.EM.modSt (fun s : Source.St E=>{s with fnLocals:=⟨Γ,inside⟩}) : Source.EM E [] Unit).run
-      (.nil,state) = (.ok (),(.nil,{state with fnLocals:=⟨Γ,inside⟩})) := rfl
-  rw [install]
-  dsimp only
-  rw [Source.Hoare.run_bind,AttemptPhysical.attempt_run]
-  have ran := post_items_low_6 (program G) F bodyIndex inside (inside.get argIndex) state
-  dsimp only [ModifierPhysical.body,postBody] at ran
-  dsimp only [Source.Vals.onto,Source.L0,List.length_cons,List.length_nil]
-  rw [ran]
-  rfl
+      (.error .timeout,(.nil,state)) :=
+  body_low_of_post_timeout G F bodyIndex argIndex inside state 4
+    (post_items_low_6 (program G) F bodyIndex inside (inside.get argIndex) state)
 
 theorem body_low {E : Source.Env} {Γ : Source.RCtx} (G : Source.Glob E) (F : Source.Fr)
     (bodyIndex argIndex : Source.Idx Γ (.bytes .memory))

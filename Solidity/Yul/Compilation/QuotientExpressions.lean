@@ -46,26 +46,11 @@ def compile {n r : Nat} (fuel : Nat) (expr : Expr [] [] n r) : Option (Compiled 
         cases builtin with
         | pure op =>
             cases op with
-            | add => exact do
-                let left ← compile fuel (args 0)
-                let right ← compile fuel (args 1)
-                pure (ProducerExpressions.binary addBridge left right)
-            | sub => exact do
-                let left ← compile fuel (args 0)
-                let right ← compile fuel (args 1)
-                pure (ProducerExpressions.binary subBridge left right)
-            | mul => exact do
-                let left ← compile fuel (args 0)
-                let right ← compile fuel (args 1)
-                pure (ProducerExpressions.binary mulBridge left right)
-            | «div» => exact do
-                let left ← compile fuel (args 0)
-                let right ← compile fuel (args 1)
-                pure (ProducerExpressions.binary divBridge left right)
-            | «mod» => exact do
-                let left ← compile fuel (args 0)
-                let right ← compile fuel (args 1)
-                pure (ProducerExpressions.binary modBridge left right)
+            | add => exact ProducerExpressions.visitBinary addBridge (fun i => compile fuel (args i))
+            | sub => exact ProducerExpressions.visitBinary subBridge (fun i => compile fuel (args i))
+            | mul => exact ProducerExpressions.visitBinary mulBridge (fun i => compile fuel (args i))
+            | «div» => exact ProducerExpressions.visitBinary divBridge (fun i => compile fuel (args i))
+            | «mod» => exact ProducerExpressions.visitBinary modBridge (fun i => compile fuel (args i))
             | _ => exact none
         | _ => exact none
 termination_by structural fuel

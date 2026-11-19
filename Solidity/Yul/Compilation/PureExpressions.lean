@@ -7,10 +7,8 @@ open Backend Scalar
 open Solidity.Yul.Closed ProducerExpressions WordExpressions BitExpressions SignedExpressions ModularExpressions RemainingWordBridges
 
 private theorem unaryProfile {fuel n : Nat} {args : Fin 1 → Expr [] [] n 1}
-    (argument : Compiled fuel (args 0)) (i : Fin 1) : ExprWordP (args i) := by
-  have equal : i = 0 := by omega
-  subst i
-  exact argument.profile
+    (argument : Compiled fuel (args 0)) (i : Fin 1) : ExprWordP (args i) :=
+  WordExpressions.unaryProfile argument i
 
 def clz {fuel n : Nat} {args : Fin 1 → Expr [] [] n 1} 
     (argument : Compiled fuel (args 0)) :
@@ -38,11 +36,8 @@ def clz {fuel n : Nat} {args : Fin 1 → Expr [] [] n 1}
 
 private theorem binaryProfile {fuel n : Nat} {args : Fin 2 → Expr [] [] n 1}
     (left : Compiled fuel (args 0)) (right : Compiled fuel (args 1))
-    (i : Fin 2) : ExprWordP (args i) := by
-  have h : i = 0 ∨ i = 1 := by omega
-  rcases h with h | h
-  · subst i; exact left.profile
-  · subst i; exact right.profile
+    (i : Fin 2) : ExprWordP (args i) :=
+  ProducerExpressions.binaryProfile left right i
 
 def byte {fuel n : Nat} {args : Fin 2 → Expr [] [] n 1} 
     (left : Compiled fuel (args 0))
@@ -84,84 +79,30 @@ def compile {n r : Nat} (fuel : Nat) (expr : Expr [] [] n r) : Option (Compiled 
         cases builtin with
         | pure op =>
             cases op with
-            | add => exact do
-                let left ← compile fuel (args 0)
-                let right ← compile fuel (args 1)
-                pure (ProducerExpressions.binary addBridge left right)
-            | sub => exact do
-                let left ← compile fuel (args 0)
-                let right ← compile fuel (args 1)
-                pure (ProducerExpressions.binary subBridge left right)
-            | mul => exact do
-                let left ← compile fuel (args 0)
-                let right ← compile fuel (args 1)
-                pure (ProducerExpressions.binary mulBridge left right)
-            | «div» => exact do
-                let left ← compile fuel (args 0)
-                let right ← compile fuel (args 1)
-                pure (ProducerExpressions.binary QuotientExpressions.divBridge left right)
-            | «mod» => exact do
-                let left ← compile fuel (args 0)
-                let right ← compile fuel (args 1)
-                pure (ProducerExpressions.binary QuotientExpressions.modBridge left right)
-            | lt => exact do
-                let left ← compile fuel (args 0)
-                let right ← compile fuel (args 1)
-                pure (ProducerExpressions.binary ltBridge left right)
-            | gt => exact do
-                let left ← compile fuel (args 0)
-                let right ← compile fuel (args 1)
-                pure (ProducerExpressions.binary gtBridge left right)
-            | eq => exact do
-                let left ← compile fuel (args 0)
-                let right ← compile fuel (args 1)
-                pure (ProducerExpressions.binary eqBridge left right)
+            | add => exact ProducerExpressions.visitBinary addBridge (fun i => compile fuel (args i))
+            | sub => exact ProducerExpressions.visitBinary subBridge (fun i => compile fuel (args i))
+            | mul => exact ProducerExpressions.visitBinary mulBridge (fun i => compile fuel (args i))
+            | «div» => exact ProducerExpressions.visitBinary QuotientExpressions.divBridge (fun i => compile fuel (args i))
+            | «mod» => exact ProducerExpressions.visitBinary QuotientExpressions.modBridge (fun i => compile fuel (args i))
+            | lt => exact ProducerExpressions.visitBinary ltBridge (fun i => compile fuel (args i))
+            | gt => exact ProducerExpressions.visitBinary gtBridge (fun i => compile fuel (args i))
+            | eq => exact ProducerExpressions.visitBinary eqBridge (fun i => compile fuel (args i))
             | iszero => exact do
                 let arg ← compile fuel (args 0)
                 pure (WordExpressions.unary iszeroBridge arg)
             | «not» => exact do
                 let arg ← compile fuel (args 0)
                 pure (WordExpressions.unary notBridge arg)
-            | «and» => exact do
-                let left ← compile fuel (args 0)
-                let right ← compile fuel (args 1)
-                pure (ProducerExpressions.binary andBridge left right)
-            | «or» => exact do
-                let left ← compile fuel (args 0)
-                let right ← compile fuel (args 1)
-                pure (ProducerExpressions.binary orBridge left right)
-            | «xor» => exact do
-                let left ← compile fuel (args 0)
-                let right ← compile fuel (args 1)
-                pure (ProducerExpressions.binary xorBridge left right)
-            | «shl» => exact do
-                let left ← compile fuel (args 0)
-                let right ← compile fuel (args 1)
-                pure (ProducerExpressions.binary shlBridge left right)
-            | «shr» => exact do
-                let left ← compile fuel (args 0)
-                let right ← compile fuel (args 1)
-                pure (ProducerExpressions.binary shrBridge left right)
-            | sdiv => exact do
-                let left ← compile fuel (args 0)
-                let right ← compile fuel (args 1)
-                pure (ProducerExpressions.binary sdivBridge left right)
-            | smod => exact do
-                let left ← compile fuel (args 0)
-                let right ← compile fuel (args 1)
-                pure (ProducerExpressions.binary smodBridge left right)
-            | slt => exact do
-                let left ← compile fuel (args 0)
-                let right ← compile fuel (args 1)
-                pure (ProducerExpressions.binary sltBridge left right)
-            | sgt => exact do
-                let left ← compile fuel (args 0)
-                let right ← compile fuel (args 1)
-                pure (ProducerExpressions.binary sgtBridge left right)
-            | sar => exact do
-                let left ← compile fuel (args 0)
-                let right ← compile fuel (args 1)
-                pure (ProducerExpressions.binary sarBridge left right)
+            | «and» => exact ProducerExpressions.visitBinary andBridge (fun i => compile fuel (args i))
+            | «or» => exact ProducerExpressions.visitBinary orBridge (fun i => compile fuel (args i))
+            | «xor» => exact ProducerExpressions.visitBinary xorBridge (fun i => compile fuel (args i))
+            | «shl» => exact ProducerExpressions.visitBinary shlBridge (fun i => compile fuel (args i))
+            | «shr» => exact ProducerExpressions.visitBinary shrBridge (fun i => compile fuel (args i))
+            | sdiv => exact ProducerExpressions.visitBinary sdivBridge (fun i => compile fuel (args i))
+            | smod => exact ProducerExpressions.visitBinary smodBridge (fun i => compile fuel (args i))
+            | slt => exact ProducerExpressions.visitBinary sltBridge (fun i => compile fuel (args i))
+            | sgt => exact ProducerExpressions.visitBinary sgtBridge (fun i => compile fuel (args i))
+            | sar => exact ProducerExpressions.visitBinary sarBridge (fun i => compile fuel (args i))
             | addmod => exact do
                 let left ← compile fuel (args 0)
                 let right ← compile fuel (args 1)
@@ -172,14 +113,8 @@ def compile {n r : Nat} (fuel : Nat) (expr : Expr [] [] n r) : Option (Compiled 
                 let right ← compile fuel (args 1)
                 let modulus ← compile fuel (args 2)
                 pure (ModularExpressions.ternary mulmodBridge left right modulus)
-            | exp => exact do
-                let left ← compile fuel (args 0)
-                let right ← compile fuel (args 1)
-                pure (ProducerExpressions.binary expBridge left right)
-            | signextend => exact do
-                let left ← compile fuel (args 0)
-                let right ← compile fuel (args 1)
-                pure (ProducerExpressions.binary signextendBridge left right)
+            | exp => exact ProducerExpressions.visitBinary expBridge (fun i => compile fuel (args i))
+            | signextend => exact ProducerExpressions.visitBinary signextendBridge (fun i => compile fuel (args i))
             | byte => exact do
                 let left ← compile fuel (args 0)
                 let right ← compile fuel (args 1)

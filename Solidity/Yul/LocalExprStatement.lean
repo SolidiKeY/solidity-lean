@@ -63,10 +63,7 @@ theorem source_step {env ctx} (expr : Solidity.Source.RExpr env ctx .bool)
           have sub : (Solidity.Source.EM.sub (Γ := []) locals
               (Solidity.Source.evalE glob frame fuel expr)).run (Solidity.Source.L0 env,world) =
                 (.error halt,(Solidity.Source.L0 env,next.2)) := by
-            have actualRun : Solidity.Source.evalE (plan := none) (calldataKnown := true) glob frame fuel expr (locals,world) =
-                (.error halt,(nextLocals,nextWorld)) := actual
-            simp only [Solidity.Source.EM.sub,ExceptT.run,ExceptT.mk,actualRun]
-            rfl
+            exact LocalBoolControl.source_sub_run (Solidity.Source.L0 env) actual
           rw [Solidity.Source.execS,Solidity.Source.Hoare.run_bind,sub]
           rfl
       | ok value =>
@@ -80,10 +77,7 @@ theorem source_step {env ctx} (expr : Solidity.Source.RExpr env ctx .bool)
                   have sub : (Solidity.Source.EM.sub (Γ := []) locals
                       (Solidity.Source.evalE glob frame fuel expr)).run (Solidity.Source.L0 env,world) =
                         (.ok (.val (.bool value),next.1),(Solidity.Source.L0 env,next.2)) := by
-                    have actualRun : Solidity.Source.evalE (plan := none) (calldataKnown := true) glob frame fuel expr (locals,world) =
-                        (.ok (.val (.bool value)),(nextLocals,nextWorld)) := actual
-                    simp only [Solidity.Source.EM.sub,ExceptT.run,ExceptT.mk,actualRun]
-                    rfl
+                    exact LocalBoolControl.source_sub_run (Solidity.Source.L0 env) actual
                   rw [Solidity.Source.execS,Solidity.Source.Hoare.run_bind,sub]
                   simp only [Except.map,project,LocalState.ofClean,LocalValues.clean_ofClean]
                   rfl
