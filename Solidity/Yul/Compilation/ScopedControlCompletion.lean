@@ -53,42 +53,14 @@ theorem source_let {c : Control} {n fuel : Nat} {rhs : Expr [] [] n 1} {body : S
 machine, caller frame and pending skip in the successful executor result. -/
 abbrev ModelSource {c : Control} {n : Nat} (stmt : Stmt [] [] c n)
  (profile : StmtWordP stmt) (code : List Evm.Instr) (caller : List Evm.Word) :=
- ∀ (locals : Vector Scalar.Word n) (m final : Evm.Machine) (skip : Nat),
- Evm.run code {m with stack := locals.toList.map coreWord++caller} = .ok final skip →
- ∃ (horizon : Nat) (out : Vector Scalar.Word n),
- evalStmt horizon .nil True.intro stmt profile (sourceLocals locals) = some ⟨sourceLocals out,.normal⟩ ∧
- skip = 0 ∧ final = {m with stack := out.toList.map coreWord++caller}
+ CompletionControls.ModelSource stmt profile code caller
 
 theorem seq_reflect {c : Control} {n : Nat} {a b : Stmt [] [] c n}
  (leftProfile : StmtWordP a) (rightProfile : StmtWordP b) (qa qb : List Evm.Instr)
  (caller : List Evm.Word)
  (leftLaw : ModelSource a leftProfile qa caller) (rightLaw : ModelSource b rightProfile qb caller) :
  ModelSource (.seq a b) ⟨leftProfile,rightProfile⟩ (qa++qb) caller := by
- intro locals m final skip ran
- have whole : (Evm.run qa {m with stack := locals.toList.map coreWord++caller}).bind
-   (fun mid pending => Evm.exec qb pending mid) = .ok final skip := by
-   simpa only [Evm.run,Evm.exec_append] using ran
- cases actual : Evm.run qa {m with stack := locals.toList.map coreWord++caller} with
- | revert => rw [actual] at whole; cases whole
- | fault => rw [actual] at whole; cases whole
- | ok mid pending =>
-   obtain ⟨lo,intermediate,leftSource,done,frame⟩ := leftLaw locals m mid pending actual
-   rw [actual,done,frame] at whole
-   change Evm.run qb {m with stack := intermediate.toList.map coreWord++caller} = .ok final skip at whole
-   obtain ⟨hi,out,rightSource,done,frame⟩ := rightLaw intermediate m final skip whole
-   have first : evalStmt (max lo hi) .nil True.intro _ leftProfile (sourceLocals locals) =
-     some ⟨sourceLocals intermediate,.normal⟩ := CompletionControls.completed_horizon
-     (fun fuel => evalStmt fuel .nil True.intro _ leftProfile (sourceLocals locals))
-     (fun fuel extra => evalStmt_refines_add fuel extra .nil True.intro _ leftProfile (sourceLocals locals))
-     (Nat.le_max_left lo hi) leftSource
-   have last : evalStmt (max lo hi) .nil True.intro _ rightProfile (sourceLocals intermediate) =
-     some ⟨sourceLocals out,.normal⟩ := CompletionControls.completed_horizon
-     (fun fuel => evalStmt fuel .nil True.intro _ rightProfile (sourceLocals intermediate))
-     (fun fuel extra => evalStmt_refines_add fuel extra .nil True.intro _ rightProfile (sourceLocals intermediate))
-     (Nat.le_max_right lo hi) rightSource
-   have source := LoopControlCompilation.sequence_source _ _ leftProfile rightProfile (max lo hi)
-     (sourceLocals locals) (sourceLocals intermediate) (sourceLocals out) first last
-   exact ⟨max lo hi+1,out,source,done,frame⟩
+ exact CompletionControls.seq_reflect leftProfile rightProfile qa qb caller leftLaw rightLaw
 
 theorem branch_reflect {c : Control} {n fuel : Nat} {test : Expr [] [] n 1} {body : Stmt [] [] c n}
  (condition : ProducerExpressions.Compiled fuel test) (armProfile : StmtWordP body)
@@ -96,23 +68,7 @@ theorem branch_reflect {c : Control} {n fuel : Nat} {test : Expr [] [] n 1} {bod
  (hp : condition.lowered.code 0 = some p) (sq : WordMachine.selectCode p = some q)
  (caller : List Evm.Word) (armLaw : ModelSource body armProfile qb caller) :
  ModelSource (.if_ test body) ⟨condition.profile,armProfile⟩ (MachineControl.branchCode q qb []) caller := by
- intro locals m final skip ran
- have testedTarget : Evm.run q {m with stack := locals.toList.map coreWord++caller} =
-   .ok {m with stack := coreWord (condition.value locals)::(locals.toList.map coreWord++caller)} 0 := by
-   simpa only [Vector.toList_empty,List.nil_append] using
-     WordExecution.loweredExpr_machine condition.lowered 0 p q hp sq locals #v[] m caller
-
- rw [MachineControl.branchCode,Evm.run_append_ok testedTarget] at ran
- by_cases zero : condition.value locals = 0
- · rw [zero] at ran
-   change Evm.exec qb qb.length {m with stack := locals.toList.map coreWord++caller} = .ok final skip at ran
-   rw [Evm.exec_length] at ran
-   have parts := Evm.Out.ok.inj ran
-   exact ⟨_,locals,LetControlCompletion.source_false condition armProfile locals zero,parts.2.symm,parts.1.symm⟩
- · rw [FramedBranch.nonzero_tail (condition.value locals) qb []
-     {m with stack := locals.toList.map coreWord++caller} zero] at ran
-   obtain ⟨horizon,out,source,done,frame⟩ := armLaw locals m final skip ran
-   exact ⟨_,out,LetControlCompletion.source_true condition armProfile horizon locals out zero source,done,frame⟩
+ exact LetControlCompletion.branch_reflect condition armProfile p q qb hp sq caller armLaw
 
 theorem zero_reflect {c : Control} {n fresh : Nat} {bodyStmt : Stmt [] [] c (fresh+n)}
  (bodyProfile : StmtWordP bodyStmt) (begin middle finish : List Evm.Instr)

@@ -1,5 +1,6 @@
 import Solidity.Yul.Compilation.ProducerExpressions
 import Solidity.Yul.Compilation.MachineAdapter
+import Solidity.Yul.ClosedHorizon
 /-! Shared normal-completion frame transport. The original intrinsic source,
 full-word locals, newer prefix and arbitrary caller/nonstack state are retained.
 This header adds no source or model execution premise to a family theorem. -/
@@ -16,6 +17,76 @@ theorem completed_horizon {α : Type} (run : Nat → Option α)
   obtain ⟨extra, eq⟩ := Nat.exists_eq_add_of_le bound
   rw [eq]
   exact refineAdd lo extra value done
+
+/-- Actual component contracts and shared sequence transport in both directions. -/
+abbrev SourceModel {c : Control} {n : Nat} (stmt : Stmt [] [] c n)
+ (profile : StmtWordP stmt) (code : List Evm.Instr) (m : Evm.Machine) (caller : List Evm.Word) :=
+ ∀ (horizon : Nat) (locals : Vector Scalar.Word n) (result : Outcome c n),
+ evalStmt horizon .nil True.intro stmt profile (sourceLocals locals) = some result →
+ ∃ out : Vector Scalar.Word n, result = ⟨sourceLocals out,.normal⟩ ∧
+ Evm.run code {m with stack := locals.toList.map coreWord++caller} =
+ .ok {m with stack := out.toList.map coreWord++caller} 0
+
+theorem seq_forward {c : Control} {n : Nat} {a b : Stmt [] [] c n}
+ (leftProfile : StmtWordP a) (rightProfile : StmtWordP b) (qa qb : List Evm.Instr)
+ (m : Evm.Machine) (caller : List Evm.Word)
+ (leftLaw : SourceModel a leftProfile qa m caller) (rightLaw : SourceModel b rightProfile qb m caller) :
+ SourceModel (.seq a b) ⟨leftProfile,rightProfile⟩ (qa++qb) m caller := by
+ intro horizon locals result ran
+ cases horizon with
+ | zero => cases ran
+ | succ horizon =>
+   change Option.bind (evalStmt horizon .nil True.intro _ leftProfile (sourceLocals locals)) _ = some result at ran
+   obtain ⟨middle,first,remaining⟩ := Option.bind_eq_some_iff.mp ran
+   obtain ⟨mid,same,firstRun⟩ := leftLaw horizon locals middle first
+   subst middle
+   change evalStmt horizon .nil True.intro _ rightProfile (sourceLocals mid) = some result at remaining
+   obtain ⟨out,same,lastRun⟩ := rightLaw horizon mid result remaining
+   refine ⟨out,same,?_⟩
+   rw [Evm.run_append_ok firstRun]
+   exact lastRun
+
+abbrev ModelSource {c : Control} {n : Nat} (stmt : Stmt [] [] c n)
+ (profile : StmtWordP stmt) (code : List Evm.Instr) (caller : List Evm.Word) :=
+ ∀ (locals : Vector Scalar.Word n) (m final : Evm.Machine) (skip : Nat),
+ Evm.run code {m with stack := locals.toList.map coreWord++caller} = .ok final skip →
+ ∃ (horizon : Nat) (out : Vector Scalar.Word n),
+ evalStmt horizon .nil True.intro stmt profile (sourceLocals locals) = some ⟨sourceLocals out,.normal⟩ ∧
+ skip = 0 ∧ final = {m with stack := out.toList.map coreWord++caller}
+
+theorem seq_reflect {c : Control} {n : Nat} {a b : Stmt [] [] c n}
+ (leftProfile : StmtWordP a) (rightProfile : StmtWordP b) (qa qb : List Evm.Instr)
+ (caller : List Evm.Word)
+ (leftLaw : ModelSource a leftProfile qa caller) (rightLaw : ModelSource b rightProfile qb caller) :
+ ModelSource (.seq a b) ⟨leftProfile,rightProfile⟩ (qa++qb) caller := by
+ intro locals m final skip ran
+ have whole : (Evm.run qa {m with stack := locals.toList.map coreWord++caller}).bind
+   (fun mid pending => Evm.exec qb pending mid) = .ok final skip := by
+   simpa only [Evm.run,Evm.exec_append] using ran
+ cases actual : Evm.run qa {m with stack := locals.toList.map coreWord++caller} with
+ | revert => rw [actual] at whole; cases whole
+ | fault => rw [actual] at whole; cases whole
+ | ok mid pending =>
+   obtain ⟨lo,intermediate,leftSource,done,frame⟩ := leftLaw locals m mid pending actual
+   rw [actual,done,frame] at whole
+   change Evm.run qb {m with stack := intermediate.toList.map coreWord++caller} = .ok final skip at whole
+   obtain ⟨hi,out,rightSource,done,frame⟩ := rightLaw intermediate m final skip whole
+   have first : evalStmt (max lo hi) .nil True.intro _ leftProfile (sourceLocals locals) =
+     some ⟨sourceLocals intermediate,.normal⟩ := CompletionControls.completed_horizon
+     (fun fuel => evalStmt fuel .nil True.intro _ leftProfile (sourceLocals locals))
+     (fun fuel extra => evalStmt_refines_add fuel extra .nil True.intro _ leftProfile (sourceLocals locals))
+     (Nat.le_max_left lo hi) leftSource
+   have last : evalStmt (max lo hi) .nil True.intro _ rightProfile (sourceLocals intermediate) =
+     some ⟨sourceLocals out,.normal⟩ := CompletionControls.completed_horizon
+     (fun fuel => evalStmt fuel .nil True.intro _ rightProfile (sourceLocals intermediate))
+     (fun fuel extra => evalStmt_refines_add fuel extra .nil True.intro _ rightProfile (sourceLocals intermediate))
+     (Nat.le_max_right lo hi) rightSource
+   have source : evalStmt (max lo hi+1) .nil True.intro (.seq a b)
+       ⟨leftProfile,rightProfile⟩ (sourceLocals locals) = some ⟨sourceLocals out,.normal⟩ := by
+     change Option.bind (evalStmt (max lo hi) .nil True.intro a leftProfile (sourceLocals locals)) _ = _
+     rw [first]
+     exact last
+   exact ⟨max lo hi+1,out,source,done,frame⟩
 
 /-- Refuse a positive pending skip only after an existing actual-run law has
 proved that every successful result has pending zero. This does not assert

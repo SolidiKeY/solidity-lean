@@ -1,4 +1,5 @@
 import Solidity.Yul.Compilation.LetScopeCompilation
+import Solidity.Yul.Compilation.LetControlCompilation
 import Solidity.Yul.Compilation.ZeroLoopScope
 import Solidity.Yul.Compilation.FramedBranch
 import Solidity.Yul.Compilation.CompletionControls
@@ -148,30 +149,14 @@ theorem scope_selected (entry exit : Backend.Program) (body : Backend.Block) (co
 machine and caller frame. This is not stored in compiler certificates. -/
 abbrev SourceModel {c : Control} {n : Nat} (stmt : Stmt [] [] c n)
  (profile : StmtWordP stmt) (code : List Evm.Instr) (m : Evm.Machine) (caller : List Evm.Word) :=
- ∀ (horizon : Nat) (locals : Vector Scalar.Word n) (result : Outcome c n),
- evalStmt horizon .nil True.intro stmt profile (sourceLocals locals) = some result →
- ∃ out : Vector Scalar.Word n, result = ⟨sourceLocals out,.normal⟩ ∧
- Evm.run code {m with stack := locals.toList.map coreWord++caller} =
- .ok {m with stack := out.toList.map coreWord++caller} 0
+ CompletionControls.SourceModel stmt profile code m caller
 
 theorem seq_forward {c : Control} {n : Nat} {a b : Stmt [] [] c n}
  (leftProfile : StmtWordP a) (rightProfile : StmtWordP b) (qa qb : List Evm.Instr)
  (m : Evm.Machine) (caller : List Evm.Word)
  (leftLaw : SourceModel a leftProfile qa m caller) (rightLaw : SourceModel b rightProfile qb m caller) :
  SourceModel (.seq a b) ⟨leftProfile,rightProfile⟩ (qa++qb) m caller := by
- intro horizon locals result ran
- cases horizon with
- | zero => cases ran
- | succ horizon =>
-   change Option.bind (evalStmt horizon .nil True.intro _ leftProfile (sourceLocals locals)) _ = some result at ran
-   obtain ⟨middle,first,remaining⟩ := Option.bind_eq_some_iff.mp ran
-   obtain ⟨mid,same,firstRun⟩ := leftLaw horizon locals middle first
-   subst middle
-   change evalStmt horizon .nil True.intro _ rightProfile (sourceLocals mid) = some result at remaining
-   obtain ⟨out,same,lastRun⟩ := rightLaw horizon mid result remaining
-   refine ⟨out,same,?_⟩
-   rw [Evm.run_append_ok firstRun]
-   exact lastRun
+ exact CompletionControls.seq_forward leftProfile rightProfile qa qb m caller leftLaw rightLaw
 
 theorem branch_forward {c : Control} {n fuel : Nat} {test : Expr [] [] n 1} {body : Stmt [] [] c n}
  (condition : ProducerExpressions.Compiled fuel test) (armProfile : StmtWordP body)
@@ -179,37 +164,7 @@ theorem branch_forward {c : Control} {n fuel : Nat} {test : Expr [] [] n 1} {bod
  (hp : condition.lowered.code 0 = some p) (sq : WordMachine.selectCode p = some q)
  (m : Evm.Machine) (caller : List Evm.Word) (armLaw : SourceModel body armProfile qb m caller) :
  SourceModel (.if_ test body) ⟨condition.profile,armProfile⟩ (MachineControl.branchCode q qb []) m caller := by
- intro horizon locals result ran
- have testedTarget : Evm.run q {m with stack := locals.toList.map coreWord++caller} =
-   .ok {m with stack := coreWord (condition.value locals)::(locals.toList.map coreWord++caller)} 0 := by
-   simpa only [Vector.toList_empty,List.nil_append] using
-     WordExecution.loweredExpr_machine condition.lowered 0 p q hp sq locals #v[] m caller
- cases horizon with
- | zero => cases ran
- | succ horizon =>
-   change Option.bind (evalExpr horizon .nil True.intro _ condition.profile (sourceLocals locals)) _ = some result at ran
-   obtain ⟨values,tested,remaining⟩ := Option.bind_eq_some_iff.mp ran
-   have same := evalExpr_completed_unique .nil True.intro _ condition.profile (sourceLocals locals)
-     tested (condition.source locals)
-   subst values
-   change (if (condition.value locals).toNat = 0 then
-     some (⟨sourceLocals locals,.normal⟩ : Outcome _ _)
-     else evalStmt horizon .nil True.intro _ armProfile (sourceLocals locals)) = some result at remaining
-   by_cases zero : condition.value locals = 0
-   · have zn : (condition.value locals).toNat = 0 := congrArg BitVec.toNat zero
-     rw [if_pos zn] at remaining
-     refine ⟨locals,(Option.some.inj remaining).symm,?_⟩
-     rw [MachineControl.branchCode,Evm.run_append_ok testedTarget,zero]
-     change Evm.exec qb qb.length {m with stack := locals.toList.map coreWord++caller} = _
-     exact Evm.exec_length qb _
-   · have nz : (condition.value locals).toNat ≠ 0 := fun h => zero (BitVec.eq_of_toNat_eq h)
-     rw [if_neg nz] at remaining
-     obtain ⟨out,same,armRun⟩ := armLaw horizon locals result remaining
-     refine ⟨out,same,?_⟩
-     rw [MachineControl.branchCode,Evm.run_append_ok testedTarget]
-     rw [FramedBranch.nonzero_tail (condition.value locals) qb []
-       {m with stack := locals.toList.map coreWord++caller} zero]
-     exact armRun
+ exact LetControlCompilation.branch_forward condition armProfile p q qb hp sq m caller armLaw
 
 theorem zero_forward {c : Control} {n fresh : Nat} {bodyStmt : Stmt [] [] c (fresh+n)}
  (bodyProfile : StmtWordP bodyStmt) (begin middle finish : List Evm.Instr)

@@ -85,18 +85,8 @@ theorem source_to_model {c : Control} {n fuel : Nat} {stmt : Stmt [] [] c n}
    obtain ⟨a,ha,rest⟩ := Option.bind_eq_some_iff.mp lowered
    obtain ⟨b,hb,same⟩ := Option.bind_eq_some_iff.mp rest
    cases Option.some.inj same
-   cases horizon with
-   | zero => cases ran
-   | succ horizon =>
-     change Option.bind (evalStmt horizon .nil True.intro _ left.profile (sourceLocals locals)) _ = some result at ran
-     obtain ⟨middle,first,remaining⟩ := Option.bind_eq_some_iff.mp ran
-     obtain ⟨mid,same,firstRun⟩ := ihLeft a ha horizon locals middle first
-     subst middle
-     change evalStmt horizon .nil True.intro _ right.profile (sourceLocals mid) = some result at remaining
-     obtain ⟨out,same,lastRun⟩ := ihRight b hb horizon mid result remaining
-     refine ⟨out,same,?_⟩
-     rw [Evm.run_append_ok firstRun]
-     exact lastRun
+   exact CompletionControls.seq_forward left.profile right.profile a b m caller
+     (ihLeft a ha) (ihRight b hb) horizon locals result ran
 
 /-- Concrete artifact transport with no stored execution or simulation law. -/
 theorem Artifact.source_to_model {c : Control} {n fuel : Nat} {stmt : Stmt [] [] c n}

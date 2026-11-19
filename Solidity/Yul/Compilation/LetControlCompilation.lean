@@ -84,6 +84,44 @@ def lower {c : Control} {n : Nat} (fuel : Nat) (stmt : Stmt [] [] c n) : Option 
  | none => none
  | some code => some ⟨compiled,code,lowered⟩
 
+theorem branch_forward {c : Control} {n fuel : Nat} {test : Expr [] [] n 1} {body : Stmt [] [] c n}
+ (condition : ProducerExpressions.Compiled fuel test) (armProfile : StmtWordP body)
+ (p : Backend.Program) (q qb : List Evm.Instr)
+ (hp : condition.lowered.code 0 = some p) (sq : WordMachine.selectCode p = some q)
+ (m : Evm.Machine) (caller : List Evm.Word) (armLaw : CompletionControls.SourceModel body armProfile qb m caller) :
+ CompletionControls.SourceModel (.if_ test body) ⟨condition.profile,armProfile⟩ (MachineControl.branchCode q qb []) m caller := by
+ intro horizon locals result ran
+ have testedTarget : Evm.run q {m with stack := locals.toList.map coreWord++caller} =
+   .ok {m with stack := coreWord (condition.value locals)::(locals.toList.map coreWord++caller)} 0 := by
+   simpa only [Vector.toList_empty,List.nil_append] using
+     WordExecution.loweredExpr_machine condition.lowered 0 p q hp sq locals #v[] m caller
+ cases horizon with
+ | zero => cases ran
+ | succ horizon =>
+   change Option.bind (evalExpr horizon .nil True.intro _ condition.profile (sourceLocals locals)) _ = some result at ran
+   obtain ⟨values,tested,remaining⟩ := Option.bind_eq_some_iff.mp ran
+   have same := evalExpr_completed_unique .nil True.intro _ condition.profile (sourceLocals locals)
+     tested (condition.source locals)
+   subst values
+   change (if (condition.value locals).toNat = 0 then
+     some (⟨sourceLocals locals,.normal⟩ : Outcome _ _)
+     else evalStmt horizon .nil True.intro _ armProfile (sourceLocals locals)) = some result at remaining
+   by_cases zero : condition.value locals = 0
+   · have zn : (condition.value locals).toNat = 0 := congrArg BitVec.toNat zero
+     rw [if_pos zn] at remaining
+     refine ⟨locals,(Option.some.inj remaining).symm,?_⟩
+     rw [MachineControl.branchCode,Evm.run_append_ok testedTarget,zero]
+     change Evm.exec qb qb.length {m with stack := locals.toList.map coreWord++caller} = _
+     exact Evm.exec_length qb _
+   · have nz : (condition.value locals).toNat ≠ 0 := fun h => zero (BitVec.eq_of_toNat_eq h)
+     rw [if_neg nz] at remaining
+     obtain ⟨out,same,armRun⟩ := armLaw horizon locals result remaining
+     refine ⟨out,same,?_⟩
+     rw [MachineControl.branchCode,Evm.run_append_ok testedTarget]
+     rw [FramedBranch.nonzero_tail (condition.value locals) qb []
+       {m with stack := locals.toList.map coreWord++caller} zero]
+     exact armRun
+
 /-- Actual source completion supplies each intermediate local vector and
 normal flow before selected instruction concatenation is executed. No desired
 child run or intermediate state is a caller premise. -/
@@ -105,18 +143,8 @@ theorem source_to_model {c : Control} {n fuel : Nat} {stmt : Stmt [] [] c n}
    obtain ⟨a,ha,rest⟩ := Option.bind_eq_some_iff.mp lowered
    obtain ⟨b,hb,same⟩ := Option.bind_eq_some_iff.mp rest
    cases Option.some.inj same
-   cases horizon with
-   | zero => cases ran
-   | succ horizon =>
-     change Option.bind (evalStmt horizon .nil True.intro _ left.profile (sourceLocals locals)) _ = some result at ran
-     obtain ⟨middle,first,remaining⟩ := Option.bind_eq_some_iff.mp ran
-     obtain ⟨mid,same,firstRun⟩ := ihLeft a ha horizon locals middle first
-     subst middle
-     change evalStmt horizon .nil True.intro _ right.profile (sourceLocals mid) = some result at remaining
-     obtain ⟨out,same,lastRun⟩ := ihRight b hb horizon mid result remaining
-     refine ⟨out,same,?_⟩
-     rw [Evm.run_append_ok firstRun]
-     exact lastRun
+   exact CompletionControls.seq_forward left.profile right.profile a b m caller
+     (ihLeft a ha) (ihRight b hb) horizon locals result ran
 
  | branch condition arm ih =>
    change (condition.lowered.code 0).bind (fun p => (WordMachine.selectCode p).bind (fun q =>
@@ -125,36 +153,8 @@ theorem source_to_model {c : Control} {n fuel : Nat} {stmt : Stmt [] [] c n}
    obtain ⟨q,sq,rest⟩ := Option.bind_eq_some_iff.mp rest
    obtain ⟨body,hb,same⟩ := Option.bind_eq_some_iff.mp rest
    cases Option.some.inj same
-   have testedTarget : Evm.run q {m with stack := locals.toList.map coreWord++caller} =
-     .ok {m with stack := coreWord (condition.value locals)::(locals.toList.map coreWord++caller)} 0 := by
-     simpa only [Vector.toList_empty,List.nil_append] using
-       WordExecution.loweredExpr_machine condition.lowered 0 p q hp sq locals #v[] m caller
-   cases horizon with
-   | zero => cases ran
-   | succ horizon =>
-     change Option.bind (evalExpr horizon .nil True.intro _ condition.profile (sourceLocals locals)) _ = some result at ran
-     obtain ⟨values,tested,remaining⟩ := Option.bind_eq_some_iff.mp ran
-     have same := evalExpr_completed_unique .nil True.intro _ condition.profile (sourceLocals locals)
-       tested (condition.source locals)
-     subst values
-     change (if (condition.value locals).toNat = 0 then
-       some (⟨sourceLocals locals,.normal⟩ : Outcome _ _)
-       else evalStmt horizon .nil True.intro _ arm.profile (sourceLocals locals)) = some result at remaining
-     by_cases zero : condition.value locals = 0
-     · have zn : (condition.value locals).toNat = 0 := congrArg BitVec.toNat zero
-       rw [if_pos zn] at remaining
-       refine ⟨locals,(Option.some.inj remaining).symm,?_⟩
-       rw [MachineControl.branchCode,Evm.run_append_ok testedTarget,zero]
-       change Evm.exec body body.length {m with stack := locals.toList.map coreWord++caller} = _
-       exact Evm.exec_length body _
-     · have nz : (condition.value locals).toNat ≠ 0 := fun h => zero (BitVec.eq_of_toNat_eq h)
-       rw [if_neg nz] at remaining
-       obtain ⟨out,same,armRun⟩ := ih body hb horizon locals result remaining
-       refine ⟨out,same,?_⟩
-       rw [MachineControl.branchCode,Evm.run_append_ok testedTarget]
-       rw [FramedBranch.nonzero_tail (condition.value locals) body []
-         {m with stack := locals.toList.map coreWord++caller} zero]
-       exact armRun
+   exact branch_forward condition arm.profile p q body hp sq m caller
+     (ih body hb) horizon locals result ran
 
 /-- Concrete artifact transport with no stored execution or simulation law. -/
 theorem Artifact.source_to_model {c : Control} {n fuel : Nat} {stmt : Stmt [] [] c n}
