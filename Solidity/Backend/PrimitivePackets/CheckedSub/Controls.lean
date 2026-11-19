@@ -1,6 +1,7 @@
 import Solidity.Backend.PrimitivePackets.CheckedSub.Agreement
 import Solidity.Evm.MemoryCompileExamples
 import Solidity.Source.SemanticsExamples
+import Solidity.Backend.PrimitivePackets.PanicBytes
 
 /-! Populated caller heap/aliases/frame, arbitrary saved stack, both pipelines,
 uint256 boundary execution and refusal controls through public selected code. -/
@@ -165,4 +166,15 @@ theorem underflow_does_not_wrap (tail : List Word) :
   cases h
 
 end Fixture
+/-! Names kept for existing references; `PanicBytes` owns the facts. -/
+theorem exact_panic_bytes : Source.panicData .arithmetic =
+    [0x4e,0x48,0x7b,0x71] ++ List.replicate 31 0 ++ [0x11] :=
+  PanicBytes.exact_panic_bytes
+
+theorem panic_not_truncated : Source.panicData .arithmetic ≠
+    [0x4e,0x48,0x7b,0x71,0x11] :=
+  PanicBytes.panic_not_truncated
+
+theorem panic_not_empty : Source.panicData .arithmetic ≠ [] :=
+  PanicBytes.panic_not_empty
 end Solidity.Backend.PrimitivePackets.CheckedSub.Controls
