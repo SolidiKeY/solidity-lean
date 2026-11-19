@@ -51,7 +51,7 @@ def eqBridge : BinaryBridge .eq := ⟨selectEq,by
   rw [test]
   cases a.toNat == b.toNat <;> rfl⟩
 
-private theorem unaryProfile {fuel n : Nat} {args : Fin 1 → Expr [] [] n 1}
+theorem unaryProfile {fuel n : Nat} {args : Fin 1 → Expr [] [] n 1}
     (argument : Compiled fuel (args 0)) (i : Fin 1) : ExprWordP (args i) := by
   have equal : i = 0 := by omega
   subst i

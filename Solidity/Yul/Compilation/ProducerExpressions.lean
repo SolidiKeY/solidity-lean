@@ -41,7 +41,7 @@ def localExpr (fuel : Nat) {n : Nat} (i : Fin n) :
     Compiled (fuel+1) (Expr.local (X := []) i) :=
   ⟨rfl, True.intro, fun locals => locals[i.val], lowerLocal i, fun _ => rfl⟩
 
-private theorem binaryProfile {fuel n : Nat} {args : Fin 2 → Expr [] [] n 1}
+theorem binaryProfile {fuel n : Nat} {args : Fin 2 → Expr [] [] n 1}
     (left : Compiled fuel (args 0)) (right : Compiled fuel (args 1))
     (i : Fin 2) : ExprWordP (args i) := by
   have h : i = 0 ∨ i = 1 := by omega

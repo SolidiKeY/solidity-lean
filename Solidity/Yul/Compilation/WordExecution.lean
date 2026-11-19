@@ -66,16 +66,8 @@ private theorem binary_transport (i : Backend.Instr) (j : Evm.Instr)
     (xs ys : Stack) (executed : Scalar.step i xs = some ys)
     (m : Evm.Machine) (tail : List Evm.Word) :
     j.step {m with stack := xs.map coreWord++tail} =
-      .ok {m with stack := ys.map coreWord++tail} 0 := by
-  rw [scalarRow] at executed
-  cases xs with
-  | nil => cases executed
-  | cons a xs =>
-    cases xs with
-    | nil => cases executed
-    | cons b xs =>
-      cases executed
-      exact modelRow a b m (xs.map coreWord++tail)
+      .ok {m with stack := ys.map coreWord++tail} 0 :=
+  NumericExecution.binary_transport i j f scalarRow modelRow xs ys executed m tail
 
 
 private theorem unary_transport (i : Backend.Instr) (j : Evm.Instr)

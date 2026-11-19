@@ -19,10 +19,8 @@ abbrev next (body : ProducerStatements.Compiled fb work) (post : ProducerStateme
  Vector Scalar.Word n → Vector Scalar.Word n := fun locals => post.update (body.update locals)
 
 private theorem repeat_shift {α : Type} (f : α → α) (count : Nat) (a : α) :
- Nat.repeat f count (f a) = Nat.repeat f (count+1) a := by
- induction count with
- | zero => rfl
- | succ count ih => exact congrArg f ih
+ Nat.repeat f count (f a) = Nat.repeat f (count+1) a :=
+  WhileWordExecution.repeat_shift f count a
 
 /-- The SOURCE horizon is constructed from the component horizons and actual
 finite turn count. It is not a proof/fuel-budget increase or an assertion that

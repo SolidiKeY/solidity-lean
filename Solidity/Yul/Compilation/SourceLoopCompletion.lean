@@ -13,10 +13,8 @@ variable {c : Solidity.Yul.Control} {n fc fp fb : Nat}
  {work : Solidity.Yul.Stmt [] [] ⟨c.function,true⟩ n}
 
 theorem repeat_shift {α : Type} (f : α → α) (count : Nat) (a : α) :
- Nat.repeat f count (f a) = Nat.repeat f (count+1) a := by
- induction count with
- | zero => rfl
- | succ count ih => exact congrArg f ih
+ Nat.repeat f count (f a) = Nat.repeat f (count+1) a :=
+  WhileWordExecution.repeat_shift f count a
 
 /-- Any completed source horizon, even below a component certificate's own
 horizon, recovers the same real finite normal iteration sequence. Existing

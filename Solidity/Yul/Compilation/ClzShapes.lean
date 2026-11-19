@@ -1,3 +1,4 @@
+import Solidity.Yul.Compilation.ClzBounds
 import Solidity.Yul.Compilation.ExpressionShapes
 import Solidity.Yul.Compilation.ClzLowering
 
@@ -55,7 +56,8 @@ theorem step_capacity (i : Fin 256) (h : Int) :
     Bool.and_eq_true,safeHeight,decide_eq_true_eq]
   omega
 
-theorem step_delta (i : Fin 256) : ((clzStepCode i).map stackDelta).sum = (0 : Int) := by rfl
+theorem step_delta (i : Fin 256) : ((clzStepCode i).map stackDelta).sum = (0 : Int) :=
+  clzStep_delta i
 
 theorem scan_shape (count : Nat) : ∀ (bound : count ≤ 256) (h : Nat), 2 ≤ h →
     CodeShape (clzScanCode count bound) h h := by
@@ -115,13 +117,8 @@ theorem expansion_shape (h : Nat) (enough : 1 ≤ h) : CodeShape clzExpansion h 
 /-- Exact every-boundary capacity for all256 emitted bit steps, including
 initialization and retirement. This is not a charged/native execution bound. -/
 theorem expansion_capacity (h : Int) :
-    stackBound clzExpansion h = true ↔ 0 ≤ h ∧ h+5 ≤ 1024 := by
-  change stackBound ([pushWord 256]++clzScanCode 256 (by decide)++writeSlot ⟨0,by decide⟩) h = true ↔ _
-  rw [List.append_assoc,bound_append]
-  have initialDelta : ([pushWord 256].map stackDelta).sum = (1 : Int) := rfl
-  rw [initialDelta,bound_append,scan_delta,Int.add_zero]
-  simp only [Bool.and_eq_true,initial_capacity,scan_capacity,retire_capacity]
-  omega
+    stackBound clzExpansion h = true ↔ 0 ≤ h ∧ h+5 ≤ 1024 :=
+  clzExpansion_bound_iff h
 
 /-- Existing intrinsic code packet with both operand and prefix-capacity
 proofs. No fake runtime transition is supplied by this constructor. -/

@@ -7,10 +7,8 @@ open Backend Scalar
 open Solidity.Yul.Closed ProducerExpressions WordExpressions BitExpressions SignedExpressions ModularExpressions RemainingWordBridges
 
 private theorem unaryProfile {fuel n : Nat} {args : Fin 1 → Expr [] [] n 1}
-    (argument : Compiled fuel (args 0)) (i : Fin 1) : ExprWordP (args i) := by
-  have equal : i = 0 := by omega
-  subst i
-  exact argument.profile
+    (argument : Compiled fuel (args 0)) (i : Fin 1) : ExprWordP (args i) :=
+  WordExpressions.unaryProfile argument i
 
 def clz {fuel n : Nat} {args : Fin 1 → Expr [] [] n 1} 
     (argument : Compiled fuel (args 0)) :
@@ -38,11 +36,8 @@ def clz {fuel n : Nat} {args : Fin 1 → Expr [] [] n 1}
 
 private theorem binaryProfile {fuel n : Nat} {args : Fin 2 → Expr [] [] n 1}
     (left : Compiled fuel (args 0)) (right : Compiled fuel (args 1))
-    (i : Fin 2) : ExprWordP (args i) := by
-  have h : i = 0 ∨ i = 1 := by omega
-  rcases h with h | h
-  · subst i; exact left.profile
-  · subst i; exact right.profile
+    (i : Fin 2) : ExprWordP (args i) :=
+  ProducerExpressions.binaryProfile left right i
 
 def byte {fuel n : Nat} {args : Fin 2 → Expr [] [] n 1} 
     (left : Compiled fuel (args 0))
