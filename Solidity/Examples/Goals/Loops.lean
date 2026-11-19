@@ -360,6 +360,50 @@ example {C : Contract} {u : Source.Syn .unit} (h : Decode.unit C = some u) {x : 
 relation is not degenerate on decoded requests. -/
 example : Simulation.InitialMatching loopRel Decode.decode := Simulation.initialMatching_loopRel
 
+/-! ### The width-aware decoder version (H1258, additive)
+
+`Decode.tablesW.decode` reads primitives at their declared widths; the landed
+decoder is unchanged. -/
+
+/-- Over `uint8 n; uint16 k`: widening `k = n` types, narrowing `n = k` does
+not; `n = 255` fits and `n = 256` does not. So the widths are read. -/
+def narrowRequest (raw : List RawStmt) : Request :=
+  ⟨IntrinsicProbe.C, ⟨sampleNames, none, raw, RawProbe.scope,
+    ⟨([("n", .val .uint 8), ("k", .val .uint 16)], 1), {}⟩⟩, none⟩
+example : (Decode.tablesW.decode (narrowRequest [.assign (.name "k") (.name "n")])).isSome =
+    true := rfl
+example : Decode.tablesW.decode (narrowRequest [.assign (.name "n") (.name "k")]) = none := rfl
+example : (Decode.tablesW.decode (narrowRequest [.assign (.name "n") (.num 255)])).isSome =
+    true := rfl
+example : Decode.tablesW.decode (narrowRequest [.assign (.name "n") (.num 256)]) = none := rfl
+/-- The landed decoder has no type for a narrow local. -/
+example : Decode.decode (narrowRequest [.assign (.name "k") (.name "n")]) = none := rfl
+/-- A narrow state variable is read at its row; a marker row, a variable named
+like one, and a local marked as an erased `address` are gaps. -/
+example : (Decode.tablesW.decode { sampleRequest [.assign (.name "s") (.num 255)] with
+    contract := { vars := [("s", .prim .uint)], widths := [("s", 8)] } }).isSome = true := rfl
+example : Decode.tablesW.decode { sampleRequest [.assign (.name "s") (.num 256)] with
+    contract := { vars := [("s", .prim .uint)], widths := [("s", 8)] } } = none := rfl
+example : Decode.tablesW.decode { sampleRequest [] with
+    contract := { vars := [("s", .prim .uint)], widths := [("s#address", 20)] } } = none := rfl
+example : Decode.tablesW.decode { sampleRequest [] with
+    contract := { vars := [("x", .prim .uint), ("x#bytes", .prim .uint)],
+                  widths := [("x#bytes", 32)] } } = none := rfl
+example : Decode.tablesW.decode { narrowRequest [] with
+    input := { (narrowRequest []).input with
+      before := ⟨([("a", .val .uint 256 [("#address", 20)])], 1), {}⟩ } } = none := rfl
+/-- On the e1 sample the version agrees with the landed decoder. -/
+example : Decode.tablesW.decode (sampleRequest RawProbe.input) =
+    Decode.decode (sampleRequest RawProbe.input) := rfl
+/-- A version's decoder against its spelling relation: sound, unique, and
+complete if Source inference is. -/
+example {T : Decode.Tables} {r : Request} {s : SourceProgram} (h : T.decode r = some s) :
+    SpellsT T r s := decode_spellsT h
+example {T : Decode.Tables} (complete : InferCompleteT T) {r : Request} {s : SourceProgram} :
+    T.decode r = some s ↔ SpellsT T r s := ⟨decode_spellsT, SpellsT.decode complete⟩
+example {T : Decode.Tables} {r : Request} {s s' : SourceProgram} (h : SpellsT T r s)
+    (h' : SpellsT T r s') : s = s' := h.unique h'
+
 end Decoder
 
 end Solidity.Goals

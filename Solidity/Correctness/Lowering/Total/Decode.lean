@@ -265,6 +265,178 @@ def decode (r : Request) : Option SourceProgram :=
     pure ⟨C.env, C.rets, C.inModifier, .body, Source.tysOf L, Source.tysOf L', d.toR⟩
   else none
 
+/-! ## Decoder versions (H1258, additive)
+
+The decoder above is landed and other modules build on it, so it is kept as it
+is. Wider decoders are versions of one generic decoder, `Tables.decode`, which
+differs from it only in its three type tables: how a declaration's type name,
+a model local and a model contract are read. The statement and expression
+spelling is shared. `tablesW` reads primitives at their declared widths. -/
+
+/-- The type tables of a decoder version. -/
+structure Tables where
+  /-- A local declaration's type, by name. -/
+  typeName : RawTy → Option (Syn .typeName)
+  /-- The Source type of a model local. -/
+  localTy : LocalTy → Option STy
+  /-- The canonical Source unit of a model contract. -/
+  unit : Contract → Option (Syn .unit)
+
+namespace Tables
+
+variable (T : Tables)
+
+/-- Simple statements, with declarations typed by the version's table. -/
+def simple : RawStmt → Option (Syn .simple)
+  | .decl U x none => (T.typeName U).map fun U => .declVar (.varDecl U none x) .none
+  | .decl U x (some e) => do
+      pure (.declVar (.varDecl (← T.typeName U) none x) (.some (← expr e)))
+  | .assign l r => do pure (.exprStmt (.assign .assign (← expr l) (← expr r)))
+  | .opAssign op l r => do pure (.exprStmt (.assign (← assignOp op) (← expr l) (← expr r)))
+  | .incDec op l => (expr (.incDec op l)).map .exprStmt
+  | .require c => (expr c).map fun c =>
+      .exprStmt (.call (.ident "require") (.positional (.cons c .nil)))
+  | .assert c => (expr c).map fun c =>
+      .exprStmt (.call (.ident "assert") (.positional (.cons c .nil)))
+  | .revert => some (.exprStmt (.call (.ident "revert") (.positional .nil)))
+  | _ => none
+
+/-- A `for` initializer of the version. -/
+def initializer : List RawStmt → Option (Syn (.opt .simple))
+  | [] => some .none
+  | [s] => (T.simple s).map .some
+  | _ => none
+
+mutual
+/-- Statements of the version: as `Decode.stmt`, over `Tables.simple`. -/
+def stmt (k : SCtx) : RawStmt → Option (Syn (.stmt k))
+  | .ite c thn els => do
+      let c ← expr c
+      let thn ← items k thn
+      match els with
+      | [] => pure (.ifStmt c (unbrace thn) .none)
+      | e :: els => pure (.ifStmt c (unbrace thn) (.some (unbrace (← items k (e :: els)))))
+  | .ret none => some (.returnStmt .none)
+  | .ret (some e) => (expr e).map fun e => .returnStmt (.some e)
+  | .block b => (items k b).map fun b => .blockStmt (.block b)
+  | .whileLoop _ c b | .loop _ c b => do
+      pure (.whileStmt (← expr c) (unbrace (← items ⟨true, k.unchecked⟩ b)))
+  | .doWhile _ b c => do
+      pure (.doWhile (unbrace (← items ⟨true, k.unchecked⟩ b)) (← expr c))
+  | .forLoop _ init c upd b => do
+      let init ← T.initializer init
+      let c ← match c with
+        | none => pure .none
+        | some c => (expr c).map Syn.some
+      pure (.forStmt init c (← update upd) (unbrace (← items ⟨true, k.unchecked⟩ b)))
+  | .brk => jump true k
+  | .cont => jump false k
+  | s => (T.simple s).map .simpleStmt
+/-- The items of a block of the version. -/
+def items (k : SCtx) : List RawStmt → Option (Syn (.list (.item k)))
+  | [] => some .nil
+  | .unchecked b :: rest => do
+      pure (.cons (← uncheckedItem k (← items ⟨k.loop, true⟩ b)) (← items k rest))
+  | s :: rest => do pure (.cons (.stmtItem (← stmt k s)) (← items k rest))
+end
+
+/-- The Source locals of a model context under the version. -/
+def locals : ECtx → Option (List (String × STy))
+  | [] => some []
+  | (x, t) :: Γ => do pure ((x, ← T.localTy t) :: (← locals Γ))
+
+/-- The Source typing context of a request under the version. -/
+def context (r : Request) : Option Source.Ctx :=
+  (T.unit r.contract).map fun u =>
+    { env := u.env, scope := some contractName, locals := [], rets := [] }
+
+/-- **The decoder of a version.** As `Decode.decode`, over the version's
+tables. -/
+def decode (r : Request) : Option SourceProgram :=
+  if plain r then do
+    let C ← T.context r
+    let L ← T.locals r.input.before.locals.1
+    let b ← T.items .body r.input.raw
+    let ⟨L', d⟩ ← Source.ItemsD.infer C L b
+    pure ⟨C.env, C.rets, C.inModifier, .body, Source.tysOf L, Source.tysOf L', d.toR⟩
+  else none
+
+end Tables
+
+/-- The landed decoder's tables. -/
+def tables1 : Tables := ⟨typeName, localTy, unit⟩
+
+/-! ### Widths
+
+`tablesW`: a primitive at its declared width. A local `uint8 x` is
+`LocalTy.val .uint 8`, a state variable's width is its own row of the
+contract's width table, a declaration names its type. -/
+
+/-- The Source elementary type of a model primitive at a width: `bool`, or
+`uintN`/`intN` for a width that is a multiple of 8 in `8 … 256`. -/
+def primElem : PrimTy → Nat → Option Source.Elem
+  | .bool, bits => if bits = 256 then some .bool else none
+  | .uint, bits =>
+    if h : bits % 8 = 0 ∧ 8 ≤ bits ∧ bits ≤ 256 then some (.int false bits h) else none
+  | .int, bits =>
+    if h : bits % 8 = 0 ∧ 8 ≤ bits ∧ bits ≤ 256 then some (.int true bits h) else none
+
+/-- The Source type of a model primitive at a width. -/
+def primTy (p : PrimTy) (bits : Nat) : Option STy := (primElem p bits).map (Source.Elem.ty .memory)
+
+/-- Declaration types by name: `bool`, `uint`/`int` (256 bits) and the narrow
+`uintN`/`intN`. `address`, `bytesN`, enums, references and user types are gaps. -/
+def typeNameW : RawTy → Option (Syn .typeName)
+  | .named s =>
+    if s = "bool" then some (.elem .bool)
+    else if s = "uint" ∨ s = "uint256" then (primElem .uint 256).map .elem
+    else if s = "int" ∨ s = "int256" then (primElem .int 256).map .elem
+    else match narrowTy? s with
+      | some (p, bits) => (primElem p bits).map .elem
+      | none => none
+  | _ => none
+
+/-- A model local at its declared width, with no shape rows. A local carrying
+a shape (the marker of an erased `address`, `bytesN`, enum or function type),
+a reference and a formula local are gaps. A local the elaborator declares
+without a marker (a capture, a pushed value) is read as the plain integer the
+model also takes it for. -/
+def localTyW : LocalTy → Option STy
+  | .val p bits [] => primTy p bits
+  | _ => none
+
+/-- The width of a state variable: its row in the width table, or 256. -/
+def stateBits (widths : List (Name × Nat)) (x : Name) : Nat :=
+  (Semantics.lookupBy x widths).getD 256
+
+/-- The state variables, in declaration order, each a primitive at its width. -/
+def stateVarsW (widths : List (Name × Nat)) :
+    List (Name × Ty) → Option (Syn (.list (.part false)))
+  | [] => some .nil
+  | (x, .prim p) :: rest => do
+      pure (.cons (.stateVar (.elem (← primElem p (stateBits widths x))) none none none false x
+        .none) (← stateVarsW widths rest))
+  | _ => none
+
+/-- A width key that is a state variable's own row: no marker (`#`) and no
+position below a reference (`[`, `{`). -/
+def plainKey (k : String) : Bool := k.data.all fun c => c != '#' && c != '[' && c != '{'
+
+/-- The canonical unit at widths. Transient roots, functions, enums, the
+constructor and initializers are gaps, and so is a contract whose width table
+has a marker row or a row below a reference, or whose state variable is named
+like one. -/
+def unitW (C : Contract) : Option (Syn .unit) :=
+  if C.transientRoots.isEmpty && C.funs.isEmpty && C.enums.isEmpty && C.ctor.isNone &&
+      C.inits.isEmpty && (C.widths.all fun w => plainKey w.1) &&
+      (C.vars.all fun v => plainKey v.1) then
+    (stateVarsW C.widths C.vars).map fun parts =>
+      .unit (.cons (.contract false contractName .none .nil parts) .nil)
+  else none
+
+/-- The width-aware decoder's tables. -/
+def tablesW : Tables := ⟨typeNameW, localTyW, unitW⟩
+
 end Decode
 
 end Solidity.Correctness.Lowering.Total
