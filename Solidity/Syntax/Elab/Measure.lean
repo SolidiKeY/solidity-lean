@@ -36,6 +36,42 @@ namespace Solidity
 
 open Semantics
 
+/-- A statement's block-bearing constructor and its unvisited child lists.
+Statements without child blocks share `leaf`; loop forms remain distinct. -/
+inductive StmtControl where
+  | leaf
+  | block (body : List RawStmt)
+  | unchecked (body : List RawStmt)
+  | checked (body : List RawStmt)
+  | ite (yes no : List RawStmt)
+  | tryCall (ok err panic other : List RawStmt)
+  | whileLoop (body : List RawStmt)
+  | doWhile (body : List RawStmt)
+  | loop (body : List RawStmt)
+  | forLoop (init update body : List RawStmt)
+
+/-- Forget a statement's own expressions without forgetting its
+block-bearing constructor or any statement inside a child block. -/
+def RawStmt.control : RawStmt → StmtControl
+  | .block b => .block b
+  | .unchecked b => .unchecked b
+  | .checked _ b => .checked b
+  | .ite _ t e => .ite t e
+  | .tryCall _ _ _ _ ok err _ panic other => .tryCall ok err panic other
+  | .whileLoop _ _ b => .whileLoop b
+  | .doWhile _ b _ => .doWhile b
+  | .loop _ _ b => .loop b
+  | .forLoop _ i _ u b => .forLoop i u b
+  | _ => .leaf
+
+/-- Expression rewriting preserves more than numeric weight: it keeps the
+block-bearing constructor and every unvisited child statement, with the same effects. -/
+theorem RawStmt.mapExprsM_control {m : Type → Type} [Monad m] [LawfulMonad m]
+    (f : RawExpr → m RawExpr) (s : RawStmt) :
+    control <$> s.mapExprsM f = (fun _ => control s) <$> s.mapExprsM f := by
+  cases s <;> simp only [RawStmt.mapExprsM, map_bind,
+    LawfulApplicative.map_pure, control]
+
 /-- Rewriting a statement's own expressions leaves its control-tree
 weight unchanged, including the blocks held by loops and branches. The
 callback's effects are retained on both sides. -/

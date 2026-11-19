@@ -188,6 +188,18 @@ def forT : RawStmt := .forLoop {} [eS] none [] []
 /-- `{ e; loop (true) { } }`: `forT`, lowered. -/
 def blk : RawStmt := .block [eS, .loop {} (.bool true) []]
 
+/-- The spike's two statements have equal control weight: weight equality
+alone cannot distinguish the loop from its lowered block. -/
+example : CalleeKernel.stmtWeight forT = CalleeKernel.stmtWeight blk := rfl
+
+/-- Rewriting only a loop's expressions cannot produce the spike's block,
+even when the callback may fail or return arbitrary expressions. -/
+example (f : RawExpr → Except String RawExpr) : forT.mapExprsM f ≠ .ok blk := by
+  intro h
+  have he := RawStmt.mapExprsM_control f forT
+  rw [h] at he
+  cases he
+
 /-- An assignment cannot acquire the loop initializer used by the spy below,
 even if its expression callback returns arbitrary expressions and programs. -/
 example [FreshNames] (hoist : RawExpr → ElabM (SProg C0 × RawExpr))
