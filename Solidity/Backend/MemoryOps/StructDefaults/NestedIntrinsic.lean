@@ -33,19 +33,6 @@ structure NestedAt {E : Source.Env} {Γ : Source.RCtx} {H : HTy}
     fs.nth 1 .bool = .ok (.val (.bool (hp.field root layout.flag_type)))
   inner : PairAt y innerAddress childAddress hp (hp.field root layout.inner_type) layout.inner
 
-private theorem dflt_field {H : HTy} {hp : Heap H} {s : Name}
-    {root : HRef H (.struct s)} (hd : hp.Dflt (.ref (.struct s)) root)
-    {f : Name} {T : Ty} (hf : lookupBy f (structDef s) = some T) :
-    hp.Dflt T (hp.field root hf) := by
-  cases hd with
-  | struct _ fields => exact fields hf
-
-private theorem dflt_length {H : HTy} {hp : Heap H}
-    {r : HRef H (.array (.prim .bool))} (hd : hp.Dflt (.ref (.array (.prim .bool))) r) :
-    hp.len r .dyn = 0 := by
-  cases hd with
-  | array _ length => exact length
-
 theorem source_nested_intrinsic {E : Source.Env} {Γ : Source.RCtx} {H : HTy}
     (y : Source.EMState E Γ) (hp : Heap H) (fuel : Nat)
     (layout : NestedLayout E innerDN outerDN innerS outerS tag child innerKey flagKey)
@@ -59,14 +46,14 @@ theorem source_nested_intrinsic {E : Source.Env} {Γ : Source.RCtx} {H : HTy}
   let g := hp.allocDefault (.struct outerS) mapFree
   have hd : g.heap.Dflt (.ref (.struct outerS)) g.val := Heap.dflt_allocDefault hp _ mapFree
   have flagZero : g.heap.field g.val layout.flag_type = false :=
-    (dflt_field hd layout.flag_type).prim_eq
+    (default_field hd layout.flag_type).prim_eq
   have innerDefault : g.heap.Dflt (.ref (.struct innerS))
-      (g.heap.field g.val layout.inner_type) := dflt_field hd layout.inner_type
+      (g.heap.field g.val layout.inner_type) := default_field hd layout.inner_type
   have tagZero : g.heap.field (g.heap.field g.val layout.inner_type) layout.inner.tag_type =
-      PrimTy.uint.dflt := (dflt_field innerDefault layout.inner.tag_type).prim_eq
+      PrimTy.uint.dflt := (default_field innerDefault layout.inner.tag_type).prim_eq
   have childEmpty : MObj.elems .dyn (g.heap.get
       (g.heap.field (g.heap.field g.val layout.inner_type) layout.inner.child_type)) = [] :=
-    List.length_eq_zero_iff.mp (dflt_length (dflt_field innerDefault layout.inner.child_type))
+    List.length_eq_zero_iff.mp (default_bool_array_length (default_field innerDefault layout.inner.child_type))
   obtain ⟨ifs, ofs, evaluated, innerPointer, flag, tagValue, childPointer⟩ :=
     source_nested_default_observers y innerDN outerDN layout.inner.source_types layout.source_outer fuel
   rw [evaluated]

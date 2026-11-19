@@ -10,7 +10,6 @@ private abbrev R : RefTy := .array (.prim .uint)
 private abbrev H : HTy := [R]
 private def old : HRef H R := ⟨0,rfl⟩
 private def values (payloads : List (Fin W)) : List PrimTy.uint.Denote := payloads.map indexValue
-private theorem wide : 256 < W := by decide
 private def heap (payloads : List (Fin W)) (bounded : payloads.length < 128) : Heap H :=
   (⟨values payloads,by rw [values,List.length_map]; omega⟩,())
 private theorem heap_length (payloads : List (Fin W)) (bounded : payloads.length < 128) :
@@ -19,7 +18,7 @@ private theorem heap_length (payloads : List (Fin W)) (bounded : payloads.length
   rw [values,List.length_map]
 private theorem snapshot (payloads : List (Fin W)) (bounded : payloads.length < 128) :
     MVal.copyMToSt (heap payloads bounded) (T := .ref R) old =
-      primitiveArrayValue .uint (values payloads) (by rw [values,List.length_map]; have large : 256 < W := wide; omega) := by
+      primitiveArrayValue .uint (values payloads) (by rw [values,List.length_map]; have large : 256 < W := (by decide); omega) := by
   rw [primitiveArray_snapshot]
   with_unfolding_all rfl
 private def bases : Nat → Fin W := fun _ => wmod 16
@@ -34,7 +33,7 @@ private theorem heap_repr (payloads : List (Fin W)) (bounded : payloads.length <
     Objects.HeapRepr (heap payloads bounded) bases 8 (machine payloads) :=
   singleton_array_heap_repr .dyn (by decide) (by
     refine ⟨?_,?_,?_⟩
-    · have large : 256 < W := wide
+    · have large : 256 < W := by decide
       with_unfolding_all change 16 + (1 + (values payloads).length) ≤ W
       rw [values,List.length_map]
       omega

@@ -167,17 +167,10 @@ theorem saturated_refusal (payloads : List (Fin W)) :
 theorem empty_saturated_refusal :
     run (checkedFixedStorageCode 0) ((moved [] wMax).push (.slot source)) = .revert := saturated_refusal []
 
-private theorem cursor_value (n : Nat) (positive : 0 < n) (bounded : n ≤ W) :
-    (wmod (W - n)).val = W - n := Nat.mod_eq_of_lt (by omega)
-private theorem cursor_above (n : Nat) (positive : 0 < n) (bounded : n ≤ 128) : 40 ≤ (wmod (W - n)).val := by
-  have large : 256 < W := by decide
-  rw [cursor_value n positive (by omega)]
-  omega
-
 theorem pair_boundary_refusal :
     run (checkedFixedStorageCode 2) ((moved [wmod 11,wmod 23] (wmod (W - 2))).push (.slot source)) = .revert := by
   rw [checked_fixed_storage_run 2 (moved [wmod 11,wmod 23] (wmod (W - 2))) (wmod (W - 2)) source rfl,
-    cursor_value 2 (by decide) (by decide)]
+    wmod_sub_val 2 (by decide) (by decide)]
   apply if_neg
   have large : 2 ≤ W := by decide
   change ¬ (W - 2 + max 1 2 < W)
@@ -187,12 +180,12 @@ theorem pair_last_fitting : ∃ fits,
     CheckedFixedStorageResult input.heap .uint 2 (value [wmod 11,wmod 23]) input.base 8 (wmod (W - 3))
       (moved [wmod 11,wmod 23] (wmod (W - 3))) source fits := by
   have fits : (wmod (W - 3)).val + max 1 2 < W := by
-    rw [cursor_value 3 (by decide) (by decide)]
+    rw [wmod_sub_val 3 (by decide) (by decide)]
     have large : 3 ≤ W := by decide
     omega
   exact ⟨fits,checked_fixed_storage_success input.heap .uint 2 (value [wmod 11,wmod 23]) input.base 8 (wmod (W - 3))
     (moved [wmod 11,wmod 23] (wmod (W - 3))) source 128
-    (moved_allocator [wmod 11,wmod 23] _ (cursor_above 3 (by decide) (by decide)))
+    (moved_allocator [wmod 11,wmod 23] _ (wmod_sub_above 3 (by decide) (by decide)))
     (represented [wmod 11,wmod 23]) fits⟩
 
 theorem fixed_count_selects_capacity :
@@ -200,12 +193,12 @@ theorem fixed_count_selects_capacity :
       (moved [] (wmod (W - 2))) source fits) ∧
     run (checkedFixedStorageCode 2) ((moved [wmod 11,wmod 23] (wmod (W - 2))).push (.slot source)) = .revert := by
   have fits : (wmod (W - 2)).val + max 1 0 < W := by
-    rw [cursor_value 2 (by decide) (by decide)]
+    rw [wmod_sub_val 2 (by decide) (by decide)]
     have large : 2 ≤ W := by decide
     omega
   exact ⟨⟨fits,checked_fixed_storage_success input.heap .uint 0 (value []) input.base 8 (wmod (W - 2))
     (moved [] (wmod (W - 2))) source 128
-    (moved_allocator [] _ (cursor_above 2 (by decide) (by decide))) (represented []) fits⟩,pair_boundary_refusal⟩
+    (moved_allocator [] _ (wmod_sub_above 2 (by decide) (by decide))) (represented []) fits⟩,pair_boundary_refusal⟩
 
 /-- Only code execution is claimed: no gigantic represented fixed input is constructed. -/
 theorem huge_code_only_refusal :

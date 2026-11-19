@@ -52,9 +52,6 @@ theorem correct : ∀ (ctx : Solidity.Source.Ctx) (returns : List Solidity.Sourc
         RawCoherent.capture state (LocalState.ofClean (locals,world))
       have nextSame : RawCoherent.coherent nextFrame = true :=
         RawCoherent.capture_coherent state locals world
-      have nextClean : nextFrame.clean = locals := by
-        simp only [nextFrame, RawCoherent.capture, LocalState.ofClean,
-          LocalValues.clean_ofClean, Option.getD_some]
       cases tag with
       | error halt =>
         change RawCondition.eval test fuel state = (.error halt,nextFrame) at conditionRun
@@ -69,11 +66,7 @@ theorem correct : ∀ (ctx : Solidity.Source.Ctx) (returns : List Solidity.Sourc
             | false =>
               change RawCondition.eval test fuel state = (.ok false,nextFrame) at conditionRun
               have branch := RawCheckedControlSequence.block_correct two glob frame checked fuel nps ph nextFrame nextSame
-              have sourceCondition :
-                  (Solidity.Source.evalE glob frame fuel condition).run (state.clean,state.world) =
-                    (.ok (.val (.bool false)),(nextFrame.clean,nextFrame.world)) := by
-                rw [nextClean]
-                exact actual
+              have sourceCondition := RawCoherent.capture_result state actual
               have selected := RawSourceAdapterIfElse.source_selected condition (.block yes) (.block no) glob frame fuel nps ph
                 state nextFrame false (RawCheckedControlSequence.block two glob.pipeline fuel nextFrame) sourceCondition branch.2
               simp only [run, conditionRun, Bool.false_eq_true, if_false]
@@ -81,11 +74,7 @@ theorem correct : ∀ (ctx : Solidity.Source.Ctx) (returns : List Solidity.Sourc
             | true =>
               change RawCondition.eval test fuel state = (.ok true,nextFrame) at conditionRun
               have branch := RawCheckedControlSequence.block_correct one glob frame checked fuel nps ph nextFrame nextSame
-              have sourceCondition :
-                  (Solidity.Source.evalE glob frame fuel condition).run (state.clean,state.world) =
-                    (.ok (.val (.bool true)),(nextFrame.clean,nextFrame.world)) := by
-                rw [nextClean]
-                exact actual
+              have sourceCondition := RawCoherent.capture_result state actual
               have selected := RawSourceAdapterIfElse.source_selected condition (.block yes) (.block no) glob frame fuel nps ph
                 state nextFrame true (RawCheckedControlSequence.block one glob.pipeline fuel nextFrame) sourceCondition branch.2
               simp only [run, conditionRun, if_true]

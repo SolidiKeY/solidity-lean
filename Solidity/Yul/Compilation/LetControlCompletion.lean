@@ -1,3 +1,4 @@
+import Solidity.Yul.Compilation.LoopControlCompletion
 import Solidity.Yul.Compilation.CompletionControls
 import Solidity.Yul.Compilation.LetControlCompilation
 import Solidity.Yul.Compilation.LetScopeCompletion
@@ -13,16 +14,8 @@ theorem source_false {c : Control} {n fuel : Nat} {test : Expr [] [] n 1} {body 
  (condition : ProducerExpressions.Compiled fuel test) (profile : StmtWordP body)
  (locals : Vector Scalar.Word n) (zero : condition.value locals = 0) :
  evalStmt (fuel+1) .nil True.intro (.if_ test body) ⟨condition.profile,profile⟩ (sourceLocals locals) =
- some ⟨sourceLocals locals,.normal⟩ := by
- change (do
-   let values ← evalExpr fuel .nil True.intro test condition.profile (sourceLocals locals)
-   if (values 0).val = 0 then pure (⟨sourceLocals locals,.normal⟩ : Outcome c n)
-   else evalStmt fuel .nil True.intro body profile (sourceLocals locals)) = _
- rw [condition.source locals]
- change (if (condition.value locals).toNat = 0 then some (⟨sourceLocals locals,.normal⟩ : Outcome c n)
-   else evalStmt fuel .nil True.intro body profile (sourceLocals locals)) = _
- have zn : (condition.value locals).toNat = 0 := congrArg BitVec.toNat zero
- rw [if_pos zn]
+ some ⟨sourceLocals locals,.normal⟩ :=
+  LoopControlCompletion.source_zero condition profile locals zero
 
 /-- Reconcile actual guard/body completion horizons and construct the original
 nonzero source branch, preserving its precise updated locals. -/

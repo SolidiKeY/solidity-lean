@@ -14,20 +14,20 @@ def sourceConcrete (glob : Solidity.Source.Glob Solidity.Yul.Checks.LocalDefault
  (locals : Solidity.Source.Locals Solidity.Yul.Checks.LocalDefaultPostIter.Fixture.env.layout Solidity.Yul.Checks.LocalDefaultPostIter.Fixture.ctx.tys) (world : Solidity.Source.St Solidity.Yul.Checks.LocalDefaultPostIter.Fixture.env) :=
  Solidity.Yul.LocalPostHorizon.sourcePostTimeout Solidity.Yul.Checks.LocalDefaultPostIter.Fixture.env [] false false Solidity.Yul.Checks.LocalDefaultPostIter.Fixture.ctx.tys Solidity.Yul.Checks.LocalDefaultPostIter.Out (.bool false) Solidity.Yul.Checks.LocalDefaultPostIter.postFalse Solidity.Yul.Checks.LocalDefaultPostIter.items Solidity.Yul.Checks.LocalDefaultPostIter.proof glob frame fuel nps ph locals world
 
-theorem falsePostTimeout : Solidity.Yul.LocalDefaultNoGuard.run Solidity.Yul.Checks.LocalDefaultPostIter.postFalse Solidity.Yul.Checks.LocalDefaultPostIter.proof 9 Solidity.Yul.Checks.LocalDefaultPostIter.initial = .halted .timeout Solidity.Yul.Checks.LocalDefaultPostIter.afterFalsePostBody := by
-  rfl
+theorem falsePostTimeout : Solidity.Yul.LocalDefaultNoGuard.run Solidity.Yul.Checks.LocalDefaultPostIter.postFalse Solidity.Yul.Checks.LocalDefaultPostIter.proof 9 Solidity.Yul.Checks.LocalDefaultPostIter.initial = .halted .timeout Solidity.Yul.Checks.LocalDefaultPostIter.afterFalsePostBody :=
+  Solidity.Yul.Checks.LocalDefaultNoGuard.withPost
 
-theorem partialPostWrite : Solidity.Yul.LocalDefaultNoGuard.run Solidity.Yul.Checks.LocalDefaultPostIter.postFault Solidity.Yul.Checks.LocalDefaultPostIter.proof 9 Solidity.Yul.Checks.LocalDefaultPostIter.initial = .halted .timeout (Solidity.Yul.Checks.LocalDefaultPostIter.assigned true) := by
-  rfl
+theorem partialPostWrite : Solidity.Yul.LocalDefaultNoGuard.run Solidity.Yul.Checks.LocalDefaultPostIter.postFault Solidity.Yul.Checks.LocalDefaultPostIter.proof 9 Solidity.Yul.Checks.LocalDefaultPostIter.initial = .halted .timeout (Solidity.Yul.Checks.LocalDefaultPostIter.assigned true) :=
+  Solidity.Yul.Checks.LocalDefaultNoGuard.partialPost
 
-theorem falseGuardSkipsPost : Solidity.Yul.LocalDefaultPostIter.run Solidity.Yul.Checks.LocalDefaultPostIter.stopTest Solidity.Yul.Checks.LocalDefaultPostIter.postFault Solidity.Yul.Checks.LocalDefaultPostIter.proof 2 Solidity.Yul.Checks.LocalDefaultPostIter.initial = .normal Solidity.Yul.Checks.LocalDefaultPostIter.initial := by
-  rfl
+theorem falseGuardSkipsPost : Solidity.Yul.LocalDefaultPostIter.run Solidity.Yul.Checks.LocalDefaultPostIter.stopTest Solidity.Yul.Checks.LocalDefaultPostIter.postFault Solidity.Yul.Checks.LocalDefaultPostIter.proof 2 Solidity.Yul.Checks.LocalDefaultPostIter.initial = .normal Solidity.Yul.Checks.LocalDefaultPostIter.initial :=
+  Solidity.Yul.Checks.LocalDefaultPostIter.guardStops
 
-theorem doWhileBodyFirstTimeout : Solidity.Yul.LocalDefaultDoWhile.run Solidity.Yul.Checks.LocalDefaultPostIter.stopTest Solidity.Yul.Checks.LocalDefaultPostIter.proof 2 Solidity.Yul.Checks.LocalDefaultPostIter.initial = .halted .timeout Solidity.Yul.Checks.LocalDefaultPostIter.initial := by
-  rfl
+theorem doWhileBodyFirstTimeout : Solidity.Yul.LocalDefaultDoWhile.run Solidity.Yul.Checks.LocalDefaultPostIter.stopTest Solidity.Yul.Checks.LocalDefaultPostIter.proof 2 Solidity.Yul.Checks.LocalDefaultPostIter.initial = .halted .timeout Solidity.Yul.Checks.LocalDefaultPostIter.initial :=
+  Solidity.Yul.Checks.LocalDefaultDoWhile.bodyFirst
 
-theorem doWhileFalseCompletes : Solidity.Yul.LocalDefaultDoWhile.run Solidity.Yul.Checks.LocalDefaultPostIter.stopTest Solidity.Yul.Checks.LocalDefaultPostIter.proof 9 Solidity.Yul.Checks.LocalDefaultPostIter.initial = .normal (Solidity.Yul.Checks.LocalDefaultPostIter.assigned false) := by
-  rfl
+theorem doWhileFalseCompletes : Solidity.Yul.LocalDefaultDoWhile.run Solidity.Yul.Checks.LocalDefaultPostIter.stopTest Solidity.Yul.Checks.LocalDefaultPostIter.proof 9 Solidity.Yul.Checks.LocalDefaultPostIter.initial = .normal (Solidity.Yul.Checks.LocalDefaultPostIter.assigned false) :=
+  Solidity.Yul.Checks.LocalDefaultDoWhile.falseGuardExecutes
 
 theorem notRevert : Solidity.Yul.LocalDefaultNoGuard.run Solidity.Yul.Checks.LocalDefaultPostIter.postFault Solidity.Yul.Checks.LocalDefaultPostIter.proof 9 Solidity.Yul.Checks.LocalDefaultPostIter.initial ≠ .halted (.revert []) (Solidity.Yul.Checks.LocalDefaultPostIter.assigned true) := by
   intro bad; cases bad

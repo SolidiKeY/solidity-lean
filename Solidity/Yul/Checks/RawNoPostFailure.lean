@@ -61,8 +61,8 @@ theorem sourceBreakCounterexample : ∀ (glob : Solidity.Source.Glob Solidity.Yu
 theorem rawBreakCounterexample : (Solidity.Yul.Checks.RawNoPostFailure.broken.run 3 Solidity.Yul.Checks.RawNoPostFailure.dirty).1 = .ok .normal ∧ (Solidity.Yul.RawFrame.view (Solidity.Yul.Checks.RawNoPostFailure.broken.run 3 Solidity.Yul.Checks.RawNoPostFailure.dirty).2 Solidity.Yul.Checks.RawNoPostFailure.flag).val = 2 ∧ (Solidity.Yul.RawFrame.view (Solidity.Yul.Checks.RawNoPostFailure.broken.run 3 Solidity.Yul.Checks.RawNoPostFailure.dirty).2 Solidity.Yul.Checks.RawNoPostFailure.small).val = 257 := by
   exact ⟨rfl,rfl,rfl⟩
 
-theorem dirtyRefusal : Solidity.Yul.RawCoherent.coherent Solidity.Yul.Checks.RawNoPostFailure.dirty = false := by
-  exact Solidity.Yul.Checks.RawNoPostFailure.Old.dirtyInput.1
+theorem dirtyRefusal : Solidity.Yul.RawCoherent.coherent Solidity.Yul.Checks.RawNoPostFailure.dirty = false :=
+  Solidity.Yul.Checks.RawStatementHorizon.dirtyRefusal
 
 theorem sourceEarlyTimeout : ∀ (glob : Solidity.Source.Glob Solidity.Yul.Checks.RawNoPostFailure.env) (frame : Solidity.Source.Fr) (nps : Nat) (ph : Option (Solidity.Source.Ph Solidity.Yul.Checks.RawNoPostFailure.env)), ((Solidity.Source.execS glob frame 2 nps ph Solidity.Yul.Checks.RawNoPostFailure.repeatedStmt Solidity.Yul.Checks.RawNoPostFailure.initial.clean).run (Solidity.Source.L0 Solidity.Yul.Checks.RawNoPostFailure.env,Solidity.Yul.Checks.RawNoPostFailure.initial.world)).1 = .error .timeout := by
   intro glob frame nps ph

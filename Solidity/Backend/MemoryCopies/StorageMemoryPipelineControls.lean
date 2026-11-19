@@ -13,11 +13,8 @@ private structure Input where
   allocator : Objects.AllocatorRepr heap base 8 (wmod 40) machine
 private def input : Input := ⟨_,_,_,_,ObjectArrayExamples.initial_allocator⟩
 private def values (payloads : List (Fin W)) : List PrimTy.uint.Denote := payloads.map indexValue
-private theorem wide : 128 < W := by decide
-private theorem large_bound : 512 < W := by decide
-private theorem boundary_large : 1024 < W := by decide
 private def value (payloads : List (Fin W)) (bounded : payloads.length < 128) : SVal (.ref (.array (.prim .uint))) :=
-  primitiveArrayValue .uint (values payloads) (by rw [values,List.length_map]; exact Nat.lt_trans bounded wide)
+  primitiveArrayValue .uint (values payloads) (by rw [values,List.length_map]; exact Nat.lt_trans bounded (by decide : 128 < W))
 private def source : Slot := .root 0
 private def store (payloads : List (Fin W)) : WordStore := ⟨fun slot => match slot with
   | .root 0 => wmod payloads.length
@@ -30,7 +27,7 @@ private theorem represented (payloads : List (Fin W)) (bounded : payloads.length
     ReprAt (machine payloads).store 128 (.ref (.array (.prim .uint))) source (value payloads bounded) := by
   refine .array ?_ (by simpa only [values,List.length_map] using bounded) ?_
   · simp only [values,List.length_map]
-    exact Nat.mod_eq_of_lt (Nat.lt_trans bounded wide)
+    exact Nat.mod_eq_of_lt (Nat.lt_trans bounded (by decide : 128 < W))
   · intro index item selected
     simp only [SVec.toList_ofList,values,List.getElem?_map] at selected
     cases chosen : payloads[index]? with
@@ -49,7 +46,7 @@ theorem certificate_inhabited : StorageMemoryPipelineCertificate := storageMemor
 
 theorem actual_typed (payloads : List (Fin W)) (bounded : payloads.length < 128) :
     ∃ fits, StorageMemoryPipelineResult input.heap .uint (values payloads)
-      (by rw [values, List.length_map]; exact Nat.lt_trans bounded wide)
+      (by rw [values, List.length_map]; exact Nat.lt_trans bounded (by decide : 128 < W))
       input.base 8 (wmod 40) (machine payloads) source fits := by
   have fits : (wmod 40).val + 2 * ((values payloads).length + 1) < W := by
     change 40 + 2 * ((values payloads).length + 1) < W
@@ -113,7 +110,7 @@ theorem actual_runtime (payloads : List (Fin W)) (bounded : payloads.length < 12
     apply Fin.ext
     simp only [values, List.length_map]
     change 40 + (payloads.length + 1) = (40 + payloads.length + 1) % W
-    have bound : 40 + payloads.length + 1 < W := by have large : 512 < W := large_bound; omega
+    have bound : 40 + payloads.length + 1 < W := by have large : 512 < W := (by decide); omega
     rw [Nat.mod_eq_of_lt bound]
     omega
   have firstObserved : intermediate.mem (wmod 40).val = .val (wmod payloads.length) ∧
@@ -128,9 +125,9 @@ theorem actual_runtime (payloads : List (Fin W)) (bounded : payloads.length < 12
     apply Fin.ext
     simp only [values, List.length_map]
     change 40 + 2 * (payloads.length + 1) = (40 + 2 * (payloads.length + 1)) % W
-    exact (Nat.mod_eq_of_lt (by have large : 512 < W := large_bound; omega)).symm
+    exact (Nat.mod_eq_of_lt (by have large : 512 < W := (by decide); omega)).symm
   · exact (retained 40 (by decide) (by change 40 < 40 + ((values payloads).length + 1); omega)).trans firstObserved.1
-  · have bound : 40 + payloads.length + 1 < W := by have large : 512 < W := large_bound; omega
+  · have bound : 40 + payloads.length + 1 < W := by have large : 512 < W := (by decide); omega
     simpa only [wmod_def, Nat.mod_eq_of_lt bound] using secondObserved.1
   · exact congrArg Machine.stack shape
   · rw [shape]
@@ -138,7 +135,7 @@ theorem actual_runtime (payloads : List (Fin W)) (bounded : payloads.length < 12
     have lower : index < payloads.length := lt_of_getElem? chosen
     have firstWord : intermediate.mem ((wmod 40).val + 1 + index) = .val payload := firstObserved.2 index payload chosen
     have secondWord : target.mem ((wmod (40 + payloads.length + 1)).val + 1 + index) = .val payload := secondObserved.2 index payload chosen
-    have bound : 40 + payloads.length + 1 < W := by have large : 512 < W := large_bound; omega
+    have bound : 40 + payloads.length + 1 < W := by have large : 512 < W := (by decide); omega
     refine ⟨(retained (41 + index) (by omega) (by simp only [values, List.length_map]; change 41 + index < 40 + (payloads.length + 1); omega)).trans firstWord, ?_⟩
     change target.mem ((40 + payloads.length + 1) % W + 1 + index) = .val payload at secondWord
     rw [Nat.mod_eq_of_lt bound] at secondWord
@@ -229,8 +226,8 @@ theorem empty_second_refusal :
       run checkedMemoryArrayCode (intermediate.push (.val (wmod (W - 2)))) = .revert) ∧
     run storageMemoryPipelineCode ((moved [] (wmod (W - 2))).push (.slot source)) = .revert := by
   have edge : (wmod (W - 2)).val = W - 2 ∧ 40 ≤ (wmod (W - 2)).val := boundary_value 2 (by decide) (by decide)
-  exact second_phase_refusal [] (by decide) _ edge.2 (by rw [edge.1]; change W - 2 + 1 < W; have large : 1024 < W := boundary_large; omega)
-    (by rw [edge.1]; change ¬ W - 2 + 2 * (0 + 1) < W; have large : 1024 < W := boundary_large; omega)
+  exact second_phase_refusal [] (by decide) _ edge.2 (by rw [edge.1]; change W - 2 + 1 < W; have large : 1024 < W := (by decide); omega)
+    (by rw [edge.1]; change ¬ W - 2 + 2 * (0 + 1) < W; have large : 1024 < W := (by decide); omega)
 
 theorem pair_second_refusal :
     (∃ (firstFits : (wmod (W - 4)).val + 3 < W), ∃ base₁ intermediate,
@@ -242,8 +239,8 @@ theorem pair_second_refusal :
     run storageMemoryPipelineCode ((moved [wmod 11, wmod 23] (wmod (W - 4))).push (.slot source)) = .revert := by
   have edge : (wmod (W - 4)).val = W - 4 ∧ 40 ≤ (wmod (W - 4)).val := boundary_value 4 (by decide) (by decide)
   exact second_phase_refusal [wmod 11, wmod 23] (by decide) _ edge.2
-    (by rw [edge.1]; change W - 4 + 3 < W; have large : 1024 < W := boundary_large; omega)
-    (by rw [edge.1]; change ¬ W - 4 + 2 * (2 + 1) < W; have large : 1024 < W := boundary_large; omega)
+    (by rw [edge.1]; change W - 4 + 3 < W; have large : 1024 < W := (by decide); omega)
+    (by rw [edge.1]; change ¬ W - 4 + 2 * (2 + 1) < W; have large : 1024 < W := (by decide); omega)
 
 theorem pair_last_fitting : ∃ fits, StorageMemoryPipelineResult input.heap .uint (values [wmod 11, wmod 23]) (by decide)
     input.base 8 (wmod (W - 7)) (moved [wmod 11, wmod 23] (wmod (W - 7))) source fits := by

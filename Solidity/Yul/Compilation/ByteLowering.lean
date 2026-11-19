@@ -82,13 +82,8 @@ theorem byteExpansion_run (index value : Word) (tail : Stack) :
     #v[index, value] #v[] tail)
   rfl
 
-private theorem pair_words (input : Vector Word 2) : input.toList = [input[0], input[1]] := by
-  apply List.ext_getElem
-  · exact Vector.length_toList
-  · intro i hi hj
-    have h : i = 0 ∨ i = 1 := by simp only [Vector.length_toList] at hi; omega
-    rcases h with h | h <;> subst i <;>
-      simp only [Vector.getElem_toList, List.getElem_cons_zero, List.getElem_cons_succ]
+private theorem pair_words (input : Vector Word 2) : input.toList = [input[0], input[1]] :=
+  vector_pair input
 
 def byteAritySlice : AritySlice 2 1 (fun input => #v[indexedByteWindow input[0] input[1]]) where
   code := byteExpansion

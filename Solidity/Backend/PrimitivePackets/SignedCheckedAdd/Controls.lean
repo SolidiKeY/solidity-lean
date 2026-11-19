@@ -28,8 +28,4 @@ def minimum (p : Roadmap.Pipeline) := success p U.lo 0 (by decide) (by decide) (
 def positiveOverflow (p : Roadmap.Pipeline) := failure p U.hi 1 (by decide) (by decide) (by decide)
 def negativeOverflow (p : Roadmap.Pipeline) := failure p U.lo (-1) (by decide) (by decide) (by decide)
 def mixedSigns (p : Roadmap.Pipeline) := success p (-7) 9 (by decide) (by decide) (by decide)
-
-theorem panic_not_empty : Source.panicData .arithmetic ≠ [] := by decide
-theorem exact_panic : Source.panicData .arithmetic =
-    [0x4e,0x48,0x7b,0x71] ++ List.replicate 31 0 ++ [0x11] := by decide
 end Solidity.Backend.PrimitivePackets.SignedCheckedAdd.Controls

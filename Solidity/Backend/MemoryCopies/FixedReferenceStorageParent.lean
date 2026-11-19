@@ -6,24 +6,9 @@ fixed-parent adoption. Full fixed storage representation supplies all children. 
 namespace Solidity.Backend.MemoryCopies
 open Evm Evm.Memory
 
-private theorem primitive_words {primitive : PrimTy} (items : List primitive.Denote) :
-    elementWordCount (SVec.ofList (items.map SVal.prim)) = 0 := by
-  induction items with
-  | nil => simp only [List.map_nil,SVec.ofList,elementWordCount]
-  | cons item items ih => simp only [List.map_cons,SVec.ofList,elementWordCount,liveWordCount,ih,Nat.zero_add]
-
-private theorem child_words (primitive : PrimTy) (rows : List (PrimitiveStorageRow primitive)) :
-    elementWordCount (nestedStorageValues primitive rows) = nestedStorageDemand rows := by
-  induction rows with
-  | nil => rfl
-  | cons row rows ih =>
-    simp only [nestedStorageValues,elementWordCount,primitiveArrayValue,liveWordCount,
-      primitive_words,List.length_map,nestedStorageDemand,ih]
-    omega
-
 theorem fixed_reference_storage_parent_demand (primitive : PrimTy) (rows : List (PrimitiveStorageRow primitive)) :
     liveWordCount (fixedReferenceStorageValue primitive rows) = fixedReferenceStorageParentDemand rows := by
-  simp only [fixedReferenceStorageValue,liveWordCount,child_words,fixedReferenceStorageParentDemand,Nat.add_comm]
+  simp only [fixedReferenceStorageValue,liveWordCount,nestedStorage_elementWordCount,fixedReferenceStorageParentDemand,Nat.add_comm]
 
 theorem fixed_reference_storage_parent_growth {H : HTy} (heap : Heap H) (primitive : PrimTy)
     (rows : List (PrimitiveStorageRow primitive)) :

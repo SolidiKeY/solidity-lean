@@ -1,3 +1,4 @@
+import Solidity.Yul.Compilation.WordInstructionCertificates
 import Solidity.Yul.Compilation.SignedClosedExecution
 import Solidity.Backend.Selection.Interface
 /-! Concrete producers of the EXISTING instruction/lowering contracts used
@@ -7,17 +8,11 @@ Input/Rep, source embedding, physical/native/charged adequacy or capacity. -/
 namespace Solidity.Yul.Compilation.SignedInstructionCertificates
 open Backend Scalar Selection MachineAdapter
 
-private theorem irStack_words (s : Stack) : irStack s = s.map coreWord := by
- apply List.map_congr_left
- intro w _
- apply congrArg Evm.Word.val
- apply Fin.ext
- change w.toNat % Evm.W = w.toNat
- exact Nat.mod_eq_of_lt w.isLt
+private theorem irStack_words (s : Stack) : irStack s = s.map coreWord :=
+  WordInstructionCertificates.irStack_words s
 
-private theorem singleton_run (i : Evm.Instr) (m : Evm.Machine) : Evm.run [i] m = i.step m := by
- change (i.step m).bind (fun next pending => Evm.exec [] pending next) = _
- cases i.step m <;> rfl
+private theorem singleton_run (i : Evm.Instr) (m : Evm.Machine) : Evm.run [i] m = i.step m :=
+  WordInstructionCertificates.singleton_run i m
 
 private theorem singleton_selected (i : Backend.Instr) (j : Evm.Instr)
  (selected : SignedMachine.selectInstr i = some j) : SignedMachine.selectCode [i] = some [j] := by

@@ -173,9 +173,6 @@ theorem correct {ctx returns modifier u stmt} (proof : Supported ctx returns mod
           RawCoherent.capture state (LocalState.ofClean (locals,world))
         have nextSame : RawCoherent.coherent nextFrame = true :=
           RawCoherent.capture_coherent state locals world
-        have nextClean : nextFrame.clean = locals := by
-          simp only [nextFrame,RawCoherent.capture,LocalState.ofClean,
-            LocalValues.clean_ofClean,Option.getD_some]
         cases tag with
         | error halt =>
           change RawCondition.eval test fuel state = (.error halt,nextFrame) at conditionRun
@@ -189,20 +186,12 @@ theorem correct {ctx returns modifier u stmt} (proof : Supported ctx returns mod
               cases choice with
               | false =>
                 change RawCondition.eval test fuel state = (.ok false,nextFrame) at conditionRun
-                have conditionActual :
-                    (Solidity.Source.evalE glob frame fuel condition).run (state.clean,state.world) =
-                      (.ok (.val (.bool false)),(nextFrame.clean,nextFrame.world)) := by
-                  rw [nextClean]
-                  exact actual
+                have conditionActual := RawCoherent.capture_result state actual
                 simp only [run_ifThen,conditionRun,Bool.false_eq_true,if_false]
                 exact ⟨nextSame,source_false condition body glob frame fuel nps ph state nextFrame conditionActual⟩
               | true =>
                 change RawCondition.eval test fuel state = (.ok true,nextFrame) at conditionRun
-                have conditionActual :
-                    (Solidity.Source.evalE glob frame fuel condition).run (state.clean,state.world) =
-                      (.ok (.val (.bool true)),(nextFrame.clean,nextFrame.world)) := by
-                  rw [nextClean]
-                  exact actual
+                have conditionActual := RawCoherent.capture_result state actual
                 have bodyRun := ih fuel nextFrame nextSame
                 simp only [run_ifThen,conditionRun,if_true]
                 exact ⟨bodyRun.1,source_true condition body glob frame fuel nps ph

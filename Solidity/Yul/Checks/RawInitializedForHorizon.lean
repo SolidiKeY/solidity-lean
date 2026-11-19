@@ -44,6 +44,12 @@ theorem initializedExit : (Solidity.Yul.Checks.RawInitializedForHorizon.continue
 theorem breakRefusal : (Solidity.Yul.Checks.RawInitializedForHorizon.refusedBreak.run 2 Solidity.Yul.Checks.RawInitializedForHorizon.dirty).1 = .error (.stuck "for initializer") ∧ (Solidity.Yul.RawFrame.view (Solidity.Yul.Checks.RawInitializedForHorizon.refusedBreak.run 2 Solidity.Yul.Checks.RawInitializedForHorizon.dirty).2 Solidity.Yul.Checks.RawInitializedForHorizon.flag).val = 2 ∧ (Solidity.Yul.RawFrame.view (Solidity.Yul.Checks.RawInitializedForHorizon.refusedBreak.run 2 Solidity.Yul.Checks.RawInitializedForHorizon.dirty).2 Solidity.Yul.Checks.RawInitializedForHorizon.small).val = 257 := by
   exact ⟨rfl,rfl,rfl⟩
 
+/-- A refused initializer is stuck, separately from fuel timeout. -/
+theorem initializerCounterexample :
+    (refusedBreak.run 2 dirty).1 = .error (.stuck "for initializer") ∧
+      (Solidity.Source.Halt.stuck "for initializer" ≠ .timeout) := by
+  exact ⟨breakRefusal.1, by intro bad; cases bad⟩
+
 theorem continueRefusal : (Solidity.Yul.Checks.RawInitializedForHorizon.refusedContinue.run 2 Solidity.Yul.Checks.RawInitializedForHorizon.dirty).1 = .error (.stuck "for initializer") ∧ (Solidity.Yul.RawFrame.view (Solidity.Yul.Checks.RawInitializedForHorizon.refusedContinue.run 2 Solidity.Yul.Checks.RawInitializedForHorizon.dirty).2 Solidity.Yul.Checks.RawInitializedForHorizon.flag).val = 2 ∧ (Solidity.Yul.RawFrame.view (Solidity.Yul.Checks.RawInitializedForHorizon.refusedContinue.run 2 Solidity.Yul.Checks.RawInitializedForHorizon.dirty).2 Solidity.Yul.Checks.RawInitializedForHorizon.small).val = 257 := by
   exact ⟨rfl,rfl,rfl⟩
 

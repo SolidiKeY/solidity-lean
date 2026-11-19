@@ -7,17 +7,25 @@ export Solidity.Yul.Checks.LocalDefaultBinding.Fixture (env ctx initial)
 end Fixture
 export Solidity.Yul.Checks.LocalDefaultBinding (initial assigned zero8 zero256)
 
-def items : Solidity.Source.RItems Fixture.env [] false ⟨false,false⟩ Fixture.ctx.tys
+/-- Shared declaration/update fixture for plain, loop and unchecked controls. -/
+def scopedItems (control : Solidity.Source.SCtx) : Solidity.Source.RItems Fixture.env [] false control Fixture.ctx.tys
     (.bool :: .int Solidity.Source.IntTy.u256 :: .int Solidity.Source.IntTy.u8 :: Fixture.ctx.tys) :=
   .stmt (.declVar (.int Solidity.Source.IntTy.u8))
     (.stmt (.declVar (.int Solidity.Source.IntTy.u256))
       (.stmt (.declInit (.unary .not (.local (.there (.there .here)))) (by rfl))
         (.stmt (.expr (.assign (.local (.there (.there (.there .here)))) (.local .here))) .nil)))
 
-def proof : LocalDefaultItems.Supported Fixture.env [] false ⟨false,false⟩ items :=
+def items : Solidity.Source.RItems Fixture.env [] false ⟨false,false⟩ Fixture.ctx.tys
+    (.bool :: .int Solidity.Source.IntTy.u256 :: .int Solidity.Source.IntTy.u8 :: Fixture.ctx.tys) :=
+  scopedItems ⟨false,false⟩
+
+def scopedProof (control : Solidity.Source.SCtx) : LocalDefaultItems.Supported Fixture.env [] false control (scopedItems control) :=
   .declaration zero8 (.declaration zero256
     (.body (.declaration (.not (.base (.local (.there (.there .here)))))
       (.expression (.assign (.there (.there (.there .here))) (.base (.local .here))) .nil))))
+
+def proof : LocalDefaultItems.Supported Fixture.env [] false ⟨false,false⟩ items :=
+  scopedProof ⟨false,false⟩
 
 def firstState : LocalState Fixture.env (.int Solidity.Source.IntTy.u8 :: Fixture.ctx.tys) :=
   ((.clean zero8.value,initial.1),initial.2)

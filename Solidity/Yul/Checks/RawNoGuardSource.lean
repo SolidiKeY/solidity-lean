@@ -36,8 +36,8 @@ theorem sourceEarlyTimeout : ∀ (glob : Solidity.Source.Glob Solidity.Yul.Check
   intro glob frame nps ph
   rfl
 
-theorem dirtyRefusal : Solidity.Yul.RawCoherent.coherent Solidity.Yul.Checks.RawNoGuardSource.dirty = false := by
-  exact Solidity.Yul.Checks.RawNoGuardSource.Old.dirtyInput.1
+theorem dirtyRefusal : Solidity.Yul.RawCoherent.coherent Solidity.Yul.Checks.RawNoGuardSource.dirty = false :=
+  Solidity.Yul.Checks.RawStatementHorizon.dirtyRefusal
 
 theorem coherentFamily : ∀ (glob : Solidity.Source.Glob Solidity.Yul.Checks.RawNoGuardSource.env) (frame : Solidity.Source.Fr) (fuel nps : Nat) (ph : Option (Solidity.Source.Ph Solidity.Yul.Checks.RawNoGuardSource.env)) (l : Bool) (state : Solidity.Yul.RawFrame.State Solidity.Yul.Checks.RawNoGuardSource.ctx) (_same : Solidity.Yul.RawCoherent.coherent state = true) (next : Solidity.Source.Locals Solidity.Yul.Checks.RawNoGuardSource.env.layout Solidity.Yul.Checks.RawNoGuardSource.ctx.tys) (finalWorld : Solidity.Source.St Solidity.Yul.Checks.RawNoGuardSource.env), (Solidity.Source.execS glob frame fuel nps ph (Solidity.Source.RStmt.forLoop (l := l) (.skip : Solidity.Source.RStmt Solidity.Yul.Checks.RawNoGuardSource.env [] false ⟨true,false⟩ Solidity.Yul.Checks.RawNoGuardSource.ctx.tys Solidity.Yul.Checks.RawNoGuardSource.ctx.tys) .none (.some (.assign (.local .here) (.bool false))) (.cont : Solidity.Source.RStmt Solidity.Yul.Checks.RawNoGuardSource.env [] false ⟨true,false⟩ Solidity.Yul.Checks.RawNoGuardSource.ctx.tys Solidity.Yul.Checks.RawNoGuardSource.ctx.tys)) state.clean).run (Solidity.Source.L0 Solidity.Yul.Checks.RawNoGuardSource.env,state.world) ≠ (.ok (.normal next),(Solidity.Source.L0 Solidity.Yul.Checks.RawNoGuardSource.env,finalWorld)) := by
   intro glob frame fuel nps ph l state same next finalWorld

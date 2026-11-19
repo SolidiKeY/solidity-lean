@@ -25,11 +25,301 @@ variable (C)
 /-- `ElabRec`'s default, as `Syntax/Elab/Arms.lean` states it. -/
 local instance {α : Type} : Inhabited (ElabM α) := ⟨fun _ _ => .error ""⟩
 
+/-- Recursive hooks used by the panic producers. External dispatch remains a
+separate hook; this record does not extend `ElabRec`. -/
+structure PanicProducerRec where
+  extDispatch : String → String → List String → List String → List RawExpr →
+    Option (Var × PrimTy) → Nat → Bool → ElabM (SProg C)
+  elabStmtsP : List RawStmt → ElabM (SProg C)
+  elabScope : (Γ : NCtx) → List RawStmt → ElabM (Blk C Γ.ctx)
+  elabCallRet : (f : String) → (args : List RawExpr) → (res : Option (Var × PrimTy)) →
+    (resW : Nat := 256) → (targets : Bool := false) → (ctor : Bool := false) →
+    (resNew : Bool := false) → (selfFrame : Bool := false) →
+    ElabM (SProg C × Option (NCtx × RefTy × Var × Bool) × List (Var × LocalTy))
+
+local instance : Inhabited (PanicProducerRec C) := ⟨{
+  extDispatch := fun _ _ _ _ _ _ _ _ => fun _ _ => .error ""
+  elabStmtsP := fun _ => fun _ _ => .error ""
+  elabScope := fun _ _ => fun _ _ => .error ""
+  elabCallRet := fun _ _ _ _ _ _ _ _ => fun _ _ => .error "" }⟩
+
+/-- The captures before an internal dispatch: the callee's tag first under
+the source-order schedule (solc's IR pipeline reads the callee value before
+the arguments, the legacy one after them; `tests/solc/FunctionValueReferences.sol`,
+`calleeOrder`), then each argument once, left to right, at its formal type.
+All operands are evaluated before dispatch, including total reads whose value
+a later argument can change and failing member reads; the formal type
+supplies the contextual type of a literal expression. A memory-array argument
+is captured as a memory local: the reference itself for a memory operand (the
+callee's writes reach the caller, as Solidity passes memory by reference), a
+copy of a storage operand, taken at its position under the legacy schedule
+and after every capture under the source-order one (`binaryLeftToRight`,
+solc's IR pipeline: its alias at its position). A storage-array argument is a storage alias of its
+path. A struct argument (`fnRefStruct?`) is captured likewise at its location. Returns the statements, the tag's name and the captured arguments. -/
+def dispatchCaptures (h : RawExpr) (ty : String) (ps : List String) (args : List RawExpr) :
+    ElabM (List RawStmt × RawExpr × List RawExpr) := do
+  let mut pre : List RawStmt := []
+  let mut tag := h
+  if C.evalOrder.binaryLeftToRight || !h.isPure then
+    let t := toString (← freshCapture "se")
+    pre := [.decl (.named ty) t (some h)]
+    tag := .name t
+  let mut as : List RawExpr := []
+  -- under the source-order schedule a storage operand of a memory parameter
+  -- is copied after every argument ran (solc's IR pipeline; `argumentOrder`:
+  -- legacy 101, viaIR 901): its alias at its position, the copy after
+  let late := C.evalOrder.binaryLeftToRight
+  let mut post : List RawStmt := []
+  for (a, c) in args.zip ps do
+    let y := toString (← freshCapture "se")
+    let memTy : Option RawTy := match fnRefElem? C c, fnRefStruct? C c with
+      | some (e, false), _ => some (.array (.named e))
+      | none, some (st, false) => some (.named st)
+      | _, _ => none
+    let fromStorage ← if late && memTy.isSome then
+        (try pure ((← synthM C a).2 matches .path _ _) catch _ => pure false)
+      else pure false
+    if let (some T, true) := (memTy, fromStorage) then
+      let z := toString (← freshCapture "sp")
+      pre := pre ++ [.declStorage T z (some a)]
+      post := post ++ [.declMemory T y (some (.name z))]
+      as := as ++ [.name y]
+      continue
+    pre := pre ++ [match fnRefElem? C c, fnRefStruct? C c with
+      | some (e, false), _ => .declMemory (.array (.named e)) y (some a)
+      | some (e, true), _ => .declStorage (.array (.named e)) y (some a)
+      | none, some (st, false) => .declMemory (.named st) y (some a)
+      | none, some (st, true) => .declStorage (.named st) y (some a)
+      | none, none => .decl (.named c) y (some a)]
+    as := as ++ [.name y]
+  pure (pre ++ post, tag, as)
+
+/-- **A call through a function value** `h(a)`, `h` of the function type
+`ty` (`fnTyOf?`): its arguments captured once, left to right,
+then a dispatch over the functions of `ty`, `if (h == 1) { r = g₁(a); } else
+if … else { revert(); }` (`fnTag`): calling an unassigned value is solc's
+`Panic(0x51)`, transported as literal data in a self-call frame and otherwise
+read as the ordinary solkey revert. A function
+of `ty` this one may not call (declared after it) is refused when it is named
+as a value in the contract; one that is not cannot reach here (`fnTag`).
+With `resNew`, `res` is declared by the statement before (`elabCallRet`). -/
+def fnDispatchWith (rc : PanicProducerRec C) (h ty : String) (args : List RawExpr) (res : Option (Var × PrimTy))
+    (resW : Nat) (resNew : Bool) : ElabM (SProg C) := do
+  let some (ps, rs, ext) := fnParts? ty | throw s!"{h}: the function type {ty}"
+  if ext then return ← rc.extDispatch h ty ps rs args res resW resNew
+  unless ps.length == args.length do
+    throw s!"{h} takes {ps.length} arguments, not {args.length}"
+  -- a reference parameter or return: no function's signature is spelled so
+  -- (`FunDecl.sigTy?`), so the dispatch would list none; a memory or storage
+  -- array of a plain value element (`fnRefElem?`) is the reference parameter spelled
+  if let some c := (ps.filter fun c => (fnRefElem? C c).isNone && (fnRefStruct? C c).isNone) ++ rs |>.find? fun c =>
+      (fnCompTy? C c).isNone then
+    throw s!"{h}(…): a function type with a {c} parameter or return is not modelled \
+      (docs/semantic-gaps.md, \"Function types\")"
+  let scope := (← read).funs
+  let taken := fnTaken C
+  let mut cands : List (String × Nat) := []
+  for ((g, d), i) in C.funs.zipIdx do
+    if fnInternal C g && FunDecl.sigTy? C d == some ty && fnReachable C g then
+      if scope.any (·.1 == g) then cands := cands ++ [(g, i + 1)]
+      else if taken.contains g then
+        throw s!"{h}(…) may call {g}, which is not declared before this function: \
+          declare the functions of type {ty} first"
+  let (pre, tag, as) ← dispatchCaptures C (.name h) ty ps args
+  let call (g : String) : RawStmt := match res with
+    | some (x, _) => .assign (.name (toString x)) (.call g as)
+    | none => .call (.name g) as
+  let (Γ0, _) ← get
+  if resNew then
+    if let some (x, p) := res then declare C (toString x) (.val p resW)
+  let P ← withReader (fun sc => { sc with top := false }) do
+    let P ← rc.elabStmtsP pre
+    let Γ ← nctx
+    -- A self-call transports exact bytes, so Panic(0x51) is independent
+    -- of the transaction oracle's fallback code for an unclassified panic.
+    let fail : Stmt C Γ.ctx Γ.ctx :=
+      if (← read).selfFrame || (← read).retainFailureData then .revertData [.bytes (Semantics.encodePanic 0x51)]
+      else .revert
+    -- One arm per candidate, in tag order (`DispatchArm.chain`, whose runs
+    -- `Semantics/Dispatch.lean` characterises per tag).
+    let mut arms : List (DispatchArm C Γ.ctx) := []
+    for (g, t) in cands do
+      let c ← checkIn C Γ .bool (.binop .eqB tag (.num t))
+      let body ← rc.elabScope Γ [call g]
+      arms := arms ++ [{ cond := c, body := body.2 }]
+    pure (P ++ [.of Γ (DispatchArm.chain arms fail)])
+  modify fun (_, k) => (Γ0, k)
+  pure P
+
+/-- Internal memory-return dispatch (`bytes memory`, `T[] memory` or a
+struct in memory, one return) uses the same source tags, scope checks and argument captures as
+scalar dispatch (`dispatchCaptures`). The shared destination is intrinsically
+a memory reference, and each branch binds the selected call's returned alias;
+no storage copy or scalar encoding of the returned reference is introduced. -/
+def fnMemoryDispatchWith (rc : PanicProducerRec C) (h : RawExpr) (ty : String) (args : List RawExpr) :
+    ElabM (SProg C × RawExpr) := do
+  let some (ps, [r], false) := fnParts? ty
+    | throw "memory dispatch needs an internal signature with one memory return"
+  let dstTy : RawTy ← if r == "bytesmemory" then pure (.named "bytes") else
+    match fnRefElem? C r, fnRefStruct? C r with
+    | some (e, false), _ => pure (.array (.named e))
+    | none, some (st, false) => pure (.named st)
+    | _, _ => throw s!"memory dispatch returns a {r}, not a memory reference"
+  unless ps.length == args.length do
+    throw s!"memory dispatch takes {ps.length} arguments, not {args.length}"
+  if let some c := ps.find? fun c =>
+      (fnRefElem? C c).isNone && (fnRefStruct? C c).isNone && (fnCompTy? C c).isNone then
+    throw s!"memory dispatch: a function type with a {c} parameter is not modelled"
+  let scope := (← read).funs
+  let taken := fnTaken C
+  let mut cands : List (String × Nat) := []
+  for ((g, d), i) in C.funs.zipIdx do
+    if fnInternal C g && FunDecl.sigTy? C d == some ty && fnReachable C g then
+      if scope.any (·.1 == g) then cands := cands ++ [(g, i + 1)]
+      else if taken.contains g then
+        throw s!"memory dispatch may call {g}, which is not declared before this function"
+  -- A zero-argument dispatch keeps its original capture of the tag first.
+  let (pre, tag, as) ← if args.isEmpty then do
+      let t := toString (← freshCapture "se")
+      pure ([.decl (.named ty) t (some h)], RawExpr.name t, [])
+    else dispatchCaptures C h ty ps args
+  let dst := toString (← freshCapture "mv")
+  let P ← rc.elabStmtsP (pre ++ [.declMemory dstTy dst none])
+  let failure := if (← read).selfFrame || (← read).retainFailureData then
+      RawStmt.revertRaw (.bytesLit ((Semantics.encodePanic 0x51).map UInt8.toNat)) else RawStmt.revert
+  let dispatch := cands.foldr (fun (g, t) rest =>
+    RawStmt.ite (.binop .eqB tag (.num t))
+      [.assign (.name dst) (.call g as)] [rest]) failure
+  let Q ← rc.elabStmtsP [dispatch]
+  pure (P ++ Q, .name dst)
+
+/-- **The body a `try` runs when its receiver is the contract itself**
+(`Stmt.tryCall`'s `self`, `docs/options.md` O8): the callee `g` inlined as a
+call with targets (`elabCallRet`), its environment the frame's
+(`RawStmt.selfFrame`), when `g` is a function declared before this one whose
+parameters take the arguments' types and whose return variables are the
+`try`'s `ρ`, or a `try` that binds none (`try this.g(x) { … }`); `none` otherwise (another contract's function, or one this
+function may not call: the restriction that keeps the run structural). -/
+def trySelfBodyWith (rc : PanicProducerRec C) (g : String) {Γ : NCtx} (args : List (ExtArg C Γ.ctx)) (ρ : Ctx) :
+    ElabM (Option ((ps : Ctx) × (Γf : Ctx) × Args C Γ.ctx ps × Prog C (ρ ++ ps) Γf)) := do
+  unless fnExternalEntry C g do return none
+  let some (_, d) := (← read).funs.find? (·.1 == g) | pure none
+  unless d.params.map (·.2) == args.map (fun a => Ty.prim a.1) do return none
+  unless d.rets.all (fun (_, T) => T matches .prim _) do return none
+  let raw := args.map fun a => Simple.toRaw C Γ.names a.2
+  -- a `try` that binds none: the callee called as a statement (`selfCall?`)
+  let targets := !ρ.isEmpty || d.rets.isEmpty
+  let r ← tryCatch (do
+      let (P, _, _) ← rc.elabCallRet g raw none (targets := targets) (selfFrame := true)
+      pure (some P)) fun _ => pure none
+  let some [st] := r | pure none
+  if h : st.Γ.ctx = Γ.ctx then
+    -- Compiler-generated getters use empty-data bounds failures. Their
+    -- source plan has already placed a require before every array index;
+    -- instrumenting the guarded reads as ordinary Solidity expressions
+    -- would invent unreachable Panic(0x32) data in catchData's analysis.
+    let getter := d.sourceDecl.any fun source => match source.callable with
+      | .getter _ => true
+      | _ => false
+    pure ((Stmt.selfCall? C ρ (h ▸ st.s)).map fun ⟨ps, Γf, sargs, sbody⟩ =>
+      ⟨ps, Γf, sargs, if getter then sbody else sbody.withPanics⟩)
+  else pure none
+
+/-- **The body a value call runs when its receiver is the contract itself**
+(`(bool ok, ) = payable(this).call{value: v}("")`, `docs/options.md` O8):
+the contract's `receive`, declared before this function, inlined as a call
+with no targets, in a frame of its own: `msg.sender` is `address(this)`, and
+`msg.value` its one parameter, which the call passes `v` (raw, read in the
+caller's scope).  `none` where there is no such `receive`, or where it does
+not elaborate so: a function it calls reads `msg.value` (its frame does not
+have the parameter). -/
+def receiveSelfBodyWith (rc : PanicProducerRec C) {Γ : NCtx} (v : RawExpr) :
+    ElabM (Option ((ps : Ctx) × (Γf : Ctx) × Args C Γ.ctx ps × Prog C ([] ++ ps) Γf)) := do
+  let funs := (← read).funs
+  let some (_, d) := funs.find? (·.1 == "receive") | pure none
+  unless d.params.isEmpty && d.rets.isEmpty && d.mods.isEmpty do return none
+  -- the parameter `msg.value` reads, a name no source declares
+  let receiveValueParam := "msgValue$"
+  let pv := RawExpr.name receiveValueParam
+  let ps : List (Name × Ty) := [(receiveValueParam, .prim .uint)]
+  let d' : FunDecl := { d with params := ps, body := d.body.map (RawStmt.selfFrame pv) }
+  let funs' := funs.map fun (n, e) => if n == "receive" then (n, d') else (n, e)
+  let r ← tryCatch (do
+      let nested : RawExpr := .name (receiveValueParam ++ "nested")
+      let (P, _, _) ← withReader (fun sc => { sc with funs := funs', selfValue := nested })
+        (rc.elabCallRet "receive" [v] none (targets := true) (selfFrame := true))
+      pure (some P)) fun _ => pure none
+  let some [st] := r | pure none
+  if h : st.Γ.ctx = Γ.ctx then
+    pure (Stmt.selfCall? C [] (h ▸ st.s))
+  else pure none
+
+/-- **A tuple assignment from a call through an internal function value**
+`(a, b) = h(x)`: the dispatch's captures (`dispatchCaptures`), then one
+branch per candidate `g` of `h`'s type, the direct tuple assignment
+`(a, b) = g(y)` on the captured arguments, then the unassigned-value failure.
+Value returns only: a direct tuple call binds primitive returns. -/
+def fnTupleDispatchWith (rc : PanicProducerRec C) (ts : List (Option RawExpr)) (h ty : String) (args : List RawExpr) :
+    ElabM (SProg C) := do
+  let some (ps, rs, false) := fnParts? ty
+    | throw s!"{h}(…): an external function value in a tuple assignment"
+  unless ps.length == args.length do throw s!"{h} takes {ps.length} arguments, not {args.length}"
+  unless rs.length == ts.length do throw s!"{h} returns {rs.length} values, not {ts.length}"
+  if let some c := ps.find? fun c =>
+      (fnRefElem? C c).isNone && (fnRefStruct? C c).isNone && (fnCompTy? C c).isNone then
+    throw s!"{h}(…): a function type with a {c} parameter is not modelled"
+  -- a memory return among several: full-word elements only, as a single
+  -- one (`fnMemRet`), since the target's type is compared without widths
+  if let some c := rs.find? fun c => (fnCompTy? C c).isNone && !fnMemRet C c then
+    throw s!"{h}(…): a function value returning a {c} among several values is not modelled \
+      (a direct tuple call binds value and full-word memory returns)"
+  let scope := (← read).funs
+  let taken := fnTaken C
+  let mut cands : List (String × Nat) := []
+  for ((g, d), i) in C.funs.zipIdx do
+    if fnInternal C g && FunDecl.sigTy? C d == some ty && fnReachable C g then
+      if scope.any (·.1 == g) then cands := cands ++ [(g, i + 1)]
+      else if taken.contains g then
+        throw s!"{h}(…) may call {g}, which is not declared before this function: \
+          declare the functions of type {ty} first"
+  let (pre, tag, as) ← dispatchCaptures C (.name h) ty ps args
+  let failure := if (← read).selfFrame || (← read).retainFailureData then
+      RawStmt.revertRaw (.bytesLit ((Semantics.encodePanic 0x51).map UInt8.toNat)) else RawStmt.revert
+  let dispatch := cands.foldr (fun (g, t) rest =>
+    RawStmt.ite (.binop .eqB tag (.num t)) [.tupleAssign ts (.call g as)] [rest]) failure
+  rc.elabStmtsP (pre ++ [dispatch])
+
+/-- Expose producer fields even when the remaining recursive callbacks are
+opaque. Both the recursive arms and the public record use this constructor. -/
+def elabRecWithProducers (rc : ElabRec C) (pr : PanicProducerRec C) : ElabRec C :=
+  { rc with
+    fnDispatch := fnDispatchWith C pr
+    fnMemoryDispatch := fnMemoryDispatchWith C pr
+    trySelfBody := fun g {_} args ρ => trySelfBodyWith C pr g args ρ }
+
+/-- A block, over the per-statement producer `stmt`: each statement in
+order, the state threaded, the programs concatenated. Total (structural on
+the list), so the block's two equations hold definitionally; the knot passes
+the partial `elabStmtP`, and the public `elabStmtsP` is this at it. -/
+def elabStmtsPWith (stmt : RawStmt → ElabM (SProg C)) : List RawStmt → ElabM (SProg C)
+  | [] => pure []
+  | s :: ss => do
+    let P ← stmt s
+    let Q ← elabStmtsPWith stmt ss
+    pure (P ++ Q)
+
 mutual
+
+/-- The recursive hooks, delayed until a producer is called. -/
+partial def panicProducerRec (_ : Unit) : PanicProducerRec C where
+  extDispatch := extDispatch
+  elabStmtsP := elabStmtsPWith C elabStmtP
+  elabScope := elabScope
+  elabCallRet := @elabCallRet
 
 /-- The record of the block's functions (`ElabRec`), which ties the arms
 defined before it. -/
-partial def elabRec (_ : Unit) : ElabRec C where
+partial def elabRecCore (_ : Unit) : ElabRec C where
   hoist := hoist
   hoistBinop := hoistBinop
   hoistTop := hoistTop
@@ -39,15 +329,16 @@ partial def elabRec (_ : Unit) : ElabRec C where
   abiDecodeBytes := abiDecodeBytes
   abiEncode := @abiEncode
   hoistCallArgs := hoistCallArgs
-  fnDispatch := fnDispatch
-  fnMemoryDispatch := fnMemoryDispatch
+  fnDispatch := fun h ty args res resW resNew =>
+    fnDispatchWith C (panicProducerRec ()) h ty args res resW resNew
+  fnMemoryDispatch := fun h ty args => fnMemoryDispatchWith C (panicProducerRec ()) h ty args
   callValue := callValue
   elabCall := @elabCall
   elabMemCall := elabMemCall
   elabStorageCall := elabStorageCall
   elabCallReceiver := elabCallReceiver
   elabCallReceiverPush := elabCallReceiverPush
-  trySelfBody := @trySelfBody
+  trySelfBody := fun g {_} args ρ => trySelfBodyWith C (panicProducerRec ()) g args ρ
   elabValueCall := elabValueCall
   elabCtor := elabCtor
   hoistStmt := hoistStmt
@@ -55,7 +346,7 @@ partial def elabRec (_ : Unit) : ElabRec C where
   elabStmt1 := elabStmt1
   loopExpr := loopExpr
   loopQ := loopQ
-  elabStmtsP := elabStmtsP
+  elabStmtsP := elabStmtsPWith C elabStmtP
   elabBranch := elabBranch
   elabScope := elabScope
   elabTuple := @elabTuple
@@ -82,7 +373,7 @@ narrow check is captured where solc evaluates it, under a test of its own: `a
 && b` is `bool se = a; if (se) { se = b; }`, and `c ? a : b` is
 `uint se; if (c) { se = a; } else { se = b; }`. -/
 partial def hoist (s0 : RawExpr) : ElabM (SProg C × RawExpr) :=
-  hoistWith C (elabRec ()) s0
+  hoistWith C (elabRecWithProducers C (elabRecCore ()) (panicProducerRec ())) s0
 
 /-- Two operands in evaluation order: hold the first read before the second
 operand's effects or explicit overflow guards. -/
@@ -169,7 +460,7 @@ partial def abiMemBytes (a : RawExpr) : ElabM (SProg C × String) := do
   if let .name x := a then
     if let .ok (.mpath ..) := synth C (← nctx) a then return ([], x)
   let x := toString (← freshCapture "mv")
-  pure (← elabStmtsP [.declMemory (.named "bytes") x (some a)], x)
+  pure (← elabStmtsPWith C elabStmtP [.declMemory (.named "bytes") x (some a)], x)
 
 
 
@@ -194,14 +485,14 @@ partial def abiDecodeBytes (T : String) (d : ByteSrc) (h n : Nat) : ElabM (SProg
      .whileLoop {} (.binop .lt (.name j) (.name L))
        [.assign (.index (.name x) (.name j)) (abiByte d (.binop .add start (.name j))),
         .assign (.name j) (.binop .add (.name j) (.num 1))]]
-  pure (← elabStmtsP S, x)
+  pure (← elabStmtsPWith C elabStmtP S, x)
 
 /-- `abi.encode(…)` (`std`) or `abi.encodePacked(…)`/`bytes.concat(…)`/
 `string.concat(…)` (`strs`: byte strings only) of the hoisted arguments: a
 fresh memory `bytes` of solc's layout (`AbiKind`). -/
 partial def abiEncode (std strs : Bool) (args : List RawExpr) (marks : List (Option AbiKind))
     (sel : Option RawExpr := none) : ElabM (SProg C × RawExpr) :=
-  abiEncodeWith C (elabRec ()) std strs args marks sel
+  abiEncodeWith C (elabRecWithProducers C (elabRecCore ()) (panicProducerRec ())) std strs args marks sel
 
 /-- Prepare a reference call in argument order. Storage-to-memory conversion
 copies at the argument's evaluation point under the legacy schedule, after
@@ -288,160 +579,12 @@ partial def hoistCallArgs (f : String) (args : List RawExpr) :
     prepared := prepared ++ [a]
   -- the late copies, in argument order
   for (y, R, ws, shape, x) in copies do
-    P := P ++ (← elabStmtsP [.declMemory (rawTyW ws (.ref R) "") y (some (.name (toString x)))])
+    P := P ++ (← elabStmtsPWith C elabStmtP
+      [.declMemory (rawTyW ws (.ref R) "") y (some (.name (toString x)))])
     declareShape y shape
   pure (P, prepared)
 
-/-- The captures before an internal dispatch: the callee's tag first under
-the source-order schedule (solc's IR pipeline reads the callee value before
-the arguments, the legacy one after them; `tests/solc/FunctionValueReferences.sol`,
-`calleeOrder`), then each argument once, left to right, at its formal type.
-All operands are evaluated before dispatch, including total reads whose value
-a later argument can change and failing member reads; the formal type
-supplies the contextual type of a literal expression. A memory-array argument
-is captured as a memory local: the reference itself for a memory operand (the
-callee's writes reach the caller, as Solidity passes memory by reference), a
-copy of a storage operand, taken at its position under the legacy schedule
-and after every capture under the source-order one (`binaryLeftToRight`,
-solc's IR pipeline: its alias at its position). A storage-array argument is a storage alias of its
-path. A struct argument (`fnRefStruct?`) is captured likewise at its location. Returns the statements, the tag's name and the captured arguments. -/
-partial def dispatchCaptures (h : RawExpr) (ty : String) (ps : List String) (args : List RawExpr) :
-    ElabM (List RawStmt × RawExpr × List RawExpr) := do
-  let mut pre : List RawStmt := []
-  let mut tag := h
-  if C.evalOrder.binaryLeftToRight || !h.isPure then
-    let t := toString (← freshCapture "se")
-    pre := [.decl (.named ty) t (some h)]
-    tag := .name t
-  let mut as : List RawExpr := []
-  -- under the source-order schedule a storage operand of a memory parameter
-  -- is copied after every argument ran (solc's IR pipeline; `argumentOrder`:
-  -- legacy 101, viaIR 901): its alias at its position, the copy after
-  let late := C.evalOrder.binaryLeftToRight
-  let mut post : List RawStmt := []
-  for (a, c) in args.zip ps do
-    let y := toString (← freshCapture "se")
-    let memTy : Option RawTy := match fnRefElem? C c, fnRefStruct? C c with
-      | some (e, false), _ => some (.array (.named e))
-      | none, some (st, false) => some (.named st)
-      | _, _ => none
-    let fromStorage ← if late && memTy.isSome then
-        (try pure ((← synthM C a).2 matches .path _ _) catch _ => pure false)
-      else pure false
-    if let (some T, true) := (memTy, fromStorage) then
-      let z := toString (← freshCapture "sp")
-      pre := pre ++ [.declStorage T z (some a)]
-      post := post ++ [.declMemory T y (some (.name z))]
-      as := as ++ [.name y]
-      continue
-    pre := pre ++ [match fnRefElem? C c, fnRefStruct? C c with
-      | some (e, false), _ => .declMemory (.array (.named e)) y (some a)
-      | some (e, true), _ => .declStorage (.array (.named e)) y (some a)
-      | none, some (st, false) => .declMemory (.named st) y (some a)
-      | none, some (st, true) => .declStorage (.named st) y (some a)
-      | none, none => .decl (.named c) y (some a)]
-    as := as ++ [.name y]
-  pure (pre ++ post, tag, as)
 
-/-- **A call through a function value** `h(a)`, `h` of the function type
-`ty` (`fnTyOf?`): its arguments captured once, left to right,
-then a dispatch over the functions of `ty`, `if (h == 1) { r = g₁(a); } else
-if … else { revert(); }` (`fnTag`): calling an unassigned value is solc's
-`Panic(0x51)`, transported as literal data in a self-call frame and otherwise
-read as the ordinary solkey revert. A function
-of `ty` this one may not call (declared after it) is refused when it is named
-as a value in the contract; one that is not cannot reach here (`fnTag`).
-With `resNew`, `res` is declared by the statement before (`elabCallRet`). -/
-partial def fnDispatch (h ty : String) (args : List RawExpr) (res : Option (Var × PrimTy))
-    (resW : Nat) (resNew : Bool) : ElabM (SProg C) := do
-  let some (ps, rs, ext) := fnParts? ty | throw s!"{h}: the function type {ty}"
-  if ext then return ← extDispatch h ty ps rs args res resW resNew
-  unless ps.length == args.length do
-    throw s!"{h} takes {ps.length} arguments, not {args.length}"
-  -- a reference parameter or return: no function's signature is spelled so
-  -- (`FunDecl.sigTy?`), so the dispatch would list none; a memory or storage
-  -- array of a plain value element (`fnRefElem?`) is the reference parameter spelled
-  if let some c := (ps.filter fun c => (fnRefElem? C c).isNone && (fnRefStruct? C c).isNone) ++ rs |>.find? fun c =>
-      (fnCompTy? C c).isNone then
-    throw s!"{h}(…): a function type with a {c} parameter or return is not modelled \
-      (docs/semantic-gaps.md, \"Function types\")"
-  let scope := (← read).funs
-  let taken := fnTaken C
-  let mut cands : List (String × Nat) := []
-  for ((g, d), i) in C.funs.zipIdx do
-    if fnInternal C g && FunDecl.sigTy? C d == some ty && fnReachable C g then
-      if scope.any (·.1 == g) then cands := cands ++ [(g, i + 1)]
-      else if taken.contains g then
-        throw s!"{h}(…) may call {g}, which is not declared before this function: \
-          declare the functions of type {ty} first"
-  let (pre, tag, as) ← dispatchCaptures (.name h) ty ps args
-  let call (g : String) : RawStmt := match res with
-    | some (x, _) => .assign (.name (toString x)) (.call g as)
-    | none => .call (.name g) as
-  let (Γ0, _) ← get
-  if resNew then
-    if let some (x, p) := res then declare C (toString x) (.val p resW)
-  let P ← withReader (fun sc => { sc with top := false }) do
-    let P ← elabStmtsP pre
-    let Γ ← nctx
-    -- A self-call transports exact bytes, so Panic(0x51) is independent
-    -- of the transaction oracle's fallback code for an unclassified panic.
-    let fail : Stmt C Γ.ctx Γ.ctx :=
-      if (← read).selfFrame || (← read).retainFailureData then .revertData [.bytes (Semantics.encodePanic 0x51)]
-      else .revert
-    -- One arm per candidate, in tag order (`DispatchArm.chain`, whose runs
-    -- `Semantics/Dispatch.lean` characterises per tag).
-    let mut arms : List (DispatchArm C Γ.ctx) := []
-    for (g, t) in cands do
-      let c ← checkIn C Γ .bool (.binop .eqB tag (.num t))
-      let body ← elabScope Γ [call g]
-      arms := arms ++ [{ cond := c, body := body.2 }]
-    pure (P ++ [.of Γ (DispatchArm.chain arms fail)])
-  modify fun (_, k) => (Γ0, k)
-  pure P
-
-
-/-- Internal memory-return dispatch (`bytes memory`, `T[] memory` or a
-struct in memory, one return) uses the same source tags, scope checks and argument captures as
-scalar dispatch (`dispatchCaptures`). The shared destination is intrinsically
-a memory reference, and each branch binds the selected call's returned alias;
-no storage copy or scalar encoding of the returned reference is introduced. -/
-partial def fnMemoryDispatch (h : RawExpr) (ty : String) (args : List RawExpr) :
-    ElabM (SProg C × RawExpr) := do
-  let some (ps, [r], false) := fnParts? ty
-    | throw "memory dispatch needs an internal signature with one memory return"
-  let dstTy : RawTy ← if r == "bytesmemory" then pure (.named "bytes") else
-    match fnRefElem? C r, fnRefStruct? C r with
-    | some (e, false), _ => pure (.array (.named e))
-    | none, some (st, false) => pure (.named st)
-    | _, _ => throw s!"memory dispatch returns a {r}, not a memory reference"
-  unless ps.length == args.length do
-    throw s!"memory dispatch takes {ps.length} arguments, not {args.length}"
-  if let some c := ps.find? fun c =>
-      (fnRefElem? C c).isNone && (fnRefStruct? C c).isNone && (fnCompTy? C c).isNone then
-    throw s!"memory dispatch: a function type with a {c} parameter is not modelled"
-  let scope := (← read).funs
-  let taken := fnTaken C
-  let mut cands : List (String × Nat) := []
-  for ((g, d), i) in C.funs.zipIdx do
-    if fnInternal C g && FunDecl.sigTy? C d == some ty && fnReachable C g then
-      if scope.any (·.1 == g) then cands := cands ++ [(g, i + 1)]
-      else if taken.contains g then
-        throw s!"memory dispatch may call {g}, which is not declared before this function"
-  -- A zero-argument dispatch keeps its original capture of the tag first.
-  let (pre, tag, as) ← if args.isEmpty then do
-      let t := toString (← freshCapture "se")
-      pure ([.decl (.named ty) t (some h)], RawExpr.name t, [])
-    else dispatchCaptures h ty ps args
-  let dst := toString (← freshCapture "mv")
-  let P ← elabStmtsP (pre ++ [.declMemory dstTy dst none])
-  let failure := if (← read).selfFrame || (← read).retainFailureData then
-      RawStmt.revertRaw (.bytesLit ((Semantics.encodePanic 0x51).map UInt8.toNat)) else RawStmt.revert
-  let dispatch := cands.foldr (fun (g, t) rest =>
-    RawStmt.ite (.binop .eqB tag (.num t))
-      [.assign (.name dst) (.call g as)] [rest]) failure
-  let Q ← elabStmtsP [dispatch]
-  pure (P ++ Q, .name dst)
 
 
 /-- **A call through an external function value** `h(a)`, `h` of the
@@ -562,7 +705,7 @@ partial def elabMemCall (f : String) (args : List RawExpr) (R : RefTy)
       | _, _ => throw s!"memory function value returns a {r}"
     let (T, _) ← ElabM.lift (elabTyW C expected)
     unless T == .ref R do throw "memory function value returns a different reference type"
-    let (P, _) ← fnMemoryDispatch h ty actuals
+    let (P, _) ← (fnMemoryDispatchWith C (panicProducerRec ())) h ty actuals
     let (r, _) :: Γ ← nctx | throw "internal: memory dispatch did not export its reference"
     let ⟨hm⟩ ← ElabM.lift (memOk R)
     return P ++ [← ElabM.lift (bind Γ r hm)]
@@ -647,68 +790,9 @@ partial def elabCallRet (f : String) (args : List RawExpr) (res : Option (Var ×
     (resW : Nat := 256) (targets : Bool := false) (ctor : Bool := false) (resNew : Bool := false)
     (selfFrame : Bool := false) :
     ElabM (SProg C × Option (NCtx × RefTy × Var × Bool) × List (Var × LocalTy)) :=
-  elabCallRetWith C (elabRec ()) f args res resW targets ctor resNew selfFrame
+  elabCallRetWith C (elabRecWithProducers C (elabRecCore ()) (panicProducerRec ())) f args res resW targets ctor resNew selfFrame
 
-/-- **The body a `try` runs when its receiver is the contract itself**
-(`Stmt.tryCall`'s `self`, `docs/options.md` O8): the callee `g` inlined as a
-call with targets (`elabCallRet`), its environment the frame's
-(`RawStmt.selfFrame`), when `g` is a function declared before this one whose
-parameters take the arguments' types and whose return variables are the
-`try`'s `ρ`, or a `try` that binds none (`try this.g(x) { … }`); `none` otherwise (another contract's function, or one this
-function may not call: the restriction that keeps the run structural). -/
-partial def trySelfBody (g : String) {Γ : NCtx} (args : List (ExtArg C Γ.ctx)) (ρ : Ctx) :
-    ElabM (Option ((ps : Ctx) × (Γf : Ctx) × Args C Γ.ctx ps × Prog C (ρ ++ ps) Γf)) := do
-  unless fnExternalEntry C g do return none
-  let some (_, d) := (← read).funs.find? (·.1 == g) | pure none
-  unless d.params.map (·.2) == args.map (fun a => Ty.prim a.1) do return none
-  unless d.rets.all (fun (_, T) => T matches .prim _) do return none
-  let raw := args.map fun a => Simple.toRaw C Γ.names a.2
-  -- a `try` that binds none: the callee called as a statement (`selfCall?`)
-  let targets := !ρ.isEmpty || d.rets.isEmpty
-  let r ← tryCatch (do
-      let (P, _, _) ← elabCallRet g raw none (targets := targets) (selfFrame := true)
-      pure (some P)) fun _ => pure none
-  let some [st] := r | pure none
-  if h : st.Γ.ctx = Γ.ctx then
-    -- Compiler-generated getters use empty-data bounds failures. Their
-    -- source plan has already placed a require before every array index;
-    -- instrumenting the guarded reads as ordinary Solidity expressions
-    -- would invent unreachable Panic(0x32) data in catchData's analysis.
-    let getter := d.sourceDecl.any fun source => match source.callable with
-      | .getter _ => true
-      | _ => false
-    pure ((Stmt.selfCall? C ρ (h ▸ st.s)).map fun ⟨ps, Γf, sargs, sbody⟩ =>
-      ⟨ps, Γf, sargs, if getter then sbody else sbody.withPanics⟩)
-  else pure none
 
-/-- **The body a value call runs when its receiver is the contract itself**
-(`(bool ok, ) = payable(this).call{value: v}("")`, `docs/options.md` O8):
-the contract's `receive`, declared before this function, inlined as a call
-with no targets, in a frame of its own: `msg.sender` is `address(this)`, and
-`msg.value` its one parameter, which the call passes `v` (raw, read in the
-caller's scope).  `none` where there is no such `receive`, or where it does
-not elaborate so: a function it calls reads `msg.value` (its frame does not
-have the parameter). -/
-partial def receiveSelfBody {Γ : NCtx} (v : RawExpr) :
-    ElabM (Option ((ps : Ctx) × (Γf : Ctx) × Args C Γ.ctx ps × Prog C ([] ++ ps) Γf)) := do
-  let funs := (← read).funs
-  let some (_, d) := funs.find? (·.1 == "receive") | pure none
-  unless d.params.isEmpty && d.rets.isEmpty && d.mods.isEmpty do return none
-  -- the parameter `msg.value` reads, a name no source declares
-  let receiveValueParam := "msgValue$"
-  let pv := RawExpr.name receiveValueParam
-  let ps : List (Name × Ty) := [(receiveValueParam, .prim .uint)]
-  let d' : FunDecl := { d with params := ps, body := d.body.map (RawStmt.selfFrame pv) }
-  let funs' := funs.map fun (n, e) => if n == "receive" then (n, d') else (n, e)
-  let r ← tryCatch (do
-      let nested : RawExpr := .name (receiveValueParam ++ "nested")
-      let (P, _, _) ← withReader (fun sc => { sc with funs := funs', selfValue := nested })
-        (elabCallRet "receive" [v] none (targets := true) (selfFrame := true))
-      pure (some P)) fun _ => pure none
-  let some [st] := r | pure none
-  if h : st.Γ.ctx = Γ.ctx then
-    pure (Stmt.selfCall? C [] (h ▸ st.s))
-  else pure none
 
 /-- **A value call** `(bool ok, ) = r.call{value: v}("")`, its result in
 `ix`: with the contract's `receive` available (`receiveSelfBody`), `bool
@@ -732,17 +816,17 @@ partial def elabValueCall (Γ : NCtx) (ix : Idx Γ.ctx (.val .bool)) (okName : R
   let ⟨Γ', _, ixc⟩ ← afterCapture Γ1 x (.val .bool)
   let addr' := addr1.wk (← ElabM.lift (Γ1.wkTo Γ'))
   let ix' := ix.wk (← ElabM.lift (Γ.wkTo Γ'))
-  let some ⟨_, _, sargs, sbody⟩ ← receiveSelfBody (Γ := Γ') a | set st; plain
+  let some ⟨_, _, sargs, sbody⟩ ← receiveSelfBodyWith C (panicProducerRec ()) (Γ := Γ') a | set st; plain
   let v ← checkIn C Γ' .uint a
   let setOk (b : Bool) : List RawStmt := [.assign okName (.bool b)]
   let (Γe, _) ← get
-  let okP ← elabStmtsP (setOk true)
+  let okP ← elabStmtsPWith C elabStmtP (setOk true)
   let okP ← ElabM.lift (SProg.chain Γ'.names ([] ++ Γ'.ctx) okP)
   let (_, k) ← get
   set (Γe, k)
   let err ← elabScope Γ' (setOk false)
   let ⟨κ, cb⟩ := CodeBinder.ofOption (none : Option Var)
-  let pnc ← elabStmtsP (setOk false)
+  let pnc ← elabStmtsPWith C elabStmtP (setOk false)
   let pnc ← ElabM.lift (SProg.chain (cb.names ++ Γ'.names) (κ ++ Γ'.ctx) pnc)
   let (_, k) ← get
   set (Γe, k)
@@ -773,17 +857,17 @@ statement left: a right-hand side before the left-hand side, as the
 interpreter evaluates them, a receiver before an argument.  A branch's statements are elaborated on their
 own. -/
 partial def hoistStmt (s0 : RawStmt) : ElabM (SProg C × RawStmt) :=
-  hoistStmtWith C (elabRec ()) s0
+  hoistStmtWith C (elabRecWithProducers C (elabRecCore ()) (panicProducerRec ())) s0
 
 /-- A statement, as a block: its narrow rewrites (`narrowPure`), its captures
 (`hoistStmt`), then the statement,
 whose compound target may need a capture of its own. -/
 partial def elabStmtP (s : RawStmt) : ElabM (SProg C) :=
-  elabStmtPWith C (elabRec ()) s
+  elabStmtPWith C (elabRecWithProducers C (elabRecCore ()) (panicProducerRec ())) s
 
 /-- A statement whose expressions have no effect left. -/
 partial def elabStmt1 (s0 : RawStmt) : ElabM (SProg C) :=
-  elabStmt1With C (elabRec ()) s0
+  elabStmt1With C (elabRecWithProducers C (elabRecCore ()) (panicProducerRec ())) s0
 
 /-- A loop's condition, invariant or variant, of type `p` (its narrow
 rewrites done, `elabStmtP`), read in `Γ`: nothing may be captured before it,
@@ -813,19 +897,11 @@ partial def loopQ (Γ : NCtx) : RawInv → ElabM (LoopQ C Γ.ctx)
     set st
     pure (.all (Var.ofName x) p body)
 
-/-- A block. -/
-partial def elabStmtsP : List RawStmt → ElabM (SProg C)
-  | [] => pure []
-  | s :: ss => do
-    let P ← elabStmtP s
-    let Q ← elabStmtsP ss
-    pure (P ++ Q)
-
 /-- A branch: its declarations stay inside it, and it does not deploy
 (`ElabScope.top`). -/
 partial def elabBranch (ss : List RawStmt) : ElabM (SProg C) := do
   let (Γ, _) ← get
-  let P ← withReader (fun sc => { sc with top := false }) (elabStmtsP ss)
+  let P ← withReader (fun sc => { sc with top := false }) (elabStmtsPWith C elabStmtP ss)
   let (_, k) ← get
   set (Γ, k)
   pure P
@@ -835,40 +911,6 @@ must be entered in). -/
 partial def elabScope (Γ : NCtx) (ss : List RawStmt) : ElabM (Blk C Γ.ctx) := do
   ElabM.lift (SProg.chain Γ.names Γ.ctx (← elabBranch ss))
 
-/-- **A tuple assignment from a call through an internal function value**
-`(a, b) = h(x)`: the dispatch's captures (`dispatchCaptures`), then one
-branch per candidate `g` of `h`'s type, the direct tuple assignment
-`(a, b) = g(y)` on the captured arguments, then the unassigned-value failure.
-Value returns only: a direct tuple call binds primitive returns. -/
-partial def fnTupleDispatch (ts : List (Option RawExpr)) (h ty : String) (args : List RawExpr) :
-    ElabM (SProg C) := do
-  let some (ps, rs, false) := fnParts? ty
-    | throw s!"{h}(…): an external function value in a tuple assignment"
-  unless ps.length == args.length do throw s!"{h} takes {ps.length} arguments, not {args.length}"
-  unless rs.length == ts.length do throw s!"{h} returns {rs.length} values, not {ts.length}"
-  if let some c := ps.find? fun c =>
-      (fnRefElem? C c).isNone && (fnRefStruct? C c).isNone && (fnCompTy? C c).isNone then
-    throw s!"{h}(…): a function type with a {c} parameter is not modelled"
-  -- a memory return among several: full-word elements only, as a single
-  -- one (`fnMemRet`), since the target's type is compared without widths
-  if let some c := rs.find? fun c => (fnCompTy? C c).isNone && !fnMemRet C c then
-    throw s!"{h}(…): a function value returning a {c} among several values is not modelled \
-      (a direct tuple call binds value and full-word memory returns)"
-  let scope := (← read).funs
-  let taken := fnTaken C
-  let mut cands : List (String × Nat) := []
-  for ((g, d), i) in C.funs.zipIdx do
-    if fnInternal C g && FunDecl.sigTy? C d == some ty && fnReachable C g then
-      if scope.any (·.1 == g) then cands := cands ++ [(g, i + 1)]
-      else if taken.contains g then
-        throw s!"{h}(…) may call {g}, which is not declared before this function: \
-          declare the functions of type {ty} first"
-  let (pre, tag, as) ← dispatchCaptures (.name h) ty ps args
-  let failure := if (← read).selfFrame || (← read).retainFailureData then
-      RawStmt.revertRaw (.bytesLit ((Semantics.encodePanic 0x51).map UInt8.toNat)) else RawStmt.revert
-  let dispatch := cands.foldr (fun (g, t) rest =>
-    RawStmt.ite (.binop .eqB tag (.num t)) [.tupleAssign ts (.call g as)] [rest]) failure
-  elabStmtsP (pre ++ [dispatch])
 
 /-- **A tuple assignment** `(t₀, , t₂) = e;`, written out as solkey's
 `ParserUtils.tupleAssignment` writes it.  From a call of a function of several
@@ -911,7 +953,7 @@ partial def elabTuple (ts : List (Option RawExpr)) (rhs : RawExpr) (direct : Boo
     (nonLocal > 1 || (tgts.map (·.toStr)).eraseDups.length != tgts.length)
   match rhs with
   | .ternary c a b =>
-    elabStmtsP [.ite c [.tupleAssign ts a] [.tupleAssign ts b]]
+    elabStmtsPWith C elabStmtP [.ite c [.tupleAssign ts a] [.tupleAssign ts b]]
   | .call f args =>
     -- a call through a value that is not a name (`s.f(x)`, `fs[i](x)`,
     -- `(h)(x)`): the callee into a fresh local of its type first, as
@@ -920,12 +962,12 @@ partial def elabTuple (ts : List (Option RawExpr)) (rhs : RawExpr) (direct : Boo
       if let h :: rest := args then
         if let some ty := fnTyOfExpr C (← ctx) h then
           let y := toString (← freshCapture "se")
-          let P ← elabStmtsP [.decl (.named ty) y (some h)]
-          return P ++ (← fnTupleDispatch ts y ty rest)
+          let P ← elabStmtsPWith C elabStmtP [.decl (.named ty) y (some h)]
+          return P ++ (← (fnTupleDispatchWith C (panicProducerRec ())) ts y ty rest)
     -- a call through an internal function value (`fnTupleDispatch`)
     if (← read).funs.all (·.1 != f) then
       if let some ty := fnTyOf? C (← ctx) f then
-        return ← fnTupleDispatch ts f ty args
+        return ← (fnTupleDispatchWith C (panicProducerRec ())) ts f ty args
     -- a function not declared before this one is `elabCallRet`'s error
     unless (castTy? f).isNone do
       throw s!"{f}(…): the right-hand side of a tuple assignment is a call of a function"
@@ -934,7 +976,7 @@ partial def elabTuple (ts : List (Option RawExpr)) (rhs : RawExpr) (direct : Boo
     unless rs.length == ts.length do throw s!"{f} returns {rs.length} values, not {ts.length}"
     for (r, t) in rs do declare C (toString r) t
     let pairs := if reverseWrites then (ts.zip rs).reverse else ts.zip rs
-    let R ← elabStmtsP (pairs.filterMap fun (t, (r, _)) =>
+    let R ← elabStmtsPWith C elabStmtP (pairs.filterMap fun (t, (r, _)) =>
       t.map fun t => .assign t (.name (toString r)))
     pure (P ++ Q ++ R)
   | .tuple es =>
@@ -967,10 +1009,142 @@ partial def elabTuple (ts : List (Option RawExpr)) (rhs : RawExpr) (direct : Boo
         tmps := tmps ++ [bind x]
         asgs := asgs ++ [.assign t (.name x)]
       | none => unless e.isPure do tmps := tmps ++ [.eval [e]]
-    elabStmtsP (tmps ++ (if reverseWrites then asgs.reverse else asgs))
+    elabStmtsPWith C elabStmtP (tmps ++ (if reverseWrites then asgs.reverse else asgs))
   | _ => throw s!"{rhs.toStr}: the right-hand side of a tuple assignment is a tuple or a call"
 
 end
+
+/-- A block (`elabStmtsPWith` at the knot's `elabStmtP`): the same term
+the recursive arms and both records use. -/
+def elabStmtsP : List RawStmt → ElabM (SProg C) :=
+  elabStmtsPWith C (elabStmtP C)
+
+/-- The empty block's equation. -/
+theorem elabStmtsP_nil : elabStmtsP C [] = pure [] := rfl
+
+/-- A block's head statement, then its rest, their programs concatenated. -/
+theorem elabStmtsP_cons (s : RawStmt) (ss : List RawStmt) :
+    elabStmtsP C (s :: ss) = (do
+      let P ← elabStmtP C s
+      let Q ← elabStmtsP C ss
+      pure (P ++ Q)) := rfl
+
+/-- The public recursion record exposes its panic producers definitionally. -/
+def elabRec (_ : Unit) : ElabRec C :=
+  elabRecWithProducers C (elabRecCore C ()) (panicProducerRec C ())
+
+/-- Public producer equation, with recursion supplied by the elaborator knot. -/
+def fnDispatch (h ty : String) (args : List RawExpr) (res : Option (Var × PrimTy))
+    (resW : Nat) (resNew : Bool) : ElabM (SProg C) :=
+  fnDispatchWith C (panicProducerRec C ()) h ty args res resW resNew
+
+/-- Public producer equation, with recursion supplied by the elaborator knot. -/
+def fnMemoryDispatch (h : RawExpr) (ty : String) (args : List RawExpr) :
+    ElabM (SProg C × RawExpr) :=
+  fnMemoryDispatchWith C (panicProducerRec C ()) h ty args
+
+/-- Public producer equation, with recursion supplied by the elaborator knot. -/
+def trySelfBody (g : String) {Γ : NCtx} (args : List (ExtArg C Γ.ctx)) (ρ : Ctx) :
+    ElabM (Option ((ps : Ctx) × (Γf : Ctx) × Args C Γ.ctx ps × Prog C (ρ ++ ps) Γf)) :=
+  trySelfBodyWith C (panicProducerRec C ()) g (Γ := Γ) args ρ
+
+/-- Public producer equation, with recursion supplied by the elaborator knot. -/
+def receiveSelfBody {Γ : NCtx} (v : RawExpr) :
+    ElabM (Option ((ps : Ctx) × (Γf : Ctx) × Args C Γ.ctx ps × Prog C ([] ++ ps) Γf)) :=
+  receiveSelfBodyWith C (panicProducerRec C ()) (Γ := Γ) v
+
+/-- Public producer equation, with recursion supplied by the elaborator knot. -/
+def fnTupleDispatch (ts : List (Option RawExpr)) (h ty : String) (args : List RawExpr) :
+    ElabM (SProg C) :=
+  fnTupleDispatchWith C (panicProducerRec C ()) ts h ty args
+
+-- Keep the large producer bodies folded while checking the wiring equations.
+attribute [local irreducible] fnDispatchWith fnMemoryDispatchWith
+
+/-- Unfold the public scalar producer without reducing its recursive hooks. -/
+theorem fnDispatch_eq (h ty : String) (args : List RawExpr) (res : Option (Var × PrimTy))
+    (resW : Nat) (resNew : Bool) :
+    fnDispatch C h ty args res resW resNew =
+      fnDispatchWith C (panicProducerRec C ()) h ty args res resW resNew := rfl
+
+/-- The public memory producer's equation. -/
+theorem fnMemoryDispatch_eq (h : RawExpr) (ty : String) (args : List RawExpr) :
+    fnMemoryDispatch C h ty args = fnMemoryDispatchWith C (panicProducerRec C ()) h ty args := rfl
+
+/-- The public tuple producer's equation. -/
+theorem fnTupleDispatch_eq (ts : List (Option RawExpr)) (h ty : String) (args : List RawExpr) :
+    fnTupleDispatch C ts h ty args = fnTupleDispatchWith C (panicProducerRec C ()) ts h ty args := rfl
+
+/-- The public self-call producer's equation, including its dependent context. -/
+theorem trySelfBody_eq (g : String) {Γ : NCtx} (args : List (ExtArg C Γ.ctx)) (ρ : Ctx) :
+    trySelfBody C g args ρ = trySelfBodyWith C (panicProducerRec C ()) g args ρ := rfl
+
+/-- The public receive producer's equation, including its dependent context. -/
+theorem receiveSelfBody_eq {Γ : NCtx} (v : RawExpr) :
+    receiveSelfBody C (Γ := Γ) v = receiveSelfBodyWith C (panicProducerRec C ()) (Γ := Γ) v := rfl
+
+/-- The callback used by the arms is the public scalar producer. -/
+theorem elabRec_fnDispatch (h ty : String) (args : List RawExpr) (res : Option (Var × PrimTy))
+    (resW : Nat) (resNew : Bool) :
+    (elabRec C ()).fnDispatch h ty args res resW resNew =
+      fnDispatch C h ty args res resW resNew := rfl
+
+/-- The callback used by the arms is the public memory producer. -/
+theorem elabRec_fnMemoryDispatch (h : RawExpr) (ty : String) (args : List RawExpr) :
+    (elabRec C ()).fnMemoryDispatch h ty args = fnMemoryDispatch C h ty args := rfl
+
+/-- The callback used by the arms is the public self-call producer. -/
+theorem elabRec_trySelfBody (g : String) {Γ : NCtx} (args : List (ExtArg C Γ.ctx)) (ρ : Ctx) :
+    (elabRec C ()).trySelfBody g args ρ = trySelfBody C g args ρ := rfl
+
+/-- The actual arms callback exposes the total producer through the public equations. -/
+example (h ty : String) (args : List RawExpr) (res : Option (Var × PrimTy))
+    (resW : Nat) (resNew : Bool) :
+    (elabRec C ()).fnDispatch h ty args res resW resNew =
+      fnDispatchWith C (panicProducerRec C ()) h ty args res resW resNew :=
+  (elabRec_fnDispatch C h ty args res resW resNew).trans
+    (fnDispatch_eq C h ty args res resW resNew)
+
+/-- Executing the memory callback preserves the result and final elaboration state. -/
+example (h : RawExpr) (ty : String) (args : List RawExpr) (sc : ElabScope) (st : ECtx × Nat) :
+    ((elabRec C ()).fnMemoryDispatch h ty args).runFrom sc st =
+      (fnMemoryDispatchWith C (panicProducerRec C ()) h ty args).runFrom sc st :=
+  congrArg (fun p => ElabM.runFrom p sc st)
+    ((elabRec_fnMemoryDispatch C h ty args).trans (fnMemoryDispatch_eq C h ty args))
+
+/-- The self-call equation is usable with its dependent context at the callback boundary. -/
+example (g : String) {Γ : NCtx} (args : List (ExtArg C Γ.ctx)) (ρ : Ctx)
+    (sc : ElabScope) (st : ECtx × Nat) :
+    ((elabRec C ()).trySelfBody g args ρ).runFrom sc st =
+      (trySelfBodyWith C (panicProducerRec C ()) g args ρ).runFrom sc st :=
+  congrArg (fun p => ElabM.runFrom p sc st)
+    ((elabRec_trySelfBody C g args ρ).trans (trySelfBody_eq C g args ρ))
+
+/-- Tuple dispatch's public equation lifted through `runFrom`. -/
+example (ts : List (Option RawExpr)) (h ty : String) (args : List RawExpr)
+    (sc : ElabScope) (st : ECtx × Nat) :
+    (fnTupleDispatch C ts h ty args).runFrom sc st =
+      (fnTupleDispatchWith C (panicProducerRec C ()) ts h ty args).runFrom sc st :=
+  congrArg (fun p => ElabM.runFrom p sc st) (fnTupleDispatch_eq C ts h ty args)
+
+/-- Receive execution's public equation lifted through `runFrom`. -/
+example {Γ : NCtx} (v : RawExpr) (sc : ElabScope) (st : ECtx × Nat) :
+    (receiveSelfBody C (Γ := Γ) v).runFrom sc st =
+      (receiveSelfBodyWith C (panicProducerRec C ()) (Γ := Γ) v).runFrom sc st :=
+  congrArg (fun p => ElabM.runFrom p sc st) (receiveSelfBody_eq C (Γ := Γ) v)
+
+-- Standard-only dependencies inherited from dispatchCaptures.
+/-- info: 'Solidity.fnDispatch' depends on axioms: [propext, Quot.sound] -/
+#guard_msgs in #print axioms fnDispatch
+
+/-- info: 'Solidity.fnMemoryDispatch' depends on axioms: [propext, Quot.sound] -/
+#guard_msgs in #print axioms fnMemoryDispatch
+
+/-- info: 'Solidity.fnTupleDispatch' depends on axioms: [propext, Quot.sound] -/
+#guard_msgs in #print axioms fnTupleDispatch
+
+/-- info: 'Solidity.elabRec' depends on axioms: [propext, Quot.sound] -/
+#guard_msgs in #print axioms elabRec
 
 end Elab
 

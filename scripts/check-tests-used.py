@@ -551,16 +551,18 @@ def read_routes(catalog):
 
 
 # Audited historical trace collectors, each bound to the exact commit holding
-# it. 74a8ac05 (d76458a00) -> current f01d503a (8d11968d4) adds only the
-# off-by-default readonly_symlinks audit (H1001): module-entry observation never
-# enables it, the lifted strace argument splitter and path resolution are
-# byte-for-byte equivalent, and source_code_hashes/code_fingerprint are
-# unchanged, so claims recorded under 74a8ac05 keep their meaning (H1010).
+# it. 74a8ac05 (d76458a00) -> f01d503a (8d11968d4) adds only the off-by-default
+# readonly_symlinks audit (H1001) with byte-equivalent path resolution and code
+# hashes. f01d503a -> current only taints more path spellings ('..', '//',
+# /proc, symlinkat; H1008): it certifies a subset and module code hashes are
+# unchanged, so claims under these pins keep their meaning (H1010).
 REVIEWED_MODULE_COLLECTORS = {
     '42027e7c42dac3912c1f8ef468a6d99bddb8075172c545b6a587692b039cff32':
         'e6d215dff997377f70e17ce50d04b8eb12284b16',
     '74a8ac05edadf4a4a1cf901134a8c23b24a844284ee8fe2a5f4e6fba274d251c':
         'd76458a00eef321c6f34cc5f7f76e0dd02ff31b9',
+    'f01d503a7acdfd5e19ae3ee71d6b128deb0bfcc979569e2adf45fe5976115dd7':
+        '8d11968d41505c0dbee15841a312c041f3465640',
 }
 
 
@@ -797,15 +799,15 @@ def validated_routes(graph, catalog, extra_reads=()):
         if not eligible and all(frame['path'] == graph.roots[original]['path'] for frame in frames): continue
         identity = original + ':read:' + hashlib.sha256(canonical(route)).hexdigest()
         graph.roots[identity] = {**graph.roots[original], 'derived_from': original, 'observed_target': target}
-        # Preserve the complete ordered stack, including repeated source paths.
-        # Turning it into filename nodes could shortcut a callback or recursion.
+        # Keep the ordered stack: path nodes might skip a callback or
+        # recursion. A failed run credits its target only (H1108).
         chain = {'root': identity, 'entry': graph.roots[identity], 'edges': []}
         for caller, callee in zip(frames, frames[1:]):
             chain = {**chain, 'edges': chain['edges'] + [{
                 'source': caller['path'], 'target': callee['path'],
                 'line': caller['line'], 'operation': ('Observed nonpassing unittest call stack' if nonpassing else 'validated Python call stack'),
                 'kind': 'executes', 'validated_for': identity}]}
-            graph.observed.append((callee['path'], chain))
+            if not nonpassing: graph.observed.append((callee['path'], chain))
         reader = frames[-1]
         chain = {**chain, 'edges': chain['edges'] + [{
             'source': reader['path'], 'target': target, 'line': reader['line'],
@@ -1886,7 +1888,7 @@ def nonpassing_boundary_controls():
                  'operation': 'Observed fixture read during nonpassing unittest'}
         catalog = {'schema_version': 1, 'standalone': [entry], 'reads': [route], 'generators': [], 'orphans': []}
         result = inventory(repo, catalog); rows = {r['path']: r for r in result['records']}
-        assert rows['tests/data.txt']['class'] == rows['tests/helper.py']['class'] == 'keep'
+        assert (rows['tests/data.txt']['class'], rows['tests/helper.py']['class']) == ('keep', None)
         chain = rows['tests/data.txt']['runner_chain']; assert chain['entry']['source_only']
         assert chain['entry']['validation_at_measured_revision']['status'] == 'failed'
         assert chain['entry']['kind'] == 'nonpassing committed unittest runner'
@@ -1895,11 +1897,11 @@ def nonpassing_boundary_controls():
         assert 'tests/other.txt' not in graph.chains()
         execution_only = copy.deepcopy(catalog); execution_only['standalone'][0]['input_scope'] = []
         execution_rows = {r['path']: r for r in inventory(repo, execution_only)['records']}
-        assert execution_rows['tests/helper.py']['class'] == 'keep' and execution_rows['tests/data.txt']['class'] is None
+        assert execution_rows['tests/helper.py']['class'] is None and execution_rows['tests/data.txt']['class'] is None
         outside = copy.deepcopy(catalog); outside['reads'][0].update(target='tests/other.txt', target_blob=repo.tree['tests/other.txt'][2])
         outside_rows = {r['path']: r for r in inventory(repo, outside)['records']}
         assert outside_rows['tests/other.txt']['class'] is None and outside_rows['tests/other.txt']['secondary']['unreviewed_readers']
-        assert outside_rows['tests/helper.py']['class'] == 'keep'
+        assert outside_rows['tests/helper.py']['class'] is None
         root_only = copy.deepcopy(outside); root_only['reads'][0]['frames'] = root_only['reads'][0]['frames'][:2]
         root_rows = {r['path']: r for r in inventory(repo, root_only)['records']}
         assert root_rows['tests/other.txt']['class'] is None and root_rows['tests/helper.py']['class'] is None
@@ -2146,7 +2148,7 @@ def module_entry_schema_controls():
         current=hashlib.sha256(helper.read_bytes()).hexdigest()
         assert reviewed_module_collector(repo,current,current) and not reviewed_module_collector(repo,'0'*64,current)
         assert not reviewed_module_collector(repo,['74a8ac05edadf4a4a1cf901134a8c23b24a844284ee8fe2a5f4e6fba274d251c'],current)
-        assert len(REVIEWED_MODULE_COLLECTORS)==2 and all(re.fullmatch('[0-9a-f]{64}',k) and re.fullmatch('[0-9a-f]{40}',v) for k,v in REVIEWED_MODULE_COLLECTORS.items())
+        assert len(REVIEWED_MODULE_COLLECTORS)==3 and all(re.fullmatch('[0-9a-f]{64}',k) and re.fullmatch('[0-9a-f]{40}',v) for k,v in REVIEWED_MODULE_COLLECTORS.items())
         for pin in REVIEWED_MODULE_COLLECTORS:  # the synthetic repository lacks the commits
             try: reviewed_module_collector(repo,pin,current)
             except ValueError as error: assert 'UNVERIFIABLE reviewed module collector source' in str(error)

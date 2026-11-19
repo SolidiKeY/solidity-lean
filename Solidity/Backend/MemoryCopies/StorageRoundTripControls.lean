@@ -13,11 +13,8 @@ private structure Input where
   allocator : Objects.AllocatorRepr heap base 8 (wmod 40) machine
 private def input : Input := ⟨_,_,_,_,ObjectArrayExamples.initial_allocator⟩
 private def values (payloads : List (Fin W)) : List PrimTy.uint.Denote := payloads.map indexValue
-private theorem wide : 128 < W := by decide
-private theorem large_bound : 512 < W := by decide
-private theorem boundary_large : 1024 < W := by decide
 private def value (payloads : List (Fin W)) (bounded : payloads.length < 128) : SVal (.ref (.array (.prim .uint))) :=
-  primitiveArrayValue .uint (values payloads) (by rw [values,List.length_map]; exact Nat.lt_trans bounded wide)
+  primitiveArrayValue .uint (values payloads) (by rw [values,List.length_map]; exact Nat.lt_trans bounded (by decide : 128 < W))
 private def source : Slot := .root 0
 private def store (payloads : List (Fin W)) : WordStore := ⟨fun slot => match slot with
   | .root 0 => wmod payloads.length
@@ -33,7 +30,7 @@ private theorem represented (payloads : List (Fin W)) (bounded : payloads.length
     ReprAt (machine payloads).store 128 (.ref (.array (.prim .uint))) source (value payloads bounded) := by
   refine .array ?_ (by simpa only [values,List.length_map] using bounded) ?_
   · simp only [values,List.length_map]
-    exact Nat.mod_eq_of_lt (Nat.lt_trans bounded wide)
+    exact Nat.mod_eq_of_lt (Nat.lt_trans bounded (by decide : 128 < W))
   · intro index item selected
     simp only [SVec.toList_ofList,values,List.getElem?_map] at selected
     cases chosen : payloads[index]? with
@@ -65,7 +62,7 @@ private theorem destination_repr (payloads : List (Fin W)) :
 
 private theorem payload_bound (payloads : List (Fin W)) (bounded : payloads.length < 128) : (values payloads).length < W := by
   rw [values,List.length_map]
-  exact Nat.lt_trans bounded wide
+  exact Nat.lt_trans bounded (by decide : 128 < W)
 
 private theorem completed (payloads : List (Fin W)) (bounded : payloads.length < 128) :
     ∃ fits, StorageRoundTripResult input.heap .uint (values payloads) (payload_bound payloads bounded) input.base 8 (wmod 40)
@@ -76,7 +73,7 @@ private theorem completed (payloads : List (Fin W)) (bounded : payloads.length <
   · exact success
   · have totalFits : (wmod 40).val + 2*((values payloads).length+1) < W := by
       rw [values,List.length_map]
-      have large : 512 < W := large_bound
+      have large : 512 < W := by decide
       change 40 + 2*(payloads.length+1) < W
       omega
     rcases refusal.1 with ⟨failed,_⟩ | ⟨fits,base,intermediate,ran,allocated,root,contents,failed,secondRun⟩
@@ -154,7 +151,7 @@ private theorem late_allocator (remaining : Nat) (positive : 0 < remaining) (sma
     Objects.AllocatorRepr input.heap input.base 8 (lateCursor remaining positive small) (late remaining positive small) := by
   have lower : 40 ≤ (lateCursor remaining positive small).val := by
     change 40 ≤ W-remaining
-    have wide : 1024 < W := boundary_large
+    have wide : 1024 < W := by decide
     omega
   refine ⟨(allocator [wmod 7,wmod 11]).heap.localWrite 0 (by decide) _,⟨by decide,by omega,rfl,?_⟩,?_⟩
   · intro address above

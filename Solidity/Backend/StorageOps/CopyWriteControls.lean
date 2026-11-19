@@ -274,6 +274,22 @@ theorem overlap_source_owner : Represented sourceNode overlapSourceQueries overl
     | (intro word observed; change some zero = some word at observed; cases observed; rfl)
     | (intro word observed; change some one = some word at observed; cases observed; rfl)
 
+/-- The overlap source is represented on all its clear demands. -/
+theorem overlap_source_demands :
+    Represented sourceNode (ClearDemands.demands sourceNode) overlapSource overlapStore := by
+  intro q member
+  apply overlap_source_owner q
+  change q ∈ [.word (.cons (.field .here) .nil),
+    .word (.cons (.field (.there .here)) (.cons (.index ⟨0,by decide⟩) (.cons (.field .here) .nil))),
+    .length (.cons (.field (.there .here)) (.cons (.index ⟨0,by decide⟩) (.cons (.field (.there .here)) .nil))),
+    .length (.cons (.field (.there .here)) .nil)] at member
+  simp only [List.mem_cons,List.not_mem_nil,or_false] at member
+  rcases member with rfl | rfl | rfl | rfl
+  · exact List.mem_cons_self
+  · exact List.mem_cons_of_mem _ (List.mem_cons_of_mem _ List.mem_cons_self)
+  · exact List.mem_cons_of_mem _ (List.mem_cons_of_mem _ (List.mem_cons_of_mem _ List.mem_cons_self))
+  · exact List.mem_cons_of_mem _ List.mem_cons_self
+
 private def badSourceMachine : WordStore := writeWord CopyDemandControls.machine 64 seven
 private noncomputable def badSourceResult : WordStore := CopyWrites.numericCopy (N := 128)
   CopyDemandControls.old CopyDemandControls.src CopyDemandControls.root (.root 1)

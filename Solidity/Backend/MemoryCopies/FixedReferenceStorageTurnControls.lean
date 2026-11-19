@@ -13,9 +13,8 @@ private structure Input where
   allocator : Objects.AllocatorRepr heap base 8 (wmod 40) machine
 private def input : Input := ⟨_, _, _, _, ObjectArrayExamples.initial_allocator⟩
 private def values (payloads : List (Fin W)) : List PrimTy.uint.Denote := payloads.map indexValue
-private theorem wide : 128 < W := by decide
 private def value (payloads : List (Fin W)) (bounded : payloads.length < 128) : SVal (.ref (.array (.prim .uint))) :=
-  primitiveArrayValue .uint (values payloads) (by rw [values, List.length_map]; exact Nat.lt_trans bounded wide)
+  primitiveArrayValue .uint (values payloads) (by rw [values, List.length_map]; exact Nat.lt_trans bounded (by decide : 128 < W))
 private def source : Slot := .data (.root 0) 0
 private def store (payloads : List (Fin W)) (selected : Fin 2) : WordStore := ⟨fun slot => match slot with
   | .data (.root 0) index => if index = selected.val then wmod payloads.length else wmod 0
@@ -31,7 +30,7 @@ private theorem represented (payloads : List (Fin W)) (bounded : payloads.length
   refine .array ?_ (by simpa only [values, List.length_map] using bounded) ?_
   · simp only [machine, allocateStructMachine, writeMachine, store, source, Slot.add, Nat.zero_add, values, List.length_map]
     simp only [WordStore.read]
-    exact Nat.mod_eq_of_lt (Nat.lt_trans bounded wide)
+    exact Nat.mod_eq_of_lt (Nat.lt_trans bounded (by decide : 128 < W))
   · intro index item chosen
     simp only [SVec.toList_ofList, values, List.getElem?_map] at chosen
     cases picked : payloads[index]? with
@@ -55,7 +54,7 @@ theorem certificate_inhabited : FixedReferenceStorageTurnCertificate := fixedRef
 
 theorem actual_typed (payloads : List (Fin W)) (bounded : payloads.length < 128) (selected : Fin 2) :
     FixedReferenceStorageTurnResult input.heap .uint (values payloads)
-      (by rw [values, List.length_map]; exact Nat.lt_trans bounded wide)
+      (by rw [values, List.length_map]; exact Nat.lt_trans bounded (by decide : 128 < W))
       input.base 8 (wmod 42) (machine payloads selected) source (wmod 40) (wmod 2)
       ⟨selected.val, Nat.lt_trans selected.isLt (by decide)⟩ (by
         change 42 + ((values payloads).length + 1) < W
@@ -174,7 +173,7 @@ theorem saturated_refusal (payloads : List (Fin W)) (bounded : payloads.length <
   have representation : ReprAt (saturated payloads selected).store 128 (.ref (.array (.prim .uint)))
       (source.add selected.val) (value payloads bounded) := represented payloads bounded selected
   rcases fixed_reference_storage_turn_correct input.heap .uint (values payloads)
-      (by rw [values, List.length_map]; exact Nat.lt_trans bounded wide)
+      (by rw [values, List.length_map]; exact Nat.lt_trans bounded (by decide : 128 < W))
       input.base 8 wMax (saturated payloads selected) source (wmod 40) (wmod 2)
       ⟨selected.val, Nat.lt_trans selected.isLt (by decide)⟩ 128
       (saturated_allocator payloads selected) (initial payloads selected).2 (by decide) (by decide)

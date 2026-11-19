@@ -61,7 +61,8 @@ def lowerInline {n args results : Nat} {input : Vector Word n → Vector Word ar
       exact run_comp (arguments.correct depth x ha locals newer tail)
         (body.correct (input locals) (newer.toList ++ (locals.toList ++ tail)))
 
-private theorem vector_pair (v : Vector Word 2) : v.toList = [v[0], v[1]] := by
+/-- The list representation of the two operands shared by binary arity slices. -/
+theorem vector_pair (v : Vector Word 2) : v.toList = [v[0], v[1]] := by
   apply List.ext_getElem
   · exact Vector.length_toList
   · intro i hi hj

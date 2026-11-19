@@ -25,14 +25,8 @@ only actual stored words are framed, and no failed read is assigned zero. -/
 theorem fold_outside (operations : List (Solidity.Storage.Loc × Semantics.Word))
     (initial : Store) (observer : Solidity.Storage.Loc)
     (outside : ∀ op ∈ operations, observer ≠ op.1) :
-    operations.foldl (fun w op => Representation.write w op.1 op.2) initial observer = initial observer := by
-  induction operations generalizing initial with
-  | nil => rfl
-  | cons op rest ih =>
-    change rest.foldl (fun w pair => Representation.write w pair.1 pair.2)
-      (Representation.write initial op.1 op.2) observer = _
-    rw [ih _ (fun pair inside => outside pair (List.mem_cons_of_mem _ inside))]
-    exact Representation.write_other _ _ _ _ (outside op List.mem_cons_self)
+    operations.foldl (fun w op => Representation.write w op.1 op.2) initial observer = initial observer :=
+  CopyDemands.writes_outside operations initial observer outside
 
 theorem prefix_outside (initial : Store) (dst src observer : Solidity.Storage.Loc) (start count : Nat)
     (outside : ∀ op ∈ log initial dst src start count, observer ≠ op.1) :

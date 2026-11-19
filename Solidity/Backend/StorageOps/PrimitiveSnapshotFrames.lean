@@ -14,12 +14,6 @@ theorem symbolic_outside (captured : Store) (dst src observer : Solidity.Storage
   rw [PrimitiveSnapshotNumeric.symbolic,Representation.write_other _ _ _ _ (outside count (Nat.lt_succ_self _))]
   exact ih (fun i inside => outside i (by omega))
 
-private theorem saved {n : Nat} {G : Schema n} {A T : TypeGraph.Ty n}
- (root result : Value G A) (dst src : TypeGraph.Path G A T) (old snapshot : Value G T)
- (readDst : root.find dst=some old) (readSrc : root.find src=some snapshot)
- (copied : recursiveCopyAt root dst src=some result) : root.save dst (recursiveCopy old snapshot)=some result := by
- simpa only [recursiveCopyAt,readSrc,readDst,Option.bind_some] using copied
-
 /-- Frame all selected OLD demands outside the actual logical save and every
 operation-generated physical word, without assuming post-copy preservation. -/
 theorem represented_frame {n : Nat} {G : Schema n} {A : TypeGraph.Ty n} {p : PrimTy} {m : FixedSize}
@@ -32,7 +26,7 @@ theorem represented_frame {n : Nat} {G : Schema n} {A : TypeGraph.Ty n} {p : Pri
  (apart : ∀ q ∈ queries,q.apart dst)
  (outside : ∀ q ∈ queries,∀ i<m.val,q.location base≠(pathLoc dst base).add i) :
  Represented result queries base (PrimitiveSnapshotNumeric.symbolic captured (pathLoc dst base) (pathLoc src base) m.val) := by
- have actualSave := saved root result dst src old snapshot readDst readSrc copied
+ have actualSave := recursiveCopyAt_saved root result dst src old snapshot readDst readSrc copied
  intro q member
  obtain ⟨supported,compatible,owner⟩:=before q member
  refine ⟨supported,?_,?_⟩
@@ -56,7 +50,7 @@ theorem represented_header {n : Nat} {G : Schema n} {A E : TypeGraph.Ty n} {p : 
  (outside : ∀ j<m.val,pathLoc stem base≠(pathLoc (stem.append (.cons (.index i) tail)) base).add j) :
  Represented result [.length stem] base
   (PrimitiveSnapshotNumeric.symbolic captured (pathLoc (stem.append (.cons (.index i) tail)) base) (pathLoc src base) m.val) := by
- have actualSave := saved root result _ src old snapshot readDst readSrc copied
+ have actualSave := recursiveCopyAt_saved root result _ src old snapshot readDst readSrc copied
  have header := ancestor_header_frame stem i tail root result (recursiveCopy old snapshot) actualSave
  intro q member
  have same : q=.length stem := List.mem_singleton.mp member

@@ -13,9 +13,8 @@ private abbrev H : HTy := [R, P]
 private def child : HRef H R := ⟨0, rfl⟩
 private def source : HRef H P := ⟨1, rfl⟩
 private def values (payloads : List (Fin W)) : List PrimTy.uint.Denote := payloads.map indexValue
-private theorem wide : 128 < W := by decide
 private def heap (payloads : List (Fin W)) (bounded : payloads.length < 128) : Heap H :=
-  (⟨values payloads, by rw [values, List.length_map]; have large : 128 < W := wide; omega⟩, (⟨[child,child], by decide⟩, ()))
+  (⟨values payloads, by rw [values, List.length_map]; have large : 128 < W := (by decide); omega⟩, (⟨[child,child], by decide⟩, ()))
 private def base (identity : Nat) : Fin W := if identity = 0 then wmod 16 else wmod 160
 private def machine (payloads : List (Fin W)) : Machine :=
   {Machine.init with stack := [w[77]], mem := fun address =>
@@ -124,7 +123,7 @@ private theorem reservation (payloads : List (Fin W)) (bounded : payloads.length
   (allocator payloads bounded).reserveFixed 3 (by decide)
 
 private def row (payloads : List (Fin W)) (bounded : payloads.length < 128) : PrimitiveStorageRow .uint :=
-  ⟨values payloads, by rw [values, List.length_map]; exact Nat.lt_trans bounded wide⟩
+  ⟨values payloads, by rw [values, List.length_map]; exact Nat.lt_trans bounded (by decide : 128 < W)⟩
 private def children (payloads : List (Fin W)) (bounded : payloads.length < 128) :=
   [row payloads bounded, row payloads bounded]
 private theorem source_rows (payloads : List (Fin W)) (bounded : payloads.length < 128) :

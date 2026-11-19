@@ -76,7 +76,8 @@ theorem source_cd_bool_run {E : Source.Env} {Γ : Source.RCtx}
     simp only [Source.Hoare.run_bind,source_bool_value_array]
     rfl
 
-private theorem except_mapM_length {α β : Type} (f : α → Source.R β) (xs : List α) :
+/-- A successful `mapM` keeps the list length. -/
+theorem except_mapM_length {α β : Type} (f : α → Source.R β) (xs : List α) :
     ∀ vs,xs.mapM f=.ok vs → vs.length=xs.length := by
   induction xs with
   | nil => intro vs h;cases Except.ok.inj h;rfl

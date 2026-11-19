@@ -60,9 +60,8 @@ theorem shadow_not_counted : liveWordCount tree =
     liveWordCount empty ≠ 1 + liveWordCount branch := by decide +kernel
 
 theorem long_growth {H : HTy} (heap : Heap H) :
-    heapWords (long.copyStToM heap rfl).heap = heapWords heap + 577 := by
-  have demand : liveWordCount long = 577 := by decide +kernel
-  simpa only [demand] using valueCopy_words long rfl heap
+    heapWords (long.copyStToM heap rfl).heap = heapWords heap + 577 :=
+  valueCopy_words long rfl heap
 
 theorem mapping_not_memory : (Ty.ref (.mapping .uint (.prim .uint))).mapFree ≠ true := by decide
 

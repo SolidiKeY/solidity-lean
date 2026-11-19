@@ -72,9 +72,8 @@ theorem preTimeout : ∀ (pipeline : Solidity.Roadmap.Pipeline) (world : Solidit
   intro pipeline world
   exact ⟨rfl,rfl,rfl⟩
 
-theorem dirtyRefuses : ∀ (world : Solidity.Source.St Solidity.Yul.Checks.RawControlGrowingBlock.Old.env), Solidity.Yul.RawCoherent.coherent (Solidity.Yul.Checks.RawControlDeclaration.Old.initial 2 257 2 world) = false := by
-  intro world
-  rfl
+theorem dirtyRefuses : ∀ (world : Solidity.Source.St Solidity.Yul.Checks.RawControlGrowingBlock.Old.env), Solidity.Yul.RawCoherent.coherent (Solidity.Yul.Checks.RawControlDeclaration.Old.initial 2 257 2 world) = false :=
+  Solidity.Yul.Checks.RawU8Statement.dirtyRefusal
 
 theorem sourceAll : ∀ (glob : Solidity.Source.Glob Solidity.Yul.Checks.RawControlGrowingBlock.Old.env) (frame : Solidity.Source.Fr), frame.checked = true →
  ∀ (fuel nps : Nat) (ph : Option (Solidity.Source.Ph Solidity.Yul.Checks.RawControlGrowingBlock.Old.env)) (world : Solidity.Source.St Solidity.Yul.Checks.RawControlGrowingBlock.Old.env),
