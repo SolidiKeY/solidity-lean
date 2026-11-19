@@ -431,4 +431,18 @@ theorem rel_cycle_forT_blk {α : Type} [WellFoundedRelation α] (μ : ElabMeasur
 
 end Counterexample
 
+/-- Unchecked rewriting preserves both components of the local statement rank. -/
+example (ss out : List RawStmt) (h : uncheckStmts ss = .ok out) :
+    ElabLoopMeasure.listRank out = ElabLoopMeasure.listRank ss := by
+  unfold ElabLoopMeasure.listRank
+  rw [uncheckStmts_loopCount ss out h, uncheckStmts_weight ss out h]
+
+/-- All source-loop roots decrease the local rank on a successful lowering run. -/
+example [FreshNames] (rs : Option (List String)) (s : RawStmt)
+    (hs : ElabLoopMeasure.rootCount s = 1) (sc : ElabScope)
+    (st st' : ECtx × Nat) (m m' : CallMemo) (out : List RawStmt)
+    (h : (((lowerLoops rs [s]).run sc).run st).run m = .ok ((out, st'), m')) :
+    WellFoundedRelation.rel (ElabLoopMeasure.listRank out) (ElabLoopMeasure.stmtRank s) :=
+  ElabLoopMeasure.lowerLoops_rank rs s hs sc st st' m m' out h
+
 end Solidity.Examples.ElabTotalMeasure
