@@ -97,84 +97,30 @@ def compile {n r : Nat} (fuel : Nat) (expr : Expr [] [] n r) : Option (Compiled 
         cases builtin with
         | pure op =>
             cases op with
-            | add => exact do
-                let left ← compile fuel (args 0)
-                let right ← compile fuel (args 1)
-                pure (ProducerExpressions.binary addBridge left right)
-            | sub => exact do
-                let left ← compile fuel (args 0)
-                let right ← compile fuel (args 1)
-                pure (ProducerExpressions.binary subBridge left right)
-            | mul => exact do
-                let left ← compile fuel (args 0)
-                let right ← compile fuel (args 1)
-                pure (ProducerExpressions.binary mulBridge left right)
-            | «div» => exact do
-                let left ← compile fuel (args 0)
-                let right ← compile fuel (args 1)
-                pure (ProducerExpressions.binary QuotientExpressions.divBridge left right)
-            | «mod» => exact do
-                let left ← compile fuel (args 0)
-                let right ← compile fuel (args 1)
-                pure (ProducerExpressions.binary QuotientExpressions.modBridge left right)
-            | lt => exact do
-                let left ← compile fuel (args 0)
-                let right ← compile fuel (args 1)
-                pure (ProducerExpressions.binary ltBridge left right)
-            | gt => exact do
-                let left ← compile fuel (args 0)
-                let right ← compile fuel (args 1)
-                pure (ProducerExpressions.binary gtBridge left right)
-            | eq => exact do
-                let left ← compile fuel (args 0)
-                let right ← compile fuel (args 1)
-                pure (ProducerExpressions.binary eqBridge left right)
+            | add => exact ProducerExpressions.visitBinary addBridge (fun i => compile fuel (args i))
+            | sub => exact ProducerExpressions.visitBinary subBridge (fun i => compile fuel (args i))
+            | mul => exact ProducerExpressions.visitBinary mulBridge (fun i => compile fuel (args i))
+            | «div» => exact ProducerExpressions.visitBinary QuotientExpressions.divBridge (fun i => compile fuel (args i))
+            | «mod» => exact ProducerExpressions.visitBinary QuotientExpressions.modBridge (fun i => compile fuel (args i))
+            | lt => exact ProducerExpressions.visitBinary ltBridge (fun i => compile fuel (args i))
+            | gt => exact ProducerExpressions.visitBinary gtBridge (fun i => compile fuel (args i))
+            | eq => exact ProducerExpressions.visitBinary eqBridge (fun i => compile fuel (args i))
             | iszero => exact do
                 let arg ← compile fuel (args 0)
                 pure (WordExpressions.unary iszeroBridge arg)
             | «not» => exact do
                 let arg ← compile fuel (args 0)
                 pure (WordExpressions.unary notBridge arg)
-            | «and» => exact do
-                let left ← compile fuel (args 0)
-                let right ← compile fuel (args 1)
-                pure (ProducerExpressions.binary andBridge left right)
-            | «or» => exact do
-                let left ← compile fuel (args 0)
-                let right ← compile fuel (args 1)
-                pure (ProducerExpressions.binary orBridge left right)
-            | «xor» => exact do
-                let left ← compile fuel (args 0)
-                let right ← compile fuel (args 1)
-                pure (ProducerExpressions.binary xorBridge left right)
-            | «shl» => exact do
-                let left ← compile fuel (args 0)
-                let right ← compile fuel (args 1)
-                pure (ProducerExpressions.binary shlBridge left right)
-            | «shr» => exact do
-                let left ← compile fuel (args 0)
-                let right ← compile fuel (args 1)
-                pure (ProducerExpressions.binary shrBridge left right)
-            | sdiv => exact do
-                let left ← compile fuel (args 0)
-                let right ← compile fuel (args 1)
-                pure (ProducerExpressions.binary sdivBridge left right)
-            | smod => exact do
-                let left ← compile fuel (args 0)
-                let right ← compile fuel (args 1)
-                pure (ProducerExpressions.binary smodBridge left right)
-            | slt => exact do
-                let left ← compile fuel (args 0)
-                let right ← compile fuel (args 1)
-                pure (ProducerExpressions.binary sltBridge left right)
-            | sgt => exact do
-                let left ← compile fuel (args 0)
-                let right ← compile fuel (args 1)
-                pure (ProducerExpressions.binary sgtBridge left right)
-            | sar => exact do
-                let left ← compile fuel (args 0)
-                let right ← compile fuel (args 1)
-                pure (ProducerExpressions.binary sarBridge left right)
+            | «and» => exact ProducerExpressions.visitBinary andBridge (fun i => compile fuel (args i))
+            | «or» => exact ProducerExpressions.visitBinary orBridge (fun i => compile fuel (args i))
+            | «xor» => exact ProducerExpressions.visitBinary xorBridge (fun i => compile fuel (args i))
+            | «shl» => exact ProducerExpressions.visitBinary shlBridge (fun i => compile fuel (args i))
+            | «shr» => exact ProducerExpressions.visitBinary shrBridge (fun i => compile fuel (args i))
+            | sdiv => exact ProducerExpressions.visitBinary sdivBridge (fun i => compile fuel (args i))
+            | smod => exact ProducerExpressions.visitBinary smodBridge (fun i => compile fuel (args i))
+            | slt => exact ProducerExpressions.visitBinary sltBridge (fun i => compile fuel (args i))
+            | sgt => exact ProducerExpressions.visitBinary sgtBridge (fun i => compile fuel (args i))
+            | sar => exact ProducerExpressions.visitBinary sarBridge (fun i => compile fuel (args i))
             | _ => exact none
         | _ => exact none
 termination_by structural fuel

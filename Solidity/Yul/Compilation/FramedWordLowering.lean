@@ -9,13 +9,8 @@ gas, capacity, physical view or recursive-control adequacy is supplied. -/
 namespace Solidity.Yul.Compilation.FramedWordLowering
 open Backend Scalar Selection MachineAdapter
 
-private theorem irStack_words (s : Stack) : irStack s = s.map coreWord := by
- apply List.map_congr_left
- intro w _
- apply congrArg Evm.Word.val
- apply Fin.ext
- change w.toNat % Evm.W = w.toNat
- exact Nat.mod_eq_of_lt w.isLt
+private theorem irStack_words (s : Stack) : irStack s = s.map coreWord :=
+  WordInstructionCertificates.irStack_words s
 
 /-- Actual producer, not another interface or an assumed reflection law. -/
 def lowering (p : Backend.Program) (q : List Evm.Instr)

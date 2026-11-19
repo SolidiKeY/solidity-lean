@@ -59,7 +59,7 @@ private theorem shr_step (a b : Scalar.Word) (m : Evm.Machine) (tail : List Evm.
 
 /-- Derive the two operands from the real successful scalar step. Both dispatch
 and model agreement are actual laws, discharged for every selected operator. -/
-private theorem binary_transport (i : Backend.Instr) (j : Evm.Instr)
+theorem binary_transport (i : Backend.Instr) (j : Evm.Instr)
     (f : Scalar.Word → Scalar.Word → Scalar.Word)
     (scalarRow : ∀ xs, Scalar.step i xs = applyBinary f xs)
     (modelRow : ∀ (a b : Scalar.Word) (m : Evm.Machine) (tail : List Evm.Word), j.step {m with stack := coreWord a::coreWord b::tail} =
