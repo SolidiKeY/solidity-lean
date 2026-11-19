@@ -425,85 +425,6 @@ theorem stmtsArm_stable {C : Contract} (μ : ElabMeasure α) (J : ElabPreds C)
 
 end ElabMeasure
 
-namespace UncheckWeightProof
-private def Obs {α : Type} (x : Except String α) (Q : α → Prop) : Prop :=
-  ∀ a, x = .ok a → Q a
-private theorem obs_pure {α : Type} {a : α} {Q : α → Prop} (h : Q a) :
-    Obs (pure a) Q := by
-  intro b he
-  cases he
-  exact h
-private theorem obs_bind {α β : Type} {x : Except String α} {f : α → Except String β}
-    {P : α → Prop} {Q : β → Prop} (hx : Obs x P)
-    (hf : ∀ a, P a → Obs (f a) Q) : Obs (x >>= f) Q := by
-  intro b h
-  cases he : x with
-  | error err => simp only [he, bind, Except.bind] at h; cases h
-  | ok a =>
-    simp only [he, bind, Except.bind] at h
-    exact hf a (hx a he) b h
-private theorem obs_any {α β : Type} {x : Except String α} {f : α → Except String β}
-    {Q : β → Prop} (hf : ∀ a, Obs (f a) Q) : Obs (x >>= f) Q :=
-  obs_bind (P := fun _ => True) (fun _ _ => trivial) (fun a _ => hf a)
-private theorem obs_throw {α : Type} {err : String} {Q : α → Prop} :
-    Obs (throw err : Except String α) Q := by
-  intro a h
-  cases h
-private theorem obs_throw_bind {α β : Type} {err : String}
-    {f : α → Except String β} {Q : β → Prop} :
-    Obs ((throw err : Except String α) >>= f) Q := by
-  intro a h
-  cases h
-private theorem obs_map (f : RawExpr → Except String RawExpr) (s : RawStmt) :
-    Obs (s.mapExprsM f) (fun out => CalleeKernel.stmtWeight out = CalleeKernel.stmtWeight s) := by
-  intro out h
-  have he := CalleeKernel.mapExprsM_weight f s
-  rw [h] at he
-  exact Except.ok.inj he
-private theorem weight_cons (s : RawStmt) (ss : List RawStmt) :
-    CalleeKernel.listWeight (s :: ss) = CalleeKernel.stmtWeight s + CalleeKernel.listWeight ss := rfl
-
-private theorem weight_key (n : Nat) : ∀ ss, CalleeKernel.listWeight ss = n →
-    Obs (uncheckStmts ss) (fun out => CalleeKernel.listWeight out = n) := by
-  induction n using Nat.strongRecOn with
-  | ind n ih =>
-    intro ss hn
-    subst n
-    cases ss with
-    | nil =>
-      rw [uncheckStmts.eq_def]
-      exact obs_pure rfl
-    | cons s ss =>
-      have recCall (b : List RawStmt)
-          (hb : CalleeKernel.listWeight b < CalleeKernel.listWeight (s :: ss)) :
-          Obs (uncheckStmts b)
-            (fun out => CalleeKernel.listWeight out = CalleeKernel.listWeight b) :=
-        ih _ hb b rfl
-      rw [uncheckStmts.eq_def]
-      cases s
-      case' checked o b => cases o
-      all_goals simp only [pure_bind]
-      all_goals repeat (first
-        | (with_reducible apply obs_pure
-           simp only [weight_cons, CalleeKernel.stmtWeight] at *
-           omega)
-        | with_reducible exact obs_throw
-        | with_reducible exact obs_throw_bind
-        | (with_reducible apply obs_bind (recCall _ (by
-             simp only [weight_cons, CalleeKernel.stmtWeight]
-             omega))
-           intro outTail hTail)
-        | (with_reducible apply obs_bind (obs_map _ _); intro out h)
-        | (with_reducible apply obs_any; intro x)
-        | split)
-end UncheckWeightProof
-
-/-- Wrapping arithmetic preserves the control weight of every successful output. -/
-theorem uncheckStmts_weight (ss out : List RawStmt)
-    (h : uncheckStmts ss = .ok out) :
-    CalleeKernel.listWeight out = CalleeKernel.listWeight ss :=
-  UncheckWeightProof.weight_key (CalleeKernel.listWeight ss) ss rfl out h
-
 namespace ElabLoopMeasure
 
 /-! Source `while`, `for`, and `do` loops remaining before loop lowering.
@@ -847,7 +768,7 @@ theorem lowerLoops_single_count [FreshNames] (rs : Option (List String)) (s : Ra
 
 end ElabLoopMeasure
 
-namespace UncheckLoopCountProof
+namespace UncheckMeasureProof
 private def Obs {α : Type} (x : Except String α) (Q : α → Prop) : Prop :=
   ∀ a, x = .ok a → Q a
 private theorem obs_pure {α : Type} {a : α} {Q : α → Prop} (h : Q a) :
@@ -877,16 +798,25 @@ private theorem obs_throw_bind {α β : Type} {err : String}
   intro a h
   cases h
 private theorem obs_map (f : RawExpr → Except String RawExpr) (s : RawStmt) :
-    Obs (s.mapExprsM f) (fun out => ElabLoopMeasure.stmtCount out = ElabLoopMeasure.stmtCount s) := by
+    Obs (s.mapExprsM f) (fun out =>
+      CalleeKernel.stmtWeight out = CalleeKernel.stmtWeight s ∧
+      ElabLoopMeasure.stmtCount out = ElabLoopMeasure.stmtCount s) := by
   intro out h
-  have he := ElabLoopMeasure.mapExprsM_count f s
-  rw [h] at he
-  exact Except.ok.inj he
+  constructor
+  · have he := CalleeKernel.mapExprsM_weight f s
+    rw [h] at he
+    exact Except.ok.inj he
+  · have he := ElabLoopMeasure.mapExprsM_count f s
+    rw [h] at he
+    exact Except.ok.inj he
 private theorem weight_cons (s : RawStmt) (ss : List RawStmt) :
     CalleeKernel.listWeight (s :: ss) = CalleeKernel.stmtWeight s + CalleeKernel.listWeight ss := rfl
 
-private theorem weight_key (n : Nat) : ∀ ss, CalleeKernel.listWeight ss = n →
-    Obs (uncheckStmts ss) (fun out => ElabLoopMeasure.listCount out = ElabLoopMeasure.listCount ss) := by
+/-- One traversal preserves both measures used by unchecked elaboration. -/
+private theorem preserves_key (n : Nat) : ∀ ss, CalleeKernel.listWeight ss = n →
+    Obs (uncheckStmts ss) (fun out =>
+      CalleeKernel.listWeight out = CalleeKernel.listWeight ss ∧
+      ElabLoopMeasure.listCount out = ElabLoopMeasure.listCount ss) := by
   induction n using Nat.strongRecOn with
   | ind n ih =>
     intro ss hn
@@ -894,12 +824,13 @@ private theorem weight_key (n : Nat) : ∀ ss, CalleeKernel.listWeight ss = n �
     cases ss with
     | nil =>
       rw [uncheckStmts.eq_def]
-      exact obs_pure rfl
+      exact obs_pure ⟨rfl, rfl⟩
     | cons s ss =>
       have recCall (b : List RawStmt)
           (hb : CalleeKernel.listWeight b < CalleeKernel.listWeight (s :: ss)) :
           Obs (uncheckStmts b)
-            (fun out => ElabLoopMeasure.listCount out = ElabLoopMeasure.listCount b) :=
+            (fun out => CalleeKernel.listWeight out = CalleeKernel.listWeight b ∧
+              ElabLoopMeasure.listCount out = ElabLoopMeasure.listCount b) :=
         ih _ hb b rfl
       rw [uncheckStmts.eq_def]
       cases s
@@ -907,8 +838,9 @@ private theorem weight_key (n : Nat) : ∀ ss, CalleeKernel.listWeight ss = n �
       all_goals simp only [pure_bind]
       all_goals repeat (first
         | (with_reducible apply obs_pure
-           simp only [ElabLoopMeasure.listCount, ElabLoopMeasure.stmtCount] at *
-           omega)
+           constructor <;>
+             simp only [weight_cons, CalleeKernel.stmtWeight,
+               ElabLoopMeasure.listCount, ElabLoopMeasure.stmtCount] at * <;> omega)
         | with_reducible exact obs_throw
         | with_reducible exact obs_throw_bind
         | (with_reducible apply obs_bind (recCall _ (by
@@ -918,13 +850,19 @@ private theorem weight_key (n : Nat) : ∀ ss, CalleeKernel.listWeight ss = n �
         | (with_reducible apply obs_bind (obs_map _ _); intro out h)
         | (with_reducible apply obs_any; intro x)
         | split)
-end UncheckLoopCountProof
+end UncheckMeasureProof
+
+/-- Wrapping arithmetic preserves the control weight of every successful output. -/
+theorem uncheckStmts_weight (ss out : List RawStmt)
+    (h : uncheckStmts ss = .ok out) :
+    CalleeKernel.listWeight out = CalleeKernel.listWeight ss :=
+  (UncheckMeasureProof.preserves_key (CalleeKernel.listWeight ss) ss rfl out h).1
 
 /-- Wrapping arithmetic preserves the source-loop count of every successful output. -/
 theorem uncheckStmts_loopCount (ss out : List RawStmt)
     (h : uncheckStmts ss = .ok out) :
     ElabLoopMeasure.listCount out = ElabLoopMeasure.listCount ss :=
-  UncheckLoopCountProof.weight_key (CalleeKernel.listWeight ss) ss rfl out h
+  (UncheckMeasureProof.preserves_key (CalleeKernel.listWeight ss) ss rfl out h).2
 
 namespace ElabLoopMeasure
 
