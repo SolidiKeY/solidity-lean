@@ -33,6 +33,21 @@ def project {env types} (result : Result env types) :
 
 
 
+/-- The existing clean Boolean declaration has an exact Source projection. -/
+theorem project_finish_ofClean {env types} (value : Bool)
+    (locals : Solidity.Source.Locals env.layout types) (world : Solidity.Source.St env) :
+    project (finish (.ok (.clean (.bool value)), LocalState.ofClean (locals, world))) =
+      some (.ok (.normal (Solidity.Source.Locals.cons (.bool value) locals)),
+        (Solidity.Source.L0 env, world)) := by
+  change (LocalValues.clean? (.bool :: types)
+    (LocalValues.ofClean (Solidity.Source.Locals.cons (.bool value) locals))).map
+    (fun finalLocals =>
+      ((Except.ok (Solidity.Source.Out.normal finalLocals) :
+        Solidity.Source.R (Solidity.Source.Out env.layout types (.bool :: types))),
+        (Solidity.Source.L0 env, world))) = _
+  rw [LocalValues.clean_ofClean]
+  rfl
+
 theorem source_agrees : ∀ (env : Solidity.Source.Env) (types : Solidity.Source.RCtx)
  (expr : Solidity.Source.RExpr env types .bool)
  (proof : Solidity.Yul.LocalBoolControl.Supported env types expr)

@@ -61,6 +61,17 @@ theorem capture_ofClean {ctx : Solidity.Source.Ctx} (initial : RawFrame.State ct
   simp only [capture, LocalState.ofClean, LocalValues.clean_ofClean, Option.getD_some,
     RawFrame.capture, RawFrame.ofClean]
 
+/-- Transport an actual clean Source result through raw frame capture. -/
+theorem capture_result {ctx : Solidity.Source.Ctx} {α : Type}
+    (initial : RawFrame.State ctx) {result : α}
+    {locals : Solidity.Source.Locals ctx.env.layout ctx.tys} {world : Solidity.Source.St ctx.env}
+    {input : α × (Solidity.Source.Locals ctx.env.layout ctx.tys × Solidity.Source.St ctx.env)}
+    (actual : input = (result, (locals, world))) :
+    input = (result, ((capture initial (LocalState.ofClean (locals, world))).clean,
+      (capture initial (LocalState.ofClean (locals, world))).world)) := by
+  rw [actual]
+  simp only [capture, LocalState.ofClean, LocalValues.clean_ofClean, Option.getD_some]
+
 theorem capture_coherent {ctx : Solidity.Source.Ctx} (initial : RawFrame.State ctx)
     (locals : Solidity.Source.Locals ctx.env.layout ctx.tys) (world : Solidity.Source.St ctx.env) :
     coherent (capture initial (LocalState.ofClean (locals, world))) = true := by
