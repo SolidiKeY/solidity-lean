@@ -21,7 +21,8 @@ private theorem binary_visit {fuel n : Nat} {args : Fin 2 → Solidity.Yul.Expr 
       (PureExpressions.compile fuel (args 1)).bind (fun right => some (ProducerExpressions.binary bridge left right))) = some compiled)
     (depth : Nat) (p : Program) (emitted : compiled.lowered.code depth = some p) :
     CodeShape p (n+depth) (n+depth+1) :=
-  ExpressionShapes.binary_visit @PureExpressions.compile bridge row leftLaws rightLaws
+  ExpressionShapes.binary_visit @PureExpressions.compile
+    (fuel := fuel) (n := n) (args := args) (op := op) bridge row leftLaws rightLaws
     compiled visited depth p emitted
 
 private theorem unary_visit {fuel n : Nat} {args : Fin 1 → Solidity.Yul.Expr [] [] n 1}

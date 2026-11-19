@@ -19,7 +19,8 @@ private theorem binary_visit {fuel n : Nat} {args : Fin 2 → Solidity.Yul.Expr 
       (compile fuel (args 1)).bind (fun right => some (ProducerExpressions.binary bridge left right))) = some compiled)
     (depth : Nat) (p : Program) (emitted : compiled.lowered.code depth = some p) :
     CodeShape p (n+depth) (n+depth+1) :=
-  ExpressionShapes.binary_visit @ProducerExpressions.compile bridge row leftLaws rightLaws
+  ExpressionShapes.binary_visit @ProducerExpressions.compile
+    (fuel := fuel) (n := n) (args := args) (op := op) bridge row leftLaws rightLaws
     compiled visited depth p emitted
 
 /-- A genuine successful visit and target emission derive operand metadata.
