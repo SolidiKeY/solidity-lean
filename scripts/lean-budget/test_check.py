@@ -138,8 +138,17 @@ class Globs(unittest.TestCase):
     def test_allow_json_steps(self):
         self.assertEqual(set(CFG["steps"]), {"b1-backend-endpoint", "e1-loops", "va2-honest-theorems", "w3-panic-codes",
                                              "e4-hash-bridge", "t0-endpoint-total", "e2a-lower-total",
-                                             "e2b-loops-producer", "yv1-yul-layout-view"})
+                                             "e2b-loops-producer", "yv1-yul-layout-view",
+                                             "finish-intrinsic-session", "finish-lowering-sim", "finish-panic",
+                                             "finish-line", "finish-yul-layout", "calls-program-bridge"})
         self.assertEqual(CFG["steps"]["yv1-yul-layout-view"], ["Solidity/Yul/Layout/**"])
+        self.assertEqual(CFG["steps"]["finish-intrinsic-session"], ["Solidity/Correctness/IntrinsicSession/**", "Solidity/Semantics/IntrinsicSession/**"])
+        self.assertEqual(CFG["steps"]["finish-lowering-sim"], ["Solidity/Correctness/Lowering/Sim/**"])
+        self.assertEqual(CFG["steps"]["finish-panic"], ["Solidity/Correctness/Panic/**"])
+        self.assertEqual(CFG["steps"]["finish-line"], ["Solidity/Finish/**"])
+        self.assertEqual(CFG["steps"]["finish-yul-layout"], ["Solidity/Yul/Layout/**"])
+        self.assertEqual(CFG["steps"]["calls-program-bridge"], ["Solidity/Backend/InternalFlow/CallsProgramBridge*.lean"])
+
 
 
 if __name__ == "__main__":
