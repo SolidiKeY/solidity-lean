@@ -64,7 +64,7 @@ private theorem allocator (payloads : List (Fin W)) (bounded : payloads.length <
     with_unfolding_all change 16 + max 1 payloads.length ≤ 256
     omega
 
-private def C (count : Nat) : Contract := {vars := [("matrix",.ref (.array (.ref (R count))))]}
+private def C (count : Nat) : Contract := {vars := [("matrix",.ref (.array (.ref (R count))))],vars_ok := by rfl,vars_nodup := by rfl}
 private def Γ (count : Nat) : Ctx := [.mem (R count),.mem (R count)]
 private def root (count : Nat) : (C count).rootType "matrix" = some (.ref (.array (.ref (R count)))) := by rfl
 private def value (payloads : List (Fin W)) : SVal (.ref (R payloads.length)) :=
