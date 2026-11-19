@@ -270,9 +270,9 @@ def decode (r : Request) : Option SourceProgram :=
 The decoder above is landed and other modules build on it, so it is kept as it
 is. Wider decoders are versions of one generic decoder, `Tables.decode`, which
 is written to differ from it only in its three type tables: how a
-declaration's type name, a model local and a model contract are read. That
-`tables1.decode` is the landed decoder holds by construction and is not
-proved; one sample checks it. Expression spelling is shared. `tablesW` reads
+declaration's type name, a model local and a model contract are read:
+`decode_tables1` proves that at the landed tables it is the landed decoder.
+Expression spelling is shared. `tablesW` reads
 integers at their declared widths (`bool` only at 256). -/
 
 /-- The type tables of a decoder version. -/
@@ -367,6 +367,72 @@ end Tables
 
 /-- The landed decoder's tables. -/
 def tables1 : Tables := ⟨typeName, localTy, unit⟩
+
+/-! ### The landed decoder is the generic decoder at its tables -/
+
+theorem simple_tables1 (s : RawStmt) : tables1.simple s = simple s := by
+  cases s with
+  | decl U x init => cases init <;> rfl
+  | _ => rfl
+
+theorem initializer_tables1 : (b : List RawStmt) → tables1.initializer b = initializer b
+  | [] => rfl
+  | [s] => by simp [Tables.initializer, initializer, simple_tables1]
+  | _ :: _ :: _ => rfl
+
+mutual
+theorem stmt_tables1 : (k : SCtx) → (s : RawStmt) → tables1.stmt k s = stmt k s
+  | k, .ite c thn [] => by simp [Tables.stmt, stmt, items_tables1 k thn]
+  | k, .ite c thn (e :: els) => by
+      simp [Tables.stmt, stmt, items_tables1 k thn, items_tables1 k (e :: els)]
+  | k, .ret none | k, .ret (some _) => by simp [Tables.stmt, stmt]
+  | k, .block b => by simp [Tables.stmt, stmt, items_tables1 k b]
+  | k, .whileLoop _ c b | k, .loop _ c b | k, .doWhile _ b c => by
+      simp [Tables.stmt, stmt, items_tables1 ⟨true, k.unchecked⟩ b]
+  | k, .forLoop _ init c upd b => by
+      simp [Tables.stmt, stmt, items_tables1 ⟨true, k.unchecked⟩ b, initializer_tables1]
+  | k, .brk | k, .cont => by simp [Tables.stmt, stmt]
+  | k, (.assign ..) | k, (.decl ..) | k, (.declStorage ..) | k, (.declMemory ..)
+  | k, (.delete ..) | k, (.opAssign ..) | k, (.incDec ..) | k, (.pushOpAssign ..)
+  | k, (.pushIncDec ..) | k, (.call ..) | k, (.assignIncDec ..) | k, (.assignPush ..)
+  | k, (.declStoragePush ..) | k, (.declPush ..) | k, (.require ..) | k, (.assert ..)
+  | k, .revert | k, (.revertMsg ..) | k, (.requireMsg ..) | k, (.revertReason ..)
+  | k, (.requireReason ..) | k, (.revertRaw ..) | k, (.revertErr ..) | k, (.requireErr ..)
+  | k, .assumeFalse | k, (.eval ..) | k, (.unchecked ..) | k, (.checked ..) | k, (.tryCall ..)
+  | k, (.send ..) | k, (.tupleDecl ..) | k, (.tupleAssign ..) | k, .hole => by
+      simp [Tables.stmt, stmt, simple_tables1]
+theorem items_tables1 : (k : SCtx) → (b : List RawStmt) → tables1.items k b = items k b
+  | k, [] => by simp [Tables.items, items]
+  | k, .unchecked b :: rest => by
+      simp [Tables.items, items, items_tables1 ⟨k.loop, true⟩ b, items_tables1 k rest]
+  | k, (.assign ..) :: rest | k, (.decl ..) :: rest | k, (.declStorage ..) :: rest
+  | k, (.declMemory ..) :: rest | k, (.delete ..) :: rest | k, (.opAssign ..) :: rest
+  | k, (.incDec ..) :: rest | k, (.pushOpAssign ..) :: rest | k, (.pushIncDec ..) :: rest
+  | k, (.call ..) :: rest | k, (.assignIncDec ..) :: rest | k, (.assignPush ..) :: rest
+  | k, (.declStoragePush ..) :: rest | k, (.declPush ..) :: rest | k, (.ite ..) :: rest
+  | k, (.require ..) :: rest | k, (.assert ..) :: rest | k, .revert :: rest
+  | k, (.revertMsg ..) :: rest | k, (.requireMsg ..) :: rest | k, (.revertReason ..) :: rest
+  | k, (.requireReason ..) :: rest | k, (.revertRaw ..) :: rest | k, (.revertErr ..) :: rest
+  | k, (.requireErr ..) :: rest | k, .assumeFalse :: rest | k, (.ret ..) :: rest
+  | k, (.eval ..) :: rest | k, (.checked ..) :: rest | k, (.tryCall ..) :: rest
+  | k, (.send ..) :: rest | k, (.tupleDecl ..) :: rest | k, (.tupleAssign ..) :: rest
+  | k, (.block ..) :: rest | k, (.whileLoop ..) :: rest | k, (.forLoop ..) :: rest
+  | k, (.doWhile ..) :: rest | k, .brk :: rest | k, .cont :: rest | k, (.loop ..) :: rest
+  | k, .hole :: rest => by
+      simp [Tables.items, items, stmt_tables1, items_tables1 k rest]
+end
+
+theorem locals_tables1 : (Γ : ECtx) → tables1.locals Γ = locals Γ
+  | [] => rfl
+  | (x, t) :: Γ => by
+      simp only [Tables.locals, locals, locals_tables1 Γ]
+      rfl
+
+/-- **The bridge**: the generic decoder at the landed tables is the landed
+decoder. -/
+theorem decode_tables1 (r : Request) : tables1.decode r = decode r := by
+  simp only [Tables.decode, decode, Tables.context, context, locals_tables1, items_tables1]
+  rfl
 
 /-! ### Widths
 

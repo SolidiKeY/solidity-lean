@@ -744,4 +744,22 @@ theorem SpellsT.decode {T : Decode.Tables} (complete : InferCompleteT T) {r : Re
     simp [Decode.Tables.decode, p, hC, hL, hb.decode, found]
   exact decoded.trans (congrArg some (SpellsT.unique (decode_spellsT decoded) h))
 
+/-- At the landed tables the version's block spelling is the landed one. -/
+theorem itemsT_tables1 {k : Source.SCtx} {raw : List RawStmt}
+    {b : Source.Syn (.list (.item k))} :
+    Spells.ItemsT Decode.tables1 k raw b ↔ Spells.Items k raw b :=
+  ⟨fun h => Spells.items_spells _ _ _ ((Decode.items_tables1 k raw).symm.trans h.decode),
+    fun h => Spells.items_spellsT _ _ _ ((Decode.items_tables1 k raw).trans h.decode)⟩
+
+/-- **The bridge**: at the landed tables the version's spelling relation is
+the landed one. -/
+theorem spellsT_tables1 {r : Request} {s : SourceProgram} :
+    SpellsT Decode.tables1 r s ↔ Spells r s := by
+  constructor
+  · rintro ⟨p, C, L, b, L', d, hC, hL, hb, rfl⟩
+    exact ⟨p, C, L, b, L', d, hC, (Decode.locals_tables1 _).symm.trans hL,
+      itemsT_tables1.mp hb, rfl⟩
+  · rintro ⟨p, C, L, b, L', d, hC, hL, hb, rfl⟩
+    exact ⟨p, C, L, b, L', d, hC, (Decode.locals_tables1 _).trans hL, itemsT_tables1.mpr hb, rfl⟩
+
 end Solidity.Correctness.Lowering.Total

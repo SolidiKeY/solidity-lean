@@ -35,6 +35,10 @@ request) is not provable for it, and the contract at this boundary cannot be
 the goal yet. A local the elaborator declares without a type marker is decoded
 as a plain integer even if it was declared `address` or `bytesN`
 (`Decode.localTyW`): a possibly wrong Source type, not a gap.
+
+Bridge to the landed boundary: at the landed tables the generic decoder and
+spelling relation are the landed ones (`Decode.decode_tables1`,
+`spellsT_tables1`).
 -/
 namespace Solidity.Correctness.Lowering.Total
 

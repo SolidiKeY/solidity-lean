@@ -413,10 +413,11 @@ example : Decode.tablesW.decode { narrowRequest [] with
 /-- The two versions' tables: the landed decoder's, and the width-aware ones. -/
 example : Decode.tables1 = ⟨Decode.typeName, Decode.localTy, Decode.unit⟩ := rfl
 example : Decode.tablesW = ⟨Decode.typeNameW, Decode.localTyW, Decode.unitW⟩ := rfl
-/-- On the e1 sample the generic decoder at the landed tables is the landed
-decoder (the general equality is by construction and not proved). -/
-example : Decode.tables1.decode (sampleRequest RawProbe.input) =
-    Decode.decode (sampleRequest RawProbe.input) := rfl
+/-- The bridge: at the landed tables the generic decoder is the landed decoder
+and the version's spelling relation is the landed one. -/
+example (r : Request) : Decode.tables1.decode r = Decode.decode r := Decode.decode_tables1 r
+example {r : Request} {s : SourceProgram} : SpellsT Decode.tables1 r s ↔ Spells r s :=
+  spellsT_tables1
 /-- On the e1 sample the width-aware version agrees with the landed decoder. -/
 example : Decode.tablesW.decode (sampleRequest RawProbe.input) =
     Decode.decode (sampleRequest RawProbe.input) := rfl
