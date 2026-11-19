@@ -245,6 +245,14 @@ example (C : Contract) (sc : ElabScope) :
 
 end ScopeRank
 
+/-- The unchecked arm's successful transformed body is strictly below the
+original enclosing statement in control weight. -/
+example (ss out : List RawStmt) (h : uncheckStmts ss = .ok out) :
+    CalleeKernel.listWeight out < CalleeKernel.stmtWeight (.unchecked ss) := by
+  rw [uncheckStmts_weight ss out h]
+  simp only [CalleeKernel.stmtWeight]
+  omega
+
 section Counterexample
 
 /-- A contract with nothing declared. -/
