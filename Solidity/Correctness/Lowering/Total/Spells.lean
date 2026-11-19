@@ -758,8 +758,8 @@ theorem spellsT_tables1 {r : Request} {s : SourceProgram} :
   constructor
   · rintro ⟨p, C, L, b, L', d, hC, hL, hb, rfl⟩
     exact ⟨p, C, L, b, L', d, hC, (Decode.locals_tables1 _).symm.trans hL,
-      itemsT_tables1.mp hb, rfl⟩
+      Iff.mp itemsT_tables1 hb, rfl⟩
   · rintro ⟨p, C, L, b, L', d, hC, hL, hb, rfl⟩
-    exact ⟨p, C, L, b, L', d, hC, (Decode.locals_tables1 _).trans hL, itemsT_tables1.mpr hb, rfl⟩
+    exact ⟨p, C, L, b, L', d, hC, (Decode.locals_tables1 _).trans hL, Iff.mpr itemsT_tables1 hb, rfl⟩
 
 end Solidity.Correctness.Lowering.Total
