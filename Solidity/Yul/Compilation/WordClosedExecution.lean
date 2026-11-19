@@ -65,6 +65,43 @@ theorem step (i : Backend.Instr) (j : Evm.Instr)
  | some ys =>
    simpa only [List.append_nil] using WordExecution.step i j selected xs ys actual m []
 
+/-- Exact selected-program execution on the complete numeric stack, including
+faults after a successful prefix. Concrete selectors supply their exact step law. -/
+theorem run_selected
+ (selectInstr : Backend.Instr → Option Evm.Instr)
+ (selectCode : Backend.Program → Option (List Evm.Instr))
+ (emptyCode : selectCode [] = some [])
+ (consCode : ∀ i p, selectCode (i::p) =
+   (selectInstr i).bind (fun j => (selectCode p).map (fun q => j::q)))
+ (oneStep : ∀ i j, selectInstr i = some j → ∀ (xs : Stack) (m : Evm.Machine),
+   j.step {m with stack := xs.map coreWord} =
+   match Scalar.step i xs with
+   | none => .fault
+   | some ys => .ok {m with stack := ys.map coreWord} 0)
+ (p : Backend.Program) (q : List Evm.Instr)
+ (selected : selectCode p = some q) (input : Stack) (m : Evm.Machine) :
+ Evm.run q {m with stack := input.map coreWord} =
+ match Scalar.run p input with
+ | none => .fault
+ | some output => .ok {m with stack := output.map coreWord} 0 := by
+ induction p generalizing q input with
+ | nil =>
+   rw [emptyCode] at selected
+   cases selected
+   rfl
+ | cons i p ih =>
+   rw [consCode] at selected
+   obtain ⟨j,hi,rest⟩ := Option.bind_eq_some_iff.mp selected
+   obtain ⟨target,hp,same⟩ := Option.map_eq_some_iff.mp rest
+   subst q
+   rw [Evm.run,Evm.exec_cons_zero,oneStep i j hi input m]
+   cases actual : Scalar.step i input with
+   | none => rw [Scalar.run,actual]; rfl
+   | some middle =>
+     rw [Scalar.run,actual]
+     simp only [Option.bind_some,Evm.Out.ok_bind]
+     exact ih target hp middle
+
 /-- Exact whole selected program, including failures after successful prefixes.
 The model still erases PUSH widths and has no 1024-word capacity enforcement. -/
 theorem run (p : Backend.Program) (q : List Evm.Instr)
@@ -73,19 +110,7 @@ theorem run (p : Backend.Program) (q : List Evm.Instr)
  match Scalar.run p input with
  | none => .fault
  | some output => .ok {m with stack := output.map coreWord} 0 := by
- induction p generalizing q input with
- | nil => cases selected; rfl
- | cons i p ih =>
-   obtain ⟨j,hi,rest⟩ := Option.bind_eq_some_iff.mp selected
-   obtain ⟨target,hp,same⟩ := Option.map_eq_some_iff.mp rest
-   subst q
-   rw [Evm.run,Evm.exec_cons_zero,step i j hi input m]
-   cases actual : Scalar.step i input with
-   | none => rw [Scalar.run,actual]; rfl
-   | some middle =>
-     rw [Scalar.run,actual]
-     simp only [Option.bind_some,Evm.Out.ok_bind]
-     exact ih target hp middle
+ exact run_selected WordMachine.selectInstr WordMachine.selectCode rfl (fun _ _ => rfl) step p q selected input m
 
 theorem failure_iff (p : Backend.Program) (q : List Evm.Instr)
  (selected : WordMachine.selectCode p = some q) (input : Stack) (m : Evm.Machine) :
