@@ -34,11 +34,8 @@ and `OpcodeSpec.residue` unfolded); each is definitionally that clause, and
 
 theorem word_val (n : Nat) : (word n).val = n % 2 ^ 256 := rfl
 
-theorem iword_val (z : Int) : (iword z).val = (z % 2 ^ 256).toNat := by
-  unfold iword
-  rw [word_val]
-  apply Nat.mod_eq_of_lt
-  omega
+theorem iword_val (z : Int) : (iword z).val = (z % 2 ^ 256).toNat :=
+  Solidity.Yul.Checks.Shifts.iword_val z
 
 theorem truth_val (p : Prop) [Decidable p] :
     (truth (decide p)).val = (if p then 1 else 0) % 2 ^ 256 := by
@@ -133,7 +130,8 @@ theorem xor_spec (xs : Fin 2 → Word) :
 
 theorem clz_spec (xs : Fin 1 → Word) :
     (Pure.eval .«clz» xs).val =
-      (if (xs 0).val = 0 then 256 else 255 - (xs 0).val.log2) % 2 ^ 256 := rfl
+      (if (xs 0).val = 0 then 256 else 255 - (xs 0).val.log2) % 2 ^ 256 :=
+  Solidity.Yul.Checks.Bytes.clz_val xs
 
 /-- The whole arithmetic contract, for every input
 (`Solidity.Goals.opcodeArithmetic` is a definitional wrapper of it). -/

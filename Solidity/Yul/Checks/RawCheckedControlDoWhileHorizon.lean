@@ -64,11 +64,8 @@ theorem pipelineCounterexample : ∀ (world : Solidity.Source.St Solidity.Yul.Ch
   cases cells
 
 theorem dirtyBoundary : ∀ (world : Solidity.Source.St Solidity.Yul.Checks.RawCheckedControlDoWhileHorizon.Old.env),
- Solidity.Yul.RawCoherent.coherent (Solidity.Yul.Checks.RawCheckedControlDoWhileHorizon.Old.initial 2 257 2 world) ≠ true := by
-  intro world
-  rw [Solidity.Yul.Checks.RawCheckedControlDoWhile.dirtyBoundary world]
-  intro bad
-  cases bad
+ Solidity.Yul.RawCoherent.coherent (Solidity.Yul.Checks.RawCheckedControlDoWhileHorizon.Old.initial 2 257 2 world) ≠ true :=
+  Solidity.Yul.Checks.RawU8Statement.dirtyNotCoherent
 
 theorem sourceBreakCompletes : ∀ (glob : Solidity.Source.Glob Solidity.Yul.Checks.RawCheckedControlDoWhileHorizon.Old.env) (frame : Solidity.Source.Fr)
  (nps : Nat) (ph : Option (Solidity.Source.Ph Solidity.Yul.Checks.RawCheckedControlDoWhileHorizon.Old.env)) (world : Solidity.Source.St Solidity.Yul.Checks.RawCheckedControlDoWhileHorizon.Old.env),
@@ -91,11 +88,7 @@ theorem sourceBreakStable : ∀ (glob : Solidity.Source.Glob Solidity.Yul.Checks
   have ready : (RawCheckedControlDoWhile.run Old.readFlag Old.breakProof glob.pipeline 16
       (RawFrame.ofClean Old.clean world)).1 ≠ .error .timeout := by
     intro bad
-    have timed : (RawSequence.represented (RawCheckedControlDoWhile.run Old.readFlag Old.breakProof glob.pipeline 16
-        (RawFrame.ofClean Old.clean world))).1 = .error .timeout := by
-      simp only [RawSequence.represented,bad,Except.map]
-    have impossible := completion.symm.trans timed
-    cases impossible
+    simp only [RawSequence.represented, bad, Except.map] at completion <;> cases completion
   exact RawCheckedControlDoWhileHorizon.sourceExtension Old.ctx [] false false false (.local Old.flag) Old.readFlag
     Old.breakItems Old.breakProof glob frame checked 16 extra nps ph
     (RawFrame.ofClean Old.clean world) (@RawCoherent.coherent_ofClean Old.ctx Old.clean world) ready
@@ -121,11 +114,7 @@ theorem sourceContinueStable : ∀ (glob : Solidity.Source.Glob Solidity.Yul.Che
   have ready : (RawCheckedControlDoWhile.run Old.readFlag Old.clearContinueProof glob.pipeline 16
       (RawFrame.ofClean Old.clean world)).1 ≠ .error .timeout := by
     intro bad
-    have timed : (RawSequence.represented (RawCheckedControlDoWhile.run Old.readFlag Old.clearContinueProof glob.pipeline 16
-        (RawFrame.ofClean Old.clean world))).1 = .error .timeout := by
-      simp only [RawSequence.represented,bad,Except.map]
-    have impossible := completion.symm.trans timed
-    cases impossible
+    simp only [RawSequence.represented, bad, Except.map] at completion <;> cases completion
   exact RawCheckedControlDoWhileHorizon.sourceExtension Old.ctx [] false false false (.local Old.flag) Old.readFlag
     Old.clearContinueItems Old.clearContinueProof glob frame checked 16 extra nps ph
     (RawFrame.ofClean Old.clean world) (@RawCoherent.coherent_ofClean Old.ctx Old.clean world) ready
