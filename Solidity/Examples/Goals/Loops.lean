@@ -1,5 +1,5 @@
 import Solidity.Goals.Loops
-import Solidity.Correctness.Lowering.Total.Boundary
+import Solidity.Correctness.Lowering.Total.Versions
 
 namespace Solidity.Goals
 
@@ -406,6 +406,31 @@ example {T : Decode.Tables} (complete : InferCompleteT T) {r : Request} {s : Sou
     T.decode r = some s ↔ SpellsT T r s := ⟨decode_spellsT, SpellsT.decode complete⟩
 example {T : Decode.Tables} {r : Request} {s s' : SourceProgram} (h : SpellsT T r s)
     (h' : SpellsT T r s') : s = s' := h.unique h'
+
+/-! ### The width-aware version's boundary (`Total.Versions`) -/
+
+/-- Its value relation: a model `uint` holding 200 is related to the Source
+`uint8` 200; a model `uint` is related to no signed Source integer. -/
+example (D : Source.Layout) (h : Source.IntTy.u8.lo ≤ 200 ∧ 200 ≤ Source.IntTy.u8.hi)
+    (x : PrimTy.uint.Denote) (same : x.1 = 200) :
+    Version.Relation.ValRel D (.int Source.IntTy.u8) .uint (.int 200 h) x :=
+  .uint Source.IntTy.u8 rfl 200 h x same
+example (D : Source.Layout) (t : Source.IntTy) (signed : t.signed = true)
+    (v : Source.Val D (.int t)) (x : PrimTy.uint.Denote) :
+    ¬ Version.Relation.ValRel D (.int t) .uint v x :=
+  fun h => by cases h with | uint _ unsigned => rw [signed] at unsigned; cases unsigned
+/-- Total initial matching is a theorem for the version (Source to model). -/
+example : Simulation.InitialMatching Version.rel Decode.tablesW.decode := Version.initialMatching
+/-- What the contract, and its version 2, ask at the version's boundary. -/
+example :
+    LowerLoopsCorrectContract Version.boundary Version.boundary.reference
+        Decode.tablesW.decode →
+      ∀ r : Request, r.Succeeds → ∃ s, Decode.tablesW.decode r = some s :=
+  fun h => (Version.residual_iff.mp h).1
+example :
+    LowerLoopsCorrectContractV2 Version.rel Version.boundary Version.boundary.reference
+        Decode.tablesW.decode → Simulation.Bound Version.rel Decode.tablesW.decode :=
+  fun h => (Version.contractV2_iff.mp h).2.2.2.2
 
 end Decoder
 
