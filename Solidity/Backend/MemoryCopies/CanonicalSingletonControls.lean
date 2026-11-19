@@ -25,8 +25,6 @@ private def path {Γ : Ctx} (index : Nat) : SPath C Γ (.ref leaf) :=
   .loc (.index (.arr .dyn) (.loc (.root "matrix" root))
     (.simple (.lit (indexValue (wmod index)).val (indexValue (wmod index)).property)))
 private def reference : SRef C (.ref leaf) := (SRef.ofRoot "matrix" root).index (.arr .dyn) (indexValue (wmod 0))
-private theorem noRefs {R : RefTy} (reference : HRef [] R) : False := by
-  simpa only [List.getElem?_nil,reduceCtorEq] using reference.get?
 
 private theorem leaf_repr (payload : Fin W) :
     ReprAt (store payload) 2 (.ref leaf) (.data (.root 0) 0) (singletonArrayValue .uint (value payload)) := by
@@ -60,16 +58,16 @@ private theorem core (payload : Fin W) : Sim C 2 1 (Frag.init []) (state payload
     initial.net,initial.netSelf,by unfold Lmax; decide,(fun index => nomatch index),initial.env,initial.funds,initial.oracle⟩
 
 private theorem heap_repr (payload : Fin W) : Objects.HeapRepr (state payload).heap bases 8 (machine payload) :=
-  ⟨⟨fun reference => (noRefs reference).elim,fun reference => (noRefs reference).elim,
-      fun reference _ _ => (noRefs reference).elim⟩,
-    (fun _ reference => (noRefs reference).elim),(fun reference => (noRefs reference).elim),
-    (fun reference _ => (noRefs reference).elim)⟩
+  ⟨⟨fun reference => (nomatch reference.get?),fun reference => (nomatch reference.get?),
+      fun reference _ _ => (nomatch reference.get?)⟩,
+    (fun _ reference => (nomatch reference.get?)),(fun reference => (nomatch reference.get?)),
+    (fun reference _ => (nomatch reference.get?))⟩
 
 private theorem represented (payload : Fin W) : Objects.StateRepr 2 1 8 (Frag.init []) (state payload) bases (machine payload) :=
   ⟨core payload,heap_repr payload,(fun index => nomatch index),by decide⟩
 
 private theorem allocator (payload : Fin W) : Objects.AllocatorRepr (state payload).heap bases 8 (wmod 40) (machine payload) := by
-  refine ⟨heap_repr payload,⟨by decide,by decide,rfl,?_⟩,fun reference => (noRefs reference).elim⟩
+  refine ⟨heap_repr payload,⟨by decide,by decide,rfl,?_⟩,fun reference => (nomatch reference.get?)⟩
   intro address above
   change 40 ≤ address at above
   simp only [machine,if_neg (show address ≠ 0 by omega),if_neg (show address ≠ 7 by omega)]

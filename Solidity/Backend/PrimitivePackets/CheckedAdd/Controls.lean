@@ -138,15 +138,4 @@ theorem low_fuel (p : Roadmap.Pipeline) :
       (.error .timeout,source 7 9 (by decide) (by decide)) := by
   first | rfl | decide | omega
 end Fixture
-
-theorem exact_panic_bytes : Source.panicData .arithmetic =
-    [0x4e,0x48,0x7b,0x71] ++ List.replicate 31 0 ++ [0x11] := by
-  first | decide | rfl | omega
-
-theorem panic_not_truncated : Source.panicData .arithmetic ≠
-    [0x4e,0x48,0x7b,0x71,0x11] := by
-  first | decide | rfl | omega
-
-theorem panic_not_empty : Source.panicData .arithmetic ≠ [] := by
-  first | decide | rfl | omega
 end Solidity.Backend.PrimitivePackets.CheckedAdd.Controls

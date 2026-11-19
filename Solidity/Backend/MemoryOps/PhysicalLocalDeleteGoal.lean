@@ -169,11 +169,6 @@ private theorem parent_length : heap.len parent .dyn=2 := by
   simp only [Heap.len,MObj.elems_dyn]
   rfl
 
-private theorem byte_word_read (memory : Environment.Memory) (a w : Nat) :
-    Environment.readMemory (Environment.writeBytes memory a (Semantics.wordBytes w)) a 32=
-      Semantics.wordBytes w := by
-  simpa only [Environment.wordBytes_length] using Environment.read_written (Semantics.wordBytes w) a memory
-
 /-- Execute the producer on the actual shared-child fixture, with all ordered
 initial/reached observations retained by the original target. -/
 theorem reference_store_client : ReferenceStoreClientGoal := by
@@ -212,7 +207,7 @@ theorem reference_store_client : ReferenceStoreClientGoal := by
     all_goals
       simp only [bytes,changedBytes,List.foldl_cons,List.foldl_nil]
       repeat (rw [readMemory_write_frame]; case sep => simp only [Environment.wordBytes_length]; omega)
-      exact byte_word_read _ _ _
+      exact word_read_written _ _ _
 
 /-- The same actual operation has nonempty initial pointer and numeric
 footprints. The full client observations are linked to its SAME typed output
@@ -335,12 +330,12 @@ theorem pointer_frame_alias_client : PointerFrameAliasClientGoal := by
   have nextFrame : PointerFrame next nextBytes (fun c => c=17 ∨ c=18) :=
     restrict_pointer_frame nextFull (fun _ hc => .inl hc)
   have old17 : Environment.readMemory oldBytes 544 32=Semantics.wordBytes 32 :=
-    byte_word_read firstBytes 544 32
+    word_read_written firstBytes 544 32
   have old18 : Environment.readMemory oldBytes 576 32=Semantics.wordBytes 32 := by
     rw [readMemory_write_frame firstBytes 576 32 544 _ (Or.inr (by rw [Environment.wordBytes_length];decide))]
-    exact byte_word_read data 576 32
+    exact word_read_written data 576 32
   have next17 : Environment.readMemory nextBytes 544 32=Semantics.wordBytes 256 :=
-    byte_word_read oldBytes 544 256
+    word_read_written oldBytes 544 256
   have next18 : Environment.readMemory nextBytes 576 32=Semantics.wordBytes 32 := by
     rw [readMemory_write_frame oldBytes 576 32 544 _ (Or.inr (by rw [Environment.wordBytes_length];decide))]
     exact old18
@@ -502,7 +497,7 @@ private theorem client_initial : ReferenceArrayAt clientHeap clientRoot clientBa
     change Environment.readMemory clientBytes 512 32=Semantics.wordBytes 2
     simp only [clientBytes,List.foldl_cons,List.foldl_nil]
     repeat (rw [readMemory_write_frame]; case sep => simp only [Environment.wordBytes_length]; omega)
-    exact byte_word_read _ _ _
+    exact word_read_written _ _ _
   · constructor
     · intro c hc
       obtain ⟨i,hi,he⟩ := hc
@@ -519,12 +514,12 @@ private theorem client_initial : ReferenceArrayAt clientHeap clientRoot clientBa
         change Environment.readMemory clientBytes 544 32=Semantics.wordBytes 32
         simp only [clientBytes,List.foldl_cons,List.foldl_nil]
         repeat (rw [readMemory_write_frame]; case sep => simp only [Environment.wordBytes_length]; omega)
-        exact byte_word_read _ _ _
+        exact word_read_written _ _ _
       · subst c
         refine ⟨Evm.wmod 1,rfl,by decide,?_⟩
         change Environment.readMemory clientBytes 576 32=Semantics.wordBytes 32
         simp only [clientBytes,List.foldl_cons,List.foldl_nil]
-        exact byte_word_read _ _ _
+        exact word_read_written _ _ _
 
 /-- Independently establish the actual initial parent, then execute the real
 redirection. Typed aliases, children, header, all pointer spans and stack remain
@@ -554,7 +549,7 @@ theorem reference_array_client : ReferenceArrayClientGoal := by
     all_goals
       simp only [clientBytes,List.foldl_cons,List.foldl_nil]
       repeat (rw [readMemory_write_frame]; case sep => simp only [Environment.wordBytes_length]; omega)
-      exact byte_word_read _ _ _
+      exact word_read_written _ _ _
 
 /-- info: 'Solidity.Backend.MemoryOps.Physical.reference_array_client' depends on axioms: [propext, Classical.choice, Quot.sound] -/
 #guard_msgs (whitespace := lax) in #print axioms reference_array_client
@@ -582,7 +577,7 @@ private theorem populated_parent : ReferenceArrayAt heap parent bases machine by
     change Environment.readMemory bytes 512 32=Semantics.wordBytes 2
     simp only [bytes,List.foldl_cons,List.foldl_nil]
     repeat (rw [readMemory_write_frame]; case sep => simp only [Environment.wordBytes_length]; omega)
-    exact byte_word_read _ _ _
+    exact word_read_written _ _ _
   · constructor
     · intro c hc
       obtain ⟨i,hi,he⟩ := hc
@@ -599,12 +594,12 @@ private theorem populated_parent : ReferenceArrayAt heap parent bases machine by
         change Environment.readMemory bytes 544 32=Semantics.wordBytes 32
         simp only [bytes,List.foldl_cons,List.foldl_nil]
         repeat (rw [readMemory_write_frame]; case sep => simp only [Environment.wordBytes_length]; omega)
-        exact byte_word_read _ _ _
+        exact word_read_written _ _ _
       · subst c
         refine ⟨Evm.wmod 1,rfl,by decide,?_⟩
         change Environment.readMemory bytes 576 32=Semantics.wordBytes 32
         simp only [bytes,List.foldl_cons,List.foldl_nil]
-        exact byte_word_read _ _ _
+        exact word_read_written _ _ _
 
 private theorem left_length : heap.len left .dyn=2 := by
   simp only [Heap.len,MObj.elems_dyn]
@@ -640,7 +635,7 @@ private theorem populated_child_bytes : WordFrame machine bytes
       first | refine ⟨Evm.wmod 2,rfl,?_⟩ | refine ⟨Evm.wmod 1,rfl,?_⟩ | refine ⟨Evm.wmod 0,rfl,?_⟩
       simp only [bytes,List.foldl_cons,List.foldl_nil]
       repeat (rw [readMemory_write_frame]; case sep => simp only [Environment.wordBytes_length]; omega)
-      exact byte_word_read _ _ _
+      exact word_read_written _ _ _
 
 private def primitiveNext : Evm.Machine := Evm.Memory.writeMachine machine 2 (.val (Evm.wmod 0))
 private def primitiveBytes : Environment.Memory := Environment.writeBytes bytes 64 (Semantics.wordBytes 0)
@@ -729,7 +724,7 @@ theorem primitive_child_store_client :
     all_goals
       simp only [bytes,primitiveBytes,List.foldl_cons,List.foldl_nil]
       repeat (rw [readMemory_write_frame]; case sep => simp only [Environment.wordBytes_length]; omega)
-      exact byte_word_read _ _ _
+      exact word_read_written _ _ _
 
 /-- info: 'Solidity.Backend.MemoryOps.Physical.primitive_child_store_client' depends on axioms: [propext, Classical.choice, Quot.sound] -/
 #guard_msgs (whitespace := lax) in #print axioms primitive_child_store_client
@@ -750,9 +745,9 @@ theorem primitive_child_store_negative :
   · have old : Environment.readMemory bytes 64 32=Semantics.wordBytes 1 := by
       simp only [bytes,List.foldl_cons,List.foldl_nil]
       repeat (rw [readMemory_write_frame]; case sep => simp only [Environment.wordBytes_length]; omega)
-      exact byte_word_read _ _ _
+      exact word_read_written _ _ _
     have next : Environment.readMemory primitiveBytes 64 32=Semantics.wordBytes 0 :=
-      byte_word_read bytes 64 0
+      word_read_written bytes 64 0
     rw [old,next]
     decide
 

@@ -7,7 +7,6 @@ namespace Solidity.Backend.MemoryCopies.SnapshotRestoreControls
 open Evm Evm.Memory
 private def H : HTy := [.array (.prim .uint)]
 private def reference : HRef H (.array (.prim .uint)) := ⟨0,rfl⟩
-private theorem wide : 1024 < W := by decide
 private def heap (n : Nat) (bounded : n < 128) : Heap H :=
   (⟨List.replicate n (indexValue (wmod 7)),by rw [List.length_replicate]; exact Nat.lt_trans bounded (by decide)⟩,())
 private def destination : Slot := .root 1
@@ -32,7 +31,7 @@ private theorem captured (n : Nat) (bounded : n < 128) :
   refine ⟨?_,?_,?_⟩
   · rw [count]
     change 16+1+n ≤ W
-    have enough : 1024 < W := wide
+    have enough : 1024 < W := by decide
     omega
   · rw [count]
     rfl

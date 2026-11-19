@@ -222,4 +222,22 @@ def runtimeMemoryArray : RuntimeMemoryArrayCertificate := ⟨runtime_memory_arra
 #print axioms memory_array_words
 #print axioms runtime_memory_array_success
 #print axioms runtimeMemoryArray
+
+/-- Equal runs of two prefixes stay equal after a common suffix. -/
+theorem run_append_congr (left right suffix : List Instr) (machine : Machine)
+    (same : run left machine = run right machine) :
+    run (left ++ suffix) machine = run (right ++ suffix) machine := by
+  simp only [run] at same ⊢
+  rw [exec_append,exec_append,same]
+
+/-- A cursor `n` words below the top of memory reads as `W - n`. -/
+theorem wmod_sub_val (n : Nat) (positive : 0 < n) (bounded : n ≤ W) :
+    (wmod (W - n)).val = W - n := Nat.mod_eq_of_lt (by omega)
+
+/-- A cursor at most 128 words below the top lies above the control frame. -/
+theorem wmod_sub_above (n : Nat) (positive : 0 < n) (bounded : n ≤ 128) : 40 ≤ (wmod (W - n)).val := by
+  have large : 256 < W := by decide
+  rw [wmod_sub_val n positive (by omega)]
+  omega
+
 end Solidity.Backend.MemoryCopies

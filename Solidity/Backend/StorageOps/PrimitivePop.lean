@@ -55,12 +55,6 @@ theorem element_location {n : Nat} {G : Schema n} {p : PrimTy} (base : Solidity.
     (elementQuery (G := G) (p := p) i).location base = .data base i.val := by
   simp only [elementQuery, Query.location, pathLoc, stepLoc, inlineSize_prim, Nat.mul_one]
 
-private theorem data_ne_base (base : Solidity.Storage.Loc) (i : Nat) : Solidity.Storage.Loc.data base i ≠ base := by
-  intro same
-  have depth := congrArg Solidity.Storage.Loc.depth same
-  simp only [Solidity.Storage.Loc.depth] at depth
-  omega
-
 /-- Full requested primitive-array query representation, not only two numeric
 points. Header compatibility follows from the OLD relation and actual pop;
 all failed/other retained reads keep their exact Option outcomes. -/
@@ -94,7 +88,7 @@ theorem represented {n : Nat} {G : Schema n} {p : PrimTy}
     refine ⟨oldRep.1, True.intro, ?_⟩
     intro word observed
     rw [element_location]
-    simp only [Representation.write, if_neg (data_ne_base base i.val)]
+    simp only [Representation.write, if_neg (Solidity.Storage.Loc.data_ne_self base i.val)]
     by_cases last : i.val = old.length.val - 1
     · rw [last_read old result popped i last] at observed
       cases observed

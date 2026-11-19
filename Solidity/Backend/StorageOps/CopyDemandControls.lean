@@ -300,4 +300,15 @@ theorem arbitrary_depth_copy (depth : Nat) :
 /-- info: 'Solidity.Backend.StorageOps.CopyDemandControls.numericView' does not depend on any axioms -/
 #guard_msgs in #print axioms numericView
 
+/-- The control array's header is represented at its root. -/
+theorem old_header_represented : Represented old [.length .nil] root store := by
+  intro q member
+  have same := List.mem_singleton.mp member
+  subst q
+  refine ⟨True.intro,⟨by decide,by decide⟩,?_⟩
+  intro word observed
+  change some two = some word at observed
+  cases observed
+  rfl
+
 end Solidity.Backend.StorageOps.CopyDemandControls

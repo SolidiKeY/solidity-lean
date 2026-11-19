@@ -7,20 +7,12 @@ coverage and cross-set separation derive read/guard/count/log stability. -/
 namespace Solidity.Backend.StorageOps.NestedPopCommutation
 open TypeGraph Solidity.Storage Solidity.Storage.Representation Solidity.Storage.Representation.Graph
 
-private theorem header_bound (N : Nat) (hash : Solidity.Storage.Pre → Nat)
- (base : Solidity.Storage.Loc) (initial : WordStore) :
- LifecycleNumeric.headerLength N hash base initial<2^256 := by
- have bound := (initial (base.word N hash)).property
- simp only [PrimTy.inRange,decide_eq_true_eq] at bound
- unfold LifecycleNumeric.headerLength
- omega
-
 def selected (N : Nat) (hash : Solidity.Storage.Pre → Nat) (base : Solidity.Storage.Loc) (initial : WordStore) : Solidity.Storage.Loc :=
  .data base (LifecycleNumeric.headerLength N hash base initial-1)
 
 def decremented (N : Nat) (hash : Solidity.Storage.Pre → Nat) (base : Solidity.Storage.Loc) (initial : WordStore) : WordStore :=
  writeWord initial (base.word N hash) (lengthWord (LifecycleNumeric.headerLength N hash base initial-1)
-  (by have bound:=header_bound N hash base initial; omega))
+  (by have bound:=LifecycleNumeric.headerLength_lt N hash base initial; omega))
 
 /-- Outer root is always read; child and runtime live grandchildren are touched
 ONLY when the original outer guard succeeds. No fixed count/depth cap. -/
@@ -32,7 +24,7 @@ def touches (N : Nat) (hash : Solidity.Storage.Pre → Nat) (base : Solidity.Sto
 clear length is read AFTER the original outer-root decrement, just as execute. -/
 def writeLog (N : Nat) (hash : Solidity.Storage.Pre → Nat) (base : Solidity.Storage.Loc) (initial : WordStore) : List (Solidity.Storage.Loc × Semantics.Word) :=
  if 0<LifecycleNumeric.headerLength N hash base initial then
- (base,lengthWord (LifecycleNumeric.headerLength N hash base initial-1) (by have bound:=header_bound N hash base initial; omega)) ::
+ (base,lengthWord (LifecycleNumeric.headerLength N hash base initial-1) (by have bound:=LifecycleNumeric.headerLength_lt N hash base initial; omega)) ::
  NumericClearCommutation.writeLog N hash (selected N hash base initial) (decremented N hash base initial) else []
 
 /-- Certificate DERIVED from actual numeric nested-pop execution, not a new

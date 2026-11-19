@@ -15,9 +15,8 @@ private structure Input where
 private def input : Input := ⟨_, _, _, _, ObjectArrayExamples.initial_allocator⟩
 private abbrev Row := {payloads : List (Fin W) // payloads.length < 128}
 private def values (payloads : List (Fin W)) : List PrimTy.uint.Denote := payloads.map indexValue
-private theorem wide : 1024 < W := by decide
 private def convert (row : Row) : PrimitiveStorageRow .uint :=
-  ⟨values row.val, by rw [values, List.length_map]; have bound : row.val.length < 128 := row.property; have large : 1024 < W := wide; omega⟩
+  ⟨values row.val, by rw [values, List.length_map]; have bound : row.val.length < 128 := row.property; have large : 1024 < W := (by decide); omega⟩
 private def rows (entries : List Row) : List (PrimitiveStorageRow .uint) := entries.map convert
 private def payloadAt (entries : List Row) (offset : Nat) : List (Fin W) := (entries[offset]?.map Subtype.val).getD []
 private def source : Slot := .data (.root 0) 0
@@ -46,7 +45,7 @@ private theorem represented (entries : List Row) (start : Nat) :
     · simp only [machine, allocateStructMachine, writeMachine, store, source, Slot.add, Nat.zero_add,
         WordStore.read, Nat.le_add_right, if_true, Nat.add_sub_cancel_left,
         payloadAt, picked, Option.map_some, Option.getD_some, convert, values, List.length_map]
-      exact Nat.mod_eq_of_lt (show row.val.length < W by have large : 1024 < W := wide; have bound : row.val.length < 128 := row.property; omega)
+      exact Nat.mod_eq_of_lt (show row.val.length < W by have large : 1024 < W := (by decide); have bound : row.val.length < 128 := row.property; omega)
     · intro item value chosen
       simp only [SVec.toList_ofList, convert, values, List.getElem?_map] at chosen
       cases found : row.val[item]? with
@@ -78,7 +77,7 @@ theorem actual_typed (entries : List Row) (start : Fin 4) (remaining : start.val
       ⟨start.val, Nat.lt_trans start.isLt (by decide)⟩ fits := by
   have fits : (wmod 43).val + nestedStorageDemand (rows entries) < W := by
     have cost : nestedStorageDemand (rows entries) ≤ 128 * entries.length := demand_bound entries
-    have large : 1024 < W := wide
+    have large : 1024 < W := by decide
     change 43 + nestedStorageDemand (rows entries) < W
     omega
   exact ⟨fits, fixed_reference_storage_loop_success input.heap .uint (rows entries) input.base 8 (wmod 43)
@@ -177,7 +176,7 @@ theorem saturated_first_refusal :
     run fixedReferenceStorageLoopCode (nestedStorageControl (moved [pair] 2 wMax) source (wmod 40) (wmod 3) (wmod 2)) = .revert :=
   actual_refusal [pair] ⟨2, by decide⟩ (by decide) wMax (by decide) (by
     change ¬ W - 1 + 3 < W
-    have large : 1024 < W := wide
+    have large : 1024 < W := by decide
     omega)
 
 theorem repeated_freshness :
@@ -211,7 +210,7 @@ theorem later_refusal_has_prefix :
       run fixedReferenceStorageTurnCode (nestedStorageControl target source (wmod 40) (wmod 3) (wmod 2)) = .revert ∧
       run fixedReferenceStorageLoopCode (nestedStorageControl (moved [empty, empty] 1 (wmod (W - 2))) source
         (wmod 40) (wmod 3) (wmod 1)) = .revert := by
-  have large : 1024 < W := wide
+  have large : 1024 < W := by decide
   have cursorValue : (wmod (W - 2)).val = W - 2 := Nat.mod_eq_of_lt (by omega)
   have above : 43 ≤ (wmod (W - 2)).val := by rw [cursorValue]; omega
   have firstFits : (wmod (W - 2)).val + ((convert empty).val.length + 1) < W := by

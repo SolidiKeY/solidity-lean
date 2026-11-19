@@ -13,9 +13,8 @@ private structure Input where
   allocator : Objects.AllocatorRepr heap base 8 (wmod 40) machine
 private def input : Input := ⟨_,_,_,_,ObjectArrayExamples.initial_allocator⟩
 private def values (payloads : List (Fin W)) : List PrimTy.uint.Denote := payloads.map indexValue
-private theorem wide : 128 < W := by decide
 private def value (payloads : List (Fin W)) (bounded : payloads.length < 128) : SVal (.ref (.array (.prim .uint))) :=
-  primitiveArrayValue .uint (values payloads) (by rw [values,List.length_map]; exact Nat.lt_trans bounded wide)
+  primitiveArrayValue .uint (values payloads) (by rw [values,List.length_map]; exact Nat.lt_trans bounded (by decide : 128 < W))
 private def source : Slot := .root 0
 private def store (payloads : List (Fin W)) : WordStore := ⟨fun slot => match slot with
   | .root 0 => wmod payloads.length
@@ -28,7 +27,7 @@ private theorem represented (payloads : List (Fin W)) (bounded : payloads.length
     ReprAt (machine payloads).store 128 (.ref (.array (.prim .uint))) source (value payloads bounded) := by
   refine .array ?_ (by simpa only [values,List.length_map] using bounded) ?_
   · simp only [values,List.length_map]
-    exact Nat.mod_eq_of_lt (Nat.lt_trans bounded wide)
+    exact Nat.mod_eq_of_lt (Nat.lt_trans bounded (by decide : 128 < W))
   · intro index item selected
     simp only [SVec.toList_ofList,values,List.getElem?_map] at selected
     cases chosen : payloads[index]? with
@@ -55,7 +54,7 @@ theorem actual_runtime (payloads : List (Fin W)) (bounded : payloads.length < 12
       (∀ (index : Nat) (payload : Fin W), payloads[index]? = some payload → target.mem (41 + index) = .val payload) := by
   obtain ⟨base',target,ran,allocated,rootAt,_,shape,below,_⟩ :=
     checked_storage_array_success input.heap .uint (values payloads)
-      (by rw [values,List.length_map]; exact Nat.lt_trans bounded wide)
+      (by rw [values,List.length_map]; exact Nat.lt_trans bounded (by decide : 128 < W))
       input.base 8 (wmod 40) (machine payloads) source 128 (allocator payloads) (represented payloads bounded)
       (by simpa only [values,List.length_map] using fits)
   have sourceLength : (grown payloads bounded).heap.len (grown payloads bounded).val .dyn = payloads.length := by
@@ -157,7 +156,7 @@ private theorem moved_representation (payloads : List (Fin W)) (bounded : payloa
 theorem saturated_refusal (payloads : List (Fin W)) (bounded : payloads.length < 128) :
     run checkedStorageArrayCode ((moved payloads wMax).push (.slot source)) = .revert := by
   rw [checked_storage_array_run input.heap .uint (values payloads)
-    (by rw [values,List.length_map]; exact Nat.lt_trans bounded wide) input.base 8 wMax (moved payloads wMax) source 128
+    (by rw [values,List.length_map]; exact Nat.lt_trans bounded (by decide : 128 < W)) input.base 8 wMax (moved payloads wMax) source 128
     (moved_allocator payloads wMax (by decide)) (moved_representation payloads bounded wMax)]
   apply if_neg
   change ¬ (W - 1 + (_ + 1) < W)
@@ -167,18 +166,11 @@ theorem saturated_refusal (payloads : List (Fin W)) (bounded : payloads.length <
 theorem empty_saturated_refusal : run checkedStorageArrayCode ((moved [] wMax).push (.slot source)) = .revert :=
   saturated_refusal [] (by decide)
 
-private theorem cursor_value (n : Nat) (positive : 0 < n) (bounded : n ≤ W) :
-    (wmod (W - n)).val = W - n := Nat.mod_eq_of_lt (by omega)
-private theorem cursor_above (n : Nat) (positive : 0 < n) (bounded : n ≤ 128) : 40 ≤ (wmod (W - n)).val := by
-  have large : 256 < W := by decide
-  rw [cursor_value n positive (by omega)]
-  omega
-
 theorem pair_boundary_refusal :
     run checkedStorageArrayCode ((moved [wmod 11,wmod 23] (wmod (W - 3))).push (.slot source)) = .revert := by
   rw [checked_storage_array_run input.heap .uint (values [wmod 11,wmod 23]) (by decide) input.base 8 (wmod (W - 3))
     (moved [wmod 11,wmod 23] (wmod (W - 3))) source 128
-    (moved_allocator _ _ (cursor_above 3 (by decide) (by decide))) (moved_representation _ (by decide) _),cursor_value 3 (by decide) (by decide)]
+    (moved_allocator _ _ (wmod_sub_above 3 (by decide) (by decide))) (moved_representation _ (by decide) _),wmod_sub_val 3 (by decide) (by decide)]
   apply if_neg
   change ¬ (W - 3 + (2 + 1) < W)
   have large : 3 ≤ W := by decide
@@ -188,24 +180,24 @@ theorem pair_last_fitting : ∃ fits,
     CheckedStorageArrayResult input.heap .uint (values [wmod 11,wmod 23]) (by decide) input.base 8 (wmod (W - 4))
       (moved [wmod 11,wmod 23] (wmod (W - 4))) source fits := by
   have fits : (wmod (W - 4)).val + ((values [wmod 11,wmod 23]).length + 1) < W := by
-    rw [cursor_value 4 (by decide) (by decide)]
+    rw [wmod_sub_val 4 (by decide) (by decide)]
     change W - 4 + (2 + 1) < W
     have large : 4 ≤ W := by decide
     omega
   exact ⟨fits,checked_storage_array_success input.heap .uint _ (by decide) input.base 8 _ _ source 128
-    (moved_allocator _ _ (cursor_above 4 (by decide) (by decide))) (moved_representation _ (by decide) _) fits⟩
+    (moved_allocator _ _ (wmod_sub_above 4 (by decide) (by decide))) (moved_representation _ (by decide) _) fits⟩
 
 theorem header_selects_capacity :
     (∃ fits, CheckedStorageArrayResult input.heap .uint (values []) (by decide) input.base 8 (wmod (W - 3))
       (moved [] (wmod (W - 3))) source fits) ∧
     run checkedStorageArrayCode ((moved [wmod 11,wmod 23] (wmod (W - 3))).push (.slot source)) = .revert := by
   have fits : (wmod (W - 3)).val + ((values []).length + 1) < W := by
-    rw [cursor_value 3 (by decide) (by decide)]
+    rw [wmod_sub_val 3 (by decide) (by decide)]
     change W - 3 + (0 + 1) < W
     have large : 3 ≤ W := by decide
     omega
   exact ⟨⟨fits,checked_storage_array_success input.heap .uint _ (by decide) input.base 8 _ _ source 128
-    (moved_allocator _ _ (cursor_above 3 (by decide) (by decide))) (moved_representation _ (by decide) _) fits⟩,pair_boundary_refusal⟩
+    (moved_allocator _ _ (wmod_sub_above 3 (by decide) (by decide))) (moved_representation _ (by decide) _) fits⟩,pair_boundary_refusal⟩
 
 #print axioms certificate_inhabited
 #print axioms actual_runtime

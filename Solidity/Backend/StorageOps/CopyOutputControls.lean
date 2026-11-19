@@ -208,18 +208,6 @@ private theorem alias_old_owner : Represented CopyWriteControls.oldNode aliasQue
     | exact ⟨by decide,by decide⟩
     | (intro word observed; change some zero = some word at observed; cases observed; rfl)
     | (intro word observed; change some one = some word at observed; cases observed; rfl)
-private theorem alias_source_owner : Represented CopyWriteControls.sourceNode
-    (ClearDemands.demands CopyWriteControls.sourceNode) CopyWriteControls.overlapSource CopyWriteControls.overlapStore := by
-  intro q member
-  apply CopyWriteControls.overlap_source_owner q
-  change q ∈ [rootFlag,childFlag,childKids,rootKids] at member
-  change q ∈ [rootFlag,rootKids,childFlag,childKids]
-  simp only [List.mem_cons,List.not_mem_nil,or_false] at member ⊢
-  rcases member with rfl | rfl | rfl | rfl
-  · exact Or.inl rfl
-  · exact Or.inr (Or.inr (Or.inl rfl))
-  · exact Or.inr (Or.inr (Or.inr rfl))
-  · exact Or.inr (Or.inl rfl)
 private theorem alias_separation : ∀ q ∈ aliasQueries,
     ∀ d ∈ CopyDemands.demands CopyWriteControls.oldNode CopyWriteControls.sourceNode,
     d.location (.root 0) = q.location (.root 0) → d = q := by
@@ -260,7 +248,7 @@ theorem alias_full_owner :
     Transport 128 CopyWriteControls.overlapHash CopyWriteControls.overlapLocations after CopyWriteControls.overlapResult :=
   represented_copy CopyWriteControls.oldNode CopyWriteControls.sourceNode aliasPermit aliasQueries (.root 0)
     CopyWriteControls.overlapSource CopyWriteControls.overlapStore CopyWriteControls.overlapMachine
-    CopyWriteControls.overlap_run alias_old_owner alias_source_owner (fun _ _ => rfl) alias_source_covered
+    CopyWriteControls.overlap_run alias_old_owner CopyWriteControls.overlap_source_demands (fun _ _ => rfl) alias_source_covered
     (fun q member => List.mem_map.mpr ⟨q,member,rfl⟩)
     (fun q member => List.mem_map.mpr ⟨q,member,rfl⟩) alias_separation
 

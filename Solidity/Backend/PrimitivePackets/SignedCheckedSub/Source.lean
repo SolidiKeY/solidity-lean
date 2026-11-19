@@ -1,4 +1,4 @@
-import Solidity.Lowering.V07.UnsignedAddition
+import Solidity.Backend.PrimitivePackets.CheckedBinary
 
 /-! Actual checked int256 Source local evaluation. No target result or desired
 run is a premise. The frame and full input state are retained. -/
@@ -15,16 +15,9 @@ theorem source_success {E : Source.Env} {Γ : Source.RCtx}
     (fits : U.lo ≤ x-y ∧ x-y ≤ U.hi) :
     (Source.evalE G {F with checked := true} (fuel+3)
       (.binary .sub (.local a) (.local b))).run s =
-      (.ok (.val (.int (x-y) fits)),s) := by
-  rw [Source.evalE]
-  simp only [reduceCtorEq,decide_false,Bool.false_or,Bool.false_eq_true,if_false]
-  rw [Source.Hoare.run_bind,source_local_pair G {F with checked := true} fuel s U a b x y hx hy ha hb]
-  change (do
-    let v ← Source.EM.lift (Source.binVal true .sub
-      (.int x hx : Source.Val E.layout (.int U)) (.int y hy))
-    pure (Source.RVal.val v)).run s = _
-  simp only [Source.binVal,Source.intBin,Source.intRes,dif_pos fits]
-  rfl
+      (.ok (.val (.int (x-y) fits)),s) :=
+  CheckedBinary.source_success G F fuel s U .sub (·-·) (by decide) (by decide)
+    a b x y hx hy ha hb rfl fits
 
 theorem source_overflow {E : Source.Env} {Γ : Source.RCtx}
     (G : Source.Glob E) (F : Source.Fr) (fuel : Nat) (s : Source.EMState E Γ)
@@ -34,15 +27,8 @@ theorem source_overflow {E : Source.Env} {Γ : Source.RCtx}
     (overflow : ¬ (U.lo ≤ x-y ∧ x-y ≤ U.hi)) :
     (Source.evalE G {F with checked := true} (fuel+3)
       (.binary .sub (.local a) (.local b))).run s =
-      (.error (.revert (Source.panicData .arithmetic)),s) := by
-  rw [Source.evalE]
-  simp only [reduceCtorEq,decide_false,Bool.false_or,Bool.false_eq_true,if_false]
-  rw [Source.Hoare.run_bind,source_local_pair G {F with checked := true} fuel s U a b x y hx hy ha hb]
-  change (do
-    let v ← Source.EM.lift (Source.binVal true .sub
-      (.int x hx : Source.Val E.layout (.int U)) (.int y hy))
-    pure (Source.RVal.val v)).run s = _
-  simp only [Source.binVal,Source.intBin,Source.intRes,dif_neg overflow,if_true,Source.panic]
-  rfl
+      (.error (.revert (Source.panicData .arithmetic)),s) :=
+  CheckedBinary.source_overflow G F fuel s U .sub (·-·) (by decide) (by decide)
+    a b x y hx hy ha hb rfl overflow
 
 end Solidity.Backend.PrimitivePackets.SignedCheckedSub

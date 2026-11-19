@@ -62,12 +62,6 @@ private theorem contextCovered : ∀ q ∈ contexts groups, q.location CopyDeman
   change q ∈ [leaf 0 0,leaf 0 1,leaf 0 2,header 0,leaf 2 0,header 2,leaf 3 0] at member
   simp only [List.mem_cons,List.not_mem_nil,or_false] at member
   rcases member with rfl | rfl | rfl | rfl | rfl | rfl | rfl <;> decide
-private theorem written : ∀ q ∈ ClearDemands.slotDemands (AggregatePop.lastSlot CopyDemandControls.old),
-    q.location (AggregatePop.childBase CopyDemandControls.old CopyDemandControls.root) ∈ CopyDemandControls.locations := by
-  intro q member
-  change q ∈ [word 0,word 1,.length .nil] at member
-  simp only [List.mem_cons,List.not_mem_nil,or_false] at member
-  rcases member with rfl | rfl | rfl <;> decide
 private theorem separated : ∀ q ∈ selected, ∀ d ∈ ClearDemands.slotDemands (AggregatePop.lastSlot CopyDemandControls.old),
     d.location (AggregatePop.childBase CopyDemandControls.old CopyDemandControls.root) =
       q.location (AggregatePop.childBase CopyDemandControls.old CopyDemandControls.root) → d = q := by
@@ -182,7 +176,7 @@ theorem combined_certificate :
     (fun _ _ => rfl) (List.mem_append.mpr (Or.inl (by decide)))
     (fun q member => List.mem_append.mpr (Or.inl (targetCovered q member)))
     (fun q member => List.mem_append.mpr (Or.inl (contextCovered q member))) outsideCovered
-    (fun q member => List.mem_append.mpr (Or.inl (written q member))) separated headerSeparated otherIndices noAlias outsideApart outsideNonalias
+    (fun q member => List.mem_append.mpr (Or.inl (AggregatePopControls.lastSlot_demands_located q member))) separated headerSeparated otherIndices noAlias outsideApart outsideNonalias
   have expected : AggregatePop.execute (N := 128) CopyDemandControls.old CopyDemandControls.hash (pathLoc dst CopyDemandControls.root)
       CopyDemandControls.machine = some final := rfl
   have equal := Option.some.inj (executed.symm.trans expected)
@@ -225,12 +219,6 @@ private theorem beforeCurrent (retained : Bool) : Represented CopyDemandControls
   all_goals first
     | (change (_ < lmax ∧ True); decide)
     | (intro value observed; change some two = some value at observed; cases observed; rfl)
-private theorem beforeAncestor : Represented CopyDemandControls.old [.length .nil] CopyDemandControls.root CopyDemandControls.store := by
-  intro q member
-  have same := List.mem_singleton.mp member
-  subst q
-  refine ⟨True.intro,⟨by decide,by decide⟩,?_⟩
-  intro value observed; change some two = some value at observed; cases observed; rfl
 private theorem ancestorUpdates (retained : Bool) :
     AggregatePop.updates inner (pathLoc (ancestorPre retained) CopyDemandControls.root) =
       [(.data (pathLoc (ancestorPre retained) CopyDemandControls.root) 1,zero),
@@ -250,7 +238,7 @@ theorem ancestor_certificate (retained : Bool) :
   obtain ⟨actual,executed,represented,transported⟩ := header_frame_at CopyDemandControls.old (ancestorResult retained)
     (ancestorPre retained) inner (by cases retained <;> rfl) (by cases retained <;> rfl)
     .nil (ancestorIndex retained) .nil rfl CopyDemandControls.root CopyDemandControls.store CopyDemandControls.machine run
-    (beforeCurrent retained) beforeAncestor (fun _ _ => rfl)
+    (beforeCurrent retained) CopyDemandControls.old_header_represented (fun _ _ => rfl)
     (by cases retained <;> exact List.mem_append.mpr (Or.inl (by decide)))
     (List.mem_append.mpr (Or.inl (by decide))) (by
       intro d member
