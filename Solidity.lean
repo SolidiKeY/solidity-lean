@@ -364,6 +364,8 @@ import Solidity.Backend.InternalDispatch.FrozenV2Controls
 import Solidity.Backend.InternalDispatch.FrozenV3
 import Solidity.Backend.InternalDispatch.FrozenV3Controls
 import Solidity.Backend.InternalDispatch.Typed
+import Solidity.Backend.InternalFlow.CallsProgramBridge
+import Solidity.Backend.InternalFlow.CallsProgramBridgeFixture
 import Solidity.Backend.InternalFlow.RuntimeFrameArgumentAgreement
 import Solidity.Backend.InternalFlow.RuntimeFrameBytes
 import Solidity.Backend.InternalFlow.RuntimeFrameCallAgreement

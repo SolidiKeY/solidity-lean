@@ -19,55 +19,11 @@ theorem finite (condition : ProducerExpressions.Compiled fc test)
  Evm.loopIterN (Evm.run q) (Evm.run (body.code++post.code)) horizon
    {m with stack := locals.toList.map coreWord++caller} =
  .inr (.ok {m with stack := out.toList.map coreWord++caller} 0) := by
- induction horizon generalizing locals result with
- | zero => cases ran
- | succ horizon ih =>
-   change Option.bind (evalExpr horizon .nil True.intro test condition.profile (sourceLocals locals)) _ = some result at ran
-   obtain ⟨values,tested,remaining⟩ := Option.bind_eq_some_iff.mp ran
-   have same := evalExpr_completed_unique .nil True.intro test condition.profile (sourceLocals locals)
-     tested (condition.source locals)
-   subst values
-   change (if (condition.value locals).toNat = 0 then
-     some (⟨sourceLocals locals,.normal⟩ : Outcome c n) else _) = some result at remaining
-   have testedTarget : Evm.run q {m with stack := locals.toList.map coreWord++caller} =
-     .ok {m with stack := coreWord (condition.value locals)::(locals.toList.map coreWord++caller)} 0 := by
-     simpa only [Vector.toList_empty,List.nil_append] using
-       WordExecution.loweredExpr_machine condition.lowered 0 p q emitted selected locals #v[] m caller
-   by_cases zero : condition.value locals = 0
-   · have zn : (condition.value locals).toNat = 0 := congrArg BitVec.toNat zero
-     rw [if_pos zn] at remaining
-     refine ⟨locals,(Option.some.inj remaining).symm,?_⟩
-     rw [Evm.loopIterN,Evm.loopTurn,testedTarget,zero]
-     rfl
-   · have nz : (condition.value locals).toNat ≠ 0 := fun h => zero (BitVec.eq_of_toNat_eq h)
-     rw [if_neg nz] at remaining
-     change Option.bind (evalStmt horizon .nil True.intro work body.compiled.profile (sourceLocals locals)) _ = some result at remaining
-     obtain ⟨afterBody,bodySource,remaining⟩ := Option.bind_eq_some_iff.mp remaining
-     obtain ⟨mid,same,bodyTarget⟩ := body.source_to_model horizon locals afterBody bodySource m caller
-     subst afterBody
-     change Option.bind (evalStmt horizon .nil True.intro step post.compiled.profile (sourceLocals mid)) _ = some result at remaining
-     obtain ⟨afterPost,postSource,remaining⟩ := Option.bind_eq_some_iff.mp remaining
-     obtain ⟨next,same,postTarget⟩ := post.source_to_model horizon mid afterPost postSource m caller
-     subst afterPost
-     change evalLoop horizon .nil True.intro test condition.profile step post.compiled.profile
-       work body.compiled.profile (sourceLocals next) = some result at remaining
-     obtain ⟨out,same,completed⟩ := ih next result remaining
-     have iteration : Evm.run (body.code++post.code) {m with stack := locals.toList.map coreWord++caller} =
-       .ok {m with stack := next.toList.map coreWord++caller} 0 := by
-       rw [Evm.run_append_ok bodyTarget]
-       exact postTarget
-     refine ⟨out,same,?_⟩
-     rw [Evm.loopIterN,Evm.loopTurn,testedTarget]
-     change (match (if (condition.value locals).toNat = 0 then
-       .inr (.ok {m with stack := locals.toList.map coreWord++caller} 0)
-       else match Evm.run (body.code++post.code) {m with stack := locals.toList.map coreWord++caller} with
-        | .ok updated 0 => .inl updated
-        | .ok _ (_+1) => .inr .fault
-        | result => .inr result : Evm.Machine ⊕ Evm.Out) with
-      | .inl updated => Evm.loopIterN (Evm.run q) (Evm.run (body.code++post.code)) horizon updated
-      | .inr result => .inr result) = _
-     rw [if_neg nz,iteration]
-     exact completed
+ exact SourceLoop.finite_components condition post.compiled.profile body.compiled.profile
+   post.code body.code p q emitted selected m caller
+   (fun horizon locals result ran => post.source_to_model horizon locals result ran m caller)
+   (fun horizon locals result ran => body.source_to_model horizon locals result ran m caller)
+   horizon locals result ran
 
 theorem model (condition : ProducerExpressions.Compiled fc test)
  (post : StructuredSequenceCompilation.Artifact fp step) (body : StructuredSequenceCompilation.Artifact fb work)
