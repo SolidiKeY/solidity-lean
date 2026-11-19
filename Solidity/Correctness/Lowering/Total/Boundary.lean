@@ -85,7 +85,9 @@ and `PassCorrect` still needs a surjection from model states onto the admitted
 Source executions. The frozen `PassCorrect` lets its prover choose that map,
 and nothing here can tie it to the state relation, so the refinement conjunct
 may be false for reasons unrelated to lowering (the admitted executions still
-range over every Source global), or say little where true. -/
+range over every Source global), or say little where true. This restriction is
+accepted for now (H1255); tying the map to the state relation is deferred to a
+later plan step, not dropped. -/
 namespace Observe
 
 open Solidity.Roadmap
@@ -985,7 +987,8 @@ def LowerLoopsCorrectContractV2
   LowerLoopsCorrectContract b i decode ∧ Simulation.InitialMatching rel decode ∧
     Simulation.Bound rel decode
 
-/-- Version 2 gives version 1. -/
+/-- Version 2 gives version 1: the bridge. The goal is to be stated against
+version 1 as worded (H1256); version 2 counts only through this lemma. -/
 theorem LowerLoopsCorrectContractV2.v1 {b : SemanticBoundary} {i : RawSourceInterpretation}
     {decode : Request → Option SourceProgram} (h : LowerLoopsCorrectContractV2 rel b i decode) :
     LowerLoopsCorrectContract b i decode := h.1
