@@ -406,11 +406,14 @@ theorem items_spells : (k : SCtx) → (b : List RawStmt) → (t : Syn (.list (.i
       spell_simp Decode.items at h; obtain ⟨s', hs, r', hr, rfl⟩ := h
       exact .stmt (stmt_spells _ _ _ hs) (items_spells _ _ _ hr)
 end
+
 /-! ### Decoder versions
 
 The same relation for `Decode.Tables.decode`, the generic decoder: only the
 rule for a declaration's type differs, by the version's `typeName` table.
-Expressions, updates and conditions are shared with the relation above. -/
+Expressions, updates and conditions are shared with the relation above. The
+relation uses the version's own tables, so it checks the recursion and
+inference of the version's decoder, not its tables. -/
 
 variable {T : Decode.Tables}
 
@@ -684,10 +687,10 @@ theorem Spells.decode (complete : InferComplete) {r : Request} {s : SourceProgra
 
 /-! ## The spelling relation of a decoder version -/
 
-/-- **The spelling relation of a decoder version.** A plain request spells a Source program when
-its raw input spells a block that has a Source typing derivation from the
-caller's locals in the canonical unit, and the program is that derivation's
-resolution. No inference function is mentioned. -/
+/-- **The spelling relation of a decoder version.** A plain request spells a
+Source program when its raw input spells a block that has a Source typing
+derivation from the caller's locals in the version's unit, and the program is
+that derivation's resolution. No inference function is mentioned. -/
 def SpellsT (T : Decode.Tables) (r : Request) (s : SourceProgram) : Prop :=
   Decode.plain r = true ∧
   ∃ (C : Source.Ctx) (L : List (String × Source.STy)) (b : Source.Syn (.list (.item .body)))
@@ -699,7 +702,8 @@ def SpellsT (T : Decode.Tables) (r : Request) (s : SourceProgram) : Prop :=
 /-- Source inference finds a derivation whenever one exists, on the decoder's
 image only: a request's canonical context and a block its raw input spells.
 Not proved in the Source front end, whose inference is documented as possibly
-incomplete in general; the decoder is complete for `Spells` under it. -/
+incomplete in general; the version's decoder is complete for `SpellsT T` under
+it. -/
 def InferCompleteT (T : Decode.Tables) : Prop :=
   ∀ (r : Request) (C : Source.Ctx) (L : List (String × Source.STy))
     (b : Source.Syn (.list (.item .body))) (L' : List (String × Source.STy)),

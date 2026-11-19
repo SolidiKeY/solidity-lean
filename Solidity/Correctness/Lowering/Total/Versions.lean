@@ -1,7 +1,7 @@
 import Solidity.Correctness.Lowering.Total.Boundary
 
 /-!
-# Loop lowering: the boundary of the width-aware decoder version (H1258)
+# Loop lowering: the boundary of the width-aware decoder version (H1258, H1265)
 
 The landed boundary (`Total.Boundary`) is for the landed decoder and is kept
 as it is. This module gives the width-aware decoder version
@@ -25,6 +25,16 @@ The relation does not tie a slot's Source width to the model's declared width:
 only the decoder does, and the model context of a request has erased it. The
 policies, the simulation and the allocation trace are the landed ones, with
 the defects listed in `Total.Boundary`. No goal is stated here.
+
+Limits. The width-aware decoder still has gaps: `address`, `bytesN`, enums,
+function types, references, calls and callee bodies, return slots,
+`unchecked`/`checked` scopes, `msg.sender` and `address(this)`, and contracts
+with functions, a constructor, initializers or transient roots. So the first
+conjunct of `residual_iff` (the decoder is defined on every successful
+request) is not provable for it, and the contract at this boundary cannot be
+the goal yet. A local the elaborator declares without a type marker is decoded
+as a plain integer even if it was declared `address` or `bytesN`
+(`Decode.localTyW`): a possibly wrong Source type, not a gap.
 -/
 namespace Solidity.Correctness.Lowering.Total
 
@@ -446,10 +456,16 @@ theorem residualAt_iff (T : Decode.Tables)
       exact Simulation.of_retEndpoint reflect falseRel
         (returnFamily_correct k (M := M) (l := l) (u := u) m pair extra names)
 
+/-- The boundary admits every request whose whole pipeline succeeds. -/
+theorem boundaryAt_fullDomain (T : Decode.Tables)
+    (rel : (E : Source.Env) → (C : Contract) → StateRelation E C) :
+    FullDomain (boundaryAt T rel) := fun _ h => h
+
 /-- The width-aware version's boundary. -/
 def boundary : SemanticBoundary := boundaryAt Decode.tablesW rel
 
-/-- What the contract asks at the width-aware version's boundary. -/
+/-- What the contract asks at the width-aware version's boundary. The first
+conjunct is not provable while the decoder has gaps. -/
 theorem residual_iff :
     LowerLoopsCorrectContract boundary boundary.reference Decode.tablesW.decode ↔
       (∀ r : Request, r.Succeeds → ∃ s, Decode.tablesW.decode r = some s) ∧

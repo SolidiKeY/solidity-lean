@@ -387,15 +387,37 @@ example : Decode.tablesW.decode { sampleRequest [.assign (.name "s") (.num 256)]
 example : Decode.tablesW.decode { sampleRequest [] with
     contract := { vars := [("s", .prim .uint)], widths := [("s#address", 20)] } } = none := rfl
 example : Decode.tablesW.decode { sampleRequest [] with
-    contract := { vars := [("x", .prim .uint), ("x#bytes", .prim .uint)],
-                  widths := [("x#bytes", 32)] } } = none := rfl
+    contract := { vars := [("x", .prim .uint), ("x#bytes", .prim .uint)] } } = none := rfl
+/-- A `bytes1` state variable (`x ↦ 8` and the marker `x#bytes ↦ 1`) is a gap,
+not a `uint8`; so is a `bool` with a width row. A row that names no state
+variable is not read. -/
+example : Decode.tablesW.decode { sampleRequest [] with
+    contract := { vars := [("x", .prim .uint)], widths := [("x", 8), ("x#bytes", 1)] } } =
+    none := rfl
+example : Decode.tablesW.decode { sampleRequest [] with
+    contract := { vars := [("b", .prim .bool)], widths := [("b", 8)] } } = none := rfl
+example : (Decode.tablesW.decode { sampleRequest [.assign (.name "s") (.num 256)] with
+    contract := { vars := [("s", .prim .uint)], widths := [("t", 8)] } }).isSome = true := rfl
+/-! Declarations by name: `uint8 m = n` types over `uint8 n`, `uint8 m = k` does
+not over `uint16 k`, and `address`/`bytes1` names are gaps. Names are read by
+string functions, so these are evaluated, not kernel-checked. -/
+#guard (Decode.tablesW.decode
+  (narrowRequest [.decl (.named "uint8") "m" (some (.name "n"))])).isSome
+#guard (Decode.tablesW.decode
+  (narrowRequest [.decl (.named "uint8") "m" (some (.name "k"))])).isNone
+#guard (Decode.tablesW.decode (narrowRequest [.decl (.named "address") "m" none])).isNone
+#guard (Decode.tablesW.decode (narrowRequest [.decl (.named "bytes1") "m" none])).isNone
 example : Decode.tablesW.decode { narrowRequest [] with
     input := { (narrowRequest []).input with
       before := ⟨([("a", .val .uint 256 [("#address", 20)])], 1), {}⟩ } } = none := rfl
 /-- The two versions' tables: the landed decoder's, and the width-aware ones. -/
 example : Decode.tables1 = ⟨Decode.typeName, Decode.localTy, Decode.unit⟩ := rfl
 example : Decode.tablesW = ⟨Decode.typeNameW, Decode.localTyW, Decode.unitW⟩ := rfl
-/-- On the e1 sample the version agrees with the landed decoder. -/
+/-- On the e1 sample the generic decoder at the landed tables is the landed
+decoder (the general equality is by construction and not proved). -/
+example : Decode.tables1.decode (sampleRequest RawProbe.input) =
+    Decode.decode (sampleRequest RawProbe.input) := rfl
+/-- On the e1 sample the width-aware version agrees with the landed decoder. -/
 example : Decode.tablesW.decode (sampleRequest RawProbe.input) =
     Decode.decode (sampleRequest RawProbe.input) := rfl
 /-- A version's decoder against its spelling relation: sound, unique, and
@@ -421,16 +443,18 @@ example (D : Source.Layout) (t : Source.IntTy) (signed : t.signed = true)
   fun h => by cases h with | uint _ unsigned => rw [signed] at unsigned; cases unsigned
 /-- Total initial matching is a theorem for the version (Source to model). -/
 example : Simulation.InitialMatching Version.rel Decode.tablesW.decode := Version.initialMatching
+/-- The version's boundary admits every request whose pipeline succeeds. -/
+example : FullDomain Version.boundary := Version.boundaryAt_fullDomain _ _
 /-- What the contract, and its version 2, ask at the version's boundary. -/
 example :
     LowerLoopsCorrectContract Version.boundary Version.boundary.reference
         Decode.tablesW.decode →
       ∀ r : Request, r.Succeeds → ∃ s, Decode.tablesW.decode r = some s :=
-  fun h => (Version.residual_iff.mp h).1
+  fun h => (Iff.mp Version.residual_iff h).1
 example :
     LowerLoopsCorrectContractV2 Version.rel Version.boundary Version.boundary.reference
         Decode.tablesW.decode → Simulation.Bound Version.rel Decode.tablesW.decode :=
-  fun h => (Version.contractV2_iff.mp h).2.2.2.2
+  fun h => (Iff.mp Version.contractV2_iff h).2.2.2.2
 
 end Decoder
 

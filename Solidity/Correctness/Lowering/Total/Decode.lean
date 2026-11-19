@@ -269,9 +269,11 @@ def decode (r : Request) : Option SourceProgram :=
 
 The decoder above is landed and other modules build on it, so it is kept as it
 is. Wider decoders are versions of one generic decoder, `Tables.decode`, which
-differs from it only in its three type tables: how a declaration's type name,
-a model local and a model contract are read. The statement and expression
-spelling is shared. `tablesW` reads primitives at their declared widths. -/
+is written to differ from it only in its three type tables: how a
+declaration's type name, a model local and a model contract are read. That
+`tables1.decode` is the landed decoder holds by construction and is not
+proved; one sample checks it. Expression spelling is shared. `tablesW` reads
+integers at their declared widths (`bool` only at 256). -/
 
 /-- The type tables of a decoder version. -/
 structure Tables where
@@ -398,9 +400,12 @@ def typeNameW : RawTy → Option (Syn .typeName)
 
 /-- A model local at its declared width, with no shape rows. A local carrying
 a shape (the marker of an erased `address`, `bytesN`, enum or function type),
-a reference and a formula local are gaps. A local the elaborator declares
-without a marker (a capture, a pushed value) is read as the plain integer the
-model also takes it for. -/
+a reference and a formula local are gaps. Not a gap, and possibly a wrong
+Source type: a local the elaborator declares without a marker (a capture, a
+pushed value `T x = b.push()`, a self-call or `try` return) has an empty
+shape even when its declared type was `address` or `bytesN`, and is read here
+as the integer `uintN` the model also takes it for. A request's locals are
+also not tied to any elaborator run. -/
 def localTyW : LocalTy → Option STy
   | .val p bits [] => primTy p bits
   | _ => none
@@ -423,9 +428,11 @@ position below a reference (`[`, `{`). -/
 def plainKey (k : String) : Bool := k.data.all fun c => c != '#' && c != '[' && c != '{'
 
 /-- The canonical unit at widths. Transient roots, functions, enums, the
-constructor and initializers are gaps, and so is a contract whose width table
-has a marker row or a row below a reference, or whose state variable is named
-like one. -/
+constructor and initializers are gaps, and so are a state variable of a
+reference type, a width that is no integer type's (or any width but 256 on a
+`bool`), a width table with a marker row or a row below a reference, and a
+state variable named like one. A row whose key is no state variable is not
+read, as the model does not read it. -/
 def unitW (C : Contract) : Option (Syn .unit) :=
   if C.transientRoots.isEmpty && C.funs.isEmpty && C.enums.isEmpty && C.ctor.isNone &&
       C.inits.isEmpty && (C.widths.all fun w => plainKey w.1) &&
