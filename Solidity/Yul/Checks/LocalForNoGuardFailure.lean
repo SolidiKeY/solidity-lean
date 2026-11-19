@@ -29,9 +29,8 @@ theorem counterPrefix : ∀ (world : Solidity.Source.St Solidity.Yul.Checks.Loca
 
 theorem guardedCompletion : ∀ (world : Solidity.Source.St Solidity.Yul.Checks.LocalForNoGuardFailure.env),
  Solidity.Yul.LocalBoolFor.run Solidity.Yul.Checks.LocalForNoGuardFailure.read Solidity.Yul.Checks.LocalForNoGuardFailure.test Solidity.Yul.Checks.LocalForNoGuardFailure.body 9 (Solidity.Yul.Checks.LocalForNoGuardFailure.state (Solidity.Yul.Checks.LocalForNoGuardFailure.raw 2) world) =
- .normal (Solidity.Yul.Checks.LocalForNoGuardFailure.state Solidity.Yul.Checks.LocalForNoGuardFailure.cleanFalse world) := by
-  intro world; rfl
-
+ .normal (Solidity.Yul.Checks.LocalForNoGuardFailure.state Solidity.Yul.Checks.LocalForNoGuardFailure.cleanFalse world) :=
+  Solidity.Yul.Checks.LocalForNoPostHorizon.completedObserved
 
 theorem falseInitializerEnters : ∀ (world : Solidity.Source.St Solidity.Yul.Checks.LocalForNoGuardFailure.env),
  Solidity.Yul.LocalBoolForNoGuard.runNoPost Solidity.Yul.Checks.LocalForNoGuardFailure.stop Solidity.Yul.Checks.LocalForNoGuardFailure.body 3 (Solidity.Yul.Checks.LocalForNoGuardFailure.state (Solidity.Yul.Checks.LocalForNoGuardFailure.raw 2) world) =
