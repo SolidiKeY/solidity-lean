@@ -92,15 +92,8 @@ theorem source_agrees : ∀ (env : Solidity.Source.Env) (types : Solidity.Source
                   (Solidity.Yul.LocalBoolInitialization.finish
                     (.ok (.clean (.bool value)),Solidity.Yul.LocalState.ofClean (nextLocals,nextWorld))) =
                   some (.ok (.normal (Solidity.Source.Locals.cons (.bool value) nextLocals)),
-                    (Solidity.Source.L0 env,nextWorld)) := by
-                  change (Solidity.Yul.LocalValues.clean? (.bool :: types)
-                    (Solidity.Yul.LocalValues.ofClean (Solidity.Source.Locals.cons (.bool value) nextLocals))).map
-                    (fun finalLocals =>
-                      ((Except.ok (Solidity.Source.Out.normal finalLocals) :
-                        Solidity.Source.R (Solidity.Source.Out env.layout types (.bool :: types))),
-                        (Solidity.Source.L0 env,nextWorld))) = _
-                  rw [Solidity.Yul.LocalValues.clean_ofClean]
-                  rfl
+                    (Solidity.Source.L0 env,nextWorld)) :=
+                  LocalBoolInitialization.project_finish_ofClean value nextLocals nextWorld
                 rw [encoded] at declaration
                 have child := (Option.some.inj declaration).symm
                 have items : (Solidity.Source.execItems glob frame (fuel+2) nps ph
