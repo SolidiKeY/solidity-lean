@@ -1038,4 +1038,78 @@ theorem eagerArgs_pair_captureAtoms
 
 end ElabCaptureProof
 
+section
+variable (C : Contract) [FreshNames]
+
+/-- Two operands in evaluation order: hold the first read before the second
+operand's effects or explicit overflow guards. -/
+def hoistPairWith (hoist : RawExpr → ElabM (SProg C × RawExpr)) (first last : RawExpr) : ElabM (SProg C × RawExpr × RawExpr) := do
+  let (P, first) ← hoist first
+  let powerData := powerDataNeeded C (← read) (← ctx) last
+  -- Expanding a pure later power inserts failing guards too. Evaluate the
+  -- earlier operand before those guards, even when neither operand writes.
+  let (Pc, first) ← if powerData then captureExpr C first else captureBefore C first [last]
+  let (Q, last) ← if last.hasIncDec || last.hasIdxLen || last.hasCast || hasNarrow C (← ctx) last || powerData
+    then hoist last else pure ([], last)
+  pure (P ++ Pc ++ Q, first, last)
+
+/-- Binary operands follow the contract's schedule; their positions in the
+operator stay fixed, including for subtraction and comparisons. -/
+def hoistBinopWith (hoist : RawExpr → ElabM (SProg C × RawExpr)) (op : BinOp) (a b : RawExpr) : ElabM (SProg C × RawExpr) := do
+  let ltr := C.evalOrder.binaryLeftToRight
+  let (P, first, last) ← if ltr then hoistPairWith C hoist a b else hoistPairWith C hoist b a
+  pure (P, if ltr then .binop op first last else .binop op last first)
+
+/-- A call's arguments, left to right. A non-simple earlier value is held
+before hoisting any later argument: casts, fixed-length bases, narrow checks
+and modular guards can fail even when they do not modify the state. Bare
+names still use the effect-aware capture policy. Already held fresh values
+and literals need no additional capture (`captureExpr`). -/
+def hoistArgsWith (hoist : RawExpr → ElabM (SProg C × RawExpr)) : List RawExpr → ElabM (SProg C × List RawExpr)
+  | [] => pure ([], [])
+  | a :: as => do
+    let (P, a) ← hoist a
+    let (Pc, a) ← if !as.isEmpty && !(a matches .name _) then
+        captureExpr C a
+      else captureBefore C a as
+    let (Q, as) ← hoistArgsWith hoist as
+    pure (P ++ Pc ++ Q, a :: as)
+
+end
+
+namespace ElabHoist
+variable [FreshNames]
+
+omit [FreshNames] in
+def structural (e : RawExpr) : Bool :=
+  match e with
+  | .call .. | .named .. => false
+  | _ => true
+
+/-- A bounded evaluator for structural expression recursion. The public helper
+uses the proven sufficient node count; no fuel failure is exposed. -/
+def hoistFuel (C : Contract)
+    (record : (RawExpr → ElabM (SProg C × RawExpr)) → ElabRec C)
+    (stmts : List RawStmt → ElabM (SProg C))
+    (fallback : RawExpr → ElabM (SProg C × RawExpr)) : Nat → RawExpr → ElabM (SProg C × RawExpr)
+  | 0, e => fallback e
+  | n + 1, e =>
+    if structural e then
+      let child := hoistFuel C record stmts fallback n
+      hoistWith C {record child with
+        hoist := child, elabStmtsP := stmts,
+        hoistArgs := hoistArgsWith C child, hoistBinop := hoistBinopWith C child} e
+    else fallback e
+
+/-- Structural recursion with one node-count computation; calls, named calls
+retain the supplied fallback behavior; folding runs only in the original arm. -/
+def hoistStructural (C : Contract)
+    (record : (RawExpr → ElabM (SProg C × RawExpr)) → ElabRec C)
+    (stmts : List RawStmt → ElabM (SProg C))
+    (fallback : RawExpr → ElabM (SProg C × RawExpr)) (e : RawExpr) :
+    ElabM (SProg C × RawExpr) :=
+  hoistFuel C record stmts fallback e.nodes e
+
+end ElabHoist
+
 end Solidity

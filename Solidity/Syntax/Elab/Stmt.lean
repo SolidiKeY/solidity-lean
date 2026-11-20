@@ -1,4 +1,4 @@
-import Solidity.Syntax.Elab.Arms
+import Solidity.Syntax.Elab.Measure
 import Solidity.Syntax.DispatchChain
 
 /-!
@@ -308,25 +308,6 @@ def elabStmtsPWith (stmt : RawStmt → ElabM (SProg C)) : List RawStmt → ElabM
     let Q ← elabStmtsPWith stmt ss
     pure (P ++ Q)
 
-/-- Two operands in evaluation order: hold the first read before the second
-operand's effects or explicit overflow guards. -/
-def hoistPairWith (hoist : RawExpr → ElabM (SProg C × RawExpr)) (first last : RawExpr) : ElabM (SProg C × RawExpr × RawExpr) := do
-  let (P, first) ← hoist first
-  let powerData := powerDataNeeded C (← read) (← ctx) last
-  -- Expanding a pure later power inserts failing guards too. Evaluate the
-  -- earlier operand before those guards, even when neither operand writes.
-  let (Pc, first) ← if powerData then captureExpr C first else captureBefore C first [last]
-  let (Q, last) ← if last.hasIncDec || last.hasIdxLen || last.hasCast || hasNarrow C (← ctx) last || powerData
-    then hoist last else pure ([], last)
-  pure (P ++ Pc ++ Q, first, last)
-
-/-- Binary operands follow the contract's schedule; their positions in the
-operator stay fixed, including for subtraction and comparisons. -/
-def hoistBinopWith (hoist : RawExpr → ElabM (SProg C × RawExpr)) (op : BinOp) (a b : RawExpr) : ElabM (SProg C × RawExpr) := do
-  let ltr := C.evalOrder.binaryLeftToRight
-  let (P, first, last) ← if ltr then hoistPairWith C hoist a b else hoistPairWith C hoist b a
-  pure (P, if ltr then .binop op first last else .binop op last first)
-
 /-- `hoist`, but an operation at the top is left to the statement, which
 checks its narrow width after the write (`narrowPost`). -/
 def hoistTopWith (hoist : RawExpr → ElabM (SProg C × RawExpr)) (e : RawExpr) : ElabM (SProg C × RawExpr) := do
@@ -396,21 +377,6 @@ theorem hoistAssignWith_shape (hoist : RawExpr → ElabM (SProg C × RawExpr))
     simp only [hx, bind, Except.bind, pure, Except.pure] at h
     cases h
     exact ⟨l', r', rfl⟩
-
-/-- A call's arguments, left to right. A non-simple earlier value is held
-before hoisting any later argument: casts, fixed-length bases, narrow checks
-and modular guards can fail even when they do not modify the state. Bare
-names still use the effect-aware capture policy. Already held fresh values
-and literals need no additional capture (`captureExpr`). -/
-def hoistArgsWith (hoist : RawExpr → ElabM (SProg C × RawExpr)) : List RawExpr → ElabM (SProg C × List RawExpr)
-  | [] => pure ([], [])
-  | a :: as => do
-    let (P, a) ← hoist a
-    let (Pc, a) ← if !as.isEmpty && !(a matches .name _) then
-        captureExpr C a
-      else captureBefore C a as
-    let (Q, as) ← hoistArgsWith hoist as
-    pure (P ++ Pc ++ Q, a :: as)
 
 /-- A byte string as a memory local: a memory one bound to a fresh name, a
 storage one copied into a fresh memory `bytes` (solc's conversion). -/
@@ -1186,7 +1152,50 @@ def elabRecWithCallbacks (hoist : RawExpr → ElabM (SProg C × RawExpr))
     elabTuple := fun ts rhs direct => elabTupleWith C base pr ts rhs direct }
   { body with elabStmt1 := elabStmt1ClosedWith C body }
 
+/-- Close structural expression recursion around the remaining call and statement callbacks. -/
+def hoistWithCallbacks (fallback : RawExpr → ElabM (SProg C × RawExpr))
+    (stmt : RawStmt → ElabM (SProg C))
+    (callRet : (f : String) → (args : List RawExpr) → (res : Option (Var × PrimTy)) →
+    (resW : Nat := 256) → (targets : Bool := false) → (ctor : Bool := false) →
+    (resNew : Bool := false) → (selfFrame : Bool := false) →
+    ElabM (SProg C × Option (NCtx × RefTy × Var × Bool) × List (Var × LocalTy))) :=
+  ElabHoist.hoistStructural C
+    (fun h => elabRecWithProducers C (elabRecWithCallbacks C h stmt @callRet)
+      (panicProducerWithCallbacks C stmt @callRet))
+    (elabStmtsPWith C stmt) fallback
+
 mutual
+
+/-- Call expansion, with structural children handled by `hoistWithCallbacks`. -/
+private partial def hoistCallCore (s0 : RawExpr) : ElabM (SProg C × RawExpr) :=
+  hoistWith C (elabRecWithProducers C (elabRecWithCallbacks C (hoistWithCallbacks C hoistCallCore elabStmtP @elabCallRet) elabStmtP @elabCallRet) (panicProducerWithCallbacks C elabStmtP @elabCallRet)) s0
+
+/-- A statement, as a block: its narrow rewrites (`narrowPure`), its captures
+(`hoistStmt`), then the statement,
+whose compound target may need a capture of its own. -/
+partial def elabStmtP (s : RawStmt) : ElabM (SProg C) :=
+  elabStmtPClosedWith C (elabRecWithProducers C (elabRecWithCallbacks C (hoistWithCallbacks C hoistCallCore elabStmtP @elabCallRet) elabStmtP @elabCallRet) (panicProducerWithCallbacks C elabStmtP @elabCallRet)) s
+
+/-- `elabCall`, and the fresh return variable of a callee that returns a
+memory reference, with its type and the caller's context: the call's frame
+declares it (a fresh default object, `CallRet.mem`) and leaves it to the
+caller, which binds it after the call (`elabMemCall`).  With `targets`, the
+call is a tuple assignment's right-hand side (`elabTuple`), KeyTaclets'
+`FunctionBodyStatement` with targets: it returns every return value
+(`CallRet.rets`, one or several), which the caller reads after the call —
+their fresh variables, types and widths.  A callee of several returns called
+as a statement (`f(a);`, KeY's `InternalCall`) declares them at the head of
+its body and returns nothing.  With `resNew`, the local `res` is declared by
+the statement before the call (`uint y = f(a);` is `uint y; y = f(a);`):
+the call is read in the context it pushes, its arguments where `res` is not
+yet in scope. -/
+partial def elabCallRet (f : String) (args : List RawExpr) (res : Option (Var × PrimTy))
+    (resW : Nat := 256) (targets : Bool := false) (ctor : Bool := false) (resNew : Bool := false)
+    (selfFrame : Bool := false) :
+    ElabM (SProg C × Option (NCtx × RefTy × Var × Bool) × List (Var × LocalTy)) :=
+  elabCallRetWith C (elabRecWithProducers C (elabRecWithCallbacks C (hoistWithCallbacks C hoistCallCore elabStmtP @elabCallRet) elabStmtP @elabCallRet) (panicProducerWithCallbacks C elabStmtP @elabCallRet)) f args res resW targets ctor resNew selfFrame
+
+end
 
 /-- **Captures before a statement**: an `++`/`−−` inside an expression, and a
 conditional of references, are evaluated before the statement that holds
@@ -1209,35 +1218,8 @@ operand of `&&`/`||` or in a branch of a conditional, an effect, a call or a
 narrow check is captured where solc evaluates it, under a test of its own: `a
 && b` is `bool se = a; if (se) { se = b; }`, and `c ? a : b` is
 `uint se; if (c) { se = a; } else { se = b; }`. -/
-partial def hoist (s0 : RawExpr) : ElabM (SProg C × RawExpr) :=
-  hoistWith C (elabRecWithProducers C (elabRecWithCallbacks C hoist elabStmtP @elabCallRet) (panicProducerWithCallbacks C elabStmtP @elabCallRet)) s0
-
-/-- A statement, as a block: its narrow rewrites (`narrowPure`), its captures
-(`hoistStmt`), then the statement,
-whose compound target may need a capture of its own. -/
-partial def elabStmtP (s : RawStmt) : ElabM (SProg C) :=
-  elabStmtPClosedWith C (elabRecWithProducers C (elabRecWithCallbacks C hoist elabStmtP @elabCallRet) (panicProducerWithCallbacks C elabStmtP @elabCallRet)) s
-
-/-- `elabCall`, and the fresh return variable of a callee that returns a
-memory reference, with its type and the caller's context: the call's frame
-declares it (a fresh default object, `CallRet.mem`) and leaves it to the
-caller, which binds it after the call (`elabMemCall`).  With `targets`, the
-call is a tuple assignment's right-hand side (`elabTuple`), KeyTaclets'
-`FunctionBodyStatement` with targets: it returns every return value
-(`CallRet.rets`, one or several), which the caller reads after the call —
-their fresh variables, types and widths.  A callee of several returns called
-as a statement (`f(a);`, KeY's `InternalCall`) declares them at the head of
-its body and returns nothing.  With `resNew`, the local `res` is declared by
-the statement before the call (`uint y = f(a);` is `uint y; y = f(a);`):
-the call is read in the context it pushes, its arguments where `res` is not
-yet in scope. -/
-partial def elabCallRet (f : String) (args : List RawExpr) (res : Option (Var × PrimTy))
-    (resW : Nat := 256) (targets : Bool := false) (ctor : Bool := false) (resNew : Bool := false)
-    (selfFrame : Bool := false) :
-    ElabM (SProg C × Option (NCtx × RefTy × Var × Bool) × List (Var × LocalTy)) :=
-  elabCallRetWith C (elabRecWithProducers C (elabRecWithCallbacks C hoist elabStmtP @elabCallRet) (panicProducerWithCallbacks C elabStmtP @elabCallRet)) f args res resW targets ctor resNew selfFrame
-
-end
+def hoist (s0 : RawExpr) : ElabM (SProg C × RawExpr) :=
+  hoistWithCallbacks C (hoistCallCore C) (elabStmtP C) (@elabCallRet C _) s0
 
 /-- Public producer record, built from the recursive callbacks. -/
 def panicProducerRec (_ : Unit) : PanicProducerRec C :=
