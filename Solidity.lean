@@ -226,6 +226,8 @@ import Solidity.Backend.CalldataPackets.RawUintN.Controls
 import Solidity.Backend.CalldataPackets.RawUintN.Execution
 import Solidity.Backend.Checks
 import Solidity.Backend.CompilerEndpoint
+import Solidity.Backend.CompilerEndpointScalarBoundary
+import Solidity.Backend.CompilerEndpointV2
 import Solidity.Backend.CompilerEndpointWitnesses
 import Solidity.Backend.CompilerTotal
 import Solidity.Backend.Control
@@ -1260,8 +1262,11 @@ import Solidity.Backend.Passes.CompilerCallScopeControls
 import Solidity.Backend.Passes.CompilerCallScopePins
 import Solidity.Backend.Passes.CompilerCallScopeRecognition
 import Solidity.Backend.Passes.CompilerProofChecks
+import Solidity.Backend.Passes.CompilerScalarBridge
 import Solidity.Backend.Passes.CompilerScopedFailure
 import Solidity.Backend.Passes.CompilerScopedFailurePins
+import Solidity.Backend.Passes.CompilerV2
+import Solidity.Backend.Passes.CompilerV3
 import Solidity.Backend.Passes.CompilerWholeScope
 import Solidity.Backend.Passes.CompilerWholeScopeControls
 import Solidity.Backend.Passes.CompilerWholeScopePins
@@ -1512,6 +1517,7 @@ import Solidity.Backend.Passes.TripleSequence
 import Solidity.Backend.Passes.TripleSuffix
 import Solidity.Backend.Passes.TupleReturnConsumer
 import Solidity.Backend.Passes.TupleReturnConsumerControls
+import Solidity.Backend.Passes.TupleReturnConsumerV2
 import Solidity.Backend.Passes.UnsignedDependentCapture
 import Solidity.Backend.Passes.UnsignedDependentControls
 import Solidity.Backend.Passes.UnsignedDependentFailure
