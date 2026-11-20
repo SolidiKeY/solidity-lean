@@ -467,8 +467,8 @@ def typeNameW : RawTy → Option (Syn .typeName)
 /-- A model local at its declared width, with no shape rows. A local carrying
 a shape (the marker of an erased `address`, `bytesN`, enum or function type),
 a reference and a formula local are gaps. Not a gap, and possibly a wrong
-Source type: a local the elaborator declares without a marker (a capture, a
-pushed value `T x = b.push()`, a self-call or `try` return) has an empty
+Source type: a local the elaborator declares without a marker (a pushed value
+`T x = b.push()`, a self-call or `try` return, a cast capture) has an empty
 shape even when its declared type was `address` or `bytesN`, and is read here
 as the integer `uintN` the model also takes it for. A request's locals are
 also not tied to any elaborator run. -/
@@ -591,7 +591,8 @@ def stateVarsOf (el : Name → PrimTy → Option Source.Elem) :
 
 /-- The canonical unit of a contract that passes `ok`, over an element table.
 Transient roots, functions, enums, the constructor and initializers are gaps,
-and so is a state variable named like a marker row. -/
+and so are a state variable of a reference type, one the table gives no
+elementary type, and one named like a marker row. -/
 def unitOf (ok : Contract → Bool) (el : Contract → Name → PrimTy → Option Source.Elem)
     (C : Contract) : Option (Syn .unit) :=
   if C.transientRoots.isEmpty && C.funs.isEmpty && C.enums.isEmpty && C.ctor.isNone &&
@@ -605,8 +606,18 @@ def unitOf (ok : Contract → Bool) (el : Contract → Name → PrimTy → Optio
 `tablesB`: as `tablesA`, and an erased `bytesN` where the model marks one. A
 local of `8N` bits marked `#bytes ↦ N`, a state variable with the row
 `x#bytes ↦ N` (and its own row `x ↦ 8N` when `N < 32`), and a declaration
-named `bytesN` are Source `bytesN`. Expressions are the shared ones, so byte
-indexing, `bytesN(e)` casts and bytes literals stay gaps. -/
+named `bytesN` are Source `bytesN`. The model holds a `bytesN` as the number
+its bytes spell big-endian, right-aligned in a `uint` of `8N` bits
+(`Syntax/Raw.lean`, at `bytesTy?`); that is the reading here, not the
+left-aligned word of `Source.Observe`.
+
+Expressions are the shared ones. Between marked operands they spell, and
+Source types, indexing `b[i]`, `b.length`, `==`, `!=`, the orderings, `&`,
+`|`, `^`, `~`, the shifts, their compound assignments and implicit widening:
+these are in the fragment, so their agreement with the model is part of the
+simulation obligation. `bytesN(e)` casts and bytes literals are gaps. A
+captured `bytesN`, whose shape carries the marker twice, is a gap, and the
+caveat at `localTyW` still applies. -/
 
 /-- `bytesN` for `N` in `1 … 32`. -/
 def bytesElem (n : Nat) : Option Source.Elem :=

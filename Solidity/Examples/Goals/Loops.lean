@@ -588,16 +588,49 @@ example : Decode.tablesB.decode { bytesRequest [] with
 example : Decode.tablesB.decode { bytesRequest [] with
     contract := { vars := [("s", .prim .uint)],
                   widths := [("s#bytes", 32), ("s#address", 20)] } } = none := rfl
+/-- Probes of what is in the fragment between marked operands. -/
+example : (Decode.tablesB.decode { bytesRequest [.assign (.name "h") (.name "x")] with
+    contract := bytesContract }).isSome = true := rfl
+example : (Decode.tablesB.decode
+    (bytesRequest [.assign (.name "y") (.index (.name "x") (.num 0))])).isSome = true := rfl
+example : (Decode.tablesB.decode
+    (bytesRequest [.assign (.name "n") (.field (.name "x") "length")])).isSome = true := rfl
+example : (Decode.tablesB.decode
+    (bytesRequest [.assign (.name "x") (.binop .band (.name "x") (.name "y"))])).isSome =
+    true := rfl
+example : (Decode.tablesB.decode
+    (bytesRequest [.require (.binop .lt (.name "x") (.name "y"))])).isSome = true := rfl
+example : Decode.tablesB.decode
+    (bytesRequest [.assign (.name "x") (.call "bytes1" [.name "n"])]) = none := rfl
 /-! A declaration by the name `bytes1` decodes (evaluated, not kernel-checked). -/
 #guard (Decode.tablesB.decode
   (bytesRequest [.decl (.named "bytes1") "m" (some (.name "x"))])).isSome
 #guard (Decode.tablesB.decode
   (bytesRequest [.decl (.named "bytes1") "m" (some (.name "n"))])).isNone
 /-- A model `uint` and the Source `bytesN` with that big-endian value are
-related: the one byte `0x2a` and the number 42. -/
-example (D : Source.Layout) (x : PrimTy.uint.Denote) (same : x.1 = 42) :
-    Version.Relation.ValRel D (.fixedBytes 1 (by decide)) .uint (.fixedBytes [42] rfl) x :=
-  .bytes 1 (by decide) [42] rfl x same
+related: the two bytes `0x01 0x02` and the number 258 (not 513). -/
+example (D : Source.Layout) (x : PrimTy.uint.Denote) (same : x.1 = 258) :
+    Version.Relation.ValRel D (.fixedBytes 2 (by decide)) .uint (.fixedBytes [1, 2] rfl) x :=
+  .bytes 2 (by decide) [1, 2] rfl x (same.trans (by decide))
+example : Source.bytesNat [1, 2] = 258 := by decide
+/-- A `bytes32` local is read; a marker of 0 or 33 bytes, a marker on an
+`int`, and a doubled marker (a captured value) are gaps. -/
+example : (Decode.tablesB.decode { bytesRequest [.assign (.name "w") (.name "w")] with
+    input := { (bytesRequest [.assign (.name "w") (.name "w")]).input with
+      before := ⟨([("w", .val .uint 256 [("#bytes", 32)])], 1), {}⟩ } }).isSome = true := rfl
+example : Decode.tablesB.decode { bytesRequest [] with
+    input := { (bytesRequest []).input with
+      before := ⟨([("w", .val .uint 0 [("#bytes", 0)])], 1), {}⟩ } } = none := rfl
+example : Decode.tablesB.decode { bytesRequest [] with
+    input := { (bytesRequest []).input with
+      before := ⟨([("w", .val .uint 264 [("#bytes", 33)])], 1), {}⟩ } } = none := rfl
+example : Decode.tablesB.decode { bytesRequest [] with
+    input := { (bytesRequest []).input with
+      before := ⟨([("w", .val .int 8 [("#bytes", 1)])], 1), {}⟩ } } = none := rfl
+example : Decode.tablesB.decode { bytesRequest [] with
+    input := { (bytesRequest []).input with
+      before := ⟨([("w", .val .uint 8 [("#bytes", 1), ("#bytes", 1)])], 1), {}⟩ } } =
+    none := rfl
 /-- The bytes-aware tables are sound, so total initial matching holds for
 them, and version 2 of the contract at their boundary is five obligations. -/
 example : Version.Sound Decode.tablesB := Version.soundB

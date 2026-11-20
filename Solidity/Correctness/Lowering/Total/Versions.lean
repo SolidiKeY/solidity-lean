@@ -50,8 +50,11 @@ literal, and payable-only operations are gaps (`address payable` is read as
 `address`), and a captured address, whose shape carries the marker twice, is a
 gap too. `a.balance` over a marked operand is typed by Source, while the state
 relation relates no balances. The bytes-aware version reads marked locals and
-state variables and the names `bytesN`; byte indexing, `bytesN(e)` casts and
-bytes literals are gaps. So the first conjunct of `residualAt_iff` (the
+state variables and the names `bytesN`, as the right-aligned big-endian number
+the model holds (not the left-aligned word of `Source.Observe`); indexing,
+`.length`, equality, ordering, bitwise operators, shifts and implicit widening
+between such operands are in the fragment, while `bytesN(e)` casts, bytes
+literals and a captured `bytesN` are gaps. So the first conjunct of `residualAt_iff` (the
 decoder is defined on every successful request) is not provable for any
 version yet, and no version's contract can be the goal yet. A local the elaborator declares without a type marker is decoded
 as a plain integer even if it was declared `address` or `bytesN`
