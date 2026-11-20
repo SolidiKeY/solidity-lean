@@ -1,6 +1,6 @@
 import Solidity.Syntax.Elab.Measure
 
-/-! Weighted expression heights and local call-expansion decrease lemmas. -/
+/-! Weighted call-expansion decreases and capture, operand, and argument output bounds. -/
 
 namespace Solidity.ElabHoist
 /-- Constant folding preserves the input or produces a literal. -/
@@ -384,6 +384,194 @@ theorem prefix_cast_lt (f : String) (a : RawExpr) (n : Nat) (w : String)
   have hw := cost_prefix_cast n hn
   have ha := height_pos a
   simp only [height, heights, hw]
+  omega
+
+end Solidity.ElabCallHeight
+
+namespace Solidity.ElabCallHeight
+open Semantics ElabControlProof
+variable (C : Contract)
+
+/-- ERC-7201 output height is preserved when the expression callback preserves
+height on strictly smaller requests. Its literal shortcut needs no callback. -/
+theorem erc_output_height
+    (H : RawExpr → ElabM (SProg C × RawExpr)) (a : RawExpr)
+    (hh : ∀ e, height e < height (.call "erc7201" [a]) →
+      Obs (H e) (fun out => height out.2 ≤ height e)) :
+    Obs (hoistERC7201With C H [a])
+      (fun out => height out.2 ≤ height (.call "erc7201" [a])) := by
+  unfold hoistERC7201With
+  dsimp only
+  split
+  · apply obs_pure
+    exact height_pos (.call "erc7201" [a])
+  · intro sc st m out st' m' h
+    have he := erc_expansion_lt a
+    exact Nat.le_trans (hh _ he sc st m out st' m' h) (Nat.le_of_lt he)
+
+end Solidity.ElabCallHeight
+
+namespace Solidity.ElabCallHeight
+open Semantics ElabControlProof
+variable (C : Contract) [FreshNames]
+
+/-- Operand preparation preserves each position's height whenever expression
+hoisting and both capture policies preserve their inputs' heights. -/
+theorem pair_output_heights
+    (H : RawExpr → ElabM (SProg C × RawExpr)) (a b : RawExpr)
+    (ha : Obs (H a) (fun out => height out.2 ≤ height a))
+    (hb : Obs (H b) (fun out => height out.2 ≤ height b))
+    (hc : ∀ e, Obs (captureExpr C e) (fun out => height out.2 ≤ height e))
+    (hd : ∀ e later, Obs (captureBefore C e later) (fun out => height out.2 ≤ height e)) :
+    Obs (hoistPairWith C H a b)
+      (fun out => height out.2.1 ≤ height a ∧ height out.2.2 ≤ height b) := by
+  unfold hoistPairWith
+  refine obs_bind ha ?_
+  rintro ⟨P, first⟩ hfirst
+  apply obs_any
+  intro scope
+  apply obs_any
+  intro context
+  extract_lets powerData finish
+  have hf : ∀ out : SProg C × RawExpr, height out.2 ≤ height first →
+      Obs (finish out) (fun out => height out.2.1 ≤ height a ∧ height out.2.2 ≤ height b) := by
+    rintro ⟨Pc, held⟩ hheld
+    simp -zeta only [finish]
+    apply obs_any
+    intro context
+    extract_lets tail
+    have ht : ∀ out : SProg C × RawExpr, height out.2 ≤ height b →
+        Obs (tail out) (fun out => height out.2.1 ≤ height a ∧ height out.2.2 ≤ height b) := by
+      rintro ⟨Q, last⟩ hlast
+      apply obs_pure
+      exact ⟨Nat.le_trans hheld hfirst, hlast⟩
+    clear_value tail
+    split
+    · exact obs_bind hb ht
+    · exact obs_bind (obs_pure (Nat.le_refl _)) ht
+  clear_value finish
+  split
+  · exact obs_bind (hc first) hf
+  · exact obs_bind (hd first [b]) hf
+
+/-- Binary preparation preserves height in either contract evaluation order. -/
+theorem binop_output_height
+    (H : RawExpr → ElabM (SProg C × RawExpr)) (op : BinOp) (a b : RawExpr)
+    (ha : Obs (H a) (fun out => height out.2 ≤ height a))
+    (hb : Obs (H b) (fun out => height out.2 ≤ height b))
+    (hc : ∀ e, Obs (captureExpr C e) (fun out => height out.2 ≤ height e))
+    (hd : ∀ e later, Obs (captureBefore C e later) (fun out => height out.2 ≤ height e)) :
+    Obs (hoistBinopWith C H op a b)
+      (fun out => height out.2 ≤ height (.binop op a b)) := by
+  unfold hoistBinopWith
+  extract_lets ltr finish
+  split
+  · rename_i he
+    refine obs_bind (pair_output_heights C H a b ha hb hc hd) ?_
+    rintro ⟨P, first, last⟩ ⟨hf, hl⟩
+    simp only [finish, he, ↓reduceIte]
+    apply obs_pure
+    simp only at hf hl
+    simp only [height]
+    omega
+  · rename_i he
+    refine obs_bind (pair_output_heights C H b a hb ha hc hd) ?_
+    rintro ⟨P, first, last⟩ ⟨hf, hl⟩
+    simp only [finish, he]
+    apply obs_pure
+    simp only at hf hl
+    simp only [Bool.false_eq_true, ↓reduceIte, height]
+    omega
+
+end Solidity.ElabCallHeight
+
+namespace Solidity.ElabCallHeight
+open Semantics ElabControlProof
+variable (C : Contract) [FreshNames]
+
+omit [FreshNames] in
+private theorem capture_shape_height_le (e out : RawExpr)
+    (h : out = e ∨ ∃ x, out = .name x) : height out ≤ height e := by
+  rcases h with rfl | ⟨x, rfl⟩
+  · exact Nat.le_refl _
+  · exact height_pos e
+
+/-- The existing capture-shape invariant implies height nonincrease. -/
+theorem captureExpr_height_bound (e : RawExpr) :
+    Obs (captureExpr C e) (fun out => height out.2 ≤ height e) := by
+  intro sc st m out st' m' h
+  exact capture_shape_height_le e out.2
+    (ElabCallArgsGood.captureExpr_shape C e sc st m out st' m' h)
+
+/-- Effect-aware capture also preserves the input height. -/
+theorem captureBefore_height_bound (e : RawExpr) (later : List RawExpr) :
+    Obs (captureBefore C e later) (fun out => height out.2 ≤ height e) := by
+  intro sc st m out st' m' h
+  exact capture_shape_height_le e out.2
+    (ElabCallArgsGood.captureBefore_shape C e later sc st m out st' m' h)
+
+/-- Ordered operand bounds require only the two hoist-output bounds. -/
+theorem pair_output_heights_of_hoist
+    (H : RawExpr → ElabM (SProg C × RawExpr)) (a b : RawExpr)
+    (ha : Obs (H a) (fun out => height out.2 ≤ height a))
+    (hb : Obs (H b) (fun out => height out.2 ≤ height b)) :
+    Obs (hoistPairWith C H a b)
+      (fun out => height out.2.1 ≤ height a ∧ height out.2.2 ≤ height b) :=
+  pair_output_heights C H a b ha hb (captureExpr_height_bound C) (captureBefore_height_bound C)
+
+/-- Binary height preservation needs no additional capture premise. -/
+theorem binop_output_height_of_hoist
+    (H : RawExpr → ElabM (SProg C × RawExpr)) (op : BinOp) (a b : RawExpr)
+    (ha : Obs (H a) (fun out => height out.2 ≤ height a))
+    (hb : Obs (H b) (fun out => height out.2 ≤ height b)) :
+    Obs (hoistBinopWith C H op a b)
+      (fun out => height out.2 ≤ height (.binop op a b)) :=
+  binop_output_height C H op a b ha hb (captureExpr_height_bound C) (captureBefore_height_bound C)
+
+end Solidity.ElabCallHeight
+
+namespace Solidity.ElabCallHeight
+open Semantics ElabControlProof
+variable (C : Contract) [FreshNames]
+
+/-- Ordinary argument preparation preserves the maximum input height, using
+the existing predicate-preservation traversal rather than another induction. -/
+theorem args_output_heights
+    (H : RawExpr → ElabM (SProg C × RawExpr)) (args : List RawExpr)
+    (hh : ∀ a, a ∈ args → Obs (H a) (fun out => height out.2 ≤ height a)) :
+    Obs (hoistArgsWith C H args) (fun out => heights out.2 ≤ heights args) := by
+  cases args with
+  | nil =>
+    simp only [hoistArgsWith]
+    apply obs_pure
+    exact Nat.le_refl _
+  | cons a args =>
+    intro sc st m out st' m' h
+    have hn : ∀ x, height (.name x) ≤ heights (a :: args) := by
+      intro x
+      have hp := height_pos a
+      simp only [height, heights]
+      omega
+    have hcallback : ∀ e, e ∈ a :: args →
+        Obs (H e) (fun out => height out.2 ≤ heights (a :: args)) := by
+      intro e he sc st m out st' m' hrun
+      exact Nat.le_trans (hh e he sc st m out st' m' hrun) (mem_height_le he)
+    have hout := ElabCallArgsGood.ordinary_good C (fun e => height e ≤ heights (a :: args))
+      hn H (a :: args) hcallback sc st m out st' m' h
+    exact heights_le hout
+
+/-- Every ordinary prepared argument is strictly smaller than the source call. -/
+theorem args_output_argument_lt
+    (H : RawExpr → ElabM (SProg C × RawExpr)) (f : String) (args : List RawExpr)
+    (hh : ∀ a, a ∈ args → Obs (H a) (fun out => height out.2 ≤ height a))
+    (sc : ElabScope) (st st' : ECtx × Nat) (m m' : CallMemo) (out : SProg C × List RawExpr)
+    (h : hoistArgsWith C H args sc st m = .ok ((out, st'), m')) :
+    ∀ e, e ∈ out.2 → height e < height (.call f args) := by
+  intro e he
+  have hout := args_output_heights C H args hh sc st m out st' m' h
+  have hm := mem_height_le he
+  have hp := cost_pos f
+  simp only [height]
   omega
 
 end Solidity.ElabCallHeight
