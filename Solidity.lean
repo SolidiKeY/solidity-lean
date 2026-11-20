@@ -2463,6 +2463,7 @@ import Solidity.Correctness.Lowering.Loops.Statement
 import Solidity.Correctness.Lowering.Loops.WhileBreak
 import Solidity.Correctness.Lowering.Loops.WhileContinue
 import Solidity.Correctness.Lowering.Loops.WhileReset
+import Solidity.Correctness.Lowering.Sim.Coverage.ThreadedV2
 import Solidity.Correctness.Lowering.Sim.Expr.Capture
 import Solidity.Correctness.Lowering.Sim.Expr.Frame
 import Solidity.Correctness.Lowering.Sim.Expr.Operand

@@ -48,6 +48,8 @@
 | `Correctness/Lowering/Sim/Session/Forward/Frames.lean` | The provisional per-frame hypothesis of the forward session diagram and the session-level match. |
 | `Correctness/Lowering/Sim/Session/Forward/Within.lean` | A reachable target session state observes a prefix of the run at every horizon above its issued actions. |
 | `Examples/Lowering/Sim/Session/Forward.lean` | Type-level uses of the forward session diagram and its resource record on the session of `spin`, under the unmet hypothesis of matched frames. |
+| `Solidity/Correctness/Lowering/Sim/Coverage/ThreadedV2.lean` | Additive caller-context threading contract, v1 projection and association bridge for `loweringBySimulation`. |
+| `Solidity/Examples/Lowering/Sim/Coverage/ThreadedV2.lean` | Existing standalone-loop vocabulary exercises the bridge with explicit threading and placement receipts. |
 # Unchecked arithmetic
 
 | Module | Purpose |
