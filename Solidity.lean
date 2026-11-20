@@ -4631,6 +4631,7 @@ import Solidity.Syntax.Contract
 import Solidity.Syntax.DispatchChain
 import Solidity.Syntax.Elab
 import Solidity.Syntax.Elab.Arms
+import Solidity.Syntax.Elab.CallMeasure
 import Solidity.Syntax.Elab.Context
 import Solidity.Syntax.Elab.Guard
 import Solidity.Syntax.Elab.Lower
