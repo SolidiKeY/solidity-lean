@@ -411,8 +411,8 @@ example : Decode.tablesW.decode { narrowRequest [] with
     input := { (narrowRequest []).input with
       before := ⟨([("a", .val .uint 256 [("#address", 20)])], 1), {}⟩ } } = none := rfl
 /-- The tables of the landed decoder and of the width-aware version. -/
-example : Decode.tables1 = ⟨Decode.typeName, Decode.localTy, Decode.unit⟩ := rfl
-example : Decode.tablesW = ⟨Decode.typeNameW, Decode.localTyW, Decode.unitW⟩ := rfl
+example : Decode.tables1 = ⟨Decode.typeName, Decode.localTy, Decode.unit, Decode.env⟩ := rfl
+example : Decode.tablesW = ⟨Decode.typeNameW, Decode.localTyW, Decode.unitW, Decode.env⟩ := rfl
 /-- The bridge: at the landed tables the generic decoder is the landed decoder
 and the version's spelling relation is the landed one. -/
 example (r : Request) : Decode.tables1.decode r = Decode.decode r := Decode.decode_tables1 r
@@ -435,7 +435,7 @@ example {T : Decode.Tables} {r : Request} {s s' : SourceProgram} (h : SpellsT T 
 `Decode.tablesA` reads an erased `address` where the model marks one. Its
 boundary is pinned further down. -/
 
-example : Decode.tablesA = ⟨Decode.typeNameA, Decode.localTyA, Decode.unitA⟩ := rfl
+example : Decode.tablesA = ⟨Decode.typeNameA, Decode.localTyA, Decode.unitA, Decode.env⟩ := rfl
 /-- Over `address a; address b; uint n`: `a = b` types, and neither `a = n`
 nor `n = a` does, so the marker is read as a Source `address`. -/
 def addressRequest (raw : List RawStmt) : Request :=
@@ -552,7 +552,7 @@ example : FullDomain Version.boundaryA := Version.boundaryAt_fullDomain _ _
 
 `Decode.tablesB` reads an erased `bytesN` where the model marks one. -/
 
-example : Decode.tablesB = ⟨Decode.typeNameB, Decode.localTyB, Decode.unitB⟩ := rfl
+example : Decode.tablesB = ⟨Decode.typeNameB, Decode.localTyB, Decode.unitB, Decode.env⟩ := rfl
 /-- Over `bytes1 x; bytes1 y; uint8 n`: `x = y` types and neither `x = n` nor
 `n = x` does, so the marker is read as `bytes1`, not `uint8`. A marker whose
 size does not match the width is a gap. -/
@@ -640,6 +640,32 @@ example :
     LowerLoopsCorrectContractV2 Version.rel Version.boundaryB Version.boundaryB.reference
         Decode.tablesB.decode → Simulation.Bound Version.rel Decode.tablesB.decode :=
   fun h => (Iff.mp (Version.contractV2At_iff Version.soundB) h).2.2.2.2
+
+/-! ### The caller-aware decoder version
+
+`Decode.tablesS` reads `msg.sender`; the state relation relates the caller. -/
+
+/-- `a = msg.sender` types for an address `a` and not for a `uint`; the
+bytes-aware version has no reading of `msg.sender`. -/
+example : (Decode.tablesS.decode (addressRequest [.assign (.name "a") (.env .msgSender)])).isSome =
+    true := rfl
+example : Decode.tablesS.decode (addressRequest [.assign (.name "n") (.env .msgSender)]) =
+    none := rfl
+example : Decode.tablesB.decode (addressRequest [.assign (.name "a") (.env .msgSender)]) =
+    none := rfl
+example : (Decode.tablesS.decode
+    (addressRequest [.require (.binop .eqB (.env .msgSender) (.name "a"))])).isSome = true := rfl
+example : Decode.tablesS.decode (addressRequest [.assign (.name "a") (.env .selfAddress)]) =
+    none := rfl
+/-- Related globals have the model's caller equal to the Source sender. -/
+example {E : Source.Env} {C : Contract} {G : Source.Glob E} {F : Source.Fr} {st : Source.St E}
+    {σ : State C []} (h : (Version.rel E C).glob G F st σ) :
+    σ.tx.msgSender.1 = (F.sender.val : Int) := h.2.2.2.1
+/-- The caller-aware tables are sound; total initial matching holds for them. -/
+example : Version.Sound Decode.tablesS := Version.soundS
+example : Simulation.InitialMatching Version.rel Decode.tablesS.decode :=
+  Version.initialMatchingAt Version.soundS
+example : FullDomain Version.boundaryS := Version.boundaryAt_fullDomain _ _
 
 end Decoder
 

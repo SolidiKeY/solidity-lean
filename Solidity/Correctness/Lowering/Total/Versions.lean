@@ -6,8 +6,8 @@ import Solidity.Correctness.Lowering.Total.Boundary
 The landed boundary (`Total.Boundary`) is for the landed decoder and is kept
 as it is. This module gives decoder versions (`Decode.Tables`) one state
 relation and a boundary each, beside it. The versions so far are the
-width-aware `Decode.tablesW`, the address-aware `Decode.tablesA` and the
-bytes-aware `Decode.tablesB`:
+width-aware `Decode.tablesW`, the address-aware `Decode.tablesA`, the
+bytes-aware `Decode.tablesB` and the caller-aware `Decode.tablesS`:
 
 * `Version.Relation.ValRel`, `Version.rel`: a model primitive is related to a
   Source Boolean, to a Source integer of the same sign holding the same
@@ -15,9 +15,10 @@ bytes-aware `Decode.tablesB`:
   Source address with that number, or to the Source `bytesN` whose big-endian
   value (`Source.bytesNat`) is that number. Globals as in
   `loopRel`: primitive state variables of the running account, `msg.value`,
-  the timestamp, a writable checking frame.
+  the timestamp, a writable checking frame; and the caller: the model's
+  `msg.sender` is the Source frame's sender.
 * `Version.Sound`: what total initial matching needs of a version's tables
-  (`soundW`, `soundA`, `soundB`). It is not a correctness criterion for the tables: it
+  (`soundW`, `soundA`, `soundB`, `soundS`). It is not a correctness criterion for the tables: it
   does not say they agree with the types the model declared.
 * `Version.initialMatchingAt`: total initial matching for every sound version,
   proved: every admitted
@@ -32,7 +33,8 @@ bytes-aware `Decode.tablesB`:
   inside them.
 * `Version.boundaryAt`, `residualAt_iff`, `contractV2At_iff`: a version's
   boundary with association `SpellsT`, and what the contract and its version 2
-  ask at it; `boundary`, `boundaryA` and `boundaryB` are the instances.
+  ask at it; `boundary`, `boundaryA`, `boundaryB` and `boundaryS` are the
+  instances.
 
 The relation does not tie a slot's Source width to the model's declared width:
 only the decoder does, and the model context of a request has erased it. The
@@ -44,8 +46,8 @@ references, calls and callee bodies, return slots, `unchecked`/`checked`
 scopes, and contracts with functions, a constructor, initializers or transient
 roots. The address-aware version reads marked locals and state variables and
 the name `address`; between such operands the shared expressions (copy, `==`,
-comparison) are spelled and Source types them, but `msg.sender`,
-`address(this)`, `address(e)`/`payable(e)`, an address against a numeric
+comparison) are spelled and Source types them, but `msg.sender` (read only by
+the caller-aware version), `address(this)`, `address(e)`/`payable(e)`, an address against a numeric
 literal, and payable-only operations are gaps (`address payable` is read as
 `address`), and a captured address, whose shape carries the marker twice, is a
 gap too. `a.balance` over a marked operand is typed by Source, while the state
@@ -119,6 +121,7 @@ def glob (E : Source.Env) (C : Contract) (G : Source.Glob E) (F : Source.Fr) (st
     (σ : State C []) : Prop :=
   fields (fun p => ((st.ex.world.accounts F.this).storage.read p).map fun v => ⟨_, v⟩) σ.storage ∧
   σ.tx.msgValue.1 = (F.value.val : Int) ∧ σ.tx.timestamp.1 = (G.timestamp.val : Int) ∧
+  σ.tx.msgSender.1 = (F.sender.val : Int) ∧
   F.static = false ∧ F.checked = true
 
 end Relation
@@ -477,8 +480,9 @@ theorem initialMatchingAt (sound : Sound T) : InitialMatching rel T.decode := by
       obtain ⟨v, hv⟩ := read_prim _ _ prim cell
       exact ⟨p, rfl, τ, v, prim, hv⟩
   exact ⟨⟨storage, [], Heap.empty, env, [], PrimTy.dflt .uint,
-      { msgValue := wordDenote e.frame.value, timestamp := wordDenote e.glob.timestamp }⟩,
-    related, hstorage, rfl, rfl, admitted.2.2.1, admitted.2.2.2⟩
+      { msgValue := wordDenote e.frame.value, timestamp := wordDenote e.glob.timestamp,
+        msgSender := ⟨e.frame.sender.val, address_inRange e.frame.sender⟩ }⟩,
+    related, hstorage, rfl, rfl, rfl, admitted.2.2.1, admitted.2.2.2⟩
 
 /-! ## The width-aware version is sound -/
 
@@ -833,6 +837,13 @@ theorem contractV2_iff :
 
 /-- The address-aware version's boundary. -/
 def boundaryA : SemanticBoundary := boundaryAt Decode.tablesA rel
+
+/-- The caller-aware tables are sound: they type locals and cells as the
+bytes-aware ones do. -/
+theorem soundS : Sound Decode.tablesS := ⟨soundB.localTy, soundB.cell⟩
+
+/-- The caller-aware version's boundary. -/
+def boundaryS : SemanticBoundary := boundaryAt Decode.tablesS rel
 
 /-- The bytes-aware version's boundary. -/
 def boundaryB : SemanticBoundary := boundaryAt Decode.tablesB rel

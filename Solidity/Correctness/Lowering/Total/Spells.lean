@@ -409,28 +409,159 @@ end
 
 /-! ### Decoder versions
 
-The same relation for `Decode.Tables.decode`, the generic decoder: only the
-rule for a declaration's type differs, by the version's `typeName` table.
-Expressions, updates and conditions are shared with the relation above. The
-relation uses the version's own tables, so it checks the recursion and
-inference of the version's decoder, not its tables. -/
+The same relation for `Decode.Tables.decode`, the generic decoder: the rules
+for a declaration's type and for an environment read are by the version's
+tables. The relation uses the version's own tables, so it checks the recursion
+and inference of the version's decoder, not its tables. -/
 
 variable {T : Decode.Tables}
 
-/-- Simple statements of a decoder version. -/
+mutual
+inductive ExprT (T : Decode.Tables) : RawExpr → Syn .expr → Prop where
+  | num (n : Nat) : ExprT T (.num n) (num n)
+  | name (x : String) : ExprT T (.name x) (.ident x)
+  | bool (b : Bool) : ExprT T (.bool b) (.lit (.bool b))
+  | field {e e'} (f : String) : ExprT T e e' → ExprT T (.field e f) (.member e' f)
+  | index {e e' k k'} : ExprT T e e' → ExprT T k k' → ExprT T (.index e k) (.index e' (.some k'))
+  | binop {op f a a' b b' t} : Decode.binop op = some f → ExprT T a a' → ExprT T b b' →
+      t = f a' b' → ExprT T (.binop op a b) t
+  | neg {a a'} : ExprT T a a' → ExprT T (.unop .neg a) (.unaryPrefix .neg a')
+  | not {a a'} : ExprT T a a' → ExprT T (.unop .not a) (.unaryPrefix .not a')
+  | bnot {a a'} : ExprT T a a' → ExprT T (.unop .bnot a) (.unaryPrefix .bitNot a')
+  | toInt {a a'} : ExprT T a a' → ExprT T (.unop .toInt a)
+      (.call (.elemType intElem (by decide)) (.positional (.cons a' .nil)))
+  | toUint {a a'} : ExprT T a a' → ExprT T (.unop .toUint a)
+      (.call (.elemType uintElem (by decide)) (.positional (.cons a' .nil)))
+  | ternary {c c' a a' b b'} : ExprT T c c' → ExprT T a a' → ExprT T b b' →
+      ExprT T (.ternary c a b) (.cond c' a' b')
+  | preInc {e e'} : ExprT T e e' → ExprT T (.incDec .preInc e) (.unaryPrefix .inc e')
+  | preDec {e e'} : ExprT T e e' → ExprT T (.incDec .preDec e) (.unaryPrefix .dec e')
+  | postInc {e e'} : ExprT T e e' → ExprT T (.incDec .postInc e) (.unarySuffix .inc e')
+  | postDec {e e'} : ExprT T e e' → ExprT T (.incDec .postDec e) (.unarySuffix .dec e')
+  | call {args args'} (f : String) : ExprsT T args args' →
+      ExprT T (.call f args) (.call (.ident f) (.positional args'))
+  | modular {a a' b b' k k'} (op : ModOp) : ExprT T a a' → ExprT T b b' → ExprT T k k' →
+      ExprT T (.modular op a b k)
+        (.call (.ident op.toStr) (.positional (.cons a' (.cons b' (.cons k' .nil)))))
+  | env {k t} : T.env k = some t → ExprT T (.env k) t
+  | tuple {a a' b b' rest rest'} : ExprT T a a' → ExprT T b b' → ComponentsT T rest rest' →
+      ExprT T (.tuple (a :: b :: rest)) (.tuple (.some a') (.cons (.some b') rest'))
+  | assign {l l' r r'} : ExprT T l l' → ExprT T r r' → ExprT T (.assign l r) (.assign .assign l' r')
+  | opAssign {op o l l' r r'} : Decode.assignOp op = some o → ExprT T l l' → ExprT T r r' →
+      ExprT T (.opAssign op l r) (.assign o l' r')
+inductive ExprsT (T : Decode.Tables) : List RawExpr → Syn (.list .expr) → Prop where
+  | nil : ExprsT T [] .nil
+  | cons {e e' es es'} : ExprT T e e' → ExprsT T es es' → ExprsT T (e :: es) (.cons e' es')
+inductive ComponentsT (T : Decode.Tables) : List RawExpr → Syn (.list (.opt .expr)) → Prop where
+  | nil : ComponentsT T [] .nil
+  | cons {e e' es es'} : ExprT T e e' → ComponentsT T es es' →
+      ComponentsT T (e :: es) (.cons (.some e') es')
+end
+
+mutual
+theorem ExprT.decode : ∀ {e t}, ExprT T e t → T.expr e = some t
+  | _, _, .num _ | _, _, .name _ | _, _, .bool _ => by simp [Decode.Tables.expr]
+  | _, _, .field _ h => by simp [Decode.Tables.expr, h.decode]
+  | _, _, .index h k => by simp [Decode.Tables.expr, h.decode, k.decode]
+  | _, _, .binop o h k e => by simp [Decode.Tables.expr, o, h.decode, k.decode, e]
+  | _, _, .neg h | _, _, .not h | _, _, .bnot h | _, _, .toInt h | _, _, .toUint h
+  | _, _, .preInc h | _, _, .preDec h | _, _, .postInc h | _, _, .postDec h => by
+      simp [Decode.Tables.expr, h.decode]
+  | _, _, .ternary c a b => by simp [Decode.Tables.expr, c.decode, a.decode, b.decode]
+  | _, _, .call _ h => by simp [Decode.Tables.expr, h.decode]
+  | _, _, .modular _ a b k => by simp [Decode.Tables.expr, a.decode, b.decode, k.decode]
+  | _, _, .env h => by simp [Decode.Tables.expr, h]
+  | _, _, .tuple a b r => by simp [Decode.Tables.expr, a.decode, b.decode, r.decode]
+  | _, _, .assign l r => by simp [Decode.Tables.expr, l.decode, r.decode]
+  | _, _, .opAssign o l r => by simp [Decode.Tables.expr, o, l.decode, r.decode]
+theorem ExprsT.decode : ∀ {es t}, ExprsT T es t → T.exprs es = some t
+  | _, _, .nil => by simp [Decode.Tables.exprs]
+  | _, _, .cons h k => by simp [Decode.Tables.exprs, h.decode, k.decode]
+theorem ComponentsT.decode : ∀ {es t}, ComponentsT T es t → T.components es = some t
+  | _, _, .nil => by simp [Decode.Tables.components]
+  | _, _, .cons h k => by simp [Decode.Tables.components, h.decode, k.decode]
+end
+
+
+mutual
+theorem expr_spellsT : (e : RawExpr) → (t : Syn .expr) → T.expr e = some t → ExprT T e t
+  | .num n, t, h => by spell_simp Decode.Tables.expr at h; subst h; exact .num n
+  | .name x, t, h => by spell_simp Decode.Tables.expr at h; subst h; exact .name x
+  | .bool b, t, h => by spell_simp Decode.Tables.expr at h; subst h; exact .bool b
+  | .field e f, t, h => by
+      spell_simp Decode.Tables.expr at h; obtain ⟨a, ha, rfl⟩ := h; exact .field f (expr_spellsT _ _ ha)
+  | .index e k, t, h => by
+      spell_simp Decode.Tables.expr at h; obtain ⟨a, ha, b, hb, rfl⟩ := h
+      exact .index (expr_spellsT _ _ ha) (expr_spellsT _ _ hb)
+  | .binop op a b, t, h => by
+      spell_simp Decode.Tables.expr at h; obtain ⟨f, hf, a', ha, b', hb, rfl⟩ := h
+      exact .binop hf (expr_spellsT _ _ ha) (expr_spellsT _ _ hb) rfl
+  | .unop .neg a, t, h => by
+      spell_simp Decode.Tables.expr at h; obtain ⟨a', ha, rfl⟩ := h; exact .neg (expr_spellsT _ _ ha)
+  | .unop .not a, t, h => by
+      spell_simp Decode.Tables.expr at h; obtain ⟨a', ha, rfl⟩ := h; exact .not (expr_spellsT _ _ ha)
+  | .unop .bnot a, t, h => by
+      spell_simp Decode.Tables.expr at h; obtain ⟨a', ha, rfl⟩ := h; exact .bnot (expr_spellsT _ _ ha)
+  | .unop .toInt a, t, h => by
+      spell_simp Decode.Tables.expr at h; obtain ⟨a', ha, rfl⟩ := h; exact .toInt (expr_spellsT _ _ ha)
+  | .unop .toUint a, t, h => by
+      spell_simp Decode.Tables.expr at h; obtain ⟨a', ha, rfl⟩ := h; exact .toUint (expr_spellsT _ _ ha)
+  | .ternary c a b, t, h => by
+      spell_simp Decode.Tables.expr at h; obtain ⟨c', hc, a', ha, b', hb, rfl⟩ := h
+      exact .ternary (expr_spellsT _ _ hc) (expr_spellsT _ _ ha) (expr_spellsT _ _ hb)
+  | .incDec .preInc e, t, h => by
+      spell_simp Decode.Tables.expr at h; obtain ⟨a', ha, rfl⟩ := h; exact .preInc (expr_spellsT _ _ ha)
+  | .incDec .preDec e, t, h => by
+      spell_simp Decode.Tables.expr at h; obtain ⟨a', ha, rfl⟩ := h; exact .preDec (expr_spellsT _ _ ha)
+  | .incDec .postInc e, t, h => by
+      spell_simp Decode.Tables.expr at h; obtain ⟨a', ha, rfl⟩ := h; exact .postInc (expr_spellsT _ _ ha)
+  | .incDec .postDec e, t, h => by
+      spell_simp Decode.Tables.expr at h; obtain ⟨a', ha, rfl⟩ := h; exact .postDec (expr_spellsT _ _ ha)
+  | .call f args, t, h => by
+      spell_simp Decode.Tables.expr at h; obtain ⟨a', ha, rfl⟩ := h; exact .call f (exprs_spellsT _ _ ha)
+  | .modular op a b k, t, h => by
+      spell_simp Decode.Tables.expr at h; obtain ⟨a', ha, b', hb, k', hk, rfl⟩ := h
+      exact .modular op (expr_spellsT _ _ ha) (expr_spellsT _ _ hb) (expr_spellsT _ _ hk)
+  | .env k, t, h => by spell_simp Decode.Tables.expr at h; exact .env h
+  | .tuple (a :: b :: rest), t, h => by
+      spell_simp Decode.Tables.expr at h; obtain ⟨a', ha, b', hb, r', hr, rfl⟩ := h
+      exact .tuple (expr_spellsT _ _ ha) (expr_spellsT _ _ hb) (components_spellsT _ _ hr)
+  | .assign l r, t, h => by
+      spell_simp Decode.Tables.expr at h; obtain ⟨l', hl, r', hr, rfl⟩ := h
+      exact .assign (expr_spellsT _ _ hl) (expr_spellsT _ _ hr)
+  | .opAssign op l r, t, h => by
+      spell_simp Decode.Tables.expr at h; obtain ⟨o, ho, l', hl, r', hr, rfl⟩ := h
+      exact .opAssign ho (expr_spellsT _ _ hl) (expr_spellsT _ _ hr)
+  | .newArr .., _, h | .named .., _, h | .tuple [], _, h | .tuple [_], _, h => by
+      spell_simp Decode.Tables.expr at h
+theorem exprs_spellsT : (es : List RawExpr) → (t : Syn (.list .expr)) →
+    T.exprs es = some t → ExprsT T es t
+  | [], t, h => by spell_simp Decode.Tables.exprs at h; subst h; exact .nil
+  | e :: es, t, h => by
+      spell_simp Decode.Tables.exprs at h; obtain ⟨a, ha, b, hb, rfl⟩ := h
+      exact .cons (expr_spellsT _ _ ha) (exprs_spellsT _ _ hb)
+theorem components_spellsT : (es : List RawExpr) → (t : Syn (.list (.opt .expr))) →
+    T.components es = some t → ComponentsT T es t
+  | [], t, h => by spell_simp Decode.Tables.components at h; subst h; exact .nil
+  | e :: es, t, h => by
+      spell_simp Decode.Tables.components at h; obtain ⟨a, ha, b, hb, rfl⟩ := h
+      exact .cons (expr_spellsT _ _ ha) (components_spellsT _ _ hb)
+end
+
+/-- SimpleT T statements. -/
 inductive SimpleT (T : Decode.Tables) : RawStmt → Syn .simple → Prop where
-  | assign {l l' r r'} : Expr l l' → Expr r r' →
+  | assign {l l' r r'} : ExprT T l l' → ExprT T r r' →
       SimpleT T (.assign l r) (.exprStmt (.assign .assign l' r'))
   | declNone {U T'} (x : String) : T.typeName U = some T' →
       SimpleT T (.decl U x none) (.declVar (.varDecl T' none x) .none)
-  | declSome {U T' e e'} (x : String) : T.typeName U = some T' → Expr e e' →
+  | declSome {U T' e e'} (x : String) : T.typeName U = some T' → ExprT T e e' →
       SimpleT T (.decl U x (some e)) (.declVar (.varDecl T' none x) (.some e'))
-  | opAssign {op o l l' r r'} : Decode.assignOp op = some o → Expr l l' → Expr r r' →
+  | opAssign {op o l l' r r'} : Decode.assignOp op = some o → ExprT T l l' → ExprT T r r' →
       SimpleT T (.opAssign op l r) (.exprStmt (.assign o l' r'))
-  | incDec {op l t} : Expr (.incDec op l) t → SimpleT T (.incDec op l) (.exprStmt t)
-  | require {c c'} : Expr c c' →
+  | incDec {op l t} : ExprT T (.incDec op l) t → SimpleT T (.incDec op l) (.exprStmt t)
+  | require {c c'} : ExprT T c c' →
       SimpleT T (.require c) (.exprStmt (.call (.ident "require") (.positional (.cons c' .nil))))
-  | assert {c c'} : Expr c c' →
+  | assert {c c'} : ExprT T c c' →
       SimpleT T (.assert c) (.exprStmt (.call (.ident "assert") (.positional (.cons c' .nil))))
   | revert : SimpleT T .revert (.exprStmt (.call (.ident "revert") (.positional .nil)))
 
@@ -450,54 +581,67 @@ theorem simple_spellsT (s : RawStmt) (t : Syn .simple) (h : T.simple s = some t)
   cases s with
   | assign l r =>
       spell_simp Decode.Tables.simple at h; obtain ⟨l', hl, r', hr, rfl⟩ := h
-      exact .assign (expr_spells _ _ hl) (expr_spells _ _ hr)
+      exact .assign (expr_spellsT _ _ hl) (expr_spellsT _ _ hr)
   | decl U x init =>
       cases init with
       | none => spell_simp Decode.Tables.simple at h; obtain ⟨T', hT, rfl⟩ := h; exact .declNone x hT
       | some e =>
         spell_simp Decode.Tables.simple at h; obtain ⟨T', hT, e', he, rfl⟩ := h
-        exact .declSome x hT (expr_spells _ _ he)
+        exact .declSome x hT (expr_spellsT _ _ he)
   | opAssign op l r =>
       spell_simp Decode.Tables.simple at h; obtain ⟨o, ho, l', hl, r', hr, rfl⟩ := h
-      exact .opAssign ho (expr_spells _ _ hl) (expr_spells _ _ hr)
+      exact .opAssign ho (expr_spellsT _ _ hl) (expr_spellsT _ _ hr)
   | incDec op l =>
-      spell_simp Decode.Tables.simple at h; obtain ⟨a, ha, rfl⟩ := h; exact .incDec (expr_spells _ _ ha)
+      spell_simp Decode.Tables.simple at h; obtain ⟨a, ha, rfl⟩ := h; exact .incDec (expr_spellsT _ _ ha)
   | require c =>
-      spell_simp Decode.Tables.simple at h; obtain ⟨a, ha, rfl⟩ := h; exact .require (expr_spells _ _ ha)
+      spell_simp Decode.Tables.simple at h; obtain ⟨a, ha, rfl⟩ := h; exact .require (expr_spellsT _ _ ha)
   | assert c =>
-      spell_simp Decode.Tables.simple at h; obtain ⟨a, ha, rfl⟩ := h; exact .assert (expr_spells _ _ ha)
+      spell_simp Decode.Tables.simple at h; obtain ⟨a, ha, rfl⟩ := h; exact .assert (expr_spellsT _ _ ha)
   | revert => spell_simp Decode.Tables.simple at h; subst h; exact .revert
   | _ => simp [Decode.Tables.simple] at h
 
-/-- A `for` initializer of a decoder version. -/
+/-- A `for` initializer: none, or one simple statement. -/
 inductive InitT (T : Decode.Tables) : List RawStmt → Syn (.opt .simple) → Prop where
   | absent : InitT T [] .none
   | one {s t} : SimpleT T s t → InitT T [s] (.some t)
 
+/-- A `for` update: none, or one assignment or update expression. -/
+inductive UpdT (T : Decode.Tables) : List RawStmt → Syn (.opt .expr) → Prop where
+  | absent : UpdT T [] .none
+  | assign {l l' r r'} : ExprT T l l' → ExprT T r r' → UpdT T [.assign l r] (.some (.assign .assign l' r'))
+  | opAssign {op o l l' r r'} : Decode.assignOp op = some o → ExprT T l l' → ExprT T r r' →
+      UpdT T [.opAssign op l r] (.some (.assign o l' r'))
+  | incDec {op l t} : ExprT T (.incDec op l) t → UpdT T [.incDec op l] (.some t)
+
+/-- A `for` condition, absent or present. -/
+inductive CondT (T : Decode.Tables) : Option RawExpr → Syn (.opt .expr) → Prop where
+  | absent : CondT T none .none
+  | present {c c'} : ExprT T c c' → CondT T (some c) (.some c')
+
 mutual
-/-- Statements of a decoder version in a control context. -/
+/-- Statements in a control context. -/
 inductive StmtT (T : Decode.Tables) : (k : SCtx) → RawStmt → Syn (.stmt k) → Prop where
-  | ite {k c c' thn thn'} : Expr c c' → ItemsT T k thn thn' →
+  | ite {k c c' thn thn'} : ExprT T c c' → ItemsT T k thn thn' →
       StmtT T k (.ite c thn []) (.ifStmt c' (unbrace thn') .none)
-  | iteElse {k c c' thn thn' e els els'} : Expr c c' → ItemsT T k thn thn' →
+  | iteElse {k c c' thn thn' e els els'} : ExprT T c c' → ItemsT T k thn thn' →
       ItemsT T k (e :: els) els' →
       StmtT T k (.ite c thn (e :: els)) (.ifStmt c' (unbrace thn') (.some (unbrace els')))
   | retNone {k} : StmtT T k (.ret none) (.returnStmt .none)
-  | retSome {k e e'} : Expr e e' → StmtT T k (.ret (some e)) (.returnStmt (.some e'))
+  | retSome {k e e'} : ExprT T e e' → StmtT T k (.ret (some e)) (.returnStmt (.some e'))
   | block {k b b'} : ItemsT T k b b' → StmtT T k (.block b) (.blockStmt (.block b'))
-  | whileLoop {l u c c' b b'} (spec : RawLoopSpec) : Expr c c' → ItemsT T ⟨true, u⟩ b b' →
+  | whileLoop {l u c c' b b'} (spec : RawLoopSpec) : ExprT T c c' → ItemsT T ⟨true, u⟩ b b' →
       StmtT T ⟨l, u⟩ (.whileLoop spec c b) (.whileStmt c' (unbrace b'))
-  | loop {l u c c' b b'} (spec : RawLoopSpec) : Expr c c' → ItemsT T ⟨true, u⟩ b b' →
+  | loop {l u c c' b b'} (spec : RawLoopSpec) : ExprT T c c' → ItemsT T ⟨true, u⟩ b b' →
       StmtT T ⟨l, u⟩ (.loop spec c b) (.whileStmt c' (unbrace b'))
-  | doWhile {l u c c' b b'} (spec : RawLoopSpec) : ItemsT T ⟨true, u⟩ b b' → Expr c c' →
+  | doWhile {l u c c' b b'} (spec : RawLoopSpec) : ItemsT T ⟨true, u⟩ b b' → ExprT T c c' →
       StmtT T ⟨l, u⟩ (.doWhile spec b c) (.doWhile (unbrace b') c')
   | forLoop {l u init init' c c' upd upd' b b'} (spec : RawLoopSpec) : InitT T init init' →
-      Cond c c' → Upd upd upd' → ItemsT T ⟨true, u⟩ b b' →
+      CondT T c c' → UpdT T upd upd' → ItemsT T ⟨true, u⟩ b b' →
       StmtT T ⟨l, u⟩ (.forLoop spec init c upd b) (.forStmt init' c' upd' (unbrace b'))
   | brk {u} : StmtT T ⟨true, u⟩ .brk .breakStmt
   | cont {u} : StmtT T ⟨true, u⟩ .cont .continueStmt
   | simple {k s t} : SimpleT T s t → StmtT T k s (.simpleStmt t)
-/-- The items of a block of a decoder version. -/
+/-- The items of a block; an `unchecked` block only in a checked context. -/
 inductive ItemsT (T : Decode.Tables) : (k : SCtx) → List RawStmt → Syn (.list (.item k)) → Prop where
   | nil {k} : ItemsT T k [] .nil
   | unchecked {l b b' rest rest'} : ItemsT T ⟨l, true⟩ b b' → ItemsT T ⟨l, false⟩ rest rest' →
@@ -505,6 +649,7 @@ inductive ItemsT (T : Decode.Tables) : (k : SCtx) → List RawStmt → Syn (.lis
   | stmt {k s s' rest rest'} : StmtT T k s s' → ItemsT T k rest rest' →
       ItemsT T k (s :: rest) (.cons (.stmtItem s') rest')
 end
+
 theorem InitT.decode {b t} (h : InitT T b t) : T.initializer b = some t := by
   cases h with
   | absent => rfl
@@ -517,6 +662,25 @@ theorem init_spellsT (b : List RawStmt) (t : Syn (.opt .simple))
   | [s], h =>
     spell_simp Decode.Tables.initializer at h; obtain ⟨a, ha, rfl⟩ := h; exact .one (simple_spellsT _ _ ha)
   | _ :: _ :: _, h => simp [Decode.Tables.initializer] at h
+
+theorem UpdT.decode {b t} (h : UpdT T b t) : T.update b = some t := by
+  cases h with
+  | absent => rfl
+  | assign l r => simp [Decode.Tables.update, l.decode, r.decode]
+  | opAssign o l r => simp [Decode.Tables.update, o, l.decode, r.decode]
+  | incDec e => simp [Decode.Tables.update, e.decode]
+
+theorem upd_spellsT (b : List RawStmt) (t : Syn (.opt .expr)) (h : T.update b = some t) :
+    UpdT T b t := by
+  unfold Decode.Tables.update at h
+  split at h
+  · cases h; exact .absent
+  · bind_simp at h; obtain ⟨l', hl, r', hr, rfl⟩ := h
+    exact .assign (expr_spellsT _ _ hl) (expr_spellsT _ _ hr)
+  · bind_simp at h; obtain ⟨o, ho, l', hl, r', hr, rfl⟩ := h
+    exact .opAssign ho (expr_spellsT _ _ hl) (expr_spellsT _ _ hr)
+  · bind_simp at h; obtain ⟨a, ha, rfl⟩ := h; exact .incDec (expr_spellsT _ _ ha)
+  · cases h
 
 mutual
 theorem StmtT.decode : ∀ {k s t}, StmtT T k s t → T.stmt k s = some t
@@ -545,35 +709,36 @@ theorem ItemsT.decode : ∀ {k b t}, ItemsT T k b t → T.items k b = some t
       have e' := rest.decode
       cases s <;> first | simp [Decode.Tables.items, e, e'] | (rename_i h; cases h <;> simp [Decode.Tables.items, e, e'])
 end
+
 mutual
 theorem stmt_spellsT : (k : SCtx) → (s : RawStmt) → (t : Syn (.stmt k)) →
     T.stmt k s = some t → StmtT T k s t
   | k, .ite c thn [], t, h => by
       spell_simp Decode.Tables.stmt at h; obtain ⟨c', hc, thn', ht, rfl⟩ := h
-      exact .ite (expr_spells _ _ hc) (items_spellsT _ _ _ ht)
+      exact .ite (expr_spellsT _ _ hc) (items_spellsT _ _ _ ht)
   | k, .ite c thn (e :: els), t, h => by
       spell_simp Decode.Tables.stmt at h; obtain ⟨c', hc, thn', ht, els', he, rfl⟩ := h
-      exact .iteElse (expr_spells _ _ hc) (items_spellsT _ _ _ ht) (items_spellsT _ _ _ he)
+      exact .iteElse (expr_spellsT _ _ hc) (items_spellsT _ _ _ ht) (items_spellsT _ _ _ he)
   | k, .ret none, t, h => by spell_simp Decode.Tables.stmt at h; subst h; exact .retNone
   | k, .ret (some e), t, h => by
-      spell_simp Decode.Tables.stmt at h; obtain ⟨e', he, rfl⟩ := h; exact .retSome (expr_spells _ _ he)
+      spell_simp Decode.Tables.stmt at h; obtain ⟨e', he, rfl⟩ := h; exact .retSome (expr_spellsT _ _ he)
   | k, .block b, t, h => by
       spell_simp Decode.Tables.stmt at h; obtain ⟨b', hb, rfl⟩ := h; exact .block (items_spellsT _ _ _ hb)
   | ⟨l, u⟩, .whileLoop spec c b, t, h => by
       spell_simp Decode.Tables.stmt at h; obtain ⟨c', hc, b', hb, rfl⟩ := h
-      exact .whileLoop spec (expr_spells _ _ hc) (items_spellsT _ _ _ hb)
+      exact .whileLoop spec (expr_spellsT _ _ hc) (items_spellsT _ _ _ hb)
   | ⟨l, u⟩, .loop spec c b, t, h => by
       spell_simp Decode.Tables.stmt at h; obtain ⟨c', hc, b', hb, rfl⟩ := h
-      exact .loop spec (expr_spells _ _ hc) (items_spellsT _ _ _ hb)
+      exact .loop spec (expr_spellsT _ _ hc) (items_spellsT _ _ _ hb)
   | ⟨l, u⟩, .doWhile spec b c, t, h => by
       spell_simp Decode.Tables.stmt at h; obtain ⟨b', hb, c', hc, rfl⟩ := h
-      exact .doWhile spec (items_spellsT _ _ _ hb) (expr_spells _ _ hc)
+      exact .doWhile spec (items_spellsT _ _ _ hb) (expr_spellsT _ _ hc)
   | ⟨l, u⟩, .forLoop spec init none upd b, t, h => by
       spell_simp Decode.Tables.stmt at h; obtain ⟨i', hi, _, rfl, u', hu, b', hb, rfl⟩ := h
-      exact .forLoop spec (init_spellsT _ _ hi) .absent (upd_spells _ _ hu) (items_spellsT _ _ _ hb)
+      exact .forLoop spec (init_spellsT _ _ hi) .absent (upd_spellsT _ _ hu) (items_spellsT _ _ _ hb)
   | ⟨l, u⟩, .forLoop spec init (some c) upd b, t, h => by
       spell_simp Decode.Tables.stmt at h; obtain ⟨i', hi, _, ⟨c', hc, rfl⟩, u', hu, b', hb, rfl⟩ := h
-      exact .forLoop spec (init_spellsT _ _ hi) (.present (expr_spells _ _ hc)) (upd_spells _ _ hu)
+      exact .forLoop spec (init_spellsT _ _ hi) (.present (expr_spellsT _ _ hc)) (upd_spellsT _ _ hu)
         (items_spellsT _ _ _ hb)
   | ⟨true, u⟩, .brk, t, h => by simp [Decode.Tables.stmt, Decode.jump] at h; subst h; exact .brk
   | ⟨false, u⟩, .brk, t, h => by simp [Decode.Tables.stmt, Decode.jump] at h
@@ -627,6 +792,7 @@ theorem items_spellsT : (k : SCtx) → (b : List RawStmt) → (t : Syn (.list (.
       spell_simp Decode.Tables.items at h; obtain ⟨s', hs, r', hr, rfl⟩ := h
       exact .stmt (stmt_spellsT _ _ _ hs) (items_spellsT _ _ _ hr)
 end
+
 end Spells
 
 /-- **The spelling relation.** A plain request spells a Source program when

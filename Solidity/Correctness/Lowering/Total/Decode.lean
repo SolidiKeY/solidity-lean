@@ -283,24 +283,76 @@ structure Tables where
   localTy : LocalTy → Option STy
   /-- The canonical Source unit of a model contract. -/
   unit : Contract → Option (Syn .unit)
+  /-- An environment read (`msg.value`, …). -/
+  env : EnvKey → Option (Syn .expr)
 
 namespace Tables
 
 variable (T : Tables)
 
+mutual
+/-- Expressions of the version: as `Decode.expr`, with environment reads by
+the version's table. -/
+def expr : RawExpr → Option (Syn .expr)
+  | .num n => some (num n)
+  | .name x => some (.ident x)
+  | .bool b => some (.lit (.bool b))
+  | .field e f => (expr e).map (.member · f)
+  | .index e k => do pure (.index (← expr e) (.some (← expr k)))
+  | .binop op a b => do pure ((← binop op) (← expr a) (← expr b))
+  | .unop .neg a => (expr a).map (.unaryPrefix .neg)
+  | .unop .not a => (expr a).map (.unaryPrefix .not)
+  | .unop .bnot a => (expr a).map (.unaryPrefix .bitNot)
+  | .unop .toInt a => (expr a).map fun a =>
+      .call (.elemType intElem (by decide)) (.positional (.cons a .nil))
+  | .unop .toUint a => (expr a).map fun a =>
+      .call (.elemType uintElem (by decide)) (.positional (.cons a .nil))
+  | .ternary c a b => do pure (.cond (← expr c) (← expr a) (← expr b))
+  | .incDec .preInc e => (expr e).map (.unaryPrefix .inc)
+  | .incDec .preDec e => (expr e).map (.unaryPrefix .dec)
+  | .incDec .postInc e => (expr e).map (.unarySuffix .inc)
+  | .incDec .postDec e => (expr e).map (.unarySuffix .dec)
+  | .call f args => (exprs args).map fun args => .call (.ident f) (.positional args)
+  | .modular op a b k => do
+      pure (.call (.ident op.toStr)
+        (.positional (.cons (← expr a) (.cons (← expr b) (.cons (← expr k) .nil)))))
+  | .env k => T.env k
+  | .tuple (a :: b :: rest) => do
+      pure (.tuple (.some (← expr a)) (.cons (.some (← expr b)) (← components rest)))
+  | .assign l r => do pure (.assign .assign (← expr l) (← expr r))
+  | .opAssign op l r => do pure (.assign (← assignOp op) (← expr l) (← expr r))
+  | _ => none
+/-- Argument lists of the version. -/
+def exprs : List RawExpr → Option (Syn (.list .expr))
+  | [] => some .nil
+  | e :: es => do pure (.cons (← expr e) (← exprs es))
+/-- Tuple components of the version. -/
+def components : List RawExpr → Option (Syn (.list (.opt .expr)))
+  | [] => some .nil
+  | e :: es => do pure (.cons (.some (← expr e)) (← components es))
+end
+
 /-- Simple statements, with declarations typed by the version's table. -/
 def simple : RawStmt → Option (Syn .simple)
   | .decl U x none => (T.typeName U).map fun U => .declVar (.varDecl U none x) .none
   | .decl U x (some e) => do
-      pure (.declVar (.varDecl (← T.typeName U) none x) (.some (← expr e)))
-  | .assign l r => do pure (.exprStmt (.assign .assign (← expr l) (← expr r)))
-  | .opAssign op l r => do pure (.exprStmt (.assign (← assignOp op) (← expr l) (← expr r)))
-  | .incDec op l => (expr (.incDec op l)).map .exprStmt
-  | .require c => (expr c).map fun c =>
+      pure (.declVar (.varDecl (← T.typeName U) none x) (.some (← T.expr e)))
+  | .assign l r => do pure (.exprStmt (.assign .assign (← T.expr l) (← T.expr r)))
+  | .opAssign op l r => do pure (.exprStmt (.assign (← assignOp op) (← T.expr l) (← T.expr r)))
+  | .incDec op l => (T.expr (.incDec op l)).map .exprStmt
+  | .require c => (T.expr c).map fun c =>
       .exprStmt (.call (.ident "require") (.positional (.cons c .nil)))
-  | .assert c => (expr c).map fun c =>
+  | .assert c => (T.expr c).map fun c =>
       .exprStmt (.call (.ident "assert") (.positional (.cons c .nil)))
   | .revert => some (.exprStmt (.call (.ident "revert") (.positional .nil)))
+  | _ => none
+
+/-- A `for` update of the version. -/
+def update : List RawStmt → Option (Syn (.opt .expr))
+  | [] => some .none
+  | [.assign l r] => do pure (.some (.assign .assign (← T.expr l) (← T.expr r)))
+  | [.opAssign op l r] => do pure (.some (.assign (← assignOp op) (← T.expr l) (← T.expr r)))
+  | [.incDec op l] => (T.expr (.incDec op l)).map .some
   | _ => none
 
 /-- A `for` initializer of the version. -/
@@ -313,24 +365,24 @@ mutual
 /-- Statements of the version: as `Decode.stmt`, over `Tables.simple`. -/
 def stmt (k : SCtx) : RawStmt → Option (Syn (.stmt k))
   | .ite c thn els => do
-      let c ← expr c
+      let c ← T.expr c
       let thn ← items k thn
       match els with
       | [] => pure (.ifStmt c (unbrace thn) .none)
       | e :: els => pure (.ifStmt c (unbrace thn) (.some (unbrace (← items k (e :: els)))))
   | .ret none => some (.returnStmt .none)
-  | .ret (some e) => (expr e).map fun e => .returnStmt (.some e)
+  | .ret (some e) => (T.expr e).map fun e => .returnStmt (.some e)
   | .block b => (items k b).map fun b => .blockStmt (.block b)
   | .whileLoop _ c b | .loop _ c b => do
-      pure (.whileStmt (← expr c) (unbrace (← items ⟨true, k.unchecked⟩ b)))
+      pure (.whileStmt (← T.expr c) (unbrace (← items ⟨true, k.unchecked⟩ b)))
   | .doWhile _ b c => do
-      pure (.doWhile (unbrace (← items ⟨true, k.unchecked⟩ b)) (← expr c))
+      pure (.doWhile (unbrace (← items ⟨true, k.unchecked⟩ b)) (← T.expr c))
   | .forLoop _ init c upd b => do
       let init ← T.initializer init
       let c ← match c with
         | none => pure .none
-        | some c => (expr c).map Syn.some
-      pure (.forStmt init c (← update upd) (unbrace (← items ⟨true, k.unchecked⟩ b)))
+        | some c => (T.expr c).map Syn.some
+      pure (.forStmt init c (← T.update upd) (unbrace (← items ⟨true, k.unchecked⟩ b)))
   | .brk => jump true k
   | .cont => jump false k
   | s => (T.simple s).map .simpleStmt
@@ -366,14 +418,42 @@ def decode (r : Request) : Option SourceProgram :=
 end Tables
 
 /-- The landed decoder's tables. -/
-def tables1 : Tables := ⟨typeName, localTy, unit⟩
+def tables1 : Tables := ⟨typeName, localTy, unit, env⟩
 
 /-! ### The landed decoder is the generic decoder at its tables -/
 
+mutual
+theorem expr_tables1 : (e : RawExpr) → tables1.expr e = expr e
+  | .num _ | .name _ | .bool _ | .env _ | .newArr .. | .named .. => by simp [Tables.expr, expr, tables1]
+  | .field e _ => by simp [Tables.expr, expr, expr_tables1 e]
+  | .index e k => by simp [Tables.expr, expr, expr_tables1 e, expr_tables1 k]
+  | .binop _ a b => by simp [Tables.expr, expr, expr_tables1 a, expr_tables1 b]
+  | .unop op a => by cases op <;> simp [Tables.expr, expr, expr_tables1 a]
+  | .ternary c a b => by simp [Tables.expr, expr, expr_tables1 c, expr_tables1 a, expr_tables1 b]
+  | .incDec op e => by cases op <;> simp [Tables.expr, expr, expr_tables1 e]
+  | .call _ args => by simp [Tables.expr, expr, exprs_tables1 args]
+  | .modular _ a b k => by
+      simp [Tables.expr, expr, expr_tables1 a, expr_tables1 b, expr_tables1 k]
+  | .tuple [] | .tuple [_] => by simp [Tables.expr, expr]
+  | .tuple (a :: b :: rest) => by
+      simp [Tables.expr, expr, expr_tables1 a, expr_tables1 b, components_tables1 rest]
+  | .assign l r | .opAssign _ l r => by simp [Tables.expr, expr, expr_tables1 l, expr_tables1 r]
+theorem exprs_tables1 : (es : List RawExpr) → tables1.exprs es = exprs es
+  | [] => by simp [Tables.exprs, exprs]
+  | e :: es => by simp [Tables.exprs, exprs, expr_tables1 e, exprs_tables1 es]
+theorem components_tables1 : (es : List RawExpr) → tables1.components es = components es
+  | [] => by simp [Tables.components, components]
+  | e :: es => by simp [Tables.components, components, expr_tables1 e, components_tables1 es]
+end
+
+theorem update_tables1 (b : List RawStmt) : tables1.update b = update b := by
+  unfold Tables.update update
+  split <;> simp [expr_tables1]
+
 theorem simple_tables1 (s : RawStmt) : tables1.simple s = simple s := by
   cases s with
-  | decl U x init => cases init <;> rfl
-  | _ => rfl
+  | decl U x init => cases init <;> simp only [Tables.simple, simple, expr_tables1] <;> rfl
+  | _ => simp [Tables.simple, simple, expr_tables1]
 
 theorem initializer_tables1 : (b : List RawStmt) → tables1.initializer b = initializer b
   | [] => rfl
@@ -382,16 +462,16 @@ theorem initializer_tables1 : (b : List RawStmt) → tables1.initializer b = ini
 
 mutual
 theorem stmt_tables1 : (k : SCtx) → (s : RawStmt) → tables1.stmt k s = stmt k s
-  | k, .ite c thn [] => by simp [Tables.stmt, stmt, items_tables1 k thn]
+  | k, .ite c thn [] => by simp [Tables.stmt, stmt, expr_tables1, update_tables1, items_tables1 k thn]
   | k, .ite c thn (e :: els) => by
-      simp [Tables.stmt, stmt, items_tables1 k thn, items_tables1 k (e :: els)]
-  | k, .ret none | k, .ret (some _) => by simp [Tables.stmt, stmt]
-  | k, .block b => by simp [Tables.stmt, stmt, items_tables1 k b]
+      simp [Tables.stmt, stmt, expr_tables1, update_tables1, items_tables1 k thn, items_tables1 k (e :: els)]
+  | k, .ret none | k, .ret (some _) => by simp [Tables.stmt, stmt, expr_tables1, update_tables1]
+  | k, .block b => by simp [Tables.stmt, stmt, expr_tables1, update_tables1, items_tables1 k b]
   | k, .whileLoop _ c b | k, .loop _ c b | k, .doWhile _ b c => by
-      simp [Tables.stmt, stmt, items_tables1 ⟨true, k.unchecked⟩ b]
+      simp [Tables.stmt, stmt, expr_tables1, update_tables1, items_tables1 ⟨true, k.unchecked⟩ b]
   | k, .forLoop _ init c upd b => by
-      simp [Tables.stmt, stmt, items_tables1 ⟨true, k.unchecked⟩ b, initializer_tables1]
-  | k, .brk | k, .cont => by simp [Tables.stmt, stmt]
+      simp [Tables.stmt, stmt, expr_tables1, update_tables1, items_tables1 ⟨true, k.unchecked⟩ b, initializer_tables1]
+  | k, .brk | k, .cont => by simp [Tables.stmt, stmt, expr_tables1, update_tables1]
   | k, (.assign ..) | k, (.decl ..) | k, (.declStorage ..) | k, (.declMemory ..)
   | k, (.delete ..) | k, (.opAssign ..) | k, (.incDec ..) | k, (.pushOpAssign ..)
   | k, (.pushIncDec ..) | k, (.call ..) | k, (.assignIncDec ..) | k, (.assignPush ..)
@@ -400,7 +480,7 @@ theorem stmt_tables1 : (k : SCtx) → (s : RawStmt) → tables1.stmt k s = stmt 
   | k, (.requireReason ..) | k, (.revertRaw ..) | k, (.revertErr ..) | k, (.requireErr ..)
   | k, .assumeFalse | k, (.eval ..) | k, (.unchecked ..) | k, (.checked ..) | k, (.tryCall ..)
   | k, (.send ..) | k, (.tupleDecl ..) | k, (.tupleAssign ..) | k, .hole => by
-      simp [Tables.stmt, stmt, simple_tables1]
+      simp [Tables.stmt, stmt, expr_tables1, update_tables1, simple_tables1]
 theorem items_tables1 : (k : SCtx) → (b : List RawStmt) → tables1.items k b = items k b
   | k, [] => by simp [Tables.items, items]
   | k, .unchecked b :: rest => by
@@ -508,7 +588,7 @@ def unitW (C : Contract) : Option (Syn .unit) :=
   else none
 
 /-- The width-aware decoder's tables. -/
-def tablesW : Tables := ⟨typeNameW, localTyW, unitW⟩
+def tablesW : Tables := ⟨typeNameW, localTyW, unitW, env⟩
 
 /-! ### Addresses
 
@@ -572,7 +652,7 @@ def unitA (C : Contract) : Option (Syn .unit) :=
   else none
 
 /-- The address-aware decoder's tables. -/
-def tablesA : Tables := ⟨typeNameA, localTyA, unitA⟩
+def tablesA : Tables := ⟨typeNameA, localTyA, unitA, env⟩
 
 /-! ### Canonical units from an element table
 
@@ -657,7 +737,22 @@ def unitB : Contract → Option (Syn .unit) :=
   unitOf (fun C => C.widths.all fun w => keyB C.vars w) fun C => elemB C.widths
 
 /-- The bytes-aware decoder's tables. -/
-def tablesB : Tables := ⟨typeNameB, localTyB, unitB⟩
+def tablesB : Tables := ⟨typeNameB, localTyB, unitB, env⟩
+
+/-! ### The caller
+
+`tablesS`: as `tablesB`, and `msg.sender` is read as the Source `msg.sender`,
+an `address`. The version's state relation relates the model's caller to the
+Source frame's sender (`Total.Versions`). `address(this)` and its balance stay
+gaps. -/
+
+/-- Environment reads with the caller. -/
+def envS : EnvKey → Option (Syn .expr)
+  | .msgSender => some (.member (.ident "msg") "sender")
+  | k => env k
+
+/-- The caller-aware decoder's tables. -/
+def tablesS : Tables := { tablesB with env := envS }
 
 end Decode
 
