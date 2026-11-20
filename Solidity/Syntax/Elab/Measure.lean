@@ -47,11 +47,22 @@ open Semantics
 private theorem reachableBy_missing (callees : FunDecl → List String)
     (funs : List (Name × FunDecl)) (f : String) (h : lookupBy f funs = none) :
     reachableBy callees funs f = [] := by
-  simp only [reachableBy, h, Option.map_none, Option.getD_none, List.contains_eq_mem,
-    List.isEmpty_iff, bind_pure_comp, map_pure, Std.Range.forIn_eq_forIn_range', Std.Range.size,
-    Nat.sub_zero, Nat.add_one_sub_one, Nat.div_one, List.range'_succ, Nat.zero_add, List.forIn_cons,
-    List.not_mem_nil, decide_false, Bool.not_false, Bool.true_and, List.filter_nil,
-    List.eraseDups_nil, ↓reduceIte, pure_bind, Id.run_pure]
+  simp only [reachableBy, h, Option.map_none, Option.getD_none]
+  simp only [forIn, forIn', Std.Range.forIn']
+  -- Unfold the private range loop once. Its general list-range theorem
+  -- brings Classical.choice through an arithmetic helper; this early exit
+  -- needs only the defining equation. Find the helper from the public body
+  -- rather than relying on its generated private-name index.
+  run_tac
+    let info ← Lean.getConstInfo ``Std.Range.forIn'
+    let some body := info.value? | throwError "range body unavailable"
+    let some loop := body.find? (fun e => match e with
+      | .const (.str _ "loop") _ => true
+      | _ => false)
+      | throwError "range loop unavailable"
+    Lean.Elab.Tactic.evalTactic (← `(tactic| unfold $(Lean.mkIdent loop.constName!)))
+  simp only [Nat.zero_lt_succ, ↓reduceDIte, List.filter_nil, List.eraseDups_nil,
+    List.isEmpty_nil, ↓reduceIte, pure_bind, Id.run_pure]
 private theorem recursive_has_decl (C : Contract) (f : String) (hr : isRecursiveC C f = true) :
     ∃ d, (f, d) ∈ C.funs := by
   cases h : lookupBy f C.funs with
@@ -62,6 +73,21 @@ private theorem recursive_has_decl (C : Contract) (f : String) (hr : isRecursive
 /-- Contract functions not yet represented by an active recursive frame. -/
 def ElabScope.unframedCount (C : Contract) (sc : ElabScope) : Nat :=
   (C.funs.filter fun p => !(sc.recs.any (·.name == p.1))).length
+
+private theorem filter_lt_of_rejected {α : Type} (p : α → Bool) (a : α)
+    (xs : List α) (hm : a ∈ xs) (hf : p a = false) :
+    (xs.filter p).length < xs.length := by
+  induction xs with
+  | nil => cases hm
+  | cons b xs ih =>
+    simp only [List.mem_cons] at hm
+    rcases hm with h | h
+    · subst b
+      simpa only [List.filter_cons, hf, Bool.false_eq_true, ↓reduceIte, List.length_cons]
+        using Nat.lt_succ_of_le (List.length_filter_le p xs)
+    · have ht := ih h
+      cases hb : p b <;>
+        simp only [List.filter_cons, hb, Bool.false_eq_true, ↓reduceIte, List.length_cons] <;> omega
 
 /-- Opening a previously absent recursive frame strictly decreases the count,
 even if the recursive call widens the list of callable functions. -/
@@ -75,10 +101,12 @@ private theorem ElabScope.unframedCount_push_of_mem (C : Contract) (sc : ElabSco
         (fun p => !(rf.name == p.1)) := by
     simp only [List.any_cons, Bool.not_or, List.filter_filter]
   rw [he]
-  apply List.length_filter_lt_length_iff_exists.mpr
-  refine ⟨(rf.name, d), ?_, ?_⟩
-  · simp only [List.mem_filter, hm, hn, Bool.not_false, and_self]
-  · simp only [beq_self_eq_true, Bool.not_true, Bool.false_eq_true, not_false_eq_true]
+  apply filter_lt_of_rejected _ (rf.name, d)
+
+  · exact List.mem_filter.mpr ⟨hm, by simp only [hn, Bool.not_false]⟩
+  · have hb : (rf.name == rf.name) = true := beq_iff_eq.mpr rfl
+    rw [hb]
+    rfl
 
 /-- A recursive body gains a new active frame, removing a contract function
 from the finite count of possible recursive-body expansions. -/
@@ -142,6 +170,26 @@ theorem ElabScope.callRank_prefix (C : Contract) (sc : ElabScope) (i : Nat)
     simp only [ht]
     exact Prod.Lex.right 0 (Prod.Lex.right (sc.unframedCount C)
       (Nat.lt_of_le_of_lt (List.length_take_le i sc.funs) hi))
+
+
+/-- The actual declaration lookup yields the strict prefix needed by ordinary inlining. -/
+theorem ElabScope.callRank_found (C : Contract) (sc : ElabScope) (f : String) (i : Nat)
+    (h : sc.funs.findIdx? (·.1 == f) = some i) :
+    WellFoundedRelation.rel
+      (({sc with top := false, funs := sc.funs.take i} : ElabScope).callRank C)
+      (sc.callRank C) := by
+  apply ElabScope.callRank_prefix
+  exact (List.findIdx?_eq_some_iff_getElem.mp h).1
+
+/-- The actual missing-frame test supplies the strict recursive-frame decrease. -/
+theorem ElabScope.callRank_freshFrame (C : Contract) (sc : ElabScope) (rf : RecFrame)
+    (funs : List (Name × FunDecl)) (hr : isRecursiveC C rf.name = true)
+    (h : sc.recs.find? (·.name == rf.name) = none) :
+    WellFoundedRelation.rel
+      (({sc with top := false, funs := funs, recs := rf :: sc.recs} : ElabScope).callRank C)
+      (sc.callRank C) := by
+  apply ElabScope.callRank_push C sc rf funs hr
+  exact List.any_eq_false.mpr (List.find?_eq_none.mp h)
 
 /-- A statement's block-bearing constructor and its unvisited child lists.
 Statements without child blocks share `leaf`; loop forms remain distinct. -/
@@ -882,5 +930,112 @@ theorem lowerLoops_rank [FreshNames] (rs : Option (List String)) (s : RawStmt)
   omega
 
 end ElabLoopMeasure
+
+private theorem bytesArgs_shape (as : List RawExpr) (bs : List Nat)
+    (h : as.mapM (fun | .num n => some n | _ => none) = some bs) :
+    as = bs.map RawExpr.num := by
+  induction as generalizing bs with
+  | nil => cases h; rfl
+  | cons a as ih =>
+    cases a <;> simp only [List.mapM_cons, bind, Option.bind, pure] at h
+    all_goals try contradiction
+    rename_i n
+    cases he : as.mapM (fun | .num n => some n | _ => none) with
+    | none => simp only [he] at h; contradiction
+    | some ns =>
+      simp only [he, Option.some.injEq] at h
+      cases h
+      simp only [List.map_cons, ih ns he]
+
+/-- Successful byte-literal recognition exposes only numeric arguments. -/
+theorem bytesLit_shape (e : RawExpr) (bs : List Nat)
+    (h : e.bytesLit? = some bs) : e = RawExpr.bytesLit bs := by
+  cases e <;> simp only [RawExpr.bytesLit?] at h
+  all_goals try contradiction
+  rename_i f as
+  split at h
+  next hf =>
+    have hf' : f = bytesLitName := beq_iff_eq.mp hf
+    subst f
+    rw [bytesArgs_shape as bs h]
+    rfl
+  next => contradiction
+
+
+namespace ElabCaptureProof
+
+open ElabControlProof
+
+/-- An operand accepted without capture, or a captured local name. -/
+def CaptureAtom (e : RawExpr) : Prop :=
+  (e.isLit || e.bytesLit?.isSome || (e matches .bool _)) = true ∨
+    ∃ x, e = .name x
+
+/-- Captured atoms have only these literal or name forms. -/
+theorem captureAtom_cases (e : RawExpr) (h : CaptureAtom e) :
+    (∃ n, e = .num n) ∨ (∃ n, e = .unop .neg (.num n)) ∨
+      (∃ b, e = .bool b) ∨ (∃ x, e = .name x) ∨ (∃ bs, e = .bytesLit bs) := by
+  rcases h with h | ⟨x, hx⟩
+  · simp only [Bool.or_eq_true] at h
+    rcases h with (hl | hb) | hb
+    · unfold RawExpr.isLit at hl
+      split at hl
+      next n => exact Or.inl ⟨n, rfl⟩
+      next n => exact Or.inr (Or.inl ⟨n, rfl⟩)
+      next => contradiction
+    · cases he : e.bytesLit? with
+      | none => simp only [he, Option.isSome_none, Bool.false_eq_true] at hb
+      | some bs => exact Or.inr (Or.inr (Or.inr (Or.inr ⟨bs, bytesLit_shape e bs he⟩)))
+    · cases e <;> simp only [Bool.false_eq_true] at hb
+      rename_i b
+      exact Or.inr (Or.inr (Or.inl ⟨b, rfl⟩))
+  · exact Or.inr (Or.inr (Or.inr (Or.inl ⟨x, hx⟩)))
+
+variable (C : Contract) [FreshNames]
+
+private theorem forceArg_obs (e : RawExpr) (p : PrimTy) :
+    Obs (forceArg C e (some p)) (fun out => CaptureAtom out.2) := by
+  simp only [forceArg]
+  change Obs (if (e.isLit || e.bytesLit?.isSome || (e matches .bool _)) = true
+    then _ else _) _
+  by_cases he : (e.isLit || e.bytesLit?.isSome || (e matches .bool _)) = true
+  · rw [if_pos he]
+    exact obs_pure (Or.inl he)
+  · rw [if_neg he]
+    simp only [pure_bind]
+    apply obs_any
+    intro ⟨Γ, t⟩
+    cases t <;> try (rename_i T _; cases T)
+    all_goals
+      repeat first
+      | apply obs_pure; exact Or.inr ⟨_, rfl⟩
+      | apply obs_any; intro a
+
+theorem forceArg_captureAtom (e : RawExpr) (p : PrimTy)
+    (sc : ElabScope) (st st' : ECtx × Nat) (m m') (out : SProg C × RawExpr)
+    (h : (((forceArg C e (some p)).run sc).run st).run m = .ok ((out, st'), m')) :
+    CaptureAtom out.2 := forceArg_obs C e p sc st m out st' m' h
+private theorem eager_pair_obs (hoist : RawExpr → ElabM (SProg C × RawExpr))
+    (a b : RawExpr) (p q : PrimTy) :
+    Obs (eagerArgsWith C hoist [a, b] false [some p, some q])
+      (fun out => ∃ x y, out.2 = [x, y] ∧ CaptureAtom x ∧ CaptureAtom y) := by
+  simp only [eagerArgsWith, List.zipIdx_cons, List.zipIdx_nil,
+    List.forIn_cons, List.forIn_nil, bind_assoc, pure_bind,
+    List.getElem?_cons_zero, List.getElem?_cons_succ, Option.getD_some, Bool.false_and, Bool.false_eq_true, ↓reduceIte]
+  repeat first
+  | (with_reducible apply obs_pure
+     exact ⟨_, _, rfl, by assumption, by assumption⟩)
+  | (with_reducible apply obs_bind (forceArg_obs C _ _); intro out hatom)
+  | (with_reducible apply obs_any; intro value)
+
+theorem eagerArgs_pair_captureAtoms
+    (hoist : RawExpr → ElabM (SProg C × RawExpr)) (a b : RawExpr) (p q : PrimTy)
+    (sc : ElabScope) (st st' : ECtx × Nat) (m m') (out : SProg C × List RawExpr)
+    (h : (((eagerArgsWith C hoist [a, b] false [some p, some q]).run sc).run st).run m =
+      .ok ((out, st'), m')) :
+    ∃ x y, out.2 = [x, y] ∧ CaptureAtom x ∧ CaptureAtom y :=
+  eager_pair_obs C hoist a b p q sc st m out st' m' h
+
+end ElabCaptureProof
 
 end Solidity
