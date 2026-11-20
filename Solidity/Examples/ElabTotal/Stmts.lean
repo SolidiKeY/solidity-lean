@@ -86,4 +86,43 @@ example (ws : List (String × Nat)) (E : Ty) (k : String) :
       .array (.array (rawTyW ws E ((k ++ "[]") ++ "[]"))) := by
   rw [rawTyW_array, rawTyW_array]
 
+
+-- The public ABI equations use only propext and Quot.sound;
+-- adding choice, sorry, or another axiom breaks these checked guards.
+/-- info: 'Solidity.abiSizeGen_eq' depends on axioms: [propext, Quot.sound] -/
+#guard_msgs in
+#print axioms abiSizeGen_eq
+
+/-- info: 'Solidity.abiSeqSizeGen_eq' depends on axioms: [propext, Quot.sound] -/
+#guard_msgs in
+#print axioms abiSeqSizeGen_eq
+
+/-- info: 'Solidity.abiTupleSizeGen_eq' depends on axioms: [propext, Quot.sound] -/
+#guard_msgs in
+#print axioms abiTupleSizeGen_eq
+
+/-- info: 'Solidity.abiWriteGen_eq' depends on axioms: [propext, Quot.sound] -/
+#guard_msgs in
+#print axioms abiWriteGen_eq
+
+/-- info: 'Solidity.abiSeqWriteGen_eq' depends on axioms: [propext, Quot.sound] -/
+#guard_msgs in
+#print axioms abiSeqWriteGen_eq
+
+/-- info: 'Solidity.abiTupleWriteGen_eq' depends on axioms: [propext, Quot.sound] -/
+#guard_msgs in
+#print axioms abiTupleWriteGen_eq
+
+/-- info: 'Solidity.abiReadGen_eq' depends on axioms: [propext, Quot.sound] -/
+#guard_msgs in
+#print axioms abiReadGen_eq
+
+/-- info: 'Solidity.abiSeqReadGen_eq' depends on axioms: [propext, Quot.sound] -/
+#guard_msgs in
+#print axioms abiSeqReadGen_eq
+
+/-- info: 'Solidity.abiSeqSizeGen_result_name' depends on axioms: [propext, Quot.sound] -/
+#guard_msgs in
+#print axioms abiSeqSizeGen_result_name
+
 end Solidity.Examples.ElabTotal.Stmts
