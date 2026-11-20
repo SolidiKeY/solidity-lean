@@ -253,6 +253,25 @@ example (ss out : List RawStmt) (h : uncheckStmts ss = .ok out) :
   simp only [CalleeKernel.stmtWeight]
   omega
 
+/-- Expression preprocessing preserves the source-loop count, even when its
+callback returns arbitrary expressions or fails. -/
+example (f : RawExpr → Except String RawExpr) (s out : RawStmt)
+    (h : s.mapExprsM f = .ok out) :
+    ElabLoopMeasure.stmtCount out = ElabLoopMeasure.stmtCount s := by
+  have he := ElabLoopMeasure.mapExprsM_count f s
+  rw [h] at he
+  exact Except.ok.inj he
+
+/-- A successful source-loop lowering strictly decreases the loop component. -/
+example [FreshNames] (rs : Option (List String)) (a : RawLoopSpec) (c : RawExpr)
+    (b : List RawStmt) (sc : ElabScope) (st st' : ECtx × Nat) (m m' : CallMemo)
+    (out : List RawStmt)
+    (h : (((lowerLoops rs [.whileLoop a c b]).run sc).run st).run m = .ok ((out, st'), m')) :
+    ElabLoopMeasure.listCount out < ElabLoopMeasure.stmtCount (.whileLoop a c b) := by
+  have hb := ElabLoopMeasure.lowerLoops_single_count rs (.whileLoop a c b) sc st st' m m' out h
+  simp only [ElabLoopMeasure.rootCount] at hb
+  omega
+
 section Counterexample
 
 /-- A contract with nothing declared. -/
@@ -273,6 +292,9 @@ def blk : RawStmt := .block [eS, .loop {} (.bool true) []]
 /-- The spike's two statements have equal control weight: weight equality
 alone cannot distinguish the loop from its lowered block. -/
 example : CalleeKernel.stmtWeight forT = CalleeKernel.stmtWeight blk := rfl
+
+/-- The loop component distinguishes the spike's equal-control-weight pair. -/
+example : ElabLoopMeasure.stmtCount blk < ElabLoopMeasure.stmtCount forT := by decide
 
 /-- Rewriting only a loop's expressions cannot produce the spike's block,
 even when the callback may fail or return arbitrary expressions. -/
@@ -408,5 +430,19 @@ theorem rel_cycle_forT_blk {α : Type} [WellFoundedRelation α] (μ : ElabMeasur
   rel_cycle3 h1 (stmtsStep_head_lt μ hst blk [] sc0) h2
 
 end Counterexample
+
+/-- Unchecked rewriting preserves both components of the local statement rank. -/
+example (ss out : List RawStmt) (h : uncheckStmts ss = .ok out) :
+    ElabLoopMeasure.listRank out = ElabLoopMeasure.listRank ss := by
+  unfold ElabLoopMeasure.listRank
+  rw [uncheckStmts_loopCount ss out h, uncheckStmts_weight ss out h]
+
+/-- All source-loop roots decrease the local rank on a successful lowering run. -/
+example [FreshNames] (rs : Option (List String)) (s : RawStmt)
+    (hs : ElabLoopMeasure.rootCount s = 1) (sc : ElabScope)
+    (st st' : ECtx × Nat) (m m' : CallMemo) (out : List RawStmt)
+    (h : (((lowerLoops rs [s]).run sc).run st).run m = .ok ((out, st'), m')) :
+    WellFoundedRelation.rel (ElabLoopMeasure.listRank out) (ElabLoopMeasure.stmtRank s) :=
+  ElabLoopMeasure.lowerLoops_rank rs s hs sc st st' m m' out h
 
 end Solidity.Examples.ElabTotalMeasure
