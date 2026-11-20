@@ -110,11 +110,6 @@ theorem scalar_success (depth : Nat) (enough : 3 < depth) :
   · rw [source] at panicked; cases panicked
   · rw [source] at diverged; cases diverged
 
-/-- At depth 4 the bridged code reaches the fixture's endpoint machine. -/
-theorem scalar_target : run (compiled 4).code ScalarContinuation.target =
-    .ok ScalarReentry.Endpoint.machine 0 :=
-  CallsProgramBridge.fixture_target
-
 /-- At depth 0 the bridged result has no `Input` at the fixture state. -/
 theorem scalar_exhausted_no_input (L frame : Nat) (base : Nat → Fin W) (m : Machine) :
     ¬ (compiled 0).Input L frame base ScalarContinuation.final m :=
