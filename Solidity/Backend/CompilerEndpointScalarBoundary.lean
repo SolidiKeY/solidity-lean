@@ -1,5 +1,5 @@
 import Solidity.Backend.CompilerEndpointV2
-import Solidity.Backend.InternalFlow.CallsProgramBridgeFixture
+import Solidity.Backend.InternalFlow.RuntimeFrameV3ScalarSourceCompilerClient
 
 /-!
 # The scalar source selector in endpoint shape, and its exhaustion boundary
@@ -16,17 +16,15 @@ selected image does not depend on the quotation depth, so at depth 0 the typed
 run is exhausted while the machine returns (`Controls.exhausted_boundary`).
 `AgreesExact` has no exhaustion case, hence `no_compilation_world`: any
 `Compilation` of that program, from any entry, has no `Input` at the fixture
-state (no such `Compilation` is exhibited). At sufficient depth the bridge `CallsProgramBridge.program` supplies the
-`Calls.Program`, so `compiled depth` is a `Compilation` of the fixture for
-every depth, with no certificate built here. `scalar_agrees` takes the
-agreement branch of `compiler_endpoint_result` at the fixture world `L = 1`,
-`frame = 16`, and `scalar_success` reads the reached success off it; at depth
-0 the same result has no `Input` there (`scalar_exhausted_no_input`).
-
-The universal entries still refuse the fixture: v1 at every depth
-(`Controls.endpoint_refused`) and v2 (`v2_refused`). The bridge is one
-`Calls.Program` family at the fixture's contract, context and fragment, not a
-recognizer over arbitrary programs, so no entry selects it from syntax.
+state (no such `Compilation` is exhibited). The v3 entry `CompilerV3.compile` accepts the fixture automatically at every
+depth (`accepted`): the selector recognises it and `CompilerScalarBridge`
+supplies the `Calls.Program`; no certificate is built here. For depth above 3
+`endpoint_agrees` takes the agreement branch of `compiler_endpoint_v3_correct`
+at the fixture world `L = 1`, `frame = 16`, and `endpoint_success` reads the
+reached success off it. At depth 0 the accepted result has no `Input` at the
+fixture state (`exhausted_no_input`): acceptance does not carry the exhausted
+run to the machine. v1 and v2 still refuse the fixture at every depth
+(`Controls.endpoint_refused`, `v2_refused`).
 -/
 namespace Solidity.Backend.InternalFlow.RuntimeFrame.ScalarSourceCompiler.Endpoint
 open Evm Evm.Memory ScalarRecursiveSource
@@ -71,55 +69,81 @@ theorem no_compilation_world
 theorem v2_refused (depth : Nat) :
     Passes.CompilerV2.compile 1 F (.cons (Client.input depth) .nil) = none := rfl
 
-/-- The fixture's `Compilation` at every depth, from the bridge's producer. -/
+/-- The fixed parameters of the v3 entry fit the fixture's context. -/
+theorem shape : Passes.CompilerScalarBridge.Shape 1 5 16 9 8 Γ := by decide
+
+/-- The fixture's bridged result at every depth. -/
 def compiled (depth : Nat) : Evm.Compiler.Compilation 1 F (.cons (Client.input depth) .nil) :=
-  .memoryCalls (CallsProgramBridge.program depth) rfl
+  .memoryCalls (Passes.CompilerScalarBridge.selectedProgram (Client.selected depth) shape) rfl
 
-/-- At sufficient depth the fixture world is an `Input` of the bridged result. -/
-theorem scalar_input (depth : Nat) (enough : 3 < depth) :
+/-- **Automatic acceptance.** The v3 entry accepts the fixture at every depth. -/
+theorem accepted (depth : Nat) :
+    Passes.CompilerV3.compile 1 F (.cons (Client.input depth) .nil) = some (compiled depth) :=
+  Passes.CompilerV3.compile_of_selected (v2_refused depth) rfl shape (Client.root depth)
+
+/-- At sufficient depth the fixture world is an `Input` of the accepted result. -/
+theorem fixture_input (depth : Nat) (enough : 3 < depth) :
     (compiled depth).Input 1 16 ScalarContinuation.finalBase ScalarContinuation.final
-      ScalarContinuation.target :=
-  CallsProgramBridge.fixture_input depth enough
-
-/-- The endpoint at the bridged result: the static check passes at `L = 1`,
-`frame = 16`, and the fixture world agrees exactly with `Evm.run`. -/
-theorem scalar_agrees (depth : Nat) (enough : 3 < depth) :
-    Passes.WholeProgram.staticRefused (compiled depth) 1 16 = false ∧
-    (compiled depth).AgreesExact 1 16 ScalarContinuation.finalBase ScalarContinuation.final
       ScalarContinuation.target := by
-  rcases compiler_endpoint_result (compiled depth) 1 16 with ⟨-, none⟩ | ⟨check, agree⟩
-  · exact absurd (scalar_input depth enough) (none _ _ _)
-  · exact ⟨check, agree _ _ _ (scalar_input depth enough)⟩
+  have arena : (Client.selected depth).plan.arenaWords ScalarContinuation.final = 6 :=
+    ScalarReentry.arena depth
+  have free : Passes.CompilerScalarBridge.cost (Client.selected depth) ScalarContinuation.final = 0 := by
+    simp only [Passes.CompilerScalarBridge.cost, arena, Nat.le_refl, if_true,
+      Client.actual_source depth enough]
+  exact ⟨(Client.entered depth).represented, by change 1 + (16 - 1) ≤ 16; decide, .inl free⟩
 
-/-- The reached success, read off the endpoint: `Evm.run` of the bridged code
-succeeds with the stack unchanged, in a state `Rep` relates to a typed result. -/
-theorem scalar_success (depth : Nat) (enough : 3 < depth) :
-    ∃ o m', (Prog.cons (Client.input depth) .nil).run ScalarContinuation.final = .ok o ∧
-      run (compiled depth).code ScalarContinuation.target = .ok m' 0 ∧
-      m'.stack = ScalarContinuation.target.stack ∧
-      (compiled depth).Rep (1 + Evm.Prog.pushes (Prog.cons (Client.input depth) .nil)) 16
-        ScalarContinuation.finalBase ScalarContinuation.final ScalarContinuation.target o.st m' := by
+/-- `compiler_endpoint_v3_correct` at the fixture: the v3 entry accepts, the
+static check passes at `L = 1`, `frame = 16`, and the fixture world agrees
+exactly with `Evm.run`. -/
+theorem endpoint_agrees (depth : Nat) (enough : 3 < depth) :
+    ∃ r, Passes.CompilerV3.compile 1 F (.cons (Client.input depth) .nil) = some r ∧
+      Passes.WholeProgram.staticRefused r 1 16 = false ∧
+      r.AgreesExact 1 16 ScalarContinuation.finalBase ScalarContinuation.final
+        ScalarContinuation.target := by
+  rcases compiler_endpoint_v3_correct 1 F (.cons (Client.input depth) .nil) with
+    refused | ⟨r, chosen, worlds⟩
+  · exact absurd ((accepted depth).symm.trans refused) (by simp)
+  · have same : compiled depth = r := Option.some.inj ((accepted depth).symm.trans chosen)
+    subst same
+    rcases worlds 1 16 with ⟨-, none⟩ | ⟨check, agree⟩
+    · exact absurd (fixture_input depth enough) (none _ _ _)
+    · exact ⟨_, accepted depth, check, agree _ _ _ (fixture_input depth enough)⟩
+
+/-- The reached success, read off the endpoint: `Evm.run` of the accepted code
+succeeds with the stack unchanged, in a state `Rep` relates to the typed result. -/
+theorem endpoint_success (depth : Nat) (enough : 3 < depth) :
+    ∃ r, Passes.CompilerV3.compile 1 F (.cons (Client.input depth) .nil) = some r ∧
+      ∃ o m', (Prog.cons (Client.input depth) .nil).run ScalarContinuation.final = .ok o ∧
+        run r.code ScalarContinuation.target = .ok m' 0 ∧
+        m'.stack = ScalarContinuation.target.stack ∧
+        r.Rep (1 + Evm.Prog.pushes (Prog.cons (Client.input depth) .nil)) 16
+          ScalarContinuation.finalBase ScalarContinuation.final ScalarContinuation.target o.st m' := by
+  obtain ⟨r, chosen, -, agree⟩ := endpoint_agrees depth enough
+  refine ⟨r, chosen, ?_⟩
   have source : (Prog.cons (Client.input depth) .nil).run ScalarContinuation.final =
       .ok ⟨ScalarReentry.Endpoint.resultState, List.prefix_refl _⟩ := by
     rw [Prog.run_cons_ok (Client.actual_source depth enough), Prog.run_nil]
     rfl
-  rcases (scalar_agrees depth enough).2 with ⟨o, m', ok, ran, stack, rep⟩ |
+  rcases agree with ⟨o, m', ok, ran, stack, rep⟩ |
     ⟨reverted | ⟨-, panicked⟩, -⟩ | ⟨diverged, -⟩
   · exact ⟨o, m', ok, ran, stack, rep⟩
   · rw [source] at reverted; cases reverted
   · rw [source] at panicked; cases panicked
   · rw [source] at diverged; cases diverged
 
-/-- At depth 0 the bridged result has no `Input` at the fixture state. -/
-theorem scalar_exhausted_no_input (L frame : Nat) (base : Nat → Fin W) (m : Machine) :
+/-- At depth 0 the v3 entry accepts, and the accepted result has no `Input` at
+the fixture state: the exhausted run is not carried to the machine. -/
+theorem exhausted_no_input (L frame : Nat) (base : Nat → Fin W) (m : Machine) :
+    Passes.CompilerV3.compile 1 F (.cons (Client.input 0) .nil) = some (compiled 0) ∧
     ¬ (compiled 0).Input L frame base ScalarContinuation.final m :=
-  no_compilation_world (compiled 0) L frame base m
+  ⟨accepted 0, no_compilation_world (compiled 0) L frame base m⟩
 
 end Solidity.Backend.InternalFlow.RuntimeFrame.ScalarSourceCompiler.Endpoint
 
 #print axioms Solidity.Backend.InternalFlow.RuntimeFrame.ScalarSourceCompiler.Endpoint.selector_endpoint
 #print axioms Solidity.Backend.InternalFlow.RuntimeFrame.ScalarSourceCompiler.Endpoint.no_compilation_world
 #print axioms Solidity.Backend.InternalFlow.RuntimeFrame.ScalarSourceCompiler.Endpoint.v2_refused
-#print axioms Solidity.Backend.InternalFlow.RuntimeFrame.ScalarSourceCompiler.Endpoint.scalar_agrees
-#print axioms Solidity.Backend.InternalFlow.RuntimeFrame.ScalarSourceCompiler.Endpoint.scalar_success
-#print axioms Solidity.Backend.InternalFlow.RuntimeFrame.ScalarSourceCompiler.Endpoint.scalar_exhausted_no_input
+#print axioms Solidity.Backend.InternalFlow.RuntimeFrame.ScalarSourceCompiler.Endpoint.accepted
+#print axioms Solidity.Backend.InternalFlow.RuntimeFrame.ScalarSourceCompiler.Endpoint.endpoint_agrees
+#print axioms Solidity.Backend.InternalFlow.RuntimeFrame.ScalarSourceCompiler.Endpoint.endpoint_success
+#print axioms Solidity.Backend.InternalFlow.RuntimeFrame.ScalarSourceCompiler.Endpoint.exhausted_no_input

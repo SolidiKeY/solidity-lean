@@ -1,8 +1,8 @@
 import Solidity.Backend.CompilerEndpoint
-import Solidity.Backend.Passes.CompilerV2
+import Solidity.Backend.Passes.CompilerV3
 
 /-!
-# The compiler endpoint over the v2 entry
+# The compiler endpoint over the v2 and v3 entries
 
 `CompilerEndpointFor entry refused` is the statement of `CompilerEndpointWith`
 with the checked entry as a parameter: any function returning a `Compilation`.
@@ -11,6 +11,9 @@ The frozen v1 statement is its instance at `Evm.Compiler.compile`
 `Passes.CompilerV2.compile`, which also accepts tuple-return calls, and
 `compiler_endpoint_v2_correct` proves it: the agreement is the same
 `Compilation.correct_exact`, the R2 stage the same `static_stage`.
+
+`CompilerEndpointV3` is the instance at `Passes.CompilerV3.compile`, which adds
+selected scalar recursive calls through `CompilerScalarBridge`.
 
 `compiler_endpoint_correct`, `CompilerEndpoint` and the v1 entry are unchanged
 (H937); v2 is additive (H314), and `CompilerV2.compile_of_v1` gives a
@@ -81,6 +84,16 @@ theorem compiler_endpoint_v2_correct : CompilerEndpointV2 :=
   compiler_endpoint_for_stages Passes.CompilerV2.compile Passes.WholeProgram.staticRefused
     static_stage
 
+/-- **The v3 compiler endpoint**: the endpoint over `CompilerV3.compile`,
+which also accepts selected scalar recursive calls. -/
+def CompilerEndpointV3 : Prop :=
+  CompilerEndpointFor Passes.CompilerV3.compile Passes.WholeProgram.staticRefused
+
+/-- `CompilerEndpointV3` holds. No stage is assumed. -/
+theorem compiler_endpoint_v3_correct : CompilerEndpointV3 :=
+  compiler_endpoint_for_stages Passes.CompilerV3.compile Passes.WholeProgram.staticRefused
+    static_stage
+
 /-- The endpoint's accepted branch at one result, whatever produced it: for
 every world bound the static check refuses and no world is accepted, or it
 passes and every accepted world agrees exactly with `Evm.run`. -/
@@ -115,3 +128,4 @@ end Solidity.Backend
 #print axioms Solidity.Backend.compiler_endpoint_for_stages
 #print axioms Solidity.Backend.not_input_of_exhausted
 #print axioms Solidity.Backend.compiler_endpoint_result
+#print axioms Solidity.Backend.compiler_endpoint_v3_correct

@@ -1262,9 +1262,11 @@ import Solidity.Backend.Passes.CompilerCallScopeControls
 import Solidity.Backend.Passes.CompilerCallScopePins
 import Solidity.Backend.Passes.CompilerCallScopeRecognition
 import Solidity.Backend.Passes.CompilerProofChecks
+import Solidity.Backend.Passes.CompilerScalarBridge
 import Solidity.Backend.Passes.CompilerScopedFailure
 import Solidity.Backend.Passes.CompilerScopedFailurePins
 import Solidity.Backend.Passes.CompilerV2
+import Solidity.Backend.Passes.CompilerV3
 import Solidity.Backend.Passes.CompilerWholeScope
 import Solidity.Backend.Passes.CompilerWholeScopeControls
 import Solidity.Backend.Passes.CompilerWholeScopePins
