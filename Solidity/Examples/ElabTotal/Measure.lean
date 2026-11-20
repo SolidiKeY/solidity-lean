@@ -1,4 +1,4 @@
-import Solidity.Goals.ElabTotal
+import Solidity.Correctness.Elab.Total
 import Solidity.Syntax.Elab.Measure
 
 /-!
