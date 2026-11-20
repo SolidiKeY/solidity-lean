@@ -7,19 +7,6 @@ admission for mapping-containing types, or eager/emitted/world execution. -/
 namespace Solidity.Backend.StorageOps.RecursiveSelfCopy
 open TypeGraph
 
-/-- Dependent array-domain transport used only in the recursive proof. -/
-private theorem array_ext {n : Nat} {G : Schema n} {E : TypeGraph.Ty n}
- (left right : Extent) (length : Index) (lb : length.val ≤ left.val) (rb : length.val ≤ right.val)
- (ls : Fin left.val → Slot G E) (rs : Fin right.val → Slot G E)
- (equal : left.val=right.val)
- (pointwise : ∀ (i : Fin left.val) (j : Fin right.val), i.val=j.val → ls i=rs j) :
- Value.array left length lb ls=Value.array right length rb rs := by
- have sizes : left=right := Fin.ext equal
- cases sizes
- have slots : ls=rs := funext (fun i => pointwise i i rfl)
- cases slots
- rfl
-
 mutual
 /-- All recursive constructors, including runtime arrays and mapping barriers. -/
 theorem value_self {n : Nat} {G : Schema n} :
@@ -32,7 +19,7 @@ theorem value_self {n : Nat} {G : Schema n} :
  | _, .array extent length bound slots => by
    rw [recursiveCopy_eq_overlay]
    simp only [Value.overlay]
-   apply array_ext
+   apply array_value_ext
    · exact Nat.max_eq_left bound
    · intro i j equal
      have inside : i.val < extent.val := by rw [equal]; exact j.isLt

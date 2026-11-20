@@ -73,10 +73,8 @@ def certificate {c n fuel} {stmt : Solidity.Yul.Stmt [] [] c n}
 
 /-- The existing complete numeric representation agrees with physical words;
 no symbolic slots are coerced into this relation. -/
-theorem irStack_words (input : Stack) : irStack input = input.map coreWord := by
- induction input with
- | nil => rfl
- | cons word rest ih => rw [FramedConditional.irStack_cons,List.map_cons,ih]
+theorem irStack_words (input : Stack) : irStack input = input.map coreWord :=
+  WordInstructionCertificates.irStack_words input
 
 /-- info: 'Solidity.Yul.Compilation.NormalFramedTransport.irStack_words' depends on axioms: [propext] -/
 #guard_msgs in

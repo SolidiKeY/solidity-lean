@@ -52,6 +52,14 @@ theorem headerLength_known {N : Nat} (hash : Solidity.Storage.Pre → Nat)
   rw [header]
   rfl
 
+/-- The current header is a word, so it is below `2 ^ 256`. -/
+theorem headerLength_lt (N : Nat) (hash : Solidity.Storage.Pre → Nat)
+    (base : Solidity.Storage.Loc) (machine : WordStore) : headerLength N hash base machine < 2 ^ 256 := by
+  have bound := (machine (base.word N hash)).property
+  simp only [PrimTy.inRange, decide_eq_true_eq] at bound
+  unfold headerLength
+  omega
+
 theorem pushHeader_known {N : Nat} (hash : Solidity.Storage.Pre → Nat)
     (base : Solidity.Storage.Loc) (machine : WordStore) (length : Index)
     (header : machine (base.word N hash) = lengthWord length.val length.isLt) :

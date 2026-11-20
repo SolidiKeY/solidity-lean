@@ -19,8 +19,8 @@ def sourceConcrete (glob : Solidity.Source.Glob Solidity.Yul.Checks.LocalDefault
  (locals : Solidity.Source.Locals Solidity.Yul.Checks.LocalDefaultPostIter.Fixture.env.layout Solidity.Yul.Checks.LocalDefaultPostIter.Fixture.ctx.tys) (world : Solidity.Source.St Solidity.Yul.Checks.LocalDefaultPostIter.Fixture.env) :=
  Solidity.Yul.LocalLoopReductions.sourceTrueDoWhileTimeout Solidity.Yul.Checks.LocalDefaultPostIter.Fixture.env [] false false false Solidity.Yul.Checks.LocalDefaultPostIter.Fixture.ctx.tys Solidity.Yul.Checks.LocalDefaultPostIter.Out Solidity.Yul.Checks.LocalDefaultPostIter.items Solidity.Yul.Checks.LocalDefaultPostIter.proof glob frame fuel nps ph locals world
 
-theorem oneBodyCompletes : Solidity.Yul.LocalDefaultDoWhile.run Solidity.Yul.Checks.LocalDefaultPostIter.stopTest Solidity.Yul.Checks.LocalDefaultPostIter.proof 9 Solidity.Yul.Checks.LocalDefaultPostIter.initial = .normal (Solidity.Yul.Checks.LocalDefaultPostIter.assigned false) := by
-  rfl
+theorem oneBodyCompletes : Solidity.Yul.LocalDefaultDoWhile.run Solidity.Yul.Checks.LocalDefaultPostIter.stopTest Solidity.Yul.Checks.LocalDefaultPostIter.proof 9 Solidity.Yul.Checks.LocalDefaultPostIter.initial = .normal (Solidity.Yul.Checks.LocalDefaultPostIter.assigned false) :=
+  Solidity.Yul.Checks.LocalDefaultDoWhile.falseGuardExecutes
 
 theorem bodyCompletes : Solidity.Yul.LocalDefaultItems.blockRun Solidity.Yul.Checks.LocalDefaultPostIter.proof 8 Solidity.Yul.Checks.LocalDefaultPostIter.initial = .normal (Solidity.Yul.Checks.LocalDefaultPostIter.assigned false) := by
   rfl

@@ -73,23 +73,6 @@ def overwriteIntervals {H : HTy} {R : RefTy} {E : Ty} (hp : Heap H)
   overwriteSlice (overwriteSlice hp r a d p h) r a e q
     (by rw [overwriteSlice_len]; exact k)
 
-private theorem objs_ext {H : HTy} (Rs : List RefTy) (left right : Objs H Rs)
-    (h : ∀ {R : RefTy} (i : Nat) (hi : Rs[i]? = some R),
-      Objs.get Rs left i hi = Objs.get Rs right i hi) : left = right := by
-  induction Rs with
-  | nil => cases left; cases right; rfl
-  | cons R Rs ih =>
-    apply Prod.ext
-    · exact h 0 rfl
-    · apply ih
-      intro Q i hi
-      exact h (i + 1) (by simpa only [List.getElem?_cons_succ] using hi)
-
-/-- Extensionality of the existing dependent heap, with no alternate state. -/
-theorem memoryOps_heap_ext {H : HTy} (hp hq : Heap H)
-    (h : ∀ {R : RefTy} (r : HRef H R), hp.get r = hq.get r) : hp = hq :=
-  objs_ext H hp hq (fun i hi => h ⟨i, hi⟩)
-
 private theorem array_ext {H : HTy} {R : RefTy} {E : Ty} (a : ArrTy R E)
     (x y : MObj H R) (h : MObj.elems a x = MObj.elems a y) : x = y := by
   cases a <;> apply Subtype.ext <;> simpa only [MObj.elems_dyn, MObj.elems_fixed] using h

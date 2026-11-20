@@ -59,7 +59,7 @@ private theorem shr_step (a b : Scalar.Word) (m : Evm.Machine) (tail : List Evm.
 
 /-- Derive the two operands from the real successful scalar step. Both dispatch
 and model agreement are actual laws, discharged for every selected operator. -/
-private theorem binary_transport (i : Backend.Instr) (j : Evm.Instr)
+theorem binary_transport (i : Backend.Instr) (j : Evm.Instr)
     (f : Scalar.Word → Scalar.Word → Scalar.Word)
     (scalarRow : ∀ xs, Scalar.step i xs = applyBinary f xs)
     (modelRow : ∀ (a b : Scalar.Word) (m : Evm.Machine) (tail : List Evm.Word), j.step {m with stack := coreWord a::coreWord b::tail} =
@@ -107,19 +107,9 @@ theorem run (p : Backend.Program) (q : List Evm.Instr)
     (selected : NumericMachine.selectCode p = some q) (xs ys : Stack)
     (executed : Scalar.run p xs = some ys) (m : Evm.Machine) (tail : List Evm.Word) :
     Evm.run q {m with stack := xs.map coreWord++tail} =
-      .ok {m with stack := ys.map coreWord++tail} 0 := by
-  induction p generalizing q xs ys with
-  | nil => cases selected; cases executed; rfl
-  | cons i p ih =>
-    obtain ⟨j,hi,rest⟩ := Option.bind_eq_some_iff.mp selected
-    obtain ⟨target,hp,same⟩ := Option.map_eq_some_iff.mp rest
-    subst q
-    cases hs : Scalar.step i xs with
-    | none => simp only [Scalar.run,hs,Option.bind_none,reduceCtorEq] at executed
-    | some zs =>
-      simp only [Scalar.run,hs,Option.bind_some] at executed
-      rw [Evm.run,Evm.exec_cons_zero,step i j hi xs zs hs m tail,Evm.Out.ok_bind]
-      exact ih target hp zs ys executed
+      .ok {m with stack := ys.map coreWord++tail} 0 :=
+  MachineAdapter.run_selected NumericMachine.selectInstr NumericMachine.selectCode
+    rfl (fun _ _ => rfl) step p q selected xs ys executed m tail
 
 /-- Real compiler certificate supplies the scalar run; no chosen execution
 is a premise. Selection still uses exactly the original NumericMachine table. -/

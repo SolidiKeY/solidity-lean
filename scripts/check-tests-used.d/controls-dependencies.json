@@ -61,9 +61,57 @@
         },
         "purpose": "Exact Git ignore policy for the implicit CPython cache of the reviewed bytecode-enabled child launch and sibling import. Source-policy credit only; launch/import reachability and external interpreter environment are not execution or pass claims. No helper, output, proof or runtime credit."
       }
+    ],
+    "persistent_module_entries": [
+      {
+        "collector_sha256": "c6685584f5ff4dffdb2ce28f028177c15b30a74d6277fedde4182106781131ad",
+        "frames": [
+          {
+            "blob": "85f52a3748dfce8a0135326b739aaca773cd4e93",
+            "line": 15,
+            "path": "tests/h62/item5/statement-graph/test_graph.py"
+          }
+        ],
+        "input_revision": "e3394c72f659f7c5423c7a7187953ad53e481635",
+        "module_code_sha256": "3fe927016bea24527b5df46a6f7b0ed2244a6f3bb9eb4df5b6b2fc1afb3d95a0",
+        "module_frame_line": 0,
+        "operation": "entered measured Python module; no fixture consumption credit",
+        "python": [
+          3,
+          12,
+          14
+        ],
+        "runner": "validated:tests/h62/item5/statement-graph/test_graph.py",
+        "target": "scripts/h62/item5/statement-graph/owner_overlay.py",
+        "target_blob": "a4233e8fbd5563a56783344e370a060997b5754a"
+      }
     ]
   },
   "routes": {
+    "module_entries": [
+      {
+        "collector_sha256": "c6685584f5ff4dffdb2ce28f028177c15b30a74d6277fedde4182106781131ad",
+        "frames": [
+          {
+            "blob": "85f52a3748dfce8a0135326b739aaca773cd4e93",
+            "line": 15,
+            "path": "tests/h62/item5/statement-graph/test_graph.py"
+          }
+        ],
+        "input_revision": "e3394c72f659f7c5423c7a7187953ad53e481635",
+        "module_code_sha256": "3fe927016bea24527b5df46a6f7b0ed2244a6f3bb9eb4df5b6b2fc1afb3d95a0",
+        "module_frame_line": 0,
+        "operation": "entered measured Python module; no fixture consumption credit",
+        "python": [
+          3,
+          12,
+          14
+        ],
+        "runner": "validated:tests/h62/item5/statement-graph/test_graph.py",
+        "target": "scripts/h62/item5/statement-graph/owner_overlay.py",
+        "target_blob": "a4233e8fbd5563a56783344e370a060997b5754a"
+      }
+    ],
     "standalone": [
       {
         "command": [
@@ -1253,6 +1301,207 @@
         },
         "purpose": "Exact source input handed by a kept consumer to the reviewed check-read operation. Source/consumption role only; unavailable historical archives or snapshots do not pass. No invocation, execution, passing run, data-read anchor, generation, output completeness, compatibility, proof or runtime credit.",
         "source_blob": "dad642373f549afefaff18069c39932b9eee8e00"
+      },
+      {
+        "command": [
+          "python3",
+          "-B",
+          "scripts/h62/item2/audit-theories/test_current_replay.py"
+        ],
+        "entry": {
+          "blob": "57f9d543e4e0c5108f3392bf51b02152e8245877",
+          "import_line": 4,
+          "path": "scripts/h62/item2/audit-theories/test_current_replay.py"
+        },
+        "input_revision": "37d4fd3ce32e5a2b433a312d3ca2d3f150892d2a",
+        "kind": "handoff-witness-role",
+        "module": {
+          "blob": "be36e9615801d394d83697e3ba58a07fea4ae568",
+          "line": 24,
+          "path": "scripts/h62/item2/audit-theories/paired_evidence.py"
+        },
+        "operation": "pinned-history-show",
+        "path": "scripts/h62/item2/audit-theories/handoff/CONFLICT-RESOLUTION-20261108.md",
+        "purpose": "Exact reviewed witness bound to the pinned historical Git read or the literal repository-root main-path read, and to the current entry/import identity. Source retention only; no consumer route, invocation, execution, passing run, read anchor, fixture, output, ownership, compatibility, proof or runtime credit. External archives remain unavailable.",
+        "read": {
+          "line": 38,
+          "path": "scripts/h62/item2/audit-theories/test_current_replay.py"
+        },
+        "source_blob": "e824c7f9512b45028b20371048ad0de6fb75d436"
+      },
+      {
+        "command": [
+          "python3",
+          "-B",
+          "scripts/h62/item2/audit-theories/test_current_replay.py"
+        ],
+        "entry": {
+          "blob": "57f9d543e4e0c5108f3392bf51b02152e8245877",
+          "import_line": 4,
+          "path": "scripts/h62/item2/audit-theories/test_current_replay.py"
+        },
+        "input_revision": "37d4fd3ce32e5a2b433a312d3ca2d3f150892d2a",
+        "kind": "handoff-witness-role",
+        "module": {
+          "blob": "be36e9615801d394d83697e3ba58a07fea4ae568",
+          "line": 22,
+          "path": "scripts/h62/item2/audit-theories/paired_evidence.py"
+        },
+        "operation": "pinned-history-show",
+        "path": "scripts/h62/item2/audit-theories/handoff/original-frozen-assignment.txt",
+        "purpose": "Exact reviewed witness bound to the pinned historical Git read or the literal repository-root main-path read, and to the current entry/import identity. Source retention only; no consumer route, invocation, execution, passing run, read anchor, fixture, output, ownership, compatibility, proof or runtime credit. External archives remain unavailable.",
+        "read": {
+          "line": 38,
+          "path": "scripts/h62/item2/audit-theories/test_current_replay.py"
+        },
+        "source_blob": "18e25bf3280604b02fc0877400b343a4749d9ea3"
+      },
+      {
+        "command": [
+          "python3",
+          "-B",
+          "scripts/h62/item2/audit-theories/test_current_replay.py"
+        ],
+        "entry": {
+          "blob": "57f9d543e4e0c5108f3392bf51b02152e8245877",
+          "import_line": 4,
+          "path": "scripts/h62/item2/audit-theories/test_current_replay.py"
+        },
+        "input_revision": "37d4fd3ce32e5a2b433a312d3ca2d3f150892d2a",
+        "kind": "handoff-witness-role",
+        "module": {
+          "blob": "be36e9615801d394d83697e3ba58a07fea4ae568",
+          "line": 23,
+          "path": "scripts/h62/item2/audit-theories/paired_evidence.py"
+        },
+        "operation": "pinned-history-show",
+        "path": "scripts/h62/item2/audit-theories/handoff/original-work-and-backfill-queue.md",
+        "purpose": "Exact reviewed witness bound to the pinned historical Git read or the literal repository-root main-path read, and to the current entry/import identity. Source retention only; no consumer route, invocation, execution, passing run, read anchor, fixture, output, ownership, compatibility, proof or runtime credit. External archives remain unavailable.",
+        "read": {
+          "line": 38,
+          "path": "scripts/h62/item2/audit-theories/test_current_replay.py"
+        },
+        "source_blob": "73326fc36de3421854174f16e5cf62a7976ca29e"
+      },
+      {
+        "command": [
+          "python3",
+          "-B",
+          "tests/h62/item6/migrate-root-gate/test_public_api_inventory.py"
+        ],
+        "entry": {
+          "blob": "c4e0b487f0a70e1d8f6435bc8ea8a38e6b5ac7cd",
+          "import_line": 20,
+          "path": "tests/h62/item6/migrate-root-gate/test_public_api_inventory.py"
+        },
+        "input_revision": "37d4fd3ce32e5a2b433a312d3ca2d3f150892d2a",
+        "kind": "handoff-witness-role",
+        "module": {
+          "blob": "a5d6dde5be926751371f820ea6afb463281d515a",
+          "line": 349,
+          "path": "scripts/h62/item6/migrate-root-gate/public-api-inventory.py"
+        },
+        "operation": "main-root-read",
+        "path": "scripts/h62/item6/migrate-root-gate/bulk-manifest.json",
+        "purpose": "Exact reviewed witness bound to the pinned historical Git read or the literal repository-root main-path read, and to the current entry/import identity. Source retention only; no consumer route, invocation, execution, passing run, read anchor, fixture, output, ownership, compatibility, proof or runtime credit. External archives remain unavailable.",
+        "read": {
+          "line": 200,
+          "path": "scripts/h62/item6/migrate-root-gate/public-api-inventory.py"
+        },
+        "source_blob": "225df645d3ebfc2903b2f54fce53b2e2f8295e87"
+      },
+      {
+        "command": [
+          "python3",
+          "-B",
+          "scripts/h62/item2/audit-compiler-transport/h69_validate.py"
+        ],
+        "input_revision": "519932356a0ea7c22f4aa984534a7c6dd803ac26",
+        "kind": "h62-cache-policy-role",
+        "launch": {
+          "blob": "de305187fbff497525095db65992b02f5cb13463",
+          "form": "program-wrapper",
+          "line": 43,
+          "literal": "generate_reflection.py",
+          "path": "scripts/h62/item2/audit-compiler-transport/h69_validate.py"
+        },
+        "line": 1,
+        "module": {
+          "blob": "fb8a158c1461dea8f3a565f834d84557ea713ee9",
+          "path": "scripts/h62/item2/audit-compiler-transport/census.py"
+        },
+        "path": "scripts/h62/item2/audit-compiler-transport/.gitignore",
+        "program": {
+          "blob": "8d883515e9c99761411f79100ba9366890a7f4a8",
+          "import": "static",
+          "import_line": 6,
+          "path": "scripts/h62/item2/audit-compiler-transport/generate_reflection.py"
+        },
+        "provenance": "d02bd456c9961bed758f6078f51032b115729476",
+        "purpose": "Implicit CPython cache policy of audit-compiler-transport: h69_validate.py (kept python3 -B root) relaunches generate_reflection.py with sys.executable, which imports census.py. Source-policy role only. Only the reviewed source-policy relationship is retained; no consumer invocation, execution, passing run, helper, output, proof or runtime credit. Launch/import reachability and the external interpreter environment remain unaudited.",
+        "source_blob": "c18dd8d83ceed1806b50b0aaa46beb7e335fff13"
+      },
+      {
+        "command": [
+          "python3",
+          "-B",
+          "scripts/h62/item4/generic-yul-views/acceptance.py"
+        ],
+        "input_revision": "519932356a0ea7c22f4aa984534a7c6dd803ac26",
+        "kind": "h62-cache-policy-role",
+        "launch": {
+          "blob": "ef73cc19f9a708c9e3ee21c6e8bf8b5584a253a1",
+          "form": "argv-wrapper",
+          "line": 46,
+          "literal": "test_census.py",
+          "path": "scripts/h62/item4/generic-yul-views/acceptance.py"
+        },
+        "line": 1,
+        "module": {
+          "blob": "24df327e36cf9bfe537da98d10734c7c45ffc56a",
+          "path": "scripts/h62/item4/generic-yul-views/census.py"
+        },
+        "path": "scripts/h62/item4/generic-yul-views/.gitignore",
+        "program": {
+          "blob": "e99157ce8cef667474d1de620e33451d1c38be73",
+          "import": "file-location",
+          "import_line": 8,
+          "path": "scripts/h62/item4/generic-yul-views/test_census.py"
+        },
+        "provenance": "7689952982335b4d8212db983704ecbdca7c1df2",
+        "purpose": "Implicit CPython cache policy of generic-yul-views: acceptance.py (kept python3 -B root) runs test_census.py with sys.executable, which loads census.py by file location. Source-policy role only. Only the reviewed source-policy relationship is retained; no consumer invocation, execution, passing run, helper, output, proof or runtime credit. Launch/import reachability and the external interpreter environment remain unaudited.",
+        "source_blob": "c18dd8d83ceed1806b50b0aaa46beb7e335fff13"
+      },
+      {
+        "command": [
+          "python3",
+          "-B",
+          "scripts/h62/item6/migrate-hash/launch_baseline.py"
+        ],
+        "input_revision": "519932356a0ea7c22f4aa984534a7c6dd803ac26",
+        "kind": "h62-cache-policy-role",
+        "launch": {
+          "blob": "7c3887ee53e84f07b3561f6200b673db3d865036",
+          "form": "flock-cwd",
+          "line": 16,
+          "literal": "scripts/h62/item6/migrate-hash/full_measure.py",
+          "path": "scripts/h62/item6/migrate-hash/launch_baseline.py"
+        },
+        "line": 1,
+        "module": {
+          "blob": "98e527e654c4ed29919d56c4d343a72e75fca3fa",
+          "path": "scripts/h62/item6/migrate-hash/lean_lex.py"
+        },
+        "path": "scripts/h62/item6/migrate-hash/.gitignore",
+        "program": {
+          "blob": "cae845b44b6c50bd6ea69065b113099fe40eb73d",
+          "import": "static",
+          "import_line": 9,
+          "path": "scripts/h62/item6/migrate-hash/full_measure.py"
+        },
+        "provenance": "2a18afcdba00a85645b0b3079704f78ffcd78860",
+        "purpose": "Implicit CPython cache policy of migrate-hash: launch_baseline.py (kept python3 -B root) runs full_measure.py under flock with sys.executable, which imports lean_lex.py. Source-policy role only. Only the reviewed source-policy relationship is retained; no consumer invocation, execution, passing run, helper, output, proof or runtime credit. Launch/import reachability and the external interpreter environment remain unaudited.",
+        "source_blob": "a348e5040c3d2ac0cee5da2f21942aa68f106669"
       }
     ]
   },

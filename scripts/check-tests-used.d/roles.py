@@ -412,8 +412,9 @@ def _lean_gate_root(classifier, graph, catalog, entry, reviewed, invocations, fo
 
 def lean_check_root(classifier, graph, catalog, entry, reviewed=None, invocations=None):
     """H999: a reviewed live non-root Lean check source as a source-only role."""
-    _lean_gate_root(classifier, graph, catalog, entry, REVIEWED_LEAN_CHECKS if reviewed is None else reviewed,
-                    REVIEWED_LEAN_CHECK_INVOCATIONS if invocations is None else invocations, LEAN_CHECK_FORM)
+    # H1231: later registry 'lean-checks' parts add rows (REVIEWED_LEAN_CHECK_EXTRA, registry.py); none by default.
+    _lean_gate_root(classifier, graph, catalog, entry, REVIEWED_LEAN_CHECKS | REVIEWED_LEAN_CHECK_EXTRA if reviewed is None else reviewed,
+                    REVIEWED_LEAN_CHECK_INVOCATIONS | REVIEWED_LEAN_CHECK_EXTRA_INVOCATIONS if invocations is None else invocations, LEAN_CHECK_FORM)
 
 
 def lean_fixture_root(classifier, graph, catalog, entry, reviewed=None, invocations=None):

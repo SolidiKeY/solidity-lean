@@ -13,23 +13,6 @@ def sourceBoolCalldataBind {E : Source.Env} {Γ : Source.RCtx}
     (src : Source.Idx Γ (.array .calldata .bool none)) : Source.RExpr E Γ SourceBoolArrayTy :=
   .assign (.local dst) (sourceBoolCalldataCopy src)
 
-/-- Only the selected local changes; no address injectivity is involved. -/
-theorem source_locals_get_set_other {D : Source.Layout} {Γ : Source.RCtx} {τ υ : Source.STy}
-    (l : Source.Locals D Γ) (dst : Source.Idx Γ τ) (other : Source.Idx Γ υ)
-    (v : Source.Val D τ) (ne : dst.toNat≠other.toNat) : (l.set dst v).get other=l.get other := by
-  induction l generalizing τ υ with
-  | nil => cases dst
-  | cons head tail ih =>
-    cases dst with
-    | here =>
-      cases other with
-      | here => exact (ne rfl).elim
-      | there other => rfl
-    | there dst =>
-      cases other with
-      | here => rfl
-      | there other => exact ih dst other v (fun eq => ne (congrArg (·+1) eq))
-
 /-- The actual assignment retains the RHS allocation; decoder failure occurs
 before local replacement, not after an invented successful suffix. -/
 theorem source_cd_bool_bind_run {E : Source.Env} {Γ : Source.RCtx}

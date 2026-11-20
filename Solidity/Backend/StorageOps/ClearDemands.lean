@@ -579,6 +579,16 @@ theorem listed_slot_compatible {n : Nat} {G : Schema n} :
       q.compatible ((recursiveClearSlot slot).getD (Value.dflt _))
   | _, .absent, _, member, _ => by cases member
   | _, .present value, q, member, before => listed_compatible value q member before
+
+/-- Clearing a slot keeps every compatible query compatible. -/
+theorem clear_slot_getD_compatible {n : Nat} {G : Schema n} {E : TypeGraph.Ty n}
+    (slot : Slot G E) (q : Query G E) (before : q.compatible (slot.getD (Value.dflt E))) :
+    q.compatible ((recursiveClearSlot slot).getD (Value.dflt E)) := by
+  classical
+  by_cases member : q ∈ slotDemands slot
+  · exact listed_slot_compatible slot q member before
+  · rw [(outside_slot_frame slot q member).2]
+    exact before
 end
 
 /-- Complete finite-query preservation for actual clear, using OLD owner

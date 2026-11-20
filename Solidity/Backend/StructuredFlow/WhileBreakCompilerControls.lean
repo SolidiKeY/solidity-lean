@@ -1,4 +1,5 @@
 import Solidity.Backend.StructuredFlow.WhileBreakCompiler
+import Solidity.Backend.StructuredFlow.ForBreakCompilerControls
 import Solidity.Lowering.G19.AssignmentWhileResetControls
 
 namespace Solidity.Backend.StructuredFlow.WhileBreakCompiler.Controls
@@ -26,7 +27,8 @@ theorem joined (pipeline : Roadmap.Pipeline) (fuel : Nat) (flag : Bool) :
 
 theorem observed (flag : Bool) :
     snapshot 0 (run (emit (C := C) 0 mapping .here (.there .here) rfl rfl) (machine flag)) =
-      some [.val (bword flag),.val (bword flag),.val (bword flag),w[99],w[77]] := by rfl
+      some [.val (bword flag),.val (bword flag),.val (bword flag),w[99],w[77]] :=
+  ForBreakCompiler.Controls.observed flag
 
 theorem nonzero_frame (flag : Bool) :
     snapshot 128 (run (emit (C := C) 128 mapping .here (.there .here) rfl rfl) (frame 128 flag)) =

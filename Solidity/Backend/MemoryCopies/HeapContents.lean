@@ -5,7 +5,8 @@ published copy functions and type-rank fuel independence; no evaluator is added.
 namespace Solidity.Backend.MemoryCopies
 open Semantics (tyRank fieldsRank)
 
-private theorem copyAt_eq {H : HTy} (hp : Heap H) (k : Nat) (T : Ty)
+/-- Copying below the fuel bound agrees with the full copy. -/
+theorem mval_copyAt_eq {H : HTy} (hp : Heap H) (k : Nat) (T : Ty)
     (bound : tyRank T < k + 1) (memory : MVal H T) :
     MVal.copyAt hp k (MVal.copyBelow hp k) T bound memory = MVal.copyMToSt hp memory :=
   MVal.copyBelow_eq hp (k + 1) T bound memory
@@ -14,9 +15,10 @@ private theorem map_copyAt_eq {H : HTy} (hp : Heap H) (k : Nat) (T : Ty)
     (bound : tyRank T < k + 1) (values : List (MVal H T)) :
     values.map (MVal.copyAt hp k (MVal.copyBelow hp k) T bound) =
       values.map (MVal.copyMToSt hp) :=
-  congrArg (fun f => values.map f) (funext (copyAt_eq hp k T bound))
+  congrArg (fun f => values.map f) (funext (mval_copyAt_eq hp k T bound))
 
-private theorem array_eq_of_contents {E : Ty} {n m : Nat}
+/-- Unbound arrays with the same contents are equal. -/
+theorem sval_array_eq_of_contents {E : Ty} {n m : Nat}
     (left : SVec E n) (right : SVec E m) (ln : n < 2 ^ 256) (rm : m < 2 ^ 256)
     (contents : left.toList = right.toList) :
     SVal.array left .nil ln = SVal.array right .nil rm := by
@@ -44,7 +46,7 @@ theorem mirror_contents {H : HTy} (hp : Heap H) :
     rw [SVal.strip_array]
     unfold MVal.copyMToSt
     rw [MVal.copyBelow, MVal.copyAt, MVal.copyRefAt]
-    apply array_eq_of_contents
+    apply sval_array_eq_of_contents
     rw [SVec.toList_ofList, map_copyAt_eq]
     simpa only [MObj.elems_dyn] using mirror_elements hp values _ frontier mirrored.2
   | _, .fixed values, memory, frontier, mirrored => by

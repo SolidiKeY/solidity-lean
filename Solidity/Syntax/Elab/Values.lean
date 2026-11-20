@@ -898,7 +898,7 @@ def extMember? (Γ : ECtx) : RawExpr → Option (RawExpr × String)
 /-- The function type of the expression `e`, as `canonFnTy` spells it: a
 name's (`fnTyOf?`), a place's marker (a struct member, an element), a
 call's return's, a conditional's first branch's, `r.g`'s external type. -/
-partial def fnTyOfExpr (Γ : ECtx) (e : RawExpr) : Option String :=
+def fnTyOfExpr (Γ : ECtx) (e : RawExpr) : Option String :=
   let canon := canonFnTy (C.enums.map fun (e : Name × List Name) => e.1)
   match e with
   | .name x =>
@@ -909,26 +909,77 @@ partial def fnTyOfExpr (Γ : ECtx) (e : RawExpr) : Option String :=
         (lookupBy x C.funs).bind (FunDecl.sigTy? C)
       else none
   | .ternary _ a _ => fnTyOfExpr Γ a
-  | .call g args => do
+  | .call g args =>
     if g == callValueName then
-      let h ← args.head?
-      let ty ← fnTyOfExpr Γ h
-      let (_, [r], _) ← fnParts? ty | none
-      guard (fnTy? r)
-      return canon r
-    if let some ty := fnTyOf? C Γ g then
-      let (_, [r], _) ← fnParts? ty | none
-      guard (fnTy? r)
-      return canon r
-    let d ← lookupBy g C.funs
-    let (r, .prim _) ← d.ret | none
-    (fnRow? d.widths r).map canon
+      -- the callee is the first argument (`args.head?`, `fnTyOfExpr_call`)
+      match args with
+      | [] => none
+      | h :: _ => do
+        let ty ← fnTyOfExpr Γ h
+        let (_, [r], _) ← fnParts? ty | none
+        guard (fnTy? r)
+        return canon r
+    else do
+      if let some ty := fnTyOf? C Γ g then
+        let (_, [r], _) ← fnParts? ty | none
+        guard (fnTy? r)
+        return canon r
+      let d ← lookupBy g C.funs
+      let (r, .prim _) ← d.ret | none
+      (fnRow? d.widths r).map canon
   | e =>
     match extMember? C Γ e with
     | some (_, g) => (lookupBy g C.funs).bind (FunDecl.extTy? C)
     | none => do
       let (tb, k, .prim _) ← widthPath? C Γ e | none
       (fnRow? tb k).map canon
+termination_by structural e
+
+/-! The defining equations of `fnTyOfExpr`, one per arm. -/
+
+theorem fnTyOfExpr_name (Γ : ECtx) (x : String) :
+    fnTyOfExpr C Γ (.name x) =
+      (fnTyOf? C Γ x).orElse fun _ =>
+        if (lookupBy x Γ).isNone && fnInternal C x then
+          (lookupBy x C.funs).bind (FunDecl.sigTy? C)
+        else none := by
+  rw [fnTyOfExpr]
+
+theorem fnTyOfExpr_ternary (Γ : ECtx) (c a b : RawExpr) :
+    fnTyOfExpr C Γ (.ternary c a b) = fnTyOfExpr C Γ a := by
+  rw [fnTyOfExpr]
+
+/-- The call arm as written before the function was total: the callee of a
+call through a value is `args.head?`. -/
+theorem fnTyOfExpr_call (Γ : ECtx) (g : String) (args : List RawExpr) :
+    fnTyOfExpr C Γ (.call g args) =
+      (let canon := canonFnTy (C.enums.map fun (e : Name × List Name) => e.1)
+       do
+        if g == callValueName then
+          let h ← args.head?
+          let ty ← fnTyOfExpr C Γ h
+          let (_, [r], _) ← fnParts? ty | none
+          guard (fnTy? r)
+          return canon r
+        if let some ty := fnTyOf? C Γ g then
+          let (_, [r], _) ← fnParts? ty | none
+          guard (fnTy? r)
+          return canon r
+        let d ← lookupBy g C.funs
+        let (r, .prim _) ← d.ret | none
+        (fnRow? d.widths r).map canon) := by
+  cases args <;> rw [fnTyOfExpr] <;> by_cases hg : g == callValueName <;> simp [hg] <;> rfl
+
+/-- Every other expression: `r.g`'s external type, else a place's marker. -/
+theorem fnTyOfExpr_other (Γ : ECtx) (e : RawExpr) (hn : ∀ x, e ≠ .name x)
+    (ht : ∀ c a b, e ≠ .ternary c a b) (hc : ∀ g args, e ≠ .call g args) :
+    fnTyOfExpr C Γ e =
+      (match extMember? C Γ e with
+      | some (_, g) => (lookupBy g C.funs).bind (FunDecl.extTy? C)
+      | none => do
+        let (tb, k, .prim _) ← widthPath? C Γ e | none
+        (fnRow? tb k).map (canonFnTy (C.enums.map fun (e : Name × List Name) => e.1))) := by
+  rw [fnTyOfExpr] <;> assumption
 
 /-- `solcEnumBelow(T, "k₁", n₁, …)`, a component of `abi.decode` the solc
 import writes for a type with nested enums (lane FU2-D): `T` at its carriers
@@ -1126,7 +1177,7 @@ def FunDecl.rawExtTy? (d : FunDecl) : Option String := do
   pure (fnTyStr ps rs true)
 
 /-- A function value's source components before dispatch canonicalization. -/
-partial def rawFnTyOfExpr? (Γ : ECtx) : RawExpr → Option String
+def rawFnTyOfExpr? (Γ : ECtx) : RawExpr → Option String
   | .name g =>
     match lookupBy g Γ with
     | some (.val ..) => localFn? Γ g
@@ -1145,6 +1196,41 @@ partial def rawFnTyOfExpr? (Γ : ECtx) : RawExpr → Option String
       return ← (lookupBy g C.funs).bind FunDecl.rawExtTy?
     let (tb, k, .prim _) ← widthPath? C Γ e | none
     fnRow? tb k
+termination_by structural e => e
+
+/-! The defining equations of `rawFnTyOfExpr?`, one per arm. -/
+
+theorem rawFnTyOfExpr?_name (Γ : ECtx) (g : String) :
+    rawFnTyOfExpr? C Γ (.name g) =
+      match lookupBy g Γ with
+      | some (.val ..) => localFn? Γ g
+      | some _ => none
+      | none => fnRow? C.widths g := by
+  rw [rawFnTyOfExpr?]
+
+theorem rawFnTyOfExpr?_ternary (Γ : ECtx) (c a b : RawExpr) :
+    rawFnTyOfExpr? C Γ (.ternary c a b) = (do
+      let ta ← rawFnTyOfExpr? C Γ a
+      guard (rawFnTyOfExpr? C Γ b == some ta)
+      pure ta) := by
+  rw [rawFnTyOfExpr?]
+
+theorem rawFnTyOfExpr?_call (Γ : ECtx) (g : String) (args : List RawExpr) :
+    rawFnTyOfExpr? C Γ (.call g args) = (do
+      let d ← lookupBy g C.funs
+      let (r, .prim _) ← d.ret | none
+      fnRow? d.widths r) := by
+  rw [rawFnTyOfExpr?]
+
+/-- Every other expression: `r.g`'s raw external type, else a place's marker. -/
+theorem rawFnTyOfExpr?_other (Γ : ECtx) (e : RawExpr) (hn : ∀ x, e ≠ .name x)
+    (ht : ∀ c a b, e ≠ .ternary c a b) (hc : ∀ g args, e ≠ .call g args) :
+    rawFnTyOfExpr? C Γ e = (do
+      if let some (_, g) := extMember? C Γ e then
+        return ← (lookupBy g C.funs).bind FunDecl.rawExtTy?
+      let (tb, k, .prim _) ← widthPath? C Γ e | none
+      fnRow? tb k) := by
+  rw [rawFnTyOfExpr?] <;> assumption
 
 /-- Raw ABI parameter spellings, before function-dispatch canonicalization
 forgets address, enum and fixed-byte distinctions. -/
@@ -1417,7 +1503,7 @@ def joinBytes : Option Nat → Option Nat → Option Nat
 member or a function's return marked so, a conversion `bytesN(…)`, an
 element `b[i]` of a `bytesN` (a `bytes1`), and the bitwise operators of
 them. -/
-partial def bytesOf? (Γ : ECtx) : RawExpr → Option Nat
+def bytesOf? (Γ : ECtx) : RawExpr → Option Nat
   | .name x =>
     match lookupBy x Γ with
     | some (.val ..) => localBytes? Γ x
@@ -1451,6 +1537,85 @@ partial def bytesOf? (Γ : ECtx) : RawExpr → Option Nat
   | .ternary _ a b => joinBytes (bytesOf? Γ a) (bytesOf? Γ b)
   | .assign l _ | .opAssign _ l _ => bytesOf? Γ l
   | _ => none
+termination_by structural e => e
+
+/-! The defining equations of `bytesOf?`, one per arm. Use these rather than
+`rw [bytesOf?]`: generating the structural equation lemmas of this match
+exceeds the default heartbeats. -/
+
+theorem bytesOf?_name (Γ : ECtx) (x : String) :
+    bytesOf? C Γ (.name x) =
+      match lookupBy x Γ with
+      | some (.val ..) => localBytes? Γ x
+      | some _ => none
+      | none => lookupBy (x ++ "#bytes") C.widths := by
+  rfl
+
+theorem bytesOf?_index (Γ : ECtx) (b i : RawExpr) :
+    bytesOf? C Γ (.index b i) =
+      (if (bytesOf? C Γ b).isSome then some 1 else do
+        let (tb, k, .prim _) ← widthPath? C Γ (.index b i) | none
+        lookupBy (k ++ "#bytes") tb) := by
+  rfl
+
+theorem bytesOf?_field_length (Γ : ECtx) (b : RawExpr) :
+    bytesOf? C Γ (.field b "length") = none := by
+  rfl
+
+theorem bytesOf?_field (Γ : ECtx) (f : RawExpr) (m : String) (hm : m ≠ "length") :
+    bytesOf? C Γ (.field f m) = (do
+      if m == "selector" && ((extMember? C Γ f).isSome ||
+          ((fnTyOfExpr C Γ f).bind fnParts?).any (·.2.2)) then return 4
+      let (tb, k, .prim _) ← widthPath? C Γ (.field f m) | none
+      lookupBy (k ++ "#bytes") tb) := by
+  delta bytesOf?; simp only []
+
+theorem bytesOf?_call (Γ : ECtx) (f : String) (as : List RawExpr) :
+    bytesOf? C Γ (.call f as) =
+      (match bytesTy? f with
+      | some n => some n
+      | none => do
+        if (f == "keccak256" || f == "sha256") && (lookupBy f C.funs).isNone then return 32
+        if f == "ripemd160" && (lookupBy f C.funs).isNone then return 20
+        let d ← lookupBy f C.funs
+        let (r, .prim _) ← d.ret | none
+        lookupBy (r ++ "#bytes") d.widths) := by
+  delta bytesOf?; rfl
+
+theorem bytesOf?_binop (Γ : ECtx) (op : BinOp) (a b : RawExpr) :
+    bytesOf? C Γ (.binop op a b) =
+      if op matches .band | .bor | .bxor then joinBytes (bytesOf? C Γ a) (bytesOf? C Γ b)
+      else if op matches .shl | .shr then bytesOf? C Γ a
+      else none := by
+  rfl
+
+theorem bytesOf?_unop_bnot (Γ : ECtx) (a : RawExpr) :
+    bytesOf? C Γ (.unop .bnot a) = bytesOf? C Γ a := by
+  rfl
+
+theorem bytesOf?_ternary (Γ : ECtx) (c a b : RawExpr) :
+    bytesOf? C Γ (.ternary c a b) = joinBytes (bytesOf? C Γ a) (bytesOf? C Γ b) := by
+  rfl
+
+theorem bytesOf?_assign (Γ : ECtx) (l r : RawExpr) :
+    bytesOf? C Γ (.assign l r) = bytesOf? C Γ l := by
+  rfl
+
+theorem bytesOf?_opAssign (Γ : ECtx) (op : BinOp) (l r : RawExpr) :
+    bytesOf? C Γ (.opAssign op l r) = bytesOf? C Γ l := by
+  rfl
+
+/-- The last arm: no other expression is a `bytesN`. -/
+theorem bytesOf?_other (Γ : ECtx) :
+    (∀ n, bytesOf? C Γ (.num n) = none) ∧ (∀ b, bytesOf? C Γ (.bool b) = none) ∧
+    (∀ op a, op ≠ .bnot → bytesOf? C Γ (.unop op a) = none) ∧
+    (∀ op a, bytesOf? C Γ (.incDec op a) = none) ∧
+    (∀ T n, bytesOf? C Γ (.newArr T n) = none) ∧
+    (∀ op a b k, bytesOf? C Γ (.modular op a b k) = none) ∧
+    (∀ f ns as, bytesOf? C Γ (.named f ns as) = none) ∧
+    (∀ k, bytesOf? C Γ (.env k) = none) ∧ (∀ es, bytesOf? C Γ (.tuple es) = none) := by
+  refine ⟨?_, ?_, ?_, ?_, ?_, ?_, ?_, ?_, ?_⟩ <;> intros <;>
+    first | rfl | (rename_i op _ h; cases op <;> first | rfl | exact absurd rfl h)
 
 /-- ABI aliases normalize without erasing integer widths or byte/address kinds. -/
 partial def abiFnType (T : String) : String :=
@@ -1897,7 +2062,7 @@ def narrowWrapNode (unc : Bool) (Γ : ECtx) (e : RawExpr) : Except String RawExp
   | _ => return e
 
 /-- `narrowWrapNode` at every node of `e`, bottom up. -/
-partial def narrowPure (unc : Bool) (Γ : ECtx) : RawExpr → Except String RawExpr
+def narrowPure (unc : Bool) (Γ : ECtx) : RawExpr → Except String RawExpr
   | .binop op a b => do narrowWrapNode C unc Γ (.binop op (← narrowPure unc Γ a) (← narrowPure unc Γ b))
   | .unop op a => do narrowWrapNode C unc Γ (.unop op (← narrowPure unc Γ a))
   | .field e f => do pure (.field (← narrowPure unc Γ e) f)
@@ -1915,6 +2080,71 @@ partial def narrowPure (unc : Bool) (Γ : ECtx) : RawExpr → Except String RawE
     pure (.modular op (← narrowPure unc Γ a) (← narrowPure unc Γ b) (← narrowPure unc Γ k))
   | .named f ns as => do pure (.named f ns (← as.mapM (narrowPure unc Γ)))
   | e => pure e
+termination_by e => sizeOf e
+
+/-! The defining equations of `narrowPure`, one per arm. -/
+
+theorem narrowPure_binop (unc : Bool) (Γ : ECtx) (op : BinOp) (a b : RawExpr) :
+    narrowPure C unc Γ (.binop op a b) = (do
+      narrowWrapNode C unc Γ (.binop op (← narrowPure C unc Γ a) (← narrowPure C unc Γ b))) := by
+  rw [narrowPure]
+
+theorem narrowPure_unop (unc : Bool) (Γ : ECtx) (op : UnOp) (a : RawExpr) :
+    narrowPure C unc Γ (.unop op a) = (do
+      narrowWrapNode C unc Γ (.unop op (← narrowPure C unc Γ a))) := by
+  rw [narrowPure]
+
+theorem narrowPure_field (unc : Bool) (Γ : ECtx) (e : RawExpr) (f : String) :
+    narrowPure C unc Γ (.field e f) = (do pure (.field (← narrowPure C unc Γ e) f)) := by
+  rw [narrowPure]
+
+theorem narrowPure_index (unc : Bool) (Γ : ECtx) (e k : RawExpr) :
+    narrowPure C unc Γ (.index e k) = (do
+      if let some (tb, key, .ref (.mapping kp _)) := widthPath? C Γ e then
+        if let some n := lookupBy (key ++ "{}") tb then fitCheck C Γ kp n k
+      pure (.index (← narrowPure C unc Γ e) (← narrowPure C unc Γ k))) := by
+  rw [narrowPure]
+
+theorem narrowPure_ternary (unc : Bool) (Γ : ECtx) (c a b : RawExpr) :
+    narrowPure C unc Γ (.ternary c a b) = (do
+      pure (.ternary (← narrowPure C unc Γ c) (← narrowPure C unc Γ a)
+        (← narrowPure C unc Γ b))) := by
+  rw [narrowPure]
+
+theorem narrowPure_incDec (unc : Bool) (Γ : ECtx) (op : IncDec) (e : RawExpr) :
+    narrowPure C unc Γ (.incDec op e) = (do pure (.incDec op (← narrowPure C unc Γ e))) := by
+  rw [narrowPure]
+
+theorem narrowPure_newArr (unc : Bool) (Γ : ECtx) (T : RawTy) (e : RawExpr) :
+    narrowPure C unc Γ (.newArr T e) = (do pure (.newArr T (← narrowPure C unc Γ e))) := by
+  rw [narrowPure]
+
+theorem narrowPure_call (unc : Bool) (Γ : ECtx) (f : String) (as : List RawExpr) :
+    narrowPure C unc Γ (.call f as) = (do pure (.call f (← as.mapM (narrowPure C unc Γ)))) := by
+  rw [narrowPure]
+
+theorem narrowPure_modular (unc : Bool) (Γ : ECtx) (op : ModOp) (a b k : RawExpr) :
+    narrowPure C unc Γ (.modular op a b k) = (do
+      pure (.modular op (← narrowPure C unc Γ a) (← narrowPure C unc Γ b)
+        (← narrowPure C unc Γ k))) := by
+  rw [narrowPure]
+
+theorem narrowPure_named (unc : Bool) (Γ : ECtx) (f : String) (ns : List String)
+    (as : List RawExpr) :
+    narrowPure C unc Γ (.named f ns as) =
+      (do pure (.named f ns (← as.mapM (narrowPure C unc Γ)))) := by
+  rw [narrowPure]
+
+/-- The last arm: a leaf, a tuple and an assignment are left as written. -/
+theorem narrowPure_other (unc : Bool) (Γ : ECtx) :
+    (∀ n, narrowPure C unc Γ (.num n) = pure (.num n)) ∧
+    (∀ x, narrowPure C unc Γ (.name x) = pure (.name x)) ∧
+    (∀ b, narrowPure C unc Γ (.bool b) = pure (.bool b)) ∧
+    (∀ k, narrowPure C unc Γ (.env k) = pure (.env k)) ∧
+    (∀ es, narrowPure C unc Γ (.tuple es) = pure (.tuple es)) ∧
+    (∀ l r, narrowPure C unc Γ (.assign l r) = pure (.assign l r)) ∧
+    (∀ op l r, narrowPure C unc Γ (.opAssign op l r) = pure (.opAssign op l r)) := by
+  refine ⟨?_, ?_, ?_, ?_, ?_, ?_, ?_⟩ <;> intros <;> rw [narrowPure] <;> intros <;> contradiction
 
 /-- `require(inTy)` of `e` at `p`'s `n` bits, when `n` is narrow. -/
 def narrowCheck (p : PrimTy) (n : Nat) (e : RawExpr) : ElabM (SProg C) := do

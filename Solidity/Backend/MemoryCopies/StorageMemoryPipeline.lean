@@ -12,11 +12,6 @@ theorem pipeline_first_length {H : HTy} (heap : Heap H) (primitive : PrimTy)
   simpa only [primitiveArrayValue, SVal.view_array, List.length_map] using
     SVal.copyStToM_array_len heap (primitiveArrayValue primitive values bounded) rfl
 
-private theorem pipeline_primitive_strip {primitive : PrimTy} : {n : Nat} →
-    (items : SVec (.prim primitive) n) → items.strip = items
-  | _, .nil => by rw [SVec.strip_nil]
-  | _, .cons (.prim value) rest => by rw [SVec.strip_cons, SVal.strip_prim, pipeline_primitive_strip rest]
-
 theorem pipeline_first_snapshot {H : HTy} (heap : Heap H) (primitive : PrimTy)
     (values : List primitive.Denote) (bounded : values.length < W) :
     let value := primitiveArrayValue primitive values bounded
@@ -24,7 +19,7 @@ theorem pipeline_first_snapshot {H : HTy} (heap : Heap H) (primitive : PrimTy)
     MVal.copyMToSt first.heap first.val = value := by
   dsimp only
   rw [(storageHeapContents (primitiveArrayValue primitive values bounded) rfl).contents heap,
-    primitiveArrayValue, SVal.strip_array, pipeline_primitive_strip]
+    primitiveArrayValue, SVal.strip_array, Evm.Memory.primitiveStrip]
 
 theorem storage_memory_pipeline_success {H : HTy} (heap : Heap H) (primitive : PrimTy)
     (values : List primitive.Denote) (bounded : values.length < W)

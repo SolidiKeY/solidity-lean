@@ -50,8 +50,8 @@ theorem initializedCounterexample : ∀ (glob : Solidity.Source.Glob Solidity.Yu
   intro glob frame nps ph bad
   cases bad
 
-theorem dirtyRefusal : Solidity.Yul.RawCoherent.coherent Solidity.Yul.Checks.RawSourceLoopTimeout.dirty = false := by
-  exact Solidity.Yul.Checks.RawSourceLoopTimeout.Old.dirtyInput.1
+theorem dirtyRefusal : Solidity.Yul.RawCoherent.coherent Solidity.Yul.Checks.RawSourceLoopTimeout.dirty = false :=
+  Solidity.Yul.Checks.RawStatementHorizon.dirtyRefusal
 
 theorem zeroBound : ∀ (glob : Solidity.Source.Glob Solidity.Yul.Checks.RawSourceLoopTimeout.env) (frame : Solidity.Source.Fr) (nps : Nat) (ph : Option (Solidity.Source.Ph Solidity.Yul.Checks.RawSourceLoopTimeout.env)) (locals : Solidity.Source.Locals Solidity.Yul.Checks.RawSourceLoopTimeout.env.layout Solidity.Yul.Checks.RawSourceLoopTimeout.ctx.tys) (world : Solidity.Source.St Solidity.Yul.Checks.RawSourceLoopTimeout.env), Solidity.Source.firstDone (fun fuel => (Solidity.Source.forIter glob frame fuel nps ph .none (.some (.assign (.local .here) (.bool false))) Solidity.Yul.Checks.RawSourceLoopTimeout.simpleBody locals).run (Solidity.Source.L0 Solidity.Yul.Checks.RawSourceLoopTimeout.env,world)) 0 = none := by
   intro glob frame nps ph locals world

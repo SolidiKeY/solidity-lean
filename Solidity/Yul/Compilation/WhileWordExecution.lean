@@ -7,7 +7,7 @@ Model fault for endless prefixes is not a source/native divergence equivalence. 
 namespace Solidity.Yul.Compilation.WhileWordExecution
 open Backend Scalar MachineAdapter
 
-private theorem repeat_shift {α : Type} (f : α → α) (count : Nat) (a : α) :
+theorem repeat_shift {α : Type} (f : α → α) (count : Nat) (a : α) :
     Nat.repeat f count (f a) = Nat.repeat f (count+1) a := by
   induction count with
   | zero => rfl

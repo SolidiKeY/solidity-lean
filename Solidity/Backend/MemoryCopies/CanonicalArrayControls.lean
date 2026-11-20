@@ -33,8 +33,6 @@ private def path (index : Nat) : SPath C [] (.ref leaf) :=
 private def reference : SRef C (.ref leaf) := (SRef.ofRoot "matrix" root).index (.arr .dyn) (indexValue (wmod 0))
 private def code (count : Nat) (bounded : count < 128) : List Instr :=
   canonicalArrayCode 1 (path 0) count (Nat.lt_trans bounded wide)
-private theorem noRefs {R : RefTy} (reference : HRef [] R) : False := by
-  simpa only [List.getElem?_nil,reduceCtorEq] using reference.get?
 
 private theorem leaf_repr (payloads : List (Fin W)) (bounded : payloads.length < 128) :
     ReprAt (store payloads) 128 (.ref leaf) (.data (.root 0) 0) (array payloads bounded) := by
@@ -77,15 +75,15 @@ private theorem core (payloads : List (Fin W)) (bounded : payloads.length < 128)
   exact ⟨storage_repr payloads bounded,(fun index => nomatch index),(fun index => nomatch index),
     initial.net,initial.netSelf,by unfold Lmax; decide,(fun index => nomatch index),initial.env,initial.funds,initial.oracle⟩
 private theorem heap_repr (payloads : List (Fin W)) : Objects.HeapRepr (Heap.empty) bases 8 (machine payloads) :=
-  ⟨⟨fun reference => (noRefs reference).elim,fun reference => (noRefs reference).elim,
-    fun reference _ _ => (noRefs reference).elim⟩,
-    (fun _ reference => (noRefs reference).elim),(fun reference => (noRefs reference).elim),
-    (fun reference _ => (noRefs reference).elim)⟩
+  ⟨⟨fun reference => (nomatch reference.get?),fun reference => (nomatch reference.get?),
+    fun reference _ _ => (nomatch reference.get?)⟩,
+    (fun _ reference => (nomatch reference.get?)),(fun reference => (nomatch reference.get?)),
+    (fun reference _ => (nomatch reference.get?))⟩
 private theorem represented (payloads : List (Fin W)) (bounded : payloads.length < 128) :
     Objects.StateRepr 128 1 8 (Frag.init []) (state payloads bounded) bases (machine payloads) :=
   ⟨core payloads bounded,heap_repr payloads,(fun index => nomatch index),by decide⟩
 private theorem allocator (payloads : List (Fin W)) : Objects.AllocatorRepr Heap.empty bases 8 (wmod 40) (machine payloads) := by
-  refine ⟨heap_repr payloads,⟨by decide,by decide,rfl,?_⟩,fun reference => (noRefs reference).elim⟩
+  refine ⟨heap_repr payloads,⟨by decide,by decide,rfl,?_⟩,fun reference => (nomatch reference.get?)⟩
   intro address above
   change 40 ≤ address at above
   simp only [machine,if_neg (show address ≠ 0 by omega),if_neg (show address ≠ 7 by omega)]

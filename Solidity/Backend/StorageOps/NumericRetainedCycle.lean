@@ -16,14 +16,6 @@ def popRegrowPop (N : Nat) (hash : Solidity.Storage.Pre → Nat) (base : Solidit
  let popped ← NestedPopTransport.execute N hash base numeric
  reuse N hash base popped
 
-private theorem header_bound (N : Nat) (hash : Solidity.Storage.Pre → Nat)
- (base : Solidity.Storage.Loc) (numeric : WordStore) :
- LifecycleNumeric.headerLength N hash base numeric < 2^256 := by
- have bound := (numeric (base.word N hash)).property
- simp only [PrimTy.inRange,decide_eq_true_eq] at bound
- unfold LifecycleNumeric.headerLength
- omega
-
 private theorem header_word (N : Nat) (hash : Solidity.Storage.Pre → Nat)
  (base : Solidity.Storage.Loc) (numeric : WordStore)
  (bound : LifecycleNumeric.headerLength N hash base numeric < 2^256) :
@@ -64,7 +56,7 @@ theorem reuse_identity (N : Nat) (hash : Solidity.Storage.Pre → Nat)
  let grown := writeWord numeric (base.word N hash) (lengthWord (length+1) room)
  have header : LifecycleNumeric.headerLength N hash base grown = length+1 :=
   LifecycleNumeric.headerLength_known hash base grown ⟨length+1,room⟩ (by simp only [grown,writeWord,if_true])
- have restored : writeWord grown (base.word N hash) (lengthWord length (header_bound N hash base numeric)) = numeric := by
+ have restored : writeWord grown (base.word N hash) (lengthWord length (LifecycleNumeric.headerLength_lt N hash base numeric)) = numeric := by
   rw [header_word N hash base numeric]
   funext observer
   by_cases same : observer = base.word N hash
@@ -96,9 +88,9 @@ theorem popped_headers {N L R : Nat} {hash : Solidity.Storage.Pre → Nat}
  (childCovered : Solidity.Storage.Loc.data base (LifecycleNumeric.headerLength N hash base numeric-1) ∈ locations)
  (visited : ∀ j, j < LifecycleNumeric.headerLength N hash
    (.data base (LifecycleNumeric.headerLength N hash base numeric-1))
-   (writeWord numeric (base.word N hash) (lengthWord (LifecycleNumeric.headerLength N hash base numeric-1) (by have bound := header_bound N hash base numeric; omega))) →
+   (writeWord numeric (base.word N hash) (lengthWord (LifecycleNumeric.headerLength N hash base numeric-1) (by have bound := LifecycleNumeric.headerLength_lt N hash base numeric; omega))) →
    Solidity.Storage.Loc.data (.data base (LifecycleNumeric.headerLength N hash base numeric-1)) j ∈ locations) :
- result (base.word N hash) = lengthWord (LifecycleNumeric.headerLength N hash base numeric-1) (by have bound := header_bound N hash base numeric; omega) ∧
+ result (base.word N hash) = lengthWord (LifecycleNumeric.headerLength N hash base numeric-1) (by have bound := LifecycleNumeric.headerLength_lt N hash base numeric; omega) ∧
  result ((Solidity.Storage.Loc.data base (LifecycleNumeric.headerLength N hash base numeric-1)).word N hash) = ClearDemands.zero := by
  unfold NestedPopTransport.execute at performed
  dsimp only at performed
@@ -131,7 +123,7 @@ theorem after_pop {N L R : Nat} {hash : Solidity.Storage.Pre → Nat}
  (childCovered : Solidity.Storage.Loc.data base (LifecycleNumeric.headerLength N hash base numeric-1) ∈ locations)
  (visited : ∀ j, j < LifecycleNumeric.headerLength N hash
    (.data base (LifecycleNumeric.headerLength N hash base numeric-1))
-   (writeWord numeric (base.word N hash) (lengthWord (LifecycleNumeric.headerLength N hash base numeric-1) (by have bound := header_bound N hash base numeric; omega))) →
+   (writeWord numeric (base.word N hash) (lengthWord (LifecycleNumeric.headerLength N hash base numeric-1) (by have bound := LifecycleNumeric.headerLength_lt N hash base numeric; omega))) →
    Solidity.Storage.Loc.data (.data base (LifecycleNumeric.headerLength N hash base numeric-1)) j ∈ locations) :
  popRegrowPop N hash base numeric = some result := by
  have headers := popped_headers run base numeric result performed rootCovered childCovered visited
@@ -147,7 +139,7 @@ theorem after_pop {N L R : Nat} {hash : Solidity.Storage.Pre → Nat}
   · cases performed
  have room : LifecycleNumeric.headerLength N hash base result + 1 < 2^256 := by
   rw [length]
-  have bound := header_bound N hash base numeric
+  have bound := LifecycleNumeric.headerLength_lt N hash base numeric
   omega
  have empty : result ((Solidity.Storage.Loc.data base (LifecycleNumeric.headerLength N hash base result)).word N hash) = ClearDemands.zero := by
   rw [length]
@@ -185,7 +177,7 @@ theorem outcome {N L R : Nat} {hash : Solidity.Storage.Pre → Nat}
  (childCovered : Solidity.Storage.Loc.data base (LifecycleNumeric.headerLength N hash base numeric-1) ∈ locations)
  (visited : ∀ j, j < LifecycleNumeric.headerLength N hash
    (.data base (LifecycleNumeric.headerLength N hash base numeric-1))
-   (writeWord numeric (base.word N hash) (lengthWord (LifecycleNumeric.headerLength N hash base numeric-1) (by have bound := header_bound N hash base numeric; omega))) →
+   (writeWord numeric (base.word N hash) (lengthWord (LifecycleNumeric.headerLength N hash base numeric-1) (by have bound := LifecycleNumeric.headerLength_lt N hash base numeric; omega))) →
    Solidity.Storage.Loc.data (.data base (LifecycleNumeric.headerLength N hash base numeric-1)) j ∈ locations) :
  popRegrowPop N hash base numeric = NestedPopTransport.execute N hash base numeric := by
  cases performed : NestedPopTransport.execute N hash base numeric with

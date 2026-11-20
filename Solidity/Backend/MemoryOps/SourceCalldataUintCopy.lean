@@ -51,22 +51,8 @@ theorem source_cd_uint_run {E : Source.Env} {Γ : Source.RCtx}
     rfl
 
 theorem source_decode_mapM_length {α β : Type} (f : α → Source.R β) (xs : List α)
-    (vs : List β) (h : xs.mapM f=.ok vs) : vs.length=xs.length := by
-  induction xs generalizing vs with
-  | nil => cases Except.ok.inj h;rfl
-  | cons x xs ih =>
-    rw [List.mapM_cons] at h
-    cases hd : f x with
-    | error e => simp only [hd,bind,Except.bind] at h;cases h
-    | ok v =>
-      simp only [hd,bind,Except.bind] at h
-      cases ht : xs.mapM f with
-      | error e => simp only [ht] at h;cases h
-      | ok tail =>
-        simp only [ht,pure,Except.pure] at h
-        have same : v::tail=vs := Except.ok.inj h
-        rw [←same]
-        simp only [List.length_cons,ih tail ht]
+    (vs : List β) (h : xs.mapM f=.ok vs) : vs.length=xs.length :=
+  except_mapM_length f xs vs h
 
 theorem sourceCalldataUintValues_length {E : Source.Env} {F : Source.Fr} {off len : Nat}
     {vs : List (Source.Val E.layout (.int .u256))} (h : sourceCalldataUintValues E F off len=.ok vs) :

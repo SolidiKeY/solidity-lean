@@ -153,18 +153,7 @@ theorem source_to_model {c : Control} {n fuel : Nat} {stmt : Stmt [] [] c n}
    obtain ⟨qa,sa,rest⟩ := Option.bind_eq_some_iff.mp selected
    obtain ⟨qb,sb,same⟩ := Option.map_eq_some_iff.mp rest
    subst code
-   cases horizon with
-   | zero => cases ran
-   | succ horizon =>
-     change Option.bind (evalStmt horizon .nil True.intro _ left.profile (sourceLocals locals)) _ = some result at ran
-     obtain ⟨middle,first,remaining⟩ := Option.bind_eq_some_iff.mp ran
-     obtain ⟨mid,same,firstRun⟩ := ihLeft a qa ha sa horizon locals middle first
-     subst middle
-     change evalStmt horizon .nil True.intro _ right.profile (sourceLocals mid) = some result at remaining
-     obtain ⟨out,same,lastRun⟩ := ihRight b qb hb sb horizon mid result remaining
-     refine ⟨out,same,?_⟩
-     rw [Evm.run_append_ok firstRun]
-     exact lastRun
+   exact ScopedControlCompilation.seq_forward left.profile right.profile qa qb m caller (ihLeft a qa ha sa) (ihRight b qb hb sb) horizon locals result ran
  | branch condition arm ih =>
    change (condition.lowered.code 0).bind (fun p => (arm.emit).bind (fun b =>
      some (Backend.Block.ite p b (.code [])))) = some block at emitted
@@ -176,36 +165,7 @@ theorem source_to_model {c : Control} {n fuel : Nat} {stmt : Stmt [] [] c n}
    obtain ⟨q,sq,rest⟩ := Option.bind_eq_some_iff.mp selected
    obtain ⟨qb,sb,same⟩ := Option.bind_eq_some_iff.mp rest
    cases Option.some.inj same
-   have testedTarget : Evm.run q {m with stack := locals.toList.map coreWord++caller} =
-     .ok {m with stack := coreWord (condition.value locals)::(locals.toList.map coreWord++caller)} 0 := by
-     simpa only [Vector.toList_empty,List.nil_append] using
-       WordExecution.loweredExpr_machine condition.lowered 0 p q hp sq locals #v[] m caller
-   cases horizon with
-   | zero => cases ran
-   | succ horizon =>
-     change Option.bind (evalExpr horizon .nil True.intro _ condition.profile (sourceLocals locals)) _ = some result at ran
-     obtain ⟨values,tested,remaining⟩ := Option.bind_eq_some_iff.mp ran
-     have same := evalExpr_completed_unique .nil True.intro _ condition.profile (sourceLocals locals)
-       tested (condition.source locals)
-     subst values
-     change (if (condition.value locals).toNat = 0 then
-       some (⟨sourceLocals locals,.normal⟩ : Outcome _ _)
-       else evalStmt horizon .nil True.intro _ arm.profile (sourceLocals locals)) = some result at remaining
-     by_cases zero : condition.value locals = 0
-     · have zn : (condition.value locals).toNat = 0 := congrArg BitVec.toNat zero
-       rw [if_pos zn] at remaining
-       refine ⟨locals,(Option.some.inj remaining).symm,?_⟩
-       rw [MachineControl.branchCode,Evm.run_append_ok testedTarget,zero]
-       change Evm.exec qb qb.length {m with stack := locals.toList.map coreWord++caller} = _
-       exact Evm.exec_length qb _
-     · have nz : (condition.value locals).toNat ≠ 0 := fun h => zero (BitVec.eq_of_toNat_eq h)
-       rw [if_neg nz] at remaining
-       obtain ⟨out,same,armRun⟩ := ih b qb hb sb horizon locals result remaining
-       refine ⟨out,same,?_⟩
-       rw [MachineControl.branchCode,Evm.run_append_ok testedTarget]
-       rw [FramedBranch.nonzero_tail (condition.value locals) qb []
-         {m with stack := locals.toList.map coreWord++caller} zero]
-       exact armRun
+   exact ScopedControlCompilation.branch_forward condition arm.profile p q qb hp sq m caller (ih b qb hb sb) horizon locals result ran
  | @zero n fuel fresh bodyStmt scope ih =>
    change (scope.emit).bind (fun b => some (Backend.Block.seq (.code (ZeroLoopScope.entry fresh))
      (.seq b (.code (popPrefix fresh))))) = some block at emitted
@@ -213,31 +173,7 @@ theorem source_to_model {c : Control} {n fuel : Nat} {stmt : Stmt [] [] c n}
    cases Option.some.inj same
    obtain ⟨begin,middle,finish,hs,hm,hf,same⟩ := ScopedControlCompilation.scope_selected _ _ _ _ selected
    subst code
-   cases horizon with
-   | zero => cases ran
-   | succ horizon =>
-     change Option.bind (evalStmt horizon .nil True.intro bodyStmt scope.profile
-       (extendValues (fun _ : Fin fresh => word 0) (sourceLocals locals))) _ = some result at ran
-     rw [←ZeroLoopScope.initial_values] at ran
-     obtain ⟨mid,bodySource,remaining⟩ := Option.bind_eq_some_iff.mp ran
-     obtain ⟨out,same,bodyRun⟩ := ih b middle hb hm horizon (Vector.replicate fresh (0 : Scalar.Word) ++ locals) mid bodySource
-     subst mid
-     have projected : result = ⟨sourceLocals (outerLocals out),.normal⟩ := by
-       have same := (Option.some.inj remaining).symm
-       rw [←ScopedStatements.locals_outer] at same
-       exact same
-     have entering := WordExecution.run (ZeroLoopScope.entry fresh) begin hs locals.toList
-       ((Vector.replicate fresh (0 : Scalar.Word)).toList++locals.toList) (pushPrefix_run _ _) m caller
-     have bodyRun' : Evm.run middle
-       {m with stack := ((Vector.replicate fresh (0 : Scalar.Word)).toList++locals.toList).map coreWord++caller} =
-       .ok {m with stack := out.toList.map coreWord++caller} 0 := by
-       simpa only [Vector.toList_append] using bodyRun
-     have exitScalar : Scalar.run (popPrefix fresh) out.toList = some (outerLocals out).toList := by
-       simpa only [List.append_nil] using popFresh_run out []
-     have exiting := WordExecution.run (popPrefix fresh) finish hf out.toList (outerLocals out).toList exitScalar m caller
-     refine ⟨outerLocals out,projected,?_⟩
-     rw [Evm.run_append_ok entering,Evm.run_append_ok bodyRun']
-     exact exiting
+   exact ScopedControlCompilation.zero_forward scope.profile begin middle finish hs hf m caller (ih b middle hb hm) horizon locals result ran
  | @letOne n fuel rhs bodyStmt initializer scope ih =>
    change (initializer.lowered.code 0).bind (fun p => (scope.emit).bind (fun b =>
      some (Backend.Block.seq (.code p) (.seq b (.code (popPrefix 1)))))) = some block at emitted
@@ -246,42 +182,8 @@ theorem source_to_model {c : Control} {n fuel : Nat} {stmt : Stmt [] [] c n}
    cases Option.some.inj same
    obtain ⟨begin,middle,finish,hs,hm,hf,same⟩ := ScopedControlCompilation.scope_selected _ _ _ _ selected
    subst code
-   cases horizon with
-   | zero => cases ran
-   | succ horizon =>
-     change (do
-       let values ← evalExpr horizon .nil True.intro rhs initializer.profile (sourceLocals locals)
-       let mid ← evalStmt horizon .nil True.intro bodyStmt scope.profile (extendValues values (sourceLocals locals))
-       pure (⟨dropValues 1 mid.vars,mid.flow⟩ : Outcome c n)) = some result at ran
-     obtain ⟨values,tested,rest⟩ := Option.bind_eq_some_iff.mp ran
-     have same := evalExpr_completed_unique .nil True.intro rhs initializer.profile (sourceLocals locals)
-       tested (initializer.source locals)
-     subst values
-     rw [LetScopeCompilation.initial_values] at rest
-     obtain ⟨mid,bodySource,remaining⟩ := Option.bind_eq_some_iff.mp rest
-     obtain ⟨out,same,bodyRun⟩ := ih b middle hb hm horizon (#v[initializer.value locals] ++ locals) mid bodySource
-     subst mid
-     have projected : result = ⟨sourceLocals (outerLocals out),.normal⟩ := by
-       have same := (Option.some.inj remaining).symm
-       rw [←ScopedStatements.locals_outer] at same
-       exact same
-     have initScalar : Scalar.run p locals.toList = some (initializer.value locals :: locals.toList) := by
-       simpa only [Vector.toList_empty,List.nil_append,List.append_nil] using
-         initializer.lowered.correct 0 p hp locals #v[] []
-     have entering := WordExecution.run p begin hs locals.toList (initializer.value locals::locals.toList) initScalar m caller
-     have bodyRun' : Evm.run middle
-       {m with stack := (initializer.value locals::locals.toList).map coreWord++caller} =
-       .ok {m with stack := out.toList.map coreWord++caller} 0 := by
-       simpa only [Vector.toList_append,Vector.toList_singleton,List.singleton_append] using bodyRun
-     have exitScalar : Scalar.run (popPrefix 1) out.toList = some (outerLocals out).toList := by
-       simpa only [List.append_nil] using popFresh_run out []
-     have exiting := WordExecution.run (popPrefix 1) finish hf out.toList (outerLocals out).toList exitScalar m caller
-     refine ⟨outerLocals out,projected,?_⟩
-     rw [Evm.run_append_ok entering,Evm.run_append_ok bodyRun']
-     exact exiting
+   exact ScopedControlCompilation.let_forward initializer scope.profile p begin middle finish hp hs hf m caller (ih b middle hb hm) horizon locals result ran
 
-/-- Actual emitted Block and selected-code projection; no simulation law is
-stored in the artifact. -/
 theorem Artifact.source_to_model {c : Control} {n fuel : Nat} {stmt : Stmt [] [] c n}
  (artifact : Artifact fuel stmt) (horizon : Nat) (locals : Vector Scalar.Word n) (result : Outcome c n)
  (ran : evalStmt horizon .nil True.intro stmt artifact.compiled.profile (sourceLocals locals) = some result)

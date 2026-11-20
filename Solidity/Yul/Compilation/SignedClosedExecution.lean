@@ -45,19 +45,7 @@ theorem run (p : Backend.Program) (q : List Evm.Instr)
  match Scalar.run p input with
  | none => .fault
  | some output => .ok {m with stack := output.map coreWord} 0 := by
- induction p generalizing q input with
- | nil => cases selected; rfl
- | cons i p ih =>
-   obtain ⟨j,hi,rest⟩ := Option.bind_eq_some_iff.mp selected
-   obtain ⟨target,hp,same⟩ := Option.map_eq_some_iff.mp rest
-   subst q
-   rw [Evm.run,Evm.exec_cons_zero,step i j hi input m]
-   cases actual : Scalar.step i input with
-   | none => rw [Scalar.run,actual]; rfl
-   | some middle =>
-     rw [Scalar.run,actual]
-     simp only [Option.bind_some,Evm.Out.ok_bind]
-     exact ih target hp middle
+ exact WordClosedExecution.run_selected SignedMachine.selectInstr SignedMachine.selectCode rfl (fun _ _ => rfl) step p q selected input m
 
 theorem failure_iff (p : Backend.Program) (q : List Evm.Instr)
  (selected : SignedMachine.selectCode p = some q) (input : Stack) (m : Evm.Machine) :

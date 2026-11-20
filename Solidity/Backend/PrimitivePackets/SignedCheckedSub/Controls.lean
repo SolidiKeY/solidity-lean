@@ -68,7 +68,6 @@ theorem low_fuel (p : Roadmap.Pipeline) :
  (.binary .sub (.local .here) (.local (.there .here)))).run (SignedDiv.Controls.source seven two)=
  (.error .timeout,SignedDiv.Controls.source seven two) := by rfl
 
-theorem exact_panic : Source.panicData .arithmetic=[78,72,123,113]++List.replicate 31 0++[17] := by decide
 #print axioms source_success
 #print axioms source_overflow
 #print axioms public_selection
@@ -86,5 +85,4 @@ theorem exact_panic : Source.panicData .arithmetic=[78,72,123,113]++List.replica
 #print axioms upper_not_wrap
 #print axioms wrong_result
 #print axioms low_fuel
-#print axioms exact_panic
 end Solidity.Backend.PrimitivePackets.SignedCheckedSub.Controls

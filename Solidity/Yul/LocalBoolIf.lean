@@ -53,9 +53,7 @@ theorem source_agrees : ∀ (env : Solidity.Source.Env) (returns : List Solidity
         have sub : (Solidity.Source.EM.sub (Γ := []) locals
           (Solidity.Source.evalE glob frame fuel condition)).run (Solidity.Source.L0 env,world) =
           (.error halt,(Solidity.Source.L0 env,nextWorld)) := by
-          have actualRun : Solidity.Source.evalE (plan := none) (calldataKnown := true) glob frame fuel condition (locals,world) =
-            (.error halt,(nextLocals,nextWorld)) := actual
-          simp only [Solidity.Source.EM.sub,ExceptT.run,ExceptT.mk,actualRun]
+          exact LocalBoolControl.source_sub_run (Solidity.Source.L0 env) actual
         simp only [Solidity.Yul.LocalBoolIf.run,expression,Solidity.Yul.LocalBoolItems.project]
         rw [Solidity.Source.execS,Solidity.Source.Hoare.run_bind,sub] <;> rfl
       | ok value =>
@@ -68,9 +66,7 @@ theorem source_agrees : ∀ (env : Solidity.Source.Env) (returns : List Solidity
             have sub : (Solidity.Source.EM.sub (Γ := []) locals
               (Solidity.Source.evalE glob frame fuel condition)).run (Solidity.Source.L0 env,world) =
               (.ok (.val (.bool value),nextLocals),(Solidity.Source.L0 env,nextWorld)) := by
-              have actualRun : Solidity.Source.evalE (plan := none) (calldataKnown := true) glob frame fuel condition (locals,world) =
-                (.ok (.val (.bool value)),(nextLocals,nextWorld)) := actual
-              simp only [Solidity.Source.EM.sub,ExceptT.run,ExceptT.mk,actualRun]
+              exact LocalBoolControl.source_sub_run (Solidity.Source.L0 env) actual
             cases value with
             | false =>
               rw [Solidity.Yul.LocalBoolIf.run,expression]

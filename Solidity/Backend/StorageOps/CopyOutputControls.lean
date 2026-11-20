@@ -208,18 +208,6 @@ private theorem alias_old_owner : Represented CopyWriteControls.oldNode aliasQue
     | exact ⟨by decide,by decide⟩
     | (intro word observed; change some zero = some word at observed; cases observed; rfl)
     | (intro word observed; change some one = some word at observed; cases observed; rfl)
-private theorem alias_source_owner : Represented CopyWriteControls.sourceNode
-    (ClearDemands.demands CopyWriteControls.sourceNode) CopyWriteControls.overlapSource CopyWriteControls.overlapStore := by
-  intro q member
-  apply CopyWriteControls.overlap_source_owner q
-  change q ∈ [rootFlag,childFlag,childKids,rootKids] at member
-  change q ∈ [rootFlag,rootKids,childFlag,childKids]
-  simp only [List.mem_cons,List.not_mem_nil,or_false] at member ⊢
-  rcases member with rfl | rfl | rfl | rfl
-  · exact Or.inl rfl
-  · exact Or.inr (Or.inr (Or.inl rfl))
-  · exact Or.inr (Or.inr (Or.inr rfl))
-  · exact Or.inr (Or.inl rfl)
 private theorem alias_separation : ∀ q ∈ aliasQueries,
     ∀ d ∈ CopyDemands.demands CopyWriteControls.oldNode CopyWriteControls.sourceNode,
     d.location (.root 0) = q.location (.root 0) → d = q := by
@@ -260,7 +248,7 @@ theorem alias_full_owner :
     Transport 128 CopyWriteControls.overlapHash CopyWriteControls.overlapLocations after CopyWriteControls.overlapResult :=
   represented_copy CopyWriteControls.oldNode CopyWriteControls.sourceNode aliasPermit aliasQueries (.root 0)
     CopyWriteControls.overlapSource CopyWriteControls.overlapStore CopyWriteControls.overlapMachine
-    CopyWriteControls.overlap_run alias_old_owner alias_source_owner (fun _ _ => rfl) alias_source_covered
+    CopyWriteControls.overlap_run alias_old_owner CopyWriteControls.overlap_source_demands (fun _ _ => rfl) alias_source_covered
     (fun q member => List.mem_map.mpr ⟨q,member,rfl⟩)
     (fun q member => List.mem_map.mpr ⟨q,member,rfl⟩) alias_separation
 
@@ -305,20 +293,7 @@ theorem slot_combinations :
     (by intro value same; cases same) one rfl
   have ya := slot_output (Slot.present (.prim (p := .bool) true) : Slot CopyDemandControls.graph (.prim .bool)) .absent p q one before zero rfl
   have yn := slot_output (Slot.present (.prim (p := .bool) true) : Slot CopyDemandControls.graph (.prim .bool)) (.present (.prim (p := .bool) false)) p q one before zero rfl
-  change (traceWord q _ seven,traceWord q _ seven,traceWord q _ one,traceWord q _ one) = _
-  have first : traceWord q (CopyWrites.slotWrites (.absent : Slot CopyDemandControls.graph (.prim .bool)) .absent (fun _ => seven)) seven = zero := aa
-  have third : traceWord q (CopyWrites.slotWrites (Slot.present (.prim (p := .bool) true) : Slot CopyDemandControls.graph (.prim .bool)) .absent (fun _ => seven)) one = zero := ya
-  have second : traceWord q (CopyWrites.slotWrites (.absent : Slot CopyDemandControls.graph (.prim .bool))
-      (.present (.prim true)) (fun _ => one)) seven = one := by
-    change traceWord q [(q,zero),(q,one)] seven = one
-    change traceWord q [(q,zero),(q,one)] seven = one at ay
-    exact ay
-  have fourth : traceWord q (CopyWrites.slotWrites (Slot.present (.prim true) : Slot CopyDemandControls.graph (.prim .bool))
-      (.present (.prim false)) (fun _ => zero)) one = zero := by
-    change traceWord q [(q,zero)] one = zero
-    change traceWord q [(q,zero)] one = zero at yn
-    exact yn
-  rw [first,second,third,fourth]
+  exact Prod.ext aa (Prod.ext ay (Prod.ext ya yn))
 
 private def twoSize : FixedSize := ⟨2,by decide⟩
 private abbrev FixedNodes : TypeGraph.Ty 1 := .fixed (.array (.node 0)) twoSize

@@ -104,8 +104,8 @@ theorem saved_after_copy {n : Nat} {G : Schema n} {A T : TypeGraph.Ty n}
     (root result : Value G A) (dst src : TypeGraph.Path G A T) (old snapshot : Value G T)
     (readDst : root.find dst = some old) (readSrc : root.find src = some snapshot)
     (copied : recursiveCopyAt root dst src = some result) :
-    root.save dst (recursiveCopy old snapshot) = some result := by
-  simpa only [recursiveCopyAt,Option.bind_eq_bind,readSrc,readDst,Option.bind_some] using copied
+    root.save dst (recursiveCopy old snapshot) = some result :=
+  recursiveCopyAt_saved root result dst src old snapshot readDst readSrc copied
 
 /-- Independent outside-ROOT source observations and actual numeric words frame
 the whole generated recursive copy. Payload representation is unnecessary for

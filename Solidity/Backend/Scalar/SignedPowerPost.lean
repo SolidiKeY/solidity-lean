@@ -19,22 +19,6 @@ def powerSignBody : Program :=
    .op .MUL, .op (.SWAP ⟨0, by decide⟩), .op .POP]
 
 
-private theorem stepDup2 (a b : Word) (tail : Stack) :
-    step (.op (.DUP ⟨1, by decide⟩)) (a::b::tail) = some (b::a::b::tail) := rfl
-private theorem stepAdd (a b : Word) (tail : Stack) :
-    step (.op .ADD) (a::b::tail) = some ((a+b)::tail) := rfl
-private theorem stepSub (a b : Word) (tail : Stack) :
-    step (.op .SUB) (a::b::tail) = some ((a-b)::tail) := rfl
-private theorem stepMul (a b : Word) (tail : Stack) :
-    step (.op .MUL) (a::b::tail) = some ((a*b)::tail) := rfl
-private theorem stepLt (a b : Word) (tail : Stack) :
-    step (.op .LT) (a::b::tail) = some (flag (decide (a.toNat<b.toNat))::tail) := rfl
-private theorem stepZero (a : Word) (tail : Stack) :
-    step (.op .ISZERO) (a::tail) = some (flag (a==0)::tail) := rfl
-private theorem stepSwap (a b : Word) (tail : Stack) :
-    step (.op (.SWAP ⟨0, by decide⟩)) (a::b::tail) = some (b::a::tail) := rfl
-private theorem stepPop (a : Word) (tail : Stack) :
-    step (.op .POP) (a::tail) = some tail := rfl
 
 theorem powerPostTest_correct (negative : Bool) (r : PrimTy.uint.Denote) (tail : Stack) :
     run powerPostTest (encodeValue .uint r::flag negative::tail) =
@@ -59,7 +43,7 @@ theorem powerSignBody_correct (negative : Bool) (r : PrimTy.uint.Denote) (tail :
     run powerSignBody (encodeValue .uint r::flag negative::tail) =
       some (BitVec.ofInt 256 (powerSignedValue negative r)::tail) := by
   simp only [powerSignBody, run, stepDup2, step_pushWord, stepMul, stepSub,
-    stepSwap, stepPop, Option.bind_some]
+    stepSwap1, stepPop, Option.bind_some]
   cases negative with
   | false =>
     change some (((1#256-2#256*0#256)*encodeValue .uint r)::tail) = some (BitVec.ofInt 256 r.val::tail)
