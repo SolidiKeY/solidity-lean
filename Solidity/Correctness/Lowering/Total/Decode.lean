@@ -269,13 +269,14 @@ def decode (r : Request) : Option SourceProgram :=
 
 The decoder above is landed and other modules build on it, so it is kept as it
 is. Wider decoders are versions of one generic decoder, `Tables.decode`, which
-is written to differ from it only in its three type tables: how a
-declaration's type name, a model local and a model contract are read:
-`decode_tables1` proves that at the landed tables it is the landed decoder.
-Expression spelling is shared. `tablesA` (below) also reads marked addresses. `tablesW` reads
+is written to differ from it only in its four tables: how a
+declaration's type name, a model local, a model contract and an environment
+read are read: `decode_tables1` proves that at the landed tables it is the
+landed decoder. Expressions are spelled per version (`Tables.expr`), differing
+only in the environment table. `tablesA` (below) also reads marked addresses. `tablesW` reads
 integers at their declared widths (`bool` only at 256). -/
 
-/-- The type tables of a decoder version. -/
+/-- The tables of a decoder version. -/
 structure Tables where
   /-- A local declaration's type, by name. -/
   typeName : RawTy → Option (Syn .typeName)
@@ -596,7 +597,7 @@ def tablesW : Tables := ⟨typeNameW, localTyW, unitW, env⟩
 local marked `#address` (20 bytes, at 256 bits) and a state variable with the
 row `x#address` are Source `address`; so is a declaration named `address`.
 `address payable` is read as `address`: the model does not record the
-difference. Expressions are still the shared ones, so `msg.sender`,
+difference. Environment reads are the landed ones (`Decode.env`), so `msg.sender`,
 `address(this)` and address casts stay gaps. A captured address, whose shape
 carries the marker twice, is a gap; and the caveat at `localTyW` still
 applies: a local declared without a marker is read as a plain integer. -/
@@ -691,7 +692,7 @@ its bytes spell big-endian, right-aligned in a `uint` of `8N` bits
 (`Syntax/Raw.lean`, at `bytesTy?`); that is the reading here, not the
 left-aligned word of `Source.Observe`.
 
-Expressions are the shared ones. Between marked operands they spell, and
+Environment reads are the landed ones (`Decode.env`). Between marked operands expressions spell, and
 Source types, indexing `b[i]`, `b.length`, `==`, `!=`, the orderings, `&`,
 `|`, `^`, `~`, the shifts, their compound assignments and implicit widening:
 these are in the fragment, so their agreement with the model is part of the

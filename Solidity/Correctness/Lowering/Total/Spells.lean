@@ -548,7 +548,7 @@ theorem components_spellsT : (es : List RawExpr) → (t : Syn (.list (.opt .expr
       exact .cons (expr_spellsT _ _ ha) (components_spellsT _ _ hb)
 end
 
-/-- SimpleT T statements. -/
+/-- Simple statements of a decoder version. -/
 inductive SimpleT (T : Decode.Tables) : RawStmt → Syn .simple → Prop where
   | assign {l l' r r'} : ExprT T l l' → ExprT T r r' →
       SimpleT T (.assign l r) (.exprStmt (.assign .assign l' r'))

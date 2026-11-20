@@ -16,7 +16,9 @@ bytes-aware `Decode.tablesB` and the caller-aware `Decode.tablesS`:
   value (`Source.bytesNat`) is that number. Globals as in
   `loopRel`: primitive state variables of the running account, `msg.value`,
   the timestamp, a writable checking frame; and the caller: the model's
-  `msg.sender` is the Source frame's sender.
+  `msg.sender` is the Source frame's sender. The caller clause is part of
+  `Version.rel`, so it holds at every version's boundary, also where the
+  decoder has no reading of `msg.sender`.
 * `Version.Sound`: what total initial matching needs of a version's tables
   (`soundW`, `soundA`, `soundB`, `soundS`). It is not a correctness criterion for the tables: it
   does not say they agree with the types the model declared.
@@ -25,8 +27,9 @@ bytes-aware `Decode.tablesB` and the caller-aware `Decode.tablesS`:
   Source execution of a successful decoded request has a related model state
   under the positional map. It is Source-to-model only. The converse fails at
   a narrow slot (a model `uint` holding 300 where the decoder says `uint8`),
-  at an address slot (a model `uint` of `2^160` or more) and at a `bytesN`
-  slot (a model `uint` of `256^N` or more): such a model
+  at an address slot (a model `uint` of `2^160` or more), at a `bytesN`
+  slot (a model `uint` of `256^N` or more) and at the caller (a model
+  `msg.sender` of `2^160` or more): such a model
   value has no related Source value, and nothing here claims it has. So the
   simulation at a version speaks only of entry states inside those ranges,
   and proving it includes proving that model results at such slots stay
