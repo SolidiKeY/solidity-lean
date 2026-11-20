@@ -537,17 +537,21 @@ def localTyA : LocalTy → Option STy
 def isAddress (widths : List (Name × Nat)) (x : Name) : Bool :=
   Semantics.lookupBy (x ++ "#address") widths == some 20
 
-/-- The state variables, an address where the table marks one. A marked
-variable must be a `uint` with no width row of its own. -/
+/-- The elementary type of a state variable: an address where the table
+marks one (it must then be a `uint` with no width row of its own), or the
+primitive at its width. -/
+def elemA (widths : List (Name × Nat)) (x : Name) (p : PrimTy) : Option Source.Elem :=
+  if isAddress widths x then
+    (if p = .uint ∧ Semantics.lookupBy x widths = none then some .address else none)
+  else primElem p (stateBits widths x)
+
+/-- The state variables, an address where the table marks one. -/
 def stateVarsA (widths : List (Name × Nat)) :
     List (Name × Ty) → Option (Syn (.list (.part false)))
   | [] => some .nil
   | (x, .prim p) :: rest => do
-      let T ← if isAddress widths x then
-          (if p = .uint ∧ Semantics.lookupBy x widths = none then some Source.Elem.address
-           else none)
-        else primElem p (stateBits widths x)
-      pure (.cons (.stateVar (.elem T) none none none false x .none) (← stateVarsA widths rest))
+      pure (.cons (.stateVar (.elem (← elemA widths x p)) none none none false x .none)
+        (← stateVarsA widths rest))
   | _ => none
 
 /-- A width key the address version reads: a plain key, or the address marker

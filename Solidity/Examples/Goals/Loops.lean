@@ -498,6 +498,24 @@ example :
         Decode.tablesW.decode → Simulation.Bound Version.rel Decode.tablesW.decode :=
   fun h => (Iff.mp Version.contractV2_iff h).2.2.2.2
 
+/-! ### The address-aware version's boundary -/
+
+/-- A model `uint` and the Source address with the same number are related. -/
+example (D : Source.Layout) (a : Solidity.Roadmap.Address) (x : PrimTy.uint.Denote)
+    (same : x.1 = (a.val : Int)) :
+    Version.Relation.ValRel D (.address false) .uint (.address a) x :=
+  .address false a x same
+/-- The address-aware tables are sound, so total initial matching holds for
+them, and version 2 of the contract at their boundary is five obligations. -/
+example : Version.Sound Decode.tablesA := Version.soundA
+example : Simulation.InitialMatching Version.rel Decode.tablesA.decode :=
+  Version.initialMatchingAt Version.soundA
+example :
+    LowerLoopsCorrectContractV2 Version.rel Version.boundaryA Version.boundaryA.reference
+        Decode.tablesA.decode → Simulation.Bound Version.rel Decode.tablesA.decode :=
+  fun h => (Iff.mp (Version.contractV2At_iff Version.soundA) h).2.2.2.2
+example : FullDomain Version.boundaryA := Version.boundaryAt_fullDomain _ _
+
 end Decoder
 
 end Solidity.Goals
