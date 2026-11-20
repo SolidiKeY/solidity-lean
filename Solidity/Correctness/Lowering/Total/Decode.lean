@@ -574,6 +574,80 @@ def unitA (C : Contract) : Option (Syn .unit) :=
 /-- The address-aware decoder's tables. -/
 def tablesA : Tables := ⟨typeNameA, localTyA, unitA⟩
 
+/-! ### Canonical units from an element table
+
+Later versions build their unit from one function: which elementary type a
+state variable has. `unitOf` is the canonical unit over it; the properties of
+the unit are proved once (`Total.Versions`). -/
+
+/-- The state variables, each at the elementary type `el` gives it. -/
+def stateVarsOf (el : Name → PrimTy → Option Source.Elem) :
+    List (Name × Ty) → Option (Syn (.list (.part false)))
+  | [] => some .nil
+  | (x, .prim p) :: rest => do
+      pure (.cons (.stateVar (.elem (← el x p)) none none none false x .none)
+        (← stateVarsOf el rest))
+  | _ => none
+
+/-- The canonical unit of a contract that passes `ok`, over an element table.
+Transient roots, functions, enums, the constructor and initializers are gaps,
+and so is a state variable named like a marker row. -/
+def unitOf (ok : Contract → Bool) (el : Contract → Name → PrimTy → Option Source.Elem)
+    (C : Contract) : Option (Syn .unit) :=
+  if C.transientRoots.isEmpty && C.funs.isEmpty && C.enums.isEmpty && C.ctor.isNone &&
+      C.inits.isEmpty && ok C && (C.vars.all fun v => plainKey v.1) then
+    (stateVarsOf (el C) C.vars).map fun parts =>
+      .unit (.cons (.contract false contractName .none .nil parts) .nil)
+  else none
+
+/-! ### Fixed bytes
+
+`tablesB`: as `tablesA`, and an erased `bytesN` where the model marks one. A
+local of `8N` bits marked `#bytes ↦ N`, a state variable with the row
+`x#bytes ↦ N` (and its own row `x ↦ 8N` when `N < 32`), and a declaration
+named `bytesN` are Source `bytesN`. Expressions are the shared ones, so byte
+indexing, `bytesN(e)` casts and bytes literals stay gaps. -/
+
+/-- `bytesN` for `N` in `1 … 32`. -/
+def bytesElem (n : Nat) : Option Source.Elem :=
+  if h : 1 ≤ n ∧ n ≤ 32 then some (.fixedBytes n h) else none
+
+/-- Declaration types by name: `bytesN`, or as `typeNameA`. -/
+def typeNameB : RawTy → Option (Syn .typeName)
+  | .named s => match bytesTy? s with
+    | some n => (bytesElem n).map .elem
+    | none => typeNameA (.named s)
+  | T => typeNameA T
+
+/-- A model local: a `bytesN` where the shape is exactly the bytes marker on a
+`uint` of `8N` bits, or as `localTyA`. -/
+def localTyB : LocalTy → Option STy
+  | .val .uint bits [("#bytes", n)] =>
+    if bits = 8 * n then (bytesElem n).map (Source.Elem.ty .memory) else none
+  | t => localTyA t
+
+/-- The elementary type of a state variable: `bytesN` where the table marks
+one (a `uint` whose width is `8N` and that is not also marked an address), or
+as `elemA`. -/
+def elemB (widths : List (Name × Nat)) (x : Name) (p : PrimTy) : Option Source.Elem :=
+  match Semantics.lookupBy (x ++ "#bytes") widths with
+  | some n =>
+    if p = .uint ∧ stateBits widths x = 8 * n ∧ isAddress widths x = false then bytesElem n
+    else none
+  | none => elemA widths x p
+
+/-- A width key the bytes version reads: as `keyA`, or the bytes marker of a
+state variable. -/
+def keyB (vars : List (Name × Ty)) (w : Name × Nat) : Bool :=
+  keyA vars w || vars.any fun v => w.1 == v.1 ++ "#bytes"
+
+/-- The canonical unit with fixed bytes. -/
+def unitB : Contract → Option (Syn .unit) :=
+  unitOf (fun C => C.widths.all fun w => keyB C.vars w) fun C => elemB C.widths
+
+/-- The bytes-aware decoder's tables. -/
+def tablesB : Tables := ⟨typeNameB, localTyB, unitB⟩
+
 end Decode
 
 end Solidity.Correctness.Lowering.Total

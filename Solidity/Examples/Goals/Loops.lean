@@ -548,6 +548,66 @@ example :
   fun h => (Iff.mp (Version.contractV2At_iff Version.soundA) h).2.2.2.2
 example : FullDomain Version.boundaryA := Version.boundaryAt_fullDomain _ _
 
+/-! ### The bytes-aware decoder version and its boundary
+
+`Decode.tablesB` reads an erased `bytesN` where the model marks one. -/
+
+example : Decode.tablesB = ⟨Decode.typeNameB, Decode.localTyB, Decode.unitB⟩ := rfl
+/-- Over `bytes1 x; bytes1 y; uint8 n`: `x = y` types and neither `x = n` nor
+`n = x` does, so the marker is read as `bytes1`, not `uint8`. A marker whose
+size does not match the width is a gap. -/
+def bytesRequest (raw : List RawStmt) : Request :=
+  ⟨IntrinsicProbe.C, ⟨sampleNames, none, raw, RawProbe.scope,
+    ⟨([("x", .val .uint 8 [("#bytes", 1)]), ("y", .val .uint 8 [("#bytes", 1)]),
+       ("n", .val .uint 8)], 1), {}⟩⟩, none⟩
+example : (Decode.tablesB.decode (bytesRequest [.assign (.name "x") (.name "y")])).isSome =
+    true := rfl
+example : Decode.tablesB.decode (bytesRequest [.assign (.name "x") (.name "n")]) = none := rfl
+example : Decode.tablesB.decode (bytesRequest [.assign (.name "n") (.name "x")]) = none := rfl
+example : Decode.tablesB.decode { bytesRequest [] with
+    input := { (bytesRequest []).input with
+      before := ⟨([("z", .val .uint 16 [("#bytes", 1)])], 1), {}⟩ } } = none := rfl
+/-- The address-aware version has no type for a bytes-marked local. -/
+example : Decode.tablesA.decode (bytesRequest [.assign (.name "x") (.name "y")]) = none := rfl
+/-- State variables: `bytes1 s` (rows `s ↦ 8`, `s#bytes ↦ 1`) and `bytes32 h`
+(row `h#bytes ↦ 32` only) are read; `s = x` types, and neither `s = n` nor the
+narrowing `x = h` does; a
+marker that does not match the width, or beside an address marker, is a gap. -/
+def bytesContract : Contract :=
+  { vars := [("s", .prim .uint), ("h", .prim .uint)],
+    widths := [("s", 8), ("s#bytes", 1), ("h#bytes", 32)] }
+example : (Decode.tablesB.decode { bytesRequest [.assign (.name "s") (.name "x")] with
+    contract := bytesContract }).isSome = true := rfl
+example : Decode.tablesB.decode { bytesRequest [.assign (.name "s") (.name "n")] with
+    contract := bytesContract } = none := rfl
+example : Decode.tablesB.decode { bytesRequest [.assign (.name "x") (.name "h")] with
+    contract := bytesContract } = none := rfl
+example : Decode.tablesB.decode { bytesRequest [] with
+    contract := { vars := [("s", .prim .uint)], widths := [("s", 16), ("s#bytes", 1)] } } =
+    none := rfl
+example : Decode.tablesB.decode { bytesRequest [] with
+    contract := { vars := [("s", .prim .uint)],
+                  widths := [("s#bytes", 32), ("s#address", 20)] } } = none := rfl
+/-! A declaration by the name `bytes1` decodes (evaluated, not kernel-checked). -/
+#guard (Decode.tablesB.decode
+  (bytesRequest [.decl (.named "bytes1") "m" (some (.name "x"))])).isSome
+#guard (Decode.tablesB.decode
+  (bytesRequest [.decl (.named "bytes1") "m" (some (.name "n"))])).isNone
+/-- A model `uint` and the Source `bytesN` with that big-endian value are
+related: the one byte `0x2a` and the number 42. -/
+example (D : Source.Layout) (x : PrimTy.uint.Denote) (same : x.1 = 42) :
+    Version.Relation.ValRel D (.fixedBytes 1 (by decide)) .uint (.fixedBytes [42] rfl) x :=
+  .bytes 1 (by decide) [42] rfl x same
+/-- The bytes-aware tables are sound, so total initial matching holds for
+them, and version 2 of the contract at their boundary is five obligations. -/
+example : Version.Sound Decode.tablesB := Version.soundB
+example : Simulation.InitialMatching Version.rel Decode.tablesB.decode :=
+  Version.initialMatchingAt Version.soundB
+example :
+    LowerLoopsCorrectContractV2 Version.rel Version.boundaryB Version.boundaryB.reference
+        Decode.tablesB.decode → Simulation.Bound Version.rel Decode.tablesB.decode :=
+  fun h => (Iff.mp (Version.contractV2At_iff Version.soundB) h).2.2.2.2
+
 end Decoder
 
 end Solidity.Goals

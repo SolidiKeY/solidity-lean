@@ -6,37 +6,40 @@ import Solidity.Correctness.Lowering.Total.Boundary
 The landed boundary (`Total.Boundary`) is for the landed decoder and is kept
 as it is. This module gives decoder versions (`Decode.Tables`) one state
 relation and a boundary each, beside it. The versions so far are the
-width-aware `Decode.tablesW` and the address-aware `Decode.tablesA`:
+width-aware `Decode.tablesW`, the address-aware `Decode.tablesA` and the
+bytes-aware `Decode.tablesB`:
 
 * `Version.Relation.ValRel`, `Version.rel`: a model primitive is related to a
   Source Boolean, to a Source integer of the same sign holding the same
   number, at whatever width the decoder gave the slot, or (a `uint`) to the
-  Source address with that number. Globals as in
+  Source address with that number, or to the Source `bytesN` whose big-endian
+  value (`Source.bytesNat`) is that number. Globals as in
   `loopRel`: primitive state variables of the running account, `msg.value`,
   the timestamp, a writable checking frame.
 * `Version.Sound`: what total initial matching needs of a version's tables
-  (`soundW`, `soundA`). It is not a correctness criterion for the tables: it
+  (`soundW`, `soundA`, `soundB`). It is not a correctness criterion for the tables: it
   does not say they agree with the types the model declared.
 * `Version.initialMatchingAt`: total initial matching for every sound version,
   proved: every admitted
   Source execution of a successful decoded request has a related model state
   under the positional map. It is Source-to-model only. The converse fails at
-  a narrow slot (a model `uint` holding 300 where the decoder says `uint8`)
-  and at an address slot (a model `uint` of `2^160` or more): such a model
+  a narrow slot (a model `uint` holding 300 where the decoder says `uint8`),
+  at an address slot (a model `uint` of `2^160` or more) and at a `bytesN`
+  slot (a model `uint` of `256^N` or more): such a model
   value has no related Source value, and nothing here claims it has. So the
   simulation at a version speaks only of entry states inside those ranges,
   and proving it includes proving that model results at such slots stay
   inside them.
 * `Version.boundaryAt`, `residualAt_iff`, `contractV2At_iff`: a version's
   boundary with association `SpellsT`, and what the contract and its version 2
-  ask at it; `boundary` and `boundaryA` are the two instances.
+  ask at it; `boundary`, `boundaryA` and `boundaryB` are the instances.
 
 The relation does not tie a slot's Source width to the model's declared width:
 only the decoder does, and the model context of a request has erased it. The
 policies, the simulation and the allocation trace are the landed ones, with
 the defects listed in `Total.Boundary`. No goal is stated here.
 
-Limits. Every version still has gaps: `bytesN`, enums, function types,
+Limits. Every version still has gaps: enums, function types,
 references, calls and callee bodies, return slots, `unchecked`/`checked`
 scopes, and contracts with functions, a constructor, initializers or transient
 roots. The address-aware version reads marked locals and state variables and
@@ -46,7 +49,9 @@ comparison) are spelled and Source types them, but `msg.sender`,
 literal, and payable-only operations are gaps (`address payable` is read as
 `address`), and a captured address, whose shape carries the marker twice, is a
 gap too. `a.balance` over a marked operand is typed by Source, while the state
-relation relates no balances. So the first conjunct of `residualAt_iff` (the
+relation relates no balances. The bytes-aware version reads marked locals and
+state variables and the names `bytesN`; byte indexing, `bytesN(e)` casts and
+bytes literals are gaps. So the first conjunct of `residualAt_iff` (the
 decoder is defined on every successful request) is not provable for any
 version yet, and no version's contract can be the goal yet. A local the elaborator declares without a type marker is decoded
 as a plain integer even if it was declared `address` or `bytesN`
@@ -70,7 +75,8 @@ namespace Relation
 
 /-- A model primitive value and the Source value it stands for: the same
 Boolean, the same number at an integer type of the primitive's sign, or (for
-a `uint`) the address with that number. -/
+a `uint`) the address with that number or the `bytesN` with that big-endian
+value. -/
 inductive ValRel (D : Source.Layout) :
     (τ : Source.STy) → (p : PrimTy) → Source.Val D τ → p.Denote → Prop where
   | bool (b : Bool) : ValRel D .bool .bool (.bool b) b
@@ -80,6 +86,9 @@ inductive ValRel (D : Source.Layout) :
       (x : PrimTy.int.Denote) (same : x.1 = n) : ValRel D (.int t) .int (.int n h) x
   | address (payable : Bool) (a : Roadmap.Address) (x : PrimTy.uint.Denote)
       (same : x.1 = (a.val : Int)) : ValRel D (.address payable) .uint (.address a) x
+  | bytes (n : Nat) (h : 1 ≤ n ∧ n ≤ 32) (bs : List UInt8) (hl : bs.length = n)
+      (x : PrimTy.uint.Denote) (same : x.1 = (Source.bytesNat bs : Int)) :
+      ValRel D (.fixedBytes n h) .uint (.fixedBytes bs hl) x
 
 /-- Values: primitives only. -/
 def val (E : Source.Env) (C : Contract) (H : HTy) (τ : Source.STy) :
@@ -148,6 +157,7 @@ inductive Prim : PrimTy → Source.STy → Prop where
   | uint (t : Source.IntTy) (unsigned : t.signed = false) : Prim .uint (.int t)
   | int (t : Source.IntTy) (signed : t.signed = true) : Prim .int (.int t)
   | address (payable : Bool) : Prim .uint (.address payable)
+  | bytes (n : Nat) (h : 1 ≤ n ∧ n ≤ 32) : Prim .uint (.fixedBytes n h)
 
 /-- The Source type of an elementary type the decoders use is a primitive
 slot's type, and a storage cell of it holds a value of it. -/
@@ -195,6 +205,36 @@ theorem address_inRange (a : Roadmap.Address) : PrimTy.uint.inRange (a.val : Int
   exact ⟨Int.natCast_nonneg _,
     Int.ofNat_lt.mpr (Nat.lt_trans a.isLt (Nat.pow_lt_pow_right (by decide) (by decide)))⟩
 
+/-- The big-endian value of a byte string is below `256 ^ length`. -/
+theorem bytesNat_lt (bs : List UInt8) : Source.bytesNat bs < 256 ^ bs.length := by
+  have fold : ∀ (bs : List UInt8) (acc : Nat),
+      bs.foldl (fun acc b => acc * 256 + b.toNat) acc < (acc + 1) * 256 ^ bs.length := by
+    intro bs
+    induction bs with
+    | nil => intro acc; simp
+    | cons b rest ih =>
+      intro acc
+      have step := ih (acc * 256 + b.toNat)
+      have byte : b.toNat < 256 := b.toNat_lt
+      have le : (acc * 256 + b.toNat + 1) * 256 ^ rest.length ≤
+          (acc + 1) * 256 * 256 ^ rest.length :=
+        Nat.mul_le_mul_right _ (by omega)
+      simp only [List.foldl_cons, List.length_cons, Nat.pow_succ]
+      calc _ < (acc * 256 + b.toNat + 1) * 256 ^ rest.length := step
+        _ ≤ (acc + 1) * 256 * 256 ^ rest.length := le
+        _ = (acc + 1) * (256 ^ rest.length * 256) := by
+          rw [Nat.mul_assoc, Nat.mul_comm 256]
+  simpa [Source.bytesNat, Source.beValue] using fold bs 0
+
+/-- A `bytesN` value is in `uint`'s range. -/
+theorem bytes_inRange {n : Nat} (h : 1 ≤ n ∧ n ≤ 32) (bs : List UInt8) (hl : bs.length = n) :
+    PrimTy.uint.inRange (Source.bytesNat bs : Int) = true := by
+  simp only [PrimTy.inRange, decide_eq_true_eq]
+  refine ⟨Int.natCast_nonneg _, Int.ofNat_lt.mpr (Nat.lt_of_lt_of_le (bytesNat_lt bs) ?_)⟩
+  rw [hl]
+  calc 256 ^ n ≤ 256 ^ 32 := Nat.pow_le_pow_right (by decide) h.2
+    _ = 2 ^ 256 := by decide
+
 /-- Every Source value at a primitive slot's type is the image of a model value. -/
 theorem prim_onto (D : Source.Layout) {p : PrimTy} {τ : Source.STy} (h : Prim p τ)
     (v : Source.Val D τ) : ∃ w : p.Denote, Relation.ValRel D τ p v w := by
@@ -207,6 +247,8 @@ theorem prim_onto (D : Source.Layout) {p : PrimTy} {τ : Source.STy} (h : Prim p
       | .int n hn => ⟨⟨n, int_inRange t signed n hn⟩, .int t signed n hn _ rfl⟩
   | address payable => exact match v with
       | .address a => ⟨⟨a.val, address_inRange a⟩, .address payable a _ rfl⟩
+  | bytes n h => exact match v with
+      | .fixedBytes bs hl => ⟨⟨Source.bytesNat bs, bytes_inRange h bs hl⟩, .bytes n h bs hl _ rfl⟩
 
 /-- A primitive slot's type has a default value, so its cell always reads. -/
 theorem Prim.default (D : Source.Layout) {p : PrimTy} {τ : Source.STy} (h : Prim p τ) :
@@ -544,6 +586,122 @@ theorem soundA : Sound Decode.tablesA where
       exact congrArg (fun τ => (some τ).getD (.tuple [])) cell
     · cases h'
 
+/-! ## Units from an element table are sound for cells -/
+
+/-- The declaration `stateVarsOf` gives the state variable the model reads
+under the name `x`, with the properties of its elementary type. -/
+theorem stateVarsOf_find {el : Name → PrimTy → Option Source.Elem}
+    (ok : ∀ x p e, el x p = some e → Prim p (e.ty .storage) ∧ (e.ty .storage).cell = e.ty .storage)
+    (x : Name) (p : PrimTy) : (vars : List (Name × Ty)) →
+    (parts : Source.Syn (.list (.part false))) →
+    Decode.stateVarsOf el vars = some parts → Semantics.lookupBy x vars = some (.prim p) →
+    ∃ e, Prim p (e.ty .storage) ∧ (e.ty .storage).cell = e.ty .storage ∧
+      (parts.collect (some Decode.contractName)).find?
+        (fun d => d.kind == .stateVar && d.scope == some Decode.contractName && d.name == x) =
+        some (Decode.varDecl x (.elem e))
+  | [], _, _, hx => by cases hx
+  | (y, .ref _) :: rest, _, h, _ => by simp [Decode.stateVarsOf] at h
+  | (y, .prim q) :: rest, parts, h, hx => by
+      simp only [Decode.stateVarsOf, Option.bind_eq_bind, Option.pure_def, Option.bind_eq_some_iff,
+        Option.some.injEq] at h
+      obtain ⟨e, he, parts', hp, rfl⟩ := h
+      simp only [Semantics.lookupBy] at hx
+      by_cases same : x = y
+      · subst same
+        simp only [if_true, Option.some.injEq, Ty.prim.injEq] at hx
+        subst hx
+        exact ⟨e, (ok _ _ _ he).1, (ok _ _ _ he).2, by simp [Source.Syn.collect, Decode.varDecl]⟩
+      · simp only [if_neg same] at hx
+        obtain ⟨e', prim, cell, found⟩ := stateVarsOf_find ok x p rest parts' hp hx
+        refine ⟨e', prim, cell, ?_⟩
+        have ne : (y == x) = false := by simpa using fun h => same h.symm
+        simp [Source.Syn.collect, ne, found]
+
+/-- `stateVarsOf` succeeds only on primitive state variables. -/
+theorem stateVarsOf_prim (el : Name → PrimTy → Option Source.Elem) : (vars : List (Name × Ty)) →
+    (parts : Source.Syn (.list (.part false))) →
+    Decode.stateVarsOf el vars = some parts → ∀ x U, (x, U) ∈ vars → ∃ p, U = .prim p
+  | [], _, _, _, _, m => nomatch m
+  | (y, .ref _) :: rest, _, h, _, _, _ => by simp [Decode.stateVarsOf] at h
+  | (y, .prim q) :: rest, parts, h, x, U, m => by
+      simp only [Decode.stateVarsOf, Option.bind_eq_bind, Option.pure_def, Option.bind_eq_some_iff,
+        Option.some.injEq] at h
+      obtain ⟨e, he, parts', hp, _⟩ := h
+      rcases List.mem_cons.mp m with same | m'
+      · cases same; exact ⟨q, rfl⟩
+      · exact stateVarsOf_prim el rest parts' hp x U m'
+
+/-- **A unit from an element table has primitive cells** when every
+elementary type the table gives is a primitive slot's type. -/
+theorem unitOf_cell {ok : Contract → Bool}
+    {el : Contract → Name → PrimTy → Option Source.Elem}
+    (good : ∀ C x p e, el C x p = some e →
+      Prim p (e.ty .storage) ∧ (e.ty .storage).cell = e.ty .storage)
+    {C : Contract} {u : Source.Syn .unit} (h : Decode.unitOf ok el C = some u) (x : Name) (U : Ty)
+    (mem : (x, U) ∈ C.vars) :
+    ∃ (p : PrimTy) (τ : Source.STy), U = .prim p ∧ Prim p τ ∧
+      u.env.cellTy ⟨⟨some Decode.contractName, x⟩, []⟩ = τ := by
+  unfold Decode.unitOf at h
+  split at h
+  · simp only [Option.map_eq_some_iff] at h
+    obtain ⟨parts, hparts, rfl⟩ := h
+    obtain ⟨p, rfl⟩ := stateVarsOf_prim _ _ _ hparts x U mem
+    obtain ⟨e, prim, cell, found⟩ := stateVarsOf_find (good C) x p C.vars parts hparts
+      (lookup_of_mem _ C.vars_nodup x _ mem)
+    have decl : (Source.Syn.unit (.cons (.contract false Decode.contractName .none .nil parts)
+        .nil)).env.declOf .stateVar ⟨some Decode.contractName, x⟩ =
+        some (Decode.varDecl x (.elem e)) := by
+      simp [Source.Env.declOf, Source.Syn.env, Source.Syn.decls, Source.Syn.collect, found]
+    refine ⟨p, e.ty .storage, rfl, prim, ?_⟩
+    simp only [Source.Env.cellTy, Source.Env.pathTy, List.foldl_nil, Source.Env.rootTy, decl,
+      Option.bind_some]
+    exact congrArg (fun τ => (some τ).getD (.tuple [])) cell
+  · cases h
+
+/-! ## The bytes-aware version is sound -/
+
+/-- `bytesN` is a primitive slot's type, at either location. -/
+theorem prim_of_bytesElem {n : Nat} {e : Source.Elem} (h : Decode.bytesElem n = some e) :
+    Prim .uint (e.ty .storage) ∧ (e.ty .storage).cell = e.ty .storage ∧
+      e.ty .memory = e.ty .storage := by
+  unfold Decode.bytesElem at h
+  split at h
+  · cases h; exact ⟨.bytes _ _, rfl, rfl⟩
+  · cases h
+
+/-- A local the bytes-aware tables type is a primitive slot. -/
+theorem localTyB_some {t : LocalTy} {τ : Source.STy} (h : Decode.localTyB t = some τ) :
+    ∃ p : PrimTy, t.toLTy = .val p ∧ Prim p τ := by
+  unfold Decode.localTyB at h
+  split at h
+  · split at h
+    · simp only [Option.map_eq_some_iff] at h
+      obtain ⟨e, he, rfl⟩ := h
+      obtain ⟨prim, _, same⟩ := prim_of_bytesElem he
+      exact ⟨.uint, rfl, same ▸ prim⟩
+    · cases h
+  · exact localTyA_some h
+
+/-- The elementary type the bytes-aware tables give a state variable. -/
+theorem elemB_prim {widths : List (Name × Nat)} {x : Name} {p : PrimTy} {e : Source.Elem}
+    (h : Decode.elemB widths x p = some e) :
+    Prim p (e.ty .storage) ∧ (e.ty .storage).cell = e.ty .storage := by
+  unfold Decode.elemB at h
+  split at h
+  · split at h
+    · rename_i ok
+      rw [ok.1]
+      exact ⟨(prim_of_bytesElem h).1, (prim_of_bytesElem h).2.1⟩
+    · cases h
+  · exact elemA_prim h
+
+/-- The bytes-aware tables are sound. -/
+theorem soundB : Sound Decode.tablesB where
+  localTy h := localTyB_some h
+  cell {C u} h x U mem :=
+    unitOf_cell (el := fun C => Decode.elemB C.widths) (fun _ _ _ _ he => elemB_prim he)
+      (show Decode.unitB C = some u from h) x U mem
+
 /-! ## The boundary of a decoder version -/
 
 /-- The boundary of a decoder version at a state relation: the landed
@@ -672,6 +830,9 @@ theorem contractV2_iff :
 
 /-- The address-aware version's boundary. -/
 def boundaryA : SemanticBoundary := boundaryAt Decode.tablesA rel
+
+/-- The bytes-aware version's boundary. -/
+def boundaryB : SemanticBoundary := boundaryAt Decode.tablesB rel
 
 end Version
 
