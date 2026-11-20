@@ -81,6 +81,20 @@ theorem compiler_endpoint_v2_correct : CompilerEndpointV2 :=
   compiler_endpoint_for_stages Passes.CompilerV2.compile Passes.WholeProgram.staticRefused
     static_stage
 
+/-- The endpoint's accepted branch at one result, whatever produced it: for
+every world bound the static check refuses and no world is accepted, or it
+passes and every accepted world agrees exactly with `Evm.run`. -/
+theorem compiler_endpoint_result {C : Contract} {Γ Δ : Ctx} {b : Nat} {F : Frag Γ}
+    {P : Solidity.Prog C Γ Δ} (r : Compilation b F P) (L frame : Nat) :
+    (Passes.WholeProgram.staticRefused r L frame = true ∧
+      ∀ (base : Nat → Fin W) (σ : State C Γ) (m : Machine), ¬ r.Input L frame base σ m) ∨
+    (Passes.WholeProgram.staticRefused r L frame = false ∧
+      ∀ (base : Nat → Fin W) (σ : State C Γ) (m : Machine),
+        r.Input L frame base σ m → r.AgreesExact L frame base σ m) := by
+  cases check : Passes.WholeProgram.staticRefused r L frame
+  · exact .inr ⟨rfl, fun base σ m h => r.correct_exact h⟩
+  · exact .inl ⟨rfl, fun base σ m => static_stage r L frame base σ m check⟩
+
 /-- No `Compilation` has an `Input` world whose typed run is exhausted:
 `AgreesExact` has no exhaustion case. So no `Compilation`-valued entry, v1 or
 v2, carries an exhausted source run to `Evm.run`. -/
@@ -100,3 +114,4 @@ end Solidity.Backend
 #print axioms Solidity.Backend.compiler_endpoint_v2_correct
 #print axioms Solidity.Backend.compiler_endpoint_for_stages
 #print axioms Solidity.Backend.not_input_of_exhausted
+#print axioms Solidity.Backend.compiler_endpoint_result
