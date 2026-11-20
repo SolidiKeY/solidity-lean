@@ -410,7 +410,7 @@ string functions, so these are evaluated, not kernel-checked. -/
 example : Decode.tablesW.decode { narrowRequest [] with
     input := { (narrowRequest []).input with
       before := ⟨([("a", .val .uint 256 [("#address", 20)])], 1), {}⟩ } } = none := rfl
-/-- The two versions' tables: the landed decoder's, and the width-aware ones. -/
+/-- The tables of the landed decoder and of the width-aware version. -/
 example : Decode.tables1 = ⟨Decode.typeName, Decode.localTy, Decode.unit⟩ := rfl
 example : Decode.tablesW = ⟨Decode.typeNameW, Decode.localTyW, Decode.unitW⟩ := rfl
 /-- The bridge: at the landed tables the generic decoder is the landed decoder
@@ -432,8 +432,8 @@ example {T : Decode.Tables} {r : Request} {s s' : SourceProgram} (h : SpellsT T 
 
 /-! ### The address-aware decoder version
 
-`Decode.tablesA` reads an erased `address` where the model marks one. It has no
-boundary yet: only the decoder and its spelling relation. -/
+`Decode.tablesA` reads an erased `address` where the model marks one. Its
+boundary is pinned further down. -/
 
 example : Decode.tablesA = ⟨Decode.typeNameA, Decode.localTyA, Decode.unitA⟩ := rfl
 /-- Over `address a; address b; uint n`: `a = b` types, and neither `a = n`
@@ -446,6 +446,28 @@ example : (Decode.tablesA.decode (addressRequest [.assign (.name "a") (.name "b"
     true := rfl
 example : Decode.tablesA.decode (addressRequest [.assign (.name "a") (.name "n")]) = none := rfl
 example : Decode.tablesA.decode (addressRequest [.assign (.name "n") (.name "a")]) = none := rfl
+/-- Equality of two addresses is spelled and typed; an address against a `uint`
+or a numeric literal is not; a marker on a `bool`, or a doubled marker (a
+captured address), is a gap. -/
+example : (Decode.tablesA.decode
+    (addressRequest [.require (.binop .eqB (.name "a") (.name "b"))])).isSome = true := rfl
+example : Decode.tablesA.decode
+    (addressRequest [.require (.binop .eqB (.name "a") (.name "n"))]) = none := rfl
+example : Decode.tablesA.decode
+    (addressRequest [.require (.binop .eqB (.name "a") (.num 0))]) = none := rfl
+example : Decode.tablesA.decode { addressRequest [] with
+    input := { (addressRequest []).input with
+      before := ⟨([("f", .val .bool 256 Decode.addressShape)], 1), {}⟩ } } = none := rfl
+example : Decode.tablesA.decode { addressRequest [] with
+    input := { (addressRequest []).input with
+      before := ⟨([("c", .val .uint 256 [("#address", 20), ("#address", 20)])], 1), {}⟩ } } =
+    none := rfl
+/-! A declaration by the name `address` decodes (evaluated, not kernel-checked:
+names are read by string functions). -/
+#guard (Decode.tablesA.decode
+  (addressRequest [.decl (.named "address") "m" (some (.name "a"))])).isSome
+#guard (Decode.tablesA.decode
+  (addressRequest [.decl (.named "address") "m" (some (.name "n"))])).isNone
 /-- The width-aware version has no type for a marked local. -/
 example : Decode.tablesW.decode (addressRequest [.assign (.name "a") (.name "b")]) = none := rfl
 /-- An address state variable (`owner#address ↦ 20`) is read; assigning it to
@@ -505,6 +527,16 @@ example (D : Source.Layout) (a : Solidity.Roadmap.Address) (x : PrimTy.uint.Deno
     (same : x.1 = (a.val : Int)) :
     Version.Relation.ValRel D (.address false) .uint (.address a) x :=
   .address false a x same
+/-- A model `uint` of `2^160` or more is related to no Source address. -/
+example (D : Source.Layout) (p : Bool) (v : Source.Val D (.address p)) (x : PrimTy.uint.Denote)
+    (big : (2 : Int) ^ 160 ≤ x.1) : ¬ Version.Relation.ValRel D (.address p) .uint v x :=
+  fun h => by
+    cases h with
+    | address _ a _ same =>
+      have bound : ((a.val : Nat) : Int) < (2 : Int) ^ 160 := by
+        have := a.isLt
+        exact_mod_cast this
+      omega
 /-- The address-aware tables are sound, so total initial matching holds for
 them, and version 2 of the contract at their boundary is five obligations. -/
 example : Version.Sound Decode.tablesA := Version.soundA

@@ -14,13 +14,19 @@ width-aware `Decode.tablesW` and the address-aware `Decode.tablesA`:
   Source address with that number. Globals as in
   `loopRel`: primitive state variables of the running account, `msg.value`,
   the timestamp, a writable checking frame.
-* `Version.Sound`: what a version's tables must satisfy (`soundW`, `soundA`).
+* `Version.Sound`: what total initial matching needs of a version's tables
+  (`soundW`, `soundA`). It is not a correctness criterion for the tables: it
+  does not say they agree with the types the model declared.
 * `Version.initialMatchingAt`: total initial matching for every sound version,
   proved: every admitted
   Source execution of a successful decoded request has a related model state
   under the positional map. It is Source-to-model only. The converse fails at
-  a narrow slot: a model `uint` holding 300 where the decoder says `uint8` has
-  no related Source value, and nothing here claims it has.
+  a narrow slot (a model `uint` holding 300 where the decoder says `uint8`)
+  and at an address slot (a model `uint` of `2^160` or more): such a model
+  value has no related Source value, and nothing here claims it has. So the
+  simulation at a version speaks only of entry states inside those ranges,
+  and proving it includes proving that model results at such slots stay
+  inside them.
 * `Version.boundaryAt`, `residualAt_iff`, `contractV2At_iff`: a version's
   boundary with association `SpellsT`, and what the contract and its version 2
   ask at it; `boundary` and `boundaryA` are the two instances.
@@ -30,15 +36,19 @@ only the decoder does, and the model context of a request has erased it. The
 policies, the simulation and the allocation trace are the landed ones, with
 the defects listed in `Total.Boundary`. No goal is stated here.
 
-Limits. Every version still has gaps (the address-aware one reads marked
-locals and state variables and the name `address`, but no address
-expression): `bytesN`, enums,
-function types, references, calls and callee bodies, return slots,
-`unchecked`/`checked` scopes, `msg.sender` and `address(this)`, and contracts
-with functions, a constructor, initializers or transient roots. So the first
-conjunct of `residual_iff` (the decoder is defined on every successful
-request) is not provable for it, and the contract at this boundary cannot be
-the goal yet. A local the elaborator declares without a type marker is decoded
+Limits. Every version still has gaps: `bytesN`, enums, function types,
+references, calls and callee bodies, return slots, `unchecked`/`checked`
+scopes, and contracts with functions, a constructor, initializers or transient
+roots. The address-aware version reads marked locals and state variables and
+the name `address`; between such operands the shared expressions (copy, `==`,
+comparison) are spelled and Source types them, but `msg.sender`,
+`address(this)`, `address(e)`/`payable(e)`, an address against a numeric
+literal, and payable-only operations are gaps (`address payable` is read as
+`address`), and a captured address, whose shape carries the marker twice, is a
+gap too. `a.balance` over a marked operand is typed by Source, while the state
+relation relates no balances. So the first conjunct of `residualAt_iff` (the
+decoder is defined on every successful request) is not provable for any
+version yet, and no version's contract can be the goal yet. A local the elaborator declares without a type marker is decoded
 as a plain integer even if it was declared `address` or `bytesN`
 (`Decode.localTyW`): a possibly wrong Source type, not a gap.
 
@@ -59,7 +69,8 @@ open Simulation (StateRelation Positional InitialMatching lookup_of_mem wordDeno
 namespace Relation
 
 /-- A model primitive value and the Source value it stands for: the same
-Boolean, or the same number at an integer type of the primitive's sign. -/
+Boolean, the same number at an integer type of the primitive's sign, or (for
+a `uint`) the address with that number. -/
 inductive ValRel (D : Source.Layout) :
     (τ : Source.STy) → (p : PrimTy) → Source.Val D τ → p.Denote → Prop where
   | bool (b : Bool) : ValRel D .bool .bool (.bool b) b

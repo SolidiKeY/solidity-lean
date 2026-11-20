@@ -272,7 +272,7 @@ is. Wider decoders are versions of one generic decoder, `Tables.decode`, which
 is written to differ from it only in its three type tables: how a
 declaration's type name, a model local and a model contract are read:
 `decode_tables1` proves that at the landed tables it is the landed decoder.
-Expression spelling is shared. `tablesW` reads
+Expression spelling is shared. `tablesA` (below) also reads marked addresses. `tablesW` reads
 integers at their declared widths (`bool` only at 256). -/
 
 /-- The type tables of a decoder version. -/
@@ -515,9 +515,11 @@ def tablesW : Tables := ⟨typeNameW, localTyW, unitW⟩
 `tablesA`: as `tablesW`, and an erased `address` where the model marks one. A
 local marked `#address` (20 bytes, at 256 bits) and a state variable with the
 row `x#address` are Source `address`; so is a declaration named `address`.
-`address payable` and contract types are read as `address`: the model does not
-record the difference. Expressions are still the shared ones, so `msg.sender`,
-`address(this)` and address casts stay gaps. -/
+`address payable` is read as `address`: the model does not record the
+difference. Expressions are still the shared ones, so `msg.sender`,
+`address(this)` and address casts stay gaps. A captured address, whose shape
+carries the marker twice, is a gap; and the caveat at `localTyW` still
+applies: a local declared without a marker is read as a plain integer. -/
 
 /-- The marker rows of an erased `address`. -/
 def addressShape : List (String × Nat) := [("#address", 20)]
