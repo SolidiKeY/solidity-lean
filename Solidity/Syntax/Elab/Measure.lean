@@ -1228,7 +1228,8 @@ private theorem obs_throw_bind {α β : Type} {err : String} {f : α → ElabM �
   cases h
 
 variable (C : Contract) [FreshNames]
-private theorem captureExpr_shape (e : RawExpr) :
+/-- Capturing an expression retains it or returns a name. -/
+theorem captureExpr_shape (e : RawExpr) :
     Obs (captureExpr C e) (fun out => out.2 = e ∨ ∃ x, out.2 = .name x) := by
   unfold captureExpr
   extract_lets tail early
@@ -1260,7 +1261,8 @@ private theorem captureExpr_shape (e : RawExpr) :
     | split)
 
 
-private theorem captureBefore_shape (e : RawExpr) (later : List RawExpr) :
+/-- Effect-aware capture retains the expression or returns a name. -/
+theorem captureBefore_shape (e : RawExpr) (later : List RawExpr) :
     Obs (captureBefore C e later) (fun out => out.2 = e ∨ ∃ x, out.2 = .name x) := by
   unfold captureBefore
   apply obs_any
@@ -1284,7 +1286,8 @@ private theorem capture_good (Good : RawExpr → Prop) (hn : ∀ x, Good (.name 
   · rw [h]; exact he
   · rw [h]; exact hn x
 
-private theorem ordinary_good (Good : RawExpr → Prop) (hn : ∀ x, Good (.name x))
+/-- Ordinary argument preparation preserves a predicate closed under captures. -/
+theorem ordinary_good (Good : RawExpr → Prop) (hn : ∀ x, Good (.name x))
     (H : RawExpr → ElabM (SProg C × RawExpr)) (args : List RawExpr)
     (hh : ∀ a, a ∈ args → Obs (H a) (fun out => Good out.2)) :
     Obs (hoistArgsWith C H args) (fun out => ∀ e, e ∈ out.2 → Good e) := by

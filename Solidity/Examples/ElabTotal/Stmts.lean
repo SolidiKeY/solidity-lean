@@ -258,3 +258,51 @@ end Solidity.Examples.ElabTotal.Stmts
 /-- info: 'Solidity.ElabCallHeight.prefix_cast_lt' depends on axioms: [propext, Quot.sound] -/
 #guard_msgs in
 #print axioms Solidity.ElabCallHeight.prefix_cast_lt
+
+/-- info: 'Solidity.ElabCallArgsGood.captureExpr_shape' depends on axioms: [propext, Quot.sound] -/
+#guard_msgs in
+#print axioms Solidity.ElabCallArgsGood.captureExpr_shape
+
+/-- info: 'Solidity.ElabCallArgsGood.captureBefore_shape' depends on axioms: [propext, Quot.sound] -/
+#guard_msgs in
+#print axioms Solidity.ElabCallArgsGood.captureBefore_shape
+
+/-- info: 'Solidity.ElabCallArgsGood.ordinary_good' depends on axioms: [propext, Quot.sound] -/
+#guard_msgs in
+#print axioms Solidity.ElabCallArgsGood.ordinary_good
+
+/-- info: 'Solidity.ElabCallHeight.erc_output_height' depends on axioms: [propext, Quot.sound] -/
+#guard_msgs in
+#print axioms Solidity.ElabCallHeight.erc_output_height
+
+/-- info: 'Solidity.ElabCallHeight.pair_output_heights' depends on axioms: [propext, Quot.sound] -/
+#guard_msgs in
+#print axioms Solidity.ElabCallHeight.pair_output_heights
+
+/-- info: 'Solidity.ElabCallHeight.binop_output_height' depends on axioms: [propext, Quot.sound] -/
+#guard_msgs in
+#print axioms Solidity.ElabCallHeight.binop_output_height
+
+/-- info: 'Solidity.ElabCallHeight.captureExpr_height_bound' depends on axioms: [propext, Quot.sound] -/
+#guard_msgs in
+#print axioms Solidity.ElabCallHeight.captureExpr_height_bound
+
+/-- info: 'Solidity.ElabCallHeight.captureBefore_height_bound' depends on axioms: [propext, Quot.sound] -/
+#guard_msgs in
+#print axioms Solidity.ElabCallHeight.captureBefore_height_bound
+
+/-- info: 'Solidity.ElabCallHeight.pair_output_heights_of_hoist' depends on axioms: [propext, Quot.sound] -/
+#guard_msgs in
+#print axioms Solidity.ElabCallHeight.pair_output_heights_of_hoist
+
+/-- info: 'Solidity.ElabCallHeight.binop_output_height_of_hoist' depends on axioms: [propext, Quot.sound] -/
+#guard_msgs in
+#print axioms Solidity.ElabCallHeight.binop_output_height_of_hoist
+
+/-- info: 'Solidity.ElabCallHeight.args_output_heights' depends on axioms: [propext, Quot.sound] -/
+#guard_msgs in
+#print axioms Solidity.ElabCallHeight.args_output_heights
+
+/-- info: 'Solidity.ElabCallHeight.args_output_argument_lt' depends on axioms: [propext, Quot.sound] -/
+#guard_msgs in
+#print axioms Solidity.ElabCallHeight.args_output_argument_lt
