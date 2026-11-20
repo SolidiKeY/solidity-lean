@@ -106,10 +106,8 @@ private theorem final_some : (consume.run second.st).toOption.isSome = true := b
 noncomputable def final : Solidity.Out C second.st.H After := (consume.run second.st).toOption.get final_some
 
 private theorem source_get {Γ Δ : Ctx} {σ : State C Γ} {P : Prog C Γ Δ}
-    {o : Solidity.Out C σ.H Δ} (hx : some o = (P.run σ).toOption) : P.run σ = .ok o := by
-  cases hs : P.run σ with
-  | ok value => rw [hs] at hx; exact congrArg Except.ok (Option.some.inj hx).symm
-  | error e => rw [hs] at hx; cases hx
+    {o : Solidity.Out C σ.H Δ} (hx : some o = (P.run σ).toOption) : P.run σ = .ok o :=
+  except_ok_of_toOption hx
 
 theorem first_source : allocate.run initial = .ok first := source_get (Option.some_get first_some)
 theorem second_source : call.run first.st = .ok second := source_get (Option.some_get second_some)
