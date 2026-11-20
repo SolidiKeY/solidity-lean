@@ -510,6 +510,64 @@ def unitW (C : Contract) : Option (Syn .unit) :=
 /-- The width-aware decoder's tables. -/
 def tablesW : Tables := ⟨typeNameW, localTyW, unitW⟩
 
+/-! ### Addresses
+
+`tablesA`: as `tablesW`, and an erased `address` where the model marks one. A
+local marked `#address` (20 bytes, at 256 bits) and a state variable with the
+row `x#address` are Source `address`; so is a declaration named `address`.
+`address payable` and contract types are read as `address`: the model does not
+record the difference. Expressions are still the shared ones, so `msg.sender`,
+`address(this)` and address casts stay gaps. -/
+
+/-- The marker rows of an erased `address`. -/
+def addressShape : List (String × Nat) := [("#address", 20)]
+
+/-- Declaration types by name: `address`, or as `typeNameW`. -/
+def typeNameA : RawTy → Option (Syn .typeName)
+  | .named s => if s = "address" then some (.elem .address) else typeNameW (.named s)
+  | T => typeNameW T
+
+/-- A model local: an `address` where the shape is exactly the address marker
+on a full-width `uint`, or as `localTyW`. -/
+def localTyA : LocalTy → Option STy
+  | .val .uint 256 [("#address", 20)] => some (.address false)
+  | t => localTyW t
+
+/-- Whether the width table marks the state variable `x` as an address. -/
+def isAddress (widths : List (Name × Nat)) (x : Name) : Bool :=
+  Semantics.lookupBy (x ++ "#address") widths == some 20
+
+/-- The state variables, an address where the table marks one. A marked
+variable must be a `uint` with no width row of its own. -/
+def stateVarsA (widths : List (Name × Nat)) :
+    List (Name × Ty) → Option (Syn (.list (.part false)))
+  | [] => some .nil
+  | (x, .prim p) :: rest => do
+      let T ← if isAddress widths x then
+          (if p = .uint ∧ Semantics.lookupBy x widths = none then some Source.Elem.address
+           else none)
+        else primElem p (stateBits widths x)
+      pure (.cons (.stateVar (.elem T) none none none false x .none) (← stateVarsA widths rest))
+  | _ => none
+
+/-- A width key the address version reads: a plain key, or the address marker
+of a state variable. -/
+def keyA (vars : List (Name × Ty)) (w : Name × Nat) : Bool :=
+  plainKey w.1 || vars.any fun v => w.1 == v.1 ++ "#address" && w.2 == 20
+
+/-- The canonical unit with addresses: as `unitW`, but address marker rows of
+state variables are read instead of being gaps. -/
+def unitA (C : Contract) : Option (Syn .unit) :=
+  if C.transientRoots.isEmpty && C.funs.isEmpty && C.enums.isEmpty && C.ctor.isNone &&
+      C.inits.isEmpty && (C.widths.all fun w => keyA C.vars w) &&
+      (C.vars.all fun v => plainKey v.1) then
+    (stateVarsA C.widths C.vars).map fun parts =>
+      .unit (.cons (.contract false contractName .none .nil parts) .nil)
+  else none
+
+/-- The address-aware decoder's tables. -/
+def tablesA : Tables := ⟨typeNameA, localTyA, unitA⟩
+
 end Decode
 
 end Solidity.Correctness.Lowering.Total

@@ -430,6 +430,47 @@ example {T : Decode.Tables} (complete : InferCompleteT T) {r : Request} {s : Sou
 example {T : Decode.Tables} {r : Request} {s s' : SourceProgram} (h : SpellsT T r s)
     (h' : SpellsT T r s') : s = s' := h.unique h'
 
+/-! ### The address-aware decoder version
+
+`Decode.tablesA` reads an erased `address` where the model marks one. It has no
+boundary yet: only the decoder and its spelling relation. -/
+
+example : Decode.tablesA = ⟨Decode.typeNameA, Decode.localTyA, Decode.unitA⟩ := rfl
+/-- Over `address a; address b; uint n`: `a = b` types, and neither `a = n`
+nor `n = a` does, so the marker is read as a Source `address`. -/
+def addressRequest (raw : List RawStmt) : Request :=
+  ⟨IntrinsicProbe.C, ⟨sampleNames, none, raw, RawProbe.scope,
+    ⟨([("a", .val .uint 256 Decode.addressShape), ("b", .val .uint 256 Decode.addressShape),
+       ("n", .val .uint)], 1), {}⟩⟩, none⟩
+example : (Decode.tablesA.decode (addressRequest [.assign (.name "a") (.name "b")])).isSome =
+    true := rfl
+example : Decode.tablesA.decode (addressRequest [.assign (.name "a") (.name "n")]) = none := rfl
+example : Decode.tablesA.decode (addressRequest [.assign (.name "n") (.name "a")]) = none := rfl
+/-- The width-aware version has no type for a marked local. -/
+example : Decode.tablesW.decode (addressRequest [.assign (.name "a") (.name "b")]) = none := rfl
+/-- An address state variable (`owner#address ↦ 20`) is read; assigning it to
+a `uint` does not type; a marker on a variable with its own width row, on an
+`int`, or with another size is a gap. -/
+def ownerContract : Contract :=
+  { vars := [("owner", .prim .uint), ("total", .prim .uint)], widths := [("owner#address", 20)] }
+example : (Decode.tablesA.decode { addressRequest [.assign (.name "owner") (.name "a")] with
+    contract := ownerContract }).isSome = true := rfl
+example : Decode.tablesA.decode { addressRequest [.assign (.name "total") (.name "owner")] with
+    contract := ownerContract } = none := rfl
+example : Decode.tablesA.decode { addressRequest [] with
+    contract := { vars := [("o", .prim .uint)], widths := [("o", 8), ("o#address", 20)] } } =
+    none := rfl
+example : Decode.tablesA.decode { addressRequest [] with
+    contract := { vars := [("o", .prim .int)], widths := [("o#address", 20)] } } = none := rfl
+example : Decode.tablesA.decode { addressRequest [] with
+    contract := { vars := [("o", .prim .uint)], widths := [("o#address", 32)] } } = none := rfl
+/-- On requests with no address the version agrees with the width-aware one. -/
+example : Decode.tablesA.decode (narrowRequest [.assign (.name "k") (.name "n")]) =
+    Decode.tablesW.decode (narrowRequest [.assign (.name "k") (.name "n")]) := rfl
+/-- Its decoder is sound for its spelling relation, as every version's is. -/
+example {r : Request} {s : SourceProgram} (h : Decode.tablesA.decode r = some s) :
+    SpellsT Decode.tablesA r s := decode_spellsT h
+
 /-! ### The width-aware version's boundary (`Total.Versions`) -/
 
 /-- Its value relation: a model `uint` holding 200 is related to the Source
