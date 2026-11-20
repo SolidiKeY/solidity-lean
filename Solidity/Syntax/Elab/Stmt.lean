@@ -420,7 +420,6 @@ def abiMemBytesWith (stmt : RawStmt → ElabM (SProg C)) (a : RawExpr) : ElabM (
   let x := toString (← freshCapture "mv")
   pure (← elabStmtsPWith C stmt [.declMemory (.named "bytes") x (some a)], x)
 
-
 /-- `abi.decode` of a `bytes` or a `string` at the head word `h` of `d`, of
 `n` head words: the offset `o` that word holds, the length `L` at `o`, then
 the `L` bytes after it copied into a fresh memory `bytes`, each read checked
@@ -535,7 +534,6 @@ def hoistCallArgsWith (hoist : RawExpr → ElabM (SProg C × RawExpr))
     declareShape y shape
   pure (P, prepared)
 
-
 /-- A loop's condition, invariant or variant, of type `p` (its narrow
 rewrites done, `elabStmtP`), read in `Γ`: nothing may be captured before it,
 since it is evaluated where the loop is, again.  So an effect, a call to a
@@ -577,7 +575,6 @@ def elabBranchWith (stmt : RawStmt → ElabM (SProg C)) (ss : List RawStmt) : El
 must be entered in). -/
 def elabScopeWith (branch : List RawStmt → ElabM (SProg C)) (Γ : NCtx) (ss : List RawStmt) : ElabM (Blk C Γ.ctx) := do
   ElabM.lift (SProg.chain Γ.names Γ.ctx (← branch ss))
-
 
 /-- **A call through an external function value** `h(a)`, `h` of the
 external function type `ty`: `h` is `address * 2^32 + selector` (`fnPure`),
@@ -815,7 +812,6 @@ def elabCtorWith (rc : PanicProducerRec C) (args : List RawExpr) : ElabM (SProg 
     throw "constructor(…) in a function's body or a block: only a program's own statements deploy"
   pure (← rc.elabCallRet "constructor" args none (targets := true) (ctor := true)).1
 
-
 /-- **A tuple assignment** `(t₀, , t₂) = e;`, written out as solkey's
 `ParserUtils.tupleAssignment` writes it.  From a call of a function of several
 returns: the call (`CallRet.rets`), then `tᵢ = rᵢ;` for each target, left to
@@ -1031,7 +1027,6 @@ private theorem sliceResume_congr
   · cases h; exact hd _ _
   · cases h
 
-
 attribute [local irreducible] elabStmtPWith
 private theorem stmtP_array_independent (rc : ElabRec C)
     (f : RawStmt → ElabM (SProg C)) (T : RawTy) (x : String) (e : RawExpr) :
@@ -1091,7 +1086,6 @@ theorem elabStmtPWith_self_congr (rc : ElabRec C)
       rcases pair with ⟨view, resume⟩
       have hr := sliceResume_congr C f g ht hd s view resume hsel
       simp only [hr]
-
 
 /-- Two arm applications close the arm's direct slice-rewrite recursion. -/
 def elabStmtPClosedWith (rc : ElabRec C) : RawStmt → ElabM (SProg C) :=
@@ -1192,7 +1186,6 @@ def elabRecWithCallbacks (hoist : RawExpr → ElabM (SProg C × RawExpr))
     elabTuple := fun ts rhs direct => elabTupleWith C base pr ts rhs direct }
   { body with elabStmt1 := elabStmt1ClosedWith C body }
 
-
 mutual
 
 /-- **Captures before a statement**: an `++`/`−−` inside an expression, and a
@@ -1219,13 +1212,11 @@ narrow check is captured where solc evaluates it, under a test of its own: `a
 partial def hoist (s0 : RawExpr) : ElabM (SProg C × RawExpr) :=
   hoistWith C (elabRecWithProducers C (elabRecWithCallbacks C hoist elabStmtP @elabCallRet) (panicProducerWithCallbacks C elabStmtP @elabCallRet)) s0
 
-
 /-- A statement, as a block: its narrow rewrites (`narrowPure`), its captures
 (`hoistStmt`), then the statement,
 whose compound target may need a capture of its own. -/
 partial def elabStmtP (s : RawStmt) : ElabM (SProg C) :=
   elabStmtPClosedWith C (elabRecWithProducers C (elabRecWithCallbacks C hoist elabStmtP @elabCallRet) (panicProducerWithCallbacks C elabStmtP @elabCallRet)) s
-
 
 /-- `elabCall`, and the fresh return variable of a callee that returns a
 memory reference, with its type and the caller's context: the call's frame
@@ -1267,14 +1258,12 @@ own. -/
 def hoistStmt (s0 : RawStmt) : ElabM (SProg C × RawStmt) :=
   hoistStmtWith C (elabRecWithProducers C (elabRecCore C ()) (panicProducerRec C ())) s0
 
-
 /-- `abi.encode(…)` (`std`) or `abi.encodePacked(…)`/`bytes.concat(…)`/
 `string.concat(…)` (`strs`: byte strings only) of the hoisted arguments: a
 fresh memory `bytes` of solc's layout (`AbiKind`). -/
 def abiEncode (std strs : Bool) (args : List RawExpr) (marks : List (Option AbiKind))
     (sel : Option RawExpr := none) : ElabM (SProg C × RawExpr) :=
   abiEncodeWith C (elabRecWithProducers C (elabRecCore C ()) (panicProducerRec C ())) std strs args marks sel
-
 
 /-- Elaborate a tuple using the public recursion callbacks. -/
 def elabTuple (ts : List (Option RawExpr)) (rhs : RawExpr) (direct : Bool := false) :
@@ -1318,7 +1307,6 @@ def elabValueCall (Γ : NCtx) (ix : Idx Γ.ctx (.val .bool)) (okName : RawExpr)
 /-- Public call helper with the knot callbacks. -/
 def elabCtor (args : List RawExpr) : ElabM (SProg C) :=
   elabCtorWith C (panicProducerRec C ()) args
-
 
 /-- Read a loop expression after checking that hoisting emits no statements. -/
 def loopExpr (Γ : NCtx) (p : PrimTy) (e : RawExpr) (what : String) : ElabM (Val C Γ.ctx p) :=
