@@ -23,6 +23,9 @@ invariants of its actual helper fields. `ElabScope.callRank` handles scope
 changes on body entry; local expression and statement transformations still
 need further measure components.
 
+`ElabLoopMeasure` supplies a loop-lowering component: a successful singleton
+lowering removes the source-loop root without increasing nested source loops.
+
 The guard is needed.  With the trivial guard (`ElabPreds.top`) the shape
 fails for every well-founded measure along one path
 (`Solidity/Examples/ElabTotal/Measure.lean`, `rel_cycle_forT_blk`):
@@ -422,7 +425,350 @@ theorem stmtsArm_stable {C : Contract} (μ : ElabMeasure α) (J : ElabPreds C)
 
 end ElabMeasure
 
-namespace UncheckWeightProof
+namespace ElabLoopMeasure
+
+/-! Source `while`, `for`, and `do` loops remaining before loop lowering.
+Canonical `loop` nodes contribute no root count. All child lists are counted,
+including a `for` loop's initializer and update, which lowering carries through. -/
+mutual
+  def stmtCount : RawStmt → Nat
+    | .block b | .unchecked b | .checked _ b | .loop _ _ b => listCount b
+    | .ite _ t e => listCount t + listCount e
+    | .tryCall _ _ _ _ ok err _ pnc other =>
+        listCount ok + listCount err + listCount pnc + listCount other
+    | .whileLoop _ _ b | .doWhile _ b _ => listCount b + 1
+    | .forLoop _ i _ u b => listCount i + listCount u + listCount b + 1
+    | _ => 0
+  def listCount : List RawStmt → Nat
+    | [] => 0
+    | s :: ss => stmtCount s + listCount ss
+end
+
+private theorem count_nil : listCount [] = 0 := rfl
+private theorem count_cons (s : RawStmt) (ss : List RawStmt) :
+    listCount (s :: ss) = stmtCount s + listCount ss := rfl
+
+theorem listCount_append (xs ys : List RawStmt) :
+    listCount (xs ++ ys) = listCount xs + listCount ys := by
+  induction xs with
+  | nil => simp only [List.nil_append, listCount, Nat.zero_add]
+  | cons s ss ih => simp only [List.cons_append, listCount, ih, Nat.add_assoc]
+
+def controlCount : StmtControl → Nat
+  | .leaf => 0
+  | .block b | .unchecked b | .checked b | .loop b => listCount b
+  | .ite t e => listCount t + listCount e
+  | .tryCall ok err pnc other => listCount ok + listCount err + listCount pnc + listCount other
+  | .whileLoop b | .doWhile b => listCount b + 1
+  | .forLoop i u b => listCount i + listCount u + listCount b + 1
+
+theorem controlCount_eq (s : RawStmt) : controlCount s.control = stmtCount s := by
+  cases s <;> rfl
+
+theorem mapExprsM_count {m : Type → Type} [Monad m] [LawfulMonad m]
+    (f : RawExpr → m RawExpr) (s : RawStmt) :
+    stmtCount <$> s.mapExprsM f = (fun _ => stmtCount s) <$> s.mapExprsM f := by
+  have h := congrArg (fun x => controlCount <$> x) (RawStmt.mapExprsM_control f s)
+  simpa only [Functor.map_map, Function.comp_def, controlCount_eq] using h
+
+private def Obs {α : Type} (x : LowerM α) (Q : α → Prop) : Prop :=
+  ∀ fl sc st m a fl' st' m', x fl sc st m = .ok (((a, fl'), st'), m') → Q a
+private theorem obs_pure {α : Type} {a : α} {Q : α → Prop} (h : Q a) :
+    Obs (pure a) Q := by
+  intro fl sc st m b fl' st' m' he
+  cases he
+  exact h
+private theorem obs_bind {α β : Type} {x : LowerM α} {f : α → LowerM β}
+    {P : α → Prop} {Q : β → Prop} (hx : Obs x P)
+    (hf : ∀ a, P a → Obs (f a) Q) : Obs (x >>= f) Q := by
+  intro fl sc st m b fl' st' m' h
+  change (do let (((a, fl₁), s), n) ← x fl sc st m; f a fl₁ sc s n) =
+    .ok (((b, fl'), st'), m') at h
+  cases he : x fl sc st m with
+  | error err => simp only [he, bind, Except.bind] at h; cases h
+  | ok v =>
+    rcases v with ⟨⟨⟨a, fl₁⟩, s⟩, n⟩
+    simp only [he, bind, Except.bind] at h
+    exact hf a (hx fl sc st m a fl₁ s n he) fl₁ sc s n b fl' st' m' h
+private theorem obs_any {α β : Type} {x : LowerM α} {f : α → LowerM β}
+    {Q : β → Prop} (hf : ∀ a, Obs (f a) Q) : Obs (x >>= f) Q :=
+  obs_bind (P := fun _ => True) (fun _ _ _ _ _ _ _ _ _ => trivial) (fun a _ => hf a)
+private theorem obs_throw {α : Type} {err : String} {Q : α → Prop} :
+    Obs (throw err : LowerM α) Q := by
+  intro fl sc st m a fl' st' m' h
+  cases h
+private theorem obs_mono {α : Type} {x : LowerM α} {P Q : α → Prop}
+    (hx : Obs x P) (h : ∀ a, P a → Q a) : Obs x Q :=
+  fun fl sc st m a fl' st' m' he => h a (hx fl sc st m a fl' st' m' he)
+local macro "count_tail " h:ident : tactic =>
+  `(tactic| repeat' first
+    | with_reducible apply $h
+    | (with_reducible refine obs_mono (by apply $h) ?_
+       intro result bound
+       simp only [listCount_append, count_cons, count_nil, stmtCount, RawStmt.declBool, RawStmt.setBool] at bound ⊢
+       omega)
+    | (with_reducible apply obs_pure
+       simp only [listCount_append, count_cons, count_nil, stmtCount, RawStmt.declBool, RawStmt.setBool]
+       omega)
+    | (with_reducible apply obs_any; intro x)
+    | split
+    | extract_lets)
+private theorem finish_count_bound [FreshNames] (spec : RawLoopSpec) (c : RawExpr)
+    (init upd : List RawStmt) (isDo : Bool) (bodyCall : LowerM (List RawStmt × List Abrupt))
+    (n : Nat) (hb : Obs bodyCall (fun out => listCount out.1 ≤ n)) :
+    Obs (LowerKernel.loopFinish spec c init upd isDo bodyCall)
+      (fun out => stmtCount out.1 ≤ listCount init + listCount upd + n) := by
+  unfold LowerKernel.loopFinish
+  with_reducible apply obs_any
+  intro outer
+  with_reducible apply obs_any
+  intro unused
+  with_reducible apply obs_bind hb
+  intro out hbody
+  split
+  simp only at hbody
+  -- Keep the generated continuations shared: unfolding all branches at once
+  -- duplicates the later proof obligations and exceeds the checking budget.
+  extract_lets exits before iter cond heads returns ab' j2 j1 j0
+  -- After the body and update are added, only zero-count flag statements and
+  -- canonical control nodes are introduced around the two statement lists.
+  have h2 : ∀ a b c d y, Obs (j2 a b c d y)
+      (fun r => stmtCount r.1 ≤ listCount a + listCount d) := by
+    intro a b c d y
+    simp -zeta only [j2]
+    extract_lets j3
+    have h3 : ∀ a b c y, Obs (j3 a b c y)
+        (fun r => stmtCount r.1 ≤ listCount a + listCount d) := by
+      intro a b c y
+      simp -zeta only [j3]
+      with_reducible apply obs_any
+      intro fl
+      extract_lets retX j5 j4
+      have h5 : ∀ a b y, Obs (j5 a b y)
+          (fun r => stmtCount r.1 ≤ listCount a + listCount d) := by
+        intro a b y
+        simp -zeta only [j5]
+        extract_lets spec' w j7 j6
+        have hw : stmtCount w = listCount d := rfl
+        have h7 : ∀ a y, Obs (j7 a y)
+            (fun r => stmtCount r.1 ≤ listCount a + listCount d) := by
+          intro a y
+          simp -zeta only [j7]
+          with_reducible apply obs_any
+          intro unused
+          extract_lets j9 j8
+          have h9 : ∀ y, Obs (j9 y)
+              (fun r => stmtCount r.1 ≤ listCount a + listCount d) := by
+            intro y
+            with_reducible apply obs_pure
+            simp only [stmtCount, listCount_append, count_cons, count_nil, hw]
+            omega
+          clear_value j9
+          have h8 : ∀ y, Obs (j8 y)
+              (fun r => stmtCount r.1 ≤ listCount a + listCount d) := by
+            intro y
+            simp -zeta only [j8]
+            count_tail h9
+          clear_value j8
+          count_tail h8
+        clear_value j7
+        have h6 : ∀ a y, Obs (j6 a y)
+            (fun r => stmtCount r.1 ≤ listCount a + listCount d) := by
+          intro a y
+          simp -zeta only [j6]
+          count_tail h7
+        clear_value j6
+        count_tail h6
+      clear_value j5
+      have h4 : ∀ a b y, Obs (j4 a b y)
+          (fun r => stmtCount r.1 ≤ listCount a + listCount d) := by
+        intro a b y
+        simp -zeta only [j4]
+        count_tail h5
+      clear_value j4
+      count_tail h4
+    clear_value j3
+    count_tail h3
+  clear_value j2
+  -- This continuation adds the lowered body and either the update directly
+  -- or an `if` containing it; both forms have the same source-loop count.
+  have h1 : ∀ a b c d y, Obs (j1 a b c d y)
+      (fun r => stmtCount r.1 ≤ listCount a + listCount d + listCount upd + n) := by
+    intro a b c d y
+    simp -zeta only [j1]
+    count_tail h2
+  clear_value j1
+  -- The continue flag, and then the do-loop flag at entry, add zero count.
+  have h0 : ∀ a b c d y, Obs (j0 a b c d y)
+      (fun r => stmtCount r.1 ≤ listCount a + listCount d + listCount upd + n) := by
+    intro a b c d y
+    simp -zeta only [j0]
+    count_tail h1
+  clear_value j0
+  simp only [before, iter]
+  count_tail h0
+private theorem obs_throw_bind {α β : Type} {err : String} {f : α → LowerM β}
+    {Q : β → Prop} : Obs ((throw err : LowerM α) >>= f) Q := by
+  intro fl sc st m a fl' st' m' h
+  cases h
+private theorem obs_outside {α : Type} {x : LowerM α} {Q : α → Prop}
+    (h : Obs x Q) : Obs (LowerM.outside x) Q := by
+  unfold LowerM.outside
+  with_reducible apply obs_any
+  intro fl
+  with_reducible apply obs_any
+  intro unused
+  with_reducible apply obs_bind h
+  intro a ha
+  with_reducible apply obs_any
+  intro unused
+  exact obs_pure ha
+private theorem obs_lift {α : Type} {x : Except String α} {Q : α → Prop}
+    (hx : ∀ a, x = .ok a → Q a) : Obs (ElabM.lift x) Q := by
+  intro fl sc st m a fl' st' m' h
+  cases he : x with
+  | error e => simp only [he] at h; cases h
+  | ok v =>
+    simp only [he] at h
+    cases h
+    exact hx _ he
+private theorem return_count (rs : List String) (e : RawExpr) :
+    Obs (ElabM.lift (lowerReturn rs e)) (fun out => listCount out = 0) := by
+  apply obs_lift
+  intro out h
+  have hm (xs : List (String × RawExpr)) :
+      listCount (xs.map fun (n, e) => RawStmt.assign (.name n) e) = 0 := by
+    induction xs with
+    | nil => rfl
+    | cons a as ih => simp only [List.map_cons, count_cons, stmtCount, ih, Nat.add_zero]
+  unfold lowerReturn at h
+  repeat' first
+    | split at h
+    | (cases h <;> simp only [count_cons, count_nil, stmtCount, Nat.zero_add, hm])
+
+def rootCount : RawStmt → Nat
+  | .whileLoop .. | .doWhile .. | .forLoop .. => 1
+  | _ => 0
+private theorem parts_count (s : RawStmt) :
+    listCount (LowerKernel.loopParts s).2.2.1 +
+      listCount (LowerKernel.loopParts s).2.2.2.1 +
+      listCount (LowerKernel.loopBody s) + rootCount s ≤ stmtCount s := by
+  cases s <;> simp only [LowerKernel.loopParts, LowerKernel.loopBody, rootCount, stmtCount, count_nil] <;> omega
+private theorem rewrite_count (s : RawStmt) (h : LowerKernel.loopGuard s = true) :
+    stmtCount (LowerKernel.loopRewrite s) = stmtCount s ∧
+      rootCount (LowerKernel.loopRewrite s) = rootCount s := by
+  cases s <;> simp only [LowerKernel.loopGuard, LowerKernel.loopParts, Bool.false_and, Bool.false_eq_true] at h
+  all_goals try contradiction
+  simp only [LowerKernel.loopRewrite, LowerKernel.loopParts, stmtCount, count_cons, count_nil, rootCount,
+    Nat.zero_add, Nat.add_zero, and_self]
+private theorem bound_key [FreshNames] (n : Nat) :
+    (∀ rs ss, LowerKernel.listMeasure ss = n →
+      Obs (lowerList rs ss) (fun out => listCount out.1 ≤ listCount ss)) ∧
+    (∀ rs s, LowerKernel.stmtMeasure s = n →
+      Obs (lowerStmt rs s) (fun out => stmtCount out.1 + rootCount s ≤ stmtCount s)) ∧
+    (∀ rs s, LowerKernel.loopMeasure s = n →
+      Obs (lowerLoop rs s) (fun out => stmtCount out.1 + rootCount s ≤ stmtCount s)) := by
+  induction n using Nat.strongRecOn with
+  | ind n ih =>
+    refine ⟨?_, ?_, ?_⟩
+    · intro rs ss hn
+      subst n
+      rw [LowerKernel.fixed.1]
+      cases ss with
+      | nil => exact obs_pure (Nat.le_refl _)
+      | cons s ss =>
+        have hs := (ih _ (LowerKernel.list_head_lt s ss)).2.1 rs s rfl
+        have ht := (ih _ (LowerKernel.list_tail_lt s ss)).1 rs ss rfl
+        simp only [LowerKernel.listStep]
+        repeat' (first
+          | (with_reducible apply obs_pure
+             simp only [stmtCount, count_cons, count_nil] at *
+             omega)
+          | (with_reducible apply obs_bind hs; intro out h)
+          | (with_reducible apply obs_bind ht; intro out h)
+          | (with_reducible apply obs_any; intro x)
+          | split)
+    · intro rs s hn
+      subst n
+      have hloop := (ih _ (LowerKernel.loop_phase_lt s)).2.2 rs s rfl
+      have recL (b : List RawStmt) (h : LowerKernel.listMeasure b < LowerKernel.stmtMeasure s) :
+          Obs (lowerList rs b) (fun out => listCount out.1 ≤ listCount b) :=
+        (ih _ h).1 rs b rfl
+      rw [LowerKernel.fixed.2.1]
+      cases s <;> simp only [LowerKernel.stmtStep, LowerKernel.stmtOutside, LowerKernel.stmtInside,
+        bind_assoc, pure_bind, bind_pure]
+      all_goals repeat' (first
+        | contradiction
+        | with_reducible exact hloop
+        | (with_reducible apply obs_pure
+           simp only [stmtCount, rootCount, count_cons, count_nil, listCount_append, RawStmt.setBool] at *
+           omega)
+        | with_reducible exact obs_throw
+        | with_reducible exact obs_throw_bind
+        | (with_reducible apply obs_bind (recL _ (by
+             simp only [LowerKernel.listMeasure, LowerKernel.stmtMeasure, LowerKernel.stmtWeight]
+             omega))
+           intro out h)
+        | (with_reducible apply obs_bind (return_count _ _); intro out h)
+        | with_reducible apply obs_outside
+        | (with_reducible apply obs_any; intro x)
+        | split)
+    · intro rs s hn
+      subst n
+      have hb := (ih _ (LowerKernel.loop_body_lt s)).1 rs (LowerKernel.loopBody s) rfl
+      have hp (h : LowerKernel.loopGuard s = true) :=
+        (ih _ (LowerKernel.loop_rewrite_lt s h)).2.2 rs (LowerKernel.loopRewrite s) rfl
+      have hparts := parts_count s
+      rw [LowerKernel.fixed.2.2, ← LowerKernel.factoredStep_eq]
+      unfold LowerKernel.factoredStep
+      unfold LowerKernel.loopBody at hb hparts
+      generalize he : LowerKernel.loopParts s = parts at *
+      rcases parts with ⟨a, c, i, u, b, isDo⟩
+      simp only at hb hparts ⊢
+      split
+      · rename_i hg
+        have hr := rewrite_count s hg
+        simpa only [hr.1, hr.2, bind_pure] using hp hg
+      · simp only [pure_bind]
+        with_reducible apply obs_mono (finish_count_bound a c i u isDo _ _ hb)
+        intro out h
+        omega
+
+private theorem single_count [FreshNames] (rs : Option (List String)) (s : RawStmt) :
+    Obs (lowerList rs [s]) (fun out => listCount out.1 + rootCount s ≤ stmtCount s) := by
+  have hs := (bound_key (LowerKernel.stmtMeasure s)).2.1 rs s rfl
+  rw [LowerKernel.fixed.1]
+  simp only [LowerKernel.listStep, lowerList.eq_def, pure_bind]
+  repeat' (first
+    | (with_reducible apply obs_pure
+       simp only [count_cons, count_nil, stmtCount] at *
+       omega)
+    | (with_reducible apply obs_bind hs; intro out h)
+    | (with_reducible apply obs_any; intro x)
+    | split)
+
+/-- The singleton boundary used when the elaborator lowers one source loop. -/
+theorem lowerLoops_single_count [FreshNames] (rs : Option (List String)) (s : RawStmt)
+    (sc : ElabScope) (st st' : ECtx × Nat) (m m' : CallMemo) (out : List RawStmt)
+    (h : (((lowerLoops rs [s]).run sc).run st).run m = .ok ((out, st'), m')) :
+    listCount out + rootCount s ≤ stmtCount s := by
+  cases he : lowerList rs [s] {} sc st m with
+  | error err =>
+    simp only [lowerLoops, StateT.run', Functor.map, StateT.map, ReaderT.run,
+      StateT.run, bind, ReaderT.bind, StateT.bind, he,
+      Except.bind] at h
+    cases h
+  | ok r =>
+    rcases r with ⟨⟨⟨⟨program, abrupt⟩, fl⟩, st₁⟩, m₁⟩
+    simp only [lowerLoops, StateT.run', Functor.map, StateT.map, ReaderT.run,
+      StateT.run, bind, ReaderT.bind, StateT.bind, pure, ReaderT.pure, StateT.pure, he,
+      Except.bind] at h
+    cases h
+    exact single_count rs s {} sc st m (program, abrupt) fl st₁ m₁ he
+
+end ElabLoopMeasure
+
+namespace UncheckMeasureProof
 private def Obs {α : Type} (x : Except String α) (Q : α → Prop) : Prop :=
   ∀ a, x = .ok a → Q a
 private theorem obs_pure {α : Type} {a : α} {Q : α → Prop} (h : Q a) :
@@ -452,16 +798,25 @@ private theorem obs_throw_bind {α β : Type} {err : String}
   intro a h
   cases h
 private theorem obs_map (f : RawExpr → Except String RawExpr) (s : RawStmt) :
-    Obs (s.mapExprsM f) (fun out => CalleeKernel.stmtWeight out = CalleeKernel.stmtWeight s) := by
+    Obs (s.mapExprsM f) (fun out =>
+      CalleeKernel.stmtWeight out = CalleeKernel.stmtWeight s ∧
+      ElabLoopMeasure.stmtCount out = ElabLoopMeasure.stmtCount s) := by
   intro out h
-  have he := CalleeKernel.mapExprsM_weight f s
-  rw [h] at he
-  exact Except.ok.inj he
+  constructor
+  · have he := CalleeKernel.mapExprsM_weight f s
+    rw [h] at he
+    exact Except.ok.inj he
+  · have he := ElabLoopMeasure.mapExprsM_count f s
+    rw [h] at he
+    exact Except.ok.inj he
 private theorem weight_cons (s : RawStmt) (ss : List RawStmt) :
     CalleeKernel.listWeight (s :: ss) = CalleeKernel.stmtWeight s + CalleeKernel.listWeight ss := rfl
 
-private theorem weight_key (n : Nat) : ∀ ss, CalleeKernel.listWeight ss = n →
-    Obs (uncheckStmts ss) (fun out => CalleeKernel.listWeight out = n) := by
+/-- One traversal preserves both measures used by unchecked elaboration. -/
+private theorem preserves_key (n : Nat) : ∀ ss, CalleeKernel.listWeight ss = n →
+    Obs (uncheckStmts ss) (fun out =>
+      CalleeKernel.listWeight out = CalleeKernel.listWeight ss ∧
+      ElabLoopMeasure.listCount out = ElabLoopMeasure.listCount ss) := by
   induction n using Nat.strongRecOn with
   | ind n ih =>
     intro ss hn
@@ -469,12 +824,13 @@ private theorem weight_key (n : Nat) : ∀ ss, CalleeKernel.listWeight ss = n �
     cases ss with
     | nil =>
       rw [uncheckStmts.eq_def]
-      exact obs_pure rfl
+      exact obs_pure ⟨rfl, rfl⟩
     | cons s ss =>
       have recCall (b : List RawStmt)
           (hb : CalleeKernel.listWeight b < CalleeKernel.listWeight (s :: ss)) :
           Obs (uncheckStmts b)
-            (fun out => CalleeKernel.listWeight out = CalleeKernel.listWeight b) :=
+            (fun out => CalleeKernel.listWeight out = CalleeKernel.listWeight b ∧
+              ElabLoopMeasure.listCount out = ElabLoopMeasure.listCount b) :=
         ih _ hb b rfl
       rw [uncheckStmts.eq_def]
       cases s
@@ -482,8 +838,9 @@ private theorem weight_key (n : Nat) : ∀ ss, CalleeKernel.listWeight ss = n �
       all_goals simp only [pure_bind]
       all_goals repeat (first
         | (with_reducible apply obs_pure
-           simp only [weight_cons, CalleeKernel.stmtWeight] at *
-           omega)
+           constructor <;>
+             simp only [weight_cons, CalleeKernel.stmtWeight,
+               ElabLoopMeasure.listCount, ElabLoopMeasure.stmtCount] at * <;> omega)
         | with_reducible exact obs_throw
         | with_reducible exact obs_throw_bind
         | (with_reducible apply obs_bind (recCall _ (by
@@ -493,12 +850,37 @@ private theorem weight_key (n : Nat) : ∀ ss, CalleeKernel.listWeight ss = n �
         | (with_reducible apply obs_bind (obs_map _ _); intro out h)
         | (with_reducible apply obs_any; intro x)
         | split)
-end UncheckWeightProof
+end UncheckMeasureProof
 
 /-- Wrapping arithmetic preserves the control weight of every successful output. -/
 theorem uncheckStmts_weight (ss out : List RawStmt)
     (h : uncheckStmts ss = .ok out) :
     CalleeKernel.listWeight out = CalleeKernel.listWeight ss :=
-  UncheckWeightProof.weight_key (CalleeKernel.listWeight ss) ss rfl out h
+  (UncheckMeasureProof.preserves_key (CalleeKernel.listWeight ss) ss rfl out h).1
+
+/-- Wrapping arithmetic preserves the source-loop count of every successful output. -/
+theorem uncheckStmts_loopCount (ss out : List RawStmt)
+    (h : uncheckStmts ss = .ok out) :
+    ElabLoopMeasure.listCount out = ElabLoopMeasure.listCount ss :=
+  (UncheckMeasureProof.preserves_key (CalleeKernel.listWeight ss) ss rfl out h).2
+
+namespace ElabLoopMeasure
+
+/-- Local statement descent before expression-generated statements are considered. -/
+def stmtRank (s : RawStmt) : Nat × Nat := (stmtCount s, CalleeKernel.stmtWeight s)
+def listRank (ss : List RawStmt) : Nat × Nat := (listCount ss, CalleeKernel.listWeight ss)
+
+theorem lowerLoops_rank [FreshNames] (rs : Option (List String)) (s : RawStmt)
+    (hs : rootCount s = 1) (sc : ElabScope) (st st' : ECtx × Nat)
+    (m m' : CallMemo) (out : List RawStmt)
+    (h : (((lowerLoops rs [s]).run sc).run st).run m = .ok ((out, st'), m')) :
+    WellFoundedRelation.rel (listRank out) (stmtRank s) := by
+  apply Prod.Lex.left
+  change listCount out < stmtCount s
+  have hc := lowerLoops_single_count rs s sc st st' m m' out h
+  rw [hs] at hc
+  omega
+
+end ElabLoopMeasure
 
 end Solidity
