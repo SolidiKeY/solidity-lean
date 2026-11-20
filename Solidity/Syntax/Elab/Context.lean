@@ -596,11 +596,11 @@ theorem RawExpr.mapMFuel_measure {m : Type → Type} [Monad m] [LawfulMonad m] [
         RawExpr.mapMFuel (fun e => (·.1) <$> g e) n' e := by
   intro n
   induction n with
-  | zero => intro n' e h; omega
+  | zero => intro n' e h; exfalso; omega
   | succ n ih =>
     intro n' e h h'
     obtain _ | n' := n'
-    · omega
+    · exfalso; omega
     rw [RawExpr.mapMFuel_succ, RawExpr.mapMFuel_succ]
     simp only [bind_map_left]
     refine bind_congr fun ⟨e', he⟩ => ?_
