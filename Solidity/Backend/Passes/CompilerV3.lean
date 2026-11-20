@@ -25,7 +25,8 @@ open Backend.InternalFlow.RuntimeFrame
 variable {C : Contract}
 
 /-- A statement that keeps its context, selected as a scalar recursive call
-and bridged, when the fixed parameters fit `b` and the context. -/
+and bridged, when the fixed parameters `5 16 9 8` fit `b` and the context;
+otherwise refused. -/
 def scalarStatement (b : Nat) {Γ : Ctx} (F : Frag Γ) (s : Stmt C Γ Γ) :
     Option (Calls.Program b F (.cons s .nil)) :=
   if shape : CompilerScalarBridge.Shape b 5 16 9 8 Γ then

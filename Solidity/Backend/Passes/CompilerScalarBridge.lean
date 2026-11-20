@@ -30,7 +30,7 @@ lies above the locals and the workspace, inside the arena bound, and the
 arena bound is a machine address. -/
 abbrev Shape (b c arena pointer bottom : Nat) (Γ : Ctx) : Prop :=
   bottom < pointer ∧ b + Γ.length ≤ pointer ∧ b + (c + 3 - b) ≤ pointer ∧
-    pointer < arena ∧ b ≤ arena ∧ arena < W
+    pointer < arena ∧ arena < W
 
 /-- The pointer cell holds the scratch cursor `pointer + 1`. -/
 def prepared (pointer : Nat) (m : Machine) : Machine :=
@@ -77,7 +77,7 @@ theorem input_entry (selected : Selected b c arena pointer bottom F s)
     (repr : StateRepr L b frame F σ base m) (room : arena ≤ frame)
     (capacity : AllocationInput b frame (cost selected σ) σ base m) :
     InterfaceV1.Entry selected.plan L b frame F σ base (prepared pointer m) (pointer + 1) := by
-  obtain ⟨below, locals, work, inside, low, small⟩ := shape
+  obtain ⟨-, locals, work, inside, small⟩ := shape
   have facts := capacity_facts selected capacity
   refine ⟨reserved_write repr pointer locals (by omega) _,
     locals, locals, work, Nat.le_refl pointer,
@@ -105,7 +105,10 @@ def selectedProgram (selected : Selected b c arena pointer bottom F s)
   zeroCost := by intro impossible; cases impossible
   sound := by
     intro L frame σ base m repr room capacity
-    have wide : arena ≤ frame := by have low := shape.2.2.2.2.1; omega
+    have wide : arena ≤ frame := by
+      have locals := shape.2.1
+      have inside := shape.2.2.2.1
+      omega
     obtain ⟨zero, fits, outcome⟩ := capacity_facts selected capacity
     have entry := input_entry selected shape repr wide capacity
     rw [single_outcome]

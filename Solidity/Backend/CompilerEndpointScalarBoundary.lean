@@ -16,7 +16,9 @@ selected image does not depend on the quotation depth, so at depth 0 the typed
 run is exhausted while the machine returns (`Controls.exhausted_boundary`).
 `AgreesExact` has no exhaustion case, hence `no_compilation_world`: any
 `Compilation` of that program, from any entry, has no `Input` at the fixture
-state (no such `Compilation` is exhibited). The v3 entry `CompilerV3.compile` accepts the fixture automatically at every
+state.
+
+The v3 entry `CompilerV3.compile` accepts the fixture automatically at every
 depth (`accepted`): the selector recognises it and `CompilerScalarBridge`
 supplies the `Calls.Program`; no certificate is built here. For depth above 3
 `endpoint_agrees` takes the agreement branch of `compiler_endpoint_v3_correct`
@@ -24,7 +26,8 @@ at the fixture world `L = 1`, `frame = 16`, and `endpoint_success` reads the
 reached success off it. At depth 0 the accepted result has no `Input` at the
 fixture state (`exhausted_no_input`): acceptance does not carry the exhausted
 run to the machine. v1 and v2 still refuse the fixture at every depth
-(`Controls.endpoint_refused`, `v2_refused`).
+(`Controls.endpoint_refused`, `v2_refused`). Depths 1 to 3 are accepted too;
+no world is exhibited for them here.
 -/
 namespace Solidity.Backend.InternalFlow.RuntimeFrame.ScalarSourceCompiler.Endpoint
 open Evm Evm.Memory ScalarRecursiveSource
