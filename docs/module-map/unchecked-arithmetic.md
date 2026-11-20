@@ -7,6 +7,8 @@
 | `Correctness/Lowering/Total/Relation.lean` | Finite lowering derivations and caller-preserving fresh-name equivalence. |
 | `Correctness/Lowering/Total/Coverage.lean` | `LowersTo` is functional, and its exact raw output on each loop-family input template. |
 | `Correctness/Lowering/Total/Coverage/Checks.lean` | The e1 sample inputs as template instances; the while/break probe's actual output is the only one. |
+| `Correctness/Lowering/Sim/Match/CasesV2.lean` | Shared frame-aware case conclusions at a fixed record, reusing `SiteSim₂` and `Stmt.V2.StmtArm`; fieldwise bridges from applicable v1 case hypotheses with kernel laws and v1 `RecSim`. Documents the unresolved capture/composition dependency; no recursive closure or final simulation. |
+| `Examples/Lowering/Sim/CasesV2.lean` | Checked uses of the shared bridge, block-site projection and existing run bridge. |
 | `Correctness/Sim/Examples.lean` | Checked boundary examples for the simulation framework. |
 | `Correctness/Sim/Lang.lean` | Instantiate the simulation framework with the existing Lang adapter. |
 | `Correctness/Sim/Observation.lean` | Observation diagrams over the roadmap's unchanged prefix order. |
