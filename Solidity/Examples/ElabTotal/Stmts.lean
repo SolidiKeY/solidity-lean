@@ -1,4 +1,5 @@
 import Solidity.Correctness.Elab.Total
+import Solidity.Syntax.Elab.CallOutput
 
 /-!
 # Checks: the block's two equations
@@ -306,3 +307,67 @@ end Solidity.Examples.ElabTotal.Stmts
 /-- info: 'Solidity.ElabCallHeight.args_output_argument_lt' depends on axioms: [propext, Quot.sound] -/
 #guard_msgs in
 #print axioms Solidity.ElabCallHeight.args_output_argument_lt
+
+/-- info: 'Solidity.ElabCallHeight.narrowCapture_height_bound' depends on axioms: [propext, Quot.sound] -/
+#guard_msgs in
+#print axioms Solidity.ElabCallHeight.narrowCapture_height_bound
+
+/-- info: 'Solidity.ElabCallHeight.forceArg_height_bound' depends on axioms: [propext, Quot.sound] -/
+#guard_msgs in
+#print axioms Solidity.ElabCallHeight.forceArg_height_bound
+
+/-- info: 'Solidity.ElabCallHeight.unop_output_height' depends on axioms: [propext, Quot.sound] -/
+#guard_msgs in
+#print axioms Solidity.ElabCallHeight.unop_output_height
+
+/-- info: 'Solidity.ElabCallHeight.field_output_height' depends on axioms: [propext, Quot.sound] -/
+#guard_msgs in
+#print axioms Solidity.ElabCallHeight.field_output_height
+
+/-- info: 'Solidity.ElabCallHeight.index_output_height' depends on axioms: [propext, Quot.sound] -/
+#guard_msgs in
+#print axioms Solidity.ElabCallHeight.index_output_height
+
+/-- info: 'Solidity.ElabCallHeight.incDec_output_height' depends on axioms: [propext, Quot.sound] -/
+#guard_msgs in
+#print axioms Solidity.ElabCallHeight.incDec_output_height
+
+/-- info: 'Solidity.ElabCallHeight.newArr_output_height' depends on axioms: [propext, Quot.sound] -/
+#guard_msgs in
+#print axioms Solidity.ElabCallHeight.newArr_output_height
+
+/-- info: 'Solidity.ElabCallHeight.ternary_output_height' depends on axioms: [propext, Quot.sound] -/
+#guard_msgs in
+#print axioms Solidity.ElabCallHeight.ternary_output_height
+
+/-- info: 'Solidity.ElabCallHeight.binary_output_height' depends on axioms: [propext, Quot.sound] -/
+#guard_msgs in
+#print axioms Solidity.ElabCallHeight.binary_output_height
+
+/-- info: 'Solidity.ElabCallHeight.modular_output_height' depends on axioms: [propext, Quot.sound] -/
+#guard_msgs in
+#print axioms Solidity.ElabCallHeight.modular_output_height
+
+/-- info: 'Solidity.ElabCallHeight.assignment_output_height' depends on axioms: [propext, Quot.sound] -/
+#guard_msgs in
+#print axioms Solidity.ElabCallHeight.assignment_output_height
+
+/-- info: 'Solidity.ElabCallHeight.compound_assignment_output' depends on axioms: [propext, Quot.sound] -/
+#guard_msgs in
+#print axioms Solidity.ElabCallHeight.compound_assignment_output
+
+/-- info: 'Solidity.ElabCallHeight.named_output_height' depends on axioms: [propext, Quot.sound] -/
+#guard_msgs in
+#print axioms Solidity.ElabCallHeight.named_output_height
+
+/-- info: 'Solidity.ElabCallHeight.addressCapture_height_bound' depends on axioms: [propext, Quot.sound] -/
+#guard_msgs in
+#print axioms Solidity.ElabCallHeight.addressCapture_height_bound
+
+/-- info: 'Solidity.ElabCallHeight.enumCapture_output_height' depends on axioms: [propext, Quot.sound] -/
+#guard_msgs in
+#print axioms Solidity.ElabCallHeight.enumCapture_output_height
+
+/-- info: 'Solidity.ElabCallHeight.castCapture_output_height' depends on axioms: [propext, Quot.sound] -/
+#guard_msgs in
+#print axioms Solidity.ElabCallHeight.castCapture_output_height
