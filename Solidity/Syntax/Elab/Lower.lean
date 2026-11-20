@@ -769,7 +769,7 @@ theorem synthetic_lt (a : RawLoopSpec) (c : RawExpr) (b : List RawStmt)
     loopMeasure (.whileLoop a c b) := by
   have hf : (RawExpr.bool true).hasIncDec = false := by
     simp [RawExpr.hasIncDec, RawExpr.any]
-  simp [loopMeasure, stmtWeight, listWeight, h, hf]
+  simp [-Nat.mul_lt_mul_left, loopMeasure, stmtWeight, listWeight, h, hf]
   omega
 
 def loopFinish [FreshNames] (spec : RawLoopSpec) (c : RawExpr)
@@ -889,7 +889,7 @@ def lowerStmt (rs : Option (List String)) (s : RawStmt) :
 termination_by LowerKernel.stmtMeasure s
 decreasing_by
   all_goals simp_wf
-  all_goals simp_all [LowerKernel.listMeasure, LowerKernel.stmtMeasure, LowerKernel.loopMeasure, LowerKernel.stmtWeight]
+  all_goals simp_all [-Nat.mul_lt_mul_left, LowerKernel.listMeasure, LowerKernel.stmtMeasure, LowerKernel.loopMeasure, LowerKernel.stmtWeight]
   all_goals omega
 
 /-- A loop, lowered to `RawStmt.loop`: `{ before; while (!brk && !ret && c)
@@ -915,9 +915,9 @@ def lowerLoop (rs : Option (List String)) (s : RawStmt) :
 termination_by LowerKernel.loopMeasure s
 decreasing_by
   all_goals simp_wf
-  all_goals cases s <;> simp_all [LowerKernel.listMeasure, LowerKernel.loopMeasure, LowerKernel.stmtWeight, LowerKernel.listWeight]
-  all_goals try simp_all +zetaDelta [RawExpr.hasIncDec, RawExpr.any]
-  all_goals first | omega | (split <;> (try simp_all [RawExpr.hasIncDec, RawExpr.any]) <;> omega)
+  all_goals cases s <;> simp_all [-Nat.mul_lt_mul_left, LowerKernel.listMeasure, LowerKernel.loopMeasure, LowerKernel.stmtWeight, LowerKernel.listWeight]
+  all_goals try simp_all +zetaDelta [-Nat.mul_lt_mul_left, RawExpr.hasIncDec, RawExpr.any]
+  all_goals first | omega | (split <;> (try simp_all [-Nat.mul_lt_mul_left]) <;> omega)
 
 end
 
@@ -1565,11 +1565,47 @@ def abiMemberTy (s f : String) : RawTy :=
 /-- A fresh `uint` local's name. -/
 def abiFresh : ElabM String := do pure (toString (← freshCapture "se"))
 
+private noncomputable def abiGenTupleWeight (ms : List (AbiTy × RawExpr)) : Nat :=
+  (ms.map (fun p => sizeOf p.1)).sum
+
+omit [FreshNames] in
+private theorem abiGenTupleWeight_mem (ms : List (AbiTy × RawExpr)) (p : AbiTy × RawExpr)
+    (h : p ∈ ms) : sizeOf p.1 ≤ abiGenTupleWeight ms := by
+  induction ms with
+  | nil => cases h
+  | cons q ms ih =>
+    rcases List.mem_cons.mp h with h | h
+    · subst p; simp [abiGenTupleWeight]
+    · have := ih h
+      simp only [abiGenTupleWeight, List.map_cons, List.sum_cons] at *
+      omega
+
+omit [FreshNames] in
+private theorem abiGenTupleWeight_fields (ms : List (String × AbiTy)) (v : RawExpr) :
+    abiGenTupleWeight (ms.map fun p => (p.2, RawExpr.field v p.1)) ≤ sizeOf ms := by
+  induction ms with
+  | nil => simp [abiGenTupleWeight]
+  | cons p ms ih =>
+    rcases p with ⟨f, t⟩
+    simp only [List.map_cons, abiGenTupleWeight, List.sum_cons] at *
+    simp_wf
+    simp only [List.map_map] at *
+    omega
+
+omit [FreshNames] in
+private theorem abiGenField_lt (ms : List (String × AbiTy)) (p : String × AbiTy)
+    (h : p ∈ ms) : sizeOf p.2 < sizeOf ms := by
+  have hh := List.sizeOf_lt_of_mem h
+  rcases p with ⟨f, t⟩
+  simp at hh
+  change sizeOf t < sizeOf ms
+  omega
+
 mutual
 
 /-- The size in bytes of `v`'s encoding at `t`: the statements computing it,
 and it. -/
-partial def abiSizeGen (t : AbiTy) (v : RawExpr) : ElabM (List RawStmt × RawExpr) := do
+def abiSizeGen (t : AbiTy) (v : RawExpr) : ElabM (List RawStmt × RawExpr) := do
   if !t.dynamic then return ([], .num t.headSize)
   match t with
   | .bytes => pure ([], (abiPad (.field v "length")).addN 32)
@@ -1582,9 +1618,16 @@ partial def abiSizeGen (t : AbiTy) (v : RawExpr) : ElabM (List RawStmt × RawExp
   | .fixed e n => abiSeqSizeGen e (.num n) (.index v)
   | .tuple _ ms => abiTupleSizeGen (ms.map fun (f, mt) => (mt, .field v f))
   | _ => pure ([], .num 32)
+termination_by (sizeOf t, 0)
+decreasing_by
+  all_goals simp_wf
+  all_goals first
+    | omega
+    | (have := abiGenTupleWeight_fields ‹List (String × AbiTy)› ‹RawExpr›; omega)
+
 
 /-- Of `L` dynamic elements: their offsets and their encodings. -/
-partial def abiSeqSizeGen (e : AbiTy) (L : RawExpr) (elem : RawExpr → RawExpr) :
+def abiSeqSizeGen (e : AbiTy) (L : RawExpr) (elem : RawExpr → RawExpr) :
     ElabM (List RawStmt × RawExpr) := do
   let acc ← abiFresh
   let i ← abiFresh
@@ -1594,17 +1637,31 @@ partial def abiSeqSizeGen (e : AbiTy) (L : RawExpr) (elem : RawExpr → RawExpr)
     .whileLoop {} (.binop .lt (.name i) L)
       (ss ++ [.assign (.name acc) (.binop .add (.name acc) n),
         .assign (.name i) (.binop .add (.name i) (.num 1))])], .name acc)
+termination_by (sizeOf e, 1)
+decreasing_by
+  all_goals simp_wf
+  all_goals omega
+
 
 /-- Of a tuple: its head and its dynamic components' tails. -/
-partial def abiTupleSizeGen (ms : List (AbiTy × RawExpr)) : ElabM (List RawStmt × RawExpr) := do
+def abiTupleSizeGen (ms : List (AbiTy × RawExpr)) : ElabM (List RawStmt × RawExpr) := do
   let mut ss : List RawStmt := []
   let mut tot : RawExpr := .num (ms.map (·.1.headSize)).sum
-  for (mt, mv) in ms do
+  for pair in ms do
+    let mt := pair.1
+    let mv := pair.2
     if mt.dynamic then
       let (s1, n) ← abiSizeGen mt mv
       ss := ss ++ s1
       tot := .binop .add tot n
   pure (ss, tot)
+termination_by (abiGenTupleWeight ms, 1)
+decreasing_by
+  all_goals simp_wf
+  all_goals first
+    | omega
+    | (have := abiGenTupleWeight_mem _ _ (by assumption); omega)
+
 
 end
 
@@ -1612,7 +1669,7 @@ mutual
 
 /-- The encoding of `v` at `t`, written into `r` from the position `p` (a
 local). -/
-partial def abiWriteGen (r : String) (t : AbiTy) (v : RawExpr) (p : String) :
+def abiWriteGen (r : String) (t : AbiTy) (v : RawExpr) (p : String) :
     ElabM (List RawStmt) := do
   match t with
   | .val k =>
@@ -1635,10 +1692,17 @@ partial def abiWriteGen (r : String) (t : AbiTy) (v : RawExpr) (p : String) :
       (← abiSeqWriteGen r e (.name L) (.index v) q))
   | .fixed e n => abiSeqWriteGen r e (.num n) (.index v) p
   | .tuple _ ms => abiTupleWriteGen r (ms.map fun (f, mt) => (mt, .field v f)) p
+termination_by (sizeOf t, 0)
+decreasing_by
+  all_goals simp_wf
+  all_goals first
+    | omega
+    | (have := abiGenTupleWeight_fields ‹List (String × AbiTy)› ‹RawExpr›; omega)
+
 
 /-- `L` elements as a tuple from `q`: each in place if static, else an
 offset from `q` and its encoding in the tail. -/
-partial def abiSeqWriteGen (r : String) (e : AbiTy) (L : RawExpr) (elem : RawExpr → RawExpr)
+def abiSeqWriteGen (r : String) (e : AbiTy) (L : RawExpr) (elem : RawExpr → RawExpr)
     (q : String) : ElabM (List RawStmt) := do
   let i ← abiFresh
   let pos ← abiFresh
@@ -1660,16 +1724,23 @@ partial def abiSeqWriteGen (r : String) (e : AbiTy) (L : RawExpr) (elem : RawExp
         .decl (.named "uint") off (some (.binop .sub (.name c) (.name q)))] ++
         abiBytes r (.name pos) (.name off) 32 ++ body ++ ss ++
         [.assign (.name c) (.binop .add (.name c) n), next])]
+termination_by (sizeOf e, 1)
+decreasing_by
+  all_goals simp_wf
+  all_goals omega
+
 
 /-- A tuple's components from `p`: the head in order, each dynamic one's
 offset from `p` there and its encoding at the tail's end. -/
-partial def abiTupleWriteGen (r : String) (ms : List (AbiTy × RawExpr)) (p : String) :
+def abiTupleWriteGen (r : String) (ms : List (AbiTy × RawExpr)) (p : String) :
     ElabM (List RawStmt) := do
   let c ← abiFresh
   let mut ss : List RawStmt :=
     [.decl (.named "uint") c (some ((RawExpr.name p).addN (ms.map (·.1.headSize)).sum))]
   let mut hp := 0
-  for (mt, mv) in ms do
+  for pair in ms do
+    let mt := pair.1
+    let mv := pair.2
     let hpos ← abiFresh
     ss := ss ++ [.decl (.named "uint") hpos (some ((RawExpr.name p).addN hp))]
     if mt.dynamic then
@@ -1682,6 +1753,13 @@ partial def abiTupleWriteGen (r : String) (ms : List (AbiTy × RawExpr)) (p : St
       ss := ss ++ (← abiWriteGen r mt mv hpos)
     hp := hp + mt.headSize
   pure ss
+termination_by (abiGenTupleWeight ms, 1)
+decreasing_by
+  all_goals simp_wf
+  all_goals first
+    | omega
+    | (have := abiGenTupleWeight_mem _ _ (by assumption); omega)
+
 
 end
 
@@ -1758,7 +1836,7 @@ mutual
 in `d`: its statements, ending in `put` of it.  `below` lists the enum
 positions of a `solcEnumBelow` component by key (`abiEnumBelow?`), `key`
 this value's. -/
-partial def abiReadGen (d : ByteSrc) (t : AbiTy) (T : RawTy) (p : RawExpr)
+def abiReadGen (d : ByteSrc) (t : AbiTy) (T : RawTy) (p : RawExpr)
     (put : RawExpr → RawStmt) (below : List (String × Nat) := []) (key : String := "") :
     ElabM (List RawStmt) := do
   match t with
@@ -1814,7 +1892,9 @@ partial def abiReadGen (d : ByteSrc) (t : AbiTy) (T : RawTy) (p : RawExpr)
     let mut ss : List RawStmt := abiBounds d p (.num ((ms.map (·.2.headSize)).sum)) ++
       [.declMemory T x none]
     let mut hp := 0
-    for (f, mt) in ms do
+    for pair in ms do
+      let f := pair.1
+      let mt := pair.2
       let hpos : RawExpr := p.addN hp
       let putF (v : RawExpr) : RawStmt := .assign (.field (.name x) f) v
       if mt.dynamic then
@@ -1827,10 +1907,17 @@ partial def abiReadGen (d : ByteSrc) (t : AbiTy) (T : RawTy) (p : RawExpr)
         ss := ss ++ (← abiReadGen d mt (abiMemberTy s f) hpos putF below (key ++ "." ++ f))
       hp := hp + mt.headSize
     pure (ss ++ [put (.name x)])
+termination_by (sizeOf t, 0)
+decreasing_by
+  all_goals simp_wf
+  all_goals first
+    | omega
+    | (have := abiGenField_lt _ _ (by assumption); omega)
+
 
 /-- `L` elements from `q`, each in place if static, else at the offset its
 head word holds from `q`; `put i v` stores the `i`-th. -/
-partial def abiSeqReadGen (d : ByteSrc) (e : AbiTy) (T : RawTy) (L q : RawExpr)
+def abiSeqReadGen (d : ByteSrc) (e : AbiTy) (T : RawTy) (L q : RawExpr)
     (put : RawExpr → RawExpr → RawStmt) (below : List (String × Nat) := []) (key : String := "") :
     ElabM (List RawStmt) := do
   let i ← abiFresh
@@ -1847,8 +1934,251 @@ partial def abiSeqReadGen (d : ByteSrc) (e : AbiTy) (T : RawTy) (L q : RawExpr)
   pure ([.decl (.named "uint") qn (some q)] ++ abiSeqBounds d e.headSize L (.name qn) ++
     [.decl (.named "uint") i (some (.num 0)), .whileLoop {} (.binop .lt (.name i) L)
       ([.decl (.named "uint") pos (some posE)] ++ body ++ [next])])
+termination_by (sizeOf e, 1)
+decreasing_by
+  all_goals simp_wf
+  all_goals omega
+
 
 end
+
+/-- The defining equation of `abiSizeGen`. -/
+theorem abiSizeGen_eq (t : AbiTy) (v : RawExpr) :
+    abiSizeGen t v = (do
+  if !t.dynamic then return ([], .num t.headSize)
+  match t with
+  | .bytes => pure ([], (abiPad (.field v "length")).addN 32)
+  | .arr e =>
+    if !e.dynamic then
+      pure ([], (RawExpr.binop .mul (.num e.headSize) (.field v "length")).addN 32)
+    else
+      let (ss, n) ← abiSeqSizeGen e (.field v "length") (.index v)
+      pure (ss, n.addN 32)
+  | .fixed e n => abiSeqSizeGen e (.num n) (.index v)
+  | .tuple _ ms => abiTupleSizeGen (ms.map fun (f, mt) => (mt, .field v f))
+  | _ => pure ([], .num 32)
+    ) := by
+  rw [abiSizeGen.eq_def]
+
+/-- The defining equation of `abiSeqSizeGen`. -/
+theorem abiSeqSizeGen_eq (e : AbiTy) (L : RawExpr) (elem : RawExpr → RawExpr) :
+    abiSeqSizeGen e L elem = (do
+  let acc ← abiFresh
+  let i ← abiFresh
+  let (ss, n) ← abiSizeGen e (elem (.name i))
+  pure ([.decl (.named "uint") acc (some (.binop .mul (.num 32) L)),
+    .decl (.named "uint") i (some (.num 0)),
+    .whileLoop {} (.binop .lt (.name i) L)
+      (ss ++ [.assign (.name acc) (.binop .add (.name acc) n),
+        .assign (.name i) (.binop .add (.name i) (.num 1))])], .name acc)
+    ) := by
+  rw [abiSeqSizeGen.eq_def]
+
+/-- The defining equation of `abiTupleSizeGen`. -/
+theorem abiTupleSizeGen_eq (ms : List (AbiTy × RawExpr)) :
+    abiTupleSizeGen ms = (do
+  let mut ss : List RawStmt := []
+  let mut tot : RawExpr := .num (ms.map (·.1.headSize)).sum
+  for pair in ms do
+    let mt := pair.1
+    let mv := pair.2
+    if mt.dynamic then
+      let (s1, n) ← abiSizeGen mt mv
+      ss := ss ++ s1
+      tot := .binop .add tot n
+  pure (ss, tot)
+    ) := by
+  rw [abiTupleSizeGen.eq_def]
+
+/-- The defining equation of `abiWriteGen`. -/
+theorem abiWriteGen_eq (r : String) (t : AbiTy) (v : RawExpr) (p : String) :
+    abiWriteGen r t v p = (do
+  match t with
+  | .val k =>
+    let w ← abiFresh
+    pure (.decl (.named "uint") w (some (k.word v)) :: abiEncodeStaticE r (.name p) k (.name w))
+  | .bytes =>
+    let L ← abiFresh
+    let j ← abiFresh
+    let start : RawExpr := (RawExpr.name p).addN 32
+    pure ([.decl (.named "uint") L (some (.field v "length"))] ++ abiBytes r (.name p) (.name L) 32 ++
+      [.decl (.named "uint") j (some (.num 0)),
+       .whileLoop {} (.binop .lt (.name j) (.name L))
+         [.assign (.index (.name r) (.binop .add start (.name j))) (.index v (.name j)),
+          .assign (.name j) (.binop .add (.name j) (.num 1))]])
+  | .arr e =>
+    let L ← abiFresh
+    let q ← abiFresh
+    pure ([.decl (.named "uint") L (some (.field v "length"))] ++ abiBytes r (.name p) (.name L) 32 ++
+      [.decl (.named "uint") q (some ((RawExpr.name p).addN 32))] ++
+      (← abiSeqWriteGen r e (.name L) (.index v) q))
+  | .fixed e n => abiSeqWriteGen r e (.num n) (.index v) p
+  | .tuple _ ms => abiTupleWriteGen r (ms.map fun (f, mt) => (mt, .field v f)) p
+    ) := by
+  rw [abiWriteGen.eq_def]
+
+/-- The defining equation of `abiSeqWriteGen`. -/
+theorem abiSeqWriteGen_eq (r : String) (e : AbiTy) (L : RawExpr) (elem : RawExpr → RawExpr)
+    (q : String) :
+    abiSeqWriteGen r e L elem q = (do
+  let i ← abiFresh
+  let pos ← abiFresh
+  let next := RawStmt.assign (.name i) (.binop .add (.name i) (.num 1))
+  if !e.dynamic then
+    let body ← abiWriteGen r e (elem (.name i)) pos
+    return [.decl (.named "uint") i (some (.num 0)),
+      .whileLoop {} (.binop .lt (.name i) L)
+        ([.decl (.named "uint") pos
+          (some (.binop .add (.name q) (.binop .mul (.num e.headSize) (.name i))))] ++ body ++ [next])]
+  let c ← abiFresh
+  let off ← abiFresh
+  let body ← abiWriteGen r e (elem (.name i)) c
+  let (ss, n) ← abiSizeGen e (elem (.name i))
+  pure [.decl (.named "uint") c (some (.binop .add (.name q) (.binop .mul (.num 32) L))),
+    .decl (.named "uint") i (some (.num 0)),
+    .whileLoop {} (.binop .lt (.name i) L)
+      ([.decl (.named "uint") pos (some (.binop .add (.name q) (.binop .mul (.num 32) (.name i)))),
+        .decl (.named "uint") off (some (.binop .sub (.name c) (.name q)))] ++
+        abiBytes r (.name pos) (.name off) 32 ++ body ++ ss ++
+        [.assign (.name c) (.binop .add (.name c) n), next])]
+    ) := by
+  rw [abiSeqWriteGen.eq_def]
+
+/-- The defining equation of `abiTupleWriteGen`. -/
+theorem abiTupleWriteGen_eq (r : String) (ms : List (AbiTy × RawExpr)) (p : String) :
+    abiTupleWriteGen r ms p = (do
+  let c ← abiFresh
+  let mut ss : List RawStmt :=
+    [.decl (.named "uint") c (some ((RawExpr.name p).addN (ms.map (·.1.headSize)).sum))]
+  let mut hp := 0
+  for pair in ms do
+    let mt := pair.1
+    let mv := pair.2
+    let hpos ← abiFresh
+    ss := ss ++ [.decl (.named "uint") hpos (some ((RawExpr.name p).addN hp))]
+    if mt.dynamic then
+      let off ← abiFresh
+      let (s1, n) ← abiSizeGen mt mv
+      ss := ss ++ [.decl (.named "uint") off (some (.binop .sub (.name c) (.name p)))] ++
+        abiBytes r (.name hpos) (.name off) 32 ++ (← abiWriteGen r mt mv c) ++ s1 ++
+        [.assign (.name c) (.binop .add (.name c) n)]
+    else
+      ss := ss ++ (← abiWriteGen r mt mv hpos)
+    hp := hp + mt.headSize
+  pure ss
+    ) := by
+  rw [abiTupleWriteGen.eq_def]
+
+/-- The defining equation of `abiReadGen`. -/
+theorem abiReadGen_eq (d : ByteSrc) (t : AbiTy) (T : RawTy) (p : RawExpr)
+    (put : RawExpr → RawStmt) (below : List (String × Nat) := []) (key : String := "") :
+    abiReadGen C d t T p put below key = (do
+  match t with
+  | .val k =>
+    let (ss, v) ← abiWordAt d k p
+    -- an enum position of a `solcEnumBelow` component, at its carrier: the
+    -- word in the carrier's range, then below the member count
+    if let some n := lookupBy key below then
+      let w ← abiFresh
+      return ss ++ [.decl (.named k.tyName) w (some v),
+        .require (.binop .lt (.name w) (.num n)), put (.name w)]
+    -- an enum element (`E[]`, `E[k]`, declared at `E`): its word as a
+    -- `uint8`, then solc's validator (`validator_revert_t_enum_*`), an empty
+    -- revert unless below the member count, as a top-level enum's
+    -- (`abiDecodeWith`); `AbiTy.of` reads it as `uint8` alone
+    if let .named E := T then
+      if let some ms := lookupBy E C.enums then
+        let w ← abiFresh
+        return ss ++ [.decl (.named "uint") w (some v),
+          .require (.binop .lt (.name w) (.num ms.length)), put (.call E [.name w])]
+    pure (ss ++ [put v])
+  | .bytes =>
+    let (s1, L) ← abiWordAt d (.uint 256) p
+    let n ← abiFresh
+    let x := toString (← freshCapture "mv")
+    let j ← abiFresh
+    let start : RawExpr := p.addN 32
+    pure (s1 ++ [.decl (.named "uint") n (some L)] ++ abiBounds d start (.name n) ++ [
+      .declMemory T x (some (.newArr T (.name n))),
+      .decl (.named "uint") j (some (.num 0)),
+      .whileLoop {} (.binop .lt (.name j) (.name n))
+        [.assign (.index (.name x) (.name j)) (abiByte d (.binop .add start (.name j))),
+         .assign (.name j) (.binop .add (.name j) (.num 1))],
+      put (.name x)])
+  | .arr e =>
+    let (s1, L) ← abiWordAt d (.uint 256) p
+    let n ← abiFresh
+    let x := toString (← freshCapture "mv")
+    pure (s1 ++ [.decl (.named "uint") n (some L)] ++
+      abiSeqBounds d e.headSize (.name n) (p.addN 32) ++ [
+      .declMemory T x (some (.newArr T (.name n)))] ++
+      (← abiSeqReadGen C d e T.elem (.name n) (p.addN 32) (fun i v => .assign (.index (.name x) i) v)
+        below (key ++ "[]")) ++
+      [put (.name x)])
+  | .fixed e m =>
+    let x := toString (← freshCapture "mv")
+    pure (abiSeqBounds d e.headSize (.num m) p ++ [.declMemory T x none] ++
+      (← abiSeqReadGen C d e T.elem (.num m) p (fun i v => .assign (.index (.name x) i) v)
+        below (key ++ "[]")) ++
+      [put (.name x)])
+  | .tuple s ms =>
+    let x := toString (← freshCapture "mv")
+    let mut ss : List RawStmt := abiBounds d p (.num ((ms.map (·.2.headSize)).sum)) ++
+      [.declMemory T x none]
+    let mut hp := 0
+    for pair in ms do
+      let f := pair.1
+      let mt := pair.2
+      let hpos : RawExpr := p.addN hp
+      let putF (v : RawExpr) : RawStmt := .assign (.field (.name x) f) v
+      if mt.dynamic then
+        let (s1, off) ← abiWordAt d (.uint 256) hpos
+        let at0 ← abiFresh
+        ss := ss ++ s1 ++ abiBounds d p off ++
+          [.decl (.named "uint") at0 (some (.binop .add p off))] ++
+          (← abiReadGen C d mt (abiMemberTy s f) (.name at0) putF below (key ++ "." ++ f))
+      else
+        ss := ss ++ (← abiReadGen C d mt (abiMemberTy s f) hpos putF below (key ++ "." ++ f))
+      hp := hp + mt.headSize
+    pure (ss ++ [put (.name x)])
+    ) := by
+  rw [abiReadGen.eq_def]
+
+/-- The defining equation of `abiSeqReadGen`. -/
+theorem abiSeqReadGen_eq (d : ByteSrc) (e : AbiTy) (T : RawTy) (L q : RawExpr)
+    (put : RawExpr → RawExpr → RawStmt) (below : List (String × Nat) := []) (key : String := "") :
+    abiSeqReadGen C d e T L q put below key = (do
+  let i ← abiFresh
+  let pos ← abiFresh
+  let qn ← abiFresh
+  let next := RawStmt.assign (.name i) (.binop .add (.name i) (.num 1))
+  let posE : RawExpr := .binop .add (.name qn) (.binop .mul (.num e.headSize) (.name i))
+  let body ← if !e.dynamic then abiReadGen C d e T (.name pos) (put (.name i)) below key else do
+    let (s1, off) ← abiWordAt d (.uint 256) (.name pos)
+    let at0 ← abiFresh
+    pure (s1 ++ abiBounds d (.name qn) off ++
+      [.decl (.named "uint") at0 (some (.binop .add (.name qn) off))] ++
+      (← abiReadGen C d e T (.name at0) (put (.name i)) below key))
+  pure ([.decl (.named "uint") qn (some q)] ++ abiSeqBounds d e.headSize L (.name qn) ++
+    [.decl (.named "uint") i (some (.num 0)), .whileLoop {} (.binop .lt (.name i) L)
+      ([.decl (.named "uint") pos (some posE)] ++ body ++ [next])])
+    ) := by
+  rw [abiSeqReadGen.eq_def]
+
+/-- A successful sequence-size computation returns its accumulator name. -/
+theorem abiSeqSizeGen_result_name (e : AbiTy) (L : RawExpr) (elem : RawExpr → RawExpr)
+    (sc : ElabScope) (st st' : ECtx × Nat) (m m' : CallMemo) (out : List RawStmt × RawExpr)
+    (h : (((abiSeqSizeGen e L elem).run sc).run st).run m = .ok ((out, st'), m')) :
+    ∃ x, out.2 = .name x := by
+  rw [abiSeqSizeGen_eq] at h
+  simp only [abiFresh, freshCapture, ReaderT.run, StateT.run, bind, ReaderT.bind,
+    StateT.bind, pure, ReaderT.pure, StateT.pure, get, getThe, MonadStateOf.get,
+    MonadStateOf.set, StateT.get, StateT.set, liftM, MonadLift.monadLift,
+    MonadLiftT.monadLift, Except.pure, Except.bind] at h
+  split at h
+  · cases h
+  · cases h
+    exact ⟨_, rfl⟩
 
 /-- The ABI type of `abi.decode`'s component written `Te`, and its declared
 type, where it is not flat (`decodeKind?`'s). -/
