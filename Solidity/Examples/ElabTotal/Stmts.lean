@@ -1,4 +1,4 @@
-import Solidity.Syntax.Elab.Stmt
+import Solidity.Correctness.Elab.Total
 
 /-!
 # Checks: the block's two equations
@@ -126,3 +126,39 @@ example (ws : List (String × Nat)) (E : Ty) (k : String) :
 #print axioms abiSeqSizeGen_result_name
 
 end Solidity.Examples.ElabTotal.Stmts
+
+/-- info: 'Solidity.ElabHoist.hoistFuel_stable' depends on axioms: [propext, Quot.sound] -/
+#guard_msgs in
+#print axioms Solidity.ElabHoist.hoistFuel_stable
+
+/-- info: 'Solidity.ElabHoist.hoistStructural_eq' depends on axioms: [propext, Quot.sound] -/
+#guard_msgs in
+#print axioms Solidity.ElabHoist.hoistStructural_eq
+
+/-- info: 'Solidity.ElabHoist.hoistStructural_unique' depends on axioms: [propext, Quot.sound] -/
+#guard_msgs in
+#print axioms Solidity.ElabHoist.hoistStructural_unique
+
+/-- info: 'Solidity.ElabHoist.hoist_structural_eq' depends on axioms: [propext, Quot.sound] -/
+#guard_msgs in
+#print axioms Solidity.ElabHoist.hoist_structural_eq
+
+/-- info: 'Solidity.ElabHoist.namedClosure_eq' depends on axioms: [propext, Quot.sound] -/
+#guard_msgs in
+#print axioms Solidity.ElabHoist.namedClosure_eq
+
+/-- info: 'Solidity.ElabHoist.namedStructural_named' depends on axioms: [propext, Quot.sound] -/
+#guard_msgs in
+#print axioms Solidity.ElabHoist.namedStructural_named
+
+/-- info: 'Solidity.ElabHoist.namedStructural_eq' depends on axioms: [propext, Quot.sound] -/
+#guard_msgs in
+#print axioms Solidity.ElabHoist.namedStructural_eq
+
+/-- info: 'Solidity.ElabHoist.namedStructural_unique' depends on axioms: [propext, Quot.sound] -/
+#guard_msgs in
+#print axioms Solidity.ElabHoist.namedStructural_unique
+
+/-- info: 'Solidity.ElabHoist.hoist_named_eq' depends on axioms: [propext, Quot.sound] -/
+#guard_msgs in
+#print axioms Solidity.ElabHoist.hoist_named_eq
