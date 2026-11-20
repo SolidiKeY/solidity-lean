@@ -445,4 +445,34 @@ example [FreshNames] (rs : Option (List String)) (s : RawStmt)
     WellFoundedRelation.rel (ElabLoopMeasure.listRank out) (ElabLoopMeasure.stmtRank s) :=
   ElabLoopMeasure.lowerLoops_rank rs s hs sc st st' m m' out h
 
+/-- Successful lookup and a missing frame give the two strict call-rank steps. -/
+example (C : Contract) (sc : ElabScope) (f : String) (i : Nat)
+    (h : sc.funs.findIdx? (·.1 == f) = some i) :
+    WellFoundedRelation.rel
+      (({sc with top := false, funs := sc.funs.take i} : ElabScope).callRank C)
+      (sc.callRank C) := ElabScope.callRank_found C sc f i h
+
+example (C : Contract) (sc : ElabScope) (rf : RecFrame) (funs : List (Name × FunDecl))
+    (hr : isRecursiveC C rf.name = true) (h : sc.recs.find? (·.name == rf.name) = none) :
+    WellFoundedRelation.rel
+      (({sc with top := false, funs := funs, recs := rf :: sc.recs} : ElabScope).callRank C)
+      (sc.callRank C) := ElabScope.callRank_freshFrame C sc rf funs hr h
+
+/-- A successful forced operand has one of the listed literal or name forms. -/
+example [FreshNames] (C : Contract) (e : RawExpr) (p : PrimTy)
+    (sc : ElabScope) (st st' : ECtx × Nat) (m m' : CallMemo) (out : SProg C × RawExpr)
+    (h : (((forceArg C e (some p)).run sc).run st).run m = .ok ((out, st'), m')) :
+    (∃ n, out.2 = .num n) ∨ (∃ n, out.2 = .unop .neg (.num n)) ∨
+      (∃ b, out.2 = .bool b) ∨ (∃ x, out.2 = .name x) ∨ (∃ bs, out.2 = .bytesLit bs) :=
+  ElabCaptureProof.captureAtom_cases _ (ElabCaptureProof.forceArg_captureAtom C e p sc st st' m m' out h)
+
+/-- Binary eager capture retains arity. -/
+example [FreshNames] (C : Contract) (hoist : RawExpr → ElabM (SProg C × RawExpr))
+    (a b : RawExpr) (p q : PrimTy) (sc : ElabScope) (st st' : ECtx × Nat)
+    (m m' : CallMemo) (out : SProg C × List RawExpr)
+    (h : (((eagerArgsWith C hoist [a, b] false [some p, some q]).run sc).run st).run m =
+      .ok ((out, st'), m')) : out.2.length = 2 := by
+  obtain ⟨x, y, he, _, _⟩ := ElabCaptureProof.eagerArgs_pair_captureAtoms C hoist a b p q sc st st' m m' out h
+  rw [he]; rfl
+
 end Solidity.Examples.ElabTotalMeasure
