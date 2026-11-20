@@ -1152,14 +1152,14 @@ def elabRecWithCallbacks (hoist : RawExpr → ElabM (SProg C × RawExpr))
     elabTuple := fun ts rhs direct => elabTupleWith C base pr ts rhs direct }
   { body with elabStmt1 := elabStmt1ClosedWith C body }
 
-/-- Close structural expression recursion around the remaining call and statement callbacks. -/
+/-- Close structural and named-argument recursion around ordinary-call and statement callbacks. -/
 def hoistWithCallbacks (fallback : RawExpr → ElabM (SProg C × RawExpr))
     (stmt : RawStmt → ElabM (SProg C))
     (callRet : (f : String) → (args : List RawExpr) → (res : Option (Var × PrimTy)) →
     (resW : Nat := 256) → (targets : Bool := false) → (ctor : Bool := false) →
     (resNew : Bool := false) → (selfFrame : Bool := false) →
     ElabM (SProg C × Option (NCtx × RefTy × Var × Bool) × List (Var × LocalTy))) :=
-  ElabHoist.hoistStructural C
+  ElabHoist.namedStructural C
     (fun h => elabRecWithProducers C (elabRecWithCallbacks C h stmt @callRet)
       (panicProducerWithCallbacks C stmt @callRet))
     (elabStmtsPWith C stmt) fallback

@@ -1,7 +1,7 @@
 import Solidity.Goals.ElabTotal
 import Solidity.Syntax.Elab.Measure
 
-/-! Structural expression closure for the elaborator totality proof. -/
+/-! Structural and named-argument closure for the elaborator totality proof. -/
 namespace Solidity.ElabHoist
 open Semantics
 variable [FreshNames]
@@ -373,31 +373,128 @@ theorem hoistStructural_unique (C : Contract)
     exact hoistStructural_unique C record stmts fallback g hg a
   next => rfl
 termination_by e.nodes
-/-- The public hoister's arm equation for every constructor other than calls. -/
-theorem hoist_structural_eq (C : Contract) (e : RawExpr) (hs : structural e = true) :
-    hoist C e = hoistWith C (elabRec C ()) e := by
-  have hupdate (H : RawExpr → ElabM (SProg C × RawExpr)) :
-      let rc := elabRecWithProducers C
-        (elabRecWithCallbacks C H (elabStmtP C) (@elabCallRet C _))
-        (panicProducerWithCallbacks C (elabStmtP C) (@elabCallRet C _))
-      {rc with
-        hoist := H, elabStmtsP := elabStmtsPWith C (elabStmtP C),
-        hoistArgs := hoistArgsWith C H, hoistBinop := hoistBinopWith C H} = rc := by
+private theorem named_congr (C : Contract) (rc rc' : ElabRec C)
+    (f : String) (ns : List String) (args : List RawExpr)
+    (h : rc.hoist (.call f ((C.structFields f).map (fun p =>
+        (lookupBy p.1 (ns.zip args)).getD (.num 0)))) =
+      rc'.hoist (.call f ((C.structFields f).map (fun p =>
+        (lookupBy p.1 (ns.zip args)).getD (.num 0))))) :
+    hoistWith C rc (.named f ns args) =
+      hoistWith C rc' (.named f ns args) := by
+  have hfold : (liftM (RawExpr.named f ns args).foldConst : ElabM RawExpr) =
+      pure (.named f ns args) := rfl
+  unfold hoistWith
+  extract_lets
+  rw [hfold]
+  simp -zeta only [pure_bind]
+  dsimp +zetaDelta only
+  simp only [List.map_map, Function.comp_def]
+  rw [h]
+
+theorem namedClosure_eq (C : Contract) (rc : ElabRec C)
+    (fallback : RawExpr → ElabM (SProg C × RawExpr)) (e : RawExpr) :
+    namedClosure C rc fallback e = match e with
+      | .named .. => hoistWith C {rc with hoist := namedClosure C rc fallback} e
+      | _ => fallback e := by
+  cases e <;> rfl
+theorem namedStructural_call (C : Contract)
+    (record : (RawExpr → ElabM (SProg C × RawExpr)) → ElabRec C)
+    (stmts : List RawStmt → ElabM (SProg C))
+    (fallback : RawExpr → ElabM (SProg C × RawExpr)) (f : String) (args : List RawExpr) :
+    namedStructural C record stmts fallback (.call f args) = fallback (.call f args) := by
+  rw [namedStructural, hoistStructural_eq]
+  rfl
+
+theorem namedStructural_named (C : Contract)
+    (record : (RawExpr → ElabM (SProg C × RawExpr)) → ElabRec C)
+    (stmts : List RawStmt → ElabM (SProg C))
+    (fallback : RawExpr → ElabM (SProg C × RawExpr)) (f : String) (ns : List String)
+    (args : List RawExpr) :
+    namedStructural C record stmts fallback (.named f ns args) =
+      hoistWith C {record (namedStructural C record stmts fallback) with
+        hoist := namedStructural C record stmts fallback, elabStmtsP := stmts,
+        hoistArgs := hoistArgsWith C (namedStructural C record stmts fallback),
+        hoistBinop := hoistBinopWith C (namedStructural C record stmts fallback)} (.named f ns args) := by
+  rw [namedStructural, hoistStructural_eq]
+  simp only [structural, Bool.false_eq_true, ↓reduceIte, namedClosure]
+  apply named_congr
+  exact (namedStructural_call C record stmts fallback f _).symm
+
+theorem namedStructural_eq (C : Contract)
+    (record : (RawExpr → ElabM (SProg C × RawExpr)) → ElabRec C)
+    (stmts : List RawStmt → ElabM (SProg C))
+    (fallback : RawExpr → ElabM (SProg C × RawExpr)) (e : RawExpr) :
+    namedStructural C record stmts fallback e = match e with
+      | .call .. => fallback e
+      | _ => hoistWith C {record (namedStructural C record stmts fallback) with
+          hoist := namedStructural C record stmts fallback, elabStmtsP := stmts,
+          hoistArgs := hoistArgsWith C (namedStructural C record stmts fallback),
+          hoistBinop := hoistBinopWith C (namedStructural C record stmts fallback)} e := by
+  cases he : e
+  case call f args => exact namedStructural_call C record stmts fallback f args
+  case named f ns args => exact namedStructural_named C record stmts fallback f ns args
+  all_goals
+    simpa only [namedStructural, he, structural, ↓reduceIte] using
+      hoistStructural_eq C record stmts (namedClosure C (record fallback) fallback) e
+
+theorem namedStructural_unique (C : Contract)
+    (record : (RawExpr → ElabM (SProg C × RawExpr)) → ElabRec C)
+    (stmts : List RawStmt → ElabM (SProg C))
+    (fallback g : RawExpr → ElabM (SProg C × RawExpr))
+    (hg : ∀ e, g e = match e with
+      | .call .. => fallback e
+      | _ => hoistWith C {record g with
+          hoist := g, elabStmtsP := stmts,
+          hoistArgs := hoistArgsWith C g, hoistBinop := hoistBinopWith C g} e)
+    (e : RawExpr) : g e = namedStructural C record stmts fallback e := by
+  unfold namedStructural
+  apply hoistStructural_unique
+  intro a
+  cases ha : a
+  case call f args => exact hg (.call f args)
+  case named f ns args =>
+    rw [hg (.named f ns args)]
+    simp only [structural, Bool.false_eq_true, ↓reduceIte, namedClosure]
+    apply named_congr
+    exact hg _
+  all_goals simpa only [ha, structural, ↓reduceIte] using hg a
+
+
+private theorem record_update_eq (C : Contract) (H : RawExpr → ElabM (SProg C × RawExpr)) :
     let rc := elabRecWithProducers C
       (elabRecWithCallbacks C H (elabStmtP C) (@elabCallRet C _))
       (panicProducerWithCallbacks C (elabStmtP C) (@elabCallRet C _))
-    have hh : rc.hoist = H := rfl
-    have hs' : rc.elabStmtsP = elabStmtsPWith C (elabStmtP C) := rfl
-    have ha : rc.hoistArgs = hoistArgsWith C H := rfl
-    have hb : rc.hoistBinop = hoistBinopWith C H := rfl
-    change {rc with
+    {rc with
       hoist := H, elabStmtsP := elabStmtsPWith C (elabStmtP C),
-      hoistArgs := hoistArgsWith C H, hoistBinop := hoistBinopWith C H} = rc
-    rw [← ha, ← hb, ← hh, ← hs']
-  unfold hoist hoistWithCallbacks
+      hoistArgs := hoistArgsWith C H, hoistBinop := hoistBinopWith C H} = rc := by
+  let rc := elabRecWithProducers C
+    (elabRecWithCallbacks C H (elabStmtP C) (@elabCallRet C _))
+    (panicProducerWithCallbacks C (elabStmtP C) (@elabCallRet C _))
+  have hh : rc.hoist = H := rfl
+  have hs' : rc.elabStmtsP = elabStmtsPWith C (elabStmtP C) := rfl
+  have ha : rc.hoistArgs = hoistArgsWith C H := rfl
+  have hb : rc.hoistBinop = hoistBinopWith C H := rfl
+  change {rc with
+    hoist := H, elabStmtsP := elabStmtsPWith C (elabStmtP C),
+    hoistArgs := hoistArgsWith C H, hoistBinop := hoistBinopWith C H} = rc
+  rw [← ha, ← hb, ← hh, ← hs']
+
+/-- The public hoister's arm equation for every constructor other than calls. -/
+theorem hoist_structural_eq (C : Contract) (e : RawExpr) (hs : structural e = true) :
+    hoist C e = hoistWith C (elabRec C ()) e := by
+  unfold hoist hoistWithCallbacks namedStructural
   rw [hoistStructural_eq, if_pos hs]
   apply congrArg (fun rc : ElabRec C => hoistWith C rc e)
   conv => rhs; unfold elabRec elabRecCore panicProducerRec hoist hoistWithCallbacks
-  exact hupdate _
+  exact record_update_eq C _
+
+/-- The public hoister obeys the original arm on named arguments. -/
+theorem hoist_named_eq (C : Contract) (f : String) (ns : List String) (args : List RawExpr) :
+    hoist C (.named f ns args) = hoistWith C (elabRec C ()) (.named f ns args) := by
+  unfold hoist hoistWithCallbacks
+  rw [namedStructural_named]
+  apply congrArg (fun rc : ElabRec C => hoistWith C rc (.named f ns args))
+  conv => rhs; unfold elabRec elabRecCore panicProducerRec hoist hoistWithCallbacks
+  exact record_update_eq C _
 
 end Solidity.ElabHoist

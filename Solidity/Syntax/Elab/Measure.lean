@@ -1110,6 +1110,21 @@ def hoistStructural (C : Contract)
     ElabM (SProg C × RawExpr) :=
   hoistFuel C record stmts fallback e.nodes e
 
+/-- Named arguments make at most one ordinary-call request, even with duplicate names. -/
+def namedClosure (C : Contract) (rc : ElabRec C)
+    (fallback : RawExpr → ElabM (SProg C × RawExpr)) : RawExpr → ElabM (SProg C × RawExpr)
+  | e@(.named ..) => hoistWith C {rc with hoist := fallback} e
+  | e => fallback e
+
+
+/-- Structural expression recursion with the named-argument rewrite closed. -/
+def namedStructural (C : Contract)
+    (record : (RawExpr → ElabM (SProg C × RawExpr)) → ElabRec C)
+    (stmts : List RawStmt → ElabM (SProg C))
+    (fallback : RawExpr → ElabM (SProg C × RawExpr)) :=
+  hoistStructural C record stmts (namedClosure C (record fallback) fallback)
+
+
 end ElabHoist
 
 end Solidity
