@@ -35,6 +35,14 @@
   "Quot.sound",
   "propext"
  ],
+ "Solidity/Examples/ElabTotal/Stmts.lean:Solidity.ElabCallArgsGood.captureBefore_shape": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Examples/ElabTotal/Stmts.lean:Solidity.ElabCallArgsGood.captureExpr_shape": [
+  "Quot.sound",
+  "propext"
+ ],
  "Solidity/Examples/ElabTotal/Stmts.lean:Solidity.ElabCallArgsGood.hoistCallArgsWith_nil": [
   "Quot.sound",
   "propext"
@@ -43,11 +51,39 @@
   "Quot.sound",
   "propext"
  ],
+ "Solidity/Examples/ElabTotal/Stmts.lean:Solidity.ElabCallArgsGood.ordinary_good": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Examples/ElabTotal/Stmts.lean:Solidity.ElabCallHeight.args_output_argument_lt": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Examples/ElabTotal/Stmts.lean:Solidity.ElabCallHeight.args_output_heights": [
+  "Quot.sound",
+  "propext"
+ ],
  "Solidity/Examples/ElabTotal/Stmts.lean:Solidity.ElabCallHeight.argument_lt_call": [
   "Quot.sound",
   "propext"
  ],
+ "Solidity/Examples/ElabTotal/Stmts.lean:Solidity.ElabCallHeight.binop_output_height": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Examples/ElabTotal/Stmts.lean:Solidity.ElabCallHeight.binop_output_height_of_hoist": [
+  "Quot.sound",
+  "propext"
+ ],
  "Solidity/Examples/ElabTotal/Stmts.lean:Solidity.ElabCallHeight.bytes_placeholder_height_le": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Examples/ElabTotal/Stmts.lean:Solidity.ElabCallHeight.captureBefore_height_bound": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Examples/ElabTotal/Stmts.lean:Solidity.ElabCallHeight.captureExpr_height_bound": [
   "Quot.sound",
   "propext"
  ],
@@ -64,6 +100,10 @@
   "propext"
  ],
  "Solidity/Examples/ElabTotal/Stmts.lean:Solidity.ElabCallHeight.erc_expansion_lt": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Examples/ElabTotal/Stmts.lean:Solidity.ElabCallHeight.erc_output_height": [
   "Quot.sound",
   "propext"
  ],
@@ -88,6 +128,14 @@
   "propext"
  ],
  "Solidity/Examples/ElabTotal/Stmts.lean:Solidity.ElabCallHeight.named_request_lt": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Examples/ElabTotal/Stmts.lean:Solidity.ElabCallHeight.pair_output_heights": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Examples/ElabTotal/Stmts.lean:Solidity.ElabCallHeight.pair_output_heights_of_hoist": [
   "Quot.sound",
   "propext"
  ],
