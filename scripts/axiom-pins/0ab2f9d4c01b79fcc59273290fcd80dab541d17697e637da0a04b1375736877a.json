@@ -35,6 +35,14 @@
   "Quot.sound",
   "propext"
  ],
+ "Solidity/Examples/ElabTotal/Stmts.lean:Solidity.ElabCallArgsGood.hoistCallArgsWith_nil": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Examples/ElabTotal/Stmts.lean:Solidity.ElabCallArgsGood.hoistCallArgsWith_preserves": [
+  "Quot.sound",
+  "propext"
+ ],
  "Solidity/Examples/ElabTotal/Stmts.lean:Solidity.ElabHoist.hoist_named_eq": [
   "Quot.sound",
   "propext"

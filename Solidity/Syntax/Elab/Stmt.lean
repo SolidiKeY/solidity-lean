@@ -297,17 +297,6 @@ def elabRecWithProducers (rc : ElabRec C) (pr : PanicProducerRec C) : ElabRec C 
     fnMemoryDispatch := fnMemoryDispatchWith C pr
     trySelfBody := fun g {_} args ρ => trySelfBodyWith C pr g args ρ }
 
-/-- A block, over the per-statement producer `stmt`: each statement in
-order, the state threaded, the programs concatenated. Total (structural on
-the list), so the block's two equations hold definitionally; the knot passes
-the partial `elabStmtP`, and the public `elabStmtsP` is this at it. -/
-def elabStmtsPWith (stmt : RawStmt → ElabM (SProg C)) : List RawStmt → ElabM (SProg C)
-  | [] => pure []
-  | s :: ss => do
-    let P ← stmt s
-    let Q ← elabStmtsPWith stmt ss
-    pure (P ++ Q)
-
 /-- `hoist`, but an operation at the top is left to the statement, which
 checks its narrow width after the write (`narrowPost`). -/
 def hoistTopWith (hoist : RawExpr → ElabM (SProg C × RawExpr)) (e : RawExpr) : ElabM (SProg C × RawExpr) := do
@@ -408,97 +397,6 @@ def abiDecodeBytesWith (stmt : RawStmt → ElabM (SProg C)) (T : String) (d : By
        [.assign (.index (.name x) (.name j)) (abiByte d (.binop .add start (.name j))),
         .assign (.name j) (.binop .add (.name j) (.num 1))]]
   pure (← elabStmtsPWith C stmt S, x)
-
-/-- Prepare a reference call in argument order. Storage-to-memory conversion
-copies at the argument's evaluation point under the legacy schedule, after
-the last argument under the source-order one (`binaryLeftToRight`, solc's
-IR pipeline); every reference's identity and
-each scalar read are held before a later argument can change them. Calls
-with only value parameters retain the ordinary capture policy. -/
-def hoistCallArgsWith (hoist : RawExpr → ElabM (SProg C × RawExpr))
-    (stmt : RawStmt → ElabM (SProg C)) (f : String) (args : List RawExpr) :
-    ElabM (SProg C × List RawExpr) := do
-  let funs := (← read).funs
-  -- A call through a function value captures its own arguments, in order and
-  -- at their formal types, after the tag under the source-order schedule
-  -- (`dispatchCaptures`); hoisting a later call argument here would run it
-  -- before an earlier storage operand is copied.
-  if f != "constructor" && funs.all (·.1 != f) && (fnTyOf? C (← ctx) f).isSome then
-    return ([], args)
-  -- likewise through a callee that is not a name: `callValue`, the memory and
-  -- the tuple dispatch capture it at its function type, then the arguments
-  if f == callValueName && (args.head?.bind (fnTyOfExpr C (← ctx))).isSome then
-    return ([], args)
-  let d := if f == "constructor" then C.ctor else lookupBy f funs
-  let some d := d | return ← hoistArgsWith C hoist args
-  unless d.params.any (fun (_, T) => T matches .ref _) do return ← hoistArgsWith C hoist args
-  unless d.params.length == args.length do
-    throw s!"{f} takes {d.params.length} arguments, not {args.length}"
-  let mut P : SProg C := []
-  let mut prepared : List RawExpr := []
-  -- solc's IR pipeline copies a storage operand of a memory parameter after
-  -- every argument ran (`tests/solc/FunctionValueReferences.sol`,
-  -- `argumentOrderDirect`: legacy 101, viaIR 901): under the source-order
-  -- schedule the operand's alias is captured at its position, its copy made
-  -- after the last argument
-  let late := C.evalOrder.binaryLeftToRight
-  let mut copies : List (String × RefTy × List (String × Nat) × List (String × Nat) × Var) := []
-  for ((n, T), a) in d.params.zip args do
-    -- a reference argument's narrow positions, on the expression as written,
-    -- before a capture names it (`elabCallRet` checks the capture again)
-    if T matches .ref _ then
-      unless a.inlineArrayRoot do
-        ElabM.lift (shapeCheck C (← ctx) (shapeUnder d.widths n) a)
-    let (Q, a) ← hoist a
-    P := P ++ Q
-    -- Inline projections now have their independently inferred shape. Check
-    -- before capture can bind the argument at the parameter's reference type.
-    if T matches .ref _ then ElabM.lift (shapeCheck C (← ctx) (shapeUnder d.widths n) a)
-    let Γ ← nctx
-    let (Q, a) ← match T with
-      | .prim p => do
-        if (lookupBy n d.paramLocs).isSome then
-          throw s!"{f}: data location on value parameter {n}"
-        ElabM.lift (fitCheck C (← ctx) p ((lookupBy n d.widths).getD 256) a)
-        captureExpr C a
-      | .ref R => do
-        let stable ← match a with
-          | .name n => match Var.ofName n with
-            | .fresh _ i => do
-              let sc ← read
-              pure (!(C.rootType n).isSome && !sc.mutableFreshNames.contains n &&
-                !sc.inlined.any (fun (k₀, k₁) => k₀ ≤ i && i < k₁))
-            | _ => pure false
-          | _ => pure false
-        match lookupBy n d.paramLocs with
-        | some .storage =>
-          let sp ← ElabM.lift (checkPath C Γ (.ref R) a)
-          if stable then pure ([], a) else do
-          let x ← captureRef C "sp" (.alias R) a
-          pure ([.of Γ (.declStorage R x (some (.path sp)))], .name (toString x))
-        | some .memory | some .calldata =>
-          let rhs ← ElabM.lift (elabMRhs C Γ R a)
-          if stable && (rhs matches .alias _) then pure ([], a) else do
-          if late && (rhs matches .copy ..) then do
-            let sp ← ElabM.lift (checkPath C Γ (.ref R) a)
-            -- the operand's own shape, ABI markers included (`captureRef`)
-            let ws := exprShape C (← ctx) a
-            let x ← captureRef C "sp" (.alias R) a
-            let y := toString (← freshCapture "mv")
-            copies := copies ++ [(y, R, shapeUnder d.widths n, ws, x)]
-            pure ([.of Γ (.declStorage R x (some (.path sp)))], .name y)
-          else
-          let x ← captureRef C "mv" (.mem R) a
-          pure ([.of Γ (.declMem R x (some rhs) rfl rhs.mapFree)], .name (toString x))
-        | none => throw s!"{f}: reference parameter {n} needs a data location"
-    P := P ++ Q
-    prepared := prepared ++ [a]
-  -- the late copies, in argument order
-  for (y, R, ws, shape, x) in copies do
-    P := P ++ (← elabStmtsPWith C stmt
-      [.declMemory (rawTyW ws (.ref R) "") y (some (.name (toString x)))])
-    declareShape y shape
-  pure (P, prepared)
 
 /-- A loop's condition, invariant or variant, of type `p` (its narrow
 rewrites done, `elabStmtP`), read in `Γ`: nothing may be captured before it,
