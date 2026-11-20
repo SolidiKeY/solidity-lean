@@ -1,5 +1,5 @@
 import Solidity.Goals.ElabTotal
-import Solidity.Syntax.Elab.Measure
+import Solidity.Syntax.Elab.CallMeasure
 
 /-! Structural and named-argument closure for the elaborator totality proof. -/
 namespace Solidity.ElabHoist
@@ -65,20 +65,6 @@ private theorem newArr_congr (C : Contract) (rc rc' : ElabRec C)
   simp -zeta only [pure_bind]
   dsimp +zetaDelta only
   rw [ha]
-
-omit [FreshNames] in
-theorem foldConst_same_or_lit (e out : RawExpr) (h : e.foldConst = .ok out) :
-    out = e ∨ out.isLit = true := by
-  unfold RawExpr.foldConst at h
-  split at h
-  · cases h; exact Or.inl rfl
-  · split at h
-    · cases h
-    · dsimp only at h
-      split at h
-      · cases h; exact Or.inr rfl
-      · cases h; exact Or.inr rfl
-
 
 omit [FreshNames] in
 theorem RawExpr.nodes_pos (e : RawExpr) : 0 < e.nodes := by

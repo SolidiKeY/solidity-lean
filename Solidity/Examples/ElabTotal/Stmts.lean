@@ -170,3 +170,91 @@ end Solidity.Examples.ElabTotal.Stmts
 /-- info: 'Solidity.ElabCallArgsGood.hoistCallArgsWith_nil' depends on axioms: [propext, Quot.sound] -/
 #guard_msgs in
 #print axioms Solidity.ElabCallArgsGood.hoistCallArgsWith_nil
+
+/-- info: 'Solidity.ElabCallHeight.height_pos' depends on axioms: [propext, Quot.sound] -/
+#guard_msgs in
+#print axioms Solidity.ElabCallHeight.height_pos
+
+/-- info: 'Solidity.ElabCallHeight.mem_height_le' depends on axioms: [propext, Quot.sound] -/
+#guard_msgs in
+#print axioms Solidity.ElabCallHeight.mem_height_le
+
+/-- info: 'Solidity.ElabCallHeight.named_request_lt' depends on axioms: [propext, Quot.sound] -/
+#guard_msgs in
+#print axioms Solidity.ElabCallHeight.named_request_lt
+
+/-- info: 'Solidity.ElabCallHeight.erc_expansion_lt' depends on axioms: [propext, Quot.sound] -/
+#guard_msgs in
+#print axioms Solidity.ElabCallHeight.erc_expansion_lt
+
+/-- info: 'Solidity.ElabCallHeight.recover_encoding_lt' depends on axioms: [propext, Quot.sound] -/
+#guard_msgs in
+#print axioms Solidity.ElabCallHeight.recover_encoding_lt
+
+/-- info: 'Solidity.ElabCallHeight.decode_request_lt' depends on axioms: [propext, Quot.sound] -/
+#guard_msgs in
+#print axioms Solidity.ElabCallHeight.decode_request_lt
+
+/-- info: 'Solidity.ElabCallHeight.signature_selector_lt' depends on axioms: [propext, Quot.sound] -/
+#guard_msgs in
+#print axioms Solidity.ElabCallHeight.signature_selector_lt
+
+/-- info: 'Solidity.ElabCallHeight.function_selector_lt' depends on axioms: [propext, Quot.sound] -/
+#guard_msgs in
+#print axioms Solidity.ElabCallHeight.function_selector_lt
+
+/-- info: 'Solidity.ElabCallHeight.foldConst_height_le' depends on axioms: [propext, Quot.sound] -/
+#guard_msgs in
+#print axioms Solidity.ElabCallHeight.foldConst_height_le
+
+/-- info: 'Solidity.ElabCallHeight.argument_lt_call' depends on axioms: [propext, Quot.sound] -/
+#guard_msgs in
+#print axioms Solidity.ElabCallHeight.argument_lt_call
+
+/-- info: 'Solidity.ElabCallHeight.selector_height_lt' depends on axioms: [propext, Quot.sound] -/
+#guard_msgs in
+#print axioms Solidity.ElabCallHeight.selector_height_lt
+
+/-- info: 'Solidity.ElabCallHeight.selector_args_height_lt' depends on axioms: [propext, Quot.sound] -/
+#guard_msgs in
+#print axioms Solidity.ElabCallHeight.selector_args_height_lt
+
+/-- info: 'Solidity.ElabCallHeight.unmark_height_le' depends on axioms: [propext, Quot.sound] -/
+#guard_msgs in
+#print axioms Solidity.ElabCallHeight.unmark_height_le
+
+/-- info: 'Solidity.ElabCallHeight.bytes_placeholder_height_le' depends on axioms: [propext, Quot.sound] -/
+#guard_msgs in
+#print axioms Solidity.ElabCallHeight.bytes_placeholder_height_le
+
+/-- info: 'Solidity.ElabCallHeight.encoding_inputs_lt' depends on axioms: [propext, Quot.sound] -/
+#guard_msgs in
+#print axioms Solidity.ElabCallHeight.encoding_inputs_lt
+
+/-- info: 'Solidity.ElabCallHeight.encoding_arg_height_lt' depends on axioms: [propext, Quot.sound] -/
+#guard_msgs in
+#print axioms Solidity.ElabCallHeight.encoding_arg_height_lt
+
+/-- info: 'Solidity.ElabCallHeight.selector_input_lt' depends on axioms: [propext, Quot.sound] -/
+#guard_msgs in
+#print axioms Solidity.ElabCallHeight.selector_input_lt
+
+/-- info: 'Solidity.ElabCallHeight.selector_encoding_inputs_lt' depends on axioms: [propext, Quot.sound] -/
+#guard_msgs in
+#print axioms Solidity.ElabCallHeight.selector_encoding_inputs_lt
+
+/-- info: 'Solidity.ElabCallHeight.selector_receiver_lt' depends on axioms: [propext, Quot.sound] -/
+#guard_msgs in
+#print axioms Solidity.ElabCallHeight.selector_receiver_lt
+
+/-- info: 'Solidity.ElabCallHeight.named_callee_decreases' depends on axioms: [propext, Quot.sound] -/
+#guard_msgs in
+#print axioms Solidity.ElabCallHeight.named_callee_decreases
+
+/-- info: 'Solidity.ElabCallHeight.prefix_input_lt' depends on axioms: [propext, Quot.sound] -/
+#guard_msgs in
+#print axioms Solidity.ElabCallHeight.prefix_input_lt
+
+/-- info: 'Solidity.ElabCallHeight.prefix_cast_lt' depends on axioms: [propext, Quot.sound] -/
+#guard_msgs in
+#print axioms Solidity.ElabCallHeight.prefix_cast_lt
