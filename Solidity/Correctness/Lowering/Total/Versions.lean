@@ -628,32 +628,6 @@ theorem residual_iff :
             (Observe.target program).behaviour)) :=
   (contract_reference_iff _ _).trans (residualAt_iff Decode.tablesW rel_reflect rel_false)
 
-/-- Version 2 of the contract at the width-aware version's boundary, with
-total initial matching discharged: five obligations are left. -/
-theorem contractV2_iff :
-    LowerLoopsCorrectContractV2 rel boundary boundary.reference Decode.tablesW.decode ↔
-      (∀ r : Request, r.Succeeds → ∃ s, Decode.tablesW.decode r = some s) ∧
-      (∀ (r : Request) s, r.Succeeds → SpellsT Decode.tablesW r s →
-        Decode.tablesW.decode r = some s) ∧
-      (∀ (r : Request) o after parts program, r.pipeline o after parts program →
-        Allocation.RoundTrip r.input.names ∧
-        SafeSpellings r.input.names (Allocation.scope r o after).protectedNames
-          (Allocation.scope r o after).generated) ∧
-      (∀ (r : Request) o after parts program s, Decode.tablesW.decode r = some s →
-        r.pipeline o after parts program →
-        Nonempty (PassCorrect (Observe.source s).behaviour (Observe.target program).behaviour)) ∧
-      Simulation.Bound rel Decode.tablesW.decode := by
-  unfold LowerLoopsCorrectContractV2
-  rw [residual_iff]
-  exact ⟨fun ⟨⟨covered, complete, allocation, pipeline⟩, _, bound⟩ =>
-      ⟨covered, complete, allocation,
-        fun r o after parts program s d run => (pipeline r o after parts program s d run).2,
-        bound⟩,
-    fun ⟨covered, complete, allocation, refines, bound⟩ =>
-      ⟨⟨covered, complete, allocation, fun r o after parts program s d run =>
-        ⟨bound.simulates d run, refines r o after parts program s d run⟩⟩, initialMatching,
-        bound⟩⟩
-
 /-- **Version 2 of the contract at a sound version's boundary**, with total
 initial matching discharged: five obligations are left. -/
 theorem contractV2At_iff (sound : Sound T) :
@@ -678,6 +652,23 @@ theorem contractV2At_iff (sound : Sound T) :
       ⟨⟨covered, complete, allocation, fun r o after parts program s d run =>
         ⟨bound.simulates d run, refines r o after parts program s d run⟩⟩,
         initialMatchingAt sound, bound⟩⟩
+
+/-- Version 2 of the contract at the width-aware version's boundary, with
+total initial matching discharged: five obligations are left. -/
+theorem contractV2_iff :
+    LowerLoopsCorrectContractV2 rel boundary boundary.reference Decode.tablesW.decode ↔
+      (∀ r : Request, r.Succeeds → ∃ s, Decode.tablesW.decode r = some s) ∧
+      (∀ (r : Request) s, r.Succeeds → SpellsT Decode.tablesW r s →
+        Decode.tablesW.decode r = some s) ∧
+      (∀ (r : Request) o after parts program, r.pipeline o after parts program →
+        Allocation.RoundTrip r.input.names ∧
+        SafeSpellings r.input.names (Allocation.scope r o after).protectedNames
+          (Allocation.scope r o after).generated) ∧
+      (∀ (r : Request) o after parts program s, Decode.tablesW.decode r = some s →
+        r.pipeline o after parts program →
+        Nonempty (PassCorrect (Observe.source s).behaviour (Observe.target program).behaviour)) ∧
+      Simulation.Bound rel Decode.tablesW.decode :=
+  contractV2At_iff soundW
 
 /-- The address-aware version's boundary. -/
 def boundaryA : SemanticBoundary := boundaryAt Decode.tablesA rel
