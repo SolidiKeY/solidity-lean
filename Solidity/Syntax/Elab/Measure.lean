@@ -253,14 +253,17 @@ theorem CalleeKernel.mapExprsM_run_weight {C : Contract}
 
 namespace ElabControlProof
 
-private def Obs {α : Type} (x : ElabM α) (Q : α → Prop) : Prop :=
+/-- Every successful elaboration result satisfies the predicate. -/
+def Obs {α : Type} (x : ElabM α) (Q : α → Prop) : Prop :=
   ∀ sc st m a st' m', x sc st m = .ok ((a, st'), m') → Q a
-private theorem obs_pure {α : Type} {a : α} {Q : α → Prop} (h : Q a) :
+/-- Pure results satisfy any predicate that holds of their value. -/
+theorem obs_pure {α : Type} {a : α} {Q : α → Prop} (h : Q a) :
     Obs (pure a) Q := by
   intro sc st m b st' m' he
   cases he
   exact h
-private theorem obs_bind {α β : Type} {x : ElabM α} {f : α → ElabM β}
+/-- A successful bind preserves the predicates of its two stages. -/
+theorem obs_bind {α β : Type} {x : ElabM α} {f : α → ElabM β}
     {P : α → Prop} {Q : β → Prop} (hx : Obs x P)
     (hf : ∀ a, P a → Obs (f a) Q) : Obs (x >>= f) Q := by
   intro sc st m b st' m' h
@@ -271,10 +274,12 @@ private theorem obs_bind {α β : Type} {x : ElabM α} {f : α → ElabM β}
     rcases v with ⟨⟨a, s⟩, n⟩
     simp only [he, bind, Except.bind] at h
     exact hf a (hx sc st m a s n he) sc s n b st' m' h
-private theorem obs_any {α β : Type} {x : ElabM α} {f : α → ElabM β}
+/-- Ignore intermediate values when the continuation is invariant for all of them. -/
+theorem obs_any {α β : Type} {x : ElabM α} {f : α → ElabM β}
     {Q : β → Prop} (hf : ∀ a, Obs (f a) Q) : Obs (x >>= f) Q :=
   obs_bind (P := fun _ => True) (fun _ _ _ _ _ _ _ => trivial) (fun a _ => hf a)
-private theorem obs_throw {α : Type} {err : String} {Q : α → Prop} :
+/-- An error has no successful result. -/
+theorem obs_throw {α : Type} {err : String} {Q : α → Prop} :
     Obs (throw err : ElabM α) Q := by
   intro sc st m a st' m' h
   cases h
@@ -962,81 +967,6 @@ theorem bytesLit_shape (e : RawExpr) (bs : List Nat)
   next => contradiction
 
 
-namespace ElabCaptureProof
-
-open ElabControlProof
-
-/-- An operand accepted without capture, or a captured local name. -/
-def CaptureAtom (e : RawExpr) : Prop :=
-  (e.isLit || e.bytesLit?.isSome || (e matches .bool _)) = true ∨
-    ∃ x, e = .name x
-
-/-- Captured atoms have only these literal or name forms. -/
-theorem captureAtom_cases (e : RawExpr) (h : CaptureAtom e) :
-    (∃ n, e = .num n) ∨ (∃ n, e = .unop .neg (.num n)) ∨
-      (∃ b, e = .bool b) ∨ (∃ x, e = .name x) ∨ (∃ bs, e = .bytesLit bs) := by
-  rcases h with h | ⟨x, hx⟩
-  · simp only [Bool.or_eq_true] at h
-    rcases h with (hl | hb) | hb
-    · unfold RawExpr.isLit at hl
-      split at hl
-      next n => exact Or.inl ⟨n, rfl⟩
-      next n => exact Or.inr (Or.inl ⟨n, rfl⟩)
-      next => contradiction
-    · cases he : e.bytesLit? with
-      | none => simp only [he, Option.isSome_none, Bool.false_eq_true] at hb
-      | some bs => exact Or.inr (Or.inr (Or.inr (Or.inr ⟨bs, bytesLit_shape e bs he⟩)))
-    · cases e <;> simp only [Bool.false_eq_true] at hb
-      rename_i b
-      exact Or.inr (Or.inr (Or.inl ⟨b, rfl⟩))
-  · exact Or.inr (Or.inr (Or.inr (Or.inl ⟨x, hx⟩)))
-
-variable (C : Contract) [FreshNames]
-
-private theorem forceArg_obs (e : RawExpr) (p : PrimTy) :
-    Obs (forceArg C e (some p)) (fun out => CaptureAtom out.2) := by
-  simp only [forceArg]
-  change Obs (if (e.isLit || e.bytesLit?.isSome || (e matches .bool _)) = true
-    then _ else _) _
-  by_cases he : (e.isLit || e.bytesLit?.isSome || (e matches .bool _)) = true
-  · rw [if_pos he]
-    exact obs_pure (Or.inl he)
-  · rw [if_neg he]
-    simp only [pure_bind]
-    apply obs_any
-    intro ⟨Γ, t⟩
-    cases t <;> try (rename_i T _; cases T)
-    all_goals
-      repeat first
-      | apply obs_pure; exact Or.inr ⟨_, rfl⟩
-      | apply obs_any; intro a
-
-theorem forceArg_captureAtom (e : RawExpr) (p : PrimTy)
-    (sc : ElabScope) (st st' : ECtx × Nat) (m m') (out : SProg C × RawExpr)
-    (h : (((forceArg C e (some p)).run sc).run st).run m = .ok ((out, st'), m')) :
-    CaptureAtom out.2 := forceArg_obs C e p sc st m out st' m' h
-private theorem eager_pair_obs (hoist : RawExpr → ElabM (SProg C × RawExpr))
-    (a b : RawExpr) (p q : PrimTy) :
-    Obs (eagerArgsWith C hoist [a, b] false [some p, some q])
-      (fun out => ∃ x y, out.2 = [x, y] ∧ CaptureAtom x ∧ CaptureAtom y) := by
-  simp only [eagerArgsWith, List.zipIdx_cons, List.zipIdx_nil,
-    List.forIn_cons, List.forIn_nil, bind_assoc, pure_bind,
-    List.getElem?_cons_zero, List.getElem?_cons_succ, Option.getD_some, Bool.false_and, Bool.false_eq_true, ↓reduceIte]
-  repeat first
-  | (with_reducible apply obs_pure
-     exact ⟨_, _, rfl, by assumption, by assumption⟩)
-  | (with_reducible apply obs_bind (forceArg_obs C _ _); intro out hatom)
-  | (with_reducible apply obs_any; intro value)
-
-theorem eagerArgs_pair_captureAtoms
-    (hoist : RawExpr → ElabM (SProg C × RawExpr)) (a b : RawExpr) (p q : PrimTy)
-    (sc : ElabScope) (st st' : ECtx × Nat) (m m') (out : SProg C × List RawExpr)
-    (h : (((eagerArgsWith C hoist [a, b] false [some p, some q]).run sc).run st).run m =
-      .ok ((out, st'), m')) :
-    ∃ x y, out.2 = [x, y] ∧ CaptureAtom x ∧ CaptureAtom y :=
-  eager_pair_obs C hoist a b p q sc st m out st' m' h
-
-end ElabCaptureProof
 
 section
 variable (C : Contract) [FreshNames]
@@ -1126,5 +1056,440 @@ def namedStructural (C : Contract)
 
 
 end ElabHoist
+
+
+section
+variable (C : Contract) [FreshNames]
+
+/-- A block, over the per-statement producer `stmt`: each statement in
+order, the state threaded, the programs concatenated. Total (structural on
+the list), so the block's two equations hold definitionally; the knot passes
+the partial `elabStmtP`, and the public `elabStmtsP` is this at it. -/
+def elabStmtsPWith (stmt : RawStmt → ElabM (SProg C)) : List RawStmt → ElabM (SProg C)
+  | [] => pure []
+  | s :: ss => do
+    let P ← stmt s
+    let Q ← elabStmtsPWith stmt ss
+    pure (P ++ Q)
+
+/-- Prepare a reference call in argument order. Storage-to-memory conversion
+copies at the argument's evaluation point under the legacy schedule, after
+the last argument under the source-order one (`binaryLeftToRight`, solc's
+IR pipeline); every reference's identity and
+each scalar read are held before a later argument can change them. Calls
+with only value parameters retain the ordinary capture policy. -/
+def hoistCallArgsWith (hoist : RawExpr → ElabM (SProg C × RawExpr))
+    (stmt : RawStmt → ElabM (SProg C)) (f : String) (args : List RawExpr) :
+    ElabM (SProg C × List RawExpr) := do
+  let funs := (← read).funs
+  -- A call through a function value captures its own arguments, in order and
+  -- at their formal types, after the tag under the source-order schedule
+  -- (`dispatchCaptures`); hoisting a later call argument here would run it
+  -- before an earlier storage operand is copied.
+  if f != "constructor" && funs.all (·.1 != f) && (fnTyOf? C (← ctx) f).isSome then
+    return ([], args)
+  -- likewise through a callee that is not a name: `callValue`, the memory and
+  -- the tuple dispatch capture it at its function type, then the arguments
+  if f == callValueName && (args.head?.bind (fnTyOfExpr C (← ctx))).isSome then
+    return ([], args)
+  let d := if f == "constructor" then C.ctor else lookupBy f funs
+  let some d := d | return ← hoistArgsWith C hoist args
+  unless d.params.any (fun (_, T) => T matches .ref _) do return ← hoistArgsWith C hoist args
+  unless d.params.length == args.length do
+    throw s!"{f} takes {d.params.length} arguments, not {args.length}"
+  let mut P : SProg C := []
+  let mut prepared : List RawExpr := []
+  -- solc's IR pipeline copies a storage operand of a memory parameter after
+  -- every argument ran (`tests/solc/FunctionValueReferences.sol`,
+  -- `argumentOrderDirect`: legacy 101, viaIR 901): under the source-order
+  -- schedule the operand's alias is captured at its position, its copy made
+  -- after the last argument
+  let late := C.evalOrder.binaryLeftToRight
+  let mut copies : List (String × RefTy × List (String × Nat) × List (String × Nat) × Var) := []
+  for ((n, T), a) in d.params.zip args do
+    -- a reference argument's narrow positions, on the expression as written,
+    -- before a capture names it (`elabCallRet` checks the capture again)
+    if T matches .ref _ then
+      unless a.inlineArrayRoot do
+        ElabM.lift (shapeCheck C (← ctx) (shapeUnder d.widths n) a)
+    let (Q, a) ← hoist a
+    P := P ++ Q
+    -- Inline projections now have their independently inferred shape. Check
+    -- before capture can bind the argument at the parameter's reference type.
+    if T matches .ref _ then ElabM.lift (shapeCheck C (← ctx) (shapeUnder d.widths n) a)
+    let Γ ← nctx
+    let (Q, a) ← match T with
+      | .prim p => do
+        if (lookupBy n d.paramLocs).isSome then
+          throw s!"{f}: data location on value parameter {n}"
+        ElabM.lift (fitCheck C (← ctx) p ((lookupBy n d.widths).getD 256) a)
+        captureExpr C a
+      | .ref R => do
+        let stable ← match a with
+          | .name n => match Var.ofName n with
+            | .fresh _ i => do
+              let sc ← read
+              pure (!(C.rootType n).isSome && !sc.mutableFreshNames.contains n &&
+                !sc.inlined.any (fun (k₀, k₁) => k₀ ≤ i && i < k₁))
+            | _ => pure false
+          | _ => pure false
+        match lookupBy n d.paramLocs with
+        | some .storage =>
+          let sp ← ElabM.lift (checkPath C Γ (.ref R) a)
+          if stable then pure ([], a) else do
+          let x ← captureRef C "sp" (.alias R) a
+          pure ([.of Γ (.declStorage R x (some (.path sp)))], .name (toString x))
+        | some .memory | some .calldata =>
+          let rhs ← ElabM.lift (elabMRhs C Γ R a)
+          if stable && (rhs matches .alias _) then pure ([], a) else do
+          if late && (rhs matches .copy ..) then do
+            let sp ← ElabM.lift (checkPath C Γ (.ref R) a)
+            -- the operand's own shape, ABI markers included (`captureRef`)
+            let ws := exprShape C (← ctx) a
+            let x ← captureRef C "sp" (.alias R) a
+            let y := toString (← freshCapture "mv")
+            copies := copies ++ [(y, R, shapeUnder d.widths n, ws, x)]
+            pure ([.of Γ (.declStorage R x (some (.path sp)))], .name y)
+          else
+          let x ← captureRef C "mv" (.mem R) a
+          pure ([.of Γ (.declMem R x (some rhs) rfl rhs.mapFree)], .name (toString x))
+        | none => throw s!"{f}: reference parameter {n} needs a data location"
+    P := P ++ Q
+    prepared := prepared ++ [a]
+  -- the late copies, in argument order
+  for (y, R, ws, shape, x) in copies do
+    P := P ++ (← elabStmtsPWith C stmt
+      [.declMemory (rawTyW ws (.ref R) "") y (some (.name (toString x)))])
+    declareShape y shape
+  pure (P, prepared)
+
+end
+
+namespace ElabCallArgsGood
+open ElabControlProof
+
+private theorem obs_mono {α : Type} {x : ElabM α} {P Q : α → Prop}
+    (hx : Obs x P) (h : ∀ a, P a → Q a) : Obs x Q := by
+  intro sc st m a st' m' he
+  exact h a (hx sc st m a st' m' he)
+
+/-- A successful list loop preserves an invariant through both exit modes. -/
+private theorem obs_forIn {α β : Type} (xs : List α) (b : β)
+    (f : α → β → ElabM (ForInStep β)) (P : β → Prop) (hb : P b)
+    (hf : ∀ a ∈ xs, ∀ b, P b → Obs (f a b)
+      (fun step => match step with | .done b | .yield b => P b)) :
+    Obs (forIn xs b f) P := by
+  induction xs generalizing b with
+  | nil => simpa only [List.forIn_nil] using obs_pure hb
+  | cons a xs ih =>
+    simp only [List.forIn_cons]
+    refine obs_bind (Q := P) (hf a (List.mem_cons_self) b hb) ?_
+    intro step hs
+    cases step with
+    | done b => exact obs_pure hs
+    | yield b =>
+      exact ih b hs (fun a ha b hb => hf a (List.mem_cons_of_mem _ ha) b hb)
+
+
+-- Avoid higher-order unification against unrelated monadic computations.
+local elab "obs_head " h:ident : tactic => do
+  let expected := Lean.mkFVar (← Lean.Elab.Tactic.getFVarId h)
+  let target ← Lean.instantiateMVars (← Lean.Elab.Tactic.getMainTarget)
+  let target := target.consumeMData
+  let args := target.getAppArgs
+  unless args.size == 3 do throwError "expected an observation"
+  let action := args[1]!.consumeMData
+  unless action.getAppFn == expected do throwError "different observation head"
+
+local elab "obs_op " op:str : tactic => do
+  let target ← Lean.instantiateMVars (← Lean.Elab.Tactic.getMainTarget)
+  let target := target.consumeMData
+  let args := target.getAppArgs
+  unless args.size == 3 do throwError "expected an observation"
+  let name := args[1]!.consumeMData.getAppFn.constName?
+  unless name.any (fun n => n.toString.endsWith ("." ++ op.getString)) do
+    throwError "different observation operation"
+
+local elab "obs_throwing" : tactic => do
+  let target ← Lean.instantiateMVars (← Lean.Elab.Tactic.getMainTarget)
+  let target := target.consumeMData
+  let args := target.getAppArgs
+  unless args.size == 3 do throwError "expected an observation"
+  let mut action := args[1]!.consumeMData
+  if action.getAppFn.constName?.any (fun n => n.toString.endsWith ".bind") then
+    let xs := action.getAppArgs
+    action := xs[xs.size - 2]!
+  unless action.getAppFn.constName?.any (fun n => n.toString.endsWith ".throw") do
+    throwError "different observation operation"
+
+private theorem obs_throw_bind {α β : Type} {err : String} {f : α → ElabM β}
+    {Q : β → Prop} : Obs ((throw err : ElabM α) >>= f) Q := by
+  intro sc st m a st' m' h
+  cases h
+
+variable (C : Contract) [FreshNames]
+private theorem captureExpr_shape (e : RawExpr) :
+    Obs (captureExpr C e) (fun out => out.2 = e ∨ ∃ x, out.2 = .name x) := by
+  unfold captureExpr
+  extract_lets tail early
+  have ht (u : PUnit) : Obs (tail u) (fun out => out.2 = e ∨ ∃ x, out.2 = .name x) := by
+    dsimp only [tail]
+    apply obs_any
+    intro ⟨Γ, t⟩
+    cases t <;> try (rename_i T _; cases T)
+    all_goals repeat (with_reducible first
+      | contradiction
+      | (apply obs_pure; exact Or.inl rfl)
+      | (apply obs_pure; exact Or.inr ⟨_, rfl⟩)
+      | exact obs_throw
+      | (apply obs_any; intro x)
+      | split)
+  have he (u : PUnit) : Obs (early u) (fun out => out.2 = e ∨ ∃ x, out.2 = .name x) := by
+    dsimp only [early]
+    repeat (with_reducible first
+      | contradiction
+      | (simpa only [pure_bind] using ht PUnit.unit)
+      | (apply obs_pure; exact Or.inl rfl)
+      | (apply obs_any; intro x)
+      | split)
+  repeat (with_reducible first
+    | contradiction
+    | (simpa only [pure_bind] using he PUnit.unit)
+    | (apply obs_pure; exact Or.inl rfl)
+    | (apply obs_any; intro x)
+    | split)
+
+
+private theorem captureBefore_shape (e : RawExpr) (later : List RawExpr) :
+    Obs (captureBefore C e later) (fun out => out.2 = e ∨ ∃ x, out.2 = .name x) := by
+  unfold captureBefore
+  apply obs_any
+  intro sc
+  apply obs_any
+  intro Γ
+  dsimp only
+  split
+  · exact captureExpr_shape C e
+  · exact obs_pure (Or.inl rfl)
+
+
+omit [FreshNames] in
+private theorem capture_good (Good : RawExpr → Prop) (hn : ∀ x, Good (.name x))
+    (e : RawExpr) (he : Good e) {act : ElabM (SProg C × RawExpr)}
+    (hs : Obs act (fun out => out.2 = e ∨ ∃ x, out.2 = .name x)) :
+    Obs act (fun out => Good out.2) := by
+  refine obs_mono (Q := fun out => Good out.2) hs ?_
+  intro out ho
+  rcases ho with h | ⟨x,h⟩
+  · rw [h]; exact he
+  · rw [h]; exact hn x
+
+private theorem ordinary_good (Good : RawExpr → Prop) (hn : ∀ x, Good (.name x))
+    (H : RawExpr → ElabM (SProg C × RawExpr)) (args : List RawExpr)
+    (hh : ∀ a, a ∈ args → Obs (H a) (fun out => Good out.2)) :
+    Obs (hoistArgsWith C H args) (fun out => ∀ e, e ∈ out.2 → Good e) := by
+  induction args with
+  | nil => exact obs_pure (by intros; contradiction)
+  | cons a args ih =>
+    simp only [hoistArgsWith]
+    refine obs_bind (hh a (List.mem_cons.mpr (Or.inl rfl))) ?_
+    intro out hhead
+    rcases out with ⟨P,b⟩
+    have finish (act : ElabM (SProg C × RawExpr)) (hc : Obs act (fun out => Good out.2)) :
+        Obs (do
+          let cap ← act
+          let tail ← hoistArgsWith C H args
+          pure (P ++ cap.1 ++ tail.1, cap.2 :: tail.2))
+          (fun out => ∀ e, e ∈ out.2 → Good e) := by
+      refine obs_bind hc ?_
+      intro cap hcap
+      refine obs_bind (ih (fun e he => hh e (List.mem_cons.mpr (Or.inr he)))) ?_
+      intro tail htail
+      refine obs_pure ?_
+      intro e he
+      rcases List.mem_cons.mp he with rfl | he
+      · exact hcap
+      · exact htail e he
+    dsimp only
+    repeat' first
+    | exact finish _ (capture_good C Good hn _ hhead (captureExpr_shape C _))
+    | exact finish _ (capture_good C Good hn _ hhead (captureBefore_shape C _ args))
+    | split
+
+private theorem callargs_good (Good : RawExpr → Prop) (hn : ∀ x, Good (.name x))
+    (H : RawExpr → ElabM (SProg C × RawExpr)) (stmt : RawStmt → ElabM (SProg C))
+    (f : String) (args : List RawExpr) (hin : ∀ a, a ∈ args → Good a)
+    (hh : ∀ a, a ∈ args → Obs (H a) (fun out => Good out.2)) :
+    Obs (hoistCallArgsWith C H stmt f args) (fun out => ∀ e, e ∈ out.2 → Good e) := by
+  have hargs := ordinary_good C Good hn H args hh
+  unfold hoistCallArgsWith
+  extract_lets P0 prepared0 late copies0 finish
+  have hf : ∀ P copies prepared (out : SProg C × RawExpr),
+      (∀ e, e ∈ prepared → Good e) → Good out.2 →
+      Obs (finish P copies prepared out) (fun step => match step with
+        | .done r | .yield r => ∀ e, e ∈ r.snd.snd → Good e) := by
+    intro P copies prepared ⟨Q,a⟩ hp ha
+    simp only [finish, pure_bind]
+    refine obs_pure ?_
+    intro e he
+    simp only [List.mem_append, List.mem_singleton] at he
+    rcases he with he | rfl
+    · exact hp e he
+    · exact ha
+  clear_value finish
+  apply obs_any
+  intro sc
+  extract_lets funs d body next
+  have hb (u : PUnit) : Obs (body u) (fun out => ∀ e, e ∈ out.2 → Good e) := by
+    dsimp -zeta -zetaHave only [body]
+    cases d with
+    | none => simpa only [bind_pure] using hargs
+    | some d =>
+      dsimp -zeta -zetaHave only
+      extract_lets loop checked
+      have hl (u0 : PUnit) : Obs (loop u0) (fun out => ∀ e, e ∈ out.2 → Good e) := by
+        dsimp -zeta -zetaHave only [loop]
+        refine obs_bind (obs_forIn _ _ _ (fun r => ∀ e, e ∈ r.snd.snd → Good e)
+          (by intro e he; cases he) ?_) ?_
+        · intro ⟨⟨n,T⟩,a⟩ hmem ⟨P,⟨copies,prepared⟩⟩ hp
+          have ha := hh a (List.of_mem_zip hmem).2
+          dsimp -zeta -zetaHave only
+          extract_lets P1 r1 copies1 prepared1 step
+          have hs : ∀ P copies prepared u0,
+              (∀ e, e ∈ prepared → Good e) →
+              Obs (step P copies prepared u0) (fun result => match result with
+                | .done r | .yield r => ∀ e, e ∈ r.snd.snd → Good e) := by
+            intro P copies prepared u0 hp
+            dsimp -zeta -zetaHave only [step]
+            refine obs_bind ha ?_
+            intro ⟨Q,b⟩ hg
+            dsimp -zeta -zetaHave only
+            extract_lets P2 post
+            have hpost : ∀ P copies prepared u1,
+                (∀ e, e ∈ prepared → Good e) →
+                Obs (post P copies prepared u1) (fun result => match result with
+                  | .done r | .yield r => ∀ e, e ∈ r.snd.snd → Good e) := by
+              intro P copies prepared u1 hp
+              dsimp -zeta -zetaHave only [post]
+              apply obs_any
+              intro Γ
+              cases T with
+              | prim p =>
+                dsimp -zeta -zetaHave only
+                extract_lets value
+                have hv (u2 : PUnit) : Obs (value u2) (fun result => match result with
+                    | .done r | .yield r => ∀ e, e ∈ r.snd.snd → Good e) := by
+                  dsimp -zeta -zetaHave only [value]
+                  apply obs_any
+                  intro ec
+                  apply obs_any
+                  intro checkedValue
+                  refine obs_bind (capture_good C Good hn b hg (captureExpr_shape C b)) ?_
+                  intro cap hcap
+                  exact hf P copies prepared cap hp hcap
+                clear_value value
+                split <;> (obs_op "bind"; apply obs_any; intro x; exact hv x)
+              | ref R =>
+                dsimp -zeta -zetaHave only
+                extract_lets memory
+                have hm (copies) (stable : Bool) : Obs (memory copies stable)
+                    (fun result => match result with
+                      | .done r | .yield r => ∀ e, e ∈ r.snd.snd → Good e) := by
+                  dsimp -zeta -zetaHave only [memory]
+                  simp only [pure_bind]
+                  repeat' first
+                  | (obs_head finish; exact hf P _ prepared _ hp hg)
+                  | (obs_head finish; exact hf P _ prepared _ hp (hn _))
+                  | (obs_throwing; first | exact obs_throw_bind | exact obs_throw)
+                  | (obs_op "bind"; apply obs_any; intro x)
+                  | split
+                  | extract_lets
+                clear_value memory
+                repeat' first
+                | (obs_head memory; exact hm _ _)
+                | (obs_op "bind"; apply obs_any; intro x)
+                | split
+            clear_value post
+            repeat' first
+            | (obs_head post; exact hpost _ _ _ _ hp)
+            | (obs_op "bind"; apply obs_any; intro x)
+            | split
+          clear_value step
+          repeat' first
+          | (obs_head step; exact hs P1 copies1 prepared1 _ hp)
+          | (obs_op "bind"; with_reducible apply obs_any; intro value)
+          | split
+          all_goals
+            refine obs_mono (hs P1 copies1 prepared1 _ hp) ?_
+            intro result hr
+            cases result <;> exact hr
+        · intro r hr
+          repeat' first
+          | with_reducible exact obs_pure hr
+          | (obs_op "bind"; with_reducible apply obs_any; intro value)
+      clear_value loop
+      have hc (u0 : PUnit) : Obs (checked u0) (fun out => ∀ e, e ∈ out.2 → Good e) := by
+        dsimp -zeta -zetaHave only [checked]
+        repeat' first
+        | with_reducible exact hl _
+        | with_reducible exact obs_throw
+        | (obs_op "bind"; with_reducible apply obs_any; intro value)
+        | split
+      clear_value checked
+      simp only [bind_pure, pure_bind]
+      split
+      · exact hc _
+      · exact hargs
+  clear_value body
+  have ht (u : PUnit) : Obs (next u) (fun out => ∀ e, e ∈ out.2 → Good e) := by
+    dsimp -zeta -zetaHave only [next]
+    repeat' first
+    | with_reducible exact hb _
+    | with_reducible exact obs_pure hin
+    | (obs_op "bind"; with_reducible apply obs_any; intro x)
+    | split
+  clear_value next
+  repeat' first
+  | with_reducible exact ht _
+  | with_reducible exact obs_pure hin
+  | (obs_op "bind"; with_reducible apply obs_any; intro x)
+  | split
+
+/-- Successful argument preparation preserves any state-independent predicate
+    satisfied by source inputs, names, and successful hoister results. -/
+theorem hoistCallArgsWith_preserves
+    (Good : RawExpr → Prop) (hn : ∀ x, Good (.name x))
+    (H : RawExpr → ElabM (SProg C × RawExpr)) (stmt : RawStmt → ElabM (SProg C))
+    (f : String) (args : List RawExpr) (hin : ∀ a, a ∈ args → Good a)
+    (hh : ∀ a, a ∈ args → ∀ sc st m out st' m',
+      H a sc st m = .ok ((out, st'), m') → Good out.2)
+    (sc : ElabScope) (st : ECtx × Nat) (m)
+    (out : SProg C × List RawExpr) (st' : ECtx × Nat) (m')
+    (hrun : hoistCallArgsWith C H stmt f args sc st m = .ok ((out, st'), m')) :
+    ∀ e, e ∈ out.2 → Good e :=
+  callargs_good C Good hn H stmt f args hin hh sc st m out st' m' hrun
+
+private theorem callargs_nil
+    (H : RawExpr → ElabM (SProg C × RawExpr)) (stmt : RawStmt → ElabM (SProg C))
+    (f : String) : Obs (hoistCallArgsWith C H stmt f []) (fun out => out.2 = []) := by
+  simp only [hoistCallArgsWith, List.zip_nil_right, List.forIn_nil, hoistArgsWith, pure_bind]
+  repeat' first
+  | (with_reducible apply obs_pure; rfl)
+  | with_reducible exact obs_throw_bind
+  | with_reducible exact obs_throw
+  | (with_reducible apply obs_any; intro value)
+  | split
+  | extract_lets
+
+
+/-- Preparing no arguments cannot introduce an argument. -/
+theorem hoistCallArgsWith_nil
+    (H : RawExpr → ElabM (SProg C × RawExpr)) (stmt : RawStmt → ElabM (SProg C))
+    (f : String) (sc : ElabScope) (st st' : ECtx × Nat) (m m' : CallMemo)
+    (out : SProg C × List RawExpr)
+    (hrun : hoistCallArgsWith C H stmt f [] sc st m = .ok ((out, st'), m')) :
+    out.2 = [] := callargs_nil C H stmt f sc st m out st' m' hrun
+
+end ElabCallArgsGood
 
 end Solidity

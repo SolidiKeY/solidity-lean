@@ -1,5 +1,5 @@
 import Solidity.Goals.ElabTotal
-import Solidity.Syntax.Elab.Measure
+import Solidity.Syntax.Elab.CallMeasure
 
 /-! Structural and named-argument closure for the elaborator totality proof. -/
 namespace Solidity.ElabHoist
@@ -65,20 +65,6 @@ private theorem newArr_congr (C : Contract) (rc rc' : ElabRec C)
   simp -zeta only [pure_bind]
   dsimp +zetaDelta only
   rw [ha]
-
-omit [FreshNames] in
-theorem foldConst_same_or_lit (e out : RawExpr) (h : e.foldConst = .ok out) :
-    out = e ∨ out.isLit = true := by
-  unfold RawExpr.foldConst at h
-  split at h
-  · cases h; exact Or.inl rfl
-  · split at h
-    · cases h
-    · dsimp only at h
-      split at h
-      · cases h; exact Or.inr rfl
-      · cases h; exact Or.inr rfl
-
 
 omit [FreshNames] in
 theorem RawExpr.nodes_pos (e : RawExpr) : 0 < e.nodes := by
@@ -498,3 +484,79 @@ theorem hoist_named_eq (C : Contract) (f : String) (ns : List String) (args : Li
   exact record_update_eq C _
 
 end Solidity.ElabHoist
+
+namespace Solidity.ElabCaptureProof
+open Semantics ElabControlProof
+
+/-- An operand accepted without capture, or a captured local name. -/
+def CaptureAtom (e : RawExpr) : Prop :=
+  (e.isLit || e.bytesLit?.isSome || (e matches .bool _)) = true ∨
+    ∃ x, e = .name x
+
+
+/-- Captured atoms have only these literal or name forms. -/
+theorem captureAtom_cases (e : RawExpr) (h : CaptureAtom e) :
+    (∃ n, e = .num n) ∨ (∃ n, e = .unop .neg (.num n)) ∨
+      (∃ b, e = .bool b) ∨ (∃ x, e = .name x) ∨ (∃ bs, e = .bytesLit bs) := by
+  rcases h with h | ⟨x, hx⟩
+  · simp only [Bool.or_eq_true] at h
+    rcases h with (hl | hb) | hb
+    · unfold RawExpr.isLit at hl
+      split at hl
+      next n => exact Or.inl ⟨n, rfl⟩
+      next n => exact Or.inr (Or.inl ⟨n, rfl⟩)
+      next => contradiction
+    · cases he : e.bytesLit? with
+      | none => simp only [he, Option.isSome_none, Bool.false_eq_true] at hb
+      | some bs => exact Or.inr (Or.inr (Or.inr (Or.inr ⟨bs, bytesLit_shape e bs he⟩)))
+    · cases e <;> simp only [Bool.false_eq_true] at hb
+      rename_i b
+      exact Or.inr (Or.inr (Or.inl ⟨b, rfl⟩))
+  · exact Or.inr (Or.inr (Or.inr (Or.inl ⟨x, hx⟩)))
+
+variable (C : Contract) [FreshNames]
+
+private theorem forceArg_obs (e : RawExpr) (p : PrimTy) :
+    Obs (forceArg C e (some p)) (fun out => CaptureAtom out.2) := by
+  simp only [forceArg]
+  change Obs (if (e.isLit || e.bytesLit?.isSome || (e matches .bool _)) = true
+    then _ else _) _
+  by_cases he : (e.isLit || e.bytesLit?.isSome || (e matches .bool _)) = true
+  · rw [if_pos he]
+    exact obs_pure (Or.inl he)
+  · rw [if_neg he]
+    simp only [pure_bind]
+    apply obs_any
+    intro ⟨Γ, t⟩
+    cases t <;> try (rename_i T _; cases T)
+    all_goals
+      repeat first
+      | apply obs_pure; exact Or.inr ⟨_, rfl⟩
+      | apply obs_any; intro a
+
+theorem forceArg_captureAtom (e : RawExpr) (p : PrimTy)
+    (sc : ElabScope) (st st' : ECtx × Nat) (m m') (out : SProg C × RawExpr)
+    (h : (((forceArg C e (some p)).run sc).run st).run m = .ok ((out, st'), m')) :
+    CaptureAtom out.2 := forceArg_obs C e p sc st m out st' m' h
+private theorem eager_pair_obs (hoist : RawExpr → ElabM (SProg C × RawExpr))
+    (a b : RawExpr) (p q : PrimTy) :
+    Obs (eagerArgsWith C hoist [a, b] false [some p, some q])
+      (fun out => ∃ x y, out.2 = [x, y] ∧ CaptureAtom x ∧ CaptureAtom y) := by
+  simp only [eagerArgsWith, List.zipIdx_cons, List.zipIdx_nil,
+    List.forIn_cons, List.forIn_nil, bind_assoc, pure_bind,
+    List.getElem?_cons_zero, List.getElem?_cons_succ, Option.getD_some, Bool.false_and, Bool.false_eq_true, ↓reduceIte]
+  repeat first
+  | (with_reducible apply obs_pure
+     exact ⟨_, _, rfl, by assumption, by assumption⟩)
+  | (with_reducible apply obs_bind (forceArg_obs C _ _); intro out hatom)
+  | (with_reducible apply obs_any; intro value)
+
+theorem eagerArgs_pair_captureAtoms
+    (hoist : RawExpr → ElabM (SProg C × RawExpr)) (a b : RawExpr) (p q : PrimTy)
+    (sc : ElabScope) (st st' : ECtx × Nat) (m m') (out : SProg C × List RawExpr)
+    (h : (((eagerArgsWith C hoist [a, b] false [some p, some q]).run sc).run st).run m =
+      .ok ((out, st'), m')) :
+    ∃ x y, out.2 = [x, y] ∧ CaptureAtom x ∧ CaptureAtom y :=
+  eager_pair_obs C hoist a b p q sc st m out st' m' h
+
+end Solidity.ElabCaptureProof
