@@ -242,7 +242,7 @@ def declTyName (ws : List (String × Nat)) (k : String) (p : PrimTy) : String :=
 /-- `T` written back as a declared type, its narrow positions at their widths
 in `ws`, keyed by their path below `k` (`elabTyW`'s inverse: a modifier's
 reference parameter, declared as a local of its type). -/
-partial def rawTyW (ws : List (String × Nat)) : Ty → String → RawTy
+def rawTyW (ws : List (String × Nat)) : Ty → String → RawTy
   | .prim p, k => .named (declTyName ws k p)
   | .ref (.struct s), _ => .named s
   | .ref (.array E), k => .array (rawTyW ws E (k ++ "[]"))
@@ -250,6 +250,26 @@ partial def rawTyW (ws : List (String × Nat)) : Ty → String → RawTy
   | .ref (.mapping p V), k =>
     .mapping (.named (if (lookupBy (k ++ "{}#hash") ws).isSome then "string"
       else declTyName ws (k ++ "{}") p)) (rawTyW ws V (k ++ "[]"))
+
+
+/-- Defining equation of the total width-aware type spelling. -/
+theorem rawTyW_eq (ws : List (String × Nat)) (T : Ty) (k : String) :
+    rawTyW ws T k = match T with
+      | .prim p => .named (declTyName ws k p)
+      | .ref (.struct s) => .named s
+      | .ref (.array E) => .array (rawTyW ws E (k ++ "[]"))
+      | .ref (.fixed E n) => .fixed (rawTyW ws E (k ++ "[]")) n
+      | .ref (.mapping p V) =>
+        .mapping (.named (if (lookupBy (k ++ "{}#hash") ws).isSome then "string"
+          else declTyName ws (k ++ "{}") p)) (rawTyW ws V (k ++ "[]")) := by
+  cases T with
+  | prim p => rfl
+  | ref R => cases R <;> rfl
+
+/-- The declared array shape retains its outer constructor. -/
+theorem rawTyW_array (ws : List (String × Nat)) (E : Ty) (k : String) :
+    rawTyW ws (.ref (.array E)) k = .array (rawTyW ws E (k ++ "[]")) := by
+  rw [rawTyW_eq]
 
 /-- A synthesised expression, read in `Γ`: a storage path, a memory path, or
 a value. -/

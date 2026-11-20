@@ -769,7 +769,7 @@ theorem synthetic_lt (a : RawLoopSpec) (c : RawExpr) (b : List RawStmt)
     loopMeasure (.whileLoop a c b) := by
   have hf : (RawExpr.bool true).hasIncDec = false := by
     simp [RawExpr.hasIncDec, RawExpr.any]
-  simp [loopMeasure, stmtWeight, listWeight, h, hf]
+  simp [-Nat.mul_lt_mul_left, loopMeasure, stmtWeight, listWeight, h, hf]
   omega
 
 def loopFinish [FreshNames] (spec : RawLoopSpec) (c : RawExpr)
@@ -889,7 +889,7 @@ def lowerStmt (rs : Option (List String)) (s : RawStmt) :
 termination_by LowerKernel.stmtMeasure s
 decreasing_by
   all_goals simp_wf
-  all_goals simp_all [LowerKernel.listMeasure, LowerKernel.stmtMeasure, LowerKernel.loopMeasure, LowerKernel.stmtWeight]
+  all_goals simp_all [-Nat.mul_lt_mul_left, LowerKernel.listMeasure, LowerKernel.stmtMeasure, LowerKernel.loopMeasure, LowerKernel.stmtWeight]
   all_goals omega
 
 /-- A loop, lowered to `RawStmt.loop`: `{ before; while (!brk && !ret && c)
@@ -915,9 +915,9 @@ def lowerLoop (rs : Option (List String)) (s : RawStmt) :
 termination_by LowerKernel.loopMeasure s
 decreasing_by
   all_goals simp_wf
-  all_goals cases s <;> simp_all [LowerKernel.listMeasure, LowerKernel.loopMeasure, LowerKernel.stmtWeight, LowerKernel.listWeight]
-  all_goals try simp_all +zetaDelta [RawExpr.hasIncDec, RawExpr.any]
-  all_goals first | omega | (split <;> (try simp_all [RawExpr.hasIncDec, RawExpr.any]) <;> omega)
+  all_goals cases s <;> simp_all [-Nat.mul_lt_mul_left, LowerKernel.listMeasure, LowerKernel.loopMeasure, LowerKernel.stmtWeight, LowerKernel.listWeight]
+  all_goals try simp_all +zetaDelta [-Nat.mul_lt_mul_left, RawExpr.hasIncDec, RawExpr.any]
+  all_goals first | omega | (split <;> (try simp_all [-Nat.mul_lt_mul_left]) <;> omega)
 
 end
 
