@@ -142,3 +142,23 @@ end Solidity.Examples.ElabTotal.Stmts
 /-- info: 'Solidity.ElabHoist.hoist_structural_eq' depends on axioms: [propext, Quot.sound] -/
 #guard_msgs in
 #print axioms Solidity.ElabHoist.hoist_structural_eq
+
+/-- info: 'Solidity.ElabHoist.namedClosure_eq' depends on axioms: [propext, Quot.sound] -/
+#guard_msgs in
+#print axioms Solidity.ElabHoist.namedClosure_eq
+
+/-- info: 'Solidity.ElabHoist.namedStructural_named' depends on axioms: [propext, Quot.sound] -/
+#guard_msgs in
+#print axioms Solidity.ElabHoist.namedStructural_named
+
+/-- info: 'Solidity.ElabHoist.namedStructural_eq' depends on axioms: [propext, Quot.sound] -/
+#guard_msgs in
+#print axioms Solidity.ElabHoist.namedStructural_eq
+
+/-- info: 'Solidity.ElabHoist.namedStructural_unique' depends on axioms: [propext, Quot.sound] -/
+#guard_msgs in
+#print axioms Solidity.ElabHoist.namedStructural_unique
+
+/-- info: 'Solidity.ElabHoist.hoist_named_eq' depends on axioms: [propext, Quot.sound] -/
+#guard_msgs in
+#print axioms Solidity.ElabHoist.hoist_named_eq

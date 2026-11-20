@@ -35,6 +35,10 @@
   "Quot.sound",
   "propext"
  ],
+ "Solidity/Examples/ElabTotal/Stmts.lean:Solidity.ElabHoist.hoist_named_eq": [
+  "Quot.sound",
+  "propext"
+ ],
  "Solidity/Examples/ElabTotal/Stmts.lean:Solidity.ElabHoist.hoist_structural_eq": [
   "Quot.sound",
   "propext"
@@ -48,6 +52,22 @@
   "propext"
  ],
  "Solidity/Examples/ElabTotal/Stmts.lean:Solidity.ElabHoist.hoistStructural_unique": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Examples/ElabTotal/Stmts.lean:Solidity.ElabHoist.namedClosure_eq": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Examples/ElabTotal/Stmts.lean:Solidity.ElabHoist.namedStructural_eq": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Examples/ElabTotal/Stmts.lean:Solidity.ElabHoist.namedStructural_named": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Examples/ElabTotal/Stmts.lean:Solidity.ElabHoist.namedStructural_unique": [
   "Quot.sound",
   "propext"
  ]
