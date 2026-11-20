@@ -86,36 +86,6 @@ theorem success_tail (result : Compilation b F P)
         σ {m with stack := tail} o.st m' :=
   success result (compilation_input_stack result hi tail) hs
 
-/-- **Saved-tail independence**: the exact outcome and every non-stack field
-do not depend on the saved tail. -/
-theorem tail_exact (result : Compilation b F P)
-    {base : Nat → Fin W} {σ : State C Γ} {m : Machine}
-    (hi : result.Input L frame base σ m) (tail : List Word) :
-    run result.code {m with stack := tail} =
-      replaceOutStack tail (run result.code {m with stack := []}) := by
-  rcases exact result (compilation_input_stack result hi []) with
-    ⟨o, canonical, hs, ht, hstack, hr⟩ | ⟨hs, ht⟩ | ⟨hs, ht⟩
-  · have he := run_tail result.code {m with stack := []} tail
-      (by rw [ht]; intro h; cases h)
-    rw [ht]
-    simpa only [ht, appendTail, appendOut, replaceOutStack, hstack,
-      List.nil_append] using he
-  · have he := run_tail result.code {m with stack := []} tail
-      (by rw [ht]; intro h; cases h)
-    rw [ht]
-    simpa only [ht, appendTail, appendOut, replaceOutStack, List.nil_append] using he
-  · rw [ht]
-    change run result.code {m with stack := tail} = .fault
-    rcases exact result (compilation_input_stack result hi tail) with
-      ⟨o, out, hs', _, _, _⟩ | ⟨hs' | ⟨_, hs'⟩, _⟩ | ⟨_, ht'⟩
-    · rw [hs] at hs'
-      cases hs'
-    · rw [hs] at hs'
-      cases hs'
-    · rw [hs] at hs'
-      cases hs'
-    · exact ht'
-
 /-- Equality after erasing only the returned stack, for any two tails. -/
 theorem two_tails (result : Compilation b F P)
     {base : Nat → Fin W} {σ : State C Γ} {m : Machine}

@@ -16,6 +16,13 @@ open Solidity.Evm.Compiler
 variable {C : Contract} {b L frame : Nat} {Γ Δ : Ctx}
   {F : Frag Γ} {P : Prog C Γ Δ}
 
+/-- Recover an exact successful result from its optional-result witness. -/
+theorem except_ok_of_toOption {ε α : Type} {result : Except ε α} {value : α}
+    (hx : some value = result.toOption) : result = .ok value := by
+  cases result with
+  | ok actual => exact congrArg Except.ok (Option.some.inj hx).symm
+  | error e => cases hx
+
 /-- Exact terminal agreement under the existing payment-freedom premise.
 The panic alternative remains explicit and is not an ABI observation. -/
 theorem compilation_exact (result : Compilation b F P)

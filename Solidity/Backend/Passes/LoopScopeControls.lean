@@ -20,10 +20,8 @@ noncomputable def prepared : Solidity.Out C initial.H Γ :=
   (prepare.run initial).toOption.get (by decide +kernel)
 
 private theorem source_get {Γ Δ : Ctx} {σ : State C Γ} {P : Prog C Γ Δ}
-    {o : Solidity.Out C σ.H Δ} (hx : some o = (P.run σ).toOption) : P.run σ = .ok o := by
-  cases hs : P.run σ with
-  | ok value => rw [hs] at hx; exact congrArg Except.ok (Option.some.inj hx).symm
-  | error e => rw [hs] at hx; cases hx
+    {o : Solidity.Out C σ.H Δ} (hx : some o = (P.run σ).toOption) : P.run σ = .ok o :=
+  except_ok_of_toOption hx
 
 theorem prepared_source : prepare.run initial = .ok prepared := source_get (Option.some_get _)
 
