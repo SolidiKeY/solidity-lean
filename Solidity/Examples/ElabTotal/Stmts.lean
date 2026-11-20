@@ -162,3 +162,11 @@ end Solidity.Examples.ElabTotal.Stmts
 /-- info: 'Solidity.ElabHoist.hoist_named_eq' depends on axioms: [propext, Quot.sound] -/
 #guard_msgs in
 #print axioms Solidity.ElabHoist.hoist_named_eq
+
+/-- info: 'Solidity.ElabCallArgsGood.hoistCallArgsWith_preserves' depends on axioms: [propext, Quot.sound] -/
+#guard_msgs in
+#print axioms Solidity.ElabCallArgsGood.hoistCallArgsWith_preserves
+
+/-- info: 'Solidity.ElabCallArgsGood.hoistCallArgsWith_nil' depends on axioms: [propext, Quot.sound] -/
+#guard_msgs in
+#print axioms Solidity.ElabCallArgsGood.hoistCallArgsWith_nil
