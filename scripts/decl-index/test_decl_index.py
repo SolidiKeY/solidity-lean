@@ -92,6 +92,71 @@ class Compare(unittest.TestCase):
         ok, rep = self.run_cmp(self.base[:1] + [other]); self.assertTrue(ok, rep)
 
 
+class PrivateIdentity(unittest.TestCase):
+    modules = ("Solidity.FixedBooleanSequence", "Solidity.FixedBooleanFailure")
+
+    def rows(self):
+        return [row("FixedBooleanSequence.selected", h, m, private=True)
+                for h, m in enumerate(self.modules, 1)]
+
+    def compare(self, base, head):
+        return d.compare(base, head, self.modules, statement_preserving=True)
+
+    def test_unchanged_collisions_in_either_order(self):
+        rows = self.rows()
+        for base in (rows, rows[::-1]):
+            for head in (rows, rows[::-1]):
+                with self.subTest(base=base, head=head):
+                    ok, rep = self.compare(base, head)
+                    self.assertTrue(ok, rep)
+                    self.assertEqual(rep, ["ok decl-index: 2 touched module(s), 0 new duplicate(s), "
+                                           "0 changed, 0 removed, 0 renamed"])
+
+    def test_changed_private_collision_fails(self):
+        rows = self.rows()
+        for i in range(2):
+            head = [dict(r) for r in rows]
+            head[i]["typeHash"] = "changed"
+            ok, rep = self.compare(rows, head)
+            self.assertFalse(ok, rep)
+            self.assertIn(f"statement changed: {rows[i]['name']} ({self.modules[i]})", rep)
+            self.assertIn("1 changed, 0 removed", rep[-1])
+
+    def test_removing_either_private_collision_fails(self):
+        rows = self.rows()
+        for i in range(2):
+            ok, rep = self.compare(rows, [rows[1 - i]])
+            self.assertFalse(ok, rep)
+            self.assertIn(f"removed: {rows[i]['name']} ({self.modules[i]})", rep)
+            self.assertIn("0 changed, 1 removed", rep[-1])
+
+    def test_public_module_move_passes(self):
+        for private_field in ({}, {"private": False}):
+            base = [row("Public.selected", 1, self.modules[0], **private_field)]
+            head = [dict(base[0], module=self.modules[1])]
+            ok, rep = self.compare(base, head)
+            self.assertTrue(ok, rep)
+            self.assertIn("0 changed, 0 removed, 0 renamed", rep[-1])
+
+    def test_live_private_collision_is_still_a_duplicate(self):
+        rows = self.rows()
+        rows[1].update(typeHash=rows[0]["typeHash"], shapeHash=rows[0]["shapeHash"],
+                       typeClass=rows[0]["typeClass"])
+        head = [rows[1], row("Renamed.selected", 1, self.modules[0], private=True)]
+        ok, rep = self.compare(rows, head)
+        self.assertFalse(ok, rep)
+        self.assertIn("1 new duplicate(s)", rep[-1])
+
+    def test_private_rename_is_detected(self):
+        rows = self.rows()
+        head = [dict(rows[0], name="Renamed.selected"), rows[1]]
+        ok, rep = self.compare(rows, head)
+        self.assertFalse(ok, rep)  # strict preservation still reports the removed name
+        self.assertIn("rename FixedBooleanSequence.selected -> Renamed.selected "
+                      "(Solidity.FixedBooleanSequence)", rep)
+        self.assertIn("1 renamed", rep[-1])
+
+
 class Git(unittest.TestCase):
     def test_library_boundary_for_changed_and_touched_modules(self):
         with tempfile.TemporaryDirectory() as t:

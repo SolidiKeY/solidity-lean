@@ -451,20 +451,25 @@ def waivers(merge, head="HEAD"):
     return {line.split()[0] for line in text.splitlines() if len(line.split()) > 1}
 
 
+def identity(r):
+    """Private names are local to their module; public names survive module moves."""
+    return (r["module"] if r.get("private", False) else "", r["name"])
+
+
 def compare(base_rows, head_rows, touched, statement_preserving=False, waived=frozenset()):
     """(ok, report lines)."""
     touched = set(touched)
-    base = {r["name"]: r for r in base_rows}
-    head = {r["name"]: r for r in head_rows}
+    base = {identity(r): r for r in base_rows}
+    head = {identity(r): r for r in head_rows}
     by_hash = defaultdict(list)
     for r in base_rows:
-        if countable(r): by_hash[key(r)].append(r["name"])
+        if countable(r): by_hash[key(r)].append(identity(r))
     gone = {n for n, r in base.items() if r["module"] in touched and n not in head}
     changed, dups, renames = [], [], []
     fresh = defaultdict(list)
     for r in head_rows:
         if r["module"] not in touched: continue
-        old = base.get(r["name"])
+        old = base.get(identity(r))
         if old is not None:
             if key(old) != key(r): changed.append(r)
             continue
@@ -472,15 +477,15 @@ def compare(base_rows, head_rows, touched, statement_preserving=False, waived=fr
         fresh[key(r)].append(r)
         same = by_hash.get(key(r), [])
         live = [n for n in same if n not in gone]
-        if live: dups.append((r, live))
-        elif same: renames.append((r, same))
+        if live: dups.append((r, [base[n]["name"] for n in live]))
+        elif same: renames.append((r, [base[n]["name"] for n in same]))
     for g in fresh.values():
         if len(g) > 1:
             for r in g[1:]: dups.append((r, [g[0]["name"]]))
     rep, ok = [], True
     for r, olds in renames: rep.append(f"rename {olds[0]} -> {r['name']} ({r['module']})")
     for r in changed: rep.append(f"statement changed: {r['name']} ({r['module']})")
-    for n in sorted(gone): rep.append(f"removed: {n} ({base[n]['module']})")
+    for n in sorted(gone): rep.append(f"removed: {base[n]['name']} ({base[n]['module']})")
     if dups:
         waived_d = "duplicates" in waived
         ok = ok and waived_d
