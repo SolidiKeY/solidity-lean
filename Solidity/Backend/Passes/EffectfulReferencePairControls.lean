@@ -45,13 +45,9 @@ theorem source_heap_live : source.2.heap.get 0 = some ⟨.bytes .memory,.bytes [
 private def okMachine : Evm.Out → Option Machine
   | .ok m 0 => some m | _ => none
 private theorem extracted {out : Evm.Out} (h : (okMachine out).isSome) :
-    out = .ok ((okMachine out).get h) 0 := by
-  cases out with
-  | ok m skip => cases skip with
-    | zero => rfl
-    | succ n => cases h
-  | revert => cases h
-  | fault => cases h
+    out = .ok ((okMachine out).get h) 0 :=
+  successfulMachine_eq_some.mp (Option.some_get h).symm
+
 @[irreducible] def executed (p : Roadmap.Pipeline) : Machine :=
   (okMachine (run (compiled p).code machine)).get (by cases p <;> decide +kernel)
 def observed (p : Roadmap.Pipeline) (tail : List Word) : Machine := {executed p with stack := tail}
