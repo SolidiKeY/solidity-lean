@@ -21,8 +21,8 @@ of a successful nested write does not depend on the state. `written_indep`
 and `cells_sub` are recursions of the same shape.
 
 The helpers `writeLength_mem`, `writeBlob_mem`, `data_congr`,
-`elem_nested` and `field_nested` restate private lemmas of `Laws/Write.lean`.
-The option-bind and sequence frame laws reuse its shared helpers.
+`elem_nested` restate private lemmas of `Laws/Write.lean`.
+The field-offset, option-bind and sequence frame laws reuse its shared helpers.
 -/
 namespace Solidity.Yul.Layout
 
@@ -226,11 +226,8 @@ private theorem elem_nested (P : Shrink.Params) (e : Shrink.Layout) (l : Shrink.
 private theorem field_nested (P : Shrink.Params) (fs : List Shrink.Layout) (l : Shrink.Loc)
     (i : Nat) (f : Shrink.Layout) (hf : fs[i]? = some f)
     (h : (geometry.field P fs l i).region = .memory) :
-    (geometry.field P fs l i).offset = indirect f := by
-  by_cases hr : l.region = .memory
-  · simp only [geometry, if_pos hr, hf, Option.map_some, Option.getD_some]
-  · simp only [geometry, if_neg hr] at h
-    exact absurd h hr
+    (geometry.field P fs l i).offset = indirect f :=
+  write_field_nested_shared P fs l i f hf h
 
 /-! ## Footprint and separation of a successful nested write: state-independent -/
 

@@ -214,6 +214,9 @@ private theorem field_nested (P : Shrink.Params) (fs : List Shrink.Layout) (l : 
   · simp only [geometry, if_pos hr, hf, Option.map_some, Option.getD_some]
   · exact absurd h (field_slotted P fs l i hr)
 
+/-- Shared memory-field offset law for layout write proofs. -/
+theorem write_field_nested_shared : type_of% (@field_nested) := @field_nested
+
 /-! ## The written footprint of a successful nested write is state-independent -/
 
 mutual
