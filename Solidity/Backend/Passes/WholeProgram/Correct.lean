@@ -76,16 +76,6 @@ theorem revert_iff (result : Compilation b F P)
   · exact ht
   · rcases hs with hs | ⟨_, hs⟩ <;> rw [hs] at hs' <;> cases hs'
 
-/-- Every saved tail: success with that exact tail and the full `Rep`. -/
-theorem success_tail (result : Compilation b F P)
-    {base : Nat → Fin W} {σ : State C Γ} {m : Machine}
-    (hi : result.Input L frame base σ m)
-    {o : Solidity.Out C σ.H Δ} (hs : P.run σ = .ok o) (tail : List Word) :
-    ∃ m', run result.code {m with stack := tail} = .ok m' 0 ∧
-      m'.stack = tail ∧ result.Rep (L + Evm.Prog.pushes P) frame base
-        σ {m with stack := tail} o.st m' :=
-  success result (compilation_input_stack result hi tail) hs
-
 /-- Equality after erasing only the returned stack, for any two tails. -/
 theorem two_tails (result : Compilation b F P)
     {base : Nat → Fin W} {σ : State C Γ} {m : Machine}

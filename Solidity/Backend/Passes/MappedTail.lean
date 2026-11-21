@@ -71,7 +71,7 @@ theorem WholeProgram.success_shared_mapped (result : Compilation b F P)
         run result.code {m with stack := tail} = .ok {canonical with stack := tail} 0 ∧
         MappedOutput result (L + Evm.Prog.pushes P) frame base σ {m with stack := tail}
           o.st {canonical with stack := tail} outBase := by
-  obtain ⟨canonical, ht, hstack, hr⟩ := Compilation.compile_success result (compilation_input_stack result hi []) hs
+  obtain ⟨canonical, ht, hstack, hr⟩ := WholeProgram.success_tail result hi hs []
   obtain ⟨outBase, hm⟩ := (mapped_output_iff result _ _ _ _ _ _ _).mp hr
   refine ⟨canonical, outBase, ht, hstack, fun tail => ?_⟩
   have he := WholeProgram.tail_exact result hi tail

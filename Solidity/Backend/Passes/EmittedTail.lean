@@ -63,6 +63,16 @@ theorem compilation_tail_exact (result : Compilation b F P)
   clear hp
   exact WholeProgram.tail_exact result hi tail
 
+/-- Every saved tail: success with that exact tail and the full `Rep`. -/
+theorem WholeProgram.success_tail (result : Compilation b F P)
+    {base : Nat → Fin W} {σ : State C Γ} {m : Machine}
+    (hi : result.Input L frame base σ m)
+    {o : Solidity.Out C σ.H Δ} (hs : P.run σ = .ok o) (tail : List Word) :
+    ∃ m', run result.code {m with stack := tail} = .ok m' 0 ∧
+      m'.stack = tail ∧ result.Rep (L + Evm.Prog.pushes P) frame base
+        σ {m with stack := tail} o.st m' :=
+  Compilation.compile_success result (compilation_input_stack result hi tail) hs
+
 /-- **One shared canonical machine** for every saved tail, with the full
 branch-specific `Rep` per run. -/
 theorem WholeProgram.success_shared (result : Compilation b F P)
@@ -75,13 +85,13 @@ theorem WholeProgram.success_shared (result : Compilation b F P)
           .ok {canonical with stack := tail} 0 ∧
         result.Rep (L + Evm.Prog.pushes P) frame base σ {m with stack := tail}
           o.st {canonical with stack := tail} := by
-  obtain ⟨canonical, ht, hstack, _⟩ := Compilation.compile_success result (compilation_input_stack result hi []) hs
+  obtain ⟨canonical, ht, hstack, _⟩ := WholeProgram.success_tail result hi hs []
   refine ⟨canonical, ht, hstack, fun tail => ?_⟩
   have he := WholeProgram.tail_exact result hi tail
   rw [ht] at he
   change run result.code {m with stack := tail} =
     .ok {canonical with stack := tail} 0 at he
-  obtain ⟨actual, ha, _, hr⟩ := Compilation.compile_success result (compilation_input_stack result hi tail) hs
+  obtain ⟨actual, ha, _, hr⟩ := WholeProgram.success_tail result hi hs tail
   have hm : actual = {canonical with stack := tail} :=
     (Evm.Out.ok.inj (ha.symm.trans he)).1
   exact ⟨he, hm ▸ hr⟩
