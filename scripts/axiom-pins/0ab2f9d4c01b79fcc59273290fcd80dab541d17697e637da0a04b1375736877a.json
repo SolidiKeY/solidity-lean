@@ -71,6 +71,10 @@
   "Quot.sound",
   "propext"
  ],
+ "Solidity/Examples/ElabTotal/Stmts.lean:Solidity.ElabCallHeight.array_output_height": [
+  "Quot.sound",
+  "propext"
+ ],
  "Solidity/Examples/ElabTotal/Stmts.lean:Solidity.ElabCallHeight.assignment_output_height": [
   "Quot.sound",
   "propext"
@@ -84,6 +88,18 @@
   "propext"
  ],
  "Solidity/Examples/ElabTotal/Stmts.lean:Solidity.ElabCallHeight.binop_output_height_of_hoist": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Examples/ElabTotal/Stmts.lean:Solidity.ElabCallHeight.bytes_index_output_height": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Examples/ElabTotal/Stmts.lean:Solidity.ElabCallHeight.bytes_index_request_lt": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Examples/ElabTotal/Stmts.lean:Solidity.ElabCallHeight.bytes_literal_output_height": [
   "Quot.sound",
   "propext"
  ],
@@ -171,6 +187,10 @@
   "propext"
  ],
  "Solidity/Examples/ElabTotal/Stmts.lean:Solidity.ElabCallHeight.height_pos": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Examples/ElabTotal/Stmts.lean:Solidity.ElabCallHeight.hoistCallArgs_argument_lt": [
   "Quot.sound",
   "propext"
  ],
@@ -291,6 +311,22 @@
   "propext"
  ],
  "Solidity/Examples/ElabTotal/Stmts.lean:Solidity.ElabCallHeight.signature_selector_lt": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Examples/ElabTotal/Stmts.lean:Solidity.ElabCallHeight.slice_index_output_height": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Examples/ElabTotal/Stmts.lean:Solidity.ElabCallHeight.slice_index_request_lt": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Examples/ElabTotal/Stmts.lean:Solidity.ElabCallHeight.sliceAdd_height_le": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Examples/ElabTotal/Stmts.lean:Solidity.ElabCallHeight.sliceCopy_output_height": [
   "Quot.sound",
   "propext"
  ],

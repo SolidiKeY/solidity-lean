@@ -463,3 +463,39 @@ end Solidity.Examples.ElabTotal.Stmts
 /-- info: 'Solidity.ElabCallHeight.decode_output_height' depends on axioms: [propext, Quot.sound] -/
 #guard_msgs in
 #print axioms Solidity.ElabCallHeight.decode_output_height
+
+/-- info: 'Solidity.ElabCallHeight.bytes_index_request_lt' depends on axioms: [propext, Quot.sound] -/
+#guard_msgs in
+#print axioms Solidity.ElabCallHeight.bytes_index_request_lt
+
+/-- info: 'Solidity.ElabCallHeight.bytes_index_output_height' depends on axioms: [propext, Quot.sound] -/
+#guard_msgs in
+#print axioms Solidity.ElabCallHeight.bytes_index_output_height
+
+/-- info: 'Solidity.ElabCallHeight.sliceAdd_height_le' depends on axioms: [propext, Quot.sound] -/
+#guard_msgs in
+#print axioms Solidity.ElabCallHeight.sliceAdd_height_le
+
+/-- info: 'Solidity.ElabCallHeight.slice_index_request_lt' depends on axioms: [propext, Quot.sound] -/
+#guard_msgs in
+#print axioms Solidity.ElabCallHeight.slice_index_request_lt
+
+/-- info: 'Solidity.ElabCallHeight.slice_index_output_height' depends on axioms: [propext, Quot.sound] -/
+#guard_msgs in
+#print axioms Solidity.ElabCallHeight.slice_index_output_height
+
+/-- info: 'Solidity.ElabCallHeight.array_output_height' depends on axioms: [propext, Quot.sound] -/
+#guard_msgs in
+#print axioms Solidity.ElabCallHeight.array_output_height
+
+/-- info: 'Solidity.ElabCallHeight.sliceCopy_output_height' depends on axioms: [propext, Quot.sound] -/
+#guard_msgs in
+#print axioms Solidity.ElabCallHeight.sliceCopy_output_height
+
+/-- info: 'Solidity.ElabCallHeight.bytes_literal_output_height' depends on axioms: [propext, Quot.sound] -/
+#guard_msgs in
+#print axioms Solidity.ElabCallHeight.bytes_literal_output_height
+
+/-- info: 'Solidity.ElabCallHeight.hoistCallArgs_argument_lt' depends on axioms: [propext, Quot.sound] -/
+#guard_msgs in
+#print axioms Solidity.ElabCallHeight.hoistCallArgs_argument_lt

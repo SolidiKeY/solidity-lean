@@ -895,3 +895,225 @@ theorem decode_output_height
     omega
 
 end Solidity.ElabCallHeight
+
+namespace Solidity.ElabCallHeight
+open Semantics ElabControlProof
+/-- Fixed-bytes extraction has room for the shift/mask arithmetic generated
+from its hoisted and captured operands. -/
+theorem bytes_index_request_lt (b i b' i' : RawExpr) (n : Nat)
+    (hb : height b' ≤ height b) (hi : height i' ≤ height i) :
+    height (.binop .mod (.binop .shr b'
+      (.binop .mulW (.num 8) (.binop .subW (.num (n - 1)) i'))) (.num 256)) <
+      height (.call "#bytesIndex" [b, i, .num n]) := by
+  have hp := height_pos b
+  have hq := height_pos i
+  have hc : cost "#bytesIndex" = 6 := rfl
+  simp only [height, heights, hc]
+  omega
+
+variable (C : Contract) [FreshNames]
+
+/-- Fixed-bytes indexing preserves output height under smaller-request callback bounds. -/
+theorem bytes_index_output_height (rc : ElabRec C) (e b i : RawExpr) (n : Nat)
+    (hf : e.foldConst = .ok (.call "#bytesIndex" [b, i, .num n]))
+    (hh : ∀ a, height a < height (.call "#bytesIndex" [b, i, .num n]) →
+      Obs (rc.hoist a) (fun out => height out.2 ≤ height a)) :
+    Obs (hoistWith C rc e)
+      (fun out => height out.2 ≤ height (.call "#bytesIndex" [b, i, .num n])) := by
+  have hb := hh b (argument_lt_call "#bytesIndex" (by simp))
+  have hi := hh i (argument_lt_call "#bytesIndex" (by simp))
+  have hfold : (liftM e.foldConst : ElabM RawExpr) =
+      pure (.call "#bytesIndex" [b, i, .num n]) := by rw [hf]; rfl
+  unfold hoistWith
+  rw [hfold]
+  simp -zeta only [pure_bind]
+  dsimp +zetaDelta only
+  with_reducible apply obs_bind hb
+  rintro ⟨P, b'⟩ hb'
+  with_reducible apply obs_bind (captureExpr_height_bound C b')
+  rintro ⟨Pb, b''⟩ hbc
+  with_reducible apply obs_bind hi
+  rintro ⟨Q, i'⟩ hi'
+  with_reducible apply obs_bind (captureExpr_height_bound C i')
+  rintro ⟨Pi, i''⟩ hic
+  have hlt := bytes_index_request_lt b i b'' i'' n
+    (Nat.le_trans hbc hb') (Nat.le_trans hic hi')
+  have hrequest := hh _ hlt
+  repeat' first
+    | (with_reducible apply obs_bind hrequest; rintro ⟨R, out⟩ hout)
+    | (with_reducible apply obs_pure; exact Nat.le_trans hout (Nat.le_of_lt hlt))
+    | (with_reducible apply obs_any; intro value)
+    | split
+
+end Solidity.ElabCallHeight
+namespace Solidity.ElabCallHeight
+open Semantics ElabControlProof
+/-- The folded offset addition used by a slice has at most one arithmetic layer. -/
+theorem sliceAdd_height_le (o k : RawExpr) :
+    height (sliceAdd o k) ≤ 1 + max (height o) (height k) := by
+  unfold sliceAdd
+  split <;> simp only [height] <;> omega
+
+/-- Slice indexing reserves room for adding the offset to the held index. -/
+theorem slice_index_request_lt (off len k past k' : RawExpr)
+    (hk : height k' ≤ height k) :
+    height (sliceAdd off k') < height (.call "#sliceIndex" [off, len, k, past]) := by
+  have h := sliceAdd_height_le off k'
+  have hc : cost "#sliceIndex" = 3 := rfl
+  simp only [height, heights, hc]
+  omega
+
+variable (C : Contract) [FreshNames]
+
+/-- Slice indexing bounds both direct and captured relative indices. -/
+theorem slice_index_output_height (rc : ElabRec C) (e off len k past : RawExpr)
+    (hf : e.foldConst = .ok (.call "#sliceIndex" [off, len, k, past]))
+    (hh : ∀ a, height a < height (.call "#sliceIndex" [off, len, k, past]) →
+      Obs (rc.hoist a) (fun out => height out.2 ≤ height a)) :
+    Obs (hoistWith C rc e)
+      (fun out => height out.2 ≤ height (.call "#sliceIndex" [off, len, k, past])) := by
+  have hk := hh k (argument_lt_call "#sliceIndex" (by simp))
+  have hfold : (liftM e.foldConst : ElabM RawExpr) =
+      pure (.call "#sliceIndex" [off, len, k, past]) := by rw [hf]; rfl
+  unfold hoistWith
+  rw [hfold]
+  simp -zeta only [pure_bind]
+  dsimp +zetaDelta only
+  with_reducible apply obs_bind hk
+  rintro ⟨P, k'⟩ hk'
+  with_reducible apply obs_any
+  intro Γk
+  have hrequest (xv : RawExpr) (hxv : height xv ≤ height k) :
+      Obs (rc.hoist (sliceAdd off xv))
+        (fun out => height out.2 ≤ height (.call "#sliceIndex" [off, len, k, past])) := by
+    have hlt := slice_index_request_lt off len k past xv hxv
+    intro sc st m out st' m' hrun
+    exact Nat.le_trans (hh _ hlt sc st m out st' m' hrun) (Nat.le_of_lt hlt)
+  have hdirect := hrequest k' hk'
+  have hcaptured (x : Var) := hrequest (.name (toString x)) (height_pos k)
+  repeat' first
+    | contradiction
+    | (with_reducible apply obs_bind hdirect; rintro ⟨S, out⟩ hout)
+    | (with_reducible apply obs_bind (hcaptured _); rintro ⟨S, out⟩ hout)
+    | (with_reducible apply obs_pure; exact hout)
+    | (with_reducible apply obs_any; intro value)
+    | split
+
+end Solidity.ElabCallHeight
+namespace Solidity.ElabCallHeight
+open Semantics ElabControlProof
+variable (C : Contract) [FreshNames]
+
+omit [FreshNames] in
+private theorem captured_output_height (P : SProg C) (x : String) :
+    Obs (pure (P, RawExpr.name x) : ElabM (SProg C × RawExpr))
+      (fun out => height out.2 = 1) := obs_pure rfl
+
+/-- Successful array elaboration returns a captured name. -/
+theorem array_output_height (rc : ElabRec C) (e : RawExpr) (args : List RawExpr)
+    (hf : e.foldConst = .ok (.call "#array" args)) :
+    Obs (hoistWith C rc e) (fun out => height out.2 = 1) := by
+  have hfold : (liftM e.foldConst : ElabM RawExpr) = pure (.call "#array" args) := by rw [hf]; rfl
+  unfold hoistWith
+  rw [hfold]
+  simp -zeta only [pure_bind]
+  dsimp +zetaDelta only
+  repeat' first
+    | contradiction
+    | (exfalso; simp_all; done)
+    | (with_reducible exact captured_output_height C _ _)
+    | (with_reducible exact obs_throw)
+    | (with_reducible apply obs_any; intro value)
+    | split
+
+/-- Successful sliceCopy elaboration returns a captured name. -/
+theorem sliceCopy_output_height (rc : ElabRec C) (e : RawExpr) (view : RawExpr)
+    (hf : e.foldConst = .ok (.call "#sliceCopy" [view])) :
+    Obs (hoistWith C rc e) (fun out => height out.2 = 1) := by
+  have hfold : (liftM e.foldConst : ElabM RawExpr) = pure (.call "#sliceCopy" [view]) := by rw [hf]; rfl
+  unfold hoistWith
+  rw [hfold]
+  simp -zeta only [pure_bind]
+  dsimp +zetaDelta only
+  repeat' first
+    | contradiction
+    | (exfalso; simp_all; done)
+    | (with_reducible exact captured_output_height C _ _)
+    | (with_reducible exact obs_throw)
+    | (with_reducible apply obs_any; intro value)
+    | split
+
+  rename_i hcopy harray heq ob hno
+  obtain ⟨rfl, rfl⟩ := RawExpr.call.inj heq
+  exact False.elim (hcopy view rfl rfl)
+
+end Solidity.ElabCallHeight
+
+namespace Solidity.ElabCallHeight
+open Semantics ElabControlProof
+variable (C : Contract) [FreshNames]
+
+/-- Successful byte-literal elaboration returns a captured name, independently of callbacks. -/
+theorem bytes_literal_output_height (rc : ElabRec C) (e : RawExpr)
+    (f : String) (args : List RawExpr) (bs : List Nat)
+    (hf : e.foldConst = .ok (.call f args))
+    (hb : (RawExpr.call f args).bytesLit? = some bs) :
+    Obs (hoistWith C rc e) (fun out => height out.2 = 1) := by
+  have hname : f = bytesLitName := by
+    simp only [RawExpr.bytesLit?] at hb
+    split at hb
+    · simpa only [beq_iff_eq] using ‹(f == bytesLitName) = true›
+    · cases hb
+  subst f
+  have hfold : (liftM e.foldConst : ElabM RawExpr) = pure (.call bytesLitName args) := by rw [hf]; rfl
+  have hresult (P : SProg C) (x : String) :
+      Obs (pure (P, RawExpr.name x) : ElabM (SProg C × RawExpr))
+        (fun out => height out.2 = 1) := obs_pure rfl
+  unfold hoistWith
+  rw [hfold]
+  simp -zeta only [pure_bind]
+  dsimp +zetaDelta only [bytesLitName]
+  split <;> try (exfalso; simp_all [RawExpr.call.injEq, bytesLitName]; done)
+  rename_i heq
+  obtain ⟨rfl, rfl⟩ := RawExpr.call.inj heq
+  change (RawExpr.call "#bytes" args).bytesLit? = some bs at hb
+  rw [hb]
+  simp -zeta only
+  repeat' first
+    | (with_reducible exact hresult _ _)
+    | (with_reducible apply obs_any; intro value)
+
+end Solidity.ElabCallHeight
+
+
+namespace Solidity.ElabCallHeight
+open Semantics ElabControlProof
+variable [FreshNames]
+
+/-- Every prepared argument is strictly below the call that supplied it,
+including the empty-list boundary, where no output arguments exist. -/
+theorem hoistCallArgs_argument_lt (C : Contract)
+    (H : RawExpr → ElabM (SProg C × RawExpr)) (stmt : RawStmt → ElabM (SProg C))
+    (f : String) (args : List RawExpr)
+    (hh : ∀ a, a ∈ args → ∀ sc st m out st' m',
+      H a sc st m = .ok ((out, st'), m') → height out.2 ≤ height a)
+    (sc : ElabScope) (st st' : ECtx × Nat) (m m' : CallMemo)
+    (out : SProg C × List RawExpr)
+    (hrun : hoistCallArgsWith C H stmt f args sc st m = .ok ((out, st'), m')) :
+    ∀ b, b ∈ out.2 → height b < height (.call f args) := by
+  cases args with
+  | nil =>
+    have he := ElabCallArgsGood.hoistCallArgsWith_nil C H stmt f sc st st' m m' out hrun
+    simp only [he, List.not_mem_nil, false_implies, implies_true]
+  | cons a args =>
+    have hsource (b : RawExpr) (hb : b ∈ a :: args) := argument_lt_call f hb
+    have hname : ∀ x, height (.name x) < height (.call f (a :: args)) := by
+      intro x
+      exact Nat.lt_of_le_of_lt (height_pos a) (hsource a (List.mem_cons_self ..))
+    exact ElabCallArgsGood.hoistCallArgsWith_preserves C
+      (fun b => height b < height (.call f (a :: args))) hname H stmt f (a :: args)
+      hsource (fun b hb sc st m out st' m' h =>
+        Nat.lt_of_le_of_lt (hh b hb sc st m out st' m' h) (hsource b hb))
+      sc st m out st' m' hrun
+
+end Solidity.ElabCallHeight
