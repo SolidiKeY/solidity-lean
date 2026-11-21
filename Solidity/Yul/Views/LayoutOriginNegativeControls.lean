@@ -44,7 +44,7 @@ theorem origin_source_profile_not_silently_expanded :
 /-- The numeric origin is representable, but the existing whole declaration
 span cannot fit; this is distinct from modulo wrapping or numeric conversion. -/
 theorem origin_span_nonwrapping_failure :
-    (originDeclarations.pack account ((2^256-1)*32)).toOption.isNone := by decide
+    (originDeclarations.pack account ((2^256-1)*32)).toOption.isNone := origin_nonwrapping_failure
 
 end Solidity.Yul.Views.Controls
 
