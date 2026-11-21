@@ -378,6 +378,19 @@ private theorem writeFields_frame (P : Shrink.Params) :
         (cellsT_indep P x f _ m m₁ hx (field_nested P all l i f (hi 0)) m₁ m' c hh)))
 end
 
+theorem writeElems_frame_shared (P : Shrink.Params) :
+    ∀ (xs : List Shrink.Tree) (e : Shrink.Layout) (l : Shrink.Loc) (i : Nat)
+      (m m' : Shrink.Phys), geometry.writeElems P e l xs i m = some m' →
+      ∀ c, ¬ geometry.elemCellsT P e l xs i m' c → m'.byte c = m.byte c :=
+  writeElems_frame P
+
+theorem writeFields_frame_shared (P : Shrink.Params) :
+    ∀ (xs : List Shrink.Tree) (fs all : List Shrink.Layout) (l : Shrink.Loc) (i : Nat)
+      (m m' : Shrink.Phys), geometry.writeFields P all l fs xs i m = some m' →
+      (∀ j, all[i + j]? = fs[j]?) →
+      ∀ c, ¬ geometry.fieldCellsT P all l fs xs i m' c → m'.byte c = m.byte c :=
+  writeFields_frame P
+
 /-! ## Ill-typed writes fail -/
 
 mutual
