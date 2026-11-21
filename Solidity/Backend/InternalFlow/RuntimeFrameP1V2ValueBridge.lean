@@ -159,10 +159,8 @@ noncomputable def bridge (selected : Composition.Program b F (.cons nativeCall .
 
 /-- Actual rejecting execution in the same canonical target language. -/
 theorem rejecting_target (e : Input C Γ) :
-    targetSem [.base .revert] e = ⟨[],some (.revert [])⟩ := by
-  change targetPrefix e.machine.base.self e.machine.calls.length
-    (.revert e.machine.calls []) = _
-  simp only [targetPrefix,eventsAfter_existing]
+    targetSem [.base .revert] e = ⟨[],some (.revert [])⟩ :=
+  P1LangV2.targetSem_lift_exact [.revert] e
 
 /-- An original successful physical entry refutes an always-revert replacement
 of the complete native bridge, even without assuming an Approved agreement. -/
