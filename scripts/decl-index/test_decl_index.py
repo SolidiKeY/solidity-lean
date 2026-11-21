@@ -130,6 +130,22 @@ class PrivateIdentity(unittest.TestCase):
             self.assertIn(f"removed: {rows[i]['name']} ({self.modules[i]})", rep)
             self.assertIn("0 changed, 1 removed", rep[-1])
 
+    def test_private_definitions_are_not_skipped(self):
+        rows = [dict(r, kind="def") for r in self.rows()]
+        for base in (rows, rows[::-1]):
+            for head in (rows, rows[::-1]):
+                ok, rep = self.compare(base, head)
+                self.assertTrue(ok, rep)
+            for i in range(2):
+                head = [dict(r) for r in base]
+                head[i]["typeHash"] = "changed"
+                ok, rep = self.compare(base, head)
+                self.assertFalse(ok, rep)
+                self.assertIn("1 changed, 0 removed", rep[-1])
+                ok, rep = self.compare(base, [base[i]])
+                self.assertFalse(ok, rep)
+                self.assertIn("0 changed, 1 removed", rep[-1])
+
     def test_public_module_move_passes(self):
         for private_field in ({}, {"private": False}):
             base = [row("Public.selected", 1, self.modules[0], **private_field)]
