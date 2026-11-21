@@ -26,6 +26,8 @@ private theorem bind_some {α β : Type} {a : Option α} {f : α → Option β} 
   | none => cases h
   | some x => exact ⟨x, rfl, h⟩
 
+theorem write_bind_some_shared : type_of% (@bind_some) := @bind_some
+
 /-- Bytes 32 and up of a word are zero. -/
 private theorem word_byte_high (w : Roadmap.Word) {b : Nat} (hb : 32 ≤ b) :
     w.val / 256 ^ b = 0 :=
