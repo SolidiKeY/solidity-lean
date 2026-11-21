@@ -23,6 +23,12 @@ private theorem transport_cursor {E : Source.Env} {Γ : Source.RCtx} {origin : S
   | solve | simp only
   | cases same; rfl
 
+theorem transport_cursor_shared {E : Source.Env} {Γ : Source.RCtx} {origin : Source.Heap E.layout}
+    (allocated : Placement origin) {s t : Source.EMState E Γ} (same : s=t)
+    (c : SnapshotCursor allocated t) :
+    (⟨s,same.symm ▸ c⟩ : Σ next, SnapshotCursor allocated next)=⟨t,c⟩ :=
+  transport_cursor allocated same c
+
 /-- Execute existing prepared Source writes, retaining their actual result state.
 The dependent cursor is transported by a proved equality, never an assumed law. -/
 def snapshotStep {E : Source.Env} {Γ : Source.RCtx} {origin : Source.Heap E.layout}
@@ -47,7 +53,7 @@ theorem snapshotStep_eq {E : Source.Env} {Γ : Source.RCtx} {origin : Source.Hea
   apply congrArg (fun f => (updates allocated c.placement c.entries c.entries m).map f)
   funext us
   have actual := realizeInventory_run allocated c.placement c.history us s c.placement c.history rfl c.entries
-  exact transport_cursor allocated (congrArg Prod.snd actual) _
+  exact transport_cursor_shared allocated (congrArg Prod.snd actual) _
 
 /-- Erasing only physical evidence gives the existing actual Source entry point. -/
 theorem snapshotStep_source {E : Source.Env} {Γ : Source.RCtx} {origin : Source.Heap E.layout}
