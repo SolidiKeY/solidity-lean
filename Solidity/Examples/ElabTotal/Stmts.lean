@@ -419,3 +419,47 @@ end Solidity.Examples.ElabTotal.Stmts
 /-- info: 'Solidity.ElabCallHeight.named_callee_closure_output_height' depends on axioms: [propext, Quot.sound] -/
 #guard_msgs in
 #print axioms Solidity.ElabCallHeight.named_callee_closure_output_height
+
+/-- info: 'Solidity.ElabCallHeight.decode_front_output_height' depends on axioms: [propext, Quot.sound] -/
+#guard_msgs in
+#print axioms Solidity.ElabCallHeight.decode_front_output_height
+
+/-- info: 'Solidity.ElabCallHeight.hash_output_height' depends on axioms: [propext, Quot.sound] -/
+#guard_msgs in
+#print axioms Solidity.ElabCallHeight.hash_output_height
+
+/-- info: 'Solidity.ElabCallHeight.internal_decode_output_height' depends on axioms: [propext, Quot.sound] -/
+#guard_msgs in
+#print axioms Solidity.ElabCallHeight.internal_decode_output_height
+
+/-- info: 'Solidity.ElabCallHeight.encode_output_height' depends on axioms: [propext, Quot.sound] -/
+#guard_msgs in
+#print axioms Solidity.ElabCallHeight.encode_output_height
+
+/-- info: 'Solidity.ElabControlProof.hash_result_name' depends on axioms: [propext, Quot.sound] -/
+#guard_msgs in
+#print axioms Solidity.ElabControlProof.hash_result_name
+
+/-- info: 'Solidity.ElabControlProof.decode_front_eq' depends on axioms: [propext, Quot.sound] -/
+#guard_msgs in
+#print axioms Solidity.ElabControlProof.decode_front_eq
+
+/-- info: 'Solidity.ElabControlProof.decode_internal_result_name' depends on axioms: [propext, Quot.sound] -/
+#guard_msgs in
+#print axioms Solidity.ElabControlProof.decode_internal_result_name
+
+/-- info: 'Solidity.ElabControlProof.encode_nested_result_name' depends on axioms: [propext, Quot.sound] -/
+#guard_msgs in
+#print axioms Solidity.ElabControlProof.encode_nested_result_name
+
+/-- info: 'Solidity.ElabControlProof.encode_result_name' depends on axioms: [propext, Quot.sound] -/
+#guard_msgs in
+#print axioms Solidity.ElabControlProof.encode_result_name
+
+/-- info: 'Solidity.ElabCallHeight.erc_args_output_height' depends on axioms: [propext, Quot.sound] -/
+#guard_msgs in
+#print axioms Solidity.ElabCallHeight.erc_args_output_height
+
+/-- info: 'Solidity.ElabCallHeight.decode_output_height' depends on axioms: [propext, Quot.sound] -/
+#guard_msgs in
+#print axioms Solidity.ElabCallHeight.decode_output_height

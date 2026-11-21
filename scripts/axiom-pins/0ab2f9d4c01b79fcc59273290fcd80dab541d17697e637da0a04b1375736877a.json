@@ -107,7 +107,19 @@
   "Quot.sound",
   "propext"
  ],
+ "Solidity/Examples/ElabTotal/Stmts.lean:Solidity.ElabCallHeight.decode_front_output_height": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Examples/ElabTotal/Stmts.lean:Solidity.ElabCallHeight.decode_output_height": [
+  "Quot.sound",
+  "propext"
+ ],
  "Solidity/Examples/ElabTotal/Stmts.lean:Solidity.ElabCallHeight.decode_request_lt": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Examples/ElabTotal/Stmts.lean:Solidity.ElabCallHeight.encode_output_height": [
   "Quot.sound",
   "propext"
  ],
@@ -120,6 +132,10 @@
   "propext"
  ],
  "Solidity/Examples/ElabTotal/Stmts.lean:Solidity.ElabCallHeight.enumCapture_output_height": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Examples/ElabTotal/Stmts.lean:Solidity.ElabCallHeight.erc_args_output_height": [
   "Quot.sound",
   "propext"
  ],
@@ -147,6 +163,10 @@
   "Quot.sound",
   "propext"
  ],
+ "Solidity/Examples/ElabTotal/Stmts.lean:Solidity.ElabCallHeight.hash_output_height": [
+  "Quot.sound",
+  "propext"
+ ],
  "Solidity/Examples/ElabTotal/Stmts.lean:Solidity.ElabCallHeight.height_nodes_before_down": [
   "propext"
  ],
@@ -167,6 +187,10 @@
   "propext"
  ],
  "Solidity/Examples/ElabTotal/Stmts.lean:Solidity.ElabCallHeight.index_output_height": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Examples/ElabTotal/Stmts.lean:Solidity.ElabCallHeight.internal_decode_output_height": [
   "Quot.sound",
   "propext"
  ],
@@ -287,6 +311,26 @@
   "propext"
  ],
  "Solidity/Examples/ElabTotal/Stmts.lean:Solidity.ElabCallHeight.unop_output_height": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Examples/ElabTotal/Stmts.lean:Solidity.ElabControlProof.decode_front_eq": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Examples/ElabTotal/Stmts.lean:Solidity.ElabControlProof.decode_internal_result_name": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Examples/ElabTotal/Stmts.lean:Solidity.ElabControlProof.encode_nested_result_name": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Examples/ElabTotal/Stmts.lean:Solidity.ElabControlProof.encode_result_name": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Examples/ElabTotal/Stmts.lean:Solidity.ElabControlProof.hash_result_name": [
   "Quot.sound",
   "propext"
  ],
