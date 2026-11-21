@@ -126,4 +126,34 @@ theorem NestedDeclaration.physical_bound {E root base d a} (r : @NestedDeclarati
     (roundSlot_bounded _ arrayBound) r.structPacked
   exact roundSlot_bounded _ structBound
 
+/-- Adjacent root packs compose their bounds, separation and root provenance. -/
+theorem rootPack_append_spec {D L} (root : Source.DeclName) (rest : List Source.DeclName)
+    (left right : List (ScalarPath D L)) (cursor middle stop : Nat)
+    (lo : cursor ≤ middle) (hi : middle ≤ stop)
+    (lb : cursor ≤ (2^256)*32 → middle ≤ (2^256)*32)
+    (rb : middle ≤ (2^256)*32 → stop ≤ (2^256)*32)
+    (ls : finiteSeparated left) (rs : finiteSeparated right)
+    (lm : ∀ c ∈ left, cursor ≤ declarationStart c ∧ declarationEnd c ≤ middle)
+    (rm : ∀ c ∈ right, middle ≤ declarationStart c ∧ declarationEnd c ≤ stop ∧ c.path.root ∈ rest)
+    (leftRoots : ∀ c ∈ left, c.path.root = root) (different : root ∉ rest) :
+    cursor ≤ stop ∧ (cursor ≤ (2^256)*32 → stop ≤ (2^256)*32) ∧ finiteSeparated (left ++ right) ∧
+    ∀ c ∈ left ++ right, cursor ≤ declarationStart c ∧ declarationEnd c ≤ stop ∧ c.path.root ∈ root :: rest := by
+  refine ⟨Nat.le_trans lo hi,(fun bound => rb (lb bound)),?_,?_⟩
+  · apply List.pairwise_append.mpr
+    refine ⟨ls,rs,?_⟩
+    intro c hc e he
+    obtain ⟨cl,ch⟩ := lm c hc
+    obtain ⟨el,eh,er⟩ := rm e he
+    refine ⟨?_,pathsApart_of_span c e (Nat.le_trans ch el)⟩
+    intro same
+    have roots := congrArg Source.SPath.root same
+    rw [leftRoots c hc] at roots
+    exact different (roots ▸ er)
+  · intro c member
+    rcases List.mem_append.mp member with hc | hc
+    · obtain ⟨cl,ch⟩ := lm c hc
+      exact ⟨cl,Nat.le_trans ch hi,List.mem_cons.mpr (Or.inl (leftRoots c hc))⟩
+    · obtain ⟨cl,ch,cr⟩ := rm c hc
+      exact ⟨Nat.le_trans lo cl,ch,List.mem_cons_of_mem root cr⟩
+
 end Solidity.Yul.Views

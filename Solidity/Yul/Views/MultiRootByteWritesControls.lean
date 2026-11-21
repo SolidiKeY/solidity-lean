@@ -28,7 +28,7 @@ theorem whole_nonbyte_prefix :
         enumeratedMemoryWriteback after mixedPlacement q history raw=.ok (some (.ok (),after)) ∧ ReservedOK raw q.free := by
   first | (simp only;done) | decide | omega | rfl | skip
   have result := sound mixedHeap.ty mixedPlacement mixedReadFrame 0 requests mixedState mixedPlacement (retainInitial _ _)
-    mixed_actual_MemOK StructWordHeap.Controls.support mixedPhysical ByteElementStore.Controls.oldReads mixed_reserved
+    mixed_actual_MemOK Solidity.Yul.Views.Controls.generated_mixed_types_supported mixedPhysical ByteElementStore.Controls.oldReads mixed_reserved
   rw [actual_coupled] at result
   exact result.2
 
@@ -48,7 +48,7 @@ theorem whole_missing_prefix :
         ReservedOK missingRaw q.free := by
   first | (simp only;done) | decide | omega | rfl | skip
   have result := sound mixedHeap.ty mixedPlacement mixedReadFrame 0 missingRequests mixedState mixedPlacement (retainInitial _ _)
-    mixed_actual_MemOK StructWordHeap.Controls.support mixedPhysical ByteElementStore.Controls.oldReads mixed_reserved
+    mixed_actual_MemOK Solidity.Yul.Views.Controls.generated_mixed_types_supported mixedPhysical ByteElementStore.Controls.oldReads mixed_reserved
   rw [actual_missing] at result
   exact result.2
 

@@ -26,7 +26,7 @@ theorem bytes_whole :
       enumeratedMemoryWriteback bytesAfter mixedPlacement bytesPlacement history bytesPatch=.ok (some (.ok (),bytesAfter)) ∧
       ReservedOK bytesPatch bytesPlacement.free :=
   whole mixedHeap.ty mixedState mixedPlacement mixedPlacement (retainInitial _ _) mixed_actual_MemOK
-    StructWordHeap.Controls.support mixedReadFrame 0 0 false mixedChild rfl ⟨2,by decide⟩ 0xff mixedPhysical oldReads mixed_reserved
+    Solidity.Yul.Views.Controls.generated_mixed_types_supported mixedReadFrame 0 0 false mixedChild rfl ⟨2,by decide⟩ 0xff mixedPhysical oldReads mixed_reserved
 
 def stringAfter := withSourceHeap mixedState (mixedHeap.write 1 (.string (mixedString.set 0 0x80)) (by rfl))
 def stringPlacement := placement mixedHeap mixedPlacement 1 true mixedString rfl ⟨0,by decide⟩ 0x80
@@ -41,15 +41,15 @@ theorem string_whole :
       enumeratedMemoryWriteback stringAfter mixedPlacement stringPlacement history stringPatch=.ok (some (.ok (),stringAfter)) ∧
       ReservedOK stringPatch stringPlacement.free :=
   whole mixedHeap.ty mixedState mixedPlacement mixedPlacement (retainInitial _ _) mixed_actual_MemOK
-    StructWordHeap.Controls.support mixedReadFrame 0 1 true mixedString rfl ⟨0,by decide⟩ 0x80 mixedPhysical oldReads mixed_reserved
+    Solidity.Yul.Views.Controls.generated_mixed_types_supported mixedReadFrame 0 1 true mixedString rfl ⟨0,by decide⟩ 0x80 mixedPhysical oldReads mixed_reserved
 
 theorem every_H (H : Source.HeapTy) (ok : Source.MemOK mixedEnv H mixedState) :
     Source.MemOK mixedEnv H bytesAfter ∧ Source.MemOK mixedEnv H stringAfter := by
   first | (simp only;done) | decide | omega | rfl | skip
   exact ⟨(whole H mixedState mixedPlacement mixedPlacement (retainInitial _ _) ok
-    StructWordHeap.Controls.support mixedReadFrame 0 0 false mixedChild rfl ⟨2,by decide⟩ 0xff mixedPhysical oldReads mixed_reserved).2.1,
+    Solidity.Yul.Views.Controls.generated_mixed_types_supported mixedReadFrame 0 0 false mixedChild rfl ⟨2,by decide⟩ 0xff mixedPhysical oldReads mixed_reserved).2.1,
     (whole H mixedState mixedPlacement mixedPlacement (retainInitial _ _) ok
-    StructWordHeap.Controls.support mixedReadFrame 0 1 true mixedString rfl ⟨0,by decide⟩ 0x80 mixedPhysical oldReads mixed_reserved).2.1⟩
+    Solidity.Yul.Views.Controls.generated_mixed_types_supported mixedReadFrame 0 1 true mixedString rfl ⟨0,by decide⟩ 0x80 mixedPhysical oldReads mixed_reserved).2.1⟩
 
 theorem aliases :
     (Source.bytesOfRV mixedReadFrame 0 (.val ((bytesAfter.1.get (.here))))).run bytesAfter=(.ok [0x11,0x22,0xff],bytesAfter) ∧
