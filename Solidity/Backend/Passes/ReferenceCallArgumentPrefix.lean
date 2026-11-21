@@ -13,14 +13,10 @@ private def successMachine : Evm.Out → Option Machine
   | .ok m 0 => some m | _ => none
 @[irreducible] def saved : Machine := (successMachine (run saveCode machine)).get (by decide +kernel)
 theorem save_run : run saveCode machine = .ok saved 0 := by
-  have h : some saved = successMachine (run saveCode machine) := by unfold saved;exact Option.some_get _
-  generalize run saveCode machine = result at h ⊢
-  cases result with
-  | ok m skip => cases skip with
-    | zero => exact congrArg (fun m => Evm.Out.ok m 0) (Option.some.inj h).symm
-    | succ n => cases h
-  | revert => cases h
-  | fault => cases h
+  apply successfulMachine_eq_some.mp
+  rw [show successfulMachine = successMachine from rfl]
+  unfold saved
+  exact (Option.some_get _).symm
 
 theorem saved_evidence :
     Context.Captured machine saved (Restore.contextCells 1 Γ) 16 16 20 ∧

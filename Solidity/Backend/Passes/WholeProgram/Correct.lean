@@ -95,46 +95,6 @@ theorem two_tails (result : Compilation b F P)
   rw [tail_exact result hi left, tail_exact result hi right]
   cases run result.code {m with stack := []} <;> rfl
 
-/-- **One shared canonical machine** for every saved tail, with the full
-branch-specific `Rep` per run. -/
-theorem success_shared (result : Compilation b F P)
-    {base : Nat → Fin W} {σ : State C Γ} {m : Machine}
-    (hi : result.Input L frame base σ m)
-    {o : Solidity.Out C σ.H Δ} (hs : P.run σ = .ok o) :
-    ∃ canonical, run result.code {m with stack := []} = .ok canonical 0 ∧
-      canonical.stack = [] ∧
-      ∀ tail, run result.code {m with stack := tail} =
-          .ok {canonical with stack := tail} 0 ∧
-        result.Rep (L + Evm.Prog.pushes P) frame base σ {m with stack := tail}
-          o.st {canonical with stack := tail} := by
-  obtain ⟨canonical, ht, hstack, _⟩ := success_tail result hi hs []
-  refine ⟨canonical, ht, hstack, fun tail => ?_⟩
-  have he := tail_exact result hi tail
-  rw [ht] at he
-  change run result.code {m with stack := tail} =
-    .ok {canonical with stack := tail} 0 at he
-  obtain ⟨actual, ha, _, hr⟩ := success_tail result hi hs tail
-  have hm : actual = {canonical with stack := tail} :=
-    (Evm.Out.ok.inj (ha.symm.trans he)).1
-  exact ⟨he, hm ▸ hr⟩
-
-/-- The shared canonical machine with one fixed selected output map. -/
-theorem success_shared_mapped (result : Compilation b F P)
-    {base : Nat → Fin W} {σ : State C Γ} {m : Machine}
-    (hi : result.Input L frame base σ m)
-    {o : Solidity.Out C σ.H Δ} (hs : P.run σ = .ok o) :
-    ∃ canonical outBase, run result.code {m with stack := []} = .ok canonical 0 ∧
-      canonical.stack = [] ∧ ∀ tail,
-        run result.code {m with stack := tail} = .ok {canonical with stack := tail} 0 ∧
-        MappedOutput result (L + Evm.Prog.pushes P) frame base σ {m with stack := tail}
-          o.st {canonical with stack := tail} outBase := by
-  obtain ⟨canonical, ht, hstack, hr⟩ := success_tail result hi hs []
-  obtain ⟨outBase, hm⟩ := (mapped_output_iff result _ _ _ _ _ _ _).mp hr
-  refine ⟨canonical, outBase, ht, hstack, fun tail => ?_⟩
-  have he := tail_exact result hi tail
-  rw [ht] at he
-  exact ⟨he, mapped_output_stack result hm tail tail⟩
-
 /-- **Typed sequencing of two accepted programs**: both stages succeed on
 the joined intrinsic program, retaining both representation witnesses. -/
 theorem sequence_success

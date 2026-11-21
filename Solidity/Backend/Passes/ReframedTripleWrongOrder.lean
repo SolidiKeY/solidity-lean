@@ -84,14 +84,8 @@ private def okMachine : Evm.Out → Option Machine
   | .ok m 0 => some m
   | _ => none
 private theorem target_get {result : Evm.Out} {m : Machine}
-    (h : some m = okMachine result) : result = .ok m 0 := by
-  cases result with
-  | ok actual skip =>
-    cases skip with
-    | zero => exact congrArg (fun m => Evm.Out.ok m 0) (Option.some.inj h).symm
-    | succ k => cases h
-  | revert => cases h
-  | fault => cases h
+    (h : some m = okMachine result) : result = .ok m 0 :=
+  successfulMachine_eq_some.mp h.symm
 
 noncomputable def effectTarget : Machine :=
   (okMachine (run effectStage.code preparedTarget)).get (by decide +kernel)

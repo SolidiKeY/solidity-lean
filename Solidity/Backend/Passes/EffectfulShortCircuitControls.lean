@@ -69,13 +69,8 @@ def cells : List Nat := [0,1,2,3,4,5,8,9]
 private def okMachine : Evm.Out → Option Machine
   | .ok m 0 => some m | _ => none
 private theorem extracted {out : Evm.Out} (h : (okMachine out).isSome) :
-    out = .ok ((okMachine out).get h) 0 := by
-  cases out with
-  | ok m skip => cases skip with
-    | zero => rfl
-    | succ n => cases h
-  | revert => cases h
-  | fault => cases h
+    out = .ok ((okMachine out).get h) 0 :=
+  successfulMachine_eq_some.mp (Option.some_get h).symm
 
 @[irreducible] def executed (conj x : Bool) : Machine :=
   (okMachine (run (compiled conj).code (machine x))).get
