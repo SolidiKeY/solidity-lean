@@ -66,7 +66,8 @@ theorem ha_second_new_alias (n : Nat) :
 theorem ha_second_gap_and_tail : haSecondView 547=0xa5 ∧ haSecondView 576=0xa5 ∧ haSecondView 613=0xa5 := by decide
 
 theorem ha_boundary_sizes : (MemoryShape.bytes 0).size=32 ∧ (MemoryShape.bytes 31).size=64 ∧
-    (MemoryShape.bytes 32).size=64 ∧ (MemoryShape.bytes 33).size=96 := by decide
+    (MemoryShape.bytes 32).size=64 ∧ (MemoryShape.bytes 33).size=96 :=
+  byte_string_boundaries
 
 theorem ha_insufficient_footprint : ¬512+(MemoryShape.bytes 33).size≤576 := by decide
 
