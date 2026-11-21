@@ -16,16 +16,8 @@ theorem wordList_point_congr (ws : List Roadmap.Word) (m n : ByteView) (base i :
 locations. This includes pointer-valued aggregate word images. -/
 theorem MemoryImage.point_congr {D : Source.Layout} {h : Source.Heap D} {p : Placement h}
     {τ : Source.STy} {d : Source.Data D τ} (image : MemoryImage p d)
-    (m n : ByteView) (base i : Nat) (same : m i=n i) : image.encode m base i=image.encode n base i := by
-  cases image with
-  | bytes bs bound | string bs bound =>
-    dsimp only [MemoryImage.encode,bytesObjectView,copyBytes,mstore]
-    split
-    · rfl
-    · split
-      · rfl
-      · exact same
-  | words d ws encoded => exact wordList_point_congr ws m n base i same
+    (m n : ByteView) (base i : Nat) (same : m i=n i) : image.encode m base i=image.encode n base i :=
+  image.residual_point m n base i same
 
 /-- Whole-map commutation, across different heaps/types and all concrete image
 families, follows from actual image spans and pointwise locality. -/
