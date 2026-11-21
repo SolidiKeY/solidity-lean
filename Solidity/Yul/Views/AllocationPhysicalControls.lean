@@ -21,7 +21,7 @@ theorem av_mixed_source_and_reserved : enumeratedMemoryWriteback aiState aiPlace
   exact ⟨facts.2.2.2.2.2.2.1,facts.2.2.2.2.2.2.2.1⟩
 
 theorem av_mixed_every_H (H) (ok : Source.MemOK mixedEnv H mixedState) : Source.MemOK mixedEnv H aiState :=
-  byteAllocRef_MemOK mixedState true aiBytes H ok
+  ai_every_H H ok
 
 theorem av_mixed_alias_and_unknown : mload avMixedPhysical 960=128 ∧ mload avMixedPhysical 992=128 ∧
     mload avMixedPhysical (mload avMixedPhysical 960).val=3 ∧
