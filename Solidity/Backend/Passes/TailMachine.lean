@@ -11,6 +11,21 @@ runs do transport. The compiler adapter separately handles typed divergence.
 namespace Solidity.Backend.Passes
 open Solidity.Evm
 
+/-- Extract only a completed successful target run; skips and failures are refused. -/
+def successfulMachine : Evm.Out → Option Machine
+  | .ok m 0 => some m
+  | _ => none
+
+/-- The decoder retains the complete machine and requires exactly zero skips. -/
+theorem successfulMachine_eq_some {out : Evm.Out} {m : Machine} :
+    successfulMachine out = some m ↔ out = .ok m 0 := by
+  cases out with
+  | ok actual skip =>
+    cases skip <;> simp only [successfulMachine, Evm.Out.ok.injEq,
+      Option.some.injEq, reduceCtorEq, and_true, and_false]
+  | revert => simp only [successfulMachine, reduceCtorEq]
+  | fault => simp only [successfulMachine, reduceCtorEq]
+
 def appendTail (m : Machine) (tail : List Word) : Machine :=
   {m with stack := m.stack ++ tail}
 

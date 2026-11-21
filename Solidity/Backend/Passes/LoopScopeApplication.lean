@@ -1,4 +1,5 @@
 import Solidity.Backend.Passes.LoopScopeControls
+import Solidity.Backend.Passes.MemoryCallApplication
 import Solidity.Backend.Passes.LoopSequence
 
 namespace Solidity.Backend.Passes.LoopScopeApplication
@@ -7,7 +8,7 @@ open MemoryCallControls (C initial base machine initial_repr)
 open LoopScopeControls
 
 theorem budget : AllocationInput 1 128 8 initial base machine :=
-  .inr ⟨by decide,wmod 256,initial_repr.2,by decide +kernel⟩
+  MemoryCallApplication.budget
 
 theorem preparation_input : (Compilation.memory preparation).Input 1 128 base initial machine :=
   ⟨initial_repr.1,by decide +kernel,budget.of_le (by rw [LoopScopeControls.costs.1]; decide)⟩

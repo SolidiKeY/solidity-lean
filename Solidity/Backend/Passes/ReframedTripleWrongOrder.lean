@@ -39,10 +39,8 @@ noncomputable def affected : Solidity.Out C prepared.st.H LoopScopeControls.Γ :
   (effects.run prepared.st).toOption.get (by decide +kernel)
 
 private theorem source_get {Γ Δ : Ctx} {σ : State C Γ} {P : Prog C Γ Δ}
-    {o : Solidity.Out C σ.H Δ} (h : some o = (P.run σ).toOption) : P.run σ = .ok o := by
-  cases hs : P.run σ with
-  | ok actual => rw [hs] at h; exact congrArg Except.ok (Option.some.inj h).symm
-  | error error => rw [hs] at h; cases h
+    {o : Solidity.Out C σ.H Δ} (h : some o = (P.run σ).toOption) : P.run σ = .ok o :=
+  except_ok_of_toOption h
 
 theorem effects_source : effects.run prepared.st = .ok affected :=
   source_get (Option.some_get _)
@@ -84,14 +82,8 @@ private def okMachine : Evm.Out → Option Machine
   | .ok m 0 => some m
   | _ => none
 private theorem target_get {result : Evm.Out} {m : Machine}
-    (h : some m = okMachine result) : result = .ok m 0 := by
-  cases result with
-  | ok actual skip =>
-    cases skip with
-    | zero => exact congrArg (fun m => Evm.Out.ok m 0) (Option.some.inj h).symm
-    | succ k => cases h
-  | revert => cases h
-  | fault => cases h
+    (h : some m = okMachine result) : result = .ok m 0 :=
+  successfulMachine_eq_some.mp h.symm
 
 noncomputable def effectTarget : Machine :=
   (okMachine (run effectStage.code preparedTarget)).get (by decide +kernel)
