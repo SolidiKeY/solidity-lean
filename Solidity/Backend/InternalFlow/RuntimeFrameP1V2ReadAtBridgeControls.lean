@@ -53,10 +53,8 @@ theorem reverting_entry_retained (approved : InterfaceV3.Admission P Γ)
 /-- Actual execution of a rejecting substitute in the SAME canonical target
 language, not an alternative observation projection. -/
 theorem rejecting_target (e : Input P Γ) :
-    targetSem [.base .revert] e = ⟨[],some (.revert [])⟩ := by
-  change targetPrefix e.machine.base.self e.machine.calls.length
-    (.revert e.machine.calls []) = _
-  simp only [targetPrefix,eventsAfter_existing]
+    targetSem [.base .revert] e = ⟨[],some (.revert [])⟩ :=
+  P1LangV2.targetSem_lift_exact [.revert] e
 
 /-- An always-revert substitute cannot meet the full fixed-map BridgeGoal.
 This is an intentional counterexample to that substitute, not an assumed
