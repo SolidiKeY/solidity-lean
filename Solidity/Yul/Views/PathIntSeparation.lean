@@ -13,13 +13,30 @@ theorem PathIntHeader.element_paths_ne {E root t cursor} (h : PathIntHeader E ro
 theorem PathIntHeader.elements_apart {E root t cursor} (h : PathIntHeader E root t cursor)
     (fixed : Roadmap.Evm.Fixed) (a : Roadmap.Address) (i j : Nat)
     (ib : i < 2^256) (jb : j < 2^256) (different : i ≠ j) : pathsApart (h.element fixed a i) (h.element fixed a j) := by
-  apply pathsApart_of_packed_indices (h.element fixed a i) (h.element fixed a j)
-    i j h.perSlot h.byteWidth different rfl rfl rfl rfl
-  intro same
-  have words := congrArg Fin.val same
-  rw [h.element_word,h.element_word] at words
-  exact Storage.Loc.off_eq_of_mod_eq (fixed.keccak_lt _)
-    (Nat.lt_of_le_of_lt (Nat.div_le_self _ _) ib) (Nat.lt_of_le_of_lt (Nat.div_le_self _ _) jb) words
+  by_cases quotient : i/h.perSlot = j/h.perSlot
+  · have rem : i%h.perSlot ≠ j%h.perSlot := by
+      intro same
+      have one := Nat.mod_add_div i h.perSlot
+      have two := Nat.mod_add_div j h.perSlot
+      rw [quotient] at one
+      exact different (by omega)
+    change _ ∨ (i%h.perSlot)*h.byteWidth+h.byteWidth ≤ (j%h.perSlot)*h.byteWidth ∨
+      (j%h.perSlot)*h.byteWidth+h.byteWidth ≤ (i%h.perSlot)*h.byteWidth
+    rcases Nat.lt_or_gt_of_ne rem with lt | gt
+    · apply Or.inr ∘ Or.inl
+      calc
+        _ = (i%h.perSlot+1)*h.byteWidth := by rw [Nat.add_mul,Nat.one_mul]
+        _ ≤ _ := Nat.mul_le_mul_right h.byteWidth (by omega)
+    · apply Or.inr ∘ Or.inr
+      calc
+        _ = (j%h.perSlot+1)*h.byteWidth := by rw [Nat.add_mul,Nat.one_mul]
+        _ ≤ _ := Nat.mul_le_mul_right h.byteWidth (by omega)
+  · apply Or.inl
+    intro same
+    have words := congrArg Fin.val same
+    rw [h.element_word,h.element_word] at words
+    exact quotient (Storage.Loc.off_eq_of_mod_eq (fixed.keccak_lt _)
+      (Nat.lt_of_le_of_lt (Nat.div_le_self _ _) ib) (Nat.lt_of_le_of_lt (Nat.div_le_self _ _) jb) words)
 
 theorem PathIntHeader.elements_separated {E root t cursor} (h : PathIntHeader E root t cursor)
     (fixed : Roadmap.Evm.Fixed) (a : Roadmap.Address) (n : Roadmap.Word) : finiteSeparated (h.elements fixed a n) := by
