@@ -8,16 +8,6 @@ real old cell, independently of the allocated object's constructor. Raw-map
 laws require real separated spans; they say nothing about aliased writes. -/
 namespace Solidity.Yul.Views
 
-theorem wordList_point_congr (ws : List Roadmap.Word) (m n : ByteView) (base i : Nat)
-    (same : m i=n i) : wordListView ws m base i=wordListView ws n base i := by
-  induction ws generalizing base with
-  | nil => exact same
-  | cons w ws ih =>
-    unfold wordListView mstore
-    split
-    · rfl
-    · exact ih (base+32)
-
 /-- Encoding at a byte depends on at most that input byte, not other residual
 locations. This includes pointer-valued aggregate word images. -/
 theorem MemoryImage.point_congr {D : Source.Layout} {h : Source.Heap D} {p : Placement h}
