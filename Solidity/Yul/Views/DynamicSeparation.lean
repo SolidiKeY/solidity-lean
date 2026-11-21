@@ -73,4 +73,31 @@ theorem DynamicHeader.elements_ne_other {E root other cursor position} (h : Dyna
   exact regions.1 _ hp _ gp distinct
     (Hash.near_of_overlap (fixedLayoutHash_lt fixed _) (fixedLayoutHash_lt fixed _) lb ib jb eq)
 
+/-- Packed fields at different indices are apart when equal slots imply equal quotients. -/
+theorem pathsApart_of_packed_indices {D L} (c d : ScalarPath D L)
+    (i j perSlot width : Nat) (different : i ≠ j)
+    (leftOffset : c.field.offset = i % perSlot * width)
+    (rightOffset : d.field.offset = j % perSlot * width)
+    (leftWidth : c.field.width = width) (rightWidth : d.field.width = width)
+    (quotients : c.slot = d.slot → i / perSlot = j / perSlot) : pathsApart c d := by
+  by_cases quotient : i/perSlot = j/perSlot
+  · have rem : i%perSlot ≠ j%perSlot := by
+      intro same
+      have one := Nat.mod_add_div i perSlot
+      have two := Nat.mod_add_div j perSlot
+      rw [quotient] at one
+      exact different (by omega)
+    unfold pathsApart
+    simp only [leftOffset,rightOffset,leftWidth,rightWidth]
+    rcases Nat.lt_or_gt_of_ne rem with lt | gt
+    · apply Or.inr ∘ Or.inl
+      calc
+        _ = (i%perSlot+1)*width := by rw [Nat.add_mul,Nat.one_mul]
+        _ ≤ _ := Nat.mul_le_mul_right width (by omega)
+    · apply Or.inr ∘ Or.inr
+      calc
+        _ = (j%perSlot+1)*width := by rw [Nat.add_mul,Nat.one_mul]
+        _ ≤ _ := Nat.mul_le_mul_right width (by omega)
+  · exact Or.inl (fun same => quotient (quotients same))
+
 end Solidity.Yul.Views
