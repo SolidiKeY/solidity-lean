@@ -65,6 +65,6 @@ theorem rfo_full_late_timeout (G : Source.Glob agEnv) (prior : List (EntryRefere
 
 theorem rfo_full_post_head (G : Source.Glob agEnv) :
     runtimeScope packedStepFrame (.val rtAlias)∈((rfoFull G).observe [] agShrink.2.1 rsOuter).2 :=
-  rfpl_post_head G
+  rfpl_initializer_head G
 
 end Solidity.Yul.Views.Controls
