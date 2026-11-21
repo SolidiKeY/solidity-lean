@@ -20,9 +20,9 @@ moves them to the state after the element's own write, because the footprint
 of a successful nested write does not depend on the state. `written_indep`
 and `cells_sub` are recursions of the same shape.
 
-The helpers `bind_some`, `writeLength_mem`, `writeBlob_mem`, `data_congr`,
+The helpers `writeLength_mem`, `writeBlob_mem`, `data_congr`,
 `elem_nested` and `field_nested` restate private lemmas of `Laws/Write.lean`.
-The sequence frame laws reuse its shared recursive frame helpers.
+The option-bind and sequence frame laws reuse its shared helpers.
 -/
 namespace Solidity.Yul.Layout
 
@@ -32,10 +32,8 @@ open Solidity.Yul.Views
 /-! ## Leaves -/
 
 private theorem bind_some {α β : Type} {a : Option α} {f : α → Option β} {b : β}
-    (h : (a >>= f) = some b) : ∃ x, a = some x ∧ f x = some b := by
-  cases a with
-  | none => cases h
-  | some x => exact ⟨x, rfl, h⟩
+    (h : (a >>= f) = some b) : ∃ x, a = some x ∧ f x = some b :=
+  write_bind_some_shared h
 
 private theorem slots_withSlots (m : Shrink.Phys) {r : Shrink.Region} (hr : r ≠ .memory)
     (s : SlotView) : (m.withSlots r s).slots r = s := by
