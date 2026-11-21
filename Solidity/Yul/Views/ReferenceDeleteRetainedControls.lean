@@ -52,7 +52,7 @@ theorem initial_safe : Source.MemOK mixedEnv mixedHeap.ty retainedRefZeroState :
 
 theorem support : ∀ a τ d,retainedRefZeroHeap.get a=some ⟨τ,d⟩ → InventoryTypeSupported mixedEnv τ :=
   heapWrite_inventory_supported mixedHeap 4 (dynamicMemberData mixedLayout (.bytes .memory) 0 Fin.elim0)
-    (by rfl) StructWordHeap.Controls.support
+    (by rfl) Solidity.Yul.Views.Controls.generated_mixed_types_supported
 
 theorem fresh : ∀ a,(mixedHeap.cells a).isSome → mixedPlacement.address a≠1664 := by
   intro a present
