@@ -323,22 +323,22 @@ theorem frame (P : Shrink.Params) :
       rw [Shrink.Geometry.write] at h
       split at h
       · rw [Shrink.Geometry.cellsT] at hc
-        exact writeElems_frame P xs e l 0 m m' h c hc
+        exact writeElems_frame_shared P xs e l 0 m m' h c hc
       · cases h
     | dynArray e =>
       rw [Shrink.Geometry.write] at h
       split at h
       · obtain ⟨m₁, hw, he⟩ := bind_some h
         rw [Shrink.Geometry.cellsT, data_congr m' m₁ (writeLength_mem hw)] at hc
-        exact (writeElems_frame P xs e _ 0 m₁ m' he c fun hx => hc (.inr hx)).trans
+        exact (writeElems_frame_shared P xs e _ 0 m₁ m' he c fun hx => hc (.inr hx)).trans
           (writeLength_frame P l _ m m₁ c hw fun hx => hc (.inl hx))
       · cases h
     | struct fs =>
       rw [Shrink.Geometry.write] at h
       rw [Shrink.Geometry.cellsT] at hc
-      exact writeFields_frame P xs fs fs l 0 m m' h (fun j => by rw [Nat.zero_add]) c hc
+      exact writeFields_frame_shared P xs fs fs l 0 m m' h (fun j => by rw [Nat.zero_add]) c hc
     | _ => simp only [Shrink.Geometry.write, reduceCtorEq] at h
-private theorem writeElems_frame (P : Shrink.Params) :
+theorem writeElems_frame_shared (P : Shrink.Params) :
     ∀ (xs : List Shrink.Tree) (e : Shrink.Layout) (l : Shrink.Loc) (i : Nat)
       (m m' : Shrink.Phys), geometry.writeElems P e l xs i m = some m' →
       ∀ c, ¬ geometry.elemCellsT P e l xs i m' c → m'.byte c = m.byte c
@@ -350,10 +350,10 @@ private theorem writeElems_frame (P : Shrink.Params) :
     rw [Shrink.Geometry.writeElems] at h
     obtain ⟨m₁, hx, hxs⟩ := bind_some h
     rw [Shrink.Geometry.elemCellsT] at hc
-    exact (writeElems_frame P xs e l (i + 1) m₁ m' hxs c fun hh => hc (.inr hh)).trans
+    exact (writeElems_frame_shared P xs e l (i + 1) m₁ m' hxs c fun hh => hc (.inr hh)).trans
       (frame P e _ x m m₁ hx c fun hh =>
         hc (.inl (cellsT_indep P x e _ m m₁ hx (elem_nested P e l i) m₁ m' c hh)))
-private theorem writeFields_frame (P : Shrink.Params) :
+theorem writeFields_frame_shared (P : Shrink.Params) :
     ∀ (xs : List Shrink.Tree) (fs all : List Shrink.Layout) (l : Shrink.Loc) (i : Nat)
       (m m' : Shrink.Phys), geometry.writeFields P all l fs xs i m = some m' →
       (∀ j, all[i + j]? = fs[j]?) →
@@ -371,12 +371,25 @@ private theorem writeFields_frame (P : Shrink.Params) :
     rw [Shrink.Geometry.writeFields] at h
     obtain ⟨m₁, hx, hxs⟩ := bind_some h
     rw [Shrink.Geometry.fieldCellsT] at hc
-    exact (writeFields_frame P xs fs all l (i + 1) m₁ m' hxs
+    exact (writeFields_frame_shared P xs fs all l (i + 1) m₁ m' hxs
         (fun j => by rw [show i + 1 + j = i + (j + 1) by omega]; exact hi (j + 1)) c
         fun hh => hc (.inr hh)).trans
       (frame P f _ x m m₁ hx c fun hh => hc (.inl
         (cellsT_indep P x f _ m m₁ hx (field_nested P all l i f (hi 0)) m₁ m' c hh)))
 end
+
+private theorem writeElems_frame (P : Shrink.Params) :
+    ∀ (xs : List Shrink.Tree) (e : Shrink.Layout) (l : Shrink.Loc) (i : Nat)
+      (m m' : Shrink.Phys), geometry.writeElems P e l xs i m = some m' →
+      ∀ c, ¬ geometry.elemCellsT P e l xs i m' c → m'.byte c = m.byte c :=
+  writeElems_frame_shared P
+
+private theorem writeFields_frame (P : Shrink.Params) :
+    ∀ (xs : List Shrink.Tree) (fs all : List Shrink.Layout) (l : Shrink.Loc) (i : Nat)
+      (m m' : Shrink.Phys), geometry.writeFields P all l fs xs i m = some m' →
+      (∀ j, all[i + j]? = fs[j]?) →
+      ∀ c, ¬ geometry.fieldCellsT P all l fs xs i m' c → m'.byte c = m.byte c :=
+  writeFields_frame_shared P
 
 /-! ## Ill-typed writes fail -/
 

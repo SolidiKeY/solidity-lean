@@ -21,8 +21,8 @@ of a successful nested write does not depend on the state. `written_indep`
 and `cells_sub` are recursions of the same shape.
 
 The helpers `bind_some`, `writeLength_mem`, `writeBlob_mem`, `data_congr`,
-`elem_nested`, `field_nested`, `writeElems_frame` and `writeFields_frame`
-restate private lemmas of `Laws/Write.lean`, which this module cannot reach.
+`elem_nested` and `field_nested` restate private lemmas of `Laws/Write.lean`.
+The sequence frame laws reuse its shared recursive frame helpers.
 -/
 namespace Solidity.Yul.Layout
 
@@ -343,43 +343,15 @@ end
 private theorem writeElems_frame (P : Shrink.Params) :
     ∀ (xs : List Shrink.Tree) (e : Shrink.Layout) (l : Shrink.Loc) (i : Nat)
       (m m' : Shrink.Phys), geometry.writeElems P e l xs i m = some m' →
-      ∀ c, ¬ geometry.elemCellsT P e l xs i m' c → m'.byte c = m.byte c
-  | [], _, _, _, m, m', h, _, _ => by
-    rw [Shrink.Geometry.writeElems] at h
-    cases h
-    rfl
-  | x :: xs, e, l, i, m, m', h, c, hc => by
-    rw [Shrink.Geometry.writeElems] at h
-    obtain ⟨m₁, hx, hxs⟩ := bind_some h
-    rw [Shrink.Geometry.elemCellsT] at hc
-    exact (writeElems_frame P xs e l (i + 1) m₁ m' hxs c fun hh => hc (.inr hh)).trans
-      (frame P e _ x m m₁ hx c fun hh => hc (.inl (Eq.mp
-        (congrFun (written_indep P x e _ m m₁ hx (elem_nested P e l i) m₁ m').1 c) hh)))
+      ∀ c, ¬ geometry.elemCellsT P e l xs i m' c → m'.byte c = m.byte c :=
+  writeElems_frame_shared P
 
 private theorem writeFields_frame (P : Shrink.Params) :
     ∀ (xs : List Shrink.Tree) (fs all : List Shrink.Layout) (l : Shrink.Loc) (i : Nat)
       (m m' : Shrink.Phys), geometry.writeFields P all l fs xs i m = some m' →
       (∀ j, all[i + j]? = fs[j]?) →
-      ∀ c, ¬ geometry.fieldCellsT P all l fs xs i m' c → m'.byte c = m.byte c
-  | [], fs, _, _, _, m, m', h, _, _, _ => by
-    cases fs with
-    | nil =>
-      rw [Shrink.Geometry.writeFields] at h
-      cases h
-      rfl
-    | cons => simp only [Shrink.Geometry.writeFields, reduceCtorEq] at h
-  | _ :: _, [], _, _, _, _, _, h, _, _, _ => by
-    simp only [Shrink.Geometry.writeFields, reduceCtorEq] at h
-  | x :: xs, f :: fs, all, l, i, m, m', h, hi, c, hc => by
-    rw [Shrink.Geometry.writeFields] at h
-    obtain ⟨m₁, hx, hxs⟩ := bind_some h
-    rw [Shrink.Geometry.fieldCellsT] at hc
-    exact (writeFields_frame P xs fs all l (i + 1) m₁ m' hxs
-        (fun j => by rw [show i + 1 + j = i + (j + 1) by omega]; exact hi (j + 1)) c
-        fun hh => hc (.inr hh)).trans
-      (frame P f _ x m m₁ hx c fun hh => hc (.inl (Eq.mp
-        (congrFun (written_indep P x f _ m m₁ hx (field_nested P all l i f (hi 0)) m₁ m').1 c)
-        hh)))
+      ∀ c, ¬ geometry.fieldCellsT P all l fs xs i m' c → m'.byte c = m.byte c :=
+  writeFields_frame_shared P
 
 /-! ## The read footprint of a written tree lies in its written footprint -/
 
@@ -550,7 +522,7 @@ theorem write_read (P : Shrink.Params) :
       rw [Shrink.Geometry.Separated, hd] at hs
       have hlen : geometry.length P l m' = xs.length :=
         (length_agree P l m₁ m' fun c hc =>
-          (writeElems_frame P xs e _ 0 m₁ m' he c fun hh => hs.2 c ⟨hc, hh⟩).symm).symm.trans
+          (writeElems_frame_shared P xs e _ 0 m₁ m' he c fun hh => hs.2 c ⟨hc, hh⟩).symm).symm.trans
           (writeLength_length hw hf.1)
       rw [Shrink.Geometry.read, hd, hlen, writeElems_read P xs e _ 0 m₁ m' hf.2 he hs.1]
       rfl
@@ -577,7 +549,7 @@ private theorem writeElems_read (P : Shrink.Params) :
     obtain ⟨hc, hsep⟩ := written_indep P x e _ m m₁ hx (elem_nested P e l i) m₁ m'
     have rx := write_read P e _ x m m₁ hf.1 hx (hsep.mpr hs.1)
     have keep := local_read P e _ m₁ m' fun c hc' =>
-      (writeElems_frame P xs e l (i + 1) m₁ m' hxs c fun hh =>
+      (writeElems_frame_shared P xs e l (i + 1) m₁ m' hxs c fun hh =>
         hs.2.1 c ⟨Eq.mp (congrFun hc c) (cells_sub P x e _ m m₁ m₁ hx rx c hc'), hh⟩).symm
     rw [List.length_cons, Shrink.Geometry.readElems, ← keep, rx,
       writeElems_read P xs e l (i + 1) m₁ m' hf.2 hxs hs.2.2]
@@ -606,7 +578,7 @@ private theorem writeFields_read (P : Shrink.Params) :
       written_indep P x f _ m m₁ hx (field_nested P all l i f (hi 0)) m₁ m'
     have rx := write_read P f _ x m m₁ hf.1 hx (hsep.mpr hs.1)
     have keep := local_read P f _ m₁ m' fun c hc' =>
-      (writeFields_frame P xs fs all l (i + 1) m₁ m' hxs next c fun hh =>
+      (writeFields_frame_shared P xs fs all l (i + 1) m₁ m' hxs next c fun hh =>
         hs.2.1 c ⟨Eq.mp (congrFun hc c) (cells_sub P x f _ m m₁ m₁ hx rx c hc'), hh⟩).symm
     rw [Shrink.Geometry.readFields, ← keep, rx,
       writeFields_read P xs fs all l (i + 1) m₁ m' hf.2 hxs hs.2.2 next]
