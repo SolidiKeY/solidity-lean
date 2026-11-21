@@ -62,6 +62,40 @@ theorem realizeInventory_images {E : Source.Env} {origin h : Source.Heap E.layou
         rw [refreshMixedEntry_id] at no
         exact no
 
+/-- Typed decoded updates construct their complete realized view and provenance. -/
+theorem realizedInventory_writeback_view {E : Source.Env} {Γ : Source.RCtx} {origin : Source.Heap E.layout}
+    (s : Source.EMState E Γ) (allocated : Placement origin) (p : Placement s.2.heap)
+    (history : RetainedAllocation allocated p) (es : List (MixedHeapEntry p))
+    (coverage : CoversMixedHeap es) (distinct : (es.map MixedHeapEntry.id).Nodup)
+    (m : ByteView) (us : List (OwnedInventoryUpdate allocated p))
+    (raw : ∀ u ∈ us, u.object.image.encode m (p.address u.entry.id) = m)
+    (ids : us.map (fun u => u.entry.id) = es.map MixedHeapEntry.id) :
+    ∃ realized : InventoryRealization allocated,
+      (runInventoryUpdates us).run s=(.ok (),withSourceHeap s realized.heap) ∧ CoversMixedHeap realized.entries ∧
+      (realized.entries.map MixedHeapEntry.id).Nodup ∧
+      realized.heap.ty=s.2.heap.ty ∧ realized.heap.next=s.2.heap.next ∧
+      realized.placement.address=p.address ∧ realized.placement.free=p.free ∧
+      encodeMixedHeap realized.placement realized.entries m=m := by
+  let realized := realizeInventory allocated p history us s.2.heap p history rfl es
+  have images := realizeInventory_images allocated p history us s.2.heap p history rfl es m raw (by
+    intro e member outside
+    have present : e.id ∈ us.map (fun u => u.entry.id) := by
+      rw [ids]
+      exact List.mem_map.mpr ⟨e,member,rfl⟩
+    obtain ⟨u,member,eq⟩ := List.mem_map.mp present
+    exact False.elim (outside u member eq.symm))
+  have choices := realizeInventory_choices allocated p history us s.2.heap p history rfl es
+  refine ⟨realized,realizeInventory_run allocated p history us s p history rfl es,
+    realizeInventory_coverage allocated p history us s.2.heap p history rfl es coverage,?_,
+    realizeInventory_types allocated p history us s.2.heap p history rfl es,choices.2.2,choices.1,choices.2.1,?_⟩
+  · rw [realizeInventory_ids]
+    exact distinct
+  · apply encodeMixedHeap_unchanged
+    intro e member
+    have reads := e.image.encode_reads m (realized.placement.address e.id)
+    rw [images e member] at reads
+    exact reads
+
 /-- A concrete final mixed heap view, with arbitrary preserved residual bytes,
 for the full decoded inventory. All data/image evidence is constructor-derived. -/
 theorem inventoryStateWriteback_view {E : Source.Env} {Γ : Source.RCtx} {origin : Source.Heap E.layout}
