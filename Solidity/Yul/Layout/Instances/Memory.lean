@@ -158,6 +158,9 @@ private theorem member_offset (n i : Nat) (le : i ≤ n) :
       simp only [List.replicate_succ, memberOffset, memSize, ih i (by omega)]
       omega
 
+/-- Shared inline offset law for word-struct members. -/
+theorem memory_member_offset_shared : type_of% (@member_offset) := @member_offset
+
 /-- Word members read, whatever the member list of the struct. -/
 private theorem read_fields (P : Shrink.Params) (all : List Shrink.Layout) (base k i : Nat)
     (m : Shrink.Phys) :

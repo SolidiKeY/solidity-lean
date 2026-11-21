@@ -1,4 +1,5 @@
 import Solidity.Yul.Layout.View
+import Solidity.Yul.Layout.Instances.Memory
 import Solidity.Yul.Views.ObjectMemoryAllocation
 import Solidity.Yul.Views.DynamicUintMemory
 
@@ -82,17 +83,8 @@ private theorem put_words (P : Shrink.Params) (base : Nat) (ws : List Roadmap.Wo
 
 /-- The inline offset of a member of a struct of words. -/
 private theorem member_offset (n i : Nat) (le : i ≤ n) :
-    memberOffset (List.replicate n (.scalar 32)) i = 32 * i := by
-  induction n generalizing i with
-  | zero => cases i with
-    | zero => rfl
-    | succ i => omega
-  | succ n ih => cases i with
-    | zero => rfl
-    | succ i =>
-      rw [List.replicate_succ, memberOffset, ih i (by omega)]
-      change 32 + 32 * i = 32 * (i + 1)
-      omega
+    memberOffset (List.replicate n (.scalar 32)) i = 32 * i :=
+  memory_member_offset_shared n i le
 
 /-- Words placed as struct members from member `i` are their serialized list. -/
 private theorem put_members (P : Shrink.Params) (base n : Nat) (ws : List Roadmap.Word)
