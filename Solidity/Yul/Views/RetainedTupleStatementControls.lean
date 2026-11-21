@@ -66,6 +66,7 @@ def rsPlan (G : Source.Glob agEnv) : CapturedOwnershipPlan packedStepFrame rhLay
 
 theorem rs_source_and_residual (G : Source.Glob agEnv) : (rsPlan G).step=rePlan.step := rfl
 
-theorem rs_single_value_rejects : rtNested.get=.error (.stuck "not a plain value") := rfl
+theorem rs_single_value_rejects : rtNested.get=.error (.stuck "not a plain value") :=
+  rt_single_val_loses
 
 end Solidity.Yul.Views.Controls
