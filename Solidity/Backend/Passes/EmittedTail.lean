@@ -1,5 +1,6 @@
 import Solidity.Backend.Passes.TailLoop
 import Solidity.Backend.Passes.Stack
+import Solidity.Backend.Payments.CompilerExact
 
 /-!
 # Exact saved-tail independence for all eleven Compilation constructors
@@ -20,15 +21,15 @@ def replaceOutStack (tail : List Word) : Evm.Out → Evm.Out
 variable {C : Contract} {b L frame : Nat} {Γ Δ : Ctx}
   {F : Frag Γ} {P : Prog C Γ Δ}
 
-/-- Exact outcome and all non-stack fields are independent of the saved tail,
-for core, memory, reference arrays, objects, construction and memory calls. -/
-theorem compilation_tail_exact (result : Compilation b F P)
+/-- **Saved-tail independence**: the exact outcome and every non-stack field
+do not depend on the saved tail. -/
+theorem WholeProgram.tail_exact (result : Compilation b F P)
     {base : Nat → Fin W} {σ : State C Γ} {m : Machine}
     (hi : result.Input L frame base σ m)
-    (hp : Evm.Prog.pays P = false) (tail : List Word) :
+    (tail : List Word) :
     run result.code {m with stack := tail} =
       replaceOutStack tail (run result.code {m with stack := []}) := by
-  rcases compilation_exact result (compilation_input_stack result hi []) hp with
+  rcases Compilation.correct_exact result (compilation_input_stack result hi []) with
     ⟨o, canonical, hs, ht, hstack, hr⟩ | ⟨hs, ht⟩ | ⟨hs, ht⟩
   · have he := run_tail result.code {m with stack := []} tail
       (by rw [ht]; intro h; cases h)
@@ -41,7 +42,7 @@ theorem compilation_tail_exact (result : Compilation b F P)
     simpa only [ht, appendTail, appendOut, replaceOutStack, List.nil_append] using he
   · rw [ht]
     change run result.code {m with stack := tail} = .fault
-    rcases compilation_exact result (compilation_input_stack result hi tail) hp with
+    rcases Compilation.correct_exact result (compilation_input_stack result hi tail) with
       ⟨o, out, hs', _, _, _⟩ | ⟨hs' | ⟨_, hs'⟩, _⟩ | ⟨_, ht'⟩
     · rw [hs] at hs'
       cases hs'
@@ -50,6 +51,16 @@ theorem compilation_tail_exact (result : Compilation b F P)
     · rw [hs] at hs'
       cases hs'
     · exact ht'
+
+/-- Exact outcome and all non-stack fields are independent of the saved tail,
+for core, memory, reference arrays, objects, construction and memory calls. -/
+theorem compilation_tail_exact (result : Compilation b F P)
+    {base : Nat → Fin W} {σ : State C Γ} {m : Machine}
+    (hi : result.Input L frame base σ m)
+    (hp : Evm.Prog.pays P = false) (tail : List Word) :
+    run result.code {m with stack := tail} =
+      replaceOutStack tail (run result.code {m with stack := []}) :=
+  WholeProgram.tail_exact result hi tail
 
 /-- One actual canonical machine works for every saved tail, retaining full
 branch-specific representation, frame, map and allocator relations per run. -/
