@@ -33,7 +33,7 @@ example : ¬ ∃ names : FreshNames,
   rintro ⟨names, hn, hp⟩
   have h := names.roundTrip "se" (by simp) 0
   rw [hn, hp] at h
-  cases h
+  exact (by decide : (some ("brk", 1) : Option (String × Nat)) ≠ some ("se", 0)) h
 
 /-- The relational rules reproduce the frozen kernel equations exactly. -/
 example [FreshNames] : listStep = Solidity.Goals.loweringKernelList := rfl
