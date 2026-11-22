@@ -73,6 +73,9 @@ def expand(root, scope):
 
 
 def module_of(path):
+    """Bridge/ is its own Lake package root: Bridge/SolidityBridge/X.lean is module SolidityBridge.X."""
+    if path.startswith("Bridge/"):
+        path = path[len("Bridge/"):]
     return path[:-5].replace("/", ".")
 
 
@@ -94,30 +97,35 @@ def main():
 
     files = lean_files(root)
     if a.goal:
-        short = a.goal.split(".")[-1]
-        goal_files = [f for f in files if f.startswith("Solidity/Goals")]
+        want = a.goal.split(".")
         found = False
-        for f in goal_files:
+        for f in (f for f in files if f.startswith("Solidity/Goals")):
             src = open(os.path.join(root, f), encoding="utf-8").read().split("\n")
-            for i, line in enumerate(src):
-                m = DECL.match(line)
-                if m and m.group(2).split(".")[-1] == short:
-                    start = i
-                    while start > 0 and src[start - 1].strip().startswith(("@[", "/--", "--")):
-                        start -= 1
-                    end = i + 1
-                    while end < len(src) and src[end].strip() and not DECL.match(src[end]) and end - i < 40:
-                        end += 1
-                    block = src[start:end]
-                    out += [f"## Goal `{a.goal}` ({f}:{i + 1})", "```lean", *block, "```", ""]
-                    names += [t for t in IDENT.findall("\n".join(block[1:]))
-                              if t not in SKIP and t.split(".")[-1] != short and len(t) > 3]
-                    found = True
-                    break
+            for ln, _, full in outline(root, f):
+                parts = full.split(".")
+                # a qualified request must match the declaration's full name as a suffix
+                if parts[-len(want):] != want and not (len(want) == 1 and parts[-1] == want[0]):
+                    continue
+                i = ln - 1
+                start = i
+                while start > 0 and src[start - 1].strip().startswith(("@[", "/--", "--")):
+                    start -= 1
+                head = "\n".join(src[start:i + 1])
+                if "@[goal" not in head:
+                    continue
+                end = i + 1
+                while end < len(src) and src[end].strip() and not DECL.match(src[end]) and end - i < 40:
+                    end += 1
+                block = src[start:end]
+                out += [f"## Goal `{full}` ({f}:{ln})", "```lean", *block, "```", ""]
+                names += [t for t in IDENT.findall("\n".join(src[i:end]))
+                          if t not in SKIP and t.split(".")[-1] != parts[-1] and len(t) > 3]
+                found = True
+                break
             if found:
                 break
         if not found:
-            out += [f"## Goal `{a.goal}`: not stated yet (no declaration in Solidity/Goals*)", ""]
+            out += [f"## Goal `{a.goal}`: no @[goal] declaration with that name in Solidity/Goals* (not stated yet)", ""]
 
     scope_files = expand(root, a.scope)
     seen, uniq = set(), []

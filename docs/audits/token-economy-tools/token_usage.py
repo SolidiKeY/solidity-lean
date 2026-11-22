@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """Token use of this checkout's agent sessions, from local Claude Code and Codex transcripts.
 
-usage: token_usage.py [--since YYYY-MM] [--repo PATH] breakdown|capsim
+usage: token_usage.py [--since YYYY-MM-DD] [--repo PATH] breakdown|capsim
 
 breakdown: cost by token type, by what each step did, and by context size.
 capsim:    replay the sessions with an auto-compaction cap (100k/150k/200k) against a matched no-cap run.
@@ -15,7 +15,7 @@ def w(u):
     return u['inp'] + 0.1 * u['cr'] + 1.25 * u['cw'] + 5 * u['out']
 
 
-def claude(repo):
+def claude(repo, since):
     key = re.sub(r'[^A-Za-z0-9]', '-', repo)
     for f in sorted(glob.glob(os.path.expanduser(f'~/.claude/projects/{key}*/**/*.jsonl'), recursive=True)):
         steps, byreq = [], {}
@@ -23,6 +23,8 @@ def claude(repo):
             if '"type":"assistant"' not in line:
                 continue
             d = json.loads(line)
+            if (d.get('timestamp') or '') < since:
+                continue
             m = d.get('message') or {}
             rid = d.get('requestId') or d.get('uuid')
             if rid not in byreq:
@@ -40,9 +42,9 @@ def claude(repo):
 
 def codex(repo, since):
     for f in sorted(glob.glob(os.path.expanduser('~/.codex/sessions/*/*/*/*.jsonl'))):
-        if '/'.join(f.split('/')[-4:-2]) < since.replace('-', '/'):
+        if '-'.join(f.split('/')[-4:-1]) < since[:10]:
             continue
-        steps, cur = [], {'calls': []}
+        steps, cur, last_total = [], {'calls': []}, None
         for i, line in enumerate(open(f, errors='replace')):
             if i == 0 and repo not in line:
                 break
@@ -52,7 +54,9 @@ def codex(repo, since):
                 cur['calls'].append((p.get('name') or '', str(p.get('input') or p.get('arguments'))))
             elif '"token_count"' in head:
                 info = json.loads(line)['payload'].get('info')
-                if info:
+                # Codex repeats the notification without a new call; count a call only when the total moves
+                if info and info['total_token_usage'] != last_total:
+                    last_total = info['total_token_usage']
                     lu = info['last_token_usage']
                     cr = lu.get('cached_input_tokens', 0)
                     cur['u'] = {'inp': lu['input_tokens'] - cr, 'cr': cr, 'cw': 0, 'out': lu['output_tokens']}
@@ -125,10 +129,10 @@ def capsim(S):
 
 if __name__ == '__main__':
     ap = argparse.ArgumentParser()
-    ap.add_argument('--since', default='2026-10')
+    ap.add_argument('--since', default='2026-10-01', help='YYYY-MM-DD (or a longer ISO time)')
     ap.add_argument('--repo', default=subprocess.run(['git', 'rev-parse', '--show-toplevel'], capture_output=True,
                                                       text=True).stdout.strip().split('-worktrees')[0])
     ap.add_argument('mode', choices=['breakdown', 'capsim'])
     a = ap.parse_args()
-    S = list(claude(a.repo)) + list(codex(a.repo, a.since))
+    S = list(claude(a.repo, a.since)) + list(codex(a.repo, a.since))
     (breakdown if a.mode == 'breakdown' else capsim)(S)
