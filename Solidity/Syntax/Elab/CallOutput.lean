@@ -630,3 +630,385 @@ theorem named_callee_closure_output_height
     (named_callee_before g args)
 
 end Solidity.ElabCallHeight
+
+namespace Solidity.ElabCallHeight
+open Semantics ElabControlProof
+
+/-- Every successful inline opening came from a descriptor or raw slice. -/
+theorem inlineSliceOpen_cases (t : String) (view : RawExpr) (v : SliceView) (pre : List RawStmt)
+    (h : inlineSliceOpen t view = .ok (v, pre)) :
+    (view = .call "#sliceDesc" [.name v.base, v.off, v.fin] ∧ pre = []) ∨
+      ∃ b i j, view = .call "#sliceRaw" [b, i, j] := by
+  unfold inlineSliceOpen at h
+  split at h
+  · exact Or.inr ⟨_, _, _, rfl⟩
+  · dsimp only at h
+    split at h
+    · cases h
+      exact Or.inl ⟨rfl, rfl⟩
+    · cases h
+/-- Opening an explicit descriptor only returns its recorded components. -/
+theorem inlineSliceOpen_desc (t base : String) (off fin : RawExpr) :
+    inlineSliceOpen t (.call "#sliceDesc" [.name base, off, fin]) =
+      .ok (({ base, off, fin } : SliceView), []) := by rfl
+
+/-- Folded subtraction adds at most one expression layer. -/
+theorem sliceSub_height_le (e o : RawExpr) :
+    height (sliceSub e o) ≤ 1 + max (height e) (height o) := by
+  unfold sliceSub
+  split <;> simp only [height] <;> omega
+
+/-- A descriptor's computed length remains below its descriptor height. -/
+theorem descriptor_len_le (base : String) (off fin : RawExpr) :
+    height (({ base, off, fin } : SliceView).len) ≤
+      height (.call "#sliceDesc" [.name base, off, fin]) := by
+  have h := sliceSub_height_le fin off
+  have hc : cost "#sliceDesc" = 1 := rfl
+  simp only [SliceView.len, height, heights, hc]
+  omega
+
+/-- The exact indexing request from an opened descriptor decreases. -/
+theorem descriptor_at_request_lt (base : String) (off fin k : RawExpr) :
+    height (.index (.name base) (.call "#sliceIndex"
+      [off, ({ base, off, fin } : SliceView).len, k, .field (.name base) "length"])) <
+    height (.call "#sliceAt" [.call "#sliceDesc" [.name base, off, fin], k]) := by
+  have h := descriptor_len_le base off fin
+  have hc : cost "#sliceDesc" = 1 := rfl
+  have hi : cost "#sliceIndex" = 3 := rfl
+  have ha : cost "#sliceAt" = 6 := rfl
+  simp only [height, heights, hc, hi, ha] at h ⊢
+  omega
+
+/-- Reading the length after opening a descriptor decreases. -/
+theorem descriptor_length_request_lt (base : String) (off fin : RawExpr) :
+    height (({ base, off, fin } : SliceView).len) <
+      height (.call "#sliceLength" [.call "#sliceDesc" [.name base, off, fin]]) := by
+  have h := descriptor_len_le base off fin
+  have hc : cost "#sliceLength" = 2 := rfl
+  simp only [height, heights, hc] at h ⊢
+  omega
+
+/-- The exact ABI decode request from an opened descriptor decreases. -/
+theorem descriptor_decode_request_lt (base : String) (off fin : RawExpr)
+    (rest : List RawExpr) :
+    height (.call "abi.decode" (.call sliceViewName
+      [.name base, off, ({ base, off, fin } : SliceView).len] :: rest)) <
+    height (.call "#sliceDecode" (.call "#sliceDesc" [.name base, off, fin] :: rest)) := by
+  have h := descriptor_len_le base off fin
+  have hc : cost "#sliceDesc" = 1 := rfl
+  have hv : cost sliceViewName = 1 := rfl
+  have hd : cost "#sliceDecode" = 5 := rfl
+  have hdecode : cost "abi.decode" = 2 := rfl
+  simp only [height, heights, hc, hv, hd, hdecode] at h ⊢
+  omega
+
+
+
+theorem raw_at_request_lt (b i j k : RawExpr) (v : SliceView)
+    (ho : height v.off ≤ 2) (hl : height v.len ≤ 3) :
+    height (.index (.name v.base) (.call "#sliceIndex"
+      [v.off, v.len, k, .field (.name v.base) "length"])) <
+      height (.call "#sliceAt" [.call "#sliceRaw" [b, i, j], k]) := by
+  have hb := height_pos b
+  have hc : cost "#sliceRaw" = 1 := rfl
+  have hi : cost "#sliceIndex" = 3 := rfl
+  have ha : cost "#sliceAt" = 6 := rfl
+  simp only [height, heights, hc, hi, ha]
+  omega
+
+theorem raw_length_request_lt (b i j : RawExpr) (v : SliceView)
+    (hl : height v.len ≤ 3) :
+    height v.len < height (.call "#sliceLength" [.call "#sliceRaw" [b, i, j]]) := by
+  have hb := height_pos b
+  have hc : cost "#sliceRaw" = 1 := rfl
+  have hd : cost "#sliceLength" = 2 := rfl
+  simp only [height, heights, hc, hd]
+  omega
+
+theorem raw_decode_request_lt (b i j : RawExpr) (v : SliceView) (rest : List RawExpr)
+    (ho : height v.off ≤ 2) (hl : height v.len ≤ 3) :
+    height (.call "abi.decode" (.call sliceViewName [.name v.base, v.off, v.len] :: rest)) <
+    height (.call "#sliceDecode" (.call "#sliceRaw" [b, i, j] :: rest)) := by
+  have hb := height_pos b
+  have hc : cost "#sliceRaw" = 1 := rfl
+  have hv : cost sliceViewName = 1 := rfl
+  have hd : cost "#sliceDecode" = 5 := rfl
+  have cost_decode : cost "abi.decode" = 2 := rfl
+  simp only [height, heights, hc, hv, hd, cost_decode]
+  omega
+
+
+end Solidity.ElabCallHeight
+
+namespace Solidity.ElabControlProof
+/-- A successful checking step retains its result predicate when lifted. -/
+theorem obs_lift {α : Type} {x : Except String α} {Q : α → Prop}
+    (hx : ∀ a, x = .ok a → Q a) : Obs (ElabM.lift x) Q := by
+  intro sc st m a st' m' h
+  cases he : x with
+  | error err => simp only [he] at h; cases h
+  | ok v =>
+    simp only [he] at h
+    cases h
+    exact hx _ he
+end Solidity.ElabControlProof
+
+namespace Solidity.ElabCallHeight
+open Semantics ElabControlProof
+variable (C : Contract) [FreshNames]
+
+/-- Slice length preserves height when opening supplies a smaller request. -/
+theorem slice_length_output_height_of_request (rc : ElabRec C) (e view : RawExpr)
+    (hf : e.foldConst = .ok (.call "#sliceLength" [view]))
+    (hreq : ∀ t v pre, inlineSliceOpen t view = .ok (v, pre) →
+      height v.len < height (.call "#sliceLength" [view]))
+    (hh : ∀ a, height a < height (.call "#sliceLength" [view]) →
+      Obs (rc.hoist a) (fun out => height out.2 ≤ height a)) :
+    Obs (hoistWith C rc e) (fun out => height out.2 ≤ height (.call "#sliceLength" [view])) := by
+  have hfold : (liftM e.foldConst : ElabM RawExpr) = pure (.call "#sliceLength" [view]) := by rw [hf]; rfl
+  unfold hoistWith
+  rw [hfold]
+  simp -zeta only [pure_bind]
+  dsimp +zetaDelta only
+  with_reducible apply obs_any
+  intro fresh
+  with_reducible apply obs_bind (obs_lift (fun out h => hreq (toString fresh) out.1 out.2 h))
+  rintro ⟨v, pre⟩ hlt
+  have hrequest := hh _ hlt
+  repeat' first
+    | (with_reducible apply obs_bind hrequest; rintro ⟨R, out⟩ hout)
+    | (with_reducible apply obs_pure; exact Nat.le_trans hout (Nat.le_of_lt hlt))
+    | (with_reducible apply obs_any; intro value)
+    | split
+
+/-- Slice at preserves height when opening supplies a smaller request. -/
+theorem slice_at_output_height_of_request (rc : ElabRec C) (e view k : RawExpr)
+    (hf : e.foldConst = .ok (.call "#sliceAt" [view, k]))
+    (hreq : ∀ t v pre, inlineSliceOpen t view = .ok (v, pre) →
+      height (.index (.name v.base) (.call "#sliceIndex" [v.off, v.len, k, .field (.name v.base) "length"])) < height (.call "#sliceAt" [view, k]))
+    (hh : ∀ a, height a < height (.call "#sliceAt" [view, k]) →
+      Obs (rc.hoist a) (fun out => height out.2 ≤ height a)) :
+    Obs (hoistWith C rc e) (fun out => height out.2 ≤ height (.call "#sliceAt" [view, k])) := by
+  have hfold : (liftM e.foldConst : ElabM RawExpr) = pure (.call "#sliceAt" [view, k]) := by rw [hf]; rfl
+  unfold hoistWith
+  rw [hfold]
+  simp -zeta only [pure_bind]
+  dsimp +zetaDelta only
+  with_reducible apply obs_any
+  intro fresh
+  with_reducible apply obs_bind (obs_lift (fun out h => hreq (toString fresh) out.1 out.2 h))
+  rintro ⟨v, pre⟩ hlt
+  have hrequest := hh _ hlt
+  repeat' first
+    | (with_reducible apply obs_bind hrequest; rintro ⟨R, out⟩ hout)
+    | (with_reducible apply obs_pure; exact Nat.le_trans hout (Nat.le_of_lt hlt))
+    | (with_reducible apply obs_any; intro value)
+    | split
+
+/-- Slice decoding preserves height when opening supplies a smaller request. -/
+theorem slice_decode_output_height_of_request (rc : ElabRec C) (e view : RawExpr)
+    (rest : List RawExpr)
+    (hf : e.foldConst = .ok (.call "#sliceDecode" (view :: rest)))
+    (hreq : ∀ t v pre, inlineSliceOpen t view = .ok (v, pre) →
+      height (.call "abi.decode" (.call sliceViewName [.name v.base, v.off, v.len] :: rest)) <
+        height (.call "#sliceDecode" (view :: rest)))
+    (hh : ∀ a, height a < height (.call "#sliceDecode" (view :: rest)) →
+      Obs (rc.hoist a) (fun out => height out.2 ≤ height a)) :
+    Obs (hoistWith C rc e) (fun out => height out.2 ≤ height (.call "#sliceDecode" (view :: rest))) := by
+  have hfold : (liftM e.foldConst : ElabM RawExpr) =
+      pure (.call "#sliceDecode" (view :: rest)) := by rw [hf]; rfl
+  unfold hoistWith
+  rw [hfold]
+  simp -zeta only [pure_bind]
+  dsimp +zetaDelta only
+  split <;> try (exfalso; simp_all [RawExpr.call.injEq]; done)
+  case h_14 =>
+    rename_i heq
+    obtain ⟨rfl, rfl⟩ := List.cons.inj (RawExpr.call.inj heq).2
+    with_reducible apply obs_any
+    intro fresh
+    with_reducible apply obs_bind (obs_lift (fun out h => hreq (toString fresh) out.1 out.2 h))
+    rintro ⟨v, pre⟩ hlt
+    have hrequest := hh _ hlt
+    repeat' first
+      | (with_reducible apply obs_bind hrequest; rintro ⟨R, out⟩ hout)
+      | (with_reducible apply obs_pure; exact Nat.le_trans hout (Nat.le_of_lt hlt))
+      | (with_reducible apply obs_any; intro value)
+  case h_17 =>
+    rename_i hdecode hcopy harray heq
+    obtain ⟨rfl, rfl⟩ := RawExpr.call.inj heq
+    exact False.elim (hdecode view rest rfl rfl)
+
+/-- Earlier specialized contract, derived from the shared arm proof. -/
+theorem descriptor_length_output_height (rc : ElabRec C) (e : RawExpr)
+    (base : String) (off fin : RawExpr)
+    (hf : e.foldConst = .ok (.call "#sliceLength" [.call "#sliceDesc" [.name base, off, fin]]))
+    (hh : ∀ a, height a < height (.call "#sliceLength" [.call "#sliceDesc" [.name base, off, fin]]) →
+      Obs (rc.hoist a) (fun out => height out.2 ≤ height a)) :
+    Obs (hoistWith C rc e) (fun out => height out.2 ≤
+      height (.call "#sliceLength" [.call "#sliceDesc" [.name base, off, fin]])) := by
+  refine slice_length_output_height_of_request C rc e _ hf ?_ hh
+  intro t v pre h
+  rw [inlineSliceOpen_desc] at h
+  cases h
+  exact descriptor_length_request_lt base off fin
+
+
+/-- Earlier specialized contract, derived from the shared arm proof. -/
+theorem descriptor_at_output_height (rc : ElabRec C) (e : RawExpr)
+    (base : String) (off fin k : RawExpr)
+    (hf : e.foldConst = .ok (.call "#sliceAt" [.call "#sliceDesc" [.name base, off, fin], k]))
+    (hh : ∀ a, height a < height (.call "#sliceAt" [.call "#sliceDesc" [.name base, off, fin], k]) →
+      Obs (rc.hoist a) (fun out => height out.2 ≤ height a)) :
+    Obs (hoistWith C rc e) (fun out => height out.2 ≤
+      height (.call "#sliceAt" [.call "#sliceDesc" [.name base, off, fin], k])) := by
+  refine slice_at_output_height_of_request C rc e _ k hf ?_ hh
+  intro t v pre h
+  rw [inlineSliceOpen_desc] at h
+  cases h
+  exact descriptor_at_request_lt base off fin k
+
+
+/-- Earlier specialized contract, derived from the shared arm proof. -/
+theorem descriptor_decode_output_height (rc : ElabRec C) (e : RawExpr)
+    (base : String) (off fin : RawExpr) (rest : List RawExpr)
+    (hf : e.foldConst = .ok (.call "#sliceDecode" (.call "#sliceDesc" [.name base, off, fin] :: rest)))
+    (hh : ∀ a, height a < height (.call "#sliceDecode" (.call "#sliceDesc" [.name base, off, fin] :: rest)) →
+      Obs (rc.hoist a) (fun out => height out.2 ≤ height a)) :
+    Obs (hoistWith C rc e) (fun out => height out.2 ≤
+      height (.call "#sliceDecode" (.call "#sliceDesc" [.name base, off, fin] :: rest))) := by
+  refine slice_decode_output_height_of_request C rc e _ rest hf ?_ hh
+  intro t v pre h
+  rw [inlineSliceOpen_desc] at h
+  cases h
+  exact descriptor_decode_request_lt base off fin rest
+
+
+/-- Earlier specialized contract, derived from the shared arm proof. -/
+theorem raw_length_output_height_of_bounds (rc : ElabRec C) (e b i j : RawExpr)
+    (hf : e.foldConst = .ok (.call "#sliceLength" [.call "#sliceRaw" [b, i, j]]))
+    (hopen : ∀ t v pre, inlineSliceOpen t (.call "#sliceRaw" [b, i, j]) = .ok (v, pre) →
+      height v.off ≤ 2 ∧ height v.len ≤ 3)
+    (hh : ∀ a, height a < height (.call "#sliceLength" [.call "#sliceRaw" [b, i, j]]) →
+      Obs (rc.hoist a) (fun out => height out.2 ≤ height a)) :
+    Obs (hoistWith C rc e) (fun out => height out.2 ≤ height (.call "#sliceLength" [.call "#sliceRaw" [b, i, j]])) := by
+  refine slice_length_output_height_of_request C rc e _ hf ?_ hh
+  intro t v pre h
+  have hv := hopen t v pre h
+  exact raw_length_request_lt b i j v hv.2
+
+
+/-- Earlier specialized contract, derived from the shared arm proof. -/
+theorem raw_at_output_height_of_bounds (rc : ElabRec C) (e b i j k : RawExpr)
+    (hf : e.foldConst = .ok (.call "#sliceAt" [.call "#sliceRaw" [b, i, j], k]))
+    (hopen : ∀ t v pre, inlineSliceOpen t (.call "#sliceRaw" [b, i, j]) = .ok (v, pre) →
+      height v.off ≤ 2 ∧ height v.len ≤ 3)
+    (hh : ∀ a, height a < height (.call "#sliceAt" [.call "#sliceRaw" [b, i, j], k]) →
+      Obs (rc.hoist a) (fun out => height out.2 ≤ height a)) :
+    Obs (hoistWith C rc e) (fun out => height out.2 ≤ height (.call "#sliceAt" [.call "#sliceRaw" [b, i, j], k])) := by
+  refine slice_at_output_height_of_request C rc e _ k hf ?_ hh
+  intro t v pre h
+  have hv := hopen t v pre h
+  exact raw_at_request_lt b i j k v hv.1 hv.2
+
+
+/-- Earlier specialized contract, derived from the shared arm proof. -/
+theorem raw_decode_output_height_of_bounds (rc : ElabRec C) (e b i j : RawExpr)
+    (rest : List RawExpr)
+    (hf : e.foldConst = .ok (.call "#sliceDecode" (.call "#sliceRaw" [b, i, j] :: rest)))
+    (hopen : ∀ t v pre, inlineSliceOpen t (.call "#sliceRaw" [b, i, j]) = .ok (v, pre) →
+      height v.off ≤ 2 ∧ height v.len ≤ 3)
+    (hh : ∀ a, height a < height (.call "#sliceDecode" (.call "#sliceRaw" [b, i, j] :: rest)) →
+      Obs (rc.hoist a) (fun out => height out.2 ≤ height a)) :
+    Obs (hoistWith C rc e) (fun out => height out.2 ≤
+      height (.call "#sliceDecode" (.call "#sliceRaw" [b, i, j] :: rest))) := by
+  refine slice_decode_output_height_of_request C rc e _ rest hf ?_ hh
+  intro t v pre h
+  have hv := hopen t v pre h
+  exact raw_decode_request_lt b i j v rest hv.1 hv.2
+
+
+end Solidity.ElabCallHeight
+
+namespace Solidity.ElabCallHeight
+open Semantics ElabControlProof
+
+/-- Successful opening yields a smaller length request, assuming raw opening bounds. -/
+theorem slice_length_request_lt_of_raw_bounds (view : RawExpr) (t : String)
+    (v : SliceView) (pre : List RawStmt)
+    (hopen : ∀ t b i j v pre, inlineSliceOpen t (.call "#sliceRaw" [b, i, j]) = .ok (v, pre) →
+      height v.off ≤ 2 ∧ height v.len ≤ 3)
+    (h : inlineSliceOpen t view = .ok (v, pre)) :
+    height v.len < height (.call "#sliceLength" [view]) := by
+  rcases inlineSliceOpen_cases t view v pre h with ⟨rfl, _⟩ | ⟨b, i, j, rfl⟩
+  · exact descriptor_length_request_lt v.base v.off v.fin
+  · exact raw_length_request_lt b i j v (hopen t b i j v pre h).2
+
+/-- Successful opening yields a smaller indexing request, assuming raw opening bounds. -/
+theorem slice_at_request_lt_of_raw_bounds (view k : RawExpr) (t : String)
+    (v : SliceView) (pre : List RawStmt)
+    (hopen : ∀ t b i j v pre, inlineSliceOpen t (.call "#sliceRaw" [b, i, j]) = .ok (v, pre) →
+      height v.off ≤ 2 ∧ height v.len ≤ 3)
+    (h : inlineSliceOpen t view = .ok (v, pre)) :
+    height (.index (.name v.base) (.call "#sliceIndex"
+      [v.off, v.len, k, .field (.name v.base) "length"])) <
+      height (.call "#sliceAt" [view, k]) := by
+  rcases inlineSliceOpen_cases t view v pre h with ⟨rfl, _⟩ | ⟨b, i, j, rfl⟩
+  · exact descriptor_at_request_lt v.base v.off v.fin k
+  · have hv := hopen t b i j v pre h
+    exact raw_at_request_lt b i j k v hv.1 hv.2
+
+/-- Successful opening yields a smaller decode request, assuming raw opening bounds. -/
+theorem slice_decode_request_lt_of_raw_bounds (view : RawExpr) (rest : List RawExpr)
+    (t : String) (v : SliceView) (pre : List RawStmt)
+    (hopen : ∀ t b i j v pre, inlineSliceOpen t (.call "#sliceRaw" [b, i, j]) = .ok (v, pre) →
+      height v.off ≤ 2 ∧ height v.len ≤ 3)
+    (h : inlineSliceOpen t view = .ok (v, pre)) :
+    height (.call "abi.decode" (.call sliceViewName [.name v.base, v.off, v.len] :: rest)) <
+      height (.call "#sliceDecode" (view :: rest)) := by
+  rcases inlineSliceOpen_cases t view v pre h with ⟨rfl, _⟩ | ⟨b, i, j, rfl⟩
+  · exact descriptor_decode_request_lt v.base v.off v.fin rest
+  · have hv := hopen t b i j v pre h
+    exact raw_decode_request_lt b i j v rest hv.1 hv.2
+
+end Solidity.ElabCallHeight
+
+namespace Solidity.ElabCallHeight
+open Semantics ElabControlProof
+variable (C : Contract) [FreshNames]
+
+/-- All successful slice-length arms preserve height under raw opening bounds. -/
+theorem slice_length_output_height_of_raw_bounds (rc : ElabRec C) (e view : RawExpr)
+    (hf : e.foldConst = .ok (.call "#sliceLength" [view]))
+    (hopen : ∀ t b i j v pre, inlineSliceOpen t (.call "#sliceRaw" [b, i, j]) = .ok (v, pre) →
+      height v.off ≤ 2 ∧ height v.len ≤ 3)
+    (hh : ∀ a, height a < height (.call "#sliceLength" [view]) →
+      Obs (rc.hoist a) (fun out => height out.2 ≤ height a)) :
+    Obs (hoistWith C rc e) (fun out => height out.2 ≤ height (.call "#sliceLength" [view])) :=
+  slice_length_output_height_of_request C rc e view hf
+    (fun t v pre h => slice_length_request_lt_of_raw_bounds view t v pre hopen h) hh
+
+/-- All successful slice-at arms preserve height under raw opening bounds. -/
+theorem slice_at_output_height_of_raw_bounds (rc : ElabRec C) (e view k : RawExpr)
+    (hf : e.foldConst = .ok (.call "#sliceAt" [view, k]))
+    (hopen : ∀ t b i j v pre, inlineSliceOpen t (.call "#sliceRaw" [b, i, j]) = .ok (v, pre) →
+      height v.off ≤ 2 ∧ height v.len ≤ 3)
+    (hh : ∀ a, height a < height (.call "#sliceAt" [view, k]) →
+      Obs (rc.hoist a) (fun out => height out.2 ≤ height a)) :
+    Obs (hoistWith C rc e) (fun out => height out.2 ≤ height (.call "#sliceAt" [view, k])) :=
+  slice_at_output_height_of_request C rc e view k hf
+    (fun t v pre h => slice_at_request_lt_of_raw_bounds view k t v pre hopen h) hh
+
+/-- All successful slice-decode arms preserve height under raw opening bounds. -/
+theorem slice_decode_output_height_of_raw_bounds (rc : ElabRec C) (e view : RawExpr)
+    (rest : List RawExpr)
+    (hf : e.foldConst = .ok (.call "#sliceDecode" (view :: rest)))
+    (hopen : ∀ t b i j v pre, inlineSliceOpen t (.call "#sliceRaw" [b, i, j]) = .ok (v, pre) →
+      height v.off ≤ 2 ∧ height v.len ≤ 3)
+    (hh : ∀ a, height a < height (.call "#sliceDecode" (view :: rest)) →
+      Obs (rc.hoist a) (fun out => height out.2 ≤ height a)) :
+    Obs (hoistWith C rc e) (fun out => height out.2 ≤ height (.call "#sliceDecode" (view :: rest))) :=
+  slice_decode_output_height_of_request C rc e view rest hf
+    (fun t v pre h => slice_decode_request_lt_of_raw_bounds view rest t v pre hopen h) hh
+
+end Solidity.ElabCallHeight
