@@ -1267,7 +1267,7 @@ private theorem freshPrefixParse_roundTrip (rows : List (String × String))
     | nil => rfl
     | cons c cs =>
       have hc := ha c (by change c ∈ ds; rw [he]; exact List.mem_cons_self)
-      simp only [he, List.takeWhile_cons, hc, Bool.not_true, Bool.false_eq_true, ↓reduceIte]
+      simp only [List.takeWhile_cons, hc, Bool.not_true, Bool.false_eq_true, ↓reduceIte]
   have hd : ds.dropWhile (!·.isDigit) = ds := by
     have h := List.takeWhile_append_dropWhile (p := fun c : Char => !c.isDigit) (l := ds)
     simpa only [ht, List.nil_append] using h
@@ -1276,7 +1276,7 @@ private theorem freshPrefixParse_roundTrip (rows : List (String × String))
   simp only [freshPrefixParse, List.takeWhile_append_of_pos hp,
     List.dropWhile_append_of_pos hp, ht, hd, List.append_nil, hall,
     Bool.not_true, Bool.or_false]
-  have he : ds.isEmpty = false := List.isEmpty_eq_false.mpr hn
+  have he : ds.isEmpty = false := List.isEmpty_eq_false_iff.mpr hn
   simp only [he, Bool.false_eq_true, ↓reduceIte]
   change (rows.find? (·.2 == pre)).map (fun row => (row.1, ds.foldl _ 0)) = _
   change ds.foldl _ 0 = index at hf
