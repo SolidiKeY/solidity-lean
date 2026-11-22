@@ -23,14 +23,17 @@ example [names : FreshNames] {C : Contract} {Γ : Ctx} (output : Checker.Output 
       output.raw output.elaborated output.names output.program =
       Checker.ElaborationReceipt output := rfl
 
-/-- Adversarial printer: disjoint strings still parse to one identity. -/
-private def aliasNames : FreshNames where
-  name _ _ := "brk1"
-  parse _ := some ("brk", 1)
+/-- Adversarial spelling functions, deliberately not a FreshNames instance. -/
+private def aliasNames : (String → Nat → String) × (String → Option (String × Nat)) :=
+  (fun _ _ => "brk1", fun _ => some ("brk", 1))
 
-/-- A protected caller alias is refused even when its printed string differs. -/
-example : ¬ SafeSpellings aliasNames ["caller"] [("brk", 1)] :=
-  fun h => h.2.2 ("brk", 1) List.mem_cons_self "caller" List.mem_cons_self rfl
+/-- A printer that aliases all identities cannot be admitted as a scheme. -/
+example : ¬ ∃ names : FreshNames,
+    names.name = aliasNames.1 ∧ names.parse = aliasNames.2 := by
+  rintro ⟨names, hn, hp⟩
+  have h := names.roundTrip "se" (by simp) 0
+  rw [hn, hp] at h
+  cases h
 
 /-- The relational rules reproduce the frozen kernel equations exactly. -/
 example [FreshNames] : listStep = Solidity.Goals.loweringKernelList := rfl

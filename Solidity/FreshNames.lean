@@ -18,8 +18,8 @@ reads `pv` as `.fresh "se" 1`, `sol{ … }` numbers its captures past it, and
 spellings only: a formula read under it is the term its default spelling
 gives, since freshness is by index.
 
-A printed line reads back when the table round-trips, which
-`FreshNames.clashes` checks: every row renames a default spelling to an
+The factory checks the universal round-trip law with `FreshNames.tableValid`.
+`FreshNames.clashes` additionally checks that every row renames a default spelling to an
 identifier, the names are distinct and none is itself a default spelling
 (`se2`), and none is a name the readers resolve before a variable — a state
 variable or an enum of the contract, a word of `FreshNames.reserved`, or a
@@ -40,19 +40,54 @@ open Semantics
 `("pv", "se1")`. -/
 abbrev FreshTable := List (String × String)
 
+private def FreshNames.tableName (rows : FreshTable) (base : FreshNames)
+    (b : String) (k : Nat) : String :=
+  let d := base.name b k
+  ((rows.find? (·.2 == d)).map (·.1)).getD d
+
+private def FreshNames.tableParse (rows : FreshTable) (base : FreshNames)
+    (s : String) : Option (String × Nat) :=
+  base.parse (((rows.find? (·.1 == s)).map (·.2)).getD s)
+
+/-- Aliases must not hide a base spelling, and each chosen alias must read
+back to the spelling it replaces. This finite check certifies every index. -/
+def FreshNames.tableValid (rows : FreshTable) (base : FreshNames := inferInstance) : Bool :=
+  rows.all fun (n, d) => (base.parse n).isNone &&
+    ((rows.find? (·.1 == n)).map Prod.snd == some d)
+
 /-- `rows` renames some of `base`'s spellings: `("pv", "se1")` spells
-`.fresh "se" 1` as `pv`, and reads `pv` back as it.  Every other variable is
-spelled by `base`.  Its default is the package's spelling (`se1`, `sp1`, …),
-not the instance in scope: a default argument is elaborated here, once.  A
-file with its own prefixes passes them, `.ofTable rows (.ofPrefixes …)`.  The
-lookup is by spelling, so `name` reduces wherever `base.name` does (`rfl` on a
-printed program). -/
-def FreshNames.ofTable (rows : FreshTable) (base : FreshNames := inferInstance) :
-    FreshNames where
-  name b k :=
-    let d := base.name b k
-    ((rows.find? (·.2 == d)).map (·.1)).getD d
-  parse s := base.parse (((rows.find? (·.1 == s)).map (·.2)).getD s)
+`.fresh "se" 1` as `pv`, and reads `pv` back as it. All other variables retain
+`base`'s spelling. The default base is the package's scheme, independent of
+the instance in scope. The auto-parameter checks the finite alias table. -/
+def FreshNames.ofTable (rows : FreshTable) (base : FreshNames := inferInstance)
+    (valid : tableValid rows base = true := by decide) : FreshNames where
+  name := tableName rows base
+  parse := tableParse rows base
+  roundTrip b hb k := by
+    have law := base.roundTrip b hb k
+    have hv := List.all_eq_true.mp valid
+    unfold tableName tableParse
+    cases hf : rows.find? (·.2 == base.name b k) with
+    | some row =>
+      have hd : row.2 = base.name b k := by
+        have ht : (row.2 == base.name b k) = true :=
+          List.find?_some (p := fun x : String × String => x.2 == base.name b k) hf
+        exact beq_iff_eq.mp ht
+      have hr := hv row (List.mem_of_find?_eq_some hf)
+      simp only [Bool.and_eq_true, beq_iff_eq] at hr
+      simp only [hf, Option.map_some, Option.getD_some, hr.2, hd, law]
+    | none =>
+      simp only [hf, Option.map_none, Option.getD_none]
+      cases hg : rows.find? (·.1 == base.name b k) with
+      | none => simpa only [hg, Option.map_none, Option.getD_none] using law
+      | some row =>
+        have hn : row.1 = base.name b k := by
+          have ht : (row.1 == base.name b k) = true :=
+            List.find?_some (p := fun x : String × String => x.1 == base.name b k) hg
+          exact beq_iff_eq.mp ht
+        have hr := hv row (List.mem_of_find?_eq_some hg)
+        simp only [Bool.and_eq_true, hn, law, Option.isNone_some, Bool.false_eq_true,
+          false_and] at hr
 
 /-- The words a reader resolves before a variable: `storage` and `memory`
 (`tStor`, `tMem`), `true` and `false` (`tVal`), `this`, `msg` and `block`
@@ -70,7 +105,6 @@ package's spelling as in `ofTable`: under a table, pass the table's base, not
 the table. -/
 def FreshNames.clashes (C : Contract) (rows : FreshTable)
     (base : FreshNames := inferInstance) : List String :=
-  let fn : FreshNames := .ofTable rows base
   rows.filterMap fun (n, d) =>
     match base.parse d with
     | some (b, k) =>
@@ -78,8 +112,8 @@ def FreshNames.clashes (C : Contract) (rows : FreshTable)
       else if n.isEmpty then some s!"{d} is given the empty name"
       else if !(n.all Lean.isIdRest && n.front.isAlpha) then some s!"{n} is not a name"
       else if (base.parse n).isSome then some s!"{n} is itself a fresh variable's spelling"
-      else if fn.parse n != some (b, k) then some s!"{n} names two variables"
-      else if fn.name b k != n then some s!"{d} has two names"
+      else if FreshNames.tableParse rows base n != some (b, k) then some s!"{n} names two variables"
+      else if FreshNames.tableName rows base b k != n then some s!"{d} has two names"
       else if (C.rootType n).isSome || (lookupBy n C.enums).isSome then
         some s!"{n} is a state variable or an enum of the contract"
       else if !(structDef n).isEmpty || (lookupBy n C.funs).isSome then

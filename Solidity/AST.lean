@@ -1294,30 +1294,42 @@ default is `se1`, `sp1`, `ie1`, `mv1`; a file picks its own with
 class FreshNames where
   name : String → Nat → String
   parse : String → Option (String × Nat)
+  roundTrip : ∀ base ∈ ["se", "sp", "ie", "mv", "cnt", "brk", "first", "ret"],
+    ∀ index, parse (name base index) = some (base, index)
 
 /- Not a parameter to specialize on: `dl!{ … }` and `sol{ … }` evaluate a call
 of the elaborator at the file's instance, and specializing it there compiles
 the whole elaborator again at every line (half a second each). -/
 attribute [nospecialize] FreshNames
 
-/-- The `k`-th fresh variable of each kind is a prefix and `k`.  The four
-prefixes must be distinct identifiers that do not end in a digit.  A loop's
-flags keep solkey's names (`brk1`, `cnt2`, `ret3`, `first4`: `lowerLoops`),
-and push-source captures use `source1`. These fixed prefixes must also be
-distinct from the four configurable prefixes. Custom prefixes must avoid
-contract roots; `FreshNames.clashes` checks explicit table aliases only. -/
-def FreshNames.ofPrefixes (se sp ie mv : String) : FreshNames where
-  name b k :=
-    let pre := if b = "se" then se else if b = "sp" then sp else if b = "ie" then ie
-      else if b = "mv" then mv else b
-    s!"{pre}{k}"
-  parse s :=
-    let stem := s.takeWhile (!·.isDigit)
-    let digits := s.drop stem.length
-    if digits.isEmpty || !digits.all (·.isDigit) then none
-    else ([("se", se), ("sp", sp), ("ie", ie), ("mv", mv), ("brk", "brk"), ("cnt", "cnt"),
-        ("ret", "ret"), ("first", "first"), ("source", "source")].find? (·.2 == stem)).map
-      (·.1, digits.toNat!)
+private def freshPrefix (se sp ie mv b : String) : String :=
+  if b = "se" then se else if b = "sp" then sp else if b = "ie" then ie
+  else if b = "mv" then mv else b
+
+private def freshPrefixRows (se sp ie mv : String) : List (String × String) :=
+  [("se", se), ("sp", sp), ("ie", ie), ("mv", mv), ("brk", "brk"),
+   ("cnt", "cnt"), ("ret", "ret"), ("first", "first"), ("source", "source")]
+
+/-- A finite check that the required prefixes contain no digits and resolve
+back to their own bases. This rejects collisions with the fixed loop names. -/
+def FreshNames.prefixesValid (se sp ie mv : String) : Bool :=
+  (["se", "sp", "ie", "mv", "cnt", "brk", "first", "ret"] ++ ["source"]).all fun b =>
+    let pre := freshPrefix se sp ie mv b
+    pre.data.all (!·.isDigit) &&
+      ((freshPrefixRows se sp ie mv).find? (·.2 == pre)).map Prod.fst == some b
+
+/-- The `k`-th fresh variable of each kind is a prefix and `k`. The finite
+validity check certifies all indices, including zero. Loop and source captures
+retain their standard prefixes. Custom prefixes must avoid contract roots;
+`FreshNames.clashes` checks explicit table aliases only. -/
+def FreshNames.ofPrefixes (se sp ie mv : String)
+    (valid : prefixesValid se sp ie mv = true := by decide) : FreshNames where
+  name b k := s!"{freshPrefix se sp ie mv b}{k}"
+  parse := freshPrefixParse (freshPrefixRows se sp ie mv)
+  roundTrip b hb k := by
+    have h := List.all_eq_true.mp valid b (List.mem_append_left ["source"] hb)
+    simp only [Bool.and_eq_true, beq_iff_eq] at h
+    exact freshPrefixParse_roundTrip _ b _ k (List.all_eq_true.mp h.1) h.2
 
 /-- `se1`, `sp1`, `ie1`, `mv1`, unless a file declares its own. -/
 instance (priority := low) : FreshNames := .ofPrefixes "se" "sp" "ie" "mv"

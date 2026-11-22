@@ -91,7 +91,7 @@ open Solidity.Correctness.Lowering Solidity.Correctness.Lowering.Total
 open Solidity.Correctness.Lowering.Checker
 
 /-- The decoder reads neither the fresh-name scheme nor the counter. -/
-def sampleNames : FreshNames := ⟨fun s n => s ++ toString n, fun _ => none⟩
+def sampleNames : FreshNames := .ofPrefixes "se" "sp" "ie" "mv"
 
 def sampleRequest (raw : List RawStmt) : Request :=
   ⟨IntrinsicProbe.C, ⟨sampleNames, none, raw, RawProbe.scope, ⟨(RawProbe.inputLocals, 1), {}⟩⟩,
