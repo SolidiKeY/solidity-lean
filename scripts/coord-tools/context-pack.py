@@ -115,7 +115,7 @@ def main():
                 if "@[goal" not in head:
                     continue
                 end = i + 1
-                while end < len(src) and src[end].strip() and not DECL.match(src[end]) and end - i < 40:
+                while end < len(src) and src[end].strip() and not DECL.match(src[end]):
                     end += 1
                 block = src[start:end]
                 out += [f"## Goal `{full}` ({f}:{ln})", "```lean", *block, "```", ""]
@@ -137,20 +137,24 @@ def main():
     uniq = uniq[:25]
     if uniq:
         out.append("## Names: definition, then up to 4 uses")
-        pattern = "|".join(re.escape(n.split(".")[-1]) for n in uniq)
-        defs = rg(root, ["-g", "*.lean", "-e",
-                         rf"^\s*(@\[[^\]]*\]\s*)*((private|protected|noncomputable|partial)\s+)*"
-                         rf"(theorem|lemma|def|abbrev|structure|inductive|class|instance|opaque)\s+"
-                         rf"(\S+\.)?({pattern})\b", "Solidity", "Bridge"])
+        table = {}
+        for f in files:
+            if f.startswith(("Solidity/", "Bridge/")):
+                for ln, _, full in outline(root, f):
+                    table.setdefault(full.split(".")[-1], []).append((full, f"{f}:{ln}"))
         for n in uniq:
-            last = n.split(".")[-1]
-            d = [x for x in defs if re.search(rf"[\s.]{re.escape(last)}\b", x.split(":", 2)[2])]
-            d = sorted(d, key=lambda x: not re.search(rf"\s{re.escape(last)}\b", x.split(":", 2)[2]))[:2]
+            want = n.split(".")
+            last = want[-1]
+            cands = [(full, loc) for full, loc in table.get(last, [])
+                     if full.split(".")[-len(want):] == want]
+            d = [f"{loc} ({full})" for full, loc in cands[:3]]
+            if len(cands) > 3:
+                d.append(f"{len(cands) - 3} more with that name")
             uses = rg(root, ["-g", "*.lean", "-w", "-m", "1", "--max-columns", "160", last, "Solidity"])
-            uses = [u for u in uses if u not in d][:4]
+            uses = uses[:4]
             if not d and not uses:
                 continue
-            out.append(f"- `{n}`: " + ("; ".join(":".join(x.split(":", 2)[:2]) for x in d) or "no definition found"))
+            out.append(f"- `{n}`: " + ("; ".join(d) or "no definition found"))
             out += [f"    {u[:180]}" for u in uses]
         out.append("")
 

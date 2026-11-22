@@ -36,7 +36,7 @@ the context they re-read.
   context kept after each compaction); lost detail after compaction is not modelled.
 - **Context pack**: [`context-pack.py`](../../scripts/coord-tools/context-pack.py)
   prints a task's goal statement, where the names it mentions are defined and used,
-  scope outlines, importers and recent commits (about 0.3 s, 3k tokens), in place
+  scope outlines, importers and recent commits (about 1 s, 3k tokens), in place
   of the search and read calls that open a task.
 - **One call for independent searches and reads**, and subtasks handed to fresh
   sessions with short briefs ([AGENTS.md](../../AGENTS.md)).
