@@ -107,8 +107,9 @@ def main():
                 if parts[-len(want):] != want and not (len(want) == 1 and parts[-1] == want[0]):
                     continue
                 i = ln - 1
+                # attributes and docstrings above the declaration, multiline ones included
                 start = i
-                while start > 0 and src[start - 1].strip().startswith(("@[", "/--", "--")):
+                while start > 0 and src[start - 1].strip() and not DECL.match(src[start - 1]) and i - start < 15:
                     start -= 1
                 head = "\n".join(src[start:i + 1])
                 if "@[goal" not in head:

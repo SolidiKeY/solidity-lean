@@ -8,7 +8,7 @@ capsim:    replay the sessions with an auto-compaction cap (100k/150k/200k) agai
 Cost is billable-equivalent input tokens: cache read 0.1, cache write 1.25, output 5.
 Reads ~/.claude/projects and ~/.codex/sessions only; prints aggregates, never transcript text.
 """
-import argparse, collections, glob, json, os, re, subprocess
+import argparse, collections, glob, json, os, re, subprocess, time
 
 
 def w(u):
@@ -42,8 +42,8 @@ def claude(repo, since):
 
 def codex(repo, since):
     for f in sorted(glob.glob(os.path.expanduser('~/.codex/sessions/*/*/*/*.jsonl'))):
-        if '-'.join(f.split('/')[-4:-1]) < since[:10]:
-            continue
+        if time.strftime('%Y-%m-%dT%H:%M:%S', time.gmtime(os.path.getmtime(f))) < since:
+            continue  # last written before the cutoff: no call in it is after it
         steps, cur, last_total = [], {'calls': []}, None
         for i, line in enumerate(open(f, errors='replace')):
             if i == 0 and repo not in line:
@@ -53,7 +53,11 @@ def codex(repo, since):
                 p = json.loads(line)['payload']
                 cur['calls'].append((p.get('name') or '', str(p.get('input') or p.get('arguments'))))
             elif '"token_count"' in head:
-                info = json.loads(line)['payload'].get('info')
+                rec = json.loads(line)
+                info = rec['payload'].get('info')
+                if (rec.get('timestamp') or '') < since:
+                    last_total = info['total_token_usage'] if info else last_total
+                    continue
                 # Codex repeats the notification without a new call; count a call only when the total moves
                 if info and info['total_token_usage'] != last_total:
                     last_total = info['total_token_usage']
