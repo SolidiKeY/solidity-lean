@@ -28,11 +28,12 @@ def claude(repo, since):
             m = d.get('message') or {}
             rid = d.get('requestId') or d.get('uuid')
             if rid not in byreq:
-                u = m.get('usage') or {}
-                byreq[rid] = {'u': {'inp': u.get('input_tokens', 0), 'cr': u.get('cache_read_input_tokens', 0),
-                                    'cw': u.get('cache_creation_input_tokens', 0), 'out': u.get('output_tokens', 0)},
-                              'calls': []}
+                byreq[rid] = {'u': {'inp': 0, 'cr': 0, 'cw': 0, 'out': 0}, 'calls': []}
                 steps.append(byreq[rid])
+            u = m.get('usage')
+            if u:  # a request is written once per content block; its last record has the final usage
+                byreq[rid]['u'] = {'inp': u.get('input_tokens', 0), 'cr': u.get('cache_read_input_tokens', 0),
+                                   'cw': u.get('cache_creation_input_tokens', 0), 'out': u.get('output_tokens', 0)}
             for c in m.get('content') or []:
                 if c.get('type') == 'tool_use':
                     byreq[rid]['calls'].append((c['name'], json.dumps(c.get('input'))))
@@ -57,6 +58,7 @@ def codex(repo, since):
                 info = rec['payload'].get('info')
                 if (rec.get('timestamp') or '') < since:
                     last_total = info['total_token_usage'] if info else last_total
+                    cur = {'calls': []}  # calls before the cutoff belong to skipped steps
                     continue
                 # Codex repeats the notification without a new call; count a call only when the total moves
                 if info and info['total_token_usage'] != last_total:
@@ -85,6 +87,9 @@ def kind(n, i):
 
 def breakdown(S):
     T = sum(w(st['u']) for s in S for st in s)
+    if not T:
+        print('no sessions with token usage in range')
+        return
     parts, acts, size = collections.Counter(), collections.Counter(), collections.Counter()
     for s in S:
         for st in s:
@@ -124,6 +129,9 @@ def replay(S, cap, kept=20000, sumout=4000):
 
 def capsim(S):
     base, _ = replay(S, 10 ** 12)
+    if not base:
+        print('no sessions with token usage in range')
+        return
     print(f'no cap {base / 1e6:.0f}M')
     for cap in (100000, 150000, 200000):
         for kept in (20000, 60000):

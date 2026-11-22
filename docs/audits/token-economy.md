@@ -1,7 +1,7 @@
 # Token economy audit
 
 Where this repository's agent tokens go and what reduces them, measured on local
-Claude Code and Codex transcripts of October–November 2026 (1,674 sessions, 111,666
+Claude Code and Codex transcripts of October–November 2026 (1,680 sessions, 111,866
 model calls). Cost is billable-equivalent input tokens: cache read 0.1, cache write
 1.25, output 5. Remote Codex lane transcripts are not stored locally and are not
 included. Re-run with
