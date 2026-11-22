@@ -34,4 +34,12 @@ example : ¬ ∃ names : FreshNames,
   rw [hn, hp] at h
   cases h
 
+/-- info: 'Solidity.FreshNames.ofPrefixes' depends on axioms: [propext] -/
+#guard_msgs in
+#print axioms FreshNames.ofPrefixes
+
+/-- info: 'Solidity.FreshNames.ofTable' depends on axioms: [propext] -/
+#guard_msgs in
+#print axioms FreshNames.ofTable
+
 end Solidity.Examples.FreshNamesLaw

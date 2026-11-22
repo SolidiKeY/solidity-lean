@@ -65,19 +65,35 @@ def FreshNames.ofTable (rows : FreshTable) (base : FreshNames := inferInstance)
   parse := tableParse rows base
   roundTrip b hb k := by
     have law := base.roundTrip b hb k
-    have hv := List.all_eq_true.mp valid
-    unfold tableName tableParse
+    let p := fun (row : String × String) => (base.parse row.1).isNone &&
+      ((rows.find? (·.1 == row.1)).map Prod.snd == some row.2)
+    have checked : ∀ rs : FreshTable, rs.all p = true → ∀ row ∈ rs, p row = true := by
+      intro rs
+      induction rs with
+      | nil => intro _ _ hm; cases hm
+      | cons x xs ih =>
+        intro h row hm
+        have hs := Bool.and_eq_true_iff.mp h
+        rcases List.mem_cons.mp hm with rfl | hm
+        · exact hs.1
+        · exact ih hs.2 row hm
+    have hv := checked rows valid
+    unfold tableName
     cases hf : rows.find? (·.2 == base.name b k) with
     | some row =>
       have hd : row.2 = base.name b k := by
         have ht : (row.2 == base.name b k) = true :=
           List.find?_some (p := fun x : String × String => x.2 == base.name b k) hf
         exact beq_iff_eq.mp ht
-      have hr := hv row (List.mem_of_find?_eq_some hf)
-      simp only [Bool.and_eq_true, beq_iff_eq] at hr
-      simp only [hf, Option.map_some, Option.getD_some, hr.2, hd, law]
+      have hr := Bool.and_eq_true_iff.mp (hv row (List.mem_of_find?_eq_some hf))
+      have back := beq_iff_eq.mp hr.2
+      simp only [hf, Option.map_some, Option.getD_some]
+      unfold tableParse
+      rw [back]
+      exact hd ▸ law
     | none =>
       simp only [hf, Option.map_none, Option.getD_none]
+      unfold tableParse
       cases hg : rows.find? (·.1 == base.name b k) with
       | none => simpa only [hg, Option.map_none, Option.getD_none] using law
       | some row =>
@@ -85,9 +101,10 @@ def FreshNames.ofTable (rows : FreshTable) (base : FreshNames := inferInstance)
           have ht : (row.1 == base.name b k) = true :=
             List.find?_some (p := fun x : String × String => x.1 == base.name b k) hg
           exact beq_iff_eq.mp ht
-        have hr := hv row (List.mem_of_find?_eq_some hg)
-        simp only [Bool.and_eq_true, hn, law, Option.isNone_some, Bool.false_eq_true,
-          false_and] at hr
+        have hr := (Bool.and_eq_true_iff.mp (hv row (List.mem_of_find?_eq_some hg))).1
+        change (base.parse row.1).isNone = true at hr
+        rw [hn, law] at hr
+        cases hr
 
 /-- The words a reader resolves before a variable: `storage` and `memory`
 (`tStor`, `tMem`), `true` and `false` (`tVal`), `this`, `msg` and `block`

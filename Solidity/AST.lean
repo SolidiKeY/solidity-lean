@@ -1187,9 +1187,14 @@ inductive Var where
 private theorem fresh_digit_value (n : Nat) (h : n < 10) :
     (Nat.digitChar n).toNat - '0'.toNat = n ∧
       (Nat.digitChar n).isDigit = true := by
-  have hn : n = 0 ∨ n = 1 ∨ n = 2 ∨ n = 3 ∨ n = 4 ∨
-      n = 5 ∨ n = 6 ∨ n = 7 ∨ n = 8 ∨ n = 9 := by omega
-  rcases hn with h | h | h | h | h | h | h | h | h | h <;> subst n <;> decide
+  have hd : ∀ i : Fin 10, (Nat.digitChar i.val).toNat - '0'.toNat = i.val ∧
+      (Nat.digitChar i.val).isDigit = true := by decide
+  exact hd ⟨n, h⟩
+
+private theorem fresh_div_lt_fuel {n fuel : Nat} (h : n < fuel + 1)
+    (hn : n / 10 ≠ 0) : n / 10 < fuel := by
+  have hp : 0 < n := Nat.pos_of_ne_zero fun hz => hn (by rw [hz])
+  exact Nat.lt_of_lt_of_le (Nat.div_lt_self hp (by decide)) (Nat.le_of_lt_succ h)
 
 /-- Reading a decimal representation followed by a suffix starts that suffix
 at the represented number. The fuel bound also covers zero. -/
@@ -1198,7 +1203,7 @@ private theorem fresh_digits_fold (fuel n : Nat) (h : n < fuel) (ds : List Char)
       (fun a c => a * 10 + (c.toNat - '0'.toNat)) 0 =
     ds.foldl (fun a c => a * 10 + (c.toNat - '0'.toNat)) n := by
   induction fuel generalizing n ds with
-  | zero => omega
+  | zero => exact False.elim (Nat.not_lt_zero n h)
   | succ fuel ih =>
     simp only [Nat.toDigitsCore]
     have hd := (fresh_digit_value (n % 10) (Nat.mod_lt n (by decide))).1
@@ -1206,12 +1211,10 @@ private theorem fresh_digits_fold (fuel n : Nat) (h : n < fuel) (ds : List Char)
     · rename_i hz
       simp only [List.foldl_cons, Nat.zero_mul, Nat.zero_add, hd]
       congr 1
-      omega
+      simpa only [hz, Nat.mul_zero, Nat.add_zero] using Nat.mod_add_div n 10
     · rename_i hn
-      rw [ih (n / 10) (by omega)]
-      simp only [List.foldl_cons, hd]
-      congr 1
-      omega
+      rw [ih (n / 10) (fresh_div_lt_fuel h hn)]
+      simp only [List.foldl_cons, hd, Nat.div_add_mod']
 
 /-- Every character emitted by the decimal printer is a digit. -/
 private theorem fresh_digits_all (fuel n : Nat) (ds : List Char)
@@ -1226,31 +1229,72 @@ private theorem fresh_digits_all (fuel n : Nat) (ds : List Char)
       rcases List.mem_cons.mp hc with rfl | hc
       · exact hd
       · exact hds c hc
-    simp only [Nat.toDigitsCore]
-    split
-    · exact hs
-    · exact ih _ _ hs
+    intro c hc
+    simp only [Nat.toDigitsCore] at hc
+    split at hc
+    · exact hs c hc
+    · exact ih _ _ hs c hc
 
 /-- Sufficient printer fuel always emits at least one decimal digit. -/
 private theorem fresh_digits_ne_nil (fuel n : Nat) (h : n < fuel) (ds : List Char) :
     Nat.toDigitsCore 10 fuel n ds ≠ [] := by
   induction fuel generalizing n ds with
-  | zero => omega
+  | zero => exact False.elim (Nat.not_lt_zero n h)
   | succ fuel ih =>
     simp only [Nat.toDigitsCore]
     split
     · exact List.noConfusion
-    · apply ih
-      omega
+    · rename_i hn
+      exact ih _ (fresh_div_lt_fuel h hn) _
+
+/- These inductions avoid the function-extensionality dependencies of the
+standard list equivalences, preserving clients' existing axiom pins. -/
+private theorem fresh_all_intro {α : Type} (p : α → Bool) (xs : List α) :
+    (∀ x ∈ xs, p x = true) → xs.all p = true := by
+  induction xs with
+  | nil => intro _; rfl
+  | cons x xs ih =>
+    intro h
+    exact Bool.and_eq_true_iff.mpr ⟨h x List.mem_cons_self,
+      ih (fun y hy => h y (List.mem_cons_of_mem x hy))⟩
+
+private theorem fresh_all_elim {α : Type} (p : α → Bool) (xs : List α) :
+    xs.all p = true → ∀ x ∈ xs, p x = true := by
+  induction xs with
+  | nil => intro _ _ hx; cases hx
+  | cons y ys ih =>
+    intro h x hx
+    have hs := Bool.and_eq_true_iff.mp h
+    rcases List.mem_cons.mp hx with rfl | hx
+    · exact hs.1
+    · exact ih hs.2 x hx
+
+private theorem fresh_scan_append (xs ys : List Char) :
+    (∀ c ∈ xs, (!c.isDigit) = true) →
+    (xs ++ ys).takeWhile (!·.isDigit) = xs ++ ys.takeWhile (!·.isDigit) ∧
+    (xs ++ ys).dropWhile (!·.isDigit) = ys.dropWhile (!·.isDigit) := by
+  induction xs with
+  | nil => intro _; exact ⟨rfl, rfl⟩
+  | cons c cs ih =>
+    intro h
+    have hc := h c List.mem_cons_self
+    have hs := ih (fun d hd => h d (List.mem_cons_of_mem c hd))
+    constructor
+    · simp only [List.cons_append, List.takeWhile_cons, hc, ↓reduceIte]
+      exact congrArg (List.cons c) hs.1
+    · simp only [List.cons_append, List.dropWhile_cons, hc, ↓reduceIte]
+      exact hs.2
+
+@[inline] private def freshPrefixParts (rows : List (String × String))
+    (stem digits : List Char) : Option (String × Nat) :=
+  if digits.isEmpty || !digits.all (·.isDigit) then none
+  else (rows.find? (·.2 == String.mk stem)).map
+    (fun row => (row.1, digits.foldl (fun n c => n * 10 + (c.toNat - '0'.toNat)) 0))
 
 /-- Prefix parsing on character lists exposes the scanner's equations to proofs. -/
 private def freshPrefixParse (rows : List (String × String)) (s : String) :
     Option (String × Nat) :=
-  let stem := s.data.takeWhile (!·.isDigit)
-  let digits := s.data.dropWhile (!·.isDigit)
-  if digits.isEmpty || !digits.all (·.isDigit) then none
-  else (rows.find? (·.2 == String.mk stem)).map
-    (fun row => (row.1, digits.foldl (fun n c => n * 10 + (c.toNat - '0'.toNat)) 0))
+  freshPrefixParts rows (s.data.takeWhile (!·.isDigit)) (s.data.dropWhile (!·.isDigit))
 
 /-- A digit-free prefix followed by a decimal index is decoded exactly. -/
 private theorem freshPrefixParse_roundTrip (rows : List (String × String))
@@ -1258,9 +1302,9 @@ private theorem freshPrefixParse_roundTrip (rows : List (String × String))
     (hp : ∀ c ∈ pre.data, (!c.isDigit) = true)
     (hr : (rows.find? (·.2 == pre)).map Prod.fst = some b) :
     freshPrefixParse rows (pre ++ toString index) = some (b, index) := by
-  have ha := fresh_digits_all (index + 1) index [] (by simp)
-  have hn := fresh_digits_ne_nil (index + 1) index (by omega) []
-  have hf := fresh_digits_fold (index + 1) index (by omega) []
+  have ha := fresh_digits_all (index + 1) index [] (fun _ hc => nomatch hc)
+  have hn := fresh_digits_ne_nil (index + 1) index (Nat.lt_succ_self index) []
+  have hf := fresh_digits_fold (index + 1) index (Nat.lt_succ_self index) []
   let ds := Nat.toDigitsCore 10 (index + 1) index []
   have ht : ds.takeWhile (!·.isDigit) = [] := by
     cases he : ds with
@@ -1271,21 +1315,22 @@ private theorem freshPrefixParse_roundTrip (rows : List (String × String))
   have hd : ds.dropWhile (!·.isDigit) = ds := by
     have h := List.takeWhile_append_dropWhile (p := fun c : Char => !c.isDigit) (l := ds)
     simpa only [ht, List.nil_append] using h
-  have hall : ds.all (·.isDigit) = true := List.all_eq_true.mpr ha
-  change freshPrefixParse rows (String.mk (pre.data ++ ds)) = _
-  simp only [freshPrefixParse, List.takeWhile_append_of_pos hp,
-    List.dropWhile_append_of_pos hp, ht, hd, List.append_nil, hall,
-    Bool.not_true, Bool.or_false]
+  have hall : ds.all (·.isDigit) = true := fresh_all_intro _ _ ha
+  change freshPrefixParts rows ((pre.data ++ ds).takeWhile (!·.isDigit))
+    ((pre.data ++ ds).dropWhile (!·.isDigit)) = _
+  have hs := fresh_scan_append pre.data ds hp
+  rw [hs.1, hs.2, ht, hd, List.append_nil]
   have he : ds.isEmpty = false := List.isEmpty_eq_false_iff.mpr hn
-  simp only [he, Bool.false_eq_true, ↓reduceIte]
+  unfold freshPrefixParts
+  simp only [he, hall, Bool.not_true, Bool.or_false, Bool.false_eq_true, ↓reduceIte]
   change (rows.find? (·.2 == pre)).map (fun row => (row.1, ds.foldl _ 0)) = _
   change ds.foldl _ 0 = index at hf
-  rw [hf]
   cases h : rows.find? (·.2 == pre) with
   | none => simp only [h, Option.map_none] at hr; contradiction
   | some row =>
     simp only [h, Option.map_some, Option.some.injEq] at hr
-    simp only [Option.map_some, hr]
+    change some (row.1, ds.foldl _ 0) = some (b, index)
+    rw [hf, hr]
 
 /-- How fresh variables are spelled: `name b k` spells `.fresh b k`, and
 `parse` reads a spelling back, so a printed line can be pasted back.  The
@@ -1327,9 +1372,9 @@ def FreshNames.ofPrefixes (se sp ie mv : String)
   name b k := s!"{freshPrefix se sp ie mv b}{k}"
   parse := freshPrefixParse (freshPrefixRows se sp ie mv)
   roundTrip b hb k := by
-    have h := List.all_eq_true.mp valid b (List.mem_append_left ["source"] hb)
+    have h := fresh_all_elim _ _ valid b (List.mem_append_left ["source"] hb)
     simp only [Bool.and_eq_true, beq_iff_eq] at h
-    exact freshPrefixParse_roundTrip _ b _ k (List.all_eq_true.mp h.1) h.2
+    exact freshPrefixParse_roundTrip _ b _ k (fresh_all_elim _ _ h.1) h.2
 
 /-- `se1`, `sp1`, `ie1`, `mv1`, unless a file declares its own. -/
 instance (priority := low) : FreshNames := .ofPrefixes "se" "sp" "ie" "mv"
