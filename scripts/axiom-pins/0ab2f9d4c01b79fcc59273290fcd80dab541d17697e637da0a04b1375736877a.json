@@ -107,6 +107,10 @@
   "Quot.sound",
   "propext"
  ],
+ "Solidity/Examples/ElabTotal/Stmts.lean:Solidity.ElabCallHeight.call_output_height_of_raw_bounds": [
+  "Quot.sound",
+  "propext"
+ ],
  "Solidity/Examples/ElabTotal/Stmts.lean:Solidity.ElabCallHeight.captureBefore_height_bound": [
   "Quot.sound",
   "propext"
