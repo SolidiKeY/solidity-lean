@@ -35,6 +35,9 @@ when a task needs it.
   | Rule or closer repairs | [rule repair](docs/rule-repair.md) |
   | Tactics | [tactics](docs/contributing.md#tactics) |
 
+- Save tokens ([token economy](docs/audits/token-economy.md)): start a task with
+  `python3 scripts/coord-tools/context-pack.py --goal GOAL SCOPE...`; put independent
+  searches and reads in one call; hand subtasks to fresh agents with short briefs.
 - Check Lean edits per file with the [lean-verify skill](.agents/skills/lean-verify/SKILL.md).
   Before pushing, merge `origin/master` and run `bash scripts/coord-tools/gate.sh touched`
   ([checks](docs/contributing.md#checks)).

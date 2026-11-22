@@ -227,6 +227,7 @@ and open obligations. Test proposals remain proposals until applied.
 - [docs/audits/size-duplicates.md](audits/size-duplicates.md)
 - [docs/audits/size-reduction.md](audits/size-reduction.md)
 - [docs/audits/size-test-vectors.md](audits/size-test-vectors.md)
+- [docs/audits/token-economy.md](audits/token-economy.md)
 - [docs/automation.md](automation.md)
 - [docs/bridge.md](bridge.md)
 - [docs/browser-simple-benchmarks.md](browser-simple-benchmarks.md)
