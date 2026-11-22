@@ -51,7 +51,7 @@ def eqBridge : BinaryBridge .eq := ⟨selectEq,by
   rw [test]
   cases a.toNat == b.toNat <;> rfl⟩
 
-private theorem unaryProfile {fuel n : Nat} {args : Fin 1 → Expr [] [] n 1}
+theorem unaryProfile {fuel n : Nat} {args : Fin 1 → Expr [] [] n 1}
     (argument : Compiled fuel (args 0)) (i : Fin 1) : ExprWordP (args i) := by
   have equal : i = 0 := by omega
   subst i
@@ -95,38 +95,14 @@ def compile {n r : Nat} (fuel : Nat) (expr : Expr [] [] n r) : Option (Compiled 
         cases builtin with
         | pure op =>
             cases op with
-            | add => exact do
-                let left ← compile fuel (args 0)
-                let right ← compile fuel (args 1)
-                pure (ProducerExpressions.binary addBridge left right)
-            | sub => exact do
-                let left ← compile fuel (args 0)
-                let right ← compile fuel (args 1)
-                pure (ProducerExpressions.binary subBridge left right)
-            | mul => exact do
-                let left ← compile fuel (args 0)
-                let right ← compile fuel (args 1)
-                pure (ProducerExpressions.binary mulBridge left right)
-            | «div» => exact do
-                let left ← compile fuel (args 0)
-                let right ← compile fuel (args 1)
-                pure (ProducerExpressions.binary QuotientExpressions.divBridge left right)
-            | «mod» => exact do
-                let left ← compile fuel (args 0)
-                let right ← compile fuel (args 1)
-                pure (ProducerExpressions.binary QuotientExpressions.modBridge left right)
-            | lt => exact do
-                let left ← compile fuel (args 0)
-                let right ← compile fuel (args 1)
-                pure (ProducerExpressions.binary ltBridge left right)
-            | gt => exact do
-                let left ← compile fuel (args 0)
-                let right ← compile fuel (args 1)
-                pure (ProducerExpressions.binary gtBridge left right)
-            | eq => exact do
-                let left ← compile fuel (args 0)
-                let right ← compile fuel (args 1)
-                pure (ProducerExpressions.binary eqBridge left right)
+            | add => exact ProducerExpressions.visitBinary addBridge (fun i => compile fuel (args i))
+            | sub => exact ProducerExpressions.visitBinary subBridge (fun i => compile fuel (args i))
+            | mul => exact ProducerExpressions.visitBinary mulBridge (fun i => compile fuel (args i))
+            | «div» => exact ProducerExpressions.visitBinary QuotientExpressions.divBridge (fun i => compile fuel (args i))
+            | «mod» => exact ProducerExpressions.visitBinary QuotientExpressions.modBridge (fun i => compile fuel (args i))
+            | lt => exact ProducerExpressions.visitBinary ltBridge (fun i => compile fuel (args i))
+            | gt => exact ProducerExpressions.visitBinary gtBridge (fun i => compile fuel (args i))
+            | eq => exact ProducerExpressions.visitBinary eqBridge (fun i => compile fuel (args i))
             | iszero => exact do
                 let arg ← compile fuel (args 0)
                 pure (unary iszeroBridge arg)

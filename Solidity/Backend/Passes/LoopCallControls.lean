@@ -31,11 +31,8 @@ def checkedCall : Compilation 1 enclosed.frag call := .memoryCalls producer free
 noncomputable def result : Solidity.Out C loopOut.st.H Returned :=
   (call.run loopOut.st).toOption.get (by decide +kernel)
 
-theorem source : call.run loopOut.st = .ok result := by
-  have h : some result = (call.run loopOut.st).toOption := Option.some_get _
-  cases hs : call.run loopOut.st with
-  | ok o => rw [hs] at h; exact congrArg Except.ok (Option.some.inj h).symm
-  | error e => rw [hs] at h; cases h
+theorem source : call.run loopOut.st = .ok result :=
+  except_ok_of_toOption (Option.some_get _)
 
 theorem cost : producer.cost loopOut.st = 6 := by decide +kernel
 theorem expanded_frame : frameNeedProg call < producer.need ∧ 1 + producer.need ≤ 128 := by

@@ -11,11 +11,19 @@ theorem mstore_residual_point (m m' : ByteView) (base a : Nat) (w : Roadmap.Word
   · rfl
   · exact same
 
-theorem wordList_residual_point (ws : List Roadmap.Word) (m m' : ByteView) (base a : Nat)
-    (same : m a=m' a) : wordListView ws m base a=wordListView ws m' base a := by
+theorem wordList_point_congr (ws : List Roadmap.Word) (m n : ByteView) (base i : Nat)
+    (same : m i=n i) : wordListView ws m base i=wordListView ws n base i := by
   induction ws generalizing base with
   | nil => exact same
-  | cons w ws ih => exact mstore_residual_point _ _ base a w (ih (base+32))
+  | cons w ws ih =>
+    unfold wordListView mstore
+    split
+    · rfl
+    · exact ih (base+32)
+
+theorem wordList_residual_point (ws : List Roadmap.Word) (m m' : ByteView) (base a : Nat)
+    (same : m a=m' a) : wordListView ws m base a=wordListView ws m' base a :=
+  wordList_point_congr ws m m' base a same
 
 theorem MemoryImage.residual_point {D : Source.Layout} {h : Source.Heap D} {p : Placement h}
     {ty : Source.STy} {d : Source.Data D ty} (image : MemoryImage p d)

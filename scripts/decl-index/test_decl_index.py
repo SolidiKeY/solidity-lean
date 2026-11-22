@@ -92,7 +92,111 @@ class Compare(unittest.TestCase):
         ok, rep = self.run_cmp(self.base[:1] + [other]); self.assertTrue(ok, rep)
 
 
+class PrivateIdentity(unittest.TestCase):
+    modules = ("Solidity.FixedBooleanSequence", "Solidity.FixedBooleanFailure")
+
+    def rows(self):
+        return [row("FixedBooleanSequence.selected", h, m, private=True)
+                for h, m in enumerate(self.modules, 1)]
+
+    def compare(self, base, head):
+        return d.compare(base, head, self.modules, statement_preserving=True)
+
+    def test_unchanged_collisions_in_either_order(self):
+        rows = self.rows()
+        for base in (rows, rows[::-1]):
+            for head in (rows, rows[::-1]):
+                with self.subTest(base=base, head=head):
+                    ok, rep = self.compare(base, head)
+                    self.assertTrue(ok, rep)
+                    self.assertEqual(rep, ["ok decl-index: 2 touched module(s), 0 new duplicate(s), "
+                                           "0 changed, 0 removed, 0 renamed"])
+
+    def test_changed_private_collision_fails(self):
+        rows = self.rows()
+        for i in range(2):
+            head = [dict(r) for r in rows]
+            head[i]["typeHash"] = "changed"
+            ok, rep = self.compare(rows, head)
+            self.assertFalse(ok, rep)
+            self.assertIn(f"statement changed: {rows[i]['name']} ({self.modules[i]})", rep)
+            self.assertIn("1 changed, 0 removed", rep[-1])
+
+    def test_removing_either_private_collision_fails(self):
+        rows = self.rows()
+        for i in range(2):
+            ok, rep = self.compare(rows, [rows[1 - i]])
+            self.assertFalse(ok, rep)
+            self.assertIn(f"removed: {rows[i]['name']} ({self.modules[i]})", rep)
+            self.assertIn("0 changed, 1 removed", rep[-1])
+
+    def test_private_definitions_are_not_skipped(self):
+        rows = [dict(r, kind="def") for r in self.rows()]
+        for base in (rows, rows[::-1]):
+            for head in (rows, rows[::-1]):
+                ok, rep = self.compare(base, head)
+                self.assertTrue(ok, rep)
+            for i in range(2):
+                head = [dict(r) for r in base]
+                head[i]["typeHash"] = "changed"
+                ok, rep = self.compare(base, head)
+                self.assertFalse(ok, rep)
+                self.assertIn("1 changed, 0 removed", rep[-1])
+                ok, rep = self.compare(base, [base[i]])
+                self.assertFalse(ok, rep)
+                self.assertIn("0 changed, 1 removed", rep[-1])
+
+    def test_public_module_move_passes(self):
+        for private_field in ({}, {"private": False}):
+            base = [row("Public.selected", 1, self.modules[0], **private_field)]
+            head = [dict(base[0], module=self.modules[1])]
+            ok, rep = self.compare(base, head)
+            self.assertTrue(ok, rep)
+            self.assertIn("0 changed, 0 removed, 0 renamed", rep[-1])
+
+    def test_live_private_collision_is_still_a_duplicate(self):
+        rows = self.rows()
+        rows[1].update(typeHash=rows[0]["typeHash"], shapeHash=rows[0]["shapeHash"],
+                       typeClass=rows[0]["typeClass"])
+        head = [rows[1], row("Renamed.selected", 1, self.modules[0], private=True)]
+        ok, rep = self.compare(rows, head)
+        self.assertFalse(ok, rep)
+        self.assertIn("1 new duplicate(s)", rep[-1])
+
+    def test_private_rename_is_detected(self):
+        rows = self.rows()
+        head = [dict(rows[0], name="Renamed.selected"), rows[1]]
+        ok, rep = self.compare(rows, head)
+        self.assertFalse(ok, rep)  # strict preservation still reports the removed name
+        self.assertIn("rename FixedBooleanSequence.selected -> Renamed.selected "
+                      "(Solidity.FixedBooleanSequence)", rep)
+        self.assertIn("1 renamed", rep[-1])
+
+
 class Git(unittest.TestCase):
+    def test_library_boundary_for_changed_and_touched_modules(self):
+        with tempfile.TemporaryDirectory() as t:
+            g = lambda *a: subprocess.run(["git", *a], cwd=t, env=ENV, check=True, capture_output=True, text=True).stdout.strip()
+            g("init", "-q", "-b", "main")
+            paths = ["Solidity/A.lean", "Solidity/Deleted.lean", "Solidity/Examples/E.lean",
+                     "Solidity/Corpus/C.lean", "Solidity/TestSuite/T.lean",
+                     "Solidity/Solkey/TestSuite.lean", "Solidity/Scratch/S.lean",
+                     "Solidity/ExamplesExtra.lean"]
+            for p in paths:
+                f = pathlib.Path(t, p); f.parent.mkdir(parents=True, exist_ok=True); f.write_text("old\n")
+            g("add", "-A"); g("commit", "-qm", "base"); g("branch", "base")
+            for p in paths: pathlib.Path(t, p).write_text("new\n")
+            pathlib.Path(t, "Solidity/Deleted.lean").unlink()
+            g("add", "-A"); g("commit", "-qm", "change")
+            cwd = os.getcwd(); os.chdir(t)
+            try:
+                self.assertEqual(d.touched_modules("base")[1], ["Solidity.A", "Solidity.ExamplesExtra"])
+                self.assertEqual(d.changed_modules("base", "HEAD"),
+                                 (["Solidity.A", "Solidity.ExamplesExtra"],
+                                  {"Solidity.A", "Solidity.Deleted", "Solidity.ExamplesExtra"}))
+            finally:
+                os.chdir(cwd)
+
     def test_touched_modules_and_waivers(self):
         with tempfile.TemporaryDirectory() as t:
             g = lambda *a: subprocess.run(["git", *a], cwd=t, env=ENV, check=True, capture_output=True, text=True).stdout
@@ -112,6 +216,223 @@ class Git(unittest.TestCase):
                 self.assertEqual(d.waivers(merge), {"duplicates"})
             finally:
                 os.chdir(cwd)
+
+
+class LakeImports(unittest.TestCase):
+    """dump builds the touched modules with Lake before linking oleans, so a declaration new on
+    the lane is indexed even when .lake/build still holds an older olean (b2 pre-gate,
+    MemoryStructDefaultPlan). Lake and Lean are faked: lean sees what the linked olean holds."""
+
+    def dump_stale(self, build=True):
+        with tempfile.TemporaryDirectory() as t:
+            top = pathlib.Path(t); lib = top / ".lake/build/lib/lean/Solidity"; lib.mkdir(parents=True)
+            (lib / "M.olean").write_text("Old\n"); (lib / "M.trace").write_text("{}")
+            calls = []
+
+            def run(cmd, cwd=None, env=None, **kw):
+                calls.append(cmd[:2])
+                if cmd[:2] == ["lake", "build"]:
+                    (lib / "M.olean").write_text("Old\nMemoryStructDefaultPlan\n")
+                elif cmd[:2] == ["lake", "env"]:
+                    names = (pathlib.Path(env["DECLINDEX_LIB"]) / "Solidity/M.olean").read_text().split()
+                    pathlib.Path(env["DECLINDEX_OUT"]).write_text(
+                        "".join(json.dumps(row(n, i, "Solidity.M")) + "\n" for i, n in enumerate(names)))
+                    return subprocess.CompletedProcess(cmd, 0, f"decls={len(names)}\n", "")
+                return subprocess.CompletedProcess(cmd, 0, "", "")
+
+            saved = d.root, d.artifacts, d.subprocess.run, d.lake_build
+            d.root, d.artifacts, d.subprocess.run = (lambda: top), (lambda: None), run
+            if not build: d.lake_build = lambda top, modules: None
+            try:
+                out = top / "i.jsonl"; d.dump(out, ["Solidity.M"])
+                return calls, [r["name"] for r in d.load(out)]
+            finally:
+                d.root, d.artifacts, d.subprocess.run, d.lake_build = saved
+
+    def test_lake_build_runs_first(self):
+        calls, names = self.dump_stale()
+        self.assertEqual(calls, [["lake", "build"], ["lake", "env"]])
+        self.assertIn("MemoryStructDefaultPlan", names)
+
+    def test_old_invocation_misses_the_declaration(self):
+        _, names = self.dump_stale(build=False)
+        self.assertNotIn("MemoryStructDefaultPlan", names)
+
+
+class HostCache(unittest.TestCase):
+    """Coordinator host (dc3): Lake built MemoryStructDefaultPlan into a cache other than the
+    one decl_index guessed (no LAKE_CACHE_DIR, elan toolchain cache absent), .lake/build held
+    only its trace, nothing was linked and Lean reported the olean missing."""
+
+    def setUp(self):
+        self.t = tempfile.TemporaryDirectory(); t = pathlib.Path(self.t.name)
+        self.top, self.lib = t / "top", t / "lib"
+        self.build = self.top / ".lake/build/lib/lean/Solidity/Evm"; self.build.mkdir(parents=True)
+        (self.build / "MemoryStructDefaultPlan.trace").write_text(json.dumps({"outputs": {"o": "abc123"}}))
+        self.xdg = t / "xdg"; (self.xdg / "lake/artifacts").mkdir(parents=True)
+        self.env = {k: os.environ.get(k) for k in ("LAKE_CACHE_DIR", "XDG_CACHE_HOME", "HOME")}
+        os.environ.pop("LAKE_CACHE_DIR", None); os.environ["XDG_CACHE_HOME"] = str(self.xdg)
+        os.environ["HOME"] = str(t / "home")
+        self.run_saved = d.subprocess.run
+        d.subprocess.run = lambda cmd, **kw: subprocess.CompletedProcess(cmd, 1, "", "")  # no elan
+
+    def tearDown(self):
+        d.subprocess.run = self.run_saved
+        for k, v in self.env.items():
+            if v is None: os.environ.pop(k, None)
+            else: os.environ[k] = v
+        self.t.cleanup()
+
+    M = "Solidity.Evm.MemoryStructDefaultPlan"
+
+    def test_olean_in_xdg_cache_is_linked(self):
+        (self.xdg / "lake/artifacts/abc123.olean").write_text("MemoryStructDefaultPlan")
+        d.link_build(self.top, self.lib, [self.M])
+        self.assertEqual((self.lib / "Solidity/Evm/MemoryStructDefaultPlan.olean").read_text(),
+                         "MemoryStructDefaultPlan")
+
+    def test_unresolved_needed_module_is_a_setup_error(self):
+        (self.build / "Other.olean").write_text("x"); (self.build / "Other.trace").write_text("{}")
+        os.symlink(self.top / "gone.olean", self.build / "MemoryStructDefaultPlan.olean")
+        with self.assertRaises(d.SetupError) as e: d.link_build(self.top, self.lib, [self.M])
+        self.assertIn(self.M, str(e.exception))
+        self.assertFalse(os.path.lexists(self.lib / "Solidity/Evm/MemoryStructDefaultPlan.olean"))
+
+    def touched_importer(self):
+        """Touched Solidity.Evm.User (olean in .lake/build) imports
+        MemoryStructDefaultPlan, whose olean is only in a Lake artifact cache."""
+        src = self.top / "Solidity/Evm"; src.mkdir(parents=True)
+        (src / "User.lean").write_text("import Solidity.Evm.MemoryStructDefaultPlan\n\ndef u := 1\n")
+        (src / "MemoryStructDefaultPlan.lean").write_text("def m := 0\n")
+        (self.build / "User.olean").write_text("User"); (self.build / "User.trace").write_text("{}")
+        return "Solidity.Evm.User"
+
+    def test_transitive_import_olean_from_cache_is_linked(self):
+        u = self.touched_importer()
+        (self.xdg / "lake/artifacts/abc123.olean").write_text("MemoryStructDefaultPlan")
+        d.link_build(self.top, self.lib, [u])
+        self.assertEqual((self.lib / "Solidity/Evm/MemoryStructDefaultPlan.olean").read_text(),
+                         "MemoryStructDefaultPlan")
+        self.assertEqual((self.lib / "Solidity/Evm/User.olean").read_text(), "User")
+
+    def test_unlinked_transitive_import_is_a_setup_error(self):
+        u = self.touched_importer()
+        with self.assertRaises(d.SetupError) as e: d.link_build(self.top, self.lib, [u])
+        self.assertIn(self.M, str(e.exception))
+
+    def test_header_imports_skip_comments(self):
+        text = "/- header\n /- nested -/ -/\n-- line\nimport A.B -- why\n/-- doc -/\nimport C\n\ndef import_x := 1\nimport D\n"
+        self.assertEqual(d.header_imports(text), ["A.B", "C"])
+        self.assertEqual(d.header_imports("module\npublic import X\nimport all Y\n"), ["X", "Y"])
+
+    def test_closure_follows_import_after_header_comment(self):
+        src = self.top / "Solidity/Backend"; src.mkdir(parents=True)
+        (src / "EvmVectors.lean").write_text("/-\nVectors.\n-/\nimport Solidity.Backend.Assembler\n")
+        (src / "Assembler.lean").write_text("def a := 0\n")
+        self.assertEqual(d.import_closure(self.top, ["Solidity.Backend.EvmVectors"]),
+                         {"Solidity.Backend.EvmVectors", "Solidity.Backend.Assembler"})
+
+    def test_trace_output_shapes(self):
+        self.assertEqual(d.trace_hashes({"o": ["a.olean", "b"], "i": "c.ilean"}), ["a", "b", "c"])
+        (self.build / "MemoryStructDefaultPlan.trace").write_text(json.dumps({"outputs": {"o": ["abc123.olean"]}}))
+        (self.xdg / "lake/artifacts/abc123.olean").write_text("MemoryStructDefaultPlan")
+        d.link_build(self.top, self.lib, [self.M])
+        self.assertTrue((self.lib / "Solidity/Evm/MemoryStructDefaultPlan.olean").is_file())
+
+    def test_olean_where_lake_fetched_it_is_linked(self):
+        """H1071: Lake fetched the module into a cache only `lake env` names; the trace has no
+        outputs and the hash is in the `.olean.hash` file Lake wrote next to the build path."""
+        u = self.touched_importer()
+        (self.build / "MemoryStructDefaultPlan.trace").write_text("{}")
+        (self.build / "MemoryStructDefaultPlan.olean.hash").write_text("feedface00000001")
+        fetched = self.top.parent / "fetched"; (fetched / "artifacts").mkdir(parents=True)
+        (fetched / "artifacts/feedface00000001.olean").write_text("MemoryStructDefaultPlan")
+        def run(cmd, **kw):
+            if cmd[:2] == ["lake", "env"]:
+                return subprocess.CompletedProcess(cmd, 0, "LAKE_CACHE_DIR=%s\nPATH=/x\n" % fetched, "")
+            return subprocess.CompletedProcess(cmd, 1, "", "")
+        d.subprocess.run = run
+        d.link_build(self.top, self.lib, [u])
+        self.assertEqual((self.lib / "Solidity/Evm/MemoryStructDefaultPlan.olean").read_text(),
+                         "MemoryStructDefaultPlan")
+        d.subprocess.run = lambda cmd, **kw: subprocess.CompletedProcess(cmd, 1, "", "")
+        with self.assertRaises(d.SetupError): d.link_build(self.top, self.top.parent / "lib2", [u])
+
+    def test_trace_output_absent_everywhere_names_module_and_hash(self):
+        """H1086 (1): a synthetic trace names o=7035471506278441810, absent from the build dir
+        and every cache: a setup error naming the module and hash, not Lean's missing object."""
+        u = self.touched_importer()
+        (self.build / "MemoryStructDefaultPlan.trace").write_text(json.dumps({"outputs": {"o": 7035471506278441810}}))
+        with self.assertRaises(d.SetupError) as e: d.link_build(self.top, self.lib, [u])
+        msg = str(e.exception)
+        self.assertIn(self.M, msg); self.assertIn("%016x" % 7035471506278441810, msg)
+        self.assertIn("setup", msg)
+
+    def test_stale_build_olean_is_not_linked(self):
+        """H1086 (2): .lake/build holds an old real olean while the trace names a newer one."""
+        u = self.touched_importer()
+        stale = self.build / "MemoryStructDefaultPlan.olean"; stale.write_text("old")
+        (self.build / "MemoryStructDefaultPlan.olean.hash").write_text("0000000000000old")
+        with self.assertRaises(d.SetupError) as e: d.link_build(self.top, self.lib, [u])
+        self.assertIn(self.M, str(e.exception))
+        self.assertFalse(os.path.lexists(self.lib / "Solidity/Evm/MemoryStructDefaultPlan.olean"))
+        (self.xdg / "lake/artifacts/abc123.olean").write_text("current")
+        d.link_build(self.top, self.top.parent / "lib2", [u])
+        self.assertEqual((self.top.parent / "lib2/Solidity/Evm/MemoryStructDefaultPlan.olean").read_text(), "current")
+
+    def test_local_build_olean_without_hash_file_is_linked(self):
+        """Lake writes the trace after the olean and clears .olean.hash on a local build:
+        such an olean is current whatever the mtimes say."""
+        u = self.touched_importer()
+        olean = self.build / "MemoryStructDefaultPlan.olean"; olean.write_text("local")
+        os.utime(olean, (1, 1))
+        d.link_build(self.top, self.lib, [u])
+        self.assertEqual((self.lib / "Solidity/Evm/MemoryStructDefaultPlan.olean").read_text(), "local")
+
+    def test_stale_output_beside_current_trace_is_not_linked(self):
+        """H1165: Shrink's trace in the tree under test names the current olean, while a
+        `.olean.hash` left by an older build and Lake's inputs jsonl (from the shared checkout's
+        pre-split build) name the stale one, which is also in the cache."""
+        u = self.touched_importer()
+        cur, old = "%016x" % 596291098603368863, "%016x" % 16904971609354165623
+        (self.build / "MemoryStructDefaultPlan.trace").write_text(
+            json.dumps({"depHash": "15601523054474717107", "outputs": {"o": 596291098603368863}}))
+        (self.build / "MemoryStructDefaultPlan.olean.hash").write_text(old)
+        arts = self.xdg / "lake/artifacts"; (self.xdg / "lake/inputs").mkdir()
+        (self.xdg / "lake/inputs/solidity.jsonl").write_text(
+            json.dumps({"i": "15601523054474717107", "o": {"o": 16904971609354165623}}) + "\n")
+        (arts / (old + ".olean")).write_text("stale")
+        with self.assertRaises(d.SetupError) as e: d.link_build(self.top, self.lib, [u])
+        self.assertIn(self.M, str(e.exception)); self.assertIn(cur, str(e.exception))
+        self.assertFalse(os.path.lexists(self.lib / "Solidity/Evm/MemoryStructDefaultPlan.olean"))
+        (arts / (cur + ".olean")).write_text("current")
+        d.link_build(self.top, self.top.parent / "lib2", [u])
+        self.assertEqual((self.top.parent / "lib2/Solidity/Evm/MemoryStructDefaultPlan.olean").read_text(), "current")
+
+    def test_inputs_jsonl_with_two_outputs_is_stale(self):
+        """A trace without outputs whose input hash Lake's jsonl maps to two oleans is refused;
+        a single mapping is followed."""
+        u = self.touched_importer()
+        (self.build / "MemoryStructDefaultPlan.trace").write_text(json.dumps({"depHash": 7}))
+        arts = self.xdg / "lake/artifacts"; (self.xdg / "lake/inputs").mkdir()
+        (arts / "00000000000000aa.olean").write_text("current")
+        (arts / "00000000000000bb.olean").write_text("stale")
+        jl = self.xdg / "lake/inputs/solidity.jsonl"
+        jl.write_text(json.dumps({"i": 7, "o": "00000000000000aa"}) + "\n")
+        d.link_build(self.top, self.lib, [u])
+        self.assertEqual((self.lib / "Solidity/Evm/MemoryStructDefaultPlan.olean").read_text(), "current")
+        jl.write_text(jl.read_text() + json.dumps({"i": 7, "o": "00000000000000bb"}) + "\n")
+        with self.assertRaises(d.SetupError) as e: d.link_build(self.top, self.top.parent / "lib2", [u])
+        self.assertIn(self.M, str(e.exception))
+
+    def test_whole_library_closure_is_checked(self):
+        """The `import Solidity` run checks the root's closure too (failure 1 was reached there)."""
+        self.touched_importer()
+        (self.top / "Solidity.lean").write_text("import Solidity.Evm.User\n")
+        (self.build.parent.parent / "Solidity.olean").write_text("root")
+        (self.build.parent.parent / "Solidity.trace").write_text("{}")
+        with self.assertRaises(d.SetupError) as e: d.link_build(self.top, self.lib, ["Solidity"])
+        self.assertIn(self.M, str(e.exception))
 
 
 if __name__ == "__main__":

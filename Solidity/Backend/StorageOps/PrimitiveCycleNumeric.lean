@@ -6,19 +6,11 @@ when physical addresses collide. No representation or hash premise is hidden. -/
 namespace Solidity.Backend.StorageOps.PrimitiveCycleNumeric
 open TypeGraph Solidity.Storage Solidity.Storage.Representation Solidity.Storage.Representation.Graph
 
-private theorem header_bound (N : Nat) (hash : Solidity.Storage.Pre → Nat)
- (base : Solidity.Storage.Loc) (numeric : WordStore) :
- LifecycleNumeric.headerLength N hash base numeric < 2^256 := by
- have bound := (numeric (base.word N hash)).property
- simp only [PrimTy.inRange,decide_eq_true_eq] at bound
- unfold LifecycleNumeric.headerLength
- omega
-
 def afterPop (N : Nat) (hash : Solidity.Storage.Pre → Nat)
  (base : Solidity.Storage.Loc) (numeric : WordStore) : WordStore :=
  let h := LifecycleNumeric.headerLength N hash base numeric
  writeWord (writeWord numeric ((Solidity.Storage.Loc.data base (h-1)).word N hash) ClearDemands.zero)
-  (base.word N hash) (lengthWord (h-1) (by have bound:=header_bound N hash base numeric; omega))
+  (base.word N hash) (lengthWord (h-1) (by have bound:=LifecycleNumeric.headerLength_lt N hash base numeric; omega))
 
 /-- Exact actual numeric pop outcome; no world rollback is inferred. -/
 theorem pop_outcome (N : Nat) (hash : Solidity.Storage.Pre → Nat)
@@ -37,7 +29,7 @@ theorem pop_header (N : Nat) (hash : Solidity.Storage.Pre → Nat)
  (base : Solidity.Storage.Loc) (numeric : WordStore) :
  LifecycleNumeric.headerLength N hash base (afterPop N hash base numeric)=
  LifecycleNumeric.headerLength N hash base numeric-1 := by
- apply LifecycleNumeric.headerLength_known hash base _ ⟨_,by have b:=header_bound N hash base numeric; omega⟩
+ apply LifecycleNumeric.headerLength_known hash base _ ⟨_,by have b:=LifecycleNumeric.headerLength_lt N hash base numeric; omega⟩
  simp only [afterPop,writeWord,if_true]
 
 /-- Entire numeric WordStore/Option equality for the actual primitive triple.
@@ -47,7 +39,7 @@ theorem cycle (N : Nat) (hash : Solidity.Storage.Pre → Nat)
  (base : Solidity.Storage.Loc) (numeric : WordStore) :
  PrimitiveCycleProgram.execute N hash base numeric=PrimitivePop.execute N hash base numeric := by
  let h := LifecycleNumeric.headerLength N hash base numeric
- have bounded : h<2^256 := header_bound N hash base numeric
+ have bounded : h<2^256 := LifecycleNumeric.headerLength_lt N hash base numeric
  by_cases positive : 0<h
  · let first := afterPop N hash base numeric
    have firstHeader : LifecycleNumeric.headerLength N hash base first=h-1 := pop_header N hash base numeric

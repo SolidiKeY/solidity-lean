@@ -27,24 +27,8 @@ theorem model_to_source {c : Control} {n fuel : Nat} {stmt : Stmt [] [] c n}
    obtain ⟨a,ha,rest⟩ := Option.bind_eq_some_iff.mp lowered
    obtain ⟨b,hb,same⟩ := Option.bind_eq_some_iff.mp rest
    cases Option.some.inj same
-   have whole : (Evm.run a {m with stack := locals.toList.map coreWord++caller}).bind
-     (fun middle pending => Evm.exec b pending middle) = .ok final skip := by
-     simpa only [Evm.run,Evm.exec_append] using ran
-   cases actual : Evm.run a {m with stack := locals.toList.map coreWord++caller} with
-   | revert => rw [actual] at whole; cases whole
-   | fault => rw [actual] at whole; cases whole
-   | ok middle pending =>
-     obtain ⟨lo,mid,sourceLeft,done,frame⟩ := ihLeft a ha locals m middle pending actual
-     rw [actual,done,frame] at whole
-     change Evm.run b {m with stack := mid.toList.map coreWord++caller} = .ok final skip at whole
-     obtain ⟨hi,out,sourceRight,done,frame⟩ := ihRight b hb mid m final skip whole
-     have first := evalStmt_stable (Nat.le_max_left lo hi) .nil True.intro _ left.profile
-       (sourceLocals locals) sourceLeft
-     have last := evalStmt_stable (Nat.le_max_right lo hi) .nil True.intro _ right.profile
-       (sourceLocals mid) sourceRight
-     have source := LoopControlCompilation.sequence_source _ _ left.profile right.profile (max lo hi)
-       (sourceLocals locals) (sourceLocals mid) (sourceLocals out) first last
-     exact ⟨max lo hi+1,out,source,done,frame⟩
+   exact SourceLoop.seq_reflect left.profile right.profile a b caller
+     (ihLeft a ha) (ihRight b hb) locals m final skip ran
 
 /-- Actual compiler artifact projection; no simulation law is stored. -/
 theorem artifact_reflected {c : Control} {n fuel : Nat} {stmt : Stmt [] [] c n}

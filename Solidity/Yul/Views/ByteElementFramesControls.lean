@@ -34,7 +34,7 @@ theorem frame_and_map :
   first | (simp only;done) | decide | omega | rfl | skip
   obtain ⟨prior,_,reserved⟩ := bytes_whole.2.2.2
   have supported := heapWrite_inventory_supported mixedHeap 0 (.bytes (mixedChild.set 2 0xff))
-    (by rfl) StructWordHeap.Controls.support
+    (by rfl) Solidity.Yul.Views.Controls.generated_mixed_types_supported
   exact whole mixedHeap.ty bytesAfter .nil reason mixedPlacement bytesPlacement prior bytes_whole.2.1
     supported mixedReadFrame 0 0 false oldBytes rfl ⟨1,by decide⟩ 0xaa bytesPatch currentReads reserved
 

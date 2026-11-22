@@ -7,15 +7,16 @@ Input/Rep, source embedding, physical/native/charged adequacy or capacity. -/
 namespace Solidity.Yul.Compilation.WordInstructionCertificates
 open Backend Scalar Selection MachineAdapter
 
-private theorem irStack_words (s : Stack) : irStack s = s.map coreWord := by
- apply List.map_congr_left
- intro w _
- apply congrArg Evm.Word.val
- apply Fin.ext
- change w.toNat % Evm.W = w.toNat
- exact Nat.mod_eq_of_lt w.isLt
+theorem irStack_words (s : Stack) : irStack s = s.map coreWord := by
+  induction s with
+  | nil => rfl
+  | cons word input ih =>
+    change Evm.Word.val (Evm.wmod word.toNat) :: irStack input = _
+    rw [Evm.wmod_of_lt word.isLt]
+    change coreWord word :: irStack input = coreWord word :: input.map coreWord
+    rw [ih]
 
-private theorem singleton_run (i : Evm.Instr) (m : Evm.Machine) : Evm.run [i] m = i.step m := by
+theorem singleton_run (i : Evm.Instr) (m : Evm.Machine) : Evm.run [i] m = i.step m := by
  change (i.step m).bind (fun next pending => Evm.exec [] pending next) = _
  cases i.step m <;> rfl
 

@@ -2,6 +2,7 @@ import Solidity.Calculus.ExactRun
 import Solidity.Calculus.SoundLoops
 import Solidity.Calculus.DeclarationReduction
 import Solidity.Calculus.ParameterReduction
+import Solidity.Calculus.CloseScoped.Leaf
 
 /-!
 # Exact normalization of supported source programs
@@ -115,13 +116,6 @@ def bindValue {Γ : Ctx} (m : Modality) (x : Var) (p : PrimTy) {φ : Fml C (.val
     (r : DeclarationReduction φ) : DeclarationReduction (.bind m x (.val p) φ) :=
   ⟨.all x p r.formula, fun σ => forall_congr' fun v => r.correct (σ.push v)⟩
 
-private theorem holds_imp' {Γ : Ctx} (σ : State C Γ) (φ ψ : Fml C Γ) :
-    holds σ (.imp φ ψ) ↔ (holds σ φ → holds σ ψ) := Iff.rfl
-private theorem holds_and' {Γ : Ctx} (σ : State C Γ) (φ ψ : Fml C Γ) :
-    holds σ (.and φ ψ) ↔ holds σ φ ∧ holds σ ψ := Iff.rfl
-private theorem holds_not' {Γ : Ctx} (σ : State C Γ) (φ : Fml C Γ) :
-    holds σ (.not φ) ↔ ¬ holds σ φ := Iff.rfl
-
 /-- `{ se := c } ψ`: the condition read by an update, as the rules read it,
 `ψ` over its value in a fresh local. -/
 def capture {Γ : Ctx} (m : Modality) (c : Val C Γ .bool) (ψ : Fml C (.val .bool :: Γ)) :
@@ -175,7 +169,7 @@ theorem requireFormula_holds {Γ : Ctx} (m : Modality) (c : Val C Γ .bool)
       | .box => c.evalT σ = .ok true → holds σ φ
       | .diamond => c.evalT σ = .ok true ∧ holds σ φ := by
   cases m <;> rw [requireFormula, capture_holds] <;> cases hc : c.evalT σ <;>
-    simp only [holds_imp', holds_and', here_holds, popped_holds, Modality.onHalt, reduceCtorEq,
+    simp only [CloseS.holds_imp, CloseS.holds_and, here_holds, popped_holds, Modality.onHalt, reduceCtorEq,
       Except.ok.injEq, false_implies, false_and, true_iff]
 
 def require {Γ Γ₁ Γ₀ : Ctx} (m : Modality) (c : Val C Γ .bool)
@@ -265,7 +259,7 @@ theorem branchFormula_holds {Γ : Ctx} (m : Modality) (c : Val C Γ .bool)
       | .diamond => ¬ (¬ (c.evalT σ = .ok true ∧ holds σ P) ∧
           ¬ (c.evalT σ = .ok false ∧ holds σ Q)) := by
   cases m <;> rw [branchFormula, capture_holds] <;> cases hc : c.evalT σ <;>
-    simp only [holds_imp', holds_and', holds_not', here_holds, popped_holds, Modality.onHalt,
+    simp only [CloseS.holds_imp, CloseS.holds_and, CloseS.holds_not, here_holds, popped_holds, Modality.onHalt,
       reduceCtorEq, Except.ok.injEq, false_implies, false_and, and_self, not_false_eq_true,
       not_true_eq_false, true_iff]
 

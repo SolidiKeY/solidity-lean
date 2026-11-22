@@ -46,8 +46,7 @@ theorem returns {C : Contract} {Γ : Ctx} {R : RefTy}
  InterfaceV1.ReturnClaim b F (DisjointScalarReturn.call hm reference count destination f depth)
    ((ScalarPlan.plan emitted reference destination).at depth) := by
  intro L frame caller base before start entry out source
- have checked := emitted.value.cert.correct entry.represented
- rcases checked with ⟨value,word,evaluated,encoded,executed⟩ | ⟨failed,executed⟩
+ rcases emitted.value.cert.correct entry.represented with ⟨value,word,evaluated,encoded,executed⟩ | ⟨failed,executed⟩
  · obtain ⟨ref,alias,pointerWord⟩ := entry.represented.pointers reference
    have actual := source_value hm reference count destination f depth caller ref alias value evaluated
    by_cases enough : value.word.val<depth
@@ -71,8 +70,7 @@ theorem bare_revert {C : Contract} {Γ : Ctx} {R : RefTy}
  InterfaceV1.BareRevertClaim b F (DisjointScalarReturn.call hm reference count destination f depth)
    ((ScalarPlan.plan emitted reference destination).at depth) := by
  intro L frame caller base before start entry source
- have checked := emitted.value.cert.correct entry.represented
- rcases checked with ⟨value,word,evaluated,encoded,executed⟩ | ⟨failed,executed⟩
+ rcases emitted.value.cert.correct entry.represented with ⟨value,word,evaluated,encoded,executed⟩ | ⟨failed,executed⟩
  · obtain ⟨ref,alias,pointerWord⟩ := entry.represented.pointers reference
    have actual := source_value hm reference count destination f depth caller ref alias value evaluated
    split at actual <;> rw [actual] at source <;> cases source

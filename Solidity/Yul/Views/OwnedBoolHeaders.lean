@@ -30,7 +30,7 @@ theorem ComputedStorage.integerHeader_represented {E ds d active Γ} (F : Source
   have member := r.integerHeader_member entry
   have notBool : E.lay F.this (h.registration F.this).path≠.bool := by
     change E.cellTy ⟨entry.val.1,[]⟩≠.bool
-    rw [integer_dynamic_header_cell h.declared]
+    rw [packed_dynamic_header_cell h.declared]
     intro impossible
     cases impossible
   have here := represented_view_nonbool cs false F.this encoding _ m view (h.registration F.this) (roots _ member) notBool

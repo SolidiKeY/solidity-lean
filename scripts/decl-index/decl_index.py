@@ -61,45 +61,276 @@ def root():
 # ---- Index ------------------------------------------------------------------------------------
 
 def artifacts():
-    cache = os.environ.get("LAKE_CACHE_DIR")
-    if not cache:
-        r = subprocess.run(["elan", "which", "lean"], capture_output=True, text=True)
-        if r.returncode: return None
-        cache = str(pathlib.Path(r.stdout.strip()).parent.parent / "lake/cache")
-    art = pathlib.Path(cache) / "artifacts"
-    return art if art.is_dir() else None
+    """Every Lake artifact cache directory that may hold this toolchain's oleans. Lake's cache
+    location depends on the host (LAKE_CACHE_DIR, the XDG cache, ~/.cache/lake or the elan
+    toolchain), so all existing candidates are searched rather than one guess: on the
+    coordinator host the guess missed the cache Lake had built into, nothing was linked for a
+    module new on the lane, and Lean failed on the missing MemoryStructDefaultPlan.olean."""
+    cands = []
+    if os.environ.get("LAKE_CACHE_DIR"): cands.append(pathlib.Path(os.environ["LAKE_CACHE_DIR"]))
+    xdg = os.environ.get("XDG_CACHE_HOME")
+    if xdg: cands.append(pathlib.Path(xdg) / "lake")
+    cands.append(pathlib.Path.home() / ".cache/lake")
+    try: r = subprocess.run(["elan", "which", "lean"], capture_output=True, text=True)
+    except OSError: r = None
+    if r is not None and not r.returncode and r.stdout.strip():
+        cands.append(pathlib.Path(r.stdout.strip()).parent.parent / "lake/cache")
+    out = []
+    for c in cands:
+        a = (c / "artifacts").resolve()
+        if a.is_dir() and a not in out: out.append(a)
+    return out
 
 
-def link_build(top, lib):
-    """A LEAN_PATH directory of the oleans the traces name. With enableArtifactCache a fetched
-    module's olean is only in Lake's cache, and a stale .lake/build olean can outlive a later
-    fetch (restore-lake-artifacts never overwrites), so the trace decides; a module whose
-    artifact is not cached falls back to its .lake/build file."""
-    build = top / ".lake/build/lib/lean"
-    if not build.is_dir(): raise SetupError(f"{build}: no build (run lake build first)")
-    art = artifacts()
+def lake_cache_dirs(top=None):
+    """The cache directories Lake itself reports: `lake env` exports the cache it uses
+    (LAKE_CACHE_DIR, or the artifact cache of this workspace), so a fetch into a cache none of
+    the fixed guesses names is still found (H1071: the coordinator host fetched four Evm modules
+    into such a cache). The workspace-local `.lake/cache` is included too."""
+    top = top or _top()
+    out = []
+    if top is not None: out.append(top / ".lake/cache")
+    try:
+        r = subprocess.run(["lake", "env", "env"], cwd=top, capture_output=True, text=True, timeout=60)
+    except Exception: return out  # a probe: no Lake or an odd host leaves the fixed guesses
+    if getattr(r, "returncode", 1) or not isinstance(getattr(r, "stdout", None), str): return out
+    for line in r.stdout.splitlines():
+        k, _, v = line.partition("=")
+        if v and k.startswith("LAKE") and "CACHE" in k:
+            out.append(pathlib.Path(v))
+            if k != "LAKE_CACHE_DIR": out.append(pathlib.Path(v).parent)
+    return out
+
+
+def _top():
+    try: return root()
+    except Exception: return None
+
+
+def hash_file_hashes(stem):
+    """The artifact hashes Lake recorded next to a module's build path (`X.olean.hash`,
+    `X.hash`): a fetched module can have these without a trace naming its outputs."""
+    out = []
+    for f in (stem.parent / (stem.name + ".olean.hash"), stem.parent / (stem.name + ".hash")):
+        try: t = f.read_text().strip()
+        except OSError: continue
+        if t: out.append(hex_hash(t))
+    return out
+
+
+def hex_hash(h):
+    """Lake's artifact file stem for a hash: traces may store it as a decimal number."""
+    if isinstance(h, int) or (isinstance(h, str) and h.isdigit() and len(h) != 16):
+        return "%016x" % int(h)
+    return str(h).split(".", 1)[0]
+
+
+def import_closure(top, modules):
+    """`modules` and every module of this package they import, transitively, read from the
+    `import` lines of the sources under `top` (modules without a source here, such as Lean's
+    own, are left out). Checking only the touched modules let an unlinked transitive import
+    surface as Lean's missing object file instead of a setup error."""
+    seen, todo = set(), list(modules)
+    while todo:
+        m = todo.pop()
+        if m in seen: continue
+        f = top / (m.replace(".", "/") + ".lean")
+        if not f.is_file(): continue
+        seen.add(m)
+        try: text = f.read_text()
+        except OSError: continue
+        todo.extend(header_imports(text))
+    return seen
+
+
+def header_imports(text):
+    """The modules a Lean file's header imports: comments (`--` and nested `/- -/`, doc
+    comments included) are skipped, `module`/`prelude` and `public`/`meta` prefixes and `all`
+    are allowed, and the header ends at the first other token."""
+    out, i, n, words = [], 0, len(text), []
+    while i < n:  # tokenize header, dropping comments
+        if text.startswith("--", i):
+            j = text.find("\n", i); i = n if j < 0 else j
+        elif text.startswith("/-", i):
+            depth, i = 1, i + 2
+            while i < n and depth:
+                if text.startswith("/-", i): depth += 1; i += 2
+                elif text.startswith("-/", i): depth -= 1; i += 2
+                else: i += 1
+        elif text[i].isspace(): i += 1
+        else:
+            j = i
+            while j < n and not text[j].isspace() and not text.startswith("--", j) and not text.startswith("/-", j): j += 1
+            words.append(text[i:j]); i = j
+            if len(words) > 1 and words[-2] not in ("import", "public", "meta", "all", "module", "prelude") \
+                    and words[-1] not in ("import", "public", "meta"):
+                break
+    k = 0
+    while k < len(words):
+        w = words[k]
+        if w in ("module", "prelude", "public", "meta", "all"): k += 1; continue
+        if w == "import" and k + 1 < len(words):
+            m = words[k + 1]
+            if m == "all" and k + 2 < len(words): m = words[k + 2]; k += 1
+            out.append(m); k += 2; continue
+        break
+    return out
+
+
+def trace_hashes(o):
+    """Every artifact hash in a trace's `outputs`: a string, a list, or a dict of them, with
+    any `.olean`-style extension dropped (Lake versions differ in the shape)."""
+    if isinstance(o, str): return [o.split(".", 1)[0]]
+    if isinstance(o, int) and not isinstance(o, bool): return [hex_hash(o)]
+    if isinstance(o, dict): o = list(o.values())
+    if isinstance(o, list): return [h for x in o for h in trace_hashes(x)]
+    return []
+
+
+def trace_dep_hash(t):
+    """The input hash (`depHash`) a module's trace records, or None."""
+    try: v = json.loads(t.read_text()).get("depHash")
+    except (OSError, ValueError, AttributeError): return None
+    return None if v is None or isinstance(v, bool) else str(v)
+
+
+def jsonl_outputs(arts, dep):
+    """The olean hashes Lake's inputs jsonl (`<cache>/inputs/*.jsonl`, next to each artifact
+    directory in `arts`) maps the input hash `dep` to. Used only when the trace names no output:
+    a single answer is taken; two different outputs for one input hash mean one was built from
+    an older source (H1165: Shrink's 16904971609354165623 before the gm2 split), so the module
+    gets the impossible hash `ambiguous:<dep>` and is reported as stale rather than guessed."""
+    if dep is None: return []
+    found = []
+    for art in arts:
+        for f in sorted((art.parent / "inputs").glob("*.jsonl")) if (art.parent / "inputs").is_dir() else []:
+            try: lines = f.read_text().splitlines()
+            except OSError: continue
+            for line in lines:
+                try: r = json.loads(line)
+                except ValueError: continue
+                if not isinstance(r, dict) or str(r.get("i", r.get("depHash"))) != dep: continue
+                o = r.get("o", r.get("outputs"))
+                o = o.get("o", o) if isinstance(o, dict) else o
+                for h in trace_hashes(o):
+                    if h not in found: found.append(h)
+    return found if len(found) <= 1 else ["ambiguous:" + dep]
+
+
+def build_olean_matches(stem, hashes):
+    """Whether the real .lake/build olean of `stem` is the one its trace names (H1086): its
+    `.olean.hash` (rewritten by Lake when it restores an artifact) is one of the trace's
+    `hashes`; without a hash file (a local build clears it) the olean is accepted. A stale olean left behind after
+    Lake moved the module to its artifact cache shadowed the current one, and Lean saw a
+    declaration twice (Solidity.Evm.Instr.step.eq_43)."""
+    olean = stem.parent / (stem.name + ".olean")
+    if not olean.is_file(): return False
+    if not hashes: return True
+    hf = stem.parent / (stem.name + ".olean.hash")
+    try: return hex_hash(hf.read_text().strip()) in hashes
+    except OSError: return True  # a local build clears .olean.hash; mtime cannot tell stale apart
+
+
+def _link_pass(build, lib, arts, done, stale=None):
+    """Link into `lib` every module's olean found via its trace or `.hash` file in `arts`, or
+    its .lake/build file when that is the olean the trace names; returns the links made and
+    the modules with an olean. A module whose trace names an olean found nowhere goes to
+    `stale` with the missing hashes."""
+    done = set(done)
+    if stale is None: stale = {}
     names = defaultdict(list)
-    if art:
-        for n in os.listdir(art): names[n.split(".", 1)[0]].append(n)
+    for art in arts:
+        for n in os.listdir(art): names[n.split(".", 1)[0]].append((art, n))
     linked = 0
-    for t in build.rglob("*.trace"):
-        stem = t.with_suffix(""); rel = stem.relative_to(build)
-        try: o = json.loads(t.read_text()).get("outputs", {}).get("o")
+    marks = list(build.rglob("*.trace")) + list(build.rglob("*.hash"))
+    for t in marks:
+        stem = t.with_suffix("")
+        if stem.suffix in (".olean", ".ilean", ".c"): stem = stem.with_suffix("")
+        rel = stem.relative_to(build)
+        if ".".join(rel.parts) in done: continue
+        t = stem.parent / (stem.name + ".trace") if (stem.parent / (stem.name + ".trace")).is_file() else t
+        try:
+            outs = json.loads(t.read_text()).get("outputs", {}) if t.suffix == ".trace" else {}
+            o = outs.get("o", outs) if isinstance(outs, dict) else outs
         except (OSError, ValueError, AttributeError): o = None
-        srcs = []
-        for h in (o if isinstance(o, list) else [o] if o else []):
-            srcs += [(art / n, n.split(".", 1)[1]) for n in names.get(str(h), []) if n.split(".", 1)[1].startswith("olean")]
-        if not srcs:
-            srcs = [(p, p.name[len(stem.name) + 1:]) for p in stem.parent.glob(stem.name + ".olean*")]
+        srcs, exts = [], set()
+        named = trace_hashes(o) if t.suffix == ".trace" else []
+        if not named and t.suffix == ".trace": named = jsonl_outputs(arts, trace_dep_hash(t))
+        # H1165: the trace of the tree under test decides; a `.hash` file or Lake's inputs jsonl
+        # naming another output is a leftover of an older source and is never linked.
+        for h in named or hash_file_hashes(stem):
+            for art, n in names.get(h, []):
+                ext = n.split(".", 1)[1]
+                if ext.startswith("olean") and ext not in exts and (art / n).is_file():
+                    srcs.append((art / n, ext)); exts.add(ext)
+        if "olean" not in exts and named and (named[0].startswith("ambiguous:")
+                                              or not build_olean_matches(stem, set(named))):
+            stale.setdefault(".".join(rel.parts), named)
+            continue
+        if "olean" not in exts:
+            srcs += [(p, p.name[len(stem.name) + 1:]) for p in stem.parent.glob(stem.name + ".olean*")
+                     if p.is_file() and p.name[len(stem.name) + 1:] not in exts]
         for src, ext in srcs:
             dst = lib / rel.parent / f"{stem.name}.{ext}"
             dst.parent.mkdir(parents=True, exist_ok=True)
+            if os.path.lexists(dst): continue
             os.symlink(src, dst); linked += 1
+        if any(e == "olean" for _, e in srcs):
+            done.add(".".join(rel.parts)); stale.pop(".".join(rel.parts), None)
+    return linked, done
+
+
+def link_build(top, lib, need=()):
+    """A LEAN_PATH directory of the oleans the traces name. With enableArtifactCache a fetched
+    module's olean is only in Lake's cache, and a stale .lake/build olean can outlive a later
+    fetch (restore-lake-artifacts never overwrites), so the trace decides; a module whose
+    artifact is not cached falls back to its .lake/build file. Only existing files are linked
+    (a dangling link shadows Lake's own path), and a module of `need` left without an olean is a
+    setup error naming the searched caches: an unlinked module under lib/Solidity is reported
+    by Lean as a missing object file."""
+    build = top / ".lake/build/lib/lean"
+    if not build.is_dir(): raise SetupError(f"{build}: no build (run lake build first)")
+    arts = list(artifacts() or [])
+    stale = {}
+    linked, done = _link_pass(build, lib, arts, set(), stale)
+    need_all = sorted(import_closure(top, need) | set(need)) if need else []
+    if any(m not in done for m in need_all):
+        extra = []  # ask Lake where it fetched (H1071), only when the fixed guesses fall short
+        for c in lake_cache_dirs(top):
+            a = (c / "artifacts").resolve()
+            if a.is_dir() and a not in arts and a not in extra: extra.append(a)
+        if extra:
+            arts += extra
+            more, done = _link_pass(build, lib, arts, done, stale)
+            linked += more
     if not linked: raise SetupError(f"{build}: no oleans found")
+    bad = [m for m in need_all if m not in done and m in stale]
+    if bad:
+        raise SetupError("host build dir disagrees with Lake (setup, not an index finding): %s "
+                         "(searched %s and caches %s); rebuild with `rm <module>.trace && lake build "
+                         "<module>` or restore the artifact"
+                         % ("; ".join("%s trace names output %s, absent or stale" % (m, "/".join(stale[m]))
+                                      for m in bad), build, [str(a) for a in arts] or "none found"))
+    missing = [m for m in need_all if m not in done]
+    if missing:
+        raise SetupError("no olean for %s in %s or caches %s (set LAKE_CACHE_DIR to Lake's cache)"
+                         % (", ".join(missing), build, [str(a) for a in arts] or "none found"))
+
+
+def lake_build(top, modules):
+    """Build `modules` and their import closure at the checked-out tree, so the traces
+    link_build reads name the oleans of this commit. Without it a touched module's index came
+    from whatever an earlier build or a coordinator overlay left, and a declaration new on the
+    lane (MemoryStructDefaultPlan at b2) was missing."""
+    r = subprocess.run(["lake", "build", *modules], cwd=top, capture_output=True, text=True)
+    if r.returncode:
+        raise SetupError("lake build %s failed (exit %d): %s"
+                         % (" ".join(modules), r.returncode, (r.stdout + r.stderr).strip()[-1500:]))
 
 
 def dump(out, modules):
-    """Index `modules` (imported together) into `out`; SetupError unless Lean finished."""
+    """Index `modules` (imported together) into `out`; SetupError unless Lake built them and
+    Lean finished."""
     top = root()
     text = SCRIPT.read_text()
     if text.count("\nimport Solidity\n") != 1: raise SetupError(f"{SCRIPT}: no single `import Solidity` line")
@@ -109,7 +340,8 @@ def dump(out, modules):
     with tempfile.TemporaryDirectory(prefix="decl-index.") as d:
         src, part = pathlib.Path(d) / "DeclIndexRun.lean", out.with_name(out.name + f".{os.getpid()}.part")
         src.write_text(text)
-        lib = pathlib.Path(d) / "lib"; link_build(top, lib)
+        lake_build(top, modules)
+        lib = pathlib.Path(d) / "lib"; link_build(top, lib, list(modules))
         env = dict(os.environ, DECLINDEX_OUT=str(part), LEAN_NUM_THREADS="1", DECLINDEX_LIB=str(lib))
         env.pop("DECLINDEX_LOCAL", None)
         r = subprocess.run(["lake", "env", "sh", "-c", 'LEAN_PATH="$DECLINDEX_LIB:$LEAN_PATH" exec lean --tstack=131072 "$1"',
@@ -188,6 +420,19 @@ def ratchet(index, update=False, top=8):
     return 1
 
 
+# Keep in sync with the exclusions for Solidity.lean in register.sh. These modules
+# belong to other libraries (or no library), so the Solidity build need not build them.
+def indexed_module(path):
+    if not path.startswith("Solidity/") or not path.endswith(".lean"):
+        return None
+    module = path[:-5].replace("/", ".")
+    excluded = ("Solidity.Scratch", "Solidity.Corpus", "Solidity.TestSuite",
+                "Solidity.Solkey.TestSuite", "Solidity.Examples")
+    if any(module == prefix or module.startswith(prefix + ".") for prefix in excluded):
+        return None
+    return module
+
+
 # ---- Base/head comparison ---------------------------------------------------------------------
 
 def touched_modules(base, head="HEAD"):
@@ -196,8 +441,8 @@ def touched_modules(base, head="HEAD"):
     out = git("diff", "--name-only", "--diff-filter=AMR", merge, head, "--")
     mods = []
     for p in out.splitlines():
-        if p.startswith("Solidity/") and p.endswith(".lean") and not p.startswith("Solidity/Scratch/"):
-            mods.append(p[:-5].replace("/", "."))
+        m = indexed_module(p)
+        if m: mods.append(m)
     return merge, sorted(mods)
 
 
@@ -206,20 +451,25 @@ def waivers(merge, head="HEAD"):
     return {line.split()[0] for line in text.splitlines() if len(line.split()) > 1}
 
 
+def identity(r):
+    """Private names are local to their module; public names survive module moves."""
+    return (r["module"] if r.get("private", False) else "", r["name"])
+
+
 def compare(base_rows, head_rows, touched, statement_preserving=False, waived=frozenset()):
     """(ok, report lines)."""
     touched = set(touched)
-    base = {r["name"]: r for r in base_rows}
-    head = {r["name"]: r for r in head_rows}
+    base = {identity(r): r for r in base_rows}
+    head = {identity(r): r for r in head_rows}
     by_hash = defaultdict(list)
     for r in base_rows:
-        if countable(r): by_hash[key(r)].append(r["name"])
+        if countable(r): by_hash[key(r)].append(identity(r))
     gone = {n for n, r in base.items() if r["module"] in touched and n not in head}
     changed, dups, renames = [], [], []
     fresh = defaultdict(list)
     for r in head_rows:
         if r["module"] not in touched: continue
-        old = base.get(r["name"])
+        old = base.get(identity(r))
         if old is not None:
             if key(old) != key(r): changed.append(r)
             continue
@@ -227,15 +477,15 @@ def compare(base_rows, head_rows, touched, statement_preserving=False, waived=fr
         fresh[key(r)].append(r)
         same = by_hash.get(key(r), [])
         live = [n for n in same if n not in gone]
-        if live: dups.append((r, live))
-        elif same: renames.append((r, same))
+        if live: dups.append((r, [base[n]["name"] for n in live]))
+        elif same: renames.append((r, [base[n]["name"] for n in same]))
     for g in fresh.values():
         if len(g) > 1:
             for r in g[1:]: dups.append((r, [g[0]["name"]]))
     rep, ok = [], True
     for r, olds in renames: rep.append(f"rename {olds[0]} -> {r['name']} ({r['module']})")
     for r in changed: rep.append(f"statement changed: {r['name']} ({r['module']})")
-    for n in sorted(gone): rep.append(f"removed: {n} ({base[n]['module']})")
+    for n in sorted(gone): rep.append(f"removed: {base[n]['name']} ({base[n]['module']})")
     if dups:
         waived_d = "duplicates" in waived
         ok = ok and waived_d
@@ -275,8 +525,8 @@ def changed_modules(old, new):
     for line in out.splitlines():
         status, path = line.split("\t", 1)
         if path in ("lean-toolchain", "lakefile.toml", "lake-manifest.json"): return None
-        if path.startswith("Solidity/") and path.endswith(".lean") and not path.startswith("Solidity/Scratch/"):
-            m = path[:-5].replace("/", ".")
+        m = indexed_module(path)
+        if m:
             all_.add(m)
             if status != "D": exist.add(m)
     return sorted(exist), all_

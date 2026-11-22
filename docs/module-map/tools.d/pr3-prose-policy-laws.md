@@ -1,0 +1,2 @@
+| `Solidity/Docs/ProseCalibrated/Policy.lean` | Calibrated prose policy laws: acceptance decides the declarative order, rejection, unseen keys, fail-closed unavailable measurements, and the shrink, tighten and no-replacement laws. |
+| `Solidity/Docs/ProseCalibrated.lean` | Assembles `prose_calibrated_ratio_rule_sound` from the allowance, classification and policy laws; checker correspondence stays a separate obligation. |

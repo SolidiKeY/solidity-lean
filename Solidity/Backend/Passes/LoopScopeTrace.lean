@@ -12,14 +12,8 @@ private def okMachine : Evm.Out → Option Machine
   | .ok m 0 => some m
   | _ => none
 private theorem machine_get {out : Evm.Out} {m : Machine} (h : some m = okMachine out) :
-    out = .ok m 0 := by
-  cases out with
-  | ok actual skip =>
-    cases skip with
-    | zero => exact congrArg (fun m => Evm.Out.ok m 0) (Option.some.inj h).symm
-    | succ k => cases h
-  | revert => cases h
-  | fault => cases h
+    out = .ok m 0 :=
+  successfulMachine_eq_some.mp h.symm
 
 noncomputable def preparedTarget : Machine :=
   (okMachine (run preparation.code machine)).get (by decide +kernel)

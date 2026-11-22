@@ -1,0 +1,2 @@
+| `Correctness/Panic/Provenance/Eval.lean` | Panic code provenance, evaluator leaves: `Coded` (an intrinsic halt's code is its retained site's code), `ErrCoded` with its closure laws (ok, bind, map, ofOpt, non-intrinsic errors, `evalProducer`), and one leaf per panic evaluator, paths and expressions by mutual induction. |
+| `Examples/Panic/ProvenanceEval.lean` | Checks of the provenance leaves: a checked addition overflow, a zero divisor and an out-of-range index, each code read off the retained failed site. |

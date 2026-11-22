@@ -47,11 +47,8 @@ theorem rtc_prefix_retained (G : Source.Glob agEnv) (prior : List (EntryReferenc
       (.cons (.tuple (.cons (.local (.there .here)) .nil)) .nil) prior agShrink.2.1 rsOuter _ (.val rtAlias) rfl)
 
 theorem rtc_tail_retained (G : Source.Glob agEnv) (prior : List (EntryReferenceScope agEnv)) :
-    runtimeScope packedStepFrame (.val rtAlias)∈(rtcCapture G prior).2 := by
-  rw [rtc_tail_scopes]
-  exact captureTupleItems_head G packedStepFrame 5 0 none (.local .here)
-    (.cons (.tuple (.cons (.local (.there .here)) .nil)) .nil) rssTail (rtcFirst G prior).2
-    agShrink.2.1 rsOuter _ (.val rtAlias) rfl
+    runtimeScope packedStepFrame (.val rtAlias)∈(rtcCapture G prior).2 :=
+  rtc_prefix_retained G prior
 
 theorem rtc_prior_retained (G : Source.Glob agEnv) (prior : List (EntryReferenceScope agEnv))
     (scope) (member : scope∈prior) : scope∈(rtcCapture G prior).2 :=

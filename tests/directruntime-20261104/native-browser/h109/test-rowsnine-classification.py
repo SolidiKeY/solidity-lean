@@ -37,7 +37,10 @@ class Classification(unittest.TestCase):
             subprocess.run(["git", "init", "-q", str(root)], check=True)
             extra = "Solidity.Examples.DecisionGaps.Extra"
             regular = "Solidity.Examples.Regular"
-            for module in baseline + [CHILD, extra, regular]:
+            # The generator also requires the five RowsNine checkpoint modules.
+            checkpoints = {CHILD + "." + name for name in
+                           ["Checkpoint", "Stage1", "Stage2", "Stage3", "Finish"]}
+            for module in baseline + [CHILD, extra, regular] + sorted(checkpoints):
                 path = root / (module.replace(".", "/") + ".lean")
                 path.parent.mkdir(parents=True, exist_ok=True)
                 path.write_text("-- source-tree metadata fixture; never elaborated\n")
@@ -48,12 +51,13 @@ class Classification(unittest.TestCase):
             self.assertIn(CHILD, imports(root / "SolidityExamples.lean"))
             self.assertNotIn(CHILD, imports(root / "SoliditySlowExamples.lean"))
             self.assertNotIn(PARENT, imports(root / "SolidityExamples.lean"))
+            self.assertTrue(checkpoints.issubset(imports(root / "SoliditySlowExamples.lean")))
             # Apply only the proposed exact-list addition, in this fixture.
             script.write_text(source)
             subprocess.run(["bash", str(script)], cwd=root, check=True)
             slow = imports(root / "SoliditySlowExamples.lean")
             default = imports(root / "SolidityExamples.lean")
-            self.assertEqual(slow, set(baseline) | {CHILD})
+            self.assertEqual(slow, set(baseline) | {CHILD} | checkpoints)
             self.assertTrue({CHILD, PARENT}.isdisjoint(default))
             self.assertTrue({extra, regular}.issubset(default))
             self.assertEqual({CHILD, PARENT, regular} - slow, {regular})

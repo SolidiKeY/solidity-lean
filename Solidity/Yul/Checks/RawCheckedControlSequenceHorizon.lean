@@ -140,11 +140,8 @@ theorem pipelineCounterexample : ∀ (world : Solidity.Source.St Solidity.Yul.Ch
     (Solidity.Yul.Checks.RawCheckedControlSequence.viaIRPartial world).2.1] at cells
   cases cells
 
-theorem dirtyBoundary : ∀ (world : Solidity.Source.St Solidity.Yul.Checks.RawCheckedControlSequenceHorizon.Old.env), Solidity.Yul.RawCoherent.coherent (Solidity.Yul.Checks.RawCheckedControlSequenceHorizon.Old.initial 2 257 2 world) ≠ true := by
-  intro world
-  rw [Solidity.Yul.Checks.RawCheckedControlSequence.dirtyBoundary world]
-  intro bad
-  cases bad
+theorem dirtyBoundary : ∀ (world : Solidity.Source.St Solidity.Yul.Checks.RawCheckedControlSequenceHorizon.Old.env), Solidity.Yul.RawCoherent.coherent (Solidity.Yul.Checks.RawCheckedControlSequenceHorizon.Old.initial 2 257 2 world) ≠ true :=
+  Solidity.Yul.Checks.RawU8Statement.dirtyNotCoherent
 
 end Solidity.Yul.Checks.RawCheckedControlSequenceHorizon
 #print axioms Solidity.Yul.RawCheckedControlSequenceHorizon.successor

@@ -22,9 +22,9 @@ reference-compiler checks, not Lean interpreter coverage. Runtime verdicts
 cover the supported functional observations in every required legacy/via-IR
 source evaluation mode. They do not test generated EVM/SSA code or gas.
 
-* [Working fixtures](results/working.txt)
-* [Broken fixtures](results/broken.txt)
-* [Blocked fixtures](results/blocked.txt)
+* [Working fixtures](https://github.com/SolidiKeY/solidity-lean-coord/blob/69e3368345f736a48dd5b6321c625cd45e30a0b1/evidence/plan-x1e-classify-runtime-upstrea-1116/x1e-classify-runtime-upstream/tests/upstream/results/working.txt)
+* [Broken fixtures](https://github.com/SolidiKeY/solidity-lean-coord/blob/69e3368345f736a48dd5b6321c625cd45e30a0b1/evidence/plan-x1e-classify-runtime-upstrea-1116/x1e-classify-runtime-upstream/tests/upstream/results/broken.txt)
+* [Blocked fixtures](https://github.com/SolidiKeY/solidity-lean-coord/blob/69e3368345f736a48dd5b6321c625cd45e30a0b1/evidence/plan-x1e-classify-runtime-upstrea-1116/x1e-classify-runtime-upstream/tests/upstream/results/blocked.txt)
 * [Complete machine-readable results](results/results.json)
 * [Every preserved file, including unrun native suites and support assets](results/file-coverage.json)
 * [Summary and run provenance](results/summary.json)

@@ -1,3 +1,4 @@
+import Solidity.Yul.Compilation.ClzBounds
 import Solidity.Yul.Compilation.ExpressionShapes
 import Solidity.Yul.Compilation.ClzLowering
 
@@ -55,7 +56,8 @@ theorem step_capacity (i : Fin 256) (h : Int) :
     Bool.and_eq_true,safeHeight,decide_eq_true_eq]
   omega
 
-theorem step_delta (i : Fin 256) : ((clzStepCode i).map stackDelta).sum = (0 : Int) := by rfl
+theorem step_delta (i : Fin 256) : ((clzStepCode i).map stackDelta).sum = (0 : Int) :=
+  clzStep_delta i
 
 theorem scan_shape (count : Nat) : ∀ (bound : count ≤ 256) (h : Nat), 2 ≤ h →
     CodeShape (clzScanCode count bound) h h := by

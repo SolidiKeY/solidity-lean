@@ -61,6 +61,23 @@ theorem mapped_output_stack (result : Compilation b F P)
     exact (h.2.2 cursor hb (ha.mem_eq rfl) hs).mem_eq rfl
 
 
+/-- The shared canonical machine with one fixed selected output map. -/
+theorem WholeProgram.success_shared_mapped (result : Compilation b F P)
+    {base : Nat → Fin W} {σ : State C Γ} {m : Machine}
+    (hi : result.Input L frame base σ m)
+    {o : Solidity.Out C σ.H Δ} (hs : P.run σ = .ok o) :
+    ∃ canonical outBase, run result.code {m with stack := []} = .ok canonical 0 ∧
+      canonical.stack = [] ∧ ∀ tail,
+        run result.code {m with stack := tail} = .ok {canonical with stack := tail} 0 ∧
+        MappedOutput result (L + Evm.Prog.pushes P) frame base σ {m with stack := tail}
+          o.st {canonical with stack := tail} outBase := by
+  obtain ⟨canonical, ht, hstack, hr⟩ := WholeProgram.success_tail result hi hs []
+  obtain ⟨outBase, hm⟩ := (mapped_output_iff result _ _ _ _ _ _ _).mp hr
+  refine ⟨canonical, outBase, ht, hstack, fun tail => ?_⟩
+  have he := WholeProgram.tail_exact result hi tail
+  rw [ht] at he
+  exact ⟨he, mapped_output_stack result hm tail tail⟩
+
 /-- One canonical non-stack machine AND one fixed selected output map work
 for every saved tail. Actual equality still comes from execution, not Rep. -/
 theorem compilation_success_shared_mapped (result : Compilation b F P)
@@ -72,13 +89,7 @@ theorem compilation_success_shared_mapped (result : Compilation b F P)
         run result.code {m with stack := tail} = .ok {canonical with stack := tail} 0 ∧
         MappedOutput result (L + Evm.Prog.pushes P) frame base σ {m with stack := tail}
           o.st {canonical with stack := tail} outBase := by
-  obtain ⟨canonical, ht, hstack, hr⟩ := compilation_success_tail result hi hp hs []
-  obtain ⟨outBase, hm⟩ :=
-    (mapped_output_iff result _ _ _ _ _ _ _).mp hr
-  refine ⟨canonical, outBase, ht, hstack, ?_⟩
-  intro tail
-  have he := compilation_tail_exact result hi hp tail
-  rw [ht] at he
-  exact ⟨he, mapped_output_stack result hm tail tail⟩
+  clear hp
+  exact WholeProgram.success_shared_mapped result hi hs
 
 end Solidity.Backend.Passes

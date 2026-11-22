@@ -20,26 +20,24 @@ def machine : Machine :=
   {Machine.init with stack := [w[77]], mem := fun a =>
     if a = 0 then w[128] else if a = 63 then w[99] else w[0]}
 
-private theorem noRef {R : RefTy} (r : HRef [] R) : False := by cases r.get?
-
 /-- Intrinsic and word input premises share an actual empty heap and free tail. -/
 theorem initial_repr : StateRepr 1 1 64 (Frag.init []) initial bases machine ∧
     StructAllocatorRepr initial.heap bases 64 (wmod 128) machine := by
   have hh : HeapRepr initial.heap bases 64 machine :=
-    ⟨fun r => (noRef r).elim, fun r => (noRef r).elim, fun r => (noRef r).elim⟩
+    ⟨fun r => (nomatch r.get?), fun r => (nomatch r.get?), fun r => (nomatch r.get?)⟩
   have hs : StructHeapRepr initial.heap bases 64 machine :=
-    ⟨fun r => (noRef r).elim, fun r => (noRef r).elim, fun r => (noRef r).elim⟩
-  have hx : StructArraySeparated initial.heap bases := fun _ r => (noRef r).elim
+    ⟨fun r => (nomatch r.get?), fun r => (nomatch r.get?), fun r => (nomatch r.get?)⟩
+  have hx : StructArraySeparated initial.heap bases := fun _ r => (nomatch r.get?)
   have hc := Sim.init C 0 W_pos (fun _ => 0) ⟨0, W_pos⟩ rfl
-  refine ⟨⟨?_, hh, ?_, by decide, hs, hx, ?_⟩, ⟨⟨hh, ?_, fun r => (noRef r).elim⟩, hs, hx,
-    fun r => (noRef r).elim⟩⟩
+  refine ⟨⟨?_, hh, ?_, by decide, hs, hx, ?_⟩, ⟨⟨hh, ?_, fun r => (nomatch r.get?)⟩, hs, hx,
+    fun r => (nomatch r.get?)⟩⟩
   · refine ⟨hc.store, ?_, ?_, hc.net, hc.netSelf, hc.bound, ?_, hc.env, hc.funds, hc.oracle⟩
     · intro p i; nomatch i
     · intro R i hi; nomatch i
     · intro R i hi; nomatch i
   · intro R i; nomatch i
   · intro s f R r hf
-    exact (noRef r).elim
+    exact (nomatch r.get?)
   · refine ⟨by decide, by decide, rfl, ?_⟩
     intro a ha
     change 128 ≤ a at ha

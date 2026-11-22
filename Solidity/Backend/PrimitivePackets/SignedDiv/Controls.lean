@@ -16,13 +16,6 @@ def machine (a b : PrimTy.int.Denote) :=
 def source (a b : PrimTy.int.Denote) : Source.EMState E0 [.int T,.int T] :=
  (.cons (sourceValue a) (.cons (sourceValue b) .nil),s0)
 
-theorem word_repr (v : PrimTy.int.Denote) : ReprV .int v (.val (sword v.val)) := by
- first | (solve | rfl) | (solve | decide) | (solve | omega) | skip
- have h := Backend.Scalar.int_range v
- refine ⟨sword v.val,rfl,?_⟩
- rw [sword_val (by change -((2^256:Nat):Int)≤v.val;omega) (by change v.val<((2^256:Nat):Int);omega)]
- exact (sgn_toWord h.1 h.2).symm
-
 theorem word_unique (v : PrimTy.int.Denote) (w : Word) (rep : ReprV .int v w) :
  w=.val (sword v.val) := by
  first | (solve | rfl) | (solve | decide) | (solve | omega) | skip
@@ -34,7 +27,7 @@ theorem word_unique (v : PrimTy.int.Denote) (w : Word) (rep : ReprV .int v w) :
 
 theorem initial (a b : PrimTy.int.Denote) :
  StateRepr 1 0 6 F (target a b) Evm.Memory.CompileExamples.base (machine a b) :=
- (Evm.Memory.CompileExamples.fixture_six_cells.consVal b _ (word_repr b) (by decide)).consVal a _ (word_repr a) (by decide)
+ (Evm.Memory.CompileExamples.fixture_six_cells.consVal b _ (ReprV.int_word b) (by decide)).consVal a _ (ReprV.int_word a) (by decide)
 
 def n (x : Int) (h : PrimTy.int.inRange x=true) : PrimTy.int.Denote := ⟨x,h⟩
 def negSeven := n (-7) (by decide)

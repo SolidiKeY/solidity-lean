@@ -71,11 +71,7 @@ theorem cleanSourceStable : ∀ (glob : Solidity.Source.Glob Solidity.Yul.Checks
   have ready : (RawCheckedDoWhile.run Old.readFlag Old.copyProof glob.pipeline 7
       (RawFrame.ofClean Old.clean world)).1 ≠ .error .timeout := by
     intro bad
-    have timed : (RawSequence.represented (RawCheckedDoWhile.run Old.readFlag Old.copyProof glob.pipeline 7
-        (RawFrame.ofClean Old.clean world))).1 = .error .timeout := by
-      simp only [RawSequence.represented,bad,Except.map]
-    have impossible := completion.symm.trans timed
-    cases impossible
+    simp only [RawSequence.represented, bad, Except.map] at completion <;> cases completion
   exact RawCheckedDoWhileHorizon.sourceExtension Old.ctx [] false false false _ Old.readFlag Old.copyItems Old.copyProof
     glob frame checked 7 extra nps ph (RawFrame.ofClean Old.clean world)
     (@RawCoherent.coherent_ofClean Old.ctx Old.clean world) ready
@@ -86,11 +82,8 @@ theorem foreverRefuses : ∀ (pipeline : Solidity.Roadmap.Pipeline) (fuel : Nat)
   exact terminal (Solidity.Yul.Checks.RawCheckedDoWhile.diverges pipeline fuel state)
 
 theorem dirtyBoundary : ∀ (world : Solidity.Source.St Solidity.Yul.Checks.RawCheckedDoWhileHorizon.Old.env),
- Solidity.Yul.RawCoherent.coherent (Solidity.Yul.Checks.RawCheckedDoWhileHorizon.Old.initial 2 257 2 world) ≠ true := by
-  intro world
-  rw [Solidity.Yul.Checks.RawCheckedDoWhile.dirtyBoundary world]
-  intro bad
-  cases bad
+ Solidity.Yul.RawCoherent.coherent (Solidity.Yul.Checks.RawCheckedDoWhileHorizon.Old.initial 2 257 2 world) ≠ true :=
+  Solidity.Yul.Checks.RawU8Statement.dirtyNotCoherent
 
 theorem earlyGuard : ∀ (pipeline : Solidity.Roadmap.Pipeline) (world : Solidity.Source.St Solidity.Yul.Checks.RawCheckedDoWhileHorizon.Old.env),
  (Solidity.Yul.RawCheckedDoWhile.run Solidity.Yul.Checks.RawCheckedDoWhileHorizon.Old.partialGuard Solidity.Yul.Checks.RawCheckedDoWhileHorizon.Old.emptyProof pipeline 3 (Solidity.Yul.Checks.RawCheckedDoWhileHorizon.Old.initial 2 257 2 world)).1 = .error .timeout ∧ (Solidity.Yul.RawFrame.view (Solidity.Yul.RawCheckedDoWhile.run Solidity.Yul.Checks.RawCheckedDoWhileHorizon.Old.partialGuard Solidity.Yul.Checks.RawCheckedDoWhileHorizon.Old.emptyProof pipeline 3 (Solidity.Yul.Checks.RawCheckedDoWhileHorizon.Old.initial 2 257 2 world)).2 Solidity.Yul.Checks.RawCheckedDoWhileHorizon.Old.flagCell).val = 2 ∧

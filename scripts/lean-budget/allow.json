@@ -1,5 +1,5 @@
 {
-  "_doc": "Lean size budget (scripts/lean-budget/check.py). cap: per-merge net Lean lines outside exempt globs (measured p75 rounded up to 500). frozen: shrink-only globs (minus except). steps: plan step id -> globs a `Lean-Budget: <id>` commit trailer lets grow.",
+  "_doc": "Lean size budget (scripts/lean-budget/check.py). cap: per-merge net Lean lines outside exempt globs (measured p75 rounded up to 500). frozen: shrink-only globs (minus except). steps: a plan step id or an area key named by budget_root -> globs a `Lean-Budget: <key>` commit trailer lets grow.",
   "cap": 500,
   "frozen": [
     {"name": "Backend", "globs": ["Solidity/Backend/**"], "except": ["Solidity/Backend/Passes/**", "Solidity/Backend/Compiler*.lean"]},
@@ -18,6 +18,12 @@
     "t0-endpoint-total": ["Solidity/Backend/CompilerTotal.lean", "Solidity/Goals/Total.lean"],
     "e2a-lower-total": ["Solidity/Syntax/Elab/Lower.lean"],
     "e2b-loops-producer": ["Solidity/Correctness/Lowering/Total/**"],
-    "yv1-yul-layout-view": ["Solidity/Yul/Layout/**"]
+    "yv1-yul-layout-view": ["Solidity/Yul/Layout/**"],
+    "finish-intrinsic-session": ["Solidity/Correctness/IntrinsicSession/**", "Solidity/Semantics/IntrinsicSession/**"],
+    "finish-lowering-sim": ["Solidity/Correctness/Lowering/Sim/**"],
+    "finish-panic": ["Solidity/Correctness/Panic/**"],
+    "finish-line": ["Solidity/Finish/**"],
+    "finish-yul-layout": ["Solidity/Yul/Layout/**"],
+    "calls-program-bridge": ["Solidity/Backend/InternalFlow/CallsProgramBridge*.lean"]
   }
 }

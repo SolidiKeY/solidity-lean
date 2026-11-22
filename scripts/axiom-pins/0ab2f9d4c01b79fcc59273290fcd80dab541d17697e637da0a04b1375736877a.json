@@ -1,0 +1,508 @@
+{
+ "Solidity/Examples/ElabTotal/Stmts.lean:Solidity.abiReadGen_eq": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Examples/ElabTotal/Stmts.lean:Solidity.abiSeqReadGen_eq": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Examples/ElabTotal/Stmts.lean:Solidity.abiSeqSizeGen_eq": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Examples/ElabTotal/Stmts.lean:Solidity.abiSeqSizeGen_result_name": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Examples/ElabTotal/Stmts.lean:Solidity.abiSeqWriteGen_eq": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Examples/ElabTotal/Stmts.lean:Solidity.abiSizeGen_eq": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Examples/ElabTotal/Stmts.lean:Solidity.abiTupleSizeGen_eq": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Examples/ElabTotal/Stmts.lean:Solidity.abiTupleWriteGen_eq": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Examples/ElabTotal/Stmts.lean:Solidity.abiWriteGen_eq": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Examples/ElabTotal/Stmts.lean:Solidity.ElabCallArgsGood.captureBefore_shape": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Examples/ElabTotal/Stmts.lean:Solidity.ElabCallArgsGood.captureExpr_shape": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Examples/ElabTotal/Stmts.lean:Solidity.ElabCallArgsGood.hoistCallArgsWith_nil": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Examples/ElabTotal/Stmts.lean:Solidity.ElabCallArgsGood.hoistCallArgsWith_preserves": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Examples/ElabTotal/Stmts.lean:Solidity.ElabCallArgsGood.ordinary_good": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Examples/ElabTotal/Stmts.lean:Solidity.ElabCallHeight.addressCapture_height_bound": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Examples/ElabTotal/Stmts.lean:Solidity.ElabCallHeight.args_output_argument_lt": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Examples/ElabTotal/Stmts.lean:Solidity.ElabCallHeight.args_output_heights": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Examples/ElabTotal/Stmts.lean:Solidity.ElabCallHeight.argument_lt_call": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Examples/ElabTotal/Stmts.lean:Solidity.ElabCallHeight.array_output_height": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Examples/ElabTotal/Stmts.lean:Solidity.ElabCallHeight.assignment_output_height": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Examples/ElabTotal/Stmts.lean:Solidity.ElabCallHeight.binary_output_height": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Examples/ElabTotal/Stmts.lean:Solidity.ElabCallHeight.binop_output_height": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Examples/ElabTotal/Stmts.lean:Solidity.ElabCallHeight.binop_output_height_of_hoist": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Examples/ElabTotal/Stmts.lean:Solidity.ElabCallHeight.bytes_index_output_height": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Examples/ElabTotal/Stmts.lean:Solidity.ElabCallHeight.bytes_index_request_lt": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Examples/ElabTotal/Stmts.lean:Solidity.ElabCallHeight.bytes_literal_output_height": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Examples/ElabTotal/Stmts.lean:Solidity.ElabCallHeight.bytes_placeholder_height_le": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Examples/ElabTotal/Stmts.lean:Solidity.ElabCallHeight.captureBefore_height_bound": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Examples/ElabTotal/Stmts.lean:Solidity.ElabCallHeight.captureExpr_height_bound": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Examples/ElabTotal/Stmts.lean:Solidity.ElabCallHeight.castCapture_output_height": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Examples/ElabTotal/Stmts.lean:Solidity.ElabCallHeight.compound_assignment_output": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Examples/ElabTotal/Stmts.lean:Solidity.ElabCallHeight.decode_front_output_height": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Examples/ElabTotal/Stmts.lean:Solidity.ElabCallHeight.decode_output_height": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Examples/ElabTotal/Stmts.lean:Solidity.ElabCallHeight.decode_request_lt": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Examples/ElabTotal/Stmts.lean:Solidity.ElabCallHeight.descriptor_at_output_height": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Examples/ElabTotal/Stmts.lean:Solidity.ElabCallHeight.descriptor_at_request_lt": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Examples/ElabTotal/Stmts.lean:Solidity.ElabCallHeight.descriptor_decode_output_height": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Examples/ElabTotal/Stmts.lean:Solidity.ElabCallHeight.descriptor_decode_request_lt": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Examples/ElabTotal/Stmts.lean:Solidity.ElabCallHeight.descriptor_len_le": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Examples/ElabTotal/Stmts.lean:Solidity.ElabCallHeight.descriptor_length_output_height": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Examples/ElabTotal/Stmts.lean:Solidity.ElabCallHeight.descriptor_length_request_lt": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Examples/ElabTotal/Stmts.lean:Solidity.ElabCallHeight.encode_output_height": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Examples/ElabTotal/Stmts.lean:Solidity.ElabCallHeight.encoding_arg_height_lt": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Examples/ElabTotal/Stmts.lean:Solidity.ElabCallHeight.encoding_inputs_lt": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Examples/ElabTotal/Stmts.lean:Solidity.ElabCallHeight.enumCapture_output_height": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Examples/ElabTotal/Stmts.lean:Solidity.ElabCallHeight.erc_args_output_height": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Examples/ElabTotal/Stmts.lean:Solidity.ElabCallHeight.erc_expansion_lt": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Examples/ElabTotal/Stmts.lean:Solidity.ElabCallHeight.erc_output_height": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Examples/ElabTotal/Stmts.lean:Solidity.ElabCallHeight.field_output_height": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Examples/ElabTotal/Stmts.lean:Solidity.ElabCallHeight.foldConst_height_le": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Examples/ElabTotal/Stmts.lean:Solidity.ElabCallHeight.forceArg_height_bound": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Examples/ElabTotal/Stmts.lean:Solidity.ElabCallHeight.function_selector_lt": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Examples/ElabTotal/Stmts.lean:Solidity.ElabCallHeight.hash_output_height": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Examples/ElabTotal/Stmts.lean:Solidity.ElabCallHeight.height_nodes_before_down": [
+  "propext"
+ ],
+ "Solidity/Examples/ElabTotal/Stmts.lean:Solidity.ElabCallHeight.height_pos": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Examples/ElabTotal/Stmts.lean:Solidity.ElabCallHeight.hoistCallArgs_argument_lt": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Examples/ElabTotal/Stmts.lean:Solidity.ElabCallHeight.hoistFuel_output_height": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Examples/ElabTotal/Stmts.lean:Solidity.ElabCallHeight.hoistFuel_output_height_on": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Examples/ElabTotal/Stmts.lean:Solidity.ElabCallHeight.incDec_output_height": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Examples/ElabTotal/Stmts.lean:Solidity.ElabCallHeight.index_output_height": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Examples/ElabTotal/Stmts.lean:Solidity.ElabCallHeight.inlineSliceOpen_cases": [
+  "Quot.sound"
+ ],
+ "Solidity/Examples/ElabTotal/Stmts.lean:Solidity.ElabCallHeight.inlineSliceOpen_desc": [],
+ "Solidity/Examples/ElabTotal/Stmts.lean:Solidity.ElabCallHeight.internal_decode_output_height": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Examples/ElabTotal/Stmts.lean:Solidity.ElabCallHeight.mem_height_le": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Examples/ElabTotal/Stmts.lean:Solidity.ElabCallHeight.modular_output_height": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Examples/ElabTotal/Stmts.lean:Solidity.ElabCallHeight.named_callee_before": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Examples/ElabTotal/Stmts.lean:Solidity.ElabCallHeight.named_callee_closure_output_height": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Examples/ElabTotal/Stmts.lean:Solidity.ElabCallHeight.named_callee_decreases": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Examples/ElabTotal/Stmts.lean:Solidity.ElabCallHeight.named_output_height": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Examples/ElabTotal/Stmts.lean:Solidity.ElabCallHeight.named_request_lt": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Examples/ElabTotal/Stmts.lean:Solidity.ElabCallHeight.namedClosure_output_height": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Examples/ElabTotal/Stmts.lean:Solidity.ElabCallHeight.namedClosure_output_height_on": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Examples/ElabTotal/Stmts.lean:Solidity.ElabCallHeight.namedStructural_output_height": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Examples/ElabTotal/Stmts.lean:Solidity.ElabCallHeight.namedStructural_output_height_before": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Examples/ElabTotal/Stmts.lean:Solidity.ElabCallHeight.namedStructural_output_height_on": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Examples/ElabTotal/Stmts.lean:Solidity.ElabCallHeight.narrowCapture_height_bound": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Examples/ElabTotal/Stmts.lean:Solidity.ElabCallHeight.newArr_output_height": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Examples/ElabTotal/Stmts.lean:Solidity.ElabCallHeight.pair_output_heights": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Examples/ElabTotal/Stmts.lean:Solidity.ElabCallHeight.pair_output_heights_of_hoist": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Examples/ElabTotal/Stmts.lean:Solidity.ElabCallHeight.prefix_cast_lt": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Examples/ElabTotal/Stmts.lean:Solidity.ElabCallHeight.prefix_input_lt": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Examples/ElabTotal/Stmts.lean:Solidity.ElabCallHeight.raw_at_output_height_of_bounds": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Examples/ElabTotal/Stmts.lean:Solidity.ElabCallHeight.raw_at_request_lt": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Examples/ElabTotal/Stmts.lean:Solidity.ElabCallHeight.raw_decode_output_height_of_bounds": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Examples/ElabTotal/Stmts.lean:Solidity.ElabCallHeight.raw_decode_request_lt": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Examples/ElabTotal/Stmts.lean:Solidity.ElabCallHeight.raw_length_output_height_of_bounds": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Examples/ElabTotal/Stmts.lean:Solidity.ElabCallHeight.raw_length_request_lt": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Examples/ElabTotal/Stmts.lean:Solidity.ElabCallHeight.recover_encoding_lt": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Examples/ElabTotal/Stmts.lean:Solidity.ElabCallHeight.selector_args_height_lt": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Examples/ElabTotal/Stmts.lean:Solidity.ElabCallHeight.selector_encoding_inputs_lt": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Examples/ElabTotal/Stmts.lean:Solidity.ElabCallHeight.selector_height_lt": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Examples/ElabTotal/Stmts.lean:Solidity.ElabCallHeight.selector_input_lt": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Examples/ElabTotal/Stmts.lean:Solidity.ElabCallHeight.selector_receiver_lt": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Examples/ElabTotal/Stmts.lean:Solidity.ElabCallHeight.signature_selector_lt": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Examples/ElabTotal/Stmts.lean:Solidity.ElabCallHeight.slice_at_output_height_of_raw_bounds": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Examples/ElabTotal/Stmts.lean:Solidity.ElabCallHeight.slice_at_output_height_of_request": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Examples/ElabTotal/Stmts.lean:Solidity.ElabCallHeight.slice_at_request_lt_of_raw_bounds": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Examples/ElabTotal/Stmts.lean:Solidity.ElabCallHeight.slice_decode_output_height_of_raw_bounds": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Examples/ElabTotal/Stmts.lean:Solidity.ElabCallHeight.slice_decode_output_height_of_request": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Examples/ElabTotal/Stmts.lean:Solidity.ElabCallHeight.slice_decode_request_lt_of_raw_bounds": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Examples/ElabTotal/Stmts.lean:Solidity.ElabCallHeight.slice_index_output_height": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Examples/ElabTotal/Stmts.lean:Solidity.ElabCallHeight.slice_index_request_lt": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Examples/ElabTotal/Stmts.lean:Solidity.ElabCallHeight.slice_length_output_height_of_raw_bounds": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Examples/ElabTotal/Stmts.lean:Solidity.ElabCallHeight.slice_length_output_height_of_request": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Examples/ElabTotal/Stmts.lean:Solidity.ElabCallHeight.slice_length_request_lt_of_raw_bounds": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Examples/ElabTotal/Stmts.lean:Solidity.ElabCallHeight.sliceAdd_height_le": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Examples/ElabTotal/Stmts.lean:Solidity.ElabCallHeight.sliceCopy_output_height": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Examples/ElabTotal/Stmts.lean:Solidity.ElabCallHeight.sliceSub_height_le": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Examples/ElabTotal/Stmts.lean:Solidity.ElabCallHeight.structural_folded_output_height": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Examples/ElabTotal/Stmts.lean:Solidity.ElabCallHeight.structural_output_height": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Examples/ElabTotal/Stmts.lean:Solidity.ElabCallHeight.ternary_output_height": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Examples/ElabTotal/Stmts.lean:Solidity.ElabCallHeight.unmark_height_le": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Examples/ElabTotal/Stmts.lean:Solidity.ElabCallHeight.unop_output_height": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Examples/ElabTotal/Stmts.lean:Solidity.ElabControlProof.decode_front_eq": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Examples/ElabTotal/Stmts.lean:Solidity.ElabControlProof.decode_internal_result_name": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Examples/ElabTotal/Stmts.lean:Solidity.ElabControlProof.encode_nested_result_name": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Examples/ElabTotal/Stmts.lean:Solidity.ElabControlProof.encode_result_name": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Examples/ElabTotal/Stmts.lean:Solidity.ElabControlProof.hash_result_name": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Examples/ElabTotal/Stmts.lean:Solidity.ElabControlProof.obs_lift": [
+  "propext"
+ ],
+ "Solidity/Examples/ElabTotal/Stmts.lean:Solidity.ElabHoist.hoist_named_eq": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Examples/ElabTotal/Stmts.lean:Solidity.ElabHoist.hoist_structural_eq": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Examples/ElabTotal/Stmts.lean:Solidity.ElabHoist.hoistFuel_stable": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Examples/ElabTotal/Stmts.lean:Solidity.ElabHoist.hoistStructural_eq": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Examples/ElabTotal/Stmts.lean:Solidity.ElabHoist.hoistStructural_unique": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Examples/ElabTotal/Stmts.lean:Solidity.ElabHoist.namedClosure_eq": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Examples/ElabTotal/Stmts.lean:Solidity.ElabHoist.namedStructural_eq": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Examples/ElabTotal/Stmts.lean:Solidity.ElabHoist.namedStructural_named": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Examples/ElabTotal/Stmts.lean:Solidity.ElabHoist.namedStructural_unique": [
+  "Quot.sound",
+  "propext"
+ ]
+}

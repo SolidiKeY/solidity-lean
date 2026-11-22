@@ -1,3 +1,4 @@
+import Solidity.Yul.RawLocalScope
 import Solidity.Yul.Composition.UncheckedLoopPhysical
 
 /-! Actual intrinsically typed Source for-loop consumers, not the Yul for_
@@ -32,12 +33,8 @@ theorem init_run {E : Source.Env} {Γ : Source.RCtx} {R : List Source.STy} {M u}
 
 theorem restore_head {D : Source.Layout} {Γ : Source.RCtx} {τ : Source.STy}
     (value : Source.Val D τ) (inside : Source.Locals D Γ) :
-    (Source.Locals.cons value inside).restore Γ = .ok inside := by
-  have count : ((τ::Γ).length-Γ.length)=1 := by simp only [List.length_cons]; omega
-  unfold Source.Locals.restore
-  rw [count]
-  simp only [List.drop_succ_cons,List.drop_zero,dif_pos rfl]
-  rfl
+    (Source.Locals.cons value inside).restore Γ = .ok inside :=
+  RawLocalScope.restore_cons D Γ τ value inside
 
 theorem condition_run {E : Source.Env} {Γ : Source.RCtx}
     (G : Source.Glob E) (F : Source.Fr) (fuel : Nat) (flag : Bool)

@@ -186,10 +186,8 @@ noncomputable def oppositeResult : Solidity.Out C (afterCapture false).st.H Fina
   (badObserve.run (afterCapture false).st).toOption.get opposite_some
 
 private theorem source_get {Γ Δ : Ctx} {τ : State C Γ} {P : Prog C Γ Δ}
-    {o : Solidity.Out C τ.H Δ} (hx : some o = (P.run τ).toOption) : P.run τ = .ok o := by
-  cases hs : P.run τ with
-  | ok value => rw [hs] at hx; exact congrArg Except.ok (Option.some.inj hx).symm
-  | error e => rw [hs] at hx; cases hx
+    {o : Solidity.Out C τ.H Δ} (hx : some o = (P.run τ).toOption) : P.run τ = .ok o :=
+  except_ok_of_toOption hx
 
 theorem opposite_source : badObserve.run (afterCapture false).st = .ok oppositeResult :=
   source_get (Option.some_get opposite_some)

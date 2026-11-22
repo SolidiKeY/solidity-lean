@@ -44,7 +44,8 @@ theorem observations (a : Bool) (tail : List Word) :
     (cells.map ((after a tail).push (.val (bword a))).mem,
       ((after a tail).push (.val (bword a))).stack) =
       ([.val (bword a),w[0],w[0],w[16],w[16],w[20],w[2],w[7],w[9],w[1],w[4]],
-        .val (bword a) :: tail) := rfl
+        .val (bword a) :: tail) :=
+  QueueCompletionControls.joined_observations a tail
 
 def observe : Evm.Out → Option (List Word × List Word)
   | .ok m _ => some (cells.map m.mem,m.stack)

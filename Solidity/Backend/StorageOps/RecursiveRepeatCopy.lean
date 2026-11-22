@@ -6,20 +6,6 @@ representation relation, eager target execution or world rollback is implied. -/
 namespace Solidity.Backend.StorageOps.RecursiveRepeatCopy
 open TypeGraph
 
-/-- Dependent array-domain transport used only in the recursive proof. -/
-private theorem array_ext {n : Nat} {G : Schema n} {E : TypeGraph.Ty n}
- (left right : Extent) (length : Index) (lb : length.val ≤ left.val) (rb : length.val ≤ right.val)
- (ls : Fin left.val → Slot G E) (rs : Fin right.val → Slot G E)
- (equal : left.val=right.val)
- (pointwise : ∀ (i : Fin left.val) (j : Fin right.val), i.val=j.val → ls i=rs j) :
- Value.array left length lb ls=Value.array right length rb rs := by
- have sizes : left=right := Fin.ext equal
- cases sizes
- have slots : ls=rs := funext (fun i => pointwise i i rfl)
- cases slots
- rfl
-
-
 mutual
 /-- Recursive operation idempotence in the destination, with source fixed. -/
 theorem value_repeat {n : Nat} {G : Schema n} :
@@ -32,7 +18,7 @@ theorem value_repeat {n : Nat} {G : Schema n} :
    exact value_repeat (old p) (src p)
  | _, .array oe ol oh os, .array ne nl nh ns => by
    simp only [recursiveCopy_eq_overlay,Value.overlay]
-   apply array_ext
+   apply array_value_ext
    · change max (max oe.val nl.val) nl.val=max oe.val nl.val
      omega
    · intro i j equal

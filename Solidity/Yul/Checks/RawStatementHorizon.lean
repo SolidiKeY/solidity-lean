@@ -65,6 +65,10 @@ theorem dirtyInput : Solidity.Yul.RawCoherent.coherent Solidity.Yul.Checks.RawSt
  (Solidity.Yul.RawFrame.view Solidity.Yul.Checks.RawStatementHorizon.dirty Solidity.Yul.Checks.RawStatementHorizon.small).val = 257 := by
   decide
 
+/-- Reused refusal of the shared dirty frame, retaining its complete observation above. -/
+theorem dirtyRefusal : RawCoherent.coherent dirty = false :=
+  dirtyInput.1
+
 #print axioms Solidity.Yul.RawStatementHorizon.discardSuccessor
 #print axioms Solidity.Yul.RawStatementHorizon.rawSuccessor
 #print axioms Solidity.Yul.RawStatementHorizon.coherentSuccessor

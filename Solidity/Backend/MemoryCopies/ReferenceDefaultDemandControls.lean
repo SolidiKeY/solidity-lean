@@ -70,12 +70,6 @@ private def emptyChild : SVal (.ref (.array (.prim .uint))) := .array .nil .nil 
 private def expected : SVal (.ref (.array (.ref (.array (.prim .uint))))) :=
   .array (SVec.replicate emptyChild 2) .nil (by decide)
 
-private theorem strip_replicate {T : Ty} (value : SVal T) (count : Nat) :
-    (SVec.replicate value count).strip = SVec.replicate value.strip count := by
-  induction count with
-  | zero => simp only [SVec.replicate, SVec.strip_nil]
-  | succ count previous => simp only [SVec.replicate, SVec.strip_cons, previous]
-
 theorem actual_contents :
     ∃ fits : (wmod 40).val + ((wmod 2).val + 1 + (wmod 2).val *
         ReferenceDefaults.defaultCells (.ref (.array (.prim .uint)))) < W,

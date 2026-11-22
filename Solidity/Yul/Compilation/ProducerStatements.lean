@@ -88,9 +88,12 @@ def seq {fuel n : Nat} {c : Control} {a b : Stmt [] [] c n}
     rw [first.source]
     exact second.source (first.update locals)
 
-/-- Finite source horizon is preserved exactly through the real evaluator.
-Other statement constructors refuse here, not at Solidity admission. -/
-def compile {c : Control} {n : Nat} (fuel : Nat) (stmt : Stmt [] [] c n) :
+/-- Shared intrinsic statement visitor; the concrete expression compiler is
+called only at single-target assignments, at the original child fuel. -/
+def compileWith
+    (compileExpr : {n : Nat} → (fuel : Nat) → (expr : Expr [] [] n 1) →
+      Option (ProducerExpressions.Compiled fuel expr))
+    {c : Control} {n : Nat} (fuel : Nat) (stmt : Stmt [] [] c n) :
     Option (Compiled fuel stmt) :=
   match fuel with
   | 0 => none
@@ -108,8 +111,8 @@ def compile {c : Control} {n : Nat} (fuel : Nat) (stmt : Stmt [] [] c n) :
         intro F X c n a b
         cases F <;> cases X
         · exact do
-            let first ← compile fuel a
-            let second ← compile fuel b
+            let first ← compileWith compileExpr fuel a
+            let second ← compileWith compileExpr fuel b
             pure (seq first second)
         all_goals exact ()
       case assign =>
@@ -120,11 +123,17 @@ def compile {c : Control} {n : Nat} (fuel : Nat) (stmt : Stmt [] [] c n) :
           | succ r =>
             cases r with
             | zero =>
-              exact (ProducerExpressions.compile fuel expr).map (assignTargets targets)
+              exact (compileExpr fuel expr).map (assignTargets targets)
             | succ _ => exact none
         all_goals exact ()
       all_goals intro F X; cases F <;> cases X <;> intros <;> first | exact none | exact ()
 termination_by structural fuel
+
+/-- Finite source horizon is preserved exactly through the real evaluator.
+Other statement constructors refuse here, not at Solidity admission. -/
+def compile {c : Control} {n : Nat} (fuel : Nat) (stmt : Stmt [] [] c n) :
+    Option (Compiled fuel stmt) :=
+  compileWith ProducerExpressions.compile fuel stmt
 
 theorem executes {fuel n : Nat} {c : Control} {stmt : Stmt [] [] c n}
     (compiled : Compiled fuel stmt) (depth : Nat) (code : Program)

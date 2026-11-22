@@ -29,7 +29,7 @@ where
     exact inventory_source_step
 
 theorem generated_mixed_all_H (H : Source.HeapTy) (ok : Source.MemOK mixedEnv H mixedState) : Source.MemOK mixedEnv H inventoryAfter :=
-  enumeratedMemoryWriteback_MemOK H mixedState mixedPlacement mixedPlacement (retainInitial _ _) inventoryPhysical _ generated_mixed_source ok
+  inventory_all_H_MemOK H ok
 
 theorem generated_mixed_actual_MemOK : Source.MemOK mixedEnv mixedHeap.ty inventoryAfter := generated_mixed_all_H _ mixed_actual_MemOK
 

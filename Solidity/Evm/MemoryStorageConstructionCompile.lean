@@ -63,13 +63,6 @@ theorem StmtFrag.correct {b L frame : Nat} {Γ Δ : Ctx} {F : Frag Γ} {G : Frag
     rw [copy_cost_zero hs σ]
     exact ((hs.correct h.fixedCopy hb).objects h).growing
 
-private theorem run_cons_revert {Γ Δ Ξ : Ctx} {σ : State C Γ}
-    {s : Stmt C Γ Δ} {P : Prog C Δ Ξ} (h : s.run σ = .error .revert) :
-    (Prog.cons s P).run σ = .error .revert := by
-  show TRun.seq s.runR P.runR σ = _
-  simp only [TRun.seq, Solidity.Stmt.run] at h ⊢
-  rw [h]
-
 theorem ProgFrag.correct {b L frame : Nat} {Γ Δ : Ctx} {F : Frag Γ} {G : Frag Δ}
     {P : Prog C Γ Δ} {code : List Instr} (hp : ProgFrag b F G P code)
     {σ : State C Γ} {base : Nat → Fin W} {m : Machine}

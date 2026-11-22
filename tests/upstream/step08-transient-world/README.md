@@ -22,12 +22,12 @@ policy was changed.
 - Inventory, orphan, layer, automatic and trust checks passed. Documentation-path
   check fails on **20 preexisting citations**, verified against starting master.
 
-See [report.json](report.json) for exact command arrays, exits, timings, memory
+See [report.json](https://github.com/SolidiKeY/solidity-lean-coord/blob/2b7866202ef9487cf11a98ef70e1184018e1df9a/evidence/plan-x1e-classify-runtime-upstrea-1116/x1e-classify-runtime-upstream/tests/upstream/step08-transient-world/report.json) for exact command arrays, exits, timings, memory
 counters, source hashes, shared edits, review results and remaining refusals;
-[axioms.json](axioms.json) and [evm-observations.json](evm-observations.json) retain
+[axioms.json](https://github.com/SolidiKeY/solidity-lean-coord/blob/2b7866202ef9487cf11a98ef70e1184018e1df9a/evidence/plan-x1e-classify-runtime-upstrea-1116/x1e-classify-runtime-upstream/tests/upstream/step08-transient-world/axioms.json) and [evm-observations.json](https://github.com/SolidiKeY/solidity-lean-coord/blob/2b7866202ef9487cf11a98ef70e1184018e1df9a/evidence/plan-x1e-classify-runtime-upstrea-1116/x1e-classify-runtime-upstream/tests/upstream/step08-transient-world/evm-observations.json) retain
 the proof/reference split. Upstream JSON reports retain every actual observation;
 `fixtures/` contains byte-identical pinned inputs including original expectations.
-[log-index.json](log-index.json) records compressed and uncompressed SHA-256 hashes.
+[log-index.json](https://github.com/SolidiKeY/solidity-lean-coord/blob/2b7866202ef9487cf11a98ef70e1184018e1df9a/evidence/plan-x1e-classify-runtime-upstrea-1116/x1e-classify-runtime-upstream/tests/upstream/step08-transient-world/log-index.json) records compressed and uncompressed SHA-256 hashes.
 Logs are losslessly gzip-compressed; use `gzip -dc` to inspect.
 
 The pre-implementation legacy refusal was checked before the edit. Both pipeline

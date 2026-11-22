@@ -1,4 +1,5 @@
 import Solidity.Yul.Views.ComputedAllocationWrite
+import Solidity.Yul.Views.ScratchHeapTransport
 import Solidity.Yul.Views.RetainedAllocationOrder
 
 /-! Pointwise locality and disjoint update order for every existing intrinsic
@@ -7,30 +8,12 @@ real old cell, independently of the allocated object's constructor. Raw-map
 laws require real separated spans; they say nothing about aliased writes. -/
 namespace Solidity.Yul.Views
 
-theorem wordList_point_congr (ws : List Roadmap.Word) (m n : ByteView) (base i : Nat)
-    (same : m i=n i) : wordListView ws m base i=wordListView ws n base i := by
-  induction ws generalizing base with
-  | nil => exact same
-  | cons w ws ih =>
-    unfold wordListView mstore
-    split
-    · rfl
-    · exact ih (base+32)
-
 /-- Encoding at a byte depends on at most that input byte, not other residual
 locations. This includes pointer-valued aggregate word images. -/
 theorem MemoryImage.point_congr {D : Source.Layout} {h : Source.Heap D} {p : Placement h}
     {τ : Source.STy} {d : Source.Data D τ} (image : MemoryImage p d)
-    (m n : ByteView) (base i : Nat) (same : m i=n i) : image.encode m base i=image.encode n base i := by
-  cases image with
-  | bytes bs bound | string bs bound =>
-    dsimp only [MemoryImage.encode,bytesObjectView,copyBytes,mstore]
-    split
-    · rfl
-    · split
-      · rfl
-      · exact same
-  | words d ws encoded => exact wordList_point_congr ws m n base i same
+    (m n : ByteView) (base i : Nat) (same : m i=n i) : image.encode m base i=image.encode n base i :=
+  image.residual_point m n base i same
 
 /-- Whole-map commutation, across different heaps/types and all concrete image
 families, follows from actual image spans and pointwise locality. -/

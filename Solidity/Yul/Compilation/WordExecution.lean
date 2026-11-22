@@ -66,16 +66,8 @@ private theorem binary_transport (i : Backend.Instr) (j : Evm.Instr)
     (xs ys : Stack) (executed : Scalar.step i xs = some ys)
     (m : Evm.Machine) (tail : List Evm.Word) :
     j.step {m with stack := xs.map coreWord++tail} =
-      .ok {m with stack := ys.map coreWord++tail} 0 := by
-  rw [scalarRow] at executed
-  cases xs with
-  | nil => cases executed
-  | cons a xs =>
-    cases xs with
-    | nil => cases executed
-    | cons b xs =>
-      cases executed
-      exact modelRow a b m (xs.map coreWord++tail)
+      .ok {m with stack := ys.map coreWord++tail} 0 :=
+  NumericExecution.binary_transport i j f scalarRow modelRow xs ys executed m tail
 
 
 private theorem unary_transport (i : Backend.Instr) (j : Evm.Instr)
@@ -119,19 +111,9 @@ theorem run (p : Backend.Program) (q : List Evm.Instr)
     (selected : WordMachine.selectCode p = some q) (xs ys : Stack)
     (executed : Scalar.run p xs = some ys) (m : Evm.Machine) (tail : List Evm.Word) :
     Evm.run q {m with stack := xs.map coreWord++tail} =
-      .ok {m with stack := ys.map coreWord++tail} 0 := by
-  induction p generalizing q xs ys with
-  | nil => cases selected; cases executed; rfl
-  | cons i p ih =>
-    obtain ⟨j,hi,rest⟩ := Option.bind_eq_some_iff.mp selected
-    obtain ⟨target,hp,same⟩ := Option.map_eq_some_iff.mp rest
-    subst q
-    cases hs : Scalar.step i xs with
-    | none => simp only [Scalar.run,hs,Option.bind_none,reduceCtorEq] at executed
-    | some zs =>
-      simp only [Scalar.run,hs,Option.bind_some] at executed
-      rw [Evm.run,Evm.exec_cons_zero,step i j hi xs zs hs m tail,Evm.Out.ok_bind]
-      exact ih target hp zs ys executed
+      .ok {m with stack := ys.map coreWord++tail} 0 :=
+  MachineAdapter.run_selected WordMachine.selectInstr WordMachine.selectCode
+    rfl (fun _ _ => rfl) step p q selected xs ys executed m tail
 
 /-- Real compiler certificate supplies the scalar run; no chosen execution
 is a premise. Selection still uses exactly the original WordMachine table. -/

@@ -23,7 +23,7 @@ theorem array_whole :
     enumeratedMemoryWriteback arrayAfter mixedPlacement arrayPlacement arrayHistory (mstore mixedPhysical 672 0)=
       .ok (some (.ok (),arrayAfter)) :=
   array mixedHeap.ty mixedState mixedPlacement mixedPlacement (retainInitial _ _) mixed_actual_MemOK
-    StructWordHeap.Controls.support mixedReadFrame 0 2 (.int Source.IntTy.u256) (some 2) 2
+    Solidity.Yul.Views.Controls.generated_mixed_types_supported mixedReadFrame 0 2 (.int Source.IntTy.u256) (some 2) 2
     (fun _ eq => (Option.some.inj eq).symm) mixedStaticVals (fun i => if i.val=0 then 7 else 9)
     mixed_static_element rfl ⟨1,by decide⟩ (uintValueOfWord mixedLayout 0) 0 (.scalar _ _ (uintValueOfWord_word _ _))
     rfl mixedPhysical ByteElementStore.Controls.oldReads mixed_reserved
@@ -40,7 +40,7 @@ theorem bool_whole :
     enumeratedMemoryWriteback boolAfter mixedPlacement boolPlacement boolHistory (mstore mixedPhysical 896 0)=
       .ok (some (.ok (),boolAfter)) :=
   strct mixedHeap.ty mixedState mixedPlacement mixedPlacement (retainInitial _ _) mixed_actual_MemOK
-    StructWordHeap.Controls.support mixedReadFrame 0 3 mixedName mixedFields StructWordStore.Controls.boolFields
+    Solidity.Yul.Views.Controls.generated_mixed_types_supported mixedReadFrame 0 3 mixedName mixedFields StructWordStore.Controls.boolFields
     mixedStructWords StructWordStore.Controls.fields rfl ⟨0,by decide⟩ (.bool false) 0 (.scalar _ _ rfl) rfl rfl
     mixedPhysical ByteElementStore.Controls.oldReads mixed_reserved
 
@@ -55,7 +55,7 @@ theorem byte_whole :
       enumeratedMemoryWriteback byteAfter mixedPlacement bytePlacement history (saveByte mixedPhysical 161 0)=
         .ok (some (.ok (),byteAfter)) ∧ ReservedOK (saveByte mixedPhysical 161 0) bytePlacement.free :=
   bytes mixedHeap.ty mixedState mixedPlacement mixedPlacement (retainInitial _ _) mixed_actual_MemOK
-    StructWordHeap.Controls.support mixedReadFrame 0 0 false mixedChild rfl ⟨1,by decide⟩ mixedPhysical
+    Solidity.Yul.Views.Controls.generated_mixed_types_supported mixedReadFrame 0 0 false mixedChild rfl ⟨1,by decide⟩ mixedPhysical
     ByteElementStore.Controls.oldReads mixed_reserved
 
 theorem integer_default (t : Source.IntTy) {E Γ} (s : Source.EMState E Γ) (n : Nat) :

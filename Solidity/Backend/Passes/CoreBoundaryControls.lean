@@ -61,10 +61,8 @@ theorem reached_success (tail : List Word) :
 
 theorem panic_link (tail : List Word) :
     ReachedMappedLink (.memory allocationStage) (.memory captureStage) RevertControls.panicStage
-      1 7 initialBase (State.init C) {initialMachine with stack := tail} := by
-  intro o mid mb _ _ _
-  exact compilation_core_mapped_link (.memory captureStage)
-    (G := captureStage.frag) (by rfl) (by decide +kernel)
+      1 7 initialBase (State.init C) {initialMachine with stack := tail} :=
+  RevertControls.panic_link tail
 
 theorem reached_asserting_panic (tail : List Word) :
     RevertControls.panicProg.asserts = true ∧

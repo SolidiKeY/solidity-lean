@@ -24,10 +24,10 @@ theorem IntDynamicHeader.readLen {E root t cursor Γ} (h : IntDynamicHeader E ro
   have typed : (Source.readAt F ⟨root,[]⟩ (.int .u256)).run s = (.ok (uintValueOfWord E.layout n),s) := by
     unfold Source.readAt
     rw [Source.Hoare.run_bind,raw]
-    simp only [dif_pos (integer_dynamic_header_cell h.declared)]
-    have cancel : (integer_dynamic_header_cell h.declared) ▸ h.lengthValue n = uintValueOfWord E.layout n :=
+    simp only [dif_pos (packed_dynamic_header_cell h.declared)]
+    have cancel : (packed_dynamic_header_cell h.declared) ▸ h.lengthValue n = uintValueOfWord E.layout n :=
       sourceVal_transport_cancel _ _
-    change ((Except.ok ((integer_dynamic_header_cell h.declared) ▸ h.lengthValue n) : Except Source.Halt (Source.Val E.layout (.int .u256))),s) = _
+    change ((Except.ok ((packed_dynamic_header_cell h.declared) ▸ h.lengthValue n) : Except Source.Halt (Source.Val E.layout (.int .u256))),s) = _
     rw [cancel]
   unfold Source.readLen
   rw [Source.Hoare.run_bind,typed]
@@ -56,6 +56,6 @@ theorem IntDynamicHeader.writeLen_operation {E root t cursor Γ} (h : IntDynamic
     (Source.writeLen F ⟨root,[]⟩ n).run s =
       (Source.setCell F ⟨root,[]⟩ (some ((integer_dynamic_header_cell h.declared).symm ▸ Source.intWrap (D := E.layout) .u256 n))).run s := by
   unfold Source.writeLen Source.writeAt
-  rw [dif_pos (integer_dynamic_header_cell h.declared).symm]
+  rw [dif_pos (packed_dynamic_header_cell h.declared).symm]
 
 end Solidity.Yul.Views

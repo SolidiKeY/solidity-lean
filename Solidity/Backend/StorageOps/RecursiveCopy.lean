@@ -180,4 +180,25 @@ theorem recursiveCopy_shortened {n : Nat} {G : Schema n} {E : TypeGraph.Ty n}
 /-- info: 'Solidity.Backend.StorageOps.fixedView' does not depend on any axioms -/
 #guard_msgs in #print axioms fixedView
 
+/-- Dependent array-domain transport: equal extents and pointwise equal slots. -/
+theorem array_value_ext {n : Nat} {G : Schema n} {E : TypeGraph.Ty n}
+    (left right : Extent) (length : Index) (lb : length.val ≤ left.val) (rb : length.val ≤ right.val)
+    (ls : Fin left.val → Slot G E) (rs : Fin right.val → Slot G E)
+    (equal : left.val = right.val)
+    (pointwise : ∀ (i : Fin left.val) (j : Fin right.val), i.val = j.val → ls i = rs j) :
+    Value.array left length lb ls = Value.array right length rb rs := by
+  have sizes : left = right := Fin.ext equal
+  cases sizes
+  have slots : ls = rs := funext (fun i => pointwise i i rfl)
+  cases slots
+  rfl
+
+/-- A successful path copy saves the copied value at the destination. -/
+theorem recursiveCopyAt_saved {n : Nat} {G : Schema n} {A T : TypeGraph.Ty n}
+    (root result : Value G A) (dst src : TypeGraph.Path G A T) (old snapshot : Value G T)
+    (readDst : root.find dst = some old) (readSrc : root.find src = some snapshot)
+    (copied : recursiveCopyAt root dst src = some result) :
+    root.save dst (recursiveCopy old snapshot) = some result := by
+  simpa only [recursiveCopyAt,Option.bind_eq_bind,readSrc,readDst,Option.bind_some] using copied
+
 end Solidity.Backend.StorageOps

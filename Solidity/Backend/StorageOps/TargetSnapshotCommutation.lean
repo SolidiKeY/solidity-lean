@@ -5,14 +5,6 @@ and read/write separation are explicit; intra-operation overlap is allowed. -/
 namespace Solidity.Backend.StorageOps.TargetSnapshotCommutation
 open TargetFixedSnapshot
 
-private theorem store_ext (a b : Evm.WordStore) (same : ∀ s,a s=b s) : a=b := by
- cases a with
- | mk a =>
-  cases b with
-  | mk b =>
-   have cells : a=b := funext (fun s => Fin.ext (same s))
-   exact congrArg Evm.WordStore.mk cells
-
 /-- Two independently captured snapshot operations commute when neither
 changes the other's source and their generated destinations are disjoint.
 There is no requirement that either operation's own source/destination differ. -/
@@ -50,7 +42,7 @@ theorem machines (pa pb : PrimTy) (ma mb : TypeGraph.FixedSize) (machine : Evm.M
        after_outside pa ma machine sa da observer outsideA,
        after_outside pa ma (afterCopy pb mb machine sb db) sa da observer outsideA,
        after_outside pb mb machine sb db observer outsideB]
- have stores := store_ext _ _ words
+ have stores := Evm.WordStore.ext words
  exact congrArg (fun store : Evm.WordStore => {machine with store:=store}) stores
 
 /-- Equality of actual intrinsic compiler instruction executions, including

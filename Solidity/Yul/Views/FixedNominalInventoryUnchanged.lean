@@ -15,10 +15,8 @@ def TypeSupported (E : Source.Env) : Source.STy → Prop
 
 theorem element_word {D : Source.Layout} {h : Source.Heap D} {p : Placement h}
     {name : Source.DeclName} {v : Source.Val D (.udvt name)} {w : Roadmap.Word}
-    (encoded : MemoryElement p v w) : v.word=some w := by
-  cases encoded with
-  | scalar _ _ word => exact word
-  | pointer loc _ _ _ _ => cases loc
+    (encoded : MemoryElement p v w) : v.word=some w :=
+  NominalInventory.element_word encoded
 
 theorem nominal_object_unchanged {E : Source.Env} {h : Source.Heap E.layout} (p : Placement h)
     (root : Nat) (name : Source.DeclName) (k : Option Nat)
@@ -38,7 +36,7 @@ theorem nominal_object_unchanged {E : Source.Env} {h : Source.Heap E.layout} (p 
       have encoded : ∀ i,(values i).word=some (mload m (p.address root+arrayPayloadOffset k+i.val*32)) := by
         intro i
         rw [elementReads i]
-        exact element_word (elements i)
+        exact NominalInventory.element_word (elements i)
       exact Option.map_eq_some_iff.mp
         (snapshot_encode p name k n hl bound values m (p.address root) declared supported header encoded)
 

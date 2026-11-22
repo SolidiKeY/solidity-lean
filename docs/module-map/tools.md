@@ -28,7 +28,11 @@ Commands for people; they prove nothing beyond the certificates they check.
 | `Automation/H28/Prove.lean` | Bounded automation-benchmark checkpoint; typed scope and retained obligations are stated in the module. |
 | `Tools/VerifierMetadata.lean` | Additive kernel facts tying each reported `postFails` index to the exact typed false postcondition clause and final run state; no source span, original-obligation or candidate association is inferred. |
 | `Tools/ExecutableGoalBindingV2.lean` | Exact executable-goal failure at a proved same candidate; retains distinct source-values equality obligations and makes no importer transport or source-authentication claim. |
+| `Docs/ProseCalibrated/Allowance.lean` | Exact allowance arithmetic: rational order, componentwise minimum, numerator antitonicity, floor/boundary evaluation, equivalence invariance, and zero calibration laws over `Goals.ProseCalibrated`. |
+| `Examples/Docs/ProseCalibrated/Allowance.lean` | Checks the complete public types of the seven allowance arithmetic laws and four helpers against their proved constants. |
 | `Solidity/Docs/ProseCalibrated/Classification.lean` | Calibrated prose classification, exclusion, locality and lexical padding laws over the frozen model. |
+| `Solidity/Docs/ProseCalibrated/Policy.lean` | Calibrated prose policy laws: acceptance decides the declarative order, rejection, unseen keys, fail-closed unavailable measurements, and the shrink, tighten and no-replacement laws. |
+| `Solidity/Docs/ProseCalibrated.lean` | Assembles `prose_calibrated_ratio_rule_sound` from the allowance, classification and policy laws; checker correspondence stays a separate obligation. |
 
 | `**/*Controls.lean` | Every `*Controls` module is in `Solidity`. `scripts/coord-tools/controls-classify.py` lists those no library module imports (candidates for a future controls library, not moved). |
 

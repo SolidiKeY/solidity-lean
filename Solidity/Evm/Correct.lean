@@ -48,12 +48,6 @@ theorem Keeps.weaken {sh' : Bool} {m m' : Machine} (h : Keeps C b sh m m')
   ⟨h.mem, fun h' => h.len (by
     cases sh <;> simp_all only [Bool.false_eq_true, Bool.true_eq_false, implies_true])⟩
 
-/-- A fault in the first piece of code faults the whole: a loop that never
-ends, then the rest. -/
-theorem run_append_fault {c₁ c₂ : List Instr} {m : Machine} (h : run c₁ m = .fault) :
-    run (c₁ ++ c₂) m = .fault := by
-  simp only [run] at h ⊢; rw [exec_append, h]; rfl
-
 /-- The machine's side of a divergence, carried past more code. -/
 theorem divOut_append {pays : Bool} {c₁ c₂ : List Instr} {m : Machine}
     (h : run c₁ m = .fault ∨ (pays = true ∧ run c₁ m = .revert)) :
