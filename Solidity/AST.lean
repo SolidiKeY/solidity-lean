@@ -1183,6 +1183,110 @@ inductive Var where
   | fresh (base : String) (k : Nat)
   deriving DecidableEq, Repr, Inhabited, Lean.ToExpr
 
+/-- Decimal digit decoding used in the fresh-name round-trip proof. -/
+private theorem fresh_digit_value (n : Nat) (h : n < 10) :
+    (Nat.digitChar n).toNat - '0'.toNat = n ∧
+      (Nat.digitChar n).isDigit = true := by
+  have hn : n = 0 ∨ n = 1 ∨ n = 2 ∨ n = 3 ∨ n = 4 ∨
+      n = 5 ∨ n = 6 ∨ n = 7 ∨ n = 8 ∨ n = 9 := by omega
+  rcases hn with h | h | h | h | h | h | h | h | h | h <;> subst n <;> decide
+
+/-- Reading a decimal representation followed by a suffix starts that suffix
+at the represented number. The fuel bound also covers zero. -/
+private theorem fresh_digits_fold (fuel n : Nat) (h : n < fuel) (ds : List Char) :
+    (Nat.toDigitsCore 10 fuel n ds).foldl
+      (fun a c => a * 10 + (c.toNat - '0'.toNat)) 0 =
+    ds.foldl (fun a c => a * 10 + (c.toNat - '0'.toNat)) n := by
+  induction fuel generalizing n ds with
+  | zero => omega
+  | succ fuel ih =>
+    simp only [Nat.toDigitsCore]
+    have hd := (fresh_digit_value (n % 10) (Nat.mod_lt n (by decide))).1
+    split
+    · rename_i hz
+      simp only [List.foldl_cons, Nat.zero_mul, Nat.zero_add, hd]
+      congr 1
+      omega
+    · rename_i hn
+      rw [ih (n / 10) (by omega)]
+      simp only [List.foldl_cons, hd]
+      congr 1
+      omega
+
+/-- Every character emitted by the decimal printer is a digit. -/
+private theorem fresh_digits_all (fuel n : Nat) (ds : List Char)
+    (hds : ∀ c ∈ ds, c.isDigit = true) :
+    ∀ c ∈ Nat.toDigitsCore 10 fuel n ds, c.isDigit = true := by
+  induction fuel generalizing n ds with
+  | zero => exact hds
+  | succ fuel ih =>
+    have hd := (fresh_digit_value (n % 10) (Nat.mod_lt n (by decide))).2
+    have hs : ∀ c ∈ Nat.digitChar (n % 10) :: ds, c.isDigit = true := by
+      intro c hc
+      rcases List.mem_cons.mp hc with rfl | hc
+      · exact hd
+      · exact hds c hc
+    simp only [Nat.toDigitsCore]
+    split
+    · exact hs
+    · exact ih _ _ hs
+
+/-- Sufficient printer fuel always emits at least one decimal digit. -/
+private theorem fresh_digits_ne_nil (fuel n : Nat) (h : n < fuel) (ds : List Char) :
+    Nat.toDigitsCore 10 fuel n ds ≠ [] := by
+  induction fuel generalizing n ds with
+  | zero => omega
+  | succ fuel ih =>
+    simp only [Nat.toDigitsCore]
+    split
+    · exact List.noConfusion
+    · apply ih
+      omega
+
+/-- Prefix parsing on character lists exposes the scanner's equations to proofs. -/
+private def freshPrefixParse (rows : List (String × String)) (s : String) :
+    Option (String × Nat) :=
+  let stem := s.data.takeWhile (!·.isDigit)
+  let digits := s.data.dropWhile (!·.isDigit)
+  if digits.isEmpty || !digits.all (·.isDigit) then none
+  else (rows.find? (·.2 == String.mk stem)).map
+    (fun row => (row.1, digits.foldl (fun n c => n * 10 + (c.toNat - '0'.toNat)) 0))
+
+/-- A digit-free prefix followed by a decimal index is decoded exactly. -/
+private theorem freshPrefixParse_roundTrip (rows : List (String × String))
+    (b pre : String) (index : Nat)
+    (hp : ∀ c ∈ pre.data, (!c.isDigit) = true)
+    (hr : (rows.find? (·.2 == pre)).map Prod.fst = some b) :
+    freshPrefixParse rows (pre ++ toString index) = some (b, index) := by
+  have ha := fresh_digits_all (index + 1) index [] (by simp)
+  have hn := fresh_digits_ne_nil (index + 1) index (by omega) []
+  have hf := fresh_digits_fold (index + 1) index (by omega) []
+  let ds := Nat.toDigitsCore 10 (index + 1) index []
+  have ht : ds.takeWhile (!·.isDigit) = [] := by
+    cases he : ds with
+    | nil => rfl
+    | cons c cs =>
+      have hc := ha c (by change c ∈ ds; rw [he]; exact List.mem_cons_self)
+      simp only [he, List.takeWhile_cons, hc, Bool.not_true, Bool.false_eq_true, ↓reduceIte]
+  have hd : ds.dropWhile (!·.isDigit) = ds := by
+    have h := List.takeWhile_append_dropWhile (p := fun c : Char => !c.isDigit) (l := ds)
+    simpa only [ht, List.nil_append] using h
+  have hall : ds.all (·.isDigit) = true := List.all_eq_true.mpr ha
+  change freshPrefixParse rows (String.mk (pre.data ++ ds)) = _
+  simp only [freshPrefixParse, List.takeWhile_append_of_pos hp,
+    List.dropWhile_append_of_pos hp, ht, hd, List.append_nil, hall,
+    Bool.not_true, Bool.or_false]
+  have he : ds.isEmpty = false := List.isEmpty_eq_false.mpr hn
+  simp only [he, Bool.false_eq_true, ↓reduceIte]
+  change (rows.find? (·.2 == pre)).map (fun row => (row.1, ds.foldl _ 0)) = _
+  change ds.foldl _ 0 = index at hf
+  rw [hf]
+  cases h : rows.find? (·.2 == pre) with
+  | none => simp only [h, Option.map_none] at hr; contradiction
+  | some row =>
+    simp only [h, Option.map_some, Option.some.injEq] at hr
+    simp only [Option.map_some, hr]
+
 /-- How fresh variables are spelled: `name b k` spells `.fresh b k`, and
 `parse` reads a spelling back, so a printed line can be pasted back.  The
 default is `se1`, `sp1`, `ie1`, `mv1`; a file picks its own with
