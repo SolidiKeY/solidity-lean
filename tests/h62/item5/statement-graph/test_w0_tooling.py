@@ -88,6 +88,8 @@ assert.throws(()=>c.parseImports('import «Hidden»'));
                 (root/'Solidity/Tools/Escape.lean').write_text(doc)
                 (root/'Solidity/Theory/New.lean').write_text(('import Solidity.Tools.Escape\n' if bad else '')+doc)
                 env=dict(os.environ,PATH=str(root/'bin')+os.pathsep+os.environ['PATH'],GATE_BASE='HEAD',GATE_LOGS=str(root/'logs'))
+                # This synthetic repository tests gate ordering, not the parent lane's task.
+                for name in ('GATE_TASK_SCOPE','GATE_TASK_GOAL'):env.pop(name,None)
                 p=subprocess.run(['bash','scripts/coord-tools/gate.sh','touched'],cwd=root,env=env,text=True,capture_output=True)
                 self.assertEqual(p.returncode,int(bad),p.stdout+p.stderr)
                 self.assertEqual((root/'events').read_text().splitlines(),['layers'] if bad else ['layers','build'])

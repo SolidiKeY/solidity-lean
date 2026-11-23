@@ -140,6 +140,7 @@ import Solidity.Examples.ExampleNames
 import Solidity.Examples.Finish.Assembly
 import Solidity.Examples.FixedArrayFloor
 import Solidity.Examples.FixedArrayRoot
+import Solidity.Examples.FreshNamesLaw
 import Solidity.Examples.Goals
 import Solidity.Examples.Goals.AuditData
 import Solidity.Examples.Goals.BenchmarkBudgetsMet
@@ -199,6 +200,7 @@ import Solidity.Examples.LexVariant
 import Solidity.Examples.LinearDecision
 import Solidity.Examples.Lowering.Sim.Cases
 import Solidity.Examples.Lowering.Sim.CasesV2
+import Solidity.Examples.Lowering.Sim.Coverage
 import Solidity.Examples.Lowering.Sim.Coverage.ThreadedV2
 import Solidity.Examples.Lowering.Sim.Expr
 import Solidity.Examples.Lowering.Sim.Match

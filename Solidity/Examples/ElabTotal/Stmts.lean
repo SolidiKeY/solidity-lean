@@ -603,3 +603,7 @@ end Solidity.Examples.ElabTotal.Stmts
 /-- info: 'Solidity.ElabCallHeight.slice_decode_output_height_of_raw_bounds' depends on axioms: [propext, Quot.sound] -/
 #guard_msgs in
 #print axioms Solidity.ElabCallHeight.slice_decode_output_height_of_raw_bounds
+
+/-- info: 'Solidity.ElabCallHeight.call_output_height_of_raw_bounds' depends on axioms: [propext, Quot.sound] -/
+#guard_msgs in
+#print axioms Solidity.ElabCallHeight.call_output_height_of_raw_bounds

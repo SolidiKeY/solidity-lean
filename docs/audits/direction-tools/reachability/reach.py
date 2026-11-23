@@ -108,13 +108,18 @@ def snapshot_texts():
             p.startswith('scripts/') and p.endswith(('.py','.mjs','.js','.sh')) or
             p.startswith('.github/workflows/') or p in ('lakefile.toml','docs/audits/architecture-tools/timing-sample.tsv')]
     command=['git','-C',str(ROOT),'archive',BASE,'--',*inputs]
-    proc=subprocess.Popen(command,stdout=subprocess.PIPE)
     result={}
-    with tarfile.open(fileobj=proc.stdout,mode='r|') as archive:
-        for member in archive:
-            if member.isfile():result[member.name]=archive.extractfile(member).read().decode()
-    proc.stdout.close()
-    if proc.wait():raise ValueError('cannot read pinned Git source snapshot')
+    with subprocess.Popen(command,stdout=subprocess.PIPE) as proc:
+        with proc.stdout:
+            with tarfile.open(fileobj=proc.stdout,mode='r|') as archive:
+                for member in archive:
+                    if member.isfile():result[member.name]=archive.extractfile(member).read().decode()
+            # Tar EOF precedes the end of Git's output (record padding). Keep
+            # reading in bounded chunks so closing the pipe cannot SIGPIPE Git.
+            while proc.stdout.read(64 * 1024):
+                pass
+        status=proc.wait()
+        if status:raise ValueError(f'cannot read pinned Git source snapshot (git archive exit {status})')
     return result
 
 
