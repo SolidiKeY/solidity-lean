@@ -1,1 +1,1 @@
-| `Examples/ExecutableGoalBinding.lean` | Exact-target refutation and wrong-target, retained-value, argument and layout refusal examples, including bounded kernel replay. |
+| `Examples/ExecutableGoalBinding.lean` | Exact-target refutation and wrong-target, retained-value, argument and layout refusal examples. Test-only kernel replay is checked by `tests/executable-goal-binding/KernelReplay.lean` in Lean CI. |
