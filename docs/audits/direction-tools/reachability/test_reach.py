@@ -8,6 +8,9 @@ import importlib.util
 import json
 from pathlib import Path
 import subprocess
+import sys
+import tempfile
+from unittest import mock
 import tarfile
 import unittest
 
@@ -36,6 +39,46 @@ class Parser(unittest.TestCase):
 
     def test_graph_cycle(self):
         self.assertEqual(r.closure({'a':{'b'},'b':{'a','c'}},['a']),{'a','b','c'})
+
+
+class Snapshot(unittest.TestCase):
+    @unittest.skipUnless(sys.platform == 'linux', 'requires Linux pipe sizing')
+    def test_archive_padding_is_drained_before_wait(self):
+        # A small pipe and minimal read-ahead keep Git blocked on tar padding
+        # after the parser reaches EOF, reproducing the runner's SIGPIPE race.
+        popen, tar_open = subprocess.Popen, tarfile.open
+        def small_pipe(*args, **kwargs):
+            return popen(*args, **kwargs, pipesize=4096)
+        def small_buffer(*args, **kwargs):
+            return tar_open(*args, **kwargs, bufsize=512)
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            subprocess.run(['git', 'init', '-q', directory], check=True)
+            (root / 'Tiny.lean').write_text('def tiny := 1\n')
+            subprocess.run(['git', '-C', directory, 'add', '.'], check=True)
+            subprocess.run(['git', '-C', directory, '-c', 'user.name=Test',
+                            '-c', 'user.email=test@example.invalid',
+                            'commit', '-qm', 'fixture'], check=True)
+            with mock.patch.object(r, 'ROOT', root), mock.patch.object(r, 'BASE', 'HEAD'), \
+                 mock.patch.object(r.subprocess, 'Popen', side_effect=small_pipe), \
+                 mock.patch.object(r.tarfile, 'open', side_effect=small_buffer):
+                self.assertEqual(r.snapshot_texts(), {'Tiny.lean': 'def tiny := 1\n'})
+
+    def test_git_error_is_not_ignored(self):
+        # A valid tar stream does not excuse a failed producer.
+        import io
+        payload = io.BytesIO()
+        with tarfile.open(fileobj=payload, mode='w'):
+            pass
+        proc = mock.MagicMock()
+        proc.__enter__.return_value = proc
+        proc.stdout = io.BytesIO(payload.getvalue())
+        proc.wait.return_value = 7
+        with mock.patch.object(r, 'git', return_value='Tiny.lean\n'), \
+             mock.patch.object(r.subprocess, 'Popen', return_value=proc):
+            with self.assertRaisesRegex(ValueError, 'cannot read pinned Git source snapshot'):
+                r.snapshot_texts()
+        proc.wait.assert_called_once()
 
 
 class CalibrationParser(unittest.TestCase):
