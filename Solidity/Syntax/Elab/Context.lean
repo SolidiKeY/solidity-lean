@@ -1352,11 +1352,42 @@ partial def slicePack (views : List (String × SliceView)) : RawExpr → RawExpr
   | .call "#slice" [b, i, j] => .call "#sliceRaw" [slicePack views b, i, j]
   | e => e
 
-mutual
+namespace ElabSliceOpen
+open Semantics
 
-/-- The view `t` of `b[i:j]`: its checks and locals pushed before the
-statement. The base and bounds retain their source evaluation order. -/
-partial def sliceOpen (t : String) (b i j : RawExpr) : SliceM (Option SliceView) := do
+def BoundAtom : RawExpr → Prop
+  | .num _ | .name _ | .field (.name _) _ => True
+  | _ => False
+
+private def fixed (base : String) : RawExpr → Bool
+  | .num _ => true
+  | .field (.name x) "length" => x == base
+  | .name x => x.startsWith "#slice$"
+  | _ => false
+
+private theorem fixed_atom (base : String) (x : RawExpr) (h : fixed base x = true) :
+    BoundAtom x := by
+  unfold fixed at h
+  split at h <;> simp_all only [BoundAtom, Bool.false_eq_true]
+
+/-- The existing slice-bound binding policy, factored without changing its order. -/
+def bindBound (t base sfx : String) (x : RawExpr) (ss : Array RawStmt) :
+    RawExpr × Array RawStmt :=
+  if fixed base x then (x, ss)
+  else (.name (t ++ "$view$" ++ sfx), ss.push (.decl (.named "uint") (t ++ "$view$" ++ sfx) (some x)))
+
+private theorem bindBound_atom (t base sfx : String) (x : RawExpr) (ss : Array RawStmt) :
+    BoundAtom (bindBound t base sfx x ss).1 := by
+  unfold bindBound
+  by_cases h : fixed base x = true
+  · rw [if_pos h]
+    exact fixed_atom base x h
+  · rw [if_neg h]
+    trivial
+
+
+def openWith (recur : String → RawExpr → RawExpr → RawExpr → SliceM (Option SliceView))
+    (node : RawExpr → SliceM RawExpr) (t : String) (b i j : RawExpr) : SliceM (Option SliceView) := do
   let t := "#slice$" ++ t
   -- Capture the base before either bound. A view must survive later
   -- rebinding or shadowing of the source name.
@@ -1371,27 +1402,20 @@ partial def sliceOpen (t : String) (b i j : RawExpr) : SliceM (Option SliceView)
         pure { base, off := .num 0, fin := .field (.name base) "length" }
     | .call "#sliceDesc" [.name base, off, fin] => pure { base, off, fin }
     | .call "#slice" [b, i, j] | .call "#sliceRaw" [b, i, j] =>
-      let some v ← sliceOpen (t ++ "$outer") b i j | return none
+      let some v ← recur (t ++ "$outer") b i j | return none
       pure v
     | b =>
       let base := t ++ "$view$base"
       modifyThe SliceSt fun (vs, origins, k, pre) =>
         (vs, origins, k, pre.push (.declMemory (.named "#sliceBase") base (some b)))
       pure { base, off := .num 0, fin := .field (.name base) "length" }
-  let i ← i.mapM sliceNode
+  let i ← i.mapM node
   -- `b[i:]` ends at the outer view's length: its `e <= len` check is
   -- `len <= len`, true, and not emitted (a premise the closer would carry
   -- to every leaf; test 31, `sliceRead`).
   let toEnd := j matches .call "#sliceEnd" []
-  let j ← (if toEnd then pure outer.len else j.mapM sliceNode)
-  let fixed : RawExpr → Bool
-    | .num _ => true
-    | .field (.name x) "length" => x == outer.base
-    | .name x => x.startsWith "#slice$"
-    | _ => false
-  let bind (sfx : String) (x : RawExpr) (ss : Array RawStmt) : RawExpr × Array RawStmt :=
-    if fixed x then (x, ss)
-    else (.name (t ++ "$view$" ++ sfx), ss.push (.decl (.named "uint") (t ++ "$view$" ++ sfx) (some x)))
+  let j ← (if toEnd then pure outer.len else j.mapM node)
+  let bind := bindBound t outer.base
   let (st, ss) := bind "s" i #[]
   let (e, ss) := bind "e" j ss
   let ss := match st, e with
@@ -1405,6 +1429,67 @@ partial def sliceOpen (t : String) (b i j : RawExpr) : SliceM (Option SliceView)
   let (fin, ss) := bind "f" (sliceAdd outer.off e) ss
   modifyThe SliceSt fun (vs, origins, k, pre) => (vs, origins, k, pre ++ ss)
   return some { base := outer.base, off, fin }
+
+private def Obs {α : Type} (x : SliceM α) (Q : α → Prop) : Prop :=
+  ∀ u s, Q ((x u s).1.1)
+private theorem obs_pure {α : Type} {a : α} {Q : α → Prop} (h : Q a) :
+    Obs (pure a) Q := by
+  intro u s
+  exact h
+private theorem obs_bind {α β : Type} {x : SliceM α} {f : α → SliceM β}
+    {P : α → Prop} {Q : β → Prop} (hx : Obs x P)
+    (hf : ∀ a, P a → Obs (f a) Q) : Obs (x >>= f) Q := by
+  intro u s
+  exact hf _ (hx u s) _ _
+private theorem obs_any {α β : Type} {x : SliceM α} {f : α → SliceM β}
+    {Q : β → Prop} (hf : ∀ a, Obs (f a) Q) : Obs (x >>= f) Q :=
+  obs_bind (P := fun _ => True) (fun _ _ => True.intro) (fun a _ => hf a)
+private def ViewAtoms : Option SliceView → Prop
+  | none => True
+  | some v => BoundAtom v.off ∧ BoundAtom v.fin
+
+private theorem openWith_obs
+    (recur : String → RawExpr → RawExpr → RawExpr → SliceM (Option SliceView))
+    (node : RawExpr → SliceM RawExpr) (t : String) (b i j : RawExpr) :
+    Obs (openWith recur node t b i j) ViewAtoms := by
+  unfold openWith
+  extract_lets t toEnd body
+  have hb (outer : SliceView) : Obs (body outer) ViewAtoms := by
+    dsimp -zeta -zetaHave only [body]
+    apply obs_any
+    intro i
+    apply obs_any
+    intro j
+    apply obs_any
+    intro ignored
+    exact obs_pure ⟨bindBound_atom .., bindBound_atom ..⟩
+  clear_value body
+  have hn : Obs (pure none) ViewAtoms := obs_pure True.intro
+  repeat' first
+  | with_reducible exact hb _
+  | with_reducible exact hn
+  | (with_reducible apply obs_any; intro value)
+  | split
+
+/-- The existing one-step producer returns simple bounds, regardless of its callbacks. -/
+theorem openWith_atoms
+    (recur : String → RawExpr → RawExpr → RawExpr → SliceM (Option SliceView))
+    (node : RawExpr → SliceM RawExpr) (t : String) (b i j : RawExpr)
+    (u : Bool × Bool) (s : SliceSt) (v : SliceView)
+    (h : ((openWith recur node t b i j) u s).1.1 = some v) :
+    BoundAtom v.off ∧ BoundAtom v.fin := by
+  have ho := openWith_obs recur node t b i j u s
+  simpa only [h, ViewAtoms] using ho
+
+
+end ElabSliceOpen
+
+mutual
+
+/-- The view `t` of `b[i:j]`: its checks and locals pushed before the
+statement. The base and bounds retain their source evaluation order. -/
+partial def sliceOpen (t : String) (b i j : RawExpr) : SliceM (Option SliceView) :=
+  ElabSliceOpen.openWith sliceOpen sliceNode t b i j
 
 /-- The view an expression is: a view's name, or a slice opened here. -/
 partial def sliceViewOf? : RawExpr → SliceM (Option SliceView)

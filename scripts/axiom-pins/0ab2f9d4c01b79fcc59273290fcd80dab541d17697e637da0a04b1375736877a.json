@@ -508,5 +508,8 @@
  "Solidity/Examples/ElabTotal/Stmts.lean:Solidity.ElabHoist.namedStructural_unique": [
   "Quot.sound",
   "propext"
+ ],
+ "Solidity/Examples/ElabTotal/Stmts.lean:Solidity.ElabSliceOpen.openWith_atoms": [
+  "propext"
  ]
 }
