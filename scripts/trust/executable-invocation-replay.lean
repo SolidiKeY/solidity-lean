@@ -1,4 +1,5 @@
 import Solidity.Frontend.ExecutableCounterexampleMetadataV2
+import Solidity.Examples.ExecutableRequestData
 
 /-! Synthetic executable invocation retention and request/goal selection checks.
 These injected ASTs are not compiler output or source-failure certificates. -/
@@ -12,7 +13,7 @@ def checkInvocationRetention : CommandElabM Unit := do
   unless axioms.all ([``propext, ``Classical.choice, ``Quot.sound].contains ·) do
     throwError "forget theorem has nonstandard axioms"
   logInfo m!"EXECUTABLE_INVOCATION forget theorem axioms: {axioms}"
-  let .ok fixture := Json.parse r#"{"contract":{"nodeType":"ContractDefinition","contractKind":"contract","nodes":[{"nodeType":"FunctionDefinition","id":1,"name":"first","kind":"function","visibility":"public","stateMutability":"pure","modifiers":[],"parameters":{"parameters":[]},"returnParameters":{"parameters":[]},"body":{"nodeType":"Block","statements":[]},"documentation":""},{"nodeType":"FunctionDefinition","id":2,"name":"second","kind":"function","visibility":"public","stateMutability":"pure","modifiers":[],"parameters":{"parameters":[]},"returnParameters":{"parameters":[]},"body":{"nodeType":"Block","statements":[]},"documentation":""}]},"listing":true}"# | throwError "invocation fixture JSON"
+  let .ok fixture := invocationFixture | throwError "invocation fixture JSON"
   let request := fixture.setObjVal! "listing" (toJson false)
   let root := `ExecutableBindingControls.invocationPrimary
   let .ok report ← Solidity.Frontend.ExecutableMetadataV2.Internal.retainInvocationV2 root request

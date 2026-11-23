@@ -138,6 +138,7 @@ import Solidity.Examples.ExactReduction
 import Solidity.Examples.ExactUpdates
 import Solidity.Examples.ExampleNames
 import Solidity.Examples.ExecutableGoalBinding
+import Solidity.Examples.ExecutableRequestData
 import Solidity.Examples.Finish.Assembly
 import Solidity.Examples.FixedArrayFloor
 import Solidity.Examples.FixedArrayRoot
