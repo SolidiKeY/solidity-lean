@@ -181,12 +181,9 @@ theorem by_two_general_accepted : (checkWordProgram .add (body byTwo)).isSome = 
 theorem by_two_increment_rejected : (checkWordOne true (body byTwo)).isNone = true := by
   rfl
 
-/- A finite configurable parser keeps these binding regressions independent
-of the standard prefix parser's string-scanner proof obligations. The checker
-itself uses the production Var.ofName with its supplied instance unchanged. -/
-local instance : FreshNames where
-  name b k := s!"{b}{k}"
-  parse spelling := if spelling = "ie1" then some ("ie", 1) else none
+/- Use the standard scheme so every generated fresh name reads back. The
+checker uses the production Var.ofName with its supplied instance unchanged. -/
+local instance : FreshNames := .ofPrefixes "se" "sp" "ie" "mv"
 
 private def contextX : NCtx := [(.user "x", .val .uint)]
 private def rawIncrement : RawStmt := .incDec .postInc (.name "x")
@@ -257,9 +254,7 @@ theorem parsed_user_slot_rejected :
       (oldSlotProgram (Γ := parsedContext.ctx) .here)).isNone = true := by
   rfl
 
-local instance : FreshNames where
-  name b k := s!"{b}{k}"
-  parse spelling := if spelling = "idx1" then some ("ie", 1) else none
+local instance : FreshNames := .ofPrefixes "se" "sp" "idx" "mv"
 
 private def customContext : NCtx :=
   [(.user "idx1", .val .uint), (.fresh "ie" 1, .val .uint)]

@@ -78,6 +78,11 @@ def keyedNames [inst : FreshNames] (ks : List (Nat × Var)) : FreshNames where
       | _ => inst.name b k
     else inst.name b k
   parse := inst.parse
+  roundTrip b hb k := by
+    have h : (b == "#") = false := by
+      simp only [List.mem_cons, List.not_mem_nil, or_false] at hb
+      rcases hb with rfl | rfl | rfl | rfl | rfl | rfl | rfl | rfl <;> rfl
+    simpa only [h, Bool.false_eq_true, ↓reduceIte] using inst.roundTrip b hb k
 
 /-! ## The commands -/
 
