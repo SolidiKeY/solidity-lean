@@ -1355,6 +1355,65 @@ partial def slicePack (views : List (String × SliceView)) : RawExpr → RawExpr
 namespace ElabSliceOpen
 open Semantics
 
+-- Locate the pinned library helper through its public definition rather than
+-- relying on a generated private-name index. Only the equality proof uses it.
+private abbrev prefixReference : String → String → String.Pos → String.Pos → String.Pos → Bool := by
+  run_tac
+    let info ← Lean.getConstInfo ``String.substrEq
+    let some body := info.value? | throwError "substring body unavailable"
+    let some loop := body.find? (fun e => match e with
+      | .const (.str _ "loop") _ => true
+      | _ => false)
+      | throwError "substring loop unavailable"
+    Lean.Elab.Tactic.evalTactic (← `(tactic| exact $(Lean.mkIdent loop.constName!)))
+private def prefixLoop (a b : String) : Nat → String.Pos → String.Pos → String.Pos → Bool
+  | 0, _, _, _ => true
+  | n + 1, i, j, stop =>
+    if i.byteIdx < stop.byteIdx then
+      let ca := a.get i
+      let cb := b.get j
+      ca == cb && prefixLoop a b n (i + ca) (j + cb) stop
+    else true
+private theorem prefixLoop_eq (a b : String) (n : Nat) (i j stop : String.Pos)
+    (h : stop.byteIdx - i.byteIdx < n) :
+    prefixLoop a b n i j stop = prefixReference a b i j stop := by
+  induction n generalizing i j with
+  | zero => omega
+  | succ n ih =>
+    rw [prefixLoop]
+    unfold prefixReference
+    run_tac
+      let info ← Lean.getConstInfo ``String.substrEq
+      let some body := info.value? | throwError "substring body unavailable"
+      let some loop := body.find? (fun e => match e with
+        | .const (.str _ "loop") _ => true
+        | _ => false)
+        | throwError "substring loop unavailable"
+      Lean.Elab.Tactic.evalTactic (← `(tactic| unfold $(Lean.mkIdent loop.constName!)))
+    split
+    · dsimp only
+      rw [ih]
+      have hc := (a.get i).utf8Size_pos
+      simp only [String.pos_add_char]
+      omega
+    · rfl
+-- Match the existing character-prefix and byte-bound checks; fuel is strictly
+-- larger than the remaining byte count, so exhaustion cannot affect the result.
+private def prefixTest (s : String) : Bool :=
+  let a := s.toSubstring.take "#slice$".length
+  let b := "#slice$".toSubstring
+  a.bsize == b.bsize &&
+    (a.startPos.byteIdx + a.bsize ≤ a.str.endPos.byteIdx &&
+     b.startPos.byteIdx + a.bsize ≤ b.str.endPos.byteIdx &&
+     prefixLoop a.str b.str (a.bsize + 1) a.startPos b.startPos
+       { byteIdx := a.startPos.byteIdx + a.bsize })
+private theorem prefixTest_eq (s : String) : prefixTest s = s.startsWith "#slice$" := by
+  unfold prefixTest String.startsWith Substring.hasBeq Substring.beq String.substrEq
+  dsimp only
+  rw [prefixLoop_eq]
+  dsimp only
+  omega
+
 def BoundAtom : RawExpr → Prop
   | .num _ | .name _ | .field (.name _) _ => True
   | _ => False
@@ -1362,7 +1421,7 @@ def BoundAtom : RawExpr → Prop
 private def fixed (base : String) : RawExpr → Bool
   | .num _ => true
   | .field (.name x) "length" => x == base
-  | .name x => x.startsWith "#slice$"
+  | .name x => prefixTest x
   | _ => false
 
 private theorem fixed_atom (base : String) (x : RawExpr) (h : fixed base x = true) :
@@ -1375,6 +1434,19 @@ def bindBound (t base sfx : String) (x : RawExpr) (ss : Array RawStmt) :
     RawExpr × Array RawStmt :=
   if fixed base x then (x, ss)
   else (.name (t ++ "$view$" ++ sfx), ss.push (.decl (.named "uint") (t ++ "$view$" ++ sfx) (some x)))
+
+/-- The binding policy retains exactly its original string-prefix test and output. -/
+theorem bindBound_eq (t base sfx : String) (x : RawExpr) (ss : Array RawStmt) :
+    bindBound t base sfx x ss =
+      if (match x with
+        | .num _ => true
+        | .field (.name y) "length" => y == base
+        | .name y => y.startsWith "#slice$"
+        | _ => false) then (x, ss)
+      else (.name (t ++ "$view$" ++ sfx),
+        ss.push (.decl (.named "uint") (t ++ "$view$" ++ sfx) (some x))) := by
+  unfold bindBound fixed
+  split <;> simp only [prefixTest_eq]
 
 private theorem bindBound_atom (t base sfx : String) (x : RawExpr) (ss : Array RawStmt) :
     BoundAtom (bindBound t base sfx x ss).1 := by
@@ -1655,9 +1727,43 @@ def inlineSliceOpen (t : String) (e : RawExpr) : Except String (SliceView × Lis
   if let .call "#sliceDesc" [.name base, off, fin] := e then
     return ({ base, off, fin }, [])
   let .call "#sliceRaw" [b, i, j] := e | throw "internal: a slice descriptor"
-  let (v, (_, _, _, pre)) := ((sliceOpen t b i j).run' (false, false)).run ([], [], 0, #[])
+  let (v, (_, _, _, pre)) := ((ElabSliceOpen.openWith sliceOpen sliceNode t b i j).run' (false, false)).run ([], [], 0, #[])
   let some v := v | throw "an inline calldata slice cannot be opened"
   pure (v, pre.toList)
+
+namespace ElabSliceOpen
+/-- Opening a raw slice exposes exactly one existing producer step. -/
+theorem inlineSliceOpen_raw_eq (t : String) (b i j : RawExpr) :
+    inlineSliceOpen t (.call "#sliceRaw" [b, i, j]) = (do
+      let (v, (_, _, _, pre)) :=
+        ((openWith sliceOpen sliceNode t b i j).run' (false, false)).run ([], [], 0, #[])
+      let some v := v | throw "an inline calldata slice cannot be opened"
+      pure (v, pre.toList)) := by
+  cases b <;> rfl
+
+/-- The raw-slice path returns only bounds guaranteed by the final binding policy. -/
+theorem inlineSliceOpen_raw_atoms
+    (t : String) (b i j : RawExpr)
+    (v : SliceView) (pre : List RawStmt)
+    (h : inlineSliceOpen t (.call "#sliceRaw" [b, i, j]) = .ok (v, pre)) :
+    BoundAtom v.off ∧ BoundAtom v.fin := by
+  unfold inlineSliceOpen at h
+  generalize hf : openWith sliceOpen sliceNode = producer at h
+  simp only [StateT.run', StateT.run] at h
+  split at h
+  · simp_all
+  · simp only [Functor.map, StateT.map] at h
+    generalize ho : producer t b i j (false, false) ([], [], 0, #[]) = out at h
+    rcases out with ⟨⟨opt, u⟩, vs, origins, k, ss⟩
+    cases opt with
+    | none => cases h
+    | some w =>
+      have hb := openWith_atoms sliceOpen sliceNode t b i j (false, false) ([], [], 0, #[]) w (by rw [hf, ho])
+      cases h
+      exact hb
+
+
+end ElabSliceOpen
 
 /-- Every read of the name `x` renamed `y`, at any depth. -/
 partial def RawStmt.renameName (x y : String) (s : RawStmt) : RawStmt :=

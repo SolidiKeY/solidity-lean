@@ -611,3 +611,23 @@ end Solidity.Examples.ElabTotal.Stmts
 /-- info: 'Solidity.ElabSliceOpen.openWith_atoms' depends on axioms: [propext] -/
 #guard_msgs in
 #print axioms Solidity.ElabSliceOpen.openWith_atoms
+
+/-- info: 'Solidity.ElabSliceOpen.inlineSliceOpen_raw_eq' does not depend on any axioms -/
+#guard_msgs in
+#print axioms Solidity.ElabSliceOpen.inlineSliceOpen_raw_eq
+
+/-- info: 'Solidity.ElabSliceOpen.inlineSliceOpen_raw_atoms' depends on axioms: [propext, Quot.sound] -/
+#guard_msgs in
+#print axioms Solidity.ElabSliceOpen.inlineSliceOpen_raw_atoms
+
+/-- info: 'Solidity.ElabCallHeight.boundAtom_height_le' depends on axioms: [propext, Quot.sound] -/
+#guard_msgs in
+#print axioms Solidity.ElabCallHeight.boundAtom_height_le
+
+/-- info: 'Solidity.ElabCallHeight.inlineSliceOpen_raw_height' depends on axioms: [propext, Quot.sound] -/
+#guard_msgs in
+#print axioms Solidity.ElabCallHeight.inlineSliceOpen_raw_height
+
+/-- info: 'Solidity.ElabSliceOpen.bindBound_eq' depends on axioms: [propext, Quot.sound] -/
+#guard_msgs in
+#print axioms Solidity.ElabSliceOpen.bindBound_eq

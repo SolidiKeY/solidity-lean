@@ -1337,3 +1337,24 @@ theorem call_output_height_of_raw_bounds (C : Contract) [FreshNames] (rc : ElabR
   case h_21 => exact obs_pure (Nat.le_refl _)
 
 end Solidity.ElabCallHeight
+
+namespace Solidity.ElabCallHeight
+open Semantics ElabSliceOpen
+/-- The extracted producer's bound atoms have at most one field layer. -/
+theorem boundAtom_height_le (e : RawExpr) (h : BoundAtom e) : height e ≤ 2 := by
+  unfold BoundAtom at h
+  split at h <;> simp_all only [height] <;> omega
+
+/-- The H1280 extraction supplies the exact raw opening premise used by call bounds. -/
+theorem inlineSliceOpen_raw_height
+    (t : String) (b i j : RawExpr) (v : SliceView) (pre : List RawStmt)
+    (h : inlineSliceOpen t (.call "#sliceRaw" [b, i, j]) = .ok (v, pre)) :
+    height v.off ≤ 2 ∧ height v.len ≤ 3 := by
+  obtain ⟨ho, hf⟩ := inlineSliceOpen_raw_atoms t b i j v pre h
+  have ho := boundAtom_height_le v.off ho
+  have hf := boundAtom_height_le v.fin hf
+  have hl := sliceSub_height_le v.fin v.off
+  exact ⟨ho, by simpa only [SliceView.len] using
+    (show height (sliceSub v.fin v.off) ≤ 3 by omega)⟩
+
+end Solidity.ElabCallHeight
