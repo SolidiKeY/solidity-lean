@@ -42,6 +42,9 @@ def checkInvocationRetention : CommandElabM Unit := do
       throwError "missing fixture/source bytes accepted"
     if (← admittedInvocationSourceV2? root namespaceName request "foreign.sol" empty empty).isSome then
       throwError "unbound source admitted"
+    match ← checkSourceBoundRetainedExecutableV2 root namespaceName request "foreign.sol" empty empty 0 Json.null with
+    | .error "pinned source/invocation admission unavailable" => pure ()
+    | _ => throwError "missing source inputs reached retained executable admission"
   logInfo "EXECUTABLE_INVOCATION missing source inputs refused; no positive source certification"
 
 run_cmd checkInvocationRetention

@@ -467,6 +467,87 @@ def checkRetainedExecutableFailureV2 (captureDeclaration : Lean.Name) (request :
       | .error reason => return .error ("executable proof kernel/audit refused: " ++ reason)
       | .ok () => return .ok ⟨prepared, valuesBinding, selectedFailure, refutation⟩
 
+/-- Exact recovered-expression identity, not equality inferred from a report,
+status, function name or a second search. This deliberately refuses merely
+propositionally equivalent alternative candidates. -/
+def sameRetainedCandidateV2 (left right : Tools.SourceCounterexampleCandidateV1) : Bool :=
+  left.original.proof == right.original.proof && left.contract == right.contract &&
+    left.formula == right.formula && left.candidate == right.candidate &&
+    left.domain == right.domain && left.values == right.values &&
+    left.valuesEquation == right.valuesEquation && left.state == right.state &&
+    left.failure == right.failure
+
+/-- Compare the unchanged producer's row projection. Admission flag, elaborated
+parameter context and diagnostic are supplied by later importer stages. V1
+checks the admission flag; this join retains but does not independently validate
+the later-stage parameter context or diagnostic. -/
+def sameImportedRowProjectionV2 (row : ImportRow) (function : SolcFun) : Bool :=
+  let original := ImportRow.ofFun function row.status row.reason
+  let expected : ImportRow := { original with
+    admissionChecked := row.admissionChecked
+    paramTypes := row.paramTypes
+    sourceDiagnostic := row.sourceDiagnostic }
+  (toExpr row : Expr) == toExpr expected
+
+/-- Internal join only: byte-pinned original source, authenticated imported
+row/theorem ingress and the actual executable failure at that retained candidate.
+No public metadata, source-clause attribution, span or runtime result is emitted. -/
+structure SourceBoundRetainedExecutableV2 where
+  private mk ::
+  source : AdmittedInvocationSourceV2
+  admission : ImportedNormalizationCaptureV1
+  retained : RetainedCounterexampleMetadataV1
+  checked : CheckedRetainedExecutableV2
+
+/-- The fixed four-case ingress is mandatory before reading a retained row.
+Require the process-local actual importer capture and its exact member/row
+projection; retain its full pre-import environment and normalization arguments.
+Reuse the old certificate ingress unchanged, then require the SAME recovered
+proof/candidate expressions in the executable checker. Neither ingress searches.
+Unavailable inputs, foreign namespaces and changed identity fail closed. -/
+def checkSourceBoundRetainedExecutableV2 (captureDeclaration namespaceName : Lean.Name)
+    (request : Json) (sourceName : String) (sourceBytes fixtureBytes : ByteArray)
+    (rowIndex : Nat) (report : Json) :
+    CommandElabM (Except String SourceBoundRetainedExecutableV2) := do
+  let some source ← admittedInvocationSourceV2? captureDeclaration namespaceName request
+      sourceName sourceBytes fixtureBytes | return .error "pinned source/invocation admission unavailable"
+  let some admission ← importedNormalizationCaptureV1? namespaceName
+    | return .error "actual importer capture unavailable"
+  unless admission.bytes == fixtureBytes && admission.fixture.compress == source.fixture.compress &&
+      admission.context.ast.compress == source.selection.goal.source.compress &&
+      (toExpr admission.context.provenance : Expr) == toExpr source.origins.provenance do
+    return .error "actual importer source/context refused"
+  let ledgers := admission.result.2.filter fun entry =>
+    entry.entry.compress == source.origins.owner.compress
+  unless ledgers.length == 1 do return .error "actual importer member ledger refused"
+  let some retained ← retainedCounterexampleMetadataV1? namespaceName rowIndex
+      source.fixture sourceName sourceBytes report | return .error "retained source row unavailable"
+  let row := retained.row.legacy
+  unless row.sourceId == source.origins.ownerId && row.sourceName == "identity" &&
+      row.declName namespaceName == namespaceName ++ `identity &&
+      retained.certificateDeclaration == namespaceName ++ `identity ++ `refuted do
+    return .error "retained source row identity refused"
+  unless retained.row.origins.owner.compress == source.origins.owner.compress &&
+      (toExpr retained.row.origins.provenance : Expr) == toExpr source.origins.provenance &&
+      retained.row.origins.bytes == sourceBytes do
+    return .error "retained source ownership refused"
+  let functions := admission.result.1.funs.filter fun function =>
+    function.sourceId == row.sourceId && function.name == row.name
+  let [function] := functions | return .error "actual importer function identity refused"
+  unless sameImportedRowProjectionV2 row function do
+    return .error "actual importer row projection refused"
+  let result ← checkRetainedExecutableFailureV2 captureDeclaration request row.sourceId
+    row.sourceName retained.certificateDeclaration report
+  let .ok checked := result | return .error (preparedRefusalV2 result)
+  unless sameRetainedCandidateV2 retained.candidate checked.prepared.imported do
+    return .error "retained candidate identity refused"
+  let some current ← selectedInvocationGoalV2? captureDeclaration request row.sourceId row.sourceName
+    | return .error "current invocation unavailable"
+  unless current.captureIndex == source.selection.captureIndex &&
+      current.captureIndex == checked.prepared.selection.captureIndex do
+    return .error "current invocation selection changed"
+  return .ok ⟨source, admission, retained, checked⟩
+
 /-- Diagnostic receipt only, never certificate admission. -/
 def invocationReceiptV2? (name : Lean.Name) : CommandElabM (Option Json) := do
   let some attempt := ((invocationAttemptsV2.getState (← getEnv)).find? name : Option InvocationAttemptV2) | return none
