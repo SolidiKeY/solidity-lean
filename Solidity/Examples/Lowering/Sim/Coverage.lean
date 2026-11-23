@@ -1,5 +1,5 @@
 import Solidity.Correctness.Lowering.Sim.Coverage.SpellingObstruction
-import Solidity.Correctness.Lowering.Sim.Coverage.BooleanSpelling
+import Solidity.Correctness.Lowering.Sim.Coverage.BooleanExprInference
 import Solidity.Correctness.Lowering.Sim.Coverage.Alignment
 import Solidity.Correctness.Lowering.Sim.Coverage.LoweringReceipt
 import Solidity.Examples.Lowering.Sim.Match
@@ -79,6 +79,19 @@ example (out : Solidity.Correctness.Lowering.Checker.Output Match.C [.val .bool,
     ∃ t, Solidity.Correctness.Lowering.Total.Decode.items .body Match.body.input.raw = some t :=
   (smoke_in_domain out).syntax_decoded
 
+/-- The general expression theorem runs Source inference on the existing
+smoke condition; it does not assert statement or production completeness. -/
+example : ∃ t, Solidity.Correctness.Lowering.Total.Spells.Expr
+    (.assign (.name "i") (.name "a")) t ∧
+    ∃ d : Source.Typed (Match.context.at Match.names) t .bool,
+      Source.Typed.infer (Match.context.at Match.names) t = some ⟨.bool, d⟩ := by
+  obtain ⟨t, ht, hi⟩ := BooleanDomain.Expr.inferred
+    (Γ := Match.context.at Match.names) (names := ["i", "a"])
+    (raw := .assign (.name "i") (.name "a")) rfl
+    (BooleanDomain.Expr.assign (by decide) (.name (by decide)))
+  obtain ⟨d, hd⟩ := hi.2 (t.nodes.length + 1) (Nat.lt_succ_self _)
+  exact ⟨t, ht, d, hd⟩
+
 end Solidity.Examples.Lowering.Sim.Coverage
 
 #print axioms Solidity.Correctness.Lowering.Sim.Coverage.spells_aligned
@@ -88,3 +101,5 @@ end Solidity.Examples.Lowering.Sim.Coverage
 #print axioms Solidity.Correctness.Lowering.Sim.Coverage.lowerAt_of_lowersTo
 
 #print axioms Solidity.Correctness.Lowering.Sim.Coverage.BooleanDomain.Input.syntax_decoded
+
+#print axioms Solidity.Correctness.Lowering.Sim.Coverage.BooleanDomain.Expr.inferred
