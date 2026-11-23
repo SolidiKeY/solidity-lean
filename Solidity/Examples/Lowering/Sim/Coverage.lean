@@ -1,5 +1,5 @@
 import Solidity.Correctness.Lowering.Sim.Coverage.SpellingObstruction
-import Solidity.Correctness.Lowering.Sim.Coverage.BooleanDomain
+import Solidity.Correctness.Lowering.Sim.Coverage.BooleanSpelling
 import Solidity.Correctness.Lowering.Sim.Coverage.Alignment
 import Solidity.Correctness.Lowering.Sim.Coverage.LoweringReceipt
 import Solidity.Examples.Lowering.Sim.Match
@@ -68,11 +68,16 @@ example : ∃ (out : List RawStmt)
 
 /-- The actual `while (i = a) break;` smoke belongs to the selected syntax
 boundary, independently of decoder success and production receipts. -/
-example (out : Solidity.Correctness.Lowering.Checker.Output Match.C [.val .bool, .val .bool]) :
+theorem smoke_in_domain (out : Solidity.Correctness.Lowering.Checker.Output Match.C [.val .bool, .val .bool]) :
     BooleanDomain.Input Match.body (Match.emitted out) := by
   refine ⟨rfl, rfl, rfl, rfl, ["i", "a"], _, _, rfl, rfl, ?_, ?_⟩
   · exact .assign (by decide) (.name (by decide))
   · exact .cons .brk .nil
+
+/-- Use the general raw-syntax decoding theorem on the exact selected smoke. -/
+example (out : Solidity.Correctness.Lowering.Checker.Output Match.C [.val .bool, .val .bool]) :
+    ∃ t, Solidity.Correctness.Lowering.Total.Decode.items .body Match.body.input.raw = some t :=
+  (smoke_in_domain out).syntax_decoded
 
 end Solidity.Examples.Lowering.Sim.Coverage
 
@@ -81,3 +86,5 @@ end Solidity.Examples.Lowering.Sim.Coverage
 #print axioms Solidity.Examples.Lowering.Sim.Coverage.smoke_decoded
 
 #print axioms Solidity.Correctness.Lowering.Sim.Coverage.lowerAt_of_lowersTo
+
+#print axioms Solidity.Correctness.Lowering.Sim.Coverage.BooleanDomain.Input.syntax_decoded
