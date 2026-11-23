@@ -2511,6 +2511,7 @@ import Solidity.Correctness.Lowering.Total.Main
 import Solidity.Correctness.Lowering.Total.Production
 import Solidity.Correctness.Lowering.Total.Relation
 import Solidity.Correctness.Lowering.Total.Spells
+import Solidity.Correctness.Lowering.Total.Versions
 import Solidity.Correctness.Lowering.Total.Versions.Marked
 import Solidity.Correctness.Lowering.Total.Versions.Matching
 import Solidity.Correctness.Lowering.Total.Versions.Primitive
