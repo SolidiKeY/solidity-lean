@@ -352,5 +352,90 @@ class ReplayControls(unittest.TestCase):
                         schema.replay_capture(raw, events, max_capture_bytes=4096, max_events=12000)
 
 
+class PythonAssociationControls(unittest.TestCase):
+    def fixture(self, code):
+        import subprocess
+        import tempfile
+        directory = tempfile.TemporaryDirectory()
+        root = Path(directory.name) / 'repo'
+        root.mkdir()
+        (root / 'reader.py').write_text(code)
+        (root / 'data').write_bytes(b'abc')
+        subprocess.run(['git', 'init', '-q', str(root)], check=True)
+        subprocess.run(['git', '-C', str(root), 'add', '.'], check=True)
+        subprocess.run(['git', '-C', str(root), '-c', 'user.name=Control', '-c', 'user.email=control@example.invalid',
+                        'commit', '-qm', 'fixture'], check=True)
+        revision = subprocess.check_output(['git', '-C', str(root), 'rev-parse', 'HEAD'], text=True).strip()
+        files = {}
+        for name in ('reader.py', 'data'):
+            blob = subprocess.check_output(['git', '-C', str(root), 'rev-parse', 'HEAD:' + name], text=True).strip()
+            files[name] = dict(blob=blob, sha256=hashlib.sha256((root / name).read_bytes()).hexdigest())
+        return directory, root, dict(measured_revision=revision, files=files)
+
+    def test_real_measured_cli_read_is_only_a_candidate(self):
+        import os
+        import sys
+        code = 'from pathlib import Path\ndef main():\n    Path("data").read_bytes()\nif __name__ == "__main__": main()\n'
+        temporary, root, manifest = self.fixture(code)
+        try:
+            python, native = load('python'), load('native')
+            env = dict(os.environ, LC_ALL='C', PYTHONUTF8='1', PYTHONCOERCECLOCALE='0')
+            env.update(python.prepare(root, manifest, Path(temporary.name) / 'hook'))
+            capture = native.ByteCapture([str(root / 'data')], max_capture_bytes=65536)
+            hook = python.PythonEvents(capture, root, env['X1_READ_LOG'], max_hook_bytes=32768)
+            result = native.trace([str(Path(sys.executable).resolve()), '-B', 'reader.py'], str(root), env,
+                                  timeout=10, max_events=30000, max_output_bytes=32768, observer=hook)
+            value = hook.candidates(result)
+            self.assertEqual(result['result'], dict(exit=0, signal=None), result['stdout'])
+            self.assertEqual(value['status'], 'candidates', (result['reason'], value['capture']['reasons']))
+            self.assertEqual(value['credit'], 'none')
+            frame = value['candidates'][0]['hook']['record']['frames'][-1]
+            self.assertEqual(frame['path'], 'reader.py')
+            self.assertEqual(frame['qualname'], 'main')
+            self.assertEqual(frame['blob'], manifest['files']['reader.py']['blob'])
+        finally:
+            temporary.cleanup()
+
+
+    def test_disabled_hook_and_synthetic_source_never_establish_frames(self):
+        import os
+        import sys
+        for synthetic in (False, True):
+            code = 'from pathlib import Path\nexec(compile(\'Path("data").read_bytes()\', "reader.py", "exec"))\n' if synthetic else 'from pathlib import Path\nPath("data").read_bytes()\n'
+            temporary, root, manifest = self.fixture(code)
+            try:
+                python, native = load('python'), load('native')
+                env = dict(os.environ, LC_ALL='C', PYTHONUTF8='1', PYTHONCOERCECLOCALE='0')
+                env.update(python.prepare(root, manifest, Path(temporary.name) / 'hook'))
+                if not synthetic:
+                    env.pop('PYTHONPATH')
+                capture = native.ByteCapture([str(root / 'data')], max_capture_bytes=65536)
+                hook = python.PythonEvents(capture, root, env['X1_READ_LOG'], max_hook_bytes=32768)
+                result = native.trace([str(Path(sys.executable).resolve()), '-B', 'reader.py'], str(root), env,
+                                      timeout=10, max_events=30000, max_output_bytes=32768, observer=hook)
+                self.assertEqual(hook.candidates(result)['status'], 'unavailable')
+            finally:
+                temporary.cleanup()
+
+
+    def test_failed_python_opener_cannot_lend_frames_to_native_read(self):
+        import os
+        import sys
+        code = 'import ctypes\nlib=ctypes.CDLL(None)\ndef decoy():\n    try: open("data", "rb", opener=lambda p,f: -1)\n    except ValueError: pass\ndef native():\n    fd=lib.open(b"data",0)\n    buffer=ctypes.create_string_buffer(3)\n    lib.read(fd,buffer,3)\n    lib.close(fd)\ndecoy()\nnative()\n'
+        temporary, root, manifest = self.fixture(code)
+        try:
+            python, native = load('python'), load('native')
+            env = dict(os.environ, LC_ALL='C', PYTHONUTF8='1', PYTHONCOERCECLOCALE='0')
+            env.update(python.prepare(root, manifest, Path(temporary.name) / 'hook'))
+            capture = native.ByteCapture([str(root / 'data')], max_capture_bytes=65536)
+            hook = python.PythonEvents(capture, root, env['X1_READ_LOG'], max_hook_bytes=32768)
+            result = native.trace([str(Path(sys.executable).resolve()), '-B', 'reader.py'], str(root), env,
+                                  timeout=10, max_events=30000, max_output_bytes=32768, observer=hook)
+            self.assertEqual(result['result'], dict(exit=0, signal=None), result['stdout'])
+            self.assertEqual(hook.candidates(result)['status'], 'unavailable')
+        finally:
+            temporary.cleanup()
+
+
 if __name__ == '__main__':
     unittest.main()
