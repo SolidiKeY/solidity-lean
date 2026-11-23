@@ -1,0 +1,37 @@
+// Reference-only command construction. All editor/OS/installer/terminal endpoints are injected.
+'use strict';
+const fs=require('node:fs'),path=require('node:path'),{randomUUID,createHash}=require('node:crypto');
+const provenance=require('./configuration-lifecycle.cjs');
+function cases(){return[
+ {id:'linux-null',os:'Linux',prefix:null},{id:'windows-null',os:'Windows_NT',prefix:null},
+ {id:'windows-empty',os:'Windows_NT',prefix:''},{id:'configured-prefix',os:'Linux',prefix:'prefix '},
+ {id:'cwd-prefix',os:'Linux',prefix:'prefix ',cwd:'/fixture/work dir'},
+ {id:'reuse-terminal',os:'Linux',prefix:null,reuse:true},
+ {id:'no-editor',os:'Linux',prefix:null,noEditor:true},
+ {id:'untitled',os:'Linux',prefix:null,untitled:true},{id:'save-refused',os:'Linux',prefix:null,save:false}];}
+const sourceNames=['package.json','package-lock.json','src/ui/compileCommands.ts','src/commands.ts','src/configuration.ts','src/constants.ts','src/ui/messages.ts'];
+const commands=['dafny.build','dafny.buildCustomArgs','dafny.run','dafny.test'];
+const captureInstallerCall=(server,newArgs,oldArgs)=>({server,newArgs:structuredClone(newArgs),oldArgs:structuredClone(oldArgs)});
+const settings=c=>({terminalCommandPrefix:c.prefix,dafnyRunArguments:[],compilerOutputDir:'bin'});
+function errors(value,trusted){try{
+ const assert=require('node:assert/strict');assert.ok(typeof trusted?.runId==='string'&&trusted.runId);assert.equal(trusted.sourcePin?.repository,'dafny-lang/ide-vscode');assert.match(trusted.sourcePin?.commit,/^[a-f0-9]{40}$/);assert.deepEqual(trusted.references?.map(r=>r.name),[...sourceNames,'node_modules/typescript/lib/typescript.js']);assert.ok(trusted.references.every(r=>path.isAbsolute(r.file)&&Number.isSafeInteger(r.bytes)&&r.bytes>0&&/^[a-f0-9]{64}$/.test(r.sha256)));assert.deepEqual(trusted.sourcePin.files,trusted.references.slice(0,-1));assert.equal(trusted.references.at(-1).sha256,provenance.referenceCompilerPin.sha256);assert.ok(value.status===undefined||value.status==='partial','Failed/nonpartial observation');assert.ok(value.validationErrors===undefined||Array.isArray(value.validationErrors)&&value.validationErrors.length===0,'Retained validation failure');assert.equal(value.error,undefined);assert.equal(value.kind,'pinned-compile-commands-injected-terminal');assert.equal(value.target,'dafny');assert.equal(value.runId,trusted.runId);assert.deepEqual(value.sourcePin,trusted.sourcePin);assert.deepEqual(value.references,trusted.references);assert.equal(value.schemaDefault,null);assert.equal(value.nativeExecution,false);assert.equal(value.terminalExecution,false);assert.equal(value.osObservation,'injected; not native Windows/Linux execution');
+ assert.deepEqual(value.cases.map(r=>r.id),cases().map(r=>r.id));
+ for(const [i,row]of value.cases.entries()){const c=cases()[i],admitted=!c.noEditor&&!c.untitled&&c.save!==false;assert.equal(row.error,undefined);assert.deepEqual(row.settings,settings(c));assert.equal(row.os,c.os);assert.deepEqual(row.registrations,commands);assert.equal(row.commandId,'dafny.build');assert.equal(row.result,admitted);assert.equal(row.saves,c.noEditor||c.untitled?0:1);assert.deepEqual(row.executed,c.untitled?['workbench.action.files.saveAs']:[]);
+  assert.equal(row.osReads,admitted&&c.prefix===null?1:0);
+  if(!admitted){assert.deepEqual(row.reads,[]);assert.deepEqual(row.installerCalls,[]);assert.deepEqual(row.terminalEvents,[]);assert.equal(row.created,0);continue;}
+  const keys=['terminalCommandPrefix','dafnyRunArguments','compilerOutputDir'];assert.equal(row.reads.length,keys.length);assert.deepEqual(row.reads.map(r=>r.key),keys);for(const r of row.reads){assert.equal(r.section,'dafny');assert.equal(r.resource,null);assert.deepEqual(r.value,row.settings[r.key]);}
+  assert.deepEqual(row.installerCalls,[{server:false,newArgs:['build','--output:bin/menus'],oldArgs:['build','--output:bin/menus']}]);assert.equal(row.created,c.reuse?0:1);
+  const prefix=c.prefix??(c.os==='Windows_NT'?'& ':''),text=(c.cwd?'cd /fixture/work dir; ':'')+prefix+'"injected CLI" "build" "--output:bin/menus" "/fixture/menus.dfy"';assert.deepEqual(row.terminalEvents,[{method:'show'},{method:'sendText',text}]);
+ }return[];
+ }catch(error){return['Terminal prefix observation: '+error.message];}}
+async function observe(root=path.resolve(__dirname,'../../.cache/dafny-extension')){
+ const names=sourceNames,pin=require('./inventory.cjs').loadInventory().upstream.extension,sourcePin=provenance.verifyUpstreamSnapshot(root,pin,names),references=[...sourcePin.files];
+ const compilerFile=fs.realpathSync(path.join(root,'node_modules/typescript/lib/typescript.js')),bytes=fs.readFileSync(compilerFile);references.push({name:'node_modules/typescript/lib/typescript.js',file:compilerFile,bytes:bytes.length,sha256:createHash('sha256').update(bytes).digest('hex')});provenance.assertReferenceCompiler(references,provenance.verifiedReferenceBytes(references.find(r=>r.name==='package-lock.json')));
+ const compiler=provenance.loadReferenceCompiler(references.at(-1)),rows=[],runId=randomUUID();
+ for(const c of cases()){const row={id:c.id,os:c.os,settings:settings(c),reads:[],registrations:[],executed:[],installerCalls:[],terminalEvents:[],created:0,saves:0,osReads:0,commandId:'dafny.build'};rows.push(row);const callbacks=new Map(),terminal={show(){row.terminalEvents.push({method:'show'});},sendText(text){row.terminalEvents.push({method:'sendText',text});}},doc={fileName:'/fixture/menus.dfy',isUntitled:!!c.untitled,async save(){row.saves++;return c.save!==false;}},editor={window:{activeTextEditor:c.noEditor?undefined:{document:doc},activeTerminal:c.reuse?terminal:undefined,createTerminal(){row.created++;return terminal;}},commands:{registerCommand(id,callback){row.registrations.push(id);callbacks.set(id,callback);return{dispose(){}};},executeCommand(id){row.executed.push(id);}},workspace:{getConfiguration(section,resource){return{get(key){const value=structuredClone(row.settings[key]);row.reads.push({section,resource:resource===undefined?null:String(resource),key,value});return value;}};}}};
+  try{const load=require('./reference-modules.cjs').createReferenceLoader({references,compiler,read:provenance.verifiedReferenceBytes,modules:{vscode:editor,os:{type(){row.osReads++;return c.os;}},path:path.posix}});load('src/ui/compileCommands.ts').default.createAndRegister({context:{subscriptions:[]},async getCliExecutable(server,newArgs,oldArgs){row.installerCalls.push(captureInstallerCall(server,newArgs,oldArgs));return{command:'injected CLI',args:newArgs,...(c.cwd?{options:{cwd:c.cwd}}:{})};}});row.result=await callbacks.get(row.commandId)();}catch(error){row.error=error.stack||String(error);}
+ }
+ for(const ref of references)provenance.verifiedReferenceBytes(ref);require('node:assert/strict').deepEqual(provenance.verifyUpstreamSnapshot(root,pin,names),sourcePin);
+ const value={kind:'pinned-compile-commands-injected-terminal',target:'dafny',runId,sourcePin,references,schemaDefault:JSON.parse(provenance.verifiedReferenceBytes(references[0])).contributes.configuration.properties['dafny.terminalCommandPrefix'].default,nativeExecution:false,terminalExecution:false,osObservation:'injected; not native Windows/Linux execution',cases:rows};value.validationErrors=errors(value,{runId,sourcePin,references});value.status=value.validationErrors.length?'failed':'partial';return value;
+}
+module.exports={cases,errors,observe,sourceNames,captureInstallerCall};

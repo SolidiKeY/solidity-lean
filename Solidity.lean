@@ -2923,6 +2923,7 @@ import Solidity.Frontend.ExecutableAst.Memory.Reader
 import Solidity.Frontend.ExecutableAst.Shared.Boundary
 import Solidity.Frontend.ExecutableAst.Shared.Compose
 import Solidity.Frontend.ExecutableAst.Shared.Intrinsic
+import Solidity.Frontend.ExecutableAst.Shared.ObligationCapture
 import Solidity.Frontend.ExecutableAst.Shared.Scope
 import Solidity.Frontend.ExecutableAst.Shared.Translate
 import Solidity.Frontend.ExpressionUniqueness.Accepted
@@ -4706,6 +4707,7 @@ import Solidity.Tools.DirectArithmetic
 import Solidity.Tools.DirectRuntime
 import Solidity.Tools.Elementary
 import Solidity.Tools.EntryReturn
+import Solidity.Tools.ExecutableGoalBinding
 import Solidity.Tools.FastMode.Engine
 import Solidity.Tools.FastMode.Meta
 import Solidity.Tools.Goal

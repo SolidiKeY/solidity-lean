@@ -79,7 +79,8 @@ test('real project compiler and LSP support imports, project services and depend
     });
     await t.test('formatting is usable and compiler diagnostics produce a real quick fix',async()=>{
       const edits=await request('textDocument/formatting',{options:{tabSize:2,insertSpaces:true}});assert.equal(edits.length,1);assert.match(edits[0].newText,/\n/);
-      const actions=await request('textDocument/codeAction',{range:{start:{line:0,character:0},end:{line:0,character:0}},context:{diagnostics:[{code:'1878',message:'SPDX license identifier not provided',range:{start:{line:0,character:0},end:{line:0,character:0}}}]}});
+      const warning=diagnostics.filter(p=>p.uri===uri&&p.version===1).at(-1)?.diagnostics.find(d=>String(d.code)==='1878'&&d.source==='solc');assert.ok(warning,'current compiler SPDX warning required');
+      const actions=await request('textDocument/codeAction',{range:warning.range,context:{diagnostics:[warning]}});
       assert.ok(actions.some(a=>a.edit.documentChanges[0].edits[0].newText.includes('SPDX-License-Identifier')));
     });
     await t.test('formatting preserves Solidity literal syntax and refuses changed loop annotations',async()=>{
@@ -94,8 +95,9 @@ test('real project compiler and LSP support imports, project services and depend
     await t.test('unused-parameter quick fixes preserve ordinary NatSpec',async()=>{
       const source='pragma solidity ^0.8.34; contract Documented {\n/// @param unused documented parameter\nfunction f(uint unused) public pure returns(uint) { return 1; } }';
       const uri=pathToFileURL(join(root,'Documented.sol')).href;rpc.notify('textDocument/didOpen',{textDocument:{uri,version:1,text:source}});
-      const position=language.position(source,source.indexOf('uint unused'));
-      const actions=await rpc.request('textDocument/codeAction',{textDocument:{uri,version:1},context:{diagnostics:[{code:'5667',range:{start:position,end:position},message:'Unused parameter'}]}});
+      await rpc.request('textDocument/documentSymbol',{textDocument:{uri,version:1}});
+      const warning=diagnostics.filter(p=>p.uri===uri&&p.version===1).at(-1)?.diagnostics.find(d=>String(d.code)==='5667'&&d.source==='solc');assert.ok(warning,'current unused-parameter compiler warning required');
+      const actions=await rpc.request('textDocument/codeAction',{textDocument:{uri,version:1},context:{diagnostics:[warning]}});
       assert.ok(!actions.some(a=>a.title.includes('unused parameter')));
     });
     await t.test('rename validates compiler output across multiple files without writing sources',async()=>{
