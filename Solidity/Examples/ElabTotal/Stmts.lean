@@ -603,3 +603,67 @@ end Solidity.Examples.ElabTotal.Stmts
 /-- info: 'Solidity.ElabCallHeight.slice_decode_output_height_of_raw_bounds' depends on axioms: [propext, Quot.sound] -/
 #guard_msgs in
 #print axioms Solidity.ElabCallHeight.slice_decode_output_height_of_raw_bounds
+
+/-- info: 'Solidity.ElabCallHeight.call_output_height_of_raw_bounds' depends on axioms: [propext, Quot.sound] -/
+#guard_msgs in
+#print axioms Solidity.ElabCallHeight.call_output_height_of_raw_bounds
+
+/-- info: 'Solidity.ElabSliceOpen.openWith_atoms' depends on axioms: [propext] -/
+#guard_msgs in
+#print axioms Solidity.ElabSliceOpen.openWith_atoms
+
+/-- info: 'Solidity.ElabSliceOpen.inlineSliceOpen_raw_eq' does not depend on any axioms -/
+#guard_msgs in
+#print axioms Solidity.ElabSliceOpen.inlineSliceOpen_raw_eq
+
+/-- info: 'Solidity.ElabSliceOpen.inlineSliceOpen_raw_atoms' depends on axioms: [propext, Quot.sound] -/
+#guard_msgs in
+#print axioms Solidity.ElabSliceOpen.inlineSliceOpen_raw_atoms
+
+/-- info: 'Solidity.ElabCallHeight.boundAtom_height_le' depends on axioms: [propext, Quot.sound] -/
+#guard_msgs in
+#print axioms Solidity.ElabCallHeight.boundAtom_height_le
+
+/-- info: 'Solidity.ElabCallHeight.inlineSliceOpen_raw_height' depends on axioms: [propext, Quot.sound] -/
+#guard_msgs in
+#print axioms Solidity.ElabCallHeight.inlineSliceOpen_raw_height
+
+/-- info: 'Solidity.ElabSliceOpen.bindBound_eq' depends on axioms: [propext, Quot.sound] -/
+#guard_msgs in
+#print axioms Solidity.ElabSliceOpen.bindBound_eq
+
+/-- info: 'Solidity.ElabCallHeight.selector_height_lt_with_names' depends on axioms: [propext, Quot.sound] -/
+#guard_msgs in
+#print axioms Solidity.ElabCallHeight.selector_height_lt_with_names
+
+/-- info: 'Solidity.ElabCallHeight.selector_args_height_lt_with_names' depends on axioms: [propext, Quot.sound] -/
+#guard_msgs in
+#print axioms Solidity.ElabCallHeight.selector_args_height_lt_with_names
+
+/-- info: 'Solidity.ElabCallHeight.selector_input_lt_with_names' depends on axioms: [propext, Quot.sound] -/
+#guard_msgs in
+#print axioms Solidity.ElabCallHeight.selector_input_lt_with_names
+
+/-- info: 'Solidity.ElabCallHeight.selector_encoding_inputs_lt_with_names' depends on axioms: [propext, Quot.sound] -/
+#guard_msgs in
+#print axioms Solidity.ElabCallHeight.selector_encoding_inputs_lt_with_names
+
+/-- info: 'Solidity.ElabControlProof.memory_dispatch_result_name' depends on axioms: [propext, Quot.sound] -/
+#guard_msgs in
+#print axioms Solidity.ElabControlProof.memory_dispatch_result_name
+
+/-- info: 'Solidity.ElabCallHeight.memory_dispatch_output_height' depends on axioms: [propext, Quot.sound] -/
+#guard_msgs in
+#print axioms Solidity.ElabCallHeight.memory_dispatch_output_height
+
+/-- info: 'Solidity.ElabCallHeight.producers_memory_dispatch_output_height' depends on axioms: [propext, Quot.sound] -/
+#guard_msgs in
+#print axioms Solidity.ElabCallHeight.producers_memory_dispatch_output_height
+
+/-- info: 'Solidity.ElabCallHeight.callbacks_encode_output_height' depends on axioms: [propext, Quot.sound] -/
+#guard_msgs in
+#print axioms Solidity.ElabCallHeight.callbacks_encode_output_height
+
+/-- info: 'Solidity.ElabCallHeight.callbacks_call_output_height' depends on axioms: [propext, Quot.sound] -/
+#guard_msgs in
+#print axioms Solidity.ElabCallHeight.callbacks_call_output_height

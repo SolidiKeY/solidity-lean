@@ -1,7 +1,8 @@
 // Concrete typed-model execution and compiler artifacts; never verification verdicts.
 'use strict';
 const fs=require('node:fs'),path=require('node:path'),{spawn}=require('node:child_process'),{createHash,randomUUID}=require('node:crypto');
-const {terminateTree}=require('./backend.cjs'),{trackChild,waitForClose,waitForGroup}=require('./child-lifetime.cjs'),{processState}=require('./process-state.cjs');
+const {terminateTree}=require('./backend.cjs'),{trackChild,waitForClose,waitForGroup,enableChildLifetimeObservation,childLifetimeObservation}=require('./child-lifetime.cjs'),{processState}=require('./process-state.cjs');
+const {isPromise}=require('node:util').types,promiseThen=Promise.prototype.then;
 const digest=text=>createHash('sha256').update(text).digest('hex');
 function selection(text){const parts=text.split('::');if(parts.length!==2||!/^[$A-Za-z_][$\w]*$/.test(parts[0])||!parts[1].trim())throw Error('Use Contract::function or Contract::function(type,...)');return{contract:parts[0],function:parts[1].trim()};}
 function argumentsOf(values){if(!Array.isArray(values)||values.some(v=>typeof v!=='boolean'&&(typeof v!=='string'||! /^-?(?:[0-9]+|0x[0-9a-fA-F]+)$/.test(v))))throw Error('Arguments must be booleans or exact integer strings');return values.map(String);}
@@ -9,22 +10,40 @@ function buildArguments(value){
  if(!value||typeof value!=='object'||Array.isArray(value)||Object.keys(value).some(key=>!['includePaths','remappings'].includes(key)))throw Error('Custom compiler arguments accept only includePaths and remappings');
  const result={};for(const key of ['includePaths','remappings'])if(Object.hasOwn(value,key)){const items=value[key];if(!Array.isArray(items)||items.some(item=>typeof item!=='string'||!item.trim()||item.includes('\0')))throw Error('Custom compiler arguments must be arrays of nonempty strings');result[key]=[...items];}return result;
 }
-function processJob(config,args,signal,timeoutMs){return new Promise((resolve,reject)=>{
+// Optional harness evidence only. No extra process readback or acceptance path.
+// The sink is TRUSTED harness code: synchronous or an ordinary unmodified native Promise.
+// Callback side effects and modified Promise constructor/species hooks are not isolated.
+// Strings and argument counts are bounded; truncation and full digests are explicit.
+function diagnosticText(value){if(typeof value!=='string')return null;return{text:value.slice(0,4096),utf16Length:value.length,sha256:digest(value),truncated:value.length>4096};}
+function sourceProcessObservation(child,launchCwd,error){
+ const args=Array.isArray(child.spawnargs)?child.spawnargs:null;
+ return{schemaVersion:1,kind:'source-command-process-diagnostic',outcome:error?'rejected':'closed',terminalWallMs:Date.now(),
+  process:{pid:child.pid??null,birth:child.processBirth??null,ownedGroup:child.ownedGroup===true},
+  spawnFile:diagnosticText(child.spawnfile),configuredCwd:diagnosticText(launchCwd),
+  argumentCount:args?.length??null,argumentsTruncated:!!args&&args.length>64,
+  spawnArguments:args?.slice(0,64).map(diagnosticText)??null,lifetime:childLifetimeObservation(child)};
+}
+function processJob(config,args,signal,timeoutMs,diagnostics){return new Promise((resolve,reject)=>{
  if(signal?.aborted){reject(Object.assign(Error('Cancelled'),{code:'CANCELLED'}));return;}
- const child=spawn(config.nodePath||process.execPath,args,{cwd:config.backendPath,shell:false,detached:process.platform!=='win32',stdio:['ignore','pipe','pipe']});child.ownedGroup=process.platform!=='win32';child.processBirth=processState(child.pid)?.birth;const closed=trackChild(child);let stdout='',stderr='',settled=false,stopping;
- const finish=(error,value)=>{if(settled)return;settled=true;clearTimeout(timer);signal?.removeEventListener('abort',abort);error?reject(error):resolve(value);};
+ const launchCwd=config.backendPath,observing=diagnostics?.observeLifetime===true;
+ const child=spawn(config.nodePath||process.execPath,args,{cwd:launchCwd,shell:false,detached:process.platform!=='win32',stdio:['ignore','pipe','pipe']});child.ownedGroup=process.platform!=='win32';child.processBirth=processState(child.pid)?.birth;if(observing)enableChildLifetimeObservation(child);const closed=trackChild(child);let stdout='',stderr='',settled=false,stopping;
+ const finish=(error,value)=>{if(settled)return;settled=true;clearTimeout(timer);signal?.removeEventListener('abort',abort);
+  if(observing){let record;try{record=sourceProcessObservation(child,launchCwd,error);}catch(failure){record={schemaVersion:1,kind:'source-command-process-diagnostic',available:false,diagnosticError:diagnosticText(String(failure?.message??failure))};}
+   try{Object.defineProperty(error||value,'sourceProcessObservation',{value:structuredClone(record),configurable:true});}catch{}
+   try{const pending=diagnostics.onObservation?.(structuredClone(record));if(isPromise(pending))promiseThen.call(pending,()=>{},()=>{});}catch{} // Observe native promises without awaiting or inspecting arbitrary thenables.
+  }error?reject(error):resolve(value);};
  const stop=error=>{if(stopping||settled)return;stopping=error;try{terminateTree(child);}catch(e){error=e;}waitForClose(child,{closed,kill:true}).then(()=>finish(error),failure=>{failure.cleanupFailed=true;finish(failure);});};
  const abort=()=>stop(Object.assign(Error('Cancelled'),{code:'CANCELLED'})),timer=setTimeout(()=>stop(Object.assign(Error('Source command timed out'),{code:'TIMEOUT'})),timeoutMs);signal?.addEventListener('abort',abort,{once:true});if(signal?.aborted)abort();
  child.stdout.setEncoding('utf8');child.stderr.setEncoding('utf8');child.on('error',error=>{if(child.pid)stop(error);else finish(error);});child.stdout.on('data',b=>{if(stopping||settled)return;if(Buffer.byteLength(stdout)+Buffer.byteLength(b)>32*1024*1024){stop(Error('Source command output exceeds32MiB'));return;}stdout+=b;});child.stderr.on('data',b=>{if(!stopping&&!settled)stderr=(stderr+b).slice(-16000);});
  child.on('close',async(code,signalCode)=>{if(stopping||settled)return;try{await waitForGroup(child);finish(null,{code,signalCode,stdout,stderr});}catch(error){error.cleanupFailed=true;finish(error);}});
  });}
-async function execute(operation,config,source,input={},signal){
+async function execute(operation,config,source,input={},signal,diagnostics){
  const requestedOperation=operation;
  if(operation==='buildCustomArgs'){config={...config,...buildArguments(input)};operation='build';}
  if(!Number.isSafeInteger(config.timeoutMs)||config.timeoutMs<1||config.timeoutMs>3600000)throw Error('Invalid source-command timeout');
  const deadline=Date.now()+config.timeoutMs,remaining=()=>{const n=deadline-Date.now();if(n<=0)throw Object.assign(Error('Source command timed out'),{code:'TIMEOUT'});return n;};
  const text=fs.readFileSync(source,'utf8'),project=require('./project.cjs').snapshot(source,text,config,[]);
- const probe=await processJob(config,['--version'],signal,Math.min(remaining(),5000)),version=/^v(\d+)\.\d+\.\d+(?:-[0-9A-Za-z.-]+)?$/.exec(probe.stdout.trim());
+ const probe=await processJob(config,['--version'],signal,Math.min(remaining(),5000),diagnostics),version=/^v(\d+)\.\d+\.\d+(?:-[0-9A-Za-z.-]+)?$/.exec(probe.stdout.trim());
  if(probe.code!==0||!version||Number(version[1])<18)throw Error('Configured runtime must satisfy the existing Node.js18+ contract; unknown version is not accepted');
  if(!require('./project.cjs').current(project,[]))throw Error('Source project changed during runtime probe');
  const root=path.resolve(config.backendPath);let directory=path.join(root,'.lake/editor-source-artifacts');
@@ -32,7 +51,7 @@ async function execute(operation,config,source,input={},signal){
  fs.mkdirSync(directory,{recursive:true});const scratch=fs.mkdtempSync(path.join(directory,operation==='build'?path.basename(source,path.extname(source))+'-':operation+'-'));
  if(operation==='build'){
   const artifact=path.join(scratch,'source.ast.json'),args=[path.join(root,'scripts/solc-ast.mjs'),'--source',source,'--out',artifact,'--no-wrapper','--project-root',config.projectRoot];for(const p of config.includePaths||[])args.push('--include-path',path.resolve(config.projectRoot||path.dirname(source),p));for(const r of config.remappings||[])args.push('--remapping',r);
-  const result=await processJob(config,args,signal,remaining());if(result.code!==0)throw Error(result.stderr||result.stdout||'Compiler build failed');const fixture=JSON.parse(fs.readFileSync(artifact,'utf8'));
+  const result=await processJob(config,args,signal,remaining(),diagnostics);if(result.code!==0)throw Error(result.stderr||result.stdout||'Compiler build failed');const fixture=JSON.parse(fs.readFileSync(artifact,'utf8'));
   const admitted=Object.entries(project.files),units=fixture.sourceUnits;
   if(admitted.length>1||units!==undefined){
    if(!Array.isArray(units)||units.length!==admitted.length||units.some(unit=>!unit||typeof unit.name!=='string')||new Set(units.map(unit=>unit.name)).size!==units.length||admitted.some(([name,file])=>!units.some(unit=>unit.name===name&&unit.sourceSha256===file.hash)))throw Error('Compiler artifact does not match admitted project');
@@ -46,7 +65,7 @@ async function execute(operation,config,source,input={},signal){
   if(signal?.aborted)throw Object.assign(Error('Cancelled'),{code:'CANCELLED'});if(!require('./project.cjs').current(project,[]))throw Error('Source project changed');const c=cases[i],target=selection(c.target),args=argumentsOf(c.args===undefined?[]:c.args),state=c.state===undefined?{}:c.state;if(!state||typeof state!=='object'||Array.isArray(state))throw Error('State must be an object');
   if(operation==='test'&&(!c.expect||!['ok','revert','panic'].includes(c.expect.status)||typeof c.expect.text!=='string'))throw Error('Each test needs exact expect.status(ok/revert/panic) and expect.text; unsupported/error cannot pass');
   const stateFile=path.join(scratch,'state-'+i+'.json');fs.writeFileSync(stateFile,JSON.stringify(state));const argv=[path.join(root,'scripts/solidity-lean.mjs'),'run','--contract',target.contract,'--function',target.function,'--state',stateFile,'--timeout',String(remaining()),'--json'];for(const a of args)argv.push('--arg',a);argv.push('--',source);
-  const result=await processJob(config,argv,signal,remaining());fs.writeFileSync(path.join(scratch,'case-'+i+'.stdout.json'),result.stdout);fs.writeFileSync(path.join(scratch,'case-'+i+'.stderr.log'),result.stderr);if(![0,1].includes(result.code))throw Error(result.stderr||result.stdout||'Concrete runner setup failed');let report;try{report=JSON.parse(result.stdout);}catch{throw Error('Concrete runner returned malformed JSON');}
+  const result=await processJob(config,argv,signal,remaining(),diagnostics);fs.writeFileSync(path.join(scratch,'case-'+i+'.stdout.json'),result.stdout);fs.writeFileSync(path.join(scratch,'case-'+i+'.stderr.log'),result.stderr);if(![0,1].includes(result.code))throw Error(result.stderr||result.stdout||'Concrete runner setup failed');let report;try{report=JSON.parse(result.stdout);}catch{throw Error('Concrete runner returned malformed JSON');}
   if(report.command!=='run'||report.schemaVersion!==1||!Array.isArray(report.results)||report.results.length!==1||!Array.isArray(report.errors)||report.errors.length)throw Error('Concrete runner returned no unique valid result');const row=report.results[0];if(row.contract!==target.contract||row.source!==source||typeof row.text!=='string'||!['ok','revert','panic','diverge','unsupported','error'].includes(row.status))throw Error('Concrete result identity/status mismatch');
   if(target.function.includes('(')?row.signature!==target.function:row.function!==target.function)throw Error('Concrete function identity mismatch');if(!require('./project.cjs').current(project,[]))throw Error('Source project changed');if(result.code!==(row.status==='ok'?0:1))throw Error('Concrete result exit/status mismatch');if(fs.readFileSync(source,'utf8')!==text)throw Error('Source changed during concrete execution');const passed=operation==='test'?row.status===c.expect.status&&row.text===c.expect.text:row.status==='ok';results.push({name:c.name||String(i+1),target:c.target,passed,status:row.status,text:row.text,exitCode:result.code});
  }
@@ -61,9 +80,9 @@ function install(vscode,context,{settings,output,cancelVerification}){
   if(retiring.has(uri))return retiring.get(uri);const job=jobs.get(uri);if(!job)return Promise.resolve();job.abort.abort();
   const promise=job.promise.then(()=>{},error=>{if(error.cleanupFailed)throw error;}).then(()=>{if(retiring.get(uri)===promise)retiring.delete(uri);});retiring.set(uri,promise);return promise;
  }
- const isCurrent=(doc,version,text,epoch)=>epochs.get(doc.uri.toString())===epoch&&!disposed&&!doc.isClosed&&doc.version===version&&doc.getText()===text&&vscode.window.activeTextEditor?.document===doc&&vscode.workspace.isTrusted;
+ const isCurrent=(doc,version,text,epoch)=>epochs.get(doc.uri.toString())===epoch&&!disposed&&!doc.isClosed&&doc.version===version&&doc.getText()===text&&vscode.window.activeTextEditor?.document===doc&&vscode.workspace.isTrusted&&require('./editor-document.cjs').isSolidityFile(doc);
  const command=operation=>async()=>{
-  const doc=vscode.window.activeTextEditor?.document;if(disposed||!vscode.workspace.isTrusted||doc?.uri.scheme!=='file'||!doc.uri.fsPath.endsWith('.sol'))return;
+  const doc=vscode.window.activeTextEditor?.document;if(disposed||!vscode.workspace.isTrusted||!require('./editor-document.cjs').isSolidityFile(doc)||!doc.uri.fsPath.endsWith('.sol'))return;
   const uri=doc.uri.toString();documents.set(uri,doc);touch(uri);const epoch=epochs.get(uri),commandId=randomUUID();let version=doc.version,text=doc.getText(),job;
   const receipt=(phase,extra={})=>output.appendLine(JSON.stringify({schemaVersion:1,kind:'source-command',commandId,operation,phase,uri,version,sourceHash:digest(text),sourceSession:epoch,verification:'not-run',...extra}));
   try{

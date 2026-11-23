@@ -1012,3 +1012,349 @@ theorem slice_decode_output_height_of_raw_bounds (rc : ElabRec C) (e view : RawE
     (fun t v pre h => slice_decode_request_lt_of_raw_bounds view rest t v pre hopen h) hh
 
 end Solidity.ElabCallHeight
+
+namespace Solidity.ElabCallHeight
+open Semantics ElabControlProof
+
+
+theorem call_output_height_of_raw_bounds (C : Contract) [FreshNames] (rc : ElabRec C) (f : String) (args : List RawExpr)
+    (hh : ∀ a, (height a < height (.call f args) ∨
+      height a = height (.call f args) ∧ a.nodes < (RawExpr.call f args).nodes) →
+      Obs (rc.hoist a) (fun out => height out.2 ≤ height a))
+    (henc : ∀ std strs xs marks sel, Obs (rc.abiEncode std strs xs marks sel)
+      (fun out => height out.2 = 1))
+    (hopen : ∀ t b i j v pre, inlineSliceOpen t (.call "#sliceRaw" [b, i, j]) = .ok (v, pre) →
+      height v.off ≤ 2 ∧ height v.len ≤ 3)
+    (hmem : ∀ h ty xs, Obs (rc.fnMemoryDispatch h ty xs) (fun out => height out.2 = 1)) :
+    Obs (hoistWith C rc (.call f args)) (fun out => height out.2 ≤ height (.call f args)) := by
+  have hhash : Obs (hoistHashWith C rc.hoist rc.abiMemBytes rc.elabStmtsP f args)
+      (fun out => height out.2 = 1) := by
+    intro sc st m out st' m' hr
+    exact hash_output_height C rc.hoist rc.abiMemBytes rc.elabStmtsP f args sc st st' m m' out hr
+  have hdecode : Obs (abiDecodeWith C rc.hoist rc.abiMemBytes rc.elabStmtsP rc.abiDecodeBytes f args)
+      (fun out => height out.2 ≤ height (.call f args)) :=
+    decode_output_height C rc.hoist rc.abiMemBytes rc.elabStmtsP rc.abiDecodeBytes f args
+      (fun e he => hh e (Or.inl he))
+  have herc : f = "erc7201" → Obs (hoistERC7201With C rc.hoist args)
+      (fun out => height out.2 ≤ height (.call f args)) := by
+    intro hf
+    subst f
+    exact erc_args_output_height C rc.hoist args (fun e he => hh e (Or.inl he))
+  have hfold : (liftM (RawExpr.call f args).foldConst : ElabM RawExpr) =
+      pure (.call f args) := rfl
+  unfold hoistWith
+  rw [hfold]
+  simp -zeta only [pure_bind]
+  extract_lets
+  split
+  case h_17 =>
+    rename_i heq
+    obtain ⟨rfl, rfl⟩ := RawExpr.call.inj heq
+    extract_lets fields declared byName byValue structFinish structBuild structOrValue castTail enumTail markedArgs builtinTail
+    have hname (P : SProg C) (x : String) :
+        Obs (pure (P, RawExpr.name x) : ElabM (SProg C × RawExpr))
+          (fun out => height out.2 = 1) := obs_pure rfl
+    have hdecl : ∀ u, Obs (declared u) (fun out => height out.2 = 1) := by
+      intro u
+      simp -zeta only [declared]
+      repeat' first
+        | (with_reducible exact hname _ _)
+        | (with_reducible exact obs_throw)
+        | (with_reducible apply obs_any; intro value)
+        | split
+        | extract_lets
+    clear_value declared
+    have hkeep (P : SProg C) (a : RawExpr) (ha : height a = 1) :
+        Obs (pure (P, a) : ElabM (SProg C × RawExpr))
+          (fun out => height out.2 = 1) := obs_pure ha
+    have hbyName : ∀ u, Obs (byName u) (fun out => height out.2 = 1) := by
+      intro u
+      simp -zeta only [byName]
+      repeat' first
+        | (with_reducible exact hdecl _)
+        | (with_reducible exact hname _ _)
+        | (with_reducible exact hkeep _ _ (by assumption))
+        | (with_reducible apply obs_bind (hmem _ _ _); rintro ⟨Q, a⟩ ha)
+        | (with_reducible exact obs_throw)
+        | (with_reducible apply obs_any; intro value)
+        | split
+        | extract_lets
+    clear_value byName
+    have weaken {x : ElabM (SProg C × RawExpr)}
+        (hx : Obs x (fun out => height out.2 = 1)) :
+        Obs x (fun out => height out.2 ≤ height (.call f args)) := by
+      intro sc st m out st' m' hr
+      have := hx sc st m out st' m' hr
+      have := height_pos (.call f args)
+      omega
+    have pureBound (P : SProg C) (a : RawExpr)
+        (ha : height a ≤ height (.call f args)) :
+        Obs (pure (P, a) : ElabM (SProg C × RawExpr))
+          (fun out => height out.2 ≤ height (.call f args)) := obs_pure ha
+    have named (g : String) (rest : List RawExpr)
+        (hf : f = callValueName) (ha : args = .name g :: rest) :
+        Obs (rc.hoist (.call g rest))
+          (fun out => height out.2 ≤ height (.call f args)) := by
+      subst f; subst args
+      have hd := named_callee_decreases g rest
+      have hp : height (.call g rest) < height (.call callValueName (.name g :: rest)) ∨
+          height (.call g rest) = height (.call callValueName (.name g :: rest)) ∧
+          (RawExpr.call g rest).nodes < (RawExpr.call callValueName (.name g :: rest)).nodes := by
+        rcases Nat.lt_or_eq_of_le hd.1 with hlt | heq
+        · exact Or.inl hlt
+        · exact Or.inr ⟨heq, hd.2⟩
+      intro sc st m out st' m' hr
+      have := hh _ hp sc st m out st' m' hr
+      omega
+    have hvalue : ∀ u, Obs (byValue u)
+        (fun out => height out.2 ≤ height (.call f args)) := by
+      intro u
+      simp -zeta only [byValue]
+      repeat' first
+        | (with_reducible exact weaken (hbyName _))
+        | (with_reducible exact weaken (hname _ _))
+        | (with_reducible exact pureBound _ _ (by assumption))
+        | (with_reducible apply obs_bind (weaken (hmem _ _ _)); rintro ⟨Q, a⟩ ha)
+        | (with_reducible apply obs_bind (named _ _ (by simpa only [beq_iff_eq] using ‹(f == callValueName) = true›) rfl); rintro ⟨Q, a⟩ ha)
+        | (with_reducible exact obs_throw)
+        | (with_reducible apply obs_any; intro value)
+        | split
+        | extract_lets
+    clear_value byValue
+    have hfinish : ∀ u, Obs (structFinish u) (fun out => height out.2 = 1) := by
+      intro u
+      simp -zeta only [structFinish]
+      repeat' first
+        | (with_reducible exact hname _ _)
+        | (with_reducible exact obs_throw)
+        | (with_reducible apply obs_any; intro value)
+        | split
+        | extract_lets
+    clear_value structFinish
+    have hbuild : ∀ u, Obs (structBuild u) (fun out => height out.2 = 1) := by
+      intro u
+      simp -zeta only [structBuild]
+      repeat' first
+        | (with_reducible exact hfinish _)
+        | (with_reducible exact obs_throw)
+        | (with_reducible apply obs_any; intro value)
+        | split
+        | extract_lets
+    clear_value structBuild
+    have hstructOrValue : ∀ u, Obs (structOrValue u)
+        (fun out => height out.2 ≤ height (.call f args)) := by
+      intro u
+      simp -zeta only [structOrValue]
+      repeat' first
+        | (with_reducible exact weaken (hbuild _))
+        | (with_reducible exact hvalue _)
+        | (with_reducible exact obs_throw)
+        | (with_reducible apply obs_any; intro value)
+        | split
+        | extract_lets
+    clear_value structOrValue
+    have hcast : ∀ u, Obs (castTail u)
+        (fun out => height out.2 ≤ height (.call f args)) := by
+      intro u
+      simp -zeta only [castTail]
+      repeat' first
+        | (with_reducible exact hstructOrValue _)
+        | (with_reducible exact weaken (hkeep _ _ (by assumption)))
+        | (with_reducible apply obs_bind (castCapture_output_height C _ _); rintro ⟨Q, a⟩ ha)
+        | (with_reducible exact obs_throw)
+        | (with_reducible apply obs_any; intro value)
+        | split
+        | extract_lets
+    clear_value castTail
+    have henum : ∀ u, Obs (enumTail u)
+        (fun out => height out.2 ≤ height (.call f args)) := by
+      intro u
+      simp -zeta only [enumTail]
+      repeat' first
+        | (with_reducible exact hcast _)
+        | (with_reducible exact weaken (hkeep _ _ (by assumption)))
+        | (with_reducible apply obs_bind (enumCapture_output_height C _ _); rintro ⟨Q, a⟩ ha)
+        | (with_reducible exact obs_throw)
+        | (with_reducible apply obs_any; intro value)
+        | split
+        | extract_lets
+    clear_value enumTail
+    have hH (a : RawExpr) (ha : height a < height (.call f args)) :
+        Obs (rc.hoist a) (fun out => height out.2 ≤ height (.call f args)) := by
+      intro sc st m out st' m' hr
+      exact Nat.le_trans (hh a (Or.inl ha) sc st m out st' m' hr) (Nat.le_of_lt ha)
+    have hbuiltin : ∀ u, Obs (builtinTail u)
+        (fun out => height out.2 ≤ height (.call f args)) := by
+      intro u
+      simp -zeta only [builtinTail]
+      apply obs_any
+      intro scope
+      extract_lets builtin addressTail decodeTail encodeTail selectorTail hashTail fallback
+      have haddressTail : ∀ u, Obs (addressTail u)
+          (fun out => height out.2 ≤ height (.call f args)) := by
+        intro u
+        simp -zeta only [addressTail]
+        repeat' first
+          | (with_reducible exact henum _)
+          | (with_reducible exact pureBound _ _ (by omega))
+          | (with_reducible apply obs_bind (addressCapture_height_bound C _); rintro ⟨Q, a⟩ ha)
+          | (with_reducible apply obs_bind (hH _ (argument_lt_call f (by simp))); rintro ⟨Q, a⟩ ha)
+          | (with_reducible exact obs_throw)
+          | (with_reducible apply obs_any; intro value)
+          | split
+          | extract_lets
+      clear_value addressTail
+      have hdecodeTail : ∀ u, Obs (decodeTail u)
+          (fun out => height out.2 ≤ height (.call f args)) := by
+        intro u
+        simp -zeta only [decodeTail]
+        repeat' first
+          | (with_reducible exact haddressTail _)
+          | (with_reducible exact pureBound _ _ (by assumption))
+          | (with_reducible apply obs_bind hdecode; rintro ⟨Q, a⟩ ha)
+          | split
+          | extract_lets
+      clear_value decodeTail
+      have hencodeTail : ∀ u, Obs (encodeTail u)
+          (fun out => height out.2 ≤ height (.call f args)) := by
+        intro u
+        simp -zeta only [encodeTail]
+        repeat' first
+          | (with_reducible exact hdecodeTail _)
+          | (with_reducible exact weaken (hkeep _ _ (by assumption)))
+          | (with_reducible apply obs_bind (henc _ _ _ _ _); rintro ⟨Q, a⟩ ha)
+          | (with_reducible apply obs_any; intro value)
+          | split
+          | extract_lets
+      clear_value encodeTail
+      have hselectorTail : ∀ u, Obs (selectorTail u)
+          (fun out => height out.2 ≤ height (.call f args)) := by
+        intro u
+        simp -zeta only [selectorTail]
+        repeat' first
+          | (with_reducible exact hencodeTail _)
+          | (with_reducible exact weaken (hkeep _ _ (by assumption)))
+          | (with_reducible apply obs_bind (henc _ _ _ _ _); rintro ⟨Q, a⟩ ha)
+          | (with_reducible exact obs_throw)
+          | (with_reducible apply obs_any; intro value)
+          | split
+          | extract_lets
+      clear_value selectorTail
+      have hhashTail : ∀ u, Obs (hashTail u)
+          (fun out => height out.2 ≤ height (.call f args)) := by
+        intro u
+        simp -zeta only [hashTail]
+        repeat' first
+          | (with_reducible exact hselectorTail _)
+          | (with_reducible exact weaken (hkeep _ _ (by assumption)))
+          | (with_reducible apply obs_bind hhash; rintro ⟨Q, a⟩ ha)
+          | split
+          | extract_lets
+      clear_value hashTail
+      have hfallback : ∀ u, Obs (fallback u)
+          (fun out => height out.2 ≤ height (.call f args)) := by
+        intro u
+        simp -zeta only [fallback]
+        split
+        · rename_i hb
+          have heq : f = "erc7201" := by
+            simpa only [beq_iff_eq] using (Bool.and_eq_true_iff.mp hb).2
+          exact obs_bind (herc heq) (fun out hout => obs_pure hout)
+        · exact hhashTail _
+      clear_value fallback
+      split
+      · rename_i hpref
+        have hpref' : f.startsWith "#bytesPrefix" = true := (Bool.and_eq_true_iff.mp hpref).2
+        split
+        · rename_i n hnparse
+          extract_lets prefixBody
+          split
+          · rename_i hn
+            have hn' : n ≤ 32 := of_decide_eq_true (Bool.and_eq_true_iff.mp hn).2
+            simp -zeta only [prefixBody]
+            repeat' first
+              | (with_reducible exact hfallback _)
+              | (with_reducible exact pureBound _ _ (by assumption))
+              | (with_reducible apply obs_bind (hH _ (prefix_cast_lt f _ n _ hpref' hn')); rintro ⟨Q, a⟩ ha)
+              | (with_reducible exact obs_throw)
+              | (with_reducible apply obs_any; intro value)
+              | split
+              | extract_lets
+          · intro sc st m out st' m' hr
+            cases hr
+        · intro sc st m out st' m' hr
+          cases hr
+      · exact hfallback _
+    clear_value builtinTail
+    repeat' first
+      | (with_reducible exact hbuiltin _)
+      | (with_reducible exact weaken (hname _ _))
+      | (with_reducible exact obs_throw)
+      | (with_reducible apply obs_any; intro value)
+      | split
+      | extract_lets
+  all_goals try (exfalso; contradiction)
+  case h_10 =>
+    rename_i b i n heq
+    obtain ⟨rfl, rfl⟩ := RawExpr.call.inj heq
+    exact bytes_index_output_height C rc (.call "#bytesIndex" [b, i, .num n]) b i n rfl
+      (fun e he => hh e (Or.inl he))
+  case h_11 =>
+    rename_i off len k past heq
+    obtain ⟨rfl, rfl⟩ := RawExpr.call.inj heq
+    exact slice_index_output_height C rc (.call "#sliceIndex" [off, len, k, past]) off len k past rfl
+      (fun e he => hh e (Or.inl he))
+  case h_12 =>
+    rename_i view k heq
+    obtain ⟨rfl, rfl⟩ := RawExpr.call.inj heq
+    exact slice_at_output_height_of_raw_bounds C rc (.call "#sliceAt" [view, k]) view k rfl hopen
+      (fun e he => hh e (Or.inl he))
+  case h_13 =>
+    rename_i view heq
+    obtain ⟨rfl, rfl⟩ := RawExpr.call.inj heq
+    exact slice_length_output_height_of_raw_bounds C rc (.call "#sliceLength" [view]) view rfl hopen
+      (fun e he => hh e (Or.inl he))
+  case h_14 =>
+    rename_i view rest h1 h2 h3 h4 heq
+    obtain ⟨rfl, rfl⟩ := RawExpr.call.inj heq
+    exact slice_decode_output_height_of_raw_bounds C rc (.call "#sliceDecode" (view :: rest)) view rest rfl hopen
+      (fun e he => hh e (Or.inl he))
+  case h_15 =>
+    rename_i view h1 h2 heq
+    obtain ⟨rfl, rfl⟩ := RawExpr.call.inj heq
+    intro sc st m out st' m' hr
+    have hn := sliceCopy_output_height C rc (.call "#sliceCopy" [view]) view rfl sc st m out st' m' hr
+    have hp := height_pos (.call "#sliceCopy" [view])
+    omega
+  case h_16 =>
+    rename_i xs h1 h2 h3 h4 h5 h6 heq
+    obtain ⟨rfl, rfl⟩ := RawExpr.call.inj heq
+    intro sc st m out st' m' hr
+    have hn := array_output_height C rc (.call "#array" args) args rfl sc st m out st' m' hr
+    have hp := height_pos (.call "#array" args)
+    omega
+
+  case h_21 => exact obs_pure (Nat.le_refl _)
+
+end Solidity.ElabCallHeight
+
+namespace Solidity.ElabCallHeight
+open Semantics ElabSliceOpen
+/-- The extracted producer's bound atoms have at most one field layer. -/
+theorem boundAtom_height_le (e : RawExpr) (h : BoundAtom e) : height e ≤ 2 := by
+  unfold BoundAtom at h
+  split at h <;> simp_all only [height] <;> omega
+
+/-- The H1280 extraction supplies the exact raw opening premise used by call bounds. -/
+theorem inlineSliceOpen_raw_height
+    (t : String) (b i j : RawExpr) (v : SliceView) (pre : List RawStmt)
+    (h : inlineSliceOpen t (.call "#sliceRaw" [b, i, j]) = .ok (v, pre)) :
+    height v.off ≤ 2 ∧ height v.len ≤ 3 := by
+  obtain ⟨ho, hf⟩ := inlineSliceOpen_raw_atoms t b i j v pre h
+  have ho := boundAtom_height_le v.off ho
+  have hf := boundAtom_height_le v.fin hf
+  have hl := sliceSub_height_le v.fin v.off
+  exact ⟨ho, by simpa only [SliceView.len] using
+    (show height (sliceSub v.fin v.off) ≤ 3 by omega)⟩
+
+end Solidity.ElabCallHeight

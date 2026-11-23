@@ -196,7 +196,7 @@ theorem argument_lt_call (f : String) {a : RawExpr} {args : List RawExpr} (h : a
   omega
 
 /-- A selector actually emitted by the helper is below its source call. -/
-theorem selector_height_lt (C : Contract) (Γ : ECtx) (f : String) (args : List RawExpr)
+theorem selector_height_lt_with_names [FreshNames] (C : Contract) (Γ : ECtx) (f : String) (args : List RawExpr)
     (sel : RawExpr) (rest : List RawExpr)
     (h : encodeSelector? C Γ f args = .ok (some (sel,rest))) :
     height sel < height (.call f args) := by
@@ -218,6 +218,12 @@ theorem selector_height_lt (C : Contract) (Γ : ECtx) (f : String) (args : List 
         | (simp only [height, cost_encodeCall]; omega))
   · cases h
 
+theorem selector_height_lt (C : Contract) (Γ : ECtx) (f : String) (args : List RawExpr)
+    (sel : RawExpr) (rest : List RawExpr)
+    (h : encodeSelector? C Γ f args = .ok (some (sel,rest))) :
+    height sel < height (.call f args) :=
+  selector_height_lt_with_names C Γ f args sel rest h
+
 private theorem tuple_arg_height_le (t a : RawExpr)
     (h : a ∈ (match t with | .tuple args => args | x => [x])) : height a ≤ height t := by
   cases t <;> try (simp only [List.mem_singleton] at h; subst a; exact Nat.le_refl _)
@@ -236,7 +242,7 @@ private theorem second_tuple_arg_lt (g t a : RawExpr)
   omega
 
 /-- Every remaining argument actually emitted by selector extraction is smaller. -/
-theorem selector_args_height_lt (C : Contract) (Γ : ECtx) (f : String) (args : List RawExpr)
+theorem selector_args_height_lt_with_names [FreshNames] (C : Contract) (Γ : ECtx) (f : String) (args : List RawExpr)
     (sel : RawExpr) (rest : List RawExpr)
     (h : encodeSelector? C Γ f args = .ok (some (sel,rest))) :
     ∀ a, a ∈ rest → height a < height (.call f args) := by
@@ -260,6 +266,12 @@ theorem selector_args_height_lt (C : Contract) (Γ : ECtx) (f : String) (args : 
         exact argument_lt_call _ (List.mem_cons.mpr
           (Or.inr (List.mem_cons.mpr (Or.inl rfl))))
   · cases h
+
+theorem selector_args_height_lt (C : Contract) (Γ : ECtx) (f : String) (args : List RawExpr)
+    (sel : RawExpr) (rest : List RawExpr)
+    (h : encodeSelector? C Γ f args = .ok (some (sel,rest))) :
+    ∀ a, a ∈ rest → height a < height (.call f args) :=
+  selector_args_height_lt_with_names C Γ f args sel rest h
 
 /-- Removing the encoder's optional one-argument byte marker does not grow height. -/
 theorem unmark_height_le (a : RawExpr) :
@@ -308,15 +320,32 @@ theorem encoding_arg_height_lt (f : String) (args : List RawExpr) (a : RawExpr)
   encoding_inputs_lt args _ (fun _ he => argument_lt_call f he) a h
 
 /-- The exact selector call's marker-stripped selector decreases. -/
+theorem selector_input_lt_with_names [FreshNames] (C : Contract) (Γ : ECtx) (f : String) (args : List RawExpr)
+    (sel : RawExpr) (rest : List RawExpr)
+    (h : encodeSelector? C Γ f args = .ok (some (sel,rest))) :
+    height ((fun e : RawExpr => match e with
+      | .call g [x] => if (abiBytesMark? g).isSome then x else e
+      | _ => e) sel) < height (.call f args) :=
+  Nat.lt_of_le_of_lt (unmark_height_le sel) (selector_height_lt_with_names C Γ f args sel rest h)
+
 theorem selector_input_lt (C : Contract) (Γ : ECtx) (f : String) (args : List RawExpr)
     (sel : RawExpr) (rest : List RawExpr)
     (h : encodeSelector? C Γ f args = .ok (some (sel,rest))) :
     height ((fun e : RawExpr => match e with
       | .call g [x] => if (abiBytesMark? g).isSome then x else e
       | _ => e) sel) < height (.call f args) :=
-  Nat.lt_of_le_of_lt (unmark_height_le sel) (selector_height_lt C Γ f args sel rest h)
+  selector_input_lt_with_names C Γ f args sel rest h
 
 /-- The actual selector remainder, transformed exactly as in hoistWith, decreases. -/
+theorem selector_encoding_inputs_lt_with_names [FreshNames] (C : Contract) (Γ : ECtx) (f : String)
+    (args : List RawExpr) (sel : RawExpr) (rest : List RawExpr)
+    (hs : encodeSelector? C Γ f args = .ok (some (sel,rest))) (a : RawExpr)
+    (ha : a ∈ ((rest.map fun e => match e with
+      | .call g [x] => if (abiBytesMark? g).isSome then x else e
+      | _ => e).map fun e => if e.bytesLit?.isSome then .num 0 else e)) :
+    height a < height (.call f args) :=
+  encoding_inputs_lt rest _ (selector_args_height_lt_with_names C Γ f args sel rest hs) a ha
+
 theorem selector_encoding_inputs_lt (C : Contract) (Γ : ECtx) (f : String)
     (args : List RawExpr) (sel : RawExpr) (rest : List RawExpr)
     (hs : encodeSelector? C Γ f args = .ok (some (sel,rest))) (a : RawExpr)
@@ -324,7 +353,7 @@ theorem selector_encoding_inputs_lt (C : Contract) (Γ : ECtx) (f : String)
       | .call g [x] => if (abiBytesMark? g).isSome then x else e
       | _ => e).map fun e => if e.bytesLit?.isSome then .num 0 else e)) :
     height a < height (.call f args) :=
-  encoding_inputs_lt rest _ (selector_args_height_lt C Γ f args sel rest hs) a ha
+  selector_encoding_inputs_lt_with_names C Γ f args sel rest hs a ha
 
 /-- Evaluating an encodeCall receiver is below its original source call. -/
 theorem selector_receiver_lt (r t : RawExpr) (field : String) :

@@ -1,0 +1,10 @@
+// Actual pinned compiler metadata plus JavaScript hints; no native UI/kernel/EVM evidence.
+'use strict';
+const test=require('node:test'),assert=require('node:assert/strict'),fs=require('node:fs'),path=require('node:path'),os=require('node:os'),lang=require('../src/language-services.cjs');
+test('pinned compiler distinguishes dynamic storage, fixed outer dimension and nonstorage arrays',async t=>{
+ const dir=fs.mkdtempSync(path.join(os.tmpdir(),'array-completion-')),source=path.join(dir,'Arrays.sol'),text='pragma solidity ^0.8.34; contract Arrays { uint256[] dynamicState; uint256[][2] fixedState; function inspect(uint256[] storage storageRef,uint256[] memory memoryRef,uint256[] calldata calldataRef) internal view returns(uint256){return dynamicState.length+fixedState.length+storageRef.length+memoryRef.length+calldataRef.length;} }';fs.writeFileSync(source,text);
+ try{const {compileFixture}=await import('../../scripts/solc-ast.mjs'),compiled=compileFixture({args:['--source',source,'--out',path.join(dir,'out.json'),'--no-wrapper'],sourceBytes:Buffer.from(text),analysisOnly:true,quiet:true}),analysis=lang.index(text,compiled.rawAst),observations=[];
+ for(const name of ['dynamicState','fixedState','storageRef','memoryRef','calldataRef']){const point=lang.position(text,text.indexOf(name+'.length')+name.length+1),receiver=analysis.target(lang.position(text,text.indexOf(name+'.length'))),members=lang.receiverMembers(text,point,analysis).map(n=>n.name);observations.push({name,members,type:receiver.typeDescriptions.typeString,storageLocation:receiver.storageLocation,stateVariable:receiver.stateVariable,outerLength:receiver.typeName.length,hasOuterLength:Object.hasOwn(receiver.typeName,'length')});t.diagnostic(JSON.stringify(observations.at(-1)));assert.deepEqual(members,['dynamicState','storageRef'].includes(name)?['length','push','pop']:['length'],name);}
+ t.diagnostic(JSON.stringify({boundary:'compiler/JavaScript hints only',compiler:compiled.compiler,sourceHash:compiled.sourceHash,observations}));
+ }finally{fs.rmSync(dir,{recursive:true,force:true});}
+});

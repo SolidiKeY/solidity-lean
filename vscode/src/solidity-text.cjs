@@ -6,7 +6,7 @@ function tokens(text){
   while(i<text.length){
     if(/\s/.test(text[i])){i++;continue;}
     const start=i;let kind='punct';
-    if(text.startsWith('//',i)){kind='comment';i=text.indexOf('\n',i);if(i<0)i=text.length;}
+    if(text.startsWith('//',i)){kind='comment';i+=2;while(i<text.length&&text[i]!=='\r'&&text[i]!=='\n')i++;}
     else if(text.startsWith('/*',i)){kind='comment';const end=text.indexOf('*/',i+2);i=end<0?text.length:end+2;}
     else if(text[i]==='"'||text[i]==="'"||/^(?:hex|unicode)["']/.test(text.slice(i))){kind='string';const prefix=/^(?:hex|unicode)(?=["'])/.exec(text.slice(i));if(prefix)i+=prefix[0].length;const quote=text[i++];while(i<text.length){if(text[i]==='\\'){i+=2;continue;}if(text[i++]===quote)break;}}
     else if(/\d/.test(text[i])||text[i]==='.'&&/\d/.test(text[i+1]??'')){kind='number';const literal=/^(?:0[xX][0-9a-fA-F_]+|(?:\d[\d_]*(?:\.[\d_]+)?|\.[\d_]+)(?:[eE][+-]?[\d_]+)?)/.exec(text.slice(i));i+=literal[0].length;}

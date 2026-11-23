@@ -1,5 +1,5 @@
 import Solidity.Goals.ElabTotal
-import Solidity.Syntax.Elab.CallMeasure
+import Solidity.Syntax.Elab.CallOutput
 
 /-! Structural and named-argument closure for the elaborator totality proof. -/
 namespace Solidity.ElabHoist
@@ -560,3 +560,125 @@ theorem eagerArgs_pair_captureAtoms
   eager_pair_obs C hoist a b p q sc st m out st' m' h
 
 end Solidity.ElabCaptureProof
+
+
+namespace Solidity.ElabControlProof
+open Semantics
+variable (C : Contract) [FreshNames]
+
+local macro "dispatch_tail " h:ident : tactic =>
+  `(tactic| repeat' first
+    | with_reducible apply $h
+    | (with_reducible apply obs_pure; exact ⟨_, rfl⟩)
+    | (with_reducible apply obs_any; intro value; try cases value)
+    | with_reducible apply obs_throw
+    | split
+    | extract_lets)
+
+/-- Memory dispatch returns the shared destination on every successful run,
+regardless of the callback programs. -/
+theorem memory_dispatch_result_name (rc : PanicProducerRec C) (h : RawExpr)
+    (ty : String) (args : List RawExpr) :
+    Obs (fnMemoryDispatchWith C rc h ty args) (fun out => ∃ x, out.2 = .name x) := by
+  unfold fnMemoryDispatchWith
+  extract_lets taken cands
+  split
+  · extract_lets typed
+    have ht : ∀ T, Obs (typed T) (fun out => ∃ x, out.2 = .name x) := by
+      intro T
+      simp -zeta only [typed]
+      extract_lets params arity
+      have hp : ∀ y, Obs (params y) (fun out => ∃ x, out.2 = .name x) := by
+        intro y
+        simp -zeta only [params]
+        with_reducible apply obs_any
+        intro scope
+        with_reducible apply obs_any
+        intro candidates
+        extract_lets selected finish
+        have hf : ∀ v, Obs (finish v) (fun out => ∃ x, out.2 = .name x) := by
+          rintro ⟨pre, tag, actuals⟩
+          simp -zeta only [finish]
+          repeat' first
+          | (with_reducible apply obs_pure; exact ⟨_, rfl⟩)
+          | (with_reducible apply obs_any; intro value)
+          | extract_lets
+        clear_value finish
+        dispatch_tail hf
+      clear_value params
+      have ha : ∀ y, Obs (arity y) (fun out => ∃ x, out.2 = .name x) := by
+        intro y
+        simp -zeta only [arity]
+        dispatch_tail hp
+      clear_value arity
+      dispatch_tail ha
+    clear_value typed
+    dispatch_tail ht
+  · exact obs_throw
+
+end Solidity.ElabControlProof
+
+namespace Solidity.ElabCallHeight
+open Semantics ElabControlProof
+variable (C : Contract) [FreshNames]
+
+/-- A successful memory dispatch has height one independently of producer callbacks. -/
+theorem memory_dispatch_output_height (pr : PanicProducerRec C) (h : RawExpr)
+    (ty : String) (args : List RawExpr) :
+    Obs (fnMemoryDispatchWith C pr h ty args) (fun out => height out.2 = 1) := by
+  intro sc st m out st' m' hr
+  obtain ⟨x, hx⟩ := memory_dispatch_result_name C pr h ty args sc st m out st' m' hr
+  simp only [hx, height]
+
+attribute [local irreducible] fnMemoryDispatchWith
+
+/-- Producer assembly supplies the memory-dispatch output invariant for any base record. -/
+theorem producers_memory_dispatch_output_height (rc : ElabRec C) (pr : PanicProducerRec C)
+    (h : RawExpr) (ty : String) (args : List RawExpr) :
+    Obs ((elabRecWithProducers C rc pr).fnMemoryDispatch h ty args)
+      (fun out => height out.2 = 1) :=
+  memory_dispatch_output_height C pr h ty args
+
+end Solidity.ElabCallHeight
+namespace Solidity.ElabCallHeight
+open Semantics ElabControlProof
+variable (C : Contract) [FreshNames]
+attribute [local irreducible] abiEncodeWith
+
+/-- The assembled record installs the actual encoder, whose successful result is a name. -/
+theorem callbacks_encode_output_height
+    (H : RawExpr → ElabM (SProg C × RawExpr))
+    (stmt : RawStmt → ElabM (SProg C)) (calls producers : PanicProducerRec C)
+    (std strs : Bool) (args : List RawExpr) (marks : List (Option AbiKind))
+    (sel : Option RawExpr) :
+    Obs ((elabRecWithProducers C
+      (elabRecWithCallbacks C H stmt @calls.elabCallRet) producers).abiEncode
+        std strs args marks sel) (fun out => height out.2 = 1) := by
+  intro sc st m out st' m' hr
+  change abiEncodeWith C _ std strs args marks sel sc st m = .ok ((out, st'), m') at hr
+  exact encode_output_height C _ std strs args marks sel sc st st' m m' out hr
+
+end Solidity.ElabCallHeight
+
+namespace Solidity.ElabCallHeight
+open Semantics ElabControlProof
+
+/-- Actual callback/producer assembly discharges both record-field output invariants. -/
+theorem callbacks_call_output_height (C : Contract) [FreshNames]
+    (H : RawExpr → ElabM (SProg C × RawExpr))
+    (stmt : RawStmt → ElabM (SProg C)) (calls producers : PanicProducerRec C)
+    (f : String) (args : List RawExpr)
+    (hh : ∀ a, (height a < height (.call f args) ∨
+      height a = height (.call f args) ∧ a.nodes < (RawExpr.call f args).nodes) →
+      Obs (H a) (fun out => height out.2 ≤ height a))
+    (hopen : ∀ t b i j v pre, inlineSliceOpen t (.call "#sliceRaw" [b, i, j]) = .ok (v, pre) →
+      height v.off ≤ 2 ∧ height v.len ≤ 3) :
+    Obs (hoistWith C (elabRecWithProducers C
+      (elabRecWithCallbacks C H stmt @calls.elabCallRet) producers) (.call f args))
+      (fun out => height out.2 ≤ height (.call f args)) := by
+  apply call_output_height_of_raw_bounds C _ f args hh
+  · exact callbacks_encode_output_height C H stmt calls producers
+  · exact hopen
+  · exact producers_memory_dispatch_output_height C _ producers
+
+end Solidity.ElabCallHeight

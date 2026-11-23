@@ -91,7 +91,7 @@ open Solidity.Correctness.Lowering Solidity.Correctness.Lowering.Total
 open Solidity.Correctness.Lowering.Checker
 
 /-- The decoder reads neither the fresh-name scheme nor the counter. -/
-def sampleNames : FreshNames := ⟨fun s n => s ++ toString n, fun _ => none⟩
+def sampleNames : FreshNames := .ofPrefixes "se" "sp" "ie" "mv"
 
 def sampleRequest (raw : List RawStmt) : Request :=
   ⟨IntrinsicProbe.C, ⟨sampleNames, none, raw, RawProbe.scope, ⟨(RawProbe.inputLocals, 1), {}⟩⟩,
@@ -230,8 +230,7 @@ example : Observe.first (fun n => if n = 2 then some (.success []) else none) 5 
     some (.success []) := rfl
 
 /-- The generated identifiers are those in the counter interval only. -/
-example : Allocation.generated ⟨fun s n => s ++ toString n,
-      fun s => if s = "brk1" then some ("brk", 1) else if s = "se7" then some ("se", 7) else none⟩
+example : Allocation.generated (FreshNames.ofPrefixes "se" "sp" "ie" "mv")
     1 3 ["i", "brk1", "se7"] = [("brk", 1)] := by decide
 
 /-- The decoder against the independent spelling relation (H1024): sound
@@ -294,10 +293,12 @@ example (s : SourceProgram) (e : SourceExecution s) (points : e.plan.isSome = tr
     ¬ (Observe.source s).allowed e :=
   fun admitted => by rw [admitted.1] at points; cases points
 
-/-- H1036: the round-trip law is part of the allocation obligation; a scheme
-that never reads a name back does not satisfy it. -/
-example : ¬ Allocation.RoundTrip ⟨fun s n => s ++ toString n, fun _ => none⟩ :=
-  fun law => nomatch law "se" (by decide) 0
+/-- H1036: a parser that never reads a name back cannot form a lawful scheme. -/
+example : ¬ ∃ names : FreshNames, names.parse = (fun _ => none) := by
+  rintro ⟨names, hp⟩
+  have law := names.roundTrip "se" (by decide) 0
+  rw [hp] at law
+  cases law
 /-! The default scheme reads back the allocated bases (sampled, not proved for
 every index; evaluated, not kernel-checked). -/
 #guard Allocation.bases.all fun base => [0, 1, 7, 42].all fun k =>
