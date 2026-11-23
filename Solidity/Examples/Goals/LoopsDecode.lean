@@ -333,4 +333,20 @@ example : (Decode.tablesW.decode { narrowRequest [.assign (.name "s") (.num 255)
 example : Decode.tablesW.decode { narrowRequest [.assign (.name "s") (.num 256)] with
     contract := { vars := [("s", .prim .uint)], widths := [("s", 8)] } } = none := rfl
 
+/-- Full-width matching does not imply converse matching at a narrow width:
+300 has a related uint256 value but no related uint8 value. -/
+example (E : Source.Env) (C : Contract) (H : HTy) :
+    (∃ v, Version.Relation.val E C H (Source.Agreement.sourceTy .uint) (.val .uint) v
+      (⟨300, by decide⟩ : PrimTy.uint.Denote)) ∧
+    ¬ ∃ v, Version.Relation.val E C H (.int Source.IntTy.u8) (.val .uint) v
+      (⟨300, by decide⟩ : PrimTy.uint.Denote) := by
+  constructor
+  · exact Version.Relation.val_total E C H .uint _
+  · rintro ⟨v, h⟩
+    cases h
+    rename_i n unsigned bounds same
+    have upper : n ≤ 255 := bounds.2
+    change 300 = n at same
+    omega
+
 end Solidity.Examples.Goals.LoopsDecode
