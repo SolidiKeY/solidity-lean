@@ -105,7 +105,7 @@ jobs:
       - name: Check executable goal-binding kernel replay
         env:
           LEAN_NUM_THREADS: '1'
-        run: timeout 300 lake lean tests/executable-goal-binding/KernelReplay.lean -- --tstack=131072 -j1
+        run: timeout 300 lake lean scripts/trust/executable-goal-replay.lean -- --tstack=131072 -j1
       # H107/F7: keep inhabited compiler_correct/net/checked applications live.
       - name: Elaborate headline non-vacuity witnesses
         env:
