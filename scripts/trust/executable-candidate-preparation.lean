@@ -21,6 +21,11 @@ theorem preparationOtherLayout : ¬ Fml.Valid (.ff : Fml quotationContract []) :
       (otherLayoutCandidate.tstate quotationContract) (.ff : Fml quotationContract []) = .ff from rfl)
 theorem preparationWrongShape : True := True.intro
 
+def freshSpellingCandidate : Cand C := { candidate with args := [("se1", .bool true)] }
+theorem preparationFreshSpelling : ¬ Fml.Valid (.ff : Fml C []) :=
+  Fml.not_valid_of_eval3Peel freshSpellingCandidate.sourceValuesV1 (freshSpellingCandidate.tstate C)
+    (show Fml.eval3Peel (poolDom freshSpellingCandidate.argInts) freshSpellingCandidate.sourceValuesV1
+      (freshSpellingCandidate.tstate C) (.ff : Fml C []) = .ff from rfl)
 def checkCandidatePreparation : CommandElabM Unit := do
   if (← getOptions).getBool `debug.skipKernelTC false then
     throwError "kernel checking must be enabled"
@@ -145,6 +150,14 @@ def checkCandidatePreparation : CommandElabM Unit := do
     | .ok () => throwError "refutation accepted for another captured target"
     setEnv base
 
+  let bridgeResult ← Solidity.Frontend.ExecutableMetadataV2.Internal.checkRetainedExecutableFailureV2
+    supportedRoot supportedRequest 1 "first" ``preparationFreshSpelling Json.null
+  match bridgeResult with
+  | .error reason =>
+    unless reason.startsWith "retained values bridge refused:" do
+      throwError "wrong values bridge failed at unrelated stage: {reason}"
+    logInfo m!"EXECUTABLE_FAILURE default-name bridge unavailable (not a false-equation proof): {reason}"
+  | .ok _ => throwError "source-values equality silently substituted for candidate-values equality"
   logInfo "EXECUTABLE_FAILURE synthetic captured-target checks; no source certificate or span"
 
 run_cmd checkCandidatePreparation
