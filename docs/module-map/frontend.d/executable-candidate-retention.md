@@ -1,0 +1,1 @@
+| `Frontend/ExecutableCounterexampleMetadataV2.lean` | Retains one executable invocation, quotes its actual contracts/formulas with synchronous kernel checks, and joins private invocation identity to pinned source admission. No candidate/failure or span certification. |
