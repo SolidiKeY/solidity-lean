@@ -38,7 +38,7 @@ private theorem not_infers {Γ : Source.Ctx} {t : Source.Syn .expr} (h : InfersB
     obtain ⟨d, hd⟩ := h.2 n (by omega)
     unfold Source.Typed.inferN
     dsimp only [Source.tryConst, Source.Syn.const, Option.orElse]
-    simp only [hd, Option.bind_some]
+    simp only [hd]
     exact ⟨_, rfl⟩
 
 private theorem assign_infers {names : List String} {Γ : Source.Ctx} {x : String}
@@ -55,15 +55,9 @@ private theorem assign_infers {names : List String} {Γ : Source.Ctx} {x : Strin
     | succ n =>
       obtain ⟨dl, hl⟩ := bound_lval_infer hΓ hx n
       obtain ⟨dr, hr⟩ := h.2 (n + 1) (by omega)
-      have hm : Γ.assignRefused .bool (.ident x) = false := by
-        unfold Source.Ctx.assignRefused
-        have hmapping : Γ.assignsMapping .bool = false := rfl
-        rw [hmapping]
-        rfl
       unfold Source.Typed.inferN
       dsimp only [Source.tryConst, Source.Syn.const, Option.orElse]
-      have himp : Source.STy.implicit Γ.isBase Γ.mapFree .bool .bool = true := rfl
-      simp only [hl, hr, Option.bind_some, himp, hm]
+      simp only [hl, hr]
       exact ⟨_, rfl⟩
 
 private theorem bin_infers {Γ : Source.Ctx} {e a b : Source.Syn .expr} {k : Source.BinKind}
