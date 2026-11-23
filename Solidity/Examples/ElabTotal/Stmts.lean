@@ -631,3 +631,19 @@ end Solidity.Examples.ElabTotal.Stmts
 /-- info: 'Solidity.ElabSliceOpen.bindBound_eq' depends on axioms: [propext, Quot.sound] -/
 #guard_msgs in
 #print axioms Solidity.ElabSliceOpen.bindBound_eq
+
+/-- info: 'Solidity.ElabCallHeight.selector_height_lt_with_names' depends on axioms: [propext, Quot.sound] -/
+#guard_msgs in
+#print axioms Solidity.ElabCallHeight.selector_height_lt_with_names
+
+/-- info: 'Solidity.ElabCallHeight.selector_args_height_lt_with_names' depends on axioms: [propext, Quot.sound] -/
+#guard_msgs in
+#print axioms Solidity.ElabCallHeight.selector_args_height_lt_with_names
+
+/-- info: 'Solidity.ElabCallHeight.selector_input_lt_with_names' depends on axioms: [propext, Quot.sound] -/
+#guard_msgs in
+#print axioms Solidity.ElabCallHeight.selector_input_lt_with_names
+
+/-- info: 'Solidity.ElabCallHeight.selector_encoding_inputs_lt_with_names' depends on axioms: [propext, Quot.sound] -/
+#guard_msgs in
+#print axioms Solidity.ElabCallHeight.selector_encoding_inputs_lt_with_names

@@ -362,7 +362,15 @@
   "Quot.sound",
   "propext"
  ],
+ "Solidity/Examples/ElabTotal/Stmts.lean:Solidity.ElabCallHeight.selector_args_height_lt_with_names": [
+  "Quot.sound",
+  "propext"
+ ],
  "Solidity/Examples/ElabTotal/Stmts.lean:Solidity.ElabCallHeight.selector_encoding_inputs_lt": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Examples/ElabTotal/Stmts.lean:Solidity.ElabCallHeight.selector_encoding_inputs_lt_with_names": [
   "Quot.sound",
   "propext"
  ],
@@ -370,7 +378,15 @@
   "Quot.sound",
   "propext"
  ],
+ "Solidity/Examples/ElabTotal/Stmts.lean:Solidity.ElabCallHeight.selector_height_lt_with_names": [
+  "Quot.sound",
+  "propext"
+ ],
  "Solidity/Examples/ElabTotal/Stmts.lean:Solidity.ElabCallHeight.selector_input_lt": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Examples/ElabTotal/Stmts.lean:Solidity.ElabCallHeight.selector_input_lt_with_names": [
   "Quot.sound",
   "propext"
  ],
