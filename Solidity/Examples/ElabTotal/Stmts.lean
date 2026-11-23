@@ -647,3 +647,23 @@ end Solidity.Examples.ElabTotal.Stmts
 /-- info: 'Solidity.ElabCallHeight.selector_encoding_inputs_lt_with_names' depends on axioms: [propext, Quot.sound] -/
 #guard_msgs in
 #print axioms Solidity.ElabCallHeight.selector_encoding_inputs_lt_with_names
+
+/-- info: 'Solidity.ElabControlProof.memory_dispatch_result_name' depends on axioms: [propext, Quot.sound] -/
+#guard_msgs in
+#print axioms Solidity.ElabControlProof.memory_dispatch_result_name
+
+/-- info: 'Solidity.ElabCallHeight.memory_dispatch_output_height' depends on axioms: [propext, Quot.sound] -/
+#guard_msgs in
+#print axioms Solidity.ElabCallHeight.memory_dispatch_output_height
+
+/-- info: 'Solidity.ElabCallHeight.producers_memory_dispatch_output_height' depends on axioms: [propext, Quot.sound] -/
+#guard_msgs in
+#print axioms Solidity.ElabCallHeight.producers_memory_dispatch_output_height
+
+/-- info: 'Solidity.ElabCallHeight.callbacks_encode_output_height' depends on axioms: [propext, Quot.sound] -/
+#guard_msgs in
+#print axioms Solidity.ElabCallHeight.callbacks_encode_output_height
+
+/-- info: 'Solidity.ElabCallHeight.callbacks_call_output_height' depends on axioms: [propext, Quot.sound] -/
+#guard_msgs in
+#print axioms Solidity.ElabCallHeight.callbacks_call_output_height

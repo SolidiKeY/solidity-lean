@@ -115,6 +115,14 @@
   "Quot.sound",
   "propext"
  ],
+ "Solidity/Examples/ElabTotal/Stmts.lean:Solidity.ElabCallHeight.callbacks_call_output_height": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Examples/ElabTotal/Stmts.lean:Solidity.ElabCallHeight.callbacks_encode_output_height": [
+  "Quot.sound",
+  "propext"
+ ],
  "Solidity/Examples/ElabTotal/Stmts.lean:Solidity.ElabCallHeight.captureBefore_height_bound": [
   "Quot.sound",
   "propext"
@@ -262,6 +270,10 @@
   "Quot.sound",
   "propext"
  ],
+ "Solidity/Examples/ElabTotal/Stmts.lean:Solidity.ElabCallHeight.memory_dispatch_output_height": [
+  "Quot.sound",
+  "propext"
+ ],
  "Solidity/Examples/ElabTotal/Stmts.lean:Solidity.ElabCallHeight.modular_output_height": [
   "Quot.sound",
   "propext"
@@ -327,6 +339,10 @@
   "propext"
  ],
  "Solidity/Examples/ElabTotal/Stmts.lean:Solidity.ElabCallHeight.prefix_input_lt": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Examples/ElabTotal/Stmts.lean:Solidity.ElabCallHeight.producers_memory_dispatch_output_height": [
   "Quot.sound",
   "propext"
  ],
@@ -491,6 +507,10 @@
   "propext"
  ],
  "Solidity/Examples/ElabTotal/Stmts.lean:Solidity.ElabControlProof.hash_result_name": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Examples/ElabTotal/Stmts.lean:Solidity.ElabControlProof.memory_dispatch_result_name": [
   "Quot.sound",
   "propext"
  ],
