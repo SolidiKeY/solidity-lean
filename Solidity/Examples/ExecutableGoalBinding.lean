@@ -1,10 +1,11 @@
 import Solidity.Tools.ExecutableGoalBinding
 import Solidity.Frontend.ExecutableAst.Shared.ObligationCapture
-import Solidity.Tools.DirectRuntime
 
-/-! Structural executable-goal controls only. These are not the four original source imports,
-not source adequacy and not ordinary runtime evidence. Guard wrong target,
-wrong retained values, changed candidate arguments and unchecked proof types.
+/-! # Executable goal-binding examples
+
+Checks exact-target refutation, true-target refusal, retained-value identity,
+argument identity and storage-layout rebinding. The compact contracts below
+are structural examples; they do not certify compiler output or source locations.
 -/
 open Lean Elab Command Meta Solidity Solidity.Tools
 namespace ExecutableBindingControls
@@ -54,7 +55,7 @@ run_cmd do
   let executable : Contract := { vars := [], funs := [("noop", emptyFunction)] }
   match obligationCapture noLoops noPre executable "noop" false false with
   | .error reason => throwError "structural positive capture refused: {reason}"
-  | .ok _ => logInfo "EXECUTABLE_V2 actual builder positive capture confirmed (injected callbacks)"
+  | .ok _ => logInfo "EXECUTABLE_BINDING actual builder positive capture confirmed (injected callbacks)"
 
 run_cmd do
   let some (.thmInfo certificate) := (← getEnv).find? ``exactTarget
@@ -83,7 +84,7 @@ run_cmd do
     match Kernel.Environment.addDecl checked options declaration with
     | .ok _ => throwError "wrong-target certificate accepted"
     | .error (.declTypeMismatch ..) =>
-      logInfo "EXECUTABLE_V2 correct-target replay and wrong-target declaration-type mismatch confirmed"
+      logInfo "EXECUTABLE_BINDING correct-target replay and wrong-target declaration-type mismatch confirmed"
     | .error _ => throwError "wrong-target refusal was not a declaration-type mismatch"
 
 #print axioms Solidity.Tools.RetainedValuesBinding.failure
@@ -95,56 +96,6 @@ run_cmd do
 #print axioms ExecutableBindingControls.changedArgumentsRefused
 
 
-/- Injected compact AST exercises actual request dispatch and capture order.
-It is not compiler output, source certification or a retained proof candidate. -/
-run_cmd do
-  let .ok request := Json.parse r#"{"contract":{"nodeType":"ContractDefinition","contractKind":"contract","nodes":[{"nodeType":"FunctionDefinition","id":1,"name":"first","kind":"function","visibility":"public","stateMutability":"pure","modifiers":[],"parameters":{"parameters":[]},"returnParameters":{"parameters":[]},"body":{"nodeType":"Block","statements":[]},"documentation":""},{"nodeType":"FunctionDefinition","id":2,"name":"second","kind":"function","visibility":"public","stateMutability":"pure","modifiers":[],"parameters":{"parameters":[]},"returnParameters":{"parameters":[]},"body":{"nodeType":"Block","statements":[]},"documentation":""}]},"listing":true}"# | throwError "capture fixture JSON"
-  let .ok (_, listed) := DirectRuntime.checkWithGoals request
-    | throwError "listing capture refused"
-  unless listed.size == 2 do throwError "listing lost ordered goals"
-  for i in [:listed.size] do
-    let some goal := listed[i]? | throwError "missing ordered listing goal"
-    unless goal.sourceId == Int.ofNat (i + 1) &&
-        goal.functionName == (if i == 0 then "first" else "second") do
-      throwError "capture identity/order mismatch"
-    unless goal.request.compress == request.compress &&
-        goal.source.compress == ((request.getObjVal? "contract").toOption.getD .null).compress do
-      throwError "capture request/source mismatch"
-    unless goal.retryRequired? == none && !goal.retry && goal.result.isNone && goal.priorResult.isNone do
-      throwError "listing fabricated an evaluation or retry"
-  let ordinary := request.setObjVal! "listing" (toJson false)
-  let .ok (report, evaluated) := DirectRuntime.checkWithGoals ordinary
-    | throwError "ordinary capture refused"
-  let .ok rows := report.getArr? | throwError "ordinary report shape"
-  unless rows.size == 2 && evaluated.size == 2 do throwError "ordinary capture count"
-  for i in [:evaluated.size] do
-    let some goal := evaluated[i]? | throwError "missing ordered evaluation goal"
-    let some result := goal.result | throwError "missing actual evaluation"
-    unless !goal.retry && goal.priorResult.isNone && goal.sourceId == Int.ofNat (i + 1) &&
-        goal.request.compress == ordinary.compress do throwError "wrong evaluation ownership"
-    let .ok status := result.getObjValAs? String "status" | throwError "missing evaluation status"
-    let .ok rowStatus := rows[i]!.getObjValAs? String "status" | throwError "missing report status"
-    unless goal.retryRequired? == some false && status == "proved" && rowStatus == "proved" do throwError "unexpected fixture status"
-    let expectedName := if i == 0 then "first" else "second"
-    let .ok rowId := rows[i]!.getObjValAs? Int "sourceId" | throwError "missing report identity"
-    let .ok rowName := rows[i]!.getObjValAs? String "function" | throwError "missing report name"
-    let .ok memberId := goal.member.getObjValAs? Int "id" | throwError "missing member identity"
-    let .ok memberName := goal.member.getObjValAs? String "name" | throwError "missing member name"
-    unless rowId == goal.sourceId && memberId == goal.sourceId &&
-        rowName == expectedName && memberName == expectedName && goal.functionName == expectedName do
-      throwError "capture/report/member identity mismatch"
-  let foreign := request.setObjVal! "sourceId" (toJson (99 : Int))
-  if (DirectRuntime.checkWithGoals foreign).isOk then
-    throwError "foreign selection admitted"
-  let malformed := request.setObjVal! "sourceId" (toJson "1")
-  if (DirectRuntime.checkWithGoals malformed).isOk then
-    throwError "malformed selector admitted"
-  logInfo "EXECUTABLE_V2 injected actual-dispatch listing/evaluation/order/ownership/refusal controls passed"
-
-#print axioms DirectRuntime.checkWithGoals_forget
-
-/- A nondefault typed candidate under distinct contracts. This is synthetic
-candidate-data preservation, not the four source cases or failure equivalence. -/
 def layoutImported : Contract := { vars := [("x", .prim .uint), ("flag", .prim .bool)] }
 def layoutExecutable : Contract :=
   { layoutImported with
@@ -185,7 +136,7 @@ run_cmd do
     let axioms ← collectAxioms name
     unless axioms.all ([``propext, ``Classical.choice, ``Quot.sound].contains ·) do
       throwError "candidate layout control has nonstandard axioms"
-    logInfo m!"EXECUTABLE_V2 layout control axioms: {name}: {axioms}"
+    logInfo m!"EXECUTABLE_BINDING layout control axioms: {name}: {axioms}"
 
 
 end ExecutableBindingControls

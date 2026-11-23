@@ -1,12 +1,10 @@
 import Solidity.Tools.SourceCounterexample
 
-/-! # Exact executable failure at a retained candidate
+/-! # Executable goal binding
 
-Guards the regression where two failed evaluations are reported as a theorem
-transporting an importer proof. These records certify the exact executable
-formula only. Actual source/request authentication belongs to the opt-in
-frontend ingress; a public record does not authenticate a caller's goal pair.
-No source search, primitive admission guard, statement or budget is changed.
+Relates imported and executable candidates by typed storage and call-data
+identities. Each formula failure is proved independently at its candidate;
+matching evaluation results alone do not establish formula equivalence.
 -/
 namespace Solidity.Tools
 
@@ -45,7 +43,7 @@ theorem Cand.rebindLayout_argInts {C D : Contract} (candidate : Cand C)
 theorem Cand.rebindLayout_vals [FreshNames] {C D : Contract} (candidate : Cand C)
     (layout : C.vars = D.vars) : (candidate.rebindLayout layout).vals = candidate.vals := rfl
 
-/-- Build the approved typed same-candidate relation from the original candidate
+/-- Build a typed same-candidate relation from the retained candidate
 and a kernel proof of the actual layouts. Source/import/request authentication
 and an independent exact executable failure proof remain frontend obligations. -/
 def SameCandidate.ofLayout (g : GoalPair) (candidate : Cand g.importedContract)
@@ -58,7 +56,7 @@ theorem SameCandidate.ofLayout_imported (g : GoalPair) (candidate : Cand g.impor
     (layout : g.importedContract.vars = g.executableContract.vars) :
     (ofLayout g candidate layout).imported = candidate := rfl
 
-/-- V1's source-values equation is not a `Cand.vals` equation. Both are required
+/-- The retained source-values equation is not a `Cand.vals` equation. Both are required
 before rewriting a retained failure to the candidate-derived values here. -/
 structure RetainedValuesBinding (C : Contract) (candidate : Cand C)
     (retained : List (Var × Semantics.CallValue)) : Prop where
