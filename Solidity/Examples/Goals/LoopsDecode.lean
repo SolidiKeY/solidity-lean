@@ -10,6 +10,9 @@ example : Decode.tables1 = ⟨Decode.typeName, Decode.localTy, Decode.unit, Deco
 /-- The bridge: the generic decoder at the landed tables preserves every request. -/
 example (r : Request) : Decode.tables1.decode r = Decode.decode r := Decode.decode_tables1 r
 
+/-- The retained width table configuration. -/
+example : Decode.tablesW = ⟨Decode.typeNameW, Decode.localTyW, Decode.unitW, Decode.env⟩ := rfl
+
 /-- Retained width probes use an empty contract and two narrow integer locals. -/
 def narrowRequest (raw : List RawStmt) : Request :=
   ⟨{ vars := [] }, ⟨⟨fun s n => s ++ toString n, fun _ => none⟩, none, raw,
