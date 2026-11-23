@@ -4,3 +4,4 @@
 | `Examples/Lowering/Sim/Coverage.lean` | Checks both coverage obstructions and the versioned receipt projection, plus independent decoding, alignment, actual lowering and program-acceptance facts for the existing smoke. |
 | `Correctness/Lowering/Sim/Coverage/Alignment.lean` | Derives an aligned context map from existing Source spelling using the decoder owner’s primitive-locals theorem, independently of the restricted coverage predicate. |
 | `Correctness/Lowering/Sim/Coverage/LoweringReceipt.lean` | Converts successful finite lowering derivations into actual standalone lowering receipts, preserving all state; no elaboration-success claim. |
+| `Correctness/Lowering/Sim/Coverage/BooleanDomain.lean` | H1361 syntax-defined unbounded Boolean control domain for the restricted coverage milestone; decoder completeness remains a separate obligation. |

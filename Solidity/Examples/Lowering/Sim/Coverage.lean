@@ -1,4 +1,5 @@
 import Solidity.Correctness.Lowering.Sim.Coverage.SpellingObstruction
+import Solidity.Correctness.Lowering.Sim.Coverage.BooleanDomain
 import Solidity.Correctness.Lowering.Sim.Coverage.Alignment
 import Solidity.Correctness.Lowering.Sim.Coverage.LoweringReceipt
 import Solidity.Examples.Lowering.Sim.Match
@@ -64,6 +65,14 @@ example : ∃ (out : List RawStmt)
     none (.assign (.name "i") (.name "a")) Match.body.input.before
     (Solidity.Correctness.Lowering.Total.Coverage.hasIncDec_assign _ _)
   exact ⟨_, _, lowerAt_of_lowersTo (h.lowers Match.body.input.scope)⟩
+
+/-- The actual `while (i = a) break;` smoke belongs to the selected syntax
+boundary, independently of decoder success and production receipts. -/
+example (out : Solidity.Correctness.Lowering.Checker.Output Match.C [.val .bool, .val .bool]) :
+    BooleanDomain.Input Match.body (Match.emitted out) := by
+  refine ⟨rfl, rfl, rfl, rfl, ["i", "a"], _, _, rfl, rfl, ?_, ?_⟩
+  · exact .assign (by decide) (.name (by decide))
+  · exact .cons .brk .nil
 
 end Solidity.Examples.Lowering.Sim.Coverage
 
