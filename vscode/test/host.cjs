@@ -286,7 +286,7 @@ contract FilteredHost {
       const member=mainDocument.positionAt(mainText.indexOf('identity(3)'));
       const completion=await vscode.commands.executeCommand('vscode.executeCompletionItemProvider',mainDocument.uri,member);assert.ok(completion.items.some(i=>i.label==='identity'));assert.ok(!completion.items.some(i=>i.label==='works'));
       const rename=await vscode.commands.executeCommand('vscode.executeDocumentRenameProvider',mainDocument.uri,call,'renamed');assert.equal(rename.get(vscode.Uri.file(projectLib)).length,1);assert.ok(rename.get(vscode.Uri.file(projectOther)).length);
-      const fixSource=join(projectRoot,'Fixes.sol');writeFileSync(fixSource,'pragma solidity ^0.8.34; contract Fixes {function f(uint unused) public pure returns(uint) {uint local=1; return 2;}}');
+      const fixSource=join(projectRoot,'Fixes.sol');writeFileSync(fixSource,require('../parity/code-action-lifecycle.cjs').source);
       const fixDocument=await vscode.workspace.openTextDocument(fixSource);await vscode.commands.executeCommand('vscode.executeDocumentSymbolProvider',fixDocument.uri);
       const fixes=await vscode.commands.executeCommand('vscode.executeCodeActionProvider',fixDocument.uri,new vscode.Range(fixDocument.positionAt(0),fixDocument.positionAt(fixDocument.getText().length)),'quickfix');
       assert.ok(fixes.some(a=>a.title.includes('SPDX')));assert.ok(fixes.some(a=>a.title.includes('unused parameter')));assert.ok(fixes.some(a=>a.title.includes('unused local')));

@@ -1,17 +1,24 @@
 'use strict';
 const {join,resolve,sep}=require('node:path');
 const {createHash}=require('node:crypto');
+const {isDeepStrictEqual}=require('node:util');
 const {summarize,issueURL}=require('./status-summary.cjs');
 const model=require('./model.cjs');
 
 function install(vscode,context,servers,reportError){
-  const selector={scheme:'file',pattern:'**/*.sol'};
+  const {selector,isSolidityFile}=require('./editor-document.cjs');
+  const codeActions=new WeakMap(),documentEpochs=new WeakMap();
+  const actionSnapshot=doc=>({doc,uri:doc.uri.toString(),version:doc.version,sourceHash:createHash('sha256').update(doc.getText()).digest('hex'),epoch:pickerEpochs.get(doc.uri.toString())||0,documentEpoch:documentEpochs.get(doc)||0});
+  const actionFailure=(message,code=-32801)=>Object.assign(new Error(message),{code});
+  const assertActionCurrent=(owner,token)=>{if(token?.isCancellationRequested)throw actionFailure('Request cancelled',-32800);if(disposed||(documentEpochs.get(owner.doc)||0)!==owner.documentEpoch||!isSolidityFile(owner.doc)||!vscode.workspace.textDocuments.includes(owner.doc)||owner.doc.uri.toString()!==owner.uri||owner.doc.version!==owner.version||createHash('sha256').update(owner.doc.getText()).digest('hex')!==owner.sourceHash||(pickerEpochs.get(owner.uri)||0)!==owner.epoch)throw actionFailure('Code action document or service changed');};
+  const materializeAction=(row,owner,deferred)=>{const action=new vscode.CodeAction(row.title,vscode.CodeActionKind.QuickFix);if(!deferred&&row.edit)action.edit=workspaceEdit(row.edit);codeActions.set(action,{owner,wire:structuredClone(row)});return action;};
+
   const range=r=>new vscode.Range(r.start.line,r.start.character,r.end.line,r.end.character);
   const location=l=>new vscode.Location(vscode.Uri.parse(l.uri),range(l.range));
   const raw=async(method,doc,params,token)=>{
     const controller=new AbortController(),registration=token?.onCancellationRequested(()=>controller.abort());
     if(token?.isCancellationRequested)controller.abort();
-    try{return await servers.request(method,doc,params,{signal:controller.signal});}finally{registration?.dispose();}
+    try{if(!isSolidityFile(doc))throw actionFailure('Unsupported editor document');const owner=actionSnapshot(doc);assertActionCurrent(owner,token);const result=await servers.request(method,doc,params,{signal:controller.signal});assertActionCurrent(owner,token);return result;}finally{registration?.dispose();}
   };
   const query=async(method,doc,params,token)=>{
     try{return await raw(method,doc,params,token);}
@@ -25,15 +32,29 @@ function install(vscode,context,servers,reportError){
   const providers=[
     vscode.languages.registerDocumentFormattingEditProvider(selector,{async provideDocumentFormattingEdits(doc,options,token){return (await query('textDocument/formatting',doc,{options},token)||[]).map(e=>new vscode.TextEdit(range(e.range),e.newText));}}),
     vscode.languages.registerCodeActionsProvider(selector,{async provideCodeActions(doc,selection,options,token){
-      const diagnostics=options.diagnostics.map(d=>({range:{start:d.range.start,end:d.range.end},message:d.message,code:typeof d.code==='object'?d.code.value:d.code,severity:d.severity+1}));
+      if(!isSolidityFile(doc))return[];const owner=actionSnapshot(doc),diagnostics=options.diagnostics.map(d=>({range:{start:d.range.start,end:d.range.end},message:d.message,source:d.source,code:typeof d.code==='object'?d.code.value:d.code,severity:d.severity+1}));
       const actions=await query('textDocument/codeAction',doc,{range:{start:selection.start,end:selection.end},context:{diagnostics,only:options.only?[options.only.value]:undefined}},token)||[];
-      return actions.map(row=>{const action=new vscode.CodeAction(row.title,vscode.CodeActionKind.QuickFix);action.edit=workspaceEdit(row.edit);return action;});
+      if(!actions.length)return[];assertActionCurrent(owner,token);
+      return actions.map(row=>{const ref=row.data?.solidityLeanCodeActionV1;if(ref&&ref.uri!==owner.uri)throw actionFailure('Foreign compiler code action');return materializeAction(row,owner,!!ref);});
+    },async resolveCodeAction(action,token){
+      const record=codeActions.get(action);if(!record)throw actionFailure('Unknown editor code action',-32602);const {owner,wire}=record;assertActionCurrent(owner,token);
+      const ref=wire.data?.solidityLeanCodeActionV1,resolved=ref?await raw('codeAction/resolve',owner.doc,structuredClone(wire),token):wire;assertActionCurrent(owner,token);
+      if(ref){if(!isDeepStrictEqual(resolved?.data,wire.data)||resolved.edit?.documentChanges?.length!==1||resolved.edit.documentChanges.some(c=>c.textDocument.uri!==owner.uri||c.textDocument.version!==owner.version))throw actionFailure('Foreign or incomplete resolved compiler edit');}
+      return materializeAction(resolved,owner,false);
     }},{providedCodeActionKinds:[vscode.CodeActionKind.QuickFix]}),
     vscode.languages.registerWorkspaceSymbolProvider({async provideWorkspaceSymbols(queryText,token){
-      if(!servers.clients.size){const files=await vscode.workspace.findFiles('**/*.sol','**/{node_modules,.lake,.git,.cache}/**',1);if(files.length)await servers.open(await vscode.workspace.openTextDocument(files[0]));}
       const abort=new AbortController(),registration=token?.onCancellationRequested(()=>abort.abort());if(token?.isCancellationRequested)abort.abort();
-      try{return (await servers.workspaceSymbols(queryText,{signal:abort.signal})).map(s=>new vscode.SymbolInformation(s.name,s.kind-1,'',location(s.location)));}
-      catch(error){if(![-32800,-32801].includes(error.code))reportError(error);return [];}
+      const current=()=>{if(abort.signal.aborted)throw actionFailure('Request cancelled',-32800);if(disposed)throw actionFailure('Editor services disposed');};
+      try{
+        current();
+        if(!servers.clients.size){
+          const files=await vscode.workspace.findFiles('**/*.sol','**/{node_modules,.lake,.git,.cache}/**',1,token);current();
+          if(files.length){const doc=await vscode.workspace.openTextDocument(files[0]);current();await servers.open(doc);current();}
+        }
+        const result=await servers.workspaceSymbols(queryText,{signal:abort.signal});current();
+        return result.map(s=>new vscode.SymbolInformation(s.name,s.kind-1,'',location(s.location)));
+      }
+      catch(error){if(![-32800,-32801].includes(error.code)&&error.code!=='CANCELLED')reportError(error);return [];}
       finally{registration?.dispose();}
     }}),
     vscode.languages.registerCompletionItemProvider(selector,{async provideCompletionItems(doc,position,token){
@@ -64,7 +85,7 @@ function install(vscode,context,servers,reportError){
   const touch=uri=>{const key=uri.toString();pickerEpochs.set(key,(pickerEpochs.get(key)||0)+1);lifecycleRevision++;};
   let disposed=false;
   const document=uri=>vscode.workspace.textDocuments.find(doc=>!doc.isClosed&&doc.uri.toString()===uri);
-  const current=doc=>{const value=states.get(doc.uri.toString());return !doc.isClosed&&value?.document===doc&&value.params.version===doc.version&&value.text===doc.getText()?value.params:null;};
+  const current=doc=>{const value=states.get(doc.uri.toString());return isSolidityFile(doc)&&value?.document===doc&&value.params.version===doc.version&&value.text===doc.getText()?value.params:null;};
   const draw=editor=>{
     const state=current(editor.document);
     const enabled=vscode.workspace.getConfiguration('solidityLean',editor.document.uri).get('displayGutterStatus',true);
@@ -82,7 +103,7 @@ function install(vscode,context,servers,reportError){
   const render=()=>{
     if(disposed)return;
     const active=vscode.window.activeTextEditor,state=active&&current(active.document),identity=active&&identities.get(active.document.uri.toString());
-    if(identity&&!active.document.isClosed&&active.document.uri.scheme==='file'&&active.document.uri.fsPath.toLowerCase().endsWith('.sol')){
+    if(identity&&isSolidityFile(active.document)){
       versionBar.text=identity.serverInfo.version;versionBar.tooltip=`${identity.serverInfo.name}: ${identity.serverInfo.version}\nNode.js: ${identity.runtimeInfo?.version||'unknown'}\nExtension: ${require('../package.json').version}`;versionBar.show();
     }else versionBar.hide();
     if(state){
@@ -105,7 +126,7 @@ function install(vscode,context,servers,reportError){
   servers.on('status',status);servers.on('identity',identity);servers.on('serverError',failed);
   providers.push(statusBar,versionBar,...icons.values(),
     vscode.commands.registerCommand('solidityLean.openStatusBarMenu',async()=>{
-      const owner=vscode.window.activeTextEditor?.document,version=owner?.version,text=owner?.getText(),epoch=owner?pickerEpochs.get(owner.uri.toString()):lifecycleRevision,active=activeRevision,identitySnapshot=owner&&identities.get(owner.uri.toString());
+      const owner=vscode.window.activeTextEditor?.document,version=owner?.version,text=owner?.getText(),epoch=owner?pickerEpochs.get(owner.uri.toString()):lifecycleRevision,active=activeRevision,documentEpoch=owner?(documentEpochs.get(owner)||0):0,identitySnapshot=owner&&identities.get(owner.uri.toString());
       const actions=[{label:'Restart Solidity Lean',description:'Restart the language servers',command:'solidityLean.restartServer'},
         {label:'Show verification output',description:'Open the Solidity Lean output channel',command:'solidityLean.showOutput'}];
       if(owner&&current(owner)&&summarize(current(owner),owner).help)actions.unshift({label:'Help with a proof',description:'Open project proof guide: docs/calculus.md',proofHelp:'guide'},{label:'Proof documentation index',description:'Open project documentation: docs/README.md',proofHelp:'index'});
@@ -113,7 +134,7 @@ function install(vscode,context,servers,reportError){
       const selected=await vscode.window.showQuickPick(actions,{matchOnDescription:true,placeHolder:'Pick an action'});
       if(disposed||!actions.includes(selected)||!vscode.workspace.isTrusted)return;
       if(vscode.window.activeTextEditor?.document!==owner||activeRevision!==active)return;
-      if(owner?(owner.isClosed||owner.version!==version||owner.getText()!==text||pickerEpochs.get(owner.uri.toString())!==epoch):lifecycleRevision!==epoch)return;
+      if(owner?((documentEpochs.get(owner)||0)!==documentEpoch||owner.isClosed||owner.version!==version||owner.getText()!==text||pickerEpochs.get(owner.uri.toString())!==epoch):lifecycleRevision!==epoch)return;
       if(selected.proofHelp){
         const state=owner&&current(owner);if(!state||!summarize(state,owner).help)return;
         const cfg=vscode.workspace.getConfiguration('solidityLean',owner.uri),folder=vscode.workspace.getWorkspaceFolder(owner.uri)?.uri.fsPath,configured=cfg.get('backendPath','');let destination;
@@ -127,7 +148,7 @@ function install(vscode,context,servers,reportError){
     vscode.window.onDidChangeVisibleTextEditors(render),vscode.window.onDidChangeActiveTextEditor(()=>{activeRevision++;render();}),
     vscode.workspace.onDidChangeConfiguration(event=>{if(event.affectsConfiguration('solidityLean.displayGutterStatus'))render();}),
     vscode.workspace.onDidChangeTextDocument(event=>{if(event.contentChanges.length)clear(event.document.uri);}),
-    vscode.workspace.onDidCloseTextDocument(doc=>{clear(doc.uri);clearIdentity(doc.uri);pickerEpochs.delete(doc.uri.toString());}),
+    vscode.workspace.onDidCloseTextDocument(doc=>{documentEpochs.set(doc,(documentEpochs.get(doc)||0)+1);clear(doc.uri);clearIdentity(doc.uri);pickerEpochs.delete(doc.uri.toString());}),
     {dispose(){disposed=true;servers.removeListener('status',status);servers.removeListener('identity',identity);servers.removeListener('serverError',failed);states.clear();identities.clear();pickerEpochs.clear();}});
   context.subscriptions.push(...providers);
   return {clear,clearIdentity};

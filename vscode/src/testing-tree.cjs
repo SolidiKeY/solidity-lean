@@ -6,10 +6,11 @@ const rowId=(uri,row)=>`${uri}#${encodeURIComponent(row.contract)}:${encodeURICo
 const contains=(a,b)=>compare(a.start,b.start)<=0&&compare(a.end,b.end)>=0;
 const compare=(a,b)=>a.line-b.line||a.character-b.character;
 function currentSymbols(symbols,text){
+ const collection=(nodes,predicate)=>{if(!Array.isArray(nodes))return false;for(let index=0;index<nodes.length;index++)if(!Object.hasOwn(nodes,index)||!predicate(nodes[index]))return false;return true;};
  if(!Array.isArray(symbols))return null;
  const validRange=range=>{if(!model.validRange(range))return false;try{offset(text,range.start);offset(text,range.end);return true;}catch{return false;}};
- const valid=(symbol,parent)=>symbol&&typeof symbol.name==='string'&&Number.isSafeInteger(symbol.kind)&&validRange(symbol.range)&&validRange(symbol.selectionRange)&&contains(symbol.range,symbol.selectionRange)&&(!parent||contains(parent,symbol.range))&&!/^Outdated:/.test(symbol.detail||'')&&Array.isArray(symbol.children)&&symbol.children.every(child=>valid(child,symbol.range));
- return symbols.every(symbol=>valid(symbol))?structuredClone(symbols):null;
+ const valid=(symbol,parent)=>symbol&&typeof symbol.name==='string'&&Number.isSafeInteger(symbol.kind)&&validRange(symbol.range)&&validRange(symbol.selectionRange)&&contains(symbol.range,symbol.selectionRange)&&(!parent||contains(parent,symbol.range))&&!/^Outdated:/.test(symbol.detail||'')&&collection(symbol.children,child=>valid(child,symbol.range));
+ return collection(symbols,symbol=>valid(symbol))?structuredClone(symbols):null;
 }
 function install(vscode,controller,metadata){
  const obligationTag=vscode.TestTag?new vscode.TestTag('solidityLean.discoveredObligation'):null;

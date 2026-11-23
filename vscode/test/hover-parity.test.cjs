@@ -15,3 +15,13 @@ test('injected hover mutations remain rejected without VM recordings (not native
  const expected=require('../parity/workloads.cjs').hoverWorkload('local').cases.find(row=>row.id==='helper-use').expected,hover={contents:{kind:'markdown',value:expected.text},range:structuredClone(expected.range)};assertHoverObservation(hover,expected);
  for(const mutate of [h=>{h.contents.value=h.contents.value.replace('helper','other');},h=>{h.contents.value=h.contents.value.replace('uint256','bool');},h=>{h.contents.value=h.contents.value.replace('Add values.','Wrong comment.');},h=>{h.range.start.character++;},h=>{h.contents.kind='plaintext';}]){const value=structuredClone(hover);mutate(value);assert.notDeepEqual(value,hover,'mutation must actually change the injected response');assert.throws(()=>assertHoverObservation(value,expected));}
 });
+
+// Injected compiler-span boundary; actual compiler matrix is a separate script.
+test('hover documentation strips line prefixes for CR, LF and CRLF without changing prose',()=>{
+ const {hoverContent,position}=require('../src/language-services.cjs');
+ for(const newline of ['\r','\n','\r\n'])for(const doc of [['/// First.','/// Second.'].join(newline),['/**',' * First.',' * Second.',' */'].join(newline)]){
+  const text=doc+newline+'function f() {}',target={nodeType:'FunctionDefinition',name:'f',documentation:{text:'fallback must not substitute for source',src:'doc'}};
+  const index={origins:new Map([[target,{text}]]),nodeRange:(_,src)=>src==='doc'?{start:position(text,0),end:position(text,doc.length)}:{start:position(text,doc.length+newline.length),end:position(text,text.length)}};
+  assert.equal(hoverContent(index,target),'First.\nSecond.\n```solidity\nfunction f()\n```');
+ }
+});

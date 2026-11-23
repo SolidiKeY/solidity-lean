@@ -1,5 +1,5 @@
 'use strict';
-const { resolve, extname, dirname } = require('node:path');
+const { resolve, dirname } = require('node:path');
 const { createHash } = require('node:crypto');
 const { runBackend } = require('./backend.cjs');
 const model = require('./model.cjs');
@@ -26,7 +26,7 @@ function createExtension(vscode, context, backend = runBackend, service = null) 
   let disposed=false,restartGeneration=0,disposal;
   const documentGenerations=new Map();
   const key = uri => uri.toString();
-  const isSolidity = doc => doc?.uri.scheme === 'file' && extname(doc.uri.fsPath).toLowerCase() === '.sol';
+  const isSolidity=require('./editor-document.cjs').isSolidityFile;
   const toRange = range => new vscode.Range(range.start.line, range.start.character, range.end.line, range.end.character);
   function settings(doc) {
     const cfg = vscode.workspace.getConfiguration('solidityLean', doc.uri);
@@ -105,7 +105,7 @@ function createExtension(vscode, context, backend = runBackend, service = null) 
     const id=key(doc.uri),previous=symbolSnapshots.get(id);if(previous?.compilerOnly&&previous.doc===doc&&previous.version===doc.version&&previous.text===doc.getText())return;
     previous?.abort.abort();const snapshot={doc,version:doc.version,text:doc.getText(),compilerOnly:true,abort:new AbortController()};symbolSnapshots.set(id,snapshot);
     const current=()=>!disposed&&!doc.isClosed&&!snapshot.abort.signal.aborted&&documents.get(id)===doc&&doc.version===snapshot.version&&doc.getText()===snapshot.text&&symbolSnapshots.get(id)===snapshot&&!reports.has(id)&&vscode.workspace.getConfiguration('solidityLean',doc.uri).get('displayVerificationAsTests',true);
-    try{const symbols=await service.request('textDocument/documentSymbol',doc,{}, {signal:snapshot.abort.signal});if(current())testingTree.renderCompiler(doc,symbols);}catch(error){if(current()&&![-32800,-32801].includes(error.code)&&error.code!=='CANCELLED'){symbolSnapshots.delete(id);output.appendLine('Compiler Testing symbols unavailable: '+error.message);}}
+    try{const symbols=await service.request('textDocument/documentSymbol',doc,{}, {signal:snapshot.abort.signal});if(current()&&!testingTree.renderCompiler(doc,symbols))symbolSnapshots.delete(id);}catch(error){if(current()){symbolSnapshots.delete(id);if(![-32800,-32801].includes(error.code)&&error.code!=='CANCELLED')output.appendLine('Compiler Testing symbols unavailable: '+error.message);}}
   }
   function accept(doc, report, config, options = {}) {
     const identities=report.results.map(row=>require('./testing-tree.cjs').rowId(key(doc.uri),row));if(new Set(identities).size!==identities.length)throw new Error('Verifier report has duplicate obligation identities');
@@ -253,15 +253,15 @@ function createExtension(vscode, context, backend = runBackend, service = null) 
       if (event.contentChanges.length) {clear(event.document.uri);if(service && isSolidity(event.document)) {documents.set(key(event.document.uri),event.document);service.open(event.document).catch(showError);}}
     }),
     vscode.workspace.onDidCloseTextDocument(doc => {clear(doc.uri);documents.delete(key(doc.uri));service?.close(doc.uri);}),
-    vscode.languages.registerHoverProvider({ scheme: 'file', pattern: '**/*.sol' }, {
+    vscode.languages.registerHoverProvider(require('./editor-document.cjs').selector, {
       provideHover(doc, position, token) {
-        if(disposed||doc.isClosed||token?.isCancellationRequested)return null;
+        if(disposed||!isSolidity(doc)||token?.isCancellationRequested)return null;
         const version=doc.version,text=doc.getText(),generation=restartGeneration;
         if (service) {
           const controller=new AbortController(),registration=token?.onCancellationRequested(()=>controller.abort());
           if(token?.isCancellationRequested)controller.abort();
           return service.request('textDocument/hover', doc, {position}, {signal:controller.signal}).then(result => {
-          if (!result||disposed||doc.isClosed||controller.signal.aborted||doc.version!==version||doc.getText()!==text||restartGeneration!==generation) return null;
+          if (!result||disposed||!isSolidity(doc)||controller.signal.aborted||doc.version!==version||doc.getText()!==text||restartGeneration!==generation) return null;
           const markdown=new vscode.MarkdownString();if(result.contents.kind==='markdown')markdown.appendMarkdown(result.contents.value);else markdown.appendText(result.contents.value);
           return new vscode.Hover(markdown,toRange(result.range));
         }).catch(error => {if(![-32800,-32801].includes(error.code))showError(error);return null;}).finally(()=>registration?.dispose());
@@ -296,7 +296,7 @@ function createExtension(vscode, context, backend = runBackend, service = null) 
       automaticTests.status(doc,params);
     };
     const receiveDiagnostics=params=>{
-      const doc=documents.get(params.uri);if(!doc||doc.isClosed||doc.version!==params.version)return;
+      const doc=documents.get(params.uri);if(!doc||doc.isClosed||doc.version!==params.version||params.sourceHash!==undefined&&hash(doc.getText())!==params.sourceHash)return;
       diagnostics.set(doc.uri,params.diagnostics.map(row=>{const d=new vscode.Diagnostic(toRange(row.range),row.message,row.severity-1);d.source=row.source;d.code=row.code;if(row.relatedInformation)d.relatedInformation=row.relatedInformation.map(r=>new vscode.DiagnosticRelatedInformation(new vscode.Location(vscode.Uri.parse(r.location.uri),toRange(r.location.range)),r.message));return d;}));
     };
     const invalidated=params=>{const doc=documents.get(params.uri);if(doc?.version===params.version){tracePresentation.reset(doc.uri);clear(doc.uri,false);}};
@@ -350,6 +350,7 @@ function activate(context) {
   const vscode=require('vscode');
   const configuration=doc=>{
     if(!vscode.workspace.isTrusted)throw new Error('Language services require a trusted workspace');
+    // Configuration also serves global workspace search; document entrypoints enforce language eligibility.
     const cfg=vscode.workspace.getConfiguration('solidityLean',doc.uri),workspace=vscode.workspace.getWorkspaceFolder(doc.uri)?.uri.fsPath;
     const configured=cfg.get('backendPath','');if(!configured&&!workspace)throw require('./startup.cjs').startupError('Set solidityLean.backendPath to the repository directory','backendPath');
     return {projectRoot:workspace||dirname(doc.uri.fsPath),includePaths:cfg.get('includePaths',[]),remappings:cfg.get('remappings',[]),backendPath:resolve(workspace||'.',configured||'.'),nodePath:cfg.get('nodePath','node'),timeoutMs:cfg.get('timeoutMs',600000),workers:cfg.get('workers',1),

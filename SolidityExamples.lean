@@ -137,6 +137,8 @@ import Solidity.Examples.ElabTotal.Values
 import Solidity.Examples.ExactReduction
 import Solidity.Examples.ExactUpdates
 import Solidity.Examples.ExampleNames
+import Solidity.Examples.ExecutableGoalBinding
+import Solidity.Examples.ExecutableRequestData
 import Solidity.Examples.Finish.Assembly
 import Solidity.Examples.FixedArrayFloor
 import Solidity.Examples.FixedArrayRoot
@@ -163,6 +165,7 @@ import Solidity.Examples.Goals.IntrinsicSession
 import Solidity.Examples.Goals.IntrinsicStorage
 import Solidity.Examples.Goals.LeanInventorySound
 import Solidity.Examples.Goals.Loops
+import Solidity.Examples.Goals.LoopsDecode
 import Solidity.Examples.Goals.LoopsProducer
 import Solidity.Examples.Goals.LoweringSim
 import Solidity.Examples.Goals.OffCriticalPath
@@ -199,6 +202,7 @@ import Solidity.Examples.LexVariant
 import Solidity.Examples.LinearDecision
 import Solidity.Examples.Lowering.Sim.Cases
 import Solidity.Examples.Lowering.Sim.CasesV2
+import Solidity.Examples.Lowering.Sim.Coverage
 import Solidity.Examples.Lowering.Sim.Coverage.ThreadedV2
 import Solidity.Examples.Lowering.Sim.Expr
 import Solidity.Examples.Lowering.Sim.Match

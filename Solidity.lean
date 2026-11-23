@@ -2470,6 +2470,13 @@ import Solidity.Correctness.Lowering.Loops.Statement
 import Solidity.Correctness.Lowering.Loops.WhileBreak
 import Solidity.Correctness.Lowering.Loops.WhileContinue
 import Solidity.Correctness.Lowering.Loops.WhileReset
+import Solidity.Correctness.Lowering.Sim.Coverage.Alignment
+import Solidity.Correctness.Lowering.Sim.Coverage.BooleanDomain
+import Solidity.Correctness.Lowering.Sim.Coverage.BooleanSpelling
+import Solidity.Correctness.Lowering.Sim.Coverage.LoweringReceipt
+import Solidity.Correctness.Lowering.Sim.Coverage.Obstruction
+import Solidity.Correctness.Lowering.Sim.Coverage.ProductionV2
+import Solidity.Correctness.Lowering.Sim.Coverage.SpellingObstruction
 import Solidity.Correctness.Lowering.Sim.Coverage.ThreadedV2
 import Solidity.Correctness.Lowering.Sim.Expr.Capture
 import Solidity.Correctness.Lowering.Sim.Expr.Frame
@@ -2503,10 +2510,13 @@ import Solidity.Correctness.Lowering.Total.Contract
 import Solidity.Correctness.Lowering.Total.Coverage
 import Solidity.Correctness.Lowering.Total.Coverage.Checks
 import Solidity.Correctness.Lowering.Total.Decode
+import Solidity.Correctness.Lowering.Total.Decode.Tables
+import Solidity.Correctness.Lowering.Total.Decode.Widths
 import Solidity.Correctness.Lowering.Total.Main
 import Solidity.Correctness.Lowering.Total.Production
 import Solidity.Correctness.Lowering.Total.Relation
 import Solidity.Correctness.Lowering.Total.Spells
+import Solidity.Correctness.Lowering.Total.Versions.Primitive
 import Solidity.Correctness.Lowering.Unchecked.CallWitness
 import Solidity.Correctness.Lowering.Unchecked.CalleeMode
 import Solidity.Correctness.Lowering.Unchecked.Composition
@@ -2913,8 +2923,10 @@ import Solidity.Frontend.ExecutableAst.Memory.Reader
 import Solidity.Frontend.ExecutableAst.Shared.Boundary
 import Solidity.Frontend.ExecutableAst.Shared.Compose
 import Solidity.Frontend.ExecutableAst.Shared.Intrinsic
+import Solidity.Frontend.ExecutableAst.Shared.ObligationCapture
 import Solidity.Frontend.ExecutableAst.Shared.Scope
 import Solidity.Frontend.ExecutableAst.Shared.Translate
+import Solidity.Frontend.ExecutableCounterexampleMetadataV2
 import Solidity.Frontend.ExpressionUniqueness.Accepted
 import Solidity.Frontend.ExpressionUniqueness.AddControls
 import Solidity.Frontend.ExpressionUniqueness.AddFreeAlgebra
@@ -4696,6 +4708,7 @@ import Solidity.Tools.DirectArithmetic
 import Solidity.Tools.DirectRuntime
 import Solidity.Tools.Elementary
 import Solidity.Tools.EntryReturn
+import Solidity.Tools.ExecutableGoalBinding
 import Solidity.Tools.FastMode.Engine
 import Solidity.Tools.FastMode.Meta
 import Solidity.Tools.Goal
