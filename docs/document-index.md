@@ -241,6 +241,7 @@ and open obligations. Test proposals remain proposals until applied.
 - [docs/corpus-parity.md](corpus-parity.md)
 - [docs/correctness.md](correctness.md)
 - [docs/coverage-plan.md](coverage-plan.md)
+- [docs/dafny-editor-lifecycle.md](dafny-editor-lifecycle.md)
 - [docs/dafny-editor-parity.md](dafny-editor-parity.md)
 - [docs/dafny-parity.md](dafny-parity.md)
 - [docs/function-specs.md](function-specs.md)

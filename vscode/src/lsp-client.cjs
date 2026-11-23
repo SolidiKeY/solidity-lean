@@ -8,7 +8,7 @@ const {checkStartup,serverIdentity,startupError,cancelled,waitForServerVersion}=
 const {processState,groupMembers,running,ownedProcess}=require('./process-state.cjs');
 const {incrementalChange}=require('./diagnostic-state.cjs');
 const {terminateTree,parseReport}=require('./backend.cjs');
-const {trackChild,waitForClose,waitForGroup}=require('./child-lifetime.cjs');
+const {trackChild,waitForClose,waitForGroup,enableChildLifetimeObservation}=require('./child-lifetime.cjs');
 
 class LanguageClient extends EventEmitter {
   constructor(configuration){
@@ -23,7 +23,7 @@ class LanguageClient extends EventEmitter {
     const configuration=this.configuration;
     this.child=spawn(configuration.nodePath||'node',[join(__dirname,'lsp-server.cjs')],{cwd:configuration.backendPath,
       detached:process.platform!=='win32',windowsHide:true,stdio:['pipe','pipe','pipe']});
-    this.child.ownedGroup=process.platform!=='win32';trackChild(this.child);
+    this.child.ownedGroup=process.platform!=='win32';if(configuration.diagnosticChildLifetime===true)enableChildLifetimeObservation(this.child);trackChild(this.child);
     this.stderr='';this.child.stderr.on('data',chunk=>{this.stderr=(this.stderr+chunk).slice(-12000);});
     this.peer=new RpcPeer(this.child.stdout,this.child.stdin);
     this.closed=new Promise(resolve=>this.child.once('close',()=>{this.childClosureConfirmed=true;resolve();}));
@@ -38,7 +38,7 @@ class LanguageClient extends EventEmitter {
     this.versionWait=waitForServerVersion(this.peer,this.startupAbort.signal);this.versionWait.promise.catch(error=>this.fail(error));
     const automaticVerification=configuration.automaticVerification||'never';
     const result=await this.peer.request('initialize',{processId:process.pid,rootUri:pathToFileURL(configuration.backendPath).href,
-      capabilities:{experimental:{solidityLeanOwnedProcess:true},textDocument:{publishDiagnostics:{versionSupport:true}}},initializationOptions:{backendPath:configuration.backendPath,
+      capabilities:{experimental:{solidityLeanOwnedProcess:true},textDocument:{publishDiagnostics:{versionSupport:true},codeAction:{dataSupport:true,resolveSupport:{properties:['edit']}}}},initializationOptions:{backendPath:configuration.backendPath,
         settings:{projectRoot:configuration.projectRoot,includePaths:configuration.includePaths||[],remappings:configuration.remappings||[],workers:configuration.workers||1,timeoutMs:configuration.timeoutMs||600000,automaticVerification,
           counterexamples:!!configuration.counterexamples,auditPreconditions:!!configuration.auditPreconditions}}},{timeoutMs:30000})
     ;
@@ -75,6 +75,8 @@ class LanguageClient extends EventEmitter {
     return parseReport(JSON.stringify(result));
   }
   async request(method,doc,params={},options={},isCurrent=()=>true){
+    if(options?.signal?.aborted)throw failure('Request cancelled',-32800);
+    if(doc.isClosed)throw failure('Document closed',-32801);
     const version=doc.version,text=doc.getText();await this.sync(doc,isCurrent,options.signal);
     const current=()=>isCurrent()&&!this.disposed&&!doc.isClosed&&doc.version===version&&doc.getText()===text;
     if(!current())throw failure('Document content changed',-32801);
@@ -139,6 +141,8 @@ class LanguageServers extends EventEmitter {
   async open(doc){await this.settled(undefined,doc);const client=this.client(doc),current=this.ownership(doc,client);await client.sync(doc,current);if(!current()||client.disposed)throw failure('Language client changed',-32801);this.emit('identity',{serverInfo:client.serverInfo,runtimeInfo:client.runtimeInfo,uris:[doc.uri.toString()]});return client;}
   async verify(args){await this.settled(args.signal,args.document);const client=this.client(args.document);return client.verify(args.document,args,this.ownership(args.document,client));}
   async request(method,doc,params,options){
+    if(options?.signal?.aborted)throw failure('Request cancelled',-32800);
+    if(doc.isClosed)throw failure('Document closed',-32801);
     const version=doc.version,text=doc.getText(),sourceCurrent=()=>!doc.isClosed&&doc.version===version&&doc.getText()===text;
     const validate=()=>{if(options?.signal?.aborted)throw failure('Request cancelled',-32800);if(!sourceCurrent())throw failure('Document content changed',-32801);};
     await this.settled(options?.signal,doc);validate();
