@@ -42,13 +42,14 @@ class Parser(unittest.TestCase):
 
 
 class Snapshot(unittest.TestCase):
-    @unittest.skipUnless(sys.platform == 'linux', 'requires Linux pipe sizing')
     def test_archive_padding_is_drained_before_wait(self):
         # A small pipe and minimal read-ahead keep Git blocked on tar padding
         # after the parser reaches EOF, reproducing the runner's SIGPIPE race.
         popen, tar_open = subprocess.Popen, tarfile.open
         def small_pipe(*args, **kwargs):
-            return popen(*args, **kwargs, pipesize=4096)
+            if sys.platform == 'linux':
+                kwargs['pipesize'] = 4096
+            return popen(*args, **kwargs)
         def small_buffer(*args, **kwargs):
             return tar_open(*args, **kwargs, bufsize=512)
         with tempfile.TemporaryDirectory() as directory:
