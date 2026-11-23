@@ -202,5 +202,112 @@ class NativeRefusalControls(unittest.TestCase):
         self.assertTrue(result['cleanup_confirmed'])
 
 
+class NativeByteControls(unittest.TestCase):
+    def capture(self, payload, command=None, budget=4096):
+        import os
+        import tempfile
+        native = load('native')
+        with tempfile.TemporaryDirectory() as directory:
+            path = Path(directory) / 'input'
+            path.write_bytes(payload)
+            observer = native.ByteCapture([str(path)], max_capture_bytes=budget)
+            argv = command(str(path)) if command else ['/bin/dd', 'if=' + str(path), 'bs=4096', 'status=none']
+            result = native.trace(argv, directory, dict(os.environ, LC_ALL='C'), timeout=5, max_events=12000,
+                                  max_output_bytes=8192, observer=observer)
+            return result, observer.finish(result)
+
+    def test_real_returned_bytes_and_empty_eof_are_captured(self):
+        import base64
+        for data in (b'abc\x00def', b''):
+            result, capture = self.capture(data)
+            self.assertEqual(result['status'], 'observed', result['reason'])
+            self.assertEqual(capture['status'], 'captured', capture['reasons'])
+            chunks = [x for x in capture['records'] if x['bytes'] or not data]
+            self.assertTrue(chunks)
+            self.assertEqual(base64.b64decode(chunks[0]['data']), data)
+            self.assertTrue(all(x['open_sequence'] < x['sequence'] < x['close_sequence'] for x in chunks))
+
+    def test_readv_descriptors_are_snapshotted_before_they_are_overwritten(self):
+        import os
+        import subprocess
+        import tempfile
+        import base64
+        native = load('native')
+        code = """#include <fcntl.h>
+#include <sys/uio.h>
+#include <stdlib.h>
+#include <sys/ioctl.h>
+#include <unistd.h>
+int main(int n, char **v) { struct iovec a[2]; char last;
+a[0].iov_base=&a[1]; a[0].iov_len=sizeof(a[1]); a[1].iov_base=&last; a[1].iov_len=1;
+if(n>3) { int f=atoi(v[3]); if(v[2][0]=='i') { int bytes; if(ioctl(f,FIONREAD,&bytes)!=0) return 4; }
+else if(pwrite(f,"z",1,0)!=1 || pwrite(f,"\\0",1,0)!=1) return 3; }
+if(n==3) { a[0].iov_base=&last; a[0].iov_len=1; }
+int fd=open(v[1],O_RDONLY); return readv(fd,a,2)==sizeof(a[1])+1 ? 0 : 2; }
+"""
+        with tempfile.TemporaryDirectory() as d:
+            root = Path(d)
+            (root / 'read.c').write_text(code)
+            subprocess.run(['/usr/bin/cc', str(root / 'read.c'), '-o', str(root / 'read')], check=True)
+            payload = bytes(range(17))
+            target = root / 'input'
+            target.write_bytes(payload)
+            capture = native.ByteCapture([str(target)], max_capture_bytes=4096)
+            result = native.trace([str(root / 'read'), str(target)], d, dict(os.environ, LC_ALL='C'),
+                                  timeout=5, max_events=12000, max_output_bytes=8192, observer=capture)
+            raw = capture.finish(result)
+            self.assertEqual(raw['status'], 'captured', raw['reasons'])
+            self.assertEqual(base64.b64decode(raw['records'][0]['data']), payload)
+            capture = native.ByteCapture([str(target)], max_capture_bytes=4096)
+            result = native.trace([str(root / 'read'), str(target), 'overlap'], d,
+                                  dict(os.environ, LC_ALL='C'), timeout=5, max_events=12000,
+                                  max_output_bytes=8192, observer=capture)
+            self.assertEqual(result['status'], 'unavailable')
+            self.assertIn('overlapping', result['reason'])
+            self.assertTrue(result['cleanup_confirmed'])
+            fd = os.open(target, os.O_RDWR)
+            os.set_inheritable(fd, True)
+            try:
+                capture = native.ByteCapture([str(target)], max_capture_bytes=4096)
+                result = native.trace([str(root / 'read'), str(target), 'mutate', str(fd)], d,
+                                      dict(os.environ, LC_ALL='C'), timeout=5, max_events=12000,
+                                      max_output_bytes=8192, observer=capture)
+                raw = capture.finish(result)
+            finally:
+                os.close(fd)
+            self.assertEqual(target.read_bytes(), payload)
+            self.assertEqual(raw['status'], 'unavailable')
+            self.assertTrue(any('pinned target' in x for x in raw['reasons']))
+            fd = os.open(target, os.O_RDWR)
+            os.set_inheritable(fd, True)
+            try:
+                capture = native.ByteCapture([str(target)], max_capture_bytes=4096)
+                result = native.trace([str(root / 'read'), str(target), 'ioctl', str(fd)], d,
+                                      dict(os.environ, LC_ALL='C'), timeout=5, max_events=12000,
+                                      max_output_bytes=8192, observer=capture)
+                raw = capture.finish(result)
+            finally:
+                os.close(fd)
+            self.assertEqual(raw['status'], 'unavailable')
+            self.assertTrue(any('pinned target' in x for x in raw['reasons']))
+
+    def test_descendants_do_not_become_read_credit(self):
+        _, capture = self.capture(b'abc', lambda p: ['/bin/sh', '-c', '/bin/cat "$1" & wait', 'sh', p])
+        self.assertEqual(capture['status'], 'unavailable')
+        self.assertTrue(any('descendants' in x for x in capture['reasons']))
+
+    def test_budget_and_symlink_inputs_are_refused(self):
+        import tempfile
+        native = load('native')
+        with tempfile.TemporaryDirectory() as directory:
+            path = Path(directory) / 'input'
+            path.write_bytes(b'abcd')
+            link = Path(directory) / 'alias'
+            link.symlink_to(path)
+            for name, budget in [(str(path), 3), (str(link), 4096)]:
+                with self.assertRaises(native.Unavailable):
+                    native.ByteCapture([name], max_capture_bytes=budget)
+
+
 if __name__ == '__main__':
     unittest.main()
