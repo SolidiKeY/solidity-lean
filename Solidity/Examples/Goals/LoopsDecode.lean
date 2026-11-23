@@ -15,7 +15,7 @@ example : Decode.tablesW = ⟨Decode.typeNameW, Decode.localTyW, Decode.unitW, D
 
 /-- Retained width probes use an empty contract and two narrow integer locals. -/
 def narrowRequest (raw : List RawStmt) : Request :=
-  ⟨{ vars := [] }, ⟨⟨fun s n => s ++ toString n, fun _ => none⟩, none, raw,
+  ⟨{ vars := [] }, ⟨FreshNames.ofPrefixes "se" "sp" "ie" "mv", none, raw,
     { funs := [] }, ⟨([("n", .val .uint 8), ("k", .val .uint 16)], 1), {}⟩⟩, none⟩
 
 example : (Decode.tablesW.decode (narrowRequest [.assign (.name "k") (.name "n")])).isSome =
