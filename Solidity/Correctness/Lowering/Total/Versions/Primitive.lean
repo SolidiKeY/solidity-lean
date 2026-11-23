@@ -7,7 +7,7 @@ namespace Solidity.Correctness.Lowering.Total.Version
 
 /-- A primitive slot: a model primitive and a Source type a decoder version
 may give it. A `bool` is a `bool`; a `uint` is an unsigned integer of any
-width or an address; an `int` is a signed integer of any width. -/
+width, an address or fixed bytes; an `int` is a signed integer of any width. -/
 inductive Prim : PrimTy → Source.STy → Prop where
   | bool : Prim .bool .bool
   | uint (t : Source.IntTy) (unsigned : t.signed = false) : Prim .uint (.int t)
