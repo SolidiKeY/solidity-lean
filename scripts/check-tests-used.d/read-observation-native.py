@@ -192,7 +192,7 @@ def trace(command, cwd, environment, *, timeout, max_events, max_output_bytes, o
                             # New children can begin with a clone return; no
                             # source/byte credit is inferred without its entry.
                             if entry is not None:
-                                item.update(number=entry['number'], args=entry['args'])
+                                item.update(number=entry['number'], args=entry['args'], enter_sequence=entry['sequence'])
                         emit(pid, item)
                     elif stop == signal.SIGSTOP:
                         if not tasks[pid]['initial_stop']:
@@ -312,6 +312,8 @@ class ByteCapture:
         if kind == 'child':
             self.reasons.add('concurrent or shared descendants unsupported')
         if kind == 'exec':
+            if pid in self.exec_seen:
+                self.reasons.add('multiple exec source association unsupported')
             self.exec_seen.add(pid)
         if pid not in self.exec_seen:
             return
@@ -332,13 +334,14 @@ class ByteCapture:
                 if any(end >= 2**64 for _, end in ranges) or any(x[1] > y[0] for x, y in zip(ranges, ranges[1:])):
                     raise Unavailable('overlapping or overflowing readv buffers')
                 self.iovecs[pid] = vectors
+                event['entry_iovecs'] = vectors
         if kind != 'leave' or 'number' not in event:
             return
         number, args, result = event['number'], event['args'], event['result']
         if result < 0:
             return
         # A supported read may not borrow an unobserved mutable address space.
-        if number in (30, 101, 206, 207, 208, 209, 210, 311, 425, 426, 427) or number == 9 and args[3] & 1:
+        if number in (30, 101, 206, 207, 208, 209, 210, 311, 425, 426, 427, 436) or number == 9 and args[3] & 1:
             self.reasons.add('shared memory or asynchronous memory modification unsupported')
         if number in (76, 77, 82, 83, 84, 86, 87, 88, 258, 263, 264, 265, 266, 316):
             self.reasons.add('path or inode mutation during observation')
