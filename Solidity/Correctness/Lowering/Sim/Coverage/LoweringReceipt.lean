@@ -1,7 +1,8 @@
 import Solidity.Correctness.Lowering.Sim.State.Storage
 
 /-! Successful finite lowering derivations give actual standalone lowering
-receipts. This does not assert successful elaboration of the lowered output. -/
+receipts toward `Solidity.Goals.loweringBySimulation`. This does not assert
+successful elaboration of the lowered output. -/
 namespace Solidity.Correctness.Lowering.Sim.Coverage
 
 open Solidity.Goals.Shrink.Lowering

@@ -3,6 +3,8 @@ import Solidity.Correctness.Lowering.Sim.Match
 /-!
 # Alignment from the existing spelling relation
 
+A prerequisite for `Solidity.Goals.loweringBySimulation`.
+
 This supplies the context-map part of coverage independently of the H117
 restriction choice. It reuses the decoder owner’s primitive-locals theorem;
 no decoder, association premise, or restricted totality statement is added.
