@@ -30,3 +30,20 @@ test('CDP execution exceptions refuse plausible values and retain raw exception 
   }finally{f.client.close();}
  }
 });
+
+test('CDP successful reply cannot spend the request deadline in its diagnostic (injected)',async()=>{
+ for(const elapsed of [4999,5000,5001]){
+  let f;const events=[];f=fixture(e=>{events.push(e);if(e.event==='response')f.advance(elapsed);});
+  try{const pending=f.client.request('Runtime.evaluate');const expected=elapsed<5000?pending:assert.rejects(pending,/CDP timeout Runtime.evaluate/);await Promise.resolve();f.advance(12);f.socket.emit('message',{data:JSON.stringify({id:1,result:{result:{value:'owned'}}})});
+   if(elapsed<5000)assert.deepEqual(await expected,{result:{value:'owned'}});else{await expected;assert.ok(events.some(e=>e.event==='response.late'&&e.stage==='after-diagnostic'&&e.elapsedMs===elapsed));}
+   assert.equal(f.client.pending.size,0);assert.equal(f.timers.size,0);
+  }finally{f.client.close();}
+ }
+});
+test('CDP diagnostic time does not replace an on-time protocol or execution error (injected)',async()=>{
+ for(const response of [{error:{code:-32001,message:'owned protocol error'}},{result:{exceptionDetails:{text:'owned execution error'}}}]){
+  let f;f=fixture(e=>{if(e.event==='response')f.advance(5000);});
+  try{const pending=f.client.request('Runtime.evaluate'),expected=assert.rejects(pending,/owned (protocol|execution) error/);await Promise.resolve();f.advance(12);f.socket.emit('message',{data:JSON.stringify({id:1,...response})});await expected;assert.equal(f.client.pending.size,0);assert.equal(f.timers.size,0);}
+  finally{f.client.close();}
+ }
+});
