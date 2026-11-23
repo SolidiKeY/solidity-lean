@@ -148,4 +148,73 @@ def checkCandidatePreparation : CommandElabM Unit := do
   logInfo "EXECUTABLE_FAILURE synthetic captured-target checks; no source certificate or span"
 
 run_cmd checkCandidatePreparation
+/- These are injected ingress/refusal controls, not the unavailable four
+original byte-pinned source/certificate cases. No source span is published. -/
+def checkRetainedCandidateIdentity : CommandElabM Unit := do
+  let some (.thmInfo certificate) := (← getEnv).find? ``preparationCertificate
+    | throwError "retained identity control theorem absent"
+  let (``Not, #[goal]) := certificate.type.consumeMData.getAppFnArgs
+    | throwError "retained identity control goal shape changed"
+  liftTermElabM do
+    let some candidate ← sourceCounterexampleCandidateV1? goal ⟨certificate.value, .null⟩
+      | throwError "retained identity control candidate unavailable"
+    let same := Solidity.Frontend.ExecutableMetadataV2.Internal.sameRetainedCandidateV2
+    unless same candidate candidate do throwError "exact retained identity refused"
+    let foreign := mkNatLit 404
+    let changes : List (String × SourceCounterexampleCandidateV1) := [
+      ("proof", { candidate with original := ⟨foreign, .null⟩ }),
+      ("contract", { candidate with contract := foreign }),
+      ("formula", { candidate with formula := foreign }),
+      ("candidate", { candidate with candidate := foreign }),
+      ("domain", { candidate with domain := foreign }),
+      ("values", { candidate with values := foreign }),
+      ("valuesEquation", { candidate with valuesEquation := foreign }),
+      ("state", { candidate with state := foreign }),
+      ("failure", { candidate with failure := foreign })]
+    for (label, changed) in changes do
+      if same candidate changed then throwError "retained identity accepted changed {label}"
+    unless same candidate { candidate with original := ⟨candidate.original.proof, toJson "presentation only"⟩ } do
+      throwError "presentation JSON changed proof identity"
+    logInfo "EXECUTABLE_INGRESS exact retained identity and nine mutation controls passed"
+  for namespaceName in [Lean.Name.str .anonymous "foreign", `V1Storage.storageAlias_legacy.Identity] do
+    let result ← Solidity.Frontend.ExecutableMetadataV2.Internal.checkSourceBoundRetainedExecutableV2
+      `missingSourceCapture namespaceName .null "missing.sol" ByteArray.empty ByteArray.empty 0 .null
+    match result with
+    | .error "pinned source/invocation admission unavailable" => pure ()
+    | .error reason => throwError "source admission refusal changed: {reason}"
+    | .ok _ => throwError "unavailable/foreign source admitted"
+  logInfo "EXECUTABLE_INGRESS source-bound unavailable/foreign ingress refused"
+
+run_cmd checkRetainedCandidateIdentity
+
+def checkImporterRowProjection : CommandElabM Unit := do
+  let function : Solidity.Frontend.SolcFun := {
+    name := "identity"
+    sourceName := "identity"
+    sourceId := 29
+    sourceSignature := "identity(uint256)"
+    line := 1
+    tag := .specified
+    params := [("x", "uint256")]
+    body := .ok [] }
+  let row := Solidity.Frontend.ImportRow.ofFun function .elaborated ""
+  let same := Solidity.Frontend.ExecutableMetadataV2.Internal.sameImportedRowProjectionV2
+  unless same row function do throwError "unchanged importer row projection refused"
+  let changes : List (String × Solidity.Frontend.ImportRow) := [
+    ("name", { row with name := "other" }),
+    ("sourceName", { row with sourceName := "other" }),
+    ("sourceSignature", { row with sourceSignature := "identity(bool)" }),
+    ("sourceId", { row with sourceId := 44 }),
+    ("tag", { row with tag := .internal }),
+    ("params", { row with params := [("other", "bool")] }),
+    ("payable", { row with payable := true }),
+    ("writingCall", { row with writingCall := false })]
+  for (label, changed) in changes do
+    if same changed function then throwError "importer projection accepted changed {label}"
+  let captured ← Solidity.Frontend.importedNormalizationCaptureV1? `NoActualImporterCapture
+  if captured.isSome then throwError "missing process-local importer capture fabricated"
+  logInfo "EXECUTABLE_INGRESS importer row projection and eight mutation controls passed"
+
+run_cmd checkImporterRowProjection
+
 end ExecutableBindingControls
