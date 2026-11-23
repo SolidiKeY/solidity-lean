@@ -63,6 +63,8 @@
 | `Correctness/Lowering/Sim/Coverage/LoweringReceipt.lean` | Converts successful finite lowering derivations into actual standalone lowering receipts, preserving all state; no elaboration-success claim. |
 | `Correctness/Lowering/Sim/Coverage/BooleanDomain.lean` | H1361 syntax-defined unbounded Boolean control domain for the restricted coverage milestone; decoder completeness remains a separate obligation. |
 | `Correctness/Lowering/Sim/Coverage/BooleanSpelling.lean` | Proves existing raw-syntax decoder success for the H1361 grammar via spelling; Source inference and resolved-program decoding remain separate. |
+| `Correctness/Lowering/Sim/Coverage/BooleanLocals.lean` | Resolves Boolean caller locals and proves actual Source lvalue and expression inference on bound names, including repeated names. |
+| `Correctness/Lowering/Sim/Coverage/BooleanExprInference.lean` | Proves actual fuel-bounded Source inference completeness for every expression in the H1361 Boolean grammar, using the existing spelling relation. |
 # Unchecked arithmetic
 
 | Module | Purpose |

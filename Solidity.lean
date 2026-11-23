@@ -2472,6 +2472,8 @@ import Solidity.Correctness.Lowering.Loops.WhileContinue
 import Solidity.Correctness.Lowering.Loops.WhileReset
 import Solidity.Correctness.Lowering.Sim.Coverage.Alignment
 import Solidity.Correctness.Lowering.Sim.Coverage.BooleanDomain
+import Solidity.Correctness.Lowering.Sim.Coverage.BooleanExprInference
+import Solidity.Correctness.Lowering.Sim.Coverage.BooleanLocals
 import Solidity.Correctness.Lowering.Sim.Coverage.BooleanSpelling
 import Solidity.Correctness.Lowering.Sim.Coverage.LoweringReceipt
 import Solidity.Correctness.Lowering.Sim.Coverage.Obstruction

@@ -327,4 +327,234 @@ def admittedInvocationSourceV2? (captureDeclaration namespaceName : Lean.Name)
   unless contracts.length == 1 do return none
   return some ⟨namespaceName, fixtureBytes, fixture, selected, origins⟩
 
+/-- Kernel-checked candidate DATA preparation only. The named theorem is
+not authenticated as an imported source row here, and the executable target
+need not fail. No source metadata, certificate or span is returned. -/
+structure PreparedRetainedCandidateV2 where
+  private mk ::
+  selection : SelectedInvocationGoalV2
+  certificateDeclaration : Lean.Name
+  imported : Tools.SourceCounterexampleCandidateV1
+  goalPair : Expr
+  relation : Expr
+
+/-- Read the candidate from a real named theorem, never from a caller's JSON
+or a second search. Prepare the typed relation to the actual retained target.
+Independent source-row admission and exact executable failure remain mandatory.
+Temporary kernel/audit declarations are removed on both success and refusal. -/
+def prepareRetainedCandidateV2 (captureDeclaration : Lean.Name) (request : Json)
+    (sourceId : Int) (functionName : String) (certificateDeclaration : Lean.Name)
+    (report : Json) : CommandElabM (Except String PreparedRetainedCandidateV2) := do
+  let some selection ← selectedInvocationGoalV2? captureDeclaration request sourceId functionName
+    | return .error "actual invocation unavailable"
+  let some (.thmInfo certificate) := (← getEnv).find? certificateDeclaration
+    | return .error "retained theorem unavailable"
+  let (``Not, #[goalType]) := certificate.type.consumeMData.getAppFnArgs
+    | return .error "retained theorem goal shape refused"
+  let axioms ← liftTermElabM <| collectAxioms certificateDeclaration
+  unless axioms.all ([``propext, ``Classical.choice, ``Quot.sound].contains ·) do
+    return .error "retained theorem dependency audit refused"
+  liftTermElabM do
+    let options ← kernelOptionsV2
+    withOptions (fun _ => options) do
+      let some imported ← Tools.sourceCounterexampleCandidateV1? goalType ⟨certificate.value, report⟩
+        | return .error "retained candidate shape or kernel validation refused"
+      let contractName := Lean.Name.str (Lean.Name.num captureDeclaration selection.captureIndex) "contract"
+      let formulaName := Lean.Name.str (Lean.Name.num captureDeclaration selection.captureIndex) "formula"
+      let executableContract := mkConst contractName
+      let importedVars := mkApp (mkConst ``Contract.vars) imported.contract
+      let executableVars := mkApp (mkConst ``Contract.vars) executableContract
+      unless ← withTransparency .all (isDefEq importedVars executableVars) do
+        return .error "storage layout mismatch"
+      let pair := mkAppN (mkConst ``Tools.GoalPair.mk)
+        #[imported.contract, executableContract, imported.formula, mkConst formulaName]
+      let layout ← mkEqRefl importedVars
+      let relation := mkAppN (mkConst ``Tools.SameCandidate.ofLayout) #[pair, imported.candidate, layout]
+      let pairType := mkConst ``Tools.GoalPair
+      let relationType := mkApp (mkConst ``Tools.SameCandidate) pair
+      let equationType ← inferType imported.valuesEquation
+      let base ← getEnv
+      let pairName ← mkFreshUserName `_executable_prepared_pair
+      let relationName ← mkFreshUserName `_executable_prepared_relation
+      let equationName ← mkFreshUserName `_executable_prepared_values
+      let checked ← installDeclarationsV2 #[(pairName, pairType, pair),
+        (relationName, relationType, relation), (equationName, equationType, imported.valuesEquation)]
+      setEnv base
+      match checked with
+      | .error reason => return .error ("candidate relation kernel/audit refused: " ++ reason)
+      | .ok () => return .ok ⟨selection, certificateDeclaration, imported, pair, relation⟩
+
+/-- Construct the exact evaluator expression at the prepared executable
+candidate. This does not evaluate it, authenticate a source or prove failure. -/
+def preparedExecutableEvaluationV2 (prepared : PreparedRetainedCandidateV2) : TermElabM Expr := do
+  let candidate ← mkAppM ``Tools.SameCandidate.executable #[prepared.relation]
+  let contract := mkApp (mkConst ``Tools.GoalPair.executableContract) prepared.goalPair
+  let formula := mkApp (mkConst ``Tools.GoalPair.executableFormula) prepared.goalPair
+  let integers ← mkAppM ``Tools.Cand.argInts #[candidate]
+  let values ← mkAppM ``Tools.Cand.vals #[candidate]
+  let state := mkApp2 (mkConst ``Tools.Cand.tstate) contract candidate
+  mkAppM ``Fml.eval3Peel #[mkApp (mkConst ``Tools.poolDom) integers, values, state, formula]
+
+private def decidePreparedProofV2 (type : Expr) : TermElabM (Except String Expr) := do
+  let saved ← Term.saveState
+  tryCatchRuntimeEx (do
+    let proof ← instantiateMVars (← mkDecideProof type)
+    let name ← mkFreshUserName `_executable_decision_proposal
+    match ← validateDeclarationsV2 #[(name, type, proof)] with
+    | .error error => throwKernelException error
+    | .ok () => return .ok proof) fun error => do
+      let reason ← error.toMessageData.toString
+      saved.restore
+      return .error reason
+
+/-- Closed, kernel/audit-checked proof expressions for an actual request target.
+This is NOT authenticated source-row metadata or a published certificate.
+Source/canonical correspondence remains separate. -/
+structure CheckedRetainedExecutableV2 where
+  private mk ::
+  prepared : PreparedRetainedCandidateV2
+  valuesBinding : Expr
+  selectedFailure : Expr
+  refutation : Expr
+
+private def preparedRefusalV2 {α : Type} : Except String α → String
+  | .error reason => reason
+  | .ok _ => "unavailable"
+
+/-- Re-read current invocation/theorem ownership, then prove failure at that
+SAME retained candidate. No candidate search or report-status substitute.
+Unknown/true/opaque/over-budget proof attempts remain explicit refusals.
+Nothing is published; the source-row/four-case gate must still be applied. -/
+def checkRetainedExecutableFailureV2 (captureDeclaration : Lean.Name) (request : Json)
+    (sourceId : Int) (functionName : String) (certificateDeclaration : Lean.Name)
+    (report : Json) : CommandElabM (Except String CheckedRetainedExecutableV2) := do
+  let prepared ← prepareRetainedCandidateV2 captureDeclaration request sourceId functionName certificateDeclaration report
+  let .ok prepared := prepared | return .error (preparedRefusalV2 prepared)
+  liftTermElabM do
+    let options ← kernelOptionsV2
+    withOptions (fun _ => options) do
+      let candidateValues ← mkAppM ``Tools.Cand.vals #[prepared.imported.candidate]
+      let bridgeType ← mkEq prepared.imported.values candidateValues
+      let bridgeResult ← decidePreparedProofV2 bridgeType
+      let .ok bridge := bridgeResult
+        | return .error ("retained values bridge refused: " ++ preparedRefusalV2 bridgeResult)
+      let valuesBinding := mkAppN (mkConst ``Tools.RetainedValuesBinding.mk)
+        #[prepared.imported.contract, prepared.imported.candidate, prepared.imported.values,
+          prepared.imported.valuesEquation, bridge]
+      let importedFailure ← mkAppM ``Tools.RetainedValuesBinding.failure
+        #[valuesBinding, prepared.imported.failure]
+      let evaluated ← preparedExecutableEvaluationV2 prepared
+      let failureType ← mkEq evaluated (mkConst ``Tools.Tri.ff)
+      let failureResult ← decidePreparedProofV2 failureType
+      let .ok failure := failureResult
+        | return .error ("executable failure proof refused: " ++ preparedRefusalV2 failureResult)
+      let selectedFailure := mkAppN (mkConst ``Tools.SelectedFailure.mk)
+        #[prepared.goalPair, prepared.relation, importedFailure, failure]
+      let refutation ← mkAppM ``Tools.SelectedFailure.refuted #[selectedFailure]
+      let formula := mkApp (mkConst ``Tools.GoalPair.executableFormula) prepared.goalPair
+      let target ← mkAppM ``Fml.Valid #[formula]
+      let bindingType := mkAppN (mkConst ``Tools.RetainedValuesBinding)
+        #[prepared.imported.contract, prepared.imported.candidate, prepared.imported.values]
+      let witnessType := mkApp (mkConst ``Tools.SelectedFailure) prepared.goalPair
+      let base ← getEnv
+      let bindingName ← mkFreshUserName `_executable_values_binding
+      let witnessName ← mkFreshUserName `_executable_selected_failure
+      let proofName ← mkFreshUserName `_executable_refutation
+      let checked ← installDeclarationsV2 #[(bindingName, bindingType, valuesBinding),
+        (witnessName, witnessType, selectedFailure), (proofName, mkNot target, refutation)]
+      setEnv base
+      match checked with
+      | .error reason => return .error ("executable proof kernel/audit refused: " ++ reason)
+      | .ok () => return .ok ⟨prepared, valuesBinding, selectedFailure, refutation⟩
+
+/-- Exact recovered-expression identity, not equality inferred from a report,
+status, function name or a second search. This deliberately refuses merely
+propositionally equivalent alternative candidates. -/
+def sameRetainedCandidateV2 (left right : Tools.SourceCounterexampleCandidateV1) : Bool :=
+  left.original.proof == right.original.proof && left.contract == right.contract &&
+    left.formula == right.formula && left.candidate == right.candidate &&
+    left.domain == right.domain && left.values == right.values &&
+    left.valuesEquation == right.valuesEquation && left.state == right.state &&
+    left.failure == right.failure
+
+/-- Compare the unchanged producer's row projection. Admission flag, elaborated
+parameter context and diagnostic are supplied by later importer stages. V1
+checks the admission flag; this join retains but does not independently validate
+the later-stage parameter context or diagnostic. -/
+def sameImportedRowProjectionV2 (row : ImportRow) (function : SolcFun) : Bool :=
+  let original := ImportRow.ofFun function row.status row.reason
+  let expected : ImportRow := { original with
+    admissionChecked := row.admissionChecked
+    paramTypes := row.paramTypes
+    sourceDiagnostic := row.sourceDiagnostic }
+  (toExpr row : Expr) == toExpr expected
+
+/-- Internal join only: byte-pinned original source, authenticated imported
+row/theorem ingress and the actual executable failure at that retained candidate.
+No public metadata, source-clause attribution, span or runtime result is emitted. -/
+structure SourceBoundRetainedExecutableV2 where
+  private mk ::
+  source : AdmittedInvocationSourceV2
+  admission : ImportedNormalizationCaptureV1
+  retained : RetainedCounterexampleMetadataV1
+  checked : CheckedRetainedExecutableV2
+
+/-- The fixed four-case ingress is mandatory before reading a retained row.
+Require the process-local actual importer capture and its exact member/row
+projection; retain its full pre-import environment and normalization arguments.
+Reuse the old certificate ingress unchanged, then require the SAME recovered
+proof/candidate expressions in the executable checker. Neither ingress searches.
+Unavailable inputs, foreign namespaces and changed identity fail closed. -/
+def checkSourceBoundRetainedExecutableV2 (captureDeclaration namespaceName : Lean.Name)
+    (request : Json) (sourceName : String) (sourceBytes fixtureBytes : ByteArray)
+    (rowIndex : Nat) (report : Json) :
+    CommandElabM (Except String SourceBoundRetainedExecutableV2) := do
+  let some source ← admittedInvocationSourceV2? captureDeclaration namespaceName request
+      sourceName sourceBytes fixtureBytes | return .error "pinned source/invocation admission unavailable"
+  let some admission ← importedNormalizationCaptureV1? namespaceName
+    | return .error "actual importer capture unavailable"
+  unless admission.bytes == fixtureBytes && admission.fixture.compress == source.fixture.compress &&
+      admission.context.ast.compress == source.selection.goal.source.compress &&
+      (toExpr admission.context.provenance : Expr) == toExpr source.origins.provenance do
+    return .error "actual importer source/context refused"
+  let ledgers := admission.result.2.filter fun entry =>
+    entry.entry.compress == source.origins.owner.compress
+  unless ledgers.length == 1 do return .error "actual importer member ledger refused"
+  let some retained ← retainedCounterexampleMetadataV1? namespaceName rowIndex
+      source.fixture sourceName sourceBytes report | return .error "retained source row unavailable"
+  let row := retained.row.legacy
+  unless row.sourceId == source.origins.ownerId && row.sourceName == "identity" &&
+      row.declName namespaceName == namespaceName ++ `identity &&
+      retained.certificateDeclaration == namespaceName ++ `identity ++ `refuted do
+    return .error "retained source row identity refused"
+  unless retained.row.origins.owner.compress == source.origins.owner.compress &&
+      (toExpr retained.row.origins.provenance : Expr) == toExpr source.origins.provenance &&
+      retained.row.origins.bytes == sourceBytes do
+    return .error "retained source ownership refused"
+  let functions := admission.result.1.funs.filter fun function =>
+    function.sourceId == row.sourceId && function.name == row.name
+  let [function] := functions | return .error "actual importer function identity refused"
+  unless sameImportedRowProjectionV2 row function do
+    return .error "actual importer row projection refused"
+  let result ← checkRetainedExecutableFailureV2 captureDeclaration request row.sourceId
+    row.sourceName retained.certificateDeclaration report
+  let .ok checked := result | return .error (preparedRefusalV2 result)
+  unless sameRetainedCandidateV2 retained.candidate checked.prepared.imported do
+    return .error "retained candidate identity refused"
+  let some current ← selectedInvocationGoalV2? captureDeclaration request row.sourceId row.sourceName
+    | return .error "current invocation unavailable"
+  unless current.captureIndex == source.selection.captureIndex &&
+      current.captureIndex == checked.prepared.selection.captureIndex do
+    return .error "current invocation selection changed"
+  return .ok ⟨source, admission, retained, checked⟩
+
+/-- Diagnostic receipt only, never certificate admission. -/
+def invocationReceiptV2? (name : Lean.Name) : CommandElabM (Option Json) := do
+  let some attempt := ((invocationAttemptsV2.getState (← getEnv)).find? name : Option InvocationAttemptV2) | return none
+  let report := attempt.report.map fun result => match result with
+    | .ok rows => Json.mkObj [("ok", rows)]
+    | .error reason => Json.mkObj [("error", toJson reason)]
+  return some (Json.mkObj [("reason", toJson attempt.reason), ("token", toJson attempt.token),
+    ("report", report.getD .null), ("retained", toJson attempt.retained.isSome)])
+
 end Solidity.Frontend.ExecutableMetadataV2.Internal

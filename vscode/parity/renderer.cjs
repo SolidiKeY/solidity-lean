@@ -32,8 +32,8 @@ class DevTools {
    const task=this.pending.get(message.id);if(!task){this.note('response.unmatched',{id:message.id});return;}
    this.pending.delete(message.id);clearTimer(task.timer);const elapsedMs=now()-task.started;
    if(elapsedMs>=5000){this.note('response.late',{id:message.id,method:task.method,elapsedMs});task.reject(Error('CDP timeout '+task.method));return;}
-   const ok=this.note('response',{id:message.id,method:task.method,elapsedMs,error:message.error??null,exception:message.result?.exceptionDetails?.text??null,bytes:Buffer.byteLength(event.data)});
-   if(!ok){task.reject(this.failure);return;}if(message.error)task.reject(Error(JSON.stringify(message.error)));else task.resolve(message.result);
+   const ok=this.note('response',{id:message.id,method:task.method,elapsedMs,error:message.error??null,exception:message.result?.exceptionDetails?.text??null,exceptionDetails:message.result?.exceptionDetails??null,bytes:Buffer.byteLength(event.data)});
+   if(!ok){task.reject(this.failure);return;}if(message.error)task.reject(Error(JSON.stringify(message.error)));else if(Object.hasOwn(message.result,'exceptionDetails'))task.reject(Object.assign(Error('CDP execution exception: '+(typeof message.result.exceptionDetails?.text==='string'?message.result.exceptionDetails.text:'unknown exception')),{code:'CDP_EXECUTION_EXCEPTION',exceptionDetails:message.result.exceptionDetails}));else task.resolve(message.result);
   });
  }
  note(event,data={}){if(this.diagnosticFailure)return false;try{this.diagnostic({...this.identity,event,monotonicMs:this.now(),wallTime:Date.now(),...data});return true;}catch(error){this.diagnosticFailure=error;this.abort(error,'diagnostic.failure');return false;}}

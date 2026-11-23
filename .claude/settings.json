@@ -34,8 +34,5 @@
       "Bash(lake lean:*)",
       "Bash(lean:*)"
     ]
-  },
-  "env": {
-    "CLAUDE_CODE_AUTO_COMPACT_WINDOW": "100000"
   }
 }

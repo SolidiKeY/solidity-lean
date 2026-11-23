@@ -91,6 +91,10 @@
   "Quot.sound",
   "propext"
  ],
+ "Solidity/Examples/ElabTotal/Stmts.lean:Solidity.ElabCallHeight.boundAtom_height_le": [
+  "Quot.sound",
+  "propext"
+ ],
  "Solidity/Examples/ElabTotal/Stmts.lean:Solidity.ElabCallHeight.bytes_index_output_height": [
   "Quot.sound",
   "propext"
@@ -108,6 +112,14 @@
   "propext"
  ],
  "Solidity/Examples/ElabTotal/Stmts.lean:Solidity.ElabCallHeight.call_output_height_of_raw_bounds": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Examples/ElabTotal/Stmts.lean:Solidity.ElabCallHeight.callbacks_call_output_height": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Examples/ElabTotal/Stmts.lean:Solidity.ElabCallHeight.callbacks_encode_output_height": [
   "Quot.sound",
   "propext"
  ],
@@ -246,11 +258,19 @@
   "Quot.sound"
  ],
  "Solidity/Examples/ElabTotal/Stmts.lean:Solidity.ElabCallHeight.inlineSliceOpen_desc": [],
+ "Solidity/Examples/ElabTotal/Stmts.lean:Solidity.ElabCallHeight.inlineSliceOpen_raw_height": [
+  "Quot.sound",
+  "propext"
+ ],
  "Solidity/Examples/ElabTotal/Stmts.lean:Solidity.ElabCallHeight.internal_decode_output_height": [
   "Quot.sound",
   "propext"
  ],
  "Solidity/Examples/ElabTotal/Stmts.lean:Solidity.ElabCallHeight.mem_height_le": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Examples/ElabTotal/Stmts.lean:Solidity.ElabCallHeight.memory_dispatch_output_height": [
   "Quot.sound",
   "propext"
  ],
@@ -322,6 +342,10 @@
   "Quot.sound",
   "propext"
  ],
+ "Solidity/Examples/ElabTotal/Stmts.lean:Solidity.ElabCallHeight.producers_memory_dispatch_output_height": [
+  "Quot.sound",
+  "propext"
+ ],
  "Solidity/Examples/ElabTotal/Stmts.lean:Solidity.ElabCallHeight.raw_at_output_height_of_bounds": [
   "Quot.sound",
   "propext"
@@ -354,7 +378,15 @@
   "Quot.sound",
   "propext"
  ],
+ "Solidity/Examples/ElabTotal/Stmts.lean:Solidity.ElabCallHeight.selector_args_height_lt_with_names": [
+  "Quot.sound",
+  "propext"
+ ],
  "Solidity/Examples/ElabTotal/Stmts.lean:Solidity.ElabCallHeight.selector_encoding_inputs_lt": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Examples/ElabTotal/Stmts.lean:Solidity.ElabCallHeight.selector_encoding_inputs_lt_with_names": [
   "Quot.sound",
   "propext"
  ],
@@ -362,7 +394,15 @@
   "Quot.sound",
   "propext"
  ],
+ "Solidity/Examples/ElabTotal/Stmts.lean:Solidity.ElabCallHeight.selector_height_lt_with_names": [
+  "Quot.sound",
+  "propext"
+ ],
  "Solidity/Examples/ElabTotal/Stmts.lean:Solidity.ElabCallHeight.selector_input_lt": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Examples/ElabTotal/Stmts.lean:Solidity.ElabCallHeight.selector_input_lt_with_names": [
   "Quot.sound",
   "propext"
  ],
@@ -470,6 +510,10 @@
   "Quot.sound",
   "propext"
  ],
+ "Solidity/Examples/ElabTotal/Stmts.lean:Solidity.ElabControlProof.memory_dispatch_result_name": [
+  "Quot.sound",
+  "propext"
+ ],
  "Solidity/Examples/ElabTotal/Stmts.lean:Solidity.ElabControlProof.obs_lift": [
   "propext"
  ],
@@ -507,6 +551,18 @@
  ],
  "Solidity/Examples/ElabTotal/Stmts.lean:Solidity.ElabHoist.namedStructural_unique": [
   "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Examples/ElabTotal/Stmts.lean:Solidity.ElabSliceOpen.bindBound_eq": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Examples/ElabTotal/Stmts.lean:Solidity.ElabSliceOpen.inlineSliceOpen_raw_atoms": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Examples/ElabTotal/Stmts.lean:Solidity.ElabSliceOpen.inlineSliceOpen_raw_eq": [],
+ "Solidity/Examples/ElabTotal/Stmts.lean:Solidity.ElabSliceOpen.openWith_atoms": [
   "propext"
  ]
 }
