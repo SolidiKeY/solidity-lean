@@ -4,3 +4,4 @@
 | `Correctness/Lowering/Total/Versions/Primitive.lean` | Retained primitive type representation relation and elementary/local type lemmas. |
 | `Correctness/Lowering/Total/Decode/Spelling.lean` | Retained generic spelling relation, decoder soundness, conditional completeness and original-table bridge. |
 | `Correctness/Lowering/Total/Decode/Marked.lean` | Retained marked-address, fixed-bytes and caller-aware decoder tables; existing coverage gaps remain explicit. |
+| `Correctness/Lowering/Total/Versions/Matching.lean` | Retained version state relation and Source-to-model initial matching for sound tables, instantiated at widths. |

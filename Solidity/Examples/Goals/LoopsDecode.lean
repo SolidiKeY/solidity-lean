@@ -1,4 +1,4 @@
-import Solidity.Correctness.Lowering.Total.Versions.Primitive
+import Solidity.Correctness.Lowering.Total.Versions.Matching
 import Solidity.Correctness.Lowering.Total.Decode.Spelling
 import Solidity.Correctness.Lowering.Total.Decode.Marked
 
@@ -191,4 +191,11 @@ example : Decode.tablesS.decode (addressRequest [.assign (.name "a") (.env .self
 /-- `envS` reads exactly `msg.sender`, as the Source `msg.sender`. -/
 example : Decode.envS .msgSender = some (.member (.ident "msg") "sender") := rfl
 example : Decode.envS .selfAddress = Decode.env .selfAddress := rfl
+/-- Retained initial matching runs from Source states to model states. -/
+example : Simulation.InitialMatching Version.rel Decode.tablesW.decode := Version.initialMatching
+/-- Related globals preserve the caller value. -/
+example {E : Source.Env} {C : Contract} {G : Source.Glob E} {F : Source.Fr} {st : Source.St E}
+    {σ : State C []} (h : (Version.rel E C).glob G F st σ) :
+    σ.tx.msgSender.1 = (F.sender.val : Int) := h.2.2.2.1
+
 end Solidity.Examples.Goals.LoopsDecode
