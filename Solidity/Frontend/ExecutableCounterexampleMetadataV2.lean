@@ -395,6 +395,78 @@ def preparedExecutableEvaluationV2 (prepared : PreparedRetainedCandidateV2) : Te
   let state := mkApp2 (mkConst ``Tools.Cand.tstate) contract candidate
   mkAppM ``Fml.eval3Peel #[mkApp (mkConst ``Tools.poolDom) integers, values, state, formula]
 
+private def decidePreparedProofV2 (type : Expr) : TermElabM (Except String Expr) := do
+  let saved ← Term.saveState
+  tryCatchRuntimeEx (do
+    let proof ← instantiateMVars (← mkDecideProof type)
+    let name ← mkFreshUserName `_executable_decision_proposal
+    match ← validateDeclarationsV2 #[(name, type, proof)] with
+    | .error error => throwKernelException error
+    | .ok () => return .ok proof) fun error => do
+      let reason ← error.toMessageData.toString
+      saved.restore
+      return .error reason
+
+/-- Closed, kernel/audit-checked proof expressions for an actual request target.
+This is NOT authenticated source-row metadata or a published certificate.
+Source/canonical correspondence remains separate. -/
+structure CheckedRetainedExecutableV2 where
+  private mk ::
+  prepared : PreparedRetainedCandidateV2
+  valuesBinding : Expr
+  selectedFailure : Expr
+  refutation : Expr
+
+private def preparedRefusalV2 {α : Type} : Except String α → String
+  | .error reason => reason
+  | .ok _ => "unavailable"
+
+/-- Re-read current invocation/theorem ownership, then prove failure at that
+SAME retained candidate. No candidate search or report-status substitute.
+Unknown/true/opaque/over-budget proof attempts remain explicit refusals.
+Nothing is published; the source-row/four-case gate must still be applied. -/
+def checkRetainedExecutableFailureV2 (captureDeclaration : Lean.Name) (request : Json)
+    (sourceId : Int) (functionName : String) (certificateDeclaration : Lean.Name)
+    (report : Json) : CommandElabM (Except String CheckedRetainedExecutableV2) := do
+  let prepared ← prepareRetainedCandidateV2 captureDeclaration request sourceId functionName certificateDeclaration report
+  let .ok prepared := prepared | return .error (preparedRefusalV2 prepared)
+  liftTermElabM do
+    let options ← kernelOptionsV2
+    withOptions (fun _ => options) do
+      let candidateValues ← mkAppM ``Tools.Cand.vals #[prepared.imported.candidate]
+      let bridgeType ← mkEq prepared.imported.values candidateValues
+      let bridgeResult ← decidePreparedProofV2 bridgeType
+      let .ok bridge := bridgeResult
+        | return .error ("retained values bridge refused: " ++ preparedRefusalV2 bridgeResult)
+      let valuesBinding := mkAppN (mkConst ``Tools.RetainedValuesBinding.mk)
+        #[prepared.imported.contract, prepared.imported.candidate, prepared.imported.values,
+          prepared.imported.valuesEquation, bridge]
+      let importedFailure ← mkAppM ``Tools.RetainedValuesBinding.failure
+        #[valuesBinding, prepared.imported.failure]
+      let evaluated ← preparedExecutableEvaluationV2 prepared
+      let failureType ← mkEq evaluated (mkConst ``Tools.Tri.ff)
+      let failureResult ← decidePreparedProofV2 failureType
+      let .ok failure := failureResult
+        | return .error ("executable failure proof refused: " ++ preparedRefusalV2 failureResult)
+      let selectedFailure := mkAppN (mkConst ``Tools.SelectedFailure.mk)
+        #[prepared.goalPair, prepared.relation, importedFailure, failure]
+      let refutation ← mkAppM ``Tools.SelectedFailure.refuted #[selectedFailure]
+      let formula := mkApp (mkConst ``Tools.GoalPair.executableFormula) prepared.goalPair
+      let target ← mkAppM ``Fml.Valid #[formula]
+      let bindingType := mkAppN (mkConst ``Tools.RetainedValuesBinding)
+        #[prepared.imported.contract, prepared.imported.candidate, prepared.imported.values]
+      let witnessType := mkApp (mkConst ``Tools.SelectedFailure) prepared.goalPair
+      let base ← getEnv
+      let bindingName ← mkFreshUserName `_executable_values_binding
+      let witnessName ← mkFreshUserName `_executable_selected_failure
+      let proofName ← mkFreshUserName `_executable_refutation
+      let checked ← installDeclarationsV2 #[(bindingName, bindingType, valuesBinding),
+        (witnessName, witnessType, selectedFailure), (proofName, mkNot target, refutation)]
+      setEnv base
+      match checked with
+      | .error reason => return .error ("executable proof kernel/audit refused: " ++ reason)
+      | .ok () => return .ok ⟨prepared, valuesBinding, selectedFailure, refutation⟩
+
 /-- Diagnostic receipt only, never certificate admission. -/
 def invocationReceiptV2? (name : Lean.Name) : CommandElabM (Option Json) := do
   let some attempt := ((invocationAttemptsV2.getState (← getEnv)).find? name : Option InvocationAttemptV2) | return none

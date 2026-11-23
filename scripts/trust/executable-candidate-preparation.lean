@@ -2,8 +2,8 @@ import Solidity.Examples.ExecutableGoalBinding
 import Solidity.Examples.ExecutableRequestData
 import Solidity.Frontend.ExecutableCounterexampleMetadataV2
 
-/-! Synthetic named-theorem candidate data and independent true-target checks.
-No original source certificate, executable failure or span is admitted here. -/
+/-! Synthetic named-theorem candidate preparation and true/false executable checks.
+No authenticated source certificate or span is admitted here. -/
 open Lean Elab Command Meta Solidity Solidity.Tools
 namespace ExecutableBindingControls
 
@@ -78,7 +78,74 @@ def checkCandidatePreparation : CommandElabM Unit := do
     throwError "candidate preparation changed invocation retention"
   unless ((← getEnv).constants.toList.map Prod.fst) == (preparationEnv.constants.toList.map Prod.fst) do
     throwError "candidate refusals or true-target control leaked declarations"
-  logInfo "EXECUTABLE_PREPARATION candidate data checked; true target is not a failure certificate"
+  let trueResult ← Solidity.Frontend.ExecutableMetadataV2.Internal.checkRetainedExecutableFailureV2
+    root request 1 "first" ``preparationCertificate Json.null
+  match trueResult with
+  | .error reason => unless reason.startsWith "executable failure proof refused:" do
+      throwError "true target failed at an unrelated stage: {reason}"
+  | .ok _ => throwError "true executable target refuted"
+  let .ok source := request.getObjVal? "contract" | throwError "missing injected source"
+  let .ok members := source.getObjValAs? (Array Json) "nodes" | throwError "missing injected members"
+  let some first := members[0]? | throwError "missing injected member"
+  let falseMember := first.setObjVal! "documentation"
+    (Json.mkObj [("nodeType", toJson "StructuredDocumentation"), ("text", toJson "@custom:key ensures false;")])
+  let falseRequest := request.setObjVal! "contract" (source.setObjVal! "nodes" (toJson #[falseMember]))
+  let falseRoot := `ExecutableBindingControls.invocationFalsePost
+  let .ok falseReport ← Solidity.Frontend.ExecutableMetadataV2.Internal.retainInvocationV2 falseRoot falseRequest
+    | throwError "injected false-post first invocation refused"
+  logInfo m!"EXECUTABLE_FAILURE before proof: injected false-post report: {falseReport.compress}"
+  let falseReceipt ← Solidity.Frontend.ExecutableMetadataV2.Internal.invocationReceiptV2? falseRoot
+  logInfo m!"EXECUTABLE_FAILURE before proof: injected false-post capture: {(falseReceipt.map Json.compress).getD "missing"}"
+  -- Preserve the unsupported semicolon observation. Do not normalize its input.
+  let suffixResult ← Solidity.Frontend.ExecutableMetadataV2.Internal.checkRetainedExecutableFailureV2
+    falseRoot falseRequest 1 "first" ``preparationCertificate Json.null
+  match suffixResult with
+  | .error reason => unless reason == "actual invocation unavailable" do
+      throwError "unsupported suffix had unrelated refusal: {reason}"
+  | .ok _ => throwError "unsupported suffix acquired a certificate"
+  let .ok suffixRows := falseReport.getArr? | throwError "missing unsupported suffix report"
+  let some suffixRow := suffixRows[0]? | throwError "missing unsupported suffix row"
+  unless (suffixRow.getObjValAs? String "status").toOption == some "unsupported" &&
+      (suffixRow.getObjValAs? String "reason").toOption == some "unsupported specification suffix" do
+    throwError "unsupported suffix observation changed"
+  -- A SEPARATE fixture in the existing parser's grammar, not an adapter or edit
+  -- to any original compiler fixture. The failed earlier positive remains archived.
+  let supportedMember := first.setObjVal! "documentation"
+    (Json.mkObj [("nodeType", toJson "StructuredDocumentation"), ("text", toJson "@custom:key ensures false")])
+  let supportedRequest := request.setObjVal! "contract" (source.setObjVal! "nodes" (toJson #[supportedMember]))
+  let supportedRoot := `ExecutableBindingControls.invocationFalsePostSupportedGrammar
+  let .ok supportedReport ← Solidity.Frontend.ExecutableMetadataV2.Internal.retainInvocationV2 supportedRoot supportedRequest
+    | throwError "supported-grammar first invocation failed"
+  logInfo m!"EXECUTABLE_FAILURE before proof: separate supported-grammar report: {supportedReport.compress}"
+  let proofBase ← getEnv
+  let checked ← Solidity.Frontend.ExecutableMetadataV2.Internal.checkRetainedExecutableFailureV2
+    supportedRoot supportedRequest 1 "first" ``preparationCertificate Json.null
+  let checked ← match checked with
+    | .ok value => pure value
+    | .error reason => throwError "actual injected false-post refutation unavailable: {reason}"
+  unless (← getEnv).constants.toList.map Prod.fst == proofBase.constants.toList.map Prod.fst do
+    throwError "executable refutation scratch declarations leaked"
+  liftTermElabM do
+    let formula := mkApp (mkConst ``GoalPair.executableFormula) checked.prepared.goalPair
+    let target ← mkAppM ``Fml.Valid #[formula]
+    let name ← mkFreshUserName `_executable_actual_refutation_replay
+    let base ← getEnv
+    let .ok () ← Solidity.Frontend.ExecutableMetadataV2.Internal.installDeclarationsV2
+      #[(name, mkNot target, checked.refutation)]
+      | throwError "actual refutation positive replay refused"
+    let dependencies ← collectAxioms name
+    logInfo m!"EXECUTABLE_FAILURE actual captured-target refutation dependencies: {dependencies}"
+    let otherFormula := mkApp (mkConst ``GoalPair.executableFormula) prepared.goalPair
+    let otherTarget ← mkAppM ``Fml.Valid #[otherFormula]
+    let wrongName ← mkFreshUserName `_executable_wrong_captured_target
+    match ← Solidity.Frontend.ExecutableMetadataV2.Internal.validateDeclarationsV2
+        #[(wrongName, mkNot otherTarget, checked.refutation)] with
+    | .error (.declTypeMismatch ..) => pure ()
+    | .error _ => throwError "wrong captured target failed for unrelated kernel reason"
+    | .ok () => throwError "refutation accepted for another captured target"
+    setEnv base
+
+  logInfo "EXECUTABLE_FAILURE synthetic captured-target checks; no source certificate or span"
 
 run_cmd checkCandidatePreparation
 end ExecutableBindingControls
