@@ -2923,6 +2923,7 @@ import Solidity.Frontend.ExecutableAst.Shared.Intrinsic
 import Solidity.Frontend.ExecutableAst.Shared.ObligationCapture
 import Solidity.Frontend.ExecutableAst.Shared.Scope
 import Solidity.Frontend.ExecutableAst.Shared.Translate
+import Solidity.Frontend.ExecutableCounterexampleMetadataV2
 import Solidity.Frontend.ExpressionUniqueness.Accepted
 import Solidity.Frontend.ExpressionUniqueness.AddControls
 import Solidity.Frontend.ExpressionUniqueness.AddFreeAlgebra
