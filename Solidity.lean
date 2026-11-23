@@ -2470,6 +2470,13 @@ import Solidity.Correctness.Lowering.Loops.Statement
 import Solidity.Correctness.Lowering.Loops.WhileBreak
 import Solidity.Correctness.Lowering.Loops.WhileContinue
 import Solidity.Correctness.Lowering.Loops.WhileReset
+import Solidity.Correctness.Lowering.Sim.Coverage.Alignment
+import Solidity.Correctness.Lowering.Sim.Coverage.BooleanDomain
+import Solidity.Correctness.Lowering.Sim.Coverage.BooleanSpelling
+import Solidity.Correctness.Lowering.Sim.Coverage.LoweringReceipt
+import Solidity.Correctness.Lowering.Sim.Coverage.Obstruction
+import Solidity.Correctness.Lowering.Sim.Coverage.ProductionV2
+import Solidity.Correctness.Lowering.Sim.Coverage.SpellingObstruction
 import Solidity.Correctness.Lowering.Sim.Coverage.ThreadedV2
 import Solidity.Correctness.Lowering.Sim.Expr.Capture
 import Solidity.Correctness.Lowering.Sim.Expr.Frame
