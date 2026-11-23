@@ -230,4 +230,37 @@ def checkImporterRowProjection : CommandElabM Unit := do
 
 run_cmd checkImporterRowProjection
 
+-- Additive lawful-table control; the original constant-table case remains deferred.
+def foreignProofNamesLawfulV2 : FreshNames :=
+  .ofPrefixes "foreignSe" "se" "foreignIe" "foreignMv"
+
+theorem freshSpellingBridgeFalseLawfulV2 : freshSpellingCandidate.sourceValuesV1 ≠
+    (letI : FreshNames := foreignProofNamesLawfulV2; freshSpellingCandidate.vals) := by
+  decide
+
+section ForeignProofNameControlLawfulV2
+local instance : FreshNames := foreignProofNamesLawfulV2
+-- A separate explicit wrong-name table control; no production instance changes.
+def checkForeignProofNameBridgeLawfulV2 : CommandElabM Unit := do
+  if (← getOptions).getBool `debug.skipKernelTC false then throwError "kernel checking must be enabled"
+  let .ok request := Json.parse r#"{"contract":{"nodeType":"ContractDefinition","contractKind":"contract","nodes":[{"nodeType":"FunctionDefinition","id":1,"name":"first","kind":"function","visibility":"public","stateMutability":"pure","modifiers":[],"parameters":{"parameters":[]},"returnParameters":{"parameters":[]},"body":{"nodeType":"Block","statements":[]},"documentation":""}]},"listing":false}"#
+    | throwError "foreign-name control request malformed"
+  let root := `ExecutableBindingControls.invocationForeignProofNamesLawfulV2
+  let .ok _ ← Solidity.Frontend.ExecutableMetadataV2.Internal.retainInvocationV2 root request
+    | throwError "foreign-name first invocation failed"
+  let result ← Solidity.Frontend.ExecutableMetadataV2.Internal.checkRetainedExecutableFailureV2
+    root request 1 "first" ``preparationFreshSpelling Json.null
+  match result with
+  | .error reason =>
+    unless reason.startsWith "retained values bridge refused:" do
+      throwError "foreign-name bridge failed at unrelated stage: {reason}"
+    logInfo m!"EXECUTABLE_LAWFUL_NAMES explicit foreign-name bridge refusal: {reason}"
+  | .ok _ => throwError "provably different source/candidate name table accepted"
+  let dependencies ← collectAxioms ``freshSpellingBridgeFalseLawfulV2
+  unless dependencies.all ([``propext, ``Classical.choice, ``Quot.sound].contains ·) do
+    throwError "foreign-name control dependencies refused"
+  logInfo "EXECUTABLE_LAWFUL_NAMES explicit foreign-name bridge false proof and refusal passed"
+run_cmd checkForeignProofNameBridgeLawfulV2
+end ForeignProofNameControlLawfulV2
+
 end ExecutableBindingControls
