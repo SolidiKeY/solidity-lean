@@ -1,4 +1,4 @@
-import Solidity.Correctness.Lowering.Total.Decode.Tables
+import Solidity.Correctness.Lowering.Total.Versions.Primitive
 
 namespace Solidity.Examples.Goals.LoopsDecode
 
@@ -9,5 +9,35 @@ example : Decode.tables1 = ⟨Decode.typeName, Decode.localTy, Decode.unit, Deco
 
 /-- The bridge: the generic decoder at the landed tables preserves every request. -/
 example (r : Request) : Decode.tables1.decode r = Decode.decode r := Decode.decode_tables1 r
+
+/-- Retained width probes use an empty contract and two narrow integer locals. -/
+def narrowRequest (raw : List RawStmt) : Request :=
+  ⟨{ vars := [] }, ⟨⟨fun s n => s ++ toString n, fun _ => none⟩, none, raw,
+    { funs := [] }, ⟨([("n", .val .uint 8), ("k", .val .uint 16)], 1), {}⟩⟩, none⟩
+
+example : (Decode.tablesW.decode (narrowRequest [.assign (.name "k") (.name "n")])).isSome =
+    true := rfl
+example : Decode.tablesW.decode (narrowRequest [.assign (.name "n") (.name "k")]) = none := rfl
+example : (Decode.tablesW.decode (narrowRequest [.assign (.name "n") (.num 255)])).isSome =
+    true := rfl
+example : Decode.tablesW.decode (narrowRequest [.assign (.name "n") (.num 256)]) = none := rfl
+example : Decode.decode (narrowRequest [.assign (.name "k") (.name "n")]) = none := rfl
+
+example : (Decode.tablesW.decode { narrowRequest [.assign (.name "s") (.num 255)] with
+    contract := { vars := [("s", .prim .uint)], widths := [("s", 8)] } }).isSome = true := rfl
+example : Decode.tablesW.decode { narrowRequest [.assign (.name "s") (.num 256)] with
+    contract := { vars := [("s", .prim .uint)], widths := [("s", 8)] } } = none := rfl
+example : Decode.tablesW.decode { narrowRequest [] with
+    contract := { vars := [("s", .prim .uint)], widths := [("s#address", 20)] } } = none := rfl
+
+-- Declaration-name parsing checks are executable guards, not semantic faithfulness proofs.
+#guard (Decode.tablesW.decode
+  (narrowRequest [.decl (.named "uint8") "m" (some (.name "n"))])).isSome
+#guard (Decode.tablesW.decode
+  (narrowRequest [.decl (.named "uint8") "m" (some (.name "k"))])).isNone
+
+/-- Type representation only; the version's simulation remains a separate obligation. -/
+example {p : PrimTy} {bits : Nat} {τ : Source.STy}
+    (h : Decode.primTy p bits = some τ) : Version.Prim p τ := Version.prim_of_primTy h
 
 end Solidity.Examples.Goals.LoopsDecode
