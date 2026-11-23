@@ -1,5 +1,6 @@
 import Solidity.Correctness.Lowering.Sim.Coverage.SpellingObstruction
 import Solidity.Correctness.Lowering.Sim.Coverage.Alignment
+import Solidity.Correctness.Lowering.Sim.Coverage.LoweringReceipt
 import Solidity.Examples.Lowering.Sim.Match
 
 /-!
@@ -9,8 +10,9 @@ The requested use of `diagram_total` cannot be supplied for the frozen v1
 statement: the first example refutes it under the authorized kernel hypothesis.
 The second checks that versioned production retains the v1 receipt; the third
 shows that caller placement alone does not repair the frozen spelling relation.
-The final checks establish decoder success, alignment and acceptance of the
-existing materialized program separately; no production receipt is inferred.
+The final checks establish decoding, alignment, acceptance of the existing
+materialized program, and actual lowering of the smoke separately; no
+elaboration receipt or complete production receipt is inferred.
 -/
 namespace Solidity.Examples.Lowering.Sim.Coverage
 
@@ -50,8 +52,23 @@ example : Solidity.Backend.AbiWorld.PublicCompilerTotal.ProgOk []
     Solidity.Correctness.Lowering.Checker.IntrinsicProbe.actual.program.2 := by
   repeat constructor
 
+/-- The exact smoke has an actual lowering receipt, independently of the
+still-needed elaboration receipt. -/
+example : ∃ (out : List RawStmt)
+    (after : Solidity.Correctness.Lowering.Checker.Snapshot),
+    (((@lowerAt productionNames none Match.raw).run Match.body.input.scope).run
+      Match.body.input.before.locals).run Match.body.input.before.memo =
+        .ok ((out, after.locals), after.memo) := by
+  letI : FreshNames := productionNames
+  have h := Solidity.Correctness.Lowering.Total.Coverage.Template.whileBreak
+    none (.assign (.name "i") (.name "a")) Match.body.input.before
+    (Solidity.Correctness.Lowering.Total.Coverage.hasIncDec_assign _ _)
+  exact ⟨_, _, lowerAt_of_lowersTo (h.lowers Match.body.input.scope)⟩
+
 end Solidity.Examples.Lowering.Sim.Coverage
 
 #print axioms Solidity.Correctness.Lowering.Sim.Coverage.spells_aligned
 
 #print axioms Solidity.Examples.Lowering.Sim.Coverage.smoke_decoded
+
+#print axioms Solidity.Correctness.Lowering.Sim.Coverage.lowerAt_of_lowersTo
