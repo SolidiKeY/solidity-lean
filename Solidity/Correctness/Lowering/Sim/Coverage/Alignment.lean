@@ -21,7 +21,8 @@ theorem spells_aligned {r : Total.Request} {s : Total.SourceProgram}
     simp only [Total.Decode.plain, Bool.and_eq_true, Option.isNone_iff_eq_none] at plain
     exact plain.1.1.1
   subst none
-  obtain ⟨ps, hs, hm⟩ := Total.Simulation.locals_primitive _ _ hL
+  obtain ⟨ps, hs, hm⟩ := Total.Simulation.locals_primitive _ _
+    ((Total.Decode.locals_tables1 _).symm.trans hL)
   have key : ∀ {srcΓ : Source.RCtx} {Γ : Ctx},
       srcΓ = Source.Agreement.sourceContext ps → Γ = Source.Agreement.modelContext ps →
       ∃ m : Solidity.Lowering.V07.ContextMap srcΓ Γ, Aligned m := by
