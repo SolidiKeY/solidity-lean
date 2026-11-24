@@ -96,7 +96,7 @@ async function capture(client,directory,screenshot=false,surface='editor') {
   const visible=JSON.parse(inspection.result.value);
   if(!(surface==='workspace-trust'?visible.trustEditorCount:visible.editorCount)||!accessibility.nodes?.length||!dom.documents?.length)throw new Error('Renderer has no inspectable editor, DOM or accessibility tree');
   writeFileSync(join(directory,'visible-state.json'),inspection.result.value);
-  if(screenshot) {const result=await client.request('Page.captureScreenshot',{format:'png'});writeFileSync(join(directory,'screenshot.png'),Buffer.from(result.data,'base64'));}
+  if(screenshot) {const result=await client.request('Page.captureScreenshot',{format:'png'});writeFileSync(join(directory,'screenshot.png'),Buffer.from(result.data,'base64'),{flag:'wx'});}
   return {captured:true,elapsedMs:performance.now()-start,screenshot,hoverCount:visible.visibleHovers.length,editorCount:visible.editorCount,accessibilityNodes:accessibility.nodes.length};
 }
 async function inputProbe(client) {
