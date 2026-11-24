@@ -669,7 +669,7 @@ theorem decode_locals_matching {r : Request} {s : SourceProgram}
     simp only [Decode.plain, Bool.and_eq_true, Option.isNone_iff_eq_none] at plain
     exact plain.1.1.1
   subst none
-  obtain ⟨ps, hs, hm⟩ := locals_primitive _ _ hL
+  obtain ⟨ps, hs, hm⟩ := locals_primitive _ _ ((Decode.locals_tables1 _).symm.trans hL)
   have key : ∀ {srcΓ : Source.RCtx} {Γ : Ctx}, srcΓ = Source.Agreement.sourceContext ps → Γ = Source.Agreement.modelContext ps →
       ∃ m : Lowering.V07.ContextMap srcΓ Γ, Positional m ∧
         ∀ (H : HTy) (ls : Source.Locals C.env.layout srcΓ),
@@ -782,6 +782,7 @@ theorem initialMatching_loopRel : InitialMatching loopRel Decode.decode := by
   refine ⟨m, positional, fun e admitted => ?_⟩
   obtain ⟨env, related⟩ := locals [] e.initial.1
   obtain ⟨plain, C, L, b, L', d, hC, _, _, rfl⟩ := decode_spells decoded
+  change Decode.context r = some C at hC
   simp only [Decode.context, Option.map_eq_some_iff] at hC
   obtain ⟨u, hu, rfl⟩ := hC
   have hu' := hu
