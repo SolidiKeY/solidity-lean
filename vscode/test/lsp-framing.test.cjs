@@ -66,3 +66,21 @@ for(const [name,Frames]of consumers){
   const bom=Buffer.concat([Buffer.from([239,187,191]),Buffer.from('{}')]);assert.throws(()=>new Frames().push(Buffer.concat([Buffer.from(`Content-Length: ${bom.length}\r\n\r\n`),bom])));
  });
 }
+
+for(const [name,Frames]of consumers){
+ test(name+' does not normalize high-bit header bytes into ASCII fields',()=>{
+  for(const index of [0,16]){
+   const bytes=Buffer.from('Content-Length: 2\r\n\r\n{}');bytes[index]|=0x80;
+   for(const size of [1,bytes.length]){const parser=new Frames(),actual=[];parser.on('message',m=>actual.push(m));assert.throws(()=>feed(parser,bytes,size),/Non-ASCII LSP header/);assert.deepEqual(actual,[]);}
+  }
+ });
+}
+
+test('non-ASCII RPC header rejects pending work before notification delivery',async()=>{
+ const {PassThrough}=require('node:stream'),{RpcPeer}=require('../src/rpc.cjs');
+ const input=new PassThrough(),output=new PassThrough(),peer=new RpcPeer(input,output);let delivered=0;peer.onNotification('changed',()=>delivered++);
+ try{const pending=peer.request('waiting',{}, {timeoutMs:1000}),rejected=assert.rejects(pending,/Non-ASCII LSP header/);
+  const body=Buffer.from(JSON.stringify({jsonrpc:'2.0',method:'changed',params:{}})),header=Buffer.from(`Content-Length: ${body.length}\r\n\r\n`);header[0]|=0x80;input.write(Buffer.concat([header,body]));
+  await rejected;assert.equal(peer.closed,true);assert.equal(peer.pending.size,0);assert.equal(delivered,0);
+ }finally{peer.close();input.destroy();output.destroy();}
+});
