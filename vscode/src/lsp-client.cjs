@@ -167,7 +167,16 @@ class LanguageServers extends EventEmitter {
   }
   async workspaceSymbols(query,options){await this.settled(options?.signal);const revision=this.revision;const current=()=>!this.disposed&&this.revision===revision;const results=(await Promise.all([...this.clients.values()].map(async client=>{await cancellable(client.ready,options?.signal);if(!current())throw failure('Language clients changed',-32801);return client.peer.request('workspace/symbol',{query},options);}))).flat();if(options?.signal?.aborted)throw failure('Request cancelled',-32800);if(!current())throw failure('Language clients changed',-32801);return [...new Map(results.map(s=>[JSON.stringify(s.location),s])).values()];}
   changed(uri){for(const [key,client]of this.clients)if(!client.peer?.closed)client.ready.then(()=>{if(this.clients.get(key)===client&&!client.disposed)client.peer.notify('workspace/didChangeWatchedFiles',{changes:[{uri:uri.toString(),type:2}]});}).catch(error=>this.operationError(error,[...this.owners].filter(([,owner])=>owner===client).map(([uri])=>uri)));}
-  save(doc){const save=async()=>{await this.settled(undefined,doc);const client=this.client(doc),current=this.ownership(doc,client);await client.sync(doc,current);if(!current()||client.disposed||doc.isClosed)throw failure('Language client changed',-32801);client.peer.notify('textDocument/didSave',{textDocument:{uri:doc.uri.toString()},text:doc.getText()});};save().catch(error=>this.operationError(error,[doc.uri.toString()]));}
+  save(doc){
+    const uri=doc.uri.toString();
+    const save=async()=>{
+      const version=doc.version,text=doc.getText(),epoch=this.epochs.get(uri),sourceCurrent=()=>!this.disposed&&!doc.isClosed&&doc.uri.toString()===uri&&doc.version===version&&doc.getText()===text;
+      await this.settled(undefined,doc);if(!sourceCurrent()||this.epochs.get(uri)!==epoch)throw failure('Saved document changed',-32801);
+      const client=this.client(doc),owned=this.ownership(doc,client),current=()=>owned()&&sourceCurrent();await client.sync(doc,current);
+      if(!current()||client.disposed)throw failure('Language client changed',-32801);
+      client.peer.notify('textDocument/didSave',{textDocument:{uri},text});
+    };save().catch(error=>this.operationError(error,[uri]));
+  }
   operationError(error,uris){if(this.disposed||this.reportedErrors.has(error)||!uris?.length||!uris.some(uri=>this.owners.has(uri)))return;if(![-32800,-32801].includes(error.code)&&error.code!=='CANCELLED'){this.reportedErrors.add(error);this.emit('serverError',Object.assign(error,{uris:error.uris||uris}));}}
   close(uri){const key=uri.toString(),client=this.owners.get(key);client?.closeDocument(key);if(this.owners.delete(key))this.touch(key);}
   cancel(uri){if(uri)this.owners.get(uri.toString())?.cancel(uri.toString());else for(const client of this.clients.values())client.cancel();}
