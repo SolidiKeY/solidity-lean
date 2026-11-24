@@ -129,13 +129,25 @@ test('a provider response from a retired or reassigned language client cannot be
   const request=servers.request('textDocument/hover',doc),obsolete=assert.rejects(request,e=>e.code===-32801);await Promise.resolve();servers.owners.set(doc.uri.toString(),{});gate2.resolve({contents:{value:'old owner'}});await obsolete;
 });
 
-test('failed reference startup cannot leave a stale passed migration artifact',()=>{
-  const root=fs.mkdtempSync(path.join(os.tmpdir(),'reference-migration-life-'));
+test('reference lifecycle refuses an existing output before overwriting receipts or spawning',()=>{
+  const root=fs.mkdtempSync(path.join(os.tmpdir(),'reference-existing-life-'));
   try{
-    const out=path.join(root,'out');fs.mkdirSync(out);fs.writeFileSync(path.join(out,'migration.json'),JSON.stringify({status:'passed',run:'old'}));
-    const executable=path.join(root,'exits-before-init');fs.writeFileSync(executable,'#!'+process.execPath+String.fromCharCode(10)+'process.exit(9);'+String.fromCharCode(10),{mode:0o700});
+    const out=path.join(root,'out');fs.mkdirSync(out);const originals={'migration.json':'{"status":"passed","run":"old"}\n','phases.json':'old phases\n','dafny-lsp.jsonl':'old trace\n','server.log':'old stderr\n'};
+    for(const [name,bytes]of Object.entries(originals))fs.writeFileSync(path.join(out,name),bytes);
+    const marker=path.join(root,'spawned'),executable=path.join(root,'must-not-spawn');fs.writeFileSync(executable,'#!'+process.execPath+'\nrequire("node:fs").writeFileSync('+JSON.stringify(marker)+',"spawned");process.exit(9);\n',{mode:0o700});
+    for(const extra of [[],['--migration']]){
+      const result=require('node:child_process').spawnSync(process.execPath,[path.resolve(__dirname,'../parity/lifecycle-trace.cjs'),executable,out,...extra],{encoding:'utf8',timeout:5000});
+      assert.equal(result.status,1);assert.equal(result.error,undefined);assert.match(result.stderr,/fresh lifecycle output/);assert.equal(fs.existsSync(marker),false);
+      for(const [name,bytes]of Object.entries(originals))assert.equal(fs.readFileSync(path.join(out,name),'utf8'),bytes);
+    }
+  }finally{fs.rmSync(root,{recursive:true,force:true});}
+});
+test('failed startup in a fresh lifecycle output records failure without a passed artifact',()=>{
+  const root=fs.mkdtempSync(path.join(os.tmpdir(),'reference-fresh-life-'));
+  try{
+    const out=path.join(root,'out'),executable=path.join(root,'exits-before-init');fs.writeFileSync(executable,'#!'+process.execPath+'\nprocess.exit(9);\n',{mode:0o700});
     const result=require('node:child_process').spawnSync(process.execPath,[path.resolve(__dirname,'../parity/lifecycle-trace.cjs'),executable,out,'--migration'],{encoding:'utf8',timeout:5000});
-    assert.equal(result.status,1);assert.equal(result.error,undefined);assert.equal(fs.existsSync(path.join(out,'migration.json')),false);
+    assert.equal(result.status,1);assert.equal(result.error,undefined);assert.equal(fs.existsSync(path.join(out,'migration.json')),false);assert.equal(fs.existsSync(path.join(out,'phases.json')),false);assert.ok(fs.readFileSync(path.join(out,'dafny-lsp.jsonl'),'utf8').includes('initialize'));
   }finally{fs.rmSync(root,{recursive:true,force:true});}
 });
 

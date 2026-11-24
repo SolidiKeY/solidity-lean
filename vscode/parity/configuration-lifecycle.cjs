@@ -6,11 +6,16 @@ const modes=['default','never','onsave','restored'];
 function schema(){const root=path.resolve(__dirname,'../..'),p=JSON.parse(fs.readFileSync(path.join(root,'.cache/dafny-extension/package.json')));return p.contributes.configuration.properties['dafny.automaticVerification'];}
 function launchArgs(mode){assert.ok(modes.includes(mode));return mode==='never'?['--verify-on:Never']:mode==='onsave'?['--verify-on:Save']:[];}
 class Exchange{
- constructor(identity,{now=()=>performance.now(),readSchema=schema}={}){this.identity={...identity};this.now=now;this.epoch=0;this.closed=false;this.requests=[];this.schema=structuredClone(readSchema());if(this.schema?.default!=='onchange'||JSON.stringify(this.schema?.enum)!==JSON.stringify(['never','onchange','onsave']))throw Error('Pinned automatic verification schema mismatch');this.default=this.schema.default;}
+ constructor(identity,{now=()=>performance.now(),readSchema=schema}={}){this.identity={...identity};this.now=now;this.epoch=0;this.closed=false;this.requests=[];this.tickets=new WeakMap();this.schema=structuredClone(readSchema());if(this.schema?.default!=='onchange'||JSON.stringify(this.schema?.enum)!==JSON.stringify(['never','onchange','onsave']))throw Error('Pinned automatic verification schema mismatch');this.default=this.schema.default;}
  effective(){return this.override??this.default;}
  set(value){if(value!==undefined&&!this.schema.enum.includes(value))throw Error('Unsupported pinned automatic verification value');this.override=value;this.epoch++;}
- ticket(params,id){if(this.closed||!Array.isArray(params?.items))throw Error('Invalid configuration request');return{identity:{...this.identity},epoch:this.epoch,at:this.now(),id,params:structuredClone(params)};}
- reply(ticket){if(this.closed||ticket.epoch!==this.epoch||JSON.stringify(ticket.identity)!==JSON.stringify(this.identity)||this.now()-ticket.at>=60000)throw Error('Stale/foreign/late configuration reply');const value=this.effective();const result=ticket.params.items.map(item=>item.section==='dafny'?{automaticVerification:value}:item.section==='dafny.automaticVerification'?value:null);this.requests.push({...ticket,result,scope:'Reference global setting, matching pinned Configuration.get without resource; not a local server effective-mode claim'});return result;}
+ ticket(params,id){if(this.closed||!Array.isArray(params?.items))throw Error('Invalid configuration request');const ticket={identity:{...this.identity},epoch:this.epoch,at:this.now(),id,params:structuredClone(params)};this.tickets.set(ticket,JSON.stringify(ticket));return ticket;}
+ reply(ticket){
+  let previous=ticket?.at;
+  const valid=()=>{const issued=this.tickets.get(ticket);if(!issued||JSON.stringify(ticket)!==issued||this.closed||ticket.epoch!==this.epoch||JSON.stringify(ticket.identity)!==JSON.stringify(this.identity)||!Number.isFinite(ticket.at))throw Error('Stale/foreign/late configuration reply');const now=this.now();if(!Number.isFinite(now)||now<previous||now-ticket.at>=60000)throw Error('Stale/foreign/late configuration reply');previous=now;};
+  valid();const value=this.effective(),result=ticket.params.items.map(item=>item.section==='dafny'?{automaticVerification:value}:item.section==='dafny.automaticVerification'?value:null);valid();this.tickets.delete(ticket);
+  this.requests.push({...ticket,result,scope:'Reference global setting, matching pinned Configuration.get without resource; not a local server effective-mode claim'});return result;
+ }
  close(){this.closed=true;this.epoch++;}
 }
 function source(doc,session){return{uri:doc.uri,version:doc.version,text:doc.text,sourceHash:createHash('sha256').update(doc.text).digest('hex'),session};}
@@ -56,14 +61,15 @@ async function observe({target,mode,peer,request,until,open,change,states,diagno
  }catch(error){failure=error;throw error;}finally{if(exchange.override!==undefined){exchange.set(undefined);try{peer.notify('workspace/didChangeConfiguration',{settings:target==='dafny'?{dafny:{}}:{}});}catch(error){restorationError=error.message;}}if(!closed)try{peer.notify('textDocument/didClose',{textDocument:{uri:doc.uri}});}catch{}exchange.close();save();if(restorationError&&!failure)throw Error('Configuration restoration failed: '+restorationError);}
 }
 function auditWire(rows,target,mode){
- const errors=[],versions=new Map(),saved=new Set();let uri;
+ const errors=[],versions=new Map(),saved=new Map(),observedUris=new Set();
  for(const {direction,message:m}of rows){if(!m)continue;
   if(direction==='client'&&['solidityLean/verify','dafny/textDocument/verifySymbol'].includes(m.method))errors.push('explicit verification request');
-  if(direction==='client'&&m.method==='textDocument/didOpen'){uri=m.params.textDocument.uri;versions.set(uri,m.params.textDocument.version);}
+  if(direction==='client'&&m.method==='textDocument/didOpen'){const uri=m.params.textDocument.uri;observedUris.add(uri);versions.set(uri,m.params.textDocument.version);saved.set(uri,new Set());}
   if(direction==='client'&&m.method==='textDocument/didChange')versions.set(m.params.textDocument.uri,m.params.textDocument.version);
-  if(direction==='client'&&m.method==='textDocument/didSave')saved.add(JSON.stringify([m.params.textDocument.uri,versions.get(m.params.textDocument.uri)]));
+  if(direction==='client'&&m.method==='textDocument/didSave'){const uri=m.params.textDocument.uri;if(versions.has(uri))saved.get(uri)?.add(versions.get(uri));}
+  if(direction==='client'&&m.method==='textDocument/didClose'){const uri=m.params.textDocument.uri;versions.delete(uri);saved.delete(uri);}
   if(direction==='server'&&target==='local'&&m.method==='solidityLean/report')errors.push('unexpected local proof report');
-  if(direction==='server'&&m.method==='dafny/textDocument/symbolStatus'&&m.params.uri===uri&&(mode==='never'||mode==='onsave'&&!saved.has(JSON.stringify([m.params.uri,m.params.version])))&&m.params.namedVerifiables?.some(s=>s.status!==0))errors.push('unexpected verification through final wire barrier');
+  if(direction==='server'&&m.method==='dafny/textDocument/symbolStatus'&&observedUris.has(m.params.uri)&&(mode==='never'||mode==='onsave'&&!saved.get(m.params.uri)?.has(m.params.version))&&m.params.namedVerifiables?.some(s=>s.status!==0))errors.push('unexpected verification through final wire barrier');
  }
  return errors;
 }

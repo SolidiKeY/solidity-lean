@@ -56,3 +56,27 @@ test('late cleanup success cannot acquire confirmation after original deadline (
  const client={close(){closed++;},request(method,params){if(method==='Runtime.evaluate'&&params.expression.endsWith('(null,true)'))return Promise.resolve().then(()=>{clock=15001;return{result:{value:true}};});return Promise.reject(Error('injected primary inspection failure'));}};
  try{await assert.rejects(require('../parity/renderer.cjs').captureOutput(client,directory,{readinessLine:'ready',channel:'Solidity Lean'}),/injected primary inspection failure/);const cleanup=JSON.parse(fs.readFileSync(path.join(directory,'output-observer-cleanup.json')));assert.equal(cleanup.confirmed,false);assert.equal(closed,1);}finally{t.mock.restoreAll();fs.rmSync(directory,{recursive:true,force:true});}
 });
+
+test('coherent malformed output endpoints cannot substitute truthy flags or invalid clocks (injected)',()=>{
+ const text='ready';
+ for(const mutate of [s=>s.characters[0].covered='false',s=>s.characters[0].covered=1,s=>s.characters[0].boxes='not-boxes',s=>s.characters[0]=null,s=>s.epoch='0',s=>s.epoch=-1,s=>s.clock=Infinity,s=>s.clock=-1,s=>delete s.start,s=>s.start=0.5,s=>s.text='foreign',s=>s.watchId=1]){
+  const before=sample(text),after=sample(text);mutate(before);mutate(after);let refused;assert.doesNotThrow(()=>{refused=errors(before,after,text,'Solidity Lean');});assert.ok(refused.length);
+ }
+});
+
+test('claimed coverage must agree with recorded boxes, clip and viewport (injected)',()=>{
+ const text='ready';
+ for(const mutate of [s=>s.characters[0].boxes[0].right=1,s=>s.characters[0].boxes[0].right=Infinity,s=>s.characters[0].boxes[0].left=NaN,s=>s.characters[0].boxes[0].left=-1,s=>s.characters[0].boxes[0].right=1001,s=>s.characters[0].clip.left=2,s=>s.characters[0].clip.right=1001,s=>s.characters[0].clip.top=-1,s=>delete s.characters[0].clip,s=>s.characters[0].boxes.push(null),s=>s.viewport.bottom=Infinity,s=>s.viewport=null]){
+  const before=sample(text),after=sample(text);mutate(before);mutate(after);let refused;assert.doesNotThrow(()=>{refused=errors(before,after,text,'Solidity Lean');});assert.ok(refused.length);
+ }
+ const before=sample(text),after=sample(text);before.characters[0].boxes[0].left=after.characters[0].boxes[0].left=0;assert.deepEqual(errors(before,after,text,'Solidity Lean'),[]);
+});
+
+test('recorded mutation history and scroll fields cannot contradict an unchanged observer (injected)',()=>{
+ const text='ready';
+ for(const mutate of [s=>delete s.changes,s=>s.changes='history',s=>s.changes=[{type:'attributes'}],s=>{s.epoch=129;s.changes=Array(129).fill({type:'attributes'});},s=>s.scroll='none',s=>s.scroll=[{left:NaN,top:0,transform:''}],s=>s.scroll=[{left:0,top:Infinity,transform:''}],s=>s.scroll=[{left:0,top:0}],s=>s.scroll=[null]]){
+  const before=sample(text),after=sample(text);mutate(before);mutate(after);let refused;assert.doesNotThrow(()=>{refused=errors(before,after,text,'Solidity Lean');});assert.ok(refused.length);
+ }
+ const before=sample(text),after=sample(text);before.epoch=after.epoch=1;before.changes=[{type:'attributes',attribute:'class'}];after.changes=[{type:'attributes',attribute:'style'}];assert.ok(errors(before,after,text,'Solidity Lean').length);
+ after.changes=structuredClone(before.changes);before.scroll=after.scroll=[{left:-1,top:0,transform:''}];assert.deepEqual(errors(before,after,text,'Solidity Lean'),[]);
+});

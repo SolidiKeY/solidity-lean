@@ -1,24 +1,8 @@
 'use strict';
 const {EventEmitter}=require('node:events');
 
-class LspFrames extends EventEmitter {
-  constructor(limit=32*1024*1024){super();this.limit=limit;this.buffer=Buffer.alloc(0);}
-  push(chunk){
-    this.buffer=Buffer.concat([this.buffer,chunk]);
-    while(this.buffer.length){
-      const end=this.buffer.indexOf('\r\n\r\n');
-      if(end<0){if(this.buffer.length>8192)throw new Error('Oversize LSP header');return;}
-      const lengths=[...this.buffer.subarray(0,end).toString('ascii').matchAll(/^Content-Length:\s*(\d+)\s*$/gim)];
-      if(lengths.length!==1)throw new Error('Invalid LSP Content-Length');
-      const length=Number(lengths[0][1]);
-      if(!Number.isSafeInteger(length)||length>this.limit)throw new Error('Oversize LSP body');
-      if(this.buffer.length<end+4+length)return;
-      const body=this.buffer.subarray(end+4,end+4+length);this.buffer=this.buffer.subarray(end+4+length);
-      this.emit('message',JSON.parse(body.toString('utf8')));
-    }
-  }
-  end(){if(this.buffer.length)throw new Error('Truncated LSP frame');}
-}
+const {LspFrames}=require('./lsp-frames.cjs');
+
 const failure=(message,code=-32603)=>Object.assign(new Error(message),{code});
 
 /** Full-duplex JSON-RPC over LSP byte framing. Notifications are synchronous
@@ -59,7 +43,13 @@ class RpcPeer extends EventEmitter {
     if(message.jsonrpc!=='2.0')return;
     if(message.method===undefined){
       const pending=this.pending.get(message.id);
-      if(pending)pending.finish(message.error?Object.assign(new Error(message.error.message),{code:message.error.code,data:message.error.data}):null,message.result);
+      if(pending){
+        const hasResult=Object.hasOwn(message,'result'),hasError=Object.hasOwn(message,'error'),error=message.error;
+        if(hasResult===hasError||hasError&&(!error||typeof error!=='object'||Array.isArray(error)||!Number.isInteger(error.code)||typeof error.message!=='string')){
+          this.close(failure('Malformed JSON-RPC response',-32600));return;
+        }
+        pending.finish(hasError?Object.assign(new Error(error.message),{code:error.code,data:error.data}):null,message.result);
+      }
       return;
     }
     if(message.id===undefined){

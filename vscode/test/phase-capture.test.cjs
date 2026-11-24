@@ -62,3 +62,119 @@ test('captured status with an error and mismatched source metadata never satisfy
 });
 
 test('proof hover phase is explicitly allowlisted without permitting arbitrary phase paths',()=>{assert.match(paths('/tmp/root','proof-help-hover').dir,/proof-help-hover$/);assert.throws(()=>paths('/tmp/root','proof-help-hover/../../escape'),/Unknown/);});
+
+
+test('reply and PNG reads cannot accept success at or beyond the phase deadline',async t=>{
+  const originalRead=fs.readFileSync;
+  for(const delayedFile of ['reply.json','screenshot.png']) for(const elapsed of [999,1000,1001]){
+    const dir=fixture();let now=0,producerDone=false;
+    try{
+      t.mock.method(Date,'now',()=>now);
+      t.mock.method(fs,'readFileSync',(file,...args)=>{
+        const bytes=originalRead(file,...args);
+        if(producerDone&&path.basename(String(file))===delayedFile)now=elapsed;
+        return bytes;
+      });
+      const pending=requestPhase(dir,'read-budget','verified',{version:3},1000);
+      const checked=elapsed<1000?pending:assert.rejects(pending,e=>e.code==='TIMEOUT');
+      await servePhases(dir,'read-budget',async d=>{
+        fs.writeFileSync(path.join(d,'screenshot.png'),png);
+        return{captured:true,screenshot:true};
+      },new Set());
+      producerDone=true;await checked;
+    }finally{t.mock.restoreAll();fs.rmSync(dir,{recursive:true,force:true});}
+  }
+});
+
+test('request persistence consumes the existing phase budget',async t=>{
+  const originalWrite=fs.writeFileSync;
+  for(const elapsed of [999,1000,1001]){
+    const dir=fixture();let now=0;
+    try{
+      t.mock.method(Date,'now',()=>now);
+      t.mock.method(fs,'writeFileSync',(file,...args)=>{
+        const value=originalWrite(file,...args);
+        if(path.basename(String(file)).startsWith('request-attempt-')&&path.basename(String(file)).endsWith('.json.tmp'))now=elapsed;
+        return value;
+      });
+      const pending=requestPhase(dir,'write-budget','open',{},1000);
+      const checked=elapsed<1000?pending:assert.rejects(pending,e=>e.code==='TIMEOUT');
+      await servePhases(dir,'write-budget',async d=>{
+        fs.writeFileSync(path.join(d,'screenshot.png'),png);
+        return{captured:true,screenshot:true};
+      },new Set());
+      await checked;
+    }finally{t.mock.restoreAll();fs.rmSync(dir,{recursive:true,force:true});}
+  }
+});
+
+
+test('late reads retain renderer and invalid-PNG failures',async t=>{
+  const originalRead=fs.readFileSync;
+  for(const failure of ['renderer','png']){
+    const dir=fixture();let now=0,producerDone=false;
+    try{
+      t.mock.method(Date,'now',()=>now);
+      t.mock.method(fs,'readFileSync',(file,...args)=>{
+        const bytes=originalRead(file,...args);
+        if(producerDone&&path.basename(String(file))===(failure==='renderer'?'reply.json':'screenshot.png'))now=1000;
+        return bytes;
+      });
+      const pending=requestPhase(dir,'read-failure','verified',{},1000);
+      const rejected=assert.rejects(pending,failure==='renderer'?/CDP disconnected/:/no PNG evidence/);
+      await servePhases(dir,'read-failure',async d=>{
+        if(failure==='renderer')throw Error('CDP disconnected');
+        fs.writeFileSync(path.join(d,'screenshot.png'),Buffer.from('invalid'));
+        return{captured:true,screenshot:true};
+      },new Set());
+      producerDone=true;await rejected;
+    }finally{t.mock.restoreAll();fs.rmSync(dir,{recursive:true,force:true});}
+  }
+});
+
+test('renderer acknowledgement refuses truthy nonbooleans and nested capture errors',async()=>{
+ for(const capture of [{captured:'false',screenshot:true},{captured:true,screenshot:'false'},{captured:1,screenshot:true},{captured:true,screenshot:1},{captured:true,screenshot:true,error:'actual renderer failure'}]){
+  const dir=fixture();try{
+   const pending=requestPhase(dir,'strict-capture','trace-hidden',{binding:'owned'},1000),rejected=assert.rejects(pending,/failed/);
+   await servePhases(dir,'strict-capture',async d=>{fs.writeFileSync(path.join(d,'screenshot.png'),png);return capture;},new Set());
+   await rejected;const reply=JSON.parse(fs.readFileSync(paths(dir,'trace-hidden').reply));assert.equal(reply.status,'failed');assert.deepEqual(reply.capture,capture);if(capture.error)assert.equal(reply.error,capture.error);
+  }finally{fs.rmSync(dir,{recursive:true,force:true});}
+ }
+});
+
+test('preexisting phase image refuses renderer input and remains unchanged',async()=>{
+ const dir=fixture();try{
+  const p=paths(dir,'trace-hidden');fs.mkdirSync(p.dir,{recursive:true});const old=Buffer.concat([png,Buffer.from('old retained image')]);fs.writeFileSync(path.join(p.dir,'screenshot.png'),old);
+  const pending=requestPhase(dir,'fresh-request','trace-hidden',{binding:'new-source'},1000),rejected=assert.rejects(pending,/failed/);let captures=0;
+  await servePhases(dir,'fresh-request',async()=>{captures++;return{captured:true,screenshot:true};},new Set());await rejected;
+  assert.equal(captures,0);assert.deepEqual(fs.readFileSync(path.join(p.dir,'screenshot.png')),old);const reply=JSON.parse(fs.readFileSync(p.reply));assert.equal(reply.status,'failed');assert.match(reply.error,/Existing phase screenshot/);
+ }finally{fs.rmSync(dir,{recursive:true,force:true});}
+});
+
+test('acknowledged image bytes cannot be substituted before the client reads them',async()=>{
+ for(const sameLength of [false,true]){const dir=fixture();try{
+  const pending=requestPhase(dir,'image-binding','trace-hidden',{source:'owned'},1000),rejected=assert.rejects(pending,/image.*mismatch/i);
+  await servePhases(dir,'image-binding',async d=>{fs.writeFileSync(path.join(d,'screenshot.png'),png);return{captured:true,screenshot:true};},new Set());
+  const p=paths(dir,'trace-hidden'),substitution=sameLength?Buffer.from(png):Buffer.concat([png,Buffer.from('substitution')]);if(sameLength)substitution[substitution.length-1]^=1;
+  fs.writeFileSync(path.join(p.dir,'screenshot.png'),substitution);await rejected;
+ }finally{fs.rmSync(dir,{recursive:true,force:true});}}
+});
+
+test('producer image binding remains inside the original client phase budget',async t=>{
+ const dir=fixture(),read=fs.readFileSync;let clock=0;try{
+  t.mock.method(Date,'now',()=>clock);t.mock.method(fs,'readFileSync',(file,...args)=>{const bytes=read(file,...args);if(path.basename(String(file))==='screenshot.png')clock=1000;return bytes;});
+  const pending=requestPhase(dir,'producer-budget','trace-hidden',{},1000),rejected=assert.rejects(pending,e=>e.code==='TIMEOUT');
+  await servePhases(dir,'producer-budget',async d=>{fs.writeFileSync(path.join(d,'screenshot.png'),png);return{captured:true,screenshot:true};},new Set());await rejected;
+ }finally{t.mock.restoreAll();fs.rmSync(dir,{recursive:true,force:true});}
+});
+
+test('a second phase request cannot overwrite an active or completed request',async()=>{
+ const dir=fixture();try{
+  const first=requestPhase(dir,'phase-slot','trace-hidden',{source:'first'},1000),p=paths(dir,'trace-hidden'),original=fs.readFileSync(p.request);
+  const firstFailure=first.catch(()=>{});
+  await assert.rejects(requestPhase(dir,'phase-slot','trace-hidden',{source:'second'},1000),e=>e.code==='EEXIST');assert.deepEqual(fs.readFileSync(p.request),original);
+  await servePhases(dir,'phase-slot',async d=>{fs.writeFileSync(path.join(d,'screenshot.png'),png);return{captured:true,screenshot:true};},new Set());await first;
+  await assert.rejects(requestPhase(dir,'phase-slot','trace-hidden',{source:'third'},1000),e=>e.code==='EEXIST');assert.deepEqual(fs.readFileSync(p.request),original);
+  const attempts=fs.readdirSync(p.dir).filter(n=>n.startsWith('request-attempt-')&&n.endsWith('.json')).map(n=>JSON.parse(fs.readFileSync(path.join(p.dir,n))));assert.deepEqual(attempts.map(a=>a.metadata.source).sort(),['first','second','third']);await firstFailure;
+ }finally{fs.rmSync(dir,{recursive:true,force:true});}
+});

@@ -3,6 +3,10 @@
 | `Examples/Goals/LoopsDecode.lean` | Retained decoder table and original-decoder equivalence checks, separate from the shared loop examples. |
 | `Correctness/Lowering/Total/Decode/Widths.lean` | Retained width-aware decoder tables for primitive locals, declarations and state variables. |
 | `Correctness/Lowering/Total/Versions/Primitive.lean` | Retained primitive type representation relation and elementary/local type lemmas. |
+| `Correctness/Lowering/Total/Decode/Spelling.lean` | Compatibility import and definitional original-table bridge for generalized spelling in Total/Spells.lean. |
+| `Correctness/Lowering/Total/Decode/Marked.lean` | Retained marked-address, fixed-bytes and caller-aware decoder tables; existing coverage gaps remain explicit. |
+| `Correctness/Lowering/Total/Versions/Matching.lean` | Retained version state relation and Source-to-model initial matching for sound tables, instantiated at widths. |
+| `Correctness/Lowering/Total/Versions/Marked.lean` | Retained representation soundness proofs for marked-address and fixed-bytes decoder tables. |
 | `Correctness/Lowering/Total/Main.lean` | The loop contract composed with the production and family theorems: it is interpretation faithfulness and `Residual` (unproved); `production_correct` derives the consumer from `Residual` and `FullDomain`. |
 | `Correctness/Lowering/Total/Decode.lean` | The stage-1 raw-to-Source decoder `Decode.decode`: a chosen Source spelling of the raw input, then Source inference and resolution; every other input is a gap. |
 | `Correctness/Lowering/Total/Spells.lean` | The inductive spelling relation `Spells`; the decoder is sound for it and complete if Source inference is (`InferComplete`, unproved). |
@@ -13,6 +17,9 @@
 | `Correctness/Lowering/Total/Coverage/Checks.lean` | The e1 sample inputs as template instances; the while/break probe's actual output is the only one. |
 | `Correctness/Lowering/Sim/Match/CasesV2.lean` | Shared frame-aware case conclusions at a fixed record, reusing `SiteSim₂` and `Stmt.V2.StmtArm`; fieldwise bridges from applicable v1 case hypotheses with kernel laws and v1 `RecSim`. Documents the unresolved capture/composition dependency; no recursive closure or final simulation. |
 | `Examples/Lowering/Sim/CasesV2.lean` | Checked uses of the shared bridge, block-site projection and existing run bridge. |
+| `Correctness/Lowering/Sim/Match/StatementV2.lean` | Contract: the statement-level relation `SegSim` between resolved Source items and a placed target part, with `SegFinal`, refinement within a horizon offset, Source `append`, context extension `MapExt` and a proved bridge to `Diagram.Final`; sequencing, refinement, fuel, extension and `SProg.chain` concatenation laws stated, not proved. |
+| `Correctness/Lowering/Sim/Match/CompositionV2.lean` | Contract: readings (Source items, map, fuel) and interpretations, part, capture and block predicates on elaborator runs, the assembled record, the capture, block and site laws (stated), `AssembledInduction` (a hypothesis), and bridges to `Stmt.V2.ArmSat` and `RunSim₂`. |
+| `Examples/Lowering/Sim/StatementV2.lean` | Shape checks of the v2 statement contract: with every law and interpretation obligation as a hypothesis, the per-run obligation follows. |
 | `Correctness/Sim/Examples.lean` | Checked boundary examples for the simulation framework. |
 | `Correctness/Sim/Lang.lean` | Instantiate the simulation framework with the existing Lang adapter. |
 | `Correctness/Sim/Observation.lean` | Observation diagrams over the roadmap's unchanged prefix order. |
@@ -53,6 +60,8 @@
 | `Correctness/Lowering/Sim/Session/Forward/Frames.lean` | The provisional per-frame hypothesis of the forward session diagram and the session-level match. |
 | `Correctness/Lowering/Sim/Session/Forward/Within.lean` | A reachable target session state observes a prefix of the run at every horizon above its issued actions. |
 | `Examples/Lowering/Sim/Session/Forward.lean` | Type-level uses of the forward session diagram and its resource record on the session of `spin`, under the unmet hypothesis of matched frames. |
+| `Correctness/Lowering/Sim/Induction/Knot.lean` | The actual elaborator record satisfies the frozen case predicates by `elabKernelTotal` induction, conditional on the three case hypotheses and the explicit loop-arm bridge; an intermediate step toward `loweringBySimulation`. |
+| `Examples/Lowering/Sim/Induction.lean` | Uses the intermediate knot-closure theorem with production fresh names and its loop-arm bridge hypothesis. |
 | `Solidity/Correctness/Lowering/Sim/Coverage/ThreadedV2.lean` | Additive caller-context threading contract, v1 projection and association bridge for `loweringBySimulation`. |
 | `Solidity/Examples/Lowering/Sim/Coverage/ThreadedV2.lean` | Existing standalone-loop vocabulary exercises the bridge with explicit threading and placement receipts. |
 | `Correctness/Lowering/Sim/Coverage/Obstruction.lean` | Exact accepted empty production run under `elabKernelTotal` refuting frozen v1 diagram coverage: placement may use an unrelated context. |
@@ -65,6 +74,12 @@
 | `Correctness/Lowering/Sim/Coverage/BooleanSpelling.lean` | Proves existing raw-syntax decoder success for the H1361 grammar via spelling; Source inference and resolved-program decoding remain separate. |
 | `Correctness/Lowering/Sim/Coverage/BooleanLocals.lean` | Resolves Boolean caller locals and proves actual Source lvalue and expression inference on bound names, including repeated names. |
 | `Correctness/Lowering/Sim/Coverage/BooleanExprInference.lean` | Proves actual fuel-bounded Source inference completeness for every expression in the H1361 Boolean grammar, using the existing spelling relation. |
+| `Correctness/Lowering/Sim/Coverage/BooleanStmtInference.lean` | Actual Source statement/sequence inference for the H1361 Boolean grammar, preserving locals and the decoder’s singleton unbracing rule. |
+| `Correctness/Lowering/Sim/Coverage/BooleanDecoding.lean` | Proves full existing-decoder success on approved Boolean inputs, with a singleton resolved statement; no decoder or inference premise is added. |
+| `Correctness/Lowering/Sim/Coverage/BooleanCoverage.lean` | Additive H1184 restricted v2 coverage under the H1361 syntax boundary and H1182 placement, retaining original acceptance; actual production nonvacuity remains separate. |
+| `Solidity/Goals/LoweringDiagramV2.lean` | `loweringBySimulationV2`, the additive frame-aware v2 of `loweringBySimulation` (H1391), open: `FrameRel`, `Diagram.SimulatesV2` (run clauses at transactional frames) and `Diagram.FrameTotal`; v1 vocabulary, `Diagram.Total` and `SessionLift` reused unchanged. |
+| `Solidity/Correctness/Lowering/Sim/Match/DiagramV2.lean` | Frame-aware diagram companion: `RunSim₂` at every run is the per-run part of `diagram.SimulatesV2`, and the v1-to-v2 bridges (never the converse); `diagram.FrameTotal` proved (`frame_matching`), and the goal from `RunSim₂` at every run, coverage and the session lift (`lowering_v2_of_runs₂`). |
+| `Solidity/Examples/Goals/LoweringDiagramV2.lean` | Pins the `loweringBySimulationV2` roadmap line, its unfolding, the bridge direction and the refusal of static, unchecked and sender-pinned frames. |
 # Unchecked arithmetic
 
 | Module | Purpose |

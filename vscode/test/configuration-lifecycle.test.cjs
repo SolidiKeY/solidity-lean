@@ -82,3 +82,26 @@ test('diagnostic coverage rejects malformed entries and future versions instead 
 test('status predicate crossing the unchanged deadline cannot return late success (injected clock)',async()=>{const {waitUntil}=require('../parity/configuration-lifecycle.cjs');let clock=0,calls=0;await assert.rejects(waitUntil(()=>{calls++;clock=5;return true;},'synchronous late status',{deadline:5,peer:{closed:false},now:()=>clock,sleep:async()=>{throw Error('unexpected sleep');}}),e=>e.code==='TIMEOUT');assert.equal(calls,1);});
 test('transport closed while evaluating a status predicate cannot certify readiness',async()=>{const {waitUntil}=require('../parity/configuration-lifecycle.cjs'),peer={closed:false};await assert.rejects(waitUntil(()=>{peer.closed=true;return true;},'closed status',{deadline:5,peer,now:()=>0,sleep:async()=>{throw Error('unexpected sleep');}}),/Server closed/);});
 test('timely status predicate and its original exception retain their behavior',async()=>{const {waitUntil}=require('../parity/configuration-lifecycle.cjs'),peer={closed:false},original=Error('owned status failure');let sleeps=0;await waitUntil(()=>true,'current status',{deadline:5,peer,now:()=>1,sleep:async()=>{sleeps++;}});assert.equal(sleeps,0);await assert.rejects(waitUntil(()=>{throw original;},'failed status',{deadline:5,peer,now:()=>1}),e=>e===original);});
+
+test('configuration wire audit cannot reuse a closed-session save or hide an earlier open document',()=>{
+ const {auditWire}=require('../parity/configuration-lifecycle.cjs'),uri='file:///configuration.dfy',other='file:///other.dfy';
+ const open=u=>({direction:'client',message:{method:'textDocument/didOpen',params:{textDocument:{uri:u,version:1,text:'method Check() {}'}}}}),save=u=>({direction:'client',message:{method:'textDocument/didSave',params:{textDocument:{uri:u}}}}),close=u=>({direction:'client',message:{method:'textDocument/didClose',params:{textDocument:{uri:u}}}}),status=u=>({direction:'server',message:{method:'dafny/textDocument/symbolStatus',params:{uri:u,version:1,namedVerifiables:[{status:5}]}}});
+ assert.ok(auditWire([open(uri),open(other),status(uri)],'dafny','never').includes('unexpected verification through final wire barrier'));
+ assert.ok(auditWire([open(uri),save(uri),close(uri),open(uri),status(uri)],'dafny','onsave').includes('unexpected verification through final wire barrier'));
+ assert.ok(auditWire([open(uri),save(uri),close(uri),status(uri)],'dafny','onsave').includes('unexpected verification through final wire barrier'));
+ assert.deepEqual(auditWire([open(uri),save(uri),close(uri),open(uri),save(uri),status(uri)],'dafny','onsave'),[]);
+});
+
+test('configuration replies require the exact unmodified issued ticket and reject replay',()=>{
+ const e=new Exchange({runId:'r',target:'dafny',serverSession:'s'},{readSchema:()=>pinnedFixture});
+ const ticket=e.ticket(params,1);assert.throws(()=>e.reply(structuredClone(ticket)),/Stale|foreign/);
+ for(const change of [t=>t.id++,t=>t.params.items[0].section='unknown',t=>t.at=NaN]){const t=e.ticket(params,2);change(t);assert.throws(()=>e.reply(t),/Stale|foreign/);}
+ const foreign=new Exchange({...e.identity},{readSchema:()=>pinnedFixture});assert.throws(()=>e.reply(foreign.ticket(params,3)),/Stale|foreign/);
+ assert.deepEqual(e.reply(ticket),['onchange',{automaticVerification:'onchange'},null]);assert.throws(()=>e.reply(ticket),/Stale|foreign/);assert.equal(e.requests.length,1);
+});
+test('configuration ticket clocks and reply preparation stay within the original deadline',()=>{
+ for(const mode of ['backwards','nonfinite','late-result','backwards-during-result']){let clock=10;const e=new Exchange({runId:'r',target:'dafny',serverSession:'s'},{readSchema:()=>pinnedFixture,now:()=>clock}),ticket=e.ticket(params,1);
+  if(mode==='backwards')clock=9;else if(mode==='nonfinite')clock=NaN;else if(mode==='late-result')e.effective=()=>{clock=60010;return 'onchange';};else{clock=20;e.effective=()=>{clock=15;return 'onchange';};}
+  assert.throws(()=>e.reply(ticket),/Stale|late/);assert.equal(e.requests.length,0);
+ }
+});

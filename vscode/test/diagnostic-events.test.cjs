@@ -39,3 +39,23 @@ test('native observer fanout reuses one public listener and retires only the own
  try{const a=owner.subscribeDiagnosticEvents(()=>seen++),b=owner.subscribeDiagnosticEvents(()=>other++),bad=owner.subscribeDiagnosticEvents(()=>{throw Error('subscriber failure');});publicCallback({uris:[]});assert.equal(seen,1);assert.equal(other,1);assert.equal(registrations,1);assert.ok(rows.some(r=>r.kind==='diagnostics.subscriberError'));a.dispose();a.dispose();bad.dispose();publicCallback({uris:[]});assert.equal(seen,1);assert.equal(other,2);b.dispose();owner.restore();assert.throws(()=>owner.subscribeDiagnosticEvents(()=>{}));assert.equal(Module._load,original);assert.equal(disposals,1);}finally{if(Module._load!==original)owner.restore();}
 });
 test('correlation observer uses the supplied native fanout without another public registration',()=>{const m=mock();m.seen.dispose();let callback,removed=0;m.vscode.languages.onDidChangeDiagnostics=()=>assert.fail('duplicate public registration');const hooked=observer.observe({vscode:m.vscode,sessionFor:()=>m.s.before.session,wire:()=>m.f.protocol.slice(0,m.s.wireEnd),subscribe:fn=>{callback=fn;return{dispose(){removed++;}};},now:()=>100});callback({uris:[m.u]});assert.equal(hooked.changes.registrationSource,'shared-public-observer');assert.equal(hooked.changes.rows[0].status,'observed');hooked.dispose();assert.equal(removed,1);});
+
+test('serialized diagnostic event refuses duplicate URI/resource entries',()=>{
+ const o=receipt(),row=o.diagnosticChanges.rows[0];row.changedUris.push(row.changedUris[0]);row.resources.push(structuredClone(row.resources[0]));assert.ok(base.errors(JSON.parse(JSON.stringify(o)),c).length);
+});
+test('unselected background diagnostic events cannot carry negative observation time',()=>{
+ const o=receipt(),changes=o.diagnosticChanges;changes.rows.unshift({observerId:changes.observerId,sequence:0,atMonotonicMs:-0.5,status:'observed',wireEnd:0,changedUris:[],resources:[]});changes.rows.forEach((row,i)=>row.sequence=i+1);o.steps.forEach(s=>s.diagnosticEventIndex++);assert.ok(base.errors(JSON.parse(JSON.stringify(o)),c).length);
+});
+
+test('serialized diagnostic events cannot rewind the append-only protocol prefix',()=>{
+ const o=receipt(),changes=o.diagnosticChanges,first=changes.rows[0];
+ changes.rows.splice(1,0,{observerId:changes.observerId,sequence:0,atMonotonicMs:first.atMonotonicMs+1,status:'observed',wireEnd:first.wireEnd-1,changedUris:[],resources:[]});
+ changes.rows.forEach((row,i)=>row.sequence=i+1);o.steps.slice(1).forEach(s=>s.diagnosticEventIndex++);
+ assert.ok(base.errors(JSON.parse(JSON.stringify(o)),c).length);
+});
+test('background diagnostic events may share the same protocol prefix',()=>{
+ const o=receipt(),changes=o.diagnosticChanges,first=changes.rows[0];
+ changes.rows.splice(1,0,{observerId:changes.observerId,sequence:0,atMonotonicMs:first.atMonotonicMs+1,status:'observed',wireEnd:first.wireEnd,changedUris:[],resources:[]});
+ changes.rows.forEach((row,i)=>row.sequence=i+1);o.steps.slice(1).forEach(s=>s.diagnosticEventIndex++);
+ assert.deepEqual(base.errors(JSON.parse(JSON.stringify(o)),c),[]);
+});

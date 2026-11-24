@@ -1,29 +1,9 @@
 'use strict';
-const {EventEmitter} = require('node:events');
 const {readdirSync, readFileSync} = require('node:fs');
 const {performance} = require('node:perf_hooks');
 const {spawnSync}=require('node:child_process');
 
-/** Byte-oriented framing: UTF-8 characters may straddle arbitrary pipe chunks. */
-class LspFrames extends EventEmitter {
-  constructor(limit = 32 * 1024 * 1024) { super(); this.buffer = Buffer.alloc(0); this.limit = limit; }
-  push(chunk) {
-    this.buffer = Buffer.concat([this.buffer, chunk]);
-    while (this.buffer.length) {
-      const end = this.buffer.indexOf('\r\n\r\n');
-      if (end < 0) { if (this.buffer.length > 8192) throw new Error('Oversize LSP header'); return; }
-      const lengths = [...this.buffer.subarray(0, end).toString('ascii').matchAll(/^Content-Length:\s*(\d+)\s*$/gim)];
-      if (lengths.length !== 1) throw new Error('Invalid LSP Content-Length');
-      const length = Number(lengths[0][1]);
-      if (!Number.isSafeInteger(length) || length > this.limit) throw new Error('Oversize LSP body');
-      if (this.buffer.length < end + 4 + length) return;
-      const body = this.buffer.subarray(end + 4, end + 4 + length);
-      this.buffer = this.buffer.subarray(end + 4 + length);
-      this.emit('message', JSON.parse(body.toString('utf8')));
-    }
-  }
-  end() { if (this.buffer.length) throw new Error('Truncated LSP frame'); }
-}
+const {LspFrames}=require('../src/lsp-frames.cjs');
 
 function statistics(values) {
   const sorted = values.filter(Number.isFinite).sort((a, b) => a - b);
@@ -59,13 +39,14 @@ function differences(left, right, path = '$') {
 
 function procTable() {
   const table = new Map();
-  for (const name of readdirSync('/proc')) {
-    if (!/^\d+$/.test(name)) continue;
+  // Prefer high PIDs before a large zombie table; this is only a scan heuristic.
+  for (const name of readdirSync('/proc').filter(name=>/^\d+$/.test(name)).sort((a,b)=>Number(b)-Number(a))) {
     try {
       const text = readFileSync(`/proc/${name}/stat`, 'utf8');
       const end = text.lastIndexOf(')');
       const fields = text.slice(end+2).trim().split(/\s+/);
-      const cmd = readFileSync(`/proc/${name}/cmdline`, 'utf8').replaceAll('\0', ' ');
+      // Linux exposes an empty cmdline for zombies; retain their stat data.
+      const cmd = fields[0]==='Z'?'':readFileSync(`/proc/${name}/cmdline`, 'utf8').replaceAll('\0', ' ');
       table.set(Number(name), {pid:Number(name), ppid:Number(fields[1]), state:fields[0],name:text.slice(text.indexOf('(')+1,end),
         ticks:Number(fields[11])+Number(fields[12]), start:fields[19], rssBytes:Number(fields[21])*4096, cmd});
     } catch { /* Processes can exit between reads. */ }

@@ -19,8 +19,10 @@ const png=Buffer.from([137,80,78,71,13,10,26,10]);
 function paths(directory,phase){if(!phases.includes(phase))throw Error('Unknown visual phase '+phase);const dir=path.join(directory,'phases',phase);return{dir,request:path.join(dir,'request.json'),reply:path.join(dir,'reply.json')};}
 function json(file,value){const tmp=file+'.tmp';fs.writeFileSync(tmp,JSON.stringify(value,null,2)+'\n');fs.renameSync(tmp,file);}
 async function requestPhase(directory,runId,phase,metadata,timeoutMs){
-  const p=paths(directory,phase);fs.mkdirSync(p.dir,{recursive:true});const request={runId,phase,requestId:randomUUID(),requested:Date.now(),metadata};const metadataHash=createHash('sha256').update(JSON.stringify(metadata)).digest('hex');json(p.request,request);
   const deadline=Date.now()+timeoutMs;
+  const p=paths(directory,phase);fs.mkdirSync(p.dir,{recursive:true});const request={runId,phase,requestId:randomUUID(),requested:Date.now(),metadata};const metadataHash=createHash('sha256').update(JSON.stringify(metadata)).digest('hex');
+  // Preserve each attempt; atomically claim this one-request phase channel.
+  const attempt=path.join(p.dir,'request-attempt-'+request.requestId+'.json');json(attempt,request);fs.linkSync(attempt,p.request);
   while(Date.now()<deadline){
     if(fs.existsSync(p.reply)){
       const reply=JSON.parse(fs.readFileSync(p.reply));
@@ -29,6 +31,8 @@ async function requestPhase(directory,runId,phase,metadata,timeoutMs){
         if(reply.error||reply.status!=='captured')throw Error('Visual phase '+phase+' failed: '+reply.error);
         const bytes=fs.readFileSync(path.join(p.dir,'screenshot.png'));
         if(bytes.length<=png.length||!bytes.subarray(0,png.length).equals(png))throw Error('Visual phase has no PNG evidence');
+        if(reply.imageBytes!==bytes.length||reply.imageSha256!==createHash('sha256').update(bytes).digest('hex'))throw Error('Visual phase image byte binding mismatch');
+        if(Date.now()>=deadline)break;
         return reply;
       }
     }
@@ -42,8 +46,10 @@ async function servePhases(directory,runId,capture,seen){
     const request=JSON.parse(fs.readFileSync(p.request));
     if(request.runId!==runId||request.phase!==phase||typeof request.requestId!=='string'||seen.has(request.requestId))continue;
     seen.add(request.requestId);const reply={runId,phase,requestId:request.requestId,status:'failed',requested:request.requested,metadataHash:createHash('sha256').update(JSON.stringify(request.metadata??null)).digest('hex')};
-    try{reply.capture=await capture(p.dir,request);reply.status=reply.capture?.captured&&reply.capture.screenshot?'captured':'failed';
-        if(reply.status!=='captured')reply.error='Renderer did not capture a screenshot';}
+    try{if(fs.existsSync(path.join(p.dir,'screenshot.png')))throw Error('Existing phase screenshot must be preserved; choose a fresh capture directory');
+        reply.capture=await capture(p.dir,request);reply.status=reply.capture?.captured===true&&reply.capture.screenshot===true&&reply.capture.error===undefined?'captured':'failed';
+        if(reply.status!=='captured')reply.error=typeof reply.capture?.error==='string'&&reply.capture.error?reply.capture.error:'Renderer did not capture a screenshot';
+        else{const bytes=fs.readFileSync(path.join(p.dir,'screenshot.png'));reply.imageBytes=bytes.length;reply.imageSha256=createHash('sha256').update(bytes).digest('hex');}}
     catch(e){reply.status='failed';reply.error=e.message;}
     reply.finished=Date.now();json(p.reply,reply);
   }
