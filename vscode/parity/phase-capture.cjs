@@ -15,7 +15,7 @@ function phaseObserved(phase,before,after){
   const expected=phase==='proof-broken'?'failed':'proved';
   return outcome(before)===expected&&outcome(after)===expected&&JSON.stringify(before.functions||before.namedVerifiables)===JSON.stringify(after.functions||after.namedVerifiables);
 }
-const {assertPngContainer}=require('./png-container.cjs');
+const {assertPngContainer}=require('./png-container.cjs'),{isDeepStrictEqual}=require('node:util');
 function captureAcknowledged(value){return value?.captured===true&&value.screenshot===true&&value.error===undefined;}
 function captureFailure(error){
   try{const message=error?.message;if(typeof message==='string'&&message)return message;}catch{}
@@ -64,9 +64,9 @@ async function servePhases(directory,runId,capture,seen){
     const p=paths(directory,phase);if(!fs.existsSync(p.request))continue;
     const request=JSON.parse(fs.readFileSync(p.request));
     if(request.runId!==runId||request.phase!==phase||typeof request.requestId!=='string'||seen.has(request.requestId))continue;
-    seen.add(request.requestId);const reply={runId,phase,requestId:request.requestId,status:'failed',requested:request.requested,metadataHash:createHash('sha256').update(JSON.stringify(request.metadata??null)).digest('hex')};
+    seen.add(request.requestId);const requestSnapshot=JSON.parse(JSON.stringify(request));const reply={runId,phase,requestId:request.requestId,status:'failed',requested:request.requested,metadataHash:createHash('sha256').update(JSON.stringify(request.metadata??null)).digest('hex')};
     try{if(imageEntry(path.join(p.dir,'screenshot.png')))throw Error('Existing phase screenshot must be preserved; choose a fresh capture directory');
-        reply.capture=await capture(p.dir,request);reply.status=captureAcknowledged(reply.capture)?'captured':'failed';
+        reply.capture=await capture(p.dir,request);if(!isDeepStrictEqual(request,requestSnapshot))throw Error('Visual phase request changed during capture');reply.status=captureAcknowledged(reply.capture)?'captured':'failed';
         if(reply.status!=='captured')reply.error=typeof reply.capture?.error==='string'&&reply.capture.error?reply.capture.error:'Renderer did not capture a screenshot';
         else{const bytes=readImage(path.join(p.dir,'screenshot.png'));assertPngContainer(bytes);reply.imageBytes=bytes.length;reply.imageSha256=createHash('sha256').update(bytes).digest('hex');}}
     catch(e){reply.status='failed';reply.error=captureFailure(e);}
