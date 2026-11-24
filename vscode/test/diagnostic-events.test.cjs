@@ -46,3 +46,16 @@ test('serialized diagnostic event refuses duplicate URI/resource entries',()=>{
 test('unselected background diagnostic events cannot carry negative observation time',()=>{
  const o=receipt(),changes=o.diagnosticChanges;changes.rows.unshift({observerId:changes.observerId,sequence:0,atMonotonicMs:-0.5,status:'observed',wireEnd:0,changedUris:[],resources:[]});changes.rows.forEach((row,i)=>row.sequence=i+1);o.steps.forEach(s=>s.diagnosticEventIndex++);assert.ok(base.errors(JSON.parse(JSON.stringify(o)),c).length);
 });
+
+test('serialized diagnostic events cannot rewind the append-only protocol prefix',()=>{
+ const o=receipt(),changes=o.diagnosticChanges,first=changes.rows[0];
+ changes.rows.splice(1,0,{observerId:changes.observerId,sequence:0,atMonotonicMs:first.atMonotonicMs+1,status:'observed',wireEnd:first.wireEnd-1,changedUris:[],resources:[]});
+ changes.rows.forEach((row,i)=>row.sequence=i+1);o.steps.slice(1).forEach(s=>s.diagnosticEventIndex++);
+ assert.ok(base.errors(JSON.parse(JSON.stringify(o)),c).length);
+});
+test('background diagnostic events may share the same protocol prefix',()=>{
+ const o=receipt(),changes=o.diagnosticChanges,first=changes.rows[0];
+ changes.rows.splice(1,0,{observerId:changes.observerId,sequence:0,atMonotonicMs:first.atMonotonicMs+1,status:'observed',wireEnd:first.wireEnd,changedUris:[],resources:[]});
+ changes.rows.forEach((row,i)=>row.sequence=i+1);o.steps.slice(1).forEach(s=>s.diagnosticEventIndex++);
+ assert.deepEqual(base.errors(JSON.parse(JSON.stringify(o)),c),[]);
+});
