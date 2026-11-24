@@ -16,6 +16,10 @@ function documentRequestParams(params,uri,version){
   return{...captured,textDocument:{uri,version}};
 }
 
+function setErrorUris(error,uris){
+  Object.defineProperty(error,'uris',{value:uris,...(Object.hasOwn(error,'uris')?{}:{writable:true,enumerable:true,configurable:true})});
+}
+
 function operationFailure(reason){
   const uris=reason&&typeof reason==='object'?Object.getOwnPropertyDescriptor(reason,'uris'):undefined;
   if(reason instanceof Error&&typeof reason.message==='string'&&Object.isExtensible(reason)&&(!uris||'value'in uris&&uris.writable))return reason;
@@ -160,11 +164,13 @@ class LanguageServers extends EventEmitter {
       client.on('serverError',error=>{
         const current=this.clients.get(key)===client;
         const uris=[...this.owners].filter(([,owner])=>owner===client).map(([uri])=>uri);
-        Object.assign(error,{uris});this.reportedErrors.add(error);
+        const reason=error;error=operationFailure(error);setErrorUris(error,uris);
+        if(reason!==null&&(typeof reason==='object'||typeof reason==='function'))this.reportedErrors.add(reason);
+        this.reportedErrors.add(error);
         for(const uri of uris){this.owners.delete(uri);this.touch(uri);}
         if(this.clients.get(key)===client)this.clients.delete(key);
         this.retire(key,client);
-        if(current&&uris.length&&!this.disposed){this.reportedErrors.add(error);this.emit('serverError',Object.assign(error,{uris}));}
+        if(current&&uris.length&&!this.disposed)this.emit('serverError',error);
       });client.on('log',message=>this.emit('log',message));
       client.on('identity',identity=>{const uris=[...this.owners].filter(([,owner])=>owner===client).map(([uri])=>uri);if(!this.disposed&&this.clients.get(key)===client&&uris.length)this.emit('identity',{...identity,uris});});
     }
@@ -213,7 +219,7 @@ class LanguageServers extends EventEmitter {
     if(this.disposed||this.reportedErrors.has(error)||!uris?.length||!uris.some(uri=>this.owners.has(uri)))return;
     const code=error?.code;if([-32800,-32801].includes(code)||code==='CANCELLED')return;
     const reported=operationFailure(error);
-    Object.defineProperty(reported,'uris',{value:reported.uris||uris,...(Object.hasOwn(reported,'uris')?{}:{writable:true,enumerable:true,configurable:true})});
+    setErrorUris(reported,reported.uris||uris);
     if(error!==null&&(typeof error==='object'||typeof error==='function'))this.reportedErrors.add(error);
     this.reportedErrors.add(reported);this.emit('serverError',reported);
   }
