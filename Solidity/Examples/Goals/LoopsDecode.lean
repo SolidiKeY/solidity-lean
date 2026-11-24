@@ -1,3 +1,4 @@
+import Solidity.Correctness.Lowering.Total.Decode.Callee.Declarations
 import Solidity.Correctness.Lowering.Total.Decode.Callee.Metadata
 import Solidity.Correctness.Lowering.Total.Versions.CalleeBinding.Resolved
 import Solidity.Source.Elaborate
@@ -651,5 +652,40 @@ example : Decode.Callee.ordinaryVisibility (.abi .publicFn .retained none) = non
 example : Decode.Callee.ordinaryVisibility .constructor = none := rfl
 example : [SourceMutability.nonpayable, .pureFn, .viewFn, .payable].map
     Decode.Callee.sourceMutability = [none, some .pure, some .view, some .payable] := rfl
+
+/-! The complete function-entry list is assembled in its original order. -/
+private def secondImportedCallee : FunDecl :=
+  let source : SourceFunction :=
+    { name := "secondIdentity", callable := .local .internalFn }
+  { identityCallee with sourceDecl := some source }
+private def importedFunctions : List (Name × FunDecl) :=
+  [("modelAlias1", importedCallee), ("modelAlias2", secondImportedCallee)]
+
+#guard_msgs in
+#eval (show IO Unit from do
+  let actual := do
+    let parts ← Decode.Callee.functionParts Decode.tablesB CallSpellExt.registry1 "C" importedFunctions
+    let res := Source.resolveUnit { pipeline := .legacy }
+      (.unit (.cons (.contract false "C" .none .nil parts) .nil))
+    let first ← Version.CalleeBinding.fromResolutionAt res 1
+    let second ← Version.CalleeBinding.fromResolutionAt res 2
+    pure (first.declaration.name, second.declaration.name)
+  unless actual == some ("sourceIdentity", "secondIdentity") do
+    throw (IO.userError "function-list assembly lost source identity or order"))
+
+example {parts : Source.Syn (.list (.part false))}
+    (h : Decode.Callee.functionParts Decode.tablesB CallSpellExt.registry1
+      "C" importedFunctions = some parts) :
+    (parts.collect (some "C")).map some =
+      importedFunctions.map (fun f =>
+        Decode.Callee.fromMetadata Decode.tablesB CallSpellExt.registry1 "C" f.2) ∧
+    (parts.collect (some "C")).length = 2 :=
+  ⟨Decode.Callee.functionParts_faithful _ _ _ _ _ h,
+    Decode.Callee.functionParts_length h⟩
+
+/-- A missing-metadata entry between valid functions fails the entire list. -/
+example : Decode.Callee.functionParts Decode.tablesB CallSpellExt.registry1 "C"
+    [("first", importedCallee), ("unsupported", identityCallee),
+      ("second", secondImportedCallee)] = none := rfl
 
 end Solidity.Examples.Goals.LoopsDecode

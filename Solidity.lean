@@ -2523,6 +2523,7 @@ import Solidity.Correctness.Lowering.Total.Decode
 import Solidity.Correctness.Lowering.Total.Decode.BytesLiteral
 import Solidity.Correctness.Lowering.Total.Decode.BytesLiteral.Checked
 import Solidity.Correctness.Lowering.Total.Decode.BytesLiteral.Evaluation
+import Solidity.Correctness.Lowering.Total.Decode.Callee.Declarations
 import Solidity.Correctness.Lowering.Total.Decode.Callee.Functions
 import Solidity.Correctness.Lowering.Total.Decode.Callee.Metadata
 import Solidity.Correctness.Lowering.Total.Decode.Callee.Parameters
