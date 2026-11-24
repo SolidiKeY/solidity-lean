@@ -2471,10 +2471,13 @@ import Solidity.Correctness.Lowering.Loops.WhileBreak
 import Solidity.Correctness.Lowering.Loops.WhileContinue
 import Solidity.Correctness.Lowering.Loops.WhileReset
 import Solidity.Correctness.Lowering.Sim.Coverage.Alignment
+import Solidity.Correctness.Lowering.Sim.Coverage.BooleanCoverage
+import Solidity.Correctness.Lowering.Sim.Coverage.BooleanDecoding
 import Solidity.Correctness.Lowering.Sim.Coverage.BooleanDomain
 import Solidity.Correctness.Lowering.Sim.Coverage.BooleanExprInference
 import Solidity.Correctness.Lowering.Sim.Coverage.BooleanLocals
 import Solidity.Correctness.Lowering.Sim.Coverage.BooleanSpelling
+import Solidity.Correctness.Lowering.Sim.Coverage.BooleanStmtInference
 import Solidity.Correctness.Lowering.Sim.Coverage.LoweringReceipt
 import Solidity.Correctness.Lowering.Sim.Coverage.Obstruction
 import Solidity.Correctness.Lowering.Sim.Coverage.ProductionV2
