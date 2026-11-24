@@ -43,8 +43,8 @@ async function servePhases(directory,runId,capture,seen){
     const request=JSON.parse(fs.readFileSync(p.request));
     if(request.runId!==runId||request.phase!==phase||typeof request.requestId!=='string'||seen.has(request.requestId))continue;
     seen.add(request.requestId);const reply={runId,phase,requestId:request.requestId,status:'failed',requested:request.requested,metadataHash:createHash('sha256').update(JSON.stringify(request.metadata??null)).digest('hex')};
-    try{reply.capture=await capture(p.dir,request);reply.status=reply.capture?.captured&&reply.capture.screenshot?'captured':'failed';
-        if(reply.status!=='captured')reply.error='Renderer did not capture a screenshot';}
+    try{reply.capture=await capture(p.dir,request);reply.status=reply.capture?.captured===true&&reply.capture.screenshot===true&&reply.capture.error===undefined?'captured':'failed';
+        if(reply.status!=='captured')reply.error=typeof reply.capture?.error==='string'&&reply.capture.error?reply.capture.error:'Renderer did not capture a screenshot';}
     catch(e){reply.status='failed';reply.error=e.message;}
     reply.finished=Date.now();json(p.reply,reply);
   }

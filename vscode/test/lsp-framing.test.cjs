@@ -52,3 +52,17 @@ test('oversized RPC header closes pending work before dispatching a notification
     await rejected;assert.equal(peer.closed,true);assert.equal(peer.pending.size,0);assert.equal(delivered,0);
   }finally{peer.close();input.destroy();output.destroy();}
 });
+
+for(const [name,Frames]of consumers){
+ test(name+' refuses malformed UTF-8 before delivering replacement-character JSON',()=>{
+  for(const bad of [[0xff],[0xc0,0xaf],[0xed,0xa0,0x80],[0xf0,0x9f]]){
+   const body=Buffer.concat([Buffer.from('{"uri":"file:///'),Buffer.from(bad),Buffer.from('.sol"}')]);
+   const bytes=Buffer.concat([Buffer.from(`Content-Length: ${body.length}\r\n\r\n`),body]);
+   for(const size of [1,bytes.length]){const parser=new Frames(),actual=[];parser.on('message',m=>actual.push(m));assert.throws(()=>feed(parser,bytes,size),/encoding|UTF-8/i);assert.deepEqual(actual,[]);}
+  }
+ });
+ test(name+' preserves legitimate replacement characters and a JSON BOM remains refused',()=>{
+  const body=Buffer.from(JSON.stringify({uri:'file:///�.sol'})),parser=new Frames(),actual=[];parser.on('message',m=>actual.push(m));parser.push(Buffer.concat([Buffer.from(`Content-Length: ${body.length}\r\n\r\n`),body]));assert.deepEqual(actual,[{uri:'file:///�.sol'}]);
+  const bom=Buffer.concat([Buffer.from([239,187,191]),Buffer.from('{}')]);assert.throws(()=>new Frames().push(Buffer.concat([Buffer.from(`Content-Length: ${bom.length}\r\n\r\n`),bom])));
+ });
+}

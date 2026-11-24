@@ -4,6 +4,16 @@
 const assert=require('node:assert/strict');
 const fs=require('node:fs'),path=require('node:path'),{pathToFileURL}=require('node:url'),{spawn}=require('node:child_process');
 const {RpcPeer}=require('../src/rpc.cjs');
+const {proofPacket,expectedDeclarations,waitUntil}=require('./configuration-lifecycle.cjs');
+function phaseProof(states,binding,status){return states.some(packet=>proofPacket(packet,binding,status));}
+async function waitForPhase({states,diagnostics,binding,status,peer,now=Date.now,sleep=()=>new Promise(r=>setTimeout(r,20))}){
+  const deadline=now()+60000,options={deadline,peer,now,sleep};
+  await waitUntil(()=>phaseProof(states,binding,status),'automatic verification version '+binding.version+' status '+status,options);
+  if(status===4)await waitUntil(()=>diagnostics.some(p=>p.uri===binding.uri&&p.version===binding.version&&p.diagnostics.some(d=>d.severity===1)),'broken-proof error diagnostic',options);
+}
+function waitForMigration(predicate,label,{peer,now=Date.now,sleep=()=>new Promise(r=>setTimeout(r,10))}){
+  return waitUntil(predicate,'reference migration: '+label,{deadline:now()+60000,peer,now,sleep});
+}
 async function main(){
   if(process.argv[4]==='--ghost'){if(!process.argv[3])throw Error('Ghost observation needs a fresh output root');const out=path.resolve(process.argv[3]);if(fs.existsSync(out))throw Error('Choose fresh ghost output');fs.mkdirSync(out,{recursive:true});for(const mode of ['on','off'])await require('./stdio.cjs').main(['--scope','ghost','--ghost-notifications',mode,'--targets','dafny','--workers','1','--obligations','1','--trials','1','--warmups','0','--dafny',path.resolve(process.argv[2]),'--output',path.join(out,mode)]);return;}
 
@@ -17,10 +27,9 @@ async function main(){
   if(process.argv[4]==='--migration'&&!process.argv[3])throw Error('Migration run needs a separate output directory');
   const root=path.resolve(__dirname,'../..'),exe=path.resolve(process.argv[2]||path.join(root,'.cache/dafny-runtime/dafny/dafny'));
   const out=path.resolve(process.argv[3]||path.join(root,'tests/editor-parity/lifecycle')),workspace=path.join(root,'.cache/lifecycle-workspace');
-  fs.mkdirSync(out,{recursive:true});fs.mkdirSync(workspace,{recursive:true});
+  if(fs.existsSync(out))throw Error("Choose a fresh lifecycle output directory");
+  fs.mkdirSync(path.dirname(out),{recursive:true});fs.mkdirSync(out);fs.mkdirSync(workspace,{recursive:true});
   const trace=path.join(out,'dafny-lsp.jsonl');fs.writeFileSync(trace,'');
-  fs.rmSync(path.join(out,'phases.json'),{force:true});
-  if(process.argv[4]==='--migration')fs.rmSync(path.join(out,'migration.json'),{force:true});
   const append=r=>fs.appendFileSync(trace,JSON.stringify({time:Date.now(),...r})+'\n');
   const commandArgs=['server','--cores','1','--verification-time-limit','20','--notify-ghostness:true','--notify-line-verification-status:true'];
   const child=spawn(exe,commandArgs,{cwd:workspace,stdio:['pipe','pipe','pipe']});
@@ -39,17 +48,9 @@ async function main(){
   const texts=[initial,initial+'\n// edit\n',initial.replace('r := 1','r := 2'),initial+'\n// fixed\n'];
   const phases=[];let migrationResult;
   async function waitFor(version,status){
-    const started=Date.now();
-    while(!states.some(p=>p.uri===uri&&p.version===version&&p.namedVerifiables?.length&&p.namedVerifiables.every(s=>status===5?s.status===5:[4,5].includes(s.status))&&p.namedVerifiables.some(s=>s.status===status))){
-      if(peer.closed||Date.now()-started>60000)throw Error('No automatic verification version '+version+' status '+status);
-      await new Promise(r=>setTimeout(r,20));
-    }
-    if(status===4){
-      while(!diagnostics.some(p=>p.uri===uri&&p.version===version&&p.diagnostics.some(d=>d.severity===1))){
-        if(Date.now()-started>60000)throw Error('Missing broken-proof error diagnostic');await new Promise(r=>setTimeout(r,20));
-      }
-    }
-    phases.push({version,status,text:texts[version-1],observed:states.filter(p=>p.uri===uri&&p.version===version),diagnostics:diagnostics.filter(p=>p.uri===uri&&p.version===version)});
+    const binding={uri,version,text:texts[version-1],sourceHash:require('node:crypto').createHash('sha256').update(texts[version-1]).digest('hex')};
+    await waitForPhase({states,diagnostics,binding,status,peer});
+    phases.push({version,status,binding,expectedDeclarations:expectedDeclarations(binding),text:texts[version-1],observed:states.filter(p=>p.uri===uri&&p.version===version),diagnostics:diagnostics.filter(p=>p.uri===uri&&p.version===version)});
   }
   try{
     await peer.request('initialize',{processId:process.pid,rootUri:pathToFileURL(workspace).href,capabilities:{workspace:{configuration:true},textDocument:{publishDiagnostics:{versionSupport:true},documentSymbol:{hierarchicalDocumentSymbolSupport:true}}}});
@@ -68,7 +69,7 @@ async function main(){
       const migratedUri=pathToFileURL(path.join(workspace,'migration.dfy')).href;
       const broken='function GetConstant(): int ensures false { 1 }';
       const insertion='lemma {:neverVerify} HasNeverVerifyAttribute(p: nat, q: nat)\n  ensures true\n{\n}\n\n',lineDelta=5;
-      const until=async(predicate,label)=>{const start=Date.now();while(!predicate()){if(peer.closed||Date.now()-start>60000)throw Error('Reference migration timed out: '+label);await new Promise(r=>setTimeout(r,10));}};
+      const until=(predicate,label)=>waitForMigration(predicate,label,{peer});
       peer.notify('textDocument/didOpen',{textDocument:{uri:migratedUri,languageId:'dafny',version:1,text:broken}});
       await until(()=>diagnostics.some(p=>p.uri===migratedUri&&p.version===1&&p.diagnostics.some(d=>d.severity===1&&d.relatedInformation?.length)),'original postcondition error');
       const original=diagnostics.filter(p=>p.uri===migratedUri&&p.version===1&&p.diagnostics.some(d=>d.severity===1)).at(-1);
@@ -95,3 +96,5 @@ async function main(){
   }finally{if(child.exitCode===null)child.kill();peer.close();}
 }
 if(require.main===module)main().catch(e=>{console.error(e.stack);process.exitCode=1;});
+
+module.exports={phaseProof,waitForPhase,waitForMigration};
