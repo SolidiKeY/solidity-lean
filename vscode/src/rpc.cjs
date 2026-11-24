@@ -73,7 +73,7 @@ class RpcPeer extends EventEmitter {
       }).catch(error=>this.close(error));
   }
   onRequest(method,handler){this.requests.set(method,handler);}
-  onNotification(method,handler){this.notifications.set(method,handler);return{dispose:()=>{if(this.notifications.get(method)===handler)this.notifications.delete(method);}};}
+  onNotification(method,handler){const registration=params=>handler(params);this.notifications.set(method,registration);return{dispose:()=>{if(this.notifications.get(method)===registration)this.notifications.delete(method);}};}
   close(error=failure('Connection closed')){
     if(this.closed)return;this.closed=true;
     for(const pending of [...this.pending.values()])pending.reject(error);
