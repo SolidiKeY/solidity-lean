@@ -67,8 +67,10 @@ class RpcPeer extends EventEmitter {
     catch(error){result=Promise.reject(error);}
     Promise.resolve(result)
       .then(result=>{if(!this.closed)this.write({jsonrpc:'2.0',id:message.id,result:result??null});},error=>{
-        if(!this.closed)this.write({jsonrpc:'2.0',id:message.id,error:{code:Number.isInteger(error.code)?error.code:-32603,message:error.message,data:error.data}});
-      });
+        if(this.closed)return;
+        const code=error?.code,text=error?.message;
+        this.write({jsonrpc:'2.0',id:message.id,error:{code:Number.isInteger(code)?code:-32603,message:typeof text==='string'?text:`Request ${message.method} failed unexpectedly without providing any details.`,data:error?.data}});
+      }).catch(error=>this.close(error));
   }
   onRequest(method,handler){this.requests.set(method,handler);}
   onNotification(method,handler){this.notifications.set(method,handler);return{dispose:()=>{if(this.notifications.get(method)===handler)this.notifications.delete(method);}};}
