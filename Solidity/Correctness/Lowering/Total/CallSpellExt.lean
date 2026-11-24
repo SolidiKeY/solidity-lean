@@ -12,51 +12,56 @@ spellings: `#bytes(…)` (`RawExpr.bytesLit`) is a fixed-bytes literal, not a ca
 This module is the additive interface through which a later decoder version can
 recognize such spellings. A `CallSpelling` claims one raw callee name and spells
 the argument list; a `Registry` is a list of them. Each registered spelling
-carries a faithfulness obligation (`CallSpelling.Faithful`): in every reading
+carries a faithfulness obligation (`CallSpelling.Faithful M`): in every reading
 context, the Source value of its spelling is the model's value of the raw call.
+The readings are one `Meaning` shared by every entry (H1455, Option B): an
+entry cannot choose how it is judged. Binding that meaning to
+`SemanticBoundary.relates` is a later step; until then every faithfulness
+statement here is open, for an arbitrary shared meaning.
 `Conforms` (node level) and `ConformsX` (the v2 spelling relation `ExprX`,
 next to the frozen v1 `Spells.ExprT`) are the contract an extended decoder
 must meet. Nothing here changes
 the landed decoder, its admission or any goal; integration is later work
 (e2b-decoder-rest).
 
-Status: statement-level contract under review. Faithfulness of the first entry
-is stated (`bytesFaithfulStatement`), not proved; only trivial bridges are. -/
+Status: statement-level contract. Faithfulness of the first entry is stated
+(`bytesFaithfulStatement`), not proved; only trivial bridges are. -/
 namespace Solidity.Correctness.Lowering.Total.CallSpellExt
 
 open Source (Syn)
 
-/-- How a registered call and its Source spelling are read: a reading context
-(for `#bytes`, the target width of the fixed-bytes conversion), the model's
-value of the raw call's arguments in that context, and the Source value of a
-spelling in that context. Both readings are relations, so a context in which
-the model rejects the call (a failed conversion) imposes nothing. -/
+/-- The shared reading of every registered call and its Source spelling: a
+reading context (for `#bytes`, at least the target width of the fixed-bytes
+conversion), the model's value of a raw expression in that context, and the
+Source value of a Source expression in that context. Both readings are
+relations, so a context in which the model rejects the call (a failed
+conversion) imposes nothing. One meaning judges every entry of a registry;
+it is to be fixed from `SemanticBoundary.relates` by the binding step. -/
 structure Meaning where
   Ctx : Type
   Val : Type
-  model : Ctx → List RawExpr → Val → Prop
+  model : Ctx → RawExpr → Val → Prop
   source : Ctx → Syn .expr → Val → Prop
 
 /-- A registered call spelling: the raw callee name it claims, the Source
-spelling of an argument list (`none`: not this spelling's arguments, a gap),
-and the meaning its faithfulness is judged by. The spelling reads the raw
-arguments directly; it does not call back into the decoder. -/
+spelling of an argument list (`none`: not this spelling's arguments, a gap).
+It carries no meaning of its own. The spelling reads the raw arguments
+directly; it does not call back into the decoder. -/
 structure CallSpelling where
   name : String
   spell : List RawExpr → Option (Syn .expr)
-  meaning : Meaning
 
 namespace CallSpelling
 
 /-- The claimed name is internal (`#…`): no user function can be shadowed. -/
 def reserved (c : CallSpelling) : Bool := c.name.data.head? == some '#'
 
-/-- **Faithfulness obligation of one registered spelling.** Whatever the
-spelling returns has, in every reading context, the model's value of the raw
-call with the same arguments. -/
-def Faithful (c : CallSpelling) : Prop :=
+/-- **Faithfulness obligation of one registered spelling** under the shared
+meaning `M`. Whatever the spelling returns has, in every reading context, the
+model's value of the raw call `name(args)` with the same arguments. -/
+def Faithful (M : Meaning) (c : CallSpelling) : Prop :=
   ∀ (args : List RawExpr) (t : Syn .expr), c.spell args = some t →
-    ∀ (κ : c.meaning.Ctx) (v : c.meaning.Val), c.meaning.model κ args v → c.meaning.source κ t v
+    ∀ (κ : M.Ctx) (v : M.Val), M.model κ (.call c.name args) v → M.source κ t v
 
 end CallSpelling
 
@@ -75,8 +80,9 @@ def claims (R : Registry) (f : String) : Bool := (R.lookup f).isSome
 def WellFormed (R : Registry) : Prop :=
   (R.map (·.name)).Nodup ∧ ∀ c ∈ R, c.reserved = true
 
-/-- **Faithfulness obligation of a registry**: one per registered spelling. -/
-def Faithful (R : Registry) : Prop := ∀ c ∈ R, c.Faithful
+/-- **Faithfulness obligation of a registry** under the shared meaning `M`:
+one per registered spelling, all judged by the same `M`. -/
+def Faithful (M : Meaning) (R : Registry) : Prop := ∀ c ∈ R, c.Faithful M
 
 /-- No call anywhere in the expression is claimed. -/
 def Unclaimed (R : Registry) (e : RawExpr) : Prop :=
@@ -177,8 +183,8 @@ def exprX_unclaimed_statement : Prop :=
 /-- The empty registry claims nothing. -/
 theorem claims_nil (f : String) : Registry.claims [] f = false := rfl
 
-/-- The empty registry is faithful. -/
-theorem faithful_nil : Registry.Faithful [] := nofun
+/-- The empty registry is faithful under every shared meaning. -/
+theorem faithful_nil (M : Meaning) : Registry.Faithful M [] := nofun
 
 /-- With the empty registry, a version's own expression decoder conforms. -/
 theorem conforms_nil (T : Decode.Tables) : Conforms T [] T.expr :=
@@ -187,32 +193,26 @@ theorem conforms_nil (T : Decode.Tables) : Conforms T [] T.expr :=
 /-! ## The first registered spelling: fixed-bytes literals
 
 `#bytes(n₁, …, nₖ)` with numeral arguments, spelled by the existing
-`Decode.BytesLiteral.decode` (not a copy). The model reads it by the
-fixed-bytes conversion `bytesAlign` at the target width, and only where the
-result fits that width; Source reads a `hex"…"` literal padded to the width. -/
-
-/-- The fixed-bytes reading: context the target width `n`, value a natural. -/
-def bytesMeaning : Meaning where
-  Ctx := Nat
-  Val := Nat
-  model n args v := ∃ bs, (RawExpr.call bytesLitName args).bytesLit? = some bs ∧
-    bytesAlign n bs = .ok v ∧ v < 256 ^ n
-  source n t v := ∃ bs, t = .lit (.hexStr bs) ∧ Source.bytesNat (Source.fitBytes n bs) = v
+`Decode.BytesLiteral.decode` (not a copy). Its faithfulness is judged by
+the shared meaning; the local value facts the binding step can use are
+`Decode.BytesLiteral.faithful` and `faithful_checked` (the model's
+`bytesAlign`/`toBytesAt` value equals the Source padding of the spelling). -/
 
 /-- The fixed-bytes literal spelling. -/
 def bytesSpelling : CallSpelling where
   name := bytesLitName
   spell args := Decode.BytesLiteral.decode (.call bytesLitName args)
-  meaning := bytesMeaning
 
 /-- The first registry: fixed-bytes literals only. -/
 def registry1 : Registry := [bytesSpelling]
 
-/-- **Statement (to prove after review):** the fixed-bytes spelling is faithful. -/
-def bytesFaithfulStatement : Prop := bytesSpelling.Faithful
+/-- **Statement (open until the shared meaning is bound):** the fixed-bytes
+spelling is faithful under `M`. -/
+def bytesFaithfulStatement (M : Meaning) : Prop := bytesSpelling.Faithful M
 
-/-- **Statement (to prove after review):** the first registry is faithful. -/
-def registry1FaithfulStatement : Prop := registry1.Faithful
+/-- **Statement (open until the shared meaning is bound):** the first registry
+is faithful under `M`. -/
+def registry1FaithfulStatement (M : Meaning) : Prop := registry1.Faithful M
 
 theorem registry1_wellFormed : registry1.WellFormed := by
   refine ⟨by decide, ?_⟩

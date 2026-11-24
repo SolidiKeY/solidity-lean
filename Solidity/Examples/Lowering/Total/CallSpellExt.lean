@@ -33,12 +33,15 @@ example (T : Decode.Tables) :
       (.addSub .add (Decode.num 1) (.lit (.hexStr [1]))) :=
   .binop rfl (.num 1) (.claimed rfl rfl) rfl
 
-/-- The bridges proved so far, and the statements left for after review. -/
-example : Registry.claims [] "f" = false ∧ Registry.Faithful [] ∧ registry1.WellFormed :=
-  ⟨claims_nil _, faithful_nil, registry1_wellFormed⟩
+/-- The bridges proved so far, and the statements left open until the shared
+meaning is bound. -/
+example (M : Meaning) :
+    Registry.claims [] "f" = false ∧ Registry.Faithful M [] ∧ registry1.WellFormed :=
+  ⟨claims_nil _, faithful_nil M, registry1_wellFormed⟩
 example (T : Decode.Tables) : Conforms T [] T.expr := conforms_nil T
-example : [conformsX_conforms_statement, exprX_nil_statement, exprX_unclaimed_statement,
-    bytesFaithfulStatement, registry1FaithfulStatement,
+example (M : Meaning) :
+    [conformsX_conforms_statement, exprX_nil_statement, exprX_unclaimed_statement,
+    bytesFaithfulStatement M, registry1FaithfulStatement M,
     ∀ T f, ConformsX T registry1 f → Conforms T registry1 f].length = 6 := rfl
 
 end Solidity.Examples.Lowering.Total.CallSpellExt

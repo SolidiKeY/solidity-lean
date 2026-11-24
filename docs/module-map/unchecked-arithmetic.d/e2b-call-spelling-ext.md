@@ -1,2 +1,2 @@
-| `Correctness/Lowering/Total/CallSpellExt.lean` | Additive call-spelling extension contract for the decoder (registry, per-spelling faithfulness obligation, conformance); v2 spelling relation `ExprX` beside frozen `Spells.ExprT`; bytes-literal entry stated, unproved, not integrated. |
+| `Correctness/Lowering/Total/CallSpellExt.lean` | Additive call-spelling extension contract for the decoder (registry, per-spelling faithfulness obligation under one shared meaning, conformance); v2 spelling relation `ExprX` beside frozen `Spells.ExprT`; bytes-literal entry stated, unproved, not integrated. |
 | `Examples/Lowering/Total/CallSpellExt.lean` | Checks of the call-spelling registry's claims and of the bytes-literal entry's argument reading. |
