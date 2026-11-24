@@ -1,5 +1,6 @@
 import Solidity.Correctness.Lowering.Total.Versions
 import Solidity.Correctness.Lowering.Total.Decode.BytesLiteral.Evaluation
+import Solidity.Correctness.Lowering.Total.Decode.Calls
 
 namespace Solidity.Examples.Goals.LoopsDecode
 
@@ -424,5 +425,29 @@ example (C : Contract) (Γ : ECtx) (Δ : NCtx) (D : Source.Layout) :
   letI : FreshNames := sampleNames
   exact Decode.BytesLiteral.evaluated_value C Γ Δ (o := .bytesLit [0, 256])
     (e := .num 0) (by decide) rfl rfl rfl (by simp only [check]; rfl) D
+
+/-! The additive call registry is honored inside ordinary call arguments and
+operators, and a malformed claimed call never falls back to a user call. -/
+example : Decode.Calls.expr Decode.tablesB CallSpellExt.registry1
+    (.call "f" [.bytesLit [0, 256]]) = some
+      (.call (.ident "f") (.positional (.cons (.lit (.hexStr [1, 0])) .nil))) := rfl
+example : Decode.Calls.expr Decode.tablesB CallSpellExt.registry1
+    (.binop .eqB (.bytesLit [1]) (.bytesLit [1])) = some
+      (.equality .eq (.lit (.hexStr [1])) (.lit (.hexStr [1]))) := rfl
+example : Decode.Calls.expr Decode.tablesB CallSpellExt.registry1
+    (.call "f" [.call bytesLitName [.bool true]]) = none := rfl
+example : Decode.Calls.expr Decode.tablesB CallSpellExt.registry1
+    (.call "#other" [.num 1]) = Decode.tablesB.expr (.call "#other" [.num 1]) := rfl
+
+/-- Both directions of the registered spelling contract hold, and they force
+unique results and compatibility with v1 wherever no registered call occurs. -/
+example (T : Decode.Tables) (R : CallSpellExt.Registry) :
+    CallSpellExt.ConformsX T R (Decode.Calls.expr T R) := Decode.Calls.conformsX
+example : CallSpellExt.conformsX_conforms_statement := Decode.Calls.conformsX_conforms
+example : CallSpellExt.exprX_unclaimed_statement := Decode.Calls.unclaimed_spelling
+example : CallSpellExt.exprX_nil_statement := Decode.Calls.empty_spelling
+example (T : Decode.Tables) (R : CallSpellExt.Registry) (e : RawExpr)
+    (a b : Source.Syn .expr) (ha : CallSpellExt.ExprX T R e a)
+    (hb : CallSpellExt.ExprX T R e b) : a = b := Decode.Calls.unique ha hb
 
 end Solidity.Examples.Goals.LoopsDecode
