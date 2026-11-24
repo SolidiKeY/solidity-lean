@@ -16,14 +16,49 @@ function documentRequestParams(params,uri,version){
   return{...captured,textDocument:{uri,version}};
 }
 
+function setErrorUris(error,uris){
+  Object.defineProperty(error,'uris',{value:uris,...(Object.hasOwn(error,'uris')?{}:{writable:true,enumerable:true,configurable:true})});
+}
+
+function operationFailure(reason){
+  const uris=reason&&typeof reason==='object'?Object.getOwnPropertyDescriptor(reason,'uris'):undefined;
+  if(reason instanceof Error&&typeof reason.message==='string'&&Object.isExtensible(reason)&&(!uris||'value'in uris&&uris.writable))return reason;
+  const error=new Error(typeof reason?.message==='string'?reason.message:typeof reason==='string'?reason:'Language operation failed',{cause:reason});
+  if(reason&&typeof reason==='object')for(const key of Reflect.ownKeys(reason)){
+    const descriptor=Object.getOwnPropertyDescriptor(reason,key);
+    if(key!=='cause'&&(key!=='message'||typeof descriptor.value==='string')&&'value'in descriptor)Object.defineProperty(error,key,{...descriptor,writable:true,configurable:true});
+  }
+  return error;
+}
+
+function notifyDocument(client,uri,method,params){
+  try{client.peer.notify(method,params);}
+  catch(error){
+    client.documents.delete(uri);
+    try{client.peer.close(error instanceof Error?error:Object.assign(failure('Document synchronization failed'),{cause:error}));}
+    catch(closeError){client.documentNotificationCloseFailure={method,uri,error:closeError};}
+    throw error;
+  }
+}
+
 class LanguageClient extends EventEmitter {
   constructor(configuration){
     super();this.configuration=configuration;this.documents=new Map();this.disposed=false;this.ownedProcesses=new Map();
     this.startupAbort=new AbortController();
-    this.ready=this.start().catch(error=>{if(this.failure)error=this.failure;else if(this.disposed)error=cancelled();else if(error.code!=='STARTUP')error=startupError('Language server initialization failed: '+error.message,null,error);this.fail(error);throw error;});
+    this.ready=this.start().catch(reason=>{
+      let error=this.failure||(this.disposed?cancelled():operationFailure(reason));
+      if(!this.failure&&!this.disposed&&error.code!=='STARTUP')error=startupError('Language server initialization failed: '+error.message,null,error);
+      this.fail(error);throw this.failure||error;
+    });
     this.ready.catch(()=>{});
   }
-  fail(error){if(this.disposed||this.failed)return;if(!this.initialized&&error.code!=='STARTUP')error=startupError('Language server initialization failed: '+error.message,null,error);this.failed=true;this.failure=error;this.emit('serverError',error);this.dispose().catch(()=>{});}
+  fail(error){
+    if(this.disposed||this.failed)return;
+    error=operationFailure(error);if(!this.initialized&&error.code!=='STARTUP')error=startupError('Language server initialization failed: '+error.message,null,error);
+    this.failed=true;this.failure=error;
+    try{this.emit('serverError',error);}catch(notificationError){this.failureNotificationFailure={error:notificationError};}
+    finally{this.dispose().catch(()=>{});}
+  }
   async start(){
     this.runtimeInfo=await checkStartup(this.configuration,this.startupAbort.signal);if(this.disposed)throw cancelled();
     const configuration=this.configuration;
@@ -59,14 +94,15 @@ class LanguageClient extends EventEmitter {
     await cancellable(this.ready,signal);
     if(signal?.aborted)throw failure('Request cancelled',-32800);
     if(this.disposed)throw cancelled();
+    if(this.peer?.closed)throw failure('Connection closed');
     if(!isCurrent())throw failure('Language client changed',-32801);
     if(doc.isClosed)throw failure('Document closed',-32801);
     const uri=doc.uri.toString(),text=doc.getText(),previous=this.documents.get(uri);let synchronizationId=previous?.synchronizationId;
-    const opened=()=>{this.syncCounter=(this.syncCounter||0)+1;synchronizationId=String(this.syncCounter);this.documents.set(uri,{version:doc.version,text,synchronizationId});this.peer.notify('textDocument/didOpen',{textDocument:{uri,languageId:'solidity',version:doc.version,text,synchronizationId}});};
+    const opened=()=>{this.syncCounter=(this.syncCounter||0)+1;synchronizationId=String(this.syncCounter);this.documents.set(uri,{version:doc.version,text,synchronizationId});notifyDocument(this,uri,'textDocument/didOpen',{textDocument:{uri,languageId:'solidity',version:doc.version,text,synchronizationId}});};
     if(!previous){opened();}
     else if(previous.version!==doc.version||previous.text!==text){
-      if(doc.version<=previous.version){this.peer.notify('textDocument/didClose',{textDocument:{uri}});opened();}
-      else this.peer.notify('textDocument/didChange',{textDocument:{uri,version:doc.version},contentChanges:[incrementalChange(previous.text,text)]});
+      if(doc.version<=previous.version){notifyDocument(this,uri,'textDocument/didClose',{textDocument:{uri}});opened();}
+      else notifyDocument(this,uri,'textDocument/didChange',{textDocument:{uri,version:doc.version},contentChanges:[incrementalChange(previous.text,text)]});
     }
     this.documents.set(uri,{version:doc.version,text,synchronizationId});
   }
@@ -92,7 +128,7 @@ class LanguageClient extends EventEmitter {
     const result=await this.peer.request(method,requestParams,options);
     if(!current())throw failure('Document content changed',-32801);return result;
   }
-  closeDocument(uri){if(this.peer&&!this.peer.closed&&this.documents.has(uri)){this.peer.notify('textDocument/didClose',{textDocument:{uri}});this.documents.delete(uri);}}
+  closeDocument(uri){if(this.peer&&!this.peer.closed&&this.documents.has(uri)){notifyDocument(this,uri,'textDocument/didClose',{textDocument:{uri}});this.documents.delete(uri);}}
   cancel(uri){if(this.peer&&!this.peer.closed)this.peer.request('solidityLean/cancel',uri?{uri}:{},{timeoutMs:5000}).catch(()=>{});}
   dispose(){
     if(this.disposal)return this.disposal;this.disposed=true;this.startupAbort.abort();return this.disposal=this.finishDispose();
@@ -128,11 +164,13 @@ class LanguageServers extends EventEmitter {
       client.on('serverError',error=>{
         const current=this.clients.get(key)===client;
         const uris=[...this.owners].filter(([,owner])=>owner===client).map(([uri])=>uri);
-        Object.assign(error,{uris});this.reportedErrors.add(error);
+        const reason=error;error=operationFailure(error);setErrorUris(error,uris);
+        if(reason!==null&&(typeof reason==='object'||typeof reason==='function'))this.reportedErrors.add(reason);
+        this.reportedErrors.add(error);
         for(const uri of uris){this.owners.delete(uri);this.touch(uri);}
         if(this.clients.get(key)===client)this.clients.delete(key);
         this.retire(key,client);
-        if(current&&uris.length&&!this.disposed){this.reportedErrors.add(error);this.emit('serverError',Object.assign(error,{uris}));}
+        if(current&&uris.length&&!this.disposed)this.emit('serverError',error);
       });client.on('log',message=>this.emit('log',message));
       client.on('identity',identity=>{const uris=[...this.owners].filter(([,owner])=>owner===client).map(([uri])=>uri);if(!this.disposed&&this.clients.get(key)===client&&uris.length)this.emit('identity',{...identity,uris});});
     }
@@ -144,7 +182,12 @@ class LanguageServers extends EventEmitter {
     const retirement=(async()=>{await client.dispose();if(client.child)await waitForClose(client.child,{closed:client.closed});})();
     this.retirementKeys.set(key,retirement);this.retiring.add(retirement);
     const release=()=>{if(this.retirementKeys.get(key)===retirement)this.retirementKeys.delete(key);};
-    retirement.then(()=>{this.retiring.delete(retirement);release();},error=>{this.retiring.delete(retirement);this.retirementFailures.push(error);this.emit('log','Failed server cleanup: '+error.message);if(client.resourcesQuiescent?.())release();else client.closed?.then(()=>{if(client.resourcesQuiescent?.())release();});});return retirement;
+    retirement.then(()=>{this.retiring.delete(retirement);release();},error=>{
+      this.retiring.delete(retirement);this.retirementFailures.push(error);
+      try{this.emit('log','Failed server cleanup: '+operationFailure(error).message);}
+      catch(logError){this.retirementLogFailure={key,error:logError};}
+      if(client.resourcesQuiescent?.())release();else client.closed?.then(()=>{if(client.resourcesQuiescent?.())release();});
+    });return retirement;
   }
   async settled(signal,doc){while(this.restarting)await cancellable(this.restarting,signal);if(doc){const key=JSON.stringify(this.configuration(doc));while(this.retirementKeys.has(key))await cancellable(this.retirementKeys.get(key),signal);}if(signal?.aborted)throw failure('Request cancelled',-32800);}
   async open(doc){await this.settled(undefined,doc);const client=this.client(doc),current=this.ownership(doc,client);await client.sync(doc,current);if(!current()||client.disposed)throw failure('Language client changed',-32801);this.emit('identity',{serverInfo:client.serverInfo,runtimeInfo:client.runtimeInfo,uris:[doc.uri.toString()]});return client;}
@@ -174,10 +217,17 @@ class LanguageServers extends EventEmitter {
       await this.settled(undefined,doc);if(!sourceCurrent()||this.epochs.get(uri)!==epoch)throw failure('Saved document changed',-32801);
       const client=this.client(doc),owned=this.ownership(doc,client),current=()=>owned()&&sourceCurrent();await client.sync(doc,current);
       if(!current()||client.disposed)throw failure('Language client changed',-32801);
-      client.peer.notify('textDocument/didSave',{textDocument:{uri},text});
+      notifyDocument(client,uri,'textDocument/didSave',{textDocument:{uri},text});
     };save().catch(error=>this.operationError(error,[uri]));
   }
-  operationError(error,uris){if(this.disposed||this.reportedErrors.has(error)||!uris?.length||!uris.some(uri=>this.owners.has(uri)))return;if(![-32800,-32801].includes(error.code)&&error.code!=='CANCELLED'){this.reportedErrors.add(error);this.emit('serverError',Object.assign(error,{uris:error.uris||uris}));}}
+  operationError(error,uris){
+    if(this.disposed||this.reportedErrors.has(error)||!uris?.length||!uris.some(uri=>this.owners.has(uri)))return;
+    const code=error?.code;if([-32800,-32801].includes(code)||code==='CANCELLED')return;
+    const reported=operationFailure(error);
+    setErrorUris(reported,reported.uris||uris);
+    if(error!==null&&(typeof error==='object'||typeof error==='function'))this.reportedErrors.add(error);
+    this.reportedErrors.add(reported);this.emit('serverError',reported);
+  }
   close(uri){const key=uri.toString(),client=this.owners.get(key);client?.closeDocument(key);if(this.owners.delete(key))this.touch(key);}
   cancel(uri){if(uri)this.owners.get(uri.toString())?.cancel(uri.toString());else for(const client of this.clients.values())client.cancel();}
   restart(uris){
