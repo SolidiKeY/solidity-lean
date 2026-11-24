@@ -43,6 +43,16 @@ example [FreshNames] :
     diagram.SimulatesV2 :=
   ⟨simulatesV2_of_runs₂, runs₂_of_simulatesV2⟩
 
+/-- Frame-total matching holds for the lane's diagram, and the goal reduces to
+the run obligations, coverage and the session lift. -/
+example [FreshNames] : diagram.FrameTotal := Solidity.Correctness.Lowering.Sim.frame_matching
+
+example : (letI : FreshNames := productionNames;
+      (∀ (b : Body) (u : Emitted) (m : Solidity.Lowering.V07.ContextMap b.ctx u.Γ),
+        Production b u → Accepted u → diagram.Assoc b u m → RunSim₂ b u m) ∧
+      diagram.Total ∧ SessionLift diagram) → loweringBySimulationV2 :=
+  fun ⟨runs, total, lift⟩ => Solidity.Correctness.Lowering.Sim.lowering_v2_of_runs₂ runs total lift
+
 /-! ## Non-vacuity of the frame relation -/
 
 /-- A static frame is related to no model state: v2 obliges nothing there. -/
