@@ -1,0 +1,3 @@
+| `Solidity/Goals/LoweringDiagramV2.lean` | `loweringBySimulationV2`, the additive frame-aware v2 of `loweringBySimulation` (H1391), open: `FrameRel`, `Diagram.SimulatesV2` (run clauses at transactional frames) and `Diagram.FrameTotal`; v1 vocabulary, `Diagram.Total` and `SessionLift` reused unchanged. |
+| `Solidity/Correctness/Lowering/Sim/Match/DiagramV2.lean` | Frame-aware diagram companion: `RunSim₂` at every run is the per-run part of `diagram.SimulatesV2`, and the v1-to-v2 bridges (never the converse); statements and definitional bridges only. |
+| `Solidity/Examples/Goals/LoweringDiagramV2.lean` | Pins the `loweringBySimulationV2` roadmap line, its unfolding, the bridge direction and the refusal of static, unchecked and sender-pinned frames. |
