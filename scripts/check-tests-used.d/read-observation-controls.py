@@ -258,6 +258,8 @@ int fd=open(v[1],O_RDONLY); return readv(fd,a,2)==sizeof(a[1])+1 ? 0 : 2; }
             raw = capture.finish(result)
             self.assertEqual(raw['status'], 'captured', raw['reasons'])
             self.assertEqual(base64.b64decode(raw['records'][0]['data']), payload)
+            self.assertEqual(schema.replay_capture(raw, result['events'], max_capture_bytes=4096,
+                                                  max_events=12000)['status'], 'replayed')
             capture = native.ByteCapture([str(target)], max_capture_bytes=4096)
             result = native.trace([str(root / 'read'), str(target), 'overlap'], d,
                                   dict(os.environ, LC_ALL='C'), timeout=5, max_events=12000,
@@ -307,6 +309,47 @@ int fd=open(v[1],O_RDONLY); return readv(fd,a,2)==sizeof(a[1])+1 ? 0 : 2; }
             for name, budget in [(str(path), 3), (str(link), 4096)]:
                 with self.assertRaises(native.Unavailable):
                     native.ByteCapture([name], max_capture_bytes=budget)
+
+
+class ReplayControls(unittest.TestCase):
+    def test_real_payload_replay_grants_no_census_credit(self):
+        for payload in (b'abc', b''):
+            result, capture = NativeByteControls.capture(self, payload)
+            replay = schema.replay_capture(capture, result['events'], max_capture_bytes=4096, max_events=12000)
+            self.assertEqual(replay['status'], 'replayed')
+            self.assertEqual(replay['credit'], 'none')
+            self.assertEqual(replay['targets'][0]['sha256'], hashlib.sha256(payload).hexdigest())
+
+    def test_fabricated_bytes_identity_and_event_links_are_refused(self):
+        result, original = NativeByteControls.capture(self, b'abc')
+        for fault in ('payload', 'inode', 'descriptor', 'generation', 'process', 'lifetime', 'sequence', 'entry', 'intervening-close', 'position', 'partial'):
+            raw, events = copy.deepcopy(original), copy.deepcopy(result['events'])
+            record = next(r for r in raw['records'] if r['bytes'])
+            if fault == 'payload': record['data'] = 'eHl6'
+            if fault == 'inode': record['inode'] += 1
+            if fault == 'descriptor': record['fd'] += 100
+            if fault == 'generation': record['fd_generation'] += 1
+            if fault == 'process': record['task'] += ':wrong'
+            if fault == 'lifetime': record['close_sequence'] = record['sequence']
+            if fault == 'sequence': events[0]['sequence'] = True
+            if fault == 'entry': events[record['sequence']]['enter_sequence'] = 0
+            if fault in ('intervening-close', 'position'):
+                close = next(e for e in events[record['open_sequence'] + 1:record['sequence']]
+                             if e['kind'] == 'leave' and e.get('number') == 3)
+                close['args'][0] = record['fd']
+                events[close['enter_sequence']]['args'][0] = record['fd']
+                if fault == 'position':
+                    close['number'], close['result'] = 8, 1
+                    close['args'] = [record['fd'], 1, 0, 0, 0, 0]
+                    events[close['enter_sequence']].update(number=8, args=list(close['args']))
+            if fault == 'partial': raw['records'].remove(record)
+            with self.subTest(fault=fault):
+                if fault == 'partial':
+                    value = schema.replay_capture(raw, events, max_capture_bytes=4096, max_events=12000)
+                    self.assertEqual(value['status'], 'unavailable')
+                else:
+                    with self.assertRaises(schema.Invalid):
+                        schema.replay_capture(raw, events, max_capture_bytes=4096, max_events=12000)
 
 
 if __name__ == '__main__':
