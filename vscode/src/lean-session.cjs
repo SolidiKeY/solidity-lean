@@ -67,7 +67,7 @@ class LeanSession {
     if(this.retiring)throw new Error('Lean session is retiring');
     noteStartup(this,'initialize.end');
     this.peer.notify('initialized',{});this.initialized=true;noteStartup(this,'initialized.notified');
-    }catch(error){noteStartup(this,'initialize.refused');peer.close(error);noteStartup(this,'failed.terminate.start');terminateTree(child);noteStartup(this,'failed.terminate.end');throw error;}
+    }catch(error){noteStartup(this,'initialize.refused');peer.close(error);noteStartup(this,'failed.terminate.start');terminateTree(child,startupObservations.has(this)?(event,details)=>noteStartup(this,event,details):undefined);noteStartup(this,'failed.terminate.end');throw error;}
     noteStartup(this,'worker.file.start');
     mkdirSync(this.directory,{recursive:true});this.file=join(this.directory,'Worker.lean');this.uri=pathToFileURL(this.file).href;noteStartup(this,'worker.file.end');
   }

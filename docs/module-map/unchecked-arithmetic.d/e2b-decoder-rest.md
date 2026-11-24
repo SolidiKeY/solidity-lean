@@ -6,3 +6,5 @@
 | `Correctness/Lowering/Total/Decode/Marked.lean` | Retained marked-address, fixed-bytes and caller-aware decoder tables; existing coverage gaps remain explicit. |
 | `Correctness/Lowering/Total/Versions/Matching.lean` | Retained version state relation and Source-to-model initial matching for sound tables, instantiated at widths. |
 | `Correctness/Lowering/Total/Versions/Marked.lean` | Retained representation soundness proofs for marked-address and fixed-bytes decoder tables. |
+| `Correctness/Lowering/Total/Versions.lean` | Retained version boundaries and contract decompositions with the original unresolved coverage, inference, simulation and allocation obligations. |
+| `Correctness/Lowering/Total/Decode/BytesLiteral.lean` | Fixed-bytes literal normalization and model-alignment value faithfulness; shared call integration remains separate. |

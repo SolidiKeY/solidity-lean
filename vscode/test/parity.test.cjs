@@ -170,17 +170,25 @@ test('a scenario timeout survives a successful editor exit in machine summaries'
 });
 test('a normal editor exit cannot leave a sampled detached verifier in the next trial',async()=>{
   if(process.platform!=='linux')return;
-  const dir=mkdtempSync(join(tmpdir(),'parity-survivor-'));let pid;
+  const dir=mkdtempSync(join(tmpdir(),'parity-survivor-')),code=join(dir,'code'),pidfile=join(dir,'pid');let pid,run,config,failure;
   try {
-    const code=join(dir,'code'),pidfile=join(dir,'pid');
     writeFileSync(code,`#!${process.execPath}\nconst fs=require('node:fs');const c=JSON.parse(fs.readFileSync(process.env.PARITY_HOST_CONFIG,'utf8'));const child=require('node:child_process').spawn(process.execPath,['-e','setInterval(()=>{},1000)'],{detached:true,stdio:'ignore'});child.unref();fs.writeFileSync(${JSON.stringify(pidfile)},String(child.pid));setTimeout(()=>fs.writeFileSync(c.result,JSON.stringify({schemaVersion:1,runId:c.runId,target:c.target,status:'passed',checks:['initial-verification'],scenarios:[{id:'initial-verification',status:'passed'}]})),350);\n`,{mode:0o700});
     const trial=join(dir,'trial');
-    const config={dir:trial,target:'local',workers:1,cache:'none',trial:0,warmup:false,workspace:join(trial,'workspace'),result:join(trial,'result.json'),events:join(trial,'events.jsonl'),trace:join(trial,'lsp.jsonl')};
-    const run=await launch(config,{code,operationTimeoutMs:1000,timeoutMs:3000,obligations:1,resourceState:admitted});
+    config={dir:trial,target:'local',workers:1,cache:'none',trial:0,warmup:false,workspace:join(trial,'workspace'),result:join(trial,'result.json'),events:join(trial,'events.jsonl'),trace:join(trial,'lsp.jsonl')};
+    run=await launch(config,{code,operationTimeoutMs:1000,timeoutMs:3000,obligations:1,resourceState:admitted});
     pid=Number(readFileSync(pidfile,'utf8'));
     assert.ok(run.resources.cleanup.terminatedOwnedSurvivors.some(p=>p.pid===pid));
     assert.deepEqual(run.resources.cleanup.remaining,[]);assert.equal(run.status,'passed');
-  }finally{if(pid)try{process.kill(pid,'SIGKILL');}catch{}rmSync(dir,{recursive:true,force:true});}
+  }catch(error){failure=error;throw error;}
+  finally{
+    let evidenceError;
+    try{if(process.env.DAFNY_DETACHED_CLEANUP_EVIDENCE){
+      const files=['code','pid','trial/config.json','trial/resources.json','trial/result.json','trial/editor.log'].map(name=>{const file=join(dir,name);try{const bytes=readFileSync(file);return{name,file,status:'retained',bytes:bytes.length,sha256:require('node:crypto').createHash('sha256').update(bytes).digest('hex'),base64:bytes.toString('base64')};}catch(error){return{name,file,status:'unavailable',code:error.code,message:error.message};}});
+      writeFileSync(process.env.DAFNY_DETACHED_CLEANUP_EVIDENCE,JSON.stringify({schemaVersion:1,scope:'Injected editor and sleeping detached Node child; no solver/kernel/nativeUI/performance claim.',assertionsPassed:!failure,expectedPid:pid,run,config,failure:failure?{name:failure.name,message:failure.message}:undefined,files},null,2),{flag:'wx'});
+    }}catch(error){evidenceError=error;if(failure)failure.fixtureEvidenceError=error.stack;}
+    finally{if(pid)try{process.kill(pid,'SIGKILL');}catch{}rmSync(dir,{recursive:true,force:true});}
+    if(evidenceError&&!failure)throw evidenceError;
+  }
 });
 test('the launcher refuses before spawning when the injected snapshot has swap or too little memory',async()=>{
   if(process.platform!=='linux')return;

@@ -59,9 +59,13 @@ function procTable() {
 class ProcessSampler {
   constructor(root, intervalMs = 100) {
     this.root = root; this.samples = []; this.seen = new Map(); this.previous = new Map();
-    this.start = performance.now(); this.sample();
-    this.ticksPerSecond=process.platform==='linux'?Number(spawnSync('getconf',['CLK_TCK'],{encoding:'utf8',timeout:1000}).stdout?.trim())||null:null;
+    this.start = performance.now();
+    // Anchor the existing interval before a synchronous initial scan can delay it.
     this.timer = setInterval(() => this.sample(), intervalMs); this.timer.unref();
+    try{
+      this.sample();
+      this.ticksPerSecond=process.platform==='linux'?Number(spawnSync('getconf',['CLK_TCK'],{encoding:'utf8',timeout:1000}).stdout?.trim())||null:null;
+    }catch(error){clearInterval(this.timer);throw error;}
   }
   sample() {
     if (process.platform !== 'linux') return;

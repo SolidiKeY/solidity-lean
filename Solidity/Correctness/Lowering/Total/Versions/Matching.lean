@@ -68,9 +68,31 @@ def glob (E : Source.Env) (C : Contract) (G : Source.Glob E) (F : Source.Fr) (st
 
 end Relation
 
+/-- Every model primitive has a related Source value at the full-width type. -/
+theorem Relation.val_total (E : Source.Env) (C : Contract) (H : HTy) : (p : PrimTy) →
+    (x : p.Denote) → ∃ v, Relation.val E C H (Source.Agreement.sourceTy p) (.val p) v x
+  | .bool, b => ⟨.bool b, .bool b⟩
+  | .uint, x => ⟨.int x.1 ((Source.Agreement.uint_range x.1).mp x.2),
+      .uint Source.IntTy.u256 rfl _ _ x rfl⟩
+  | .int, x => ⟨.int x.1 ((Source.Agreement.int_range x.1).mp x.2),
+      .int { Source.IntTy.u256 with signed := true } rfl _ _ x rfl⟩
+
 /-- The state relation. -/
 def rel (E : Source.Env) (C : Contract) : StateRelation E C :=
   ⟨Relation.val E C, Relation.glob E C⟩
+
+/-- It reflects Booleans. -/
+theorem rel_reflect (E : Source.Env) (C : Contract) (H : HTy)
+    (v : Source.Val E.layout .bool) (b : Bool)
+    (h : (rel E C).val H .bool (.val .bool) v b) : v = .bool b := by
+  cases h
+  rfl
+
+/-- It relates `false` to `false`. -/
+theorem rel_false (E : Source.Env) (C : Contract) (H : HTy) :
+    (rel E C).val H .bool (.val .bool) (.bool false) false :=
+  .bool false
+
 
 /-- An unsigned integer type's range is inside `uint`'s. -/
 theorem uint_inRange (t : Source.IntTy) (unsigned : t.signed = false) (n : Int)

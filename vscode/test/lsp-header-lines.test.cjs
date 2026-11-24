@@ -1,0 +1,9 @@
+// Injected framing controls only; no native/row acceptance.
+'use strict';
+const test=require('node:test'),assert=require('node:assert/strict'),{PassThrough}=require('node:stream'),{RpcPeer}=require('../src/rpc.cjs');
+const consumers=[['RPC',require('../src/rpc.cjs').LspFrames],['recorder',require('../parity/core.cjs').LspFrames]];
+for(const [name,Frames] of consumers){
+ for(const header of ['Content-Length:\r\n2','Content-Length:\r2','Content-Length:\n2','Content-Length:\r\n2\r\nContent-Length: 2'])test(name+' refuses a length field crossing a line '+JSON.stringify(header),()=>{const bytes=Buffer.from(header+'\r\n\r\n{}');for(const size of [1,bytes.length]){const parser=new Frames(),seen=[];parser.on('message',m=>seen.push(m));assert.throws(()=>{for(let i=0;i<bytes.length;i+=size)parser.push(bytes.subarray(i,i+size));},/Invalid LSP Content-Length/);assert.deepEqual(seen,[]);}});
+ test(name+' keeps horizontal padding and ordinary multiple header lines',()=>{const bytes=Buffer.from('content-length:\t 2 \t\r\nContent-Type: application/vscode-jsonrpc; charset=utf-8\r\n\r\n{}'),parser=new Frames(),seen=[];parser.on('message',m=>seen.push(m));for(const byte of bytes)parser.push(Buffer.from([byte]));assert.deepEqual(seen,[{}]);});
+}
+test('cross-line length closes RPC before notification dispatch',async()=>{const input=new PassThrough(),output=new PassThrough(),peer=new RpcPeer(input,output);let calls=0;peer.onNotification('changed',()=>calls++);try{const pending=peer.request('waiting',{}, {timeoutMs:1000}),rejected=assert.rejects(pending,/Invalid LSP Content-Length/),body=Buffer.from(JSON.stringify({jsonrpc:'2.0',method:'changed',params:{}}));input.write(Buffer.concat([Buffer.from(`Content-Length:\r\n${body.length}\r\n\r\n`),body]));await rejected;assert.equal(calls,0);assert.equal(peer.closed,true);assert.equal(peer.pending.size,0);}finally{peer.close();input.destroy();output.destroy();}});
