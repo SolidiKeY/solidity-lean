@@ -493,6 +493,22 @@ example : (do
       ([.int ⟨false, 8, by decide⟩, .address false, .fixedBytes 4 (by decide)],
        [.bool, .int ⟨true, 16, by decide⟩]) := rfl
 
+/-- Consume the general certificate at the heterogeneous concrete header:
+all parameter/return slots retain their exact width/marker-table decisions. -/
+example : ∃ f,
+    (do
+      let (ps, rs) ← Decode.Callee.signature calleeHeader
+      Source.Frame.mk? { decls := [] } none ps rs .nil true false) = some f ∧
+    f.names = [some "small", some "who", some "tag"] ∧
+    f.rnames = [some "ok", some "out"] ∧
+    Decode.Callee.Slots calleeHeader.widths calleeHeader.params f.ps ∧
+    Decode.Callee.Slots calleeHeader.widths calleeHeader.rets f.rs := by
+  obtain ⟨⟨ps, rs⟩, hs⟩ : ∃ sig, Decode.Callee.signature calleeHeader = some sig := ⟨_, rfl⟩
+  obtain ⟨f, hf, pn, rn, pts, rts, _⟩ :=
+    Decode.Callee.signature_frame hs { decls := [] } none .nil true false
+  refine ⟨f, ?_, pn, rn, pts, rts⟩
+  simp [hs, hf]
+
 /-- Repeated names are preserved, not silently removed or renamed. -/
 example : (Decode.Callee.parameters [] [("x", .prim .bool), ("x", .prim .bool)]).map
     Source.Syn.paramNames = some [some "x", some "x"] := rfl
