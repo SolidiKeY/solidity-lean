@@ -94,7 +94,7 @@ test('request persistence consumes the existing phase budget',async t=>{
       t.mock.method(Date,'now',()=>now);
       t.mock.method(fs,'writeFileSync',(file,...args)=>{
         const value=originalWrite(file,...args);
-        if(path.basename(String(file))==='request.json.tmp')now=elapsed;
+        if(path.basename(String(file)).startsWith('request-attempt-')&&path.basename(String(file)).endsWith('.json.tmp'))now=elapsed;
         return value;
       });
       const pending=requestPhase(dir,'write-budget','open',{},1000);
@@ -166,4 +166,15 @@ test('producer image binding remains inside the original client phase budget',as
   const pending=requestPhase(dir,'producer-budget','trace-hidden',{},1000),rejected=assert.rejects(pending,e=>e.code==='TIMEOUT');
   await servePhases(dir,'producer-budget',async d=>{fs.writeFileSync(path.join(d,'screenshot.png'),png);return{captured:true,screenshot:true};},new Set());await rejected;
  }finally{t.mock.restoreAll();fs.rmSync(dir,{recursive:true,force:true});}
+});
+
+test('a second phase request cannot overwrite an active or completed request',async()=>{
+ const dir=fixture();try{
+  const first=requestPhase(dir,'phase-slot','trace-hidden',{source:'first'},1000),p=paths(dir,'trace-hidden'),original=fs.readFileSync(p.request);
+  const firstFailure=first.catch(()=>{});
+  await assert.rejects(requestPhase(dir,'phase-slot','trace-hidden',{source:'second'},1000),e=>e.code==='EEXIST');assert.deepEqual(fs.readFileSync(p.request),original);
+  await servePhases(dir,'phase-slot',async d=>{fs.writeFileSync(path.join(d,'screenshot.png'),png);return{captured:true,screenshot:true};},new Set());await first;
+  await assert.rejects(requestPhase(dir,'phase-slot','trace-hidden',{source:'third'},1000),e=>e.code==='EEXIST');assert.deepEqual(fs.readFileSync(p.request),original);
+  const attempts=fs.readdirSync(p.dir).filter(n=>n.startsWith('request-attempt-')&&n.endsWith('.json')).map(n=>JSON.parse(fs.readFileSync(path.join(p.dir,n))));assert.deepEqual(attempts.map(a=>a.metadata.source).sort(),['first','second','third']);await firstFailure;
+ }finally{fs.rmSync(dir,{recursive:true,force:true});}
 });

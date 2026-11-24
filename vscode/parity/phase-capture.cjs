@@ -20,7 +20,9 @@ function paths(directory,phase){if(!phases.includes(phase))throw Error('Unknown 
 function json(file,value){const tmp=file+'.tmp';fs.writeFileSync(tmp,JSON.stringify(value,null,2)+'\n');fs.renameSync(tmp,file);}
 async function requestPhase(directory,runId,phase,metadata,timeoutMs){
   const deadline=Date.now()+timeoutMs;
-  const p=paths(directory,phase);fs.mkdirSync(p.dir,{recursive:true});const request={runId,phase,requestId:randomUUID(),requested:Date.now(),metadata};const metadataHash=createHash('sha256').update(JSON.stringify(metadata)).digest('hex');json(p.request,request);
+  const p=paths(directory,phase);fs.mkdirSync(p.dir,{recursive:true});const request={runId,phase,requestId:randomUUID(),requested:Date.now(),metadata};const metadataHash=createHash('sha256').update(JSON.stringify(metadata)).digest('hex');
+  // Preserve each attempt; atomically claim this one-request phase channel.
+  const attempt=path.join(p.dir,'request-attempt-'+request.requestId+'.json');json(attempt,request);fs.linkSync(attempt,p.request);
   while(Date.now()<deadline){
     if(fs.existsSync(p.reply)){
       const reply=JSON.parse(fs.readFileSync(p.reply));
