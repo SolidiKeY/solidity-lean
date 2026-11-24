@@ -71,3 +71,12 @@ test('claimed coverage must agree with recorded boxes, clip and viewport (inject
  }
  const before=sample(text),after=sample(text);before.characters[0].boxes[0].left=after.characters[0].boxes[0].left=0;assert.deepEqual(errors(before,after,text,'Solidity Lean'),[]);
 });
+
+test('recorded mutation history and scroll fields cannot contradict an unchanged observer (injected)',()=>{
+ const text='ready';
+ for(const mutate of [s=>delete s.changes,s=>s.changes='history',s=>s.changes=[{type:'attributes'}],s=>{s.epoch=129;s.changes=Array(129).fill({type:'attributes'});},s=>s.scroll='none',s=>s.scroll=[{left:NaN,top:0,transform:''}],s=>s.scroll=[{left:0,top:Infinity,transform:''}],s=>s.scroll=[{left:0,top:0}],s=>s.scroll=[null]]){
+  const before=sample(text),after=sample(text);mutate(before);mutate(after);let refused;assert.doesNotThrow(()=>{refused=errors(before,after,text,'Solidity Lean');});assert.ok(refused.length);
+ }
+ const before=sample(text),after=sample(text);before.epoch=after.epoch=1;before.changes=[{type:'attributes',attribute:'class'}];after.changes=[{type:'attributes',attribute:'style'}];assert.ok(errors(before,after,text,'Solidity Lean').length);
+ after.changes=structuredClone(before.changes);before.scroll=after.scroll=[{left:-1,top:0,transform:''}];assert.deepEqual(errors(before,after,text,'Solidity Lean'),[]);
+});

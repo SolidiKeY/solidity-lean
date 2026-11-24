@@ -25,11 +25,14 @@ function probe(expected,stop=false){
 }
 function validRect(r){return !!r&&['left','top','right','bottom'].every(key=>Number.isFinite(r[key]))&&r.right>r.left&&r.bottom>r.top;}
 function inside(r,clip){return validRect(r)&&validRect(clip)&&r.left>=clip.left&&r.top>=clip.top&&r.right<=clip.right&&r.bottom<=clip.bottom;}
+// Match the probe's existing bounded mutation-history and scroll schema.
+function observerFields(s){return Array.isArray(s?.changes)&&s.changes.length<=128&&s.changes.length<=s.epoch&&Array.isArray(s.scroll)&&s.scroll.every(p=>p&&Number.isFinite(p.left)&&Number.isFinite(p.top)&&typeof p.transform==='string');}
 function errors(before,after,expected,channel){
  const errors=[];if(typeof expected!=='string'||!expected||typeof channel!=='string'||!channel)return ['foreign/empty required text or channel'];
  if(before?.channel!==channel||after?.channel!==channel)errors.push('foreign/empty required text or channel');
  for(const [label,s]of [['before',before],['after',after]])if(!s||s.expected!==expected||!Number.isSafeInteger(s.start)||s.start<0||typeof s.text!=='string'||s.text.slice(s.start,s.start+expected.length)!==expected||!Array.isArray(s.characters)||s.characters.length!==expected.length||!s.characters.every((c,i)=>c?.unit===expected[i]&&c.covered===true&&Array.isArray(c.boxes)&&c.boxes.length>0&&inside(c.clip,s.viewport)&&c.clip.left>=0&&c.clip.top>=0&&c.boxes.every(box=>inside(box,c.clip))))errors.push(label+' missing/clipped/occluded character');
- if(typeof before?.watchId!=='string'||!before.watchId||before.watchId!==after?.watchId||!Number.isSafeInteger(before.epoch)||before.epoch<0||before.epoch!==after?.epoch||!Number.isFinite(before.clock)||before.clock<0||!Number.isFinite(after?.clock)||!(after.clock>=before.clock)||!before.channel||before.channel!==after?.channel||before.text!==after?.text||JSON.stringify(before.viewport)!==JSON.stringify(after?.viewport)||JSON.stringify(before.scroll)!==JSON.stringify(after?.scroll)||JSON.stringify(before.characters)!==JSON.stringify(after?.characters))errors.push('capture interval changed');return errors;
+ for(const [label,s]of [['before',before],['after',after]])if(!observerFields(s))errors.push(label+' malformed observer/scroll state');
+ if(typeof before?.watchId!=='string'||!before.watchId||before.watchId!==after?.watchId||!Number.isSafeInteger(before.epoch)||before.epoch<0||before.epoch!==after?.epoch||JSON.stringify(before.changes)!==JSON.stringify(after?.changes)||!Number.isFinite(before.clock)||before.clock<0||!Number.isFinite(after?.clock)||!(after.clock>=before.clock)||!before.channel||before.channel!==after?.channel||before.text!==after?.text||JSON.stringify(before.viewport)!==JSON.stringify(after?.viewport)||JSON.stringify(before.scroll)!==JSON.stringify(after?.scroll)||JSON.stringify(before.characters)!==JSON.stringify(after?.characters))errors.push('capture interval changed');return errors;
 }
 // Preparation samples are not screenshot brackets. Keep the observer epoch intact and
 // retain every sample, including refusals. Exactly one screenshot bracket follows.
