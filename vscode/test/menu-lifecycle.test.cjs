@@ -77,7 +77,7 @@ test('recovery phases complete through request and capture server transport (syn
    const observed=[];
    await servePhases(dir,'recovery-run',async(destination,request)=>{
     observed.push(request.phase);
-    fs.writeFileSync(path.join(destination,'screenshot.png'),Buffer.from([137,80,78,71,13,10,26,10,0]));
+    fs.writeFileSync(path.join(destination,'screenshot.png'),Buffer.from('iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR4nGNgYGD4DwABBAEAX+XDSwAAAABJRU5ErkJggg==','base64'));
     return {captured:true,screenshot:true};
    },seen);
    const reply=await pending;

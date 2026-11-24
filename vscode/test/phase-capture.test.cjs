@@ -2,7 +2,13 @@
 'use strict';
 const test=require('node:test'),assert=require('node:assert/strict'),fs=require('node:fs'),path=require('node:path'),os=require('node:os');
 const {paths,requestPhase,servePhases}=require('../parity/phase-capture.cjs');
-const png=Buffer.from([137,80,78,71,13,10,26,10,0]);
+const png=Buffer.from('iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR4nGNgYGD4DwABBAEAX+XDSwAAAABJRU5ErkJggg==','base64');
+function observeReads(t,read,after){
+ const names=new Map(),open=fs.openSync,close=fs.closeSync;
+ t.mock.method(fs,'openSync',(file,...args)=>{const fd=open(file,...args);names.set(fd,String(file));return fd;});
+ t.mock.method(fs,'closeSync',fd=>{names.delete(fd);return close(fd);});
+ t.mock.method(fs,'readFileSync',(file,...args)=>{const bytes=read(file,...args);after(typeof file==='number'?names.get(file):String(file));return bytes;});
+}
 const fixture=()=>fs.mkdtempSync(path.join(os.tmpdir(),'parity-phase-'));
 test('fresh screenshot acknowledgements retain launch, phase and source snapshot identity',async()=>{
   const dir=fixture();try{
@@ -70,11 +76,7 @@ test('reply and PNG reads cannot accept success at or beyond the phase deadline'
     const dir=fixture();let now=0,producerDone=false;
     try{
       t.mock.method(Date,'now',()=>now);
-      t.mock.method(fs,'readFileSync',(file,...args)=>{
-        const bytes=originalRead(file,...args);
-        if(producerDone&&path.basename(String(file))===delayedFile)now=elapsed;
-        return bytes;
-      });
+      observeReads(t,originalRead,file=>{if(producerDone&&path.basename(String(file))===delayedFile)now=elapsed;});
       const pending=requestPhase(dir,'read-budget','verified',{version:3},1000);
       const checked=elapsed<1000?pending:assert.rejects(pending,e=>e.code==='TIMEOUT');
       await servePhases(dir,'read-budget',async d=>{
@@ -115,11 +117,7 @@ test('late reads retain renderer and invalid-PNG failures',async t=>{
     const dir=fixture();let now=0,producerDone=false;
     try{
       t.mock.method(Date,'now',()=>now);
-      t.mock.method(fs,'readFileSync',(file,...args)=>{
-        const bytes=originalRead(file,...args);
-        if(producerDone&&path.basename(String(file))===(failure==='renderer'?'reply.json':'screenshot.png'))now=1000;
-        return bytes;
-      });
+      observeReads(t,originalRead,file=>{if(producerDone&&path.basename(String(file))===(failure==='renderer'?'reply.json':'screenshot.png'))now=1000;});
       const pending=requestPhase(dir,'read-failure','verified',{},1000);
       const rejected=assert.rejects(pending,failure==='renderer'?/CDP disconnected/:/no PNG evidence/);
       await servePhases(dir,'read-failure',async d=>{
@@ -155,14 +153,14 @@ test('acknowledged image bytes cannot be substituted before the client reads the
  for(const sameLength of [false,true]){const dir=fixture();try{
   const pending=requestPhase(dir,'image-binding','trace-hidden',{source:'owned'},1000),rejected=assert.rejects(pending,/image.*mismatch/i);
   await servePhases(dir,'image-binding',async d=>{fs.writeFileSync(path.join(d,'screenshot.png'),png);return{captured:true,screenshot:true};},new Set());
-  const p=paths(dir,'trace-hidden'),substitution=sameLength?Buffer.from(png):Buffer.concat([png,Buffer.from('substitution')]);if(sameLength)substitution[substitution.length-1]^=1;
+  const p=paths(dir,'trace-hidden'),substitution=Buffer.from(sameLength?'iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR4nGNgZGD4DwABCAEBfBRbtQAAAABJRU5ErkJggg==':'iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR4nGNgYGD4DwABBAEAX+XDSwAAAA50RVh0bm90ZQBhbHRlcm5hdGW4ZEnDAAAAAElFTkSuQmCC','base64');assert.equal(substitution.length===png.length,sameLength);
   fs.writeFileSync(path.join(p.dir,'screenshot.png'),substitution);await rejected;
  }finally{fs.rmSync(dir,{recursive:true,force:true});}}
 });
 
 test('producer image binding remains inside the original client phase budget',async t=>{
  const dir=fixture(),read=fs.readFileSync;let clock=0;try{
-  t.mock.method(Date,'now',()=>clock);t.mock.method(fs,'readFileSync',(file,...args)=>{const bytes=read(file,...args);if(path.basename(String(file))==='screenshot.png')clock=1000;return bytes;});
+  t.mock.method(Date,'now',()=>clock);observeReads(t,read,file=>{if(path.basename(String(file))==='screenshot.png')clock=1000;});
   const pending=requestPhase(dir,'producer-budget','trace-hidden',{},1000),rejected=assert.rejects(pending,e=>e.code==='TIMEOUT');
   await servePhases(dir,'producer-budget',async d=>{fs.writeFileSync(path.join(d,'screenshot.png'),png);return{captured:true,screenshot:true};},new Set());await rejected;
  }finally{t.mock.restoreAll();fs.rmSync(dir,{recursive:true,force:true});}

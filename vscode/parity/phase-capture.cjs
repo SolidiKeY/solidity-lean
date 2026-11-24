@@ -15,7 +15,25 @@ function phaseObserved(phase,before,after){
   const expected=phase==='proof-broken'?'failed':'proved';
   return outcome(before)===expected&&outcome(after)===expected&&JSON.stringify(before.functions||before.namedVerifiables)===JSON.stringify(after.functions||after.namedVerifiables);
 }
-const png=Buffer.from([137,80,78,71,13,10,26,10]);
+const {assertPngContainer}=require('./png-container.cjs'),{isDeepStrictEqual}=require('node:util');
+function captureAcknowledged(value){return value?.captured===true&&value.screenshot===true&&value.error===undefined;}
+function captureFailure(error){
+  try{const message=error?.message;if(typeof message==='string'&&message)return message;}catch{}
+  return typeof error==='string'&&error?error:'Renderer capture failed without an error message';
+}
+function imageEntry(file){try{return fs.lstatSync(file,{bigint:true});}catch(error){if(error.code==='ENOENT')return null;throw error;}}
+function regularImage(stat){return !!stat&&stat.isFile()&&stat.nlink===1n;}
+function sameImage(a,b){return regularImage(a)&&regularImage(b)&&['dev','ino','size','mtimeNs','ctimeNs'].every(key=>a[key]===b[key]);}
+function readImage(file){
+  const before=imageEntry(file);if(!regularImage(before))throw Error('Visual phase screenshot is not a single-link regular file');
+  const fd=fs.openSync(file,fs.constants.O_RDONLY|(fs.constants.O_NOFOLLOW||0)|(fs.constants.O_NONBLOCK||0));
+  try{
+    const opened=fs.fstatSync(fd,{bigint:true});if(!sameImage(before,opened))throw Error('Visual phase screenshot changed before read');
+    const bytes=fs.readFileSync(fd),after=fs.fstatSync(fd,{bigint:true});
+    if(!sameImage(opened,after)||!sameImage(after,imageEntry(file))||after.size!==BigInt(bytes.length))throw Error('Visual phase screenshot changed during read');
+    return bytes;
+  }finally{fs.closeSync(fd);}
+}
 function paths(directory,phase){if(!phases.includes(phase))throw Error('Unknown visual phase '+phase);const dir=path.join(directory,'phases',phase);return{dir,request:path.join(dir,'request.json'),reply:path.join(dir,'reply.json')};}
 function json(file,value){const tmp=file+'.tmp';fs.writeFileSync(tmp,JSON.stringify(value,null,2)+'\n');fs.renameSync(tmp,file);}
 async function requestPhase(directory,runId,phase,metadata,timeoutMs){
@@ -28,9 +46,10 @@ async function requestPhase(directory,runId,phase,metadata,timeoutMs){
       const reply=JSON.parse(fs.readFileSync(p.reply));
       if(reply.runId===runId&&reply.requestId===request.requestId&&reply.phase===phase){
         if(reply.metadataHash!==metadataHash)throw Error('Visual phase source metadata mismatch');
-        if(reply.error||reply.status!=='captured')throw Error('Visual phase '+phase+' failed: '+reply.error);
-        const bytes=fs.readFileSync(path.join(p.dir,'screenshot.png'));
-        if(bytes.length<=png.length||!bytes.subarray(0,png.length).equals(png))throw Error('Visual phase has no PNG evidence');
+        if(reply.error!==undefined||reply.status!=='captured')throw Error('Visual phase '+phase+' failed: '+reply.error);
+        if(!captureAcknowledged(reply.capture))throw Error('Visual phase '+phase+' failed: Invalid renderer acknowledgement');
+        const bytes=readImage(path.join(p.dir,'screenshot.png'));
+        assertPngContainer(bytes);
         if(reply.imageBytes!==bytes.length||reply.imageSha256!==createHash('sha256').update(bytes).digest('hex'))throw Error('Visual phase image byte binding mismatch');
         if(Date.now()>=deadline)break;
         return reply;
@@ -45,12 +64,15 @@ async function servePhases(directory,runId,capture,seen){
     const p=paths(directory,phase);if(!fs.existsSync(p.request))continue;
     const request=JSON.parse(fs.readFileSync(p.request));
     if(request.runId!==runId||request.phase!==phase||typeof request.requestId!=='string'||seen.has(request.requestId))continue;
-    seen.add(request.requestId);const reply={runId,phase,requestId:request.requestId,status:'failed',requested:request.requested,metadataHash:createHash('sha256').update(JSON.stringify(request.metadata??null)).digest('hex')};
-    try{if(fs.existsSync(path.join(p.dir,'screenshot.png')))throw Error('Existing phase screenshot must be preserved; choose a fresh capture directory');
-        reply.capture=await capture(p.dir,request);reply.status=reply.capture?.captured===true&&reply.capture.screenshot===true&&reply.capture.error===undefined?'captured':'failed';
+    seen.add(request.requestId);const requestSnapshot=JSON.parse(JSON.stringify(request));const reply={runId,phase,requestId:request.requestId,status:'failed',requested:request.requested,metadataHash:createHash('sha256').update(JSON.stringify(request.metadata??null)).digest('hex')};
+    try{if(imageEntry(path.join(p.dir,'screenshot.png')))throw Error('Existing phase screenshot must be preserved; choose a fresh capture directory');
+        const captured=await capture(p.dir,request),acknowledged=captureAcknowledged(captured);
+        reply.capture=JSON.parse(JSON.stringify(captured));
+        if(!isDeepStrictEqual(request,requestSnapshot))throw Error('Visual phase request changed during capture');
+        reply.status=acknowledged&&captureAcknowledged(captured)&&captureAcknowledged(reply.capture)?'captured':'failed';
         if(reply.status!=='captured')reply.error=typeof reply.capture?.error==='string'&&reply.capture.error?reply.capture.error:'Renderer did not capture a screenshot';
-        else{const bytes=fs.readFileSync(path.join(p.dir,'screenshot.png'));reply.imageBytes=bytes.length;reply.imageSha256=createHash('sha256').update(bytes).digest('hex');}}
-    catch(e){reply.status='failed';reply.error=e.message;}
+        else{const bytes=readImage(path.join(p.dir,'screenshot.png'));assertPngContainer(bytes);reply.imageBytes=bytes.length;reply.imageSha256=createHash('sha256').update(bytes).digest('hex');}}
+    catch(e){reply.status='failed';reply.error=captureFailure(e);}
     reply.finished=Date.now();json(p.reply,reply);
   }
 }

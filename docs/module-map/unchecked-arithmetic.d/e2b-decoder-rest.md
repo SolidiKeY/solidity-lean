@@ -8,3 +8,5 @@
 | `Correctness/Lowering/Total/Versions/Marked.lean` | Retained representation soundness proofs for marked-address and fixed-bytes decoder tables. |
 | `Correctness/Lowering/Total/Versions.lean` | Retained version boundaries and contract decompositions with the original unresolved coverage, inference, simulation and allocation obligations. |
 | `Correctness/Lowering/Total/Decode/BytesLiteral.lean` | Fixed-bytes literal normalization and model-alignment value faithfulness; shared call integration remains separate. |
+| `Correctness/Lowering/Total/Decode/BytesLiteral/Checked.lean` | Fixed-bytes value faithfulness from contextual conversion, narrow-width fit and full-word numeric checks. |
+| `Correctness/Lowering/Total/Decode/BytesLiteral/Evaluation.lean` | Source typed resolution and evaluation of normalized fixed-bytes literals, with local checked model-value agreement. |
