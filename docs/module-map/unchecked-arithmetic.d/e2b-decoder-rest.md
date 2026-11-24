@@ -12,3 +12,6 @@
 | `Correctness/Lowering/Total/Decode/BytesLiteral/Evaluation.lean` | Source typed resolution and evaluation of normalized fixed-bytes literals, with local checked model-value agreement. |
 | `Correctness/Lowering/Total/Decode/Calls.lean` | Executable additive call-spelling expression decoder, exact ExprX contract and conservative unclaimed-expression behavior. |
 | `Correctness/Lowering/Total/Decode/WithExpr.lean` | Expression-parameterized statement/request decoding, registered-call integration, and exact v1 recovery for an empty registry. |
+| `Correctness/Lowering/Total/Versions/CalleeBinding.lean` | Structural callee declaration/output interface, ordinary and recursive endpoints, with translator and semantic obligations open. |
+| `Correctness/Lowering/Total/Decode/Callee/Parameters.lean` | Callee primitive parameter/return spelling, ordered type correspondence and actual Source frame construction. |
+| `Correctness/Lowering/Total/Decode/Callee/Functions.lean` | Ordinary function declaration assembly with original body spelling, ordered modifiers and exact Source frame correspondence. |

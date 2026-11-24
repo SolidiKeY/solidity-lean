@@ -1,6 +1,8 @@
+import Solidity.Source.Elaborate
 import Solidity.Correctness.Lowering.Total.Versions
 import Solidity.Correctness.Lowering.Total.Decode.BytesLiteral.Evaluation
 import Solidity.Correctness.Lowering.Total.Decode.WithExpr
+import Solidity.Correctness.Lowering.Total.Decode.Callee.Functions
 
 namespace Solidity.Examples.Goals.LoopsDecode
 
@@ -472,5 +474,106 @@ example (T : Decode.Tables) (r : Request) : Decode.Calls.decode T [] r = T.decod
 example (T : Decode.Tables) (R : CallSpellExt.Registry) (r : Request) (s : SourceProgram)
     (h : Decode.Calls.decode T R r = some s) : Decode.plain r = true :=
   Decode.WithExpr.decode_guard T (Decode.Calls.expr T R) h
+
+/-! Callee headers reach the real Source frame constructor. -/
+private def calleeHeader : FunDecl :=
+  { params := [("small", .prim .uint), ("who", .prim .uint), ("tag", .prim .uint)]
+    rets := [("ok", .prim .bool), ("out", .prim .int)]
+    widths := [("small", 8), ("who#address", 20), ("tag", 32), ("tag#bytes", 4), ("out", 16)]
+    body := [] }
+
+example : (do
+    let (ps, rs) ← Decode.Callee.signature calleeHeader
+    let f ← Source.Frame.mk? { decls := [] } none ps rs .nil true false
+    pure (f.locals.map Prod.fst)) = some ["out", "ok", "tag", "who", "small"] := rfl
+
+example : (do
+    let (ps, rs) ← Decode.Callee.signature calleeHeader
+    let f ← Source.Frame.mk? { decls := [] } none ps rs .nil true false
+    pure (f.ps, f.rs)) = some
+      ([.int ⟨false, 8, by decide⟩, .address false, .fixedBytes 4 (by decide)],
+       [.bool, .int ⟨true, 16, by decide⟩]) := rfl
+
+/-- Consume the general certificate at the heterogeneous concrete header:
+all parameter/return slots retain their exact width/marker-table decisions. -/
+example : ∃ f,
+    (do
+      let (ps, rs) ← Decode.Callee.signature calleeHeader
+      Source.Frame.mk? { decls := [] } none ps rs .nil true false) = some f ∧
+    f.names = [some "small", some "who", some "tag"] ∧
+    f.rnames = [some "ok", some "out"] ∧
+    Decode.Callee.Slots calleeHeader.widths calleeHeader.params f.ps ∧
+    Decode.Callee.Slots calleeHeader.widths calleeHeader.rets f.rs := by
+  obtain ⟨⟨ps, rs⟩, hs⟩ : ∃ sig, Decode.Callee.signature calleeHeader = some sig := ⟨_, rfl⟩
+  obtain ⟨f, hf, pn, rn, pts, rts, _⟩ :=
+    Decode.Callee.signature_frame hs { decls := [] } none .nil true false
+  refine ⟨f, ?_, pn, rn, pts, rts⟩
+  simp [hs, hf]
+
+/-- Repeated names are preserved, not silently removed or renamed. -/
+example : (Decode.Callee.parameters [] [("x", .prim .bool), ("x", .prim .bool)]).map
+    Source.Syn.paramNames = some [some "x", some "x"] := rfl
+example : Decode.Callee.parameters [("x", 7)] [("x", .prim .uint)] = none := rfl
+example : Decode.Callee.parameters [("x", 32), ("x#bytes", 4), ("x#address", 20)]
+    [("x", .prim .uint)] = none := rfl
+/-- Reference parameters remain an explicit implementation gap. -/
+example : Decode.Callee.parameters [] [("xs", .ref (.array (.prim .uint)))] = none := rfl
+
+/-! Original ordinary function bodies reach Source elaboration. These are
+component checks, not complete unit or callee-pipeline coverage. -/
+private def identityCallee : FunDecl :=
+  { params := [("x", .prim .uint)], rets := [("r", .prim .uint)]
+    widths := [("x", 8), ("r", 8)], body := [.ret (some (.name "x"))] }
+
+private def identityDecl := Decode.Callee.functionDecl Decode.tablesB
+  CallSpellExt.registry1 "C" "identity" (some .internal) none identityCallee
+
+-- Executable Source elaboration checks; the general frame certificate below
+-- is kernel-proved separately.
+#guard_msgs in
+#eval (show IO Unit from do
+  let actual := do
+    let d ← identityDecl
+    let b ← Source.elabBody { decls := [d] } d
+    pure (b.val.ps.length, b.val.rs.length)
+  unless actual == some (1, 1) do
+    throw (IO.userError "identity callee failed Source body elaboration"))
+
+/-- The assembly certificate connects this original declaration to its actual
+Source frame, including the narrow parameter and return-slot correspondence. -/
+example : ∃ d f, identityDecl = some d ∧
+    d.frame? { decls := [d] } = some f ∧
+    f.names = [some "x"] ∧ f.rnames = [some "r"] ∧
+    Decode.Callee.Slots identityCallee.widths identityCallee.params f.ps ∧
+    Decode.Callee.Slots identityCallee.widths identityCallee.rets f.rs := by
+  obtain ⟨d, hd⟩ : ∃ d, identityDecl = some d := ⟨_, rfl⟩
+  obtain ⟨_, _, _, _, f, _, _, _, _, hf, hn, hr, hp, hs, _⟩ :=
+    Decode.Callee.functionDecl_faithful _ _ _ _ _ _ _ d hd { decls := [d] }
+  exact ⟨d, f, hd, hf, hn, hr, hp, hs⟩
+
+private def guardedCallee : FunDecl :=
+  { identityCallee with mods :=
+    [{ name := "first", params := [], args := [.bytesLit [1]], body := [] },
+     { name := "second", params := [], args := [], body := [] }] }
+
+example : (Decode.Callee.modifiers Decode.tablesB CallSpellExt.registry1
+    guardedCallee.mods).map (fun ms => ms.invList.map (fun m => m.1.head)) =
+    some ["first", "second"] := by
+  change (some (.cons (.modInv ⟨"first", []⟩ (.some (.positional
+    (.cons (.lit (.hexStr [1])) .nil))))
+    (.cons (.modInv ⟨"second", []⟩ (.some (.positional .nil))) .nil)) :
+      Option (Source.Syn (.list .modInv))).map _ = _
+  simp [Source.Syn.invList]
+
+-- Missing modifier definitions are rejected by Source elaboration; assembly
+-- cannot silently erase them to make a body elaborate.
+#guard_msgs in
+#eval (show IO Unit from do
+  let actual := do
+    let d ← Decode.Callee.functionDecl Decode.tablesB CallSpellExt.registry1
+      "C" "identity" (some .internal) none guardedCallee
+    pure (Source.elabBody { decls := [d] } d).isSome
+  unless actual == some false do
+    throw (IO.userError "unresolved callee modifiers were not rejected"))
 
 end Solidity.Examples.Goals.LoopsDecode

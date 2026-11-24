@@ -2523,6 +2523,8 @@ import Solidity.Correctness.Lowering.Total.Decode
 import Solidity.Correctness.Lowering.Total.Decode.BytesLiteral
 import Solidity.Correctness.Lowering.Total.Decode.BytesLiteral.Checked
 import Solidity.Correctness.Lowering.Total.Decode.BytesLiteral.Evaluation
+import Solidity.Correctness.Lowering.Total.Decode.Callee.Functions
+import Solidity.Correctness.Lowering.Total.Decode.Callee.Parameters
 import Solidity.Correctness.Lowering.Total.Decode.Calls
 import Solidity.Correctness.Lowering.Total.Decode.Marked
 import Solidity.Correctness.Lowering.Total.Decode.Spelling
@@ -2534,6 +2536,7 @@ import Solidity.Correctness.Lowering.Total.Production
 import Solidity.Correctness.Lowering.Total.Relation
 import Solidity.Correctness.Lowering.Total.Spells
 import Solidity.Correctness.Lowering.Total.Versions
+import Solidity.Correctness.Lowering.Total.Versions.CalleeBinding
 import Solidity.Correctness.Lowering.Total.Versions.Marked
 import Solidity.Correctness.Lowering.Total.Versions.Matching
 import Solidity.Correctness.Lowering.Total.Versions.Primitive
