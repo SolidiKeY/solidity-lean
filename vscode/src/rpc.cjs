@@ -43,7 +43,13 @@ class RpcPeer extends EventEmitter {
     if(message.jsonrpc!=='2.0')return;
     if(message.method===undefined){
       const pending=this.pending.get(message.id);
-      if(pending)pending.finish(message.error?Object.assign(new Error(message.error.message),{code:message.error.code,data:message.error.data}):null,message.result);
+      if(pending){
+        const hasResult=Object.hasOwn(message,'result'),hasError=Object.hasOwn(message,'error'),error=message.error;
+        if(hasResult===hasError||hasError&&(!error||typeof error!=='object'||Array.isArray(error)||!Number.isInteger(error.code)||typeof error.message!=='string')){
+          this.close(failure('Malformed JSON-RPC response',-32600));return;
+        }
+        pending.finish(hasError?Object.assign(new Error(error.message),{code:error.code,data:error.data}):null,message.result);
+      }
       return;
     }
     if(message.id===undefined){
