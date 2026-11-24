@@ -1,9 +1,9 @@
 'use strict';
 const { spawn, spawnSync } = require('node:child_process');
 const { resolve, join } = require('node:path');
-const { existsSync,readdirSync } = require('node:fs');
+const { existsSync } = require('node:fs');
 const { parseReport } = require('./report.cjs');
-const {processState}=require('./process-state.cjs');
+const {processState,directChildren}=require('./process-state.cjs');
 
 /** Stop only a known-owned positive PID and its descendants or explicitly owned session. */
 function terminateTree(child) {
@@ -18,8 +18,7 @@ function terminateTree(child) {
   if(process.platform==='linux'){
     const stop=record=>{if(!record)return;const now=processState(record.pid);if(!now||now.birth!==record.birth)return;
       try{process.kill(record.pid,'SIGSTOP');}catch{}
-      // CONFIG_PROC_CHILDREN is optional; use PPID records rather than assuming task/*/children exists.
-      const children=readdirSync('/proc').filter(name=>/^\d+$/.test(name)).map(Number).map(processState).filter(candidate=>candidate?.ppid===record.pid);
+      const children=directChildren(record);
       for(const candidate of children)stop(candidate);
       if(processState(record.pid)?.birth===record.birth)try{process.kill(record.pid,'SIGKILL');}catch{}
     };stop(identity);
