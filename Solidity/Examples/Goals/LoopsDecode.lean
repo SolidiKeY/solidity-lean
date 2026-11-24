@@ -1,4 +1,4 @@
-import Solidity.Correctness.Lowering.Total.Versions.Matching
+import Solidity.Correctness.Lowering.Total.Versions.Marked
 import Solidity.Correctness.Lowering.Total.Decode.Spelling
 import Solidity.Correctness.Lowering.Total.Decode.Marked
 
@@ -197,5 +197,11 @@ example : Simulation.InitialMatching Version.rel Decode.tablesW.decode := Versio
 example {E : Source.Env} {C : Contract} {G : Source.Glob E} {F : Source.Fr} {st : Source.St E}
     {σ : State C []} (h : (Version.rel E C).glob G F st σ) :
     σ.tx.msgSender.1 = (F.sender.val : Int) := h.2.2.2.1
+
+/-- Retained marked-type matching statements keep the same one-way relation. -/
+example : Simulation.InitialMatching Version.rel Decode.tablesA.decode :=
+  Version.initialMatchingAt Version.soundA
+example : Simulation.InitialMatching Version.rel Decode.tablesB.decode :=
+  Version.initialMatchingAt Version.soundB
 
 end Solidity.Examples.Goals.LoopsDecode
