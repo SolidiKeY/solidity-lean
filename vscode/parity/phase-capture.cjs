@@ -17,6 +17,10 @@ function phaseObserved(phase,before,after){
 }
 const {assertPngContainer}=require('./png-container.cjs');
 function captureAcknowledged(value){return value?.captured===true&&value.screenshot===true&&value.error===undefined;}
+function captureFailure(error){
+  try{const message=error?.message;if(typeof message==='string'&&message)return message;}catch{}
+  return typeof error==='string'&&error?error:'Renderer capture failed without an error message';
+}
 function imageEntry(file){try{return fs.lstatSync(file,{bigint:true});}catch(error){if(error.code==='ENOENT')return null;throw error;}}
 function regularImage(stat){return !!stat&&stat.isFile()&&stat.nlink===1n;}
 function sameImage(a,b){return regularImage(a)&&regularImage(b)&&['dev','ino','size','mtimeNs','ctimeNs'].every(key=>a[key]===b[key]);}
@@ -65,7 +69,7 @@ async function servePhases(directory,runId,capture,seen){
         reply.capture=await capture(p.dir,request);reply.status=captureAcknowledged(reply.capture)?'captured':'failed';
         if(reply.status!=='captured')reply.error=typeof reply.capture?.error==='string'&&reply.capture.error?reply.capture.error:'Renderer did not capture a screenshot';
         else{const bytes=readImage(path.join(p.dir,'screenshot.png'));assertPngContainer(bytes);reply.imageBytes=bytes.length;reply.imageSha256=createHash('sha256').update(bytes).digest('hex');}}
-    catch(e){reply.status='failed';reply.error=e.message;}
+    catch(e){reply.status='failed';reply.error=captureFailure(e);}
     reply.finished=Date.now();json(p.reply,reply);
   }
 }

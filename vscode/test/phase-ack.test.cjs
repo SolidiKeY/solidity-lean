@@ -8,3 +8,15 @@ for(const capture of captures)test('consumer refuses malformed renderer acknowle
 for(const error of [false,0,null,'','transport failed'])test('consumer refuses explicit top-level error '+JSON.stringify(error),()=>forged({captured:true,screenshot:true},error));
 for(const capture of captures)test('producer preserves matching refusal '+JSON.stringify(capture),async()=>{const dir=fixture();try{const pending=requestPhase(dir,'run','menus-source',{},1000),rejected=assert.rejects(pending,/failed/);await servePhases(dir,'run',async d=>{fs.writeFileSync(path.join(d,'screenshot.png'),png);return capture;},new Set());await rejected;assert.equal(JSON.parse(fs.readFileSync(paths(dir,'menus-source').reply)).status,'failed');}finally{fs.rmSync(dir,{recursive:true,force:true});}});
 test('complete boolean acknowledgement with no error keeps hash-bound success',async()=>{const reply=await forged({captured:true,screenshot:true},undefined,true);assert.equal(reply.status,'captured');assert.equal(reply.imageSha256,hash(png));});
+
+const rejections=[undefined,null,false,0,'','renderer rejected',new Error('capture rejected'),{message:0},{get message(){throw Error('message unavailable');}},Symbol('capture'),1n];
+for(const [index,reason] of rejections.entries())test('producer retains failed reply for thrown renderer reason '+index,async()=>{
+  const dir=fixture();try{
+    const pending=requestPhase(dir,'run','menus-source',{},1000),rejected=assert.rejects(pending,/failed/),p=paths(dir,'menus-source');
+    await servePhases(dir,'run',async()=>{throw reason;},new Set());await rejected;
+    const reply=JSON.parse(fs.readFileSync(p.reply));assert.equal(reply.status,'failed');assert.equal(typeof reply.error,'string');assert.ok(reply.error.length>0);assert.equal(reply.imageSha256,undefined);
+    if(typeof reason==='string'&&reason)assert.equal(reply.error,reason);
+    if(reason instanceof Error)assert.equal(reply.error,reason.message);
+    assert.equal(fs.existsSync(path.join(p.dir,'screenshot.png')),false);
+  }finally{fs.rmSync(dir,{recursive:true,force:true});}
+});
