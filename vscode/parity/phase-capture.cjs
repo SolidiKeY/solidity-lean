@@ -19,8 +19,8 @@ const png=Buffer.from([137,80,78,71,13,10,26,10]);
 function paths(directory,phase){if(!phases.includes(phase))throw Error('Unknown visual phase '+phase);const dir=path.join(directory,'phases',phase);return{dir,request:path.join(dir,'request.json'),reply:path.join(dir,'reply.json')};}
 function json(file,value){const tmp=file+'.tmp';fs.writeFileSync(tmp,JSON.stringify(value,null,2)+'\n');fs.renameSync(tmp,file);}
 async function requestPhase(directory,runId,phase,metadata,timeoutMs){
-  const p=paths(directory,phase);fs.mkdirSync(p.dir,{recursive:true});const request={runId,phase,requestId:randomUUID(),requested:Date.now(),metadata};const metadataHash=createHash('sha256').update(JSON.stringify(metadata)).digest('hex');json(p.request,request);
   const deadline=Date.now()+timeoutMs;
+  const p=paths(directory,phase);fs.mkdirSync(p.dir,{recursive:true});const request={runId,phase,requestId:randomUUID(),requested:Date.now(),metadata};const metadataHash=createHash('sha256').update(JSON.stringify(metadata)).digest('hex');json(p.request,request);
   while(Date.now()<deadline){
     if(fs.existsSync(p.reply)){
       const reply=JSON.parse(fs.readFileSync(p.reply));
@@ -29,6 +29,7 @@ async function requestPhase(directory,runId,phase,metadata,timeoutMs){
         if(reply.error||reply.status!=='captured')throw Error('Visual phase '+phase+' failed: '+reply.error);
         const bytes=fs.readFileSync(path.join(p.dir,'screenshot.png'));
         if(bytes.length<=png.length||!bytes.subarray(0,png.length).equals(png))throw Error('Visual phase has no PNG evidence');
+        if(Date.now()>=deadline)break;
         return reply;
       }
     }
