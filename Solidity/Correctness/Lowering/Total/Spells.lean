@@ -103,7 +103,6 @@ theorem ComponentsT.decode : ∀ {es t}, ComponentsT T es t → T.components es 
   | _, _, .cons h k => by simp [Decode.Tables.components, h.decode, k.decode]
 end
 
-
 mutual
 theorem expr_spellsT : (e : RawExpr) → (t : Syn .expr) → T.expr e = some t → ExprT T e t
   | .num n, t, h => by spell_simp Decode.Tables.expr at h; subst h; exact .num n
@@ -485,7 +484,6 @@ abbrev Components := ComponentsT Decode.tables1
 abbrev Simple := SimpleT Decode.tables1
 abbrev Init := InitT Decode.tables1
 abbrev Upd := UpdT Decode.tables1
-abbrev Cond := CondT Decode.tables1
 abbrev Stmt := StmtT Decode.tables1
 abbrev Items := ItemsT Decode.tables1
 
@@ -493,65 +491,33 @@ theorem Expr.decode {e : RawExpr} {t : Source.Syn .expr}
     (h : Expr e t) : Decode.expr e = some t :=
   (Decode.expr_tables1 e).symm.trans (ExprT.decode h)
 
-theorem expr_spells (e : RawExpr) (t : Source.Syn .expr)
-    (h : Decode.expr e = some t) : Expr e t :=
-  expr_spellsT e t ((Decode.expr_tables1 e).trans h)
-
 theorem Exprs.decode {es : List RawExpr} {t : Source.Syn (.list .expr)}
     (h : Exprs es t) : Decode.exprs es = some t :=
   (Decode.exprs_tables1 es).symm.trans (ExprsT.decode h)
-
-theorem exprs_spells (es : List RawExpr) (t : Source.Syn (.list .expr))
-    (h : Decode.exprs es = some t) : Exprs es t :=
-  exprs_spellsT es t ((Decode.exprs_tables1 es).trans h)
 
 theorem Components.decode {es : List RawExpr} {t : Source.Syn (.list (.opt .expr))}
     (h : Components es t) : Decode.components es = some t :=
   (Decode.components_tables1 es).symm.trans (ComponentsT.decode h)
 
-theorem components_spells (es : List RawExpr) (t : Source.Syn (.list (.opt .expr)))
-    (h : Decode.components es = some t) : Components es t :=
-  components_spellsT es t ((Decode.components_tables1 es).trans h)
-
 theorem Simple.decode {s : RawStmt} {t : Source.Syn .simple}
     (h : Simple s t) : Decode.simple s = some t :=
   (Decode.simple_tables1 s).symm.trans (SimpleT.decode h)
-
-theorem simple_spells (s : RawStmt) (t : Source.Syn .simple)
-    (h : Decode.simple s = some t) : Simple s t :=
-  simple_spellsT s t ((Decode.simple_tables1 s).trans h)
 
 theorem Init.decode {b : List RawStmt} {t : Source.Syn (.opt .simple)}
     (h : Init b t) : Decode.initializer b = some t :=
   (Decode.initializer_tables1 b).symm.trans (InitT.decode h)
 
-theorem init_spells (b : List RawStmt) (t : Source.Syn (.opt .simple))
-    (h : Decode.initializer b = some t) : Init b t :=
-  init_spellsT b t ((Decode.initializer_tables1 b).trans h)
-
 theorem Upd.decode {b : List RawStmt} {t : Source.Syn (.opt .expr)}
     (h : Upd b t) : Decode.update b = some t :=
   (Decode.update_tables1 b).symm.trans (UpdT.decode h)
-
-theorem upd_spells (b : List RawStmt) (t : Source.Syn (.opt .expr))
-    (h : Decode.update b = some t) : Upd b t :=
-  upd_spellsT b t ((Decode.update_tables1 b).trans h)
 
 theorem Stmt.decode {k : Source.SCtx} {s : RawStmt} {t : Source.Syn (.stmt k)}
     (h : Stmt k s t) : Decode.stmt k s = some t :=
   (Decode.stmt_tables1 k s).symm.trans (StmtT.decode h)
 
-theorem stmt_spells (k : Source.SCtx) (s : RawStmt) (t : Source.Syn (.stmt k))
-    (h : Decode.stmt k s = some t) : Stmt k s t :=
-  stmt_spellsT k s t ((Decode.stmt_tables1 k s).trans h)
-
 theorem Items.decode {k : Source.SCtx} {b : List RawStmt} {t : Source.Syn (.list (.item k))}
     (h : Items k b t) : Decode.items k b = some t :=
   (Decode.items_tables1 k b).symm.trans (ItemsT.decode h)
-
-theorem items_spells (k : Source.SCtx) (b : List RawStmt) (t : Source.Syn (.list (.item k)))
-    (h : Decode.items k b = some t) : Items k b t :=
-  items_spellsT k b t ((Decode.items_tables1 k b).trans h)
 
 end Spells
 
