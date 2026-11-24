@@ -182,7 +182,12 @@ class LanguageServers extends EventEmitter {
     const retirement=(async()=>{await client.dispose();if(client.child)await waitForClose(client.child,{closed:client.closed});})();
     this.retirementKeys.set(key,retirement);this.retiring.add(retirement);
     const release=()=>{if(this.retirementKeys.get(key)===retirement)this.retirementKeys.delete(key);};
-    retirement.then(()=>{this.retiring.delete(retirement);release();},error=>{this.retiring.delete(retirement);this.retirementFailures.push(error);this.emit('log','Failed server cleanup: '+error.message);if(client.resourcesQuiescent?.())release();else client.closed?.then(()=>{if(client.resourcesQuiescent?.())release();});});return retirement;
+    retirement.then(()=>{this.retiring.delete(retirement);release();},error=>{
+      this.retiring.delete(retirement);this.retirementFailures.push(error);
+      try{this.emit('log','Failed server cleanup: '+operationFailure(error).message);}
+      catch(logError){this.retirementLogFailure={key,error:logError};}
+      if(client.resourcesQuiescent?.())release();else client.closed?.then(()=>{if(client.resourcesQuiescent?.())release();});
+    });return retirement;
   }
   async settled(signal,doc){while(this.restarting)await cancellable(this.restarting,signal);if(doc){const key=JSON.stringify(this.configuration(doc));while(this.retirementKeys.has(key))await cancellable(this.retirementKeys.get(key),signal);}if(signal?.aborted)throw failure('Request cancelled',-32800);}
   async open(doc){await this.settled(undefined,doc);const client=this.client(doc),current=this.ownership(doc,client);await client.sync(doc,current);if(!current()||client.disposed)throw failure('Language client changed',-32801);this.emit('identity',{serverInfo:client.serverInfo,runtimeInfo:client.runtimeInfo,uris:[doc.uri.toString()]});return client;}
