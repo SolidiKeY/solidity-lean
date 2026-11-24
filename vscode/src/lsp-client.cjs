@@ -79,10 +79,11 @@ class LanguageClient extends EventEmitter {
   async request(method,doc,params={},options={},isCurrent=()=>true){
     if(options?.signal?.aborted)throw failure('Request cancelled',-32800);
     if(doc.isClosed)throw failure('Document closed',-32801);
-    const version=doc.version,text=doc.getText();await this.sync(doc,isCurrent,options.signal);
-    const current=()=>isCurrent()&&!this.disposed&&!doc.isClosed&&doc.version===version&&doc.getText()===text;
+    const uri=doc.uri.toString(),version=doc.version,text=doc.getText();
+    const current=()=>isCurrent()&&!this.disposed&&!doc.isClosed&&doc.uri.toString()===uri&&doc.version===version&&doc.getText()===text;
+    await this.sync(doc,current,options.signal);
     if(!current())throw failure('Document content changed',-32801);
-    const result=await this.peer.request(method,{textDocument:{uri:doc.uri.toString(),version},...params},options);
+    const result=await this.peer.request(method,{textDocument:{uri,version},...params},options);
     if(!current())throw failure('Document content changed',-32801);return result;
   }
   closeDocument(uri){if(this.peer&&!this.peer.closed&&this.documents.has(uri)){this.peer.notify('textDocument/didClose',{textDocument:{uri}});this.documents.delete(uri);}}
@@ -151,9 +152,9 @@ class LanguageServers extends EventEmitter {
   async request(method,doc,params,options){
     if(options?.signal?.aborted)throw failure('Request cancelled',-32800);
     if(doc.isClosed)throw failure('Document closed',-32801);
-    const version=doc.version,text=doc.getText(),sourceCurrent=()=>!doc.isClosed&&doc.version===version&&doc.getText()===text;
+    const uri=doc.uri.toString(),version=doc.version,text=doc.getText(),epoch=this.epochs.get(uri),sourceCurrent=()=>!doc.isClosed&&doc.uri.toString()===uri&&doc.version===version&&doc.getText()===text;
     const validate=()=>{if(options?.signal?.aborted)throw failure('Request cancelled',-32800);if(!sourceCurrent())throw failure('Document content changed',-32801);};
-    await this.settled(options?.signal,doc);validate();
+    await this.settled(options?.signal,doc);validate();if(this.epochs.get(uri)!==epoch)throw failure('Language client changed',-32801);
     const client=this.client(doc),owned=this.ownership(doc,client),current=()=>owned()&&sourceCurrent();
     const result=await client.request(method,doc,params,options,current);validate();if(!current())throw failure('Language client changed',-32801);return result;
   }
