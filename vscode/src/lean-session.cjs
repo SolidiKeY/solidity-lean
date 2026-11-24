@@ -11,35 +11,48 @@ const {RpcPeer}=require('./rpc.cjs');
 const {terminateTree}=require('./backend.cjs');
 const {trackChild,waitForClose}=require('./child-lifetime.cjs');
 
+// Optional bounded phase timings are diagnostics, never startup/readiness evidence.
+const startupObservations=new WeakMap();
+function enableStartupObservation(session){if(!startupObservations.has(session))startupObservations.set(session,{events:[],dropped:0});}
+function startupObservation(session){const value=startupObservations.get(session);return value?structuredClone(value):null;}
+function noteStartup(session,event,extra={}){try{const value=startupObservations.get(session);if(!value)return;const row={event,monotonicMs:performance.now(),...extra};if(value.events.length<64)value.events.push(row);else{value.dropped++;value.last=row;}}catch{}}
+
 /** One persistent Lean document retains its import environment between versions.
  * The parent owns and terminates this worker's entire process tree on cancellation. */
 class LeanSession {
   constructor(root,directory){this.root=root;this.directory=directory;this.version=0;this.messages=[];}
   async start(timeoutMs=60000){
     if(this.retiring)throw new Error('Lean session is retiring');
-    if(this.initialized&&this.peer&&!this.peer.closed)return;
+    if(this.initialized&&this.peer&&!this.peer.closed){noteStartup(this,'startup.reused');return;}
     const deadline=performance.now()+timeoutMs;
+    noteStartup(this,'startup.enter',{timeoutMs,deadline});
     const remaining=()=>{const ms=Math.floor(deadline-performance.now());if(ms<=0)throw new Error('Lean startup timed out');return ms;};
     this.initialized=false;this.version=0;this.messages=[];
-    if(this.child)terminateTree(this.child);
+    if(this.child){noteStartup(this,'previous.terminate.start');terminateTree(this.child);noteStartup(this,'previous.terminate.end');}
+    noteStartup(this,'command.import.start');
     const {lakeCommand}=await import(pathToFileURL(join(this.root,'scripts/lake-command.mjs')).href);
     if(this.retiring)throw new Error('Lean session is retiring');
+    noteStartup(this,'command.import.end');noteStartup(this,'native.inspect.start');
     const lake=lakeCommand(),selection=this.nativeDisabled?{reason:this.nativeDisabled}:inspectNative(this.root);
+    noteStartup(this,'native.inspect.end');
     this.native={active:false,reason:selection.reason||'runtime-mismatch'};
     let plugin=[];
     if(selection.path){
       try{
+        noteStartup(this,'probe.start');
         const probe=execute(lake,['env','lean','--githash'],{cwd:this.root,timeout:Math.min(remaining(),10000),windowsHide:true});
         const child=probe.child;this.startupProbe={child,closed:trackChild(child)};
-        let stdout;try{({stdout}=await probe);}finally{if(this.startupProbe?.child===child)this.startupProbe=null;}
+        let stdout;try{({stdout}=await probe);}finally{noteStartup(this,'probe.end');if(this.startupProbe?.child===child)this.startupProbe=null;}
         if(stdout.trim()===selection.leanCommit){
           plugin=['--plugin='+selection.path];
           this.native={active:true,sha256:selection.sha256,optimization:selection.optimization,probe:selection.probe};
         }
-      }catch{this.native={active:false,reason:'runtime-unavailable'};}
+      }catch{noteStartup(this,'probe.refused');this.native={active:false,reason:'runtime-unavailable'};}
     }
     remaining();if(this.retiring)throw new Error('Lean session is retiring');
+    noteStartup(this,'server.spawn.start');
     this.child=spawn(lake,['serve','--','--tstack=131072','-Dserver.reportDelayMs=0',...plugin],{cwd:this.root,stdio:['pipe','pipe','pipe'],windowsHide:true});
+    noteStartup(this,'server.spawn.end',{pid:this.child.pid});
     const child=this.child;this.closed=trackChild(child);
     this.stderr='';this.child.stderr.on('data',chunk=>{this.stderr=(this.stderr+chunk).slice(-12000);});
     const peer=this.peer=new RpcPeer(this.child.stdout,this.child.stdin);
@@ -48,12 +61,15 @@ class LeanSession {
     this.peer.onNotification('textDocument/publishDiagnostics',params=>{if(params.uri===this.uri&&(params.version===undefined||params.version===this.version))this.messages=params.diagnostics;});
     this.peer.onRequest('workspace/configuration',params=>params.items.map(()=>null));
     this.peer.onRequest('client/registerCapability',()=>null);
+    noteStartup(this,'initialize.start');
     try{await this.peer.request('initialize',{processId:process.pid,rootUri:pathToFileURL(this.root).href,
       capabilities:{textDocument:{publishDiagnostics:{versionSupport:true}}}},{timeoutMs:remaining()});
     if(this.retiring)throw new Error('Lean session is retiring');
-    this.peer.notify('initialized',{});this.initialized=true;
-    }catch(error){peer.close(error);terminateTree(child);throw error;}
-    mkdirSync(this.directory,{recursive:true});this.file=join(this.directory,'Worker.lean');this.uri=pathToFileURL(this.file).href;
+    noteStartup(this,'initialize.end');
+    this.peer.notify('initialized',{});this.initialized=true;noteStartup(this,'initialized.notified');
+    }catch(error){noteStartup(this,'initialize.refused');peer.close(error);noteStartup(this,'failed.terminate.start');terminateTree(child);noteStartup(this,'failed.terminate.end');throw error;}
+    noteStartup(this,'worker.file.start');
+    mkdirSync(this.directory,{recursive:true});this.file=join(this.directory,'Worker.lean');this.uri=pathToFileURL(this.file).href;noteStartup(this,'worker.file.end');
   }
   async check(text,timeoutMs=60000){
     const deadline=performance.now()+timeoutMs;
@@ -101,4 +117,4 @@ class LeanSession {
   dispose(){if(this.startupProbe)terminateTree(this.startupProbe.child);const child=this.child||this.retiringChild;if(child){terminateTree(child);this.peer?.close();this.child=null;}}
 
 }
-module.exports={LeanSession};
+module.exports={LeanSession,enableStartupObservation,startupObservation};

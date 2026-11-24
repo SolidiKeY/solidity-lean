@@ -13,7 +13,10 @@ class LspFrames extends EventEmitter {
       const end=this.buffer.indexOf('\r\n\r\n');
       if(end<0){if(this.buffer.length>HEADER_LIMIT)throw new Error('Oversize LSP header');return;}
       if(end+4>HEADER_LIMIT)throw new Error('Oversize LSP header');
-      const lengths=[...this.buffer.subarray(0,end).toString('ascii').matchAll(/^Content-Length:\s*(\d+)\s*$/gim)];
+      const header=this.buffer.subarray(0,end);
+      // Buffer's ASCII decoder clears bit7; inspect bytes before field parsing.
+      if(header.some(byte=>byte>0x7f))throw new Error('Non-ASCII LSP header');
+      const lengths=[...header.toString('ascii').matchAll(/^Content-Length:\s*(\d+)\s*$/gim)];
       if(lengths.length!==1)throw new Error('Invalid LSP Content-Length');
       const length=Number(lengths[0][1]);
       if(!Number.isSafeInteger(length)||length>this.limit)throw new Error('Oversize LSP body');
