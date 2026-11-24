@@ -63,3 +63,11 @@ test('coherent malformed output endpoints cannot substitute truthy flags or inva
   const before=sample(text),after=sample(text);mutate(before);mutate(after);let refused;assert.doesNotThrow(()=>{refused=errors(before,after,text,'Solidity Lean');});assert.ok(refused.length);
  }
 });
+
+test('claimed coverage must agree with recorded boxes, clip and viewport (injected)',()=>{
+ const text='ready';
+ for(const mutate of [s=>s.characters[0].boxes[0].right=1,s=>s.characters[0].boxes[0].right=Infinity,s=>s.characters[0].boxes[0].left=NaN,s=>s.characters[0].boxes[0].left=-1,s=>s.characters[0].boxes[0].right=1001,s=>s.characters[0].clip.left=2,s=>s.characters[0].clip.right=1001,s=>s.characters[0].clip.top=-1,s=>delete s.characters[0].clip,s=>s.characters[0].boxes.push(null),s=>s.viewport.bottom=Infinity,s=>s.viewport=null]){
+  const before=sample(text),after=sample(text);mutate(before);mutate(after);let refused;assert.doesNotThrow(()=>{refused=errors(before,after,text,'Solidity Lean');});assert.ok(refused.length);
+ }
+ const before=sample(text),after=sample(text);before.characters[0].boxes[0].left=after.characters[0].boxes[0].left=0;assert.deepEqual(errors(before,after,text,'Solidity Lean'),[]);
+});
