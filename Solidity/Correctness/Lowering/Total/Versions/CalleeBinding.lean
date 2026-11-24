@@ -2,11 +2,10 @@ import Solidity.Correctness.Lowering.Total.Contract
 import Solidity.Source.Elaborate
 
 /-!
-# Proposed callee binding obligations
+# Structural callee binding obligations
 
-Statement-only proposal for review. No producer or inhabitant of `Contract` is
-supplied. In particular, the existing plain-request decoder cannot satisfy its
-coverage field. This module neither changes admission nor claims that a body
+No producer or inhabitant of `Contract` is supplied. The existing plain-request
+decoder cannot satisfy its coverage field. This module neither changes admission nor claims that a body
 binding proves semantic preservation.
 
 `Output` retains the complete resolved declaration body, including modifiers.
@@ -19,7 +18,7 @@ remain additional semantic obligations, not consequences of `Declared`.
 -/
 namespace Solidity.Correctness.Lowering.Total.Version.CalleeBinding
 
-/-- Prospective additive decoder output. No copy of a traversal or decoder.
+/-- Additive decoder output carrying the selected declaration and resolved body.
 The output carries a Source program, including its initializer/base-argument
 tables. Correspondence with and complete retention of the model contract remain
 obligations; the type alone does not establish them. -/
@@ -29,7 +28,7 @@ structure Output where
   frame : Source.Frame
   body : Source.RBody source.res.env
 
-/-- Exact declared-body association proposed for review. The body comes from
+/-- Exact declared-body association. The body comes from
 Source elaboration of the selected declaration, including its complete modifier
 list, rather than an arbitrary `RBody.Derived` witness or lowered raw output.
 This is a structural relation; it does not establish type/value faithfulness of
@@ -75,7 +74,7 @@ def Recursive (r : Request) (c : CalleeRequest) (o : ProductionOutput)
     { locals := (c.locals, o.after.locals.2), memo := {} }
     after o.raw parts placementNames p
 
-/-- Proposed first-stage obligations for one fixed additive producer.
+/-- Structural obligations for one fixed additive producer.
 Coverage is required on every successful ordinary callee pipeline; a producer
 returning `none` for all callees is not certified by conditional soundness.
 The fixed declaration producer reads the complete original request,
@@ -84,9 +83,8 @@ obligation: these equations do not certify an arbitrary translator as faithful.
 
 This is NOT the semantic-faithfulness contract: no assertion here equates
 `RBody.items` execution with the full modified body, drops initializers, or
-identifies ordinary and recursive runs. The user review must decide whether
-this structural checkpoint is the intended P2 binding layer before any proofs
-are attempted. Recursive-site provenance and semantic preservation stay open. -/
+identifies ordinary and recursive runs. Recursive-site provenance and semantic
+preservation remain additional obligations. -/
 structure Contract
     (spellDeclaration : Request → Option Source.Decl)
     (produce : Request → Option Output) : Prop where
@@ -107,7 +105,5 @@ structure Contract
       inlined := List.cons (c.start, o.after.locals.2) r.input.scope.inlined }
   state : ∀ (r : Request) (c : CalleeRequest) (o : ProductionOutput), r.callee = some c →
     r.elabState o = { o.after with locals := (c.locals, o.after.locals.2) }
-  returns : ∀ c, returnSlots c =
-    c.declaration.rets.map (fun (n, _) => (Semantics.lookupBy n c.names).getD n)
 
 end Solidity.Correctness.Lowering.Total.Version.CalleeBinding
