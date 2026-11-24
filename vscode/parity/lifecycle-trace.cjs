@@ -24,10 +24,9 @@ async function main(){
   if(process.argv[4]==='--migration'&&!process.argv[3])throw Error('Migration run needs a separate output directory');
   const root=path.resolve(__dirname,'../..'),exe=path.resolve(process.argv[2]||path.join(root,'.cache/dafny-runtime/dafny/dafny'));
   const out=path.resolve(process.argv[3]||path.join(root,'tests/editor-parity/lifecycle')),workspace=path.join(root,'.cache/lifecycle-workspace');
-  fs.mkdirSync(out,{recursive:true});fs.mkdirSync(workspace,{recursive:true});
+  if(fs.existsSync(out))throw Error("Choose a fresh lifecycle output directory");
+  fs.mkdirSync(path.dirname(out),{recursive:true});fs.mkdirSync(out);fs.mkdirSync(workspace,{recursive:true});
   const trace=path.join(out,'dafny-lsp.jsonl');fs.writeFileSync(trace,'');
-  fs.rmSync(path.join(out,'phases.json'),{force:true});
-  if(process.argv[4]==='--migration')fs.rmSync(path.join(out,'migration.json'),{force:true});
   const append=r=>fs.appendFileSync(trace,JSON.stringify({time:Date.now(),...r})+'\n');
   const commandArgs=['server','--cores','1','--verification-time-limit','20','--notify-ghostness:true','--notify-line-verification-status:true'];
   const child=spawn(exe,commandArgs,{cwd:workspace,stdio:['pipe','pipe','pipe']});
