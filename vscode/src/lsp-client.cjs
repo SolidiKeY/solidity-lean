@@ -41,10 +41,16 @@ class LanguageClient extends EventEmitter {
   constructor(configuration){
     super();this.configuration=configuration;this.documents=new Map();this.disposed=false;this.ownedProcesses=new Map();
     this.startupAbort=new AbortController();
-    this.ready=this.start().catch(error=>{if(this.failure)error=this.failure;else if(this.disposed)error=cancelled();else if(error.code!=='STARTUP')error=startupError('Language server initialization failed: '+error.message,null,error);this.fail(error);throw error;});
+    this.ready=this.start().catch(reason=>{const error=this.failure||(this.disposed?cancelled():operationFailure(reason));this.fail(error);throw this.failure||error;});
     this.ready.catch(()=>{});
   }
-  fail(error){if(this.disposed||this.failed)return;if(!this.initialized&&error.code!=='STARTUP')error=startupError('Language server initialization failed: '+error.message,null,error);this.failed=true;this.failure=error;this.emit('serverError',error);this.dispose().catch(()=>{});}
+  fail(error){
+    if(this.disposed||this.failed)return;
+    error=operationFailure(error);if(!this.initialized&&error.code!=='STARTUP')error=startupError('Language server initialization failed: '+error.message,null,error);
+    this.failed=true;this.failure=error;
+    try{this.emit('serverError',error);}catch(notificationError){this.failureNotificationFailure={error:notificationError};}
+    finally{this.dispose().catch(()=>{});}
+  }
   async start(){
     this.runtimeInfo=await checkStartup(this.configuration,this.startupAbort.signal);if(this.disposed)throw cancelled();
     const configuration=this.configuration;
