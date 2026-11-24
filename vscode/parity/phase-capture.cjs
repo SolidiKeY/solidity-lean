@@ -66,7 +66,10 @@ async function servePhases(directory,runId,capture,seen){
     if(request.runId!==runId||request.phase!==phase||typeof request.requestId!=='string'||seen.has(request.requestId))continue;
     seen.add(request.requestId);const requestSnapshot=JSON.parse(JSON.stringify(request));const reply={runId,phase,requestId:request.requestId,status:'failed',requested:request.requested,metadataHash:createHash('sha256').update(JSON.stringify(request.metadata??null)).digest('hex')};
     try{if(imageEntry(path.join(p.dir,'screenshot.png')))throw Error('Existing phase screenshot must be preserved; choose a fresh capture directory');
-        reply.capture=await capture(p.dir,request);if(!isDeepStrictEqual(request,requestSnapshot))throw Error('Visual phase request changed during capture');reply.status=captureAcknowledged(reply.capture)?'captured':'failed';
+        const captured=await capture(p.dir,request),acknowledged=captureAcknowledged(captured);
+        reply.capture=JSON.parse(JSON.stringify(captured));
+        if(!isDeepStrictEqual(request,requestSnapshot))throw Error('Visual phase request changed during capture');
+        reply.status=acknowledged&&captureAcknowledged(captured)&&captureAcknowledged(reply.capture)?'captured':'failed';
         if(reply.status!=='captured')reply.error=typeof reply.capture?.error==='string'&&reply.capture.error?reply.capture.error:'Renderer did not capture a screenshot';
         else{const bytes=readImage(path.join(p.dir,'screenshot.png'));assertPngContainer(bytes);reply.imageBytes=bytes.length;reply.imageSha256=createHash('sha256').update(bytes).digest('hex');}}
     catch(e){reply.status='failed';reply.error=captureFailure(e);}
