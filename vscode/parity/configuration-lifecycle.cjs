@@ -56,14 +56,15 @@ async function observe({target,mode,peer,request,until,open,change,states,diagno
  }catch(error){failure=error;throw error;}finally{if(exchange.override!==undefined){exchange.set(undefined);try{peer.notify('workspace/didChangeConfiguration',{settings:target==='dafny'?{dafny:{}}:{}});}catch(error){restorationError=error.message;}}if(!closed)try{peer.notify('textDocument/didClose',{textDocument:{uri:doc.uri}});}catch{}exchange.close();save();if(restorationError&&!failure)throw Error('Configuration restoration failed: '+restorationError);}
 }
 function auditWire(rows,target,mode){
- const errors=[],versions=new Map(),saved=new Set();let uri;
+ const errors=[],versions=new Map(),saved=new Map(),observedUris=new Set();
  for(const {direction,message:m}of rows){if(!m)continue;
   if(direction==='client'&&['solidityLean/verify','dafny/textDocument/verifySymbol'].includes(m.method))errors.push('explicit verification request');
-  if(direction==='client'&&m.method==='textDocument/didOpen'){uri=m.params.textDocument.uri;versions.set(uri,m.params.textDocument.version);}
+  if(direction==='client'&&m.method==='textDocument/didOpen'){const uri=m.params.textDocument.uri;observedUris.add(uri);versions.set(uri,m.params.textDocument.version);saved.set(uri,new Set());}
   if(direction==='client'&&m.method==='textDocument/didChange')versions.set(m.params.textDocument.uri,m.params.textDocument.version);
-  if(direction==='client'&&m.method==='textDocument/didSave')saved.add(JSON.stringify([m.params.textDocument.uri,versions.get(m.params.textDocument.uri)]));
+  if(direction==='client'&&m.method==='textDocument/didSave'){const uri=m.params.textDocument.uri;if(versions.has(uri))saved.get(uri)?.add(versions.get(uri));}
+  if(direction==='client'&&m.method==='textDocument/didClose'){const uri=m.params.textDocument.uri;versions.delete(uri);saved.delete(uri);}
   if(direction==='server'&&target==='local'&&m.method==='solidityLean/report')errors.push('unexpected local proof report');
-  if(direction==='server'&&m.method==='dafny/textDocument/symbolStatus'&&m.params.uri===uri&&(mode==='never'||mode==='onsave'&&!saved.has(JSON.stringify([m.params.uri,m.params.version])))&&m.params.namedVerifiables?.some(s=>s.status!==0))errors.push('unexpected verification through final wire barrier');
+  if(direction==='server'&&m.method==='dafny/textDocument/symbolStatus'&&observedUris.has(m.params.uri)&&(mode==='never'||mode==='onsave'&&!saved.get(m.params.uri)?.has(m.params.version))&&m.params.namedVerifiables?.some(s=>s.status!==0))errors.push('unexpected verification through final wire barrier');
  }
  return errors;
 }
