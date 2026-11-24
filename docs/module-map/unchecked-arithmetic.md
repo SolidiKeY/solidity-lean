@@ -1,4 +1,6 @@
 <!-- Generated from docs/module-map/unchecked-arithmetic.d/ by scripts/coord-tools/fragments.sh; edit the fragments there, not this file. -->
+| `Correctness/Lowering/Total/CallSpellExt.lean` | Additive call-spelling extension contract for the decoder (registry, per-spelling faithfulness obligation under one shared meaning, conformance); v2 spelling relation `ExprX` beside frozen `Spells.ExprT`; bytes-literal entry stated, unproved, not integrated. |
+| `Examples/Lowering/Total/CallSpellExt.lean` | Checks of the call-spelling registry's claims and of the bytes-literal entry's argument reading. |
 | `Correctness/Lowering/Total/Decode/Tables.lean` | Parameterized raw-to-Source decoder and proof that the original tables recover the landed decoder. |
 | `Examples/Goals/LoopsDecode.lean` | Retained decoder table and original-decoder equivalence checks, separate from the shared loop examples. |
 | `Correctness/Lowering/Total/Decode/Widths.lean` | Retained width-aware decoder tables for primitive locals, declarations and state variables. |
