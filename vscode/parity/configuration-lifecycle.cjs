@@ -6,11 +6,16 @@ const modes=['default','never','onsave','restored'];
 function schema(){const root=path.resolve(__dirname,'../..'),p=JSON.parse(fs.readFileSync(path.join(root,'.cache/dafny-extension/package.json')));return p.contributes.configuration.properties['dafny.automaticVerification'];}
 function launchArgs(mode){assert.ok(modes.includes(mode));return mode==='never'?['--verify-on:Never']:mode==='onsave'?['--verify-on:Save']:[];}
 class Exchange{
- constructor(identity,{now=()=>performance.now(),readSchema=schema}={}){this.identity={...identity};this.now=now;this.epoch=0;this.closed=false;this.requests=[];this.schema=structuredClone(readSchema());if(this.schema?.default!=='onchange'||JSON.stringify(this.schema?.enum)!==JSON.stringify(['never','onchange','onsave']))throw Error('Pinned automatic verification schema mismatch');this.default=this.schema.default;}
+ constructor(identity,{now=()=>performance.now(),readSchema=schema}={}){this.identity={...identity};this.now=now;this.epoch=0;this.closed=false;this.requests=[];this.tickets=new WeakMap();this.schema=structuredClone(readSchema());if(this.schema?.default!=='onchange'||JSON.stringify(this.schema?.enum)!==JSON.stringify(['never','onchange','onsave']))throw Error('Pinned automatic verification schema mismatch');this.default=this.schema.default;}
  effective(){return this.override??this.default;}
  set(value){if(value!==undefined&&!this.schema.enum.includes(value))throw Error('Unsupported pinned automatic verification value');this.override=value;this.epoch++;}
- ticket(params,id){if(this.closed||!Array.isArray(params?.items))throw Error('Invalid configuration request');return{identity:{...this.identity},epoch:this.epoch,at:this.now(),id,params:structuredClone(params)};}
- reply(ticket){if(this.closed||ticket.epoch!==this.epoch||JSON.stringify(ticket.identity)!==JSON.stringify(this.identity)||this.now()-ticket.at>=60000)throw Error('Stale/foreign/late configuration reply');const value=this.effective();const result=ticket.params.items.map(item=>item.section==='dafny'?{automaticVerification:value}:item.section==='dafny.automaticVerification'?value:null);this.requests.push({...ticket,result,scope:'Reference global setting, matching pinned Configuration.get without resource; not a local server effective-mode claim'});return result;}
+ ticket(params,id){if(this.closed||!Array.isArray(params?.items))throw Error('Invalid configuration request');const ticket={identity:{...this.identity},epoch:this.epoch,at:this.now(),id,params:structuredClone(params)};this.tickets.set(ticket,JSON.stringify(ticket));return ticket;}
+ reply(ticket){
+  let previous=ticket?.at;
+  const valid=()=>{const issued=this.tickets.get(ticket);if(!issued||JSON.stringify(ticket)!==issued||this.closed||ticket.epoch!==this.epoch||JSON.stringify(ticket.identity)!==JSON.stringify(this.identity)||!Number.isFinite(ticket.at))throw Error('Stale/foreign/late configuration reply');const now=this.now();if(!Number.isFinite(now)||now<previous||now-ticket.at>=60000)throw Error('Stale/foreign/late configuration reply');previous=now;};
+  valid();const value=this.effective(),result=ticket.params.items.map(item=>item.section==='dafny'?{automaticVerification:value}:item.section==='dafny.automaticVerification'?value:null);valid();this.tickets.delete(ticket);
+  this.requests.push({...ticket,result,scope:'Reference global setting, matching pinned Configuration.get without resource; not a local server effective-mode claim'});return result;
+ }
  close(){this.closed=true;this.epoch++;}
 }
 function source(doc,session){return{uri:doc.uri,version:doc.version,text:doc.text,sourceHash:createHash('sha256').update(doc.text).digest('hex'),session};}

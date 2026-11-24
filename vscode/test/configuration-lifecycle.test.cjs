@@ -91,3 +91,17 @@ test('configuration wire audit cannot reuse a closed-session save or hide an ear
  assert.ok(auditWire([open(uri),save(uri),close(uri),status(uri)],'dafny','onsave').includes('unexpected verification through final wire barrier'));
  assert.deepEqual(auditWire([open(uri),save(uri),close(uri),open(uri),save(uri),status(uri)],'dafny','onsave'),[]);
 });
+
+test('configuration replies require the exact unmodified issued ticket and reject replay',()=>{
+ const e=new Exchange({runId:'r',target:'dafny',serverSession:'s'},{readSchema:()=>pinnedFixture});
+ const ticket=e.ticket(params,1);assert.throws(()=>e.reply(structuredClone(ticket)),/Stale|foreign/);
+ for(const change of [t=>t.id++,t=>t.params.items[0].section='unknown',t=>t.at=NaN]){const t=e.ticket(params,2);change(t);assert.throws(()=>e.reply(t),/Stale|foreign/);}
+ const foreign=new Exchange({...e.identity},{readSchema:()=>pinnedFixture});assert.throws(()=>e.reply(foreign.ticket(params,3)),/Stale|foreign/);
+ assert.deepEqual(e.reply(ticket),['onchange',{automaticVerification:'onchange'},null]);assert.throws(()=>e.reply(ticket),/Stale|foreign/);assert.equal(e.requests.length,1);
+});
+test('configuration ticket clocks and reply preparation stay within the original deadline',()=>{
+ for(const mode of ['backwards','nonfinite','late-result','backwards-during-result']){let clock=10;const e=new Exchange({runId:'r',target:'dafny',serverSession:'s'},{readSchema:()=>pinnedFixture,now:()=>clock}),ticket=e.ticket(params,1);
+  if(mode==='backwards')clock=9;else if(mode==='nonfinite')clock=NaN;else if(mode==='late-result')e.effective=()=>{clock=60010;return 'onchange';};else{clock=20;e.effective=()=>{clock=15;return 'onchange';};}
+  assert.throws(()=>e.reply(ticket),/Stale|late/);assert.equal(e.requests.length,0);
+ }
+});
