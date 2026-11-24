@@ -667,3 +667,47 @@ end Solidity.Examples.ElabTotal.Stmts
 /-- info: 'Solidity.ElabCallHeight.callbacks_call_output_height' depends on axioms: [propext, Quot.sound] -/
 #guard_msgs in
 #print axioms Solidity.ElabCallHeight.callbacks_call_output_height
+
+/-- info: 'Solidity.ElabCallHeight.callbacks_closed_call_output_height' depends on axioms: [propext, Quot.sound] -/
+#guard_msgs in
+#print axioms Solidity.ElabCallHeight.callbacks_closed_call_output_height
+
+/-- info: 'Solidity.ElabCallHeight.callbacks_output_height' depends on axioms: [propext, Quot.sound] -/
+#guard_msgs in
+#print axioms Solidity.ElabCallHeight.callbacks_output_height
+
+/-- info: 'Solidity.ElabCallHeight.callbacks_closed_output_height' depends on axioms: [propext, Quot.sound] -/
+#guard_msgs in
+#print axioms Solidity.ElabCallHeight.callbacks_closed_output_height
+
+/-- info: 'Solidity.ElabCallHeight.callbacks_fixed_output_height' depends on axioms: [propext, Quot.sound] -/
+#guard_msgs in
+#print axioms Solidity.ElabCallHeight.callbacks_fixed_output_height
+
+/-- info: 'Solidity.ElabHoist.structural_height_congr' depends on axioms: [propext, Quot.sound] -/
+#guard_msgs in
+#print axioms Solidity.ElabHoist.structural_height_congr
+
+/-- info: 'Solidity.ElabHoist.hoistFuel_congr_on' depends on axioms: [propext, Quot.sound] -/
+#guard_msgs in
+#print axioms Solidity.ElabHoist.hoistFuel_congr_on
+
+/-- info: 'Solidity.ElabHoist.namedClosure_congr_on' depends on axioms: [propext, Quot.sound] -/
+#guard_msgs in
+#print axioms Solidity.ElabHoist.namedClosure_congr_on
+
+/-- info: 'Solidity.ElabHoist.namedStructural_congr_on' depends on axioms: [propext, Quot.sound] -/
+#guard_msgs in
+#print axioms Solidity.ElabHoist.namedStructural_congr_on
+
+/-- info: 'Solidity.ElabCallHeight.callbacks_fixed_closure_output_height' depends on axioms: [propext, Quot.sound] -/
+#guard_msgs in
+#print axioms Solidity.ElabCallHeight.callbacks_fixed_closure_output_height
+
+/-- info: 'Solidity.elabKernel_helpers' depends on axioms: [propext, Quot.sound] -/
+#guard_msgs in
+#print axioms Solidity.elabKernel_helpers
+
+/-- info: 'Solidity.ElabCallHeight.callbacks_call_output_height_raw' depends on axioms: [propext, Quot.sound] -/
+#guard_msgs in
+#print axioms Solidity.ElabCallHeight.callbacks_call_output_height_raw
