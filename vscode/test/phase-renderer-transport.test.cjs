@@ -51,3 +51,18 @@ test('failed lookup journal cannot replace original fetch or JSON failure',async
  for(const stage of ['fetch','json']){const f=transport(),original=Error(stage+' original');
  await assert.rejects(connect(42,{...f.options,diagnostic:event=>{if(event.event==='target.lookup.failed')throw Error('journal write failed');},fetchImpl:async()=>{if(stage==='fetch')throw original;return{ok:true,status:200,json:async()=>{throw original;}};}}),e=>e===original&&e.reportingErrors[0]==='journal write failed');assert.equal(f.created(),0);}
 });
+
+const phaseReasons=[undefined,null,false,0,'','renderer rejected',{message:'object rejection'},{get message(){throw Error('unavailable');}},Symbol('phase'),1n];
+for(const menu of [false,true])for(const stage of ['lookup','capture','cleanup'])for(const [index,reason] of phaseReasons.entries())test('non-Error phase refusal '+[menu,stage,index].join('/'),async t=>{
+ const f=phase(t);if(menu)f.request.phase='menus-source';let captured=0,closed=0;
+ const close=()=>{closed++;if(stage==='cleanup')throw reason;},client={close,finish:close};
+ await assert.rejects(withPhaseRenderer(42,f.dir,f.request,f.config,async()=>{captured++;if(stage==='capture')throw reason;return{captured:true,screenshot:true};},{connectRenderer:async()=>{if(stage==='lookup')throw reason;return client;}}),error=>{assert.ok(error instanceof Error);assert.equal(error.cause,reason);assert.ok(error.message.length);return true;});
+ assert.equal(captured,stage==='lookup'?0:1);assert.equal(closed,stage==='lookup'?0:1);const rows=f.rows();assert.equal(rows.at(-1).event,'phase.failed');assert.equal(typeof rows.at(-1).error,'string');assert.ok(rows.at(-1).error.length);assert.equal(rows.filter(r=>r.event==='phase.complete').length,0);
+});
+test('falsy primary cause survives a second falsy cleanup failure',async t=>{const f=phase(t);await assert.rejects(withPhaseRenderer(42,f.dir,f.request,f.config,async()=>{throw null;},{connectRenderer:async()=>({close(){throw false;}})}),e=>e instanceof Error&&e.cause===null&&e.cleanupErrors.length===1&&e.cleanupErrors[0].includes('false'));assert.equal(f.rows().at(-1).event,'phase.failed');assert.equal(f.rows().filter(r=>r.event==='phase.complete').length,0);});
+
+for(const stage of ['fetch','json'])for(const [index,reason] of phaseReasons.entries())test('default connect retains non-Error '+stage+' cause '+index,async()=>{
+ const f=transport();await assert.rejects(connect(42,{...f.options,fetchImpl:async()=>{if(stage==='fetch')throw reason;return{ok:true,status:200,json:async()=>{throw reason;}};}}),e=>e instanceof Error&&e.cause===reason&&e.message.length>0);
+ assert.equal(f.created(),0);assert.equal(f.events.at(-1).event,'target.lookup.failed');assert.ok(f.events.at(-1).error.length);
+});
+test('falsy lookup reporting failure cannot replace original fetch cause',async()=>{const f=transport();await assert.rejects(connect(42,{...f.options,diagnostic:event=>{if(event.event==='target.lookup.failed')throw null;f.events.push(event);},fetchImpl:async()=>{throw false;}}),e=>e instanceof Error&&e.cause===false&&e.reportingErrors.length===1&&e.reportingErrors[0].includes('null'));assert.equal(f.created(),0);});

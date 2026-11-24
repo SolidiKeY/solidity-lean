@@ -73,7 +73,13 @@ async function connect(port,options={}){
   const page=pages.find(p=>p?.type==='page'&&typeof p.url==='string'&&p.url.startsWith('vscode-file:'));if(!page)throw Error('VS Code renderer not ready');
   note('target.lookup.finish',{targetId:page.id,targetUrl:page.url,targetTitle:page.title});onTime();
   return new DevTools(page.webSocketDebuggerUrl,{...clientOptions,now,identity:{...clientOptions.identity,targetId:page.id,targetUrl:page.url,targetTitle:page.title}});
- }catch(error){try{note('target.lookup.failed',{error:error.message});}catch(reporting){(error.reportingErrors??=[]).push(reporting.message);}throw error;}
+ }catch(error){error=phaseError(error);try{note('target.lookup.failed',{error:error.message});}catch(reporting){(error.reportingErrors??=[]).push(phaseError(reporting).message);}throw error;}
+}
+function phaseError(reason){
+ if(reason instanceof Error)return reason;
+ let message;try{const value=reason?.message;if(typeof value==='string'&&value)message=value;}catch{}
+ if(!message)message=reason===null||!['object','function'].includes(typeof reason)?'Renderer phase failed: '+String(reason):'Renderer phase failed without an Error';
+ return new Error(message,{cause:reason});
 }
 async function withPhaseRenderer(port,directory,request,config,capturePhase,{connectRenderer=connect}={}){
  const tracked=request.phase.startsWith('menus-')||request.phase.startsWith('diagnostics-problems-');
@@ -81,9 +87,9 @@ async function withPhaseRenderer(port,directory,request,config,capturePhase,{con
  const note=(event,data={})=>diagnostic?.({event,wallTime:Date.now(),monotonicMs:performance.now(),...data});
  let client,result,primary;
  try{note('phase.start');client=await connectRenderer(port,{diagnostic});result=await capturePhase(client);}
- catch(error){primary=error;}
- finally{try{if(client){if(request.phase.startsWith('menus-'))client.finish();else client.close();}}catch(error){if(primary)(primary.cleanupErrors??=[]).push(error.message);else primary=error;}}
- if(primary){try{note('phase.failed',{error:primary.message,cleanupErrors:primary.cleanupErrors??[]});}catch(reporting){(primary.reportingErrors??=[]).push(reporting.message);}throw primary;}
+ catch(error){primary=phaseError(error);}
+ finally{try{if(client){if(request.phase.startsWith('menus-'))client.finish();else client.close();}}catch(error){error=phaseError(error);if(primary)(primary.cleanupErrors??=[]).push(error.message);else primary=error;}}
+ if(primary){try{note('phase.failed',{error:primary.message,cleanupErrors:primary.cleanupErrors??[]});}catch(reporting){(primary.reportingErrors??=[]).push(phaseError(reporting).message);}throw primary;}
  note('phase.complete');return result;
 }
 async function capture(client,directory,screenshot=false,surface='editor') {
