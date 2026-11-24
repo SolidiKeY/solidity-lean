@@ -6,7 +6,7 @@ const { parseReport } = require('./report.cjs');
 const {processState,directChildren}=require('./process-state.cjs');
 
 /** Stop only a known-owned positive PID and its descendants or explicitly owned session. */
-function terminateTree(child) {
+function terminateTree(child,observe) {
   if (!Number.isSafeInteger(child.pid) || child.pid <= 0) return;
   if (process.platform === 'win32') {
     spawnSync('taskkill', ['/pid', String(child.pid), '/T', '/F'], { windowsHide: true, timeout: 5000 });
@@ -18,7 +18,7 @@ function terminateTree(child) {
   if(process.platform==='linux'){
     const stop=record=>{if(!record)return;const now=processState(record.pid);if(!now||now.birth!==record.birth)return;
       try{process.kill(record.pid,'SIGSTOP');}catch{}
-      const children=directChildren(record);
+      const children=directChildren(record,observe);
       for(const candidate of children)stop(candidate);
       if(processState(record.pid)?.birth===record.birth)try{process.kill(record.pid,'SIGKILL');}catch{}
     };stop(identity);
