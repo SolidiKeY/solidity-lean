@@ -56,3 +56,10 @@ test('late cleanup success cannot acquire confirmation after original deadline (
  const client={close(){closed++;},request(method,params){if(method==='Runtime.evaluate'&&params.expression.endsWith('(null,true)'))return Promise.resolve().then(()=>{clock=15001;return{result:{value:true}};});return Promise.reject(Error('injected primary inspection failure'));}};
  try{await assert.rejects(require('../parity/renderer.cjs').captureOutput(client,directory,{readinessLine:'ready',channel:'Solidity Lean'}),/injected primary inspection failure/);const cleanup=JSON.parse(fs.readFileSync(path.join(directory,'output-observer-cleanup.json')));assert.equal(cleanup.confirmed,false);assert.equal(closed,1);}finally{t.mock.restoreAll();fs.rmSync(directory,{recursive:true,force:true});}
 });
+
+test('coherent malformed output endpoints cannot substitute truthy flags or invalid clocks (injected)',()=>{
+ const text='ready';
+ for(const mutate of [s=>s.characters[0].covered='false',s=>s.characters[0].covered=1,s=>s.characters[0].boxes='not-boxes',s=>s.characters[0]=null,s=>s.epoch='0',s=>s.epoch=-1,s=>s.clock=Infinity,s=>s.clock=-1,s=>delete s.start,s=>s.start=0.5,s=>s.text='foreign',s=>s.watchId=1]){
+  const before=sample(text),after=sample(text);mutate(before);mutate(after);let refused;assert.doesNotThrow(()=>{refused=errors(before,after,text,'Solidity Lean');});assert.ok(refused.length);
+ }
+});
