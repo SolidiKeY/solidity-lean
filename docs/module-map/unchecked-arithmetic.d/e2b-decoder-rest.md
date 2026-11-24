@@ -11,3 +11,4 @@
 | `Correctness/Lowering/Total/Decode/BytesLiteral/Checked.lean` | Fixed-bytes value faithfulness from contextual conversion, narrow-width fit and full-word numeric checks. |
 | `Correctness/Lowering/Total/Decode/BytesLiteral/Evaluation.lean` | Source typed resolution and evaluation of normalized fixed-bytes literals, with local checked model-value agreement. |
 | `Correctness/Lowering/Total/Decode/Calls.lean` | Executable additive call-spelling expression decoder, exact ExprX contract and conservative unclaimed-expression behavior. |
+| `Correctness/Lowering/Total/Decode/WithExpr.lean` | Expression-parameterized statement/request decoding, registered-call integration, and exact v1 recovery for an empty registry. |
