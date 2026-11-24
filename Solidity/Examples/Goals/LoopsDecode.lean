@@ -1,6 +1,7 @@
 import Solidity.Correctness.Lowering.Total.Versions
 import Solidity.Correctness.Lowering.Total.Decode.BytesLiteral.Evaluation
 import Solidity.Correctness.Lowering.Total.Decode.WithExpr
+import Solidity.Correctness.Lowering.Total.Decode.Callee.Parameters
 
 namespace Solidity.Examples.Goals.LoopsDecode
 
@@ -472,5 +473,33 @@ example (T : Decode.Tables) (r : Request) : Decode.Calls.decode T [] r = T.decod
 example (T : Decode.Tables) (R : CallSpellExt.Registry) (r : Request) (s : SourceProgram)
     (h : Decode.Calls.decode T R r = some s) : Decode.plain r = true :=
   Decode.WithExpr.decode_guard T (Decode.Calls.expr T R) h
+
+/-! Callee headers reach the real Source frame constructor. -/
+private def calleeHeader : FunDecl :=
+  { params := [("small", .prim .uint), ("who", .prim .uint), ("tag", .prim .uint)]
+    rets := [("ok", .prim .bool), ("out", .prim .int)]
+    widths := [("small", 8), ("who#address", 20), ("tag", 32), ("tag#bytes", 4), ("out", 16)]
+    body := [] }
+
+example : (do
+    let (ps, rs) ← Decode.Callee.signature calleeHeader
+    let f ← Source.Frame.mk? { decls := [] } none ps rs .nil true false
+    pure (f.locals.map Prod.fst)) = some ["out", "ok", "tag", "who", "small"] := rfl
+
+example : (do
+    let (ps, rs) ← Decode.Callee.signature calleeHeader
+    let f ← Source.Frame.mk? { decls := [] } none ps rs .nil true false
+    pure (f.ps, f.rs)) = some
+      ([.int ⟨false, 8, by decide⟩, .address false, .fixedBytes 4 (by decide)],
+       [.bool, .int ⟨true, 16, by decide⟩]) := rfl
+
+/-- Repeated names are preserved, not silently removed or renamed. -/
+example : (Decode.Callee.parameters [] [("x", .prim .bool), ("x", .prim .bool)]).map
+    Source.Syn.paramNames = some [some "x", some "x"] := rfl
+example : Decode.Callee.parameters [("x", 7)] [("x", .prim .uint)] = none := rfl
+example : Decode.Callee.parameters [("x", 32), ("x#bytes", 4), ("x#address", 20)]
+    [("x", .prim .uint)] = none := rfl
+/-- Reference parameters remain an explicit implementation gap. -/
+example : Decode.Callee.parameters [] [("xs", .ref (.array (.prim .uint)))] = none := rfl
 
 end Solidity.Examples.Goals.LoopsDecode
