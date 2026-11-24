@@ -188,7 +188,7 @@ def Interp.Covers : Prop :=
     diagram.Assoc b ⟨C, Γ, o⟩ m →
     LowerFresh b ⟨C, Γ, o⟩ ∧ ∃ κ : SrcRun b.E b.ctx b.ctx,
       I.block o.raw o.elabScope o.beforeElab.locals o.names ⟨b.E, b.ctx, [], [], κ, m⟩ ∧
-      (SrcRun.ofStmt b.input.resolved).settled.Refines κ
+      SrcRun.Refines (SrcRun.settled (SrcRun.ofStmt b.input.resolved)) κ
 
 /-- **Capture then statement** are the statement's parts (`elabStmtPWith`). -/
 def CaptureLaw : Prop :=
