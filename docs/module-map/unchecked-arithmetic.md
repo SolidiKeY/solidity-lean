@@ -68,6 +68,9 @@
 | `Correctness/Lowering/Sim/Coverage/BooleanSpelling.lean` | Proves existing raw-syntax decoder success for the H1361 grammar via spelling; Source inference and resolved-program decoding remain separate. |
 | `Correctness/Lowering/Sim/Coverage/BooleanLocals.lean` | Resolves Boolean caller locals and proves actual Source lvalue and expression inference on bound names, including repeated names. |
 | `Correctness/Lowering/Sim/Coverage/BooleanExprInference.lean` | Proves actual fuel-bounded Source inference completeness for every expression in the H1361 Boolean grammar, using the existing spelling relation. |
+| `Solidity/Goals/LoweringDiagramV2.lean` | `loweringBySimulationV2`, the additive frame-aware v2 of `loweringBySimulation` (H1391), open: `FrameRel`, `Diagram.SimulatesV2` (run clauses at transactional frames) and `Diagram.FrameTotal`; v1 vocabulary, `Diagram.Total` and `SessionLift` reused unchanged. |
+| `Solidity/Correctness/Lowering/Sim/Match/DiagramV2.lean` | Frame-aware diagram companion: `RunSim₂` at every run is the per-run part of `diagram.SimulatesV2`, and the v1-to-v2 bridges (never the converse); `diagram.FrameTotal` proved (`frame_matching`), and the goal from `RunSim₂` at every run, coverage and the session lift (`lowering_v2_of_runs₂`). |
+| `Solidity/Examples/Goals/LoweringDiagramV2.lean` | Pins the `loweringBySimulationV2` roadmap line, its unfolding, the bridge direction and the refusal of static, unchecked and sender-pinned frames. |
 # Unchecked arithmetic
 
 | Module | Purpose |

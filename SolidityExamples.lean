@@ -167,6 +167,7 @@ import Solidity.Examples.Goals.LeanInventorySound
 import Solidity.Examples.Goals.Loops
 import Solidity.Examples.Goals.LoopsDecode
 import Solidity.Examples.Goals.LoopsProducer
+import Solidity.Examples.Goals.LoweringDiagramV2
 import Solidity.Examples.Goals.LoweringSim
 import Solidity.Examples.Goals.OffCriticalPath
 import Solidity.Examples.Goals.OpcodeEval

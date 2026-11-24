@@ -2489,6 +2489,7 @@ import Solidity.Correctness.Lowering.Sim.Match
 import Solidity.Correctness.Lowering.Sim.Match.Cases
 import Solidity.Correctness.Lowering.Sim.Match.CasesV2
 import Solidity.Correctness.Lowering.Sim.Match.CompositionV2
+import Solidity.Correctness.Lowering.Sim.Match.DiagramV2
 import Solidity.Correctness.Lowering.Sim.Match.Relations
 import Solidity.Correctness.Lowering.Sim.Match.StatementV2
 import Solidity.Correctness.Lowering.Sim.Session.Backward
@@ -3387,6 +3388,7 @@ import Solidity.Goals.IntrinsicStorage
 import Solidity.Goals.LeanInventorySound
 import Solidity.Goals.Loops
 import Solidity.Goals.LoweringDiagram
+import Solidity.Goals.LoweringDiagramV2
 import Solidity.Goals.LoweringSession
 import Solidity.Goals.LoweringSim
 import Solidity.Goals.OffCriticalPath
