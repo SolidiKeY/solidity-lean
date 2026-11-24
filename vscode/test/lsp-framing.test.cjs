@@ -1,0 +1,54 @@
+// Byte-framing controls only; these messages are not native parity observations.
+'use strict';
+const test=require('node:test'),assert=require('node:assert/strict');
+const consumers=[['RPC',require('../src/rpc.cjs').LspFrames],['recorder',require('../parity/core.cjs').LspFrames]];
+function frame(headerBytes,message={id:1,result:'é🦀'}){
+  const body=Buffer.from(JSON.stringify(message));
+  const prefix=Buffer.from(`Content-Length: ${body.length}\r\nX-Pad: `),suffix=Buffer.from('\r\n\r\n');
+  const header=Buffer.concat([prefix,Buffer.alloc(headerBytes-prefix.length-suffix.length,120),suffix]);
+  assert.equal(header.length,headerBytes);
+  return Buffer.concat([header,body]);
+}
+function feed(parser,bytes,size){for(let i=0;i<bytes.length;i+=size)parser.push(bytes.subarray(i,i+size));}
+for(const [name,Frames]of consumers){
+  test(name+' admits bounded headers and coalesced UTF-8 frames regardless of fragmentation',()=>{
+    const messages=[{id:1,result:'é🦀'},{id:2,result:'next'}];
+    for(const headerBytes of [8191,8192]){
+      const bytes=Buffer.concat(messages.map(message=>frame(headerBytes,message)));
+      for(const size of [1,7,8192,bytes.length]){
+        const parser=new Frames(),actual=[];parser.on('message',m=>actual.push(m));
+        feed(parser,bytes,size);parser.end();assert.deepEqual(actual,messages);
+      }
+    }
+  });
+  test(name+' refuses oversized headers in both coalesced and fragmented deliveries',()=>{
+    for(const headerBytes of [8193,9000]){
+      const bytes=frame(headerBytes);
+      for(const size of [bytes.length,1,7,8192]){
+        const parser=new Frames(),actual=[];parser.on('message',m=>actual.push(m));
+        assert.throws(()=>feed(parser,bytes,size),/Oversize LSP header/);
+        assert.deepEqual(actual,[]);
+      }
+    }
+  });
+}
+
+test('RPC and recorder share one framing implementation without changing body limits',()=>{
+  assert.equal(consumers[0][1],consumers[1][1]);
+  for(const [,Frames]of consumers){
+    assert.equal(new Frames().limit,32*1024*1024);
+    assert.throws(()=>new Frames(1).push(frame(40,{})),/Oversize LSP body/);
+  }
+});
+
+test('oversized RPC header closes pending work before dispatching a notification',async()=>{
+  const {PassThrough}=require('node:stream'),{RpcPeer}=require('../src/rpc.cjs');
+  const input=new PassThrough(),output=new PassThrough(),peer=new RpcPeer(input,output);let delivered=0;
+  peer.onNotification('textDocument/didOpen',()=>{delivered++;});
+  try{
+    const pending=peer.request('waiting',{}, {timeoutMs:1000});
+    const rejected=assert.rejects(pending,/Oversize LSP header/);
+    input.write(frame(8193,{jsonrpc:'2.0',method:'textDocument/didOpen',params:{uri:'file:///owned.sol'}}));
+    await rejected;assert.equal(peer.closed,true);assert.equal(peer.pending.size,0);assert.equal(delivered,0);
+  }finally{peer.close();input.destroy();output.destroy();}
+});

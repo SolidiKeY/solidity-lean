@@ -111,3 +111,10 @@ test('anchor DOM cannot borrow URI from a different Monaco subtree',async()=>{
  const nearest=anchor.closest;anchor.closest=selector=>selector.includes('[data-uri]')?owned:nearest(selector);
  try{await assert.rejects(captureContributionMenu({async request(method,params){calls.push(method);return{result:{value:vm.runInNewContext(params.expression,{document,innerWidth:1000,innerHeight:800})}};}},dir,{target:'local',kind:'editor',binding:{uri:'file:///owned.sol'}}),/Owned menu anchor/);assert.equal(calls.filter(x=>x.startsWith('Input.')).length,0);assert.equal(JSON.parse(fs.readFileSync(path.join(dir,'menu-anchor.json'))).anchor.activeUri,null);}finally{fs.rmSync(dir,{recursive:true,force:true});}
 });
+
+test('raw presentation-role diagnostics cannot waive strict trust menu attributes',()=>{
+ const {trustErrors}=require('../parity/menu-lifecycle.cjs'),v=trustedFixture(),m=v.trust.steps[0].capture.capture.contributionMenu;
+ m.before.items.push({label:'',ariaDisabled:null,className:null,withinViewport:true,bounds:{left:1,top:1,right:100,bottom:20}});m.after=structuredClone(m.before);
+ v.menuRoles={version:1,reads:[{roles:[{label:{role:'presentation',className:'separator disabled',ariaDisabled:'true'},menuItem:null}]}]};
+ assert.ok(trustErrors(v,'run','local').includes('incomplete trust menu attributes'));
+});

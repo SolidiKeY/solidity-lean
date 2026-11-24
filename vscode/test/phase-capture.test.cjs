@@ -62,3 +62,72 @@ test('captured status with an error and mismatched source metadata never satisfy
 });
 
 test('proof hover phase is explicitly allowlisted without permitting arbitrary phase paths',()=>{assert.match(paths('/tmp/root','proof-help-hover').dir,/proof-help-hover$/);assert.throws(()=>paths('/tmp/root','proof-help-hover/../../escape'),/Unknown/);});
+
+
+test('reply and PNG reads cannot accept success at or beyond the phase deadline',async t=>{
+  const originalRead=fs.readFileSync;
+  for(const delayedFile of ['reply.json','screenshot.png']) for(const elapsed of [999,1000,1001]){
+    const dir=fixture();let now=0;
+    try{
+      t.mock.method(Date,'now',()=>now);
+      t.mock.method(fs,'readFileSync',(file,...args)=>{
+        const bytes=originalRead(file,...args);
+        if(path.basename(String(file))===delayedFile)now=elapsed;
+        return bytes;
+      });
+      const pending=requestPhase(dir,'read-budget','verified',{version:3},1000);
+      const checked=elapsed<1000?pending:assert.rejects(pending,e=>e.code==='TIMEOUT');
+      await servePhases(dir,'read-budget',async d=>{
+        fs.writeFileSync(path.join(d,'screenshot.png'),png);
+        return{captured:true,screenshot:true};
+      },new Set());
+      await checked;
+    }finally{t.mock.restoreAll();fs.rmSync(dir,{recursive:true,force:true});}
+  }
+});
+
+test('request persistence consumes the existing phase budget',async t=>{
+  const originalWrite=fs.writeFileSync;
+  for(const elapsed of [999,1000,1001]){
+    const dir=fixture();let now=0;
+    try{
+      t.mock.method(Date,'now',()=>now);
+      t.mock.method(fs,'writeFileSync',(file,...args)=>{
+        const value=originalWrite(file,...args);
+        if(path.basename(String(file))==='request.json.tmp')now=elapsed;
+        return value;
+      });
+      const pending=requestPhase(dir,'write-budget','open',{},1000);
+      const checked=elapsed<1000?pending:assert.rejects(pending,e=>e.code==='TIMEOUT');
+      await servePhases(dir,'write-budget',async d=>{
+        fs.writeFileSync(path.join(d,'screenshot.png'),png);
+        return{captured:true,screenshot:true};
+      },new Set());
+      await checked;
+    }finally{t.mock.restoreAll();fs.rmSync(dir,{recursive:true,force:true});}
+  }
+});
+
+
+test('late reads retain renderer and invalid-PNG failures',async t=>{
+  const originalRead=fs.readFileSync;
+  for(const failure of ['renderer','png']){
+    const dir=fixture();let now=0;
+    try{
+      t.mock.method(Date,'now',()=>now);
+      t.mock.method(fs,'readFileSync',(file,...args)=>{
+        const bytes=originalRead(file,...args);
+        if(path.basename(String(file))===(failure==='renderer'?'reply.json':'screenshot.png'))now=1000;
+        return bytes;
+      });
+      const pending=requestPhase(dir,'read-failure','verified',{},1000);
+      const rejected=assert.rejects(pending,failure==='renderer'?/CDP disconnected/:/no PNG evidence/);
+      await servePhases(dir,'read-failure',async d=>{
+        if(failure==='renderer')throw Error('CDP disconnected');
+        fs.writeFileSync(path.join(d,'screenshot.png'),Buffer.from('invalid'));
+        return{captured:true,screenshot:true};
+      },new Set());
+      await rejected;
+    }finally{t.mock.restoreAll();fs.rmSync(dir,{recursive:true,force:true});}
+  }
+});
