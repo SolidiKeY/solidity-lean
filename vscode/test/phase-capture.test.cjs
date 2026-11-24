@@ -141,3 +141,12 @@ test('renderer acknowledgement refuses truthy nonbooleans and nested capture err
   }finally{fs.rmSync(dir,{recursive:true,force:true});}
  }
 });
+
+test('preexisting phase image refuses renderer input and remains unchanged',async()=>{
+ const dir=fixture();try{
+  const p=paths(dir,'trace-hidden');fs.mkdirSync(p.dir,{recursive:true});const old=Buffer.concat([png,Buffer.from('old retained image')]);fs.writeFileSync(path.join(p.dir,'screenshot.png'),old);
+  const pending=requestPhase(dir,'fresh-request','trace-hidden',{binding:'new-source'},1000),rejected=assert.rejects(pending,/failed/);let captures=0;
+  await servePhases(dir,'fresh-request',async()=>{captures++;return{captured:true,screenshot:true};},new Set());await rejected;
+  assert.equal(captures,0);assert.deepEqual(fs.readFileSync(path.join(p.dir,'screenshot.png')),old);const reply=JSON.parse(fs.readFileSync(p.reply));assert.equal(reply.status,'failed');assert.match(reply.error,/Existing phase screenshot/);
+ }finally{fs.rmSync(dir,{recursive:true,force:true});}
+});
