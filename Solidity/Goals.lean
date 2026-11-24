@@ -24,6 +24,7 @@ import Solidity.Goals.IntrinsicStorage
 import Solidity.Goals.LeanInventorySound
 import Solidity.Goals.Loops
 import Solidity.Goals.LoweringDiagram
+import Solidity.Goals.LoweringDiagramV2
 import Solidity.Goals.LoweringSession
 import Solidity.Goals.LoweringSim
 import Solidity.Goals.OffCriticalPath
