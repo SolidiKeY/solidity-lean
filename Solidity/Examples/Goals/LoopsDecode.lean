@@ -1,5 +1,5 @@
 import Solidity.Correctness.Lowering.Total.Versions
-import Solidity.Correctness.Lowering.Total.Decode.BytesLiteral
+import Solidity.Correctness.Lowering.Total.Decode.BytesLiteral.Checked
 
 namespace Solidity.Examples.Goals.LoopsDecode
 
@@ -366,5 +366,36 @@ example : Source.bytesNat (Source.fitBytes 0 (Decode.BytesLiteral.bytes [])) = 0
   Decode.BytesLiteral.faithful rfl (by decide)
 /-- A one-component overflow does not satisfy the model target-width check. -/
 example : bytesAlign 1 [256] = .ok 256 ∧ ¬ 256 < 256 ^ 1 := ⟨rfl, by decide⟩
+
+/-- Contextual conversion and the actual checks justify the carry-and-padding value. -/
+example (C : Contract) (Γ : ECtx) (Δ : NCtx) :
+    Source.bytesNat (Source.fitBytes 4 (Decode.BytesLiteral.bytes [0, 256])) =
+      16777216 := by
+  letI : FreshNames := sampleNames
+  exact Decode.BytesLiteral.faithful_checked C Γ Δ (o := .bytesLit [0, 256])
+    (e := .num 0) (by decide) rfl rfl rfl (by
+      simp only [check]
+      rfl)
+
+/-- At bytes32, fitCheck alone accepts an overflowing word; the numeric checker
+rejects it. Both checks in faithful_checked are therefore material. -/
+example (C : Contract) (Γ : ECtx) (Δ : NCtx) :
+    letI : FreshNames := sampleNames
+    fitCheck C Γ .uint 256 (.num (2 ^ 256)) = .ok () ∧
+      (check C Δ .uint (.num (2 ^ 256))).isOk = false := by
+  constructor
+  · rfl
+  · simp only [check]
+    rfl
+
+/-- The full-word branch also proves faithfulness for a padded single byte. -/
+example (C : Contract) (Γ : ECtx) (Δ : NCtx) :
+    Source.bytesNat (Source.fitBytes 32 (Decode.BytesLiteral.bytes [1])) =
+      256 ^ 31 := by
+  letI : FreshNames := sampleNames
+  exact Decode.BytesLiteral.faithful_checked C Γ Δ (o := .bytesLit [1])
+    (e := .num 0) (by decide) rfl rfl rfl (by
+      simp only [check]
+      rfl)
 
 end Solidity.Examples.Goals.LoopsDecode

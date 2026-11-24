@@ -2520,6 +2520,7 @@ import Solidity.Correctness.Lowering.Total.Coverage
 import Solidity.Correctness.Lowering.Total.Coverage.Checks
 import Solidity.Correctness.Lowering.Total.Decode
 import Solidity.Correctness.Lowering.Total.Decode.BytesLiteral
+import Solidity.Correctness.Lowering.Total.Decode.BytesLiteral.Checked
 import Solidity.Correctness.Lowering.Total.Decode.Marked
 import Solidity.Correctness.Lowering.Total.Decode.Spelling
 import Solidity.Correctness.Lowering.Total.Decode.Tables
