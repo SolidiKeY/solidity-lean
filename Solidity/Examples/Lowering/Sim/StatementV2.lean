@@ -15,17 +15,17 @@ variable [FreshNames]
 covering, splitting interpretation give the v2 per-run obligation. -/
 example (C : Contract) (I : Interp) (induction : AssembledInduction C) (step : KnotStep C I)
     (block : BlockLaw C I) (splits : I.Splits C (elabStmtP C)) (site : SiteLaw C I)
-    (fuel : I.fuel = diagram.fuel) (covers : I.Covers C) (b : Body) (Γ : Ctx)
+    (covers : I.Covers C) (b : Body) (Γ : Ctx)
     (o : Solidity.Correctness.Lowering.Checker.Output C Γ) (m : ContextMap b.ctx Γ) (production : Production b ⟨C, Γ, o⟩)
     (accepted : Accepted ⟨C, Γ, o⟩) (assoc : diagram.Assoc b ⟨C, Γ, o⟩ m) :
     RunSim₂ b ⟨C, Γ, o⟩ m :=
-  runs₂_of_segments C I (site fuel covers)
+  runs₂_of_segments C I (site covers)
     (block _ splits (knot_genSeg C I induction step).2.1) b Γ o m production accepted
     assoc
 
 /-- What later checkpoints prove, once the relation is reviewed. -/
 example (C : Contract) (I : Interp) : Prop :=
-  SeqLaw ∧ RefinesLaw ∧ MapExt.Laws ∧ ChainAppendLaw ∧ CaptureLaw C I ∧ ClosureLaw C I
+  SeqLaw ∧ RefinesLaw ∧ MonoLaw ∧ MapExt.Laws ∧ ChainAppendLaw ∧ CaptureLaw C I
 
 /-- The knot's `hoistTop`, free under v1 `RecSim`, is derived from its `hoist`. -/
 example (C : Contract) : (elabRec C ()).hoistTop = hoistTopWith C (hoist C) :=

@@ -3,31 +3,26 @@ import Solidity.Correctness.Lowering.Sim.Match.StatementV2
 /-!
 # Statement capture, sequencing and callback closure, v2 (contract)
 
-An additive prerequisite for `Solidity.Goals.loweringBySimulation`
-(ls3v-p1-statement-v2): the relation of `StatementV2.lean` (`SegSim`) read on
-the elaborator's runs (`ElabRan`/`ElabSat`, `SProg` and its placement, context
-maps, the callback record) and connected to the conclusions of `CasesV2.lean`.
-
-**Contract only: unreviewed.** `CaptureLaw`, `BlockLaw`, `ClosureLaw`,
-`SiteLaw` and `KnotStep` are propositions, not theorems. Proved: definitional
-facts of the assembled record and bridges that only apply a hypothesis.
-
-The Source reading of raw input (`Reading`, `Interp`) is a parameter: no
-resolver from raw syntax exists. `assembled` is the knot's record from its
-three generators; no field is free, so `Sim.passRec` is not of this shape.
+An additive prerequisite for `Solidity.Goals.loweringBySimulation`: `SegSim`
+(`StatementV2.lean`) read on the elaborator's runs, `SProg` placement, context
+maps and the callback record, and connected to `CasesV2.lean`.
+**Contract only.** `CaptureLaw`, `BlockLaw`, `SiteLaw` and `KnotStep` are
+propositions; proved are facts of the assembled record and bridges that only
+apply a hypothesis. The Source reading of raw input (`Reading`: resolved
+Source items, H1422 option B, with a fuel transport) is a parameter
+(`Interp`): no resolver from raw syntax exists. `assembled` is the knot's
+record from its three generators; no field is free (unlike `Sim.passRec`).
 
 ## Limitations
 
-* **`AssembledInduction` is a new hypothesis**, not `ElabKernelInduction`
-  (`Goals/ElabTotal.lean`), whose step ranges over every record. The
-  generators are `partial`; a proof belongs with the knot's totalization
-  (`Correctness/Elab/Total.lean`, outside this scope).
-* **`ClosureLaw` is a candidate.** It needs laws of the interpretation not
-  fixed here: `Interp.ctx` closed under sub-term contexts, readings invariant
-  under `foldConst` and a branch's scope, base cases for `captureExpr`, and
-  `Captures` closed under sequence (the prefix stable at every state).
-* `RecSeg` has no predicate for the call, ABI, dispatch, tuple, scope and loop
-  fields; the capture conclusions of `CasesV2.ExprCases` are not targeted.
+* **`AssembledInduction` is a new hypothesis** (additive, H1423), not
+  `ElabKernelInduction`, whose step ranges over every record. The generators
+  are `partial`; a proof belongs with the knot's totalization.
+* Callback closure is stated as shape only (`assembled_fields`): predicates
+  for the derived capture, branch, call, ABI, dispatch, tuple and loop fields
+  wait for the interpretation's base cases (this step, H1417) and its
+  invariance under `foldConst` and a branch's scope (P2-P5). The capture
+  conclusions of `CasesV2.ExprCases` are not targeted.
 * No interpretation with `Covers` and `Splits` is exhibited.
 -/
 namespace Solidity.Correctness.Lowering.Sim.CompositionV2
@@ -38,21 +33,25 @@ open Solidity.Lowering.V07 (ContextMap)
 open Solidity.Correctness.Lowering.Checker (Output ElaborationReceipt)
 open StatementV2
 
-/-- **A Source reading** at the target context `Γ`: a Source computation from
-`pre` to `post`, both over `base`, and the map of its input locals into `Γ`. -/
+/-- **A Source reading** at the target context `Γ`: resolved Source items
+from `pre` to `post`, both over `base`, the map of their input locals into
+`Γ`, and the fuel transport they are simulated at. -/
 structure Reading (Γ : Ctx) where
   E : Source.Env
+  R : List Source.STy
+  M : Bool
+  k : Source.SCtx
   base : Source.RCtx
   pre : Source.RCtx
   post : Source.RCtx
-  run : SrcRun E (pre ++ base) (post ++ base)
+  items : Source.RItems E R M k (pre ++ base) (post ++ base)
   map : ContextMap (pre ++ base) Γ
+  fuel : Nat → Nat
 
 /-- **An interpretation**: the readings of a raw statement, a raw block and a
 call with its result, under a scope, from a state, placed under the given
-names; the statement contexts captures are judged in; the fuel transport. -/
+names; the statement contexts captures are judged in. -/
 structure Interp where
-  fuel : Nat → Nat
   stmt : RawStmt → ElabScope → ECtx × Nat → List Var → {Γ : Ctx} → Reading Γ → Prop
   block : List RawStmt → ElabScope → ECtx × Nat → List Var → {Γ : Ctx} → Reading Γ → Prop
   call : String → List RawExpr → Option (Var × PrimTy) → ElabScope → ECtx × Nat → List Var →
@@ -68,29 +67,32 @@ def Seg (rd : List Var → {Γ : Ctx} → Reading Γ → Prop) (P : SProg C) : P
   ∀ (ns : List Var) (Γ Γ' : Ctx) (p : Prog C Γ Γ'), SProg.chain ns Γ P = .ok ⟨Γ', p⟩ →
     ∀ r : Reading Γ, rd ns r →
       ∃ (emb : Thin Γ Γ') (m' : ContextMap (r.post ++ r.base) Γ'),
-        MapExt r.map emb m' ∧ SegSim I.fuel r.run p r.map m'
+        MapExt r.map emb m' ∧ SegSim r.fuel r.items p r.map m'
 
 /-- The parts of one statement. -/
 def stmtQ (s : RawStmt) (sc : ElabScope) (st : ECtx × Nat) (P : SProg C) (_ : ECtx × Nat) : Prop :=
-  Seg C I (I.stmt s sc st) P
+  Seg C (I.stmt s sc st) P
 
 /-- The parts of a block. -/
 def blockQ (ss : List RawStmt) (sc : ElabScope) (st : ECtx × Nat) (P : SProg C)
     (_ : ECtx × Nat) : Prop :=
-  Seg C I (I.block ss sc st) P
+  Seg C (I.block ss sc st) P
 
 /-- **Statement capture**: `P` captures part of `s`, leaving `s'`. Every
-reading of `s` refines a Source prefix, which the placed `P` simulates, then a
-reading of `s'` from the state and at the context and names `P` leaves. -/
+reading of `s` refines, within `c` horizon steps, Source items that the placed
+`P` simulates, then a reading of `s'` from the state and at the context and
+names `P` leaves, both at a monotone fuel that fits the reading's. -/
 def Captures (s : RawStmt) (sc : ElabScope) (st : ECtx × Nat) (P : SProg C) (s' : RawStmt)
     (st' : ECtx × Nat) : Prop :=
   ∀ (ns : List Var) (Γ Γ' : Ctx) (p : Prog C Γ Γ'), SProg.chain ns Γ P = .ok ⟨Γ', p⟩ →
     ∀ r : Reading Γ, I.stmt s sc st ns r →
-      ∃ (mid : Source.RCtx) (κ₀ : SrcRun r.E (r.pre ++ r.base) (mid ++ r.base))
-        (κ' : SrcRun r.E (mid ++ r.base) (r.post ++ r.base)) (emb : Thin Γ Γ')
-        (m₁ : ContextMap (mid ++ r.base) Γ'),
-        MapExt r.map emb m₁ ∧ SegSim I.fuel κ₀ p r.map m₁ ∧ r.run.Refines (κ₀.seq κ') ∧
-        I.stmt s' sc st' (p.outNames ns) ⟨r.E, r.base, mid, r.post, κ', m₁⟩
+      ∃ (mid : Source.RCtx) (a₀ : Source.RItems r.E r.R r.M r.k (r.pre ++ r.base) (mid ++ r.base))
+        (a' : Source.RItems r.E r.R r.M r.k (mid ++ r.base) (r.post ++ r.base)) (emb : Thin Γ Γ')
+        (m₁ : ContextMap (mid ++ r.base) Γ') (c : Nat) (g : Nat → Nat),
+        MapExt r.map emb m₁ ∧ SegSim g a₀ p r.map m₁ ∧
+        (SrcRun.ofItems r.items).Refines (SrcRun.ofItems (append a₀ a')) c ∧
+        (∀ n n', n ≤ n' → g n ≤ g n') ∧ (∀ n, g (n + c) ≤ r.fuel n) ∧
+        I.stmt s' sc st' (p.outNames ns) ⟨r.E, r.R, r.M, r.k, r.base, mid, r.post, a', m₁, g⟩
 
 /-- The captures of a term with its residual, in every admitted context. -/
 def captureQ {α : Type} (a : α) (sc : ElabScope) (st : ECtx × Nat) (out : SProg C × α)
@@ -119,7 +121,7 @@ def CallSat (Q : String → List RawExpr → Option (Var × PrimTy) → ElabScop
 /-- The parts of a call with its result. -/
 def callQ (f : String) (args : List RawExpr) (res : Option (Var × PrimTy)) (sc : ElabScope)
     (st : ECtx × Nat) (out : CallOut C) (_ : ECtx × Nat) : Prop :=
-  Seg C I (I.call f args res sc st) out.1
+  Seg C (I.call f args res sc st) out.1
 
 /-- **The generators simulate**: the three callbacks the knot is tied on. -/
 def GenSeg (h : RawExpr → ElabM (SProg C × RawExpr)) (p : RawStmt → ElabM (SProg C))
@@ -144,51 +146,40 @@ theorem assembled_fields (h : RawExpr → ElabM (SProg C × RawExpr))
     (assembled C h p c).elabBranch = elabBranchWith C p :=
   ⟨rfl, rfl, rfl, rfl, rfl, rfl, rfl, rfl, rfl⟩
 
-/-- **The record simulates, v2**: the capture, statement and block fields. -/
-structure RecSeg (rc : ElabRec C) : Prop where
-  hoist : ElabSat (captureQ C I) rc.hoist
-  hoistTop : ElabSat (captureQ C I) rc.hoistTop
-  hoistBinop : ∀ op a b sc st out st', ElabRan (rc.hoistBinop op a b) sc st out st' →
-    captureQ C I (RawExpr.binop op a b) sc st out st'
-  hoistAssign : ∀ l r sc st out st', ElabRan (rc.hoistAssign l r) sc st out st' →
-    captureQ C I (RawStmt.assign l r) sc st out st'
-  hoistArgs : ElabSat (captureQ C I) rc.hoistArgs
-  hoistCallArgs : ∀ f, ElabSat (captureQ C I) (rc.hoistCallArgs f)
-  hoistStmt : ElabSat (captureQ C I) rc.hoistStmt
-  elabStmtP : ElabSat (stmtQ C I) rc.elabStmtP
-  elabStmt1 : ElabSat (stmtQ C I) rc.elabStmt1
-  elabStmtsP : ElabSat (blockQ C I) rc.elabStmtsP
-  elabBranch : ElabSat (blockQ C I) rc.elabBranch
 /-- **Block readings split** along the statement callback `stmt`: the empty
-block reads as nothing; the block of one statement reads as the statement; a
-reading of `s :: ss` refines a reading of `s`, then, after any run of `stmt`
-on `s` whose placed output simulates that reading, a reading of `ss` from the
-state, context, names and map it leaves. -/
+block reads as nothing; the block of one statement as the statement; `s :: ss`
+refines a reading of `s`, then, after any run of `stmt` on `s` whose placed
+output simulates it, a reading of `ss` where it leaves; at a fuel that fits. -/
 structure Interp.Splits (stmt : RawStmt → ElabM (SProg C)) : Prop where
   nil : ∀ sc st ns (Γ : Ctx) (r : Reading Γ), I.block [] sc st ns r →
     ∃ m' : ContextMap (r.post ++ r.base) Γ, MapExt r.map .refl m' ∧
-      SegSim I.fuel r.run (.nil : Prog C Γ Γ) r.map m'
+      SegSim r.fuel r.items (.nil : Prog C Γ Γ) r.map m'
   single : ∀ s sc st ns (Γ : Ctx) (r : Reading Γ), I.block [s] sc st ns r → I.stmt s sc st ns r
   cons : ∀ s ss sc st ns (Γ : Ctx) (r : Reading Γ), I.block (s :: ss) sc st ns r →
-    ∃ (mid : Source.RCtx) (κ₁ : SrcRun r.E (r.pre ++ r.base) (mid ++ r.base))
-      (κ₂ : SrcRun r.E (mid ++ r.base) (r.post ++ r.base)),
-      I.stmt s sc st ns ⟨r.E, r.base, r.pre, mid, κ₁, r.map⟩ ∧ r.run.Refines (κ₁.seq κ₂) ∧
+    ∃ (mid : Source.RCtx) (a₁ : Source.RItems r.E r.R r.M r.k (r.pre ++ r.base) (mid ++ r.base))
+      (a₂ : Source.RItems r.E r.R r.M r.k (mid ++ r.base) (r.post ++ r.base)) (c : Nat)
+      (g : Nat → Nat),
+      I.stmt s sc st ns ⟨r.E, r.R, r.M, r.k, r.base, r.pre, mid, a₁, r.map, g⟩ ∧
+      (SrcRun.ofItems r.items).Refines (SrcRun.ofItems (append a₁ a₂)) c ∧
+      (∀ n n', n ≤ n' → g n ≤ g n') ∧ (∀ n, g (n + c) ≤ r.fuel n) ∧
       ∀ (P : SProg C) (st₁ : ECtx × Nat) (Γ' : Ctx) (p : Prog C Γ Γ') (emb : Thin Γ Γ')
         (m₁ : ContextMap (mid ++ r.base) Γ'), ElabRan (stmt s) sc st P st₁ →
-        SProg.chain ns Γ P = .ok ⟨Γ', p⟩ → MapExt r.map emb m₁ → SegSim I.fuel κ₁ p r.map m₁ →
-        I.block ss sc st₁ (p.outNames ns) ⟨r.E, r.base, mid, r.post, κ₂, m₁⟩
+        SProg.chain ns Γ P = .ok ⟨Γ', p⟩ → MapExt r.map emb m₁ → SegSim g a₁ p r.map m₁ →
+        I.block ss sc st₁ (p.outNames ns) ⟨r.E, r.R, r.M, r.k, r.base, mid, r.post, a₂, m₁, g⟩
 
 /-- **The interpretation covers the production bodies**: at every associated
-production run of the fragment, the producer's fresh state is sound and the
-lowered raw input, at the placement of the run, has a reading over the body's
-context under the association's map that the body's settled Source run refines. -/
+production run the producer's fresh state is sound and the lowered raw input
+reads, under the association's map, as Source items that the body's settled
+Source run refines at a fuel that fits the diagram's. -/
 def Interp.Covers : Prop :=
   ∀ (b : Body) (Γ : Ctx) (o : Output C Γ) (m : ContextMap b.ctx Γ),
     ElaborationReceipt o → Lowered b ⟨C, Γ, o⟩ → Threaded b ⟨C, Γ, o⟩ → Accepted ⟨C, Γ, o⟩ →
     diagram.Assoc b ⟨C, Γ, o⟩ m →
-    LowerFresh b ⟨C, Γ, o⟩ ∧ ∃ κ : SrcRun b.E b.ctx b.ctx,
-      I.block o.raw o.elabScope o.beforeElab.locals o.names ⟨b.E, b.ctx, [], [], κ, m⟩ ∧
-      SrcRun.Refines (SrcRun.settled (SrcRun.ofStmt b.input.resolved)) κ
+    LowerFresh b ⟨C, Γ, o⟩ ∧ ∃ (R : List Source.STy) (M : Bool) (k : Source.SCtx)
+      (a : Source.RItems b.E R M k b.ctx b.ctx) (c : Nat) (g : Nat → Nat),
+      I.block o.raw o.elabScope o.beforeElab.locals o.names ⟨b.E, R, M, k, b.ctx, [], [], a, m, g⟩ ∧
+      SrcRun.Refines (SrcRun.settled (SrcRun.ofStmt b.input.resolved)) (SrcRun.ofItems a) c ∧
+      ∀ n, g (n + c) ≤ diagram.fuel n
 
 /-- **Capture then statement** are the statement's parts (`elabStmtPWith`). -/
 def CaptureLaw : Prop :=
@@ -200,20 +191,13 @@ def BlockLaw : Prop :=
   ∀ stmt : RawStmt → ElabM (SProg C), I.Splits C stmt → ElabSat (stmtQ C I) stmt →
     ElabSat (blockQ C I) (elabStmtsPWith C stmt)
 
-/-- **Callback closure** (candidate; see "Limitations"): at simulating
-generators, the assembled record simulates once its two statement arms do. -/
-def ClosureLaw : Prop :=
-  ∀ h p c, GenSeg C I h p c → I.Splits C p →
-    ElabSat (captureQ C I) (assembled C h p c).hoistStmt →
-    ElabSat (stmtQ C I) (assembled C h p c).elabStmt1 → RecSeg C I (assembled C h p c)
-
 /-- A block's parts meet the v2 site obligation. -/
 def Sites : Prop :=
   ∀ raw sc st (P : SProg C) st', blockQ C I raw sc st P st' → SiteSim₂ C raw sc st P st'
 
-/-- **Whole bodies**: at the diagram's fuel, under a covering interpretation. -/
+/-- **Whole bodies**, under a covering interpretation. -/
 def SiteLaw : Prop :=
-  I.fuel = diagram.fuel → I.Covers C → Sites C I
+  I.Covers C → Sites C I
 
 /-- **Induction over the knot's runs at assembled records** (a hypothesis;
 see "Limitations"): predicates on the runs of the three generators that the

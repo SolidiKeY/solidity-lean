@@ -5,25 +5,28 @@ import Solidity.Correctness.Lowering.Sim.Match.CasesV2
 
 An additive prerequisite for `Solidity.Goals.loweringBySimulation`: where
 `SiteSim₂` ties an elaborator output to a whole body, the relation for a part.
-**Contract only: unreviewed.** The composition laws (`SeqLaw`, `RefinesLaw`,
-`MapExt.Laws`, `ChainAppendLaw`) are propositions, not theorems; only a bridge
-to `Diagram.Final` is proved.
+**Contract only**: the laws (`SeqLaw`, `RefinesLaw`, `MonoLaw`, `MapExt.Laws`,
+`ChainAppendLaw`) are propositions, not theorems; only a bridge to
+`Diagram.Final` is proved.
 
-* `SrcRun E Γs Δs`: a horizon-indexed Source computation, the Source side of
-  a part. Semantic, not Source syntax: a capture and a lowered statement have
-  no resolved Source statement.
-* `SegSim fuel κ p m m'`: the run clauses of `RunSim₂` for a target part `p`,
-  from the map `m` to a map `m'` on the contexts the part leaves. Normal
-  completion keeps `frameRel`; `return`, `break` and `continue` match nothing
-  (the parts of a lowered body are jump-free).
+* The Source side of a part is resolved Source syntax (`Source.RItems`; user
+  decision H1422, option B), run by `Source.execItems` (`SrcRun.ofItems`).
+  Parts are sequenced by `append`.
+* `SrcRun.Refines κ κ' c`: `κ'` has the result of `κ`, at most `c` horizon
+  steps later, and completes nowhere else; `κ` is stable. It relates a
+  statement to its hoisted form, and a body to its lowered items.
+* `SegSim fuel a p m m'`: the run clauses of `RunSim₂` for the items `a` and a
+  target part `p`, from the map `m` to a map `m'` on the contexts the part
+  leaves. Normal completion keeps `frameRel`; `return`, `break` and `continue`
+  match nothing (the parts of a lowered body are jump-free).
 * `MapExt m emb m'`: over a base Source context that both maps' contexts
   extend, the base locals keep their target slots along the thinning.
 
 ## Limitations
 
-* No `SrcRun` is produced for raw input, and no law for Source syntax
-  (`execItems` as a `seq`) is stated yet.
-* The fuel transport is a parameter: `diagram.fuel` is not shown to suit.
+* Captures and lowered statements must be given as Source items: nothing
+  here produces them.
+* Refinement costs horizon; that the parts' fuel fits `diagram.fuel` is not shown.
 -/
 namespace Solidity.Correctness.Lowering.Sim.StatementV2
 
@@ -48,19 +51,10 @@ def ofStmt {R : List Source.STy} {M : Bool} {k : Source.SCtx}
     (s : Source.RStmt E R M k Γs Δs) : SrcRun E Γs Δs :=
   fun G F n nps ph src => (Source.execS G F n nps ph s src.1).run (.nil, src.2)
 
-/-- **Sequence** at one horizon: the second from the normal outcome of the
-first, its outcome moved to the first's context (`Source.Out.up`). -/
-def seq (κ₁ : SrcRun E Γs Γ₁) (κ₂ : SrcRun E Γ₁ Δs) : SrcRun E Γs Δs :=
-  fun G F n nps ph src =>
-    match κ₁ G F n nps ph src with
-    | (.ok (.normal l), _, st) =>
-      match κ₂ G F n nps ph (l, st) with
-      | (.ok o, rest) => (o.up Γs, rest)
-      | (.error h, rest) => (.error h, rest)
-    | (.ok (.brk l), rest) => (.ok (.brk l), rest)
-    | (.ok (.cont l), rest) => (.ok (.cont l), rest)
-    | (.ok (.ret l), rest) => (.ok (.ret l), rest)
-    | (.error h, rest) => (.error h, rest)
+/-- The run of resolved items. -/
+def ofItems {R : List Source.STy} {M : Bool} {k : Source.SCtx}
+    (a : Source.RItems E R M k Γs Δs) : SrcRun E Γs Δs :=
+  fun G F n nps ph src => (Source.execItems G F n nps ph a src.1).run (.nil, src.2)
 
 /-- A `return` read as normal completion, as `Diagram.Final` observes a body. -/
 def settled (κ : SrcRun E Γs Γs) : SrcRun E Γs Γs :=
@@ -69,18 +63,27 @@ def settled (κ : SrcRun E Γs Γs) : SrcRun E Γs Γs :=
     | (.ok (.ret l), rest) => (.ok (.normal l), rest)
     | r => r
 
-/-- **Refinement**: where `κ` completes, `κ'` has the same result; `κ` is
-stable under larger horizons; every completed result of `κ'` is one of `κ`. -/
-def Refines (κ κ' : SrcRun E Γs Δs) : Prop :=
+/-- **Refinement** within `c` horizon steps: where `κ` completes, `κ'` has the
+same result `c` steps later; `κ` is stable under larger horizons; every
+completed result of `κ'` is one of `κ`. -/
+def Refines (κ κ' : SrcRun E Γs Δs) (c : Nat) : Prop :=
   ∀ G F nps ph src,
     (∀ n, (κ G F n nps ph src).1 ≠ .error .timeout →
-      κ' G F n nps ph src = κ G F n nps ph src) ∧
+      κ' G F (n + c) nps ph src = κ G F n nps ph src) ∧
     (∀ n n', n ≤ n' → (κ G F n nps ph src).1 ≠ .error .timeout →
       κ G F n' nps ph src = κ G F n nps ph src) ∧
     (∀ j, (κ' G F j nps ph src).1 ≠ .error .timeout →
       ∃ n, κ G F n nps ph src = κ' G F j nps ph src)
 
 end SrcRun
+
+/-- **Source sequence**: the items `a`, then the items `b`. -/
+def append {E : Source.Env} {R : List Source.STy} {M : Bool} :
+    {k : Source.SCtx} → {Γs Γ₁ Δs : Source.RCtx} → Source.RItems E R M k Γs Γ₁ →
+    Source.RItems E R M k Γ₁ Δs → Source.RItems E R M k Γs Δs
+  | _, _, _, _, .nil, b => b
+  | _, _, _, _, .stmt s rest, b => .stmt s (append rest b)
+  | _, _, _, _, .unchecked inner rest, b => .unchecked inner (append rest b)
 
 /-- **Final matching of a part**: normal completion under the output map, with
 the global and frame relations; halts by `HaltMatch`; nothing else. -/
@@ -96,21 +99,22 @@ def SegFinal {E : Source.Env} {Γs Δs : Source.RCtx} {C : Contract} {Γ' : Ctx}
 
 /-- **The statement-level relation**: from Source and target states related
 under `m`, with the global and frame relations, the run clauses of `RunSim₂`
-for the Source computation `κ` and the target part `p`, with `SegFinal` under
-the output map `m'`, at the fuel transport `fuel`. -/
-def SegSim (fuel : Nat → Nat) {E : Source.Env} {Γs Δs : Source.RCtx} (κ : SrcRun E Γs Δs)
+for the Source items `a` and the target part `p`, with `SegFinal` under the
+output map `m'`, at the fuel transport `fuel`. -/
+def SegSim (fuel : Nat → Nat) {E : Source.Env} {R : List Source.STy} {M : Bool}
+    {k : Source.SCtx} {Γs Δs : Source.RCtx} (a : Source.RItems E R M k Γs Δs)
     {C : Contract} {Γ Γ' : Ctx} (p : Prog C Γ Γ') (m : ContextMap Γs Γ)
     (m' : ContextMap Δs Γ') : Prop :=
   ∀ (G : Source.Glob E) (F : Source.Fr) (nps : Nat) (ph : Option (Source.Ph E))
     (src : Source.EMState E Γs) (tgt : State C Γ),
     m.Related (fun τ v => diagram.valRel τ v) src.1 tgt.env → diagram.globRel src.2 tgt →
     frameRel G F tgt →
-    (∀ n, (κ G F n nps ph src).1 ≠ .error .timeout →
-      SegFinal m' G F (κ G F n nps ph src) (p.runF (fuel n) tgt)) ∧
-    (∀ n n', n ≤ n' → (κ G F n nps ph src).1 ≠ .error .timeout →
-      κ G F n' nps ph src = κ G F n nps ph src) ∧
+    (∀ n, (SrcRun.ofItems a G F n nps ph src).1 ≠ .error .timeout →
+      SegFinal m' G F (SrcRun.ofItems a G F n nps ph src) (p.runF (fuel n) tgt)) ∧
+    (∀ n n', n ≤ n' → (SrcRun.ofItems a G F n nps ph src).1 ≠ .error .timeout →
+      SrcRun.ofItems a G F n' nps ph src = SrcRun.ofItems a G F n nps ph src) ∧
     (∀ n, p.runF n tgt ≠ .error .diverge →
-      ∃ j, SegFinal m' G F (κ G F j nps ph src) (p.runF n tgt))
+      ∃ j, SegFinal m' G F (SrcRun.ofItems a G F j nps ph src) (p.runF n tgt))
 
 /-- A local of the base context, under the locals `pre` pushed over it. -/
 def liftIdx {base : Source.RCtx} {τ : Source.STy} :
@@ -145,19 +149,32 @@ theorem SegFinal.final {E : Source.Env} {Γs : Source.RCtx} {C : Contract} {Γ �
       | normal ls => exact ⟨h.1, h.2.1⟩
       | brk ls | cont ls | ret ls => exact h.elim
 
-/-- **Sequencing**: parts compose along the intermediate map. -/
+/-- **Sequencing**: parts compose along the intermediate map, at a monotone
+fuel transport. -/
 def SeqLaw : Prop :=
-  ∀ (fuel : Nat → Nat) {E : Source.Env} {Γs Γ₁ Δs : Source.RCtx} (κ₁ : SrcRun E Γs Γ₁)
-    (κ₂ : SrcRun E Γ₁ Δs) {C : Contract} {Γ Γ' Γ'' : Ctx} (p₁ : Prog C Γ Γ')
-    (p₂ : Prog C Γ' Γ'') (m : ContextMap Γs Γ) (m₁ : ContextMap Γ₁ Γ') (m₂ : ContextMap Δs Γ''),
-    SegSim fuel κ₁ p₁ m m₁ → SegSim fuel κ₂ p₂ m₁ m₂ →
-    SegSim fuel (κ₁.seq κ₂) (p₁.join p₂) m m₂
+  ∀ (fuel : Nat → Nat) {E : Source.Env} {R : List Source.STy} {M : Bool} {k : Source.SCtx}
+    {Γs Γ₁ Δs : Source.RCtx} (a : Source.RItems E R M k Γs Γ₁) (b : Source.RItems E R M k Γ₁ Δs)
+    {C : Contract} {Γ Γ' Γ'' : Ctx} (p₁ : Prog C Γ Γ') (p₂ : Prog C Γ' Γ'')
+    (m : ContextMap Γs Γ) (m₁ : ContextMap Γ₁ Γ') (m₂ : ContextMap Δs Γ''),
+    (∀ n n', n ≤ n' → fuel n ≤ fuel n') → SegSim fuel a p₁ m m₁ → SegSim fuel b p₂ m₁ m₂ →
+    SegSim fuel (append a b) (p₁.join p₂) m m₂
 
-/-- **Refinement transfers the relation** to the refined computation. -/
+/-- **Refinement transfers the relation** to the refined items, at the fuel
+of the later horizon. -/
 def RefinesLaw : Prop :=
-  ∀ (fuel : Nat → Nat) {E : Source.Env} {Γs Δs : Source.RCtx} (κ κ' : SrcRun E Γs Δs)
-    {C : Contract} {Γ Γ' : Ctx} (p : Prog C Γ Γ') (m : ContextMap Γs Γ) (m' : ContextMap Δs Γ'),
-    κ.Refines κ' → SegSim fuel κ' p m m' → SegSim fuel κ p m m'
+  ∀ (fuel : Nat → Nat) (c : Nat) {E : Source.Env} {R R' : List Source.STy} {M M' : Bool}
+    {k k' : Source.SCtx} {Γs Δs : Source.RCtx} (a : Source.RItems E R M k Γs Δs)
+    (b : Source.RItems E R' M' k' Γs Δs) {C : Contract} {Γ Γ' : Ctx} (p : Prog C Γ Γ')
+    (m : ContextMap Γs Γ) (m' : ContextMap Δs Γ'),
+    (SrcRun.ofItems a).Refines (SrcRun.ofItems b) c → SegSim fuel b p m m' →
+    SegSim (fun n => fuel (n + c)) a p m m'
+
+/-- **More fuel keeps the relation.** -/
+def MonoLaw : Prop :=
+  ∀ (f g : Nat → Nat) {E : Source.Env} {R : List Source.STy} {M : Bool} {k : Source.SCtx}
+    {Γs Δs : Source.RCtx} (a : Source.RItems E R M k Γs Δs) {C : Contract} {Γ Γ' : Ctx}
+    (p : Prog C Γ Γ') (m : ContextMap Γs Γ) (m' : ContextMap Δs Γ'),
+    (∀ n, f n ≤ g n) → SegSim f a p m m' → SegSim g a p m m'
 
 /-- **Context extension**: the identity; composition along the thinnings; a
 target-only binder (a capture); a declared pair of locals. -/
