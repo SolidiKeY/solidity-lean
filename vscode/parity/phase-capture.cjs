@@ -15,7 +15,7 @@ function phaseObserved(phase,before,after){
   const expected=phase==='proof-broken'?'failed':'proved';
   return outcome(before)===expected&&outcome(after)===expected&&JSON.stringify(before.functions||before.namedVerifiables)===JSON.stringify(after.functions||after.namedVerifiables);
 }
-const png=Buffer.from([137,80,78,71,13,10,26,10]);
+const {assertPngContainer}=require('./png-container.cjs');
 function paths(directory,phase){if(!phases.includes(phase))throw Error('Unknown visual phase '+phase);const dir=path.join(directory,'phases',phase);return{dir,request:path.join(dir,'request.json'),reply:path.join(dir,'reply.json')};}
 function json(file,value){const tmp=file+'.tmp';fs.writeFileSync(tmp,JSON.stringify(value,null,2)+'\n');fs.renameSync(tmp,file);}
 async function requestPhase(directory,runId,phase,metadata,timeoutMs){
@@ -30,7 +30,7 @@ async function requestPhase(directory,runId,phase,metadata,timeoutMs){
         if(reply.metadataHash!==metadataHash)throw Error('Visual phase source metadata mismatch');
         if(reply.error||reply.status!=='captured')throw Error('Visual phase '+phase+' failed: '+reply.error);
         const bytes=fs.readFileSync(path.join(p.dir,'screenshot.png'));
-        if(bytes.length<=png.length||!bytes.subarray(0,png.length).equals(png))throw Error('Visual phase has no PNG evidence');
+        assertPngContainer(bytes);
         if(reply.imageBytes!==bytes.length||reply.imageSha256!==createHash('sha256').update(bytes).digest('hex'))throw Error('Visual phase image byte binding mismatch');
         if(Date.now()>=deadline)break;
         return reply;
@@ -49,7 +49,7 @@ async function servePhases(directory,runId,capture,seen){
     try{if(fs.existsSync(path.join(p.dir,'screenshot.png')))throw Error('Existing phase screenshot must be preserved; choose a fresh capture directory');
         reply.capture=await capture(p.dir,request);reply.status=reply.capture?.captured===true&&reply.capture.screenshot===true&&reply.capture.error===undefined?'captured':'failed';
         if(reply.status!=='captured')reply.error=typeof reply.capture?.error==='string'&&reply.capture.error?reply.capture.error:'Renderer did not capture a screenshot';
-        else{const bytes=fs.readFileSync(path.join(p.dir,'screenshot.png'));reply.imageBytes=bytes.length;reply.imageSha256=createHash('sha256').update(bytes).digest('hex');}}
+        else{const bytes=fs.readFileSync(path.join(p.dir,'screenshot.png'));assertPngContainer(bytes);reply.imageBytes=bytes.length;reply.imageSha256=createHash('sha256').update(bytes).digest('hex');}}
     catch(e){reply.status='failed';reply.error=e.message;}
     reply.finished=Date.now();json(p.reply,reply);
   }

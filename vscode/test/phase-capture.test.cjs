@@ -2,7 +2,7 @@
 'use strict';
 const test=require('node:test'),assert=require('node:assert/strict'),fs=require('node:fs'),path=require('node:path'),os=require('node:os');
 const {paths,requestPhase,servePhases}=require('../parity/phase-capture.cjs');
-const png=Buffer.from([137,80,78,71,13,10,26,10,0]);
+const png=Buffer.from('iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR4nGNgYGD4DwABBAEAX+XDSwAAAABJRU5ErkJggg==','base64');
 const fixture=()=>fs.mkdtempSync(path.join(os.tmpdir(),'parity-phase-'));
 test('fresh screenshot acknowledgements retain launch, phase and source snapshot identity',async()=>{
   const dir=fixture();try{
@@ -155,7 +155,7 @@ test('acknowledged image bytes cannot be substituted before the client reads the
  for(const sameLength of [false,true]){const dir=fixture();try{
   const pending=requestPhase(dir,'image-binding','trace-hidden',{source:'owned'},1000),rejected=assert.rejects(pending,/image.*mismatch/i);
   await servePhases(dir,'image-binding',async d=>{fs.writeFileSync(path.join(d,'screenshot.png'),png);return{captured:true,screenshot:true};},new Set());
-  const p=paths(dir,'trace-hidden'),substitution=sameLength?Buffer.from(png):Buffer.concat([png,Buffer.from('substitution')]);if(sameLength)substitution[substitution.length-1]^=1;
+  const p=paths(dir,'trace-hidden'),substitution=Buffer.from(sameLength?'iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR4nGNgZGD4DwABCAEBfBRbtQAAAABJRU5ErkJggg==':'iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR4nGNgYGD4DwABBAEAX+XDSwAAAA50RVh0bm90ZQBhbHRlcm5hdGW4ZEnDAAAAAElFTkSuQmCC','base64');assert.equal(substitution.length===png.length,sameLength);
   fs.writeFileSync(path.join(p.dir,'screenshot.png'),substitution);await rejected;
  }finally{fs.rmSync(dir,{recursive:true,force:true});}}
 });
