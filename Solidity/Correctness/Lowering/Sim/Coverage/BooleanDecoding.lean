@@ -41,7 +41,7 @@ theorem Input.decoded_stmt {b u} (h : Input b u) :
       some (.cons (.stmtItem s) .nil) := by
     change Total.Decode.items .body b.input.raw = _
     rw [raw]
-    exact (Total.Spells.Items.stmt spelled .nil).decode
+    exact Total.Spells.Items.decode (.stmt spelled .nil)
   refine ⟨C, L, s, d, ?_⟩
   unfold Total.Decode.decode
   rw [hp, hC, hl, ht]
