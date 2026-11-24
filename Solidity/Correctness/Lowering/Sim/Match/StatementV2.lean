@@ -3,18 +3,15 @@ import Solidity.Correctness.Lowering.Sim.Match.CasesV2
 /-!
 # The statement-level relation, v2 (ls3v-p1-statement-v2, contract)
 
-An additive prerequisite for `Solidity.Goals.loweringBySimulation`. `SiteSim₂`
-ties an elaborator output to a whole body (`Sim/Match/CasesV2.lean`); this
-module states the relation for a part.
-
+An additive prerequisite for `Solidity.Goals.loweringBySimulation`: where
+`SiteSim₂` ties an elaborator output to a whole body, the relation for a part.
 **Contract only: unreviewed.** The composition laws (`SeqLaw`, `RefinesLaw`,
-`MapExt.Laws`, `ChainAppendLaw`) are propositions, not theorems; only bridges
-that do not depend on the choice are proved.
+`MapExt.Laws`, `ChainAppendLaw`) are propositions, not theorems; only a bridge
+to `Diagram.Final` is proved.
 
 * `SrcRun E Γs Δs`: a horizon-indexed Source computation, the Source side of
   a part. Semantic, not Source syntax: a capture and a lowered statement have
-  no resolved Source statement. `seq` composes at one horizon; `settled` reads
-  a `return` as normal completion.
+  no resolved Source statement.
 * `SegSim fuel κ p m m'`: the run clauses of `RunSim₂` for a target part `p`,
   from the map `m` to a map `m'` on the contexts the part leaves. Normal
   completion keeps `frameRel`; `return`, `break` and `continue` match nothing
@@ -24,9 +21,8 @@ that do not depend on the choice are proved.
 
 ## Limitations
 
-* Nothing here produces a `SrcRun` for raw input (`CompositionV2.lean` takes
-  the reading as a parameter), and no law for Source syntax (`execItems` as a
-  `seq`) is stated yet.
+* No `SrcRun` is produced for raw input, and no law for Source syntax
+  (`execItems` as a `seq`) is stated yet.
 * The fuel transport is a parameter: `diagram.fuel` is not shown to suit.
 -/
 namespace Solidity.Correctness.Lowering.Sim.StatementV2
@@ -85,11 +81,6 @@ def Refines (κ κ' : SrcRun E Γs Δs) : Prop :=
       ∃ n, κ G F n nps ph src = κ' G F j nps ph src)
 
 end SrcRun
-
-/-- **Bridge**: a body's `sourceRun` is the run of its resolved statement. -/
-theorem sourceRun_eq (b : Body) (G : Source.Glob b.E) (F : Source.Fr) (n nps : Nat)
-    (ph : Option (Source.Ph b.E)) (src : Source.EMState b.E b.ctx) :
-    sourceRun b G F n nps ph src = SrcRun.ofStmt b.input.resolved G F n nps ph src := rfl
 
 /-- **Final matching of a part**: normal completion under the output map, with
 the global and frame relations; halts by `HaltMatch`; nothing else. -/

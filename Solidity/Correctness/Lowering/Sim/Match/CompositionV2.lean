@@ -19,21 +19,16 @@ three generators; no field is free, so `Sim.passRec` is not of this shape.
 ## Limitations
 
 * **`AssembledInduction` is a new hypothesis**, not `ElabKernelInduction`
-  (`Goals/ElabTotal.lean`), whose step ranges over every record and cannot be
-  discharged where an arm calls a field outside its five. The generators are
-  `partial`; a proof belongs with the knot's totalization
+  (`Goals/ElabTotal.lean`), whose step ranges over every record. The
+  generators are `partial`; a proof belongs with the knot's totalization
   (`Correctness/Elab/Total.lean`, outside this scope).
-* **`ClosureLaw` is a candidate.** Its derived capture and branch fields need
-  laws of the interpretation not fixed here: `Interp.ctx` closed under
-  sub-term contexts, readings invariant under `foldConst` and under a branch's
-  scope, base cases for `captureExpr`/`captureBefore`, and `Captures` closed
-  under sequence (which needs the prefix stable at every state).
+* **`ClosureLaw` is a candidate.** It needs laws of the interpretation not
+  fixed here: `Interp.ctx` closed under sub-term contexts, readings invariant
+  under `foldConst` and a branch's scope, base cases for `captureExpr`, and
+  `Captures` closed under sequence (the prefix stable at every state).
 * `RecSeg` has no predicate for the call, ABI, dispatch, tuple, scope and loop
-  fields (fixed by the generators; the state and loop cases conclude them),
-  and the capture conclusions of `CasesV2.ExprCases` are not targeted
-  (`Sim/Expr/Strength.lean`).
-* No interpretation with `Covers` and `Splits` is exhibited: the contract is
-  not shown satisfiable.
+  fields; the capture conclusions of `CasesV2.ExprCases` are not targeted.
+* No interpretation with `Covers` and `Splits` is exhibited.
 -/
 namespace Solidity.Correctness.Lowering.Sim.CompositionV2
 
@@ -135,10 +130,6 @@ def GenSeg (h : RawExpr → ElabM (SProg C × RawExpr)) (p : RawStmt → ElabM (
 def assembled (h : RawExpr → ElabM (SProg C × RawExpr)) (p : RawStmt → ElabM (SProg C))
     (c : CallRet C) : ElabRec C :=
   elabRecWithProducers C (elabRecWithCallbacks C h p c) (panicProducerWithCallbacks C p c)
-
-/-- The knot's record is assembled from the knot's generators. -/
-theorem elabRec_assembled :
-    elabRec C () = assembled C (hoist C) (elabStmtP C) (@elabCallRet C _) := rfl
 
 /-- **No callback is free**: fields of an assembled record, from the generators. -/
 theorem assembled_fields (h : RawExpr → ElabM (SProg C × RawExpr))
