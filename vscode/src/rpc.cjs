@@ -80,10 +80,11 @@ class RpcPeer extends EventEmitter {
 function cancellable(promise,signal){
   if(!signal)return promise;
   return new Promise((resolve,reject)=>{
-    const finish=(error,value)=>{signal.removeEventListener('abort',abort);if(error)reject(error);else resolve(value);};
-    const abort=()=>finish(failure('Request cancelled',-32800));
+    let settled=false;
+    const finish=(settle,value)=>{if(settled)return;settled=true;signal.removeEventListener('abort',abort);settle(value);};
+    const abort=()=>finish(reject,failure('Request cancelled',-32800));
     signal.addEventListener('abort',abort,{once:true});
-    Promise.resolve(promise).then(value=>finish(null,value),error=>finish(error));
+    Promise.resolve(promise).then(value=>finish(resolve,value),error=>finish(reject,error));
     if(signal.aborted)abort();
   });
 }
