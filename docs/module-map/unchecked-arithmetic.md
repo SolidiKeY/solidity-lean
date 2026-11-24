@@ -65,6 +65,9 @@
 | `Correctness/Lowering/Sim/Coverage/BooleanSpelling.lean` | Proves existing raw-syntax decoder success for the H1361 grammar via spelling; Source inference and resolved-program decoding remain separate. |
 | `Correctness/Lowering/Sim/Coverage/BooleanLocals.lean` | Resolves Boolean caller locals and proves actual Source lvalue and expression inference on bound names, including repeated names. |
 | `Correctness/Lowering/Sim/Coverage/BooleanExprInference.lean` | Proves actual fuel-bounded Source inference completeness for every expression in the H1361 Boolean grammar, using the existing spelling relation. |
+| `Correctness/Lowering/Sim/Match/StatementV2.lean` | Contract (unreviewed): the statement-level relation `SegSim` between a Source computation (`SrcRun`) and a placed target part, with `SegFinal`, refinement, context extension `MapExt` and bridges to `sourceRun` and `Diagram.Final` (proved); sequencing, refinement, extension and `SProg.chain` concatenation laws stated, not proved. |
+| `Correctness/Lowering/Sim/Match/CompositionV2.lean` | Contract (unreviewed): readings and interpretations, part, capture and block predicates on elaborator runs, the assembled record with `RecSeg`, the laws of capture, block sequencing and callback closure (stated), `AssembledInduction` (a hypothesis), and bridges to `Stmt.V2.ArmSat` and `RunSim₂`. |
+| `Examples/Lowering/Sim/StatementV2.lean` | Shape checks of the v2 statement contract: with every law and interpretation obligation as a hypothesis, the per-run obligation follows. |
 # Unchecked arithmetic
 
 | Module | Purpose |

@@ -2488,7 +2488,9 @@ import Solidity.Correctness.Lowering.Sim.Expr.Strength
 import Solidity.Correctness.Lowering.Sim.Match
 import Solidity.Correctness.Lowering.Sim.Match.Cases
 import Solidity.Correctness.Lowering.Sim.Match.CasesV2
+import Solidity.Correctness.Lowering.Sim.Match.CompositionV2
 import Solidity.Correctness.Lowering.Sim.Match.Relations
+import Solidity.Correctness.Lowering.Sim.Match.StatementV2
 import Solidity.Correctness.Lowering.Sim.Session.Backward
 import Solidity.Correctness.Lowering.Sim.Session.Backward.NoDiagram
 import Solidity.Correctness.Lowering.Sim.Session.Binding
