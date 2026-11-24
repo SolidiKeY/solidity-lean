@@ -115,6 +115,7 @@ theorem Assoc.storageTyped {b : Body} {u : Emitted} {m : ContextMap b.ctx u.Γ}
     (h : Assoc b u m) : StorageTyped b.E u.C := by
   obtain ⟨_, _, _, s, ⟨_, Cx, L, t, L', d, hC, _, _, rfl⟩, reads⟩ := h
   have hE : Cx.env = b.E := reads.env
+  change Total.Decode.context (request b u) = some Cx at hC
   simp only [Total.Decode.context, Option.map_eq_some_iff] at hC
   obtain ⟨un, hu, rfl⟩ := hC
   have hu' := hu
