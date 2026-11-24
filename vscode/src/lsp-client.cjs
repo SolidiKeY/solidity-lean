@@ -16,6 +16,17 @@ function documentRequestParams(params,uri,version){
   return{...captured,textDocument:{uri,version}};
 }
 
+function operationFailure(reason){
+  const uris=reason&&typeof reason==='object'?Object.getOwnPropertyDescriptor(reason,'uris'):undefined;
+  if(reason instanceof Error&&typeof reason.message==='string'&&Object.isExtensible(reason)&&(!uris||'value'in uris&&uris.writable))return reason;
+  const error=new Error(typeof reason?.message==='string'?reason.message:typeof reason==='string'?reason:'Language operation failed',{cause:reason});
+  if(reason&&typeof reason==='object')for(const key of Reflect.ownKeys(reason)){
+    const descriptor=Object.getOwnPropertyDescriptor(reason,key);
+    if(key!=='cause'&&(key!=='message'||typeof descriptor.value==='string')&&'value'in descriptor)Object.defineProperty(error,key,{...descriptor,writable:true,configurable:true});
+  }
+  return error;
+}
+
 function notifyDocument(client,uri,method,params){
   try{client.peer.notify(method,params);}
   catch(error){
@@ -188,7 +199,14 @@ class LanguageServers extends EventEmitter {
       notifyDocument(client,uri,'textDocument/didSave',{textDocument:{uri},text});
     };save().catch(error=>this.operationError(error,[uri]));
   }
-  operationError(error,uris){if(this.disposed||this.reportedErrors.has(error)||!uris?.length||!uris.some(uri=>this.owners.has(uri)))return;if(![-32800,-32801].includes(error.code)&&error.code!=='CANCELLED'){this.reportedErrors.add(error);this.emit('serverError',Object.assign(error,{uris:error.uris||uris}));}}
+  operationError(error,uris){
+    if(this.disposed||this.reportedErrors.has(error)||!uris?.length||!uris.some(uri=>this.owners.has(uri)))return;
+    const code=error?.code;if([-32800,-32801].includes(code)||code==='CANCELLED')return;
+    const reported=operationFailure(error);
+    Object.defineProperty(reported,'uris',{value:reported.uris||uris,...(Object.hasOwn(reported,'uris')?{}:{writable:true,enumerable:true,configurable:true})});
+    if(error!==null&&(typeof error==='object'||typeof error==='function'))this.reportedErrors.add(error);
+    this.reportedErrors.add(reported);this.emit('serverError',reported);
+  }
   close(uri){const key=uri.toString(),client=this.owners.get(key);client?.closeDocument(key);if(this.owners.delete(key))this.touch(key);}
   cancel(uri){if(uri)this.owners.get(uri.toString())?.cancel(uri.toString());else for(const client of this.clients.values())client.cancel();}
   restart(uris){
