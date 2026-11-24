@@ -58,6 +58,8 @@
 | `Correctness/Lowering/Sim/Session/Forward/Frames.lean` | The provisional per-frame hypothesis of the forward session diagram and the session-level match. |
 | `Correctness/Lowering/Sim/Session/Forward/Within.lean` | A reachable target session state observes a prefix of the run at every horizon above its issued actions. |
 | `Examples/Lowering/Sim/Session/Forward.lean` | Type-level uses of the forward session diagram and its resource record on the session of `spin`, under the unmet hypothesis of matched frames. |
+| `Correctness/Lowering/Sim/Induction/Knot.lean` | The actual elaborator record satisfies the frozen case predicates by `elabKernelTotal` induction, conditional on the three case hypotheses and the explicit loop-arm bridge; an intermediate step toward `loweringBySimulation`. |
+| `Examples/Lowering/Sim/Induction.lean` | Uses the intermediate knot-closure theorem with production fresh names and its loop-arm bridge hypothesis. |
 | `Solidity/Correctness/Lowering/Sim/Coverage/ThreadedV2.lean` | Additive caller-context threading contract, v1 projection and association bridge for `loweringBySimulation`. |
 | `Solidity/Examples/Lowering/Sim/Coverage/ThreadedV2.lean` | Existing standalone-loop vocabulary exercises the bridge with explicit threading and placement receipts. |
 | `Correctness/Lowering/Sim/Coverage/Obstruction.lean` | Exact accepted empty production run under `elabKernelTotal` refuting frozen v1 diagram coverage: placement may use an unrelated context. |
