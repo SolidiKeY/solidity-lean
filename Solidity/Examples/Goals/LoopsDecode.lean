@@ -1,4 +1,5 @@
 import Solidity.Correctness.Lowering.Total.Versions
+import Solidity.Correctness.Lowering.Total.Decode.BytesLiteral
 
 namespace Solidity.Examples.Goals.LoopsDecode
 
@@ -348,5 +349,22 @@ example (E : Source.Env) (C : Contract) (H : HTy) :
     have upper : n ≤ 255 := bounds.2
     change 300 = n at same
     omega
+
+/-! Fixed-bytes literal components are folded before byte normalization. These
+checks exercise the literal helper; the shared call decoder is not extended yet. -/
+example : Decode.BytesLiteral.decode (.bytesLit [0, 256]) =
+    some (.lit (.hexStr [1, 0])) := rfl
+example : Decode.BytesLiteral.decode (.bytesLit [222, 173]) =
+    some (.lit (.hexStr [222, 173])) := rfl
+example : Decode.BytesLiteral.decode (.call bytesLitName [.bool true]) = none := rfl
+example (Γ : Source.Ctx) :
+    Source.Typed Γ (Decode.BytesLiteral.spelling [0, 256]) (.stringLit [1, 0]) := .hexStr _
+/-- Padding carries the folded value, rather than truncating the second component. -/
+example : Source.bytesNat (Source.fitBytes 4 (Decode.BytesLiteral.bytes [0, 256])) =
+    16777216 := Decode.BytesLiteral.faithful rfl (by decide)
+example : Source.bytesNat (Source.fitBytes 0 (Decode.BytesLiteral.bytes [])) = 0 :=
+  Decode.BytesLiteral.faithful rfl (by decide)
+/-- A one-component overflow does not satisfy the model target-width check. -/
+example : bytesAlign 1 [256] = .ok 256 ∧ ¬ 256 < 256 ^ 1 := ⟨rfl, by decide⟩
 
 end Solidity.Examples.Goals.LoopsDecode
