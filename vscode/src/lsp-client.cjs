@@ -10,6 +10,12 @@ const {incrementalChange}=require('./diagnostic-state.cjs');
 const {terminateTree,parseReport}=require('./backend.cjs');
 const {trackChild,waitForClose,waitForGroup,enableChildLifetimeObservation}=require('./child-lifetime.cjs');
 
+function documentRequestParams(params,uri,version){
+  const captured={...params},target=captured.textDocument;
+  if(typeof captured.toJSON==='function'||target!==undefined&&(!target||typeof target!=='object'||Array.isArray(target)||target.uri!==uri||target.version!==undefined&&target.version!==version))throw failure('Request document does not match source',-32801);
+  return{...captured,textDocument:{uri,version}};
+}
+
 class LanguageClient extends EventEmitter {
   constructor(configuration){
     super();this.configuration=configuration;this.documents=new Map();this.disposed=false;this.ownedProcesses=new Map();
@@ -79,11 +85,11 @@ class LanguageClient extends EventEmitter {
   async request(method,doc,params={},options={},isCurrent=()=>true){
     if(options?.signal?.aborted)throw failure('Request cancelled',-32800);
     if(doc.isClosed)throw failure('Document closed',-32801);
-    const uri=doc.uri.toString(),version=doc.version,text=doc.getText();
+    const uri=doc.uri.toString(),version=doc.version,text=doc.getText(),requestParams=documentRequestParams(params,uri,version);
     const current=()=>isCurrent()&&!this.disposed&&!doc.isClosed&&doc.uri.toString()===uri&&doc.version===version&&doc.getText()===text;
     await this.sync(doc,current,options.signal);
     if(!current())throw failure('Document content changed',-32801);
-    const result=await this.peer.request(method,{textDocument:{uri,version},...params},options);
+    const result=await this.peer.request(method,requestParams,options);
     if(!current())throw failure('Document content changed',-32801);return result;
   }
   closeDocument(uri){if(this.peer&&!this.peer.closed&&this.documents.has(uri)){this.peer.notify('textDocument/didClose',{textDocument:{uri}});this.documents.delete(uri);}}
@@ -153,10 +159,11 @@ class LanguageServers extends EventEmitter {
     if(options?.signal?.aborted)throw failure('Request cancelled',-32800);
     if(doc.isClosed)throw failure('Document closed',-32801);
     const uri=doc.uri.toString(),version=doc.version,text=doc.getText(),epoch=this.epochs.get(uri),sourceCurrent=()=>!doc.isClosed&&doc.uri.toString()===uri&&doc.version===version&&doc.getText()===text;
+    const requestParams=documentRequestParams(params,uri,version);
     const validate=()=>{if(options?.signal?.aborted)throw failure('Request cancelled',-32800);if(!sourceCurrent())throw failure('Document content changed',-32801);};
     await this.settled(options?.signal,doc);validate();if(this.epochs.get(uri)!==epoch)throw failure('Language client changed',-32801);
     const client=this.client(doc),owned=this.ownership(doc,client),current=()=>owned()&&sourceCurrent();
-    const result=await client.request(method,doc,params,options,current);validate();if(!current())throw failure('Language client changed',-32801);return result;
+    const result=await client.request(method,doc,requestParams,options,current);validate();if(!current())throw failure('Language client changed',-32801);return result;
   }
   async workspaceSymbols(query,options){await this.settled(options?.signal);const revision=this.revision;const current=()=>!this.disposed&&this.revision===revision;const results=(await Promise.all([...this.clients.values()].map(async client=>{await cancellable(client.ready,options?.signal);if(!current())throw failure('Language clients changed',-32801);return client.peer.request('workspace/symbol',{query},options);}))).flat();if(options?.signal?.aborted)throw failure('Request cancelled',-32800);if(!current())throw failure('Language clients changed',-32801);return [...new Map(results.map(s=>[JSON.stringify(s.location),s])).values()];}
   changed(uri){for(const [key,client]of this.clients)if(!client.peer?.closed)client.ready.then(()=>{if(this.clients.get(key)===client&&!client.disposed)client.peer.notify('workspace/didChangeWatchedFiles',{changes:[{uri:uri.toString(),type:2}]});}).catch(error=>this.operationError(error,[...this.owners].filter(([,owner])=>owner===client).map(([uri])=>uri)));}
