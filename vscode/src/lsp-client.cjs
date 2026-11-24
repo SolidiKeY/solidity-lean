@@ -41,7 +41,11 @@ class LanguageClient extends EventEmitter {
   constructor(configuration){
     super();this.configuration=configuration;this.documents=new Map();this.disposed=false;this.ownedProcesses=new Map();
     this.startupAbort=new AbortController();
-    this.ready=this.start().catch(reason=>{const error=this.failure||(this.disposed?cancelled():operationFailure(reason));this.fail(error);throw this.failure||error;});
+    this.ready=this.start().catch(reason=>{
+      let error=this.failure||(this.disposed?cancelled():operationFailure(reason));
+      if(!this.failure&&!this.disposed&&error.code!=='STARTUP')error=startupError('Language server initialization failed: '+error.message,null,error);
+      this.fail(error);throw this.failure||error;
+    });
     this.ready.catch(()=>{});
   }
   fail(error){
