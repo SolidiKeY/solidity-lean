@@ -26,7 +26,7 @@ private theorem fold_zeros (k a : Nat) :
   | zero => simp
   | succ k ih =>
     simp only [List.replicate_succ, List.foldl_cons, Nat.add_zero, ih, Nat.pow_succ]
-    simp [Nat.mul_assoc, Nat.mul_comm, Nat.mul_left_comm]
+    simp [Nat.mul_assoc, Nat.mul_comm]
 
 private theorem align_value {n : Nat} {bs : List Nat} {v : Nat}
     (h : bytesAlign n bs = .ok v) :
