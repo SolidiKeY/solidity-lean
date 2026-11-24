@@ -185,7 +185,7 @@ class LanguageServers extends EventEmitter {
       await this.settled(undefined,doc);if(!sourceCurrent()||this.epochs.get(uri)!==epoch)throw failure('Saved document changed',-32801);
       const client=this.client(doc),owned=this.ownership(doc,client),current=()=>owned()&&sourceCurrent();await client.sync(doc,current);
       if(!current()||client.disposed)throw failure('Language client changed',-32801);
-      client.peer.notify('textDocument/didSave',{textDocument:{uri},text});
+      notifyDocument(client,uri,'textDocument/didSave',{textDocument:{uri},text});
     };save().catch(error=>this.operationError(error,[uri]));
   }
   operationError(error,uris){if(this.disposed||this.reportedErrors.has(error)||!uris?.length||!uris.some(uri=>this.owners.has(uri)))return;if(![-32800,-32801].includes(error.code)&&error.code!=='CANCELLED'){this.reportedErrors.add(error);this.emit('serverError',Object.assign(error,{uris:error.uris||uris}));}}
