@@ -2,7 +2,25 @@
 'use strict';
 const fs=require('node:fs');
 function processState(pid){if(process.platform!=='linux')return null;try{const text=fs.readFileSync('/proc/'+pid+'/stat','utf8'),parts=text.slice(text.lastIndexOf(')')+2).split(' ');return{pid,state:parts[0],ppid:Number(parts[1]),group:Number(parts[2]),session:Number(parts[3]),threads:Number(parts[17]),birth:parts[19],rssPages:Number(parts[21])};}catch(error){if(['ENOENT','ESRCH'].includes(error.code))return null;throw error;}}
+// Kernel child lists are optional. Always validate PPID and the parent's birth.
+function directChildren(parent){
+ const current=processState(parent.pid);if(!current)return [];
+ if(current.birth!==parent.birth)throw Error('Owned process identity changed; refusing child discovery');
+ let ids;
+ try{
+  if(current.state!=='T')throw Error('Parent stop not confirmed');
+  const tasks=fs.readdirSync('/proc/'+parent.pid+'/task').filter(name=>/^\d+$/.test(name));
+  if(!tasks.length)throw Error('No process tasks');
+  ids=[...new Set(tasks.flatMap(tid=>{const text=fs.readFileSync('/proc/'+parent.pid+'/task/'+tid+'/children','utf8').trim();if(!text)return [];const names=text.split(/\s+/);if(!names.every(name=>/^\d+$/.test(name)&&Number.isSafeInteger(Number(name))&&Number(name)>0))throw Error('Invalid child list');return names.map(Number);}))];
+ }catch{
+  ids=fs.readdirSync('/proc').filter(name=>/^\d+$/.test(name)).map(Number);
+ }
+ const rows=ids.map(processState).filter(row=>row?.ppid===parent.pid);
+ const after=processState(parent.pid);if(!after)return [];
+ if(after.birth!==parent.birth)throw Error('Owned process identity changed; refusing child discovery');
+ return rows;
+}
 const running=record=>!!record&&!['Z','X'].includes(record.state);
 function groupMembers(child){if(process.platform!=='linux'||!child.ownedGroup)return[];const root=processState(child.pid);if(root&&child.processBirth&&root.birth!==child.processBirth)throw new Error('Owned process identity changed; refusing group cleanup');return fs.readdirSync('/proc').filter(name=>/^\d+$/.test(name)).map(Number).map(processState).filter(record=>record?.group===child.pid&&record.session===child.pid);}
 function ownedProcess(params,parent){if(!Number.isSafeInteger(params?.pid)||params.pid<=0||params.pid===parent.pid||!/^\d+$/.test(params.birth)||!['analysis','proof','build'].includes(params.kind))throw new Error('Invalid owned process registration');const current=processState(params.pid);if(!running(current)||current.birth!==params.birth||current.ppid!==parent.pid||current.group!==params.pid||current.session!==params.pid)throw new Error('Process is not owned by this server');return{pid:params.pid,processBirth:params.birth,ownedGroup:true,kind:params.kind};}
-module.exports={processState,running,groupMembers,ownedProcess};
+module.exports={processState,directChildren,running,groupMembers,ownedProcess};

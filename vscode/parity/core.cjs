@@ -39,13 +39,14 @@ function differences(left, right, path = '$') {
 
 function procTable() {
   const table = new Map();
-  for (const name of readdirSync('/proc')) {
-    if (!/^\d+$/.test(name)) continue;
+  // Prefer high PIDs before a large zombie table; this is only a scan heuristic.
+  for (const name of readdirSync('/proc').filter(name=>/^\d+$/.test(name)).sort((a,b)=>Number(b)-Number(a))) {
     try {
       const text = readFileSync(`/proc/${name}/stat`, 'utf8');
       const end = text.lastIndexOf(')');
       const fields = text.slice(end+2).trim().split(/\s+/);
-      const cmd = readFileSync(`/proc/${name}/cmdline`, 'utf8').replaceAll('\0', ' ');
+      // Linux exposes an empty cmdline for zombies; retain their stat data.
+      const cmd = fields[0]==='Z'?'':readFileSync(`/proc/${name}/cmdline`, 'utf8').replaceAll('\0', ' ');
       table.set(Number(name), {pid:Number(name), ppid:Number(fields[1]), state:fields[0],name:text.slice(text.indexOf('(')+1,end),
         ticks:Number(fields[11])+Number(fields[12]), start:fields[19], rssBytes:Number(fields[21])*4096, cmd});
     } catch { /* Processes can exit between reads. */ }
