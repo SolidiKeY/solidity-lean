@@ -26,16 +26,17 @@ class RpcPeer extends EventEmitter {
     if(signal?.aborted)return Promise.reject(failure('Request cancelled',-32800));
     const id=++this.next;
     return new Promise((resolve,reject)=>{
-      const finish=(error,result)=>{
+      const finish=(settle,value)=>{
         if(!this.pending.delete(id))return;
         clearTimeout(timer);signal?.removeEventListener('abort',abort);
-        if(error)reject(error);else resolve(result);
+        settle(value);
       };
-      const cancel=message=>{let writeError;try{if(!this.closed)this.notify('$/cancelRequest',{id});}catch(error){writeError=error;}finish(failure(message,-32800));if(writeError)this.close(writeError);};
+      const succeed=value=>finish(resolve,value),fail=error=>finish(reject,error);
+      const cancel=message=>{let writeFailed=false,writeError;try{if(!this.closed)this.notify('$/cancelRequest',{id});}catch(error){writeFailed=true;writeError=error;}fail(failure(message,-32800));if(writeFailed)this.close(writeError);};
       const abort=()=>cancel('Request cancelled');
       const timer=setTimeout(()=>cancel('Request timed out'),timeoutMs);
-      this.pending.set(id,{finish});signal?.addEventListener('abort',abort,{once:true});
-      try{this.write({jsonrpc:'2.0',id,method,params});}catch(error){finish(error);}
+      this.pending.set(id,{resolve:succeed,reject:fail});signal?.addEventListener('abort',abort,{once:true});
+      try{this.write({jsonrpc:'2.0',id,method,params});}catch(error){fail(error);}
     });
   }
   receive(message){
@@ -48,7 +49,8 @@ class RpcPeer extends EventEmitter {
         if(hasResult===hasError||hasError&&(!error||typeof error!=='object'||Array.isArray(error)||!Number.isInteger(error.code)||typeof error.message!=='string')){
           this.close(failure('Malformed JSON-RPC response',-32600));return;
         }
-        pending.finish(hasError?Object.assign(new Error(error.message),{code:error.code,data:error.data}):null,message.result);
+        if(hasError)pending.reject(Object.assign(new Error(error.message),{code:error.code,data:error.data}));
+        else pending.resolve(message.result);
       }
       return;
     }
@@ -72,7 +74,7 @@ class RpcPeer extends EventEmitter {
   onNotification(method,handler){this.notifications.set(method,handler);return{dispose:()=>{if(this.notifications.get(method)===handler)this.notifications.delete(method);}};}
   close(error=failure('Connection closed')){
     if(this.closed)return;this.closed=true;
-    for(const pending of [...this.pending.values()])pending.finish(error);
+    for(const pending of [...this.pending.values()])pending.reject(error);
     this.notifications.clear();this.requests.clear();
     this.emit('close',error);
   }
