@@ -1,6 +1,6 @@
 import Solidity.Correctness.Lowering.Total.Versions
 import Solidity.Correctness.Lowering.Total.Decode.BytesLiteral.Evaluation
-import Solidity.Correctness.Lowering.Total.Decode.Calls
+import Solidity.Correctness.Lowering.Total.Decode.WithExpr
 
 namespace Solidity.Examples.Goals.LoopsDecode
 
@@ -449,5 +449,28 @@ example : CallSpellExt.exprX_nil_statement := Decode.Calls.empty_spelling
 example (T : Decode.Tables) (R : CallSpellExt.Registry) (e : RawExpr)
     (a b : Source.Syn .expr) (ha : CallSpellExt.ExprX T R e a)
     (hb : CallSpellExt.ExprX T R e b) : a = b := Decode.Calls.unique ha hb
+
+/-! Registered literals now reach Source statement inference through the
+complete request decoder; the old decoder and its guard remain unchanged. -/
+example : (Decode.Calls.decode Decode.tablesB CallSpellExt.registry1
+    (bytesRequest [.assign (.name "x") (.bytesLit [1])])).isSome = true := rfl
+example : Decode.tablesB.decode
+    (bytesRequest [.assign (.name "x") (.bytesLit [1])]) = none := rfl
+example : (Decode.Calls.decode Decode.tablesB CallSpellExt.registry1
+    (bytesRequest [.block [.assign (.name "x") (.bytesLit [1])]])).isSome = true := rfl
+example : (Decode.Calls.decode Decode.tablesB CallSpellExt.registry1
+    (bytesRequest [.unchecked [.assign (.name "x") (.bytesLit [1])]])).isSome = true := rfl
+example : Decode.Calls.decode Decode.tablesB CallSpellExt.registry1
+    (bytesRequest [.assign (.name "x") (.call bytesLitName [.bool true])]) = none := rfl
+example : Decode.Calls.decode Decode.tablesB CallSpellExt.registry1
+    (bytesRequest [.assign (.name "x") (.bytesLit [1, 2])]) = none := rfl
+/-- The complete old decoder is recovered for every request and table, not
+only for the positive literal examples. -/
+example (T : Decode.Tables) (r : Request) : Decode.Calls.decode T [] r = T.decode r :=
+  Decode.Calls.decode_empty T r
+
+example (T : Decode.Tables) (R : CallSpellExt.Registry) (r : Request) (s : SourceProgram)
+    (h : Decode.Calls.decode T R r = some s) : Decode.plain r = true :=
+  Decode.WithExpr.decode_guard T (Decode.Calls.expr T R) h
 
 end Solidity.Examples.Goals.LoopsDecode
