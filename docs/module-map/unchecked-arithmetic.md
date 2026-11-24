@@ -12,6 +12,7 @@
 | `Correctness/Lowering/Total/Versions.lean` | Retained version boundaries and contract decompositions with the original unresolved coverage, inference, simulation and allocation obligations. |
 | `Correctness/Lowering/Total/Decode/BytesLiteral.lean` | Fixed-bytes literal normalization and model-alignment value faithfulness; shared call integration remains separate. |
 | `Correctness/Lowering/Total/Decode/BytesLiteral/Checked.lean` | Fixed-bytes value faithfulness from contextual conversion, narrow-width fit and full-word numeric checks. |
+| `Correctness/Lowering/Total/Decode/BytesLiteral/Evaluation.lean` | Source typed resolution and evaluation of normalized fixed-bytes literals, with local checked model-value agreement. |
 | `Correctness/Lowering/Total/Main.lean` | The loop contract composed with the production and family theorems: it is interpretation faithfulness and `Residual` (unproved); `production_correct` derives the consumer from `Residual` and `FullDomain`. |
 | `Correctness/Lowering/Total/Decode.lean` | The stage-1 raw-to-Source decoder `Decode.decode`: a chosen Source spelling of the raw input, then Source inference and resolution; every other input is a gap. |
 | `Correctness/Lowering/Total/Spells.lean` | The inductive spelling relation `Spells`; the decoder is sound for it and complete if Source inference is (`InferComplete`, unproved). |
