@@ -1,5 +1,5 @@
 import Solidity.Goals.ElabTotal
-import Solidity.Syntax.Elab.CallMeasure
+import Solidity.Syntax.Elab.CallOutput
 
 /-! Structural and named-argument closure for the elaborator totality proof. -/
 namespace Solidity.ElabHoist
@@ -237,10 +237,10 @@ private theorem error_congr (C : Contract) (rc rc' : ElabRec C)
   rw [hfold]
   rfl
 
-private theorem structural_congr (C : Contract) (rc rc' : ElabRec C)
+private theorem structural_bounded_congr (C : Contract) (rc rc' : ElabRec C)
     (H K : RawExpr → ElabM (SProg C × RawExpr)) (stmts : List RawStmt → ElabM (SProg C))
     (e : RawExpr) (hs : structural e = true)
-    (h : ∀ a, a.nodes < e.nodes → H a = K a) :
+    (h : ∀ a, a.nodes < e.nodes → ElabCallHeight.height a < ElabCallHeight.height e → H a = K a) :
     hoistWith C {rc with hoist := H, elabStmtsP := stmts, hoistArgs := hoistArgsWith C H, hoistBinop := hoistBinopWith C H} e =
       hoistWith C {rc' with hoist := K, elabStmtsP := stmts, hoistArgs := hoistArgsWith C K, hoistBinop := hoistBinopWith C K} e := by
   cases hf : e.foldConst with
@@ -248,55 +248,73 @@ private theorem structural_congr (C : Contract) (rc rc' : ElabRec C)
   | ok s =>
     have hsout := foldConst_structural e s hf hs
     have hb := foldConst_nodes_le e s hf
+    have ht := ElabCallHeight.foldConst_height_le e s hf
     cases s <;> simp only [structural, Bool.false_eq_true] at hsout
     all_goals try exact terminal_congr C {rc with hoistArgs := hoistArgsWith C H, hoistBinop := hoistBinopWith C H} {rc' with hoistArgs := hoistArgsWith C K, hoistBinop := hoistBinopWith C K} H K stmts e _ hf rfl
     case field a f =>
       apply field_congr C {rc with elabStmtsP := stmts, hoistArgs := hoistArgsWith C H, hoistBinop := hoistBinopWith C H} {rc' with elabStmtsP := stmts, hoistArgs := hoistArgsWith C K, hoistBinop := hoistBinopWith C K} H K e a f hf
       all_goals apply h
-      all_goals simp only [RawExpr.nodes] at hb
+      all_goals simp only [RawExpr.nodes, ElabCallHeight.height] at hb ht
       all_goals omega
     case index a b =>
       apply index_congr C {rc with elabStmtsP := stmts, hoistArgs := hoistArgsWith C H, hoistBinop := hoistBinopWith C H} {rc' with elabStmtsP := stmts, hoistArgs := hoistArgsWith C K, hoistBinop := hoistBinopWith C K} H K e a b hf
       all_goals apply h
-      all_goals simp only [RawExpr.nodes] at hb
+      all_goals simp only [RawExpr.nodes, ElabCallHeight.height] at hb ht
       all_goals omega
     case unop op a =>
       apply unop_congr C {rc with elabStmtsP := stmts, hoistArgs := hoistArgsWith C H, hoistBinop := hoistBinopWith C H} {rc' with elabStmtsP := stmts, hoistArgs := hoistArgsWith C K, hoistBinop := hoistBinopWith C K} H K e a op hf
       all_goals apply h
-      all_goals simp only [RawExpr.nodes] at hb
+      all_goals simp only [RawExpr.nodes, ElabCallHeight.height] at hb ht
       all_goals omega
     case incDec op a =>
       apply incDec_congr C {rc with elabStmtsP := stmts, hoistArgs := hoistArgsWith C H, hoistBinop := hoistBinopWith C H} {rc' with elabStmtsP := stmts, hoistArgs := hoistArgsWith C K, hoistBinop := hoistBinopWith C K} H K e a op hf
       all_goals apply h
-      all_goals simp only [RawExpr.nodes] at hb
+      all_goals simp only [RawExpr.nodes, ElabCallHeight.height] at hb ht
       all_goals omega
     case newArr op a =>
       apply newArr_congr C {rc with elabStmtsP := stmts, hoistArgs := hoistArgsWith C H, hoistBinop := hoistBinopWith C H} {rc' with elabStmtsP := stmts, hoistArgs := hoistArgsWith C K, hoistBinop := hoistBinopWith C K} H K e a op hf
       all_goals apply h
-      all_goals simp only [RawExpr.nodes] at hb
+      all_goals simp only [RawExpr.nodes, ElabCallHeight.height] at hb ht
       all_goals omega
     case assign l r =>
       apply assign_congr C {rc with hoistArgs := hoistArgsWith C H, hoistBinop := hoistBinopWith C H} {rc' with hoistArgs := hoistArgsWith C K, hoistBinop := hoistBinopWith C K} H K stmts e l r hf
       all_goals apply h
-      all_goals simp only [RawExpr.nodes] at hb
+      all_goals simp only [RawExpr.nodes, ElabCallHeight.height] at hb ht
       all_goals omega
     case ternary c a b =>
       apply ternary_congr C {rc with hoistArgs := hoistArgsWith C H, hoistBinop := hoistBinopWith C H} {rc' with hoistArgs := hoistArgsWith C K, hoistBinop := hoistBinopWith C K} H K stmts e c a b hf
       all_goals apply h
-      all_goals simp only [RawExpr.nodes] at hb
+      all_goals simp only [RawExpr.nodes, ElabCallHeight.height] at hb ht
       all_goals omega
 
     case modular op a b k =>
       apply modular_congr C {rc with elabStmtsP := stmts, hoistBinop := hoistBinopWith C H} {rc' with elabStmtsP := stmts, hoistBinop := hoistBinopWith C K} H K e a b k op hf
       all_goals apply h
-      all_goals simp only [RawExpr.nodes] at hb
+      all_goals simp only [RawExpr.nodes, ElabCallHeight.height] at hb ht
       all_goals omega
 
     case binop op a b =>
       apply binary_congr C {rc with hoistArgs := hoistArgsWith C H} {rc' with hoistArgs := hoistArgsWith C K} H K stmts e a b op hf
       all_goals apply h
-      all_goals simp only [RawExpr.nodes] at hb
+      all_goals simp only [RawExpr.nodes, ElabCallHeight.height] at hb ht
       all_goals omega
+
+private theorem structural_congr (C : Contract) (rc rc' : ElabRec C)
+    (H K : RawExpr → ElabM (SProg C × RawExpr)) (stmts : List RawStmt → ElabM (SProg C))
+    (e : RawExpr) (hs : structural e = true)
+    (h : ∀ a, a.nodes < e.nodes → H a = K a) :
+    hoistWith C {rc with hoist := H, elabStmtsP := stmts, hoistArgs := hoistArgsWith C H, hoistBinop := hoistBinopWith C H} e =
+      hoistWith C {rc' with hoist := K, elabStmtsP := stmts, hoistArgs := hoistArgsWith C K, hoistBinop := hoistBinopWith C K} e := by
+  exact structural_bounded_congr C rc rc' H K stmts e hs (fun a hn _ => h a hn)
+
+/-- Structural callback agreement only needs strictly smaller weighted heights. -/
+theorem structural_height_congr (C : Contract) (rc rc' : ElabRec C)
+    (H K : RawExpr → ElabM (SProg C × RawExpr)) (stmts : List RawStmt → ElabM (SProg C))
+    (e : RawExpr) (hs : structural e = true)
+    (h : ∀ a, ElabCallHeight.height a < ElabCallHeight.height e → H a = K a) :
+    hoistWith C {rc with hoist := H, elabStmtsP := stmts, hoistArgs := hoistArgsWith C H, hoistBinop := hoistBinopWith C H} e =
+      hoistWith C {rc' with hoist := K, elabStmtsP := stmts, hoistArgs := hoistArgsWith C K, hoistBinop := hoistBinopWith C K} e := by
+  exact structural_bounded_congr C rc rc' H K stmts e hs (fun a _ hh => h a hh)
 
 theorem hoistFuel_stable (C : Contract)
     (record : (RawExpr → ElabM (SProg C × RawExpr)) → ElabRec C)
@@ -483,6 +501,57 @@ theorem hoist_named_eq (C : Contract) (f : String) (ns : List String) (args : Li
   conv => rhs; unfold elabRec elabRecCore panicProducerRec hoist hoistWithCallbacks
   exact record_update_eq C _
 
+
+/-- Structural closure transports fallback equality on a downward-closed proof region. -/
+theorem hoistFuel_congr_on (C : Contract)
+    (record record' : (RawExpr → ElabM (SProg C × RawExpr)) → ElabRec C)
+    (stmts : List RawStmt → ElabM (SProg C))
+    (fallback fallback' : RawExpr → ElabM (SProg C × RawExpr))
+    (Good : RawExpr → Prop)
+    (hdown : ∀ e a, Good e → ElabCallHeight.height a < ElabCallHeight.height e → Good a)
+    (hfb : ∀ e, Good e → fallback e = fallback' e)
+    (fuel : Nat) (e : RawExpr) (he : Good e) :
+    hoistFuel C record stmts fallback fuel e =
+      hoistFuel C record' stmts fallback' fuel e := by
+  induction fuel generalizing e with
+  | zero => exact hfb e he
+  | succ n ih =>
+    simp only [hoistFuel]
+    split
+    next hs =>
+      apply structural_height_congr C _ _ _ _ stmts e hs
+      intro a ha
+      exact ih a (hdown e a he ha)
+    next => exact hfb e he
+
+/-- Named closure only needs fallback equality on the smaller reordered call. -/
+theorem namedClosure_congr_on (C : Contract) (rc rc' : ElabRec C)
+    (fallback fallback' : RawExpr → ElabM (SProg C × RawExpr))
+    (Good : RawExpr → Prop)
+    (hdown : ∀ e a, Good e → ElabCallHeight.height a < ElabCallHeight.height e → Good a)
+    (hfb : ∀ e, Good e → fallback e = fallback' e)
+    (e : RawExpr) (he : Good e) :
+    namedClosure C rc fallback e = namedClosure C rc' fallback' e := by
+  cases e <;> simp only [namedClosure] <;> try exact hfb _ he
+  rename_i f ns args
+  apply named_congr
+  exact hfb _ (hdown _ _ he (ElabCallHeight.named_request_lt C f ns args))
+
+/-- Combined closure preserves regional fallback agreement with fixed statement callbacks. -/
+theorem namedStructural_congr_on (C : Contract)
+    (record record' : (RawExpr → ElabM (SProg C × RawExpr)) → ElabRec C)
+    (stmts : List RawStmt → ElabM (SProg C))
+    (fallback fallback' : RawExpr → ElabM (SProg C × RawExpr))
+    (Good : RawExpr → Prop)
+    (hdown : ∀ e a, Good e → ElabCallHeight.height a < ElabCallHeight.height e → Good a)
+    (hfb : ∀ e, Good e → fallback e = fallback' e)
+    (e : RawExpr) (he : Good e) :
+    namedStructural C record stmts fallback e =
+      namedStructural C record' stmts fallback' e := by
+  exact hoistFuel_congr_on C record record' stmts _ _ Good hdown
+    (namedClosure_congr_on C (record fallback) (record' fallback')
+      fallback fallback' Good hdown hfb) e.nodes e he
+
 end Solidity.ElabHoist
 
 namespace Solidity.ElabCaptureProof
@@ -560,3 +629,290 @@ theorem eagerArgs_pair_captureAtoms
   eager_pair_obs C hoist a b p q sc st m out st' m' h
 
 end Solidity.ElabCaptureProof
+
+
+namespace Solidity.ElabControlProof
+open Semantics
+variable (C : Contract) [FreshNames]
+
+local macro "dispatch_tail " h:ident : tactic =>
+  `(tactic| repeat' first
+    | with_reducible apply $h
+    | (with_reducible apply obs_pure; exact ⟨_, rfl⟩)
+    | (with_reducible apply obs_any; intro value; try cases value)
+    | with_reducible apply obs_throw
+    | split
+    | extract_lets)
+
+/-- Memory dispatch returns the shared destination on every successful run,
+regardless of the callback programs. -/
+theorem memory_dispatch_result_name (rc : PanicProducerRec C) (h : RawExpr)
+    (ty : String) (args : List RawExpr) :
+    Obs (fnMemoryDispatchWith C rc h ty args) (fun out => ∃ x, out.2 = .name x) := by
+  unfold fnMemoryDispatchWith
+  extract_lets taken cands
+  split
+  · extract_lets typed
+    have ht : ∀ T, Obs (typed T) (fun out => ∃ x, out.2 = .name x) := by
+      intro T
+      simp -zeta only [typed]
+      extract_lets params arity
+      have hp : ∀ y, Obs (params y) (fun out => ∃ x, out.2 = .name x) := by
+        intro y
+        simp -zeta only [params]
+        with_reducible apply obs_any
+        intro scope
+        with_reducible apply obs_any
+        intro candidates
+        extract_lets selected finish
+        have hf : ∀ v, Obs (finish v) (fun out => ∃ x, out.2 = .name x) := by
+          rintro ⟨pre, tag, actuals⟩
+          simp -zeta only [finish]
+          repeat' first
+          | (with_reducible apply obs_pure; exact ⟨_, rfl⟩)
+          | (with_reducible apply obs_any; intro value)
+          | extract_lets
+        clear_value finish
+        dispatch_tail hf
+      clear_value params
+      have ha : ∀ y, Obs (arity y) (fun out => ∃ x, out.2 = .name x) := by
+        intro y
+        simp -zeta only [arity]
+        dispatch_tail hp
+      clear_value arity
+      dispatch_tail ha
+    clear_value typed
+    dispatch_tail ht
+  · exact obs_throw
+
+end Solidity.ElabControlProof
+
+namespace Solidity.ElabCallHeight
+open Semantics ElabControlProof
+variable (C : Contract) [FreshNames]
+
+/-- A successful memory dispatch has height one independently of producer callbacks. -/
+theorem memory_dispatch_output_height (pr : PanicProducerRec C) (h : RawExpr)
+    (ty : String) (args : List RawExpr) :
+    Obs (fnMemoryDispatchWith C pr h ty args) (fun out => height out.2 = 1) := by
+  intro sc st m out st' m' hr
+  obtain ⟨x, hx⟩ := memory_dispatch_result_name C pr h ty args sc st m out st' m' hr
+  simp only [hx, height]
+
+attribute [local irreducible] fnMemoryDispatchWith
+
+/-- Producer assembly supplies the memory-dispatch output invariant for any base record. -/
+theorem producers_memory_dispatch_output_height (rc : ElabRec C) (pr : PanicProducerRec C)
+    (h : RawExpr) (ty : String) (args : List RawExpr) :
+    Obs ((elabRecWithProducers C rc pr).fnMemoryDispatch h ty args)
+      (fun out => height out.2 = 1) :=
+  memory_dispatch_output_height C pr h ty args
+
+end Solidity.ElabCallHeight
+namespace Solidity.ElabCallHeight
+open Semantics ElabControlProof
+variable (C : Contract) [FreshNames]
+attribute [local irreducible] abiEncodeWith
+
+/-- The assembled record installs the actual encoder, whose successful result is a name. -/
+theorem callbacks_encode_output_height
+    (H : RawExpr → ElabM (SProg C × RawExpr))
+    (stmt : RawStmt → ElabM (SProg C)) (calls producers : PanicProducerRec C)
+    (std strs : Bool) (args : List RawExpr) (marks : List (Option AbiKind))
+    (sel : Option RawExpr) :
+    Obs ((elabRecWithProducers C
+      (elabRecWithCallbacks C H stmt @calls.elabCallRet) producers).abiEncode
+        std strs args marks sel) (fun out => height out.2 = 1) := by
+  intro sc st m out st' m' hr
+  change abiEncodeWith C _ std strs args marks sel sc st m = .ok ((out, st'), m') at hr
+  exact encode_output_height C _ std strs args marks sel sc st st' m m' out hr
+
+end Solidity.ElabCallHeight
+
+namespace Solidity.ElabCallHeight
+open Semantics ElabControlProof
+
+/-- Actual callback/producer assembly discharges both record-field output invariants. -/
+theorem callbacks_call_output_height (C : Contract) [FreshNames]
+    (H : RawExpr → ElabM (SProg C × RawExpr))
+    (stmt : RawStmt → ElabM (SProg C)) (calls producers : PanicProducerRec C)
+    (f : String) (args : List RawExpr)
+    (hh : ∀ a, (height a < height (.call f args) ∨
+      height a = height (.call f args) ∧ a.nodes < (RawExpr.call f args).nodes) →
+      Obs (H a) (fun out => height out.2 ≤ height a))
+    (hopen : ∀ t b i j v pre, inlineSliceOpen t (.call "#sliceRaw" [b, i, j]) = .ok (v, pre) →
+      height v.off ≤ 2 ∧ height v.len ≤ 3) :
+    Obs (hoistWith C (elabRecWithProducers C
+      (elabRecWithCallbacks C H stmt @calls.elabCallRet) producers) (.call f args))
+      (fun out => height out.2 ≤ height (.call f args)) := by
+  apply call_output_height_of_raw_bounds C _ f args hh
+  · exact callbacks_encode_output_height C H stmt calls producers
+  · exact hopen
+  · exact producers_memory_dispatch_output_height C _ producers
+
+end Solidity.ElabCallHeight
+
+namespace Solidity.ElabCallHeight
+open Semantics ElabControlProof
+
+/-- Closing structural/named recursion needs the fallback bound only before the call. -/
+theorem callbacks_closed_call_output_height (C : Contract) [FreshNames]
+    (fallback : RawExpr → ElabM (SProg C × RawExpr))
+    (stmt : RawStmt → ElabM (SProg C)) (calls producers : PanicProducerRec C)
+    (f : String) (args : List RawExpr)
+    (hfb : ∀ a, (height a < height (.call f args) ∨
+      height a = height (.call f args) ∧ a.nodes < (RawExpr.call f args).nodes) →
+      Obs (fallback a) (fun out => height out.2 ≤ height a))
+    (hopen : ∀ t b i j v pre, inlineSliceOpen t (.call "#sliceRaw" [b, i, j]) = .ok (v, pre) →
+      height v.off ≤ 2 ∧ height v.len ≤ 3) :
+    Obs (hoistWith C (elabRecWithProducers C
+      (elabRecWithCallbacks C (hoistWithCallbacks C fallback stmt @calls.elabCallRet)
+        stmt @calls.elabCallRet) producers) (.call f args))
+      (fun out => height out.2 ≤ height (.call f args)) := by
+  apply callbacks_call_output_height C _ stmt calls producers f args
+  · intro e he
+    exact namedStructural_output_height_before C _ _ fallback (.call f args) hfb e he
+  · exact hopen
+
+end Solidity.ElabCallHeight
+
+namespace Solidity.ElabCallHeight
+open Semantics ElabControlProof
+
+/-- Actual record assembly preserves successful output height for every expression form. -/
+theorem callbacks_output_height (C : Contract) [FreshNames]
+    (H : RawExpr → ElabM (SProg C × RawExpr))
+    (stmt : RawStmt → ElabM (SProg C)) (calls producers : PanicProducerRec C)
+    (e : RawExpr)
+    (hh : ∀ a, (height a < height e ∨ height a = height e ∧ a.nodes < e.nodes) →
+      Obs (H a) (fun out => height out.2 ≤ height a))
+    (hopen : ∀ t b i j v pre, inlineSliceOpen t (.call "#sliceRaw" [b, i, j]) = .ok (v, pre) →
+      height v.off ≤ 2 ∧ height v.len ≤ 3) :
+    Obs (hoistWith C (elabRecWithProducers C
+      (elabRecWithCallbacks C H stmt @calls.elabCallRet) producers) e)
+      (fun out => height out.2 ≤ height e) := by
+  let rc := elabRecWithProducers C (elabRecWithCallbacks C H stmt @calls.elabCallRet) producers
+  have hsmall : ∀ a, height a < height e →
+      Obs (rc.hoist a) (fun out => height out.2 ≤ height a) := fun a ha => hh a (Or.inl ha)
+  by_cases hs : ElabHoist.structural e = true
+  · exact structural_output_height C rc e hs hsmall rfl rfl
+  · cases e <;> try (exact False.elim (hs rfl))
+    · rename_i f args
+      exact callbacks_call_output_height C H stmt calls producers f args hh hopen
+    · rename_i f ns args
+      exact named_output_height C rc (.named f ns args) f ns args rfl
+        (hsmall _ (named_request_lt C f ns args))
+
+/-- The complete hoist arm inherits strict-prefix fallback output bounds through closure. -/
+theorem callbacks_closed_output_height (C : Contract) [FreshNames]
+    (fallback : RawExpr → ElabM (SProg C × RawExpr))
+    (stmt : RawStmt → ElabM (SProg C)) (calls producers : PanicProducerRec C)
+    (e : RawExpr)
+    (hfb : ∀ a, (height a < height e ∨ height a = height e ∧ a.nodes < e.nodes) →
+      Obs (fallback a) (fun out => height out.2 ≤ height a))
+    (hopen : ∀ t b i j v pre, inlineSliceOpen t (.call "#sliceRaw" [b, i, j]) = .ok (v, pre) →
+      height v.off ≤ 2 ∧ height v.len ≤ 3) :
+    Obs (hoistWith C (elabRecWithProducers C
+      (elabRecWithCallbacks C (hoistWithCallbacks C fallback stmt @calls.elabCallRet)
+        stmt @calls.elabCallRet) producers) e)
+      (fun out => height out.2 ≤ height e) := by
+  apply callbacks_output_height C _ stmt calls producers e
+  · intro a ha
+    exact namedStructural_output_height_before C _ _ fallback e hfb a ha
+  · exact hopen
+
+end Solidity.ElabCallHeight
+
+namespace Solidity.ElabCallHeight
+open Semantics ElabControlProof
+
+/-- Any callback satisfying the assembled arm equation preserves output height.
+This is an invariant of a supplied solution, not an existence or termination proof. -/
+theorem callbacks_fixed_output_height (C : Contract) [FreshNames]
+    (fallback : RawExpr → ElabM (SProg C × RawExpr))
+    (stmt : RawStmt → ElabM (SProg C)) (calls producers : PanicProducerRec C)
+    (heq : ∀ e, fallback e = hoistWith C (elabRecWithProducers C
+      (elabRecWithCallbacks C (hoistWithCallbacks C fallback stmt @calls.elabCallRet)
+        stmt @calls.elabCallRet) producers) e)
+    (hopen : ∀ t b i j v pre, inlineSliceOpen t (.call "#sliceRaw" [b, i, j]) = .ok (v, pre) →
+      height v.off ≤ 2 ∧ height v.len ≤ 3) :
+    ∀ e, Obs (fallback e) (fun out => height out.2 ≤ height e) := by
+  intro e
+  generalize hk : height e = k
+  induction k using Nat.strongRecOn generalizing e with
+  | ind k ih =>
+    generalize hn : e.nodes = n
+    induction n using Nat.strongRecOn generalizing e with
+    | ind n jh =>
+      rw [← hk, heq e]
+      apply callbacks_closed_output_height C fallback stmt calls producers e
+      · intro a ha
+        rcases ha with ha | ⟨ha, hnodes⟩
+        · exact ih (height a) (by omega) a rfl
+        · simpa only [ha, hk] using jh a.nodes (by omega) a (by omega) rfl
+      · exact hopen
+
+end Solidity.ElabCallHeight
+
+namespace Solidity.ElabCallHeight
+open Semantics ElabControlProof
+
+/-- Structural/named closure preserves the output invariant of a supplied arm solution. -/
+theorem callbacks_fixed_closure_output_height (C : Contract) [FreshNames]
+    (fallback : RawExpr → ElabM (SProg C × RawExpr))
+    (stmt : RawStmt → ElabM (SProg C)) (calls producers : PanicProducerRec C)
+    (heq : ∀ e, fallback e = hoistWith C (elabRecWithProducers C
+      (elabRecWithCallbacks C (hoistWithCallbacks C fallback stmt @calls.elabCallRet)
+        stmt @calls.elabCallRet) producers) e)
+    (hopen : ∀ t b i j v pre, inlineSliceOpen t (.call "#sliceRaw" [b, i, j]) = .ok (v, pre) →
+      height v.off ≤ 2 ∧ height v.len ≤ 3) (e : RawExpr) :
+    Obs (hoistWithCallbacks C fallback stmt @calls.elabCallRet e)
+      (fun out => height out.2 ≤ height e) := by
+  unfold hoistWithCallbacks
+  apply namedStructural_output_height_on C _ _ fallback (fun _ => True)
+  · intro _ _ _ _
+    trivial
+  · intro a _
+    exact callbacks_fixed_output_height C fallback stmt calls producers heq hopen a
+  · trivial
+
+end Solidity.ElabCallHeight
+
+namespace Solidity.ElabCallHeight
+open Semantics ElabControlProof
+
+/-- Actual raw opening discharges the call-arm opening bound. -/
+theorem callbacks_call_output_height_raw (C : Contract) [FreshNames]
+    (H : RawExpr → ElabM (SProg C × RawExpr))
+    (stmt : RawStmt → ElabM (SProg C)) (calls producers : PanicProducerRec C)
+    (f : String) (args : List RawExpr)
+    (hh : ∀ a, (height a < height (.call f args) ∨
+      height a = height (.call f args) ∧ a.nodes < (RawExpr.call f args).nodes) →
+      Obs (H a) (fun out => height out.2 ≤ height a)) :
+    Obs (hoistWith C (elabRecWithProducers C
+      (elabRecWithCallbacks C H stmt @calls.elabCallRet) producers) (.call f args))
+      (fun out => height out.2 ≤ height (.call f args)) :=
+  callbacks_call_output_height C H stmt calls producers f args hh
+    inlineSliceOpen_raw_height
+
+end Solidity.ElabCallHeight
+
+namespace Solidity
+open Semantics
+/-- Defining equations of the reached helpers in the registered totality goal. -/
+theorem elabKernel_helpers : Goals.ElabKernelHelpers := by
+  refine ⟨?_, ?_, ?_⟩
+  · intro f hf e
+    exact RawExpr.mapM_except_eq RawExpr.measure_sizeOf f hf e
+  · intro r ss
+    exact lowerReturns.eq_def r ss
+  · intro inst ρ ss
+    rw [renameStmts.eq_def]
+    cases ss with
+    | nil => rfl
+    | cons s ss =>
+      cases s <;> try rfl
+      all_goals try (simp only [pure_bind])
+      case send T x e a g => cases T <;> cases x <;> rfl
+      case forLoop a i c u b => cases i <;> rfl
+end Solidity

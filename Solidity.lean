@@ -2471,8 +2471,13 @@ import Solidity.Correctness.Lowering.Loops.WhileBreak
 import Solidity.Correctness.Lowering.Loops.WhileContinue
 import Solidity.Correctness.Lowering.Loops.WhileReset
 import Solidity.Correctness.Lowering.Sim.Coverage.Alignment
+import Solidity.Correctness.Lowering.Sim.Coverage.BooleanCoverage
+import Solidity.Correctness.Lowering.Sim.Coverage.BooleanDecoding
 import Solidity.Correctness.Lowering.Sim.Coverage.BooleanDomain
+import Solidity.Correctness.Lowering.Sim.Coverage.BooleanExprInference
+import Solidity.Correctness.Lowering.Sim.Coverage.BooleanLocals
 import Solidity.Correctness.Lowering.Sim.Coverage.BooleanSpelling
+import Solidity.Correctness.Lowering.Sim.Coverage.BooleanStmtInference
 import Solidity.Correctness.Lowering.Sim.Coverage.LoweringReceipt
 import Solidity.Correctness.Lowering.Sim.Coverage.Obstruction
 import Solidity.Correctness.Lowering.Sim.Coverage.ProductionV2
@@ -2486,7 +2491,10 @@ import Solidity.Correctness.Lowering.Sim.Expr.Strength
 import Solidity.Correctness.Lowering.Sim.Match
 import Solidity.Correctness.Lowering.Sim.Match.Cases
 import Solidity.Correctness.Lowering.Sim.Match.CasesV2
+import Solidity.Correctness.Lowering.Sim.Match.CompositionV2
+import Solidity.Correctness.Lowering.Sim.Match.DiagramV2
 import Solidity.Correctness.Lowering.Sim.Match.Relations
+import Solidity.Correctness.Lowering.Sim.Match.StatementV2
 import Solidity.Correctness.Lowering.Sim.Session.Backward
 import Solidity.Correctness.Lowering.Sim.Session.Backward.NoDiagram
 import Solidity.Correctness.Lowering.Sim.Session.Binding
@@ -2510,6 +2518,7 @@ import Solidity.Correctness.Lowering.Total.Contract
 import Solidity.Correctness.Lowering.Total.Coverage
 import Solidity.Correctness.Lowering.Total.Coverage.Checks
 import Solidity.Correctness.Lowering.Total.Decode
+import Solidity.Correctness.Lowering.Total.Decode.Spelling
 import Solidity.Correctness.Lowering.Total.Decode.Tables
 import Solidity.Correctness.Lowering.Total.Decode.Widths
 import Solidity.Correctness.Lowering.Total.Main
@@ -3383,6 +3392,7 @@ import Solidity.Goals.IntrinsicStorage
 import Solidity.Goals.LeanInventorySound
 import Solidity.Goals.Loops
 import Solidity.Goals.LoweringDiagram
+import Solidity.Goals.LoweringDiagramV2
 import Solidity.Goals.LoweringSession
 import Solidity.Goals.LoweringSim
 import Solidity.Goals.OffCriticalPath

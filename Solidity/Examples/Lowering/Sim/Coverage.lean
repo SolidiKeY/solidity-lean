@@ -1,5 +1,5 @@
 import Solidity.Correctness.Lowering.Sim.Coverage.SpellingObstruction
-import Solidity.Correctness.Lowering.Sim.Coverage.BooleanSpelling
+import Solidity.Correctness.Lowering.Sim.Coverage.BooleanCoverage
 import Solidity.Correctness.Lowering.Sim.Coverage.Alignment
 import Solidity.Correctness.Lowering.Sim.Coverage.LoweringReceipt
 import Solidity.Examples.Lowering.Sim.Match
@@ -79,6 +79,36 @@ example (out : Solidity.Correctness.Lowering.Checker.Output Match.C [.val .bool,
     ∃ t, Solidity.Correctness.Lowering.Total.Decode.items .body Match.body.input.raw = some t :=
   (smoke_in_domain out).syntax_decoded
 
+/-- The general expression theorem runs Source inference on the existing
+smoke condition; it does not assert statement or production completeness. -/
+example : ∃ t, Solidity.Correctness.Lowering.Total.Spells.Expr
+    (.assign (.name "i") (.name "a")) t ∧
+    ∃ d : Source.Typed (Match.context.at Match.names) t .bool,
+      Source.Typed.infer (Match.context.at Match.names) t = some ⟨.bool, d⟩ := by
+  obtain ⟨t, ht, hi⟩ := BooleanDomain.Expr.inferred
+    (Γ := Match.context.at Match.names) (names := ["i", "a"])
+    (raw := .assign (.name "i") (.name "a")) rfl
+    (BooleanDomain.Expr.assign (by decide) (.name (by decide)))
+  obtain ⟨d, hd⟩ := hi.2 (t.nodes.length + 1) (Nat.lt_succ_self _)
+  exact ⟨t, ht, d, hd⟩
+
+/-- The general grammar theorem decodes the exact smoke to a singleton
+resolved statement, without relying on the precomputed smoke decoder proof. -/
+example (out : Solidity.Correctness.Lowering.Checker.Output Match.C [.val .bool, .val .bool]) :
+    ∃ (C : Source.Ctx) (L : List (String × Source.STy)) (s : Source.Syn (.stmt .body))
+      (d : Source.StmtD C L s L),
+      Solidity.Correctness.Lowering.Total.Decode.decode (request Match.body (Match.emitted out)) =
+        some (Solidity.Correctness.Lowering.Total.SourceProgram.ofStmt d.toR) :=
+  (smoke_in_domain out).decoded_stmt
+
+/-- Restricted coverage specializes to the existing Match smoke. The actual
+production receipt is still a hypothesis, not a nonvacuity claim. -/
+example (out : Solidity.Correctness.Lowering.Checker.Output Match.C [.val .bool, .val .bool])
+    (production : @ProductionV2 productionNames Match.body (Match.emitted out))
+    (accepted : Accepted (Match.emitted out)) :
+    ∃ b' : Body, b'.SameInput Match.body ∧ ∃ m, diagram.Assoc b' (Match.emitted out) m :=
+  diagram_total_boolean Match.body (Match.emitted out) (smoke_in_domain out) production accepted
+
 end Solidity.Examples.Lowering.Sim.Coverage
 
 #print axioms Solidity.Correctness.Lowering.Sim.Coverage.spells_aligned
@@ -88,3 +118,9 @@ end Solidity.Examples.Lowering.Sim.Coverage
 #print axioms Solidity.Correctness.Lowering.Sim.Coverage.lowerAt_of_lowersTo
 
 #print axioms Solidity.Correctness.Lowering.Sim.Coverage.BooleanDomain.Input.syntax_decoded
+
+#print axioms Solidity.Correctness.Lowering.Sim.Coverage.BooleanDomain.Expr.inferred
+
+#print axioms Solidity.Correctness.Lowering.Sim.Coverage.BooleanDomain.Stmt.inferred
+#print axioms Solidity.Correctness.Lowering.Sim.Coverage.BooleanDomain.Input.decoded_stmt
+#print axioms Solidity.Correctness.Lowering.Sim.Coverage.diagram_total_boolean

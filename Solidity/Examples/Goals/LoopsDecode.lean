@@ -1,4 +1,5 @@
 import Solidity.Correctness.Lowering.Total.Versions.Primitive
+import Solidity.Correctness.Lowering.Total.Decode.Spelling
 
 namespace Solidity.Examples.Goals.LoopsDecode
 
@@ -42,5 +43,11 @@ example : Decode.tablesW.decode { narrowRequest [] with
 /-- Type representation only; the version's simulation remains a separate obligation. -/
 example {p : PrimTy} {bits : Nat} {τ : Source.STy}
     (h : Decode.primTy p bits = some τ) : Version.Prim p τ := Version.prim_of_primTy h
+
+/-- Retained spelling checks preserve the Source inference completeness premise. -/
+example {T : Decode.Tables} (complete : InferCompleteT T) {r : Request} {s : SourceProgram} :
+    T.decode r = some s ↔ SpellsT T r s := ⟨decode_spellsT, SpellsT.decode complete⟩
+example {r : Request} {s : SourceProgram} : SpellsT Decode.tables1 r s ↔ Spells r s :=
+  spellsT_tables1
 
 end Solidity.Examples.Goals.LoopsDecode
