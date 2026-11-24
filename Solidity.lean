@@ -2562,6 +2562,7 @@ import Solidity.Correctness.Panic.Capture
 import Solidity.Correctness.Panic.Dispatch
 import Solidity.Correctness.Panic.Guards.Arith
 import Solidity.Correctness.Panic.Guards.State
+import Solidity.Correctness.Panic.Main
 import Solidity.Correctness.Panic.Provenance
 import Solidity.Correctness.Panic.Provenance.Control
 import Solidity.Correctness.Panic.Provenance.Eval
