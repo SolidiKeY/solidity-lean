@@ -1,3 +1,4 @@
+import Solidity.Correctness.Lowering.Total.Versions.CalleeBinding.Resolved
 import Solidity.Source.Elaborate
 import Solidity.Correctness.Lowering.Total.Versions
 import Solidity.Correctness.Lowering.Total.Decode.BytesLiteral.Evaluation
@@ -575,5 +576,41 @@ example : (Decode.Callee.modifiers Decode.tablesB CallSpellExt.registry1
     pure (Source.elabBody { decls := [d] } d).isSome
   unless actual == some false do
     throw (IO.userError "unresolved callee modifiers were not rejected"))
+
+/-! Bind the translated function to its complete elaborated Source unit. -/
+private def identityResolution : Source.Resolution :=
+  let d := identityDecl.get (by rfl)
+  Source.resolveUnit { pipeline := .legacy }
+    (.unit (.cons (.contract false "C" .none .nil (.cons d.node .nil)) .nil))
+
+#guard_msgs in
+#eval (show IO Unit from do
+  let d := identityDecl.get (by rfl)
+  let actual := Version.CalleeBinding.fromResolution identityResolution d
+  unless actual.isSome do
+    throw (IO.userError "translated identity unit failed resolved-body binding"))
+
+/-- The general binding certificate identifies the actual program body for
+this translated declaration, rather than an independently chosen derivation. -/
+example {s : Version.CalleeBinding.Output}
+    (h : Version.CalleeBinding.fromResolution identityResolution
+      (identityDecl.get (by rfl)) = some s) :
+    s.source.prog.body (identityDecl.get (by rfl)) = some s.body :=
+  (Version.CalleeBinding.fromResolution_bound h).2.2.2.2.1
+
+#guard_msgs in
+#eval (show IO Unit from do
+  let actual := Version.CalleeBinding.fromResolutionAt identityResolution 1
+  unless actual.map (fun s => s.declaration.name) == some "identity" do
+    throw (IO.userError "indexed callee selection failed")
+  unless (Version.CalleeBinding.fromResolutionAt identityResolution 0).isNone do
+    throw (IO.userError "bodyless contract declaration was bound as a function")
+  unless (Version.CalleeBinding.fromResolutionAt identityResolution 2).isNone do
+    throw (IO.userError "out-of-range callee selection succeeded"))
+
+example {s : Version.CalleeBinding.Output}
+    (h : Version.CalleeBinding.fromResolutionAt identityResolution 1 = some s) :
+    s.declaration ∈ s.source.res.env.decls :=
+  (Version.CalleeBinding.fromResolutionAt_member h).2.1
 
 end Solidity.Examples.Goals.LoopsDecode
