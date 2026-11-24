@@ -52,6 +52,9 @@ class RpcPeer extends EventEmitter {
       }
       return;
     }
+    if(typeof message.method!=='string'||message.id!==undefined&&!(typeof message.id==='string'||typeof message.id==='number'&&Number.isFinite(message.id))){
+      this.close(failure('Malformed JSON-RPC request',-32600));return;
+    }
     if(message.id===undefined){
       try{Promise.resolve(this.notifications.get(message.method)?.(message.params)).catch(error=>this.emit('handlerError',error));}
       catch(error){this.emit('handlerError',error);}return;
