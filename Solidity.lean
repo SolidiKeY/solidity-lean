@@ -2524,6 +2524,7 @@ import Solidity.Correctness.Lowering.Total.Decode.BytesLiteral
 import Solidity.Correctness.Lowering.Total.Decode.BytesLiteral.Checked
 import Solidity.Correctness.Lowering.Total.Decode.BytesLiteral.Evaluation
 import Solidity.Correctness.Lowering.Total.Decode.Callee.Functions
+import Solidity.Correctness.Lowering.Total.Decode.Callee.Metadata
 import Solidity.Correctness.Lowering.Total.Decode.Callee.Parameters
 import Solidity.Correctness.Lowering.Total.Decode.Calls
 import Solidity.Correctness.Lowering.Total.Decode.Marked

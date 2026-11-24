@@ -1,3 +1,4 @@
+import Solidity.Correctness.Lowering.Total.Decode.Callee.Metadata
 import Solidity.Correctness.Lowering.Total.Versions.CalleeBinding.Resolved
 import Solidity.Source.Elaborate
 import Solidity.Correctness.Lowering.Total.Versions
@@ -612,5 +613,43 @@ example {s : Version.CalleeBinding.Output}
     (h : Version.CalleeBinding.fromResolutionAt identityResolution 1 = some s) :
     s.declaration ∈ s.source.res.env.decls :=
   (Version.CalleeBinding.fromResolutionAt_member h).2.1
+
+/-! Retained ordinary headers supply source identity and call flags. -/
+private def importedCallee : FunDecl :=
+  let source : SourceFunction :=
+    { name := "sourceIdentity", mutability := .viewFn,
+      callable := .abi .externalFn .selected none }
+  { identityCallee with sourceDecl := some source }
+
+example : (Decode.Callee.fromMetadata Decode.tablesB CallSpellExt.registry1
+    "C" importedCallee).map (fun d => d.name) = some "sourceIdentity" := rfl
+example : (do
+    let d ← Decode.Callee.fromMetadata Decode.tablesB CallSpellExt.registry1 "C" importedCallee
+    let f ← d.frame? { decls := [d] }
+    pure f.msgValue) = some false := rfl
+
+example {d : Source.Decl}
+    (h : Decode.Callee.fromMetadata Decode.tablesB CallSpellExt.registry1
+      "C" importedCallee = some d) : d.name = "sourceIdentity" := by
+  obtain ⟨source, _, hs, _, _, hn, _⟩ := Decode.Callee.fromMetadata_header h
+  cases hs
+  exact hn
+
+#guard_msgs in
+#eval (show IO Unit from do
+  let d := (Decode.Callee.fromMetadata Decode.tablesB CallSpellExt.registry1
+    "C" importedCallee).get (by rfl)
+  let res := Source.resolveUnit { pipeline := .legacy }
+    (.unit (.cons (.contract false "C" .none .nil (.cons d.node .nil)) .nil))
+  unless (Version.CalleeBinding.fromResolution res d).isSome do
+    throw (IO.userError "retained metadata function failed Source binding"))
+
+example : Decode.Callee.fromMetadata Decode.tablesB CallSpellExt.registry1
+    "C" identityCallee = none := rfl
+example : Decode.Callee.ordinaryVisibility (.local .freeFn) = none := rfl
+example : Decode.Callee.ordinaryVisibility (.abi .publicFn .retained none) = none := rfl
+example : Decode.Callee.ordinaryVisibility .constructor = none := rfl
+example : [SourceMutability.nonpayable, .pureFn, .viewFn, .payable].map
+    Decode.Callee.sourceMutability = [none, some .pure, some .view, some .payable] := rfl
 
 end Solidity.Examples.Goals.LoopsDecode
