@@ -4,8 +4,13 @@
 const assert=require('node:assert/strict');
 const fs=require('node:fs'),path=require('node:path'),{pathToFileURL}=require('node:url'),{spawn}=require('node:child_process');
 const {RpcPeer}=require('../src/rpc.cjs');
-const {proofPacket,expectedDeclarations}=require('./configuration-lifecycle.cjs');
+const {proofPacket,expectedDeclarations,waitUntil}=require('./configuration-lifecycle.cjs');
 function phaseProof(states,binding,status){return states.some(packet=>proofPacket(packet,binding,status));}
+async function waitForPhase({states,diagnostics,binding,status,peer,now=Date.now,sleep=()=>new Promise(r=>setTimeout(r,20))}){
+  const deadline=now()+60000,options={deadline,peer,now,sleep};
+  await waitUntil(()=>phaseProof(states,binding,status),'automatic verification version '+binding.version+' status '+status,options);
+  if(status===4)await waitUntil(()=>diagnostics.some(p=>p.uri===binding.uri&&p.version===binding.version&&p.diagnostics.some(d=>d.severity===1)),'broken-proof error diagnostic',options);
+}
 async function main(){
   if(process.argv[4]==='--ghost'){if(!process.argv[3])throw Error('Ghost observation needs a fresh output root');const out=path.resolve(process.argv[3]);if(fs.existsSync(out))throw Error('Choose fresh ghost output');fs.mkdirSync(out,{recursive:true});for(const mode of ['on','off'])await require('./stdio.cjs').main(['--scope','ghost','--ghost-notifications',mode,'--targets','dafny','--workers','1','--obligations','1','--trials','1','--warmups','0','--dafny',path.resolve(process.argv[2]),'--output',path.join(out,mode)]);return;}
 
@@ -41,16 +46,8 @@ async function main(){
   const texts=[initial,initial+'\n// edit\n',initial.replace('r := 1','r := 2'),initial+'\n// fixed\n'];
   const phases=[];let migrationResult;
   async function waitFor(version,status){
-    const started=Date.now(),binding={uri,version,text:texts[version-1],sourceHash:require('node:crypto').createHash('sha256').update(texts[version-1]).digest('hex')};
-    while(!phaseProof(states,binding,status)){
-      if(peer.closed||Date.now()-started>60000)throw Error('No automatic verification version '+version+' status '+status);
-      await new Promise(r=>setTimeout(r,20));
-    }
-    if(status===4){
-      while(!diagnostics.some(p=>p.uri===uri&&p.version===version&&p.diagnostics.some(d=>d.severity===1))){
-        if(Date.now()-started>60000)throw Error('Missing broken-proof error diagnostic');await new Promise(r=>setTimeout(r,20));
-      }
-    }
+    const binding={uri,version,text:texts[version-1],sourceHash:require('node:crypto').createHash('sha256').update(texts[version-1]).digest('hex')};
+    await waitForPhase({states,diagnostics,binding,status,peer});
     phases.push({version,status,binding,expectedDeclarations:expectedDeclarations(binding),text:texts[version-1],observed:states.filter(p=>p.uri===uri&&p.version===version),diagnostics:diagnostics.filter(p=>p.uri===uri&&p.version===version)});
   }
   try{
@@ -98,4 +95,4 @@ async function main(){
 }
 if(require.main===module)main().catch(e=>{console.error(e.stack);process.exitCode=1;});
 
-module.exports={phaseProof};
+module.exports={phaseProof,waitForPhase};
