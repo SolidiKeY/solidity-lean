@@ -1,5 +1,5 @@
 import Solidity.Correctness.Lowering.Sim.Coverage.SpellingObstruction
-import Solidity.Correctness.Lowering.Sim.Coverage.BooleanExprInference
+import Solidity.Correctness.Lowering.Sim.Coverage.BooleanCoverage
 import Solidity.Correctness.Lowering.Sim.Coverage.Alignment
 import Solidity.Correctness.Lowering.Sim.Coverage.LoweringReceipt
 import Solidity.Examples.Lowering.Sim.Match
@@ -92,6 +92,23 @@ example : ∃ t, Solidity.Correctness.Lowering.Total.Spells.Expr
   obtain ⟨d, hd⟩ := hi.2 (t.nodes.length + 1) (Nat.lt_succ_self _)
   exact ⟨t, ht, d, hd⟩
 
+/-- The general grammar theorem decodes the exact smoke to a singleton
+resolved statement, without relying on the precomputed smoke decoder proof. -/
+example (out : Solidity.Correctness.Lowering.Checker.Output Match.C [.val .bool, .val .bool]) :
+    ∃ (C : Source.Ctx) (L : List (String × Source.STy)) (s : Source.Syn (.stmt .body))
+      (d : Source.StmtD C L s L),
+      Solidity.Correctness.Lowering.Total.Decode.decode (request Match.body (Match.emitted out)) =
+        some (Solidity.Correctness.Lowering.Total.SourceProgram.ofStmt d.toR) :=
+  (smoke_in_domain out).decoded_stmt
+
+/-- Restricted coverage specializes to the existing Match smoke. The actual
+production receipt is still a hypothesis, not a nonvacuity claim. -/
+example (out : Solidity.Correctness.Lowering.Checker.Output Match.C [.val .bool, .val .bool])
+    (production : @ProductionV2 productionNames Match.body (Match.emitted out))
+    (accepted : Accepted (Match.emitted out)) :
+    ∃ b' : Body, b'.SameInput Match.body ∧ ∃ m, diagram.Assoc b' (Match.emitted out) m :=
+  diagram_total_boolean Match.body (Match.emitted out) (smoke_in_domain out) production accepted
+
 end Solidity.Examples.Lowering.Sim.Coverage
 
 #print axioms Solidity.Correctness.Lowering.Sim.Coverage.spells_aligned
@@ -103,3 +120,7 @@ end Solidity.Examples.Lowering.Sim.Coverage
 #print axioms Solidity.Correctness.Lowering.Sim.Coverage.BooleanDomain.Input.syntax_decoded
 
 #print axioms Solidity.Correctness.Lowering.Sim.Coverage.BooleanDomain.Expr.inferred
+
+#print axioms Solidity.Correctness.Lowering.Sim.Coverage.BooleanDomain.Stmt.inferred
+#print axioms Solidity.Correctness.Lowering.Sim.Coverage.BooleanDomain.Input.decoded_stmt
+#print axioms Solidity.Correctness.Lowering.Sim.Coverage.diagram_total_boolean
