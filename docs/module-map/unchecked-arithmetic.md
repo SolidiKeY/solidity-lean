@@ -4,6 +4,7 @@
 | `Correctness/Lowering/Total/Decode/Widths.lean` | Retained width-aware decoder tables for primitive locals, declarations and state variables. |
 | `Correctness/Lowering/Total/Versions/Primitive.lean` | Retained primitive type representation relation and elementary/local type lemmas. |
 | `Correctness/Lowering/Total/Decode/Spelling.lean` | Compatibility import and definitional original-table bridge for generalized spelling in Total/Spells.lean. |
+| `Correctness/Lowering/Total/Decode/Marked.lean` | Retained marked-address, fixed-bytes and caller-aware decoder tables; existing coverage gaps remain explicit. |
 | `Correctness/Lowering/Total/Main.lean` | The loop contract composed with the production and family theorems: it is interpretation faithfulness and `Residual` (unproved); `production_correct` derives the consumer from `Residual` and `FullDomain`. |
 | `Correctness/Lowering/Total/Decode.lean` | The stage-1 raw-to-Source decoder `Decode.decode`: a chosen Source spelling of the raw input, then Source inference and resolution; every other input is a gap. |
 | `Correctness/Lowering/Total/Spells.lean` | The inductive spelling relation `Spells`; the decoder is sound for it and complete if Source inference is (`InferComplete`, unproved). |
