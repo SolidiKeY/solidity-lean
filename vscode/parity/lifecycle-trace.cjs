@@ -11,6 +11,9 @@ async function waitForPhase({states,diagnostics,binding,status,peer,now=Date.now
   await waitUntil(()=>phaseProof(states,binding,status),'automatic verification version '+binding.version+' status '+status,options);
   if(status===4)await waitUntil(()=>diagnostics.some(p=>p.uri===binding.uri&&p.version===binding.version&&p.diagnostics.some(d=>d.severity===1)),'broken-proof error diagnostic',options);
 }
+function waitForMigration(predicate,label,{peer,now=Date.now,sleep=()=>new Promise(r=>setTimeout(r,10))}){
+  return waitUntil(predicate,'reference migration: '+label,{deadline:now()+60000,peer,now,sleep});
+}
 async function main(){
   if(process.argv[4]==='--ghost'){if(!process.argv[3])throw Error('Ghost observation needs a fresh output root');const out=path.resolve(process.argv[3]);if(fs.existsSync(out))throw Error('Choose fresh ghost output');fs.mkdirSync(out,{recursive:true});for(const mode of ['on','off'])await require('./stdio.cjs').main(['--scope','ghost','--ghost-notifications',mode,'--targets','dafny','--workers','1','--obligations','1','--trials','1','--warmups','0','--dafny',path.resolve(process.argv[2]),'--output',path.join(out,mode)]);return;}
 
@@ -66,7 +69,7 @@ async function main(){
       const migratedUri=pathToFileURL(path.join(workspace,'migration.dfy')).href;
       const broken='function GetConstant(): int ensures false { 1 }';
       const insertion='lemma {:neverVerify} HasNeverVerifyAttribute(p: nat, q: nat)\n  ensures true\n{\n}\n\n',lineDelta=5;
-      const until=async(predicate,label)=>{const start=Date.now();while(!predicate()){if(peer.closed||Date.now()-start>60000)throw Error('Reference migration timed out: '+label);await new Promise(r=>setTimeout(r,10));}};
+      const until=(predicate,label)=>waitForMigration(predicate,label,{peer});
       peer.notify('textDocument/didOpen',{textDocument:{uri:migratedUri,languageId:'dafny',version:1,text:broken}});
       await until(()=>diagnostics.some(p=>p.uri===migratedUri&&p.version===1&&p.diagnostics.some(d=>d.severity===1&&d.relatedInformation?.length)),'original postcondition error');
       const original=diagnostics.filter(p=>p.uri===migratedUri&&p.version===1&&p.diagnostics.some(d=>d.severity===1)).at(-1);
@@ -94,4 +97,4 @@ async function main(){
 }
 if(require.main===module)main().catch(e=>{console.error(e.stack);process.exitCode=1;});
 
-module.exports={phaseProof,waitForPhase};
+module.exports={phaseProof,waitForPhase,waitForMigration};
