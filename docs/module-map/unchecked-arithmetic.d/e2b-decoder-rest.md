@@ -10,3 +10,4 @@
 | `Correctness/Lowering/Total/Decode/BytesLiteral.lean` | Fixed-bytes literal normalization and model-alignment value faithfulness; shared call integration remains separate. |
 | `Correctness/Lowering/Total/Decode/BytesLiteral/Checked.lean` | Fixed-bytes value faithfulness from contextual conversion, narrow-width fit and full-word numeric checks. |
 | `Correctness/Lowering/Total/Decode/BytesLiteral/Evaluation.lean` | Source typed resolution and evaluation of normalized fixed-bytes literals, with local checked model-value agreement. |
+| `Correctness/Lowering/Total/Decode/Calls.lean` | Executable additive call-spelling expression decoder, exact ExprX contract and conservative unclaimed-expression behavior. |
