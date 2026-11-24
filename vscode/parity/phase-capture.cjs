@@ -29,6 +29,7 @@ async function requestPhase(directory,runId,phase,metadata,timeoutMs){
         if(reply.error||reply.status!=='captured')throw Error('Visual phase '+phase+' failed: '+reply.error);
         const bytes=fs.readFileSync(path.join(p.dir,'screenshot.png'));
         if(bytes.length<=png.length||!bytes.subarray(0,png.length).equals(png))throw Error('Visual phase has no PNG evidence');
+        if(reply.imageBytes!==bytes.length||reply.imageSha256!==createHash('sha256').update(bytes).digest('hex'))throw Error('Visual phase image byte binding mismatch');
         if(Date.now()>=deadline)break;
         return reply;
       }
@@ -45,7 +46,8 @@ async function servePhases(directory,runId,capture,seen){
     seen.add(request.requestId);const reply={runId,phase,requestId:request.requestId,status:'failed',requested:request.requested,metadataHash:createHash('sha256').update(JSON.stringify(request.metadata??null)).digest('hex')};
     try{if(fs.existsSync(path.join(p.dir,'screenshot.png')))throw Error('Existing phase screenshot must be preserved; choose a fresh capture directory');
         reply.capture=await capture(p.dir,request);reply.status=reply.capture?.captured===true&&reply.capture.screenshot===true&&reply.capture.error===undefined?'captured':'failed';
-        if(reply.status!=='captured')reply.error=typeof reply.capture?.error==='string'&&reply.capture.error?reply.capture.error:'Renderer did not capture a screenshot';}
+        if(reply.status!=='captured')reply.error=typeof reply.capture?.error==='string'&&reply.capture.error?reply.capture.error:'Renderer did not capture a screenshot';
+        else{const bytes=fs.readFileSync(path.join(p.dir,'screenshot.png'));reply.imageBytes=bytes.length;reply.imageSha256=createHash('sha256').update(bytes).digest('hex');}}
     catch(e){reply.status='failed';reply.error=e.message;}
     reply.finished=Date.now();json(p.reply,reply);
   }
