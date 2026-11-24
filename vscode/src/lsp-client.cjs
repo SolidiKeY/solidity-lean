@@ -65,13 +65,15 @@ class LanguageClient extends EventEmitter {
     this.documents.set(uri,{version:doc.version,text,synchronizationId});
   }
   async verify(doc,options={},isCurrent=()=>true){
-    try{await this.sync(doc,isCurrent,options.signal);}catch(error){if(options.signal?.aborted||this.disposed||error.code===-32801)error.code='CANCELLED';throw error;}
+    const uri=doc.uri.toString(),version=doc.version,text=doc.getText(),current=()=>isCurrent()&&!doc.isClosed&&doc.uri.toString()===uri&&doc.version===version&&doc.getText()===text;
+    try{await this.sync(doc,current,options.signal);}catch(error){if(options.signal?.aborted||this.disposed||error.code===-32801)error.code='CANCELLED';throw error;}
+    if(!current()||this.disposed)throw cancelled();
     let result;
-    try{result=await this.peer.request('solidityLean/verify',{textDocument:{uri:doc.uri.toString(),version:doc.version},options:{listing:!!options.listing,
+    try{result=await this.peer.request('solidityLean/verify',{textDocument:{uri,version},options:{listing:!!options.listing,
       contract:options.contract,function:options.function,counterexamples:!!options.counterexamples,auditPreconditions:!!options.auditPreconditions,timeoutMs:options.timeoutMs}},
     {signal:options.signal,timeoutMs:options.timeoutMs||600000});}
     catch(error){if([-32800,-32801].includes(error.code))error.code='CANCELLED';throw error;}
-    if(!isCurrent()||this.disposed||doc.isClosed)throw cancelled();
+    if(!current()||this.disposed)throw cancelled();
     return parseReport(JSON.stringify(result));
   }
   async request(method,doc,params={},options={},isCurrent=()=>true){
