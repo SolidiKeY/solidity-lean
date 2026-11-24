@@ -131,3 +131,13 @@ test('late reads retain renderer and invalid-PNG failures',async t=>{
     }finally{t.mock.restoreAll();fs.rmSync(dir,{recursive:true,force:true});}
   }
 });
+
+test('renderer acknowledgement refuses truthy nonbooleans and nested capture errors',async()=>{
+ for(const capture of [{captured:'false',screenshot:true},{captured:true,screenshot:'false'},{captured:1,screenshot:true},{captured:true,screenshot:1},{captured:true,screenshot:true,error:'actual renderer failure'}]){
+  const dir=fixture();try{
+   const pending=requestPhase(dir,'strict-capture','trace-hidden',{binding:'owned'},1000),rejected=assert.rejects(pending,/failed/);
+   await servePhases(dir,'strict-capture',async d=>{fs.writeFileSync(path.join(d,'screenshot.png'),png);return capture;},new Set());
+   await rejected;const reply=JSON.parse(fs.readFileSync(paths(dir,'trace-hidden').reply));assert.equal(reply.status,'failed');assert.deepEqual(reply.capture,capture);if(capture.error)assert.equal(reply.error,capture.error);
+  }finally{fs.rmSync(dir,{recursive:true,force:true});}
+ }
+});
