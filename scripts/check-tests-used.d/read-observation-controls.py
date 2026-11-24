@@ -113,5 +113,94 @@ class MetadataControls(unittest.TestCase):
                 schema.validate_receipt(record)
 
 
+class NativeLifecycleControls(unittest.TestCase):
+    def test_real_exec_and_child_tree_are_observed(self):
+        import os
+        native = load('native')
+        result = native.trace(['/bin/sh', '-c', '/bin/true & wait'], '/tmp', dict(os.environ),
+                              timeout=5, max_events=6000, max_output_bytes=16384)
+        self.assertEqual(result['status'], 'observed', result['reason'])
+        self.assertTrue(result['cleanup_confirmed'])
+        self.assertEqual(result['result'], dict(exit=0, signal=None))
+        self.assertTrue(any(x['kind'] == 'child' for x in result['events']))
+        self.assertTrue(any(x['kind'] == 'exec' for x in result['events']))
+        self.assertEqual([x['sequence'] for x in result['events']], list(range(len(result['events']))))
+
+    def test_timeout_and_event_loss_never_pass(self):
+        import os
+        native = load('native')
+        for command, timeout, budget in [(['/bin/sleep', '2'], .1, 6000), (['/bin/true'], 5, 1)]:
+            result = native.trace(command, '/tmp', dict(os.environ), timeout=timeout, max_events=budget, max_output_bytes=16384)
+            self.assertEqual(result['status'], 'unavailable')
+            self.assertTrue(result['cleanup_confirmed'])
+
+
+class NativeRefusalControls(unittest.TestCase):
+    def test_invalid_budgets_fail_before_fork(self):
+        native = load('native')
+        for timeout, events in [(float('inf'), 10), (float('nan'), 10), (1, float('nan')), (True, 1), (1, 1.5)]:
+            with self.subTest(timeout=timeout, events=events), self.assertRaises(native.Unavailable):
+                native.trace(['/bin/true'], '/tmp', {}, timeout=timeout, max_events=events, max_output_bytes=1024)
+
+    def test_group_stop_is_not_swallowed(self):
+        import os
+        native = load('native')
+        result = native.trace(['/bin/sh', '-c', 'kill -STOP $$; echo continued'], '/tmp', dict(os.environ),
+                              timeout=2, max_events=6000, max_output_bytes=16384)
+        self.assertEqual(result['status'], 'unavailable')
+        self.assertNotIn(b'continued', result['stdout'])
+        self.assertTrue(result['cleanup_confirmed'])
+
+    def test_identity_failure_still_reaps_provisional_child(self):
+        import os
+        native = load('native')
+        def broken(_): raise OSError('injected identity failure')
+        native.process_identity = broken
+        result = native.trace(['/bin/true'], '/tmp', dict(os.environ), timeout=2,
+                              max_events=6000, max_output_bytes=16384)
+        self.assertEqual(result['status'], 'unavailable')
+        self.assertTrue(result['cleanup_confirmed'])
+        self.assertFalse(native.traced_tasks())
+
+    def test_tiny_deadline_reaps_child_before_ptrace_admission(self):
+        import os
+        native = load('native')
+        result = native.trace(['/bin/sleep', '2'], '/tmp', dict(os.environ), timeout=1e-12,
+                              max_events=50, max_output_bytes=1024)
+        self.assertEqual(result['status'], 'unavailable')
+        self.assertTrue(result['cleanup_confirmed'])
+        self.assertFalse(native.traced_tasks())
+
+    def test_exit_observer_failure_does_not_signal_reaped_root(self):
+        import os
+        native = load('native')
+        original = native.os.kill
+        reaped = set()
+        def kill(pid, sig):
+            self.assertNotIn(pid, reaped)
+            return original(pid, sig)
+        def observe(event, pid, _):
+            if event['kind'] == 'exit':
+                reaped.add(pid)
+                raise native.Unavailable('injected exit observer failure')
+        native.os.kill = kill
+        try:
+            result = native.trace(['/bin/true'], '/tmp', dict(os.environ), timeout=3,
+                                  max_events=6000, max_output_bytes=1024, observer=observe)
+        finally:
+            native.os.kill = original
+        self.assertEqual(result['status'], 'unavailable')
+        self.assertTrue(result['cleanup_confirmed'])
+
+    def test_large_output_is_bounded_and_unavailable(self):
+        import os
+        native = load('native')
+        result = native.trace(['/bin/dd', 'if=/dev/zero', 'bs=65536', 'count=1'], '/tmp', dict(os.environ),
+                              timeout=3, max_events=6000, max_output_bytes=1024)
+        self.assertEqual(result['status'], 'unavailable')
+        self.assertLessEqual(len(result['stdout']), 1024)
+        self.assertTrue(result['cleanup_confirmed'])
+
+
 if __name__ == '__main__':
     unittest.main()
