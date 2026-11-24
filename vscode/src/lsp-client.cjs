@@ -141,7 +141,13 @@ class LanguageServers extends EventEmitter {
   }
   async settled(signal,doc){while(this.restarting)await cancellable(this.restarting,signal);if(doc){const key=JSON.stringify(this.configuration(doc));while(this.retirementKeys.has(key))await cancellable(this.retirementKeys.get(key),signal);}if(signal?.aborted)throw failure('Request cancelled',-32800);}
   async open(doc){await this.settled(undefined,doc);const client=this.client(doc),current=this.ownership(doc,client);await client.sync(doc,current);if(!current()||client.disposed)throw failure('Language client changed',-32801);this.emit('identity',{serverInfo:client.serverInfo,runtimeInfo:client.runtimeInfo,uris:[doc.uri.toString()]});return client;}
-  async verify(args){await this.settled(args.signal,args.document);const client=this.client(args.document);return client.verify(args.document,args,this.ownership(args.document,client));}
+  async verify(args){
+    const doc=args.document,uri=doc.uri.toString(),version=doc.version,text=doc.getText(),epoch=this.epochs.get(uri);
+    const sourceCurrent=()=>!this.disposed&&!doc.isClosed&&doc.uri.toString()===uri&&doc.version===version&&doc.getText()===text;
+    await this.settled(args.signal,doc);if(!sourceCurrent()||this.epochs.get(uri)!==epoch)throw cancelled();
+    const client=this.client(doc),owned=this.ownership(doc,client),current=()=>owned()&&sourceCurrent();
+    const result=await client.verify(doc,args,current);if(!current())throw cancelled();return result;
+  }
   async request(method,doc,params,options){
     if(options?.signal?.aborted)throw failure('Request cancelled',-32800);
     if(doc.isClosed)throw failure('Document closed',-32801);
