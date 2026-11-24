@@ -8,14 +8,8 @@ local decoding, the request guard and Source inference are shared unchanged.
 -/
 namespace Solidity.Correctness.Lowering.Total.Decode.WithExpr
 
-open Source (Syn SCtx)
+open Source (Syn)
 variable (T : Tables) (spell : RawExpr → Option (Syn .expr))
-
-abbrev simple := Tables.WithExpr.simple
-abbrev update := Tables.WithExpr.update
-abbrev initializer := Tables.WithExpr.initializer
-abbrev stmt := Tables.WithExpr.stmt
-abbrev items := Tables.WithExpr.items
 
 /-- Run the unchanged request guard, context/local decoding and Source
 inference after spelling statements with the supplied expression decoder. -/
@@ -23,7 +17,7 @@ def decode (r : Request) : Option SourceProgram :=
   if plain r then do
     let C ← T.context r
     let L ← T.locals r.input.before.locals.1
-    let b ← items T spell .body r.input.raw
+    let b ← Tables.WithExpr.items T spell .body r.input.raw
     let ⟨L', d⟩ ← Source.ItemsD.infer C L b
     pure ⟨C.env, C.rets, C.inModifier, .body, Source.tysOf L, Source.tysOf L', d.toR⟩
   else none
@@ -39,23 +33,9 @@ theorem decode_guard {r : Request} {s : SourceProgram}
 
 variable (T : Tables)
 
-theorem update_original (b : List RawStmt) : update T.expr b = T.update b := rfl
-
-theorem simple_original (s : RawStmt) : simple T T.expr s = T.simple s := rfl
-
-theorem initializer_original (b : List RawStmt) :
-    initializer T T.expr b = T.initializer b := rfl
-
-theorem stmt_original (k : SCtx) (s : RawStmt) :
-    stmt T T.expr k s = T.stmt k s := rfl
-
-theorem items_original (k : SCtx) (b : List RawStmt) :
-    items T T.expr k b = T.items k b := rfl
-
 /-- With the old expression decoder, the complete request decoder is exactly
 v1, including its admission guard and inferred Source program. -/
-theorem decode_original (r : Request) : decode T T.expr r = T.decode r := by
-  simp only [decode, Tables.decode, items_original]
+theorem decode_original (r : Request) : decode T T.expr r = T.decode r := rfl
 
 end Solidity.Correctness.Lowering.Total.Decode.WithExpr
 
