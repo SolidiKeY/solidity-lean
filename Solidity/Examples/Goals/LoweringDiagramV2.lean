@@ -11,7 +11,8 @@ info: open Solidity.Goals.loweringBySimulationV2 ← Solidity.Correctness.Loweri
 
 namespace Shrink.Lowering
 
-open Solidity.Correctness.Lowering.Sim (simulatesV2_of_simulates)
+open Solidity.Correctness.Lowering.Sim (simulatesV2_of_simulates lowering_v2_of_v1 frameRel_eq
+  simulatesV2_of_runs₂ runs₂_of_simulatesV2 diagram RunSim₂)
 
 /-- The v2 goal differs from v1 in its diagram obligations only. -/
 example : loweringBySimulationV2 =
@@ -24,7 +25,23 @@ example (h : loweringBySimulation)
     loweringBySimulationV2 :=
   letI : FreshNames := productionNames
   let ⟨bound, D, simulates, total, lift⟩ := h
-  ⟨bound, D, simulatesV2_of_simulates simulates, frames D simulates, total, lift⟩
+  lowering_v2_of_v1 ⟨bound, D, simulates, frames D simulates, total, lift⟩
+
+/-- The v1 obligations of a diagram give its v2 ones. -/
+example [FreshNames] (D : Diagram) (h : D.Simulates) : D.SimulatesV2 := simulatesV2_of_simulates h
+
+/-- The contract's frame relation is the one `RunSim₂` is stated over. -/
+example {E : Source.Env} {C : Contract} {Γ : Ctx} (G : Source.Glob E) (F : Source.Fr)
+    (σ : State C Γ) : Solidity.Correctness.Lowering.Sim.frameRel G F σ = FrameRel G F σ :=
+  frameRel_eq G F σ
+
+/-- `RunSim₂` at every associated production run of the fragment is exactly the
+per-run part of `diagram.SimulatesV2`. -/
+example [FreshNames] :
+    (∀ (b : Body) (u : Emitted) (m : Solidity.Lowering.V07.ContextMap b.ctx u.Γ),
+      Production b u → Accepted u → diagram.Assoc b u m → RunSim₂ b u m) ↔
+    diagram.SimulatesV2 :=
+  ⟨simulatesV2_of_runs₂, runs₂_of_simulatesV2⟩
 
 /-! ## Non-vacuity of the frame relation -/
 
