@@ -2,6 +2,8 @@
 'use strict';
 const {EventEmitter}=require('node:events');
 const HEADER_LIMIT=8192;
+// Preserve BOM handling by JSON.parse while refusing malformed source/URI bytes.
+const utf8=new (require('node:util').TextDecoder)('utf-8',{fatal:true,ignoreBOM:true});
 
 class LspFrames extends EventEmitter {
   constructor(limit=32*1024*1024){super();this.limit=limit;this.buffer=Buffer.alloc(0);}
@@ -17,7 +19,7 @@ class LspFrames extends EventEmitter {
       if(!Number.isSafeInteger(length)||length>this.limit)throw new Error('Oversize LSP body');
       if(this.buffer.length<end+4+length)return;
       const body=this.buffer.subarray(end+4,end+4+length);this.buffer=this.buffer.subarray(end+4+length);
-      this.emit('message',JSON.parse(body.toString('utf8')));
+      this.emit('message',JSON.parse(utf8.decode(body)));
     }
   }
   end(){if(this.buffer.length)throw new Error('Truncated LSP frame');}
