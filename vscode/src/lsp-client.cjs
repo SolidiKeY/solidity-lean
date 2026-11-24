@@ -16,6 +16,16 @@ function documentRequestParams(params,uri,version){
   return{...captured,textDocument:{uri,version}};
 }
 
+function notifyDocument(client,uri,method,params){
+  try{client.peer.notify(method,params);}
+  catch(error){
+    client.documents.delete(uri);
+    try{client.peer.close(error instanceof Error?error:Object.assign(failure('Document synchronization failed'),{cause:error}));}
+    catch(closeError){client.documentNotificationCloseFailure={method,uri,error:closeError};}
+    throw error;
+  }
+}
+
 class LanguageClient extends EventEmitter {
   constructor(configuration){
     super();this.configuration=configuration;this.documents=new Map();this.disposed=false;this.ownedProcesses=new Map();
@@ -59,14 +69,15 @@ class LanguageClient extends EventEmitter {
     await cancellable(this.ready,signal);
     if(signal?.aborted)throw failure('Request cancelled',-32800);
     if(this.disposed)throw cancelled();
+    if(this.peer?.closed)throw failure('Connection closed');
     if(!isCurrent())throw failure('Language client changed',-32801);
     if(doc.isClosed)throw failure('Document closed',-32801);
     const uri=doc.uri.toString(),text=doc.getText(),previous=this.documents.get(uri);let synchronizationId=previous?.synchronizationId;
-    const opened=()=>{this.syncCounter=(this.syncCounter||0)+1;synchronizationId=String(this.syncCounter);this.documents.set(uri,{version:doc.version,text,synchronizationId});this.peer.notify('textDocument/didOpen',{textDocument:{uri,languageId:'solidity',version:doc.version,text,synchronizationId}});};
+    const opened=()=>{this.syncCounter=(this.syncCounter||0)+1;synchronizationId=String(this.syncCounter);this.documents.set(uri,{version:doc.version,text,synchronizationId});notifyDocument(this,uri,'textDocument/didOpen',{textDocument:{uri,languageId:'solidity',version:doc.version,text,synchronizationId}});};
     if(!previous){opened();}
     else if(previous.version!==doc.version||previous.text!==text){
-      if(doc.version<=previous.version){this.peer.notify('textDocument/didClose',{textDocument:{uri}});opened();}
-      else this.peer.notify('textDocument/didChange',{textDocument:{uri,version:doc.version},contentChanges:[incrementalChange(previous.text,text)]});
+      if(doc.version<=previous.version){notifyDocument(this,uri,'textDocument/didClose',{textDocument:{uri}});opened();}
+      else notifyDocument(this,uri,'textDocument/didChange',{textDocument:{uri,version:doc.version},contentChanges:[incrementalChange(previous.text,text)]});
     }
     this.documents.set(uri,{version:doc.version,text,synchronizationId});
   }
@@ -92,7 +103,7 @@ class LanguageClient extends EventEmitter {
     const result=await this.peer.request(method,requestParams,options);
     if(!current())throw failure('Document content changed',-32801);return result;
   }
-  closeDocument(uri){if(this.peer&&!this.peer.closed&&this.documents.has(uri)){this.peer.notify('textDocument/didClose',{textDocument:{uri}});this.documents.delete(uri);}}
+  closeDocument(uri){if(this.peer&&!this.peer.closed&&this.documents.has(uri)){notifyDocument(this,uri,'textDocument/didClose',{textDocument:{uri}});this.documents.delete(uri);}}
   cancel(uri){if(this.peer&&!this.peer.closed)this.peer.request('solidityLean/cancel',uri?{uri}:{},{timeoutMs:5000}).catch(()=>{});}
   dispose(){
     if(this.disposal)return this.disposal;this.disposed=true;this.startupAbort.abort();return this.disposal=this.finishDispose();
