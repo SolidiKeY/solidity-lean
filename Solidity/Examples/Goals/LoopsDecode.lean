@@ -1,3 +1,4 @@
+import Solidity.Correctness.Lowering.Total.Versions.CalleeBinding.Frame
 import Solidity.Correctness.Lowering.Total.Versions.CalleeBinding.Functions
 import Solidity.Correctness.Lowering.Total.Decode.Callee.Units
 import Solidity.Correctness.Lowering.Total.Decode.Callee.Declarations
@@ -777,5 +778,15 @@ example {s : Version.CalleeBinding.Output}
       some s.declaration := by
   obtain ⟨_, _, _, hd, _, _⟩ := Version.CalleeBinding.fromFunctions_bound h (by rfl)
   exact hd
+
+/-- The selected frame retains the model declaration's original return name,
+not the model alias or a name inferred from the Source body. -/
+example {s : Version.CalleeBinding.Output}
+    (h : Version.CalleeBinding.fromFunctions Decode.tablesB CallSpellExt.registry1
+      { pipeline := .legacy } "C" statePrefix [("modelReader", stateReader)] 0 = some s) :
+    s.frame.names = [] ∧ s.frame.rnames = [some "r"] ∧ s.frame.inModifier = false := by
+  obtain ⟨_, _, _, _, _, _, _, hn, hr, _, _, _, hm⟩ :=
+    Version.CalleeBinding.fromFunctions_frame h (by rfl)
+  exact ⟨hn, hr, hm⟩
 
 end Solidity.Examples.Goals.LoopsDecode
