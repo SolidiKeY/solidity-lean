@@ -7,6 +7,7 @@ import Solidity.Correctness.Lowering.Total.Versions.CalleeBinding.Resolved
 import Solidity.Source.Elaborate
 import Solidity.Correctness.Lowering.Total.Versions.Self
 import Solidity.Correctness.Lowering.Total.Decode.Casts
+import Solidity.Correctness.Lowering.Total.CallSpellExt
 import Solidity.Correctness.Lowering.Total.Decode.BytesLiteral.Evaluation
 import Solidity.Correctness.Lowering.Total.Decode.WithExpr
 import Solidity.Correctness.Lowering.Total.Decode.Callee.Functions
@@ -420,6 +421,18 @@ casts has no reading of either. A conversion Source refuses (`uint256` to
 /- The surface `address(this)` is the raw `address` of the own-address read. -/
 #guard (Decode.Casts.decode Decode.tablesT [] (addressRequest
   [.assign (.name "a") (.call "address" [.env .selfAddress])])).isSome
+/- With the bytes-literal registry the same decoder reads a `bytes4` literal
+(`#bytes(…)`), a `bytes4(…)` cast of a `bytes2` literal's local, and both own-account reads together. -/
+#guard (Decode.Casts.decode Decode.tablesT CallSpellExt.registry1
+  { addressRequest [.assign (.name "w") (.call bytesLitName [.num 222, .num 173]),
+      .assign (.name "w") (.call "bytes4" [.name "h"]),
+      .require (.binop .lt (.num 0) (.env .selfBalance))] with
+    input := { (addressRequest []).input with
+      raw := [.assign (.name "w") (.call bytesLitName [.num 222, .num 173]),
+        .assign (.name "w") (.call "bytes4" [.name "h"]),
+        .require (.binop .lt (.num 0) (.env .selfBalance))]
+      before := ⟨([("w", .val .uint 32 [("#bytes", 4)]), ("h", .val .uint 16 [("#bytes", 2)])], 1),
+        {}⟩ } }).isSome
 /- The cast names: integers, `address`, `bytesN`; nothing else. -/
 #guard (Decode.Casts.target "uint8").isSome && (Decode.Casts.target "int").isSome &&
   (Decode.Casts.target "bytes4").isSome && (Decode.Casts.target "address").isSome &&
