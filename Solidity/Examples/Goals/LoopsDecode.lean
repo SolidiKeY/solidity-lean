@@ -6,6 +6,7 @@ import Solidity.Correctness.Lowering.Total.Decode.Callee.Metadata
 import Solidity.Correctness.Lowering.Total.Versions.CalleeBinding.Resolved
 import Solidity.Source.Elaborate
 import Solidity.Correctness.Lowering.Total.Versions.Self
+import Solidity.Correctness.Lowering.Total.Decode.Casts
 import Solidity.Correctness.Lowering.Total.Decode.BytesLiteral.Evaluation
 import Solidity.Correctness.Lowering.Total.Decode.WithExpr
 import Solidity.Correctness.Lowering.Total.Decode.Callee.Functions
@@ -391,6 +392,69 @@ example : Version.Sound Decode.tablesT := Version.soundT
 example : Simulation.InitialMatching Version.rel Decode.tablesT.decode :=
   Version.initialMatchingAt Version.soundT
 example : FullDomain Version.boundaryT := Version.boundaryAt_fullDomain _ _
+
+/-! ### Casts written as calls
+
+`Decode.Casts.expr` reads an unclaimed one-argument call of a cast name as the
+Source explicit conversion; Source typing decides whether it is allowed.
+(Evaluated, not kernel-checked: names are read by string functions.) -/
+
+/- `uint8 m = uint8(n)` and `a = address(b)` decode; the version without
+casts has no reading of either. A conversion Source refuses (`uint256` to
+`address`), and a cast name with two arguments, stay gaps. -/
+#guard (Decode.Casts.decode Decode.tablesT [] (addressRequest
+  [.decl (.named "uint8") "m" (some (.call "uint8" [.name "n"]))])).isSome
+#guard (Decode.tablesT.decode (addressRequest
+  [.decl (.named "uint8") "m" (some (.call "uint8" [.name "n"]))])).isNone
+#guard (Decode.Casts.decode Decode.tablesT [] (addressRequest
+  [.assign (.name "a") (.call "address" [.name "b"])])).isSome
+#guard (Decode.Casts.decode Decode.tablesT [] (addressRequest
+  [.assign (.name "a") (.call "address" [.name "n"])])).isNone
+#guard (Decode.Casts.decode Decode.tablesT [] (addressRequest
+  [.assign (.name "n") (.call "uint8" [.name "n", .name "n"])])).isNone
+/- A nested cast inside arithmetic and a loop condition. -/
+#guard (Decode.Casts.decode Decode.tablesT [] (addressRequest
+  [.whileLoop {} (.binop .lt (.call "uint16" [.call "uint8" [.name "n"]]) (.num 7))
+    [.incDec .postInc (.name "n")]])).isSome
+/- The cast names: integers, `address`, `bool`, `bytesN`; nothing else. -/
+#guard (Decode.Casts.target "uint8").isSome && (Decode.Casts.target "int").isSome &&
+  (Decode.Casts.target "bytes4").isSome && (Decode.Casts.target "address").isSome &&
+  (Decode.Casts.target "f").isNone && (Decode.Casts.target "uint7").isNone &&
+  (Decode.Casts.intTarget (.bool, 8)).isNone
+#guard Decode.Casts.isCast (.call "uint8" [.name "n"]) && !Decode.Casts.isCast (.call "f" [.name "n"])
+example : Decode.Casts.single (.cons (.ident "n") .nil) = some (.ident "n") := rfl
+example : Decode.Casts.single .nil = none := rfl
+/-- The equation at a cast, and the cast decoder on cast-free input. -/
+example {T : Decode.Tables} {R : CallSpellExt.Registry} {f : String}
+    {conv : Source.Syn .expr → Source.Syn .expr} (a : RawExpr)
+    (unclaimed : R.lookup f = none) (cast : Decode.Casts.target f = some conv) :
+    Decode.Casts.expr T R (.call f [a]) = (Decode.Casts.expr T R a).map conv :=
+  Decode.Casts.expr_cast a unclaimed cast
+example {T : Decode.Tables} {R : CallSpellExt.Registry} (e : RawExpr) (es : List RawExpr)
+    (h : Decode.Casts.CastFree e) (hs : ∀ e ∈ es, Decode.Casts.CastFree e) :
+    Decode.Casts.expr T R e = Decode.Calls.expr T R e ∧
+      Decode.Casts.exprs T R es = Decode.Calls.exprs T R es ∧
+      Decode.Casts.components T R es = Decode.Calls.components T R es :=
+  ⟨Decode.Casts.conservative e h, Decode.Casts.conservative_args es hs,
+    Decode.Casts.conservative_components es hs⟩
+example : Decode.Casts.CastFree (.binop .add (.name "n") (.num 1)) := by
+  simp [Decode.Casts.CastFree, RawExpr.any, Decode.Casts.isCast]
+/-- Typing, and value faithfulness at integer targets: `uint8(300)` is `44`,
+`int8(200)` is `-56`, as the model's `lowBits` and `signedAt` compute. -/
+example {Γ : Source.Ctx} {a : Source.Syn .expr} (argument : Source.Typed Γ a (.address false)) :
+    Source.Typed Γ (Decode.Casts.conversion .address (by decide) a) (.address false) :=
+  Decode.Casts.typed .address (by decide) argument rfl
+example {D : Source.Layout} (s t : Source.IntTy) (x : Int) (h : s.lo ≤ x ∧ x ≤ s.hi) :
+    Source.convExplicitVal (D := D) (.int t) (.int (t := s) x h) = pure (Source.intWrap t x) :=
+  Decode.Casts.convert_int s t x h
+example : Source.wrapBits false 8 300 = 44 :=
+  (Decode.Casts.unsigned_value (by decide) 300).trans (by decide)
+example : Source.wrapBits true 8 200 = -56 :=
+  (Decode.Casts.signed_value (by decide) 200).trans (by decide)
+/-- Reading casts keeps the request guard. -/
+example {T : Decode.Tables} {R : CallSpellExt.Registry} {r : Request} {s : SourceProgram}
+    (h : Decode.Casts.decode T R r = some s) : Decode.plain r = true :=
+  Decode.Casts.decode_guard h
 
 
 /-- Supplementary primitive representation check; simulation is separate. -/

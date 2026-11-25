@@ -23,3 +23,4 @@
 | `Correctness/Lowering/Total/Versions/CalleeBinding/Frame.lean` | Original parameter/return names, slot types, body spelling and flags bound to the actual selected Source frame. |
 | `Correctness/Lowering/Total/Decode/Self.lean` | Self-aware decoder tables: `address(this)` and its balance spelled; the environment table has no gap. |
 | `Correctness/Lowering/Total/Versions/Self.lean` | Self-aware version: soundness, boundary, Source typing/evaluation of the two reads and value faithfulness under related globals. |
+| `Correctness/Lowering/Total/Decode/Casts.lean` | Casts written as calls read as Source explicit conversions: cast equation, conservativity over the registered-call decoder, typing and integer value faithfulness. |
