@@ -5,7 +5,7 @@ import Solidity.Correctness.Lowering.Total.Decode.Callee.Declarations
 import Solidity.Correctness.Lowering.Total.Decode.Callee.Metadata
 import Solidity.Correctness.Lowering.Total.Versions.CalleeBinding.Resolved
 import Solidity.Source.Elaborate
-import Solidity.Correctness.Lowering.Total.Versions.Self
+import Solidity.Correctness.Lowering.Total.Versions.WithExpr
 import Solidity.Correctness.Lowering.Total.Decode.Casts
 import Solidity.Correctness.Lowering.Total.CallSpellExt
 import Solidity.Correctness.Lowering.Total.Decode.BytesLiteral.Evaluation
@@ -432,6 +432,25 @@ example : Source.wrapBits false 8 300 = 44 ∧ Source.wrapBits true 8 200 = -56 
     (Casts.signed_value (by decide) 200).trans (by decide)⟩
 example {T : Tables} {R : CallSpellExt.Registry} {r : Request} {s : SourceProgram}
     (h : Casts.decode T R r = some s) : plain r = true := Casts.decode_guard h
+
+/-! Decoders with their own expression spelling have a boundary and total
+initial matching (`Versions.WithExpr`). -/
+example : Simulation.InitialMatching rel (Casts.decode tablesT CallSpellExt.registry1) ∧
+    FullDomain boundaryC := ⟨initialMatchingC, fun _ h => h⟩
+example {T : Tables} (sound : Sound T) (R : CallSpellExt.Registry) :
+    Simulation.InitialMatching rel (Calls.decode T R) := initialMatchingWith sound _
+/-- The decoder is sound for its relation, which has one program per request
+and is the version's at the version's own expressions. -/
+example {T : Tables} {spell : RawExpr → Option (Syn .expr)} {r : Request} {s s' : SourceProgram}
+    (h : WithExpr.decode T spell r = some s) (h' : SpellsWith T spell r s') :
+    s = s' ∧ Version.Shape T r s ∧ (SpellsWith T T.expr r s ↔ SpellsT T r s) :=
+  ⟨(decode_spellsWith h).unique h', shape_of_spellsWith (decode_spellsWith h),
+    spellsWith_original r s⟩
+/-- The contract at the cast decoder's boundary asks for coverage first. -/
+example (h : LowerLoopsCorrectContract boundaryC boundaryC.reference
+    (Casts.decode tablesT CallSpellExt.registry1)) (r : Request) (ok : r.Succeeds) :
+    ∃ s, Casts.decode tablesT CallSpellExt.registry1 r = some s :=
+  ((residualWith_iff tablesT _).mp h).1 r ok
 
 end SelfAndCasts
 

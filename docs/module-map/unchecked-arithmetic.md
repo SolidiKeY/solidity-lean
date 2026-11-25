@@ -54,6 +54,7 @@
 | `Correctness/Lowering/Total/Decode/Self.lean` | Self-aware decoder tables: `address(this)` and its balance spelled; the environment table has no gap. |
 | `Correctness/Lowering/Total/Versions/Self.lean` | Self-aware version: soundness, boundary, Source typing/evaluation of the two reads and value faithfulness under related globals. |
 | `Correctness/Lowering/Total/Decode/Casts.lean` | Casts written as calls read as Source explicit conversions: cast equation, conservativity over the registered-call decoder, typing and integer value faithfulness. |
+| `Correctness/Lowering/Total/Versions/WithExpr.lean` | Association, boundary, residual characterization and total initial matching for decoders with their own expression spelling (registered calls, casts). |
 | `Correctness/Lowering/Total/Main.lean` | The loop contract composed with the production and family theorems: it is interpretation faithfulness and `Residual` (unproved); `production_correct` derives the consumer from `Residual` and `FullDomain`. |
 | `Correctness/Lowering/Total/Decode.lean` | The stage-1 raw-to-Source decoder `Decode.decode`: a chosen Source spelling of the raw input, then Source inference and resolution; every other input is a gap. |
 | `Correctness/Lowering/Total/Spells.lean` | The inductive spelling relation `Spells`; the decoder is sound for it and complete if Source inference is (`InferComplete`, unproved). |
