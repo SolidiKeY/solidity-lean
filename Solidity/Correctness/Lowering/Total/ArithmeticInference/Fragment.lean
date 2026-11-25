@@ -165,4 +165,311 @@ theorem Infers.sound (h : Infers Γ e τ) :
       · rw [inferN_bitNot hcn da hty (by rw [ha n, if_pos h1]), if_pos (by omega)]
       · rw [inferN_bitNot_none hcn (by rw [ha n, if_neg h1]), if_neg (by omega)]
 
+variable {s : Syn .expr}
+
+/-- The family is spelled by every decoder version. -/
+theorem Infers.spelled (h : Infers Γ e τ) : ∃ s, T.expr e = some s :=
+  let ⟨s, hs, _⟩ := h.sound (T := T); ⟨s, hs⟩
+
+/-- The spelling's constant is the model fold. -/
+theorem Infers.const_eq (h : Infers Γ e τ) (hs : T.expr e = some s) : s.const = fold e := by
+  obtain ⟨s', hs', hc, _⟩ := h.sound (T := T)
+  cases hs.symm.trans hs'; exact hc
+
+/-- **Exact inference with exact fuel**: `τ` with one derivation from fuel
+`depth e` on, nothing below (so the result is transported along any fuel). -/
+theorem Infers.inferN (h : Infers Γ e τ) (hs : T.expr e = some s) :
+    ∃ d : Typed Γ s τ, ∀ n, Typed.inferN n Γ s = if depth e ≤ n then some ⟨τ, d⟩ else none := by
+  obtain ⟨s', hs', _, hd⟩ := h.sound (T := T)
+  cases hs.symm.trans hs'; exact hd
+
+theorem Infers.inferN_of_le {n : Nat} (h : Infers Γ e τ) (hs : T.expr e = some s)
+    (hn : depth e ≤ n) : ∃ d, Typed.inferN n Γ s = some ⟨τ, d⟩ :=
+  let ⟨d, hd⟩ := h.inferN hs; ⟨d, by rw [hd, if_pos hn]⟩
+
+/-- Insufficient fuel: below `depth e` there is no result. -/
+theorem Infers.inferN_short {n : Nat} (h : Infers Γ e τ) (hs : T.expr e = some s)
+    (hn : n < depth e) : Typed.inferN n Γ s = none :=
+  let ⟨_, hd⟩ := h.inferN hs; by rw [hd, if_neg (by omega)]
+
+/-- **Fuel transport** between any two sufficient fuels. -/
+theorem Infers.inferN_transport {n m : Nat} (h : Infers Γ e τ) (hs : T.expr e = some s)
+    (hn : depth e ≤ n) (hm : depth e ≤ m) : Typed.inferN n Γ s = Typed.inferN m Γ s :=
+  let ⟨_, hd⟩ := h.inferN hs; by rw [hd, hd, if_pos hn, if_pos hm]
+
+/-- The family's type is unique. -/
+theorem Infers.unique {τ' : STy} (h : Infers Γ e τ) (h' : Infers Γ e τ') : τ = τ' := by
+  obtain ⟨s, hs, _, d, hd⟩ := h.sound (T := Decode.tables1)
+  obtain ⟨d', hd'⟩ := h'.inferN hs
+  have := (hd (depth e)).symm.trans (hd' (depth e))
+  simp only [Nat.le_refl, if_true, Option.some.injEq] at this
+  exact congrArg Sigma.fst this
+
+/-- A folding expression has only its constant's type. -/
+theorem Infers.ty_of_fold {q : Q} (h : Infers Γ e τ) (hq : fold e = some q) : τ = .rational q :=
+  h.unique (.const hq)
+
+theorem fold_bin_none {op : BinOp} {a b : RawExpr} (h : bothConst a b = false) :
+    fold (.binop op a b) = none := by
+  rw [fold]
+  cases ha : fold a with
+  | none => exact foldBin_none_left
+  | some _ => cases hb : fold b with
+    | none => exact foldBin_none_right
+    | some _ => simp [bothConst, ha, hb] at h
+
+/-- Operands meeting at a common type are not both constants. -/
+theorem bothConst_of_common {a b : RawExpr} {τa τb : STy} (ha : Infers Γ a τa)
+    (hb : Infers Γ b τb) (hc : STy.common? Γ.isBase Γ.mapFree τa τb = some τ) :
+    bothConst a b = false := by
+  cases hfa : fold a with
+  | none => simp [bothConst, hfa]
+  | some x => cases hfb : fold b with
+    | none => simp [bothConst, hfb]
+    | some y =>
+      cases ha.ty_of_fold hfa; cases hb.ty_of_fold hfb
+      simp [STy.common?, STy.isConstTy] at hc
+
+section families
+variable {op : BinOp} {a b : RawExpr} {τa τb : STy}
+
+/-- `+ - * / %` (`add sub mul div mod`): numbers at a common type, no
+constant zero divisor. -/
+theorem Infers.arith (hop : family op = some .arith) (ha : Infers Γ a τa) (hb : Infers Γ b τb)
+    (hc : STy.common? Γ.isBase Γ.mapFree τa τb = some τ) (hn : τ.isNumeric = true)
+    (hz : (divMod op && τb.isZeroConst) = false) : Infers Γ (.binop op a b) τ :=
+  .bin hop ha hb (fold_bin_none (bothConst_of_common ha hb hc)) rfl
+    (by simp only [binTy, hz, hc, hn]; rfl)
+
+/-- `& | ^` (`band bor bxor`): integers or `bytesN` at a common type. -/
+theorem Infers.bit (hop : family op = some .bit) (ha : Infers Γ a τa) (hb : Infers Γ b τb)
+    (hc : STy.common? Γ.isBase Γ.mapFree τa τb = some τ) (hn : τ.isBits = true) :
+    Infers Γ (.binop op a b) τ :=
+  .bin hop ha hb (fold_bin_none (bothConst_of_common ha hb hc)) rfl
+    (by simp only [binTy, hc, hn]; rfl)
+
+/-- `<<` and `>>` (`shl`, and `shr` spelled `sar`): bits by an unsigned
+amount, at the left operand's shift type; not two constants. -/
+theorem Infers.shift (hop : family op = some .shift) (ha : Infers Γ a τa) (hb : Infers Γ b τb)
+    (h1 : τa.shiftTy.isBits = true) (h2 : τb.isAmount = true) (h3 : bothConst a b = false) :
+    Infers Γ (.binop op a b) τa.shiftTy :=
+  .bin hop ha hb (fold_bin_none h3) rfl (by simp [binTy, h1, h2, h3])
+
+/-- `**` (`pow`): an integer to an unsigned power; not two constants. -/
+theorem Infers.exp (hop : family op = some .exp) (ha : Infers Γ a τa) (hb : Infers Γ b τb)
+    (h1 : τa.shiftTy.isInt = true) (h2 : τb.isAmount = true) (h3 : bothConst a b = false) :
+    Infers Γ (.binop op a b) τa.shiftTy :=
+  .bin hop ha hb (fold_bin_none h3) rfl (by simp [binTy, h1, h2, h3])
+
+/-- `< > <= >=` (`lt gt le ge`): ordered operands at a common type. -/
+theorem Infers.order (hop : family op = some .order) (ha : Infers Γ a τa) (hb : Infers Γ b τb)
+    (hc : STy.common? Γ.isBase Γ.mapFree τa τb = some τ) (hn : τ.isOrdered = true) :
+    Infers Γ (.binop op a b) .bool :=
+  have h := bothConst_of_common ha hb hc
+  .bin hop ha hb (fold_bin_none h) (by simp [h]) (by simp only [binTy, hc, hn]; rfl)
+
+/-- `== !=` (`eqB neB`): operands with equality at a common type. -/
+theorem Infers.eq (hop : family op = some .eq) (ha : Infers Γ a τa) (hb : Infers Γ b τb)
+    (hc : STy.common? Γ.isBase Γ.mapFree τa τb = some τ) (hn : τ.hasEq = true) :
+    Infers Γ (.binop op a b) .bool :=
+  have h := bothConst_of_common ha hb hc
+  .bin hop ha hb (fold_bin_none h) (by simp [h]) (by simp only [binTy, hc, hn]; rfl)
+
+/-- Unary `-` on a signed integer. -/
+theorem Infers.negInt {t : Source.IntTy} (ha : Infers Γ a (.int t)) (hs : t.signed = true) :
+    Infers Γ (.unop .neg a) (.int t) := by
+  refine .neg ha ?_ (by simp [negTy, hs])
+  cases hf : fold a with
+  | none => rfl
+  | some q => cases ha.ty_of_fold hf
+
+/-- `~` on bits. -/
+theorem Infers.bitNot' (ha : Infers Γ a τ) (hn : τ.isBits = true) : Infers Γ (.unop .bnot a) τ := by
+  refine .bitNot ha ?_ hn
+  cases hf : fold a with
+  | none => rfl
+  | some q => cases ha.ty_of_fold hf; cases hn
+
+end families
+
+/-- **Rejected forms have no inferred type** at any fuel, and no constant. -/
+theorem Rejects.sound {r : Reason} (h : Rejects Γ e r) :
+    ∀ {s : Syn .expr}, T.expr e = some s → s.const = none ∧ ∀ n, Typed.inferN n Γ s = none := by
+  induction h with
+  | @bin op k a b τa τb r hk hia hib hf hcc hty =>
+    intro s hs
+    obtain ⟨f', sa, sb, hf', hsa, hsb, rfl⟩ := expr_binop.mp hs
+    obtain ⟨f, hff, hspec⟩ := binop_family hk
+    cases hf'.symm.trans hff
+    obtain ⟨hbo, hdm, hc, _, _⟩ := hspec sa sb
+    have hca := hia.const_eq hsa
+    have hcb := hib.const_eq hsb
+    obtain ⟨da, ha⟩ := hia.inferN hsa
+    obtain ⟨db, hb⟩ := hib.inferN hsb
+    have hcs : (f' sa sb).const = none := by rw [hc, hca, hcb]; exact hf
+    have hbc : (sa.const.isSome && sb.const.isSome) = bothConst a b := by rw [hca, hcb]; rfl
+    refine ⟨hcs, fun n => ?_⟩
+    cases n with
+    | zero => exact inferN_zero
+    | succ n =>
+      rw [inferN_bin hbo, tryConst_none hcs, ha n, hb n]
+      dsimp only [Option.orElse]
+      by_cases h1 : depth a ≤ n <;> by_cases h2 : depth b ≤ n
+      · rw [if_pos h1, if_pos h2]
+        exact inferBin_error hbo (by rw [hbc]; exact hcc) (by rw [hdm, hbc]; exact hty)
+      all_goals exact inferBin_none hbo (by rw [hbc]; exact hcc) (by simp [h1, h2])
+  | @neg a τ r hia hf hty =>
+    intro s hs
+    obtain ⟨sa, hsa, rfl⟩ := expr_neg.mp hs
+    have hcn : sa.const = none := (hia.const_eq hsa).trans hf
+    obtain ⟨da, ha⟩ := hia.inferN hsa
+    refine ⟨const_neg hcn, fun n => ?_⟩
+    cases n with
+    | zero => exact inferN_zero
+    | succ n =>
+      by_cases h1 : depth a ≤ n
+      · exact inferN_neg_error hcn hty (by rw [ha n, if_pos h1])
+      · exact inferN_neg_none hcn (by rw [ha n, if_neg h1])
+  | @bitNot a τ hia hf hty =>
+    intro s hs
+    obtain ⟨sa, hsa, rfl⟩ := expr_bnot.mp hs
+    have hcn : sa.const = none := (hia.const_eq hsa).trans hf
+    obtain ⟨da, ha⟩ := hia.inferN hsa
+    refine ⟨const_bitNot hcn, fun n => ?_⟩
+    cases n with
+    | zero => exact inferN_zero
+    | succ n =>
+      by_cases h1 : depth a ≤ n
+      · exact inferN_bitNot_error hcn hty (by rw [ha n, if_pos h1])
+      · exact inferN_bitNot_none hcn (by rw [ha n, if_neg h1])
+  | @left op k a b r hk _ ih =>
+    intro s hs
+    obtain ⟨f', sa, sb, hf', hsa, hsb, rfl⟩ := expr_binop.mp hs
+    obtain ⟨f, hff, hspec⟩ := binop_family hk
+    cases hf'.symm.trans hff
+    obtain ⟨hbo, _, hc, _, _⟩ := hspec sa sb
+    obtain ⟨hca, ha⟩ := ih hsa
+    have hcs : (f' sa sb).const = none := by rw [hc, hca]; exact foldBin_none_left
+    refine ⟨hcs, fun n => ?_⟩
+    cases n with
+    | zero => exact inferN_zero
+    | succ n =>
+      rw [inferN_bin hbo, tryConst_none hcs]
+      exact inferBin_none hbo (by simp [hca]) (Or.inl (ha n))
+  | @right op k a b r hk _ ih =>
+    intro s hs
+    obtain ⟨f', sa, sb, hf', hsa, hsb, rfl⟩ := expr_binop.mp hs
+    obtain ⟨f, hff, hspec⟩ := binop_family hk
+    cases hf'.symm.trans hff
+    obtain ⟨hbo, _, hc, _, _⟩ := hspec sa sb
+    obtain ⟨hcb, hb⟩ := ih hsb
+    have hcs : (f' sa sb).const = none := by rw [hc, hcb]; exact foldBin_none_right
+    refine ⟨hcs, fun n => ?_⟩
+    cases n with
+    | zero => exact inferN_zero
+    | succ n =>
+      rw [inferN_bin hbo, tryConst_none hcs]
+      exact inferBin_none hbo (by simp [hcb]) (Or.inr (hb n))
+  | @negArg a r _ ih =>
+    intro s hs
+    obtain ⟨sa, hsa, rfl⟩ := expr_neg.mp hs
+    obtain ⟨hca, ha⟩ := ih hsa
+    refine ⟨const_neg hca, fun n => ?_⟩
+    cases n with
+    | zero => exact inferN_zero
+    | succ n => exact inferN_neg_none hca (ha n)
+  | @bitNotArg a r _ ih =>
+    intro s hs
+    obtain ⟨sa, hsa, rfl⟩ := expr_bnot.mp hs
+    obtain ⟨hca, ha⟩ := ih hsa
+    refine ⟨const_bitNot hca, fun n => ?_⟩
+    cases n with
+    | zero => exact inferN_zero
+    | succ n => exact inferN_bitNot_none hca (ha n)
+
+/-- A rejected form is outside the family. -/
+theorem Rejects.not_infers {r : Reason} (h : Rejects Γ e r) : ¬ Infers Γ e τ := fun hi => by
+  obtain ⟨s, hs, _, d, hd⟩ := hi.sound (T := Decode.tables1)
+  have := (h.sound hs).2 (depth e)
+  rw [hd, if_pos (Nat.le_refl _)] at this
+  cases this
+
+section rejections
+variable {op : BinOp} {a b : RawExpr} {τa τb : STy}
+
+theorem family_divMod (h : divMod op = true) : family op = some .arith := by
+  cases op <;> first | rfl | cases h
+
+/-- **Constant zero divisor**: `/` or `%` by a zero constant, whatever the
+dividend. -/
+theorem Rejects.zeroDivisor (hop : divMod op = true) (ha : Infers Γ a τa) (hb : Infers Γ b τb)
+    (hz : τb.isZeroConst = true) : Rejects Γ (.binop op a b) .zeroDivisor := by
+  refine .bin (family_divMod hop) ha hb ?_ rfl (by simp [binTy, hop, hz])
+  rw [fold]
+  cases hfa : fold a with
+  | none => exact foldBin_none_left
+  | some x => cases hfb : fold b with
+    | none => exact foldBin_none_right
+    | some y =>
+      cases hb.ty_of_fold hfb
+      have hy : y.num = 0 := by simpa [STy.isZeroConst] using hz
+      cases op <;> first | (cases hop; done) | simp [foldBin, Q.div, Q.mod, hy]
+
+/-- **Incompatible operands**: no common type, in a family that needs one. -/
+theorem Rejects.noCommon {k : Family} (hop : family op = some k)
+    (hk : k ≠ .shift ∧ k ≠ .exp) (ha : Infers Γ a τa) (hb : Infers Γ b τb)
+    (hc : STy.common? Γ.isBase Γ.mapFree τa τb = none) (hnc : bothConst a b = false)
+    (hz : (divMod op && τb.isZeroConst) = false) : Rejects Γ (.binop op a b) .incompatible := by
+  refine .bin hop ha hb (fold_bin_none hnc) (by simp [hnc]) ?_
+  cases k <;> simp_all [binTy]
+
+/-- **Wrong amount**: a shift amount or exponent that is not unsigned. -/
+theorem Rejects.badAmount {k : Family} (hop : family op = some k)
+    (hk : k = .shift ∨ k = .exp) (ha : Infers Γ a τa) (hb : Infers Γ b τb)
+    (hm : τb.isAmount = false) (hnc : bothConst a b = false) :
+    Rejects Γ (.binop op a b) .incompatible := by
+  refine .bin hop ha hb (fold_bin_none hnc) (by simp [hnc]) ?_
+  rcases hk with rfl | rfl <;> simp [binTy, hm]
+
+/-- **Wrong signedness**: unary `-` on an unsigned integer. -/
+theorem Rejects.negUnsigned {t : Source.IntTy} (ha : Infers Γ a (.int t))
+    (hs : t.signed = false) : Rejects Γ (.unop .neg a) .incompatible := by
+  refine .neg ha ?_ (by simp [negTy, hs])
+  cases hf : fold a with
+  | none => rfl
+  | some q => cases ha.ty_of_fold hf
+
+end rejections
+
+/-! ## Unsupported spellings -/
+
+/-- The wrapping operators are the ones with no Source spelling. -/
+theorem binop_eq_none_iff {op : BinOp} :
+    Decode.binop op = none ↔ op = .addW ∨ op = .subW ∨ op = .mulW ∨ op = .powW := by
+  cases op <;> simp [Decode.binop]
+
+/-- Outside the families: the wrapping operators, and `&&`, `||` (spelled, the
+scalar lane's). -/
+theorem family_eq_none_iff {op : BinOp} :
+    family op = none ↔ Decode.binop op = none ∨ op = .and ∨ op = .or := by
+  cases op <;> simp [family, Decode.binop]
+
+/-- **Unsupported spelling**: a wrapping operator is not decoded. -/
+theorem expr_unspelled {op : BinOp} {a b : RawExpr} (h : Decode.binop op = none) :
+    T.expr (.binop op a b) = none := by
+  cases hs : T.expr (.binop op a b) with
+  | none => rfl
+  | some s => obtain ⟨f, _, _, hf, _⟩ := expr_binop.mp hs; rw [h] at hf; cases hf
+
+/-- An undecoded operand leaves the operator form undecoded. -/
+theorem expr_binop_none {op : BinOp} {a b : RawExpr} (h : T.expr a = none ∨ T.expr b = none) :
+    T.expr (.binop op a b) = none := by
+  cases hs : T.expr (.binop op a b) with
+  | none => rfl
+  | some s =>
+    obtain ⟨_, _, _, _, ha, hb, _⟩ := expr_binop.mp hs
+    rcases h with h | h
+    · rw [h] at ha; cases ha
+    · rw [h] at hb; cases hb
+
 end Solidity.Correctness.Lowering.Total.ArithmeticInference
