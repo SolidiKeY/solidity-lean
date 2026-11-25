@@ -103,12 +103,10 @@ theorem build_ok (h : build T R C scope fs = .ok u) :
       withFunctions T R scope (appendParts ss p) fs = some u := by
   unfold build at h
   split at h; · cases h
-  rename_i ss hs
-  split at h; · cases h
+  rename_i ss hs; split at h; · cases h
   rename_i p hp
-  split at h
-  · rename_i u' hu; cases h; exact ⟨ss, p, hs, hp, hu⟩
-  · cases h
+  split at h <;> cases h
+  rename_i hu; exact ⟨ss, p, hs, hp, hu⟩
 
 /-- **Exact declarations**: the contract, the structs (one per table entry, in order),
 the constructor declaration (none for the implicit one), the roots, then the functions
@@ -236,8 +234,7 @@ theorem build_ctor_implicit (h : build T R C scope fs = .ok u) (hc : C.ctor = no
     u.env.ctorDecl scope = none ∧ u.env.ctorFrame scope = none ∧
       (Source.progOf u.env).ctor scope = none := by
   obtain ⟨ctors, hcs, hd, hf, hb⟩ := build_ctor h
-  rw [hc] at hcs; cases hcs
-  exact ⟨hd, hf, hb⟩
+  rw [hc] at hcs; cases hcs; exact ⟨hd, hf, hb⟩
 
 theorem build_ctor_explicit (h : build T R C scope fs = .ok u) {d : FunDecl}
     (hc : C.ctor = some d) :
@@ -297,8 +294,7 @@ theorem build_resolved (h : build T R C scope fs = .ok u) {w : Name}
     ∃ e d, lookupBy w C.structs = some e ∧ Gen C scope (w, e) d ∧
       u.env.lookup (some scope) w = [d] ∧ Resolved u.env (some scope) w ⟨some scope, w⟩ := by
   obtain ⟨ss, pre, post, hs, hE, free⟩ := build_split h
-  have ne : C.structs.filter (·.1 == w) ≠ [] := fun e => by simp [e] at one
-  exact StructDecode.resolved hs hE one (free w (key_ne hs ne) apart)
+  exact StructDecode.resolved hs hE one (free w (key_ne hs fun e => by simp [e] at one) apart)
 
 /-- **Only then**: a name with an entry that resolves is declared once and apart; a
 repeated name, or one a root or function carries, does not resolve. -/

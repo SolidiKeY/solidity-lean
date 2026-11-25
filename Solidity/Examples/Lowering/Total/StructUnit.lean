@@ -13,8 +13,7 @@ open Solidity.Examples.Lowering.Total.ReferenceStatePlacement (ctor get mixed)
 open ReferenceDecode (Resolved)
 
 /-- `function get() internal view returns (uint r) { return n; }` -/
-def getN : FunDecl := { get with body := [.ret (some (.name "n"))] }
-def fs : List (Name × FunDecl) := [("get", getN)]
+def fs : List (Name × FunDecl) := [("get", { get with body := [.ret (some (.name "n"))] })]
 /-- `struct Pair { uint a; uint8 b; } struct Tag { address t; }
 uint8 n = 1; Pair p; constructor() payable { n = 2; }` -/
 def full : Contract :=
@@ -76,6 +75,13 @@ example {u} (h : build tablesS [] full "C" fs = .ok u) :=
       subst hw
       exact ⟨by decide, apart _ (by decide)⟩
 
+/-- `Pair`'s Source fields in the unit, every declared name `Apart`. -/
+example {u} (h : build tablesS [] full "C" fs = .ok u) := by
+  refine build_structFields h (fun w e hl => apart w ?_) (w := "Pair") rfl (by decide) .storage
+    fun _ _ => .inl rfl
+  simp only [full, Solidity.Semantics.lookupBy] at hl; repeat' split at hl
+  all_goals simp_all
+
 /-! Boundaries: names that do not resolve. -/
 
 /-- `struct Pair` written twice: both are declared, and `Pair` resolves to neither. -/
@@ -103,7 +109,7 @@ example : build tablesS [] { full with structs := full.structs ++ [("T", "Nope")
 example : build tablesS [] { full with ctor := some { ctor with sourceDecl := none } } "C" fs =
     .error (.placement .constructor) := build_placement_error rfl rfl
 /-- A function entry with no retained header. -/
-example : build tablesS [] full "C" [("get", { getN with sourceDecl := none })] =
+example : build tablesS [] full "C" [("get", { get with sourceDecl := none })] =
     .error .functions := build_functions_error rfl rfl rfl
 /-- With no struct entry the unit is `assemble`'s. -/
 example {u} (h : ReferenceStatePlacement.assemble tablesS [] mixed "C" fs = .ok u) :
