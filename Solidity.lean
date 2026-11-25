@@ -2535,6 +2535,7 @@ import Solidity.Correctness.Lowering.Total.Decode.Tables
 import Solidity.Correctness.Lowering.Total.Decode.Widths
 import Solidity.Correctness.Lowering.Total.Decode.WithExpr
 import Solidity.Correctness.Lowering.Total.EnumDecode
+import Solidity.Correctness.Lowering.Total.EnumUseDecode
 import Solidity.Correctness.Lowering.Total.Main
 import Solidity.Correctness.Lowering.Total.Production
 import Solidity.Correctness.Lowering.Total.Relation
