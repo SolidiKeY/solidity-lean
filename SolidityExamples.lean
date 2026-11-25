@@ -219,6 +219,7 @@ import Solidity.Examples.Lowering.Sim.Stmt
 import Solidity.Examples.Lowering.Total.CallSpellExt
 import Solidity.Examples.Lowering.Total.CalleeAliases
 import Solidity.Examples.Lowering.Total.CalleeResolution
+import Solidity.Examples.Lowering.Total.CalleeSelection
 import Solidity.Examples.Lowering.Total.ConstructorDecode
 import Solidity.Examples.Lowering.Total.ConstructorPlacement
 import Solidity.Examples.Lowering.Total.EnumDecode
