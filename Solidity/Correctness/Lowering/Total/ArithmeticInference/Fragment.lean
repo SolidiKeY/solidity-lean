@@ -12,9 +12,13 @@ expression is spelled, and its spelling infers to `τ` with one derivation at
 every fuel from `depth e` and to nothing below (`Infers.inferN`, with
 `inferN_of_le`, `inferN_short`, `inferN_transport`). Per-family rules state the
 common-type, signedness, shift-amount and division checks (`Infers.arith`,
-`bit`, `shift`, `exp`, `order`, `eq`, `negInt`, `bitNot'`).
+`bit`, `shift`, `exp`, `order`, `eq`, `negInt`, `negFixed`, `bitNot'`).
 
-`Rejects Γ e r` keeps the rejected forms with their reason, through nesting
+Literals are the model's decimal naturals; a name that is not a local (a state
+variable, an unresolved name) is not a leaf.
+
+`Rejects Γ e r` keeps rejected forms with a classifying reason, through nesting
+under the family's operators, for any spelling of the whole form
 (`Rejects.sound`: no result at any fuel; `zeroDivisor`, `noCommon`,
 `badAmount`, `negUnsigned`), and the wrapping operators are not decoded
 (`expr_unspelled`, `binop_eq_none_iff`).
@@ -32,7 +36,8 @@ open Decode (Tables)
 /-- **The arithmetic argument family**, by explicit conditions on the model
 expression: a folding constant; a local with its resolution and slot type; a
 supported binary operator over the family whose operand types pass the
-family's check; a comparison of two constants; `-` and `~`. -/
+family's check; a comparison of two constants; `-` and `~`. A local leaf has
+any slot type, so the checks, not the leaves, keep the family numeric. -/
 inductive Infers (Γ : Source.Ctx) : RawExpr → STy → Prop
   /-- Folding wins: the exact constant. -/
   | const {e : RawExpr} {q : Q} : fold e = some q → Infers Γ e (.rational q)
@@ -50,7 +55,10 @@ inductive Infers (Γ : Source.Ctx) : RawExpr → STy → Prop
   | bitNot {a : RawExpr} {τ : STy} : Infers Γ a τ → fold a = none → τ.isBits = true →
       Infers Γ (.unop .bnot a) τ
 
-/-- **Rejected forms** of the family, with the reason. -/
+/-- **Rejected forms** of the family, with the reason: a failed check over
+operands of the family, through nesting. Sufficient, not exhaustive: a form in
+neither `Infers` nor `Rejects` (an operand outside the family, `~` of a
+fractional constant) is not decided here. -/
 inductive Rejects (Γ : Source.Ctx) : RawExpr → Reason → Prop
   | bin {op : BinOp} {k : Family} {a b : RawExpr} {τa τb : STy} {r : Reason} :
       family op = some k → Infers Γ a τa → Infers Γ b τb → fold (.binop op a b) = none →
@@ -115,7 +123,7 @@ theorem Infers.sound (h : Infers Γ e τ) :
     refine ⟨_, expr_name, rfl, .loc hr ht, fun n => ?_⟩
     cases n with
     | zero => exact inferN_zero
-    | succ n => rw [inferN_local hr ht, if_pos (by simp [depth])]
+    | succ n => rw [ArgumentInference.inferN_loc hr ht, if_pos (by simp [depth])]
   | @bin op k a b τa τb τ hk _ _ hf hcc hty iha ihb =>
     obtain ⟨sa, hsa, hca, da, ha⟩ := iha
     obtain ⟨sb, hsb, hcb, db, hb⟩ := ihb
@@ -308,6 +316,14 @@ theorem Infers.eq (hop : family op = some .eq) (ha : Infers Γ a τa) (hb : Infe
 theorem Infers.negInt {t : Source.IntTy} (ha : Infers Γ a (.int t)) (hs : t.signed = true) :
     Infers Γ (.unop .neg a) (.int t) := by
   refine .neg ha ?_ (by simp [negTy, hs])
+  cases hf : fold a with
+  | none => rfl
+  | some q => cases ha.ty_of_fold hf
+
+/-- Unary `-` on a fixed-point number. -/
+theorem Infers.negFixed {f : Source.FixTy} (ha : Infers Γ a (.fixed f)) :
+    Infers Γ (.unop .neg a) (.fixed f) := by
+  refine .neg ha ?_ rfl
   cases hf : fold a with
   | none => rfl
   | some q => cases ha.ty_of_fold hf

@@ -24,9 +24,13 @@ def ctx (u : Syn .unit) : Source.Ctx :=
 
 variable {u : Syn .unit}
 
+/-- The local `uint x` with its resolution and slot type. -/
 theorem x : Infers (ctx u) (.name "x") u256 := .local (i := 0) (resolve_local rfl) rfl
+/-- The local `uint y` with its resolution and slot type. -/
 theorem y : Infers (ctx u) (.name "y") u256 := .local (i := 1) (resolve_local rfl) rfl
+/-- The local `int i` with its resolution and slot type. -/
 theorem i : Infers (ctx u) (.name "i") i256 := .local (i := 2) (resolve_local rfl) rfl
+/-- The local `bool b` with its resolution and slot type. -/
 theorem b : Infers (ctx u) (.name "b") .bool := .local (i := 3) (resolve_local rfl) rfl
 
 /-- The type the actual `Typed.infer` gives the `tables1` spelling in the empty unit. -/
@@ -41,6 +45,7 @@ def inferTyN (n : Nat) (e : RawExpr) : Option (Option STy) :=
 /-- `(x + 1) * y`. -/
 def e1 : RawExpr := .binop .mul (.binop .add (.name "x") (.num 1)) (.name "y")
 
+/-- In the family: `e1_infers`. -/
 theorem e1_infers : Infers (ctx u) e1 u256 :=
   .arith rfl (.arith rfl x (.const rfl) rfl rfl rfl) y rfl rfl rfl
 
@@ -59,6 +64,7 @@ example {s} (hs : tables1.expr e1 = some s) :
 /-- A folded operand inside a non-constant sum: `x + 2 * 3`. -/
 def e2 : RawExpr := .binop .add (.name "x") (.binop .mul (.num 2) (.num 3))
 
+/-- In the family: `e2_infers`. -/
 theorem e2_infers : Infers (ctx u) e2 u256 := .arith rfl x (.const rfl) rfl rfl rfl
 
 #guard depth e2 = 2
@@ -73,6 +79,7 @@ def c1 : RawExpr := .binop .mul (.binop .add (.num 2) (.num 3)) (.num 4)
 #guard depth c1 = 1
 #guard inferTyN 1 c1 = some (some (.rational (Q.ofInt 20)))
 
+/-- In the family: `c1_infers`. -/
 theorem c1_infers : Infers (ctx u) c1 (.rational (Q.ofInt 20)) := .const (by decide)
 
 /-- `-(1 - 3)` and `~5` fold: `2` and `-6`. -/
@@ -86,6 +93,7 @@ example : fold (.binop .band (.num 6) (.num 3)) = some (Q.ofInt 2) := by decide
 
 /-! ## Bitwise, shift, exponentiation, negation, complement -/
 
+/-- In the family: `and_infers`. -/
 theorem and_infers : Infers (ctx u) (.binop .band (.name "x") (.name "y")) u256 :=
   .bit rfl x y rfl rfl
 /-- Model `>>` is spelled `sar`: `x >> 2` at `x`'s type. -/
@@ -95,9 +103,12 @@ theorem shr_infers : Infers (ctx u) (.binop .shr (.name "x") (.num 2)) u256 :=
 theorem shl_infers : Infers (ctx u) (.binop .shl (.num 1) (.name "x")) u256 :=
   show Infers _ _ (STy.rational (Source.NumLit.dec 1 0 0).value).shiftTy from
     .shift rfl (.const rfl) x (by decide) rfl rfl
+/-- In the family: `pow_infers`. -/
 theorem pow_infers : Infers (ctx u) (.binop .pow (.name "x") (.num 2)) u256 :=
   .exp rfl x (.const rfl) rfl rfl rfl
+/-- In the family: `neg_infers`. -/
 theorem neg_infers : Infers (ctx u) (.unop .neg (.name "i")) i256 := .negInt i rfl
+/-- In the family: `bnot_infers`. -/
 theorem bnot_infers : Infers (ctx u) (.unop .bnot (.binop .bxor (.name "x") (.name "y"))) u256 :=
   .bitNot' (.bit rfl x y rfl rfl) rfl
 
@@ -115,8 +126,10 @@ example : Decode.binop .shr = some (.shift .sar) := rfl
 /-- `x + 1 < y`. -/
 def lt1 : RawExpr := .binop .lt (.binop .add (.name "x") (.num 1)) (.name "y")
 
+/-- In the family: `lt1_infers`. -/
 theorem lt1_infers : Infers (ctx u) lt1 .bool :=
   .order rfl (.arith rfl x (.const rfl) rfl rfl rfl) y rfl rfl
+/-- In the family: `eq_infers`. -/
 theorem eq_infers : Infers (ctx u) (.binop .neB (.name "x") (.num 0)) .bool :=
   .eq rfl x (.const rfl) rfl rfl
 /-- Two constants compare at fuel 1, without operand inference: `1 < 2`. -/
@@ -127,13 +140,19 @@ theorem ltc_infers : Infers (ctx u) (.binop .lt (.num 1) (.num 2)) .bool :=
 #guard inferTy (.binop .neB (.name "x") (.num 0)) = some (some .bool)
 #guard depth (.binop .lt (.num 1) (.num 2)) = 1
 #guard inferTyN 1 (.binop .lt (.num 1) (.num 2)) = some (some .bool)
+/-- `1 == 2` likewise. -/
+theorem eqc_infers : Infers (ctx u) (.binop .eqB (.num 1) (.num 2)) .bool :=
+  .cmpConst (k := .eq) rfl rfl rfl rfl
+#guard inferTyN 1 (.binop .eqB (.num 1) (.num 2)) = some (some .bool)
 
 /-! ## Ordered arguments at their position-dependent fuels -/
 
 /-- `(x + 1) * y`, `x + 1 < y`, `(2 + 3) * 4`. -/
 def es : List RawExpr := [e1, lt1, c1]
+/-- In the family: `σs`. -/
 def σs : List STy := [u256, .bool, .rational (Q.ofInt 20)]
 
+/-- In the family: `es_infers`. -/
 theorem es_infers : ∀ (j : Nat) e σ, es[j]? = some e → σs[j]? = some σ → Infers (ctx u) e σ
   | 0, _, _, he, hσ => by cases he; cases hσ; exact e1_infers
   | 1, _, _, he, hσ => by cases he; cases hσ; exact lt1_infers
@@ -176,9 +195,11 @@ def fs : List (Name × FunDecl) :=
              params := [("p", .prim .uint), ("q", .prim .bool)], rets := [("r", .prim .uint)],
              body := [] })]
 
+/-- In the family: `paramSlots`. -/
 theorem paramSlots : Slots [] [("p", Ty.prim .uint), ("q", Ty.prim .bool)] [u256, .bool] :=
   .cons ⟨.uint, .int false 256 (by decide), rfl, rfl, rfl, .uint _ rfl⟩
     (.cons ⟨.bool, .bool, rfl, rfl, rfl, .bool⟩ .nil)
+/-- In the family: `retSlots`. -/
 theorem retSlots : Slots [] [("r", Ty.prim .uint)] [u256] :=
   .cons ⟨.uint, .int false 256 (by decide), rfl, rfl, rfl, .uint _ rfl⟩ .nil
 
@@ -221,9 +242,11 @@ theorem wrong_bits : Rejects (ctx u) (.unop .bnot (.name "b")) .incompatible := 
 /-- Constant zero divisor: `x / 0`, `x % (1 - 1)`, and the constant `1 / 0`. -/
 theorem zero_div : Rejects (ctx u) (.binop .div (.name "x") (.num 0)) .zeroDivisor :=
   .zeroDivisor rfl x (.const rfl) rfl
+/-- In the family: `zero_mod`. -/
 theorem zero_mod :
     Rejects (ctx u) (.binop .mod (.name "x") (.binop .sub (.num 1) (.num 1))) .zeroDivisor :=
   .zeroDivisor rfl x (.const (q := Q.ofInt 0) (by decide)) rfl
+/-- In the family: `zero_const`. -/
 theorem zero_const : Rejects (ctx u) (.binop .div (.num 1) (.num 0)) .zeroDivisor :=
   .zeroDivisor rfl (.const rfl) (.const rfl) rfl
 /-- Two constants that do not fold: `1 << 5000` is past solc's bound. -/
@@ -234,6 +257,15 @@ theorem nested_rejected :
     Rejects (ctx u) (.binop .lt (.binop .add (.binop .div (.name "x") (.num 0)) (.name "y"))
       (.name "x")) .zeroDivisor :=
   .left (k := .order) rfl (.left (k := .arith) rfl zero_div)
+
+/-- Two constants that do not fold: `2 ** 5000`. -/
+theorem unfolded_pow : Rejects (ctx u) (.binop .pow (.num 2) (.num 5000)) .unfolded :=
+  .bin (k := .exp) rfl (.const rfl) (.const rfl) (by decide) rfl rfl
+/-- A rejected right operand under `~` and `-`: `-(y & ~(x / 0))`. -/
+theorem nested_right :
+    Rejects (ctx u) (.unop .neg (.binop .band (.name "y")
+      (.unop .bnot (.binop .div (.name "x") (.num 0))))) .zeroDivisor :=
+  .negArg (.right (k := .bit) rfl (.bitNotArg zero_div))
 
 /-- No fuel infers a rejected form. -/
 example {T : Tables} {s n} (hs : T.expr (.binop .div (.name "x") (.num 0)) = some s) :
@@ -247,6 +279,7 @@ example {T : Tables} {s n} (hs : T.expr (.binop .div (.name "x") (.num 0)) = som
 #guard inferTy (.binop .mod (.name "x") (.binop .sub (.num 1) (.num 1))) = some none
 #guard inferTy (.binop .div (.num 1) (.num 0)) = some none
 #guard inferTy (.binop .shl (.num 1) (.num 5000)) = some none
+#guard inferTy (.binop .pow (.num 2) (.num 5000)) = some none
 -- Division by a nonzero constant is admitted.
 #guard inferTy (.binop .div (.name "x") (.num 2)) = some (some u256)
 

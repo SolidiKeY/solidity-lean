@@ -80,8 +80,9 @@ def fold : RawExpr → Option Q
 /-- Both operands are constants. -/
 def bothConst (a b : RawExpr) : Bool := (fold a).isSome && (fold b).isSome
 
-/-- The least fuel at which the spelling infers: one for a constant, a local
-or a comparison of constants, else one more than the operands need. -/
+/-- The least fuel at which a spelling of the family infers (`Infers.inferN`):
+one for a constant, a local or a comparison of constants, else one more than
+the operands need. Outside the family it is only a bound (`depth_le_nodes`). -/
 def depth : RawExpr → Nat
   | .binop op a b =>
     if (fold (.binop op a b)).isSome || (cmpOp op && bothConst a b) then 1

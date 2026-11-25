@@ -5,7 +5,7 @@ import Solidity.Correctness.Lowering.Total.CalleeInference
 # Arithmetic argument inference for selected calls
 
 Discharges the arithmetic argument family left open by `CalleeInference`:
-`alias_inferN_arith` and `alias_infer_arith` are `alias_inferN` and
+`alias_inferN_arith` (`alias_inferN_arith_nodes`) and `alias_infer_arith` are `alias_inferN` and
 `alias_infer` with their length and per-argument premises derived, for any
 ordered list, from `Infers` (`ArithmeticInference/Fragment.lean`) at the
 position-dependent budgets (`ArithmeticInference/Budget.lean`); a rejected
@@ -58,6 +58,31 @@ theorem alias_inferN_arith {a : Name} {fd : FunDecl} {source : SourceFunction} {
   obtain ⟨hl', he⟩ := args_inferN hargs hlen hty hfuel
   exact alias_inferN h henv hsc hl hf hs hne hloc hcall hps hfit hothers hpre
     (by rw [(exprs_get hargs).1]; exact hn) hl' he
+
+/-- The same at any fuel from the argument list's node count: no budget premise. -/
+theorem alias_inferN_arith_nodes {a : Name} {fd : FunDecl} {source : SourceFunction}
+    {index : Nat}
+    (h : withFunctions T R scope leadingParts fs = some u) (henv : Γ.env = u.env)
+    (hsc : Γ.scope = some scope) (hl : lookupBy a fs = some fd)
+    (hf : firstIndex a fs = some index) (hs : fd.sourceDecl = some source)
+    (hne : source.name ≠ "") (hloc : (Γ.locals.map Prod.fst).idxOf? source.name = none)
+    (hcall : callable fd = true) (hps : Slots fd.widths fd.params ps)
+    (hfit : Source.argsFit Γ.isBase Γ.mapFree σs ps = true)
+    (hothers : OthersReject Γ.isBase Γ.mapFree σs fs source.name index)
+    (hpre : PrefixRejects Γ σs scope leadingParts source.name)
+    (hargs : T.exprs es = some args) (hlen : σs.length = es.length)
+    (hty : ∀ (i : Nat) e σ, es[i]? = some e → σs[i]? = some σ → Infers Γ e σ)
+    (hn : args.nodes.length ≤ n) :
+    ∃ out rs, fromMetadata T R scope fd = some out ∧ Slots fd.widths fd.rets rs ∧
+      ∃ (da : TypedArgs Γ args σs)
+        (hsel : (Γ.functions source.name).filter (fits Γ σs) = [out])
+        (hsig : out.fnSig Γ.env = some (ps, rs)),
+        TypedArgs.inferN n Γ args = some ⟨σs, da⟩ ∧
+        Typed.inferN (n + 1) Γ (.call (.ident source.name) (.positional args)) =
+          some ⟨STy.ret rs, typedCall da hsel hsig⟩ :=
+  alias_inferN_arith h henv hsc hl hf hs hne hloc hcall hps hfit hothers hpre hargs hlen hty
+    (by have := argExprs_length_lt args; rw [(exprs_get hargs).1] at this; omega)
+    fun i e he => by have := args_budget hargs he; omega
 
 /-- **Alias-selected call over arithmetic arguments at `Typed.infer`'s fuel**:
 `alias_infer` with its length and per-argument premises derived from the

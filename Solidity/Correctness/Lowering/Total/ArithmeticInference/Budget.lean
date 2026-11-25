@@ -1,12 +1,13 @@
 import Solidity.Correctness.Lowering.Total.ArithmeticInference.Fragment
-import Solidity.Correctness.Lowering.Total.CalleeInference.Args
+import Solidity.Correctness.Lowering.Total.ArgumentInference
 
 /-!
 # Structural fuel and the argument budgets
 
 `depth e` is at most the node count of the spelling (`depth_le_nodes`, for
 every spelled model expression), and argument `i` of a spelled list fits the
-list's node count less `i + 2` (`arg_nodes`, `args_budget`). So the family in
+list's node count less `i + 2` (`args_budget`, over the scalar lane's
+`ArgumentInference.argExprs_nodes`). So the family in
 order meets the per-argument premises of `CalleeInference.alias_inferN` at the
 budgets `n - 1 - i` (`args_inferN`, `args_inferN_nodes`) and those of
 `alias_infer` at `args.nodes.length + 2 - i` (`args_infer`); `exprs_get`
@@ -39,8 +40,8 @@ theorem expr_unop_nodes {op : UnOp} {a : RawExpr} {s : Syn .expr}
     refine ⟨sa, rfl, ?_⟩
     cases op <;> simp [Tables.expr, h] at hs <;> subst hs <;> simp [Syn.nodes] <;> omega
 
-/-- **Structural fuel**: the fuel a spelled expression needs is at most its
-node count (for every model expression, in or out of the family). -/
+/-- **Structural fuel**: `depth` is at most the spelling's node count, for every
+spelled model expression; on the family `depth` is the fuel needed. -/
 theorem depth_le_nodes {e : RawExpr} : ∀ {s : Syn .expr}, T.expr e = some s →
     depth e ≤ s.nodes.length := by
   induction e using depth.induct with
@@ -61,18 +62,6 @@ theorem depth_le_nodes {e : RawExpr} : ∀ {s : Syn .expr}, T.expr e = some s �
     intro s _
     cases t <;> first | (simp only [depth]; exact nodes_pos s) | exact (h1 _ _ _ rfl).elim
                       | exact (h2 _ _ rfl).elim
-
-/-- A positional argument's nodes, its position and the list's two closing
-nodes fit in the list. -/
-theorem arg_nodes : ∀ {args : Syn (.list .expr)} {i : Nat} {a : Syn .expr},
-    (argExprs args)[i]? = some a → a.nodes.length + i + 2 ≤ args.nodes.length
-  | .nil, _, _, h => by simp [argExprs] at h
-  | .cons e es, 0, _, h => by
-      simp only [argExprs, List.getElem?_cons_zero, Option.some.injEq] at h
-      subst h; have := nodes_pos es; simp [Syn.nodes]; omega
-  | .cons e es, i + 1, _, h => by
-      have := arg_nodes (args := es) (i := i) (by simpa [argExprs] using h)
-      have := nodes_pos e; simp [Syn.nodes]; omega
 
 theorem exprs_cons {e : RawExpr} {es : List RawExpr} {args : Syn (.list .expr)} :
     T.exprs (e :: es) = some args ↔
@@ -108,7 +97,7 @@ theorem args_budget (hs : T.exprs es = some args) {i : Nat} {e : RawExpr}
   obtain ⟨e', he', ha⟩ := hg i _ (List.getElem?_eq_getElem hlt)
   cases hi.symm.trans he'
   have := depth_le_nodes ha
-  have := arg_nodes (List.getElem?_eq_getElem hlt)
+  have := ArgumentInference.argExprs_nodes (List.getElem?_eq_getElem hlt)
   omega
 
 /-- **Arithmetic arguments at the fuels `TypedArgs.inferN n` passes**: the

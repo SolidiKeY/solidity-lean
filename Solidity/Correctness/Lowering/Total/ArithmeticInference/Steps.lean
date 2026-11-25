@@ -1,13 +1,13 @@
-import Solidity.Source.Infer
+import Solidity.Correctness.Lowering.Total.ArgumentInference.Scalar
 
 /-!
 # Steps of `Typed.inferN` on arithmetic Source forms
 
 Equations of the actual `Source.Typed.inferN`, operand results as hypotheses
 (the composable layer, for operands of any family): `tryConst` first
-(`inferN_const`, `tryConst_none`); a local by its resolution and slot type
-(`inferN_local`); a binary operator form through `Source.inferBin`
-(`inferN_bin`); unary `-` and `~`. `binTy`, `negTy` and `bitNotTy` state the
+(`inferN_const`, `tryConst_none`); a binary operator form through `Source.inferBin`
+(`inferN_bin`); unary `-` and `~`. A local is the scalar lane's
+`ArgumentInference.inferN_loc`. `binTy` and `negTy` state the
 checks `inferBin` and the unary branches apply to inferred operand types, with
 a `Reason` on failure; `inferBin_ok`, `inferBin_error` and `inferBin_none`
 relate them to `inferBin`, and a comparison of two constants needs no operand
@@ -43,7 +43,10 @@ def Family.cmp : Family → Bool
   | .order | .eq => true
   | _ => false
 
-/-- The check `Source.inferBin` applies to inferred operand types. -/
+/-- The check `Source.inferBin` applies to inferred operand types: `.ok` exactly
+when `inferBin` succeeds, with that type. The `Reason` is a classification only:
+a constant zero divisor is reported first, though `inferBin` tests the common
+type before it (both give no result). -/
 def binTy (Γ : Ctx) (k : Family) (divMod bothConst : Bool) (τa τb : STy) : Except Reason STy :=
   match k with
   | .arith =>
@@ -78,10 +81,6 @@ def negTy : STy → Except Reason STy
   | .fixed f => .ok (.fixed f)
   | _ => .error .incompatible
 
-/-- The check of `~`. -/
-def bitNotTy (τ : STy) : Except Reason STy :=
-  if τ.isBits then .ok τ else .error .incompatible
-
 variable {Γ : Ctx} {n : Nat}
 
 theorem inferN_zero {s : Syn .expr} : Typed.inferN 0 Γ s = none := by simp only [Typed.inferN]
@@ -109,19 +108,6 @@ theorem inferN_bin {s a b : Syn .expr} {k : BinKind} (hb : s.binOp? = some (k, a
         Source.inferBin Γ s a b k hb (Typed.inferN n Γ a) (Typed.inferN n Γ b) := by
   cases s <;> first | (cases hb; done) | skip
   all_goals (cases hb; rw [Typed.inferN])
-
-theorem inferN_local {x : String} {i : Nat} {τ : STy} (hr : Γ.resolve x = some (.loc i))
-    (ht : Γ.tys[i]? = some τ) :
-    Typed.inferN (n + 1) Γ (.ident x) = some ⟨τ, .loc hr ht⟩ := by
-  rw [Typed.inferN, show Source.tryConst Γ (.ident x) = none from rfl]
-  dsimp only [Option.orElse]
-  split
-  · rename_i j hr'
-    cases hr.symm.trans hr'
-    split
-    · rename_i τ' ht'; cases ht.symm.trans ht'; rfl
-    · rename_i ht'; rw [ht] at ht'; cases ht'
-  all_goals first | (rename_i hr'; rw [hr] at hr'; cases hr'; done) | (rename_i h1 _ _; exact (h1 i hr).elim)
 
 theorem const_neg {a : Syn .expr} (hc : a.const = none) :
     (Syn.unaryPrefix .neg a : Syn .expr).const = none := by
