@@ -19,8 +19,10 @@ position, without a spelling, and its `ReferenceDecode.Error`); `stray_eq_some_i
 (the first width row outside the support); `part_error_iff` (a name that is not
 written, then a member failure, then no members, then a stray row);
 `parts_error_iff`, `decode_error_iff` (the first entry, by position offset from
-the starting index, that is not `Representable`). `Error.index`, `Error.written`,
-`Error.table` name the entry (`part_error_entry`, `parts_error_index`).
+the starting index, that is not `Representable`); `part_error_member_iff` and
+`part_error_unreadRow_iff` compose an entry's failure with the member or row position;
+`members_eq_ok_nil_iff` is empty-member rejection. `StructDecode.Error.index`,
+`written`, `table` name the entry (`part_error_entry`, `parts_error_index`).
 
 Complete-unit assembly, nested resolved-table agreement, retained `RawTy`
 agreement, frame correspondence and semantic binding are not here.
@@ -49,9 +51,8 @@ theorem Agree.left {ks : List Name} (h : Agree (keys ++ ks) w w') : Agree keys w
   h.mono fun _ hk => List.mem_append_left _ hk
 theorem Agree.right {ks : List Name} (h : Agree (ks ++ keys) w w') : Agree keys w w' :=
   h.mono fun _ hk => List.mem_append_right _ hk
-theorem Agree.symm (h : Agree keys w w') : Agree keys w' w := fun k hk => (h k hk).symm
 
-/-- `elemB` reads exactly the first rows of `leafKeys`. -/
+/-- `elemB` reads no row outside the first rows of `leafKeys`. -/
 theorem elemB_congr {key : Name} (h : Agree (leafKeys key) w w') (p : PrimTy) :
     Decode.elemB w key p = Decode.elemB w' key p := by
   have h0 := h key (by simp [leafKeys])
@@ -206,14 +207,27 @@ theorem members_error_iff (C : Contract) (w : List (Name × Nat)) :
             exact ⟨pre, y, post, rfl, fun z hz => hpre z (List.mem_cons_of_mem _ hz), hy, rfl⟩
 
 /-- The entry position an error names. -/
-def Error.index : StructDecode.Error → Nat
+def _root_.Solidity.Correctness.Lowering.Total.StructDecode.Error.index :
+    StructDecode.Error → Nat
   | .notWritten i .. | .noMembers i .. | .member i .. | .unreadRow i .. => i
 /-- The written name of the entry an error names. -/
-def Error.written : StructDecode.Error → Name
+def _root_.Solidity.Correctness.Lowering.Total.StructDecode.Error.written :
+    StructDecode.Error → Name
   | .notWritten _ w _ | .noMembers _ w _ | .member _ w .. | .unreadRow _ w .. => w
 /-- The table type of the entry an error names. -/
-def Error.table : StructDecode.Error → Name
+def _root_.Solidity.Correctness.Lowering.Total.StructDecode.Error.table :
+    StructDecode.Error → Name
   | .notWritten _ _ t | .noMembers _ _ t | .member _ _ t .. | .unreadRow _ _ t .. => t
+
+/-- Empty-member rejection: `members` spells no member exactly for no declared member. -/
+theorem members_eq_ok_nil_iff (C : Contract) (w : List (Name × Nat)) :
+    (fs : List (Name × Ty)) → members C w fs = .ok .nil ↔ fs = []
+  | [] => by simp [members]
+  | x :: xs => by
+      simp only [members, reduceCtorEq, iff_false]
+      cases spellType C w x.1 .storage x.2 with
+      | error => simp
+      | ok t => cases members C w xs <;> simp [bind, Except.bind]
 
 /-- **Why an entry fails**, in `part`'s priority: an unwritten name, then the first
 failing member, then no members, then the first stray row. -/
@@ -268,9 +282,48 @@ theorem part_error_iff {C : Contract} {i : Nat} {entry : Name × Name} {err : St
 /-- The error of an entry names its position, written name and table type. -/
 theorem part_error_entry {C : Contract} {i : Nat} {entry : Name × Name}
     {err : StructDecode.Error} (h : part C i entry = .error err) :
-    Error.index err = i ∧ Error.written err = entry.1 ∧ Error.table err = entry.2 := by
+    err.index = i ∧ err.written = entry.1 ∧ err.table = entry.2 := by
   rcases part_error_iff.1 h with ⟨-, rfl⟩ | ⟨-, -, ⟨_, _, -, rfl⟩ | ⟨-, rfl⟩ | ⟨_, _, _, -, -, rfl⟩⟩ <;>
     exact ⟨rfl, rfl, rfl⟩
+
+/-- **A member failure of an entry**, composed with `members_error_iff`: the written
+name is plain, and the member at its position in the table type is the first without a
+spelling, failing with `e`. -/
+theorem part_error_member_iff {C : Contract} {i j : Nat} {entry : Name × Name}
+    {wn tn m : Name} {e : ReferenceDecode.Error} :
+    part C i entry = .error (.member j wn tn m e) ↔
+      j = i ∧ wn = entry.1 ∧ tn = entry.2 ∧ isEnc entry.1 = false ∧ entry.1 ≠ "" ∧
+      ∃ pre x post, structDef entry.2 = pre ++ x :: post ∧
+        (∀ y ∈ pre, ∃ t, spellType C (structWidths entry.2) y.1 .storage y.2 = .ok t) ∧
+        spellType C (structWidths entry.2) x.1 .storage x.2 = .error e ∧ m = x.1 := by
+  rw [part_error_iff]
+  simp only [reduceCtorEq, and_false, false_or, exists_false, or_false,
+    StructDecode.Error.member.injEq]
+  constructor
+  · rintro ⟨enc, name, m', e', hm, rfl, rfl, rfl, rfl, rfl⟩
+    exact ⟨rfl, rfl, rfl, enc, name, (members_error_iff C _ _ _ _).1 hm⟩
+  · rintro ⟨rfl, rfl, rfl, enc, name, h⟩
+    exact ⟨enc, name, m, e, (members_error_iff C _ _ _ _).2 h, rfl, rfl, rfl, rfl, rfl⟩
+
+/-- **A stray row of an entry**, composed with `stray_eq_some_iff`: the written name is
+plain, some member spells and every member spells, and `(k, v)` is the first width row of
+the table type outside the support. -/
+theorem part_error_unreadRow_iff {C : Contract} {i j : Nat} {entry : Name × Name}
+    {wn tn k : Name} {v : Nat} :
+    part C i entry = .error (.unreadRow j wn tn k v) ↔
+      j = i ∧ wn = entry.1 ∧ tn = entry.2 ∧ isEnc entry.1 = false ∧ entry.1 ≠ "" ∧
+      (∃ m ms, members C (structWidths entry.2) (structDef entry.2) = .ok (.cons m ms)) ∧
+      ∃ pre post, structWidths entry.2 = pre ++ (k, v) :: post ∧
+        (∀ r ∈ pre, r.1 ∈ support (structDef entry.2)) ∧ k ∉ support (structDef entry.2) := by
+  rw [part_error_iff]
+  simp only [reduceCtorEq, and_false, false_or, exists_false, StructDecode.Error.unreadRow.injEq]
+  constructor
+  · rintro ⟨enc, name, m, ms, r, hm, hs, rfl, rfl, rfl, hk, hv⟩
+    obtain ⟨k', v'⟩ := r
+    cases hk; cases hv
+    exact ⟨rfl, rfl, rfl, enc, name, ⟨m, ms, hm⟩, stray_eq_some_iff.1 hs⟩
+  · rintro ⟨rfl, rfl, rfl, enc, name, ⟨m, ms, hm⟩, h⟩
+    exact ⟨enc, name, m, ms, (k, v), hm, stray_eq_some_iff.2 h, rfl, rfl, rfl, rfl, rfl⟩
 
 /-- An entry is representable exactly when it has a declaration, at any position. -/
 theorem representable_iff_part {C : Contract} (i : Nat) (entry : Name × Name) :
@@ -332,7 +385,7 @@ theorem parts_error_iff {C : Contract} :
 theorem parts_error_index {C : Contract} {i : Nat} {es : List (Name × Name)}
     {err : StructDecode.Error} (h : parts C i es = .error err) :
     ∃ pre e post, es = pre ++ e :: post ∧ (∀ e' ∈ pre, Representable C e') ∧
-      Error.index err = i + pre.length ∧ Error.written err = e.1 ∧ Error.table err = e.2 ∧
+      err.index = i + pre.length ∧ err.written = e.1 ∧ err.table = e.2 ∧
       part C (i + pre.length) e = .error err := by
   obtain ⟨pre, e, post, rfl, hpre, he⟩ := (parts_error_iff i es err).1 h
   exact ⟨pre, e, post, rfl, hpre, (part_error_entry he).1, (part_error_entry he).2.1,
