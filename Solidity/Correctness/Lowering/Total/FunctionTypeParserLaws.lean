@@ -332,7 +332,7 @@ theorem Well.index {s n : String} (h : Well s) (hn : plain n.data = true) :
     Well (s ++ "[" ++ n ++ "]") := by
   rw [String.append_assoc, String.append_assoc]
   have d : ("[" ++ (n ++ "]")).data = '[' :: (n.data ++ [']']) := rfl
-  refine h.append ?_ ?_
+  refine Well.append h ?_ ?_
   · rw [d]
     show splitScan 1 (n.data ++ [']']) = some 0
     rw [splitScan_append _ (splitScan_plain hn 1)]; rfl
@@ -356,8 +356,8 @@ theorem Covered.well {s : String} (h : Covered s) : Well s := by
   induction h with
   | name ne p => exact well_plain ne p
   | fn ext _ _ ihp ihr => exact well_fnTyStr ext ihp ihr
-  | suffix _ p ih => exact ih.append (splitScan_plain p 0) (closeScan_plain p 0)
-  | index _ p ih => exact ih.index p
+  | suffix _ p ih => exact Well.append ih (splitScan_plain p 0) (closeScan_plain p 0)
+  | index _ p ih => exact Well.index ih p
 
 /-- The round trip on the grammar: a function type of covered components
 reads back. A returned component that is itself `fnTyStr` of covered

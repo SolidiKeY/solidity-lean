@@ -10,7 +10,7 @@ equal to a `List Char` operation on `String.mk l`:
 
 * `drop_mk`, `dropRight_mk`, `isEmpty_mk`;
 * `startsWith_mk`, `endsWith_mk` (each the `decide` of a list equation);
-* `intercalate_mk` (`sepJoin`), `data_intercalate`.
+* `data_intercalate` (`sepJoin`).
 
 Nothing here mentions the parser; the laws hold for every character list.
 -/
@@ -312,10 +312,5 @@ theorem data_intercalate (s : String) (l : List String) :
         intro x y r; cases r <;> simp [sepJoin]
       rw [e, ih (a ++ s ++ b)]
       simp [j, sepJoin]
-
-theorem intercalate_mk (s : List Char) (l : List (List Char)) :
-    (String.mk s).intercalate (l.map String.mk) = ⟨sepJoin s l⟩ := by
-  apply String.ext
-  simp [data_intercalate, Function.comp_def]
 
 end Solidity.Correctness.Lowering.Total.FunctionTypeParserLaws.Str
