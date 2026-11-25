@@ -1,0 +1,63 @@
+name: Bytecode selection witnesses
+# Compiles the bytecode-selection audit witnesses (tests/h62/item2/audit-bytecode-selection/*.lean)
+# against the current Solidity sources, so that each file has a committed consumer: every
+# `lean` line below names one witness literally, which the tests-used census
+# (scripts/check-tests-used.py, add_roots) reads as a CI root.
+#
+# Each file is checked on its own with the per-file bounds of the audit's verify.py
+# (scripts/h62/item2/audit-bytecode-selection/verify.py): one thread, -j1, an 8192 MB Lean
+# heap (-M8192), --tstack=131072, MIMALLOC_PURGE_DELAY=0 and a 300 s timeout. verify.py
+# itself is not run here: it pins every Solidity import to its frozen base commit, which
+# master has moved past. Its import closure is built by Lake instead (seeded from the
+# master cache); the two witnesses that others import are written as .olean files to a
+# fresh directory outside the checkout, in import order.
+#
+# The witness steps must stay plain commands (no continuation lines, no shell operators):
+# the census reads them, and scripts/ci/bytecode-selection-witnesses.sh runs the same lines
+# locally.
+on:
+  pull_request:
+    paths:
+      - 'tests/h62/item2/audit-bytecode-selection/**'
+      - 'scripts/h62/item2/audit-bytecode-selection/**'
+      - '.github/workflows/bytecode-selection-witnesses.yml'
+      - 'scripts/ci/bytecode-selection-witnesses.sh'
+  push:
+    paths:
+      - 'tests/h62/item2/audit-bytecode-selection/**'
+      - 'scripts/h62/item2/audit-bytecode-selection/**'
+      - '.github/workflows/bytecode-selection-witnesses.yml'
+      - 'scripts/ci/bytecode-selection-witnesses.sh'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  witnesses:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v5
+      - name: Set up Lean
+        uses: leanprover/lean-action@v1
+        with:
+          build: "false"
+          use-github-cache: "false"
+          use-mathlib-cache: "false"
+          test: "false"
+          lint: "false"
+      - name: Seed Lake cache from master
+        run: bash scripts/ci/fetch-lake-cache.sh
+      - name: Build the witnesses' imports
+        run: |
+          lake build Solidity.Backend.AbiEntry.BoolBinding Solidity.Backend.AbiEntry.ValueGate Solidity.Backend.FailurePaths.Controls Solidity.Backend.Selection.CompositionControls Solidity.Backend.Selection.InterfaceV2Controls Solidity.Backend.Selection.LiteralSelection Solidity.Backend.Selection.PremisesV2
+          python3 scripts/ci/restore-lake-artifacts.py
+      - name: Check the witnesses
+        run: |
+          mkdir -p $RUNNER_TEMP/witnesses/tests/h62/item2/audit-bytecode-selection
+          LEAN_NUM_THREADS=1 MIMALLOC_PURGE_DELAY=0 LEAN_PATH=$RUNNER_TEMP/witnesses lake env timeout 300 lean -j1 --tstack=131072 tests/h62/item2/audit-bytecode-selection/RuntimePremiseWitness.lean -M8192 -o $RUNNER_TEMP/witnesses/tests/h62/item2/audit-bytecode-selection/RuntimePremiseWitness.olean
+          LEAN_NUM_THREADS=1 MIMALLOC_PURGE_DELAY=0 LEAN_PATH=$RUNNER_TEMP/witnesses lake env timeout 300 lean -j1 --tstack=131072 tests/h62/item2/audit-bytecode-selection/HypothesisDomains.lean -M8192 -o $RUNNER_TEMP/witnesses/tests/h62/item2/audit-bytecode-selection/HypothesisDomains.olean
+          LEAN_NUM_THREADS=1 MIMALLOC_PURGE_DELAY=0 LEAN_PATH=$RUNNER_TEMP/witnesses lake env timeout 300 lean -j1 --tstack=131072 tests/h62/item2/audit-bytecode-selection/Witnesses.lean -M8192 -o $RUNNER_TEMP/witnesses/tests/h62/item2/audit-bytecode-selection/Witnesses.olean
+          LEAN_NUM_THREADS=1 MIMALLOC_PURGE_DELAY=0 LEAN_PATH=$RUNNER_TEMP/witnesses lake env timeout 300 lean -j1 --tstack=131072 tests/h62/item2/audit-bytecode-selection/LiteralSuccess.lean -M8192 -o $RUNNER_TEMP/witnesses/tests/h62/item2/audit-bytecode-selection/LiteralSuccess.olean
+          LEAN_NUM_THREADS=1 MIMALLOC_PURGE_DELAY=0 LEAN_PATH=$RUNNER_TEMP/witnesses lake env timeout 300 lean -j1 --tstack=131072 tests/h62/item2/audit-bytecode-selection/ValueGateSuccess.lean -M8192 -o $RUNNER_TEMP/witnesses/tests/h62/item2/audit-bytecode-selection/ValueGateSuccess.olean
+          LEAN_NUM_THREADS=1 MIMALLOC_PURGE_DELAY=0 LEAN_PATH=$RUNNER_TEMP/witnesses lake env timeout 300 lean -j1 --tstack=131072 tests/h62/item2/audit-bytecode-selection/BoolBindingSuccess.lean -M8192 -o $RUNNER_TEMP/witnesses/tests/h62/item2/audit-bytecode-selection/BoolBindingSuccess.olean
+          LEAN_NUM_THREADS=1 MIMALLOC_PURGE_DELAY=0 LEAN_PATH=$RUNNER_TEMP/witnesses lake env timeout 300 lean -j1 --tstack=131072 tests/h62/item2/audit-bytecode-selection/FailurePathsWitnesses.lean -M8192 -o $RUNNER_TEMP/witnesses/tests/h62/item2/audit-bytecode-selection/FailurePathsWitnesses.olean
