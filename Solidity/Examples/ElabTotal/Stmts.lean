@@ -1,4 +1,5 @@
 import Solidity.Correctness.Elab.Total
+import Solidity.Correctness.Elab.Congruence
 import Solidity.Syntax.Elab.CallOutput
 
 /-!
@@ -711,3 +712,61 @@ end Solidity.Examples.ElabTotal.Stmts
 /-- info: 'Solidity.ElabCallHeight.callbacks_call_output_height_raw' depends on axioms: [propext, Quot.sound] -/
 #guard_msgs in
 #print axioms Solidity.ElabCallHeight.callbacks_call_output_height_raw
+
+/-! ## Callback agreement (`Correctness/Elab/Congruence.lean`) -/
+
+namespace Solidity.Examples.ElabTotal.Stmts
+open Solidity Solidity.ElabAgree
+variable [FreshNames] (C : Contract)
+
+open Classical in
+/-- `stmt`, failing off the statements of `ss`. -/
+private noncomputable def onlyAt (stmt : RawStmt → ElabM (SProg C)) (ss : List RawStmt) :
+    RawStmt → ElabM (SProg C) :=
+  fun s => if s ∈ ss then stmt s else throw "cut"
+
+omit [FreshNames] in
+/-- A block does not see a cut of its statement callback off its own statements. -/
+example (stmt : RawStmt → ElabM (SProg C)) (ss : List RawStmt) (sc : ElabScope) :
+    Agree sc (elabStmtsPWith C (onlyAt C stmt ss) ss) (elabStmtsPWith C stmt ss) := by
+  refine elabStmtsPWith_agree C _ _ sc ss fun s hs => ?_
+  simp only [onlyAt, hs, ↓reduceIte]
+  exact agree_refl _ _
+
+/-- Callbacks that agree at a scope give the helpers the same runs there. -/
+example (H K : RawExpr → ElabM (SProg C × RawExpr)) (stmt : RawStmt → ElabM (SProg C))
+    (sc : ElabScope) (op : BinOp) (a b : RawExpr) (f : String) (h : ∀ e, Agree sc (H e) (K e)) :
+    Agree sc (hoistBinopWith C H op a b) (hoistBinopWith C K op a b) ∧
+    Agree sc (eagerArgsWith C H [a, b]) (eagerArgsWith C K [a, b]) ∧
+    Agree sc (hoistCallArgsWith C H stmt f [a, b]) (hoistCallArgsWith C K stmt f [a, b]) :=
+  ⟨hoistBinopWith_agree C H K sc op a b (h a) (h b),
+   eagerArgsWith_agree C H K sc [a, b] false [] fun e _ => h e,
+   hoistCallArgsWith_agree C H K stmt stmt sc f [a, b] (fun e _ => h e)
+     fun _ _ _ => agree_refl _ _⟩
+
+/-- The call arm over records agreeing on dispatch here and on blocks that cannot deploy. -/
+example (rc rc' : ElabRec C) (sc : ElabScope) (f : String) (args : List RawExpr)
+    (hm : ∀ h ty as, Agree sc (rc.fnMemoryDispatch h ty as) (rc'.fnMemoryDispatch h ty as))
+    (hv : ∀ h as, Agree sc (rc.callValue h as none 256 false) (rc'.callValue h as none 256 false))
+    (hd : ∀ ty, Agree sc (rc.fnDispatch f ty args none 256 false)
+      (rc'.fnDispatch f ty args none 256 false))
+    (hb : ∀ sc' ss, sc'.top = false → Agree sc' (rc.elabStmtsP ss) (rc'.elabStmtsP ss)) :
+    Agree sc (elabCallRetWith C rc f args none) (elabCallRetWith C rc' f args none) :=
+  elabCallRetWith_agree C rc rc' sc f args none 256 false false false false
+    (elabCallRetCore_agree C rc rc' sc f args none 256 false false false false
+      (fun h ty as _ => hm h ty as) (fun h as _ => hv h as) hd
+      (fun sc' body ht _ _ => hb sc' body ht) (fun _ _ _ sc' body _ ht _ => hb sc' body ht))
+
+/-- `agree_run` leaves the invocation at which the two differ, under its branch's facts. -/
+example (H K : RawExpr → ElabM (SProg C × RawExpr)) (sc : ElabScope) (e : RawExpr)
+    (h : e.isLit = false → Agree sc (H e) (K e)) :
+    Agree sc (if _hl : e.isLit = true then pure ([], e) else do
+        let (P, e') ← H e
+        if (← read).top then pure (P, e') else throw "inner")
+      (if _hl : e.isLit = true then pure ([], e) else do
+        let (P, e') ← K e
+        if (← read).top then pure (P, e') else throw "inner") := by
+  agree_run
+  exact h (by simpa using ‹¬e.isLit = true›)
+
+end Solidity.Examples.ElabTotal.Stmts
