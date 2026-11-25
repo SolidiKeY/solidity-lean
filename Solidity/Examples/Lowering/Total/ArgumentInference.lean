@@ -111,10 +111,4 @@ example (Te : Tables) {u} (hu : Callee.withFunctions tablesS [] "C" .nil fs = so
         (.cons (.name (x := "n") (i := 2) rfl rfl) .nil))
   exact ⟨_, he, rs, _, h⟩
 
--- Axiom guard: only the standard axioms.
-/-- info: 'Solidity.Correctness.Lowering.Total.ArgumentInference.alias_infer_raw' depends on axioms: [propext,
- Classical.choice,
- Quot.sound] -/
-#guard_msgs in #print axioms Solidity.Correctness.Lowering.Total.ArgumentInference.alias_infer_raw
-
 end Solidity.Examples.Lowering.Total.ArgumentInference
