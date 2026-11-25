@@ -2538,6 +2538,7 @@ import Solidity.Correctness.Lowering.Total.Decode.WithExpr
 import Solidity.Correctness.Lowering.Total.EnumDecode
 import Solidity.Correctness.Lowering.Total.EnumUseDecode
 import Solidity.Correctness.Lowering.Total.FunctionTypeDecode
+import Solidity.Correctness.Lowering.Total.FunctionTypeFuelLaws
 import Solidity.Correctness.Lowering.Total.FunctionTypeParserLaws
 import Solidity.Correctness.Lowering.Total.FunctionTypeParserLaws.Delimiters
 import Solidity.Correctness.Lowering.Total.FunctionTypeParserLaws.Strings
