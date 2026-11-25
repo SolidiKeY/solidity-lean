@@ -224,6 +224,7 @@ import Solidity.Examples.Lowering.Total.FunctionTypeDecode
 import Solidity.Examples.Lowering.Total.FunctionTypeFuelLaws
 import Solidity.Examples.Lowering.Total.FunctionTypeParserLaws
 import Solidity.Examples.Lowering.Total.ReferenceDecode
+import Solidity.Examples.Lowering.Total.ReferenceStateDecode
 import Solidity.Examples.Lowering.Total.TransientDecode
 import Solidity.Examples.MemoryFloor
 import Solidity.Examples.MemoryInstantiation
