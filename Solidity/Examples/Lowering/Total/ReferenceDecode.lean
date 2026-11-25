@@ -1,9 +1,7 @@
 import Solidity.Correctness.Lowering.Total.ReferenceDecode
 
-/-! Checks of the reference decoder: nested arrays, a struct, a mapping and the
-three locations in one signature, its Source types, and named errors. -/
+/-! The reference decoder on one signature, its Source types, named errors. -/
 namespace Solidity.Examples.Lowering.Total.ReferenceDecode
-
 open Solidity.Correctness.Lowering.Total.ReferenceDecode Source
 
 /-- `struct Pair { uint a; uint8 b; }`, spelled in the table by its members. -/
@@ -22,7 +20,6 @@ def f : FunDecl where
   widths := [("xs[][]", 8), ("m{}#address", 20), ("m[][]", 8)]
   body := []
 
-/-- Names, order, nesting, lengths, widths, written struct name, locations. -/
 theorem f_signature : signature pairs f = .ok
     (.cons (.param (.array (.array u8 (.some (lenLit 3))) .none) (some .memory) (some "xs"))
     (.cons (.param (.userType ⟨"Pair", []⟩) (some .storage) (some "p"))
@@ -48,6 +45,9 @@ example (E : Source.Env) (d : Source.DeclName) (h : Resolved E (some "C") "Pair"
 def g : FunDecl := { f with paramLocs := [("xs", .calldata), ("p", .storage), ("m", .storage),
   ("ys", .calldata)] }
 example : f.paramCtx = g.paramCtx := rfl
+example {Γ : ECtx} (h : g.paramCtx = .ok Γ) := (paramCtx_reverse h).1
+example : frameTy [] "a" (.ref (.array .uint)) (some .calldata) = .mem (.array .uint) [] :=
+  (frameTy_memory_calldata [] "a" _).symm
 example : (signature pairs g).map (fun s => declaredLocs s.1) =
     .ok [some .calldata, some .storage, none, some .storage, some .calldata] := rfl
 
@@ -57,8 +57,11 @@ def r (T : Ty) (mem sto : Bool) : FunDecl :=
   { params := [], rets := [("r", T)], retMem := mem, retStorage := sto, body := [] }
 
 example : signature pairs (a [] []) = .error (.missingLocation "a") := rfl
-example : signature pairs (a [("a", .memory)] [("a[]#enum", 1)]) =
-    .error (.unreadRow "a" "a[]#enum" 1) := rfl
+/-- `Pair` is the only identifier read as its table type. -/
+example : pairs.structName? "Pair" = some "Pair{a:uint;b:uint8}" :=
+  ((written?_iff (C := pairs) rfl "Pair").mpr rfl).1
+example (E : Source.Env) := signature_frame (C := pairs) (d := a [("a", .memory)] []) (E := E)
+  (scope := none) rfl (by simp [a, structsTy, structsRef]) .nil false false
 example : signature pairs (a [("a", .memory)] [("a[]", 8), ("a[]#bytes", 1)]) =
     .error (.erasedBytes "a") := rfl
 example : signature pairs { f with paramLocs := [("xs", .memory), ("p", .storage), ("m", .memory)] } =
@@ -70,5 +73,4 @@ example : signature pairs (r .uint true false) = .error (.locationOnValueReturn 
 example : signature { vars := [], structs := [("A", "A{a:uint}"), ("B", "A{a:uint}")] }
     (r (.ref (.struct "A{a:uint}")) true false) =
     .error (.ambiguousStruct "r" "A{a:uint}" ["A", "B"]) := rfl
-
 end Solidity.Examples.Lowering.Total.ReferenceDecode
