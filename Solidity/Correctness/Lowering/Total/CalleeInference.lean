@@ -191,7 +191,8 @@ theorem call_nodes :
 
 /-- **At `Typed.infer`'s syntax-node fuel**: the residual obligations are the
 individual argument results, position `i` at fuel `args.nodes.length + 2 - i`,
-which is what `Typed.infer` gives that position through the call. -/
+the fuel `Typed.infer` of the call passes to that position (not the
+argument's own `Typed.infer` fuel; no fuel monotonicity is used). -/
 theorem alias_infer {a : Name} {fd : FunDecl} {source : SourceFunction} {index : Nat}
     (h : withFunctions T R scope leadingParts fs = some u) (henv : Γ.env = u.env)
     (hsc : Γ.scope = some scope) (hl : lookupBy a fs = some fd)

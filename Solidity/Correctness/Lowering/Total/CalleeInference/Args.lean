@@ -11,7 +11,8 @@ So position `i` is inferred at `n - 1 - i` when the list is inferred at `n`.
 
 Failure propagates: a failing head or tail (`argsN_head_none`, `argsN_tail_none`),
 a failing position at its fuel (`argsN_fail_at`) or too little fuel for the list
-(`argsN_short`) leaves no result. Success is derived from the individual
+(`argsN_short`) leaves no result; conversely a failing list with enough fuel
+has a position failing at its fuel (`fail_at_of_argsN`). Success is derived from the individual
 argument results at their actual fuels (`argsN_of_each`), and conversely each
 position of a successful result was inferred there (`each_of_argsN`). Nothing
 here relates `Typed.inferN` to a `Typed` derivation found otherwise.
@@ -80,6 +81,23 @@ theorem argsN_fail_at : ∀ {n i : Nat} {es : Syn (.list .expr)} {e : Syn .expr}
   | n + 1, i + 1, .cons _ es, _, hi, h =>
       argsN_tail_none (argsN_fail_at (n := n) (i := i) (es := es)
         (by simpa [argExprs] using hi) (by simpa [Nat.sub_sub, Nat.add_comm] using h))
+
+/-- A failing list with enough fuel has a position failing at its actual fuel. -/
+theorem fail_at_of_argsN : ∀ {n : Nat} {es : Syn (.list .expr)},
+    TypedArgs.inferN n Γ es = none → (argExprs es).length < n →
+    ∃ i e, (argExprs es)[i]? = some e ∧ Typed.inferN (n - 1 - i) Γ e = none
+  | 0, _, _, hn => absurd hn (Nat.not_lt_zero _)
+  | _ + 1, .nil, h, _ => by simp [argsN_nil] at h
+  | n + 1, .cons e es, h, hn => by
+      cases hd : Typed.inferN n Γ e with
+      | none => exact ⟨0, e, by simp [argExprs], by simpa using hd⟩
+      | some r =>
+          cases hds : TypedArgs.inferN n Γ es with
+          | some rs => rw [argsN_cons, hd, hds] at h; cases h
+          | none =>
+              obtain ⟨i, a, hi, ha⟩ := fail_at_of_argsN hds (by simp [argExprs] at hn; omega)
+              exact ⟨i + 1, a, by simpa [argExprs] using hi,
+                by simpa [Nat.sub_sub, Nat.add_comm] using ha⟩
 
 /-- **Success from individual results**: each position `i` inferred with type
 `σs[i]` at the fuel `n - 1 - i` the implementation uses, with enough fuel for

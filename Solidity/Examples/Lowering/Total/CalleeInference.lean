@@ -131,6 +131,11 @@ example (Γ : Source.Ctx) :
 example (Γ : Source.Ctx) : Source.TypedArgs.inferN 2 Γ (args [tru, one]) = none :=
   argsN_short (by simp [args, argExprs])
 
+/-- Argument failure: in an empty unit `nope` is unresolved at the fuel its
+position gets, so `f(nope)` fails before any branch is tried. -/
+example : Source.Typed.inferN 5 (ctx (Syn.unit .nil) []) (call "f" [.ident "nope"]) = none :=
+  inferN_call_fail_at (i := 0) (by simp [args, argExprs]) rfl
+
 /-- Duplicate accepting entries: inference of `f(true)` fails. -/
 example {u} (hu : Callee.withFunctions tablesS [] "C" .nil
       [("f_0", fn "f" [("p", .prim .bool)]), ("f_1", fn "f" [("p", .prim .bool)])] = some u) :

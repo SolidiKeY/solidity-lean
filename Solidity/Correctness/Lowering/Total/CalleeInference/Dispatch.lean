@@ -13,9 +13,11 @@ tries, in order, a conversion (`convTarget`, one argument), a struct constructio
 `NotOther` holds whenever the callee name denotes a declaration set containing a
 function-kind declaration (`notOther_of_function`), in particular whenever some
 callable function is visible under it (`notOther_of_functions`), and under a
-local of the name (`notOther_local`). Where no function-kind declaration is
-denoted, the competing branches stay possible and `NotOther` is a local fact
-the caller must supply.
+local of the name (`notOther_local`). `NotOther` is sufficient, not necessary:
+the conversion branch fires only on one argument, so with zero or several
+arguments a conversion target alone would not prevent `inferCall`. Where no
+function-kind declaration is denoted, the competing branches stay possible and
+`NotOther` is a local fact the caller must supply.
 -/
 namespace Solidity.Correctness.Lowering.Total.CalleeInference
 
