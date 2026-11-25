@@ -4,10 +4,10 @@ import Solidity.Syntax.Elab.Values
 # Checks: the value rewrites' equations
 
 The functions of `Syntax/Elab/Values.lean` checked here are total
-(`bytesPure`, the `narrow…?` group, `abiTyName`, `abiTyExpr?` and `abiFnType` are still `partial`),
+(the `narrow…?` group, `abiTyName`, `abiTyExpr?` and `abiFnType` are still `partial`),
 so each unfolds by its named equations with no `native_decide`: structural ones
 (`fnTyOfExpr`, `rawFnTyOfExpr?`, `bytesOf?`) also reduce in the kernel (`rfl`), the
-well-founded ones (`narrowPure`, `fnPure`)
+well-founded ones (`narrowPure`, `bytesPure`, `fnPure`)
 by rewriting. The `#guard`s pin the compiled functions.
 -/
 
@@ -169,6 +169,72 @@ private def shown (r : Except String RawExpr) : String :=
   shown (.ok (.binop .subW (.num 255) (.name "a")))
 #guard (shown (narrowPure C0 false [("a", .val .uint 8 [])]
   (.index (.name "m") (.binop .add (.name "a") (.num 300))))).startsWith "error: 300 does not fit"
+
+/-! ### `bytesPure`: by `sizeOf`, through `List.mapM` -/
+
+/-- Every arm that only rebuilds its node, on leaves; an array literal is not entered. -/
+theorem bytesPure_rebuild (C : Contract) (Γ : ECtx) (x : String) (T : RawTy) (o : IncDec)
+    (m : ModOp) (ns : List String) (as : List RawExpr) :
+    bytesPure C Γ (.modular m (.incDec o (.name x)) (.newArr T (.name x))
+        (.named "f" ns [.tuple [.name x], .field (.name x) "f", .call "#array" as])) =
+      pure (.modular m (.incDec o (.name x)) (.newArr T (.name x))
+        (.named "f" ns [.tuple [.name x], .field (.name x) "f", .call "#array" as])) := by
+  rw [bytesPure_modular, bytesPure_incDec, bytesPure_newArr, bytesPure_named, List.mapM_cons,
+    List.mapM_cons, List.mapM_cons, List.mapM_nil, bytesPure_tuple, List.mapM_cons, List.mapM_nil,
+    bytesPure_field C Γ _ "f" (by decide), bytesPure_call_array, (bytesPure_other C Γ).2.1]
+  rfl
+
+/-- Operators of literals: no operand is a `bytesN`, so nothing is converted. -/
+theorem bytesPure_literals (C : Contract) (Γ : ECtx) (c : Bool) :
+    bytesPure C Γ (.binop .add (.num 1) (.num 2)) = pure (.binop .add (.num 1) (.num 2)) ∧
+      bytesPure C Γ (.unop .neg (.num 1)) = pure (.unop .neg (.num 1)) ∧
+      bytesPure C Γ (.ternary (.bool c) (.num 1) (.num 2)) =
+        pure (.ternary (.bool c) (.num 1) (.num 2)) ∧
+      bytesPure C Γ (.assign (.num 1) (.num 2)) = pure (.assign (.num 1) (.num 2)) ∧
+      bytesPure C Γ (.opAssign .add (.num 1) (.num 2)) =
+        pure (.opAssign .add (.num 1) (.num 2)) := by
+  have hn := (bytesPure_other C Γ).1
+  refine ⟨?_, ?_, ?_, ?_, ?_⟩
+  · rw [bytesPure_binop, hn, hn]; rfl
+  · rw [bytesPure_unop, hn]; rfl
+  · rw [bytesPure_ternary, (bytesPure_other C Γ).2.2.1, hn, hn]; rfl
+  · rw [bytesPure_assign, hn, hn]; rfl
+  · rw [bytesPure_opAssign, hn, hn]; rfl
+
+/-- `x.length` and `x[k]` of a `bytesN` name: the literal `N`, the byte `k` (`bytesAt`). -/
+theorem bytesPure_fixed (C : Contract) (Γ : ECtx) (x : String) (n k : Nat)
+    (hb : bytesOf? C Γ (.name x) = some n) :
+    bytesPure C Γ (.field (.name x) "length") = pure (.num n) ∧
+      bytesPure C Γ (.index (.name x) (.num k)) = bytesAt n (.name x) (.num k) := by
+  have hx : (RawExpr.name x).hasIncDec = false := by simp [RawExpr.hasIncDec, RawExpr.any]
+  have hk : (RawExpr.num k).hasIncDec = false := by simp [RawExpr.hasIncDec, RawExpr.any]
+  refine ⟨?_, ?_⟩
+  · rw [bytesPure_field_length, hb]; simp only [hx]; rfl
+  · rw [bytesPure_index, (bytesPure_other C Γ).2.1, (bytesPure_other C Γ).1, hb]
+    simp only [hk, Bool.false_eq_true, ↓reduceIte, pure_bind, bind_pure]
+
+/-- A prefix witness that is no `bytes(…)` conversion is rewritten as it stands. -/
+theorem bytesPure_backing_num (C : Contract) (Γ : ECtx) (n : Nat) :
+    bytesPure C Γ (match RawExpr.num n with
+      | .call "bytes" [value] => value
+      | value => value) = pure (.num n) := by
+  exact (bytesPure_backing C Γ (.num n)).symm.trans ((bytesPure_other C Γ).1 n)
+
+/-- A fixed byte prefix whose name carries no width is refused before its argument is read. -/
+theorem bytesPure_prefix_width (C : Contract) (Γ : ECtx) (f : String) (as : List RawExpr)
+    (hf : f ≠ "#array") (hp : (f.startsWith "#bytesPrefix" && (lookupBy f C.funs).isNone) = true)
+    (hn : (f.drop 12).toNat? = none) :
+    bytesPure C Γ (.call f as) = throw "a fixed byte prefix needs its width" := by
+  rw [bytesPure_call C Γ f as hf, if_pos hp, hn]
+  rfl
+
+#guard shown (bytesPure C0 [] (.field (.call "bytes4" [.num 1]) "length")) == "4"
+#guard shown (bytesPure C0 [] (.call "#array" [.field (.call "bytes4" [.num 1]) "length"])) ==
+  shown (.ok (.call "#array" [.field (.call "bytes4" [.num 1]) "length"]))
+#guard (shown (bytesPure C0 [] (.index (.call "bytes4" [.name "x"]) (.num 9)))).startsWith
+  "error: index 9 out of range"
+#guard shown (bytesPure C0 [] (.call "#bytesPrefix" [.name "x"])) ==
+  "error: a fixed byte prefix needs its width"
 
 /-! ### `fnPure`: by the node count (`RawExpr.nodes`) -/
 
