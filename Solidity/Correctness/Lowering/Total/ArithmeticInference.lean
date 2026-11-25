@@ -1,6 +1,22 @@
 import Solidity.Correctness.Lowering.Total.ArithmeticInference.Budget
 import Solidity.Correctness.Lowering.Total.CalleeInference
 
+/-!
+# Arithmetic argument inference for selected calls
+
+Discharges the arithmetic argument family left open by `CalleeInference`:
+`alias_inferN_arith` and `alias_infer_arith` are `alias_inferN` and
+`alias_infer` with their length and per-argument premises derived, for any
+ordered list, from `Infers` (`ArithmeticInference/Fragment.lean`) at the
+position-dependent budgets (`ArithmeticInference/Budget.lean`); a rejected
+argument fails the call at every fuel (`call_rejected`).
+
+The decoder and composition lane consumes these; reference and nested-call
+arguments, mixed families, Boolean-only recursion, semantic binding and
+universal coverage stay there. No statement here is an admission condition of
+`lowerLoopsCorrect`.
+-/
+
 namespace Solidity.Correctness.Lowering.Total.ArithmeticInference
 
 open Semantics (lookupBy)

@@ -1,5 +1,19 @@
 import Solidity.Source.Infer
 
+/-!
+# Steps of `Typed.inferN` on arithmetic Source forms
+
+Equations of the actual `Source.Typed.inferN`, operand results as hypotheses
+(the composable layer, for operands of any family): `tryConst` first
+(`inferN_const`, `tryConst_none`); a local by its resolution and slot type
+(`inferN_local`); a binary operator form through `Source.inferBin`
+(`inferN_bin`); unary `-` and `~`. `binTy`, `negTy` and `bitNotTy` state the
+checks `inferBin` and the unary branches apply to inferred operand types, with
+a `Reason` on failure; `inferBin_ok`, `inferBin_error` and `inferBin_none`
+relate them to `inferBin`, and a comparison of two constants needs no operand
+result (`inferBin_order_const`, `inferBin_eq_const`).
+-/
+
 namespace Solidity.Correctness.Lowering.Total.ArithmeticInference
 
 open Source (STy Syn Ctx Typed BinKind Inferred Q)

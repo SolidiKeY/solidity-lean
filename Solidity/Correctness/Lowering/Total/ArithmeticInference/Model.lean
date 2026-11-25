@@ -1,6 +1,19 @@
 import Solidity.Correctness.Lowering.Total.ArithmeticInference.Steps
 import Solidity.Correctness.Lowering.Total.Decode.Tables
 
+/-!
+# Model operators and their Source spelling
+
+Which model operators spell the arithmetic Source forms (`family`,
+`binop_family`): `add sub mul div mod` are `+ - * / %`, `band bor bxor` are
+`& | ^`, `shl` is `<<` and `shr` is `sar`, `pow` is `**`, `lt gt le ge` and
+`eqB neB` the comparisons; `and`/`or` are spelled but not of this family, and
+the wrapping forms are not spelled. `fold` mirrors `Syn.const` on the spelling
+(`fold_spec`: a folding model expression is spelled by every decoder version
+and meets `tryConst`'s premises), and `depth` is the least fuel at which the
+spelling infers.
+-/
+
 namespace Solidity.Correctness.Lowering.Total.ArithmeticInference
 
 open Source (STy Syn Ctx Typed BinKind Inferred Q)

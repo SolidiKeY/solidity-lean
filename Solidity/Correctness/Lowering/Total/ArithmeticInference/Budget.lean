@@ -1,6 +1,18 @@
 import Solidity.Correctness.Lowering.Total.ArithmeticInference.Fragment
 import Solidity.Correctness.Lowering.Total.CalleeInference.Args
 
+/-!
+# Structural fuel and the argument budgets
+
+`depth e` is at most the node count of the spelling (`depth_le_nodes`, for
+every spelled model expression), and argument `i` of a spelled list fits the
+list's node count less `i + 2` (`arg_nodes`, `args_budget`). So the family in
+order meets the per-argument premises of `CalleeInference.alias_inferN` at the
+budgets `n - 1 - i` (`args_inferN`, `args_inferN_nodes`) and those of
+`alias_infer` at `args.nodes.length + 2 - i` (`args_infer`); `exprs_get`
+relates the model list to `argExprs` position by position.
+-/
+
 namespace Solidity.Correctness.Lowering.Total.ArithmeticInference
 
 open Source (STy Syn Typed Q)

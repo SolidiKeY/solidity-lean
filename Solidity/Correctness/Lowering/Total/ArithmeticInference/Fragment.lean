@@ -1,5 +1,29 @@
 import Solidity.Correctness.Lowering.Total.ArithmeticInference.Model
 
+/-!
+# The arithmetic argument family and its exact inference
+
+`Infers Γ e τ` is given by explicit conditions on the model expression: a
+folding constant, a local with its resolution and slot-type facts, a supported
+operator whose operand types pass the family's check, a comparison of two
+constants, `-` and `~`; no inference result is assumed. `Infers.sound` proves
+it against the unchanged `Tables.expr` and the actual `Typed.inferN`: the
+expression is spelled, and its spelling infers to `τ` with one derivation at
+every fuel from `depth e` and to nothing below (`Infers.inferN`, with
+`inferN_of_le`, `inferN_short`, `inferN_transport`). Per-family rules state the
+common-type, signedness, shift-amount and division checks (`Infers.arith`,
+`bit`, `shift`, `exp`, `order`, `eq`, `negInt`, `bitNot'`).
+
+`Rejects Γ e r` keeps the rejected forms with their reason, through nesting
+(`Rejects.sound`: no result at any fuel; `zeroDivisor`, `noCommon`,
+`badAmount`, `negUnsigned`), and the wrapping operators are not decoded
+(`expr_unspelled`, `binop_eq_none_iff`).
+
+These are local family conditions for the decoder lane, not admission
+conditions of `lowerLoopsCorrect`; Boolean-only recursion (`!`, `&&`, `||`,
+Boolean literals), references, nested calls and mixed families are outside.
+-/
+
 namespace Solidity.Correctness.Lowering.Total.ArithmeticInference
 
 open Source (STy Syn Ctx Typed BinKind Inferred Q)
@@ -229,6 +253,11 @@ theorem bothConst_of_common {a b : RawExpr} {τa τb : STy} (ha : Infers Γ a τ
     | some y =>
       cases ha.ty_of_fold hfa; cases hb.ty_of_fold hfb
       simp [STy.common?, STy.isConstTy] at hc
+
+/-- A local's resolution fact from its position among the locals. -/
+theorem resolve_local {x : String} {i : Nat} (h : (Γ.locals.map Prod.fst).idxOf? x = some i) :
+    Γ.resolve x = some (.loc i) := by
+  simp [Source.Ctx.resolve, Source.Env.resolve, h]
 
 section families
 variable {op : BinOp} {a b : RawExpr} {τa τb : STy}
