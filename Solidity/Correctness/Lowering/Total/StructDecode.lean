@@ -510,6 +510,9 @@ def Declared (C : Contract) (table : Name) : Prop :=
   ∀ x ∈ structDef table, ∀ s ∈ structsTy x.2, ∀ w ∈ written? C s,
     (C.structs.filter (·.1 == w)).length = 1
 
+instance (C : Contract) (table : Name) : Decidable (Declared C table) := by
+  unfold Declared; infer_instance
+
 /-- Noninterference: no surrounding declaration of the contract scope carries a
 name the table declares. -/
 def Free (C : Contract) (c : String) (ds : List Source.Decl) : Prop :=
