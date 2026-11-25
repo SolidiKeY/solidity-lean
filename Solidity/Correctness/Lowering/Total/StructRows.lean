@@ -55,10 +55,8 @@ theorem Agree.right {ks : List Name} (h : Agree (ks ++ keys) w w') : Agree keys 
 /-- `elemB` reads no row outside the first rows of `leafKeys`. -/
 theorem elemB_congr {key : Name} (h : Agree (leafKeys key) w w') (p : PrimTy) :
     Decode.elemB w key p = Decode.elemB w' key p := by
-  have h0 := h key (by simp [leafKeys])
-  have h1 := h (key ++ "#address") (by simp [leafKeys])
-  have h2 := h (key ++ "#bytes") (by simp [leafKeys])
-  simp only [Decode.elemB, Decode.elemA, Decode.isAddress, Decode.stateBits, h0, h1, h2]
+  simp only [Decode.elemB, Decode.elemA, Decode.isAddress, Decode.stateBits, h key (by simp [leafKeys]),
+    h (key ++ "#address") (by simp [leafKeys]), h (key ++ "#bytes") (by simp [leafKeys])]
 
 /-- A struct reference reads no row: its spelling is the written name only. -/
 theorem spellRef_struct (C : Contract) (key : Name) (loc : DataLoc) (s : Name) :
@@ -70,21 +68,16 @@ mutual
 complete result, success or error. -/
 theorem spellType_congr (C : Contract) : (T : Ty) → (key : Name) → (loc : DataLoc) →
     Agree (readTy key T) w w' → spellType C w key loc T = spellType C w' key loc T
-  | .prim p, key, _, h => by
-      simp only [readTy] at h
-      simp only [spellType, elemB_congr h p]
+  | .prim p, key, _, h => by simp only [readTy] at h; simp only [spellType, elemB_congr h p]
   | .ref R, key, loc, h => by
-      simp only [readTy] at h
-      simpa only [spellType] using spellRef_congr C R key loc h
+      simp only [readTy] at h; simpa only [spellType] using spellRef_congr C R key loc h
 theorem spellRef_congr (C : Contract) : (R : RefTy) → (key : Name) → (loc : DataLoc) →
     Agree (readRef key R) w w' → spellRef C w key loc R = spellRef C w' key loc R
   | .struct s, key, loc, _ => spellRef_struct C key loc s
   | .array T, key, loc, h | .fixed T _, key, loc, h => by
-      simp only [readRef] at h
-      simp only [spellRef, spellType_congr C T _ loc h]
+      simp only [readRef] at h; simp only [spellRef, spellType_congr C T _ loc h]
   | .mapping K V, key, loc, h => by
-      simp only [readRef] at h
-      simp only [spellRef, elemB_congr h.left K, spellType_congr C V _ .storage h.right]
+      simp only [readRef] at h; simp only [spellRef, elemB_congr h.left K, spellType_congr C V _ .storage h.right]
 end
 
 /-- **Row support of the members**, in order. -/
@@ -93,8 +86,7 @@ theorem members_congr (C : Contract) :
   | [], _ => rfl
   | x :: xs, h => by
       simp only [support, List.flatMap_cons] at h
-      simp only [members, spellType_congr C x.2 x.1 .storage h.left,
-        members_congr C xs h.right]
+      simp only [members, spellType_congr C x.2 x.1 .storage h.left, members_congr C xs h.right]
 
 /-- Filtering keeps the first row of every key it keeps. -/
 theorem lookupBy_filter_of {α : Type} {k : Name} {p : Name × α → Bool}
@@ -103,8 +95,7 @@ theorem lookupBy_filter_of {α : Type} {k : Name} {p : Name × α → Bool}
   | (k', v) :: l => by
       by_cases hk : k = k'
       · subst hk; simp [hp, lookupBy]
-      · simp only [List.filter_cons]
-        split <;> simp [lookupBy, hk, lookupBy_filter_of hp l]
+      · simp only [List.filter_cons]; split <;> simp [lookupBy, hk, lookupBy_filter_of hp l]
 
 /-- Filtering away rows outside `keys` keeps agreement at `keys`. -/
 theorem agree_filter {p : Name × Nat → Bool} (hp : ∀ k ∈ keys, ∀ v, p (k, v) = true)
@@ -169,8 +160,7 @@ theorem members_error_iff (C : Contract) (w : List (Name × Nat)) :
         spellType C w x.1 .storage x.2 = .error e ∧ n = x.1
   | [], n, e => by
       simp only [members, reduceCtorEq, false_iff]
-      rintro ⟨pre, x, post, h, -⟩
-      cases pre <;> cases h
+      rintro ⟨pre, x, post, h, -⟩; cases pre <;> cases h
   | x :: xs, n, e => by
       have ih := members_error_iff C w xs n e
       cases hx : spellType C w x.1 .storage x.2 with
@@ -181,12 +171,8 @@ theorem members_error_iff (C : Contract) (w : List (Name × Nat)) :
           exact ⟨[], x, xs, rfl, by simp, hx, rfl⟩
         · rintro ⟨pre, y, post, h, hpre, hy, rfl⟩
           cases pre with
-          | nil =>
-            cases h; rw [hx] at hy; cases hy; exact ⟨rfl, rfl⟩
-          | cons z pre =>
-            cases h
-            obtain ⟨t, ht⟩ := hpre x List.mem_cons_self
-            rw [hx] at ht; cases ht
+          | nil => cases h; rw [hx] at hy; cases hy; exact ⟨rfl, rfl⟩
+          | cons z pre => cases h; obtain ⟨t, ht⟩ := hpre x List.mem_cons_self; simp [hx] at ht
       | ok t =>
         have step : members C w (x :: xs) = .error (n, e) ↔ members C w xs = .error (n, e) := by
           simp only [members, hx]
@@ -194,11 +180,8 @@ theorem members_error_iff (C : Contract) (w : List (Name × Nat)) :
         rw [step, ih]
         constructor
         · rintro ⟨pre, y, post, rfl, hpre, hy, rfl⟩
-          refine ⟨x :: pre, y, post, rfl, ?_, hy, rfl⟩
-          intro z hz
-          rcases List.mem_cons.1 hz with rfl | hz
-          · exact ⟨t, hx⟩
-          · exact hpre z hz
+          refine ⟨x :: pre, y, post, rfl, fun z hz => ?_, hy, rfl⟩
+          rcases List.mem_cons.1 hz with rfl | hz <;> first | exact ⟨t, hx⟩ | exact hpre z hz
         · rintro ⟨pre, y, post, h, hpre, hy, rfl⟩
           cases pre with
           | nil => cases h; rw [hx] at hy; cases hy
@@ -275,16 +258,14 @@ theorem part_error_iff {C : Contract} {i : Nat} {entry : Name × Name} {err : St
       | none => simp only [reduceCtorEq, false_and, and_false, exists_false]
       | some r =>
         simp only [Except.error.injEq, Option.some.injEq]
-        constructor
-        · intro h; exact ⟨m, ms, r, rfl, rfl, h.symm⟩
-        · rintro ⟨_, _, _, -, rfl, h⟩; exact h.symm
+        exact ⟨fun h => ⟨m, ms, r, rfl, rfl, h.symm⟩, by rintro ⟨_, _, _, -, rfl, h⟩; exact h.symm⟩
 
 /-- The error of an entry names its position, written name and table type. -/
 theorem part_error_entry {C : Contract} {i : Nat} {entry : Name × Name}
     {err : StructDecode.Error} (h : part C i entry = .error err) :
     err.index = i ∧ err.written = entry.1 ∧ err.table = entry.2 := by
-  rcases part_error_iff.1 h with ⟨-, rfl⟩ | ⟨-, -, ⟨_, _, -, rfl⟩ | ⟨-, rfl⟩ | ⟨_, _, _, -, -, rfl⟩⟩ <;>
-    exact ⟨rfl, rfl, rfl⟩
+  rcases part_error_iff.1 h with
+    ⟨-, rfl⟩ | ⟨-, -, ⟨_, _, -, rfl⟩ | ⟨-, rfl⟩ | ⟨_, _, _, -, -, rfl⟩⟩ <;> exact ⟨rfl, rfl, rfl⟩
 
 /-- **A member failure of an entry**, composed with `members_error_iff`: the written
 name is plain, and the member at its position in the table type is the first without a
@@ -318,22 +299,16 @@ theorem part_error_unreadRow_iff {C : Contract} {i j : Nat} {entry : Name × Nam
   rw [part_error_iff]
   simp only [reduceCtorEq, and_false, false_or, exists_false, StructDecode.Error.unreadRow.injEq]
   constructor
-  · rintro ⟨enc, name, m, ms, r, hm, hs, rfl, rfl, rfl, hk, hv⟩
-    obtain ⟨k', v'⟩ := r
-    cases hk; cases hv
+  · rintro ⟨enc, name, m, ms, ⟨_, _⟩, hm, hs, rfl, rfl, rfl, rfl, rfl⟩
     exact ⟨rfl, rfl, rfl, enc, name, ⟨m, ms, hm⟩, stray_eq_some_iff.1 hs⟩
   · rintro ⟨rfl, rfl, rfl, enc, name, ⟨m, ms, hm⟩, h⟩
     exact ⟨enc, name, m, ms, (k, v), hm, stray_eq_some_iff.2 h, rfl, rfl, rfl, rfl, rfl⟩
 
 /-- An entry is representable exactly when it has a declaration, at any position. -/
 theorem representable_iff_part {C : Contract} (i : Nat) (entry : Name × Name) :
-    Representable C entry ↔ ∃ p, part C i entry = .ok p := by
-  constructor
-  · rintro ⟨⟨m, ms, hm⟩, r⟩
-    exact ⟨_, StructDecode.part_ok_iff.2 ⟨⟨m, ms, rfl, hm⟩, r⟩⟩
-  · rintro ⟨p, hp⟩
-    obtain ⟨⟨m, ms, -, hm⟩, r⟩ := StructDecode.part_ok_iff.1 hp
-    exact ⟨⟨m, ms, hm⟩, r⟩
+    Representable C entry ↔ ∃ p, part C i entry = .ok p :=
+  ⟨fun ⟨⟨m, ms, hm⟩, r⟩ => ⟨_, StructDecode.part_ok_iff.2 ⟨⟨m, ms, rfl, hm⟩, r⟩⟩,
+    fun ⟨_, hp⟩ => let ⟨⟨m, ms, _, hm⟩, r⟩ := StructDecode.part_ok_iff.1 hp; ⟨⟨m, ms, hm⟩, r⟩⟩
 
 /-- **First failing entry**: the earlier entries are representable, and this one, at
 the starting index plus its position, fails with the error. -/
@@ -343,8 +318,7 @@ theorem parts_error_iff {C : Contract} :
         (∀ e' ∈ pre, Representable C e') ∧ part C (i + pre.length) e = .error err
   | _, [], err => by
       simp only [parts, reduceCtorEq, false_iff]
-      rintro ⟨pre, e, post, h, -⟩
-      cases pre <;> cases h
+      rintro ⟨pre, e, post, h, -⟩; cases pre <;> cases h
   | i, e :: es, err => by
       have ih := parts_error_iff (C := C) (i + 1) es err
       cases he : part C i e with
@@ -358,9 +332,8 @@ theorem parts_error_iff {C : Contract} :
           cases pre with
           | nil => cases h; simp only [List.length_nil, Nat.add_zero, he] at hy; cases hy; rfl
           | cons z pre =>
-            cases h
-            obtain ⟨p, hp⟩ := (representable_iff_part i e).1 (hpre e List.mem_cons_self)
-            rw [he] at hp; cases hp
+            cases h; obtain ⟨p, hp⟩ := (representable_iff_part i e).1 (hpre e List.mem_cons_self)
+            simp [he] at hp
       | ok p =>
         have step : parts C i (e :: es) = .error err ↔ parts C (i + 1) es = .error err := by
           simp only [parts, he]
@@ -368,11 +341,10 @@ theorem parts_error_iff {C : Contract} :
         rw [step, ih]
         constructor
         · rintro ⟨pre, y, post, rfl, hpre, hy⟩
-          refine ⟨e :: pre, y, post, rfl, ?_, by simpa [Nat.add_assoc, Nat.add_comm 1] using hy⟩
-          intro z hz
-          rcases List.mem_cons.1 hz with rfl | hz
-          · exact (representable_iff_part i _).2 ⟨p, he⟩
-          · exact hpre z hz
+          refine ⟨e :: pre, y, post, rfl, fun z hz => ?_,
+            by simpa [Nat.add_assoc, Nat.add_comm 1] using hy⟩
+          rcases List.mem_cons.1 hz with rfl | hz <;>
+            first | exact (representable_iff_part i _).2 ⟨p, he⟩ | exact hpre z hz
         · rintro ⟨pre, y, post, h, hpre, hy⟩
           cases pre with
           | nil => cases h; simp only [List.length_nil, Nat.add_zero, he] at hy; cases hy

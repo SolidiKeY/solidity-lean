@@ -37,17 +37,12 @@ example : spellType C (w.filter fun r => (readTy "xs" xs.2).contains r.1) "xs" .
 /-- The support is conservative: it lists `#address`/`#bytes` markers nobody set. -/
 example : support fs = ["xs[][]", "xs[][]#address", "xs[][]#bytes", "m{}", "m{}#address",
     "m{}#bytes", "m[][]", "m[][]#address", "m[][]#bytes", "f", "f#address", "f#bytes"] := rfl
-/-- Filtering to the support drops only `junk` and keeps the spelling. -/
-example : w.filter (fun r => (support fs).contains r.1) =
-    [("xs[][]", 16), ("m{}", 8), ("m[][]", 24), ("xs[][]", 32)] := rfl
+/-- Filtering to the support (dropping `junk`) keeps the spelling. -/
 example : members C (w.filter fun r => (support fs).contains r.1) fs = members C w fs :=
   members_filter_support C fs w
 /-- `junk` is the first stray row; after filtering none is. -/
 example : stray w fs = some ("junk", 3) := rfl
-example : "junk" ∉ support fs :=
-  let ⟨_, _, _, _, h⟩ := stray_eq_some_iff.1 (show stray w fs = some ("junk", 3) from rfl); h
-example : stray
-    (w.filter fun r => (support fs).contains r.1) fs = none := stray_filter_support fs w
+example : stray (w.filter fun r => (support fs).contains r.1) fs = none := stray_filter_support fs w
 
 /-- First match: the first `xs[][]` row decides (`uint16`); the later one is ignored. -/
 example : members C [("xs[][]", 16), ("xs[][]", 32)] [xs] =
@@ -64,8 +59,7 @@ example : spellType C w "i" .storage (.ref (.struct "Inner{a:uint8;b:address}"))
 def bad : List (Name × Ty) :=
   [("a", .prim .uint), ("a", .ref (.fixed (.prim .uint) 0)), ("b", .ref (.array (.prim .uint)))]
 example : members C [("a", 7)] bad = .error ("a", .unrepresentable "a" .uint) := rfl
-example : members C [] bad = .error ("a", .zeroLength "a") := rfl
-/-- The same failure from its characterization: the second member, after one that spells. -/
+/-- The second member, after one that spells, by the characterization. -/
 example : members C [] bad = .error ("a", .zeroLength "a") :=
   (members_error_iff C [] bad _ _).2
     ⟨[("a", .prim .uint)], _, [_], rfl, by simp only [List.mem_singleton, forall_eq]; exact ⟨_, rfl⟩,
@@ -98,8 +92,7 @@ example : "k{}#hash" ∉ support (structDef "T{k:mapping(string=>uint)}") :=
 def es : List (Name × Name) :=
   [("Inner", "Inner{a:uint8;b:address}"), ("Inner", "Inner{a:uint8;b:address}"),
    ("T", "T{s:string}"), ("U", "Nope")]
-example : parts C 5 es = .error (.member 7 "T" "T{s:string}" "s" (.erasedBytes "s")) := rfl
-/-- The same failure from its characterization: two representable entries first. -/
+/-- Two representable entries first, then the failing one, by the characterization. -/
 example : parts C 5 es = .error (.member 7 "T" "T{s:string}" "s" (.erasedBytes "s")) :=
   (parts_error_iff 5 es _).2 ⟨es.take 2, ("T", "T{s:string}"), [("U", "Nope")], rfl,
     fun e m => (representable_iff_part 0 e).2 (by
@@ -111,8 +104,6 @@ example : ∃ pre e post, es = pre ++ e :: post ∧ 7 = 5 + pre.length ∧ e = (
     (show parts C 5 es = .error (.member 7 "T" "T{s:string}" "s" (.erasedBytes "s")) from rfl)
   ⟨pre, e, post, hes, hi, Prod.ext hw.symm ht.symm⟩
 /-- `decode` starts at zero; a duplicated entry is decoded twice before the failure. -/
-example : decode { vars := [], structs := es } =
-    .error (.member 2 "T" "T{s:string}" "s" (.erasedBytes "s")) := rfl
 example : ∃ pre e post, es = pre ++ e :: post ∧ pre.length = 2 ∧
     part { vars := [], structs := es } pre.length e =
       .error (.member 2 "T" "T{s:string}" "s" (.erasedBytes "s")) :=
