@@ -182,6 +182,30 @@ theorem rawElem_none {s : String} (h : rawElem s = none) :
       unfold PrimTy.ofName?
       split <;> simp_all
 
+theorem bytesTy?_none_of_hd {s : String} (b : hd s ≠ some 'b') : bytesTy? s = none := by
+  cases h : bytesTy? s with
+  | none => rfl
+  | some n => exact absurd (hd_of_startsWith (bytesTy?_some h).2.2.1 rfl) b
+
+/-- A name starting with none of `a`, `b`, `i`, `u` has no elementary reading. -/
+theorem rawElem_none_of_hd {s : String} (a : hd s ≠ some 'a') (b : hd s ≠ some 'b')
+    (i : hd s ≠ some 'i') (u : hd s ≠ some 'u') : rawElem s = none := by
+  rw [rawElem_eq, bytesTy?_none_of_hd b, narrowTy?_none_of_hd u i]
+  simp only
+  rw [if_neg fun e : s = "address" => a (e ▸ rfl), if_neg fun e : s = "bool" => b (e ▸ rfl),
+    if_neg fun e : s = "uint" ∨ s = "uint256" => e.elim (fun e => u (e ▸ rfl)) fun e => u (e ▸ rfl),
+    if_neg fun e : s = "int" ∨ s = "int256" => e.elim (fun e => i (e ▸ rfl)) fun e => i (e ▸ rfl)]
+
+theorem rawElem_bool : rawElem "bool" = some .bool := by
+  rw [rawElem_eq]
+  have nb : bytesTy? "bool" = none := by
+    cases h : bytesTy? "bool" with
+    | none => rfl
+    | some n =>
+      obtain ⟨-, hi, -, digits⟩ := bytesTy?_some h
+      exact absurd (digits.trans (drop_data "bool" 5)) (repr_narrow n (by omega)).1
+  rw [nb]; rfl
+
 /-! ## The rows `Decode.elemB` reads at the empty path -/
 
 theorem elemB_nil (p : PrimTy) : Decode.elemB [] "" p = Decode.primElem p 256 := by
