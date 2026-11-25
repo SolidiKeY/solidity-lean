@@ -3,26 +3,14 @@ import Solidity.Source.Infer
 /-!
 # Exact inference of literal, local and Boolean arguments
 
-Inference results of the actual `Source.Typed.inferN` on three syntactic
-families, from explicit context facts:
-
-- a decimal number literal infers to its exact constant type
-  `.rational (NumLit.dec m f x).value` (`tryConst` fires: `inferN_num`);
-- a Boolean literal infers to `.bool` (`inferN_bool`);
-- a name resolving to local slot `i` (`Γ.resolve x = some (.loc i)`) whose slot
-  type is `τ` (`Γ.tys[i]? = some τ`) infers to `τ` (`inferN_loc`);
-- negation, conjunction, disjunction, Boolean equality or inequality and a
-  conditional over Boolean operands infer to `.bool` (`inferN_not`, `inferN_and`,
-  `inferN_or`, `inferN_eq`, `inferN_cond`).
-
-`BoolArg` closes the Boolean shapes under arbitrary nesting over Boolean
-literals and Boolean locals; `ScalarArg` adds number literals and locals of any
-slot type. Each family member infers at every fuel above its node count to one
-derivation fixed in advance (`BoolArg.inferN`, `ScalarArg.inferN`), hence at
-`Typed.infer`'s fuel (`ScalarArg.infer`); the bound is proved from the syntax,
-no fuel monotonicity is assumed. Boundaries: an unresolved name
-(`inferN_ident_none`), a non-Boolean operand of `!` (`inferN_not_none`) and zero
-fuel (`inferN_zero`) leave `none`.
+One step of the actual `Source.Typed.inferN`: a decimal literal infers to its
+constant type (`inferN_num`), a Boolean literal to `bool` (`inferN_bool`), a name
+resolving to local slot `i` of slot type `τ` to `τ` (`inferN_loc`), and `!`, `&&`,
+`||`, `==`/`!=`, `?:` over Boolean operands to `bool`. `BoolArg` (arbitrary
+nesting) and `ScalarArg` infer at every fuel above their node count to one fixed
+derivation (`BoolArg.inferN`, `ScalarArg.inferN`): the bound comes from the
+syntax, no monotonicity is assumed. Boundaries: an unresolved name, a non-Boolean
+`!` operand (`inferN_ident_none`, `inferN_not_none`).
 -/
 namespace Solidity.Correctness.Lowering.Total.ArgumentInference
 
@@ -31,8 +19,6 @@ open Source (STy Syn Ctx Typed NumLit EqOp)
 variable {Γ : Ctx} {k : Nat}
 
 /-! ## One step of the actual inference -/
-
-theorem inferN_zero {e : Syn .expr} : Typed.inferN 0 Γ e = none := rfl
 
 /-- A decimal literal is a constant: its exact value as its type. -/
 theorem inferN_num (m f : Nat) (x : Int) :
@@ -46,30 +32,23 @@ theorem inferN_bool (b : Bool) :
 theorem inferN_loc {x : String} {i : Nat} {τ : STy} (hr : Γ.resolve x = some (.loc i))
     (ht : Γ.tys[i]? = some τ) : Typed.inferN (k + 1) Γ (.ident x) = some ⟨τ, .loc hr ht⟩ := by
   show Option.orElse none _ = _
-  simp only [Option.orElse]
-  split
-  · rename_i j hj
-    obtain rfl : j = i := by rw [hr] at hj; cases hj; rfl
+  simp only [Option.orElse]; split
+  · rename_i j hj; obtain rfl : j = i := by rw [hr] at hj; cases hj; rfl
     split
-    · rename_i σ hσ
-      obtain rfl : σ = τ := by rw [ht] at hσ; cases hσ; rfl
+    · rename_i σ hσ; obtain rfl : σ = τ := by rw [ht] at hσ; cases hσ; rfl
       rfl
     · rename_i hσ; rw [ht] at hσ; cases hσ
-  · rename_i h; rw [hr] at h; cases h
-  · rename_i h; rw [hr] at h; cases h
-  · rename_i h _ _; exact (h i hr).elim
+  any_goals (rename_i h; rw [hr] at h; cases h)
+  rename_i h _ _; exact (h i hr).elim
 
 /-- Missing local: an unresolved name has no type. -/
 theorem inferN_ident_none {x : String} (hr : Γ.resolve x = none) :
     Typed.inferN k Γ (.ident x) = none := by
-  cases k with
-  | zero => exact inferN_zero
-  | succ k =>
-    show Option.orElse none _ = _
-    simp only [Option.orElse]
-    split
-    any_goals (rename_i h; rw [hr] at h; cases h)
-    rfl
+  cases k; · rfl
+  show Option.orElse none _ = _
+  simp only [Option.orElse]; split
+  any_goals (rename_i h; rw [hr] at h; cases h)
+  rfl
 
 variable {a b c : Syn .expr}
 
@@ -144,64 +123,48 @@ theorem inferN_eq {op : EqOp} {da : Typed Γ a .bool} {db : Typed Γ b .bool} (h
     (Typed.inferN k Γ a) (Typed.inferN k Γ b) = _
   rw [ha, hb]; exact inferBin_eq hA
 
+/-- Fuel above a bound is a successor. -/
+theorem fuel_succ {P : Nat → Prop} {k : Nat} (h : ∀ m, k ≤ m → P (m + 1)) : ∀ m, k < m → P m
+  | 0, hm => absurd hm (Nat.not_lt_zero _)
+  | m + 1, hm => h m (by omega)
+
 /-- **Boolean arguments infer to `bool`** at every fuel above their node count,
 to one derivation. -/
 theorem BoolArg.inferN {e : Syn .expr} (h : BoolArg Γ e) :
     ∃ d, ∀ m, e.nodes.length < m → Typed.inferN m Γ e = some ⟨.bool, d⟩ := by
   induction h with
-  | lit b => exact ⟨.bool b, fun m hm => by
-      obtain ⟨m, rfl⟩ : ∃ m', m = m' + 1 := ⟨m - 1, by omega⟩
-      exact inferN_bool b⟩
-  | loc hr ht => exact ⟨.loc hr ht, fun m hm => by
-      obtain ⟨m, rfl⟩ : ∃ m', m = m' + 1 := ⟨m - 1, by omega⟩
-      exact inferN_loc hr ht⟩
+  | lit b => exact ⟨.bool b, fuel_succ fun _ _ => inferN_bool b⟩
+  | loc hr ht => exact ⟨.loc hr ht, fuel_succ fun _ _ => inferN_loc hr ht⟩
   | not _ iha =>
     obtain ⟨d, hd⟩ := iha
-    refine ⟨.not d, fun m hm => ?_⟩
-    obtain ⟨m, rfl⟩ : ∃ m', m = m' + 1 := ⟨m - 1, by omega⟩
-    exact inferN_not (hd m (by simp [Source.Syn.nodes] at hm; omega))
+    exact ⟨.not d, fuel_succ fun m h => by
+      simp [Source.Syn.nodes] at h; exact inferN_not (hd m (by omega))⟩
   | and _ _ iha ihb =>
     obtain ⟨da, hda⟩ := iha; obtain ⟨db, hdb⟩ := ihb
-    refine ⟨.logic rfl da db, fun m hm => ?_⟩
-    obtain ⟨m, rfl⟩ : ∃ m', m = m' + 1 := ⟨m - 1, by omega⟩
-    simp [Source.Syn.nodes] at hm
-    exact inferN_and (hda m (by omega)) (hdb m (by omega))
+    exact ⟨.logic rfl da db, fuel_succ fun m h => by
+      simp [Source.Syn.nodes] at h; exact inferN_and (hda m (by omega)) (hdb m (by omega))⟩
   | or _ _ iha ihb =>
     obtain ⟨da, hda⟩ := iha; obtain ⟨db, hdb⟩ := ihb
-    refine ⟨.logic rfl da db, fun m hm => ?_⟩
-    obtain ⟨m, rfl⟩ : ∃ m', m = m' + 1 := ⟨m - 1, by omega⟩
-    simp [Source.Syn.nodes] at hm
-    exact inferN_or (hda m (by omega)) (hdb m (by omega))
+    exact ⟨.logic rfl da db, fuel_succ fun m h => by
+      simp [Source.Syn.nodes] at h; exact inferN_or (hda m (by omega)) (hdb m (by omega))⟩
   | eq op ha _ iha ihb =>
     obtain ⟨da, hda⟩ := iha; obtain ⟨db, hdb⟩ := ihb
-    refine ⟨.eq rfl da db rfl rfl, fun m hm => ?_⟩
-    obtain ⟨m, rfl⟩ : ∃ m', m = m' + 1 := ⟨m - 1, by omega⟩
-    simp [Source.Syn.nodes] at hm
-    exact inferN_eq ha (hda m (by omega)) (hdb m (by omega))
+    exact ⟨.eq rfl da db rfl rfl, fuel_succ fun m h => by
+      simp [Source.Syn.nodes] at h; exact inferN_eq ha (hda m (by omega)) (hdb m (by omega))⟩
   | cond _ _ _ ihc iha ihb =>
     obtain ⟨dc, hdc⟩ := ihc; obtain ⟨da, hda⟩ := iha; obtain ⟨db, hdb⟩ := ihb
-    refine ⟨.cond dc da db rfl, fun m hm => ?_⟩
-    obtain ⟨m, rfl⟩ : ∃ m', m = m' + 1 := ⟨m - 1, by omega⟩
-    simp [Source.Syn.nodes] at hm
-    exact inferN_cond (hdc m (by omega)) (hda m (by omega)) (hdb m (by omega))
+    exact ⟨.cond dc da db rfl, fuel_succ fun m h => by
+      simp [Source.Syn.nodes] at h
+      exact inferN_cond (hdc m (by omega)) (hda m (by omega)) (hdb m (by omega))⟩
 
 /-- **Scalar arguments infer to their type** at every fuel above their node
 count, to one derivation. -/
 theorem ScalarArg.inferN {e : Syn .expr} {τ : STy} (h : ScalarArg Γ e τ) :
     ∃ d, ∀ m, e.nodes.length < m → Typed.inferN m Γ e = some ⟨τ, d⟩ := by
   cases h with
-  | num m f x => exact ⟨.const rfl rfl rfl, fun n hn => by
-      obtain ⟨n, rfl⟩ : ∃ n', n = n' + 1 := ⟨n - 1, by omega⟩
-      exact inferN_num m f x⟩
-  | loc hr ht => exact ⟨.loc hr ht, fun n hn => by
-      obtain ⟨n, rfl⟩ : ∃ n', n = n' + 1 := ⟨n - 1, by omega⟩
-      exact inferN_loc hr ht⟩
+  | num m f x => exact ⟨.const rfl rfl rfl, fuel_succ fun _ _ => inferN_num m f x⟩
+  | loc hr ht => exact ⟨.loc hr ht, fuel_succ fun _ _ => inferN_loc hr ht⟩
   | bool hb => exact hb.inferN
-
-/-- At `Typed.infer`'s fuel. -/
-theorem ScalarArg.infer {e : Syn .expr} {τ : STy} (h : ScalarArg Γ e τ) :
-    ∃ d, Typed.infer Γ e = some ⟨τ, d⟩ :=
-  let ⟨d, hd⟩ := h.inferN; ⟨d, hd _ (Nat.lt_succ_self _)⟩
 
 /-- Ordered scalar arguments with their inferred types, position by position. -/
 inductive ScalarArgs (Γ : Ctx) : List (Syn .expr) → List STy → Prop

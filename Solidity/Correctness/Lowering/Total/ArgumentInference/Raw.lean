@@ -5,24 +5,18 @@ import Solidity.Correctness.Lowering.Total.CalleeInference.Args
 /-!
 # The decoder's spelling of scalar arguments
 
-The unchanged expression spelling of every decoder version (`Decode.Tables.expr`,
-`Decode.Tables.exprs`) lands raw scalar arguments in the families of
-`ArgumentInference.Scalar`. `RawBool` and `RawScalar` are the raw shapes:
-`.num n`, `.bool b`, a `.name x` resolving to a local slot (with its slot type),
-and `.unop .not`, `.binop .and/.or/.eqB/.neB` and `.ternary` over Boolean ones,
-nested arbitrarily. Their spelling succeeds and is a `BoolArg`/`ScalarArg`
-(`RawBool.expr`, `RawScalar.expr`); an ordered raw list spells to an argument
-list whose positions are `ScalarArgs` with the same types in the same order
-(`RawScalars.exprs`); and a raw call is spelled `f(args)` (`expr_call`). The
-environment table is never consulted. Other raw constructs (arithmetic, fields,
-indices, nested calls) are not covered.
+Raw scalar arguments (`RawBool`, `RawScalar`, ordered `RawScalars`) spell under
+the unchanged `Decode.Tables.expr`/`exprs` of any decoder version to the families
+of `ArgumentInference.Scalar`, with types in order (`RawBool.expr`,
+`RawScalar.expr`, `RawScalars.exprs`); a raw call spells to `f(args)`
+(`expr_call`). Other raw constructs are not covered.
 -/
 namespace Solidity.Correctness.Lowering.Total.ArgumentInference
 
 open Decode CalleeInference
 open Source (STy Syn NumLit)
 
-variable {Γ : Source.Ctx} (T : Tables)
+variable {Γ : Source.Ctx} {T : Tables}
 
 /-- Raw Boolean arguments over Boolean locals, nested arbitrarily. -/
 inductive RawBool (Γ : Source.Ctx) : RawExpr → Prop
@@ -50,8 +44,6 @@ inductive RawScalars (Γ : Source.Ctx) : List RawExpr → List STy → Prop
   | nil : RawScalars Γ [] []
   | cons {r : RawExpr} {σ : STy} {rs : List RawExpr} {σs : List STy} :
       RawScalar Γ r σ → RawScalars Γ rs σs → RawScalars Γ (r :: rs) (σ :: σs)
-
-variable {T}
 
 /-- A raw Boolean argument spells to a Boolean argument. -/
 theorem RawBool.expr {r : RawExpr} (h : RawBool Γ r) : ∃ e, T.expr r = some e ∧ BoolArg Γ e := by
