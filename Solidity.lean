@@ -2587,7 +2587,6 @@ import Solidity.Correctness.Lowering.Total.Versions.Marked
 import Solidity.Correctness.Lowering.Total.Versions.Matching
 import Solidity.Correctness.Lowering.Total.Versions.Primitive
 import Solidity.Correctness.Lowering.Total.Versions.Self
-import Solidity.Correctness.Lowering.Total.Versions.WithExpr
 import Solidity.Correctness.Lowering.Unchecked.CallWitness
 import Solidity.Correctness.Lowering.Unchecked.CalleeMode
 import Solidity.Correctness.Lowering.Unchecked.Composition

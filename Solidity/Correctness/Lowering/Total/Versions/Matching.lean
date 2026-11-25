@@ -307,31 +307,16 @@ theorem locals_primitive (sound : Sound T) : (Γ : ECtx) → (L : List (String �
         rw [ht, hm names]
         rfl
 
-/-- What initial matching reads of a decoded request: the request is plain,
-and the program is over the version's context and the decoded locals. Its
-items, however they were spelled, are not read. -/
-def Shape (T : Decode.Tables) (r : Request) (s : SourceProgram) : Prop :=
-  Decode.plain r = true ∧
-  ∃ (C : Source.Ctx) (L : List (String × Source.STy)) (after : Source.RCtx)
-    (items : Source.RItems C.env C.rets C.inModifier .body (Source.tysOf L) after),
-    T.context r = some C ∧ T.locals r.input.before.locals.1 = some L ∧
-    s = ⟨C.env, C.rets, C.inModifier, .body, Source.tysOf L, after, items⟩
-
-/-- A spelled program has the shape. -/
-theorem shape_of_spellsT {r : Request} {s : SourceProgram} (h : SpellsT T r s) : Shape T r s := by
-  obtain ⟨plain, C, L, b, L', d, hC, hL, _, rfl⟩ := h
-  exact ⟨plain, C, L, _, _, hC, hL, rfl⟩
-
-/-- **The locals half of total initial matching.** A request of a sound
-version's shape has a positional map under which every Source locals has
-related model locals. -/
+/-- **The locals half of total initial matching.** A request a sound version
+decodes has a positional map under which every Source locals has related
+model locals. -/
 theorem decode_locals_matching (sound : Sound T) {r : Request} {s : SourceProgram}
-    (h : Shape T r s) :
+    (h : T.decode r = some s) :
     ∃ m : Lowering.V07.ContextMap s.before r.context.ctx, Positional m ∧
       ∀ (H : HTy) (ls : Source.Locals s.env.layout s.before),
         ∃ env : TEnv r.contract H r.context.ctx,
           m.Related (Relation.val s.env r.contract H) ls env := by
-  obtain ⟨plain, C, L, after, items, _, hL, rfl⟩ := h
+  obtain ⟨plain, C, L, b, L', d, _, hL, _, rfl⟩ := decode_spellsT h
   obtain ⟨contract, input, callee⟩ := r
   have none : callee = none := by
     simp only [Decode.plain, Bool.and_eq_true, Option.isNone_iff_eq_none] at plain
@@ -394,16 +379,15 @@ theorem read_prim {D : Source.Layout} {L : Source.SPath → Source.STy} (s : Sou
   obtain ⟨v, e⟩ := Option.isSome_iff_exists.mp present
   exact ⟨v, by rw [e]; rfl⟩
 
-/-- **Total initial matching for every decoder of a sound version's shape**:
-every admitted Source execution of a successful request it decodes has a
-related model state under the positional map. -/
-theorem initialMatchingOf (sound : Sound T) {D : Request → Option SourceProgram}
-    (shape : ∀ r s, D r = some s → Shape T r s) : InitialMatching rel D := by
+/-- **Total initial matching holds for every sound version**: every admitted
+Source execution of a successful request the version decodes has a related
+model state under the positional map. -/
+theorem initialMatchingAt (sound : Sound T) : InitialMatching rel T.decode := by
   intro r s _ decoded
-  obtain ⟨m, positional, locals⟩ := decode_locals_matching sound (shape r s decoded)
+  obtain ⟨m, positional, locals⟩ := decode_locals_matching sound decoded
   refine ⟨m, positional, fun e admitted => ?_⟩
   obtain ⟨env, related⟩ := locals [] e.initial.1
-  obtain ⟨plain, C, L, after, items, hC, _, rfl⟩ := shape r s decoded
+  obtain ⟨plain, C, L, b, L', d, hC, _, _, rfl⟩ := decode_spellsT decoded
   simp only [Decode.Tables.context, Option.map_eq_some_iff] at hC
   obtain ⟨u, hu, rfl⟩ := hC
   obtain ⟨storage, hstorage⟩ := fields_onto
@@ -418,10 +402,6 @@ theorem initialMatchingOf (sound : Sound T) {D : Request → Option SourceProgra
         msgSender := ⟨e.frame.sender.val, address_inRange e.frame.sender⟩,
         selfAddress := ⟨e.frame.this.val, address_inRange e.frame.this⟩ }⟩,
     related, hstorage, rfl, rfl, rfl, rfl, rfl, admitted.2.2.1, admitted.2.2.2⟩
-
-/-- **Total initial matching holds for every sound version.** -/
-theorem initialMatchingAt (sound : Sound T) : InitialMatching rel T.decode :=
-  initialMatchingOf sound fun _ _ h => shape_of_spellsT (decode_spellsT h)
 
 /-! ## The width-aware version is sound -/
 

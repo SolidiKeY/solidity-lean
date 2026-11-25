@@ -84,71 +84,20 @@ variable {T : Decode.Tables}
 
 /-! ## The boundary of a decoder version -/
 
-/-- The boundary at an association and a state relation: the landed
-admission, policies, simulation and allocation trace. -/
-def boundaryOf (associated : Request → SourceProgram → Prop)
-    (rel : (E : Source.Env) → (C : Contract) → StateRelation E C) : SemanticBoundary :=
-  ⟨⟨associated, loopEntry, Observe.source, fun p => Observe.target p⟩,
-    fun s _ _ p => Simulation.Simulates rel s p, Allocation.trace⟩
-
-/-- The boundary of a decoder version at a state relation, with the version's
+/-- The boundary of a decoder version at a state relation: the landed
+admission, policies, simulation and allocation trace, with the version's
 spelling relation as association. -/
 def boundaryAt (T : Decode.Tables)
     (rel : (E : Source.Env) → (C : Contract) → StateRelation E C) : SemanticBoundary :=
-  boundaryOf (SpellsT T) rel
+  ⟨⟨SpellsT T, loopEntry, Observe.source, fun p => Observe.target p⟩,
+    fun s _ _ p => Simulation.Simulates rel s p, Allocation.trace⟩
 
-/-- **What the contract asks at a boundary** whose association a decoder is
-sound for, at a state relation that reflects Booleans and relates `false` to
-`false`: the decoder is defined on every successful request and complete for
-the association; the fresh-name scheme round-trips and the run's allocation
-scope is safe; each successful pipeline simulates its decoded program and
-refines it. The e1 family obligations follow from the endpoint theorems. -/
-theorem residualOf_iff {associated : Request → SourceProgram → Prop}
-    {decode : Request → Option SourceProgram}
-    (sound : ∀ r s, decode r = some s → associated r s)
-    {rel : (E : Source.Env) → (C : Contract) → StateRelation E C}
-    (reflect : ∀ E C H (v : Source.Val E.layout .bool) (b : Bool),
-      (rel E C).val H .bool (.val .bool) v b → v = .bool b)
-    (falseRel : ∀ E C H, (rel E C).val H .bool (.val .bool) (.bool false) false) :
-    Residual (boundaryOf associated rel) decode ↔
-      (∀ r : Request, r.Succeeds → ∃ s, decode r = some s) ∧
-      (∀ (r : Request) s, r.Succeeds → associated r s → decode r = some s) ∧
-      (∀ (r : Request) o after parts program, r.pipeline o after parts program →
-        Allocation.RoundTrip r.input.names ∧
-        SafeSpellings r.input.names (Allocation.scope r o after).protectedNames
-          (Allocation.scope r o after).generated) ∧
-      (∀ (r : Request) o after parts program s, decode r = some s →
-        r.pipeline o after parts program →
-        Simulation.Simulates rel s program ∧
-          Nonempty (PassCorrect (Observe.source s).behaviour
-            (Observe.target program).behaviour)) := by
-  constructor
-  · intro h
-    refine ⟨h.total, fun r s e spelled => (h.decoder r s e).mpr spelled,
-      fun r o after parts program run => ?_,
-      fun r o after parts program s d run =>
-        h.pipeline r o after parts program s ⟨o, after, parts, program, run⟩ d run⟩
-    obtain ⟨scopes, ⟨trace, law⟩, safe⟩ :=
-      h.allocation r o after parts program ⟨o, after, parts, program, run⟩ run
-    cases trace
-    exact ⟨law, safe _ (List.mem_singleton.mpr rfl)⟩
-  · intro ⟨covered, complete, allocation, pipeline⟩
-    refine ⟨covered, fun r s e => ⟨sound r s, complete r s e⟩,
-      fun r o after parts program _ run =>
-        ⟨_, ⟨rfl, (allocation r o after parts program run).1⟩, fun scope member => ?_⟩,
-      fun r o after parts program s _ d run => pipeline r o after parts program s d run, ?_, ?_⟩
-    · cases List.mem_singleton.mp member
-      exact (allocation r o after parts program run).2
-    · intro k E srcΓ returns M l u C Γ m pair extra names
-      obtain ⟨embedding, endpoint⟩ := normalFamily_correct k (returns := returns) (M := M)
-        (l := l) (u := u) m pair extra names (k.lowered pair extra names) rfl
-      exact Simulation.of_endpoint reflect falseRel endpoint
-    · intro k E srcΓ M l u C Γ m pair extra names
-      exact Simulation.of_retEndpoint reflect falseRel
-        (returnFamily_correct k (M := M) (l := l) (u := u) m pair extra names)
-
-/-- **What the contract asks at a version's boundary**: `residualOf_iff` at
-the version's spelling relation and decoder. -/
+/-- **What the contract asks at a version's boundary**, for a state relation
+that reflects Booleans and relates `false` to `false`: the decoder is defined
+on every successful request and complete for the version's spelling relation;
+the fresh-name scheme round-trips and the run's allocation scope is safe; each
+successful pipeline simulates its decoded program and refines it. The e1
+family obligations follow from the endpoint theorems. -/
 theorem residualAt_iff (T : Decode.Tables)
     {rel : (E : Source.Env) → (C : Contract) → StateRelation E C}
     (reflect : ∀ E C H (v : Source.Val E.layout .bool) (b : Bool),
@@ -165,8 +114,31 @@ theorem residualAt_iff (T : Decode.Tables)
         r.pipeline o after parts program →
         Simulation.Simulates rel s program ∧
           Nonempty (PassCorrect (Observe.source s).behaviour
-            (Observe.target program).behaviour)) :=
-  residualOf_iff (fun _ _ => decode_spellsT) reflect falseRel
+            (Observe.target program).behaviour)) := by
+  constructor
+  · intro h
+    refine ⟨h.total, fun r s e spelled => (h.decoder r s e).mpr spelled,
+      fun r o after parts program run => ?_,
+      fun r o after parts program s d run =>
+        h.pipeline r o after parts program s ⟨o, after, parts, program, run⟩ d run⟩
+    obtain ⟨scopes, ⟨trace, law⟩, safe⟩ :=
+      h.allocation r o after parts program ⟨o, after, parts, program, run⟩ run
+    cases trace
+    exact ⟨law, safe _ (List.mem_singleton.mpr rfl)⟩
+  · intro ⟨covered, complete, allocation, pipeline⟩
+    refine ⟨covered, fun r s e => ⟨decode_spellsT, complete r s e⟩,
+      fun r o after parts program _ run =>
+        ⟨_, ⟨rfl, (allocation r o after parts program run).1⟩, fun scope member => ?_⟩,
+      fun r o after parts program s _ d run => pipeline r o after parts program s d run, ?_, ?_⟩
+    · cases List.mem_singleton.mp member
+      exact (allocation r o after parts program run).2
+    · intro k E srcΓ returns M l u C Γ m pair extra names
+      obtain ⟨embedding, endpoint⟩ := normalFamily_correct k (returns := returns) (M := M)
+        (l := l) (u := u) m pair extra names (k.lowered pair extra names) rfl
+      exact Simulation.of_endpoint reflect falseRel endpoint
+    · intro k E srcΓ M l u C Γ m pair extra names
+      exact Simulation.of_retEndpoint reflect falseRel
+        (returnFamily_correct k (M := M) (l := l) (u := u) m pair extra names)
 
 /-- The boundary admits every request whose whole pipeline succeeds. -/
 theorem boundaryAt_fullDomain (T : Decode.Tables)
