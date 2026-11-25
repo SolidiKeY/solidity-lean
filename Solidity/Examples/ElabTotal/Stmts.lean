@@ -768,6 +768,38 @@ example (rc rc' : ElabRec C) (sc : ElabScope) (f : String) (d : FunDecl)
   hP.of_agree ((inlinedBody_agree C rc rc' sc f d ρ false false false scope k₀ Γ Γf
     fun body _ _ => h _ body rfl).trans (agree_refl _ _))
 
+/-- The call arm over two records that agree on the dispatch callbacks at this
+scope and on blocks in every scope that cannot deploy. -/
+example (rc rc' : ElabRec C) (sc : ElabScope) (f : String) (args : List RawExpr)
+    (hm : ∀ h ty as, Agree sc (rc.fnMemoryDispatch h ty as) (rc'.fnMemoryDispatch h ty as))
+    (hv : ∀ h as, Agree sc (rc.callValue h as none 256 false) (rc'.callValue h as none 256 false))
+    (hd : ∀ ty, Agree sc (rc.fnDispatch f ty args none 256 false)
+      (rc'.fnDispatch f ty args none 256 false))
+    (hb : ∀ sc' ss, sc'.top = false → Agree sc' (rc.elabStmtsP ss) (rc'.elabStmtsP ss)) :
+    Agree sc (elabCallRetWith C rc f args none) (elabCallRetWith C rc' f args none) :=
+  elabCallRetWith_agree C rc rc' sc f args none 256 false false false false
+    (elabCallRetCore_agree C rc rc' sc f args none 256 false false false false
+      (fun h ty as _ => hm h ty as) (fun h as _ => hv h as) hd
+      (fun sc' body ht _ _ => hb sc' body ht)
+      (fun _ _ _ sc' body _ ht _ => hb sc' body ht))
+
+/-- `agree_run` leaves the one invocation at which two computations differ,
+under the facts of its branch. -/
+example (H K : RawExpr → ElabM (SProg C × RawExpr)) (sc : ElabScope) (e : RawExpr)
+    (h : e.isLit = false → Agree sc (H e) (K e)) :
+    Agree sc (do
+        let sc ← read
+        if _hl : e.isLit = true then pure ([], e) else
+          let (P, e') ← H e
+          if sc.top then pure (P, e') else throw "inner")
+      (do
+        let sc ← read
+        if _hl : e.isLit = true then pure ([], e) else
+          let (P, e') ← K e
+          if sc.top then pure (P, e') else throw "inner") := by
+  agree_run
+  exact h (by simpa using ‹¬e.isLit = true›)
+
 end Agreement
 
 end Solidity.Examples.ElabTotal.Stmts
