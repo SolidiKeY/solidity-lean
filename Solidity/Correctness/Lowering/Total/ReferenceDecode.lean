@@ -16,8 +16,9 @@ locations to `FunDecl.paramCtx`, where `memory` and `calldata` coincide.
 
 `rawType` spells a retained `RawTy` (a declaration in a body, as read) with
 leaves by `Decode.typeNameB` or a struct name as written; `rawType_typed` proves
-it against `Source.Syn.tys`, `rawLeaf_spellRef` and `rawStruct_written` tie its
-struct names to `spellRef`'s written name.
+it against `Source.Syn.tys`; `rawLeaf_spellRef` spells a struct leaf as
+`spellRef` spells its table type and `rawStruct_written` equates it with `written?`.
+Compound types are not compared with `spellType` (`bytes1[]` is erased there).
 
 Open: `bytes`/`string`, enum and function types, payability, struct declarations
 and member widths, discharging `Resolved`, integrating `rawType` with the
@@ -431,8 +432,10 @@ theorem paramCtx_reverse {d : FunDecl} {Γ : ECtx} (h : d.paramCtx = .ok Γ) :
 A declaration in a body keeps its type as read. Its spelling needs no width
 rows: a leaf is the name `Decode.typeNameB` reads, or a struct name as written. -/
 
-/-- Why a retained type as read has no Source spelling here. These are local
-limitations of this component, not exclusions from decoder coverage. -/
+/-- Why a retained type as read has no Source spelling here: an invalid type, or
+(`unsupportedName`, and `unsupportedKey` for `string`, `bytes`, enum and
+`address payable` keys) a local limitation of this component, not an exclusion
+from decoder coverage. -/
 inductive RawError where
   /-- An enum, function-type, `bytes`/`string` or member-spelling name: its
   reading stays with the complete-unit decoder. -/
@@ -572,7 +575,8 @@ theorem rawStruct_written {loc : DataLoc} {s w table : Name} {τ : STy}
   | elem he' => rw [he] at he'; cases he'
   | struct _ _ ident _ => exact ((written?_iff hw s).1 ⟨ht, ident⟩).symm
 
-/-- A struct leaf as read is spelled exactly as `spellRef` spells its table type. -/
+/-- A struct leaf as read is spelled exactly as `spellRef` spells its table type,
+when that type has one written name (an aliased struct is `ambiguousStruct` there). -/
 theorem rawLeaf_spellRef {s table w key : Name} {loc : DataLoc} {t : Syn .typeName}
     (h : rawLeaf C s = .ok t) (he : rawElem s = none) (ht : C.structName? s = some table)
     (hw : written? C table = some w) : spellRef C widths key loc (.struct table) = .ok t := by
