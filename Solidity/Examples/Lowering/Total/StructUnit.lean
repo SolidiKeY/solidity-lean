@@ -89,6 +89,7 @@ example {u} (h : build tablesS [] twice "C" fs = .ok u) :
   revert two; decide
 /-- A root named `Tag`: the struct name is carried by a state variable, so ambiguous. -/
 def clash : Contract := { full with vars := full.vars ++ [("Tag", .uint)] }
+#guard (table clash fs).isSome
 example {u} (h : build tablesS [] clash "C" fs = .ok u) :
     ¬ ∃ d, Resolved u.env (some "C") "Tag" d := fun r =>
   (build_resolved_only h (by decide) r).2.1 ("Tag", .uint) (by decide) rfl

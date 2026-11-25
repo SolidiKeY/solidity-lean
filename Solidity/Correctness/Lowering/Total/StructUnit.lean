@@ -7,8 +7,8 @@ import Solidity.Correctness.Lowering.Total.ReferenceStatePlacement
 `build` composes `StructDecode.decode`, `ReferenceStatePlacement.prefixParts` and
 `Callee.withFunctions`, each unchanged: the generated structs in table order, then the
 constructor/state prefix, then the translated functions. A refusing component is a named
-`Error` (`build_*_error`); no declaration is filtered, no metadata invented, no component
-replaced by an empty one.
+`Error` (`build_*_error`; only a struct refusal carries its entry's position); nothing is
+filtered, no metadata invented, no component replaced by an empty one.
 
 From a successful build: the exact declarations (`build_decls`); the structs and functions
 as the entries, one each, in order (`build_structs`, `build_functions`); placement, roots,
@@ -16,7 +16,7 @@ initializers and the constructor from the component theorems (`build_placed`,
 `build_owned`, `build_roots`, `build_inits`, `build_ctor*`); a struct name resolves exactly
 when the table declares it once and no root or function carries it (`build_resolved`,
 `build_resolved_only`), discharging field and root typing (`build_structFields`,
-`build_typed`). With no struct the unit is `assemble`'s (`build_of_assemble`).
+`build_typed`). With no struct, `assemble`'s unit is built (`build_of_assemble`).
 
 Open: complete decoder coverage, discharging the components' representability conditions
 (the decoder and final producer keep that obligation), nested table interpretation,
@@ -330,8 +330,8 @@ where
         · obtain ⟨b, hb, h'⟩ := ordered_mem_left t a ha
           exact ⟨b, List.mem_cons_of_mem _ hb, h'⟩
 
-/-- **Struct fields in the unit**, with `StructDecode`'s resolution obligations
-discharged: every declared name is `Apart`, the table type `Declared`. -/
+/-- **Struct fields in the unit**: `structFields_closed`, its noninterference derived from
+every declared name being `Apart`; `Declared` and `here` remain hypotheses. -/
 theorem build_structFields (h : build T R C scope fs = .ok u)
     (apart : ∀ w e, lookupBy w C.structs = some e → Apart C fs w) {w e : Name}
     (hw : lookupBy w C.structs = some e) (dec : Declared C e) (loc : Source.DataLoc)
@@ -377,7 +377,7 @@ theorem build_functions_error {ss p : Syn (.list (.part false))}
     (hf : functionParts T R scope fs = none) : build T R C scope fs = .error .functions := by
   simp only [build, hs, hp, withFunctions, hf, Option.bind_eq_bind, Option.bind_none]
 
-/-- With no struct entry the unit is `assemble`'s. -/
+/-- With no struct entry, a unit `assemble` produces is `build`'s. -/
 theorem build_of_assemble (hs : C.structs = [])
     (ha : assemble T R C scope fs = .ok u) : build T R C scope fs = .ok u := by
   obtain ⟨p, hp, hu⟩ := ReferenceStatePlacement.assemble_ok ha
