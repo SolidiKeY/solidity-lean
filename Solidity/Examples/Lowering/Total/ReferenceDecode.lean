@@ -3,7 +3,8 @@ import Solidity.Correctness.Lowering.Total.ReferenceDecode
 /-! Checks of the reference-type and parameter-location decoder: nested arrays
 with their lengths and element width, structs by their one written name,
 mappings and the three declared locations, the frame context that merges
-`memory` and `calldata`, and an error naming each missing piece of metadata. -/
+`memory` and `calldata`, an error naming each missing piece of metadata, and
+the same spellings from types as read. -/
 namespace Solidity.Examples.Lowering.Total.ReferenceDecode
 
 open Solidity.Correctness.Lowering.Total Solidity.Correctness.Lowering.Total.ReferenceDecode
@@ -172,5 +173,62 @@ example : binders pairs [("n", 8)] (fun _ _ => .ok none) [("n", .uint), ("b", .b
     (.cons (.param (.elem u8) none (some "n"))
       (.cons (.param (.elem .bool) none (some "b")) .nil)) :=
   binders_primitive rfl (by simp)
+
+/-! ## Types as read
+
+Leaf names are read by string functions the kernel does not unfold, so these
+are evaluated checks. -/
+
+-- `uint8[3][]`: the same nesting, length and width from the retained names.
+#guard match rawType pairs .memory (.array (.fixed (.named "uint8") 3)) with
+  | .ok (.array (.array (.elem (.int false 8 _)) (.some (.lit (.num (.dec 3 0 0))))) .none) =>
+    true
+  | _ => false
+
+-- `mapping(address => Pair[])` in storage: the struct by its written name.
+#guard match rawType pairs .storage (.mapping (.named "address") (.array (.named "Pair"))) with
+  | .ok (.mapping (.elem .address _) none (.array (.userType ⟨"Pair", []⟩) .none) none) => true
+  | _ => false
+
+/-- Its Source type, under the resolution obligation of `Pair`. -/
+example (E : Source.Env) (d : Source.DeclName) (h : Resolved E (some "C") "Pair" d)
+    (t : Syn .typeName)
+    (ok : rawType pairs .storage (.mapping (.named "address") (.array (.named "Pair"))) = .ok t) :
+    ∃ τ, t.tys E (some "C") .storage = some [τ] ∧
+      RawRep pairs E (some "C") .storage
+        (.mapping (.named "address") (.array (.named "Pair"))) τ :=
+  rawType_typed pairs E (some "C") _ .storage t ok (by
+    intro s ms _
+    have : s = "Pair" := by simpa [rawNames] using ms
+    exact ⟨d, this ▸ h⟩)
+
+/-- `bytes`, an enum and a struct key are named, not read as something else. -/
+def withEnum : Contract where
+  vars := []
+  enums := [("Color", ["Red", "Green"])]
+
+#guard match rawType pairs .memory (.named "bytes") with
+  | .error (.unsupportedName "bytes") => true
+  | _ => false
+
+#guard match rawType withEnum .memory (.array (.named "Color")) with
+  | .error (.unsupportedName "Color") => true
+  | _ => false
+
+#guard match rawType pairs .storage (.mapping (.named "Pair") (.named "uint")) with
+  | .error (.unsupportedKey (.named "Pair")) => true
+  | _ => false
+
+#guard match rawType pairs .memory (.mapping (.named "uint") (.named "uint")) with
+  | .error (.mappingOutsideStorage .memory) => true
+  | _ => false
+
+#guard match rawType pairs .memory (.named "Missing") with
+  | .error (.unknownName "Missing") => true
+  | _ => false
+
+#guard match rawType pairs .memory (.fixed (.named "bool") 0) with
+  | .error .zeroLength => true
+  | _ => false
 
 end Solidity.Examples.Lowering.Total.ReferenceDecode

@@ -29,6 +29,9 @@ width rows; `paramCtx_reverse` and `signature_paramCtx` relate declared
 locations to `FunDecl.paramCtx`, where `memory` and `calldata` coincide
 (`frameTy_memory_calldata`).
 
+`rawType` spells a retained `RawTy` the same way, its leaves by
+`Decode.typeNameB`, with `rawType_typed` against Source elaboration.
+
 Open, with the complete-unit decoder: `bytes`/`string`, enum identity and
 function types inside references, struct declarations and their member widths,
 discharging `Resolved`, unit coverage and semantic binding. This is a
@@ -815,5 +818,193 @@ theorem signature_paramCtx {C : Contract} {d : FunDecl} {ps rs : Syn (.list .par
         exact List.map_congr_left locs
       rw [ctx, decl, zip_map]
     · cases h
+
+/-! ## Retained `RawTy`
+
+A declaration in a body keeps its type as read. Its spelling needs no width
+rows: a leaf is the name the marked decoder `Decode.typeNameB` reads, or a
+struct name as written. -/
+
+/-- Why a retained type as read has no Source spelling here. -/
+inductive RawError where
+  /-- An enum, function-type, `bytes`/`string` or member-spelling name: its
+  reading stays with the complete-unit decoder. -/
+  | unsupportedName (s : String)
+  /-- Neither a marked elementary type nor a struct of the contract. -/
+  | unknownName (s : String)
+  /-- A mapping key that is not a marked elementary type name. -/
+  | unsupportedKey (K : RawTy)
+  /-- A fixed array of length zero. -/
+  | zeroLength
+  /-- A mapping at a position outside storage. -/
+  | mappingOutsideStorage (loc : DataLoc)
+  deriving Repr
+
+/-- The elementary type the marked decoder reads a name as. -/
+def rawElem (s : String) : Option Source.Elem :=
+  match Decode.typeNameB (.named s) with
+  | some (.elem e) => some e
+  | _ => none
+
+/-- A leaf name: its marked elementary type, or a struct name as written. -/
+def rawLeaf (C : Contract) (s : String) : Except RawError (Syn .typeName) :=
+  match rawElem s with
+  | some e => .ok (.elem e)
+  | none =>
+    if (lookupBy s C.enums).isSome || fnTy? s || dynBytesTy s || Semantics.isEnc s then
+      .error (.unsupportedName s)
+    else match C.structName? s with
+      | some _ => .ok (.userType ⟨s, []⟩)
+      | none => .error (.unknownName s)
+
+/-- A mapping key: a marked elementary type name. -/
+def rawKey : RawTy → Except RawError Source.MapKey
+  | .named k =>
+    match rawElem k with
+    | some e =>
+      if h : e = .addressPayable then .error (.unsupportedKey (.named k)) else .ok (.elem e h)
+    | none => .error (.unsupportedKey (.named k))
+  | K => .error (.unsupportedKey K)
+
+/-- The Source type name of a type as read, in the location `loc`. -/
+def rawType (C : Contract) : DataLoc → RawTy → Except RawError (Syn .typeName)
+  | _, .named s => rawLeaf C s
+  | loc, .array T =>
+    match rawType C loc T with
+    | .ok t => .ok (.array t .none)
+    | .error e => .error e
+  | loc, .fixed T n =>
+    if n = 0 then .error .zeroLength
+    else match rawType C loc T with
+      | .ok t => .ok (.array t (.some (lenLit n)))
+      | .error e => .error e
+  | loc, .mapping K V =>
+    if loc = .storage then
+      match rawKey K with
+      | .ok k =>
+        match rawType C .storage V with
+        | .ok t => .ok (.mapping k none t none)
+        | .error e => .error e
+      | .error e => .error e
+    else .error (.mappingOutsideStorage loc)
+
+/-- The names a type as read mentions outside mapping keys. -/
+def rawNames : RawTy → List String
+  | .named s => [s]
+  | .array T => rawNames T
+  | .fixed T _ => rawNames T
+  | .mapping _ V => rawNames V
+
+/-- What a successful spelling of a type as read denotes: the marked
+elementary type of each leaf name, the same nesting and lengths, the key and
+value of a mapping, and for a struct name both the table type the model
+elaborates it to and the declaration it resolves to. -/
+inductive RawRep (C : Contract) (E : Source.Env) (scope : Option String) :
+    DataLoc → RawTy → STy → Prop where
+  | elem {loc s e} : rawElem s = some e → RawRep C E scope loc (.named s) (e.ty loc)
+  | struct {loc s table d} : rawElem s = none → C.structName? s = some table →
+      Semantics.isEnc s = false → Resolved E scope s d →
+      RawRep C E scope loc (.named s) (.struct loc d)
+  | array {loc T τ} : RawRep C E scope loc T τ →
+      RawRep C E scope loc (.array T) (.array loc τ none)
+  | fixed {loc T τ n} : 0 < n → RawRep C E scope loc T τ →
+      RawRep C E scope loc (.fixed T n) (.array loc τ (some n))
+  | mapping {k V e τ} : rawElem k = some e → RawRep C E scope .storage V τ →
+      RawRep C E scope .storage (.mapping (.named k) V) (.mapping (e.ty .memory) τ)
+
+theorem rawKey_ok {K : RawTy} {key : Source.MapKey} (h : rawKey K = .ok key) :
+    ∃ k e ne, K = .named k ∧ key = .elem e ne ∧ rawElem k = some e := by
+  unfold rawKey at h
+  split at h
+  · rename_i k
+    split at h
+    · rename_i e he
+      split at h
+      · cases h
+      · rename_i ne
+        cases h
+        exact ⟨k, e, ne, rfl, rfl, he⟩
+    · cases h
+  · cases h
+
+/-- A successful spelling of a type as read elaborates, under the resolution
+obligations of the struct names it mentions, to the type it represents. -/
+theorem rawType_typed (C : Contract) (E : Source.Env) (scope : Option String) :
+    (T : RawTy) → (loc : DataLoc) → (t : Syn .typeName) → rawType C loc T = .ok t →
+    (∀ s ∈ rawNames T, rawElem s = none → ∃ d, Resolved E scope s d) →
+    ∃ τ, t.tys E scope loc = some [τ] ∧ RawRep C E scope loc T τ
+  | .named s, loc, t, h, res => by
+      simp only [rawType] at h
+      unfold rawLeaf at h
+      split at h
+      · rename_i e he
+        cases h
+        exact ⟨e.ty loc, rfl, .elem he⟩
+      · rename_i he
+        split at h
+        · cases h
+        · rename_i plain
+          split at h
+          · rename_i table ht
+            cases h
+            obtain ⟨d, hd⟩ := res s (by simp [rawNames]) he
+            have ident : Semantics.isEnc s = false := by
+              cases hi : Semantics.isEnc s with
+              | false => rfl
+              | true => simp [hi] at plain
+            exact ⟨.struct loc d, by simp [Source.Syn.tys, hd.userTy loc],
+              .struct he ht ident hd⟩
+          · cases h
+  | .array T, loc, t, h, res => by
+      simp only [rawType] at h
+      split at h
+      · rename_i t' ht
+        cases h
+        obtain ⟨τ, typed, rep⟩ := rawType_typed C E scope T loc t' ht
+          (by simpa only [rawNames] using res)
+        exact ⟨.array loc τ none, by simp [Source.Syn.tys, typed, Source.arrayLen], .array rep⟩
+      · cases h
+  | .fixed T n, loc, t, h, res => by
+      simp only [rawType] at h
+      split at h
+      · cases h
+      · rename_i pos
+        split at h
+        · rename_i t' ht
+          cases h
+          obtain ⟨τ, typed, rep⟩ := rawType_typed C E scope T loc t' ht
+            (by simpa only [rawNames] using res)
+          have pos' : 0 < n := Nat.pos_of_ne_zero pos
+          exact ⟨.array loc τ (some n),
+            by simp [Source.Syn.tys, typed, arrayLen_lenLit pos'], .fixed pos' rep⟩
+        · cases h
+  | .mapping K V, loc, t, h, res => by
+      simp only [rawType] at h
+      split at h
+      · rename_i hloc
+        subst hloc
+        split at h
+        · rename_i key hk
+          split at h
+          · rename_i t' ht
+            cases h
+            obtain ⟨τ, typed, rep⟩ := rawType_typed C E scope V .storage t' ht
+              (by simpa only [rawNames] using res)
+            obtain ⟨k, e, ne, rfl, rfl, he⟩ := rawKey_ok hk
+            exact ⟨.mapping (e.ty .memory) τ,
+              by simp [Source.Syn.tys, typed, Source.Env.keyTy], .mapping he rep⟩
+          · cases h
+        · cases h
+      · cases h
+
+/-- A struct name as read and the written name of the type the model elaborates
+it to are the same name: the two spellings agree on struct identity. -/
+theorem rawStruct_written {C : Contract} {E : Source.Env} {scope : Option String}
+    {loc : DataLoc} {s w table : Name} {τ : STy} (h : RawRep C E scope loc (.named s) τ)
+    (ht : C.structName? s = some table) (hw : written? C table = some w)
+    (he : rawElem s = none) : w = s := by
+  cases h with
+  | elem he' => rw [he] at he'; cases he'
+  | struct _ _ ident _ => exact (written?_unique hw ht ident).symm
 
 end Solidity.Correctness.Lowering.Total.ReferenceDecode
