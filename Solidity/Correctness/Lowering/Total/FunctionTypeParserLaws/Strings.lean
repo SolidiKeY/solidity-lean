@@ -9,7 +9,7 @@ positions, well-founded loops). Here each is proved, from its definition,
 equal to a `List Char` operation on `String.mk l`:
 
 * `drop_mk`, `dropRight_mk`, `isEmpty_mk`;
-* `startsWith_mk`, `endsWith_mk` (as decided list equations, both directions);
+* `startsWith_mk`, `endsWith_mk` (each the `decide` of a list equation);
 * `intercalate_mk` (`sepJoin`), `data_intercalate`.
 
 Nothing here mentions the parser; the laws hold for every character list.
@@ -19,7 +19,9 @@ namespace Solidity.Correctness.Lowering.Total.FunctionTypeParserLaws.Str
 open Lean Elab Tactic Meta in
 /-- One unfolding of `String.substrEq`'s character loop. The loop is a private
 `where` function of core, so no identifier names it; this only looks the
-constant up and calls the ordinary `unfold`, whose proof the kernel checks. -/
+constant up (by its module, `Init.Data.String.Basic`: a toolchain change that
+moves it fails here, loudly) and calls the ordinary `unfold`, whose proof the
+kernel checks. -/
 elab "unfold_substrEq_loop" : tactic => liftMetaTactic1 fun g => do
   return some (← Meta.unfoldTarget g
     (mkPrivateNameCore `Init.Data.String.Basic `String.substrEq.loop))

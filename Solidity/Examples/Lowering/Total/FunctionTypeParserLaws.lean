@@ -36,8 +36,8 @@ example : fnParts? "function(function(uint8)returns(bool),bytes4)returns(uint8,u
     = some (["function(uint8)returns(bool)", "bytes4"], ["uint8", "uint"], false) :=
   reads (by decide)
 
-/-- Components that are themselves spellings, to any depth: a covered
-signature reads back, and so does each function type it returns. -/
+/-- Components that are themselves spellings, three levels here: a covered
+signature reads back, and so does its first parameter. -/
 example {ps rs qs : List String} (e₁ e₂ e₃ : Bool)
     (hp : ∀ p ∈ ps, Covered p) (hr : ∀ r ∈ rs, Covered r) (hq : ∀ q ∈ qs, Covered q) :
     fnParts? (fnTyStr [fnTyStr [fnTyStr ps rs e₁] qs e₂, "uint"] [fnTyStr qs ps e₃] e₁)
@@ -62,7 +62,7 @@ example : Well "mapping(uint=>function(uint,bool)external)" := by decide
 example : Covered ("uint" ++ "[" ++ "2" ++ "]" ++ "memory") :=
   .suffix (.index (.name (by decide) (by decide)) (by decide)) (by decide)
 
-/-- A location or array suffix after a covered component, here a function type. -/
+/-- A location or array suffix after any covered component. -/
 example (ext : Bool) {c : String} (h : Covered c) :
     fnParts? (fnTyStr [c ++ "[" ++ "" ++ "]" ++ "storage"] [c ++ "calldata"] ext)
       = some ([c ++ "[" ++ "" ++ "]" ++ "storage"], [c ++ "calldata"], ext) :=
@@ -102,13 +102,13 @@ example {α : Type} (ext : Bool) (a : α) (P R : Parts α)
 example : fnParts? "uint" = none := reads (by decide)
 example : fnParts? "function(uint" = none := reads (by decide)
 example : fnParts? "function(uint)returns(uint" = none := reads (by decide)
-/-- Mutability is not spelled; a spelling that carries it is refused. -/
-example : fnParts? "function(uint)view" = none := reads (by decide)
-example : fnParts? "function(uint)internal" = none := reads (by decide)
+/-- Text written with a mutability or with `internal` is refused. -/
+example : fnParts? "function(uint)view" = none ∧ fnParts? "function(uint)internal" = none :=
+  ⟨reads (by decide), reads (by decide)⟩
 /-- A function type that continues is no function-type spelling. -/
 example : fnParts? "function(uint)[]memory" = none := reads (by decide)
 
-/-- An empty component is not read back. -/
+/-- A lone empty component is not read back. -/
 example : ¬ SplitOk "" := by decide
 example : fnParts? (fnTyStr [""] ["uint"] false) = some ([], ["uint"], false) := reads (by decide)
 example : fnParts? (fnTyStr ["uint"] [""] true) = some (["uint"], [], true) := reads (by decide)
@@ -118,12 +118,12 @@ example : ¬ SplitOk "a,b" := by decide
 example : fnTyStr ["a,b"] [] false = fnTyStr ["a", "b"] [] false := by decide
 example : fnParts? (fnTyStr ["a,b"] [] false) = some (["a", "b"], [], false) := reads (by decide)
 
-/-- A component closing a bracket it did not open ends the parameters early. -/
+/-- A component closing below its depth ends the parameters early. -/
 example : ¬ CloseOk "a)" ∧ ¬ CloseOk "uint]" ∧ ¬ SplitOk "x}" := by decide
 example : fnParts? (fnTyStr ["a)returns(b"] [] false) = some (["a"], ["b"], false) :=
   reads (by decide)
 example : fnParts? (fnTyStr ["a)"] [] false) = none := reads (by decide)
-/-- A component leaving a bracket open swallows the closing `)`. -/
+/-- A component leaving a bracket open swallows the closing `)`; components can merge. -/
 example : ¬ Well "a(" := by decide
 example : fnParts? (fnTyStr ["a("] ["uint"] true) = none := reads (by decide)
 /-- `close` does not count braces, `splitTop` does: `SplitOk` and `CloseOk` differ. -/

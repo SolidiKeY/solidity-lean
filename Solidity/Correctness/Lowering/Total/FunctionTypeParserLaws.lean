@@ -22,19 +22,20 @@ existing `fnParts?`, `fnTyStr` and `splitTopCommas` (no native evaluation; the
 
 ## The conditions, and what stays open
 
-`SplitOk c`: `c` is not empty, has no comma outside brackets, never closes a
-`}` `)` `]` it did not open, and ends with all closed. `CloseOk c`: the same
-for `(` `[` / `)` `]` alone, as `close` counts. They are decidable syntactic
-conditions on the component strings, sufficient for the two delimiter
-algorithms; they are not shown necessary. A signature some component of which
+`SplitOk c`: `c` is not empty, has no comma at bracket depth `0`, never
+closes (`}` `)` `]`) below depth `0`, and ends at depth `0`. `CloseOk c`: only
+the two depth conditions, over `(` `[` / `)` `]` as `close` counts. Depth is
+counted as the algorithms count it: bracket kinds are not matched (`(]` is
+accepted). They are decidable syntactic conditions on the component strings,
+sufficient for the two delimiter algorithms; they are not shown necessary. A signature some component of which
 fails them is an unresolved representation obligation of the original
 decoder, not excluded here and no premise of `lowerLoopsCorrect`:
 
-* an empty component (`fnTyStr [""] [] e` reads back `[]`);
+* a lone empty component (`fnTyStr [""] [] e` reads back `[]`);
 * a comma at a component's own depth (`fnTyStr ["a,b"]` and `fnTyStr ["a",
   "b"]` are one spelling: ambiguous, it reads as two components);
-* a component closing a bracket it did not open or leaving one open (the
-  parameter list ends early, or the spelling is refused);
+* a component closing below its depth or leaving a bracket open (the
+  parameter list ends early, components merge, or the spelling is refused);
 * any text `fnTyStr` does not produce: `fnParts?_mk` says what `fnParts?`
   does with it, and nothing relates the result to a signature.
 
@@ -150,12 +151,12 @@ theorem fnTy?_fnTyStr (ps rs : List String) (ext : Bool) : fnTy? (fnTyStr ps rs 
 /-! ## Conditions on a component -/
 
 /-- A component `splitTopCommas` gives back from a comma-joined list: not
-empty, no comma outside brackets, no bracket (`{` `(` `[`) closed below the
-component's own depth, all closed at its end. -/
+empty, no comma at depth `0`, no `}` `)` `]` at depth `0`, depth `0` at its
+end (depth counted over all three bracket kinds, kinds not matched). -/
 def SplitOk (s : String) : Prop := s.data ≠ [] ∧ splitScan 0 s.data = some 0
 
 /-- A component the parameter list's closing `)` is found behind: no `)` or
-`]` closed below the component's own depth, all `(` `[` closed at its end. -/
+`]` at depth `0`, depth `0` at its end (depth counted over `(` `[` / `)` `]`). -/
 def CloseOk (s : String) : Prop := closeScan 0 s.data = some 0
 
 /-- A component good in both positions. -/
@@ -341,8 +342,9 @@ theorem Well.index {s n : String} (h : Well s) (hn : plain n.data = true) :
 
 /-- The component spellings the laws are stated for, as a grammar: plain
 names, function types of covered components (any nesting), and a covered
-component followed by plain text (a location) or an array suffix. Anything
-else that is `Well` (decidable on a concrete spelling) is covered too. -/
+component followed by plain text (a location) or an array suffix. Other
+`Well` components (decidable on a concrete spelling) are not `Covered` but
+satisfy `fnParts?_fnTyStr` all the same. -/
 inductive Covered : String → Prop
   | name {s : String} : s.data ≠ [] → plain s.data = true → Covered s
   | fn {ps rs : List String} (ext : Bool) :
@@ -358,8 +360,9 @@ theorem Covered.well {s : String} (h : Covered s) : Well s := by
   | index _ p ih => exact ih.index p
 
 /-- The round trip on the grammar: a function type of covered components
-reads back, and each component it returns is covered again, so nested
-function types read back in turn. -/
+reads back. A returned component that is itself `fnTyStr` of covered
+components reads back by this law again; one continued by a suffix is
+returned as a string and is no function-type spelling. -/
 theorem fnParts?_covered {ps rs : List String} (ext : Bool)
     (hp : ∀ p ∈ ps, Covered p) (hr : ∀ r ∈ rs, Covered r) :
     fnParts? (fnTyStr ps rs ext) = some (ps, rs, ext) :=
