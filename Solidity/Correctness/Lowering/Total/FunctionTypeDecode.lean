@@ -165,13 +165,6 @@ theorem part_malformed {c : String} (isFn : fnTy? c = true) (parts : fnParts? c 
     rw [if_pos isFn, parts]
     rfl
 
-/-- `readSig` on a spelling `fnParts?` splits: `part_fn` at its length. -/
-theorem readSig_fn {s : String} {ps rs : List String} {ext : Bool}
-    (parts : fnParts? s = some (ps, rs, ext)) :
-    readSig s = (partsWith (part s.length) ps).bind fun P =>
-      (partsWith (part s.length) rs).map fun R => .fn ext () P R :=
-  (if_pos (fnTy_of_parts parts)).trans (part_fn s.length parts)
-
 /-- A function type's marker row: a `uint` tag, keyed by the spelling. -/
 theorem valueRows_fn {s : String} (isFn : fnTy? s = true) :
     valueRows? s = some (.uint, [("#" ++ s, 0)]) := by

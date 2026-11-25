@@ -18,8 +18,7 @@ def U (bits : Nat) (h : bits % 8 = 0 ∧ 8 ≤ bits ∧ bits ≤ 256 := by decid
 
 #guard readSig "function(uint)returns(uint)" == some (.fn false () (one (.elem u256)) (one (.elem u256)))
 #guard ofDecl (.named "function(uint256)returns(uint)") == readSig "function(uint)returns(uint)"
-#guard readSig "function(address)externalreturns(bool)" ==
-  some (.fn true () (one (.elem .address)) (one (.elem .bool)))
+#guard readSig "function(address)externalreturns(bool)" == some (.fn true () (one (.elem .address)) (one (.elem .bool)))
 #guard ofRows [("#function()external", 0)] "" == some (.fn true () .nil .nil)
 #guard ofRows [("x", 8), ("f#function()external", 0)] "f" == some (.fn true () .nil .nil)
 #guard valueRows? "function()external" == some (.uint, [("#function()external", 0)])
@@ -32,13 +31,22 @@ def nestedPs (inner : Ann) : Parts Ann :=
 def nestedRs : Parts Ann := .cons (.elem u8) (one (.elem u256))
 def nested (inner outer : Ann) : Part Ann := .fn false outer (nestedPs inner) nestedRs
 
-#guard readSig "function(function(uint8)returns(bool),bytes4)returns(uint8,uint)" ==
-  some (nested ⟨none, false⟩ ⟨none, false⟩).erase
-#guard (nested ⟨some .view, true⟩ ⟨some .pure, false⟩).spell ==
-  "function(function(uint8)returns(bool),bytes4)returns(uint8,uint)"
-#guard readSig "function(function()external)" ==
-  some (.fn false () (one (.fn true () .nil .nil)) .nil)
+#guard readSig "function(function(uint8)returns(bool),bytes4)returns(uint8,uint)" == some (nested ⟨none, false⟩ ⟨none, false⟩).erase
+#guard (nested ⟨some .view, true⟩ ⟨some .pure, false⟩).spell == "function(function(uint8)returns(bool),bytes4)returns(uint8,uint)"
+#guard readSig "function(function()external)" == some (.fn false () (one (.fn true () .nil .nil)) .nil)
 #guard leaf "uint8" == .elem u8 && leaf "bytes4" == .elem b4 && leaf "uint256" == .elem u256
+
+/-- The reader's equations from `fnParts?`'s split alone: flag, order, marker row. -/
+example (n : Nat) {s c : String} (notFn : fnTy? c = false)
+    (parts : fnParts? s = some ([c, c], [], true)) :
+    part (n + 2) s = some (.fn true () (.cons (leaf c) (one (leaf c))) .nil) ∧
+      valueRows? s = some (.uint, [("#" ++ s, 0)]) :=
+  ⟨by simp only [part_fn _ parts, part_leaf _ notFn, partsWith, one, Option.pure_def,
+    Option.bind_eq_bind, Option.bind_some, Option.map_some], valueRows_fn (fnTy_of_parts parts)⟩
+example {s : String} (isFn : fnTy? s = true) (parts : fnParts? s = none) (n : Nat) :
+    part n s = none := part_malformed isFn parts n
+example {c : String} {e : Source.Elem} (h : leaf c = .elem e) :
+    Decode.typeNameB (.named c) = some (.elem e) := leaf_elem h
 
 /-! ## Locations, and a reference table standing in for a reference decoder -/
 
