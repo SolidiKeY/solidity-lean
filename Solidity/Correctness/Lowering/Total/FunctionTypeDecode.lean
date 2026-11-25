@@ -10,29 +10,34 @@ the marker row `k#function(…) ↦ 0` beside the `uint` tag (`valueRows?`,
 `fnRow?`). This module reads such a spelling back as a signature tree and
 relates the tree to Source.
 
-- `comp` (fuel) and `read` read a spelling with `fnParts?` into a `Comp Unit`:
+- `part` (fuel) and `readSig` read a spelling with `fnParts?` into a `Part Unit`:
   nested signatures, elementary components at their width (`Decode.typeNameB`),
   other names, and reference components with their recorded location.
   `ofDecl`, `ofShape` and `ofState` read a declaration's marker and the marker
   rows of a local and of a state variable.
 - `Reads` is the fuel-free reading. `Reads.leaf`, `Reads.fn`, `Reads.inv` and
   `Reads.unique` are its exact structure: visibility is `fnParts?`'s flag,
-  parameters and returns are read pointwise in order (`ReadsAll`), a marker
-  `fnParts?` refuses has no reading (`Reads.malformed`).
-- `Comp.spell` is the spelling of a tree (`fnTyStr`, annotations ignored).
-- `Comp.typeName` is the Source type name of an annotated tree, over a
+  parameters and returns are read pointwise in order (`ReadsAll`,
+  `ReadsAll.length`, `ReadsAll.get`), a marker `fnParts?` refuses has no
+  reading (`Reads.malformed`).
+- `typeNameB_named`: an elementary component's type and width, by name;
+  `valueRows_narrow`, `valueRows_fn`: the model's width and marker rows of the
+  same names.
+- `Part.spell` is the spelling of a tree (`fnTyStr`, annotations ignored).
+- `Part.typeName` is the Source type name of an annotated tree, over a
   compositional table `Refs` for the components this module does not read
-  (user types, references). `fnType_ty`: from the component typing facts
-  `RefsTyped` the type name is a `Source.Syn.fnType` whose `Source.Syn.ty` is
-  exactly `STy.fn ext params returns mutability`.
+  (user types, references). `fnType_ty` (`sig_ty` for a whole tree): from the
+  component typing facts `RefsTyped` the type name is a `Source.Syn.fnType`
+  whose `Source.Syn.ty` is exactly `STy.fn ext params returns mutability`.
 
 ## What the spelling erases
 
 `spellFnTy`/`fnTyStr` do not record, so no reading here determines:
 * the **mutability** of each function type, nested ones included (`pure`,
   `view`, `payable` or none). Trees carry it as an annotation `Ann` that the
-  caller supplies; `annotate_erase` and `sty_mutability` show every choice is
-  consistent with one spelling and gives a different Source type. A function
+  caller supplies; `Part.annotate_erase`, `sty_mutability` and
+  `mutability_ambiguous` show every choice is consistent with one spelling
+  and each mutability gives a different Source type. A function
   declaration's mutability is not its variables' function types' mutability;
 * whether `internal` was written or left out (`Ann.internalKeyword`; both
   denote the same Source type, `vis_external`);
@@ -49,11 +54,12 @@ relates the tree to Source.
 
 Lean's `String.startsWith`, `drop` and `endsWith` have no core lemmas and do
 not reduce in the kernel, so nothing here is derived by computing `fnParts?`:
-facts about it enter as hypotheses (`Reads.fn`), and the examples check
+facts about it enter as hypotheses (`Reads.fn`; only `fnTy_of_parts`, its
+guard, is proved), and the examples check
 concrete spellings with `#guard`. In particular `fnParts? (fnTyStr ps rs ext)
 = some (ps, rs, ext)` for well-bracketed comma-free components, and that
-`read`'s fuel (the spelling's length) always suffices, are not established;
-`Reads` is the proof-facing reading and `read` computes it (`read_reads`).
+`readSig`'s fuel (the spelling's length) always suffices, are not established;
+`Reads` is the proof-facing reading and `readSig` computes it (`readSig_reads`).
 
 Open, for the original decoder: binding the `uint` tag to a function index,
 whole-unit integration, which annotation the original source had, the `Refs`
@@ -68,7 +74,7 @@ open Source (Syn STy DataLoc)
 mutual
 /-- A component of a retained signature, with an annotation `α` at each
 function type. -/
-inductive Comp (α : Type) where
+inductive Part (α : Type) where
   /-- An elementary type, at its width. -/
   | elem (e : Source.Elem)
   /-- Another name with no location: an enum, a contract, a value type. -/
@@ -76,57 +82,58 @@ inductive Comp (α : Type) where
   /-- A reference component: its spelling and its recorded location. -/
   | located (base : String) (loc : DataLoc)
   /-- A function type: external or internal, parameters, returns. -/
-  | fn (ext : Bool) (a : α) (ps rs : Comps α)
+  | fn (ext : Bool) (a : α) (ps rs : Parts α)
   deriving DecidableEq, Repr
 /-- Components, in order. -/
-inductive Comps (α : Type) where
+inductive Parts (α : Type) where
   | nil
-  | cons (c : Comp α) (cs : Comps α)
+  | cons (c : Part α) (cs : Parts α)
   deriving DecidableEq, Repr
 end
 
 mutual
 /-- The tree without its annotations: what a spelling retains. -/
-def Comp.erase {α : Type} : Comp α → Comp Unit
+def Part.erase {α : Type} : Part α → Part Unit
   | .elem e => .elem e
   | .named c => .named c
   | .located b l => .located b l
   | .fn ext _ ps rs => .fn ext () ps.erase rs.erase
-/-- `Comp.erase`, componentwise. -/
-def Comps.erase {α : Type} : Comps α → Comps Unit
+/-- `Part.erase`, componentwise. -/
+def Parts.erase {α : Type} : Parts α → Parts Unit
   | .nil => .nil
   | .cons c cs => .cons c.erase cs.erase
 end
 
 mutual
 /-- The tree with the annotation `μ` at every function type. -/
-def Comp.annotate {α : Type} (μ : α) : Comp Unit → Comp α
+def Part.annotate {α : Type} (μ : α) : Part Unit → Part α
   | .elem e => .elem e
   | .named c => .named c
   | .located b l => .located b l
   | .fn ext _ ps rs => .fn ext μ (ps.annotate μ) (rs.annotate μ)
-/-- `Comp.annotate`, componentwise. -/
-def Comps.annotate {α : Type} (μ : α) : Comps Unit → Comps α
+/-- `Part.annotate`, componentwise. -/
+def Parts.annotate {α : Type} (μ : α) : Parts Unit → Parts α
   | .nil => .nil
   | .cons c cs => .cons (c.annotate μ) (cs.annotate μ)
 end
 
 /-- The components as a list. -/
-def Comps.toList {α : Type} : Comps α → List (Comp α)
+def Parts.toList {α : Type} : Parts α → List (Part α)
   | .nil => []
   | .cons c cs => c :: cs.toList
 
 mutual
 /-- Every annotation is consistent with a retained tree. -/
-theorem Comp.annotate_erase {α : Type} (μ : α) : (t : Comp Unit) → (t.annotate μ).erase = t
+theorem Part.annotate_erase {α : Type} (μ : α) : (t : Part Unit) → (t.annotate μ).erase = t
   | .elem _ | .named _ | .located _ _ => rfl
   | .fn ext () ps rs => by
-    simp only [Comp.annotate, Comp.erase, Comps.annotate_erase μ ps, Comps.annotate_erase μ rs]
-/-- `Comp.annotate_erase`, componentwise. -/
-theorem Comps.annotate_erase {α : Type} (μ : α) : (ts : Comps Unit) → (ts.annotate μ).erase = ts
+    simp only [Part.annotate, Part.erase, Parts.annotate_erase μ ps, Parts.annotate_erase μ rs]
+/-- `Part.annotate_erase`, componentwise. -/
+theorem Parts.annotate_erase {α : Type} (μ : α) :
+    (ts : Parts Unit) → (ts.annotate μ).erase = ts
   | .nil => rfl
   | .cons c cs => by
-    simp only [Comps.annotate, Comps.erase, Comp.annotate_erase μ c, Comps.annotate_erase μ cs]
+    simp only [Parts.annotate, Parts.erase, Part.annotate_erase μ c, Parts.annotate_erase μ cs]
 end
 
 /-! ## Reading a spelling -/
@@ -142,7 +149,7 @@ def locSuffix (c : String) : Option (String × DataLoc) :=
 /-- A component that is no function type: an elementary type by name
 (`Decode.typeNameB`: `bool`, `uintN`, `intN`, `address`, `bytesN`), else a
 located reference, else a name. -/
-def leaf (c : String) : Comp Unit :=
+def leaf (c : String) : Part Unit :=
   match Decode.typeNameB (.named c) with
   | some (.elem e) => .elem e
   | _ =>
@@ -151,56 +158,65 @@ def leaf (c : String) : Comp Unit :=
     | none => .named c
 
 /-- Components read by `f`, in order; none is dropped. -/
-def compsWith (f : String → Option (Comp Unit)) : List String → Option (Comps Unit)
+def partsWith (f : String → Option (Part Unit)) : List String → Option (Parts Unit)
   | [] => some .nil
-  | c :: cs => do pure (.cons (← f c) (← compsWith f cs))
+  | c :: cs => do pure (.cons (← f c) (← partsWith f cs))
 
 /-- A function type from `fnParts?`'s split, its components read by `f`. -/
-def node (f : String → Option (Comp Unit)) :
-    Option (List String × List String × Bool) → Option (Comp Unit)
-  | some (ps, rs, ext) => do pure (.fn ext () (← compsWith f ps) (← compsWith f rs))
+def node (f : String → Option (Part Unit)) :
+    Option (List String × List String × Bool) → Option (Part Unit)
+  | some (ps, rs, ext) => do pure (.fn ext () (← partsWith f ps) (← partsWith f rs))
   | none => none
 
 /-- A component: a function type by `fnParts?` (nested ones with one fuel
 less), anything else a `leaf`. A function-type spelling `fnParts?` refuses is
 not read. -/
-def comp : Nat → String → Option (Comp Unit)
+def part : Nat → String → Option (Part Unit)
   | 0, _ => none
-  | n + 1, c => if fnTy? c then node (comp n) (fnParts? c) else some (leaf c)
+  | n + 1, c => if fnTy? c then node (part n) (fnParts? c) else some (leaf c)
 
 /-- A retained function-type spelling; fuel is its length. -/
-def read (s : String) : Option (Comp Unit) :=
-  if fnTy? s then comp (s.length + 1) s else none
+def readSig (s : String) : Option (Part Unit) :=
+  if fnTy? s then part (s.length + 1) s else none
 
 /-- A declaration's type: the marker `expandTy` leaves for a function type. -/
-def ofDecl : RawTy → Option (Comp Unit)
-  | .named s => read s
+def ofDecl : RawTy → Option (Part Unit)
+  | .named s => readSig s
   | _ => none
 
 /-- A local's function type, from the marker row of its shape (`localFn?`). -/
-def ofShape (shape : List (String × Nat)) : Option (Comp Unit) :=
-  (fnRow? shape "").bind read
+def ofShape (shape : List (String × Nat)) : Option (Part Unit) :=
+  (fnRow? shape "").bind readSig
 
 /-- A state variable's function type, from its marker row of the width table. -/
-def ofState (widths : List (Name × Nat)) (x : Name) : Option (Comp Unit) :=
-  (fnRow? widths x).bind read
+def ofState (widths : List (Name × Nat)) (x : Name) : Option (Part Unit) :=
+  (fnRow? widths x).bind readSig
 
 /-- The fuel-free reading: some fuel reads `c` as `t`. -/
-def Reads (c : String) (t : Comp Unit) : Prop := ∃ n, comp n c = some t
+def Reads (c : String) (t : Part Unit) : Prop := ∃ n, part n c = some t
 
 /-- Components read pointwise, in order, none dropped or added. -/
-def ReadsAll : List String → Comps Unit → Prop
+def ReadsAll : List String → Parts Unit → Prop
   | [], .nil => True
   | c :: cs, .cons t ts => Reads c t ∧ ReadsAll cs ts
   | _, _ => False
 
-theorem comp_step (n : Nat) (c : String) :
-    comp (n + 1) c = if fnTy? c then node (comp n) (fnParts? c) else some (leaf c) := rfl
+/-- What `fnParts?` splits is a function-type spelling. -/
+theorem fnTy_of_parts {s : String} {x : List String × List String × Bool}
+    (h : fnParts? s = some x) : fnTy? s = true := by
+  by_cases isFn : fnTy? s = true
+  · exact isFn
+  · unfold fnParts? at h
+    simp only [guard, isFn] at h
+    cases h
 
-theorem compsWith_cons {f : String → Option (Comp Unit)} {c : String} {cs : List String}
-    {ts : Comps Unit} : compsWith f (c :: cs) = some ts ↔
-      ∃ t ts', f c = some t ∧ compsWith f cs = some ts' ∧ ts = .cons t ts' := by
-  simp only [compsWith, Option.pure_def, Option.bind_eq_bind, Option.bind_eq_some_iff,
+theorem part_step (n : Nat) (c : String) :
+    part (n + 1) c = if fnTy? c then node (part n) (fnParts? c) else some (leaf c) := rfl
+
+theorem partsWith_cons {f : String → Option (Part Unit)} {c : String} {cs : List String}
+    {ts : Parts Unit} : partsWith f (c :: cs) = some ts ↔
+      ∃ t ts', f c = some t ∧ partsWith f cs = some ts' ∧ ts = .cons t ts' := by
+  simp only [partsWith, Option.pure_def, Option.bind_eq_bind, Option.bind_eq_some_iff,
     Option.some.injEq]
   constructor
   · rintro ⟨t, ht, ts', hts, rfl⟩
@@ -208,9 +224,9 @@ theorem compsWith_cons {f : String → Option (Comp Unit)} {c : String} {cs : Li
   · rintro ⟨t, ts', ht, hts, rfl⟩
     exact ⟨t, ht, ts', hts, rfl⟩
 
-theorem node_some {f : String → Option (Comp Unit)} {ps rs : List String} {ext : Bool}
-    {t : Comp Unit} : node f (some (ps, rs, ext)) = some t ↔
-      ∃ P R, compsWith f ps = some P ∧ compsWith f rs = some R ∧ t = .fn ext () P R := by
+theorem node_some {f : String → Option (Part Unit)} {ps rs : List String} {ext : Bool}
+    {t : Part Unit} : node f (some (ps, rs, ext)) = some t ↔
+      ∃ P R, partsWith f ps = some P ∧ partsWith f rs = some R ∧ t = .fn ext () P R := by
   simp only [node, Option.pure_def, Option.bind_eq_bind, Option.bind_eq_some_iff,
     Option.some.injEq]
   constructor
@@ -219,24 +235,24 @@ theorem node_some {f : String → Option (Comp Unit)} {ps rs : List String} {ext
   · rintro ⟨P, R, hP, hR, rfl⟩
     exact ⟨P, hP, R, hR, rfl⟩
 
-theorem compsWith_mono {f g : String → Option (Comp Unit)}
+theorem partsWith_mono {f g : String → Option (Part Unit)}
     (h : ∀ c t, f c = some t → g c = some t) :
-    ∀ (cs : List String) (ts : Comps Unit), compsWith f cs = some ts → compsWith g cs = some ts
+    ∀ (cs : List String) (ts : Parts Unit), partsWith f cs = some ts → partsWith g cs = some ts
   | [], _, e => e
   | c :: cs, ts, e => by
-    obtain ⟨t, ts', ht, hts, rfl⟩ := compsWith_cons.mp e
-    exact compsWith_cons.mpr ⟨t, ts', h c t ht, compsWith_mono h cs ts' hts, rfl⟩
+    obtain ⟨t, ts', ht, hts, rfl⟩ := partsWith_cons.mp e
+    exact partsWith_cons.mpr ⟨t, ts', h c t ht, partsWith_mono h cs ts' hts, rfl⟩
 
 /-- More fuel reads the same tree. -/
-theorem comp_succ (n : Nat) : ∀ (c : String) (t : Comp Unit),
-    comp n c = some t → comp (n + 1) c = some t := by
+theorem part_succ (n : Nat) : ∀ (c : String) (t : Part Unit),
+    part n c = some t → part (n + 1) c = some t := by
   induction n with
   | zero =>
     intro c t h
     cases h
   | succ n ih =>
     intro c t h
-    rw [comp_step] at h ⊢
+    rw [part_step] at h ⊢
     by_cases isFn : fnTy? c = true
     · rw [if_pos isFn] at h ⊢
       cases parts : fnParts? c with
@@ -247,32 +263,32 @@ theorem comp_succ (n : Nat) : ∀ (c : String) (t : Comp Unit),
         obtain ⟨ps, rs, ext⟩ := x
         rw [parts] at h
         obtain ⟨P, R, hP, hR, rfl⟩ := node_some.mp h
-        exact node_some.mpr ⟨P, R, compsWith_mono ih ps P hP, compsWith_mono ih rs R hR, rfl⟩
+        exact node_some.mpr ⟨P, R, partsWith_mono ih ps P hP, partsWith_mono ih rs R hR, rfl⟩
     · rw [if_neg isFn] at h ⊢
       exact h
 
-theorem comp_le {n m : Nat} (le : n ≤ m) {c : String} {t : Comp Unit}
-    (h : comp n c = some t) : comp m c = some t := by
+theorem part_le {n m : Nat} (le : n ≤ m) {c : String} {t : Part Unit}
+    (h : part n c = some t) : part m c = some t := by
   induction le with
   | refl => exact h
-  | step _ ih => exact comp_succ _ _ _ ih
+  | step _ ih => exact part_succ _ _ _ ih
 
 /-- One fuel reads all the components. -/
-theorem readsAll_iff : ∀ (cs : List String) (ts : Comps Unit),
-    ReadsAll cs ts ↔ ∃ n, compsWith (comp n) cs = some ts
+theorem readsAll_iff : ∀ (cs : List String) (ts : Parts Unit),
+    ReadsAll cs ts ↔ ∃ n, partsWith (part n) cs = some ts
   | [], .nil => ⟨fun _ => ⟨0, rfl⟩, fun _ => trivial⟩
   | [], .cons _ _ => ⟨fun h => h.elim, fun ⟨_, h⟩ => by cases h⟩
   | _ :: _, .nil => ⟨fun h => h.elim, fun ⟨_, h⟩ => by
-      obtain ⟨_, _, _, _, e⟩ := compsWith_cons.mp h
+      obtain ⟨_, _, _, _, e⟩ := partsWith_cons.mp h
       cases e⟩
   | c :: cs, .cons t ts => by
     constructor
     · rintro ⟨⟨n, hn⟩, rest⟩
       obtain ⟨m, hm⟩ := (readsAll_iff cs ts).mp rest
-      exact ⟨max n m, compsWith_cons.mpr ⟨t, ts, comp_le (Nat.le_max_left n m) hn,
-        compsWith_mono (fun _ _ => comp_le (Nat.le_max_right n m)) cs ts hm, rfl⟩⟩
+      exact ⟨max n m, partsWith_cons.mpr ⟨t, ts, part_le (Nat.le_max_left n m) hn,
+        partsWith_mono (fun _ _ => part_le (Nat.le_max_right n m)) cs ts hm, rfl⟩⟩
     · rintro ⟨n, h⟩
-      obtain ⟨t', ts', ht, hts, e⟩ := compsWith_cons.mp h
+      obtain ⟨t', ts', ht, hts, e⟩ := partsWith_cons.mp h
       cases e
       exact ⟨⟨n, ht⟩, (readsAll_iff cs ts).mpr ⟨n, hts⟩⟩
 
@@ -280,24 +296,25 @@ namespace Reads
 
 /-- A component that is no function type reads as its `leaf`. -/
 theorem leaf {c : String} (h : fnTy? c = false) : Reads c (leaf c) :=
-  ⟨1, by rw [comp_step, h]; rfl⟩
+  ⟨1, by rw [part_step, h]; rfl⟩
 
 /-- A function type reads as `fnParts?` splits it: its visibility flag, and
 its parameters and returns read in order. -/
-theorem fn {c : String} {ps rs : List String} {ext : Bool} {P R : Comps Unit}
-    (isFn : fnTy? c = true) (parts : fnParts? c = some (ps, rs, ext))
+theorem fn {c : String} {ps rs : List String} {ext : Bool} {P R : Parts Unit}
+    (parts : fnParts? c = some (ps, rs, ext))
     (params : ReadsAll ps P) (returns : ReadsAll rs R) : Reads c (.fn ext () P R) := by
+  have isFn := fnTy_of_parts parts
   obtain ⟨n, hn⟩ := (readsAll_iff ps P).mp params
   obtain ⟨m, hm⟩ := (readsAll_iff rs R).mp returns
   refine ⟨max n m + 1, ?_⟩
-  rw [comp_step, if_pos isFn, parts]
+  rw [part_step, if_pos isFn, parts]
   exact node_some.mpr ⟨P, R,
-    compsWith_mono (fun _ _ => comp_le (Nat.le_max_left n m)) ps P hn,
-    compsWith_mono (fun _ _ => comp_le (Nat.le_max_right n m)) rs R hm, rfl⟩
+    partsWith_mono (fun _ _ => part_le (Nat.le_max_left n m)) ps P hn,
+    partsWith_mono (fun _ _ => part_le (Nat.le_max_right n m)) rs R hm, rfl⟩
 
 /-- Every reading is one of the two: a leaf, or a function type split by
 `fnParts?` with its components read in order. -/
-theorem inv {c : String} {t : Comp Unit} (h : Reads c t) :
+theorem inv {c : String} {t : Part Unit} (h : Reads c t) :
     (fnTy? c = false ∧ t = FunctionTypeDecode.leaf c) ∨
     ∃ ps rs ext P R, fnTy? c = true ∧ fnParts? c = some (ps, rs, ext) ∧
       ReadsAll ps P ∧ ReadsAll rs R ∧ t = .fn ext () P R := by
@@ -305,7 +322,7 @@ theorem inv {c : String} {t : Comp Unit} (h : Reads c t) :
   cases n with
   | zero => cases h
   | succ n =>
-    rw [comp_step] at h
+    rw [part_step] at h
     by_cases isFn : fnTy? c = true
     · rw [if_pos isFn] at h
       cases parts : fnParts? c with
@@ -323,16 +340,16 @@ theorem inv {c : String} {t : Comp Unit} (h : Reads c t) :
       exact .inl ⟨Bool.eq_false_iff.mpr isFn, rfl⟩
 
 /-- A spelling has at most one reading. -/
-theorem unique {c : String} {t t' : Comp Unit} (h : Reads c t) (h' : Reads c t') : t = t' := by
+theorem unique {c : String} {t t' : Part Unit} (h : Reads c t) (h' : Reads c t') : t = t' := by
   obtain ⟨n, hn⟩ := h
   obtain ⟨m, hm⟩ := h'
-  have a := comp_le (Nat.le_max_left n m) hn
-  have b := comp_le (Nat.le_max_right n m) hm
+  have a := part_le (Nat.le_max_left n m) hn
+  have b := part_le (Nat.le_max_right n m) hm
   exact Option.some.inj (a.symm.trans b)
 
 /-- A function-type marker `fnParts?` refuses has no reading. -/
 theorem malformed {c : String} (isFn : fnTy? c = true) (parts : fnParts? c = none)
-    (t : Comp Unit) : ¬ Reads c t := by
+    (t : Part Unit) : ¬ Reads c t := by
   intro h
   rcases h.inv with ⟨notFn, _⟩ | ⟨_, _, _, _, _, _, some, _⟩
   · rw [isFn] at notFn
@@ -343,16 +360,16 @@ theorem malformed {c : String} (isFn : fnTy? c = true) (parts : fnParts? c = non
 end Reads
 
 /-- The components read are as many as the spellings. -/
-theorem ReadsAll.length : ∀ {cs : List String} {ts : Comps Unit},
+theorem ReadsAll.length : ∀ {cs : List String} {ts : Parts Unit},
     ReadsAll cs ts → ts.toList.length = cs.length
   | [], .nil, _ => rfl
   | [], .cons _ _, h => h.elim
   | _ :: _, .nil, h => h.elim
   | _ :: cs, .cons _ ts, h => by
-    simp only [Comps.toList, List.length_cons, ReadsAll.length h.2]
+    simp only [Parts.toList, List.length_cons, ReadsAll.length h.2]
 
 /-- The `i`-th component read is the reading of the `i`-th spelling. -/
-theorem ReadsAll.get : ∀ {cs : List String} {ts : Comps Unit}, ReadsAll cs ts →
+theorem ReadsAll.get : ∀ {cs : List String} {ts : Parts Unit}, ReadsAll cs ts →
     ∀ (i : Nat) (c : String), cs[i]? = some c → ∃ t, ts.toList[i]? = some t ∧ Reads c t
   | [], .nil, _, _, _, h => by simp at h
   | [], .cons _ _, h, _, _, _ => h.elim
@@ -362,27 +379,27 @@ theorem ReadsAll.get : ∀ {cs : List String} {ts : Comps Unit}, ReadsAll cs ts 
     exact ⟨t, rfl, hc ▸ h.1⟩
   | _ :: cs, .cons _ ts, h, i + 1, c, hc => by
     simp only [List.getElem?_cons_succ] at hc
-    simpa only [Comps.toList, List.getElem?_cons_succ] using ReadsAll.get h.2 i c hc
+    simpa only [Parts.toList, List.getElem?_cons_succ] using ReadsAll.get h.2 i c hc
 
-theorem read_of_fn {s : String} (isFn : fnTy? s = true) : read s = comp (s.length + 1) s :=
+theorem readSig_of_fn {s : String} (isFn : fnTy? s = true) : readSig s = part (s.length + 1) s :=
   if_pos isFn
 
 /-- A name that is no function-type spelling is not read as one. -/
-theorem read_not_fn {s : String} (h : fnTy? s = false) : read s = none :=
+theorem readSig_not_fn {s : String} (h : fnTy? s = false) : readSig s = none :=
   if_neg (by rw [h]; exact Bool.false_ne_true)
 
-/-- `read` computes a reading of a function-type spelling. -/
-theorem read_reads {s : String} {t : Comp Unit} (h : read s = some t) :
+/-- `readSig` computes a reading of a function-type spelling. -/
+theorem readSig_reads {s : String} {t : Part Unit} (h : readSig s = some t) :
     fnTy? s = true ∧ Reads s t := by
   by_cases isFn : fnTy? s = true
-  · exact ⟨isFn, _, (read_of_fn isFn).symm.trans h⟩
-  · rw [read_not_fn (Bool.eq_false_iff.mpr isFn)] at h
+  · exact ⟨isFn, _, (readSig_of_fn isFn).symm.trans h⟩
+  · rw [readSig_not_fn (Bool.eq_false_iff.mpr isFn)] at h
     cases h
 
-/-- What `read` returns is a function type. -/
-theorem read_fn {s : String} {t : Comp Unit} (h : read s = some t) :
+/-- What `readSig` returns is a function type. -/
+theorem readSig_fn {s : String} {t : Part Unit} (h : readSig s = some t) :
     ∃ ext P R, t = .fn ext () P R := by
-  obtain ⟨isFn, reads⟩ := read_reads h
+  obtain ⟨isFn, reads⟩ := readSig_reads h
   rcases reads.inv with ⟨notFn, _⟩ | ⟨_, _, ext, P, R, _, _, _, _, rfl⟩
   · rw [isFn] at notFn
     cases notFn
@@ -395,6 +412,16 @@ theorem valueRows_fn {s : String} (isFn : fnTy? s = true) :
   unfold fnTy? at isFn
   unfold valueRows?
   rw [if_pos isFn]
+
+/-- The width row of a narrow integer (`valueRows?`): the width `narrowTy?`
+reads from its name, at the component's own position. -/
+theorem valueRows_narrow {c : String} {p : PrimTy} {bits : Nat} (notFn : fnTy? c = false)
+    (notAddress : c ≠ "address") (narrow : narrowTy? c = some (p, bits)) :
+    valueRows? c = some (p, [("", bits)]) := by
+  unfold fnTy? at notFn
+  delta valueRows?
+  rw [if_neg (by rw [notFn]; exact Bool.false_ne_true),
+    if_neg (by simpa only [beq_iff_eq] using notAddress), narrow]
 
 /-! ## Elementary components and their widths -/
 
@@ -488,13 +515,13 @@ def locName : DataLoc → String
 
 mutual
 /-- The spelling of a tree (`fnTyStr`); annotations are not spelled. -/
-def Comp.spell {α : Type} : Comp α → String
+def Part.spell {α : Type} : Part α → String
   | .elem e => elemName e
   | .named c => c
   | .located b l => b ++ locName l
   | .fn ext _ ps rs => fnTyStr ps.spells rs.spells ext
 /-- The spellings of components, in order. -/
-def Comps.spells {α : Type} : Comps α → List String
+def Parts.spells {α : Type} : Parts α → List String
   | .nil => []
   | .cons c cs => c.spell :: cs.spells
 end
@@ -502,21 +529,21 @@ end
 mutual
 /-- Trees with one erasure have one spelling: the spelling retains no
 annotation. -/
-theorem Comp.spell_erase {α : Type} : (t : Comp α) → t.erase.spell = t.spell
+theorem Part.spell_erase {α : Type} : (t : Part α) → t.erase.spell = t.spell
   | .elem _ | .named _ | .located _ _ => rfl
   | .fn _ _ ps rs => by
-    simp only [Comp.erase, Comp.spell, Comps.spells_erase ps, Comps.spells_erase rs]
-/-- `Comp.spell_erase`, componentwise. -/
-theorem Comps.spells_erase {α : Type} : (ts : Comps α) → ts.erase.spells = ts.spells
+    simp only [Part.erase, Part.spell, Parts.spells_erase ps, Parts.spells_erase rs]
+/-- `Part.spell_erase`, componentwise. -/
+theorem Parts.spells_erase {α : Type} : (ts : Parts α) → ts.erase.spells = ts.spells
   | .nil => rfl
   | .cons c cs => by
-    simp only [Comps.erase, Comps.spells, Comp.spell_erase c, Comps.spells_erase cs]
+    simp only [Parts.erase, Parts.spells, Part.spell_erase c, Parts.spells_erase cs]
 end
 
 /-- Parameters and returns are spelled in order, one spelling each. -/
-theorem Comps.spells_eq {α : Type} : (ts : Comps α) → ts.spells = ts.toList.map Comp.spell
+theorem Parts.spells_eq {α : Type} : (ts : Parts α) → ts.spells = ts.toList.map Part.spell
   | .nil => rfl
-  | .cons _ cs => by simp only [Comps.spells, Comps.toList, List.map_cons, Comps.spells_eq cs]
+  | .cons _ cs => by simp only [Parts.spells, Parts.toList, List.map_cons, Parts.spells_eq cs]
 
 /-! ## Source type names -/
 
@@ -546,13 +573,13 @@ structure Refs where
 def Refs.none : Refs := ⟨fun _ => Option.none, fun _ => Option.none⟩
 
 /-- A component's recorded location: a reference component's own. -/
-def Comp.loc {α : Type} : Comp α → Option DataLoc
+def Part.loc {α : Type} : Part α → Option DataLoc
   | .located _ l => some l
   | _ => none
 
 mutual
 /-- The Source type name of a component. -/
-def Comp.typeName (refs : Refs) : Comp Ann → Option (Syn .typeName)
+def Part.typeName (refs : Refs) : Part Ann → Option (Syn .typeName)
   | .elem e => some (.elem e)
   | .named c => refs.value c
   | .located b _ => refs.located b
@@ -560,7 +587,7 @@ def Comp.typeName (refs : Refs) : Comp Ann → Option (Syn .typeName)
     pure (.fnType (← ps.params refs) (a.vis ext) a.mutability (← rs.params refs))
 /-- Parameters or returns, in order: each component at its recorded location,
 unnamed. -/
-def Comps.params (refs : Refs) : Comps Ann → Option (Syn (.list .param))
+def Parts.params (refs : Refs) : Parts Ann → Option (Syn (.list .param))
   | .nil => some .nil
   | .cons c cs => do pure (.cons (.param (← c.typeName refs) c.loc none) (← cs.params refs))
 end
@@ -582,13 +609,13 @@ structure RefsTyped (E : Source.Env) (scope : Option String) (refs : Refs) (ρ :
 
 mutual
 /-- The Source type of a component, from the component types `ρ`. -/
-def Comp.sty (ρ : RefTys) : Comp Ann → Option STy
+def Part.sty (ρ : RefTys) : Part Ann → Option STy
   | .elem e => some (e.ty .memory)
   | .named c => ρ.value c
   | .located b l => ρ.located b l
   | .fn ext a ps rs => do pure (.fn ext (← ps.stys ρ) (← rs.stys ρ) a.mutability)
 /-- The Source types of components, in order. -/
-def Comps.stys (ρ : RefTys) : Comps Ann → Option (List STy)
+def Parts.stys (ρ : RefTys) : Parts Ann → Option (List STy)
   | .nil => some []
   | .cons c cs => do pure ((← c.sty ρ) :: (← cs.stys ρ))
 end
@@ -604,64 +631,85 @@ variable {E : Source.Env} {scope : Option String} {refs : Refs} {ρ : RefTys}
 
 mutual
 /-- A component's type name denotes its type, at its recorded location. -/
-theorem Comp.typeName_tys (typed : RefsTyped E scope refs ρ) :
-    (t : Comp Ann) → {T : Syn .typeName} → {τ : STy} → t.typeName refs = some T →
+theorem Part.typeName_tys (typed : RefsTyped E scope refs ρ) :
+    (t : Part Ann) → {T : Syn .typeName} → {τ : STy} → t.typeName refs = some T →
       t.sty ρ = some τ → T.tys E scope (t.loc.getD .memory) = some [τ]
   | .elem e, T, τ, hT, hτ => by
-    simp only [Comp.typeName, Option.some.injEq] at hT
-    simp only [Comp.sty, Option.some.injEq] at hτ
+    simp only [Part.typeName, Option.some.injEq] at hT
+    simp only [Part.sty, Option.some.injEq] at hτ
     subst hT hτ
     rfl
   | .named c, T, τ, hT, hτ => typed.value hT hτ
   | .located b l, T, τ, hT, hτ => typed.located hT hτ
   | .fn ext a ps rs, T, τ, hT, hτ => by
-    simp only [Comp.typeName, Option.pure_def, Option.bind_eq_bind, Option.bind_eq_some_iff,
+    simp only [Part.typeName, Option.pure_def, Option.bind_eq_bind, Option.bind_eq_some_iff,
       Option.some.injEq] at hT
-    simp only [Comp.sty, Option.pure_def, Option.bind_eq_bind, Option.bind_eq_some_iff,
+    simp only [Part.sty, Option.pure_def, Option.bind_eq_bind, Option.bind_eq_some_iff,
       Option.some.injEq] at hτ
     obtain ⟨P, hP, R, hR, rfl⟩ := hT
     obtain ⟨πs, hπ, ρs, hρ, rfl⟩ := hτ
-    simp only [Syn.tys, Comps.params_tys typed ps hP hπ, Comps.params_tys typed rs hR hρ,
+    simp only [Syn.tys, Parts.params_tys typed ps hP hπ, Parts.params_tys typed rs hR hρ,
       Ann.vis_external]
 /-- Parameters and returns denote their types, in order. -/
-theorem Comps.params_tys (typed : RefsTyped E scope refs ρ) :
-    (ts : Comps Ann) → {P : Syn (.list .param)} → {τs : List STy} → ts.params refs = some P →
-      ts.stys ρ = some τs → P.tys E scope .memory = some τs
+theorem Parts.params_tys (typed : RefsTyped E scope refs ρ) :
+    (ts : Parts Ann) → {P : Syn (.list .param)} → {τs : List STy} →
+      ts.params refs = some P → ts.stys ρ = some τs → P.tys E scope .memory = some τs
   | .nil, P, τs, hP, hτ => by
-    simp only [Comps.params, Option.some.injEq] at hP
-    simp only [Comps.stys, Option.some.injEq] at hτ
+    simp only [Parts.params, Option.some.injEq] at hP
+    simp only [Parts.stys, Option.some.injEq] at hτ
     subst hP hτ
     rfl
   | .cons c cs, P, τs, hP, hτ => by
-    simp only [Comps.params, Option.pure_def, Option.bind_eq_bind, Option.bind_eq_some_iff,
+    simp only [Parts.params, Option.pure_def, Option.bind_eq_bind, Option.bind_eq_some_iff,
       Option.some.injEq] at hP
-    simp only [Comps.stys, Option.pure_def, Option.bind_eq_bind, Option.bind_eq_some_iff,
+    simp only [Parts.stys, Option.pure_def, Option.bind_eq_bind, Option.bind_eq_some_iff,
       Option.some.injEq] at hτ
     obtain ⟨T, hT, P', hP', rfl⟩ := hP
     obtain ⟨τ, hτ', τs', hτs', rfl⟩ := hτ
-    simp only [Syn.tys, Comp.typeName_tys typed c hT hτ', Comps.params_tys typed cs hP' hτs',
+    simp only [Syn.tys, Part.typeName_tys typed c hT hτ', Parts.params_tys typed cs hP' hτs',
       List.singleton_append]
 end
+
+/-- Whether a tree is a function type. -/
+def Part.isFn {α : Type} : Part α → Bool
+  | .fn _ _ _ _ => true
+  | _ => false
 
 /-- **The Source function type of a retained signature.** Given the component
 typing facts, a tree's type name is a `Source.Syn.fnType` with the retained
 visibility, the components in order and the supplied mutability, and it
 denotes exactly `STy.fn ext params returns mutability`, at every location. -/
-theorem fnType_ty (typed : RefsTyped E scope refs ρ) {ext : Bool} {a : Ann} {ps rs : Comps Ann}
+theorem fnType_ty (typed : RefsTyped E scope refs ρ) {ext : Bool} {a : Ann} {ps rs : Parts Ann}
     {T : Syn .typeName} {πs ρs : List STy} (loc : DataLoc)
-    (hT : (Comp.fn ext a ps rs).typeName refs = some T)
+    (hT : (Part.fn ext a ps rs).typeName refs = some T)
     (hπ : ps.stys ρ = some πs) (hρ : rs.stys ρ = some ρs) :
     (∃ P R, ps.params refs = some P ∧ rs.params refs = some R ∧
       T = .fnType P (a.vis ext) a.mutability R ∧
       P.tys E scope .memory = some πs ∧ R.tys E scope .memory = some ρs) ∧
     T.ty E scope loc = some (.fn ext πs ρs a.mutability) := by
-  simp only [Comp.typeName, Option.pure_def, Option.bind_eq_bind, Option.bind_eq_some_iff,
+  simp only [Part.typeName, Option.pure_def, Option.bind_eq_bind, Option.bind_eq_some_iff,
     Option.some.injEq] at hT
   obtain ⟨P, hP, R, hR, rfl⟩ := hT
-  have tP := Comps.params_tys typed ps hP hπ
-  have tR := Comps.params_tys typed rs hR hρ
+  have tP := Parts.params_tys typed ps hP hπ
+  have tR := Parts.params_tys typed rs hR hρ
   refine ⟨⟨P, R, hP, hR, rfl, tP, tR⟩, ?_⟩
   simp only [Syn.ty, Syn.tys, tP, tR, Ann.vis_external]
+
+/-- `fnType_ty` for a tree given whole: its type name denotes its type, at
+every location. -/
+theorem sig_ty (typed : RefsTyped E scope refs ρ) (t : Part Ann) (loc : DataLoc)
+    {T : Syn .typeName} {τ : STy} (isFn : t.isFn = true) (hT : t.typeName refs = some T)
+    (hτ : t.sty ρ = some τ) : T.ty E scope loc = some τ := by
+  cases t with
+  | fn ext a ps rs =>
+    have hτ' := hτ
+    simp only [Part.sty, Option.pure_def, Option.bind_eq_bind, Option.bind_eq_some_iff,
+      Option.some.injEq] at hτ'
+    obtain ⟨πs, hπ, ρs, hρ, rfl⟩ := hτ'
+    exact (fnType_ty typed loc hT hπ hρ).2
+  | elem _ => cases isFn
+  | named _ => cases isFn
+  | located _ _ => cases isFn
 
 end Typing
 
@@ -674,10 +722,10 @@ theorem RefsTyped.none (E : Source.Env) (scope : Option String) (ρ : RefTys) :
 
 /-- The mutability of a function type's Source type is the annotation's:
 annotations of different mutability give different Source types. -/
-theorem sty_mutability {ρ : RefTys} {ext : Bool} {a b : Ann} {ps rs ps' rs' : Comps Ann}
-    {τ : STy} (ha : (Comp.fn ext a ps rs).sty ρ = some τ)
-    (hb : (Comp.fn ext b ps' rs').sty ρ = some τ) : a.mutability = b.mutability := by
-  simp only [Comp.sty, Option.pure_def, Option.bind_eq_bind, Option.bind_eq_some_iff,
+theorem sty_mutability {ρ : RefTys} {ext : Bool} {a b : Ann} {ps rs ps' rs' : Parts Ann}
+    {τ : STy} (ha : (Part.fn ext a ps rs).sty ρ = some τ)
+    (hb : (Part.fn ext b ps' rs').sty ρ = some τ) : a.mutability = b.mutability := by
+  simp only [Part.sty, Option.pure_def, Option.bind_eq_bind, Option.bind_eq_some_iff,
     Option.some.injEq] at ha hb
   obtain ⟨_, _, _, _, ea⟩ := ha
   obtain ⟨_, _, _, _, eb⟩ := hb
@@ -687,15 +735,16 @@ theorem sty_mutability {ρ : RefTys} {ext : Bool} {a b : Ann} {ps rs ps' rs' : C
 spelling and one erasure; where both annotations have a Source type and their
 mutabilities differ, the Source types differ. The retained signature does not
 determine which the source had. -/
-theorem mutability_ambiguous (ρ : RefTys) {ext : Bool} {P R : Comps Unit} (a b : Ann)
+theorem mutability_ambiguous (ρ : RefTys) {ext : Bool} {P R : Parts Unit} (a b : Ann)
     (differ : a.mutability ≠ b.mutability) :
-    let t := Comp.fn ext () P R
+    let t := Part.fn ext () P R
     (t.annotate a).erase = (t.annotate b).erase ∧ (t.annotate a).spell = (t.annotate b).spell ∧
-      ∀ τ τ', (t.annotate a).sty ρ = some τ → (t.annotate b).sty ρ = some τ' → τ ≠ τ' := by
+      ∀ τ τ', (t.annotate a).sty ρ = some τ → (t.annotate b).sty ρ = some τ' →
+        τ ≠ τ' := by
   intro t
-  refine ⟨by rw [Comp.annotate_erase, Comp.annotate_erase], ?_, ?_⟩
-  · rw [← Comp.spell_erase, Comp.annotate_erase, ← Comp.spell_erase (t.annotate b),
-      Comp.annotate_erase]
+  refine ⟨by rw [Part.annotate_erase, Part.annotate_erase], ?_, ?_⟩
+  · rw [← Part.spell_erase, Part.annotate_erase, ← Part.spell_erase (t.annotate b),
+      Part.annotate_erase]
   · rintro τ _ ha hb rfl
     exact differ (sty_mutability ha hb)
 
