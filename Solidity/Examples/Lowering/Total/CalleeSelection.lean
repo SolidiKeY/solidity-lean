@@ -16,9 +16,7 @@ def fn (name : String) (callable : SourceCallable) (t : PrimTy) : FunDecl :=
   { sourceDecl := some { name, callable }, params := [("p", .prim t)], body := [] }
 
 def internal : SourceCallable := .local .internalFn
-/-- External-only role. -/
 def external : SourceCallable := .abi .externalFn .selected none
-
 /-- `f(uint)` and `f(bool)`: one name, distinct parameter types. -/
 def overload : List (Name × FunDecl) :=
   [("f_0", fn "f" internal .uint), ("f_1", fn "f" internal .bool)]
@@ -35,7 +33,6 @@ def prefixF : Source.Syn (.list (.part false)) :=
     (some .internal) none .nil false none .nil (.some (.block .nil))) .nil
 /-- Prefix `error f();`: named `f`, not a function. -/
 def errorF : Source.Syn (.list (.part false)) := .cons (.error "f" .nil) .nil
-
 /-- The context of the generated contract `C` over the assembled unit. -/
 def ctx (u : Source.Syn .unit) (locals : List (String × STy)) : Source.Ctx :=
   { env := u.env, scope := some "C", locals }
@@ -49,7 +46,6 @@ def selectOf (pre : Source.Syn (.list (.part false))) (fs : List (Name × FunDec
     (((ctx u locals).functions "f").filter (fits (ctx u locals) [.bool]) |>.length,
       (Source.inferCall (ctx u locals) "f" trueArg [.bool] (trueTyped _)).isSome)
 
-/-! Unique overload, ambiguity, external-only, local shadowing, prefix competitors. -/
 #guard selectOf .nil overload [] == some (1, true)
 #guard selectOf .nil twice [] == some (2, false)
 #guard selectOf .nil withExternal [] == some (1, true)
@@ -65,6 +61,10 @@ theorem uint_rejects {isBase mapFree} : ¬ Accepts isBase mapFree [.bool] (fn "f
   rintro ⟨ps, hps, hfit⟩
   cases slots_unique hps (.cons ⟨.uint, .int false 256 (by decide), rfl, rfl, rfl, .uint _ rfl⟩ .nil)
   exact Bool.false_ne_true hfit
+
+/-- Every callable entry declaration of `f` carries that name. -/
+example {o} (h : o ∈ callableEntries tablesS [] "C" overload "f") : o.name = "f" :=
+  (callableEntries_entry h).elim fun _ h => h.2.2.1
 
 /-- Unique overload: alias `f_1` selects `f(bool)`; `f(uint)` rejects a `bool`. -/
 example {u} (hu : Callee.withFunctions tablesS [] "C" .nil overload = some u) :
