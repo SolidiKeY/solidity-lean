@@ -1,4 +1,5 @@
 import Solidity.Correctness.Elab.Total
+import Solidity.Correctness.Elab.Congruence
 import Solidity.Syntax.Elab.CallOutput
 
 /-!
@@ -711,3 +712,62 @@ end Solidity.Examples.ElabTotal.Stmts
 /-- info: 'Solidity.ElabCallHeight.callbacks_call_output_height_raw' depends on axioms: [propext, Quot.sound] -/
 #guard_msgs in
 #print axioms Solidity.ElabCallHeight.callbacks_call_output_height_raw
+
+/-! ## Callback agreement (`Correctness/Elab/Congruence.lean`)
+
+A callback cut off the invocations a helper makes leaves the helper's result
+unchanged: the shape in which the knot's well-founded definition uses them. -/
+
+namespace Solidity.Examples.ElabTotal.Stmts
+
+section Agreement
+
+open Solidity Solidity.ElabAgree
+
+variable [FreshNames] (C : Contract)
+
+open Classical in
+/-- `stmt`, failing off the statements of `ss`. -/
+private noncomputable def onlyAt (stmt : RawStmt → ElabM (SProg C)) (ss : List RawStmt) :
+    RawStmt → ElabM (SProg C) :=
+  fun s => if s ∈ ss then stmt s else throw "cut"
+
+omit [FreshNames] in
+/-- A block does not see a cut of its statement callback off its own statements. -/
+example (stmt : RawStmt → ElabM (SProg C)) (ss : List RawStmt) :
+    elabStmtsPWith C (onlyAt C stmt ss) ss = elabStmtsPWith C stmt ss := by
+  apply eq_of_agree
+  intro sc
+  apply elabStmtsPWith_agree
+  intro s hs
+  simp only [onlyAt, hs, ↓reduceIte]
+  exact agree_refl _ _
+
+/-- Callbacks that agree at a scope give the binary-operator, eager-argument
+and call-argument helpers the same runs there, in either direction. -/
+example (H K : RawExpr → ElabM (SProg C × RawExpr)) (stmt : RawStmt → ElabM (SProg C))
+    (sc : ElabScope) (op : BinOp) (a b : RawExpr) (f : String)
+    (h : ∀ e, Agree sc (H e) (K e)) :
+    Agree sc (hoistBinopWith C K op a b) (hoistBinopWith C H op a b) ∧
+    Agree sc (eagerArgsWith C H [a, b]) (eagerArgsWith C K [a, b]) ∧
+    Agree sc (hoistCallArgsWith C H stmt f [a, b]) (hoistCallArgsWith C K stmt f [a, b]) :=
+  ⟨(hoistBinopWith_agree C H K sc op a b (h a) (h b)).symm,
+   eagerArgsWith_agree C H K sc [a, b] false [] fun e _ => h e,
+   hoistCallArgsWith_agree C H K stmt stmt sc f [a, b] (fun e _ => h e)
+     fun _ _ _ => agree_refl _ _⟩
+
+/-- An inlined body reads the block callback only in the callee's scope: two
+records whose blocks agree at every scope without deployment inline alike, and
+an output of one is an output of the other. -/
+example (rc rc' : ElabRec C) (sc : ElabScope) (f : String) (d : FunDecl)
+    (ρ : List (String × String)) (scope : List (Name × FunDecl)) (k₀ : Nat) (Γ Γf : ECtx)
+    (P : SProg C)
+    (h : ∀ sc' ss, sc'.top = false → Agree sc' (rc.elabStmtsP ss) (rc'.elabStmtsP ss))
+    (hP : Out sc (inlinedBody C rc f d ρ false false false scope k₀ Γ Γf) P) :
+    Out sc (inlinedBody C rc' f d ρ false false false scope k₀ Γ Γf) P :=
+  hP.of_agree ((inlinedBody_agree C rc rc' sc f d ρ false false false scope k₀ Γ Γf
+    fun body _ _ => h _ body rfl).trans (agree_refl _ _))
+
+end Agreement
+
+end Solidity.Examples.ElabTotal.Stmts
