@@ -350,6 +350,9 @@ same option to its monitor fixtures; no environment fallback enables it.
 | `Syntax/NumericV2.lean` | Additive full-domain signed-power range guard and statement/value pair; v1 remains unchanged. |
 | `Syntax/NumericV2Correct.lean` | Exact mathematical range/value, guard-before-value execution and full Source arithmetic panic-payload proofs. |
 | `Syntax/NumericV2Controls.lean` | Magnitude-overflow, signed-boundary, huge-exponent unit and unchanged successful-state regressions. |
+| `Goals/Panic.lean` | `runCarriesPanicCodes`: conjunction of `panicRunOutcomes`, `panicCodeProvenance` and `panicSourceAssociation` (plan w3b-panic-bind). |
+| `Correctness/Panic/Main.lean` | `Semantics.run_panic_codes` assembles the three component proofs; guarded axiom pin permits only `propext`, `Classical.choice` and `Quot.sound`. |
+| `Examples/Goals/Panic.lean` | Roadmap pin and example of `runCarriesPanicCodes` proved by `Semantics.run_panic_codes`. |
 | `Correctness/Panic/Guards/Arith.lean` | Origin equations for the remaining arithmetic and assertion panic guards: signed and `%` divisors, the `addmod`/`mulmod` modulus, the `assert` arm in both elaboration modes, and the `0x11` range guards of `+`, `-`, unsigned `*`, signed `/` and negation, each with its producer origin, V1 failure and emitted panic bytes. |
 | `Examples/Panic/GuardsArith.lean` | Concrete failing evaluations of each guard family: signed division by zero, `x % 0`, `mulmod` by zero, a false `assert` in both modes, `x++` at the maximum, `MIN / -1` and `-MIN`, with the solc code derived from the site. |
 | `Correctness/Panic/Guards/State.lean` | Origin equations of the generated state guards: storage and memory index (`Checked.idxPG`, `Checked.mIdxPG`, `0x32`) and empty pop (`0x31`), each with its guard list, producer origin, V1 revert and emitted panic bytes. |
