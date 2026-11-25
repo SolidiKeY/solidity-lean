@@ -57,13 +57,23 @@ def fields {D : Source.Layout} (read : Source.SPath → Option ((τ : Source.STy
   | _, .nil => True
   | _, .cons (f := x) v rest => field read x v ∧ fields read rest
 
+/-- The balance Source observes for the running account (`Source.evalE` at
+`a.balance`): the account's own while it has code, the ledger's otherwise. -/
+def ownBalance {E : Source.Env} (G : Source.Glob E) (F : Source.Fr) (st : Source.St E) :
+    Roadmap.Word :=
+  match (st.ex.world.accounts F.this).code with
+  | some _ => Source.Monetary.wordView (st.ex.world.accounts F.this).balance
+  | none => G.fixed.ledger G.balance0 st.events F.this
+
 /-- Globals: storage of the running account, `msg.value`, the timestamp, the
-caller, and a Source frame that may write and checks arithmetic, as the model always does. -/
+caller, the running account's address and observed balance, and a Source frame
+that may write and checks arithmetic, as the model always does. -/
 def glob (E : Source.Env) (C : Contract) (G : Source.Glob E) (F : Source.Fr) (st : Source.St E)
     (σ : State C []) : Prop :=
   fields (fun p => ((st.ex.world.accounts F.this).storage.read p).map fun v => ⟨_, v⟩) σ.storage ∧
   σ.tx.msgValue.1 = (F.value.val : Int) ∧ σ.tx.timestamp.1 = (G.timestamp.val : Int) ∧
   σ.tx.msgSender.1 = (F.sender.val : Int) ∧
+  σ.tx.selfAddress.1 = (F.this.val : Int) ∧ σ.selfBalance.1 = ((ownBalance G F st).val : Int) ∧
   F.static = false ∧ F.checked = true
 
 end Relation
@@ -386,10 +396,12 @@ theorem initialMatchingAt (sound : Sound T) : InitialMatching rel T.decode := by
       obtain ⟨p, τ, rfl, prim, cell⟩ := sound.cell hu x U mem
       obtain ⟨v, hv⟩ := read_prim _ _ prim cell
       exact ⟨p, rfl, τ, v, prim, hv⟩
-  exact ⟨⟨storage, [], Heap.empty, env, [], PrimTy.dflt .uint,
+  exact ⟨⟨storage, [], Heap.empty, env, [],
+      wordDenote (Relation.ownBalance e.glob e.frame e.initial.2),
       { msgValue := wordDenote e.frame.value, timestamp := wordDenote e.glob.timestamp,
-        msgSender := ⟨e.frame.sender.val, address_inRange e.frame.sender⟩ }⟩,
-    related, hstorage, rfl, rfl, rfl, admitted.2.2.1, admitted.2.2.2⟩
+        msgSender := ⟨e.frame.sender.val, address_inRange e.frame.sender⟩,
+        selfAddress := ⟨e.frame.this.val, address_inRange e.frame.this⟩ }⟩,
+    related, hstorage, rfl, rfl, rfl, rfl, rfl, admitted.2.2.1, admitted.2.2.2⟩
 
 /-! ## The width-aware version is sound -/
 

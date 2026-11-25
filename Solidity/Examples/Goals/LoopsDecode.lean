@@ -5,7 +5,9 @@ import Solidity.Correctness.Lowering.Total.Decode.Callee.Declarations
 import Solidity.Correctness.Lowering.Total.Decode.Callee.Metadata
 import Solidity.Correctness.Lowering.Total.Versions.CalleeBinding.Resolved
 import Solidity.Source.Elaborate
-import Solidity.Correctness.Lowering.Total.Versions
+import Solidity.Correctness.Lowering.Total.Versions.Self
+import Solidity.Correctness.Lowering.Total.Decode.Casts
+import Solidity.Correctness.Lowering.Total.CallSpellExt
 import Solidity.Correctness.Lowering.Total.Decode.BytesLiteral.Evaluation
 import Solidity.Correctness.Lowering.Total.Decode.WithExpr
 import Solidity.Correctness.Lowering.Total.Decode.Callee.Functions
@@ -331,6 +333,107 @@ example : Version.Sound Decode.tablesS := Version.soundS
 example : Simulation.InitialMatching Version.rel Decode.tablesS.decode :=
   Version.initialMatchingAt Version.soundS
 example : FullDomain Version.boundaryS := Version.boundaryAt_fullDomain _ _
+
+/-! ### The self-aware decoder version and casts
+
+`Decode.tablesT` reads the own address and balance, which the state relation
+relates; `Decode.Casts` reads casts written as calls. -/
+section SelfAndCasts
+open Decode Version
+open Source (Syn)
+
+/-- The own-address read types as an address and not as a `uint`, the own
+balance the other way round; the caller-aware version reads neither. -/
+example : (tablesT.decode (addressRequest [.assign (.name "a") (.env .selfAddress)])).isSome = true ∧
+    tablesT.decode (addressRequest [.assign (.name "n") (.env .selfAddress)]) = none ∧
+    (tablesT.decode (addressRequest [.assign (.name "n") (.env .selfBalance)])).isSome = true ∧
+    tablesT.decode (addressRequest [.assign (.name "a") (.env .selfBalance)]) = none ∧
+    tablesS.decode (addressRequest [.assign (.name "n") (.env .selfBalance)]) = none :=
+  ⟨rfl, rfl, rfl, rfl, rfl⟩
+/-- Both reads inside a loop condition and a comparison with the caller. -/
+example : (tablesT.decode (addressRequest
+    [.whileLoop {} (.binop .lt (.name "n") (.env .selfBalance))
+      [.require (.binop .neB (.env .msgSender) (.env .selfAddress)),
+       .incDec .postInc (.name "n")]])).isSome = true := rfl
+example (k : EnvKey) : (envT k).isSome = true := envT_total k
+example : envT .selfAddress = some thisAddress ∧ envT .timestamp = envS .timestamp := ⟨rfl, rfl⟩
+/-- Under related globals the model state's own address and balance are
+value-related to the Source frame's own address and observed balance. -/
+example {E : Source.Env} {C : Contract} {G : Source.Glob E} {F : Source.Fr} {st : Source.St E}
+    {σ : State C []} (h : (rel E C).glob G F st σ) :
+    Relation.ValRel E.layout (.address false) .uint (.address F.this) σ.tx.selfAddress ∧
+    Relation.ValRel E.layout (.int Source.IntTy.u256) .uint
+      (Source.intWrap Source.IntTy.u256 (Relation.ownBalance G F st).val) σ.selfBalance :=
+  ⟨selfAddress_faithful h, selfBalance_faithful h⟩
+/-- Inside a contract both spellings are typed, and their resolved forms
+evaluate to exactly those Source values, changing neither locals nor state. -/
+example (Γ : Source.Ctx) {c : String} (builtin : Γ.resolve "this" = some (.builtin .this))
+    (scope : Γ.scope = some c) (G : Source.Glob Γ.env) (F : Source.Fr) (k : Nat)
+    (l : Source.Locals Γ.env.layout Γ.tys) (s : Source.St Γ.env) :
+    Source.evalE G F (k + 2) (Self.typedAddress Γ builtin scope).toR =
+        pure (.val (.address F.this)) ∧
+      (Source.evalE G F (k + 3) (Self.typedBalance Γ builtin scope).toR).run.run (l, s) =
+        (.ok (.val (Source.intWrap Source.IntTy.u256 (Relation.ownBalance G F s).val)), (l, s)) :=
+  ⟨Self.eval_address Γ builtin scope G F k, Self.eval_balance Γ builtin scope G F k l s⟩
+example : Simulation.InitialMatching rel tablesT.decode ∧ FullDomain boundaryT :=
+  ⟨initialMatchingAt soundT, boundaryAt_fullDomain _ _⟩
+
+/- Casts (evaluated, not kernel-checked: names are read by string functions).
+`uint8 m = uint8(n)`, `a = address(b)`, a nested cast in a loop condition and
+the surface `address(this)` decode; without casts the first has no reading; a
+conversion Source refuses and a cast name with two arguments stay gaps. -/
+#guard (Casts.decode tablesT [] (addressRequest
+    [.decl (.named "uint8") "m" (some (.call "uint8" [.name "n"])),
+     .assign (.name "a") (.call "address" [.name "b"]),
+     .whileLoop {} (.binop .lt (.call "uint16" [.call "uint8" [.name "n"]]) (.num 7))
+       [.incDec .postInc (.name "n")],
+     .assign (.name "a") (.call "address" [.env .selfAddress])])).isSome &&
+  (tablesT.decode (addressRequest
+    [.decl (.named "uint8") "m" (some (.call "uint8" [.name "n"]))])).isNone &&
+  (Casts.decode tablesT [] (addressRequest
+    [.assign (.name "a") (.call "address" [.name "n"])])).isNone &&
+  (Casts.decode tablesT [] (addressRequest
+    [.assign (.name "n") (.call "uint8" [.name "n", .name "n"])])).isNone
+/- With the bytes-literal registry the same decoder reads a `bytes4` literal,
+a `bytes4(…)` cast of a `bytes2` local and the own balance together. -/
+#guard (Casts.decode tablesT CallSpellExt.registry1
+  { addressRequest [] with input := { (addressRequest []).input with
+      raw := [.assign (.name "w") (.call bytesLitName [.num 222, .num 173]),
+        .assign (.name "w") (.call "bytes4" [.name "h"]),
+        .require (.binop .lt (.num 0) (.env .selfBalance))]
+      before := ⟨([("w", .val .uint 32 [("#bytes", 4)]), ("h", .val .uint 16 [("#bytes", 2)])], 1),
+        {}⟩ } }).isSome
+/- The cast names: integers, `address`, `bytesN`; nothing else. -/
+#guard (Casts.target "uint8").isSome && (Casts.target "int").isSome &&
+  (Casts.target "bytes4").isSome && (Casts.target "address").isSome &&
+  (Casts.target "f").isNone && (Casts.target "uint7").isNone && (Casts.target "bool").isNone &&
+  (Casts.intTarget (.bool, 8)).isNone && Casts.isCast (.call "uint8" [.name "n"]) &&
+  !Casts.isCast (.call "f" [.name "n"])
+/-- The equation at a cast, and the cast decoder on cast-free input. -/
+example : Casts.single (.cons (.ident "n") .nil) = some (.ident "n") := rfl
+example {T : Tables} {R : CallSpellExt.Registry} {f : String} {conv : Syn .expr → Syn .expr}
+    (a : RawExpr) (unclaimed : R.lookup f = none) (cast : Casts.target f = some conv) :
+    Casts.expr T R (.call f [a]) = (Casts.expr T R a).map conv :=
+  Casts.expr_cast a unclaimed cast
+example {T : Tables} {R : CallSpellExt.Registry} (e : RawExpr) (es : List RawExpr)
+    (h : Casts.CastFree e) (hs : ∀ e ∈ es, Casts.CastFree e) :
+    Casts.expr T R e = Calls.expr T R e ∧ Casts.exprs T R es = Calls.exprs T R es ∧
+      Casts.components T R es = Calls.components T R es :=
+  ⟨Casts.conservative e h, Casts.conservative_args es hs, Casts.conservative_components es hs⟩
+example : Casts.CastFree (.binop .add (.name "n") (.num 1)) := by
+  simp [Casts.CastFree, RawExpr.any, Casts.isCast]
+/-- Typing, and the arithmetic of integer targets: a word holding `300` wraps
+to `44` at `uint8`, one holding `200` to `-56` at `int8`. -/
+example {Γ : Source.Ctx} {a : Syn .expr} (argument : Source.Typed Γ a (.address false)) :
+    Source.Typed Γ (Casts.conversion .address (by decide) a) (.address false) :=
+  Casts.typed .address (by decide) argument rfl
+example : Source.wrapBits false 8 300 = 44 ∧ Source.wrapBits true 8 200 = -56 :=
+  ⟨(Casts.unsigned_value (by decide) 300).trans (by decide),
+    (Casts.signed_value (by decide) 200).trans (by decide)⟩
+example {T : Tables} {R : CallSpellExt.Registry} {r : Request} {s : SourceProgram}
+    (h : Casts.decode T R r = some s) : plain r = true := Casts.decode_guard h
+
+end SelfAndCasts
 
 
 /-- Supplementary primitive representation check; simulation is separate. -/
