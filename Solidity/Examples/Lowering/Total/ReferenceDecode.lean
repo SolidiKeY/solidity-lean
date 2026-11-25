@@ -1,6 +1,7 @@
 import Solidity.Correctness.Lowering.Total.ReferenceDecode
 
-/-! The reference decoder on one signature, its Source types, named errors. -/
+/-! The reference decoder on one signature, its Source types, named errors, and
+the same spellings from retained types as read. -/
 namespace Solidity.Examples.Lowering.Total.ReferenceDecode
 open Solidity.Correctness.Lowering.Total.ReferenceDecode Source
 
@@ -73,4 +74,48 @@ example : signature pairs (r .uint true false) = .error (.locationOnValueReturn 
 example : signature { vars := [], structs := [("A", "A{a:uint}"), ("B", "A{a:uint}")] }
     (r (.ref (.struct "A{a:uint}")) true false) =
     .error (.ambiguousStruct "r" "A{a:uint}" ["A", "B"]) := rfl
+
+/-! Types as read. Leaf names are read by string functions the kernel does not
+unfold, so values are evaluated checks. -/
+
+-- `uint8[3][]`: the nesting, the length and the width from the names alone.
+#guard match rawType pairs .memory (.array (.fixed (.named "uint8") 3)) with
+  | .ok (.array (.array (.elem (.int false 8 _)) (.some (.lit (.num (.dec 3 0 0))))) .none) => true
+  | _ => false
+-- `bytes4[2]` keeps its byte width.
+#guard match rawType pairs .calldata (.fixed (.named "bytes4") 2) with
+  | .ok (.array (.elem (.fixedBytes 4 _)) (.some (.lit (.num (.dec 2 0 0))))) => true
+  | _ => false
+-- `mapping(address => Pair[])` in storage: the struct by its written name.
+#guard match rawType pairs .storage (.mapping (.named "address") (.array (.named "Pair"))) with
+  | .ok (.mapping (.elem .address _) none (.array (.userType ⟨"Pair", []⟩) .none) none) => true
+  | _ => false
+
+/-- `mapping(address => Pair[])`: its Source type once `Pair` resolves. -/
+example (E : Source.Env) (d : Source.DeclName) (h : Resolved E (some "C") "Pair" d)
+    (t : Syn .typeName)
+    (ok : rawType pairs .storage (.mapping (.named "address") (.array (.named "Pair"))) = .ok t) :
+    ∃ τ, t.tys E (some "C") .storage = some [τ] ∧
+      RawRep pairs E (some "C") .storage (.mapping (.named "address") (.array (.named "Pair"))) τ :=
+  rawType_typed _ .storage t ok fun s ms _ => ⟨d, by simp_all [rawNames]⟩
+
+/-- `Pair` as read is spelled as the reference decoder spells its table type. -/
+example {t : Syn .typeName} (ok : rawLeaf pairs "Pair" = .ok t) (he : rawElem "Pair" = none) :
+    spellRef pairs [] "p" .memory (.struct "Pair{a:uint;b:uint8}") = .ok t :=
+  rawLeaf_spellRef ok he rfl rfl
+
+def withEnum : Contract := { vars := [], enums := [("Color", ["Red", "Green"])] }
+-- `bytes`, an enum, a struct key, a mapping in memory, an unknown name, `bool[0]`.
+#guard match rawType pairs .memory (.named "bytes") with
+  | .error (.unsupportedName "bytes") => true | _ => false
+#guard match rawType withEnum .memory (.array (.named "Color")) with
+  | .error (.unsupportedName "Color") => true | _ => false
+#guard match rawType pairs .storage (.mapping (.named "Pair") (.named "uint")) with
+  | .error (.unsupportedKey (.named "Pair")) => true | _ => false
+#guard match rawType pairs .memory (.mapping (.named "uint") (.named "uint")) with
+  | .error (.mappingOutsideStorage .memory) => true | _ => false
+#guard match rawType pairs .memory (.named "Missing") with
+  | .error (.unknownName "Missing") => true | _ => false
+#guard match rawType pairs .memory (.fixed (.named "bool") 0) with
+  | .error .zeroLength => true | _ => false
 end Solidity.Examples.Lowering.Total.ReferenceDecode
