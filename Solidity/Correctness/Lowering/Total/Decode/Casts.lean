@@ -4,41 +4,28 @@ import Solidity.Source.Eval
 /-!
 # Casts written as calls
 
-The model writes an explicit conversion as a raw call of the type's name:
-`uintN(e)`, `intN(e)`, `bytesN(e)` and `address(e)` (which is also how it
-writes `payable(e)`, and `address(this)` is `address` of the own-address read). The landed expression decoders spell every
-raw call as a Source call of an identifier, so a cast was a gap: no Source
-identifier is named `uint8`.
+The model writes a conversion as a raw call of the type's name: `uintN(e)`,
+`intN(e)`, `bytesN(e)`, `address(e)` (also its `payable(e)`; `address(this)`
+is `address` of the own-address read). `Casts.expr` is `Calls.expr` with one
+more case: an unclaimed one-argument call of a cast name (`target`) is the
+Source explicit conversion `T(e)`; Source typing (`STy.explicit`) decides
+whether it is allowed.
 
-`Casts.expr` is the registered-call decoder (`Calls.expr`) with one more
-case: an unclaimed call of a cast name with exactly one argument is the Source
-explicit conversion `T(e)` to that elementary type. Whether the conversion is
-allowed is decided by Source typing (`STy.explicit`), not here.
+* `expr_cast`: the equation at a cast; `conservative`: cast-free expressions
+  are spelled as before; `typed`: the spelling has the target type wherever
+  Source allows the conversion; `Casts.decode`: the request decoder over it,
+  with the unchanged guard.
+* `unsigned_value`, `signed_value`: integer targets, as arithmetic. Source
+  converts by wrapping (`convExplicitVal`); the wrapped number equals the
+  number denoted by the formulas `lowBits` and `signedAt` write. The formulas
+  are transcribed: the lemmas mention neither function nor their evaluation,
+  and do not cover a literal argument (checked by `fitCheck` instead).
 
-* `target`: the cast names and their types.
-* `expr_cast`: the equation at a cast; `conservative`: an expression with no
-  one-argument call of a cast name is spelled as before.
-* `typed`: the spelling has the target type wherever Source allows the
-  explicit conversion.
-* `convert_int`, `unsigned_value`, `signed_value`: value faithfulness for
-  integer targets, as arithmetic. Source converts by wrapping
-  (`Source.intWrap`); the wrapped number equals the number denoted by the
-  formulas the model's `lowBits` (the word modulo `2^N`) and `signedAt`
-  (moved by `2^(N-1)`, cut to `N` bits, moved back) write. The formulas are
-  transcribed here; the lemmas do not mention `lowBits`/`signedAt` or their
-  evaluation, and a literal argument (which the model checks with `fitCheck`
-  instead) is not covered by them.
-* `Casts.decode`: the request decoder over this expression decoder, with the
-  unchanged request guard.
-
-Not shown: that the model's elaborated cast (a capture, `castCapture`) runs to
-that number: part of the simulation obligation. `payable(e)` is read as
-`address(e)`, as `address payable` is read as `address`. A cast the model
-accepts and Source refuses (`STy.explicit` is solc's rule; for example the
-model reduces `address(uint256)` modulo `2^160`) stays a gap, and so does a
-cast among the raw arguments of a registered call, which its registered
-spelling reads, not this decoder. This decoder has no state relation, initial
-matching or boundary of its own. No goal is stated.
+Not shown: that the model's elaborated cast (`castCapture`) runs to that
+number (simulation obligation). Gaps: a cast the model accepts and Source
+refuses (the model reduces `address(uint256)` modulo `2^160`), and a cast
+among the raw arguments of a registered call. This decoder has no state
+relation, initial matching or boundary of its own. No goal is stated.
 -/
 namespace Solidity.Correctness.Lowering.Total.Decode.Casts
 
@@ -73,8 +60,7 @@ def single : Syn (.list .expr) → Option (Syn .expr)
   | .cons a .nil => some a
   | _ => none
 
-/-- An unclaimed call from its spelled arguments: the conversion for a cast
-name with one argument, the Source call of the identifier otherwise. -/
+/-- An unclaimed call: a conversion for a one-argument cast name, else a call. -/
 def call (f : String) (args : List RawExpr) (spelled : Option (Syn (.list .expr))) :
     Option (Syn .expr) :=
   match target f, args with
@@ -160,10 +146,7 @@ theorem conservative : (e : RawExpr) → CastFree e → expr T R e = Calls.expr 
   | .index a b, h | .binop _ a b, h | .assign a b, h | .opAssign _ a b, h => by
       simp only [CastFree, RawExpr.any, isCast, Bool.false_or, Bool.or_eq_false_iff] at h
       simp [expr, Calls.expr, conservative a h.1, conservative b h.2]
-  | .unop op a, h => by
-      simp only [CastFree, RawExpr.any, isCast, Bool.false_or] at h
-      cases op <;> simp [expr, Calls.expr, conservative a h]
-  | .incDec op a, h => by
+  | .unop op a, h | .incDec op a, h => by
       simp only [CastFree, RawExpr.any, isCast, Bool.false_or] at h
       cases op <;> simp [expr, Calls.expr, conservative a h]
   | .ternary a b c, h | .modular _ a b c, h => by
@@ -211,22 +194,14 @@ end
 
 /-! ## Typing and value faithfulness -/
 
-/-- The conversion has the target type wherever Source allows the explicit
-conversion from the argument's type. -/
+/-- The conversion has the target type wherever Source allows it. -/
 def typed {Γ : Source.Ctx} {a : Syn .expr} {σ : Source.STy} (el : Source.Elem)
     (h : el ≠ .addressPayable) (argument : Source.Typed Γ a σ)
     (allowed : σ.explicit Γ.isBase Γ.mapFree (el.ty σ.convLoc) = true) :
     Source.Typed Γ (conversion el h a) (el.ty σ.convLoc) :=
   .convElem argument rfl allowed
 
-/-- Source converts an integer to an integer type by wrapping. -/
-theorem convert_int {D : Source.Layout} (s t : Source.IntTy) (x : Int)
-    (h : s.lo ≤ x ∧ x ≤ s.hi) :
-    Source.convExplicitVal (D := D) (.int t) (.int (t := s) x h) = pure (Source.intWrap t x) :=
-  rfl
-
-/-- **Unsigned targets**: the wrapped number is the argument's word modulo
-`2^N`, the formula `lowBits` writes. -/
+/-- **Unsigned targets** wrap to the word modulo `2^N` (the `lowBits` formula). -/
 theorem unsigned_value {n : Nat} (width : n ≤ 256) (x : Int) :
     Source.wrapBits false n x = (x % ((2 ^ 256 : Nat) : Int)) % ((2 ^ n : Nat) : Int) := by
   have divides : ((2 ^ n : Nat) : Int) ∣ ((2 ^ 256 : Nat) : Int) :=
@@ -262,8 +237,7 @@ theorem signed_value {n : Nat} (width : 1 ≤ n) (x : Int) :
   · rw [Int.emod_eq_of_lt (by omega) (by omega)]
     omega
 
-/-- **The request decoder with casts**: the unchanged request guard, context
-and local decoding and Source inference over `Casts.expr`. -/
+/-- **The request decoder with casts**: `WithExpr.decode` over `Casts.expr`. -/
 def decode (T : Tables) (R : Registry) : Request → Option SourceProgram :=
   WithExpr.decode T (expr T R)
 

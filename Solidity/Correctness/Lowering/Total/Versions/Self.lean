@@ -5,32 +5,26 @@ import Solidity.Source.Eval
 /-!
 # The self-aware decoder version: `address(this)` and its balance
 
-`Decode.tablesT` spells the model's own address and own balance. Here:
-
-* `soundT`, `boundaryT`: the version is sound, so total initial matching holds
-  for it (`Version.initialMatchingAt`), and it has its boundary.
-* `Self.typedAddress`, `Self.typedBalance`: inside a contract, where `this` is
-  the builtin, the spellings have Source types `address` and `uint256`.
-* `Self.eval_address`, `Self.eval_balance`: their resolved forms evaluate to
-  the frame's own address and to the balance Source observes for it
-  (`Relation.ownBalance`), leaving the Source state unchanged.
+* `soundT`, `boundaryT`: `Decode.tablesT` is sound (so total initial matching
+  holds for it) and has its boundary.
+* `Self.typedAddress`, `Self.typedBalance`, `Self.eval_address`,
+  `Self.eval_balance`: inside a contract the two spellings are typed, and
+  their resolved forms evaluate to the frame's own address and to the balance
+  Source observes for it (`Relation.ownBalance`), changing no state.
 * `selfAddress_faithful`, `selfBalance_faithful`: under related globals the
-  model state's own address and own balance (`σ.tx.selfAddress`,
-  `σ.selfBalance`, the components the model's two reads denote) are
-  value-related to those Source results.
+  model state's own address and balance (the components the model's two reads
+  denote) are value-related to those Source results.
 
-Not shown here: that the model's elaborated reads evaluate to those state
-components; that a run keeps the two globals related (the simulation
-obligation, which the two clauses add to for every version: the ledger
-balance depends on the Source event history); and the remaining gaps of every version listed in
-`Total.Versions`. No goal is stated.
+Not shown: that the model's elaborated reads evaluate to those components, and
+that a run keeps the two globals related (the simulation obligation, which the
+two clauses add to for every version: the ledger balance depends on the Source
+event history). No goal is stated.
 -/
 namespace Solidity.Correctness.Lowering.Total
 
 namespace Version
 
-/-- The self-aware tables are sound: they type locals and cells as the
-bytes-aware ones do. -/
+/-- The self-aware tables type locals and cells as the bytes-aware ones do. -/
 theorem soundT : Sound Decode.tablesT := ⟨soundB.localTy, soundB.cell⟩
 
 /-- The self-aware version's boundary. -/
@@ -50,8 +44,7 @@ def typedBalance (Γ : Source.Ctx) {c : String}
     Source.Typed Γ Decode.thisBalance (.int Source.IntTy.u256) :=
   .balance (typedAddress Γ builtin scope)
 
-/-- The resolved `address(this)` evaluates to the frame's own address at every
-sufficient horizon, in any state, changing nothing. -/
+/-- The resolved `address(this)` evaluates to the frame's own address. -/
 theorem eval_address (Γ : Source.Ctx) {c : String}
     (builtin : Γ.resolve "this" = some (.builtin .this)) (scope : Γ.scope = some c)
     (G : Source.Glob Γ.env) (F : Source.Fr) (k : Nat) :
@@ -60,8 +53,7 @@ theorem eval_address (Γ : Source.Ctx) {c : String}
   simp only [typedAddress, Source.Typed.toR, Source.evalE, pure_bind]
   rfl
 
-/-- The resolved `address(this).balance` evaluates, from any locals and state,
-to the balance Source observes for the running account, changing nothing. -/
+/-- The resolved `address(this).balance` evaluates to the observed balance. -/
 theorem eval_balance (Γ : Source.Ctx) {c : String}
     (builtin : Γ.resolve "this" = some (.builtin .this)) (scope : Γ.scope = some c)
     (G : Source.Glob Γ.env) (F : Source.Fr) (k : Nat)
