@@ -1,3 +1,4 @@
+import Solidity.Correctness.Lowering.Total.Versions.CalleeBinding.Functions
 import Solidity.Correctness.Lowering.Total.Decode.Callee.Units
 import Solidity.Correctness.Lowering.Total.Decode.Callee.Declarations
 import Solidity.Correctness.Lowering.Total.Decode.Callee.Metadata
@@ -718,5 +719,24 @@ example {u : Source.Syn .unit}
     (u.decls.drop (1 + (statePrefix.collect (some "C")).length)).map some =
       [Decode.Callee.fromMetadata Decode.tablesB CallSpellExt.registry1 "C" stateReader] :=
   Decode.Callee.withFunctions_tail h
+
+/-! Relative function selection skips the complete supplied declaration prefix. -/
+#guard_msgs in
+#eval (show IO Unit from do
+  let bind := Version.CalleeBinding.fromFunctions Decode.tablesB CallSpellExt.registry1
+    { pipeline := .legacy } "C" statePrefix [("modelReader", stateReader)]
+  let actual := (bind 0).map fun s => (s.declaration.name, s.body.ps.length, s.body.rs.length)
+  unless actual == some ("sourceIdentity", 0, 1) do
+    throw (IO.userError "relative function selection did not bind the translated model entry")
+  unless (bind 1).isNone do
+    throw (IO.userError "out-of-range relative function selection succeeded"))
+
+example {s : Version.CalleeBinding.Output}
+    (h : Version.CalleeBinding.fromFunctions Decode.tablesB CallSpellExt.registry1
+      { pipeline := .legacy } "C" statePrefix [("modelReader", stateReader)] 0 = some s) :
+    Decode.Callee.fromMetadata Decode.tablesB CallSpellExt.registry1 "C" stateReader =
+      some s.declaration := by
+  obtain ⟨_, _, _, hd, _, _⟩ := Version.CalleeBinding.fromFunctions_bound h (by rfl)
+  exact hd
 
 end Solidity.Examples.Goals.LoopsDecode

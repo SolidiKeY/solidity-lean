@@ -2538,11 +2538,13 @@ import Solidity.Correctness.Lowering.Total.EnumDecode
 import Solidity.Correctness.Lowering.Total.EnumUseDecode
 import Solidity.Correctness.Lowering.Total.Main
 import Solidity.Correctness.Lowering.Total.Production
+import Solidity.Correctness.Lowering.Total.ReferenceDecode
 import Solidity.Correctness.Lowering.Total.Relation
 import Solidity.Correctness.Lowering.Total.Spells
 import Solidity.Correctness.Lowering.Total.TransientDecode
 import Solidity.Correctness.Lowering.Total.Versions
 import Solidity.Correctness.Lowering.Total.Versions.CalleeBinding
+import Solidity.Correctness.Lowering.Total.Versions.CalleeBinding.Functions
 import Solidity.Correctness.Lowering.Total.Versions.CalleeBinding.Resolved
 import Solidity.Correctness.Lowering.Total.Versions.Marked
 import Solidity.Correctness.Lowering.Total.Versions.Matching
