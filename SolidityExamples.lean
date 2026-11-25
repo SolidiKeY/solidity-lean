@@ -230,6 +230,7 @@ import Solidity.Examples.Lowering.Total.FunctionTypeRefs
 import Solidity.Examples.Lowering.Total.ReferenceDecode
 import Solidity.Examples.Lowering.Total.ReferenceStateDecode
 import Solidity.Examples.Lowering.Total.ReferenceStatePlacement
+import Solidity.Examples.Lowering.Total.StructDecode
 import Solidity.Examples.Lowering.Total.TransientDecode
 import Solidity.Examples.MemoryFloor
 import Solidity.Examples.MemoryInstantiation
