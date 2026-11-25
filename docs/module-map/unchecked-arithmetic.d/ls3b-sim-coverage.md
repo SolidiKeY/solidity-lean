@@ -1,0 +1,13 @@
+| `Correctness/Lowering/Sim/Coverage/Obstruction.lean` | Exact accepted empty production run under `elabKernelTotal` refuting frozen v1 diagram coverage: placement may use an unrelated context. |
+| `Correctness/Lowering/Sim/Coverage/ProductionV2.lean` | Additive caller-placed production and coverage vocabulary, preserving v1 receipts and unchanged acceptance. |
+| `Correctness/Lowering/Sim/Coverage/SpellingObstruction.lean` | Exact accepted, caller-placed empty run in an unchecked scope refuting coverage with the frozen spelling relation. |
+| `Examples/Lowering/Sim/Coverage.lean` | Checks both coverage obstructions and the versioned receipt projection, plus independent decoding, alignment, actual lowering and program-acceptance facts for the existing smoke. |
+| `Correctness/Lowering/Sim/Coverage/Alignment.lean` | Derives an aligned context map from existing Source spelling using the decoder owner’s primitive-locals theorem, independently of the restricted coverage predicate. |
+| `Correctness/Lowering/Sim/Coverage/LoweringReceipt.lean` | Converts successful finite lowering derivations into actual standalone lowering receipts, preserving all state; no elaboration-success claim. |
+| `Correctness/Lowering/Sim/Coverage/BooleanDomain.lean` | H1361 syntax-defined unbounded Boolean control domain for the restricted coverage milestone; decoder completeness remains a separate obligation. |
+| `Correctness/Lowering/Sim/Coverage/BooleanSpelling.lean` | Proves existing raw-syntax decoder success for the H1361 grammar via spelling; Source inference and resolved-program decoding remain separate. |
+| `Correctness/Lowering/Sim/Coverage/BooleanLocals.lean` | Resolves Boolean caller locals and proves actual Source lvalue and expression inference on bound names, including repeated names. |
+| `Correctness/Lowering/Sim/Coverage/BooleanExprInference.lean` | Proves actual fuel-bounded Source inference completeness for every expression in the H1361 Boolean grammar, using the existing spelling relation. |
+| `Correctness/Lowering/Sim/Coverage/BooleanStmtInference.lean` | Actual Source statement/sequence inference for the H1361 Boolean grammar, preserving locals and the decoder’s singleton unbracing rule. |
+| `Correctness/Lowering/Sim/Coverage/BooleanDecoding.lean` | Proves full existing-decoder success on approved Boolean inputs, with a singleton resolved statement; no decoder or inference premise is added. |
+| `Correctness/Lowering/Sim/Coverage/BooleanCoverage.lean` | Additive H1184 restricted v2 coverage under the H1361 syntax boundary and H1182 placement, retaining original acceptance; actual production nonvacuity remains separate. |

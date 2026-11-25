@@ -196,7 +196,7 @@ theorem argument_lt_call (f : String) {a : RawExpr} {args : List RawExpr} (h : a
   omega
 
 /-- A selector actually emitted by the helper is below its source call. -/
-theorem selector_height_lt (C : Contract) (Γ : ECtx) (f : String) (args : List RawExpr)
+theorem selector_height_lt_with_names [FreshNames] (C : Contract) (Γ : ECtx) (f : String) (args : List RawExpr)
     (sel : RawExpr) (rest : List RawExpr)
     (h : encodeSelector? C Γ f args = .ok (some (sel,rest))) :
     height sel < height (.call f args) := by
@@ -218,6 +218,12 @@ theorem selector_height_lt (C : Contract) (Γ : ECtx) (f : String) (args : List 
         | (simp only [height, cost_encodeCall]; omega))
   · cases h
 
+theorem selector_height_lt (C : Contract) (Γ : ECtx) (f : String) (args : List RawExpr)
+    (sel : RawExpr) (rest : List RawExpr)
+    (h : encodeSelector? C Γ f args = .ok (some (sel,rest))) :
+    height sel < height (.call f args) :=
+  selector_height_lt_with_names C Γ f args sel rest h
+
 private theorem tuple_arg_height_le (t a : RawExpr)
     (h : a ∈ (match t with | .tuple args => args | x => [x])) : height a ≤ height t := by
   cases t <;> try (simp only [List.mem_singleton] at h; subst a; exact Nat.le_refl _)
@@ -236,7 +242,7 @@ private theorem second_tuple_arg_lt (g t a : RawExpr)
   omega
 
 /-- Every remaining argument actually emitted by selector extraction is smaller. -/
-theorem selector_args_height_lt (C : Contract) (Γ : ECtx) (f : String) (args : List RawExpr)
+theorem selector_args_height_lt_with_names [FreshNames] (C : Contract) (Γ : ECtx) (f : String) (args : List RawExpr)
     (sel : RawExpr) (rest : List RawExpr)
     (h : encodeSelector? C Γ f args = .ok (some (sel,rest))) :
     ∀ a, a ∈ rest → height a < height (.call f args) := by
@@ -260,6 +266,12 @@ theorem selector_args_height_lt (C : Contract) (Γ : ECtx) (f : String) (args : 
         exact argument_lt_call _ (List.mem_cons.mpr
           (Or.inr (List.mem_cons.mpr (Or.inl rfl))))
   · cases h
+
+theorem selector_args_height_lt (C : Contract) (Γ : ECtx) (f : String) (args : List RawExpr)
+    (sel : RawExpr) (rest : List RawExpr)
+    (h : encodeSelector? C Γ f args = .ok (some (sel,rest))) :
+    ∀ a, a ∈ rest → height a < height (.call f args) :=
+  selector_args_height_lt_with_names C Γ f args sel rest h
 
 /-- Removing the encoder's optional one-argument byte marker does not grow height. -/
 theorem unmark_height_le (a : RawExpr) :
@@ -308,15 +320,32 @@ theorem encoding_arg_height_lt (f : String) (args : List RawExpr) (a : RawExpr)
   encoding_inputs_lt args _ (fun _ he => argument_lt_call f he) a h
 
 /-- The exact selector call's marker-stripped selector decreases. -/
+theorem selector_input_lt_with_names [FreshNames] (C : Contract) (Γ : ECtx) (f : String) (args : List RawExpr)
+    (sel : RawExpr) (rest : List RawExpr)
+    (h : encodeSelector? C Γ f args = .ok (some (sel,rest))) :
+    height ((fun e : RawExpr => match e with
+      | .call g [x] => if (abiBytesMark? g).isSome then x else e
+      | _ => e) sel) < height (.call f args) :=
+  Nat.lt_of_le_of_lt (unmark_height_le sel) (selector_height_lt_with_names C Γ f args sel rest h)
+
 theorem selector_input_lt (C : Contract) (Γ : ECtx) (f : String) (args : List RawExpr)
     (sel : RawExpr) (rest : List RawExpr)
     (h : encodeSelector? C Γ f args = .ok (some (sel,rest))) :
     height ((fun e : RawExpr => match e with
       | .call g [x] => if (abiBytesMark? g).isSome then x else e
       | _ => e) sel) < height (.call f args) :=
-  Nat.lt_of_le_of_lt (unmark_height_le sel) (selector_height_lt C Γ f args sel rest h)
+  selector_input_lt_with_names C Γ f args sel rest h
 
 /-- The actual selector remainder, transformed exactly as in hoistWith, decreases. -/
+theorem selector_encoding_inputs_lt_with_names [FreshNames] (C : Contract) (Γ : ECtx) (f : String)
+    (args : List RawExpr) (sel : RawExpr) (rest : List RawExpr)
+    (hs : encodeSelector? C Γ f args = .ok (some (sel,rest))) (a : RawExpr)
+    (ha : a ∈ ((rest.map fun e => match e with
+      | .call g [x] => if (abiBytesMark? g).isSome then x else e
+      | _ => e).map fun e => if e.bytesLit?.isSome then .num 0 else e)) :
+    height a < height (.call f args) :=
+  encoding_inputs_lt rest _ (selector_args_height_lt_with_names C Γ f args sel rest hs) a ha
+
 theorem selector_encoding_inputs_lt (C : Contract) (Γ : ECtx) (f : String)
     (args : List RawExpr) (sel : RawExpr) (rest : List RawExpr)
     (hs : encodeSelector? C Γ f args = .ok (some (sel,rest))) (a : RawExpr)
@@ -324,7 +353,7 @@ theorem selector_encoding_inputs_lt (C : Contract) (Γ : ECtx) (f : String)
       | .call g [x] => if (abiBytesMark? g).isSome then x else e
       | _ => e).map fun e => if e.bytesLit?.isSome then .num 0 else e)) :
     height a < height (.call f args) :=
-  encoding_inputs_lt rest _ (selector_args_height_lt C Γ f args sel rest hs) a ha
+  selector_encoding_inputs_lt_with_names C Γ f args sel rest hs a ha
 
 /-- Evaluating an encodeCall receiver is below its original source call. -/
 theorem selector_receiver_lt (r t : RawExpr) (field : String) :
@@ -573,5 +602,547 @@ theorem args_output_argument_lt
   have hp := cost_pos f
   simp only [height]
   omega
+
+end Solidity.ElabCallHeight
+
+section
+open Solidity.ElabControlProof
+
+local macro "result_name_tail " h:ident : tactic =>
+  `(tactic| repeat' first
+    | with_reducible apply $h
+    | (with_reducible apply obs_pure; exact ⟨_, rfl⟩)
+    | (with_reducible apply obs_any; intro value; try cases value)
+    | with_reducible apply obs_throw
+    | split
+    | extract_lets)
+
+namespace Solidity.ElabControlProof
+open Semantics
+variable (C : Contract) [FreshNames]
+private theorem hash_result_obs
+    (H : RawExpr → ElabM (SProg C × RawExpr))
+    (mem : RawExpr → ElabM (SProg C × String))
+    (stmts : List RawStmt → ElabM (SProg C)) (f : String) (args : List RawExpr) :
+    Obs (hoistHashWith C H mem stmts f args) (fun out => ∃ x, out.2 = .name x) := by
+  simp only [hoistHashWith]
+  repeat first
+  | (with_reducible apply obs_throw)
+  | (with_reducible apply obs_pure; exact ⟨_, rfl⟩)
+  | split
+  | (with_reducible apply obs_any; intro value; try cases value)
+
+theorem hash_result_name
+    (H : RawExpr → ElabM (SProg C × RawExpr))
+    (mem : RawExpr → ElabM (SProg C × String))
+    (stmts : List RawStmt → ElabM (SProg C)) (f : String) (args : List RawExpr)
+    (sc : ElabScope) (st st' : ECtx × Nat) (m m' : CallMemo) (out : SProg C × RawExpr)
+    (h : hoistHashWith C H mem stmts f args sc st m = .ok ((out, st'), m')) :
+    ∃ x, out.2 = .name x := hash_result_obs C H mem stmts f args sc st m out st' m' h
+/-- The public decode helper makes one internal-decode request after its tuple check. -/
+theorem decode_front_eq
+    (H : RawExpr → ElabM (SProg C × RawExpr))
+    (mem : RawExpr → ElabM (SProg C × String))
+    (stmts : List RawStmt → ElabM (SProg C))
+    (bytes : String → ByteSrc → Nat → Nat → ElabM (SProg C × String))
+    (b T : RawExpr) :
+    abiDecodeWith C H mem stmts bytes "abi.decode" [b,T] =
+      if (T matches .tuple _) then
+        throw "abi.decode: one type here; a tuple of them is a declaration's `(T a, U b) = abi.decode(…)`"
+      else H (.call abiDecodeName [b,T,.num 0,.num (decodeHeadWords C T)]) := by
+  have hf : ("abi.decode" == "abi.decode") = true := by decide
+  cases T <;> simp only [abiDecodeWith, hf, Bool.false_eq_true, ↓reduceIte,
+    pure_bind, bind_pure] <;> rfl
+
+private theorem decode_internal_obs
+    (H : RawExpr → ElabM (SProg C × RawExpr))
+    (mem : RawExpr → ElabM (SProg C × String))
+    (stmts : List RawStmt → ElabM (SProg C))
+    (bytes : String → ByteSrc → Nat → Nat → ElabM (SProg C × String))
+    (f : String) (args : List RawExpr) (hf : f ≠ "abi.decode") :
+    Obs (abiDecodeWith C H mem stmts bytes f args) (fun out => ∃ x, out.2 = .name x) := by
+  have hfb : (f == "abi.decode") = false := by
+    change decide (f = "abi.decode") = false
+    exact decide_eq_false hf
+  unfold abiDecodeWith
+  extract_lets backend
+  have hb : ∀ y, Obs (backend y) (fun out => ∃ x, out.2 = .name x) := by
+    intro y
+    simp -zeta only [backend]
+    split
+    · with_reducible apply obs_any
+      intro value
+      rcases value with ⟨P, Q, d⟩
+      extract_lets len enough below word pos general
+      have hg : ∀ y, Obs (general y) (fun out => ∃ x, out.2 = .name x) := by
+        intro y
+        simp -zeta only [general]
+        split
+        · with_reducible apply obs_any
+          intro fresh
+          extract_lets x finish
+          have hfinish : ∀ S, Obs (finish S) (fun out => ∃ x, out.2 = .name x) := by
+            intro S
+            with_reducible apply obs_any
+            intro R
+            exact obs_pure ⟨_, rfl⟩
+          clear_value finish
+          result_name_tail hfinish
+        · split
+          · extract_lets nested
+            have hn : ∀ y, Obs (nested y) (fun out => ∃ x, out.2 = .name x) := by
+              intro y
+              simp -zeta only [nested]
+              with_reducible apply obs_any
+              intro fresh
+              extract_lets x finish
+              have hfinish : ∀ S, Obs (finish S) (fun out => ∃ x, out.2 = .name x) := by
+                intro S
+                with_reducible apply obs_any
+                intro R
+                exact obs_pure ⟨_, rfl⟩
+              clear_value finish
+              result_name_tail hfinish
+            clear_value nested
+            result_name_tail hn
+          · exact obs_throw
+      clear_value general
+      split
+      · extract_lets primitive enum
+        have hp : ∀ y, Obs (primitive y) (fun out => ∃ x, out.2 = .name x) := by
+          intro y
+          simp -zeta only [primitive]
+          result_name_tail hg
+        clear_value primitive
+        have he : ∀ y, Obs (enum y) (fun out => ∃ x, out.2 = .name x) := by
+          intro y
+          simp -zeta only [enum]
+          result_name_tail hp
+        clear_value enum
+        result_name_tail he
+      · result_name_tail hg
+    · exact obs_throw
+  clear_value backend
+  simp only [hfb, Bool.false_eq_true, ↓reduceIte]
+  exact hb _
+
+
+
+theorem decode_internal_result_name
+    (H : RawExpr → ElabM (SProg C × RawExpr))
+    (mem : RawExpr → ElabM (SProg C × String))
+    (stmts : List RawStmt → ElabM (SProg C))
+    (bytes : String → ByteSrc → Nat → Nat → ElabM (SProg C × String))
+    (f : String) (args : List RawExpr) (hf : f ≠ "abi.decode")
+    (sc : ElabScope) (st st' : ECtx × Nat) (m m' : CallMemo) (out : SProg C × RawExpr)
+    (h : abiDecodeWith C H mem stmts bytes f args sc st m = .ok ((out, st'), m')) :
+    ∃ x, out.2 = .name x :=
+  decode_internal_obs C H mem stmts bytes f args hf sc st m out st' m' h
+
+end Solidity.ElabControlProof
+
+namespace Solidity.ElabCallHeight
+open Semantics ElabControlProof
+variable (C : Contract) [FreshNames]
+
+/-- Successful hash helpers return an expression of height one. -/
+theorem hash_output_height
+    (H : RawExpr → ElabM (SProg C × RawExpr))
+    (bytes : RawExpr → ElabM (SProg C × String))
+    (stmts : List RawStmt → ElabM (SProg C)) (f : String) (args : List RawExpr)
+    (sc : ElabScope) (st st' : ECtx × Nat) (m m' : CallMemo) (out : SProg C × RawExpr)
+    (h : hoistHashWith C H bytes stmts f args sc st m = .ok ((out, st'), m')) :
+    height out.2 = 1 := by
+  obtain ⟨x, hx⟩ := hash_result_name C H bytes stmts f args sc st st' m m' out h
+  simp only [hx, height]
+
+/-- Successful internal ABI decoding returns an expression of height one. -/
+theorem internal_decode_output_height
+    (H : RawExpr → ElabM (SProg C × RawExpr))
+    (mem : RawExpr → ElabM (SProg C × String))
+    (stmts : List RawStmt → ElabM (SProg C))
+    (bytes : String → ByteSrc → Nat → Nat → ElabM (SProg C × String))
+    (f : String) (args : List RawExpr) (hf : f ≠ "abi.decode")
+    (sc : ElabScope) (st st' : ECtx × Nat) (m m' : CallMemo) (out : SProg C × RawExpr)
+    (h : abiDecodeWith C H mem stmts bytes f args sc st m = .ok ((out, st'), m')) :
+    height out.2 = 1 := by
+  obtain ⟨x, hx⟩ := decode_internal_result_name C H mem stmts bytes f args hf sc st st' m m' out h
+  simp only [hx, height]
+
+/-- The public decode front preserves the caller's height bound once its
+strictly smaller internal request preserves its own height. -/
+theorem decode_front_output_height
+    (H : RawExpr → ElabM (SProg C × RawExpr))
+    (mem : RawExpr → ElabM (SProg C × String))
+    (stmts : List RawStmt → ElabM (SProg C))
+    (bytes : String → ByteSrc → Nat → Nat → ElabM (SProg C × String))
+    (b T : RawExpr)
+    (hh : Obs (H (.call abiDecodeName [b, T, .num 0, .num (decodeHeadWords C T)]))
+      (fun out => height out.2 ≤ height (.call abiDecodeName [b, T, .num 0, .num (decodeHeadWords C T)]))) :
+    Obs (abiDecodeWith C H mem stmts bytes "abi.decode" [b,T])
+      (fun out => height out.2 ≤ height (.call "abi.decode" [b,T])) := by
+  rw [decode_front_eq]
+  split
+  · exact obs_throw
+  · intro sc st m out st' m' h
+    exact Nat.le_trans (hh sc st m out st' m' h) (Nat.le_of_lt (decode_request_lt C b T))
+
+end Solidity.ElabCallHeight
+
+namespace Solidity.ElabControlProof
+open Semantics
+variable (C : Contract) [FreshNames]
+private theorem encode_nested_obs
+    (kind : RawExpr → ElabM AbiKind)
+    (mem : RawExpr → ElabM (SProg C × String))
+    (stmts : List RawStmt → ElabM (SProg C))
+    (args : List RawExpr) (marks : List (Option AbiKind)) (sel : Option RawExpr) :
+    Obs (abiEncodeNested? C kind mem stmts args marks sel)
+      (fun result => ∀ out, result = some out → ∃ x, out.2 = .name x) := by
+  unfold abiEncodeNested?
+  repeat' first
+  | (with_reducible apply obs_pure; intro out he; cases he <;> exact ⟨_, rfl⟩)
+  | (with_reducible apply obs_any; intro value; try cases value)
+  | with_reducible apply obs_throw
+  | split
+  | extract_lets
+
+/-- Successful nested ABI encoding returns a raw name whenever it handles the input. -/
+theorem encode_nested_result_name
+    (kind : RawExpr → ElabM AbiKind)
+    (mem : RawExpr → ElabM (SProg C × String))
+    (stmts : List RawStmt → ElabM (SProg C))
+    (args : List RawExpr) (marks : List (Option AbiKind)) (sel : Option RawExpr)
+    (sc : ElabScope) (st st' : ECtx × Nat) (m m' : CallMemo) (out : SProg C × RawExpr)
+    (h : abiEncodeNested? C kind mem stmts args marks sel sc st m = .ok ((some out, st'), m')) :
+    ∃ x, out.2 = .name x :=
+  encode_nested_obs C kind mem stmts args marks sel sc st m (some out) st' m' h out rfl
+
+private theorem encode_obs (rc : ElabRec C) (std strs : Bool) (args : List RawExpr)
+    (marks : List (Option AbiKind)) (sel : Option RawExpr) :
+    Obs (abiEncodeWith C rc std strs args marks sel) (fun out => ∃ x, out.2 = .name x) := by
+  unfold abiEncodeWith
+  extract_lets mem stmts kind P base parts len pad words hpos finish select
+  have hf : ∀ P selW, Obs (finish P selW) (fun out => ∃ x, out.2 = .name x) := by
+    intro P selW
+    simp -zeta only [finish]
+    repeat' first
+    | (with_reducible apply obs_pure; exact ⟨_, rfl⟩)
+    | (with_reducible apply obs_any; intro value; try cases value)
+    | with_reducible apply obs_throw
+    | split
+    | extract_lets
+  clear_value finish
+  have hs : ∀ y, Obs (select y) (fun out => ∃ x, out.2 = .name x) := by
+    intro y
+    simp -zeta only [select]
+    result_name_tail hf
+  clear_value select
+  split
+  · with_reducible apply obs_bind (encode_nested_obs C kind mem stmts args marks sel)
+    intro result hr
+    cases result with
+    | none => result_name_tail hs
+    | some out => exact obs_pure (hr out rfl)
+  · result_name_tail hs
+
+/-- ABI encoding returns a raw name on every successful run. -/
+theorem encode_result_name (rc : ElabRec C) (std strs : Bool) (args : List RawExpr)
+    (marks : List (Option AbiKind)) (sel : Option RawExpr)
+    (sc : ElabScope) (st st' : ECtx × Nat) (m m' : CallMemo) (out : SProg C × RawExpr)
+    (h : abiEncodeWith C rc std strs args marks sel sc st m = .ok ((out, st'), m')) :
+    ∃ x, out.2 = .name x :=
+  encode_obs C rc std strs args marks sel sc st m out st' m' h
+
+
+end Solidity.ElabControlProof
+
+namespace Solidity.ElabCallHeight
+open Semantics ElabControlProof
+variable (C : Contract) [FreshNames]
+
+/-- ABI encoding returns a height-one destination, independently of callback outputs. -/
+theorem encode_output_height (rc : ElabRec C) (std strs : Bool) (args : List RawExpr)
+    (marks : List (Option AbiKind)) (sel : Option RawExpr)
+    (sc : ElabScope) (st st' : ECtx × Nat) (m m' : CallMemo) (out : SProg C × RawExpr)
+    (h : abiEncodeWith C rc std strs args marks sel sc st m = .ok ((out, st'), m')) :
+    height out.2 = 1 := by
+  obtain ⟨x, hx⟩ := encode_result_name C rc std strs args marks sel sc st st' m m' out h
+  simp only [hx, height]
+
+end Solidity.ElabCallHeight
+
+
+end
+
+namespace Solidity.ElabCallHeight
+open Semantics ElabControlProof
+variable (C : Contract) [FreshNames]
+
+omit [FreshNames] in
+/-- Include malformed arities in the ERC helper's output invariant. -/
+theorem erc_args_output_height
+    (H : RawExpr → ElabM (SProg C × RawExpr)) (args : List RawExpr)
+    (hh : ∀ e, height e < height (.call "erc7201" args) →
+      Obs (H e) (fun out => height out.2 ≤ height e)) :
+    Obs (hoistERC7201With C H args)
+      (fun out => height out.2 ≤ height (.call "erc7201" args)) := by
+  cases args with
+  | nil => exact obs_throw
+  | cons a rest =>
+    cases rest with
+    | nil => exact erc_output_height C H a hh
+    | cons b rest => exact obs_throw
+
+/-- Both public and internal decode helpers preserve the original call bound. -/
+theorem decode_output_height
+    (H : RawExpr → ElabM (SProg C × RawExpr))
+    (mem : RawExpr → ElabM (SProg C × String))
+    (stmts : List RawStmt → ElabM (SProg C))
+    (bytes : String → ByteSrc → Nat → Nat → ElabM (SProg C × String))
+    (f : String) (args : List RawExpr)
+    (hh : ∀ e, height e < height (.call f args) →
+      Obs (H e) (fun out => height out.2 ≤ height e)) :
+    Obs (abiDecodeWith C H mem stmts bytes f args)
+      (fun out => height out.2 ≤ height (.call f args)) := by
+  by_cases hf : f = "abi.decode"
+  · subst f
+    cases args with
+    | nil => exact obs_throw
+    | cons b rest =>
+      cases rest with
+      | nil => exact obs_throw
+      | cons T rest =>
+        cases rest with
+        | nil =>
+          exact decode_front_output_height C H mem stmts bytes b T
+            (hh _ (decode_request_lt C b T))
+        | cons extra rest => exact obs_throw
+  · intro sc st m out st' m' hr
+    have hn := internal_decode_output_height C H mem stmts bytes f args hf sc st st' m m' out hr
+    have hp := height_pos (.call f args)
+    omega
+
+end Solidity.ElabCallHeight
+
+namespace Solidity.ElabCallHeight
+open Semantics ElabControlProof
+/-- Fixed-bytes extraction has room for the shift/mask arithmetic generated
+from its hoisted and captured operands. -/
+theorem bytes_index_request_lt (b i b' i' : RawExpr) (n : Nat)
+    (hb : height b' ≤ height b) (hi : height i' ≤ height i) :
+    height (.binop .mod (.binop .shr b'
+      (.binop .mulW (.num 8) (.binop .subW (.num (n - 1)) i'))) (.num 256)) <
+      height (.call "#bytesIndex" [b, i, .num n]) := by
+  have hp := height_pos b
+  have hq := height_pos i
+  have hc : cost "#bytesIndex" = 6 := rfl
+  simp only [height, heights, hc]
+  omega
+
+variable (C : Contract) [FreshNames]
+
+/-- Fixed-bytes indexing preserves output height under smaller-request callback bounds. -/
+theorem bytes_index_output_height (rc : ElabRec C) (e b i : RawExpr) (n : Nat)
+    (hf : e.foldConst = .ok (.call "#bytesIndex" [b, i, .num n]))
+    (hh : ∀ a, height a < height (.call "#bytesIndex" [b, i, .num n]) →
+      Obs (rc.hoist a) (fun out => height out.2 ≤ height a)) :
+    Obs (hoistWith C rc e)
+      (fun out => height out.2 ≤ height (.call "#bytesIndex" [b, i, .num n])) := by
+  have hb := hh b (argument_lt_call "#bytesIndex" (by simp))
+  have hi := hh i (argument_lt_call "#bytesIndex" (by simp))
+  have hfold : (liftM e.foldConst : ElabM RawExpr) =
+      pure (.call "#bytesIndex" [b, i, .num n]) := by rw [hf]; rfl
+  unfold hoistWith
+  rw [hfold]
+  simp -zeta only [pure_bind]
+  dsimp +zetaDelta only
+  with_reducible apply obs_bind hb
+  rintro ⟨P, b'⟩ hb'
+  with_reducible apply obs_bind (captureExpr_height_bound C b')
+  rintro ⟨Pb, b''⟩ hbc
+  with_reducible apply obs_bind hi
+  rintro ⟨Q, i'⟩ hi'
+  with_reducible apply obs_bind (captureExpr_height_bound C i')
+  rintro ⟨Pi, i''⟩ hic
+  have hlt := bytes_index_request_lt b i b'' i'' n
+    (Nat.le_trans hbc hb') (Nat.le_trans hic hi')
+  have hrequest := hh _ hlt
+  repeat' first
+    | (with_reducible apply obs_bind hrequest; rintro ⟨R, out⟩ hout)
+    | (with_reducible apply obs_pure; exact Nat.le_trans hout (Nat.le_of_lt hlt))
+    | (with_reducible apply obs_any; intro value)
+    | split
+
+end Solidity.ElabCallHeight
+namespace Solidity.ElabCallHeight
+open Semantics ElabControlProof
+/-- The folded offset addition used by a slice has at most one arithmetic layer. -/
+theorem sliceAdd_height_le (o k : RawExpr) :
+    height (sliceAdd o k) ≤ 1 + max (height o) (height k) := by
+  unfold sliceAdd
+  split <;> simp only [height] <;> omega
+
+/-- Slice indexing reserves room for adding the offset to the held index. -/
+theorem slice_index_request_lt (off len k past k' : RawExpr)
+    (hk : height k' ≤ height k) :
+    height (sliceAdd off k') < height (.call "#sliceIndex" [off, len, k, past]) := by
+  have h := sliceAdd_height_le off k'
+  have hc : cost "#sliceIndex" = 3 := rfl
+  simp only [height, heights, hc]
+  omega
+
+variable (C : Contract) [FreshNames]
+
+/-- Slice indexing bounds both direct and captured relative indices. -/
+theorem slice_index_output_height (rc : ElabRec C) (e off len k past : RawExpr)
+    (hf : e.foldConst = .ok (.call "#sliceIndex" [off, len, k, past]))
+    (hh : ∀ a, height a < height (.call "#sliceIndex" [off, len, k, past]) →
+      Obs (rc.hoist a) (fun out => height out.2 ≤ height a)) :
+    Obs (hoistWith C rc e)
+      (fun out => height out.2 ≤ height (.call "#sliceIndex" [off, len, k, past])) := by
+  have hk := hh k (argument_lt_call "#sliceIndex" (by simp))
+  have hfold : (liftM e.foldConst : ElabM RawExpr) =
+      pure (.call "#sliceIndex" [off, len, k, past]) := by rw [hf]; rfl
+  unfold hoistWith
+  rw [hfold]
+  simp -zeta only [pure_bind]
+  dsimp +zetaDelta only
+  with_reducible apply obs_bind hk
+  rintro ⟨P, k'⟩ hk'
+  with_reducible apply obs_any
+  intro Γk
+  have hrequest (xv : RawExpr) (hxv : height xv ≤ height k) :
+      Obs (rc.hoist (sliceAdd off xv))
+        (fun out => height out.2 ≤ height (.call "#sliceIndex" [off, len, k, past])) := by
+    have hlt := slice_index_request_lt off len k past xv hxv
+    intro sc st m out st' m' hrun
+    exact Nat.le_trans (hh _ hlt sc st m out st' m' hrun) (Nat.le_of_lt hlt)
+  have hdirect := hrequest k' hk'
+  have hcaptured (x : Var) := hrequest (.name (toString x)) (height_pos k)
+  repeat' first
+    | contradiction
+    | (with_reducible apply obs_bind hdirect; rintro ⟨S, out⟩ hout)
+    | (with_reducible apply obs_bind (hcaptured _); rintro ⟨S, out⟩ hout)
+    | (with_reducible apply obs_pure; exact hout)
+    | (with_reducible apply obs_any; intro value)
+    | split
+
+end Solidity.ElabCallHeight
+namespace Solidity.ElabCallHeight
+open Semantics ElabControlProof
+variable (C : Contract) [FreshNames]
+
+omit [FreshNames] in
+private theorem captured_output_height (P : SProg C) (x : String) :
+    Obs (pure (P, RawExpr.name x) : ElabM (SProg C × RawExpr))
+      (fun out => height out.2 = 1) := obs_pure rfl
+
+/-- Successful array elaboration returns a captured name. -/
+theorem array_output_height (rc : ElabRec C) (e : RawExpr) (args : List RawExpr)
+    (hf : e.foldConst = .ok (.call "#array" args)) :
+    Obs (hoistWith C rc e) (fun out => height out.2 = 1) := by
+  have hfold : (liftM e.foldConst : ElabM RawExpr) = pure (.call "#array" args) := by rw [hf]; rfl
+  unfold hoistWith
+  rw [hfold]
+  simp -zeta only [pure_bind]
+  dsimp +zetaDelta only
+  repeat' first
+    | contradiction
+    | (exfalso; simp_all; done)
+    | (with_reducible exact captured_output_height C _ _)
+    | (with_reducible exact obs_throw)
+    | (with_reducible apply obs_any; intro value)
+    | split
+
+/-- Successful sliceCopy elaboration returns a captured name. -/
+theorem sliceCopy_output_height (rc : ElabRec C) (e : RawExpr) (view : RawExpr)
+    (hf : e.foldConst = .ok (.call "#sliceCopy" [view])) :
+    Obs (hoistWith C rc e) (fun out => height out.2 = 1) := by
+  have hfold : (liftM e.foldConst : ElabM RawExpr) = pure (.call "#sliceCopy" [view]) := by rw [hf]; rfl
+  unfold hoistWith
+  rw [hfold]
+  simp -zeta only [pure_bind]
+  dsimp +zetaDelta only
+  repeat' first
+    | contradiction
+    | (exfalso; simp_all; done)
+    | (with_reducible exact captured_output_height C _ _)
+    | (with_reducible exact obs_throw)
+    | (with_reducible apply obs_any; intro value)
+    | split
+
+  rename_i hcopy harray heq ob hno
+  obtain ⟨rfl, rfl⟩ := RawExpr.call.inj heq
+  exact False.elim (hcopy view rfl rfl)
+
+end Solidity.ElabCallHeight
+
+namespace Solidity.ElabCallHeight
+open Semantics ElabControlProof
+variable (C : Contract) [FreshNames]
+
+/-- Successful byte-literal elaboration returns a captured name, independently of callbacks. -/
+theorem bytes_literal_output_height (rc : ElabRec C) (e : RawExpr)
+    (f : String) (args : List RawExpr) (bs : List Nat)
+    (hf : e.foldConst = .ok (.call f args))
+    (hb : (RawExpr.call f args).bytesLit? = some bs) :
+    Obs (hoistWith C rc e) (fun out => height out.2 = 1) := by
+  have hname : f = bytesLitName := by
+    simp only [RawExpr.bytesLit?] at hb
+    split at hb
+    · simpa only [beq_iff_eq] using ‹(f == bytesLitName) = true›
+    · cases hb
+  subst f
+  have hfold : (liftM e.foldConst : ElabM RawExpr) = pure (.call bytesLitName args) := by rw [hf]; rfl
+  have hresult (P : SProg C) (x : String) :
+      Obs (pure (P, RawExpr.name x) : ElabM (SProg C × RawExpr))
+        (fun out => height out.2 = 1) := obs_pure rfl
+  unfold hoistWith
+  rw [hfold]
+  simp -zeta only [pure_bind]
+  dsimp +zetaDelta only [bytesLitName]
+  split <;> try (exfalso; simp_all [RawExpr.call.injEq, bytesLitName]; done)
+  rename_i heq
+  obtain ⟨rfl, rfl⟩ := RawExpr.call.inj heq
+  change (RawExpr.call "#bytes" args).bytesLit? = some bs at hb
+  rw [hb]
+  simp -zeta only
+  repeat' first
+    | (with_reducible exact hresult _ _)
+    | (with_reducible apply obs_any; intro value)
+
+end Solidity.ElabCallHeight
+
+
+namespace Solidity.ElabCallHeight
+open Semantics ElabControlProof
+variable [FreshNames]
+
+/-- Every prepared argument is strictly below the call that supplied it,
+including the empty-list boundary, where no output arguments exist. -/
+theorem hoistCallArgs_argument_lt (C : Contract)
+    (H : RawExpr → ElabM (SProg C × RawExpr)) (stmt : RawStmt → ElabM (SProg C))
+    (f : String) (args : List RawExpr)
+    (hh : ∀ a, a ∈ args → ∀ sc st m out st' m',
+      H a sc st m = .ok ((out, st'), m') → height out.2 ≤ height a)
+    (sc : ElabScope) (st st' : ECtx × Nat) (m m' : CallMemo)
+    (out : SProg C × List RawExpr)
+    (hrun : hoistCallArgsWith C H stmt f args sc st m = .ok ((out, st'), m')) :
+    ∀ b, b ∈ out.2 → height b < height (.call f args) := by
+  cases args with
+  | nil =>
+    have he := ElabCallArgsGood.hoistCallArgsWith_nil C H stmt f sc st st' m m' out hrun
+    simp only [he, List.not_mem_nil, false_implies, implies_true]
+  | cons a args =>
+    have hsource (b : RawExpr) (hb : b ∈ a :: args) := argument_lt_call f hb
+    have hname : ∀ x, height (.name x) < height (.call f (a :: args)) := by
+      intro x
+      exact Nat.lt_of_le_of_lt (height_pos a) (hsource a (List.mem_cons_self ..))
+    exact ElabCallArgsGood.hoistCallArgsWith_preserves C
+      (fun b => height b < height (.call f (a :: args))) hname H stmt f (a :: args)
+      hsource (fun b hb sc st m out st' m' h =>
+        Nat.lt_of_le_of_lt (hh b hb sc st m out st' m' h) (hsource b hb))
+      sc st m out st' m' hrun
 
 end Solidity.ElabCallHeight

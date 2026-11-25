@@ -51,16 +51,10 @@ private def successMachine : Evm.Out → Option Machine
 @[irreducible] def returned : Machine :=
   (successMachine (run (V3CallProducerRef.plan selected 16 16).code initial)).get (by decide +kernel)
 theorem returned_run : run (V3CallProducerRef.plan selected 16 16).code initial = .ok returned 0 := by
-  have h : some returned = successMachine (run (V3CallProducerRef.plan selected 16 16).code initial) := by
-    unfold returned
-    exact Option.some_get _
-  generalize run (V3CallProducerRef.plan selected 16 16).code initial = result at h ⊢
-  cases result with
-  | ok m skip => cases skip with
-    | zero => exact congrArg (fun m => Evm.Out.ok m 0) (Option.some.inj h).symm
-    | succ n => cases h
-  | revert => cases h
-  | fault => cases h
+  apply successfulMachine_eq_some.mp
+  rw [show successfulMachine = successMachine from rfl]
+  unfold returned
+  exact (Option.some_get _).symm
 
 def suffix := CapturedValueStability.compiled (.user "tupleCapture") value vc dst update uc
 def after (tail : List Word) : Machine :=

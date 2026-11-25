@@ -25,7 +25,7 @@ theorem derived_composition (G : Source.Glob mixedEnv) (n : Nat) :
       output.word=some (keccak256 G.fixed.evm raw 160 bytes.length) := by
   first | (simp only;done) | decide | omega | rfl | skip
   have result := transport G mixedReadFrame 0 n writePrefix mixedHeap.ty mixedState mixedPlacement mixedPlacement (retainInitial _ _)
-    mixed_actual_MemOK StructWordHeap.Controls.support mixedPhysical ByteElementStore.Controls.oldReads mixed_reserved .here 0 mixedChild rfl rfl
+    mixed_actual_MemOK Solidity.Yul.Views.Controls.generated_mixed_types_supported mixedPhysical ByteElementStore.Controls.oldReads mixed_reserved .here 0 mixedChild rfl rfl
   rw [actual_writePrefix] at result
   exact result
 

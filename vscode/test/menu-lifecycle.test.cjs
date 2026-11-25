@@ -1,12 +1,7 @@
 // Injected capture envelopes test refusal logic; no native/raster evidence.
 'use strict';
 const test=require('node:test'),assert=require('node:assert/strict'),{createHash}=require('node:crypto'),{validate,phases}=require('../parity/menu-lifecycle.cjs');
-function fixture(target='local'){
- const value={runId:'run',target,phases:[],forbiddenActions:[],events:[]};
- for(const phase of phases){const kind=phase==='tab'?'tab':'editor',visible=['source','restored'].includes(phase)||phase==='untitled'&&target==='dafny',binding={uri:phase==='untitled'?'untitled:1':'file:///'+(phase==='unrelated'?'unrelated.txt':'menus.'+(target==='local'?'sol':'dfy')),version:1,session:phase==='unrelated'?'txt':phase==='untitled'?'untitled':'source',language:phase==='unrelated'?'plaintext':target==='local'?'solidity':'dafny',scheme:phase==='untitled'?'untitled':'file',trusted:true,sourceHash:createHash('sha256').update(phase==='unrelated'?'Menu language isolation.\n':require('../parity/workloads.cjs').workload(target,1)).digest('hex')};
- const before={activeUri:binding.uri,items:visible?[{label:target==='local'?'Solidity Lean':'Dafny'},{label:target==='local'?'Build Compiler Artifact with Import Options':'Build with Custom Arguments'}]:[{label:'Copy'}]};for(const i of before.items)Object.assign(i,{ariaDisabled:null,className:'menuitem',withinViewport:true,bounds:{left:1,top:1,right:100,bottom:20}});value.phases.push({phase,binding,eventStart:0,eventEnd:0,events:[],after:structuredClone(binding),capture:{status:'captured',runId:'run',phase:'menus-'+phase,metadataHash:createHash('sha256').update(JSON.stringify({binding,target,kind,visible})).digest('hex'),capture:{captured:true,screenshot:true,contributionMenu:{binding:structuredClone(binding),before,after:structuredClone(before),submenuVisible:visible,kind}}}});
- }return value;
-}
+const {fixture}=require('./menu-fixture.cjs');
 test('menu envelopes retain distinct upstream untitled predicate and ordered source lifetime (injected)',()=>{for(const target of ['local','dafny'])assert.deepEqual(validate(fixture(target),'run',target,'/'),[]);});
 test('menu envelopes refuse wrong target, source, lifetime, phase, menu, capture changes and side effects (injected)',()=>{
  const changes=[v=>v.target='dafny',v=>v.phases.reverse(),v=>v.phases.pop(),v=>v.phases[0].binding.sourceHash='a'.repeat(64),v=>v.phases[0].binding.session='foreign',v=>v.phases[0].binding.uri='file:///foreign.sol',v=>v.phases[0].after.version++,v=>v.phases[0].capture.runId='foreign',v=>v.phases[0].capture.metadataHash='x',v=>v.phases[0].capture.capture.screenshot=false,v=>v.phases[0].capture.capture.contributionMenu.before.activeUri='foreign',v=>v.phases[0].capture.capture.contributionMenu.after.items.pop(),v=>v.phases[0].capture.capture.contributionMenu.submenuVisible=false,v=>v.forbiddenActions.push({kind:'command.start'}),v=>v.phases[0].capture.status='failed',v=>v.phases[0].capture.error='failed',v=>v.phases[0].error='failed',v=>v.phases[0].events.push({kind:'command.start',data:{id:'solidityLean.build'}}),v=>v.events.push({kind:'terminal.start'}),v=>delete v.events,v=>delete v.phases[0].capture.capture.contributionMenu.before.items[0].ariaDisabled,v=>v.phases[0].capture.capture.contributionMenu.before.items[0].withinViewport=false];
@@ -82,7 +77,7 @@ test('recovery phases complete through request and capture server transport (syn
    const observed=[];
    await servePhases(dir,'recovery-run',async(destination,request)=>{
     observed.push(request.phase);
-    fs.writeFileSync(path.join(destination,'screenshot.png'),Buffer.from([137,80,78,71,13,10,26,10,0]));
+    fs.writeFileSync(path.join(destination,'screenshot.png'),Buffer.from('iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR4nGNgYGD4DwABBAEAX+XDSwAAAABJRU5ErkJggg==','base64'));
     return {captured:true,screenshot:true};
    },seen);
    const reply=await pending;
@@ -91,4 +86,35 @@ test('recovery phases complete through request and capture server transport (syn
    assert.deepEqual(observed,[phase]);
   }
  }finally{fs.rmSync(dir,{recursive:true,force:true});}
+});
+
+// Injected CDP geometry controls; these do not establish native menu/raster parity.
+test('native menu collector refuses unowned or unusable anchors before any input',async()=>{
+ const {captureContributionMenu}=require('../parity/renderer.cjs'),fs=require('node:fs'),os=require('node:os'),path=require('node:path');
+ const good={activeUri:'file:///owned.sol',rect:{left:10,top:20,right:210,bottom:120,width:200,height:100},viewport:{width:1000,height:800}};
+ for(const change of [v=>v.activeUri='file:///foreign.sol',v=>v.rect.width=0,v=>v.rect.left=-1,v=>v.rect.right=1001,v=>v.rect.top=NaN,v=>v.viewport.height=0,v=>v.rect=null]){
+  const sample=structuredClone(good);change(sample);const calls=[],dir=fs.mkdtempSync(path.join(os.tmpdir(),'menu-anchor-'));
+  try{await assert.rejects(captureContributionMenu({async request(method){calls.push(method);return{result:{value:sample}};}},dir,{target:'local',kind:'editor',binding:{uri:'file:///owned.sol'}}),/Owned menu anchor/);assert.equal(calls.filter(x=>x.startsWith('Input.')).length,0);}finally{fs.rmSync(dir,{recursive:true,force:true});}
+ }
+});
+
+test('owned visible menu anchor preserves original mouse offsets and rejects inconsistent point',()=>{
+ const {menuAnchorPoint}=require('../parity/menu-lifecycle.cjs'),sample={activeUri:'file:///owned',rect:{left:10,top:20,right:210,bottom:120,width:200,height:100},viewport:{width:1000,height:800}};
+ assert.deepEqual(menuAnchorPoint(sample,'file:///owned'),{x:70,y:32});sample.rect.right=20;assert.throws(()=>menuAnchorPoint(sample,'file:///owned'),/point/);
+});
+
+test('anchor DOM cannot borrow URI from a different Monaco subtree',async()=>{
+ const {captureContributionMenu}=require('../parity/renderer.cjs'),vm=require('node:vm'),fs=require('node:fs'),os=require('node:os'),path=require('node:path'),calls=[],dir=fs.mkdtempSync(path.join(os.tmpdir(),'menu-dom-owner-')),rect={left:10,top:20,right:210,bottom:120,width:200,height:100};
+ const owned={getAttribute:()=> 'file:///owned.sol',getBoundingClientRect:()=>rect},foreign={getAttribute:()=> 'file:///foreign.sol',getBoundingClientRect:()=>rect},group={querySelectorAll:selector=>selector.includes('monaco-editor')?[owned]:[]},anchor={getBoundingClientRect:()=>rect,closest:selector=>selector.includes('editor-group')?group:foreign};
+ const document={querySelector:selector=>selector.includes('view-lines')?anchor:owned};
+ // A filtered closest() must not skip a nested Monaco lacking data-uri.
+ const nearest=anchor.closest;anchor.closest=selector=>selector.includes('[data-uri]')?owned:nearest(selector);
+ try{await assert.rejects(captureContributionMenu({async request(method,params){calls.push(method);return{result:{value:vm.runInNewContext(params.expression,{document,innerWidth:1000,innerHeight:800})}};}},dir,{target:'local',kind:'editor',binding:{uri:'file:///owned.sol'}}),/Owned menu anchor/);assert.equal(calls.filter(x=>x.startsWith('Input.')).length,0);assert.equal(JSON.parse(fs.readFileSync(path.join(dir,'menu-anchor.json'))).anchor.activeUri,null);}finally{fs.rmSync(dir,{recursive:true,force:true});}
+});
+
+test('raw presentation-role diagnostics cannot waive strict trust menu attributes',()=>{
+ const {trustErrors}=require('../parity/menu-lifecycle.cjs'),v=trustedFixture(),m=v.trust.steps[0].capture.capture.contributionMenu;
+ m.before.items.push({label:'',ariaDisabled:null,className:null,withinViewport:true,bounds:{left:1,top:1,right:100,bottom:20}});m.after=structuredClone(m.before);
+ v.menuRoles={version:1,reads:[{roles:[{label:{role:'presentation',className:'separator disabled',ariaDisabled:'true'},menuItem:null}]}]};
+ assert.ok(trustErrors(v,'run','local').includes('incomplete trust menu attributes'));
 });

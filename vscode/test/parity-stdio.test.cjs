@@ -54,3 +54,43 @@ test('symbol lifecycle assertions reject metadata decoys and stale nested labels
   assert.throws(()=>assertServiceSymbols([{name:'reopened',children:[{name:'isolated'}]}],'reopened',['isolated']));
   assert.deepEqual(assertServiceSymbols([{name:'Services',children:[{name:'reopened'}]}],'reopened',['newest']),['Services','reopened']);
 });
+
+// Regression: malformed retained evidence must not replace a real request failure.
+// Owned Node protocol fixture only; no native Dafny, Lean or proof observation.
+test('stdio failure reporting preserves request error when partial JSON is malformed',async()=>{
+ if(process.platform==='win32')return;
+ const fs=require('node:fs'),dir=mkdtempSync(join(tmpdir(),'stdio-evidence-failure-')),trialDir=join(dir,'trial'),file=join(trialDir,'configuration-observations.json'),code=join(dir,'fixture-server'),rpc=require.resolve('../src/rpc.cjs'),originalWrite=fs.writeFileSync,originalRead=fs.readFileSync;
+ writeFileSync(code,`#!${process.execPath}
+const {RpcPeer}=require(${JSON.stringify(rpc)});const peer=new RpcPeer(process.stdin,process.stdout);
+peer.onRequest('initialize',()=>({capabilities:{}}));
+peer.onRequest('textDocument/documentSymbol',async()=>{await new Promise(resolve=>setTimeout(resolve,300));throw Object.assign(Error('owned original request failure'),{code:-32077});});
+peer.onRequest('shutdown',()=>null);peer.onNotification('exit',()=>process.exit(0));
+`,{mode:0o700});
+ // Inject resource observations only for this owned protocol fixture. Native guards stay unchanged.
+ fs.readFileSync=function(name,...args){return String(name)==='/proc/meminfo'?'MemAvailable: 12582912 kB\nSwapTotal: 0 kB\n':originalRead.call(this,name,...args);};
+ fs.writeFileSync=function(name,...args){return originalWrite.call(this,name,...(String(name)===file?['{malformed-partial']:args));};
+ try{const result=await trial('dafny',1,{dafny:code,scope:'configuration',configurationMode:'never',timeoutMs:1000,memoryReserveMiB:12288,memoryMaxMiB:4096},trialDir,{configurationSchema:()=>({default:'onchange',enum:['never','onchange','onsave']})});
+  const row=result.result.scenarios.find(s=>s.id==='automatic-configuration-lifecycle');assert.ok(row,'Original failed scenario must remain in aggregate');assert.equal(row.status,'broken');assert.match(row.error,/owned original request failure/);assert.ok(row.failedPartialEvidence.error);assert.equal(row.failedPartialEvidence.bytes,18);assert.match(row.failedPartialEvidence.sha256,/^[a-f0-9]{64}$/);assert.deepEqual(result.resources.cleanup.remaining,[]);assert.equal(result.status,'broken');
+ }finally{fs.writeFileSync=originalWrite;fs.readFileSync=originalRead;rmSync(dir,{recursive:true,force:true});}
+});
+
+test('stdio failed evidence roundtrip retains complete ordered observation without accepting its status',()=>{
+ const {failedScenario}=require('../parity/stdio.cjs'),{createHash}=require('node:crypto'),observation={status:'passed',rows:[{phase:'open',uri:'file:///owned.dfy',version:1,sourceHash:'a'.repeat(64)},{phase:'edit',uri:'file:///owned.dfy',version:2,sourceHash:'b'.repeat(64)},{phase:'closed',uri:'file:///owned.dfy',version:2}],restoration:{confirmed:false}},bytes=Buffer.from(JSON.stringify(observation)+'\n'),original=Error('actual scenario refusal');let reads=0;
+ const row=failedScenario('configuration',23,original,'configuration','/owned',{readFileSync(){reads++;return bytes;}}),copy=JSON.parse(JSON.stringify(row));
+ assert.equal(reads,1);assert.equal(copy.status,'broken');assert.equal(copy.error,original.stack);assert.deepEqual(copy.failedPartialObservation,observation);assert.equal(copy.failedPartialEvidence.sha256,createHash('sha256').update(bytes).digest('hex'));assert.equal(copy.failedPartialEvidence.bytes,bytes.length);
+});
+test('missing unreadable and malformed evidence preserve timeout/missing/error classifications',()=>{
+ const {failedScenario}=require('../parity/stdio.cjs');for(const scope of ['configuration','ghost'])for(const code of ['ENOENT','EACCES','MALFORMED']){
+  const original=Object.assign(Error('owned timed out'),{code:'TIMEOUT'}),row=failedScenario('failed',1,original,scope,'/owned',{readFileSync(){if(code==='MALFORMED')return Buffer.from('{broken');throw Object.assign(Error('evidence unavailable'),{code});}});
+  assert.equal(row.status,'timeout');assert.equal(row.error,original.stack);assert.equal(row.failedPartialObservation,undefined);assert.ok(row.failedPartialEvidence.error);if(code==='MALFORMED')assert.match(row.failedPartialEvidence.sha256,/^[a-f0-9]{64}$/);else assert.equal(row.failedPartialEvidence.code,code);
+ }
+ const missing=failedScenario('missing',1,Object.assign(Error('unsupported request'),{code:-32601}),'services','/owned',{readFileSync(){throw Error('must not read');}});assert.equal(missing.status,'missing');assert.equal(missing.failedPartialEvidence,undefined);
+});
+
+test('configuration resource refusal precedes spawning the protocol fixture',async()=>{
+ if(process.platform!=='linux')return;
+ const resources=require('../parity/resource-state.cjs'),original=resources.resourceState,dir=mkdtempSync(join(tmpdir(),'stdio-resource-refusal-'));let spawned=false;
+ resources.resourceState=()=>({availableBytes:12288*1024**2-1,swapTotalBytes:0});
+ try{await assert.rejects(trial('dafny',1,{dafny:'/owned-fixture',scope:'configuration',configurationMode:'never',memoryReserveMiB:12288,memoryMaxMiB:4096},dir,{configurationSchema:()=>({default:'onchange',enum:['never','onchange','onsave']}),spawnServer(){spawned=true;throw Error('must not spawn');}}),/Configuration resource admission denied/);assert.equal(spawned,false);}
+ finally{resources.resourceState=original;rmSync(dir,{recursive:true,force:true});}
+});

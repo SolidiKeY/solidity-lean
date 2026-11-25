@@ -1,0 +1,22 @@
+// Forged acknowledgement protocol fixtures only; no native/rendered/recovery/row evidence.
+'use strict';
+const test=require('node:test'),assert=require('node:assert/strict'),fs=require('node:fs'),os=require('node:os'),path=require('node:path'),{createHash}=require('node:crypto'),{requestPhase,servePhases,paths}=require('../parity/phase-capture.cjs');
+const png=Buffer.from('iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR4nGNgYGD4DwABBAEAX+XDSwAAAABJRU5ErkJggg==','base64'),hash=b=>createHash('sha256').update(b).digest('hex'),fixture=()=>fs.mkdtempSync(path.join(os.tmpdir(),'phase-ack-'));
+const captures=[undefined,null,false,'captured',{},[],{captured:false,screenshot:true},{captured:'true',screenshot:true},{captured:true,screenshot:false},{captured:true,screenshot:'true'},...[false,0,null,'','renderer failed'].map(error=>({captured:true,screenshot:true,error}))];
+async function forged(capture,error,expectSuccess=false){const dir=fixture();try{const pending=requestPhase(dir,'run','menus-source',{uri:'file:///owned.sol'},1000),checked=expectSuccess?pending:assert.rejects(pending,/failed|acknowledg/i),p=paths(dir,'menus-source'),request=JSON.parse(fs.readFileSync(p.request));fs.writeFileSync(path.join(p.dir,'screenshot.png'),png);const reply={runId:request.runId,phase:request.phase,requestId:request.requestId,metadataHash:hash(JSON.stringify(request.metadata)),status:'captured',capture,error,imageBytes:png.length,imageSha256:hash(png)};fs.writeFileSync(p.reply,JSON.stringify(reply));const result=await checked;assert.deepEqual(JSON.parse(fs.readFileSync(p.reply)),JSON.parse(JSON.stringify(reply)));assert.deepEqual(fs.readFileSync(path.join(p.dir,'screenshot.png')),png);return result;}finally{fs.rmSync(dir,{recursive:true,force:true});}}
+for(const capture of captures)test('consumer refuses malformed renderer acknowledgement '+JSON.stringify(capture),()=>forged(capture));
+for(const error of [false,0,null,'','transport failed'])test('consumer refuses explicit top-level error '+JSON.stringify(error),()=>forged({captured:true,screenshot:true},error));
+for(const capture of captures)test('producer preserves matching refusal '+JSON.stringify(capture),async()=>{const dir=fixture();try{const pending=requestPhase(dir,'run','menus-source',{},1000),rejected=assert.rejects(pending,/failed/);await servePhases(dir,'run',async d=>{fs.writeFileSync(path.join(d,'screenshot.png'),png);return capture;},new Set());await rejected;assert.equal(JSON.parse(fs.readFileSync(paths(dir,'menus-source').reply)).status,'failed');}finally{fs.rmSync(dir,{recursive:true,force:true});}});
+test('complete boolean acknowledgement with no error keeps hash-bound success',async()=>{const reply=await forged({captured:true,screenshot:true},undefined,true);assert.equal(reply.status,'captured');assert.equal(reply.imageSha256,hash(png));});
+
+const rejections=[undefined,null,false,0,'','renderer rejected',new Error('capture rejected'),{message:0},{get message(){throw Error('message unavailable');}},Symbol('capture'),1n];
+for(const [index,reason] of rejections.entries())test('producer retains failed reply for thrown renderer reason '+index,async()=>{
+  const dir=fixture();try{
+    const pending=requestPhase(dir,'run','menus-source',{},1000),rejected=assert.rejects(pending,/failed/),p=paths(dir,'menus-source');
+    await servePhases(dir,'run',async()=>{throw reason;},new Set());await rejected;
+    const reply=JSON.parse(fs.readFileSync(p.reply));assert.equal(reply.status,'failed');assert.equal(typeof reply.error,'string');assert.ok(reply.error.length>0);assert.equal(reply.imageSha256,undefined);
+    if(typeof reason==='string'&&reason)assert.equal(reply.error,reason);
+    if(reason instanceof Error)assert.equal(reply.error,reason.message);
+    assert.equal(fs.existsSync(path.join(p.dir,'screenshot.png')),false);
+  }finally{fs.rmSync(dir,{recursive:true,force:true});}
+});

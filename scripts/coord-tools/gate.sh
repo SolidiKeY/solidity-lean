@@ -114,9 +114,17 @@ else
     run_gate run-changed python3 -B scripts/hygiene/run_changed.py --block workflow --validators \
       --base "$(git merge-base "${GATE_BASE:-origin/master}" HEAD)" --head HEAD
   fi
+  # A factory task step's write scope (GATE_TASK_SCOPE, set by the factory pre-gate for task lanes).
+  if [ "$mode" = touched ] && [ -n "${GATE_TASK_SCOPE:-}" ]; then
+    run_gate task-scope bash scripts/coord-tools/task-gate.sh scope
+  fi
   [ "$failed" -eq 0 ] || exit "$failed"
   [ "$heartbeats" != 1 ] || rm -rf "$logs/heartbeats"  # a reused GATE_LOGS: no old records
   run_gate build-touched build_touched
+  # A factory task step's done test: its target is proved (GATE_TASK_GOAL, set for task lanes).
+  if [ "$mode" = touched ] && [ -n "${GATE_TASK_GOAL:-}" ] && [ "$failed" -eq 0 ]; then
+    run_gate task-goal bash scripts/coord-tools/task-gate.sh goal
+  fi
   # Checking-speed ratchet (scripts/heartbeats/library/ratchet.py), opt-in: the factory sets
   # it. Fails when a rebuilt module exceeds its heartbeat baseline by more than the tolerance.
   if [ "$heartbeats" = 1 ] && [ "$mode" = touched ] && [ "$failed" -eq 0 ]; then

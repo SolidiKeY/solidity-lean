@@ -8,7 +8,7 @@ const unavailable='Positioned verification traces are unavailable: the backend d
 function normalize(text){if(text.startsWith('assume '))text=text.slice(7);if(text.endsWith(';'))text=text.slice(0,-1).trimEnd();return text.split(' && ').map(v=>/^.* == [\w'?]+$/.test(v)?v.split(' == ')[1]+' == '+v.split(' == ')[0]:v).join(', ');}
 function install(vscode,context,{request=null,clock={set:setTimeout,clear:clearTimeout},notify=message=>vscode.window.showInformationMessage?.(message)}={}){
  const states=new Map(),sessions=new WeakMap();let disposed=false;
- const uri=d=>d.uri.toString(),eligible=e=>!disposed&&vscode.workspace.isTrusted&&e&&!e.document.isClosed&&e.document.uri.scheme==='file'&&/\.sol$/i.test(e.document.uri.fsPath);
+ const uri=d=>d.uri.toString(),eligible=e=>!disposed&&vscode.workspace.isTrusted&&e&&require('./editor-document.cjs').isSolidityFile(e.document);
  const colors=d=>vscode.workspace.getConfiguration('solidityLean',d.uri).get('verificationTraceColor',{backgroundColor:null,fontColor:null});
  function session(doc){if(!sessions.has(doc))sessions.set(doc,randomUUID());return sessions.get(doc);}
  function state(doc){let s=states.get(uri(doc));if(s&&s.doc!==doc){stop(s);states.delete(uri(doc));s=null;}if(!s){s={doc,enabled:false,epoch:0};states.set(uri(doc),s);}return s;}
@@ -32,6 +32,7 @@ function install(vscode,context,{request=null,clock={set:setTimeout,clear:clearT
   vscode.commands.registerCommand('solidityLean.hideVerificationTrace',()=>{const e=vscode.window.activeTextEditor;if(e)reset(e.document.uri);}),
   vscode.commands.registerCommand('solidityLean.copyVerificationTrace',()=>{const e=vscode.window.activeTextEditor;if(!eligible(e))return;const s=state(e.document);return fetch(e,s,true);}),
   vscode.workspace.onDidChangeTextDocument(e=>{if(e.contentChanges.length){const s=states.get(uri(e.document));if(s?.doc===e.document){stop(s);if(vscode.window.activeTextEditor?.document===e.document)update(vscode.window.activeTextEditor);}}}),
+  vscode.workspace.onDidOpenTextDocument?.(doc=>{const editor=vscode.window.activeTextEditor;if(editor?.document===doc)update(editor);else menu();}),
   vscode.workspace.onDidCloseTextDocument(doc=>{const s=states.get(uri(doc));if(s?.doc===doc){stop(s);states.delete(uri(doc));}menu();}),
   vscode.workspace.onDidChangeConfiguration(e=>{for(const s of states.values())if(e.affectsConfiguration('solidityLean',s.doc.uri)){stop(s);if(vscode.window.activeTextEditor?.document===s.doc)update(vscode.window.activeTextEditor);}menu();}),
   vscode.window.onDidChangeActiveTextEditor?.(editor=>{for(const s of states.values())stop(s);update(editor);}),

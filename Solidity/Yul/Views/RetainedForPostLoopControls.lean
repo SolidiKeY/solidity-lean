@@ -56,16 +56,8 @@ theorem rfpl_iteration_post_head (G : Source.Glob agEnv) (prior : List (EntryRef
 
 /-- The post inventory survives for-loop composition after normal init. -/
 theorem rfpl_post_head (G : Source.Glob agEnv) :
-    runtimeScope packedStepFrame (.val rtAlias)∈((rfplObserver G).observe [] agShrink.2.1 rsOuter).2 := by
-  have inventory := observeForLoop_iteration_scopes G packedStepFrame 11 0 none (.expr (.tuple rtArgs))
-    (.some (rbrDeepBool 9)) (.some (.tuple rtArgs)) .skip (rfplInit G) (rfiObserver G 11)
-    [] agShrink.2.1 agShrink.2.1 rsOuter rsOuter (rfpl_init_success G [])
-  change runtimeScope packedStepFrame (.val rtAlias)∈
-    (observeForLoop G packedStepFrame 11 0 none (.expr (.tuple rtArgs))
-      (.some (rbrDeepBool 9)) (.some (.tuple rtArgs)) .skip (rfplInit G) (rfiObserver G 11)
-      [] agShrink.2.1 rsOuter).2
-  rw [inventory]
-  exact rfpl_iteration_post_head G _
+    runtimeScope packedStepFrame (.val rtAlias)∈((rfplObserver G).observe [] agShrink.2.1 rsOuter).2 :=
+  rfpl_initializer_head G
 
 /-- Continue has no expression; it still reaches the actual present post. -/
 def rfplContinues (G : Source.Glob agEnv) (n : Nat) :

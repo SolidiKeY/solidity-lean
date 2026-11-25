@@ -1,0 +1,7 @@
+{
+ "Solidity/Correctness/Panic/Main.lean:Solidity.Semantics.run_panic_codes": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ]
+}
