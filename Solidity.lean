@@ -2549,6 +2549,7 @@ import Solidity.Correctness.Lowering.Total.Decode.Callee.Parameters
 import Solidity.Correctness.Lowering.Total.Decode.Callee.Units
 import Solidity.Correctness.Lowering.Total.Decode.Calls
 import Solidity.Correctness.Lowering.Total.Decode.Marked
+import Solidity.Correctness.Lowering.Total.Decode.Self
 import Solidity.Correctness.Lowering.Total.Decode.Spelling
 import Solidity.Correctness.Lowering.Total.Decode.Tables
 import Solidity.Correctness.Lowering.Total.Decode.Widths
@@ -2583,6 +2584,7 @@ import Solidity.Correctness.Lowering.Total.Versions.CalleeBinding.Resolved
 import Solidity.Correctness.Lowering.Total.Versions.Marked
 import Solidity.Correctness.Lowering.Total.Versions.Matching
 import Solidity.Correctness.Lowering.Total.Versions.Primitive
+import Solidity.Correctness.Lowering.Total.Versions.Self
 import Solidity.Correctness.Lowering.Unchecked.CallWitness
 import Solidity.Correctness.Lowering.Unchecked.CalleeMode
 import Solidity.Correctness.Lowering.Unchecked.Composition

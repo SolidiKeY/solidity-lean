@@ -20,3 +20,5 @@
 | `Correctness/Lowering/Total/Decode/Callee/Declarations.lean` | Ordered assembly of all function entries, exact collected-declaration correspondence and count preservation. |
 | `Correctness/Lowering/Total/Decode/Callee/Units.lean` | Contract-unit assembly preserving supplied declaration prefixes and exact translated-function table suffixes. |
 | `Correctness/Lowering/Total/Versions/CalleeBinding/Functions.lean` | Original function-index selection tied to exact translated declaration and actual elaborated Source body. |
+| `Correctness/Lowering/Total/Decode/Self.lean` | Self-aware decoder tables: `address(this)` and its balance spelled; the environment table has no gap. |
+| `Correctness/Lowering/Total/Versions/Self.lean` | Self-aware version: soundness, boundary, Source typing/evaluation of the two reads and value faithfulness under related globals. |

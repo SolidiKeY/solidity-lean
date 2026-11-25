@@ -4,7 +4,7 @@ import Solidity.Correctness.Lowering.Total.Decode.Callee.Declarations
 import Solidity.Correctness.Lowering.Total.Decode.Callee.Metadata
 import Solidity.Correctness.Lowering.Total.Versions.CalleeBinding.Resolved
 import Solidity.Source.Elaborate
-import Solidity.Correctness.Lowering.Total.Versions
+import Solidity.Correctness.Lowering.Total.Versions.Self
 import Solidity.Correctness.Lowering.Total.Decode.BytesLiteral.Evaluation
 import Solidity.Correctness.Lowering.Total.Decode.WithExpr
 import Solidity.Correctness.Lowering.Total.Decode.Callee.Functions
@@ -330,6 +330,45 @@ example : Version.Sound Decode.tablesS := Version.soundS
 example : Simulation.InitialMatching Version.rel Decode.tablesS.decode :=
   Version.initialMatchingAt Version.soundS
 example : FullDomain Version.boundaryS := Version.boundaryAt_fullDomain _ _
+
+/-! ### The self-aware decoder version
+
+`Decode.tablesT` reads `address(this)` and its balance; the state relation
+relates the running account's address and observed balance. -/
+
+/-- `a = address(this)` types for an address `a` and not for a `uint`;
+`n = address(this).balance` types for a `uint` `n` and not for an address. The
+caller-aware version reads neither. -/
+example : (Decode.tablesT.decode
+    (addressRequest [.assign (.name "a") (.env .selfAddress)])).isSome = true := rfl
+example : Decode.tablesT.decode (addressRequest [.assign (.name "n") (.env .selfAddress)]) =
+    none := rfl
+example : (Decode.tablesT.decode
+    (addressRequest [.assign (.name "n") (.env .selfBalance)])).isSome = true := rfl
+example : Decode.tablesT.decode (addressRequest [.assign (.name "a") (.env .selfBalance)]) =
+    none := rfl
+example : Decode.tablesS.decode (addressRequest [.assign (.name "n") (.env .selfBalance)]) =
+    none := rfl
+/-- Both reads inside a loop condition and a comparison with the caller. -/
+example : (Decode.tablesT.decode (addressRequest
+    [.whileLoop {} (.binop .lt (.name "n") (.env .selfBalance))
+      [.require (.binop .neB (.env .msgSender) (.env .selfAddress)),
+       .incDec .postInc (.name "n")]])).isSome = true := rfl
+/-- The environment table has no gap left, and is the caller-aware one elsewhere. -/
+example (k : EnvKey) : (Decode.envT k).isSome = true := Decode.envT_total k
+example : Decode.envT .msgSender = Decode.envS .msgSender := rfl
+example : Decode.envT .selfAddress = some Decode.thisAddress := rfl
+/-- Related globals relate both reads to the Source frame's own account. -/
+example {E : Source.Env} {C : Contract} {G : Source.Glob E} {F : Source.Fr} {st : Source.St E}
+    {σ : State C []} (h : (Version.rel E C).glob G F st σ) :
+    σ.tx.selfAddress.1 = (F.this.val : Int) ∧
+      σ.selfBalance.1 = ((Version.Relation.ownBalance G F st).val : Int) :=
+  ⟨h.2.2.2.2.1, h.2.2.2.2.2.1⟩
+/-- The self-aware tables are sound; total initial matching holds for them. -/
+example : Version.Sound Decode.tablesT := Version.soundT
+example : Simulation.InitialMatching Version.rel Decode.tablesT.decode :=
+  Version.initialMatchingAt Version.soundT
+example : FullDomain Version.boundaryT := Version.boundaryAt_fullDomain _ _
 
 
 /-- Supplementary primitive representation check; simulation is separate. -/
