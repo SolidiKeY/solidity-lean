@@ -22,7 +22,7 @@ proves the Source facts and the agreement with the landed components.
   in order, the program's initializers the model's in order, and the constructor
   declaration the assembled one.
 * **Compatibility** (`partsOf_stateParts`, `stateParts_partsOf`,
-  `partsOf_declsT`, `declsT_partsOf`, `declarationParts_compat`): on an
+  `partsOf_declsT`, `declsT_partsOf`, `slots_compat`, `declarationParts_compat`): on an
   all-primitive root list the result is `Constructor.stateParts`'s, and without
   initializers `TransientDecode.declsT`'s, in both directions.
 * **Transient references** (`ref_not_transient`, `state_ne_transientReference`):
@@ -347,6 +347,19 @@ theorem declsT_partsOf (C : Contract) (roots : List Name) :
       have ih := declsT_partsOf C roots vars rest hr fun v m => prim v (List.mem_cons_of_mem _ m)
       exact (TransientDecode.declsT_ok_iff _ _).mpr
         (.cons he ((TransientDecode.declsT_ok_iff _ _).mp ih))
+
+/-- The primitive component's root and initializer projections are this
+component's, at the same declaration: its slots are read unchanged here. -/
+theorem slots_compat (C : Contract) {scope : String} {d : Source.Decl} :
+    (∀ {v : Name × Ty}, Constructor.VarSlot el tr scope v d →
+      RootSlot (rootType C el) tr scope v d) ∧
+    (∀ {i : Name × RawExpr}, Constructor.InitSlot spell scope i d → InitSlot spell scope i d) := by
+  refine ⟨fun {v} h => ?_, fun {i} h => ?_⟩
+  · obtain ⟨x, T⟩ := v
+    obtain ⟨p, elem, init, rfl, he, rfl⟩ := h
+    exact ⟨.elem elem, init, by simp only [rootType, he], fun _ => rfl, rfl⟩
+  · obtain ⟨elem, t, hs, rfl⟩ := h
+    exact ⟨.elem elem, t, hs, rfl⟩
 
 /-- **Compatibility of the contract assemblies.** Where the landed components
 succeed, this component gives their parts: `Constructor.declarationParts` (the
