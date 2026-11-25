@@ -13,6 +13,7 @@ open Solidity.Correctness.Lowering.Total.CalleeSelection
 open Solidity.Correctness.Lowering.Total.CalleeInference
 open Solidity.Source (STy Syn)
 
+/-- The `internal` role. -/
 def internal : SourceCallable := .local .internalFn
 /-- `function NAME(params) internal returns (rets) {}` with retained source identity. -/
 def fn (name : String) (params : List (Name × Ty)) (rets : List (Name × Ty) := []) : FunDecl :=
@@ -20,13 +21,17 @@ def fn (name : String) (params : List (Name × Ty)) (rets : List (Name × Ty) :=
 /-- The context of the generated contract `C` over the assembled unit. -/
 def ctx (u : Syn .unit) (locals : List (String × STy)) : Source.Ctx :=
   { env := u.env, scope := some "C", locals }
+/-- The positional argument list of `es`, in order. -/
 def args : List (Syn .expr) → Syn (.list .expr)
   | [] => .nil
   | e :: es => .cons e (args es)
 /-- `f(es…)`. -/
 def call (f : String) (es : List (Syn .expr)) : Syn .expr := .call (.ident f) (.positional (args es))
+/-- `true`. -/
 def tru : Syn .expr := .lit (.bool true)
+/-- `1`. -/
 def one : Syn .expr := .lit (.num (.dec 1 0 0))
+/-- `uint256`. -/
 def u256 : STy := .int Source.IntTy.u256
 
 /-- The type `Typed.infer` gives `e` in the assembled contract, if it assembles. -/
@@ -75,8 +80,10 @@ def structS : Syn (.list (.part false)) :=
 
 /-! ## Theorems at the actual fuels -/
 
+/-- The retained parameter slot `bool p`. -/
 theorem boolSlots : Slots [] [("p", Ty.prim .bool)] [.bool] :=
   .cons ⟨.bool, .bool, rfl, rfl, rfl, .bool⟩ .nil
+/-- The retained return slot `uint r`. -/
 theorem uintSlots : Slots [] [("r", Ty.prim .uint)] [u256] :=
   .cons ⟨.uint, .int false 256 (by decide), rfl, rfl, rfl, .uint _ rfl⟩ .nil
 
