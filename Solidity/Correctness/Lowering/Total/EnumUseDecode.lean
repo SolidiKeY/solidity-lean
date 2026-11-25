@@ -106,6 +106,10 @@ theorem Form.read_lt {f : Form} {ms : List String} {i : Nat} (h : f.read ms = so
   | max =>
     cases ms <;> simp_all [Form.read]
 
+section RawReading
+
+variable [FreshNames]
+
 /-! ## The exact reading of `enumLit?` -/
 
 /-- The raw shadowing test of `enumLit?`: a local or a state variable named `x`. -/
@@ -201,6 +205,8 @@ theorem enumLit?_some {C : Contract} {Γ : NCtx} {e : RawExpr} {m : String} {i :
         exact ⟨x, ms, rfl, hs, hl, h, Form.read_lt h⟩
   | _ => simp at h
 
+end RawReading
+
 /-! ## The Source reading on a decoded table -/
 
 /-- The Source reading of a form: the enum's Source member list, read at the form. -/
@@ -235,28 +241,11 @@ theorem sourceRead_min_isSome {C : Contract} {ps : Source.Syn (.list (.part fals
     | nil => exact absurd rfl hne
     | cons _ _ => simp [Form.read]
 
-/-! ## Name resolution, typing and value -/
+/-! ## Decoded declarations, lookup and the typed conversion -/
 
 /-- The enum declaration decoding produces for the entry `(x, f :: r)`. -/
 def enumDecl (s x f : String) (r : List String) : Source.Decl :=
   ⟨.enum, x, some s, false, .enum x f r⟩
-
-/-- **The raw/Source scope alignment** for a name `x` of contract scope `s`,
-around a decoded enum table `ps` of `C`: the Source context is the scope of
-the contract whose environment holds the decoded enums beside non-enum
-declarations; a Source local named `x` is a raw local; a Source declaration
-of scope `s` named `x` outside the enum table is a raw state variable; and
-enum names are distinct and nonempty (solc: one declaration per identifier). -/
-structure Aligned (C : Contract) (ps : Source.Syn (.list (.part false))) (Γr : NCtx)
-    (Γs : Source.Ctx) (s : String) (pre post : List Source.Decl) (x : Name) : Prop where
-  scope : Γs.scope = some s
-  decls : Γs.env.decls = pre ++ ps.collect (some s) ++ post
-  pre_nonEnum : ∀ d ∈ pre, d.kind ≠ .enum
-  post_nonEnum : ∀ d ∈ post, d.kind ≠ .enum
-  locals : x ∈ Γs.locals.map Prod.fst → (Γr.lookupTy (Var.ofName x)).isSome
-  state : ∀ d ∈ pre ++ post, d.scope = some s → d.name = x → (C.rootType x).isSome
-  distinct : C.enums.Pairwise fun a b => a.1 ≠ b.1
-  nonempty : x ≠ ""
 
 private theorem collect_mem (s : String) :
     ∀ (i : Nat) (es : List (Name × List Name)) (ps : Source.Syn (.list (.part false))),
@@ -338,99 +327,11 @@ private theorem lookup_own (E : Source.Env) (s x : String) (h : E.declared (some
   rw [hr, List.map_cons, List.find?_cons_of_pos (by rw [hv, hne]; rfl)]
   exact hv
 
-private theorem declared_eq {C : Contract} {ps : Source.Syn (.list (.part false))}
-    {Γr : NCtx} {Γs : Source.Ctx} {s : String} {pre post : List Source.Decl} {x : Name}
-    (hd : decode C = .ok ps) (hA : Aligned C ps Γr Γs s pre post x)
-    (hst : C.rootType x = none) {ms : List Name} (hl : lookupBy x C.enums = some ms) :
-    ∃ f r, ms = f :: r ∧ Γs.env.declared (some s) x = [enumDecl s x f r] := by
-  obtain ⟨f, r, hms, hf⟩ := collect_filter s x hA.nonempty 0 C.enums ps hd hA.distinct ms hl
-  refine ⟨f, r, hms, ?_⟩
-  have hnone : ∀ l : List Source.Decl, (∀ d ∈ l, d ∈ pre ++ post) →
-      l.filter (fun d => d.scope == some s && d.name == x && x != "") = [] := by
-    intro l hl'
-    rw [List.filter_eq_nil_iff]
-    intro d hdm
-    have := hA.state d (hl' d hdm)
-    simp only [hst, Option.isSome_none, Bool.false_eq_true, imp_false] at this
-    simp only [Bool.and_eq_true, beq_iff_eq, bne_iff_ne, ne_eq]
-    exact fun ⟨⟨hsc, hn⟩, _⟩ => this hsc hn
-  unfold Source.Env.declared
-  rw [hA.decls, List.filter_append, List.filter_append, hf,
-    hnone pre (fun d h => List.mem_append_left _ h),
-    hnone post (fun d h => List.mem_append_right _ h)]
-  rfl
-
-/-- **Name resolution**: under the alignment, an unshadowed raw enum name
-resolves in Source to exactly its decoded enum declaration. -/
-theorem resolve_eq {C : Contract} {ps : Source.Syn (.list (.part false))}
-    {Γr : NCtx} {Γs : Source.Ctx} {s : String} {pre post : List Source.Decl} {x : Name}
-    (hd : decode C = .ok ps) (hA : Aligned C ps Γr Γs s pre post x)
-    (hs : Shadowed C Γr x = false) {ms : List Name} (hl : lookupBy x C.enums = some ms) :
-    ∃ f r, ms = f :: r ∧ Γs.resolve x = some (.decls [enumDecl s x f r]) := by
-  have hloc : (Γr.lookupTy (Var.ofName x)).isSome = false := by
-    simp only [Shadowed, Bool.or_eq_false_iff] at hs; exact hs.1
-  have hst : C.rootType x = none := by
-    simp only [Shadowed, Bool.or_eq_false_iff, Option.isSome_eq_false_iff,
-      Option.isNone_iff_eq_none] at hs
-    exact hs.2
-  obtain ⟨f, r, hms, hdecl⟩ := declared_eq hd hA hst hl
-  refine ⟨f, r, hms, ?_⟩
-  have hidx : (Γs.locals.map Prod.fst).idxOf? x = none := by
-    rw [List.idxOf?_eq_none_iff]
-    intro hm
-    have := hA.locals hm
-    simp_all
-  have hlook : Γs.env.lookup Γs.scope x = [enumDecl s x f r] := by
-    rw [hA.scope, lookup_own _ _ _ (by simp [hdecl]), hdecl]
-  simp only [Source.Ctx.resolve, Source.Env.resolve, hidx, hlook]
-
-/-- **The conversion target**: S01's `Ctx.convTarget` reads the name as the
-decoded enum type. -/
-theorem convTarget_eq {C : Contract} {ps : Source.Syn (.list (.part false))}
-    {Γr : NCtx} {Γs : Source.Ctx} {s : String} {pre post : List Source.Decl} {x : Name}
-    (hd : decode C = .ok ps) (hA : Aligned C ps Γr Γs s pre post x)
-    (hs : Shadowed C Γr x = false) {ms : List Name} (hl : lookupBy x C.enums = some ms) :
-    Γs.convTarget x = some (.enum ⟨some s, x⟩) := by
-  obtain ⟨f, r, -, hr⟩ := resolve_eq hd hA hs hl
-  simp only [Source.Ctx.convTarget, hr, enumDecl]
-
 /-- The conversion `E(i)` is typed at the enum `E` names. -/
 def typedOrdinal {Γ : Source.Ctx} {x : String} {dn : Source.DeclName}
     (h : Γ.convTarget x = some (.enum dn)) (i : Nat) :
     Source.Typed Γ (ordinalSpell x i) (.enum dn) :=
   .convUser h (.const rfl rfl rfl) (by simp [Source.STy.explicit, Source.Q.isInt, Source.Q.toInt, Source.NumLit.value])
-
-/-- **A successful raw enum use, read in Source.** Under the alignment, when
-`enumLit?` reads `x` with field `m` as the ordinal `i`, the base is the name
-`x`, and in Source: `x` resolves to its single decoded enum declaration, whose
-members are the raw ones; S01's conversion target of `x` is that enum type;
-the Source reading of the form is `i`; `E(i)` is typed at the enum type; `i` is
-below the Source layout's member count; and the enum value of ordinal `i` has
-key `i` and is the value `enumOfInt` gives `i`. -/
-theorem decode_use {C : Contract} {ps : Source.Syn (.list (.part false))}
-    {Γr : NCtx} {Γs : Source.Ctx} {s : String} {pre post : List Source.Decl} {x : Name}
-    (hd : decode C = .ok ps) (hA : Aligned C ps Γr Γs s pre post x)
-    {m : String} {i : Nat} (h : enumLit? C Γr (.name x) m = some i) :
-    (∃ f r, lookupBy x C.enums = some (f :: r) ∧
-      Γs.resolve x = some (.decls [enumDecl s x f r])) ∧
-    Γs.convTarget x = some (.enum ⟨some s, x⟩) ∧
-    sourceRead Γs.env ⟨some s, x⟩ (Form.ofField m) = some i ∧
-    Nonempty (Source.Typed Γs (ordinalSpell x i) (.enum ⟨some s, x⟩)) ∧
-    ∃ hi : i < Γs.env.layout.enumSize ⟨some s, x⟩,
-      (Source.Val.enum ⟨i, hi⟩ : Source.Val Γs.env.layout (.enum ⟨some s, x⟩)).key = some i ∧
-      Source.enumOfInt (D := Γs.env.layout) ⟨some s, x⟩ i = pure (.enum ⟨i, hi⟩) := by
-  obtain ⟨x', ms, he, hs, hl, hread, hlt⟩ := enumLit?_some h
-  cases he
-  obtain ⟨f, r, hms, hres⟩ := resolve_eq hd hA hs hl
-  subst hms
-  have hconv := convTarget_eq hd hA hs hl
-  have hsize : Γs.env.layout.enumSize ⟨some s, x⟩ = (f :: r).length := by
-    rw [enumSize_eq hd hA.decls hA.pre_nonEnum hA.post_nonEnum x, hl]; rfl
-  have hi : i < Γs.env.layout.enumSize ⟨some s, x⟩ := hsize ▸ hlt
-  refine ⟨⟨f, r, hl, hres⟩, hconv, ?_, ⟨typedOrdinal hconv i⟩, hi, rfl, ?_⟩
-  · rw [sourceRead_eq hd hA.decls hA.pre_nonEnum hA.post_nonEnum, hl]
-    exact hread
-  · simp [Source.enumOfInt, hi]
 
 /-! ## Source shadowing and the untyped member spelling -/
 
@@ -443,41 +344,6 @@ theorem convTarget_local {Γ : Source.Ctx} {x : String} (h : x ∈ Γ.locals.map
     | none => exact absurd h (List.idxOf?_eq_none_iff.mp hq)
     | some i => exact ⟨i, rfl⟩
   simp [Source.Ctx.convTarget, Source.Ctx.resolve, Source.Env.resolve, hi]
-
-/-- A declaration of the contract scope named `x` beside its enum (solc's
-state-variable shadow, refused there) makes the name ambiguous: `x` is no
-conversion target. -/
-theorem convTarget_shadow {C : Contract} {ps : Source.Syn (.list (.part false))}
-    {Γr : NCtx} {Γs : Source.Ctx} {s : String} {pre post : List Source.Decl} {x : Name}
-    (hd : decode C = .ok ps) (hA : Aligned C ps Γr Γs s pre post x)
-    (hloc : x ∉ Γs.locals.map Prod.fst) {ms : List Name} (hl : lookupBy x C.enums = some ms)
-    {d : Source.Decl} (hdm : d ∈ pre ++ post) (hsc : d.scope = some s) (hn : d.name = x) :
-    Γs.convTarget x = none := by
-  obtain ⟨f, r, -, hf⟩ := collect_filter s x hA.nonempty 0 C.enums ps hd hA.distinct ms hl
-  let p : Source.Decl → Bool := fun d => d.scope == some s && d.name == x && x != ""
-  have hpd : p d = true := by simp [p, hsc, hn, hA.nonempty]
-  have hdecl : Γs.env.declared (some s) x =
-      pre.filter p ++ [enumDecl s x f r] ++ post.filter p := by
-    unfold Source.Env.declared
-    rw [hA.decls, List.filter_append, List.filter_append, hf]
-  have hlen : 2 ≤ (Γs.env.declared (some s) x).length := by
-    rw [hdecl]
-    rcases List.mem_append.mp hdm with hm | hm
-    · have : 0 < (pre.filter p).length :=
-        List.length_pos_of_mem (List.mem_filter.mpr ⟨hm, hpd⟩)
-      simp only [List.length_append, List.length_singleton]; omega
-    · have : 0 < (post.filter p).length :=
-        List.length_pos_of_mem (List.mem_filter.mpr ⟨hm, hpd⟩)
-      simp only [List.length_append, List.length_singleton]; omega
-  have hidx : (Γs.locals.map Prod.fst).idxOf? x = none := List.idxOf?_eq_none_iff.mpr hloc
-  have hlook : Γs.env.lookup Γs.scope x = Γs.env.declared (some s) x := by
-    rw [hA.scope, lookup_own]
-    intro h0; rw [h0] at hlen; simp at hlen
-  unfold Source.Ctx.convTarget Source.Ctx.resolve Source.Env.resolve
-  rw [hidx]
-  simp only [hlook]
-  match hq : Γs.env.declared (some s) x, hlen with
-  | _ :: _ :: _, _ => rfl
 
 private theorem ident_untyped {Γ : Source.Ctx} {x : String} {d : Source.Decl}
     (hres : Γ.resolve x = some (.decls [d])) (hk : d.kind = .enum) {σ : Source.STy}
@@ -562,5 +428,153 @@ theorem spell_bound_untyped {Γ : Source.Ctx} {x : String} {f : Form} (hf : f = 
   rcases hf with rfl | rfl
   · exact bound_untyped _ "min" (by decide) (by decide) t
   · exact bound_untyped _ "max" (by decide) (by decide) t
+
+/-! ## Under the raw/Source alignment -/
+
+section Aligned
+
+variable [FreshNames]
+
+/-- **The raw/Source scope alignment** for a name `x` of contract scope `s`,
+around a decoded enum table `ps` of `C`: the Source context is the scope of
+the contract whose environment holds the decoded enums beside non-enum
+declarations; a Source local named `x` is a raw local; a Source declaration
+of scope `s` named `x` outside the enum table is a raw state variable; and
+enum names are distinct and nonempty (solc: one declaration per identifier). -/
+structure Aligned (C : Contract) (ps : Source.Syn (.list (.part false))) (Γr : NCtx)
+    (Γs : Source.Ctx) (s : String) (pre post : List Source.Decl) (x : Name) : Prop where
+  scope : Γs.scope = some s
+  decls : Γs.env.decls = pre ++ ps.collect (some s) ++ post
+  pre_nonEnum : ∀ d ∈ pre, d.kind ≠ .enum
+  post_nonEnum : ∀ d ∈ post, d.kind ≠ .enum
+  locals : x ∈ Γs.locals.map Prod.fst → (Γr.lookupTy (Var.ofName x)).isSome
+  state : ∀ d ∈ pre ++ post, d.scope = some s → d.name = x → (C.rootType x).isSome
+  distinct : C.enums.Pairwise fun a b => a.1 ≠ b.1
+  nonempty : x ≠ ""
+
+private theorem declared_eq {C : Contract} {ps : Source.Syn (.list (.part false))}
+    {Γr : NCtx} {Γs : Source.Ctx} {s : String} {pre post : List Source.Decl} {x : Name}
+    (hd : decode C = .ok ps) (hA : Aligned C ps Γr Γs s pre post x)
+    (hst : C.rootType x = none) {ms : List Name} (hl : lookupBy x C.enums = some ms) :
+    ∃ f r, ms = f :: r ∧ Γs.env.declared (some s) x = [enumDecl s x f r] := by
+  obtain ⟨f, r, hms, hf⟩ := collect_filter s x hA.nonempty 0 C.enums ps hd hA.distinct ms hl
+  refine ⟨f, r, hms, ?_⟩
+  have hnone : ∀ l : List Source.Decl, (∀ d ∈ l, d ∈ pre ++ post) →
+      l.filter (fun d => d.scope == some s && d.name == x && x != "") = [] := by
+    intro l hl'
+    rw [List.filter_eq_nil_iff]
+    intro d hdm
+    have := hA.state d (hl' d hdm)
+    simp only [hst, Option.isSome_none, Bool.false_eq_true, imp_false] at this
+    simp only [Bool.and_eq_true, beq_iff_eq, bne_iff_ne, ne_eq]
+    exact fun ⟨⟨hsc, hn⟩, _⟩ => this hsc hn
+  unfold Source.Env.declared
+  rw [hA.decls, List.filter_append, List.filter_append, hf,
+    hnone pre (fun d h => List.mem_append_left _ h),
+    hnone post (fun d h => List.mem_append_right _ h)]
+  rfl
+
+/-- **Name resolution**: under the alignment, an unshadowed raw enum name
+resolves in Source to exactly its decoded enum declaration. -/
+theorem resolve_eq {C : Contract} {ps : Source.Syn (.list (.part false))}
+    {Γr : NCtx} {Γs : Source.Ctx} {s : String} {pre post : List Source.Decl} {x : Name}
+    (hd : decode C = .ok ps) (hA : Aligned C ps Γr Γs s pre post x)
+    (hs : Shadowed C Γr x = false) {ms : List Name} (hl : lookupBy x C.enums = some ms) :
+    ∃ f r, ms = f :: r ∧ Γs.resolve x = some (.decls [enumDecl s x f r]) := by
+  have hloc : (Γr.lookupTy (Var.ofName x)).isSome = false := by
+    simp only [Shadowed, Bool.or_eq_false_iff] at hs; exact hs.1
+  have hst : C.rootType x = none := by
+    simp only [Shadowed, Bool.or_eq_false_iff, Option.isSome_eq_false_iff,
+      Option.isNone_iff_eq_none] at hs
+    exact hs.2
+  obtain ⟨f, r, hms, hdecl⟩ := declared_eq hd hA hst hl
+  refine ⟨f, r, hms, ?_⟩
+  have hidx : (Γs.locals.map Prod.fst).idxOf? x = none := by
+    rw [List.idxOf?_eq_none_iff]
+    intro hm
+    have := hA.locals hm
+    simp_all
+  have hlook : Γs.env.lookup Γs.scope x = [enumDecl s x f r] := by
+    rw [hA.scope, lookup_own _ _ _ (by simp [hdecl]), hdecl]
+  simp only [Source.Ctx.resolve, Source.Env.resolve, hidx, hlook]
+
+/-- **The conversion target**: S01's `Ctx.convTarget` reads the name as the
+decoded enum type. -/
+theorem convTarget_eq {C : Contract} {ps : Source.Syn (.list (.part false))}
+    {Γr : NCtx} {Γs : Source.Ctx} {s : String} {pre post : List Source.Decl} {x : Name}
+    (hd : decode C = .ok ps) (hA : Aligned C ps Γr Γs s pre post x)
+    (hs : Shadowed C Γr x = false) {ms : List Name} (hl : lookupBy x C.enums = some ms) :
+    Γs.convTarget x = some (.enum ⟨some s, x⟩) := by
+  obtain ⟨f, r, -, hr⟩ := resolve_eq hd hA hs hl
+  simp only [Source.Ctx.convTarget, hr, enumDecl]
+
+/-- **A successful raw enum use, read in Source.** Under the alignment, when
+`enumLit?` reads `x` with field `m` as the ordinal `i`, the base is the name
+`x`, and in Source: `x` resolves to its single decoded enum declaration, whose
+members are the raw ones; S01's conversion target of `x` is that enum type;
+the Source reading of the form is `i`; `E(i)` is typed at the enum type; `i` is
+below the Source layout's member count; and the enum value of ordinal `i` has
+key `i` and is the value `enumOfInt` gives `i`. -/
+theorem decode_use {C : Contract} {ps : Source.Syn (.list (.part false))}
+    {Γr : NCtx} {Γs : Source.Ctx} {s : String} {pre post : List Source.Decl} {x : Name}
+    (hd : decode C = .ok ps) (hA : Aligned C ps Γr Γs s pre post x)
+    {m : String} {i : Nat} (h : enumLit? C Γr (.name x) m = some i) :
+    (∃ f r, lookupBy x C.enums = some (f :: r) ∧
+      Γs.resolve x = some (.decls [enumDecl s x f r])) ∧
+    Γs.convTarget x = some (.enum ⟨some s, x⟩) ∧
+    sourceRead Γs.env ⟨some s, x⟩ (Form.ofField m) = some i ∧
+    Nonempty (Source.Typed Γs (ordinalSpell x i) (.enum ⟨some s, x⟩)) ∧
+    ∃ hi : i < Γs.env.layout.enumSize ⟨some s, x⟩,
+      (Source.Val.enum ⟨i, hi⟩ : Source.Val Γs.env.layout (.enum ⟨some s, x⟩)).key = some i ∧
+      Source.enumOfInt (D := Γs.env.layout) ⟨some s, x⟩ i = pure (.enum ⟨i, hi⟩) := by
+  obtain ⟨x', ms, he, hs, hl, hread, hlt⟩ := enumLit?_some h
+  cases he
+  obtain ⟨f, r, hms, hres⟩ := resolve_eq hd hA hs hl
+  subst hms
+  have hconv := convTarget_eq hd hA hs hl
+  have hsize : Γs.env.layout.enumSize ⟨some s, x⟩ = (f :: r).length := by
+    rw [enumSize_eq hd hA.decls hA.pre_nonEnum hA.post_nonEnum x, hl]; rfl
+  have hi : i < Γs.env.layout.enumSize ⟨some s, x⟩ := hsize ▸ hlt
+  refine ⟨⟨f, r, hl, hres⟩, hconv, ?_, ⟨typedOrdinal hconv i⟩, hi, rfl, ?_⟩
+  · rw [sourceRead_eq hd hA.decls hA.pre_nonEnum hA.post_nonEnum, hl]
+    exact hread
+  · simp [Source.enumOfInt, hi]
+
+/-- A declaration of the contract scope named `x` beside its enum (solc's
+state-variable shadow, refused there) makes the name ambiguous: `x` is no
+conversion target. -/
+theorem convTarget_shadow {C : Contract} {ps : Source.Syn (.list (.part false))}
+    {Γr : NCtx} {Γs : Source.Ctx} {s : String} {pre post : List Source.Decl} {x : Name}
+    (hd : decode C = .ok ps) (hA : Aligned C ps Γr Γs s pre post x)
+    (hloc : x ∉ Γs.locals.map Prod.fst) {ms : List Name} (hl : lookupBy x C.enums = some ms)
+    {d : Source.Decl} (hdm : d ∈ pre ++ post) (hsc : d.scope = some s) (hn : d.name = x) :
+    Γs.convTarget x = none := by
+  obtain ⟨f, r, -, hf⟩ := collect_filter s x hA.nonempty 0 C.enums ps hd hA.distinct ms hl
+  let p : Source.Decl → Bool := fun d => d.scope == some s && d.name == x && x != ""
+  have hpd : p d = true := by simp [p, hsc, hn, hA.nonempty]
+  have hdecl : Γs.env.declared (some s) x =
+      pre.filter p ++ [enumDecl s x f r] ++ post.filter p := by
+    unfold Source.Env.declared
+    rw [hA.decls, List.filter_append, List.filter_append, hf]
+  have hlen : 2 ≤ (Γs.env.declared (some s) x).length := by
+    rw [hdecl]
+    rcases List.mem_append.mp hdm with hm | hm
+    · have : 0 < (pre.filter p).length :=
+        List.length_pos_of_mem (List.mem_filter.mpr ⟨hm, hpd⟩)
+      simp only [List.length_append, List.length_singleton]; omega
+    · have : 0 < (post.filter p).length :=
+        List.length_pos_of_mem (List.mem_filter.mpr ⟨hm, hpd⟩)
+      simp only [List.length_append, List.length_singleton]; omega
+  have hidx : (Γs.locals.map Prod.fst).idxOf? x = none := List.idxOf?_eq_none_iff.mpr hloc
+  have hlook : Γs.env.lookup Γs.scope x = Γs.env.declared (some s) x := by
+    rw [hA.scope, lookup_own]
+    intro h0; rw [h0] at hlen; simp at hlen
+  unfold Source.Ctx.convTarget Source.Ctx.resolve Source.Env.resolve
+  rw [hidx]
+  simp only [hlook]
+  match hq : Γs.env.declared (some s) x, hlen with
+  | _ :: _ :: _, _ => rfl
+
+end Aligned
 
 end Solidity.Correctness.Lowering.Total.EnumUseDecode
