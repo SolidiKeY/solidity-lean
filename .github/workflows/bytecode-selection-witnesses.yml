@@ -34,7 +34,9 @@ permissions:
 jobs:
   witnesses:
     runs-on: ubuntu-latest
-    timeout-minutes: 30
+    # One measured run with a warm master cache took 2 min 10 s (26 s of it the seven
+    # witness steps); 20 min leaves room for a slow cache download and stops a cold build.
+    timeout-minutes: 20
     steps:
       - uses: actions/checkout@v5
       - name: Set up Lean
