@@ -21,6 +21,7 @@
 | `Correctness/Lowering/Total/Versions/CalleeBinding/Resolved.lean` | Executable whole-unit elaboration and exact selected-declaration frame/body binding to the Source program. |
 | `Correctness/Lowering/Total/Decode/Callee/Metadata.lean` | Ordinary function assembly from retained source identity, visibility and mutability, with exact header correspondence. |
 | `Correctness/Lowering/Total/Decode/Callee/Declarations.lean` | Ordered assembly of all function entries, exact collected-declaration correspondence and count preservation. |
+| `Correctness/Lowering/Total/Decode/Callee/Units.lean` | Contract-unit assembly preserving supplied declaration prefixes and exact translated-function table suffixes. |
 | `Correctness/Lowering/Total/Main.lean` | The loop contract composed with the production and family theorems: it is interpretation faithfulness and `Residual` (unproved); `production_correct` derives the consumer from `Residual` and `FullDomain`. |
 | `Correctness/Lowering/Total/Decode.lean` | The stage-1 raw-to-Source decoder `Decode.decode`: a chosen Source spelling of the raw input, then Source inference and resolution; every other input is a gap. |
 | `Correctness/Lowering/Total/Spells.lean` | The inductive spelling relation `Spells`; the decoder is sound for it and complete if Source inference is (`InferComplete`, unproved). |
