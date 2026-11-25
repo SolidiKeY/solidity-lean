@@ -41,23 +41,48 @@ relates the tree to Source.
   declaration's mutability is not its variables' function types' mutability;
 * whether `internal` was written or left out (`Ann.internalKeyword`; both
   denote the same Source type, `vis_external`);
-* parameter and return names inside the type (read as unnamed; the Source
-  type does not depend on them, `param_name_tys`);
+* the modifier list: the grammar takes any number of `internal`, `external`,
+  `pure`, `view`, `payable` in any order, and the spelling keeps one flag
+  (whether `external` occurs), so repetition, order and a contradictory
+  `internal external` are gone too;
 * `address payable` (spelled `address`, read as `address`: a different Source
   type, `STy.address true`, is never produced);
-* the boundary between a component's name and its location: the suffix is
-  appended with no separator, so a value type named `Tmemory` and `T memory`
-  have one spelling; `locSuffix` reads the location, as `canonFnTy` does;
-* `uint`/`uint256` and `int`/`int256` (one Source type each).
+* an empty `returns ()` (spelled, and read, as no `returns`);
+* the boundary between a component's type and its location: the suffix is
+  appended with no separator, so a type named `Tmemory` and `T memory` have
+  one spelling. `locSuffix` reads a location wherever the spelling ends in
+  one, the base possibly empty. The elaborator reads less: `canonFnTy` only
+  `[]memory`/`[]storage` after a primitive, `fnRefStruct?` a struct of the
+  contract at `memory`/`storage`; elsewhere it keeps the component whole;
+* how a fixed array's length was written (`spellFnTy` spells its value).
+The grammar gives a component a type and a location, no name, so parameter
+names are not erased: they cannot be written (`param_name_tys`: a Source
+name would not change the type).
+
+## What the reading adds or refuses
+
+* The trees are finer than the elaborator's signature equality: `canonFnTy`
+  reads `uint256`, `address` and an enum's name as `uint`, while `leaf` keeps
+  `address` and leaves an enum a name. `leaf` itself merges `uint`/`uint256`
+  and `int`/`int256` (one Source type each; `elemName` spells the short one,
+  so `Part.spell` after a reading is not always the spelling read).
+* `leaf` validates nothing: a component that is no elementary type and ends
+  in no location is a `Part.named` whatever it is (`uint[]`, `string`,
+  `mapping(…)`, an enum, junk such as an empty component); `Refs` decides
+  whether it has a type name.
+* A component that starts as a function type and continues (`spellFnTy` can
+  spell an array of function types, `function(uint)[]memory`) is sent to
+  `fnParts?`, which refuses it: the enclosing signature has no reading.
+  `Reads.malformed` is this refusal, not a well-formedness check of names.
 
 ## What is not proved
 
 Lean's `String.startsWith`, `drop` and `endsWith` have no core lemmas and do
 not reduce in the kernel, so nothing here is derived by computing `fnParts?`:
-facts about it enter as hypotheses (`Reads.fn`; only `fnTy_of_parts`, its
-guard, is proved), and the examples check
-concrete spellings with `#guard`. In particular `fnParts? (fnTyStr ps rs ext)
-= some (ps, rs, ext)` for well-bracketed comma-free components, and that
+facts about it enter as hypotheses (`Reads.fn`, `reads_spell`; only
+`fnTy_of_parts`, its guard, is proved), and the examples check concrete
+spellings with `#guard`. In particular `fnParts? (fnTyStr ps rs ext) =
+some (ps, rs, ext)` for well-bracketed comma-free components, and that
 `readSig`'s fuel (the spelling's length) always suffices, are not established;
 `Reads` is the proof-facing reading and `readSig` computes it (`readSig_reads`).
 
@@ -77,7 +102,8 @@ function type. -/
 inductive Part (α : Type) where
   /-- An elementary type, at its width. -/
   | elem (e : Source.Elem)
-  /-- Another name with no location: an enum, a contract, a value type. -/
+  /-- Any other component with no location suffix, as spelled: an enum, a
+  contract, a value type, or a spelling `leaf` does not classify. -/
   | named (c : String)
   /-- A reference component: its spelling and its recorded location. -/
   | located (base : String) (loc : DataLoc)
@@ -539,6 +565,15 @@ theorem Parts.spells_erase {α : Type} : (ts : Parts α) → ts.erase.spells = t
   | .cons c cs => by
     simp only [Parts.erase, Parts.spells, Part.spell_erase c, Parts.spells_erase cs]
 end
+
+/-- A spelled function type reads back as its tree once `fnParts?` splits the
+spelling into the components' spellings and those read back: the one string
+fact a round trip needs, as a hypothesis. -/
+theorem reads_spell {ext : Bool} {P R : Parts Unit}
+    (parts : fnParts? (Part.fn ext () P R).spell = some (P.spells, R.spells, ext))
+    (params : ReadsAll P.spells P) (returns : ReadsAll R.spells R) :
+    Reads (Part.fn ext () P R).spell (.fn ext () P R) :=
+  .fn parts params returns
 
 /-- Parameters and returns are spelled in order, one spelling each. -/
 theorem Parts.spells_eq {α : Type} : (ts : Parts α) → ts.spells = ts.toList.map Part.spell

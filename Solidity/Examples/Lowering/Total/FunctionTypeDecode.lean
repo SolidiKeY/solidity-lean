@@ -108,16 +108,17 @@ example {s inner : String} (bool : fnTy? "bool" = false)
     Reads s (.fn true () (.cons (.fn false () .nil (.cons (leaf "bool") .nil)) .nil) .nil) :=
   .fn parts ⟨.fn innerParts trivial ⟨.leaf bool, trivial⟩, trivial⟩ trivial
 
-/-- A narrow component's model width row is the width its Source type has
-(`uint8`: the row `("", 8)`, the type `uint8`). -/
+/-- A component `narrowTy?` reads as `uint8`: its model width row is `("", 8)`,
+and its Source type is `uint8` unless the name is one of the full-width names
+(which `narrowTy?` does not read as narrow, a string fact not proved here). -/
 example {c : String} {T : Syn .typeName} (notFn : fnTy? c = false) (notAddress : c ≠ "address")
     (narrow : narrowTy? c = some (.uint, 8)) (notBytes : bytesTy? c = none)
     (h : Decode.typeNameB (.named c) = some T) :
     valueRows? c = some (.uint, [("", 8)]) ∧ (T = .elem u8 ∨ c = "bool" ∨ c = "uint" ∨
       c = "uint256" ∨ c = "int" ∨ c = "int256") := by
   refine ⟨valueRows_narrow notFn notAddress narrow, ?_⟩
-  rcases typeNameB_named h with ⟨n, _, bytes, _⟩ | ⟨address, _⟩ | ⟨bool, _⟩ | ⟨uint, _⟩ |
-    ⟨int, _⟩ | ⟨p, bits, e, narrow', elem, rfl⟩
+  rcases typeNameB_named h with ⟨n, _, bytes, _⟩ | ⟨address, _⟩ | ⟨bool, _⟩ |
+    ⟨uint, _⟩ | ⟨int, _⟩ | ⟨p, bits, e, narrow', elem, rfl⟩
   · rw [notBytes] at bytes
     cases bytes
   · exact absurd address notAddress
@@ -148,9 +149,10 @@ def located : Part Unit :=
 -- A location is part of the reading.
 #guard readSig "function(uint[]storage,Sstorage)returns(bytesmemory)" != some located
 
--- The suffix has no separator: a name ending in a location word reads as a located component (as
--- `canonFnTy` reads it).
+-- The suffix has no separator: a name ending in a location word reads as a located
+-- component, the base possibly empty (the elaborator keeps such a name whole).
 #guard readSig "function(Tmemory)" == some (.fn false () (.cons (.located "T" .memory) .nil) .nil)
+#guard readSig "function(memory)" == some (.fn false () (.cons (.located "" .memory) .nil) .nil)
 
 /-- A reference table for `uint[]` and `bytes`, standing in for a reference
 decoder. -/
@@ -213,6 +215,15 @@ example : (located.annotate ⟨none, false⟩).typeName refs = none := rfl
 #guard readSig "function(function(uint)" == none
 #guard ofDecl (.array (.named "function()")) == none
 #guard ofShape [("#address", 20)] == none
+
+-- An array of function types is spelled by `spellFnTy` and refused here; an empty `returns()`
+-- reads as none; other components are not validated (`Refs` gives them no type name).
+#guard readSig "function(function(uint)[]memory)" == none
+#guard readSig "function(uint)returns()" == readSig "function(uint)"
+#guard readSig "function(uint[],?)" ==
+  some (.fn false () (.cons (.named "uint[]") (.cons (.named "?") .nil)) .nil)
+-- `uint256` reads as `uint`, so spelling a reading need not return the spelling read.
+#guard (readSig "function(uint256)").map Part.spell == some "function(uint)"
 
 /-- A marker `fnParts?` refuses has no reading at any fuel, whatever its tail. -/
 example {s : String} (isFn : fnTy? s = true) (parts : fnParts? s = none) (t : Part Unit) :
