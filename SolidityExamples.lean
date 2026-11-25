@@ -217,6 +217,7 @@ import Solidity.Examples.Lowering.Sim.State
 import Solidity.Examples.Lowering.Sim.StatementV2
 import Solidity.Examples.Lowering.Sim.Stmt
 import Solidity.Examples.Lowering.Total.CallSpellExt
+import Solidity.Examples.Lowering.Total.TransientDecode
 import Solidity.Examples.MemoryFloor
 import Solidity.Examples.MemoryInstantiation
 import Solidity.Examples.MemoryNegativeCountermodel
