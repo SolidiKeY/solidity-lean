@@ -99,7 +99,8 @@ def Table.value (tbl : Table) (c : String) : Option RawTy :=
 
 /-- The type retained for the base `b` at the recorded location `l`. -/
 def Table.located (tbl : Table) (b : String) (l : DataLoc) : Option RawTy :=
-  (tbl.base b).bind fun T => if tbl.entry (b ++ locName l) = some ⟨T, some l⟩ then some T else none
+  (tbl.base b).bind fun T =>
+    if tbl.entry (b ++ locName l) = some ⟨T, some l⟩ then some T else none
 
 variable {tbl : Table}
 
@@ -123,6 +124,26 @@ theorem base_iff {b : String} {T : RawTy} :
     | some l => exact ⟨⟨l, m⟩, sp, fun e me le se => all _ ⟨e, ⟨me, le, se⟩, rfl⟩⟩
   · rintro ⟨⟨l, m⟩, sp, all⟩
     exact ⟨⟨_, ⟨m, rfl, sp⟩, rfl⟩, fun T' ⟨e, ⟨me, le, se⟩, eq⟩ => eq ▸ all e me le se⟩
+
+/-- Two different entries with one spelling: the spelling is not answered. -/
+theorem entry_conflict {e e' : Entry} (m : e ∈ tbl) (m' : e' ∈ tbl) (k : e'.key = e.key)
+    (ne : e ≠ e') : tbl.entry e.key = none := by
+  cases h : tbl.entry e.key with
+  | none => rfl
+  | some x =>
+    obtain ⟨-, -, all⟩ := entry_iff.1 h
+    exact (ne ((all e m rfl).trans (all e' m' k).symm)).elim
+
+/-- Two located entries with one base spelling and different types, at any
+locations: the base is not answered. -/
+theorem base_conflict {T T' : RawTy} {l l' : DataLoc} (m : ⟨T, some l⟩ ∈ tbl)
+    (m' : ⟨T', some l'⟩ ∈ tbl) (sp : spell T' = spell T) (ne : T ≠ T') :
+    tbl.base (spell T) = none := by
+  cases h : tbl.base (spell T) with
+  | none => rfl
+  | some x =>
+    obtain ⟨-, -, all⟩ := base_iff.1 h
+    exact (ne ((all _ m rfl rfl).trans (all _ m' rfl sp).symm)).elim
 
 theorem value_iff {c : String} {T : RawTy} :
     tbl.value c = some T ↔ tbl.entry c = some ⟨T, none⟩ := by
