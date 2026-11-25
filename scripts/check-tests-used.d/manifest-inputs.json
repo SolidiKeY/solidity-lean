@@ -102,6 +102,188 @@
         "path": "tests/h28-sol/mutation-testing/tools/freeze_final.py",
         "purpose": "Default final-manifest generator reads the retained full manifest and hashes oracle source bytes. Paired normal/observed invocations passed in an isolated checkout. Exact unchanged inputs only; no generated-output, Lean execution, semantic or proof credit.",
         "source_blob": "6663df365dbc63476d2ef913780e7bce9fce0ff8"
+      },
+      {
+        "command": [
+          "python3",
+          "-B",
+          "scripts/h55/module-times/census.py"
+        ],
+        "entry_line": 55,
+        "input_revision": "25bd0fef63201b18d9aec4010fb9a85d666956f0",
+        "input_scope": [
+          "tests/h28-sol/automation-benchmark/ChainControls.lean",
+          "tests/h28-sol/automation-benchmark/ChainRefusalBaseline.lean",
+          "tests/h28-sol/automation-benchmark/ChainRefusalCandidate.lean",
+          "tests/h28-sol/automation-benchmark/ContextControls.lean",
+          "tests/h28-sol/automation-benchmark/ProveZeroBaseline.lean",
+          "tests/h28-sol/automation-benchmark/ProveZeroCandidate.lean",
+          "tests/h28-sol/automation-benchmark/ScalarControls.lean",
+          "tests/h28-sol/mutation-testing/oracles/WeakGuardOracle.lean",
+          "tests/h28-sol/solkey-ports/Controls.lean",
+          "tests/h28-sol/solkey-ports/Ledger.lean",
+          "tests/h28-sol/solkey-ports/Runtime.lean",
+          "tests/h28-sol/statement-grammar/BlockHeaderBoundaryControls.lean",
+          "tests/h28-sol/statement-grammar/BlockHeaderBoundaryPublicAxioms.lean",
+          "tests/h28-sol/statement-grammar/CatchCoverageControls.lean",
+          "tests/h28-sol/statement-grammar/CatchCoveragePublicAxioms.lean",
+          "tests/h28-sol/statement-grammar/CatchListCoverageControls.lean",
+          "tests/h28-sol/statement-grammar/CatchListCoveragePublicAxioms.lean",
+          "tests/h28-sol/statement-grammar/G0PublicAxioms.lean",
+          "tests/h28-sol/statement-grammar/ParenBalanceControls.lean",
+          "tests/h28-sol/statement-grammar/TryCoverageControls.lean",
+          "tests/h28-sol/statement-grammar/TryCoveragePublicAxioms.lean",
+          "tests/h28-sol/type-grammar/AxiomAudit.lean",
+          "tests/h28-sol/type-grammar/ParserFixtureMain.lean",
+          "tests/h55/g49-final-theorem/ConstructorCensus.lean",
+          "tests/h55/g49-final-theorem/FoldedPublicControls.lean",
+          "tests/h55/g49-final-theorem/PassCorrectAdapterControls.lean",
+          "tests/h55/g49-final-theorem/PassCorrectControls.lean",
+          "tests/h55/g49-final-theorem/PremiseInventory.lean",
+          "tests/h55/g49-final-theorem/staging/CalculusConsumer.lean",
+          "tests/h55/g49-final-theorem/staging/CalculusControls.lean",
+          "tests/h55/interface-pairs/EquivalenceControls.lean",
+          "tests/h55/source-relations/ContextMapAcceptance.lean",
+          "tests/h55/source-relations/HelperCompatibility.lean",
+          "tests/h55/source-relations/InferAcceptance.lean",
+          "tests/h55/source-relations/RelationRoundtrip.lean",
+          "tests/h55/v08-agreements/Agreements.lean",
+          "tests/h55/yul-artifact/ControlFamilyAdapters.lean"
+        ],
+        "kind": "runnable-entrypoint",
+        "other_reads": "unresolved",
+        "path": "scripts/h55/module-times/census.py",
+        "purpose": "Default h55 Lean module census enumerates and SHA256-hashes every tracked Lean path. Paired normal and observed runs passed; exact unchanged byte reads only. No elaboration, Lean check, semantic-test or proof credit.",
+        "source_blob": "63e1c9bcc965a51797957ee088c8f567281fe33b"
+      },
+      {
+        "command": [
+          "python3",
+          "-B",
+          "tests/h28-sol/mutation-testing/tools/bulk.py"
+        ],
+        "entry_line": 107,
+        "input_revision": "25bd0fef63201b18d9aec4010fb9a85d666956f0",
+        "input_scope": [
+          "tests/h28-sol/mutation-testing/runs/BULK.json"
+        ],
+        "kind": "runnable-entrypoint",
+        "other_reads": "unresolved",
+        "path": "tests/h28-sol/mutation-testing/tools/bulk.py",
+        "purpose": "Default bulk-run checker reads the retained BULK.json run record and reports mismatches. Paired normal and observed runs passed; exact unchanged input only. No Lean execution, oracle rerun or proof credit.",
+        "source_blob": "f6f3b09c5a88aff594c187f6fb7f643d44d08985"
+      },
+      {
+        "path": "tests/h28-sol/type-grammar/run_solc.mjs",
+        "input_revision": "316eb1a6f92b649e5d218a1ba45c77ea47cf88e9",
+        "source_blob": "cb05eeac7078737564180bdc3d7f030520c35065",
+        "kind": "nonpython-entry-source-role",
+        "command": [
+          "node",
+          "tests/h28-sol/type-grammar/run_solc.mjs"
+        ],
+        "interface": {
+          "interpreter": "node",
+          "shebang": null,
+          "entry_line": 6
+        },
+        "provenance": {
+          "commit": "05b3f3f3a0bbb708eb00e86025811aee3eee15b3",
+          "path": "tests/h28-sol/type-grammar/run_solc.mjs",
+          "blob": "cb05eeac7078737564180bdc3d7f030520c35065"
+        },
+        "purpose": "Reviewed H1004 Node program (bare interpreter prefix; needs a solc argument). Source role only, never run or certified to pass. No run/pass/read-anchor/fixture/helper/child/output/compiler/Lean/proof/runtime credit."
+      },
+      {
+        "path": "tests/h28-sol/literal-grammar/solc-fixtures.mjs",
+        "input_revision": "316eb1a6f92b649e5d218a1ba45c77ea47cf88e9",
+        "source_blob": "56774afb5f8d6355c2e8fca81557371364b2b08d",
+        "kind": "nonpython-entry-source-role",
+        "command": [
+          "node",
+          "tests/h28-sol/literal-grammar/solc-fixtures.mjs"
+        ],
+        "interface": {
+          "interpreter": "node",
+          "shebang": null,
+          "entry_line": 5
+        },
+        "provenance": {
+          "commit": "3b327d00fd2262cfb27ccecdc911e9c5d2e7d4f1",
+          "path": "tests/h28-sol/literal-grammar/solc-fixtures.mjs",
+          "blob": "56774afb5f8d6355c2e8fca81557371364b2b08d"
+        },
+        "purpose": "Reviewed H1004 Node program (bare interpreter prefix; needs a solc argument). Source role only, never run or certified to pass. No run/pass/read-anchor/fixture/helper/child/output/compiler/Lean/proof/runtime credit."
+      },
+      {
+        "command": [
+          "python3",
+          "-B",
+          "tests/h28-sol/automation-benchmark/test_scope_policy.py"
+        ],
+        "imports": [
+          {
+            "importer": "tests/h28-sol/automation-benchmark/test_scope_policy.py",
+            "importer_blob": "01146f6d8222a26bc34a89beab21211c5cf3b440",
+            "importer_commit": "bf64bc529d40d2dfc63d34f26b262c70f77a19de",
+            "line": 2
+          }
+        ],
+        "input_revision": "316eb1a6f92b649e5d218a1ba45c77ea47cf88e9",
+        "interface": {
+          "module": "scope_policy",
+          "names": [
+            "adoption_ancestry",
+            "changed_paths",
+            "scope_violations"
+          ]
+        },
+        "kind": "python-import-source-role",
+        "path": "tests/h28-sol/automation-benchmark/scope_policy.py",
+        "provenance": {
+          "blob": "d4dc3f8b3abf74db4759b03dbb84b8e1bdfc9bbe",
+          "commit": "22e91b98298078b2f7b43d0a9bd5e1553b7eb17d",
+          "path": "tests/h28-sol/automation-benchmark/scope_policy.py"
+        },
+        "purpose": "Reviewed H1004 exact Python import dependency of the named kept python3 -B entry sources. Source consumption only: no invocation, passing-run, entered-module, data-read, fixture, child, runtime or proof credit.",
+        "source_blob": "d4dc3f8b3abf74db4759b03dbb84b8e1bdfc9bbe"
+      },
+      {
+        "command": [
+          "python3",
+          "-B",
+          "tests/h28-sol/mutation-testing/tools/check_selected_controls.py"
+        ],
+        "imports": [
+          {
+            "importer": "tests/h28-sol/mutation-testing/tools/check_selected_controls.py",
+            "importer_blob": "fb128da9f4fc433f60f35560c05d5af7d4523888",
+            "importer_commit": "50a5679e38aeaf468850d8f46645bdf5e71aa706",
+            "line": 12
+          },
+          {
+            "importer": "tests/h28-sol/mutation-testing/tools/verify_combined.py",
+            "importer_blob": "521bd933f52e0bb6acd24d3864e506ac3a44a847",
+            "importer_commit": "50a5679e38aeaf468850d8f46645bdf5e71aa706",
+            "line": 106
+          }
+        ],
+        "input_revision": "316eb1a6f92b649e5d218a1ba45c77ea47cf88e9",
+        "interface": {
+          "module": "selected_accounting",
+          "names": [
+            "verify"
+          ]
+        },
+        "kind": "python-import-source-role",
+        "path": "tests/h28-sol/mutation-testing/tools/selected_accounting.py",
+        "provenance": {
+          "blob": "585c80fd909f44f89c526c3c9b9d999457374b82",
+          "commit": "50a5679e38aeaf468850d8f46645bdf5e71aa706",
+          "path": "tests/h28-sol/mutation-testing/tools/selected_accounting.py"
+        },
+        "purpose": "Reviewed H1004 exact Python import dependency of the named kept python3 -B entry sources. Source consumption only: no invocation, passing-run, entered-module, data-read, fixture, child, runtime or proof credit.",
+        "source_blob": "585c80fd909f44f89c526c3c9b9d999457374b82"
       }
     ]
   },
@@ -1721,6 +1903,918 @@
         ],
         "target": "tests/h28-sol/mutation-testing/oracles/RootDeleteSkippedOnProduction.lean",
         "target_blob": "3c60285660f1fa459db6c2434702e21228c2e62f",
+        "operation": "validated Python read of measured bytes"
+      },
+      {
+        "runner": "validated:scripts/h55/module-times/census.py",
+        "input_revision": "25bd0fef63201b18d9aec4010fb9a85d666956f0",
+        "frames": [
+          {
+            "path": "scripts/h55/module-times/census.py",
+            "blob": "63e1c9bcc965a51797957ee088c8f567281fe33b",
+            "line": 56
+          },
+          {
+            "path": "scripts/h55/module-times/census.py",
+            "blob": "63e1c9bcc965a51797957ee088c8f567281fe33b",
+            "line": 48
+          },
+          {
+            "path": "scripts/h55/module-times/census.py",
+            "blob": "63e1c9bcc965a51797957ee088c8f567281fe33b",
+            "line": 39
+          }
+        ],
+        "target": "tests/h28-sol/automation-benchmark/ChainControls.lean",
+        "target_blob": "998d0b53a84d3766090da936c02ac260587a3bce",
+        "operation": "validated Python read of measured bytes"
+      },
+      {
+        "runner": "validated:scripts/h55/module-times/census.py",
+        "input_revision": "25bd0fef63201b18d9aec4010fb9a85d666956f0",
+        "frames": [
+          {
+            "path": "scripts/h55/module-times/census.py",
+            "blob": "63e1c9bcc965a51797957ee088c8f567281fe33b",
+            "line": 56
+          },
+          {
+            "path": "scripts/h55/module-times/census.py",
+            "blob": "63e1c9bcc965a51797957ee088c8f567281fe33b",
+            "line": 48
+          },
+          {
+            "path": "scripts/h55/module-times/census.py",
+            "blob": "63e1c9bcc965a51797957ee088c8f567281fe33b",
+            "line": 39
+          }
+        ],
+        "target": "tests/h28-sol/automation-benchmark/ChainRefusalBaseline.lean",
+        "target_blob": "ce3f9f58320468c7214cf169945c70ad9f85f26f",
+        "operation": "validated Python read of measured bytes"
+      },
+      {
+        "runner": "validated:scripts/h55/module-times/census.py",
+        "input_revision": "25bd0fef63201b18d9aec4010fb9a85d666956f0",
+        "frames": [
+          {
+            "path": "scripts/h55/module-times/census.py",
+            "blob": "63e1c9bcc965a51797957ee088c8f567281fe33b",
+            "line": 56
+          },
+          {
+            "path": "scripts/h55/module-times/census.py",
+            "blob": "63e1c9bcc965a51797957ee088c8f567281fe33b",
+            "line": 48
+          },
+          {
+            "path": "scripts/h55/module-times/census.py",
+            "blob": "63e1c9bcc965a51797957ee088c8f567281fe33b",
+            "line": 39
+          }
+        ],
+        "target": "tests/h28-sol/automation-benchmark/ChainRefusalCandidate.lean",
+        "target_blob": "fc79e0cddf629a5dc1eb8e16b4ff75ab9efc31d4",
+        "operation": "validated Python read of measured bytes"
+      },
+      {
+        "runner": "validated:scripts/h55/module-times/census.py",
+        "input_revision": "25bd0fef63201b18d9aec4010fb9a85d666956f0",
+        "frames": [
+          {
+            "path": "scripts/h55/module-times/census.py",
+            "blob": "63e1c9bcc965a51797957ee088c8f567281fe33b",
+            "line": 56
+          },
+          {
+            "path": "scripts/h55/module-times/census.py",
+            "blob": "63e1c9bcc965a51797957ee088c8f567281fe33b",
+            "line": 48
+          },
+          {
+            "path": "scripts/h55/module-times/census.py",
+            "blob": "63e1c9bcc965a51797957ee088c8f567281fe33b",
+            "line": 39
+          }
+        ],
+        "target": "tests/h28-sol/automation-benchmark/ContextControls.lean",
+        "target_blob": "e975cac99b508d947f4163e6e3fc804b0f116e72",
+        "operation": "validated Python read of measured bytes"
+      },
+      {
+        "runner": "validated:scripts/h55/module-times/census.py",
+        "input_revision": "25bd0fef63201b18d9aec4010fb9a85d666956f0",
+        "frames": [
+          {
+            "path": "scripts/h55/module-times/census.py",
+            "blob": "63e1c9bcc965a51797957ee088c8f567281fe33b",
+            "line": 56
+          },
+          {
+            "path": "scripts/h55/module-times/census.py",
+            "blob": "63e1c9bcc965a51797957ee088c8f567281fe33b",
+            "line": 48
+          },
+          {
+            "path": "scripts/h55/module-times/census.py",
+            "blob": "63e1c9bcc965a51797957ee088c8f567281fe33b",
+            "line": 39
+          }
+        ],
+        "target": "tests/h28-sol/automation-benchmark/ProveZeroBaseline.lean",
+        "target_blob": "e3c6b5a0488c75d8570b604159a68492c3b0e0c6",
+        "operation": "validated Python read of measured bytes"
+      },
+      {
+        "runner": "validated:scripts/h55/module-times/census.py",
+        "input_revision": "25bd0fef63201b18d9aec4010fb9a85d666956f0",
+        "frames": [
+          {
+            "path": "scripts/h55/module-times/census.py",
+            "blob": "63e1c9bcc965a51797957ee088c8f567281fe33b",
+            "line": 56
+          },
+          {
+            "path": "scripts/h55/module-times/census.py",
+            "blob": "63e1c9bcc965a51797957ee088c8f567281fe33b",
+            "line": 48
+          },
+          {
+            "path": "scripts/h55/module-times/census.py",
+            "blob": "63e1c9bcc965a51797957ee088c8f567281fe33b",
+            "line": 39
+          }
+        ],
+        "target": "tests/h28-sol/automation-benchmark/ProveZeroCandidate.lean",
+        "target_blob": "b0ba88ba17b5a3a62473fef574e197655cecd7f1",
+        "operation": "validated Python read of measured bytes"
+      },
+      {
+        "runner": "validated:scripts/h55/module-times/census.py",
+        "input_revision": "25bd0fef63201b18d9aec4010fb9a85d666956f0",
+        "frames": [
+          {
+            "path": "scripts/h55/module-times/census.py",
+            "blob": "63e1c9bcc965a51797957ee088c8f567281fe33b",
+            "line": 56
+          },
+          {
+            "path": "scripts/h55/module-times/census.py",
+            "blob": "63e1c9bcc965a51797957ee088c8f567281fe33b",
+            "line": 48
+          },
+          {
+            "path": "scripts/h55/module-times/census.py",
+            "blob": "63e1c9bcc965a51797957ee088c8f567281fe33b",
+            "line": 39
+          }
+        ],
+        "target": "tests/h28-sol/automation-benchmark/ScalarControls.lean",
+        "target_blob": "d87765309584ab208aee662f9c1ede1d2b23ec8a",
+        "operation": "validated Python read of measured bytes"
+      },
+      {
+        "runner": "validated:scripts/h55/module-times/census.py",
+        "input_revision": "25bd0fef63201b18d9aec4010fb9a85d666956f0",
+        "frames": [
+          {
+            "path": "scripts/h55/module-times/census.py",
+            "blob": "63e1c9bcc965a51797957ee088c8f567281fe33b",
+            "line": 56
+          },
+          {
+            "path": "scripts/h55/module-times/census.py",
+            "blob": "63e1c9bcc965a51797957ee088c8f567281fe33b",
+            "line": 48
+          },
+          {
+            "path": "scripts/h55/module-times/census.py",
+            "blob": "63e1c9bcc965a51797957ee088c8f567281fe33b",
+            "line": 39
+          }
+        ],
+        "target": "tests/h28-sol/mutation-testing/oracles/WeakGuardOracle.lean",
+        "target_blob": "d12b59148fdc2307f9942ea4f33892eaa0626fc2",
+        "operation": "validated Python read of measured bytes"
+      },
+      {
+        "runner": "validated:scripts/h55/module-times/census.py",
+        "input_revision": "25bd0fef63201b18d9aec4010fb9a85d666956f0",
+        "frames": [
+          {
+            "path": "scripts/h55/module-times/census.py",
+            "blob": "63e1c9bcc965a51797957ee088c8f567281fe33b",
+            "line": 56
+          },
+          {
+            "path": "scripts/h55/module-times/census.py",
+            "blob": "63e1c9bcc965a51797957ee088c8f567281fe33b",
+            "line": 48
+          },
+          {
+            "path": "scripts/h55/module-times/census.py",
+            "blob": "63e1c9bcc965a51797957ee088c8f567281fe33b",
+            "line": 39
+          }
+        ],
+        "target": "tests/h28-sol/solkey-ports/Controls.lean",
+        "target_blob": "76c2a2f4acc4381a7f7806c44f44686ed7b4871a",
+        "operation": "validated Python read of measured bytes"
+      },
+      {
+        "runner": "validated:scripts/h55/module-times/census.py",
+        "input_revision": "25bd0fef63201b18d9aec4010fb9a85d666956f0",
+        "frames": [
+          {
+            "path": "scripts/h55/module-times/census.py",
+            "blob": "63e1c9bcc965a51797957ee088c8f567281fe33b",
+            "line": 56
+          },
+          {
+            "path": "scripts/h55/module-times/census.py",
+            "blob": "63e1c9bcc965a51797957ee088c8f567281fe33b",
+            "line": 48
+          },
+          {
+            "path": "scripts/h55/module-times/census.py",
+            "blob": "63e1c9bcc965a51797957ee088c8f567281fe33b",
+            "line": 39
+          }
+        ],
+        "target": "tests/h28-sol/solkey-ports/Ledger.lean",
+        "target_blob": "813804bcae76cef99f9a5ab013f02ea9e4508e79",
+        "operation": "validated Python read of measured bytes"
+      },
+      {
+        "runner": "validated:scripts/h55/module-times/census.py",
+        "input_revision": "25bd0fef63201b18d9aec4010fb9a85d666956f0",
+        "frames": [
+          {
+            "path": "scripts/h55/module-times/census.py",
+            "blob": "63e1c9bcc965a51797957ee088c8f567281fe33b",
+            "line": 56
+          },
+          {
+            "path": "scripts/h55/module-times/census.py",
+            "blob": "63e1c9bcc965a51797957ee088c8f567281fe33b",
+            "line": 48
+          },
+          {
+            "path": "scripts/h55/module-times/census.py",
+            "blob": "63e1c9bcc965a51797957ee088c8f567281fe33b",
+            "line": 39
+          }
+        ],
+        "target": "tests/h28-sol/solkey-ports/Runtime.lean",
+        "target_blob": "2c5230b0530afd8d16e81e7968da545d760b2caf",
+        "operation": "validated Python read of measured bytes"
+      },
+      {
+        "runner": "validated:scripts/h55/module-times/census.py",
+        "input_revision": "25bd0fef63201b18d9aec4010fb9a85d666956f0",
+        "frames": [
+          {
+            "path": "scripts/h55/module-times/census.py",
+            "blob": "63e1c9bcc965a51797957ee088c8f567281fe33b",
+            "line": 56
+          },
+          {
+            "path": "scripts/h55/module-times/census.py",
+            "blob": "63e1c9bcc965a51797957ee088c8f567281fe33b",
+            "line": 48
+          },
+          {
+            "path": "scripts/h55/module-times/census.py",
+            "blob": "63e1c9bcc965a51797957ee088c8f567281fe33b",
+            "line": 39
+          }
+        ],
+        "target": "tests/h28-sol/statement-grammar/BlockHeaderBoundaryControls.lean",
+        "target_blob": "1f6b0fe82a9a3bd2930c42e1d58f9398c9f61f8d",
+        "operation": "validated Python read of measured bytes"
+      },
+      {
+        "runner": "validated:scripts/h55/module-times/census.py",
+        "input_revision": "25bd0fef63201b18d9aec4010fb9a85d666956f0",
+        "frames": [
+          {
+            "path": "scripts/h55/module-times/census.py",
+            "blob": "63e1c9bcc965a51797957ee088c8f567281fe33b",
+            "line": 56
+          },
+          {
+            "path": "scripts/h55/module-times/census.py",
+            "blob": "63e1c9bcc965a51797957ee088c8f567281fe33b",
+            "line": 48
+          },
+          {
+            "path": "scripts/h55/module-times/census.py",
+            "blob": "63e1c9bcc965a51797957ee088c8f567281fe33b",
+            "line": 39
+          }
+        ],
+        "target": "tests/h28-sol/statement-grammar/BlockHeaderBoundaryPublicAxioms.lean",
+        "target_blob": "b7b8667baca117a09c14773157084ff5db012505",
+        "operation": "validated Python read of measured bytes"
+      },
+      {
+        "runner": "validated:scripts/h55/module-times/census.py",
+        "input_revision": "25bd0fef63201b18d9aec4010fb9a85d666956f0",
+        "frames": [
+          {
+            "path": "scripts/h55/module-times/census.py",
+            "blob": "63e1c9bcc965a51797957ee088c8f567281fe33b",
+            "line": 56
+          },
+          {
+            "path": "scripts/h55/module-times/census.py",
+            "blob": "63e1c9bcc965a51797957ee088c8f567281fe33b",
+            "line": 48
+          },
+          {
+            "path": "scripts/h55/module-times/census.py",
+            "blob": "63e1c9bcc965a51797957ee088c8f567281fe33b",
+            "line": 39
+          }
+        ],
+        "target": "tests/h28-sol/statement-grammar/CatchCoverageControls.lean",
+        "target_blob": "575038ef8d9baafbbc758e0e11878380ec61dbdd",
+        "operation": "validated Python read of measured bytes"
+      },
+      {
+        "runner": "validated:scripts/h55/module-times/census.py",
+        "input_revision": "25bd0fef63201b18d9aec4010fb9a85d666956f0",
+        "frames": [
+          {
+            "path": "scripts/h55/module-times/census.py",
+            "blob": "63e1c9bcc965a51797957ee088c8f567281fe33b",
+            "line": 56
+          },
+          {
+            "path": "scripts/h55/module-times/census.py",
+            "blob": "63e1c9bcc965a51797957ee088c8f567281fe33b",
+            "line": 48
+          },
+          {
+            "path": "scripts/h55/module-times/census.py",
+            "blob": "63e1c9bcc965a51797957ee088c8f567281fe33b",
+            "line": 39
+          }
+        ],
+        "target": "tests/h28-sol/statement-grammar/CatchCoveragePublicAxioms.lean",
+        "target_blob": "93c373a6b932b8bc5b706c650770c1d05f53fd67",
+        "operation": "validated Python read of measured bytes"
+      },
+      {
+        "runner": "validated:scripts/h55/module-times/census.py",
+        "input_revision": "25bd0fef63201b18d9aec4010fb9a85d666956f0",
+        "frames": [
+          {
+            "path": "scripts/h55/module-times/census.py",
+            "blob": "63e1c9bcc965a51797957ee088c8f567281fe33b",
+            "line": 56
+          },
+          {
+            "path": "scripts/h55/module-times/census.py",
+            "blob": "63e1c9bcc965a51797957ee088c8f567281fe33b",
+            "line": 48
+          },
+          {
+            "path": "scripts/h55/module-times/census.py",
+            "blob": "63e1c9bcc965a51797957ee088c8f567281fe33b",
+            "line": 39
+          }
+        ],
+        "target": "tests/h28-sol/statement-grammar/CatchListCoverageControls.lean",
+        "target_blob": "e6fd31b2cdc7836e71dc101e57b363b923dbe3af",
+        "operation": "validated Python read of measured bytes"
+      },
+      {
+        "runner": "validated:scripts/h55/module-times/census.py",
+        "input_revision": "25bd0fef63201b18d9aec4010fb9a85d666956f0",
+        "frames": [
+          {
+            "path": "scripts/h55/module-times/census.py",
+            "blob": "63e1c9bcc965a51797957ee088c8f567281fe33b",
+            "line": 56
+          },
+          {
+            "path": "scripts/h55/module-times/census.py",
+            "blob": "63e1c9bcc965a51797957ee088c8f567281fe33b",
+            "line": 48
+          },
+          {
+            "path": "scripts/h55/module-times/census.py",
+            "blob": "63e1c9bcc965a51797957ee088c8f567281fe33b",
+            "line": 39
+          }
+        ],
+        "target": "tests/h28-sol/statement-grammar/CatchListCoveragePublicAxioms.lean",
+        "target_blob": "b40c86b1c7bd6b02284c19bb66f00d4ada6fef7b",
+        "operation": "validated Python read of measured bytes"
+      },
+      {
+        "runner": "validated:scripts/h55/module-times/census.py",
+        "input_revision": "25bd0fef63201b18d9aec4010fb9a85d666956f0",
+        "frames": [
+          {
+            "path": "scripts/h55/module-times/census.py",
+            "blob": "63e1c9bcc965a51797957ee088c8f567281fe33b",
+            "line": 56
+          },
+          {
+            "path": "scripts/h55/module-times/census.py",
+            "blob": "63e1c9bcc965a51797957ee088c8f567281fe33b",
+            "line": 48
+          },
+          {
+            "path": "scripts/h55/module-times/census.py",
+            "blob": "63e1c9bcc965a51797957ee088c8f567281fe33b",
+            "line": 39
+          }
+        ],
+        "target": "tests/h28-sol/statement-grammar/G0PublicAxioms.lean",
+        "target_blob": "9ba21002849a48d776ff998046266b5ff5c70b06",
+        "operation": "validated Python read of measured bytes"
+      },
+      {
+        "runner": "validated:scripts/h55/module-times/census.py",
+        "input_revision": "25bd0fef63201b18d9aec4010fb9a85d666956f0",
+        "frames": [
+          {
+            "path": "scripts/h55/module-times/census.py",
+            "blob": "63e1c9bcc965a51797957ee088c8f567281fe33b",
+            "line": 56
+          },
+          {
+            "path": "scripts/h55/module-times/census.py",
+            "blob": "63e1c9bcc965a51797957ee088c8f567281fe33b",
+            "line": 48
+          },
+          {
+            "path": "scripts/h55/module-times/census.py",
+            "blob": "63e1c9bcc965a51797957ee088c8f567281fe33b",
+            "line": 39
+          }
+        ],
+        "target": "tests/h28-sol/statement-grammar/ParenBalanceControls.lean",
+        "target_blob": "076c67e410382a7294fbedbd509edb85fdb0dcb9",
+        "operation": "validated Python read of measured bytes"
+      },
+      {
+        "runner": "validated:scripts/h55/module-times/census.py",
+        "input_revision": "25bd0fef63201b18d9aec4010fb9a85d666956f0",
+        "frames": [
+          {
+            "path": "scripts/h55/module-times/census.py",
+            "blob": "63e1c9bcc965a51797957ee088c8f567281fe33b",
+            "line": 56
+          },
+          {
+            "path": "scripts/h55/module-times/census.py",
+            "blob": "63e1c9bcc965a51797957ee088c8f567281fe33b",
+            "line": 48
+          },
+          {
+            "path": "scripts/h55/module-times/census.py",
+            "blob": "63e1c9bcc965a51797957ee088c8f567281fe33b",
+            "line": 39
+          }
+        ],
+        "target": "tests/h28-sol/statement-grammar/TryCoverageControls.lean",
+        "target_blob": "6c8c9f6e95f3a17e6ff37d9dfa8191c34d4aac79",
+        "operation": "validated Python read of measured bytes"
+      },
+      {
+        "runner": "validated:scripts/h55/module-times/census.py",
+        "input_revision": "25bd0fef63201b18d9aec4010fb9a85d666956f0",
+        "frames": [
+          {
+            "path": "scripts/h55/module-times/census.py",
+            "blob": "63e1c9bcc965a51797957ee088c8f567281fe33b",
+            "line": 56
+          },
+          {
+            "path": "scripts/h55/module-times/census.py",
+            "blob": "63e1c9bcc965a51797957ee088c8f567281fe33b",
+            "line": 48
+          },
+          {
+            "path": "scripts/h55/module-times/census.py",
+            "blob": "63e1c9bcc965a51797957ee088c8f567281fe33b",
+            "line": 39
+          }
+        ],
+        "target": "tests/h28-sol/statement-grammar/TryCoveragePublicAxioms.lean",
+        "target_blob": "7d0353b3bccd3cc80442772c8e85221aad9f677e",
+        "operation": "validated Python read of measured bytes"
+      },
+      {
+        "runner": "validated:scripts/h55/module-times/census.py",
+        "input_revision": "25bd0fef63201b18d9aec4010fb9a85d666956f0",
+        "frames": [
+          {
+            "path": "scripts/h55/module-times/census.py",
+            "blob": "63e1c9bcc965a51797957ee088c8f567281fe33b",
+            "line": 56
+          },
+          {
+            "path": "scripts/h55/module-times/census.py",
+            "blob": "63e1c9bcc965a51797957ee088c8f567281fe33b",
+            "line": 48
+          },
+          {
+            "path": "scripts/h55/module-times/census.py",
+            "blob": "63e1c9bcc965a51797957ee088c8f567281fe33b",
+            "line": 39
+          }
+        ],
+        "target": "tests/h28-sol/type-grammar/AxiomAudit.lean",
+        "target_blob": "f3ab6e655d625ce862ea71dfa400833a03b39668",
+        "operation": "validated Python read of measured bytes"
+      },
+      {
+        "runner": "validated:scripts/h55/module-times/census.py",
+        "input_revision": "25bd0fef63201b18d9aec4010fb9a85d666956f0",
+        "frames": [
+          {
+            "path": "scripts/h55/module-times/census.py",
+            "blob": "63e1c9bcc965a51797957ee088c8f567281fe33b",
+            "line": 56
+          },
+          {
+            "path": "scripts/h55/module-times/census.py",
+            "blob": "63e1c9bcc965a51797957ee088c8f567281fe33b",
+            "line": 48
+          },
+          {
+            "path": "scripts/h55/module-times/census.py",
+            "blob": "63e1c9bcc965a51797957ee088c8f567281fe33b",
+            "line": 39
+          }
+        ],
+        "target": "tests/h28-sol/type-grammar/ParserFixtureMain.lean",
+        "target_blob": "362b299ab71ab5c4d14e4954590df0a533f3bd34",
+        "operation": "validated Python read of measured bytes"
+      },
+      {
+        "runner": "validated:scripts/h55/module-times/census.py",
+        "input_revision": "25bd0fef63201b18d9aec4010fb9a85d666956f0",
+        "frames": [
+          {
+            "path": "scripts/h55/module-times/census.py",
+            "blob": "63e1c9bcc965a51797957ee088c8f567281fe33b",
+            "line": 56
+          },
+          {
+            "path": "scripts/h55/module-times/census.py",
+            "blob": "63e1c9bcc965a51797957ee088c8f567281fe33b",
+            "line": 48
+          },
+          {
+            "path": "scripts/h55/module-times/census.py",
+            "blob": "63e1c9bcc965a51797957ee088c8f567281fe33b",
+            "line": 39
+          }
+        ],
+        "target": "tests/h55/g49-final-theorem/ConstructorCensus.lean",
+        "target_blob": "c1210d4c55357368a403dd01a6a4bc47fc8d9f25",
+        "operation": "validated Python read of measured bytes"
+      },
+      {
+        "runner": "validated:scripts/h55/module-times/census.py",
+        "input_revision": "25bd0fef63201b18d9aec4010fb9a85d666956f0",
+        "frames": [
+          {
+            "path": "scripts/h55/module-times/census.py",
+            "blob": "63e1c9bcc965a51797957ee088c8f567281fe33b",
+            "line": 56
+          },
+          {
+            "path": "scripts/h55/module-times/census.py",
+            "blob": "63e1c9bcc965a51797957ee088c8f567281fe33b",
+            "line": 48
+          },
+          {
+            "path": "scripts/h55/module-times/census.py",
+            "blob": "63e1c9bcc965a51797957ee088c8f567281fe33b",
+            "line": 39
+          }
+        ],
+        "target": "tests/h55/g49-final-theorem/FoldedPublicControls.lean",
+        "target_blob": "0aa9b7e43e0528d0944cd07f8f3174c11db599f4",
+        "operation": "validated Python read of measured bytes"
+      },
+      {
+        "runner": "validated:scripts/h55/module-times/census.py",
+        "input_revision": "25bd0fef63201b18d9aec4010fb9a85d666956f0",
+        "frames": [
+          {
+            "path": "scripts/h55/module-times/census.py",
+            "blob": "63e1c9bcc965a51797957ee088c8f567281fe33b",
+            "line": 56
+          },
+          {
+            "path": "scripts/h55/module-times/census.py",
+            "blob": "63e1c9bcc965a51797957ee088c8f567281fe33b",
+            "line": 48
+          },
+          {
+            "path": "scripts/h55/module-times/census.py",
+            "blob": "63e1c9bcc965a51797957ee088c8f567281fe33b",
+            "line": 39
+          }
+        ],
+        "target": "tests/h55/g49-final-theorem/PassCorrectAdapterControls.lean",
+        "target_blob": "c1e0886c0c759026aab8c18ac09e153e9c0f3424",
+        "operation": "validated Python read of measured bytes"
+      },
+      {
+        "runner": "validated:scripts/h55/module-times/census.py",
+        "input_revision": "25bd0fef63201b18d9aec4010fb9a85d666956f0",
+        "frames": [
+          {
+            "path": "scripts/h55/module-times/census.py",
+            "blob": "63e1c9bcc965a51797957ee088c8f567281fe33b",
+            "line": 56
+          },
+          {
+            "path": "scripts/h55/module-times/census.py",
+            "blob": "63e1c9bcc965a51797957ee088c8f567281fe33b",
+            "line": 48
+          },
+          {
+            "path": "scripts/h55/module-times/census.py",
+            "blob": "63e1c9bcc965a51797957ee088c8f567281fe33b",
+            "line": 39
+          }
+        ],
+        "target": "tests/h55/g49-final-theorem/PassCorrectControls.lean",
+        "target_blob": "6a51ce79620670ea11f23a2850f6f1dbcee53c12",
+        "operation": "validated Python read of measured bytes"
+      },
+      {
+        "runner": "validated:scripts/h55/module-times/census.py",
+        "input_revision": "25bd0fef63201b18d9aec4010fb9a85d666956f0",
+        "frames": [
+          {
+            "path": "scripts/h55/module-times/census.py",
+            "blob": "63e1c9bcc965a51797957ee088c8f567281fe33b",
+            "line": 56
+          },
+          {
+            "path": "scripts/h55/module-times/census.py",
+            "blob": "63e1c9bcc965a51797957ee088c8f567281fe33b",
+            "line": 48
+          },
+          {
+            "path": "scripts/h55/module-times/census.py",
+            "blob": "63e1c9bcc965a51797957ee088c8f567281fe33b",
+            "line": 39
+          }
+        ],
+        "target": "tests/h55/g49-final-theorem/PremiseInventory.lean",
+        "target_blob": "1b69a7adf1a9754db2d3587b108b3dd9b155a2a4",
+        "operation": "validated Python read of measured bytes"
+      },
+      {
+        "runner": "validated:scripts/h55/module-times/census.py",
+        "input_revision": "25bd0fef63201b18d9aec4010fb9a85d666956f0",
+        "frames": [
+          {
+            "path": "scripts/h55/module-times/census.py",
+            "blob": "63e1c9bcc965a51797957ee088c8f567281fe33b",
+            "line": 56
+          },
+          {
+            "path": "scripts/h55/module-times/census.py",
+            "blob": "63e1c9bcc965a51797957ee088c8f567281fe33b",
+            "line": 48
+          },
+          {
+            "path": "scripts/h55/module-times/census.py",
+            "blob": "63e1c9bcc965a51797957ee088c8f567281fe33b",
+            "line": 39
+          }
+        ],
+        "target": "tests/h55/g49-final-theorem/staging/CalculusConsumer.lean",
+        "target_blob": "a39a843041f59dea90d9081995f4bdc7df50c862",
+        "operation": "validated Python read of measured bytes"
+      },
+      {
+        "runner": "validated:scripts/h55/module-times/census.py",
+        "input_revision": "25bd0fef63201b18d9aec4010fb9a85d666956f0",
+        "frames": [
+          {
+            "path": "scripts/h55/module-times/census.py",
+            "blob": "63e1c9bcc965a51797957ee088c8f567281fe33b",
+            "line": 56
+          },
+          {
+            "path": "scripts/h55/module-times/census.py",
+            "blob": "63e1c9bcc965a51797957ee088c8f567281fe33b",
+            "line": 48
+          },
+          {
+            "path": "scripts/h55/module-times/census.py",
+            "blob": "63e1c9bcc965a51797957ee088c8f567281fe33b",
+            "line": 39
+          }
+        ],
+        "target": "tests/h55/g49-final-theorem/staging/CalculusControls.lean",
+        "target_blob": "5b7e7a920debf6fa00d0c309816cdc29a0b11f6c",
+        "operation": "validated Python read of measured bytes"
+      },
+      {
+        "runner": "validated:scripts/h55/module-times/census.py",
+        "input_revision": "25bd0fef63201b18d9aec4010fb9a85d666956f0",
+        "frames": [
+          {
+            "path": "scripts/h55/module-times/census.py",
+            "blob": "63e1c9bcc965a51797957ee088c8f567281fe33b",
+            "line": 56
+          },
+          {
+            "path": "scripts/h55/module-times/census.py",
+            "blob": "63e1c9bcc965a51797957ee088c8f567281fe33b",
+            "line": 48
+          },
+          {
+            "path": "scripts/h55/module-times/census.py",
+            "blob": "63e1c9bcc965a51797957ee088c8f567281fe33b",
+            "line": 39
+          }
+        ],
+        "target": "tests/h55/interface-pairs/EquivalenceControls.lean",
+        "target_blob": "a8eeaf30eda4d54b5a93e43e5de38b5f9ba0e85b",
+        "operation": "validated Python read of measured bytes"
+      },
+      {
+        "runner": "validated:scripts/h55/module-times/census.py",
+        "input_revision": "25bd0fef63201b18d9aec4010fb9a85d666956f0",
+        "frames": [
+          {
+            "path": "scripts/h55/module-times/census.py",
+            "blob": "63e1c9bcc965a51797957ee088c8f567281fe33b",
+            "line": 56
+          },
+          {
+            "path": "scripts/h55/module-times/census.py",
+            "blob": "63e1c9bcc965a51797957ee088c8f567281fe33b",
+            "line": 48
+          },
+          {
+            "path": "scripts/h55/module-times/census.py",
+            "blob": "63e1c9bcc965a51797957ee088c8f567281fe33b",
+            "line": 39
+          }
+        ],
+        "target": "tests/h55/source-relations/ContextMapAcceptance.lean",
+        "target_blob": "101cd9f5a63fe8d26cc1afe02eca90e2a51769c9",
+        "operation": "validated Python read of measured bytes"
+      },
+      {
+        "runner": "validated:scripts/h55/module-times/census.py",
+        "input_revision": "25bd0fef63201b18d9aec4010fb9a85d666956f0",
+        "frames": [
+          {
+            "path": "scripts/h55/module-times/census.py",
+            "blob": "63e1c9bcc965a51797957ee088c8f567281fe33b",
+            "line": 56
+          },
+          {
+            "path": "scripts/h55/module-times/census.py",
+            "blob": "63e1c9bcc965a51797957ee088c8f567281fe33b",
+            "line": 48
+          },
+          {
+            "path": "scripts/h55/module-times/census.py",
+            "blob": "63e1c9bcc965a51797957ee088c8f567281fe33b",
+            "line": 39
+          }
+        ],
+        "target": "tests/h55/source-relations/HelperCompatibility.lean",
+        "target_blob": "25d476cf7e7f7a82152be817247ecb1dfe29ca33",
+        "operation": "validated Python read of measured bytes"
+      },
+      {
+        "runner": "validated:scripts/h55/module-times/census.py",
+        "input_revision": "25bd0fef63201b18d9aec4010fb9a85d666956f0",
+        "frames": [
+          {
+            "path": "scripts/h55/module-times/census.py",
+            "blob": "63e1c9bcc965a51797957ee088c8f567281fe33b",
+            "line": 56
+          },
+          {
+            "path": "scripts/h55/module-times/census.py",
+            "blob": "63e1c9bcc965a51797957ee088c8f567281fe33b",
+            "line": 48
+          },
+          {
+            "path": "scripts/h55/module-times/census.py",
+            "blob": "63e1c9bcc965a51797957ee088c8f567281fe33b",
+            "line": 39
+          }
+        ],
+        "target": "tests/h55/source-relations/InferAcceptance.lean",
+        "target_blob": "f6df3ceb9f4a6bbcf3c3ce0020ed716381987879",
+        "operation": "validated Python read of measured bytes"
+      },
+      {
+        "runner": "validated:scripts/h55/module-times/census.py",
+        "input_revision": "25bd0fef63201b18d9aec4010fb9a85d666956f0",
+        "frames": [
+          {
+            "path": "scripts/h55/module-times/census.py",
+            "blob": "63e1c9bcc965a51797957ee088c8f567281fe33b",
+            "line": 56
+          },
+          {
+            "path": "scripts/h55/module-times/census.py",
+            "blob": "63e1c9bcc965a51797957ee088c8f567281fe33b",
+            "line": 48
+          },
+          {
+            "path": "scripts/h55/module-times/census.py",
+            "blob": "63e1c9bcc965a51797957ee088c8f567281fe33b",
+            "line": 39
+          }
+        ],
+        "target": "tests/h55/source-relations/RelationRoundtrip.lean",
+        "target_blob": "a07693535b1abaa93e7dfd6616c87cffded49b29",
+        "operation": "validated Python read of measured bytes"
+      },
+      {
+        "runner": "validated:scripts/h55/module-times/census.py",
+        "input_revision": "25bd0fef63201b18d9aec4010fb9a85d666956f0",
+        "frames": [
+          {
+            "path": "scripts/h55/module-times/census.py",
+            "blob": "63e1c9bcc965a51797957ee088c8f567281fe33b",
+            "line": 56
+          },
+          {
+            "path": "scripts/h55/module-times/census.py",
+            "blob": "63e1c9bcc965a51797957ee088c8f567281fe33b",
+            "line": 48
+          },
+          {
+            "path": "scripts/h55/module-times/census.py",
+            "blob": "63e1c9bcc965a51797957ee088c8f567281fe33b",
+            "line": 39
+          }
+        ],
+        "target": "tests/h55/v08-agreements/Agreements.lean",
+        "target_blob": "50839fc67a6ae412de4ca3be6edcca73a67d39f3",
+        "operation": "validated Python read of measured bytes"
+      },
+      {
+        "runner": "validated:scripts/h55/module-times/census.py",
+        "input_revision": "25bd0fef63201b18d9aec4010fb9a85d666956f0",
+        "frames": [
+          {
+            "path": "scripts/h55/module-times/census.py",
+            "blob": "63e1c9bcc965a51797957ee088c8f567281fe33b",
+            "line": 56
+          },
+          {
+            "path": "scripts/h55/module-times/census.py",
+            "blob": "63e1c9bcc965a51797957ee088c8f567281fe33b",
+            "line": 48
+          },
+          {
+            "path": "scripts/h55/module-times/census.py",
+            "blob": "63e1c9bcc965a51797957ee088c8f567281fe33b",
+            "line": 39
+          }
+        ],
+        "target": "tests/h55/yul-artifact/ControlFamilyAdapters.lean",
+        "target_blob": "30b1a02b279e3902842757b8a63b7d9c656724af",
+        "operation": "validated Python read of measured bytes"
+      },
+      {
+        "runner": "validated:tests/h28-sol/mutation-testing/tools/bulk.py",
+        "input_revision": "25bd0fef63201b18d9aec4010fb9a85d666956f0",
+        "frames": [
+          {
+            "path": "tests/h28-sol/mutation-testing/tools/bulk.py",
+            "blob": "f6f3b09c5a88aff594c187f6fb7f643d44d08985",
+            "line": 114
+          },
+          {
+            "path": "tests/h28-sol/mutation-testing/tools/bulk.py",
+            "blob": "f6f3b09c5a88aff594c187f6fb7f643d44d08985",
+            "line": 69
+          },
+          {
+            "path": "tests/h28-sol/mutation-testing/tools/bulk.py",
+            "blob": "f6f3b09c5a88aff594c187f6fb7f643d44d08985",
+            "line": 65
+          }
+        ],
+        "target": "tests/h28-sol/mutation-testing/runs/BULK.json",
+        "target_blob": "2ad31ad0faaac3a8530d07522208cbcaaefa8791",
         "operation": "validated Python read of measured bytes"
       }
     ]
