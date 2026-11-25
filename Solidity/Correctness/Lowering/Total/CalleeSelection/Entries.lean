@@ -3,16 +3,13 @@ import Solidity.Correctness.Lowering.Total.CalleeResolution
 /-!
 # Signatures and callability of translated callee entries
 
-Per-entry facts for overload selection, read from a successful
-`Callee.fromMetadata` translation. The Source signature of the translated
-declaration is derived from `functionDecl_faithful` and its ordered `Slots`
-facts (`fromMetadata_signature`); `Slots` is functional (`slots_unique`), so
-the retained table fixes the ordered parameter types. Source bare-name
-callability from the generated contract's scope is the retained role
-(`callable`, `fromMetadata_callableFrom`): external-only entries are rejected
-and private ones are callable from their own contract. The Source argument
-filter on a translated entry is `Accepts` on its retained parameters
-(`fromMetadata_fits`).
+Per-entry facts read from a successful `Callee.fromMetadata` translation.
+The Source signature is derived from `functionDecl_faithful` and its ordered
+`Slots` (`fromMetadata_signature`), which the retained table fixes
+(`slots_unique`). Bare-name callability from the generated contract's scope is
+the retained role (`callable`, `fromMetadata_callableFrom`): external-only
+entries are rejected, private ones callable from their own contract. The Source
+argument filter is `Accepts` on the retained parameters (`fromMetadata_fits`).
 -/
 namespace Solidity.Correctness.Lowering.Total.CalleeSelection
 
@@ -22,8 +19,7 @@ open Source (STy)
 variable {T : Tables} {R : CallSpellExt.Registry} {scope : String} {f : FunDecl}
   {out : Source.Decl}
 
-/-- The retained role is callable by bare name from the generated contract:
-it has an ordinary visibility other than `external`. -/
+/-- The retained role has an ordinary visibility other than `external`. -/
 def callable (f : FunDecl) : Bool :=
   (f.sourceDecl.bind fun s => ordinaryVisibility s.callable).any (· != .external)
 
@@ -33,8 +29,7 @@ def fits (Γ : Source.Ctx) (σs : List STy) (d : Source.Decl) : Bool :=
   | some (ps, _) => Source.argsFit Γ.isBase Γ.mapFree σs ps
   | none => false
 
-/-- The retained ordered parameter types accept arguments of types `σs` under
-the existing conversion relation. -/
+/-- The retained ordered parameter types accept `σs` under the conversion relation. -/
 def Accepts (isBase : Source.DeclName → Source.DeclName → Bool)
     (mapFree : Source.DeclName → Bool) (σs : List STy) (f : FunDecl) : Prop :=
   ∃ ps, Slots f.widths f.params ps ∧ Source.argsFit isBase mapFree σs ps = true

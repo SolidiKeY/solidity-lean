@@ -16,6 +16,7 @@ def fn (name : String) (callable : SourceCallable) (t : PrimTy) : FunDecl :=
   { sourceDecl := some { name, callable }, params := [("p", .prim t)], body := [] }
 
 def internal : SourceCallable := .local .internalFn
+/-- External-only role. -/
 def external : SourceCallable := .abi .externalFn .selected none
 
 /-- `f(uint)` and `f(bool)`: one name, distinct parameter types. -/
@@ -65,8 +66,7 @@ theorem uint_rejects {isBase mapFree} : ¬ Accepts isBase mapFree [.bool] (fn "f
   cases slots_unique hps (.cons ⟨.uint, .int false 256 (by decide), rfl, rfl, rfl, .uint _ rfl⟩ .nil)
   exact Bool.false_ne_true hfit
 
-/-- Uniquely compatible overload: alias `f_1` selects `f(bool)`; `f(uint)`
-retains the same name but rejects a `bool`, and inference succeeds. -/
+/-- Unique overload: alias `f_1` selects `f(bool)`; `f(uint)` rejects a `bool`. -/
 example {u} (hu : Callee.withFunctions tablesS [] "C" .nil overload = some u) :
     ∃ out rs hsel hsig, Slots [] [] rs ∧
       Source.inferCall (ctx u []) "f" trueArg [.bool] (trueTyped _) =
@@ -83,8 +83,7 @@ example {u} (hu : Callee.withFunctions tablesS [] "C" .nil overload = some u) :
       (fun p hp => by cases hp) (trueTyped _)
   exact ⟨out, rs, hsel, hsig, hrs, hinf⟩
 
-/-- Ambiguous compatible overloads: two positions with equal declarations
-both accept; no singleton filter exists and inference fails. -/
+/-- Ambiguity: two accepting positions with equal declarations; inference fails. -/
 example {u} (hu : Callee.withFunctions tablesS [] "C" .nil twice = some u) :
     Source.inferCall (ctx u []) "f" trueArg [.bool] (trueTyped _) = none :=
   inferCall_none _ <| entries_ambiguous (i := 0) (j := 1)
@@ -94,12 +93,13 @@ example {u} (hu : Callee.withFunctions tablesS [] "C" .nil twice = some u) :
     ⟨[.bool], boolSlots, rfl⟩
     ⟨[.bool], boolSlots, rfl⟩
 
-/-- External-only candidate: its role is not callable, so it is never among
-the callable functions, and the private `f(bool)` at position 1 is selected. -/
+/-- External-only `f` is never callable; the private `f(bool)` at position 1 is selected. -/
 example {u} (hu : Callee.withFunctions tablesS [] "C" .nil withExternal = some u) :
-    callable (fn "f" external .bool) = false ∧
-      ∃ out, (((ctx u []).functions "f").filter (fits (ctx u []) [.bool])) = [out] := by
-  obtain ⟨out, _, _, _, hsel, _⟩ :=
+    (∀ o, fromMetadata tablesS [] "C" (fn "f" external .bool) = some o →
+        o ∉ (ctx u []).functions "f") ∧
+      ∃ out, fromMetadata tablesS [] "C" (fn "f" (.local .privateFn) .bool) = some out ∧
+        (((ctx u []).functions "f").filter (fits (ctx u []) [.bool])) = [out] := by
+  obtain ⟨out, _, hm, _, hsel, _⟩ :=
     entry_selected (Γ := ctx u []) (index := 1) (σs := [.bool])
       (e := ("f_1", fn "f" (.local .privateFn) .bool))
       (source := { name := "f", callable := .local .privateFn }) hu rfl rfl rfl rfl (by decide)
@@ -110,18 +110,18 @@ example {u} (hu : Callee.withFunctions tablesS [] "C" .nil withExternal = some u
         · exact absurd rfl hne
         · cases hj)
       (fun p hp => by cases hp)
-  exact ⟨callable_external rfl rfl, out, hsel⟩
+  exact ⟨fun o ho => entry_unreachable ho (callable_external rfl rfl) rfl, out, hm, hsel⟩
 
-/-- Local shadowing: a local `f` leaves no callable function; inference fails. -/
+/-- Local shadowing over any unit (assembled included): no callable `f`; inference fails. -/
 example (u : Source.Syn .unit) :
     Source.inferCall (ctx u [("f", .bool)]) "f" trueArg [.bool] (trueTyped _) = none :=
   inferCall_none _ fun o h => by
     rw [functions_local (i := 0) rfl] at h; cases h
 
-/-- Matching prefix competitor: the prefix `f(bool)` is callable and accepts,
-so the prefix obligation fails for it. -/
-example {u} (Γ : Source.Ctx) (_ : Callee.withFunctions tablesS [] "C" prefixF single = some u) :
-    ¬ PrefixRejects Γ [.bool] "C" prefixF "f" := fun h => by
+/-- Matching prefix competitor: the prefix `f(bool)` is callable and accepts
+in any context, so the prefix obligation fails (the `#guard` above shows the
+resulting two-candidate filter on the assembled unit). -/
+example (Γ : Source.Ctx) : ¬ PrefixRejects Γ [.bool] "C" prefixF "f" := fun h => by
   rcases h ⟨.function, "f", some "C", false, .function (.ident "f")
       (.cons (.param (.elem .bool) none (some "p")) .nil) (some .internal) none .nil false none
       .nil (.some (.block .nil))⟩ (by simp [CalleeResolution.prefixNamed, prefixF,

@@ -4,35 +4,29 @@ import Solidity.Source.Infer
 /-!
 # Typed callee selection from retained overload metadata
 
-`CalleeResolution.candidates` lists, in order, the declarations a retained
-source name denotes in a successfully assembled `Callee.withFunctions` unit.
-This module reads that list with the existing Source call typing:
-`Source.Ctx.functions`, `Source.Decl.fnSig`, `Source.argsFit`,
-`Source.Typed.callInternal` and `Source.inferCall`. No decoder, resolution or
+Reads `CalleeResolution.candidates` of an assembled `Callee.withFunctions`
+unit with the existing Source call typing (`Ctx.functions`, `Decl.fnSig`,
+`argsFit`, `Typed.callInternal`, `inferCall`); no decoder, resolution or
 selection algorithm is added.
 
-For a context over the assembled environment in the generated contract's
-scope, the callable functions of a name absent from locals are the callable
-prefix functions followed by one declaration per entry retaining that name
-with a callable role (`functions_scope`, `callableEntries`); signatures come
-from `fromMetadata_signature`. External-only entries are never among them
-(`entry_unreachable`); a local of the name hides all (`functions_local`).
+In the generated contract's scope the callable functions of a declared name
+absent from locals are the callable prefix functions, then one declaration per
+entry retaining the name with a callable role (`functions_scope`; signatures
+by `callableEntries_entry` and `fromMetadata_signature`). Noncallable entries
+are never among them (`entry_unreachable`); a local hides all (`functions_local`).
 
-`entry_selected` derives the actual singleton overload filter for an entry
-from table-level conditions: its retained name is nonempty and unshadowed, its
-role is callable, its retained parameter slots accept the argument types, and
-every other entry position retaining the name (`OthersReject`) and every
-matching prefix declaration (`PrefixRejects`) is noncallable or
-argument-incompatible. Conditions are positional: two accepting callable
-positions are ambiguous even with equal declarations (`entries_ambiguous`).
-`typedCall` is the resulting `Typed.callInternal`, and `inferCall_selected`,
-`alias_inferCall` show that `inferCall` returns it from independently supplied
-`TypedArgs`; `inferCall_none` is the failure side.
+`entry_selected` derives the actual singleton overload filter from table-level
+conditions: a nonempty unshadowed retained name, a callable role, accepting
+retained parameter slots, and every other entry position retaining the name
+(`OthersReject`) and matching prefix declaration (`PrefixRejects`) noncallable
+or argument-incompatible. Two accepting callable positions are ambiguous even
+with equal declarations (`entries_ambiguous`). `typedCall` is the
+`Typed.callInternal` derivation; `inferCall_selected`, `alias_inferCall` show
+`inferCall` returns it from supplied `TypedArgs`, `inferCall_none` the failure.
 
-The conditions are obligations for the decoder lane to discharge, not
-admission restrictions or premises of `lowerLoopsCorrect`. Nothing here
-claims expression inference completeness, execution agreement, inheritance
-reconstruction, complete coverage or simulation.
+The conditions are decoder-lane obligations, not admission restrictions or
+premises of `lowerLoopsCorrect`. No expression inference completeness,
+execution agreement, inheritance reconstruction, coverage or simulation.
 -/
 namespace Solidity.Correctness.Lowering.Total.CalleeSelection
 
@@ -44,22 +38,19 @@ variable {T : Tables} {R : CallSpellExt.Registry} {scope : String}
   {leadingParts : Source.Syn (.list (.part false))} {fs : List (Name × FunDecl)}
   {u : Source.Syn .unit} {Γ : Source.Ctx} {σs : List STy} {x : String}
 
-/-- Translations of the entries retaining source name `x` with a callable
-role, in entry order, one per entry. -/
+/-- Translations of the callable entries retaining source name `x`, one per entry, in order. -/
 def callableEntries (T : Tables) (R : CallSpellExt.Registry) (scope : String)
     (fs : List (Name × FunDecl)) (x : String) : List Source.Decl :=
   fs.filterMap fun e => (fromMetadata T R scope e.2).filter fun d => d.name == x && callable e.2
 
-/-- Every entry position other than `index` retaining source name `x` is
-noncallable or does not accept the arguments. -/
+/-- Every other entry position retaining `x` is noncallable or rejects the arguments. -/
 def OthersReject (isBase : Source.DeclName → Source.DeclName → Bool)
     (mapFree : Source.DeclName → Bool) (σs : List STy) (fs : List (Name × FunDecl))
     (x : String) (index : Nat) : Prop :=
   ∀ (j : Nat) (e : Name × FunDecl) (s : SourceFunction), fs[j]? = some e → j ≠ index →
     e.2.sourceDecl = some s → s.name = x → callable e.2 = false ∨ ¬ Accepts isBase mapFree σs e.2
 
-/-- Every prefix declaration named `x` in the contract scope is not a
-function, not callable from the contract, or does not accept the arguments. -/
+/-- Every prefix declaration named `x` is no callable function or rejects the arguments. -/
 def PrefixRejects (Γ : Source.Ctx) (σs : List STy) (scope : String)
     (leadingParts : Source.Syn (.list (.part false))) (x : String) : Prop :=
   ∀ p ∈ prefixNamed scope leadingParts x,
@@ -67,8 +58,7 @@ def PrefixRejects (Γ : Source.Ctx) (σs : List STy) (scope : String)
 
 /-! ## Callable functions of a name -/
 
-/-- With the name absent from locals, the callable functions are the visible
-function declarations of the actual lookup. -/
+/-- Without a local of the name: the visible functions of the actual lookup. -/
 theorem functions_lookup (hloc : (Γ.locals.map Prod.fst).idxOf? x = none) :
     Γ.functions x =
       (Γ.env.lookup Γ.scope x).filter fun d => d.kind == .function && d.callableFrom Γ.scope := by
@@ -82,8 +72,35 @@ theorem functions_local {i : Nat} (hloc : (Γ.locals.map Prod.fst).idxOf? x = so
     Γ.functions x = [] := by
   simp only [Source.Ctx.functions, Source.Ctx.resolve, Source.Env.resolve, hloc]
 
-/-- In the assembled contract scope the callable functions of a declared name
-are the callable prefix functions, then the callable retained entries. -/
+/-- A translated entry is a candidate of its nonempty name. -/
+theorem entry_candidate {index : Nat} {e : Name × FunDecl} {out : Source.Decl}
+    (hi : fs[index]? = some e) (hm : fromMetadata T R scope e.2 = some out) (hx : out.name ≠ "") :
+    out ∈ candidates T R scope leadingParts fs out.name := by
+  simp only [candidates, hx, if_false]
+  exact List.mem_append_right _ (List.mem_filterMap.mpr
+    ⟨e, List.mem_of_getElem? hi, by simp [hm, Option.filter]⟩)
+
+/-- A nonempty candidate list is the actual lookup. -/
+theorem lookup_candidates (h : withFunctions T R scope leadingParts fs = some u)
+    (hc : candidates T R scope leadingParts fs x ≠ []) :
+    u.env.lookup (some scope) x = candidates T R scope leadingParts fs x := by
+  rw [lookup_scope h]
+  cases hcs : candidates T R scope leadingParts fs x with
+  | nil => exact absurd hcs hc
+  | cons _ _ => rfl
+
+/-- Each callable entry declaration translates a callable entry retaining the name. -/
+theorem callableEntries_entry {o : Source.Decl} (ho : o ∈ callableEntries T R scope fs x) :
+    ∃ e ∈ fs, fromMetadata T R scope e.2 = some o ∧ o.name = x ∧ callable e.2 = true := by
+  obtain ⟨e, he, hb⟩ := List.mem_filterMap.mp ho
+  refine ⟨e, he, ?_⟩
+  cases hm : fromMetadata T R scope e.2 with
+  | none => simp [hm] at hb
+  | some o' =>
+      by_cases h1 : o'.name = x <;> by_cases h2 : callable e.2 = true <;>
+        simp_all [Option.filter]
+
+/-- Callable functions of a declared name: callable prefix functions, then callable entries. -/
 theorem functions_scope (h : withFunctions T R scope leadingParts fs = some u)
     (henv : Γ.env = u.env) (hsc : Γ.scope = some scope)
     (hloc : (Γ.locals.map Prod.fst).idxOf? x = none)
@@ -93,12 +110,7 @@ theorem functions_scope (h : withFunctions T R scope leadingParts fs = some u)
           (fun d => d.kind == .function && d.callableFrom (some scope)) ++
         callableEntries T R scope fs x := by
   have hx : x ≠ "" := fun hx => hc (hx ▸ candidates_empty)
-  have he : (candidates T R scope leadingParts fs x).isEmpty = false := by
-    cases hcs : candidates T R scope leadingParts fs x with
-    | nil => exact absurd hcs hc
-    | cons _ _ => rfl
-  rw [functions_lookup hloc, henv, hsc, lookup_scope h]
-  simp only [he, Bool.false_eq_true, if_false]
+  rw [functions_lookup hloc, henv, hsc, lookup_candidates h hc]
   simp only [candidates, hx, if_false, List.filter_append, entriesNamed, callableEntries,
     List.filter_filterMap]
   congr 2
@@ -109,8 +121,7 @@ theorem functions_scope (h : withFunctions T R scope leadingParts fs = some u)
       by_cases hn : o.name = x <;>
         simp [Option.filter, hn, fromMetadata_callableFrom hm]
 
-/-- An entry with a noncallable role (external-only included) is never among
-the callable functions of the generated contract, under any name. -/
+/-- A noncallable (e.g. external-only) entry is never a callable function, under any name. -/
 theorem entry_unreachable {f : FunDecl} {out : Source.Decl}
     (hm : fromMetadata T R scope f = some out) (hcall : callable f = false)
     (hsc : Γ.scope = some scope) : out ∉ Γ.functions x := by
@@ -143,11 +154,8 @@ theorem entry_selected {index : Nat} {e : Name × FunDecl} {source : SourceFunct
     fromMetadata_signature hm Γ.env
   cases hs.symm.trans hs'
   cases slots_unique hps hps'
-  have hc : candidates T R scope leadingParts fs source.name ≠ [] := by
-    refine List.ne_nil_of_mem (a := out) ?_
-    simp only [candidates, hne, if_false]
-    exact List.mem_append_right _ (List.mem_filterMap.mpr
-      ⟨e, List.mem_of_getElem? hi, by simp [hm, Option.filter, hn]⟩)
+  have hc : candidates T R scope leadingParts fs source.name ≠ [] :=
+    List.ne_nil_of_mem (hn ▸ entry_candidate hi hm (hn ▸ hne))
   refine ⟨out, rs, hm, hrs, ?_, hsig⟩
   rw [functions_scope h henv hsc hloc hc, List.filter_append]
   rw [List.filter_eq_nil_iff.mpr fun p hp => by
@@ -168,9 +176,8 @@ theorem entry_selected {index : Nat} {e : Name × FunDecl} {source : SourceFunct
       · rw [hq.1.2] at hk; cases hk
       · exact hk ((fromMetadata_fits hm' Γ σs).mp hq.2)
 
-/-- Positional ambiguity: two distinct entry positions retaining the name,
-both callable and accepting, leave no singleton overload filter, even when
-their declarations coincide. -/
+/-- Positional ambiguity: two callable accepting positions retaining the name
+leave no singleton overload filter, even when their declarations coincide. -/
 theorem entries_ambiguous {i j : Nat} {e e' : Name × FunDecl} {s s' : SourceFunction}
     (h : withFunctions T R scope leadingParts fs = some u) (henv : Γ.env = u.env)
     (hsc : Γ.scope = some scope) (hx : x ≠ "")
@@ -187,16 +194,9 @@ theorem entries_ambiguous {i j : Nat} {e e' : Name × FunDecl} {s s' : SourceFun
   obtain ⟨t', _, _, _, ht', _, hnt', hst', _⟩ := fromMetadata_signature hm' Γ.env
   cases hs.symm.trans ht
   cases hs'.symm.trans ht'
-  have hmem : out ∈ candidates T R scope leadingParts fs x := by
-    simp only [candidates, hx, if_false]
-    exact List.mem_append_right _ (List.mem_filterMap.mpr
-      ⟨e, List.mem_of_getElem? hi, by simp [hm, Option.filter, hnt, hn]⟩)
-  have he : (candidates T R scope leadingParts fs x).isEmpty = false := by
-    cases hcs : candidates T R scope leadingParts fs x with
-    | nil => rw [hcs] at hmem; cases hmem
-    | cons _ _ => rfl
-  rw [functions_lookup hloc, henv, hsc, lookup_scope h] at ho
-  simp only [he, Bool.false_eq_true, if_false] at ho
+  have hxo : out.name = x := hnt.trans hn
+  rw [functions_lookup hloc, henv, hsc, lookup_candidates h
+    (List.ne_nil_of_mem (hxo ▸ entry_candidate hi hm (hxo ▸ hx)))] at ho
   rw [← declared_scope h, Source.Env.declared, List.filter_filter, List.filter_filter] at ho
   have hpos := filter_singleton_index ho hp
     (by simp [hst, hnt, hn, hx, fromMetadata_callableFrom hm, hc,
@@ -242,10 +242,8 @@ theorem inferCall_none (da : Source.TypedArgs Γ args σs)
     exact absurd hf (hno d')
   · rfl
 
-/-- **Typed selection for a model alias**: under the table-level conditions,
-the alias-selected entry's translation is the unique overload, and call
-inference succeeds with its `Typed.callInternal` derivation from any supplied
-argument typing. -/
+/-- **Typed selection for a model alias**: the alias-selected entry is the unique
+overload, and inference returns its derivation from any supplied argument typing. -/
 theorem alias_inferCall {a : Name} {fd : FunDecl} {source : SourceFunction} {index : Nat}
     (h : withFunctions T R scope leadingParts fs = some u) (henv : Γ.env = u.env)
     (hsc : Γ.scope = some scope) (hl : lookupBy a fs = some fd)
