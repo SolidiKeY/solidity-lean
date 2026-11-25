@@ -1,0 +1,2 @@
+| `Correctness/Lowering/Total/FunctionTypeRoundTrip/Nat.lean` | `String.any`, `String.foldl` and `String.toNat?` of `String.mk l` proved equal to list operations from the core definitions. |
+| `Correctness/Lowering/Total/FunctionTypeRoundTrip/Leaves.lean` | The leaf reader on characters (`narrowTy?`, `bytesTy?`, `typeNameB`, `locSuffix`, `leaf`), every elementary width read back (kernel evaluation), the `ElemFree` condition with a sufficient syntactic criterion, and located spellings cut exactly at their location: the leaf facts of the function-signature round trip. |

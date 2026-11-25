@@ -13,7 +13,7 @@ kernel. Each is proved equal to a character-list form (`leaf_mk`), from which:
   `address`, `uintN`/`intN` at every width, `bytesN`) is read back at its type
   and width, is no function type and is `Well` (all widths by kernel
   evaluation, `intsOk`, `bytesOk`);
-* `ElemFree` (decidable): no elementary reading; `elemFree_of_last`: a
+* `ElemFree` (decidable): no elementary reading; sufficient (`elemFree_of_last`): a
   component not ending in a digit and none of `bool`, `address`, `uint`, `int`;
 * `leaf_located`: `b ++ locName d` is read as `b` at `d`, for every base.
 -/
