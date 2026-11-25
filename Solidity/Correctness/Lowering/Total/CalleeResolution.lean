@@ -18,11 +18,12 @@ in the contract scope are exactly, in order, the matching scope declarations
 of the supplied prefix followed by every matching translated function entry
 (`declared_scope`, `candidates`), so overloads and entries sharing a retained
 name all stay; lookup is that set when nonempty and the file level otherwise
-(`lookup_scope`). For an alias-selected entry with a nonempty retained name the
+(`lookup_scope`); nothing is found under the empty name (`lookup_empty`). For an alias-selected entry with a nonempty retained name the
 declaration is in the actual lookup (`alias_lookup`); with the name absent from
 locals, `Resolves` and `Env.resolve` give the whole declaration set
-(`alias_resolves`), while a local of that name shadows it (`alias_local`). The
-empty name has no candidates (`candidates_empty`).
+(`alias_resolves`), while a local of that name shadows it (`alias_local`, like `visible_self` a
+generic fact of `Source.Resolves`, not of the assembly). The empty name has no
+candidates (`candidates_empty`).
 
 `DeclaredUniquely` follows from explicit retained-name uniqueness and prefix
 noncollision (`alias_declaredUniquely`); both are obligations for the decoder
@@ -122,11 +123,17 @@ theorem lookup_scope (h : withFunctions T R scope leadingParts fs = some u) (x :
   simp only [List.find?_cons, List.find?_nil, hv]
   cases hc : candidates T R scope leadingParts fs x <;> simp [hv, hc]
 
+/-- Empty-name boundary: nothing is found under `""` in the contract scope. -/
+theorem lookup_empty (h : withFunctions T R scope leadingParts fs = some u) :
+    u.env.lookup (some scope) "" = [] := by
+  rw [lookup_scope h]
+  simp [candidates, Source.Env.declared]
+
 /-! ## The alias-selected declaration -/
 
-/-- The declaration an alias lookup selects is among the candidates under its
-retained name, and for a nonempty name the actual lookup is the whole
-candidate set and contains it. -/
+/-- The declaration an alias lookup selects is among the translated entries
+named by its retained name; for a nonempty name it is also a candidate, and
+the actual lookup is the whole candidate set and contains it. -/
 theorem alias_lookup {a : Name} {d : FunDecl}
     (h : withFunctions T R scope leadingParts fs = some u) (hl : lookupBy a fs = some d) :
     ∃ out source, fromMetadata T R scope d = some out ∧ d.sourceDecl = some source ∧

@@ -21,6 +21,8 @@ def overload : List (Name × FunDecl) := [("h_0", fn "h"), ("h_1", fn "h")]
 /-- A prefix `error f();` colliding with the function `f`. -/
 def errorF : Source.Syn (.list (.part false)) := .cons (.error "f" .nil) .nil
 def single : List (Name × FunDecl) := [("f_0", fn "f")]
+/-- Alias `f` twice: lookup selects `first`; `second` is shadowed as an alias only. -/
+def dupAlias : List (Name × FunDecl) := [("f", fn "first"), ("f", fn "second")]
 
 def unitOf (pre : Source.Syn (.list (.part false))) (fs : List (Name × FunDecl)) :
     Option (Source.Syn .unit) :=
@@ -47,6 +49,9 @@ def resolveOf (pre : Source.Syn (.list (.part false))) (fs : List (Name × FunDe
 #guard resolveOf .nil overload [] "h" == some (some (.inr 2))
 #guard resolveOf .nil renamed ["x", "get"] "get" == some (some (.inl 1))
 #guard lookupOf .nil [("e", fn "")] "" == some []
+#guard lookupOf .nil dupAlias "first" == some [("first", true)]
+#guard lookupOf .nil dupAlias "second" == some [("second", true)]
+#guard lookupOf .nil dupAlias "f" == some []
 
 /-- The assembled contract linearizes to itself. -/
 example {u} (hu : unitOf .nil renamed = some u) : u.env.linearize "C" = some ["C"] :=
@@ -91,17 +96,35 @@ example {u} (hu : unitOf .nil overload = some u) :
   rw [declared_scope hu, hn, hlen] at this
   cases this
 
-/-- Prefix collision: `error f()` is a candidate before the function `f`. -/
+/-- Prefix collision: `error f()` is a candidate before the function `f`; the
+function is still in the actual lookup, but uniqueness fails. -/
 example {u} (hu : unitOf errorF single = some u) :
-    (candidates tablesS [] "C" errorF single "f").length = 2 ∧
-      (prefixNamed "C" errorF "f").length = 1 := by
-  obtain ⟨out, source, hm, hs, hn, _, _, _⟩ := alias_lookup hu (a := "f_0") rfl
+    ∃ out, (candidates tablesS [] "C" errorF single "f").length = 2 ∧
+      (prefixNamed "C" errorF "f").length = 1 ∧
+      out ∈ u.env.lookup (some "C") "f" ∧ ¬ DeclaredUniquely u "C" out := by
+  obtain ⟨out, source, hm, hs, hn, _, _, hk⟩ := alias_lookup hu (a := "f_0") rfl
   cases hs
   have he : entriesNamed tablesS [] "C" single "f" = [out] := by
     simp [entriesNamed, single, hm, Option.filter, hn]
-  refine ⟨?_, rfl⟩
-  simp only [candidates, if_neg (by decide : "f" ≠ ""), List.length_append, he]
-  rfl
+  have hlen : (candidates tablesS [] "C" errorF single "f").length = 2 := by
+    simp only [candidates, if_neg (by decide : "f" ≠ ""), List.length_append, he]
+    rfl
+  refine ⟨out, hlen, rfl, (hk (by decide)).2.2, fun h => ?_⟩
+  have := congrArg List.length h
+  rw [declared_scope hu, hn, hlen] at this
+  cases this
+
+/-- Duplicate aliases: `f` selects `first`; the shadowed entry `second` is
+still a Source declaration under its own name. -/
+example {u} (hu : unitOf .nil dupAlias = some u) :
+    ∃ out, out.name = "first" ∧ out ∈ u.env.lookup (some "C") "first" := by
+  obtain ⟨out, source, _, hs, hn, _, _, hk⟩ := alias_lookup hu (a := "f") rfl
+  cases hs
+  exact ⟨out, hn, (hk (by decide)).2.2⟩
+
+/-- Empty name: lookup in the assembled scope finds nothing. -/
+example {u} (hu : unitOf .nil [("e", fn "")] = some u) : u.env.lookup (some "C") "" = [] :=
+  lookup_empty hu
 
 /-- Local shadowing: a local `get` hides the declaration. -/
 example {u} (_ : unitOf .nil renamed = some u) :
