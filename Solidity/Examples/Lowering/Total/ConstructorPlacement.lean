@@ -31,6 +31,9 @@ def mixed : Contract :=
   { vars := [("a", .prim .uint), ("t", .prim .bool), ("n", .prim .uint), ("b", .prim .uint)],
     widths := [("a", 8)], transientRoots := ["t", "n"], inits := [("a", .num 7)] }
 
+/-- `mixed` with the explicit constructor. -/
+def mixedCtor : Contract := { mixed with ctor := some ctor }
+
 /-- The unit assembled from the generated prefix and the function entries. -/
 def unitOf (C : Contract) (fs : List (Name × FunDecl)) : Option (Source.Syn .unit) := do
   Callee.withFunctions tablesS [] "C" (← declarationParts tablesS [] C) fs
@@ -58,6 +61,11 @@ these checks run compiled; the theorems below are the general facts. -/
 
 -- The explicit constructor is found with the retained payable header; the
 -- implicit one is absent; no roots, no state variables.
+-- Explicit constructor with mixed roots: the constructor, then the roots in order.
+#guard table mixedCtor [("get", get)] == some [(.contract, "C", none),
+    (.constructor, "", some "C"), (.stateVar, "a", some "C"), (.stateVar, "t", some "C"),
+    (.stateVar, "n", some "C"), (.stateVar, "b", some "C"), (.function, "get", some "C")]
+#guard ((envOf mixedCtor [("get", get)]).ctorDecl "C").isSome
 #guard ((envOf explicit [("get", get)]).ctorFrame "C").map (·.msgValue) == some true
 #guard ((envOf implicit [("get", get)]).ctorDecl "C").isNone
 #guard ((envOf empty []).stateVarsOf "C").isEmpty
@@ -88,6 +96,12 @@ example : initsOf mixedParts = [("a", num 7)] := by
 example : stateViews mixedParts = [some ("a", .elem uint8, false), some ("t", .elem .bool, true),
     some ("n", .elem uintElem, true), some ("b", .elem uintElem, false)] := by
   simp [mixedParts, stateViews, TransientDecode.stateView, stateVarDecl]
+/-- The generated parts exist for every contract above. -/
+example : [explicit, implicit, empty, mixed, mixedCtor].map
+    (fun C => (declarationParts tablesS [] C).isSome) = [true, true, true, true, true] := rfl
+/-- An initializer on a transient root is refused, not dropped: no parts, no unit. -/
+example : (declarationParts tablesS [] { mixed with inits := [("t", .num 1)] }).isSome = false :=
+  rfl
 /-- The explicit constructor contributes one `none` view before the roots'. -/
 example {p} (hp : declarationParts tablesS [] explicit = some p) :
     (stateViews p).head? = some none := by
