@@ -17,9 +17,12 @@ Boundaries proved here: lookup fails exactly when no entry has the alias;
 duplicate aliases resolve to the first entry and shadow later ones; aliases are
 labels the assembly ignores (`withFunctions_relabel`); an entry without retained
 metadata fails the whole assembly. Successful assembly does not make source
-names unique: Source name resolution of the declaration (`SourceResolves`) is an
-explicit local obligation for the decoder lane, not a consequence here, and
-not a premise or exclusion of `lowerLoopsCorrect`. Frame correspondence,
+names unique: `DeclaredUniquely` (the declaration is the only one of its name
+declared directly in the selected scope) is an explicit local obligation for
+the decoder lane, not a consequence here, and not a premise or exclusion of
+`lowerLoopsCorrect`. It is only the scope-local step: full Source name
+resolution (linearization, visibility, locals, `Source.Resolves`) is not
+proved or connected here. Frame correspondence,
 function-index binding, semantic callee agreement, complete-unit integration
 and coverage stay with that lane; no simulation is claimed.
 -/
@@ -171,12 +174,14 @@ theorem fromFunctions_alias {settings : Source.Settings} {a : Name} {index : Nat
   exact ⟨d, source, u, Iff.mpr lookupBy_eq_some_iff ⟨index, hf, hi⟩, hi, hs, hn, hsc,
     hu, hp, hr, hmem, hb⟩
 
-/-! ## Source name resolution: an explicit obligation -/
+/-! ## Scope-local name uniqueness: an explicit obligation -/
 
-/-- The declaration is the only one of its name declared in `scope`.
-Assembly does not establish this (two entries may retain one source name);
-the decoder lane must discharge it from the actual generated environment. -/
-def SourceResolves (u : Source.Syn .unit) (scope : String) (out : Source.Decl) : Prop :=
+/-- The declaration is the only one of its name declared directly in `scope`
+(`Source.Env.declared`). Assembly does not establish this (two entries may
+retain one source name); the decoder lane must discharge it from the actual
+generated environment. This is not full Source name resolution, which also
+involves linearization, visibility and locals. -/
+def DeclaredUniquely (u : Source.Syn .unit) (scope : String) (out : Source.Decl) : Prop :=
   u.env.declared (some scope) out.name = [out]
 
 /-- Without the obligation, the positional declaration is still one of the
@@ -193,8 +198,8 @@ theorem alias_declared {u : Source.Syn .unit} {a : Name} {d : FunDecl}
 
 /-- Under the explicit obligation, the declaration is the unique Source
 candidate for its retained name in the selected scope. -/
-theorem SourceResolves.unique {u : Source.Syn .unit} {out d' : Source.Decl}
-    (h : SourceResolves u scope out) (hd : d' ∈ u.env.declared (some scope) out.name) :
+theorem DeclaredUniquely.unique {u : Source.Syn .unit} {out d' : Source.Decl}
+    (h : DeclaredUniquely u scope out) (hd : d' ∈ u.env.declared (some scope) out.name) :
     d' = out := by
   rw [h] at hd
   exact List.mem_singleton.mp hd
@@ -202,8 +207,8 @@ theorem SourceResolves.unique {u : Source.Syn .unit} {out d' : Source.Decl}
 /-- Under the obligation, at most one table position declares the name in
 `scope`. Two assembled entries retaining one source name (overloads) therefore
 refute it, although assembly succeeds. -/
-theorem SourceResolves.position_unique {u : Source.Syn .unit} {out o o' : Source.Decl}
-    {p q : Nat} (h : SourceResolves u scope out) (hne : out.name ≠ "")
+theorem DeclaredUniquely.position_unique {u : Source.Syn .unit} {out o o' : Source.Decl}
+    {p q : Nat} (h : DeclaredUniquely u scope out) (hne : out.name ≠ "")
     (hp : u.decls[p]? = some o) (hn : o.name = out.name) (hs : o.scope = some scope)
     (hq : u.decls[q]? = some o') (hn' : o'.name = out.name) (hs' : o'.scope = some scope) :
     p = q :=

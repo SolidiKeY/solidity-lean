@@ -3,7 +3,7 @@ import Solidity.Correctness.Lowering.Total.CalleeAliases
 /-! Model callee aliases against assembled Source declarations: model aliases
 different from retained source names, duplicate aliases resolved by first
 match, missing metadata failing assembly, and one source name retained by two
-entries, where assembly succeeds but `SourceResolves` does not hold. Execution
+entries, where assembly succeeds but `DeclaredUniquely` does not hold. Execution
 is not checked. -/
 namespace Solidity.Examples.Lowering.Total.CalleeAliases
 
@@ -57,8 +57,10 @@ example : lookupBy "f" dup = some (fn "first") := rfl
 example : lookupBy "missing" dup = none :=
   Iff.mpr alias_none (by simp [dup])
 example : firstIndex "f" dup = some 1 := rfl
-/-- The shadowed `f` sits strictly after the first match. -/
-example : 1 < 2 := alias_shadowed (fs := dup) (d' := fn "second") rfl rfl (by decide)
+/-- Any first-match position of `f` lies strictly before the shadowed `second`. -/
+example {i} (hf : firstIndex "f" dup = some i) : i < 2 := by
+  have h1 : firstIndex "f" dup = some 1 := rfl
+  exact alias_shadowed (j := 2) (d' := fn "second") hf rfl (by rw [h1] at hf; cases hf; decide)
 /-- Missing metadata fails assembly whatever the alias. -/
 example : unitOf [("get", fn "get"), ("bare", bare)] = none :=
   withFunctions_absent (e := ("bare", bare)) (by simp) rfl
@@ -79,7 +81,7 @@ example {u} (hu : unitOf dup = some u) :
 name-resolution obligation, though assembly succeeded. -/
 example {u} (hu : unitOf overload = some u) :
     ∃ out, u.decls[entryPosition "C" .nil 0]? = some out ∧ out.name = "h" ∧
-      ¬ SourceResolves u "C" out := by
+      ¬ DeclaredUniquely u "C" out := by
   obtain ⟨i, out, source, hi, _, hp, _, hs, hn, hsc, _⟩ := alias_entry hu (a := "h_0") rfl
   cases hi; cases hs
   obtain ⟨out', source', hp', _, hs', hn', hsc', _⟩ :=
@@ -103,9 +105,9 @@ example {u} (hu : unitOf renamed = some u) :
   exact ⟨out, hn, hd (by decide)⟩
 
 /-- Under the obligation, every candidate is the landing declaration. -/
-example {u : Source.Syn .unit} {out d' : Source.Decl} (h : SourceResolves u "C" out)
+example {u : Source.Syn .unit} {out d' : Source.Decl} (h : DeclaredUniquely u "C" out)
     (hd : d' ∈ u.env.declared (some "C") out.name) : d' = out :=
-  SourceResolves.unique h hd
+  DeclaredUniquely.unique h hd
 
 /-- Binding at the first-match position of `f` selects `first`, not `second`. -/
 example {settings s}
