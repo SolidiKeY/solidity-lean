@@ -221,6 +221,7 @@ import Solidity.Examples.Lowering.Total.ConstructorDecode
 import Solidity.Examples.Lowering.Total.EnumDecode
 import Solidity.Examples.Lowering.Total.EnumUseDecode
 import Solidity.Examples.Lowering.Total.FunctionTypeDecode
+import Solidity.Examples.Lowering.Total.FunctionTypeParserLaws
 import Solidity.Examples.Lowering.Total.ReferenceDecode
 import Solidity.Examples.Lowering.Total.TransientDecode
 import Solidity.Examples.MemoryFloor
