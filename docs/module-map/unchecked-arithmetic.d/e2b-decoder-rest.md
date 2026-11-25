@@ -20,3 +20,4 @@
 | `Correctness/Lowering/Total/Decode/Callee/Declarations.lean` | Ordered assembly of all function entries, exact collected-declaration correspondence and count preservation. |
 | `Correctness/Lowering/Total/Decode/Callee/Units.lean` | Contract-unit assembly preserving supplied declaration prefixes and exact translated-function table suffixes. |
 | `Correctness/Lowering/Total/Versions/CalleeBinding/Functions.lean` | Original function-index selection tied to exact translated declaration and actual elaborated Source body. |
+| `Correctness/Lowering/Total/Versions/CalleeBinding/Frame.lean` | Original parameter/return names, slot types, body spelling and flags bound to the actual selected Source frame. |

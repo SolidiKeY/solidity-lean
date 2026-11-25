@@ -2514,6 +2514,14 @@ import Solidity.Correctness.Lowering.Sim.Stmt.Frame
 import Solidity.Correctness.Lowering.Sim.Stmt.Framed
 import Solidity.Correctness.Lowering.Sim.Stmt.Jump
 import Solidity.Correctness.Lowering.Sim.Stmt.Main
+import Solidity.Correctness.Lowering.Total.ArgumentInference
+import Solidity.Correctness.Lowering.Total.ArgumentInference.Raw
+import Solidity.Correctness.Lowering.Total.ArgumentInference.Scalar
+import Solidity.Correctness.Lowering.Total.ArithmeticInference
+import Solidity.Correctness.Lowering.Total.ArithmeticInference.Budget
+import Solidity.Correctness.Lowering.Total.ArithmeticInference.Fragment
+import Solidity.Correctness.Lowering.Total.ArithmeticInference.Model
+import Solidity.Correctness.Lowering.Total.ArithmeticInference.Steps
 import Solidity.Correctness.Lowering.Total.Boundary
 import Solidity.Correctness.Lowering.Total.CallSpellExt
 import Solidity.Correctness.Lowering.Total.CalleeAliases
@@ -2567,9 +2575,12 @@ import Solidity.Correctness.Lowering.Total.StructRows
 import Solidity.Correctness.Lowering.Total.StructTableAgreement
 import Solidity.Correctness.Lowering.Total.StructTableAgreement.Refs
 import Solidity.Correctness.Lowering.Total.StructUnit
+import Solidity.Correctness.Lowering.Total.StructUnitInference
+import Solidity.Correctness.Lowering.Total.StructUnitInference.Leading
 import Solidity.Correctness.Lowering.Total.TransientDecode
 import Solidity.Correctness.Lowering.Total.Versions
 import Solidity.Correctness.Lowering.Total.Versions.CalleeBinding
+import Solidity.Correctness.Lowering.Total.Versions.CalleeBinding.Frame
 import Solidity.Correctness.Lowering.Total.Versions.CalleeBinding.Functions
 import Solidity.Correctness.Lowering.Total.Versions.CalleeBinding.Resolved
 import Solidity.Correctness.Lowering.Total.Versions.Marked
