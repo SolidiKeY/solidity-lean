@@ -42,7 +42,8 @@ theorem mixed_state : state tablesS [] mixed = .ok
 
 example : (state tablesS [] mixed).map (fun p => (p.collect (some "C")).map (·.name)) =
     .ok (mixed.vars.map (·.1)) := rfl
-example {p} (h : state tablesS [] mixed = .ok p) := partsOf_names h "C"
+/-- Roots once and in order; initializers once, in order, on their targets. -/
+example {p} (h : state tablesS [] mixed = .ok p) := partsOf_faithful "C" _ _ p h
 
 /-- The declared Source types, once `Pair` resolves to a declaration `d`. -/
 example (E : Source.Env) (d : Source.DeclName) (h : ReferenceDecode.Resolved E (some "C") "Pair" d) :
@@ -65,7 +66,7 @@ example (E : Source.Env) (d : Source.DeclName) (h : ReferenceDecode.Resolved E (
 /-- The exported typing fact: only struct resolution is asked. -/
 example (E : Source.Env) (d : Source.DeclName) (h : ReferenceDecode.Resolved E (some "C") "Pair" d)
     {p} (hp : state tablesS [] mixed = .ok p) :=
-  state_typed (E := E) hp "C" (by
+  partsOf_typed (E := E) "C" hp (by
     intro v mv s ms w hw
     have : s = "Pair{a:uint;b:uint8}" := by
       simp only [mixed, List.mem_cons, List.not_mem_nil, or_false] at mv
@@ -98,21 +99,29 @@ example : state tablesS [] (one! (.ref (.array .uint)) [("r[]#enum", 2)] []) =
 example : state tablesS [] (one! (.ref (.array .uint)) [("r[]#function()", 1)] []) =
     .error (.unreadRow "r" "r[]#function()" 1) := rfl
 example : state tablesS [] (one! (.ref (.array .uint)) [("r", 8)] []) = .error (.unreadRow "r" "r" 8) := rfl
--- `bytes` and `bytes1[]` share their rows; a zero length; a non-elementary key.
+-- `bytes` and `bytes1[]` share their rows; a zero length; a key width that is no type;
+-- an enum key; a `string` root, by its marker row.
 example : state tablesS [] (one! (.ref (.array .uint)) [("r[]", 8), ("r[]#bytes", 1)] []) =
     .error (.type "r" (.erasedBytes "r")) := rfl
 example : state tablesS [] (one! (.ref (.fixed .uint 0)) [] []) = .error (.type "r" (.zeroLength "r")) := rfl
 example : state tablesS [] (one! (.ref (.mapping .uint (.ref (.array .uint)))) [("r{}", 7)] []) =
     .error (.type "r" (.unrepresentable "r{}" .uint)) := rfl
+example : state tablesS [] (one! (.ref (.mapping .uint .uint)) [("r{}#enum", 2)] []) =
+    .error (.unreadRow "r" "r{}#enum" 2) := rfl
+example : state tablesS [] (one! (.ref (.array .uint)) [("r#string", 1)] []) =
+    .error (.unreadRow "r" "r#string" 1) := rfl
 -- A struct no identifier is read as; one two identifiers are read as.
 example : state tablesS [] (one! (.ref (.array (.ref (.struct "A{a:uint}")))) [] []) =
     .error (.type "r" (.unknownStruct "r[]" "A{a:uint}")) := rfl
 example : state tablesS [] (one! (.ref (.struct "A{a:uint}")) [] [("A", "A{a:uint}"), ("B", "A{a:uint}")]) =
     .error (.type "r" (.ambiguousStruct "r" "A{a:uint}" ["A", "B"])) := rfl
--- Initializers: out of root order, naming no root, on a transient root, unspelled.
+-- Initializers: out of root order, naming no root, two for one root, on a transient
+-- root, unspelled.
 example : state tablesS [] { mixed with inits := [("z", .num 3), ("n", .num 1)] } =
     .error (.strayInit "n") := rfl
 example : state tablesS [] { mixed with inits := [("q", .num 1)] } = .error (.strayInit "q") := rfl
+example : state tablesS [] { mixed with inits := [("n", .num 1), ("n", .num 2)] } =
+    .error (.strayInit "n") := rfl
 example : state tablesS [] { mixed with inits := [("t", .num 1)] } = .error (.transientInit "t") := rfl
 example : state tablesS [] { mixed with inits := [("xs", .tuple [])] } =
     .error (.unspelledInit "xs" (.tuple [])) := rfl
@@ -123,22 +132,22 @@ example : (state tablesS [] { mixed with inits := [("ys", .name "xs")] }).map
 /-- A transient reference root: no contract has one (`ref_not_transient`). -/
 example : partsOf (rootType mixed (TransientDecode.elemOf mixed)) (fun _ => true) (Calls.expr tablesS [])
     [("q", .ref (.array .uint))] [] = .error (.transientReference "q") := rfl
-example (r : Name) := state_ne_transientReference tablesS [] mixed r
-/-- A refused constructor (no retained header) is a failure of the assembly. -/
-example : declarationParts tablesS [] { mixed with ctor := some { params := [], body := [] } } =
-    .error .constructor := rfl
+example := @ref_not_transient mixed "xs" (.array (.ref (.fixed .uint 3))) (by simp [mixed])
 
 /-! Agreement with the primitive components on primitive roots. -/
 
 def prims : Contract :=
   { vars := [("a", .uint), ("b", .uint), ("c", .uint)], widths := [("a", 8)], transientRoots := ["b"],
     inits := [("a", .num 1), ("c", .binop .add (.name "a") (.num 2))] }
-example : (declarationParts tablesS [] prims).toOption = Constructor.declarationParts tablesS [] prims := rfl
+example : (state tablesS [] prims).toOption = Constructor.stateParts (TransientDecode.elemOf prims)
+    (fun x => prims.transientRoots.contains x) (Calls.expr tablesS []) prims.vars prims.inits := rfl
 example : (state tablesS [] { prims with inits := [] }).toOption =
     (TransientDecode.decls { prims with inits := [] }).toOption := rfl
-example {p} (h : Constructor.declarationParts tablesS [] prims = some p) :
-    declarationParts tablesS [] prims = .ok p := declarationParts_compat.1 h
-example {E : Source.Env} {p} (h : declarationParts tablesS [] mixed = .ok p)
-    (hp : Constructor.Placed E "C" p) := placed_declarations h hp
+example := And.intro (@partsOf_stateParts (TransientDecode.elemOf prims) (fun _ => false)
+  (Calls.expr tablesS []) prims) (@partsOf_declsT (TransientDecode.elemOf prims)
+  (Calls.expr tablesS []) prims)
+/-- An elaborated initializer of `xs` would have the array type and derive the spelled text. -/
+example (E : Source.Env) := @rootDecl_elabInit E "C" (.array u8 .none) false "xs" (.ident "ys")
+  (.array .storage (.int ⟨false, 8, by decide⟩) none) rfl
 
 end Solidity.Examples.Lowering.Total.ReferenceStateDecode
