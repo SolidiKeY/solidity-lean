@@ -365,6 +365,27 @@ example {E : Source.Env} {C : Contract} {G : Source.Glob E} {F : Source.Fr} {st 
     σ.tx.selfAddress.1 = (F.this.val : Int) ∧
       σ.selfBalance.1 = ((Version.Relation.ownBalance G F st).val : Int) :=
   ⟨h.2.2.2.2.1, h.2.2.2.2.2.1⟩
+example : Decode.envT .timestamp = Decode.envS .timestamp := Decode.envT_envS nofun nofun
+/-- Under related globals the two model reads are value-related to the Source
+frame's own address and to the balance Source observes for it. -/
+example {E : Source.Env} {C : Contract} {G : Source.Glob E} {F : Source.Fr} {st : Source.St E}
+    {σ : State C []} (h : (Version.rel E C).glob G F st σ) :
+    Version.Relation.ValRel E.layout (.address false) .uint (.address F.this) σ.tx.selfAddress ∧
+    Version.Relation.ValRel E.layout (.int Source.IntTy.u256) .uint
+      (Source.intWrap Source.IntTy.u256 (Version.Relation.ownBalance G F st).val) σ.selfBalance :=
+  ⟨Version.selfAddress_faithful h, Version.selfBalance_faithful h⟩
+/-- Inside a contract both spellings are typed, and their resolved forms
+evaluate to exactly those Source values, changing neither locals nor state. -/
+example (Γ : Source.Ctx) {c : String} (builtin : Γ.resolve "this" = some (.builtin .this))
+    (scope : Γ.scope = some c) (G : Source.Glob Γ.env) (F : Source.Fr) (k : Nat)
+    (l : Source.Locals Γ.env.layout Γ.tys) (s : Source.St Γ.env) :
+    Source.evalE G F (k + 2) (Version.Self.typedAddress Γ builtin scope).toR =
+        pure (.val (.address F.this)) ∧
+      (Source.evalE G F (k + 3) (Version.Self.typedBalance Γ builtin scope).toR).run.run (l, s) =
+        (.ok (.val (Source.intWrap Source.IntTy.u256 (Version.Relation.ownBalance G F s).val)),
+          (l, s)) :=
+  ⟨Version.Self.eval_address Γ builtin scope G F k,
+    Version.Self.eval_balance Γ builtin scope G F k l s⟩
 /-- The self-aware tables are sound; total initial matching holds for them. -/
 example : Version.Sound Decode.tablesT := Version.soundT
 example : Simulation.InitialMatching Version.rel Decode.tablesT.decode :=
