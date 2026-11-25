@@ -172,6 +172,118 @@
         "path": "tests/h28-sol/mutation-testing/tools/bulk.py",
         "purpose": "Default bulk-run checker reads the retained BULK.json run record and reports mismatches. Paired normal and observed runs passed; exact unchanged input only. No Lean execution, oracle rerun or proof credit.",
         "source_blob": "f6f3b09c5a88aff594c187f6fb7f643d44d08985"
+      },
+      {
+        "path": "tests/h28-sol/type-grammar/run_solc.mjs",
+        "input_revision": "316eb1a6f92b649e5d218a1ba45c77ea47cf88e9",
+        "source_blob": "cb05eeac7078737564180bdc3d7f030520c35065",
+        "kind": "nonpython-entry-source-role",
+        "command": [
+          "node",
+          "tests/h28-sol/type-grammar/run_solc.mjs"
+        ],
+        "interface": {
+          "interpreter": "node",
+          "shebang": null,
+          "entry_line": 6
+        },
+        "provenance": {
+          "commit": "05b3f3f3a0bbb708eb00e86025811aee3eee15b3",
+          "path": "tests/h28-sol/type-grammar/run_solc.mjs",
+          "blob": "cb05eeac7078737564180bdc3d7f030520c35065"
+        },
+        "purpose": "Reviewed H1004 Node program (bare interpreter prefix; needs a solc argument). Source role only, never run or certified to pass. No run/pass/read-anchor/fixture/helper/child/output/compiler/Lean/proof/runtime credit."
+      },
+      {
+        "path": "tests/h28-sol/literal-grammar/solc-fixtures.mjs",
+        "input_revision": "316eb1a6f92b649e5d218a1ba45c77ea47cf88e9",
+        "source_blob": "56774afb5f8d6355c2e8fca81557371364b2b08d",
+        "kind": "nonpython-entry-source-role",
+        "command": [
+          "node",
+          "tests/h28-sol/literal-grammar/solc-fixtures.mjs"
+        ],
+        "interface": {
+          "interpreter": "node",
+          "shebang": null,
+          "entry_line": 5
+        },
+        "provenance": {
+          "commit": "3b327d00fd2262cfb27ccecdc911e9c5d2e7d4f1",
+          "path": "tests/h28-sol/literal-grammar/solc-fixtures.mjs",
+          "blob": "56774afb5f8d6355c2e8fca81557371364b2b08d"
+        },
+        "purpose": "Reviewed H1004 Node program (bare interpreter prefix; needs a solc argument). Source role only, never run or certified to pass. No run/pass/read-anchor/fixture/helper/child/output/compiler/Lean/proof/runtime credit."
+      },
+      {
+        "command": [
+          "python3",
+          "-B",
+          "tests/h28-sol/automation-benchmark/test_scope_policy.py"
+        ],
+        "imports": [
+          {
+            "importer": "tests/h28-sol/automation-benchmark/test_scope_policy.py",
+            "importer_blob": "01146f6d8222a26bc34a89beab21211c5cf3b440",
+            "importer_commit": "bf64bc529d40d2dfc63d34f26b262c70f77a19de",
+            "line": 2
+          }
+        ],
+        "input_revision": "316eb1a6f92b649e5d218a1ba45c77ea47cf88e9",
+        "interface": {
+          "module": "scope_policy",
+          "names": [
+            "adoption_ancestry",
+            "changed_paths",
+            "scope_violations"
+          ]
+        },
+        "kind": "python-import-source-role",
+        "path": "tests/h28-sol/automation-benchmark/scope_policy.py",
+        "provenance": {
+          "blob": "d4dc3f8b3abf74db4759b03dbb84b8e1bdfc9bbe",
+          "commit": "22e91b98298078b2f7b43d0a9bd5e1553b7eb17d",
+          "path": "tests/h28-sol/automation-benchmark/scope_policy.py"
+        },
+        "purpose": "Reviewed H1004 exact Python import dependency of the named kept python3 -B entry sources. Source consumption only: no invocation, passing-run, entered-module, data-read, fixture, child, runtime or proof credit.",
+        "source_blob": "d4dc3f8b3abf74db4759b03dbb84b8e1bdfc9bbe"
+      },
+      {
+        "command": [
+          "python3",
+          "-B",
+          "tests/h28-sol/mutation-testing/tools/check_selected_controls.py"
+        ],
+        "imports": [
+          {
+            "importer": "tests/h28-sol/mutation-testing/tools/check_selected_controls.py",
+            "importer_blob": "fb128da9f4fc433f60f35560c05d5af7d4523888",
+            "importer_commit": "50a5679e38aeaf468850d8f46645bdf5e71aa706",
+            "line": 12
+          },
+          {
+            "importer": "tests/h28-sol/mutation-testing/tools/verify_combined.py",
+            "importer_blob": "521bd933f52e0bb6acd24d3864e506ac3a44a847",
+            "importer_commit": "50a5679e38aeaf468850d8f46645bdf5e71aa706",
+            "line": 106
+          }
+        ],
+        "input_revision": "316eb1a6f92b649e5d218a1ba45c77ea47cf88e9",
+        "interface": {
+          "module": "selected_accounting",
+          "names": [
+            "verify"
+          ]
+        },
+        "kind": "python-import-source-role",
+        "path": "tests/h28-sol/mutation-testing/tools/selected_accounting.py",
+        "provenance": {
+          "blob": "585c80fd909f44f89c526c3c9b9d999457374b82",
+          "commit": "50a5679e38aeaf468850d8f46645bdf5e71aa706",
+          "path": "tests/h28-sol/mutation-testing/tools/selected_accounting.py"
+        },
+        "purpose": "Reviewed H1004 exact Python import dependency of the named kept python3 -B entry sources. Source consumption only: no invocation, passing-run, entered-module, data-read, fixture, child, runtime or proof credit.",
+        "source_blob": "585c80fd909f44f89c526c3c9b9d999457374b82"
       }
     ]
   },
