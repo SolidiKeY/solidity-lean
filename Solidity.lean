@@ -2440,6 +2440,7 @@ import Solidity.Calculus.UpdateRules
 import Solidity.Calculus.VisitedSet
 import Solidity.Calculus.WalkSyntax
 import Solidity.Calculus.WkOver
+import Solidity.Correctness.Elab.Congruence
 import Solidity.Correctness.Elab.Total
 import Solidity.Correctness.IntrinsicSession.Laws.Boundary
 import Solidity.Correctness.IntrinsicSession.Laws.Common
