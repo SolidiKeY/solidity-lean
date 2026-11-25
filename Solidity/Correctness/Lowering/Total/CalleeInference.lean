@@ -56,9 +56,9 @@ theorem inferN_call_selected {da : TypedArgs Γ args σs}
 
 /-- **Selected call from individual arguments**: each position `i` inferred
 with type `σs[i]` at the fuel `n - 1 - i` the implementation uses. -/
-theorem inferN_call_of_each (hn : (exprs args).length < n)
-    (hl : σs.length = (exprs args).length)
-    (he : ∀ i a σ, (exprs args)[i]? = some a → σs[i]? = some σ →
+theorem inferN_call_of_each (hn : (argExprs args).length < n)
+    (hl : σs.length = (argExprs args).length)
+    (he : ∀ i a σ, (argExprs args)[i]? = some a → σs[i]? = some σ →
       ∃ d, Typed.inferN (n - 1 - i) Γ a = some ⟨σ, d⟩)
     (hsel : (Γ.functions f).filter (fits Γ σs) = [d]) (hsig : d.fnSig Γ.env = some (ps, rs)) :
     ∃ da, TypedArgs.inferN n Γ args = some ⟨σs, da⟩ ∧
@@ -68,7 +68,7 @@ theorem inferN_call_of_each (hn : (exprs args).length < n)
   ⟨da, hargs, inferN_call_selected hargs hsel hsig⟩
 
 /-- A position failing at its actual fuel fails the call. -/
-theorem inferN_call_fail_at {i : Nat} {a : Syn .expr} (hi : (exprs args)[i]? = some a)
+theorem inferN_call_fail_at {i : Nat} {a : Syn .expr} (hi : (argExprs args)[i]? = some a)
     (hf : Typed.inferN (n - 1 - i) Γ a = none) :
     Typed.inferN (n + 1) Γ (.call (.ident f) (.positional args)) = none :=
   inferN_call_args_none (argsN_fail_at hi hf)
@@ -160,8 +160,8 @@ theorem alias_inferN {a : Name} {fd : FunDecl} {source : SourceFunction} {index 
     (hfit : Source.argsFit Γ.isBase Γ.mapFree σs ps = true)
     (hothers : OthersReject Γ.isBase Γ.mapFree σs fs source.name index)
     (hpre : PrefixRejects Γ σs scope leadingParts source.name)
-    (hn : (exprs args).length < n) (hlen : σs.length = (exprs args).length)
-    (he : ∀ i a σ, (exprs args)[i]? = some a → σs[i]? = some σ →
+    (hn : (argExprs args).length < n) (hlen : σs.length = (argExprs args).length)
+    (he : ∀ i a σ, (argExprs args)[i]? = some a → σs[i]? = some σ →
       ∃ d, Typed.inferN (n - 1 - i) Γ a = some ⟨σ, d⟩) :
     ∃ out rs, fromMetadata T R scope fd = some out ∧ Slots fd.widths fd.rets rs ∧
       ∃ (da : TypedArgs Γ args σs)
@@ -178,11 +178,11 @@ theorem alias_inferN {a : Name} {fd : FunDecl} {source : SourceFunction} {index 
 /-! ## At the fuel of `Typed.infer` -/
 
 /-- An argument list has more nodes than positions. -/
-theorem exprs_length_lt : ∀ es : Syn (.list .expr), (exprs es).length < es.nodes.length
-  | .nil => by simp [exprs, Source.Syn.nodes]
+theorem argExprs_length_lt : ∀ es : Syn (.list .expr), (argExprs es).length < es.nodes.length
+  | .nil => by simp [argExprs, Source.Syn.nodes]
   | .cons _ es => by
-      have := exprs_length_lt es
-      simp [exprs, Source.Syn.nodes]; omega
+      have := argExprs_length_lt es
+      simp [argExprs, Source.Syn.nodes]; omega
 
 /-- The node count of `f(args)`. -/
 theorem call_nodes :
@@ -201,8 +201,8 @@ theorem alias_infer {a : Name} {fd : FunDecl} {source : SourceFunction} {index :
     (hfit : Source.argsFit Γ.isBase Γ.mapFree σs ps = true)
     (hothers : OthersReject Γ.isBase Γ.mapFree σs fs source.name index)
     (hpre : PrefixRejects Γ σs scope leadingParts source.name)
-    (hlen : σs.length = (exprs args).length)
-    (he : ∀ i a σ, (exprs args)[i]? = some a → σs[i]? = some σ →
+    (hlen : σs.length = (argExprs args).length)
+    (he : ∀ i a σ, (argExprs args)[i]? = some a → σs[i]? = some σ →
       ∃ d, Typed.inferN (args.nodes.length + 2 - i) Γ a = some ⟨σ, d⟩) :
     ∃ out rs, fromMetadata T R scope fd = some out ∧ Slots fd.widths fd.rets rs ∧
       ∃ (da : TypedArgs Γ args σs)
@@ -210,7 +210,7 @@ theorem alias_infer {a : Name} {fd : FunDecl} {source : SourceFunction} {index :
         (hsig : out.fnSig Γ.env = some (ps, rs)),
         Typed.infer Γ (.call (.ident source.name) (.positional args)) =
           some ⟨STy.ret rs, typedCall da hsel hsig⟩ := by
-  have hlt := exprs_length_lt args
+  have hlt := argExprs_length_lt args
   obtain ⟨out, rs, hm, hrs, da, hsel, hsig, _, hinf⟩ :=
     alias_inferN (n := args.nodes.length + 3) h henv hsc hl hf hs hne hloc hcall hps hfit
       hothers hpre (by omega) hlen fun i a σ hi hσ => by
