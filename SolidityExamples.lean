@@ -217,6 +217,10 @@ import Solidity.Examples.Lowering.Sim.State
 import Solidity.Examples.Lowering.Sim.StatementV2
 import Solidity.Examples.Lowering.Sim.Stmt
 import Solidity.Examples.Lowering.Total.CallSpellExt
+import Solidity.Examples.Lowering.Total.CalleeAliases
+import Solidity.Examples.Lowering.Total.CalleeInference
+import Solidity.Examples.Lowering.Total.CalleeResolution
+import Solidity.Examples.Lowering.Total.CalleeSelection
 import Solidity.Examples.Lowering.Total.ConstructorDecode
 import Solidity.Examples.Lowering.Total.ConstructorPlacement
 import Solidity.Examples.Lowering.Total.EnumDecode
@@ -227,6 +231,11 @@ import Solidity.Examples.Lowering.Total.FunctionTypeParserLaws
 import Solidity.Examples.Lowering.Total.FunctionTypeRefs
 import Solidity.Examples.Lowering.Total.ReferenceDecode
 import Solidity.Examples.Lowering.Total.ReferenceStateDecode
+import Solidity.Examples.Lowering.Total.ReferenceStatePlacement
+import Solidity.Examples.Lowering.Total.StructDecode
+import Solidity.Examples.Lowering.Total.StructRows
+import Solidity.Examples.Lowering.Total.StructTableAgreement
+import Solidity.Examples.Lowering.Total.StructUnit
 import Solidity.Examples.Lowering.Total.TransientDecode
 import Solidity.Examples.MemoryFloor
 import Solidity.Examples.MemoryInstantiation
