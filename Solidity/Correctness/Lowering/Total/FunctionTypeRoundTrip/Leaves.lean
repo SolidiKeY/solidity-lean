@@ -214,7 +214,8 @@ theorem natL_some {ds : List Char} {n : Nat} (h : natL ds = some n) :
   · cases h
 
 theorem last_digit {l : List Char} (k : Nat) (ne : l.drop k ≠ [])
-    (dig : (l.drop k).all Char.isDigit = true) : ∃ c, l.getLast? = some c ∧ c.isDigit = true := by
+    (dig : (l.drop k).all Char.isDigit = true) :
+    ∃ c, l.getLast? = some c ∧ c.isDigit = true := by
   obtain ⟨c, hc⟩ : ∃ c, (l.drop k).getLast? = some c := by
     cases h : (l.drop k).getLast? with
     | none => exact absurd (List.getLast?_eq_none_iff.1 h) ne

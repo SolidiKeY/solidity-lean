@@ -4,7 +4,8 @@ import Solidity.Correctness.Lowering.Total.FunctionTypeRoundTrip.Leaves
 here is a kernel proof (no `#guard`, no native code). -/
 namespace Solidity.Examples.Lowering.Total.FunctionTypeRoundTrip
 
-open Solidity Solidity.Correctness.Lowering.Total Solidity.Correctness.Lowering.Total.FunctionTypeDecode
+open Solidity Solidity.Correctness.Lowering.Total
+open Solidity.Correctness.Lowering.Total.FunctionTypeDecode
 open Solidity.Correctness.Lowering.Total.FunctionTypeRoundTrip
 
 def u256 : Source.Elem := .int false 256 (by decide)
