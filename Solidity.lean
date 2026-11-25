@@ -2518,6 +2518,8 @@ import Solidity.Correctness.Lowering.Total.Boundary
 import Solidity.Correctness.Lowering.Total.CallSpellExt
 import Solidity.Correctness.Lowering.Total.CalleeAliases
 import Solidity.Correctness.Lowering.Total.CalleeAliases.Lookup
+import Solidity.Correctness.Lowering.Total.CalleeResolution
+import Solidity.Correctness.Lowering.Total.CalleeResolution.Lists
 import Solidity.Correctness.Lowering.Total.ConstructorDecode
 import Solidity.Correctness.Lowering.Total.ConstructorPlacement
 import Solidity.Correctness.Lowering.Total.Contract
