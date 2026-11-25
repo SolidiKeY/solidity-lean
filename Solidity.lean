@@ -2562,6 +2562,8 @@ import Solidity.Correctness.Lowering.Total.Relation
 import Solidity.Correctness.Lowering.Total.Spells
 import Solidity.Correctness.Lowering.Total.StructDecode
 import Solidity.Correctness.Lowering.Total.StructRows
+import Solidity.Correctness.Lowering.Total.StructTableAgreement
+import Solidity.Correctness.Lowering.Total.StructTableAgreement.Refs
 import Solidity.Correctness.Lowering.Total.TransientDecode
 import Solidity.Correctness.Lowering.Total.Versions
 import Solidity.Correctness.Lowering.Total.Versions.CalleeBinding
