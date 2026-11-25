@@ -55,7 +55,7 @@ declaration carries the source name; the alias itself declares nothing. -/
 
 example : lookupBy "f" dup = some (fn "first") := rfl
 example : lookupBy "missing" dup = none :=
-  alias_none.mpr (by simp [dup])
+  Iff.mpr alias_none (by simp [dup])
 example : firstIndex "f" dup = some 1 := rfl
 /-- The shadowed `f` sits strictly after the first match. -/
 example : 1 < 2 := alias_shadowed (fs := dup) (d' := fn "second") rfl rfl (by decide)
@@ -89,5 +89,30 @@ example {u} (hu : unitOf overload = some u) :
   have := h.position_unique (by simp [hn]) hp rfl (by simpa using hsc) hp' (hn'.trans hn.symm)
     (by simpa using hsc')
   simp [entryPosition, Source.Syn.collect] at this
+
+/-- First-match shadowing as a list fact: `first` is preceded only by `g`. -/
+example : lookupBy "f" dup = some (fn "first") :=
+  lookupBy_shadow [("g", fn "other")] [("f", fn "second")] (by simp)
+
+/-- Without the obligation, `get_0`'s declaration is a Source candidate under
+the source name `get`, never under the alias. -/
+example {u} (hu : unitOf renamed = some u) :
+    ∃ out, out.name = "get" ∧ out ∈ u.env.declared (some "C") "get" := by
+  obtain ⟨out, source, _, hs, hn, hd⟩ := alias_declared hu (a := "get_0") rfl
+  cases hs
+  exact ⟨out, hn, hd (by decide)⟩
+
+/-- Under the obligation, every candidate is the landing declaration. -/
+example {u : Source.Syn .unit} {out d' : Source.Decl} (h : SourceResolves u "C" out)
+    (hd : d' ∈ u.env.declared (some "C") out.name) : d' = out :=
+  SourceResolves.unique h hd
+
+/-- Binding at the first-match position of `f` selects `first`, not `second`. -/
+example {settings s}
+    (h : Version.CalleeBinding.fromFunctions tablesS [] settings "C" .nil dup 1 = some s) :
+    s.declaration.name = "first" ∧ s.declaration.scope = some "C" := by
+  obtain ⟨d, source, _, _, hi, hs, hn, hsc, _⟩ := fromFunctions_alias (a := "f") rfl h
+  cases hi; cases hs
+  exact ⟨hn, hsc⟩
 
 end Solidity.Examples.Lowering.Total.CalleeAliases

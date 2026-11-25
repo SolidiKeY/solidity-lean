@@ -131,13 +131,13 @@ theorem alias_entry {u : Source.Syn .unit} {a : Name} {d : FunDecl}
       u.decls[entryPosition scope leadingParts index]? = some out ∧
       fromMetadata T R scope d = some out ∧ d.sourceDecl = some source ∧
       out.name = source.name ∧ out.scope = some scope ∧ out ∈ u.decls := by
-  obtain ⟨index, hf, hi⟩ := lookupBy_eq_some_iff.mp hl
+  obtain ⟨index, hf, hi⟩ := Iff.mp lookupBy_eq_some_iff hl
   obtain ⟨out, source, rest⟩ := withFunctions_identity h hi
   exact ⟨index, out, source, hf, hi, rest⟩
 
 /-- Exact lookup failure: no entry has the alias. -/
 theorem alias_none {a : Name} : lookupBy a fs = none ↔ ∀ e ∈ fs, e.1 ≠ a :=
-  lookupBy_eq_none_iff.trans firstIndex_eq_none_iff
+  Iff.trans lookupBy_eq_none_iff firstIndex_eq_none_iff
 
 /-- Shadowing: an entry with the alias after the first match is never the
 lookup result's position; distinct declarations may still sit there. -/
@@ -168,7 +168,7 @@ theorem fromFunctions_alias {settings : Source.Settings} {a : Name} {index : Nat
   obtain ⟨out, hp, hm'⟩ := withFunctions_entry hu hi
   obtain rfl : out = s.declaration := Option.some.inj (hm'.symm.trans hm)
   obtain ⟨source, _, hs, _, _, hn, hsc⟩ := fromMetadata_header hm
-  exact ⟨d, source, u, lookupBy_eq_some_iff.mpr ⟨index, hf, hi⟩, hi, hs, hn, hsc,
+  exact ⟨d, source, u, Iff.mpr lookupBy_eq_some_iff ⟨index, hf, hi⟩, hi, hs, hn, hsc,
     hu, hp, hr, hmem, hb⟩
 
 /-! ## Source name resolution: an explicit obligation -/

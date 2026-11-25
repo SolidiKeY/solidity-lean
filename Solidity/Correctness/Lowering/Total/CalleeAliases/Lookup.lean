@@ -92,12 +92,12 @@ theorem lookupBy_eq_none_iff {k : κ} {l : List (κ × α)} :
     | none => rfl
     | some i =>
         obtain ⟨v, hv⟩ := firstIndex_key hi
-        cases (h.symm.trans (lookupBy_eq_some_iff.mpr ⟨i, hi, hv⟩))
+        cases (h.symm.trans ((Iff.mpr lookupBy_eq_some_iff) ⟨i, hi, hv⟩))
   · intro h
     cases hv : lookupBy k l with
     | none => rfl
     | some v =>
-        obtain ⟨i, hi, _⟩ := lookupBy_eq_some_iff.mp hv
+        obtain ⟨i, hi, _⟩ := Iff.mp lookupBy_eq_some_iff hv
         cases h.symm.trans hi
 
 /-- An entry preceded only by other keys is found, whatever follows it,
