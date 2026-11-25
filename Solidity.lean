@@ -2544,6 +2544,7 @@ import Solidity.Correctness.Lowering.Total.Spells
 import Solidity.Correctness.Lowering.Total.TransientDecode
 import Solidity.Correctness.Lowering.Total.Versions
 import Solidity.Correctness.Lowering.Total.Versions.CalleeBinding
+import Solidity.Correctness.Lowering.Total.Versions.CalleeBinding.Frame
 import Solidity.Correctness.Lowering.Total.Versions.CalleeBinding.Functions
 import Solidity.Correctness.Lowering.Total.Versions.CalleeBinding.Resolved
 import Solidity.Correctness.Lowering.Total.Versions.Marked
