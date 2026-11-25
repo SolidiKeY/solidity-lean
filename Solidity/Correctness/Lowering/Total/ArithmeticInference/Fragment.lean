@@ -80,9 +80,6 @@ variable {Γ : Source.Ctx} {T : Tables} {e : RawExpr} {τ : STy}
 theorem depth_const {q : Q} (h : fold e = some q) : depth e = 1 := by
   cases e <;> simp [depth, h]
 
-theorem depth_pos : 0 < depth e := by
-  cases e <;> simp only [depth] <;> (try split) <;> omega
-
 theorem foldBin_cmp {op : BinOp} {k : Family} {qa qb : Option Q} (hk : family op = some k)
     (hc : k.cmp = true) : foldBin op qa qb = none := by
   cases h : foldBin op qa qb with

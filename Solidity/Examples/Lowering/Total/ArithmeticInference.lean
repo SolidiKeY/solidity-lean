@@ -225,6 +225,28 @@ example {u'} (hu : Callee.withFunctions tablesS [] "C" .nil fs = some u') {args}
   cases slots_unique hrs retSlots
   exact ⟨_, h⟩
 
+/-- The same call at `TypedArgs.inferN`'s fuels, from the list's node count on. -/
+example {u'} (hu : Callee.withFunctions tablesS [] "C" .nil fs = some u') {args n}
+    (hs : tablesS.exprs [e1, lt1] = some args) (hn : args.nodes.length ≤ n) :
+    ∃ d, Typed.inferN (n + 1) (ctx u') (.call (.ident "h") (.positional args)) =
+      some ⟨u256, d⟩ := by
+  obtain ⟨_, rs, _, hrs, _, _, _, _, h⟩ :=
+    alias_inferN_arith_nodes (Γ := ctx u') (a := "h_0") (index := 0) (σs := [u256, .bool])
+      (source := { name := "h", callable := .local .internalFn }) hu rfl rfl rfl rfl rfl
+      (by decide) rfl rfl paramSlots rfl
+      (fun j e s hj hne hs hn => by
+        rcases j with _ | j
+        · exact absurd rfl hne
+        · simp [fs] at hj)
+      (fun p hp => by cases hp) hs rfl
+      (fun j e σ he hσ => by
+        rcases j with _ | _ | j
+        · cases he; cases hσ; exact e1_infers
+        · cases he; cases hσ; exact lt1_infers
+        · cases he) hn
+  cases slots_unique hrs retSlots
+  exact ⟨_, h⟩
+
 end call
 
 /-! ## Boundaries -/
@@ -295,41 +317,37 @@ example {T : Tables} {args n} {f : String}
     Typed.inferN n (ctx u) (.call (.ident f) (.positional args)) = none :=
   call_rejected hs (i := 1) rfl zero_div
 
-/-! ## Axioms -/
+/-! ## Remaining exports -/
 
-/--
-info: 'Solidity.Correctness.Lowering.Total.ArithmeticInference.Infers.sound' depends on axioms: [propext,
- Classical.choice,
- Quot.sound]
--/
-#guard_msgs in #print axioms Infers.sound
+/-- The family is spelled by every decoder version, and any two sufficient
+fuels give the same result. -/
+example {T : Tables} : ∃ s, T.expr e1 = some s ∧
+    Typed.inferN 3 (ctx u) s = Typed.inferN 7 (ctx u) s :=
+  let ⟨s, hs⟩ := (e1_infers (u := u)).spelled (T := T)
+  ⟨s, hs, e1_infers.inferN_transport hs (by decide) (by decide)⟩
 
-/--
-info: 'Solidity.Correctness.Lowering.Total.ArithmeticInference.Rejects.sound' depends on axioms: [propext,
- Classical.choice,
- Quot.sound]
--/
-#guard_msgs in #print axioms Rejects.sound
+/-- A rejected form is outside the family at every type. -/
+example {τ} : ¬ Infers (ctx u) (.binop .div (.name "x") (.num 0)) τ := zero_div.not_infers
 
-/--
-info: 'Solidity.Correctness.Lowering.Total.ArithmeticInference.alias_infer_arith' depends on axioms: [propext,
- Classical.choice,
- Quot.sound]
--/
-#guard_msgs in #print axioms alias_infer_arith
+/-- `-` on a fixed-point local. -/
+example {Γ : Source.Ctx} {j : Nat} {f : Source.FixTy} (hr : Γ.resolve "p" = some (.loc j))
+    (ht : Γ.tys[j]? = some (.fixed f)) : Infers Γ (.unop .neg (.name "p")) (.fixed f) :=
+  .negFixed (.local hr ht)
 
-/--
-info: 'Solidity.Correctness.Lowering.Total.ArithmeticInference.alias_inferN_arith' depends on axioms: [propext,
- Classical.choice,
- Quot.sound]
--/
-#guard_msgs in #print axioms alias_inferN_arith
+/-- The operators outside the families: the four wrapping ones are not spelled;
+`&&`, `||` are spelled and left to the scalar lane. -/
+example : Decode.binop .powW = none := binop_eq_none_iff.mpr (.inr (.inr (.inr rfl)))
+example : family .and = none := family_eq_none_iff.mpr (.inr (.inl rfl))
 
-/--
-info: 'Solidity.Correctness.Lowering.Total.ArithmeticInference.args_infer' depends on axioms: [propext,
- Classical.choice,
- Quot.sound]
--/
-#guard_msgs in #print axioms args_infer
+/-- The premises of `alias_inferN` at any fuel from the list's node count. -/
+example {T : Tables} {args n} (hs : T.exprs es = some args) (hn : args.nodes.length ≤ n + 1) :
+    σs.length = (argExprs args).length ∧
+      ∀ (j : Nat) a σ, (argExprs args)[j]? = some a → σs[j]? = some σ →
+        ∃ d, Typed.inferN (n - 1 - j) (ctx u) a = some ⟨σ, d⟩ :=
+  args_inferN_nodes hs rfl es_infers hn
+
+/-- A model call is spelled over its spelled arguments. -/
+example {T : Tables} {args} (hs : T.exprs es = some args) :
+    T.expr (.call "h" es) = some (.call (.ident "h") (.positional args)) := expr_call hs
 
 end Solidity.Examples.Lowering.Total.ArithmeticInference
