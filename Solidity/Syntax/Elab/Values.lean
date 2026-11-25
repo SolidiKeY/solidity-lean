@@ -1117,26 +1117,10 @@ type's). -/
 /-- `2^32`: an external function value's address is above its selector. -/
 def selShift : Nat := 2 ^ 32
 
-omit [FreshNames] in
-/-- A member's type ranks below its struct (`structDef_rank_lt`): the
-decrease of `abiTyName` at a struct. -/
-theorem tyRank_lt_of_mem_structDef {s : Name} {x : Name × Ty} (h : x ∈ structDef s) :
-    tyRank x.2 < structRank s := by
-  have hle : ∀ (l : List (Name × Ty)), x ∈ l → tyRank x.2 ≤ fieldsRank l := by
-    intro l
-    induction l with
-    | nil => intro h; cases h
-    | cons y l ih =>
-      intro h
-      rcases List.mem_cons.1 h with rfl | h
-      · exact Nat.le_max_left _ _
-      · exact Nat.le_trans (ih h) (Nat.le_max_right _ _)
-  exact Nat.lt_of_le_of_lt (hle _ h) (structDef_rank_lt s)
-
 /-- The canonical ABI name of the type `T` at the key `k` of the width table
 `ws`, as a signature writes it: `uint256`, `address`, `bytes4`, `string`,
 `uint8[]`, a struct as the tuple of its members.  None for a mapping. -/
-def abiTyName (ws : List (String × Nat)) (k : String) : Ty → Option String
+partial def abiTyName (ws : List (String × Nat)) (k : String) : Ty → Option String
   | .prim .bool => some "bool"
   | .prim .int => some s!"int{(lookupBy k ws).getD 256}"
   | .prim .uint =>
@@ -1151,64 +1135,9 @@ def abiTyName (ws : List (String × Nat)) (k : String) : Ty → Option String
     else (abiTyName ws (k ++ "[]") E).map (· ++ "[]")
   | .ref (.fixed E n) => (abiTyName ws (k ++ "[]") E).map (s!"{·}[{n}]")
   | .ref (.struct s) => do
-    -- (attached: the member's membership reaches the decrease)
-    let ms ← (structDef s).attach.mapM fun ⟨m, _⟩ => abiTyName (structWidths s) m.1 m.2
+    let ms ← (structDef s).mapM fun (f, T) => abiTyName (structWidths s) f T
     pure s!"({",".intercalate ms})"
   | .ref (.mapping ..) => none
-termination_by T => (tyRank T, sizeOf T)
-decreasing_by
-  all_goals first
-    | exact Prod.Lex.left _ _ (tyRank_lt_of_mem_structDef ‹_›)
-    | (apply Prod.Lex.left; simp [tyRank]; done)
-    | (apply Prod.Lex.right; simp; omega)
-
-/-! The defining equations of `abiTyName`, one per arm. -/
-
-omit [FreshNames] in
-theorem abiTyName_bool (ws : List (String × Nat)) (k : String) :
-    abiTyName ws k (.prim .bool) = some "bool" := by
-  rw [abiTyName]
-
-omit [FreshNames] in
-theorem abiTyName_int (ws : List (String × Nat)) (k : String) :
-    abiTyName ws k (.prim .int) = some s!"int{(lookupBy k ws).getD 256}" := by
-  rw [abiTyName]
-
-omit [FreshNames] in
-theorem abiTyName_uint (ws : List (String × Nat)) (k : String) :
-    abiTyName ws k (.prim .uint) =
-      if (lookupBy (k ++ "#address") ws).isSome then some "address"
-      else if let some n := lookupBy (k ++ "#bytes") ws then some s!"bytes{n}"
-      else if (lookupBy (k ++ "#enum") ws).isSome then some "uint8"
-      else if (fnRow? ws k).isSome then some "function"
-      else some s!"uint{(lookupBy k ws).getD 256}" := by
-  rw [abiTyName]
-
-omit [FreshNames] in
-theorem abiTyName_array (ws : List (String × Nat)) (k : String) (E : Ty) :
-    abiTyName ws k (.ref (.array E)) =
-      if lookupBy (k ++ "[]#bytes") ws == some 1 then
-        some (if (lookupBy (k ++ "#string") ws).isSome then "string" else "bytes")
-      else (abiTyName ws (k ++ "[]") E).map (· ++ "[]") := by
-  rw [abiTyName]
-
-omit [FreshNames] in
-theorem abiTyName_fixed (ws : List (String × Nat)) (k : String) (E : Ty) (n : Nat) :
-    abiTyName ws k (.ref (.fixed E n)) = (abiTyName ws (k ++ "[]") E).map (s!"{·}[{n}]") := by
-  rw [abiTyName]
-
-omit [FreshNames] in
-theorem abiTyName_struct (ws : List (String × Nat)) (k : String) (s : Name) :
-    abiTyName ws k (.ref (.struct s)) = (do
-      let ms ← (structDef s).mapM fun (f, T) => abiTyName (structWidths s) f T
-      pure s!"({",".intercalate ms})") := by
-  rw [abiTyName, List.mapM_subtype (g := fun m => abiTyName (structWidths s) m.1 m.2)
-    (fun _ _ => rfl), List.unattach_attach]
-
-omit [FreshNames] in
-theorem abiTyName_mapping (ws : List (String × Nat)) (k : String) (K : PrimTy) (V : Ty) :
-    abiTyName ws k (.ref (.mapping K V)) = none := by
-  rw [abiTyName]
 
 /-- The canonical signature of the function `g` of `C`, `g(uint256,address)`. -/
 def fnSignature? (g : String) : Option String := do
@@ -1368,49 +1297,6 @@ def isRefTy : Ty → Bool
   | .ref _ => true
   | .prim _ => false
 
-omit [FreshNames] in
-/-- `findSome?` over the attached list is `findSome?` over the list. -/
-theorem findSome?_attach_val {α β : Type} (l : List α) (f : α → Option β) :
-    (l.attach.findSome? fun ⟨a, _⟩ => f a) = l.findSome? f := by
-  have h := List.findSome?_map (f := Subtype.val) (p := f) (l := l.attach)
-  rw [List.attach_map_subtype_val] at h
-  exact h.symm
-
-omit [FreshNames] in
-/-- `findSome?` over the attached list's indexed pairs is that over the list's. -/
-theorem findSome?_attach_zipIdx {α β : Type} (l : List α) (f : α → Nat → Option β) :
-    (l.attach.zipIdx.findSome? fun (⟨a, _⟩, i) => f a i) =
-      l.zipIdx.findSome? fun (a, i) => f a i := by
-  have h := List.findSome?_map (f := Prod.map Subtype.val id) (p := fun (a, i) => f a i)
-    (l := l.attach.zipIdx)
-  rw [← List.zipIdx_map, List.attach_map_subtype_val] at h
-  exact h.symm
-
-omit [FreshNames] in
-/-- `findSome?_attach_val` for a function of the attached element that reads
-only its value. -/
-theorem findSome?_attach_of {α β : Type} {l : List α} {F : { x // x ∈ l } → Option β}
-    {g : α → Option β} (h : ∀ x, F x = g x.1) : l.attach.findSome? F = l.findSome? g := by
-  rw [funext h]; exact findSome?_attach_val l g
-
-omit [FreshNames] in
-/-- `findSome?_attach_zipIdx` for a function that reads only the element's value. -/
-theorem findSome?_attach_zipIdx_of {α β : Type} {l : List α}
-    {F : { x // x ∈ l } × Nat → Option β} {g : α × Nat → Option β}
-    (h : ∀ x i, F (x, i) = g (x.1, i)) : l.attach.zipIdx.findSome? F = l.zipIdx.findSome? g := by
-  have hF : F = fun (x : { x // x ∈ l } × Nat) => match x with
-      | (⟨a, _⟩, i) => (fun a i => g (a, i)) a i := funext fun ⟨x, i⟩ => h x i
-  rw [hF]; exact findSome?_attach_zipIdx l fun a i => g (a, i)
-
-/-- The decrease of the three mutual functions below: an expression inside
-the argument (a member of an argument list by `List.sizeOf_lt_of_mem`), or the
-same expression at a lower tag. -/
-local macro "narrow_decreasing" : tactic => `(tactic|
-  (all_goals simp_wf
-   all_goals first
-    | omega
-    | (have h := List.sizeOf_lt_of_mem ‹_ ∈ _›; simp at h; omega)))
-
 mutual
 /-- A use of a place `narrowWhole` names other than through an index, a
 member (`.length`, `.push`, `.pop`), `delete`, or where its narrow positions
@@ -1418,7 +1304,7 @@ are checked against the target's (a reference local's initializer, a
 reference assignment, a function's reference argument: `shapeCheck`).  A
 reference type has no width (`uint[]` is `uint8[]`'s `Ty`), so any other use
 (an operand of a conditional, a tuple, a named argument) would lose it. -/
-def narrowWholeUse? (Γ : ECtx) : RawExpr → Option RawExpr
+partial def narrowWholeUse? (Γ : ECtx) : RawExpr → Option RawExpr
   | e@(.name _) => if narrowWhole C Γ e then some e else none
   | e@(.index b k) =>
     if narrowWhole C Γ e then some e else (narrowBase? Γ b).orElse fun _ => narrowWholeUse? Γ k
@@ -1426,41 +1312,39 @@ def narrowWholeUse? (Γ : ECtx) : RawExpr → Option RawExpr
   -- a function's reference argument: its shape is checked against the
   -- parameter's (`elabCallRet`); a struct constructor's arguments, each
   -- against its member's, by the member writes it is lowered to (`hoist`)
+  | .call "#array" as => as.findSome? (narrowWholeAt? Γ)
   | .call f as =>
-    -- (an `if`, not a literal pattern: the equations stay cheap to generate)
-    if f = "#array" then as.attach.findSome? fun ⟨a, _⟩ => narrowWholeAt? Γ a
+    if f.startsWith "#bytesPrefix" && (lookupBy f C.funs).isNone then
+      -- The prefix lowering validates the bytes kind before hoisting.
+      as.findSome? fun a => narrowWholeAt? Γ (match a with
+        | .call "bytes" [v] => v
+        | _ => a)
     else
-      if f.startsWith "#bytesPrefix" && (lookupBy f C.funs).isNone then
-        -- The prefix lowering validates the bytes kind before hoisting.
-        as.attach.findSome? fun ⟨a, _⟩ => match a with
-          | .call "bytes" [v] => narrowWholeAt? Γ v
-          | a => narrowWholeAt? Γ a
-      else
-      if (lookupBy f C.funs).isNone && !(C.structFields f).isEmpty then
-        as.attach.findSome? fun ⟨a, _⟩ => narrowWholeAt? Γ a
-      -- a byte string read whole by `keccak256` or the ABI (`abiKind` admits
-      -- no other array)
-      else if (lookupBy f C.funs).isNone &&
-          (byteBuiltin f || f == "erc7201" || f == sliceViewName || f.startsWith "#slice" ||
-            ((bytesTy? f).isSome && as.length == 1 &&
-              as.all (fun a => dynamicBytesExpr C Γ a))) then
-        as.attach.findSome? fun ⟨a, _⟩ => narrowBase? Γ a
-      else
-      -- a call through a function value (a name, or `callValueName` whose first
-      -- argument is the callee): a reference component (`fnRefElem?`,
-      -- `fnRefStruct?`) is captured at its declared shape (`dispatchCaptures`),
-      -- whose initializer `shapeCheck`s the argument
-      let valueRefs (ty : String) : List Bool :=
-        ((fnParts? ty).map fun (ps, _, _) =>
-          ps.map fun c => (fnRefElem? C c).isSome || (fnRefStruct? C c).isSome).getD []
-      let refs : List Bool := match lookupBy f C.funs with
-        | some d => d.params.map fun (_, T) => isRefTy T
-        | none =>
-          if f == callValueName then
-            false :: (((as.head?.bind (fnTyOfExpr C Γ)).map valueRefs).getD [])
-          else ((fnTyOf? C Γ f).map valueRefs).getD []
-      as.attach.zipIdx.findSome? fun (⟨a, _⟩, i) =>
-        if refs.getD i false then narrowWholeAt? Γ a else narrowWholeUse? Γ a
+    if (lookupBy f C.funs).isNone && !(C.structFields f).isEmpty then
+      as.findSome? (narrowWholeAt? Γ)
+    -- a byte string read whole by `keccak256` or the ABI (`abiKind` admits
+    -- no other array)
+    else if (lookupBy f C.funs).isNone &&
+        (byteBuiltin f || f == "erc7201" || f == sliceViewName || f.startsWith "#slice" ||
+          ((bytesTy? f).isSome && as.length == 1 &&
+            as.all (fun a => dynamicBytesExpr C Γ a))) then
+      as.findSome? (narrowBase? Γ)
+    else
+    -- a call through a function value (a name, or `callValueName` whose first
+    -- argument is the callee): a reference component (`fnRefElem?`,
+    -- `fnRefStruct?`) is captured at its declared shape (`dispatchCaptures`),
+    -- whose initializer `shapeCheck`s the argument
+    let valueRefs (ty : String) : List Bool :=
+      ((fnParts? ty).map fun (ps, _, _) =>
+        ps.map fun c => (fnRefElem? C c).isSome || (fnRefStruct? C c).isSome).getD []
+    let refs : List Bool := match lookupBy f C.funs with
+      | some d => d.params.map fun (_, T) => isRefTy T
+      | none =>
+        if f == callValueName then
+          false :: (((as.head?.bind (fnTyOfExpr C Γ)).map valueRefs).getD [])
+        else ((fnTyOf? C Γ f).map valueRefs).getD []
+    as.zipIdx.findSome? fun (a, i) =>
+      if refs.getD i false then narrowWholeAt? Γ a else narrowWholeUse? Γ a
   | .assign a b =>
     if storageMappingAlias? C Γ a && sameShape (placeShape C Γ a) (exprShape C Γ b) then
       (narrowWholeAt? Γ a).orElse fun _ => narrowWholeAt? Γ b
@@ -1470,190 +1354,30 @@ def narrowWholeUse? (Γ : ECtx) : RawExpr → Option RawExpr
   | .ternary c a b =>
     ((narrowWholeUse? Γ c).orElse fun _ => narrowWholeUse? Γ a).orElse fun _ => narrowWholeUse? Γ b
   | .named f _ as =>
-    if (lookupBy f C.funs).isNone && !(C.structFields f).isEmpty then
-      as.attach.findSome? fun ⟨a, _⟩ => narrowWholeAt? Γ a
-    else as.attach.findSome? fun ⟨a, _⟩ => narrowWholeUse? Γ a
-  | .tuple as => as.attach.findSome? fun ⟨a, _⟩ => narrowWholeUse? Γ a
-  | .modular _ a b k =>
-    ((narrowWholeUse? Γ a).orElse fun _ => narrowWholeUse? Γ b).orElse fun _ => narrowWholeUse? Γ k
+    if (lookupBy f C.funs).isNone && !(C.structFields f).isEmpty then as.findSome? (narrowWholeAt? Γ)
+    else as.findSome? (narrowWholeUse? Γ)
+  | .tuple as => as.findSome? (narrowWholeUse? Γ)
+  | .modular _ a b k => [a, b, k].findSome? (narrowWholeUse? Γ)
   | _ => none
-termination_by e => (sizeOf e, 0)
-decreasing_by narrow_decreasing
 
 /-- `narrowBase?` at a whole use whose shape is checked (`shapeCheck`): a
 conditional's branches too, when their narrow positions agree (solc has no
 common type of `uint8[]` and `uint[]`). -/
-def narrowWholeAt? (Γ : ECtx) : RawExpr → Option RawExpr
+partial def narrowWholeAt? (Γ : ECtx) : RawExpr → Option RawExpr
   | e@(.ternary c a b) =>
     if sameShape (exprShape C Γ a) (exprShape C Γ b) then
       ((narrowWholeUse? Γ c).orElse fun _ => narrowWholeAt? Γ a).orElse fun _ => narrowWholeAt? Γ b
     else some e
   | e => narrowBase? Γ e
-termination_by e => (sizeOf e, 2)
-decreasing_by narrow_decreasing
 
 /-- `narrowWholeUse?` of an index's or a member's base, or of a use whose
 shape is checked (`shapeCheck`): its own indices only. -/
-def narrowBase? (Γ : ECtx) : RawExpr → Option RawExpr
+partial def narrowBase? (Γ : ECtx) : RawExpr → Option RawExpr
   | .index b k => (narrowBase? Γ b).orElse fun _ => narrowWholeUse? Γ k
   | .field b _ => narrowBase? Γ b
   | .name _ => none
   | e => narrowWholeUse? Γ e
-termination_by e => (sizeOf e, 1)
-decreasing_by narrow_decreasing
 end
-
-/-! The defining equations of `narrowWholeUse?`, `narrowWholeAt?` and
-`narrowBase?`, one per arm, as written before the functions were total (the
-definitions go through `List.attach`). -/
-
-theorem narrowWholeUse?_name (Γ : ECtx) (x : String) :
-    narrowWholeUse? C Γ (.name x) = if narrowWhole C Γ (.name x) then some (.name x) else none := by
-  rw [narrowWholeUse?]
-
-theorem narrowWholeUse?_index (Γ : ECtx) (b k : RawExpr) :
-    narrowWholeUse? C Γ (.index b k) =
-      if narrowWhole C Γ (.index b k) then some (.index b k)
-      else (narrowBase? C Γ b).orElse fun _ => narrowWholeUse? C Γ k := by
-  rw [narrowWholeUse?]
-
-theorem narrowWholeUse?_field (Γ : ECtx) (b : RawExpr) (f : String) :
-    narrowWholeUse? C Γ (.field b f) =
-      if narrowWhole C Γ (.field b f) then some (.field b f) else narrowBase? C Γ b := by
-  rw [narrowWholeUse?]
-
-theorem narrowWholeUse?_call_array (Γ : ECtx) (as : List RawExpr) :
-    narrowWholeUse? C Γ (.call "#array" as) = as.findSome? (narrowWholeAt? C Γ) := by
-  rw [narrowWholeUse?, if_pos rfl, findSome?_attach_val]
-
-theorem narrowWholeUse?_call (Γ : ECtx) (f : String) (as : List RawExpr) (hf : f ≠ "#array") :
-    narrowWholeUse? C Γ (.call f as) =
-      (if f.startsWith "#bytesPrefix" && (lookupBy f C.funs).isNone then
-        as.findSome? fun a => narrowWholeAt? C Γ (match a with
-          | .call "bytes" [v] => v
-          | _ => a)
-      else
-      if (lookupBy f C.funs).isNone && !(C.structFields f).isEmpty then
-        as.findSome? (narrowWholeAt? C Γ)
-      else if (lookupBy f C.funs).isNone &&
-          (byteBuiltin f || f == "erc7201" || f == sliceViewName || f.startsWith "#slice" ||
-            ((bytesTy? f).isSome && as.length == 1 &&
-              as.all (fun a => dynamicBytesExpr C Γ a))) then
-        as.findSome? (narrowBase? C Γ)
-      else
-      let valueRefs (ty : String) : List Bool :=
-        ((fnParts? ty).map fun (ps, _, _) =>
-          ps.map fun c => (fnRefElem? C c).isSome || (fnRefStruct? C c).isSome).getD []
-      let refs : List Bool := match lookupBy f C.funs with
-        | some d => d.params.map fun (_, T) => isRefTy T
-        | none =>
-          if f == callValueName then
-            false :: (((as.head?.bind (fnTyOfExpr C Γ)).map valueRefs).getD [])
-          else ((fnTyOf? C Γ f).map valueRefs).getD []
-      as.zipIdx.findSome? fun (a, i) =>
-        if refs.getD i false then narrowWholeAt? C Γ a else narrowWholeUse? C Γ a) := by
-  rw [narrowWholeUse?, if_neg hf]
-  refine ite_congr rfl (fun _ => ?_) fun _ => ite_congr rfl (fun _ => ?_) fun _ =>
-    ite_congr rfl (fun _ => ?_) fun _ => ?_
-  · refine findSome?_attach_of ?_
-    rintro ⟨a, ha⟩
-    dsimp only
-    split <;> (try split) <;> first
-      | rfl
-      | (rename_i h; cases h; rfl)
-      | (rename_i h; exact (h _ rfl).elim)
-      | (rename_i h; exact (h _ ‹_› rfl HEq.rfl).elim)
-  · exact findSome?_attach_of fun _ => rfl
-  · exact findSome?_attach_of fun _ => rfl
-  · exact findSome?_attach_zipIdx_of fun _ _ => rfl
-
-theorem narrowWholeUse?_assign (Γ : ECtx) (a b : RawExpr) :
-    narrowWholeUse? C Γ (.assign a b) =
-      if storageMappingAlias? C Γ a && sameShape (placeShape C Γ a) (exprShape C Γ b) then
-        (narrowWholeAt? C Γ a).orElse fun _ => narrowWholeAt? C Γ b
-      else (narrowWholeUse? C Γ a).orElse fun _ => narrowWholeUse? C Γ b := by
-  rw [narrowWholeUse?]
-
-theorem narrowWholeUse?_binop (Γ : ECtx) (op : BinOp) (a b : RawExpr) :
-    narrowWholeUse? C Γ (.binop op a b) =
-      (narrowWholeUse? C Γ a).orElse fun _ => narrowWholeUse? C Γ b := by
-  rw [narrowWholeUse?]
-
-theorem narrowWholeUse?_opAssign (Γ : ECtx) (op : BinOp) (a b : RawExpr) :
-    narrowWholeUse? C Γ (.opAssign op a b) =
-      (narrowWholeUse? C Γ a).orElse fun _ => narrowWholeUse? C Γ b := by
-  rw [narrowWholeUse?]
-
-theorem narrowWholeUse?_unop (Γ : ECtx) (op : UnOp) (a : RawExpr) :
-    narrowWholeUse? C Γ (.unop op a) = narrowWholeUse? C Γ a := by
-  rw [narrowWholeUse?]
-
-theorem narrowWholeUse?_incDec (Γ : ECtx) (op : IncDec) (a : RawExpr) :
-    narrowWholeUse? C Γ (.incDec op a) = narrowWholeUse? C Γ a := by
-  rw [narrowWholeUse?]
-
-theorem narrowWholeUse?_newArr (Γ : ECtx) (T : RawTy) (a : RawExpr) :
-    narrowWholeUse? C Γ (.newArr T a) = narrowWholeUse? C Γ a := by
-  rw [narrowWholeUse?]
-
-theorem narrowWholeUse?_ternary (Γ : ECtx) (c a b : RawExpr) :
-    narrowWholeUse? C Γ (.ternary c a b) =
-      ((narrowWholeUse? C Γ c).orElse fun _ => narrowWholeUse? C Γ a).orElse fun _ =>
-        narrowWholeUse? C Γ b := by
-  rw [narrowWholeUse?]
-
-theorem narrowWholeUse?_named (Γ : ECtx) (f : String) (ns : List String) (as : List RawExpr) :
-    narrowWholeUse? C Γ (.named f ns as) =
-      if (lookupBy f C.funs).isNone && !(C.structFields f).isEmpty then
-        as.findSome? (narrowWholeAt? C Γ)
-      else as.findSome? (narrowWholeUse? C Γ) := by
-  rw [narrowWholeUse?, findSome?_attach_val, findSome?_attach_val]
-
-theorem narrowWholeUse?_tuple (Γ : ECtx) (as : List RawExpr) :
-    narrowWholeUse? C Γ (.tuple as) = as.findSome? (narrowWholeUse? C Γ) := by
-  rw [narrowWholeUse?, findSome?_attach_val]
-
-theorem narrowWholeUse?_modular (Γ : ECtx) (op : ModOp) (a b k : RawExpr) :
-    narrowWholeUse? C Γ (.modular op a b k) = [a, b, k].findSome? (narrowWholeUse? C Γ) := by
-  rw [narrowWholeUse?]
-  simp only [List.findSome?]
-  cases narrowWholeUse? C Γ a <;> cases narrowWholeUse? C Γ b <;>
-    cases narrowWholeUse? C Γ k <;> rfl
-
-/-- The last arm: a literal and an environment value name no place. -/
-theorem narrowWholeUse?_other (Γ : ECtx) :
-    (∀ n, narrowWholeUse? C Γ (.num n) = none) ∧ (∀ b, narrowWholeUse? C Γ (.bool b) = none) ∧
-    (∀ k, narrowWholeUse? C Γ (.env k) = none) := by
-  refine ⟨?_, ?_, ?_⟩ <;> intros <;> rw [narrowWholeUse?] <;> intros <;> contradiction
-
-theorem narrowWholeAt?_ternary (Γ : ECtx) (c a b : RawExpr) :
-    narrowWholeAt? C Γ (.ternary c a b) =
-      if sameShape (exprShape C Γ a) (exprShape C Γ b) then
-        ((narrowWholeUse? C Γ c).orElse fun _ => narrowWholeAt? C Γ a).orElse fun _ =>
-          narrowWholeAt? C Γ b
-      else some (.ternary c a b) := by
-  rw [narrowWholeAt?]
-
-theorem narrowWholeAt?_other (Γ : ECtx) (e : RawExpr) (ht : ∀ c a b, e ≠ .ternary c a b) :
-    narrowWholeAt? C Γ e = narrowBase? C Γ e := by
-  rw [narrowWholeAt?]; assumption
-
-theorem narrowBase?_index (Γ : ECtx) (b k : RawExpr) :
-    narrowBase? C Γ (.index b k) =
-      (narrowBase? C Γ b).orElse fun _ => narrowWholeUse? C Γ k := by
-  rw [narrowBase?]
-
-theorem narrowBase?_field (Γ : ECtx) (b : RawExpr) (f : String) :
-    narrowBase? C Γ (.field b f) = narrowBase? C Γ b := by
-  rw [narrowBase?]
-
-theorem narrowBase?_name (Γ : ECtx) (x : String) : narrowBase? C Γ (.name x) = none := by
-  rw [narrowBase?]
-
-theorem narrowBase?_other (Γ : ECtx) (e : RawExpr) (hi : ∀ b k, e ≠ .index b k)
-    (hf : ∀ b f, e ≠ .field b f) (hn : ∀ x, e ≠ .name x) :
-    narrowBase? C Γ e = narrowWholeUse? C Γ e := by
-  rw [narrowBase?] <;> assumption
 
 /-- The smallest integer type holding the literals `u` and `v` (solc's mobile
 type, of both): `uintN` when neither is negative, else `intN`. -/
