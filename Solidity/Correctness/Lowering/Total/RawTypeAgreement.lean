@@ -11,7 +11,8 @@ agreeing with the generated rows rebased there (`rebase key ws`) on the keys the
 reads; `agree_surround` gives that among rows that are not read. Struct resolution is derived, in
 `E.decls = pre ++ ps.collect (some c) ++ post` with `decode C = .ok ps`, from table facts
 (`Closed`, `Free`, `Keyed` leaves) through `StructTableAgreement.agrees` (`leaf_agrees`).
-Domain: `Plain` excludes an elementary name that is also an enum (`elabTyW` reads the enum).
+Domain: `Plain` excludes an elementary name that is also an enum (`elabTyW` reads the enum);
+`Keyed` excludes entry-less (fallback), repeated and aliased struct names.
 `rawType` errors stay errors (enum, function, `bytes`/`string`, member-spelling names, other
 keys, zero lengths, mappings outside storage), though `elabTyW` may succeed. The conclusion is
 `Rep`, not a `spellType` equation (`bytes1[]` has no spelling there); an aliased table has no
