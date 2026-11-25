@@ -1,0 +1,2 @@
+| `Correctness/Lowering/Total/TransientDecode.lean` | Ordered state-variable declarations with transient flags from `transientRoots` at marked types; success/faithfulness iff, error inversion, width/marker representation and root lemmas; unit composition and semantic binding open. |
+| `Examples/Lowering/Total/TransientDecode.lean` | Checks of transient and persistent declarations, widths, order, and errors for reference and unrepresentable state variables. |
