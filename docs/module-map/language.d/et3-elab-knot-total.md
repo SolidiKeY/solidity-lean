@@ -1,3 +1,4 @@
 | `Correctness/Elab/Total.lean` | Structural and named-argument closure for elaborator totality: fuel sufficiency, defining equations and uniqueness, with fixed ordinary-call and statement callbacks; capture-atom preservation proofs. |
 | `Syntax/Elab/CallMeasure.lean` | Weighted call-expansion decreases; constant-folding nonincrease and capture, operand, and argument output-height preservation. |
 | `Syntax/Elab/CallOutput.lean` | Structural expression and capture output-height bounds supporting elaborator totality. |
+| `Correctness/Elab/Congruence.lean` | Callback agreement for the elaborator's helpers, at run level and scope by scope (`Agree`, `Out`): a block, argument, pair, binary-operator and eager-argument hoisting, call-argument preparation and an inlined body give the same result over callbacks that agree at the invocations each makes. |
