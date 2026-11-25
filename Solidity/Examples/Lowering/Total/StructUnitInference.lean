@@ -96,25 +96,39 @@ theorem uint_rejects {isBase mapFree} :
 example {u} (h : StructUnit.build tablesS [] full "C" fsM = .ok u) (Γ : Source.Ctx) :=
   build_prefixRejects (Γ := Γ) (σs := [.bool]) (x := "Pair") h
 
+/-- Lookup of `n`: the root `n` and the function `n`, the root no function. -/
+example {u} (h : StructUnit.build tablesS [] full "C" fsM = .ok u) := build_lookup (x := "n") h
+
 /-- The callable functions of `f` are exactly its callable entries. -/
 example {u} (h : StructUnit.build tablesS [] implicit "C" fsM = .ok u) :
     (ctx u []).functions "f" = callableEntries tablesS [] "C" fsM "f" :=
   build_functions h rfl rfl (by decide) rfl
 
 /-- The external `f(bool)` is never callable. -/
-example {u} {o} (hm : fromMetadata tablesS [] "C" (fn "f" external pb) = some o) :
+example {u : Syn .unit} {o} (hm : fromMetadata tablesS [] "C" (fn "f" external pb) = some o) :
     o ∉ (ctx u []).functions "f" :=
-  build_entry_unreachable hm (callable_external rfl rfl) rfl
+  entry_unreachable hm (callable_external rfl rfl) rfl
 
 /-- First-alias lookup: `f_0` selects position 0, not the later `h()` under `f_0`. -/
 example {u} (h : StructUnit.build tablesS [] full "C" fsM = .ok u) :
     ∃ out, firstIndex "f_0" fsM = some 0 ∧ fromMetadata tablesS [] "C" (fn "f" internal pb ru) = some out ∧
       out ∈ u.env.lookup (some "C") "f" ∧ out ∈ (ctx u []).functions "f" := by
-  obtain ⟨index, out, hf, hi, hm, -, -, hl, hc⟩ :=
-    build_alias_lookup (Γ := ctx u []) (a := "f_0") (fd := fn "f" internal pb ru) (source := { name := "f", callable := internal })
-      h rfl rfl rfl rfl (by decide)
+  obtain ⟨index, out, source, hf, -, hm, hs, -, -, hk⟩ :=
+    build_alias_lookup (Γ := ctx u []) (a := "f_0") (fd := fn "f" internal pb ru) h rfl rfl rfl
   cases hf.symm.trans (rfl : firstIndex "f_0" fsM = some 0)
+  cases hs
+  obtain ⟨hl, hc⟩ := hk (by decide)
   exact ⟨out, rfl, hm, hl, hc rfl rfl⟩
+
+/-- A name no entry retains (here the struct `Tag`) has no callable function. -/
+example {u} (h : StructUnit.build tablesS [] full "C" fsM = .ok u) :
+    (ctx u []).functions "Tag" = [] := by
+  rw [build_functions h rfl rfl (by decide) rfl]; rfl
+
+/-- An empty function list: no callable function under any nonempty name. -/
+example {u} {x : String} (h : StructUnit.build tablesS [] implicit "C" [] = .ok u) (hx : x ≠ "")
+    (hloc : ([] : List String).idxOf? x = none) : (ctx u []).functions x = [] :=
+  build_functions h rfl rfl hx hloc
 
 /-- **Unique overload**: `f(true)` infers to `uint` at `Typed.infer`'s fuel; `f(uint)`
 rejects the argument and the external `f(bool)` is not callable. -/
@@ -139,11 +153,15 @@ example {u} (h : StructUnit.build tablesS [] full "C" fsM = .ok u) :
   exact ⟨_, hinf⟩
 
 /-- **Colliding struct name**: the function `Pair` excludes the struct branch, so
-`Pair(…)` dispatches to `inferCall`. -/
+`Pair(true)` dispatches to `inferCall`. -/
 example {u} (h : StructUnit.build tablesS [] full "C" fsM = .ok u) :
-    NotOther (ctx u []) "Pair" :=
-  build_entry_notOther (Γ := ctx u []) (index := 3) (source := { name := "Pair", callable := internal })
-    h rfl rfl rfl rfl (by decide) rfl
+    NotOther (ctx u []) "Pair" ∧
+      Source.Typed.inferN 5 (ctx u []) (call "Pair" [tru]) =
+        Source.inferCall (ctx u []) "Pair" (args [tru]) [.bool] (.cons (.bool true) .nil) :=
+  ⟨build_entry_notOther (Γ := ctx u []) (index := 3)
+    (source := { name := "Pair", callable := internal }) h rfl rfl rfl rfl (by decide) rfl,
+   build_entry_dispatch (index := 3) (source := { name := "Pair", callable := internal })
+    h rfl rfl rfl rfl (by decide) rfl rfl⟩
 
 /-- **Colliding root name**: `n(true)` selects the function `n` alone. -/
 example {u} (h : StructUnit.build tablesS [] implicit "C" fsM = .ok u) :
@@ -175,32 +193,7 @@ example {u} (h : StructUnit.build tablesS [] full "C" fsM = .ok u) :
 example {u} (_ : StructUnit.build tablesS [] full "C" fsM = .ok u) :
     (ctx u [("f", .bool)]).functions "f" = [] ∧
       Source.Typed.inferN 5 (ctx u [("f", .bool)]) (call "f" [tru]) = none :=
-  ⟨build_functions_local (i := 0) rfl, local_inferN (da := .cons (.bool true) .nil) (i := 0) rfl rfl⟩
+  ⟨functions_local (i := 0) rfl, local_inferN (da := .cons (.bool true) .nil) (i := 0) rfl rfl⟩
 
-/-! ## Printed axioms: no new axiom -/
-
-/-- info: 'Solidity.Correctness.Lowering.Total.StructUnitInference.build_functions' depends on axioms: [propext, Classical.choice, Quot.sound] -/
-#guard_msgs (whitespace := lax) in
-#print axioms Solidity.Correctness.Lowering.Total.StructUnitInference.build_functions
-
-/-- info: 'Solidity.Correctness.Lowering.Total.StructUnitInference.build_alias_lookup' depends on axioms: [propext, Classical.choice, Quot.sound] -/
-#guard_msgs (whitespace := lax) in
-#print axioms Solidity.Correctness.Lowering.Total.StructUnitInference.build_alias_lookup
-
-/-- info: 'Solidity.Correctness.Lowering.Total.StructUnitInference.build_entry_selected' depends on axioms: [propext, Classical.choice, Quot.sound] -/
-#guard_msgs (whitespace := lax) in
-#print axioms Solidity.Correctness.Lowering.Total.StructUnitInference.build_entry_selected
-
-/-- info: 'Solidity.Correctness.Lowering.Total.StructUnitInference.build_alias_infer' depends on axioms: [propext, Classical.choice, Quot.sound] -/
-#guard_msgs (whitespace := lax) in
-#print axioms Solidity.Correctness.Lowering.Total.StructUnitInference.build_alias_infer
-
-/-- info: 'Solidity.Correctness.Lowering.Total.StructUnitInference.build_entry_dispatch' depends on axioms: [propext, Classical.choice, Quot.sound] -/
-#guard_msgs (whitespace := lax) in
-#print axioms Solidity.Correctness.Lowering.Total.StructUnitInference.build_entry_dispatch
-
-/-- info: 'Solidity.Correctness.Lowering.Total.StructUnitInference.build_ambiguous_inferN' depends on axioms: [propext, Classical.choice, Quot.sound] -/
-#guard_msgs (whitespace := lax) in
-#print axioms Solidity.Correctness.Lowering.Total.StructUnitInference.build_ambiguous_inferN
 
 end Solidity.Examples.Lowering.Total.StructUnitInference

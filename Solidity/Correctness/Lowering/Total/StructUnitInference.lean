@@ -3,35 +3,26 @@ import Solidity.Correctness.Lowering.Total.StructUnitInference.Leading
 /-!
 # Callee lookup, selection and call inference in an assembled mixed unit
 
-Specializes `CalleeResolution`, `CalleeSelection` and `CalleeInference` to the unit of
-a successful `StructUnit.build`: the contract, the generated structs, the optional
-constructor and every state root (reference roots included), then the translated
-functions, every declaration kept in order. Nothing is deduplicated.
+Specializes `CalleeResolution`, `CalleeSelection` and `CalleeInference` to a successful
+`StructUnit.build`: structs, optional constructor and every state root, then the
+translated functions, every declaration kept in order, nothing deduplicated.
 
-The leading prefix is read from `StructDecode.decode` and
-`ReferenceStatePlacement.prefixParts`: it has no function-kind declaration
-(`leading_noFunction`), which discharges `PrefixRejects` for that actual prefix
-(`build_prefixRejects`) without making struct, state or constructor names disjoint
-from callable names. A colliding struct or root stays a candidate of the name
-(`build_lookup`), but the callable functions of a nonempty name absent from locals
-are exactly the callable entries retaining it, one per entry and in entry order
-(`build_functions`); a local hides them all (`build_functions_local`), and a
-noncallable entry is never among them (`build_entry_unreachable`). An alias selects
-the first entry carrying it, whose declaration is in the actual lookup
-(`build_alias_lookup`).
+The leading prefix, read from `StructDecode.decode` and `prefixParts`, has no function
+(`leading_noFunction`): that discharges `PrefixRejects` for it (`build_prefixRejects`)
+without names disjoint from callable ones. A colliding struct or root stays a candidate
+(`build_lookup`), yet the callable functions of a nonempty unshadowed name are exactly
+its callable entries in entry order (`build_functions`; locals and noncallable entries:
+the generic `functions_local`, `entry_unreachable`); first-alias lookup
+(`build_alias_lookup`). Selection and inference without the prefix premise
+(`build_entry_selected`, `build_alias_infer`); the dispatch order (constant, arguments,
+conversion, struct, builtin, then `inferCall`) with the competing branches excluded by
+a retained entry (`build_entry_notOther`, `build_entry_dispatch`); ambiguity
+(`build_ambiguous_inferN`).
 
-Selection and inference without the prefix premise: `build_entry_selected`,
-`build_alias_inferCall`, `build_alias_inferN`, `build_alias_infer`. The dispatch order
-(constant, arguments, conversion, struct, builtin, then `inferCall`) is kept: an entry
-retaining the unshadowed name excludes the competing branches (`build_entry_notOther`,
-`build_entry_dispatch`). Two accepting callable positions are ambiguous
-(`build_entries_ambiguous`, `build_ambiguous_inferN`).
-
-Residual obligations stay explicit hypotheses: the retained signature slots (`Slots`),
-argument fit (`argsFit`), competing overloads (`OthersReject`) and each argument's
-inference at its actual fuel. They are decoder-lane obligations, not premises of
-`lowerLoopsCorrect`. Open: concrete execution agreement, metadata recovery, expression
-completeness, whole-unit elaboration success and universal decoder coverage.
+Residual hypotheses: signature slots, argument fit, `OthersReject` and each argument's
+inference at its fuel: decoder-lane obligations, not premises of `lowerLoopsCorrect`.
+Open: execution agreement, metadata recovery, expression completeness, whole-unit
+elaboration success and universal decoder coverage.
 -/
 namespace Solidity.Correctness.Lowering.Total.StructUnitInference
 
@@ -101,40 +92,29 @@ theorem build_functions (h : build T R C scope fs = .ok u) (henv : Γ.env = u.en
     exact List.filter_eq_nil_iff.mpr fun d hd => by simp [build_declared_none h d hd]
   · rw [functions_scope hw henv hsc hloc hc, leading_functions_nil hs hp, List.nil_append]
 
-/-- Local shadowing: a local of the name leaves no callable function. -/
-theorem build_functions_local {i : Nat} (hloc : (Γ.locals.map Prod.fst).idxOf? x = some i) :
-    Γ.functions x = [] :=
-  functions_local hloc
-
-/-- A noncallable (e.g. external-only) entry is never a callable function of the unit. -/
-theorem build_entry_unreachable {f : FunDecl} {out : Source.Decl}
-    (hm : fromMetadata T R scope f = some out) (hcall : callable f = false)
-    (hsc : Γ.scope = some scope) : out ∉ Γ.functions x :=
-  entry_unreachable hm hcall hsc
-
 /-- **First-alias lookup in the unit**: an alias selects the first entry carrying it;
-its declaration, named by the retained source name, is in the actual lookup of that
-name, and among the callable functions when the entry is callable and unshadowed. -/
-theorem build_alias_lookup {a : Name} {fd : FunDecl} {source : SourceFunction}
+its declaration carries the entry's retained source name and, for a nonempty name, is in
+the actual lookup of that name, and among the callable functions when the entry is
+callable and the name unshadowed. -/
+theorem build_alias_lookup {a : Name} {fd : FunDecl}
     (h : build T R C scope fs = .ok u) (henv : Γ.env = u.env) (hsc : Γ.scope = some scope)
-    (hl : lookupBy a fs = some fd) (hs : fd.sourceDecl = some source)
-    (hne : source.name ≠ "") :
-    ∃ index out, firstIndex a fs = some index ∧ fs[index]? = some (a, fd) ∧
-      fromMetadata T R scope fd = some out ∧ out.name = source.name ∧
-      out.scope = some scope ∧ out ∈ u.env.lookup (some scope) source.name ∧
-      (callable fd = true → (Γ.locals.map Prod.fst).idxOf? source.name = none →
-        out ∈ Γ.functions source.name) := by
+    (hl : lookupBy a fs = some fd) :
+    ∃ index out source, firstIndex a fs = some index ∧ fs[index]? = some (a, fd) ∧
+      fromMetadata T R scope fd = some out ∧ fd.sourceDecl = some source ∧
+      out.name = source.name ∧ out.scope = some scope ∧
+      (source.name ≠ "" → out ∈ u.env.lookup (some scope) source.name ∧
+        (callable fd = true → (Γ.locals.map Prod.fst).idxOf? source.name = none →
+          out ∈ Γ.functions source.name)) := by
   obtain ⟨ss, p, _, _, hw⟩ := build_ok h
-  obtain ⟨index, out, source', hf, hi, _, hm, hs', hn, hsco, _⟩ := alias_entry hw hl
-  cases hs.symm.trans hs'
+  obtain ⟨index, out, source, hf, hi, _, hm, hs, hn, hsco, _⟩ := alias_entry hw hl
   obtain ⟨o, so, hmo, hso, -, -, -, hk⟩ := alias_lookup hw hl
   cases hs.symm.trans hso
   cases hm.symm.trans hmo
-  obtain ⟨-, -, hmem⟩ := hk hne
-  refine ⟨index, out, hf, hi, hm, hn, hsco, hmem, fun hcall hloc => ?_⟩
-  · rw [build_functions h henv hsc hne hloc]
-    exact List.mem_filterMap.mpr ⟨(a, fd), List.mem_of_getElem? hi,
-      by simp [hm, Option.filter, hn, hcall]⟩
+  refine ⟨index, out, source, hf, hi, hm, hs, hn, hsco, fun hne => ⟨(hk hne).2.2, ?_⟩⟩
+  intro hcall hloc
+  rw [build_functions h henv hsc hne hloc]
+  exact List.mem_filterMap.mpr ⟨(a, fd), List.mem_of_getElem? hi,
+    by simp [hm, Option.filter, hn, hcall]⟩
 
 /-! ## Selection and call inference in the unit -/
 
@@ -153,20 +133,6 @@ theorem build_entry_selected {index : Nat} {e : Name × FunDecl} {source : Sourc
       out.fnSig Γ.env = some (ps, rs) := by
   obtain ⟨_, _, hw, hpre⟩ := build_prefixRejects (Γ := Γ) (σs := σs) (x := source.name) h
   exact entry_selected hw henv hsc hi hs hne hloc hcall hps hfit hothers hpre
-
-/-- **Ambiguity in the unit**: two callable accepting positions retaining the name
-leave no singleton overload filter, even with equal declarations. -/
-theorem build_entries_ambiguous {i j : Nat} {e e' : Name × FunDecl} {s s' : SourceFunction}
-    (h : build T R C scope fs = .ok u) (henv : Γ.env = u.env)
-    (hsc : Γ.scope = some scope) (hx : x ≠ "")
-    (hloc : (Γ.locals.map Prod.fst).idxOf? x = none) (hij : i ≠ j)
-    (hi : fs[i]? = some e) (hj : fs[j]? = some e') (hs : e.2.sourceDecl = some s)
-    (hs' : e'.2.sourceDecl = some s') (hn : s.name = x) (hn' : s'.name = x)
-    (hc : callable e.2 = true) (hc' : callable e'.2 = true)
-    (ha : Accepts Γ.isBase Γ.mapFree σs e.2) (ha' : Accepts Γ.isBase Γ.mapFree σs e'.2)
-    (o : Source.Decl) : (Γ.functions x).filter (fits Γ σs) ≠ [o] := by
-  obtain ⟨ss, p, _, _, hw⟩ := build_ok h
-  exact entries_ambiguous hw henv hsc hx hloc hij hi hj hs hs' hn hn' hc hc' ha ha' o
 
 /-- **Branch selection from retained metadata**: an entry retaining the unshadowed
 nonempty name excludes the conversion, struct and builtin branches, even when a
@@ -205,48 +171,6 @@ theorem build_ambiguous_inferN {i j : Nat} {e e' : Name × FunDecl}
     Typed.inferN (n + 1) Γ (.call (.ident x) (.positional args)) = none := by
   obtain ⟨ss, p, _, _, hw⟩ := build_ok h
   exact ambiguous_inferN hw henv hsc hx hloc hij hi hj hs hs' hn hn' hc hc' ha ha' hargs
-
-/-- **Typed selection for an alias in the unit**: `alias_inferCall` without the prefix
-premise. -/
-theorem build_alias_inferCall {a : Name} {fd : FunDecl} {source : SourceFunction}
-    {index : Nat} (h : build T R C scope fs = .ok u) (henv : Γ.env = u.env)
-    (hsc : Γ.scope = some scope) (hl : lookupBy a fs = some fd)
-    (hf : firstIndex a fs = some index) (hs : fd.sourceDecl = some source)
-    (hne : source.name ≠ "") (hloc : (Γ.locals.map Prod.fst).idxOf? source.name = none)
-    (hcall : callable fd = true) (hps : Slots fd.widths fd.params ps)
-    (hfit : Source.argsFit Γ.isBase Γ.mapFree σs ps = true)
-    (hothers : OthersReject Γ.isBase Γ.mapFree σs fs source.name index)
-    (da : TypedArgs Γ args σs) :
-    ∃ out rs, fromMetadata T R scope fd = some out ∧ Slots fd.widths fd.rets rs ∧
-      ∃ (hsel : (Γ.functions source.name).filter (fits Γ σs) = [out])
-        (hsig : out.fnSig Γ.env = some (ps, rs)),
-        Source.inferCall Γ source.name args σs da =
-          some ⟨STy.ret rs, typedCall da hsel hsig⟩ := by
-  obtain ⟨_, _, hw, hpre⟩ := build_prefixRejects (Γ := Γ) (σs := σs) (x := source.name) h
-  exact alias_inferCall hw henv hsc hl hf hs hne hloc hcall hps hfit hothers hpre da
-
-/-- **Inferred return type of an alias in the unit**, from each argument's result at its
-actual fuel: `alias_inferN` without the prefix premise. -/
-theorem build_alias_inferN {a : Name} {fd : FunDecl} {source : SourceFunction} {index : Nat}
-    (h : build T R C scope fs = .ok u) (henv : Γ.env = u.env)
-    (hsc : Γ.scope = some scope) (hl : lookupBy a fs = some fd)
-    (hf : firstIndex a fs = some index) (hs : fd.sourceDecl = some source)
-    (hne : source.name ≠ "") (hloc : (Γ.locals.map Prod.fst).idxOf? source.name = none)
-    (hcall : callable fd = true) (hps : Slots fd.widths fd.params ps)
-    (hfit : Source.argsFit Γ.isBase Γ.mapFree σs ps = true)
-    (hothers : OthersReject Γ.isBase Γ.mapFree σs fs source.name index)
-    (hn : (argExprs args).length < n) (hlen : σs.length = (argExprs args).length)
-    (he : ∀ i a σ, (argExprs args)[i]? = some a → σs[i]? = some σ →
-      ∃ d, Typed.inferN (n - 1 - i) Γ a = some ⟨σ, d⟩) :
-    ∃ out rs, fromMetadata T R scope fd = some out ∧ Slots fd.widths fd.rets rs ∧
-      ∃ (da : TypedArgs Γ args σs)
-        (hsel : (Γ.functions source.name).filter (fits Γ σs) = [out])
-        (hsig : out.fnSig Γ.env = some (ps, rs)),
-        TypedArgs.inferN n Γ args = some ⟨σs, da⟩ ∧
-        Typed.inferN (n + 1) Γ (.call (.ident source.name) (.positional args)) =
-          some ⟨STy.ret rs, typedCall da hsel hsig⟩ := by
-  obtain ⟨_, _, hw, hpre⟩ := build_prefixRejects (Γ := Γ) (σs := σs) (x := source.name) h
-  exact alias_inferN hw henv hsc hl hf hs hne hloc hcall hps hfit hothers hpre hn hlen he
 
 /-- **At `Typed.infer`'s fuel in the unit**: `alias_infer` without the prefix premise. -/
 theorem build_alias_infer {a : Name} {fd : FunDecl} {source : SourceFunction} {index : Nat}

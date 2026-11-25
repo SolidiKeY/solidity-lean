@@ -4,16 +4,12 @@ import Solidity.Correctness.Lowering.Total.CalleeInference
 /-!
 # The leading declarations of an assembled mixed unit
 
-A successful `StructUnit.build` hands `Callee.withFunctions` the leading parts
-`appendParts ss p`, `ss` from `StructDecode.decode` and `p` from
-`ReferenceStatePlacement.prefixParts`. Read from those two components, every
-leading declaration is a struct, the constructor or a state root of the
-generated contract (`leading_kind`), so none is a function (`leading_noFunction`)
-and `CalleeSelection.PrefixRejects` holds for that prefix under every name,
-context and argument typing (`leading_prefixRejects`). Struct and state names
-may coincide with callable names: they stay candidates of the name.
-The functions are declared in the contract scope (`functions_inScope`), so the
-only file-level declaration is the contract (`build_declared_none`).
+The leading parts `appendParts ss p` of a successful `StructUnit.build` (`ss` from
+`StructDecode.decode`, `p` from `prefixParts`) are structs, the constructor or state roots
+of the contract scope (`leading_kind`): no function (`leading_noFunction`), so
+`PrefixRejects` holds for every name and context (`leading_prefixRejects`) while those
+names may still coincide with callable ones. The only file-level declaration is the
+contract (`build_declared_none`).
 -/
 namespace Solidity.Correctness.Lowering.Total.StructUnitInference
 
