@@ -2566,6 +2566,7 @@ import Solidity.Correctness.Lowering.Total.FunctionTypeParserLaws.Strings
 import Solidity.Correctness.Lowering.Total.FunctionTypeRefs
 import Solidity.Correctness.Lowering.Total.Main
 import Solidity.Correctness.Lowering.Total.Production
+import Solidity.Correctness.Lowering.Total.RawTypeAgreement
 import Solidity.Correctness.Lowering.Total.RawTypeAgreement.Leaf
 import Solidity.Correctness.Lowering.Total.RawTypeAgreement.Rows
 import Solidity.Correctness.Lowering.Total.ReferenceDecode
