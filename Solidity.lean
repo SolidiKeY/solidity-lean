@@ -2514,6 +2514,9 @@ import Solidity.Correctness.Lowering.Sim.Stmt.Frame
 import Solidity.Correctness.Lowering.Sim.Stmt.Framed
 import Solidity.Correctness.Lowering.Sim.Stmt.Jump
 import Solidity.Correctness.Lowering.Sim.Stmt.Main
+import Solidity.Correctness.Lowering.Total.ArgumentInference
+import Solidity.Correctness.Lowering.Total.ArgumentInference.Raw
+import Solidity.Correctness.Lowering.Total.ArgumentInference.Scalar
 import Solidity.Correctness.Lowering.Total.Boundary
 import Solidity.Correctness.Lowering.Total.CallSpellExt
 import Solidity.Correctness.Lowering.Total.CalleeAliases
