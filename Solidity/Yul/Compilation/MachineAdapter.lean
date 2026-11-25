@@ -89,28 +89,49 @@ def stackCode : Backend.Program → Option (List Evm.Instr)
   | [] => some []
   | i :: p => (selectStack i).bind (fun j => (stackCode p).map (fun q => j :: q))
 
+/-- Lift a concrete selector's successful scalar steps to its selected program.
+The selector equations and step law are discharged by each existing consumer. -/
+theorem run_selected
+    (selectInstr : Backend.Instr → Option Evm.Instr)
+    (selectCode : Backend.Program → Option (List Evm.Instr))
+    (emptyCode : selectCode [] = some [])
+    (consCode : ∀ i p, selectCode (i :: p) =
+      (selectInstr i).bind (fun j => (selectCode p).map (fun q => j :: q)))
+    (oneStep : ∀ (i : Backend.Instr) (j : Evm.Instr), selectInstr i = some j →
+      ∀ (xs ys : Stack), Scalar.step i xs = some ys →
+      ∀ (m : Evm.Machine) (tail : List Evm.Word),
+      j.step {m with stack := xs.map coreWord ++ tail} =
+        .ok {m with stack := ys.map coreWord ++ tail} 0)
+    (p : Backend.Program) (q : List Evm.Instr)
+    (selected : selectCode p = some q) (xs ys : Stack)
+    (executed : Scalar.run p xs = some ys) (m : Evm.Machine) (tail : List Evm.Word) :
+    Evm.run q {m with stack := xs.map coreWord ++ tail} =
+      .ok {m with stack := ys.map coreWord ++ tail} 0 := by
+  induction p generalizing q xs ys with
+  | nil =>
+    rw [emptyCode] at selected
+    cases selected
+    cases executed
+    rfl
+  | cons i p ih =>
+    rw [consCode] at selected
+    obtain ⟨j,hi,rest⟩ := Option.bind_eq_some_iff.mp selected
+    obtain ⟨target,hp,same⟩ := Option.map_eq_some_iff.mp rest
+    subst q
+    cases hs : Scalar.step i xs with
+    | none => simp only [Scalar.run,hs,Option.bind_none,reduceCtorEq] at executed
+    | some zs =>
+      simp only [Scalar.run,hs,Option.bind_some] at executed
+      rw [Evm.run,Evm.exec_cons_zero,oneStep i j hi xs zs hs m tail,Evm.Out.ok_bind]
+      exact ih target hp zs ys executed
+
 theorem stack_run (p : Backend.Program) (q : List Evm.Instr)
     (selected : stackCode p = some q) (xs ys : Stack)
     (executed : Scalar.run p xs = some ys) (m : Evm.Machine) (tail : List Evm.Word) :
     Evm.run q { m with stack := xs.map coreWord ++ tail } =
-      .ok { m with stack := ys.map coreWord ++ tail } 0 := by
-  induction p generalizing q xs ys with
-  | nil => cases selected; cases executed; rfl
-  | cons i p ih =>
-    cases hi : selectStack i with
-    | none => simp only [stackCode, hi, Option.bind_none, reduceCtorEq] at selected
-    | some j =>
-      cases hp : stackCode p with
-      | none => simp only [stackCode, hi, hp, Option.bind_some, Option.map_none, reduceCtorEq] at selected
-      | some target =>
-        simp only [stackCode, hi, hp, Option.bind_some, Option.map_some, Option.some.injEq] at selected
-        subst q
-        cases hs : Scalar.step i xs with
-        | none => simp only [Scalar.run, hs, Option.bind_none, reduceCtorEq] at executed
-        | some zs =>
-          simp only [Scalar.run, hs, Option.bind_some] at executed
-          rw [Evm.run, Evm.exec_cons_zero, stack_step i j hi xs zs hs m tail, Evm.Out.ok_bind]
-          exact ih target hp zs ys executed
+      .ok { m with stack := ys.map coreWord ++ tail } 0 :=
+  run_selected selectStack stackCode rfl (fun _ _ => rfl) stack_step
+    p q selected xs ys executed m tail
 
 /-- Actual selected compiler code supplies operand success. The generic Scalar
 premise is discharged here by the real compiler certificate, not assumed. -/

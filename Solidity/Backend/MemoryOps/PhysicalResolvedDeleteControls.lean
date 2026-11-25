@@ -167,10 +167,6 @@ theorem initial_views (k : Fin W) :
 #guard_msgs (whitespace := lax) in #print axioms initial_views
 private def numericCells (c : Nat) : Prop := (8≤c ∧ c<12) ∨ (16≤c ∧ c<19)
 
-private theorem written_read (m : Environment.Memory) (a w : Nat) :
-    Environment.readMemory (Environment.writeBytes m a (Semantics.wordBytes w)) a 32=Semantics.wordBytes w := by
-  simpa only [Environment.wordBytes_length] using Environment.read_written (Semantics.wordBytes w) a m
-
 private theorem numeric_frame (k : Fin W) : WordFrame (machine k) (bytes k) numericCells := by
   constructor
   · intro c hc
@@ -192,7 +188,7 @@ private theorem numeric_frame (k : Fin W) : WordFrame (machine k) (bytes k) nume
       | refine ⟨wmod 9,rfl,?_⟩
       simp only [bytes,List.foldl_cons,List.foldl_nil]
       repeat (rw [readMemory_write_frame]; case sep => simp only [Environment.wordBytes_length];omega)
-      exact written_read _ _ _
+      exact Physical.word_read_written _ _ _
 
 private theorem initial (k : Fin W) : UintArrayAt (input k) 0 hp root (base root.id) (machine k) (bytes k) := by
   refine ⟨source_repr k,(initial_repr k).legacy.heap.arrays root,?_,?_⟩
@@ -462,7 +458,7 @@ theorem complete_observations (pipeline : Roadmap.Pipeline) (fuel nps : Nat) :
     all_goals
       simp only [bytes,nextBytes,List.foldl_cons,List.foldl_nil,←uint_delete_bytes]
       repeat (rw [readMemory_write_frame]; case sep => simp only [Environment.wordBytes_length];omega)
-      first | exact written_read _ _ _ | rfl
+      first | exact Physical.word_read_written _ _ _ | rfl
   · simpa only [uint_delete_bytes] using byte_mstore (bytes (wmod 0))
       [lenU 11 (by decide),lenU 22 (by decide)] (wmod 9) (wmod 0) (by decide)
   · intro c hc
@@ -535,7 +531,7 @@ theorem stale_inputs (pipeline : Roadmap.Pipeline) (fuel : Nat) :
       change Environment.readMemory (Environment.writeBytes (bytes (wmod 0)) 288
         (List.replicate 32 (0 : UInt8))) 288 32=_
       rw [←uint_delete_bytes]
-      exact written_read _ _ _
+      exact Physical.word_read_written _ _ _
     rw [old,next]
     decide
 
@@ -733,7 +729,7 @@ theorem assignment_delete_images :
     all_goals
       simp only [bytes,pairBytes,pairBytesOut,List.foldl_cons,List.foldl_nil]
       repeat (rw [readMemory_write_frame]; case sep => simp only [Environment.wordBytes_length];omega)
-      first | exact written_read _ _ _ | rfl
+      first | exact Physical.word_read_written _ _ _ | rfl
 
 /-- info: 'Solidity.Backend.MemoryOps.Physical.ResolvedDeleteControls.assignment_delete_images' depends on axioms: [propext, Quot.sound] -/
 #guard_msgs (whitespace := lax) in #print axioms assignment_delete_images
@@ -852,8 +848,8 @@ theorem assignment_delete_discriminates (pipeline : Roadmap.Pipeline) (fuel nps 
     have unequal : u 1=u 0 := by simpa only [calldataUint_sourceUint] using converted
     have impossible : (1 : Int)=0 := congrArg Subtype.val unequal
     omega
-  · have first : Environment.readMemory pairBytes 320 32=Semantics.wordBytes 1 := written_read _ _ _
-    have final : Environment.readMemory pairBytesOut 320 32=Semantics.wordBytes 0 := written_read _ _ _
+  · have first : Environment.readMemory pairBytes 320 32=Semantics.wordBytes 1 := Physical.word_read_written _ _ _
+    have final : Environment.readMemory pairBytesOut 320 32=Semantics.wordBytes 0 := Physical.word_read_written _ _ _
     intro same
     have cell := congrArg (fun xs : List (List UInt8) => xs[8]?) same
     change some (Environment.readMemory pairBytes 320 32)=some (Environment.readMemory pairBytesOut 320 32) at cell
@@ -1045,7 +1041,7 @@ theorem rejected_suffix_images :
     all_goals
       simp only [bytes,rejectBytes,rejectMidBytes,List.foldl_cons,List.foldl_nil]
       repeat (rw [readMemory_write_frame]; case sep => simp only [Environment.wordBytes_length];omega)
-      first | exact written_read _ _ _ | rfl
+      first | exact Physical.word_read_written _ _ _ | rfl
 
 /-- info: 'Solidity.Backend.MemoryOps.Physical.ResolvedDeleteControls.rejected_suffix_images' depends on axioms: [propext, Quot.sound] -/
 #guard_msgs (whitespace := lax) in #print axioms rejected_suffix_images
@@ -1113,7 +1109,7 @@ theorem rejected_suffix_byte_prefix (tail : List Environment.Word) :
       ⟨lenU 320 (by decide)::lenU 1 (by decide)::tail,rejectBytes⟩=some ⟨tail,rejectMidBytes⟩ ∧
     Environment.readMemory rejectMidBytes 320 32=Semantics.wordBytes 1 ∧
     (∀ a,a<320 ∨ 352≤a → rejectMidBytes a=rejectBytes a) := by
-  refine ⟨byte_mstore rejectBytes tail (wmod 10) (wmod 1) (by decide),written_read _ _ _,?_⟩
+  refine ⟨byte_mstore rejectBytes tail (wmod 10) (wmod 1) (by decide),Physical.word_read_written _ _ _,?_⟩
   intro a outside
   exact Environment.writeBytes_frame _ _ a _ (by simp only [Environment.wordBytes_length];omega)
 
@@ -1308,7 +1304,7 @@ theorem delete_assign_images :
     all_goals
       simp only [bytes,reverseBytes,reverseBytesOut,List.foldl_cons,List.foldl_nil]
       repeat (rw [readMemory_write_frame]; case sep => simp only [Environment.wordBytes_length];omega)
-      first | exact written_read _ _ _ | rfl
+      first | exact Physical.word_read_written _ _ _ | rfl
 
 /-- info: 'Solidity.Backend.MemoryOps.Physical.ResolvedDeleteControls.delete_assign_images' depends on axioms: [propext, Quot.sound] -/
 #guard_msgs (whitespace := lax) in #print axioms delete_assign_images
@@ -1348,8 +1344,8 @@ theorem actual_order_discriminates (pipeline : Roadmap.Pipeline) (fuel nps : Nat
     have unequal : u 0=u 1 := by simpa only [calldataUint_sourceUint] using converted
     have impossible : (0 : Int)=1 := congrArg Subtype.val unequal
     omega
-  · have forward : Environment.readMemory pairBytesOut 320 32=Semantics.wordBytes 0 := written_read _ _ _
-    have reverse : Environment.readMemory reverseBytesOut 320 32=Semantics.wordBytes 1 := written_read _ _ _
+  · have forward : Environment.readMemory pairBytesOut 320 32=Semantics.wordBytes 0 := Physical.word_read_written _ _ _
+    have reverse : Environment.readMemory reverseBytesOut 320 32=Semantics.wordBytes 1 := Physical.word_read_written _ _ _
     intro same
     have cell := congrArg (fun xs : List (List UInt8) => xs[8]?) same
     change some (Environment.readMemory pairBytesOut 320 32)=some (Environment.readMemory reverseBytesOut 320 32) at cell
@@ -1627,7 +1623,7 @@ theorem disjoint_order_images :
   all_goals
     simp only [bytes,disjointBytes,disjointFBytes,disjointOutBytes,disjointRBytes,disjointReverseOutBytes,List.foldl_cons,List.foldl_nil]
     repeat (rw [readMemory_write_frame]; case sep => simp only [Environment.wordBytes_length];omega)
-    first | exact written_read _ _ _ | rfl
+    first | exact Physical.word_read_written _ _ _ | rfl
 
 /-- info: 'Solidity.Backend.MemoryOps.Physical.ResolvedDeleteControls.disjoint_order_images' depends on axioms: [propext, Classical.choice, Quot.sound] -/
 #guard_msgs (whitespace := lax) in #print axioms disjoint_order_images

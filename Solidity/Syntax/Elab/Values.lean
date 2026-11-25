@@ -1117,26 +1117,10 @@ type's). -/
 /-- `2^32`: an external function value's address is above its selector. -/
 def selShift : Nat := 2 ^ 32
 
-omit [FreshNames] in
-/-- A member's type ranks below its struct (`structDef_rank_lt`): the
-decrease of `abiTyName` at a struct. -/
-theorem tyRank_lt_of_mem_structDef {s : Name} {x : Name × Ty} (h : x ∈ structDef s) :
-    tyRank x.2 < structRank s := by
-  have hle : ∀ (l : List (Name × Ty)), x ∈ l → tyRank x.2 ≤ fieldsRank l := by
-    intro l
-    induction l with
-    | nil => intro h; cases h
-    | cons y l ih =>
-      intro h
-      rcases List.mem_cons.1 h with rfl | h
-      · exact Nat.le_max_left _ _
-      · exact Nat.le_trans (ih h) (Nat.le_max_right _ _)
-  exact Nat.lt_of_le_of_lt (hle _ h) (structDef_rank_lt s)
-
 /-- The canonical ABI name of the type `T` at the key `k` of the width table
 `ws`, as a signature writes it: `uint256`, `address`, `bytes4`, `string`,
 `uint8[]`, a struct as the tuple of its members.  None for a mapping. -/
-def abiTyName (ws : List (String × Nat)) (k : String) : Ty → Option String
+partial def abiTyName (ws : List (String × Nat)) (k : String) : Ty → Option String
   | .prim .bool => some "bool"
   | .prim .int => some s!"int{(lookupBy k ws).getD 256}"
   | .prim .uint =>
@@ -1151,64 +1135,9 @@ def abiTyName (ws : List (String × Nat)) (k : String) : Ty → Option String
     else (abiTyName ws (k ++ "[]") E).map (· ++ "[]")
   | .ref (.fixed E n) => (abiTyName ws (k ++ "[]") E).map (s!"{·}[{n}]")
   | .ref (.struct s) => do
-    -- (attached: the member's membership reaches the decrease)
-    let ms ← (structDef s).attach.mapM fun ⟨m, _⟩ => abiTyName (structWidths s) m.1 m.2
+    let ms ← (structDef s).mapM fun (f, T) => abiTyName (structWidths s) f T
     pure s!"({",".intercalate ms})"
   | .ref (.mapping ..) => none
-termination_by T => (tyRank T, sizeOf T)
-decreasing_by
-  all_goals first
-    | exact Prod.Lex.left _ _ (tyRank_lt_of_mem_structDef ‹_›)
-    | (apply Prod.Lex.left; simp [tyRank]; done)
-    | (apply Prod.Lex.right; simp; omega)
-
-/-! The defining equations of `abiTyName`, one per arm. -/
-
-omit [FreshNames] in
-theorem abiTyName_bool (ws : List (String × Nat)) (k : String) :
-    abiTyName ws k (.prim .bool) = some "bool" := by
-  rw [abiTyName]
-
-omit [FreshNames] in
-theorem abiTyName_int (ws : List (String × Nat)) (k : String) :
-    abiTyName ws k (.prim .int) = some s!"int{(lookupBy k ws).getD 256}" := by
-  rw [abiTyName]
-
-omit [FreshNames] in
-theorem abiTyName_uint (ws : List (String × Nat)) (k : String) :
-    abiTyName ws k (.prim .uint) =
-      if (lookupBy (k ++ "#address") ws).isSome then some "address"
-      else if let some n := lookupBy (k ++ "#bytes") ws then some s!"bytes{n}"
-      else if (lookupBy (k ++ "#enum") ws).isSome then some "uint8"
-      else if (fnRow? ws k).isSome then some "function"
-      else some s!"uint{(lookupBy k ws).getD 256}" := by
-  rw [abiTyName]
-
-omit [FreshNames] in
-theorem abiTyName_array (ws : List (String × Nat)) (k : String) (E : Ty) :
-    abiTyName ws k (.ref (.array E)) =
-      if lookupBy (k ++ "[]#bytes") ws == some 1 then
-        some (if (lookupBy (k ++ "#string") ws).isSome then "string" else "bytes")
-      else (abiTyName ws (k ++ "[]") E).map (· ++ "[]") := by
-  rw [abiTyName]
-
-omit [FreshNames] in
-theorem abiTyName_fixed (ws : List (String × Nat)) (k : String) (E : Ty) (n : Nat) :
-    abiTyName ws k (.ref (.fixed E n)) = (abiTyName ws (k ++ "[]") E).map (s!"{·}[{n}]") := by
-  rw [abiTyName]
-
-omit [FreshNames] in
-theorem abiTyName_struct (ws : List (String × Nat)) (k : String) (s : Name) :
-    abiTyName ws k (.ref (.struct s)) = (do
-      let ms ← (structDef s).mapM fun (f, T) => abiTyName (structWidths s) f T
-      pure s!"({",".intercalate ms})") := by
-  rw [abiTyName, List.mapM_subtype (g := fun m => abiTyName (structWidths s) m.1 m.2)
-    (fun _ _ => rfl), List.unattach_attach]
-
-omit [FreshNames] in
-theorem abiTyName_mapping (ws : List (String × Nat)) (k : String) (K : PrimTy) (V : Ty) :
-    abiTyName ws k (.ref (.mapping K V)) = none := by
-  rw [abiTyName]
 
 /-- The canonical signature of the function `g` of `C`, `g(uint256,address)`. -/
 def fnSignature? (g : String) : Option String := do
@@ -1368,49 +1297,6 @@ def isRefTy : Ty → Bool
   | .ref _ => true
   | .prim _ => false
 
-omit [FreshNames] in
-/-- `findSome?` over the attached list is `findSome?` over the list. -/
-theorem findSome?_attach_val {α β : Type} (l : List α) (f : α → Option β) :
-    (l.attach.findSome? fun ⟨a, _⟩ => f a) = l.findSome? f := by
-  have h := List.findSome?_map (f := Subtype.val) (p := f) (l := l.attach)
-  rw [List.attach_map_subtype_val] at h
-  exact h.symm
-
-omit [FreshNames] in
-/-- `findSome?` over the attached list's indexed pairs is that over the list's. -/
-theorem findSome?_attach_zipIdx {α β : Type} (l : List α) (f : α → Nat → Option β) :
-    (l.attach.zipIdx.findSome? fun (⟨a, _⟩, i) => f a i) =
-      l.zipIdx.findSome? fun (a, i) => f a i := by
-  have h := List.findSome?_map (f := Prod.map Subtype.val id) (p := fun (a, i) => f a i)
-    (l := l.attach.zipIdx)
-  rw [← List.zipIdx_map, List.attach_map_subtype_val] at h
-  exact h.symm
-
-omit [FreshNames] in
-/-- `findSome?_attach_val` for a function of the attached element that reads
-only its value. -/
-theorem findSome?_attach_of {α β : Type} {l : List α} {F : { x // x ∈ l } → Option β}
-    {g : α → Option β} (h : ∀ x, F x = g x.1) : l.attach.findSome? F = l.findSome? g := by
-  rw [funext h]; exact findSome?_attach_val l g
-
-omit [FreshNames] in
-/-- `findSome?_attach_zipIdx` for a function that reads only the element's value. -/
-theorem findSome?_attach_zipIdx_of {α β : Type} {l : List α}
-    {F : { x // x ∈ l } × Nat → Option β} {g : α × Nat → Option β}
-    (h : ∀ x i, F (x, i) = g (x.1, i)) : l.attach.zipIdx.findSome? F = l.zipIdx.findSome? g := by
-  have hF : F = fun (x : { x // x ∈ l } × Nat) => match x with
-      | (⟨a, _⟩, i) => (fun a i => g (a, i)) a i := funext fun ⟨x, i⟩ => h x i
-  rw [hF]; exact findSome?_attach_zipIdx l fun a i => g (a, i)
-
-/-- The decrease of the three mutual functions below: an expression inside
-the argument (a member of an argument list by `List.sizeOf_lt_of_mem`), or the
-same expression at a lower tag. -/
-local macro "narrow_decreasing" : tactic => `(tactic|
-  (all_goals simp_wf
-   all_goals first
-    | omega
-    | (have h := List.sizeOf_lt_of_mem ‹_ ∈ _›; simp at h; omega)))
-
 mutual
 /-- A use of a place `narrowWhole` names other than through an index, a
 member (`.length`, `.push`, `.pop`), `delete`, or where its narrow positions
@@ -1418,7 +1304,7 @@ are checked against the target's (a reference local's initializer, a
 reference assignment, a function's reference argument: `shapeCheck`).  A
 reference type has no width (`uint[]` is `uint8[]`'s `Ty`), so any other use
 (an operand of a conditional, a tuple, a named argument) would lose it. -/
-def narrowWholeUse? (Γ : ECtx) : RawExpr → Option RawExpr
+partial def narrowWholeUse? (Γ : ECtx) : RawExpr → Option RawExpr
   | e@(.name _) => if narrowWhole C Γ e then some e else none
   | e@(.index b k) =>
     if narrowWhole C Γ e then some e else (narrowBase? Γ b).orElse fun _ => narrowWholeUse? Γ k
@@ -1426,41 +1312,39 @@ def narrowWholeUse? (Γ : ECtx) : RawExpr → Option RawExpr
   -- a function's reference argument: its shape is checked against the
   -- parameter's (`elabCallRet`); a struct constructor's arguments, each
   -- against its member's, by the member writes it is lowered to (`hoist`)
+  | .call "#array" as => as.findSome? (narrowWholeAt? Γ)
   | .call f as =>
-    -- (an `if`, not a literal pattern: the equations stay cheap to generate)
-    if f = "#array" then as.attach.findSome? fun ⟨a, _⟩ => narrowWholeAt? Γ a
+    if f.startsWith "#bytesPrefix" && (lookupBy f C.funs).isNone then
+      -- The prefix lowering validates the bytes kind before hoisting.
+      as.findSome? fun a => narrowWholeAt? Γ (match a with
+        | .call "bytes" [v] => v
+        | _ => a)
     else
-      if f.startsWith "#bytesPrefix" && (lookupBy f C.funs).isNone then
-        -- The prefix lowering validates the bytes kind before hoisting.
-        as.attach.findSome? fun ⟨a, _⟩ => match a with
-          | .call "bytes" [v] => narrowWholeAt? Γ v
-          | a => narrowWholeAt? Γ a
-      else
-      if (lookupBy f C.funs).isNone && !(C.structFields f).isEmpty then
-        as.attach.findSome? fun ⟨a, _⟩ => narrowWholeAt? Γ a
-      -- a byte string read whole by `keccak256` or the ABI (`abiKind` admits
-      -- no other array)
-      else if (lookupBy f C.funs).isNone &&
-          (byteBuiltin f || f == "erc7201" || f == sliceViewName || f.startsWith "#slice" ||
-            ((bytesTy? f).isSome && as.length == 1 &&
-              as.all (fun a => dynamicBytesExpr C Γ a))) then
-        as.attach.findSome? fun ⟨a, _⟩ => narrowBase? Γ a
-      else
-      -- a call through a function value (a name, or `callValueName` whose first
-      -- argument is the callee): a reference component (`fnRefElem?`,
-      -- `fnRefStruct?`) is captured at its declared shape (`dispatchCaptures`),
-      -- whose initializer `shapeCheck`s the argument
-      let valueRefs (ty : String) : List Bool :=
-        ((fnParts? ty).map fun (ps, _, _) =>
-          ps.map fun c => (fnRefElem? C c).isSome || (fnRefStruct? C c).isSome).getD []
-      let refs : List Bool := match lookupBy f C.funs with
-        | some d => d.params.map fun (_, T) => isRefTy T
-        | none =>
-          if f == callValueName then
-            false :: (((as.head?.bind (fnTyOfExpr C Γ)).map valueRefs).getD [])
-          else ((fnTyOf? C Γ f).map valueRefs).getD []
-      as.attach.zipIdx.findSome? fun (⟨a, _⟩, i) =>
-        if refs.getD i false then narrowWholeAt? Γ a else narrowWholeUse? Γ a
+    if (lookupBy f C.funs).isNone && !(C.structFields f).isEmpty then
+      as.findSome? (narrowWholeAt? Γ)
+    -- a byte string read whole by `keccak256` or the ABI (`abiKind` admits
+    -- no other array)
+    else if (lookupBy f C.funs).isNone &&
+        (byteBuiltin f || f == "erc7201" || f == sliceViewName || f.startsWith "#slice" ||
+          ((bytesTy? f).isSome && as.length == 1 &&
+            as.all (fun a => dynamicBytesExpr C Γ a))) then
+      as.findSome? (narrowBase? Γ)
+    else
+    -- a call through a function value (a name, or `callValueName` whose first
+    -- argument is the callee): a reference component (`fnRefElem?`,
+    -- `fnRefStruct?`) is captured at its declared shape (`dispatchCaptures`),
+    -- whose initializer `shapeCheck`s the argument
+    let valueRefs (ty : String) : List Bool :=
+      ((fnParts? ty).map fun (ps, _, _) =>
+        ps.map fun c => (fnRefElem? C c).isSome || (fnRefStruct? C c).isSome).getD []
+    let refs : List Bool := match lookupBy f C.funs with
+      | some d => d.params.map fun (_, T) => isRefTy T
+      | none =>
+        if f == callValueName then
+          false :: (((as.head?.bind (fnTyOfExpr C Γ)).map valueRefs).getD [])
+        else ((fnTyOf? C Γ f).map valueRefs).getD []
+    as.zipIdx.findSome? fun (a, i) =>
+      if refs.getD i false then narrowWholeAt? Γ a else narrowWholeUse? Γ a
   | .assign a b =>
     if storageMappingAlias? C Γ a && sameShape (placeShape C Γ a) (exprShape C Γ b) then
       (narrowWholeAt? Γ a).orElse fun _ => narrowWholeAt? Γ b
@@ -1470,190 +1354,30 @@ def narrowWholeUse? (Γ : ECtx) : RawExpr → Option RawExpr
   | .ternary c a b =>
     ((narrowWholeUse? Γ c).orElse fun _ => narrowWholeUse? Γ a).orElse fun _ => narrowWholeUse? Γ b
   | .named f _ as =>
-    if (lookupBy f C.funs).isNone && !(C.structFields f).isEmpty then
-      as.attach.findSome? fun ⟨a, _⟩ => narrowWholeAt? Γ a
-    else as.attach.findSome? fun ⟨a, _⟩ => narrowWholeUse? Γ a
-  | .tuple as => as.attach.findSome? fun ⟨a, _⟩ => narrowWholeUse? Γ a
-  | .modular _ a b k =>
-    ((narrowWholeUse? Γ a).orElse fun _ => narrowWholeUse? Γ b).orElse fun _ => narrowWholeUse? Γ k
+    if (lookupBy f C.funs).isNone && !(C.structFields f).isEmpty then as.findSome? (narrowWholeAt? Γ)
+    else as.findSome? (narrowWholeUse? Γ)
+  | .tuple as => as.findSome? (narrowWholeUse? Γ)
+  | .modular _ a b k => [a, b, k].findSome? (narrowWholeUse? Γ)
   | _ => none
-termination_by e => (sizeOf e, 0)
-decreasing_by narrow_decreasing
 
 /-- `narrowBase?` at a whole use whose shape is checked (`shapeCheck`): a
 conditional's branches too, when their narrow positions agree (solc has no
 common type of `uint8[]` and `uint[]`). -/
-def narrowWholeAt? (Γ : ECtx) : RawExpr → Option RawExpr
+partial def narrowWholeAt? (Γ : ECtx) : RawExpr → Option RawExpr
   | e@(.ternary c a b) =>
     if sameShape (exprShape C Γ a) (exprShape C Γ b) then
       ((narrowWholeUse? Γ c).orElse fun _ => narrowWholeAt? Γ a).orElse fun _ => narrowWholeAt? Γ b
     else some e
   | e => narrowBase? Γ e
-termination_by e => (sizeOf e, 2)
-decreasing_by narrow_decreasing
 
 /-- `narrowWholeUse?` of an index's or a member's base, or of a use whose
 shape is checked (`shapeCheck`): its own indices only. -/
-def narrowBase? (Γ : ECtx) : RawExpr → Option RawExpr
+partial def narrowBase? (Γ : ECtx) : RawExpr → Option RawExpr
   | .index b k => (narrowBase? Γ b).orElse fun _ => narrowWholeUse? Γ k
   | .field b _ => narrowBase? Γ b
   | .name _ => none
   | e => narrowWholeUse? Γ e
-termination_by e => (sizeOf e, 1)
-decreasing_by narrow_decreasing
 end
-
-/-! The defining equations of `narrowWholeUse?`, `narrowWholeAt?` and
-`narrowBase?`, one per arm, as written before the functions were total (the
-definitions go through `List.attach`). -/
-
-theorem narrowWholeUse?_name (Γ : ECtx) (x : String) :
-    narrowWholeUse? C Γ (.name x) = if narrowWhole C Γ (.name x) then some (.name x) else none := by
-  rw [narrowWholeUse?]
-
-theorem narrowWholeUse?_index (Γ : ECtx) (b k : RawExpr) :
-    narrowWholeUse? C Γ (.index b k) =
-      if narrowWhole C Γ (.index b k) then some (.index b k)
-      else (narrowBase? C Γ b).orElse fun _ => narrowWholeUse? C Γ k := by
-  rw [narrowWholeUse?]
-
-theorem narrowWholeUse?_field (Γ : ECtx) (b : RawExpr) (f : String) :
-    narrowWholeUse? C Γ (.field b f) =
-      if narrowWhole C Γ (.field b f) then some (.field b f) else narrowBase? C Γ b := by
-  rw [narrowWholeUse?]
-
-theorem narrowWholeUse?_call_array (Γ : ECtx) (as : List RawExpr) :
-    narrowWholeUse? C Γ (.call "#array" as) = as.findSome? (narrowWholeAt? C Γ) := by
-  rw [narrowWholeUse?, if_pos rfl, findSome?_attach_val]
-
-theorem narrowWholeUse?_call (Γ : ECtx) (f : String) (as : List RawExpr) (hf : f ≠ "#array") :
-    narrowWholeUse? C Γ (.call f as) =
-      (if f.startsWith "#bytesPrefix" && (lookupBy f C.funs).isNone then
-        as.findSome? fun a => narrowWholeAt? C Γ (match a with
-          | .call "bytes" [v] => v
-          | _ => a)
-      else
-      if (lookupBy f C.funs).isNone && !(C.structFields f).isEmpty then
-        as.findSome? (narrowWholeAt? C Γ)
-      else if (lookupBy f C.funs).isNone &&
-          (byteBuiltin f || f == "erc7201" || f == sliceViewName || f.startsWith "#slice" ||
-            ((bytesTy? f).isSome && as.length == 1 &&
-              as.all (fun a => dynamicBytesExpr C Γ a))) then
-        as.findSome? (narrowBase? C Γ)
-      else
-      let valueRefs (ty : String) : List Bool :=
-        ((fnParts? ty).map fun (ps, _, _) =>
-          ps.map fun c => (fnRefElem? C c).isSome || (fnRefStruct? C c).isSome).getD []
-      let refs : List Bool := match lookupBy f C.funs with
-        | some d => d.params.map fun (_, T) => isRefTy T
-        | none =>
-          if f == callValueName then
-            false :: (((as.head?.bind (fnTyOfExpr C Γ)).map valueRefs).getD [])
-          else ((fnTyOf? C Γ f).map valueRefs).getD []
-      as.zipIdx.findSome? fun (a, i) =>
-        if refs.getD i false then narrowWholeAt? C Γ a else narrowWholeUse? C Γ a) := by
-  rw [narrowWholeUse?, if_neg hf]
-  refine ite_congr rfl (fun _ => ?_) fun _ => ite_congr rfl (fun _ => ?_) fun _ =>
-    ite_congr rfl (fun _ => ?_) fun _ => ?_
-  · refine findSome?_attach_of ?_
-    rintro ⟨a, ha⟩
-    dsimp only
-    split <;> (try split) <;> first
-      | rfl
-      | (rename_i h; cases h; rfl)
-      | (rename_i h; exact (h _ rfl).elim)
-      | (rename_i h; exact (h _ ‹_› rfl HEq.rfl).elim)
-  · exact findSome?_attach_of fun _ => rfl
-  · exact findSome?_attach_of fun _ => rfl
-  · exact findSome?_attach_zipIdx_of fun _ _ => rfl
-
-theorem narrowWholeUse?_assign (Γ : ECtx) (a b : RawExpr) :
-    narrowWholeUse? C Γ (.assign a b) =
-      if storageMappingAlias? C Γ a && sameShape (placeShape C Γ a) (exprShape C Γ b) then
-        (narrowWholeAt? C Γ a).orElse fun _ => narrowWholeAt? C Γ b
-      else (narrowWholeUse? C Γ a).orElse fun _ => narrowWholeUse? C Γ b := by
-  rw [narrowWholeUse?]
-
-theorem narrowWholeUse?_binop (Γ : ECtx) (op : BinOp) (a b : RawExpr) :
-    narrowWholeUse? C Γ (.binop op a b) =
-      (narrowWholeUse? C Γ a).orElse fun _ => narrowWholeUse? C Γ b := by
-  rw [narrowWholeUse?]
-
-theorem narrowWholeUse?_opAssign (Γ : ECtx) (op : BinOp) (a b : RawExpr) :
-    narrowWholeUse? C Γ (.opAssign op a b) =
-      (narrowWholeUse? C Γ a).orElse fun _ => narrowWholeUse? C Γ b := by
-  rw [narrowWholeUse?]
-
-theorem narrowWholeUse?_unop (Γ : ECtx) (op : UnOp) (a : RawExpr) :
-    narrowWholeUse? C Γ (.unop op a) = narrowWholeUse? C Γ a := by
-  rw [narrowWholeUse?]
-
-theorem narrowWholeUse?_incDec (Γ : ECtx) (op : IncDec) (a : RawExpr) :
-    narrowWholeUse? C Γ (.incDec op a) = narrowWholeUse? C Γ a := by
-  rw [narrowWholeUse?]
-
-theorem narrowWholeUse?_newArr (Γ : ECtx) (T : RawTy) (a : RawExpr) :
-    narrowWholeUse? C Γ (.newArr T a) = narrowWholeUse? C Γ a := by
-  rw [narrowWholeUse?]
-
-theorem narrowWholeUse?_ternary (Γ : ECtx) (c a b : RawExpr) :
-    narrowWholeUse? C Γ (.ternary c a b) =
-      ((narrowWholeUse? C Γ c).orElse fun _ => narrowWholeUse? C Γ a).orElse fun _ =>
-        narrowWholeUse? C Γ b := by
-  rw [narrowWholeUse?]
-
-theorem narrowWholeUse?_named (Γ : ECtx) (f : String) (ns : List String) (as : List RawExpr) :
-    narrowWholeUse? C Γ (.named f ns as) =
-      if (lookupBy f C.funs).isNone && !(C.structFields f).isEmpty then
-        as.findSome? (narrowWholeAt? C Γ)
-      else as.findSome? (narrowWholeUse? C Γ) := by
-  rw [narrowWholeUse?, findSome?_attach_val, findSome?_attach_val]
-
-theorem narrowWholeUse?_tuple (Γ : ECtx) (as : List RawExpr) :
-    narrowWholeUse? C Γ (.tuple as) = as.findSome? (narrowWholeUse? C Γ) := by
-  rw [narrowWholeUse?, findSome?_attach_val]
-
-theorem narrowWholeUse?_modular (Γ : ECtx) (op : ModOp) (a b k : RawExpr) :
-    narrowWholeUse? C Γ (.modular op a b k) = [a, b, k].findSome? (narrowWholeUse? C Γ) := by
-  rw [narrowWholeUse?]
-  simp only [List.findSome?]
-  cases narrowWholeUse? C Γ a <;> cases narrowWholeUse? C Γ b <;>
-    cases narrowWholeUse? C Γ k <;> rfl
-
-/-- The last arm: a literal and an environment value name no place. -/
-theorem narrowWholeUse?_other (Γ : ECtx) :
-    (∀ n, narrowWholeUse? C Γ (.num n) = none) ∧ (∀ b, narrowWholeUse? C Γ (.bool b) = none) ∧
-    (∀ k, narrowWholeUse? C Γ (.env k) = none) := by
-  refine ⟨?_, ?_, ?_⟩ <;> intros <;> rw [narrowWholeUse?] <;> intros <;> contradiction
-
-theorem narrowWholeAt?_ternary (Γ : ECtx) (c a b : RawExpr) :
-    narrowWholeAt? C Γ (.ternary c a b) =
-      if sameShape (exprShape C Γ a) (exprShape C Γ b) then
-        ((narrowWholeUse? C Γ c).orElse fun _ => narrowWholeAt? C Γ a).orElse fun _ =>
-          narrowWholeAt? C Γ b
-      else some (.ternary c a b) := by
-  rw [narrowWholeAt?]
-
-theorem narrowWholeAt?_other (Γ : ECtx) (e : RawExpr) (ht : ∀ c a b, e ≠ .ternary c a b) :
-    narrowWholeAt? C Γ e = narrowBase? C Γ e := by
-  rw [narrowWholeAt?]; assumption
-
-theorem narrowBase?_index (Γ : ECtx) (b k : RawExpr) :
-    narrowBase? C Γ (.index b k) =
-      (narrowBase? C Γ b).orElse fun _ => narrowWholeUse? C Γ k := by
-  rw [narrowBase?]
-
-theorem narrowBase?_field (Γ : ECtx) (b : RawExpr) (f : String) :
-    narrowBase? C Γ (.field b f) = narrowBase? C Γ b := by
-  rw [narrowBase?]
-
-theorem narrowBase?_name (Γ : ECtx) (x : String) : narrowBase? C Γ (.name x) = none := by
-  rw [narrowBase?]
-
-theorem narrowBase?_other (Γ : ECtx) (e : RawExpr) (hi : ∀ b k, e ≠ .index b k)
-    (hf : ∀ b f, e ≠ .field b f) (hn : ∀ x, e ≠ .name x) :
-    narrowBase? C Γ e = narrowWholeUse? C Γ e := by
-  rw [narrowBase?] <;> assumption
 
 /-- The smallest integer type holding the literals `u` and `v` (solc's mobile
 type, of both): `uintN` when neither is negative, else `intN`. -/
@@ -1967,39 +1691,12 @@ section FnPureMeasure
 
 variable {C}
 
-mutual
-/-- The nodes of an expression, each counted once whatever name or literal it
-carries: the measure
-`fnPure` decreases (`abi.encodeCall` lowers the conversion `T(a)` of an
+omit [FreshNames] in
+/-- Every expression has a node (`RawExpr.nodes`, `Context.lean`: the measure
+`fnPure` decreases; `abi.encodeCall` lowers the conversion `T(a)` of an
 argument `a`, whose `sizeOf` the name `T` makes arbitrary). -/
-def RawExpr.nodes : RawExpr → Nat
-  | .field e _ | .unop _ e | .incDec _ e | .newArr _ e => e.nodes + 1
-  | .index a b | .binop _ a b | .assign a b | .opAssign _ a b => a.nodes + b.nodes + 1
-  | .ternary a b c | .modular _ a b c => a.nodes + b.nodes + c.nodes + 1
-  | .call _ as | .named _ _ as | .tuple as => RawExpr.nodesList as + 1
-  | .num _ | .name _ | .bool _ | .env _ => 1
-/-- The nodes of a list of expressions. -/
-def RawExpr.nodesList : List RawExpr → Nat
-  | [] => 0
-  | a :: as => a.nodes + RawExpr.nodesList as
-end
-
-omit [FreshNames] in
-/-- Every expression has a node. -/
-theorem RawExpr.nodes_pos (e : RawExpr) : 0 < e.nodes := by
-  cases e <;> simp [RawExpr.nodes]
-
-omit [FreshNames] in
-/-- A member has no more nodes than its list. -/
-theorem RawExpr.nodes_le_of_mem {a : RawExpr} {as : List RawExpr} (h : a ∈ as) :
-    a.nodes ≤ RawExpr.nodesList as := by
-  induction as with
-  | nil => cases h
-  | cons b as ih =>
-    simp only [RawExpr.nodesList]
-    rcases List.mem_cons.1 h with rfl | h
-    · omega
-    · have := ih h; omega
+theorem RawExpr.one_le_nodes (e : RawExpr) : 1 ≤ e.nodes := by
+  cases e <;> simp only [RawExpr.nodes] <;> omega
 
 /-- The receiver `extMember?` returns is smaller than the member expression. -/
 theorem extMember?_nodes {Γ : ECtx} {h r : RawExpr} {g : String}
@@ -2033,7 +1730,7 @@ omit [FreshNames] in
 theorem encodeCallActual_nodes {t a : RawExpr}
     (h : a ∈ (match t with | .tuple xs => xs | a => [a])) : a.nodes ≤ t.nodes := by
   split at h
-  · have := RawExpr.nodes_le_of_mem h; simp only [RawExpr.nodes]; omega
+  · have := RawExpr.nodes_lt_of_mem h; simp only [RawExpr.nodes]; omega
   · cases List.mem_singleton.1 h; exact Nat.le_refl _
 
 variable (C) in
@@ -2165,12 +1862,12 @@ decreasing_by
     | (simp only [RawExpr.nodes, RawExpr.nodesList]; omega)
     | (have := extMember?_nodes ‹extMember? _ _ _ = some _›
        simp only [RawExpr.nodes, RawExpr.nodesList] at *; omega)
-    | (have := RawExpr.nodes_le_of_mem ‹_ ∈ _›
+    | (have := RawExpr.nodes_lt_of_mem ‹_ ∈ _›
        simp only [RawExpr.nodes, RawExpr.nodesList] at *; omega)
     | (rename_i hmem hres
        have hle : RawExpr.nodes _ ≤ RawExpr.nodes _ :=
          encodeCallActual_nodes (List.of_mem_zip hmem).2
-       have hpos := RawExpr.nodes_pos h
+       have hpos := RawExpr.one_le_nodes h
        rcases hres with rfl | rfl <;>
          simp only [RawExpr.nodes, RawExpr.nodesList] at * <;> omega)
 
@@ -2430,73 +2127,73 @@ def abiBytesMark? (f : String) : Option Nat :=
 operations (`docs/semantic-gaps.md`, "Bytes and strings"): a conversion, an
 index, `.length`, a literal of bytes, an implicit widening; read bottom up,
 the types from the expression as written. -/
-def bytesPure (Γ : ECtx) : RawExpr → Except String RawExpr
-  | .call f as =>
-    -- (an `if`, not a literal pattern: the equations stay cheap to generate)
-    if f = "#array" then pure (.call f as) else do
-      -- A lazy branch is elaborated as a statement again. Validate the raw
-      -- prefix witness before recursively rewriting its backing value, then
-      -- rebuild the bytes marker that an ordinary bytes conversion would erase.
-      if f.startsWith "#bytesPrefix" && (lookupBy f C.funs).isNone then
-        let some n := (f.drop 12).toNat? | throw "a fixed byte prefix needs its width"
-        unless 0 < n && n ≤ 32 do throw "a fixed byte prefix needs one through 32 bytes"
-        let [witness] := as | throw "a fixed byte prefix takes one bytes argument"
-        unless dynamicBytesExpr C Γ witness do
-          throw "a fixed byte prefix takes bytes, not another reference type"
-        let backing ← match witness with
-          | .call "bytes" [value] => bytesPure Γ value
-          | value => bytesPure Γ value
-        return .call f [.call "bytes" [backing]]
-      if f == "string.concat" && (lookupBy f C.funs).isNone then
-        unless as.all (stringReason? C Γ) do throw "string.concat takes strings"
-      if f == "bytes.concat" && (lookupBy f C.funs).isNone then
-        let bytesArg (a : RawExpr) : Bool :=
-          if a.bytesLit?.isSome || (bytesOf? C Γ a).isSome then true else
-          match a with
-          | .call "bytes" [_] => true
-          | _ => let ws := exprShape C Γ a
-                 ws.contains ("[]#bytes", 1) && !ws.contains ("#string", 1)
-        unless as.all bytesArg do throw "bytes.concat takes bytes or fixed bytes"
-      if f == "erc7201" && (lookupBy f C.funs).isNone then
-        let [a] := as | throw "erc7201 takes one string argument"
-        unless stringReason? C Γ a do throw "erc7201 takes a string; convert bytes with string(data)"
-      let as' ← as.mapM (bytesPure Γ)
-      if let some n := bytesTy? f then
-        let ([o], [a]) := (as, as') | throw s!"a conversion {f}(…) takes one argument"
-        if let some bs := o.bytesLit? then return .num (← bytesAlign n bs)
-        -- A dynamic bytes-to-fixed-bytes conversion takes the first N bytes,
-        -- right padded with zero, rather than converting a memory reference
-        -- numerically. A hidden bounded lowering captures the receiver once.
-        if dynamicBytesExpr C Γ o then
-          -- Keep the bytes kind explicit when `bytesPure` erased a valid
-          -- `bytes(text)` conversion from a string-backed memory reference.
-          return .call ("#bytesPrefix" ++ toString n) [.call "bytes" [a]]
-        return match bytesOf? C Γ o with
-          | some m =>
-            if m == n then a
-            else if m < n then widenBytes m n a
-            else .call (tyName .uint (8 * n)) [.binop .shr a (.num (8 * (m - n)))]
-          | none => .call (tyName .uint (8 * n)) [a]
-      if dynBytesTy f then
-        let [a] := as' | throw s!"a conversion {f}(…) takes one argument"
-        return a
-      -- an argument of the ABI's that is a `bytesN`: marked, its width lost to
-      -- the rewrite (`abiBytesMark`)
-      if encodeBuiltin f && (lookupBy f C.funs).isNone then
-        let mark (o a : RawExpr) : RawExpr := match bytesOf? C Γ o with
-          | some n => .call (abiBytesMark n) [a]
-          | none => a
-        return .call f ((as.zip as').map fun (o, a) =>
-          match o, a with
-          | .tuple os, .tuple vs => .tuple ((os.zip vs).map fun (o, a) => mark o a)
-          | _, _ => mark o a)
-      match lookupBy f C.funs with
-      | some d =>
-        if d.params.length != as.length then return .call f as'
-        let as'' ← ((d.params.zip as).zip as').mapM fun (((n, _), o), a) =>
-          toBytesAt? C Γ (lookupBy (n ++ "#bytes") d.widths) o a
-        pure (.call f as'')
-      | none => pure (.call f as')
+partial def bytesPure (Γ : ECtx) : RawExpr → Except String RawExpr
+  | .call "#array" as => pure (.call "#array" as)
+  | .call f as => do
+    -- A lazy branch is elaborated as a statement again. Validate the raw
+    -- prefix witness before recursively rewriting its backing value, then
+    -- rebuild the bytes marker that an ordinary bytes conversion would erase.
+    if f.startsWith "#bytesPrefix" && (lookupBy f C.funs).isNone then
+      let some n := (f.drop 12).toNat? | throw "a fixed byte prefix needs its width"
+      unless 0 < n && n ≤ 32 do throw "a fixed byte prefix needs one through 32 bytes"
+      let [witness] := as | throw "a fixed byte prefix takes one bytes argument"
+      unless dynamicBytesExpr C Γ witness do
+        throw "a fixed byte prefix takes bytes, not another reference type"
+      let backing := match witness with
+        | .call "bytes" [value] => value
+        | value => value
+      let backing ← bytesPure Γ backing
+      return .call f [.call "bytes" [backing]]
+    if f == "string.concat" && (lookupBy f C.funs).isNone then
+      unless as.all (stringReason? C Γ) do throw "string.concat takes strings"
+    if f == "bytes.concat" && (lookupBy f C.funs).isNone then
+      let bytesArg (a : RawExpr) : Bool :=
+        if a.bytesLit?.isSome || (bytesOf? C Γ a).isSome then true else
+        match a with
+        | .call "bytes" [_] => true
+        | _ => let ws := exprShape C Γ a
+               ws.contains ("[]#bytes", 1) && !ws.contains ("#string", 1)
+      unless as.all bytesArg do throw "bytes.concat takes bytes or fixed bytes"
+    if f == "erc7201" && (lookupBy f C.funs).isNone then
+      let [a] := as | throw "erc7201 takes one string argument"
+      unless stringReason? C Γ a do throw "erc7201 takes a string; convert bytes with string(data)"
+    let as' ← as.mapM (bytesPure Γ)
+    if let some n := bytesTy? f then
+      let ([o], [a]) := (as, as') | throw s!"a conversion {f}(…) takes one argument"
+      if let some bs := o.bytesLit? then return .num (← bytesAlign n bs)
+      -- A dynamic bytes-to-fixed-bytes conversion takes the first N bytes,
+      -- right padded with zero, rather than converting a memory reference
+      -- numerically. A hidden bounded lowering captures the receiver once.
+      if dynamicBytesExpr C Γ o then
+        -- Keep the bytes kind explicit when `bytesPure` erased a valid
+        -- `bytes(text)` conversion from a string-backed memory reference.
+        return .call ("#bytesPrefix" ++ toString n) [.call "bytes" [a]]
+      return match bytesOf? C Γ o with
+        | some m =>
+          if m == n then a
+          else if m < n then widenBytes m n a
+          else .call (tyName .uint (8 * n)) [.binop .shr a (.num (8 * (m - n)))]
+        | none => .call (tyName .uint (8 * n)) [a]
+    if dynBytesTy f then
+      let [a] := as' | throw s!"a conversion {f}(…) takes one argument"
+      return a
+    -- an argument of the ABI's that is a `bytesN`: marked, its width lost to
+    -- the rewrite (`abiBytesMark`)
+    if encodeBuiltin f && (lookupBy f C.funs).isNone then
+      let mark (o a : RawExpr) : RawExpr := match bytesOf? C Γ o with
+        | some n => .call (abiBytesMark n) [a]
+        | none => a
+      return .call f ((as.zip as').map fun (o, a) =>
+        match o, a with
+        | .tuple os, .tuple vs => .tuple ((os.zip vs).map fun (o, a) => mark o a)
+        | _, _ => mark o a)
+    match lookupBy f C.funs with
+    | some d =>
+      if d.params.length != as.length then return .call f as'
+      let as'' ← ((d.params.zip as).zip as').mapM fun (((n, _), o), a) =>
+        toBytesAt? C Γ (lookupBy (n ++ "#bytes") d.widths) o a
+      pure (.call f as'')
+    | none => pure (.call f as')
   | .index b i => do
     let b' ← bytesPure Γ b
     let i' ← bytesPure Γ i
@@ -2510,13 +2207,12 @@ def bytesPure (Γ : ECtx) : RawExpr → Except String RawExpr
       | _ => (none, false)
     if hashed then return .index b' (.call "keccak256" [i'])
     pure (.index b' (← toBytesAt? C Γ key i i'))
-  | .field b f =>
-    if f = "length" then do
-      if let some n := bytesOf? C Γ b then
-        if b.hasIncDec then throw s!"{b.toStr}.length: a bytes{n} with an effect"
-        return .num n
-      pure (.field (← bytesPure Γ b) f)
-    else do pure (.field (← bytesPure Γ b) f)
+  | .field b "length" => do
+    if let some n := bytesOf? C Γ b then
+      if b.hasIncDec then throw s!"{b.toStr}.length: a bytes{n} with an effect"
+      return .num n
+    pure (.field (← bytesPure Γ b) "length")
+  | .field b f => do pure (.field (← bytesPure Γ b) f)
   | .binop op a b => do
     let a' ← bytesPure Γ a
     let b' ← bytesPure Γ b
@@ -2547,190 +2243,6 @@ def bytesPure (Γ : ECtx) : RawExpr → Except String RawExpr
   | .opAssign op l r => do
     pure (.opAssign op (← bytesPure Γ l) (← toBytesAt? C Γ (bytesOf? C Γ l) r (← bytesPure Γ r)))
   | e => pure e
-termination_by e => sizeOf e
-
-/-- `bytesPure` of a prefix witness's backing value: the two spellings agree. -/
-theorem bytesPure_backing (Γ : ECtx) (w : RawExpr) :
-    (match w with
-      | .call "bytes" [value] => bytesPure C Γ value
-      | value => bytesPure C Γ value) =
-    bytesPure C Γ (match w with
-      | .call "bytes" [value] => value
-      | value => value) := by
-  split <;> (try split) <;> first
-    | rfl
-    | (rename_i h; cases h; rfl)
-    | (rename_i h; exact (h _ rfl).elim)
-
-/-! The defining equations of `bytesPure`, one per arm, as written before the
-function was total (the call arm's prefix witness as the definition now
-recurses on it; `bytesPure_backing` gives the earlier spelling). -/
-
-theorem bytesPure_call_array (Γ : ECtx) (as : List RawExpr) :
-    bytesPure C Γ (.call "#array" as) = pure (.call "#array" as) := by
-  rw [bytesPure, if_pos rfl]
-
-theorem bytesPure_call (Γ : ECtx) (f : String) (as : List RawExpr) (hf : f ≠ "#array") :
-    bytesPure C Γ (.call f as) = (do
-      -- A lazy branch is elaborated as a statement again. Validate the raw
-      -- prefix witness before recursively rewriting its backing value, then
-      -- rebuild the bytes marker that an ordinary bytes conversion would erase.
-      if f.startsWith "#bytesPrefix" && (lookupBy f C.funs).isNone then
-        let some n := (f.drop 12).toNat? | throw "a fixed byte prefix needs its width"
-        unless 0 < n && n ≤ 32 do throw "a fixed byte prefix needs one through 32 bytes"
-        let [witness] := as | throw "a fixed byte prefix takes one bytes argument"
-        unless dynamicBytesExpr C Γ witness do
-          throw "a fixed byte prefix takes bytes, not another reference type"
-        let backing ← match witness with
-          | .call "bytes" [value] => bytesPure C Γ value
-          | value => bytesPure C Γ value
-        return .call f [.call "bytes" [backing]]
-      if f == "string.concat" && (lookupBy f C.funs).isNone then
-        unless as.all (stringReason? C Γ) do throw "string.concat takes strings"
-      if f == "bytes.concat" && (lookupBy f C.funs).isNone then
-        let bytesArg (a : RawExpr) : Bool :=
-          if a.bytesLit?.isSome || (bytesOf? C Γ a).isSome then true else
-          match a with
-          | .call "bytes" [_] => true
-          | _ => let ws := exprShape C Γ a
-                 ws.contains ("[]#bytes", 1) && !ws.contains ("#string", 1)
-        unless as.all bytesArg do throw "bytes.concat takes bytes or fixed bytes"
-      if f == "erc7201" && (lookupBy f C.funs).isNone then
-        let [a] := as | throw "erc7201 takes one string argument"
-        unless stringReason? C Γ a do throw "erc7201 takes a string; convert bytes with string(data)"
-      let as' ← as.mapM (bytesPure C Γ)
-      if let some n := bytesTy? f then
-        let ([o], [a]) := (as, as') | throw s!"a conversion {f}(…) takes one argument"
-        if let some bs := o.bytesLit? then return .num (← bytesAlign n bs)
-        -- A dynamic bytes-to-fixed-bytes conversion takes the first N bytes,
-        -- right padded with zero, rather than converting a memory reference
-        -- numerically. A hidden bounded lowering captures the receiver once.
-        if dynamicBytesExpr C Γ o then
-          -- Keep the bytes kind explicit when `bytesPure` erased a valid
-          -- `bytes(text)` conversion from a string-backed memory reference.
-          return .call ("#bytesPrefix" ++ toString n) [.call "bytes" [a]]
-        return match bytesOf? C Γ o with
-          | some m =>
-            if m == n then a
-            else if m < n then widenBytes m n a
-            else .call (tyName .uint (8 * n)) [.binop .shr a (.num (8 * (m - n)))]
-          | none => .call (tyName .uint (8 * n)) [a]
-      if dynBytesTy f then
-        let [a] := as' | throw s!"a conversion {f}(…) takes one argument"
-        return a
-      -- an argument of the ABI's that is a `bytesN`: marked, its width lost to
-      -- the rewrite (`abiBytesMark`)
-      if encodeBuiltin f && (lookupBy f C.funs).isNone then
-        let mark (o a : RawExpr) : RawExpr := match bytesOf? C Γ o with
-          | some n => .call (abiBytesMark n) [a]
-          | none => a
-        return .call f ((as.zip as').map fun (o, a) =>
-          match o, a with
-          | .tuple os, .tuple vs => .tuple ((os.zip vs).map fun (o, a) => mark o a)
-          | _, _ => mark o a)
-      match lookupBy f C.funs with
-      | some d =>
-        if d.params.length != as.length then return .call f as'
-        let as'' ← ((d.params.zip as).zip as').mapM fun (((n, _), o), a) =>
-          toBytesAt? C Γ (lookupBy (n ++ "#bytes") d.widths) o a
-        pure (.call f as'')
-      | none => pure (.call f as')) := by
-  rw [bytesPure, if_neg hf]
-
-theorem bytesPure_index (Γ : ECtx) (b i : RawExpr) :
-    bytesPure C Γ (.index b i) = (do
-      let b' ← bytesPure C Γ b
-      let i' ← bytesPure C Γ i
-      if let some n := bytesOf? C Γ b then
-        if i.hasIncDec then
-          throw s!"{(RawExpr.index b i).toStr}: an index of a bytes{n} with an effect"
-        return ← bytesAt n b' i'
-      let (key, hashed) := match widthPath? C Γ b with
-        | some (tb, k, .ref (.mapping ..)) =>
-          (lookupBy (k ++ "{}#bytes") tb, (lookupBy (k ++ "{}#hash") tb).isSome)
-        | _ => (none, false)
-      if hashed then return .index b' (.call "keccak256" [i'])
-      pure (.index b' (← toBytesAt? C Γ key i i'))) := by
-  rw [bytesPure]
-
-theorem bytesPure_field_length (Γ : ECtx) (b : RawExpr) :
-    bytesPure C Γ (.field b "length") = (do
-      if let some n := bytesOf? C Γ b then
-        if b.hasIncDec then throw s!"{b.toStr}.length: a bytes{n} with an effect"
-        return .num n
-      pure (.field (← bytesPure C Γ b) "length")) := by
-  rw [bytesPure, if_pos rfl]
-
-theorem bytesPure_field (Γ : ECtx) (b : RawExpr) (f : String) (hf : f ≠ "length") :
-    bytesPure C Γ (.field b f) = (do pure (.field (← bytesPure C Γ b) f)) := by
-  rw [bytesPure, if_neg hf]
-
-theorem bytesPure_binop (Γ : ECtx) (op : BinOp) (a b : RawExpr) :
-    bytesPure C Γ (.binop op a b) = (do
-      let a' ← bytesPure C Γ a
-      let b' ← bytesPure C Γ b
-      if op matches .lt | .gt | .le | .ge | .eqB | .neB | .band | .bor | .bxor then
-        let n := joinBytes (bytesOf? C Γ a) (bytesOf? C Γ b)
-        return .binop op (← toBytesAt? C Γ n a a') (← toBytesAt? C Γ n b b')
-      pure (.binop op a' b')) := by
-  rw [bytesPure.eq_def]
-
-theorem bytesPure_unop (Γ : ECtx) (op : UnOp) (a : RawExpr) :
-    bytesPure C Γ (.unop op a) = (do
-      let lowered ← bytesPure C Γ a
-      if op == .bnot then
-        if let some n := bytesOf? C Γ a then
-          return .binop .subW (.num (2 ^ (8 * n) - 1)) lowered
-      pure (.unop op lowered)) := by
-  rw [bytesPure]
-
-theorem bytesPure_ternary (Γ : ECtx) (c a b : RawExpr) :
-    bytesPure C Γ (.ternary c a b) = (do
-      let n := joinBytes (bytesOf? C Γ a) (bytesOf? C Γ b)
-      pure (.ternary (← bytesPure C Γ c) (← toBytesAt? C Γ n a (← bytesPure C Γ a))
-        (← toBytesAt? C Γ n b (← bytesPure C Γ b)))) := by
-  rw [bytesPure]
-
-theorem bytesPure_incDec (Γ : ECtx) (op : IncDec) (e : RawExpr) :
-    bytesPure C Γ (.incDec op e) = (do pure (.incDec op (← bytesPure C Γ e))) := by
-  rw [bytesPure]
-
-theorem bytesPure_newArr (Γ : ECtx) (T : RawTy) (e : RawExpr) :
-    bytesPure C Γ (.newArr T e) = (do pure (.newArr T (← bytesPure C Γ e))) := by
-  rw [bytesPure]
-
-theorem bytesPure_modular (Γ : ECtx) (op : ModOp) (a b k : RawExpr) :
-    bytesPure C Γ (.modular op a b k) = (do
-      pure (.modular op (← bytesPure C Γ a) (← bytesPure C Γ b) (← bytesPure C Γ k))) := by
-  rw [bytesPure]
-
-theorem bytesPure_named (Γ : ECtx) (f : String) (ns : List String) (as : List RawExpr) :
-    bytesPure C Γ (.named f ns as) = (do pure (.named f ns (← as.mapM (bytesPure C Γ)))) := by
-  rw [bytesPure]
-
-theorem bytesPure_tuple (Γ : ECtx) (as : List RawExpr) :
-    bytesPure C Γ (.tuple as) = (do pure (.tuple (← as.mapM (bytesPure C Γ)))) := by
-  rw [bytesPure]
-
-theorem bytesPure_assign (Γ : ECtx) (l r : RawExpr) :
-    bytesPure C Γ (.assign l r) = (do
-      pure (.assign (← bytesPure C Γ l)
-        (← toBytesAt? C Γ (bytesOf? C Γ l) r (← bytesPure C Γ r)))) := by
-  rw [bytesPure]
-
-theorem bytesPure_opAssign (Γ : ECtx) (op : BinOp) (l r : RawExpr) :
-    bytesPure C Γ (.opAssign op l r) = (do
-      pure (.opAssign op (← bytesPure C Γ l)
-        (← toBytesAt? C Γ (bytesOf? C Γ l) r (← bytesPure C Γ r)))) := by
-  rw [bytesPure]
-
-/-- The last arm: a leaf is left as written. -/
-theorem bytesPure_other (Γ : ECtx) :
-    (∀ n, bytesPure C Γ (.num n) = pure (.num n)) ∧
-    (∀ x, bytesPure C Γ (.name x) = pure (.name x)) ∧
-    (∀ b, bytesPure C Γ (.bool b) = pure (.bool b)) ∧
-    (∀ k, bytesPure C Γ (.env k) = pure (.env k)) := by
-  refine ⟨?_, ?_, ?_, ?_⟩ <;> intros <;> rw [bytesPure] <;> intros <;> contradiction
 
 /-- `bytesPure` of a statement's expressions, and a value written where a
 `bytesN` is expected converted to it: a declaration's initializer, an

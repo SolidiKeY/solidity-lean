@@ -102,6 +102,14 @@ jobs:
       # need them in .lake/build (scripts/ci/restore-lake-artifacts.py).
       - name: Restore fetched artifacts
         run: python3 scripts/ci/restore-lake-artifacts.py
+      - name: Check executable goal-binding kernel replay
+        env:
+          LEAN_NUM_THREADS: '1'
+        run: |
+          timeout 300 lake lean scripts/trust/executable-goal-replay.lean -- --tstack=131072 -j1
+          timeout 300 lake lean scripts/trust/executable-invocation-replay.lean -- --tstack=131072 -j1
+          timeout 300 lake lean scripts/trust/executable-quotation-replay.lean -- --tstack=131072 -j1
+          timeout 300 lake lean scripts/trust/executable-candidate-preparation.lean -- --tstack=131072 -j1
       # H107/F7: keep inhabited compiler_correct/net/checked applications live.
       - name: Elaborate headline non-vacuity witnesses
         env:

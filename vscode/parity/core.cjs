@@ -1,29 +1,9 @@
 'use strict';
-const {EventEmitter} = require('node:events');
 const {readdirSync, readFileSync} = require('node:fs');
 const {performance} = require('node:perf_hooks');
 const {spawnSync}=require('node:child_process');
 
-/** Byte-oriented framing: UTF-8 characters may straddle arbitrary pipe chunks. */
-class LspFrames extends EventEmitter {
-  constructor(limit = 32 * 1024 * 1024) { super(); this.buffer = Buffer.alloc(0); this.limit = limit; }
-  push(chunk) {
-    this.buffer = Buffer.concat([this.buffer, chunk]);
-    while (this.buffer.length) {
-      const end = this.buffer.indexOf('\r\n\r\n');
-      if (end < 0) { if (this.buffer.length > 8192) throw new Error('Oversize LSP header'); return; }
-      const lengths = [...this.buffer.subarray(0, end).toString('ascii').matchAll(/^Content-Length:\s*(\d+)\s*$/gim)];
-      if (lengths.length !== 1) throw new Error('Invalid LSP Content-Length');
-      const length = Number(lengths[0][1]);
-      if (!Number.isSafeInteger(length) || length > this.limit) throw new Error('Oversize LSP body');
-      if (this.buffer.length < end + 4 + length) return;
-      const body = this.buffer.subarray(end + 4, end + 4 + length);
-      this.buffer = this.buffer.subarray(end + 4 + length);
-      this.emit('message', JSON.parse(body.toString('utf8')));
-    }
-  }
-  end() { if (this.buffer.length) throw new Error('Truncated LSP frame'); }
-}
+const {LspFrames}=require('../src/lsp-frames.cjs');
 
 function statistics(values) {
   const sorted = values.filter(Number.isFinite).sort((a, b) => a - b);
@@ -59,13 +39,14 @@ function differences(left, right, path = '$') {
 
 function procTable() {
   const table = new Map();
-  for (const name of readdirSync('/proc')) {
-    if (!/^\d+$/.test(name)) continue;
+  // Prefer high PIDs before a large zombie table; this is only a scan heuristic.
+  for (const name of readdirSync('/proc').filter(name=>/^\d+$/.test(name)).sort((a,b)=>Number(b)-Number(a))) {
     try {
       const text = readFileSync(`/proc/${name}/stat`, 'utf8');
       const end = text.lastIndexOf(')');
       const fields = text.slice(end+2).trim().split(/\s+/);
-      const cmd = readFileSync(`/proc/${name}/cmdline`, 'utf8').replaceAll('\0', ' ');
+      // Linux exposes an empty cmdline for zombies; retain their stat data.
+      const cmd = fields[0]==='Z'?'':readFileSync(`/proc/${name}/cmdline`, 'utf8').replaceAll('\0', ' ');
       table.set(Number(name), {pid:Number(name), ppid:Number(fields[1]), state:fields[0],name:text.slice(text.indexOf('(')+1,end),
         ticks:Number(fields[11])+Number(fields[12]), start:fields[19], rssBytes:Number(fields[21])*4096, cmd});
     } catch { /* Processes can exit between reads. */ }
@@ -78,9 +59,13 @@ function procTable() {
 class ProcessSampler {
   constructor(root, intervalMs = 100) {
     this.root = root; this.samples = []; this.seen = new Map(); this.previous = new Map();
-    this.start = performance.now(); this.sample();
-    this.ticksPerSecond=process.platform==='linux'?Number(spawnSync('getconf',['CLK_TCK'],{encoding:'utf8',timeout:1000}).stdout?.trim())||null:null;
+    this.start = performance.now();
+    // Anchor the existing interval before a synchronous initial scan can delay it.
     this.timer = setInterval(() => this.sample(), intervalMs); this.timer.unref();
+    try{
+      this.sample();
+      this.ticksPerSecond=process.platform==='linux'?Number(spawnSync('getconf',['CLK_TCK'],{encoding:'utf8',timeout:1000}).stdout?.trim())||null:null;
+    }catch(error){clearInterval(this.timer);throw error;}
   }
   sample() {
     if (process.platform !== 'linux') return;
@@ -225,7 +210,11 @@ function hostEvidenceErrors(result,config) {
   if(!Array.isArray(result?.scenarios)||!Array.isArray(result?.checks))return [...errors,'missing scenarios/checks'];
   const ids=result.scenarios.map(s=>s.id);
   if(ids.some(id=>typeof id!=='string')||new Set(ids).size!==ids.length)errors.push('invalid or duplicate scenario IDs');
-  if(config.suite==='contribution-menus'){if(config.menuTrust==='recovery')errors.push(...require('./menu-lifecycle.cjs').recoveryErrors(result.scenarios.find(s=>s.id==='native-contribution-menu-recovery')?.observation,config.runId,config.target,config.menuRecovery));else errors.push(...require('./menu-lifecycle.cjs').validate(result.scenarios.find(s=>s.id==='native-contribution-menus')?.observation,config.runId,config.target,config.workspace,config.menuTrust));
+  if(config.suite==='contribution-menus'){if(config.menuTrust==='recovery')errors.push(...require('./menu-lifecycle.cjs').recoveryErrors(result.scenarios.find(s=>s.id==='native-contribution-menu-recovery')?.observation,config.runId,config.target,config.menuRecovery));else errors.push(...require('./menu-lifecycle.cjs').validateCurrent(result.scenarios.find(s=>s.id==='native-contribution-menus')?.observation,config.runId,config.target,config.workspace,config.menuTrust,config.sourceHead,config.menuAnchor));
+  }else if(['workspace-symbols','workspace-symbols-resolved'].includes(config.suite)){errors.push(...require('./workspace-symbol-lifecycle.cjs').errors(result.scenarios.find(s=>s.id==='native-workspace-symbols')?.observation,config));
+  }else if(config.suite==='editor-language-scope'){errors.push(...require('./symbol-provider-observer.cjs').recordingErrors(result.observations?.symbolProviderRecordingFailures));errors.push(...require('./editor-language-lifecycle.cjs').errors(result.scenarios.find(s=>s.id==='native-editor-language-scope')?.observation,config));
+  }else if(config.suite==='related-diagnostics'){if(config.diagnosticLifecycle)errors.push(...require('./related-diagnostic-lifecycle.cjs').errors(result.scenarios.find(s=>s.id==='native-related-diagnostic-lifecycle')?.observation,config));else errors.push(...require('./related-diagnostics.cjs').errors(result.scenarios.find(s=>s.id==='native-related-diagnostics')?.observation,config));
+  }else if(config.suite==='compiler-code-actions'){errors.push(...require('./code-action-lifecycle.cjs').errors(result.scenarios.find(s=>s.id==='native-compiler-code-actions')?.observation,config.runId,config.sourceHead,config.workspace,config.target));
   }else if(config.suite==='verification-time-limit'){errors.push(...require('./verification-limit.cjs').errors(result.scenarios.find(s=>s.id==='native-verification-time-limit')?.observation,config.runId,config.operationTimeoutMs,config.timeLimitReferenceImages,config.target));
   }else if(config.suite==='testing-symbols'){errors.push(...require('./hierarchy-lifecycle.cjs').renderedErrors(result.scenarios.find(s=>s.id==='native-compiler-testing')?.observation,config.runId));
   }else if(config.suite==='trace-unavailable'){errors.push(...require('./trace-presentation.cjs').unavailableErrors(result.scenarios.find(s=>s.id==='native-trace-unavailable')?.observation,config.runId));

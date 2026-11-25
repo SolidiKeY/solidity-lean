@@ -10,7 +10,8 @@ typed memory-path observation, including reference results and bounds failures.
 -/
 namespace Solidity.Backend.MemoryOps
 
-private theorem objects_eq {H : HTy} (Rs : List RefTy) (left right : Objs H Rs)
+/-- Object tuples are equal when every component is. -/
+theorem memoryOps_objs_ext {H : HTy} (Rs : List RefTy) (left right : Objs H Rs)
     (h : ∀ {R : RefTy} (i : Nat) (hi : Rs[i]? = some R),
       Objs.get Rs left i hi = Objs.get Rs right i hi) : left = right := by
   induction Rs with
@@ -24,14 +25,15 @@ private theorem objects_eq {H : HTy} (Rs : List RefTy) (left right : Objs H Rs)
         simpa only [List.getElem?_cons_succ] using hi
       exact h (i + 1) ht
 
-private theorem heap_eq {H : HTy} (left right : Heap H)
+/-- Heaps are equal when every reference reads the same object. -/
+theorem memoryOps_heap_ext {H : HTy} (left right : Heap H)
     (h : ∀ {R : RefTy} (r : HRef H R), left.get r = right.get r) : left = right :=
-  objects_eq H left right (fun i hi => h ⟨i, hi⟩)
+  memoryOps_objs_ext H left right (fun i hi => h ⟨i, hi⟩)
 
 private theorem heap_set_comm {H : HTy} {R Q : RefTy} (hp : Heap H)
     (r : HRef H R) (q : HRef H Q) (x : MObj H R) (y : MObj H Q)
     (hne : r.id ≠ q.id) : (hp.set r x).set q y = (hp.set q y).set r x := by
-  apply heap_eq
+  apply memoryOps_heap_ext
   intro T s
   by_cases hr : r.id = s.id
   · obtain ⟨rfl, he⟩ := HRef.heq_of_id r s hr
@@ -53,7 +55,7 @@ theorem overwriteSlice_empty {H : HTy} {R : RefTy} {E : Ty} (hp : Heap H)
     (r : HRef H R) (a : ArrTy R E) (offset : Nat)
     (h : offset + ([] : List (MVal H E)).length ≤ hp.len r a) :
     overwriteSlice hp r a offset [] h = hp := by
-  apply heap_eq
+  apply memoryOps_heap_ext
   intro Q q
   by_cases he : r.id = q.id
   · obtain ⟨rfl, hh⟩ := HRef.heq_of_id r q he

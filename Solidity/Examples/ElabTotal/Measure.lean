@@ -1,4 +1,4 @@
-import Solidity.Goals.ElabTotal
+import Solidity.Correctness.Elab.Total
 import Solidity.Syntax.Elab.Measure
 
 /-!
@@ -98,9 +98,39 @@ theorem stable_at {β γ : Type} {μ : ElabMeasure α} {J : ElabPreds C} {m : β
   subst hx
   exact h rc x sc hb
 
-/-- **Clause 2 from the arms' guarded decrease.** -/
-theorem elabKernelInduction_of_stable (μ : ElabMeasure α) (J : ElabPreds C) (rc : ElabRec C)
-    (hfix : ElabKernelFix C rc) (hst : ArmsStable μ J) (hJ : GuardKept J) :
+/-- Stability at the actual record suffices; unrelated helper implementations
+need not satisfy the same decrease obligations. -/
+def ArmsStableFor (μ : ElabMeasure α) (J : ElabPreds C) (rc : ElabRec C) : Prop :=
+  StableFor μ J μ.hoist (hoistWith C) rc ∧
+  StableFor μ J μ.hoistStmt (hoistStmtWith C) rc ∧
+  StableFor μ J μ.elabStmtP (elabStmtPWith C) rc ∧
+  StableFor μ J μ.elabStmt1 (elabStmt1With C) rc ∧
+  StableFor μ J μ.elabStmtsP (elabStmtsStep C) rc
+
+/-- Guard preservation is needed only for cuts of the actual record. Cuts
+retain its helper fields, including their independently proved invariants. -/
+def GuardKeptFor (μ : ElabMeasure α) (J : ElabPreds C) (rc : ElabRec C) : Prop :=
+  ∀ a, let r := cut μ a rc
+    ElabSat J.hoist r.hoist → ElabSat J.hoistStmt r.hoistStmt →
+    ElabSat J.elabStmtP r.elabStmtP → ElabSat J.elabStmt1 r.elabStmt1 →
+    ElabSat J.elabStmtsP r.elabStmtsP →
+    ElabSat J.hoist (hoistWith C r) ∧ ElabSat J.hoistStmt (hoistStmtWith C r) ∧
+    ElabSat J.elabStmtP (elabStmtPWith C r) ∧ ElabSat J.elabStmt1 (elabStmt1With C r) ∧
+    ElabSat J.elabStmtsP (elabStmtsStep C r)
+
+omit [FreshNames] in
+private theorem stableFor_at {β γ : Type} {μ : ElabMeasure α} {J : ElabPreds C}
+    {m : β → ElabScope → α} {arm : ElabRec C → β → ElabM γ}
+    {a : α} {rc : ElabRec C} (h : StableFor μ J m arm rc)
+    (hb : MeetsBelow μ J a rc) :
+    ∀ x sc, m x sc = a → (arm (cut μ a rc) x).run sc = (arm rc x).run sc := by
+  intro x sc he
+  subst a
+  exact h x sc hb
+
+/-- Induction from guarded decrease at the actual record and its cuts. -/
+theorem elabKernelInduction_of_guarded_cut (μ : ElabMeasure α) (J : ElabPreds C) (rc : ElabRec C)
+    (hfix : ElabKernelFix C rc) (hst : ArmsStableFor μ J rc) (hJ : GuardKeptFor μ J rc) :
     ElabKernelInduction C rc := by
   intro QH QS QP Q1 QL hQ
   obtain ⟨hnil, hcons, hP, h1, hS, hH⟩ := hfix
@@ -152,24 +182,95 @@ theorem elabKernelInduction_of_stable (μ : ElabMeasure α) (J : ElabPreds C) (r
       (elabSat_iff.2 fun x sc st b st' m m' hr => (cP x sc st b st' m m' hr).1)
       (elabSat_iff.2 fun x sc st b st' m m' hr => (c1 x sc st b st' m m' hr).1)
       (elabSat_iff.2 fun x sc st b st' m m' hr => (cL x sc st b st' m m' hr).1)
-    obtain ⟨jH, jS, jP, j1, jL⟩ := hJ r'
+    obtain ⟨jH, jS, jP, j1, jL⟩ := hJ a
       (elabSat_iff.2 fun x sc st b st' m m' hr => (cH x sc st b st' m m' hr).2)
       (elabSat_iff.2 fun x sc st b st' m m' hr => (cS x sc st b st' m m' hr).2)
       (elabSat_iff.2 fun x sc st b st' m m' hr => (cP x sc st b st' m m' hr).2)
       (elabSat_iff.2 fun x sc st b st' m m' hr => (c1 x sc st b st' m m' hr).2)
       (elabSat_iff.2 fun x sc st b st' m m' hr => (cL x sc st b st' m m' hr).2)
-    exact ⟨field_meets hH (stable_at hst.1 bJ) qH jH,
-      field_meets hS (stable_at hst.2.1 bJ) qS jS,
-      field_meets hP (stable_at hst.2.2.1 bJ) qP jP,
-      field_meets h1 (stable_at hst.2.2.2.1 bJ) q1 j1,
-      field_meets hL (stable_at hst.2.2.2.2 bJ) qL jL⟩
+    exact ⟨field_meets hH (stableFor_at hst.1 bJ) qH jH,
+      field_meets hS (stableFor_at hst.2.1 bJ) qS jS,
+      field_meets hP (stableFor_at hst.2.2.1 bJ) qP jP,
+      field_meets h1 (stableFor_at hst.2.2.2.1 bJ) q1 j1,
+      field_meets hL (stableFor_at hst.2.2.2.2 bJ) qL jL⟩
   exact ⟨elabSat_iff.2 fun x sc st b st' m m' hr => ((key _).1 x sc rfl st b st' m m' hr).1,
     elabSat_iff.2 fun x sc st b st' m m' hr => ((key _).2.1 x sc rfl st b st' m m' hr).1,
     elabSat_iff.2 fun x sc st b st' m m' hr => ((key _).2.2.1 x sc rfl st b st' m m' hr).1,
     elabSat_iff.2 fun x sc st b st' m m' hr => ((key _).2.2.2.1 x sc rfl st b st' m m' hr).1,
     elabSat_iff.2 fun x sc st b st' m m' hr => ((key _).2.2.2.2 x sc rfl st b st' m m' hr).1⟩
 
+/-- The universal guarded-stability criterion retains its original statement. -/
+theorem elabKernelInduction_of_stable (μ : ElabMeasure α) (J : ElabPreds C) (rc : ElabRec C)
+    (hfix : ElabKernelFix C rc) (hst : ArmsStable μ J) (hJ : GuardKept J) :
+    ElabKernelInduction C rc :=
+  elabKernelInduction_of_guarded_cut μ J rc hfix
+    ⟨fun x sc hb => stable_at hst.1 hb x sc rfl,
+     fun x sc hb => stable_at hst.2.1 hb x sc rfl,
+     fun x sc hb => stable_at hst.2.2.1 hb x sc rfl,
+     fun x sc hb => stable_at hst.2.2.2.1 hb x sc rfl,
+     fun x sc hb => stable_at hst.2.2.2.2 hb x sc rfl⟩
+    (fun a => hJ (cut μ a rc))
+
 end Induction
+
+section ScopeRank
+
+/-- The other scope updates performed on recursive-body entry do not affect
+its strict decrease. -/
+example (C : Contract) (sc : ElabScope) (rf : RecFrame)
+    (funs : List (Name × FunDecl)) (selfFrame : Bool) (k₀ k₁ : Nat)
+    (hr : isRecursiveC C rf.name = true) (hn : sc.recs.any (·.name == rf.name) = false) :
+    WellFoundedRelation.rel
+      (({ sc with funs := funs, top := false, selfFrame := selfFrame, unchecked := false,
+                  inlined := (k₀, k₁) :: sc.inlined, recs := rf :: sc.recs } : ElabScope).callRank C)
+      (sc.callRank C) :=
+  ElabScope.callRank_push C sc rf funs hr hn
+
+/-- Ordinary inlining's context flags likewise leave the prefix argument valid. -/
+example (C : Contract) (sc : ElabScope) (i k₀ k₁ : Nat) (selfFrame : Bool)
+    (hi : i < sc.funs.length) :
+    WellFoundedRelation.rel
+      (({ sc with funs := sc.funs.take i, top := false, selfFrame := selfFrame, unchecked := false,
+                  inlined := (k₀, k₁) :: sc.inlined } : ElabScope).callRank C)
+      (sc.callRank C) :=
+  ElabScope.callRank_prefix C sc i hi
+
+/-- Explicit constructor entry can restore all contract functions even when
+the public caller supplied a non-deployment scope. -/
+example (C : Contract) (sc : ElabScope) :
+    WellFoundedRelation.rel
+      (({ sc with top := false, funs := C.funs } : ElabScope).callRank C)
+      (sc.callRank C true) :=
+  ElabScope.callRank_ctor C _ _ rfl
+
+end ScopeRank
+
+/-- The unchecked arm's successful transformed body is strictly below the
+original enclosing statement in control weight. -/
+example (ss out : List RawStmt) (h : uncheckStmts ss = .ok out) :
+    CalleeKernel.listWeight out < CalleeKernel.stmtWeight (.unchecked ss) := by
+  rw [uncheckStmts_weight ss out h]
+  simp only [CalleeKernel.stmtWeight]
+  omega
+
+/-- Expression preprocessing preserves the source-loop count, even when its
+callback returns arbitrary expressions or fails. -/
+example (f : RawExpr → Except String RawExpr) (s out : RawStmt)
+    (h : s.mapExprsM f = .ok out) :
+    ElabLoopMeasure.stmtCount out = ElabLoopMeasure.stmtCount s := by
+  have he := ElabLoopMeasure.mapExprsM_count f s
+  rw [h] at he
+  exact Except.ok.inj he
+
+/-- A successful source-loop lowering strictly decreases the loop component. -/
+example [FreshNames] (rs : Option (List String)) (a : RawLoopSpec) (c : RawExpr)
+    (b : List RawStmt) (sc : ElabScope) (st st' : ECtx × Nat) (m m' : CallMemo)
+    (out : List RawStmt)
+    (h : (((lowerLoops rs [.whileLoop a c b]).run sc).run st).run m = .ok ((out, st'), m')) :
+    ElabLoopMeasure.listCount out < ElabLoopMeasure.stmtCount (.whileLoop a c b) := by
+  have hb := ElabLoopMeasure.lowerLoops_single_count rs (.whileLoop a c b) sc st st' m m' out h
+  simp only [ElabLoopMeasure.rootCount] at hb
+  omega
 
 section Counterexample
 
@@ -187,6 +288,62 @@ def forT : RawStmt := .forLoop {} [eS] none [] []
 
 /-- `{ e; loop (true) { } }`: `forT`, lowered. -/
 def blk : RawStmt := .block [eS, .loop {} (.bool true) []]
+
+/-- The spike's two statements have equal control weight: weight equality
+alone cannot distinguish the loop from its lowered block. -/
+example : CalleeKernel.stmtWeight forT = CalleeKernel.stmtWeight blk := rfl
+
+/-- The loop component distinguishes the spike's equal-control-weight pair. -/
+example : ElabLoopMeasure.stmtCount blk < ElabLoopMeasure.stmtCount forT := by decide
+
+/-- Rewriting only a loop's expressions cannot produce the spike's block,
+even when the callback may fail or return arbitrary expressions. -/
+example (f : RawExpr → Except String RawExpr) : forT.mapExprsM f ≠ .ok blk := by
+  intro h
+  have he := RawStmt.mapExprsM_control f forT
+  rw [h] at he
+  cases he
+
+/-- An assignment cannot acquire the loop initializer used by the spy below,
+even if its expression callback returns arbitrary expressions and programs. -/
+example [FreshNames] (hoist : RawExpr → ElabM (SProg C0 × RawExpr))
+    (l r : RawExpr) (sc : ElabScope) (st st' : ECtx × Nat) (m m' : CallMemo)
+    (P : SProg C0) :
+    (((hoistAssignWith C0 hoist l r).run sc).run st).run m ≠
+      .ok (((P, forT), st'), m') := by
+  intro h
+  obtain ⟨l', r', he⟩ := hoistAssignWith_shape C0 hoist l r sc st st' m m' (P, forT) h
+  cases he
+
+/-- The actual assignment helper supplies the only helper assumption in the guard. -/
+example [FreshNames] (C : Contract) (rc : ElabRec C)
+    (s : RawStmt) (sc : ElabScope) (st : ECtx × Nat) (m : CallMemo)
+    (out : SProg C × RawStmt) (st' : ECtx × Nat) (m' : CallMemo)
+    (h : (((hoistStmtWith C { rc with hoistAssign := hoistAssignWith C rc.hoist } s).run sc).run st).run m =
+      .ok ((out, st'), m')) : out.2.control = s.control ∧
+      CalleeKernel.stmtWeight out.2 = CalleeKernel.stmtWeight s := by
+  have hc : out.2.control = s.control := by
+    refine hoistStmtWith_control _ ?_ s sc st m out st' m' h
+    intro l r sc st m out st' m' he
+    obtain ⟨l', r', hs⟩ := hoistAssignWith_shape C rc.hoist l r sc st st' m m' out he
+    rw [hs]
+    rfl
+  refine ⟨hc, ?_⟩
+  simpa only [RawStmt.control_weight] using congrArg StmtControl.weight hc
+
+/-- Cutting the five recursive fields retains the assignment helper's shape
+invariant, so the residual-control guard holds at every cut level too. -/
+example [FreshNames] {α : Type} [WellFoundedRelation α] (μ : ElabMeasure α) (a : α)
+    (C : Contract) (rc : ElabRec C) (s : RawStmt) (sc : ElabScope)
+    (st st' : ECtx × Nat) (m m' : CallMemo) (out : SProg C × RawStmt)
+    (h : (((hoistStmtWith C
+      (cut μ a { rc with hoistAssign := hoistAssignWith C rc.hoist }) s).run sc).run st).run m =
+      .ok ((out, st'), m')) : out.2.control = s.control := by
+  refine hoistStmtWith_control _ ?_ s sc st m out st' m' h
+  intro l r sc st m out st' m' he
+  obtain ⟨l', r', hs⟩ := hoistAssignWith_shape C rc.hoist l r sc st st' m m' out he
+  rw [hs]
+  rfl
 
 /-- What bounds inlining at a call: the scope's functions, recursive frames and
 inlined calls. -/
@@ -273,5 +430,49 @@ theorem rel_cycle_forT_blk {α : Type} [WellFoundedRelation α] (μ : ElabMeasur
   rel_cycle3 h1 (stmtsStep_head_lt μ hst blk [] sc0) h2
 
 end Counterexample
+
+/-- Unchecked rewriting preserves both components of the local statement rank. -/
+example (ss out : List RawStmt) (h : uncheckStmts ss = .ok out) :
+    ElabLoopMeasure.listRank out = ElabLoopMeasure.listRank ss := by
+  unfold ElabLoopMeasure.listRank
+  rw [uncheckStmts_loopCount ss out h, uncheckStmts_weight ss out h]
+
+/-- All source-loop roots decrease the local rank on a successful lowering run. -/
+example [FreshNames] (rs : Option (List String)) (s : RawStmt)
+    (hs : ElabLoopMeasure.rootCount s = 1) (sc : ElabScope)
+    (st st' : ECtx × Nat) (m m' : CallMemo) (out : List RawStmt)
+    (h : (((lowerLoops rs [s]).run sc).run st).run m = .ok ((out, st'), m')) :
+    WellFoundedRelation.rel (ElabLoopMeasure.listRank out) (ElabLoopMeasure.stmtRank s) :=
+  ElabLoopMeasure.lowerLoops_rank rs s hs sc st st' m m' out h
+
+/-- Successful lookup and a missing frame give the two strict call-rank steps. -/
+example (C : Contract) (sc : ElabScope) (f : String) (i : Nat)
+    (h : sc.funs.findIdx? (·.1 == f) = some i) :
+    WellFoundedRelation.rel
+      (({sc with top := false, funs := sc.funs.take i} : ElabScope).callRank C)
+      (sc.callRank C) := ElabScope.callRank_found C sc f i h
+
+example (C : Contract) (sc : ElabScope) (rf : RecFrame) (funs : List (Name × FunDecl))
+    (hr : isRecursiveC C rf.name = true) (h : sc.recs.find? (·.name == rf.name) = none) :
+    WellFoundedRelation.rel
+      (({sc with top := false, funs := funs, recs := rf :: sc.recs} : ElabScope).callRank C)
+      (sc.callRank C) := ElabScope.callRank_freshFrame C sc rf funs hr h
+
+/-- A successful forced operand has one of the listed literal or name forms. -/
+example [FreshNames] (C : Contract) (e : RawExpr) (p : PrimTy)
+    (sc : ElabScope) (st st' : ECtx × Nat) (m m' : CallMemo) (out : SProg C × RawExpr)
+    (h : (((forceArg C e (some p)).run sc).run st).run m = .ok ((out, st'), m')) :
+    (∃ n, out.2 = .num n) ∨ (∃ n, out.2 = .unop .neg (.num n)) ∨
+      (∃ b, out.2 = .bool b) ∨ (∃ x, out.2 = .name x) ∨ (∃ bs, out.2 = .bytesLit bs) :=
+  ElabCaptureProof.captureAtom_cases _ (ElabCaptureProof.forceArg_captureAtom C e p sc st st' m m' out h)
+
+/-- Binary eager capture retains arity. -/
+example [FreshNames] (C : Contract) (hoist : RawExpr → ElabM (SProg C × RawExpr))
+    (a b : RawExpr) (p q : PrimTy) (sc : ElabScope) (st st' : ECtx × Nat)
+    (m m' : CallMemo) (out : SProg C × List RawExpr)
+    (h : (((eagerArgsWith C hoist [a, b] false [some p, some q]).run sc).run st).run m =
+      .ok ((out, st'), m')) : out.2.length = 2 := by
+  obtain ⟨x, y, he, _, _⟩ := ElabCaptureProof.eagerArgs_pair_captureAtoms C hoist a b p q sc st st' m m' out h
+  rw [he]; rfl
 
 end Solidity.Examples.ElabTotalMeasure

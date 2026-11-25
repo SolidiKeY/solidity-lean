@@ -109,11 +109,8 @@ theorem sourceFalseCompletes : ∀ (glob : Solidity.Source.Glob Solidity.Yul.Che
   rfl
 
 theorem dirtyBoundary : ∀ (world : Solidity.Source.St Solidity.Yul.Checks.RawCheckedControlIfElse.Old.env),
- Solidity.Yul.RawCoherent.coherent (Solidity.Yul.Checks.RawCheckedControlIfElse.Old.initial 2 257 2 world) ≠ true := by
-  intro world
-  rw [Solidity.Yul.Checks.RawCheckedControlWhile.dirtyBoundary world]
-  intro bad
-  cases bad
+ Solidity.Yul.RawCoherent.coherent (Solidity.Yul.Checks.RawCheckedControlIfElse.Old.initial 2 257 2 world) ≠ true :=
+  Solidity.Yul.Checks.RawU8Statement.dirtyNotCoherent
 
 end Solidity.Yul.Checks.RawCheckedControlIfElse
 #print axioms Solidity.Yul.RawCheckedControlIfElse.correct

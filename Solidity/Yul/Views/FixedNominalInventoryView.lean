@@ -61,27 +61,8 @@ theorem writeback_view {E : Source.Env} {Γ : Source.RCtx} {origin : Source.Heap
       encodeMixedHeap realized.placement realized.entries m=m := by
   obtain ⟨us,decoded,same⟩ := Option.map_eq_some_iff.mp step
   subst result
-  let realized := realizeInventory allocated p history us s.2.heap p history rfl es
-  have raw := updates_raw allocated p es es m us decoded
-  have ids := updates_ids allocated p es es m us decoded
-  have images := realizeInventory_images allocated p history us s.2.heap p history rfl es m raw (by
-    intro e member outside
-    have present : e.id ∈ us.map (fun u => u.entry.id) := by
-      rw [ids]
-      exact List.mem_map.mpr ⟨e,member,rfl⟩
-    obtain ⟨u,member,eq⟩ := List.mem_map.mp present
-    exact False.elim (outside u member eq.symm))
-  have choices := realizeInventory_choices allocated p history us s.2.heap p history rfl es
-  refine ⟨realized,realizeInventory_run allocated p history us s p history rfl es,
-    realizeInventory_coverage allocated p history us s.2.heap p history rfl es coverage,?_,
-    realizeInventory_types allocated p history us s.2.heap p history rfl es,choices.2.2,choices.1,choices.2.1,?_⟩
-  · rw [realizeInventory_ids]
-    exact distinct
-  · apply encodeMixedHeap_unchanged
-    intro e member
-    have reads := e.image.encode_reads m (realized.placement.address e.id)
-    rw [images e member] at reads
-    exact reads
+  exact realizedInventory_writeback_view s allocated p history es coverage distinct m us
+    (updates_raw allocated p es es m us decoded) (updates_ids allocated p es es m us decoded)
 
 /-- Owner preparation supplies the complete inventory for a changed snapshot;
 only actual successful canonical preparation is a writeback premise. -/

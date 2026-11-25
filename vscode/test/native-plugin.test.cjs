@@ -6,7 +6,7 @@ const {join,resolve}=require('node:path');
 const {tmpdir}=require('node:os');
 const {createHash}=require('node:crypto');
 const {inspectNative,nativeFingerprint}=require('../src/native-plugin.cjs');
-const {LeanSession}=require('../src/lean-session.cjs');
+const {LeanSession,enableStartupObservation,startupObservation}=require('../src/lean-session.cjs');
 const digest=bytes=>createHash('sha256').update(bytes).digest('hex');
 const commit='1'.repeat(40),stem='Solidity/Frontend/Testing';
 function fixture(){
@@ -91,11 +91,24 @@ test('ordinary RPC failures and timeouts keep a healthy native process enabled',
     assert.deepEqual(await s.check('-- next',3000),[]);assert.equal(s.version,2);assert.equal(rows('launches.jsonl').length,1);
   });
 });
-test('runtime mismatch avoids native loading and startup shares the original deadline',async()=>{
+test('runtime mismatch avoids native loading and startup shares the original deadline',async(t)=>{
   await sessionFixture({commit:'2'.repeat(40)},async(s,rows)=>{
     assert.deepEqual(await s.check('-- document',3000),[]);assert.equal(s.native.reason,'runtime-mismatch');assert.deepEqual(rows('launches.jsonl'),[{native:false}]);
   });
   await sessionFixture({probeDelay:250,hangInit:true},async(s)=>{
-    const start=performance.now();await assert.rejects(s.check('-- document',400),/timed out/);assert.ok(performance.now()-start<575,'startup granted a second timeout after the runtime probe');
+    enableStartupObservation(s);const start=performance.now();await assert.rejects(s.check('-- document',400),/timed out/);const elapsed=performance.now()-start,observation=startupObservation(s);t.diagnostic(JSON.stringify({kind:'startup-phase-diagnostic',elapsed,observation}));assert.ok(elapsed<575,'startup granted a second timeout after the runtime probe: '+JSON.stringify(observation));
   });
+});
+
+test('startup phase observation is opt-in, bounded and independently copied',async()=>{
+ const s=new LeanSession('/unused','/unused');s.initialized=true;s.peer={closed:false};await s.start();assert.equal(startupObservation(s),null);
+ enableStartupObservation(s);for(let i=0;i<100;i++)await s.start();const trace=startupObservation(s);assert.equal(trace.events.length,64);assert.equal(trace.dropped,36);assert.equal(trace.last.event,'startup.reused');
+ trace.events[0].event='forged';assert.equal(startupObservation(s).events[0].event,'startup.reused');enableStartupObservation(s);assert.equal(startupObservation(s).dropped,36);
+});
+test('startup phase observations bracket real injected probe and initialize separately',async()=>{
+ await sessionFixture({},async(s)=>{enableStartupObservation(s);await s.start(3000);const trace=startupObservation(s),names=trace.events.map(r=>r.event);
+  const order=['startup.enter','command.import.start','command.import.end','native.inspect.start','native.inspect.end','probe.start','probe.end','server.spawn.start','server.spawn.end','initialize.start','initialize.end','initialized.notified','worker.file.start','worker.file.end'];assert.deepEqual(names,order);
+  for(let i=0;i<trace.events.length;i++){assert.ok(Number.isFinite(trace.events[i].monotonicMs));if(i)assert.ok(trace.events[i].monotonicMs>=trace.events[i-1].monotonicMs);}
+  assert.ok(trace.events[0].deadline>trace.events[0].monotonicMs);assert.equal(trace.events[0].timeoutMs,3000);
+ });
 });

@@ -1,3 +1,6 @@
+# Compact long contexts early: most token cost is re-reading context over 150k (docs/audits/token-economy.md).
+model_auto_compact_token_limit = 100000
+
 [mcp_servers.lean_lsp]
 command = "scripts/run-lean-mcp.sh"
 cwd = "."

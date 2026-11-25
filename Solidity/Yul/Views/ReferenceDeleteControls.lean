@@ -83,7 +83,7 @@ theorem source_and_physical :
         ReservedOK patch q.free := by
   first | (simp only;done) | decide | omega | rfl | skip
   obtain ⟨r,after,q,step,addresses,free,run,safe,whole,origin,history,writeback,reservedAfter⟩ :=
-    strct mixedHeap.ty mixedState p rfl mixed_actual_MemOK StructWordHeap.Controls.support mixedReadFrame 0 3 mixedName false
+    strct mixedHeap.ty mixedState p rfl mixed_actual_MemOK Solidity.Yul.Views.Controls.generated_mixed_types_supported mixedReadFrame 0 3 mixedName false
       mixedFields refFields words fields rfl ⟨2,by decide⟩ rfl (by decide) memory oldReads reserved
   have rawEq : r=raw := Option.some.inj (step.symm.trans allocation_step)
   subst r
@@ -121,7 +121,7 @@ theorem allocation_failure_and_map :
   first | (simp only;done) | decide | omega | rfl | skip
   have physical := ComputedAllocationWrite.sound mixedHeap.ty mixedState p rfl
     (Source.Data.bytes (l:=.memory) []) (.bytes 0) rfl (by decide) memory raw allocation_step mixed_actual_MemOK
-    trivial (.bytes _) trivial StructWordHeap.Controls.support oldReads
+    trivial (.bytes _) trivial Solidity.Yul.Views.Controls.generated_mixed_types_supported oldReads
   exact ⟨rfl,physical.2.1,physical.2.2.2.1,physical.2.2.2.2⟩
 
 theorem missing_allocation_negative : (mload patch 384).val≠(mload memory 384).val ∧

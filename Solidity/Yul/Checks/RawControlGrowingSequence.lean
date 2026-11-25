@@ -86,9 +86,8 @@ theorem continueProjection : ∀ (pipeline : Solidity.Roadmap.Pipeline) (world :
   rw [continueRaw]
   rfl
 
-theorem dirtyRefuses : ∀ (world : Solidity.Source.St Solidity.Yul.Checks.RawControlGrowingSequence.Old.env), Solidity.Yul.RawCoherent.coherent (Solidity.Yul.Checks.RawControlDeclaration.Old.initial 2 257 2 world) = false := by
-  intro world
-  rfl
+theorem dirtyRefuses : ∀ (world : Solidity.Source.St Solidity.Yul.Checks.RawControlGrowingSequence.Old.env), Solidity.Yul.RawCoherent.coherent (Solidity.Yul.Checks.RawControlDeclaration.Old.initial 2 257 2 world) = false :=
+  Solidity.Yul.Checks.RawU8Statement.dirtyRefusal
 
 theorem sourceAll : ∀ (glob : Solidity.Source.Glob Solidity.Yul.Checks.RawControlGrowingSequence.Old.env) (frame : Solidity.Source.Fr), frame.checked = true →
  ∀ (fuel nps : Nat) (ph : Option (Solidity.Source.Ph Solidity.Yul.Checks.RawControlGrowingSequence.Old.env)) (world : Solidity.Source.St Solidity.Yul.Checks.RawControlGrowingSequence.Old.env),

@@ -37,7 +37,7 @@ theorem supported_current : ∀ a τ d,current.2.heap.get a=some ⟨τ,d⟩ → 
     exact supported
   · change (mixedHeap.write 3 (.struct pointerFields) (by rfl)).get a=some ⟨τ,d⟩ at actual
     rw [Source.Heap.write_other mixedHeap same] at actual
-    exact StructWordHeap.Controls.support a τ d actual
+    exact Solidity.Yul.Views.Controls.generated_mixed_types_supported a τ d actual
 
 theorem current_reads : ∀ e∈generatedHeapEntries q,e.image.Reads pointerPatch (q.address e.id) := by
   first | (simp only;done) | decide | omega | rfl | skip

@@ -233,9 +233,6 @@ private theorem memOK : Source.MemOK E SH inputSource :=
 private theorem allocator : StructAllocatorRepr hp base 8 ⟨48,by decide⟩ inputWord :=
   ((initial_allocator.localWrite 5 (by decide) (by decide) (.val (wmod 1))).localWrite 6
     (by decide) (by decide) (.val (bword true)))
-private theorem written_read (m : Environment.Memory) (a w : Nat) :
-    Environment.readMemory (Environment.writeBytes m a (Semantics.wordBytes w)) a 32=Semantics.wordBytes w := by
-  simpa only [Environment.wordBytes_length] using Environment.read_written (Semantics.wordBytes w) a m
 
 private theorem child_frame : WordFrame inputWord bytes
     (fun c => (base left.id).val≤c ∧ c<(base left.id).val+1+hp.len left .dyn) := by
@@ -255,7 +252,7 @@ private theorem child_frame : WordFrame inputWord bytes
       refine ⟨_,rfl,?_⟩
       simp only [bytes,List.foldl_cons,List.foldl_nil]
       repeat (rw [readMemory_write_frame]; case sep => simp only [Environment.wordBytes_length];omega)
-      exact written_read _ _ _
+      exact Physical.word_read_written _ _ _
 
 /-- Existing named parent/tag and two nonuniform children, repeated old
 aliases, actual scalar locals, word allocator and physical child are inhabited. -/
@@ -448,7 +445,7 @@ private theorem initial_byte_cell (entry : Nat × Nat) (h : entry∈byteTable) :
   all_goals
     simp only [bytes,List.foldl_cons,List.foldl_nil]
     repeat (rw [readMemory_write_frame]; case sep => simp only [Environment.wordBytes_length];omega)
-    exact written_read _ _ _
+    exact Physical.word_read_written _ _ _
 
 /-- All eighteen physical cell images, including scaled POINTER words.
 The final image changes exactly the selected child cell18. This does not
@@ -466,7 +463,7 @@ theorem complete_byte_vectors :
     intro e he
     by_cases hx : e.1=18
     · rw [if_pos hx,hx]
-      exact written_read bytes 576 1
+      exact Physical.word_read_written bytes 576 1
     · rw [if_neg hx]
       unfold outputBytes
       rw [readMemory_write_frame]
@@ -726,7 +723,7 @@ theorem named_reference_vectors :
   · apply List.map_congr_left
     intro e he
     by_cases hx : e.1=33
-    · rw [if_pos hx,hx];exact written_read bytes 1056 768
+    · rw [if_pos hx,hx];exact Physical.word_read_written bytes 1056 768
     · rw [if_neg hx]
       unfold redirectBytes
       rw [readMemory_write_frame]
@@ -743,9 +740,9 @@ theorem named_reference_encoding_and_timeout (p : Roadmap.Pipeline) :
     redirectWord.mem 33≠inputWord.mem 33 ∧
     (∀ n,n≤2 → (Source.evalE (G p) F0 n (sourceStructAssign layout sroot srhs)).run inputSource=(.error .timeout,inputSource)) := by
   refine ⟨?_,?_,source_struct_assign_low_horizon layout (G p) F0 inputSource sroot srhs⟩
-  · rw [written_read]
+  · rw [Physical.word_read_written]
     change Semantics.wordBytes 24≠Environment.readMemory (Environment.writeBytes bytes 1056 (Semantics.wordBytes 768)) 1056 32
-    rw [written_read]
+    rw [Physical.word_read_written]
     decide
   · first | decide | simp only [redirectWord,writeMachine,upd_same];decide
 
@@ -1043,7 +1040,7 @@ theorem named_sequence_vectors :
 private theorem seq_initial_byte (e : Nat × Nat) (he : e∈byteTable) :
     Environment.readMemory seqBytes (32*e.1) 32=Semantics.wordBytes (if e.1=5 then 0 else e.2) := by
   by_cases hx : e.1=5
-  · rw [if_pos hx,hx];exact written_read bytes 160 0
+  · rw [if_pos hx,hx];exact Physical.word_read_written bytes 160 0
   · rw [if_neg hx]
     unfold seqBytes
     rw [readMemory_write_frame]
@@ -1052,7 +1049,7 @@ private theorem seq_initial_byte (e : Nat × Nat) (he : e∈byteTable) :
 private theorem seq_mid_byte (e : Nat × Nat) (he : e∈byteTable) :
     Environment.readMemory seqFirstBytes (32*e.1) 32=Semantics.wordBytes (if e.1=33 then 768 else if e.1=5 then 0 else e.2) := by
   by_cases hx : e.1=33
-  · rw [if_pos hx,hx];exact written_read seqBytes 1056 768
+  · rw [if_pos hx,hx];exact Physical.word_read_written seqBytes 1056 768
   · rw [if_neg hx]
     unfold seqFirstBytes
     rw [readMemory_write_frame]
@@ -1072,7 +1069,7 @@ theorem named_sequence_byte_vectors :
   apply List.map_congr_left
   intro e he
   by_cases hx : e.1=25
-  · rw [if_pos hx,hx];exact written_read seqFirstBytes 800 1
+  · rw [if_pos hx,hx];exact Physical.word_read_written seqFirstBytes 800 1
   · rw [if_neg hx]
     unfold seqFinalBytes
     rw [readMemory_write_frame]
@@ -1222,7 +1219,7 @@ theorem named_sequence_reject_vectors :
 private theorem reject_initial_byte (e : Nat × Nat) (he : e∈byteTable) :
     Environment.readMemory rejectBytes (32*e.1) 32=Semantics.wordBytes (if e.1=5 then 3 else e.2) := by
   by_cases hx : e.1=5
-  · rw [if_pos hx,hx];exact written_read bytes 160 3
+  · rw [if_pos hx,hx];exact Physical.word_read_written bytes 160 3
   · rw [if_neg hx]
     unfold rejectBytes
     rw [readMemory_write_frame]
@@ -1240,7 +1237,7 @@ theorem named_sequence_reject_byte_vectors :
   apply List.map_congr_left
   intro e he
   by_cases hx : e.1=33
-  · rw [if_pos hx,hx];exact written_read rejectBytes 1056 768
+  · rw [if_pos hx,hx];exact Physical.word_read_written rejectBytes 1056 768
   · rw [if_neg hx]
     unfold rejectFirstBytes
     rw [readMemory_write_frame]
@@ -1405,7 +1402,7 @@ theorem named_delete_byte_vectors :
       simp only [byteTable,List.mem_cons,List.not_mem_nil,or_false] at he
       rcases he with rfl|rfl|rfl|rfl|rfl|rfl|rfl|rfl|rfl|rfl|rfl|rfl|rfl|rfl|rfl|rfl|rfl|rfl <;> simp_all
     rw [hx,hv]
-    exact written_read outputBytes 576 0
+    exact Physical.word_read_written outputBytes 576 0
   · unfold deletedBytes outputBytes
     rw [readMemory_write_frame,readMemory_write_frame]
     · exact initial_byte_cell e he
@@ -1515,7 +1512,7 @@ theorem named_selected_alias_byte_vectors :
   intro e he
   by_cases hx : e.1=3
   · rw [if_pos hx,hx]
-    exact written_read bytes 96 512
+    exact Physical.word_read_written bytes 96 512
   · rw [if_neg hx]
     unfold aliasBytes
     rw [readMemory_write_frame]
@@ -1534,7 +1531,7 @@ theorem named_selected_alias_controls (p : Roadmap.Pipeline) :
     have actual : aliasWord.mem 3=.val (wmod 16) := rfl
     have same : v=wmod 16 := Evm.Word.val.inj (hw.symm.trans actual)
     subst v
-    have read := written_read bytes 96 16
+    have read := Physical.word_read_written bytes 96 16
     have bad : Semantics.wordBytes 16=Semantics.wordBytes 512 := read.symm.trans hb
     have different : Semantics.wordBytes 16≠Semantics.wordBytes 512 := by decide
     exact different bad

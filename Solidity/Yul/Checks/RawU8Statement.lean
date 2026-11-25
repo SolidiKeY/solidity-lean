@@ -75,6 +75,12 @@ theorem dirtyRefusal : ∀ (world : Solidity.Source.St Solidity.Yul.Checks.RawU8
   intro world
   rfl
 
+/-- The shared dirty Boolean fixture is outside the coherent Source boundary. -/
+theorem dirtyNotCoherent (world : Solidity.Source.St Old.env) :
+    RawCoherent.coherent (initial 2 257 2 world) ≠ true := by
+  rw [dirtyRefusal world]
+  decide
+
 theorem unsupportedSub : ¬ Nonempty (Solidity.Yul.LocalU8Expr.Supported Solidity.Yul.Checks.RawU8Statement.ctx.env Solidity.Yul.Checks.RawU8Statement.ctx.tys (.binary .sub (.local Solidity.Yul.Checks.RawU8Statement.Old.x) (.local Solidity.Yul.Checks.RawU8Statement.Old.arg))) := by
   exact Solidity.Yul.Checks.LocalU8Representation.unsupportedSub
 

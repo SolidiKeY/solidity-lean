@@ -26,6 +26,8 @@ private theorem bind_some {α β : Type} {a : Option α} {f : α → Option β} 
   | none => cases h
   | some x => exact ⟨x, rfl, h⟩
 
+theorem write_bind_some_shared : type_of% (@bind_some) := @bind_some
+
 /-- Bytes 32 and up of a word are zero. -/
 private theorem word_byte_high (w : Roadmap.Word) {b : Nat} (hb : 32 ≤ b) :
     w.val / 256 ^ b = 0 :=
@@ -212,6 +214,9 @@ private theorem field_nested (P : Shrink.Params) (fs : List Shrink.Layout) (l : 
   · simp only [geometry, if_pos hr, hf, Option.map_some, Option.getD_some]
   · exact absurd h (field_slotted P fs l i hr)
 
+/-- Shared memory-field offset law for layout write proofs. -/
+theorem write_field_nested_shared : type_of% (@field_nested) := @field_nested
+
 /-! ## The written footprint of a successful nested write is state-independent -/
 
 mutual
@@ -377,6 +382,19 @@ private theorem writeFields_frame (P : Shrink.Params) :
       (frame P f _ x m m₁ hx c fun hh => hc (.inl
         (cellsT_indep P x f _ m m₁ hx (field_nested P all l i f (hi 0)) m₁ m' c hh)))
 end
+
+theorem writeElems_frame_shared (P : Shrink.Params) :
+    ∀ (xs : List Shrink.Tree) (e : Shrink.Layout) (l : Shrink.Loc) (i : Nat)
+      (m m' : Shrink.Phys), geometry.writeElems P e l xs i m = some m' →
+      ∀ c, ¬ geometry.elemCellsT P e l xs i m' c → m'.byte c = m.byte c :=
+  writeElems_frame P
+
+theorem writeFields_frame_shared (P : Shrink.Params) :
+    ∀ (xs : List Shrink.Tree) (fs all : List Shrink.Layout) (l : Shrink.Loc) (i : Nat)
+      (m m' : Shrink.Phys), geometry.writeFields P all l fs xs i m = some m' →
+      (∀ j, all[i + j]? = fs[j]?) →
+      ∀ c, ¬ geometry.fieldCellsT P all l fs xs i m' c → m'.byte c = m.byte c :=
+  writeFields_frame P
 
 /-! ## Ill-typed writes fail -/
 

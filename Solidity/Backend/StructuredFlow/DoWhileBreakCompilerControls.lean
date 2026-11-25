@@ -46,7 +46,7 @@ theorem observed (flag : Bool) :
 
 theorem omitted_body_refused :
     snapshot 0 (run [] (machine true)) ≠
-      snapshot 0 (run (emit (C := C) 0 mapping .here (.there .here) rfl rfl) (machine true)) := by
-  decide
+      snapshot 0 (run (emit (C := C) 0 mapping .here (.there .here) rfl rfl) (machine true)) :=
+  ForBreakCompiler.Controls.omitted_initializer_refused
 
 end Solidity.Backend.StructuredFlow.DoWhileBreakCompiler.Controls

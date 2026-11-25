@@ -1,4 +1,5 @@
 import Solidity.Yul.Views.MemberArray
+import Solidity.Yul.Views.RetainedDynamicUint
 
 /-! Actual retained ordinary allocations for canonical array-member families.
 The original allocated region remains owned through typed write lineage; the
@@ -150,11 +151,8 @@ theorem retainedMemberArray_other_region {D : Source.Layout} {origin h : Source.
     (root other : Nat) (hr : (h.cells root).isSome) (ho : (h.cells other).isSome) (distinct : root ≠ other)
     (k : Nat) (bound : k < 2 ^ 256) (words : Fin k → Roadmap.Word)
     (capacity : (MemoryShape.array true k).size ≤ (allocated.shape root).size) (m : ByteView) (off : Nat) (inside : off < (allocated.shape other).size) :
-    dynamicUintView k bound words m (current.address root) (current.address other + off) = m (current.address other + off) := by
-  have sep := (retainedByte_full_separation allocated current history root other hr ho distinct).2.2
-  change 32 + k * 32 ≤ (allocated.shape root).size at capacity
-  apply dynamicUint_residual
-  omega
+    dynamicUintView k bound words m (current.address root) (current.address other + off) = m (current.address other + off) :=
+  retainedDynamicUint_other_region allocated current history root other hr ho distinct k bound words capacity m off inside
 
 theorem retainedMemberArray_raw_reencode (m : ByteView) (base : Nat) :
     dynamicUintView (mload m base).val (mload m base).isLt (fun i => mload m (base + 32 + i.val * 32)) m base = m :=

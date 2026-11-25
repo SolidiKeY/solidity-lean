@@ -112,7 +112,8 @@ theorem disjoint_right : ∃ target,
     (by decide) (by decide) (by decide)
   exact ⟨target,ran,contents 0 (by decide),contents 3 (by decide),outside 16 (.inl (by decide))⟩
 
-theorem boundary_not_in_range : ¬ ((W - 1) + 2 ≤ W) := by omega
+theorem boundary_not_in_range : ¬ ((W - 1) + 2 ≤ W) :=
+  ForwardOverlapControls.boundary_not_in_range
 
 #print axioms certificate_inhabited
 #print axioms right_overlap

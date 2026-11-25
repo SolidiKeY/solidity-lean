@@ -1,4 +1,4 @@
 {
  "comment": "Redundant exact-duplicate theorems of Solidity (scripts/decl-index/decl_index.py); may only go down.",
- "duplicate_theorems": 418
+ "duplicate_theorems": 258
 }

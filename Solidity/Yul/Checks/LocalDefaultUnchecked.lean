@@ -8,16 +8,10 @@ end Fixture
 export Solidity.Yul.Checks.LocalDefaultItems (initial assigned zero8 zero256)
 def inner : Solidity.Source.RItems Fixture.env [] false ⟨false,true⟩ Fixture.ctx.tys
     (.bool :: .int Solidity.Source.IntTy.u256 :: .int Solidity.Source.IntTy.u8 :: Fixture.ctx.tys) :=
-  .stmt (.declVar (.int Solidity.Source.IntTy.u8))
-    (.stmt (.declVar (.int Solidity.Source.IntTy.u256))
-      (.stmt (.declInit (.unary .not (.local (.there (.there .here)))) (by rfl))
-        (.stmt (.expr (.assign (.local (.there (.there (.there .here)))) (.local .here))) .nil)))
+  Solidity.Yul.Checks.LocalDefaultItems.scopedItems ⟨false,true⟩
 
 def inside : LocalDefaultItems.Supported Fixture.env [] false ⟨false,true⟩ inner :=
-  .declaration zero8 (.declaration zero256
-    (.body (.declaration (.not (.base (.local (.there (.there .here)))))
-      (.expression (.assign (.there (.there (.there .here))) (.base (.local .here))) .nil))))
-
+  Solidity.Yul.Checks.LocalDefaultItems.scopedProof ⟨false,true⟩
 
 abbrev Middle := Solidity.Source.STy.bool :: .int Solidity.Source.IntTy.u256 ::
   .int Solidity.Source.IntTy.u8 :: Fixture.ctx.tys

@@ -47,23 +47,11 @@ def signedFits (w : Fin 32) (a : PrimTy.int.Denote) : Bool :=
   decide (-((2^(widthBits w-1):Nat):Int) ≤ a.val ∧ a.val < ((2^(widthBits w-1):Nat):Int))
 
 
-private theorem stepDup1 (a : Word) (tail : Stack) :
-    step (.op (.DUP ⟨0, by decide⟩)) (a::tail) = some (a::a::tail) := rfl
-private theorem stepDup2 (a b : Word) (tail : Stack) :
-    step (.op (.DUP ⟨1, by decide⟩)) (a::b::tail) = some (b::a::b::tail) := rfl
-private theorem stepSwap1 (a b : Word) (tail : Stack) :
-    step (.op (.SWAP ⟨0, by decide⟩)) (a::b::tail) = some (b::a::tail) := rfl
-private theorem stepLT (a b : Word) (tail : Stack) :
-    step (.op .LT) (a::b::tail) = some (flag (decide (a.toNat<b.toNat))::tail) := rfl
-private theorem stepSLT (a b : Word) (tail : Stack) :
-    step (.op .SLT) (a::b::tail) = some (flag (decide (a.toInt<b.toInt))::tail) := rfl
-private theorem stepOR (a b : Word) (tail : Stack) :
-    step (.op .OR) (a::b::tail) = some ((a ||| b)::tail) := rfl
 
 theorem unsignedWidthTest_correct (w : Fin 32) (a : PrimTy.uint.Denote) (tail : Stack) :
     run (unsignedWidthTest w) (encodeValue .uint a::tail) =
       some (flag (!unsignedFits w a)::encodeValue .uint a::tail) := by
-  simp only [unsignedWidthTest, run, stepDup1, step_pushWord, stepLT, Option.bind_some]
+  simp only [unsignedWidthTest, run, stepDup1, step_pushWord, stepLt, Option.bind_some]
   rw [encode_uint_toNat, encode_uint_toNat]
   have ha : 0 ≤ a.val ∧ a.val < ((2 ^ 256 : Nat) : Int) := uint_range a
   have hp : 0 < 2 ^ widthBits w := Nat.pow_pos (by decide : 0<2) (n := widthBits w)
@@ -78,7 +66,7 @@ theorem signedWidthTest_correct (w : Fin 32) (a : PrimTy.int.Denote) (tail : Sta
     run (signedWidthTest w) (encodeValue .int a::tail) =
       some (flag (!signedFits w a)::encodeValue .int a::tail) := by
   simp only [signedWidthTest, run, stepDup1, step_pushWord, stepSwap1,
-    stepDup2, stepSLT, stepOR, Option.bind_some]
+    stepDup2, stepSlt, stepOr, Option.bind_some]
   rw [flag_or]
   simp only [encode_int_toInt]
   have hp : 0 < 2 ^ (widthBits w - 1) := Nat.pow_pos (by decide : 0<2) (n := widthBits w-1)

@@ -75,17 +75,11 @@ theorem call_run {depth : Nat} {source : Prog C (Frame A) (Frame A)} (checked : 
 
 theorem returns {depth : Nat} {source : Prog C (Frame A) (Frame A)} (checked : Certificate A (by rfl) depth source) :
  InterfaceV1.ReturnClaim 2 F (call depth source) (AllocatingOuterPlan.plan.at depth) := by
- intro L frame caller base before start entry out actual
- have native : (AllocatingOuterFamily.source depth).run caller=.ok out :=
-   (congrFun (call_run checked) caller).symm.trans actual
- exact AllocatingOuterClaims.returns depth L frame caller base before start entry out native
+ simpa only [InterfaceV1.ReturnClaim, Stmt.run, call_run checked] using AllocatingOuterClaims.returns depth
 
 theorem bare_revert {depth : Nat} {source : Prog C (Frame A) (Frame A)} (checked : Certificate A (by rfl) depth source) :
  InterfaceV1.BareRevertClaim 2 F (call depth source) (AllocatingOuterPlan.plan.at depth) := by
- intro L frame caller base before start entry actual
- have native : (AllocatingOuterFamily.source depth).run caller=.error .revert :=
-   (congrFun (call_run checked) caller).symm.trans actual
- exact AllocatingOuterClaims.bare_revert depth L frame caller base before start entry native
+ simpa only [InterfaceV1.BareRevertClaim, Stmt.run, call_run checked] using AllocatingOuterClaims.bare_revert depth
 
 end Solidity.Backend.InternalFlow.RuntimeFrame.AllocatingSourceCertificate
 /-- info: 'Solidity.Backend.InternalFlow.RuntimeFrame.AllocatingSourceCertificate.step_congr' depends on axioms: [propext, Classical.choice, Quot.sound] -/

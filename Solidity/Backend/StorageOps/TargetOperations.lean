@@ -83,6 +83,13 @@ theorem run_copy (dst src : Evm.Slot) (machine : Evm.Machine) :
     Evm.run (copyCode dst src) machine =
       .ok { machine with store := Evm.WordStore.write machine.store dst (machine.store.cells src).val } 0 := rfl
 
+/-- A copy whose source word is known writes that value. -/
+theorem run_copy_known (machine : Evm.Machine) (dst src : Evm.Slot) (value : Nat)
+    (known : machine.store src = value) :
+    Evm.run (copyCode dst src) machine =
+      .ok { machine with store := Evm.WordStore.write machine.store dst value } 0 := by
+  rw [run_copy, Evm.WordStore.cells_val, known]
+
 /-- A successful independent graph read is related to ACTUAL SLOAD through the
 old PUBLIC owner relation and initial target cell agreement. This does not infer
 failure or liveness checks from the total symbolic target storage operation. -/

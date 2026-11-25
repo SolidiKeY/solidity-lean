@@ -124,19 +124,12 @@ private theorem push_push_physical {N : Nat} (hash : Solidity.Storage.Pre → Na
     · have bFirst : LifecycleNumeric.pushPrimitive N hash b m = none := dif_neg roomB
       rw [aFirst, bFirst, Option.bind_none, Option.bind_none]
 
-private theorem header_bound {N : Nat} (hash : Solidity.Storage.Pre → Nat)
-    (base : Solidity.Storage.Loc) (m : WordStore) : LifecycleNumeric.headerLength N hash base m < 2 ^ 256 := by
-  have bound := (m (base.word N hash)).property
-  simp only [PrimTy.inRange, decide_eq_true_eq] at bound
-  unfold LifecycleNumeric.headerLength
-  omega
-
 def popUpdates (N : Nat) (hash : Solidity.Storage.Pre → Nat)
     (base : Solidity.Storage.Loc) (initial : WordStore) : List (Solidity.Storage.Loc × Semantics.Word) :=
   let length := LifecycleNumeric.headerLength N hash base initial
   if 0 < length then
     [(.data base (length - 1), ClearDemands.zero),
-      (base, lengthWord (length - 1) (by have bound := header_bound (N := N) hash base initial; omega))] else []
+      (base, lengthWord (length - 1) (by have bound := LifecycleNumeric.headerLength_lt (N := N) hash base initial; omega))] else []
 
 private theorem pop_framed {N : Nat} (hash : Solidity.Storage.Pre → Nat)
     (base : Solidity.Storage.Loc) (before after : WordStore)
@@ -146,7 +139,7 @@ private theorem pop_framed {N : Nat} (hash : Solidity.Storage.Pre → Nat)
         some (twoWrites after ((Solidity.Storage.Loc.data base (LifecycleNumeric.headerLength N hash base before - 1)).word N hash)
           ClearDemands.zero (base.word N hash)
           (lengthWord (LifecycleNumeric.headerLength N hash base before - 1)
-            (by have bound := header_bound (N := N) hash base before; omega))) else none := by
+            (by have bound := LifecycleNumeric.headerLength_lt (N := N) hash base before; omega))) else none := by
   unfold PrimitivePop.execute
   simp only [same, twoWrites]
 
@@ -174,7 +167,7 @@ private theorem push_pop_physical {N : Nat} (hash : Solidity.Storage.Pre → Nat
     by_cases roomB : 0 < LifecycleNumeric.headerLength N hash b m
     · let updateB := fun initial => twoWrites initial
         ((Solidity.Storage.Loc.data b (LifecycleNumeric.headerLength N hash b m - 1)).word N hash) ClearDemands.zero
-        (b.word N hash) (lengthWord (LifecycleNumeric.headerLength N hash b m - 1) (by have bound := header_bound (N := N) hash b m; omega))
+        (b.word N hash) (lengthWord (LifecycleNumeric.headerLength N hash b m - 1) (by have bound := LifecycleNumeric.headerLength_lt (N := N) hash b m; omega))
       have bFirst : PrimitivePop.execute N hash b m = some (updateB m) := by exact dif_pos roomB
       have frameA : LifecycleNumeric.headerLength N hash a (updateB m) = LifecycleNumeric.headerLength N hash a m :=
         header_two hash a m _ _ _ _ (rightFrame roomB) headers
@@ -200,7 +193,7 @@ private theorem push_pop_physical {N : Nat} (hash : Solidity.Storage.Pre → Nat
     by_cases roomB : 0 < LifecycleNumeric.headerLength N hash b m
     · let updateB := fun initial => twoWrites initial
         ((Solidity.Storage.Loc.data b (LifecycleNumeric.headerLength N hash b m - 1)).word N hash) ClearDemands.zero
-        (b.word N hash) (lengthWord (LifecycleNumeric.headerLength N hash b m - 1) (by have bound := header_bound (N := N) hash b m; omega))
+        (b.word N hash) (lengthWord (LifecycleNumeric.headerLength N hash b m - 1) (by have bound := LifecycleNumeric.headerLength_lt (N := N) hash b m; omega))
       have bFirst : PrimitivePop.execute N hash b m = some (updateB m) := dif_pos roomB
       have frameA : LifecycleNumeric.headerLength N hash a (updateB m) = LifecycleNumeric.headerLength N hash a m :=
         header_two hash a m _ _ _ _ (rightFrame roomB) headers
@@ -226,7 +219,7 @@ private theorem pop_pop_physical {N : Nat} (hash : Solidity.Storage.Pre → Nat)
   by_cases roomA : 0 < LifecycleNumeric.headerLength N hash a m
   · let updateA := fun initial => twoWrites initial
       ((Solidity.Storage.Loc.data a (LifecycleNumeric.headerLength N hash a m - 1)).word N hash) ClearDemands.zero
-      (a.word N hash) (lengthWord (LifecycleNumeric.headerLength N hash a m - 1) (by have bound := header_bound (N := N) hash a m; omega))
+      (a.word N hash) (lengthWord (LifecycleNumeric.headerLength N hash a m - 1) (by have bound := LifecycleNumeric.headerLength_lt (N := N) hash a m; omega))
     have aFirst : PrimitivePop.execute N hash a m = some (updateA m) := by
       exact dif_pos roomA
     have frameB : LifecycleNumeric.headerLength N hash b (updateA m) = LifecycleNumeric.headerLength N hash b m :=
@@ -234,7 +227,7 @@ private theorem pop_pop_physical {N : Nat} (hash : Solidity.Storage.Pre → Nat)
     by_cases roomB : 0 < LifecycleNumeric.headerLength N hash b m
     · let updateB := fun initial => twoWrites initial
         ((Solidity.Storage.Loc.data b (LifecycleNumeric.headerLength N hash b m - 1)).word N hash) ClearDemands.zero
-        (b.word N hash) (lengthWord (LifecycleNumeric.headerLength N hash b m - 1) (by have bound := header_bound (N := N) hash b m; omega))
+        (b.word N hash) (lengthWord (LifecycleNumeric.headerLength N hash b m - 1) (by have bound := LifecycleNumeric.headerLength_lt (N := N) hash b m; omega))
       have bFirst : PrimitivePop.execute N hash b m = some (updateB m) := by exact dif_pos roomB
       have frameA : LifecycleNumeric.headerLength N hash a (updateB m) = LifecycleNumeric.headerLength N hash a m :=
         header_two hash a m _ _ _ _ (rightFrame roomB) headers
@@ -260,7 +253,7 @@ private theorem pop_pop_physical {N : Nat} (hash : Solidity.Storage.Pre → Nat)
     by_cases roomB : 0 < LifecycleNumeric.headerLength N hash b m
     · let updateB := fun initial => twoWrites initial
         ((Solidity.Storage.Loc.data b (LifecycleNumeric.headerLength N hash b m - 1)).word N hash) ClearDemands.zero
-        (b.word N hash) (lengthWord (LifecycleNumeric.headerLength N hash b m - 1) (by have bound := header_bound (N := N) hash b m; omega))
+        (b.word N hash) (lengthWord (LifecycleNumeric.headerLength N hash b m - 1) (by have bound := LifecycleNumeric.headerLength_lt (N := N) hash b m; omega))
       have bFirst : PrimitivePop.execute N hash b m = some (updateB m) := dif_pos roomB
       have frameA : LifecycleNumeric.headerLength N hash a (updateB m) = LifecycleNumeric.headerLength N hash a m :=
         header_two hash a m _ _ _ _ (rightFrame roomB) headers

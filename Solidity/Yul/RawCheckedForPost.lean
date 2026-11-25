@@ -56,17 +56,10 @@ theorem correct : ∀ {ctx : Solidity.Source.Ctx} {returns : List Solidity.Sourc
         Solidity.Yul.RawCoherent.capture state (Solidity.Yul.LocalState.ofClean (locals,world))
       have nextSame : Solidity.Yul.RawCoherent.coherent nextFrame = true :=
         Solidity.Yul.RawCoherent.capture_coherent state locals world
-      have nextClean : nextFrame.clean = locals := by
-        simp only [nextFrame,Solidity.Yul.RawCoherent.capture,Solidity.Yul.LocalState.ofClean,
-          Solidity.Yul.LocalValues.clean_ofClean,Option.getD_some]
       cases tag with
       | error halt =>
         change Solidity.Yul.RawCondition.eval test fuel state = (.error halt,nextFrame) at conditionRun
-        have sourceCondition :
-            (Solidity.Source.evalE glob frame fuel condition).run (state.clean,state.world) =
-              (.error halt,(nextFrame.clean,nextFrame.world)) := by
-          rw [nextClean]
-          exact actual
+        have sourceCondition := RawCoherent.capture_result state actual
         simp only [Solidity.Yul.RawCheckedForPost.run,conditionRun]
         exact ⟨nextSame,Solidity.Yul.RawSourceForPost.source_error condition post body
           glob frame fuel nps ph state nextFrame halt sourceCondition⟩
@@ -76,11 +69,7 @@ theorem correct : ∀ {ctx : Solidity.Source.Ctx} {returns : List Solidity.Sourc
           cases value with
           | bool choice =>
             have branch := inside.correct glob frame checked fuel nps ph nextFrame nextSame
-            have sourceCondition :
-                (Solidity.Source.evalE glob frame fuel condition).run (state.clean,state.world) =
-                  (.ok (.val (.bool choice)),(nextFrame.clean,nextFrame.world)) := by
-              rw [nextClean]
-              exact actual
+            have sourceCondition := RawCoherent.capture_result state actual
             have selected := Solidity.Yul.RawSourceForPost.source_choice condition post body
               glob frame fuel nps ph state nextFrame choice (inside.run glob.pipeline fuel nextFrame) sourceCondition branch.2
             cases choice with

@@ -38,11 +38,6 @@ private def wrongForward : Evm.Machine := {forward2 with store:=Evm.WordStore.wr
 private def backward1 : Evm.Machine := {target with store:=Evm.WordStore.write target.store (.root 2) 71}
 private def backward2 : Evm.Machine := {backward1 with store:=Evm.WordStore.write backward1.store (.root 1) 71}
 private def wrongBackward : Evm.Machine := {backward2 with store:=Evm.WordStore.write backward2.store (.root 0) 71}
-private theorem copy_known (machine : Evm.Machine) (dst src : Evm.Slot) (value : Nat)
- (known : machine.store src=value) :
- Evm.run (TargetOperations.copyCode dst src) machine=
- .ok {machine with store:=Evm.WordStore.write machine.store dst value} 0 := by
- rw [TargetOperations.run_copy,Evm.WordStore.cells_val,known]
 
 /-- Wrong read/write interleaving is actual instruction execution, no oracle. -/
 theorem wrong_interleaving :
@@ -51,17 +46,17 @@ theorem wrong_interleaving :
  wrongForward.store (.root 2)≠forward.store (.root 2) ∧ wrongBackward.store (.root 0)≠backward.store (.root 0) := by
  refine ⟨?_,?_,by decide,by decide,by decide,by decide⟩
  · unfold streamingForward
-   rw [Evm.run_append_ok (copy_known target (.root 1) (.root 0) 17 rfl)]
+   rw [Evm.run_append_ok (TargetOperations.run_copy_known target (.root 1) (.root 0) 17 rfl)]
    change Evm.run (TargetOperations.copyCode (.root 2) (.root 1) ++ TargetOperations.copyCode (.root 3) (.root 2)) forward1=.ok wrongForward 0
-   rw [Evm.run_append_ok (copy_known forward1 (.root 2) (.root 1) 17
+   rw [Evm.run_append_ok (TargetOperations.run_copy_known forward1 (.root 2) (.root 1) 17
     (Evm.WordStore.write_same_of_lt _ _ _ (by decide)))]
-   exact copy_known forward2 (.root 3) (.root 2) 17 (Evm.WordStore.write_same_of_lt _ _ _ (by decide))
+   exact TargetOperations.run_copy_known forward2 (.root 3) (.root 2) 17 (Evm.WordStore.write_same_of_lt _ _ _ (by decide))
  · unfold streamingBackward
-   rw [Evm.run_append_ok (copy_known target (.root 2) (.root 3) 71 rfl)]
+   rw [Evm.run_append_ok (TargetOperations.run_copy_known target (.root 2) (.root 3) 71 rfl)]
    change Evm.run (TargetOperations.copyCode (.root 1) (.root 2) ++ TargetOperations.copyCode (.root 0) (.root 1)) backward1=.ok wrongBackward 0
-   rw [Evm.run_append_ok (copy_known backward1 (.root 1) (.root 2) 71
+   rw [Evm.run_append_ok (TargetOperations.run_copy_known backward1 (.root 1) (.root 2) 71
     (Evm.WordStore.write_same_of_lt _ _ _ (by decide)))]
-   exact copy_known backward2 (.root 0) (.root 1) 71 (Evm.WordStore.write_same_of_lt _ _ _ (by decide))
+   exact TargetOperations.run_copy_known backward2 (.root 0) (.root 1) 71 (Evm.WordStore.write_same_of_lt _ _ _ (by decide))
 
 private def captured : List Evm.Word := [.val ⟨71,by decide⟩,.val ⟨53,by decide⟩,.val ⟨23,by decide⟩]
 private def processedStore := Evm.storeAt target.store (.root 0) [2] [71]

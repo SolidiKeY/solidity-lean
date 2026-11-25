@@ -17,21 +17,6 @@ theorem fixed_primitive_source {H : HTy} (heap : Heap H) (primitive : PrimTy) (c
   simp only [contents]
   rfl
 
-theorem fixed_reservation {H : HTy} (heap : Heap H) (base : Nat → Fin W) (frame : Nat)
-    (cursor : Fin W) (machine : Machine) (allocator : Objects.AllocatorRepr heap base frame cursor machine)
-    (count : Nat) (fits : cursor.val + max 1 count < W) :
-    Objects.AllocatorRepr heap base frame ⟨cursor.val + max 1 count,fits⟩
-      (allocateStructMachine machine cursor (max 1 count)) ∧
-    Objects.Gap heap base cursor.val (cursor.val + max 1 count) := by
-  have represented : Objects.HeapRepr heap base frame (allocateStructMachine machine cursor (max 1 count)) := by
-    apply allocator.heap.writeOutside 0 _
-    intro Q reference
-    exact .inl (Nat.lt_of_lt_of_le allocator.free.reserved (allocator.heap.owner.above reference))
-  refine ⟨⟨represented,allocator.free.allocateStruct _ fits,?_⟩,fun reference => .inl (allocator.live reference)⟩
-  intro Q reference
-  change (base reference.id).val + Objects.cells heap reference ≤ cursor.val + max 1 count
-  exact Nat.le_trans (allocator.live reference) (Nat.le_add_right _ _)
-
 theorem fixed_words_allocator {H : HTy} (heap : Heap H) (primitive : PrimTy) (count : Nat)
     (values : List primitive.Denote) (sized : values.length = count) (words : List Word)
     (representation : PrimitiveWords primitive values words) (base : Nat → Fin W) (frame : Nat)
@@ -42,7 +27,7 @@ theorem fixed_words_allocator {H : HTy} (heap : Heap H) (primitive : PrimTy) (co
       (arrayWordsMachine cursor 0 words (allocateStructMachine machine cursor (max 1 count))) := by
   let object := fixedPrimitiveObject (H := H) primitive count values sized
   let target := arrayWordsMachine cursor 0 words (allocateStructMachine machine cursor (max 1 count))
-  obtain ⟨reserved,gap⟩ := fixed_reservation heap base frame cursor machine allocator count fits
+  obtain ⟨reserved,gap⟩ := allocator.reserveFixed count fits
   have positive : 0 < cursor.val + 0 := by
     have below : 0 < frame := allocator.free.reserved
     have above : frame ≤ cursor.val := allocator.free.above
@@ -180,7 +165,6 @@ theorem runtime_fixed_memory_success {H : HTy} (heap : Heap H) (primitive : Prim
 def fixedMemoryCopy : FixedMemoryCopyCertificate := ⟨runtime_fixed_memory_success⟩
 
 #print axioms fixed_primitive_source
-#print axioms fixed_reservation
 #print axioms fixed_words_allocator
 #print axioms fixed_memory_enter
 #print axioms runtime_fixed_memory_run

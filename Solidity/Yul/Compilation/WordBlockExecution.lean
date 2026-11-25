@@ -33,7 +33,7 @@ private theorem loop_parts (cc : Backend.Program) (b : Backend.Block) (code : Li
  obtain ⟨qb,hb,same⟩ := Option.map_eq_some_iff.mp rest
  exact ⟨qc,qb,hc,hb,same.symm⟩
 
-private theorem loop_singleton (qc qb : List Evm.Instr) (m : Evm.Machine) :
+theorem loop_singleton (qc qb : List Evm.Instr) (m : Evm.Machine) :
  Evm.run [.loop qc qb] m = Evm.loopRun (Evm.run qc) (Evm.run qb) m := by
  change (Evm.loopRun (Evm.run qc) (Evm.run qb) m).bind (fun next pending => Evm.exec [] pending next) = _
  cases Evm.loopRun (Evm.run qc) (Evm.run qb) m <;> rfl

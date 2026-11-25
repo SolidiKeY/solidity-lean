@@ -29,19 +29,6 @@ theorem SourceBoolRefsAt.eval_nested_delete_of_write {E : Source.Env} {Γ : Sour
   have hd : (Source.deleteLoc (E := E) (Γ := Γ) F (horizon+3) (τ := .bool) (.mem (address q.id) l.1.toNat)).run y=(.ok (),z) := hw
   rw [Source.Hoare.run_bind,hd];rfl
 
-private theorem delete_index_code {C : Contract} {Γ : Ctx} {L b : Nat} {F : Evm.Frag Γ}
-    {σ : State C Γ} {m : Evm.Machine} (hm : Evm.Sim C L b F σ m)
-    (j : Idx Γ (.val .uint)) (l : Fin Evm.W) (ht : TEnv.get j σ.env=Evm.Memory.indexValue l) :
-    Evm.run (Evm.compileVal b (.simple (.local j) : Val C Γ .uint)) m=.ok (m.push (.val l)) 0 := by
-  obtain ⟨w,hw,hc⟩ := Evm.simple_sim hm (.local j) rfl
-  change Evm.ReprV .uint (TEnv.get j σ.env) w at hw
-  rw [ht] at hw
-  obtain ⟨a,ha,he,rfl⟩ := hw.uint_inv
-  have heq : a=l.val := by
-    have h := congrArg Int.toNat he
-    simpa only [Evm.Memory.indexValue,Int.toNat_natCast] using h.symm
-  subst a;exact hc
-
 private theorem nested_delete_code_of_clear {C : Contract} {Γ : Ctx} {L b frame : Nat} {F : Evm.Frag Γ}
     {σ : State C Γ} {base : Nat → Fin Evm.W} {m : Evm.Machine}
     (hm : Evm.Memory.RefArrayStateRepr L b frame F σ base m)
@@ -56,7 +43,7 @@ private theorem nested_delete_code_of_clear {C : Contract} {Γ : Ctx} {L b frame
   have he : (MPath.loc (.index .dyn (.var root rfl) (.simple (.local i)))).mvalT σ=.ok q := by
     simp only [MPath.mvalT,MLoc.addrT,Val.evalT,Simple.evalT,ht,hi,Heap.readAddr,hq,TRes.ofOpt,bind,Except.bind,pure,Except.pure]
   have hptr := hc.run_of_eval (hm.push (.val (Evm.bword false))) he
-  have hidx := delete_index_code ((hm.push (.val (Evm.bword false))).push (.val (base q.id))).state.core j l hj
+  have hidx := local_uint_code ((hm.push (.val (Evm.bword false))).push (.val (base q.id))).state.core j l hj
   change Evm.run ([.push (.val (Evm.bword false))] ++ (ptr ++ (Evm.compileVal b (.simple (.local j) : Val C Γ .uint) ++ Evm.Memory.writeArrayStackCode))) m=_
   rw [Evm.run_append_ok (show Evm.run [.push (.val (Evm.bword false))] m=.ok (m.push (.val (Evm.bword false))) 0 from rfl),Evm.run_append_ok hptr,Evm.run_append_ok hidx]
   rw [Evm.Memory.writeArrayStackCode,Evm.Memory.arrayStack_append_eq (m.push (.val (Evm.bword false))) (base q.id) l _

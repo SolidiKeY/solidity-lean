@@ -23,10 +23,8 @@ private theorem capture_some (b : Bool) :
 noncomputable def afterCapture (b : Bool) : Solidity.Out C (middle b).st.H Captured :=
   (capturePrefix.run (middle b).st).toOption.get (capture_some b)
 private theorem source_get {Γ Δ : Ctx} {τ : State C Γ} {P : Prog C Γ Δ}
-    {o : Solidity.Out C τ.H Δ} (hx : some o = (P.run τ).toOption) : P.run τ = .ok o := by
-  cases hs : P.run τ with
-  | ok value => rw [hs] at hx; exact congrArg Except.ok (Option.some.inj hx).symm
-  | error e => rw [hs] at hx; cases hx
+    {o : Solidity.Out C τ.H Δ} (hx : some o = (P.run τ).toOption) : P.run τ = .ok o :=
+  except_ok_of_toOption hx
 
 theorem capture_source (b : Bool) : capturePrefix.run (middle b).st = .ok (afterCapture b) :=
   source_get (Option.some_get (capture_some b))

@@ -59,11 +59,8 @@ theorem empty_shadow :
 /--64 complete branch copies consume193 new identities, independent of old heap size. -/
 theorem long_count {H : HTy} (heap : Heap H) :
     (long.copyStToM heap rfl).H'.length = H.length + 193 ∧
-      (long.copyStToM heap rfl).val.id = H.length + 193 - 1 := by
-  have measure : liveObjectCount long = 193 := by decide +kernel
-  constructor
-  · simpa only [measure] using valueCopy_count long rfl heap
-  · simpa only [measure] using copy_root_index long rfl heap
+      (long.copyStToM heap rfl).val.id = H.length + 193 - 1 :=
+  ⟨valueCopy_count long rfl heap, copy_root_index long rfl heap⟩
 
 theorem roundtrip : MVal.copyMToSt grown.heap grown.val = tree.strip :=
   (storageHeapContents tree rfl).contents seed.heap

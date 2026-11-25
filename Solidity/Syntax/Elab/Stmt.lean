@@ -1,4 +1,4 @@
-import Solidity.Syntax.Elab.Arms
+import Solidity.Syntax.Elab.Measure
 import Solidity.Syntax.DispatchChain
 
 /-!
@@ -297,106 +297,9 @@ def elabRecWithProducers (rc : ElabRec C) (pr : PanicProducerRec C) : ElabRec C 
     fnMemoryDispatch := fnMemoryDispatchWith C pr
     trySelfBody := fun g {_} args ρ => trySelfBodyWith C pr g args ρ }
 
-/-- A block, over the per-statement producer `stmt`: each statement in
-order, the state threaded, the programs concatenated. Total (structural on
-the list), so the block's two equations hold definitionally; the knot passes
-the partial `elabStmtP`, and the public `elabStmtsP` is this at it. -/
-def elabStmtsPWith (stmt : RawStmt → ElabM (SProg C)) : List RawStmt → ElabM (SProg C)
-  | [] => pure []
-  | s :: ss => do
-    let P ← stmt s
-    let Q ← elabStmtsPWith stmt ss
-    pure (P ++ Q)
-
-mutual
-
-/-- The recursive hooks, delayed until a producer is called. -/
-partial def panicProducerRec (_ : Unit) : PanicProducerRec C where
-  extDispatch := extDispatch
-  elabStmtsP := elabStmtsPWith C elabStmtP
-  elabScope := elabScope
-  elabCallRet := @elabCallRet
-
-/-- The record of the block's functions (`ElabRec`), which ties the arms
-defined before it. -/
-partial def elabRecCore (_ : Unit) : ElabRec C where
-  hoist := hoist
-  hoistBinop := hoistBinop
-  hoistTop := hoistTop
-  hoistAssign := hoistAssign
-  hoistArgs := hoistArgs
-  abiMemBytes := abiMemBytes
-  abiDecodeBytes := abiDecodeBytes
-  abiEncode := @abiEncode
-  hoistCallArgs := hoistCallArgs
-  fnDispatch := fun h ty args res resW resNew =>
-    fnDispatchWith C (panicProducerRec ()) h ty args res resW resNew
-  fnMemoryDispatch := fun h ty args => fnMemoryDispatchWith C (panicProducerRec ()) h ty args
-  callValue := callValue
-  elabCall := @elabCall
-  elabMemCall := elabMemCall
-  elabStorageCall := elabStorageCall
-  elabCallReceiver := elabCallReceiver
-  elabCallReceiverPush := elabCallReceiverPush
-  trySelfBody := fun g {_} args ρ => trySelfBodyWith C (panicProducerRec ()) g args ρ
-  elabValueCall := elabValueCall
-  elabCtor := elabCtor
-  hoistStmt := hoistStmt
-  elabStmtP := elabStmtP
-  elabStmt1 := elabStmt1
-  loopExpr := loopExpr
-  loopQ := loopQ
-  elabStmtsP := elabStmtsPWith C elabStmtP
-  elabBranch := elabBranch
-  elabScope := elabScope
-  elabTuple := @elabTuple
-
-/-- **Captures before a statement**: an `++`/`−−` inside an expression, and a
-conditional of references, are evaluated before the statement that holds
-them, in the contract's order (an assignment's right-hand side before its target, a
-binary operator's right operand first by default, its left under `.viaIR`, an index's base before the
-index: an operand read before an effect is captured with `captureExpr`),
-into fresh locals (KeY's captures): `values[i++] = 1;`
-is `uint se1; se1 = i++; values[se1] = 1;`, and
-`Person storage p = c ? alice : bob;` is
-`Person storage sp1; if (c) { sp1 = alice; } else { sp1 = bob; }
-Person storage p = sp1;`, the alias declared before the branches, which are
-scopes.  A memory one is `Person memory mv1 = mx;
-if (c) { mv1 = mx; } else { mv1 = my; }`: declared bound to a branch that
-indexes nothing (`MPath.indexFree`, a read that cannot revert on a set
-local; an unset one, which only a hidden binder holds (decision 17'),
-reverts there where solc reads the other branch), or, when both index, to
-a fresh default object (`Person memory mv1;`, an object nothing reaches),
-and rebound in each branch.  Under the right
-operand of `&&`/`||` or in a branch of a conditional, an effect, a call or a
-narrow check is captured where solc evaluates it, under a test of its own: `a
-&& b` is `bool se = a; if (se) { se = b; }`, and `c ? a : b` is
-`uint se; if (c) { se = a; } else { se = b; }`. -/
-partial def hoist (s0 : RawExpr) : ElabM (SProg C × RawExpr) :=
-  hoistWith C (elabRecWithProducers C (elabRecCore ()) (panicProducerRec ())) s0
-
-/-- Two operands in evaluation order: hold the first read before the second
-operand's effects or explicit overflow guards. -/
-partial def hoistPair (first last : RawExpr) : ElabM (SProg C × RawExpr × RawExpr) := do
-  let (P, first) ← hoist first
-  let powerData := powerDataNeeded C (← read) (← ctx) last
-  -- Expanding a pure later power inserts failing guards too. Evaluate the
-  -- earlier operand before those guards, even when neither operand writes.
-  let (Pc, first) ← if powerData then captureExpr C first else captureBefore C first [last]
-  let (Q, last) ← if last.hasIncDec || last.hasIdxLen || last.hasCast || hasNarrow C (← ctx) last || powerData
-    then hoist last else pure ([], last)
-  pure (P ++ Pc ++ Q, first, last)
-
-/-- Binary operands follow the contract's schedule; their positions in the
-operator stay fixed, including for subtraction and comparisons. -/
-partial def hoistBinop (op : BinOp) (a b : RawExpr) : ElabM (SProg C × RawExpr) := do
-  let ltr := C.evalOrder.binaryLeftToRight
-  let (P, first, last) ← if ltr then hoistPair a b else hoistPair b a
-  pure (P, if ltr then .binop op first last else .binop op last first)
-
 /-- `hoist`, but an operation at the top is left to the statement, which
 checks its narrow width after the write (`narrowPost`). -/
-partial def hoistTop (e : RawExpr) : ElabM (SProg C × RawExpr) := do
+def hoistTopWith (hoist : RawExpr → ElabM (SProg C × RawExpr)) (e : RawExpr) : ElabM (SProg C × RawExpr) := do
   let e ← e.foldConst
   match e with
   | .binop op a b => do
@@ -407,7 +310,7 @@ partial def hoistTop (e : RawExpr) : ElabM (SProg C × RawExpr) := do
       (intTyOf C (← ctx) a).all (fun (p, _) => p == .uint)
     if op.shortCircuits || (op == .pow && (sc.retainFailureData || selfPower)) then
       hoist (.binop op a b)
-    else hoistBinop op a b
+    else hoistBinopWith C hoist op a b
   | .unop op a => do
     let (P, a) ← hoist a
     pure (P, .unop op a)
@@ -415,8 +318,9 @@ partial def hoistTop (e : RawExpr) : ElabM (SProg C × RawExpr) := do
 
 /-- `l = r;`: the right-hand side's captures, then the target's; an operation at
 the top of `r` stays there when `l` is a variable (`hoistTop`). -/
-partial def hoistAssign (l r : RawExpr) : ElabM (SProg C × RawStmt) := do
-  let (P, r) ← if l matches .name _ then hoistTop r else hoist r
+private def hoistAssignPartsWith (hoist : RawExpr → ElabM (SProg C × RawExpr))
+    (l r : RawExpr) : ElabM (SProg C × RawExpr × RawExpr) := do
+  let (P, r) ← if l matches .name _ then hoistTopWith C hoist r else hoist r
   -- a storage reference into a memory object's member or element: copied
   -- into a fresh memory object first, before the target's index (solkey's
   -- `memoryIndexWriteStorageRefRhsCapture`: `T memory mv = sp; m[i] = mv;`)
@@ -437,39 +341,46 @@ partial def hoistAssign (l r : RawExpr) : ElabM (SProg C × RawStmt) := do
     | _, _ => pure (P, r)
   let (Pc, r) ← if l.hasIncDec then captureExpr C r else pure ([], r)
   let (Q, l) ← hoist l
-  pure (P ++ Pc ++ Q, .assign l r)
+  pure (P ++ Pc ++ Q, l, r)
 
-/-- A call's arguments, left to right. A non-simple earlier value is held
-before hoisting any later argument: casts, fixed-length bases, narrow checks
-and modular guards can fail even when they do not modify the state. Bare
-names still use the effect-aware capture policy. Already held fresh values
-and literals need no additional capture (`captureExpr`). -/
-partial def hoistArgs : List RawExpr → ElabM (SProg C × List RawExpr)
-  | [] => pure ([], [])
-  | a :: as => do
-    let (P, a) ← hoist a
-    let (Pc, a) ← if !as.isEmpty && !(a matches .name _) then
-        captureExpr C a
-      else captureBefore C a as
-    let (Q, as) ← hoistArgs as
-    pure (P ++ Pc ++ Q, a :: as)
+/-- Assignment hoisting retains the assignment constructor. -/
+def hoistAssignWith (hoist : RawExpr → ElabM (SProg C × RawExpr))
+    (l r : RawExpr) : ElabM (SProg C × RawStmt) := do
+  let (P, l, r) ← hoistAssignPartsWith C hoist l r
+  pure (P, .assign l r)
+
+/-- The actual assignment helper cannot return an arbitrary statement,
+regardless of the expression callback's outputs. -/
+theorem hoistAssignWith_shape (hoist : RawExpr → ElabM (SProg C × RawExpr))
+    (l r : RawExpr) (sc : ElabScope) (st st' : ECtx × Nat) (m m' : CallMemo)
+    (out : SProg C × RawStmt)
+    (h : (((hoistAssignWith C hoist l r).run sc).run st).run m = .ok ((out, st'), m')) :
+    ∃ l' r', out.2 = .assign l' r' := by
+  change (do
+    let (((P, l', r'), st''), m'') ← hoistAssignPartsWith C hoist l r sc st m
+    pure (((P, RawStmt.assign l' r'), st''), m'')) = .ok ((out, st'), m') at h
+  cases hx : hoistAssignPartsWith C hoist l r sc st m with
+  | error e => simp only [hx, bind, Except.bind] at h; cases h
+  | ok v =>
+    rcases v with ⟨⟨⟨P, l', r'⟩, st''⟩, m''⟩
+    simp only [hx, bind, Except.bind, pure, Except.pure] at h
+    cases h
+    exact ⟨l', r', rfl⟩
 
 /-- A byte string as a memory local: a memory one bound to a fresh name, a
 storage one copied into a fresh memory `bytes` (solc's conversion). -/
-partial def abiMemBytes (a : RawExpr) : ElabM (SProg C × String) := do
+def abiMemBytesWith (stmt : RawStmt → ElabM (SProg C)) (a : RawExpr) : ElabM (SProg C × String) := do
   if let .name x := a then
     if let .ok (.mpath ..) := synth C (← nctx) a then return ([], x)
   let x := toString (← freshCapture "mv")
-  pure (← elabStmtsPWith C elabStmtP [.declMemory (.named "bytes") x (some a)], x)
-
-
+  pure (← elabStmtsPWith C stmt [.declMemory (.named "bytes") x (some a)], x)
 
 /-- `abi.decode` of a `bytes` or a `string` at the head word `h` of `d`, of
 `n` head words: the offset `o` that word holds, the length `L` at `o`, then
 the `L` bytes after it copied into a fresh memory `bytes`, each read checked
 in range as solc's decoder checks it (an offset or a length past the data
 reverts). -/
-partial def abiDecodeBytes (T : String) (d : ByteSrc) (h n : Nat) : ElabM (SProg C × String) := do
+def abiDecodeBytesWith (stmt : RawStmt → ElabM (SProg C)) (T : String) (d : ByteSrc) (h n : Nat) : ElabM (SProg C × String) := do
   let o := toString (← freshCapture "se")
   let L := toString (← freshCapture "se")
   let x := toString (← freshCapture "mv")
@@ -485,107 +396,49 @@ partial def abiDecodeBytes (T : String) (d : ByteSrc) (h n : Nat) : ElabM (SProg
      .whileLoop {} (.binop .lt (.name j) (.name L))
        [.assign (.index (.name x) (.name j)) (abiByte d (.binop .add start (.name j))),
         .assign (.name j) (.binop .add (.name j) (.num 1))]]
-  pure (← elabStmtsPWith C elabStmtP S, x)
+  pure (← elabStmtsPWith C stmt S, x)
 
-/-- `abi.encode(…)` (`std`) or `abi.encodePacked(…)`/`bytes.concat(…)`/
-`string.concat(…)` (`strs`: byte strings only) of the hoisted arguments: a
-fresh memory `bytes` of solc's layout (`AbiKind`). -/
-partial def abiEncode (std strs : Bool) (args : List RawExpr) (marks : List (Option AbiKind))
-    (sel : Option RawExpr := none) : ElabM (SProg C × RawExpr) :=
-  abiEncodeWith C (elabRecWithProducers C (elabRecCore ()) (panicProducerRec ())) std strs args marks sel
+/-- A loop's condition, invariant or variant, of type `p` (its narrow
+rewrites done, `elabStmtP`), read in `Γ`: nothing may be captured before it,
+since it is evaluated where the loop is, again.  So an effect, a call to a
+declared function, a cast, a narrow operation that needs a capture or a
+struct constructor in it is refused (`docs/loops.md`), where solkey
+evaluates it per iteration. -/
+def loopExprWith (hoist : RawExpr → ElabM (SProg C × RawExpr)) (Γ : NCtx) (p : PrimTy) (e : RawExpr) (what : String) : ElabM (Val C Γ.ctx p) := do
+  let st ← get
+  let (P, _) ← hoist e
+  set st
+  unless P.isEmpty do
+    throw s!"{e.toStr}: a loop's {what} needs a statement before it (an effect, a call, \
+      a cast, a narrow operation or a constructor), and is evaluated again each iteration"
+  checkIn C Γ p e
 
-/-- Prepare a reference call in argument order. Storage-to-memory conversion
-copies at the argument's evaluation point under the legacy schedule, after
-the last argument under the source-order one (`binaryLeftToRight`, solc's
-IR pipeline); every reference's identity and
-each scalar read are held before a later argument can change them. Calls
-with only value parameters retain the ordinary capture policy. -/
-partial def hoistCallArgs (f : String) (args : List RawExpr) :
-    ElabM (SProg C × List RawExpr) := do
-  let funs := (← read).funs
-  -- A call through a function value captures its own arguments, in order and
-  -- at their formal types, after the tag under the source-order schedule
-  -- (`dispatchCaptures`); hoisting a later call argument here would run it
-  -- before an earlier storage operand is copied.
-  if f != "constructor" && funs.all (·.1 != f) && (fnTyOf? C (← ctx) f).isSome then
-    return ([], args)
-  -- likewise through a callee that is not a name: `callValue`, the memory and
-  -- the tuple dispatch capture it at its function type, then the arguments
-  if f == callValueName && (args.head?.bind (fnTyOfExpr C (← ctx))).isSome then
-    return ([], args)
-  let d := if f == "constructor" then C.ctor else lookupBy f funs
-  let some d := d | return ← hoistArgs args
-  unless d.params.any (fun (_, T) => T matches .ref _) do return ← hoistArgs args
-  unless d.params.length == args.length do
-    throw s!"{f} takes {d.params.length} arguments, not {args.length}"
-  let mut P : SProg C := []
-  let mut prepared : List RawExpr := []
-  -- solc's IR pipeline copies a storage operand of a memory parameter after
-  -- every argument ran (`tests/solc/FunctionValueReferences.sol`,
-  -- `argumentOrderDirect`: legacy 101, viaIR 901): under the source-order
-  -- schedule the operand's alias is captured at its position, its copy made
-  -- after the last argument
-  let late := C.evalOrder.binaryLeftToRight
-  let mut copies : List (String × RefTy × List (String × Nat) × List (String × Nat) × Var) := []
-  for ((n, T), a) in d.params.zip args do
-    -- a reference argument's narrow positions, on the expression as written,
-    -- before a capture names it (`elabCallRet` checks the capture again)
-    if T matches .ref _ then
-      unless a.inlineArrayRoot do
-        ElabM.lift (shapeCheck C (← ctx) (shapeUnder d.widths n) a)
-    let (Q, a) ← hoist a
-    P := P ++ Q
-    -- Inline projections now have their independently inferred shape. Check
-    -- before capture can bind the argument at the parameter's reference type.
-    if T matches .ref _ then ElabM.lift (shapeCheck C (← ctx) (shapeUnder d.widths n) a)
-    let Γ ← nctx
-    let (Q, a) ← match T with
-      | .prim p => do
-        if (lookupBy n d.paramLocs).isSome then
-          throw s!"{f}: data location on value parameter {n}"
-        ElabM.lift (fitCheck C (← ctx) p ((lookupBy n d.widths).getD 256) a)
-        captureExpr C a
-      | .ref R => do
-        let stable ← match a with
-          | .name n => match Var.ofName n with
-            | .fresh _ i => do
-              let sc ← read
-              pure (!(C.rootType n).isSome && !sc.mutableFreshNames.contains n &&
-                !sc.inlined.any (fun (k₀, k₁) => k₀ ≤ i && i < k₁))
-            | _ => pure false
-          | _ => pure false
-        match lookupBy n d.paramLocs with
-        | some .storage =>
-          let sp ← ElabM.lift (checkPath C Γ (.ref R) a)
-          if stable then pure ([], a) else do
-          let x ← captureRef C "sp" (.alias R) a
-          pure ([.of Γ (.declStorage R x (some (.path sp)))], .name (toString x))
-        | some .memory | some .calldata =>
-          let rhs ← ElabM.lift (elabMRhs C Γ R a)
-          if stable && (rhs matches .alias _) then pure ([], a) else do
-          if late && (rhs matches .copy ..) then do
-            let sp ← ElabM.lift (checkPath C Γ (.ref R) a)
-            -- the operand's own shape, ABI markers included (`captureRef`)
-            let ws := exprShape C (← ctx) a
-            let x ← captureRef C "sp" (.alias R) a
-            let y := toString (← freshCapture "mv")
-            copies := copies ++ [(y, R, shapeUnder d.widths n, ws, x)]
-            pure ([.of Γ (.declStorage R x (some (.path sp)))], .name y)
-          else
-          let x ← captureRef C "mv" (.mem R) a
-          pure ([.of Γ (.declMem R x (some rhs) rfl rhs.mapFree)], .name (toString x))
-        | none => throw s!"{f}: reference parameter {n} needs a data location"
-    P := P ++ Q
-    prepared := prepared ++ [a]
-  -- the late copies, in argument order
-  for (y, R, ws, shape, x) in copies do
-    P := P ++ (← elabStmtsPWith C elabStmtP
-      [.declMemory (rawTyW ws (.ref R) "") y (some (.name (toString x)))])
-    declareShape y shape
-  pure (P, prepared)
+/-- A quantified invariant clause (`LoopQ`): its bound local pushed while
+its body is read. -/
+def loopQWith (loop : (Γ : NCtx) → (p : PrimTy) → RawExpr → String → ElabM (Val C Γ.ctx p)) (Γ : NCtx) : RawInv → ElabM (LoopQ C Γ.ctx)
+  | .expr e => do pure (.val (← loop Γ .bool e "invariant"))
+  | .imp a b => do
+    pure (.imp (← loop Γ .bool a "invariant") (← loop Γ .bool b "invariant"))
+  | .all p x b => do
+    let st ← get
+    modify fun (Γe, k) => ((x, .val p) :: Γe, k)
+    let body ← loopQWith loop ((Var.ofName x, .val p) :: Γ) b
+    set st
+    pure (.all (Var.ofName x) p body)
 
+/-- A branch: its declarations stay inside it, and it does not deploy
+(`ElabScope.top`). -/
+def elabBranchWith (stmt : RawStmt → ElabM (SProg C)) (ss : List RawStmt) : ElabM (SProg C) := do
+  let (Γ, _) ← get
+  let P ← withReader (fun sc => { sc with top := false }) (elabStmtsPWith C stmt ss)
+  let (_, k) ← get
+  set (Γ, k)
+  pure P
 
-
+/-- A branch as a block of its own, from the locals in scope `Γ` (which it
+must be entered in). -/
+def elabScopeWith (branch : List RawStmt → ElabM (SProg C)) (Γ : NCtx) (ss : List RawStmt) : ElabM (Blk C Γ.ctx) := do
+  ElabM.lift (SProg.chain Γ.names Γ.ctx (← branch ss))
 
 /-- **A call through an external function value** `h(a)`, `h` of the
 external function type `ty`: `h` is `address * 2^32 + selector` (`fnPure`),
@@ -596,7 +449,7 @@ selector is a call the model names `#selector`, its first argument the
 selector, whose response the world chooses as for any external call. Imported
 source declarations additionally clean the receiver to `address(h / 2^32)`;
 the selector still uses the raw quotient. -/
-partial def extDispatch (h ty : String) (ps rs : List String) (args : List RawExpr)
+def extDispatchWith (branch : List RawStmt → ElabM (SProg C)) (h ty : String) (ps rs : List String) (args : List RawExpr)
     (res : Option (Var × PrimTy)) (resW : Nat) (resNew : Bool) : ElabM (SProg C) := do
   unless ps.length == args.length do
     throw s!"{h} takes {ps.length} arguments, not {args.length}"
@@ -635,21 +488,20 @@ partial def extDispatch (h ty : String) (ps rs : List String) (args : List RawEx
   let (Γ0, _) ← get
   if resNew then
     if let some (x, p) := res then declare C (toString x) (.val p resW)
-  let P ← elabBranch (pre ++ disp)
+  let P ← branch (pre ++ disp)
   modify fun (_, k) => (Γ0, k)
   pure P
-
 /-- **A call through a value that is not a name** (`callValueName`):
 `s.f(x)`, `fs[i](x)`, `choose(b)(x)`.  The callee is evaluated first, into
 a fresh local of its function type (`fnTyOfExpr`), then called as a name is
 (`fnDispatch`); `r.g(x)` for a function `g` of `C` is an external call
 (`extCallStmt`), `this.g(x)` the contract's own (O8). -/
-partial def callValue (h : RawExpr) (args : List RawExpr) (res : Option (Var × PrimTy))
+def callValueWith (branch : List RawStmt → ElabM (SProg C)) (rc : PanicProducerRec C) (h : RawExpr) (args : List RawExpr) (res : Option (Var × PrimTy))
     (resW : Nat) (resNew : Bool) : ElabM (SProg C) := do
   -- a function's or a function value's name in parentheses
   if let .name g := h then
     if (← read).funs.any (·.1 == g) || (fnTyOf? C (← ctx) g).isSome then
-      return (← elabCallRet g args res resW (resNew := resNew)).1
+      return (← rc.elabCallRet g args res resW (resNew := resNew)).1
   let Γe ← ctx
   let stmts : List RawStmt ← match extMember? C Γe h with
     | some (r, g) => do
@@ -668,10 +520,9 @@ partial def callValue (h : RawExpr) (args : List RawExpr) (res : Option (Var × 
   let (Γ0, _) ← get
   if resNew then
     if let some (x, p) := res then declare C (toString x) (.val p resW)
-  let P ← elabBranch stmts
+  let P ← branch stmts
   modify fun (_, k) => (Γ0, k)
   pure P
-
 /-- **A call, inlined** (KeY's `FunctionBodyStatement`, then its body): `f`
 is found among the functions the scope may call, its arguments are checked
 at its parameters' types in the caller's scope, and its body is elaborated in
@@ -679,15 +530,14 @@ a scope of its own — its parameters and its return variable, every local
 renamed fresh (`renameStmts`), then its `return`s lowered (`lowerReturns`) — with
 the functions declared before `f`, so no call recurses.  `res` is the local
 the returned value lands in, with its type. -/
-partial def elabCall (f : String) (args : List RawExpr) (res : Option (Var × PrimTy))
+def elabCallWith (rc : PanicProducerRec C) (f : String) (args : List RawExpr) (res : Option (Var × PrimTy))
     (resW : Nat := 256) (resNew : Bool := false) : ElabM (SProg C) := do
-  pure (← elabCallRet f args res resW (resNew := resNew)).1
-
+  pure (← rc.elabCallRet f args res resW (resNew := resNew)).1
 /-- A call of `f`, which returns a memory reference of type `R`, and `bind Γ r`,
 the statement that binds the callee's return variable `r` where the call
 is, read in the caller's context `Γ` with `r` pushed: `Account memory mv1 =
 mv2;`, `m = mv2;` (the module docstring). -/
-partial def elabMemCall (f : String) (args : List RawExpr) (R : RefTy)
+def elabMemCallWith (rc : PanicProducerRec C) (f : String) (args : List RawExpr) (R : RefTy)
     (bind : (Γ : NCtx) → Var → (Ty.ref R).mapFree = true → Except String (SStmt C)) :
     ElabM (SProg C) := do
   let dynamic ← if f == callValueName then do
@@ -705,11 +555,11 @@ partial def elabMemCall (f : String) (args : List RawExpr) (R : RefTy)
       | _, _ => throw s!"memory function value returns a {r}"
     let (T, _) ← ElabM.lift (elabTyW C expected)
     unless T == .ref R do throw "memory function value returns a different reference type"
-    let (P, _) ← (fnMemoryDispatchWith C (panicProducerRec ())) h ty actuals
+    let (P, _) ← (fnMemoryDispatchWith C rc) h ty actuals
     let (r, _) :: Γ ← nctx | throw "internal: memory dispatch did not export its reference"
     let ⟨hm⟩ ← ElabM.lift (memOk R)
     return P ++ [← ElabM.lift (bind Γ r hm)]
-  let (P, r, _) ← elabCallRet f args none
+  let (P, r, _) ← rc.elabCallRet f args none
   match r with
   | some ⟨Γ, R', r, storage⟩ =>
     if storage then throw s!"{f} returns a storage reference, not a memory reference"
@@ -717,37 +567,34 @@ partial def elabMemCall (f : String) (args : List RawExpr) (R : RefTy)
     let ⟨hm⟩ ← ElabM.lift (memOk R)
     pure (P ++ [← ElabM.lift (bind Γ r hm)])
   | none => throw s!"{f} does not return a memory reference"
-
 /-- Bind the alias exported by a storage-returning call, without a copy or
 an allocation. The return variable is the newest local after the call. -/
-partial def elabStorageCall (f : String) (args : List RawExpr) (R : RefTy)
+def elabStorageCallWith (rc : PanicProducerRec C) (f : String) (args : List RawExpr) (R : RefTy)
     (bind : (Γ : NCtx) → Var → Except String (SStmt C)) : ElabM (SProg C) := do
-  let (P, result, _) ← elabCallRet f args none
+  let (P, result, _) ← rc.elabCallRet f args none
   match result with
   | some ⟨Γ, R', r, storage⟩ =>
     unless storage do throw s!"{f} returns a memory reference, not a storage reference"
     unless R' = R do throw s!"{f} returns a {Ty.ref R'}, not a {Ty.ref R}"
     pure (P ++ [← ElabM.lift (bind Γ r)])
   | none => throw s!"{f} does not return a storage reference"
-
 /-- Retain `f().push(e)` or `f().pop()` as the calculus's native receiver
 statement. The callee is elaborated in its frame, without exporting a caller local. -/
-partial def elabCallReceiver (f : String) (args : List RawExpr)
+def elabCallReceiverWith (rc : PanicProducerRec C) (f : String) (args : List RawExpr)
     (op : (Γ : NCtx) → (E : Ty) → ElabM (ReceiverOp C Γ.ctx E)) :
     ElabM (SProg C) := do
-  let (P, _, _) ← elabCallRet f args none
+  let (P, _, _) ← rc.elabCallRet f args none
   let [⟨Γ, _, s⟩] := P | throw s!"{f}: a receiver call must elaborate to one call"
   match s with
   | .call f args (.storage (.array E) r) body =>
     pure [.of Γ (.callReceiver f args r body (← op Γ E))]
   | _ => throw s!"{f}: push/pop needs a dynamic storage-array return"
-
 /-- Keep an effectful operand inside `f().push(e)`, in a private caller scope.
 Its prefix is expanded only after the getter has been captured by the taclet. -/
-partial def elabCallReceiverPush (f : String) (args : List RawExpr) (a : RawExpr) :
+def elabCallReceiverPushWith (rc : PanicProducerRec C) (hoist : RawExpr → ElabM (SProg C × RawExpr)) (f : String) (args : List RawExpr) (a : RawExpr) :
     ElabM (SProg C) := do
   let caller ← ctx
-  let (P, _, _) ← elabCallRet f args none
+  let (P, _, _) ← rc.elabCallRet f args none
   let [⟨Γ, _, s⟩] := P | throw s!"{f}: a receiver call must elaborate to one call"
   match s with
   | .call f args (.storage (.array E) r) body =>
@@ -772,35 +619,13 @@ partial def elabCallReceiverPush (f : String) (args : List RawExpr) (a : RawExpr
     modify fun (_, k) => (caller, k)
     pure [result]
   | _ => throw s!"{f}: push/pop needs a dynamic storage-array return"
-
-/-- `elabCall`, and the fresh return variable of a callee that returns a
-memory reference, with its type and the caller's context: the call's frame
-declares it (a fresh default object, `CallRet.mem`) and leaves it to the
-caller, which binds it after the call (`elabMemCall`).  With `targets`, the
-call is a tuple assignment's right-hand side (`elabTuple`), KeyTaclets'
-`FunctionBodyStatement` with targets: it returns every return value
-(`CallRet.rets`, one or several), which the caller reads after the call —
-their fresh variables, types and widths.  A callee of several returns called
-as a statement (`f(a);`, KeY's `InternalCall`) declares them at the head of
-its body and returns nothing.  With `resNew`, the local `res` is declared by
-the statement before the call (`uint y = f(a);` is `uint y; y = f(a);`):
-the call is read in the context it pushes, its arguments where `res` is not
-yet in scope. -/
-partial def elabCallRet (f : String) (args : List RawExpr) (res : Option (Var × PrimTy))
-    (resW : Nat := 256) (targets : Bool := false) (ctor : Bool := false) (resNew : Bool := false)
-    (selfFrame : Bool := false) :
-    ElabM (SProg C × Option (NCtx × RefTy × Var × Bool) × List (Var × LocalTy)) :=
-  elabCallRetWith C (elabRecWithProducers C (elabRecCore ()) (panicProducerRec ())) f args res resW targets ctor resNew selfFrame
-
-
-
 /-- **A value call** `(bool ok, ) = r.call{value: v}("")`, its result in
 `ix`: with the contract's `receive` available (`receiveSelfBody`), `bool
 se = r == address(this); if (se) { try this.receive{value: v}() { ok = true; } catch { ok
 = false; } } else { … the call … }`, the self-call a `try` the contract runs
 (`Stmt.tryCall`'s `self`), every failure `ok = false` with the state the
 caller's; otherwise the call alone. -/
-partial def elabValueCall (Γ : NCtx) (ix : Idx Γ.ctx (.val .bool)) (okName : RawExpr)
+def elabValueCallWith (rc : PanicProducerRec C) (Γ : NCtx) (ix : Idx Γ.ctx (.val .bool)) (okName : RawExpr)
     (e a : RawExpr) : ElabM (SProg C) := do
   let plain : ElabM (SProg C) := do
     pure [.of Γ (.send ix (← checkIn C Γ .uint e) (← checkIn C Γ .uint a) true)]
@@ -816,28 +641,27 @@ partial def elabValueCall (Γ : NCtx) (ix : Idx Γ.ctx (.val .bool)) (okName : R
   let ⟨Γ', _, ixc⟩ ← afterCapture Γ1 x (.val .bool)
   let addr' := addr1.wk (← ElabM.lift (Γ1.wkTo Γ'))
   let ix' := ix.wk (← ElabM.lift (Γ.wkTo Γ'))
-  let some ⟨_, _, sargs, sbody⟩ ← receiveSelfBodyWith C (panicProducerRec ()) (Γ := Γ') a | set st; plain
+  let some ⟨_, _, sargs, sbody⟩ ← receiveSelfBodyWith C rc (Γ := Γ') a | set st; plain
   let v ← checkIn C Γ' .uint a
   let setOk (b : Bool) : List RawStmt := [.assign okName (.bool b)]
   let (Γe, _) ← get
-  let okP ← elabStmtsPWith C elabStmtP (setOk true)
+  let okP ← rc.elabStmtsP (setOk true)
   let okP ← ElabM.lift (SProg.chain Γ'.names ([] ++ Γ'.ctx) okP)
   let (_, k) ← get
   set (Γe, k)
-  let err ← elabScope Γ' (setOk false)
+  let err ← rc.elabScope Γ' (setOk false)
   let ⟨κ, cb⟩ := CodeBinder.ofOption (none : Option Var)
-  let pnc ← elabStmtsPWith C elabStmtP (setOk false)
+  let pnc ← rc.elabStmtsP (setOk false)
   let pnc ← ElabM.lift (SProg.chain (cb.names ++ Γ'.names) (κ ++ Γ'.ctx) pnc)
   let (_, k) ← get
   set (Γe, k)
-  let other ← elabScope Γ' (setOk false)
+  let other ← rc.elabScope Γ' (setOk false)
   let call : ExtCall C Γ'.ctx := ⟨addr', "receive", [], .call, .unknown⟩
   let tryS : Stmt C Γ'.ctx Γ'.ctx :=
     .tryCall call Binders.nil okP.2 err.2 cb pnc.2 other.2 sargs sbody true
   pure (P ++ [.of Γ1 (.declLocal .bool x (some c)),
     .of Γ' (.ite (.simple (.local ixc)) (.cons tryS .nil)
       (.cons (.send ix' (.simple addr') v true) .nil))])
-
 /-- **`constructor(args);`**, a deployment (solkey's obligation's
 `constructor(x̄)@C;`): the constructor inlined as any call is
 (`elabCallRet`), the state variables' initializers prepended to its body
@@ -847,70 +671,10 @@ one, of no parameters and no body.  It returns to no targets
 (`functionBodyExpand`).  Only a program's own statements deploy, never an
 inlined body (no function calls the constructor), and not a branch, a loop
 or a block (`elabBranch`), which would deploy again or only sometimes. -/
-partial def elabCtor (args : List RawExpr) : ElabM (SProg C) := do
+def elabCtorWith (rc : PanicProducerRec C) (args : List RawExpr) : ElabM (SProg C) := do
   unless (← read).top do
     throw "constructor(…) in a function's body or a block: only a program's own statements deploy"
-  pure (← elabCallRet "constructor" args none (targets := true) (ctor := true)).1
-
-/-- The captures a statement's own expressions need (`hoist`), and the
-statement left: a right-hand side before the left-hand side, as the
-interpreter evaluates them, a receiver before an argument.  A branch's statements are elaborated on their
-own. -/
-partial def hoistStmt (s0 : RawStmt) : ElabM (SProg C × RawStmt) :=
-  hoistStmtWith C (elabRecWithProducers C (elabRecCore ()) (panicProducerRec ())) s0
-
-/-- A statement, as a block: its narrow rewrites (`narrowPure`), its captures
-(`hoistStmt`), then the statement,
-whose compound target may need a capture of its own. -/
-partial def elabStmtP (s : RawStmt) : ElabM (SProg C) :=
-  elabStmtPWith C (elabRecWithProducers C (elabRecCore ()) (panicProducerRec ())) s
-
-/-- A statement whose expressions have no effect left. -/
-partial def elabStmt1 (s0 : RawStmt) : ElabM (SProg C) :=
-  elabStmt1With C (elabRecWithProducers C (elabRecCore ()) (panicProducerRec ())) s0
-
-/-- A loop's condition, invariant or variant, of type `p` (its narrow
-rewrites done, `elabStmtP`), read in `Γ`: nothing may be captured before it,
-since it is evaluated where the loop is, again.  So an effect, a call to a
-declared function, a cast, a narrow operation that needs a capture or a
-struct constructor in it is refused (`docs/loops.md`), where solkey
-evaluates it per iteration. -/
-partial def loopExpr (Γ : NCtx) (p : PrimTy) (e : RawExpr) (what : String) : ElabM (Val C Γ.ctx p) := do
-  let st ← get
-  let (P, _) ← hoist e
-  set st
-  unless P.isEmpty do
-    throw s!"{e.toStr}: a loop's {what} needs a statement before it (an effect, a call, \
-      a cast, a narrow operation or a constructor), and is evaluated again each iteration"
-  checkIn C Γ p e
-
-/-- A quantified invariant clause (`LoopQ`): its bound local pushed while
-its body is read. -/
-partial def loopQ (Γ : NCtx) : RawInv → ElabM (LoopQ C Γ.ctx)
-  | .expr e => do pure (.val (← loopExpr Γ .bool e "invariant"))
-  | .imp a b => do
-    pure (.imp (← loopExpr Γ .bool a "invariant") (← loopExpr Γ .bool b "invariant"))
-  | .all p x b => do
-    let st ← get
-    modify fun (Γe, k) => ((x, .val p) :: Γe, k)
-    let body ← loopQ ((Var.ofName x, .val p) :: Γ) b
-    set st
-    pure (.all (Var.ofName x) p body)
-
-/-- A branch: its declarations stay inside it, and it does not deploy
-(`ElabScope.top`). -/
-partial def elabBranch (ss : List RawStmt) : ElabM (SProg C) := do
-  let (Γ, _) ← get
-  let P ← withReader (fun sc => { sc with top := false }) (elabStmtsPWith C elabStmtP ss)
-  let (_, k) ← get
-  set (Γ, k)
-  pure P
-
-/-- A branch as a block of its own, from the locals in scope `Γ` (which it
-must be entered in). -/
-partial def elabScope (Γ : NCtx) (ss : List RawStmt) : ElabM (Blk C Γ.ctx) := do
-  ElabM.lift (SProg.chain Γ.names Γ.ctx (← elabBranch ss))
-
+  pure (← rc.elabCallRet "constructor" args none (targets := true) (ctor := true)).1
 
 /-- **A tuple assignment** `(t₀, , t₂) = e;`, written out as solkey's
 `ParserUtils.tupleAssignment` writes it.  From a call of a function of several
@@ -923,7 +687,7 @@ otherwise (solc's; solkey keeps only a call). Primitive targets may overlap:
 the captured values are written right to left, as in Solidity. Reference targets
 that may alias, and targets reading another target, remain refused.  The variables of a tuple
 declaration, which no component reads, are assigned directly (`direct`). -/
-partial def elabTuple (ts : List (Option RawExpr)) (rhs : RawExpr) (direct : Bool := false) :
+def elabTupleWith (rc : ElabRec C) (pr : PanicProducerRec C) (ts : List (Option RawExpr)) (rhs : RawExpr) (direct : Bool := false) :
     ElabM (SProg C) := do
   let tgts := ts.filterMap id
   let mut nonLocal := 0
@@ -953,7 +717,7 @@ partial def elabTuple (ts : List (Option RawExpr)) (rhs : RawExpr) (direct : Boo
     (nonLocal > 1 || (tgts.map (·.toStr)).eraseDups.length != tgts.length)
   match rhs with
   | .ternary c a b =>
-    elabStmtsPWith C elabStmtP [.ite c [.tupleAssign ts a] [.tupleAssign ts b]]
+    pr.elabStmtsP [.ite c [.tupleAssign ts a] [.tupleAssign ts b]]
   | .call f args =>
     -- a call through a value that is not a name (`s.f(x)`, `fs[i](x)`,
     -- `(h)(x)`): the callee into a fresh local of its type first, as
@@ -962,21 +726,21 @@ partial def elabTuple (ts : List (Option RawExpr)) (rhs : RawExpr) (direct : Boo
       if let h :: rest := args then
         if let some ty := fnTyOfExpr C (← ctx) h then
           let y := toString (← freshCapture "se")
-          let P ← elabStmtsPWith C elabStmtP [.decl (.named ty) y (some h)]
-          return P ++ (← (fnTupleDispatchWith C (panicProducerRec ())) ts y ty rest)
+          let P ← pr.elabStmtsP [.decl (.named ty) y (some h)]
+          return P ++ (← (fnTupleDispatchWith C pr) ts y ty rest)
     -- a call through an internal function value (`fnTupleDispatch`)
     if (← read).funs.all (·.1 != f) then
       if let some ty := fnTyOf? C (← ctx) f then
-        return ← (fnTupleDispatchWith C (panicProducerRec ())) ts f ty args
+        return ← (fnTupleDispatchWith C pr) ts f ty args
     -- a function not declared before this one is `elabCallRet`'s error
     unless (castTy? f).isNone do
       throw s!"{f}(…): the right-hand side of a tuple assignment is a call of a function"
-    let (P, args) ← hoistCallArgs f args
-    let (Q, _, rs) ← elabCallRet f args none (targets := true)
+    let (P, args) ← rc.hoistCallArgs f args
+    let (Q, _, rs) ← pr.elabCallRet f args none (targets := true)
     unless rs.length == ts.length do throw s!"{f} returns {rs.length} values, not {ts.length}"
     for (r, t) in rs do declare C (toString r) t
     let pairs := if reverseWrites then (ts.zip rs).reverse else ts.zip rs
-    let R ← elabStmtsPWith C elabStmtP (pairs.filterMap fun (t, (r, _)) =>
+    let R ← pr.elabStmtsP (pairs.filterMap fun (t, (r, _)) =>
       t.map fun t => .assign t (.name (toString r)))
     pure (P ++ Q ++ R)
   | .tuple es =>
@@ -1009,10 +773,468 @@ partial def elabTuple (ts : List (Option RawExpr)) (rhs : RawExpr) (direct : Boo
         tmps := tmps ++ [bind x]
         asgs := asgs ++ [.assign t (.name x)]
       | none => unless e.isPure do tmps := tmps ++ [.eval [e]]
-    elabStmtsPWith C elabStmtP (tmps ++ (if reverseWrites then asgs.reverse else asgs))
+    pr.elabStmtsP (tmps ++ (if reverseWrites then asgs.reverse else asgs))
   | _ => throw s!"{rhs.toStr}: the right-hand side of a tuple assignment is a tuple or a call"
 
+section Stmt1Closure
+
+attribute [local irreducible] elabStmt1With
+
+/-- The direct recursive field is read only at these three target constructors. -/
+theorem elabStmt1With_self_congr (rc : ElabRec C)
+    (f g : RawStmt → ElabM (SProg C))
+    (ha : ∀ l e, f (.assign l e) = g (.assign l e))
+    (hi : ∀ c t e, f (.ite c t e) = g (.ite c t e))
+    (hr : ∀ c, f (.require c) = g (.require c)) :
+    elabStmt1With C {rc with elabStmt1 := f} =
+      elabStmt1With C {rc with elabStmt1 := g} := by
+  have hw (c : RawExpr) (args : List RawExpr) :
+      f (RawStmt.requireWith c args) = g (RawStmt.requireWith c args) := by
+    unfold RawStmt.requireWith
+    split
+    · exact hr c
+    · exact hi c _ _
+  unfold elabStmt1With
+  simp only [ha, hi, hr, hw]
+
+private theorem stmt1_assign_independent (rc : ElabRec C) (f : RawStmt → ElabM (SProg C)) (l e) :
+    elabStmt1With C {rc with elabStmt1 := f} (.assign l e) = elabStmt1With C rc (.assign l e) := by
+  cases e <;> unfold elabStmt1With <;> rfl
+private theorem stmt1_ite_independent (rc : ElabRec C) (f : RawStmt → ElabM (SProg C)) (c t e) :
+    elabStmt1With C {rc with elabStmt1 := f} (.ite c t e) = elabStmt1With C rc (.ite c t e) := by
+  unfold elabStmt1With
+  rfl
+private theorem stmt1_require_independent (rc : ElabRec C) (f : RawStmt → ElabM (SProg C)) (c) :
+    elabStmt1With C {rc with elabStmt1 := f} (.require c) = elabStmt1With C rc (.require c) := by
+  unfold elabStmt1With
+  rfl
+
+/-- Two arm applications close the arm's direct self-recursion. -/
+def elabStmt1ClosedWith (rc : ElabRec C) : RawStmt → ElabM (SProg C) :=
+  elabStmt1With C {rc with elabStmt1 := elabStmt1With C rc}
+
+theorem elabStmt1ClosedWith_eq (rc : ElabRec C) :
+    elabStmt1ClosedWith C rc =
+      elabStmt1With C {rc with elabStmt1 := elabStmt1ClosedWith C rc} := by
+  apply elabStmt1With_self_congr
+  · intro l e; exact (stmt1_assign_independent C rc _ l e).symm
+  · intro c t e; exact (stmt1_ite_independent C rc _ c t e).symm
+  · intro c; exact (stmt1_require_independent C rc _ c).symm
+
+/-- The original recursive field is unobservable in the closed arm. -/
+theorem elabStmt1ClosedWith_independent (rc : ElabRec C)
+    (f : RawStmt → ElabM (SProg C)) :
+    elabStmt1ClosedWith C {rc with elabStmt1 := f} = elabStmt1ClosedWith C rc := by
+  unfold elabStmt1ClosedWith
+  apply elabStmt1With_self_congr
+  · intro l e; exact stmt1_assign_independent C rc f l e
+  · intro c t e; exact stmt1_ite_independent C rc f c t e
+  · intro c; exact stmt1_require_independent C rc f c
+
+/-- The direct arm equation has a unique solution with the other callbacks fixed. -/
+theorem elabStmt1ClosedWith_unique (rc : ElabRec C) (g : RawStmt → ElabM (SProg C))
+    (hg : g = elabStmt1With C {rc with elabStmt1 := g}) :
+    g = elabStmt1ClosedWith C rc := by
+  calc
+    g = elabStmt1With C {rc with elabStmt1 := g} := hg
+    _ = elabStmt1ClosedWith C rc := by
+      apply elabStmt1With_self_congr
+      · intro l e
+        exact (congrFun hg (.assign l e)).trans (stmt1_assign_independent C rc g l e)
+      · intro c t e
+        exact (congrFun hg (.ite c t e)).trans (stmt1_ite_independent C rc g c t e)
+      · intro c
+        exact (congrFun hg (.require c)).trans (stmt1_require_independent C rc g c)
+
+end Stmt1Closure
+
+section StmtPClosure
+
+private def sliceBaseMatch (f : RawStmt → ElabM (SProg C))
+    (P : SProg C) (e : RawExpr) (Γ : ECtx) (x : String)
+    (t : TExpr C Γ.toNCtx.ctx) : ElabM (SProg C) :=
+  match t with
+  | .mpath (.ref R@(.array _)) _ => do
+    let ws := exprShape C Γ e
+    let Q ← f (.declMemory (rawTyW ws (.ref R) "") x (some e))
+    declareShape x ws
+    pure (P ++ Q)
+  | _ => throw "a calldata slice needs a dynamic array base"
+private theorem sliceBaseMatch_congr
+    (f g : RawStmt → ElabM (SProg C))
+    (ha : ∀ T x e, f (.declMemory (.array T) x (some e)) = g (.declMemory (.array T) x (some e)))
+    (P : SProg C) (e : RawExpr) (Γ : ECtx) (x : String) (t : TExpr C Γ.toNCtx.ctx) :
+    sliceBaseMatch C f P e Γ x t = sliceBaseMatch C g P e Γ x t := by
+  cases t with
+  | path T p => rfl
+  | val p v => rfl
+  | mpath T p =>
+    cases T with
+    | prim p => rfl
+    | ref R =>
+      cases R <;> simp only [sliceBaseMatch, rawTyW_array, ha]
+omit [FreshNames] in
+private theorem sliceResume_congr
+    (f g : RawStmt → ElabM (SProg C))
+    (ht : ∀ ts args, f (.tupleAssign ts (.call "abi.decode" args)) = g (.tupleAssign ts (.call "abi.decode" args)))
+    (hd : ∀ ts args, f (.tupleDecl ts (.call "abi.decode" args)) = g (.tupleDecl ts (.call "abi.decode" args)))
+    (s : RawStmt) (v : RawExpr) (resume : RawExpr → RawStmt)
+    (h : (match s with
+      | .tupleAssign ts (.call "#sliceDecode" (view :: rest)) =>
+        some (view, fun data => RawStmt.tupleAssign ts (.call "abi.decode" (data :: rest)))
+      | .tupleDecl ts (.call "#sliceDecode" (view :: rest)) =>
+        some (view, fun data => RawStmt.tupleDecl ts (.call "abi.decode" (data :: rest)))
+      | _ => none) = some (v, resume)) (data : RawExpr) :
+    f (resume data) = g (resume data) := by
+  split at h
+  · cases h; exact ht _ _
+  · cases h; exact hd _ _
+  · cases h
+
+attribute [local irreducible] elabStmtPWith
+private theorem stmtP_array_independent (rc : ElabRec C)
+    (f : RawStmt → ElabM (SProg C)) (T : RawTy) (x : String) (e : RawExpr) :
+    elabStmtPWith C {rc with elabStmtP := f} (.declMemory (.array T) x (some e)) =
+      elabStmtPWith C rc (.declMemory (.array T) x (some e)) := by
+  unfold elabStmtPWith
+  rfl
+private theorem stmtP_tupleAssign_independent (rc : ElabRec C)
+    (f : RawStmt → ElabM (SProg C)) (ts : List (Option RawExpr)) (args : List RawExpr) :
+    elabStmtPWith C {rc with elabStmtP := f} (.tupleAssign ts (.call "abi.decode" args)) =
+      elabStmtPWith C rc (.tupleAssign ts (.call "abi.decode" args)) := by
+  unfold elabStmtPWith
+  rfl
+private theorem stmtP_tupleDecl_independent (rc : ElabRec C)
+    (f : RawStmt → ElabM (SProg C)) (ts : List (Option (RawTy × String))) (args : List RawExpr) :
+    elabStmtPWith C {rc with elabStmtP := f} (.tupleDecl ts (.call "abi.decode" args)) =
+      elabStmtPWith C rc (.tupleDecl ts (.call "abi.decode" args)) := by
+  unfold elabStmtPWith
+  rfl
+
+omit [FreshNames] in
+private theorem elab_throw_bind {α β : Type} (err : String) (k : α → ElabM β) :
+    ((throw err : ElabM α) >>= k) = (throw err : ElabM β) := rfl
+
+theorem elabStmtPWith_self_congr (rc : ElabRec C)
+    (f g : RawStmt → ElabM (SProg C))
+    (ha : ∀ T x e, f (.declMemory (.array T) x (some e)) = g (.declMemory (.array T) x (some e)))
+    (ht : ∀ ts args, f (.tupleAssign ts (.call "abi.decode" args)) = g (.tupleAssign ts (.call "abi.decode" args)))
+    (hd : ∀ ts args, f (.tupleDecl ts (.call "abi.decode" args)) = g (.tupleDecl ts (.call "abi.decode" args))) :
+    elabStmtPWith C {rc with elabStmtP := f} = elabStmtPWith C {rc with elabStmtP := g} := by
+  have hb := sliceBaseMatch_congr C f g ha
+  simp only [sliceBaseMatch] at hb
+  funext s
+  unfold elabStmtPWith
+  -- Keep the unchanged suffix shared while comparing the two slice prefixes.
+  extract_lets hoistL selected literal stmt1L stmtsL errArgs checked bodyL castL errL fallbackL decodeL hoistR stmt1R stmtsR bodyR castR errR fallbackR decodeR
+  simp -zeta only [elab_throw_bind, pure_bind]
+  with_reducible congr 1
+  · funext x e
+    with_reducible congr 1
+    funext out
+    with_reducible congr 1
+    funext Γ
+    with_reducible congr 1
+    funext t
+    exact hb out.1 out.2 Γ x t
+  · funext x
+    have hbody : bodyL = bodyR := by rfl
+    have hcast : castL = castR := by simp only [castL, castR, hbody]
+    have herr : errL = errR := by simp only [errL, errR, hcast]
+    have hfallback : fallbackL = fallbackR := by simp only [fallbackL, fallbackR, herr]
+    dsimp only [decodeL, decodeR]
+    simp only [pure_bind, hfallback]
+    cases hsel : selected with
+    | none => rfl
+    | some pair =>
+      rcases pair with ⟨view, resume⟩
+      have hr := sliceResume_congr C f g ht hd s view resume hsel
+      simp only [hr]
+
+/-- Two arm applications close the arm's direct slice-rewrite recursion. -/
+def elabStmtPClosedWith (rc : ElabRec C) : RawStmt → ElabM (SProg C) :=
+  elabStmtPWith C {rc with elabStmtP := elabStmtPWith C rc}
+
+theorem elabStmtPClosedWith_eq (rc : ElabRec C) :
+    elabStmtPClosedWith C rc =
+      elabStmtPWith C {rc with elabStmtP := elabStmtPClosedWith C rc} := by
+  apply elabStmtPWith_self_congr
+  · intro T x e; exact (stmtP_array_independent C rc _ T x e).symm
+  · intro ts args; exact (stmtP_tupleAssign_independent C rc _ ts args).symm
+  · intro ts args; exact (stmtP_tupleDecl_independent C rc _ ts args).symm
+
+theorem elabStmtPClosedWith_independent (rc : ElabRec C)
+    (f : RawStmt → ElabM (SProg C)) :
+    elabStmtPClosedWith C {rc with elabStmtP := f} = elabStmtPClosedWith C rc := by
+  unfold elabStmtPClosedWith
+  apply elabStmtPWith_self_congr
+  · intro T x e; exact stmtP_array_independent C rc f T x e
+  · intro ts args; exact stmtP_tupleAssign_independent C rc f ts args
+  · intro ts args; exact stmtP_tupleDecl_independent C rc f ts args
+
+theorem elabStmtPClosedWith_unique (rc : ElabRec C) (g : RawStmt → ElabM (SProg C))
+    (hg : g = elabStmtPWith C {rc with elabStmtP := g}) :
+    g = elabStmtPClosedWith C rc := by
+  calc
+    g = elabStmtPWith C {rc with elabStmtP := g} := hg
+    _ = elabStmtPClosedWith C rc := by
+      apply elabStmtPWith_self_congr
+      · intro T x e
+        exact (congrFun hg (.declMemory (.array T) x (some e))).trans
+          (stmtP_array_independent C rc g T x e)
+      · intro ts args
+        exact (congrFun hg (.tupleAssign ts (.call "abi.decode" args))).trans
+          (stmtP_tupleAssign_independent C rc g ts args)
+      · intro ts args
+        exact (congrFun hg (.tupleDecl ts (.call "abi.decode" args))).trans
+          (stmtP_tupleDecl_independent C rc g ts args)
+
+end StmtPClosure
+
+/-- Producer callbacks assembled without recursively constructing records. -/
+def panicProducerWithCallbacks (stmt : RawStmt → ElabM (SProg C))
+    (callRet : (f : String) → (args : List RawExpr) → (res : Option (Var × PrimTy)) →
+    (resW : Nat := 256) → (targets : Bool := false) → (ctor : Bool := false) →
+    (resNew : Bool := false) → (selfFrame : Bool := false) →
+    ElabM (SProg C × Option (NCtx × RefTy × Var × Bool) × List (Var × LocalTy))) : PanicProducerRec C where
+  extDispatch := extDispatchWith C (elabBranchWith C stmt)
+  elabStmtsP := elabStmtsPWith C stmt
+  elabScope := elabScopeWith C (elabBranchWith C stmt)
+  elabCallRet := @callRet
+
+/-- Assemble the helper fields from three recursive callbacks. The temporary
+helper fields are replaced below; direct statement self-recursion is closed by
+two arm applications, with its defining equation proved above. -/
+def elabRecWithCallbacks (hoist : RawExpr → ElabM (SProg C × RawExpr))
+    (elabStmtP : RawStmt → ElabM (SProg C))
+    (callRet : (f : String) → (args : List RawExpr) → (res : Option (Var × PrimTy)) →
+    (resW : Nat := 256) → (targets : Bool := false) → (ctor : Bool := false) →
+    (resNew : Bool := false) → (selfFrame : Bool := false) →
+    ElabM (SProg C × Option (NCtx × RefTy × Var × Bool) × List (Var × LocalTy))) : ElabRec C :=
+  let pr := panicProducerWithCallbacks C elabStmtP @callRet
+  let base : ElabRec C := {
+    hoist := hoist
+    hoistBinop := hoistBinopWith C hoist
+    hoistTop := hoistTopWith C hoist
+    hoistAssign := hoistAssignWith C hoist
+    hoistArgs := hoistArgsWith C hoist
+    abiMemBytes := abiMemBytesWith C elabStmtP
+    abiDecodeBytes := abiDecodeBytesWith C elabStmtP
+    abiEncode := default
+    hoistCallArgs := hoistCallArgsWith C hoist elabStmtP
+    fnDispatch := fun h ty args res resW resNew =>
+      fnDispatchWith C pr h ty args res resW resNew
+    fnMemoryDispatch := fun h ty args => fnMemoryDispatchWith C pr h ty args
+    callValue := (callValueWith C (elabBranchWith C elabStmtP) pr)
+    elabCall := fun f args res resW resNew => elabCallWith C pr f args res resW resNew
+    elabMemCall := (elabMemCallWith C pr)
+    elabStorageCall := (elabStorageCallWith C pr)
+    elabCallReceiver := (elabCallReceiverWith C pr)
+    elabCallReceiverPush := (elabCallReceiverPushWith C pr hoist)
+    trySelfBody := fun g {_} args ρ => trySelfBodyWith C pr g args ρ
+    elabValueCall := (elabValueCallWith C pr)
+    elabCtor := (elabCtorWith C pr)
+    hoistStmt := default
+    elabStmtP := elabStmtP
+    elabStmt1 := default
+    loopExpr := loopExprWith C hoist
+    loopQ := loopQWith C (loopExprWith C hoist)
+    elabStmtsP := elabStmtsPWith C elabStmtP
+    elabBranch := elabBranchWith C elabStmtP
+    elabScope := elabScopeWith C (elabBranchWith C elabStmtP)
+    elabTuple := default
+  }
+  let body := { base with
+    abiEncode := fun std strs args marks sel => abiEncodeWith C base std strs args marks sel
+    hoistStmt := hoistStmtWith C base
+    elabTuple := fun ts rhs direct => elabTupleWith C base pr ts rhs direct }
+  { body with elabStmt1 := elabStmt1ClosedWith C body }
+
+/-- Close structural and named-argument recursion around ordinary-call and statement callbacks. -/
+def hoistWithCallbacks (fallback : RawExpr → ElabM (SProg C × RawExpr))
+    (stmt : RawStmt → ElabM (SProg C))
+    (callRet : (f : String) → (args : List RawExpr) → (res : Option (Var × PrimTy)) →
+    (resW : Nat := 256) → (targets : Bool := false) → (ctor : Bool := false) →
+    (resNew : Bool := false) → (selfFrame : Bool := false) →
+    ElabM (SProg C × Option (NCtx × RefTy × Var × Bool) × List (Var × LocalTy))) :=
+  ElabHoist.namedStructural C
+    (fun h => elabRecWithProducers C (elabRecWithCallbacks C h stmt @callRet)
+      (panicProducerWithCallbacks C stmt @callRet))
+    (elabStmtsPWith C stmt) fallback
+
+mutual
+
+/-- Call expansion, with structural children handled by `hoistWithCallbacks`. -/
+private partial def hoistCallCore (s0 : RawExpr) : ElabM (SProg C × RawExpr) :=
+  hoistWith C (elabRecWithProducers C (elabRecWithCallbacks C (hoistWithCallbacks C hoistCallCore elabStmtP @elabCallRet) elabStmtP @elabCallRet) (panicProducerWithCallbacks C elabStmtP @elabCallRet)) s0
+
+/-- A statement, as a block: its narrow rewrites (`narrowPure`), its captures
+(`hoistStmt`), then the statement,
+whose compound target may need a capture of its own. -/
+partial def elabStmtP (s : RawStmt) : ElabM (SProg C) :=
+  elabStmtPClosedWith C (elabRecWithProducers C (elabRecWithCallbacks C (hoistWithCallbacks C hoistCallCore elabStmtP @elabCallRet) elabStmtP @elabCallRet) (panicProducerWithCallbacks C elabStmtP @elabCallRet)) s
+
+/-- `elabCall`, and the fresh return variable of a callee that returns a
+memory reference, with its type and the caller's context: the call's frame
+declares it (a fresh default object, `CallRet.mem`) and leaves it to the
+caller, which binds it after the call (`elabMemCall`).  With `targets`, the
+call is a tuple assignment's right-hand side (`elabTuple`), KeyTaclets'
+`FunctionBodyStatement` with targets: it returns every return value
+(`CallRet.rets`, one or several), which the caller reads after the call —
+their fresh variables, types and widths.  A callee of several returns called
+as a statement (`f(a);`, KeY's `InternalCall`) declares them at the head of
+its body and returns nothing.  With `resNew`, the local `res` is declared by
+the statement before the call (`uint y = f(a);` is `uint y; y = f(a);`):
+the call is read in the context it pushes, its arguments where `res` is not
+yet in scope. -/
+partial def elabCallRet (f : String) (args : List RawExpr) (res : Option (Var × PrimTy))
+    (resW : Nat := 256) (targets : Bool := false) (ctor : Bool := false) (resNew : Bool := false)
+    (selfFrame : Bool := false) :
+    ElabM (SProg C × Option (NCtx × RefTy × Var × Bool) × List (Var × LocalTy)) :=
+  elabCallRetWith C (elabRecWithProducers C (elabRecWithCallbacks C (hoistWithCallbacks C hoistCallCore elabStmtP @elabCallRet) elabStmtP @elabCallRet) (panicProducerWithCallbacks C elabStmtP @elabCallRet)) f args res resW targets ctor resNew selfFrame
+
 end
+
+/-- **Captures before a statement**: an `++`/`−−` inside an expression, and a
+conditional of references, are evaluated before the statement that holds
+them, in the contract's order (an assignment's right-hand side before its target, a
+binary operator's right operand first by default, its left under `.viaIR`, an index's base before the
+index: an operand read before an effect is captured with `captureExpr`),
+into fresh locals (KeY's captures): `values[i++] = 1;`
+is `uint se1; se1 = i++; values[se1] = 1;`, and
+`Person storage p = c ? alice : bob;` is
+`Person storage sp1; if (c) { sp1 = alice; } else { sp1 = bob; }
+Person storage p = sp1;`, the alias declared before the branches, which are
+scopes.  A memory one is `Person memory mv1 = mx;
+if (c) { mv1 = mx; } else { mv1 = my; }`: declared bound to a branch that
+indexes nothing (`MPath.indexFree`, a read that cannot revert on a set
+local; an unset one, which only a hidden binder holds (decision 17'),
+reverts there where solc reads the other branch), or, when both index, to
+a fresh default object (`Person memory mv1;`, an object nothing reaches),
+and rebound in each branch.  Under the right
+operand of `&&`/`||` or in a branch of a conditional, an effect, a call or a
+narrow check is captured where solc evaluates it, under a test of its own: `a
+&& b` is `bool se = a; if (se) { se = b; }`, and `c ? a : b` is
+`uint se; if (c) { se = a; } else { se = b; }`. -/
+def hoist (s0 : RawExpr) : ElabM (SProg C × RawExpr) :=
+  hoistWithCallbacks C (hoistCallCore C) (elabStmtP C) (@elabCallRet C _) s0
+
+/-- Public producer record, built from the recursive callbacks. -/
+def panicProducerRec (_ : Unit) : PanicProducerRec C :=
+  panicProducerWithCallbacks C (elabStmtP C) (@elabCallRet C _)
+
+/-- Public helper record, built without recursive record construction. -/
+def elabRecCore (_ : Unit) : ElabRec C :=
+  elabRecWithCallbacks C (hoist C) (elabStmtP C) (@elabCallRet C _)
+
+/-- A statement whose expressions have no effect left. -/
+def elabStmt1 (s0 : RawStmt) : ElabM (SProg C) :=
+  (elabRecCore C ()).elabStmt1 s0
+
+/-- The captures a statement's own expressions need (`hoist`), and the
+statement left: a right-hand side before the left-hand side, as the
+interpreter evaluates them, a receiver before an argument.  A branch's statements are elaborated on their
+own. -/
+def hoistStmt (s0 : RawStmt) : ElabM (SProg C × RawStmt) :=
+  hoistStmtWith C (elabRecWithProducers C (elabRecCore C ()) (panicProducerRec C ())) s0
+
+/-- `abi.encode(…)` (`std`) or `abi.encodePacked(…)`/`bytes.concat(…)`/
+`string.concat(…)` (`strs`: byte strings only) of the hoisted arguments: a
+fresh memory `bytes` of solc's layout (`AbiKind`). -/
+def abiEncode (std strs : Bool) (args : List RawExpr) (marks : List (Option AbiKind))
+    (sel : Option RawExpr := none) : ElabM (SProg C × RawExpr) :=
+  abiEncodeWith C (elabRecWithProducers C (elabRecCore C ()) (panicProducerRec C ())) std strs args marks sel
+
+/-- Elaborate a tuple using the public recursion callbacks. -/
+def elabTuple (ts : List (Option RawExpr)) (rhs : RawExpr) (direct : Bool := false) :
+    ElabM (SProg C) :=
+  elabTupleWith C (elabRecWithProducers C (elabRecCore C ()) (panicProducerRec C ())) (panicProducerRec C ()) ts rhs direct
+
+/-- Public call helper with the knot callbacks. -/
+def extDispatch (h ty : String) (ps rs : List String) (args : List RawExpr)
+    (res : Option (Var × PrimTy)) (resW : Nat) (resNew : Bool) : ElabM (SProg C) :=
+  extDispatchWith C (elabBranchWith C (elabStmtP C)) h ty ps rs args res resW resNew
+/-- Public call helper with the knot callbacks. -/
+def callValue (h : RawExpr) (args : List RawExpr) (res : Option (Var × PrimTy))
+    (resW : Nat) (resNew : Bool) : ElabM (SProg C) :=
+  callValueWith C (elabBranchWith C (elabStmtP C)) (panicProducerRec C ()) h args res resW resNew
+/-- Public call helper with the knot callbacks. -/
+def elabCall (f : String) (args : List RawExpr) (res : Option (Var × PrimTy))
+    (resW : Nat := 256) (resNew : Bool := false) : ElabM (SProg C) :=
+  elabCallWith C (panicProducerRec C ()) f args res resW resNew
+/-- Public call helper with the knot callbacks. -/
+def elabMemCall (f : String) (args : List RawExpr) (R : RefTy)
+    (bind : (Γ : NCtx) → Var → (Ty.ref R).mapFree = true → Except String (SStmt C)) :
+    ElabM (SProg C) :=
+  elabMemCallWith C (panicProducerRec C ()) f args R bind
+/-- Public call helper with the knot callbacks. -/
+def elabStorageCall (f : String) (args : List RawExpr) (R : RefTy)
+    (bind : (Γ : NCtx) → Var → Except String (SStmt C)) : ElabM (SProg C) :=
+  elabStorageCallWith C (panicProducerRec C ()) f args R bind
+/-- Public call helper with the knot callbacks. -/
+def elabCallReceiver (f : String) (args : List RawExpr)
+    (op : (Γ : NCtx) → (E : Ty) → ElabM (ReceiverOp C Γ.ctx E)) :
+    ElabM (SProg C) :=
+  elabCallReceiverWith C (panicProducerRec C ()) f args op
+/-- Public call helper with the knot callbacks. -/
+def elabCallReceiverPush (f : String) (args : List RawExpr) (a : RawExpr) :
+    ElabM (SProg C) :=
+  elabCallReceiverPushWith C (panicProducerRec C ()) (hoist C) f args a
+/-- Public call helper with the knot callbacks. -/
+def elabValueCall (Γ : NCtx) (ix : Idx Γ.ctx (.val .bool)) (okName : RawExpr)
+    (e a : RawExpr) : ElabM (SProg C) :=
+  elabValueCallWith C (panicProducerRec C ()) Γ ix okName e a
+/-- Public call helper with the knot callbacks. -/
+def elabCtor (args : List RawExpr) : ElabM (SProg C) :=
+  elabCtorWith C (panicProducerRec C ()) args
+
+/-- Read a loop expression after checking that hoisting emits no statements. -/
+def loopExpr (Γ : NCtx) (p : PrimTy) (e : RawExpr) (what : String) : ElabM (Val C Γ.ctx p) :=
+  loopExprWith C (hoist C) Γ p e what
+
+/-- Read an invariant, preserving its quantified local contexts. -/
+def loopQ (Γ : NCtx) : RawInv → ElabM (LoopQ C Γ.ctx) :=
+  loopQWith C (loopExpr C) Γ
+
+/-- Elaborate a branch with declarations scoped inside it and deployment disabled. -/
+def elabBranch (ss : List RawStmt) : ElabM (SProg C) :=
+  elabBranchWith C (elabStmtP C) ss
+
+/-- Chain the branch into a block with the supplied local context. -/
+def elabScope (Γ : NCtx) (ss : List RawStmt) : ElabM (Blk C Γ.ctx) :=
+  elabScopeWith C (elabBranch C) Γ ss
+
+/-- Two operands in the contract's evaluation order. -/
+def hoistPair (first last : RawExpr) : ElabM (SProg C × RawExpr × RawExpr) :=
+  hoistPairWith C (hoist C) first last
+
+/-- Binary operands hoisted in the contract's evaluation order. -/
+def hoistBinop (op : BinOp) (a b : RawExpr) : ElabM (SProg C × RawExpr) :=
+  hoistBinopWith C (hoist C) op a b
+
+/-- Hoist an expression, leaving a top-level operation to its statement. -/
+def hoistTop (e : RawExpr) : ElabM (SProg C × RawExpr) :=
+  hoistTopWith C (hoist C) e
+
+/-- Hoist an assignment's right-hand side and then its target. -/
+def hoistAssign (l r : RawExpr) : ElabM (SProg C × RawStmt) :=
+  hoistAssignWith C (hoist C) l r
+
+/-- Hoist call arguments from left to right. -/
+def hoistArgs : List RawExpr → ElabM (SProg C × List RawExpr) :=
+  hoistArgsWith C (hoist C)
+
+/-- A byte string captured as a memory local. -/
+def abiMemBytes (a : RawExpr) : ElabM (SProg C × String) :=
+  abiMemBytesWith C (elabStmtP C) a
+
+/-- Decode a dynamic byte string from the ABI head and tail. -/
+def abiDecodeBytes (T : String) (d : ByteSrc) (h n : Nat) : ElabM (SProg C × String) :=
+  abiDecodeBytesWith C (elabStmtP C) T d h n
+
+/-- Hoist and capture call arguments at their parameter types. -/
+def hoistCallArgs (f : String) (args : List RawExpr) : ElabM (SProg C × List RawExpr) :=
+  hoistCallArgsWith C (hoist C) (elabStmtP C) f args
 
 /-- A block (`elabStmtsPWith` at the knot's `elabStmtP`): the same term
 the recursive arms and both records use. -/

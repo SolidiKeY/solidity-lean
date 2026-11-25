@@ -1,3 +1,4 @@
+import Solidity.Yul.RawSourceForPost
 import Solidity.Yul.LocalBoolForPost
 
 /-! Omitted for guards reuse the actual literal-true evaluator after exact Source transport. -/
@@ -11,20 +12,8 @@ theorem iter_eq : ∀ (env : Solidity.Source.Env) (returns : List Solidity.Sourc
  (fuel nps : Nat) (ph : Option (Solidity.Source.Ph env))
  (locals : Solidity.Source.Locals env.layout types),
  Solidity.Source.forIter glob frame fuel nps ph .none post body locals =
- Solidity.Source.forIter glob frame fuel nps ph (.some (.bool true)) post body locals := by
-
-  intro env returns modifier u types out post body glob frame fuel nps ph locals
-  induction fuel generalizing locals with
-  | zero => rfl
-  | succ fuel ih =>
-    cases fuel with
-    | zero => rfl
-    | succ fuel =>
-      conv => lhs; rw [Solidity.Source.forIter]
-      conv => rhs; rw [Solidity.Source.forIter]
-      simp only [pure_bind,ih]
-      rfl
-
+ Solidity.Source.forIter glob frame fuel nps ph (.some (.bool true)) post body locals :=
+  @RawSourceForPost.Absent.source_true
 
 theorem for_eq : ∀ (env : Solidity.Source.Env) (returns : List Solidity.Source.STy)
  (modifier l u : Bool) (types middle out : Solidity.Source.RCtx)

@@ -1,4 +1,5 @@
 import Solidity.Yul.Views.StructWordHeap
+import Solidity.Yul.Views.HeapEnumerationControls
 import Solidity.Yul.Views.StructWordStoreControls
 
 /-! Six heterogeneous objects inhabit the whole-heap struct update theorem.
@@ -12,19 +13,7 @@ open StructWordStore.Controls
 def next := withSourceHeap mixedState (mixedHeap.write 3 (.struct pointerFields) (by rfl))
 def placement := structWrittenPlacement mixedHeap mixedPlacement 3 mixedName mixedFields pointerFields rfl
 
-theorem support : ∀ a τ d,mixedHeap.get a=some ⟨τ,d⟩ → InventoryTypeSupported mixedEnv τ := by
-  first | (simp only;done) | decide | omega | rfl | skip
-  intro a τ d found
-  have present : (mixedHeap.cells a).isSome := by change (mixedHeap.get a).isSome=true;rw [found];rfl
-  have small := mixed_present_lt a present
-  have choices : a=0 ∨ a=1 ∨ a=2 ∨ a=3 ∨ a=4 ∨ a=5 := by omega
-  rcases choices with rfl | rfl | rfl | rfl | rfl | rfl <;> cases found
-  · trivial
-  · trivial
-  · exact Or.inl (Or.inr (Or.inl rfl))
-  · exact supported
-  · exact Or.inl (Or.inr (Or.inr rfl))
-  · trivial
+theorem support : ∀ a τ d,mixedHeap.get a=some ⟨τ,d⟩ → InventoryTypeSupported mixedEnv τ := Solidity.Yul.Views.Controls.generated_mixed_types_supported
 
 theorem source_and_whole :
     (Source.writeLoc mixedReadFrame 0 (.mem 3 2) (Source.Val.memRef (τ:=.bytes .memory) rfl 5)).run mixedState=(.ok (),next) ∧
@@ -36,7 +25,7 @@ theorem source_and_whole :
   have beforeReads : ∀ e∈generatedHeapEntries mixedPlacement,e.image.Reads mixedPhysical (mixedPlacement.address e.id) := by
     intro e _
     exact mixedImage_reads_of_coverage mixedPlacement mixedEntries mixed_coverage mixedPhysical mixed_all_reads e
-  exact whole mixedHeap.ty mixedState mixedPlacement mixed_actual_MemOK support mixedReadFrame 0 3 mixedName
+  exact whole mixedHeap.ty mixedState mixedPlacement mixed_actual_MemOK Solidity.Yul.Views.Controls.generated_mixed_types_supported mixedReadFrame 0 3 mixedName
     mixedFields pointerFields mixedStructWords fields rfl ⟨2,by decide⟩ (.memRef rfl 5) 1408
     (.pointer rfl 5 (.bytes .memory) rfl rfl) rfl mixedPhysical beforeReads mixed_reserved
 
@@ -45,7 +34,7 @@ theorem every_H (H : Source.HeapTy) (ok : Source.MemOK mixedEnv H mixedState) : 
   have beforeReads : ∀ e∈generatedHeapEntries mixedPlacement,e.image.Reads mixedPhysical (mixedPlacement.address e.id) := by
     intro e _
     exact mixedImage_reads_of_coverage mixedPlacement mixedEntries mixed_coverage mixedPhysical mixed_all_reads e
-  exact (whole H mixedState mixedPlacement ok support mixedReadFrame 0 3 mixedName
+  exact (whole H mixedState mixedPlacement ok Solidity.Yul.Views.Controls.generated_mixed_types_supported mixedReadFrame 0 3 mixedName
     mixedFields pointerFields mixedStructWords fields rfl ⟨2,by decide⟩ (.memRef rfl 5) 1408
     (.pointer rfl 5 (.bytes .memory) rfl rfl) rfl mixedPhysical beforeReads mixed_reserved).2.1
 

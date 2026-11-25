@@ -43,7 +43,8 @@ private theorem queryCovered : ∀ q ∈ selected,
   intro q member
   simp only [selected,List.mem_cons,List.not_mem_nil,or_false] at member
   rcases member with rfl | rfl | rfl | rfl <;> decide
-private theorem written : ∀ q ∈ ClearDemands.slotDemands (lastSlot CopyDemandControls.old),
+/-- Every demand of the cleared last slot lies in the control locations. -/
+theorem lastSlot_demands_located : ∀ q ∈ ClearDemands.slotDemands (lastSlot CopyDemandControls.old),
     q.location (childBase CopyDemandControls.old CopyDemandControls.root) ∈ CopyDemandControls.locations := by
   intro q member
   change q ∈ [.word (.cons (.index (ix 0)) .nil),.word (.cons (.index (ix 1)) .nil),.length .nil] at member
@@ -75,7 +76,7 @@ theorem nested_certificate :
       ((updates CopyDemandControls.old CopyDemandControls.root).foldl (fun w op => write w op.1 op.2) CopyDemandControls.store) final := by
   obtain ⟨actual,executed,represented,transported⟩ := complete_numeric CopyDemandControls.old popped popped_ok
     selected CopyDemandControls.root CopyDemandControls.store CopyDemandControls.machine CopyDemandControls.run
-    before (fun _ _ => rfl) (by decide) queryCovered written separation headerSeparate
+    before (fun _ _ => rfl) (by decide) queryCovered lastSlot_demands_located separation headerSeparate
   have equal : actual = final := by
     have expected : execute (N := 128) CopyDemandControls.old CopyDemandControls.hash CopyDemandControls.root
         CopyDemandControls.machine = some final := rfl

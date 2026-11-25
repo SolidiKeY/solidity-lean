@@ -1,5 +1,6 @@
 import Solidity.Backend.Passes.TailLoop
 import Solidity.Backend.Passes.Stack
+import Solidity.Backend.Payments.CompilerExact
 
 /-!
 # Exact saved-tail independence for all eleven Compilation constructors
@@ -20,15 +21,15 @@ def replaceOutStack (tail : List Word) : Evm.Out → Evm.Out
 variable {C : Contract} {b L frame : Nat} {Γ Δ : Ctx}
   {F : Frag Γ} {P : Prog C Γ Δ}
 
-/-- Exact outcome and all non-stack fields are independent of the saved tail,
-for core, memory, reference arrays, objects, construction and memory calls. -/
-theorem compilation_tail_exact (result : Compilation b F P)
+/-- **Saved-tail independence**: the exact outcome and every non-stack field
+do not depend on the saved tail. -/
+theorem WholeProgram.tail_exact (result : Compilation b F P)
     {base : Nat → Fin W} {σ : State C Γ} {m : Machine}
     (hi : result.Input L frame base σ m)
-    (hp : Evm.Prog.pays P = false) (tail : List Word) :
+    (tail : List Word) :
     run result.code {m with stack := tail} =
       replaceOutStack tail (run result.code {m with stack := []}) := by
-  rcases compilation_exact result (compilation_input_stack result hi []) hp with
+  rcases Compilation.correct_exact result (compilation_input_stack result hi []) with
     ⟨o, canonical, hs, ht, hstack, hr⟩ | ⟨hs, ht⟩ | ⟨hs, ht⟩
   · have he := run_tail result.code {m with stack := []} tail
       (by rw [ht]; intro h; cases h)
@@ -41,7 +42,7 @@ theorem compilation_tail_exact (result : Compilation b F P)
     simpa only [ht, appendTail, appendOut, replaceOutStack, List.nil_append] using he
   · rw [ht]
     change run result.code {m with stack := tail} = .fault
-    rcases compilation_exact result (compilation_input_stack result hi tail) hp with
+    rcases Compilation.correct_exact result (compilation_input_stack result hi tail) with
       ⟨o, out, hs', _, _, _⟩ | ⟨hs' | ⟨_, hs'⟩, _⟩ | ⟨_, ht'⟩
     · rw [hs] at hs'
       cases hs'
@@ -50,6 +51,50 @@ theorem compilation_tail_exact (result : Compilation b F P)
     · rw [hs] at hs'
       cases hs'
     · exact ht'
+
+/-- Exact outcome and all non-stack fields are independent of the saved tail,
+for core, memory, reference arrays, objects, construction and memory calls. -/
+theorem compilation_tail_exact (result : Compilation b F P)
+    {base : Nat → Fin W} {σ : State C Γ} {m : Machine}
+    (hi : result.Input L frame base σ m)
+    (hp : Evm.Prog.pays P = false) (tail : List Word) :
+    run result.code {m with stack := tail} =
+      replaceOutStack tail (run result.code {m with stack := []}) := by
+  clear hp
+  exact WholeProgram.tail_exact result hi tail
+
+/-- Every saved tail: success with that exact tail and the full `Rep`. -/
+theorem WholeProgram.success_tail (result : Compilation b F P)
+    {base : Nat → Fin W} {σ : State C Γ} {m : Machine}
+    (hi : result.Input L frame base σ m)
+    {o : Solidity.Out C σ.H Δ} (hs : P.run σ = .ok o) (tail : List Word) :
+    ∃ m', run result.code {m with stack := tail} = .ok m' 0 ∧
+      m'.stack = tail ∧ result.Rep (L + Evm.Prog.pushes P) frame base
+        σ {m with stack := tail} o.st m' :=
+  Compilation.compile_success result (compilation_input_stack result hi tail) hs
+
+/-- **One shared canonical machine** for every saved tail, with the full
+branch-specific `Rep` per run. -/
+theorem WholeProgram.success_shared (result : Compilation b F P)
+    {base : Nat → Fin W} {σ : State C Γ} {m : Machine}
+    (hi : result.Input L frame base σ m)
+    {o : Solidity.Out C σ.H Δ} (hs : P.run σ = .ok o) :
+    ∃ canonical, run result.code {m with stack := []} = .ok canonical 0 ∧
+      canonical.stack = [] ∧
+      ∀ tail, run result.code {m with stack := tail} =
+          .ok {canonical with stack := tail} 0 ∧
+        result.Rep (L + Evm.Prog.pushes P) frame base σ {m with stack := tail}
+          o.st {canonical with stack := tail} := by
+  obtain ⟨canonical, ht, hstack, _⟩ := WholeProgram.success_tail result hi hs []
+  refine ⟨canonical, ht, hstack, fun tail => ?_⟩
+  have he := WholeProgram.tail_exact result hi tail
+  rw [ht] at he
+  change run result.code {m with stack := tail} =
+    .ok {canonical with stack := tail} 0 at he
+  obtain ⟨actual, ha, _, hr⟩ := WholeProgram.success_tail result hi hs tail
+  have hm : actual = {canonical with stack := tail} :=
+    (Evm.Out.ok.inj (ha.symm.trans he)).1
+  exact ⟨he, hm ▸ hr⟩
 
 /-- One actual canonical machine works for every saved tail, retaining full
 branch-specific representation, frame, map and allocator relations per run. -/
@@ -64,18 +109,8 @@ theorem compilation_success_shared (result : Compilation b F P)
           .ok {canonical with stack := tail} 0 ∧
         result.Rep (L + Evm.Prog.pushes P) frame base σ {m with stack := tail}
           o.st {canonical with stack := tail} := by
-  obtain ⟨canonical, ht, hstack, _⟩ :=
-    compilation_success_tail result hi hp hs []
-  refine ⟨canonical, ht, hstack, ?_⟩
-  intro tail
-  have he := compilation_tail_exact result hi hp tail
-  rw [ht] at he
-  change run result.code {m with stack := tail} =
-    .ok {canonical with stack := tail} 0 at he
-  obtain ⟨actual, ha, _, hr⟩ := compilation_success_tail result hi hp hs tail
-  have hm : actual = {canonical with stack := tail} :=
-    (Evm.Out.ok.inj (ha.symm.trans he)).1
-  exact ⟨he, hm ▸ hr⟩
+  clear hp
+  exact WholeProgram.success_shared result hi hs
 
 /-- Equality after erasing only the returned stack includes all failure
 outcomes and every non-stack machine component. -/

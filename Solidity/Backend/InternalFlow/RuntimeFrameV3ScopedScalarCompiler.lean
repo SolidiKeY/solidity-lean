@@ -131,15 +131,11 @@ theorem Selected.source_run {C : Contract} {Γ : Ctx} {b c frame pointer bottom 
 theorem Selected.returns {C : Contract} {Γ : Ctx} {b c frame pointer bottom : Nat} {F : Frag Γ}
  {source : Stmt C Γ Γ} (selection : Selected b c frame pointer bottom F source) (below : bottom<pointer) :
  InterfaceV1.ReturnClaim b F source selection.plan := by
- intro L fr caller base before start entry out actual
- exact selection.selected.returns below L fr caller base before start entry out
-   ((selection.source_run caller).symm.trans actual)
+ simpa only [InterfaceV1.ReturnClaim, selection.source_run] using selection.selected.returns below
 
 theorem Selected.bare_revert {C : Contract} {Γ : Ctx} {b c frame pointer bottom : Nat} {F : Frag Γ}
  {source : Stmt C Γ Γ} (selection : Selected b c frame pointer bottom F source) (below : bottom<pointer) :
  InterfaceV1.BareRevertClaim b F source selection.plan := by
- intro L fr caller base before start entry actual
- exact selection.selected.bare_revert below L fr caller base before start entry
-   ((selection.source_run caller).symm.trans actual)
+ simpa only [InterfaceV1.BareRevertClaim, selection.source_run] using selection.selected.bare_revert below
 
 end Solidity.Backend.InternalFlow.RuntimeFrame.ScopedScalarCompiler

@@ -3,7 +3,7 @@
 const {mkdtempSync,mkdirSync,rmSync}=require('node:fs');
 const {join,resolve,dirname}=require('node:path');
 const {fileURLToPath,pathToFileURL}=require('node:url');
-const {createHash}=require('node:crypto');
+const {createHash,randomUUID}=require('node:crypto');
 const {fork}=require('node:child_process');
 const {RpcPeer,failure,cancellable}=require('./rpc.cjs');
 const {WorkerPool,fingerprint}=require('./worker-pool.cjs');
@@ -49,7 +49,10 @@ class SolidityService {
     const functions=doc.index?.nodes.filter(n=>n.nodeType==='FunctionDefinition').map(node=>{let parent=doc.index.parents.get(node);while(parent&&parent.nodeType!=='ContractDefinition')parent=doc.index.parents.get(parent);return{range:doc.index.nameRange(node),name:(parent?.name?parent.name+'.':'')+(node.name||node.kind||'constructor'),status:'ready'};}).filter(row=>row.range);
     this.notify('solidityLean/status',{uri:doc.uri,version:doc.version,sourceHash:hash(doc.text),synchronizationId:doc.synchronizationId,state,progressScope:'document',functions:state==='cancelled'?[]:functions,...extra});
   }
-  diagnostics(doc,diagnostics){this.notify('textDocument/publishDiagnostics',{uri:doc.uri,version:doc.version,sourceHash:hash(doc.text),synchronizationId:doc.synchronizationId,diagnostics});}
+  diagnostics(doc,diagnostics){
+    doc.failedAnalysis=null;doc.codeActionSet=null;const sourceHash=hash(doc.text);doc.publishedDiagnostics={uri:doc.uri,version:doc.version,sourceHash,synchronizationId:doc.synchronizationId,generation:this.generation,values:structuredClone(diagnostics)};
+    this.notify('textDocument/publishDiagnostics',{uri:doc.uri,version:doc.version,sourceHash,synchronizationId:doc.synchronizationId,diagnostics});
+  }
   cancel(doc){
     if(!doc)return;clearTimeout(doc.timer);doc.analysisAbort?.abort();doc.verifyAbort?.abort();
     // A new verification must never join the compiler promise just cancelled
@@ -200,10 +203,12 @@ class SolidityService {
     }
     if(doc.analysisPromise)return doc.analysisPromise;
     const version=doc.version,generation=this.generation,text=doc.text,controller=new AbortController();doc.analysisAbort=controller;
+    doc.failedAnalysis=null;
+    const configuration=this.settings,configurationKey=JSON.stringify(configuration),documents=[...this.docs.values()];let analysisProject=null;
     doc.analysisPromise=(async()=>{
       this.status(doc,'compiling');const start=Date.now();
       try{
-        const project=this.testing.analyze?null:projects.snapshot(doc.path,text,this.settings,[...this.docs.values()]);doc.projectSnapshot=project;
+        const project=this.testing.analyze?null:projects.snapshot(doc.path,text,this.settings,[...this.docs.values()]);doc.projectSnapshot=project;analysisProject=project;
         const compiled=this.testing.analyze?await this.testing.analyze(doc,controller.signal):await this.analysisPool.run({action:'analyze',source:doc.path,text,project},{signal:controller.signal,timeoutMs:this.settings.timeoutMs});
         if(!this.current(doc,version,generation)||controller.signal.aborted)throw failure('Document content changed',-32801);
         if((compiled.sourceHash??compiled.fixture?.header.sourceSha256)!==hash(text))throw new Error('Compiler source hash mismatch');
@@ -213,7 +218,7 @@ class SolidityService {
         const proofDiagnostics=doc.verificationDiagnostics||[];
         this.diagnostics(doc,[...this.compilerDiagnostics(doc,compiled.diagnostics),...proofDiagnostics]);if(!doc.verifyPromise&&!doc.report)this.status(doc,'ready');return compiled;
       }catch(error){
-        if(this.current(doc,version,generation)&&!controller.signal.aborted&&doc.analysisAbort===controller&&![-32800,-32801].includes(error.code)){this.diagnostics(doc,[...this.compilerDiagnostics(doc,error.diagnostics||[{severity:'error',message:error.message}]),...(doc.verificationDiagnostics||[])]);this.status(doc,'error',{phase:'compilation',message:error.message});}
+        if(this.current(doc,version,generation)&&!controller.signal.aborted&&doc.analysisAbort===controller&&![-32800,-32801].includes(error.code)){this.diagnostics(doc,[...this.compilerDiagnostics(doc,error.diagnostics||[{severity:'error',message:error.message}]),...(doc.verificationDiagnostics||[])]);doc.failedAnalysis={document:doc,batch:doc.publishedDiagnostics,project:analysisProject,configuration,configurationKey,documents};this.status(doc,'error',{phase:'compilation',message:error.message});}
         throw error;
       }
     })();
@@ -232,7 +237,7 @@ class SolidityService {
     return diagnostics.filter(d=>['error','warning'].includes(d.severity)).map(d=>{
       const primary=locate(d.sourceLocation),foreign=primary.file?projects.identity(primary.file.path)!==projects.identity(doc.path):!!d.sourceLocation?.file&&d.sourceLocation.file!==doc.path;
       const related=[];
-      if(foreign&&primary.file)related.push({location:{uri:pathToFileURL(primary.file.path).href,range:primary.range||model.rangeOf({})},message:d.message});
+      if(foreign&&primary.file&&primary.range)related.push({location:{uri:pathToFileURL(primary.file.path).href,range:primary.range},message:d.message});
       for(const secondary of d.secondarySourceLocations||[]){
         const {file,range}=locate(secondary);if(!file||!range)continue;
         related.push({location:{uri:pathToFileURL(file.path).href,range},message:secondary.message||d.message});
@@ -363,7 +368,16 @@ class SolidityService {
     const doc=this.docs.get(params.textDocument.uri);checkVersion(doc,params.textDocument.version);
     const version=doc.version;
     if(signal?.aborted)throw failure('Request cancelled',-32800);
-    try{await cancellable(this.analyze(doc),signal);}catch(error){if([-32800,-32801].includes(error.code))throw error;}
+    const codeAction=method==='textDocument/codeAction';
+    if(codeAction){
+      this.refresh();
+      if(this.currentFailedAnalysis(doc)){
+        const facts=this.codeActionFacts(doc,params);
+        const emptyRequest=Array.isArray(params.context?.diagnostics)&&params.context.diagnostics.length===0;
+        if(emptyRequest||facts.diagnostics.length&&facts.diagnostics.every(d=>!this.codeActionKind(d.code))){doc.codeActionSet=null;return [];}
+      }
+    }
+    try{await cancellable(this.analyze(doc,{refresh:!codeAction}),signal);}catch(error){if([-32800,-32801].includes(error.code))throw error;}
     if(signal?.aborted)throw failure('Request cancelled',-32800);
     if(!this.current(doc,version))throw failure('Document content changed',-32801);
     if(!doc.index&&lookup.methods.has(method)&&doc.lookup){
@@ -414,20 +428,66 @@ class SolidityService {
     }
     return null;
   }
+  currentFailedAnalysis(doc){
+    const failed=doc.failedAnalysis,project=failed?.project,batch=failed?.batch;
+    if(!failed||failed.document!==doc||doc.analysisPromise||!project||batch!==doc.publishedDiagnostics||!this.current(doc,batch.version,batch.generation)||batch.sourceHash!==hash(doc.text)||batch.synchronizationId!==doc.synchronizationId||failed.configuration!==this.settings||failed.configurationKey!==JSON.stringify(this.settings))return false;
+    const files=Object.values(project.files),primary=project.files[project.mainSource];
+    if(!primary||projects.identity(primary.path)!==projects.identity(doc.path)||primary.hash!==batch.sourceHash||primary.version!==doc.version)return false;
+    // Refuse ambiguous aliases and close/reopen epochs, even when bytes agree.
+    for(const file of files){
+      if(file.canonicalPath!==projects.identity(file.path))return false;
+      const before=failed.documents.filter(d=>projects.identity(d.path)===file.canonicalPath),now=[...this.docs.values()].filter(d=>projects.identity(d.path)===file.canonicalPath);
+      if(before.length>1||now.length!==before.length||before.some((d,i)=>now[i]!==d))return false;
+    }
+    return projects.current(project,this.projectDocuments(),true);
+  }
+  codeActionKind(code){return ({1878:'license',5667:'parameter',2072:'local'})[String(code)]??null;}
+  codeActionFacts(doc,params){
+    // CodeActionKind identifiers are dot-separated hierarchies, not lexical prefixes.
+    // This producer emits only the base quickfix kind; descendants do not select it.
+    const only=params.context?.only;if(only!==undefined){if(!Array.isArray(only)||only.some(k=>typeof k!=='string'))throw failure('Invalid code action kind filter',-32602);if(!only.some(k=>k===''||k==='quickfix'))return {batch:null,diagnostics:[]};}
+    // Client diagnostics select current compiler facts; they do not authorize edits.
+    const batch=doc.publishedDiagnostics;
+    if(!this.current(doc,doc.version)||!batch||batch.uri!==doc.uri||batch.version!==doc.version||batch.sourceHash!==hash(doc.text)||batch.generation!==this.generation||batch.synchronizationId!==doc.synchronizationId)return {batch:null,diagnostics:[]};
+    const diagnosticKey=d=>{const r=d?.range;if(d?.code===undefined||!r||!['start','end'].every(k=>['line','character'].every(n=>Number.isSafeInteger(r[k]?.[n])&&r[k][n]>=0)))return null;return JSON.stringify([String(d.code),r.start.line,r.start.character,r.end.line,r.end.character]);};
+    const compiler=new Map();for(const d of batch.values){const key=diagnosticKey(d);if(d.source==='solc'&&key!==null&&!compiler.has(key))compiler.set(key,d);}
+    const diagnostics=[];
+    for(const requested of params.context?.diagnostics||[]){
+      if(!requested||requested.source!==undefined&&requested.source!=='solc')continue;
+      const key=diagnosticKey(requested),owned=key===null?null:compiler.get(key);if(!owned)continue;
+      diagnostics.push(structuredClone(owned));
+    }
+    return {batch,diagnostics};
+  }
   codeActions(doc,params){
-    const actions=[],add=(title,diagnostic,range,newText)=>actions.push({title,kind:'quickfix',diagnostics:[diagnostic],edit:{documentChanges:[{textDocument:{uri:doc.uri,version:doc.version},edits:[{range,newText}]}]}});
-    if(params.context?.only&&!params.context.only.some(k=>'quickfix'.startsWith(k)))return [];
-    for(const diagnostic of params.context?.diagnostics||[]){
-      if(String(diagnostic.code)==='1878')for(const license of ['UNLICENSED','MIT','Apache-2.0'])add('Add SPDX license identifier: '+license,diagnostic,{start:{line:0,character:0},end:{line:0,character:0}},'// SPDX-License-Identifier: '+license+'\n');
-      if(!['5667','2072'].includes(String(diagnostic.code))||!doc.index)continue;
+    doc.codeActionSet=null;const actions=[],add=(title,diagnostic,range,newText)=>actions.push({title,kind:'quickfix',diagnostics:[diagnostic],edit:{documentChanges:[{textDocument:{uri:doc.uri,version:doc.version},edits:[{range,newText}]}]}});
+    const {batch,diagnostics}=this.codeActionFacts(doc,params);
+    for(const diagnostic of diagnostics){
+      if(this.codeActionKind(diagnostic.code)==='license')for(const license of ['UNLICENSED','MIT','Apache-2.0'])add('Add SPDX license identifier: '+license,diagnostic,{start:{line:0,character:0},end:{line:0,character:0}},'// SPDX-License-Identifier: '+license+'\n');
+      if(!['parameter','local'].includes(this.codeActionKind(diagnostic.code))||!doc.index)continue;
       const variable=doc.index.nodes.find(n=>n.nodeType==='VariableDeclaration'&&n.name&&language.contains(doc.index.nodeRange(n),diagnostic.range.start));if(!variable)continue;
       const quoted=variable.name.replace(/[.*+?^${}()|[\]\\]/g,'\\$&');
       if(sourceText.tokens(doc.text).some(t=>t.kind==='comment'&&/@(?:custom:key|param|return)\b/.test(t.text)&&new RegExp('(?<![\\w$])'+quoted+'(?![\\w$])').test(t.text)))continue;
       const parent=doc.index.parents.get(variable);
-      if(String(diagnostic.code)==='5667'&&parent?.nodeType==='ParameterList')add('Remove unused parameter name '+variable.name,diagnostic,doc.index.nameRange(variable),'');
-      if(String(diagnostic.code)==='2072'&&parent?.nodeType==='VariableDeclarationStatement'&&parent.declarations.length===1&&(!parent.initialValue||parent.initialValue.nodeType==='Literal')&&/^(?:u?int\d*|bool|address|bytes\d+)$/.test(variable.typeName?.name||''))add('Remove unused local '+variable.name,diagnostic,doc.index.nodeRange(parent),'');
+      if(this.codeActionKind(diagnostic.code)==='parameter'&&parent?.nodeType==='ParameterList')add('Remove unused parameter name '+variable.name,diagnostic,doc.index.nameRange(variable),'');
+      if(this.codeActionKind(diagnostic.code)==='local'&&parent?.nodeType==='VariableDeclarationStatement'&&parent.declarations.length===1&&(!parent.initialValue||parent.initialValue.nodeType==='Literal')&&/^(?:u?int\d*|bool|address|bytes\d+)$/.test(variable.typeName?.name||''))add('Remove unused local '+variable.name,diagnostic,doc.index.nodeRange(parent),'');
     }
-    return actions;
+    if(!actions.length)return actions;
+    const listing=randomUUID(),entries=new Map(),unique=new Map();
+    const result=actions.map(action=>{const key=JSON.stringify(action);let id=unique.get(key);if(!id){id=randomUUID();unique.set(key,id);}const data={solidityLeanCodeActionV1:{uri:doc.uri,listing,id}};if(!entries.has(id))entries.set(id,structuredClone({...action,data}));return{...action,data};});
+    doc.codeActionSet={document:doc,batch,uri:doc.uri,version:doc.version,sourceHash:batch.sourceHash,generation:this.generation,synchronizationId:doc.synchronizationId,project:doc.compiled?.project??doc.projectSnapshot,listing,actions:entries};return result;
+  }
+  resolveCodeAction(action,signal){
+    if(signal?.aborted)throw failure('Request cancelled',-32800);
+    this.refresh();
+    const ref=action?.data?.solidityLeanCodeActionV1;
+    if(!ref||!['uri','listing','id'].every(k=>typeof ref[k]==='string'&&ref[k].length))throw failure('Unknown compiler code action data',-32602);
+    const doc=this.docs.get(ref.uri),set=doc?.codeActionSet;
+    if(!set||set.document!==doc||set.listing!==ref.listing||!this.current(doc,set.version)||doc.uri!==set.uri||hash(doc.text)!==set.sourceHash||this.generation!==set.generation||doc.synchronizationId!==set.synchronizationId||doc.publishedDiagnostics!==set.batch)throw failure('Code action is no longer current',-32801);
+    if(set.project&&!projects.current(set.project,this.projectDocuments(),true))throw failure('Code action dependency changed',-32801);
+    if(action.textDocument){if(action.textDocument.uri!==doc.uri)throw failure('Code action resource changed',-32801);checkVersion(doc,action.textDocument.version);}
+    const original=set.actions.get(ref.id);if(!original)throw failure('Unknown compiler code action',-32602);
+    return structuredClone(original);
   }
 
   async validateEdits(doc,edit,signal,expected=new Map()){
@@ -474,7 +534,7 @@ function startServer(input=process.stdin,output=process.stdout){
     service=new SolidityService(peer,params.initializationOptions?.backendPath||fileURLToPath(params.rootUri),params.initializationOptions?.settings);
     return {serverInfo:identity(),capabilities:{textDocumentSync:{openClose:true,change:2,save:{includeText:true}},hoverProvider:true,
       completionProvider:{triggerCharacters:['.']},definitionProvider:true,referencesProvider:true,documentSymbolProvider:true,documentHighlightProvider:true,
-      workspaceSymbolProvider:true,documentFormattingProvider:true,codeActionProvider:{codeActionKinds:['quickfix']},renameProvider:{prepareProvider:true},signatureHelpProvider:{triggerCharacters:['(',',']}}};
+      workspaceSymbolProvider:true,documentFormattingProvider:true,codeActionProvider:{codeActionKinds:['quickfix'],resolveProvider:true},renameProvider:{prepareProvider:true},signatureHelpProvider:{triggerCharacters:['(',',']}}};
   });
   const ready=()=>{if(!service||shuttingDown)throw failure('Server is not initialized',-32002);return service;};
   peer.onNotification('initialized',()=>{if(!versionSent){ready();peer.notify(versionNotification,identity());versionSent=true;}});
@@ -496,6 +556,7 @@ function startServer(input=process.stdin,output=process.stdout){
     workers:service.pool.workers.map(w=>w.child.pid),analysisWorkers:service.analysisPool.workers.map(w=>w.child.pid),retiringWorkers:[...service.pool.workers,...service.analysisPool.workers].filter(w=>w.retiring).map(w=>w.child.pid),directory:service.directory,queued:service.pool.queue.length,generation:service.generation}));
   for(const method of ['hover','completion','definition','references','documentSymbol','signatureHelp','documentHighlight','prepareRename','rename','formatting','codeAction'])
     peer.onRequest('textDocument/'+method,async(params,id)=>{const s=ready(),controller=new AbortController();s.requests.set(id,controller);try{return await s.language('textDocument/'+method,params,controller.signal);}finally{s.requests.delete(id);}});
+  peer.onRequest('codeAction/resolve',async(params,id)=>{const s=ready(),controller=new AbortController();s.requests.set(id,controller);try{return s.resolveCodeAction(params,controller.signal);}finally{s.requests.delete(id);}});
   peer.onRequest('workspace/symbol',async(params,id)=>{const s=ready(),controller=new AbortController();s.requests.set(id,controller);try{return await s.workspaceSymbols(params.query,controller.signal);}finally{s.requests.delete(id);}});
   peer.onNotification('workspace/didChangeWatchedFiles',params=>{for(const change of params.changes)ready().invalidatePath(fileURLToPath(change.uri));});
   peer.onRequest('shutdown',async()=>{shuttingDown=true;await service?.dispose();return null;});

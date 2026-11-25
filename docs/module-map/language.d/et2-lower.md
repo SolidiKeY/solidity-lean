@@ -1,0 +1,1 @@
+| `Examples/ElabTotal/Lower.lean` | Checks of the callee-side producers' equations in `Syntax/Elab/Lower.lean`, now total (`renameStmts`, `lowerReturns`, `wrapMods` with its step `wrapMod`): bodies unfolded by the per-arm equations (`renameStmts_decl`, `renameStmts_forLoop_cons`, `lowerReturns_block`, `wrapMods_cons`, …) and concrete runs agreeing with the unfolded forms. |

@@ -49,15 +49,9 @@ theorem wrong_word {C : Contract} {Γ : Ctx} (offset : Nat) (F : Frag Γ)
   have stacks := congrArg (fun o => match o with | Out.ok state _ => state.stack | _ => []) same
   exact different (List.cons.inj stacks).1
 
-theorem zero_fits (t : Source.IntTy) : t.lo ≤ 0 ∧ 0 ≤ t.hi := by
-  have hp := Source.two_pow_pos t.bits
-  have hs := Source.two_pow_pos (t.bits-1)
-  cases sign : t.signed <;>
-    simp only [Source.IntTy.lo,Source.IntTy.hi,sign,Bool.false_eq_true,if_true,if_false] <;> omega
-
 theorem zero {C : Contract} {Γ : Ctx} (offset : Nat) (F : Frag Γ)
     (t : Source.IntTy) (m : Machine) (tail : List Word) :
-    run (selected (C:=C) offset F t 0 (zero_fits t)).code {m with stack := tail} =
+    run (selected (C:=C) offset F t 0 t.zero_mem).code {m with stack := tail} =
       .ok ({m with stack := tail}.push (.val (sword 0))) 0 :=
   target_success offset F t 0 _ m tail
 

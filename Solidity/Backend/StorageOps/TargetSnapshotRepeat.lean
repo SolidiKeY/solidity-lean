@@ -6,14 +6,6 @@ No numeric-address/hash interpretation, Source lowering, gas or world claim. -/
 namespace Solidity.Backend.StorageOps.TargetSnapshotRepeat
 open TargetFixedSnapshot
 
-private theorem store_ext (a b : Evm.WordStore) (same : ∀ s,a s=b s) : a=b := by
- cases a with
- | mk a =>
-  cases b with
-  | mk b =>
-   have cells : a=b := funext (fun s => Fin.ext (same s))
-   exact congrArg Evm.WordStore.mk cells
-
 /-- Two ACTUAL copies have the first copy's entire Machine outcome when
 source and destination coincide, or every generated source/write pair differs.
 The separation premise is on actual slots, not a desired post-state equality. -/
@@ -40,7 +32,7 @@ theorem complete (p : PrimTy) (size : TypeGraph.FixedSize) (machine : Evm.Machin
       · apply after_outside
         intro i inside equal
         exact hit ⟨i,inside,equal⟩
-    have stores := store_ext _ _ words
+    have stores := Evm.WordStore.ext words
     exact congrArg (fun store : Evm.WordStore => {machine with store:=store}) stores
  refine ⟨?_,repeated⟩
  rw [Evm.run_append_ok (run_code p size machine src dst),run_code,repeated]
