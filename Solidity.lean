@@ -2538,6 +2538,7 @@ import Solidity.Correctness.Lowering.Total.EnumDecode
 import Solidity.Correctness.Lowering.Total.EnumUseDecode
 import Solidity.Correctness.Lowering.Total.Main
 import Solidity.Correctness.Lowering.Total.Production
+import Solidity.Correctness.Lowering.Total.ReferenceDecode
 import Solidity.Correctness.Lowering.Total.Relation
 import Solidity.Correctness.Lowering.Total.Spells
 import Solidity.Correctness.Lowering.Total.TransientDecode
