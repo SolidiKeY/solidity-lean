@@ -222,6 +222,7 @@ import Solidity.Examples.Lowering.Total.EnumDecode
 import Solidity.Examples.Lowering.Total.EnumUseDecode
 import Solidity.Examples.Lowering.Total.FunctionTypeDecode
 import Solidity.Examples.Lowering.Total.ReferenceDecode
+import Solidity.Examples.Lowering.Total.StructDecode
 import Solidity.Examples.Lowering.Total.TransientDecode
 import Solidity.Examples.MemoryFloor
 import Solidity.Examples.MemoryInstantiation

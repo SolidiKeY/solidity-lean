@@ -2543,6 +2543,7 @@ import Solidity.Correctness.Lowering.Total.Production
 import Solidity.Correctness.Lowering.Total.ReferenceDecode
 import Solidity.Correctness.Lowering.Total.Relation
 import Solidity.Correctness.Lowering.Total.Spells
+import Solidity.Correctness.Lowering.Total.StructDecode
 import Solidity.Correctness.Lowering.Total.TransientDecode
 import Solidity.Correctness.Lowering.Total.Versions
 import Solidity.Correctness.Lowering.Total.Versions.CalleeBinding
