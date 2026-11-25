@@ -218,6 +218,7 @@ import Solidity.Examples.Lowering.Sim.StatementV2
 import Solidity.Examples.Lowering.Sim.Stmt
 import Solidity.Examples.Lowering.Total.CallSpellExt
 import Solidity.Examples.Lowering.Total.ConstructorDecode
+import Solidity.Examples.Lowering.Total.ConstructorPlacement
 import Solidity.Examples.Lowering.Total.EnumDecode
 import Solidity.Examples.Lowering.Total.EnumUseDecode
 import Solidity.Examples.Lowering.Total.FunctionTypeDecode
