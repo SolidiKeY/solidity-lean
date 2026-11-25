@@ -146,7 +146,7 @@ theorem fold_spec {e : RawExpr} {q : Q} (h : fold e = some q) :
     obtain ⟨sb, hsb, hcb, _⟩ := ihb hy
     obtain ⟨f, hf, hspec⟩ := binop_family hk
     obtain ⟨_, _, hc, hal, hhx⟩ := hspec sa sb
-    exact ⟨_, expr_binop.mpr ⟨f, sa, sb, hf, hsa, hsb, rfl⟩,
+    exact ⟨_, (expr_binop).mpr ⟨f, sa, sb, hf, hsa, hsb, rfl⟩,
       by rw [hc, hca, hcb, ← hx, ← hy]; exact h, hal, hhx⟩
   | case3 a ih =>
     rw [fold] at h
@@ -155,7 +155,7 @@ theorem fold_spec {e : RawExpr} {q : Q} (h : fold e = some q) :
     | some x =>
       rw [hx] at h; cases h
       obtain ⟨sa, hsa, hca, _⟩ := ih hx
-      exact ⟨_, expr_neg.mpr ⟨sa, hsa, rfl⟩, by show sa.const.map Q.neg = _; rw [hca]; rfl, rfl, rfl⟩
+      exact ⟨_, (expr_neg).mpr ⟨sa, hsa, rfl⟩, by show sa.const.map Q.neg = _; rw [hca]; rfl, rfl, rfl⟩
   | case4 a ih =>
     rw [fold] at h
     cases hx : fold a with
@@ -163,7 +163,7 @@ theorem fold_spec {e : RawExpr} {q : Q} (h : fold e = some q) :
     | some x =>
       rw [hx] at h
       obtain ⟨sa, hsa, hca, _⟩ := ih hx
-      refine ⟨_, expr_bnot.mpr ⟨sa, hsa, rfl⟩, ?_, rfl, rfl⟩
+      refine ⟨_, (expr_bnot).mpr ⟨sa, hsa, rfl⟩, ?_, rfl, rfl⟩
       show (sa.const.bind fun q => q.int?.bind fun k => _) = _
       rw [hca]; exact h
   | case5 e h1 h2 h3 h4 =>

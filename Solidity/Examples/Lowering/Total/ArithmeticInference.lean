@@ -336,8 +336,8 @@ example {Γ : Source.Ctx} {j : Nat} {f : Source.FixTy} (hr : Γ.resolve "p" = so
 
 /-- The operators outside the families: the four wrapping ones are not spelled;
 `&&`, `||` are spelled and left to the scalar lane. -/
-example : Decode.binop .powW = none := binop_eq_none_iff.mpr (.inr (.inr (.inr rfl)))
-example : family .and = none := family_eq_none_iff.mpr (.inr (.inl rfl))
+example : Decode.binop .powW = none := (binop_eq_none_iff).mpr (.inr (.inr (.inr rfl)))
+example : family .and = none := (family_eq_none_iff).mpr (.inr (.inl rfl))
 
 /-- The premises of `alias_inferN` at any fuel from the list's node count. -/
 example {T : Tables} {args n} (hs : T.exprs es = some args) (hn : args.nodes.length ≤ n + 1) :

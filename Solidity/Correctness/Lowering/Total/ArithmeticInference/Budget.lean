@@ -48,7 +48,7 @@ theorem depth_le_nodes {e : RawExpr} : ∀ {s : Syn .expr}, T.expr e = some s �
   | case1 op a b h => intro s _; rw [depth, if_pos h]; exact nodes_pos s
   | case2 op a b h iha ihb =>
     intro s hs
-    obtain ⟨f, sa, sb, hf, hsa, hsb, rfl⟩ := expr_binop.mp hs
+    obtain ⟨f, sa, sb, hf, hsa, hsb, rfl⟩ := (expr_binop).mp hs
     have := iha hsa; have := ihb hsb
     rw [depth, if_neg h, binop_nodes hf, Nat.add_le_add_iff_right, Nat.max_le]
     omega
@@ -76,7 +76,7 @@ theorem exprs_get : ∀ {es : List RawExpr} {args : Syn (.list .expr)}, T.exprs 
       simp only [Tables.exprs, Option.some.injEq] at h; subst h
       exact ⟨by simp [argExprs], fun i a hi => by simp [argExprs] at hi⟩
   | e :: es, args, h => by
-      obtain ⟨a, as, ha, has, rfl⟩ := exprs_cons.mp h
+      obtain ⟨a, as, ha, has, rfl⟩ := (exprs_cons).mp h
       obtain ⟨hl, hg⟩ := exprs_get has
       refine ⟨by simp [argExprs, hl], fun i b hi => ?_⟩
       cases i with

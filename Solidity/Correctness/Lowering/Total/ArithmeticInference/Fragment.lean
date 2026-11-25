@@ -129,7 +129,7 @@ theorem Infers.sound (h : Infers Γ e τ) :
     have hcs : (f sa sb).const = none := by rw [hc, hca, hcb]; exact hf
     have hbc : (sa.const.isSome && sb.const.isSome) = bothConst a b := by rw [hca, hcb]; rfl
     obtain ⟨d, hd⟩ := inferBin_ok hbo (by rw [hbc]; exact hcc) da db (by rw [hdm, hbc]; exact hty)
-    refine ⟨_, expr_binop.mpr ⟨f, sa, sb, hf', hsa, hsb, rfl⟩, hcs.trans hf.symm, d, fun n => ?_⟩
+    refine ⟨_, (expr_binop).mpr ⟨f, sa, sb, hf', hsa, hsb, rfl⟩, hcs.trans hf.symm, d, fun n => ?_⟩
     cases n with
     | zero => rw [if_neg (by rw [depth_bin hk hf hcc]; omega)]; exact inferN_zero
     | succ n =>
@@ -150,7 +150,7 @@ theorem Infers.sound (h : Infers Γ e τ) :
     have hcs : (f sa sb).const = none := by rw [hcn]; exact foldBin_cmp hk hc
     have hdepth : depth (.binop op a b) = 1 := by
       simp [depth, cmpOp_family hk, hc, bothConst, hqa, hqb]
-    refine ⟨_, expr_binop.mpr ⟨f, sa, sb, hf', hsa, hsb, rfl⟩, hcs.trans hfold.symm, ?_⟩
+    refine ⟨_, (expr_binop).mpr ⟨f, sa, sb, hf', hsa, hsb, rfl⟩, hcs.trans hfold.symm, ?_⟩
     rw [hdepth]
     cases k <;> cases hc
     · refine ⟨.compareConst hbo (Or.inl rfl) hca hcb, fun n => ?_⟩
@@ -170,7 +170,7 @@ theorem Infers.sound (h : Infers Γ e τ) :
     have hcn : sa.const = none := hca.trans hf
     have hfold : fold (.unop .neg a) = none := by rw [fold, hf]; rfl
     obtain ⟨d, hd⟩ := inferN_neg hcn da hty
-    refine ⟨_, expr_neg.mpr ⟨sa, hsa, rfl⟩, (const_neg hcn).trans hfold.symm, d, fun n => ?_⟩
+    refine ⟨_, (expr_neg).mpr ⟨sa, hsa, rfl⟩, (const_neg hcn).trans hfold.symm, d, fun n => ?_⟩
     have hdepth : depth (.unop .neg a) = depth a + 1 := by simp [depth, hfold]
     rw [hdepth]
     cases n with
@@ -183,7 +183,7 @@ theorem Infers.sound (h : Infers Γ e τ) :
     obtain ⟨sa, hsa, hca, da, ha⟩ := ih
     have hcn : sa.const = none := hca.trans hf
     have hfold : fold (.unop .bnot a) = none := by rw [fold, hf]; rfl
-    refine ⟨_, expr_bnot.mpr ⟨sa, hsa, rfl⟩, (const_bitNot hcn).trans hfold.symm,
+    refine ⟨_, (expr_bnot).mpr ⟨sa, hsa, rfl⟩, (const_bitNot hcn).trans hfold.symm,
       .bitNot da hty, fun n => ?_⟩
     have hdepth : depth (.unop .bnot a) = depth a + 1 := by simp [depth, hfold]
     rw [hdepth]
@@ -340,7 +340,7 @@ theorem Rejects.sound {r : Reason} (h : Rejects Γ e r) :
   induction h with
   | @bin op k a b τa τb r hk hia hib hf hcc hty =>
     intro s hs
-    obtain ⟨f', sa, sb, hf', hsa, hsb, rfl⟩ := expr_binop.mp hs
+    obtain ⟨f', sa, sb, hf', hsa, hsb, rfl⟩ := (expr_binop).mp hs
     obtain ⟨f, hff, hspec⟩ := binop_family hk
     cases hf'.symm.trans hff
     obtain ⟨hbo, hdm, hc, _, _⟩ := hspec sa sb
@@ -362,7 +362,7 @@ theorem Rejects.sound {r : Reason} (h : Rejects Γ e r) :
       all_goals exact inferBin_none hbo (by rw [hbc]; exact hcc) (by simp [h1, h2])
   | @neg a τ r hia hf hty =>
     intro s hs
-    obtain ⟨sa, hsa, rfl⟩ := expr_neg.mp hs
+    obtain ⟨sa, hsa, rfl⟩ := (expr_neg).mp hs
     have hcn : sa.const = none := (hia.const_eq hsa).trans hf
     obtain ⟨da, ha⟩ := hia.inferN hsa
     refine ⟨const_neg hcn, fun n => ?_⟩
@@ -374,7 +374,7 @@ theorem Rejects.sound {r : Reason} (h : Rejects Γ e r) :
       · exact inferN_neg_none hcn (by rw [ha n, if_neg h1])
   | @bitNot a τ hia hf hty =>
     intro s hs
-    obtain ⟨sa, hsa, rfl⟩ := expr_bnot.mp hs
+    obtain ⟨sa, hsa, rfl⟩ := (expr_bnot).mp hs
     have hcn : sa.const = none := (hia.const_eq hsa).trans hf
     obtain ⟨da, ha⟩ := hia.inferN hsa
     refine ⟨const_bitNot hcn, fun n => ?_⟩
@@ -386,7 +386,7 @@ theorem Rejects.sound {r : Reason} (h : Rejects Γ e r) :
       · exact inferN_bitNot_none hcn (by rw [ha n, if_neg h1])
   | @left op k a b r hk _ ih =>
     intro s hs
-    obtain ⟨f', sa, sb, hf', hsa, hsb, rfl⟩ := expr_binop.mp hs
+    obtain ⟨f', sa, sb, hf', hsa, hsb, rfl⟩ := (expr_binop).mp hs
     obtain ⟨f, hff, hspec⟩ := binop_family hk
     cases hf'.symm.trans hff
     obtain ⟨hbo, _, hc, _, _⟩ := hspec sa sb
@@ -400,7 +400,7 @@ theorem Rejects.sound {r : Reason} (h : Rejects Γ e r) :
       exact inferBin_none hbo (by simp [hca]) (Or.inl (ha n))
   | @right op k a b r hk _ ih =>
     intro s hs
-    obtain ⟨f', sa, sb, hf', hsa, hsb, rfl⟩ := expr_binop.mp hs
+    obtain ⟨f', sa, sb, hf', hsa, hsb, rfl⟩ := (expr_binop).mp hs
     obtain ⟨f, hff, hspec⟩ := binop_family hk
     cases hf'.symm.trans hff
     obtain ⟨hbo, _, hc, _, _⟩ := hspec sa sb
@@ -414,7 +414,7 @@ theorem Rejects.sound {r : Reason} (h : Rejects Γ e r) :
       exact inferBin_none hbo (by simp [hcb]) (Or.inr (hb n))
   | @negArg a r _ ih =>
     intro s hs
-    obtain ⟨sa, hsa, rfl⟩ := expr_neg.mp hs
+    obtain ⟨sa, hsa, rfl⟩ := (expr_neg).mp hs
     obtain ⟨hca, ha⟩ := ih hsa
     refine ⟨const_neg hca, fun n => ?_⟩
     cases n with
@@ -422,7 +422,7 @@ theorem Rejects.sound {r : Reason} (h : Rejects Γ e r) :
     | succ n => exact inferN_neg_none hca (ha n)
   | @bitNotArg a r _ ih =>
     intro s hs
-    obtain ⟨sa, hsa, rfl⟩ := expr_bnot.mp hs
+    obtain ⟨sa, hsa, rfl⟩ := (expr_bnot).mp hs
     obtain ⟨hca, ha⟩ := ih hsa
     refine ⟨const_bitNot hca, fun n => ?_⟩
     cases n with
@@ -501,7 +501,7 @@ theorem expr_unspelled {op : BinOp} {a b : RawExpr} (h : Decode.binop op = none)
     T.expr (.binop op a b) = none := by
   cases hs : T.expr (.binop op a b) with
   | none => rfl
-  | some s => obtain ⟨f, _, _, hf, _⟩ := expr_binop.mp hs; rw [h] at hf; cases hf
+  | some s => obtain ⟨f, _, _, hf, _⟩ := (expr_binop).mp hs; rw [h] at hf; cases hf
 
 /-- An undecoded operand leaves the operator form undecoded. -/
 theorem expr_binop_none {op : BinOp} {a b : RawExpr} (h : T.expr a = none ∨ T.expr b = none) :
@@ -509,7 +509,7 @@ theorem expr_binop_none {op : BinOp} {a b : RawExpr} (h : T.expr a = none ∨ T.
   cases hs : T.expr (.binop op a b) with
   | none => rfl
   | some s =>
-    obtain ⟨_, _, _, _, ha, hb, _⟩ := expr_binop.mp hs
+    obtain ⟨_, _, _, _, ha, hb, _⟩ := (expr_binop).mp hs
     rcases h with h | h
     · rw [h] at ha; cases ha
     · rw [h] at hb; cases hb
