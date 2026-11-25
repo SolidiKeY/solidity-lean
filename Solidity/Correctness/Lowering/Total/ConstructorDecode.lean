@@ -6,7 +6,7 @@ import Solidity.Source.Elaborate
 
 Reads `Contract.ctor`, `Contract.inits`, `Contract.vars` and the retained
 constructor header (`FunDecl.sourceDecl`), and spells actual Source syntax: one
-state variable per storage root, carrying its original initializer, then the
+state variable per storage root, carrying its original initializer, after the
 explicit constructor when the contract declares one. Parameters, modifier
 invocations and expression/body spelling are the landed callee components.
 
@@ -28,7 +28,7 @@ initializers run before the constructor body.
 namespace Solidity.Correctness.Lowering.Total.Decode.Constructor
 
 open Source (Syn STy)
-open Callee (parameters Slots modifiers ModifierSpelling appendParts)
+open Callee (parameters Slots modifiers ModifierSpelling)
 
 /-- Two lists related entry by entry, in order: equal lengths, nothing
 dropped, added or moved. -/
@@ -373,24 +373,19 @@ theorem progOf_inits (E : Source.Env) (c : String) (hE : Source.elaborates E = t
 
 /-! ## Contract declaration parts -/
 
-/-- The declaration parts this component owns: every root as a state
-variable with its initializer, then the explicit constructor if there is one.
-A contract without a constructor gets no constructor part: Source's implicit
-constructor is the absence of the declaration, not an empty one. -/
+/-- The declaration parts this component owns: the explicit constructor if
+there is one, then every root as a state variable with its initializer. A
+contract without a constructor gets no constructor part: Source's implicit
+constructor is the absence of the declaration, not an empty one. The model
+does not retain where the constructor stood among the members, and Source
+reads neither it nor the state variables by position relative to the other. -/
 def declarationParts (T : Tables) (R : CallSpellExt.Registry) (C : Contract) :
     Option (Syn (.list (.part false))) := do
   let state ← stateParts (elemB C.widths) (fun x => C.transientRoots.contains x)
     (Calls.expr T R) C.vars C.inits
   match C.ctor with
   | none => pure state
-  | some d => pure (appendParts state (.cons (← constructorPart T R d) .nil))
-
-private theorem collect_appendParts (scope : Option String) :
-    ∀ (xs ys : Syn (.list (.part false))),
-      (appendParts xs ys).collect scope = xs.collect scope ++ ys.collect scope
-  | .nil, _ => by simp only [appendParts, Source.Syn.collect, List.nil_append]
-  | .cons x xs, ys => by
-      simp only [appendParts, Source.Syn.collect, collect_appendParts scope xs ys, List.append_assoc]
+  | some d => pure (.cons (← constructorPart T R d) state)
 
 /-- The constructor declarations of an optional model constructor. -/
 def ctorDecls (T : Tables) (R : CallSpellExt.Registry) (scope : String) :
@@ -398,16 +393,16 @@ def ctorDecls (T : Tables) (R : CallSpellExt.Registry) (scope : String) :
   | none => some []
   | some d => (constructorDecl T R scope d).map ([·])
 
-/-- **Declaration assembly.** The collected declarations are the state
-variables in root order followed by the constructor declaration: exactly one
-for an explicit constructor, none for the implicit one. -/
+/-- **Declaration assembly.** The collected declarations are the constructor
+declaration, exactly one for an explicit constructor and none for the
+implicit one, followed by the state variables in root order. -/
 theorem declarationParts_collect {T : Tables} {R : CallSpellExt.Registry} {C : Contract}
     {parts : Syn (.list (.part false))} (h : declarationParts T R C = some parts) (scope : String) :
     ∃ state ctors,
       stateParts (elemB C.widths) (fun x => C.transientRoots.contains x) (Calls.expr T R)
         C.vars C.inits = some state ∧
       ctorDecls T R scope C.ctor = some ctors ∧
-      parts.collect (some scope) = state.collect (some scope) ++ ctors := by
+      parts.collect (some scope) = ctors ++ state.collect (some scope) := by
   simp only [declarationParts, Option.bind_eq_bind, Option.bind_eq_some_iff] at h
   obtain ⟨state, hs, h⟩ := h
   cases hc : C.ctor with
@@ -415,14 +410,14 @@ theorem declarationParts_collect {T : Tables} {R : CallSpellExt.Registry} {C : C
       rw [hc] at h
       simp only [Option.pure_def, Option.some.injEq] at h
       subst h
-      exact ⟨state, [], hs, rfl, (List.append_nil _).symm⟩
+      exact ⟨state, [], hs, rfl, rfl⟩
   | some d =>
       rw [hc] at h
       simp only [Option.pure_def, Option.bind_eq_some_iff, Option.some.injEq] at h
       obtain ⟨node, hn, rfl⟩ := h
       refine ⟨state, [ctorDecl scope node], hs, ?_, ?_⟩
       · simp [ctorDecls, constructorDecl, hn]
-      · rw [collect_appendParts, Source.Syn.collect]
+      · rw [Source.Syn.collect]
         simp only [constructorPart, Option.bind_eq_bind, Option.bind_eq_some_iff] at hn
         obtain ⟨_, _, _, _, hn⟩ := hn
         split at hn
@@ -513,7 +508,7 @@ theorem placed_stateVars {T : Tables} {R : CallSpellExt.Registry} {C : Contract}
           simp only [ctorDecls, constructorDecl, Option.map_eq_some_iff] at hc
           obtain ⟨_, ⟨node, _, rfl⟩, rfl⟩ := hc
           rfl
-    rw [keep, drop, List.append_nil]
+    rw [keep, drop, List.nil_append]
   rw [same]
   exact ⟨vars, inits⟩
 
@@ -559,7 +554,7 @@ theorem placed_implicit {T : Tables} {R : CallSpellExt.Registry} {C : Contract}
     rw [placed_filter placed _ (by
       intro d hd
       simp only [Bool.and_eq_true, beq_iff_eq] at hd
-      exact ⟨hd.2, .inl hd.1⟩), hcol, List.append_nil] at hf
+      exact ⟨hd.2, .inl hd.1⟩), hcol, List.nil_append] at hf
     obtain ⟨hm, hq'⟩ := List.mem_filter.mp hf
     have hk := (kinds d hm).1
     simp [hk] at hq'
@@ -603,9 +598,6 @@ theorem placed_explicit {T : Tables} {R : CallSpellExt.Registry} {C : Contract}
       exact hl d hd hq.2 hq.1
     rw [List.append_assoc, List.find?_append,
       skip before (fun d hd hs => (outside d (List.mem_append_left _ hd) hs).1),
-      Option.none_or, List.find?_append, List.find?_append,
-      skip (state.collect (some scope)) (fun d hd _ hk => by
-        rw [(kinds d hd).1] at hk; cases hk),
       Option.none_or]
     simp [ctorDecl]
   refine ⟨_, ho, found, ?_, ?_, ?_⟩
@@ -622,7 +614,7 @@ theorem withFunctions_placed {T : Tables} {R : CallSpellExt.Registry} {scope : S
     (h : Callee.withFunctions T R scope parts fs = some u) : Placed u.env scope parts := by
   obtain ⟨functions, hf, _, hd⟩ := Callee.withFunctions_declarations h
   refine ⟨[⟨.contract, scope, none, true,
-    .contract false scope .none .nil (appendParts parts functions)⟩],
+    .contract false scope .none .nil (Callee.appendParts parts functions)⟩],
     functions.collect (some scope), ?_, ?_⟩
   · simp only [Source.Syn.env, hd, List.cons_append, List.nil_append]
   · intro d hd hs
