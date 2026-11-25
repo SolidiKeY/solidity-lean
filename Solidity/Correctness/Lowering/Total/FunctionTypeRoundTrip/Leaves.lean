@@ -2,6 +2,22 @@ import Solidity.Correctness.Lowering.Total.FunctionTypeDecode
 import Solidity.Correctness.Lowering.Total.FunctionTypeParserLaws
 import Solidity.Correctness.Lowering.Total.FunctionTypeRoundTrip.Nat
 
+/-!
+# Function-signature round trip: the leaf reader on character lists
+
+`FunctionTypeDecode.leaf` reads a component through `Decode.typeNameB`
+(`bytesTy?`, `narrowTy?`) and `locSuffix`, none of which reduces in the
+kernel. Each is proved equal to a character-list form (`leaf_mk`), from which:
+
+* `spelled_leaf`: every elementary type `elemName` spells (`Spelled`: `bool`,
+  `address`, `uintN`/`intN` at every width, `bytesN`) is read back at its type
+  and width, is no function type and is `Well` (all widths by kernel
+  evaluation, `intsOk`, `bytesOk`);
+* `ElemFree` (decidable): no elementary reading; `elemFree_of_last`: a
+  component not ending in a digit and none of `bool`, `address`, `uint`, `int`;
+* `leaf_located`: `b ++ locName d` is read as `b` at `d`, for every base.
+-/
+
 namespace Solidity.Correctness.Lowering.Total.FunctionTypeRoundTrip
 
 open Source (Syn DataLoc)

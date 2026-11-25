@@ -1,5 +1,15 @@
 import Solidity.Correctness.Lowering.Total.FunctionTypeParserLaws.Strings
 
+/-!
+# Function-signature round trip: `String.toNat?` on character lists
+
+Core has no lemmas for `String.any`, `String.foldl` or `String.toNat?`, and
+their well-founded position loops do not reduce in the kernel. Each is proved
+here, from its definition, equal to a `List Char` operation on `String.mk l`
+(`any_mk`, `foldl_mk`, `toNat?_mk` with `natL`), by the position lemmas of
+`FunctionTypeParserLaws/Strings`.
+-/
+
 namespace Solidity.Correctness.Lowering.Total.FunctionTypeRoundTrip
 
 open Solidity.Correctness.Lowering.Total.FunctionTypeParserLaws.Str
