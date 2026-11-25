@@ -1,4 +1,4 @@
-import Solidity.Correctness.Lowering.Total.ArgumentInference.Scalar
+import Solidity.Correctness.Lowering.Total.ArgumentInference.Raw
 import Solidity.Correctness.Lowering.Total.CalleeInference
 
 /-!
@@ -14,7 +14,10 @@ facts alone: each position has fewer nodes than its budget (`argExprs_nodes`),
 so its family result applies (`scalarArgs_each`, `scalarArgs_each_infer`); the
 list infers to the expected types in order (`scalarArgs_argsN`,
 `scalarArgs_argsInfer`); and the call theorems specialise
-(`alias_inferN_scalar`, `alias_infer_scalar`).
+(`alias_inferN_scalar`, `alias_infer_scalar`). On the decoder's own spelling
+(`Tables.expr`/`exprs`, `ArgumentInference.Raw`), a raw call over raw scalar
+arguments (`RawScalars`) is spelled and inferred with no argument premise left
+(`alias_infer_raw`).
 
 Arithmetic, reference and nested-call arguments are not covered; the selection
 conditions of `alias_inferCall` stay premises. Decoder-lane obligations, not
@@ -27,26 +30,6 @@ open Decode Decode.Callee CalleeAliases CalleeResolution CalleeSelection CalleeI
 open Source (STy Syn Typed TypedArgs)
 
 variable {Γ : Source.Ctx}
-
-/-- Ordered scalar arguments with their inferred types, position by position. -/
-inductive ScalarArgs (Γ : Source.Ctx) : List (Syn .expr) → List STy → Prop
-  | nil : ScalarArgs Γ [] []
-  | cons {e : Syn .expr} {σ : STy} {es : List (Syn .expr)} {σs : List STy} :
-      ScalarArg Γ e σ → ScalarArgs Γ es σs → ScalarArgs Γ (e :: es) (σ :: σs)
-
-theorem ScalarArgs.length_eq {es : List (Syn .expr)} {σs : List STy} (h : ScalarArgs Γ es σs) :
-    σs.length = es.length := by
-  induction h <;> simp_all
-
-theorem ScalarArgs.get {es : List (Syn .expr)} {σs : List STy} (h : ScalarArgs Γ es σs) :
-    ∀ {i : Nat} {a σ}, es[i]? = some a → σs[i]? = some σ → ScalarArg Γ a σ := by
-  induction h with
-  | nil => intro i a σ hi; simp at hi
-  | cons he _ ih =>
-    intro i a σ hi hσ
-    cases i with
-    | zero => simp at hi hσ; subst hi hσ; exact he
-    | succ i => exact ih (by simpa using hi) (by simpa using hσ)
 
 /-- **Budget from the syntax**: position `i` of an argument list sits under `i`
 earlier cons nodes, its own cons node and the end node. -/
@@ -140,5 +123,32 @@ theorem alias_infer_scalar {a : Name} {fd : FunDecl} {source : SourceFunction} {
           some ⟨STy.ret rs, typedCall da hsel hsig⟩ :=
   alias_infer h henv hsc hl hf hs hne hloc hcall hps hfit hothers hpre hargs.length_eq
     (scalarArgs_each_infer hargs)
+
+/-- **On the decoder's spelling**: a raw call `f(rs)` of an alias-selected
+callee over ordered raw scalar arguments is spelled by `Tables.expr` as
+`f(args)`, `args` the spelled arguments, and infers at `Typed.infer`'s fuel to
+the callee's ordered retained return slots; no argument premise is left. -/
+theorem alias_infer_raw (Te : Tables) {rs : List RawExpr} {a : Name} {fd : FunDecl}
+    {source : SourceFunction} {index : Nat}
+    (h : withFunctions T R scope leadingParts fs = some u) (henv : Γ.env = u.env)
+    (hsc : Γ.scope = some scope) (hl : lookupBy a fs = some fd)
+    (hf : firstIndex a fs = some index) (hs : fd.sourceDecl = some source)
+    (hne : source.name ≠ "") (hloc : (Γ.locals.map Prod.fst).idxOf? source.name = none)
+    (hcall : callable fd = true) (hps : Slots fd.widths fd.params ps)
+    (hfit : Source.argsFit Γ.isBase Γ.mapFree σs ps = true)
+    (hothers : OthersReject Γ.isBase Γ.mapFree σs fs source.name index)
+    (hpre : PrefixRejects Γ σs scope leadingParts source.name)
+    (hraw : RawScalars Γ rs σs) :
+    ∃ args, Te.exprs rs = some args ∧
+      Te.expr (.call source.name rs) = some (.call (.ident source.name) (.positional args)) ∧
+      ∃ out rets, fromMetadata T R scope fd = some out ∧ Slots fd.widths fd.rets rets ∧
+        ∃ (da : TypedArgs Γ args σs)
+          (hsel : (Γ.functions source.name).filter (fits Γ σs) = [out])
+          (hsig : out.fnSig Γ.env = some (ps, rets)),
+          Typed.infer Γ (.call (.ident source.name) (.positional args)) =
+            some ⟨STy.ret rets, typedCall da hsel hsig⟩ := by
+  obtain ⟨args, hargs, hA⟩ := hraw.exprs (T := Te)
+  exact ⟨args, hargs, expr_call hargs,
+    alias_infer_scalar h henv hsc hl hf hs hne hloc hcall hps hfit hothers hpre hA⟩
 
 end Solidity.Correctness.Lowering.Total.ArgumentInference

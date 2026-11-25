@@ -203,4 +203,24 @@ theorem ScalarArg.infer {e : Syn .expr} {τ : STy} (h : ScalarArg Γ e τ) :
     ∃ d, Typed.infer Γ e = some ⟨τ, d⟩ :=
   let ⟨d, hd⟩ := h.inferN; ⟨d, hd _ (Nat.lt_succ_self _)⟩
 
+/-- Ordered scalar arguments with their inferred types, position by position. -/
+inductive ScalarArgs (Γ : Ctx) : List (Syn .expr) → List STy → Prop
+  | nil : ScalarArgs Γ [] []
+  | cons {e : Syn .expr} {σ : STy} {es : List (Syn .expr)} {σs : List STy} :
+      ScalarArg Γ e σ → ScalarArgs Γ es σs → ScalarArgs Γ (e :: es) (σ :: σs)
+
+theorem ScalarArgs.length_eq {es : List (Syn .expr)} {σs : List STy} (h : ScalarArgs Γ es σs) :
+    σs.length = es.length := by
+  induction h <;> simp_all
+
+theorem ScalarArgs.get {es : List (Syn .expr)} {σs : List STy} (h : ScalarArgs Γ es σs) :
+    ∀ {i : Nat} {a σ}, es[i]? = some a → σs[i]? = some σ → ScalarArg Γ a σ := by
+  induction h with
+  | nil => intro i a σ hi; simp at hi
+  | cons he _ ih =>
+    intro i a σ hi hσ
+    cases i with
+    | zero => simp at hi hσ; subst hi hσ; exact he
+    | succ i => exact ih (by simpa using hi) (by simpa using hσ)
+
 end Solidity.Correctness.Lowering.Total.ArgumentInference

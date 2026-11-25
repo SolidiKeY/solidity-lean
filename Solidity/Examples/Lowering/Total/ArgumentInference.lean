@@ -3,7 +3,8 @@ import Solidity.Correctness.Lowering.Total.ArgumentInference
 /-! Scalar argument inference: nested Boolean arguments, scalar locals, number
 literals and mixed lists, by the family theorems and by `#guard` on the actual
 inference; the boundaries (missing local, wrong type, too little fuel) fail; and
-the call theorem `alias_infer_scalar` on `h(x && !y, n)` over an assembled unit. -/
+the call theorems `alias_infer_scalar` and, on the decoder's raw spelling,
+`alias_infer_raw` for `h(x && !y, n)` in any unit the assembly returns. -/
 namespace Solidity.Examples.Lowering.Total.ArgumentInference
 
 open Solidity.Correctness.Lowering.Total Solidity.Correctness.Lowering.Total.Decode
@@ -121,8 +122,8 @@ theorem paramSlots : Slots [] [("p", Ty.prim .bool), ("q", Ty.prim .uint)] [.boo
   .cons ⟨.bool, .bool, rfl, rfl, rfl, .bool⟩ (.cons ⟨.uint, .int false 256 (by decide), rfl, rfl,
     rfl, .uint _ rfl⟩ .nil)
 
-/-- `h(x && !y, n)` infers to `h`'s return type at `Typed.infer`'s fuel: every
-argument premise comes from `ScalarArgs`. -/
+/-- `h(x && !y, n)` infers to `h`'s return type at `Typed.infer`'s fuel in any
+unit the assembly returns: every argument premise comes from `ScalarArgs`. -/
 example {u} (hu : Callee.withFunctions tablesS [] "C" .nil fs = some u) :
     ∃ rs, ∃ d, Source.Typed.infer (ctx u)
       (.call (.ident "h") (.positional (args [.and x (.unaryPrefix .not y), n]))) =
@@ -139,6 +140,30 @@ example {u} (hu : Callee.withFunctions tablesS [] "C" .nil fs = some u) :
       (by rw [argExprs_args]
           exact .cons (.bool (.and (bx u) (.not (bY u)))) (.cons (.loc (x := "n") (i := 2) rfl rfl) .nil))
   exact ⟨rs, _, h⟩
+
+/-- On the decoder's spelling: the raw call `h(x && !y, n)` is spelled by any
+decoder version and infers to `h`'s return type, every argument premise derived
+from the raw arguments and the context. -/
+example (Te : Tables) {u} (hu : Callee.withFunctions tablesS [] "C" .nil fs = some u) :
+    ∃ e, Te.expr (.call "h" [.binop .and (.name "x") (.unop .not (.name "y")), .name "n"]) =
+      some e ∧ ∃ rs d, Source.Typed.infer (ctx u) e = some ⟨STy.ret rs, d⟩ := by
+  obtain ⟨_, _, he, _, rs, _, _, _, _, _, h⟩ :=
+    alias_infer_raw (Γ := ctx u) (a := "h_0") (index := 0) (σs := [.bool, u256]) Te
+      (source := { name := "h", callable := .local .internalFn }) hu rfl rfl rfl rfl rfl
+      (by decide) rfl rfl paramSlots rfl
+      (fun j e s hj hne hs hn => by
+        rcases j with _ | j
+        · exact absurd rfl hne
+        · simp [fs] at hj)
+      (fun p hp => by cases hp)
+      (.cons (.bool (.and (.name (x := "x") (i := 0) rfl rfl) (.not (.name (x := "y") (i := 1) rfl rfl))))
+        (.cons (.name (x := "n") (i := 2) rfl rfl) .nil))
+  exact ⟨_, he, rs, _, h⟩
+
+/-- A raw number spells to the decimal literal, at its constant type. -/
+example (Te : Tables) (u : Syn .unit) :
+    ∃ e, Te.expr (.num 7) = some e ∧ ScalarArg (ctx u) e (.rational (Source.NumLit.dec 7 0 0).value) :=
+  (RawScalar.num 7).expr
 
 /-! ## Axiom guards: only the standard axioms -/
 
@@ -166,5 +191,10 @@ example {u} (hu : Callee.withFunctions tablesS [] "C" .nil fs = some u) :
  Classical.choice,
  Quot.sound] -/
 #guard_msgs in #print axioms Solidity.Correctness.Lowering.Total.ArgumentInference.alias_infer_scalar
+
+/-- info: 'Solidity.Correctness.Lowering.Total.ArgumentInference.alias_infer_raw' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound] -/
+#guard_msgs in #print axioms Solidity.Correctness.Lowering.Total.ArgumentInference.alias_infer_raw
 
 end Solidity.Examples.Lowering.Total.ArgumentInference
