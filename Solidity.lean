@@ -2543,6 +2543,7 @@ import Solidity.Correctness.Lowering.Total.FunctionTypeFuelLaws
 import Solidity.Correctness.Lowering.Total.FunctionTypeParserLaws
 import Solidity.Correctness.Lowering.Total.FunctionTypeParserLaws.Delimiters
 import Solidity.Correctness.Lowering.Total.FunctionTypeParserLaws.Strings
+import Solidity.Correctness.Lowering.Total.FunctionTypeRefs
 import Solidity.Correctness.Lowering.Total.Main
 import Solidity.Correctness.Lowering.Total.Production
 import Solidity.Correctness.Lowering.Total.ReferenceDecode
