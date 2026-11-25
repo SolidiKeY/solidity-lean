@@ -1,0 +1,2 @@
+| `Correctness/Lowering/Total/EnumDecode.lean` | Contract enum table to ordered Source enum parts; exact declarations, member-list, member-index and enum-size lookup agreement; memberless entries fail as an exposed representation obligation; enum uses, type reconstruction and binding stay open. |
+| `Examples/Lowering/Total/EnumDecode.lean` | Checks of the enum decoder: two ordered enums in one unit, present, absent, repeated and out-of-scope member lookup, and a memberless-enum failure. |
