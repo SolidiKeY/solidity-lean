@@ -85,9 +85,7 @@ and `PassCorrect` still needs a surjection from model states onto the admitted
 Source executions. The frozen `PassCorrect` lets its prover choose that map,
 and nothing here can tie it to the state relation, so the refinement conjunct
 may be false for reasons unrelated to lowering (the admitted executions still
-range over every Source global), or say little where true. This restriction is
-accepted for now (H1255); tying the map to the state relation is deferred to a
-later plan step, not dropped. -/
+range over every Source global), or say little where true. -/
 namespace Observe
 
 open Solidity.Roadmap
@@ -671,7 +669,7 @@ theorem decode_locals_matching {r : Request} {s : SourceProgram}
     simp only [Decode.plain, Bool.and_eq_true, Option.isNone_iff_eq_none] at plain
     exact plain.1.1.1
   subst none
-  obtain ⟨ps, hs, hm⟩ := locals_primitive _ _ hL
+  obtain ⟨ps, hs, hm⟩ := locals_primitive _ _ ((Decode.locals_tables1 _).symm.trans hL)
   have key : ∀ {srcΓ : Source.RCtx} {Γ : Ctx}, srcΓ = Source.Agreement.sourceContext ps → Γ = Source.Agreement.modelContext ps →
       ∃ m : Lowering.V07.ContextMap srcΓ Γ, Positional m ∧
         ∀ (H : HTy) (ls : Source.Locals C.env.layout srcΓ),
@@ -784,6 +782,7 @@ theorem initialMatching_loopRel : InitialMatching loopRel Decode.decode := by
   refine ⟨m, positional, fun e admitted => ?_⟩
   obtain ⟨env, related⟩ := locals [] e.initial.1
   obtain ⟨plain, C, L, b, L', d, hC, _, _, rfl⟩ := decode_spells decoded
+  change Decode.context r = some C at hC
   simp only [Decode.context, Option.map_eq_some_iff] at hC
   obtain ⟨u, hu, rfl⟩ := hC
   have hu' := hu
@@ -987,8 +986,7 @@ def LowerLoopsCorrectContractV2
   LowerLoopsCorrectContract b i decode ∧ Simulation.InitialMatching rel decode ∧
     Simulation.Bound rel decode
 
-/-- Version 2 gives version 1: the bridge. The goal is to be stated against
-version 1 as worded (H1256); version 2 counts only through this lemma. -/
+/-- Version 2 gives version 1. -/
 theorem LowerLoopsCorrectContractV2.v1 {b : SemanticBoundary} {i : RawSourceInterpretation}
     {decode : Request → Option SourceProgram} (h : LowerLoopsCorrectContractV2 rel b i decode) :
     LowerLoopsCorrectContract b i decode := h.1

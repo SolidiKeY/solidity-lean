@@ -36,7 +36,7 @@ theorem derived_return_and_map (G : Source.Glob mixedEnv) (n : Nat) (H : Source.
       value.word=some (keccak256 G.fixed.evm raw 416 bytes.length) := by
   first | (simp only;done) | decide | omega | rfl | skip
   have result := transport G mixedReadFrame 0 n writePrefix H mixedState aliases incoming.1.2
-    mixedPlacement mixedPlacement (retainInitial _ _) ok StructWordHeap.Controls.support
+    mixedPlacement mixedPlacement (retainInitial _ _) ok Solidity.Yul.Views.Controls.generated_mixed_types_supported
     mixedPhysical ByteElementStore.Controls.oldReads mixed_reserved .here 1 true [0xff,0x61] rfl rfl
   have reached := actual_plan
   dsimp only [initial] at reached

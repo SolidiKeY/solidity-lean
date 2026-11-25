@@ -2,4 +2,3 @@
 | `Correctness/Lowering/Total/Decode.lean` | The stage-1 raw-to-Source decoder `Decode.decode`: a chosen Source spelling of the raw input, then Source inference and resolution; every other input is a gap. |
 | `Correctness/Lowering/Total/Spells.lean` | The inductive spelling relation `Spells`; the decoder is sound for it and complete if Source inference is (`InferComplete`, unproved). |
 | `Correctness/Lowering/Total/Boundary.lean` | The stage-1 boundary: observation policies, general simulation, allocation trace, state relation `loopRel`, and `loopResidualStage1_iff` (four obligations left, unproved; known defects listed). |
-| `Correctness/Lowering/Total/Versions.lean` | The boundary of the width-aware decoder version (`Decode.tablesW`): a state relation at any integer width, total initial matching (proved), and what the contract and its version 2 ask there (unproved). |

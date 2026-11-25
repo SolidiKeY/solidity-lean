@@ -4,9 +4,8 @@ namespace Solidity.Yul.Views
 
 theorem integer_dynamic_header_cell {E : Source.Env} {root : Source.DeclName} {t : Source.IntTy}
     (declared : E.rootTy root = some (.array .storage (.int t) none)) :
-    E.cellTy ⟨root,[]⟩ = .int .u256 := by
-  simp only [Source.Env.cellTy,Source.Env.pathTy,List.foldl_nil,declared,Option.map_some,
-    Source.STy.cell,Option.getD_some]
+    E.cellTy ⟨root,[]⟩ = .int .u256 :=
+  packed_dynamic_header_cell declared
 
 /-- Typed actual declaration and actual checked header cursor, NOT assumed
 physical/source agreement. Includes the existing full-width unsigned case. -/
@@ -22,7 +21,7 @@ def IntDynamicHeader.registration {E root t cursor} (h : IntDynamicHeader E root
 root declaration has already been checked at its actual array element type. -/
 theorem IntDynamicHeader.header_packed {E root t cursor} (h : IntDynamicHeader E root t cursor) (a : Roadmap.Address) :
     (StorageDeclaration.uintArray (E := E)).pack ⟨root,[]⟩ a cursor = .ok ([h.registration a],roundSlot cursor+32) := by
-  have typed := integer_dynamic_header_cell h.declared
+  have typed := packed_dynamic_header_cell h.declared
   change ((packDeclarationPaths E (fun _ => ⟨root,[]⟩) a 0 [("",.int .u256)] (roundSlot cursor)).map
     (fun out => (out.1,roundSlot out.2))) = _
   have scalar : declarationScalar? E.layout (.int .u256) = some (dynamicHeaderSeed E) := Option.get_mem (by rfl)
@@ -47,7 +46,7 @@ theorem integer_header_of_packed {E : Source.Env} {root t cursor a cs stop}
   · let h : IntDynamicHeader E root t cursor := ⟨declared,bound⟩
     have same := Except.ok.inj ((h.header_packed a).symm.trans success)
     exact ⟨h,(congrArg Prod.fst same).symm,(congrArg Prod.snd same).symm⟩
-  · have typed := integer_dynamic_header_cell declared
+  · have typed := packed_dynamic_header_cell declared
     have scalar : declarationScalar? E.layout (.int .u256) = some (dynamicHeaderSeed E) := Option.get_mem (by rfl)
     change ((packDeclarationPaths E (fun _ => ⟨root,[]⟩) a 0 [("",.int .u256)] (roundSlot cursor)).map
       (fun out => (out.1,roundSlot out.2))) = _ at success

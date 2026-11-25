@@ -130,17 +130,15 @@ theorem Selected.value_root {C : Contract} {Γ : Ctx} {b c frame pointer bottom 
 theorem Selected.returns {C : Contract} {Γ : Ctx} {b c frame pointer bottom : Nat}
  {F : Frag Γ} {source : Stmt C Γ Γ} (selected : Selected b c frame pointer bottom F source)
  (below : bottom<pointer) : InterfaceV1.ReturnClaim b F source selected.plan := by
- intro L fr caller base before start entry out actual
- apply ScalarDemand.returns selected.emitted below selected.memoryFree selected.reference selected.destination
-   selected.function selected.depth L fr caller base before start entry out
- exact (selected.source_run caller).symm.trans actual
+ simpa only [InterfaceV1.ReturnClaim, selected.source_run] using
+   (ScalarDemand.returns selected.emitted below selected.memoryFree selected.reference
+     selected.destination selected.function selected.depth)
 
 theorem Selected.bare_revert {C : Contract} {Γ : Ctx} {b c frame pointer bottom : Nat}
  {F : Frag Γ} {source : Stmt C Γ Γ} (selected : Selected b c frame pointer bottom F source)
  (below : bottom<pointer) : InterfaceV1.BareRevertClaim b F source selected.plan := by
- intro L fr caller base before start entry actual
- apply ScalarDemand.bare_revert selected.emitted below selected.memoryFree selected.reference selected.destination
-   selected.function selected.depth L fr caller base before start entry
- exact (selected.source_run caller).symm.trans actual
+ simpa only [InterfaceV1.BareRevertClaim, selected.source_run] using
+   (ScalarDemand.bare_revert selected.emitted below selected.memoryFree selected.reference
+     selected.destination selected.function selected.depth)
 
 end Solidity.Backend.InternalFlow.RuntimeFrame.RecursiveScopeCompiler

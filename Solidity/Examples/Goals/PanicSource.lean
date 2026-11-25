@@ -1,7 +1,25 @@
-import Solidity.Correctness.Panic.Dispatch
+import Solidity.Goals.PanicSource
 
-/-! Checks of the panic dispatch producers (plan w3d-panic-dispatch): the theorems hold at the
-knot's own record, and their axioms. -/
+/-! Pin of `panicSourceAssociation` (plan w3d-panic-dispatch) and checks of the panic dispatch
+producers: the theorems hold at the knot's own record, and their axioms. -/
+
+namespace Solidity.Goals
+
+/--
+info: proved Solidity.Goals.panicSourceAssociation ← Solidity.Correctness.Panic.source_association plan w3d-panic-dispatch
+-/
+#guard_msgs in
+#roadmap_goal panicSourceAssociation
+
+example : Solidity.Goals.panicSourceAssociation := Solidity.Correctness.Panic.source_association
+
+/--
+info: 'Solidity.Correctness.Panic.source_association' depends on axioms: [propext, Classical.choice, Quot.sound]
+-/
+#guard_msgs in
+#print axioms Solidity.Correctness.Panic.source_association
+
+end Solidity.Goals
 
 namespace Solidity.Examples.Goals.PanicSource
 

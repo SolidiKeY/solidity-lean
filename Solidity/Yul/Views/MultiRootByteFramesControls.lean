@@ -28,7 +28,7 @@ theorem caller_frame_whole :
         enumeratedMemoryWriteback after mixedPlacement q history raw=.ok (some (.ok (),after)) ∧ ReservedOK raw q.free := by
   first | (simp only;done) | decide | omega | rfl | skip
   have result := sub_physical mixedHeap.ty mixedPlacement mixedReadFrame 0 requests mixedState child child_OK mixedPlacement
-    (retainInitial _ _) mixed_actual_MemOK StructWordHeap.Controls.support mixedPhysical ByteElementStore.Controls.oldReads mixed_reserved
+    (retainInitial _ _) mixed_actual_MemOK Solidity.Yul.Views.Controls.generated_mixed_types_supported mixedPhysical ByteElementStore.Controls.oldReads mixed_reserved
   rw [actual_child] at result
   exact result
 
@@ -53,7 +53,7 @@ theorem caller_locals_not_child : child.get .here≠after.1.get .here := by
 theorem actual_source_heap_only :
     ∃ result heap,(program mixedReadFrame 0 requests).run mixedState=(result,withSourceHeap mixedState heap) ∧
       heap.ty=mixedHeap.ty ∧ ∀ a τ d,heap.get a=some ⟨τ,d⟩ → InventoryTypeSupported mixedEnv τ :=
-  program_store mixedReadFrame 0 requests mixedState StructWordHeap.Controls.support
+  program_store mixedReadFrame 0 requests mixedState Solidity.Yul.Views.Controls.generated_mixed_types_supported
 
 theorem prefix_and_unrelated_raw : raw 162=0x55 ∧ raw 416=0x80 ∧ raw 1440=0xee ∧ raw 1443=0xa5 ∧
     after.2.heap.get 2=mixedHeap.get 2 ∧ after.2.ex=mixedState.2.ex ∧ after.2.logs=mixedState.2.logs := by

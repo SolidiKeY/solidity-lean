@@ -46,11 +46,8 @@ def compiled : CompiledProg 1 enclosed.frag fresh := (Memory.compileProg 1 _ fre
 noncomputable def result : Solidity.Out C loopOut.st.H (.mem A :: LoopScopeControls.Γ) :=
   (fresh.run loopOut.st).toOption.get (by decide +kernel)
 
-theorem source : fresh.run loopOut.st = .ok result := by
-  have h : some result = (fresh.run loopOut.st).toOption := Option.some_get _
-  cases hs : fresh.run loopOut.st with
-  | ok o => rw [hs] at h; exact congrArg Except.ok (Option.some.inj h).symm
-  | error e => rw [hs] at h; cases h
+theorem source : fresh.run loopOut.st = .ok result :=
+  except_ok_of_toOption (Option.some_get _)
 
 theorem cost : compiled.cert.cost loopOut.st = 2 := by decide +kernel
 

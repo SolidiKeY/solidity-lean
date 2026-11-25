@@ -28,23 +28,8 @@ theorem RootDeclarations.pack_spec {E ds} (d : RootDeclarations E ds)
           have leftRoots (c) (hc : c ∈ left) : c.path.root = root := by
             obtain ⟨suffix,equal⟩ := (lm c hc).2.2
             exact congrArg Source.SPath.root equal
-          refine ⟨by omega,(fun bound => rb (lb bound)),?_,?_⟩
-          · apply List.pairwise_append.mpr
-            refine ⟨ls,rs,?_⟩
-            intro c hc e he
-            obtain ⟨cl,ch,_⟩ := lm c hc
-            obtain ⟨el,eh,er⟩ := rm e he
-            refine ⟨?_,pathsApart_of_span c e (by omega)⟩
-            intro same
-            have roots := congrArg Source.SPath.root same
-            rw [leftRoots c hc] at roots
-            exact nodup.1 (roots ▸ er)
-          · intro c member
-            rcases List.mem_append.mp member with hc | hc
-            · obtain ⟨cl,ch,_⟩ := lm c hc
-              exact ⟨cl,by omega,List.mem_cons.mpr (Or.inl (leftRoots c hc))⟩
-            · obtain ⟨cl,ch,cr⟩ := rm c hc
-              exact ⟨by omega,ch,List.mem_cons_of_mem root cr⟩
+          exact rootPack_append_spec root (rest.map Prod.fst) left right cursor middle last
+            lo hi lb rb ls rs (fun c hc => ⟨(lm c hc).1,(lm c hc).2.1⟩) rm leftRoots nodup.1
     · cases success
 
 theorem RootDeclarations.pack_paths {E ds} (d : RootDeclarations E ds) (a : Roadmap.Address)

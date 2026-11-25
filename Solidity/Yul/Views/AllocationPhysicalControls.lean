@@ -1,4 +1,5 @@
 import Solidity.Yul.Views.AllocatedPhysicalMemory
+import Solidity.Yul.Views.RetainedWindowControls
 import Solidity.Yul.Views.AllocationInventoryControls
 
 namespace Solidity.Yul.Views.Controls
@@ -21,7 +22,7 @@ theorem av_mixed_source_and_reserved : enumeratedMemoryWriteback aiState aiPlace
   exact ⟨facts.2.2.2.2.2.2.1,facts.2.2.2.2.2.2.2.1⟩
 
 theorem av_mixed_every_H (H) (ok : Source.MemOK mixedEnv H mixedState) : Source.MemOK mixedEnv H aiState :=
-  byteAllocRef_MemOK mixedState true aiBytes H ok
+  ai_every_H H ok
 
 theorem av_mixed_alias_and_unknown : mload avMixedPhysical 960=128 ∧ mload avMixedPhysical 992=128 ∧
     mload avMixedPhysical (mload avMixedPhysical 960).val=3 ∧
@@ -44,8 +45,7 @@ from a gap or free pointer. -/
 def avBeforeRetained := encodeMixedHeap retainedEmptyPlacement (generatedHeapEntries retainedEmptyPlacement) emptyPhysical
 def avRetainedPhysical := byteAllocationView alBytes 512 576 (by decide) avBeforeRetained
 
-theorem av_retained_before_prepared : prepareHeapInventory retainedEmptyPlacement=.ok (generatedHeapEntries retainedEmptyPlacement) :=
-  ownerMemOK_prepares_inventory byteHeap.ty emptyState retainedEmptyPlacement actual_resize_MemOK.2.2 ai_empty_support
+theorem av_retained_before_prepared : prepareHeapInventory retainedEmptyPlacement=.ok (generatedHeapEntries retainedEmptyPlacement) := RetainedWindowControls.empty_prepared
 
 theorem av_retained_before_reserved : ReservedOK avBeforeRetained 512 :=
   encodeMixedHeap_reserved _ _ _ raw_resize_reserved.2.2
@@ -53,7 +53,7 @@ theorem av_retained_before_reserved : ReservedOK avBeforeRetained 512 :=
 theorem av_retained_whole_map_and_state : encodeMixedHeap alPlacement (generatedHeapEntries alPlacement) avRetainedPhysical=avRetainedPhysical ∧
     enumeratedMemoryWriteback alState alOriginalPlacement alPlacement alHistory avRetainedPhysical=.ok (some (.ok (),alState)) ∧
     ReservedOK avRetainedPhysical 576 := by
-  have before := prepareHeapInventory_ok retainedEmptyPlacement _ av_retained_before_prepared
+  have before := prepareHeapInventory_ok retainedEmptyPlacement _ RetainedWindowControls.empty_prepared
   have facts := retainedByteAllocation_physical byteHeap.ty emptyState (bytePlacement 0) retainedEmptyPlacement retainedEmpty
     true alBytes 512 576 (by decide) ha_fresh (by decide) avBeforeRetained actual_resize_MemOK.2.2 ai_empty_support
     (encodeMixedHeap_reads _ _ before.2.2 emptyPhysical) av_retained_before_reserved

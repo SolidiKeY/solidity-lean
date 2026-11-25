@@ -19,3 +19,31 @@ test('CDP phase completion refuses disconnect after the final reply (injected)',
 test('host restart is recorded and refused without overwriting original partial evidence (injected host boundary)',()=>{const fs=require('node:fs'),os=require('node:os'),path=require('node:path'),{beginHostLifecycle}=require('../parity/host.cjs'),dir=fs.mkdtempSync(path.join(os.tmpdir(),'host-lifetime-'));try{const config={dir,runId:'owned',target:'local'},partial=path.join(dir,'menu-observations.json');fs.writeFileSync(partial,'original failed bytes');const record=beginHostLifecycle(config,false);record('host.exit',{code:0});assert.throws(()=>beginHostLifecycle(config,false),/restarted/);assert.equal(fs.readFileSync(partial,'utf8'),'original failed bytes');const rows=fs.readFileSync(path.join(dir,'host-lifecycle.jsonl'),'utf8').trim().split('\n').map(JSON.parse);assert.deepEqual(rows.map(r=>r.event),['host.start','host.exit','host.start']);assert.equal(rows[2].previousHostRecorded,true);assert.notEqual(rows[0].hostSession,rows[2].hostSession);assert.ok(rows.every(r=>r.runId==='owned'&&r.target==='local'&&r.pid===process.pid&&(process.platform==='linux'?/^[0-9]+$/.test(r.birth):r.birth===null)));}finally{fs.rmSync(dir,{recursive:true,force:true});}});
 
 test('CDP socket failure retains its native error detail while rejecting work (injected)',async()=>{const f=fixture(),pending=f.client.request('Page.captureScreenshot'),reject=assert.rejects(pending,/CDP connection failed/);await Promise.resolve();f.socket.emit('error',{message:'owned renderer closed',error:{message:'socket reset'}});await reject;const event=f.events.find(e=>e.event==='socket.error');assert.equal(event.message,'owned renderer closed');assert.equal(event.errorMessage,'socket reset');assert.throws(()=>f.client.finish(),/CDP connection failed/);assert.equal(f.timers.size,0);});
+
+// An execution exception is not a successful observation, even with plausible value data.
+test('CDP execution exceptions refuse plausible values and retain raw exception details (injected)',async()=>{
+ for(const method of ['Runtime.evaluate','Runtime.callFunctionOn'])for(const details of [{text:'Uncaught',exception:{type:'object',subtype:'error',description:'owned evaluation failure'},lineNumber:7,columnNumber:3},{text:{toString:null}},null]){
+  const f=fixture();
+  try{const pending=f.client.request(method),rejected=assert.rejects(pending,error=>{assert.equal(error.code,'CDP_EXECUTION_EXCEPTION');assert.deepEqual(error.exceptionDetails,details);return true;});await Promise.resolve();
+   f.socket.emit('message',{data:JSON.stringify({id:1,result:{result:{type:'object',value:{activeUri:'file:///owned.sol',items:[{label:'Dafny'}]}},exceptionDetails:details}})});
+   await rejected;assert.deepEqual(f.events.find(e=>e.event==='response').exceptionDetails,details);assert.equal(f.client.pending.size,0);assert.equal(f.timers.size,0);
+  }finally{f.client.close();}
+ }
+});
+
+test('CDP successful reply cannot spend the request deadline in its diagnostic (injected)',async()=>{
+ for(const elapsed of [4999,5000,5001]){
+  let f;const events=[];f=fixture(e=>{events.push(e);if(e.event==='response')f.advance(elapsed);});
+  try{const pending=f.client.request('Runtime.evaluate');const expected=elapsed<5000?pending:assert.rejects(pending,/CDP timeout Runtime.evaluate/);await Promise.resolve();f.advance(12);f.socket.emit('message',{data:JSON.stringify({id:1,result:{result:{value:'owned'}}})});
+   if(elapsed<5000)assert.deepEqual(await expected,{result:{value:'owned'}});else{await expected;assert.ok(events.some(e=>e.event==='response.late'&&e.stage==='after-diagnostic'&&e.elapsedMs===elapsed));}
+   assert.equal(f.client.pending.size,0);assert.equal(f.timers.size,0);
+  }finally{f.client.close();}
+ }
+});
+test('CDP diagnostic time does not replace an on-time protocol or execution error (injected)',async()=>{
+ for(const response of [{error:{code:-32001,message:'owned protocol error'}},{result:{exceptionDetails:{text:'owned execution error'}}}]){
+  let f;f=fixture(e=>{if(e.event==='response')f.advance(5000);});
+  try{const pending=f.client.request('Runtime.evaluate'),expected=assert.rejects(pending,/owned (protocol|execution) error/);await Promise.resolve();f.advance(12);f.socket.emit('message',{data:JSON.stringify({id:1,...response})});await expected;assert.equal(f.client.pending.size,0);assert.equal(f.timers.size,0);}
+  finally{f.client.close();}
+ }
+});

@@ -1468,5 +1468,10 @@
     "file": "Solidity/Tools/Goal.lean",
     "kind": "opaque",
     "code": "opaque Unstated : Prop"
+  },
+  {
+    "file": "Solidity/Frontend/ExecutableCounterexampleMetadataV2.lean",
+    "kind": "kernel-option",
+    "code": "return debug.skipKernelTC.set (Elab.async.set (maxHeartbeats.set options limit) false) false"
   }
 ]

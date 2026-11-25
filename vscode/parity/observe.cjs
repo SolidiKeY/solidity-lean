@@ -9,7 +9,7 @@ const {createHash,randomUUID}=require('node:crypto');
 
 /** Observe calls on real VS Code objects. No mocked renderer or verifier. */
 function observe(vscode, record, extensionPath, tracePath,workspacePath,options={}) {
-  const controllers = [], profiles = [], decorations = [], outputs=[], finalizers=[];
+  const controllers = [], profiles = [], decorations = [], outputs=[], finalizers=[], diagnosticListeners=new Set();
   function instrument(object, handlers) {
     return new Proxy(object, {get(target,key) {
       if (handlers[key]) return handlers[key];
@@ -20,7 +20,9 @@ function observe(vscode, record, extensionPath, tracePath,workspacePath,options=
   const sessions=new WeakMap();let commandSequence=0,outputSequence=0;
   const diagnostic=value=>{try{return value instanceof Error?value.message:String(value);}catch{return 'Unprintable observation error';}};
   const commandSource=()=>{try{const doc=vscode.window.activeTextEditor?.document;if(!doc)return null;if(!sessions.has(doc))sessions.set(doc,randomUUID());return{uri:doc.uri.toString(),version:doc.version,session:sessions.get(doc),textHash:createHash('sha256').update(doc.getText()).digest('hex'),dirty:doc.isDirty,closed:doc.isClosed,trusted:vscode.workspace.isTrusted};}catch(error){return{unavailable:true,reason:diagnostic(error)};}};
+  const symbolProviders=options.observeSymbolProviders?require('./symbol-provider-observer.cjs').observeSymbolProviders(vscode,record,options.documentSessionFor):null;
   const api = {...vscode,
+    ...(symbolProviders?{languages:symbolProviders.languages}:{}),
     env:vscode.env&&instrument(vscode.env,{clipboard:instrument(vscode.env.clipboard,{writeText(text){record('clipboard.write',{sha256:createHash('sha256').update(text).digest('hex'),source:commandSource()});return vscode.env.clipboard.writeText(text);}})}),
     commands:vscode.commands&&instrument(vscode.commands,{registerCommand(id,handler,thisArg){
       return vscode.commands.registerCommand(id,function(...args){
@@ -117,7 +119,8 @@ function observe(vscode, record, extensionPath, tracePath,workspacePath,options=
   };
   const registration = vscode.languages.onDidChangeDiagnostics(event => {
     for (const uri of event.uris) record('diagnostics',{uri:uri.toString(),diagnostics:vscode.languages.getDiagnostics(uri)});
+    for(const entry of [...diagnosticListeners])if(diagnosticListeners.has(entry))try{entry.listener(event);}catch(error){record('diagnostics.subscriberError',{message:diagnostic(error)});}
   });
-  return {controllers,profiles,decorations,outputs,terminalSupported,ownTerminal:terminal=>ownedTerminals.add(terminal),restore() { restored=true;for(const subscription of terminalSubscriptions)subscription.dispose(); finalizers.forEach(f=>f());Module._load = original; registration.dispose(); }};
+  return {subscribeDiagnosticEvents(listener){if(restored||typeof listener!=='function')throw Error('Invalid diagnostic observation subscription');const entry={listener};diagnosticListeners.add(entry);return{dispose(){diagnosticListeners.delete(entry);}};},controllers,profiles,decorations,outputs,symbolProviderFailures:symbolProviders?.failures,terminalSupported,ownTerminal:terminal=>ownedTerminals.add(terminal),restore() { restored=true;diagnosticListeners.clear();symbolProviders?.dispose();for(const subscription of terminalSubscriptions)subscription.dispose(); finalizers.forEach(f=>f());Module._load = original; registration.dispose(); }};
 }
 module.exports = {observe};

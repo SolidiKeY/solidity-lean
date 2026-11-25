@@ -15,13 +15,7 @@ noncomputable def target : Machine := (okMachine (run producer.code loopTarget))
 theorem target_run : run producer.code loopTarget = .ok target 0 := by
   have h : some target = okMachine (run producer.code loopTarget) := Option.some_get _
   generalize run producer.code loopTarget = value at h ⊢
-  cases value with
-  | ok m skip =>
-    cases skip with
-    | zero => exact congrArg (fun m => Evm.Out.ok m 0) (Option.some.inj h).symm
-    | succ n => cases h
-  | revert => cases h
-  | fault => cases h
+  exact successfulMachine_eq_some.mp h.symm
 
 def code : List Evm.Instr := preparation.code ++ (enclosed.code ++ producer.code)
 theorem whole_target : run code machine = .ok target 0 := by

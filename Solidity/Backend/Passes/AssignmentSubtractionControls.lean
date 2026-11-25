@@ -42,16 +42,10 @@ private def successMachine : Evm.Out → Option Machine
   (successMachine (run (compiled p).code {machine with stack := []})).get (by cases p <;> decide +kernel)
 theorem prefix_run (p : Roadmap.Pipeline) :
     run (compiled p).code {machine with stack := []} = .ok (after p) 0 := by
-  have h : some (after p) = successMachine (run (compiled p).code {machine with stack := []}) := by
-    unfold after
-    exact Option.some_get _
-  generalize run (compiled p).code {machine with stack := []} = result at h ⊢
-  cases result with
-  | ok m skip => cases skip with
-    | zero => exact congrArg (fun m => Evm.Out.ok m 0) (Option.some.inj h).symm
-    | succ n => cases h
-  | revert => cases h
-  | fault => cases h
+  apply successfulMachine_eq_some.mp
+  rw [show successfulMachine = successMachine from rfl]
+  unfold after
+  exact (Option.some_get _).symm
 
 def resultWord (p : Roadmap.Pipeline) : Word := if p = .legacy then w[2] else w[0]
 def code (p : Roadmap.Pipeline) := (compiled p).code ++ (operand p).code

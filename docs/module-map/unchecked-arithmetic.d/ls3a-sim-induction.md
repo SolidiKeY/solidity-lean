@@ -1,0 +1,2 @@
+| `Correctness/Lowering/Sim/Induction/Knot.lean` | The actual elaborator record satisfies the frozen case predicates by `elabKernelTotal` induction, conditional on the three case hypotheses and the explicit loop-arm bridge; an intermediate step toward `loweringBySimulation`. |
+| `Examples/Lowering/Sim/Induction.lean` | Uses the intermediate knot-closure theorem with production fresh names and its loop-arm bridge hypothesis. |

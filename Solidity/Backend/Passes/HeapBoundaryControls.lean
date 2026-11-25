@@ -64,36 +64,21 @@ theorem input : (Compilation.construction allocation).Input 1 8 base initial mac
 private theorem first_some : (allocate.run initial).toOption.isSome = true := by decide +kernel
 noncomputable def first : Solidity.Out C initial.H Locals := (allocate.run initial).toOption.get first_some
 
-theorem allocation_source : allocate.run initial = .ok first := by
-  have h : some first = (allocate.run initial).toOption := Option.some_get first_some
-  cases hs : allocate.run initial with
-  | ok o =>
-    rw [hs] at h
-    exact congrArg Except.ok (Option.some.inj h).symm
-  | error e => rw [hs] at h; cases h
+theorem allocation_source : allocate.run initial = .ok first :=
+  except_ok_of_toOption (Option.some_get first_some)
 
 private theorem second_some : (mutate.run first.st).toOption.isSome = true := by decide +kernel
 noncomputable def second : Solidity.Out C first.st.H Locals := (mutate.run first.st).toOption.get second_some
 
-theorem mutation_source : mutate.run first.st = .ok second := by
-  have h : some second = (mutate.run first.st).toOption := Option.some_get second_some
-  cases hs : mutate.run first.st with
-  | ok o =>
-    rw [hs] at h
-    exact congrArg Except.ok (Option.some.inj h).symm
-  | error e => rw [hs] at h; cases h
+theorem mutation_source : mutate.run first.st = .ok second :=
+  except_ok_of_toOption (Option.some_get second_some)
 
 private theorem third_some : (read.run second.st).toOption.isSome = true := by decide +kernel
 noncomputable def third : Solidity.Out C second.st.H (.val .uint :: Locals) :=
   (read.run second.st).toOption.get third_some
 
-theorem observation_source : read.run second.st = .ok third := by
-  have h : some third = (read.run second.st).toOption := Option.some_get third_some
-  cases hs : read.run second.st with
-  | ok o =>
-    rw [hs] at h
-    exact congrArg Except.ok (Option.some.inj h).symm
-  | error e => rw [hs] at h; cases h
+theorem observation_source : read.run second.st = .ok third :=
+  except_ok_of_toOption (Option.some_get third_some)
 
 theorem reached_link (tail : List Word) :
     ReachedMappedLink (.construction allocation) (.referenceArrays mutation) (.memory observation)

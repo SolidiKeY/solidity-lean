@@ -54,6 +54,29 @@ test('compiler secondary locations retain individual file text, UTF8 offsets, me
     assert.equal(rows[0].relatedInformation.length,2);assert.deepEqual(rows[0].relatedInformation[0],{location:{uri:pathToFileURL(foreign).href,range:range(1,0,1,3)},message:'other declaration'});assert.equal(rows[0].relatedInformation[1].location.uri,s.uri);
   }finally{s.dispose();}
 });
+test('foreign compiler primary links require real UTF8 and CRLF boundaries, not a zero fallback',()=>{
+  const s=setup();try{
+    const foreign=path.join(s.root,'Lib.sol'),foreignUri=pathToFileURL(foreign).href;
+    const source='// 😀\r\nxyz';
+    s.doc.projectSnapshot={files:{'Lib.sol':{path:foreign,text:source}}};
+    const diagnostic=(start,end)=>({severity:'error',message:'foreign failure',errorCode:42,
+      sourceLocation:{file:'Lib.sol',start,end}});
+    for(const [start,end] of [[4,7],[3,4],[8,9],[-1,2],[0,100],[5,3],[0.5,2],[0,Number.MAX_SAFE_INTEGER+1]]){
+      const rows=s.service.compilerDiagnostics(s.doc,[diagnostic(start,end)]);
+      assert.equal(rows.length,1);assert.equal(rows[0].severity,1);assert.equal(rows[0].code,'import:42');
+      assert.equal(rows[0].message,'foreign failure');assert.deepEqual(rows[0].range,range(0,0,0,0));
+      assert.equal(rows[0].relatedInformation,undefined,'invalid foreign span must not invent a navigation target: '+start+':'+end);
+    }
+    for(const [start,end,expected] of [[0,0,range(0,0,0,0)],[3,7,range(0,3,0,5)],[9,12,range(1,0,1,3)]]){
+      const rows=s.service.compilerDiagnostics(s.doc,[diagnostic(start,end)]);
+      assert.deepEqual(rows[0].relatedInformation,[{location:{uri:foreignUri,range:expected},message:'foreign failure'}]);
+    }
+    const rows=s.service.compilerDiagnostics(s.doc,[{...diagnostic(4,7),secondarySourceLocations:[
+      {file:'Lib.sol',start:9,end:12,message:'valid secondary'},
+      {file:'Lib.sol',start:8,end:9,message:'invalid secondary'}]}]);
+    assert.deepEqual(rows[0].relatedInformation,[{location:{uri:foreignUri,range:range(1,0,1,3)},message:'valid secondary'}]);
+  }finally{s.dispose();}
+});
 test('hover returns a declaration while verification remains pending',async()=>{
   const gate=deferred(),started=deferred();let done=false;
   const s=setup({verify:async()=>{started.resolve();await gate.promise;return{results:[],errors:[]};}});
@@ -106,13 +129,25 @@ test('a provider response from a retired or reassigned language client cannot be
   const request=servers.request('textDocument/hover',doc),obsolete=assert.rejects(request,e=>e.code===-32801);await Promise.resolve();servers.owners.set(doc.uri.toString(),{});gate2.resolve({contents:{value:'old owner'}});await obsolete;
 });
 
-test('failed reference startup cannot leave a stale passed migration artifact',()=>{
-  const root=fs.mkdtempSync(path.join(os.tmpdir(),'reference-migration-life-'));
+test('reference lifecycle refuses an existing output before overwriting receipts or spawning',()=>{
+  const root=fs.mkdtempSync(path.join(os.tmpdir(),'reference-existing-life-'));
   try{
-    const out=path.join(root,'out');fs.mkdirSync(out);fs.writeFileSync(path.join(out,'migration.json'),JSON.stringify({status:'passed',run:'old'}));
-    const executable=path.join(root,'exits-before-init');fs.writeFileSync(executable,'#!'+process.execPath+String.fromCharCode(10)+'process.exit(9);'+String.fromCharCode(10),{mode:0o700});
+    const out=path.join(root,'out');fs.mkdirSync(out);const originals={'migration.json':'{"status":"passed","run":"old"}\n','phases.json':'old phases\n','dafny-lsp.jsonl':'old trace\n','server.log':'old stderr\n'};
+    for(const [name,bytes]of Object.entries(originals))fs.writeFileSync(path.join(out,name),bytes);
+    const marker=path.join(root,'spawned'),executable=path.join(root,'must-not-spawn');fs.writeFileSync(executable,'#!'+process.execPath+'\nrequire("node:fs").writeFileSync('+JSON.stringify(marker)+',"spawned");process.exit(9);\n',{mode:0o700});
+    for(const extra of [[],['--migration']]){
+      const result=require('node:child_process').spawnSync(process.execPath,[path.resolve(__dirname,'../parity/lifecycle-trace.cjs'),executable,out,...extra],{encoding:'utf8',timeout:5000});
+      assert.equal(result.status,1);assert.equal(result.error,undefined);assert.match(result.stderr,/fresh lifecycle output/);assert.equal(fs.existsSync(marker),false);
+      for(const [name,bytes]of Object.entries(originals))assert.equal(fs.readFileSync(path.join(out,name),'utf8'),bytes);
+    }
+  }finally{fs.rmSync(root,{recursive:true,force:true});}
+});
+test('failed startup in a fresh lifecycle output records failure without a passed artifact',()=>{
+  const root=fs.mkdtempSync(path.join(os.tmpdir(),'reference-fresh-life-'));
+  try{
+    const out=path.join(root,'out'),executable=path.join(root,'exits-before-init');fs.writeFileSync(executable,'#!'+process.execPath+'\nprocess.exit(9);\n',{mode:0o700});
     const result=require('node:child_process').spawnSync(process.execPath,[path.resolve(__dirname,'../parity/lifecycle-trace.cjs'),executable,out,'--migration'],{encoding:'utf8',timeout:5000});
-    assert.equal(result.status,1);assert.equal(result.error,undefined);assert.equal(fs.existsSync(path.join(out,'migration.json')),false);
+    assert.equal(result.status,1);assert.equal(result.error,undefined);assert.equal(fs.existsSync(path.join(out,'migration.json')),false);assert.equal(fs.existsSync(path.join(out,'phases.json')),false);assert.ok(fs.readFileSync(path.join(out,'dafny-lsp.jsonl'),'utf8').includes('initialize'));
   }finally{fs.rmSync(root,{recursive:true,force:true});}
 });
 

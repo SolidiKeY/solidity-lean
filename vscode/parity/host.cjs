@@ -20,7 +20,7 @@ function beginHostLifecycle(config,trusted){
 async function run() {
   const vscode = require('vscode');
   const config = JSON.parse(readFileSync(process.env.PARITY_HOST_CONFIG,'utf8'));
-  if(config.menuTrust){const lifecycle=beginHostLifecycle(config,vscode.workspace.isTrusted);if(config.menuTrust==='recovery')config.menuRecoveryHost=lifecycle.identity;process.once('exit',code=>lifecycle('host.exit',{code}));process.on('uncaughtExceptionMonitor',error=>lifecycle('host.uncaught',{message:error.message}));}
+  if(config.menuTrust||config.suite==='contribution-menus'){const lifecycle=beginHostLifecycle(config,vscode.workspace.isTrusted);config.menuHost=lifecycle.identity;if(config.menuTrust==='recovery')config.menuRecoveryHost=lifecycle.identity;process.once('exit',code=>lifecycle('host.exit',{code}));process.on('uncaughtExceptionMonitor',error=>lifecycle('host.uncaught',{message:error.message}));}
   config.hostFilesystemCapability=require('./filesystem.cjs').recursiveCapability(config.dir);writeFileSync(join(config.dir,'host-filesystem-capability.json'),JSON.stringify(config.hostFilesystemCapability));
   // Desktop VS Code may resolve a login-shell PATH. Preserve the explicitly
   // selected backend toolchain rather than silently switching installations.
@@ -34,7 +34,7 @@ async function run() {
   const extension=vscode.extensions.getExtension(target==='dafny'?'dafny-lang.ide-vscode':'SolidiKeY.solidity-lean');
   if(!config.menuTrust)assert.ok(extension,'target extension is installed');
   const observedExtensionPath=extension?.extensionPath||config.observedExtensionPath;assert.ok(observedExtensionPath,'missing target extension source path');
-  const observation = observe(vscode,record,observedExtensionPath,config.recordProtocol?config.trace:null,config.workspace,{captureServerArtifacts:config.suite==='verification-time-limit',artifactReferenceDirectory:target==='dafny'?require('node:path').dirname(config.dafnyExecutable):undefined});
+  const observation = observe(vscode,record,observedExtensionPath,config.recordProtocol?config.trace:null,config.workspace,{observeSymbolProviders:config.suite==='editor-language-scope',documentSessionFor:doc=>sessionFor(doc),captureServerArtifacts:config.suite==='verification-time-limit',artifactReferenceDirectory:target==='dafny'?require('node:path').dirname(config.dafnyExecutable):undefined});
   const heartbeat = [];
   let last = performance.now();
   const timer = setInterval(()=>{const now=performance.now();heartbeat.push(Math.max(0,now-last-25));last=now;},25);
@@ -120,6 +120,14 @@ async function run() {
     }
     if(config.suite==='contribution-menus'){
       await scenario(config.menuTrust==='recovery'?'native-contribution-menu-recovery':'native-contribution-menus',()=>require('./menu-lifecycle.cjs').run({vscode,config,events,sessionFor}));
+    }else if(['workspace-symbols','workspace-symbols-resolved'].includes(config.suite)){
+      await scenario('native-workspace-symbols',()=>require('./workspace-symbol-lifecycle.cjs').run({vscode,config,events,sessionFor,bounded}));
+    }else if(config.suite==='editor-language-scope'){
+      await scenario('native-editor-language-scope',()=>require('./editor-language-lifecycle.cjs').run({vscode,config,events,sessionFor}));
+    }else if(config.suite==='related-diagnostics'){
+      if(config.diagnosticLifecycle)await scenario('native-related-diagnostic-lifecycle',()=>require('./related-diagnostic-lifecycle.cjs').run({vscode,config,events,sessionFor}));else await scenario('native-related-diagnostics',()=>require('./related-diagnostics.cjs').run({vscode,config,events,sessionFor,diagnosticSubscribe:config.diagnosticEvents?listener=>observation.subscribeDiagnosticEvents(listener):undefined}));
+    }else if(config.suite==='compiler-code-actions'){
+      await scenario('native-compiler-code-actions',()=>require('./code-action-lifecycle.cjs').run({vscode,config,api,events,sessionFor}));
     }else if(config.suite==='verification-time-limit'){
       await scenario('native-verification-time-limit',()=>require('./verification-limit.cjs').run({vscode,config,api,events,until}));
     }else if(config.suite==='testing-symbols'){
@@ -565,7 +573,7 @@ async function run() {
   } catch(error) {result.status=error.code==='TIMEOUT'?'timeout':'broken';result.error=error.stack;}
   finally {
     if(localStatus)api.service.removeListener('status',localStatus);
-    clearInterval(timer);observation.restore();result.elapsedMs=performance.now()-started;
+    clearInterval(timer);observation.restore();if(observation.symbolProviderFailures)require('./symbol-provider-observer.cjs').finalizeRecording(result,observation.symbolProviderFailures);result.elapsedMs=performance.now()-started;
     writeFileSync(config.result,JSON.stringify(result,null,2));
     if(target==='local'&&!localRetirementStarted) api?.cancel();
     const captureStart=performance.now();

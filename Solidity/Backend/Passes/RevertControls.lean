@@ -55,37 +55,6 @@ theorem middle_witness (tail : List Word) : ∃ (mid : Machine) (mb : Nat → Fi
   have ad : MappedBoundaryLink (.memory allocationStage) (.memory TripleFailures.middleBad)
       1 7 initialBase (State.init C) {initialMachine with stack := tail} :=
     memory_nonallocating_mapped_link _ _ (by decide +kernel) (by decide +kernel)
-  have ht : run (allocationStage.code ++ TripleFailures.middleBad.code)
-      {initialMachine with stack := tail} = .revert :=
-    (compilation_mapped_revert_iff (.memory allocationStage) (.memory TripleFailures.middleBad)
-      (compilation_input_stack (.memory allocationStage) prefix_input7 tail) ad rfl rfl).mpr
-      (.inr ⟨_, ReachabilityControls.fresh_state_reaches_fixture,
-        .inl LinkedControls.right_stage_source_revert⟩)
-  have h := (compilation_mapped_revert_witness_iff (.memory allocationStage) (.memory TripleFailures.middleBad)
-    (compilation_input_stack (.memory allocationStage) prefix_input7 tail) ad rfl rfl).mp ht
-  rcases h with ⟨hs | ⟨_, hs⟩, _⟩ | ⟨o, mid, mb, hs, hm, ma, hi, hf, hr⟩
-  · rw [ReachabilityControls.fresh_state_reaches_fixture] at hs
-    cases hs
-  · rw [ReachabilityControls.fresh_state_reaches_fixture] at hs
-    cases hs
-  · have ho : o = ⟨σ, ⟨σ.H, rfl⟩⟩ :=
-      Except.ok.inj (hs.symm.trans ReachabilityControls.fresh_state_reaches_fixture)
-    cases ho
-    exact ⟨mid, mb, hm,
-      by simpa only [allocationStage.cert.pushes_zero, Nat.add_zero] using ma,
-      by simpa only [allocationStage.cert.pushes_zero, Nat.add_zero] using hi, hf, hr⟩
-
-/-- The genuinely reached middle branch also instantiates the TRIPLE
-witness law; third source/Input obligations remain absent. -/
-theorem middle_triple_witness (tail : List Word) : ∃ (mid : Machine) (mb : Nat → Fin W),
-    run allocationStage.code {initialMachine with stack := tail} = .ok mid 0 ∧
-    MappedOutput (.memory allocationStage) 1 7 initialBase (State.init C)
-      {initialMachine with stack := tail} σ mid mb ∧
-    (Compilation.memory TripleFailures.middleBad).Input 1 7 mb σ mid ∧
-    TerminalFailure CompileExamples.badRhsRead σ ∧ run TripleFailures.middleBad.code mid = .revert := by
-  have ad : MappedBoundaryLink (.memory allocationStage) (.memory TripleFailures.middleBad)
-      1 7 initialBase (State.init C) {initialMachine with stack := tail} :=
-    memory_nonallocating_mapped_link _ _ (by decide +kernel) (by decide +kernel)
   have de : ReachedMappedLink (.memory allocationStage) (.memory TripleFailures.middleBad)
       (.memory TripleFailures.afterBad) 1 7 initialBase (State.init C) {initialMachine with stack := tail} := by
     intro o mid mb _ _ _
@@ -106,6 +75,16 @@ theorem middle_triple_witness (tail : List Word) : ∃ (mid : Machine) (mb : Nat
         by simpa only [allocationStage.cert.pushes_zero, Nat.add_zero] using hi, hf, hr⟩
     · rw [LinkedControls.right_stage_source_revert] at hu
       cases hu
+
+/-- The genuinely reached middle branch also instantiates the TRIPLE
+witness law; third source/Input obligations remain absent. -/
+theorem middle_triple_witness (tail : List Word) : ∃ (mid : Machine) (mb : Nat → Fin W),
+    run allocationStage.code {initialMachine with stack := tail} = .ok mid 0 ∧
+    MappedOutput (.memory allocationStage) 1 7 initialBase (State.init C)
+      {initialMachine with stack := tail} σ mid mb ∧
+    (Compilation.memory TripleFailures.middleBad).Input 1 7 mb σ mid ∧
+    TerminalFailure CompileExamples.badRhsRead σ ∧ run TripleFailures.middleBad.code mid = .revert :=
+  middle_witness tail
 
 /-- Both actual prefix maps, full output relations AND the failing suffix
 Input/run are retained. This works for independently supplied physical links. -/

@@ -34,7 +34,7 @@ theorem derived_hash (G : Source.Glob mixedEnv) (n : Nat) :
       output.word=some (keccak256 G.fixed.evm raw 416 bytes.length) := by
   first | (simp only;done) | decide | omega | rfl | skip
   have result := transport G mixedReadFrame 0 n writePrefix mixedHeap.ty initial
-    mixedPlacement mixedPlacement (retainInitial _ _) incoming StructWordHeap.Controls.support
+    mixedPlacement mixedPlacement (retainInitial _ _) incoming Solidity.Yul.Views.Controls.generated_mixed_types_supported
     mixedPhysical ByteElementStore.Controls.oldReads mixed_reserved .here 1 true [0xff,0x61] rfl rfl
   rw [actual_plan] at result
   exact result

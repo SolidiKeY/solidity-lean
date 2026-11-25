@@ -63,5 +63,16 @@ function renderedErrors(o,runId){try{assert.equal(o.source,compilerHierarchySour
  assert.ok(!o.events.some(e=>e.kind.startsWith('test.')));return[];}catch(error){return['incomplete compiler Testing renderer evidence: '+error.message];}}
 module.exports.renderedErrors=renderedErrors;
 
-function assertRenderedTree(view,metadata){assert.match(view.rootClass,/(^|\s)test-explorer(\s|$)/);assert.equal(view.activeUri,metadata.binding.uri);if(metadata.visible){assert.equal(view.rootVisible,true);assert.ok(view.toolbar.some(b=>typeof b.label==='string'&&b.label.length));}else if(!view.rootVisible){assert.equal(view.emptyWelcome?.visible,true);assert.ok(view.emptyWelcome.text.includes('No tests have been found in this workspace yet.'));}if(metadata.visible){const file=require('node:path').basename(require('node:url').fileURLToPath(metadata.binding.uri));assert.ok(view.rows.some(r=>r.label===file),'owned source file in Testing view');for(const name of ['Base','Derived','f','g'])assert.ok(view.rows.some(r=>r.label===name));assert.equal(view.rows.filter(r=>r.label==='f').length,2);}else assert.ok(!view.rows.some(r=>['Base','Derived','f','g'].includes(r.label)));return view;}
+function assertRenderedTree(view,metadata){
+ assert.match(view.rootClass,/(^|\s)test-explorer(\s|$)/);assert.equal(view.activeUri,metadata.binding.uri);
+ if(metadata.visible){assert.equal(view.rootVisible,true);assert.ok(view.toolbar.some(b=>typeof b.label==='string'&&b.label.length));}
+ else if(!view.rootVisible){assert.equal(view.emptyWelcome?.visible,true);assert.ok(view.emptyWelcome.text.includes('No tests have been found in this workspace yet.'));}
+ const file=require('node:path').basename(require('node:url').fileURLToPath(metadata.binding.uri));
+ if(metadata.visible){
+  // Label/ARIA correspondence only; the DOM row does not attest a resource URI.
+  const files=view.rows.map((r,i)=>r.label===file?i:-1).filter(i=>i>=0);assert.equal(files.length,1,'Unique source-label root in Testing view');const start=files[0];assert.equal(view.rows[start].level,'1','Source-label row must be a root');
+  const next=view.rows.findIndex((r,i)=>i>start&&r.level==='1'),owned=view.rows.slice(start,next<0?undefined:next);
+  assert.deepEqual(owned.map(r=>[r.label,r.level,r.expanded]),[[file,'1','true'],['Base','2','true'],['f','3',null],['f','3',null],['Derived','2','true'],['g','3',null]],'Ordered source-label Testing hierarchy differs');
+ }else assert.ok(!view.rows.some(r=>[file,'Base','Derived','f','g'].includes(r.label)),'Hidden owned Testing rows remain');return view;
+}
 module.exports.assertRenderedTree=assertRenderedTree;
