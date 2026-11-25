@@ -15,7 +15,7 @@ def one {α : Type} (c : Part α) : Parts α := .cons c .nil
 /-! ## Nested readings, too little fuel and more fuel -/
 
 /-- `function (function (function (uint8)) external) returns (uint)`: three nested
-function types over a leaf, depth 4. -/
+function types around `uint8`, depth 4. -/
 def deep : Part Unit :=
   .fn false () (one (.fn true () (one (.fn false () (one (.elem u8)) .nil)) .nil))
     (one (.elem u256))
@@ -52,6 +52,22 @@ example {s c d : String} (isFn : fnTy? c = true) (bad : fnParts? c = none)
     (parts : fnParts? s = some ([d], [c], true)) (n : Nat) : part n s = none :=
   part_refused (.ret parts (List.mem_singleton.2 rfl) (.malformed isFn bad)) n
 
+/-- The ordered traversal: two components read pointwise, in order. -/
+example {f : String → Option (Part Unit)} {a b : String} {p q : Part Unit}
+    (ha : f a = some p) (hb : f b = some q) :
+    partsWith f [a, b] = some (.cons p (one q)) :=
+  (partsWith_eq_some_iff f _ _).2 ⟨a, [b], rfl, ha, b, [], rfl, hb, rfl⟩
+example (f : String → Option (Part Unit)) : partsWith f [] = some .nil := partsWith_nil f
+example {cs : List String} {P : Parts Unit} (h : partsWith (part 2) cs = some P) :
+    partsWith (part 9) cs = some P := partsWith_part_mono (by decide) h
+
+/-- A malformed parameter refuses the list it is in and the signature around it. -/
+example {s c : String} (isFn : fnTy? c = true) (bad : fnParts? c = none)
+    (parts : fnParts? s = some ([c, "uint"], [], false)) (n : Nat) :
+    partsWith (part n) [c, "uint"] = none ∧ readSig s = none :=
+  ⟨partsWith_refused (List.mem_cons_self ..) (.malformed isFn bad) n,
+    readSig_refused (.param parts (List.mem_cons_self ..) (.malformed isFn bad))⟩
+
 /-- `deep`'s shape at abstract spellings: the hypotheses are its two nested
 `fnParts?` splits, the outer one, and its two leaves' readings. -/
 theorem deep_splits {s m i a b : String}
@@ -72,7 +88,7 @@ example {s m i a b : String}
     part 3 s = none ∧ part 4 s = some deep ∧ part 7 s = some deep :=
   have h := deep_splits outer mid inner ha la hb lb
   ⟨part_lt_depth deep h (by decide), part_of_splits deep h (by decide),
-    part_of_splits deep h (by decide)⟩
+    (part_splits_iff h 7).2 (by decide)⟩
 
 /-- Annotations are erased: a tree annotated with mutabilities reads back as
 its erasure, at `readSig`'s fuel, when its own spelling splits as itself. -/
