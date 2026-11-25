@@ -224,6 +224,7 @@ import Solidity.Examples.Lowering.Total.EnumUseDecode
 import Solidity.Examples.Lowering.Total.FunctionTypeDecode
 import Solidity.Examples.Lowering.Total.FunctionTypeFuelLaws
 import Solidity.Examples.Lowering.Total.FunctionTypeParserLaws
+import Solidity.Examples.Lowering.Total.FunctionTypeRefs
 import Solidity.Examples.Lowering.Total.ReferenceDecode
 import Solidity.Examples.Lowering.Total.ReferenceStateDecode
 import Solidity.Examples.Lowering.Total.TransientDecode
