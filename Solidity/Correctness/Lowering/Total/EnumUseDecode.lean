@@ -4,42 +4,29 @@ import Solidity.Syntax.Elab.Values
 /-!
 # Decoding enum member expressions into Source
 
-The expression-level enum component `EnumDecode` leaves open: the raw
-elaborator reads `E.m`, `type(E).min` and `type(E).max` through
-`Solidity.enumLit?` (an unshadowed enum of the contract, then the member's
-position, `0`, or the last position), and erases the result to a `uint`
-literal. This module reads those uses back as Source.
+`EnumDecode` leaves enum uses open. The raw elaborator reads `E.m`,
+`type(E).min` and `type(E).max` through `Solidity.enumLit?` and erases the
+ordinal to a `uint` literal; here those uses are read back as Source.
 
-- `Form` classifies the field name `enumLit?` inspects (`Form.ofField`), and
-  `Form.read` is its ordinal reading of an ordered member list.
-- `enumLit?_eq` is the exact reading of `enumLit?` on every input: `none` on a
-  non-name base and on a local or state-variable shadow, otherwise the raw
-  table's ordinal; `enumLit?_member`, `enumLit?_min`, `enumLit?_max` and the
-  failures (`enumLit?_shadow_local`, `enumLit?_shadow_state`, `enumLit?_absent`,
-  `enumLit?_empty`) specialize it.
-- `Form.spell` is the Source spelling (`E.m`, `type(E).min`, `type(E).max`);
-  `ordinalSpell` is the conversion `E(i)` S01 types.
-- On a decoded table (`EnumDecode.decode`) placed in the Source environment
-  of the contract scope beside only non-enum declarations, `sourceRead_eq`
-  transports the ordinal to the Source member list, and the minimum and
-  maximum exist exactly for the enums the table has (`sourceRead_min_isSome`).
-- Under the explicit raw/Source scope alignment `Aligned`, a successful
-  `enumLit?` gives actual Source name resolution of `E` to its single enum
-  declaration (`resolve_eq`), S01's conversion target (`convTarget_eq`), a
-  `Typed` derivation of `E(i)` at the enum type (`typedOrdinal`), an ordinal
-  below the Source layout's member count, and the enum value `Val.enum` whose
-  key is the ordinal and which `enumOfInt` produces (`decode_use`).
-- A Source local of the name resolves to the local, and a same-scope
-  declaration beside the enum makes the name ambiguous: neither is a
-  conversion target (`convTarget_local`, `convTarget_shadow`).
-- S01 types neither a member access on an enum name (`spell_member_untyped`)
-  nor `type(T).min`/`type(T).max` (`spell_bound_untyped`, the S04.02 gap), so
-  the typed Source reading of every form is the conversion spelling.
+- `enumLit?_eq`: the exact reading of `enumLit?` on every input (`Form.ofField`
+  classifies the field, `Form.read` reads an ordered member list): `none` on a
+  non-name base, a local or state shadow, an absent enum or member, a memberless
+  enum's bounds.
+- `Form.spell` is the Source spelling of each form. S01's `Typed` has no rule
+  for a member access on an enum name, and `type(T)` is the ledger's S04.02
+  gap, so the typed stand-in is the conversion `E(i)` (`ordinalSpell`).
+- `sourceRead_eq`: on a decoded table the Source member lists give the same
+  readings (`sourceRead_bounds`: decoded enums always have bounds).
+- Under the explicit raw/Source alignment `Aligned`, `decode_use`: a successful
+  `enumLit?` gives Source resolution of `E` to its single decoded declaration,
+  S01's conversion target, the Source reading, a `Typed` `E(i)`, an ordinal
+  below the layout's member count, and the enum value `enumOfInt` gives the
+  ordinal (the value S01's constant conversion produces, `Value.lean`).
+  A Source local hides the enum (`convTarget_local`).
 
-Not established here: reconstruction of enum-typed variables (erased to
-`uint` by the raw elaborator, so no enum identity is read from a plain
-`uint`), general conversions, whole-unit coverage and execution simulation;
-those stay with the complete-unit decoder.
+Not established: enum-typed variables (erased to `uint`, so no enum identity
+is read from a plain `uint`), general conversions, evaluation of `E(i)`,
+whole-unit coverage and execution simulation.
 -/
 namespace Solidity.Correctness.Lowering.Total.EnumUseDecode
 
@@ -60,20 +47,11 @@ inductive Form where
 def Form.ofField (m : String) : Form :=
   if m == "type(min)" then .min else if m == "type(max)" then .max else .member m
 
-/-- The raw field name of a form. -/
-def Form.field : Form → String
-  | .member m => m
-  | .min => "type(min)"
-  | .max => "type(max)"
-
 /-- The ordinal a form denotes in an ordered member list. -/
 def Form.read : Form → List String → Option Nat
   | .member m, ms => ms.findIdx? (· == m)
   | .min, ms => if ms.isEmpty then none else some 0
   | .max, ms => if ms.isEmpty then none else some (ms.length - 1)
-
-/-- The raw spelling of a form on the name `x`. -/
-def Form.raw (x : Name) (f : Form) : RawExpr := .field (.name x) f.field
 
 /-- The Source spelling: `E.m`, `type(E).min`, `type(E).max`. -/
 def Form.spell (x : String) : Form → Source.Syn .expr
@@ -81,12 +59,9 @@ def Form.spell (x : String) : Form → Source.Syn .expr
   | .min => .member (.metaType (.userType ⟨x, []⟩)) "min"
   | .max => .member (.metaType (.userType ⟨x, []⟩)) "max"
 
-/-- The Source conversion `E(i)` of the ordinal `i`, the spelling S01 types. -/
+/-- The conversion `E(i)`: S01's typed stand-in for a form read as `i`. -/
 def ordinalSpell (x : String) (i : Nat) : Source.Syn .expr :=
   .call (.ident x) (.positional (.cons (.lit (.num (.dec i 0 0))) .nil))
-
-theorem Form.ofField_field_min : Form.ofField Form.min.field = .min := rfl
-theorem Form.ofField_field_max : Form.ofField Form.max.field = .max := rfl
 
 /-- A member name that is not one of the macro's reserved fields reads as
 itself (no Solidity identifier contains parentheses). -/
@@ -94,6 +69,7 @@ theorem Form.ofField_member {m : String} (h₁ : m ≠ "type(min)") (h₂ : m �
     Form.ofField m = .member m := by
   simp [Form.ofField, h₁, h₂]
 
+/-- A read ordinal is a position of the list. -/
 theorem Form.read_lt {f : Form} {ms : List String} {i : Nat} (h : f.read ms = some i) :
     i < ms.length := by
   cases f with
@@ -146,37 +122,10 @@ theorem enumLit?_member (C : Contract) (Γ : NCtx) {x : Name} {m : String}
   simp only [hs, Form.ofField_member h₁ h₂, rawMember?, Bool.false_eq_true, if_false]
   rfl
 
-/-- `type(E).min`: position `0` of a nonempty member list. -/
-theorem enumLit?_min (C : Contract) (Γ : NCtx) {x : Name} {ms : List Name}
-    (hs : Shadowed C Γ x = false) (hl : lookupBy x C.enums = some ms) (hne : ms ≠ []) :
-    enumLit? C Γ (.name x) "type(min)" = some 0 := by
-  rw [enumLit?_eq]
-  simp [hs, hl, Form.ofField, Form.read, hne]
-
-/-- `type(E).max`: the last position of a nonempty member list. -/
-theorem enumLit?_max (C : Contract) (Γ : NCtx) {x : Name} {ms : List Name}
-    (hs : Shadowed C Γ x = false) (hl : lookupBy x C.enums = some ms) (hne : ms ≠ []) :
-    enumLit? C Γ (.name x) "type(max)" = some (ms.length - 1) := by
-  rw [enumLit?_eq]
-  simp [hs, hl, Form.ofField, Form.read, hne]
-
-/-- A local named `x` shadows the enum: nothing is read. -/
-theorem enumLit?_shadow_local (C : Contract) (Γ : NCtx) {x : Name} {m : String} {t : LTy}
-    (h : Γ.lookupTy (Var.ofName x) = some t) : enumLit? C Γ (.name x) m = none := by
-  rw [enumLit?_eq]
-  simp [Shadowed, h]
-
-/-- A state variable named `x` shadows the enum: nothing is read. -/
-theorem enumLit?_shadow_state (C : Contract) (Γ : NCtx) {x : Name} {m : String} {T : Ty}
-    (h : C.rootType x = some T) : enumLit? C Γ (.name x) m = none := by
-  rw [enumLit?_eq]
-  simp [Shadowed, h]
-
-/-- No enum named `x`: nothing is read. -/
-theorem enumLit?_absent (C : Contract) (Γ : NCtx) {x : Name} {m : String}
-    (h : lookupBy x C.enums = none) : enumLit? C Γ (.name x) m = none := by
-  rw [enumLit?_eq]
-  simp [h]
+/-- A local or a state variable named `x` shadows the enum: nothing is read. -/
+theorem enumLit?_shadowed (C : Contract) (Γ : NCtx) {x : Name} {m : String}
+    (h : Shadowed C Γ x = true) : enumLit? C Γ (.name x) m = none := by
+  rw [enumLit?_eq]; simp [h]
 
 /-- An empty enum table reads nothing. -/
 theorem enumLit?_empty (C : Contract) (Γ : NCtx) (e : RawExpr) (m : String)
@@ -225,7 +174,7 @@ theorem sourceRead_eq {C : Contract} {ps : Source.Syn (.list (.part false))}
 
 /-- On a decoded table the minimum and maximum exist exactly for the enums
 the table has: decoding rules out the empty member list. -/
-theorem sourceRead_min_isSome {C : Contract} {ps : Source.Syn (.list (.part false))}
+theorem sourceRead_bounds {C : Contract} {ps : Source.Syn (.list (.part false))}
     (h : decode C = .ok ps) {s : String} {E : Source.Env} {pre post : List Source.Decl}
     (hE : E.decls = pre ++ ps.collect (some s) ++ post)
     (hpre : ∀ d ∈ pre, d.kind ≠ .enum) (hpost : ∀ d ∈ post, d.kind ≠ .enum) (x : Name) :
@@ -234,11 +183,8 @@ theorem sourceRead_min_isSome {C : Contract} {ps : Source.Syn (.list (.part fals
   rw [sourceRead_eq h hE hpre hpost, sourceRead_eq h hE hpre hpost]
   cases hl : lookupBy x C.enums with
   | none => simp
-  | some ms =>
-    have hne : ms ≠ [] :=
-      (decode_ok_iff C).mp ⟨ps, h⟩ (x, ms) (Semantics.lookupBy_eq_some_mem hl)
-    cases ms with
-    | nil => exact absurd rfl hne
+  | some ms => cases ms with
+    | nil => exact absurd rfl ((decode_ok_iff C).mp ⟨ps, h⟩ _ (Semantics.lookupBy_eq_some_mem hl))
     | cons _ _ => simp [Form.read]
 
 /-! ## Decoded declarations, lookup and the typed conversion -/
@@ -333,7 +279,7 @@ def typedOrdinal {Γ : Source.Ctx} {x : String} {dn : Source.DeclName}
     Source.Typed Γ (ordinalSpell x i) (.enum dn) :=
   .convUser h (.const rfl rfl rfl) (by simp [Source.STy.explicit, Source.Q.isInt, Source.Q.toInt, Source.NumLit.value])
 
-/-! ## Source shadowing and the untyped member spelling -/
+/-! ## Source shadowing -/
 
 /-- A Source local named `x` shadows every declaration: `x` is no conversion
 target. -/
@@ -345,102 +291,18 @@ theorem convTarget_local {Γ : Source.Ctx} {x : String} (h : x ∈ Γ.locals.map
     | some i => exact ⟨i, rfl⟩
   simp [Source.Ctx.convTarget, Source.Ctx.resolve, Source.Env.resolve, hi]
 
-private theorem ident_untyped {Γ : Source.Ctx} {x : String} {d : Source.Decl}
-    (hres : Γ.resolve x = some (.decls [d])) (hk : d.kind = .enum) {σ : Source.STy}
-    (t : Source.Typed Γ (.ident x) σ) : False := by
-  have hb0 : (Source.Syn.ident x : Source.Syn .expr).binOp? = none := rfl
-  have hc0 : (Source.Syn.ident x : Source.Syn .expr).const = none := rfl
-  have hb : ∀ p, (Source.Syn.ident x : Source.Syn .expr).binOp? ≠ some p := by
-    intro p h; rw [hb0] at h; cases h
-  generalize he : (Source.Syn.ident x : Source.Syn .expr) = e at t
-  cases t
-  all_goals (try (cases he; done))
-  all_goals cases he
-  case state.refl =>
-    rename_i d' hv hr
-    rw [hres] at hr
-    simp only [Option.some.injEq, Source.Denot.decls.injEq, List.cons.injEq, and_true] at hr
-    subst hr
-    obtain ⟨k, n, sc, top, node⟩ := d
-    cases hk
-    simp [Source.Decl.varTy] at hv
-  case const.refl => rename_i hc _ _; rw [hc0] at hc; cases hc
-  case loc.refl => rename_i _ hr; rw [hres] at hr; cases hr
-  case this.refl => rename_i h _; rw [hres] at h; cases h
-  all_goals exact absurd ‹(Source.Syn.ident x : Source.Syn .expr).binOp? = some _› (hb _)
-
-/-- S01 types no member access on an enum name: `E.m` has no `Typed`
-derivation, so the typed Source reading of a member is `ordinalSpell`. -/
-theorem spell_member_untyped {Γ : Source.Ctx} {x m : String} {d : Source.Decl}
-    (hres : Γ.resolve x = some (.decls [d])) (hk : d.kind = .enum) {τ : Source.STy}
-    (t : Source.Typed Γ (Form.spell x (.member m)) τ) : False := by
-  have hb0 : (Source.Syn.member (.ident x) m : Source.Syn .expr).binOp? = none := rfl
-  have hc0 : (Source.Syn.member (.ident x) m : Source.Syn .expr).const = none := rfl
-  have hb : ∀ p, (Source.Syn.member (.ident x) m : Source.Syn .expr).binOp? ≠ some p := by
-    intro p h; rw [hb0] at h; cases h
-  change Source.Typed Γ (.member (.ident x) m) τ at t
-  generalize he : (Source.Syn.member (.ident x) m : Source.Syn .expr) = e at t
-  cases t
-  all_goals (try (cases he; done))
-  all_goals cases he
-  case const.refl => rename_i hc _ _; rw [hc0] at hc; cases hc
-  case magic.refl =>
-    have h := hres.symm.trans ‹Γ.resolve x = some (Source.Denot.builtin _)›
-    cases h
-  all_goals first
-    | exact absurd ‹(Source.Syn.member (.ident x) m : Source.Syn .expr).binOp? = some _› (hb _)
-    | exact ident_untyped hres hk ‹Source.Typed Γ (.ident x) _›
-
-private theorem metaType_untyped {Γ : Source.Ctx} (tn : Source.Syn .typeName) {σ : Source.STy}
-    (t : Source.Typed Γ (.metaType tn) σ) : False := by
-  have hb0 : (Source.Syn.metaType tn : Source.Syn .expr).binOp? = none := rfl
-  have hc0 : (Source.Syn.metaType tn : Source.Syn .expr).const = none := rfl
-  have hb : ∀ p, (Source.Syn.metaType tn : Source.Syn .expr).binOp? ≠ some p := by
-    intro p h; rw [hb0] at h; cases h
-  generalize he : (Source.Syn.metaType tn : Source.Syn .expr) = e at t
-  cases t
-  all_goals (try (cases he; done))
-  all_goals cases he
-  case const.refl => rename_i hc _ _; rw [hc0] at hc; cases hc
-  all_goals exact absurd ‹(Source.Syn.metaType tn : Source.Syn .expr).binOp? = some _› (hb _)
-
-private theorem bound_untyped {Γ : Source.Ctx} (tn : Source.Syn .typeName) (n : String)
-    (h₁ : n ≠ "length") (h₂ : n ≠ "balance") {τ : Source.STy}
-    (t : Source.Typed Γ (.member (.metaType tn) n) τ) : False := by
-  have hb0 : (Source.Syn.member (.metaType tn) n : Source.Syn .expr).binOp? = none := rfl
-  have hc0 : (Source.Syn.member (.metaType tn) n : Source.Syn .expr).const = none := rfl
-  have hb : ∀ p, (Source.Syn.member (.metaType tn) n : Source.Syn .expr).binOp? ≠ some p := by
-    intro p h; rw [hb0] at h; cases h
-  generalize he : (Source.Syn.member (.metaType tn) n : Source.Syn .expr) = e at t
-  cases t
-  all_goals (try (cases he; done))
-  all_goals cases he
-  case const.refl => rename_i hc _ _; rw [hc0] at hc; cases hc
-  case length.refl => exact h₁ rfl
-  case balance.refl => exact h₂ rfl
-  case member.refl => exact metaType_untyped tn ‹Source.Typed Γ (.metaType tn) _›
-  all_goals exact absurd ‹(Source.Syn.member (.metaType tn) n : Source.Syn .expr).binOp? = some _› (hb _)
-
-/-- S01 types no `type(E).min` or `type(E).max` (`type(T)` is the recorded
-S04.02 gap), in any context. -/
-theorem spell_bound_untyped {Γ : Source.Ctx} {x : String} {f : Form} (hf : f = .min ∨ f = .max)
-    {τ : Source.STy} (t : Source.Typed Γ (Form.spell x f) τ) : False := by
-  rcases hf with rfl | rfl
-  · exact bound_untyped _ "min" (by decide) (by decide) t
-  · exact bound_untyped _ "max" (by decide) (by decide) t
-
 /-! ## Under the raw/Source alignment -/
 
 section Aligned
 
 variable [FreshNames]
 
-/-- **The raw/Source scope alignment** for a name `x` of contract scope `s`,
-around a decoded enum table `ps` of `C`: the Source context is the scope of
-the contract whose environment holds the decoded enums beside non-enum
-declarations; a Source local named `x` is a raw local; a Source declaration
-of scope `s` named `x` outside the enum table is a raw state variable; and
-enum names are distinct and nonempty (solc: one declaration per identifier). -/
+/-- **The raw/Source scope alignment** for the name `x` in contract `s`: the
+Source context is a body of `s` whose environment holds the decoded enums `ps`
+of `C` beside non-enum declarations; a Source local `x` is a raw local; a
+Source declaration of scope `s` named `x` outside the table is a raw state
+variable (solc refuses any other redeclaration); the raw enum names are
+distinct (solc well-formedness, not derived from `EnumDecode`); `x ≠ ""`. -/
 structure Aligned (C : Contract) (ps : Source.Syn (.list (.part false))) (Γr : NCtx)
     (Γs : Source.Ctx) (s : String) (pre post : List Source.Decl) (x : Name) : Prop where
   scope : Γs.scope = some s
@@ -512,9 +374,9 @@ theorem convTarget_eq {C : Contract} {ps : Source.Syn (.list (.part false))}
 `enumLit?` reads `x` with field `m` as the ordinal `i`, the base is the name
 `x`, and in Source: `x` resolves to its single decoded enum declaration, whose
 members are the raw ones; S01's conversion target of `x` is that enum type;
-the Source reading of the form is `i`; `E(i)` is typed at the enum type; `i` is
-below the Source layout's member count; and the enum value of ordinal `i` has
-key `i` and is the value `enumOfInt` gives `i`. -/
+the Source reading of the form is `i`; the stand-in `E(i)` is typed at the enum
+type; `i` is below the Source layout's member count; and `enumOfInt` at `i`
+gives the enum value of ordinal `i`, whose key is `i`. -/
 theorem decode_use {C : Contract} {ps : Source.Syn (.list (.part false))}
     {Γr : NCtx} {Γs : Source.Ctx} {s : String} {pre post : List Source.Decl} {x : Name}
     (hd : decode C = .ok ps) (hA : Aligned C ps Γr Γs s pre post x)
@@ -539,41 +401,6 @@ theorem decode_use {C : Contract} {ps : Source.Syn (.list (.part false))}
   · rw [sourceRead_eq hd hA.decls hA.pre_nonEnum hA.post_nonEnum, hl]
     exact hread
   · simp [Source.enumOfInt, hi]
-
-/-- A declaration of the contract scope named `x` beside its enum (solc's
-state-variable shadow, refused there) makes the name ambiguous: `x` is no
-conversion target. -/
-theorem convTarget_shadow {C : Contract} {ps : Source.Syn (.list (.part false))}
-    {Γr : NCtx} {Γs : Source.Ctx} {s : String} {pre post : List Source.Decl} {x : Name}
-    (hd : decode C = .ok ps) (hA : Aligned C ps Γr Γs s pre post x)
-    (hloc : x ∉ Γs.locals.map Prod.fst) {ms : List Name} (hl : lookupBy x C.enums = some ms)
-    {d : Source.Decl} (hdm : d ∈ pre ++ post) (hsc : d.scope = some s) (hn : d.name = x) :
-    Γs.convTarget x = none := by
-  obtain ⟨f, r, -, hf⟩ := collect_filter s x hA.nonempty 0 C.enums ps hd hA.distinct ms hl
-  let p : Source.Decl → Bool := fun d => d.scope == some s && d.name == x && x != ""
-  have hpd : p d = true := by simp [p, hsc, hn, hA.nonempty]
-  have hdecl : Γs.env.declared (some s) x =
-      pre.filter p ++ [enumDecl s x f r] ++ post.filter p := by
-    unfold Source.Env.declared
-    rw [hA.decls, List.filter_append, List.filter_append, hf]
-  have hlen : 2 ≤ (Γs.env.declared (some s) x).length := by
-    rw [hdecl]
-    rcases List.mem_append.mp hdm with hm | hm
-    · have : 0 < (pre.filter p).length :=
-        List.length_pos_of_mem (List.mem_filter.mpr ⟨hm, hpd⟩)
-      simp only [List.length_append, List.length_singleton]; omega
-    · have : 0 < (post.filter p).length :=
-        List.length_pos_of_mem (List.mem_filter.mpr ⟨hm, hpd⟩)
-      simp only [List.length_append, List.length_singleton]; omega
-  have hidx : (Γs.locals.map Prod.fst).idxOf? x = none := List.idxOf?_eq_none_iff.mpr hloc
-  have hlook : Γs.env.lookup Γs.scope x = Γs.env.declared (some s) x := by
-    rw [hA.scope, lookup_own]
-    intro h0; rw [h0] at hlen; simp at hlen
-  unfold Source.Ctx.convTarget Source.Ctx.resolve Source.Env.resolve
-  rw [hidx]
-  simp only [hlook]
-  match hq : Γs.env.declared (some s) x, hlen with
-  | _ :: _ :: _, _ => rfl
 
 end Aligned
 
