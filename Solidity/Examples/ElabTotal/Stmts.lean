@@ -713,17 +713,10 @@ end Solidity.Examples.ElabTotal.Stmts
 #guard_msgs in
 #print axioms Solidity.ElabCallHeight.callbacks_call_output_height_raw
 
-/-! ## Callback agreement (`Correctness/Elab/Congruence.lean`)
-
-A callback cut off the invocations a helper makes leaves the helper's result
-unchanged: the shape in which the knot's well-founded definition uses them. -/
+/-! ## Callback agreement (`Correctness/Elab/Congruence.lean`) -/
 
 namespace Solidity.Examples.ElabTotal.Stmts
-
-section Agreement
-
 open Solidity Solidity.ElabAgree
-
 variable [FreshNames] (C : Contract)
 
 open Classical in
@@ -734,42 +727,24 @@ private noncomputable def onlyAt (stmt : RawStmt → ElabM (SProg C)) (ss : List
 
 omit [FreshNames] in
 /-- A block does not see a cut of its statement callback off its own statements. -/
-example (stmt : RawStmt → ElabM (SProg C)) (ss : List RawStmt) :
-    elabStmtsPWith C (onlyAt C stmt ss) ss = elabStmtsPWith C stmt ss := by
-  apply eq_of_agree
-  intro sc
-  apply elabStmtsPWith_agree
-  intro s hs
+example (stmt : RawStmt → ElabM (SProg C)) (ss : List RawStmt) (sc : ElabScope) :
+    Agree sc (elabStmtsPWith C (onlyAt C stmt ss) ss) (elabStmtsPWith C stmt ss) := by
+  refine elabStmtsPWith_agree C _ _ sc ss fun s hs => ?_
   simp only [onlyAt, hs, ↓reduceIte]
   exact agree_refl _ _
 
-/-- Callbacks that agree at a scope give the binary-operator, eager-argument
-and call-argument helpers the same runs there, in either direction. -/
+/-- Callbacks that agree at a scope give the helpers the same runs there. -/
 example (H K : RawExpr → ElabM (SProg C × RawExpr)) (stmt : RawStmt → ElabM (SProg C))
-    (sc : ElabScope) (op : BinOp) (a b : RawExpr) (f : String)
-    (h : ∀ e, Agree sc (H e) (K e)) :
-    Agree sc (hoistBinopWith C K op a b) (hoistBinopWith C H op a b) ∧
+    (sc : ElabScope) (op : BinOp) (a b : RawExpr) (f : String) (h : ∀ e, Agree sc (H e) (K e)) :
+    Agree sc (hoistBinopWith C H op a b) (hoistBinopWith C K op a b) ∧
     Agree sc (eagerArgsWith C H [a, b]) (eagerArgsWith C K [a, b]) ∧
     Agree sc (hoistCallArgsWith C H stmt f [a, b]) (hoistCallArgsWith C K stmt f [a, b]) :=
-  ⟨(hoistBinopWith_agree C H K sc op a b (h a) (h b)).symm,
+  ⟨hoistBinopWith_agree C H K sc op a b (h a) (h b),
    eagerArgsWith_agree C H K sc [a, b] false [] fun e _ => h e,
    hoistCallArgsWith_agree C H K stmt stmt sc f [a, b] (fun e _ => h e)
      fun _ _ _ => agree_refl _ _⟩
 
-/-- An inlined body reads the block callback only in the callee's scope: two
-records whose blocks agree at every scope without deployment inline alike, and
-an output of one is an output of the other. -/
-example (rc rc' : ElabRec C) (sc : ElabScope) (f : String) (d : FunDecl)
-    (ρ : List (String × String)) (scope : List (Name × FunDecl)) (k₀ : Nat) (Γ Γf : ECtx)
-    (P : SProg C)
-    (h : ∀ sc' ss, sc'.top = false → Agree sc' (rc.elabStmtsP ss) (rc'.elabStmtsP ss))
-    (hP : Out sc (inlinedBody C rc f d ρ false false false scope k₀ Γ Γf) P) :
-    Out sc (inlinedBody C rc' f d ρ false false false scope k₀ Γ Γf) P :=
-  hP.of_agree ((inlinedBody_agree C rc rc' sc f d ρ false false false scope k₀ Γ Γf
-    fun body _ _ => h _ body rfl).trans (agree_refl _ _))
-
-/-- The call arm over two records that agree on the dispatch callbacks at this
-scope and on blocks in every scope that cannot deploy. -/
+/-- The call arm over records agreeing on dispatch here and on blocks that cannot deploy. -/
 example (rc rc' : ElabRec C) (sc : ElabScope) (f : String) (args : List RawExpr)
     (hm : ∀ h ty as, Agree sc (rc.fnMemoryDispatch h ty as) (rc'.fnMemoryDispatch h ty as))
     (hv : ∀ h as, Agree sc (rc.callValue h as none 256 false) (rc'.callValue h as none 256 false))
@@ -780,26 +755,18 @@ example (rc rc' : ElabRec C) (sc : ElabScope) (f : String) (args : List RawExpr)
   elabCallRetWith_agree C rc rc' sc f args none 256 false false false false
     (elabCallRetCore_agree C rc rc' sc f args none 256 false false false false
       (fun h ty as _ => hm h ty as) (fun h as _ => hv h as) hd
-      (fun sc' body ht _ _ => hb sc' body ht)
-      (fun _ _ _ sc' body _ ht _ => hb sc' body ht))
+      (fun sc' body ht _ _ => hb sc' body ht) (fun _ _ _ sc' body _ ht _ => hb sc' body ht))
 
-/-- `agree_run` leaves the one invocation at which two computations differ,
-under the facts of its branch. -/
+/-- `agree_run` leaves the invocation at which the two differ, under its branch's facts. -/
 example (H K : RawExpr → ElabM (SProg C × RawExpr)) (sc : ElabScope) (e : RawExpr)
     (h : e.isLit = false → Agree sc (H e) (K e)) :
-    Agree sc (do
-        let sc ← read
-        if _hl : e.isLit = true then pure ([], e) else
-          let (P, e') ← H e
-          if sc.top then pure (P, e') else throw "inner")
-      (do
-        let sc ← read
-        if _hl : e.isLit = true then pure ([], e) else
-          let (P, e') ← K e
-          if sc.top then pure (P, e') else throw "inner") := by
+    Agree sc (if _hl : e.isLit = true then pure ([], e) else do
+        let (P, e') ← H e
+        if (← read).top then pure (P, e') else throw "inner")
+      (if _hl : e.isLit = true then pure ([], e) else do
+        let (P, e') ← K e
+        if (← read).top then pure (P, e') else throw "inner") := by
   agree_run
   exact h (by simpa using ‹¬e.isLit = true›)
-
-end Agreement
 
 end Solidity.Examples.ElabTotal.Stmts

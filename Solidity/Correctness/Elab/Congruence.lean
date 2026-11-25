@@ -3,22 +3,13 @@ import Solidity.Syntax.Elab.CallOutput
 /-!
 # Callback agreement for the elaborator's helpers
 
-The totalization of the knot of `Syntax/Elab/Stmt.lean` by a well-founded cut
-needs, for every arm, that the arm's result at an input and a scope does not
-change when its recursive callbacks are replaced by callbacks that agree with
-them at the arguments and scopes the arm invokes them at.  This module states
-that property at run level, scope by scope (`Agree`), with the arguments an
-invocation may take described by the successful outputs of the computations
-before it (`Out`), and proves it for the helpers below `Syntax/Elab/Stmt.lean`
-that take a callback: `elabStmtsPWith`, `hoistArgsWith`, `hoistPairWith`,
-`hoistBinopWith`, `eagerArgsWith`, `hoistCallArgsWith`, `inlinedBody` and the
-call arm `elabCallRetCore`/`elabCallRetWith`.  No measure is fixed here: each
-lemma names the invocations themselves, with the facts a measure needs about
-them (which arguments, which scope).
-
-`agree_run` is the proof procedure: it walks two computations of the same
-shape (binds, conditionals, matches, scope changes, join points) and leaves
-the invocations at which they differ.
+The well-founded cut of the knot of `Syntax/Elab/Stmt.lean` needs each arm's
+result at an input and scope to be the same over callbacks that agree at the
+arguments and scopes the arm invokes them at.  Stated at run level, scope by
+scope (`Agree`), the arguments described by the outputs of the stages before
+(`Out`); proved for the callback-taking helpers below `Stmt.lean` and the call
+arm, measure-free.  `agree_run` walks two computations of the same shape and
+leaves the invocations at which they differ.
 -/
 
 namespace Solidity.ElabAgree
@@ -36,25 +27,7 @@ def Agree {α : Type} (sc : ElabScope) (x y : ElabM α) : Prop :=
 theorem agree_refl {α : Type} (sc : ElabScope) (x : ElabM α) : Agree sc x x :=
   fun _ _ => rfl
 
-theorem Agree.symm {α : Type} {sc : ElabScope} {x y : ElabM α} (h : Agree sc x y) :
-    Agree sc y x := fun st m => (h st m).symm
-
-theorem Agree.trans {α : Type} {sc : ElabScope} {x y z : ElabM α} (h : Agree sc x y)
-    (k : Agree sc y z) : Agree sc x z := fun st m => (h st m).trans (k st m)
-
-/-- Agreement at every scope is equality. -/
-theorem eq_of_agree {α : Type} {x y : ElabM α} (h : ∀ sc, Agree sc x y) : x = y := by
-  funext sc st m
-  exact h sc st m
-
-/-- Outputs transfer along agreement. -/
-theorem Out.of_agree {α : Type} {sc : ElabScope} {x y : ElabM α} {a : α}
-    (h : Agree sc x y) (ha : Out sc x a) : Out sc y a := by
-  obtain ⟨st, m, st', m', hr⟩ := ha
-  exact ⟨st, m, st', m', (h st m).symm.trans hr⟩
-
-/-- A bind's stages agree: the first, then the continuations at each of its
-successful outputs. -/
+/-- A bind: its first stage, then the continuations at its outputs. -/
 theorem agree_bind {α β : Type} {sc : ElabScope} {x y : ElabM α} {f g : α → ElabM β}
     (hx : Agree sc x y) (hf : ∀ a, Out sc x a → Agree sc (f a) (g a)) :
     Agree sc (x >>= f) (y >>= g) := by
@@ -67,12 +40,6 @@ theorem agree_bind {α β : Type} {sc : ElabScope} {x y : ElabM α} {f g : α �
   | ok v =>
     rcases v with ⟨⟨a, s⟩, n⟩
     exact hf a ⟨st, m, s, n, he⟩ s n
-
-/-- A changed scope: agreement there. -/
-theorem agree_withReader {α : Type} {sc : ElabScope} {x y : ElabM α}
-    (f : ElabScope → ElabScope) (h : Agree (f sc) x y) :
-    Agree sc (withReader f x) (withReader f y) :=
-  fun st m => h st m
 
 /-- A list loop whose bodies agree at the list's elements. -/
 theorem agree_forIn {α β : Type} {sc : ElabScope} (xs : List α) (init : β)
@@ -143,7 +110,6 @@ def localAgree? (x y : Expr) : MetaM (Option Expr) := do
     let ty ← instantiateMVars d.type
     let body := ty.getForallBody
     if let some (_, _, l, r) := parts? body then
-      -- only a hypothesis quantified over exactly the arguments, in order
       let n := args.size
       let bound (e : Expr) : Bool := e.getAppNumArgs == n &&
         (List.range n).all fun i => e.getAppArgs[i]! == .bvar (n - 1 - i)
@@ -154,25 +120,22 @@ def localAgree? (x y : Expr) : MetaM (Option Expr) := do
 
 /-- Prove `Agree sc x y` for two computations of the same shape, returning
 the goals it leaves: the invocations at which the two differ. -/
-partial def run (inl : List Nat) (cnt : IO.Ref Nat) (g : MVarId) (fuel : Nat := 100000) :
+partial def run (inl : List Nat) (cnt : IO.Ref Nat) (g : MVarId) :
     MetaM (List MVarId) := g.withContext do
   let t ← g.getType
   let some (α, sc, x, y) := parts? t | return [g]
   if x == y then
     g.assign (mkApp3 (mkConst ``Solidity.ElabAgree.agree_refl) α sc x)
     return []
-  if fuel == 0 then return [g]
-  let fuel := fuel - 1
   let retarget (x' y' : Expr) : MetaM (List MVarId) := do
-    run inl cnt (← g.replaceTargetDefEq (mkAgree α sc x' y')) fuel
+    run inl cnt (← g.replaceTargetDefEq (mkAgree α sc x' y'))
   match x, y with
   | .letE n tL vL bL _, .letE _ tR vR bR _ =>
     if tL == tR && vL == vR then
       let (xv, g2) ← (← g.define n tL vL).intro1
       let g3 ← g2.replaceTargetDefEq
         (mkAgree α sc (bL.instantiate1 (mkFVar xv)) (bR.instantiate1 (mkFVar xv)))
-      return ← run inl cnt g3 fuel
-    -- join points are numbered in the order met; the listed ones are inlined
+      return ← run inl cnt g3
     let idx ← cnt.modifyGet fun k => (k, if vL.isLambda then k + 1 else k)
     if vL.isLambda && inl.contains idx then
       return ← retarget (bL.instantiate1 vL) (bR.instantiate1 vR)
@@ -188,7 +151,6 @@ partial def run (inl : List Nat) (cnt : IO.Ref Nat) (g : MVarId) (fuel : Nat := 
       pure (some r) : MetaM (Option (Expr × Expr))) <|> pure none
     match jp? with
     | some (hypOf, side) =>
-      -- the join point agrees at all arguments (once); both sides keep it as a local definition
       let ms ← mkFreshExprSyntheticOpaqueMVar side
       let g1 ← g.assert `hside side ms
       let (hs, g2) ← g1.intro1
@@ -200,19 +162,17 @@ partial def run (inl : List Nat) (cnt : IO.Ref Nat) (g : MVarId) (fuel : Nat := 
         let (_, g8) ← g7.intro1
         g8.replaceTargetDefEq (mkAgree α sc (bL.instantiate1 (mkFVar xL)) (bR.instantiate1 (mkFVar xR)))
       let (_, ms') ← ms.mvarId!.intros
-      return (← run inl cnt ms' fuel) ++ (← run inl cnt g9 fuel)
+      return (← run inl cnt ms') ++ (← run inl cnt g9)
     | none =>
       if tL == tR && vL.isLambda && vR.isLambda then
-        -- a local function that is not a computation: equal values (a leaf), then shared
         let me ← mkFreshExprSyntheticOpaqueMVar (← mkEq vL vR)
         let m ← mkFreshExprSyntheticOpaqueMVar (.forallE n tL (mkAgree α sc bL bR) .default)
         let motive := Expr.lam n tL (mkAgree α sc (bL.instantiate1 vL) bR) .default
         g.assign (← mkAppOptM ``Eq.subst #[none, motive, vL, vR, me, mkApp m vL])
         let (_, m') ← m.mvarId!.intro n
-        return me.mvarId! :: (← run inl cnt m' fuel)
+        return me.mvarId! :: (← run inl cnt m')
       return ← retarget (bL.instantiate1 vL) (bR.instantiate1 vR)
   | _, _ => pure ()
-  -- a bind
   if x.isAppOfArity ``Bind.bind 6 && y.isAppOfArity ``Bind.bind 6 then
     let xa := x.getAppArgs
     let ya := y.getAppArgs
@@ -222,12 +182,12 @@ partial def run (inl : List Nat) (cnt : IO.Ref Nat) (g : MVarId) (fuel : Nat := 
         if x₁.isAppOf ``MonadReader.read || x₁.isAppOf ``MonadReaderOf.read then
           let m ← mkFreshExprSyntheticOpaqueMVar (mkAgree α sc (f.beta #[sc]) (k.beta #[sc]))
           g.assign (mkAppN (mkConst ``Solidity.ElabAgree.agree_read_bind) #[α, sc, f, k, m])
-          return ← run inl cnt m.mvarId! fuel
+          return ← run inl cnt m.mvarId!
         if x₁.isAppOfArity ``Pure.pure 4 then
           let a := x₁.appArg!
           let m ← mkFreshExprSyntheticOpaqueMVar (mkAgree α sc (f.beta #[a]) (k.beta #[a]))
           g.assign (mkAppN (mkConst ``Solidity.ElabAgree.agree_pure_bind) #[α₁, α, sc, a, f, k, m])
-          return ← run inl cnt m.mvarId! fuel
+          return ← run inl cnt m.mvarId!
         if x₁.isAppOfArity ``MonadExcept.throw 5 || x₁.isAppOfArity ``throw 5 then
           g.assign (mkAppN (mkConst ``Solidity.ElabAgree.agree_throw_bind) #[α₁, α, sc, x₁.appArg!, f, k])
           return []
@@ -238,8 +198,7 @@ partial def run (inl : List Nat) (cnt : IO.Ref Nat) (g : MVarId) (fuel : Nat := 
       let mf ← mkFreshExprSyntheticOpaqueMVar fty
       g.assign (mkAppN (mkConst ``Solidity.ElabAgree.agree_bind) #[α₁, α, sc, x₁, y₁, f, k, mx, mf])
       let (_, mf') ← mf.mvarId!.introN 2
-      return (← run inl cnt mx.mvarId! fuel) ++ (← run inl cnt mf' fuel)
-  -- conditionals
+      return (← run inl cnt mx.mvarId!) ++ (← run inl cnt mf')
   if x.isAppOfArity ``ite 5 && y.isAppOfArity ``ite 5 then
     let xa := x.getAppArgs
     let ya := y.getAppArgs
@@ -251,7 +210,7 @@ partial def run (inl : List Nat) (cnt : IO.Ref Nat) (g : MVarId) (fuel : Nat := 
         #[α, sc, c, xa[2]!, xa[3]!, xa[4]!, ya[3]!, ya[4]!, mt, me])
       let (_, mt') ← mt.mvarId!.intro1
       let (_, me') ← me.mvarId!.intro1
-      return (← run inl cnt mt' fuel) ++ (← run inl cnt me' fuel)
+      return (← run inl cnt mt') ++ (← run inl cnt me')
   if x.isAppOfArity ``dite 5 && y.isAppOfArity ``dite 5 then
     let xa := x.getAppArgs
     let ya := y.getAppArgs
@@ -267,25 +226,34 @@ partial def run (inl : List Nat) (cnt : IO.Ref Nat) (g : MVarId) (fuel : Nat := 
         #[α, sc, c, xa[2]!, xa[3]!, ya[3]!, xa[4]!, ya[4]!, mt, me])
       let (_, mt') ← mt.mvarId!.intro1
       let (_, me') ← me.mvarId!.intro1
-      return (← run inl cnt mt' fuel) ++ (← run inl cnt me' fuel)
-  -- a join point or another local function
+      return (← run inl cnt mt') ++ (← run inl cnt me')
+  if x.isAppOfArity ``forIn 9 && y.isAppOfArity ``forIn 9 then
+    let xa := x.getAppArgs
+    let ya := y.getAppArgs
+    if xa[1]!.isAppOf ``List && xa[6]! == ya[6]! && xa[7]! == ya[7]! then
+      let (el, st, xs, f, k) := (xa[2]!, xa[4]!, xa[6]!, xa[8]!, ya[8]!)
+      let ty ← withLocalDeclD `a el fun a => do
+        withLocalDeclD `hm (← mkAppM ``Membership.mem #[xs, a]) fun hm =>
+          withLocalDeclD `b st fun b => do
+            mkForallFVars #[a, hm, b]
+              (mkAgree (← inferType (f.beta #[a, b])).appArg! sc (f.beta #[a, b]) (k.beta #[a, b]))
+      let m ← mkFreshExprSyntheticOpaqueMVar ty
+      g.assign (mkAppN (mkConst ``Solidity.ElabAgree.agree_forIn) #[el, st, sc, xs, xa[7]!, f, k, m])
+      let (_, m') ← m.mvarId!.introN 3
+      return ← run inl cnt m'
   if let some pf ← localAgree? x y then
     g.assign pf
     return []
-  -- a join point called at different arguments: its body, at these
   if x.getAppFn.isFVar && y.getAppFn.isFVar then
     if let some vL ← x.getAppFn.fvarId!.getValue? then
       if let some vR ← y.getAppFn.fvarId!.getValue? then
         return ← retarget (vL.beta x.getAppArgs) (vR.beta y.getAppArgs)
-  -- head reduction
   let x' ← withConfig (fun c => { c with zeta := false }) (whnfCore x)
   let y' ← withConfig (fun c => { c with zeta := false }) (whnfCore y)
   if x' != x || y' != y then return ← retarget x' y'
-  -- a match: case analysis on a local discriminant, else `split`
   if let some app ← matchMatcherApp? x then
     for d in app.discrs do
       if d.isFVar then
-        -- a local definition keeps its defining equation through the case analysis
         let g ← (do
           let some v ← d.fvarId!.getValue? | pure g
           let g1 ← g.assert `hdef (← mkEq d v) (← mkEqRefl d)
@@ -293,12 +261,12 @@ partial def run (inl : List Nat) (cnt : IO.Ref Nat) (g : MVarId) (fuel : Nat := 
         let r ← (do pure (some (← g.cases d.fvarId!)) : MetaM _) <|> pure none
         if let some subs := r then
           let mut out := []
-          for s in subs do out := out ++ (← run inl cnt s.mvarId fuel)
+          for s in subs do out := out ++ (← run inl cnt s.mvarId)
           return out
     let r ← (do pure (some (← Split.splitMatch g x)) : MetaM (Option (List MVarId))) <|> pure none
     if let some subs := r then
       let mut out := []
-      for s in subs do out := out ++ (← run inl cnt s fuel)
+      for s in subs do out := out ++ (← run inl cnt s)
       return out
   return [g]
 
@@ -308,16 +276,6 @@ elab "agree_run" inl:(num)* : tactic => do
   replaceMainGoal gs
 
 end Engine
-
-/-- One step of an agreement proof over two computations of the same shape. -/
-macro "agree_step" : tactic => `(tactic| first
-  | (with_reducible exact agree_refl _ _)
-  | (with_reducible assumption)
-  | (with_reducible apply agree_withReader)
-  | (with_reducible refine agree_ite (fun _ => ?_) (fun _ => ?_))
-  | (with_reducible refine agree_bind ?_ (fun _ _ => ?_))
-  | (dsimp only)
-  | split)
 
 variable (C : Contract) [FreshNames]
 
@@ -343,26 +301,26 @@ theorem hoistArgsWith_agree (H K : RawExpr → ElabM (SProg C × RawExpr)) (sc :
   induction xs with
   | nil => exact agree_refl _ _
   | cons a as ih =>
-    have ha := h a (by simp)
-    have has := ih fun x hx => h x (by simp [hx])
     simp only [hoistArgsWith]
-    repeat' agree_step
+    agree_run
+    · exact h a (by simp)
+    all_goals exact ih fun x hx => h x (by simp [hx])
 
 /-- A pair's hoisting invokes its callback at the two operands. -/
 theorem hoistPairWith_agree (H K : RawExpr → ElabM (SProg C × RawExpr)) (sc : ElabScope)
     (a b : RawExpr) (ha : Agree sc (H a) (K a)) (hb : Agree sc (H b) (K b)) :
     Agree sc (hoistPairWith C H a b) (hoistPairWith C K a b) := by
   unfold hoistPairWith
-  repeat' agree_step
+  agree_run <;> assumption
 
 /-- A binary operator's hoisting invokes its callback at the two operands. -/
 theorem hoistBinopWith_agree (H K : RawExpr → ElabM (SProg C × RawExpr)) (sc : ElabScope)
     (op : BinOp) (a b : RawExpr) (ha : Agree sc (H a) (K a)) (hb : Agree sc (H b) (K b)) :
     Agree sc (hoistBinopWith C H op a b) (hoistBinopWith C K op a b) := by
-  have hab := hoistPairWith_agree C H K sc a b ha hb
-  have hba := hoistPairWith_agree C H K sc b a hb ha
   unfold hoistBinopWith
-  repeat' agree_step
+  agree_run
+  · exact hoistPairWith_agree C H K sc a b ha hb
+  · exact hoistPairWith_agree C H K sc b a hb ha
 
 /-- Eager argument evaluation invokes its callback at the list's members. -/
 theorem eagerArgsWith_agree (H K : RawExpr → ElabM (SProg C × RawExpr)) (sc : ElabScope)
@@ -371,36 +329,26 @@ theorem eagerArgsWith_agree (H K : RawExpr → ElabM (SProg C × RawExpr)) (sc :
     Agree sc (eagerArgsWith C H args discard expected)
       (eagerArgsWith C K args discard expected) := by
   unfold eagerArgsWith
-  apply agree_bind
-  · apply agree_forIn
-    rintro ⟨a, i⟩ hm b
-    have ha : Agree sc (H a) (K a) := h a (by
-      have hz := List.of_mem_zip (l₁ := args) (l₂ := List.range' 0 args.length)
-        (by simpa [List.zipIdx_eq_zip_range'] using hm)
-      exact hz.1)
-    repeat' agree_step
-  · intro _ _
-    exact agree_refl _ _
+  agree_run
+  exact h _ (List.of_mem_zip (l₂ := List.range' 0 args.length)
+    (by simpa [List.zipIdx_eq_zip_range'] using ‹_ ∈ args.zipIdx›)).1
 
-/-- Call-argument preparation invokes its expression callback at the
-arguments and its statement callback at the late copies it declares. -/
+/-- Call-argument preparation: the arguments, and the late copies it declares. -/
 theorem hoistCallArgsWith_agree (H K : RawExpr → ElabM (SProg C × RawExpr))
     (stmt stmt' : RawStmt → ElabM (SProg C)) (sc : ElabScope) (f : String)
     (args : List RawExpr) (h : ∀ a ∈ args, Agree sc (H a) (K a))
     (hs : ∀ T y x, Agree sc (stmt (.declMemory T y (some (.name x))))
       (stmt' (.declMemory T y (some (.name x))))) :
     Agree sc (hoistCallArgsWith C H stmt f args) (hoistCallArgsWith C K stmt' f args) := by
-  have hargs := hoistArgsWith_agree C H K sc args h
   unfold hoistCallArgsWith
-  repeat' first
-    | (exact h _ (List.of_mem_zip ‹_›).2)
-    | (with_reducible apply agree_forIn; intro _ _ _)
-    | (with_reducible apply elabStmtsPWith_agree; intro s hm;
+  agree_run
+  all_goals first
+    | exact hoistArgsWith_agree C H K sc args h
+    | exact h _ (List.of_mem_zip ‹_›).2
+    | (apply elabStmtsPWith_agree; intro s hm
        simp only [List.mem_cons, List.not_mem_nil, or_false] at hm; subst hm; exact hs _ _ _)
-    | agree_step
 
-/-- An inlined body invokes the block callback at the callee's prepared body,
-in the callee's scope. -/
+/-- An inlined body: the callee's prepared body, in the callee's scope. -/
 theorem inlinedBody_agree (rc rc' : ElabRec C) (sc : ElabScope) (f : String) (d : FunDecl)
     (ρ : List (String × String)) (shared ctor selfFrame : Bool)
     (scope : List (Name × FunDecl)) (k₀ : Nat) (Γ Γf : ECtx)
@@ -411,9 +359,8 @@ theorem inlinedBody_agree (rc rc' : ElabRec C) (sc : ElabScope) (f : String) (d 
     Agree sc (inlinedBody C rc f d ρ shared ctor selfFrame scope k₀ Γ Γf)
       (inlinedBody C rc' f d ρ shared ctor selfFrame scope k₀ Γ Γf) := by
   unfold inlinedBody
-  repeat' first
-    | (exact h _ _ ‹_›)
-    | agree_step
+  agree_run
+  all_goals exact h _ _ ‹_›
 
 omit [FreshNames] in
 /-- Agreement at a scope, through `runFrom`. -/
